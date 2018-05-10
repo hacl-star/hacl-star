@@ -7,7 +7,6 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 
-open FStar.HyperHeap
 open FStar.HyperStack
 open FStar.UInt32
 open FStar.Ghost
@@ -71,7 +70,9 @@ let rec print_buffer s i len =
     ()
 
 // TODO: Deprecate?
+noextract
 val sel_bytes: h:mem -> l:UInt32.t -> buf:lbuffer (v l) -> GTot (lbytes (v l))
+noextract
 let sel_bytes h l buf = Buffer.as_seq h buf
 
 #reset-options "--z3rlimit 20"
@@ -91,7 +92,7 @@ let rec load_bytes l buf =
     let t = load_bytes (l -^ 1ul) (Buffer.sub buf 1ul (l -^ 1ul)) in
     Seq.cons b t
 
-noextract private val store_bytes_aux: len:UInt32.t -> buf:lbuffer (v len)
+private val store_bytes_aux: len:UInt32.t -> buf:lbuffer (v len)
   -> i:UInt32.t{i <=^ len} -> b:lbytes (v len) -> ST unit
   (requires (fun h0 -> Buffer.live h0 buf /\
       Seq.equal (Seq.slice b 0 (v i)) (sel_bytes h0 i (Buffer.sub buf 0ul i))))
@@ -108,7 +109,7 @@ let rec store_bytes_aux len buf i b =
     store_bytes_aux len buf (i +^ 1ul) b
     end
 
-noextract val store_bytes: l:UInt32.t -> buf:lbuffer (v l) -> b:lbytes (v l) -> ST unit
+val store_bytes: l:UInt32.t -> buf:lbuffer (v l) -> b:lbytes (v l) -> ST unit
   (requires (fun h0 -> Buffer.live h0 buf))
   (ensures  (fun h0 r h1 -> Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
     Seq.equal b (sel_bytes h1 l buf)))
@@ -397,7 +398,7 @@ let rec load_big128 len buf =
 // check efficient compilation for all back-ends
 val store_uint32:
   len:UInt32.t {v len <= 4} -> buf:lbuffer (v len) ->
-  n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> StackInline unit
+  n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> Stack unit
   (requires (fun h0 -> Buffer.live h0 buf))
   (ensures (fun h0 r h1 ->
     Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\
@@ -417,7 +418,7 @@ let rec store_uint32 len buf n =
 
 val store_big32:
   len:UInt32.t {v len <= 4} -> buf:lbuffer (v len) ->
-  n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> StackInline unit
+  n:UInt32.t {UInt32.v n < pow2 (8 * v len)} -> Stack unit
   (requires (fun h0 -> Buffer.live h0 buf))
   (ensures (fun h0 r h1 ->
     Buffer.live h1 buf /\ Buffer.modifies_1 buf h0 h1 /\

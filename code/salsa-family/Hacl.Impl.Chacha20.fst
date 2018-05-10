@@ -1,4 +1,4 @@
-module Hacl.Impl.Chacha20
+ module Hacl.Impl.Chacha20
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -46,7 +46,7 @@ val quarter_round: st:state -> a:idx -> b:idx -> c:idx -> d:idx ->
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
 			  as_lseq st h1 == Spec.quarter_round (v a) (v b) (v c) (v d) (as_lseq  st h0 )))
-		  
+
 [@ "c_inline"]
 let quarter_round st a b c d =
   line st a b d (u32 16);
@@ -103,7 +103,7 @@ val rounds: st:state ->
     (requires (fun h -> live h st))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
 		 as_lseq st h1 == Spec.rounds (as_lseq st h0)))
-let rounds st = 
+let rounds st =
   iter (size 10) Spec.double_round double_round st
 
 [@ "c_inline"]
@@ -132,7 +132,7 @@ val setup:
     (requires (fun h -> live h st /\ live h k /\ live h n
                     /\ disjoint k st /\ disjoint n st))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
-                       /\ as_lseq st h1 == 
+                       /\ as_lseq st h1 ==
 			 Spec.setup (as_lseq k h0) (as_lseq n h0) (as_lseq st h0)))
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
@@ -145,7 +145,7 @@ let setup st k n =
   let st_k = sub st (index 4) (index 8) in
   uint32s_from_bytes_le #8 (size 8) st_k k;
   let st_n = sub st (index 13) (index 3) in
-  uint32s_from_bytes_le #3 (size 3) st_n n 
+  uint32s_from_bytes_le #3 (size 3) st_n n
 
 [@ "c_inline"]
 val chacha20_init:
@@ -154,48 +154,48 @@ val chacha20_init:
   StackInline state
     (requires (fun h -> live h k /\ live h n))
     (ensures (fun h0 st h1 -> preserves_live h0 h1 /\ creates1 st h0 h1
-                       /\ as_lseq st h1 == 
+                       /\ as_lseq st h1 ==
 			 Spec.chacha20_init (as_lseq k h0) (as_lseq n h0)))
 
-let chacha20_init k n = 
+let chacha20_init k n =
   let st : state = create #uint32 #16 (size 16) (u32 0) in
   setup st k n;
   st
-  
+
 
 [@ "c_inline"]
 val chacha20_set_counter: st:state -> c:counter -> Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
-                       /\ as_lseq st h1 == 
+                       /\ as_lseq st h1 ==
 			 Spec.chacha20_set_counter (as_lseq st h0) c))
 
-let chacha20_set_counter st c = 
+let chacha20_set_counter st c =
   st.(size 12) <- u32 c
 
 [@ "c_inline"]
 val chacha20_key_block: b:lbuffer uint8 64 -> st:state -> Stack unit
     (requires (fun h -> live h st /\ live h b /\ disjoint st b))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
-                       /\ as_lseq b h1 == 
+                       /\ as_lseq b h1 ==
 			 Spec.chacha20_key_block (as_lseq st h0)))
-let chacha20_key_block b st = 
+let chacha20_key_block b st =
   alloc (size 16) (u32 0) [BufItem st] [BufItem b]
   (fun h0 _ h1 -> as_lseq b h1 == Spec.chacha20_key_block (as_lseq st h0))
-  (fun st' -> chacha20_core st' st; 
+  (fun st' -> chacha20_core st' st;
 	   uint32s_to_bytes_le (size 16) b st')
 
 
 [@ "c_inline"]
-val chacha20_key_block0: b:lbuffer uint8 64 -> 
-  k:lbuffer uint8 32 -> 
+val chacha20_key_block0: b:lbuffer uint8 64 ->
+  k:lbuffer uint8 32 ->
   n:lbuffer uint8 12 -> Stack unit
     (requires (fun h -> live h k /\ live h n /\ live h b /\ disjoint b k /\ disjoint b n))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
-                       /\ as_lseq b h1 == 
+                       /\ as_lseq b h1 ==
 			 Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0)))
 #reset-options "--z3rlimit 300"
-let chacha20_key_block0 b k n = 
+let chacha20_key_block0 b k n =
   alloc #_ #_ #16 (size 16) (u32 0) [BufItem k; BufItem n] [BufItem b]
   (fun h0 _ h1 -> as_lseq b h1 == Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0))
   (fun st -> setup st k n;
@@ -210,11 +210,11 @@ val chacha20_block:
   st:state ->
   ctr:size_t ->
   Stack unit
-    (requires (fun h -> live h stream_block /\ 
-		     live h st /\ 
+    (requires (fun h -> live h stream_block /\
+		     live h st /\
 		     disjoint stream_block st))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 st stream_block h0 h1 /\
-			   as_lseq st h1 == 
+			   as_lseq st h1 ==
 			   Spec.chacha20_block stream_block st ctrsetup (as_lseq k h0) (as_lseq n h0) c (as_lseq st h0)))
 			   ))
 
@@ -226,11 +226,11 @@ let chacha20_block stream_block st ctr =
   let impl st' : Stack unit
     (requires (fun h -> live h st' /\ live_list h bufs /\ disjoint_list st' bufs))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies3 st' st stream_block h0 h1))
-  = 
+  =
     chacha20_core st' st ctr;
     uint32s_to_bytes_le #16 stream_block st' in
   alloc 16 (u32 0) bufs spec impl
-    
+
 
 [@ "c_inline"]
 val init:
@@ -243,7 +243,7 @@ val init:
 [@ "c_inline"]
 let init st k n =
   setup st k n 0
-  
+
 #reset-options " --max_fuel 0 --z3rlimit 400"
 
 val update_last:
@@ -473,7 +473,7 @@ let chacha20_counter_mode output plain len log st ctr =
     let _ = update_last output'' plain'' part_len log st FStar.UInt32.(ctr +^ blocks_len) in
     (**) let h' = ST.get() in
     (**) modifies_subbuffer_2 h1 h' output'' st output)
-  else 
+  else
     (**) lemma_modifies_sub_2 h1 h1 output st;
   let h = ST.get() in
   (**) lemma_modifies_2_trans output st h0 h1 h;

@@ -1,4 +1,4 @@
-module Crypto.KrmlTest
+module KrmlTest
 
 module ST = FStar.HyperStack.ST
 
@@ -27,17 +27,13 @@ open Crypto
 open Buffer
 open Flag
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 module Plain = Crypto.Plain
 module MAC = Crypto.Symmetric.MAC
 module Cipher = Crypto.Symmetric.Cipher
 module PRF = Crypto.Symmetric.PRF
-module AE = Crypto.AEAD
-module AETypes = Crypto.AEAD.Invariant
-module D = Crypto.AEAD.Decrypt
-module E = Crypto.AEAD.Encrypt
+module AE = Crypto.AEAD.Main
 
 module L = FStar.List.Tot
 
@@ -130,42 +126,42 @@ let test() =
   let cipherlen = plainlen +^ 16ul in
   assert(Buffer.length expected_cipher = v cipherlen);
   let cipher = Buffer.create 0uy cipherlen in
-  let st = AE.coerce i HH.root key in
+  let st = AE.coerce i HS.root key in
 
   // To prove the assertion below for the concrete constants in PRF, AEAD:
   assert_norm (114 <= pow2 14);
   assert_norm (FStar.Mul.(114 <= 1999 * 64));
-  assert(AETypes.safelen i (v plainlen) 1ul);
+  (* assert(AETypes.safelen i (v plainlen) 1ul); *)
   //NS: These 3 separation properties are explicitly violated by allocating st in HH.root
   //    Assuming them for the moment
-  assume (
-    HH.disjoint (Buffer.frameOf (Plain.as_buffer plain)) (AETypes.AEADState?.log_region st) /\
-    HH.disjoint (Buffer.frameOf cipher) (AETypes.AEADState?.log_region st) /\
-    HH.disjoint (Buffer.frameOf aad) (AETypes.AEADState?.log_region st)
-  );
-  AEAD.Encrypt.encrypt i st iv aadlen aad plainlen plain cipher;
+  (* assume ( *)
+  (*   HH.disjoint (Buffer.frameOf (Plain.as_buffer plain)) (AETypes.AEADState?.log_region st) /\ *)
+  (*   HH.disjoint (Buffer.frameOf cipher) (AETypes.AEADState?.log_region st) /\ *)
+  (*   HH.disjoint (Buffer.frameOf aad) (AETypes.AEADState?.log_region st) *)
+  (* ); *)
+  AEAD.Main.encrypt i st iv aadlen aad plainlen plain cipher;
 
-  TestLib.compare_and_print (C.string_of_literal "cipher") expected_cipher cipher cipherlen;
+  TestLib.compare_and_print (C.String.of_literal "cipher") expected_cipher cipher cipherlen;
 
   (* let ok_0 = diff "cipher" cipherlen expected_cipher cipher in *)
 
   let decrypted = Plain.create i 0uy plainlen in
 
   let st = AE.genReader st in
-  let ok_1 = AEAD.Decrypt.decrypt i st iv aadlen aad plainlen decrypted cipher in
+  let ok_1 = AEAD.Main.decrypt i st iv aadlen aad plainlen decrypted cipher in
 
-  TestLib.compare_and_print (C.string_of_literal "decryption") (bufferRepr #i plain) (bufferRepr #i decrypted) plainlen;
+  TestLib.compare_and_print (C.String.of_literal "decryption") (bufferRepr #i plain) (bufferRepr #i decrypted) plainlen;
   (* let ok_2 = diff "decryption" plainlen (bufferRepr #i decrypted) (bufferRepr #i plain) in *)
 
   // testing that decryption fails when truncating aad or tweaking the ciphertext.
-  let fail_0 = AEAD.Decrypt.decrypt i st iv (aadlen -^ 1ul) (Buffer.sub aad 0ul (aadlen -^ 1ul)) plainlen decrypted cipher in
+  let fail_0 = AEAD.Main.decrypt i st iv (aadlen -^ 1ul) (Buffer.sub aad 0ul (aadlen -^ 1ul)) plainlen decrypted cipher in
 
   tweak 3ul cipher;
-  let fail_1 = AEAD.Decrypt.decrypt i st iv aadlen aad plainlen decrypted cipher in
+  let fail_1 = AEAD.Main.decrypt i st iv aadlen aad plainlen decrypted cipher in
   tweak 3ul cipher;
 
   tweak plainlen cipher;
-  let fail_2 = AEAD.Decrypt.decrypt i st iv aadlen aad plainlen decrypted cipher in
+  let fail_2 = AEAD.Main.decrypt i st iv aadlen aad plainlen decrypted cipher in
   tweak plainlen cipher;
 
   pop_frame ();
@@ -191,23 +187,23 @@ let test_aes_gcm i (tn: UInt32.t) key ivBuffer aadlen aad plainlen plainrepr exp
   // Plain.store plainlen plain plainbytes; // trying hard to forget we know the plaintext
   let plain = Plain.unsafe_hide_buffer i plainrepr in
 
-  let st = AE.coerce i HH.root key in
+  let st = AE.coerce i HS.root key in
   let iv : Crypto.Symmetric.Cipher.iv (cipherAlg_of_id i) =
     lemma_little_endian_is_bounded (load_bytes 12ul ivBuffer);
     load_uint128 12ul ivBuffer in
   let cipherlen = plainlen +^ 16ul in
   let cipher = Buffer.create 2uy cipherlen in
-  AEAD.Encrypt.encrypt i st iv aadlen aad plainlen plain cipher;
+  AEAD.Main.encrypt i st iv aadlen aad plainlen plain cipher;
 
   (* let ok_0 = diff "cipher" cipherlen expected_cipher cipher in  *)
-  TestLib.compare_and_print (C.string_of_literal "cipher")  expected_cipher cipher cipherlen;
+  TestLib.compare_and_print (C.String.of_literal "cipher")  expected_cipher cipher cipherlen;
 
   let st = AE.genReader st in
   let decrypted = Plain.create i 3uy plainlen in
-  let ok_1 = AEAD.Decrypt.decrypt i st iv aadlen aad plainlen decrypted cipher in
+  let ok_1 = AEAD.Main.decrypt i st iv aadlen aad plainlen decrypted cipher in
   (* let ok_2 = diff "decryption" plainlen (bufferRepr #i plain) (bufferRepr #i decrypted) in *)
 
-  TestLib.compare_and_print (C.string_of_literal "decryption") (bufferRepr #i decrypted) (bufferRepr #i plain) plainlen;
+  TestLib.compare_and_print (C.String.of_literal "decryption") (bufferRepr #i decrypted) (bufferRepr #i plain) plainlen;
   (* let ok_2 = diff "decryption" plainlen (bufferRepr #i decrypted) (bufferRepr #i plain) in *)
 
   pop_frame();
@@ -347,20 +343,20 @@ let test_aes_gcm_4 () =
   assume(Buffer.length cipher = v (plainlen +^ 16ul));
   test_aes_gcm i 4ul k iv aadlen aad plainlen plain cipher
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
-  C.print_string (C.string_of_literal "test()\n");
+  C.String.print (C.String.of_literal "test()\n");
   let _ = test() in
-  C.print_string (C.string_of_literal "test_aes_gcm_0()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_0()\n");
   let _ = test_aes_gcm_0 () in
-  C.print_string (C.string_of_literal "test_aes_gcm_1()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_1()\n");
   let _ = test_aes_gcm_1 () in
-  C.print_string (C.string_of_literal "test_aes_gcm_2()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_2()\n");
   let _ = test_aes_gcm_2 () in
-  C.print_string (C.string_of_literal "test_aes_gcm_3()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_3()\n");
   let _ = test_aes_gcm_3 () in
-  C.print_string (C.string_of_literal "test_aes_gcm_4()\n");
+  C.String.print (C.String.of_literal "test_aes_gcm_4()\n");
   let _ = test_aes_gcm_4 () in
-  C.exit_success
+  C.EXIT_SUCCESS

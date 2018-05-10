@@ -140,12 +140,11 @@ test-all:
 #
 
 ci: .clean-banner .clean-git .clean-snapshots
-	$(MAKE) extract-specs
-	$(MAKE) -C test test-specs
-	# $(MAKE) verify extract-specs extract-all
-	# $(MAKE) build-make
-	# $(MAKE) test-all
-	# $(MAKE) package
+#	$(MAKE) verify // Suspend verification from CI
+	$(MAKE) extract-specs extract-all
+	$(MAKE) build-make
+	$(MAKE) test-all
+	$(MAKE) package
 
 #
 # Clean

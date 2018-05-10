@@ -16,7 +16,7 @@ open Hacl.Endianness
 let uint8_p = buffer Hacl.UInt8.t
 let felem = b:buffer t{length b = 5}
 
-[@ "substitute"]
+[@ Substitute]
 private
 val store_4:
   output:uint8_p{length output = 32} ->
@@ -27,7 +27,7 @@ val store_4:
       /\ (let s = as_seq h1 output in
          s == FStar.Seq.(hlittle_bytes 8ul (v v1) @| hlittle_bytes 8ul (v v2)
                          @| hlittle_bytes 8ul (v v3) @| hlittle_bytes 8ul (v v4)))))
-[@ "substitute"]
+[@ Substitute]
 let store_4 output v0 v1 v2 v3 =
   let b0 = Buffer.sub output 0ul  8ul in
   let b1 = Buffer.sub output 8ul  8ul in
@@ -62,7 +62,7 @@ let store_4 output v0 v1 v2 v3 =
   FStar.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 b1)) (little_bytes 8ul (v v1));
   FStar.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 b2)) (little_bytes 8ul (v v2));
   FStar.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 b3)) (little_bytes 8ul (v v3));
-  Seq.lemma_eq_intro (as_seq h4 output) 
+  Seq.lemma_eq_intro (as_seq h4 output)
                      FStar.Seq.(hlittle_bytes 8ul (v v0) @| hlittle_bytes 8ul (v v1)
                          @| hlittle_bytes 8ul (v v2) @| hlittle_bytes 8ul (v v3))
 
@@ -171,6 +171,6 @@ let store_51_ output input =
   let o3 = (t4 <<^ 12ul) |^ (t3 >>^ 39ul) in
   store_4 output o0 o1 o2 o3
 
-[@ "substitute"]
+[@ Substitute]
 let store_51 output input =
   store_51_ output input

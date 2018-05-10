@@ -4,6 +4,8 @@ open FStar.HyperStack.All
 
 module ST = FStar.HyperStack.ST
 
+let equal_domains = ST.equal_domains
+
 open FStar.Mul
 open FStar.HyperStack
 open FStar.Buffer

@@ -1,11 +1,12 @@
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdio.h>
 
-#ifdef _WIN32
-#define STDCALL __attribute__((stdcall))
-#else
-#define STDCALL
+#if defined(_MSC_VER)  // Visual Studio - always use __stdcall
+  #define STDCALL __stdcall
+#elif defined(WIN32)   // GCC/MinGW targeting Windows 32-bit - use the __stdcall macro
+  #define STDCALL __attribute__((stdcall))
+#else                  // Targeting other platforms - use the ambient calling convention
+  #define STDCALL
 #endif
 
 extern void STDCALL KeyExpansionStdcall(const void *key_ptr, void *expanded_key_ptr, void *placeholder);

@@ -3,6 +3,7 @@ module Box.Plain
 open FStar.HyperStack.All
 
 module ST = FStar.HyperStack.ST
+module HS = FStar.HyperStack
 
 open FStar.Seq
 open FStar.Buffer
@@ -62,7 +63,7 @@ val log_cmp_monotonic: unit -> Lemma (Monotonic.RRef.monotonic log log_cmp)
 let log_cmp_monotonic () = admit()
 
 
-let log_ref (r:HyperHeap.rid{HyperStack.is_eternal_region r}) = Monotonic.RRef.m_rref r log log_cmp
+let log_ref (r:HS.rid{HyperStack.is_eternal_region r}) = Monotonic.RRef.m_rref r log log_cmp
 
 
 (* type valid_msg #nonce h (m:msg nonce) : GTot Type0 = *)

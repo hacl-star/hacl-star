@@ -295,7 +295,7 @@ Hacl_Box_ZeroPad_crypto_box_open_easy_afternm(
   uint8_t *k1
 )
 {
-  uint8_t *mac = c;
+  uint8_t *mac = c + (uint32_t)16U;
   uint32_t t = Hacl_Box_ZeroPad_crypto_box_open_detached_afternm(m, c, mac, mlen, n1, k1);
   return t;
 }

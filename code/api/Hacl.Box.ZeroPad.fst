@@ -217,7 +217,7 @@ val crypto_box_open_easy_afternm:
 let crypto_box_open_easy_afternm m c mlen n k =
   let mlen' = Int.Cast.uint64_to_uint32 mlen in
   Math.Lemmas.modulo_lemma (U64.v mlen) (pow2 32);
-  let mac = sub c 0ul 16ul in
+  let mac = sub c 16ul 16ul in
   let h0 = ST.get () in
   let t = crypto_box_open_detached_afternm m c mac mlen n k in
   let h1 = ST.get () in

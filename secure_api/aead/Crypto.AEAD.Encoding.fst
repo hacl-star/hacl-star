@@ -9,7 +9,6 @@ open FStar.HyperStack.All
 
 open FStar.UInt32
 open FStar.Ghost
-open FStar.Monotonic.RRef
 
 open FStar.Math.Lib
 open FStar.Math.Lemmas
@@ -18,7 +17,6 @@ open Crypto.Symmetric.Bytes
 open Crypto.Plain
 open Flag
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 module MAC = Crypto.Symmetric.MAC
@@ -26,11 +24,11 @@ module CMA = Crypto.Symmetric.UF1CMA
 module Cipher = Crypto.Symmetric.Cipher
 module PRF = Crypto.Symmetric.PRF
 
-type region = rgn:HH.rid {HS.is_eternal_region rgn}
+type region = rgn:HS.rid {is_eternal_region rgn}
 
 let alg (i:id) = cipherAlg_of_id i
 
-type rgn = rgn:HH.rid {HS.is_eternal_region rgn}
+type rgn = rgn:HS.rid {is_eternal_region rgn}
 
 // Concrete, somewhat arbitrary bounds on input lengths;
 // these should go to some configuration flle
@@ -151,6 +149,8 @@ let rec lemma_encode_bytes_injective t0 t1 =
 
 // If the length is not a multiple of 16, pad to 16
 // (we actually don't depend on the details of the padding)
+[@"c_inline"]
+inline_for_extraction
 val pad_16: b:lbuffer 16 -> len:UInt32.t {0 < v len /\ v len <= 16} -> STL unit
   (requires (fun h -> Buffer.live h b))
   (ensures  (fun h0 _ h1 ->
@@ -178,7 +178,7 @@ private val add_bytes:
     Buffer.disjoint (MAC.as_buffer (CMA.abuf acc)) txt /\
     Buffer.disjoint CMA.(MAC.as_buffer st.r) txt /\
     (mac_log ==>
-      Buffer.frameOf txt <> (CMA.alog acc).HS.id \/
+      Buffer.frameOf txt <> HS.frameOf (CMA.alog acc) \/
       Buffer.disjoint_ref_1 txt CMA.(alog acc))))
   (ensures (fun h0 () h1 ->
     let b = CMA.(MAC.as_buffer (CMA.abuf acc)) in
@@ -204,7 +204,49 @@ val lemma_encode_final: b:Seq.seq UInt8.t{0 <> Seq.length b /\ Seq.length b < 16
 let lemma_encode_final b = ()
 
 #reset-options "--z3rlimit 400 --max_fuel 0 --detail_hint_replay"
+// 2018.02.22 SZ: Disabled verification to loopify it; see the verified recursive
+// version in the comment below.
+#set-options "--lax"
 let rec add_bytes #i st acc len txt =
+  push_frame();
+  let bound = len /^ 16ul in
+  C.Loops.for 0ul bound (fun _ _ -> True)
+  (fun i ->
+    let w = Buffer.sub txt (16ul *^ i) 16ul in
+    CMA.update st acc w
+  );
+  let rem = len %^ 16ul in
+  if 0ul <^ rem then
+  begin
+    let w = Buffer.create 0uy 16ul in
+    Buffer.blit txt (len -^ rem) w 0ul rem;
+    CMA.update st acc w
+  end;
+  pop_frame()
+
+(*
+  // Recursive version with only computationally relevant parts retained
+  push_frame();
+  if len = 0ul then () else
+  if len <^ 16ul then
+  begin
+    let w = Buffer.create 0uy 16ul in
+    Buffer.blit txt 0ul w 0ul len;
+    //pad_16 w len; // Unnecessary, since `w` is zero-initialized
+    CMA.update st acc w
+  end
+  else
+  begin
+    let w = Buffer.sub txt 0ul 16ul in
+    CMA.update st acc w;
+    let txt' = Buffer.offset txt 16ul in
+    add_bytes st acc (len -^ 16ul) txt'
+  end;
+  pop_frame()
+*)
+
+(*
+  // Verified recursive version
   let h0 = ST.get() in
   assert(mac_log ==> h0 `HS.contains` (CMA.alog acc));
   push_frame();
@@ -271,7 +313,8 @@ let rec add_bytes #i st acc len txt =
   CMA.frame_acc_inv st acc h5 h6;
   MAC.frame_sel_elem h5 h6 (CMA.abuf acc);
   if not mac_log then
-    Buffer.lemma_intro_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h6
+Buffer.lemma_intro_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h0 h6
+*)
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 private let encode_lengths_poly1305 (aadlen:UInt32.t) (plainlen:UInt32.t) : b:lbytes 16
@@ -409,7 +452,7 @@ let store_lengths i aadlen txtlen w =
   | POLY1305 -> store_lengths_poly1305 aadlen txtlen w
   | GHASH    -> store_lengths_ghash    aadlen txtlen w
 
-let fresh_sref (#a:Type0) h0 h1 (r:HS.reference a) =
+let fresh_sref (#a:Type0) h0 h1 (r:ST.reference a) =
   (r `HS.unused_in` h0) /\
   HS.frameOf r == HS.(h1.tip) /\
   h1 `HS.contains` r
@@ -417,7 +460,7 @@ let fresh_sref (#a:Type0) h0 h1 (r:HS.reference a) =
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 private val frame_modifies_buf_and_ref: #a:Type -> #b:Type -> #c:Type -> h0:mem -> h1:mem ->
   buf:Buffer.buffer a ->
-  ref:HS.reference b{Buffer.frameOf buf == ref.HS.id} ->
+  ref:HS.reference b{Buffer.frameOf buf == HS.frameOf ref} ->
   buf':Buffer.buffer c -> Lemma
   (requires (CMA.modifies_buf_and_ref #a #b buf ref h0 h1 /\
              (Buffer.frameOf buf' <> Buffer.frameOf buf \/

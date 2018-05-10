@@ -12,7 +12,7 @@ let len = 114ul
 
 #set-options "--lax"
 
-val main: unit -> Stack FStar.Int32.t
+val main: unit -> Stack C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -65,6 +65,6 @@ let main () =
   let counter = 1ul in
   let ctx = create 0ul 32ul in
   Chacha20.chacha20 ciphertext plaintext len key nonce counter;
-  TestLib.compare_and_print (C.string_of_literal "chacha20") expected ciphertext len;
+  TestLib.compare_and_print (C.String.of_literal "chacha20") expected ciphertext len;
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS

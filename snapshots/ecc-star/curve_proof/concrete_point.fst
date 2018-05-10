@@ -634,7 +634,7 @@ let distinct_lemma a b =
 #reset-options
 
 val distinct_commutative: a:point -> b:point -> Lemma 
-  (requires (True)) (ensures (Distinct a b <==> Distinct b a)) [SMTPatT (Distinct a b)]
+  (requires (True)) (ensures (Distinct a b <==> Distinct b a)) [SMTPat (Distinct a b)]
 let distinct_commutative a b = 
   //@@
   ()

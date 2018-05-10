@@ -10,7 +10,7 @@ open Spec.Poly1305.Lemmas
 (* Field types and parameters *)
 let prime =  pow2 130 - 5
 unfold type elem = nat_mod prime
-let to_elem (x:nat) : elem = x `modulo` prime 
+let to_elem (x:nat) : elem = x `modulo` prime
 let from_elem (x:elem) : nat = nat_mod_v #prime x
 let zero : elem = to_elem 0
 
@@ -39,8 +39,6 @@ let update1 (len:size_nat{len <= blocksize}) (b:lbytes len) (st:state) : state =
   let n = to_elem (pow2 (8 * len)) +. to_elem (nat_from_bytes_le b) in
   let acc = (n +. st.acc) *. st.r in
   set_acc st acc
-  
-
 
 let update_blocks (n:size_nat{n * blocksize <= max_size_t}) (text:lbytes (n * blocksize)) (st:state) : state =
   repeati n (fun i st ->

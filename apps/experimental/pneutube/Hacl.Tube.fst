@@ -153,11 +153,10 @@ open FStar.Mul
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
 
-module HH = FStar.HyperHeap
 module HS = FStar.HyperStack
 
 
-noextract let triple (a:HH.rid) (b:HH.rid) (c:HH.rid) = Set.union (Set.singleton a) (Set.union (Set.singleton b) (Set.singleton c))
+noextract let triple (a:HS.rid) (b:HS.rid) (c:HS.rid) = Set.union (Set.singleton a) (Set.union (Set.singleton b) (Set.singleton c))
 
 type uint8_p = b:uint8_p{frameOf b <> file_rgn /\ frameOf b <> socket_rgn}
 
@@ -344,7 +343,7 @@ let file_flush_all sb fb immut_state mut_state ctr rem =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200 --lax"
 
 
-assume val input_rgn: r:HH.rid{r <> file_rgn /\ r <> socket_rgn}
+assume val input_rgn: r:HS.rid{r <> file_rgn /\ r <> socket_rgn}
 assume val dummy_ptr: uint8_p
 
 

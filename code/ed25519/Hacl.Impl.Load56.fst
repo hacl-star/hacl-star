@@ -16,7 +16,7 @@ open Hacl.Spec.Endianness
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val hload56_le:
   b:hint8_p{length b = 64} ->
@@ -26,7 +26,7 @@ val hload56_le:
     (ensures (fun h0 z h1 -> h0 == h1 /\ live h0 b /\
       v z == hlittle_endian (Seq.slice (as_seq h0 b) (UInt32.v off) (UInt32.v off + 7)) /\
       v z < pow2 56))
-[@ "substitute"]
+[@ Substitute]
 let hload56_le b off =
   let b8 = Buffer.sub b off 8ul in
   let z  = hload64_le b8 in
@@ -144,7 +144,7 @@ let load_64_bytes out b =
   Hacl.Lib.Create64.make_h64_10 out b0 b1 b2 b3 b4 b5 b6 b7 b8 b9
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val hload56_le':
   b:hint8_p{length b = 32} ->
@@ -154,7 +154,7 @@ val hload56_le':
     (ensures (fun h0 z h1 -> h0 == h1 /\ live h0 b /\
       v z == hlittle_endian (Seq.slice (as_seq h0 b) (UInt32.v off) (UInt32.v off + 7)) /\
       v z < pow2 56))
-[@ "substitute"]
+[@ Substitute]
 let hload56_le' b off =
   let b8 = Buffer.sub b off 8ul in
   let z  = hload64_le b8 in

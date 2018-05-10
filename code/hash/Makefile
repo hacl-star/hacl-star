@@ -26,7 +26,7 @@ all-hints: hints
 
 KREMLIN_ARGS+=-verbose \
 	-no-prefix C.Loops \
-	-drop Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+	-drop FStar,Prims,C.Loops.Spec.Loops,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
 	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
 	$(KREMLIN_TESTLIB) -add-include '"kremstr.h"' -ccopt -march=native

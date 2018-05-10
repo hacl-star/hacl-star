@@ -1,6 +1,7 @@
 module Hacl.Impl.Chacha20.Vec128
 
 module ST = FStar.HyperStack.ST
+module HyperHeap = FStar.Monotonic.HyperHeap
 
 open FStar.HyperStack.All
 
@@ -41,7 +42,7 @@ let as_state h st =
   let st = as_seq h st in let op_String_Access = Seq.index in
   Seq.Create.create_4 (vec_as_seq (st.[0])) (vec_as_seq (st.[1])) (vec_as_seq (st.[2])) (vec_as_seq (st.[3]))
 
-[@ "substitute"]
+[@ CInline]
 val line:
   st:state ->
   a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s > 0 /\ U32.v s < 32} ->
@@ -50,7 +51,7 @@ val line:
     (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st /\
       as_state h1 st == Spec.line (U32.v a) (U32.v b) (U32.v d) s (as_state h0 st)
       ))
-[@ "substitute"]
+[@ CInline]
 let line st a b d s =
   let h0 = ST.get() in
   let sa = st.(a) in
@@ -64,14 +65,14 @@ let line st a b d s =
   Seq.lemma_eq_intro (as_state h1 st) (Spec.line (U32.v a) (U32.v b) (U32.v d) s (as_state h0 st))
 
 
-[@ "c_inline"]
+[@ CInline]
 val round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1 /\
       as_state h1 st == Spec.round (as_state h0 st)))
-[@ "c_inline"]
+[@ CInline]
 let round st =
   let h0 = ST.get() in
   line st 0ul 1ul 3ul 16ul;
@@ -82,25 +83,25 @@ let round st =
   Seq.lemma_eq_intro (as_state h1 st) (Spec.round (as_state h0 st))
 
 
-[@ "substitute"]
+[@ Substitute]
 val column_round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1 /\
       as_state h1 st == Spec.column_round (as_state h0 st)))
-[@ "substitute"]
+[@ Substitute]
 let column_round st = round st
 
 
-[@ "substitute"]
+[@ Substitute]
 val shuffle_rows_0123:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1 /\
       as_state h1 st == Spec.shuffle_rows_0123 (as_state h0 st)))
-[@ "substitute"]
+[@ Substitute]
 let shuffle_rows_0123 st =
   let h0 = ST.get() in
     let r1 = st.(1ul) in
@@ -113,14 +114,14 @@ let shuffle_rows_0123 st =
   Seq.lemma_eq_intro (as_state h1 st) (Spec.shuffle_rows_0123 (as_state h0 st))
 
 
-[@ "substitute"]
+[@ Substitute]
 val shuffle_rows_0321:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1 /\
       as_state h1 st == Spec.shuffle_rows_0321 (as_state h0 st)))
-[@ "substitute"]
+[@ Substitute]
 let shuffle_rows_0321 st =
   let h0 = ST.get() in
     let r1 = st.(1ul) in
@@ -133,28 +134,28 @@ let shuffle_rows_0321 st =
   Seq.lemma_eq_intro (as_state h1 st) (Spec.shuffle_rows_0321 (as_state h0 st))
 
 
-[@ "substitute"]
+[@ Substitute]
 val diagonal_round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1 /\
       as_state h1 st == Spec.diagonal_round (as_state h0 st)))
-[@ "substitute"]
+[@ Substitute]
 let diagonal_round st =
   shuffle_rows_0123 st;
   round st;
   shuffle_rows_0321 st
 
 
-[@ "c_inline"]
+[@ CInline]
 val double_round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1 /\
       as_state h1 st == Spec.double_round (as_state h0 st)))
-[@ "c_inline"]
+[@ CInline]
 let double_round st =
     column_round st;
     diagonal_round st
@@ -162,7 +163,7 @@ let double_round st =
 
 #reset-options "--max_fuel 0 --z3rlimit 10"
 
-[@ "c_inline"]
+[@ CInline]
 val double_round3:
   st:state ->
   st':state{disjoint st st'} ->
@@ -186,8 +187,8 @@ val lemma_modifies_double_round3:
   st:state ->
   st':state{disjoint st st'} ->
   st'':state{disjoint st st' /\ disjoint st' st''} ->
-  Lemma (requires (live h0 st /\ live h0 st' /\ live h0 st'' /\ HyperStack.equal_domains h0 h1 /\
-    HyperStack.equal_domains h1 h2 /\ HyperStack.equal_domains h2 h3 /\
+  Lemma (requires (live h0 st /\ live h0 st' /\ live h0 st'' /\ ST.equal_domains h0 h1 /\
+    ST.equal_domains h1 h2 /\ ST.equal_domains h2 h3 /\
     modifies_1 st h0 h1 /\ modifies_1 st' h1 h2 /\ modifies_1 st'' h2 h3))
         (ensures (modifies_3 st st' st'' h0 h3))
 
@@ -202,7 +203,7 @@ let lemma_modifies_double_round3 h0 h1 h2 h3 st st' st'' =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 let double_round3 st st' st'' =
   let h0 = ST.get() in
   double_round st;
@@ -228,14 +229,14 @@ let double_round3 st st' st'' =
   lemma_modifies_double_round3 h0 h1 h2 h3 st st' st''
 
 
-[@ "substitute"]
+[@ Substitute]
 val rounds:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1 /\
       as_state h1 st == Spec.rounds (as_state h0 st)))
-[@ "substitute"]
+[@ Substitute]
 let rounds st =
   let h0 = ST.get() in
   let inv (h1: HyperStack.mem) (i: nat): Type0 =
@@ -255,7 +256,7 @@ let rounds st =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 val rounds3:
   st:state ->
   st':state{disjoint st st'} ->
@@ -341,7 +342,7 @@ let lemma_helper_rounds3 h0 h1 h2 st st' st'' i =
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ "substitute"]
+[@ Substitute]
 let rounds3 st st' st'' =
   let h0 = ST.get() in
   let inv (h1:mem) (i:nat) : Type0 =
@@ -364,7 +365,7 @@ let rounds3 st st' st'' =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 val sum_states:
   st':state ->
   st:state{disjoint st st'} ->
@@ -374,7 +375,7 @@ val sum_states:
       live h0 st' /\
       (let st1' = as_state h1 st' in let st0' = as_state h0 st' in let st0 = as_state h0 st in
        st1' == Spec.Loops.seq_map2 Spec.op_Plus_Percent_Hat st0' st0)))
-[@ "c_inline"]
+[@ CInline]
 let sum_states st' st =
   let h0 = ST.get() in
   let s0 = st.(0ul) in
@@ -394,7 +395,7 @@ let sum_states st' st =
                                       Spec.Loops.seq_map2 Spec.op_Plus_Percent_Hat st0' st0)
 
 
-[@ "c_inline"]
+[@ CInline]
 val copy_state:
   st':state ->
   st:state{disjoint st st'} ->
@@ -402,7 +403,7 @@ val copy_state:
     (requires (fun h -> live h st /\ live h st'))
     (ensures (fun h0 _ h1 -> live h1 st' /\ live h0 st /\ modifies_1 st' h0 h1 /\
       as_state h1 st' == as_state h0 st))
-[@ "c_inline"]
+[@ CInline]
 let copy_state st' st =
   let h0 = ST.get() in
   let st0 = st.(0ul) in
@@ -428,7 +429,7 @@ let invariant (log:log_t) (h:mem) (st:state) : GTot Type0 =
   match log with | MkLog key nonce ctr -> s == Spec.setup key nonce (UInt32.v ctr))
 
 
-[@ "c_inline"]
+[@ CInline]
 val chacha20_core:
   log:log_t ->
   k:state ->
@@ -439,7 +440,7 @@ val chacha20_core:
       invariant log h0 st /\ (
       match Ghost.reveal log with | MkLog k' n ctr ->
         as_state h1 k == Spec.(chacha20_core (setup k' n (UInt32.v ctr)))) ))
-[@ "c_inline"]
+[@ CInline]
 let chacha20_core log k st =
   let h0 = ST.get() in
   copy_state k st;
@@ -453,7 +454,7 @@ let chacha20_core log k st =
 
 #reset-options "--max_fuel 0 --z3rlimit 10"
 
-[@ "substitute"]
+[@ Substitute]
 val state_incr:
   log:log_t ->
   st:state ->
@@ -495,7 +496,7 @@ let log_incr log =
 #reset-options "--max_fuel 0 --z3rlimit 50"
 
 
-[@ "substitute"]
+[@ Substitute]
 val chacha20_incr3:
   log:log_t ->
   k0:state ->
@@ -523,7 +524,7 @@ val lemma_chacha_incr3_modifies:
   h2:HyperStack.mem ->
   h3:HyperStack.mem ->
   st0:state -> st1:state{disjoint st0 st1} -> st2:state{disjoint st2 st1 /\ disjoint st2 st0} ->
-  Lemma (requires (live h0 st0 /\ live h0 st1 /\ live h0 st2 /\ modifies_1 st0 h0 h1 /\ modifies_1 st1 h1 h2 /\ modifies_1 st2 h2 h3 /\ HyperStack.equal_domains h0 h1 /\ HyperStack.equal_domains h1 h2 /\ HyperStack.equal_domains h2 h3))
+  Lemma (requires (live h0 st0 /\ live h0 st1 /\ live h0 st2 /\ modifies_1 st0 h0 h1 /\ modifies_1 st1 h1 h2 /\ modifies_1 st2 h2 h3 /\ ST.equal_domains h0 h1 /\ ST.equal_domains h1 h2 /\ ST.equal_domains h2 h3))
         (ensures (modifies_3 st0 st1 st2 h0 h3))
 let lemma_chacha_incr3_modifies h0 h1 h2 h3 st0 st1 st2 =
   lemma_reveal_modifies_1 st0 h0 h1;
@@ -533,7 +534,7 @@ let lemma_chacha_incr3_modifies h0 h1 h2 h3 st0 st1 st2 =
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ "c_inline"]
+[@ CInline]
 let chacha20_incr3 log k0 k1 k2 st =
   let h0 = ST.get() in
   copy_state k0 st;
@@ -581,7 +582,7 @@ let chacha20_incr3 log k0 k1 k2 st =
   lemma_chacha_incr3_modifies h0 h1 h3 h5 k0 k1 k2
 
 
-[@ "c_inline"]
+[@ CInline]
 val chacha20_sum3:
   log:log_t ->
   k0:state ->
@@ -599,7 +600,7 @@ val chacha20_sum3:
       invariant log h0 st /\
       modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h1 /\
       modifies_buf_1 (frameOf st) st h0 h1 /\
-      HyperHeap.modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) /\ (
+      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) /\ (
       match Ghost.reveal log with | MkLog k n ctr ->
       UInt32.v ctr < pow2 32 - 2 /\
       as_state h1 st == Spec.setup k n (UInt32.v ctr+2) /\
@@ -622,13 +623,13 @@ val lemma_modifies_sum3:
   k1:state{disjoint st k1 /\ disjoint k0 k1 /\ frameOf k1 == frameOf k0} ->
   k2:state{disjoint st k2 /\ disjoint k0 k2 /\ disjoint k1 k2 /\ frameOf k2 == frameOf k1} ->
   Lemma (requires (live h0 st /\ live h0 k0 /\ live h0 k1 /\ live h0 k2 /\
-    HyperStack.equal_domains h0 h1 /\ HyperStack.equal_domains h1 h2 /\
-    HyperStack.equal_domains h2 h3 /\ HyperStack.equal_domains h3 h4 /\ HyperStack.equal_domains h4 h5 /\
+    ST.equal_domains h0 h1 /\ ST.equal_domains h1 h2 /\
+    ST.equal_domains h2 h3 /\ ST.equal_domains h3 h4 /\ ST.equal_domains h4 h5 /\
     modifies_1 k0 h0 h1 /\ modifies_1 st h1 h2 /\ modifies_1 k1 h2 h3 /\ modifies_1 st h3 h4 /\
     modifies_1 k2 h4 h5))
         (ensures (modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h5 /\
           modifies_buf_1 (frameOf st) st h0 h5 /\
-          HyperHeap.modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h5.h) ))
+          modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h5.h) ))
 let lemma_modifies_sum3 h0 h1 h2 h3 h4 h5 st k0 k1 k2 =
   lemma_reveal_modifies_1 k0 h0 h1;
   lemma_reveal_modifies_1 st h1 h2;
@@ -638,7 +639,7 @@ let lemma_modifies_sum3 h0 h1 h2 h3 h4 h5 st k0 k1 k2 =
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ "c_inline"]
+[@ CInline]
 let chacha20_sum3 log k0 k1 k2 st =
   let log' = log_incr log in
   Math.Lemmas.modulo_lemma (UInt32.v (MkLog?.ctr (Ghost.reveal log)) + 1) (pow2 32);
@@ -674,7 +675,7 @@ let chacha20_sum3 log k0 k1 k2 st =
 
 
 
-[@ "c_inline"]
+[@ CInline]
 val chacha20_core3:
   log:log_t ->
   k0:state ->
@@ -689,7 +690,7 @@ val chacha20_core3:
       invariant log h0 st /\
       modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h1 /\
       modifies_buf_1 (frameOf st) st h0 h1 /\
-      HyperHeap.modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) /\ (
+      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) /\ (
       match Ghost.reveal log with | MkLog k n ctr ->
       UInt32.v ctr < pow2 32 - 2 /\
       as_state h1 st == Spec.setup k n (UInt32.v ctr+2) /\
@@ -700,7 +701,7 @@ val chacha20_core3:
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 let chacha20_core3 log k0 k1 k2 st =
   let h0 = ST.get() in
   chacha20_incr3 log k0 k1 k2 st;
@@ -713,7 +714,7 @@ let chacha20_core3 log k0 k1 k2 st =
   ()
 
 
-[@ "c_inline"]
+[@ CInline]
 val chacha20_block:
   log:log_t ->
   stream_block:uint8_p{length stream_block = 64} ->
@@ -729,7 +730,7 @@ val chacha20_block:
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 let chacha20_block log stream_block st =
   (**) let hinit = ST.get() in
   push_frame();
@@ -752,7 +753,7 @@ let chacha20_block log stream_block st =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "c_inline"]
+[@ CInline]
 val init:
   st:state ->
   k:uint8_p{length k = 32 /\ disjoint st k} ->
@@ -763,7 +764,7 @@ val init:
     (ensures  (fun h0 log h1 -> live h1 st /\ live h0 k /\ live h0 n /\ modifies_1 st h0 h1 /\
       invariant log h1 st /\
       Ghost.reveal log == MkLog (reveal_sbytes (as_seq h0 k)) (reveal_sbytes (as_seq h0 n)) ctr))
-[@ "c_inline"]
+[@ CInline]
 let init st k n ctr =
   let h = ST.get() in
   state_setup st k n ctr;
@@ -1117,7 +1118,7 @@ val lemma_live_update3:
   Lemma (requires (live h0 st /\ live h0 k0 /\ live h0 k1 /\ live h0 k2 /\ live h0 buf /\
       modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h1 /\
       modifies_buf_1 (frameOf st) st h0 h1 /\
-      HyperHeap.modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) ))
+      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) ))
         (ensures (live h1 buf /\ live h0 buf /\ as_seq h0 buf == as_seq h1 buf))
 let lemma_live_update3 h0 h1 st k0 k1 k2 buf =
   ()
@@ -1163,10 +1164,10 @@ val lemma_modifies_update3:
   h0:HyperStack.mem ->
   h1:HyperStack.mem{HyperStack.fresh_frame h0 h1} ->
   h2:HyperStack.mem{modifies_0 h1 h2} ->
-  h3:HyperStack.mem{HyperStack.equal_domains h2 h3} ->
-  h4:HyperStack.mem{HyperStack.equal_domains h3 h4} ->
-  h5:HyperStack.mem{HyperStack.equal_domains h4 h5} ->
-  h6:HyperStack.mem{HyperStack.equal_domains h5 h6} ->
+  h3:HyperStack.mem{ST.equal_domains h2 h3} ->
+  h4:HyperStack.mem{ST.equal_domains h3 h4} ->
+  h5:HyperStack.mem{ST.equal_domains h4 h5} ->
+  h6:HyperStack.mem{ST.equal_domains h5 h6} ->
   h7:HyperStack.mem{HyperStack.popped h6 h7} ->
   output:uint8_p{length output = 192 /\ live h0 output /\ live h1 output /\ live h2 output /\ live h3 output /\ live h4 output /\ live h5 output /\ live h6 output /\ live h7 output} ->
   st:state{live h0 st /\ live h1 st /\ live h2 st /\ live h3 st /\ live h4 st /\ live h5 st /\ live h6 st /\ live h7 st} ->
@@ -1176,7 +1177,7 @@ val lemma_modifies_update3:
   Lemma (requires (
       modifies_buf_3 (frameOf k0) k0 k1 k2 h2 h3 /\
       modifies_buf_1 (frameOf st) st h2 h3 /\
-      HyperHeap.modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h3.h) FStar.HyperStack.(h2.h) /\
+      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h3.h) FStar.HyperStack.(h2.h) /\
       modifies_1 (Buffer.sub output 0ul   64ul) h3 h4 /\
       modifies_1 (Buffer.sub output 64ul  64ul) h4 h5 /\
       modifies_1 (Buffer.sub output 128ul 64ul) h5 h6))

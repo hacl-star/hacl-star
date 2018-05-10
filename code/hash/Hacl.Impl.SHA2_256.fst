@@ -59,7 +59,7 @@ inline_for_extraction let h32_to_h64 = Cast.sint32_to_sint64
 inline_for_extraction let u64_to_h64 = Cast.uint64_to_sint64
 
 
-#reset-options "--max_fuel 0  --z3rlimit 10"
+#reset-options "--using_facts_from '+Prims +FStar.Pervasives +FStar.UInt +FStar.UInt32 +Spec.SHA2_256 +Hacl.Hash.Lib +Hacl.Impl.SHA2_256' --max_fuel 0 --z3rlimit 10"
 
 //
 // SHA-256
@@ -126,7 +126,7 @@ private val _sigma1: x:uint32_ht -> Tot uint32_ht
 let _sigma1 x = H32.logxor (rotate_right x 17ul) (H32.logxor (rotate_right x 19ul) (H32.shift_right x 10ul))
 
 
-#reset-options " --max_fuel 0 --z3rlimit 10"
+#set-options " --max_fuel 0 --z3rlimit 10"
 
 [@"substitute"]
 private val constants_set_k:
@@ -174,9 +174,9 @@ let constants_set_h_0 hash = hupd_8 hash
   (u32_to_h32 0x510e527ful) (u32_to_h32 0x9b05688cul) (u32_to_h32 0x1f83d9abul) (u32_to_h32 0x5be0cd19ul)
 
 
-#reset-options " --max_fuel 0 --z3rlimit 20"
+#set-options " --max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val ws_part_1_core:
   ws_w    :uint32_p {length ws_w = v size_ws_w} ->
@@ -194,9 +194,9 @@ val ws_part_1_core:
                   let b = reveal_h32s (as_seq h0 block_w) in
                   (forall (j:nat). {:pattern (Seq.index w j)} j < UInt32.v i+1 ==> Seq.index w j == Spec.ws b j))))
 
-#reset-options " --max_fuel 0 --z3rlimit 100"
+#set-options " --max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 let ws_part_1_core ws_w block_w t =
   (**) let h0 = ST.get() in
   (**) let h = ST.get() in
@@ -220,7 +220,7 @@ private val ws_part_1:
                   let b = reveal_h32s (as_seq h0 block_w) in
                   (forall (i:nat). {:pattern (Seq.index w i)} i < 16 ==> Seq.index w i == Spec.ws b i))))
 
-#reset-options " --max_fuel 0 --z3rlimit 200"
+#set-options " --max_fuel 0 --z3rlimit 200"
 
 [@"substitute"]
 let ws_part_1 ws_w block_w =
@@ -244,9 +244,9 @@ let ws_part_1 ws_w block_w =
   (**) let h1 = ST.get() in ()
 
 
-#reset-options " --max_fuel 0 --z3rlimit 20"
+#set-options " --max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val ws_part_2_core:
   ws_w    :uint32_p {length ws_w = v size_ws_w} ->
@@ -264,9 +264,9 @@ val ws_part_2_core:
                   let b = reveal_h32s (as_seq h0 block_w) in
                   (forall (j:nat). {:pattern (Seq.index w j)} j < UInt32.v i+1 ==> Seq.index w j == Spec.ws b j))))
 
-#reset-options " --max_fuel 0 --z3rlimit 100"
+#set-options " --max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 let ws_part_2_core ws_w block_w t =
   (**) let h0 = ST.get () in
   let t16 = ws_w.(t -^ 16ul) in
@@ -280,7 +280,7 @@ let ws_part_2_core ws_w block_w t =
   (**) assert(Seq.index (reveal_h32s (as_seq h1 ws_w)) (UInt32.v t) == Spec.ws (reveal_h32s (as_seq h0 block_w)) (UInt32.v t))
 
 
-#reset-options " --max_fuel 0 --z3rlimit 20"
+#set-options " --max_fuel 0 --z3rlimit 20"
 
 [@"substitute"]
 private val ws_part_2:
@@ -297,7 +297,7 @@ private val ws_part_2:
                   let b = reveal_h32s (as_seq h0 block_w) in
                   (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i))))
 
-#reset-options " --max_fuel 0 --z3rlimit 200"
+#set-options " --max_fuel 0 --z3rlimit 200"
 
 [@"substitute"]
 let ws_part_2 ws_w block_w =
@@ -321,7 +321,7 @@ let ws_part_2 ws_w block_w =
   (**) let h1 = ST.get() in ()
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 private val ws:
@@ -335,7 +335,7 @@ private val ws:
                   let b = reveal_h32s (as_seq h0 block_w) in
                   (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i))))
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 let ws ws_w block_w =
@@ -343,7 +343,7 @@ let ws ws_w block_w =
   ws_part_2 ws_w block_w
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 private val shuffle_core:
@@ -365,7 +365,7 @@ private val shuffle_core:
                   let seq_block = reveal_h32s (as_seq h0 block_w) in
                   seq_hash_1 == Spec.shuffle_core seq_block seq_hash_0 (U32.v t))))
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 [@"substitute"]
 let shuffle_core hash block ws k t =
@@ -388,7 +388,7 @@ let shuffle_core hash block ws k t =
   hupd_8 hash H32.(t1 +%^ t2) a b c H32.(d +%^ t1) e f g
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 private val shuffle:
@@ -409,7 +409,7 @@ private val shuffle:
                   let seq_block = reveal_h32s (as_seq h0 block_w) in
                   seq_hash_1 == Spec.shuffle seq_hash_0 seq_block)))
 
-#reset-options "--max_fuel 0  --z3rlimit 100"
+#set-options "--max_fuel 0  --z3rlimit 150"
 
 [@"substitute"]
 let shuffle hash block ws k =
@@ -431,7 +431,7 @@ let shuffle hash block ws k =
   for 0ul size_ws_w inv f'
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 private val sum_hash:
@@ -445,14 +445,14 @@ private val sum_hash:
               let seq_hash_1 = as_seq h0 hash_1 in
               new_seq_hash_0 == Spec.Lib.map2 (fun x y -> H32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 let sum_hash hash_0 hash_1 =
   C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H32.(x +%^ y))
 
 
-#reset-options "--max_fuel 0 --z3rlimit 20"
+#set-options "--max_fuel 0 --z3rlimit 20"
 
 [@"c_inline"]
 val alloc:
@@ -466,7 +466,7 @@ val alloc:
 let alloc () = Buffer.create (u32_to_h32 0ul) size_state
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 val init:
   state:uint32_p{length state = v size_state} ->
@@ -481,7 +481,7 @@ val init:
               let seq_h_0 = Hacl.Spec.Endianness.reveal_h32s slice_h_0 in
               seq_k == Spec.k /\ seq_h_0 == Spec.h_0 /\ H32.v counter = 0)))
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 let init state =
   (**) let h0 = ST.get () in
@@ -493,7 +493,7 @@ let init state =
   upd n 0ul 0ul
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 private val copy_hash:
@@ -504,7 +504,7 @@ private val copy_hash:
         (ensures  (fun h0 _ h1 -> live h0 hash_w_1 /\ live h0 hash_w_2 /\ live h1 hash_w_1 /\ modifies_1 hash_w_1 h0 h1
                   /\ (as_seq h1 hash_w_1 == as_seq h0 hash_w_2)))
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 let copy_hash hash_w_1 hash_w_2 =
@@ -515,7 +515,7 @@ let copy_hash hash_w_1 hash_w_2 =
   (**) Lemmas.lemma_blit_slices_eq h0 h1 hash_w_1 hash_w_2 (v size_hash_w)
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 private val update_core:
@@ -537,7 +537,7 @@ private val update_core:
                   let seq_block = reveal_sbytes (as_seq h0 data) in
                   seq_hash_1 == Spec.update seq_hash_0 seq_block)))
 
-#reset-options "--max_fuel 0  --z3rlimit 400"
+#set-options "--max_fuel 0  --z3rlimit 400"
 
 [@"substitute"]
 let update_core hash_w data data_w ws_w k_w =
@@ -610,7 +610,7 @@ let update_core hash_w data data_w ws_w k_w =
   (**) modifies_popped_1 hash_w h0 h1 h5 hfin
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 val counter_increment:
@@ -624,7 +624,7 @@ val counter_increment:
                   let counter_1 = Seq.index (as_seq h1 counter_w) 0 in
                   H32.v counter_1 = H32.v counter_0 + 1 /\ H32.v counter_1 < pow2 32)))
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 [@"substitute"]
 let counter_increment counter_w =
@@ -633,7 +633,7 @@ let counter_increment counter_w =
   counter_w.(0ul) <- H32.(c0 +%^ one)
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 val update:
   state :uint32_p {length state = v size_state} ->
@@ -658,7 +658,7 @@ val update:
                   /\ H32.v counter_1 = H32.v counter_0 + 1 /\ H32.v counter_1 < pow2 32
                   /\ (reveal_h32s seq_hash_1 == Spec.update (reveal_h32s seq_hash_0) (reveal_sbytes seq_block)))))
 
-#reset-options "--max_fuel 0  --z3rlimit 500"
+#set-options "--max_fuel 0  --z3rlimit 500"
 
 let update state data =
 
@@ -764,7 +764,7 @@ let update state data =
   (**) modifies_popped_1 state h0 h1 h6 h7
 
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 val update_multi:
   state :uint32_p{length state = v size_state} ->
@@ -838,14 +838,14 @@ let update_multi state data n =
   for 0ul n inv f
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 inline_for_extraction
 let pad0_length (len:uint32_t{v len + 1 + v size_len_8 < pow2 32}) : Tot (n:uint32_t{v n = Spec.pad0_length (v len)}) =
   (size_block -^ (len +^ size_len_8 +^ 1ul) %^ size_block) %^ size_block
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 inline_for_extraction
 let encode_length (count:uint32_ht) (len:uint32_t) : Tot (l:uint64_ht{H64.v l = (H32.v count * v size_block + v len) * 8}) =
@@ -854,7 +854,7 @@ let encode_length (count:uint32_ht) (len:uint32_t) : Tot (l:uint64_ht{H64.v l = 
   H64.((l_0 +^ l_1) *%^ (u32_to_h64 8ul))
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 val set_pad_part1:
@@ -865,7 +865,7 @@ val set_pad_part1:
                              /\ (let seq_buf1 = reveal_sbytes (as_seq h1 buf1) in
                              seq_buf1 = Seq.create 1 0x80uy)))
 
-#reset-options "--max_fuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --z3rlimit 50"
 
 [@"substitute"]
 let set_pad_part1 buf1 =
@@ -873,7 +873,7 @@ let set_pad_part1 buf1 =
   (**) let h = ST.get () in
   (**) Seq.lemma_eq_intro (as_seq h buf1) (Seq.create 1 (u8_to_h8 0x80uy))
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 [@"substitute"]
 val set_pad_part2:
@@ -885,7 +885,7 @@ val set_pad_part2:
                   /\ (let seq_buf2 = reveal_sbytes (as_seq h1 buf2) in
                   seq_buf2 == Endianness.big_bytes size_len_8 (H64.v encodedlen))))
 
-#reset-options "--max_fuel 0  --z3rlimit 30"
+#set-options "--max_fuel 0  --z3rlimit 30"
 
 [@"substitute"]
 let set_pad_part2 buf2 encodedlen =
@@ -894,7 +894,7 @@ let set_pad_part2 buf2 encodedlen =
   (**) Lemmas.lemma_eq_endianness h buf2 encodedlen
 
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 [@"substitute"]
 val pad:
@@ -912,7 +912,7 @@ val pad:
                   /\ (let seq_padding = reveal_sbytes (as_seq h1 padding) in
                   seq_padding == Spec.pad (H32.v n * v size_block) (v len))))
 
-#reset-options "--max_fuel 0  --z3rlimit 100"
+#set-options "--max_fuel 0  --z3rlimit 100"
 
 [@"substitute"]
 let pad padding n len =
@@ -950,7 +950,7 @@ let pad padding n len =
   (**) Lemmas.lemma_pad_aux h1 n len buf1 zeros buf2
 
 
-#reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 50"
+#set-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 50"
 
 val update_last:
   state :uint32_p {length state = v size_state} ->
@@ -971,7 +971,7 @@ val update_last:
                   let prevlen = U32.(H32.v (Seq.index count 0) * (v size_block)) in
                   (reveal_h32s seq_hash_1) == Spec.update_last (reveal_h32s seq_hash_0) prevlen seq_data)))
 
-#reset-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 300"
+#set-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 300"
 
 let update_last state data len =
   (**) assert_norm(pow2 32 = 0x100000000);
@@ -1074,7 +1074,7 @@ let update_last state data len =
   (**) modifies_popped_1 state hinit h00 h4 hfin
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 [@"substitute"]
 val finish_core:
@@ -1091,7 +1091,7 @@ val finish_core:
 let finish_core hash_w hash = uint32s_to_be_bytes hash hash_w size_hash_w
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 val finish:
   state :uint32_p{length state = v size_state} ->
@@ -1108,7 +1108,7 @@ let finish state hash =
   finish_core hash_w hash
 
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0  --z3rlimit 20"
 
 val hash:
   hash :uint8_p {length hash = v size_hash} ->
@@ -1121,7 +1121,7 @@ val hash:
                   let seq_hash = reveal_sbytes (as_seq h1 hash) in
                   seq_hash == Spec.hash seq_input)))
 
-#reset-options "--max_fuel 0  --z3rlimit 50"
+#set-options "--max_fuel 0  --z3rlimit 50"
 
 let hash hash input len =
 

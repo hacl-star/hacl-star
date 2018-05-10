@@ -9,7 +9,7 @@ open FStar.Buffer
 
 module Ed25519 = Hacl.Ed25519
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -226,45 +226,45 @@ let main () =
   Ed25519.secret_to_public pk1' sk1;
   Ed25519.secret_to_public pk2' sk2;
   Ed25519.secret_to_public pk3' sk3;
-  TestLib.compare_and_print (C.string_of_literal "Public key 1 generation") pk1 pk1' 32ul;
-  TestLib.compare_and_print (C.string_of_literal "Public key 2 generation") pk2 pk2' 32ul;
-  TestLib.compare_and_print (C.string_of_literal "Public key 3 generation") pk3 pk3' 32ul;
+  TestLib.compare_and_print (C.String.of_literal "Public key 1 generation") pk1 pk1' 32ul;
+  TestLib.compare_and_print (C.String.of_literal "Public key 2 generation") pk2 pk2' 32ul;
+  TestLib.compare_and_print (C.String.of_literal "Public key 3 generation") pk3 pk3' 32ul;
 
   let sig1' = create 0uy 64ul in
   let sig2' = create 0uy 64ul in
   let sig3' = create 0uy 64ul in
   (* let sig4' = create 0uy 64ul in *)
 
-  let ret = C.exit_success in
+  let ret = C.EXIT_SUCCESS in
   let res = Ed25519.verify pk1 msg1 0ul sig1 in
   let ret =
     if res then (
       Ed25519.sign sig1' sk1 msg1 0ul;
-      TestLib.compare_and_print (C.string_of_literal "Ed25519 sig1") sig1 sig1' 64ul;
-      C.exit_success
-    ) else C.exit_failure in
+      TestLib.compare_and_print (C.String.of_literal "Ed25519 sig1") sig1 sig1' 64ul;
+      C.EXIT_SUCCESS
+    ) else C.EXIT_FAILURE in
 
   let res = Ed25519.verify pk2 msg2 1ul sig2 in
   let ret =
-    if res && (ret = C.exit_success) then (
+    if res && (ret = C.EXIT_SUCCESS) then (
       Ed25519.sign sig2' sk2 msg2 1ul;
-      TestLib.compare_and_print (C.string_of_literal "Ed25519 sig2") sig2 sig2' 64ul;
-      C.exit_success
-    ) else C.exit_failure in
+      TestLib.compare_and_print (C.String.of_literal "Ed25519 sig2") sig2 sig2' 64ul;
+      C.EXIT_SUCCESS
+    ) else C.EXIT_FAILURE in
 
   let res = Ed25519.verify pk3 msg3 2ul sig3 in
   let ret =
-    if res && (ret = C.exit_success) then (
+    if res && (ret = C.EXIT_SUCCESS) then (
       Ed25519.sign sig3' sk3 msg3 2ul;
-      TestLib.compare_and_print (C.string_of_literal "Ed25519 sig3") sig3 sig3' 64ul;
-      C.exit_success
-    ) else C.exit_failure in
+      TestLib.compare_and_print (C.String.of_literal "Ed25519 sig3") sig3 sig3' 64ul;
+      C.EXIT_SUCCESS
+    ) else C.EXIT_FAILURE in
 
   (* let res = Ed25519.verify pk4 msg4 1023ul sig4 in *)
   (* let ret = *)
   (*   if res then ( *)
   (*     Ed25519.sign sig4' sk4 msg4 1023ul; *)
-  (*     TestLib.compare_and_print (C.string_of_literal "Ed25519 sig4") sig4 sig4' 64ul; *)
+  (*     TestLib.compare_and_print (C.String.of_literal "Ed25519 sig4") sig4 sig4' 64ul; *)
   (*     C.exit_success *)
   (*   ) else C.exit_failure in *)
 

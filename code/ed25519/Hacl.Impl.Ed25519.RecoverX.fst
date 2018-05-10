@@ -19,7 +19,7 @@ let norm h (x:elemB{live h x}) : GTot Type0 =
   v (Seq.index s 0) + pow2 51 * v (Seq.index s 1) + pow2 102 * v (Seq.index s 2) + pow2 153 * v (Seq.index s 3) + pow2 204 * v (Seq.index s 4) < Spec.Curve25519.prime)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val make_zero:
   b:elemB ->
@@ -28,7 +28,7 @@ val make_zero:
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 0
       /\ norm h1 b
       /\ Hacl.Bignum25519.red_513 (as_seq h1 b)))
-[@ "substitute"]
+[@ Substitute]
 let make_zero b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   Hacl.Lib.Create64.make_h64_5 b zero zero zero zero zero;
@@ -39,7 +39,7 @@ let make_zero b =
   lemma_red_51_is_red_513 (as_seq h b)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val make_one:
   b:elemB ->
@@ -47,7 +47,7 @@ val make_one:
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 1
       /\ Hacl.Bignum25519.red_513 (as_seq h1 b)))
-[@ "substitute"]
+[@ Substitute]
 let make_one b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   let one  = Hacl.Cast.uint64_to_sint64 1uL in
@@ -61,7 +61,7 @@ let make_one b =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val recover_x_step_1:
   x2:elemB ->
@@ -81,7 +81,7 @@ val recover_x_step_1:
        Spec.Ed25519.(Spec.Curve25519.(
          x2 == ((y `fmul` y) `fsub` 1) `fmul` (modp_inv ((d `fmul` (y `fmul` y)) `fadd` one)))))))
 #reset-options "--max_fuel 0 --z3rlimit 200"
-[@ "substitute"]
+[@ Substitute]
 let recover_x_step_1 x2 y =
   (**) let hinit = ST.get() in
   push_frame();
@@ -167,7 +167,7 @@ let is_0 x =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val mul_modp_sqrt_m1:
   x:elemB ->
@@ -179,7 +179,7 @@ val mul_modp_sqrt_m1:
       == Spec.Curve25519.(seval (as_seq h0 x) `fmul` (Spec.Ed25519.modp_sqrt_m1))
     ))
 #reset-options "--max_fuel 0 --z3rlimit 200"
-[@ "substitute"]
+[@ Substitute]
 let mul_modp_sqrt_m1 x =
   let open FStar.Mul in
   assert_norm(pow2 51 = 0x8000000000000);
@@ -205,7 +205,7 @@ let mul_modp_sqrt_m1 x =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 private
 val gte_q:
   x:elemB ->
@@ -216,7 +216,7 @@ val gte_q:
        FStar.Mul.(v (Seq.index s 0) + pow2 51 * v (Seq.index s 1)
                   + pow2 102 * v (Seq.index s 2) + pow2 153 * v (Seq.index s 3)
                   + pow2 204 * v (Seq.index s 4)) >= pow2 255 - 19)) ))
-[@ "substitute"]
+[@ Substitute]
 let gte_q x =
   let h = ST.get() in
   lemma_reveal_red_51 (as_seq h x);
@@ -235,7 +235,7 @@ let gte_q x =
 
 open FStar.Mul
 
-[@ "substitute"]
+[@ Substitute]
 private
 val copy:
   src:elemB ->
@@ -244,7 +244,7 @@ val copy:
     (requires (fun h -> live h src /\ live h dest))
     (ensures (fun h0 _ h1 -> live h0 src /\ live h1 dest /\ modifies_1 dest h0 h1 /\
       as_seq h1 dest == as_seq h0 src))
-[@ "substitute"]
+[@ Substitute]
 let copy src dest =
   let h0 = ST.get() in
   blit src 0ul dest 0ul 5ul;
@@ -259,7 +259,7 @@ let lemma_mul_5 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) : Lemma
   = ()
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val fdifference_norm:
   x:elemB ->
@@ -277,7 +277,7 @@ val fdifference_norm:
                                + pow2 204 * v (Seq.index s 4) < Spec.Curve25519.prime))) /\
       seval (as_seq h1 x) = Spec.Curve25519.(seval (as_seq h0 y) `fsub` seval (as_seq h0 x))
     ))
-[@ "substitute"]
+[@ Substitute]
 let fdifference_norm x y =
   fdifference x y;
   reduce_513 x;
@@ -305,7 +305,7 @@ let lemma_x_mod_2 (a:nat) (b:nat) (c:nat) (d:nat) (e:nat) :
     Math.Lemmas.paren_mul_right 2 (pow2 203) e;
     Math.Lemmas.modulo_addition_lemma a 2 ((pow2 50 * b)+(pow2 101 * c)+(pow2 152 * d)+(pow2 203 * e))
 
-[@ "substitute"]
+[@ Substitute]
 private val x_mod_2:
   x:felem ->
   Stack Hacl.UInt64.t
@@ -317,7 +317,7 @@ private val x_mod_2:
                                + pow2 153 * v (Seq.index s 3)
                                + pow2 204 * v (Seq.index s 4) < pow2 255 - 19)))))
     (ensures (fun h0 z h1 -> h0 == h1 /\ live h0 x /\ v z = seval (as_seq h0 x) % 2))
-[@ "substitute"]
+[@ Substitute]
 let x_mod_2 x =
   let h = ST.get() in
   Hacl.Bignum25519.lemma_reveal_seval (as_seq h x);
@@ -345,7 +345,7 @@ let lemma_modifies_1 #a h (b:buffer a) :
   Lemma (modifies_1 b h h)
   = lemma_intro_modifies_1 b h h
 
-[@ "substitute"]
+[@ Substitute]
 private
 val recover_x_step_2:
   x:elemB ->
@@ -367,7 +367,7 @@ val recover_x_step_2:
        else if seval x2 = 0 && v sign = 1
        then (h0 == h1 /\ z == 0uy)
        else (h0 == h1 /\ z == 2uy))))
-[@ "substitute"]
+[@ Substitute]
 let recover_x_step_2 x sign x2 =
   let x2_is_0 = is_0 x2 in
   if x2_is_0 then (
@@ -381,7 +381,7 @@ let recover_x_step_2 x sign x2 =
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val recover_x_step_3:
   tmp:buffer Hacl.UInt64.t{length tmp = 20} ->
@@ -398,7 +398,7 @@ val recover_x_step_3:
        seval x3 == y /\ red_51 x3 /\ x2' == x2 /\ v (Seq.index x3 0) + pow2 51 * v (Seq.index x3 1)
        + pow2 102 * v (Seq.index x3 2) + pow2 153 * v (Seq.index x3 3)
        + pow2 204 * v (Seq.index x3 4) < Spec.Curve25519.prime)))
-[@ "substitute"]
+[@ Substitute]
 let recover_x_step_3 tmp =
   let x2  = Buffer.sub tmp 0ul 5ul in
   let x3  = Buffer.sub tmp 5ul 5ul in
@@ -418,7 +418,7 @@ let recover_x_step_3 tmp =
   Hacl.Bignum25519.reduce x3
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val recover_x_step_4:
   tmp:buffer Hacl.UInt64.t{length tmp = 20} ->
@@ -439,7 +439,7 @@ val recover_x_step_4:
        if y <> 0 then z == false
        else (x2' == x2 /\ x3' == x3 /\ z == true))))
 #reset-options "--max_fuel 0 --z3rlimit 100"
-[@ "substitute"]
+[@ Substitute]
 let recover_x_step_4 tmp =
   let h0 = ST.get() in
   let x2  = Buffer.sub tmp 0ul 5ul in
@@ -465,7 +465,7 @@ let lemma_fdiff_prime x =
   FStar.Math.Axioms.lemma_mod_sub_distr_l_l Spec.Curve25519.prime x Spec.Curve25519.prime
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val recover_x_step_5:
   x:elemB ->
@@ -503,7 +503,7 @@ let recover_x_step_5 x sign tmp =
   assert(red_51 (as_seq h' x3));
   copy x3 x
 
-[@ "substitute"]
+[@ Substitute]
 private
 val recover_x_:
   x:elemB ->
