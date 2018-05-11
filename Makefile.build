@@ -58,12 +58,12 @@ clean-c-code:
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
 SNAPSHOT_FILES= \
+	snapshots/kremlib/include/* \
 	$(addprefix snapshots/api/, HACL.h) \
 	$(addprefix snapshots/api/, haclnacl.*) \
 	$(addprefix snapshots/makefiles/, Makefile) \
 	$(addprefix snapshots/common/, vec128.h) \
 	$(addprefix snapshots/experimental/, Hacl_Unverified_Random.*) \
-	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h testlib.*) \
 	$(addprefix code/uint128/uint128-c/, FStar_UInt128.*) \
 	$(addprefix code/poly1305/poly-c/, Hacl_Poly1305_64.* AEAD_Poly1305_64.*) \
 	$(addprefix code/poly1305_32/poly-c/, Hacl_Poly1305_32.*) \
@@ -85,7 +85,7 @@ SNAPSHOT_CCOMP_FILES=$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/k
 
 snapshot-collect:
 	mkdir -p $(SNAPSHOT_DIR)
-	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
+	cp -r $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
 	touch $(SNAPSHOT_DIR)/Prims.h
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	cp $(SNAPSHOT_CCOMP_FILES) $(SNAPSHOT_DIR)/
@@ -144,9 +144,10 @@ SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, FStar_UInt128.* AEA
 	done
 
 .snapshots/hacl-c/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h; do \
-		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
-	done
+	cp -r snapshots/kremlib/include/* snapshots/hacl-c
+# 	for f in kremlib.h; do \
+# 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
+# 	done
 
 .snapshots/hacl-c/api:
 	for f in HACL.h haclnacl.h haclnacl.c; do \

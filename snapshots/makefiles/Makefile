@@ -16,11 +16,11 @@ CCOPTS32 = -Ofast -mtune=generic -m32 -fwrapv -fomit-frame-pointer -funroll-loop
 #CCOPTS32 = -Ofast -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon-fp-armv8 -fwrapv -fomit-frame-pointer -funroll-loops
 
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
-  LIBFLAGS=$(CCOPTS) $(CFLAGS)
+  LIBFLAGS=$(CCOPTS) $(CFLAGS) -I .
   LIBFLAGS32=$(CCOPTS32) $(CFLAGS)
   OTHER=FStar_UInt128.c -shared
 else
-  LIBFLAGS=$(CCOPTS) -fPIC
+  LIBFLAGS=$(CCOPTS) -fPIC -I .
   LIBFLAGS32=$(CCOPTS32) -fPIC -DKRML_NOUINT128 -Wno-unused-function
   OTHER=-shared
 endif
