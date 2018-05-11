@@ -182,7 +182,8 @@ SNAPSHOT_NSS_FILES = \
 	done
 
 .snapshots/nss/kremlib:
-	for f in kremlib.h kremlib_base.h; do \
+	cp -r snapshots/kremlib/include/* snapshots/nss
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
 		(cat $(HACL_LICENSE_NSS) snapshots/kremlib/$$f ) > snapshots/nss/$$f ; \
 	done
 
@@ -207,7 +208,8 @@ SNAPSHOT_RIOT_FILES = $(addprefix snapshots/snapshot-gcc/, FStar_UInt128.* AEAD_
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*)
 
 .snapshots/riot/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h; do \
+	cp -r snapshots/kremlib/include/* snapshots/riot
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/riot/$$f ; \
 	done
 
@@ -223,7 +225,8 @@ snapshots/riot: snapshots-remove-intermediates
 SNAPSHOT_WIREGUARD_FILES = $(addprefix snapshots/snapshot-gcc-unrolled/, FStar_UInt128.* Hacl_Curve25519*)
 
 .snapshots/wireguard/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h; do \
+	cp -r snapshots/kremlib/include/* snapshots/wireguard
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/wireguard/$$f ; \
 	done
 
@@ -249,7 +252,8 @@ SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, FStar_UInt128.* Hacl
 	done
 
 .snapshots/tezos/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h; do \
+	cp -r snapshots/kremlib/include/* snapshots/tezos
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/tezos/$$f ; \
 	done
 
