@@ -21,18 +21,14 @@
  * SOFTWARE.
  */
 #include "kremlib.h"
-#include <stdlib.h>
+#include "kremlin/prims_int.h"
 
-intptr_t nullptr = (intptr_t) NULL;
+/******************************************************************************/
+/* Implementation of FStar.Date                                               */
+/******************************************************************************/
 
-/* DEPRECATED */
-int exit_success = EXIT_SUCCESS;
-int exit_failure = EXIT_FAILURE;
+/* FStar_Date.h has all the extern val's. This is just the implementation. */
 
-void print_bytes(const uint8_t *b, uint32_t len) {
-  uint32_t i;
-  for (i = 0; i < len; i++){
-    printf("%02x", b[i]);
-  }
-  printf("\n");
+Prims_nat FStar_Date_secondsFromDawn() {
+  return KRML_HOST_TIME();
 }
