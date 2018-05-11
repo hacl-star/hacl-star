@@ -8,10 +8,10 @@ extract-c: uint128-c/FStar_UInt128.h
 
 uint128-c/FStar_UInt128.h:
 	mkdir -p $(dir $@)
-	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
+	$(KREMLIN_HOME)/krml $(KREMLIN_ARGS) -minimal -fnouint128 \
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst \
-	  -add-early-include '"kremlin/fstar_ints.h"' \
 	  -add-early-include '<stdbool.h>' \
+	  -add-early-include '<inttypes.h>' \
 	  -tmpdir uint128-c -skip-compilation \
 	  -bundle FStar.UInt128=FStar.*,Prims # -fnostruct-passing
 
