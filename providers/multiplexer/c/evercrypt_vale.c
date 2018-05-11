@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "kremlin/internal/target.h"
 #include "EverCrypt_Vale.h"
 
 // This is SUPER stale and the .h can't even be generated anymore for the module
@@ -21,8 +22,8 @@ void EverCrypt_Vale_sha256_update(uint32_t *x0, uint8_t *x1){
 }
 
 void EverCrypt_Vale_sha256_update_multi(uint32_t *x0, uint8_t *x1, uint32_t x2){
-  fprintf(stderr, "TODO: sha256_update_multi/Vale\n");
-  exit(255);
+  KRML_HOST_EPRINTF("TODO: sha256_update_multi/Vale\n");
+  KRML_HOST_EXIT(255);
 }
 
 void EverCrypt_Vale_sha256_update_last(uint32_t *x0, uint8_t *x1, uint32_t x2){

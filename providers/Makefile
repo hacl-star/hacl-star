@@ -146,7 +146,7 @@ INCLUDE_DIRS	= $(foreach c,$(ALL_SOURCES),$(dir $(c))) \
 
 
 CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter
+  -Wno-parentheses -Wno-unused-parameter -Wno-infinite-recursion
 
 ifneq (,$(EVEREST_WINDOWS))
 FSTAR_UINT128	= ../secure_api/out/runtime_switch/uint128/FStar_UInt128.c
