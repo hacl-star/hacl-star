@@ -194,7 +194,7 @@ static void Hacl_Impl_SHA2_256_update(uint32_t *state, uint8_t *data)
     uint32_t c = hash_0[2U];
     uint32_t d = hash_0[3U];
     uint32_t e = hash_0[4U];
-    uint32_t f1 = hash_0[5U];
+    uint32_t f = hash_0[5U];
     uint32_t g = hash_0[6U];
     uint32_t h = hash_0[7U];
     uint32_t kt = k_w[i];
@@ -207,7 +207,7 @@ static void Hacl_Impl_SHA2_256_update(uint32_t *state, uint8_t *data)
         ^
           ((e >> (uint32_t)11U | e << ((uint32_t)32U - (uint32_t)11U))
           ^ (e >> (uint32_t)25U | e << ((uint32_t)32U - (uint32_t)25U))))
-      + ((e & f1) ^ (~e & g))
+      + ((e & f) ^ (~e & g))
       + kt
       + wst;
     uint32_t
@@ -227,7 +227,7 @@ static void Hacl_Impl_SHA2_256_update(uint32_t *state, uint8_t *data)
     p1[3U] = c;
     p2[0U] = x5;
     p2[1U] = e;
-    p2[2U] = f1;
+    p2[2U] = f;
     p2[3U] = g;
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
@@ -270,8 +270,9 @@ static void Hacl_Impl_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint3
   pad0len = ((uint32_t)64U - (len + (uint32_t)8U + (uint32_t)1U) % (uint32_t)64U) % (uint32_t)64U;
   uint8_t *buf1 = padding;
   uint8_t *buf2 = padding + (uint32_t)1U + pad0len;
-  uint64_t
-  encodedlen = ((uint64_t)n1 * (uint64_t)(uint32_t)64U + (uint64_t)len) * (uint64_t)(uint32_t)8U;
+  uint64_t l_0 = (uint64_t)n1 * (uint64_t)(uint32_t)64U;
+  uint64_t l_1 = (uint64_t)len;
+  uint64_t encodedlen = (l_0 + l_1) * (uint64_t)(uint32_t)8U;
   buf1[0U] = (uint8_t)0x80U;
   store64_be(buf2, encodedlen);
   Hacl_Impl_SHA2_256_update_multi(state, final_blocks, nb);
@@ -296,11 +297,37 @@ static void Hacl_Impl_SHA2_256_hash(uint8_t *hash1, uint8_t *input, uint32_t len
   Hacl_Impl_SHA2_256_finish(state, hash1);
 }
 
+uint32_t Hacl_SHA2_256_size_word = (uint32_t)4U;
+
+uint32_t Hacl_SHA2_256_size_hash_w = (uint32_t)8U;
+
+uint32_t Hacl_SHA2_256_size_block_w = (uint32_t)16U;
+
 uint32_t Hacl_SHA2_256_size_hash = (uint32_t)32U;
 
 uint32_t Hacl_SHA2_256_size_block = (uint32_t)64U;
 
+uint64_t Hacl_SHA2_256_max_input_len = (uint64_t)2305843009213693952U;
+
+uint32_t Hacl_SHA2_256_size_k_w = (uint32_t)64U;
+
+uint32_t Hacl_SHA2_256_size_ws_w = (uint32_t)64U;
+
+uint32_t Hacl_SHA2_256_size_whash_w = (uint32_t)8U;
+
+uint32_t Hacl_SHA2_256_size_count_w = (uint32_t)1U;
+
+uint32_t Hacl_SHA2_256_size_len_8 = (uint32_t)8U;
+
 uint32_t Hacl_SHA2_256_size_state = (uint32_t)137U;
+
+uint32_t Hacl_SHA2_256_pos_k_w = (uint32_t)0U;
+
+uint32_t Hacl_SHA2_256_pos_ws_w = (uint32_t)64U;
+
+uint32_t Hacl_SHA2_256_pos_whash_w = (uint32_t)128U;
+
+uint32_t Hacl_SHA2_256_pos_count_w = (uint32_t)136U;
 
 void Hacl_SHA2_256_init(uint32_t *state)
 {

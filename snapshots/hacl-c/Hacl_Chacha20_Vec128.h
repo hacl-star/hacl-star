@@ -21,43 +21,13 @@
  * SOFTWARE.
  */
 
+
 #include "kremlib.h"
 #ifndef __Hacl_Chacha20_Vec128_H
 #define __Hacl_Chacha20_Vec128_H
 
 
-
 #include "vec128.h"
-
-typedef uint32_t Hacl_Impl_Xor_Lemmas_u32;
-
-typedef uint8_t Hacl_Impl_Xor_Lemmas_u8;
-
-typedef uint32_t Hacl_Impl_Chacha20_Vec128_State_u32;
-
-typedef uint32_t Hacl_Impl_Chacha20_Vec128_State_h32;
-
-typedef uint8_t *Hacl_Impl_Chacha20_Vec128_State_uint8_p;
-
-typedef vec *Hacl_Impl_Chacha20_Vec128_State_state;
-
-typedef uint32_t Hacl_Impl_Chacha20_Vec128_u32;
-
-typedef uint32_t Hacl_Impl_Chacha20_Vec128_h32;
-
-typedef uint8_t *Hacl_Impl_Chacha20_Vec128_uint8_p;
-
-typedef uint32_t Hacl_Impl_Chacha20_Vec128_idx;
-
-typedef struct 
-{
-  void *k;
-  void *n;
-  uint32_t ctr;
-}
-Hacl_Impl_Chacha20_Vec128_log_t_;
-
-typedef void *Hacl_Impl_Chacha20_Vec128_log_t;
 
 typedef uint8_t *Hacl_Chacha20_Vec128_uint8_p;
 
@@ -70,4 +40,6 @@ Hacl_Chacha20_Vec128_chacha20(
   uint8_t *n1,
   uint32_t ctr
 );
+
+#define __Hacl_Chacha20_Vec128_H_DEFINED
 #endif

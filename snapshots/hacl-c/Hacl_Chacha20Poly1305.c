@@ -24,12 +24,6 @@
 
 #include "Hacl_Chacha20Poly1305.h"
 
-Prims_int Hacl_Chacha20Poly1305_noncelen = (krml_checked_int_t)12;
-
-Prims_int Hacl_Chacha20Poly1305_keylen = (krml_checked_int_t)32;
-
-Prims_int Hacl_Chacha20Poly1305_maclen = (krml_checked_int_t)16;
-
 static void
 Hacl_Chacha20Poly1305_aead_encrypt_poly(
   uint8_t *c,
@@ -47,8 +41,8 @@ Hacl_Chacha20Poly1305_aead_encrypt_poly(
   uint64_t tmp1[6U] = { 0U };
   Hacl_Impl_Poly1305_64_State_poly1305_state
   st = AEAD_Poly1305_64_mk_state(tmp1, tmp1 + (uint32_t)3U);
-  (void)AEAD_Poly1305_64_poly1305_blocks_init(st, aad1, aadlen, mk);
-  (void)AEAD_Poly1305_64_poly1305_blocks_continue(st, c, mlen);
+  AEAD_Poly1305_64_poly1305_blocks_init(st, aad1, aadlen, mk);
+  AEAD_Poly1305_64_poly1305_blocks_continue(st, c, mlen);
   AEAD_Poly1305_64_poly1305_blocks_finish(st, lb, mac, key_s);
 }
 
