@@ -52,7 +52,7 @@ FSTAR		= $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   --use_two_phase_tc true \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) \
-  --use_hints --admit_smt_queries true # --record_hints --hint_info
+  --use_hints # --record_hints --hint_info
 
 ROOTS		= EverCrypt.fst EverCrypt.Bytes.fsti
 
@@ -75,8 +75,9 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of the .c files
 ifneq (,$(EVEREST_WINDOWS))
-KOPTS+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
+KOPTS		+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
   -add-early-include '"FStar_UInt128.h"'
+CFLAGS	+=-DNO_OPENSSL
 endif
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
@@ -171,7 +172,9 @@ $(OUT_DIR):
 
 # 4. Collecting all of the object files into a static and a dynamic library.
 
-LDFLAGS += -lcrypto -L$(OPENSSL_HOME)
+ifeq (,$(EVEREST_WINDOWS))
+LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
+endif
 
 # Note: see
 # https://www.gnu.org/software/make/manual/html_node/Archive-Pitfalls.html#Archive-Pitfalls
@@ -180,7 +183,7 @@ $(OUT_DIR)/libevercrypt.a: $(ALL_OBJS) | $(OUT_DIR)
 	$(AR) cr $@ $^
 
 $(OUT_DIR)/libevercrypt.$(SO): $(ALL_OBJS) | $(OUT_DIR)
-	$(CC) $(LDFLAGS) -shared $^ -o $@
+	$(CC) -shared $^ $(LDFLAGS) -o $@
 
 .PRECIOUS: %.o
 
