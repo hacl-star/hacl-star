@@ -12,6 +12,7 @@ uint128-c/FStar_UInt128.h:
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst \
 	  -add-early-include '<stdbool.h>' \
 	  -add-early-include '<inttypes.h>' \
+	  -add-early-include '"kremlin/fstar_ints.h"' \
 	  -tmpdir uint128-c -skip-compilation \
 	  -bundle FStar.UInt128=FStar.*,Prims # -fnostruct-passing
 
