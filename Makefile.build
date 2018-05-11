@@ -145,9 +145,9 @@ SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, FStar_UInt128.* AEA
 
 .snapshots/hacl-c/kremlib:
 	cp -r snapshots/kremlib/include/* snapshots/hacl-c
-# 	for f in kremlib.h; do \
-# 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
-# 	done
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
+		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
+	done
 
 .snapshots/hacl-c/api:
 	for f in HACL.h haclnacl.h haclnacl.c; do \
