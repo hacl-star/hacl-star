@@ -53,7 +53,7 @@ void Hacl_Chacha20Poly1305_encode_length(uint8_t *lb, uint32_t aad_len, uint32_t
   store64_le(x0, (uint64_t)mlen);
 }
 
-uint32_t
+static uint32_t
 Hacl_Chacha20Poly1305_aead_encrypt_(
   uint8_t *c,
   uint8_t *mac,

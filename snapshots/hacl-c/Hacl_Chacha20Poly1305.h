@@ -37,18 +37,6 @@ typedef void *Hacl_Chacha20Poly1305_log_t;
 void Hacl_Chacha20Poly1305_encode_length(uint8_t *lb, uint32_t aad_len, uint32_t mlen);
 
 uint32_t
-Hacl_Chacha20Poly1305_aead_encrypt_(
-  uint8_t *c,
-  uint8_t *mac,
-  uint8_t *m,
-  uint32_t mlen,
-  uint8_t *aad1,
-  uint32_t aadlen,
-  uint8_t *k1,
-  uint8_t *n1
-);
-
-uint32_t
 Hacl_Chacha20Poly1305_aead_encrypt(
   uint8_t *c,
   uint8_t *mac,
