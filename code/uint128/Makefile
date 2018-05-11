@@ -8,7 +8,7 @@ extract-c: uint128-c/FStar_UInt128.h
 
 uint128-c/FStar_UInt128.h:
 	mkdir -p $(dir $@)
-	$(KREMLIN_HOME)/krml $(KREMLIN_ARGS) -minimal -fnouint128 \
+	$(KREMLIN_HOME)/krml $(KREMLIN_ARGS) -minimal -fnouint128 -fparentheses \
 	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst \
 	  -add-early-include '<stdbool.h>' \
 	  -add-early-include '<inttypes.h>' \
