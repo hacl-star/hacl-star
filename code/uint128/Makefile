@@ -16,6 +16,8 @@ uint128-c/FStar_UInt128.h:
 	  -tmpdir uint128-c -skip-compilation \
 	  -bundle FStar.UInt128=FStar.*,Prims # -fnostruct-passing
 
+test:
+	@echo "No tests for FStar_UInt128.c/h"
 
 clean:
 	rm -rf *~
