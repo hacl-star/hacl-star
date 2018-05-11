@@ -75,8 +75,9 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of the .c files
 ifneq (,$(EVEREST_WINDOWS))
-KOPTS+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
+KOPTS		+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
   -add-early-include '"FStar_UInt128.h"'
+CFLAGS	+=-DNO_OPENSSL
 endif
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
@@ -171,7 +172,9 @@ $(OUT_DIR):
 
 # 4. Collecting all of the object files into a static and a dynamic library.
 
+ifeq (,$(EVEREST_WINDOWS))
 LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
+endif
 
 # Note: see
 # https://www.gnu.org/software/make/manual/html_node/Archive-Pitfalls.html#Archive-Pitfalls

@@ -1,4 +1,6 @@
+#ifndef NO_OPENSSL
 #include <openssl/evp.h>
+#endif
 #include <inttypes.h>
 
 #include "EverCrypt_OpenSSL.h"
@@ -15,6 +17,22 @@
   do {                                                                         \
     fprintf(stderr, "Error at %s:%d\n", __FILE__, __LINE__);                   \
   } while (0)
+
+#ifdef NO_OPENSSL
+
+void EverCrypt_OpenSSL_aes256_gcm_encrypt(uint8_t *ciphertext,
+                                          uint8_t *tag,
+                                          uint8_t *key,
+                                          uint8_t *iv,
+                                          uint8_t *plaintext,
+                                          uint32_t plaintext_len,
+                                          uint8_t *aad,
+                                          uint32_t aad_len) {
+  fprintf(stderr, "OpenSSL not available in this build\n");
+  exit(255);
+}
+
+#else
 
 void EverCrypt_OpenSSL_aes256_gcm_encrypt(uint8_t *ciphertext,
                                           uint8_t *tag,
@@ -76,3 +94,5 @@ void EverCrypt_OpenSSL_aes256_gcm_encrypt(uint8_t *ciphertext,
 
   return;
 }
+
+#endif
