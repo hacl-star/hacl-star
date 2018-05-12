@@ -1,4 +1,4 @@
-#include "testlib.h"
+#include "kremlin/testlib.h"
 
 void print_buf(uint8_t *buf, size_t size, char *file, int line) {
   char *str = malloc(2 * size + 1);

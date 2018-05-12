@@ -181,7 +181,7 @@ static void Hacl_Impl_SHA2_512_init(uint64_t *state)
 
 static void Hacl_Impl_SHA2_512_update(uint64_t *state, uint8_t *data)
 {
-  KRML_CHECK_SIZE((uint64_t)(uint32_t)0U, (uint32_t)16U);
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)16U);
   uint64_t data_w[16U];
   for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
     data_w[_i] = (uint64_t)(uint32_t)0U;
@@ -220,7 +220,7 @@ static void Hacl_Impl_SHA2_512_update(uint64_t *state, uint8_t *data)
     uint64_t c = hash_0[2U];
     uint64_t d = hash_0[3U];
     uint64_t e = hash_0[4U];
-    uint64_t f1 = hash_0[5U];
+    uint64_t f = hash_0[5U];
     uint64_t g = hash_0[6U];
     uint64_t h = hash_0[7U];
     uint64_t k_t = k_w[i];
@@ -233,7 +233,7 @@ static void Hacl_Impl_SHA2_512_update(uint64_t *state, uint8_t *data)
         ^
           ((e >> (uint32_t)18U | e << ((uint32_t)64U - (uint32_t)18U))
           ^ (e >> (uint32_t)41U | e << ((uint32_t)64U - (uint32_t)41U))))
-      + ((e & f1) ^ (~e & g))
+      + ((e & f) ^ (~e & g))
       + k_t
       + ws_t;
     uint64_t
@@ -253,7 +253,7 @@ static void Hacl_Impl_SHA2_512_update(uint64_t *state, uint8_t *data)
     p1[3U] = c;
     p2[0U] = x5;
     p2[1U] = e;
-    p2[2U] = f1;
+    p2[2U] = f;
     p2[3U] = g;
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
@@ -292,11 +292,10 @@ static void Hacl_Impl_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint6
   memcpy(final_blocks, data, (uint32_t)len * sizeof data[0U]);
   uint64_t n1 = state[168U];
   uint8_t *padding = final_blocks + (uint32_t)len;
-  FStar_UInt128_t
-  encodedlen =
-    FStar_UInt128_shift_left(FStar_UInt128_add(FStar_UInt128_mul_wide(n1, (uint64_t)(uint32_t)128U),
-        FStar_UInt128_uint64_to_uint128(len)),
-      (uint32_t)3U);
+  FStar_UInt128_uint128 l0 = FStar_UInt128_mul_wide(n1, (uint64_t)(uint32_t)128U);
+  FStar_UInt128_uint128 l1 = FStar_UInt128_uint64_to_uint128(len);
+  FStar_UInt128_uint128
+  encodedlen = FStar_UInt128_shift_left(FStar_UInt128_add(l0, l1), (uint32_t)3U);
   uint32_t
   pad0len = ((uint32_t)256U - ((uint32_t)len + (uint32_t)16U + (uint32_t)1U)) % (uint32_t)128U;
   uint8_t *buf1 = padding;
@@ -314,7 +313,7 @@ static void Hacl_Impl_SHA2_512_finish(uint64_t *state, uint8_t *hash1)
 
 static void Hacl_Impl_SHA2_512_hash(uint8_t *hash1, uint8_t *input, uint32_t len)
 {
-  KRML_CHECK_SIZE((uint64_t)(uint32_t)0U, (uint32_t)169U);
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)169U);
   uint64_t state[169U];
   for (uint32_t _i = 0U; _i < (uint32_t)169U; ++_i)
     state[_i] = (uint64_t)(uint32_t)0U;

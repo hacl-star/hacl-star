@@ -9,7 +9,7 @@ set(CMAKE_BUILD_TYPE Release)
 # Verified files
 set(SOURCE_FILES_VERIFIED
     AEAD_Poly1305_64.c
-    FStar.c
+    FStar_UInt128.c
     Hacl_Chacha20.c
     Hacl_Chacha20Poly1305.c
     Hacl_Chacha20_Vec128.c
@@ -39,7 +39,7 @@ set(HEADER_FILES
     kremlib_base.h
     kremlib.h
     AEAD_Poly1305_64.h
-    FStar.h
+    FStar_UInt128.h
     Hacl_Chacha20.h
     Hacl_Chacha20Poly1305.h
     Hacl_Chacha20_Vec128.h

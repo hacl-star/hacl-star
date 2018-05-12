@@ -21,6 +21,7 @@
  * SOFTWARE.
  */
 
+
 #include "kremlib.h"
 #ifndef __Hacl_SHA2_256_H
 #define __Hacl_SHA2_256_H
@@ -28,62 +29,37 @@
 
 
 
+extern uint32_t Hacl_SHA2_256_size_word;
 
-typedef uint8_t Hacl_Hash_Lib_Create_uint8_t;
+extern uint32_t Hacl_SHA2_256_size_hash_w;
 
-typedef uint32_t Hacl_Hash_Lib_Create_uint32_t;
-
-typedef uint64_t Hacl_Hash_Lib_Create_uint64_t;
-
-typedef uint8_t Hacl_Hash_Lib_Create_uint8_ht;
-
-typedef uint32_t Hacl_Hash_Lib_Create_uint32_ht;
-
-typedef uint64_t Hacl_Hash_Lib_Create_uint64_ht;
-
-typedef uint8_t *Hacl_Hash_Lib_Create_uint8_p;
-
-typedef uint32_t *Hacl_Hash_Lib_Create_uint32_p;
-
-typedef uint64_t *Hacl_Hash_Lib_Create_uint64_p;
-
-typedef uint8_t *Hacl_Hash_Lib_LoadStore_uint8_p;
-
-typedef uint8_t Hacl_Impl_SHA2_256_uint8_t;
-
-typedef uint32_t Hacl_Impl_SHA2_256_uint32_t;
-
-typedef uint64_t Hacl_Impl_SHA2_256_uint64_t;
-
-typedef uint8_t Hacl_Impl_SHA2_256_uint8_ht;
-
-typedef uint32_t Hacl_Impl_SHA2_256_uint32_ht;
-
-typedef uint64_t Hacl_Impl_SHA2_256_uint64_ht;
-
-typedef uint32_t *Hacl_Impl_SHA2_256_uint32_p;
-
-typedef uint8_t *Hacl_Impl_SHA2_256_uint8_p;
-
-typedef uint8_t Hacl_SHA2_256_uint8_t;
-
-typedef uint32_t Hacl_SHA2_256_uint32_t;
-
-typedef uint64_t Hacl_SHA2_256_uint64_t;
-
-typedef uint8_t Hacl_SHA2_256_uint8_ht;
-
-typedef uint32_t Hacl_SHA2_256_uint32_ht;
-
-typedef uint32_t *Hacl_SHA2_256_uint32_p;
-
-typedef uint8_t *Hacl_SHA2_256_uint8_p;
+extern uint32_t Hacl_SHA2_256_size_block_w;
 
 extern uint32_t Hacl_SHA2_256_size_hash;
 
 extern uint32_t Hacl_SHA2_256_size_block;
 
+extern uint64_t Hacl_SHA2_256_max_input_len;
+
+extern uint32_t Hacl_SHA2_256_size_k_w;
+
+extern uint32_t Hacl_SHA2_256_size_ws_w;
+
+extern uint32_t Hacl_SHA2_256_size_whash_w;
+
+extern uint32_t Hacl_SHA2_256_size_count_w;
+
+extern uint32_t Hacl_SHA2_256_size_len_8;
+
 extern uint32_t Hacl_SHA2_256_size_state;
+
+extern uint32_t Hacl_SHA2_256_pos_k_w;
+
+extern uint32_t Hacl_SHA2_256_pos_ws_w;
+
+extern uint32_t Hacl_SHA2_256_pos_whash_w;
+
+extern uint32_t Hacl_SHA2_256_pos_count_w;
 
 void Hacl_SHA2_256_init(uint32_t *state);
 
@@ -96,4 +72,6 @@ void Hacl_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint32_t len);
 void Hacl_SHA2_256_finish(uint32_t *state, uint8_t *hash1);
 
 void Hacl_SHA2_256_hash(uint8_t *hash1, uint8_t *input, uint32_t len);
+
+#define __Hacl_SHA2_256_H_DEFINED
 #endif

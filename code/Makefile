@@ -2,7 +2,7 @@ all: extract-c ct verify
 
 # The bignum directory is not included because it is independently
 # checked by curve25519 and poly1305 with specific parameters
-DIRECTORIES=salsa-family poly1305 poly1305_32 curve25519 api hmac ed25519 hash lib lib/kremlin
+DIRECTORIES=uint128 salsa-family poly1305 poly1305_32 curve25519 api hmac ed25519 hash lib lib/kremlin
 TOOSLOW=experimental
 
 %-c: %

@@ -40,7 +40,6 @@ void TestLib_perr(unsigned int err_code);
 #define TestLib_uint64_p_null NULL
 
 typedef unsigned long long TestLib_cycles;
-typedef TestLib_cycles cycles;
 
 #ifndef _MSC_VER
 static __inline__ TestLib_cycles TestLib_cpucycles(void) {

@@ -21,10 +21,10 @@
  * SOFTWARE.
  */
 
+
 #include "kremlib.h"
 #ifndef __Hacl_Policies_H
 #define __Hacl_Policies_H
-
 
 
 
@@ -35,9 +35,11 @@ uint32_t Hacl_Policies_declassify_u32(uint32_t x);
 
 uint64_t Hacl_Policies_declassify_u64(uint64_t x);
 
-FStar_UInt128_t Hacl_Policies_declassify_u128(FStar_UInt128_t x);
+FStar_UInt128_uint128 Hacl_Policies_declassify_u128(FStar_UInt128_uint128 x);
 
 uint8_t Hacl_Policies_cmp_bytes_(uint8_t *b1, uint8_t *b2, uint32_t len, uint8_t *tmp);
 
 uint8_t Hacl_Policies_cmp_bytes(uint8_t *b1, uint8_t *b2, uint32_t len);
+
+#define __Hacl_Policies_H_DEFINED
 #endif

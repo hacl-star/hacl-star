@@ -12,7 +12,7 @@ include_directories(./snapshots/hacl-c ./snapshots/hacl-c-experimental)
 # Verified files
 set(SOURCE_FILES_VERIFIED
     snapshots/hacl-c/AEAD_Poly1305_64.c
-    snapshots/hacl-c/FStar.c
+    snapshots/hacl-c/FStar_UInt128.c
     snapshots/hacl-c/Hacl_Chacha20.c
     snapshots/hacl-c/Hacl_Chacha20Poly1305.c
     snapshots/hacl-c/Hacl_Chacha20_Vec128.c
@@ -48,7 +48,7 @@ set(HEADER_FILES
     snapshots/hacl-c/kremlib_base.h
     snapshots/hacl-c/kremlib.h
     snapshots/hacl-c/AEAD_Poly1305_64.h
-    snapshots/hacl-c/FStar.h
+    snapshots/hacl-c/FStar_UInt128.h
     snapshots/hacl-c/Hacl_Chacha20.h
     snapshots/hacl-c/Hacl_Chacha20Poly1305.h
     snapshots/hacl-c/Hacl_Chacha20_Vec128.h

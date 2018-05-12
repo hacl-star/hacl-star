@@ -195,7 +195,8 @@ inline static void Hacl_Impl_Salsa20_copy_state(uint32_t *st, uint32_t *st_)
 inline static void Hacl_Impl_Salsa20_salsa20_core(uint32_t *k, uint32_t *st, uint64_t ctr)
 {
   uint32_t c0 = (uint32_t)ctr;
-  uint32_t c1 = (uint32_t)(ctr >> (uint32_t)32U);
+  uint64_t x_ = ctr >> (uint32_t)32U;
+  uint32_t c1 = (uint32_t)x_;
   st[8U] = c0;
   st[9U] = c1;
   Hacl_Impl_Salsa20_copy_state(k, st);
@@ -301,8 +302,7 @@ Hacl_Impl_Salsa20_salsa20(
   uint64_t ctr
 )
 {
-  uint32_t buf[16U] = { 0U };
-  uint32_t *st = buf;
+  uint32_t st[16U] = { 0U };
   Hacl_Impl_Salsa20_init(st, k, n1);
   Hacl_Impl_Salsa20_salsa20_counter_mode(output, plain, len, st, ctr);
 }
