@@ -49,9 +49,11 @@ sha2-c/Hacl_SHA2_%.c: sha2-c/out.krml
 	 -bundle "Hacl.SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Impl.SHA2_$*,Hacl.SHA2_$*" \
 	 $^ -o $@
 
-# Linearize this step to avoid a race when these two target are both writing in
-# parallel into the Hacl.SHA2_$*.c file.
-sha2-c/Hacl_Test_SHA2_%.c: sha2-c/Hacl_SHA2_%.c
+# Until the target above writes to disjoint sets of files with its different
+# invocations, this Makefile cannot be run in parallel. This has caused sadness
+# on CI because of concurrent writes to the same file that leave invalid C
+# syntax in there.
+.NOTPARALLEL:
 
 sha2-c/Hacl_Test_SHA2_%.c: sha2-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation -no-prefix Hacl.Test.SHA2_$* \
