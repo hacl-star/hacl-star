@@ -17,7 +17,7 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
 		Spec.HMAC.fst \
-		Spec.HSalsa20.fst 
+		Spec.HSalsa20.fst
 
 hints: $(addsuffix .hints, $(SPEC_FILES))
 verify: $(addsuffix -verify, $(SPEC_FILES))
@@ -25,7 +25,7 @@ all-hints: hints
 all-ver: verify
 
 all: test
-test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe ed25519.exe hmac.exe hkdf.exe 
+test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe ed25519.exe hmac.exe hkdf.exe
 
 
 noise.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Noise.fst
@@ -107,7 +107,7 @@ curve25519.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst l
 	./curve25519.exe
 
 
-kyber.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Kyber.fst 
+kyber.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Kyber.fst
 	mkdir -p kyber-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Kyber --odir kyber-ml $^
 	@echo 'let _ = test()' >> kyber-ml/Spec_Kyber.ml
