@@ -7,12 +7,6 @@ open FStar.HyperStack.ST
 inline_for_extraction noextract
 let (!$) = C.String.((!$))
 
-// TODO: use C.Failwith instead!
-inline_for_extraction
-let failwith msg =
-  C.String.print msg;
-  C.exit 255l
-
 /// For the time being, we do not write any specifications and just try to reach
 /// agreement on calling conventions. A series of convenient type abbreviations
 /// follows.

@@ -5,6 +5,7 @@ module Vale = EverCrypt.Vale
 
 open EverCrypt.Native
 open EverCrypt.Helpers
+open C.Failure
 
 /// Some remarks here.
 ///

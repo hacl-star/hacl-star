@@ -3,6 +3,7 @@
 #endif
 #include <inttypes.h>
 
+#include "kremlin/internal/target.h"
 #include "EverCrypt_OpenSSL.h"
 
 // KB, BB, JP: for now, we just ignore internal errors since the HACL* interface
@@ -15,7 +16,7 @@
 
 #define handleErrors(...)                                                      \
   do {                                                                         \
-    fprintf(stderr, "Error at %s:%d\n", __FILE__, __LINE__);                   \
+    KRML_HOST_EPRINTF("Error at %s:%d\n", __FILE__, __LINE__);                   \
   } while (0)
 
 #ifdef NO_OPENSSL
@@ -28,8 +29,8 @@ void EverCrypt_OpenSSL_aes256_gcm_encrypt(uint8_t *ciphertext,
                                           uint32_t plaintext_len,
                                           uint8_t *aad,
                                           uint32_t aad_len) {
-  fprintf(stderr, "OpenSSL not available in this build\n");
-  exit(255);
+  KRML_HOST_EPRINTF("OpenSSL not available in this build\n");
+  KRML_HOST_EXIT(255);
 }
 
 #else
