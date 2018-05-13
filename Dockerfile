@@ -1,4 +1,4 @@
-FROM ubuntu:xenial
+FROM ubuntu:bionic
 
 MAINTAINER Benjamin Beurdouche <benjamin.beurdouche@inria.fr>
 # Based on the original F* formula with Daniel Fabian
@@ -11,9 +11,7 @@ ENV kremlinv master
 
 # Install required packages and set versions
 RUN apt-get -qq update
-RUN apt-get install --yes sudo wget libssl-dev libsqlite3-dev g++-5 gcc-5 m4 make opam pkg-config python libgmp3-dev unzip cmake
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 200
-RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 200
+RUN apt-get install --yes sudo wget libssl-dev libsqlite3-dev g++ gcc m4 make opam pkg-config python libgmp3-dev unzip cmake
 
 # Create user
 RUN useradd -ms /bin/bash Work
@@ -36,6 +34,7 @@ ENV PATH "/home/Work/z3/bin:$PATH"
 WORKDIR /home/Work
 
 # Prepare and build F*
+ARG RESET_FSTAR=0
 RUN git clone https://github.com/FStarLang/FStar.git
 WORKDIR /home/Work/FStar
 RUN git checkout ${fstarv}
@@ -45,6 +44,7 @@ RUN opam config exec -- make -C ulib/ml
 WORKDIR /home/Work
 
 # Prepare and build KreMLin
+ARG RESET_KREMLIN=0
 RUN git clone https://github.com/FStarLang/kremlin.git
 WORKDIR /home/Work/kremlin
 RUN git checkout ${kremlinv}
@@ -53,7 +53,7 @@ RUN opam config exec -- make
 WORKDIR /home/Work
 
 # Prepare and build HACL*
-ARG CACHEBUST=1
+ARG RESET_HACL=0
 RUN git clone https://github.com/mitls/hacl-star.git
 WORKDIR /home/Work/hacl-star
 RUN git checkout master
