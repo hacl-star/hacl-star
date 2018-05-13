@@ -7,6 +7,7 @@ open FStar.HyperStack.ST
 
 #reset-options "--z3rlimit 50"
 let uint32_from_bytes_le (i:lbuffer uint8 4) = C.load32_le i
+let uint32_to_bytes_le (o:lbuffer uint8 4) i = C.store32_le o i
 
 let uint64_from_bytes_be (i:lbuffer uint8 8) = C.load64_be i
 

@@ -2,13 +2,33 @@ module Spec.Lib.IntTypes
 
 open FStar.Math.Lemmas
 
+///
+/// Definition of machine integer base types
+///
 
 type inttype =
  | U8 | U16 | U32 | U64 | U128 | SIZE
+ | NATm : m:pos -> inttype
+
+let machineint t =
+  match t with
+  | U8
+  | U16
+  | U32
+  | U64
+  | U128
+  | SIZE -> True
+  | NATm m -> False
+
+let m_inttype = t:inttype{machineint t}
+
+///
+/// Operations on the underlying machine integer base types
+///
 
 inline_for_extraction
 unfold
-let bits (n:inttype) =
+let bits (n:m_inttype) =
   match n with
   | U8 -> 8
   | U16 -> 16
@@ -19,7 +39,7 @@ let bits (n:inttype) =
 
 inline_for_extraction
 unfold
-let numbytes (n:inttype) =
+let numbytes (n:m_inttype) =
   match n with
   | U8 -> 1
   | U16 -> 2
@@ -39,36 +59,48 @@ val pow2_values: n:nat ->  Lemma (
     [SMTPat (pow2 n)]
 
 inline_for_extraction
-unfold
-let maxint (t:inttype) = pow2 (bits t) - 1
-(*
+unfold let modulus (t:inttype) =
   match t with
-  | U8 -> 0xff
-  | U16 -> 0xffff
-  | U32 -> 0xffffffff
-  | U64 -> 0xffffffffffffffff
-  | U128 -> 0xffffffffffffffffffffffffffffffff
-*)
+  | NATm m -> m
+  | _ -> pow2 (bits t)
+
+inline_for_extraction
+unfold let maxint (t:inttype) =
+  modulus t - 1
 
 
 inline_for_extraction
 val uint_t: t:inttype -> Type0
+
 inline_for_extraction
 val uint_v: #t:inttype -> u:uint_t t -> GTot (n:nat{n <= maxint t})
 
+///
+/// Definition of machine integers
+///
+
 inline_for_extraction
 type uint8 = uint_t U8
+
 inline_for_extraction
 type uint16 = uint_t U16
+
 inline_for_extraction
 type uint32 = uint_t U32
+
 inline_for_extraction
 type uint64 = uint_t U64
+
 inline_for_extraction
 type uint128 = uint_t U128
 
+///
+/// Casts between natural numbers and machine integers
+///
+
 inline_for_extraction
 val u8: (n:nat{n <= maxint U8}) -> u:uint8{uint_v #U8 u == n}
+
 inline_for_extraction
 val u16: (n:nat{n <= maxint U16}) -> u:uint16{uint_v #U16 u == n}
 
@@ -81,48 +113,68 @@ val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v #U64 u == n}
 inline_for_extraction
 val u128: (n:nat{n <= maxint U128}) -> u:uint128{uint_v #U128 u == n}
 
+
 inline_for_extraction
 val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u == n}
 
 inline_for_extraction
-val cast: #t:inttype{t <> SIZE} -> t':inttype{t' <> SIZE} -> u1:uint_t t -> u2:uint_t t'{uint_v u2 == uint_v u1 % pow2 (bits t')}
+val cast: #t:m_inttype{t <> SIZE} -> t':m_inttype{t' <> SIZE} -> u1:uint_t t -> u2:uint_t t'{uint_v u2 == uint_v u1 % modulus t'}
+
 
 inline_for_extraction
 let to_u8 #t u : uint8 = cast #t U8 u
+
 inline_for_extraction
 let to_u16 #t u : uint16 = cast #t U16 u
+
 inline_for_extraction
 let to_u32 #t u : uint32 = cast #t U32 u
+
 inline_for_extraction
 let to_u64 #t u : uint64 = cast #t U64 u
+
 inline_for_extraction
 let to_u128 #t u : uint128 = cast #t U128 u
 
-inline_for_extraction
-val add_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> c:uint_t t {uint_v c == (uint_v a + uint_v b) % pow2 (bits t)}
+///
+/// Bitwise operators for all machine integers
+///
 
+inline_for_extraction
+val add_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> c:uint_t t {uint_v c == (uint_v a + uint_v b) % modulus t}
 
 inline_for_extraction
 val add: #t:inttype -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
-  (requires (uint_v a + uint_v b < pow2 (bits t)))
+  (requires (uint_v a + uint_v b < modulus t))
   (ensures (fun c -> uint_v c == uint_v a + uint_v b))
 
 inline_for_extraction
 val incr: #t:inttype -> a:uint_t t -> Pure (uint_t t)
-  (requires (uint_v a < pow2 (bits t) - 1))
+  (requires (uint_v a < maxint t))
   (ensures (fun c -> uint_v c == uint_v a + 1))
 
 inline_for_extraction
-val mul_mod: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> c:uint_t t {uint_v c == (uint_v a `op_Multiply` uint_v b) % pow2 (bits t)}
+val mul_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
+  (requires (t <> U128))
+  (ensures (fun c -> uint_v c == (uint_v a `op_Multiply` uint_v b) % modulus t))
+
 
 inline_for_extraction
 val mul: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
-  (requires (uint_v a `op_Multiply` uint_v b < pow2 (bits t)))
+  (requires (uint_v a `op_Multiply` uint_v b < modulus t))
   (ensures (fun c -> uint_v c == uint_v a `op_Multiply` uint_v b))
 
-(* I would prefer the post-condition to say: uint_v c = (pow2 (bits t) + uint_v a - uint_v b) % pow2 (bits t) *)
 inline_for_extraction
-val sub_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> c:uint_t t{uint_v c == (uint_v a - uint_v b) % pow2 (bits t)}
+val mul_wide: a:uint64 -> b:uint64 -> Pure (uint128)
+  (requires (True))
+  (ensures (fun c -> uint_v #U128 c == uint_v #U64 a `op_Multiply` uint_v #U64 b))
+
+(* KB: I would prefer the post-condition to say:
+       uint_v c = (pow2 (bits t) + uint_v a - uint_v b) % pow2 (bits t)
+*)
+inline_for_extraction
+val sub_mod: #t:inttype -> a:uint_t t -> b:uint_t t -> c:uint_t t{uint_v c == (uint_v a - uint_v b) % modulus t}
+
 inline_for_extraction
 val sub: #t:inttype -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
   (requires (uint_v a >= uint_v b ))
@@ -134,90 +186,148 @@ val decr: #t:inttype -> a:uint_t t -> Pure (uint_t t)
   (ensures (fun c -> uint_v c == uint_v a - 1))
 
 inline_for_extraction
-val logxor: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
-inline_for_extraction
-val logand: #t:inttype -> a:uint_t t  ->
-b:uint_t t -> uint_t t
-inline_for_extraction
-val logor: #t:inttype -> a:uint_t t  ->
-b:uint_t t -> uint_t t
-inline_for_extraction
-val lognot: #t:inttype -> a:uint_t t -> uint_t t
+val logxor: #t:m_inttype -> a:uint_t t -> b:uint_t t -> uint_t t
 
 inline_for_extraction
-type shiftval (t:inttype) = u:uint32{uint_v #U32 u < bits t}
-inline_for_extraction
-type rotval  (t:inttype) = u:uint32{uint_v #U32 u > 0 /\ uint_v #U32 u < bits t}
+val logand: #t:m_inttype -> a:uint_t t -> b:uint_t t -> uint_t t
 
 inline_for_extraction
-val shift_right: #t:inttype -> a:uint_t t -> b:shiftval t ->
+val logor: #t:m_inttype -> a:uint_t t -> b:uint_t t -> uint_t t
+
+inline_for_extraction
+val lognot: #t:m_inttype -> a:uint_t t -> uint_t t
+
+inline_for_extraction
+type shiftval (t:m_inttype) = u:uint32{uint_v #U32 u < bits t}
+
+inline_for_extraction
+type rotval  (t:m_inttype) = u:uint32{uint_v #U32 u > 0 /\ uint_v #U32 u < bits t}
+
+inline_for_extraction
+val shift_right: #t:m_inttype -> a:uint_t t -> b:shiftval t ->
     c:uint_t t{uint_v #t c ==  uint_v #t a / pow2 (uint_v #U32 b)}
 
 inline_for_extraction
-val shift_left: #t:inttype -> a:uint_t t -> b:shiftval t ->
-    c:uint_t t{uint_v #t c == (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % pow2 (bits t)}
+val shift_left: #t:m_inttype -> a:uint_t t -> b:shiftval t ->
+    c:uint_t t{uint_v #t c == (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % modulus t}
 
 inline_for_extraction
-val rotate_right: #t:inttype -> a:uint_t t -> b:rotval t -> uint_t t
+val rotate_right: #t:m_inttype -> a:uint_t t -> b:rotval t -> uint_t t
 
 inline_for_extraction
-val rotate_left: #t:inttype -> a:uint_t t -> b:rotval t -> uint_t t
+val rotate_left: #t:m_inttype -> a:uint_t t -> b:rotval t -> uint_t t
+
+///
+/// Masking operators for all machine integers
+///
 
 inline_for_extraction
-val eq_mask: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+val eq_mask: #t:m_inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
 
 inline_for_extraction
-val neq_mask: #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+val neq_mask: #t:m_inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
 
 inline_for_extraction
-val gte_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+val gt_mask:  #t:m_inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
 
 inline_for_extraction
-val gt_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+val gte_mask:  #t:m_inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
 
 inline_for_extraction
-val lt_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+val lt_mask:  #t:m_inttype -> a:uint_t t  -> b:uint_t t -> c:uint_t t
 
 inline_for_extraction
-val lte_mask:  #t:inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+val lte_mask:  #t:m_inttype -> a:uint_t t  -> b:uint_t t -> uint_t t
+
+val eq_mask_lemma: #t:m_inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma
+    (requires (True))
+    (ensures  ((eq_mask #t a b) `logand` d == (if uint_v a = uint_v b then d else nat_to_uint 0)))
+    [SMTPat (eq_mask #t a b `logand` d)]
+
+val neq_mask_lemma: #t:m_inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma
+    (requires (True))
+    (ensures  ((neq_mask #t a b) `logand` d == (if uint_v a <> uint_v b then d else nat_to_uint 0)))
+    [SMTPat (neq_mask #t a b `logand` d)]
+
+val gt_mask_lemma: #t:m_inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma
+    (requires (True))
+    (ensures  ((gt_mask #t a b) `logand` d == (if uint_v a > uint_v b then d else nat_to_uint 0)))
+    [SMTPat (gt_mask #t a b `logand` d)]
+
+val gte_mask_lemma: #t:m_inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma
+    (requires (True))
+    (ensures  ((gte_mask #t a b) `logand` d == (if uint_v a >= uint_v b then d else nat_to_uint 0)))
+    [SMTPat (gte_mask #t a b `logand` d)]
+
+val lt_mask_lemma: #t:m_inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma
+    (requires (True))
+    (ensures  ((lt_mask #t a b) `logand` d == (if uint_v a  < uint_v b then d else nat_to_uint 0)))
+    [SMTPat (lt_mask #t a b `logand` d)]
+
+val lte_mask_lemma: #t:m_inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Lemma
+    (requires (True))
+    (ensures  ((lte_mask #t a b) `logand` d == (if uint_v a  <= uint_v b then d else nat_to_uint 0)))
+    [SMTPat (lte_mask #t a b `logand` d)]
+
+///
+/// Operators available for all machine integers
+///
 
 inline_for_extraction
-let (+!) = add
+let (+!) #t = add #t
+
 inline_for_extraction
-let (+.) = add_mod
+let (+.) #t = add_mod #t
+
 inline_for_extraction
-let ( *! ) = mul
+let ( *! ) #t = mul #t
+
 inline_for_extraction
-let ( *. ) = mul_mod
+let ( *. ) #t = mul_mod #t
+
 inline_for_extraction
-let ( -! ) = sub
+let ( -! ) #t = sub #t
+
 inline_for_extraction
-let ( -. ) = sub_mod
+let ( -. ) #t = sub_mod #t
+
 inline_for_extraction
-let ( >>. ) = shift_right
+let ( >>. ) #t = shift_right #t
+
 inline_for_extraction
-let ( <<. ) = shift_left
+let ( <<. ) #t = shift_left #t
+
 inline_for_extraction
-let ( >>>. ) = rotate_right
+let ( >>>. ) #t = rotate_right #t
+
 inline_for_extraction
-let ( <<<. ) = rotate_left
+let ( <<<. ) #t = rotate_left #t
+
 inline_for_extraction
-let ( ^. ) = logxor
+let ( ^. ) #t = logxor #t
+
 inline_for_extraction
-let ( |. ) = logor
+let ( |. ) #t = logor #t
+
 inline_for_extraction
-let ( &. ) = logand
+let ( &. ) #t = logand #t
+
 inline_for_extraction
-let ( ~. ) = lognot
+let ( ~. ) #t = lognot #t
+
+///
+/// Operations reserved to public integers
+///
 
 unfold inline_for_extraction
 let max_size_t = maxint SIZE
 
 inline_for_extraction
-type size_t = uint_t SIZE
+unfold type size_t = uint_t SIZE
 
 inline_for_extraction
-type size_nat = n:nat{n <= max_size_t}
+unfold type size_nat = n:nat{n <= max_size_t}
+
 
 inline_for_extraction
 val size: n:size_nat -> u:size_t{uint_v #SIZE u == n}
@@ -225,79 +335,76 @@ val size: n:size_nat -> u:size_t{uint_v #SIZE u == n}
 inline_for_extraction
 val size_v: s:size_t -> n:size_nat{uint_v #SIZE s == n}
 
+
 inline_for_extraction
 val size_to_uint32: s:size_t -> u:uint32{uint_v #U32 u == size_v s}
 
 inline_for_extraction
-val size_incr: s:size_t{size_v s < max_size_t} -> s':size_t{size_v s' == size_v s + 1}
+unfold type nat_mod (m:pos) = uint_t (NATm m)
 
 inline_for_extraction
-val size_decr: s:size_t{size_v s > 0} -> s':size_t{size_v s' == size_v s - 1}
-
-
-inline_for_extraction
-val size_div: s1:size_t -> s2:size_t{size_v s2 > 0} -> s3:size_t{size_v s3 == size_v s1 / size_v s2}
+val nat_mod_v: #m:pos -> s:nat_mod m -> n:nat{uint_v #(NATm m) s == n}
 
 inline_for_extraction
-val size_mod: s1:size_t -> s2:size_t{size_v s2 > 0} -> s3:size_t{size_v s3 == size_v s1 % size_v s2}
+val modulo: x:nat -> m:pos -> s:nat_mod m{uint_v #(NATm m) s == x}
 
 inline_for_extraction
-val size_eq: s1:size_t -> s2:size_t -> b:bool{b == (size_v s1 = size_v s2)}
+val div: #t:inttype{t == SIZE \/ NATm? t} -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
+  (requires (uint_v #t b > 0))
+  (ensures (fun c -> uint_v c == uint_v a / uint_v b))
 
 inline_for_extraction
-val size_lt: s1:size_t -> s2:size_t -> b:bool{b == (size_v s1 < size_v s2)}
+val mod: #t:inttype{t == SIZE \/ NATm? t} -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
+  (requires (uint_v #t b > 0))
+  (ensures (fun c -> uint_v c == uint_v a % uint_v b))
 
 inline_for_extraction
-val size_le: s1:size_t -> s2:size_t -> b:bool{b == (size_v s1 <= size_v s2)}
+val eq: #t:inttype{t == SIZE \/ NATm? t} -> a:uint_t t -> b:uint_t t -> Pure bool
+  (requires (True))
+  (ensures (fun c -> c == (uint_v a = uint_v b)))
 
 inline_for_extraction
-val size_gt: s1:size_t -> s2:size_t -> b:bool{b == (size_v s1 > size_v s2)}
+val ne: #t:inttype{t == SIZE \/ NATm? t} -> a:uint_t t -> b:uint_t t -> Pure bool
+  (requires (True))
+  (ensures (fun c -> c == (uint_v a <> uint_v b)))
 
 inline_for_extraction
-val size_ge: s1:size_t -> s2:size_t -> b:bool{b == (size_v s1 >= size_v s2)}
+val lt: #t:inttype{t == SIZE \/ NATm? t} -> a:uint_t t -> b:uint_t t -> Pure bool
+  (requires (True))
+  (ensures (fun c -> c == (uint_v a < uint_v b)))
 
 inline_for_extraction
-let (/.) = size_div
+val le: #t:inttype{t == SIZE \/ NATm? t} -> a:uint_t t -> b:uint_t t -> Pure bool
+  (requires (True))
+  (ensures (fun c -> c == (uint_v a <= uint_v b)))
 
 inline_for_extraction
-let (%.) = size_mod
+val gt: #t:inttype{t == SIZE \/ NATm? t} -> a:uint_t t -> b:uint_t t -> Pure bool
+  (requires (True))
+  (ensures (fun c -> c == (uint_v a > uint_v b)))
 
 inline_for_extraction
-let (=.) = size_eq
+val ge: #t:inttype{t == SIZE \/ NATm? t} -> a:uint_t t -> b:uint_t t -> Pure bool
+  (requires (True))
+  (ensures (fun c -> c == (uint_v a >= uint_v b)))
 
 inline_for_extraction
-let (<.) = size_lt
+let (/.) #t = div #t
 
 inline_for_extraction
-let (<=.) = size_le
+let (%.) #t = mod #t
 
 inline_for_extraction
-let (>.) = size_gt
+let (=.) #t = eq #t
 
 inline_for_extraction
-let (>=.) = size_ge
+let (<.) #t = lt #t
 
+inline_for_extraction
+let (<=.) #t = le #t
 
 inline_for_extraction
-val bignum: Type0
-inline_for_extraction
-val bn_v: bignum -> GTot nat
-inline_for_extraction
-val bn: nat -> bignum
-inline_for_extraction
-val bn_add: bignum -> bignum -> bignum
-inline_for_extraction
-val bn_mul: bignum -> bignum -> bignum
-inline_for_extraction
-val bn_sub: a:bignum -> b:bignum{bn_v a >= bn_v b} -> bignum
-inline_for_extraction
-val bn_mod: bignum -> b:bignum{bn_v b <> 0} -> bignum
-inline_for_extraction
-val bn_div: bignum -> b:bignum{bn_v b <> 0} -> bignum
+let (>.) #t = gt #t
 
-(*
-val uint_v_lemma: #t:inttype -> a:uint_t t -> b:uint_t t -> Lemma 
-    (requires (uint_v #t a == uint_v #t b))
-    (ensures (a == b))
-    [SMTPat (uint_v #t a); SMTPat (uint_v #t b)]
-*)
+inline_for_extraction
+let (>=.) #t = ge #t

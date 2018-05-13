@@ -27,7 +27,7 @@ let q: elem =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   pow2 252 + 27742317777372353535851937790883648493 // Group order
 
-let sha512_modq (len:size_t) (s:lbytes len) : Tot elem =
+let sha512_modq (len:size_nat) (s:lbytes len) : Tot elem =
   nat_from_bytes_le (hash512 len s) % q
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
@@ -64,23 +64,23 @@ let point_double (p:ext_point) : Tot ext_point =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-let ith_bit (len:size_t) (k:lbytes len) (i:size_t{i < 8 * len}) =
+let ith_bit (len:size_nat) (k:lbytes len) (i:size_nat{i < 8 * len}) =
   let q = i / 8 in let r = u32 (i % 8) in
   (k.[q] >>. r) &. u8 1
 
-let rec montgomery_ladder_ (x:ext_point) (xp1:ext_point) (len:size_t{8 * len <= max_size_t}) (k:lbytes len) (ctr:size_t{ ctr <= 8 * len})
+let rec montgomery_ladder_ (x:ext_point) (xp1:ext_point) (len:size_nat{8 * len <= max_size_t}) (k:lbytes len) (ctr:size_nat{ ctr <= 8 * len})
   : Tot (tuple2 ext_point ext_point) (decreases ctr) =
   if ctr = 0 then x, xp1
   else (
     let x, xp1 = montgomery_ladder_ x xp1 len k (ctr-1) in
-    let ctr' : size_t = 8 * len - ctr in
+    let ctr' : size_nat = 8 * len - ctr in
     let x, xp1 = if uint_to_nat (ith_bit len k ctr') = 1 then xp1, x else x, xp1 in
     let xx = point_double x in
     let xxp1 = point_add x xp1 in
     if uint_to_nat (ith_bit len k ctr') = 1 then xxp1, xx else xx, xxp1
   )
 
-let point_mul (len:size_t{8 * len <= max_size_t}) (a:lbytes len) (p:ext_point) =
+let point_mul (len:size_nat{8 * len <= max_size_t}) (a:lbytes len) (p:ext_point) =
   fst (montgomery_ladder_ (zero, one, one, zero) p len a (8 * len))
 
 let modp_sqrt_m1 : elem = 2 ** ((prime - 1) / 4)
@@ -139,7 +139,7 @@ let secret_to_public (secret:lbytes 32) =
 
 #reset-options "--max_fuel 0 --z3rlimit 25"
 
-let sign (secret:lbytes 32) (len:size_t{ 8 * len < max_size_t}) (msg:lbytes len) =
+let sign (secret:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes len) =
   let a, prefix = secret_expand secret in
   let a' = point_compress (point_mul 32 a g) in
   let tmp = create (len + 64) (u8 0) in
@@ -164,7 +164,7 @@ let point_equal (p:ext_point) (q:ext_point) =
   else if ((py `fmul` qz) <> (qy `fmul` pz)) then false
   else true
 
-let verify (public:lbytes 32) (len:size_t{ 8 * len < max_size_t}) (msg:lbytes len) (signature:lbytes 64) =
+let verify (public:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes len) (signature:lbytes 64) =
   let a' = point_decompress public in
   match a' with
   | None -> false

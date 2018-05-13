@@ -20,7 +20,7 @@ type cipher =
 
 
 val xor: #len:size_nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
-let xor #len x y = map2 (fun x y -> x ^. y) x y
+let xor #len x y = map2 (fun x y -> logxor #U8 x y) x y
 
 val counter_mode_blocks:
   enc: cipher ->
@@ -35,6 +35,8 @@ let counter_mode_blocks enc st0 counter n plain =
   repeati n
     (fun i cipher ->
       let st = enc.set_counter st0 (counter + i) in
+      let start : size_nat = i * enc.block_len in
+      let fin : size_nat = (i+1) * enc.block_len in
       let b = slice plain (i * enc.block_len) ((i+1) * enc.block_len) in
       let k = enc.key_block st in
       let c = xor b k in

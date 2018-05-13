@@ -35,7 +35,7 @@ SLOW=
 
 POLY1305_FILES=$(BIGNUM) $(POLY1305_SPECIFIC)
 
-FSTAR_INCLUDES+=--include ../bignum
+FSTAR_INCLUDES+=--include ../bignum --expose_interfaces
 
 # Parameters for interactive mode
 %.fst-in:
@@ -78,7 +78,7 @@ depend:
 -include .depend
 
 # The F* -> out.krml step only depends on F* files.
-poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst Hacl.Test.Poly1305_64.fst
+poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
 # We need one invocation of kremlin for each bundle because of KreMLin bug #43

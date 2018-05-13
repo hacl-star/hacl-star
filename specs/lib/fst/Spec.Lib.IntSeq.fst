@@ -9,7 +9,13 @@ open Spec.Lib.RawIntTypes
 let decr (x:size_nat{x > 0}) : size_nat = x - 1
 let incr (x:size_nat{x < max_size_t}) : size_nat = x + 1
 
-let lseq (a:Type0) (len:size_nat) =  s:list a {List.Tot.length s = len}
+let seq (a:Type0) =  s:list a {List.Tot.length s <= max_size_t}
+let length (#a:Type0) (l:seq a) = List.Tot.length l
+
+let to_lseq #a (s:seq a) = s
+let to_lbytes (s:bytes) = s
+let to_seq #a #len (s:lseq a len) = s
+let to_bytes #len (s:lbytes len) = s
 
 val create_: #a:Type -> len:size_nat -> init:a -> Tot (lseq a len) (decreases (len))
 let rec create_ #a len x =
@@ -17,6 +23,7 @@ let rec create_ #a len x =
   else
     let t = create_ #a (decr len) x in
     x :: t
+
 let create = create_
 
 let createL #a l = l
@@ -43,7 +50,7 @@ let rec prefix_ #a #len l n =
   | 0, _ -> []
   | n', h::t -> h::prefix_ #a #(decr len) t (decr n)
 
-let prefix = prefix_
+let prefix #a #len = prefix_ #a #len
 
 val suffix: #a:Type -> #len:size_nat -> lseq a len -> n:size_nat{n <= len} -> Tot (lseq a (len - n)) (decreases (n))
 let rec suffix #a #len l n =
@@ -53,14 +60,14 @@ let rec suffix #a #len l n =
 
 let sub #a #len l s n =
   let suf = suffix #a #len l s in
-  prefix #(len - s) suf n
+  prefix #a #(len - s) suf n
 
 let slice #a #len l s f = sub #a #len l s (f-s)
 
 val last: #a:Type -> #len:size_nat{len > 0} -> x:lseq a len -> a
 let last #a #len x = index #a #len x (decr len)
 
-val snoc: #a:Type -> #len:size_nat{len < maxint U32} -> i:lseq a len -> x:a -> Tot (o:lseq a (incr len){i == prefix #(incr len) o len /\ last o == x}) (decreases (len))
+val snoc: #a:Type -> #len:size_nat{len < maxint U32} -> i:lseq a len -> x:a -> Tot (o:lseq a (incr len){i == prefix #a #(incr len) o len /\ last o == x}) (decreases (len))
 let rec snoc #a #len i x =
   match i with
   | [] -> [x]
@@ -87,9 +94,16 @@ let rec repeat_range_ #a min max f x =
   if min = max then x
   else repeat_range_ #a (incr min) max f (f min x)
 
+val repeat_range_ghost_: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (s:size_nat{s >= min /\ s < max} -> a -> GTot a) -> a -> GTot (a) (decreases (max - min))
+let rec repeat_range_ghost_ #a min max f x =
+  if min = max then x
+  else repeat_range_ghost_ #a (incr min) max f (f min x)
+
 
 let repeat_range = repeat_range_
+let repeat_range_ghost = repeat_range_ghost_
 let repeati #a = repeat_range #a 0
+let repeati_ghost #a = repeat_range_ghost #a 0
 let repeat #a n f x = repeat_range 0 n (fun i -> f) x
 
 unfold type repeatable (#a:Type) (#n:size_nat) (pred:(i:size_nat{i <= n} -> a -> Tot Type)) = i:size_nat{i < n} -> x:a -> Pure a (requires (pred i x)) (ensures (fun r -> pred (i+1) r))
@@ -180,7 +194,7 @@ let rec nat_from_intseq_be_ #t #len b =
   if len = 0 then 0
   else
     let l = uint_to_nat #t (last #(uint_t t) #len b) in
-    let pre : intseq t (decr len) = prefix #len b (decr len) in
+    let pre : intseq t (decr len) = prefix #(uint_t t) #len b (decr len) in
     let shift = pow2 (bits t) in
     let n' : n:nat{n < pow2 ((len-1) * bits t)}  = nat_from_intseq_be_ #t #(decr len) pre in
     assert (l <= shift - 1);
@@ -212,9 +226,8 @@ let rec nat_from_intseq_le_ #t #len (b:intseq t len)  =
     l + shift * n'
 
 let nat_from_intseq_le = nat_from_intseq_le_
-
-let nat_from_bytes_be = nat_from_intseq_be
-let nat_from_bytes_le = nat_from_intseq_le
+let nat_from_bytes_be = nat_from_intseq_be #U8
+let nat_from_bytes_le = nat_from_intseq_le #U8
 
 val nat_to_bytes_be_:
   len:size_nat -> n:nat{ n < pow2 (8 * len)} ->
@@ -281,24 +294,24 @@ let uints_from_bytes_be #t (#len:size_nat{len * numbytes t < pow2 32}) (b:lbytes
   let l = create #(uint_t t) len (nat_to_uint 0) in
   repeati len (fun i l -> l.[i] <- uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))) l
 
+let rec concat #a #len1 #len2 s1 s2 =
+  match s2 with
+  | [] -> s1
+  | h :: t -> List.Tot.append h (concat #a #(len1 + 1) #(len2 - 1) s1 t)
+
+let rec split_blocks #t #len s bs =
+    if bs < length(s) then
+      let h = sub s 0 bs in
+      let rem = sub s bs (len - bs) in
+      let t,l = split_blocks #t #(len - bs) rem bs in
+      h :: t, l
+    else
+      [],s
+
+let rec concat_blocks #a #len #bs s l =
+  match s with
+  | [] -> l
+  | h :: t -> List.Tot.append h (concat_blocks #a #(len - bs) #bs t l)
+
 let as_list #a #len l = l
 
-(*
-val map_block_: #a:Type -> #b:Type -> min:size_nat -> max:size_nat{min <= max} ->
-		blocksize:size_nat{max * blocksize <= max_size_t} -> 
-		(i:size_nat{i >= min /\ i < max} -> lseq a blocksize -> lseq b blocksize) -> 
-		lseq a ((max - min) * blocksize) -> 
-		Tot (lseq b ((max - min) * blocksize)) (decreases (max - min))
-let rec map_block_ #a #b min max sz f x =
-  if min = max then []
-  else 
-    let h = slice x 0 sz in 
-    let t = slice x sz ((max - min) * sz) in
-    let h' = f min h in
-    let t' = map_block_ #a #b (min+1) max sz f t in
-    let r = h' @ t' in
-    List.Tot.append_length h' t';
-    r
-
-let map_block #a #b n sz f x = map_block_ #a #b 0 n sz f x
-*)

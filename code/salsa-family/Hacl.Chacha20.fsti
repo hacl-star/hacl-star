@@ -29,8 +29,8 @@ val chacha20_key_block:
       h1.[block] == Spec.Chacha20.chacha20_block h0.[k] h0.[n] (v ctr)))
 
 
-(** @summary This function implements Chacha20  
-    @type   
+(** @summary This function implements Chacha20
+    @type
 *)
 val chacha20:
   output:uint8_p ->

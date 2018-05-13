@@ -1,7 +1,11 @@
 *.o
+*.a
 *.so
 *.exe
 *.exe.dSYM
+*.cmi
+*.cmx
+*.cmxa
 out.krml
 
 hacl-star.tar.gz
@@ -9,15 +13,9 @@ hacl-star.tar.gz
 build/
 build-experimental/
 
-lib/hst/ml/*.cmi
-lib/hst/ml/*.cmx
-lib/hst/ml/*.o
-
 test/hash/ml/*
-test/hash/*.exe
 test/hash/sha256
 test/hmac/ml/*
-test/hmac/*.exe
 test/hmac/hmac_sha256
 test/bench.txt
 
@@ -29,16 +27,12 @@ specs/*-ml/
 
 code/lib/kremlin/ccomp-c/
 code/lib/kremlin/lib-c/
-code/lib/ml/hacllib.a
-code/lib/ml/hacllib.cmxa
-code/lib/ml/*.cmi
-code/lib/ml/*.cmx
-code/lib/ml/*.o
 
 code/hash/sha2-c/
 code/hash/sha2-256-c/
 code/hash/sha2-384-c/
 code/hash/sha2-512-c/
+code/hash/blake2s-c/
 code/hmac/hmac-c/
 code/api/aead-c/
 code/api/box-c/
@@ -46,6 +40,7 @@ code/api/policies-c/
 code/curve25519/x25519-c/
 code/ed25519/ed25519-c/
 code/poly1305/poly-c/
+code/poly1305_32/poly-c/
 code/salsa-family/chacha-c/
 code/salsa-family/chacha-vec128/
 code/salsa-family/chacha-vec128-c/
@@ -62,9 +57,17 @@ snapshots/hacl-c/libhacl.*
 snapshots/hacl-c/libhacl32.*
 snapshots/snapshot-gcc
 snapshots/snapshot-gcc-unrolled
+snapshots/snapshot-compcert
+snapshots/snapshot-compcert-unrolled
+snapshots/snapshot-msvc
+snapshots/snapshot-msvc-unrolled
 snapshots/nss
+snapshots/riot
+snapshots/wireguard
 
 doc/tutorial/0-coding-field-arithmetic-in-fstar/extracted_c/
 doc/tutorial/1-recursion-vs-loops/extracted_c/
 doc/tutorial/2-verifying-memory-safety/extracted_c/
 doc/tutorial/4-verifying-functional-correctness/extracted_c/
+
+dependencies

@@ -79,15 +79,15 @@ let verify (public:lbytes 32) (len:size_t{len < pow2 32 - 64}) (msg:lbytes len) 
   let zR = 1 in
   let zT0 = 1 in
   let zT1 = 1 in
-  let _Bxx = ((xT0 `fmul` xT1) `fsub` (zT0 `fmul` zT1)) in
-  let _Bxx = _Bxx `fmul` _Bxx in
-  let _Bzz = ((xT0 `fmul` zT1) `fsub` (zT0 `fmul` xT1)) in
-  let _Bzz = _Bzz `fmul` _Bzz in
-  let _Bxz = (((xT0 `fmul` xT1) `fadd` (zT0 `fmul` zT1)) `fmul` ((xT0 `fmul` zT1) `fadd` (zT0 `fmul` xT1))) `fadd` (2 `fmul` _A `fmul` xT0 `fmul` zT0 `fmul` xT1 `fmul` zT1) in
-  let _Bzz_xR2 = _Bzz `fmul` xR `fmul` xR in
-  let _Bxx_zR2 = _Bxx `fmul` zR `fmul` zR in
-  let _2Bxz_xR_zR = 2 `fmul` _Bxz `fmul` xR `fmul` zR in
-  let left = (_Bzz_xR2 `fadd` _Bxx_zR2) in
+  let _Bxx = ((xT0 *. xT1) -. (zT0 *. zT1)) in
+  let _Bxx = _Bxx *. _Bxx in
+  let _Bzz = ((xT0 *. zT1) -. (zT0 *. xT1)) in
+  let _Bzz = _Bzz *. _Bzz in
+  let _Bxz = (((xT0 *. xT1) +. (zT0 *. zT1)) *. ((xT0 *. zT1) +. (zT0 *. xT1))) +. (2 *. _A *. xT0 *. zT0 *. xT1 *. zT1) in
+  let _Bzz_xR2 = _Bzz *. xR *. xR in
+  let _Bxx_zR2 = _Bxx *. zR *. zR in
+  let _2Bxz_xR_zR = 2 *. _Bxz *. xR *. zR in
+  let left = (_Bzz_xR2 +. _Bxx_zR2) in
   let right = _2Bxz_xR_zR in
   IO.print_string "\n_left:";
   List.iter (fun i -> IO.print_string (UInt8.to_string (Spec.Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (nat_to_bytes_le 32 left));

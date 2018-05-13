@@ -71,10 +71,7 @@ let alloc () = Hash.alloc ()
 val init:
   state:uint32_p{length state = v size_state} ->
   Stack unit
-    (requires (fun h0 -> live h0 state
-              /\ (let seq_counter = Seq.slice (as_seq h0 state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w)) in
-              let counter = Seq.index seq_counter 0 in
-              H32.v counter = 0)))
+    (requires (fun h0 -> live h0 state))
     (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1
               /\ (let slice_k = Seq.slice (as_seq h1 state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w)) in
               let slice_h_0 = Seq.slice (as_seq h1 state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w)) in

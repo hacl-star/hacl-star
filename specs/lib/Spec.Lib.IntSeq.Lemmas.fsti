@@ -24,7 +24,12 @@ val sub_index: #a:Type -> #len:size_nat -> s:lseq a len -> start:size_nat -> n:s
 		  (ensures (index (sub s start n) i == index s (start + i)))
 		  [SMTPat (index (sub s start n) i)]
 
-val slice_index: #a:Type -> #len:size_nat -> s:lseq a len -> start:size_nat -> fin:size_nat{start <= fin /\ fin <= len} -> i:size_nat{i < fin - start} -> Lemma
+val sub_create: #a:Type -> len:size_t -> init: a -> start:size_t -> n:size_t{start + n <= len} -> Lemma
+		  (requires True)
+		  (ensures (sub (create len init) start n == create n init)
+		  [SMTPat (sub (create len init) start n)]
+
+val slice_index: #a:Type -> #len:size_t -> s:lseq a len -> start:size_t -> fin:size_t{start <= fin /\ fin <= len} -> i:size_t{i < fin - start} -> Lemma
 		  (requires True)
 		  (ensures (index (slice s start fin) i == index s (start + i)))
 		  [SMTPat (index (slice s start fin) i)]

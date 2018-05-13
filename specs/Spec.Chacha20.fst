@@ -1,9 +1,9 @@
 module Spec.Chacha20
+
 open FStar.Mul
 open Spec.Lib.IntTypes
 open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
-
 
 #set-options "--max_fuel 0 --z3rlimit 100"
 
@@ -55,8 +55,8 @@ let rounds : shuffle =
 
 let chacha20_core (s:state) : Tot state =
   let k = rounds s in
-  map2 (add_mod #U32) k s
-
+  map2 (+.) k s
+  
 (* state initialization *)
 inline_for_extraction
 let c0 = 0x61707865
@@ -98,3 +98,4 @@ let chacha20_cipher =
 
 let chacha20_encrypt_bytes key nonce counter len m =
   Spec.CTR.counter_mode chacha20_cipher key nonce counter len m
+

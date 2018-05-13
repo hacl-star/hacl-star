@@ -105,6 +105,12 @@ x25519.exe: x25519-c/out.krml
 		$^ -o $@
 	./$@
 
+x25519.wasm: x25519-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -wasm -no-prefix Hacl.Test.X25519 \
+	 	-bundle 'Hacl.Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
+		$^ -o $@
+	./$@
+
 extract-c: x25519-c/Hacl_Curve25519.c x25519-c/Hacl_Test_X25519.c
 
 test: x25519.exe
