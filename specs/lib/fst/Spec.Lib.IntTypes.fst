@@ -311,9 +311,11 @@ let lte_mask_lemma #t a b d = admit()
 
 (* defined in .fsti: notations +^, -^, ...*)
 
+inline_for_extraction
 let size x = size_ x
+inline_for_extraction
 let size_v x = UInt32.v x
-let size_to_uint32 x = x
+let size_to_uint32 x = x <: UInt32.t
 let nat_mod_v #m x = x
 let modulo x m = modulo_ x m
 

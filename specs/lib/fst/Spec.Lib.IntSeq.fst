@@ -11,7 +11,6 @@ let incr (x:size_nat{x < max_size_t}) : size_nat = x + 1
 
 let seq (a:Type0) =  s:list a {List.Tot.length s <= max_size_t}
 let length (#a:Type0) (l:seq a) = List.Tot.length l
-let lseq (a:Type0) (len:size_nat) = s:seq a {length s == len}
 
 let to_lseq #a (s:seq a) = s
 let to_lbytes (s:bytes) = s
@@ -35,7 +34,7 @@ let rec index_ #a #len l i =
   | 0, h::t -> h
   | n, h::t -> index_ #a #(decr len) t (decr i)
 
-let index = index_
+let index #a #len s n = index_ #a #len s n
 
 val upd_: #a:Type -> #len:size_nat -> lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a -> Tot (o:lseq a len{index o n == x}) (decreases (n))
 let rec upd_ #a #len l i x =
@@ -43,7 +42,7 @@ let rec upd_ #a #len l i x =
   | 0, h::t -> x::t
   | n, h::t -> h::upd_ #a #(decr len) t (decr i) x
 
-let upd = upd_
+let upd #a #len s n x = upd_ #a #len s n x
 
 val prefix_: #a:Type -> #len:size_nat -> lseq a len -> n:size_nat{n <= len} -> Tot (lseq a n) (decreases (n))
 let rec prefix_ #a #len l n =
@@ -62,8 +61,6 @@ let rec suffix #a #len l n =
 let sub #a #len l s n =
   let suf = suffix #a #len l s in
   prefix #a #(len - s) suf n
-
-let slice #a #len l s f = sub #a #len l s (f-s)
 
 val last: #a:Type -> #len:size_nat{len > 0} -> x:lseq a len -> a
 let last #a #len x = index #a #len x (decr len)
@@ -87,8 +84,6 @@ let rec update_sub_ #a #len l s n l' =
   | _, h::t -> h:: update_sub_ #a #(decr len) t (decr s) n l'
 
 let update_sub = update_sub_
-
-let update_slice #a #len l s f sl = update_sub #a #len l s (f-s) sl
 
 val repeat_range_: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (s:size_nat{s >= min /\ s < max} -> a -> Tot a) -> a -> Tot (a) (decreases (max - min))
 let rec repeat_range_ #a min max f x =
@@ -179,7 +174,7 @@ let rec for_all2_ #a #b #len f x y = match x,y with
 let for_all2 = for_all2_
 
 
-val nat_from_intseq_be_:#t:inttype -> #len:size_nat -> b:intseq t len -> Tot (n:nat{n < pow2 (len * bits t)})  (decreases (len))
+val nat_from_intseq_be_:#t:m_inttype -> #len:size_nat -> b:intseq t len -> Tot (n:nat{n < pow2 (len * bits t)})  (decreases (len))
 let rec nat_from_intseq_be_ #t #len b =
   if len = 0 then 0
   else
@@ -199,7 +194,7 @@ let rec nat_from_intseq_be_ #t #len b =
 let nat_from_intseq_be = nat_from_intseq_be_
 
 
-val nat_from_intseq_le_:#t:inttype -> #len:size_nat -> b:intseq t len -> Tot (n:nat{n < pow2 (len * bits t)}) (decreases (len))
+val nat_from_intseq_le_:#t:m_inttype -> #len:size_nat -> b:intseq t len -> Tot (n:nat{n < pow2 (len * bits t)}) (decreases (len))
 let rec nat_from_intseq_le_ #t #len (b:intseq t len)  =
   match len,b with
   | 0, _ -> (0)
@@ -284,24 +279,46 @@ let uints_from_bytes_be #t (#len:size_nat{len * numbytes t < pow2 32}) (b:lbytes
   let l = create #(uint_t t) len (nat_to_uint 0) in
   repeati len (fun i l -> l.[i] <- uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))) l
 
-let rec concat #a #len1 #len2 s1 s2 =
-  match s2 with
-  | [] -> s1
-  | h :: t -> List.Tot.append h (concat #a #(len1 + 1) #(len2 - 1) s1 t)
-
-let rec split_blocks #t #len s bs =
-    if bs < length(s) then
-      let h = sub s 0 bs in
-      let rem = sub s bs (len - bs) in
-      let t,l = split_blocks #t #(len - bs) rem bs in
-      h :: t, l
-    else
-      [],s
-
-let rec concat_blocks #a #len #bs s l =
-  match s with
-  | [] -> l
-  | h :: t -> List.Tot.append h (concat_blocks #a #(len - bs) #bs t l)
-
 let as_list #a #len l = l
 
+
+let rec concat #a #len1 #len2 s1 s2 =
+  match s1 with
+  | [] -> s2
+  | h :: t -> h :: (concat #a #(len1 - 1) #len2 t s2)
+
+let map_blocks #a bs nb f inp = 
+  let len = nb * bs in
+  let out = inp in
+  let out = repeati #(lseq a len) nb
+	    (fun i out ->  
+	         update_slice #a out (i * bs) ((i+1) * bs)
+			      (f i (slice #a inp (i * bs) ((i+1) * bs))))
+	    out in
+  out
+
+let reduce_blocks #a #b bs nb f inp init = 
+  let len = nb * bs in
+  let acc = init in
+  let acc = repeati #b nb
+	    (fun i acc ->   
+	       f i (slice #a inp (i * bs) ((i+1) * bs)) acc)
+	    acc in
+  acc
+
+
+(*
+#reset-options "--z3rlimit 400 --max_fuel 0"
+
+let reduce_blocks #a #b bs inp f g init = 
+  let len = length inp in 
+  let blocks = len / bs in
+  let rem = len % bs in
+  let acc = repeati #b blocks 
+	       (fun i acc -> f i (slice (to_lseq inp) (i * bs) ((i+1) * bs)) acc)
+	    init in
+  let acc = g blocks rem (sub (to_lseq inp) (blocks * bs) rem) acc in
+  acc
+
+
+*)

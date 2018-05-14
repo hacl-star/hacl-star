@@ -15,7 +15,7 @@ val length: #a:Type0 -> seq a -> size_nat
 
 let lseq (a:Type0) (len:size_nat) = s:seq a{length s == len}
 
-type intseq (t:inttype) (len:size_nat) = lseq (uint_t t) len
+type intseq (t:m_inttype) (len:size_nat) = lseq (uint_t t) len
 
 ///
 /// Definition of byte-based sequences
@@ -45,6 +45,8 @@ val create: #a:Type -> len:size_nat -> init:a -> lseq a len
 
 val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (List.Tot.length l)
 
+//val copy: #a:Type -> #len:size_nat -> lseq a len -> lseq a len
+
 ///
 /// Operations on sequences
 ///
@@ -55,11 +57,14 @@ val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len >
 
 val sub: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> lseq a n
 
-val slice: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> fin:size_nat{start <= fin /\ fin <= len} -> lseq a (fin - start)
+let slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat)
+	  (fin:size_nat{start <= fin /\ fin <= len}) = 
+	  sub #a #len i start (fin - start)
 
 val update_sub: #a:Type -> #len:size_nat -> i:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}
 
-val update_slice: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> fin:size_nat{start <= fin /\ fin <= len} -> lseq a (fin - start) -> lseq a len
+let update_slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat) (fin:size_nat{start <= fin /\ fin <= len}) (upd:lseq a (fin - start)) = 
+		 update_sub #a #len i start (fin-start) upd
 
 
 let op_String_Access #a #len = index #a #len
@@ -130,16 +135,6 @@ val uints_from_bytes_le: #t:m_inttype -> #len:size_nat{len `op_Multiply` numbyte
 
 val uints_from_bytes_be: #t:m_inttype -> #len:size_nat{len `op_Multiply` numbytes t <= max_size_t} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
 
-///
-/// Experimental functions
-///
-
-val concat: #a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 < maxint SIZE} -> lseq a len1 -> lseq a len2 -> lseq a (len1 + len2)
-let (@|) #a #len1 #len2 s1 s2 = concat #a #len1 #len2 s1 s2
-
-val split_blocks: #a:Type -> #len:size_nat -> lseq a len -> bs:size_nat{bs > 0} -> tuple2 (lseq (lseq a bs) (len / bs)) (lseq a (len % bs))
-
-val concat_blocks: #a:Type -> #len:size_nat -> #bs:size_nat{bs > 0} -> lseq (lseq a bs) (len / bs) -> lseq a (len % bs) -> lseq a len
 
 ///
 /// Unsafe functions
@@ -147,3 +142,28 @@ val concat_blocks: #a:Type -> #len:size_nat -> #bs:size_nat{bs > 0} -> lseq (lse
 ///
 
 val as_list: #a:Type -> #len:size_nat -> lseq a len -> l:list a{List.Tot.length l = len}
+
+
+///
+/// Experimental functions
+///
+
+val concat: #a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 <= maxint SIZE} -> lseq a len1 -> lseq a len2 -> lseq a (len1 + len2)
+let (@|) #a #len1 #len2 s1 s2 = concat #a #len1 #len2 s1 s2
+
+open FStar.Mul
+val map_blocks: #a:Type0 ->
+		blocksize:size_nat{blocksize > 0} ->
+		nblocks:size_nat{nblocks * blocksize <= maxint SIZE} ->
+		f:(i:size_nat{i + 1 <= nblocks} -> lseq a blocksize -> lseq a blocksize) ->
+		inp: lseq a (nblocks * blocksize) ->
+		out:  lseq a (nblocks * blocksize) 
+val reduce_blocks: #a:Type0 -> #b:Type0 ->
+		blocksize:size_nat{blocksize > 0} ->
+		nblocks:size_nat{nblocks * blocksize <= maxint SIZE} ->
+		f:(i:size_nat{i + 1 <= nblocks} -> lseq a blocksize -> b -> b) ->
+		inp: lseq a (nblocks * blocksize) ->
+		init: b ->
+		out:  b
+
+

@@ -1,5 +1,6 @@
 include ../../Makefile.include
 
+CFLAGS+=-g
 # Files for verification
 SHA2_FILES = \
 	Hacl.Hash.Lib.LoadStore.fst \
@@ -110,7 +111,6 @@ blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
 
 test-blake2s.exe: blake2s-c/Hacl_Blake2s.o blake2s-c/Hacl_Test_Blake2s.o $(BASE_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
-	./test-blake2s.exe
 
 #
 # Clean

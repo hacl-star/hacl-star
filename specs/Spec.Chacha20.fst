@@ -16,6 +16,7 @@ type key = lbytes keylen
 type block = lbytes blocklen
 type nonce = lbytes noncelen
 type counter = size_nat
+type subblock = b:bytes{length b <= blocklen}
 
 // Internally, blocks are represented as 16 x 4-byte integers
 type state = m:intseq U32 16
@@ -90,12 +91,33 @@ let chacha20_key_block (st:state) : Tot block =
 
 let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
   let st = chacha20_init k n in
-  let st' = chacha20_core st in
-  uints_to_bytes_le st'
+  chacha20_key_block st
 
-let chacha20_cipher =
-  Spec.CTR.Cipher state keylen noncelen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
+let chacha20_encrypt_block (st0:state) (ctr0:counter) (incr:counter{ctr0 + incr <= max_size_t}) (b:block) : Tot block =
+  let st = chacha20_set_counter st0 (ctr0 + incr) in
+  let kb = chacha20_key_block st in
+  map2 (^.) b kb
 
-let chacha20_encrypt_bytes key nonce counter len m =
-  Spec.CTR.counter_mode chacha20_cipher key nonce counter len m
-
+let chacha20_encrypt_last (st0:state) (ctr0:counter) (incr:counter{ctr0 + incr <= max_size_t}) (len:size_nat{len < blocklen}) (b:lbytes len) : lbytes len  =
+  let plain = create blocklen (u8 0) in
+  let plain = update_slice plain 0 len b in 
+  let cipher = chacha20_encrypt_block st0 ctr0 incr plain in
+  slice cipher 0 len
+  
+val chacha20_encrypt_bytes: 
+  key -> nonce -> c:counter -> len:size_nat{c + len <= maxint SIZE} -> 
+  msg:lseq uint8 len -> cipher:lseq uint8 len
+let chacha20_encrypt_bytes key nonce counter len msg = 
+  let cipher = msg in
+  let st0 = chacha20_init key nonce in
+  let nblocks = len / blocklen in
+  let rem = len % blocklen in
+  let bs = map_blocks #uint8 blocklen nblocks 
+	   (chacha20_encrypt_block st0 counter)
+	   (sub cipher 0 (nblocks * blocklen)) in
+  let cipher = update_sub cipher 0 (nblocks * blocklen) bs in
+  let l = chacha20_encrypt_last st0 counter nblocks rem
+	   (sub cipher (nblocks * blocklen) rem) in
+  update_sub cipher (nblocks * blocklen) rem l
+       
+       
