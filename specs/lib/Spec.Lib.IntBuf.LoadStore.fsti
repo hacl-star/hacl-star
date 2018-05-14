@@ -51,7 +51,7 @@ val uints_to_bytes_be:
   o:lbuffer uint8 (len `op_Multiply` numbytes t) ->
   i:lbuffer (uint_t t) (len) ->
   Stack unit
-	(requires (fun h0 -> live h0 o /\ live h0 i))
+	(requires (fun h0 -> live h0 o /\ live h0 i /\ disjoint o i))
 	(ensures (fun h0 _ h1 -> preserves_live h0 h1 /\
 			      modifies1 o h0 h1 /\
 			      as_lseq o h1 ==

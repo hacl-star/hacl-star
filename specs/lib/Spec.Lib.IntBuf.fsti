@@ -224,7 +224,7 @@ inline_for_extraction val salloc11:
 
 
 inline_for_extraction val salloc21:
-  #h0:mem -> #a0:Type0 -> #a1:Type0 -> #b:Type0 -> #w:Type0 -> #len0:size_nat -> #len1:size_nat -> #wlen:size_nat ->
+  #h0:mem -> #b:Type0 -> #a0:Type0 -> #a1:Type0 -> #w:Type0 -> #len0:size_nat -> #len1:size_nat -> #wlen:size_nat ->
   clen0:size_t{v clen0 == len0} ->
   clen1:size_t{v clen1 == len1} ->
   init0:a0 ->
