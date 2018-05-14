@@ -49,7 +49,7 @@ let rec mgf_sha256_ count_max accLen stLen st counter =
      hash_sha256 mHash mgfseed_counter_len mgfseed_counter;
      let acc' = Buffer.sub #uint8 #(v accLen) #(v hLen) acc (mul #SIZE hLen counter) hLen in
      copy hLen mHash acc';
-     mgf_sha256_ count_max accLen stLen st (size_incr counter)
+     mgf_sha256_ count_max accLen stLen st (add #SIZE counter (size 1))
   end
 
 val mgf_sha256:

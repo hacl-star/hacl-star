@@ -24,7 +24,7 @@ let rec bn_lshift1_ #aLen aaLen a carry i res =
         let tmp = a.(i) in
         res.(i) <- (shift_left #U64 tmp (u32 1)) |. carry;
         let carry = if (eq_u64 (logand #U64 tmp bn_tbit) bn_tbit) then u64 1 else u64 0 in
-        bn_lshift1_ aaLen a carry (size_incr i) res
+        bn_lshift1_ aaLen a carry (add #SIZE i (size 1)) res
     end
 
 // res = a << 1

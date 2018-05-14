@@ -17,7 +17,7 @@ val blocks: x:size_nat{x > 0} -> m:size_nat{m > 0} -> Tot (r:size_nat{r > 0 /\ x
 let blocks x m = (x - 1) / m + 1
 
 val xor_bytes: len:size_nat -> b1:lbytes len -> b2:lbytes len -> Tot (res:lbytes len)
-let xor_bytes len b1 b2 = map2 (fun x y -> x ^. y) b1 b2
+let xor_bytes len b1 b2 = map2 (fun x y -> logxor #U8 x y) b1 b2
 
 val eq_bytes: len:size_nat -> b1:lbytes len -> b2:lbytes len -> Tot bool
 let eq_bytes len b1 b2 = for_all2 (fun x y -> uint_to_nat #U8 x = uint_to_nat #U8 y) b1 b2
@@ -140,7 +140,7 @@ let pss_encode msBits sLen salt msgLen msg emLen em =
     else begin
         let em = pss_encode_ sLen salt msgLen msg emLen em in
         assert (0 < 8 - msBits /\ 8 - msBits < 8);
-        em.[0] <- em.[0] &. ((u8 0xff) >>. u32 (8 - msBits)) end
+        em.[0] <- logand #U8 em.[0] ((u8 0xff) >>. u32 (8 - msBits)) end
 
 val pss_verify_:
     sLen:size_nat{sLen + hLen + 8 < pow2 32 /\ sLen + hLen + 8 < max_input_len_sha256} ->
@@ -170,7 +170,7 @@ let pss_verify_ sLen msBits emLen em msgLen msg =
         if msBits > 0
         then begin
             assert (0 < 8 - msBits /\ 8 - msBits < 8);
-            db.[0] <- db.[0] &. (u8 0xff >>. u32 (8 - msBits)) end
+            db.[0] <- logand #U8 db.[0] (u8 0xff >>. u32 (8 - msBits)) end
         else db in
 	
     let pad = slice db 0 pad_size in

@@ -46,7 +46,7 @@ let rec bn_sub_ #aLen #bLen caLen a cbLen b i carry res =
        let t2 = bval cbLen b i in
        let (carry, res_i) = subborrow_u64 carry t1 t2 in
        res.(i) <- res_i;
-       bn_sub_ #aLen #bLen caLen a cbLen b (size_incr i) carry res
+       bn_sub_ #aLen #bLen caLen a cbLen b (add #SIZE i (size 1)) carry res
     end
 
 (* a must be greater than b *)
@@ -78,7 +78,7 @@ let rec bn_add_ #aLen #bLen caLen a cbLen b i carry res =
        let t2 = bval cbLen b i in
        let (carry, res_i) = addcarry_u64 carry t1 t2 in
        res.(i) <- res_i;
-       bn_add_ #aLen #bLen caLen a cbLen b (size_incr i) carry res end
+       bn_add_ #aLen #bLen caLen a cbLen b (add #SIZE i (size 1)) carry res end
     else carry
 
 val bn_add:
@@ -118,7 +118,7 @@ let rec bn_sub_u64_ #aLen aaLen a carry i res =
        let res_i = sub_mod #U64 t1 carry in
        res.(i) <- res_i;
        let carry = if (lt_u64 t1 carry) then u64 1 else u64 0 in
-       bn_sub_u64_ #aLen aaLen a carry (size_incr i) res
+       bn_sub_u64_ #aLen aaLen a carry (add #SIZE i (size 1)) res
     end
     
 val bn_sub_u64:

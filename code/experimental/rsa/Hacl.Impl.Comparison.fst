@@ -17,7 +17,7 @@ val bn_is_less_:
     [@"c_inline"]
 let rec bn_is_less_ #aLen #bLen aaLen a bbLen b i =
     if (i >. size 0) then
-        let i = size_decr i in
+        let i = sub #SIZE i (size 1) in
         let t1 = a.(i) in
         let t2 = bval bbLen b i in
         (if not (eq_u64 t1 t2) then

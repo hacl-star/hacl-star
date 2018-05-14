@@ -37,7 +37,7 @@ let rec bn_mult_by_limb_addj #aLen aaLen a l i j resLen carry res =
         let res_ij = res.(ij) in
         let (carry', res_ij) = bn_mul_by_limb_addj_f a.(i) l carry res_ij in
         res.(ij) <- res_ij;
-        bn_mult_by_limb_addj aaLen a l (size_incr i) j resLen carry' res end
+        bn_mult_by_limb_addj aaLen a l (add #SIZE i (size 1)) j resLen carry' res end
     else res.(ij) <- carry
 
 val bn_mult_:
@@ -52,7 +52,7 @@ val bn_mult_:
 let rec bn_mult_ #aLen #bLen aaLen a bbLen b j resLen res =
     if (j <. bbLen) then begin
         bn_mult_by_limb_addj aaLen a b.(j) (size 0) j resLen (u64 0) res;
-        bn_mult_ aaLen a bbLen b (size_incr j) resLen res
+        bn_mult_ aaLen a bbLen b (add #SIZE j (size 1)) resLen res
     end
 
 // res = a * b
@@ -162,7 +162,7 @@ let rec karatsuba_ #aLen pow2_i aaLen a b tmp res =
        let tmp0 = Buffer.sub #uint64 #(v tmpLen) #(4 * v pow2_i0) tmp (mul #SIZE (size 4) pow2_i0) (mul #SIZE (size 4) pow2_i0) in
        karatsuba_ #(v pow2_i0) pow2_i0 pow2_i0 a2 b2 tmp0 c2; // c2 = a2 * b2
 
-       let tmp1Len = size_incr pow2_i in
+       let tmp1Len = add #SIZE pow2_i (size 1) in
        let tmp1 = Buffer.sub #uint64 #(v tmpLen) #(v tmp1Len) tmp (mul #SIZE (size 4) pow2_i0) tmp1Len in
        add_sign #(v pow2_i0) pow2_i0 c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 tmp1Len tmp1; //tmp1 = (c0 + c1) +/- c2
 

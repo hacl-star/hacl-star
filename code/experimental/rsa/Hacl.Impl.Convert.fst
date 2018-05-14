@@ -26,7 +26,7 @@ let rec text_to_nat_ #len clen input resLen res i =
         let inputi = uint64_from_bytes_be (Buffer.sub input (mul #SIZE (size 8) i) (size 8)) in
 	let ind = sub #SIZE (sub #SIZE resLen i) (size 1) in
         res.(ind) <- inputi;
-        text_to_nat_ #len clen input resLen res (size_incr i)
+        text_to_nat_ #len clen input resLen res (add #SIZE i (size 1))
     end
 
 val text_to_nat:
@@ -71,7 +71,7 @@ let rec nat_to_text_ #len clen input resLen res i =
         let ind = sub #SIZE (sub #SIZE clen i) (size 1) in
         let tmp = input.(ind) in
 	uint64_to_bytes_be (Buffer.sub res (mul #SIZE (size 8) i) (size 8)) tmp;
-        nat_to_text_ #len clen input resLen res (size_incr i)
+        nat_to_text_ #len clen input resLen res (add #SIZE i (size 1))
     end
 
 val nat_to_text:

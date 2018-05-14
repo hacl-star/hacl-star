@@ -111,7 +111,7 @@ val eq_b_:
 let rec eq_b_ #len clen b1 b2 i =
     if (i <. clen) then begin
        if (eq_u8 b1.(i) b2.(i))
-       then eq_b_ #len clen b1 b2 (size_incr i)
+       then eq_b_ #len clen b1 b2 (add #SIZE i (size 1))
        else false end 
     else true
 

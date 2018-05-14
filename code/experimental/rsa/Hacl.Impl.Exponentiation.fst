@@ -58,7 +58,7 @@ let rec mod_exp_ #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara st_exp bBits 
   (if (i <. bBits) then begin
     (if (bn_is_bit_set bLen b i) then mul_mod_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara aM accM accM); // acc = (acc * a) % n
     mul_mod_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara aM aM aM; // a = (a * a) % n
-    mod_exp_ #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b (size_incr i)
+    mod_exp_ #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b (add #SIZE i (size 1))
   end); admit()
   
 // res = a ^^ b mod n
@@ -74,8 +74,8 @@ val mod_exp:
   #reset-options "--z3rlimit 150 --max_fuel 0"
   [@"c_inline"]    
 let mod_exp #nLen pow2_i modBits nnLen n a bBits b res =
-  //push_frame();
-  let rrLen = size_incr nnLen in
+  push_frame();
+  let rrLen = nnLen +! size 1 in
   assume (128 * v rrLen < max_size_t);
   let exp_r = mul #SIZE (size 64) rrLen in
   let exp2 = add #SIZE exp_r exp_r in
@@ -108,7 +108,7 @@ let mod_exp #nLen pow2_i modBits nnLen n a bBits b res =
     to_mont #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 r2 a st_kara aM;
     to_mont #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 r2 acc st_kara accM;
     mod_exp_ #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b (size 0);
-    assume (disjoint tmp n);
+    //assume (disjoint tmp n);
     from_mont #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 accM tmp res; admit()
-    )
-    //pop_frame()
+    );
+    pop_frame()

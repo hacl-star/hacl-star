@@ -69,7 +69,7 @@ let pss_encode_ #sLen #msgLen #emLen ssLen salt mmsgLen msg eemLen em =
        
        let last_before_salt = sub #SIZE (sub #SIZE db_size ssLen) (size 1) in
        db.(last_before_salt) <- u8 1;
-       let db' = Buffer.sub #uint8 #(v db_size) #sLen db (size_incr last_before_salt) ssLen in
+       let db' = Buffer.sub #uint8 #(v db_size) #sLen db (last_before_salt +! size 1) ssLen in
        copy ssLen salt db';
     
        mgf_sha256 m1Hash db_size dbMask;
@@ -79,7 +79,7 @@ let pss_encode_ #sLen #msgLen #emLen ssLen salt mmsgLen msg eemLen em =
        copy db_size db em';
        let em' = Buffer.sub #uint8 #emLen #(v hLen) em db_size hLen in
        copy hLen m1Hash em';
-       em.(size_decr eemLen) <- u8 0xbc
+       em.(sub #SIZE eemLen (size 1)) <- u8 0xbc
     )
 		
 val pss_encode:
@@ -96,10 +96,10 @@ val pss_encode:
 let pss_encode #sLen #msgLen #emLen msBits ssLen salt mmsgLen msg eemLen em =
     if (msBits =. size 0)
     then begin
-	let em' = Buffer.sub #uint8 #emLen #(emLen - 1) em (size 1) (size_decr eemLen) in
-	disjoint_sub_lemma1 em msg (size 1) (size_decr eemLen);
-	disjoint_sub_lemma1 em salt (size 1) (size_decr eemLen);
-	pss_encode_ ssLen salt mmsgLen msg (size_decr eemLen) em' end
+	let em' = Buffer.sub #uint8 #emLen #(emLen - 1) em (size 1) (sub #SIZE eemLen (size 1)) in
+	disjoint_sub_lemma1 em msg (size 1) (sub #SIZE eemLen (size 1));
+	disjoint_sub_lemma1 em salt (size 1) (sub #SIZE eemLen (size 1));
+	pss_encode_ ssLen salt mmsgLen msg (sub #SIZE eemLen (size 1)) em' end
     else begin
 	pss_encode_ ssLen salt mmsgLen msg eemLen em;
 	let shift' = sub #SIZE (size 8) msBits in
@@ -141,7 +141,7 @@ let pss_verify_ #sLen #msgLen #emLen ssLen msBits eemLen em mmsgLen msg =
        disjoint_sub_lemma1 st msg (size 0) hLen;
        hash_sha256 mHash mmsgLen msg;
        
-       pad2.(size_decr pad_size) <- u8 0x01;
+       pad2.(sub #SIZE pad_size (size 1)) <- u8 0x01;
        let maskedDB = Buffer.sub #uint8 #emLen #(v db_size) em (size 0) db_size in
        let m1Hash = Buffer.sub #uint8 #emLen #(v hLen) em db_size hLen in
        mgf_sha256 m1Hash db_size dbMask;
@@ -184,13 +184,13 @@ val pss_verify:
 let pss_verify #sLen #msgLen #emLen ssLen msBits eemLen em mmsgLen msg =
     let h0 = FStar.HyperStack.ST.get() in
     let em_0 = em.(size 0) &. (shift_left #U8 (u8 0xff) (size_to_uint32 msBits)) in
-    let em_last = em.(size_decr eemLen) in
+    let em_last = em.(sub #SIZE eemLen (size 1)) in
 
     let res = 
       if not ((eq_u8 em_0 (u8 0)) && (eq_u8 em_last (u8 0xbc)))
       then false
       else begin
-	 let eemLen1 = if msBits =. size 0 then size_decr eemLen else eemLen in
+	 let eemLen1 = if msBits =. size 0 then sub #SIZE eemLen (size 1) else eemLen in
 	 let em1:lbytes (v eemLen1) =
 	     if msBits =. size 0 then begin
 	       let em' = Buffer.sub em (size 1) eemLen1 in
@@ -224,7 +224,7 @@ val rsa_sign:
      
 let rsa_sign #sLen #msgLen #nLen pow2_i modBits eBits dBits pLen qLen skey rBlind ssLen salt mmsgLen msg sgnt =
     let k = blocks modBits (size 8) in
-    let msBits = (size_decr modBits) %. size 8 in
+    let msBits = (sub #SIZE modBits (size 1)) %. size 8 in
 
     //let nLen = bits_to_bn modBits in
     let nLen = get_size_nat k in
@@ -289,7 +289,7 @@ val rsa_verify:
     
 let rsa_verify #sLen #msgLen #nLen pow2_i modBits eBits pkey ssLen sgnt mmsgLen msg =
     let k = blocks modBits (size 8) in
-    let msBits = (size_decr modBits) %. size 8 in
+    let msBits = (sub #SIZE modBits (size 1)) %. size 8 in
     //let nLen = bits_to_bn modBits in
     let nLen = get_size_nat k in
     let eLen = bits_to_bn eBits in

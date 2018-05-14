@@ -198,6 +198,11 @@ val disjoints_lemma4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len0:
            disjoint b2 b3 /\ disjoint b3 b2)))
 //			[SMTPat (disjoints [BufItem b0; BufItem b1; BufItem b2; BufItem b3])]
 
+val modifies_modifies_0: h0:mem -> h1:mem -> Lemma
+			(requires (True))
+			(ensures (modifies [] h0 h1 == modifies0 h0 h1))
+			[SMTPat (modifies [] h0 h1)]
+
 val modifies_modifies_1: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> h0:mem -> h1:mem -> Lemma
 			(requires (True))
 			(ensures (modifies [BufItem b] h0 h1 == modifies1 b h0 h1))

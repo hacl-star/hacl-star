@@ -28,7 +28,7 @@ let rec bn_pow2_mod_n_ #aLen #rLen aaLen a i p rrLen res =
     bn_lshift1 rrLen res res;
     (if not (bn_is_less rrLen res aaLen a) then
       bn_sub rrLen res aaLen a res);
-    bn_pow2_mod_n_ aaLen a (size_incr i) p rrLen res
+    bn_pow2_mod_n_ aaLen a (add #SIZE i (size 1)) p rrLen res
   end
 
 // res = 2 ^^ p % a
@@ -42,14 +42,14 @@ val bn_pow2_mod_n:
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
   [@"c_inline"]
 let bn_pow2_mod_n #aLen aaLen aBits a p res =
-  let rLen = size_incr aaLen in
+  let rLen = add #SIZE aaLen (size 1) in
   alloc #uint64 #unit #(v rLen) rLen (u64 0) [BufItem a] [BufItem res]
   (fun h0 _ h1 -> True)
   (fun tmp -> 
     assume (v aBits / 64 < v rLen);
     bn_set_bit rLen tmp aBits;
     bn_sub rLen tmp aaLen a tmp; // tmp = tmp - a
-    bn_pow2_mod_n_ aaLen a aBits p rLen tmp;
+    bn_pow2_mod_n_ #aLen #(v rLen) aaLen a aBits p rLen tmp;
     let tmp' = Buffer.sub #uint64 #(v rLen) #aLen tmp (size 0) aaLen in
     copy aaLen tmp' res
   )
@@ -65,7 +65,7 @@ let rec mod_inv_u64_ alpha beta ub vb i =
 
     let alpha_if_u_is_odd = alpha &. u_is_odd in
     let vb = add_mod #U64 (shift_right #U64 vb (u32 1)) alpha_if_u_is_odd in
-    mod_inv_u64_ alpha beta ub vb (size_incr i) end 
+    mod_inv_u64_ alpha beta ub vb (add #SIZE i (size 1)) end 
   else vb
 
 val mod_inv_u64: n0:uint64 -> Tot uint64
@@ -90,7 +90,7 @@ let rec bn_mult_by_limb_addj_carry #aLen aaLen a l carry i j resLen res =
     let res_ij = res.(ij) in
     let (carry', res_ij) = bn_mul_by_limb_addj_f a.(i) l carry res_ij in
     res.(ij) <- res_ij;
-    bn_mult_by_limb_addj_carry aaLen a l carry' (size_incr i) j resLen res end
+    bn_mult_by_limb_addj_carry aaLen a l carry' (add #SIZE i (size 1)) j resLen res end
   else begin
     let res_ij = res.(ij) in
     let (c', res_ij) = addcarry_u64 (u64 0) res_ij carry in
@@ -111,9 +111,9 @@ let rec mont_reduction_ #nLen #rLen nnLen rrLen c n nInv_u64 i =
     let ci = c.(i) in
     let qi = mul_mod #U64 nInv_u64 ci in
     let carry = bn_mult_by_limb_addj_carry nnLen n qi (u64 0) (size 0) i (add #SIZE nnLen rrLen) c in
-    let c_i1 = c.(size_incr (add #SIZE nnLen i)) in
-    c.(size_incr (add #SIZE nnLen i)) <- add_mod #U64 c_i1 carry;
-    mont_reduction_ nnLen rrLen c n nInv_u64 (size_incr i)
+    let c_i1 = c.(add #SIZE (add #SIZE nnLen i) (size 1)) in
+    c.(add #SIZE (add #SIZE nnLen i) (size 1)) <- add_mod #U64 c_i1 carry;
+    mont_reduction_ nnLen rrLen c n nInv_u64 (add #SIZE i (size 1))
   end else begin
     let ci = c.(i) in
     let qi = mul_mod #U64 nInv_u64 ci in
