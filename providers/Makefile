@@ -174,6 +174,9 @@ $(OUT_DIR):
 
 ifeq (,$(EVEREST_WINDOWS))
 LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
+ifeq ($(UNAME),Linux)
+LDFLAGS += -ldl -lpthread
+endif
 endif
 
 # Note: see
