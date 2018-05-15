@@ -94,7 +94,9 @@ inline_for_extraction val alloc1: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 ->
   write:lbuffer w wlen ->
   spec:(h:mem -> GTot(r:b -> LSeq.lseq w wlen -> Type)) ->
   impl:(buf:lbuffer a len -> Stack b
-    (requires (fun h -> creates1 #a #len buf h0 h /\ preserves_live h0 h /\ modifies1 buf h0 h /\
+    (requires (fun h -> creates1 #a #len buf h0 h /\ 
+		     preserves_live h0 h /\ 
+		     modifies1 buf h0 h /\
 		     as_lseq buf h == LSeq.create #a len init /\ 
 		     live h0 write))
     (ensures (fun h r h' -> preserves_live h h' /\ modifies2 buf write h h' /\

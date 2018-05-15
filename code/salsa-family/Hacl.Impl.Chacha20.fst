@@ -185,11 +185,13 @@ val chacha20_key_block: b:lbuffer uint8 64 -> st:state -> Stack unit
 			 Spec.chacha20_key_block (as_lseq st h0)))
 [@ "c_inline"]
 let chacha20_key_block b st = 
-  alloc (size 16) (u32 0) [BufItem st] [BufItem b]
-  (fun h0 _ h1 -> as_lseq b h1 == Spec.chacha20_key_block (as_lseq st h0))
+  let h0 = ST.get() in
+  alloc1 #h0 (size 16) (u32 0) b
+  (fun h -> 
+     let st0 = as_lseq st h in
+     (fun _ bseq -> bseq == Spec.chacha20_key_block st0))
   (fun st' -> chacha20_core st' st; 
 	   uints_to_bytes_le #U32 b st')
-
 
 [@ "c_inline"]
 val chacha20_key_block0: b:lbuffer uint8 64 -> 
@@ -201,8 +203,12 @@ val chacha20_key_block0: b:lbuffer uint8 64 ->
 			 Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0)))
 [@ "c_inline"]
 let chacha20_key_block0 b k n = 
-  alloc (size 16) (u32 0) [BufItem k; BufItem n] [BufItem b]
-  (fun h0 _ h1 -> as_lseq b h1 == Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0))
+  let h0 = ST.get() in
+  alloc1 #h0 (size 16) (u32 0) b
+  (fun h ->
+    let key = as_lseq k h in
+    let nonce = as_lseq n h in
+    (fun _ bfin -> bfin == Spec.chacha20_key_block0 key nonce))
   (fun st -> setup st k n;
 	  chacha20_key_block b st)
 	  
@@ -228,18 +234,25 @@ val chacha20_encrypt_block:
 			   (as_lseq block h0)))
 			   
 let chacha20_encrypt_block st0 ctr0 incr block = 
-  alloc (size 16) (u32 0) [BufItem st0] [BufItem block]
-  (fun h0 _ h1 -> 
-    as_lseq block h1 == 
-    Spec.chacha20_encrypt_block (as_lseq st0 h0) (size_v ctr0) (size_v incr) (as_lseq block h0))
+  let h0 = ST.get () in
+  alloc1 #h0 (size 16) (u32 0) block
+  (fun h -> 
+    let st_init = as_lseq st0 h in
+    let block_init = as_lseq block h in
+    (fun _ block_fin ->
+      block_fin == 
+      Spec.chacha20_encrypt_block st_init (size_v ctr0) (size_v incr) block_init))
   (fun st -> copy st (size 16) st0;
 	  chacha20_set_counter st (ctr0 +. incr);
-	  alloc (size 64) (u8 0) [BufItem st] [BufItem block]
-	    (fun h0 _ h1 -> 
-	       let st_v = as_lseq st h0 in
-	       let kb_v = Spec.chacha20_key_block st_v in
-	       as_lseq block h1 == LSeq.map2 (^.) (as_lseq block h0) kb_v)
-	    (fun kb -> chacha20_key_block kb st;
+	  let h1 = ST.get() in
+	  alloc1 #h1 (size 64) (u8 0) block
+	    (fun h -> 
+	       let st_init = as_lseq st h in
+	       let block_init = as_lseq block h in
+	       (fun _ block_fin -> 
+		 let kb_v = Spec.chacha20_key_block st_init in
+		 block_fin == LSeq.map2 (^.) block_init kb_v))
+	    (fun kb -> chacha20_key_block kb st; 
 		    map2 (size 64) (^.) block kb))
 
 [@ "c_inline"]
@@ -265,13 +278,17 @@ val chacha20_encrypt_last:
 			   (as_lseq block h0)))
 			   
 let chacha20_encrypt_last st0 ctr0 incr len block = 
-  alloc (size 64) (u8 0) [BufItem st0] [BufItem block]
-  (fun h0 _ h1 -> 
-    as_lseq block h1 == 
-    Spec.chacha20_encrypt_last (as_lseq st0 h0) (size_v ctr0) (size_v incr) (size_v len) (as_lseq block h0))
-  (fun bl -> copy (sub bl (size 0) len) len block;
-	  chacha20_encrypt_block st0 ctr0 incr bl;
-	  copy block len (sub bl (size 0) len))
+  let h0 = ST.get () in
+  alloc1 #h0 (size 64) (u8 0) block
+  (fun h -> 
+    let st_init = as_lseq st0 h in
+    let block_init = as_lseq block h in
+    (fun _ block_fin -> 
+      block_fin == 
+      Spec.chacha20_encrypt_last st_init (size_v ctr0) (size_v incr) (size_v len) block_init))
+    (fun bl -> copy (sub bl (size 0) len) len block;
+	    chacha20_encrypt_block st0 ctr0 incr bl;
+	    copy block len (sub bl (size 0) len))
 
 
 [@ "c_inline"]
@@ -296,14 +313,15 @@ val chacha20_encrypt_bytes:
 		           modifies1 cipher h0 h1))
 
 let chacha20_encrypt_bytes #len clen cipher plain key nonce ctr = 
-  alloc (size 16) (u32 0) [BufItem plain; BufItem key; BufItem nonce] [BufItem cipher]
-  (fun h0 _ h1 -> as_lseq cipher h1 == 
-	       Spec.chacha20_encrypt_bytes 
-		 (as_lseq key h0) 
-		 (as_lseq nonce h0)
-		 (size_v ctr)
-		 len
-		 (as_lseq plain h0))
+  let h0 = ST.get() in
+  alloc1 #h0 (size 16) (u32 0) cipher
+  (fun h -> 
+     let key0 = as_lseq key h in
+     let nonce0 = as_lseq nonce h in
+     let plain0 = as_lseq plain h in
+     (fun _ cipher_final ->
+       cipher_final == 
+       Spec.chacha20_encrypt_bytes key0 nonce0 (size_v ctr) len plain0))
   (fun st -> copy cipher clen plain;
           setup st key nonce;
 	  let nblocks = clen /. blocksize in
