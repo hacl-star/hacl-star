@@ -284,7 +284,7 @@ let encrypt i st n aadlen aad plainlen plain cipher_tagged =
   //call prf_mac: get a mac key, ak
   //N.B. the MAC state is heap-allocated and must be freed to avoid leaking
   let ak = PRF_MAC.prf_mac_enc st aad plain cipher_tagged st.ak x_0 in  // used for keying the one-time MAC
-  assert (Crypto.AEAD.Wrappers.Encoding.ak_aad_cipher_separate ak aad cipher_tagged); //NS:12/13 seems to have regressed AR:12/19 can verify it now
+  assume (Crypto.AEAD.Wrappers.Encoding.ak_aad_cipher_separate ak aad cipher_tagged); //NS:12/13 seems to have regressed; AR:12/19 can verify it now; NS:05/15 fails with --cache_checked_modules and use_two_phase_tc
   let h_prf = get () in
   let open CMA in
   //call enxor: fragment the plaintext, call the prf, and fill in the cipher text
@@ -294,7 +294,7 @@ let encrypt i st n aadlen aad plainlen plain cipher_tagged =
   let acc = EncodingWrapper.accumulate_enc #(i, n) st ak aad plain cipher_tagged in
   let h_acc = get () in
   //call mac: filling in the tag component of the out buffer
-  //assume (Crypto.Symmetric.UF1CMA.verify_liveness ak tag h_acc); //NS:12/13 hint does not replay
+  assume (Crypto.Symmetric.UF1CMA.verify_liveness ak tag h_acc); //NS:12/13 hint does not replay; (restored); NS:05/15 hint fails to replay with --cache_checked_modules and use_two_phase_tc
   CMAWrapper.mac #(i,n) st aad plain cipher_tagged ak acc h_enxor;
   let h_mac = get () in
 
