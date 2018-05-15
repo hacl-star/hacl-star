@@ -24,10 +24,6 @@ let rec create_ #a len x =
     let t = create_ #a (decr len) x in
     x :: t
 
-let create = create_
-
-let createL #a l = l
-
 val index_: #a:Type -> #len:size_nat{len > 0} -> lseq a len -> n:size_nat{n < len} -> Tot a (decreases (n))
 let rec index_ #a #len l i =
   match i, l with
@@ -43,6 +39,10 @@ let rec upd_ #a #len l i x =
   | n, h::t -> h::upd_ #a #(decr len) t (decr i) x
 
 let upd #a #len s n x = upd_ #a #len s n x
+
+let create = create_
+
+let createL #a l = l
 
 val prefix_: #a:Type -> #len:size_nat -> lseq a len -> n:size_nat{n <= len} -> Tot (lseq a n) (decreases (n))
 let rec prefix_ #a #len l n =

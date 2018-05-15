@@ -37,15 +37,6 @@ val to_seq: #a:Type0 -> #len:size_nat -> s:lseq a len -> o:seq a {length o == le
 
 val to_bytes: #len:size_nat -> b:lbytes len -> o:bytes{length o == len}
 
-///
-/// Allocation functions for sequences
-///
-
-val create: #a:Type -> len:size_nat -> init:a -> lseq a len
-
-val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (List.Tot.length l)
-
-//val copy: #a:Type -> #len:size_nat -> lseq a len -> lseq a len
 
 ///
 /// Operations on sequences
@@ -53,7 +44,19 @@ val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (Lis
 
 val index: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len} -> a
 
-val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a -> o:lseq a len
+val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a -> o:lseq a len{index o n == x /\
+    (forall (i:size_nat). {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)}
+
+///
+/// Allocation functions for sequences
+///
+
+val create: #a:Type -> len:size_nat -> init:a -> s:lseq a len{
+    forall (i:size_nat). {:pattern (index s i)} i < len ==> index s i == init}
+
+val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (List.Tot.length l)
+
+//val copy: #a:Type -> #len:size_nat -> lseq a len -> lseq a len
 
 val sub: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> lseq a n
 

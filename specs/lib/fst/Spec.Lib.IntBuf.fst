@@ -42,6 +42,14 @@ let alloc #a #b #len clen init read writes spec impl =
   pop_frame();
   r
 
+let alloc1 #h0 #a #b #w #len #wlen clen init write spec impl = 
+  push_frame();
+  let buf = create clen init in
+  let r = impl buf in
+  pop_frame();
+  r
+
+
 let map #a #len clen f b =
   let h0 = ST.get() in
   let inv (h1:mem) (j:nat) = True in

@@ -5,6 +5,10 @@ module Spec.Lib.IntTypes
 
 let pow2_values n =
     assert_norm (pow2 0 = 1);
+    assert_norm (pow2 1 = 2);
+    assert_norm (pow2 2 = 4);
+    assert_norm (pow2 3 = 8);
+    assert_norm (pow2 4 = 16);
     assert_norm (pow2 8 = 0x100);
     assert_norm (pow2 16 = 0x10000);
     assert_norm (pow2 32 = 0x100000000);

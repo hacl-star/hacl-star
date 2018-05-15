@@ -50,6 +50,10 @@ let numbytes (n:m_inttype) =
 
 val pow2_values: n:nat ->  Lemma (
     pow2 0 == 1 /\
+    pow2 1 == 2 /\
+    pow2 2 == 4 /\
+    pow2 3 == 8 /\
+    pow2 4 == 16 /\
     pow2 8 == 0x100 /\
     pow2 16 == 0x10000 /\
     pow2 32 == 0x100000000 /\
