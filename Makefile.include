@@ -58,8 +58,7 @@ KREMLIN_ARGS+=$(KOPTS)
 KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
 
 ifneq (,$(EVEREST_WINDOWS))
-KREMLIN_ARGS+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
-  -add-early-include '"FStar_UInt128.h"'
+KREMLIN_ARGS+=-falloca -ftail-calls
 endif
 
 # Compiler options
