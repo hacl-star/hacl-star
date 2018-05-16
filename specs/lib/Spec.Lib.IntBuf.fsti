@@ -94,13 +94,13 @@ inline_for_extraction val alloc1: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 ->
   write:lbuffer w wlen ->
   spec:(h:mem -> GTot(r:b -> LSeq.lseq w wlen -> Type)) ->
   impl:(buf:lbuffer a len -> Stack b
-    (requires (fun h -> creates1 #a #len buf h0 h /\ 
-		     preserves_live h0 h /\ 
+    (requires (fun h -> creates1 #a #len buf h0 h /\
+		     preserves_live h0 h /\
 		     modifies1 buf h0 h /\
-		     as_lseq buf h == LSeq.create #a len init /\ 
+		     as_lseq buf h == LSeq.create #a len init /\
 		     live h0 write))
     (ensures (fun h r h' -> preserves_live h h' /\ modifies2 buf write h h' /\
-			 spec h0 r (as_lseq write h')))) -> 
+			 spec h0 r (as_lseq write h')))) ->
   Stack b
     (requires (fun h -> h == h0 /\ live h write))
     (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
@@ -136,7 +136,7 @@ val copy: #a:Type -> #len:size_nat -> o:lbuffer a len -> clen:size_t{v clen == l
 
 inline_for_extraction
 val uint_from_bytes_le:
-  #t:m_inttype -> 
+  #t:m_inttype ->
   i:lbuffer uint8 (numbytes t) ->
   Stack (uint_t t)
 	(requires (fun h0 -> live h0 i))
@@ -145,7 +145,7 @@ val uint_from_bytes_le:
 
 inline_for_extraction
 val uint_from_bytes_be:
-  #t:m_inttype -> 
+  #t:m_inttype ->
   i:lbuffer uint8 (numbytes t) ->
   Stack (uint_t t)
 	(requires (fun h0 -> live h0 i))
@@ -154,7 +154,7 @@ val uint_from_bytes_be:
 
 inline_for_extraction
 val uint_to_bytes_le:
-  #t:m_inttype -> 
+  #t:m_inttype ->
   o:lbuffer uint8 (numbytes t) ->
   i:uint_t t ->
   Stack unit
@@ -164,7 +164,7 @@ val uint_to_bytes_le:
 			      as_lseq o h1 == LSeq.uint_to_bytes_le #t i))
 inline_for_extraction
 val uint_to_bytes_be:
-  #t:m_inttype -> 
+  #t:m_inttype ->
   o:lbuffer uint8 (numbytes t) ->
   i:uint_t t ->
   Stack unit
@@ -357,10 +357,10 @@ val loop2:
 #reset-options "--z3rlimit 1000 --max_fuel 0"
 open FStar.Mul
 
-inline_for_extraction 
+inline_for_extraction
 val map_blocks: #h0:mem ->
-		#a:Type0 -> 
-		#bs:size_nat{bs > 0} -> 
+		#a:Type0 ->
+		#bs:size_nat{bs > 0} ->
 		#nb:size_nat{nb * bs <= maxint SIZE} ->
 		blocksize:size_t{size_v blocksize == bs} ->
 		nblocks:size_t{size_v nblocks == nb} ->
@@ -368,47 +368,47 @@ val map_blocks: #h0:mem ->
 		f_spec:(mem -> GTot (i:size_nat{i + 1 <= nb} -> LSeq.lseq a bs -> LSeq.lseq a bs)) ->
 		f:(i:size_t{size_v i + 1 <= nb} -> Stack unit
 				  (requires (fun h -> live h buf /\
-						   preserves_live h0 h /\ 
+						   preserves_live h0 h /\
 				                   modifies1 buf h0 h))
-				  (ensures (fun h _ h' -> 
+				  (ensures (fun h _ h' ->
 						   preserves_live h h' /\
 						  (let bufi = sub buf (i *. blocksize) blocksize in
 						   modifies1 bufi h h' /\
-						   as_lseq bufi h' == 
+						   as_lseq bufi h' ==
 						   f_spec h (size_v i) (as_lseq bufi h))))) ->
-		Stack unit 
+		Stack unit
 		                  (requires (fun h -> h == h0 /\ live h buf))
 				  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 buf h0 h1 /\
 							as_lseq buf h1 == LSeq.map_blocks #a bs nb (f_spec h0) (as_lseq buf h0)))
 
 (*
 val map_blocks: #h0:mem ->
-		#a:Type0 -> 
-		#bs:size_nat{bs > 0} -> 
+		#a:Type0 ->
+		#bs:size_nat{bs > 0} ->
 		#nb:size_nat{nb * bs <= maxint SIZE} ->
 		blocksize:size_t{size_v blocksize == bs} ->
 		nblocks:size_t{size_v nblocks == nb} ->
 		f_spec:(mem -> GTot (i:size_nat{i + 1 <= nb} -> LSeq.lseq a bs -> LSeq.lseq a bs)) ->
 		f:(i:size_t{size_v i + 1 <= nb} -> bufi:lbuffer a bs -> Stack unit
 				  (requires (fun h -> live h bufi /\
-						   preserves_live h0 h /\ 
+						   preserves_live h0 h /\
 				                   modifies1 bufi h0 h))
-				  (ensures (fun h _ h' -> 
+				  (ensures (fun h _ h' ->
 						   preserves_live h h' /\
 						   modifies1 bufi h h' /\
-						   as_lseq bufi h' == 
+						   as_lseq bufi h' ==
 						   f_spec h0 (size_v i) (as_lseq bufi h0)))) ->
 		buf:lbuffer a (nb * bs) ->
-		Stack unit 
+		Stack unit
 		                  (requires (fun h -> h == h0 /\ live h buf))
 				  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 buf h0 h1 /\
 							as_lseq buf h1 == LSeq.map_blocks #a bs nb (f_spec h0) (as_lseq buf h0)))
 *)
-inline_for_extraction 
+inline_for_extraction
 val reduce_blocks: #h0:mem ->
-		#a:Type0 -> 
+		#a:Type0 ->
 		#r:Type0 ->
-		#bs:size_nat{bs > 0} -> 
+		#bs:size_nat{bs > 0} ->
 		#nb:size_nat{nb * bs <= maxint SIZE} ->
 		#rlen:size_nat ->
 		blocksize:size_t{size_v blocksize == bs} ->
@@ -417,15 +417,15 @@ val reduce_blocks: #h0:mem ->
 		f_spec:(mem -> i:size_nat{i + 1 <= nb} -> LSeq.lseq a bs -> LSeq.lseq r rlen -> LSeq.lseq r rlen) ->
 		f:(i:size_t{size_v i + 1 <= nb} -> bufi:lbuffer a bs -> Stack unit
 				  (requires (fun h -> live h bufi /\ live h rbuf /\ disjoint bufi rbuf /\ disjoint rbuf bufi /\
-						   preserves_live h0 h /\ 
+						   preserves_live h0 h /\
 				                   modifies1 rbuf h0 h))
-				  (ensures (fun h _ h' -> 
+				  (ensures (fun h _ h' ->
 						   preserves_live h h' /\
 						   modifies1 rbuf h h' /\
-						   as_lseq rbuf h' == 
+						   as_lseq rbuf h' ==
 							  f_spec h0 (size_v i) (as_lseq bufi h0) (as_lseq rbuf h)))) ->
 		buf:lbuffer a (nb * bs) ->
-		Stack unit 
+		Stack unit
 		                  (requires (fun h -> h == h0 /\ live h buf /\ live h rbuf))
 				  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 rbuf h0 h1 /\
 							as_lseq rbuf h1 == LSeq.reduce_blocks #a #(LSeq.lseq r rlen) bs nb (f_spec h0) (as_lseq buf h0) (as_lseq rbuf h0)))
