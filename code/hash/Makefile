@@ -27,7 +27,7 @@ all-hints: hints
 
 KREMLIN_ARGS+=-verbose \
 	-no-prefix C.Loops \
-	-drop Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+	-drop Prims,FStar,C.Loops.Spec.Loops,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
 	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
 	$(KREMLIN_TESTLIB) -add-include '"kremstr.h"' -ccopt -march=native
@@ -94,7 +94,10 @@ test-native-sha2_512.exe: sha2-c/Hacl_SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o $(B
 
 BASE_OBJ = ../../specs/lib/c/Spec_Lib_Print.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
 
-blake2s-c/out.krml: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
+HACL_LIBS = ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst
+
+
+blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--expose_interfaces" -tmpdir blake2s-c \
 	-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst \
 	-skip-translation $^
