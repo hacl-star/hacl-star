@@ -44,8 +44,10 @@ val to_bytes: #len:size_nat -> b:lbytes len -> o:bytes{length o == len}
 
 val index: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len} -> a
 
-val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a -> o:lseq a len{index o n == x /\
-    (forall (i:size_nat). {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)}
+val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a -> Pure (lseq a len)
+    (requires True)
+    (ensures (fun o -> index o n == x /\
+      (forall (i:size_nat). {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)))
 
 ///
 /// Allocation functions for sequences

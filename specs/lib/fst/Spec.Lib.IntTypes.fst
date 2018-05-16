@@ -74,33 +74,44 @@ let nat_to_uint #t x : uint_t t =
   | SIZE -> size_ x
   | NATm m -> modulo_ x m
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 500 --max_fuel 0"
 let cast #t t' u  =
   match t, t' with
   | U8, U8 -> u
   | U8, U16 -> FStar.Int.Cast.uint8_to_uint16 u
   | U8, U32 -> FStar.Int.Cast.uint8_to_uint32 u
+  | U8, SIZE -> FStar.Int.Cast.uint8_to_uint32 u
   | U8, U64 -> FStar.Int.Cast.uint8_to_uint64 u
   | U8, U128 -> FStar.UInt128.uint64_to_uint128 (FStar.Int.Cast.uint8_to_uint64 u)
   | U16, U8 -> FStar.Int.Cast.uint16_to_uint8 u
   | U16, U16 -> u
   | U16, U32 -> FStar.Int.Cast.uint16_to_uint32 u
+  | U16, SIZE -> FStar.Int.Cast.uint16_to_uint32 u
   | U16, U64 -> FStar.Int.Cast.uint16_to_uint64 u
   | U16, U128 -> FStar.UInt128.uint64_to_uint128 (FStar.Int.Cast.uint16_to_uint64 u)
   | U32, U8 -> FStar.Int.Cast.uint32_to_uint8 u
   | U32, U16 -> FStar.Int.Cast.uint32_to_uint16 u
   | U32, U32 -> u
+  | U32, SIZE -> u
   | U32, U64 -> FStar.Int.Cast.uint32_to_uint64 u
   | U32, U128 -> FStar.UInt128.uint64_to_uint128 (FStar.Int.Cast.uint32_to_uint64 u)
+  | SIZE, U8 -> FStar.Int.Cast.uint32_to_uint8 u
+  | SIZE, U16 -> FStar.Int.Cast.uint32_to_uint16 u
+  | SIZE, U32 -> u
+  | SIZE, SIZE -> u
+  | SIZE, U64 -> FStar.Int.Cast.uint32_to_uint64 u
+  | SIZE, U128 -> FStar.UInt128.uint64_to_uint128 (FStar.Int.Cast.uint32_to_uint64 u)
   | U64, U8 -> FStar.Int.Cast.uint64_to_uint8 u
   | U64, U16 -> FStar.Int.Cast.uint64_to_uint16 u
   | U64, U32 -> FStar.Int.Cast.uint64_to_uint32 u
+  | U64, SIZE -> FStar.Int.Cast.uint64_to_uint32 u
   | U64, U64 -> u
   | U64, U128 -> FStar.UInt128.uint64_to_uint128 u
-  | U128, U64 -> FStar.UInt128.uint128_to_uint64 u
   | U128, U8 -> FStar.Int.Cast.uint64_to_uint8 (FStar.UInt128.uint128_to_uint64 u)
   | U128, U16 -> FStar.Int.Cast.uint64_to_uint16 (FStar.UInt128.uint128_to_uint64 u)
   | U128, U32 -> FStar.Int.Cast.uint64_to_uint32 (FStar.UInt128.uint128_to_uint64 u)
+  | U128, SIZE -> FStar.Int.Cast.uint64_to_uint32 (FStar.UInt128.uint128_to_uint64 u)
+  | U128, U64 -> FStar.UInt128.uint128_to_uint64 u
   | U128, U128 -> u
 
 #reset-options "--z3rlimit 100"
