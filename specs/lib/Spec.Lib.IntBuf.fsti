@@ -227,6 +227,25 @@ val iter: #a:Type -> #len:size_nat -> n:size_t ->
 	 (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1 /\
 				              as_lseq #a #len input h1 ==  LSeq.repeat (v n) spec (as_lseq #a #len input h0)))
 
+inline_for_extraction
+val iter_range_simple: #a:Type -> #len:size_nat -> start:size_t -> fin:size_t{v start <= v fin} ->
+  impl:(i:size_t{v start <= v i /\ v i < v fin}  -> x:lbuffer a (len) -> Stack unit
+    (requires (fun h0 -> live h0 x))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 x h0 h1))) ->
+  input:lbuffer a (len) ->
+  Stack unit
+    (requires (fun h0 -> live h0 input))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1))
+
+inline_for_extraction
+val iteri_simple: #a:Type -> #len:size_nat -> n:size_t ->
+  impl:(i:size_t{v i < v n}  -> x:lbuffer a (len) -> Stack unit
+  (requires (fun h0 -> live h0 x))
+  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 x h0 h1))) ->
+  input:lbuffer a (len) ->
+  Stack unit
+    (requires (fun h0 -> live h0 input))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1))
 
 let loop_inv (h0:mem) (h1:mem) (#a:Type) (len:size_nat) (n:size_nat)  (buf:lbuffer a len)
   (spec:(h:mem -> GTot (i:size_nat{i < n} -> LSeq.lseq a len -> Tot (LSeq.lseq a len)))) (i:size_nat{i <= n}) : Type =

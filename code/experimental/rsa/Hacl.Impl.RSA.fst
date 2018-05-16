@@ -72,7 +72,8 @@ let pss_encode_ #sLen #msgLen #emLen ssLen salt mmsgLen msg eemLen em =
        let db' = Buffer.sub #uint8 #(v db_size) #sLen db (last_before_salt +! size 1) ssLen in
        copy ssLen salt db';
     
-       mgf_sha256 m1Hash db_size dbMask;
+       //mgf_sha256 m1Hash db_size dbMask;
+       mgf_sha256 #(v hLen) #(v db_size) hLen m1Hash db_size dbMask;
        xor_bytes db_size db dbMask;
        
        let em' = Buffer.sub #uint8 #emLen #(v db_size) em (size 0) db_size in
@@ -144,7 +145,8 @@ let pss_verify_ #sLen #msgLen #emLen ssLen msBits eemLen em mmsgLen msg =
        pad2.(sub #SIZE pad_size (size 1)) <- u8 0x01;
        let maskedDB = Buffer.sub #uint8 #emLen #(v db_size) em (size 0) db_size in
        let m1Hash = Buffer.sub #uint8 #emLen #(v hLen) em db_size hLen in
-       mgf_sha256 m1Hash db_size dbMask;
+       //mgf_sha256 m1Hash db_size dbMask;
+       mgf_sha256 #(v hLen) #(v db_size) hLen m1Hash db_size dbMask;
        xor_bytes db_size dbMask maskedDB;
     
        (if (msBits >. size 0) then begin

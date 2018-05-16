@@ -144,6 +144,17 @@ let iter #a #len n spec impl input =
       impl input in
   Spec.Lib.Loops.for (size 0) n inv f'
 
+let iter_range_simple #a #len start fin impl input =
+  let h0 = ST.get() in
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{v start <= v j /\ v j <= v fin}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      impl j input in
+  Spec.Lib.Loops.for start fin inv f'
+
+let iteri_simple #a #len n impl input = iter_range_simple #a #len (size 0) n impl input
+
 inline_for_extraction let loop #h0 #a #len n buf spec impl =
   let inv (h1:mem) (j:nat) = True in
   let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit

@@ -1,4 +1,4 @@
-include ../../../Makefile.include 
+include ../../../Makefile.include
 
 RSA_FILES= \
 	Hacl.Impl.Lib.fst \
@@ -15,13 +15,15 @@ RSA_FILES= \
 
 verify: $(addsuffix -lax, $(RSA_FILES))
 
-KREMLIN_ARGS+= \
-        -drop Prims,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Endianness,Hacl.Cast,Hacl.Spec.*,Spec.*,Seq.* \
+KREMLIN_ARGS+=-verbose \
+	-no-prefix C.Loops \
+	-drop Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
 	-I ../../../specs -I ../../../specs/lib -I ../../../specs/lib/fst -I ../../../specs/lib/c \
-        $(KREMLIN_TESTLIB)
+	$(KREMLIN_TESTLIB) -add-include '"kremstr.h"' -ccopt -march=native
 
 rsa-c/out.krml: ../../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../../specs/lib/c/Spec.Lib.Loops.fst ../../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../../specs/lib/c/Spec.Lib.Endian.fst ../../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst $(RSA_FILES) Hacl.Test.RSA.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir rsa-c -skip-translation $^
+	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--expose_interfaces" -tmpdir rsa-c -skip-translation $^
 
 rsa-c/Hacl_RSAPSS.c: rsa-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir rsa-c -no-prefix 'Hacl.Test.RSA' -skip-compilation \
@@ -38,7 +40,7 @@ INCLUDE_C=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HO
 
 CC := $(CC) $(INCLUDE_C)
 
-BASE_OBJ = $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(HACL_HOME)/code/experimental/rsa/sha/Hacl_Hash_Lib_LoadStore.o $(HACL_HOME)/code/experimental/rsa/sha/Hacl_Hash_Lib_Create.o $(HACL_HOME)/code/experimental/rsa/sha/Hacl_Hash_SHA2_256.o $(HACL_HOME)/code/experimental/rsa/sha/SHA2_256.o
+BASE_OBJ = $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o $(HACL_HOME)/code/experimental/rsa/sha/Hacl_Hash_Lib_LoadStore.o $(HACL_HOME)/code/experimental/rsa/sha/Hacl_Hash_Lib_Create.o $(HACL_HOME)/code/experimental/rsa/sha/Hacl_Hash_SHA2_256.o $(HACL_HOME)/code/experimental/rsa/sha/SHA2_256.o
 
 EXTRACTED= \
 	Hacl_RSAPSS \
@@ -49,4 +51,3 @@ EXTRACTED= \
 
 test-rsa.exe: $(addprefix rsa-c/,$(addsuffix .o, $(EXTRACTED))) $(BASE_OBJ)
 	$(CC) -o $@ $^
-	./test-rsa.exe

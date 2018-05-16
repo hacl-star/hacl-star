@@ -398,5 +398,5 @@ val main: unit -> Stack FStar.Int32.t
     (ensures  (fun h0 r h1 -> True))
 let main () =
     let test = test1() && test2() && test3() && test4() in
-    if test then C.print_string (C.string_of_literal "SUCCESS") else C.print_string (C.string_of_literal "Test failed");
-    C.exit_success
+    if test then C.String.print (C.String.of_literal "SUCCESS") else C.String.print (C.String.of_literal "Test failed");
+    1l
