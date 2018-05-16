@@ -1,7 +1,7 @@
-FSTAR_HOME	?= ../FStar
-KREMLIN_HOME	?= ../kremlin
+FSTAR_HOME	?= ../../FStar
+KREMLIN_HOME	?= ../../kremlin
 HACL_HOME	?= ..
-OPENSSL_HOME	?= ../../openssl
+OPENSSL_HOME	?= ../../MLCrypto/openssl
 
 CACHE_DIR	= .cache
 OUTPUT_DIR	= .output
@@ -103,7 +103,7 @@ VALE_DIR 	= $(HACL_HOME)/secure_api/vale/asm
 VALE_SOURCES	= $(addprefix $(VALE_DIR)/,sha256_main_i.c \
   vale_aes_glue.c Vale_Hash_SHA2_256.c)
 VALE_ASM 	= $(addprefix $(VALE_DIR)/,\
-  sha256-$(MARCH)$(VARIANT).S aes-$(MARCH)$(VARIANT).S)
+  sha256-$(MARCH)$(VARIANT).S aes-$(MARCH)$(VARIANT).S aesgcm-$(MARCH)$(VARIANT).S)
 
 # TODO: understand why these two targets are broken/possibly switch to a HACL*
 # branch where their compilation is restored.
