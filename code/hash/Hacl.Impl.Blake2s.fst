@@ -229,7 +229,7 @@ val blake2_round : wv:working_vector -> m:message_block -> i:size_t -> const_sig
                          /\ modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_round h0.[m] (v i) h0.[wv]))
 
-[@ (CConst "const_sigma")]
+// [@ (CConst "const_sigma")]
 let blake2_round wv m i const_sigma =
   blake2_round1 wv m i const_sigma;
   blake2_round2 wv m i const_sigma
@@ -334,7 +334,7 @@ val blake2_compress :
                          /\ modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress h0.[s] h0.[m] offset f))
 
-[@ (CConst "const_iv") (CConst "const_sigma")]
+// [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2_compress s m offset flag const_iv const_sigma =
   (**) let hinit = ST.get () in
   salloc11 #hinit #_ #_ #_ #16 #_ (size 16) (u32 0) [BufItem m; BufItem const_iv; BufItem const_sigma] s
@@ -513,7 +513,7 @@ val blake2s_internal:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 //                         /\ h1.[res] == Spec.Blake2s.blake2s_internal (v dd) h0.[d] (v ll) (v kk) (v nn)))
 
-[@ (CConst "const_iv") (CConst "const_sigma")]
+// [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2s_internal dd d ll kk nn res const_iv const_sigma =
   let h0 = ST.get () in
   salloc21 #h0 #unit #uint32 #uint8 #uint8 #32 #8 #(v nn) (size 32) (size 8) (u32 0) (u8 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res
