@@ -36,7 +36,7 @@ $(DIST_DIR)/uint128/FStar_UInt128.h:
 	  -add-early-include '"kremlin/fstar_ints.h"' \
 	  -add-early-include '<stdbool.h>' \
 	  -tmpdir $(DIST_DIR)/uint128 -skip-compilation \
-	  -bundle FStar.UInt128=FStar.*,Prims # -fnostruct-passing
+	  -bundle FStar.UInt128=* # -fnostruct-passing
 	touch $(subst .c,.h,$(@))
 
 KOPTS+=-add-early-include '"FStar_UInt128.h"'
