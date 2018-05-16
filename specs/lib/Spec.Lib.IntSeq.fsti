@@ -61,7 +61,7 @@ val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (Lis
 val sub: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> lseq a n
 
 let slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat)
-	  (fin:size_nat{start <= fin /\ fin <= len}) = 
+	  (fin:size_nat{start <= fin /\ fin <= len}) =
 	  sub #a #len i start (fin - start)
 
 val update_sub: #a:Type -> #len:size_nat -> i:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}

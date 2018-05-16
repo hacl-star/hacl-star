@@ -66,19 +66,19 @@ val lemma_repeati: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a)
 let lemma_repeati #a n f init i = admit()
 
 
-val lemma_repeati_zero: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> Lemma
-  (requires True)
-  (ensures  (init == repeati #a 0 f init))
-  [SMTPat (repeati #a 0 f init)]
+(* val lemma_repeati_zero: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> Lemma *)
+(*   (requires True) *)
+(*   (ensures  (init == repeati #a 0 f init)) *)
+(*   [SMTPat (repeati #a 0 f init)] *)
 
-let lemma_repeati_zero #a n f init = admit()
+(* let lemma_repeati_zero #a n f init = admit() *)
 
 
-val lemma_size_to_uint32_equal_u32_of_v_of_size_t: x:size_t -> Lemma
-  (requires True)
-  (ensures (size_to_uint32 x == u32 (v x)))
-  [SMTPat (u32 (v x))]
-let lemma_size_to_uint32_equal_u32_of_v_of_size_t x = admit()
+(* val lemma_size_to_uint32_equal_u32_of_v_of_size_t: x:size_t -> Lemma *)
+(*   (requires True) *)
+(*   (ensures (size_to_uint32 x == u32 (v x))) *)
+(*   [SMTPat (u32 (v x))] *)
+(* let lemma_size_to_uint32_equal_u32_of_v_of_size_t x = admit() *)
 
 
 val lemma_value_mixed_size_addition: x:size_t -> y:size_nat -> Lemma
@@ -98,7 +98,7 @@ val update_sub: #a:Type0 -> #len:size_nat -> #xlen:size_nat -> i:lbuffer a len -
 [@ Substitute]
 let update_sub #a #len #olen i start n x =
   let i' = sub i start n in
-  copy n x i'
+  copy i' n x
 
 
 ///
@@ -382,7 +382,7 @@ let blake2s_internal2_inner s dd d i const_iv const_sigma =
   (fun h0 _ sv -> sv == Spec.blake2s_internal2_inner (v dd) h0.[d] (v i) h0.[s])
   (fun to_compress ->
     let sub_d = sub d (i *. (size Spec.bytes_in_block)) (size Spec.bytes_in_block) in
-    uint32s_from_bytes_le #16 (size 16) to_compress sub_d;
+    uint32s_from_bytes_le #16 to_compress sub_d;
     let offset32 = size_to_uint32 ((i +. (size 1)) *. (size Spec.block_bytes)) in
     let offset = to_u64 #U32 offset32 in
     (**) lemma_cast_to_u64 offset32;
@@ -483,7 +483,7 @@ val blake2s_internal3: s:lbuffer uint32 8 ->
 let blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma =
   let offset:size_t = (dd -. (size 1)) *. (size 64) in
   let sub_d = sub d offset (size Spec.bytes_in_block) in
-  uint32s_from_bytes_le (size 16) to_compress sub_d;
+  uint32s_from_bytes_le #16 to_compress sub_d;
   let ll64 = to_u64 #U32 (size_to_uint32 ll) in
   let ll_plus_block_bytes64 = to_u64 #U32 (size_to_uint32 (ll +. (size Spec.block_bytes))) in
   (**) lemma_value_mixed_size_addition ll Spec.block_bytes;
@@ -521,7 +521,7 @@ let blake2s_internal dd d ll kk nn res const_iv const_sigma =
   (fun st_u32 tmp ->
     let s = sub st_u32 (size 16) (size 8) in
     let to_compress = sub st_u32 (size 0) (size 16) in
-    copy (size 8) const_iv s;
+    copy s (size 8) const_iv;
     blake2s_internal1 s kk nn;
     blake2s_internal2 s dd d to_compress const_iv const_sigma;
     blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma;
@@ -533,11 +533,11 @@ let blake2s_internal dd d ll kk nn res const_iv const_sigma =
     assert(32 == 8 `op_Multiply` 4);
     assert(disjoint tmp s);
     assert(disjoint s tmp);
-    uint32s_to_bytes_le #8 (size 8) tmp s; admit();
+    uint32s_to_bytes_le #8 tmp s; admit();
     let h0' = ST.get () in
     assert(modifies2 st_u32 tmp h0 h0'); admit();
     let tmp' = sub tmp (size 0) nn in
-    copy nn tmp' res;
+    copy res nn tmp';
     let h1 = ST.get () in
     assert(modifies3 res st_u32 tmp h0 h1); admit()
   ); admit()
@@ -571,19 +571,19 @@ let blake2s ll d kk k nn res =
       let data = sub #uint8 #(v len_st_u8) #(v data_length) st_u8 ((size 32) +. (padded_data_length +. (size Spec.bytes_in_block))) data_length in
 
       let padded_data' = sub padded_data (size 0) ll in
-      copy ll d padded_data';
+      copy padded_data' ll d;
 
       if (kk =. size 0) then
 	     blake2s_internal data_blocks padded_data ll kk nn res const_iv const_sigma
       else begin
 	     let padded_key' = sub padded_key (size 0) kk in
-	     copy kk k padded_key';
+	     copy padded_key' kk k;
 
 	     let data' = sub data (size 0) (size Spec.bytes_in_block) in
-	     copy (size Spec.bytes_in_block) padded_key data';
+	     copy data' (size Spec.bytes_in_block) padded_key;
 
 	     let data' = sub data (size Spec.bytes_in_block) padded_data_length in
-        copy padded_data_length padded_data data';
+        copy data' padded_data_length padded_data;
 
 	     blake2s_internal (data_blocks +. (size 1)) data' ll kk nn res const_iv const_sigma
       end
