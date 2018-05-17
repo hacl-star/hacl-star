@@ -84,6 +84,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  -add-include '"kremlib.h"' -add-include '"kremlin/c_string.h"' \
 	  -bundle 'FStar.*,Prims,C.Loops,Spec.*,Hacl.Spec.*,Seq.*' \
+	  -bundle 'LowStar.*' \
 	  -tmpdir generated $^ -warn-error +9 \
 	  && \
 	touch $@
@@ -174,6 +175,9 @@ $(OUT_DIR):
 
 ifeq (,$(EVEREST_WINDOWS))
 LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
+ifeq ($(UNAME),Linux)
+LDFLAGS += -ldl -lpthread
+endif
 endif
 
 # Note: see
