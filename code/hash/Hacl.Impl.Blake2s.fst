@@ -525,22 +525,10 @@ let blake2s_internal dd d ll kk nn res const_iv const_sigma =
     blake2s_internal1 s kk nn;
     blake2s_internal2 s dd d to_compress const_iv const_sigma;
     blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma;
-    let h = ST.get () in
-    assert(live h tmp);
-    assert(live h s);
-    assert(8 `op_Multiply` 4 <= max_size_t);
-    assert(size_v (size 8) == 8);
-    assert(32 == 8 `op_Multiply` 4);
-    assert(disjoint tmp s);
-    assert(disjoint s tmp);
-    uint32s_to_bytes_le #8 tmp s; admit();
-    let h0' = ST.get () in
-    assert(modifies2 st_u32 tmp h0 h0'); admit();
+    uints_to_bytes_le #U32 tmp s;
     let tmp' = sub tmp (size 0) nn in
-    copy res nn tmp';
-    let h1 = ST.get () in
-    assert(modifies3 res st_u32 tmp h0 h1); admit()
-  ); admit()
+    copy res nn tmp'
+  )
 
 
 val blake2s :
