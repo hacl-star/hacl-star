@@ -153,7 +153,7 @@ let salloc11 #h0 #a #b #c #len #wlen clen init read write spec impl =
   pop_frame();
   r
 
-let salloc21 #h0 #a0 #a1 #b #w #len0 #len1 #wlen clen0 clen1 init0 init1 reads write spec impl =
+let salloc21 #h0 #b #a0 #a1 #w #len0 #len1 #wlen clen0 clen1 init0 init1 reads write spec impl =
   push_frame();
   let buf0 = create clen0 init0 in
   let buf1 = create clen1 init1 in
