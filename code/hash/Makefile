@@ -103,25 +103,25 @@ BASE_OBJ = ../../specs/lib/c/Spec_Lib_Print.o $(KREMLIN_HOME)/kremlib/testlib.o 
 HACL_LIBS = ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst
 
 
-c-blake2s/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fsopt "--expose_interfaces" -tmpdir c-blake2s \
+blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fsopt "--expose_interfaces" -tmpdir blake2s-c \
 	-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst -I $(KREMLIN_HOME)/include \
 	-skip-translation $^
 
 
 # I don't want to generate Hacl_Blake2s.c with -add-include '"kremlin/c_string.h"' !!!
-c-blake2s/Hacl_Blake2s.c: c-blake2s/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fparentheses -tmpdir c-blake2s -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
+blake2s-c/Hacl_Blake2s.c: blake2s-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fparentheses -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
 	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	$^ -o $@
 
-c-blake2s/Hacl_Test_Blake2s.c: c-blake2s/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -add-include '"kremlin/c_string.h"' -tmpdir c-blake2s -skip-compilation -no-prefix Hacl.Test.Blake2s \
+blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -add-include '"kremlin/c_string.h"' -tmpdir blake2s-c -skip-compilation -no-prefix Hacl.Test.Blake2s \
 	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	$^ -o $@
 
 
-test-blake2s.exe: c-blake2s/Hacl_Blake2s.c c-blake2s/Hacl_Test_Blake2s.c $(BASE_OBJ)
+test-blake2s.exe: blake2s-c/Hacl_Blake2s.c blake2s-c/Hacl_Test_Blake2s.c $(BASE_OBJ)
 	$(CC) $(CFLAGS) -I $(KREMLIN_HOME)/include -o $@ $^
 
 #
@@ -130,4 +130,4 @@ test-blake2s.exe: c-blake2s/Hacl_Blake2s.c c-blake2s/Hacl_Test_Blake2s.c $(BASE_
 
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
-	rm -rf sha2-c sha2-*-c c-blake2s
+	rm -rf sha2-c sha2-*-c blake2s-c

@@ -41,9 +41,7 @@ let update1 (len:size_nat{len <= blocksize}) (b:lbytes len) (st:state) : state =
   set_acc st acc
 
 let update_blocks (n:size_nat{n * blocksize <= max_size_t}) (text:lbytes (n * blocksize)) (st:state) : state =
-  repeati n (fun i st ->
-    let b = slice text (blocksize * i) (blocksize * (i+1)) in
-    update1 16 b st) st
+  reduce_blocks blocksize n (fun i -> update1 16) text st
 
 let poly (len:size_nat) (text:lbytes len) (st:state) : state =
   let n = len / blocksize in
