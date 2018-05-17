@@ -73,7 +73,7 @@ inline_for_extraction val createL: #a:Type0 -> init:list a{List.Tot.length init 
 				            /\ modifies1 r h0 h1
 					         /\ as_lseq r h1 == LSeq.createL #a init))
 
-
+// FIXME : UNSOUND EXPERIMENT
 inline_for_extraction val alloc: #a:Type0 -> #b:Type0 -> #len:size_nat -> clen:size_t{v clen == len} -> init:a ->
   reads:list bufitem ->
   writes:list bufitem ->
@@ -106,6 +106,37 @@ inline_for_extraction val alloc1: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 ->
     (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
 		          modifies1 write h0 h1 /\
 		          spec h0 r (as_lseq write h1)))
+
+(** This allocation function creates one buffer and writes two buffers.
+    It reasons about the output of the first written buffer but not about
+    the second one, for which functionnal correctness is ignored. *)
+inline_for_extraction val alloc_modifies2:
+    #h0:mem
+  -> #a:Type0
+  -> #b:Type0
+  -> #w0:Type0
+  -> #w1:Type0
+  -> #len:size_nat
+  -> #wlen0:size_nat
+  -> #wlen1:size_nat
+  -> clen:size_t{v clen == len}
+  -> init:a
+  -> write0:lbuffer w0 wlen0
+  -> write1:lbuffer w1 wlen1
+  -> spec:(h:mem -> GTot(r:b -> LSeq.lseq w0 wlen0 -> Type))
+  -> impl:(buf:lbuffer a len -> Stack b
+    (requires (fun h -> creates1 #a #len buf h0 h
+		             /\ live h0 write0 /\ live h0 write1
+                   /\ preserves_live h0 h
+		             /\ modifies1 buf h0 h
+		             /\ as_lseq buf h == LSeq.create #a len init))
+    (ensures (fun h r h' -> preserves_live h h' /\ modifies3 buf write0 write1 h h'
+                       /\ spec h0 r (as_lseq write0 h')))) ->
+  Stack b
+    (requires (fun h -> h == h0 /\ live h write0 /\ live h write1))
+    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
+		                    modifies2 write0 write1 h0 h1 /\
+		                    spec h0 r (as_lseq write0 h1)))
 
 
 (* Various Allocation Patterns *)
@@ -279,6 +310,7 @@ val iteri: #a:Type -> #len:size_nat -> n:size_t ->
 	 (requires (fun h0 -> live h0 input))
 	 (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1 /\
 				              as_lseq #a #len input h1 ==  LSeq.repeati (v n) spec (as_lseq #a #len input h0)))
+
 
 inline_for_extraction
 val iter: #a:Type -> #len:size_nat -> n:size_t ->

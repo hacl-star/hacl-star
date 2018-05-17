@@ -61,7 +61,6 @@ let lemma_modifies1_is_modifies2 #a0 #a1 #len0 #len1 b0 b1 h0 h1 = admit()
 val lemma_repeati: #a:Type -> n:size_nat -> f:(i:size_nat{i < n}  -> a -> Tot a) -> init:a -> i:size_nat{i < n} -> Lemma
   (requires True)
   (ensures  (f i (repeati #a i f init) == repeati #a (i + 1) f init))
-  [SMTPat (repeati #a (i + 1) f init)]
 
 let lemma_repeati #a n f init i = admit()
 
@@ -312,6 +311,7 @@ val blake2_compress3 :
                          /\ modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress3 h0.[wv] h0.[s]))
 
+
 //[@ Substitute ]
 let blake2_compress3 wv s const_sigma =
   (**) let h0 = ST.get () in
@@ -337,12 +337,21 @@ val blake2_compress :
 // [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2_compress s m offset flag const_iv const_sigma =
   (**) let hinit = ST.get () in
-  salloc11 #hinit #_ #_ #_ #16 #_ (size 16) (u32 0) [BufItem m; BufItem const_iv; BufItem const_sigma] s
-  (fun h0 _ sv -> sv == Spec.Blake2s.blake2_compress h0.[s] h0.[m] offset flag)
+  alloc1 #hinit (size 16) (u32 0) s
+  (fun h0 ->
+    let s0 = h0.[s] in
+    let m0 = h0.[m] in
+    (fun _ sv -> sv == Spec.Blake2s.blake2_compress s0 m0 offset flag))
   (fun wv ->
     blake2_compress1 wv s m offset flag const_iv;
     blake2_compress2 wv m const_sigma;
     blake2_compress3 wv s const_sigma)
+  (* salloc11 #hinit #_ #_ #_ #16 #_ (size 16) (u32 0) [BufItem m; BufItem const_iv; BufItem const_sigma] s *)
+  (* (fun h0 _ sv -> sv == Spec.Blake2s.blake2_compress h0.[s] h0.[m] offset flag) *)
+  (* (fun wv -> *)
+  (*   blake2_compress1 wv s m offset flag const_iv; *)
+  (*   blake2_compress2 wv m const_sigma; *)
+  (*   blake2_compress3 wv s const_sigma) *)
 
 
 val blake2s_internal1: s:lbuffer uint32 8 ->
@@ -378,8 +387,11 @@ val blake2s_internal2_inner: s:lbuffer uint32 8 ->
 [@ Substitute]
 let blake2s_internal2_inner s dd d i const_iv const_sigma =
   let h0 = ST.get () in
-  salloc11 #h0 #uint32 #unit #_ #16 #_ (size 16) (u32 0) [BufItem d; BufItem const_iv; BufItem const_sigma] s
-  (fun h0 _ sv -> sv == Spec.blake2s_internal2_inner (v dd) h0.[d] (v i) h0.[s])
+  alloc1 #h0 (size 16) (u32 0) s
+  (fun h ->
+    let d0 = h.[d] in
+    let s0 = h.[s] in
+    (fun _ sv -> sv == Spec.blake2s_internal2_inner (v dd) d0 (v i) s0))
   (fun to_compress ->
     let sub_d = sub d (i *. (size Spec.bytes_in_block)) (size Spec.bytes_in_block) in
     uint32s_from_bytes_le #16 to_compress sub_d;
@@ -388,6 +400,16 @@ let blake2s_internal2_inner s dd d i const_iv const_sigma =
     (**) lemma_cast_to_u64 offset32;
     blake2_compress s to_compress offset false const_iv const_sigma
   )
+  (* salloc11 #h0 #uint32 #unit #_ #16 #_ (size 16) (u32 0) [BufItem d; BufItem const_iv; BufItem const_sigma] s *)
+  (* (fun h0 _ sv -> sv == Spec.blake2s_internal2_inner (v dd) h0.[d] (v i) h0.[s]) *)
+  (* (fun to_compress -> *)
+  (*   let sub_d = sub d (i *. (size Spec.bytes_in_block)) (size Spec.bytes_in_block) in *)
+  (*   uint32s_from_bytes_le #16 to_compress sub_d; *)
+  (*   let offset32 = size_to_uint32 ((i +. (size 1)) *. (size Spec.block_bytes)) in *)
+  (*   let offset = to_u64 #U32 offset32 in *)
+  (*   (\**\) lemma_cast_to_u64 offset32; *)
+  (*   blake2_compress s to_compress offset false const_iv const_sigma *)
+  (* ) *)
 
 
 val blake2s_internal2_loop: s:lbuffer uint32 8 ->
@@ -513,22 +535,81 @@ val blake2s_internal:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
 //                         /\ h1.[res] == Spec.Blake2s.blake2s_internal (v dd) h0.[d] (v ll) (v kk) (v nn)))
 
+val lemma_modifies2_of_subs_is_modifies1: #h0:mem -> #h1:mem -> #a:Type0 -> #len:size_nat -> #pos0:size_nat -> #len0:size_nat{pos0 + len0 < len} -> #pos1:size_nat -> #len1:size_nat{pos1 + len1 <= len} -> buf:lbuffer a len -> sub0:lbuffer a len0 -> sub1:lbuffer a len1 ->
+  Lemma
+    (requires ((modifies2 sub0 sub1 h0 h1 \/ modifies2 sub0 sub1 h0 h1)
+               /\ sub0 == sub buf (size pos0) (size len0)
+               /\ sub1 == sub buf (size pos1) (size len1)))
+    (ensures  (modifies1 buf h0 h1))
+
+let lemma_modifies2_of_subs_is_modifies1 #h0 #h1 #a #len #pos0 #len0 #pos1 #len1 buf sub0 sub1 = admit()
+
+val lemma_modifies2_trans: #h0:mem -> #h1:mem -> #h2:mem -> #a0:Type0 -> #a1:Type0 -> #len0:size_nat -> #len1:size_nat -> buf0:lbuffer a0 len0 -> buf1:lbuffer a1 len1 ->
+  Lemma
+    (requires (modifies2 buf0 buf1 h0 h1 /\ modifies2 buf0 buf1 h1 h2))
+    (ensures  (modifies2 buf0 buf1 h0 h2))
+
+let lemma_modifies2_trans #h0 #h1 #h2 #a0 #a1 #len0 #len1 buf0 buf1 = admit()
+
+
 // [@ (CConst "const_iv") (CConst "const_sigma")]
 let blake2s_internal dd d ll kk nn res const_iv const_sigma =
   let h0 = ST.get () in
-  salloc21 #h0 #unit #uint32 #uint8 #uint8 #32 #8 #(v nn) (size 32) (size 8) (u32 0) (u8 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res
-  (fun h0 _ h1 -> True)
-  (fun st_u32 tmp ->
-    let s = sub st_u32 (size 16) (size 8) in
-    let to_compress = sub st_u32 (size 0) (size 16) in
-    copy s (size 8) const_iv;
-    blake2s_internal1 s kk nn;
-    blake2s_internal2 s dd d to_compress const_iv const_sigma;
-    blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma;
-    uints_to_bytes_le #U32 tmp s;
+  alloc1 #h0 (size 32) (u8 0) res
+  (fun h -> (fun _ _ -> True))
+  (fun tmp ->
+    let h0' = ST.get () in
+    alloc1 #h0' (size 24) (u32 0) tmp
+    (fun h' -> (fun _ _ -> True))
+    (fun st_u32 ->
+      (**) let h00 = ST.get () in
+      let s = sub st_u32 (size 16) (size 8) in
+      let to_compress = sub #uint32 #24 st_u32 (size 0) (size 16) in
+      copy s (size 8) const_iv;
+      (**) let ha = ST.get () in
+      (* assert(modifies1 s h00 ha); *)
+      blake2s_internal1 s kk nn;
+      (**) let hb = ST.get () in
+      (* assert(modifies1 s h00 hb); *)
+      (* assert(modifies1 st_u32 h00 hb); *)
+      (**) lemma_modifies1_is_modifies2 s to_compress h00 hb;
+      (* assert(modifies2 s to_compress h00 hb); *)
+      blake2s_internal2 s dd d to_compress const_iv const_sigma;
+      (**) let hc = ST.get () in
+      (* assert(s == sub st_u32 (size 16) (size 8)); *)
+      (* assert(to_compress == sub st_u32 (size 0) (size 16)); *)
+      (**) lemma_modifies2_trans #h00 #hb #hc s to_compress;
+      (* assume((modifies2 s to_compress h00 hb /\ modifies2 s to_compress hb hc) ==> modifies2 s to_compress h00 hc); *)
+      (* assert(modifies2 s to_compress h00 hc); *)
+      blake2s_internal1 s kk nn;
+      (**) let hd = ST.get () in
+      (**) lemma_modifies1_is_modifies2 s to_compress hc hd;
+      (**) lemma_modifies2_trans #h00 #hc #hd s to_compress;
+      (* assert(modifies2 s to_compress h00 hd); *)
+      blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma;
+      (**) let he = ST.get () in
+      (**) lemma_modifies2_trans #h00 #hd #he s to_compress;
+      assert(modifies2 s to_compress h00 he); admit();
+      uints_to_bytes_le #U32 tmp s;
+      let h11 = ST.get () in
+      assume(modifies2 st_u32 tmp h00 h11)
+    );
     let tmp' = sub tmp (size 0) nn in
     copy res nn tmp'
   )
+  (* salloc21 #h0 #unit #uint32 #uint8 #uint8 #32 #8 #(v nn) (size 32) (size 8) (u32 0) (u8 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res *)
+  (* (fun h0 _ h1 -> True) *)
+  (* (fun st_u32 tmp -> *)
+  (*   let s = sub st_u32 (size 16) (size 8) in *)
+  (*   let to_compress = sub st_u32 (size 0) (size 16) in *)
+  (*   copy s (size 8) const_iv; *)
+  (*   blake2s_internal1 s kk nn; *)
+  (*   blake2s_internal2 s dd d to_compress const_iv const_sigma; *)
+  (*   blake2s_internal3 s dd d ll kk nn to_compress res const_iv const_sigma; *)
+  (*   uints_to_bytes_le #U32 tmp s; *)
+  (*   let tmp' = sub tmp (size 0) nn in *)
+  (*   copy res nn tmp' *)
+  (* ) *)
 
 
 val blake2s :

@@ -341,7 +341,7 @@ val size_v: s:size_t -> n:size_nat{uint_v #SIZE s == n}
 
 
 inline_for_extraction
-val size_to_uint32: s:size_t -> u:uint32{u = u32 (size_v s)}
+val size_to_uint32: s:size_t -> u:uint32{u == u32 (size_v s)}
 
 inline_for_extraction
 unfold type nat_mod (m:pos) = uint_t (NATm m)

@@ -42,7 +42,14 @@ let alloc #a #b #len clen init read writes spec impl =
   pop_frame();
   r
 
-let alloc1 #h0 #a #b #w #len #wlen clen init write spec impl = 
+let alloc1 #h0 #a #b #w #len #wlen clen init write spec impl =
+  push_frame();
+  let buf = create clen init in
+  let r = impl buf in
+  pop_frame();
+  r
+
+let alloc_modifies2 #h0 #a #b #w0 #w1 #len #wlen0 #wlen1 clen init write0 write1 spec impl =
   push_frame();
   let buf = create clen init in
   let r = impl buf in
@@ -123,7 +130,7 @@ let uint_to_bytes_be #t o i =
   | U32 -> C.store32_be o (u32_to_UInt32 i)
   | U64 -> C.store64_be o (u64_to_UInt64 i)
   | U128 -> C.store128_be o (u128_to_UInt128 i)
-  
+
 
 (* EXPERIMENTAL *)
 
@@ -210,7 +217,7 @@ inline_for_extraction let loop2 #h0 #a0 #a1 #len0 #len1 n buf0 buf1 spec impl =
   Spec.Lib.Loops.for (size 0) n inv f'
 
 
-inline_for_extraction let map_blocks #h0 #a #bs #nb blocksize nblocks buf f_spec f = 
+inline_for_extraction let map_blocks #h0 #a #bs #nb blocksize nblocks buf f_spec f =
   let inv (h1:mem) (j:nat) = True in
   let f' (j:size_t{0 <= v j /\ v j <= nb}) : Stack unit
       (requires (fun h -> inv h (v j)))
@@ -220,7 +227,7 @@ inline_for_extraction let map_blocks #h0 #a #bs #nb blocksize nblocks buf f_spec
   Spec.Lib.Loops.for (size 0) nblocks inv f'
 
 
-inline_for_extraction let reduce_blocks #h0 #a #r #bs #nb #rlen blocksize nblocks rbuf f_spec f buf = 
+inline_for_extraction let reduce_blocks #h0 #a #r #bs #nb #rlen blocksize nblocks rbuf f_spec f buf =
   let inv (h1:mem) (j:nat) = True in
   let f' (j:size_t{0 <= v j /\ v j <= nb}) : Stack unit
       (requires (fun h -> inv h (v j)))
@@ -228,5 +235,3 @@ inline_for_extraction let reduce_blocks #h0 #a #r #bs #nb #rlen blocksize nblock
       let bufi = sub buf (j *. blocksize) blocksize in
       f j bufi in
   Spec.Lib.Loops.for (size 0) nblocks inv f'
-
-
