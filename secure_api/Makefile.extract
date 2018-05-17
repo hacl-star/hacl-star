@@ -246,6 +246,7 @@ $(DIST_DIR)/uint128/FStar_UInt128.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(DIST_DIR)/uint128/FStar_UInt128.c: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(CURVE_DIR)/Hacl_Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(CHACHAPOLY_DIR)/Hacl_Policies.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(VALE_DIR)/Vale_Hash_SHA2_256.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(DIST_DIR)/uint128/FStar_UInt128.h
