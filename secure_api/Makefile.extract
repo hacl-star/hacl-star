@@ -296,7 +296,7 @@ LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
 LowCProvider/LowCProvider.cmo: $(MLCRYPTO_HOME)/CryptoTypes.cmo
 LowCProvider/Tests.cmo: LowCProvider/LowCProvider.cmo
 
-ARCHIVE_FILES= \
+ARCHIVE_FILES= $(VALE_OBJ) \
     $(DIST_DIR)/uint128/FStar_UInt128.o \
     LowCProvider/LowCProvider.cmx \
     LowCProvider/HaclProvider.cmx \
