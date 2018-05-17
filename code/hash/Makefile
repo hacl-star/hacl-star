@@ -27,7 +27,7 @@ all-hints: hints
 
 KREMLIN_ARGS+=-verbose \
 	-no-prefix C.Loops \
-	-drop Prims,FStar,C.Loops.Spec.Loops,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+	-drop Prims,FStar,LowStar,C.Loops.Spec.Loops,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
 	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
 	-ccopt -march=native
@@ -80,7 +80,7 @@ test-native: test-native-sha2_256.exe test-native-sha2_384.exe test-native-sha2_
 BASE_OBJ=$(VALE_A) sha2-c/testlib.o sha2-c/kremlib.o
 $(BASE_OBJ): sha2-c/out.krml
 
-CFLAGS=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash
+CFLAGS=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash -I $(KREMLIN_HOME)/include
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
