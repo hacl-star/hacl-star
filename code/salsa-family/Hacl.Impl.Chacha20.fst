@@ -1,4 +1,4 @@
- module Hacl.Impl.Chacha20
+module Hacl.Impl.Chacha20
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -16,12 +16,11 @@ module Spec = Spec.Chacha20
 (* Definition of the state *)
 type state = lbuffer uint32 16
 type idx = n:size_t{v n < 16}
+unfold let blocksize:size_t = size 64
 
+noextract unfold let v = size_v
 
-inline_for_extraction
-let v = size_v
-inline_for_extraction
-let index (x:size_nat) = size x
+noextract unfold let index (x:size_nat) = size x
 
 [@ "substitute"]
 private
@@ -98,11 +97,13 @@ let double_round st =
 
 
 [@ "c_inline"]
+private
 val rounds: st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
 		 as_lseq st h1 == Spec.rounds (as_lseq st h0)))
+[@ "c_inline"]
 let rounds st =
   iter (size 10) Spec.double_round double_round st
 
@@ -118,12 +119,13 @@ val chacha20_core:
 #reset-options "--z3rlimit 50"
 [@ "c_inline"]
 let chacha20_core k st =
-  copy (size 16) st k;
+  copy k (size 16) st;
   rounds k;
   map2 (size 16) (add_mod #U32) k st;
   ()
 
 [@ "c_inline"]
+private
 val setup:
   st:state ->
   k:lbuffer uint8 32 ->
@@ -143,9 +145,9 @@ let setup st k n =
   st.(index 2) <- u32 Spec.c2;
   st.(index 3) <- u32 Spec.c3;
   let st_k = sub st (index 4) (index 8) in
-  uint32s_from_bytes_le #8 (size 8) st_k k;
+  uints_from_bytes_le #U32 #8 st_k k;
   let st_n = sub st (index 13) (index 3) in
-  uint32s_from_bytes_le #3 (size 3) st_n n
+  uints_from_bytes_le #U32 #3 st_n n
 
 [@ "c_inline"]
 val chacha20_init:
@@ -157,6 +159,7 @@ val chacha20_init:
                        /\ as_lseq st h1 ==
 			 Spec.chacha20_init (as_lseq k h0) (as_lseq n h0)))
 
+[@ "c_inline"]
 let chacha20_init k n =
   let st : state = create #uint32 #16 (size 16) (u32 0) in
   setup st k n;
@@ -164,14 +167,15 @@ let chacha20_init k n =
 
 
 [@ "c_inline"]
-val chacha20_set_counter: st:state -> c:counter -> Stack unit
+val chacha20_set_counter: st:state -> c:size_t -> Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
                        /\ as_lseq st h1 ==
-			 Spec.chacha20_set_counter (as_lseq st h0) c))
+			 Spec.chacha20_set_counter (as_lseq st h0) (size_v c)))
 
+[@ "c_inline"]
 let chacha20_set_counter st c =
-  st.(size 12) <- u32 c
+  st.(size 12) <- size_to_uint32 c
 
 [@ "c_inline"]
 val chacha20_key_block: b:lbuffer uint8 64 -> st:state -> Stack unit
@@ -179,12 +183,15 @@ val chacha20_key_block: b:lbuffer uint8 64 -> st:state -> Stack unit
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
                        /\ as_lseq b h1 ==
 			 Spec.chacha20_key_block (as_lseq st h0)))
+[@ "c_inline"]
 let chacha20_key_block b st =
-  alloc (size 16) (u32 0) [BufItem st] [BufItem b]
-  (fun h0 _ h1 -> as_lseq b h1 == Spec.chacha20_key_block (as_lseq st h0))
+  let h0 = ST.get() in
+  alloc1 #h0 (size 16) (u32 0) b
+  (fun h ->
+     let st0 = as_lseq st h in
+     (fun _ bseq -> bseq == Spec.chacha20_key_block st0))
   (fun st' -> chacha20_core st' st;
-	   uint32s_to_bytes_le (size 16) b st')
-
+	   uints_to_bytes_le #U32 b st')
 
 [@ "c_inline"]
 val chacha20_key_block0: b:lbuffer uint8 64 ->
@@ -194,29 +201,147 @@ val chacha20_key_block0: b:lbuffer uint8 64 ->
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
                        /\ as_lseq b h1 ==
 			 Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0)))
-#reset-options "--z3rlimit 300"
+[@ "c_inline"]
 let chacha20_key_block0 b k n =
-  alloc #_ #_ #16 (size 16) (u32 0) [BufItem k; BufItem n] [BufItem b]
-  (fun h0 _ h1 -> as_lseq b h1 == Spec.chacha20_key_block0 (as_lseq k h0) (as_lseq n h0))
+  let h0 = ST.get() in
+  alloc1 #h0 (size 16) (u32 0) b
+  (fun h ->
+    let key = as_lseq k h in
+    let nonce = as_lseq n h in
+    (fun _ bfin -> bfin == Spec.chacha20_key_block0 key nonce))
   (fun st -> setup st k n;
 	  chacha20_key_block b st)
 
 
+[@ "c_inline"]
+val chacha20_encrypt_block:
+  st0:state ->
+  ctr0:size_t ->
+  incr:size_t{size_v ctr0 + size_v incr <= max_size_t} ->
+  block: lbuffer uint8 64 ->
+  Stack unit
+    (requires (fun h -> live h block /\
+		     live h st0 /\
+		     disjoint block st0 /\
+		     disjoint st0 block ))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\
+		           modifies1 block h0 h1 /\
+			   as_lseq block h1 ==
+			   Spec.chacha20_encrypt_block
+			   (as_lseq st0 h0)
+			   (size_v ctr0)
+			   (size_v incr)
+			   (as_lseq block h0)))
+
+let chacha20_encrypt_block st0 ctr0 incr block =
+  let h0 = ST.get () in
+  alloc1 #h0 (size 16) (u32 0) block
+  (fun h ->
+    let st_init = as_lseq st0 h in
+    let block_init = as_lseq block h in
+    (fun _ block_fin ->
+      block_fin ==
+      Spec.chacha20_encrypt_block st_init (size_v ctr0) (size_v incr) block_init))
+  (fun st -> copy st (size 16) st0;
+	  chacha20_set_counter st (ctr0 +. incr);
+	  let h1 = ST.get() in
+	  alloc1 #h1 (size 64) (u8 0) block
+	    (fun h ->
+	       let st_init = as_lseq st h in
+	       let block_init = as_lseq block h in
+	       (fun _ block_fin ->
+		 let kb_v = Spec.chacha20_key_block st_init in
+		 block_fin == LSeq.map2 (^.) block_init kb_v))
+	    (fun kb -> chacha20_key_block kb st;
+		    map2 (size 64) (^.) block kb))
+
+[@ "c_inline"]
+val chacha20_encrypt_last:
+  st0:state ->
+  ctr0:size_t ->
+  incr:size_t{size_v ctr0 + size_v incr <= max_size_t} ->
+  len:size_t{size_v len < blocklen} ->
+  block: lbuffer uint8 (size_v len) ->
+  Stack unit
+    (requires (fun h -> live h block /\
+		     live h st0 /\
+		     disjoint block st0 /\
+		     disjoint st0 block ))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\
+		           modifies1 block h0 h1 /\
+			   as_lseq block h1 ==
+			   Spec.chacha20_encrypt_last
+			   (as_lseq st0 h0)
+			   (size_v ctr0)
+			   (size_v incr)
+			   (size_v len)
+			   (as_lseq block h0)))
+
+let chacha20_encrypt_last st0 ctr0 incr len block =
+  let h0 = ST.get () in
+  alloc1 #h0 (size 64) (u8 0) block
+  (fun h ->
+    let st_init = as_lseq st0 h in
+    let block_init = as_lseq block h in
+    (fun _ block_fin ->
+      block_fin ==
+      Spec.chacha20_encrypt_last st_init (size_v ctr0) (size_v incr) (size_v len) block_init))
+    (fun bl -> copy (sub bl (size 0) len) len block;
+	    chacha20_encrypt_block st0 ctr0 incr bl;
+	    copy block len (sub bl (size 0) len))
+
+
+[@ "c_inline"]
+val chacha20_encrypt_bytes:
+  #len:size_nat ->
+  clen:size_t{size_v clen == len} ->
+  cipher:lbuffer uint8 len ->
+  plain:lbuffer uint8 len ->
+  key:lbuffer uint8 32 ->
+  nonce:lbuffer uint8 12 ->
+  ctr:size_t{size_v ctr + len <= max_size_t} ->
+  Stack unit
+    (requires (fun h -> live h cipher /\
+		     live h plain /\
+		     live h key /\
+		     live h nonce /\
+		     disjoint cipher plain /\ disjoint plain cipher /\
+		     disjoint cipher key /\ disjoint key cipher /\
+		     disjoint cipher nonce /\ disjoint nonce cipher /\
+		     size_v ctr + (len / blocklen) <= max_size_t))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\
+		           modifies1 cipher h0 h1))
+
+let chacha20_encrypt_bytes #len clen cipher plain key nonce ctr =
+  let h0 = ST.get() in
+  alloc1 #h0 (size 16) (u32 0) cipher
+  (fun h ->
+     let key0 = as_lseq key h in
+     let nonce0 = as_lseq nonce h in
+     let plain0 = as_lseq plain h in
+     (fun _ cipher_final ->
+       cipher_final ==
+       Spec.chacha20_encrypt_bytes key0 nonce0 (size_v ctr) len plain0))
+  (fun st -> copy cipher clen plain;
+          setup st key nonce;
+	  let nblocks = clen /. blocksize in
+	  let rem = clen %. blocksize in
+	  let cipher0 = sub cipher (size 0) (nblocks *. blocksize) in
+	  let cipher1 = sub cipher (nblocks *. blocksize) rem in
+	  let h0 = ST.get() in
+	  map_blocks #h0 #_ #blocklen #(len / blocklen) blocksize nblocks cipher0
+	    (fun h ->
+    	       let st0 = as_lseq st h in
+	       Spec.chacha20_encrypt_block st0 (size_v ctr))
+	    (fun i ->
+	       let bufi = sub cipher0 (i *. blocksize) blocksize in
+	       chacha20_encrypt_block st ctr i bufi);
+	  chacha20_encrypt_last st ctr nblocks rem cipher1
+	  )
+
+
 
 (*
-[@ "c_inline"]
-val chacha20_block:
-  stream_block:lbuffer uint8 64 ->
-  st:state ->
-  ctr:size_t ->
-  Stack unit
-    (requires (fun h -> live h stream_block /\
-		     live h st /\
-		     disjoint stream_block st))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 st stream_block h0 h1 /\
-			   as_lseq st h1 ==
-			   Spec.chacha20_block stream_block st ctrsetup (as_lseq k h0) (as_lseq n h0) c (as_lseq st h0)))
-			   ))
 
 #reset-options "--z3rlimit 100"
 [@ "c_inline"]

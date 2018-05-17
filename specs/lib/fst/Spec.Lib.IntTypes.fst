@@ -5,6 +5,10 @@ module Spec.Lib.IntTypes
 
 let pow2_values n =
     assert_norm (pow2 0 = 1);
+    assert_norm (pow2 1 = 2);
+    assert_norm (pow2 2 = 4);
+    assert_norm (pow2 3 = 8);
+    assert_norm (pow2 4 = 16);
     assert_norm (pow2 8 = 0x100);
     assert_norm (pow2 16 = 0x10000);
     assert_norm (pow2 32 = 0x100000000);
@@ -311,9 +315,11 @@ let lte_mask_lemma #t a b d = admit()
 
 (* defined in .fsti: notations +^, -^, ...*)
 
+inline_for_extraction
 let size x = size_ x
+inline_for_extraction
 let size_v x = UInt32.v x
-let size_to_uint32 x = x
+let size_to_uint32 x = x <: UInt32.t
 let nat_mod_v #m x = x
 let modulo x m = modulo_ x m
 

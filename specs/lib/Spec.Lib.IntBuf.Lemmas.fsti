@@ -52,17 +52,18 @@ val creates1_lemma:  #a1:Type0 -> #a2:Type0 -> #len1:size_nat -> #len2:size_nat 
 			 [SMTPat (creates1 b2 h0 h1);
 			  SMTPat (live h0 b1)]
 
+(*
 val creates1_preserves:  #a1:Type0 -> #len1:size_nat -> b:lbuffer a1 len1 -> h0:mem -> h1:mem -> h2:mem -> Lemma
 			 (requires (preserves_live h0 h1 /\ creates1 b h1 h2))
-			 (ensures  (creates1 b h0 h1))
+			 (ensures  (creates1 b h0 h2))
 			 [SMTPat (creates1 b h1 h2);
 			  SMTPat (preserves_live h0 h1)]
-
 val creates1_preserves':  #a1:Type0 -> #len1:size_nat -> b:lbuffer a1 len1 -> h0:mem -> h1:mem -> h2:mem -> Lemma
 			 (requires (creates1 b h0 h1 /\ preserves_live h1 h2))
 			 (ensures  (creates1 b h0 h2))
 			 [SMTPat (creates1 b h0 h1);
 			  SMTPat (preserves_live h1 h2)]
+*)
 
 let creates2 #a1 #a2 #len1 #len2 (b1:lbuffer a1 len1) (b2:lbuffer a2 len2) h0 h1 =
   creates1 #a1 #len1 b1 h0 h1 /\

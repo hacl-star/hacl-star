@@ -63,6 +63,13 @@ poly1305.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib
 	$(OCAMLOPT) -I poly1305-ml poly1305-ml/Spec_Lib_IntTypes.ml poly1305-ml/Spec_Lib_IntSeq.ml poly1305-ml/Spec_Poly1305.ml poly1305-ml/Spec_Poly1305_Test.ml -o poly1305.exe
 	./poly1305.exe
 
+poly1305_generic.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Poly1305.Generic.fst tests/Spec.Poly1305.Generic.Test.fst
+	mkdir -p poly1305-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Poly1305.Generic --extract_module Spec.Poly1305.Generic.Test --odir poly1305-ml $^
+	@echo 'let _ = test()' >> poly1305-ml/Spec_Poly1305_Generic_Test.ml
+	$(OCAMLOPT) -I poly1305-ml poly1305-ml/Spec_Lib_IntTypes.ml poly1305-ml/Spec_Lib_IntSeq.ml poly1305-ml/Spec_Poly1305_Generic.ml poly1305-ml/Spec_Poly1305_Generic_Test.ml -o poly1305_generic.exe
+	./poly1305_generic.exe
+
 chacha20poly1305.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst tests/Spec.Chacha20Poly1305.Test.fst
 	mkdir -p chacha20poly1305-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.CTR --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.Chacha20Poly1305.Test --odir chacha20poly1305-ml $^

@@ -22,6 +22,19 @@ type cipher =
 val xor: #len:size_nat -> x:lbytes len -> y:lbytes len -> Tot (lbytes len)
 let xor #len x y = map2 (fun x y -> logxor #U8 x y) x y
 
+val process_block:
+  enc: cipher ->
+  st0:enc.state ->
+  c:size_nat {c <= enc.counter_max} ->
+  plain:lbytes enc.block_len ->
+  Tot (lbytes enc.block_len)
+
+let process_block enc st0 c plain = 
+  let st = enc.set_counter st0 c in
+  let k = enc.key_block st in
+  let c = xor plain k in
+  c
+  
 val counter_mode_blocks:
   enc: cipher ->
   st0:enc.state ->
@@ -29,19 +42,17 @@ val counter_mode_blocks:
   n:size_nat{n * enc.block_len < pow2 32 /\ c + n <= enc.counter_max} ->
   plain:lbytes (n * enc.block_len) ->
   Tot (lbytes (n * enc.block_len))
-#set-options "--z3rlimit 1000"
+#reset-options "--z3rlimit 100"
 let counter_mode_blocks enc st0 counter n plain =
   let ciphertext = create (n * enc.block_len) (u8 0) in
   repeati n
     (fun i cipher ->
-      let st = enc.set_counter st0 (counter + i) in
       let start : size_nat = i * enc.block_len in
       let fin : size_nat = (i+1) * enc.block_len in
       let b = slice plain (i * enc.block_len) ((i+1) * enc.block_len) in
-      let k = enc.key_block st in
-      let c = xor b k in
+      let c = process_block enc st0 (counter + i) b in
       update_slice cipher (i * enc.block_len) ((i+1) * enc.block_len) c)
-      ciphertext
+    ciphertext
 
 val counter_mode:
   enc: cipher ->
