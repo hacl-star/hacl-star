@@ -43,7 +43,7 @@ val mod_exp_:
   rrLen:size_t{v rrLen == rLen /\ nLen + rLen < max_size_t} ->
   pow2_i:size_t{2 * nLen + 4 * v pow2_i < max_size_t /\ nLen <= v pow2_i /\ rLen < 2 * v pow2_i} ->
   n:lbignum nLen -> nInv_u64:uint64 -> st_kara:lbignum (2 * nLen + 4 * v pow2_i) -> st_exp:lbignum (2 * nLen) ->
-  bBits:size_t{0 < v bBits} -> bLen:size_t{v bLen = v (bits_to_bn bBits) /\ v bBits / 64 < v bLen} -> b:lbignum (v bLen) ->
+  bBits:size_t{0 < v bBits} -> bLen:size_t{v bLen = v (blocks bBits (size 64)) /\ v bBits / 64 < v bLen} -> b:lbignum (v bLen) ->
   i:size_t{v i <= v bBits} ->
   Stack unit
     (requires (fun h -> live h n /\ live h b /\ live h st_kara /\ live h st_exp /\
@@ -65,9 +65,9 @@ let rec mod_exp_ #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara st_exp bBits 
 val mod_exp:
   #nLen:size_nat ->
   pow2_i:size_t{6 * nLen + 4 * v pow2_i < max_size_t /\ nLen <= v pow2_i /\ nLen + 1 < 2 * v pow2_i} ->
-  modBits:size_t{0 < v modBits} -> nnLen:size_t{v nnLen == nLen /\ nLen = v (bits_to_bn modBits)} ->
+  modBits:size_t{0 < v modBits} -> nnLen:size_t{v nnLen == nLen /\ nLen = v (blocks modBits (size 64))} ->
   n:lbignum nLen -> a:lbignum nLen ->
-  bBits:size_t{0 < v bBits} -> b:lbignum (v (bits_to_bn bBits)) -> res:lbignum nLen ->
+  bBits:size_t{0 < v bBits} -> b:lbignum (v (blocks bBits (size 64))) -> res:lbignum nLen ->
   Stack unit
     (requires (fun h -> live h n /\ live h a /\ live h b /\ live h res))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
@@ -80,7 +80,7 @@ let mod_exp #nLen pow2_i modBits nnLen n a bBits b res =
   let exp_r = mul #SIZE (size 64) rrLen in
   let exp2 = add #SIZE exp_r exp_r in
 
-  let bLen = bits_to_bn bBits in
+  let bLen = blocks bBits (size 64) in
   assume (v bBits / 64 < v bLen);
 
   let karaLen = add #SIZE (add #SIZE nnLen nnLen) (mul #SIZE (size 4) pow2_i) in

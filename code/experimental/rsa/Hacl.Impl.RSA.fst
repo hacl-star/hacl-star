@@ -204,7 +204,7 @@ let rsa_sign #sLen #msgLen #nLen pow2_i modBits eBits dBits pLen qLen skey rBlin
       bn_mul_u64 pqLen phi_n rBlind d'; //d' = phi_n * rBlind
       assume (v dLen <= v dLen' /\ v dLen' * 64 < max_size_t);
       bn_add dLen' d' dLen d d'; //d' = d' + d
-      assume (v nLen = v (bits_to_bn modBits));
+      assume (v nLen = v (blocks modBits (size 64)));
       mod_exp pow2_i modBits nLen n m (mul #SIZE dLen' (size 64)) d' s;
       nat_to_text k s sgnt
     )

@@ -17,7 +17,7 @@ val text_to_nat_:
   resLen:size_t{len = 8 * v resLen} -> res:lbignum (v resLen) -> Stack unit
   (requires (fun h -> live h input /\ live h res /\ disjoint res input))
   (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-  [@"c_inline"]
+  [@ "substitute"]
 let text_to_nat_ #len clen input resLen res =
   iteri_simple #uint64 #(v resLen) resLen
   (fun i res ->
@@ -54,7 +54,7 @@ val nat_to_text_:
   resLen:size_t{v resLen = 8 * len} -> res:lbytes (v resLen) -> Stack unit
   (requires (fun h -> live h input /\ live h res /\ disjoint res input))
   (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-  [@"c_inline"]
+  [@ "substitute"]
 let nat_to_text_ #len clen input resLen res =
   iteri_simple #uint8 #(v resLen) clen
   (fun i res ->

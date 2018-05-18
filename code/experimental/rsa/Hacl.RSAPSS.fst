@@ -14,11 +14,11 @@ module Buffer = Spec.Lib.IntBuf
 val rsa_pss_sign:
     #sLen:size_nat -> #msgLen:size_nat -> #nLen:size_nat ->
     pow2_i:size_t{6 * nLen + 4 * v pow2_i < max_size_t /\ nLen <= v pow2_i /\ nLen + 1 < 2 * v pow2_i} ->
-    modBits:size_t{0 < v modBits /\ nLen = v (bits_to_bn modBits)} ->
+    modBits:size_t{0 < v modBits /\ nLen = v (blocks modBits (size 64))} ->
     eBits:size_t{0 < v eBits /\ v eBits <= v modBits} ->
     dBits:size_t{0 < v dBits /\ v dBits <= v modBits} ->
-    pLen:size_t -> qLen:size_t{nLen + v (bits_to_bn eBits) + v (bits_to_bn dBits) + v pLen + v qLen < max_size_t} ->
-    skey:lbignum (nLen + v (bits_to_bn eBits) + v (bits_to_bn dBits) + v pLen + v qLen) ->
+    pLen:size_t -> qLen:size_t{nLen + v (blocks eBits (size 64)) + v (blocks dBits (size 64)) + v pLen + v qLen < max_size_t} ->
+    skey:lbignum (nLen + v (blocks eBits (size 64)) + v (blocks dBits (size 64)) + v pLen + v qLen) ->
     rBlind:uint64 ->
     ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t /\ v (blocks modBits (size 8)) - sLen - v hLen - 3 >= 0} -> salt:lbytes sLen ->
     mmsgLen:size_t{v mmsgLen == msgLen /\ msgLen < pow2 61} -> msg:lbytes msgLen ->
@@ -35,9 +35,9 @@ let rsa_pss_sign #sLen #msgLen #nLen pow2_i modBits eBits dBits pLen qLen skey r
 val rsa_pss_verify:
     #sLen:size_nat -> #msgLen:size_nat -> #nLen:size_nat ->
     pow2_i:size_t{6 * nLen + 4 * v pow2_i < max_size_t /\ nLen <= v pow2_i /\ nLen + 1 < 2 * v pow2_i} ->
-    modBits:size_t{0 < v modBits /\ nLen = v (bits_to_bn modBits)} ->
-    eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\ nLen + v (bits_to_bn eBits) < max_size_t} ->
-    pkey:lbignum (nLen + v (bits_to_bn eBits)) ->
+    modBits:size_t{0 < v modBits /\ nLen = v (blocks modBits (size 64))} ->
+    eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\ nLen + v (blocks eBits (size 64)) < max_size_t} ->
+    pkey:lbignum (nLen + v (blocks eBits (size 64))) ->
     ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t /\ v (blocks modBits (size 8)) - sLen - v hLen - 3 >= 0} ->
     sgnt:lbytes (v (blocks modBits (size 8))) ->
     mmsgLen:size_t{v mmsgLen == msgLen /\ msgLen < pow2 61} -> msg:lbytes msgLen -> Stack bool

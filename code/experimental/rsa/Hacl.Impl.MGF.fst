@@ -31,7 +31,7 @@ val mgf_sha256_:
   st:lbytes stLen -> count_max:size_t{v accLen = v count_max * v hLen} -> Stack unit
   (requires (fun h -> live h st))
   (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
-  [@"c_inline"]
+  [@ "substitute"]
 let mgf_sha256_ #stLen mgfseedLen accLen sstLen st count_max =
   iteri_simple #uint8 #stLen count_max
   (fun counter st ->
