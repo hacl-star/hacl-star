@@ -208,17 +208,19 @@ let blake2s_internal3 h dd d ll kk nn =
     blake2_compress h last_block (u64 (ll + block_bytes)) true
 
 
-val blake2s_internal_core : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+val blake2s_internal_core : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lseq uint8 32)
 let blake2s_internal_core dd d ll kk nn =
-  let h = blake2s_internal1 const_init kk nn in
+  let h = const_init in
+  let h = blake2s_internal1 h kk nn in
   let h = blake2s_internal2 dd d h in
   let h = blake2s_internal3 h dd d ll kk nn in
-  h
+  uints_to_bytes_le h
+
 
 val blake2s_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 let blake2s_internal dd d ll kk nn =
-  let h = blake2s_internal_core dd d ll kk nn in
-  sub (uints_to_bytes_le h) 0 nn
+  let tmp = blake2s_internal_core dd d ll kk nn in
+  sub tmp 0 nn
 
 
 val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * bytes_in_block } ->  d:lbytes ll ->  kk:size_nat{kk<=32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
@@ -238,3 +240,13 @@ let blake2s ll d kk k nn =
     let data = update_slice data 0 bytes_in_block padded_key in
     let data = update_slice data bytes_in_block data_length padded_data in
     blake2s_internal (data_blocks+1) data ll kk nn
+
+
+  (* let n = len / blocksize in *)
+  (* let rem = len % blocksize in *)
+  (* let blocks = slice text 0 (n * blocksize) in *)
+  (* let st = update_blocks n blocks st in *)
+  (* if rem = 0 then st *)
+  (* else *)
+  (*   let last = slice text (n * blocksize) len in *)
+  (*   update1 rem last st *)
