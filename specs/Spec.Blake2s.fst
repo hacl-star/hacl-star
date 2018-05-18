@@ -223,30 +223,24 @@ let blake2s_internal dd d ll kk nn =
   sub tmp 0 nn
 
 
-val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * bytes_in_block } ->  d:lbytes ll ->  kk:size_nat{kk<=32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
+val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * bytes_in_block } ->  d:lbytes ll ->  kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 
 let blake2s ll d kk k nn =
-  let data_blocks : size_nat = ((ll - 1) / bytes_in_block) + 1 in
-  let padded_data_length : size_nat = data_blocks * bytes_in_block in
-  let padded_data = create padded_data_length (u8 0) in
-  let padded_data : lbytes (data_blocks * bytes_in_block) = update_slice padded_data 0 ll d in
-  if kk = 0 then
-    blake2s_internal data_blocks padded_data ll kk nn
-  else
-    let padded_key = create bytes_in_block (u8 0) in
-    let padded_key = update_slice padded_key 0 kk k in
-    let data_length : size_nat = bytes_in_block + padded_data_length in
-    let data = create data_length (u8 0) in
-    let data = update_slice data 0 bytes_in_block padded_key in
-    let data = update_slice data bytes_in_block data_length padded_data in
-    blake2s_internal (data_blocks+1) data ll kk nn
+  let nblocks = ll / bytes_in_block in
+  let rem = ll % bytes_in_block in
+  let blocks = sub d 0 (nblocks * bytes_in_block) in
+  let last = sub d (nblocks * bytes_in_block) rem in
+  let key_block = create bytes_in_block (u8 0) in
+  let key_block = update_sub key_block 0 kk k in
+  let last_block = create bytes_in_block (u8 0) in
+  let last_block = update_sub last_block 0 rem last in
+  let (|nblocks, data|) : ( n:size_nat{n * bytes_in_block <= max_size_t} & lseq uint8 (n * bytes_in_block))=
+    if rem = 0 then (|nblocks, blocks|)
+    else (|(nblocks + 1), concat blocks last_block|)
+  in
 
-
-  (* let n = len / blocksize in *)
-  (* let rem = len % blocksize in *)
-  (* let blocks = slice text 0 (n * blocksize) in *)
-  (* let st = update_blocks n blocks st in *)
-  (* if rem = 0 then st *)
-  (* else *)
-  (*   let last = slice text (n * blocksize) len in *)
-  (*   update1 rem last st *)
+  let (|nblocks, data|)  =
+    if kk = 0 then (|nblocks, data|)
+    else (|(nblocks + 1), concat key_block data|)
+  in
+  blake2s_internal nblocks data ll kk nn
