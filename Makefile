@@ -143,7 +143,6 @@ providers:
 	@echo $(CYAN)"# Verifying, Extracting and Testing the Providers"$(NORMAL)
 	$(MAKE) extract-c-code
 	$(MAKE) -C providers
-	$(MAKE) test -C providers
 
 #
 # CI
