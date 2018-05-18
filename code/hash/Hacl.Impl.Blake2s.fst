@@ -563,11 +563,7 @@ let blake2s_internal dd d ll kk nn res const_iv const_sigma =
     alloc1 #h0' (size 24) (u32 0) tmp
     (fun h' ->
       let d0 = h'.[d] in
-      let ls = Spec.Blake2s.const_init in
-      (fun _ rs -> True))
-        (* let ls = Spec.blake2s_internal1 ls (v kk) (v nn) in *)
-        (* let ls = Spec.blake2s_internal2 (v dd) d0 ls in *)
-        (* rs == Spec.blake2s_internal3 ls (v dd) d0 (v ll) (v kk) (v nn))) *)
+      (fun _ rs -> True)) //rs == Spec.Blake2s.blake2s_internal_core (v dd) d0 (v ll) (v kk) (v nn)))
     (fun st_u32 ->
       (**) let h00 = ST.get () in
       let s = sub st_u32 (size 16) (size 8) in
@@ -588,7 +584,7 @@ let blake2s_internal dd d ll kk nn res const_iv const_sigma =
              /\ modifies2 s to_compress h00 hd) ==> modifies1 st_u32 h00 hd);
       uints_to_bytes_le #U32 tmp s
     );
-    let tmp' = sub tmp (size 0) nn in
+    let tmp' = sub #uint8 #32 #(v nn) tmp (size 0) nn in
     copy res nn tmp'
   )
   (* salloc21 #h0 #unit #uint32 #uint8 #uint8 #32 #8 #(v nn) (size 32) (size 8) (u32 0) (u8 0) [BufItem d; BufItem const_iv; BufItem const_sigma] res *)

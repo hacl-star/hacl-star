@@ -208,12 +208,16 @@ let blake2s_internal3 h dd d ll kk nn =
     blake2_compress h last_block (u64 (ll + block_bytes)) true
 
 
-val blake2s_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
-let blake2s_internal dd d ll kk nn =
-  let h = const_init in
-  let h = blake2s_internal1 h kk nn in
+val blake2s_internal_core : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+let blake2s_internal_core dd d ll kk nn =
+  let h = blake2s_internal1 const_init kk nn in
   let h = blake2s_internal2 dd d h in
   let h = blake2s_internal3 h dd d ll kk nn in
+  h
+
+val blake2s_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
+let blake2s_internal dd d ll kk nn =
+  let h = blake2s_internal_core dd d ll kk nn in
   sub (uints_to_bytes_le h) 0 nn
 
 
