@@ -96,7 +96,7 @@ EXTRACT='* -FStar -CryptoTypes'
 include .depend.$(IMPL_CHOICE)
 
 # Now we get parallel lax-checking, which is nice.
-# cwinter: The order-only dependency makes sure that F* will not run until 
+# cwinter: The order-only dependency makes sure that F* will not run until
 # .depend.* is re-generated. Otherwise it can happen that this rule is executed
 # in parallel with the .depend rule, where this rule uses the old .depend file.
 %.checked.lax: | .depend.$(IMPL_CHOICE) $(CACHE_DIR) $(OUTPUT_DIR)
@@ -161,7 +161,7 @@ VALE_DIR = vale/asm
 
 VALE_OBJ = $(addprefix $(VALE_DIR)/,sha256_main_i.o \
   sha256-$(MARCH)$(VARIANT).o Vale_Hash_SHA2_256.o \
-  vale_aes_glue.o aes-$(MARCH)$(VARIANT).o)
+  vale_aes_glue.o aesgcm-$(MARCH)$(VARIANT).o aes-$(MARCH)$(VARIANT).o)
 
 # These three concrete specializations want you to bring in the vale object
 # files into your cmxa / .exe
@@ -218,10 +218,26 @@ ifeq (,$(wildcard $(CURVE_DIR)/Hacl_Curve25519.c))
   endif
 endif
 
+POLY_DIR=$(HACL_HOME)/code/poly1305/poly-c
+CHACHA_DIR=$(HACL_HOME)/code/salsa-family/chacha-c
+CHACHAPOLY_DIR=$(HACL_HOME)/code/api/aead-c
+
+ifeq (,$(wildcard $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c))
+  ifneq (,$(KRML_NOUINT128))
+    $(error The Chacha20Poly1305 directory is $(CHACHAPOLY_DIR) and I cannot find \
+      $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c -- please run `KOPTS="-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full -add-early-include '\"FStar_UInt128.h\"'" make -C $(CHACHAPOLY_DIR)/.. extract-c`)
+  else
+    $(error The Chacha20Poly1305 directory is $(CHACHAPOLY_DIR) and I cannot find \
+      $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c -- please run `make -C $(CHACHAPOLY_DIR)/.. extract-c`)
+  endif
+endif
+
 # Since we're building an actual C file, we need the standalone AEAD file, along
 # with the actual extraction of the index. We also need a helper from
 # Crypto.Symmetric.Bytes.
-HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Hacl_Curve25519.h \
+HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h \
+	  $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.h \
+	  $(CURVE_DIR)/Hacl_Curve25519.h \
 	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h \
 	  $(DIST_DIR)/uint128/FStar_UInt128.h
 
@@ -229,6 +245,10 @@ HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h $(CURVE_DIR)/Hacl_Curve25519.h \
 $(DIST_DIR)/uint128/FStar_UInt128.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(DIST_DIR)/uint128/FStar_UInt128.c: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(CURVE_DIR)/Hacl_Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(CHACHA_DIR)/Hacl_Chacha20.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(POLY_DIR)/AEAD_Poly1305_64.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+$(CHACHAPOLY_DIR)/Hacl_Policies.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(VALE_DIR)/Vale_Hash_SHA2_256.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(DIST_DIR)/uint128/FStar_UInt128.h
@@ -250,8 +270,9 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib -g -I $(FSTAR_HOME)/uli
 # right include paths...
 %.o: %.c
 	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/include -I $(MLCRYPTO_HOME) \
-	  -I $(TLS_FFI_DIR) -ccopt "-o $@" \
-	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) $(addprefix -ccopt ,$(CCOPTS)) \
+	  -I $(TLS_FFI_DIR) -ccopt "-o $@" -I $(CHACHA_DIR) -I $(POLY_DIR) \
+	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) -I $(CHACHAPOLY_DIR) \
+	  $(addprefix -ccopt ,$(CCOPTS)) \
 	  -I $(DIST_DIR)/uint128
 
 # Gross approximation: the cmx's we build are most likely extracted F* code and,
@@ -278,13 +299,17 @@ LowCProvider/Tests.cmx: LowCProvider/LowCProvider.cmx
 LowCProvider/LowCProvider.cmo: $(MLCRYPTO_HOME)/CryptoTypes.cmo
 LowCProvider/Tests.cmo: LowCProvider/LowCProvider.cmo
 
-ARCHIVE_FILES= \
+ARCHIVE_FILES= $(VALE_OBJ) \
     $(DIST_DIR)/uint128/FStar_UInt128.o \
     LowCProvider/LowCProvider.cmx \
     LowCProvider/HaclProvider.cmx \
     LowCProvider/lowc_stub.o \
     $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
     $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
+    $(CHACHA_DIR)/Hacl_Chacha20.o \
+    $(POLY_DIR)/AEAD_Poly1305_64.o \
+    $(CHACHAPOLY_DIR)/Hacl_Policies.o \
+    $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o \
     $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Hacl_Curve25519.o \
     $($(IMPL_CHOICE)_EXTRA)
 
@@ -318,11 +343,19 @@ QUICPROVIDER_DIR = QuicProvider
 $(QUICPROVIDER_DIR)/quic_provider.o: $(HEADERS) $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h
 $(QUICPROVIDER_DIR)/test.o: $(HEADERS) $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h
 
-$(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) $(QUICPROVIDER_DIR)/quic_provider.o \
+$(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) \
+  $(QUICPROVIDER_DIR)/quic_provider.o \
   $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o \
-  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
-  $(DIST_DIR)/copied/kremstr.o $(DIST_DIR)/uint128/FStar_UInt128.o
+  $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o \
+  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
+  $(CHACHA_DIR)/Hacl_Chacha20.o \
+  $(POLY_DIR)/AEAD_Poly1305_64.o \
+  $(CHACHAPOLY_DIR)/Hacl_Policies.o \
+  $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o \
+  $(DIST_DIR)/copied/kremstr.o \
+  $(DIST_DIR)/uint128/FStar_UInt128.o
 	$(CC) $^ -o $@ $(QUICPROVIDER_SO_LDOPTS) -shared
 
 $(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)
 	$(CC) $< -o $@ -L$(DIST_DIR) -lquicprovider
+

@@ -47,7 +47,6 @@ endif
 # Kremlin
 #
 
-KREMINC=$(KREMLIN_HOME)/include
 KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMLIN=$(KREMLIN_HOME)/krml
 KREMTEST=$(KREMLIN_HOME)/test
@@ -56,7 +55,7 @@ KREMTEST=$(KREMLIN_HOME)/test
 # Default Kremlin arguments
 KREMLIN_ARGS?=
 KREMLIN_ARGS+=$(KOPTS)
-KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMINC) -I $(HACL_HOME)/specs -I .
+KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
 
 ifneq (,$(EVEREST_WINDOWS))
 KREMLIN_ARGS+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
