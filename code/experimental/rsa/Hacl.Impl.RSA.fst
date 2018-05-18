@@ -179,7 +179,7 @@ let rsa_sign #sLen #msgLen #nLen pow2_i modBits eBits dBits pLen qLen skey rBlin
   assume (2 * v nLen + 2 * (v pLen + v qLen) + 1 < max_size_t);
   let n2Len = add #SIZE nLen nLen in
   let pqLen = add #SIZE pLen qLen in
-  let stLen:size_t = add #SIZE n2Len (add #SIZE (add #SIZE pqLen pqLen) (size 1)) in
+  let stLen:size_t = add #SIZE n2Len (add #SIZE (add #SIZE pqLen pqLen) (size 2)) in
 
   alloc #uint8 #unit #(v emLen) emLen (u8 0) [BufItem skey; BufItem msg; BufItem salt] [BufItem sgnt]
   (fun h0 _ h1 -> True)
@@ -195,16 +195,17 @@ let rsa_sign #sLen #msgLen #nLen pow2_i modBits eBits dBits pLen qLen skey rBlin
       let p1 = Buffer.sub #uint64 #(v stLen) #(v pLen) tmp (add #SIZE n2Len pqLen) pLen in
       let q1 = Buffer.sub #uint64 #(v stLen) #(v qLen) tmp (add #SIZE (add #SIZE n2Len pqLen) pLen) qLen in
       let dLen':size_t = add #SIZE (add #SIZE pLen qLen) (size 1) in
-      let bn1_start = add #SIZE (add #SIZE (add #SIZE n2Len pqLen) pLen) qLen in
-      let bn1 = Buffer.sub #uint64 #(v stLen) #1 tmp bn1_start (size 1) in
       let d' = Buffer.sub #uint64 #(v stLen) #(v dLen') tmp (add #SIZE n2Len pqLen) dLen' in
+      let bn1_start = add #SIZE (add #SIZE (add #SIZE (add #SIZE n2Len pqLen) pLen) qLen) (size 1) in
+      let bn1 = Buffer.sub #uint64 #(v stLen) #1 tmp bn1_start (size 1) in
 
       text_to_nat emLen em m;
       bn1.(size 0) <- u64 1;
       let _ = bn_sub pLen p (size 1) bn1 p1 in // p1 = p - 1
       let _ = bn_sub qLen q (size 1) bn1 q1 in // q1 = q - 1
       bn_mul pLen p1 qLen q1 phi_n; // phi_n = p1 * q1
-      bn_mul_u64 pqLen phi_n rBlind d'; //d' = phi_n * rBlind
+      bn1.(size 0) <- rBlind;
+      bn_mul pqLen phi_n (size 1) bn1 d'; //d' = phi_n * rBlind
       assume (v dLen <= v dLen' /\ v dLen' * 64 < max_size_t);
       let _ = bn_add dLen' d' dLen d d' in //d' = d' + d
       assume (v nLen = v (blocks modBits (size 64)));
