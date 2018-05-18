@@ -548,18 +548,26 @@ val blake2s_internal:
                    /\ disjoint res const_iv /\ disjoint res const_sigma
                    /\ disjoint d res
                    /\ disjoint const_iv res /\ disjoint const_sigma res))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-//                         /\ h1.[res] == Spec.Blake2s.blake2s_internal (v dd) h0.[d] (v ll) (v kk) (v nn)))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1
+                         /\ h1.[res] == Spec.Blake2s.blake2s_internal (v dd) h0.[d] (v ll) (v kk) (v nn)))
 
 // [@ (Cconst "const_iv") (CConst "const_sigma")]
 let blake2s_internal dd d ll kk nn res const_iv const_sigma =
   let h0 = ST.get () in
   alloc1 #h0 (size 32) (u8 0) res
-  (fun h -> (fun _ _ -> True))
+  (fun h ->
+    let d0 = h0.[d] in
+    (fun _ rres -> rres == Spec.Blake2s.blake2s_internal (v dd) d0 (v ll) (v kk) (v nn)))
   (fun tmp ->
     let h0' = ST.get () in
     alloc1 #h0' (size 24) (u32 0) tmp
-    (fun h' -> (fun _ _ -> True))
+    (fun h' ->
+      let d0 = h'.[d] in
+      let ls = Spec.Blake2s.const_init in
+      (fun _ rs -> True))
+        (* let ls = Spec.blake2s_internal1 ls (v kk) (v nn) in *)
+        (* let ls = Spec.blake2s_internal2 (v dd) d0 ls in *)
+        (* rs == Spec.blake2s_internal3 ls (v dd) d0 (v ll) (v kk) (v nn))) *)
     (fun st_u32 ->
       (**) let h00 = ST.get () in
       let s = sub st_u32 (size 16) (size 8) in
@@ -618,7 +626,7 @@ let blake2s ll d kk k nn res =
 
   let h0 = ST.get () in
   alloc1 #h0 len_st_u8 (u8 0) res
-  (fun h0 -> (fun _ _ -> True))
+  (fun h0 -> (fun _ r -> True))
   (fun st_u8 ->
 
       let padded_data = sub #uint8 #(v len_st_u8) #(v padded_data_length) st_u8 (size 32) padded_data_length in
