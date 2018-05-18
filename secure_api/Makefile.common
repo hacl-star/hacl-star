@@ -35,7 +35,7 @@ else ifeq ($(OS),Windows_NT)
   QUICPROVIDER_SO_LDOPTS =
   export PATH
 endif
-CCOPTS=-Wall -Wextra $(CFLAGS) -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
+CCOPTS=-Wall -Wextra $(CFLAGS) -I $(KREMLIN_HOME)/include $(CCOPTS_EXTRA)
 
 # -Werror --not yet feasible because of FStar_Char_char_of_int in kremstr.h
 # The include paths, including the implementation choice.
@@ -47,7 +47,7 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/code/poly1305 \
 	$(HACL_HOME)/code/hash \
 	$(HACL_HOME)/code/salsa-family \
-	$(KREMLIN_HOME)/kremlib	\
+	$(KREMLIN_HOME)/kremlib \
 	$(HACL_HOME)/secure_api \
 	$(HACL_HOME)/secure_api/aead \
 	$(HACL_HOME)/secure_api/prf \
