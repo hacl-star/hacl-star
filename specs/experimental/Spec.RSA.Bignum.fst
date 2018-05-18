@@ -32,28 +32,21 @@ let rec get_limbi c i =
   if (i = 0) then c % pow2 64
   else get_limbi (c / pow2 64) (i - 1)
 
-val mod_inv_u64_:
-  alpha:uint64 -> beta:uint64 ->
-  ub:uint64 -> vb:uint64 -> i:size_nat{i <= 64} -> Tot uint64
-  (decreases (64 - i))
-let rec mod_inv_u64_ alpha beta ub vb i =
-  if (i < 64) then begin
-    let u_is_odd = u64 0 -. (ub &. u64 1) in
-    let beta_if_u_is_odd = beta &. u_is_odd in
-    let ub = ((ub ^. beta_if_u_is_odd) >>. (u32 1)) +. (ub &. beta_if_u_is_odd) in
-
-    let alpha_if_u_is_odd = alpha &. u_is_odd in
-    let vb = (shift_right #U64 vb (u32 1)) +. alpha_if_u_is_odd in
-    mod_inv_u64_ alpha beta ub vb (i + 1) end
-  else vb
-
 val mod_inv_u64: n0:uint64 -> Tot uint64
 let mod_inv_u64 n0 =
   let alpha = shift_left #U64 (u64 1) (u32 63) in
   let beta = n0 in
-  let ub = u64 1 in
-  let vb = u64 0 in
-  mod_inv_u64_ alpha beta ub vb 0
+  let (ub, vb) =
+    repeati 64
+    (fun i (ub, vb) ->
+      let u_is_odd = u64 0 -. (ub &. u64 1) in
+      let beta_if_u_is_odd = beta &. u_is_odd in
+      let ub = ((ub ^. beta_if_u_is_odd) >>. (u32 1)) +. (ub &. beta_if_u_is_odd) in
+
+      let alpha_if_u_is_odd = alpha &. u_is_odd in
+      let vb = (shift_right #U64 vb (u32 1)) +. alpha_if_u_is_odd in
+      (ub, vb)) (u64 1, u64 0) in
+  vb
 
 (* Karatsuba's multiplication *)
 type sign =
@@ -82,7 +75,7 @@ val add_sign:
 	     sa2 = (if (a0 >= a1) then Positive else Negative) /\
 	     sb2 = (if (b0 >= b1) then Positive else Negative)))
   (ensures (fun res -> res == a1 * b0 + a0 * b1))
-
+  #reset-options "--z3rlimit 100 --max_fuel 0"
 let add_sign c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 =
   if ((sa2 = Positive && sb2 = Positive) || (sa2 = Negative && sb2 = Negative))
   then (c0 + c1) - c2

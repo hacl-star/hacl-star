@@ -9,6 +9,7 @@ open FStar.Mul
 open Hacl.Impl.Lib
 open Hacl.Impl.Montgomery
 open Hacl.Impl.Multiplication
+open Hacl.Impl.Shift
 
 module Buffer = Spec.Lib.IntBuf
 

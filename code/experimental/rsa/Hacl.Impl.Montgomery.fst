@@ -8,74 +8,43 @@ open FStar.Mul
 
 open Hacl.Impl.Lib
 open Hacl.Impl.Addition
-open Hacl.Impl.Comparison
 open Hacl.Impl.Multiplication
-open Hacl.Impl.Shift
 
 module Buffer = Spec.Lib.IntBuf
 
-val bn_pow2_mod_n_:
-  #aLen:size_nat -> #rLen:size_nat{aLen < rLen} ->
-  aaLen:size_t{v aaLen == aLen} -> a:lbignum aLen ->
-  i:size_t -> p:size_t ->
-  rrLen:size_t{v rrLen == rLen} -> res:lbignum rLen ->
-  Stack unit
-    (requires (fun h -> live h a /\ live h res /\ disjoint res a))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-  [@"c_inline"]
-let rec bn_pow2_mod_n_ #aLen #rLen aaLen a i p rrLen res =
-  if (i <. p) then begin
-    bn_lshift1 rrLen res res;
-    (if not (bn_is_less rrLen res aaLen a) then
-      let _ = bn_sub rrLen res aaLen a res in ());
-    bn_pow2_mod_n_ aaLen a (add #SIZE i (size 1)) p rrLen res
-  end
-
-// res = 2 ^^ p % a
-val bn_pow2_mod_n:
-  #aLen:size_nat -> aaLen:size_t{v aaLen == aLen /\ aLen + 1 < max_size_t} ->
-  aBits:size_t -> a:lbignum aLen ->
-  p:size_t{v aBits < v p} ->
-  res:lbignum aLen ->
-  Stack unit
-    (requires (fun h -> live h a /\ live h res /\ disjoint res a))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-  [@"c_inline"]
-let bn_pow2_mod_n #aLen aaLen aBits a p res =
-  let rLen = add #SIZE aaLen (size 1) in
-  alloc #uint64 #unit #(v rLen) rLen (u64 0) [BufItem a] [BufItem res]
-  (fun h0 _ h1 -> True)
-  (fun tmp -> 
-    assume (v aBits / 64 < v rLen);
-    bn_set_bit rLen tmp aBits;
-    let _ = bn_sub rLen tmp aaLen a tmp in // tmp = tmp - a
-    bn_pow2_mod_n_ #aLen #(v rLen) aaLen a aBits p rLen tmp;
-    let tmp' = Buffer.sub #uint64 #(v rLen) #aLen tmp (size 0) aaLen in
-    copy aaLen tmp' res
-  )
-
 val mod_inv_u64_:
-  alpha:uint64 -> beta:uint64 -> ub:uint64 -> vb:uint64 -> i:size_t{v i <= 64} -> Tot uint64
-  (decreases (64 - v i))
-let rec mod_inv_u64_ alpha beta ub vb i =
-  if (i <. size 64) then begin
+  alpha:uint64 -> beta:uint64 -> uv:lbignum 2 -> Stack unit
+  (requires (fun h -> live h uv))
+  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 uv h0 h1))
+  [@ "substitute"]
+let mod_inv_u64_ alpha beta uv =
+  iteri_simple #uint64 #2 (size 64)
+  (fun i uv ->
+    let ub = uv.(size 0) in
+    let vb = uv.(size 1) in
     let u_is_odd = u64 0 -. (ub &. u64 1) in
     let beta_if_u_is_odd = beta &. u_is_odd in
-    let ub = add_mod #U64 (shift_right #U64 (ub ^. beta_if_u_is_odd) (u32 1)) (ub &. beta_if_u_is_odd) in
+    uv.(size 0) <- add_mod #U64 (shift_right #U64 (ub ^. beta_if_u_is_odd) (u32 1)) (ub &. beta_if_u_is_odd);
 
     let alpha_if_u_is_odd = alpha &. u_is_odd in
-    let vb = add_mod #U64 (shift_right #U64 vb (u32 1)) alpha_if_u_is_odd in
-    mod_inv_u64_ alpha beta ub vb (add #SIZE i (size 1)) end 
-  else vb
+    uv.(size 1) <- add_mod #U64 (shift_right #U64 vb (u32 1)) alpha_if_u_is_odd
+  ) uv
 
-val mod_inv_u64: n0:uint64 -> Tot uint64
+val mod_inv_u64: n0:uint64 -> Stack uint64
+  (requires (fun h -> True))
+  (ensures (fun h0 _ h1 -> modifies0 h0 h1))
+  [@"c_inline"]
 let mod_inv_u64 n0 =
   let alpha = shift_left #U64 (u64 1) (u32 63) in
   let beta = n0 in
-
-  let ub = u64 1 in
-  let vb = u64 0 in
-  mod_inv_u64_ alpha beta ub vb (size 0)
+  alloc #uint64 #uint64 #2 (size 2) (u64 0) [] []
+  (fun h0 _ h1 -> True)
+  (fun uv ->
+    uv.(size 0) <- u64 1;
+    uv.(size 1) <- u64 0;
+    mod_inv_u64_ alpha beta uv;
+    uv.(size 1)
+  )
 
 val bn_mult_by_limb_addj_carry:
   #aLen:size_nat -> aaLen:size_t{v aaLen == aLen} -> a:lbignum aLen ->
@@ -94,9 +63,9 @@ let rec bn_mult_by_limb_addj_carry #aLen aaLen a l carry i j resLen res =
   else begin
     let res_ij = res.(ij) in
     let (c', res_ij) = addcarry_u64 (u64 0) res_ij carry in
-    res.(ij) <- res_ij; 
+    res.(ij) <- res_ij;
     c' end
-      
+
 val mont_reduction_:
   #nLen:size_nat -> #rLen:size_nat{nLen < rLen} ->
   nnLen:size_t{v nnLen == nLen} ->
@@ -185,5 +154,3 @@ let from_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 aM tmp a =
   //bn_rshift rLen2 tmp (mul #SIZE (size 64) rrLen) tmp; // tmp = tmp / r
   let tmp' = Buffer.sub #uint64 #(v tmpLen) #nLen tmp rrLen nnLen in
   copy nnLen tmp' a
-
-
