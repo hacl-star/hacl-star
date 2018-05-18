@@ -45,7 +45,6 @@ let main (): St C.exit_code =
   EverCrypt.(init (Some Hacl));
   test1 ();
   EverCrypt.(init (Some Vale));
-  // 2018.05.18 SZ: This currently fails
-  // test1 (); 
+  test1 ();
   pop_frame ();
   C.EXIT_SUCCESS

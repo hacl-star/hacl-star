@@ -6,14 +6,16 @@ UNAME = $(shell uname)
 ifeq ($(OS),Windows_NT)
   ifeq ($(shell uname -o),Cygwin)
     EVERCRYPT_HOME_RUN := $(shell cygpath -a -u ${EVERCRYPT_HOME})
+    MLCRYPTO_HOME_RUN := $(shell cygpath -a -u ${MLCRYPTO_HOME})
   else
     EVERCRYPT_HOME_RUN := $(EVERCRYPT_HOME)
+    MLCRYPTO_HOME_RUN := $(MLCRYPTO_HOME)
   endif
-  PREFIX = PATH=$(EVERCRYPT_HOME)/out
+  PREFIX = PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(PATH)
 else ifeq ($(UNAME),Darwin)
-  PREFIX = DYLD_LIBRARY_PATH=$(EVERCRYPT_HOME)/out
+  PREFIX = DYLD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(DYLD_LIBRARY_PATH)
 else ifeq ($(UNAME),Linux)
-  PREFIX = LD_LIBRARY_PATH=$(EVERCRYPT_HOME)/out
+  PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(LD_LIBRARY_PATH)
 endif
 
 test: sample-project.exe
