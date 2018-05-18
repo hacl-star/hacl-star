@@ -95,10 +95,10 @@ val abs:
 let abs #aLen aaLen a b res =
     if (bn_is_less aaLen a aaLen b) //a < b
     then begin
-      bn_sub aaLen b aaLen a res;
+      let _ = bn_sub aaLen b aaLen a res in
       Negative end
     else begin
-      bn_sub aaLen a aaLen b res;
+      let _ = bn_sub aaLen a aaLen b res in
       Positive end
 
 val add_sign:
@@ -116,10 +116,12 @@ val add_sign:
     [@"c_inline"]
 let add_sign #a0Len aa0Len c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 rresLen res =
     let c0Len = add #SIZE aa0Len aa0Len in
-    bn_add_carry c0Len c0 c0Len c1 res;
+    let res1 = Buffer.sub #uint64 #(v rresLen) #(v c0Len) res (size 0) c0Len in
+    let c = bn_add c0Len c0 c0Len c1 res1 in
+    res.(c0Len) <- c;
     if ((sa2 = Positive && sb2 = Positive) || (sa2 = Negative && sb2 = Negative))
-    then bn_sub rresLen res c0Len c2 res
-    else bn_add rresLen res c0Len c2 res
+    then let _ = bn_sub rresLen res c0Len c2 res in ()
+    else let _ = bn_add rresLen res c0Len c2 res in ()
 
 val karatsuba_:
     #aLen:size_nat ->
@@ -170,7 +172,7 @@ let rec karatsuba_ #aLen pow2_i aaLen a b tmp res =
        //tmp = [a2; b2; c2; tmp1; _]
        let res1Len = add #SIZE pow2_i0 pow2_i in
        let res1 = Buffer.sub #uint64 #(v resLen) #(v res1Len) res pow2_i0 res1Len in
-       bn_add res1Len res1 tmp1Len tmp1 res1
+       let _ = bn_add res1Len res1 tmp1Len tmp1 res1 in ()
     end); admit()
 
 val karatsuba:

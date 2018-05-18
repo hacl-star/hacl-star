@@ -27,7 +27,7 @@ let rec bn_pow2_mod_n_ #aLen #rLen aaLen a i p rrLen res =
   if (i <. p) then begin
     bn_lshift1 rrLen res res;
     (if not (bn_is_less rrLen res aaLen a) then
-      bn_sub rrLen res aaLen a res);
+      let _ = bn_sub rrLen res aaLen a res in ());
     bn_pow2_mod_n_ aaLen a (add #SIZE i (size 1)) p rrLen res
   end
 
@@ -48,7 +48,7 @@ let bn_pow2_mod_n #aLen aaLen aBits a p res =
   (fun tmp -> 
     assume (v aBits / 64 < v rLen);
     bn_set_bit rLen tmp aBits;
-    bn_sub rLen tmp aaLen a tmp; // tmp = tmp - a
+    let _ = bn_sub rLen tmp aaLen a tmp in // tmp = tmp - a
     bn_pow2_mod_n_ #aLen #(v rLen) aaLen a aBits p rLen tmp;
     let tmp' = Buffer.sub #uint64 #(v rLen) #aLen tmp (size 0) aaLen in
     copy aaLen tmp' res
