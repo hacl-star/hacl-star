@@ -49,7 +49,7 @@ FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib multiplexer multiplexer/fst \
   $(HACL_CODE)/lib/kremlin $(HACL_CODE)/curve25519/interfaces $(HACL_CODE)/hash/interfaces \
   $(HACL_SPEC)
 FSTAR		= $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
-  --use_two_phase_tc true --admit_smt_queries true $(OTHERFLAGS) \
+  $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) \
   --use_hints # --record_hints --hint_info
