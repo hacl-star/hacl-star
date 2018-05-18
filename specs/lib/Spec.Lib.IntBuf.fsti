@@ -107,6 +107,31 @@ inline_for_extraction val alloc1: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 ->
 		          modifies1 write h0 h1 /\
 		          spec h0 r (as_lseq write h1)))
 
+
+inline_for_extraction val alloc1_with: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 -> #len:size_nat -> #wlen:size_nat -> clen:size_t{v clen == len} ->
+  init_spec: LSeq.lseq a len ->
+  init:(unit -> StackInline (lbuffer a len)
+               (requires (fun h -> h == h0))
+               (ensures  (fun h0 r h1 -> creates1 #a #len r h0 h1 /\
+		                                preserves_live h0 h1 /\
+		                                modifies1 r h0 h1 /\
+		                                as_lseq r h1 == init_spec))) ->
+  write:lbuffer w wlen ->
+  spec:(h:mem -> GTot(r:b -> LSeq.lseq w wlen -> Type)) ->
+  impl:(buf:lbuffer a len -> Stack b
+    (requires (fun h -> creates1 #a #len buf h0 h /\
+		     preserves_live h0 h /\
+		     modifies1 buf h0 h /\
+		     as_lseq buf h == init_spec /\
+		     live h0 write))
+    (ensures (fun h r h' -> preserves_live h h' /\ modifies2 buf write h h' /\
+			 spec h0 r (as_lseq write h')))) ->
+  Stack b
+    (requires (fun h -> h == h0 /\ live h write))
+    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
+		          modifies1 write h0 h1 /\
+		          spec h0 r (as_lseq write h1)))
+
 (** This allocation function creates one buffer and writes two buffers.
     It reasons about the output of the first written buffer but not about
     the second one, for which functionnal correctness is ignored. *)

@@ -49,6 +49,13 @@ let alloc1 #h0 #a #b #w #len #wlen clen init write spec impl =
   pop_frame();
   r
 
+let alloc1_with #h0 #a #b #w #len #wlen clen init_spec init write spec impl =
+  push_frame();
+  let buf = init () in
+  let r = impl buf in
+  pop_frame();
+  r
+
 let alloc_modifies2 #h0 #a #b #w0 #w1 #len #wlen0 #wlen1 clen init write0 write1 spec impl =
   push_frame();
   let buf = create clen init in
