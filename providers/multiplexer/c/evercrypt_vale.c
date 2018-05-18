@@ -32,4 +32,12 @@ void EverCrypt_Vale_sha256_update_last(uint32_t *x0, uint8_t *x1, uint32_t x2){
 
 void EverCrypt_Vale_sha256_finish(uint32_t *x0, uint8_t *x1){
   Vale_Hash_SHA2_256_finish(x0, x1);
+  for (int i = 0; i < 8; i++) {
+    uint32_t v = ((uint32_t *) x1)[i];
+    x1[i * 4]     = v >> 24;
+    x1[i * 4 + 1] = v >> 16;
+    x1[i * 4 + 2] = v >> 8;
+    x1[i * 4 + 3] = v;
+  }
+
 }
