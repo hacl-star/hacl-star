@@ -26,22 +26,9 @@ inline_for_extraction let list_init : list uint32 =
   [u32 0x6A09E667; u32 0xBB67AE85; u32 0x3C6EF372; u32 0xA54FF53A;
    u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19]
 
-let const_init : intseq U32 8 =
+let const_iv : intseq U32 8 =
   assert_norm (List.Tot.length list_init = 8);
   createL list_init
-
-// inline_for_extraction let list_sigma: list (n:size_nat{n<16}) = [
-//    0;  1;  2;  3;  4;  5;  6;  7;  8;  9; 10; 11; 12; 13; 14; 15;
-//   14; 10;  4;  8;  9; 15; 13;  6;  1; 12;  0;  2; 11;  7;  5;  3;
-//   11;  8; 12;  0;  5;  2; 15; 13; 10; 14;  3;  6;  7;  1;  9;  4;
-//    7;  9;  3;  1; 13; 12; 11; 14;  2;  6;  5; 10;  4;  0; 15;  8;
-//    9;  0;  5;  7;  2;  4; 10; 15; 14;  1; 11; 12;  6;  8;  3; 13;
-//    2; 12;  6; 10;  0; 11;  8;  3;  4; 13;  7;  5; 15; 14;  1;  9;
-//   12;  5;  1; 15; 14; 13;  4; 10;  0;  7;  6;  3;  9;  2;  8; 11;
-//   13; 11;  7; 14; 12;  1;  3;  9;  5;  0; 15;  4;  8;  6;  2; 10;
-//    6; 15; 14;  9; 11;  3;  0;  8; 12;  2; 13;  7;  1;  4; 10;  5;
-//   10;  2;  8;  4;  7;  6;  1;  5; 15; 11;  9; 14;  3; 12; 13;  0
-// ]
 
 inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
   size 0; size  1; size  2; size  3; size  4; size  5; size  6; size  7; size  8; size  9; size 10; size 11; size 12; size 13; size 14; size 15; size
@@ -56,22 +43,9 @@ inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
   10; size  2; size  8; size  4; size  7; size  6; size  1; size  5; size 15; size 11; size  9; size 14; size  3; size 12; size 13; size 0
 ]
 
-let sigma:lseq (n:size_t{size_v n < 16}) 160 =
+let const_sigma:lseq (n:size_t{size_v n < 16}) 160 =
   assert_norm (List.Tot.length list_sigma = 160);
   createL list_sigma
-
-// let sigma_size:lseq (n:size_t{ size_v n < 16}) 160 =
-//   assert_norm (List.Tot.length list_sigma_size = 160);
-//   createL list_sigma_size
-
-
-// inline_for_extraction
-// val size_sigma_t: n:size_nat{n < 16} -> u:size_t{size_v u < 16 /\ uint_v #SIZE u == n}
-// let size_sigma_t n = admit(); size n
-
-// let lemma_eq_sigmas unit : Lemma
-//   (requires (True))
-//   (ensures  (sigma_size == map size_sigma_t sigma)) = admit()
 
 
 (* Definition of base types *)
@@ -106,7 +80,7 @@ let blake2_mixing v a b c d x y =
 
 val blake2_round1 : working_vector -> message_block -> size_nat -> Tot working_vector
 let blake2_round1 v m i =
-  let s = sub sigma ((i % 10) * 16) 16 in
+  let s = sub const_sigma ((i % 10) * 16) 16 in
   let v = blake2_mixing v 0 4  8 12 (m.[size_v s.[ 0]]) (m.[size_v s.[ 1]]) in
   let v = blake2_mixing v 1 5  9 13 (m.[size_v s.[ 2]]) (m.[size_v s.[ 3]]) in
   let v = blake2_mixing v 2 6 10 14 (m.[size_v s.[ 4]]) (m.[size_v s.[ 5]]) in
@@ -116,7 +90,7 @@ let blake2_round1 v m i =
 
 val blake2_round2 : working_vector -> message_block -> size_nat -> Tot working_vector
 let blake2_round2 v m i =
-  let s = sub sigma ((i % 10) * 16) 16 in
+  let s = sub const_sigma ((i % 10) * 16) 16 in
   let v = blake2_mixing v 0 5 10 15 (m.[size_v s.[ 8]]) (m.[size_v s.[ 9]]) in
   let v = blake2_mixing v 1 6 11 12 (m.[size_v s.[10]]) (m.[size_v s.[11]]) in
   let v = blake2_mixing v 2 7  8 13 (m.[size_v s.[12]]) (m.[size_v s.[13]]) in
@@ -134,7 +108,7 @@ let blake2_round m i v =
 val blake2_compress1 : working_vector -> hash_state -> message_block -> uint64 -> last_block_flag -> Tot working_vector
 let blake2_compress1 v h m offset flag =
   let v = update_sub v 0 8 h in
-  let v = update_sub v 8 8 const_init in
+  let v = update_sub v 8 8 const_iv in
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 word_size) in
   let v_12 = v.[12] ^. low_offset in
@@ -209,14 +183,14 @@ let blake2s_internal3 h dd d ll kk nn =
   let offset : size_nat = (dd - 1) * 16 * 4 in
   let last_block : intseq U32 16 = uints_from_bytes_le (sub d offset bytes_in_block) in
   if kk = 0 then
-    blake2_compress h last_block (u64  ll) true
+    blake2_compress h last_block (u64 ll) true
   else
     blake2_compress h last_block (u64 (ll + block_bytes)) true
 
 
 val blake2s_internal_core : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lseq uint8 32)
 let blake2s_internal_core dd d ll kk nn =
-  let h = const_init in
+  let h = const_iv in
   let h = blake2s_internal1 h kk nn in
   let h = blake2s_internal2 dd d h in
   let h = blake2s_internal3 h dd d ll kk nn in
