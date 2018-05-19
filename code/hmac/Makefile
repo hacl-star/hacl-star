@@ -32,7 +32,7 @@ clean:
 KREMLIN_ARGS+= \
 		-verbose -tmpdir hmac-c \
 		-I $(HACL_HOME)/code/hash \
-		-drop FStar,Prims,C.Loops.Spec.Loops \
+		-drop FStar,Prims,C.Loops.Spec.Loops,LowStar \
 		-drop Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 		-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.*,Hacl.Impl.SHA2_256.Lemmas \
 		-bundle "Hacl.HMAC.SHA2_256=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Impl.SHA2_256,Hacl.Impl.HMAC.SHA2_256,Hacl.HMAC.SHA2_256" \

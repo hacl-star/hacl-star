@@ -82,7 +82,8 @@ all-ci: bignum-ci specific-ci
 
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 KREMLIN_ARGS+=-I ../bignum -tmpdir x25519-c \
-	-drop FStar,Prims,C.Loops.Spec.Loops,Spec.*,Hacl.Spec.*,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+	-drop FStar,Prims,LowStar,C.Loops.Spec.Loops,Spec.* \
+	-drop Hacl.Spec.*,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	$(KREMLIN_TESTLIB)
 
 # Acknowledge the F* dependency graph
