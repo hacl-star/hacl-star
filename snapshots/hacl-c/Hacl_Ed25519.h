@@ -35,9 +35,9 @@ typedef uint8_t *Hacl_Ed25519_hint8_p;
 
 void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32_t len1);
 
-bool Hacl_Ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t len1, uint8_t *signature);
+bool Hacl_Ed25519_verify(uint8_t *output, uint8_t *msg, uint32_t len1, uint8_t *signature);
 
-void Hacl_Ed25519_secret_to_public(uint8_t *out, uint8_t *secret);
+void Hacl_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret);
 
 #define __Hacl_Ed25519_H_DEFINED
 #endif
