@@ -2816,13 +2816,13 @@ void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32
   Hacl_Impl_Ed25519_Sign_sign(signature, secret, msg, len1);
 }
 
-bool Hacl_Ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t len1, uint8_t *signature)
+bool Hacl_Ed25519_verify(uint8_t *output, uint8_t *msg, uint32_t len1, uint8_t *signature)
 {
-  return Hacl_Impl_Ed25519_Verify_verify(public, msg, len1, signature);
+  return Hacl_Impl_Ed25519_Verify_verify(output, msg, len1, signature);
 }
 
-void Hacl_Ed25519_secret_to_public(uint8_t *out, uint8_t *secret)
+void Hacl_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret)
 {
-  Hacl_Impl_Ed25519_SecretToPublic_secret_to_public(out, secret);
+  Hacl_Impl_Ed25519_SecretToPublic_secret_to_public(output, secret);
 }
 
