@@ -8,16 +8,18 @@ open Spec.Lib.IntSeq
 
 
 (* Algorithm parameters *)
+inline_for_extraction let size_hash_w : size_nat = 8
 inline_for_extraction let size_word : size_nat = 4
 inline_for_extraction let size_block_w : size_nat = 16
 inline_for_extraction let size_block : size_nat = size_block_w * size_word
+inline_for_extraction let max_size_hash : size_nat = 32
 inline_for_extraction let rounds_in_f : size_nat = 10
 
 
 (* Definition of base types *)
-type working_vector = intseq U32 16
-type message_block = intseq U32 16
-type hash_state = intseq U32 8
+type working_vector = intseq U32 size_block_w
+type message_block = intseq U32 size_block_w
+type hash_state = intseq U32 size_hash_w
 type idx = n:size_nat{n < 16}
 type counter = uint64
 type last_block_flag = bool
@@ -163,7 +165,7 @@ let blake2_compress s m offset flag =
   s
 
 
-// Init
+// Init0
 val blake2s_internal1: hash_state -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
 let blake2s_internal1 s kk nn =
   let s0 = s.[0] in
