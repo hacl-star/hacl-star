@@ -13,6 +13,7 @@ inline_for_extraction let size_block_w : size_nat = 16
 inline_for_extraction let size_block : size_nat = size_block_w * size_word
 inline_for_extraction let rounds_in_f : size_nat = 10
 
+
 (* Definition of base types *)
 type working_vector = intseq U32 16
 type message_block = intseq U32 16
@@ -20,6 +21,16 @@ type hash_state = intseq U32 8
 type idx = n:size_nat{n < 16}
 type counter = uint64
 type last_block_flag = bool
+
+noeq type state = {
+  h: hash_state;
+  t: intseq U32 2;
+  f: intseq U32 2;
+  buf: intseq U8 size_block;
+  buflen: size_t;
+  outlen: size_t;
+  last_node: uint8;
+}
 
 
 (* Constants *)
@@ -37,41 +48,31 @@ let const_iv : intseq U32 8 =
   createL list_init
 
 inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
-  size 0; size  1; size  2; size  3; size  4; size  5; size  6; size  7; size  8; size  9; size 10; size 11; size 12; size 13; size 14; size 15; size
-  14; size 10; size  4; size  8; size  9; size 15; size 13; size  6; size  1; size 12; size  0; size  2; size 11; size  7; size  5; size  3; size
-  11; size  8; size 12; size  0; size  5; size  2; size 15; size 13; size 10; size 14; size  3; size  6; size  7; size  1; size  9; size  4; size
-   7; size  9; size  3; size  1; size 13; size 12; size 11; size 14; size  2; size  6; size  5; size 10; size  4; size  0; size 15; size  8; size
-   9; size  0; size  5; size  7; size  2; size  4; size 10; size 15; size 14; size  1; size 11; size 12; size  6; size  8; size  3; size 13; size
-   2; size 12; size  6; size 10; size  0; size 11; size  8; size  3; size  4; size 13; size  7; size  5; size 15; size 14; size  1; size  9; size
-  12; size  5; size  1; size 15; size 14; size 13; size  4; size 10; size  0; size  7; size  6; size  3; size  9; size  2; size  8; size 11; size
-  13; size 11; size  7; size 14; size 12; size  1; size  3; size  9; size  5; size  0; size 15; size  4; size  8; size  6; size  2; size 10; size
-   6; size 15; size 14; size  9; size 11; size  3; size  0; size  8; size 12; size  2; size 13; size  7; size  1; size  4; size 10; size  5; size
-  10; size  2; size  8; size  4; size  7; size  6; size  1; size  5; size 15; size 11; size  9; size 14; size  3; size 12; size 13; size 0
+  size  0; size  1; size  2; size  3; size  4; size  5; size  6; size  7;
+  size  8; size  9; size 10; size 11; size 12; size 13; size 14; size 15;
+  size 14; size 10; size  4; size  8; size  9; size 15; size 13; size  6;
+  size  1; size 12; size  0; size  2; size 11; size  7; size  5; size  3;
+  size 11; size  8; size 12; size  0; size  5; size  2; size 15; size 13;
+  size 10; size 14; size  3; size  6; size  7; size  1; size  9; size  4;
+  size  7; size  9; size  3; size  1; size 13; size 12; size 11; size 14;
+  size  2; size  6; size  5; size 10; size  4; size  0; size 15; size  8;
+  size  9; size  0; size  5; size  7; size  2; size  4; size 10; size 15;
+  size 14; size  1; size 11; size 12; size  6; size  8; size  3; size 13;
+  size  2; size 12; size  6; size 10; size  0; size 11; size  8; size  3;
+  size  4; size 13; size  7; size  5; size 15; size 14; size  1; size  9;
+  size 12; size  5; size  1; size 15; size 14; size 13; size  4; size 10;
+  size  0; size  7; size  6; size  3; size  9; size  2; size  8; size 11;
+  size 13; size 11; size  7; size 14; size 12; size  1; size  3; size  9;
+  size  5; size  0; size 15; size  4; size  8; size  6; size  2; size 10;
+  size  6; size 15; size 14; size  9; size 11; size  3; size  0; size  8;
+  size 12; size  2; size 13; size  7; size  1; size  4; size 10; size  5;
+  size 10; size  2; size  8; size  4; size  7; size  6; size  1; size  5;
+  size 15; size 11; size  9; size 14; size  3; size 12; size 13; size 0
 ]
 
 let const_sigma:lseq (n:size_t{size_v n < 16}) 160 =
   assert_norm (List.Tot.length list_sigma = 160);
   createL list_sigma
-
-
-
-(*   typedef struct blake2s_state__ *)
-(*   { *)
-(*     uint32_t h[8]; *)
-(*     uint32_t t[2]; *)
-(*     uint32_t f[2]; *)
-(*     uint8_t  buf[BLAKE2S_BLOCKBYTES]; *)
-(*     size_t   buflen; *)
-(*     size_t   outlen; *)
-(*     uint8_t  last_node; *)
-(* } blake2s_state; *)
-
-(* type state = { *)
-(*   h: hash_state; *)
-(*   t: intseq U32 2; *)
-(*   f: intseq U32 2; *)
-(*   buf: intseq U8 size_block *)
-(* } *)
 
 
 (* Functions *)
