@@ -8,12 +8,18 @@ open Spec.Lib.IntSeq
 
 
 (* Algorithm parameters *)
-inline_for_extraction let word_size : size_nat = 32
-inline_for_extraction let words_block_size : size_nat = 16
-inline_for_extraction let bytes_in_word : size_nat = 4
-inline_for_extraction let bytes_in_block : size_nat = words_block_size * bytes_in_word
+inline_for_extraction let size_word : size_nat = 4
+inline_for_extraction let size_block_w : size_nat = 16
+inline_for_extraction let size_block : size_nat = size_block_w * size_word
 inline_for_extraction let rounds_in_f : size_nat = 10
-inline_for_extraction let block_bytes : size_nat = 64
+
+(* Definition of base types *)
+type working_vector = intseq U32 16
+type message_block = intseq U32 16
+type hash_state = intseq U32 8
+type idx = n:size_nat{n < 16}
+type counter = uint64
+type last_block_flag = bool
 
 
 (* Constants *)
@@ -48,13 +54,24 @@ let const_sigma:lseq (n:size_t{size_v n < 16}) 160 =
   createL list_sigma
 
 
-(* Definition of base types *)
-type working_vector = intseq U32 16
-type message_block = intseq U32 16
-type hash_state = intseq U32 8
-type idx = n:size_nat{n < 16}
-type counter = uint64
-type last_block_flag = bool
+
+(*   typedef struct blake2s_state__ *)
+(*   { *)
+(*     uint32_t h[8]; *)
+(*     uint32_t t[2]; *)
+(*     uint32_t f[2]; *)
+(*     uint8_t  buf[BLAKE2S_BLOCKBYTES]; *)
+(*     size_t   buflen; *)
+(*     size_t   outlen; *)
+(*     uint8_t  last_node; *)
+(* } blake2s_state; *)
+
+(* type state = { *)
+(*   h: hash_state; *)
+(*   t: intseq U32 2; *)
+(*   f: intseq U32 2; *)
+(*   buf: intseq U8 size_block *)
+(* } *)
 
 
 (* Functions *)
@@ -110,7 +127,7 @@ let blake2_compress1 v h m offset flag =
   let v = update_sub v 0 8 h in
   let v = update_sub v 8 8 const_iv in
   let low_offset = to_u32 #U64 offset in
-  let high_offset = to_u32 #U64 (offset >>. u32 word_size) in
+  let high_offset = to_u32 #U64 (offset >>. u32 32) in
   let v_12 = v.[12] ^. low_offset in
   let v_13 = v.[13] ^. high_offset in
   let v_14 = v.[14] ^. (u32 0xFFFFFFFF) in
@@ -154,21 +171,21 @@ let blake2s_internal1 h kk nn =
 
 
 // Update 1
-val blake2s_internal2_inner: dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> i:size_nat{i < dd - 1} -> h:intseq U32 8 -> Tot (h:intseq U32 8)
+val blake2s_internal2_inner: dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> i:size_nat{i < dd - 1} -> h:intseq U32 8 -> Tot (h:intseq U32 8)
 let blake2s_internal2_inner dd d i h =
-  let sub_d = (sub d (i * bytes_in_block) bytes_in_block) in
+  let sub_d = (sub d (i * size_block) size_block) in
   let to_compress : intseq U32 16 = uints_from_bytes_le sub_d in
-  let offset = u64 ((i + 1) * block_bytes) in
+  let offset = u64 ((i + 1) * size_block) in
   blake2_compress h to_compress offset false
 
 
 // Update_blocks // Update_multi
-val blake2s_internal2_loop : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> h:intseq U32 8 -> Tot (h:intseq U32 8)
+val blake2s_internal2_loop : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> h:intseq U32 8 -> Tot (h:intseq U32 8)
 let blake2s_internal2_loop dd d h = repeati (dd - 1) (blake2s_internal2_inner dd d) h
 
 
 // BB. This seems odd as blake2 internal should be called when dd = 1 !!
-val blake2s_internal2 : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> h:intseq U32 8 -> Tot (h:intseq U32 8)
+val blake2s_internal2 : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> h:intseq U32 8 -> Tot (h:intseq U32 8)
 let blake2s_internal2 dd d h =
   if dd > 1 then
     blake2s_internal2_loop dd d h
@@ -177,18 +194,18 @@ let blake2s_internal2 dd d h =
 
 // Update last
 // We should insert the key in update1 instead ?
-val blake2s_internal3 : h:intseq U32 8 -> dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+val blake2s_internal3 : h:intseq U32 8 -> dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
 
 let blake2s_internal3 h dd d ll kk nn =
   let offset : size_nat = (dd - 1) * 16 * 4 in
-  let last_block : intseq U32 16 = uints_from_bytes_le (sub d offset bytes_in_block) in
+  let last_block : intseq U32 16 = uints_from_bytes_le (sub d offset size_block) in
   if kk = 0 then
     blake2_compress h last_block (u64 ll) true
   else
-    blake2_compress h last_block (u64 (ll + block_bytes)) true
+    blake2_compress h last_block (u64 (ll + size_block)) true
 
 
-val blake2s_internal_core : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lseq uint8 32)
+val blake2s_internal_core : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lseq uint8 32)
 let blake2s_internal_core dd d ll kk nn =
   let h = const_iv in
   let h = blake2s_internal1 h kk nn in
@@ -197,24 +214,24 @@ let blake2s_internal_core dd d ll kk nn =
   uints_to_bytes_le h
 
 
-val blake2s_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t} -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
+val blake2s_internal : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 let blake2s_internal dd d ll kk nn =
   let tmp = blake2s_internal_core dd d ll kk nn in
   sub tmp 0 nn
 
 
-val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * bytes_in_block } ->  d:lbytes ll ->  kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
+val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * size_block } ->  d:lbytes ll ->  kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 
 let blake2s ll d kk k nn =
-  let nblocks = ll / bytes_in_block in
-  let rem = ll % bytes_in_block in
-  let blocks = sub d 0 (nblocks * bytes_in_block) in
-  let last = sub d (nblocks * bytes_in_block) rem in
-  let key_block = create bytes_in_block (u8 0) in
+  let nblocks = ll / size_block in
+  let rem = ll % size_block in
+  let blocks = sub d 0 (nblocks * size_block) in
+  let last = sub d (nblocks * size_block) rem in
+  let key_block = create size_block (u8 0) in
   let key_block = update_sub key_block 0 kk k in
-  let last_block = create bytes_in_block (u8 0) in
+  let last_block = create size_block (u8 0) in
   let last_block = update_sub last_block 0 rem last in
-  let (|nblocks, data|) : ( n:size_nat{n * bytes_in_block <= max_size_t} & lseq uint8 (n * bytes_in_block))=
+  let (|nblocks, data|) : ( n:size_nat{n * size_block <= max_size_t} & lseq uint8 (n * size_block))=
     if rem = 0 then (|nblocks, blocks|)
     else (|(nblocks + 1), concat blocks last_block|)
   in
