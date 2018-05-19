@@ -29,21 +29,21 @@ val sign:
 
 
 val verify:
-  public:uint8_p{length public = 32} ->
+  output:uint8_p{length output = 32} ->
   msg:uint8_p ->
   len:UInt32.t{length msg = UInt32.v len /\ length msg < pow2 32 - 64} ->
   signature:uint8_p{length signature = 64} ->
   Stack bool
-    (requires (fun h -> live h public /\ live h msg /\ live h signature))
-    (ensures (fun h0 b h1 -> live h0 public /\ live h0 msg /\ live h0 signature /\
+    (requires (fun h -> live h output /\ live h msg /\ live h signature))
+    (ensures (fun h0 b h1 -> live h0 output /\ live h0 msg /\ live h0 signature /\
       modifies_0 h0 h1 /\
-      b == Spec.Ed25519.verify h0.[public] h0.[msg] h0.[signature]))
+      b == Spec.Ed25519.verify h0.[output] h0.[msg] h0.[signature]))
 
 
 val secret_to_public:
-  out:hint8_p{length out = 32} ->
-  secret:hint8_p{length secret = 32 /\ disjoint out secret} ->
+  output:hint8_p{length output = 32} ->
+  secret:hint8_p{length secret = 32 /\ disjoint output secret} ->
   Stack unit
-    (requires (fun h -> live h out /\ live h secret))
-    (ensures (fun h0 _ h1 -> live h0 out /\ live h0 secret /\ live h1 out /\ modifies_1 out h0 h1 /\
-      as_seq h1 out == Spec.Ed25519.secret_to_public h0.[secret]))
+    (requires (fun h -> live h output /\ live h secret))
+    (ensures (fun h0 _ h1 -> live h0 output /\ live h0 secret /\ live h1 output /\ modifies_1 output h0 h1 /\
+      as_seq h1 output == Spec.Ed25519.secret_to_public h0.[secret]))
