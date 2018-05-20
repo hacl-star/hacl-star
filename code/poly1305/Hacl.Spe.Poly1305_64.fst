@@ -135,7 +135,7 @@ let invariant (st:poly1305_state_) : GTot Type0 =
 val append_empty: #a:Type -> s1:Seq.seq a -> s2:Seq.seq a -> Lemma
   (requires (Seq.length s1 == 0))
   (ensures  (Seq.append s1 s2 == s2))
-  [SMTPat (Seq.append s1 s2); SMTPatT (Seq.length s1 == 0)]
+  [SMTPat (Seq.append s1 s2); SMTPat (Seq.length s1 == 0)]
 let append_empty #a s1 s2 =
   Seq.lemma_eq_intro (Seq.append s1 s2) s2
 
@@ -161,7 +161,7 @@ let append_assoc #a s1 s2 s3 = ()
 val encode_bytes_empty: txt:Seq.seq H8.t -> Lemma
     (requires Seq.length txt == 0)
     (ensures  encode_bytes (reveal_sbytes txt) == Seq.createEmpty)
-    [SMTPat (encode_bytes (reveal_sbytes txt)); SMTPatT (Seq.length txt == 0)]
+    [SMTPat (encode_bytes (reveal_sbytes txt)); SMTPat (Seq.length txt == 0)]
 let encode_bytes_empty txt = ()
 
 

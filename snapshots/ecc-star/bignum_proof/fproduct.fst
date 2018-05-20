@@ -22,7 +22,7 @@ val constant_template_lemma: #size_a:pos -> a:biginteger size_a -> #size_b:pos -
   Lemma
     (requires (ConstantTemplate a /\ getTemplate a = getTemplate b))
     (ensures (ConstantTemplate b))
-    [SMTPatT (Similar a b)]
+    [SMTPat (Similar a b)]
 let constant_template_lemma #size_a a #size_b b = 
   //@@
   assert(getTemplate b 0 = getTemplate a 0)

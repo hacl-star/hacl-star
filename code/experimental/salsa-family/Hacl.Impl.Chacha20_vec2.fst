@@ -27,31 +27,31 @@ let uint8_p = buffer H8.t
 
 let idx = a:U32.t{U32.v a < 4}
 
-[@ "c_inline"]
+[@ CInline]
 val line:
   st:state ->
   a:idx -> b:idx -> d:idx -> s:U32.t{U32.v s < 32} ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h1 st /\ modifies_1 st h0 h1 /\ live h0 st))
-[@ "c_inline"]
+[@ CInline]
 let line st a b d s =
-  let sa = st.(a) in 
+  let sa = st.(a) in
   let sb = st.(b) in
-  let sd = st.(d) in 
+  let sd = st.(d) in
   let sa = sa +%^ sb in
   let sd = (sd ^^ sa) <<< s in
   st.(a) <- sa;
   st.(d) <- sd
 
 
-[@ "c_inline"]
+[@ CInline]
 val column_round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
-[@ "c_inline"]
+[@ CInline]
 let column_round st =
   line st 0ul 4ul 12ul 16ul;
   line st 1ul 5ul 13ul 16ul;
@@ -72,14 +72,14 @@ let column_round st =
   line st 9ul 13ul 5ul 7ul;
   line st 10ul 14ul 6ul 7ul;
   line st 11ul 15ul 7ul 7ul
-    
-[@ "substitute"]
+
+[@ Substitute]
 val diagonal_round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
-[@ "substitute"]
+[@ Substitute]
 let diagonal_round st =
   line st 0ul 5ul 15ul 16ul;
   line st 1ul 6ul 12ul 16ul;
@@ -101,26 +101,26 @@ let diagonal_round st =
   line st 8ul 13ul 7ul 7ul;
   line st 9ul 14ul 4ul 7ul
 
-[@ "c_inline"]
+[@ CInline]
 val double_round:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
-[@ "c_inline"]
+[@ CInline]
 let double_round st =
     column_round st;
     diagonal_round st
 
 #reset-options "--initial_fuel 0 --max_fuel 1 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 val rounds:
   st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> live h0 st /\ live h1 st /\ modifies_1 st h0 h1))
-[@ "substitute"]
+[@ Substitute]
 let rounds st = Loops_vec.rounds16 st
 // Real implementation bellow
   (* Combinators.iter #H32.t #16 #(double_round') 10ul double_round st 16ul *)
@@ -129,25 +129,25 @@ let rounds st = Loops_vec.rounds16 st
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 
-[@ "c_inline"]
+[@ CInline]
 val sum_states:
   st':state ->
   st:state{disjoint st st'} ->
   Stack unit
     (requires (fun h -> live h st /\ live h st'))
     (ensures  (fun h0 _ h1 -> live h1 st' /\ live h1 st /\ modifies_1 st' h0 h1))
-[@ "c_inline"]
+[@ CInline]
 let sum_states st' st =
     Loops_vec.sum_states16 st' st
 
-[@ "c_inline"]
+[@ CInline]
 val copy_state:
   st':state ->
   st:state{disjoint st st'} ->
   Stack unit
     (requires (fun h -> live h st /\ live h st'))
     (ensures (fun h0 _ h1 -> live h1 st /\ live h0 st' /\ modifies_1 st' h0 h1))
-[@ "c_inline"]
+[@ CInline]
 let copy_state st' st =
     Loops_vec.copy_state16 st' st
 
@@ -160,28 +160,28 @@ type log_t = Ghost.erased log_t_
 
 
 
-[@ "c_inline"]
+[@ CInline]
 val chacha20_core:
   k:state ->
   st:state ->
   Stack unit
     (requires (fun h -> live h k /\ live h st))
     (ensures  (fun h0 updated_log h1 -> live h1 k /\ live h1 st /\ modifies_1 k h0 h1))
-[@ "c_inline"]
+[@ CInline]
 let chacha20_core k st =
   copy_state k st;
   rounds k;
   sum_states k st
 
 
-[@ "c_inline"]
+[@ CInline]
 val chacha20_block:
   stream_block:uint8_p{length stream_block = 16 * U32.v vecsizebytes} ->
   st:state{disjoint st stream_block} ->
   Stack unit
     (requires (fun h -> live h stream_block))
     (ensures  (fun h0 updated_log h1 -> live h1 stream_block /\ modifies_1 stream_block h0 h1))
-[@ "c_inline"]
+[@ CInline]
 let chacha20_block stream_block st =
   push_frame();
   let k = state_alloc() in
@@ -190,7 +190,7 @@ let chacha20_block stream_block st =
   pop_frame()
 
 
-[@ "c_inline"]
+[@ CInline]
 val init:
   st:state ->
   k:uint8_p{length k = 32 /\ disjoint st k} ->
@@ -198,8 +198,8 @@ val init:
   Stack unit
     (requires (fun h -> live h k /\ live h n /\ live h st))
     (ensures  (fun h0 log h1 -> live h1 st /\ live h0 k /\ live h0 n /\ modifies_1 st h0 h1))
-[@ "c_inline"]
-let init st k n = 
+[@ CInline]
+let init st k n =
   state_setup st k n 0ul
 
 
@@ -228,7 +228,7 @@ val xor_block:
   Stack unit
     (requires (fun h -> live h output /\ live h plain))
     (ensures (fun h0 _ h1 -> live h1 output /\ live h0 plain /\ modifies_2 st output h0 h1))
-let xor_block output plain st = 
+let xor_block output plain st =
   state_to_key st;
   Loops_vec.vec_xor16 output plain st vecsizebytes
 
@@ -264,7 +264,7 @@ let rec chacha20_counter_mode_ output plain len st =
   if U32.(len =^ 0ul) then (
      ()
   ) else  (
-     update_last output plain len st 
+     update_last output plain len st
   )
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"

@@ -82,7 +82,7 @@ all-ci: bignum-ci specific-ci
 
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 KREMLIN_ARGS+=-I ../bignum -tmpdir x25519-c \
-	-drop Spec.*,Hacl.Spec.*,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Prims \
+	-drop FStar,Prims,C.Loops.Spec.Loops,Spec.*,Hacl.Spec.*,Hacl.Cast,Hacl.UInt.*,Hacl.Endianness,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	$(KREMLIN_TESTLIB)
 
 # Acknowledge the F* dependency graph
@@ -94,14 +94,16 @@ depend:
 x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
-x25519-c/Hacl_Curve25519.c x25519-c/Hacl_Test_X25519.c: x25519-c/out.krml
+x25519-c/Hacl_Test_X25519.c: x25519-c/Hacl_Curve25519.c
+
+x25519-c/Hacl_Curve25519.c:  x25519-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -no-prefix Hacl.Test.X25519 \
-	 	-bundle 'Hacl.Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
+	 	-bundle 'Hacl.Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*,LowStar.*' \
 		-skip-compilation $^ -o $@
 
 x25519.exe: x25519-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -no-prefix Hacl.Test.X25519 \
-	 	-bundle 'Hacl.Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
+	 	-bundle 'Hacl.Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*,LowStar.*' \
 		$^ -o $@
 	./$@
 

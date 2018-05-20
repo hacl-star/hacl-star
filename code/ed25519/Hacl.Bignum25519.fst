@@ -109,7 +109,7 @@ let fcontract_first_carry_pass_s s =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 private val fcontract_first_carry_pass:
   input:felem ->
   Stack unit
@@ -117,7 +117,7 @@ private val fcontract_first_carry_pass:
     (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h0 input)
       /\ Buffer.live h1 input /\ modifies_1 input h0 h1
       /\ as_seq h1 input == fcontract_first_carry_pass_s (as_seq h0 input) ))
-[@ "substitute"]
+[@ Substitute]
 private let fcontract_first_carry_pass input =
   assert_norm(pow2 51 = 0x8000000000000);
   assert_norm(pow2 0 = 1);
@@ -155,9 +155,9 @@ let reduce_513_s input =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ "substitute"]
+[@ Substitute]
 val reduce_513_:
-  a:felem -> 
+  a:felem ->
   Stack unit
     (requires (fun h -> live h a /\ red_5413 (as_seq h a)))
     (ensures (fun h0 _ h1 -> live h0 a /\ red_5413 (as_seq h0 a)
@@ -167,7 +167,7 @@ val reduce_513_:
 
 #reset-options "--max_fuel 0 --z3rlimit 500"
 
-[@ "substitute"]
+[@ Substitute]
 let reduce_513_ a =
   assert_norm(pow2 51 = 0x8000000000000);
   assert_norm(pow2 63 = 0x8000000000000000);
@@ -193,7 +193,7 @@ let fmul out a b =
   Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine (as_seq h a) (as_seq h b);
   Hacl.Bignum.fmul out a b
 
-#reset-options "--max_fuel 0 --z3rlimit 232" 
+#reset-options "--max_fuel 0 --z3rlimit 232"
 
 open Hacl.Cast
 

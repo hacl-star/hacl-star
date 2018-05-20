@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 
 open FStar.Buffer
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -50,8 +50,14 @@ let main () =
     0xe6uy; 0xf8uy; 0xf7uy; 0x64uy; 0x7auy; 0xacuy; 0x79uy; 0x57uy
     ] in
   Hacl.EC.crypto_scalarmult result scalar1 input1;
-  TestLib.compare_and_print (C.string_of_literal "Curve25519") expected1 result keysize;
+  TestLib.compare_and_print (C.String.of_literal "Curve25519") expected1 result keysize;
   Hacl.EC.crypto_scalarmult result scalar2 input2;
-  TestLib.compare_and_print (C.string_of_literal "Curve25519") expected2 result keysize;
+  TestLib.compare_and_print (C.String.of_literal "Curve25519") expected2 result keysize;
+  let t1 = C.clock () in
+  C.Loops.for 0ul 1000ul (fun _ _ -> True) (fun _ ->
+    Hacl.EC.crypto_scalarmult result scalar2 input2
+  );
+  let t2 = C.clock () in
+  TestLib.print_clock_diff t1 t2;
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS

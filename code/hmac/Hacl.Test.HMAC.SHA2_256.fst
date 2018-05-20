@@ -45,7 +45,7 @@ let test_1 () =
   HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 1") expected output Hash.size_hash;
+  TestLib.compare_and_print (C.String.of_literal "Test 1") expected output Hash.size_hash;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -92,7 +92,7 @@ let test_2 () =
   HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 2") expected output Hash.size_hash;
+  TestLib.compare_and_print (C.String.of_literal "Test 2") expected output Hash.size_hash;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -132,7 +132,7 @@ let test_3 () =
   HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 3") expected output Hash.size_hash;
+  TestLib.compare_and_print (C.String.of_literal "Test 3") expected output Hash.size_hash;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -177,7 +177,7 @@ let test_4 () =
   HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 4") expected output Hash.size_hash;
+  TestLib.compare_and_print (C.String.of_literal "Test 4") expected output Hash.size_hash;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -214,7 +214,7 @@ let test_5 () =
   HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 5") expected output 16ul;
+  TestLib.compare_and_print (C.String.of_literal "Test 5") expected output 16ul;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -257,7 +257,7 @@ let test_6 () =
   HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 6") expected output Hash.size_hash;
+  TestLib.compare_and_print (C.String.of_literal "Test 6") expected output Hash.size_hash;
 
   (* Pop the memory frame *)
   (**) pop_frame()
@@ -312,14 +312,14 @@ let test_7 () =
   HMAC.hmac output key key_len data data_len;
 
   (* Display the result *)
-  TestLib.compare_and_print (C.string_of_literal "Test 7") expected output Hash.size_hash;
+  TestLib.compare_and_print (C.String.of_literal "Test 7") expected output Hash.size_hash;
 
   (* Pop the memory frame *)
   (**) pop_frame()
 
 
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -334,4 +334,4 @@ let main () =
   test_7 ();
 
   (* Exit the program *)
-  C.exit_success
+  C.EXIT_SUCCESS

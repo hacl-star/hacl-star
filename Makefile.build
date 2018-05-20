@@ -58,11 +58,13 @@ clean-c-code:
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
 SNAPSHOT_FILES= \
+	snapshots/kremlib/* \
 	$(addprefix snapshots/api/, HACL.h) \
 	$(addprefix snapshots/api/, haclnacl.*) \
 	$(addprefix snapshots/makefiles/, Makefile) \
+	$(addprefix snapshots/common/, vec128.h) \
 	$(addprefix snapshots/experimental/, Hacl_Unverified_Random.*) \
-	$(addprefix snapshots/kremlib/, kremlib.h kremlib.c kremlib_base.h testlib.* FStar.* vec128.h) \
+	$(addprefix code/uint128/uint128-c/, FStar_UInt128.*) \
 	$(addprefix code/poly1305/poly-c/, Hacl_Poly1305_64.* AEAD_Poly1305_64.*) \
 	$(addprefix code/poly1305_32/poly-c/, Hacl_Poly1305_32.*) \
 	$(addprefix code/curve25519/x25519-c/, Hacl_Curve25519.*) \
@@ -83,7 +85,7 @@ SNAPSHOT_CCOMP_FILES=$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/k
 
 snapshot-collect:
 	mkdir -p $(SNAPSHOT_DIR)
-	cp $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
+	cp -r $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
 	touch $(SNAPSHOT_DIR)/Prims.h
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
 	cp $(SNAPSHOT_CCOMP_FILES) $(SNAPSHOT_DIR)/
@@ -128,7 +130,7 @@ HACL_LICENSE?=$(HACL_HOME)/snapshots/licenses/MIT
 HACL_LICENSE_NSS?=$(HACL_HOME)/snapshots/licenses/APACHE2
 
 
-SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
+SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, FStar_UInt128.* AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Chacha20_Vec128.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*)
 
 .snapshots/hacl-c/makefiles:
@@ -136,8 +138,14 @@ SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* 
 		cp snapshots/makefiles/$$f snapshots/hacl-c/$$f ; \
 	done
 
+.snapshots/hacl-c/common:
+	for f in vec128.h; do \
+		(cat $(HACL_LICENSE) snapshots/common/$$f ) > snapshots/hacl-c/$$f ; \
+	done
+
 .snapshots/hacl-c/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c vec128.h; do \
+	cp -r snapshots/kremlib/* snapshots/hacl-c
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
 	done
 
@@ -158,17 +166,24 @@ snapshots/hacl-c: snapshots-remove-intermediates
 	mkdir -p snapshots/hacl-c
 	cp $(SNAPSHOT_HACL_C_FILES) ./snapshots/hacl-c
 	$(MAKE) .snapshots/hacl-c/makefiles
+	$(MAKE) .snapshots/hacl-c/common
 	$(MAKE) .snapshots/hacl-c/kremlib
 	$(MAKE) .snapshots/hacl-c/api
 	$(MAKE) .snapshots/hacl-c/experimental
 
 
 SNAPSHOT_NSS_FILES = \
-	$(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl_Chacha20_Vec128.* Hacl_Poly1305_64.* Hacl_Poly1305_32.*) \
+	$(addprefix snapshots/snapshot-gcc/, FStar_UInt128.* Hacl_Chacha20.* Hacl_Chacha20_Vec128.* Hacl_Poly1305_64.* Hacl_Poly1305_32.*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519*)
 
+.snapshots/nss/common:
+	for f in vec128.h; do \
+		(cat $(HACL_LICENSE_NSS) snapshots/common/$$f ) > snapshots/nss/$$f ; \
+	done
+
 .snapshots/nss/kremlib:
-	for f in kremlib.h kremlib_base.h FStar.h FStar.c vec128.h; do \
+	cp -r snapshots/kremlib/* snapshots/nss
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
 		(cat $(HACL_LICENSE_NSS) snapshots/kremlib/$$f ) > snapshots/nss/$$f ; \
 	done
 
@@ -184,15 +199,17 @@ snapshots/nss: snapshots-remove-intermediates
 	mkdir -p snapshots/nss
 	mkdir -p snapshots/nss/specs
 	cp $(SNAPSHOT_NSS_FILES) snapshots/nss
+	$(MAKE) .snapshots/nss/common
 	$(MAKE) .snapshots/nss/kremlib
 	$(MAKE) .snapshots/nss/specs
 
 
-SNAPSHOT_RIOT_FILES = $(addprefix snapshots/snapshot-gcc/, AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
+SNAPSHOT_RIOT_FILES = $(addprefix snapshots/snapshot-gcc/, FStar_UInt128.* AEAD_Poly1305_64.* Hacl_Chacha20.* Hacl_Chacha20Poly1305.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*)
 
 .snapshots/riot/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
+	cp -r snapshots/kremlib/* snapshots/riot
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/riot/$$f ; \
 	done
 
@@ -205,10 +222,11 @@ snapshots/riot: snapshots-remove-intermediates
 	$(MAKE) .snapshots/riot/kremlib
 
 
-SNAPSHOT_WIREGUARD_FILES = $(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519*)
+SNAPSHOT_WIREGUARD_FILES = $(addprefix snapshots/snapshot-gcc-unrolled/, FStar_UInt128.* Hacl_Curve25519*)
 
 .snapshots/wireguard/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
+	cp -r snapshots/kremlib/* snapshots/wireguard
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/wireguard/$$f ; \
 	done
 
@@ -220,7 +238,7 @@ snapshots/wireguard: snapshots-remove-intermediates
 	$(MAKE) .snapshots/wireguard/kremlib
 
 
-SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_* AEAD_Poly1305_64.* Hacl_Chacha20Poly1305.*) \
+SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, FStar_UInt128.* Hacl_Chacha20.* Hacl_Policies.* NaCl.* Hacl_Poly1305_64.* Hacl_Poly1305_32.* Hacl_Salsa20.* Hacl_SHA2_* Hacl_HMAC_SHA2_* AEAD_Poly1305_64.* Hacl_Chacha20Poly1305.*) \
 	$(addprefix snapshots/snapshot-gcc-unrolled/, Hacl_Curve25519* Hacl_Ed25519*)
 
 .snapshots/tezos/makefiles:
@@ -234,7 +252,8 @@ SNAPSHOT_TEZOS_FILES = $(addprefix snapshots/snapshot-gcc/, Hacl_Chacha20.* Hacl
 	done
 
 .snapshots/tezos/kremlib:
-	for f in kremlib.h kremlib.c kremlib_base.h FStar.h FStar.c; do \
+	cp -r snapshots/kremlib/* snapshots/tezos
+	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
 		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/tezos/$$f ; \
 	done
 

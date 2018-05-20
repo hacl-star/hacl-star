@@ -13,6 +13,9 @@ open Spec.Curve25519
 (* Point addition *)
 type aff_point = tuple2 elem elem           // Affine point
 type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
+let fsub (x:elem) (y:elem) = x -. y 
+let fadd (x:elem) (y:elem) = x +. y 
+let fmul (x:elem) (y:elem) = x *. y 
 
 // let sha512 (b:bytes{length b < pow2 32}) : Tot (lbytes 64) =
 //   assert_norm(pow2 32 < pow2 125);
@@ -21,22 +24,22 @@ type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
 let modp_inv (x:elem) : Tot elem =
   x ** (prime - 2)
 
-let d : elem = 37095705934669439343138083508754565189542113879843219016388785533085940283555
+let d : elem = to_elem 37095705934669439343138083508754565189542113879843219016388785533085940283555
 
-let q: elem =
+let q: nat =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
-  pow2 252 + 27742317777372353535851937790883648493 // Group order
+  (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
-let sha512_modq (len:size_nat) (s:lbytes len) : Tot elem =
-  nat_from_bytes_le (hash512 len s) % q
+let sha512_modq (len:size_nat) (s:lbytes len) : nat =
+  (nat_from_bytes_le (hash512 len s) % q)
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
   let x2, y2, z2, t2 = q in
   let a = (y1 `fsub` x1) `fmul` (y2 `fsub` x2) in
   let b = (y1 `fadd` x1) `fmul` (y2 `fadd` x2) in
-  let c = (2 `fmul` d `fmul` t1) `fmul` t2 in
-  let d = (2 `fmul` z1) `fmul` z2 in
+  let c = (to_elem 2 `fmul` d `fmul` t1) `fmul` t2 in
+  let d = (to_elem 2 `fmul` z1) `fmul` z2 in
   let e = b `fsub` a in
   let f = d `fsub` c in
   let g = d `fadd` c in
@@ -51,7 +54,7 @@ let point_double (p:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
   let a = x1 `fmul` x1 in
   let b = y1 `fmul` y1 in
-  let c = 2 `fmul` (z1 `fmul` z1) in
+  let c = to_elem 2 `fmul` (z1 `fmul` z1) in
   let h = a `fadd` b in
   let e = h `fsub` ((x1 `fadd` y1) `fmul` (x1 `fadd` y1)) in
   let g = a `fsub` b in
@@ -83,14 +86,14 @@ let rec montgomery_ladder_ (x:ext_point) (xp1:ext_point) (len:size_nat{8 * len <
 let point_mul (len:size_nat{8 * len <= max_size_t}) (a:lbytes len) (p:ext_point) =
   fst (montgomery_ladder_ (zero, one, one, zero) p len a (8 * len))
 
-let modp_sqrt_m1 : elem = 2 ** ((prime - 1) / 4)
+let modp_sqrt_m1 : elem = to_elem 2 ** ((prime - 1) / 4)
 
 noeq type record = { s:(s':lseq bool 3)}
 
 let recover_x (y:nat) (sign:bool) : Tot (option elem) =
   if y >= prime then None
   else (
-    let x2 = ((y `fmul` y) `fsub` 1) `fmul` (modp_inv ((d `fmul` (y `fmul` y)) `fadd` one)) in
+    let x2 = to_elem ((y * y) - 1) `fmul` (modp_inv ((d `fmul` (to_elem (y * y))) `fadd` one)) in
     if x2 = zero then (
       if sign then None
       else Some zero
@@ -99,20 +102,20 @@ let recover_x (y:nat) (sign:bool) : Tot (option elem) =
       let x = if ((x `fmul` x) `fsub` x2) <> zero then x `fmul` modp_sqrt_m1 else x in
       if ((x `fmul` x) `fsub` x2) <> zero then None
       else (
-        let x = if (x % 2 = 1) <> sign then prime `fsub` x else x in
+        let x = if (nat_mod_v x % 2 = 1) <> sign then to_elem (prime - nat_mod_v x) else x in
         Some x)))
 
-let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
-let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
+let g_x : elem = to_elem 15112221349535400772501151409588531511454012693041857206046113283949847762202
+let g_y : elem = to_elem 46316835694926478169428394003475163141307993866256225615783033603165251855960
 
-let g: ext_point = (g_x, g_y, 1, g_x `fmul` g_y)
+let g: ext_point = (g_x, g_y, to_elem 1, g_x `fmul` g_y)
 
 let point_compress (p:ext_point) : Tot (lbytes 32) =
   let px, py, pz, pt = p in
   let zinv = modp_inv pz in
   let x = px `fmul` zinv in
   let y = py `fmul` zinv in
-  nat_to_bytes_le 32 ((pow2 255 * (x % 2)) + y)
+  nat_to_bytes_le 32 ((pow2 255 * (nat_mod_v x % 2)) + nat_mod_v y)
 
 let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   let y = nat_from_bytes_le s in
@@ -120,17 +123,17 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   let y = y % (pow2 255) in
   let x = recover_x y sign in
   match x with
-  | Some x -> Some (x, y % prime, one, x `fmul` (y % prime))
+  | Some x -> Some (x, to_elem y, one, x `fmul` to_elem y)
   | _ -> None
 
 let secret_expand (secret:lbytes 32) =
   let h = hash512 32 secret in
-  let h_low = slice h 0 32 in
-  let h_high = slice h 32 64 in
-  let h_low0  = h_low.[0] in
+  let h_low : lbytes 32 = slice h 0 32 in
+  let h_high : lbytes 32 = slice h 32 64 in
+  let h_low0 : uint8  = h_low.[0] in
   let h_low31 = h_low.[31] in
-  let h_low = h_low.[ 0] <- (h_low0 &. u8 0xf8) in
-  let h_low = h_low.[31] <- ((h_low31 &. u8 127) |. u8 64) in
+  let h_low = h_low.[ 0] <- h_low.[0] &. u8 0xf8 in
+  let h_low = h_low.[31] <- (h_low.[31] &. u8 127) |. u8 64 in
   h_low, h_high
 
 let secret_to_public (secret:lbytes 32) =

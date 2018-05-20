@@ -9,7 +9,7 @@ open Hacl.Cast
 
 module Poly = Hacl.Poly1305_64
 
-val main: unit -> ST FStar.Int32.t
+val main: unit -> ST C.exit_code
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> True))
 let main () =
@@ -38,6 +38,6 @@ let main () =
     ] in
   (* Hacl.MAC.Poly1305_64.crypto_onetimeauth mac plaintext len' key; *)
   Poly.crypto_onetimeauth mac plaintext len' key;
-  TestLib.compare_and_print (C.string_of_literal "poly1305") expected mac macsize;
+  TestLib.compare_and_print (C.String.of_literal "poly1305") expected mac macsize;
   pop_frame();
-  C.exit_success
+  C.EXIT_SUCCESS

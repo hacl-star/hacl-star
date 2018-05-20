@@ -1,5 +1,6 @@
 include ../../Makefile.include
 
+CFLAGS+=-g
 # Files for verification
 SHA2_FILES = \
 	Hacl.Hash.Lib.LoadStore.fst \
@@ -26,10 +27,10 @@ all-hints: hints
 
 KREMLIN_ARGS+=-verbose \
 	-no-prefix C.Loops \
-	-drop Prims,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
+	-drop Prims,FStar,LowStar,C.Loops.Spec.Loops,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
 	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
-	$(KREMLIN_TESTLIB) -add-include '"kremstr.h"' -ccopt -march=native
+	-ccopt -march=native
 
 MODULES=$(foreach N,256 384 512,Hacl.SHA2_$(N) Hacl.Impl.SHA2_$(N))
 TESTMODS=$(foreach N,256 384 512,Hacl.Test.SHA2_$(N))
@@ -41,7 +42,7 @@ SPACE=$(empty) $(empty)
 COMMA=,
 
 sha2-c/out.krml: $(SHA2_FILES) $(addsuffix .fst,$(MODULES)) $(addsuffix .fst,$(TESTMODS))
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-translation $^
+	$(KREMLIN) $(KREMLIN_ARGS) -I interfaces -tmpdir sha2-c -skip-translation $^
 
 sha2-c/Hacl_SHA2_%.c: sha2-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation \
@@ -50,15 +51,21 @@ sha2-c/Hacl_SHA2_%.c: sha2-c/out.krml
 	 -bundle "Hacl.SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Impl.SHA2_$*,Hacl.SHA2_$*" \
 	 $^ -o $@
 
+# Until the target above writes to disjoint sets of files with its different
+# invocations, this Makefile cannot be run in parallel. This has caused sadness
+# on CI because of concurrent writes to the same file that leave invalid C
+# syntax in there.
+.NOTPARALLEL:
+
 sha2-c/Hacl_Test_SHA2_%.c: sha2-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-c -skip-compilation -no-prefix Hacl.Test.SHA2_$* \
+	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir sha2-c -skip-compilation -no-prefix Hacl.Test.SHA2_$* \
 	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Impl.SHA2_$*,$(filter-out Hacl.SHA2_$*,$(MODULES)))) \
 	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Test.SHA2_$*,$(TESTMODS))) \
 	-bundle "Hacl.SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Impl.SHA2_$*,Hacl.SHA2_$*" \
 	$^ -o $@
 
 test-sha2_%.exe: sha2-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir sha2-$*-c -no-prefix Hacl.Test.SHA2_$* \
+	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir sha2-$*-c -no-prefix Hacl.Test.SHA2_$* \
 	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Impl.SHA2_$*,$(filter-out Hacl.SHA2_$*,$(MODULES)))) \
 	-drop $(subst $(SPACE),$(COMMA),$(filter-out Hacl.Test.SHA2_$*,$(TESTMODS))) \
 	-bundle "Hacl.SHA2_$*=Hacl.Hash.Lib.Create,Hacl.Hash.Lib.LoadStore,Hacl.Impl.SHA2_$*,Hacl.SHA2_$*" \
@@ -73,7 +80,7 @@ test-native: test-native-sha2_256.exe test-native-sha2_384.exe test-native-sha2_
 BASE_OBJ=$(VALE_A) sha2-c/testlib.o sha2-c/kremlib.o
 $(BASE_OBJ): sha2-c/out.krml
 
-CFLAGS=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash
+CFLAGS=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/hash -I $(KREMLIN_HOME)/include
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -93,24 +100,29 @@ test-native-sha2_512.exe: sha2-c/Hacl_SHA2_512.o sha2-c/Hacl_Test_SHA2_512.o $(B
 
 BASE_OBJ = ../../specs/lib/c/Spec_Lib_Print.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
 
-blake2s-c/out.krml: ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--expose_interfaces" -tmpdir blake2s-c \
-	-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst \
+HACL_LIBS = ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst
+
+
+blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fsopt "--expose_interfaces" -tmpdir blake2s-c \
+	-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst -I $(KREMLIN_HOME)/include \
 	-skip-translation $^
 
+
+# I don't want to generate Hacl_Blake2s.c with -add-include '"kremlin/c_string.h"' !!!
 blake2s-c/Hacl_Blake2s.c: blake2s-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -fparentheses -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
+	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fparentheses -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
 	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	$^ -o $@
 
 blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir blake2s-c -skip-compilation -no-prefix Hacl.Test.Blake2s \
+	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -add-include '"kremlin/c_string.h"' -tmpdir blake2s-c -skip-compilation -no-prefix Hacl.Test.Blake2s \
 	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	$^ -o $@
 
-test-blake2s.exe: blake2s-c/Hacl_Blake2s.o blake2s-c/Hacl_Test_Blake2s.o $(BASE_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
-	./test-blake2s.exe
+
+test-blake2s.exe: blake2s-c/Hacl_Blake2s.c blake2s-c/Hacl_Test_Blake2s.c $(BASE_OBJ)
+	$(CC) $(CFLAGS) -I $(KREMLIN_HOME)/include -o $@ $^
 
 #
 # Clean

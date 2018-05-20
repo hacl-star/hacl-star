@@ -25,7 +25,7 @@ let lemma_most_significant_bit s =
   lemma_eq_intro (slice s 31 32) (create 1 s31);
   Endianness.little_endian_append (slice s 0 31) (slice s 31 32);
   Endianness.little_endian_singleton s31;
-  Math.Lemmas.lemma_div_mod (Endianness.little_endian s) (pow2 248);  
+  Math.Lemmas.lemma_div_mod (Endianness.little_endian s) (pow2 248);
   assert(Endianness.little_endian s ==
     Endianness.little_endian (slice s 0 31) + pow2 248 * Endianness.little_endian (slice s 31 32));
   Endianness.lemma_little_endian_is_bounded (slice s 0 31);
@@ -33,7 +33,7 @@ let lemma_most_significant_bit s =
   Math.Lemmas.small_division_lemma_1 (Endianness.little_endian (slice s 0 31)) (pow2 248)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val most_significant_bit:
   s:buffer UInt8.t{length s = 32} ->
@@ -41,7 +41,7 @@ val most_significant_bit:
     (requires (fun h -> live h s))
     (ensures (fun h0 z h1 -> live h0 s /\ h1 == h0 /\
       v z == (Endianness.little_endian (as_seq h0 s) / pow2 255) % 2))
-[@ "substitute"]
+[@ Substitute]
 let most_significant_bit s =
   let h = ST.get() in
   let s31 = s.(31ul) in
@@ -58,7 +58,7 @@ let most_significant_bit s =
   Int.Cast.uint8_to_uint64 z
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val copy:
   a:buffer Hacl.UInt64.t{length a = 5} ->
@@ -67,7 +67,7 @@ val copy:
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h0 a == as_seq h1 b))
-[@ "substitute"]
+[@ Substitute]
 let copy a b =
   let h = ST.get() in
   blit a 0ul b 0ul 5ul;
@@ -76,7 +76,7 @@ let copy a b =
   Seq.lemma_eq_intro (as_seq h' b) (Seq.slice (as_seq h' b) 0 5)
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val make_one:
   b:buffer Hacl.UInt64.t{length b = 5} ->
@@ -84,7 +84,7 @@ val make_one:
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 1
       /\ Hacl.Bignum25519.red_513 (as_seq h1 b)))
-[@ "substitute"]
+[@ Substitute]
 let make_one b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   let one  = Hacl.Cast.uint64_to_sint64 1uL in
@@ -111,7 +111,7 @@ let lemma_modifies_1 #a h (b:buffer a{live h b}) :
   = lemma_intro_modifies_1 b h h
 
 
-[@ "substitute"]
+[@ Substitute]
 private
 val point_decompress_step_1:
   s:buffer UInt8.t{length s = 32} ->
@@ -125,14 +125,14 @@ val point_decompress_step_1:
        let sign = (y / pow2 255) % 2 = 1 in
        let y = y % pow2 255 in
        let x = Spec.Ed25519.recover_x y sign in
-       if b then (Some? x /\ seval x' == Some?.v x /\ seval y' == y % Spec.Curve25519.prime /\ 
+       if b then (Some? x /\ seval x' == Some?.v x /\ seval y' == y % Spec.Curve25519.prime /\
                   red_513 x' /\ red_513 y' /\ b == true)
        else (None? x))
     ))
 
 #reset-options "--max_fuel 0 --z3rlimit 500"
 
-[@ "substitute"]
+[@ Substitute]
 let point_decompress_step_1 s tmp =
   let h0 = ST.get() in
   let y    = Buffer.sub tmp 0ul 5ul in
@@ -148,9 +148,9 @@ let point_decompress_step_1 s tmp =
     lemma_red_51_is_red_513 (as_seq h y));
   let h1 = ST.get() in
   z
-  
 
-[@ "substitute"]
+
+[@ Substitute]
 private
 val point_decompress_:
   out:point ->
@@ -169,7 +169,7 @@ val point_decompress_:
     ))
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
-[@ "substitute"]
+[@ Substitute]
 let point_decompress_ out s tmp =
   let y    = Buffer.sub tmp 0ul 5ul in
   let x    = Buffer.sub tmp 5ul 5ul in
