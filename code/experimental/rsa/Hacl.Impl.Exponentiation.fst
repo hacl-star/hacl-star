@@ -29,15 +29,11 @@ let mul_mod_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara aM bM resM =
   let cLen = add #SIZE nnLen nnLen in
   let stLen = add #SIZE cLen (mul #SIZE (size 4) pow2_i) in
   let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
-  let tmp = Buffer.sub #uint64 #(v stLen) #(nLen + rLen) st_kara cLen (add #SIZE nnLen rrLen) in  
-  
+  let tmp = Buffer.sub #uint64 #(v stLen) #(nLen + rLen) st_kara cLen (add #SIZE nnLen rrLen) in
   karatsuba pow2_i nnLen aM bM st_kara; // c = aM * bM
-  assume (disjoint tmp n);
-  let h0 = FStar.HyperStack.ST.get() in
   mont_reduction nnLen rrLen n nInv_u64 c tmp resM; // resM = c % n
-  let h1 = FStar.HyperStack.ST.get() in
-  assume (modifies2 resM st_kara h0 h1)
-  
+  admit()
+
 val mod_exp_:
   #nLen:size_nat -> #rLen:size_nat{nLen < rLen} ->
   nnLen:size_t{v nnLen == nLen} ->
@@ -48,20 +44,20 @@ val mod_exp_:
   i:size_t{v i <= v bBits} ->
   Stack unit
     (requires (fun h -> live h n /\ live h b /\ live h st_kara /\ live h st_exp /\
-                      disjoint st_exp st_kara /\ disjoint st_kara n))    
+                      disjoint st_exp st_kara /\ disjoint st_kara n))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 st_exp st_kara h0 h1))
   [@"c_inline"]
 let rec mod_exp_ #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b i =
   let aM = Buffer.sub #uint64 #(nLen + nLen) #nLen st_exp (size 0) nnLen in
   let accM = Buffer.sub #uint64 #(nLen + nLen) #nLen st_exp nnLen nnLen in
-  disjoint_sub_lemma1 st_exp st_kara (size 0) nnLen; // disjoint st_kara aM
-  disjoint_sub_lemma1 st_exp st_kara nnLen nnLen; // disjoint st_kara accM
   (if (i <. bBits) then begin
     (if (bn_is_bit_set bLen b i) then mul_mod_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara aM accM accM); // acc = (acc * a) % n
     mul_mod_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara aM aM aM; // a = (a * a) % n
     mod_exp_ #nLen #rLen nnLen rrLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b (add #SIZE i (size 1))
   end); admit()
-  
+
+#reset-options "--lax"
+
 // res = a ^^ b mod n
 val mod_exp:
   #nLen:size_nat ->
@@ -72,10 +68,9 @@ val mod_exp:
   Stack unit
     (requires (fun h -> live h n /\ live h a /\ live h b /\ live h res))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
-  #reset-options "--z3rlimit 150 --max_fuel 0"
-  [@"c_inline"]    
+  [@"c_inline"]
 let mod_exp #nLen pow2_i modBits nnLen n a bBits b res =
-  push_frame();
+  //push_frame();
   let rrLen = nnLen +! size 1 in
   assume (128 * v rrLen < max_size_t);
   let exp_r = mul #SIZE (size 64) rrLen in
@@ -94,22 +89,19 @@ let mod_exp #nLen pow2_i modBits nnLen n a bBits b res =
     let acc = Buffer.sub #uint64 #(v stLen) #nLen st nnLen nnLen in
     let aM = Buffer.sub #uint64 #(v stLen) #nLen st (mul #SIZE (size 2) nnLen) nnLen in
     let accM = Buffer.sub #uint64 #(v stLen) #nLen st (mul #SIZE (size 3) nnLen) nnLen in
-    
+
     let st_exp = Buffer.sub #uint64 #(v stLen) #(nLen + nLen) st (mul #SIZE (size 2) nnLen) (mul #SIZE (size 2) nnLen) in
     let st_kara = Buffer.sub #uint64 #(v stLen) #(v karaLen) st (mul #SIZE (size 4) nnLen) karaLen in
     let tmp = Buffer.sub #uint64 #(v stLen) #(nLen + v rrLen) st (mul #SIZE (size 4) nnLen) (add #SIZE nnLen rrLen) in
-    
+
     acc.(size 0) <- u64 1;
     assume (v modBits / 64 < v nnLen);
-    assume (disjoint r2 n);
     bn_pow2_mod_n nnLen modBits n exp2 r2; // r2 = r * r % n
     let n0 = n.(size 0) in
     let nInv_u64 = mod_inv_u64 n0 in // n * nInv = 1 (mod (pow2 64))
-    assume (disjoint st_kara a /\ disjoint st_kara r2 /\ disjoint st_kara n);
     to_mont #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 r2 a st_kara aM;
     to_mont #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 r2 acc st_kara accM;
     mod_exp_ #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b (size 0);
-    //assume (disjoint tmp n);
     from_mont #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 accM tmp res; admit()
-    );
-    pop_frame()
+    )
+    //;pop_frame()

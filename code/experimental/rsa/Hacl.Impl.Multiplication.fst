@@ -40,8 +40,8 @@ let bn_mult_by_limb_addj #aLen aaLen a l j resLen res carry =
     let (c, res_ij) = bn_mul_by_limb_addj_f a.(i) l carry.(size 0) res_ij in
     carry.(size 0) <- c;
     res.(ij) <- res_ij
-  );
-  res.(add #SIZE aaLen j) <- carry.(size 0)
+  )
+  
 
 val bn_mult_:
   #aLen:size_nat -> #bLen:size_nat ->
@@ -57,7 +57,8 @@ let bn_mult_ #aLen #bLen aaLen a bbLen b resLen res carry =
   loop2_simple #h0 #uint64 #uint64 #1 #(v resLen) bbLen carry res
   (fun j ->
     carry.(size 0) <- u64 0;
-    bn_mult_by_limb_addj aaLen a b.(j) j resLen res carry
+    bn_mult_by_limb_addj aaLen a b.(j) j resLen res carry;
+    res.(add #SIZE aaLen j) <- carry.(size 0)
   )
 
 // res = a * b
