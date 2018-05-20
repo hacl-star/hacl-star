@@ -48,7 +48,7 @@ let mgf_sha256_ #stLen mgfseedLen accLen sstLen st count_max =
 
     hash_sha256 mHash mgfseed_counterLen mgfseed_counter;
     let acc' = Buffer.sub #uint8 #(v accLen) #(v hLen) acc (mul #SIZE hLen counter) hLen in
-    copy hLen mHash acc'
+    copy acc' hLen mHash
   ) st
 
 val mgf_sha256:
@@ -71,9 +71,9 @@ let mgf_sha256 #mgfseedLen #maskLen mmgfseedLen mgfseed mmaskLen res =
   (fun st ->
     let mgfseed_counter = Buffer.sub #uint8 #(v stLen) #(v mgfseed_counterLen) st (size 0) mgfseed_counterLen in
     let mgfseed_st = Buffer.sub #uint8 #(v mgfseed_counterLen) #mgfseedLen mgfseed_counter (size 0) mmgfseedLen in
-    copy mmgfseedLen mgfseed mgfseed_st;
+    copy mgfseed_st mmgfseedLen mgfseed;
     mgf_sha256_ #(v stLen) mmgfseedLen accLen stLen st count_max;
     let acc = Buffer.sub #uint8 #(v stLen) #(v accLen) st (add #SIZE mgfseed_counterLen hLen) accLen in
     let acc1 = Buffer.sub #uint8 #(v accLen) #maskLen acc (size 0) mmaskLen in
-    copy mmaskLen acc1 res
+    copy res mmaskLen acc1
   )

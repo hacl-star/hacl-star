@@ -117,12 +117,12 @@ val mont_reduction:
 let mont_reduction #nLen #rLen nnLen rrLen n nInv_u64 c tmp res =
   let nLen2 = add #SIZE nnLen nnLen in
   let tmp1 = Buffer.sub #uint64 #(nLen +rLen) #(v nLen2) tmp (size 0) nLen2 in
-  copy nLen2 c tmp1;
+  copy tmp1 nLen2 c;
   tmp.(nLen2) <- u64 0;
   mont_reduction_a nnLen rrLen tmp n nInv_u64;
   //bn_rshift rLen2 tmp (mul #SIZE (size 64) rrLen) tmp; // tmp = tmp / r
   let tmp1 = Buffer.sub #uint64 #(nLen + rLen) #nLen tmp rrLen nnLen in
-  copy nnLen tmp1 res
+  copy res nnLen tmp1
 
 #reset-options "--lax"
 
@@ -164,8 +164,8 @@ let from_mont #nLen #rLen nnLen rrLen pow2_i n nInv_u64 aM tmp a =
   let tmpLen = add #SIZE nnLen rrLen in
   fill tmpLen tmp (u64 0);
   let tmp1 = Buffer.sub #uint64 #(v tmpLen) #nLen tmp (size 0) nnLen in
-  copy nnLen aM tmp1;
+  copy tmp1 nnLen aM;
   mont_reduction_a nnLen rrLen tmp n nInv_u64;
   //bn_rshift rLen2 tmp (mul #SIZE (size 64) rrLen) tmp; // tmp = tmp / r
   let tmp1 = Buffer.sub #uint64 #(v tmpLen) #nLen tmp rrLen nnLen in
-  copy nnLen tmp1 a
+  copy a nnLen tmp1

@@ -81,7 +81,7 @@ let fill #len clen b z =
   alloc #uint64 #unit #len clen z [] [BufItem b]
   (fun h0 _ h1 -> True)
   (fun tmp ->
-    copy clen tmp b
+    copy b clen tmp
   )
 
 val mul_wide: a:uint64 -> b:uint64 -> Tot uint128

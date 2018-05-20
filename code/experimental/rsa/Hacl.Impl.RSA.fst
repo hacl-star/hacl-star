@@ -61,16 +61,16 @@ let pss_encode #sLen #msgLen #emLen ssLen salt mmsgLen msg emBits em =
 
     hash_sha256 mHash mmsgLen msg;
     let m1_hash = Buffer.sub #uint8 #(v m1Len) #(v hLen) m1 (size 8) hLen in
-    copy hLen mHash m1_hash;
+    copy m1_hash hLen mHash;
     let m1_salt = Buffer.sub #uint8 #(v m1Len) #sLen m1 (add #SIZE (size 8) hLen) ssLen in
-    copy ssLen salt m1_salt;
+    copy m1_salt ssLen salt;
     hash_sha256 m1Hash m1Len m1;
 
     assert (0 <= v dbLen - sLen - 1);
     let last_before_salt = sub #SIZE (sub #SIZE dbLen ssLen) (size 1) in
     db.(last_before_salt) <- u8 1;
     let db_salt = Buffer.sub #uint8 #(v dbLen) #sLen db (add #SIZE last_before_salt (size 1)) ssLen in
-    copy ssLen salt db_salt;
+    copy db_salt ssLen salt;
     mgf_sha256 #(v hLen) #(v dbLen) hLen m1Hash dbLen dbMask;
     xor_bytes dbLen db dbMask;
 
@@ -81,9 +81,9 @@ let pss_encode #sLen #msgLen #emLen ssLen salt mmsgLen msg emBits em =
     end);
 
     let em_db = Buffer.sub #uint8 #(v emLen) #(v dbLen) em (size 0) dbLen in
-    copy dbLen db em_db;
+    copy em_db dbLen db;
     let em_hash = Buffer.sub #uint8 #(v emLen) #(v hLen) em dbLen hLen in
-    copy hLen m1Hash em_hash;
+    copy em_hash hLen m1Hash;
     em.(sub #SIZE emLen (size 1)) <- u8 0xbc
   )
 
@@ -138,9 +138,9 @@ let pss_verify #msgLen #emLen sLen mmsgLen msg emBits em =
       let salt = Buffer.sub #uint8 #(v dbLen) #(v sLen) dbMask padLen sLen in
 
       let m1_hash = Buffer.sub #uint8 #(v m1Len) #(v hLen) m1 (size 8) hLen in
-      copy hLen mHash m1_hash;
+      copy m1_hash hLen mHash;
       let m1_salt = Buffer.sub #uint8 #(v m1Len) #(v sLen) m1 (add #SIZE (size 8) hLen) sLen in
-      copy sLen salt m1_salt;
+      copy m1_salt sLen salt;
       hash_sha256 m1Hash' m1Len m1;
 
       if not (eq_b padLen pad pad2) then false

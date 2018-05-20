@@ -70,7 +70,7 @@ val mod_exp:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
   [@"c_inline"]
 let mod_exp #nLen pow2_i modBits nnLen n a bBits b res =
-  //push_frame();
+  push_frame();
   let rrLen = nnLen +! size 1 in
   assume (128 * v rrLen < max_size_t);
   let exp_r = mul #SIZE (size 64) rrLen in
@@ -103,5 +103,5 @@ let mod_exp #nLen pow2_i modBits nnLen n a bBits b res =
     to_mont #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 r2 acc st_kara accM;
     mod_exp_ #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b (size 0);
     from_mont #nLen #(v rrLen) nnLen rrLen pow2_i n nInv_u64 accM tmp res; admit()
-    )
-    //;pop_frame()
+    ); 
+    pop_frame()

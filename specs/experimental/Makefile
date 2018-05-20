@@ -4,7 +4,7 @@ FSTAR_ARGS=$(OTHERFLAGS)
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
-FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lemmas
+FSTAR_INCLUDES+=--include $(HACL_HOME)/specs/lib --include $(HACL_HOME)/specs/lib/fst --include $(HACL_HOME)/specs/lemmas --expose_interfaces
 
 all:
 	$(MAKE) lib
@@ -15,8 +15,6 @@ EXTRACTED= FStar_Seq_Base.ml FStar_Seq.ml FStar_Seq_Properties.ml FStar_Math_Lib
 NOEXTRACT=$(addprefix --no_extract FStar., Classical Ghost Int16 Int32 Int64 Int63 Int16 Int8 Int.Cast Int List.Tot.Base List.Tot List.Tot.Properties Math.Lemmas Mul StrongExcludedMiddle UInt128 UInt16 UInt32 UInt63 UInt64 UInt8) $(addprefix --no_extract Hacl., UInt64 UInt32 UInt8)
 
 ARGS=--codegen OCaml --lax --include $(HACL_HOME)/code/lib/kremlin $(NOEXTRACT) --include $(KREMLIN_HOME)/kremlib --include ..
-
-OCAML_INCLUDES=-I $(HACL_HOME)/code/lib/ml $(HACL_HOME)/code/lib/ml/hacllib.cmxa
 
 %.fst-verify: %.fst
 	$(FSTAR) --include $(HACL_HOME)/code/lib/kremlin --include $(KREMLIN_HOME)/kremlib --include .. --use_hints $*.fst
@@ -66,7 +64,7 @@ sha2_256.exe: Spec.SHA256.fst
 
 rsapss.exe: ../lib/fst/Spec.Lib.IntTypes.fst ../lib/fst/Spec.Lib.RawIntTypes.fst ../lib/fst/Spec.Lib.IntSeq.fst ../lib/fst/Spec.Lib.Stateful.fst ../Spec.SHA2.fst Spec.RSA.Bignum.fst Spec.RSA.fst Spec.RSA.Test.fst
 	mkdir -p rsapss-ml
-	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSA.Bignum --extract_module Spec.RSA --extract_module Spec.RSA.Test --odir rsapss-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSA.Bignum --extract_module Spec.RSA --extract_module Spec.RSA.Test --odir rsapss-ml $^
 	@echo 'let _ = test()' >> rsapss-ml/Spec_RSA_Test.ml
 	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) rsapss-ml/Spec_Lib_IntTypes.ml rsapss-ml/Spec_Lib_RawIntTypes.ml rsapss-ml/Spec_Lib_IntSeq.ml rsapss-ml/Spec_Lib_Stateful.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSA_Bignum.ml rsapss-ml/Spec_RSA.ml rsapss-ml/Spec_RSA_Test.ml -o rsapss.exe
 	./rsapss.exe

@@ -235,6 +235,13 @@ inline_for_extraction let loop2 #h0 #a0 #a1 #len0 #len1 n buf0 buf1 spec impl =
       impl j in
   Spec.Lib.Loops.for (size 0) n inv f'
 
+inline_for_extraction let loop2_simple #h0 #a0 #a1 #len0 #len1 n buf0 buf1 impl =
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len0}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      impl j in
+  Spec.Lib.Loops.for (size 0) n inv f'
 
 inline_for_extraction let map_blocks #h0 #a #bs #nb blocksize nblocks buf f_spec f =
   let inv (h1:mem) (j:nat) = True in

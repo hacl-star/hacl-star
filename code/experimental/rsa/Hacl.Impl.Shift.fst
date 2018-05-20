@@ -77,5 +77,5 @@ let bn_pow2_mod_n #aLen aaLen aBits a p res =
     let _ = bn_sub rLen tmp aaLen a tmp in // tmp = tmp - a
     bn_pow2_mod_n_ #aLen #(v rLen) aaLen a aBits p rLen tmp;
     let tmp' = Buffer.sub #uint64 #(v rLen) #aLen tmp (size 0) aaLen in
-    copy aaLen tmp' res
+    copy res aaLen tmp'
   )
