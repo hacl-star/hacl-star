@@ -1,0 +1,6 @@
+#include "Hacl_SHA256.h"
+
+void Hacl_SHA256_hash(Prims_nat x0, uint8_t *mHash, uint32_t len, uint8_t *m)
+{
+  Hacl_SHA2_256_hash(mHash, m, len);
+}

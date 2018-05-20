@@ -19,8 +19,8 @@ KREMLIN_ARGS+=-verbose \
 	-no-prefix C.Loops \
 	-drop Prims,FStar,LowStar,C.Loops.Spec.Loops,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
 	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create,Spec.* \
-	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
-	-add-include '"kremlin/c_string.h"' -add-include '"kremlin/prims_int.h"' \
+	-drop Hacl.SHA256 \
+	-add-early-include '"Hacl_SHA256.h"' -add-include '"kremlin/c_string.h"' -add-include '"kremlin/prims_int.h"' \
 	-ccopt -march=native
 
 rsa-c/out.krml: ../../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../../specs/lib/c/Spec.Lib.Loops.fst ../../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../../specs/lib/c/Spec.Lib.Endian.fst ../../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst $(RSA_FILES) Hacl.Test.RSA.fst
@@ -44,11 +44,11 @@ test-rsa-kremlin.exe: rsa-c/out.krml
 	$^ -o $@
 	./$@
 
-INCLUDE_C=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/include
+INCLUDE_C=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/include -I $(HACL_HOME)/snapshots/hacl-c/ -I $(HACL_HOME)/code/experimental/rsa/include
 
 CC := $(CC) $(INCLUDE_C)
 
-BASE_OBJ = $(HACL_HOME)/code/experimental/rsa/sha/Hacl_Hash_Lib_LoadStore.o $(HACL_HOME)/code/experimental/rsa/sha/Hacl_Hash_Lib_Create.o $(HACL_HOME)/code/experimental/rsa/sha/Hacl_Hash_SHA2_256.o $(HACL_HOME)/code/experimental/rsa/sha/SHA2_256.o
+BASE_OBJ=$(HACL_HOME)/snapshots/hacl-c/Hacl_SHA2_256.o $(HACL_HOME)/code/experimental/rsa/include/Hacl_SHA256.o
 
 EXTRACTED= \
 	Hacl_RSAPSS \
@@ -63,4 +63,3 @@ test-rsa.exe: $(addprefix rsa-c/,$(addsuffix .o, $(EXTRACTED))) $(BASE_OBJ)
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf rsa-c
-

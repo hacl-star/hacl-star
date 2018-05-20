@@ -15,14 +15,15 @@ module Buffer = Spec.Lib.IntBuf
 inline_for_extraction
 let hLen:size_t = size 32
 
-assume val hash_sha256:
+val hash_sha256:
   #len:size_nat ->
   mHash:lbytes (v hLen) ->
   clen:size_t{v clen == len} ->
   m:lbytes len -> Stack unit
   (requires (fun h -> live h mHash /\ live h m /\ disjoint m mHash))
   (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 mHash h0 h1))
-//let hash_sha256 #len mHash clen m = SHA2_256.hash mHash m clen
+let hash_sha256 #len mHash clen m = Hacl.SHA256.hash mHash clen m
+//SHA2_256.hash mHash m clen
 
 (* Mask Generation Function *)
 val mgf_sha256_:
