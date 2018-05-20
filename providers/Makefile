@@ -116,7 +116,7 @@ HACL_SOURCES	= \
   $(HACL_CODE)/curve25519/x25519-c/Hacl_Curve25519.c \
   $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
   $(HACL_CODE)/poly1305/poly-c/Hacl_Poly1305_64.c \
-  $(HACL_CODE)/hmac/hmac-c/Hacl_HMAC_SHA2_256.c \
+  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
   $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
   $(HACL_CODE)/salsa-family/chacha-vec128-c/Hacl_Chacha20_Vec128.c \
   #$(HACL_CODE)/api/aead-c/Chacha20Poly1305.c \

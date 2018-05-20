@@ -42,7 +42,7 @@ let test_1a () =
 
   (* Call the hash function *)
   Hash.init state;
-  Hash.update_last state plaintext (FStar.Int.Cast.uint32_to_uint64 plaintext_len);
+  Hash.update_last state plaintext plaintext_len;
   Hash.finish state output;
 
   (* Display the result *)
@@ -123,7 +123,7 @@ let test_2a () =
 
   (* Call the hash function *)
   Hash.init state;
-  Hash.update_last state plaintext (FStar.Int.Cast.uint32_to_uint64 plaintext_len);
+  Hash.update_last state plaintext plaintext_len;
   Hash.finish state output;
 
   (* Display the result *)
@@ -211,7 +211,7 @@ let test_3a () =
 
   (* Call the hash function *)
   Hash.init state;
-  Hash.update_last state plaintext (FStar.Int.Cast.uint32_to_uint64 plaintext_len);
+  Hash.update_last state plaintext plaintext_len;
   Hash.finish state output;
 
   (* Display the result *)
@@ -313,7 +313,7 @@ let test_4a () =
 
   (* Call the hash function *)
   Hash.init state;
-  Hash.update_last state plaintext (FStar.Int.Cast.uint32_to_uint64 plaintext_len);
+  Hash.update_last state plaintext plaintext_len;
   Hash.finish state output;
 
   (* Display the result *)
@@ -487,7 +487,7 @@ let test_6 () =
   test_6_loop state plaintext;
 
   let rem_len = UInt32.rem (128ul *%^ 8388607ul) Hash.size_block in
-  Hash.update_last state plaintext (FStar.Int.Cast.uint32_to_uint64 plaintext_len);
+  Hash.update_last state plaintext plaintext_len;
   Hash.finish state output;
 
   (* Display the result *)

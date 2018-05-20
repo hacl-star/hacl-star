@@ -34,7 +34,7 @@ val sha384_update: state:uint64_p -> data:uint8_p ->
   Stack unit sha384_update_pre sha384_update_post
 val sha384_update_multi: state:uint64_p -> data:uint8_p -> n:uint32_t ->
   Stack unit sha384_update_multi_pre sha384_update_multi_post
-val sha384_update_last: state:uint64_p -> data:uint8_p -> n:uint64_t ->
+val sha384_update_last: state:uint64_p -> data:uint8_p -> n:uint32_t ->
   Stack unit sha384_update_last_pre sha384_update_last_post
 val sha384_finish: state:uint64_p -> data:uint8_p ->
   Stack unit sha384_finish_pre sha384_finish_post
@@ -53,7 +53,7 @@ val sha512_update: state:uint64_p -> data:uint8_p ->
   Stack unit sha512_update_pre sha512_update_post
 val sha512_update_multi: state:uint64_p -> data:uint8_p -> n:uint32_t ->
   Stack unit sha512_update_multi_pre sha512_update_multi_post
-val sha512_update_last: state:uint64_p -> data:uint8_p -> n:uint64_t ->
+val sha512_update_last: state:uint64_p -> data:uint8_p -> n:uint32_t ->
   Stack unit sha512_update_last_pre sha512_update_last_post
 val sha512_finish: state:uint64_p -> data:uint8_p ->
   Stack unit sha512_finish_pre sha512_finish_post
