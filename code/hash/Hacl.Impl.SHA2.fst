@@ -3,21 +3,26 @@ module Hacl.Impl.SHA2
 open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
-open Spec.Lib.IntTypes
 
+open Spec.Lib.IntTypes
 open Spec.Lib.IntBuf
 open Spec.Lib.IntBuf.Lemmas
 open Spec.SHA2
 
 module ST = FStar.HyperStack.ST
-module LSeq = Spec.Lib.IntSeq
+module S = Spec.Lib.IntSeq
 module Spec = Spec.SHA2
 
 
-inline_for_extraction
-let v = size_v
-inline_for_extraction
-let index (x:size_nat) = size x
+///
+/// Helper functions
+///
+
+(* Operators *)
+inline_for_extraction let v = size_v
+inline_for_extraction let index (x:size_nat) = size x
+let op_String_Access #a #len m b = as_lseq #a #len b m
+
 
 (* Define algorithm parameters *)
 inline_for_extraction let size_hash_w : size_t = size Spec.size_hash_w
@@ -33,22 +38,39 @@ type hash_w  (p:Spec.parameters) = b:lbuffer (uint_t p.wt) Spec.size_hash_w
 unfold type kTable (p:Spec.parameters) = b:lbuffer (uint_t p.wt) p.kSize
 unfold type wsTable (p:Spec.parameters) = b:lbuffer (uint_t p.wt) p.kSize
 
+
+(* Definition of constants *)
+inline_for_extraction val create_const_k: p:Spec.parameters -> StackInline (kTable p)
+  (requires (fun h -> True))
+  (ensures (fun h0 r h1 -> creates1 r h0 h1 /\
+		                  preserves_live h0 h1 /\
+		                  modifies1 r h0 h1 /\
+		                  as_lseq r h1 == p.kTable))
+
+inline_for_extraction let create_const_k p = admit() //createL p.kTable
+
+
+
 (* Definition of the scheduling function (part 1) *)
-let step_ws0 (p:Spec.parameters) (b:block_w p) (i:size_t{size_v i < 16}) (s:wsTable p)
-: Stack unit
+val step_ws0: p:Spec.parameters -> b:block_w p -> i:size_t{size_v i < 16} -> s:wsTable p ->
+  Stack unit
   (requires (fun h -> live h s /\ live h b))
   (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-            /\ as_lseq s h1 == Spec.step_ws0 p (as_lseq b h0) (size_v i) (as_lseq s h0))) =
+            /\ as_lseq s h1 == Spec.step_ws0 p (as_lseq b h0) (size_v i) (as_lseq s h0)))
+
+let step_ws0 p b i s =
   s.(i) <- b.(i)
 
 #set-options "--max_fuel 0 --z3rlimit 50"
 
 (* Definition of the scheduling function (part 2) *)
-let step_ws1 (p:Spec.parameters) (i:size_t{size_v i >= 16 /\ size_v i < p.kSize}) (s:wsTable p)
-: Stack unit
+val step_ws1: p:Spec.parameters -> i:size_t{size_v i >= 16 /\ size_v i < p.kSize} -> s:wsTable p ->
+  Stack unit
   (requires (fun h -> live h s))
   (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-                       /\ as_lseq s h1 == Spec.step_ws1 p (size_v i) (as_lseq s h0))) =
+                       /\ as_lseq s h1 == Spec.step_ws1 p (size_v i) (as_lseq s h0)))
+
+let step_ws1 p i s =
   let t16 = s.(i -. size 16) in
   let t15 = s.(i -. size 15) in
   let t7  = s.(i -. size 7) in
@@ -57,24 +79,50 @@ let step_ws1 (p:Spec.parameters) (i:size_t{size_v i >= 16 /\ size_v i < p.kSize}
   let s0 = _sigma0 p t15 in
   s.(i) <- s1 +. (t7 +. (s0 +. t16))
 
+
 (* Definition of the core scheduling function *)
-let ws (p:Spec.parameters) (s:wsTable p) (b:block_w p) :
+val loop_ws0: p:Spec.parameters -> s:wsTable p -> b:block_w p ->
   Stack unit
-        (requires (fun h -> live h s /\ live h b))
-        (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1)) =
-  (**) let h0 = ST.get () in
-  // FIXME let lseq_b = as_lseq b h0 in
-  let lseq_b = LSeq.create 16 (nat_to_uint #p.wt 0) in
-  let spec0 (i:size_nat{i < 16}) (s:Spec.Lib.IntSeq.intseq p.wt p.kSize) : Tot (Spec.Lib.IntSeq.intseq p.wt p.kSize) = Spec.step_ws0 p lseq_b i s in
-  let spec1 (i:size_nat{i + 16 < p.kSize}) (s:Spec.Lib.IntSeq.intseq p.wt p.kSize) : Tot (Spec.Lib.IntSeq.intseq p.wt p.kSize) = Spec.step_ws1 p (i + 16) s in
-  iteri (size 16) spec0 (step_ws0 p b) s;
-  iteri (size p.kSize -. size 16) spec1 (fun i -> step_ws1 p (i +. size 16)) s
+  (requires (fun h -> live h s /\ live h b))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1))
+
+let loop_ws0 p s b = ()
+  (* (\**\) let h0 = ST.get () in *)
+  (* loop #h0 (size 16) s *)
+  (*   (fun hi -> S.repeati 16 (Spec.step_ws0 p hi.[b]) hi.[s]) *)
+  (*   (fun i -> step_ws0 p b i s) *)
+
+
+val loop_ws1: p:Spec.parameters -> s:wsTable p ->
+  Stack unit
+  (requires (fun h -> live h s))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1))
+
+let loop_ws1 p s = ()
+  (* (\**\) let h0 = ST.get () in *)
+  (* loop #h0 (size ((p.kSize - 16))) s *)
+  (*   (fun hi -> S.repeati 16 (step_ws1 p ((v i) + 16)) hi.[s]) *)
+  (*   (fun i -> step_ws1 p (i +. 16) s) *)
+
+
+(* Definition of the core scheduling function *)
+val ws: p:Spec.parameters -> s:wsTable p -> b:block_w p ->
+  Stack unit
+  (requires (fun h -> live h s /\ live h b))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1))
+
+let ws p s b =
+  loop_ws0 p s b;
+  loop_ws1 p s
+
 
 (* Definition of the core shuffling function *)
-let shuffle_core (p:Spec.parameters) (kt:kTable p) (wst:wsTable p) (t:size_t{size_v t < p.kSize}) (hash:hash_w p)
-: Stack unit
-        (requires (fun h -> live h kt /\ live h wst /\ live h hash))
-        (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1)) =
+val shuffle_core: p:Spec.parameters -> kt:kTable p -> wst:wsTable p -> t:size_t{size_v t < p.kSize} -> hash:hash_w p ->
+  Stack unit
+  (requires (fun h -> live h kt /\ live h wst /\ live h hash))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1))
+
+let shuffle_core p kt wst t hash =
   let a0 = hash.(size 0) in
   let b0 = hash.(size 1) in
   let c0 = hash.(size 2) in
@@ -98,19 +146,34 @@ let shuffle_core (p:Spec.parameters) (kt:kTable p) (wst:wsTable p) (t:size_t{siz
   hash.(size 6) <- f0;
   hash.(size 7) <- g0
 
-// Definition of the full shuffling function
-val shuffle: (p:Spec.parameters) -> (kt:kTable p) -> (wst:wsTable p) -> (hash:hash_w p) ->
+
+(* Definition of the full shuffling function *)
+val shuffle: p:Spec.parameters -> kt:kTable p -> wst:wsTable p -> hash:hash_w p ->
   Stack unit
         (requires (fun h -> live h kt /\ live h wst))
         (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1))
-let shuffle (p:parameters) (kt:kTable p) (wst:wsTable p) (hash:hash_w p)
-: Stack unit
-        (requires (fun h -> live h kt /\ live h wst))
-        (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1)) =
-  let h0 = ST.get () in
-  // FIXME let lseq_wst : LSeq.intseq p.wt p.kSize = as_lseq wst h0 in
-  let lseq_wst = LSeq.create p.kSize (nat_to_uint #p.wt 0) in
-  iteri (size p.kSize) (Spec.shuffle_core p lseq_wst) (shuffle_core p kt wst) hash
+let shuffle p kt wst hash = admit()
+  (* (\**\) let h0 = ST.get () in *)
+  (* loop #h0 (size p.kSize) hash *)
+  (* (fun _ -> True) *)
+  (* (fun i -> shuffle_core p kt wst i hash) *)
+
+
+(* Definition of the core compression function *)
+// Discuss if we prefer using block_w (uint32_t*) or directly block (uint8_t*)
+val compress: p:Spec.parameters -> b:block_w p -> k:const_k -> hash:hash_w p ->
+  Stack unit
+  (requires (fun h -> live h b /\ live h hash))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1))
+
+let compress p b k hash =
+  (**) let h0 = ST.get () in
+  alloc #h0 (size size_block_w) hash
+  (fun wst ->
+    ws p wst b;
+    shuffle p kt wst hash;
+    map2 (fun x y -> x +. y) hash0 hash1)
+
 
 
 (* Definition of the SHA2 state *)

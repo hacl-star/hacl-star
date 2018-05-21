@@ -64,11 +64,17 @@ let step_ws1 p (i:size_nat{i >= 16 /\ i < p.kSize}) (s:intseq p.wt p.kSize) : To
   let s0 = _sigma0 p t15 in
   s.[i] <- s1 +. (t7 +. (s0 +. t16))
 
+(* Definition of the loop over the scheduling function (part 1) *)
+let loop_ws0 p b s = repeati 16 (step_ws0 p b) s
+
+(* Definition of the loop over the scheduling function (part 2) *)
+let loop_ws1 p b s = repeati (p.kSize - 16) (fun i -> step_ws1 p (i + 16)) s
+
 (* Definition of the core scheduling function *)
 let ws p (b:block_w p) =
   let s = create p.kSize (nat_to_uint #p.wt 0) in
-  let s = repeati 16 (step_ws0 p b) s in
-  let s = repeati (p.kSize - 16) (fun i -> step_ws1 p (i + 16)) s in
+  let s = loop_ws0 p b s in
+  let s = loop_ws1 p s in
   s
 
 (* Definition of the core shuffling function *)
