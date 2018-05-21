@@ -12,40 +12,32 @@ open Hacl.Impl.MGF
 module Buffer = Spec.Lib.IntBuf
 
 val rsa_pss_sign:
-    #sLen:size_nat -> #msgLen:size_nat -> #nLen:size_nat ->
-    pow2_i:size_t{6 * nLen + 4 * v pow2_i < max_size_t /\ nLen <= v pow2_i /\ nLen + 1 < 2 * v pow2_i} ->
-    modBits:size_t{0 < v modBits /\ nLen = v (blocks modBits (size 64))} ->
-    eBits:size_t{0 < v eBits /\ v eBits <= v modBits} ->
-    dBits:size_t{0 < v dBits /\ v dBits <= v modBits} ->
-    pLen:size_t -> qLen:size_t{nLen + v (blocks eBits (size 64)) + v (blocks dBits (size 64)) + v pLen + v qLen < max_size_t} ->
-    skey:lbignum (nLen + v (blocks eBits (size 64)) + v (blocks dBits (size 64)) + v pLen + v qLen) ->
-    rBlind:uint64 ->
-    ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t /\ v (blocks modBits (size 8)) - sLen - v hLen - 3 >= 0} -> salt:lbytes sLen ->
-    mmsgLen:size_t{v mmsgLen == msgLen /\ msgLen < pow2 61} -> msg:lbytes msgLen ->
-    sgnt:lbytes (v (blocks modBits (size 8))) -> Stack unit
-    (requires (fun h -> live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
-	              disjoint msg salt /\ disjoint msg sgnt /\ disjoint sgnt salt))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 sgnt h0 h1))
+  pow2_i:size_t -> modBits:size_t{0 < v modBits} ->
+  eBits:size_t{0 < v eBits /\ v eBits <= v modBits} -> dBits:size_t{0 < v dBits /\ v dBits <= v modBits} ->
+  pLen:size_t -> qLen:size_t{v (blocks modBits (size 64)) + v (blocks eBits (size 64)) + v (blocks dBits (size 64)) + v pLen + v qLen < max_size_t} ->
+  skey:lbignum (add #SIZE (add #SIZE (add #SIZE (add #SIZE (blocks modBits (size 64)) (blocks eBits (size 64))) (blocks dBits (size 64))) pLen) qLen) -> rBlind:uint64 ->
+  sLen:size_t{v sLen + v hLen + 8 < max_size_t /\ v (blocks modBits (size 8)) - v sLen - v hLen - 2 >= 0} -> salt:lbytes sLen ->
+  msgLen:size_t -> msg:lbytes msgLen -> sgnt:lbytes (blocks modBits (size 8)) -> Stack unit
+  (requires (fun h -> live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
+	            disjoint msg salt /\ disjoint msg sgnt /\ disjoint sgnt salt))
+  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 sgnt h0 h1))
 
-let rsa_pss_sign #sLen #msgLen #nLen pow2_i modBits eBits dBits pLen qLen skey rBlind ssLen salt mmsgLen msg sgnt =
-    push_frame();
-    Hacl.Impl.RSA.rsa_sign #sLen #msgLen #nLen pow2_i modBits eBits dBits pLen qLen skey rBlind ssLen salt mmsgLen msg sgnt;
-    pop_frame()
+let rsa_pss_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen msg sgnt =
+  push_frame();
+  Hacl.Impl.RSA.rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen msg sgnt;
+  pop_frame()
 
 val rsa_pss_verify:
-    #sLen:size_nat -> #msgLen:size_nat -> #nLen:size_nat ->
-    pow2_i:size_t{6 * nLen + 4 * v pow2_i < max_size_t /\ nLen <= v pow2_i /\ nLen + 1 < 2 * v pow2_i} ->
-    modBits:size_t{0 < v modBits /\ nLen = v (blocks modBits (size 64))} ->
-    eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\ nLen + v (blocks eBits (size 64)) < max_size_t} ->
-    pkey:lbignum (nLen + v (blocks eBits (size 64))) ->
-    ssLen:size_t{v ssLen == sLen /\ sLen + v hLen + 8 < max_size_t /\ v (blocks modBits (size 8)) - sLen - v hLen - 3 >= 0} ->
-    sgnt:lbytes (v (blocks modBits (size 8))) ->
-    mmsgLen:size_t{v mmsgLen == msgLen /\ msgLen < pow2 61} -> msg:lbytes msgLen -> Stack bool
-    (requires (fun h -> live h msg /\ live h sgnt /\ live h pkey /\ disjoint msg sgnt))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies0 h0 h1))
-
-let rsa_pss_verify #sLen #msgLen #nLen pow2_i modBits eBits pkey ssLen sgnt mmsgLen msg =
-    push_frame();
-    let res = Hacl.Impl.RSA.rsa_verify #sLen #msgLen pow2_i modBits eBits pkey ssLen sgnt mmsgLen msg in
-    pop_frame();
-    res
+  pow2_i:size_t -> modBits:size_t{0 < v modBits} ->
+  eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\ v (blocks modBits (size 64)) + v (blocks eBits (size 64)) < max_size_t} ->
+  pkey:lbignum (add #SIZE (blocks modBits (size 64)) (blocks eBits (size 64))) ->
+  sLen:size_t{v sLen + v hLen + 8 < max_size_t /\ v (blocks modBits (size 8)) - v sLen - v hLen - 2 >= 0} ->
+  sgnt:lbytes (blocks modBits (size 8)) ->
+  msgLen:size_t -> msg:lbytes msgLen -> Stack bool
+  (requires (fun h -> live h msg /\ live h sgnt /\ live h pkey /\ disjoint msg sgnt))
+  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies0 h0 h1))
+let rsa_pss_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg =
+  push_frame();
+  let res = Hacl.Impl.RSA.rsa_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg in
+  pop_frame();
+  res

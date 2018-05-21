@@ -32,71 +32,70 @@ let subborrow_u64 carry a b =
   (carry, res)
 
 val bn_sub_:
-  #aLen:size_nat -> #bLen:size_nat ->
-  caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
-  cbLen:size_t{v cbLen == bLen} -> b:lbignum bLen ->
-  carry:lbignum 1 -> res:lbignum aLen -> Stack unit
+  aLen:size_t -> a:lbignum aLen ->
+  bLen:size_t -> b:lbignum bLen ->
+  carry:lbignum (size 1) -> res:lbignum aLen -> Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h res /\ live h carry))
   (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 carry res h0 h1))
   [@ "substitute"]
-let bn_sub_ #aLen #bLen caLen a cbLen b carry res =
+let bn_sub_ aLen a bLen b carry res =
   let h0 = FStar.HyperStack.ST.get() in
-  loop2_simple #h0 #uint64 #uint64 #1 #aLen caLen carry res
+  loop2_simple #h0 aLen carry res
   (fun i ->
     let t1 = a.(i) in
-    let t2 = bval cbLen b i in
+    let t2 = bval bLen b i in
     let (c, res_i) = subborrow_u64 carry.(size 0) t1 t2 in
     carry.(size 0) <- c;
     res.(i) <- res_i
   )
 
 val bn_sub:
-  #aLen:size_nat -> #bLen:size_nat ->
-  caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
-  cbLen:size_t{v cbLen == bLen /\ bLen <= aLen} -> b:lbignum bLen ->
+  aLen:size_t -> a:lbignum aLen ->
+  bLen:size_t{v bLen <= v aLen} -> b:lbignum bLen ->
   res:lbignum aLen -> Stack uint64
   (requires (fun h -> live h a /\ live h b /\ live h res))
   (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
   [@"c_inline"]
-let bn_sub #aLen #bLen caLen a cbLen b res =
-  alloc #uint64 #uint64 #1 (size 1) (u64 0) [BufItem a; BufItem b] [BufItem res]
-  (fun h0 _ h1 -> True)
+let bn_sub aLen a bLen b res =
+  let h0 = FStar.HyperStack.ST.get () in
+  alloc1 #h0 (size 1) (u64 0) res
+  (fun h -> (fun _ r -> True))
   (fun carry ->
-    bn_sub_ #aLen #bLen caLen a cbLen b carry res;
+    bn_sub_ aLen a bLen b carry res;
     carry.(size 0)
   )
 
 val bn_add_:
-  #aLen:size_nat -> #bLen:size_nat ->
-  caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
-  cbLen:size_t{v cbLen == bLen} -> b:lbignum bLen ->
-  carry:lbignum 1 -> res:lbignum aLen -> Stack unit
+  aLen:size_t -> a:lbignum aLen ->
+  bLen:size_t -> b:lbignum bLen ->
+  carry:lbignum (size 1) -> res:lbignum aLen -> Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h res /\ live h carry))
   (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 carry res h0 h1))
   [@ "substitute"]
-let bn_add_ #aLen #bLen caLen a cbLen b carry res =
+let bn_add_ aLen a bLen b carry res =
   let h0 = FStar.HyperStack.ST.get() in
-  loop2_simple #h0 #uint64 #uint64 #1 #aLen caLen carry res
+  loop2_simple #h0 aLen carry res
   (fun i ->
     let t1 = a.(i) in
-    let t2 = bval cbLen b i in
+    let t2 = bval bLen b i in
     let (c, res_i) = addcarry_u64 carry.(size 0) t1 t2 in
     carry.(size 0) <- c;
     res.(i) <- res_i
   )
 
 val bn_add:
-  #aLen:size_nat -> #bLen:size_nat ->
-  caLen:size_t{v caLen == aLen} -> a:lbignum aLen ->
-  cbLen:size_t{v cbLen == bLen /\ bLen <= aLen} -> b:lbignum bLen ->
+  aLen:size_t -> a:lbignum aLen ->
+  bLen:size_t{v bLen <= v aLen} -> b:lbignum bLen ->
   res:lbignum aLen -> Stack uint64
   (requires (fun h -> live h a /\ live h b /\ live h res))
   (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
   [@"c_inline"]
-let bn_add #aLen #bLen caLen a cbLen b res =
-  alloc #uint64 #uint64 #1 (size 1) (u64 0) [BufItem a; BufItem b] [BufItem res]
-  (fun h0 _ h1 -> True)
+let bn_add aLen a bLen b res =
+  let h0 = FStar.HyperStack.ST.get () in
+  alloc1 #h0 (size 1) (u64 0) res
+  (fun h -> (fun _ r -> True))
   (fun carry ->
-    bn_add_ #aLen #bLen caLen a cbLen b carry res;
+    bn_add_ aLen a bLen b carry res;
     carry.(size 0)
   )
+  
