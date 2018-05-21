@@ -2,7 +2,7 @@
 # Main HACL* Makefile
 #
 
-.PHONY: display verify test clean dependencies
+.PHONY: display verify test providers clean dependencies
 
 all: display
 
@@ -136,11 +136,21 @@ test-all:
 	$(MAKE) -C test
 
 #
+# Providers
+#
+
+providers:
+	@echo $(CYAN)"# Verifying, Extracting and Testing the Providers"$(NORMAL)
+	$(MAKE) extract-c-code
+	$(MAKE) -C providers
+
+#
 # CI
 #
 
 ci: .clean-banner .clean-git .clean-snapshots
 #	$(MAKE) verify // Suspend verification from CI
+	$(MAKE) providers
 	$(MAKE) extract-specs extract-all
 	$(MAKE) build-make
 	$(MAKE) test-all

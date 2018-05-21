@@ -49,7 +49,7 @@ FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib multiplexer multiplexer/fst \
   $(HACL_CODE)/lib/kremlin $(HACL_CODE)/curve25519/interfaces $(HACL_CODE)/hash/interfaces \
   $(HACL_SPEC)
 FSTAR		= $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
-  --use_two_phase_tc true --admit_smt_queries true $(OTHERFLAGS) \
+  $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) \
   --use_hints # --record_hints --hint_info
@@ -116,7 +116,7 @@ HACL_SOURCES	= \
   $(HACL_CODE)/curve25519/x25519-c/Hacl_Curve25519.c \
   $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
   $(HACL_CODE)/poly1305/poly-c/Hacl_Poly1305_64.c \
-  $(HACL_CODE)/hmac/hmac-c/Hacl_HMAC_SHA2_256.c \
+  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
   $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
   $(HACL_CODE)/salsa-family/chacha-vec128-c/Hacl_Chacha20_Vec128.c \
   #$(HACL_CODE)/api/aead-c/Chacha20Poly1305.c \

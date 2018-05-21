@@ -1,16 +1,7 @@
 module SampleProject
 
 (* This file is provided for test purposes only. It can be built in a single
- * invocation of KreMLin:
-
-  krml -ldopt -levercrypt SampleProject.fst -no-prefix SampleProject -I
-    ../multiplexer/ -add-include '"kremstr.h"' KRML_HOME/kremlib/testlib.c
-    -add-include '"testlib.h"' -ldopt -L.. -o sample-project.exe
-
- * Then, it can be run with:
- * - LD_LIBRARY_PATH=.. ./sample-project.exe (Linux)
- * - DYLD_LIBRARY_PATH=.. ./sample-project.exe (OSX)
- * - PATH=.. ./sample-project.exe (Windows)
+ * invocation of KreMLin, as in the Makefile.
  *)
 
 module B = FStar.Buffer
@@ -27,9 +18,7 @@ let test1 () =
   let output = B.create 0uy output_len in
 
   let plaintext_len = 3ul in
-  let plaintext = B.createL [
-      0x61uy; 0x62uy; 0x63uy;
-    ] in
+  let plaintext = B.createL [ 0x61uy; 0x62uy; 0x63uy; ] in
 
   let expected = B.createL [
       0xBAuy; 0x78uy; 0x16uy; 0xBFuy; 0x8Fuy; 0x01uy; 0xCFuy; 0xEAuy;
@@ -53,9 +42,9 @@ let test1 () =
 
 let main (): St C.exit_code =
   push_frame ();
+  EverCrypt.(init (Some Hacl));
   test1 ();
   EverCrypt.(init (Some Vale));
   test1 ();
-  EverCrypt.(init (Some Hacl));
   pop_frame ();
   C.EXIT_SUCCESS
