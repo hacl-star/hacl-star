@@ -43,8 +43,8 @@ let text_to_nat len input res =
   (fun h -> (fun _ r -> True))
   (fun tmp ->
     let tmpLen1 = sub #SIZE tmpLen ind in
-    assert (v tmpLen1 = v len);    
-    let tmp1 = Buffer.sub #uint8 #(v tmpLen) #(v tmpLen1) tmp ind tmpLen1 in
+    assert (v tmpLen1 = v len);
+    let tmp1 = Buffer.sub tmp ind tmpLen1 in
     copy tmp1 len input;
     text_to_nat_ tmpLen tmp num_words res
   )
@@ -84,6 +84,7 @@ let nat_to_text len input res =
   (fun tmp ->
     nat_to_text_ num_words input tmpLen tmp;
     let tmpLen1 = sub #SIZE tmpLen ind in
-    let tmp1 = Buffer.sub #uint8 #(v tmpLen) #(v tmpLen1) tmp ind tmpLen1 in
+    assert (v tmpLen1 = v len);
+    let tmp1 = Buffer.sub tmp ind tmpLen1 in
     copy res len tmp1
   )

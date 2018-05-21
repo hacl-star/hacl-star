@@ -138,11 +138,14 @@ let to_mont nLen rLen pow2_i n nInv_u64 r2 a st_kara aM =
   let cLen = add #SIZE nLen nLen in
   let stLen = add #SIZE cLen (mul #SIZE (size 4) pow2_i) in
   let c = Buffer.sub #uint64 #(v stLen) #(v cLen) st_kara (size 0) cLen in
+  let h0 = FStar.HyperStack.ST.get () in
   karatsuba pow2_i nLen a r2 st_kara; // c = a * r2
+  let h1 = FStar.HyperStack.ST.get () in
+  assert (modifies1 st_kara h0 h1);
   let tmp = Buffer.sub st_kara cLen (add #SIZE nLen rLen) in
-  mont_reduction nLen rLen n nInv_u64 c tmp aM // aM = c % n
-
-#reset-options "--z3rlimit 30"
+  mont_reduction nLen rLen n nInv_u64 c tmp aM; // aM = c % n
+  let h2 = FStar.HyperStack.ST.get () in
+  assert (modifies2 aM tmp h1 h2)
 
 val from_mont:
   nLen:size_t ->
