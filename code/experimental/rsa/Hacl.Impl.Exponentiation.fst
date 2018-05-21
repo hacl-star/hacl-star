@@ -39,20 +39,22 @@ val mod_exp_:
   pow2_i:size_t{v nLen + v nLen + 4 * v pow2_i < max_size_t /\ v nLen <= v pow2_i /\ v rLen < 2 * v pow2_i} ->
   n:lbignum nLen -> nInv_u64:uint64 -> st_kara:lbignum (add #SIZE (add #SIZE nLen nLen) (mul #SIZE (size 4) pow2_i)) -> st_exp:lbignum (add #SIZE nLen nLen) ->
   bBits:size_t{0 < v bBits} -> bLen:size_t{v bLen = v (blocks bBits (size 64)) /\ v bBits / 64 < v bLen} -> b:lbignum bLen ->
-  i:size_t{v i <= v bBits} ->
   Stack unit
     (requires (fun h -> live h n /\ live h b /\ live h st_kara /\ live h st_exp /\
                       disjoint st_exp st_kara /\ disjoint st_kara n))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 st_exp st_kara h0 h1))
   [@"c_inline"]
-let rec mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b i =
+let mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b =
   let aM = Buffer.sub st_exp (size 0) nLen in
   let accM = Buffer.sub st_exp nLen nLen in
-  (if (i <. bBits) then begin
-    (if (bn_is_bit_set bLen b i) then mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM accM accM); // acc = (acc * a) % n
-    mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM aM aM; // a = (a * a) % n
-    mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b (add #SIZE i (size 1))
-  end); admit()
+
+  let h0 = FStar.HyperStack.ST.get() in
+  loop2_simple #h0 bBits st_exp st_kara
+  (fun i ->
+      (if (bn_is_bit_set bLen b i) then
+        mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM accM accM); // acc = (acc * a) % n
+      mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM aM aM // a = (a * a) % n
+  )
 
 // res = a ^^ b mod n
 val mod_exp:
@@ -98,7 +100,7 @@ let mod_exp pow2_i modBits nLen n a bBits b res =
     let nInv_u64 = mod_inv_u64 n0 in // n * nInv = 1 (mod (pow2 64))
     to_mont nLen rLen pow2_i n nInv_u64 r2 a st_kara aM;
     to_mont nLen rLen pow2_i n nInv_u64 r2 acc st_kara accM;
-    mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b (size 0);
+    mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b;
     from_mont nLen rLen pow2_i n nInv_u64 accM tmp res; admit()
     )
     //;pop_frame()
