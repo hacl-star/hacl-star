@@ -75,3 +75,14 @@ val aes256_gcm_encrypt: cipher: uint8_p -> tag:uint8_p -> key:uint8_p ->
   iv:uint8_p -> plaintext:uint8_p -> len: uint32_t ->
   ad:uint8_p -> adlen:uint32_t ->
     Stack unit aes256_gcm_encrypt_pre aes256_gcm_encrypt_post
+
+/// Chacha20-Poly1305
+
+val chacha20_poly1305_encode_length: lb:uint8_p -> aad_len:uint32_t -> m_len:uint32_t ->
+  Stack unit chacha20_poly1305_encode_length_pre chacha20_poly1305_encode_length_post
+val chacha20_poly1305_encrypt: c:uint8_p -> mac:uint8_p -> m:uint8_p -> m_len:uint32_t ->
+  aad:uint8_p -> aad_len:uint32_t -> k:uint8_p -> n:uint8_p ->
+  Stack uint32_t chacha20_poly1305_encrypt_pre chacha20_poly1305_encrypt_post
+val chacha20_poly1305_decrypt: m:uint8_p -> c:uint8_p -> m_len:uint32_t -> mac:uint8_p ->
+  aad:uint8_p -> aad_len:uint32_t -> k:uint8_p -> n:uint8_p ->
+  Stack uint32_t chacha20_poly1305_decrypt_pre chacha20_poly1305_decrypt_post

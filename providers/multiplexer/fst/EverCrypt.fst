@@ -132,3 +132,21 @@ let aes256_gcm_encrypt cipher tag key iv plaintext len ad adlen =
   | Hacl -> failwith !$"TODO: aes-gcm/hacl"
   | Vale -> failwith !$"TODO: aes-gcm/vale"
   | OpenSSL -> EverCrypt.OpenSSL.aes256_gcm_encrypt cipher tag key iv plaintext len ad adlen
+
+let chacha20_poly1305_encode_length lb aad_len m_len =
+  match chacha20_poly1305_impl with
+  | Hacl -> EverCrypt.Hacl.chacha20_poly1305_encode_length lb aad_len m_len
+  | Vale -> failwith !$"TODO: chacha20_poly1305_encode_length/vale"
+  | OpenSSL -> failwith !$"TODO: chacha20_poly1305_encode_length/OpenSSL"
+
+let chacha20_poly1305_encrypt c mac m m_len aad aad_len k n =
+  match chacha20_poly1305_impl with
+  | Hacl -> EverCrypt.Hacl.chacha20_poly1305_encrypt c mac m m_len aad aad_len k n
+  | Vale -> failwith !$"TODO: chacha20_poly1305_encrypt/vale"
+  | OpenSSL -> failwith !$"TODO: chacha20_poly1305_encrypt/OpenSSL"
+
+let chacha20_poly1305_decrypt m c m_len mac aad aad_len k n  =
+  match chacha20_poly1305_impl with
+  | Hacl -> EverCrypt.Hacl.chacha20_poly1305_decrypt m c m_len mac aad aad_len k n
+  | Vale -> failwith !$"TODO: chacha20_poly1305_decrypt/vale"
+  | OpenSSL -> failwith !$"TODO: chacha20_poly1305_decrypt/OpenSSL"
