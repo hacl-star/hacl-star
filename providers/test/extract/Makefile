@@ -4,6 +4,7 @@ EVERCRYPT_HOME=../../out
 FILES = $(basename $(ALL_C_FILES))
 CFLAGS = -I $(KREMLIN_HOME)/include
 
+# See https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
 %.d: %.c
 	@set -e; rm -f $@; \
 	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \

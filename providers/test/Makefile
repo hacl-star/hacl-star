@@ -71,7 +71,9 @@ test: $(EXTRACT_DIR)/Test.c
 	$(PREFIX) extract/test.exe
 
 clean:
-	rm -rf .depend cache extract/*.krml extract/*.d extract/*.c extract/*.o extract/Makefile.include extract/test.exe
+	rm -rf .depend cache
+	-@find $(EXTRACT_DIR) -type f -and -not -name Makefile -and -not -name .gitignore -and -not -name hacks.h \
+        | xargs rm -f
 
 %.fst-in:
 	@echo --include ../multiplexer --include $(KREMLIN_HOME)/kremlib

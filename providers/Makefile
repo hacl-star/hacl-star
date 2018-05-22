@@ -37,8 +37,9 @@ all:
 
 all_: $(OUT_DIR)/libevercrypt.a $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)/evercrypt.cmxa
 
-test: sample-project/sample-project.exe
-	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. PATH=. ./$<
+.PHONY: test
+test:
+	$(MAKE) -C test test
 
 # 1. Generation of the .krml files
 # - generate the F* dependency graph via `fstar --dep full`
@@ -203,21 +204,12 @@ $(HACL_SOURCES):
 
 .PHONY: clean
 clean:
-	rm -rf $(GENERATED_DIR) multiplexer/c/*.o libevercrypt.so libevercrypt.a test/sample-project.exe
+	rm -rf $(GENERATED_DIR) multiplexer/c/*.o libevercrypt.so libevercrypt.a
+	$(MAKE) -C test clean
 
 .PHONY: distclean
 distclean: clean
 	rm -rf $(OUT_DIR) $(CACHE_DIR)
-
-# 5. A sample project that is a client of the library; run in a single
-# invocation of KreMLin for simplicity; essentially checks that separate linking
-# works.
-
-sample-project/sample-project.exe: sample-project/SampleProject.fst $(OUT_DIR)/libevercrypt.so
-	$(KREMLIN_HOME)/krml -ldopt -levercrypt $< -no-prefix SampleProject \
-	  -I multiplexer/ -add-include '"kremlin/c_string.h"' KRML_HOME/kremlib/testlib.c \
-	  -tmpdir .sample-project \
-	  -add-include '"kremlin/testlib.h"' -ldopt -Lout -o $@
 
 # 6. An OCaml library that exposes only the bytes-based interface, for now
 
