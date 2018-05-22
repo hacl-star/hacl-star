@@ -141,7 +141,7 @@ inline_for_extraction val create_const_iv: unit -> StackInline init_vector
   (ensures (fun h0 r h1 -> creates1 r h0 h1 /\
 		                  preserves_live h0 h1 /\
 		                  modifies1 r h0 h1 /\
-		                  as_lseq r h1 == Spec.const_init))
+		                  as_lseq r h1 == Spec.const_iv))
 
 inline_for_extraction let create_const_iv () =
   assert_norm(List.Tot.length Spec.list_init = 8);
