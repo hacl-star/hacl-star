@@ -380,6 +380,22 @@ val loop:
                        b1 == LSeq.repeati #(LSeq.lseq a len) (v n) (spec h0) b0)))
 
 
+inline_for_extraction
+val loop_set:
+  #a:Type0 ->
+  #len:size_nat ->
+  buf:lbuffer a len ->
+  start:size_t ->
+  n:size_t{v n + v start <= len} ->
+  init:a ->
+  Stack unit
+	 (requires (fun h -> live h buf))
+	 (ensures (fun h0 _ h1 -> preserves_live h0 h1
+                       /\ modifies1 buf h0 h1
+                       /\ (let b1 = as_lseq #a #len buf h1 in
+                         LSeq.sub b1 (v start) (v n) == LSeq.create #a len init)))
+
+
 let loop2_inv (h0:mem) (h1:mem) (#a0:Type) (#a1:Type) (len0:size_nat) (len1:size_nat) (n:size_nat)  (buf0:lbuffer a0 len0) (buf1:lbuffer a1 len1)
   (spec:(h:mem -> GTot (i:size_nat{i < n} -> LSeq.lseq a0 len0 -> Tot (LSeq.lseq a0 len0)))) (i:size_nat{i <= n}) : Type =
   live h0 buf0 /\ live h0 buf1 /\ preserves_live h0 h1
