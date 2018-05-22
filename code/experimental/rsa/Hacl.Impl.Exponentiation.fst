@@ -9,7 +9,6 @@ open FStar.Mul
 open Hacl.Impl.Lib
 open Hacl.Impl.Montgomery
 open Hacl.Impl.Multiplication
-open Hacl.Impl.Shift
 
 module Buffer = Spec.Lib.IntBuf
 
@@ -73,38 +72,36 @@ let mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b =
 val mod_exp:
   pow2_i:size_t -> modBits:size_t{0 < v modBits} ->
   nLen:size_t{128 * (v nLen + 1) < max_size_t /\ v nLen = v (blocks modBits (size 64)) /\ 6 * v nLen + 4 * v pow2_i < max_size_t /\ v nLen <= v pow2_i /\ v nLen + 1 < 2 * v pow2_i} ->
-  n:lbignum nLen -> a:lbignum nLen ->
+  n:lbignum nLen -> r2:lbignum nLen -> a:lbignum nLen ->
   bBits:size_t{0 < v bBits} -> b:lbignum (blocks bBits (size 64)) -> res:lbignum nLen ->
   Stack unit
-    (requires (fun h -> live h n /\ live h a /\ live h b /\ live h res))
+    (requires (fun h -> live h n /\ live h a /\ live h b /\ live h res /\ live h r2))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 res h0 h1))
   #reset-options "--z3rlimit 150 --max_fuel 0"
   [@"c_inline"]
-let mod_exp pow2_i modBits nLen n a bBits b res =
-  let rLen = nLen +! size 1 in
+let mod_exp pow2_i modBits nLen n r2 a bBits b res =
+  let rLen = add #SIZE nLen (size 1) in
   let exp_r = mul #SIZE (size 64) rLen in
   let exp2 = add #SIZE exp_r exp_r in
 
   let bLen = blocks bBits (size 64) in
 
   let karaLen = add #SIZE (add #SIZE nLen nLen) (mul #SIZE (size 4) pow2_i) in
-  let stLen = add #SIZE (mul #SIZE (size 4) nLen) karaLen in
+  let stLen = add #SIZE (add #SIZE (add #SIZE nLen nLen) nLen) karaLen in
 
   let h0 = FStar.HyperStack.ST.get () in
   alloc1 #h0 stLen (u64 0) res
   (fun h -> (fun _ r -> True))
   (fun st ->
-    let r2   = Buffer.sub st (size 0) nLen in
-    let acc  = Buffer.sub st nLen nLen in
-    let aM   = Buffer.sub st (mul #SIZE (size 2) nLen) nLen in
-    let accM = Buffer.sub st (mul #SIZE (size 3) nLen) nLen in
+    let acc  = Buffer.sub st (size 0) nLen in
+    let aM   = Buffer.sub st nLen nLen in
+    let accM = Buffer.sub st (add #SIZE nLen nLen) nLen in
 
-    let st_exp  = Buffer.sub st (mul #SIZE (size 2) nLen) (mul #SIZE (size 2) nLen) in
-    let st_kara = Buffer.sub st (mul #SIZE (size 4) nLen) karaLen in
-    let tmp     = Buffer.sub #uint64 #(v stLen) #_ st (mul #SIZE (size 4) nLen) (add #SIZE nLen rLen) in
+    let st_exp  = Buffer.sub st nLen (add #SIZE nLen nLen) in
+    let st_kara = Buffer.sub st (add #SIZE (add #SIZE nLen nLen) nLen) karaLen in
+    let tmp     = Buffer.sub #uint64 #(v stLen) #_ st (add #SIZE (add #SIZE nLen nLen) nLen) (add #SIZE nLen rLen) in
 
     acc.(size 0) <- u64 1;
-    bn_pow2_mod_n nLen modBits n exp2 r2; // r2 = r * r % n
     let n0 = n.(size 0) in
     let nInv_u64 = mod_inv_u64 n0 in // n * nInv = 1 (mod (pow2 64))
     to_mont nLen rLen pow2_i n nInv_u64 r2 a st_kara aM;

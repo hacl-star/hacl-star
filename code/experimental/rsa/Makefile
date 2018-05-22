@@ -6,7 +6,6 @@ RSA_FILES= \
 	Hacl.Impl.Comparison.fst \
 	Hacl.Impl.Addition.fst \
 	Hacl.Impl.Multiplication.fst \
-	Hacl.Impl.Shift.fst \
 	Hacl.Impl.Montgomery.fst \
 	Hacl.Impl.Exponentiation.fst \
 	Hacl.Impl.MGF.fst \

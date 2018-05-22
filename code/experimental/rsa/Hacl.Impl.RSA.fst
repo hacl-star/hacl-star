@@ -163,13 +163,15 @@ let rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen m
   let nLen = blocks modBits (size 64) in
   let eLen = blocks eBits (size 64) in
   let dLen = blocks dBits (size 64) in
-  let skeyLen:size_t = add #SIZE (add #SIZE (add #SIZE (add #SIZE nLen eLen) dLen) pLen) qLen in
+  let pkeyLen = add #SIZE (add #SIZE nLen eLen) nLen in
+  let skeyLen:size_t = add #SIZE (add #SIZE (add #SIZE pkeyLen dLen) pLen) qLen in
 
   let n = Buffer.sub #uint64 #(v skeyLen) #(v nLen) skey (size 0) nLen in
   let e = Buffer.sub #uint64 #(v skeyLen) #(v eLen) skey nLen eLen in
-  let d = Buffer.sub #uint64 #(v skeyLen) #(v dLen) skey (add #SIZE nLen eLen) dLen in
-  let p = Buffer.sub #uint64 #(v skeyLen) #(v pLen) skey (add #SIZE (add #SIZE nLen eLen) dLen) pLen in
-  let q = Buffer.sub #uint64 #(v skeyLen) #(v qLen) skey (add #SIZE ((add #SIZE (add #SIZE nLen eLen) dLen)) pLen) qLen in
+  let r2 = Buffer.sub #uint64 #(v skeyLen) #(v nLen) skey (add #SIZE nLen eLen) nLen in
+  let d = Buffer.sub #uint64 #(v skeyLen) #(v dLen) skey pkeyLen dLen in
+  let p = Buffer.sub #uint64 #(v skeyLen) #(v pLen) skey (add #SIZE pkeyLen dLen) pLen in
+  let q = Buffer.sub #uint64 #(v skeyLen) #(v qLen) skey (add #SIZE (add #SIZE pkeyLen dLen) pLen) qLen in
 
   let k = blocks modBits (size 8) in
   let emBits = sub #SIZE modBits (size 1) in
@@ -208,7 +210,7 @@ let rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen m
       assume (v dLen <= v dLen' /\ v dLen' * 64 < max_size_t);
       let _ = bn_add dLen' d' dLen d d' in //d' = d' + d
       assume (v nLen = v (blocks modBits (size 64)));
-      mod_exp pow2_i modBits nLen n m (mul #SIZE dLen' (size 64)) d' s;
+      mod_exp pow2_i modBits nLen n r2 m (mul #SIZE dLen' (size 64)) d' s;
       nat_to_text k s sgnt
     )
   )
@@ -225,11 +227,12 @@ val rsa_verify:
 let rsa_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg =
   let nLen = blocks modBits (size 64) in
   let eLen = blocks eBits (size 64) in
-  let pkeyLen:size_t = add #SIZE nLen eLen in
+  let pkeyLen = add #SIZE (add #SIZE nLen eLen) nLen in
 
   let n = Buffer.sub #uint64 #(v pkeyLen) #(v nLen) pkey (size 0) nLen in
   let e = Buffer.sub #uint64 #(v pkeyLen) #(v eLen) pkey nLen eLen in
-
+  let r2 = Buffer.sub #uint64 #(v pkeyLen) #(v nLen) pkey (add #SIZE nLen eLen) nLen in
+  
   let k = blocks modBits (size 8) in
   let emBits = sub #SIZE modBits (size 1) in
   let emLen = blocks emBits (size 8) in
@@ -247,7 +250,7 @@ let rsa_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg =
       text_to_nat k sgnt s;
 
       if (bn_is_less nLen s nLen n) then begin
-        mod_exp pow2_i modBits nLen n s eBits e m;
+        mod_exp pow2_i modBits nLen n r2 s eBits e m;
         nat_to_text emLen m em;
         pss_verify sLen msgLen msg emBits em end
       else false
