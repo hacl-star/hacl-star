@@ -22,6 +22,29 @@ let bn_mul_by_limb_addj_f a_i l c r_ij =
   let c' = to_u64 (res >>. u32 64) in
   (c', r)
 
+//res = res + limb * bn * beta_j
+val bn_mult_by_limb_addj_add:
+  aLen:size_t -> a:lbignum aLen ->
+  l:uint64 -> j:size_t ->
+  resLen:size_t{v aLen + v j < v resLen} -> res:lbignum resLen ->
+  carry:lbignum (size 1) -> Stack uint64
+  (requires (fun h -> live h a /\ live h res /\ live h carry /\ disjoint res a))
+  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies2 carry res h0 h1))
+  [@ "substitute"]
+let bn_mult_by_limb_addj_add aLen a l j resLen res carry =
+  let h0 = FStar.HyperStack.ST.get() in
+  loop2_simple #h0 aLen carry res
+  (fun i ->
+    let ij = add #SIZE i j in
+    let res_ij = res.(ij) in
+    let (c, res_ij) = bn_mul_by_limb_addj_f a.(i) l carry.(size 0) res_ij in
+    carry.(size 0) <- c;
+    res.(ij) <- res_ij
+  );
+  let res1Len = sub #SIZE resLen (add #SIZE aLen j) in
+  let res1 = Buffer.sub res (add #SIZE aLen j) res1Len in
+  bn_add res1Len res1 (size 1) carry res1
+
 val bn_mult_by_limb_addj:
   aLen:size_t -> a:lbignum aLen ->
   l:uint64 -> j:size_t ->
@@ -39,8 +62,8 @@ let bn_mult_by_limb_addj aLen a l j resLen res carry =
     let (c, res_ij) = bn_mul_by_limb_addj_f a.(i) l carry.(size 0) res_ij in
     carry.(size 0) <- c;
     res.(ij) <- res_ij
-  )
-
+  );
+  res.(add #SIZE aLen j) <- carry.(size 0)
 
 val bn_mult_:
   aLen:size_t -> a:lbignum aLen ->
@@ -55,8 +78,7 @@ let bn_mult_ aLen a bLen b resLen res carry =
   loop2_simple #h0 bLen carry res
   (fun j ->
     carry.(size 0) <- u64 0;
-    bn_mult_by_limb_addj aLen a b.(j) j resLen res carry;
-    res.(add #SIZE aLen j) <- carry.(size 0)
+    bn_mult_by_limb_addj aLen a b.(j) j resLen res carry
   )
 
 // res = a * b

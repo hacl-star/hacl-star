@@ -57,13 +57,7 @@ val mont_reduction_f:
 let mont_reduction_f nLen rLen c n nInv_u64 carry i =
   let ci = c.(i) in
   let qi = mul_mod #U64 nInv_u64 ci in
-  (* FIX: res = res + limb * bn * beta ^ i *)
-  bn_mult_by_limb_addj nLen n qi i (add #SIZE nLen rLen) c carry;
-  let c_ni =  c.(add #SIZE nLen i) in
-  let (c1, c_ni) = addcarry_u64 (u64 0) c_ni carry.(size 0) in
-  c.(add #SIZE nLen i) <- c_ni;
-  let c_ni1 = c.(add #SIZE (add #SIZE nLen i) (size 1)) in
-  c.(add #SIZE (add #SIZE nLen i) (size 1)) <- add_mod #U64 c_ni1 c1
+  let _ = bn_mult_by_limb_addj_add nLen n qi i (add #SIZE nLen rLen) c carry in ()
 
 val mont_reduction_:
   nLen:size_t ->
@@ -75,17 +69,11 @@ val mont_reduction_:
   [@ "substitute"]
 let mont_reduction_ nLen rLen c n nInv_u64 carry =
   let h0 = FStar.HyperStack.ST.get() in
-  loop2_simple #h0 nLen carry c
+  loop2_simple #h0 rLen carry c
   (fun i ->
     carry.(size 0) <- u64 0;
     mont_reduction_f nLen rLen c n nInv_u64 carry i
-  );
-  let ci = c.(nLen) in
-  let qi = mul_mod #U64 nInv_u64 ci in
-  bn_mult_by_limb_addj nLen n qi nLen (add #SIZE nLen rLen) c carry;
-  let c_ni =  c.(add #SIZE nLen nLen) in
-  let c1 = carry.(size 0) in
-  c.(add #SIZE nLen nLen) <- add_mod #U64 c_ni c1
+  )
 
 val mont_reduction_a:
   nLen:size_t ->
