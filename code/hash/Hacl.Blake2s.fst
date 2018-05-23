@@ -15,7 +15,7 @@ module LSeq = Spec.Lib.IntSeq
 module Spec = Spec.Blake2s
 
 val blake2s :
-  ll:size_t{0 < size_v ll /\ size_v ll <= max_size_t - 2 * Spec.bytes_in_block } ->
+  ll:size_t{0 < size_v ll /\ size_v ll <= max_size_t - 2 * Spec.size_block } ->
   d:lbuffer uint8 (size_v ll) -> kk:size_t{size_v kk <= 32} ->
   k:lbuffer uint8 (size_v kk) -> nn:size_t{1 <= size_v nn /\ size_v nn <= 32} -> res:lbuffer uint8 (size_v nn) ->
   Stack unit
