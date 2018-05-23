@@ -64,6 +64,7 @@ $(EXTRACT_DIR)/Test.c: $(filter-out $(EXTRACT_DIR)/prims.krml ,$(ALL_KRML_FILES)
 	  -add-include '"kremlin/testlib.h"' \
 	  -add-include '"kremlin/prims_int.h"' \
 	  -add-include '"kremlin/prims_string.h"' \
+	  -add-include '"kremlin/c_string.h"' \
 	  -add-include '"hacks.h"'
 
 test: $(EXTRACT_DIR)/Test.c
