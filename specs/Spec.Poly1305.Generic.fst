@@ -61,7 +61,7 @@ let poly #ff (len:size_nat) (text:lbytes len) (st:state ff) : state ff =
     update1 rem last st
 
 let finish #ff (st:state ff) : tag =
-  let n = u128(ff.from_elem st.acc) +. st.s in
+  let n = u128(ff.from_elem st.acc % pow2 128) +. st.s in
   uint_to_bytes_le n
 
 let encode_r (#ff:finite_field 130) (rb:block) : ff.elem =
@@ -93,13 +93,18 @@ let poly1305_generic (#ff:finite_field 130) (len:size_nat) (msg:lbytes len) (k:k
 (* Field types and parameters *)
 let prime =  pow2 130 - 5
 unfold type elem = nat_mod prime
+inline_for_extraction
 let to_elem (x:nat) : elem = x `modulo` prime 
+inline_for_extraction
 let from_elem (x:elem) : n:nat{n < pow2 130} = nat_mod_v #prime x
+inline_for_extraction
 let zero : elem = to_elem 0
 
+inline_for_extraction
 let poly1305_field : finite_field 130 = 
     MkFF elem to_elem from_elem zero (+.) ( *. )
 
+inline_for_extraction
 let poly1305 (len:size_nat) (msg:lbytes len) (k:key) : tag =
     poly1305_generic #poly1305_field len msg k
 
@@ -115,6 +120,7 @@ let zero2 : elem2 =
 let to_elem2 (n:nat{n < pow2 130}) : elem2 = 
     repeati 3 (fun i acc ->
       acc.[i] <- u64 ((n / pow2 (i * 44)) % pow2 44)) zero2
+//      acc.[0] <- u64 ((n / pow2 (i * 44)) % pow2 44)) zero2
 
 let from_elem2 (s:elem2) : (n:nat{n < pow2 130}) = 
     repeati 3 (fun i acc ->

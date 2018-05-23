@@ -55,6 +55,7 @@ let test2_expected : lbytes 32 =
   assert_norm (List.Tot.length test2_expected_list = 32);
   createL test2_expected_list
 
+
 //
 // Main
 //
@@ -80,7 +81,7 @@ let test () =
   IO.print_string "\nTEST 2";
 
   let test2_result : lbytes 32 =
-    Spec.Blake2s.blake2s 32 test2_key 1 test2_plaintext 32
+    Spec.Blake2s.blake2s 1 test2_plaintext 32 test2_key  32
   in
   let result2 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected test2_result in
 
@@ -91,6 +92,7 @@ let test () =
   List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list test2_expected);
 
   if result1 && result2 then IO.print_string "\n\nSuccess !\n"
-  else IO.print_string "\n\nFailed !\n"
+  else IO.print_string "\n\nFailed !\n";
 
+  ()
 

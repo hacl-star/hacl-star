@@ -25,7 +25,7 @@ all-hints: hints
 all-ver: verify
 
 all: test
-test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe qdsa.exe sha2.exe ed25519.exe hmac.exe hkdf.exe
+test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe sha2.exe ed25519.exe hmac.exe hkdf.exe qdsa.exe 
 
 
 noise.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Noise.fst
@@ -67,7 +67,12 @@ poly1305_generic.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes
 	mkdir -p poly1305-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Poly1305.Generic --extract_module Spec.Poly1305.Generic.Test --odir poly1305-ml $^
 	@echo 'let _ = test()' >> poly1305-ml/Spec_Poly1305_Generic_Test.ml
-	$(OCAMLOPT) -I poly1305-ml poly1305-ml/Spec_Lib_IntTypes.ml poly1305-ml/Spec_Lib_IntSeq.ml poly1305-ml/Spec_Poly1305_Generic.ml poly1305-ml/Spec_Poly1305_Generic_Test.ml -o poly1305_generic.exe
+	$(OCAMLOPT) -g -I poly1305-ml poly1305-ml/Spec_Lib_IntTypes.ml poly1305-ml/Spec_Lib_IntSeq.ml poly1305-ml/Spec_Poly1305_Generic.ml poly1305-ml/Spec_Poly1305_Generic_Test.ml -o poly1305_generic.exe
+	./poly1305_generic.exe
+
+poly1305_ml.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.Poly1305.Generic.fst tests/Spec.Poly1305.Generic.Test.fst
+	$(OCAMLOPT) -g -I poly1305-ml poly1305-ml/Spec_Lib_IntTypes.ml poly1305-ml/Spec_Lib_IntSeq.ml poly1305-ml/Spec_Poly1305_Generic.ml poly1305-ml/Spec_Poly1305_Generic_Test.ml -o poly1305_generic.exe
+	export OCAMLRUNPARAM=b
 	./poly1305_generic.exe
 
 chacha20poly1305.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst tests/Spec.Chacha20Poly1305.Test.fst
@@ -154,6 +159,13 @@ blake2s.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/
 	@echo 'let _ = test()' >> blake2s-ml/Spec_Blake2s_Test.ml
 	$(OCAMLOPT) -I blake2s-ml blake2s-ml/Spec_Lib_IntTypes.ml blake2s-ml/Spec_Lib_RawIntTypes.ml blake2s-ml/Spec_Lib_IntSeq.ml blake2s-ml/Spec_Lib_Stateful.ml blake2s-ml/Spec_Blake2s.ml blake2s-ml/Spec_Blake2s_Test.ml -o blake2s.exe
 	./blake2s.exe
+
+blake2generic.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.Blake2.Generic.fst tests/Spec.Blake2.Generic.Test.fst
+	mkdir -p blake2generic-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2.Generic --extract_module Spec.Blake2.Generic.Test --odir blake2generic-ml $^
+	@echo 'let _ = test()' >> blake2generic-ml/Spec_Blake2_Generic_Test.ml
+	$(OCAMLOPT) -I blake2generic-ml blake2generic-ml/Spec_Lib_IntTypes.ml blake2generic-ml/Spec_Lib_RawIntTypes.ml blake2generic-ml/Spec_Lib_IntSeq.ml blake2generic-ml/Spec_Lib_Stateful.ml blake2generic-ml/Spec_Blake2_Generic.ml blake2generic-ml/Spec_Blake2_Generic_Test.ml -o blake2generic.exe
+	./blake2generic.exe
 
 blake2b.exe: lib/fst/Spec.Lib.IntTypes.fst lib/fst/Spec.Lib.RawIntTypes.fst lib/fst/Spec.Lib.IntSeq.fst lib/fst/Spec.Lib.Stateful.fst Spec.Blake2b.fst tests/Spec.Blake2b.Test.fst
 	mkdir -p blake2b-ml

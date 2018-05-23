@@ -189,10 +189,7 @@ let blake2s_internal2_loop dd d s = repeati (dd - 1) (blake2s_internal2_inner dd
 
 // BB. This seems odd as blake2 internal should be called when dd = 1 !!
 val blake2s_internal2 : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
-let blake2s_internal2 dd d s =
-  if dd > 1 then
-    blake2s_internal2_loop dd d s
-  else s
+let blake2s_internal2 dd d s =  blake2s_internal2_loop dd d s
 
 
 // Update last
@@ -200,7 +197,7 @@ let blake2s_internal2 dd d s =
 val blake2s_internal3 : hash_state -> dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
 
 let blake2s_internal3 s dd d ll kk nn =
-  let offset : size_nat = (dd - 1) * 16 * 4 in
+  let offset : size_nat = (dd - 1) * size_block in
   let last_block : intseq U32 16 = uints_from_bytes_le (sub d offset size_block) in
   if kk = 0 then
     blake2_compress s last_block (u64 ll) true
@@ -226,21 +223,24 @@ let blake2s_internal dd d ll kk nn =
 val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * size_block } ->  d:lbytes ll ->  kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 
 let blake2s ll d kk k nn =
-  let nblocks = ll / size_block in
-  let rem = ll % size_block in
-  let blocks = sub d 0 (nblocks * size_block) in
-  let last = sub d (nblocks * size_block) rem in
-  let key_block = create size_block (u8 0) in
-  let key_block = update_sub key_block 0 kk k in
-  let last_block = create size_block (u8 0) in
-  let last_block = update_sub last_block 0 rem last in
-  let (|nblocks, data|) : ( n:size_nat{n * size_block <= max_size_t} & lseq uint8 (n * size_block))=
-    if rem = 0 then (|nblocks, blocks|)
-    else (|(nblocks + 1), concat blocks last_block|)
-  in
-
-  let (|nblocks, data|)  =
-    if kk = 0 then (|nblocks, data|)
-    else (|(nblocks + 1), concat key_block data|)
-  in
-  blake2s_internal nblocks data ll kk nn
+  if ll = 0 && kk = 0 then
+     let data = create size_block (u8 0) in
+     blake2s_internal 1 data ll kk nn
+  else 
+    let nblocks = ll / size_block in
+    let rem = ll % size_block in
+    let blocks = sub d 0 (nblocks * size_block) in
+    let last = sub d (nblocks * size_block) rem in
+    let key_block = create size_block (u8 0) in
+    let key_block = update_sub key_block 0 kk k in
+    let last_block = create size_block (u8 0) in
+    let last_block = update_sub last_block 0 rem last in
+    let (|nblocks, data|) : ( n:size_nat{n * size_block <= max_size_t} & lseq uint8 (n * size_block))=
+      if rem = 0 then (|nblocks, blocks|)
+      else (|(nblocks + 1), concat blocks last_block|)
+    in
+    let (|nblocks, data|)  =
+      if kk = 0 then (|nblocks, data|)
+      else (|(nblocks + 1), concat key_block data|)
+    in
+    blake2s_internal nblocks data ll kk nn
