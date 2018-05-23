@@ -82,6 +82,11 @@ $(CACHE_DIR)/Hacl.Policies.fst.checked: | .depend
 	$(FSTAR) --admit_smt_queries true $< && \
 	touch $@
 
+# Admit SMT queries for modules in FStar namespace
+$(CACHE_DIR)/FStar.%.fst.checked: | .depend
+	$(FSTAR) --admit_smt_queries true $< && \
+	touch $@
+
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
 	  --use_hints --record_hints --hint_info \
