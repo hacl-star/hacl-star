@@ -10,6 +10,7 @@ val sha384_impl: impl
 val sha512_impl: impl
 val x25519_impl: impl
 val aes_gcm_impl: impl
+val chacha20_poly1305_impl: impl
 
 /// By default, EverCrypt calls into Hacl whenever available, and defaults to
 /// OpenSSL for the algorithms that are not yet implemented by HACL.

@@ -37,8 +37,9 @@ all:
 
 all_: $(OUT_DIR)/libevercrypt.a $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)/evercrypt.cmxa
 
-test: sample-project/sample-project.exe
-	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. PATH=. ./$<
+.PHONY: test
+test:
+	$(MAKE) -C test test
 
 # 1. Generation of the .krml files
 # - generate the F* dependency graph via `fstar --dep full`
@@ -46,9 +47,17 @@ test: sample-project/sample-project.exe
 # - extract each .checked file into a .krml file in parallel
 
 FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib multiplexer multiplexer/fst \
-  $(HACL_CODE)/lib/kremlin $(HACL_CODE)/curve25519/interfaces $(HACL_CODE)/hash/interfaces \
+  $(HACL_CODE)/lib/kremlin \
+  $(HACL_CODE)/curve25519/interfaces \
+  $(HACL_CODE)/hash/interfaces \
+  $(HACL_CODE)/api/interfaces \
+  $(HACL_CODE)/api \
+  $(HACL_CODE)/salsa-family \
+  $(HACL_CODE)/poly1305 \
+  $(HACL_CODE)/bignum \
   $(HACL_SPEC)
-FSTAR		= $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
+
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) \
@@ -82,7 +91,9 @@ endif
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
-	  -add-include '"kremlib.h"' -add-include '"kremlin/c_string.h"' \
+	  -add-include '"kremlib.h"' \
+	  -add-include '"kremlin/c_string.h"' \
+	  -add-include '"kremlin/prims_int.h"' \
 	  -bundle 'FStar.*,Prims,C.Loops,Spec.*,Hacl.Spec.*,Seq.*' \
 	  -bundle 'LowStar.*' \
 	  -tmpdir generated $^ -warn-error +9 \
@@ -110,16 +121,14 @@ VALE_ASM 	= $(addprefix $(VALE_DIR)/,\
 # - aead-c: kremlin seems to generate an extra argument, JK had a hack to sed
 #   the code in place
 HACL_SOURCES	= \
-  $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \
-  $(HACL_CODE)/salsa-family/salsa-c/Hacl_Salsa20.c \
   $(addprefix $(HACL_CODE)/hash/sha2-c/Hacl_SHA2_,256.c 384.c 512.c) \
   $(HACL_CODE)/curve25519/x25519-c/Hacl_Curve25519.c \
   $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
-  $(HACL_CODE)/poly1305/poly-c/Hacl_Poly1305_64.c \
   $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
+  $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \
   $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
-  $(HACL_CODE)/salsa-family/chacha-vec128-c/Hacl_Chacha20_Vec128.c \
-  #$(HACL_CODE)/api/aead-c/Chacha20Poly1305.c \
+  $(HACL_CODE)/api/aead-c/Hacl_Policies.c \
+  $(HACL_CODE)/api/aead-c/Hacl_Chacha20Poly1305.c
 
 EVERCRYPT_SOURCES = \
   $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c) \
@@ -133,9 +142,8 @@ EVERCRYPT_SOURCES = \
 # files for them in generated/. However, we are only interested in the header,
 # and drop these (mostly empty) C files, since the "real" ones are collected via
 # HACL_SOURCES above.
-ALL_OUR_FILES 	= $(filter-out Hacl_%,$(ALL_C_FILES))
+ALL_OUR_FILES 	= $(filter-out Hacl_%.c AEAD_%.c FStar_%.c kremlinit.c, $(ALL_C_FILES))
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
-
 
 ALL_SOURCES	= $(HACL_SOURCES) $(VALE_SOURCES) $(EVERCRYPT_SOURCES) $(ALL_GENERATED_FILES)
 ALL_OBJS	= $(patsubst %.c,%.o,$(ALL_SOURCES)) $(patsubst %.S,%.o,$(VALE_ASM))
@@ -196,21 +204,12 @@ $(HACL_SOURCES):
 
 .PHONY: clean
 clean:
-	rm -rf $(GENERATED_DIR) multiplexer/c/*.o libevercrypt.so libevercrypt.a test/sample-project.exe
+	rm -rf $(GENERATED_DIR) multiplexer/c/*.o libevercrypt.so libevercrypt.a
+	$(MAKE) -C test clean
 
 .PHONY: distclean
 distclean: clean
 	rm -rf $(OUT_DIR) $(CACHE_DIR)
-
-# 5. A sample project that is a client of the library; run in a single
-# invocation of KreMLin for simplicity; essentially checks that separate linking
-# works.
-
-sample-project/sample-project.exe: sample-project/SampleProject.fst $(OUT_DIR)/libevercrypt.so
-	$(KREMLIN_HOME)/krml -ldopt -levercrypt $< -no-prefix SampleProject \
-	  -I multiplexer/ -add-include '"kremlin/c_string.h"' KRML_HOME/kremlib/testlib.c \
-	  -tmpdir .sample-project \
-	  -add-include '"kremlin/testlib.h"' -ldopt -Lout -o $@
 
 # 6. An OCaml library that exposes only the bytes-based interface, for now
 

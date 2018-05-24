@@ -161,7 +161,9 @@ VALE_DIR = vale/asm
 
 VALE_OBJ = $(addprefix $(VALE_DIR)/,sha256_main_i.o \
   sha256-$(MARCH)$(VARIANT).o Vale_Hash_SHA2_256.o \
-  vale_aes_glue.o aesgcm-$(MARCH)$(VARIANT).o aes-$(MARCH)$(VARIANT).o)
+  vale_aes_glue.o \
+  aes-$(MARCH)$(VARIANT).o)
+#  aesgcm-$(MARCH)$(VARIANT).o WIP
 
 # These three concrete specializations want you to bring in the vale object
 # files into your cmxa / .exe
