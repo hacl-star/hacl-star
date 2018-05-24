@@ -19,6 +19,8 @@ set(SOURCE_FILES_VERIFIED
     snapshots/hacl-c/Hacl_Curve25519.c
     snapshots/hacl-c/Hacl_Ed25519.c
     snapshots/hacl-c/Hacl_HMAC_SHA2_256.c
+    snapshots/hacl-c/Hacl_HMAC_SHA2_384.c
+    snapshots/hacl-c/Hacl_HMAC_SHA2_512.c
     snapshots/hacl-c/Hacl_Policies.c
     snapshots/hacl-c/Hacl_Poly1305_32.c
     snapshots/hacl-c/Hacl_Poly1305_64.c
