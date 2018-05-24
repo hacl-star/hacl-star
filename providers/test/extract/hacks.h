@@ -15,7 +15,14 @@ typedef struct K___uint8_t_uint8_t_s
 }
 K___uint8_t_uint8_t;
 
-typedef FStar_Pervasives_Native_option__EverCrypt_Native_impl_tags
+typedef struct  K___FStar_Bytes_bytes_FStar_Bytes_bytes_s
+{
+  FStar_Bytes_bytes fst;
+  FStar_Bytes_bytes snd;
+}
+K___FStar_Bytes_bytes_FStar_Bytes_bytes;
+
+typedef  enum { FStar_Pervasives_Native_None, FStar_Pervasives_Native_Some }
 FStar_Pervasives_Native_option__Prims_string_tags;
 
 typedef struct FStar_Pervasives_Native_option__Prims_string_s

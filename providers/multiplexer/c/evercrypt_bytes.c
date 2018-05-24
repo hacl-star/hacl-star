@@ -12,11 +12,11 @@ FStar_Bytes_bytes EverCrypt_Bytes_x25519(FStar_Bytes_bytes secret, FStar_Bytes_b
   return out;
 }
 
-K___FStar_Bytes_bytes_FStar_Bytes_bytes
+EverCrypt_Bytes_cipher_tag
 EverCrypt_Bytes_chacha20_poly1305_encrypt(FStar_Bytes_bytes m,
-                                                            FStar_Bytes_bytes aad,
-                                                            FStar_Bytes_bytes k,
-                                                            FStar_Bytes_bytes n) {
+                                          FStar_Bytes_bytes aad,
+                                          FStar_Bytes_bytes k,
+                                          FStar_Bytes_bytes n) {
   FStar_Bytes_bytes cipher = {
     .length = m.length,
     .data = KRML_HOST_CALLOC(m.length, 1)
@@ -25,9 +25,9 @@ EverCrypt_Bytes_chacha20_poly1305_encrypt(FStar_Bytes_bytes m,
     .length = 16,
     .data = KRML_HOST_CALLOC(16, 1)
   };
-  K___FStar_Bytes_bytes_FStar_Bytes_bytes out = {
-    .fst = cipher,
-    .snd = tag
+  EverCrypt_Bytes_cipher_tag out = {
+    .cipher = cipher,
+    .tag = tag
   };
   EverCrypt_chacha20_poly1305_encrypt((uint8_t *) cipher.data,
                                       (uint8_t *) tag.data,

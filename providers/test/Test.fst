@@ -110,21 +110,23 @@ let test_chacha20_poly1305_bytes _ =
   let n   = bytes_of_hex "070000004041424344454647" in
   let cipher = bytes_of_hex  "d31a8d34648e60db7b86afbc53ef7ec2a4aded51296e08fea9e2b5a736ee62d63dbea45e8ca9671282fafb69da92728b1a71de0a9e060b2905d6a5b67ecd3b3692ddbd7f2d778b8c9803aee328091b58fab324e4fad675945585808b4831d7bc3ff4def08e4b7a9de576d26586cec64b6116" in
   let tag = bytes_of_hex "1ae10b594f09e26a7e902ecbd0600691" in
-  let cipher', tag' = EverCrypt.Bytes.chacha20_poly1305_encrypt m aad k n in
+  let open EverCrypt.Bytes in
+  let { cipher=cipher'; tag=tag'} = chacha20_poly1305_encrypt m aad k n in
   if cipher = cipher' && tag = tag' then
     C.String.print (C.String.of_literal "[test] of Chacha20-Poly1305 bytes is a success\n")
   else
     C.String.print (C.String.of_literal "[test] of Chacha20-Poly1305 bytes is a failure\n")
 
 let main (): St C.exit_code =
+  let open EverCrypt in
   push_frame ();
 /// Hacl tests
-  EverCrypt.(init (Some Hacl));
+  init (Prefer Hacl);
   test_sha256 ();
   test_chacha20_poly1305 ();
   test_chacha20_poly1305_bytes ();
 /// Vale tests
-  EverCrypt.(init (Some Vale));
+  init (Prefer Vale);
   test_sha256 ();
   pop_frame ();
   C.EXIT_SUCCESS

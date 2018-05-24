@@ -108,10 +108,14 @@ endif
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
+	  $(KOPTS) \
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/c_string.h"' \
 	  -add-include '"kremlin/prims_int.h"' \
-	  -bundle 'FStar.*,Prims,C.Loops,Spec.*,Hacl.Spec.*,Seq.*' \
+	  -add-include '"kremlin/prims_string.h"' \
+	  -bundle 'FStar.*' \
+	  -bundle 'C.Loops=C.Loops,Spec.*,Hacl.Spe.*,Hacl.Spec.*,Seq.*,Hacl.Endianness,Hacl.Types,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Constants,Hacl.Cast' \
+	  -bundle 'Hacl.Chacha20=Hacl.Impl.*,Hacl.Chacha20,Hacl.Standalone.Poly1305_64,Hacl.Lib.*,Hacl.Bignum.*' \
 	  -bundle 'LowStar.*' \
 	  -tmpdir generated $^ -warn-error +9 \
 	  && \
