@@ -69,7 +69,7 @@ void Hacl_SHA2_384_update(uint64_t *state, uint8_t *data_8);
 
 void Hacl_SHA2_384_update_multi(uint64_t *state, uint8_t *data, uint32_t n1);
 
-void Hacl_SHA2_384_update_last(uint64_t *state, uint8_t *data, uint64_t len);
+void Hacl_SHA2_384_update_last(uint64_t *state, uint8_t *data, uint32_t len);
 
 void Hacl_SHA2_384_finish(uint64_t *state, uint8_t *hash1);
 

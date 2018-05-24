@@ -83,7 +83,7 @@ void Hacl_SHA2_512_update(uint64_t *state, uint8_t *data);
 
 void Hacl_SHA2_512_update_multi(uint64_t *state, uint8_t *data, uint32_t n1);
 
-void Hacl_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint64_t len);
+void Hacl_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint32_t len);
 
 void Hacl_SHA2_512_finish(uint64_t *state, uint8_t *hash1);
 
