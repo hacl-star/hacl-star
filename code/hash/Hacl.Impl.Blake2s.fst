@@ -277,7 +277,7 @@ let blake2_compress1 wv s m offset flag const_iv =
   update_sub wv (size 0) (size 8) s;
   update_sub wv (size 8) (size 8) const_iv;
   let low_offset = to_u32 #U64 offset in
-  let high_offset = to_u32 #U64 (offset >>. u32 Spec.size_word) in
+  let high_offset = to_u32 #U64 (offset >>. u32 32) in
   // BB. Note that using the ^. operator here would break extraction !
   let wv_12 = logxor #U32 wv.(size 12) low_offset in
   let wv_13 = logxor #U32 wv.(size 13) high_offset in
@@ -461,16 +461,18 @@ val blake2s_internal2: s:lbuffer uint32 8 ->
      (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
                           /\ h1.[s] == Spec.blake2s_internal2 (v dd) h0.[d] h0.[s]))
 
+let blake2s_internal2 s dd d const_iv const_sigma = blake2s_internal2_loop s dd d const_iv const_sigma
+
 //[@ Substitute]
-let blake2s_internal2 s dd d const_iv const_sigma =
-  (**) let h0 = ST.get () in
-  if (dd >. size 1) then begin
-    blake2s_internal2_loop s dd d const_iv const_sigma
-  end
-  else begin
-    (**) let h1 = ST.get () in
-    (**) lemma_modifies0_is_modifies1 s h0 h1
-  end
+(* let blake2s_internal2 s dd d const_iv const_sigma = *)
+(*   (\**\) let h0 = ST.get () in *)
+(*   if (dd >. size 1) then begin *)
+(*     blake2s_internal2_loop s dd d const_iv const_sigma *)
+(*   end *)
+(*   else begin *)
+(*     (\**\) let h1 = ST.get () in *)
+(*     (\**\) lemma_modifies0_is_modifies1 s h0 h1 *)
+(*   end *)
 
 
 val blake2s_internal3: s:lbuffer uint32 8 ->

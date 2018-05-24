@@ -189,7 +189,7 @@ let blake2s_internal2_loop dd d s = repeati (dd - 1) (blake2s_internal2_inner dd
 
 // BB. This seems odd as blake2 internal should be called when dd = 1 !!
 val blake2s_internal2 : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
-let blake2s_internal2 dd d s =  blake2s_internal2_loop dd d s
+let blake2s_internal2 dd d s = blake2s_internal2_loop dd d s
 
 
 // Update last
