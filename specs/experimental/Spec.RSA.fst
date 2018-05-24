@@ -6,14 +6,10 @@ open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
 open FStar.Math.Lemmas
 
+open Spec.Bignum.Basic
 open Spec.RSA.Bignum
 
 module Hash = Spec.SHA2
-
-#reset-options "--z3rlimit 50 --max_fuel 0"
-
-val blocks: x:size_nat{x > 0} -> m:size_nat{m > 0} -> Tot (r:size_nat{r > 0 /\ x <= m * r})
-let blocks x m = (x - 1) / m + 1
 
 val xor_bytes: #len:size_nat -> b1:lbytes len -> b2:lbytes len -> Tot (res:lbytes len)
 let xor_bytes #len b1 b2 = map2 (fun x y -> logxor #U8 x y) b1 b2
@@ -37,7 +33,7 @@ val mgf_sha256:
   mgfseed:lbytes mgfseedLen ->
   maskLen:size_nat{0 < maskLen /\ (blocks maskLen hLen) * hLen < pow2 32} ->
   Tot (mask:lbytes maskLen)
-
+  #reset-options "--z3rlimit 50 --max_fuel 0"
 let mgf_sha256 #mgfseedLen mgfseed maskLen =
   let counter_max = blocks maskLen hLen in
   let accLen : size_nat = counter_max * hLen in
@@ -55,27 +51,19 @@ let mgf_sha256 #mgfseedLen mgfseed maskLen =
     ) acc in
   slice acc 0 maskLen
 
-(* Bignum convert functions *)
-val os2ip: #bLen:size_nat -> b:lbytes bLen -> Tot (res:nat{res < pow2 (8 * bLen)})
-let os2ip #bLen b = nat_from_intseq_be #U8 #bLen b
-
-val i2osp: #bLen:size_nat -> n:nat{n < pow2 (8 * bLen)} -> Tot (lbytes bLen)
-let i2osp #bLen n = nat_to_bytes_be bLen n
-
 (* RSA *)
-type elem n = x:nat{x < n}
+type modBits = modBits:size_nat{64 <= modBits /\ 2 * 64 * (blocks modBits 64 + 1) < max_size_t}
 
-type modBits = modBits:size_nat{1 < modBits}
+noeq type rsa_pubkey (modBits:modBits) (eBits:size_nat) =
+  | Mk_rsa_pubkey: n:bignum modBits{0 < bn_v n /\ pow2 (modBits - 1) <= bn_v n} ->
+                   e:bignum eBits{bn_v e < bn_v n} -> rsa_pubkey modBits eBits
 
-noeq type rsa_pubkey (x0:size_nat) (modBits:modBits) =
-  | Mk_rsa_pubkey: n:nat{1 < n /\ pow2 (modBits - 1) <= n /\ n < pow2 modBits /\ 2 * n < pow2 (pow2 x0)} ->
-                   e:elem n{1 < e} -> rsa_pubkey x0 modBits
-
-noeq type rsa_privkey (x0:size_nat) (modBits:modBits) =
-  | Mk_rsa_privkey: pkey:rsa_pubkey x0 modBits ->
-		    d:elem (Mk_rsa_pubkey?.n pkey){1 < d} ->
-		    p:elem (Mk_rsa_pubkey?.n pkey){1 < p} ->
-		    q:elem (Mk_rsa_pubkey?.n pkey){1 < q /\ (Mk_rsa_pubkey?.n pkey) = p * q} -> rsa_privkey x0 modBits
+noeq type rsa_privkey (modBits:modBits) (eBits:size_nat) (dBits:size_nat) (pBits:size_nat) (qBits:size_nat) =
+  | Mk_rsa_privkey: pkey:rsa_pubkey modBits eBits ->
+		    d:bignum dBits{bn_v d < bn_v (Mk_rsa_pubkey?.n pkey) /\ dBits < modBits} ->
+		    p:bignum pBits{0 < bn_v p /\ bn_v p < bn_v (Mk_rsa_pubkey?.n pkey) /\ pBits + qBits == modBits} ->
+		    q:bignum qBits{0 < bn_v q /\ bn_v q < bn_v (Mk_rsa_pubkey?.n pkey) /\ bn_v (Mk_rsa_pubkey?.n pkey) = bn_v p * bn_v q}
+		    -> rsa_privkey modBits eBits dBits pBits qBits
 
 val pss_encode:
   #sLen:size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < max_input_len_sha256} ->
@@ -102,7 +90,7 @@ let pss_encode #sLen #msgLen salt msg emBits =
   let last_before_salt = dbLen - sLen - 1 in
   let db = db.[last_before_salt] <- (u8 1) in
   let db = update_slice db (last_before_salt + 1) dbLen salt in
-
+  assume ((blocks dbLen hLen) * hLen < pow2 32);
   let dbMask = mgf_sha256 m1Hash dbLen in
   let maskedDB = xor_bytes db dbMask in
   let maskedDB =
@@ -138,7 +126,7 @@ let pss_verify #msgLen sLen msg emBits em =
       let (dbLen:size_nat{dbLen > 0}) = emLen - hLen - 1 in
       let maskedDB = slice em 0 dbLen in
       let m1Hash = slice em dbLen (dbLen + hLen) in
-
+      assume ((blocks dbLen hLen) * hLen < pow2 32);
       let dbMask = mgf_sha256 m1Hash dbLen in
       let db = xor_bytes maskedDB dbMask in
       let db =
@@ -153,27 +141,27 @@ let pss_verify #msgLen sLen msg emBits em =
       let pad = slice db 0 padLen in
       let salt = slice db padLen (padLen + sLen) in
 
+      let m1Len = 8 + hLen + sLen in
+      let m1 = create m1Len (u8 0) in
+      let m1 = update_sub #uint8 #m1Len m1 8 hLen mHash in
+      let m1 = update_sub #uint8 #m1Len m1 (8 + hLen) sLen salt in
+      let m1Hash0 = hash_sha256 #m1Len m1 in
+
       if not (eq_bytes pad pad2) then false
-      else begin
-	let m1Len:size_nat = 8 + hLen + sLen in
-	let m1 = create m1Len (u8 0) in
-	let m1 = update_slice m1 8 (8 + hLen) mHash in
-	let m1 = update_slice m1 (8 + hLen) m1Len salt in
-	let m1Hash0 = hash_sha256 #m1Len m1 in
-	eq_bytes m1Hash0 m1Hash
-      end
+      else eq_bytes m1Hash0 m1Hash
     end
   end
 
 val rsapss_sign:
   #sLen:size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < max_input_len_sha256} ->
   #msgLen:size_nat{msgLen < max_input_len_sha256} ->
-  x0:size_nat -> modBits:modBits{sLen + hLen + 2 <= (blocks (modBits - 1) 8)} ->
-  skey:rsa_privkey x0 modBits ->
-  salt:lbytes sLen -> rBlind:nat{rBlind < pow2 64} ->
+  modBits:modBits{sLen + hLen + 2 <= (blocks (modBits - 1) 8)} ->
+  eBits:size_nat -> dBits:size_nat -> pBits:size_nat -> qBits:size_nat ->
+  skey:rsa_privkey modBits eBits dBits pBits qBits ->
+  salt:lbytes sLen -> rBlind:bignum 63 ->
   msg:lbytes msgLen -> Tot (sgnt:lbytes (blocks modBits 8))
 
-let rsapss_sign #sLen #msgLen x0 modBits skey salt rBlind msg =
+let rsapss_sign #sLen #msgLen modBits eBits dBits pBits qBits skey salt rBlind msg =
   let pkey = Mk_rsa_privkey?.pkey skey in
   let n = Mk_rsa_pubkey?.n pkey in
   let e = Mk_rsa_pubkey?.e pkey in
@@ -181,45 +169,34 @@ let rsapss_sign #sLen #msgLen x0 modBits skey salt rBlind msg =
   let p = Mk_rsa_privkey?.p skey in
   let q = Mk_rsa_privkey?.q skey in
 
-  let nLen = blocks modBits 8 in
-  assert (modBits <= 8 * nLen);
-  pow2_le_compat (8 * nLen) modBits;
-  assert (pow2 modBits <= pow2 (8 * nLen));
-  assert (n < pow2 (8 * nLen));
-
   let emBits = modBits - 1 in
   let em = pss_encode #sLen #msgLen salt msg emBits in
-  let emLen = blocks emBits 8 in
-  let m = os2ip #emLen em in
-  assume (m < n);
-
-  let s = rsa_blinding x0 modBits n p q d m rBlind in
-  assert (s < n);
-  i2osp #nLen s
+  let m = bn_from_bytes_be #emBits em in
+  assume (bn_v m < pow2 modBits);
+  let m = bn_cast modBits m in
+  let s = rsa_blinding #modBits #pBits #qBits n p q m dBits d rBlind in
+  bn_to_bytes_be modBits s
 
 val rsapss_verify:
   #msgLen:size_nat{msgLen < max_input_len_sha256} ->
-  x0:size_nat -> modBits:modBits ->
-  pkey:rsa_pubkey x0 modBits ->
+  modBits:modBits -> eBits:size_nat ->
+  pkey:rsa_pubkey modBits eBits ->
   sLen:size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < max_input_len_sha256} ->
   msg:lbytes msgLen ->
   sgnt:lbytes (blocks modBits 8) -> Tot bool
 
-let rsapss_verify #msgLen x0 modBits pkey sLen msg sgnt =
+let rsapss_verify #msgLen modBits eBits pkey sLen msg sgnt =
   let n = Mk_rsa_pubkey?.n pkey in
   let e = Mk_rsa_pubkey?.e pkey in
-  let nLen = blocks modBits 8 in
-  assert (modBits <= 8 * nLen);
-  pow2_le_compat (8 * nLen) modBits;
-  assert (pow2 modBits <= pow2 (8 * nLen));
-  assert (n < pow2 (8 * nLen));
 
-  let s = os2ip #nLen sgnt in
-  if s < n then begin
-    let m = mod_exp x0 modBits n s e in
+  let s = bn_from_bytes_be #modBits sgnt in
+
+  if bn_is_less s n then begin
+    let m = mod_exp #modBits n s eBits e in
+
     let emBits = modBits - 1 in
-    let emLen = blocks emBits 8 in
-    assume (m < pow2 (emLen * 8));
-    let em = i2osp #emLen m in
+    assume (bn_v m < pow2 emBits);
+    let m = bn_cast emBits m in
+    let em = bn_to_bytes_be emBits m in
     pss_verify #msgLen sLen msg emBits em end
   else false

@@ -7,6 +7,7 @@ open Spec.Lib.IntSeq
 open Spec.Lib.Stateful
 open FStar.All
 
+open Spec.Bignum.Basic
 open Spec.RSA
 
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
@@ -14,18 +15,20 @@ open Spec.RSA
 (* RSASSA-PSS test vectors *)
 (* https://github.com/pyca/cryptography/blob/master/vectors/cryptography_vectors/asymmetric/RSA/pkcs-1v2-1d2-vec/pss-vect.txt *)
 
-let ctest x0 modBits nLen n eLen e dLen d pLen p qLen q msgLen msg sLen salt rBlindLen rBlind sgnt_expected num =
-  let n = os2ip #nLen n in
-  let e = os2ip #eLen e in
-  let d = os2ip #dLen d in
-  let p = os2ip #pLen p in
-  let q = os2ip #qLen q in
-  let rBlind = os2ip #rBlindLen rBlind in
+let ctest modBits n eBits e dBits d pBits p qBits q msgLen msg sLen salt rBlind sgnt_expected num =
+  let n = bn_from_bytes_be #modBits n in
+  let e = bn_from_bytes_be #eBits e in
+  let d = bn_from_bytes_be #dBits d in
+  let p = bn_from_bytes_be #pBits p in
+  let q = bn_from_bytes_be #qBits q in
+  let rBlind = bn_from_bytes_be #63 rBlind in
+
   let pkey = Mk_rsa_pubkey n e in
   let skey = Mk_rsa_privkey pkey d p q in
-  let sgnt_computed = rsapss_sign #sLen #msgLen x0 modBits skey salt rBlind msg in
-  let check = eq_bytes #nLen sgnt_computed sgnt_expected in
-  let verify = rsapss_verify #msgLen x0 modBits pkey sLen msg sgnt_expected in
+  let sgnt_computed = rsapss_sign #sLen #msgLen modBits eBits dBits pBits qBits skey salt rBlind msg in
+  let check = eq_bytes sgnt_computed sgnt_expected in
+
+  let verify = rsapss_verify #msgLen modBits eBits pkey sLen msg sgnt_expected in
 
   IO.print_string ("\n Test "); IO.print_string (UInt8.to_string (num));
   IO.print_string "\n sgnt_computed \n";
@@ -95,7 +98,8 @@ let test1() =
     0xefuy; 0x28uy; 0x69uy; 0xfauy; 0x40uy; 0xc3uy; 0x46uy; 0xcbuy; 0x18uy; 0x3duy; 0xabuy; 0x3duy; 0x7buy; 0xffuy; 0xc9uy; 0x8fuy;
     0xd5uy; 0x6duy; 0xf4uy; 0x2duy] in
   let salt : lbytes 20 = createL salt in
-  ctest 11 modBits 128 n 3 e 128 d 64 p 64 q 51 msg 20 salt 8 rBlind sgnt_expected (1uy)
+  let modBits2 = modBits / 2 in
+  ctest modBits n 17 e modBits d modBits2 p modBits2 q 51 msg 20 salt rBlind sgnt_expected (1uy)
 
 
 val test2: unit -> ML bool
@@ -173,7 +177,7 @@ let test2() =
     0x73uy; 0x24uy; 0x54uy; 0x3euy; 0xcduy; 0xafuy; 0x56uy; 0xf7uy; 0x44uy; 0x6euy; 0x20uy; 0x79uy; 0xb8uy; 0x9cuy; 0xc4uy; 0x8fuy;
     0x2duy ] in
   let sgnt_expected : lbytes 129 = createL sgnt_expected in
-  ctest 11 modBits 129 n 3 e 128 d 65 p 65 q 234 msg 20 salt 8 rBlind sgnt_expected (2uy)
+  ctest modBits n 17 e 1024 d (512 + 8) p (512 + 8) q 234 msg 20 salt rBlind sgnt_expected (2uy)
 
 
 val test3: unit -> ML bool
@@ -255,7 +259,7 @@ let test3() =
     0x89uy; 0x2auy; 0x74uy; 0x0euy; 0x1buy; 0x8auy; 0x88uy; 0x76uy; 0x6auy; 0x30uy; 0xfcuy; 0xe9uy; 0xb6uy; 0x0euy; 0x03uy; 0x32uy;
     0xd7uy; 0xa0uy; 0x1buy; 0xa5uy; 0xfauy; 0x13uy; 0x5fuy; 0xe7uy; 0xc4uy; 0x92uy; 0x72uy; 0xacuy; 0xbbuy; 0x1duy; 0x30uy; 0xf1uy] in
   let sgnt_expected : lbytes 192 = createL sgnt_expected in
-  ctest 11 modBits 192 n 3 e 192 d 96 p 96 q 107 msg 20 salt 8 rBlind sgnt_expected (3uy)
+  ctest modBits n 17 e modBits d (96*8) p (96*8) q 107 msg 20 salt rBlind sgnt_expected (3uy)
 
 
 val test4: unit -> ML bool
@@ -354,7 +358,7 @@ let test4() =
     0x98uy; 0xbeuy; 0xbbuy; 0x0duy; 0x5duy; 0x01uy; 0x0euy; 0x32uy; 0xe0uy; 0xb8uy; 0x00uy; 0xe9uy; 0x65uy; 0x6fuy; 0x64uy; 0x08uy;
     0x2buy; 0xb1uy; 0xacuy; 0x95uy; 0xa2uy; 0x23uy; 0xf4uy; 0x31uy; 0xecuy; 0x40uy; 0x6auy; 0x42uy; 0x95uy; 0x4buy; 0x2duy; 0x57uy] in
   let sgnt_expected : lbytes 256 = createL sgnt_expected in
-  ctest 12 modBits 256 n 3 e 256 d 128 p 128 q 128 msg 20 salt 8 rBlind sgnt_expected (4uy)
+  ctest modBits n 17 e modBits d (128*8) p (128*8) q 128 msg 20 salt rBlind sgnt_expected (4uy)
 
 val test: unit -> ML unit
 let test() =

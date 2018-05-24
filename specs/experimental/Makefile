@@ -62,11 +62,11 @@ sha2_256.exe: Spec.SHA256.fst
 	$(OCAMLOPT) -I sha2-spec $(OCAML_INCLUDES) $(addprefix sha2-spec/, $(EXTRACTED)) sha2-spec/Spec_Loops.ml sha2-spec/Spec_Lib.ml sha2-spec/Seq_Create.ml sha2-spec/Spec_SHA256.ml -o sha2_256.exe
 	./sha2_256.exe
 
-rsapss.exe: ../lib/fst/Spec.Lib.IntTypes.fst ../lib/fst/Spec.Lib.RawIntTypes.fst ../lib/fst/Spec.Lib.IntSeq.fst ../lib/fst/Spec.Lib.Stateful.fst ../Spec.SHA2.fst Spec.RSA.Bignum.fst Spec.RSA.fst Spec.RSA.Test.fst
+rsapss.exe: ../lib/fst/Spec.Lib.IntTypes.fst ../lib/fst/Spec.Lib.RawIntTypes.fst ../lib/fst/Spec.Lib.IntSeq.fst ../lib/fst/Spec.Lib.Stateful.fst ../Spec.SHA2.fst Spec.Bignum.Basic.fst Spec.RSA.Bignum.fst Spec.RSA.fst Spec.RSA.Test.fst
 	mkdir -p rsapss-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSA.Bignum --extract_module Spec.RSA --extract_module Spec.RSA.Test --odir rsapss-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Spec.Lib.IntTypes --extract_module Spec.Lib.RawIntTypes  --extract_module Spec.Lib.IntSeq --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Bignum.Basic --extract_module Spec.RSA.Bignum --extract_module Spec.RSA --extract_module Spec.RSA.Test --odir rsapss-ml $^
 	@echo 'let _ = test()' >> rsapss-ml/Spec_RSA_Test.ml
-	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) rsapss-ml/Spec_Lib_IntTypes.ml rsapss-ml/Spec_Lib_RawIntTypes.ml rsapss-ml/Spec_Lib_IntSeq.ml rsapss-ml/Spec_Lib_Stateful.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSA_Bignum.ml rsapss-ml/Spec_RSA.ml rsapss-ml/Spec_RSA_Test.ml -o rsapss.exe
+	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) rsapss-ml/Spec_Lib_IntTypes.ml rsapss-ml/Spec_Lib_RawIntTypes.ml rsapss-ml/Spec_Lib_IntSeq.ml rsapss-ml/Spec_Lib_Stateful.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_Bignum_Basic.ml rsapss-ml/Spec_RSA_Bignum.ml rsapss-ml/Spec_RSA.ml rsapss-ml/Spec_RSA_Test.ml -o rsapss.exe
 	./rsapss.exe
 
 
