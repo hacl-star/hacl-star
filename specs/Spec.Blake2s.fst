@@ -224,9 +224,9 @@ val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * size_block } ->  d:lb
 
 let blake2s ll d kk k nn =
   if ll = 0 && kk = 0 then
-     let data = create size_block (u8 0) in
-     blake2s_internal 1 data ll kk nn
-  else 
+    let data = create size_block (u8 0) in
+    blake2s_internal 1 data ll kk nn
+  else
     let nblocks = ll / size_block in
     let rem = ll % size_block in
     let blocks = sub d 0 (nblocks * size_block) in
