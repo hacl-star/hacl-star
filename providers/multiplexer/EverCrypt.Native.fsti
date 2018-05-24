@@ -5,6 +5,10 @@ open FStar.HyperStack.ST
 /// Multiplexing support
 type impl = | Hacl | Vale | OpenSSL
 
+type cfg = 
+| Default
+| Prefer: preferred:impl -> cfg
+
 val sha256_impl: impl
 val sha384_impl: impl
 val sha512_impl: impl
@@ -26,4 +30,4 @@ val chacha20_poly1305_impl: impl
 ///
 /// This function is implemented in C for CPU detection and mutation of the
 /// assumed val's right above.
-val init: option impl -> Stack unit (fun _ -> True) (fun h0 _ h1 -> h0 == h1)
+val init: cfg -> Stack unit (fun _ -> True) (fun h0 _ h1 -> h0 == h1)
