@@ -18,26 +18,16 @@ module H = Spec.HSalsa20
 
 assume val random_bytes: n:(n:nat{n<=32}) -> unit -> lbytes n
 
-assume val pkae_flag: bool
-
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 1"
 // For some reason it doesn't verify if there is an additional refinement on the output of secretbox_open_easy
 let secretbox_scheme =
   AE.ES #(AE_Spec.keylen) #(AE_Spec.noncelen) (fun n -> n / Spec.Salsa20.blocklen < pow2 32) (fun n -> n >= 16 && (n - 16) / Spec.Salsa20.blocklen < pow2 32) (random_bytes 32) AE_Spec.secretbox_easy AE_Spec.secretbox_open_easy
 
-let ae_params = AE.GP AE_Spec.keylen AE_Spec.noncelen secretbox_scheme
-
-let pp = PP (AE.get_ae_flagGT ae_params) (fun n -> n / Spec.Salsa20.blocklen < pow2 32)
+//let ae_params = AE.GP AE_Spec.keylen AE_Spec.noncelen secretbox_scheme
+//
+//let pp = PP (AE.get_ae_flagGT ae_params) (fun n -> n / Spec.Salsa20.blocklen < pow2 32)
 
 let kp = AE.create_ae_key_package ODH.id AE_Spec.keylen
-
-let ae_package_log_key = i:ODH.id
-let ae_package_log_value (rgn:erid) (i:ODH.id) = (ap:AE.ae_package #ODH.id #i #AE_Spec.keylen kp ae_params pp{extends (AE.get_ap_rgn ap) rgn})
-let ae_package_log_range (rgn:erid) (k:ae_package_log_key) = ae_package_log_value rgn k
-let ae_package_log_inv (rgn:erid) (f:MM.map' (ae_package_log_key) (ae_package_log_range rgn))  = True
-
-let ae_package_log (log_rgn:erid) (ap_rgn:erid) =
-  MM.t log_rgn (ae_package_log_key) (ae_package_log_range ap_rgn) (ae_package_log_inv ap_rgn)
 
 let zero_nonce = Seq.create H.noncelen (UInt8.uint_to_t 0)
 let hsalsa20_hash input = H.hsalsa20 input zero_nonce
@@ -48,9 +38,11 @@ noeq abstract type pkae_package =
   | PKAE_P :
     op_rgn:erid ->
     op: ODH.odh_package #AE_Spec.keylen #(AE.key AE_Spec.keylen #ODH.id) kp odh_params{extends (ODH.get_op_rgn op) op_rgn} ->
-    ap_log_rgn:erid{disjoint op_rgn ap_log_rgn} ->
-    ap_rgn:erid{disjoint op_rgn ap_rgn /\ disjoint ap_rgn ap_log_rgn /\ disjoint (ODH.get_op_rgn op) ap_rgn} ->
-    ap_log: ae_package_log ap_log_rgn ap_rgn ->
+    ae_params: AE.ae_parameters ->
+    pp: plain_package ->
+    ap_rgn:erid{disjoint op_rgn ap_rgn /\ disjoint (ODH.get_op_rgn op) ap_rgn} ->
+    ap: AE.ae_package kp ae_params pp{extends (AE.get_ap_rgn ap) ap_rgn} ->
+    b:bool ->
     pkae_package
 
 val create_pkae_package: rgn:erid -> ST pkae_package
@@ -62,11 +54,10 @@ val create_pkae_package: rgn:erid -> ST pkae_package
 let create_pkae_package rgn =
   let pkae_rgn = new_region rgn in
   let odh_rgn = new_region pkae_rgn in
-  let op = ODH.create_odh_package kp odh_params odh_rgn in
-  let ap_log_rgn = new_region pkae_rgn in
+  let op = ODH.create_odh_package kp odh_params odh_rgn b in
   let ap_rgn = new_region pkae_rgn in
-  let ap_log = MM.alloc #ap_log_rgn #ae_package_log_key #(ae_package_log_range ap_rgn) #(ae_package_log_inv ap_rgn) in
-  PKAE_P odh_rgn op ap_log_rgn ap_rgn ap_log
+  let ap = AE.create_ae_package ap_rgn kp ae_params pp in
+  PKAE_P odh_rgn op ap_rgn ap
 
 let pkey = ODH.share odh_params
 let skey = ODH.exponent odh_params
@@ -75,29 +66,6 @@ let ciphertext = AE.ciphertext ae_params
 let gen = ODH.gen_dh odh_params
 
 #set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
-val get_ap_from_log: pkae_p:pkae_package -> i:ODH.id -> ST (option (ap:ae_package_log_value pkae_p.ap_rgn i))
-  (requires (fun h0 -> True))
-  (ensures (fun h0 ap h1 ->
-    (match sel h0 pkae_p.ap_log i with
-      | Some ap ->
-        contains h1 (AE.get_ap_log ap)
-        /\ MM.defined pkae_p.ap_log i h1
-        /\ MM.contains pkae_p.ap_log i ap h1
-        /\ witnessed (MM.defined pkae_p.ap_log i)
-        /\ witnessed (MM.contains pkae_p.ap_log i ap)
-      | None -> MM.fresh pkae_p.ap_log i h1)
-    /\ h0 == h1
-    /\ ap == MM.sel (sel h1 pkae_p.ap_log) i
-  ))
-
-let get_ap_from_log pkae_p i =
-  match MM.lookup pkae_p.ap_log i with
-  | Some ap ->
-    AE.recall_log ap;
-    Some ap
-  | None -> None
-
-
 //#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
 //val nonce_freshness_framing_lemma: pkae_p:pkae_package -> i:ODH.id -> n:nonce -> h0:mem -> h1:mem -> Lemma
 //  (requires (
@@ -129,36 +97,17 @@ let get_ap_from_log pkae_p i =
 val encrypt: pkae_package:pkae_package -> pk:pkey -> sk:skey{ODH.get_share_raw pk <> ODH.get_share_raw (ODH.get_exp_share sk)} -> n:nonce -> p:protected_plain pp (ODH.create_id pk (ODH.get_exp_share sk)) -> ST ciphertext
   (requires (fun h0 ->
     let i = ODH.create_id pk (ODH.get_exp_share sk) in
-    match sel h0 pkae_package.ap_log i with
-    | Some ap ->
-      contains h0 (AE.get_ap_log ap)
-      /\ AE.nonce_is_unique ap n h0
-    | None -> True
+    AE.nonce_is_unique pkae_package.ap i n h0
   ))
   (ensures (fun h0 c h1 ->
     let i = ODH.create_id pk (ODH.get_exp_share sk) in
     let both_honest = ODH.exp_hon sk && ODH.sh_hon pk in
     let kp_log = ODH.get_op_log pkae_package.op in
-    // Describe ap_log state
-    Some? (sel h1 pkae_package.ap_log i)
-    /\ (let ap = Some?.v (sel h1 pkae_package.ap_log i) in
-    (if Some? (sel h0 pkae_package.ap_log i) then
-      sel h1 pkae_package.ap_log == sel h0 pkae_package.ap_log
-      /\ sel h1 (AE.get_ap_log ap) == MM.upd (sel h0 (AE.get_ap_log ap)) (n,c) p
-    else
-      sel h1 pkae_package.ap_log == MM.upd (sel h0 pkae_package.ap_log) i ap
-      /\ (forall n' . n' =!= n ==> AE.nonce_is_unique ap n' h1))
+    let ap = pkae_package.ap in
     // Describe modified memory regions
-    /\ (let modified_regions_ap_op = Set.union
+    (let modified_regions = Set.union
         (AE.encrypt_modified_regions ap)
         (ODH.dh_op_modified_regions pkae_package.op pk sk h0)
-      in
-      let modified_regions_extend_ap_log = Set.union (Set.singleton pkae_package.ap_rgn) (Set.singleton pkae_package.ap_log_rgn) in
-      let modified_regions =
-        if Some? (sel h0 pkae_package.ap_log i) then
-          modified_regions_ap_op
-        else
-          Set.union modified_regions_ap_op modified_regions_extend_ap_log
       in
       modifies modified_regions h0 h1)
     /\ ODH.dh_op_log_change pkae_package.op pk sk h0 h1
@@ -177,7 +126,7 @@ val encrypt: pkae_package:pkae_package -> pk:pkey -> sk:skey{ODH.get_share_raw p
       )
       // In case we have a dishonest key or we don't idealize, we can't guarantee anything.
     )
-  ))
+  )
 
 #set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
 let encrypt pkae_package pk sk n p =
