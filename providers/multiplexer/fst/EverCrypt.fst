@@ -46,7 +46,7 @@ let sha256_finish state data =
 let sha256_hash dst src len =
   match sha256_impl with
   | Hacl -> Hacl.sha256_hash dst src len
-  | Vale -> failwith !$"TODO: sha256_hash/Vale"
+  | Vale -> Vale.sha256_hash dst src len
   | OpenSSL -> failwith !$"TODO: sha256_hash/OpenSSL"
 
 let sha384_init state =
