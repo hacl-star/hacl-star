@@ -13,7 +13,7 @@ CFLAGS = -I $(KREMLIN_HOME)/include
 
 -include $(addsuffix .d,$(FILES))
 
-test.exe: $(addsuffix .o,$(FILES)) $(KREMLIN_HOME)/kremlib/testlib.c
+Test.exe: $(addsuffix .o,$(FILES)) $(KREMLIN_HOME)/kremlib/testlib.c $(KREMLIN_HOME)/kremlib/kremstr.c $(KREMLIN_HOME)/kremlib/kremlib.c 
 	$(CC) $^ -o $@ -levercrypt -L $(EVERCRYPT_HOME) -I $(KREMLIN_HOME)/include
 
-test: test.exe
+test: Test.exe
