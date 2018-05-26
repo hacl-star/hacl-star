@@ -39,3 +39,36 @@ EverCrypt_Bytes_chacha20_poly1305_encrypt(FStar_Bytes_bytes m,
                                       (uint8_t *) n.data);
   return out;
 }
+
+
+EverCrypt_Bytes_maybe_plaintext
+EverCrypt_Bytes_chacha20_poly1305_decrypt(FStar_Bytes_bytes cipher,
+                                          FStar_Bytes_bytes tag,                               
+                                          FStar_Bytes_bytes aad,
+                                          FStar_Bytes_bytes k,
+                                          FStar_Bytes_bytes n) {
+  FStar_Bytes_bytes m = {
+    .length = cipher.length,
+    .data = KRML_HOST_CALLOC(cipher.length, 1)
+  };
+  uint32_t res =
+    EverCrypt_chacha20_poly1305_decrypt((uint8_t *) m.data,
+                                        (uint8_t *) cipher.data,
+                                        m.length,
+                                        (uint8_t *) tag.data,                                 
+                                        (uint8_t *) aad.data,
+                                        aad.length,
+                                        (uint8_t *) k.data,
+                                        (uint8_t *) n.data);
+
+  EverCrypt_Bytes_maybe_plaintext out;
+  if (res == 0) {
+    out.tag = EverCrypt_Bytes_Correct;
+    out._0  = m;
+  }
+  else {
+    out.tag = EverCrypt_Bytes_Error;
+  }
+  
+  return out;
+}
