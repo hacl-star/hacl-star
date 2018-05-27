@@ -4,19 +4,18 @@ module B = FStar.Buffer
 module U32 = FStar.UInt32
 
 open FStar.HyperStack.ST
+open FStar.Bytes
 open EverCrypt.Helpers
 
 open Test.Vectors
+open U32
 
 #set-options "--admit_smt_queries true"
 
 type lbuffer (l:nat) = b:B.buffer UInt8.t {Buffer.length b == l}
-open FStar.UInt32
 
-open FStar.Bytes
-
-private val store_bytes_aux: len:UInt32.t -> buf:lbuffer (UInt32.v len)
-  -> i:UInt32.t{i <=^ len} -> b:lbytes (v len) -> St unit
+private val store_bytes_aux: len:U32.t -> buf:lbuffer (U32.v len)
+  -> i:U32.t{i <=^ len} -> b:lbytes (v len) -> St unit
 let rec store_bytes_aux len buf i b =
   if i <^ len then
    begin
@@ -24,7 +23,7 @@ let rec store_bytes_aux len buf i b =
    store_bytes_aux len buf (i +^ 1ul) b
    end
 
-val store_bytes: l:UInt32.t -> buf:lbuffer (v l) -> b:lbytes (v l) -> St unit
+val store_bytes: l:U32.t -> buf:lbuffer (v l) -> b:lbytes (v l) -> St unit
 let store_bytes l buf b = store_bytes_aux l buf 0ul b
 
 val buffer_of_hex: string -> StackInline (B.buffer UInt8.t)
@@ -47,7 +46,7 @@ let buffer_of_string s =
   store_bytes l buf b;
   buf
 
-val buffer_of_strings: UInt32.t -> string -> StackInline (B.buffer UInt8.t)
+val buffer_of_strings: U32.t -> string -> StackInline (B.buffer UInt8.t)
  (requires fun _ -> True)
  (ensures  fun _ _ _ -> True)
 let buffer_of_strings n s =
@@ -57,6 +56,8 @@ let buffer_of_strings n s =
   C.Loops.for 0ul n (fun _ _ -> True)
     (fun i -> store_bytes l (B.offset buf (i *^ l)) b);
   buf
+
+/// SHA2-256
 
 val test_sha256: v:hash_vector{v.hash_alg == SHA256} -> St unit
 let test_sha256 v =
@@ -96,6 +97,87 @@ let test_sha256 v =
 
   pop_frame()
 
+/// SHA2-384
+
+val test_sha384: v:hash_vector{v.hash_alg == SHA384} -> St unit
+let test_sha384 v =
+  push_frame();
+
+  let output_len = 48ul in
+  let output = B.create 0uy output_len in
+
+  let repeat   = U32.uint_to_t v.repeat in
+  let len      = U32.mul (Bytes.len (bytes_of_string v.input)) repeat in
+  let input    = buffer_of_strings repeat v.input in
+  let expected = buffer_of_hex v.output in
+
+  (* Allocate memory for state *)
+  let ctx = B.create 0uL U32.(80ul +^ 80ul +^ 8ul +^ 1ul) in
+
+  (* Compute the number of blocks to process *)
+  let size_block = 128ul in
+  let n = U32.div len size_block in
+  let r = U32.rem len size_block in
+
+  (* Get all full blocks and the last block *)
+  let input_blocks = B.sub input 0ul (n *%^ size_block) in
+  let input_last   = B.sub input (n *%^ size_block) r in
+
+  (* Call the hash function incrementally *)
+  EverCrypt.sha384_init ctx;
+  EverCrypt.sha384_update_multi ctx input_blocks n;
+  EverCrypt.sha384_update_last ctx input_last r;
+  EverCrypt.sha384_finish ctx output;
+
+  // Non-incrementally:
+  // EverCrypt.sha384_hash output input len
+
+  (* Display the result *)
+  TestLib.compare_and_print !$"of SHA384" expected output 32ul;
+
+  pop_frame()
+
+/// SHA2-512
+
+val test_sha512: v:hash_vector{v.hash_alg == SHA512} -> St unit
+let test_sha512 v =
+  push_frame();
+
+  let output_len = 64ul in
+  let output = B.create 0uy output_len in
+
+  let repeat   = U32.uint_to_t v.repeat in
+  let len      = U32.mul (Bytes.len (bytes_of_string v.input)) repeat in
+  let input    = buffer_of_strings repeat v.input in
+  let expected = buffer_of_hex v.output in
+
+  (* Allocate memory for state *)
+  let ctx = B.create 0uL U32.(80ul +^ 80ul +^ 8ul +^ 1ul) in
+
+  (* Compute the number of blocks to process *)
+  let size_block = 128ul in
+  let n = U32.div len size_block in
+  let r = U32.rem len size_block in
+
+  (* Get all full blocks and the last block *)
+  let input_blocks = B.sub input 0ul (n *%^ size_block) in
+  let input_last   = B.sub input (n *%^ size_block) r in
+
+  (* Call the hash function incrementally *)
+  EverCrypt.sha512_init ctx;
+  EverCrypt.sha512_update_multi ctx input_blocks n;
+  EverCrypt.sha512_update_last ctx input_last r;
+  EverCrypt.sha512_finish ctx output;
+
+  // Non-incrementally:
+  // EverCrypt.sha512_hash output input len
+
+  (* Display the result *)
+  TestLib.compare_and_print !$"of SHA512" expected output 32ul;
+
+  pop_frame()
+
+/// ChaCha20-Poly1305
 
 val test_chacha20_poly1305: v:aead_vector{v.cipher == CHACHA20_POLY1305} -> St unit
 let test_chacha20_poly1305 v =
@@ -125,6 +207,7 @@ let test_chacha20_poly1305 v =
 
   pop_frame()
 
+/// Test drivers
 
 val test_aead: list aead_vector -> St unit
 let rec test_aead v =
@@ -143,13 +226,15 @@ let rec test_hash v =
   match v with
   | [] -> ()
   | v :: vs ->
+    begin
     match v.hash_alg with
-    | SHA256 ->
-      let this = test_sha256 v in
-      let rest = test_hash vs in
-      ()
-    | _ -> test_hash vs
-
+    | SHA256 -> test_sha256 v
+    | SHA384 -> test_sha384 v
+    | SHA512 -> test_sha512 v
+    | SHA1   -> ()
+    | MD5    -> ()
+    end;
+    test_hash vs
 
 let main (): St C.exit_code =
   let open EverCrypt in
@@ -166,9 +251,3 @@ let main (): St C.exit_code =
   test_hash hash_vectors;
   pop_frame ();
   C.EXIT_SUCCESS
-
-// fstar.exe --include $KREMLIN_HOME/kremlib --include ../multiplexer --codegen OCaml --odir out Test.fst
-// ocamlfind opt -package ctypes,ctypes.foreign -linkpkg EverCrypt_Bytes.ml
-// ocamlfind opt -package ctypes,ctypes.foreign -linkpkg EverCrypt_Native.ml
-// OCAMLPATH=~/everest/FStar/bin ocamlfind opt -package fstarlib,ctypes,ctypes.foreign -linkpkg -I ../../multiplexer/ml -I $KREMLIN_HOME/kremlib -cclib -L../../out -cclib -levercrypt ../../multiplexer/ml/EverCrypt_Native.cmx ../../multiplexer/ml/EverCrypt_Bytes.cmx Test.ml
-// DYLD_LIBRARY_PATH=../../out:~/everest/MLCrypto/openssl:$DYLD_LIBRARY_PATH ./a.out
