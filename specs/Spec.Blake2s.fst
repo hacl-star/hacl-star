@@ -19,6 +19,7 @@ inline_for_extraction let rounds_in_f : size_nat = 10
 (* Definition of base types *)
 type working_vector = intseq U32 size_block_w
 type message_block_w = intseq U32 size_block_w
+type message_block = intseq U8 size_block
 type hash_state = intseq U32 size_hash_w
 type idx = n:size_nat{n < 16}
 type counter = uint64
@@ -172,28 +173,30 @@ let blake2s_init kk nn =
   blake2s_init_hash s kk nn
 
 
-val blake2s_update_block: dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> i:size_nat{i < dd - 1} -> hash_state -> Tot hash_state
-let blake2s_update_block dd d i s =
-  let sub_d = (sub d (i * size_block) size_block) in
-  let to_compress : intseq U32 16 = uints_from_bytes_le sub_d in
+val blake2s_update_block: #dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:message_block -> i:size_nat{i < dd - 1} -> hash_state -> Tot hash_state
+let blake2s_update_block #dd d i s =
+  let to_compress : intseq U32 16 = uints_from_bytes_le d in
   let offset = u64 ((i + 1) * size_block) in
   blake2_compress s to_compress offset false
 
 
-val blake2s_update_multi_loop : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
-let blake2s_update_multi_loop dd d s = repeati (dd - 1) (blake2s_update_block dd d) s
+val blake2s_update_multi_iteration : #dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) ->  i:size_nat{i < dd - 1} -> s:hash_state -> Tot hash_state
+let blake2s_update_multi_iteration #dd d i s =
+  let block = (sub d (i * size_block) size_block) in
+  blake2s_update_block #dd block i s
 
 
 // BB. This seems odd as blake2 internal should be called when dd = 1 !!
 val blake2s_update_multi : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
-let blake2s_update_multi dd d s = blake2s_update_multi_loop dd d s
+let blake2s_update_multi dd d s =
+  repeati (dd - 1) (blake2s_update_multi_iteration #dd d) s
 
 
 // Update last
 // We should insert the key in update1 instead ?
-val blake2s_update_last : hash_state -> dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+val blake2s_update_last : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> hash_state -> Tot hash_state
 
-let blake2s_update_last s dd d ll kk nn =
+let blake2s_update_last dd d ll kk nn s =
   let offset : size_nat = (dd - 1) * size_block in
   let last_block : intseq U32 16 = uints_from_bytes_le (sub d offset size_block) in
   if kk = 0 then
@@ -202,8 +205,8 @@ let blake2s_update_last s dd d ll kk nn =
     blake2_compress s last_block (u64 (ll + size_block)) true
 
 
-val blake2s_finish : nn:size_nat{1 <= nn /\ nn <= 32} -> s:hash_state -> Tot (lbytes nn)
-let blake2s_finish nn s =
+val blake2s_finish : s:hash_state -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
+let blake2s_finish s nn =
   let full = uints_to_bytes_le s in
   sub full 0 nn
 
@@ -212,8 +215,8 @@ val blake2s_core : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lby
 let blake2s_core dd d ll kk nn =
   let s = blake2s_init kk nn in
   let s = blake2s_update_multi dd d s in
-  let s = blake2s_update_last s dd d ll kk nn in
-  blake2s_finish nn s
+  let s = blake2s_update_last dd d ll kk nn s in
+  blake2s_finish s nn
 
 
 val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * size_block } ->  d:lbytes ll ->  kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
