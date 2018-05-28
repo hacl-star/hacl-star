@@ -167,7 +167,7 @@ val blake2s_init_iv: unit -> Tot hash_state
 let blake2s_init_iv iv = const_iv
 
 
-val blake2s_init: kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+val blake2s_init: kk:size_nat{kk <= 32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
 let blake2s_init kk nn =
   let s = blake2s_init_iv () in
   blake2s_init_hash s kk nn
@@ -194,12 +194,12 @@ let blake2s_update_multi dd d s =
 
 // Update last
 // We should insert the key in update1 instead ?
-val blake2s_update_last : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> hash_state -> Tot hash_state
+val blake2s_update_last : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> flag_key:bool -> hash_state -> Tot hash_state
 
-let blake2s_update_last dd d ll kk nn s =
+let blake2s_update_last dd d ll fk s =
   let offset : size_nat = (dd - 1) * size_block in
   let last_block : intseq U32 16 = uints_from_bytes_le (sub d offset size_block) in
-  if kk = 0 then
+  if not fk then
     blake2_compress s last_block (u64 ll) true
   else
     blake2_compress s last_block (u64 (ll + size_block)) true
@@ -213,9 +213,10 @@ let blake2s_finish s nn =
 
 val blake2s_core : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lseq uint8 nn)
 let blake2s_core dd d ll kk nn =
+  let fk = if kk = 0 then false else true in
   let s = blake2s_init kk nn in
   let s = blake2s_update_multi dd d s in
-  let s = blake2s_update_last dd d ll kk nn s in
+  let s = blake2s_update_last dd d ll fk s in
   blake2s_finish s nn
 
 
