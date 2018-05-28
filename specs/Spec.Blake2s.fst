@@ -18,21 +18,11 @@ inline_for_extraction let rounds_in_f : size_nat = 10
 
 (* Definition of base types *)
 type working_vector = intseq U32 size_block_w
-type message_block = intseq U32 size_block_w
+type message_block_w = intseq U32 size_block_w
 type hash_state = intseq U32 size_hash_w
 type idx = n:size_nat{n < 16}
 type counter = uint64
 type last_block_flag = bool
-
-noeq type state = {
-  s: hash_state;
-  t: intseq U32 2;
-  f: intseq U32 2;
-  buf: intseq U8 size_block;
-  buflen: size_t;
-  outlen: size_t;
-  last_node: uint8;
-}
 
 
 (* Constants *)
@@ -41,13 +31,13 @@ inline_for_extraction let r2 = u32 12
 inline_for_extraction let r3 = u32 8
 inline_for_extraction let r4 = u32 7
 
-inline_for_extraction let list_init : list uint32 =
+inline_for_extraction let list_iv : list uint32 =
   [u32 0x6A09E667; u32 0xBB67AE85; u32 0x3C6EF372; u32 0xA54FF53A;
    u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19]
 
 let const_iv : intseq U32 8 =
-  assert_norm (List.Tot.length list_init = 8);
-  createL list_init
+  assert_norm (List.Tot.length list_iv = 8);
+  createL list_iv
 
 inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
   size  0; size  1; size  2; size  3; size  4; size  5; size  6; size  7;
@@ -98,7 +88,7 @@ let blake2_mixing wv a b c d x y =
   wv
 
 
-val blake2_round1 : working_vector -> message_block -> size_nat -> Tot working_vector
+val blake2_round1 : working_vector -> message_block_w -> size_nat -> Tot working_vector
 let blake2_round1 wv m i =
   let s = sub const_sigma ((i % 10) * 16) 16 in
   let wv = blake2_mixing wv 0 4  8 12 (m.[size_v s.[ 0]]) (m.[size_v s.[ 1]]) in
@@ -108,7 +98,7 @@ let blake2_round1 wv m i =
   wv
 
 
-val blake2_round2 : working_vector -> message_block -> size_nat -> Tot working_vector
+val blake2_round2 : working_vector -> message_block_w -> size_nat -> Tot working_vector
 let blake2_round2 wv m i =
   let s = sub const_sigma ((i % 10) * 16) 16 in
   let wv = blake2_mixing wv 0 5 10 15 (m.[size_v s.[ 8]]) (m.[size_v s.[ 9]]) in
@@ -118,14 +108,14 @@ let blake2_round2 wv m i =
   wv
 
 
-val blake2_round : message_block -> size_nat -> working_vector -> Tot working_vector
+val blake2_round : message_block_w -> size_nat -> working_vector -> Tot working_vector
 let blake2_round m i wv =
   let wv = blake2_round1 wv m i in
   let wv = blake2_round2 wv m i in
   wv
 
 
-val blake2_compress1 : working_vector -> hash_state -> message_block -> uint64 -> last_block_flag -> Tot working_vector
+val blake2_compress1 : working_vector -> hash_state -> message_block_w -> uint64 -> last_block_flag -> Tot working_vector
 let blake2_compress1 wv s m offset flag =
   let wv = update_sub wv 0 8 s in
   let wv = update_sub wv 8 8 const_iv in
@@ -140,7 +130,7 @@ let blake2_compress1 wv s m offset flag =
   wv
 
 
-val blake2_compress2: working_vector -> message_block -> Tot working_vector
+val blake2_compress2: working_vector -> message_block_w -> Tot working_vector
 let blake2_compress2 wv m = repeati rounds_in_f (blake2_round m) wv
 
 
@@ -156,7 +146,7 @@ val blake2_compress3: working_vector -> hash_state -> Tot hash_state
 let blake2_compress3 wv s = repeati 8 (blake2_compress3_inner wv) s
 
 
-val blake2_compress : hash_state -> message_block -> uint64 -> last_block_flag -> Tot hash_state
+val blake2_compress : hash_state -> message_block_w -> uint64 -> last_block_flag -> Tot hash_state
 let blake2_compress s m offset flag =
   let wv = create 16 (u32 0) in
   let wv = blake2_compress1 wv s m offset flag in
@@ -165,38 +155,45 @@ let blake2_compress s m offset flag =
   s
 
 
-// Init0
-val blake2s_internal1: hash_state -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
-let blake2s_internal1 s kk nn =
+val blake2s_init_hash: hash_state -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+let blake2s_init_hash s kk nn =
   let s0 = s.[0] in
   let s0' = s0 ^. (u32 0x01010000) ^. ((u32 kk) <<. (u32 8)) ^. (u32 nn) in
   s.[0] <- s0'
 
 
-// Update 1
-val blake2s_internal2_inner: dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> i:size_nat{i < dd - 1} -> hash_state -> Tot hash_state
-let blake2s_internal2_inner dd d i s =
+val blake2s_init_iv: unit -> Tot hash_state
+let blake2s_init_iv iv = const_iv
+
+
+val blake2s_init: kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+let blake2s_init kk nn =
+  let s = blake2s_init_iv () in
+  blake2s_init_hash s kk nn
+
+
+val blake2s_update_block: dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> i:size_nat{i < dd - 1} -> hash_state -> Tot hash_state
+let blake2s_update_block dd d i s =
   let sub_d = (sub d (i * size_block) size_block) in
   let to_compress : intseq U32 16 = uints_from_bytes_le sub_d in
   let offset = u64 ((i + 1) * size_block) in
   blake2_compress s to_compress offset false
 
 
-// Update_blocks // Update_multi
-val blake2s_internal2_loop : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
-let blake2s_internal2_loop dd d s = repeati (dd - 1) (blake2s_internal2_inner dd d) s
+val blake2s_update_multi_loop : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
+let blake2s_update_multi_loop dd d s = repeati (dd - 1) (blake2s_update_block dd d) s
 
 
 // BB. This seems odd as blake2 internal should be called when dd = 1 !!
-val blake2s_internal2 : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
-let blake2s_internal2 dd d s = blake2s_internal2_loop dd d s
+val blake2s_update_multi : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
+let blake2s_update_multi dd d s = blake2s_update_multi_loop dd d s
 
 
 // Update last
 // We should insert the key in update1 instead ?
-val blake2s_internal3 : hash_state -> dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+val blake2s_update_last : hash_state -> dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
 
-let blake2s_internal3 s dd d ll kk nn =
+let blake2s_update_last s dd d ll kk nn =
   let offset : size_nat = (dd - 1) * size_block in
   let last_block : intseq U32 16 = uints_from_bytes_le (sub d offset size_block) in
   if kk = 0 then
@@ -205,27 +202,26 @@ let blake2s_internal3 s dd d ll kk nn =
     blake2_compress s last_block (u64 (ll + size_block)) true
 
 
-val blake2s_internal_core : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lseq uint8 32)
-let blake2s_internal_core dd d ll kk nn =
-  let s = const_iv in
-  let s = blake2s_internal1 s kk nn in
-  let s = blake2s_internal2 dd d s in
-  let s = blake2s_internal3 s dd d ll kk nn in
-  uints_to_bytes_le s
+val blake2s_finish : nn:size_nat{1 <= nn /\ nn <= 32} -> s:hash_state -> Tot (lbytes nn)
+let blake2s_finish nn s =
+  let full = uints_to_bytes_le s in
+  sub full 0 nn
 
 
-val blake2s_internal : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
-let blake2s_internal dd d ll kk nn =
-  let tmp = blake2s_internal_core dd d ll kk nn in
-  sub tmp 0 nn
+val blake2s_core : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lseq uint8 nn)
+let blake2s_core dd d ll kk nn =
+  let s = blake2s_init kk nn in
+  let s = blake2s_update_multi dd d s in
+  let s = blake2s_update_last s dd d ll kk nn in
+  blake2s_finish nn s
 
 
 val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * size_block } ->  d:lbytes ll ->  kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 
 let blake2s ll d kk k nn =
-  if ll = 0 && kk = 0 then
+  if ll = 0 && kk = 0 then begin
     let data = create size_block (u8 0) in
-    blake2s_internal 1 data ll kk nn
+    blake2s_core 1 data ll kk nn end
   else
     let nblocks = ll / size_block in
     let rem = ll % size_block in
@@ -243,4 +239,4 @@ let blake2s ll d kk k nn =
       if kk = 0 then (|nblocks, data|)
       else (|(nblocks + 1), concat key_block data|)
     in
-    blake2s_internal nblocks data ll kk nn
+    blake2s_core nblocks data ll kk nn
