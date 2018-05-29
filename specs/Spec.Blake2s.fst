@@ -193,7 +193,7 @@ let blake2s_update_multi_iteration dd_prev dd d i s =
 // BB. This seems odd as blake2 internal should be called when dd = 1 !!
 val blake2s_update_multi : dd_prev:size_nat -> dd:size_nat{0 < dd /\ (dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
 let blake2s_update_multi dd_prev dd d s =
-  repeati (dd - 1) (blake2s_update_multi_iteration dd_prev dd d) s
+  repeati dd (blake2s_update_multi_iteration dd_prev dd d) s
 
 
 // Update last
@@ -230,7 +230,6 @@ let blake2s ll d kk k nn =
   let nblocks = ll / size_block in
   let blocks = sub d 0 (nblocks * size_block) in
   let last = sub d (nblocks * size_block) rem in
-  let nblocks = if rem = 0 then nblocks else (nblocks + 1) in
   if ll = 0 && kk = 0 then begin
     let data = create size_block (u8 0) in
     let s = blake2s_init kk k nn in
