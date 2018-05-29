@@ -180,16 +180,16 @@ let blake2s_update_block #dd d i s =
   blake2_compress s to_compress offset false
 
 
-val blake2s_update_multi_iteration : #dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) ->  i:size_nat{i < dd - 1} -> s:hash_state -> Tot hash_state
-let blake2s_update_multi_iteration #dd d i s =
+val blake2s_update_multi_iteration : dd_prev:size_nat -> dd:size_nat{0 < dd /\ (dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) ->  i:size_nat{i < dd_prev + dd - 1} -> s:hash_state -> Tot hash_state
+let blake2s_update_multi_iteration dd_prev dd d i s =
   let block = (sub d (i * size_block) size_block) in
-  blake2s_update_block #dd block i s
+  blake2s_update_block #dd block (i + dd_prev) s
 
 
 // BB. This seems odd as blake2 internal should be called when dd = 1 !!
-val blake2s_update_multi : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
-let blake2s_update_multi dd d s =
-  repeati (dd - 1) (blake2s_update_multi_iteration #dd d) s
+val blake2s_update_multi : dd_prev:size_nat -> dd:size_nat{0 < dd /\ (dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
+let blake2s_update_multi dd_prev dd d s =
+  repeati (dd - 1) (blake2s_update_multi_iteration dd_prev dd d) s
 
 
 // Update last
@@ -222,10 +222,11 @@ val blake2s:
 
 let blake2s ll d kk k nn =
   let fk = if kk = 0 then false else true in
-  let nblocks = ll / size_block in
   let rem = ll % size_block in
+  let nblocks = ll / size_block in
   let blocks = sub d 0 (nblocks * size_block) in
   let last = sub d (nblocks * size_block) rem in
+  let nblocks = if rem = 0 then nblocks else (nblocks + 1) in
   if ll = 0 && kk = 0 then begin
     let data = create size_block (u8 0) in
     let s = blake2s_init kk nn in
@@ -234,19 +235,9 @@ let blake2s ll d kk k nn =
   else
     let key_block = create size_block (u8 0) in
     let key_block = update_sub key_block 0 kk k in
-    let nblocks : size_nat =
-      if rem = 0 then nblocks
-      else (nblocks + 1)
-    in
-    let nblocks : size_nat =
-      if kk = 0 then nblocks
-      else (nblocks + 1)
-    in
-    let data : lseq uint8 (nblocks * size_block) =
-      if kk = 0 then d
-      else concat key_block d
-    in
     let s = blake2s_init kk nn in
-    let s = blake2s_update_multi nblocks data s in
+    let s =
+      if kk = 0 then s else blake2s_update_block #1 key_block 0 s in
+    let s = blake2s_update_multi 1 nblocks blocks s in
     let s = blake2s_update_last rem last ll fk s in
     blake2s_finish s nn
