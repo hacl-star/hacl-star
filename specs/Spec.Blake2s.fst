@@ -194,10 +194,12 @@ let blake2s_update_multi dd d s =
 
 // Update last
 // We should insert the key in update1 instead ?
-val blake2s_update_last : d:lbytes size_block -> ll:size_nat -> flag_key:bool -> hash_state -> Tot hash_state
+val blake2s_update_last : len:size_nat{len <= size_block} -> last:lbytes len -> ll:size_nat -> flag_key:bool -> hash_state -> Tot hash_state
 
-let blake2s_update_last d ll fk s =
-  let last_block : intseq U32 16 = uints_from_bytes_le d in
+let blake2s_update_last len last ll fk s =
+  let last_block = create size_block (u8 0) in
+  let last_block = update_sub last_block 0 len last in
+  let last_block : intseq U32 16 = uints_from_bytes_le last_block in
   if not fk then
     blake2_compress s last_block (u64 ll) true
   else
@@ -227,22 +229,22 @@ let blake2s ll d kk k nn =
   if ll = 0 && kk = 0 then begin
     let data = create size_block (u8 0) in
     let s = blake2s_init kk nn in
-    let s = blake2s_update_last data ll fk s in
+    let s = blake2s_update_last size_block data ll fk s in
     blake2s_finish s nn end
   else
     let key_block = create size_block (u8 0) in
     let key_block = update_sub key_block 0 kk k in
     let last_complement = create (size_block - rem) (u8 0) in
-    let (|nblocks, data|)  =
+    let nblocks : size_nat =
+      if rem = 0 then nblocks
+      else (nblocks + 1)
+    in
+    let (|nblocks, data|) : ( n:size_nat{n * size_block <= max_size_t} & lseq uint8 (n * size_block)) =
       if kk = 0 then (|nblocks, d|)
       else (|(nblocks + 1), concat key_block d|)
     in
-    let (|nblocks, data|) : ( n:size_nat{n * size_block <= max_size_t} & lseq uint8 (n * size_block))=
-      if rem = 0 then (|nblocks, blocks|)
-      else (|(nblocks + 1), concat data last_complement|)
-    in
     let s = blake2s_init kk nn in
     let s = blake2s_update_multi nblocks data s in
-    let s = blake2s_update_last (concat last last_complement) ll fk s in
+    let s = blake2s_update_last rem last ll fk s in
     blake2s_finish s nn
 
