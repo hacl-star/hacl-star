@@ -167,10 +167,10 @@ val blake2s_init_iv: unit -> Tot hash_state
 let blake2s_init_iv iv = const_iv
 
 
-val blake2s_update_block: d:message_block -> i:size_nat -> hash_state -> Tot hash_state
-let blake2s_update_block d i s =
+val blake2s_update_block: dd_prev:size_nat -> d:message_block -> hash_state -> Tot hash_state
+let blake2s_update_block dd_prev d s =
   let to_compress : intseq U32 16 = uints_from_bytes_le d in
-  let offset = u64 ((i + 1) * size_block) in
+  let offset = u64 ((dd_prev + 1) * size_block) in
   blake2_compress s to_compress offset false
 
 val blake2s_init: kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
@@ -181,13 +181,13 @@ let blake2s_init kk k nn =
   else begin
     let key_block = create size_block (u8 0) in
     let key_block = update_sub key_block 0 kk k in
-    blake2s_update_block key_block 0 s end
+    blake2s_update_block 0 key_block s end
 
 
 val blake2s_update_multi_iteration : dd_prev:size_nat -> dd:size_nat{(dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) ->  i:size_nat{i + 1 <= dd} -> s:hash_state -> Tot hash_state
 let blake2s_update_multi_iteration dd_prev dd d i s =
   let block = (sub d (i * size_block) size_block) in
-  blake2s_update_block block (i + dd_prev) s
+  blake2s_update_block (dd_prev + i) block s
 
 
 val blake2s_update_multi : dd_prev:size_nat -> dd:size_nat{(dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
