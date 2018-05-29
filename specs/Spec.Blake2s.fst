@@ -184,20 +184,17 @@ let blake2s_init kk k nn =
     blake2s_update_block key_block 0 s end
 
 
-val blake2s_update_multi_iteration : dd_prev:size_nat -> dd:size_nat{0 < dd /\ (dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) ->  i:size_nat{i + 1 <= dd} -> s:hash_state -> Tot hash_state
+val blake2s_update_multi_iteration : dd_prev:size_nat -> dd:size_nat{(dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) ->  i:size_nat{i + 1 <= dd} -> s:hash_state -> Tot hash_state
 let blake2s_update_multi_iteration dd_prev dd d i s =
   let block = (sub d (i * size_block) size_block) in
   blake2s_update_block block (i + dd_prev) s
 
 
-// BB. This seems odd as blake2 internal should be called when dd = 1 !!
-val blake2s_update_multi : dd_prev:size_nat -> dd:size_nat{0 < dd /\ (dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
+val blake2s_update_multi : dd_prev:size_nat -> dd:size_nat{(dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
 let blake2s_update_multi dd_prev dd d s =
   repeati dd (blake2s_update_multi_iteration dd_prev dd d) s
 
 
-// Update last
-// We should insert the key in update1 instead ?
 val blake2s_update_last : ll:size_nat -> len:size_nat{len <= size_block} -> last:lbytes len -> flag_key:bool -> hash_state -> Tot hash_state
 
 let blake2s_update_last ll len last fk s =
