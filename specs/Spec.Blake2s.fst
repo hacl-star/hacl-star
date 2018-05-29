@@ -167,17 +167,22 @@ val blake2s_init_iv: unit -> Tot hash_state
 let blake2s_init_iv iv = const_iv
 
 
-val blake2s_init: kk:size_nat{kk <= 32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
-let blake2s_init kk nn =
-  let s = blake2s_init_iv () in
-  blake2s_init_hash s kk nn
-
-
 val blake2s_update_block: #dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:message_block -> i:size_nat{i < dd - 1} -> hash_state -> Tot hash_state
 let blake2s_update_block #dd d i s =
   let to_compress : intseq U32 16 = uints_from_bytes_le d in
   let offset = u64 ((i + 1) * size_block) in
   blake2_compress s to_compress offset false
+
+
+val blake2s_init: kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+let blake2s_init kk k nn =
+  let s = blake2s_init_iv () in
+  let s = blake2s_init_hash s kk nn in
+  if kk = 0 then s
+  else
+    let key_block = create size_block (u8 0) in
+    let key_block = update_sub key_block 0 kk k in
+    blake2s_update_block #1 key_block 0 s
 
 
 val blake2s_update_multi_iteration : dd_prev:size_nat -> dd:size_nat{0 < dd /\ (dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) ->  i:size_nat{i < dd_prev + dd - 1} -> s:hash_state -> Tot hash_state
@@ -194,9 +199,9 @@ let blake2s_update_multi dd_prev dd d s =
 
 // Update last
 // We should insert the key in update1 instead ?
-val blake2s_update_last : len:size_nat{len <= size_block} -> last:lbytes len -> ll:size_nat -> flag_key:bool -> hash_state -> Tot hash_state
+val blake2s_update_last : ll:size_nat -> len:size_nat{len <= size_block} -> last:lbytes len -> flag_key:bool -> hash_state -> Tot hash_state
 
-let blake2s_update_last len last ll fk s =
+let blake2s_update_last ll len last fk s =
   let last_block = create size_block (u8 0) in
   let last_block = update_sub last_block 0 len last in
   let last_block : intseq U32 16 = uints_from_bytes_le last_block in
@@ -229,15 +234,12 @@ let blake2s ll d kk k nn =
   let nblocks = if rem = 0 then nblocks else (nblocks + 1) in
   if ll = 0 && kk = 0 then begin
     let data = create size_block (u8 0) in
-    let s = blake2s_init kk nn in
-    let s = blake2s_update_last size_block data ll fk s in
+    let s = blake2s_init kk k nn in
+    let s = blake2s_update_last ll size_block data fk s in
     blake2s_finish s nn end
   else
-    let key_block = create size_block (u8 0) in
-    let key_block = update_sub key_block 0 kk k in
-    let s = blake2s_init kk nn in
-    let s = if kk = 0 then s else blake2s_update_block #1 key_block 0 s in
+    let s = blake2s_init kk k nn in
     let nprev = if kk = 0 then 0 else 1 in
     let s = blake2s_update_multi nprev nblocks blocks s in
-    let s = blake2s_update_last rem last ll fk s in
+    let s = blake2s_update_last ll rem last fk s in
     blake2s_finish s nn
