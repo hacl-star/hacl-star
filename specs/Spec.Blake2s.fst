@@ -236,8 +236,8 @@ let blake2s ll d kk k nn =
     let key_block = create size_block (u8 0) in
     let key_block = update_sub key_block 0 kk k in
     let s = blake2s_init kk nn in
-    let s =
-      if kk = 0 then s else blake2s_update_block #1 key_block 0 s in
-    let s = blake2s_update_multi 1 nblocks blocks s in
+    let s = if kk = 0 then s else blake2s_update_block #1 key_block 0 s in
+    let nprev = if kk = 0 then 0 else 1 in
+    let s = blake2s_update_multi nprev nblocks blocks s in
     let s = blake2s_update_last rem last ll fk s in
     blake2s_finish s nn
