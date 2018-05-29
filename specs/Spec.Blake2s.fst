@@ -211,26 +211,27 @@ let blake2s_finish s nn =
   sub full 0 nn
 
 
-val blake2s_core : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lseq uint8 nn)
-let blake2s_core dd d ll kk nn =
-  let fk = if kk = 0 then false else true in
-  let s = blake2s_init kk nn in
-  let s = blake2s_update_multi dd d s in
-  let s = blake2s_update_last dd d ll fk s in
-  blake2s_finish s nn
-
-
-val blake2s : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * size_block } ->  d:lbytes ll ->  kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
+val blake2s:
+    ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * size_block }
+  -> d:lbytes ll
+  -> kk:size_nat{kk <= 32}
+  -> k:lbytes kk
+  -> nn:size_nat{1 <= nn /\ nn <= 32} ->
+  Tot (lbytes nn)
 
 let blake2s ll d kk k nn =
+  let fk = if kk = 0 then false else true in
+  let nblocks = ll / size_block in
+  let rem = ll % size_block in
+  let blocks = sub d 0 (nblocks * size_block) in
+  let last = sub d (nblocks * size_block) rem in
   if ll = 0 && kk = 0 then begin
     let data = create size_block (u8 0) in
-    blake2s_core 1 data ll kk nn end
+    let s = blake2s_init kk nn in
+    let s = blake2s_update_multi 1 data s in
+    let s = blake2s_update_last 1 data ll fk s in
+    blake2s_finish s nn end
   else
-    let nblocks = ll / size_block in
-    let rem = ll % size_block in
-    let blocks = sub d 0 (nblocks * size_block) in
-    let last = sub d (nblocks * size_block) rem in
     let key_block = create size_block (u8 0) in
     let key_block = update_sub key_block 0 kk k in
     let last_block = create size_block (u8 0) in
@@ -243,4 +244,8 @@ let blake2s ll d kk k nn =
       if kk = 0 then (|nblocks, data|)
       else (|(nblocks + 1), concat key_block data|)
     in
-    blake2s_core nblocks data ll kk nn
+    let s = blake2s_init kk nn in
+    let s = blake2s_update_multi nblocks data s in
+    let s = blake2s_update_last nblocks data ll fk s in
+    blake2s_finish s nn
+
