@@ -234,15 +234,14 @@ let blake2s ll d kk k nn =
   else
     let key_block = create size_block (u8 0) in
     let key_block = update_sub key_block 0 kk k in
-    let last_block = create size_block (u8 0) in
-    let last_block = update_sub last_block 0 rem last in
+    let last_complement = create (size_block - rem) (u8 0) in
+    let (|nblocks, data|)  =
+      if kk = 0 then (|nblocks, d|)
+      else (|(nblocks + 1), concat key_block d|)
+    in
     let (|nblocks, data|) : ( n:size_nat{n * size_block <= max_size_t} & lseq uint8 (n * size_block))=
       if rem = 0 then (|nblocks, blocks|)
-      else (|(nblocks + 1), concat blocks last_block|)
-    in
-    let (|nblocks, data|)  =
-      if kk = 0 then (|nblocks, data|)
-      else (|(nblocks + 1), concat key_block data|)
+      else (|(nblocks + 1), concat data last_complement|)
     in
     let s = blake2s_init kk nn in
     let s = blake2s_update_multi nblocks data s in
