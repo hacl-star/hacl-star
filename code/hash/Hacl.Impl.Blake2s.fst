@@ -397,7 +397,7 @@ let blake2s_update_block s dd_prev d flag const_iv const_sigma =
     (fun _ sv -> sv == Spec.blake2s_update_block (v dd_prev) d0 s0))
   (fun to_compress ->
     uints_from_bytes_le to_compress d;
-    let offset = u64 ((v dd_prev + 1) * Spec.size_block) in
+    let offset = to_u64 (size_to_uint32 (dd_prev +. (size 1))) *. (to_u64 (size Spec.size_block)) in
     blake2_compress s to_compress offset flag const_iv const_sigma
   )
 

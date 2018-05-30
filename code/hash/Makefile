@@ -111,7 +111,7 @@ blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Tes
 
 # I don't want to generate Hacl_Blake2s.c with -add-include '"kremlin/c_string.h"' !!!
 blake2s-c/Hacl_Blake2s.c: blake2s-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fparentheses -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
+	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"myvoid.h"' -add-include '"kremlin/c_string.h"' -fparentheses -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
 	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	$^ -o $@
 
@@ -122,6 +122,7 @@ blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
 
 
 test-blake2s.exe: blake2s-c/Hacl_Blake2s.c blake2s-c/Hacl_Test_Blake2s.c $(BASE_OBJ)
+	cp myvoid.h blake2s-c/
 	$(CC) $(CFLAGS) -I $(KREMLIN_HOME)/include -o $@ $^
 
 #
