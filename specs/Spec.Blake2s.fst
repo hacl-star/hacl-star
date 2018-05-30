@@ -156,22 +156,22 @@ let blake2_compress s m offset flag =
   s
 
 
-val blake2s_init_hash: hash_state -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
-let blake2s_init_hash s kk nn =
-  let s0 = s.[0] in
-  let s0' = s0 ^. (u32 0x01010000) ^. ((u32 kk) <<. (u32 8)) ^. (u32 nn) in
-  s.[0] <- s0'
+val blake2s_update_block: dd_prev:size_nat -> d:message_block -> hash_state -> Tot hash_state
+let blake2s_update_block dd_prev d s =
+  let to_compress : intseq U32 16 = uints_from_bytes_le d in
+  let offset = u64 ((dd_prev + 1) * size_block) in
+  blake2_compress s to_compress offset false
 
 
 val blake2s_init_iv: unit -> Tot hash_state
 let blake2s_init_iv iv = const_iv
 
 
-val blake2s_update_block: dd_prev:size_nat -> d:message_block -> hash_state -> Tot hash_state
-let blake2s_update_block dd_prev d s =
-  let to_compress : intseq U32 16 = uints_from_bytes_le d in
-  let offset = u64 ((dd_prev + 1) * size_block) in
-  blake2_compress s to_compress offset false
+val blake2s_init_hash: hash_state -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
+let blake2s_init_hash s kk nn =
+  let s0 = s.[0] in
+  let s0' = s0 ^. (u32 0x01010000) ^. ((u32 kk) <<. (u32 8)) ^. (u32 nn) in
+  s.[0] <- s0'
 
 val blake2s_init: kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
 let blake2s_init kk k nn =
