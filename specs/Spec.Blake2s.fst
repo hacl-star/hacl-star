@@ -214,7 +214,7 @@ let blake2s_finish s nn =
 
 
 val blake2s:
-    ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * size_block }
+    ll:size_nat{ll + 2 * size_block <= max_size_t} // This could be relaxed
   -> d:lbytes ll
   -> kk:size_nat{kk <= 32}
   -> k:lbytes kk
