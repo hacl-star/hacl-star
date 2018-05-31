@@ -91,18 +91,24 @@ type mpfr_rnd_t =
 
 let gmp_NUMB_BITS = 64ul
 
+open FStar.UInt
+open FStar.Math.Lemmas
+
 let mpfr_LIMB_ONE = 1uL
 
-val mpfr_LIMB_MASK: s:u32{FStar.UInt32.v s < 64} -> Tot u64
-#set-options "--z3refresh --z3rlimit 100 --log_queries"
+val mpfr_LIMB_MASK: s:u32{FStar.UInt32.v s < 64} ->
+    Tot (r:u64{forall (i:nat{0 <= i /\ i < 64}). i >= 64 - FStar.UInt32.v s <==> nth (v r) i == true})
+#set-options "--z3refresh --z3rlimit 5 --log_queries"
 let mpfr_LIMB_MASK s =
     let lsh = 1uL <<^ s in
-    assume (lsh >^ 0uL);
+    pow2_lt_compat 64 (FStar.UInt32.v s);
+    small_modulo_lemma_1 (pow2 (FStar.UInt32.v s)) (pow2 64);
     lsh -^ 1uL
 
-let mpfr_LIMB_HIGHBIT = 0x8000000000000000uL
-
-
+val mpfr_LIMB_HIGHBIT: s:u64{forall (i:nat{0 <= i /\ i < 64}). i == 0 <==> nth (v s) i == true}
+let mpfr_LIMB_HIGHBIT =
+    assert_norm(pow2_n #64 63 == v 0x8000000000000000uL);
+    0x8000000000000000uL
 
 assume val gmpfr_emax: mpfr_exp_t
 assume val gmpfr_flags: i32
