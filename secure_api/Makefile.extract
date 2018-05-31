@@ -190,13 +190,8 @@ ifeq (,$(wildcard $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa))
 endif
 
 ifeq (,$(wildcard $(CURVE_DIR)/Hacl_Curve25519.c))
-  ifneq (,$(EVEREST_WINDOWS))
-    $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
-      $(CURVE_DIR)/Hacl_Curve25519.c -- please run `EVEREST_WINDOWS=1 make -C $(CURVE_DIR)/.. extract-c`)
-  else
-    $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
-      $(CURVE_DIR)/Hacl_Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
-  endif
+  $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
+    $(CURVE_DIR)/Hacl_Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
 endif
 
 POLY_DIR=$(HACL_HOME)/code/poly1305/poly-c
@@ -204,13 +199,8 @@ CHACHA_DIR=$(HACL_HOME)/code/salsa-family/chacha-c
 CHACHAPOLY_DIR=$(HACL_HOME)/code/api/aead-c
 
 ifeq (,$(wildcard $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c))
-  ifneq (,$(KRML_NOUINT128))
-    $(error The Chacha20Poly1305 directory is $(CHACHAPOLY_DIR) and I cannot find \
-      $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c -- please run `KOPTS="-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full -add-early-include '\"FStar_UInt128.h\"'" make -C $(CHACHAPOLY_DIR)/.. extract-c`)
-  else
-    $(error The Chacha20Poly1305 directory is $(CHACHAPOLY_DIR) and I cannot find \
-      $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c -- please run `make -C $(CHACHAPOLY_DIR)/.. extract-c`)
-  endif
+  $(error The Chacha20Poly1305 directory is $(CHACHAPOLY_DIR) and I cannot find \
+    $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c -- please run `make -C $(CHACHAPOLY_DIR)/.. extract-c`)
 endif
 
 # Since we're building an actual C file, we need the standalone AEAD file, along
@@ -220,20 +210,6 @@ HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h \
 	  $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.h \
 	  $(CURVE_DIR)/Hacl_Curve25519.h \
 	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.h
-
-# Technically these dependency edges are only real for the KRML_NOUINT128 case.
-$(DIST_DIR)/uint128/FStar_UInt128.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(DIST_DIR)/uint128/FStar_UInt128.c: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CURVE_DIR)/Hacl_Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CHACHA_DIR)/Hacl_Chacha20.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(POLY_DIR)/AEAD_Poly1305_64.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CHACHAPOLY_DIR)/Hacl_Policies.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(VALE_DIR)/Vale_Hash_SHA2_256.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Indexing.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o: $(DIST_DIR)/uint128/FStar_UInt128.h
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
@@ -330,7 +306,7 @@ $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) \
   $(POLY_DIR)/AEAD_Poly1305_64.o \
   $(CHACHAPOLY_DIR)/Hacl_Policies.o \
   $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o \
-  $(DIST_DIR)/copied/kremstr.o \
+  $(DIST_DIR)/copied/kremstr.o
 	$(CC) $^ -o $@ $(QUICPROVIDER_SO_LDOPTS) -shared
 
 $(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)
