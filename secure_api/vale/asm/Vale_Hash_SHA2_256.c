@@ -15,9 +15,10 @@ struct KremlinWorkaround {
 
 void Vale_Hash_SHA2_256_init(uint32_t *state) {
   struct KremlinWorkaround *k = (struct KremlinWorkaround *) state;
-  memset(k, 0, sizeof(*k));
   k->ctx_value.H = k->H_value;
   k->ctx_value.unprocessed_bytes = k->unprocessed_bytes_value;
+  k->ctx_value.num_unprocessed_bytes = (uint32_t)0U;
+  k->ctx_value.num_total_bytes = (uint64_t)0U;
 
   sha256_main_i_SHA256_Init(&k->ctx_value);
 }

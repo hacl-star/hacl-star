@@ -35,7 +35,7 @@ else ifeq ($(OS),Windows_NT)
   QUICPROVIDER_SO_LDOPTS =
   export PATH
 endif
-CCOPTS=-Wall -Wextra $(CFLAGS) -I $(KREMLIN_HOME)/kremlib $(CCOPTS_EXTRA)
+CCOPTS=-Wall -Wextra $(CFLAGS) -I $(KREMLIN_HOME)/include $(CCOPTS_EXTRA)
 
 # -Werror --not yet feasible because of FStar_Char_char_of_int in kremstr.h
 # The include paths, including the implementation choice.
@@ -47,7 +47,7 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/code/poly1305 \
 	$(HACL_HOME)/code/hash \
 	$(HACL_HOME)/code/salsa-family \
-	$(KREMLIN_HOME)/kremlib	\
+	$(KREMLIN_HOME)/kremlib \
 	$(HACL_HOME)/secure_api \
 	$(HACL_HOME)/secure_api/aead \
 	$(HACL_HOME)/secure_api/prf \
@@ -61,27 +61,24 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(CONCRETE_DIR)/$(IMPL_CHOICE) \
 	$(HACL_HOME)/secure_api/test)
 
-# The F* compiler and the entry points.
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe \
-        $(OTHERFLAGS) \
+FSTAR_FLAGS=$(OTHERFLAGS) \
         --cache_dir $(CACHE_DIR) \
         --cache_checked_modules \
         $(INCLUDE_PATHS) \
-        --odir $(OUTPUT_DIR)
+        --odir $(OUTPUT_DIR) \
+        --use_hints
 
+# The F* compiler and the entry points.
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 %.fst-ver: %.fst
-	$(FSTAR) --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
-	  $^
+	$(FSTAR) $^
 
 %.fst-lax: %.fst
-	$(FSTAR) --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
-	  --cache_checked_modules $^ --lax
+	$(FSTAR) $^ --lax
 
 %.fsti-in:
-	@echo --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
-	  --cache_checked_modules
+	@echo $(FSTAR_FLAGS)
 
 %.fst-in:
-	@echo --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
-	  --cache_checked_modules
+	@echo $(FSTAR_FLAGS)

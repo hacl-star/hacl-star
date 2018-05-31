@@ -30,13 +30,14 @@ On top of these three building blocks, we have:
 
 # status of primitives
 
- primitive | hacl | vale | openssl | c/bytes | ml/bytes 
------------|------|------|---------|---------|---------
- sha256    | yes  | yes  | no      | no      | no
- sha384    | yes  | no   | no      | no      | no
- sha512    | yes  | no   | no      | no      | no
- curve     | yes  | no   | no      | yes     | yes
- aes256gcm | no   | no   | yes     | no      | no
+ primitive | hacl  | vale | openssl | c/bytes | ml/bytes 
+-------------------|------|------|---------|---------|---------
+ sha256            | yes  | yes  | no      | no      | no
+ sha384            | yes  | no   | no      | no      | no
+ sha512            | yes  | no   | no      | no      | no
+ curve             | yes  | no   | no      | yes     | yes
+ aes256gcm         | no   | no   | yes     | no      | no
+ chacha20-poly1305 | yes  | no   | no      | yes     | yes
 
 How to add a primitive:
 - EverCrypt.Specs.fsti, to be extended with suitable pre- and post-conditions
@@ -50,10 +51,11 @@ How to add a primitive:
 - if Hacl: edit EverCrypt.Hacl.fst, to implement the corresponding function by
   poking into code/<your-algorithm>/interfaces/<your-interface.fsti>
 - if OpenSSL or Vale: edit evercrypt_(openssl|vale).c
-- if new primitive: edit the Makefile and add the source to HACL_SOURCES or
-  VALE_SOURCES or VALE_ASM
+- if new primitive: edit the Makefile to add the source to HACL_SOURCES or
+  VALE_SOURCES or VALE_ASM, add paths to the interface files in FSTAR_INCLUDE,
+  and filter out spurious files in ALL_OUR_FILES
 - if this primitive is to be called from miTLS
-  - edit EverCrypt.Bytes.fst to expose a Pure function that returns bytes
+  - edit EverCrypt.Bytes.fsti to declare a Pure function that returns bytes
   - edit evercrypt_bytes.c to implement this function in C
   - edit EverCrypt_bytes.ml to implement this function in ML using ctypes
-- add a test for your primitive in sample-project/
+- add a test for your primitive in test/

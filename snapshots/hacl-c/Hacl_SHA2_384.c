@@ -276,29 +276,30 @@ static void Hacl_Impl_SHA2_384_update_multi(uint64_t *state, uint8_t *data, uint
   }
 }
 
-static void Hacl_Impl_SHA2_384_update_last(uint64_t *state, uint8_t *data, uint64_t len)
+static void Hacl_Impl_SHA2_384_update_last(uint64_t *state, uint8_t *data, uint32_t len)
 {
   uint8_t blocks[256U] = { 0U };
   uint32_t nb;
-  if (len < (uint64_t)112U)
+  if (len < (uint32_t)112U)
     nb = (uint32_t)1U;
   else
     nb = (uint32_t)2U;
   uint8_t *final_blocks;
-  if (len < (uint64_t)112U)
+  if (len < (uint32_t)112U)
     final_blocks = blocks + (uint32_t)128U;
   else
     final_blocks = blocks;
-  memcpy(final_blocks, data, (uint32_t)len * sizeof data[0U]);
+  memcpy(final_blocks, data, len * sizeof data[0U]);
   uint64_t n1 = state[168U];
-  uint8_t *padding = final_blocks + (uint32_t)len;
-  FStar_UInt128_uint128 l0 = FStar_UInt128_mul_wide(n1, (uint64_t)(uint32_t)128U);
-  FStar_UInt128_uint128 l1 = FStar_UInt128_uint64_to_uint128(len);
+  uint8_t *padding = final_blocks + len;
+  FStar_UInt128_uint128
+  l0 = FStar_UInt128_mul_wide((uint64_t)(uint32_t)n1, (uint64_t)(uint32_t)128U);
+  FStar_UInt128_uint128 l1 = FStar_UInt128_uint64_to_uint128((uint64_t)len);
   FStar_UInt128_uint128
   encodedlen = FStar_UInt128_shift_left(FStar_UInt128_add(l0, l1), (uint32_t)3U);
   uint32_t
   pad0len =
-    ((uint32_t)128U - ((uint32_t)len + (uint32_t)16U + (uint32_t)1U) % (uint32_t)128U)
+    ((uint32_t)128U - (len + (uint32_t)16U + (uint32_t)1U) % (uint32_t)128U)
     % (uint32_t)128U;
   uint8_t *buf1 = padding;
   uint8_t *buf2 = padding + (uint32_t)1U + pad0len;
@@ -325,7 +326,7 @@ static void Hacl_Impl_SHA2_384_hash(uint8_t *hash1, uint8_t *input, uint32_t len
   uint8_t *input_last = input + n1 * (uint32_t)128U;
   Hacl_Impl_SHA2_384_init(state);
   Hacl_Impl_SHA2_384_update_multi(state, input_blocks, n1);
-  Hacl_Impl_SHA2_384_update_last(state, input_last, (uint64_t)r);
+  Hacl_Impl_SHA2_384_update_last(state, input_last, r);
   Hacl_Impl_SHA2_384_finish(state, hash1);
 }
 
@@ -378,7 +379,7 @@ void Hacl_SHA2_384_update_multi(uint64_t *state, uint8_t *data, uint32_t n1)
   Hacl_Impl_SHA2_384_update_multi(state, data, n1);
 }
 
-void Hacl_SHA2_384_update_last(uint64_t *state, uint8_t *data, uint64_t len)
+void Hacl_SHA2_384_update_last(uint64_t *state, uint8_t *data, uint32_t len)
 {
   Hacl_Impl_SHA2_384_update_last(state, data, len);
 }

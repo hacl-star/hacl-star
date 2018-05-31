@@ -37,7 +37,7 @@ val sha384_update: state:uint64_p -> data:uint8_p ->
   Stack unit sha384_update_pre sha384_update_post
 val sha384_update_multi: state:uint64_p -> data:uint8_p -> n:uint32_t ->
   Stack unit sha384_update_multi_pre sha384_update_multi_post
-val sha384_update_last: state:uint64_p -> data:uint8_p -> n:uint64_t ->
+val sha384_update_last: state:uint64_p -> data:uint8_p -> n:uint32_t ->
   Stack unit sha384_update_last_pre sha384_update_last_post
 val sha384_finish: state:uint64_p -> data:uint8_p ->
   Stack unit sha384_finish_pre sha384_finish_post
@@ -56,7 +56,7 @@ val sha512_update: state:uint64_p -> data:uint8_p ->
   Stack unit sha512_update_pre sha512_update_post
 val sha512_update_multi: state:uint64_p -> data:uint8_p -> n:uint32_t ->
   Stack unit sha512_update_multi_pre sha512_update_multi_post
-val sha512_update_last: state:uint64_p -> data:uint8_p -> n:uint64_t ->
+val sha512_update_last: state:uint64_p -> data:uint8_p -> n:uint32_t ->
   Stack unit sha512_update_last_pre sha512_update_last_post
 val sha512_finish: state:uint64_p -> data:uint8_p ->
   Stack unit sha512_finish_pre sha512_finish_post
@@ -70,3 +70,15 @@ val sha512_hash: dst:uint8_p -> src:uint8_p -> len:uint32_t ->
 
 val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
   Stack unit curve_x25519_pre curve_x25519_post
+
+
+/// Chacha20-Poly1305
+
+val chacha20_poly1305_encode_length: lb:uint8_p -> aad_len:uint32_t -> m_len:uint32_t ->
+  Stack unit chacha20_poly1305_encode_length_pre chacha20_poly1305_encode_length_post
+val chacha20_poly1305_encrypt: c:uint8_p -> mac:uint8_p -> m:uint8_p -> m_len:uint32_t ->
+  aad:uint8_p -> aad_len:uint32_t -> k:uint8_p -> n:uint8_p ->
+  Stack uint32_t chacha20_poly1305_encrypt_pre chacha20_poly1305_encrypt_post
+val chacha20_poly1305_decrypt: m:uint8_p -> c:uint8_p -> m_len:uint32_t -> mac:uint8_p ->
+  aad:uint8_p -> aad_len:uint32_t -> k:uint8_p -> n:uint8_p ->
+  Stack uint32_t chacha20_poly1305_decrypt_pre chacha20_poly1305_decrypt_post

@@ -992,28 +992,28 @@ static void Hacl_Impl_SHA2_512_update_multi(uint64_t *state, uint8_t *data, uint
   }
 }
 
-static void Hacl_Impl_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint64_t len1)
+static void Hacl_Impl_SHA2_512_update_last(uint64_t *state, uint8_t *data, uint32_t len1)
 {
   uint8_t blocks[256U] = { 0U };
   uint32_t nb;
-  if (len1 < (uint64_t)112U)
+  if (len1 < (uint32_t)112U)
     nb = (uint32_t)1U;
   else
     nb = (uint32_t)2U;
   uint8_t *final_blocks;
-  if (len1 < (uint64_t)112U)
+  if (len1 < (uint32_t)112U)
     final_blocks = blocks + (uint32_t)128U;
   else
     final_blocks = blocks;
-  memcpy(final_blocks, data, (uint32_t)len1 * sizeof data[0U]);
+  memcpy(final_blocks, data, len1 * sizeof data[0U]);
   uint64_t n1 = state[168U];
-  uint8_t *padding = final_blocks + (uint32_t)len1;
-  FStar_UInt128_uint128 l0 = FStar_UInt128_mul_wide(n1, (uint64_t)(uint32_t)128U);
-  FStar_UInt128_uint128 l1 = FStar_UInt128_uint64_to_uint128(len1);
+  uint8_t *padding = final_blocks + len1;
+  FStar_UInt128_uint128
+  l0 = FStar_UInt128_mul_wide((uint64_t)(uint32_t)n1, (uint64_t)(uint32_t)128U);
+  FStar_UInt128_uint128 l1 = FStar_UInt128_uint64_to_uint128((uint64_t)len1);
   FStar_UInt128_uint128
   encodedlen = FStar_UInt128_shift_left(FStar_UInt128_add(l0, l1), (uint32_t)3U);
-  uint32_t
-  pad0len = ((uint32_t)256U - ((uint32_t)len1 + (uint32_t)16U + (uint32_t)1U)) % (uint32_t)128U;
+  uint32_t pad0len = ((uint32_t)256U - (len1 + (uint32_t)16U + (uint32_t)1U)) % (uint32_t)128U;
   uint8_t *buf1 = padding;
   uint8_t *buf2 = padding + (uint32_t)1U + pad0len;
   buf1[0U] = (uint8_t)0x80U;
@@ -1039,7 +1039,7 @@ static void Hacl_Impl_SHA2_512_hash(uint8_t *hash1, uint8_t *input, uint32_t len
   uint8_t *input_last = input + n1 * (uint32_t)128U;
   Hacl_Impl_SHA2_512_init(state);
   Hacl_Impl_SHA2_512_update_multi(state, input_blocks, n1);
-  Hacl_Impl_SHA2_512_update_last(state, input_last, (uint64_t)r);
+  Hacl_Impl_SHA2_512_update_last(state, input_last, r);
   Hacl_Impl_SHA2_512_finish(state, hash1);
 }
 
@@ -1052,7 +1052,7 @@ Hacl_Impl_SHA512_Ed25519_2_hash_block_and_rest(
 )
 {
   uint32_t nblocks = len1 >> (uint32_t)7U;
-  uint64_t rest = (uint64_t)(len1 & (uint32_t)127U);
+  uint32_t rest = len1 & (uint32_t)127U;
   uint64_t st[169U] = { 0U };
   Hacl_Impl_SHA2_512_init(st);
   Hacl_Impl_SHA2_512_update(st, block);
@@ -2882,13 +2882,13 @@ void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint8_t *msg, uint32
   Hacl_Impl_Ed25519_Sign_sign(signature, secret, msg, len1);
 }
 
-bool Hacl_Ed25519_verify(uint8_t *public, uint8_t *msg, uint32_t len1, uint8_t *signature)
+bool Hacl_Ed25519_verify(uint8_t *output, uint8_t *msg, uint32_t len1, uint8_t *signature)
 {
-  return Hacl_Impl_Ed25519_Verify_verify(public, msg, len1, signature);
+  return Hacl_Impl_Ed25519_Verify_verify(output, msg, len1, signature);
 }
 
-void Hacl_Ed25519_secret_to_public(uint8_t *out, uint8_t *secret)
+void Hacl_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret)
 {
-  Hacl_Impl_Ed25519_SecretToPublic_secret_to_public(out, secret);
+  Hacl_Impl_Ed25519_SecretToPublic_secret_to_public(output, secret);
 }
 

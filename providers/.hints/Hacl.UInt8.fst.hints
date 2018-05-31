@@ -1,0 +1,71 @@
+[
+  "SW–©þà&_Óø(›ÔSÚç",
+  [
+    [
+      "Hacl.UInt8.gt_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "78eff4f83de9d7465cd75174360989e8"
+    ],
+    [
+      "Hacl.UInt8.gt_mask",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero"
+      ],
+      0,
+      "794ce831b58c9663294d63ce9d157d53"
+    ],
+    [
+      "Hacl.UInt8.lt_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "a6f236de660891babfb81b585980115e"
+    ],
+    [
+      "Hacl.UInt8.lt_mask",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero"
+      ],
+      0,
+      "6226ae56e62febbea2e6e58a264c31e9"
+    ],
+    [
+      "Hacl.UInt8.lte_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "24d5cc2dd770a1f22b4d9890e9b591f1"
+    ],
+    [
+      "Hacl.UInt8.lte_mask",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.ones", "equation_FStar.UInt.zero",
+        "equation_Hacl.UInt8.gt_mask",
+        "refinement_interpretation_Hacl.UInt8_Tm_refine_5408bbf8703de69b4e13bf005ef42b87",
+        "typing_Hacl.UInt8.gt_mask"
+      ],
+      0,
+      "e1f94f24a7ce8bf653fa9fbdc251ab1a"
+    ]
+  ]
+]

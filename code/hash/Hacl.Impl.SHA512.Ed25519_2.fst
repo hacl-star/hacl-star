@@ -33,10 +33,10 @@ let hash_block_and_rest out block msg len =
   let h0 = ST.get() in
   let nblocks = len >>^ 7ul in
   assert_norm(pow2 7 = 128);
-  let rest    = Int.Cast.uint32_to_uint64 (len &^ 127ul) in
+  let rest = (len &^ 127ul) in
   UInt.logand_mask (UInt32.v len) 7;
   assert(UInt32.v nblocks = UInt32.v len / 128);
-  assert(UInt64.v rest = UInt32.v len % 128);
+  assert(UInt32.v rest = UInt32.v len % 128);
   let st      = create (Hacl.Cast.uint64_to_sint64 0uL) 169ul in
   let h1 = ST.get() in
   no_upd_lemma_0 h0 h1 block;

@@ -53,7 +53,9 @@ code/hash/sha2-c/
 code/hash/sha2-256-c/
 code/hash/sha2-384-c/
 code/hash/sha2-512-c/
-code/hmac/hmac-c/
+code/hmac/hmac-sha256-c/
+code/hmac/hmac-sha384-c/
+code/hmac/hmac-sha512-c/
 code/api/aead-c/
 code/api/box-c/
 code/api/policies-c/
@@ -70,7 +72,16 @@ code/salsa-family/salsa-c/
 code/salsa-family/xsalsa-c/
 code/uint128/uint128-c/
 
-secure_api/LowCProvider/.depend
+providers/.cache
+providers/.depend
+providers/.output
+providers/generated
+providers/out
+providers/multiplexer/ml/*.cm?
+
+secure_api/.depend.*
+secure_api/LowCProvider/*.cm?
+secure_api/out
 secure_api/tmp-hacl/
 secure_api/tmp-vale/
 

@@ -251,8 +251,8 @@ let agile_update_last (a:alg) (st:state a)
   =
   match a with
   | SHA256 -> H256.update_last st input len
-  | SHA384 -> H384.update_last st input (Int.Cast.uint32_to_uint64 len)
-  | SHA512 -> H512.update_last st input (Int.Cast.uint32_to_uint64 len)
+  | SHA384 -> H384.update_last st input len
+  | SHA512 -> H512.update_last st input len
 
 let agile_finish (a:alg) (st:state a)
   (hash:uint8_p {length hash = v (hash_size a)})
