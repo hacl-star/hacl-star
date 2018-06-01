@@ -381,19 +381,17 @@ let blake2_compress s m offset flag const_iv const_sigma =
 val blake2s_update_block:
     s:state
   -> dd_prev:size_t
-  -> d:message_block
-  -> const_iv:iv_t
-  -> const_sigma:sigma_t ->
+  -> d:message_block ->
   Stack unit
-    (requires (fun h -> live h s.hash /\ live h d /\ live h const_iv /\ live h const_sigma
-                   /\ h.[const_sigma] == Spec.const_sigma
-                   /\ h.[const_iv] == Spec.const_iv
-                   /\ disjoint s.hash const_sigma /\ disjoint s.hash const_iv
-                   /\ disjoint const_sigma s.hash /\ disjoint const_iv s.hash))
+    (requires (fun h -> live h s.hash /\ live h d /\ live h s.const_iv /\ live h s.const_sigma
+                   /\ h.[s.const_sigma] == Spec.const_sigma
+                   /\ h.[s.const_iv] == Spec.const_iv
+                   /\ disjoint s.hash s.const_sigma /\ disjoint s.hash s.const_iv
+                   /\ disjoint s.const_sigma s.hash /\ disjoint s.const_iv s.hash))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s.hash h0 h1
                          /\ h1.[s.hash] == Spec.blake2s_update_block (v dd_prev) h0.[d] h0.[s.hash]))
 
-let blake2s_update_block s dd_prev d const_iv const_sigma =
+let blake2s_update_block s dd_prev d =
   let h0 = ST.get () in
   alloc1 #h0 (size 16) (u32 0) s.hash
   (fun h ->
@@ -403,7 +401,7 @@ let blake2s_update_block s dd_prev d const_iv const_sigma =
   (fun block ->
     uints_from_bytes_le block d;
     let offset = to_u64 (size_to_uint32 (dd_prev +. (size 1))) *. (to_u64 (size Spec.size_block)) in
-    blake2_compress s.hash block offset false const_iv const_sigma
+    blake2_compress s.hash block offset false s.const_iv s.const_sigma
   )
 
 
@@ -458,7 +456,7 @@ let blake2s_init #vkk st k kk nn =
     if kk =. (size 0) then ()
     else begin
       update_sub key_block (size 0) kk k;
-      blake2s_update_block st (size 0) key_block st.const_iv st.const_sigma end
+      blake2s_update_block st (size 0) key_block end
   )
 
 
@@ -482,7 +480,7 @@ val blake2s_update_multi_iteration:
 
 let blake2s_update_multi_iteration st dd_prev dd d i const_iv const_sigma =
   let block = sub d (i *. size Spec.size_block) (size Spec.size_block) in
-  blake2s_update_block st (dd_prev +. i) block const_iv const_sigma
+  blake2s_update_block st (dd_prev +. i) block
 
 
 val blake2s_update_multi:
@@ -578,7 +576,7 @@ val blake2s:
   -> #vnn: size_nat
   -> output: lbuffer uint8 vnn
   -> d: lbuffer uint8 vll
-  -> ll: size_t{v ll + 2 * Spec.size_block <= max_size_t /\ v ll = vll}
+  -> ll: size_t{v ll + 2 * Spec.size_block <= max_size_t /\ v ll = vll} // This could be relaxed
   -> kk: size_t{v kk <= 32 /\ v kk = vkk}
   -> k: lbuffer uint8 vkk
   -> nn:size_t{1 <= v nn /\ v nn <= 32 /\ v nn = v nn} ->
