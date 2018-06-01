@@ -262,7 +262,6 @@ val blake2_round : wv:working_vector -> m:message_block_w -> i:size_t -> const_s
                          /\ modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_round h0.[m] (v i) h0.[wv]))
 
-// [@ (CConst "const_sigma")]
 let blake2_round wv m i const_sigma =
   blake2_round1 wv m i const_sigma;
   blake2_round2 wv m i const_sigma
@@ -280,6 +279,7 @@ val blake2_compress1 : wv:working_vector ->
                          /\ modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.Blake2s.blake2_compress1 h0.[wv] h0.[s] h0.[m] offset flag))
 
+[@ Substitute ]
 let blake2_compress1 wv s m offset flag const_iv =
   update_sub wv (size 0) (size 8) s;
   update_sub wv (size 8) (size 8) const_iv;
@@ -306,7 +306,7 @@ val blake2_compress2 :
                          /\ h1.[wv] == Spec.blake2_compress2 h0.[wv] h0.[m]))
 
 
-//[@ Substitute ]
+[@ Substitute ]
 let blake2_compress2 wv m const_sigma =
   (**) let h0 = ST.get () in
   loop #h0 (size Spec.rounds_in_f) wv
@@ -324,7 +324,7 @@ val blake2_compress3_inner :
                          /\ modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress3_inner h0.[wv] (v i) h0.[s]))
 
-//[@ Substitute ]
+[@ Substitute ]
 let blake2_compress3_inner wv i s const_sigma =
   let i_plus_8 = i +. (size 8) in
   let hi_xor_wvi = s.(i) ^. wv.(i) in
@@ -344,6 +344,7 @@ val blake2_compress3 :
                          /\ modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress3 h0.[wv] h0.[s]))
 
+[@ Substitute ]
 let blake2_compress3 wv s const_sigma =
   (**) let h0 = ST.get () in
   loop #h0 (size 8) s
@@ -446,6 +447,7 @@ val blake2s_init:
     (requires (fun h -> True))
     (ensures  (fun h0 _ h1 -> True))
 
+[@ Substitute ]
 let blake2s_init #vkk st k kk nn =
   let h0 = ST.get () in
   alloc1 #h0 (size Spec.size_block) (u8 0) st.hash
@@ -478,6 +480,7 @@ val blake2s_update_multi_iteration:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s.hash h0 h1
                          /\ h1.[s.hash] == Spec.blake2s_update_multi_iteration (v dd_prev) (v dd) h0.[d] (v i) h0.[s.hash]))
 
+[@ Substitute ]
 let blake2s_update_multi_iteration st dd_prev dd d i const_iv const_sigma =
   let block = sub d (i *. size Spec.size_block) (size Spec.size_block) in
   blake2s_update_block st (dd_prev +. i) block
