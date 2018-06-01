@@ -36,8 +36,9 @@ inline_for_extraction let list_iv : list uint32 =
   [u32 0x6A09E667; u32 0xBB67AE85; u32 0x3C6EF372; u32 0xA54FF53A;
    u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19]
 
-let const_iv : intseq U32 8 =
-  assert_norm (List.Tot.length list_iv = 8);
+inline_for_extraction let size_const_iv : size_nat = 8
+let const_iv : intseq U32 size_const_iv =
+  assert_norm (List.Tot.length list_iv = size_const_iv);
   createL list_iv
 
 inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
@@ -60,11 +61,12 @@ inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
   size  6; size 15; size 14; size  9; size 11; size  3; size  0; size  8;
   size 12; size  2; size 13; size  7; size  1; size  4; size 10; size  5;
   size 10; size  2; size  8; size  4; size  7; size  6; size  1; size  5;
-  size 15; size 11; size  9; size 14; size  3; size 12; size 13; size 0
+  size 15; size 11; size  9; size 14; size  3; size 12; size 13; size  0
 ]
 
-let const_sigma:lseq (n:size_t{size_v n < 16}) 160 =
-  assert_norm (List.Tot.length list_sigma = 160);
+inline_for_extraction let size_const_sigma : size_nat = 160
+let const_sigma:lseq (n:size_t{size_v n < 16}) size_const_sigma =
+  assert_norm (List.Tot.length list_sigma = size_const_sigma);
   createL list_sigma
 
 

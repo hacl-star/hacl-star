@@ -134,6 +134,13 @@ type iv_t = lbuffer uint32 Spec.size_hash_w
 type sigma_elt = n:size_t{size_v n < 16}
 type sigma_t = lbuffer sigma_elt 160
 
+noeq type state = {
+  hash: hash_state;
+  const_iv: iv_t;
+  const_sigma: sigma_t;
+}
+
+
 
 (* Definition of constants *)
 inline_for_extraction val create_const_iv: unit -> StackInline iv_t
@@ -372,116 +379,91 @@ let blake2_compress s m offset flag const_iv const_sigma =
 
 
 val blake2s_update_block:
-    s:hash_state
+    s:state
   -> dd_prev:size_t
   -> d:message_block
   -> const_iv:iv_t
   -> const_sigma:sigma_t ->
   Stack unit
-    (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
+    (requires (fun h -> live h s.hash /\ live h d /\ live h const_iv /\ live h const_sigma
                    /\ h.[const_sigma] == Spec.const_sigma
                    /\ h.[const_iv] == Spec.const_iv
-                   /\ disjoint s const_sigma /\ disjoint s const_iv
-                   /\ disjoint const_sigma s /\ disjoint const_iv s))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-                         /\ h1.[s] == Spec.blake2s_update_block (v dd_prev) h0.[d] h0.[s]))
+                   /\ disjoint s.hash const_sigma /\ disjoint s.hash const_iv
+                   /\ disjoint const_sigma s.hash /\ disjoint const_iv s.hash))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s.hash h0 h1
+                         /\ h1.[s.hash] == Spec.blake2s_update_block (v dd_prev) h0.[d] h0.[s.hash]))
 
 let blake2s_update_block s dd_prev d const_iv const_sigma =
   let h0 = ST.get () in
-  alloc1 #h0 (size 16) (u32 0) s
+  alloc1 #h0 (size 16) (u32 0) s.hash
   (fun h ->
     let d0 = h.[d] in
-    let s0 = h.[s] in
+    let s0 = h.[s.hash] in
     (fun _ sv -> sv == Spec.blake2s_update_block (v dd_prev) d0 s0))
   (fun block ->
     uints_from_bytes_le block d;
     let offset = to_u64 (size_to_uint32 (dd_prev +. (size 1))) *. (to_u64 (size Spec.size_block)) in
-    blake2_compress s block offset false const_iv const_sigma
+    blake2_compress s.hash block offset false const_iv const_sigma
   )
 
 
 val blake2s_init_hash:
     #vkk:size_nat
-  -> s:lbuffer uint32 8
+  -> s:state
   -> kk:size_t{v kk <= 32 /\ v kk = vkk}
   -> nn:size_t{1 <= v nn /\ v nn <= 32} ->
   Stack unit
-     (requires (fun h -> live h s))
-     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-                          /\ h1.[s] == Spec.Blake2s.blake2s_init_hash h0.[s] (v kk) (v nn)))
+     (requires (fun h -> live h s.hash))
+     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s.hash h0 h1
+                          /\ h1.[s.hash] == Spec.Blake2s.blake2s_init_hash h0.[s.hash] (v kk) (v nn)))
 
 let blake2s_init_hash #vkk s kk nn =
-  let s0 = s.(size 0) in
+  let s0 = s.hash.(size 0) in
   let kk_shift_8 = shift_left #U32 (size_to_uint32 kk) (u32 8) in
   let s0' = s0 ^. (u32 0x01010000) ^. kk_shift_8 ^. size_to_uint32 nn in
-  s.(size 0) <- s0'
+  s.hash.(size 0) <- s0'
 
 
-(* val blake2s_init: *)
-(*     #vkk:size_nat *)
-(*   -> k:lbuffer uint8 vkk *)
-(*   -> kk:size_t{v kk <= 32 /\ v kk = vkk} *)
-(*   -> nn:size_t{1 <= v nn /\ v nn <= 32} -> *)
-(*   StackInline hash_state *)
-(*     (requires (fun h -> True)) *)
-(*     (ensures  (fun h0 _ h1 -> True)) *)
 
-(* let blake2s_init #vkk k kk nn = *)
-(*   let st = create (size Spec.size_hash_w) (u32 0) in *)
-(*   let h0 = ST.get () in *)
-(*   alloc1_with #h0 (size 8) Spec.const_iv create_const_iv st *)
-(*   (fun h -> (fun _ _ -> True)) *)
-(*   (fun const_iv -> *)
-(*     let h0 = ST.get () in *)
-(*     copy st (size Spec.size_hash_w) const_iv; *)
-(*     alloc1_with #h0 (size 160) Spec.const_sigma create_const_sigma st *)
-(*     (fun h -> (fun _ _ -> True)) *)
-(*     (fun const_sigma -> *)
-(*       let h0 = ST.get () in *)
-(*       alloc1 #h0 (size Spec.size_block) (u8 0) st *)
-(*       (fun h -> *)
-(*         (fun _ sv -> True)) *)
-(*       (fun key_block -> *)
-(*         blake2s_init_hash #vkk st kk nn; *)
-(*         if kk = 0 then () *)
-(*         else *)
-(*           update_sub key_block (size 0) kk k; *)
-(*           blake2s_update_block st (size 0) key_block const_iv const_sigma *)
-(*       ) *)
-(*     ) *)
-(*   ); *)
-(*   st *)
+val blake2s_mkstate: unit ->
+  StackInline state
+    (requires (fun h -> True))
+    (ensures  (fun h0 _ h1 -> True))
+
+let blake2s_mkstate () =
+  {
+    hash = create (size Spec.size_hash_w) (u32 0);
+    const_iv = create_const_iv (); //create (size Spec.size_const_iv) (u32 0); //
+    const_sigma = create_const_sigma (); //create (size Spec.size_const_sigma) (size 0) //
+  }
 
 
 val blake2s_init:
     #vkk:size_nat
+  -> st:state
   -> k:lbuffer uint8 vkk
   -> kk:size_t{v kk <= 32 /\ v kk = vkk}
-  -> nn:size_t{1 <= v nn /\ v nn <= 32}
-  -> const_iv: iv_t
-  -> const_sigma: sigma_t ->
-  StackInline hash_state
+  -> nn:size_t{1 <= v nn /\ v nn <= 32} ->
+  Stack unit
     (requires (fun h -> True))
     (ensures  (fun h0 _ h1 -> True))
 
-let blake2s_init #vkk k kk nn const_iv const_sigma =
-  let st = create (size Spec.size_hash_w) (u32 0) in
-  copy st (size Spec.size_hash_w) const_iv;
+let blake2s_init #vkk st k kk nn =
   let h0 = ST.get () in
-  alloc1 #h0 (size Spec.size_block) (u8 0) st
+  alloc1 #h0 (size Spec.size_block) (u8 0) st.hash
   (fun h -> (fun _ sv -> True))
   (fun key_block ->
+    copy st.hash (size Spec.size_hash_w) st.const_iv;
     blake2s_init_hash #vkk st kk nn;
     if kk =. (size 0) then ()
     else begin
       update_sub key_block (size 0) kk k;
-      blake2s_update_block st (size 0) key_block const_iv const_sigma end
-  );
-  st
+      blake2s_update_block st (size 0) key_block st.const_iv st.const_sigma end
+  )
 
 
 val blake2s_update_multi_iteration:
-    s:hash_state
+    s:state
   -> dd_prev:size_t
   -> dd:size_t{(v dd + v dd_prev) * Spec.size_block <= max_size_t}
   -> d:lbuffer uint8 (v dd * Spec.size_block)
@@ -489,14 +471,14 @@ val blake2s_update_multi_iteration:
   -> const_iv:iv_t
   -> const_sigma:sigma_t ->
   Stack unit
-    (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
+    (requires (fun h -> live h s.hash /\ live h d /\ live h const_iv /\ live h const_sigma
                      /\ h.[const_sigma] == Spec.const_sigma
                      /\ h.[const_iv] == Spec.const_iv
-                     /\ disjoint s d /\ disjoint d s
-                     /\ disjoint s const_sigma /\ disjoint s const_iv
-                     /\ disjoint const_sigma s /\ disjoint const_iv s))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-                         /\ h1.[s] == Spec.blake2s_update_multi_iteration (v dd_prev) (v dd) h0.[d] (v i) h0.[s]))
+                     /\ disjoint s.hash d /\ disjoint d s.hash
+                     /\ disjoint s.hash const_sigma /\ disjoint s.hash const_iv
+                     /\ disjoint const_sigma s.hash /\ disjoint const_iv s.hash))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s.hash h0 h1
+                         /\ h1.[s.hash] == Spec.blake2s_update_multi_iteration (v dd_prev) (v dd) h0.[d] (v i) h0.[s.hash]))
 
 let blake2s_update_multi_iteration st dd_prev dd d i const_iv const_sigma =
   let block = sub d (i *. size Spec.size_block) (size Spec.size_block) in
@@ -504,58 +486,54 @@ let blake2s_update_multi_iteration st dd_prev dd d i const_iv const_sigma =
 
 
 val blake2s_update_multi:
-    s: hash_state
+    s: state
   -> dd_prev: size_t
   -> dd: size_t{(v dd + v dd_prev) * Spec.size_block <= max_size_t}
-  -> d: lbuffer uint8 (size_v dd * Spec.size_block)
-  -> const_iv:iv_t
-  -> const_sigma:sigma_t ->
+  -> d: lbuffer uint8 (size_v dd * Spec.size_block) ->
    Stack unit
-     (requires (fun h -> live h s /\ live h d /\ live h const_iv /\ live h const_sigma
-                    /\ h.[const_sigma] == Spec.const_sigma
-                    /\ h.[const_iv] == Spec.const_iv
+     (requires (fun h -> live h s.hash /\ live h d /\ live h s.const_iv /\ live h s.const_sigma
+                    /\ h.[s.const_sigma] == Spec.const_sigma
+                    /\ h.[s.const_iv] == Spec.const_iv
                     // Disjointness for s
-                    /\ disjoint s d /\ disjoint d s
-                    /\ disjoint s const_iv /\ disjoint const_iv s
-                    /\ disjoint s const_sigma /\ disjoint const_sigma s))
-     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-                          /\ h1.[s] == Spec.blake2s_update_multi (v dd_prev) (v dd) h0.[d] h0.[s]))
+                    /\ disjoint s.hash d /\ disjoint d s.hash
+                    /\ disjoint s.hash s.const_iv /\ disjoint s.const_iv s.hash
+                    /\ disjoint s.hash s.const_sigma /\ disjoint s.const_sigma s.hash))
+     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s.hash h0 h1
+                          /\ h1.[s.hash] == Spec.blake2s_update_multi (v dd_prev) (v dd) h0.[d] h0.[s.hash]))
 
-let blake2s_update_multi s dd_prev dd d const_iv const_sigma =
+let blake2s_update_multi s dd_prev dd d =
   (**) let h0 = ST.get () in
-  loop #h0 dd s
+  loop #h0 dd s.hash
   (fun hi ->
     let d0 = h0.[d] in
-    let s0 = h0.[s] in
+    let s0 = h0.[s.hash] in
     (fun i s -> Spec.Blake2s.blake2s_update_multi (v dd_prev) (v dd) d0 s0))
   (fun i ->
-    blake2s_update_multi_iteration s dd_prev dd d i const_iv const_sigma;
-    lemma_repeati (v dd) (Spec.blake2s_update_multi_iteration (v dd_prev) (v dd) h0.[d]) h0.[s] (v i))
+    blake2s_update_multi_iteration s dd_prev dd d i s.const_iv s.const_sigma;
+    lemma_repeati (v dd) (Spec.blake2s_update_multi_iteration (v dd_prev) (v dd) h0.[d]) h0.[s.hash] (v i))
 
 
 
 val blake2s_update_last:
     #vlen: size_nat
-  -> s: lbuffer uint32 8
+  -> s: state
   -> ll: size_t
   -> len: size_t
   -> last: lbuffer uint8 vlen
-  -> flag_key: bool
-  -> const_iv: iv_t
-  -> const_sigma: sigma_t ->
+  -> flag_key: bool ->
   Stack unit
     (requires (fun h -> True))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s.hash h0 h1))
 
-let blake2s_update_last #vlen s ll len last fk const_iv const_sigma =
+let blake2s_update_last #vlen s ll len last fk =
   (**) let h0 = ST.get () in
-  alloc1 #h0 (size Spec.size_block) (u8 0) s
+  alloc1 #h0 (size Spec.size_block) (u8 0) s.hash
   (fun h ->
     (fun _ r -> True)// r == Spec.blake2s_internal3 s0 (v dd) d0 (v ll) (v kk) (v nn))
   )
   (fun last_block ->
     (**) let h0 = ST.get () in
-    alloc1 #h0 (size Spec.size_block_w) (u32 0) s
+    alloc1 #h0 (size Spec.size_block_w) (u32 0) s.hash
     (fun h ->
       (fun _ r -> True)// r == Spec.blake2s_internal3 s0 (v dd) d0 (v ll) (v kk) (v nn))
     )
@@ -566,9 +544,9 @@ let blake2s_update_last #vlen s ll len last fk const_iv const_sigma =
       let ll_plus_block_bytes64 = ll64 +. (to_u64 #U32 (size_to_uint32 (size Spec.size_block))) in
       (**) lemma_value_mixed_size_addition ll Spec.size_block;
       if not fk then
-        blake2_compress s last_block_w ll64 true const_iv const_sigma
+        blake2_compress s.hash last_block_w ll64 true s.const_iv s.const_sigma
       else
-        blake2_compress s last_block_w ll_plus_block_bytes64 true const_iv const_sigma
+        blake2_compress s.hash last_block_w ll_plus_block_bytes64 true s.const_iv s.const_sigma
     )
   )
 
@@ -576,11 +554,11 @@ let blake2s_update_last #vlen s ll len last fk const_iv const_sigma =
 val blake2s_finish:
     #vnn: size_nat
   -> output: lbuffer uint8 vnn
-  -> st: lbuffer uint32 8
+  -> st: state
   -> nn: size_t{v nn = vnn} ->
   Stack unit
     (requires (fun h -> True))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st.hash h0 h1))
 
 let blake2s_finish #vnn output s nn =
   (**) let h0 = ST.get () in
@@ -589,7 +567,7 @@ let blake2s_finish #vnn output s nn =
     (fun _ r -> True)// r == Spec.blake2s_internal3 s0 (v dd) d0 (v ll) (v kk) (v nn))
   )
   (fun full ->
-    uints_to_bytes_le full s;
+    uints_to_bytes_le full s.hash;
     update_sub output (size 0) nn full)
 
 
@@ -609,33 +587,24 @@ val blake2s:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1))
 
 let blake2s #vll #vkk #vnn output d ll kk k nn =
-  let h0 = ST.get () in
-  alloc1_with #h0 (size 8) Spec.const_iv create_const_iv output
-  (fun h -> (fun _ _ -> True))
-  (fun const_iv ->
+  let fk = if kk =. (size 0) then false else true in
+  let rem = ll %. (size Spec.size_block) in
+  let nblocks = ll /. (size Spec.size_block) in
+  let blocks = sub #uint8 #vll #(v nblocks * Spec.size_block) d (size 0) (nblocks *. (size Spec.size_block)) in
+  let last = sub d (nblocks *. (size Spec.size_block)) rem in
+  let st = blake2s_mkstate () in
+  if  ll =. (size 0) && kk =. (size 0) then begin
     let h0 = ST.get () in
-    alloc1_with #h0 (size 160) Spec.const_sigma create_const_sigma output
-    (fun h -> (fun _ _ -> True))
-    (fun const_sigma ->
-      let fk = if kk =. (size 0) then false else true in
-      let rem = ll %. (size Spec.size_block) in
-      let nblocks = ll /. (size Spec.size_block) in
-      let blocks = sub #uint8 #vll #(v nblocks * Spec.size_block) d (size 0) (nblocks *. (size Spec.size_block)) in
-      let last = sub d (nblocks *. (size Spec.size_block)) rem in
-      if  ll =. (size 0) && kk =. (size 0) then begin
-        let h0 = ST.get () in
-        alloc1 #h0 (size Spec.size_block) (u8 0) output
-        (fun h -> (fun _ r -> True))
-        (fun data ->
-          let h0 = ST.get () in
-          let s = blake2s_init #vkk k kk nn const_iv const_sigma in
-          blake2s_update_last #(v rem) s ll (size Spec.size_block) data fk const_iv const_sigma;
-          blake2s_finish #vnn output s nn) end
-      else
-        let s = blake2s_init #vkk k kk nn const_iv const_sigma in
-        let nprev = if kk =. (size 0) then (size 0) else (size 1) in
-        blake2s_update_multi s nprev nblocks d const_iv const_sigma;
-        blake2s_update_last #(v rem) s ll rem last fk const_iv const_sigma;
-        blake2s_finish #vnn output s nn
-    )
-  )
+    alloc1 #h0 (size Spec.size_block) (u8 0) output
+    (fun h -> (fun _ r -> True))
+    (fun data ->
+      let h0 = ST.get () in
+      blake2s_init #vkk st k kk nn;
+      blake2s_update_last #(v rem) st ll (size Spec.size_block) data fk;
+      blake2s_finish #vnn output st nn) end
+  else
+    blake2s_init #vkk st k kk nn;
+    let nprev = if kk =. (size 0) then (size 0) else (size 1) in
+    blake2s_update_multi st nprev nblocks d;
+    blake2s_update_last #(v rem) st ll rem last fk;
+    blake2s_finish #vnn output st nn
