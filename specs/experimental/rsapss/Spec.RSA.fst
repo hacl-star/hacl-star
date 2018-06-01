@@ -198,17 +198,16 @@ let rsapss_verify #msgLen modBits eBits pkey sLen msg sgnt =
   let n = Mk_rsa_pubkey?.n pkey in
   let e = Mk_rsa_pubkey?.e pkey in
 
-  let nLen = blocks modBits 8 in
+  //let nLen = blocks modBits 8 in
   let s = bn_from_bytes_be sgnt in
   //assume (bn_v n < pow2 (8 * nLen));
-  //let n = bn_cast (8*nLen) n in
+  //let n = bn_cast_gt (8*nLen) n in
   if bn_is_less s n then begin
     let m = mod_exp n s eBits e in
 
     let emBits = modBits - 1 in
     //assume (bn_v m < pow2 emBits);
-    //let m = bn_cast emBits m in
+    let m = bn_cast_le emBits m in
     let em = bn_to_bytes_be m in
-    //pss_verify #msgLen sLen msg emBits em end
-    true end
+    pss_verify #msgLen sLen msg emBits em end
   else false

@@ -187,7 +187,7 @@ let test2() =
     0x73uy; 0x24uy; 0x54uy; 0x3euy; 0xcduy; 0xafuy; 0x56uy; 0xf7uy; 0x44uy; 0x6euy; 0x20uy; 0x79uy; 0xb8uy; 0x9cuy; 0xc4uy; 0x8fuy;
     0x2duy ] in
   let sgnt_expected : lbytes 129 = createL sgnt_expected in
-  ctest modBits n 17 e 1024 d (512 + 8) p (512 + 8) q 234 msg 20 salt rBlind sgnt_expected (2uy)
+  ctest modBits n 17 e 1024 d (65*8) p (65*8) q 234 msg 20 salt rBlind sgnt_expected (2uy)
 
 
 val test3: unit -> ML bool
