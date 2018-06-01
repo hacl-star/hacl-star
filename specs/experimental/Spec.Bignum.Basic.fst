@@ -54,16 +54,12 @@ let bn_lshift_mul_add #n #m x i y z =
   lemma_bn_lshift_mul_add #n #m x i y z;
   x * (pow2 i) * y + z
 
-#reset-options "--z3rlimit 50 --max_fuel 0"
-let blocks x m = (x - 1) / m + 1
+let bn_from_bytes_be #bBytes b =
+  let res = nat_from_bytes_be b in
+  bn #(8*bBytes) res
 
-let bn_from_bytes_be #bBits b =
-  let res = nat_from_intseq_be b in
-  assume (res < pow2 bBits);
-  bn #bBits res
-
-let bn_to_bytes_be bBits n =
-  assume (bn_v n < pow2 (8 * (blocks bBits 8)));
+let bn_to_bytes_be #bBits n =
+  assume (n < pow2 (8 * (blocks bBits 8)));
   nat_to_bytes_be (blocks bBits 8) n
 
 let bn_pow2_r_mod #nBits n r = (pow2 r) % n

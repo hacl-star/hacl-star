@@ -125,9 +125,9 @@ val nat_from_bytes_be: #len:size_nat -> b:lbytes len -> Tot (n:nat{n < pow2 (len
 
 val nat_from_bytes_le: #len:size_nat -> b:lbytes len -> Tot (n:nat{n < pow2 (len `op_Multiply` 8)})
 
-val nat_to_bytes_be: len:size_nat -> n:nat{n < pow2 (8 `op_Multiply` len)} ->  Tot (b:lbytes len {n == nat_from_intseq_be #U8 #len b})
+val nat_to_bytes_be: len:size_nat -> n:nat{n < pow2 (8 `op_Multiply` len)} ->  Tot (b:lbytes len {n == nat_from_bytes_be #len b})
 
-val nat_to_bytes_le: len:size_nat -> n:nat{n < pow2 (8 `op_Multiply` len)} ->  Tot (b:lbytes len {n == nat_from_intseq_le #U8 #len b})
+val nat_to_bytes_le: len:size_nat -> n:nat{n < pow2 (8 `op_Multiply` len)} ->  Tot (b:lbytes len {n == nat_from_bytes_le #len b})
 
 val uint_to_bytes_le: #t:m_inttype -> u:uint_t t -> lbytes (numbytes t)
 

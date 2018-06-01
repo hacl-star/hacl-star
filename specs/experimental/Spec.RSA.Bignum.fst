@@ -119,8 +119,6 @@ let mod_exp_ #nBits rBits nInv_u64 n a bBits b acc =
     ) (a, acc) in
   acc
 
-//r2:bignum (nBits-1) and a:bignum(nBits-1)
-//res:bignum(nBits-1)
 val mod_exp:
   #nBits:size_nat{64 <= nBits /\ 2 * 64 * (blocks nBits 64 + 1) < max_size_t} ->
   n:bignum nBits{0 < bn_v n} -> a:bignum nBits ->
@@ -139,11 +137,11 @@ let mod_exp #nBits n a bBits b =
 
 val rsa_blinding:
   #nBits:size_nat{64 <= nBits /\ 2 * 64 * (blocks nBits 64 + 1) < max_size_t} ->
-  #pBits:size_nat{0 < pBits} -> #qBits:size_nat{0 < qBits /\ pBits + qBits == nBits} ->
+  #pBits:size_nat{0 < pBits} -> #qBits:size_nat{0 < qBits /\ pBits + qBits + 64 < max_size_t} ->
   n:bignum nBits{0 < bn_v n} ->
   p:bignum pBits{0 < bn_v p} -> q:bignum qBits{0 < bn_v q /\ bn_v n == bn_v p * bn_v q} ->
   m:bignum nBits ->
-  dBits:size_nat{dBits < nBits + 64} -> d:bignum dBits ->
+  dBits:size_nat{dBits < pBits + qBits + 64} -> d:bignum dBits ->
   rBlind:bignum 63 -> Tot (s:bignum nBits)
 let rsa_blinding #nBits #pBits #qBits n p q m dBits d rBlind =
   let bn_1 = bn #1 1 in
@@ -153,5 +151,5 @@ let rsa_blinding #nBits #pBits #qBits n p q m dBits d rBlind =
   let d1 = bn_mul phi_n rBlind in
   let d1 = bn_add d1 d in
   //let d1 = bn_lshift_mul_add phi_n 0 rBlind d
-  let s = mod_exp #nBits n m (nBits + 64) d1 in
+  let s = mod_exp #nBits n m (pBits + qBits + 64) d1 in
   s

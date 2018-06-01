@@ -14,14 +14,24 @@ open Spec.RSA
 
 (* RSASSA-PSS test vectors *)
 (* https://github.com/pyca/cryptography/blob/master/vectors/cryptography_vectors/asymmetric/RSA/pkcs-1v2-1d2-vec/pss-vect.txt *)
-
+val ctest:
+  modBits:size_nat{8*blocks modBits 8 < max_size_t} -> n:lbytes (blocks modBits 8) ->
+  eBits:size_nat{8*blocks eBits 8 < max_size_t} -> e:lbytes (blocks eBits 8) ->
+  dBits:size_nat{8*blocks dBits 8 < max_size_t} -> d:lbytes (blocks dBits 8) ->
+  pBits:size_nat{8*blocks pBits 8 < max_size_t} -> p:lbytes (blocks pBits 8) ->
+  qBits:size_nat{8*blocks qBits 8 < max_size_t} -> q:lbytes (blocks qBits 8) ->
+  msgLen:size_nat -> msg:lbytes msgLen ->
+  sLen:size_nat -> salt:lbytes sLen ->
+  rBlind:lbytes 8 ->
+  sgnt_expected:lbytes (8*blocks modBits 8) -> num:FStar.UInt8.t ->
+  ML bool
 let ctest modBits n eBits e dBits d pBits p qBits q msgLen msg sLen salt rBlind sgnt_expected num =
-  let n = bn_from_bytes_be #modBits n in
-  let e = bn_from_bytes_be #eBits e in
-  let d = bn_from_bytes_be #dBits d in
-  let p = bn_from_bytes_be #pBits p in
-  let q = bn_from_bytes_be #qBits q in
-  let rBlind = bn_from_bytes_be #63 rBlind in
+  let n = bn_from_bytes_be #(blocks modBits 8) n in
+  let e = bn_from_bytes_be #(blocks eBits 8) e in
+  let d = bn_from_bytes_be #(blocks dBits 8) d in
+  let p = bn_from_bytes_be #(blocks pBits 8) p in
+  let q = bn_from_bytes_be #(blocks qBits 8) q in
+  let rBlind = bn_from_bytes_be #8 rBlind in
 
   let pkey = Mk_rsa_pubkey n e in
   let skey = Mk_rsa_privkey pkey d p q in

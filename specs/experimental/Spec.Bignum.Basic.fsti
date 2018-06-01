@@ -45,9 +45,15 @@ val bn_is_less:#n:size_nat -> a:bignum n -> b:bignum n-> c:bool{c == true ==> bn
 
 val bn_lshift_mul_add:#n:size_nat -> #m:size_nat{m >= n /\ m + 1 < max_size_t} -> x:bignum n -> i:size_nat -> y:bignum 64 -> z:bignum m -> c:bignum (m + 1){bn_v c == bn_v x * (pow2 i) * bn_v y + bn_v z}
 
-val blocks: x:size_nat{x > 0} -> m:size_nat{m > 0} -> Tot (r:size_nat{r > 0 /\ x <= m * r})
-val bn_from_bytes_be: #bBits:size_nat{bBits > 0} -> b:lbytes (blocks bBits 8) -> Tot (n:bignum bBits)
-val bn_to_bytes_be: bBits:size_nat{bBits > 0} -> n:bignum bBits ->  Tot (b:lbytes (blocks bBits 8) {bn_v n == bn_v (bn_from_bytes_be #bBits b)})
+//val blocks: x:size_nat{x > 0} ->  -> Tot (r:size_nat{r > 0 /\ x <= m * r})
+#reset-options "--z3rlimit 150 --max_fuel 0"
+let blocks (x:size_nat) (m:size_nat{m > 0}): (r:size_nat{x <= m * r}) = 
+  if x < 1 then 0
+  else (x - 1) / m + 1
+
+val bn_from_bytes_be: #bBytes:size_nat{8 * bBytes < max_size_t} -> b:lbytes bBytes -> Tot (n:bignum (8*bBytes){bn_v n == nat_from_bytes_be b})
+
+val bn_to_bytes_be: #bBits:size_nat -> n:bignum bBits ->  Tot (b:lbytes (blocks bBits 8) {bn_v n == nat_from_bytes_be b})
 
 val bn_pow2_r_mod:#nBits:size_nat -> n:bignum nBits{bn_v n > 0} -> r:size_nat -> c:bignum nBits{bn_v c == (pow2 r) % (bn_v n)}
 
