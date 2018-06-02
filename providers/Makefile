@@ -195,7 +195,7 @@ CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
 	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
 	  rm -f $@.$$$$
 
--include $(addsuffix .d,$(ALL_SOURCES))
+-include $(patsubst %.c,%.d,$(ALL_SOURCES))
 
 $(OUT_DIR):
 	mkdir -p $@

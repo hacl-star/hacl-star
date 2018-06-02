@@ -114,11 +114,9 @@ CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable 
 
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
-$(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
-	$(KREMLIN_HOME)/krml $(KOPTS) -drop FStar.UInt128,FStar.Int.Cast.Full -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
-	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include \
-	  '"kremlin/c_string.h"' -add-include '"kremlin/prims_int.h"' \
-	  -add-include '"kremlin/prims_string.h"' \
+$(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(ALL_KRML_FILES)
+	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
+	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremlin/internal/compat.h"' \
 	  $(EXTRA)
 
 # Manually override the default argument for bundles, so as to provide a +
@@ -129,7 +127,7 @@ $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.c \
   $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h: BUNDLE=Crypto_HKDF+Crypto_HMAC
 
 # This is without the indexing id.
-$(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"kremlin/testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
+$(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
 
 
 ################################################################################
@@ -170,12 +168,11 @@ $(DIST_DIR)/copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
 
 # Note: this does not yet use the standalone C file because the test still
 # bypasses Crypto.AEAD.Main
-$(DIST_DIR)/krml-test.exe: $(ALL_KRML_FILES) $($(IMPL_CHOICE)_EXTRA) $(DIST_DIR)/copied/testlib.c
+$(DIST_DIR)/krml-test.exe: $(ALL_KRML_FILES) $($(IMPL_CHOICE)_EXTRA)
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
-	    Crypto.AEAD.Main=Crypto.* -add-include '"kremlin/c_string.h"' -add-include \
-	  '"kremlin/testlib.h"' -add-include '"kremlib.h"' -tmpdir $(OUTPUT_DIR) \
-	  -add-include '"kremlin/prims_int.h"' \
+	    Crypto.AEAD.Main=Crypto.* -tmpdir $(OUTPUT_DIR) \
+	    -add-include '"kremlin/internal/compat.h"' \
 	  $^ -o $@ \
 	  -drop HaclProvider,LowCProvider,CryptoTypes
 
@@ -283,7 +280,7 @@ $(DIST_DIR)/LowC.cma: $(ARCHIVE_FILES)
 # Note: clients of MLCrypto are generally assumed to use CoreCrypto.cmxa but
 # here since we just need the type definitions we optimize the linking and just
 # pass CryptoTypes.cmx
-$(DIST_DIR)/LowCTests.exe: $(DIST_DIR)/copied/kremstr.o \
+$(DIST_DIR)/LowCTests.exe:  \
 	  $(MLCRYPTO_HOME)/CryptoTypes.cmx $(DIST_DIR)/LowC.cmxa LowCProvider/Tests.cmx
 	$(OCAMLOPT) -I $(OUTPUT_DIR) -I LowCProvider \
 	  -ccopt -L$(DIST_DIR) -linkpkg $^ -o $@
@@ -305,8 +302,7 @@ $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) \
   $(CHACHA_DIR)/Hacl_Chacha20.o \
   $(POLY_DIR)/AEAD_Poly1305_64.o \
   $(CHACHAPOLY_DIR)/Hacl_Policies.o \
-  $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o \
-  $(DIST_DIR)/copied/kremstr.o
+  $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o
 	$(CC) $^ -o $@ $(QUICPROVIDER_SO_LDOPTS) -shared
 
 $(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)
