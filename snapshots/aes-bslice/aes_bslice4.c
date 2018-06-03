@@ -1,8 +1,8 @@
 #include <inttypes.h>
-#include <stdlib.h> 
-#include <string.h> 
-#include <sys/types.h> 
-#include "endianness.h"
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include "kremlin/c_endianness.h"
 
 typedef uint64_t* transpose_t;
 
@@ -26,7 +26,7 @@ static uint64_t transpose64(uint64_t x) {
     ((x << 35) & 0x0402010000000000LL) |
     ((x << 42) & 0x0201000000000000LL) |
     ((x << 49) & 0x0100000000000000LL);
-  
+
   return y;
 }
 
@@ -62,7 +62,7 @@ static void from_transpose(uint8_t* out, transpose_t in) {
   uint64_t t2 = (in[2] & 0xffffffff) ^ (in[6] << 32);
   uint64_t t3 = (in[3] & 0xffffffff) ^ (in[7] << 32);
 
-  
+
   uint64_t t4 = (in[4] & 0xffffffff00000000) ^ (in[0] >> 32);
   uint64_t t5 = (in[5] & 0xffffffff00000000) ^ (in[1] >> 32);
   uint64_t t6 = (in[6] & 0xffffffff00000000) ^ (in[2] >> 32);
@@ -76,7 +76,7 @@ static void from_transpose(uint8_t* out, transpose_t in) {
   uint64_t t5_ = t5;
   uint64_t t6_ = t6;
   uint64_t t7_ = t7;
-  
+
   t0 = (t0 & 0x0000ffff0000ffff) ^ ((t2 & 0x0000ffff0000ffff) << 16);
   t1 = (t1 & 0x0000ffff0000ffff) ^ ((t3 & 0x0000ffff0000ffff) << 16);
   t2 = (t2 & 0xffff0000ffff0000) ^ ((t0_ & 0xffff0000ffff0000) >> 16);
@@ -112,7 +112,7 @@ static void from_transpose(uint8_t* out, transpose_t in) {
   /* printf("t[5] = %" PRIx64 "\n",t5); */
   /* printf("t[6] = %" PRIx64 "\n",t6); */
   /* printf("t[7] = %" PRIx64 "\n",t7); */
-  
+
 
   t0 = transpose64(t0);
   t1 = transpose64(t1);
@@ -144,35 +144,35 @@ static void subBytes(transpose_t st) {
   uint64_t u6 = st[1];
   uint64_t u7 = st[0];
 
-  uint64_t t1 = u6 ^ u4; 
+  uint64_t t1 = u6 ^ u4;
   uint64_t t2 = u3 ^ u0;
   uint64_t t3 = u1 ^ u2;
-  uint64_t t6 = u1 ^ u5; 
-  uint64_t t7 = u0 ^ u6; 
-  uint64_t t13 = u2 ^ u5; 
+  uint64_t t6 = u1 ^ u5;
+  uint64_t t7 = u0 ^ u6;
+  uint64_t t13 = u2 ^ u5;
   uint64_t t16 = u0 ^ u5;
   uint64_t t18 = u6 ^ u5;
-  
+
   uint64_t t4 = u7 ^ t3;
-  uint64_t t5 = t1 ^ t2; 
+  uint64_t t5 = t1 ^ t2;
   uint64_t t8 = t1 ^ t6;
   uint64_t t9 = u6 ^ t4;
-    
+
   uint64_t t10 = u3 ^ t4;
   uint64_t t11 = u7 ^ t5;
   uint64_t t12 = t5 ^ t6;
   uint64_t t14 = t3 ^ t5;
-  uint64_t t15 = u5 ^ t7; 
-  uint64_t t17 = u7 ^ t8;  
+  uint64_t t15 = u5 ^ t7;
+  uint64_t t17 = u7 ^ t8;
   uint64_t t19 = t2 ^ t18;
   uint64_t t22 = u0 ^ t4;
   uint64_t t54 = t2 & t8;
   uint64_t t50 = t9 & t4;
-    
-  uint64_t t20 = t4 ^ t15; 
+
+  uint64_t t20 = t4 ^ t15;
   uint64_t t21 = t1 ^ t13;
   uint64_t t39 = t21 ^ t5;
-  uint64_t t40 = t21 ^ t7;  
+  uint64_t t40 = t21 ^ t7;
   uint64_t t41 = t7 ^ t19;
   uint64_t t42 = t16 ^ t14;
   uint64_t t43 = t22 ^ t17;
@@ -180,8 +180,8 @@ static void subBytes(transpose_t st) {
   uint64_t t45 = t20 & t11;
   uint64_t t47 = t10 & u7;
   uint64_t t57 = t16 & t14;
-  
-  uint64_t t46 = t12 ^ t44;  
+
+  uint64_t t46 = t12 ^ t44;
   uint64_t t48 = t47 ^ t44;
   uint64_t t49 = t7 & t21;
   uint64_t t51 = t40 ^ t49;
@@ -199,11 +199,11 @@ static void subBytes(transpose_t st) {
   uint64_t t64 = t60 ^ t58;
   uint64_t t65 = t61 ^ t56;
   uint64_t t66 = t62 ^ t43;
-  uint64_t t67 = t65 ^ t66; 
+  uint64_t t67 = t65 ^ t66;
   uint64_t t68 = t65 & t63;
   uint64_t t69 = t64 ^ t68;
   uint64_t t70 = t63 ^ t64;
-  uint64_t t71 = t66 ^ t68; 
+  uint64_t t71 = t66 ^ t68;
   uint64_t t72 = t71 & t70;
   uint64_t t73 = t69 & t67;
   uint64_t t74 = t63 & t66;
@@ -273,18 +273,18 @@ static void subBytes(transpose_t st) {
   uint64_t t138 = t119 ^ t132;
   st[2] = t109 ^ t138;
   uint64_t t140 = t114 ^ t136;
-  st[6] = ~(t109 ^ t140); 
+  st[6] = ~(t109 ^ t140);
 }
 
 static  void shiftRows(transpose_t st){
   for (int i = 0; i < 8; i++) {
     uint64_t curr = st[i];
     curr = (curr & 0x1111111111111111) |
-      ((curr & 0x2220222022202220) >> 4) | 
+      ((curr & 0x2220222022202220) >> 4) |
       ((curr & 0x0002000200020002) << 12) |
-      ((curr & 0x4400440044004400) >> 8) | 
+      ((curr & 0x4400440044004400) >> 8) |
       ((curr & 0x0044004400440044) << 8) |
-      ((curr & 0x8000800080008000) >> 12) | 
+      ((curr & 0x8000800080008000) >> 12) |
       ((curr & 0x0888088808880888) << 4);
     st[i] =  curr;
   }
@@ -360,7 +360,7 @@ static void key_expansion_step(transpose_t next, transpose_t prev, uint8_t rcon)
     next[i] = n ^ p;
   }
 }
-			
+
 static void key_expansion(uint64_t* out, uint8_t* key) {
   to_transpose_block_copy(out,key);
   for (int i = 1; i < 11; i++)
@@ -369,7 +369,7 @@ static void key_expansion(uint64_t* out, uint8_t* key) {
 
 static void aes128_block(uint8_t* out, uint64_t* kex, uint64_t* nt, uint32_t c) {
   uint8_t ctr[16] = {0};
-  for (int i = 0; i < 4; i++) 
+  for (int i = 0; i < 4; i++)
     store32_be(ctr+(4*i),c + i);
   uint64_t st[8] = {0};
   to_transpose_block(st,ctr);
@@ -391,7 +391,7 @@ static void aes128_ctr(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_
   memcpy(nb,n,12);
   uint64_t nt[8] = {0};
   to_transpose_block_copy(nt,nb);
-  
+
   uint8_t kb[64] = {0};
   int blocks64 = in_len / 64;
   for (int i = 0; i < blocks64; i++) {
@@ -420,4 +420,3 @@ void aes128_encrypt(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* 
 void aes128_decrypt(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* n, uint32_t c) {
   aes128_ctr(out,in,in_len,k,n,c);
 }
-

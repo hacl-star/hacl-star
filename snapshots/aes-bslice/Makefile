@@ -1,6 +1,6 @@
 
 CC?=gcc-7
-CCOPTS=-O3 -Wall -Wextra -march=native -mtune=native
+CCOPTS=-O3 -Wall -Wextra -march=native -mtune=native -I ../kremlib
 #CCOPTS=-O3 -Wall -Wextra -m64 -mtune=generic
 
 aes: aes_test.exe tiny_aes_test.exe aes_bslice_test.exe aes_ni_test.exe aes_bslice4_test.exe aes_ni4_test.exe aes_ni_bear_test.exe
