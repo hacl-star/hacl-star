@@ -52,17 +52,16 @@ let mgf_sha256 #mgfseedLen mgfseed maskLen =
   slice acc 0 maskLen
 
 (* RSA *)
-type modBits = modBits:size_nat{8 * (blocks modBits 8) < max_size_t /\
-                                64 <= 8 * (blocks modBits 8) /\
-                                2 * 64 * (blocks (8 * (blocks modBits 8)) 64 + 1) < max_size_t}
+type modBits = modBits:size_pos{64 <= modBits /\ 2 * 64 * (blocks modBits 64 + 1) < max_size_t /\
+                                blocks (8 * (blocks modBits 8)) 8 < max_size_t}
 
-noeq type rsa_pubkey (modBits:modBits) (eBits:size_nat) =
+noeq type rsa_pubkey (modBits:modBits) (eBits:size_pos) =
   | Mk_rsa_pubkey: n:bignum modBits{0 < bn_v n /\ pow2 (modBits - 1) <= bn_v n} ->
                    e:bignum eBits{bn_v e < bn_v n} -> rsa_pubkey modBits eBits
 
-noeq type rsa_privkey (modBits:modBits) (eBits:size_nat) (dBits:size_nat) (pBits:size_nat) (qBits:size_nat) =
+noeq type rsa_privkey (modBits:modBits) (eBits:size_pos) (dBits:size_pos) (pBits:size_pos) (qBits:size_pos) =
   | Mk_rsa_privkey: pkey:rsa_pubkey modBits eBits ->
-		    d:bignum dBits{bn_v d < bn_v (Mk_rsa_pubkey?.n pkey) /\ dBits < modBits} ->
+		    d:bignum dBits{bn_v d < bn_v (Mk_rsa_pubkey?.n pkey)} ->
 		    p:bignum pBits{0 < bn_v p /\ bn_v p < bn_v (Mk_rsa_pubkey?.n pkey) /\ pBits + qBits + 64 < max_size_t /\ dBits < pBits + qBits + 64} ->
 		    q:bignum qBits{0 < bn_v q /\ bn_v q < bn_v (Mk_rsa_pubkey?.n pkey) /\ bn_v (Mk_rsa_pubkey?.n pkey) = bn_v p * bn_v q}
 		    -> rsa_privkey modBits eBits dBits pBits qBits
@@ -79,20 +78,19 @@ let pss_encode #sLen #msgLen salt msg emBits =
   let msBits = emBits % 8 in
 
   let mHash = hash_sha256 msg in
-  let m1Len:size_nat = 8 + hLen + sLen in
+  let m1Len = 8 + hLen + sLen in
   //m1 = [8 * 0x00; mHash; salt]
   let m1 = create m1Len (u8 0) in
   let m1 = update_slice m1 8 (8 + hLen) mHash in
   let m1 = update_slice m1 (8 + hLen) m1Len salt in
-  let m1Hash = hash_sha256 #m1Len m1 in
+  let m1Hash = hash_sha256 m1 in
 
-  let dbLen:size_nat = emLen - hLen - 1 in
+  let dbLen:size_pos = emLen - hLen - 1 in
   //db = [0x00;..; 0x00; 0x01; salt]
   let db = create dbLen (u8 0) in
   let last_before_salt = dbLen - sLen - 1 in
   let db = db.[last_before_salt] <- (u8 1) in
   let db = update_slice db (last_before_salt + 1) dbLen salt in
-  assume ((blocks dbLen hLen) * hLen < pow2 32);
   let dbMask = mgf_sha256 m1Hash dbLen in
   let maskedDB = xor_bytes db dbMask in
   let maskedDB =
@@ -114,7 +112,7 @@ val pss_verify:
   em:lbytes (blocks emBits 8) -> Tot bool
 
 let pss_verify #msgLen sLen msg emBits em =
-  let (emLen:size_nat{emLen > 0}) = blocks emBits 8 in
+  let emLen:size_pos = blocks emBits 8 in
   let msBits = emBits % 8 in
   let mHash = hash_sha256 msg in
 
@@ -125,10 +123,9 @@ let pss_verify #msgLen sLen msg emBits em =
   else begin
     if (not (uint_to_nat #U8 em_last = 0xbc && uint_to_nat #U8 em_0 = 0)) then false
     else begin
-      let (dbLen:size_nat{dbLen > 0}) = emLen - hLen - 1 in
+      let dbLen:size_pos = emLen - hLen - 1 in
       let maskedDB = slice em 0 dbLen in
       let m1Hash = slice em dbLen (dbLen + hLen) in
-      assume ((blocks dbLen hLen) * hLen < pow2 32);
       let dbMask = mgf_sha256 m1Hash dbLen in
       let db = xor_bytes maskedDB dbMask in
       let db =
@@ -136,7 +133,7 @@ let pss_verify #msgLen sLen msg emBits em =
 	then db.[0] <- logand #U8 db.[0] (u8 0xff >>. u32 (8 - msBits))
 	else db in
 
-      let (padLen:size_nat{padLen > 0}) = emLen - sLen - hLen - 1 in
+      let padLen:size_pos = emLen - sLen - hLen - 1 in
       let pad2 = create padLen (u8 0) in
       let pad2 = pad2.[padLen - 1] <- (u8 0x01) in
 
@@ -145,9 +142,9 @@ let pss_verify #msgLen sLen msg emBits em =
 
       let m1Len = 8 + hLen + sLen in
       let m1 = create m1Len (u8 0) in
-      let m1 = update_sub #uint8 #m1Len m1 8 hLen mHash in
-      let m1 = update_sub #uint8 #m1Len m1 (8 + hLen) sLen salt in
-      let m1Hash0 = hash_sha256 #m1Len m1 in
+      let m1 = update_sub m1 8 hLen mHash in
+      let m1 = update_sub m1 (8 + hLen) sLen salt in
+      let m1Hash0 = hash_sha256 m1 in
 
       if not (eq_bytes pad pad2) then false
       else eq_bytes m1Hash0 m1Hash
@@ -156,14 +153,14 @@ let pss_verify #msgLen sLen msg emBits em =
 
 val rsapss_sign:
   #sLen:size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < max_input_len_sha256} ->
-  #msgLen:size_nat{msgLen < max_input_len_sha256} ->
-  modBits:modBits{sLen + hLen + 2 <= (blocks (modBits - 1) 8)} ->
-  eBits:size_nat -> dBits:size_nat -> pBits:size_nat -> qBits:size_nat ->
+  #msgLen:size_nat{msgLen < max_input_len_sha256} -> #eBits:size_pos ->
+  modBits:modBits{sLen + hLen + 2 <= (blocks (modBits - 1) 8)} -> dBits:size_pos ->
+  pBits:size_pos -> qBits:size_pos ->
   skey:rsa_privkey modBits eBits dBits pBits qBits ->
-  salt:lbytes sLen -> rBlind:bignum 63 ->
+  salt:lbytes sLen -> rBlind:bignum 64 ->
   msg:lbytes msgLen -> Tot (sgnt:lbytes (blocks (8 * (blocks modBits 8)) 8))
   #reset-options "--z3rlimit 50 --max_fuel 0"
-let rsapss_sign #sLen #msgLen modBits eBits dBits pBits qBits skey salt rBlind msg =
+let rsapss_sign #sLen #msgLen #eBits modBits dBits pBits qBits skey salt rBlind msg =
   let pkey = Mk_rsa_privkey?.pkey skey in
   let n = Mk_rsa_pubkey?.n pkey in
   let e = Mk_rsa_pubkey?.e pkey in
@@ -172,23 +169,15 @@ let rsapss_sign #sLen #msgLen modBits eBits dBits pBits qBits skey salt rBlind m
   let q = Mk_rsa_privkey?.q skey in
 
   let emBits = modBits - 1 in
-  let nLen = blocks modBits 8 in
-  let emLen = blocks emBits 8 in
-  let em = pss_encode #sLen #msgLen salt msg emBits in
-  //let em1 = create nLen (u8 0) in
-  //let em1 = update_sub em1 1 emLen em in
+  let em = pss_encode salt msg emBits in
   let m = bn_from_bytes_be em in
-
-  //assume (bn_v m < pow2 (8 * nLen));
-  //let m = bn_cast_gt (8*nLen) m in
-  //assume (bn_v n < pow2 (8 * nLen));
-  //let n = bn_cast (8*nLen) n in
-  let s = rsa_blinding n p q m dBits d rBlind in
+  assume (8 * blocks emBits 8 <= modBits); // <== fix bn_from_bytes_be
+  let s = rsa_blinding modBits n pBits p qBits q m dBits d rBlind in
   bn_to_bytes_be s
 
 val rsapss_verify:
   #msgLen:size_nat{msgLen < max_input_len_sha256} ->
-  modBits:modBits -> eBits:size_nat ->
+  modBits:modBits -> eBits:size_pos ->
   pkey:rsa_pubkey modBits eBits ->
   sLen:size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < max_input_len_sha256} ->
   msg:lbytes msgLen ->
@@ -197,17 +186,15 @@ val rsapss_verify:
 let rsapss_verify #msgLen modBits eBits pkey sLen msg sgnt =
   let n = Mk_rsa_pubkey?.n pkey in
   let e = Mk_rsa_pubkey?.e pkey in
-
-  //let nLen = blocks modBits 8 in
   let s = bn_from_bytes_be sgnt in
-  //assume (bn_v n < pow2 (8 * nLen));
-  //let n = bn_cast_gt (8*nLen) n in
-  if bn_is_less s n then begin
-    let m = mod_exp n s eBits e in
-
+  assume (8 * blocks modBits 8 <= modBits); // <== fix bn_from_bytes_be
+  
+  if not (bn_is_less s n) then false
+  else begin
+    let m = mod_exp modBits n s eBits e in
     let emBits = modBits - 1 in
-    //assume (bn_v m < pow2 emBits);
+    assume (bn_v m < pow2 emBits); // <== where should we check this condition?
     let m = bn_cast_le emBits m in
     let em = bn_to_bytes_be m in
-    pss_verify #msgLen sLen msg emBits em end
-  else false
+    pss_verify sLen msg emBits em
+  end

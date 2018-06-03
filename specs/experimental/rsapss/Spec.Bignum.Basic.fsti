@@ -46,16 +46,16 @@ val bn_sub:#n:size_pos -> #m:size_pos{m <= n} -> a:bignum n -> b:bignum m {bn_v 
 
 val bn_mul:#n:size_pos -> #m:size_pos{n + m < max_size_t} -> a:bignum n -> b:bignum m -> c:bignum (n + m){bn_v c == bn_v a * bn_v b}
 
-val bn_get_bit:#n:size_pos -> b:bignum n -> i:size_pos{i < n} -> c:nat{c == 0 \/ c == 1}
-val bn_get_bits:#n:size_pos -> b:bignum n -> i:size_pos{i < n /\ i % 64 == 0} -> j:size_pos{i < j /\ j % 64 == 0 /\ j <= n} -> c:bignum (j - i){bn_v c == (bn_v b / pow2 i) % pow2 (j - i)}
+val bn_get_bit:#n:size_pos -> b:bignum n -> i:size_nat{i < n} -> c:nat{c == 0 \/ c == 1}
+val bn_get_bits:#n:size_pos -> b:bignum n -> i:size_nat{i < n /\ i % 64 == 0} -> j:size_pos{i < j /\ j % 64 == 0 /\ j <= n} -> c:bignum (j - i){bn_v c == (bn_v b / pow2 i) % pow2 (j - i)}
 val bn_rshift:#n:size_pos -> b:bignum n -> i:size_pos{i < n /\ i % 64 == 0} -> c:bignum (n - i){bn_v c == bn_v b / pow2 i}
 
 val bn_to_u64:b:bignum 64 -> c:uint64{uint_v c == bn_v b}
 val bn_from_u64:c:uint64 -> b:bignum 64{uint_v c == bn_v b}
 
-val bn_is_less:#n:size_pos -> a:bignum n -> b:bignum n-> c:bool{c == true ==> bn_v a < bn_v b}
+val bn_is_less:#n:size_pos -> #m:size_pos -> a:bignum n -> b:bignum m -> c:bool{c == true ==> bn_v a < bn_v b}
 
-val bn_lshift_mul_add:#n:size_pos -> #m:size_pos{n <= m} -> x:bignum n -> i:size_pos{n + 1 + i <= m} -> y:bignum 64 -> z:bignum m -> Pure (tuple2 carry (bignum m))
+val bn_lshift_mul_add:#n:size_pos -> #m:size_pos{n <= m} -> x:bignum n -> i:size_nat{n + 1 + i <= m} -> y:bignum 64 -> z:bignum m -> Pure (tuple2 carry (bignum m))
   (requires (True))
   (ensures (fun (c, res) -> bn_v res + uint_v c * pow2 m == bn_v x * (pow2 i) * bn_v y + bn_v z))
 

@@ -53,7 +53,7 @@ let bn_rshift #n x i =
 let bn_to_u64 b = u64 b
 let bn_from_u64 c = bn #64 (uint_to_nat c)
 
-let bn_is_less #n x y = x < y
+let bn_is_less #n #m x y = x < y
 
 val lemma_bn_lshift_mul_add:#n:size_pos -> #m:size_pos -> x:bignum n -> i:size_nat -> y:bignum 64 -> z:bignum m -> Lemma
   (bn_v x * (pow2 i) * bn_v y + bn_v z < pow2 (m + 1))

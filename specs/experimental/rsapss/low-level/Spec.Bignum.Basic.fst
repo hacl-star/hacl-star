@@ -222,10 +222,8 @@ let bn_is_less_ aLen a bLen b =
   assume (res = true ==> eval aLen a < eval bLen b);
   res
 
-let bn_is_less #n x y =
-  assume (x.len == y.len);
-  let len = x.len in
-  bn_is_less_ len x.bn len y.bn
+let bn_is_less #n #m x y =
+  bn_is_less_ x.len x.bn y.len y.bn
 
 val bn_lshift_mul_add_:
   aLen:size_pos -> a:bignum_i aLen ->

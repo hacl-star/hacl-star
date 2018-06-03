@@ -35,7 +35,7 @@ let ctest modBits n eBits e dBits d pBits p qBits q msgLen msg sLen salt rBlind 
 
   let pkey = Mk_rsa_pubkey n e in
   let skey = Mk_rsa_privkey pkey d p q in
-  let sgnt_computed = rsapss_sign #sLen #msgLen modBits eBits dBits pBits qBits skey salt rBlind msg in
+  let sgnt_computed = rsapss_sign #sLen #msgLen #eBits modBits dBits pBits qBits skey salt rBlind msg in
   let check = eq_bytes sgnt_computed sgnt_expected in
 
   let verify = rsapss_verify #msgLen modBits eBits pkey sLen msg sgnt_expected in
