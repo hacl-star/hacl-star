@@ -69,13 +69,13 @@ let step_ws1 (p:parameters) (i:size_nat{i >= 16 /\ i < p.kSize}) (s:ws_w p) : To
 let loop_ws0 p b s = repeati 16 (step_ws0 p b) s
 
 (* Definition of the loop over the scheduling function (part 2) *)
-let loop_ws1 p b s = repeati (p.kSize - 16) (fun i -> step_ws1 p (i + 16)) s
+let loop_ws1 p s = repeati (p.kSize - 16) (fun i -> step_ws1 p (i + 16)) s
 
 (* Definition of the core scheduling function *)
 let ws (p:parameters) (b:block_w p) : Tot (ws_w p) =
   let s = create p.kSize (nat_to_uint #p.wt 0) in
   let s = loop_ws0 p b s in
-  let s = loop_ws1 p b s in
+  let s = loop_ws1 p s in
   s
 
 (* Definition of the core shuffling function *)
@@ -107,8 +107,8 @@ let shuffle (p:parameters) (wsTable:ws_w p) (hash:hash_w p) : Tot (hash_w p) =
   repeati p.kSize (shuffle_core p wsTable) hash
 
 (* Definition of the core compression function *)
-let compress (p:parameters) (block:lbytes (size_block p)) (hash0:hash_w p) : Tot (hash_w p) =
-  let wsTable: ws_w p = ws p (uints_from_bytes_be block) in
+let compress (p:parameters) (block:block_w p) (hash0:hash_w p) : Tot (hash_w p) =
+  let wsTable: ws_w p = ws p block in
   let hash1: hash_w p = shuffle p wsTable hash0 in
   map2 (fun x y -> x +. y) hash0 hash1
 
@@ -196,7 +196,8 @@ let init (p:parameters) : Tot (state p) =
 
 (* Definition of the single block update function *)
 let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p{(st.n + 1) * (size_block p) <= max_input p /\ st.n + 1 <= max_size_t}) : Tot (st1:state p)(*{st1.n = st.n + 1 /\ st1.len_block = st.len_block})*) =
-    {st with n = st.n + 1; hash = compress p block st.hash }
+  let bw = uints_from_bytes_be block in
+    {st with n = st.n + 1; hash = compress p bw st.hash }
 
 (* Definition of the compression function iterated over multiple blocks *)
 let update_multi (p:parameters) (n:size_nat{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p{st.n + n <= max_size_t}) : Tot (st1:state p)(* {st1.n = st.n + n})*) =
@@ -204,7 +205,8 @@ let update_multi (p:parameters) (n:size_nat{n * size_block p <= max_size_t}) (bl
   let h =
     repeati n (fun i h ->
       let block = sub blocks (i * bl) bl in
-      compress p block h
+      let bw = uints_from_bytes_be block in
+      compress p bw h
     ) st.hash in
   {st with n = st.n + n; hash = h}
 

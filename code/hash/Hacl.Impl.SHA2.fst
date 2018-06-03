@@ -12,7 +12,7 @@ open Spec.SHA2
 module ST = FStar.HyperStack.ST
 module S = Spec.Lib.IntSeq
 module Spec = Spec.SHA2
-
+module Lemmas = Hacl.Impl.Lemmas
 
 ///
 /// Helper functions
@@ -33,42 +33,46 @@ inline_for_extraction let max_input (p:Spec.parameters) = Spec.max_input p
 
 (* Definition: Types for block and hash as sequences of words *)
 type block_w (p:Spec.parameters) = b:lbuffer (uint_t p.wt) 16
-type hash_w  (p:Spec.parameters) = b:lbuffer (uint_t p.wt) Spec.size_hash_w
+type hash_w (p:Spec.parameters) = b:lbuffer (uint_t p.wt) Spec.size_hash_w
+type ws_w (p:Spec.parameters) = b:lbuffer (uint_t p.wt) p.kSize
 
 unfold type kTable (p:Spec.parameters) = b:lbuffer (uint_t p.wt) p.kSize
 unfold type wsTable (p:Spec.parameters) = b:lbuffer (uint_t p.wt) p.kSize
 
 
 (* Definition of constants *)
-inline_for_extraction val create_const_k: p:Spec.parameters -> StackInline (kTable p)
+inline_for_extraction val create_const_k: p:Spec.parameters -> StackInline (ws_w p)
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> creates1 r h0 h1 /\
 		                  preserves_live h0 h1 /\
 		                  modifies1 r h0 h1 /\
 		                  as_lseq r h1 == p.kTable))
 
-inline_for_extraction let create_const_k p = admit() //createL p.kTable
+inline_for_extraction let create_const_k p =
+  admit()
+//  assert_norm(List.Tot.length p.kTable = 8);
+//  createL p.kTable
 
 
+#set-options "--max_fuel 0 --z3rlimit 50"
 
 (* Definition of the scheduling function (part 1) *)
 val step_ws0: p:Spec.parameters -> b:block_w p -> i:size_t{size_v i < 16} -> s:wsTable p ->
   Stack unit
   (requires (fun h -> live h s /\ live h b))
   (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-            /\ as_lseq s h1 == Spec.step_ws0 p (as_lseq b h0) (size_v i) (as_lseq s h0)))
+            /\ h1.[s] == Spec.step_ws0 p h0.[b] (v i) h0.[s]))
 
 let step_ws0 p b i s =
   s.(i) <- b.(i)
 
-#set-options "--max_fuel 0 --z3rlimit 50"
 
 (* Definition of the scheduling function (part 2) *)
 val step_ws1: p:Spec.parameters -> i:size_t{size_v i >= 16 /\ size_v i < p.kSize} -> s:wsTable p ->
   Stack unit
   (requires (fun h -> live h s))
   (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
-                       /\ as_lseq s h1 == Spec.step_ws1 p (size_v i) (as_lseq s h0)))
+                       /\ h1.[s] == Spec.step_ws1 p (v i) h0.[s]))
 
 let step_ws1 p i s =
   let t16 = s.(i -. size 16) in
@@ -81,35 +85,42 @@ let step_ws1 p i s =
 
 
 (* Definition of the core scheduling function *)
-val loop_ws0: p:Spec.parameters -> s:wsTable p -> b:block_w p ->
+val loop_ws0: p:Spec.parameters -> s:ws_w p -> b:block_w p ->
   Stack unit
-  (requires (fun h -> live h s /\ live h b))
-  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1))
+  (requires (fun h -> live h s /\ live h b
+                 /\ disjoint s b /\ disjoint b s))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
+                       /\ h1.[s] == Spec.loop_ws0 p h0.[b] h0.[s]))
 
-let loop_ws0 p s b = ()
-  (* (\**\) let h0 = ST.get () in *)
-  (* loop #h0 (size 16) s *)
-  (*   (fun hi -> S.repeati 16 (Spec.step_ws0 p hi.[b]) hi.[s]) *)
-  (*   (fun i -> step_ws0 p b i s) *)
+let loop_ws0 p s b =
+  (**) let h0 = ST.get () in
+  loop #h0 (size 16) s
+    (fun hi -> Spec.step_ws0 p hi.[b])
+    (fun i -> step_ws0 p b i s;
+           Lemmas.lemma_repeati 16 (Spec.step_ws0 p h0.[b]) h0.[s] (v i))
 
 
-val loop_ws1: p:Spec.parameters -> s:wsTable p ->
+val loop_ws1: p:Spec.parameters -> s:ws_w p ->
   Stack unit
   (requires (fun h -> live h s))
-  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
+                       /\ h1.[s] == Spec.loop_ws1 p h0.[s]))
 
-let loop_ws1 p s = ()
-  (* (\**\) let h0 = ST.get () in *)
-  (* loop #h0 (size ((p.kSize - 16))) s *)
-  (*   (fun hi -> S.repeati 16 (step_ws1 p ((v i) + 16)) hi.[s]) *)
-  (*   (fun i -> step_ws1 p (i +. 16) s) *)
+let loop_ws1 p s =
+  (**) let h0 = ST.get () in
+  loop #h0 (size p.kSize -. size 16) s
+    (fun hi -> Spec.step_ws1 p)
+    (fun i -> step_ws1 p i s;
+           Lemmas.lemma_repeati (p.kSize - 16) (Spec.step_ws1 p) h0.[s] (v i + 16))
 
 
 (* Definition of the core scheduling function *)
-val ws: p:Spec.parameters -> s:wsTable p -> b:block_w p ->
+val ws: p:Spec.parameters -> s:ws_w p -> b:block_w p ->
   Stack unit
-  (requires (fun h -> live h s /\ live h b))
-  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1))
+  (requires (fun h -> live h s /\ live h b
+                 /\ disjoint s b /\ disjoint b s))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
+                       /\ h1.[s] == Spec.ws p h0.[b]))
 
 let ws p s b =
   loop_ws0 p s b;
@@ -117,10 +128,11 @@ let ws p s b =
 
 
 (* Definition of the core shuffling function *)
-val shuffle_core: p:Spec.parameters -> kt:kTable p -> wst:wsTable p -> t:size_t{size_v t < p.kSize} -> hash:hash_w p ->
+val shuffle_core: p:Spec.parameters -> const_kt:kTable p -> wst:wsTable p -> t:size_t{size_v t < p.kSize} -> hash:hash_w p ->
   Stack unit
-  (requires (fun h -> live h kt /\ live h wst /\ live h hash))
-  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1))
+  (requires (fun h -> live h const_kt /\ live h wst /\ live h hash))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1
+                       /\ h1.[hash] == Spec.shuffle_core p h0.[wst] (v t) h0.[hash]))
 
 let shuffle_core p kt wst t hash =
   let a0 = hash.(size 0) in
@@ -150,30 +162,39 @@ let shuffle_core p kt wst t hash =
 (* Definition of the full shuffling function *)
 val shuffle: p:Spec.parameters -> kt:kTable p -> wst:wsTable p -> hash:hash_w p ->
   Stack unit
-        (requires (fun h -> live h kt /\ live h wst))
-        (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1))
-let shuffle p kt wst hash = admit()
-  (* (\**\) let h0 = ST.get () in *)
-  (* loop #h0 (size p.kSize) hash *)
-  (* (fun _ -> True) *)
-  (* (fun i -> shuffle_core p kt wst i hash) *)
+        (requires (fun h -> live h kt /\ live h wst /\ live h hash))
+        (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1
+                             /\ h1.[hash] == Spec.shuffle p h0.[wst] h0.[hash]))
+let shuffle p kt wst hash =
+  (**) let h0 = ST.get () in
+  loop #h0 (size p.kSize) hash
+    (fun hi -> Spec.shuffle_core p hi.[wst])
+    (fun i -> shuffle_core p kt wst i hash;
+           Lemmas.lemma_repeati p.kSize (Spec.shuffle_core p h0.[wst]) h0.[hash] (v i))
 
 
 (* Definition of the core compression function *)
-// Discuss if we prefer using block_w (uint32_t*) or directly block (uint8_t*)
-val compress: p:Spec.parameters -> b:block_w p -> k:const_k -> hash:hash_w p ->
+val compress: p:Spec.parameters -> b:block_w p -> kt:kTable p -> s:hash_w p ->
   Stack unit
-  (requires (fun h -> live h b /\ live h hash))
-  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 hash h0 h1))
+  (requires (fun h -> live h b /\ live h kt /\ live h s))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 s h0 h1
+                       /\ h1.[s] == Spec.compress p h0.[b] h0.[s]))
 
-let compress p b k hash =
+let compress p b kt s =
   (**) let h0 = ST.get () in
-  alloc #h0 (size size_block_w) hash
+  alloc1 #h0 (size p.kSize) (u32 0) s
+  (fun h0 -> (fun _ sv -> True))
   (fun wst ->
-    ws p wst b;
-    shuffle p kt wst hash;
-    map2 (fun x y -> x +. y) hash0 hash1)
-
+    (**) let h0 = ST.get () in
+    alloc1 #h0 (size_block p) (u8 0) s
+    (fun h0 -> (fun _ sv -> True))
+    (fun s1 ->
+      copy s1 (size (size_hash p)) s;
+      ws p wst b;
+      shuffle p kt wst s1;
+      map2 (size (size_hash p)) (fun x y -> x +. y) s s1
+    )
+  )
 
 
 (* Definition of the SHA2 state *)
