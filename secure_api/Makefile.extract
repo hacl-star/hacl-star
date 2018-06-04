@@ -222,7 +222,7 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib -g -I $(FSTAR_HOME)/uli
 # Then, we need to generate some .o ourselves, using ocamlopt to get all the
 # right include paths...
 %.o: %.c
-	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/include -I $(MLCRYPTO_HOME) \
+	$(OCAMLOPT) -c $< -I $(dir $@) -I $(DIST_DIR) -I $(KREMLIN_HOME)/include -I $(MLCRYPTO_HOME) \
 	  -I $(TLS_FFI_DIR) -ccopt "-o $@" -I $(CHACHA_DIR) -I $(POLY_DIR) \
 	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) -I $(CHACHAPOLY_DIR) \
 	  $(addprefix -ccopt ,$(CCOPTS))
