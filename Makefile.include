@@ -70,13 +70,6 @@ else
   KREMLIN_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
 endif
 
-# Release mode (includes testlib if not release)
-ifdef HACL_RELEASE
-  KREMLIN_TESTLIB=
-else
-  KREMLIN_TESTLIB=-add-include '"kremlin/testlib.h"' $(KREMLIB)/testlib.c
-endif
-
 # License header
 ifdef HACL_LICENSE
   KREMLIN_ARGS+=-header $(HACL_LICENSE)

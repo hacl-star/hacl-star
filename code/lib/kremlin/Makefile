@@ -35,7 +35,7 @@ lib-c/Hacl_Policies.c: Hacl.Policies.fst
 ccomp-c/FStar.h ccomp-c/FStar.c: $(FSTAR_HOME)/ulib/FStar.UInt128.fst \
 	$(FSTAR_HOME)/ulib/FStar.Int.Cast.Full.fst \
 	Hacl.UInt128.fst Hacl.Cast.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation $^  -fnouint128 -fnostruct-passing -fnoanonymous-unions -tmpdir ccomp-c
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation $^  -fnostruct-passing -fnoanonymous-unions -tmpdir ccomp-c
 
 # # JK: FIXME
 # lib-c/FStar.h: $(FSTAR_HOME)/ulib/FStar.UInt128.fst $(FSTAR_HOME)/ulib/FStar.Int.Cast.Full.fst Hacl.UInt128.fst Hacl.Cast.fst
