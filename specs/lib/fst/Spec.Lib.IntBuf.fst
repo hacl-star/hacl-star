@@ -35,30 +35,28 @@ let upd #a #len b i v = Buf.upd b (size_to_UInt32 i) v
 let create #a #len clen init = Buf.create init (size_to_UInt32 clen)
 let createL #a init = Buf.createL init
 
-let alloc #a #b #len clen init read writes spec impl =
+let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
   push_frame();
   let buf = create clen init in
   let r = impl buf in
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      upd #a #len buf j init in
+  Spec.Lib.Loops.for (size 0) clen inv f';
   pop_frame();
   r
+  // Unprotected alloc
+  (* push_frame(); *)
+  (* let buf = create clen init in *)
+  (* let r = impl buf in *)
+  (* pop_frame(); *)
+  (* r *)
 
-let alloc1 #h0 #a #b #w #len #wlen clen init write spec impl =
-  push_frame();
-  let buf = create clen init in
-  let r = impl buf in
-  pop_frame();
-  r
-
-let alloc1_with #h0 #a #b #w #len #wlen clen init_spec init write spec impl =
+let alloc_with #h0 #a #b #w #len #wlen clen init_spec init write spec impl =
   push_frame();
   let buf = init () in
-  let r = impl buf in
-  pop_frame();
-  r
-
-let alloc_modifies2 #h0 #a #b #w0 #w1 #len #wlen0 #wlen1 clen init write0 write1 spec impl =
-  push_frame();
-  let buf = create clen init in
   let r = impl buf in
   pop_frame();
   r
@@ -139,54 +137,6 @@ let uint_to_bytes_be #t o i =
   | U128 -> C.store128_be o (u128_to_UInt128 i)
 
 
-(* EXPERIMENTAL *)
-
-let salloc #h0 #a #b #len clen init read writes spec impl =
-  push_frame();
-  let buf = create clen init in
-  let r = impl buf in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      upd #a #len buf j init in
-  Spec.Lib.Loops.for (size 0) clen inv f';
-  pop_frame();
-  r
-
-let salloc11 #h0 #a #b #c #len #wlen clen init read write spec impl =
-  push_frame();
-  let buf = create clen init in
-  let r = impl buf in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      upd #a #len buf j init in
-  Spec.Lib.Loops.for (size 0) clen inv f';
-  pop_frame();
-  r
-
-let salloc21 #h0 #b #a0 #a1 #w #len0 #len1 #wlen clen0 clen1 init0 init1 reads write spec impl =
-  push_frame();
-  let buf0 = create clen0 init0 in
-  let buf1 = create clen1 init1 in
-  let r = impl buf0 buf1 in
-  let inv (h1:mem) (j:nat) = True in
-  let f'0 (j:size_t{0 <= v j /\ v j <= len0}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      upd #a0 #len0 buf0 j init0 in
-  let f'1 (j:size_t{0 <= v j /\ v j <= len1}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      upd #a1 #len1 buf1 j init1 in
-  Spec.Lib.Loops.for (size 0) clen0 inv f'0;
-  Spec.Lib.Loops.for (size 0) clen1 inv f'1;
-  pop_frame();
-  r
-
-
 let iter_range #a #len start fin spec impl input =
   let h0 = ST.get() in
   let inv (h1:mem) (j:nat) = True in
@@ -222,14 +172,6 @@ inline_for_extraction let loop_set #a #len buf start n init =
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       upd buf j init in
   Spec.Lib.Loops.for start n inv f'
-
-inline_for_extraction let loop2 #h0 #a0 #a1 #len0 #len1 n buf0 buf1 spec impl =
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len0}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      impl j in
-  Spec.Lib.Loops.for (size 0) n inv f'
 
 
 inline_for_extraction let map_blocks #h0 #a #bs #nb blocksize nblocks buf f_spec f =
