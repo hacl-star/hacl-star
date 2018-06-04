@@ -199,8 +199,46 @@ let compress p b kt s =
   )
 
 
+(* Definition of the function returning the number of padding blocks for a single input block *)
+let number_blocks_padding_single (p:parameters) (len:size_t{v len <= Spec.size_block p}) : size_t =
+  if len <. size_block p -. size (numbytes (lenType p)) then size 1 else size 2
+
+
+val pad:
+    vn:size_nat
+  -> vlen:size_nat
+  -> p:Spec.parameters
+  -> blocks:lbuffer uint8 (2 * Spec.size_block p)
+  -> n:size_t{v n = vn}
+  -> last:lbuffer uint8 vlen
+  -> len:size_t{v len = vlen} ->
+  Stack unit
+  (requires (fun h -> live h blocks /\ live h last))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 blocks h0 h1))
+
+let pad vn vlen p blocks n last len =
+  // Copy the end of the data in the final padded blocks
+  let blast = sub blocks (size 0) len in
+  copy blast len last;
+  // Write the 0x80 byte right after the data
+  upd blocks len (u8 0x80);
+  // Compute the encoding for the total number bits
+  let nn = cast (lenType p) n in
+  let nlen = cast (lenType p) (size_to_uint32 len) in
+  let n8 = cast (lenType p) (size_to_uint32 (size 8)) in
+  let nsize_block = cast (lenType p) (size (Spec.size_block p)) in
+  let tlen = nn *. nsize_block +. nlen in
+  let tlenbits = tlen *. n8 in
+  // Compute the position for the encoded length
+  let nblocks = number_blocks_padding_single p len in
+  let pos = nblocks *. (size (Spec.size_block p)) -. (size (numbytes (lenType p))) in
+  // Encode the total length in bits at the end of the padding
+  let bencoding = sub #uint8 #(2 * Spec.size_block p) #(numbytes (lenType p)) blocks pos (size (numbytes (lenType p))) in
+  uint_to_bytes_be bencoding tlenbits
+
+
 (* Definition of the SHA2 state *)
-let len_block_t (p:Spec.parameters) = l:size_t{uint_v l < Spec.size_block p}
+//let len_block_t (p:Spec.parameters) = l:size_t{uint_v l < Spec.size_block p}
 
 noeq type state (p:Spec.parameters) = {
   hash:hash_w p;
@@ -285,8 +323,7 @@ let update_block p st block =
 val update_multi_iteration:
     p:Spec.parameters
   -> st:state p
-  -> n_prev:size_t
-  -> n:size_t{(v n + v n_prev) * Spec.size_block p <= max_size_t}
+  -> n:size_t{(v n) * Spec.size_block p <= max_size_t}
   -> b:lbuffer uint8 (v n * Spec.size_block p)
   -> i:size_t{v i + 1 <= v n} ->
   Stack unit
@@ -295,7 +332,7 @@ val update_multi_iteration:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st.hash h0 h1))
 
 [@ Substitute ]
-let update_multi_iteration p st n_prev n b i =
+let update_multi_iteration p st n b i =
   let block = sub b (i *. (size (Spec.size_block p))) (size (Spec.size_block p)) in
   update_block p st block
 
@@ -315,7 +352,30 @@ let update_multi p st n_prev n b =
   (**) let h0 = ST.get () in
   loop #h0 n st.hash
   (fun hi -> (fun i s -> s))
-  (fun i -> update_multi_iteration p st n_prev n b i)
+  (fun i -> update_multi_iteration p st n b i)
+
+
+val update_last:
+    vn:size_nat
+  -> vlen:size_nat
+  -> p:Spec.parameters
+  -> st:state p
+  -> n:size_t{v n = vn}
+  -> last:lbuffer uint8 vlen
+  -> len:size_t{v len = vlen} ->
+  Stack unit
+  (requires (fun h -> live h st.hash /\ live h last))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st.hash h0 h1))
+
+let update_last vn vlen p st n last len =
+  (**) let h0 = ST.get () in
+  alloc1 #h0 (size 2 *. (size (Spec.size_block p))) (u8 0) st.hash
+  (fun h0 -> (fun _ sv -> True))
+  (fun blocks ->
+    let nblocks = number_blocks_padding_single p len in
+    pad vn vlen p blocks n last len;
+    update_multi p st n nblocks blocks
+  )
 
 
 val finish:
@@ -355,5 +415,5 @@ let sha2 #vlen p output input len =
   let st = mkstate p in
   init p st;
   update_multi p st (size 0) nblocks input;
-  update_last p st len last rem;
+  update_last (v nblocks) (v rem) p st len last rem;
   finish p output st
