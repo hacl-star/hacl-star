@@ -3,8 +3,7 @@ module Spec.RSA.Lemmas
 open FStar.Mul
 open FStar.Math.Lemmas
 open Spec.Lib.IntTypes
-
-type elem (n:nat) = e:nat{e < n}
+open Spec.Bignum.Basic
 
 (* LEMMAS *)
 #reset-options "--z3rlimit 30 --max_fuel 2"
@@ -90,37 +89,41 @@ val lemma_mult_div_mod:
   ((a * (b / d)) % n == (a * b / d) % n)
 let lemma_mult_div_mod a b d n = admit()
 
-(* LEMMAS for Montgomery's arithmetic *)
-val lemma_beta_mul_by_beta_i: i:size_nat{i + 1 < max_size_t} -> Lemma
-  (pow2 64 * pow2 (64 * i) == pow2 (64 * (i + 1)))
-let lemma_beta_mul_by_beta_i i =
-  pow2_plus 64 (64 * i)
-
-val lemma_mul_le: a:nat -> b:nat{b > 0} -> c:nat{c > 0} -> Lemma
-  (requires (a <= b))
-  (ensures (a * c <= b * c))
-let lemma_mul_le a b c = ()
-
-val lemma_div_exact_le:
-  a:nat -> b:nat -> c:nat{c > 0} -> Lemma
-  (requires (a < b * c))
-  (ensures (a / c < b))
-let lemma_div_exact_le a b c = ()
-
-val lemma_mod_div_simplify:
-  res:nat -> a:nat -> r:nat{r > 0} -> n:nat{n > 0} -> Lemma
-  (requires (res % n == (a * ((r * r) % n) / r) % n))
-  (ensures (res % n == (a * r) % n))
+(* Lemmas for Montgomery's arithmetic *)
+val lemma_mont_reduction_f:
+  #nBits:size_pos -> #cBits:size_pos ->
+  rBits:size_pos{nBits < rBits /\ nBits + 1 + rBits < max_size_t} ->
+  n:bignum nBits{bn_v n > 0} ->
+  c:bignum cBits{cBits < nBits + rBits} -> i:size_nat{64*(i+1)<=rBits} -> Lemma
+  (requires True)
+  (ensures (bn_v c + (pow2 (64*(i+1)) - 1) * bn_v n < pow2 (nBits+1+rBits)))
   #reset-options "--z3rlimit 50 --max_fuel 0"
-let lemma_mod_div_simplify res a r n =
-  assert (res % n == (a * ((r * r) % n) / r) % n);
-  lemma_mod_mult_div (r * r) a r n;
-  assert (res % n == (a * (r * r) / r) % n);
-  paren_mul_right a r r;
-  paren_mul_left a r r;
-  multiple_division_lemma (a * r) r
+let lemma_mont_reduction_f #nBits #cBits rBits n c i =
+  pow2_le_compat rBits (64*(i+1));
+  assert (bn_v c + (pow2 (64*(i+1)) - 1) * bn_v n < pow2 cBits + pow2 rBits * pow2 nBits);
+  pow2_plus rBits nBits;
+  pow2_lt_compat (nBits+rBits) cBits;
+  assert (bn_v c + (pow2 (64*(i+1)) - 1) * bn_v n < pow2 (nBits+rBits) + pow2 (nBits+rBits));
+  pow2_double_sum (nBits+rBits)
+
+val lemma_mont_reduction:
+  #nBits:size_pos -> #cBits:size_pos ->
+  rBits:size_pos{nBits < rBits /\ nBits+1+rBits < max_size_t} ->
+  n:bignum nBits{bn_v n > 0} ->
+  c:bignum cBits{cBits < nBits + rBits} -> Lemma
+  (requires True)
+  (ensures (bn_v c + (pow2 rBits - 1) * bn_v n < pow2 (nBits+1+rBits)))
+  #reset-options "--z3rlimit 50 --max_fuel 0"
+let lemma_mont_reduction #nBits #cBits rBits n c =
+  assert (bn_v c + (pow2 rBits - 1) * bn_v n < pow2 cBits + pow2 rBits * pow2 nBits);
+  pow2_plus rBits nBits;
+  pow2_lt_compat (nBits+rBits) cBits;
+  assert (bn_v c + (pow2 rBits - 1) * bn_v n < pow2 (nBits+rBits) + pow2 (nBits+rBits));
+  pow2_double_sum (nBits+rBits)
+
 
 (* LEMMAS for modular exponentiation *)
+assume val bn_get_bits_first:#n:size_pos -> b:bignum n -> i:size_pos{i <= n} -> Tot (c:bignum i{bn_v c == bn_v b % pow2 i})
 
 val lemma_mult_abc:
   a:nat -> b:nat -> c:nat -> Lemma
@@ -210,6 +213,7 @@ let lemma_mod_exp_2 n a a_r b acc_r r res_r =
   lemma_mod_mul_distr_l r (pow a b) n
 
 (* LEMMAS for exponent blinding *)
+(*
 val lemma_mod_pq:
   a:nat -> b:nat -> p:nat{p > 1} -> q:nat{q > 1} -> Lemma
   (requires (a % p == b % p /\ a % q == b % q))
@@ -361,44 +365,4 @@ let lemma_exp_blinding n phi_n p q d m r =
   if (m = 0 || m % p = 0 || m % q = 0) then
     lemma_exp_blinding_0 n phi_n p q d m r
   else lemma_exp_blinding_1 n phi_n p q d m r
-
-(* LEMMAS for Karatsuba's multiplication *)
-val abs: x:int -> Tot (y:nat{(x >= 0 ==> y = x) /\ (x < 0 ==> y = -x)})
-let abs x = if x >= 0 then x else -x
-
-val lemma_distributivity_mult:
-  a:nat -> b:nat -> c:nat -> d:nat -> Lemma
-  ((a + b) * (c + d) = a * c + a * d + b * c + b * d)
-let lemma_distributivity_mult a b c d = ()
-
-val lemma_karatsuba_mult:
-  x:size_nat -> a:nat -> a0:nat -> a1:nat -> b:nat -> b0:nat -> b1:nat -> Lemma
-  (requires (let pow_x = pow2 (pow2 x) in
-	     a == a1 * pow_x + a0 /\ b == b1 * pow_x + b0))
-  (ensures (let pow_x = pow2 (pow2 x) in
-	    let pow_x1 = pow2 (pow2 (x + 1)) in
-	    a * b == a1 * b1 * pow_x1 + (a0 * b1 + a1 * b0) * pow_x + a0 * b0))
-  #reset-options "--z3rlimit 50 --max_fuel 2"
-let lemma_karatsuba_mult x a a0 a1 b b0 b1 =
-  let pow_x = pow2 (pow2 x) in
-  let pow_x1 = pow2 (pow2 (x + 1)) in
-  assert (a * b == (a1 * pow_x + a0) * (b1 * pow_x + b0));
-  lemma_distributivity_mult (a1 * pow_x) a0 (b1 * pow_x) b0;
-  pow2_plus (pow2 x) (pow2 x);
-  pow2_double_sum x
-
-val lemma_pow_div_karatsuba:
-  x0:size_nat{x0 > 0} -> b:nat{b < pow2 (pow2 x0)} -> Lemma
-  (requires (True))
-  (ensures (let pow_x = pow2 (pow2 (x0 - 1)) in
-	    let b1 = b / pow_x in
-	    0 <= b1 /\ b1 < pow_x))
-  #reset-options "--z3rlimit 150 --max_fuel 0"
-let lemma_pow_div_karatsuba x0 b =
-  let x = x0 - 1 in
-  let pow_x = pow2 (pow2 x) in
-  pow2_lt_compat x0 x;
-  lemma_div_lt b (pow2 x0) (pow2 x);
-  assert (b / pow_x < pow2 (pow2 x0 - pow2 x));
-  pow2_plus (x0 - 1) 1;
-  assert_norm (pow2 1 = 2)
+*)
