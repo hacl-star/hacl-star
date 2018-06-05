@@ -6,7 +6,7 @@
 
 #include "kremlib.h"
 #include "Crypto_HKDF_Crypto_HMAC.h"
-#include "Crypto_AEAD_Main_Crypto_Indexing.h"
+#include "Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.h"
 #include "Crypto_Symmetric_Bytes.h"
 #include "quic_provider.h"
 
@@ -340,17 +340,35 @@ int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned c
 {
   switch(Crypto_Indexing_cipherAlg_of_id(key->id))
   {
+    FStar_UInt128_t nonce;
     case Crypto_Indexing_CHACHA20:
-      FStar_UInt128_uint128 nonce = FStar_UInt128_shift_right(load128_le(sample), 32);
-      Crypto_Symmetric_Cipher_compute(key->id, mask, key->pne, nonce, load32_le(sample), 4);
+#ifdef KRML_NOSTRUCT_PASSING
+      Crypto_Symmetric_Bytes_load_uint128(16, (uint8_t*)sample, &nonce);
+      nonce = FStar_UInt128_shift_right(nonce, 32);
+      uint32_t ctr;
+      Crypto_Symmetric_Bytes_load_uint32(4, (uint8_t*)sample, &ctr);
+      Crypto_Symmetric_Cipher_compute(&key->id, mask, key->pne.prf.key, &nonce, ctr, 4);
+#else
+      nonce = Crypto_Symmetric_Bytes_load_uint128(16, (uint8_t*)sample);
+      nonce = FStar_UInt128_shift_right(nonce, 32);
+      uint32_t ctr = Crypto_Symmetric_Bytes_load_uint32(4, (uint8_t*)sample);
+      Crypto_Symmetric_Cipher_compute(key->id, mask, key->pne.prf.key, nonce, ctr, 4);
+#endif
       return 1;
 
     case Crypto_Indexing_AES128:
     case Crypto_Indexing_AES256:
-      FStar_UInt128_uint128 nonce = load128_be(sample);
-      Crypto_Symmetric_Cipher_compute(key->id, mask, key->pne, nonce, 0, 4);
+#ifdef KRML_NOSTRUCT_PASSING
+      Crypto_Symmetric_Bytes_load_big128(16, (uint8_t*)sample, &nonce);
+      Crypto_Symmetric_Cipher_compute(&key->id, mask, key->pne.prf.key, &nonce, 0, 4);
+#else
+      nonce = Crypto_Symmetric_Bytes_load_big128(16, (uint8_t*)sample);
+      Crypto_Symmetric_Cipher_compute(key->id, mask, key->pne.prf.key, nonce, 0, 4);  
+#endif
       return 1;
   }
+
+  return 0;
 }
 
 int MITLS_CALLCONV quic_crypto_free_key(quic_key *key)
