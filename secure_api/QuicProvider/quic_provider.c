@@ -338,6 +338,7 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
 
 int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned char *sample, unsigned char *mask)
 {
+  FStar_UInt128_uint128 nonce;
   switch(Crypto_Indexing_cipherAlg_of_id(key->id))
   {
     FStar_UInt128_t nonce;
