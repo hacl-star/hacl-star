@@ -304,7 +304,7 @@ val blake2_compress :
 
 let blake2_compress s m offset flag const_iv const_sigma =
   (**) let hinit = ST.get () in
-  alloc1 #hinit (size 16) (u32 0) s
+  alloc #hinit (size 16) (u32 0) s
   (fun h0 ->
     let s0 = h0.[s] in
     let m0 = h0.[m] in
@@ -327,7 +327,7 @@ val blake2s_update_block:
 
 let blake2s_update_block st dd_prev d =
   let h0 = ST.get () in
-  alloc1 #h0 (size 16) (u32 0) st.hash
+  alloc #h0 (size 16) (u32 0) st.hash
   (fun h ->
     let d0 = h.[d] in
     let s0 = h.[st.hash] in
@@ -385,7 +385,7 @@ val blake2s_init:
 [@ Substitute ]
 let blake2s_init #vkk st k kk nn =
   let h0 = ST.get () in
-  alloc1 #h0 (size Spec.size_block) (u8 0) st.hash
+  alloc #h0 (size Spec.size_block) (u8 0) st.hash
   (fun h -> (fun _ sv -> True))
   (fun key_block ->
     copy st.hash (size Spec.size_hash_w) st.const_iv;
@@ -453,13 +453,13 @@ val blake2s_update_last:
 
 let blake2s_update_last #vlen s ll last len fk =
   (**) let h0 = ST.get () in
-  alloc1 #h0 (size Spec.size_block) (u8 0) s.hash
+  alloc #h0 (size Spec.size_block) (u8 0) s.hash
   (fun h ->
     (fun _ r -> True)
   )
   (fun last_block ->
     (**) let h0 = ST.get () in
-    alloc1 #h0 (size Spec.size_block_w) (u32 0) s.hash
+    alloc #h0 (size Spec.size_block_w) (u32 0) s.hash
     (fun h ->
       (fun _ r -> True)
     )
@@ -490,7 +490,7 @@ val blake2s_finish:
 
 let blake2s_finish #vnn output s nn =
   (**) let h0 = ST.get () in
-  alloc1 #h0 (size 32) (u8 0) output
+  alloc #h0 (size 32) (u8 0) output
   (fun h ->
     (fun _ r -> r == Spec.Blake2s.blake2s_finish h0.[s.hash] (v nn))
   )
@@ -526,7 +526,7 @@ let blake2s #vll #vkk #vnn output d ll kk k nn =
   let st = blake2s_mkstate () in
   if  ll =. (size 0) && kk =. (size 0) then begin
     let h0 = ST.get () in
-    alloc1 #h0 (size Spec.size_block) (u8 0) output
+    alloc #h0 (size Spec.size_block) (u8 0) output
     (fun h -> (fun _ r -> True))
     (fun data ->
       let h0 = ST.get () in

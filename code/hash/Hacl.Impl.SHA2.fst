@@ -184,11 +184,11 @@ val compress: p:Spec.parameters -> b:block_w p -> kt:kTable p -> s:hash_w p ->
 
 let compress p b kt s =
   (**) let h0 = ST.get () in
-  alloc1 #h0 (size p.kSize) (u32 0) s
+  alloc #h0 (size p.kSize) (u32 0) s
   (fun h0 -> (fun _ sv -> True))
   (fun wst ->
     (**) let h0 = ST.get () in
-    alloc1 #h0 (size_block p) (u8 0) s
+    alloc #h0 (size_block p) (u8 0) s
     (fun h0 -> (fun _ sv -> True))
     (fun s1 ->
       copy s1 (size (size_hash p)) s;
@@ -312,7 +312,7 @@ val update_block: p:parameters -> st:state p -> block:lbuffer uint8 (Spec.size_b
 
 let update_block p st block =
   (**) let h0 = ST.get () in
-  alloc1 #h0 size_block_w (u8 0) st.hash
+  alloc #h0 size_block_w (nat_to_uint #p.wt 0) st.hash
   (fun h0 -> (fun _ sv -> True))
   (fun bw ->
     uints_from_bytes_be bw block;
@@ -369,7 +369,7 @@ val update_last:
 
 let update_last vn vlen p st n last len =
   (**) let h0 = ST.get () in
-  alloc1 #h0 (size 2 *. (size (Spec.size_block p))) (u8 0) st.hash
+  alloc #h0 (size 2 *. (size (Spec.size_block p))) (u8 0) st.hash
   (fun h0 -> (fun _ sv -> True))
   (fun blocks ->
     let nblocks = number_blocks_padding_single p len in
@@ -389,7 +389,7 @@ val finish:
 
 let finish p output s =
   (**) let h0 = ST.get () in
-  alloc1 #h0 (size 32) (u8 0) output
+  alloc #h0 (size (size_hash p)) (u8 0) output
   (fun h -> (fun _ r -> True))
   (fun full ->
     uints_to_bytes_le full s.hash;
