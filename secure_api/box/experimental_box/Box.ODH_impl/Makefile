@@ -36,3 +36,11 @@ fsti-impl-ver: $(addsuffix .fsti-impl-ver, $(VERIFY))
 	$(FSTAR_INCLUDES) \
 	--include . \
 	../$(addsuffix _impl, $(basename $@))/$(basename $@).fst
+
+%.fst-in:
+	@echo $(FSTAR_INCLUDES) \
+	$($(basename $@)_INCLUDES)
+
+%.fsti-in:
+	@echo $(FSTAR_INCLUDES) \
+	$($(basename $@)_INCLUDES)

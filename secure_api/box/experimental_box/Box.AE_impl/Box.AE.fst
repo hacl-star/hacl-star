@@ -43,6 +43,10 @@ let cset #id #key_length i raw =
 let create_ae_key_package id key_length =
   KEY.create_key_package key_length (key key_length #id) (hon #id #key_length) (getGT #id #key_length) (cget #id #key_length) (get #id #key_length) (gen #id key_length) cset set
 
+let get_flag #id #key_length #kp #aparams ap = ap.b
+
+let get_ap_pp #id #key_length #kp #aparams ap = ap.pp
+
 let get_ap_rgn (#id:eqtype) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id key_length (key key_length #id)) (#aparams:ae_parameters{aparams.keylength = key_length}) (ap:ae_package #id #key_length kp aparams)= ap.rgn
 
 let recall_log (#id:eqtype) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id key_length (key key_length #id)) (#aparams:ae_parameters{aparams.keylength = key_length}) (ap:ae_package #id kp aparams) = recall ap.log

@@ -14,19 +14,19 @@ noeq abstract type key_package (#id:eqtype) (key_length:(n:nat{n<=32})) (key_typ
   set: (i:id -> raw:lbytes key_length -> (k:key_type i{raw = getGT i k /\ hon i k = true})) ->
   key_package #id key_length key_type
 
-val hon: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> (kp_hon:(i:id -> key_type i -> bool){kp_hon == kp.hon})
+val hon: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> GTot (kp_hon:(i:id -> key_type i -> bool){kp_hon == kp.hon})
 
 val getGT: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> (kp_getGT:(i:id -> k:key_type i -> GTot (lbytes key_length)){kp_getGT == kp.getGT})
 
-val cget: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> (i:id -> k:key_type i{kp.hon i k = false} -> (raw:lbytes key_length{raw = kp.getGT i k}))
+val cget: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> GTot (i:id -> k:key_type i{kp.hon i k = false} -> (raw:lbytes key_length{raw = kp.getGT i k}))
 
-val get: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> (i:id -> k:key_type i -> (raw:lbytes key_length{raw = kp.getGT i k}))
+val get: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> GTot (i:id -> k:key_type i -> (raw:lbytes key_length{raw = kp.getGT i k}))
 
-val gen: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> (i:id -> k:key_type i{kp.hon i k = true})
+val gen: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> GTot (i:id -> k:key_type i{kp.hon i k = true})
 
-val cset: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> (i:id -> raw:lbytes key_length -> (k:key_type i{raw = kp.getGT i k /\ kp.hon i k = false}))
+val cset: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> GTot (i:id -> raw:lbytes key_length -> (k:key_type i{raw = kp.getGT i k /\ kp.hon i k = false}))
 
-val set: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> (i:id -> raw:lbytes key_length -> (k:key_type i{raw = kp.getGT i k /\ kp.hon i k = true}))
+val set: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> kp:key_package #id key_length key_type -> GTot (i:id -> raw:lbytes key_length -> (k:key_type i{raw = kp.getGT i k /\ kp.hon i k = true}))
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 val create_key_package:

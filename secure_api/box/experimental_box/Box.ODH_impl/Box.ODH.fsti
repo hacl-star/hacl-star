@@ -94,6 +94,7 @@ val create_odh_package: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)
   (ensures (fun h0 op h1 ->
     modifies (Set.singleton rgn) h0 h1
     /\ extends op.rgn rgn
+    /\ b = op.b
   ))
 
 let dh_op_modified_regions (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (h0:mem) : (GTot (Set.set rid)) =

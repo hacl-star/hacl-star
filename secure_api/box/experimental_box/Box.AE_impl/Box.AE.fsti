@@ -89,7 +89,10 @@ noeq abstract type ae_package (#id:eqtype) (#key_length:(n:nat{n<=32})) (kp:KEY.
     log:message_log #pp #id rgn aparams ->
     ae_package #id #key_length kp aparams
 
+val get_flag: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#kp:KEY.key_package #id key_length (key key_length #id)) -> (#aparams:ae_parameters{aparams.keylength = key_length}) -> ap:ae_package kp aparams -> GTot (b:bool{b = ap.b})
 //let valid_ae_plain_package (aparams:ae_parameters) (pp:plain_package) = pp == PP (get_ae_flagGT aparams) aparams.scheme.valid_plain_length
+
+val get_ap_pp: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#kp:KEY.key_package #id key_length (key key_length #id)) -> (#aparams:ae_parameters{aparams.keylength = key_length}) -> (ap:ae_package #id #key_length kp aparams) -> pp:plain_package{pp == PP ap.b aparams.scheme.valid_plain_length /\ pp == ap.pp}
 
 val get_ap_rgn: (#id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#kp:KEY.key_package #id key_length (key key_length #id)) -> (#aparams:ae_parameters{aparams.keylength = key_length}) -> (ap:ae_package #id #key_length kp aparams) -> rgn:erid{rgn = ap.rgn}
 
@@ -127,10 +130,9 @@ let encrypt_log_change (#id:eqtype) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_pa
 
 let encrypt_functional_spec (#id:eqtype) (#i:id) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id key_length (key key_length #id)) (#aparams:ae_parameters{aparams.keylength = key_length}) (ap:ae_package #id #key_length kp aparams) (k:key key_length i) (n:nonce aparams) (c:ciphertext aparams) (p:protected_plain ap.pp i) =
   let a = 1 in
-  ((KEY.(hon kp i k) /\ ap.b) ==>
+  ((KEY.(hon kp i k) /\ get_flag ap) ==>
     (c = aparams.scheme.enc (zero_bytes (ap.pp.valid_length) (length p)) k.raw n))
-    // Not sure why I can't use aparams.b here instead of get_ae_flagGT...
-  /\ ((~(KEY.(hon kp i k)) \/ ~ap.b) ==>
+  /\ ((~(KEY.(hon kp i k)) \/ ~(get_flag ap)) ==>
     (c = aparams.scheme.enc (repr #ap.pp kp k p) k.raw n))
 
 #set-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 300"
@@ -143,6 +145,10 @@ val encrypt: #id:eqtype -> #i:id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_pa
     /\ encrypt_log_change ap i n c p h0 h1
     /\ modifies (encrypt_modified_regions ap) h0 h1
     /\ ((forall n'. nonce_is_unique ap i n' h0) ==> (forall n' . n' =!=n ==> nonce_is_unique ap i n' h1))
+    /\ ((KEY.(hon kp i k) /\ get_flag ap) ==>
+      (c = aparams.scheme.enc (zero_bytes ((get_ap_pp ap).valid_length) (length p)) (getGT i k) n))
+    /\ ((~(KEY.(hon kp i k)) \/ ~(get_flag ap)) ==>
+      (c = aparams.scheme.enc (repr #ap.pp kp k p) (getGT i k) n))
   ))
 
 let decrypt_modified_regions (#id:eqtype) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package #id key_length (key key_length #id)) (#aparams:ae_parameters{aparams.keylength = key_length}) (ap:ae_package #id #key_length kp aparams) = Set.empty
