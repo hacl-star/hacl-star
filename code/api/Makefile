@@ -38,7 +38,7 @@ KREMLIN_ARGS+=$(addprefix -I ,$(INCLUDE_DIRS)) \
 	-drop Hacl.UInt8,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Cast,Hacl.UInt16,Hacl.Types
 
 policies-c/Hacl_Policies.c: $(HACL_HOME)/code/lib/kremlin/Hacl.Policies.fst
-	$(KREMLIN) $(KREMLIN_ARGS) $^ -tmpdir policies-c -skip-compilation
+	$(KREMLIN) $(KREMLIN_ARGS) $^ -tmpdir policies-c -skip-compilation -minimal -bundle Hacl_Policies=* -add-include '"kremlib.h"'
 
 box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Hacl.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Hacl.Salsa20.fsti $(HACL_HOME)/code/curve25519/interfaces/Hacl.Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst  NaCl.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir box-c NaCl.fst -skip-compilation \

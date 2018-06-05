@@ -194,6 +194,7 @@ endif
 POLY_DIR=$(HACL_HOME)/code/poly1305/poly-c
 CHACHA_DIR=$(HACL_HOME)/code/salsa-family/chacha-c
 CHACHAPOLY_DIR=$(HACL_HOME)/code/api/aead-c
+POLICIES_DIR=$(HACL_HOME)/code/api/policies-c
 
 ifeq (,$(wildcard $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c))
   $(error The Chacha20Poly1305 directory is $(CHACHAPOLY_DIR) and I cannot find \
@@ -259,7 +260,7 @@ ARCHIVE_FILES= $(VALE_OBJ) \
     $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
     $(CHACHA_DIR)/Hacl_Chacha20.o \
     $(POLY_DIR)/AEAD_Poly1305_64.o \
-    $(CHACHAPOLY_DIR)/Hacl_Policies.o \
+    $(POLICIES_DIR)/Hacl_Policies.o \
     $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o \
     $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Hacl_Curve25519.o \
     $($(IMPL_CHOICE)_EXTRA)
@@ -277,13 +278,18 @@ $(DIST_DIR)/LowC.cma: $(ARCHIVE_FILES)
 # 5. The LowC provider tests                                     	       #
 ################################################################################
 
+LIBKREMLIB = $(KREMLIN_HOME)/kremlib/out/libkremlib.a
+
+$(LIBKREMLIB):
+	$(error Please run make -C $(KREMLIN_HOME)/kremlib to generate libkremlib.a)
+
 # Note: clients of MLCrypto are generally assumed to use CoreCrypto.cmxa but
 # here since we just need the type definitions we optimize the linking and just
 # pass CryptoTypes.cmx
 $(DIST_DIR)/LowCTests.exe:  \
 	  $(MLCRYPTO_HOME)/CryptoTypes.cmx $(DIST_DIR)/LowC.cmxa LowCProvider/Tests.cmx
 	$(OCAMLOPT) -I $(OUTPUT_DIR) -I LowCProvider \
-	  -ccopt -L$(DIST_DIR) -linkpkg $^ -o $@
+	  -ccopt -L$(DIST_DIR) -cclib $(LIBKREMLIB) -linkpkg $^ -o $@
 
 ################################################################################
 # 6. The QuicProvider tests                                      	       #
@@ -301,10 +307,11 @@ $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) \
   $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
   $(CHACHA_DIR)/Hacl_Chacha20.o \
   $(POLY_DIR)/AEAD_Poly1305_64.o \
-  $(CHACHAPOLY_DIR)/Hacl_Policies.o \
+  $(POLICIES_DIR)/Hacl_Policies.o \
   $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o
 	$(CC) $^ -o $@ $(QUICPROVIDER_SO_LDOPTS) -shared
 
-$(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)
-	$(CC) $< -o $@ -L$(DIST_DIR) -lquicprovider
+$(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO) \
+  $(LIBKREMLIB)
+	$(CC) $< -o $@ -L$(DIST_DIR) -lquicprovider $(LIBKREMLIB)
 
