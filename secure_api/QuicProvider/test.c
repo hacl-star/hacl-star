@@ -95,12 +95,24 @@ void coverage(void)
   quic_crypto_encrypt(k, cipher, 0, salt, 13, data, 28);
   dump(cipher, 28+16);
 
+  unsigned char pnmask[4];
+  if(quic_crypto_packet_number_otp(k, cipher, pnmask))
+  {
+    printf("PN encryption mask:\n");
+    dump(pnmask, 4);
+  } else {
+    printf("PN encryption failed.\n");
+    exit(1);
+  }
+
   if(quic_crypto_decrypt(k, hash, 0, salt, 13, cipher, 28+16)) {
     printf("DECRYPT SUCCES: \n");
     dump(hash, 28);
   } else {
     printf("DECRYPT FAILED.\n");
+    exit(1);
   }
+
   quic_crypto_free_key(k);
 
   s.hash = TLS_hash_SHA256;
