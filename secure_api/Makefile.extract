@@ -308,7 +308,8 @@ $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) \
   $(CHACHA_DIR)/Hacl_Chacha20.o \
   $(POLY_DIR)/AEAD_Poly1305_64.o \
   $(POLICIES_DIR)/Hacl_Policies.o \
-  $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o
+  $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o \
+  $(LIBKREMLIB)
 	$(CC) $^ -o $@ $(QUICPROVIDER_SO_LDOPTS) -shared
 
 $(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO) \
