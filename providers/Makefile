@@ -110,9 +110,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
 	  -add-include '"kremlib.h"' \
-	  -add-include '"kremlin/c_string.h"' \
-	  -add-include '"kremlin/prims_int.h"' \
-	  -add-include '"kremlin/prims_string.h"' \
+	  -add-include '"kremlin/internal/compat.h"' \
 	  -bundle 'FStar.*' \
 	  -bundle 'C.Loops=C.Loops,Spec.*,Hacl.Spe.*,Hacl.Spec.*,Seq.*,Hacl.Endianness,Hacl.Types,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Constants,Hacl.Cast' \
 	  -bundle 'Hacl.Chacha20=Hacl.Impl.*,Hacl.Chacha20,Hacl.Standalone.Poly1305_64,Hacl.Lib.*,Hacl.Bignum.*' \
@@ -148,7 +146,7 @@ HACL_SOURCES	= \
   $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
   $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \
   $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
-  $(HACL_CODE)/api/aead-c/Hacl_Policies.c \
+  $(HACL_CODE)/api/policies-c/Hacl_Policies.c \
   $(HACL_CODE)/api/aead-c/Hacl_Chacha20Poly1305.c
 
 EVERCRYPT_SOURCES = \
@@ -172,7 +170,7 @@ ALL_OBJS	= $(patsubst %.c,%.o,$(ALL_SOURCES)) $(patsubst %.S,%.o,$(VALE_ASM))
 INCLUDE_DIRS	= $(foreach c,$(ALL_SOURCES),$(dir $(c))) \
   $(HACL_HOME)/secure_api/out/runtime_switch/extracted \
   $(HACL_HOME)/snapshots/common $(KREMLIN_HOME)/include \
-  $(OPENSSL_HOME)/include
+  $(OPENSSL_HOME)/include $(KREMLIN_HOME)
 
 
 CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
@@ -209,6 +207,11 @@ LDFLAGS += -ldl -lpthread
 endif
 endif
 
+LIBKREMLIB = $(KREMLIN_HOME)/kremlib/out/libkremlib.a
+
+$(LIBKREMLIB):
+	$(error Please run make -C $(KREMLIN_HOME)/kremlib to generate libkremlib.a)
+
 # Note: see
 # https://www.gnu.org/software/make/manual/html_node/Archive-Pitfalls.html#Archive-Pitfalls
 # for why we are not using libhacl.a($(OBJS))
@@ -216,7 +219,7 @@ $(OUT_DIR)/libevercrypt.a: $(ALL_OBJS) | $(OUT_DIR)
 	$(AR) cr $@ $^
 
 $(OUT_DIR)/libevercrypt.$(SO): $(ALL_OBJS) | $(OUT_DIR)
-	$(CC) -shared $^ $(LDFLAGS) -o $@
+	$(CC) -shared $^ $(LDFLAGS) -o $@ $(LIBKREMLIB)
 
 .PRECIOUS: %.o
 
