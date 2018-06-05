@@ -65,7 +65,6 @@ let leak #i st
   = assume false;
     Crypto.AEAD.leak #i st
 
-
 let encrypt i st n aadlen aad plainlen plain cipher_tag
   = assume false;
     Crypto.AEAD.encrypt i st n aadlen aad plainlen plain cipher_tag
@@ -73,3 +72,8 @@ let encrypt i st n aadlen aad plainlen plain cipher_tag
 let decrypt i st n aadlen aad plainlen plain cipher_tag
   = assume false;
     Crypto.AEAD.Decrypt.decrypt i st n aadlen aad plainlen plain cipher_tag
+
+let compute i output st n ctr len =
+  assume false;
+  Crypto.Symmetric.Cipher.compute i output st n ctr len
+

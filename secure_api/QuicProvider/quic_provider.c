@@ -338,19 +338,21 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
 
 int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned char *sample, unsigned char *mask)
 {
+  FStar_UInt128_uint128 nonce;
   switch(Crypto_Indexing_cipherAlg_of_id(key->id))
   {
     case Crypto_Indexing_CHACHA20:
-      FStar_UInt128_uint128 nonce = FStar_UInt128_shift_right(load128_le(sample), 32);
-      Crypto_Symmetric_Cipher_compute(key->id, mask, key->pne, nonce, load32_le(sample), 4);
+      nonce = FStar_UInt128_shift_right(load128_le((unsigned char*)sample), 32);
+      Crypto_AEAD_Main_compute(key->id, mask, key->pne.prf.key, nonce, load32_le((unsigned char*)sample), 4);
       return 1;
 
     case Crypto_Indexing_AES128:
     case Crypto_Indexing_AES256:
-      FStar_UInt128_uint128 nonce = load128_be(sample);
-      Crypto_Symmetric_Cipher_compute(key->id, mask, key->pne, nonce, 0, 4);
+      nonce = load128_be((unsigned char*)sample);
+      Crypto_AEAD_Main_compute(key->id, mask, key->pne.prf.key, nonce, 0, 4);
       return 1;
   }
+  return 0;
 }
 
 int MITLS_CALLCONV quic_crypto_free_key(quic_key *key)

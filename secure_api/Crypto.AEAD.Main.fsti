@@ -13,6 +13,8 @@ module Plain = Crypto.Plain
 type eternal_region =
      rgn:HS.rid {is_eternal_region rgn}
 
+type buffer = Buffer.buffer UInt8.t
+
 type lbuffer (l:nat) =
      b:Buffer.buffer UInt8.t {Buffer.length b == l}
 
@@ -308,3 +310,16 @@ val decrypt
                enc_dec_liveness st aad plain cipher_tag h1 /\
                // modifies_fp FPLOC.(loc_union (footprint st) (loc_buffer (Plain.as_buffer plain))) h0 h1 /\
                (safeId i ==> entry_for_nonce n st h1 == Some (entry_of n aad plain cipher_tag h1))))
+
+// ADL: expose direct access to the PRF function
+// this is a temporary solution to provide QUIC packet number encryption
+val compute:
+  i:I.id ->
+  output:buffer ->
+  st:buffer ->
+  n:Crypto.Symmetric.Cipher.iv (I.cipherAlg_of_id i) ->
+  counter:UInt32.t ->
+  len:UInt32.t ->
+  Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
