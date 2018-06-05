@@ -61,27 +61,24 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(CONCRETE_DIR)/$(IMPL_CHOICE) \
 	$(HACL_HOME)/secure_api/test)
 
-# The F* compiler and the entry points.
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe \
-        $(OTHERFLAGS) \
+FSTAR_FLAGS=$(OTHERFLAGS) \
         --cache_dir $(CACHE_DIR) \
         --cache_checked_modules \
         $(INCLUDE_PATHS) \
-        --odir $(OUTPUT_DIR)
+        --odir $(OUTPUT_DIR) \
+        --use_hints
 
+# The F* compiler and the entry points.
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 %.fst-ver: %.fst
-	$(FSTAR) --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
-	  $^
+	$(FSTAR) $^
 
 %.fst-lax: %.fst
-	$(FSTAR) --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
-	  --cache_checked_modules $^ --lax
+	$(FSTAR) $^ --lax
 
 %.fsti-in:
-	@echo --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
-	  --cache_checked_modules
+	@echo $(FSTAR_FLAGS)
 
 %.fst-in:
-	@echo --use_hints $(INCLUDE_PATHS) $(OTHERFLAGS) \
-	  --cache_checked_modules
+	@echo $(FSTAR_FLAGS)

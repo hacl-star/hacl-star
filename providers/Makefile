@@ -68,7 +68,8 @@ ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti
 .PRECIOUS: %.krml
 
 .depend:
-	$(FSTAR) --dep full $(ROOTS) --extract Kremlin > $@
+	$(FSTAR) --dep full $(ROOTS) \
+	  --extract '* -Prims -FStar -C +C.Loops -EverCrypt.Bytes' > $@
 
 include .depend
 

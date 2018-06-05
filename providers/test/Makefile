@@ -31,7 +31,7 @@ all: test
 	  $(addprefix --include , $(INCLUDE_PATHS)) \
 	  --cache_dir $(CACHE_DIR) \
 	  --odir $(EXTRACT_DIR) \
-	  --dep full Test.fst > .depend 
+	  --dep full Test.fst Test.Bytes.fst > .depend 
 
 include .depend
 
@@ -65,11 +65,12 @@ $(EXTRACT_DIR)/Test.c: $(filter-out $(EXTRACT_DIR)/prims.krml ,$(ALL_KRML_FILES)
 	  -add-include '"kremlin/prims_int.h"' \
 	  -add-include '"kremlin/prims_string.h"' \
 	  -add-include '"kremlin/c_string.h"' \
-	  -add-include '"hacks.h"'
+	  -add-include '"hacks.h"' \
+	  -ccopt -g
 
 test: $(EXTRACT_DIR)/Test.c
-	$(MAKE) -C $(EXTRACT_DIR) test.exe
-	$(PREFIX) extract/test.exe
+	$(MAKE) -C $(EXTRACT_DIR) Test.exe
+	$(PREFIX) extract/Test.exe
 
 clean:
 	rm -rf .depend cache

@@ -12,6 +12,7 @@ void Vale_Hash_SHA2_256_init(uint32_t *state);
 void Vale_Hash_SHA2_256_update(uint32_t *state, uint8_t *data);
 void Vale_Hash_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint32_t len);
 void Vale_Hash_SHA2_256_finish(uint32_t *state, uint8_t *dst);
+void Vale_Hash_SHA2_256_hash(uint32_t *dst, uint8_t *data, uint32_t len);
 
 void EverCrypt_Vale_sha256_init(uint32_t *x0){
   Vale_Hash_SHA2_256_init(x0);
@@ -22,8 +23,10 @@ void EverCrypt_Vale_sha256_update(uint32_t *x0, uint8_t *x1){
 }
 
 void EverCrypt_Vale_sha256_update_multi(uint32_t *x0, uint8_t *x1, uint32_t x2){
-  KRML_HOST_EPRINTF("TODO: sha256_update_multi/Vale\n");
-  KRML_HOST_EXIT(255);
+  for (uint32_t i = 0; i < x2; i++) {
+    uint8_t *b = x1 + i * 64;
+    Vale_Hash_SHA2_256_update(x0, b);
+  }
 }
 
 void EverCrypt_Vale_sha256_update_last(uint32_t *x0, uint8_t *x1, uint32_t x2){
@@ -37,4 +40,9 @@ void EverCrypt_Vale_sha256_finish(uint32_t *x0, uint8_t *x1){
     uint32_t *out = (uint32_t *) x1;
     store32_be((uint8_t *) &out[i], out[i]);
   }
+}
+
+void EverCrypt_Vale_sha256_hash(uint8_t *x0, uint8_t *x1, uint32_t x2){
+  KRML_HOST_EPRINTF("TODO: sha256_hash/Vale\n");
+  KRML_HOST_EXIT(255);
 }

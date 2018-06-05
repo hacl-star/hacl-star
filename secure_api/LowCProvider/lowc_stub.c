@@ -24,7 +24,7 @@
 #include <caml/mlvalues.h>
 
 #include "FStar_UInt128.h"
-#include "Crypto_AEAD_Main_Crypto_Indexing.h"
+#include "Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.h"
 #include "Crypto_Symmetric_Bytes.h"
 #include "Crypto_HKDF_Crypto_HMAC.h"
 #include "Hacl_Curve25519.h"
