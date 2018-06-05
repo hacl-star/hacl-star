@@ -317,7 +317,7 @@ val compute:
   i:I.id ->
   output:buffer ->
   st:buffer ->
-  n:Crypto.Symmetric.Cipher.iv (I.cipherAlg_of_id i) ->
+  n:UInt128.t ->
   counter:UInt32.t ->
   len:UInt32.t ->
   Stack unit
