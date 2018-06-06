@@ -5,7 +5,7 @@ EXTRACT_DIR = extract
 CACHE_DIR   = cache
 INCLUDE_PATHS = \
 	$(KREMLIN_HOME)/kremlib \
-	 ../multiplexer
+	 ../evercrypt
 
 UNAME = $(shell uname)
 
@@ -78,4 +78,4 @@ clean:
         | xargs rm -f
 
 %.fst-in:
-	@echo --include ../multiplexer --include $(KREMLIN_HOME)/kremlib
+	@echo --include ../evercrypt --include $(KREMLIN_HOME)/kremlib

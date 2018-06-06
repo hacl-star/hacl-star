@@ -6,6 +6,7 @@ module U32 = FStar.UInt32
 open FStar.HyperStack.ST
 open FStar.Bytes
 open EverCrypt.Helpers
+open EverCrypt.AutoConfig
 
 open Test.Vectors
 open U32
