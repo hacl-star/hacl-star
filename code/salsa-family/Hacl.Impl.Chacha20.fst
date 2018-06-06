@@ -14,7 +14,7 @@ module LSeq = Spec.Lib.IntSeq
 module Spec = Spec.Chacha20
 
 (* Definition of the state *)
-type state = lbuffer uint32 16
+type state = lbuffer uint32 (size 16)
 type idx = n:size_t{v n < 16}
 unfold let blocksize:size_t = size 64
 
