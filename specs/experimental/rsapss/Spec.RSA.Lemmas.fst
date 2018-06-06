@@ -75,6 +75,7 @@ val lemma_mod_mult_div_1:
   ((a / d) % n == ((a % n) / d) % n)
 let lemma_mod_mult_div_1 a d n = admit()
 
+// (1 / d) % n is an inverse element of d
 val lemma_mod_mult_div:
   a:nat -> b:nat -> d:nat{d > 0} -> n:nat{n > 0} -> Lemma
   ((a * b / d) % n == ((a % n) * b / d) % n)
@@ -83,11 +84,10 @@ let lemma_mod_mult_div a b d n =
   lemma_mod_mul_distr_l a b n;
   lemma_mod_mult_div_1 ((a % n) * b) d n
 
-// (1 / d) % n is an inverse element of d
-val lemma_mult_div_mod:
-  a:nat -> b:nat -> d:nat{d > 0} -> n:nat{n > 0} -> Lemma
-  ((a * (b / d)) % n == (a * b / d) % n)
-let lemma_mult_div_mod a b d n = admit()
+val lemma_mul_div_mod:
+  a:nat -> b:pos -> c:nat -> d:pos -> e:pos -> n:pos -> Lemma
+  (((a / b) * (c / d)) / e % n == ((a * c) / (b * d * e)) % n)
+let lemma_mul_div_mod a b c d e n = admit()
 
 (* Lemmas for Montgomery's arithmetic *)
 val lemma_mont_reduction_f:
@@ -121,82 +121,224 @@ let lemma_mont_reduction #nBits #cBits rBits n c =
   assert (bn_v c + (pow2 rBits - 1) * bn_v n < pow2 (nBits+rBits) + pow2 (nBits+rBits));
   pow2_double_sum (nBits+rBits)
 
+val lemma_mont_reduction_fi:
+  #nBits:size_pos -> #cBits:size_pos ->
+  rBits:size_pos{nBits < rBits /\ nBits+1+rBits < max_size_t} ->
+  qi:bignum 64 -> n:bignum nBits{bn_v n > 0} ->
+  c:bignum cBits ->
+  i:size_nat{i <= rBits / 64} -> res:bignum (nBits + 1 + rBits) -> Lemma
+  (requires (bn_v res + bn_v n * pow2 (64*i) * bn_v qi <= bn_v c + (pow2 (64*i)-1) * bn_v n + bn_v n * pow2 (64*i) * bn_v qi))
+  (ensures (bn_v res + bn_v n * pow2 (64*i) * bn_v qi <= bn_v c + (pow2 (64*(i+1)) - 1) * bn_v n))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+let lemma_mont_reduction_fi #nBits #cBits rBits qi n c i res =
+  let res1 = bn_v res + bn_v n * pow2 (64*i) * bn_v qi in
+  assert (res1 <= bn_v c + (pow2 (64*i)-1) * bn_v n + bn_v n * pow2 (64*i) * bn_v qi); //from ind hypo
+  assert (bn_v qi < pow2 64);
+  assert (res1 <= bn_v c + (pow2 (64*i)-1) * bn_v n + bn_v n * pow2 (64*i) * (pow2 64 - 1));
+  assert (res1 <= bn_v c + pow2 (64*i) * bn_v n - bn_v n + bn_v n * pow2 (64*i) * (pow2 64 - 1));
+  assert (res1 <= bn_v c + pow2 (64*i) * bn_v n - bn_v n + bn_v n * pow2 (64*i) * pow2 64 - bn_v n * pow2 (64*i));
+  assert (res1 <= bn_v c - bn_v n + bn_v n * pow2 (64*i) * pow2 64);
+  assert (res1 <= bn_v c + (pow2 (64*i) * pow2 64 - 1) * bn_v n);
+  pow2_plus (64*i) 64;
+  assert (res1 <= bn_v c + (pow2 (64*(i+1)) - 1) * bn_v n)
 
 (* LEMMAS for modular exponentiation *)
-assume val bn_get_bits_first:#n:size_pos -> b:bignum n -> i:size_pos{i <= n} -> Tot (c:bignum i{bn_v c == bn_v b % pow2 i})
+assume val bn_get_bits_first:#n:size_pos -> b:bignum n -> i:size_nat{i <= n} -> Tot (c:bignum i{bn_v c == bn_v b % pow2 i})
 
-val lemma_mult_abc:
+val lemma_get_bit_first:
+  bBits:size_pos -> b:bignum bBits -> i:size_nat{i < bBits} -> Lemma
+  (bn_v b % pow2 (i+1) == bn_v b % pow2 i + pow2 i * bn_get_bit b i)
+let lemma_get_bit_first bBits b i =
+  let c = bn_v b % pow2 (i+1) in
+  euclidean_division_definition c (pow2 i);
+  //assert (c == c % pow2 i + pow2 i * (c / pow2 i));
+  pow2_modulo_modulo_lemma_1 (bn_v b) i (i+1);
+  //assert (c == bn_v b % pow2 i + pow2 i * (c / pow2 i));
+  pow2_modulo_division_lemma_1 (bn_v b) i (i+1)
+  //assert (c == bn_v b % pow2 i + pow2 i * ((bn_v b / pow2 i) % 2))
+
+val mod_exp_pred:
+  nBits:size_pos ->
+  rBits:size_pos{nBits + 1 < rBits /\ nBits + rBits + 1 < max_size_t /\ rBits % 64 == 0} ->
+  nInv_u64:bignum 64 -> n:bignum nBits{bn_v n > 0} ->
+  bBits:size_pos -> b:bignum bBits ->
+  a0:bignum (nBits+1) -> acc0:bignum (nBits+1) ->
+  i:size_nat{i <= bBits} ->
+  a_acc:tuple2 (bignum (nBits+1)) (bignum (nBits+1)) -> Tot Type0
+let mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 i (a, acc) =
+  if i = 0 then
+    bn_v acc % bn_v n = bn_v acc0 % bn_v n &&
+    bn_v a % bn_v n = bn_v a0 % bn_v n
+  else
+    bn_v acc % bn_v n = ((pow (bn_v a0) (bn_v (bn_get_bits_first b i)) * bn_v acc0) / pow (pow2 rBits) (bn_v (bn_get_bits_first b i))) % bn_v n &&
+    bn_v a % bn_v n = (pow (bn_v a0) (pow2 i) / pow (pow2 rBits) (pow2 i - 1)) % bn_v n
+
+val lemma_mod_exp_f1:
+  nBits:size_pos -> rBits:size_pos{nBits + 2 < rBits /\ nBits + rBits + 1 < max_size_t /\ rBits % 64 == 0} ->
+  nInv_u64:bignum 64 -> n:bignum nBits{bn_v n > 0} ->
+  bBits:size_pos -> b:bignum bBits ->
+  a0:bignum (nBits+1) -> acc0:bignum (nBits+1) ->
+  a:bignum (nBits+1) -> acc:bignum (nBits+1) ->
+  a1:bignum (nBits+1) -> i:size_nat{i < bBits /\ bn_get_bit b i = 0} -> Lemma
+  (requires (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 i (a, acc) /\
+             bn_v a1 % bn_v n = (pow (bn_v a0) (pow2 (i+1)) / pow (pow2 rBits) (pow2 (i+1) - 1)) % bn_v n))
+  (ensures (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 (i+1) (a1, acc)))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+let lemma_mod_exp_f1 nBits rBits nInv_u64 n bBits b a0 acc0 a acc a1 i =
+  lemma_get_bit_first bBits b i;
+  assert (bn_v (bn_get_bits_first b (i+1)) == bn_v (bn_get_bits_first b i) + pow2 i * bn_get_bit b i);
+  assert (bn_v (bn_get_bits_first b (i+1)) == bn_v (bn_get_bits_first b i));
+  if i = 0 then begin
+     assert (bn_v acc % bn_v n == bn_v acc0 % bn_v n);
+     assert (bn_v a % bn_v n = bn_v a0 % bn_v n);
+     assert_norm (bn_v (bn_get_bits_first b i) == 0);
+     assert_norm (pow (bn_v a0) (bn_v (bn_get_bits_first b (i+1))) == 1);
+     assert_norm (pow (pow2 rBits) (bn_v (bn_get_bits_first b (i+1))) == 1);
+     //assert_norm (bn_v acc % bn_v n == ((pow (bn_v a0) (bn_v (bn_get_bits_first b (i+1))) * bn_v acc0) / pow (pow2 rBits) (bn_v (bn_get_bits_first b (i+1)))) % bn_v n);
+     assert (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 (i+1) (a1, acc)) end
+  else begin
+     assert (bn_v acc % bn_v n = ((pow (bn_v a0) (bn_v (bn_get_bits_first b i)) * bn_v acc0) / pow (pow2 rBits) (bn_v (bn_get_bits_first b i))) % bn_v n);
+     //assert_norm (pow (bn_v a0) (bn_v (bn_get_bits_first b (i+1))) == pow (bn_v a0) (bn_v (bn_get_bits_first b i)));
+     //assert_norm (pow (pow2 rBits) (bn_v (bn_get_bits_first b (i+1))) == pow (pow2 rBits) (bn_v (bn_get_bits_first b i)));
+     assert (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 (i+1) (a1, acc))
+  end
+
+val lemma_mul_mul:
   a:nat -> b:nat -> c:nat -> Lemma
   (a * b * c == a * c * b)
-let lemma_mult_abc a b c = ()
+let lemma_mul_mul a b c = ()
 
-val lemma_r_n:
-  modBits:nat{modBits > 0} -> r:nat{r > 0} -> n:nat{n > 0} -> Lemma
-  (requires (r == pow2 (64 * ((modBits - 1) / 64 + 2)) /\ n < pow2 modBits))
-  (ensures (4 * n < r))
-let lemma_r_n modBits r n =
-  assert (4 * n < 4 * pow2 modBits);
-  assert_norm (pow2 2 = 4);
-  pow2_plus 2 modBits;
-  assert (4 * n < pow2 (modBits + 2));
-  euclidean_division_definition (modBits - 1) 64;
-  assert (64 * ((modBits - 1) / 64) = modBits - 1 - (modBits - 1) % 64);
-  let exp2_r = 64 * ((modBits - 1) / 64 + 2) in
-  assert (exp2_r = 64 * ((modBits - 1) / 64) + 128);
-  assert (modBits + 63 < exp2_r);
-  pow2_lt_compat (modBits + 63) (modBits + 2);
-  pow2_lt_compat exp2_r (modBits + 63);
-  assert (4 * n < r)
+val lemma_mod_exp_f20:
+  nBits:size_pos -> rBits:size_pos{nBits + 2 < rBits /\ nBits + rBits + 1 < max_size_t /\ rBits % 64 == 0} ->
+  nInv_u64:bignum 64 -> n:bignum nBits{bn_v n > 0} ->
+  bBits:size_pos -> b:bignum bBits ->
+  a0:bignum (nBits+1) -> acc0:bignum (nBits+1) ->
+  a:bignum (nBits+1) -> acc:bignum (nBits+1) ->
+  a1:bignum (nBits+1) -> acc1:bignum (nBits+1) ->
+  i:size_nat{0 < i /\ i < bBits /\ bn_get_bit b i = 1} -> Lemma
+  (requires (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 i (a, acc) /\
+             bn_v a1 % bn_v n == (pow (bn_v a0) (pow2 (i+1)) / pow (pow2 rBits) (pow2 (i+1) - 1)) % bn_v n /\
+	     bn_v acc1 % bn_v n == ((bn_v a * bn_v acc) / pow2 rBits) % bn_v n))
+  (ensures (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 (i+1) (a1, acc1)))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+let lemma_mod_exp_f20 nBits rBits nInv_u64 n bBits b a0 acc0 a acc a1 acc1 i =
+  assert (bn_v acc % bn_v n == ((pow (bn_v a0) (bn_v (bn_get_bits_first b i)) * bn_v acc0) / pow (pow2 rBits) (bn_v (bn_get_bits_first b i))) % bn_v n);
+  assert (bn_v a % bn_v n == (pow (bn_v a0) (pow2 i) / pow (pow2 rBits) (pow2 i - 1)) % bn_v n);
+  assert (bn_v acc1 % bn_v n == ((bn_v a * bn_v acc) / pow2 rBits) % bn_v n);
+  lemma_mod_mult_div_1 (bn_v a * bn_v acc) (pow2 rBits) (bn_v n);
+  lemma_mod_plus_mul_distr 0 (bn_v a) (bn_v acc) (bn_v n);
+  let a_n = pow (bn_v a0) (pow2 i) / pow (pow2 rBits) (pow2 i - 1) in
+  let acc_n = (pow (bn_v a0) (bn_v (bn_get_bits_first b i)) * bn_v acc0) / pow (pow2 rBits) (bn_v (bn_get_bits_first b i)) in
+  lemma_mod_plus_mul_distr 0 a_n acc_n (bn_v n);
+  lemma_mod_mult_div_1 (a_n * acc_n) (pow2 rBits) (bn_v n);
+  assert (bn_v acc1 % bn_v n == ((a_n * acc_n) / pow2 rBits) % bn_v n);
+  let al = pow (bn_v a0) (pow2 i) in
+  let bl = pow (pow2 rBits) (pow2 i - 1) in
+  let cl = pow (bn_v a0) (bn_v (bn_get_bits_first b i)) * bn_v acc0 in
+  let dl = pow (pow2 rBits) (bn_v (bn_get_bits_first b i)) in
+  lemma_mul_div_mod al bl cl dl (pow2 rBits) (bn_v n);
+  assert (bn_v acc1 % bn_v n == ((al * cl) / (bl * dl * pow2 rBits)) % bn_v n);
+  lemma_get_bit_first bBits b i;
+  //assert (bn_v (bn_get_bits_first b (i+1)) == bn_v (bn_get_bits_first b i) + pow2 i * bn_get_bit b i);
+  assert (bn_v (bn_get_bits_first b (i+1)) == bn_v (bn_get_bits_first b i) + pow2 i);
+  lemma_pow (bn_v a0) (pow2 i) (bn_v (bn_get_bits_first b i));
+  assert (al * cl == pow (bn_v a0) (bn_v (bn_get_bits_first b (i+1))) * bn_v acc0);
+  lemma_pow (pow2 rBits) (pow2 i - 1) 1;
+  assert_norm (pow2 rBits == pow (pow2 rBits) 1);
+  //assert (bl * pow2 rBits == pow (pow2 rBits) (pow2 i));
+  lemma_pow (pow2 rBits) (pow2 i) (bn_v (bn_get_bits_first b i));
+  lemma_mul_mul  bl dl (pow2 rBits);
+  //assert (bl * dl * pow2 rBits == bl * pow2 rBits * dl);
+  assert (bl * dl * pow2 rBits == pow (pow2 rBits) (bn_v (bn_get_bits_first b (i+1))));
+  assert (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 (i+1) (a1, acc1))
 
-val lemma_mod_exp:
-  n:nat{n > 1} -> a:nat -> a2:nat ->
-  b:nat -> b2:nat -> acc:nat -> r:nat{r > 0} -> res:nat -> Lemma
-  (requires (a2 % n == (a * a / r) % n /\ b2 == b / 2 /\
-             res % n == ((pow a2 b2) * acc / pow r b2) % n))
-  (ensures (res % n == ((pow a (2 * b2)) * acc / pow r (2 * b2)) % n))
-let lemma_mod_exp n a a2 b b2 acc r res =
-  lemma_mod_mult_div (pow a2 b2) acc (pow r b2) n;
-  lemma_pow_mod a2 b2 n;
-  lemma_pow_mod (a * a / r) b2 n;
-  lemma_pow_div (a * a) b2 r;
-  lemma_pow_a2_b a b2;
-  lemma_mod_mult_div (pow a (2 * b2) / pow r b2) acc (pow r b2) n;
-  lemma_mod_mult_div_1 ((pow a (2 * b2) / pow r b2) * acc) (pow r b2) n;
-  lemma_mult_div_mod acc (pow a (2 * b2)) (pow r b2) n;
-  lemma_mod_mult_div_1 ((acc * pow a (2 * b2)) / pow r b2) (pow r b2) n;
-  division_multiplication_lemma (acc * pow a (2 * b2)) (pow r b2) (pow r b2);
-  lemma_pow r b2 b2
+val lemma_mod_exp_f2:
+  nBits:size_pos -> rBits:size_pos{nBits + 2 < rBits /\ nBits + rBits + 1 < max_size_t /\ rBits % 64 == 0} ->
+  nInv_u64:bignum 64 -> n:bignum nBits{bn_v n > 0} ->
+  bBits:size_pos -> b:bignum bBits ->
+  a0:bignum (nBits+1) -> acc0:bignum (nBits+1) ->
+  a:bignum (nBits+1) -> acc:bignum (nBits+1) ->
+  a1:bignum (nBits+1) -> acc1:bignum (nBits+1) ->
+  i:size_nat{i < bBits /\ bn_get_bit b i = 1} -> Lemma
+  (requires (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 i (a, acc) /\
+             bn_v a1 % bn_v n == (pow (bn_v a0) (pow2 (i+1)) / pow (pow2 rBits) (pow2 (i+1) - 1)) % bn_v n /\
+	     bn_v acc1 % bn_v n == ((bn_v a * bn_v acc) / pow2 rBits) % bn_v n))
+  (ensures (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 (i+1) (a1, acc1)))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+let lemma_mod_exp_f2 nBits rBits nInv_u64 n bBits b a0 acc0 a acc a1 acc1 i =
+  lemma_get_bit_first bBits b i;
+  assert (bn_v (bn_get_bits_first b (i+1)) == bn_v (bn_get_bits_first b i) + pow2 i * bn_get_bit b i);
+  assert (bn_v (bn_get_bits_first b (i+1)) == bn_v (bn_get_bits_first b i) + pow2 i);
+  if i = 0 then begin
+    assert (bn_v acc % bn_v n == bn_v acc0 % bn_v n);
+    assert (bn_v a % bn_v n == bn_v a0 % bn_v n);
+    assert_norm (bn_v (bn_get_bits_first b i) == 0);
+    assert (bn_v (bn_get_bits_first b (i+1)) == 1);
+    assert_norm (pow (bn_v a0) 1 == bn_v a0);
+    assert_norm (pow (pow2 rBits) 1 == pow2 rBits);
+    assert_norm (pow2 rBits > 0);
+    assert (bn_v acc1 % bn_v n == ((bn_v a * bn_v acc) / pow2 rBits) % bn_v n);
+    lemma_mod_mult_div_1 (bn_v a * bn_v acc) (pow2 rBits) (bn_v n);
+    lemma_mod_plus_mul_distr 0 (bn_v a) (bn_v acc) (bn_v n);
+    lemma_mod_plus_mul_distr 0 (bn_v a0) (bn_v acc0) (bn_v n);
+    lemma_mod_mult_div_1 (bn_v a0 * bn_v acc0) (pow2 rBits) (bn_v n);
+    assert (bn_v acc1 % bn_v n == ((bn_v a0 * bn_v acc0) / pow2 rBits) % bn_v n);
+    assert (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 (i+1) (a1, acc1)) end
+  else lemma_mod_exp_f20 nBits rBits nInv_u64 n bBits b a0 acc0 a acc a1 acc1 i
 
-val lemma_mod_exp_1:
-  n:nat{n > 1} -> a:nat -> a2:nat ->
-  b:nat -> b2:nat -> acc:nat -> acc':nat -> r:nat{r > 0} -> res:nat -> Lemma
-  (requires (a2 % n == (a * a / r) % n /\ b2 == b / 2 /\
-             res % n == ((pow a2 b2) * acc' / pow r b2) % n /\
-             acc' % n == (a * acc / r) % n))
-  (ensures (res % n == ((pow a (2 * b2 + 1)) * acc / pow r (2 * b2 + 1)) % n))
-let lemma_mod_exp_1 n a a2 b b2 acc acc' r res =
-  assert (res % n == ((pow a2 b2) * acc' / pow r b2) % n);
-  lemma_mod_exp n a a2 b b2 acc' r res;
-  lemma_mod_mult_div acc' (pow a (2 * b2)) (pow r (2 * b2)) n;
-  lemma_mod_mult_div (a * acc / r) (pow a (2 * b2)) (pow r (2 * b2)) n;
-  lemma_mod_mult_div_1 ((pow a (2 * b2)) * (a * acc / r)) (pow r (2 * b2)) n;
-  lemma_mult_div_mod (pow a (2 * b2)) (a * acc) r n;
-  lemma_mod_mult_div_1 ((pow a (2 * b2)) * (a * acc) / r) ( pow r (2 * b2)) n;
-  division_multiplication_lemma ((pow a (2 * b2)) * (a * acc)) r (pow r (2 * b2));
-  paren_mul_right (pow a (2 * b2)) a acc;
-  paren_mul_left (pow a (2 * b2)) a acc;
-  assert_norm (pow a 1 = a);
-  lemma_pow a 1 (2 * b2);
-  assert_norm (pow r 1 = r);
-  lemma_pow r 1 (2 * b2)
+val lemma_mod_exp_a2:
+  nBits:size_pos -> rBits:size_pos{nBits + 2 < rBits /\ nBits + rBits + 1 < max_size_t /\ rBits % 64 == 0} ->
+  nInv_u64:bignum 64 -> n:bignum nBits{bn_v n > 0} ->
+  bBits:size_pos -> b:bignum bBits ->
+  a0:bignum (nBits+1) -> acc0:bignum (nBits+1) ->
+  a:bignum (nBits+1) -> acc:bignum (nBits+1) ->
+  a1:bignum (nBits+1) -> i:size_nat{i < bBits} -> Lemma
+  (requires (mod_exp_pred nBits rBits nInv_u64 n bBits b a0 acc0 i (a, acc) /\
+             bn_v a1 % bn_v n == ((bn_v a * bn_v a) / pow2 rBits) % bn_v n))
+  (ensures (bn_v a1 % bn_v n == (pow (bn_v a0) (pow2 (i+1)) / pow (pow2 rBits) (pow2 (i+1) - 1)) % bn_v n))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+let lemma_mod_exp_a2 nBits rBits nInv_u64 n bBits b a0 acc0 a acc a1 i =
+  if (i = 0) then begin
+    assert (bn_v a % bn_v n = bn_v a0 % bn_v n);
+    assert (bn_v a1 % bn_v n == ((bn_v a * bn_v a) / pow2 rBits) % bn_v n);
+    lemma_mod_mult_div_1 (bn_v a * bn_v a) (pow2 rBits) (bn_v n);
+    lemma_mod_plus_mul_distr 0 (bn_v a) (bn_v a) (bn_v n);
+    lemma_mod_plus_mul_distr 0 (bn_v a0) (bn_v a0) (bn_v n);
+    lemma_mod_mult_div_1 (bn_v a0 * bn_v a0) (pow2 rBits) (bn_v n);
+    assert_norm (pow2 1 = 2);
+    assert_norm (pow (pow2 rBits) (pow2 1 - 1) == pow2 rBits);
+    assert_norm (pow (bn_v a0) 2 = bn_v a0 * bn_v a0);
+    assert (bn_v a1 % bn_v n == (pow (bn_v a0) (pow2 1) / pow (pow2 rBits) (pow2 1 - 1)) % bn_v n) end
+  else begin
+    assert (bn_v a % bn_v n = (pow (bn_v a0) (pow2 i) / pow (pow2 rBits) (pow2 i - 1)) % bn_v n);
+    assert (bn_v a1 % bn_v n == ((bn_v a * bn_v a) / pow2 rBits) % bn_v n);
+    lemma_mod_mult_div_1 (bn_v a * bn_v a) (pow2 rBits) (bn_v n);
+    lemma_mod_plus_mul_distr 0 (bn_v a) (bn_v a) (bn_v n);
+    let a_n = pow (bn_v a0) (pow2 i) / pow (pow2 rBits) (pow2 i - 1) in
+    lemma_mod_plus_mul_distr 0 a_n a_n (bn_v n);
+    lemma_mod_mult_div_1 (a_n * a_n) (pow2 rBits) (bn_v n);
+    let al = pow (bn_v a0) (pow2 i) in
+    let bl = pow (pow2 rBits) (pow2 i - 1) in
+    lemma_mul_div_mod al bl al bl (pow2 rBits) (bn_v n);
+    assert (bn_v a1 % bn_v n == ((al * al) / (bl * bl * pow2 rBits)) % bn_v n);
+    lemma_pow (bn_v a0) (pow2 i) (pow2 i);
+    pow2_double_sum i;
+    assert (al * al == pow (bn_v a0) (pow2 (i + 1)));
+    lemma_pow (pow2 rBits) (pow2 i - 1) (pow2 i - 1);
+    pow2_double_sum i;
+    assert (bl * bl == pow (pow2 rBits) (pow2 (i+1) - 2));
+    lemma_pow (pow2 rBits) (pow2 (i+1) - 2) 1;
+    assert_norm (pow (pow2 rBits) 1 == pow2 rBits);
+    assert (bl * bl * pow2 rBits == pow (pow2 rBits) (pow2 (i+1) - 1))
+  end
 
 val lemma_mod_exp_2:
-  n:nat{n > 1} -> a:nat -> a_r:nat ->
+  n:nat{n > 0} -> a:nat -> a_r:nat ->
   b:nat -> acc_r:nat -> r:nat{r > 0} -> res_r:nat -> Lemma
   (requires (a_r % n == (a * r) % n /\ acc_r % n == r % n /\
              res_r % n == ((pow a_r b) * acc_r / pow r b) % n))
   (ensures (res_r % n == ((pow a b) * r) % n))
-  #reset-options "--z3rlimit 50 --max_fuel 2"
+  #reset-options "--z3rlimit 50 --max_fuel 0"
 let lemma_mod_exp_2 n a a_r b acc_r r res_r =
   assert (res_r % n == ((pow a_r b) * acc_r / pow r b) % n);
   lemma_mod_mult_div (pow a_r b) acc_r (pow r b) n;
@@ -206,14 +348,15 @@ let lemma_mod_exp_2 n a a_r b acc_r r res_r =
   lemma_pow_mul a r b;
   assert (res_r % n == (((pow a b * pow r b) % n) * acc_r / pow r b) % n);
   lemma_mod_mult_div (pow a b * pow r b) acc_r (pow r b) n;
-  assert (res_r % n == (pow a b * (pow r b) * acc_r / pow r b) % n);
-  lemma_mult_abc (pow a b) (pow r b) acc_r;
+  assert (res_r % n == (pow a b * pow r b * acc_r / pow r b) % n);
+  lemma_mul_mul (pow a b) (pow r b) acc_r;
   multiple_division_lemma ((pow a b) * acc_r) (pow r b);
   lemma_mod_mul_distr_l acc_r (pow a b) n;
   lemma_mod_mul_distr_l r (pow a b) n
 
 (* LEMMAS for exponent blinding *)
-(*
+let elem n = x:nat{x < n}
+
 val lemma_mod_pq:
   a:nat -> b:nat -> p:nat{p > 1} -> q:nat{q > 1} -> Lemma
   (requires (a % p == b % p /\ a % q == b % q))
@@ -228,11 +371,11 @@ val fermat_little_theorem:
 let fermat_little_theorem p m = admit()
 
 val lemma_exp_blinding_q:
-  n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} ->
-  q:elem n{q > 1} -> m:elem n{m > 0} -> Lemma
+  n:nat{n > 0} -> phi_n:nat -> p:elem n{p > 0} ->
+  q:elem n{q > 0} -> m:elem n{m > 0} -> Lemma
   (requires (phi_n == (p - 1) * (q - 1) /\ n = p * q /\ m % q <> 0))
   (ensures ((pow m phi_n) % q == 1))
-  #reset-options "--z3rlimit 50 --max_fuel 2"
+  #reset-options "--z3rlimit 50 --max_fuel 0"
 let lemma_exp_blinding_q n phi_n p q m =
   let res = (pow m phi_n) % q in
   lemma_pow_pow m (q - 1) (p - 1);
@@ -241,8 +384,8 @@ let lemma_exp_blinding_q n phi_n p q m =
   lemma_pow_1 (p - 1)
 
 val lemma_exp_blinding_pq:
-  n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} ->
-  q:elem n{q > 1} -> m:elem n{m > 0} -> Lemma
+  n:nat{n > 0} -> phi_n:nat -> p:elem n{p > 0} ->
+  q:elem n{q > 0} -> m:elem n{m > 0} -> Lemma
   (requires (phi_n == (p - 1) * (q - 1) /\ n = p * q /\ m % p <> 0 /\ m % q <> 0))
   (ensures ((pow m phi_n) % (p * q) == 1))
   #reset-options "--z3rlimit 50 --max_fuel 0"
@@ -255,7 +398,7 @@ let lemma_exp_blinding_pq n phi_n p q m =
   small_modulo_lemma_1 1 n
 
 val lemma_exp_blinding_1:
-  n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
+  n:nat{n > 0} -> phi_n:nat -> p:elem n{p > 0} -> q:elem n{q > 0} ->
   d:elem n{d > 0} -> m:elem n{m > 0} -> r:nat -> Lemma
   (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % p <> 0 /\ m % q <> 0))
   (ensures ((pow m (d + r * phi_n)) % n  == (pow m d) % n))
@@ -267,13 +410,13 @@ let lemma_exp_blinding_1 n phi_n p q d m r =
   lemma_pow_pow m phi_n r;
   lemma_pow_mod (pow m phi_n) r n;
   assert ((pow (pow m phi_n) r) % n == (pow ((pow m phi_n) % n) r) % n);
-  assert ((pow (pow m phi_n) r) % n == (pow 1 r) % n);
+  //assert ((pow (pow m phi_n) r) % n == (pow 1 r) % n);
   lemma_pow_1 r;
   modulo_lemma 1 n;
   lemma_mod_mul_distr_l (pow m (r * phi_n)) (pow m d) n
 
 val lemma_exp_blinding_0_q0:
-  n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
+  n:nat{n > 0} -> phi_n:nat -> p:elem n{p > 0} -> q:elem n{q > 0} ->
   d:elem n{d > 0} -> m:elem n{m > 0} -> r:nat -> Lemma
   (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % q = 0))
   (ensures ((pow m (d + r * phi_n)) % q == (pow m d) % q))
@@ -286,7 +429,7 @@ let lemma_exp_blinding_0_q0 n phi_n p q d m r =
   lemma_pow_0 d
 
 val lemma_exp_blinding_0_q1:
-  n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
+  n:nat{n > 0} -> phi_n:nat -> p:elem n{p > 0} -> q:elem n{q > 0} ->
   d:elem n{d > 0} -> m:elem n{m > 0} -> r:nat -> Lemma
   (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % p <> 0))
   (ensures ((pow m (d + r * phi_n)) % p == (pow m d) % p))
@@ -307,7 +450,7 @@ let lemma_exp_blinding_0_q1 n phi_n p q d m r =
   assert (res % p == ((pow m d) * 1) % p)
 
 val lemma_exp_blinding_0_q:
-  n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
+  n:nat{n > 0} -> phi_n:nat -> p:elem n{p > 0} -> q:elem n{q > 0} ->
   d:elem n{d > 0} -> m:elem n{m > 0} -> r:nat -> Lemma
   (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % q = 0 /\ m % p <> 0))
   (ensures ((pow m (d + r * phi_n)) % n == (pow m d) % n))
@@ -319,7 +462,7 @@ let lemma_exp_blinding_0_q n phi_n p q d m r =
   assert (res % n == (pow m d) % n)
 
 val lemma_exp_blinding_0_pq:
-  n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
+  n:nat{n > 0} -> phi_n:nat -> p:elem n{p > 0} -> q:elem n{q > 0} ->
   d:elem n{d > 0} -> m:elem n -> r:nat -> Lemma
   (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\ m % q = 0 /\ m % p = 0))
   (ensures ((pow m (d + r * phi_n)) % n == (pow m d) % n))
@@ -335,7 +478,7 @@ let lemma_exp_blinding_0_pq n phi_n p q d m r =
   lemma_pow_0 d
 
 val lemma_exp_blinding_0:
-  n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
+  n:nat{n > 0} -> phi_n:nat -> p:elem n{p > 0} -> q:elem n{q > 0} ->
   d:elem n{d > 0} -> m:elem n -> r:nat -> Lemma
   (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q /\
             (m = 0 \/ m % p = 0 \/ m % q = 0)))
@@ -357,7 +500,7 @@ let lemma_exp_blinding_0 n phi_n p q d m r =
   end
 
 val lemma_exp_blinding:
-  n:nat{n > 1} -> phi_n:nat -> p:elem n{p > 1} -> q:elem n{q > 1} ->
+  n:nat{n > 0} -> phi_n:nat -> p:elem n{p > 0} -> q:elem n{q > 0} ->
   d:elem n{d > 0} -> m:elem n -> r:nat -> Lemma
   (requires (phi_n = (p - 1) * (q - 1) /\ n = p * q))
   (ensures ((pow m (d + r * phi_n)) % n  == (pow m d) % n))
@@ -365,4 +508,3 @@ let lemma_exp_blinding n phi_n p q d m r =
   if (m = 0 || m % p = 0 || m % q = 0) then
     lemma_exp_blinding_0 n phi_n p q d m r
   else lemma_exp_blinding_1 n phi_n p q d m r
-*)

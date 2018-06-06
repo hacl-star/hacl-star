@@ -30,9 +30,9 @@ let blocks (x:size_nat) (m:size_nat{m > 0}): (r:size_nat{x <= m * r}) =
 let size_pos = x:size_nat{x > 0}
 let carry = x:uint8{uint_v x == 0 \/ uint_v x == 1}
 
-val bignum:bits:size_pos -> Type0
+val bignum:bits:size_nat -> Type0
 
-val bn_v:#bits:size_pos -> bignum bits -> GTot (r:nat{r < pow2 bits})
+val bn_v:#bits:size_nat -> bignum bits -> GTot (r:nat{r < pow2 bits})
 val bn_const_1:#bits:size_pos -> r:bignum bits{bn_v r == 1}
 
 val bn_cast_le:#n:size_pos -> m:size_pos{m <= n} -> b:bignum n{bn_v b < pow2 m} -> c:bignum m{bn_v c == bn_v b}
@@ -46,7 +46,7 @@ val bn_sub:#n:size_pos -> #m:size_pos{m <= n} -> a:bignum n -> b:bignum m {bn_v 
 
 val bn_mul:#n:size_pos -> #m:size_pos{n + m < max_size_t} -> a:bignum n -> b:bignum m -> c:bignum (n + m){bn_v c == bn_v a * bn_v b}
 
-val bn_get_bit:#n:size_pos -> b:bignum n -> i:size_nat{i < n} -> c:nat{c == 0 \/ c == 1}
+val bn_get_bit:#n:size_pos -> b:bignum n -> i:size_nat{i < n} -> c:nat{(c == 0 \/ c == 1) /\ c == (bn_v b / pow2 i) % 2}
 val bn_get_bits:#n:size_pos -> b:bignum n -> i:size_nat{i < n /\ i % 64 == 0} -> j:size_pos{i < j /\ j % 64 == 0 /\ j <= n} -> c:bignum (j - i){bn_v c == (bn_v b / pow2 i) % pow2 (j - i)}
 val bn_rshift:#n:size_pos -> b:bignum n -> i:size_pos{i < n /\ i % 64 == 0} -> c:bignum (n - i){bn_v c == bn_v b / pow2 i}
 
