@@ -25,7 +25,7 @@ impl chacha20_poly1305_impl = Hacl;
 bool detect_aesni() {
   int features[4];
   // 1: request feature bits
-  __cpuid(b, 1);
+  __cpuid(features, 1);
   return (features[3] & 0x2000000) != 0;
 }
 
