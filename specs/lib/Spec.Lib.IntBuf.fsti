@@ -116,6 +116,20 @@ inline_for_extraction val alloc_with: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type
 		          modifies1 write h0 h1 /\
 		          spec h0 r (as_lseq write h1)))
 
+
+inline_for_extraction val alloc_nospec: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 -> #len:size_nat -> #wlen:size_nat -> clen:size_t{v clen == len} -> init:a ->
+  write:lbuffer w wlen ->
+  impl:(buf:lbuffer a len -> Stack b
+    (requires (fun h -> creates1 #a #len buf h0 h /\
+		     preserves_live h0 h /\
+		     modifies1 buf h0 h /\
+		     live h0 write))
+    (ensures (fun h r h' -> preserves_live h h' /\ modifies2 buf write h h'))) ->
+  Stack b
+    (requires (fun h -> h == h0 /\ live h write))
+    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
+		          modifies1 write h0 h1))
+
 (* Various Allocation Patterns *)
 
 val map: #a:Type -> #len:size_nat -> clen:size_t{v clen == len} -> f:(a -> Tot a) -> b:lbuffer a (len) ->
@@ -273,6 +287,23 @@ val loop_set:
                          LSeq.sub b1 (v start) (v n) == LSeq.create #a len init)))
 
 
+let loop_nospec_inv (h0:mem) (h1:mem) (#a:Type) (len:size_nat) (n:size_nat)  (buf:lbuffer a len) (i:size_nat{i <= n}) : Type =
+  live h0 buf /\ preserves_live h0 h1
+  /\ modifies1 buf h0 h1
+
+val loop_nospec:
+  #h0:mem ->
+  #a:Type0 ->
+  #len:size_nat ->
+  n:size_t ->
+  buf:lbuffer a len ->
+  impl:(i:size_t{v i < v n} -> Stack unit
+    (requires (fun h -> loop_nospec_inv h0 h #a len (v n) buf (v i)))
+	 (ensures (fun _ _ h1 -> loop_nospec_inv h0 h1 #a len (v n) buf (v i + 1)))) ->
+  Stack unit
+	 (requires (fun h -> live h buf /\ h0 == h))
+	 (ensures (fun _ _ h1 -> preserves_live h0 h1
+                       /\ modifies1 buf h0 h1))
 
 #reset-options "--z3rlimit 1000 --max_fuel 0"
 open FStar.Mul

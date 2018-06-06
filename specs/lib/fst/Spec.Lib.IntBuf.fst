@@ -61,6 +61,18 @@ let alloc_with #h0 #a #b #w #len #wlen clen init_spec init write spec impl =
   pop_frame();
   r
 
+let alloc_nospec #h0 #a #b #w #len #wlen clen init write impl =
+  push_frame();
+  let buf = create clen init in
+  let r = impl buf in
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      upd #a #len buf j init in
+  Spec.Lib.Loops.for (size 0) clen inv f';
+  pop_frame();
+  r
 
 let map #a #len clen f b =
   let h0 = ST.get() in
@@ -172,6 +184,14 @@ inline_for_extraction let loop_set #a #len buf start n init =
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       upd buf j init in
   Spec.Lib.Loops.for start n inv f'
+
+inline_for_extraction let loop_nospec #h0 #a #len n buf impl =
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      impl j in
+  Spec.Lib.Loops.for (size 0) n inv f'
 
 
 inline_for_extraction let map_blocks #h0 #a #bs #nb blocksize nblocks buf f_spec f =
