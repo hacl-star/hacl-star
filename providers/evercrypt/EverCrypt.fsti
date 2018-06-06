@@ -4,8 +4,6 @@ open FStar.HyperStack.ST
 open EverCrypt.Helpers
 open EverCrypt.Specs
 
-include EverCrypt.Native
-
 ///  SHA256
 
 /// Incremental API

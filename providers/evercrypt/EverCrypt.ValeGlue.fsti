@@ -1,4 +1,8 @@
-module EverCrypt.Vale
+module EverCrypt.ValeGlue
+
+/// The functions is this module are implemented in C and do a little bit of
+/// adapting / gluing before calling Vale. The implementation is in
+/// c/evercrypt_vale_glue.c. Eventually the glue code should be written in Low*.
 
 open EverCrypt.Helpers
 

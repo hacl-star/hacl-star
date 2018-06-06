@@ -1,20 +1,22 @@
-module EverCrypt.Native
+module EverCrypt.AutoConfig
 
+open EverCrypt.Helpers
 open FStar.HyperStack.ST
 
 /// Multiplexing support
 type impl = | Hacl | Vale | OpenSSL
 
-type cfg = 
+type cfg =
 | Default
 | Prefer: preferred:impl -> cfg
 
-val sha256_impl: impl
-val sha384_impl: impl
-val sha512_impl: impl
-val x25519_impl: impl
-val aes_gcm_impl: impl
-val chacha20_poly1305_impl: impl
+let getter a = unit -> Stack_ a
+val sha256_impl: getter impl
+val sha384_impl: getter impl
+val sha512_impl: getter impl
+val x25519_impl: getter impl
+val aes256_gcm_impl: getter impl
+val chacha20_poly1305_impl: getter impl
 
 /// By default, EverCrypt calls into Hacl whenever available, and defaults to
 /// OpenSSL for the algorithms that are not yet implemented by HACL.
