@@ -1,9 +1,9 @@
 module Spec.Chacha20
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
-open Spec.Lib.RawIntTypes
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 #set-options "--max_fuel 0 --z3rlimit 100"
 

@@ -1,8 +1,9 @@
 module Spec.CTR
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
