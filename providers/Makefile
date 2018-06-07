@@ -162,7 +162,7 @@ HACL_SOURCES	= \
 
 EVERCRYPT_SOURCES = \
   $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c EverCrypt_ValeGlue.c) \
-  $(addprefix evercrypt/c/evercrypt_,autoconfig.c bytes.c)
+  $(addprefix evercrypt/c/evercrypt_,autoconfig.c bytes.c vale_stubs.c)
 
 ifneq ($(CONFIG),noopenssl)
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_openssl.c
