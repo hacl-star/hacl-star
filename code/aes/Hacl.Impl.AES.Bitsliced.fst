@@ -53,10 +53,10 @@ let to_transpose_step_left w i j =
   (w &. ((u8 1) <<. is8)) <<. (is8 -. js8)
 
 
-val to_transpose_step: transpose_t -> state_t -> i:size_t{v i < 8} -> j:size_t{v j < 16} ->
+val to_transpose_step: output:transpose_t -> input:state_t -> i:size_t{v i < 8} -> j:size_t{v j < 16} ->
   Stack unit
-  (requires (fun h -> True))
-  (ensures  (fun h0 _ h1 -> True))
+  (requires (fun h -> live h output /\ live h input))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1))
 
 let to_transpose_step output input i j =
   let output_i : uint16 = output.(i) in
@@ -70,10 +70,10 @@ let to_transpose_step output input i j =
   upd output i output_nv
 
 
-val to_transpose_loop_inner: transpose_t -> state_t -> i:size_t{v i < 8} ->
+val to_transpose_loop_inner: output:transpose_t -> input:state_t -> i:size_t{v i < 8} ->
   Stack unit
-  (requires (fun h -> True))
-  (ensures  (fun h0 _ h1 -> True))
+  (requires (fun h -> live h output /\ live h input))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1))
 
 let to_transpose_loop_inner output input i =
   let h0 = ST.get () in
@@ -81,10 +81,10 @@ let to_transpose_loop_inner output input i =
     (fun j -> to_transpose_step output input i j)
 
 
-val to_transpose_loop: transpose_t -> state_t ->
+val to_transpose_loop: output:transpose_t -> input:state_t ->
   Stack unit
-  (requires (fun h -> True))
-  (ensures  (fun h0 _ h1 -> True))
+  (requires (fun h -> live h output /\ live h input))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1))
 
 let to_transpose_loop output input =
   let h0 = ST.get () in
@@ -92,10 +92,10 @@ let to_transpose_loop output input =
     (fun i -> to_transpose_loop_inner output input i)
 
 
-val to_transpose: transpose_t -> state_t ->
+val to_transpose: output:transpose_t -> input:state_t ->
   Stack unit
-  (requires (fun h -> True))
-  (ensures  (fun h0 _ h1 -> True))
+  (requires (fun h -> live h output /\ live h input))
+  (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1))
 
 let to_transpose output input =
   loop_set output (size 0) (size 16) (u16 0);
