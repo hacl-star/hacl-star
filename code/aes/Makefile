@@ -38,6 +38,9 @@ aes_test.exe: aes-c/Hacl_Impl_AES_Bitsliced.c aes_test.c
 	$(CC) $(CFLAGS) aes-c/Hacl_Impl_AES_Bitsliced.c aes_test.c -o aes_test.exe
 	./aes_test.exe
 
+
+extract-c: aes-c/Hacl_Impl_AES_Bitsliced.c
+
 #
 # Clean
 #
