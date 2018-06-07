@@ -636,7 +636,7 @@ let key_expansion output key rcon =
   (fun i -> key_expansion_step output rcon (i +. (size 1)))
 
 
-val aes128_block: state_t -> key_w -> nonce_t -> uint8 ->
+val aes128_block: state_t -> key_w -> nonce_t -> size_t ->
   Stack unit
   (requires (fun h -> True))
   (ensures  (fun h0 _ h1 -> True))
@@ -647,9 +647,84 @@ let aes128_block output kex n c =
   (fun input ->
     let sub_input = sub input (size 0) (size 12) in
     copy sub_input (size 12) n;
-    upd input (size 12) (c >>. (size_to_uint32 (size 24)));
-    upd input (size 13) (c >>. (size_to_uint32 (size 16)));
-    upd input (size 14) (c >>. (size_to_uint32 (size 8)));
-    upd input (size 15) c;
+    upd input (size 12) ((to_u8 c) >>. (size_to_uint32 (size 24)));
+    upd input (size 13) ((to_u8 c) >>. (size_to_uint32 (size 16)));
+    upd input (size 14) ((to_u8 c) >>. (size_to_uint32 (size 8)));
+    upd input (size 15) (to_u8 c);
     block_cipher output input kex
+  )
+
+
+val aes128_ctr_loop_inner_step: #vlen:size_nat -> block_t -> lbuffer uint8 vlen -> lbuffer uint8 16 -> size_t -> size_t ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 _ h1 -> True))
+
+let aes128_ctr_loop_inner_step #vlen output input kb i j =
+  let idx = ((size 16) *. i) +. j in
+  let in_idx = input.(idx) in
+  let kb_j = kb.(j) in
+  upd output i (in_idx ^. kb_j)
+
+
+val aes128_ctr_loop1_inner: #vlen:size_nat -> block_t -> lbuffer uint8 vlen -> lbuffer uint8 16 -> size_t ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 _ h1 -> True))
+
+let aes128_ctr_loop1_inner #vlen output input kb i =
+  let h0 = ST.get () in
+  loop_nospec #h0 (size 16) output
+  (fun j -> aes128_ctr_loop_inner_step #vlen output input kb i j)
+
+
+val aes128_ctr_loop1: #vlen:size_nat -> block_t -> lbuffer uint8 vlen -> key_w -> lbuffer uint8 12 -> lbuffer uint8 16 -> size_t -> size_t ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 _ h1 -> True))
+
+let aes128_ctr_loop1 #vlen output input kex nonce kb nblocks c =
+  let h0 = ST.get () in
+  loop_nospec #h0 nblocks output
+  (fun i ->
+    aes128_block kb kex nonce (c +. i);
+    aes128_ctr_loop1_inner #vlen output input kb i)
+
+
+val aes128_ctr_loop2: #vlen:size_nat -> block_t -> lbuffer uint8 vlen -> lbuffer uint8 16 -> size_t -> size_t ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 _ h1 -> True))
+
+let aes128_ctr_loop2 #vlen output input kb nblocks rem =
+  let h0 = ST.get () in
+  loop_nospec #h0 rem output
+  (fun j -> aes128_ctr_loop_inner_step #vlen output input kb nblocks j)
+
+
+val aes128_ctr: #vlen:size_nat -> block_t -> lbuffer uint8 vlen -> size_t -> state_t -> nonce_t -> size_t ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 _ h1 -> True))
+
+let aes128_ctr #vlen output input len key nonce c =
+  let rcon = create_const_rcon () in
+  (**) let h0 = ST.get () in
+  alloc_nospec #h0 (size 8 *. size 11) (u16 0) output
+  (fun kex ->
+    (**) let h0 = ST.get () in
+    alloc_nospec #h0 (size 16) (u8 0) output
+    (fun kb ->
+      (**) let h0 = ST.get () in
+      alloc_nospec #h0 (size size_key_w) (u16 0) output
+      (fun kexw ->
+        key_expansion kex key rcon;
+        let nblocks = len /. (size size_block) in
+        let rem = len %. (size size_block) in
+        aes128_ctr_loop1 #vlen output input kexw nonce kb nblocks c;
+        if rem >=. (size 0) then
+          aes128_block kb kexw nonce (c +. nblocks);
+          aes128_ctr_loop2 #vlen output input kb nblocks rem
+      )
+    )
   )
