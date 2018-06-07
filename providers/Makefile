@@ -161,8 +161,8 @@ HACL_SOURCES	= \
   $(HACL_CODE)/api/aead-c/Hacl_Chacha20Poly1305.c
 
 EVERCRYPT_SOURCES = \
-  $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c) \
-  $(addprefix evercrypt/c/evercrypt_,autoconfig.c vale_glue.c bytes.c)
+  $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c EverCrypt_ValeGlue.c) \
+  $(addprefix evercrypt/c/evercrypt_,autoconfig.c bytes.c)
 
 ifneq ($(CONFIG),noopenssl)
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_openssl.c
