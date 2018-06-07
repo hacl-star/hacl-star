@@ -1,20 +1,40 @@
 module MPFR.Lib
+open FStar.Mul
+open FStar.Math.Lemmas
 open FStar.HyperStack.All
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Buffer
 open FStar.UInt64
 
+module I32 = FStar.Int32
+module U32 = FStar.UInt32
+
+open MPFR.Lib.Spec
+
 // GENERIC LIBRARY DEFINITIONS
-
-
 type i32 = FStar.Int32.t
 type u32 = FStar.UInt32.t
 type u64 = FStar.UInt64.t
 
-type mpfr_prec_t = u32
-type mpfr_sign_t = i:i32{i = 1l \/ i = -1l}
-type mpfr_exp_t = i:i32{FStar.Int32.v i < pow2 30 /\ FStar.Int32.v i > 1 - pow2 30}
+let gmp_NUMB_BITS = 64ul
+let mpfr_PREC_MIN = 1ul
+let mpfr_PREC_MAX = U32.(gmp_NUMB_BITS -^ 1ul)
+let mpfr_PREC_COND (p:u32) = U32.(mpfr_PREC_MIN <=^ p /\ p <=^ mpfr_PREC_MAX)
+
+val mpfr_EXP_INVALID: x:i32{I32.v x = pow2 30}
+let mpfr_EXP_INVALID = assert_norm(0x40000000 = pow2 30); 0x40000000l
+let mpfr_EMIN = I32.(1l -^ mpfr_EXP_INVALID)
+let mpfr_EMAX = I32.(mpfr_EXP_INVALID -^ 1l)
+let mpfr_EXP_COND (x:i32) = I32.(mpfr_EMIN <=^ x /\ x <=^ mpfr_EMAX)
+
+let mpfr_SIGN_POS = 1l
+let mpfr_SIGN_NEG = -1l
+let mpfr_SIGN_COND (s:i32) = I32.(s =^ mpfr_SIGN_POS \/ s =^ mpfr_SIGN_NEG)
+
+type mpfr_prec_t = p:u32{mpfr_PREC_COND p}
+type mpfr_sign_t = s:i32{mpfr_SIGN_COND s}
+type mpfr_exp_t  = x:i32{mpfr_EXP_COND  x}
 type mpfr_uexp_t = u32
 type mp_limb_t = u64
 
@@ -27,6 +47,39 @@ noeq type mpfr_struct = {
     mpfr_d: buffer mp_limb_t
 }
 
+let valid_struct h (s:mpfr_struct) =
+    let l = length s.mpfr_d in
+    l >= 1 /\ (l - 1) * 64 < U32.v s.mpfr_prec /\ U32.v s.mpfr_prec <= l * 64 /\
+    v (get h s.mpfr_d 0) >= pow2 63 /\
+    v (get h s.mpfr_d (l - 1)) % pow2 (l * 64 - U32.v s.mpfr_prec) = 0
+
+(* Conversion to pure struct *)
+val to_val: s:Seq.seq u64 -> Tot nat (decreases (Seq.length s))
+let rec to_val (s:Seq.seq u64) = 
+    if Seq.length s = 0 then 0
+    else (v (Seq.index s 0)) * pow2 ((Seq.length s - 1) * 64) + to_val (Seq.slice s 1 (Seq.length s))
+
+let as_val h (b:buffer mp_limb_t) = to_val (as_seq h b)
+
+val as_pure: h:mem -> s:mpfr_struct{valid_struct h s} ->
+    GTot (ps:mpfr_structP{valid_structP ps /\
+             I32.v s.mpfr_sign = ps.sign /\
+	     U32.v s.mpfr_prec = ps.prec /\
+	     I32.v s.mpfr_exp  = ps.exp + ps.prec /\
+             as_val h s.mpfr_d = ps.mant * pow2 (length s.mpfr_d * 64 - U32.v s.mpfr_prec)})
+let as_pure h s =
+    let p = U32.v s.mpfr_prec in
+    let l = length s.mpfr_d in
+    let m = as_val h s.mpfr_d / pow2 (l * 64 - p) in
+    lemma_div_lt (as_val h s.mpfr_d) (l * 64) (l * 64 - p);
+    lemma_div_le (pow2 (l * 64 - 1)) (as_val h s.mpfr_d) (pow2 (l * 64 - p));
+    pow2_minus (l * 64 - 1) (l * 64 - p);
+    {sign = I32.v s.mpfr_sign;
+     prec = p;
+     mant = as_val h s.mpfr_d / pow2 (length s.mpfr_d * 64 - U32.v s.mpfr_prec);
+     exp  = I32.v s.mpfr_exp - U32.v s.mpfr_prec}
+
+(* Struct functions *)
 type mpfr_ptr = b:buffer mpfr_struct{length b = 1}
 
 val mk_mpfr_struct: mpfr_prec_t -> mpfr_sign_t -> mpfr_exp_t -> buffer mp_limb_t -> Tot mpfr_struct
@@ -88,21 +141,16 @@ type mpfr_rnd_t =
    | MPFR_RNDF
    | MPFR_RNDNA
 
-
-let gmp_NUMB_BITS = 64ul
-
 open FStar.UInt
-open FStar.Math.Lemmas
 
 let mpfr_LIMB_ONE = 1uL
 
-val mpfr_LIMB_MASK: s:u32{FStar.UInt32.v s < 64} ->
-    Tot (r:u64{forall (i:nat{0 <= i /\ i < 64}). i >= 64 - FStar.UInt32.v s <==> nth (v r) i == true})
-#set-options "--z3refresh --z3rlimit 5 --log_queries"
+val mpfr_LIMB_MASK: s:u32{U32.v s < 64} ->
+    Tot (r:u64{forall (i:nat{0 <= i /\ i < 64}). i >= 64 - U32.v s <==> nth (v r) i == true})
 let mpfr_LIMB_MASK s =
     let lsh = 1uL <<^ s in
-    pow2_lt_compat 64 (FStar.UInt32.v s);
-    small_modulo_lemma_1 (pow2 (FStar.UInt32.v s)) (pow2 64);
+    pow2_lt_compat 64 (U32.v s);
+    small_modulo_lemma_1 (pow2 (U32.v s)) (pow2 64);
     lsh -^ 1uL
 
 val mpfr_LIMB_HIGHBIT: s:u64{forall (i:nat{0 <= i /\ i < 64}). i == 0 <==> nth (v s) i == true}
@@ -121,4 +169,4 @@ assume val mpfr_IS_RNDUTEST_OR_RNDDNOTTEST: mpfr_rnd_t -> i32 -> Tot bool
 
 assume val mpfr_IS_LIKE_RNDZ: mpfr_rnd_t -> i32 -> Tot bool
 
-let mpfr_IS_NEG x = FStar.Int32.(mpfr_SIGN x <^ 0l)
+let mpfr_IS_NEG x = I32.(mpfr_SIGN x <^ 0l)
