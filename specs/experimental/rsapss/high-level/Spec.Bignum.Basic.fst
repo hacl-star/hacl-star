@@ -17,6 +17,10 @@ let bn_const_1 #n =
   assert_norm (1 < pow2 n);
   bn 1
 
+let bn_const_0 #n =
+  assert_norm (0 < pow2 n);
+  bn 0
+
 let bn_cast_le #n m b = bn #m b
 let bn_cast_gt #n m b = bn #m b
 
@@ -30,6 +34,11 @@ let bn_add #n #m a b =
   let c = (a + b) / pow2 n in
   assume (c < pow2 1);
   (u8 c, bn #n res)
+
+let bn_add_carry #n #m a b =
+  let res = a + b in
+  assume (res < pow2 (n + 1));
+  bn res
 
 let bn_sub #n #m a b = a - b
 
@@ -62,6 +71,13 @@ let lemma_bn_lshift_mul_add #n #m x i y z = admit()
 let bn_lshift_mul_add #n #m x i y z =
   lemma_bn_lshift_mul_add #n #m x i y z;
   let res = x * (pow2 i) * y + z in
+  let r = res % pow2 m in
+  let c = res / pow2 m in
+  assume (c < pow2 1);
+  (u8 c, bn #m r)
+
+let bn_lshift_add #n #m x i z =
+  let res = x * (pow2 i) + z in
   let r = res % pow2 m in
   let c = res / pow2 m in
   assume (c < pow2 1);

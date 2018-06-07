@@ -30,7 +30,7 @@ let eval (len:size_pos) s = eval_i len s len
 val bval: bLen:size_pos -> b:bignum_i bLen -> i:size_nat -> Tot uint64
 let bval bLen b i = if (i < bLen) then b.[i] else u64 0
 
-noeq type bignum (nBits:size_pos) =
+noeq type bignum (nBits:size_nat) =
   | Bignum:len:size_pos -> bn:bignum_i len{eval len bn < pow2 nBits} -> bignum nBits
 
 let bn_v #nBits b = eval b.len b.bn
