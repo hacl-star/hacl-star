@@ -23,21 +23,35 @@ impl chacha20_poly1305_impl = Hacl;
 
 #include <intrin.h>
 bool detect_aesni() {
+// X64: cpuid exists, we have vale code that uses aesni, detect
+#if defined(_M_X64)
   int features[4];
   // 1: request feature bits
   __cpuid(features, 1);
   return (features[3] & 0x2000000) != 0;
+// X86: cpuid exists, but we do not have vale code; bail
+#elif defined(_M_IX86)
+  return false;
+// other architectures: no cpuid intrinsic, todo
+#else
+  return false;
+#endif
 }
 
 #else // _MSC_VER
 
 #include <cpuid.h>
 bool detect_aesni() {
+// Same logic as above
+#if defined(__x86_64)
   // https://github.com/gcc-mirror/gcc/blob/master/gcc/config/i386/cpuid.h
   unsigned int eax, ebx, ecx, edx;
   if (!__get_cpuid(1, &eax, &ebx, &ecx, &edx))
     return false;
   return (ecx & bit_AES) != 0;
+#else
+  return false;
+#endif
 }
 
 #endif // _MSC_VER
