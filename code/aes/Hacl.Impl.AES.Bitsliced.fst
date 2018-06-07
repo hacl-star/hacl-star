@@ -728,3 +728,19 @@ let aes128_ctr #vlen output input len key nonce c =
       )
     )
   )
+
+
+val aes128_encrypt: #vlen:size_nat -> block_t -> lbuffer uint8 vlen -> size_t -> state_t -> nonce_t -> size_t ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 _ h1 -> True))
+
+let aes128_encrypt #vlen output input len key nonce c = aes128_ctr #vlen output input len key nonce c
+
+
+val aes128_decrypt: #vlen:size_nat -> block_t -> lbuffer uint8 vlen -> size_t -> state_t -> nonce_t -> size_t ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures  (fun h0 _ h1 -> True))
+
+let aes128_decrypt #vlen output input len key nonce c = aes128_ctr #vlen output input len key nonce c
