@@ -291,6 +291,7 @@ let loop_nospec_inv (h0:mem) (h1:mem) (#a:Type) (len:size_nat) (n:size_nat)  (bu
   live h0 buf /\ preserves_live h0 h1
   /\ modifies1 buf h0 h1
 
+inline_for_extraction
 val loop_nospec:
   #h0:mem ->
   #a:Type0 ->
