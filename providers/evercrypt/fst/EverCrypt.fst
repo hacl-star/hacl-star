@@ -169,13 +169,15 @@ let aes256_gcm_encrypt cipher tag key iv plaintext len ad adlen =
   if SC.vale && i = AC.Vale then begin
     push_frame ();
     let open EverCrypt.Vale in
+    let expanded = B.create 0uy FStar.UInt32.(11ul *^ 16ul) in
+    Vale.aes_key_expansion key expanded;
     let b = B.create ({
       plain = plaintext;
       plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
       aad = ad;
       aad_len = FStar.Int.Cast.Full.uint32_to_uint64 adlen;
       iv = iv;
-      expanded_key = key;
+      expanded_key = expanded;
       cipher = cipher;
       tag = tag
     }) 1ul in
