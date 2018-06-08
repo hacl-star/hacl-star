@@ -47,7 +47,7 @@ all_: $(OUT_DIR)/libevercrypt.a $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)/evercry
 
 .PHONY: test
 test:
-	$(MAKE) -C test test
+	$(MAKE) -C test
 
 # 1. Generation of the .krml files
 # - generate the F* dependency graph via `fstar --dep full`
