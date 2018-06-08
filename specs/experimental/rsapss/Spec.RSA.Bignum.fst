@@ -70,7 +70,7 @@ val add_sign:
 	     sa2 = (if (bn_v a0 >= bn_v a1) then Positive else Negative) /\
 	     sb2 = (if (bn_v b0 >= bn_v b1) then Positive else Negative)))
   (ensures (fun res -> bn_v res == bn_v (bn_add_carry (bn_mul a1 b0) (bn_mul a0 b1))))
-  #reset-options "--z3rlimit 300 --max_fuel 0"
+  #reset-options "--z3rlimit 150 --max_fuel 0"
 let add_sign #a0Bits #a1Bits c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 =
   lemma_add_sign (bn_v c0) (bn_v c1) (bn_v c2) (bn_v a0) (bn_v a1) (bn_v a2) (bn_v b0) (bn_v b1) (bn_v b2) sa2 sb2;
   let c01 = bn_add_carry c0 c1 in
@@ -325,9 +325,9 @@ let mod_exp #aBits nBits n a bBits b =
 
 val rsa_blinding:
   #mBits:size_pos ->
-  nBits:size_pos{64 <= nBits /\ 2 * 64 * (blocks nBits 64 + 1) < max_size_t} -> n:bignum nBits{0 < bn_v n} ->
-  pBits:size_pos -> p:bignum pBits{0 < bn_v p /\ bn_v p < bn_v n} ->
-  qBits:size_pos{pBits + qBits + 64 < max_size_t} -> q:bignum qBits{0 < bn_v q /\ bn_v q < bn_v n /\ bn_v n == bn_v p * bn_v q} ->
+  nBits:size_pos{64 <= nBits /\ 2 * 64 * (blocks nBits 64 + 1) < max_size_t} -> n:bignum nBits{1 < bn_v n} ->
+  pBits:size_pos -> p:bignum pBits{1 < bn_v p /\ bn_v p < bn_v n} ->
+  qBits:size_pos{pBits + qBits + 64 < max_size_t} -> q:bignum qBits{1 < bn_v q /\ bn_v q < bn_v n /\ bn_v n == bn_v p * bn_v q} ->
   m:bignum mBits{mBits <= nBits /\ bn_v m < bn_v n} ->
   dBits:size_pos{dBits < pBits + qBits + 64} -> d:bignum dBits{0 < bn_v d /\ bn_v d < bn_v n} ->
   rBlind:bignum 64 -> Tot (s:bignum nBits{bn_v s == (pow (bn_v m) (bn_v d)) % bn_v n})
@@ -339,10 +339,7 @@ let rsa_blinding #mBits nBits n pBits p qBits q m dBits d rBlind =
   let phi_n = bn_mul p1 q1 in
   let d1 = bn_mul phi_n rBlind in
   let (c, d2) = bn_add d1 d in
-  assert (bn_v d2 + uint_v c * pow2 (pBits + qBits + 64) == bn_v d1 + bn_v d);
-  assume (bn_v d1 + bn_v d < pow2 (pBits + qBits + 64));
-  assert (uint_v c == 0);
+  assume (bn_v d2 == bn_v d1 + bn_v d);
   let s = mod_exp nBits n m (pBits + qBits + 64) d2 in
-  //lemma_exp_blinding (bn_v n) (bn_v phi_n) (bn_v p) (bn_v q) (bn_v d) (bn_v m) (bn_v rBlind);
-  admit();
+  lemma_exp_blinding_bn #nBits #pBits #qBits #dBits #mBits n phi_n p q d m rBlind;
   s
