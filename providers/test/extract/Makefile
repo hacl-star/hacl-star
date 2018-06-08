@@ -11,6 +11,8 @@ LDFLAGS = -L $(EVERCRYPT_HOME) -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))
 LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
+else
+LDFLAGS += -lbcrypt
 endif
 
 # See https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html

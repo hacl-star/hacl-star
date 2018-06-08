@@ -164,7 +164,9 @@ EVERCRYPT_SOURCES = \
   $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c EverCrypt_ValeGlue.c) \
   $(addprefix evercrypt/c/evercrypt_,autoconfig.c bytes.c vale_stubs.c)
 
-ifneq ($(CONFIG),noopenssl)
+ifeq ($(CONFIG),noopenssl)
+EVERCRYPT_SOURCES += evercrypt/c/evercrypt_bcrypt.c
+else
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_openssl.c
 endif
 
@@ -217,7 +219,10 @@ $(OUT_DIR):
 
 ifeq (,$(EVEREST_WINDOWS))
 LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
+else
+LDFLAGS += -lbcrypt
 endif
+
 ifeq ($(UNAME),Linux)
 LDFLAGS += -ldl -lpthread
 endif

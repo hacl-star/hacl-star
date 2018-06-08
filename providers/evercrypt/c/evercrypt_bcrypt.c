@@ -8,7 +8,12 @@
   #else
     #include <windows.h>
   #endif
+
+  #include <ntdef.h>
   #include <bcrypt.h>
+  #ifndef BCRYPT_AES_GCM_ALG_HANDLE
+  #define BCRYPT_AES_GCM_ALG_HANDLE ((BCRYPT_ALG_HANDLE) 0x000001e1)
+  #endif
 #else
   #define IS_WINDOWS 0
   #include <unistd.h>
@@ -39,12 +44,12 @@ static int bcrypt_aead(ULONG key_size, int enc,
   uint8_t *ciphertext, uint8_t *tag)
 {
 #if IS_WINDOWS
-  BCRYPT_KEY_HANDLE* phKey;
+  BCRYPT_KEY_HANDLE hKey = NULL;
   BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO Info;
   NTSTATUS s;
   ULONG OutSize;
 
-  s = BCryptGenerateSymmetricKey(BCRYPT_AES_GCM_ALG_HANDLE, key, NULL, 0, phKey, key_size, 0);
+  s = BCryptGenerateSymmetricKey(BCRYPT_AES_GCM_ALG_HANDLE, &hKey, NULL, 0, key, key_size, 0);
   if(!NT_SUCCESS(s)) return 0;
 
   BCRYPT_INIT_AUTH_MODE_INFO(Info);
@@ -56,9 +61,11 @@ static int bcrypt_aead(ULONG key_size, int enc,
   Info.cbNonce = 12;
 
   if(enc)
-    s = BCryptEncrypt(phKey, plaintext, plaintext_len, &Info, iv, 12, ciphertext, plaintext_len, &OutSize, 0);
+    s = BCryptEncrypt(hKey, plaintext, plaintext_len, &Info, iv, 12, ciphertext, plaintext_len, &OutSize, 0);
   else
-    s = BCryptDecrypt(phKey, ciphertext, plaintext_len, &Info, iv, 12, plaintext, plaintext_len, &OutSize, 0);
+    s = BCryptDecrypt(hKey, ciphertext, plaintext_len, &Info, iv, 12, plaintext, plaintext_len, &OutSize, 0);
+
+  BCryptDestroyKey(hKey);
 
   if (!NT_SUCCESS(s))
     return 0;
