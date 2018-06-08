@@ -3,6 +3,7 @@ module EverCrypt.ValeGlue
 
 open EverCrypt.Helpers
 open C.Failure
+open C.Endianness
 
 module U32 = FStar.UInt32
 
@@ -30,7 +31,7 @@ let sha256_finish state hash =
   admit();
   C.Loops.for 0ul 8ul (fun _ _ -> True) (fun i ->
     let out = Buffer.sub hash U32.(i *^ 4ul) 4ul in
-    Hacl.Endianness.(store32_le out (htole32 (load32_be out))))
+    store32_le out (htole32 (load32_be out)))
 
 /// All-in one
 let sha256_hash state data len =
