@@ -23,4 +23,4 @@ type gcm_args = {
 val gcm_encrypt: N.pointer gcm_args -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val aes_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> uint8_p -> Stack_ unit
+val aes_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
