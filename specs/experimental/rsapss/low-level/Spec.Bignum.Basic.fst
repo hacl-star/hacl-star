@@ -9,14 +9,13 @@ open FStar.Math.Lemmas
 open Spec.Bignum.Base
 open Spec.Convert
 
-let bignum_i len = intseq U64 len
-//let x_i (i:size_nat):nat = pow2 (64 * i)
-
 val eq_u64: a:uint64 -> b:uint64 -> Tot bool
 let eq_u64 a b = FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
 
 val lt_u64: a:uint64 -> b:uint64 -> Tot bool
 let lt_u64 a b = FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
+
+let bignum_i len = intseq U64 len
 
 val eval_i:len:size_pos -> s:bignum_i len -> first_i:size_nat{first_i <= len} -> Tot nat
 let eval_i len s first_i =
@@ -41,6 +40,14 @@ let bn_const_1 #bits =
   let r = r.[0] <- u64 1 in
   assume (eval len r == 1);
   assume (1 < pow2 bits);
+  let res:bignum bits = Bignum len r in
+  res
+
+let bn_const_0 #bits =
+  let len = blocks bits 64 in
+  let r = create len (u64 0) in
+  assume (eval len r == 0);
+  assume (0 < pow2 bits);
   let res:bignum bits = Bignum len r in
   res
 
@@ -92,6 +99,19 @@ let bn_add #nBits #mBits a b =
   assume (a.len * 64 == nBits);
   assume(eval a.len r + uint_v c' * x_i nBits = eval a.len a.bn + eval b.len b.bn);
   (c', res)
+
+let bn_add_carry #nBits #mBits a b =
+  let (c', r) = bn_add_ a.len a.bn b.len b.bn in
+  assume (eval a.len r < pow2 nBits);
+  assume (a.len + 1 < max_size_t);
+  let r1 = create (a.len + 1) (u64 0) in
+  let r1 = update_sub r1 0 a.len r in
+  let r1 = r1.[a.len] <- to_u64 c' in
+  assume (eval (a.len + 1) r1 < pow2 (nBits + 1));
+  let res:bignum (nBits+1) = Bignum (a.len+1) r1 in
+  //assume (a.len * 64 == nBits);
+  assume(eval (a.len+1) r1 = eval a.len a.bn + eval b.len b.bn);
+  res
 
 val bn_sub_:
   aLen:size_pos -> a:bignum_i aLen ->
@@ -160,8 +180,9 @@ let bn_get_bit #n b ind =
   assume (i < b.len);
   let tmp = b.bn.[i] in
   let tmp = (tmp >>. u32 j) &. u64 1 in
-  let res = if (eq_u64 tmp (u64 1)) then 1 else 0 in
-  res
+  if (eq_u64 tmp (u64 1))
+  then begin admit(); 1 end
+  else begin admit(); 0 end
 
 val bn_get_bits_:
   len:size_nat -> b:bignum_i len -> i:size_nat{i < len} -> j:size_nat{i < j /\ j <= len} -> Tot (bignum_i (j - i))
@@ -169,9 +190,10 @@ let bn_get_bits_ len b i j = slice b i j
 
 let bn_get_bits #n b i j =
   let i1 = i / 64 in
-  let j1 = j / 64 in
-  assume (i1 < b.len);
-  assume (j1 < b.len);
+  let j1 = blocks j 64 in
+  //assume (i1 < b.len);
+  //assume (j1 < b.len);
+  admit();
   let r = bn_get_bits_ b.len b.bn i1 j1 in
   assume (eval (j1 - i1) r < pow2 (j - i));
   let res:bignum (j - i) = Bignum (j1 - i1) r in
@@ -223,6 +245,7 @@ let bn_is_less_ aLen a bLen b =
   res
 
 let bn_is_less #n #m x y =
+  admit();
   bn_is_less_ x.len x.bn y.len y.bn
 
 val bn_lshift_mul_add_:
@@ -259,6 +282,18 @@ let bn_lshift_mul_add #n #m x i y z =
   let res:bignum m = Bignum z.len r in
   assume (64 * z.len == m);
   assume (eval z.len r + uint_v c1 * x_i z.len == eval x.len x.bn * pow2 i * eval y.len y.bn + eval z.len z.bn);
+  (c1, res)
+
+let bn_lshift_add #n #m x i z =
+  let i1 = i / 64 in
+  assume (i1 + x.len <= z.len);
+  let x1 = create (i1 + x.len) (u64 0) in
+  let x1 = update_sub x1 i1 x.len x.bn in
+  let (c1, r) = bn_add_ z.len z.bn (i1 + x.len) x1 in
+  admit();
+  let res:bignum m = Bignum z.len r in
+  assume (64 * z.len == m);
+  assume (eval z.len r + uint_v c1 * x_i z.len == eval x.len x.bn * pow2 i + eval z.len z.bn);
   (c1, res)
 
 let bn_from_bytes_be #bBytes b =
@@ -316,7 +351,7 @@ let bn_pow2_mod_n aBits rLen a p =
     if not (bn_is_less_ rLen res (rLen-1) a)
     then bn_sub_ rLen res (rLen-1) a
     else res
-  ) res 
+  ) res
 
 let bn_pow2_r_mod #nBits n r =
   assume (nBits < r);
