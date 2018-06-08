@@ -4,7 +4,7 @@ open EverCrypt.Helpers
 open FStar.HyperStack.ST
 
 /// Multiplexing support
-type impl = | Hacl | Vale | OpenSSL
+type impl = | Hacl | Vale | OpenSSL | BCrypt
 
 type cfg =
 | Default

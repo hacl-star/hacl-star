@@ -186,6 +186,8 @@ let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =
     pop_frame ()
   end else if SC.openssl && i = AC.OpenSSL then
     EverCrypt.OpenSSL.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+  else if SC.bcrypt && i = AC.BCrypt then
+    EverCrypt.BCrypt.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 
@@ -193,6 +195,8 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes128_gcm_impl () in
   if SC.openssl && i = AC.OpenSSL then
     EverCrypt.OpenSSL.aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag
+  else if SC.bcrypt && i = AC.BCrypt then
+    EverCrypt.BCrypt.aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 
@@ -200,6 +204,8 @@ let aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes256_gcm_impl () in
   if SC.openssl && i = AC.OpenSSL then
     EverCrypt.OpenSSL.aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag
+  else if SC.bcrypt && i = AC.BCrypt then
+    EverCrypt.BCrypt.aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 
@@ -207,6 +213,8 @@ let aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes256_gcm_impl () in
   if SC.openssl && i = AC.OpenSSL then
     EverCrypt.OpenSSL.aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag
+  else if SC.bcrypt && i = AC.BCrypt then
+    EverCrypt.BCrypt.aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 

@@ -311,5 +311,8 @@ let main (): St C.exit_code =
   Test.Bytes.print "==========OpenSSL=========" "";
   init (Prefer OpenSSL);
   test_aead aead_vectors;
+  Test.Bytes.print "==========BCrypt==========" "";
+  init (Prefer BCrypt);
+  test_aead aead_vectors;
   pop_frame ();
   C.EXIT_SUCCESS

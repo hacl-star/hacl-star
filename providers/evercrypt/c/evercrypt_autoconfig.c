@@ -3,9 +3,12 @@
 
 // Abbreviations, for readability
 typedef EverCrypt_AutoConfig_impl impl;
-#define Vale EverCrypt_AutoConfig_Vale;
-#define Hacl EverCrypt_AutoConfig_Hacl;
-#define OpenSSL EverCrypt_AutoConfig_OpenSSL;
+
+#define Vale EverCrypt_AutoConfig_Vale
+#define Hacl EverCrypt_AutoConfig_Hacl
+#define OpenSSL EverCrypt_AutoConfig_OpenSSL
+#define BCrypt EverCrypt_AutoConfig_BCrypt
+
 EverCrypt_AutoConfig_cfg_tags Default = EverCrypt_AutoConfig_Default;
 EverCrypt_AutoConfig_cfg_tags Prefer = EverCrypt_AutoConfig_Prefer;
 
@@ -62,6 +65,7 @@ void EverCrypt_AutoConfig_init(EverCrypt_AutoConfig_cfg x0) {
   bool prefer_hacl = x0.tag == Prefer && x0.preferred == Hacl;
   bool prefer_vale = x0.tag == Prefer && x0.preferred == Vale;
   bool prefer_openssl = x0.tag == Prefer && x0.preferred == OpenSSL;
+  bool prefer_bcrypt = x0.tag == Prefer && x0.preferred == BCrypt;
   bool has_aesni = detect_aesni();
 
   // The switches follow a regular structure. Honor the prefered choice first,
@@ -72,27 +76,30 @@ void EverCrypt_AutoConfig_init(EverCrypt_AutoConfig_cfg x0) {
   // SHA256: best = Vale (unconditionally), fallback = Hacl (always works)
   if (prefer_hacl) {
     sha256_impl = Hacl;
-  } else if (prefer_vale) {
-    sha256_impl = Vale;
-  } else if (EverCrypt_StaticConfig_vale) {
+  } else if (EverCrypt_StaticConfig_vale && prefer_vale) {
     sha256_impl = Vale;
   } else {
     sha256_impl = Hacl;
   }
 
-  // AES256-GCM: best = Vale (IF AES-NI), fallback = OpenSSL (always works)
-  if (has_aesni && prefer_vale) {
+  // AES128-GCM: best = Vale (IF AES-NI), fallback = OpenSSL or BCrypt
+  if (has_aesni && EverCrypt_StaticConfig_vale && prefer_vale) {
     aes128_gcm_impl = Vale;
-  } else if (prefer_openssl) {
+  } else if (EverCrypt_StaticConfig_bcrypt && prefer_bcrypt) {
+    aes128_gcm_impl = BCrypt;
+  } else if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
     aes128_gcm_impl = OpenSSL;
   } else {
-    aes128_gcm_impl = OpenSSL;
+    aes128_gcm_impl = EverCrypt_StaticConfig_bcrypt ? BCrypt : OpenSSL;
   }
 
-  if (prefer_openssl) {
+  // AES256-GCM: OpenSSL or BCrypt
+  if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
     aes256_gcm_impl = OpenSSL;
+  } else if (EverCrypt_StaticConfig_bcrypt && prefer_bcrypt) {
+    aes256_gcm_impl = BCrypt;
   } else {
-    aes256_gcm_impl = OpenSSL;
+    aes256_gcm_impl = EverCrypt_StaticConfig_bcrypt ? BCrypt : OpenSSL;
   }
 }
 
