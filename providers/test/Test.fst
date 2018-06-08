@@ -9,7 +9,7 @@ open EverCrypt.Helpers
 open EverCrypt.AutoConfig
 
 open Test.Vectors
-open U32
+open FStar.UInt32
 
 #set-options "--admit_smt_queries true"
 
@@ -184,7 +184,41 @@ val test_chacha20_poly1305: v:aead_vector{v.cipher == CHACHA20_POLY1305} -> St u
 let test_chacha20_poly1305 v =
   push_frame();
 
-  (* Tests: RFC7539 *)
+  let key        = buffer_of_hex v.key in
+  let iv         = buffer_of_hex v.iv in
+  let aad        = buffer_of_hex v.aad in
+  let tag        = buffer_of_hex v.tag in
+  let plaintext  = buffer_of_hex v.plaintext in
+  let ciphertext = buffer_of_hex v.ciphertext in
+
+  let plaintext_len = Bytes.len (bytes_of_hex v.ciphertext) in
+  let aad_len       = Bytes.len (bytes_of_hex v.aad) in
+  let plaintext'    = B.create 0uy plaintext_len in
+  let ciphertext'   = B.create 0uy plaintext_len in
+  let tag'          = B.create 0uy 16ul in
+  match EverCrypt.chacha20_poly1305_encrypt
+    ciphertext' tag' plaintext plaintext_len aad aad_len key iv with
+  | 0ul ->
+    begin
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
+    match EverCrypt.chacha20_poly1305_decrypt
+      plaintext' ciphertext' plaintext_len tag' aad aad_len key iv with
+    | 0ul ->
+      TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len
+    | _ -> C.String.print !$"Decryption failed"
+    end
+  | _ ->
+    C.String.print !$"Encryption failed";
+
+  pop_frame()
+
+/// AES-GCM 256
+
+val test_aes256_gcm: v:aead_vector{v.cipher == AES_256_GCM} -> St unit
+let test_aes256_gcm v =
+  push_frame();
+
   let key        = buffer_of_hex v.key in
   let iv         = buffer_of_hex v.iv in
   let aad        = buffer_of_hex v.aad in
@@ -196,17 +230,14 @@ let test_chacha20_poly1305 v =
   let aad_len       = Bytes.len (bytes_of_hex v.aad) in
   let ciphertext'   = B.create 0uy plaintext_len in
   let tag'          = B.create 0uy 16ul in
-  match EverCrypt.chacha20_poly1305_encrypt
-    ciphertext' tag' plaintext plaintext_len aad aad_len key iv with
-  | 0ul ->
-    begin
-    TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
-    TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul
-    end
-  | _ ->
-    C.String.print !$"Encryption failed";
+
+  EverCrypt.aes256_gcm_encrypt
+    ciphertext' tag' key iv plaintext plaintext_len aad aad_len;
+  TestLib.compare_and_print !$"of AES-GCM 256 cipher" ciphertext ciphertext' plaintext_len;
+  TestLib.compare_and_print !$"of AES-GCM 256 tag" tag tag' 16ul;
 
   pop_frame()
+
 
 /// Test drivers
 
@@ -218,6 +249,10 @@ let rec test_aead v =
     match v.cipher with
     | CHACHA20_POLY1305 ->
       let this = test_chacha20_poly1305 v in
+      let rest = test_aead vs in
+      ()
+    | AES_256_GCM ->
+      let this = test_aes256_gcm v in
       let rest = test_aead vs in
       ()
     | _ -> test_aead vs
