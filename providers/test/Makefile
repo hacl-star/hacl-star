@@ -1,5 +1,6 @@
-EVERCRYPT_HOME ?= ../
+EVERCRYPT_HOME ?= ..
 KREMLIN_HOME   ?= ../../../kremlin
+MLCRYPTO_HOME ?= ../../../MLCrypto
 
 EXTRACT_DIR = extract
 CACHE_DIR   = cache
@@ -79,3 +80,4 @@ clean:
 
 %.fst-in:
 	@echo --include ../evercrypt --include $(KREMLIN_HOME)/kremlib
+

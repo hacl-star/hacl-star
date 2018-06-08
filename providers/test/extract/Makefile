@@ -1,8 +1,16 @@
 -include Makefile.include 
 
 EVERCRYPT_HOME=../../out
+MLCRYPTO_HOME?=../../../../MLCrypto
+OPENSSL_HOME=$(MLCRYPTO_HOME)/openssl
+
 FILES = $(basename $(ALL_C_FILES))
 CFLAGS = -I $(KREMLIN_HOME)/include
+LDFLAGS = -L $(EVERCRYPT_HOME) -levercrypt
+
+ifeq (,$(EVEREST_WINDOWS))
+LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
+endif
 
 # See https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
 %.d: %.c
@@ -14,6 +22,6 @@ CFLAGS = -I $(KREMLIN_HOME)/include
 -include $(addsuffix .d,$(FILES))
 
 Test.exe: $(addsuffix .o,$(FILES)) $(KREMLIN_HOME)/kremlib/testlib.c $(KREMLIN_HOME)/kremlib/kremstr.c $(KREMLIN_HOME)/kremlib/kremlib.c 
-	$(CC) $^ -o $@ -levercrypt -L $(EVERCRYPT_HOME) -I $(KREMLIN_HOME)/include
+	$(CC) $^ -o $@ $(LDFLAGS) -I $(KREMLIN_HOME)/include
 
 test: Test.exe
