@@ -17,63 +17,84 @@
     KRML_HOST_EPRINTF("Error at %s:%d\n", __FILE__, __LINE__);                   \
   } while (0)
 
-void EverCrypt_OpenSSL_aes256_gcm_encrypt(uint8_t *ciphertext,
-                                          uint8_t *tag,
-                                          uint8_t *key,
-                                          uint8_t *iv,
-                                          uint8_t *plaintext,
-                                          uint32_t plaintext_len,
-                                          uint8_t *aad,
-                                          uint32_t aad_len) {
+static int openssl_aead(const EVP_CIPHER *alg, int enc,
+  uint8_t *key, uint8_t *iv,
+  uint8_t *aad, uint32_t aad_len,
+  uint8_t *plaintext, uint32_t plaintext_len,
+  uint8_t *ciphertext, uint8_t *tag)
+{
   EVP_CIPHER_CTX *ctx;
-
-  int iv_len = 12;
   int len;
 
-  int ciphertext_len;
-
-  /* Create and initialise the context */
+  // Create and initialise the context
   if (!(ctx = EVP_CIPHER_CTX_new()))
     handleErrors();
 
-  /* Initialise the encryption operation. */
-  if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL))
+  // Initialise the cipher with the key and IV
+  if (1 != EVP_CipherInit_ex(ctx, alg, NULL, key, iv, enc))
     handleErrors();
 
-  /* Set IV length if default 12 bytes (96 bits) is not appropriate */
-  if (1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, iv_len, NULL))
+  if(!enc && EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, 16, tag) <= 0)
     handleErrors();
 
-  /* Initialise key and IV */
-  if (1 != EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv))
+  // Set additional authenticated data
+  if (1 != EVP_CipherUpdate(ctx, NULL, &len, aad, aad_len))
     handleErrors();
 
-  /* Provide any AAD data. This can be called zero or more times as
-   * required
-   */
-  if (1 != EVP_EncryptUpdate(ctx, NULL, &len, aad, aad_len))
+  // Process the data
+  if (1 != EVP_CipherUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
     handleErrors();
 
-  /* Provide the message to be encrypted, and obtain the encrypted output.
-   * EVP_EncryptUpdate can be called multiple times if necessary
-   */
-  if (1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
-    handleErrors();
-  ciphertext_len = len;
-
-  /* Finalise the encryption. Normally ciphertext bytes may be written at
-   * this stage, but this does not occur in GCM mode
-   */
-  if (1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len))
-    handleErrors();
-  ciphertext_len += len;
+  // Finalize last block
+  if (1 != EVP_CipherFinal_ex(ctx, ciphertext + len, &len))
+    return 0;
 
   /* Get the tag */
-  if (1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag))
+  if (enc && 1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag))
     handleErrors();
 
   /* Clean up */
   EVP_CIPHER_CTX_free(ctx);
 
-  return;
+  return 1;
 }
+
+void EverCrypt_OpenSSL_aes128_gcm_encrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,
+                                          uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)
+{
+  if(1 != openssl_aead(EVP_aes_128_gcm(), 1, key, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag))
+    handleErrors();
+}
+
+uint32_t EverCrypt_OpenSSL_aes128_gcm_decrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,
+                                         uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)
+{
+  return openssl_aead(EVP_aes_128_gcm(), 0, key, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag);
+}
+
+void EverCrypt_OpenSSL_aes256_gcm_encrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,
+                                          uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)
+{
+  if(1 != openssl_aead(EVP_aes_256_gcm(), 1, key, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag))
+    handleErrors();
+}
+
+uint32_t EverCrypt_OpenSSL_aes256_gcm_decrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,
+                                         uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)
+{
+  return openssl_aead(EVP_aes_256_gcm(), 0, key, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag);
+}
+
+void EverCrypt_OpenSSL_chacha20_poly1305_encrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,
+                                          uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)
+{
+  if(1 != openssl_aead(EVP_chacha20_poly1305(), 1, key, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag))
+    handleErrors();
+}
+
+uint32_t EverCrypt_OpenSSL_chacha20_poly1305_decrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,
+                                         uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)
+{
+  return openssl_aead(EVP_chacha20_poly1305(), 0, key, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag);
+}
+
