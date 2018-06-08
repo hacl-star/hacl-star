@@ -3,8 +3,9 @@ module Spec.Poly1305
 #reset-options "--z3rlimit 60 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 open Spec.Poly1305.Lemmas
 
 (* Field types and parameters *)

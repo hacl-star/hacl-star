@@ -1,9 +1,9 @@
 module Spec.Poly1305.Test
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
 open Spec.Poly1305
 
 (* ********************* *)
