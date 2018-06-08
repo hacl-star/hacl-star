@@ -25,7 +25,9 @@ else ifeq ($(UNAME),Linux)
   PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(LD_LIBRARY_PATH)
 endif
 
-all: test
+all:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) test
 
 .depend:
 	fstar.exe \
