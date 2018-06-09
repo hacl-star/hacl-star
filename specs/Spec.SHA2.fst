@@ -1,8 +1,9 @@
 module Spec.SHA2
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 #set-options "--z3rlimit  25"
 
@@ -74,7 +75,7 @@ let loop_ws1 p b s = repeati (p.kSize - 16) (fun i -> step_ws1 p (i + 16)) s
 let ws p (b:block_w p) =
   let s = create p.kSize (nat_to_uint #p.wt 0) in
   let s = loop_ws0 p b s in
-  let s = loop_ws1 p s in
+  let s = loop_ws1 p b s in
   s
 
 (* Definition of the core shuffling function *)

@@ -1,9 +1,10 @@
 module Spec.Ed25519
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
-open Spec.Lib.RawIntTypes
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
+open Lib.RawIntTypes
 open Spec.SHA2
 open Spec.Curve25519
 

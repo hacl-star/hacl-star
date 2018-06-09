@@ -1,8 +1,9 @@
 module Spec.Qdsa
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 open Spec.SHA2
 open Spec.Curve25519
 
@@ -65,13 +66,13 @@ let verify (public:lbytes 32) (len:size_t{len < pow2 32 - 64}) (msg:lbytes len) 
   let h = sha512_modn_bar (len + 64) msg' in
   let h_s = nat_to_bytes_le 32 h in
   IO.print_string "\n_h_s:";
-  List.iter (fun i -> IO.print_string (UInt8.to_string (Spec.Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (h_s));
+  List.iter (fun i -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (h_s));
   let _T0 = scalarmult' s _P in
   let _T1 = scalarmult' h_s _Q in
   IO.print_string "\n_T0:";
-  List.iter (fun i -> IO.print_string (UInt8.to_string (Spec.Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (_T0));
+  List.iter (fun i -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (_T0));
   IO.print_string "\n_T1:";
-  List.iter (fun i -> IO.print_string (UInt8.to_string (Spec.Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (_T1));
+  List.iter (fun i -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (_T1));
   IO.print_string "\n";
   let xR = decodePoint _R in
   let xT0 = decodePoint _T0 in
@@ -90,9 +91,9 @@ let verify (public:lbytes 32) (len:size_t{len < pow2 32 - 64}) (msg:lbytes len) 
   let left = (_Bzz_xR2 +. _Bxx_zR2) in
   let right = _2Bxz_xR_zR in
   IO.print_string "\n_left:";
-  List.iter (fun i -> IO.print_string (UInt8.to_string (Spec.Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (nat_to_bytes_le 32 left));
+  List.iter (fun i -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (nat_to_bytes_le 32 left));
   IO.print_string "\n_right:";
-  List.iter (fun i -> IO.print_string (UInt8.to_string (Spec.Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (nat_to_bytes_le 32 right));
+  List.iter (fun i -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (nat_to_bytes_le 32 right));
   IO.print_string "\n";
   left = right
 
@@ -115,9 +116,9 @@ let test()  =
     let d = createL d in
     let (s,p) = keygen d in
   IO.print_string "\ns:";
-  List.iter (fun i -> IO.print_string (UInt8.to_string (Spec.Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (s));
+  List.iter (fun i -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (s));
   IO.print_string "\np:";
-  List.iter (fun i -> IO.print_string (UInt8.to_string (Spec.Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (p));
+  List.iter (fun i -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 i))) (as_list (p));
     let m3 = createL msg3 in
     let sg = sign p s 2 m3 in
     let vr = verify p 2 m3 sg in

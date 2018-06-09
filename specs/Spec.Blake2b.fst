@@ -1,10 +1,11 @@
 module Spec.Blake2b
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 open FStar.All
-open Spec.Lib.RawIntTypes
+open Lib.RawIntTypes
 
 (* Constants *)
 

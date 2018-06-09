@@ -29,7 +29,44 @@ all-hints: hints
 all-ver: verify
 
 all: test
-test: chacha20.exe salsa20.exe poly1305.exe chacha20poly1305.exe curve25519.exe curve448.exe sha2.exe ed25519.exe hmac.exe hkdf.exe qdsa.exe 
+test: Chacha20.exe Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Curve25519.exe Curve448.exe SHA2.exe Ed25519.exe HMAC.exe HKDF.exe
+
+
+%.exe: $(LIBS_FILES) Spec.%.fst tests/Spec.%.Test.fst
+	mkdir -p $*-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.$* --extract_module Spec.$*.Test --odir $*-ml $^
+	@echo 'let _ = test()' >> $*-ml/Spec_$*_Test.ml
+	$(OCAMLOPT) -I $*-ml $(addprefix $*-ml/, $(LIBS_ML))  $*-ml/Spec_$*.ml $*-ml/Spec_$*_Test.ml -o $*.exe
+	./$*.exe
+
+Salsa20.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Salsa20.fst tests/Spec.Salsa20.Test.fst
+	mkdir -p Salsa20-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.CTR --extract_module Spec.Salsa20 --extract_module Spec.Salsa20.Test --odir Salsa20-ml $^
+	@echo 'let _ = test()' >> Salsa20-ml/Spec_Salsa20_Test.ml
+	$(OCAMLOPT) -I Salsa20-ml $(addprefix Salsa20-ml/, $(LIBS_ML)) Salsa20-ml/Spec_CTR.ml Salsa20-ml/Spec_Salsa20.ml Salsa20-ml/Spec_Salsa20_Test.ml -o Salsa20.exe
+	./Salsa20.exe
+
+
+Chacha20Poly1305.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst tests/Spec.Chacha20Poly1305.Test.fst
+	mkdir -p Chacha20Poly1305-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.CTR --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.Chacha20Poly1305.Test --odir Chacha20Poly1305-ml $^
+	@echo 'let _ = test()' >> Chacha20Poly1305-ml/Spec_Chacha20Poly1305_Test.ml
+	$(OCAMLOPT) -I Chacha20Poly1305-ml $(addprefix Chacha20Poly1305-ml/, $(LIBS_ML)) Chacha20Poly1305-ml/Spec_CTR.ml Chacha20Poly1305-ml/Spec_Chacha20.ml Chacha20Poly1305-ml/Spec_Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305_Test.ml -o Chacha20Poly1305.exe
+	./Chacha20Poly1305.exe
+
+Ed25519.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Curve25519.fst Spec.Ed25519.fst tests/Spec.Ed25519.Test.fst
+	mkdir -p Ed25519-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2 --extract_module Spec.Curve25519 --extract_module Spec.Ed25519 --extract_module Spec.Ed25519.Test --odir Ed25519-ml $^
+	@echo 'let _ = test()' >> Ed25519-ml/Spec_Ed25519_Test.ml
+	$(OCAMLOPT) -I Ed25519-ml $(addprefix Ed25519-ml/, $(LIBS_ML)) Ed25519-ml/Spec_SHA2.ml Ed25519-ml/Spec_Curve25519.ml Ed25519-ml/Spec_Ed25519.ml Ed25519-ml/Spec_Ed25519_Test.ml -o Ed25519.exe
+	./Ed25519.exe
+
+gf128.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.GF128.fst tests/Spec.GF128.Test.fst
+	mkdir -p gf128-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.GF128 --extract_module Spec.GF128.Test --odir gf128-ml $^
+	@echo 'let _ = test()' >> gf128-ml/Spec_GF128_Test.ml
+	$(OCAMLOPT) -I gf128-ml $(OCAML_INCLUDES) $(addprefix gf128-ml/, $(LIBS_ML)) gf128-ml/Spec_GaloisField.ml gf128-ml/Spec_GF128.ml gf128-ml/Spec_GF128_Test.ml -o gf128.exe
+	./gf128.exe
 
 
 noise.exe: $(LIBS_FILES) Spec.Noise.fst
@@ -39,13 +76,6 @@ noise.exe: $(LIBS_FILES) Spec.Noise.fst
 	$(OCAMLOPT) -I noise-ml $(addprefix noise-ml/, $(LIBS_ML)) noise-ml/Spec_Noise.ml -o noise.exe
 	./noise.exe
 
-chacha20.exe: $(LIBS_FILES) Spec.Chacha20.fst tests/Spec.Chacha20.Test.fst
-	mkdir -p chacha20-ml
-	$(FSTAR) --codegen OCaml $(LIBS_EX) --extract_module Spec.CTR --extract_module Spec.Chacha20 --extract_module Spec.Chacha20.Test --odir chacha20-ml $^
-	@echo 'let _ = test()' >> chacha20-ml/Spec_Chacha20_Test.ml
-	$(OCAMLOPT) -I chacha20-ml $(addprefix chacha20-ml/, $(LIBS_ML))  chacha20-ml/Spec_CTR.ml chacha20-ml/Spec_Chacha20.ml chacha20-ml/Spec_Chacha20_Test.ml -o chacha20.exe
-	./chacha20.exe
-
 chacha20_vec.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Chacha20_vec.fst tests/Spec.Chacha20_vec.Test.fst
 	mkdir -p chacha20_vec-ml
 	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.CTR --extract_module Spec.Chacha20_vec --extract_module Spec.Chacha20_vec.Test --odir chacha20_vec-ml $^
@@ -53,45 +83,18 @@ chacha20_vec.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Chacha20_vec.fst tests/Spec.Ch
 	$(OCAMLOPT) -I chacha20_vec-ml chacha20_vec-ml/Lib_IntTypes.ml chacha20_vec-ml/Lib_RawIntTypes.ml chacha20_vec-ml/Lib_Sequence.ml chacha20_vec-ml/Spec_CTR.ml chacha20_vec-ml/Spec_Chacha20_vec.ml chacha20_vec-ml/Spec_Chacha20_vec_Test.ml -o chacha20_vec.exe
 	./chacha20_vec.exe
 
-salsa20.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Salsa20.fst tests/Spec.Salsa20.Test.fst
-	mkdir -p salsa20-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.CTR --extract_module Spec.Salsa20 --extract_module Spec.Salsa20.Test --odir salsa20-ml $^
-	@echo 'let _ = test()' >> salsa20-ml/Spec_Salsa20_Test.ml
-	$(OCAMLOPT) -I salsa20-ml $(addprefix salsa20-ml/, $(LIBS_ML)) salsa20-ml/Spec_CTR.ml salsa20-ml/Spec_Salsa20.ml salsa20-ml/Spec_Salsa20_Test.ml -o salsa20.exe
-	./salsa20.exe
-
-poly1305.exe: $(LIBS_FILES) Spec.Poly1305.fst tests/Spec.Poly1305.Test.fst
-	mkdir -p poly1305-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Poly1305 --extract_module Spec.Poly1305.Test --odir poly1305-ml $^
-	@echo 'let _ = test()' >> poly1305-ml/Spec_Poly1305_Test.ml
-	$(OCAMLOPT) -I poly1305-ml $(addprefix poly1305-ml/, $(LIBS_ML)) poly1305-ml/Spec_Poly1305.ml poly1305-ml/Spec_Poly1305_Test.ml -o poly1305.exe
-	./poly1305.exe
-
 poly1305_generic.exe: $(LIBS_FILES) Spec.Poly1305.Generic.fst tests/Spec.Poly1305.Generic.Test.fst
 	mkdir -p poly1305-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Poly1305.Generic --extract_module Spec.Poly1305.Generic.Test --odir poly1305-ml $^
 	@echo 'let _ = test()' >> poly1305-ml/Spec_Poly1305_Generic_Test.ml
-	$(OCAMLOPT) -g -I poly1305-ml $(addprefix poly1305-ml/ $(LIBS_ML)) poly1305-ml/Spec_Poly1305_Generic.ml poly1305-ml/Spec_Poly1305_Generic_Test.ml -o poly1305_generic.exe
+	$(OCAMLOPT) -g -I poly1305-ml $(addprefix poly1305-ml/, $(LIBS_ML)) poly1305-ml/Spec_Poly1305_Generic.ml poly1305-ml/Spec_Poly1305_Generic_Test.ml -o poly1305_generic.exe
 	./poly1305_generic.exe
 
 poly1305_ml.exe: $(LIBS_FILES) Spec.Poly1305.Generic.fst tests/Spec.Poly1305.Generic.Test.fst
-	$(OCAMLOPT) -g -I poly1305-ml $(addprefix poly1305-ml/ $(LIBS_ML)) poly1305-ml/Spec_Poly1305_Generic.ml poly1305-ml/Spec_Poly1305_Generic_Test.ml -o poly1305_generic.exe
+	$(OCAMLOPT) -g -I poly1305-ml $(addprefix poly1305-ml/, $(LIBS_ML)) poly1305-ml/Spec_Poly1305_Generic.ml poly1305-ml/Spec_Poly1305_Generic_Test.ml -o poly1305_generic.exe
 	export OCAMLRUNPARAM=b
 	./poly1305_generic.exe
 
-chacha20poly1305.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst tests/Spec.Chacha20Poly1305.Test.fst
-	mkdir -p chacha20poly1305-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.CTR --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.Chacha20Poly1305.Test --odir chacha20poly1305-ml $^
-	@echo 'let _ = test()' >> chacha20poly1305-ml/Spec_Chacha20Poly1305_Test.ml
-	$(OCAMLOPT) -I chacha20poly1305-ml chacha20poly1305-ml/Lib_IntTypes.ml chacha20poly1305-ml/Lib_Sequence.ml chacha20poly1305-ml/Spec_CTR.ml chacha20poly1305-ml/Spec_Chacha20.ml chacha20poly1305-ml/Spec_Poly1305.ml chacha20poly1305-ml/Spec_Chacha20Poly1305.ml chacha20poly1305-ml/Spec_Chacha20Poly1305_Test.ml -o chacha20poly1305.exe
-	./chacha20poly1305.exe
-
-gf128.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.GF128.fst tests/Spec.GF128.Test.fst
-	mkdir -p gf128-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.GaloisField --extract_module Spec.GF128 --extract_module Spec.GF128.Test --odir gf128-ml $^
-	@echo 'let _ = test()' >> gf128-ml/Spec_GF128_Test.ml
-	$(OCAMLOPT) -I gf128-ml $(OCAML_INCLUDES) gf128-ml/Lib_IntTypes.ml gf128-ml/Lib_Sequence.ml gf128-ml/Spec_GaloisField.ml gf128-ml/Spec_GF128.ml gf128-ml/Spec_GF128_Test.ml -o gf128.exe
-	./gf128.exe
 
 sbox.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.Sbox.fst
 	mkdir -p sbox-ml
@@ -207,12 +210,6 @@ pbkdf2.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Ha
 	$(OCAMLOPT) -I pbkdf2-ml $(OCAML_INCLUDES) pbkdf2-ml/Lib_IntTypes.ml pbkdf2-ml/Lib_RawIntTypes.ml pbkdf2-ml/Lib_Sequence.ml pbkdf2-ml/Lib_Stateful.ml pbkdf2-ml/Spec_SHA2.ml pbkdf2-ml/Spec_Hash.ml pbkdf2-ml/Spec_HMAC.ml pbkdf2-ml/Spec_PBKDF2.ml pbkdf2-ml/Spec_PBKDF2_Test.ml -o pbkdf2.exe
 	./pbkdf2.exe
 
-ed25519.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Curve25519.fst Spec.Ed25519.fst tests/Spec.Ed25519.Test.fst
-	mkdir -p ed25519-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Curve25519 --extract_module Spec.Ed25519 --extract_module Spec.Ed25519.Test --odir ed25519-ml $^
-	@echo 'let _ = test()' >> ed25519-ml/Spec_Ed25519_Test.ml
-	$(OCAMLOPT) -I ed25519-ml ed25519-ml/Lib_IntTypes.ml ed25519-ml/Lib_RawIntTypes.ml ed25519-ml/Lib_Sequence.ml ed25519-ml/Lib_Stateful.ml ed25519-ml/Spec_SHA2.ml ed25519-ml/Spec_Curve25519.ml ed25519-ml/Spec_Ed25519.ml ed25519-ml/Spec_Ed25519_Test.ml -o ed25519.exe
-	./ed25519.exe
 
 network.exe: $(LIBS_FILES) tests/Spec.Network.Test.fst
 	mkdir -p network-ml

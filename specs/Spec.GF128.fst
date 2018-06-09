@@ -1,8 +1,9 @@
 module Spec.GF128
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 open Spec.GaloisField
 
 (* Field types and parameters *)

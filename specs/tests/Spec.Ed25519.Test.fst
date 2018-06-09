@@ -3,9 +3,10 @@ module Spec.Ed25519.Test
 #reset-options "--z3rlimit 100 --max_fuel 0"
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 open Spec.Ed25519
 

@@ -1,9 +1,10 @@
 module Spec.Chacha20_vec
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
-open Spec.Lib.RawIntTypes
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
+open Lib.RawIntTypes
 
 (* This should go elsewhere! *)
 

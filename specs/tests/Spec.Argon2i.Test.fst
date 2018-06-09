@@ -3,9 +3,10 @@ module Spec.Argon2i.Test
 #reset-options "--z3rlimit 100 --max_fuel 0"
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 let password_list = List.Tot.map u8_from_UInt8 [
   0x01uy; 0x01uy; 0x01uy; 0x01uy; 0x01uy; 0x01uy; 0x01uy; 0x01uy;

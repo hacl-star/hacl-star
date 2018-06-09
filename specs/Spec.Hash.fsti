@@ -1,8 +1,9 @@
 module Spec.Hash
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 #reset-options "--max_fuel 0 --z3rlimit 25"
 

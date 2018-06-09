@@ -1,8 +1,9 @@
 module Spec.PBKDF2
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 ///   https://tools.ietf.org/html/rfc2898
 ///   PBKDF2 (P, S, c, dkLen)

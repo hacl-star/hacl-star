@@ -1,9 +1,10 @@
 module Spec.Gimli.Test
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 
 //

@@ -1,9 +1,10 @@
 module Spec.Curve25519
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 open Spec.Curve25519.Lemmas
 
 #reset-options "--max_fuel 0 --z3rlimit 20"

@@ -1,8 +1,8 @@
 module Spec.AES.Test
 
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
 open Spec.AES
 
 let test_key = List.map u8 [

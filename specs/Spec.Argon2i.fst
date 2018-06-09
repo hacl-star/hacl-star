@@ -3,9 +3,10 @@ module Spec.Argon2i
 #reset-options "--z3rlimit 100 --max_fuel 0"
 
 let ( *$ ) = FStar.Mul.(( * ))
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
-open Spec.Lib.RawIntTypes
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
+open Lib.RawIntTypes
 open FStar.All
 
 let version_number : uint8 = assert_norm (0x13 < maxint (U8));u8 0x13

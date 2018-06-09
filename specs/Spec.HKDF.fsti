@@ -1,8 +1,9 @@
 module Spec.HKDF
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 #reset-options "--z3rlimit 2000 --max_fuel 0"
 

@@ -1,9 +1,10 @@
 module Spec.Curve448
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
 

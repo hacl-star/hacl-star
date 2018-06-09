@@ -1,8 +1,9 @@
 module Spec.HMAC
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 #set-options "--z3rlimit 25"
 
