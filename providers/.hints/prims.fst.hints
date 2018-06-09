@@ -1,0 +1,115 @@
+[
+  "∆ΩM∫,”é8õ\u0007ﬁ.\u0007\"ÎC",
+  [
+    [
+      "Prims.Ghost",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "0acdca8cb0eb165492dc405e28aebe5e"
+    ],
+    [
+      "Prims.list",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "14c1425e232695320717dab95b14ea47"
+    ],
+    [
+      "Prims.__proj__Cons__item__hd",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "disc_equation_Prims.Cons",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_7aac12c24449a22c34d98a0ea8ed4a32"
+      ],
+      0,
+      "b5b5617072e2960a15af0b6693ec9d3a"
+    ],
+    [
+      "Prims.__proj__Cons__item__tl",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "disc_equation_Prims.Cons",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_7aac12c24449a22c34d98a0ea8ed4a32"
+      ],
+      0,
+      "e754c686e29204741820753e36b85747"
+    ],
+    [
+      "Prims.Lemma",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "4e4b9f545a1929dda8cdb4de0d0a415b"
+    ],
+    [
+      "Prims._assert",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "03a9676443c2ec5ffe1c15165528d054"
+    ],
+    [
+      "Prims.assert_spinoff",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "a6a08c68cc1844cfe45ba574499d5984"
+    ],
+    [
+      "Prims.cut",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "0c748938f44184ad2218e83b4028b0a4"
+    ],
+    [
+      "Prims.nonzero",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "39efb9bc1645125cbb6b7e5370d8dc03"
+    ],
+    [
+      "Prims.pow2",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "int_typing", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "84800b2769cd1b9769ff07641dfd2e91"
+    ]
+  ]
+]
