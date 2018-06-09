@@ -2,6 +2,7 @@ module Spec.Bignum.Basic
 
 open FStar.Mul
 open Spec.Lib.IntTypes
+open Spec.Lib.IntSeq.Lemmas
 open Spec.Lib.IntSeq
 open Spec.Lib.RawIntTypes
 
@@ -17,20 +18,105 @@ let lt_u64 a b = FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
 
 let bignum_i len = intseq U64 len
 
-val eval_i:len:size_pos -> s:bignum_i len -> first_i:size_nat{first_i <= len} -> Tot nat
-let eval_i len s first_i =
-  repeati #nat first_i
-  (fun i acc ->
-    acc + (uint_to_nat s.[i]) * x_i i
-  ) 0
-
-let eval (len:size_pos) s = eval_i len s len
-
 val bval: bLen:size_pos -> b:bignum_i bLen -> i:size_nat -> Tot uint64
 let bval bLen b i = if (i < bLen) then b.[i] else u64 0
 
+val eval_i:
+  len:size_nat -> s:bignum_i len -> i:size_nat{i <= len} -> Tot nat (decreases i)
+let rec eval_i len s i =
+  if i = 0 then 0
+  else eval_i len s (i - 1) + (uint_to_nat s.[i - 1]) * x_i (i - 1)
+
+let eval (len:size_nat) s = eval_i len s len
+
 noeq type bignum (nBits:size_nat) =
-  | Bignum:len:size_pos -> bn:bignum_i len{eval len bn < pow2 nBits} -> bignum nBits
+  | Bignum:len:size_pos{blocks nBits 64 <= len} ->
+           bn:bignum_i len{eval_i len bn (blocks nBits 64) == eval len bn /\ (forall (i:size_nat{blocks nBits 64 <= i /\ i < len}). uint_v bn.[i] = 0) /\ eval len bn < pow2 nBits} ->
+	   bignum nBits
+
+
+#reset-options "--z3rlimit 50 --max_fuel 2"
+val lemma_eval_incr:
+  len:size_pos -> s:bignum_i len -> i:size_nat{0 < i /\ i <= len} -> Lemma
+  (requires (True))
+  (ensures (eval_i len s i == eval_i len s (i - 1) + (uint_to_nat s.[i - 1]) * x_i (i - 1)))
+let lemma_eval_incr len s i = ()
+
+val lemma_eval_init_seq_is_0:
+  len:size_pos -> s:bignum_i len -> i:size_nat{i <= len} -> Lemma
+  (requires (forall (j:size_nat). j < len ==> uint_to_nat s.[j] = 0))
+  (ensures (eval_i len s i = 0))
+  (decreases i)
+let rec lemma_eval_init_seq_is_0 len s i =
+  if i = 0 then ()
+  else lemma_eval_init_seq_is_0 len s (i - 1)
+
+val lemma_eval_u64:
+  len:size_pos -> s:bignum_i len -> v_u64:uint64 -> i:size_nat{0 < i /\ i <= len} -> Lemma
+  (requires (uint_to_nat s.[0] = uint_v v_u64 /\ (forall (j:size_nat). 0 < j /\ j < len ==> uint_to_nat s.[j] = 0)))
+  (ensures (eval_i len s i = uint_v v_u64))
+  (decreases i)
+let rec lemma_eval_u64 len s v_u64 i =
+  if i = 1 then ()
+  else lemma_eval_u64 len s v_u64 (i - 1)
+
+val lemma_eval_equal1:
+  len1:size_nat -> s1:bignum_i len1 ->
+  len2:size_nat{len2 <= len1} -> s2:bignum_i len2 -> i:size_nat{i <= len2} -> Lemma
+  (requires (forall (j:size_nat{j < i}). uint_v s1.[j] == uint_v s2.[j]))
+  (ensures (eval_i len1 s1 i == eval_i len2 s2 i))
+  (decreases i)
+let rec lemma_eval_equal1 len1 s1 len2 s2 i =
+  if i = 0 then ()
+  else lemma_eval_equal1 len1 s1 len2 s2 (i - 1)
+
+val lemma_eval_equal2:
+  aLen:size_pos -> a:bignum_i aLen ->
+  bLen:size_pos{bLen <= aLen} -> b:bignum_i bLen -> i:size_nat{bLen <= i /\ i <= aLen} -> Lemma
+  (requires ((forall (j:size_nat{j < bLen}). uint_v a.[j] = uint_v b.[j]) /\ (forall (j:size_nat{bLen <= j /\ j < aLen}). uint_v a.[j] = 0)))
+  (ensures (eval_i aLen a i = eval bLen b))
+let rec lemma_eval_equal2 aLen a bLen b i =
+  if i = bLen then lemma_eval_equal1 aLen a bLen b i
+  else lemma_eval_equal2 aLen a bLen b (i - 1)
+
+// val lemma_eval_with_0:
+//   len:size_pos -> len0:size_pos{len0 <= len} -> b:bignum_i len -> i:size_nat{len0 <= i /\ i <= len} -> Lemma
+//   (requires (forall (j:size_nat{len0 <= j /\ j < len}). uint_v b.[j] = 0))
+//   (ensures (eval_i len b i == eval_i len b len0))
+// let rec lemma_eval_with_0 len len0 b i =
+//   if (i = len0) then ()
+//   else begin
+//     lemma_eval_incr len b i;
+//     assert (eval_i len b i == eval_i len b (i - 1) + uint_v b.[i-1] * x_i (i -1));
+//     assert_norm (eval_i len b i == eval_i len b (i - 1));
+//     lemma_eval_with_0 len len0 b (i-1)
+//   end
+
+val lemma_eval_pow2:
+  len:size_pos -> len0:size_pos{len0 <= len} -> b:bignum_i len -> i:size_nat{len0 <= i /\ i <= len} -> Lemma
+  (requires (eval len b < x_i len0))
+  (ensures (eval len b == eval_i len b i /\ (forall (j:size_nat{i <= j /\ j < len}). uint_v b.[j] = 0)))
+let lemma_eval_pow2 len len0 b i = admit()
+
+val eval_is_greater_len:
+  len:size_pos -> b:bignum_i len -> i:size_nat -> Tot nat
+let rec eval_is_greater_len len b i =
+  if (i <= len) then eval_i len b i
+  else eval_is_greater_len len b (i - 1)
+
+val lemma_eval_is_greater_len:
+  len:size_pos -> b:bignum_i len -> i:size_nat{i >= len} -> Lemma
+  (eval len b == eval_is_greater_len len b i)
+let rec lemma_eval_is_greater_len len b i =
+  if i = len then ()
+  else lemma_eval_is_greater_len len b (i - 1)
+
+val lemma_mult_x1_xi:
+  i:size_nat{i+1 < max_size_t} -> Lemma
+  (x_i 1 * x_i i = x_i (i + 1))
+let lemma_mult_x1_xi i =
+  pow2_plus (64 * 1) (64 * i)
+
 
 let bn_v #nBits b = eval b.len b.bn
 
@@ -38,66 +124,100 @@ let bn_const_1 #bits =
   let len = blocks bits 64 in
   let r = create len (u64 0) in
   let r = r.[0] <- u64 1 in
-  assume (eval len r == 1);
-  assume (1 < pow2 bits);
+  lemma_eval_u64 len r (u64 1) len;
+  assert (eval len r == 1);
+  assert_norm (1 < pow2 bits);
   let res:bignum bits = Bignum len r in
   res
 
 let bn_const_0 #bits =
   let len = blocks bits 64 in
   let r = create len (u64 0) in
-  assume (eval len r == 0);
-  assume (0 < pow2 bits);
+  lemma_eval_u64 len r (u64 0) len;
+  assert (eval len r == 0);
+  assert_norm (0 < pow2 bits);
   let res:bignum bits = Bignum len r in
   res
 
 let bn_cast_le #bits mBits b =
-  let res:bignum mBits = Bignum b.len b.bn in
+  let mLen = blocks mBits 64 in
+  pow2_le_compat (64 * mLen) mBits;
+  lemma_eval_pow2 b.len mLen b.bn mLen;
+  let r = sub b.bn 0 mLen in
+  lemma_eval_equal2 b.len b.bn mLen r b.len;
+  let res:bignum mBits = Bignum mLen r in
   res
 
 let bn_cast_gt #bits mBits b =
-  let mLen = blocks mBits 64 in
   let nLen = blocks bits 64 in
-  let r = create mLen (u64 0) in
-  assume (nLen <= b.len);
+  assert (nLen <= b.len);
   let b_bn = sub b.bn 0 nLen in
-  let r = update_slice r 0 nLen b_bn in
-  assume (eval mLen r < pow2 mBits);
+  lemma_eval_equal2 b.len b.bn nLen b_bn b.len;
+  let mLen = blocks mBits 64 in
+  let r = create mLen (u64 0) in
+  let r = update_sub r 0 nLen b_bn in
+  lemma_eval_equal2 mLen r nLen b_bn mLen;
+  assert (eval mLen r < pow2 mBits);
   let res:bignum mBits = Bignum mLen r in
-  assume (eval mLen r == eval b.len b.bn);
   res
 
-val bn_add_:
+val bn_add_f_pred:
   aLen:size_pos -> a:bignum_i aLen ->
-  bLen:size_pos -> b:bignum_i bLen -> Pure (tuple2 carry (bignum_i aLen))
+  bLen:size_pos{bLen <= aLen} -> b:bignum_i bLen ->
+  i:size_nat{i <= aLen} -> tuple2 carry (bignum_i aLen) -> Tot Type0
+let bn_add_f_pred aLen a bLen b i (c, res) = eval_i aLen res i + uint_v c * x_i i = eval_i aLen a i + eval_is_greater_len bLen b i
+
+val bn_add_f:
+  aLen:size_pos{aLen + 1 < max_size_t} -> a:bignum_i aLen ->
+  bLen:size_pos{bLen <= aLen} -> b:bignum_i bLen -> Tot (repeatable #(tuple2 carry (bignum_i aLen)) #aLen (bn_add_f_pred aLen a bLen b))
+  #reset-options "--z3rlimit 150 --max_fuel 2"
+let bn_add_f aLen a bLen b i (c, res) =
+  assert (bn_add_f_pred aLen a bLen b i (c, res));
+  let bi = bval bLen b i in
+  let (c', res_i) = addcarry_u64 a.[i] bi c in
+  assert (uint_v res_i + uint_v c' * x_i 1 = uint_v a.[i] + uint_v bi + uint_v c);
+  let res' = res.[i] <- res_i in
+  lemma_eval_equal1 aLen res aLen res' i;
+  assert (eval_i aLen res i == eval_i aLen res' i);
+  lemma_eval_incr aLen res' (i + 1);
+  assert (eval_i aLen res' (i + 1) == eval_i aLen res' i + (uint_v res'.[i]) * x_i i); //from eval_i
+  assert (eval_i aLen res' (i + 1) == eval_i aLen a i + eval_is_greater_len bLen b i - uint_v c * x_i i + (uint_v a.[i] + uint_v bi + uint_v c - uint_v c' * x_i 1) * x_i i); //expansion
+  assume (eval_i aLen res' (i + 1) == eval_i aLen a i + eval_is_greater_len bLen b i + uint_v a.[i] * x_i i + uint_v bi * x_i i - uint_v c' * x_i 1 * x_i i);
+  lemma_mult_x1_xi i;
+  assert (eval_i aLen res' (i + 1) + uint_v c' * x_i (i + 1) == eval_i aLen a i + eval_is_greater_len bLen b i + uint_v a.[i] * x_i i + uint_v bi * x_i i);
+  assert (eval_i aLen res' (i + 1) + uint_v c' * x_i (i + 1) == eval_i aLen a (i+1) + eval_is_greater_len bLen b (i+1));
+  (c', res')
+
+val bn_add_:
+  aLen:size_pos{aLen + 1 < max_size_t} -> a:bignum_i aLen ->
+  bLen:size_pos{bLen <= aLen} -> b:bignum_i bLen -> Pure (tuple2 carry (bignum_i aLen))
   (requires True)
   (ensures (fun (c', res') -> eval aLen res' + uint_v c' * x_i aLen = eval aLen a + eval bLen b))
 let bn_add_ aLen a bLen b =
   let res = create aLen (u64 0) in
-  let (c, res) = repeati aLen
-  (fun i (c, res) ->
-      let bi = bval bLen b i in
-      let (c', res_i) = addcarry_u64 a.[i] bi c in
-      let res' = res.[i] <- res_i in
-      (c', res')
-  ) (u8 0, res) in
-  assume(eval aLen res + uint_v c * x_i aLen = eval aLen a + eval bLen b);
-  (c, res)
+  let (c', res') = repeati_inductive aLen
+    (bn_add_f_pred aLen a bLen b)
+    (fun i (c, res) ->
+      bn_add_f aLen a bLen b i (c, res)
+    ) (u8 0, res) in
+  assert (eval_i aLen res' aLen + uint_v c' * x_i aLen == eval_i aLen a aLen + eval_is_greater_len bLen b aLen);
+  lemma_eval_is_greater_len bLen b aLen;
+  (c', res')
 
-// let bn_add #nBits #mBits a b =
-//   assume (b.len <= a.len);
-//   assume (a.len * 64 == nBits);
-//   let (c', r) = bn_add_ a.len a.bn b.len b.bn in
-//   assume (eval a.len r < pow2 nBits);
-//   let res:bignum nBits = Bignum a.len r in
-//   (c', res)
-
+#reset-options "--z3rlimit 50 --max_fuel 0"
 let bn_add #nBits #mBits a b =
-  let (c', r) = bn_add_ a.len a.bn b.len b.bn in
-  assume (eval a.len r < pow2 nBits);
-  let res:bignum nBits = Bignum a.len r in
-  assume (a.len * 64 == nBits);
-  assume(eval a.len r + uint_v c' * x_i nBits = eval a.len a.bn + eval b.len b.bn);
+  let aLen = blocks nBits 64 in
+  let a_bn = sub a.bn 0 aLen in
+  lemma_eval_equal2 a.len a.bn aLen a_bn a.len;
+  let bLen = blocks mBits 64 in
+  let b_bn = sub b.bn 0 bLen in
+  lemma_eval_equal2 b.len b.bn bLen b_bn b.len;
+  assert (bLen <= aLen);
+  let (c', r) = bn_add_ aLen a_bn bLen b_bn in
+  assert (eval aLen r + uint_v c' * x_i aLen == eval aLen a_bn + eval bLen b_bn);
+  assume (nBits == 64 * aLen);
+  assume (eval aLen r < pow2 nBits);
+  let res:bignum nBits = Bignum aLen r in
   (c', res)
 
 let bn_add_carry #nBits #mBits a b =

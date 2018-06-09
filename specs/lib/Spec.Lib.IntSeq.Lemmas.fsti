@@ -24,17 +24,17 @@ val sub_index: #a:Type -> #len:size_nat -> s:lseq a len -> start:size_nat -> n:s
 		  (ensures (index (sub s start n) i == index s (start + i)))
 		  [SMTPat (index (sub s start n) i)]
 
-val sub_create: #a:Type -> len:size_t -> init: a -> start:size_t -> n:size_t{start + n <= len} -> Lemma
+val sub_create: #a:Type -> len:size_nat -> init: a -> start:size_nat -> n:size_nat{start + n <= len} -> Lemma
 		  (requires True)
-		  (ensures (sub (create len init) start n == create n init)
+		  (ensures (sub (create len init) start n == create n init))
 		  [SMTPat (sub (create len init) start n)]
 
-val slice_index: #a:Type -> #len:size_t -> s:lseq a len -> start:size_t -> fin:size_t{start <= fin /\ fin <= len} -> i:size_t{i < fin - start} -> Lemma
+val slice_index: #a:Type -> #len:size_nat -> s:lseq a len -> start:size_nat -> fin:size_nat{start <= fin /\ fin <= len} -> i:size_nat{i < fin - start} -> Lemma
 		  (requires True)
 		  (ensures (index (slice s start fin) i == index s (start + i)))
 		  [SMTPat (index (slice s start fin) i)]
 
-val update_sub_index: #a:Type -> #len:size_nat -> s:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> i:size_nat{i < n} -> Lemma
+val update_sub_index: #a:Type -> #len:size_nat -> s:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> i:size_nat{i < len} -> Lemma
 		  (requires True)
 		  (ensures (index (update_sub s start n x) i == 
 			    (if i < start then index s i else
@@ -42,7 +42,7 @@ val update_sub_index: #a:Type -> #len:size_nat -> s:lseq a len -> start:size_nat
 			     index x (i - start))))
 		  [SMTPat (index (update_sub s start n x) i )]
 
-val update_slice_index: #a:Type -> #len:size_nat -> s:lseq a len -> start:size_nat -> fin:size_nat{start <= fin /\ fin <= len} -> x:lseq a (fin - start) -> i:size_nat{i < fin - start} -> Lemma
+val update_slice_index: #a:Type -> #len:size_nat -> s:lseq a len -> start:size_nat -> fin:size_nat{start <= fin /\ fin <= len} -> x:lseq a (fin - start) -> i:size_nat{i < len} -> Lemma
 		  (requires True)
 		  (ensures (index (update_slice s start fin x) i == 
 			    (if i < start then index s i else
