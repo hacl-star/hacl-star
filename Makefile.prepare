@@ -18,10 +18,11 @@ ifeq ($(UNAME),Darwin)
 	VERSION_Z3=4.5.1.1f29cebd4df6-x64-osx-10.11.6
 endif
 ifeq ($(UNAME),Linux)
-	VERSION_OCAML=4.04.2
+	VERSION_OCAML=4.05.0
 	VERSION_Z3=4.5.1.1f29cebd4df6-x64-ubuntu-14.04
 endif
 
+VERSION_KREMLIN=4064311aba2c365c7f229f7c5d2118648d29cb41
 
 .prepare:
 	mkdir -p $(HACL_HOME)/dependencies
@@ -71,6 +72,7 @@ prepare-kremlin: .prepare
 	rm -rf $(HACL_HOME)/dependencies/kremlin && \
 	git clone https://github.com/FStarLang/kremlin.git
 	cd $(HACL_HOME)/dependencies/kremlin && \
+	git checkout $(VERSION_KREMLIN) && \
 	opam config exec -- make
 	$(MAKE) .prepare-kremlin-display-done
 
