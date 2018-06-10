@@ -4,9 +4,10 @@ module Hacl.Test.Blake2s
 
 open FStar.HyperStack.All
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntBuf
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Buffer
+open Lib.ByteBuffer
 
 //
 // Test 1
@@ -56,7 +57,7 @@ let main () =
   Hacl.Impl.Blake2s.blake2s #_ #_ #_ test1_result test1_plaintext test1_plaintext_len test1_empty_len empty test1_expected_len;
   (* Hacl.Impl.Blake2s.blake2s test1_plaintext_len test1_plaintext test1_empty_len empty test1_expected_len test1_result; *)
 
-  Spec.Lib.Print.print_compare_display test1_expected_len test1_result test1_expected;
+  Lib.Print.print_compare_display test1_expected_len test1_result test1_expected;
 
   (* let test2_plaintext_len = size 1 in *)
   (* let test2_key_len = size 32 in *)
@@ -84,6 +85,6 @@ let main () =
   (* Hacl.Impl.Blake2s.blake2s test2_plaintext_len test2_plaintext test2_key_len test2_key test2_expected_len test2_result; *)
 
   (* Display the result *)
-  (* Spec.Lib.Print.print_compare_display test2_expected_len test2_result test2_expected; *)
+  (* Lib.Print.print_compare_display test2_expected_len test2_result test2_expected; *)
 
   C.EXIT_SUCCESS

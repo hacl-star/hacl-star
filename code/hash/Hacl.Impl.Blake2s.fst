@@ -4,14 +4,14 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
-open Spec.Lib.IntBuf
-open Spec.Lib.IntBuf.Lemmas
-open Spec.Lib.IntBuf.LoadStore
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.Buffer
+open Lib.Buffer.Lemmas
+open Lib.ByteBuffer
 
 module ST = FStar.HyperStack.ST
-module LSeq = Spec.Lib.IntSeq
+module LSeq = Lib.Sequence
 module Spec = Spec.Blake2s
 
 
@@ -111,7 +111,7 @@ val update_sub: #a:Type0 -> #len:size_nat -> #xlen:size_nat -> i:lbuffer a len -
   Stack unit
     (requires (fun h -> live h i /\ live h x))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
-                         /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[x]))
+                         /\ h1.[i] == LSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[x]))
 
 [@ Substitute]
 let update_sub #a #len #olen i start n x =

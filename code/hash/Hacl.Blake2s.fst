@@ -4,8 +4,9 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-open Spec.Lib.IntTypes
-open Spec.Lib.IntBuf
+open Lib.IntTypes
+open Lib.Buffer
+open Lib.ByteBuffer
 
 module S = Spec.Blake2s
 module I = Hacl.Impl.Blake2s
