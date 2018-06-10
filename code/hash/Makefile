@@ -103,7 +103,7 @@ BASE_OBJ = ../../lib/c/Spec_Lib_Print.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREM
 HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.ByteBuffer.fst
 
 
-blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
+blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst 
 	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fsopt "--expose_interfaces" -tmpdir blake2s-c \
 	-I ../../specs -I ../../lib -I ../../lib/fst -I $(KREMLIN_HOME)/include \
 	-skip-translation $^
@@ -112,16 +112,14 @@ blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Tes
 # I don't want to generate Hacl_Blake2s.c with -add-include '"kremlin/c_string.h"' !!!
 blake2s-c/Hacl_Blake2s.c: blake2s-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"myvoid.h"' -add-include '"kremlin/c_string.h"' -fparentheses -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' -skip-compilation \
-	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	$^ -o $@
 
 blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -add-include '"kremlin/c_string.h"' -tmpdir blake2s-c -skip-compilation -no-prefix Hacl.Test.Blake2s \
-	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	$^ -o $@
 
 
-test-blake2s.exe: blake2s-c/Hacl_Blake2s.c blake2s-c/Hacl_Test_Blake2s.c $(BASE_OBJ)
+test-blake2s.exe: blake2s-c/Hacl_Blake2s.c $(BASE_OBJ)
 	cp myvoid.h blake2s-c/
 	$(CC) $(CFLAGS) -I $(KREMLIN_HOME)/include -o $@ $^
 

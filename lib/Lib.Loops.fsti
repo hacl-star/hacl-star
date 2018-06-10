@@ -4,7 +4,7 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open Lib.IntTypes
 
-let v = size_v
+unfold let v = size_v
 
 inline_for_extraction
 val for:

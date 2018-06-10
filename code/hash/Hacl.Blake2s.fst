@@ -85,6 +85,7 @@ val finish:
 let finish #vnn output st nn = I.blake2s_finish #vnn output st nn
 
 
+(*
 val blake2s:
     #vll: size_nat
   -> #vkk: size_nat
@@ -100,3 +101,4 @@ val blake2s:
     (ensures  (fun h0 _ h1 -> True))
 
 let blake2s #vll #vkk #vnn output outlen input ilen key klen = I.blake2s #vll #vkk #vnn output input ilen klen key outlen
+*)
