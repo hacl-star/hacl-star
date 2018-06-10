@@ -34,23 +34,28 @@ static int openssl_aead(const EVP_CIPHER *alg, int enc,
   if (1 != EVP_CipherInit_ex(ctx, alg, NULL, key, iv, enc))
     handleErrors();
 
-  if(!enc && EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, 16, tag) <= 0)
-    handleErrors();
-
   // Set additional authenticated data
   if (1 != EVP_CipherUpdate(ctx, NULL, &len, aad, aad_len))
     handleErrors();
 
-  // Process the data
-  if (1 != EVP_CipherUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
+  // Process the plaintext
+  if (enc && 1 != EVP_CipherUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
+    handleErrors();
+
+  // Process the ciphertext
+  if (!enc && 1 != EVP_CipherUpdate(ctx, plaintext, &len, ciphertext, plaintext_len))
+    handleErrors();
+
+  // Set the tag
+  if(!enc && EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, 16, tag) <= 0)
     handleErrors();
 
   // Finalize last block
   if (1 != EVP_CipherFinal_ex(ctx, ciphertext + len, &len))
     return 0;
 
-  /* Get the tag */
-  if (enc && 1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag))
+  // Get the tag
+  if (enc && 1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, 16, tag))
     handleErrors();
 
   /* Clean up */
