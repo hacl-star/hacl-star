@@ -1,13 +1,13 @@
-module Spec.Lib.IntBuf
+module Lib.Buffer
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
 module ST = FStar.HyperStack.ST
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
 
-module LSeq = Spec.Lib.IntSeq
+module LSeq = Lib.Sequence
 
 module Buf = FStar.Buffer
 module U32 = FStar.UInt32
@@ -19,6 +19,7 @@ let disjoint #a1 #a2 #len1 #len2 b1 b2 : GTot Type0 = Buf.disjoint #a1 #a2 b1 b2
 let live #a #len h b : GTot Type0 = Buf.live h b
 
 let preserves_live h0 h1 = True
+let as_seq #a #len b m = admit()
 let as_lseq #a #len b m = admit()
 let modifies1 #a #len b h0 h1 = admit()
 let modifies2 = admit()
@@ -72,7 +73,7 @@ let map #a #len clen f b =
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       let b_i = b.(j) in
       b.(j) <- f b_i in
-  Spec.Lib.Loops.for (size 0) clen inv f'
+  Lib.Loops.for (size 0) clen inv f'
 
 
 let map2 #a1 #a2 #len clen f b1 b2 =
@@ -84,7 +85,7 @@ let map2 #a1 #a2 #len clen f b1 b2 =
       let i1 = b1.(j) in
       let i2 = b2.(j) in
       b1.(j) <- f i1 i2 in
-  Spec.Lib.Loops.for (size 0) clen inv f'
+  Lib.Loops.for (size 0) clen inv f'
 
 let copy #a #len o clen i =
   let h0 = ST.get() in
@@ -98,7 +99,7 @@ let copy #a #len o clen i =
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       let src_i = i.(j) in
       o.(j) <- src_i in
-  Spec.Lib.Loops.for (size 0) clen inv f'
+  Lib.Loops.for (size 0) clen inv f'
 
 
 
@@ -150,7 +151,7 @@ let salloc #h0 #a #b #len clen init read writes spec impl =
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       upd #a #len buf j init in
-  Spec.Lib.Loops.for (size 0) clen inv f';
+  Lib.Loops.for (size 0) clen inv f';
   pop_frame();
   r
 
@@ -163,7 +164,7 @@ let salloc11 #h0 #a #b #c #len #wlen clen init read write spec impl =
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       upd #a #len buf j init in
-  Spec.Lib.Loops.for (size 0) clen inv f';
+  Lib.Loops.for (size 0) clen inv f';
   pop_frame();
   r
 
@@ -181,8 +182,8 @@ let salloc21 #h0 #b #a0 #a1 #w #len0 #len1 #wlen clen0 clen1 init0 init1 reads w
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       upd #a1 #len1 buf1 j init1 in
-  Spec.Lib.Loops.for (size 0) clen0 inv f'0;
-  Spec.Lib.Loops.for (size 0) clen1 inv f'1;
+  Lib.Loops.for (size 0) clen0 inv f'0;
+  Lib.Loops.for (size 0) clen1 inv f'1;
   pop_frame();
   r
 
@@ -194,7 +195,7 @@ let iter_range #a #len start fin spec impl input =
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       impl j input in
-  Spec.Lib.Loops.for start fin inv f'
+  Lib.Loops.for start fin inv f'
 
 let iteri #a #len n spec impl input = iter_range #a #len (size 0) n spec impl input
 
@@ -205,7 +206,7 @@ let iter #a #len n spec impl input =
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       impl input in
-  Spec.Lib.Loops.for (size 0) n inv f'
+  Lib.Loops.for (size 0) n inv f'
 
 inline_for_extraction let loop #h0 #a #len n buf spec impl =
   let inv (h1:mem) (j:nat) = True in
@@ -213,7 +214,7 @@ inline_for_extraction let loop #h0 #a #len n buf spec impl =
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       impl j in
-  Spec.Lib.Loops.for (size 0) n inv f'
+  Lib.Loops.for (size 0) n inv f'
 
 inline_for_extraction let loop_set #a #len buf start n init =
   let inv (h1:mem) (j:nat) = True in
@@ -221,7 +222,7 @@ inline_for_extraction let loop_set #a #len buf start n init =
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       upd buf j init in
-  Spec.Lib.Loops.for start n inv f'
+  Lib.Loops.for start n inv f'
 
 inline_for_extraction let loop2 #h0 #a0 #a1 #len0 #len1 n buf0 buf1 spec impl =
   let inv (h1:mem) (j:nat) = True in
@@ -229,7 +230,7 @@ inline_for_extraction let loop2 #h0 #a0 #a1 #len0 #len1 n buf0 buf1 spec impl =
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       impl j in
-  Spec.Lib.Loops.for (size 0) n inv f'
+  Lib.Loops.for (size 0) n inv f'
 
 
 inline_for_extraction let map_blocks #h0 #a #bs #nb blocksize nblocks buf f_spec f =
@@ -239,7 +240,7 @@ inline_for_extraction let map_blocks #h0 #a #bs #nb blocksize nblocks buf f_spec
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       let bufi = sub #a #(nb*bs) #bs buf (j *. blocksize) blocksize in
       f j in
-  Spec.Lib.Loops.for (size 0) nblocks inv f'
+  Lib.Loops.for (size 0) nblocks inv f'
 
 
 inline_for_extraction let reduce_blocks #h0 #a #r #bs #nb #rlen blocksize nblocks rbuf f_spec f buf =
@@ -249,4 +250,4 @@ inline_for_extraction let reduce_blocks #h0 #a #r #bs #nb #rlen blocksize nblock
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       let bufi = sub buf (j *. blocksize) blocksize in
       f j bufi in
-  Spec.Lib.Loops.for (size 0) nblocks inv f'
+  Lib.Loops.for (size 0) nblocks inv f'

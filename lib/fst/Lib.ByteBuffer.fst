@@ -1,14 +1,15 @@
-module Spec.Lib.IntBuf.LoadStore
+module Lib.ByteBuffer
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
 module ST = FStar.HyperStack.ST
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
-open Spec.Lib.IntBuf
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
+open Lib.Buffer
+open Lib.ByteSequence
 
-module LSeq = Spec.Lib.IntSeq
+module LSeq = Lib.Sequence
 
 module Buf = FStar.Buffer
 module U32 = FStar.UInt32

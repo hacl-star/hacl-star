@@ -1,8 +1,8 @@
-module Spec.Lib.Loops
+module Lib.Loops
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
-open Spec.Lib.IntTypes
+open Lib.IntTypes
 
 let v = size_v
 
