@@ -535,7 +535,7 @@ let blake2s #vll #vkk #vnn output d ll kk k nn =
   else
     blake2s_init #vkk st k kk nn;
     let nprev = if kk =. (size 0) then (size 0) else (size 1) in
-    blake2s_update_multi st (size 0) nblocks d;
+    blake2s_update_multi st nprev nblocks d;
     blake2s_update_last #(v rem) st ll last rem fk;
     blake2s_finish #vnn output st nn
 
