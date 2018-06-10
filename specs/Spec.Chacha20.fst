@@ -19,7 +19,7 @@ type counter = size_nat
 type subblock = b:bytes{length b <= blocklen}
 
 // Internally, blocks are represented as 16 x 4-byte integers
-type state = m:intseq U32 16
+type state = lseq uint32 16
 type idx = n:size_nat{n < 16}
 type shuffle = state -> Tot state
 

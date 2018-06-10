@@ -33,10 +33,10 @@ val disjoint_sub_lemma2: #a:Type0 -> #len:size_t -> b:lbuffer a len -> start1:si
 			 (ensures (disjoint (sub #a #len #(n1) b start1 n1) (sub #a #len #(n2) b start2 n2)))
 			 [SMTPat (disjoint (sub #a #len #(n1) b start1 n1) (sub #a #len #(n2) b  start2 n2))]
 
-val as_lseq_sub_lemma: #a:Type0 -> #len:size_t -> h:mem -> b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= v len} -> Lemma
+val as_seq_sub_lemma: #a:Type0 -> #len:size_t -> h:mem -> b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= v len} -> Lemma
 			 (requires (live h b))
-			 (ensures (as_lseq (sub #a #len #(n) b start n) h == Seq.sub (as_lseq b h) (v start) (v n)))
-			 [SMTPat (as_lseq (sub #a #len #(n) b start n) h)]
+			 (ensures (as_seq (sub #a #len #(n) b start n) h == Seq.sub #a #(v len) (as_seq b h) (v start) (v n)))
+			 [SMTPat (as_seq (sub #a #len #(n) b start n) h)]
 
 
 val preserves_live_lemma: #a:Type0 -> #len:size_t -> b:lbuffer a len -> h0:mem -> h1:mem -> Lemma
@@ -275,7 +275,7 @@ val modifies_3_trans: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_t -> #le
 
 val modifies1_lemma:  #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> h0:mem -> h1:mem -> Lemma
 			 (requires (disjoint b1 b2 /\ live h0 b1 /\ modifies1 b2 h0 h1))
-			 (ensures  (live h1 b1 /\ as_lseq b1 h1 == as_lseq b1 h0))
+			 (ensures  (live h1 b1 /\ as_seq b1 h1 == as_seq b1 h0))
 			 [SMTPat (disjoint b1 b2);
 			  SMTPat (live h0 b1);
 			  SMTPat (modifies1 b2 h0 h1)]
@@ -283,7 +283,7 @@ val modifies1_lemma:  #a1:Type0 -> #a2:Type0 -> #len1:size_t -> #len2:size_t -> 
 
 val modifies2_lemma:  #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_t -> #len2:size_t -> #len3:size_t -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> h0:mem -> h1:mem -> Lemma
 			 (requires (disjoint b1 b2 /\ disjoint b1 b3 /\ live h0 b1 /\ modifies2 b2 b3 h0 h1))
-			 (ensures  (live h1 b1 /\ as_lseq b1 h1 == as_lseq b1 h0))
+			 (ensures  (live h1 b1 /\ as_seq b1 h1 == as_seq b1 h0))
 			 [SMTPat (disjoint b1 b2);
 			  SMTPat (disjoint b1 b3);
 			  SMTPat (live h0 b1);
@@ -293,7 +293,7 @@ val modifies2_lemma:  #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_t -> #le
 val modifies3_lemma:  #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #a4:Type0-> #len1:size_t -> #len2:size_t -> #len3:size_t -> #len4:size_t ->
 		      b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> b3:lbuffer a3 len3 -> b4:lbuffer a4 len4 -> h0:mem -> h1:mem -> Lemma
 			 (requires (disjoint b1 b2 /\ disjoint b1 b3 /\ disjoint b1 b4 /\ live h0 b1 /\ modifies3 b2 b3 b4 h0 h1))
-			 (ensures  (live h1 b1 /\ as_lseq b1 h1 == as_lseq b1 h0))
+			 (ensures  (live h1 b1 /\ as_seq b1 h1 == as_seq b1 h0))
 			 [SMTPat (disjoint b1 b2);
 			  SMTPat (disjoint b1 b3);
 			  SMTPat (disjoint b1 b4);
@@ -303,6 +303,6 @@ val modifies3_lemma:  #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #a4:Type0-> #len1:s
 
 val modifies_sub_lemma: #a:Type0 -> #len:size_t -> b:lbuffer a len -> start:size_t -> n:size_t{v start+v n <= v len} -> h0:mem -> h1:mem -> Lemma
 			 (requires (live h0 b /\ modifies1 (sub #a #len #(n) b start n) h0 h1))
-			 (ensures  (modifies1 b h0 h1 /\ as_lseq b h1 == Seq.update_sub (as_lseq b h0) (v start) (v n) (Seq.sub (as_lseq b h1) (v start) (v n))))
+			 (ensures  (modifies1 b h0 h1 /\ as_seq b h1 == Seq.update_sub #a #(v len) (as_seq b h0) (v start) (v n) (Seq.sub #a  #(v len) (as_seq b h1) (v start) (v n))))
 			 [SMTPat (live h0 b);
 			  SMTPat (modifies1 (sub #a #len #(n) b start n) h0 h1)]

@@ -21,9 +21,9 @@ type intseq (t:m_inttype) (len:size_nat) = lseq (uint_t t) len
 /// Conversions operations
 ///
 
-val to_lseq: #a:Type0 -> s:seq a -> lseq a (length s)
+val to_lseq: #a:Type0 -> s:seq a -> l:lseq a (length s){l == s}
 
-val to_seq: #a:Type0 -> #len:size_nat -> s:lseq a len -> o:seq a {length o == len}
+val to_seq: #a:Type0 -> #len:size_nat -> s:lseq a len -> o:seq a {o == s /\ length o == len}
 
 
 ///

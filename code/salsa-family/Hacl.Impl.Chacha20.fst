@@ -2,15 +2,15 @@ module Hacl.Impl.Chacha20
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
-open Spec.Lib.IntTypes
+open Lib.IntTypes
 
-open Spec.Lib.IntBuf
-open Spec.Lib.IntBuf.LoadStore
-open Spec.Lib.IntBuf.Lemmas
+open Lib.Buffer
+open Lib.ByteBuffer
+open Lib.Buffer.Lemmas
 open Spec.Chacha20
 
 module ST = FStar.HyperStack.ST
-module LSeq = Spec.Lib.IntSeq
+module LSeq = Lib.Sequence
 module Spec = Spec.Chacha20
 
 (* Definition of the state *)
@@ -22,13 +22,17 @@ noextract unfold let v = size_v
 
 noextract unfold let index (x:size_nat) = size x
 
+noextract unfold 
+let as_state (st:state) (h:mem) : GTot Spec.state =
+  LSeq.to_lseq #uint32 (as_seq st h)
+  
 [@ "substitute"]
 private
 val line: st:state -> a:idx -> b:idx -> d:idx -> s:rotval U32 ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
-			   as_lseq st h1 == Spec.line (v a) (v b) (v d) s (as_lseq st h0)))
+			   as_state st h1 == Spec.line (v a) (v b) (v d) s (as_state st h0)))
 [@ "substitute"]
 let line st a b d s =
   let sa = st.(a) in let sb = st.(b) in
@@ -44,7 +48,7 @@ val quarter_round: st:state -> a:idx -> b:idx -> c:idx -> d:idx ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
-			  as_lseq st h1 == Spec.quarter_round (v a) (v b) (v c) (v d) (as_lseq  st h0 )))
+			  as_state st h1 == Spec.quarter_round (v a) (v b) (v c) (v d) (as_state  st h0 )))
 
 [@ "c_inline"]
 let quarter_round st a b c d =
@@ -60,7 +64,7 @@ val column_round:
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
-	     as_lseq st h1 == Spec.column_round (as_lseq st h0)))
+	     as_state st h1 == Spec.column_round (as_state st h0)))
 [@ "substitute"]
 let column_round st =
   quarter_round st (index 0) (index 4) (index 8)  (index 12);
@@ -74,7 +78,7 @@ val diagonal_round: st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
-       as_lseq st h1 == Spec.diagonal_round (as_lseq st h0)))
+       as_state st h1 == Spec.diagonal_round (as_state st h0)))
 [@ "substitute"]
 let diagonal_round st =
   quarter_round st (index 0) (index 5) (index 10) (index 15);
@@ -89,7 +93,7 @@ val double_round: st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
-		 as_lseq st h1 == Spec.double_round (as_lseq st h0)))
+		 as_state st h1 == Spec.double_round (as_state st h0)))
 [@ "c_inline"]
 let double_round st =
   column_round st;
@@ -102,10 +106,10 @@ val rounds: st:state ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1 /\
-		 as_lseq st h1 == Spec.rounds (as_lseq st h0)))
+		 as_state st h1 == Spec.rounds (as_state st h0)))
 [@ "c_inline"]
 let rounds st =
-  iter (size 10) Spec.double_round double_round st
+  iter #uint32 #16 #(size 16) (size 10) Spec.double_round double_round st
 
 [@ "c_inline"]
 private
@@ -115,11 +119,11 @@ val chacha20_core:
   Stack unit
     (requires (fun h -> live h k /\ live h st /\ disjoint st k))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 k h0 h1 /\
-		as_lseq k h1 == Spec.chacha20_core (as_lseq st h0)))
+		as_state k h1 == Spec.chacha20_core (as_state st h0)))
 #reset-options "--z3rlimit 50"
 [@ "c_inline"]
 let chacha20_core k st =
-  copy k (size 16) st;
+  copy #_ #(size 16) k st;
   rounds k;
   map2 (size 16) (add_mod #U32) k st;
   ()
@@ -128,13 +132,13 @@ let chacha20_core k st =
 private
 val setup:
   st:state ->
-  k:lbuffer uint8 32 ->
-  n:lbuffer uint8 12 ->
+  k:lbuffer uint8 (size 32) ->
+  n:lbuffer uint8 (size 12) ->
   Stack unit
     (requires (fun h -> live h st /\ live h k /\ live h n
                     /\ disjoint k st /\ disjoint n st))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st h0 h1
-                       /\ as_lseq st h1 ==
+                       /\ as_state st h1 ==
 			 Spec.setup (as_lseq k h0) (as_lseq n h0) (as_lseq st h0)))
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
@@ -145,9 +149,9 @@ let setup st k n =
   st.(index 2) <- u32 Spec.c2;
   st.(index 3) <- u32 Spec.c3;
   let st_k = sub st (index 4) (index 8) in
-  uints_from_bytes_le #U32 #8 st_k k;
+  uints_from_bytes_le #U32 #(size 8) st_k k;
   let st_n = sub st (index 13) (index 3) in
-  uints_from_bytes_le #U32 #3 st_n n
+  uints_from_bytes_le #U32 #(size 3) st_n n
 
 [@ "c_inline"]
 val chacha20_init:
