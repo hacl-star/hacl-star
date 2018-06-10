@@ -14,6 +14,17 @@
   #endif
 #endif
 
+void check_result(const char* testname, const unsigned char *actual, const unsigned char *expected, uint32_t length)
+{
+    for (uint32_t i=0; i<length; ++i) {
+        if (actual[i] != expected[i]) {
+            printf("FAIL %s:  actual 0x%2.2x mismatch with expected 0x%2.2x at offset %u\n",
+              testname, actual[i], expected[i], i);
+            exit(1);
+        }
+    }
+}
+
 void dump(unsigned char buffer[], size_t len)
 {
   size_t i;
@@ -95,12 +106,26 @@ void coverage(void)
   quic_crypto_encrypt(k, cipher, 0, salt, 13, data, 28);
   dump(cipher, 28+16);
 
+  unsigned char *expected_pnmask = (unsigned char *)"\x04\xdd\x7a\xef";
+  unsigned char pnmask[4];
+  if(quic_crypto_packet_number_otp(k, cipher, pnmask))
+  {
+    printf("PN encryption mask:\n");
+    dump(pnmask, 4);
+    check_result("PN encryption mask", pnmask, expected_pnmask, sizeof(pnmask));
+  } else {
+    printf("PN encryption failed.\n");
+    exit(1);
+  }
+
   if(quic_crypto_decrypt(k, hash, 0, salt, 13, cipher, 28+16)) {
-    printf("DECRYPT SUCCES: \n");
+    printf("DECRYPT SUCCESS: \n");
     dump(hash, 28);
   } else {
     printf("DECRYPT FAILED.\n");
+    exit(1);
   }
+
   quic_crypto_free_key(k);
 
   s.hash = TLS_hash_SHA256;
@@ -116,8 +141,19 @@ void coverage(void)
   quic_crypto_encrypt(k, cipher, 0x29e255a7, salt, 13, data, 28);
   dump(cipher, 28+16);
 
+  expected_pnmask = (unsigned char *)"\x30\x8a\xc6\xf5";
+  if(quic_crypto_packet_number_otp(k, cipher, pnmask))
+  {
+    printf("PN encryption mask:\n");
+    dump(pnmask, 4);
+    check_result("PN encryption mask", pnmask, expected_pnmask, sizeof(pnmask));
+  } else {
+    printf("PN encryption failed.\n");
+    exit(1);
+  }
+
   if(quic_crypto_decrypt(k, hash, 0x29e255a7, salt, 13, cipher, 28+16)) {
-    printf("DECRYPT SUCCES: \n");
+    printf("DECRYPT SUCCESS: \n");
     dump(hash, 28);
   } else {
     printf("DECRYPT FAILED.\n");
@@ -374,17 +410,6 @@ void dumptofile(FILE *fp, const char buffer[], size_t len)
     fprintf(fp, "0x%2.2x,", (unsigned char)buffer[i]);
     if (i % 16 == 15 || i == len-1) fprintf(fp, "\n");
   }
-}
-
-void check_result(const char* testname, const unsigned char *actual, const unsigned char *expected, uint32_t length)
-{
-    for (uint32_t i=0; i<length; ++i) {
-        if (actual[i] != expected[i]) {
-            printf("FAIL %s:  actual 0x%2.2x mismatch with expected 0x%2.2x at offset %u\n",
-              testname, actual[i], expected[i], i);
-            exit(1);
-        }
-    }
 }
 
 void test_crypto(const quic_secret *secret, const unsigned char *expected_cipher)

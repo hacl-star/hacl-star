@@ -190,7 +190,7 @@ val chacha20_key_block: b:lbuffer uint8 64 -> st:state -> Stack unit
 [@ "c_inline"]
 let chacha20_key_block b st =
   let h0 = ST.get() in
-  alloc1 #h0 (size 16) (u32 0) b
+  alloc #h0 (size 16) (u32 0) b
   (fun h ->
      let st0 = as_lseq st h in
      (fun _ bseq -> bseq == Spec.chacha20_key_block st0))
@@ -208,7 +208,7 @@ val chacha20_key_block0: b:lbuffer uint8 64 ->
 [@ "c_inline"]
 let chacha20_key_block0 b k n =
   let h0 = ST.get() in
-  alloc1 #h0 (size 16) (u32 0) b
+  alloc #h0 (size 16) (u32 0) b
   (fun h ->
     let key = as_lseq k h in
     let nonce = as_lseq n h in
@@ -239,7 +239,7 @@ val chacha20_encrypt_block:
 
 let chacha20_encrypt_block st0 ctr0 incr block =
   let h0 = ST.get () in
-  alloc1 #h0 (size 16) (u32 0) block
+  alloc #h0 (size 16) (u32 0) block
   (fun h ->
     let st_init = as_lseq st0 h in
     let block_init = as_lseq block h in
@@ -249,7 +249,7 @@ let chacha20_encrypt_block st0 ctr0 incr block =
   (fun st -> copy st (size 16) st0;
 	  chacha20_set_counter st (ctr0 +. incr);
 	  let h1 = ST.get() in
-	  alloc1 #h1 (size 64) (u8 0) block
+	  alloc #h1 (size 64) (u8 0) block
 	    (fun h ->
 	       let st_init = as_lseq st h in
 	       let block_init = as_lseq block h in
@@ -283,7 +283,7 @@ val chacha20_encrypt_last:
 
 let chacha20_encrypt_last st0 ctr0 incr len block =
   let h0 = ST.get () in
-  alloc1 #h0 (size 64) (u8 0) block
+  alloc #h0 (size 64) (u8 0) block
   (fun h ->
     let st_init = as_lseq st0 h in
     let block_init = as_lseq block h in
@@ -317,7 +317,7 @@ val chacha20_encrypt_bytes:
 
 let chacha20_encrypt_bytes clen cipher plain key nonce ctr =
   let h0 = ST.get() in
-  alloc1 #h0 (size 16) (u32 0) cipher
+  alloc #h0 (size 16) (u32 0) cipher
   (fun h ->
      let key0 = as_lseq key h in
      let nonce0 = as_lseq nonce h in

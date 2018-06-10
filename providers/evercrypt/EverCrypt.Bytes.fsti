@@ -13,5 +13,12 @@ type cipher_tag = {
   tag:    lbytes 32
 }
 
-val chacha20_poly1305_encrypt: m:lbytes 32 -> aad:lbytes 32 -> k:lbytes 32 -> n:lbytes 32 ->
-  cipher_tag
+val chacha20_poly1305_encrypt: m:lbytes 32 -> aad:lbytes 32 -> k:lbytes 32 -> n:lbytes 32
+  -> cipher_tag
+
+type maybe_plaintext =
+| Error
+| Correct of lbytes 32
+
+val chacha20_poly1305_decrypt: c:lbytes 32 -> tag:lbytes 32 -> aad:lbytes 32
+  -> k:lbytes 32 -> n:lbytes 32 -> maybe_plaintext

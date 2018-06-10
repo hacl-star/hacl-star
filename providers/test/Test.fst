@@ -1,132 +1,318 @@
 module Test
 
-(* This file is provided for test purposes only. It can be built in a single
- * invocation of KreMLin, as in the Makefile.
- *)
-
 module B = FStar.Buffer
 module U32 = FStar.UInt32
 
 open FStar.HyperStack.ST
+open FStar.Bytes
 open EverCrypt.Helpers
+open EverCrypt.AutoConfig
 
-val test_sha256: unit -> St unit
-let test_sha256 () =
+open Test.Vectors
+open FStar.UInt32
+
+#set-options "--admit_smt_queries true"
+
+type lbuffer (l:nat) = b:B.buffer UInt8.t {Buffer.length b == l}
+
+private val store_bytes_aux: len:U32.t -> buf:lbuffer (U32.v len)
+  -> i:U32.t{i <=^ len} -> b:lbytes (v len) -> St unit
+let rec store_bytes_aux len buf i b =
+  if i <^ len then
+   begin
+   B.upd buf i (Bytes.index b (v i));
+   store_bytes_aux len buf (i +^ 1ul) b
+   end
+
+val store_bytes: l:U32.t -> buf:lbuffer (v l) -> b:lbytes (v l) -> St unit
+let store_bytes l buf b = store_bytes_aux l buf 0ul b
+
+val buffer_of_hex: string -> StackInline (B.buffer UInt8.t)
+ (requires fun _ -> True)
+ (ensures  fun _ _ _ -> True)
+let buffer_of_hex s =
+  let b = bytes_of_hex s in
+  let l = Bytes.len b in
+  let buf = B.create 0x00uy l in
+  store_bytes l buf b;
+  buf
+
+val buffer_of_string: string -> StackInline (B.buffer UInt8.t)
+ (requires fun _ -> True)
+ (ensures  fun _ _ _ -> True)
+let buffer_of_string s =
+  let b = bytes_of_string s in
+  let l = Bytes.len b in
+  let buf = B.create 0x00uy l in
+  store_bytes l buf b;
+  buf
+
+val buffer_of_strings: U32.t -> string -> StackInline (B.buffer UInt8.t)
+ (requires fun _ -> True)
+ (ensures  fun _ _ _ -> True)
+let buffer_of_strings n s =
+  let b = bytes_of_string s in
+  let l = Bytes.len b in
+  let buf = B.rcreate HyperStack.root 0x00uy (l *^ n) in
+  C.Loops.for 0ul n (fun _ _ -> True)
+    (fun i -> store_bytes l (B.offset buf (i *^ l)) b);
+  buf
+
+/// SHA2-256
+
+val test_sha256: v:hash_vector{v.hash_alg == SHA256} -> St unit
+let test_sha256 v =
   push_frame();
 
   let output_len = 32ul in
   let output = B.create 0uy output_len in
 
-  let plaintext_len = 3ul in
-  let plaintext = B.createL [ 0x61uy; 0x62uy; 0x63uy; ] in
-
-  let expected = B.createL [
-      0xBAuy; 0x78uy; 0x16uy; 0xBFuy; 0x8Fuy; 0x01uy; 0xCFuy; 0xEAuy;
-      0x41uy; 0x41uy; 0x40uy; 0xDEuy; 0x5Duy; 0xAEuy; 0x22uy; 0x23uy;
-      0xB0uy; 0x03uy; 0x61uy; 0xA3uy; 0x96uy; 0x17uy; 0x7Auy; 0x9Cuy;
-      0xB4uy; 0x10uy; 0xFFuy; 0x61uy; 0xF2uy; 0x00uy; 0x15uy; 0xADuy
-    ] in
+  let repeat   = U32.uint_to_t v.repeat in
+  let len      = U32.mul (Bytes.len (bytes_of_string v.input)) repeat in
+  let input    = buffer_of_strings repeat v.input in
+  let expected = buffer_of_hex v.output in
 
   (* Allocate memory for state *)
   let ctx = B.create 0ul U32.(64ul +^ 64ul +^ 8ul +^ 1ul) in
 
-  (* Call the hash function *)
+  (* Compute the number of blocks to process *)
+  let size_block = 64ul in
+  let n = U32.div len size_block in
+  let r = U32.rem len size_block in
+
+  (* Get all full blocks and the last block *)
+  let input_blocks = B.sub input 0ul (n *%^ size_block) in
+  let input_last   = B.sub input (n *%^ size_block) r in
+
+  (* Call the hash function incrementally *)
   EverCrypt.sha256_init ctx;
-  EverCrypt.sha256_update_last ctx plaintext plaintext_len;
+  EverCrypt.sha256_update_multi ctx input_blocks n;
+  EverCrypt.sha256_update_last ctx input_last r;
   EverCrypt.sha256_finish ctx output;
+
+  // Non-incrementally:
+  // EverCrypt.sha256_hash output input len
 
   (* Display the result *)
   TestLib.compare_and_print !$"of SHA256" expected output 32ul;
 
   pop_frame()
 
-val test_chacha20_poly1305: unit -> St unit
-let test_chacha20_poly1305 _ =
+/// SHA2-384
+
+val test_sha384: v:hash_vector{v.hash_alg == SHA384} -> St unit
+let test_sha384 v =
   push_frame();
 
-  (* Tests: RFC7539 *)
-  let k = B.createL
-    [0x80uy; 0x81uy; 0x82uy; 0x83uy; 0x84uy; 0x85uy; 0x86uy; 0x87uy;
-     0x88uy; 0x89uy; 0x8auy; 0x8buy; 0x8cuy; 0x8duy; 0x8euy; 0x8fuy;
-     0x90uy; 0x91uy; 0x92uy; 0x93uy; 0x94uy; 0x95uy; 0x96uy; 0x97uy;
-     0x98uy; 0x99uy; 0x9auy; 0x9buy; 0x9cuy; 0x9duy; 0x9euy; 0x9fuy] in
-  let m = B.createL
-    [0x4cuy; 0x61uy; 0x64uy; 0x69uy; 0x65uy; 0x73uy; 0x20uy; 0x61uy;
-     0x6euy; 0x64uy; 0x20uy; 0x47uy; 0x65uy; 0x6euy; 0x74uy; 0x6cuy;
-     0x65uy; 0x6duy; 0x65uy; 0x6euy; 0x20uy; 0x6fuy; 0x66uy; 0x20uy;
-     0x74uy; 0x68uy; 0x65uy; 0x20uy; 0x63uy; 0x6cuy; 0x61uy; 0x73uy;
-     0x73uy; 0x20uy; 0x6fuy; 0x66uy; 0x20uy; 0x27uy; 0x39uy; 0x39uy;
-     0x3auy; 0x20uy; 0x49uy; 0x66uy; 0x20uy; 0x49uy; 0x20uy; 0x63uy;
-     0x6fuy; 0x75uy; 0x6cuy; 0x64uy; 0x20uy; 0x6fuy; 0x66uy; 0x66uy;
-     0x65uy; 0x72uy; 0x20uy; 0x79uy; 0x6fuy; 0x75uy; 0x20uy; 0x6fuy;
-     0x6euy; 0x6cuy; 0x79uy; 0x20uy; 0x6fuy; 0x6euy; 0x65uy; 0x20uy;
-     0x74uy; 0x69uy; 0x70uy; 0x20uy; 0x66uy; 0x6fuy; 0x72uy; 0x20uy;
-     0x74uy; 0x68uy; 0x65uy; 0x20uy; 0x66uy; 0x75uy; 0x74uy; 0x75uy;
-     0x72uy; 0x65uy; 0x2cuy; 0x20uy; 0x73uy; 0x75uy; 0x6euy; 0x73uy;
-     0x63uy; 0x72uy; 0x65uy; 0x65uy; 0x6euy; 0x20uy; 0x77uy; 0x6fuy;
-     0x75uy; 0x6cuy; 0x64uy; 0x20uy; 0x62uy; 0x65uy; 0x20uy; 0x69uy;
-     0x74uy; 0x2euy] in
-  let n = B.createL
-    [0x07uy; 0x00uy; 0x00uy; 0x00uy; 0x40uy; 0x41uy; 0x42uy; 0x43uy;
-     0x44uy; 0x45uy; 0x46uy; 0x47uy] in
-  let aad = B.createL
-    [0x50uy; 0x51uy; 0x52uy; 0x53uy; 0xc0uy; 0xc1uy; 0xc2uy; 0xc3uy;
-     0xc4uy; 0xc5uy; 0xc6uy; 0xc7uy] in
-  let cipher = B.createL
-    [0xd3uy; 0x1auy; 0x8duy; 0x34uy; 0x64uy; 0x8euy; 0x60uy; 0xdbuy;
-     0x7buy; 0x86uy; 0xafuy; 0xbcuy; 0x53uy; 0xefuy; 0x7euy; 0xc2uy;
-     0xa4uy; 0xaduy; 0xeduy; 0x51uy; 0x29uy; 0x6euy; 0x08uy; 0xfeuy;
-     0xa9uy; 0xe2uy; 0xb5uy; 0xa7uy; 0x36uy; 0xeeuy; 0x62uy; 0xd6uy;
-     0x3duy; 0xbeuy; 0xa4uy; 0x5euy; 0x8cuy; 0xa9uy; 0x67uy; 0x12uy;
-     0x82uy; 0xfauy; 0xfbuy; 0x69uy; 0xdauy; 0x92uy; 0x72uy; 0x8buy;
-     0x1auy; 0x71uy; 0xdeuy; 0x0auy; 0x9euy; 0x06uy; 0x0buy; 0x29uy;
-     0x05uy; 0xd6uy; 0xa5uy; 0xb6uy; 0x7euy; 0xcduy; 0x3buy; 0x36uy;
-     0x92uy; 0xdduy; 0xbduy; 0x7fuy; 0x2duy; 0x77uy; 0x8buy; 0x8cuy;
-     0x98uy; 0x03uy; 0xaeuy; 0xe3uy; 0x28uy; 0x09uy; 0x1buy; 0x58uy;
-     0xfauy; 0xb3uy; 0x24uy; 0xe4uy; 0xfauy; 0xd6uy; 0x75uy; 0x94uy;
-     0x55uy; 0x85uy; 0x80uy; 0x8buy; 0x48uy; 0x31uy; 0xd7uy; 0xbcuy;
-     0x3fuy; 0xf4uy; 0xdeuy; 0xf0uy; 0x8euy; 0x4buy; 0x7auy; 0x9duy;
-     0xe5uy; 0x76uy; 0xd2uy; 0x65uy; 0x86uy; 0xceuy; 0xc6uy; 0x4buy;
-     0x61uy; 0x16uy;] in
-  let tag = B.createL
-     [0x1auy; 0xe1uy; 0x0buy; 0x59uy; 0x4fuy; 0x09uy; 0xe2uy; 0x6auy;
-      0x7euy; 0x90uy; 0x2euy; 0xcbuy; 0xd0uy; 0x60uy; 0x06uy; 0x91uy] in
-  let cipher' = B.create 0uy 114ul in
-  let tag' = B.create 0uy 16ul in
+  let output_len = 48ul in
+  let output = B.create 0uy output_len in
 
-  let l = EverCrypt.chacha20_poly1305_encrypt cipher' tag' m 114ul aad 12ul k n in
+  let repeat   = U32.uint_to_t v.repeat in
+  let len      = U32.mul (Bytes.len (bytes_of_string v.input)) repeat in
+  let input    = buffer_of_strings repeat v.input in
+  let expected = buffer_of_hex v.output in
 
-  TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" cipher cipher' 114ul;
-  TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
+  (* Allocate memory for state *)
+  let ctx = B.create 0uL U32.(80ul +^ 80ul +^ 8ul +^ 1ul) in
+
+  (* Compute the number of blocks to process *)
+  let size_block = 128ul in
+  let n = U32.div len size_block in
+  let r = U32.rem len size_block in
+
+  (* Get all full blocks and the last block *)
+  let input_blocks = B.sub input 0ul (n *%^ size_block) in
+  let input_last   = B.sub input (n *%^ size_block) r in
+
+  (* Call the hash function incrementally *)
+  EverCrypt.sha384_init ctx;
+  EverCrypt.sha384_update_multi ctx input_blocks n;
+  EverCrypt.sha384_update_last ctx input_last r;
+  EverCrypt.sha384_finish ctx output;
+
+  // Non-incrementally:
+  // EverCrypt.sha384_hash output input len
+
+  (* Display the result *)
+  TestLib.compare_and_print !$"of SHA384" expected output 32ul;
 
   pop_frame()
 
-val test_chacha20_poly1305_bytes: unit -> St unit
-let test_chacha20_poly1305_bytes _ =
-  let open FStar.Bytes in
-  let m   = bytes_of_hex "4c616469657320616e642047656e746c656d656e206f662074686520636c617373206f66202739393a204966204920636f756c64206f6666657220796f75206f6e6c79206f6e652074697020666f7220746865206675747572652c2073756e73637265656e20776f756c642062652069742e" in
-  let aad = bytes_of_hex "50515253c0c1c2c3c4c5c6c7" in
-  let k   = bytes_of_hex "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f" in
-  let n   = bytes_of_hex "070000004041424344454647" in
-  let cipher = bytes_of_hex  "d31a8d34648e60db7b86afbc53ef7ec2a4aded51296e08fea9e2b5a736ee62d63dbea45e8ca9671282fafb69da92728b1a71de0a9e060b2905d6a5b67ecd3b3692ddbd7f2d778b8c9803aee328091b58fab324e4fad675945585808b4831d7bc3ff4def08e4b7a9de576d26586cec64b6116" in
-  let tag = bytes_of_hex "1ae10b594f09e26a7e902ecbd0600691" in
-  let open EverCrypt.Bytes in
-  let { cipher=cipher'; tag=tag'} = chacha20_poly1305_encrypt m aad k n in
-  if cipher = cipher' && tag = tag' then
-    C.String.print (C.String.of_literal "[test] of Chacha20-Poly1305 bytes is a success\n")
-  else
-    C.String.print (C.String.of_literal "[test] of Chacha20-Poly1305 bytes is a failure\n")
+/// SHA2-512
+
+val test_sha512: v:hash_vector{v.hash_alg == SHA512} -> St unit
+let test_sha512 v =
+  push_frame();
+
+  let output_len = 64ul in
+  let output = B.create 0uy output_len in
+
+  let repeat   = U32.uint_to_t v.repeat in
+  let len      = U32.mul (Bytes.len (bytes_of_string v.input)) repeat in
+  let input    = buffer_of_strings repeat v.input in
+  let expected = buffer_of_hex v.output in
+
+  (* Allocate memory for state *)
+  let ctx = B.create 0uL U32.(80ul +^ 80ul +^ 8ul +^ 1ul) in
+
+  (* Compute the number of blocks to process *)
+  let size_block = 128ul in
+  let n = U32.div len size_block in
+  let r = U32.rem len size_block in
+
+  (* Get all full blocks and the last block *)
+  let input_blocks = B.sub input 0ul (n *%^ size_block) in
+  let input_last   = B.sub input (n *%^ size_block) r in
+
+  (* Call the hash function incrementally *)
+  EverCrypt.sha512_init ctx;
+  EverCrypt.sha512_update_multi ctx input_blocks n;
+  EverCrypt.sha512_update_last ctx input_last r;
+  EverCrypt.sha512_finish ctx output;
+
+  // Non-incrementally:
+  // EverCrypt.sha512_hash output input len
+
+  (* Display the result *)
+  TestLib.compare_and_print !$"of SHA512" expected output 32ul;
+
+  pop_frame()
+
+/// ChaCha20-Poly1305
+
+val test_chacha20_poly1305: v:aead_vector{v.cipher == CHACHA20_POLY1305} -> St unit
+let test_chacha20_poly1305 v =
+  push_frame();
+
+  let key        = buffer_of_hex v.key in
+  let iv         = buffer_of_hex v.iv in
+  let aad        = buffer_of_hex v.aad in
+  let tag        = buffer_of_hex v.tag in
+  let plaintext  = buffer_of_hex v.plaintext in
+  let ciphertext = buffer_of_hex v.ciphertext in
+
+  let plaintext_len = Bytes.len (bytes_of_hex v.ciphertext) in
+  let aad_len       = Bytes.len (bytes_of_hex v.aad) in
+  let plaintext'    = B.create 0uy plaintext_len in
+  let ciphertext'   = B.create 0uy plaintext_len in
+  let tag'          = B.create 0uy 16ul in
+
+  EverCrypt.chacha20_poly1305_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
+  TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
+  TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
+
+  match EverCrypt.chacha20_poly1305_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
+  | 1ul ->
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len
+  | _ ->
+    C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
+
+  pop_frame()
+
+val test_aes128_gcm: v:aead_vector{v.cipher == AES_128_GCM} -> St unit
+let test_aes128_gcm v =
+  push_frame();
+
+  let key        = buffer_of_hex v.key in
+  let iv         = buffer_of_hex v.iv in
+  let aad        = buffer_of_hex v.aad in
+  let tag        = buffer_of_hex v.tag in
+  let plaintext  = buffer_of_hex v.plaintext in
+  let ciphertext = buffer_of_hex v.ciphertext in
+
+  let plaintext_len = Bytes.len (bytes_of_hex v.ciphertext) in
+  let aad_len       = Bytes.len (bytes_of_hex v.aad) in
+  let plaintext'    = B.create 0uy plaintext_len in
+  let ciphertext'   = B.create 0uy plaintext_len in
+  let tag'          = B.create 0uy 16ul in
+
+  EverCrypt.aes128_gcm_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
+  TestLib.compare_and_print !$"of AES-GCM 128 cipher" ciphertext ciphertext' plaintext_len;
+  TestLib.compare_and_print !$"of AES-GCM 128 tag" tag tag' 16ul;
+
+  pop_frame()
+
+val test_aes256_gcm: v:aead_vector{v.cipher == AES_256_GCM} -> St unit
+let test_aes256_gcm v =
+  push_frame();
+
+  let key        = buffer_of_hex v.key in
+  let iv         = buffer_of_hex v.iv in
+  let aad        = buffer_of_hex v.aad in
+  let tag        = buffer_of_hex v.tag in
+  let plaintext  = buffer_of_hex v.plaintext in
+  let ciphertext = buffer_of_hex v.ciphertext in
+
+  let plaintext_len = Bytes.len (bytes_of_hex v.ciphertext) in
+  let aad_len       = Bytes.len (bytes_of_hex v.aad) in
+  let plaintext'    = B.create 0uy plaintext_len in
+  let ciphertext'   = B.create 0uy plaintext_len in
+  let tag'          = B.create 0uy 16ul in
+
+  EverCrypt.aes256_gcm_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
+  TestLib.compare_and_print !$"of AES-GCM 256 cipher" ciphertext ciphertext' plaintext_len;
+  TestLib.compare_and_print !$"of AES-GCM 256 tag" tag tag' 16ul;
+
+  pop_frame()
+
+
+/// Test drivers
+
+val test_aead: list aead_vector -> St unit
+let rec test_aead v =
+  match v with
+  | [] -> ()
+  | v :: vs ->
+    match v.cipher with
+    | CHACHA20_POLY1305 ->
+      let this = test_chacha20_poly1305 v in
+      let rest = test_aead vs in
+      ()
+    | AES_128_GCM ->
+      let this = test_aes128_gcm v in
+      let rest = test_aead vs in
+      ()
+    | AES_256_GCM ->
+      let this = test_aes256_gcm v in
+      let rest = test_aead vs in
+      ()
+    | _ -> test_aead vs
+
+val test_hash: list hash_vector -> St unit
+let rec test_hash v =
+  match v with
+  | [] -> ()
+  | v :: vs ->
+    begin
+    match v.hash_alg with
+    | SHA256 -> test_sha256 v
+    | SHA384 -> test_sha384 v
+    | SHA512 -> test_sha512 v
+    | SHA1   -> ()
+    | MD5    -> ()
+    end;
+    test_hash vs
 
 let main (): St C.exit_code =
   let open EverCrypt in
   push_frame ();
 /// Hacl tests
+  Test.Bytes.print "===========Hacl===========" "";
   init (Prefer Hacl);
-  test_sha256 ();
-  test_chacha20_poly1305 ();
-  test_chacha20_poly1305_bytes ();
+  test_hash hash_vectors;
+  test_aead aead_vectors;
+  Test.Bytes.main ();
 /// Vale tests
+  Test.Bytes.print "===========Vale===========" "";
   init (Prefer Vale);
-  test_sha256 ();
+  test_aead aead_vectors;
+  test_hash hash_vectors;
+// OpenSSL tests
+  Test.Bytes.print "==========OpenSSL=========" "";
+  init (Prefer OpenSSL);
+  test_aead aead_vectors;
+  Test.Bytes.print "==========BCrypt==========" "";
+  init (Prefer BCrypt);
+  test_aead aead_vectors;
   pop_frame ();
   C.EXIT_SUCCESS

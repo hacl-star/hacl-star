@@ -61,14 +61,17 @@ int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsi
 // to form the 12-byte AEAD IV
 //
 // NB: NOT DOT ENCRYPT TWICE WITH THE SAME KEY AND SN
-//
 int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, /*out*/ unsigned char *cipher, uint64_t sn, const unsigned char *ad, uint32_t ad_len, const unsigned char *plain, uint32_t plain_len);
 
 // AEAD-decrypts cipher and authenticate additional data ad, using
 // counter; when successful, writes cipher_len - 16 bytes to the
 // output plain. The input and output buffers must not overlap.
-//
 int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, /*out*/ unsigned char *plain, uint64_t sn, const unsigned char *ad, uint32_t ad_len, const unsigned char *cipher, uint32_t cipher_len);
+
+// Compute a one time pad to obfuscate the packet number from the encrypted packet contents
+// *sample must point to the start of the encrypted packet payload
+// 4 bytes will be written to *mask, to be XORed with the packet number (after encoding)
+int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned char *sample, unsigned char *mask);
 
 // Keys allocated by quic_crypto_derive_key and quic_crypto_create must be freed
 int MITLS_CALLCONV quic_crypto_free_key(quic_key *key);

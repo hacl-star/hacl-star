@@ -1,2 +1,3 @@
 HACL_HOME=../../
-include ../Makefile
+include $(HACL_HOME)/secure_api/Makefile.common
+

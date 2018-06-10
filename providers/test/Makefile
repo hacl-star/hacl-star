@@ -1,11 +1,12 @@
-EVERCRYPT_HOME ?= ../
+EVERCRYPT_HOME ?= ..
 KREMLIN_HOME   ?= ../../../kremlin
+MLCRYPTO_HOME ?= ../../../MLCrypto
 
 EXTRACT_DIR = extract
 CACHE_DIR   = cache
 INCLUDE_PATHS = \
 	$(KREMLIN_HOME)/kremlib \
-	 ../multiplexer
+	 ../evercrypt
 
 UNAME = $(shell uname)
 
@@ -24,14 +25,16 @@ else ifeq ($(UNAME),Linux)
   PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(LD_LIBRARY_PATH)
 endif
 
-all: test
+all:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) test
 
 .depend:
 	fstar.exe \
 	  $(addprefix --include , $(INCLUDE_PATHS)) \
 	  --cache_dir $(CACHE_DIR) \
 	  --odir $(EXTRACT_DIR) \
-	  --dep full Test.fst > .depend 
+	  --dep full Test.fst Test.Bytes.fst > .depend 
 
 include .depend
 
@@ -65,11 +68,12 @@ $(EXTRACT_DIR)/Test.c: $(filter-out $(EXTRACT_DIR)/prims.krml ,$(ALL_KRML_FILES)
 	  -add-include '"kremlin/prims_int.h"' \
 	  -add-include '"kremlin/prims_string.h"' \
 	  -add-include '"kremlin/c_string.h"' \
-	  -add-include '"hacks.h"'
+	  -add-include '"hacks.h"' \
+	  -ccopt -g
 
 test: $(EXTRACT_DIR)/Test.c
-	$(MAKE) -C $(EXTRACT_DIR) test.exe
-	$(PREFIX) extract/test.exe
+	$(MAKE) -C $(EXTRACT_DIR) Test.exe
+	$(PREFIX) extract/Test.exe
 
 clean:
 	rm -rf .depend cache
@@ -77,4 +81,5 @@ clean:
         | xargs rm -f
 
 %.fst-in:
-	@echo --include ../multiplexer --include $(KREMLIN_HOME)/kremlib
+	@echo --include ../evercrypt --include $(KREMLIN_HOME)/kremlib
+

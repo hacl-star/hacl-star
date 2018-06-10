@@ -6,7 +6,7 @@
 
 #include "kremlib.h"
 #include "Crypto_HKDF_Crypto_HMAC.h"
-#include "Crypto_AEAD_Main_Crypto_Indexing.h"
+#include "Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.h"
 #include "Crypto_Symmetric_Bytes.h"
 #include "quic_provider.h"
 
@@ -16,6 +16,7 @@ typedef struct quic_key {
   Crypto_AEAD_Invariant_aead_state st;
   Crypto_Indexing_id id;
   unsigned char static_iv[12];
+  Crypto_AEAD_Invariant_aead_state pne;
 } quic_key;
 
 #if DEBUG
@@ -218,6 +219,7 @@ int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secre
 
   unsigned char info[259] = {0};
   unsigned char dkey[32];
+  unsigned char pnkey[32];
   size_t info_len;
 
   if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "key", klen))
@@ -230,15 +232,23 @@ int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secre
   if(!quic_crypto_hkdf_expand(secret->hash, key->static_iv, 12, (uint8_t *) secret->secret, slen, info, info_len))
     return 0;
 
-#if DEBIG
+  if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "pn", klen))
+    return 0;
+  if(!quic_crypto_hkdf_expand(secret->hash, pnkey, klen, (uint8_t *) secret->secret, slen, info, info_len))
+    return 0;
+
+#if DEBUG
    printf("KEY: "); dump(dkey, klen);
    printf("IV: "); dump(key->static_iv, 12);
+   printf("PNE: "); dump(pnkey, klen);
 #endif
 
 #ifdef KRML_NOSTRUCT_PASSING
   Crypto_AEAD_Main_coerce(&key->id, (uint8_t*)dkey, &key->st);
+  Crypto_AEAD_Main_coerce(&key->id, (uint8_t*)pnkey, &key->pne);
 #else
   key->st = Crypto_AEAD_Main_coerce(key->id, (uint8_t*)dkey);
+  key->pne = Crypto_AEAD_Main_coerce(key->id, (uint8_t*)pnkey);
 #endif
   *k = key;
   return 1;
@@ -261,7 +271,8 @@ int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsi
   k->id = Crypto_Indexing_testId((Crypto_Indexing_aeadAlg)alg);
   k->st = Crypto_AEAD_Main_coerce(k->id, (uint8_t*)raw_key);
 #endif
-  memcpy(k->static_iv, iv, 12);
+  k->pne = k->st;
+  memcpy(k->static_iv, iv, 12); 
   *key = k;
   return 1;
 }
@@ -325,6 +336,42 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
   return r;
 }
 
+int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned char *sample, unsigned char *mask)
+{
+  FStar_UInt128_uint128 nonce;
+  switch(Crypto_Indexing_cipherAlg_of_id(key->id))
+  {
+    FStar_UInt128_t nonce;
+    case Crypto_Indexing_CHACHA20:
+#ifdef KRML_NOSTRUCT_PASSING
+      Crypto_Symmetric_Bytes_load_uint128(16, (uint8_t*)sample, &nonce);
+      nonce = FStar_UInt128_shift_right(nonce, 32);
+      uint32_t ctr;
+      Crypto_Symmetric_Bytes_load_uint32(4, (uint8_t*)sample, &ctr);
+      Crypto_Symmetric_Cipher_compute(&key->id, mask, key->pne.prf.key, &nonce, ctr, 4);
+#else
+      nonce = Crypto_Symmetric_Bytes_load_uint128(16, (uint8_t*)sample);
+      nonce = FStar_UInt128_shift_right(nonce, 32);
+      uint32_t ctr = Crypto_Symmetric_Bytes_load_uint32(4, (uint8_t*)sample);
+      Crypto_Symmetric_Cipher_compute(key->id, mask, key->pne.prf.key, nonce, ctr, 4);
+#endif
+      return 1;
+
+    case Crypto_Indexing_AES128:
+    case Crypto_Indexing_AES256:
+#ifdef KRML_NOSTRUCT_PASSING
+      Crypto_Symmetric_Bytes_load_big128(16, (uint8_t*)sample, &nonce);
+      Crypto_Symmetric_Cipher_compute(&key->id, mask, key->pne.prf.key, &nonce, 0, 4);
+#else
+      nonce = Crypto_Symmetric_Bytes_load_big128(16, (uint8_t*)sample);
+      Crypto_Symmetric_Cipher_compute(key->id, mask, key->pne.prf.key, nonce, 0, 4);  
+#endif
+      return 1;
+  }
+
+  return 0;
+}
+
 int MITLS_CALLCONV quic_crypto_free_key(quic_key *key)
 {
   // ADL: the PRF stats is allocated with Buffer.screate
@@ -332,8 +379,11 @@ int MITLS_CALLCONV quic_crypto_free_key(quic_key *key)
   if(key != NULL)
   {
     KRML_HOST_FREE(key->st.prf.key);
-    if(key->st.ak.tag) //  == FStar_Pervasives_Native_Some
+    if(key->st.ak.tag)
       KRML_HOST_FREE(key->st.ak._0);
+    KRML_HOST_FREE(key->pne.prf.key);
+    if(key->pne.ak.tag)
+      KRML_HOST_FREE(key->pne.ak._0);
     KRML_HOST_FREE(key);
   }
   return 1;

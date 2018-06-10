@@ -123,6 +123,14 @@ test-blake2s.exe: blake2s-c/Hacl_Blake2s.c $(BASE_OBJ)
 	cp myvoid.h blake2s-c/
 	$(CC) $(CFLAGS) -I $(KREMLIN_HOME)/include -o $@ $^
 
+
+
+sha2-agile-c/out.krml: $(HACL_LIBS) Hacl.Impl.SHA2.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fsopt "--expose_interfaces" -tmpdir sha2-agile-c \
+	-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst -I $(KREMLIN_HOME)/include \
+	-skip-translation $^
+
+
 #
 # Clean
 #
