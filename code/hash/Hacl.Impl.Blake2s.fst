@@ -5,7 +5,6 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 
 open Lib.IntTypes
-open Lib.Sequence
 open Lib.Buffer
 open Lib.Buffer.Lemmas
 open Lib.ByteBuffer
@@ -32,7 +31,7 @@ module Lemmas = Hacl.Impl.Lemmas
 (* Operators *)
 inline_for_extraction let v = size_v
 inline_for_extraction let index (x:size_nat) = size x
-let op_String_Access #a #len m b = as_lseq #a #len b m
+noextract let op_String_Access #a #len m b = as_lseq #a #len b m
 
 (* Functions to add to the libraries *)
 [@ Substitute]
@@ -46,7 +45,6 @@ val update_sub: #a:Type0 -> #len:size_nat -> #xlen:size_nat -> i:lbuffer a len -
 let update_sub #a #len #olen i start n x =
   let i' = sub i start n in
   copy i' n x
-
 
 ///
 /// Blake2s
@@ -333,7 +331,7 @@ let blake2s_update_block st dd_prev d =
     let s0 = h.[st.hash] in
     (fun _ sv -> sv == Spec.blake2s_update_block (v dd_prev) d0 s0))
   (fun block ->
-    uints_from_bytes_le block d;
+    uints_from_bytes_le block (size Spec.size_block_w) d;
     let offset = to_u64 (size_to_uint32 (dd_prev +. (size 1))) *. (to_u64 (size Spec.size_block)) in
     blake2_compress st.hash block offset false st.const_iv st.const_sigma
   )
@@ -465,7 +463,7 @@ let blake2s_update_last #vlen s ll last len fk =
     )
     (fun last_block_w ->
       update_sub last_block (size 0) len last;
-      uint32s_from_bytes_le #16 last_block_w last_block;
+      uint32s_from_bytes_le last_block_w (size 16) last_block;
       let ll64 = to_u64 #U32 (size_to_uint32 ll) in
       let ll_plus_block_bytes64 = ll64 +. (to_u64 #U32 (size_to_uint32 (size Spec.size_block))) in
       (**) Lemmas.lemma_value_mixed_size_addition ll Spec.size_block;
@@ -495,7 +493,7 @@ let blake2s_finish #vnn output s nn =
     (fun _ r -> r == Spec.Blake2s.blake2s_finish h0.[s.hash] (v nn))
   )
   (fun full ->
-    uints_to_bytes_le full s.hash;
+    uints_to_bytes_le full (size 8) s.hash;
     update_sub output (size 0) nn full)
 
 val blake2s:
@@ -538,4 +536,5 @@ let blake2s #vll #vkk #vnn output d ll kk k nn =
     blake2s_update_multi st nprev nblocks d;
     blake2s_update_last #(v rem) st ll last rem fk;
     blake2s_finish #vnn output st nn
+
 
