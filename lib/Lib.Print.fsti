@@ -1,7 +1,7 @@
-module Spec.Lib.Print
+module Lib.Print
 
-open Spec.Lib.IntTypes
-open Spec.Lib.IntBuf
+open Lib.IntTypes
+open Lib.Buffer
 
 open FStar.HyperStack.All
 

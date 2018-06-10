@@ -180,7 +180,7 @@ val map2: #a1:Type -> #a2:Type -> #len:size_nat -> clen:size_t{v clen == len} ->
                         /\ as_seq b1 h1 == LSeq.map2 #a1 #a2 #a1 #(len) f (as_seq b1 h0) (as_seq b2 h0)))
 
 inline_for_extraction
-val copy: #a:Type -> #len:size_nat -> o:lbuffer a len -> i:lbuffer a len ->
+val copy: #a:Type -> #len:size_nat -> o:lbuffer a len -> clen:size_t{v clen == len}  -> i:lbuffer a len ->
   Stack unit
     (requires (fun h0 -> live h0 i /\ live h0 o ))
     (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\

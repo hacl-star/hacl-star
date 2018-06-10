@@ -2,9 +2,9 @@ module Hacl.Test.Chacha20
 
 open FStar.HyperStack.All
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntBuf
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Buffer
 
 module Chacha20=Hacl.Impl.Chacha20
 
@@ -59,6 +59,6 @@ let main () =
     u8 0; u8 0; u8 0; u8 0; u8 0; u8 0; u8 0; u8 0x4a; u8 0; u8 0; u8 0; u8 0
     ] in
   let counter = size 1 in
-  Chacha20.chacha20_encrypt_bytes #(size_v len) len ciphertext plaintext key nonce counter;
-  Spec.Lib.Print.print_compare_display len ciphertext expected;
+  Chacha20.chacha20_encrypt_bytes len ciphertext plaintext key nonce counter;
+  Lib.Print.print_compare_display len ciphertext expected;
   C.EXIT_SUCCESS

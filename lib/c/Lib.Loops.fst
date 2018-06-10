@@ -1,4 +1,4 @@
-module Spec.Lib.Loops
+module Lib.Loops
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
