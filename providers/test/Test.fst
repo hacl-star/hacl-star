@@ -230,6 +230,12 @@ let test_aes128_gcm v =
   TestLib.compare_and_print !$"of AES-GCM 128 cipher" ciphertext ciphertext' plaintext_len;
   TestLib.compare_and_print !$"of AES-GCM 128 tag" tag tag' 16ul;
 
+  match EverCrypt.aes128_gcm_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
+  | 1ul ->
+    TestLib.compare_and_print !$"of AES-GCM 128 plaintext" plaintext plaintext' plaintext_len
+  | _ ->
+    C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
+
   pop_frame()
 
 val test_aes256_gcm: v:aead_vector{v.cipher == AES_256_GCM} -> St unit
@@ -252,6 +258,12 @@ let test_aes256_gcm v =
   EverCrypt.aes256_gcm_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
   TestLib.compare_and_print !$"of AES-GCM 256 cipher" ciphertext ciphertext' plaintext_len;
   TestLib.compare_and_print !$"of AES-GCM 256 tag" tag tag' 16ul;
+
+  match EverCrypt.aes256_gcm_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
+  | 1ul ->
+    TestLib.compare_and_print !$"of AES-GCM 256 plaintext" plaintext plaintext' plaintext_len
+  | _ ->
+    C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
 
   pop_frame()
 
