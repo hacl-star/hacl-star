@@ -222,6 +222,21 @@ let blake2s_finish s nn =
   sub full 0 nn
 
 
+val blake2s_empty:
+    ll:size_nat{ll + 2 * size_block <= max_size_t} // This could be relaxed
+  -> d:lbytes ll
+  -> kk:size_nat{kk <= 32}
+  -> k:lbytes kk
+  -> nn:size_nat{1 <= nn /\ nn <= 32} ->
+  Tot (lbytes nn)
+
+let blake2s_empty ll d kk k nn =
+  let data = create size_block (u8 0) in
+  let s = blake2s_init kk k nn in
+  let s = blake2s_update_last ll size_block data false s in
+  blake2s_finish s nn
+
+
 val blake2s:
     ll:size_nat{ll + 2 * size_block <= max_size_t} // This could be relaxed
   -> d:lbytes ll
@@ -236,11 +251,7 @@ let blake2s ll d kk k nn =
   let nblocks = ll / size_block in
   let blocks = sub d 0 (nblocks * size_block) in
   let last = sub d (nblocks * size_block) rem in
-  if ll = 0 && kk = 0 then begin
-    let data = create size_block (u8 0) in
-    let s = blake2s_init kk k nn in
-    let s = blake2s_update_last ll size_block data fk s in
-    blake2s_finish s nn end
+  if ll = 0 && kk = 0 then blake2s_empty ll d kk k nn
   else
     let s = blake2s_init kk k nn in
     let nprev = if kk = 0 then 0 else 1 in

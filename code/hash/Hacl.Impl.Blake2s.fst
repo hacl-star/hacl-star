@@ -490,6 +490,38 @@ let blake2s_finish #vnn output s nn =
     copy output nn final)
 
 
+val blake2s_empty:
+    #vll: size_t
+  -> #vkk: size_t
+  -> #vnn: size_t
+  -> output: lbuffer uint8 (v vnn)
+  -> d: lbuffer uint8 (v vll)
+  -> ll: size_t{v ll + 2 * Spec.size_block <= max_size_t /\ ll == vll} // This could be relaxed
+  -> k: lbuffer uint8 (v vkk)
+  -> kk: size_t{v kk <= 32 /\ kk == vkk}
+  -> nn:size_t{1 <= v nn /\ v nn <= 32 /\ nn == vnn} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h d /\ live h k
+                   /\ disjoint output d /\ disjoint d output
+                   /\ disjoint output k /\ disjoint k output))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1
+                         /\ h1.[output] == Spec.Blake2s.blake2s_empty (v ll) h0.[d] (v kk) h0.[k] (v nn)))
+
+let blake2s_empty #vll #vkk #vnn output d ll k kk nn =
+  let rem = ll %. (size Spec.size_block) in
+  let nblocks = ll /. (size Spec.size_block) in
+  let st = blake2s_mkstate () in
+  let h0 = ST.get () in
+  alloc #h0 (size Spec.size_block) (u8 0) output
+  (fun h -> (fun _ r -> True))
+  (fun data ->
+    let h0 = ST.get () in
+    blake2s_init #vkk st k kk nn;
+    blake2s_update_last #rem st ll data (size Spec.size_block) false;
+    blake2s_finish #vnn output st nn
+  )
+
+
 val blake2s:
     #vll: size_t
   -> #vkk: size_t
@@ -514,16 +546,7 @@ let blake2s #vll #vkk #vnn output d ll k kk nn =
   let blocks = sub #_ #_ #(v nblocks * Spec.size_block) d (size 0) (nblocks *. (size Spec.size_block)) in
   let last = sub #_ #_ #(v rem) d (nblocks *. (size Spec.size_block)) rem in
   let st = blake2s_mkstate () in
-  if  ll =. (size 0) && kk =. (size 0) then begin
-    let h0 = ST.get () in
-    alloc #h0 (size Spec.size_block) (u8 0) output
-    (fun h -> (fun _ r -> True))
-    (fun data ->
-      let h0 = ST.get () in
-      blake2s_init #vkk st k kk nn;
-      blake2s_update_last #rem st ll data (size Spec.size_block) fk;
-      blake2s_finish #vnn output st nn
-      ) end
+  if  ll =. (size 0) && kk =. (size 0) then blake2s_empty #vll #vkk #vnn output d ll k kk nn
   else
     blake2s_init #vkk st k kk nn;
     let nprev = if kk =. (size 0) then (size 0) else (size 1) in
