@@ -216,19 +216,16 @@ let blake2s_update_last ll len last fk s =
   blake2s_update_last_block ll last_block fk s
 
 
+val blake2s_update_last_empty: hash_state -> Tot hash_state
+let blake2s_update_last_empty st =
+  let data = create size_block (u8 0) in
+  blake2s_update_last 0 size_block data false st
+
+
 val blake2s_finish : s:hash_state -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 let blake2s_finish s nn =
   let full = uints_to_bytes_le s in
   sub full 0 nn
-
-
-val blake2s_empty: nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
-let blake2s_empty nn =
-  let data = create size_block (u8 0) in
-  let key = create 0 (u8 0) in
-  let s = blake2s_init 0 key nn in
-  let s = blake2s_update_last 0 size_block data false s in
-  blake2s_finish s nn
 
 
 val blake2s:
@@ -245,10 +242,11 @@ let blake2s ll d kk k nn =
   let nblocks = ll / size_block in
   let blocks = sub d 0 (nblocks * size_block) in
   let last = sub d (nblocks * size_block) rem in
-  if ll = 0 && kk = 0 then blake2s_empty nn
-  else
-    let s = blake2s_init kk k nn in
-    let nprev = if kk = 0 then 0 else 1 in
-    let s = blake2s_update_multi nprev nblocks blocks s in
-    let s = blake2s_update_last ll rem last fk s in
-    blake2s_finish s nn
+  let s = blake2s_init kk k nn in
+  let s =
+    if ll = 0 && kk = 0 then blake2s_update_last_empty s
+    else begin
+      let nprev = if kk = 0 then 0 else 1 in
+      let s = blake2s_update_multi nprev nblocks blocks s in
+      blake2s_update_last ll rem last fk s end in
+  blake2s_finish s nn
