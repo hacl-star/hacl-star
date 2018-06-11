@@ -21,8 +21,8 @@ SPEC_FILES=	Spec.Chacha20.fst \
 
 LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.Sequence.fst Lib.ByteSequence.fst
 LIBS_FILES= $(addprefix ../lib/fst/, $(LIBS))
-LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_Sequence.ml Lib_ByteSequence.ml 
-LIBS_EX = --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes  --extract_module Lib.Sequence --extract_module Lib.ByteSequence  
+LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_Sequence.ml Lib_ByteSequence.ml
+LIBS_EX = --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes  --extract_module Lib.Sequence --extract_module Lib.ByteSequence
 hints: $(addsuffix .hints, $(SPEC_FILES))
 verify: $(addsuffix -verify, $(SPEC_FILES))
 all-hints: hints
@@ -160,11 +160,11 @@ keccak.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Keccak.fst tests
 	$(OCAMLOPT) -I keccak-ml keccak-ml/Lib_IntTypes.ml keccak-ml/Lib_RawIntTypes.ml keccak-ml/Lib_Sequence.ml keccak-ml/Lib_Stateful.ml keccak-ml/Spec_Keccak.ml keccak-ml/Spec_Keccak_Test.ml -o keccak.exe
 	./keccak.exe
 
-blake2s.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Blake2s.fst tests/Spec.Blake2s.Test.fst
+blake2s.exe: $(LIBS_FILES) Spec.Blake2s.fst tests/Spec.Blake2s.Test.fst
 	mkdir -p blake2s-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2s --extract_module Spec.Blake2s.Test --odir blake2s-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Blake2s --extract_module Spec.Blake2s.Test --odir blake2s-ml $^
 	@echo 'let _ = test()' >> blake2s-ml/Spec_Blake2s_Test.ml
-	$(OCAMLOPT) -I blake2s-ml blake2s-ml/Lib_IntTypes.ml blake2s-ml/Lib_RawIntTypes.ml blake2s-ml/Lib_Sequence.ml blake2s-ml/Lib_Stateful.ml blake2s-ml/Spec_Blake2s.ml blake2s-ml/Spec_Blake2s_Test.ml -o blake2s.exe
+	$(OCAMLOPT) -I blake2s-ml blake2s-ml/Lib_IntTypes.ml blake2s-ml/Lib_RawIntTypes.ml blake2s-ml/Lib_Sequence.ml blake2s-ml/Lib_ByteSequence.ml blake2s-ml/Spec_Blake2s.ml blake2s-ml/Spec_Blake2s_Test.ml -o blake2s.exe
 	./blake2s.exe
 
 blake2generic.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Blake2.Generic.fst tests/Spec.Blake2.Generic.Test.fst
