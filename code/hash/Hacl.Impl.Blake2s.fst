@@ -14,16 +14,6 @@ module LSeq = Lib.Sequence
 module Spec = Spec.Blake2s
 module Lemmas = Hacl.Impl.Lemmas
 
-
-///
-/// STATUS
-/// ------
-///
-/// 0. The code is proven until `blake2s_compress`.
-/// 1. Lemmata need to be proven and moved back to the libraries.
-///
-
-
 ///
 /// Helper functions
 ///
@@ -315,7 +305,7 @@ let blake2_compress s m offset flag const_iv const_sigma =
 
 val blake2s_update_block:
     st:state
-  -> dd_prev:size_t
+  -> dd_prev:size_t{(size_v dd_prev + 1) * Spec.size_block <= max_size_t}
   -> d:message_block ->
   Stack unit
     (requires (fun h -> state_invariant h st /\ live h d
@@ -332,8 +322,8 @@ let blake2s_update_block st dd_prev d =
     (fun _ sv -> sv == Spec.blake2s_update_block (v dd_prev) d0 s0))
   (fun block ->
     uints_from_bytes_le block (size Spec.size_block_w) d;
-    let offset = to_u64 (size_to_uint32 (dd_prev +. (size 1))) *. (to_u64 (size Spec.size_block)) in
-    blake2_compress st.hash block offset false st.const_iv st.const_sigma
+    let offset64 = to_u64 (size_to_uint32 ((dd_prev +. (size 1)) *. (size Spec.size_block))) in
+    blake2_compress st.hash block offset64 false st.const_iv st.const_sigma
   )
 
 
@@ -383,7 +373,7 @@ val blake2s_init:
 let blake2s_init #vkk st k kk nn =
   let h0 = ST.get () in
   alloc #h0 (size Spec.size_block) (u8 0) st.hash
-  (fun h -> (fun _ sv -> True))
+  (fun h -> (fun _ sv -> sv == Spec.Blake2s.blake2s_init (v kk) h0.[k] (v nn)))
   (fun key_block ->
     copy st.hash (size Spec.size_hash_w) st.const_iv;
     blake2s_init_hash st kk nn;
@@ -449,6 +439,7 @@ val blake2s_update_last:
                          /\ h1.[st.hash] == Spec.Blake2s.blake2s_update_last (v ll) (v len) h0.[last] flag_key h0.[st.hash]))
 
 let blake2s_update_last #vlen s ll last len fk =
+  admit();
   (**) let h0 = ST.get () in
   alloc #h0 (size Spec.size_block) (u8 0) s.hash
   (fun h ->
@@ -486,6 +477,7 @@ val blake2s_finish:
                          /\ h1.[output] == Spec.Blake2s.blake2s_finish h0.[st.hash] (v nn)))
 
 let blake2s_finish #vnn output s nn =
+  admit();
   (**) let h0 = ST.get () in
   alloc #h0 (size 32) (u8 0) output
   (fun h ->
@@ -494,6 +486,7 @@ let blake2s_finish #vnn output s nn =
   (fun full ->
     uints_to_bytes_le full (size 8) s.hash;
     update_sub output (size 0) nn full)
+
 
 val blake2s:
     #vll: size_t
@@ -513,6 +506,7 @@ val blake2s:
                          /\ h1.[output] == Spec.Blake2s.blake2s (v ll) h0.[d] (v kk) h0.[k] (v nn)))
 
 let blake2s #vll #vkk #vnn output d ll kk k nn =
+  admit();
   let fk = if kk =. (size 0) then false else true in
   let rem = ll %. (size Spec.size_block) in
   let nblocks = ll /. (size Spec.size_block) in
@@ -535,5 +529,4 @@ let blake2s #vll #vkk #vnn output d ll kk k nn =
     blake2s_update_multi st nprev nblocks d;
     blake2s_update_last #rem st ll last rem fk;
     blake2s_finish #vnn output st nn
-
 
