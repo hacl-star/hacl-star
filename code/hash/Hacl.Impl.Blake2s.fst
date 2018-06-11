@@ -511,6 +511,83 @@ let blake2s_finish #vnn output s nn =
     copy output nn final)
 
 
+val blake2s2:
+    #vll: size_t
+  -> #vkk: size_t
+  -> #vnn: size_t
+  -> output: lbuffer uint8 (v vnn)
+  -> d: lbuffer uint8 (v vll)
+  -> ll: size_t{v ll + 2 * Spec.size_block <= max_size_t /\ ll == vll} // This could be relaxed
+  -> k: lbuffer uint8 (v vkk)
+  -> kk: size_t{v kk <= 32 /\ kk == vkk}
+  -> nn:size_t{1 <= v nn /\ v nn <= 32 /\ nn == vnn} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h d /\ live h k
+                   /\ disjoint output d /\ disjoint d output
+                   /\ disjoint output k /\ disjoint k output))
+    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1
+                         /\ h1.[output] == Spec.Blake2s.blake2s (v ll) h0.[d] (v kk) h0.[k] (v nn)))
+
+let blake2s2 #vll #vkk #vnn output d ll k kk nn =
+  let fk = if kk =. (size 0) then false else true in
+  let rem = ll %. (size Spec.size_block) in
+  let nblocks = ll /. (size Spec.size_block) in
+  let blocks = sub #_ #_ #(v nblocks * Spec.size_block) d (size 0) (nblocks *. (size Spec.size_block)) in
+  let last = sub #_ #_ #(v rem) d (nblocks *. (size Spec.size_block)) rem in
+  let st = blake2s_mkstate () in
+  blake2s_init #vkk st k kk nn;
+  if  ll =. (size 0) && kk =. (size 0) then blake2s_update_last_empty st
+  else begin
+    let nprev = if kk =. (size 0) then (size 0) else (size 1) in
+    blake2s_update_multi st nprev nblocks d;
+    blake2s_update_last #rem st ll last rem fk
+  end;
+  blake2s_finish #vnn output st nn
+
+
+
+inline_for_extraction val mkstate:
+  #h0: mem ->
+  #b: Type0 ->
+  #w: Type0 ->
+  #wlen: size_nat ->
+  write: lbuffer w wlen ->
+  spec:(h:mem -> GTot(r:b -> LSeq.lseq w (wlen) -> Type)) ->
+  impl:(st:state ->
+        Stack b
+        (requires (fun h -> state_invariant h st
+		                 /\ preserves_live h0 h
+		                 /\ modifies3 st.hash st.const_iv st.const_sigma h0 h))
+        (ensures (fun h r h' -> preserves_live h h'
+                           /\ modifies2 st.hash write h h' /\
+			 spec h0 r (as_seq write h')))) ->
+  Stack b
+    (requires (fun h -> h == h0 /\ live h write))
+    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
+		          modifies1 write h0 h1 /\
+		          spec h0 r (as_seq write h1)))
+
+let mkstate #h0 #b #w #wlen write spec impl =
+  admit();
+  let h0 = ST.get () in
+  alloc #h0 (size Spec.size_hash_w) (u32 0) write
+  (fun h -> (fun _ sv -> True))
+  (fun hash ->
+    let h0 = ST.get () in
+    alloc_with #h0 (size 8) Spec.const_iv create_const_iv write
+    (fun h -> (fun _ _ -> True))
+    (fun const_iv ->
+      let h0 = ST.get () in
+      alloc_with #h0 (size 160) Spec.const_sigma create_const_sigma write
+      (fun h -> (fun _ _ -> True))
+      (fun const_sigma ->
+        let st = {hash = hash; const_iv = const_iv; const_sigma = const_sigma} in
+        impl st
+      )
+    )
+  )
+
+
 val blake2s:
     #vll: size_t
   -> #vkk: size_t
@@ -529,17 +606,21 @@ val blake2s:
                          /\ h1.[output] == Spec.Blake2s.blake2s (v ll) h0.[d] (v kk) h0.[k] (v nn)))
 
 let blake2s #vll #vkk #vnn output d ll k kk nn =
-  let fk = if kk =. (size 0) then false else true in
-  let rem = ll %. (size Spec.size_block) in
-  let nblocks = ll /. (size Spec.size_block) in
-  let blocks = sub #_ #_ #(v nblocks * Spec.size_block) d (size 0) (nblocks *. (size Spec.size_block)) in
-  let last = sub #_ #_ #(v rem) d (nblocks *. (size Spec.size_block)) rem in
-  let st = blake2s_mkstate () in
-  blake2s_init #vkk st k kk nn;
-  if  ll =. (size 0) && kk =. (size 0) then blake2s_update_last_empty st
-  else begin
-    let nprev = if kk =. (size 0) then (size 0) else (size 1) in
-    blake2s_update_multi st nprev nblocks d;
-    blake2s_update_last #rem st ll last rem fk
-  end;
-  blake2s_finish #vnn output st nn
+  let h0 = ST.get () in
+  mkstate #h0 output
+  (fun h -> (fun _ sv -> sv == Spec.Blake2s.blake2s (v ll) h0.[d] (v kk) h0.[k] (v nn)))
+  (fun st ->
+    let fk = if kk =. (size 0) then false else true in
+    let rem = ll %. (size Spec.size_block) in
+    let nblocks = ll /. (size Spec.size_block) in
+    let blocks = sub #_ #_ #(v nblocks * Spec.size_block) d (size 0) (nblocks *. (size Spec.size_block)) in
+    let last = sub #_ #_ #(v rem) d (nblocks *. (size Spec.size_block)) rem in
+    blake2s_init #vkk st k kk nn;
+    if ll =. (size 0) && kk =. (size 0) then blake2s_update_last_empty st
+    else begin
+      let nprev = if kk =. (size 0) then (size 0) else (size 1) in
+      blake2s_update_multi st nprev nblocks d;
+      blake2s_update_last #rem st ll last rem fk
+    end;
+    blake2s_finish #vnn output st nn
+  )
