@@ -198,16 +198,22 @@ let blake2s_update_multi dd_prev dd d s =
   repeati dd (blake2s_update_multi_iteration dd_prev dd d) s
 
 
-val blake2s_update_last : ll:size_nat -> len:size_nat{len <= size_block} -> last:lbytes len -> flag_key:bool -> hash_state -> Tot hash_state
+val blake2s_update_last_block : ll:size_nat -> last_block:lbytes size_block -> flag_key:bool -> hash_state -> Tot hash_state
 
-let blake2s_update_last ll len last fk s =
-  let last_block = create size_block (u8 0) in
-  let last_block = update_sub last_block 0 len last in
+let blake2s_update_last_block ll last_block fk s =
   let last_block : intseq U32 16 = uints_from_bytes_le last_block in
   if not fk then
     blake2_compress s last_block (u64 ll) true
   else
     blake2_compress s last_block (u64 (ll + size_block)) true
+
+
+val blake2s_update_last : ll:size_nat -> len:size_nat{len <= size_block} -> last:lbytes len -> flag_key:bool -> hash_state -> Tot hash_state
+
+let blake2s_update_last ll len last fk s =
+  let last_block = create size_block (u8 0) in
+  let last_block = update_sub last_block 0 len last in
+  blake2s_update_last_block ll last_block fk s
 
 
 val blake2s_finish : s:hash_state -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)

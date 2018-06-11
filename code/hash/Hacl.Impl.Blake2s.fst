@@ -416,10 +416,7 @@ val blake2s_update_multi:
 let blake2s_update_multi st dd_prev dd d =
   (**) let h0 = ST.get () in
   loop #h0 dd st.hash
-  (fun hi ->
-    let d0 = h0.[d] in
-    let s0 = h0.[st.hash] in
-    (fun i s -> Spec.Blake2s.blake2s_update_multi (v dd_prev) (v dd) d0 s0))
+  (fun h -> Spec.Blake2s.blake2s_update_multi_iteration (v dd_prev) (v dd) h.[d])
   (fun i ->
     blake2s_update_multi_iteration st dd_prev dd d i;
     Lemmas.lemma_repeati (v dd) (Spec.blake2s_update_multi_iteration (v dd_prev) (v dd) h0.[d]) h0.[st.hash] (v i))
@@ -438,29 +435,34 @@ val blake2s_update_last:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 st.hash h0 h1
                          /\ h1.[st.hash] == Spec.Blake2s.blake2s_update_last (v ll) (v len) h0.[last] flag_key h0.[st.hash]))
 
-let blake2s_update_last #vlen s ll last len fk =
-  admit();
+#reset-options "--z3rlimit 50"
+
+let blake2s_update_last #vlen st ll last len fk =
+  let ll64 : uint64 = to_u64 #U32 (size_to_uint32 ll) in
+  let ll_plus_block_bytes64 = ll64 +. (u64 Spec.size_block) in
+  assume(ll_plus_block_bytes64 == u64 (size_v ll + Spec.size_block));
   (**) let h0 = ST.get () in
-  alloc #h0 (size Spec.size_block) (u8 0) s.hash
+  alloc #h0 (size Spec.size_block) (u8 0) st.hash
   (fun h ->
-    (fun _ r -> True)
+    let hash0 = h0.[st.hash] in
+    let last0 = h0.[last] in
+    (fun _ r -> r == Spec.Blake2s.blake2s_update_last (v ll) (v len) last0 fk hash0)
   )
   (fun last_block ->
-    (**) let h0 = ST.get () in
-    alloc #h0 (size Spec.size_block_w) (u32 0) s.hash
+    update_sub last_block (size 0) len last;
+    (**) let h1 = ST.get () in
+    alloc #h1 (size Spec.size_block_w) (u32 0) st.hash
     (fun h ->
-      (fun _ r -> True)
+      let hash1 = h1.[st.hash] in
+      let last_block1 = h1.[last_block] in
+      (fun _ r -> r == Spec.Blake2s.blake2s_update_last_block (v ll) last_block1 fk hash1)
     )
     (fun last_block_w ->
-      update_sub last_block (size 0) len last;
       uint32s_from_bytes_le last_block_w (size 16) last_block;
-      let ll64 = to_u64 #U32 (size_to_uint32 ll) in
-      let ll_plus_block_bytes64 = ll64 +. (to_u64 #U32 (size_to_uint32 (size Spec.size_block))) in
-      (**) Lemmas.lemma_value_mixed_size_addition ll Spec.size_block;
       if not fk then
-        blake2_compress s.hash last_block_w ll64 true s.const_iv s.const_sigma
+        blake2_compress st.hash last_block_w ll64 true st.const_iv st.const_sigma
       else
-        blake2_compress s.hash last_block_w ll_plus_block_bytes64 true s.const_iv s.const_sigma
+        blake2_compress st.hash last_block_w ll_plus_block_bytes64 true st.const_iv st.const_sigma
     )
   )
 
@@ -477,7 +479,6 @@ val blake2s_finish:
                          /\ h1.[output] == Spec.Blake2s.blake2s_finish h0.[st.hash] (v nn)))
 
 let blake2s_finish #vnn output s nn =
-  admit();
   (**) let h0 = ST.get () in
   alloc #h0 (size 32) (u8 0) output
   (fun h ->
@@ -485,7 +486,8 @@ let blake2s_finish #vnn output s nn =
   )
   (fun full ->
     uints_to_bytes_le full (size 8) s.hash;
-    update_sub output (size 0) nn full)
+    let final = sub full (size 0) nn in
+    copy output nn final)
 
 
 val blake2s:
@@ -495,8 +497,8 @@ val blake2s:
   -> output: lbuffer uint8 (v vnn)
   -> d: lbuffer uint8 (v vll)
   -> ll: size_t{v ll + 2 * Spec.size_block <= max_size_t /\ ll == vll} // This could be relaxed
-  -> kk: size_t{v kk <= 32 /\ kk == vkk}
   -> k: lbuffer uint8 (v vkk)
+  -> kk: size_t{v kk <= 32 /\ kk == vkk}
   -> nn:size_t{1 <= v nn /\ v nn <= 32 /\ nn == vnn} ->
   Stack unit
     (requires (fun h -> live h output /\ live h d /\ live h k
@@ -505,8 +507,7 @@ val blake2s:
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 output h0 h1
                          /\ h1.[output] == Spec.Blake2s.blake2s (v ll) h0.[d] (v kk) h0.[k] (v nn)))
 
-let blake2s #vll #vkk #vnn output d ll kk k nn =
-  admit();
+let blake2s #vll #vkk #vnn output d ll k kk nn =
   let fk = if kk =. (size 0) then false else true in
   let rem = ll %. (size Spec.size_block) in
   let nblocks = ll /. (size Spec.size_block) in
