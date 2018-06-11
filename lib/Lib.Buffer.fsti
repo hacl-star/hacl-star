@@ -128,6 +128,29 @@ inline_for_extraction val alloc_nospec: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Ty
     (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
 		          modifies1 write h0 h1))
 
+(** This function will allocate one buffer, write it and write in 2 other buffers,
+    the value of the first 'write' buffer is functionnally caracterized while the
+    functionnal behavior of the second 'write2' buffer is discarded
+*)
+inline_for_extraction val alloc_write2_discard: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 -> #w2:Type0 -> #len:size_nat -> #wlen:size_nat -> #wlen2:size_nat -> clen:size_t{v clen == len} -> init:a ->
+  write:lbuffer w wlen ->
+  write2:lbuffer w2 wlen2 ->
+  spec:(h:mem -> GTot(r:b -> LSeq.lseq w (wlen) -> Type)) ->
+  impl:(buf:lbuffer a len -> Stack b
+    (requires (fun h -> creates1 #a #len buf h0 h /\
+              live h0 write /\ live h0 write2
+              /\ disjoint write write2 /\ disjoint write2 write /\
+		          preserves_live h0 h /\
+		          modifies1 buf h0 h /\
+	             as_seq buf h == LSeq.create #a (len) init))
+    (ensures (fun h r h' -> preserves_live h h' /\ modifies3 buf write write2 h h' /\
+			 spec h0 r (as_seq write h')))) ->
+  Stack b
+    (requires (fun h -> h == h0 /\ live h write /\ live h write2))
+    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
+		          modifies2 write write2 h0 h1 /\
+		          spec h0 r (as_seq write h1)))
+
 (* Various Allocation Patterns *)
 
 val map: #a:Type -> #len:size_nat -> clen:size_t{v clen == len} -> f:(a -> Tot a) -> b:lbuffer a (len) ->
