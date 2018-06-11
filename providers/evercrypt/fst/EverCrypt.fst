@@ -170,7 +170,7 @@ let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   if SC.vale && i = AC.Vale then begin
     push_frame ();
     let open EverCrypt.Vale in
-    let expanded   = B.create 0uy 256ul in
+    let expanded   = B.create 0uy 176ul in
     let iv'        = B.create 0uy 16ul in
     let plaintext' = B.create 0uy U32.((len /^ 16ul) *^ 16ul) in
     let cipher'    = B.create 0uy U32.((len /^ 16ul) *^ 16ul) in
@@ -205,7 +205,7 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   if SC.vale && i = AC.Vale then begin
     push_frame ();
     let open EverCrypt.Vale in
-    let expanded   = B.create 0uy 256ul in
+    let expanded   = B.create 0uy 176ul in
     let iv'        = B.create 0uy 16ul in
     let plaintext' = B.create 0uy U32.((len /^ 16ul) *^ 16ul) in
     let cipher'    = B.create 0uy U32.((len /^ 16ul) *^ 16ul) in
@@ -215,13 +215,13 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
     B.blit ad 0ul ad' 0ul adlen;
     Vale.aes_key_expansion key expanded;
     let b = B.create ({
-      plain = plaintext';
+      plain = cipher';
       plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
       aad = ad';
       aad_len = FStar.Int.Cast.Full.uint32_to_uint64 adlen;
       iv = iv';
       expanded_key = expanded;
-      cipher = cipher';
+      cipher = plaintext';
       tag = tag
     }) 1ul in
     let ret = Vale.gcm_decrypt b in
