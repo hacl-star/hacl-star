@@ -34,17 +34,17 @@ inline_for_extraction let index (x:size_nat) = size x
 noextract let op_String_Access #a #len m b = as_lseq #a #len b m
 
 (* Functions to add to the libraries *)
-[@ Substitute]
+inline_for_extraction
 val update_sub: #a:Type0 -> #len:size_nat -> #xlen:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == xlen} -> x:lbuffer a xlen ->
   Stack unit
     (requires (fun h -> live h i /\ live h x))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
                          /\ h1.[i] == LSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[x]))
 
-[@ Substitute]
+inline_for_extraction
 let update_sub #a #len #olen i start n x =
-  let i' = sub i start n in
-  copy i' n x
+  let buf = sub i start n in
+  copy buf n x
 
 ///
 /// Blake2s
@@ -501,10 +501,10 @@ val blake2s:
   -> #vnn: size_t
   -> output: lbuffer uint8 (v vnn)
   -> d: lbuffer uint8 (v vll)
-  -> ll: size_t{v ll + 2 * Spec.size_block <= max_size_t /\ v ll = vll} // This could be relaxed
+  -> ll: size_t{v ll + 2 * Spec.size_block <= max_size_t /\ ll == vll} // This could be relaxed
   -> kk: size_t{v kk <= 32 /\ kk == vkk}
   -> k: lbuffer uint8 (v vkk)
-  -> nn:size_t{1 <= v nn /\ v nn <= 32 /\ nn == v nn} ->
+  -> nn:size_t{1 <= v nn /\ v nn <= 32 /\ nn == vnn} ->
   Stack unit
     (requires (fun h -> live h output /\ live h d /\ live h k
                    /\ disjoint output d /\ disjoint d output

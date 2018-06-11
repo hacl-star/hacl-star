@@ -35,7 +35,6 @@ let upd #a #len b i v = Buf.upd b (size_to_UInt32 i) v
 
 let create #a #len clen init = Buf.create init (size_to_UInt32 clen)
 let createL #a init = Buf.createL init
-
 let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
   push_frame();
   let buf = create clen init in
