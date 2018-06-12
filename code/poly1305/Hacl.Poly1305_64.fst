@@ -10,6 +10,7 @@ open FStar.Endianness
 open FStar.Buffer
 open Hacl.Cast
 
+module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module H8   = Hacl.UInt8
 module Limb = Hacl.Bignum.Limb
@@ -37,8 +38,8 @@ private let get_accumulator (st:state) = I.(st.h)
 val alloc:
   unit -> StackInline state
     (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ I.live_st h1 st /\ frameOf I.(st.h) == h0.tip
-      /\ frameOf I.(st.r) = h0.tip /\ (I.(st.r) `unused_in` h0) /\ (I.(st.h) `unused_in` h0)))
+    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ I.live_st h1 st /\ frameOf I.(st.h) == HS.get_tip h0
+      /\ frameOf I.(st.r) = HS.get_tip h0 /\ (I.(st.r) `unused_in` h0) /\ (I.(st.h) `unused_in` h0)))
 let alloc () =
   I.alloc()
 

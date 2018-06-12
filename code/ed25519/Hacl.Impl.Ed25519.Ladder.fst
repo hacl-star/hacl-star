@@ -1,5 +1,6 @@
 module Hacl.Impl.Ed25519.Ladder
 
+module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
@@ -174,7 +175,7 @@ let modifies_2_to_2_1 (#a:Type) (b1:buffer a) (b2:buffer a) (h0 h1 h2:mem)
   : Lemma (requires (live h0 b2 /\
                      b1 `unused_in` h0 /\
                      modifies_0 h0 h1 /\
-                     frameOf b1 == h0.tip /\
+                     frameOf b1 == (HS.get_tip h0) /\
                      live h1 b1 /\
                      modifies_2 b1 b2 h1 h2 ))
           (ensures modifies_2_1 b2 h0 h2)
@@ -211,7 +212,7 @@ let point_mul result scalar q =
   sum_modifications b result hh0 hh3 hh4;
   assert (modifies_2 b result hh0 hh4);
   assert (b `unused_in` hh);
-  assert (frameOf b == hh.tip);
+  assert (frameOf b == (HS.get_tip hh));
   modifies_2_to_2_1 b result hh hh0 hh4;
   pop_frame();
   let h1 = ST.get() in

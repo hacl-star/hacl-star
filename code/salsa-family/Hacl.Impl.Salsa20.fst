@@ -1,5 +1,6 @@
 module Hacl.Impl.Salsa20
 
+module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All

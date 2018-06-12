@@ -2,6 +2,7 @@ module AEAD.Poly1305_64
 
 open FStar.HyperStack.All
 
+module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open FStar.Mul
@@ -37,7 +38,7 @@ val pad_16_bytes:
   len:U32.t{length input = U32.v len /\ U32.v len < 16 /\ U32.v len > 0} ->
   StackInline (uint8_p)
     (requires (fun h -> live h input))
-    (ensures (fun h0 output h1 -> live h0 input /\ live h1 output /\ frameOf output = h1.tip
+    (ensures (fun h0 output h1 -> live h0 input /\ live h1 output /\ frameOf output = HS.get_tip h1
       /\ modifies_0 h0 h1 /\ length output = 16 /\ output `unused_in` h0
       /\ (let o = reveal_sbytes (as_seq h1 output) in let i = reveal_sbytes (as_seq h0 input) in
          o == Spec.Chacha20Poly1305.pad_16 i)))
