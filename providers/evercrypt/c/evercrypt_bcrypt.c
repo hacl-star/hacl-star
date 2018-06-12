@@ -8,8 +8,6 @@
   #else
     #include <windows.h>
   #endif
-
-  #include <ntdef.h>
   #include <bcrypt.h>
   #ifndef BCRYPT_AES_GCM_ALG_HANDLE
   #define BCRYPT_AES_GCM_ALG_HANDLE ((BCRYPT_ALG_HANDLE) 0x000001e1)
@@ -18,6 +16,8 @@
   #define IS_WINDOWS 0
   #include <unistd.h>
 #endif
+
+#define NT_SUCCESS(Status)          (((NTSTATUS)(Status)) >= 0)
 
 #include <fcntl.h>
 #include <inttypes.h>
