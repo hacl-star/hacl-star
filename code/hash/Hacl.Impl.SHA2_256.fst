@@ -461,8 +461,8 @@ val alloc:
   unit ->
   StackInline (state:uint32_p{length state = v size_state})
     (requires (fun h0 -> True))
-    (ensures (fun h0 st h1 -> (st `unused_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
-             /\ Map.domain h1.h == Map.domain h0.h))
+    (ensures (fun h0 st h1 -> (st `unused_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == HS.get_tip h1
+             /\ Map.domain (HS.get_hmap h1) == Map.domain (HS.get_hmap h0)))
 
 [@"c_inline"]
 let alloc () = Buffer.create (u32_to_h32 0ul) size_state

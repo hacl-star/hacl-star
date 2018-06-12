@@ -221,7 +221,7 @@ val create: i:id -> StackInline (elemB i)
      b `unused_in` h0 /\
      norm h1 r /\
      sel_elem h1 r == zero i /\
-     Buffer.frameOf b = HS.(h0.tip) /\ // /\ Map.domain h1.h == Map.domain h0.h
+     Buffer.frameOf b == HS.get_tip h0 /\ // /\ Map.domain (HS.get_hmap h1) == Map.domain h0.h
      Buffer.modifies_0 h0 h1 ))
 
 let create i =
@@ -316,7 +316,7 @@ val start: #i:id -> StackInline (elemB i)
        b `unused_in` h0
      /\ norm h1 r
      /\ sel_elem h1 r = zero i
-     /\ Buffer.frameOf b = HS.(h0.tip) // /\ Map.domain h1.h == Map.domain h0.h
+     /\ Buffer.frameOf b = HS.get_tip h0 // /\ Map.domain (HS.get_hmap h1) == Map.domain h0.h
      /\ Buffer.modifies_0 h0 h1 ))
 //16-11-27 factor out this kind of post?
 
