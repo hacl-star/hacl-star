@@ -22,10 +22,15 @@ val bval: bLen:size_pos -> b:bignum_i bLen -> i:size_nat -> Tot uint64
 let bval bLen b i = if (i < bLen) then b.[i] else u64 0
 
 val eval_i:
-  len:size_nat -> s:bignum_i len -> i:size_nat{i <= len} -> Tot nat (decreases i)
+  len:size_nat -> s:bignum_i len -> i:size_nat{i <= len} -> Tot (res:nat{res < x_i i}) (decreases i)
 let rec eval_i len s i =
   if i = 0 then 0
-  else eval_i len s (i - 1) + (uint_to_nat s.[i - 1]) * x_i (i - 1)
+  else begin
+    let res = eval_i len s (i - 1) + (uint_to_nat s.[i - 1]) * x_i (i - 1) in
+    assert (res <= x_i (i - 1) + (pow2 64 - 1) * x_i (i - 1));
+    assert (res <= x_i (i - 1) + pow2 64 * x_i (i - 1) - x_i (i - 1));
+    pow2_plus 64 (64 * (i - 1));
+    res end
 
 let eval (len:size_nat) s = eval_i len s len
 
@@ -207,6 +212,7 @@ let bn_add_ aLen a bLen b =
 #reset-options "--z3rlimit 50 --max_fuel 0"
 let bn_add #nBits #mBits a b =
   let aLen = blocks nBits 64 in
+  assert (nBits <= 64 * aLen);
   let a_bn = sub a.bn 0 aLen in
   lemma_eval_equal2 a.len a.bn aLen a_bn a.len;
   let bLen = blocks mBits 64 in
@@ -215,7 +221,10 @@ let bn_add #nBits #mBits a b =
   assert (bLen <= aLen);
   let (c', r) = bn_add_ aLen a_bn bLen b_bn in
   assert (eval aLen r + uint_v c' * x_i aLen == eval aLen a_bn + eval bLen b_bn);
-  admit();
+  assert (eval aLen a_bn + eval bLen b_bn < pow2 nBits);
+  assert (eval aLen r + uint_v c' * x_i aLen < pow2 nBits);
+  pow2_le_compat (64*aLen) nBits;
+  assert (uint_v c' = 0);
   let res:bignum nBits = Bignum aLen r in
   res
 
