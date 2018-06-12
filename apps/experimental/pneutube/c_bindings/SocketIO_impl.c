@@ -27,13 +27,13 @@ FileIO_Types_sresult SocketIO_tcp_connect(char* host, int port, FileIO_Types_soc
   if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
       perror("Error : Could not create socket");
-      return FileIO_Types_sresult_SocketError;
+      return FileIO_Types_SocketError;
     }
 
   struct hostent *server = gethostbyname(host);
   if (server == NULL) {
     perror("SocketError, DNS lookup on host failed");
-    return FileIO_Types_sresult_SocketError;
+    return FileIO_Types_SocketError;
   }
   memset(&serv_addr, 0, sizeof(serv_addr)); 
   serv_addr.sin_family = AF_INET;
@@ -50,12 +50,12 @@ FileIO_Types_sresult SocketIO_tcp_connect(char* host, int port, FileIO_Types_soc
   if( connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
       perror("Error : Connect Failed");
-      return FileIO_Types_sresult_SocketError;
+      return FileIO_Types_SocketError;
     } 
   sh->socket_fd = sockfd;
   sh->sent_bytes = 0;
   sh->received_bytes = 0;
-  return FileIO_Types_sresult_SocketOk;
+  return FileIO_Types_SocketOk;
 }
 
 FileIO_Types_sresult SocketIO_tcp_listen(int port, FileIO_Types_socket* sh) {
@@ -65,7 +65,7 @@ FileIO_Types_sresult SocketIO_tcp_listen(int port, FileIO_Types_socket* sh) {
   if((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
       perror("Error : Could not create socket");
-      return FileIO_Types_sresult_SocketError;
+      return FileIO_Types_SocketError;
     } 
   memset(&serv_addr, 0, sizeof(serv_addr)); 
   serv_addr.sin_family = AF_INET;
@@ -74,15 +74,15 @@ FileIO_Types_sresult SocketIO_tcp_listen(int port, FileIO_Types_socket* sh) {
 
   if (bind(listenfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
     perror("bind");
-    return FileIO_Types_sresult_SocketError;
+    return FileIO_Types_SocketError;
   }
     
   if (listen(listenfd, 10) < 0) {
     perror("listen");
-    return FileIO_Types_sresult_SocketError;
+    return FileIO_Types_SocketError;
   }
   sh->socket_fd = listenfd;
-  return FileIO_Types_sresult_SocketOk;
+  return FileIO_Types_SocketOk;
 }
 
 FileIO_Types_sresult SocketIO_tcp_accept(FileIO_Types_socket* lh, FileIO_Types_socket* conn) {
@@ -91,22 +91,22 @@ FileIO_Types_sresult SocketIO_tcp_accept(FileIO_Types_socket* lh, FileIO_Types_s
   if( sockfd < 0)
     {
       perror("Error : accept Failed");
-      return FileIO_Types_sresult_SocketError;
+      return FileIO_Types_SocketError;
     } 
   conn->socket_fd = sockfd;
   conn->sent_bytes = 0;
   conn->received_bytes = 0;
-  return FileIO_Types_sresult_SocketOk;
+  return FileIO_Types_SocketOk;
 }
 
 
 FileIO_Types_sresult SocketIO_tcp_write_all(FileIO_Types_socket* conn, uint8_t* buf, uint64_t len) {
   if (write(conn->socket_fd, buf, len) < len) {
     perror("write did not write all");
-    return FileIO_Types_sresult_SocketError;
+    return FileIO_Types_SocketError;
   }
   conn->sent_bytes += len;
-  return FileIO_Types_sresult_SocketOk;
+  return FileIO_Types_SocketOk;
 }    
 
 
@@ -116,22 +116,22 @@ FileIO_Types_sresult SocketIO_tcp_read_all(FileIO_Types_socket* conn, uint8_t* b
     int n = read(conn->socket_fd, buf+got, len-got);
     if (n == 0) {
       perror("early end of file");
-      return FileIO_Types_sresult_SocketError;
+      return FileIO_Types_SocketError;
     }
     if (n < 0) {
       perror("socket read error");
-      return FileIO_Types_sresult_SocketError;
+      return FileIO_Types_SocketError;
     }
     got += n;
   }
   conn->received_bytes += got;
-  return FileIO_Types_sresult_SocketOk;
+  return FileIO_Types_SocketOk;
 }
 
 FileIO_Types_sresult SocketIO_tcp_close(FileIO_Types_socket* conn) {
   shutdown(conn->socket_fd,2);
   printf("Sent %" PRIu64 " bytes, Received %" PRIu64 " bytes\n",conn->sent_bytes,conn->received_bytes);
-  return FileIO_Types_sresult_SocketOk;
+  return FileIO_Types_SocketOk;
 }
 
 #endif

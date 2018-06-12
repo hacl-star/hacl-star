@@ -33,17 +33,17 @@ FileIO_Types_fresult PaddedFileIO_file_open_read_sequential(uint8_t* file,FileIO
   fd = open ((char*) file, O_RDONLY);
   if (fd == -1) {
     perror ("open");
-    return FileIO_Types_fresult_FileError;
+    return FileIO_Types_FileError;
   }
 
   if (fstat (fd, &sb) == -1) {
     perror ("fstat");
-    return FileIO_Types_fresult_FileError;
+    return FileIO_Types_FileError;
   }
 
   if (!S_ISREG (sb.st_mode)) {
     fprintf (stderr, "%s is not a filen", file);
-    return FileIO_Types_fresult_FileError;
+    return FileIO_Types_FileError;
   }
 
   uint64_t file_size = sb.st_size;
@@ -51,7 +51,7 @@ FileIO_Types_fresult PaddedFileIO_file_open_read_sequential(uint8_t* file,FileIO
   p = mmap (0, file_size, PROT_READ, MAP_PRIVATE, fd, 0);
   if (p == MAP_FAILED) {
     perror ("mmap");
-    return FileIO_Types_fresult_FileError; 
+    return FileIO_Types_FileError;
   }
 
   int adv = madvise(p,file_size,MADV_SEQUENTIAL|MADV_WILLNEED);
@@ -64,7 +64,7 @@ FileIO_Types_fresult PaddedFileIO_file_open_read_sequential(uint8_t* file,FileIO
   fh->fd.last = (uint8_t*) malloc(PaddedFileIO_max_block_size);
   memset(fh->fd.last,0,PaddedFileIO_max_block_size);
   fh->fd.current = 0;
-  return FileIO_Types_fresult_FileOk;
+  return FileIO_Types_FileOk;
 }
 
 
@@ -77,24 +77,24 @@ FileIO_Types_fresult PaddedFileIO_file_open_write_sequential(FileIO_Types_file_s
   fd = open ((char*) st.name, O_RDWR | O_CREAT | O_TRUNC, (mode_t) 0600);
   if (fd == -1) {
     perror ("open");
-    return FileIO_Types_fresult_FileError;
+    return FileIO_Types_FileError;
   }
   
   if (fstat (fd, &sb) == -1) {
     perror ("fstat");
-    return FileIO_Types_fresult_FileError;
+    return FileIO_Types_FileError;
   }
   
   if (!S_ISREG (sb.st_mode)) {
     fprintf (stderr, "%s is not a filen", st.name);
-    return FileIO_Types_fresult_FileError;
+    return FileIO_Types_FileError;
   }
   i = ftruncate(fd,st.size + PaddedFileIO_max_block_size);
   fsync(fd); 
   p = mmap (0, st.size + PaddedFileIO_max_block_size, PROT_WRITE, MAP_SHARED, fd, 0);
   if (p == MAP_FAILED) {
     perror ("mmap");
-    return FileIO_Types_fresult_FileError; 
+    return FileIO_Types_FileError;
   }
 
   int adv = madvise(p,st.size + PaddedFileIO_max_block_size,MADV_SEQUENTIAL|MADV_WILLNEED);
@@ -107,7 +107,7 @@ FileIO_Types_fresult PaddedFileIO_file_open_write_sequential(FileIO_Types_file_s
   memset(fh->fd.last,0,PaddedFileIO_max_block_size);
   fh->fd.current = 0;
 
-  return FileIO_Types_fresult_FileOk;
+  return FileIO_Types_FileOk;
 }
 
 uint8_t* PaddedFileIO_file_next_read_buffer(FileIO_Types_file_handle* fh,uint64_t len) {
@@ -149,18 +149,18 @@ FileIO_Types_fresult PaddedFileIO_file_close(FileIO_Types_file_handle* fh) {
   free(fh->fd.last);
   if (close (fh->fd.fd_fd) == -1) {
     perror ("close");
-    return FileIO_Types_fresult_FileError; 
+    return FileIO_Types_FileError;
   }
 
   if (madvise(fh->fd.mmap, fh->stat.size, MADV_DONTNEED) == -1) {
     perror ("madvise");
-    return FileIO_Types_fresult_FileError; 
+    return FileIO_Types_FileError;
   }
   if (munmap (fh->fd.mmap, fh->stat.size) == -1) {
     perror ("munmap");
-    return FileIO_Types_fresult_FileError; 
+    return FileIO_Types_FileError;
   }
-  return FileIO_Types_fresult_FileOk;
+  return FileIO_Types_FileOk;
 }
 
 #endif

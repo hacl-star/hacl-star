@@ -1,11 +1,11 @@
 include ../../../Makefile.include
 
-INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/api $(HACL_HOME)/code/curve25519 $(HACL_HOME)/specs $(HACL_HOME)/snapshots/hacl-c c_bindings
+INCLUDE_DIRS=$(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/code/api $(HACL_HOME)/code/bignum $(HACL_HOME)/code/curve25519 $(HACL_HOME)/specs $(HACL_HOME)/snapshots/hacl-c $(HACL_HOME)/snapshots/hacl-c/kremlin tube/ c_bindings
 
 INCLUDES=$(addprefix -I , $(INCLUDE_DIRS))
 KRML_BIN=$(KREMLIN_HOME)/_build/src/Kremlin.native
 KRML=$(KRML_BIN) $(KREMLIN_ARGS) $(INCLUDES) -tmpdir tube \
-	-drop Prims,Hacl.Constants,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,FStar,Hacl.Cast # -ccopt '-Wno-pointer-sign'
+	#-drop Hacl.Constants,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,FStar,Hacl.Cast # -ccopt '-Wno-pointer-sign'
 
 HINTS_ENABLED?=--use_hints
 FSTAR_INCLUDES=--include $(KREMLIN_HOME)/kremlib $(addprefix --include ,$(INCLUDE_DIRS))
@@ -24,7 +24,9 @@ tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_
 		-drop Libsodium,Curve25519,Hacl.Types,NaCl,Spec.\*,Hacl.Spec.\* \
 		-bundle "Hacl.Tube.Send=Hacl.Tube.Send" \
 		-no-prefix Libsodium -add-include '<sodium.h>' -add-include '"testlib.h"' \
-		-add-include '"NaCl.h"' -add-include '"Curve25519.h"' \
+		-add-include '"NaCl.h"' -add-include '"Hacl_Curve25519.h"' \
+		-add-include '"kremlib.h"' -add-include '"prims_int.h"' \
+		-warn-error +9 \
 		-tmpdir tube -o tube-star.exe -ldopt "-lsodium" -ldopt "-lhacl" -ldopt "-L../../../snapshots/hacl-c/"
 
 tube-lax: Hacl.Tube.Receive.fst Hacl.Tube.Send.fst

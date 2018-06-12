@@ -83,7 +83,7 @@ let getPublicKey sk pk =
   push_frame();
   let basepoint = create (Hacl.Cast.uint8_to_sint8 0uy) 32ul in
   basepoint.(0ul) <- (Hacl.Cast.uint8_to_sint8 9uy);
-  Curve25519.crypto_scalarmult pk sk basepoint;
+  Hacl.Curve25519.crypto_scalarmult pk sk basepoint;
   pop_frame();
   let hfin = ST.get() in
   assume (as_seq hfin pk == pubKey (as_seq hinit sk))
