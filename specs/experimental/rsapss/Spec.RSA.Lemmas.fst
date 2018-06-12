@@ -343,8 +343,10 @@ val lemma_add_sign1:
   a0:bignum a0Bits -> a1:bignum a1Bits ->
   b0:bignum a0Bits -> b1:bignum a1Bits -> Lemma
   (bn_v a1 * bn_v b0 + bn_v a0 * bn_v b1 < pow2 (a0Bits + a1Bits + 1))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
 let lemma_add_sign1 a0Bits a1Bits a0 a1 b0 b1 =
-  assert (bn_v a1 * bn_v b0 + bn_v a0 * bn_v b1 < pow2 a1Bits * pow2 a0Bits + pow2 a0Bits * pow2 a1Bits);
+  let res = bn_v a1 * bn_v b0 + bn_v a0 * bn_v b1 in
+  assert (res < pow2 a1Bits * pow2 a0Bits + pow2 a0Bits * pow2 a1Bits);
   pow2_plus a1Bits a0Bits;
   pow2_double_sum (a0Bits + a1Bits)
 

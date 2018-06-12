@@ -74,20 +74,15 @@ val add_sign:
 let add_sign #a0Bits #a1Bits c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 =
   lemma_add_sign (bn_v c0) (bn_v c1) (bn_v c2) (bn_v a0) (bn_v a1) (bn_v a2) (bn_v b0) (bn_v b1) (bn_v b2) sa2 sb2;
   let c01 = bn_add_carry c0 c1 in
-  assert (bn_v c01 == bn_v c0 + bn_v c1);
   if (sa2 = sb2)
-  then begin
-    let res = bn_sub c01 c2 in
-    assert (bn_v res == (bn_v c0 + bn_v c1) - bn_v c2);
-    res end
+  then bn_sub c01 c2
   else begin
     assert ((bn_v c0 + bn_v c1) + bn_v c2 == bn_v a0 * bn_v b1 + bn_v a1 * bn_v b0);
     lemma_add_sign1 a0Bits a1Bits a0 a1 b0 b1;
     pow2_le_compat (a0Bits+a0Bits+1) (a0Bits+a1Bits+1);
     assert ((bn_v c0 + bn_v c1) + bn_v c2 < pow2 (a0Bits + a0Bits + 1));
-    let (c, res) = bn_add c01 c2 in
-    assert (bn_v res == (bn_v c0 + bn_v c1) + bn_v c2);
-    res end
+    bn_add c01 c2
+  end
 
 val karatsuba_f:
   #aBits:size_pos{aBits + aBits < max_size_t} -> #a0Bits:size_pos ->
@@ -99,14 +94,14 @@ val karatsuba_f:
 let karatsuba_f #aBits #a0Bits #a1Bits c0 c1 tmp =
   let c = bn_const_0 #(aBits + aBits) in
   pow2_lt_compat (aBits + aBits) (a0Bits + a0Bits);
-  let (_, res0) = bn_add c c0 in
+  let res0 = bn_add c c0 in
   assert (bn_v res0 == bn_v c + bn_v c0);
   pow2_lt_compat (aBits + aBits) (a1Bits + a1Bits);
-  let (_, res1) = bn_lshift_add c1 (a0Bits + a0Bits) res0 in
+  let res1 = bn_lshift_add c1 (a0Bits + a0Bits) res0 in
   assert (bn_v res1 == bn_v c0 + bn_v c1 * pow2 (a0Bits + a0Bits));
   let tmp = bn_cast_le (a0Bits+a1Bits+1) tmp in
   pow2_lt_compat (aBits + aBits) (a0Bits + a1Bits + 1);
-  let (_, res2) = bn_lshift_add tmp a0Bits res1 in
+  let res2 = bn_lshift_add tmp a0Bits res1 in
   assert (bn_v res2 == bn_v c0 + bn_v c1 * pow2 (a0Bits + a0Bits) + bn_v tmp * pow2 a0Bits);
   res2
 
@@ -169,12 +164,11 @@ val mont_reduction_f:
 let mont_reduction_f #nBits #cBits rBits nInv_u64 n c i res =
   let res_i = bn_get_bits res (i * 64) ((i + 1)*64) in
   let qi = bn_get_bits (bn_mul nInv_u64 res_i) 0 64 in
-  let (c1, res1) = bn_lshift_mul_add n (64*i) qi res in
+  assert (bn_v res + bn_v n * pow2 (64*i) * bn_v qi <= bn_v c + (pow2 (64*i)-1) * bn_v n + bn_v n * pow2 (64*i) * bn_v qi);
   lemma_mont_reduction_fi #nBits #cBits rBits qi n c i res;
   lemma_mont_reduction_f #nBits #cBits rBits n c i;
-  assert (bn_v res + bn_v n * pow2 (64*i) * bn_v qi < pow2 (nBits+rBits+1));
-  assert (bn_v res1 + uint_v c1 * pow2 (nBits + 1 + rBits) == bn_v res + bn_v n * pow2 (64*i) * bn_v qi); //from bn_lshift_mul_add
-  assert (bn_v res1 == bn_v res + pow2 (64*i) * bn_v qi * bn_v n);
+  assert (bn_v res + bn_v n * pow2 (64*i) * bn_v qi < pow2 (nBits+1+rBits));
+  let res1 = bn_lshift_mul_add n (64*i) qi res in
   lemma_mod_plus (bn_v res) (pow2 (64*i) * bn_v qi) (bn_v n); // res1 % n == res % n
   res1
 
@@ -327,19 +321,19 @@ val rsa_blinding:
   #mBits:size_pos ->
   nBits:size_pos{64 <= nBits /\ 2 * 64 * (blocks nBits 64 + 1) < max_size_t} -> n:bignum nBits{1 < bn_v n} ->
   pBits:size_pos -> p:bignum pBits{1 < bn_v p /\ bn_v p < bn_v n} ->
-  qBits:size_pos{pBits + qBits + 64 < max_size_t} -> q:bignum qBits{1 < bn_v q /\ bn_v q < bn_v n /\ bn_v n == bn_v p * bn_v q} ->
+  qBits:size_pos{pBits + qBits + 65 < max_size_t} -> q:bignum qBits{1 < bn_v q /\ bn_v q < bn_v n /\ bn_v n == bn_v p * bn_v q} ->
   m:bignum mBits{mBits <= nBits /\ bn_v m < bn_v n} ->
   dBits:size_pos{dBits < pBits + qBits + 64} -> d:bignum dBits{0 < bn_v d /\ bn_v d < bn_v n} ->
   rBlind:bignum 64 -> Tot (s:bignum nBits{bn_v s == (pow (bn_v m) (bn_v d)) % bn_v n})
-  #reset-options "--z3rlimit 300 --max_fuel 0"
+  #reset-options "--z3rlimit 150 --max_fuel 0"
 let rsa_blinding #mBits nBits n pBits p qBits q m dBits d rBlind =
   let bn_1 = bn_const_1 #1 in
   let p1 = bn_sub p bn_1 in
   let q1 = bn_sub q bn_1 in
   let phi_n = bn_mul p1 q1 in
   let d1 = bn_mul phi_n rBlind in
-  let (c, d2) = bn_add d1 d in
-  assume (bn_v d2 == bn_v d1 + bn_v d);
-  let s = mod_exp nBits n m (pBits + qBits + 64) d2 in
+  let d2 = bn_add_carry d1 d in
+  assert (bn_v d2 == bn_v d + bn_v rBlind * bn_v phi_n);
+  let s = mod_exp nBits n m (pBits + qBits + 65) d2 in
   lemma_exp_blinding_bn #nBits #pBits #qBits #dBits #mBits n phi_n p q d m rBlind;
   s

@@ -21,11 +21,11 @@ val bn_const_0:#bits:size_pos -> r:bignum bits{bn_v r == 0}
 val bn_cast_le:#n:size_pos -> m:size_pos{m <= n} -> b:bignum n{bn_v b < pow2 m} -> c:bignum m{bn_v c == bn_v b}
 val bn_cast_gt:#n:size_pos -> m:size_pos{m >= n} -> b:bignum n{bn_v b < pow2 m} -> c:bignum m{bn_v c == bn_v b}
 
-val bn_add:#n:size_pos -> #m:size_pos{m <= n} -> a:bignum n -> b:bignum m -> Pure (tuple2 carry (bignum n))
-  (requires (True))
-  (ensures (fun (c, res) -> bn_v res + uint_v c * pow2 n == bn_v a + bn_v b))
+val bn_add:#n:size_pos -> #m:size_pos{m <= n} -> a:bignum n -> b:bignum m -> Pure (bignum n)
+  (requires (bn_v a + bn_v b < pow2 n))
+  (ensures (fun res -> bn_v res == bn_v a + bn_v b))
 
-val bn_add_carry:#n:size_pos{n+1 < max_size_t} -> #m:size_pos{m <= n} -> a:bignum n -> b:bignum m -> Tot (res:bignum (n+1){bn_v res == bn_v a + bn_v b})
+val bn_add_carry:#n:size_pos{n + 1 < max_size_t} -> #m:size_pos{m <= n} -> a:bignum n -> b:bignum m -> Tot (res:bignum (n+1){bn_v res == bn_v a + bn_v b})
 
 val bn_sub:#n:size_pos -> #m:size_pos -> a:bignum n -> b:bignum m {bn_v a >= bn_v b} -> c:bignum n{bn_v c == bn_v a - bn_v b}
 
@@ -40,13 +40,13 @@ val bn_from_u64:c:uint64 -> b:bignum 64{uint_v c == bn_v b}
 
 val bn_is_less:#n:size_pos -> #m:size_pos -> a:bignum n -> b:bignum m -> c:bool{if c then bn_v a < bn_v b else bn_v a >= bn_v b}
 
-val bn_lshift_mul_add:#n:size_pos -> #m:size_pos{n <= m} -> x:bignum n -> i:size_nat{n + i + 64 <= m} -> y:bignum 64 -> z:bignum m -> Pure (tuple2 carry (bignum m))
-  (requires (True))
-  (ensures (fun (c, res) -> bn_v res + uint_v c * pow2 m == bn_v x * (pow2 i) * bn_v y + bn_v z))
+val bn_lshift_mul_add:#n:size_pos -> #m:size_pos{n <= m} -> x:bignum n -> i:size_nat{n + i + 64 <= m} -> y:bignum 64 -> z:bignum m -> Pure (bignum m)
+  (requires (bn_v x * (pow2 i) * bn_v y + bn_v z < pow2 m))
+  (ensures (fun res -> bn_v res == bn_v x * (pow2 i) * bn_v y + bn_v z))
 
-val bn_lshift_add:#n:size_pos -> #m:size_pos{n <= m} -> x:bignum n -> i:size_nat{n + i <= m} -> z:bignum m -> Pure (tuple2 carry (bignum m))
-  (requires (True))
-  (ensures (fun (c, res) -> bn_v res + uint_v c * pow2 m == bn_v x * (pow2 i) + bn_v z))
+val bn_lshift_add:#n:size_pos -> #m:size_pos{n <= m} -> x:bignum n -> i:size_nat{n + i <= m} -> z:bignum m -> Pure (bignum m)
+  (requires (bn_v x * (pow2 i) + bn_v z < pow2 m))
+  (ensures (fun res -> bn_v res == bn_v x * (pow2 i) + bn_v z))
 
 val bn_from_bytes_be:#bBytes:size_pos{8 * bBytes < max_size_t} -> b:lbytes bBytes -> Tot (n:bignum (8 * bBytes){bn_v n == nat_from_bytes_be b})
 val bn_to_bytes_be: #bBits:size_pos -> n:bignum bBits ->  Tot (b:lbytes (blocks bBits 8) {bn_v n == nat_from_bytes_be b})

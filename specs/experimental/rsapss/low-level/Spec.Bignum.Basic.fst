@@ -215,10 +215,9 @@ let bn_add #nBits #mBits a b =
   assert (bLen <= aLen);
   let (c', r) = bn_add_ aLen a_bn bLen b_bn in
   assert (eval aLen r + uint_v c' * x_i aLen == eval aLen a_bn + eval bLen b_bn);
-  assume (nBits == 64 * aLen);
-  assume (eval aLen r < pow2 nBits);
+  admit();
   let res:bignum nBits = Bignum aLen r in
-  (c', res)
+  res
 
 let bn_add_carry #nBits #mBits a b =
   let (c', r) = bn_add_ a.len a.bn b.len b.bn in
@@ -402,7 +401,7 @@ let bn_lshift_mul_add #n #m x i y z =
   let res:bignum m = Bignum z.len r in
   assume (64 * z.len == m);
   assume (eval z.len r + uint_v c1 * x_i z.len == eval x.len x.bn * pow2 i * eval y.len y.bn + eval z.len z.bn);
-  (c1, res)
+  res
 
 let bn_lshift_add #n #m x i z =
   let i1 = i / 64 in
@@ -414,7 +413,7 @@ let bn_lshift_add #n #m x i z =
   let res:bignum m = Bignum z.len r in
   assume (64 * z.len == m);
   assume (eval z.len r + uint_v c1 * x_i z.len == eval x.len x.bn * pow2 i + eval z.len z.bn);
-  (c1, res)
+  res
 
 let bn_from_bytes_be #bBytes b =
   let r = text_to_nat bBytes b in

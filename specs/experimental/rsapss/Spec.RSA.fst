@@ -62,7 +62,7 @@ noeq type rsa_pubkey (modBits:modBits) (eBits:size_pos) =
 noeq type rsa_privkey (modBits:modBits) (eBits:size_pos) (dBits:size_pos) (pBits:size_pos) (qBits:size_pos) =
   | Mk_rsa_privkey: pkey:rsa_pubkey modBits eBits ->
 		    d:bignum dBits{0 < bn_v d /\ bn_v d < bn_v (Mk_rsa_pubkey?.n pkey)} ->
-		    p:bignum pBits{1 < bn_v p /\ bn_v p < bn_v (Mk_rsa_pubkey?.n pkey) /\ pBits + qBits + 64 < max_size_t /\ dBits < pBits + qBits + 64} ->
+		    p:bignum pBits{1 < bn_v p /\ bn_v p < bn_v (Mk_rsa_pubkey?.n pkey) /\ pBits + qBits + 65 < max_size_t /\ dBits < pBits + qBits + 64} ->
 		    q:bignum qBits{1 < bn_v q /\ bn_v q < bn_v (Mk_rsa_pubkey?.n pkey) /\ bn_v (Mk_rsa_pubkey?.n pkey) = bn_v p * bn_v q}
 		    -> rsa_privkey modBits eBits dBits pBits qBits
 
