@@ -27,7 +27,7 @@ val bn_add:#n:size_pos -> #m:size_pos{m <= n} -> a:bignum n -> b:bignum m -> Pur
 
 val bn_add_carry:#n:size_pos{n + 1 < max_size_t} -> #m:size_pos{m <= n} -> a:bignum n -> b:bignum m -> Tot (res:bignum (n+1){bn_v res == bn_v a + bn_v b})
 
-val bn_sub:#n:size_pos -> #m:size_pos -> a:bignum n -> b:bignum m {bn_v a >= bn_v b} -> c:bignum n{bn_v c == bn_v a - bn_v b}
+val bn_sub:#n:size_pos -> #m:size_pos{m <= n} -> a:bignum n -> b:bignum m {bn_v a >= bn_v b} -> c:bignum n{bn_v c == bn_v a - bn_v b}
 
 val bn_mul:#n:size_pos -> #m:size_pos{n + m < max_size_t} -> a:bignum n -> b:bignum m -> c:bignum (n + m){bn_v c == bn_v a * bn_v b}
 

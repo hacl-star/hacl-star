@@ -270,26 +270,66 @@ let bn_add_carry #nBits #mBits a b =
     let res:bignum (nBits+1) = Bignum resLen r1 in
     res end
 
-val bn_sub_:
+val bn_sub_f_pred:
   aLen:size_pos -> a:bignum_i aLen ->
-  bLen:size_pos -> b:bignum_i bLen -> Tot (res:bignum_i aLen{eval aLen res = eval aLen a - eval bLen b})
+  bLen:size_pos{bLen <= aLen} -> b:bignum_i bLen ->
+  i:size_nat{i <= aLen} -> tuple2 carry (bignum_i aLen) -> Tot Type0
+let bn_sub_f_pred aLen a bLen b i (c, res) = eval_i aLen res i - uint_v c * x_i i = eval_i aLen a i - eval_is_greater_len bLen b i
+
+val bn_sub_f:
+  aLen:size_pos{aLen + 1 < max_size_t} -> a:bignum_i aLen ->
+  bLen:size_pos{bLen <= aLen} -> b:bignum_i bLen -> Tot (repeatable #(tuple2 carry (bignum_i aLen)) #aLen (bn_sub_f_pred aLen a bLen b))
+  #reset-options "--z3rlimit 150 --max_fuel 2"
+let bn_sub_f aLen a bLen b i (c, res) =
+  assert (bn_sub_f_pred aLen a bLen b i (c, res));
+  let bi = bval bLen b i in
+  let (c', res_i) = subborrow_u64 a.[i] bi c in
+  assert (uint_v res_i - uint_v c' * x_i 1 = uint_v a.[i] - uint_v bi - uint_v c);
+  let res' = res.[i] <- res_i in
+  lemma_eval_equal1 aLen res aLen res' i;
+  assert (eval_i aLen res i == eval_i aLen res' i);
+  lemma_eval_incr aLen res' (i + 1);
+  assert (eval_i aLen res' (i + 1) == eval_i aLen res' i + (uint_v res'.[i]) * x_i i); //from eval_i
+  assert (eval_i aLen res' (i + 1) == eval_i aLen a i - eval_is_greater_len bLen b i + uint_v c * x_i i + (uint_v a.[i] - uint_v bi - uint_v c + uint_v c' * x_i 1) * x_i i); //expansion
+  assume (eval_i aLen res' (i + 1) == eval_i aLen a i - eval_is_greater_len bLen b i + uint_v a.[i] * x_i i - uint_v bi * x_i i + uint_v c' * x_i 1 * x_i i);
+  lemma_mult_x1_xi i;
+  assert (eval_i aLen res' (i + 1) - uint_v c' * x_i (i + 1) == eval_i aLen a i - eval_is_greater_len bLen b i + uint_v a.[i] * x_i i - uint_v bi * x_i i);
+  assert (eval_i aLen res' (i + 1) - uint_v c' * x_i (i + 1) == eval_i aLen a (i+1) - eval_is_greater_len bLen b (i+1));
+  (c', res')
+
+val bn_sub_:
+  aLen:size_pos{aLen + 1 < max_size_t} -> a:bignum_i aLen ->
+  bLen:size_pos{bLen <= aLen} -> b:bignum_i bLen -> Pure (tuple2 carry (bignum_i aLen))
+  (requires True)
+  (ensures (fun (c', res') -> eval aLen res' - uint_v c' * x_i aLen = eval aLen a - eval bLen b))
 let bn_sub_ aLen a bLen b =
   let res = create aLen (u64 0) in
-  let (c, res) = repeati aLen
-  (fun i (c, res) ->
-      let bi = bval bLen b i in
-      let (c', res_i) = subborrow_u64 a.[i] bi c in
-      let res' = res.[i] <- res_i in
-      (c', res')
-  ) (u8 0, res) in
-  assume(eval aLen res = eval aLen a - eval bLen b);
-  res
+  let (c', res') = repeati_inductive aLen
+    (bn_sub_f_pred aLen a bLen b)
+    (fun i (c, res) ->
+      bn_sub_f aLen a bLen b i (c, res)
+    ) (u8 0, res) in
+  assert (eval_i aLen res' aLen - uint_v c' * x_i aLen == eval_i aLen a aLen - eval_is_greater_len bLen b aLen);
+  lemma_eval_is_greater_len bLen b aLen;
+  (c', res')
 
 let bn_sub #nBits #mBits a b =
-  let r = bn_sub_ a.len a.bn b.len b.bn in
-  assume (eval a.len r < pow2 nBits);
-  let res:bignum nBits = Bignum a.len r in
-  assume(eval a.len r = eval a.len a.bn - eval b.len b.bn);
+  let aLen = blocks nBits 64 in
+  assert (nBits <= 64 * aLen);
+  let a_bn = sub a.bn 0 aLen in
+  lemma_eval_equal2 a.len a.bn aLen a_bn a.len;
+  let bLen = blocks mBits 64 in
+  let b_bn = sub b.bn 0 bLen in
+  lemma_eval_equal2 b.len b.bn bLen b_bn b.len;
+  assert (bLen <= aLen);
+  let (c', r) = bn_sub_ aLen a_bn bLen b_bn in
+  assert (eval aLen r - uint_v c' * x_i aLen == eval aLen a_bn - eval bLen b_bn);
+  assert (eval aLen r - uint_v c' * x_i aLen < pow2 nBits);
+  assert (0 <= eval aLen a_bn - eval bLen b_bn);
+  assert (0 <= eval aLen r - uint_v c' * x_i aLen);
+  assert (eval aLen r < pow2 (64*aLen));
+  assert (uint_v c' = 0);
+  let res:bignum nBits = Bignum aLen r in
   res
 
 val bn_mul_by_limb_addj:
@@ -501,12 +541,12 @@ val bn_pow2_mod_n:
 let bn_pow2_mod_n aBits rLen a p =
   let res = create rLen (u64 0) in
   let res = bn_set_bit rLen res aBits in
-  let res = bn_sub_ rLen res (rLen-1) a in // res = res - a
+  let (c, res) = bn_sub_ rLen res (rLen-1) a in // res = res - a
   repeati (p - aBits)
   (fun i res ->
     let res = bn_lshift1 rLen res in
     if not (bn_is_less_ rLen res (rLen-1) a)
-    then bn_sub_ rLen res (rLen-1) a
+    then begin let (c, res) = bn_sub_ rLen res (rLen-1) a in res end
     else res
   ) res
 
