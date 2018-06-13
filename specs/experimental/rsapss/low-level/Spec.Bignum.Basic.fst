@@ -228,18 +228,47 @@ let bn_add #nBits #mBits a b =
   let res:bignum nBits = Bignum aLen r in
   res
 
+
+val lemma_bn_add:#n:size_pos -> #m:size_pos{n >= m} -> a:bignum n -> b:bignum m -> Lemma
+  (bn_v a + bn_v b < pow2 (n + 1))
+let lemma_bn_add #n #m a b =
+  pow2_le_compat n m;
+  assert (bn_v a + bn_v b < pow2 n + pow2 n);
+  pow2_double_sum n
+
 let bn_add_carry #nBits #mBits a b =
-  let (c', r) = bn_add_ a.len a.bn b.len b.bn in
-  assume (eval a.len r < pow2 nBits);
-  assume (a.len + 1 < max_size_t);
-  let r1 = create (a.len + 1) (u64 0) in
-  let r1 = update_sub r1 0 a.len r in
-  let r1 = r1.[a.len] <- to_u64 c' in
-  assume (eval (a.len + 1) r1 < pow2 (nBits + 1));
-  let res:bignum (nBits+1) = Bignum (a.len+1) r1 in
-  //assume (a.len * 64 == nBits);
-  assume(eval (a.len+1) r1 = eval a.len a.bn + eval b.len b.bn);
-  res
+  let aLen = blocks nBits 64 in
+  assert (nBits <= 64 * aLen);
+  let a_bn = sub a.bn 0 aLen in
+  lemma_eval_equal2 a.len a.bn aLen a_bn a.len;
+  let bLen = blocks mBits 64 in
+  let b_bn = sub b.bn 0 bLen in
+  lemma_eval_equal2 b.len b.bn bLen b_bn b.len;
+  assert (bLen <= aLen);
+  let (c', r) = bn_add_ aLen a_bn bLen b_bn in
+  assert (eval aLen r + uint_v c' * x_i aLen == eval aLen a_bn + eval bLen b_bn);
+  lemma_bn_add #nBits #mBits a b;
+  assert (eval aLen r + uint_v c' * x_i aLen < pow2 (nBits + 1));
+  assert (eval aLen r < pow2 (64*aLen));
+  let resLen = blocks (nBits + 1) 64 in
+  assert (nBits + 1 <= resLen * 64);
+  assert (aLen <= resLen);
+  let r1 = create resLen (u64 0) in
+  let r1 = update_sub r1 0 aLen r in
+  lemma_eval_equal2 resLen r1 aLen r aLen;
+  if (aLen < resLen) then begin
+    let r2 = r1.[aLen] <- to_u64 c' in
+    lemma_eval_equal1 resLen r2 resLen r1 aLen;
+    lemma_eval_incr resLen r2 resLen;
+    assert (eval resLen r2 == eval_i resLen r2 aLen + uint_v r2.[aLen] * x_i aLen);
+    assert (eval resLen r2 < pow2 (nBits + 1));
+    let res:bignum (nBits+1) = Bignum resLen r2 in
+    res end
+  else begin
+    pow2_le_compat (64*resLen) (nBits+1);
+    assert (uint_v c' = 0);
+    let res:bignum (nBits+1) = Bignum resLen r1 in
+    res end
 
 val bn_sub_:
   aLen:size_pos -> a:bignum_i aLen ->
