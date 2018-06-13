@@ -231,12 +231,12 @@ int crypto_sign(uint8_t *signed_msg, uint64_t *signed_len, const uint8_t *msg, u
 int crypto_sign_open(uint8_t *unsigned_msg, uint64_t *unsigned_msg_len, const uint8_t *msg, uint64_t msg_len, const uint8_t *pk){
   uint32_t res;
   res = Hacl_Ed25519_verify((uint8_t *)pk, (uint8_t *)msg+64, msg_len - 64, (uint8_t *)msg);
-  if (res == true){
+  if (res){
     memmove(unsigned_msg, msg+64, sizeof(uint8_t) * (msg_len-64));
     *unsigned_msg_len = msg_len - 64;
-    return true;
+    return 0;
   } else {
-    return false;
+    return -1;
   }
 }
 
