@@ -58,15 +58,16 @@ let encrypt #rgn #ip #i #key_length #kp #aparams ap k n p =
     if honest_i && Flags.ae then
       aparams.scheme.enc_star (length p) k.raw n
     else
-      lemma_dishonest_not_others
-      aparams.scheme.enc (repr p) k.raw n
+      //lemma_dishonest_not_others
+      aparams.scheme.enc (repr #rgn #ap.pp #ip p) k.raw n
   in
   recall ap.log;
   MM.extend ap.log (LOG_KEY i n c) p;
   c
 
-let decrypt #id #i #key_length #kp #aparams ap k n c =
-  match kp.KEY.hon k && ap.b with
+let decrypt #rgn #ip #i #key_length #kp #aparams ap k n c =
+  let honest_i = get_honesty ip i in
+  match honest_i && Flags.ae with
   | true ->
     (match MM.lookup ap.log (LOG_KEY i n c) with
     | Some p ->
@@ -75,5 +76,5 @@ let decrypt #id #i #key_length #kp #aparams ap k n c =
     | None -> None)
   | false ->
     match aparams.scheme.dec c k.raw n with
-    | Some p -> Some (coerce #ap.pp kp k p)
+    | Some p -> Some (Plain.coerce #rgn #ap.pp ip i p)
     | None -> None

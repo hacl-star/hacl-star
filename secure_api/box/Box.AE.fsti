@@ -137,6 +137,7 @@ let encrypt_functional_spec (#rgn:erid) (#ip:index_package rgn) (#i:inst_id) (#k
 val encrypt: #rgn:erid -> #ip:index_package rgn -> #i:inst_id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package ip key_length (key key_length) -> #aparams:ae_parameters{key_length = aparams.keylength} -> ap:ae_package kp aparams -> k:key key_length i -> n:nonce aparams -> p:protected_plain ap.pp i -> ST (ciphertext aparams)
   (requires (fun h0 ->
     (nonce_is_unique ap i n h0)
+    /\ registered ip i
   ))
   (ensures (fun h0 c h1 ->
     encrypt_functional_spec ap k n c p
@@ -177,7 +178,7 @@ let decrypt_functional_spec (#rgn:erid)
 
 val decrypt: #rgn:erid -> #ip:index_package rgn -> #i:inst_id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package ip key_length (key key_length) -> #aparams:ae_parameters{key_length = aparams.keylength} -> ap:ae_package kp aparams -> k:key key_length i -> n:nonce aparams -> c:ciphertext aparams -> ST (option (p:protected_plain ap.pp i))
   (requires (fun h0 ->
-    True
+    registered ip i
   ))
   (ensures (fun h0 p h1 ->
     decrypt_functional_spec ap k n c p h0

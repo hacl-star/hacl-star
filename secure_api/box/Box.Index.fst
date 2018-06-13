@@ -175,18 +175,30 @@ let lemma_honest_not_others #rgn ip i =
   assert(dishonest ip i ==> False)
 
 
-val lemma_honest_or_dishonest: #rgn:erid -> ip:index_package rgn -> (i:id) -> Lemma
-  (requires (
-    registered ip i
-  ))
-  (ensures (
-    ~(dishonest ip i)
-  ))
-  [SMTPat (honest ip i)]
-let lemma_honest_not_others #rgn ip i =
-  let (j:(i:id{honest ip i})) = i in
-  FStar.Classical.impl_intro (lemma_dishonest_and_others_tot ip j);
-  assert(dishonest ip i ==> False)
+//val lemma_honest_or_dishonest: #rgn:erid -> ip:index_package rgn -> (i:id) -> ST unit
+//  (requires (fun h0 ->
+//    registered ip i
+//  ))
+//  (ensures (fun h0 _ h1 ->
+//    h0 == h1
+//    ///\ ~(dishonest ip i)
+//  ))
+//  //[SMTPat (honest ip i)]
+//let rec lemma_honest_or_dishonest #rgn ip i =
+//  match i with
+//  | PK_id i' ->
+//    (match MM.lookup ip.id_log (PK_id i') with
+//    | Some i''->
+//      (if i'' then
+//        testify (MM.contains ip.id_log (PK_id i') true)
+//      else
+//        testify (MM.contains ip.id_log (PK_id i') false)))
+//  | Instance_id i' ->
+//    lemma_honest_or_dishonest ip (fst i');
+//    lemma_honest_or_dishonest ip (snd i')
+  //let (j:(i:id{honest ip i})) = i in
+  //FStar.Classical.impl_intro (lemma_dishonest_and_others_tot ip j);
+  //assert(dishonest ip i ==> False)
 
 //val lemma_honest_dishonest: #rgn:erid -> ip:index_package rgn -> i:id -> ST unit
 //  (requires (fun h0 ->
