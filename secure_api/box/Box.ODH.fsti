@@ -1,173 +1,152 @@
 module Box.ODH
 
 open FStar.Set
-open FStar.HyperHeap
+open FStar.Seq
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-open Crypto.Symmetric.Bytes
+open Box.Key
 
-module ID = Box.Index
-module HH = FStar.HyperHeap
-module Key = Box.Key
+open FStar.Endianness
 
-val smaller': n:nat -> i1:lbytes n -> i2:lbytes n -> b:bool{b ==> i1 <> i2}
+module MM = FStar.Monotonic.Map
 
-#set-options "--__temp_no_proj Box.ODH"
-#set-options "--z3rlimit 300 --max_ifuel 2 --max_fuel 0"
-abstract noeq type odh_module = // require subId type to be dh_share?
-  | ODH:
-    rgn:(r:HH.rid) ->
-    hash_length:(n:nat) ->
-    dh_share_length:(n:nat) ->
-    dh_exponent_length:(n:nat) ->
-    hash: (lbytes dh_share_length -> (lbytes hash_length)) ->
-    exponentiate: (lbytes dh_exponent_length -> lbytes dh_share_length -> Tot (lbytes dh_share_length)) ->
-    base_point: lbytes dh_share_length ->
-    im:ID.index_module{ID.id im == lbytes dh_share_length} ->
-    kim:ID.index_module{ID.id kim == i:(lbytes dh_share_length * lbytes dh_share_length){b2t (smaller' dh_share_length (fst i) (snd i))}} ->
-    km:Key.key_module kim{Key.get_keylen kim km = hash_length} ->
-    odh_module
+val random_bytes: n:nat{n<=32} -> lbytes n
 
-val smaller: om:odh_module -> i1:lbytes om.dh_share_length -> i2:lbytes om.dh_share_length -> b:bool{b == smaller' om.dh_share_length i1 i2}
+noeq type odh_parameters =
+  | OP:
+  share_length:(n:nat{n<=32}) ->
+  exponent_length:(n:nat{n<=32}) ->
+  hash_length:(n:nat{n<=32}) ->
+  generator:lbytes share_length ->
+  exponentiate:(lbytes exponent_length -> lbytes share_length -> lbytes share_length) ->
+  hash:(lbytes share_length -> lbytes hash_length) ->
+  odh_parameters
 
-#set-options "--z3rlimit 1000 --max_ifuel 2 --max_fuel 0"
-// Basic types
-let dh_share (om:odh_module) = lbytes om.dh_share_length
-let dh_exponent (om:odh_module) = lbytes om.dh_exponent_length
-let hash_output (om:odh_module) = lbytes om.hash_length
-let key_id (om:odh_module) =  i:(dh_share om * dh_share om){b2t (smaller om (fst i) (snd i))}
-val hash_fun: om:odh_module -> (hash:(dh_share om -> (hash_output om)){hash == om.hash})
-val dh_exponentiate: om:odh_module -> exp:(dh_exponent om -> dh_share om -> (dh_share om)){exp == om.exponentiate}
-val share_from_exponent: om:odh_module -> exp:dh_exponent om -> Tot (sh:dh_share om{sh = om.exponentiate exp om.base_point})
+abstract type share (oparam:odh_parameters) =
+  | SH:
+  raw_sh:lbytes oparam.share_length ->
+  h:bool ->
+  share oparam
 
-// Key types and key handling
-val skey: om:odh_module -> Type0
-val pkey: om:odh_module -> Type0
-val get_pkey: om:odh_module -> skey om -> pkey om
-val compatible_keys: om:odh_module -> sk:skey om -> pk:pkey om -> t:Type0{t <==> pk =!= get_pkey om sk}
+abstract type exponent (oparam:odh_parameters) =
+  | EXP:
+  raw_exp:lbytes oparam.exponent_length ->
+  sh:share oparam{sh.raw_sh = oparam.exponentiate raw_exp oparam.generator} ->
+  exponent oparam
 
-// Getters
-val get_hash_length: om:odh_module -> n:nat{n = om.hash_length}
-val get_dh_share_length: om:odh_module -> n:nat{n = om.dh_share_length}
-val get_dh_exponent_length: om:odh_module -> n:nat{n = om.dh_exponent_length}
-val get_base_point: om:odh_module -> sh:dh_share om{sh = om.base_point}
-val get_index_module: om:odh_module -> im:ID.index_module{im==om.im}
-val get_key_index_module: om:odh_module -> kim:ID.index_module{kim==om.kim}
-val get_key_module: om:odh_module -> kim:ID.index_module{kim == om.kim} -> km:Key.key_module kim{km==om.km /\ Key.get_keylen kim km = om.hash_length}
+val sh_hon: #oparams:odh_parameters -> sh:share oparams -> GTot (b:bool{b=sh.h})
 
-val total_order_lemma: (om:odh_module -> i1:dh_share om -> i2:dh_share om -> Lemma
+val exp_hon: #oparams:odh_parameters -> exp:exponent oparams -> GTot (b:bool{b=exp.sh.h})
+
+val get_exp_share: #oparams:odh_parameters -> e:exponent oparams -> sh:share oparams{e.sh = sh}
+
+val get_share_raw: #oparams:odh_parameters -> sh:share oparams -> raw:lbytes oparams.share_length{raw = sh.raw_sh}
+
+val get_exponent_raw: #oparams:odh_parameters -> exp:exponent oparams -> GTot (raw:lbytes oparams.exponent_length{raw = exp.raw_exp})
+
+val gen_dh: (oparam:odh_parameters) -> exponent oparam
+
+val coerce_dh_sh: (oparam:odh_parameters) -> (rash_sh:lbytes oparam.share_length) -> sh:share oparam
+
+val coerce_dh_exp: (oparam:odh_parameters) -> (raw_exp:lbytes oparam.exponent_length) -> exp:exponent oparam
+
+let id = id:(bytes*bytes)
+
+val create_id: (#oparam:odh_parameters) -> sh1:share oparam -> sh2:share oparam{sh1.raw_sh <> sh2.raw_sh} -> i:id
+
+#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 1"
+val lemma_symmetric_id: (#oparam:odh_parameters) -> sh1:share oparam -> sh2:share oparam{sh1.raw_sh <> sh2.raw_sh} -> Lemma
   (requires True)
-  (ensures
-    (b2t (smaller om i1 i2) ==> (forall i. i <> i1 /\ i <> i2 /\ b2t (smaller om i i1) ==> b2t (smaller om i i2)))
-    /\ (~ (b2t (smaller om i1 i2)) <==> (i1 = i2 \/ b2t (smaller om i2 i1)))))
+  (ensures create_id sh1 sh2 = create_id sh2 sh1)
+  [SMTPat (create_id #oparam sh1 sh2)]
+
+let key_package_log_key = id
+let key_package_log_value (i:id) (key_type:(id -> Type0)) = key_type i
+let key_package_log_range  (key_type:(id -> Type0)) (k:key_package_log_key) = key_package_log_value k key_type
+let key_package_log_inv (key_type:(id -> Type0)) (f:MM.map' (key_package_log_key) (key_package_log_range key_type)) = True
+
+let key_package_log (rgn:erid) (key_type:(id -> Type0)) =
+  MM.t rgn (key_package_log_key) (key_package_log_range key_type) (key_package_log_inv key_type)
+
+noeq abstract type odh_package (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (kp:key_package key_length key_type) (oparam:odh_parameters{oparam.hash_length = key_length}) =
+  | ODH:
+  rgn:erid ->
+  b:bool ->
+  kp_log:key_package_log rgn key_type ->
+  odh_package #key_length #key_type kp oparam
+
+val get_flag: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> op:odh_package #key_length #key_type kp oparam -> GTot (flag:bool{flag = op.b})
+
+val get_op_rgn: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> (op:odh_package #key_length #key_type kp oparam) -> (rgn:erid{rgn = op.rgn})
+
+val get_op_log: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> (op:odh_package #key_length #key_type kp oparam) -> GTot (log:key_package_log op.rgn key_type)
+
+val recall_op_log: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> (op:odh_package #key_length #key_type kp oparam) -> ST unit
+  (requires (fun h0 -> True))
+  (ensures (fun h0 _ h1 ->
+    h0 == h1
+    /\ contains h1 op.kp_log
+  ))
+
+val create_odh_package: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (kp:key_package key_length key_type) -> (oparam:odh_parameters{oparam.hash_length = key_length}) -> (rgn:erid) -> b:bool -> ST (odh_package #key_length #key_type kp oparam)
+  (requires (fun h0 -> True))
+  (ensures (fun h0 op h1 ->
+    modifies (Set.singleton rgn) h0 h1
+    /\ extends op.rgn rgn
+    /\ b = op.b
+  ))
+
+let dh_op_modified_regions (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (h0:mem) : (GTot (Set.set rid)) =
+  let i = create_id sh exp.sh in
+  let both_honest = sh.h && exp.sh.h in
+  if both_honest && op.b then
+    match MM.sel (sel h0 op.kp_log) i with
+    | Some _ ->
+      Set.empty
+    | None ->
+        Set.singleton op.rgn
+  else
+    Set.empty
+
+let dh_op_log_change (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (h0:mem) (h1:mem) =
+  let i = create_id sh exp.sh in
+  let both_honest = sh.h && exp.sh.h in
+  contains h0 op.kp_log
+  /\ ((both_honest /\ op.b) ==>
+      (MM.defined op.kp_log i h0 ==>
+        Some? (sel h1 op.kp_log i)
+        /\ (let k = Some?.v (sel h1 op.kp_log i) in
+          sel h1 op.kp_log == sel h0 op.kp_log
+        /\ witnessed (MM.contains op.kp_log i k)))
+      /\ (MM.fresh op.kp_log i h0 ==>
+          Some? (sel h1 op.kp_log i)
+          /\ (let k = Some?.v (sel h1 op.kp_log i) in
+          witnessed (MM.contains op.kp_log i k)
+          /\ sel h1 op.kp_log == MM.upd (sel h0 op.kp_log) i k))
+    )
+  /\ ((~both_honest \/ ~op.b) ==>
+      sel h1 op.kp_log == sel h0 op.kp_log)
+
+// Do we need/want this?
+let dh_op_functional_spec (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (k:key_type (create_id sh exp.sh)) (h:mem) =
+  let i = create_id sh exp.sh in
+  let both_honest = sh.h && exp.sh.h in
+    ((op.b /\ both_honest) ==>
+      (Some? (MM.sel (sel h op.kp_log) i)
+      /\ k == Some?.v (MM.sel (sel h op.kp_log) i))) // If possible, indicate somehow that k was randomly drawn.
+    /\ (~op.b \/ ~both_honest ==>
+      kp.getGT k == oparam.hash (oparam.exponentiate exp.raw_exp sh.raw_sh)
+      /\ kp.hon k = false)
+
 
 #set-options "--z3rlimit 300 --max_ifuel 2 --max_fuel 1"
-val create: om_hash_len:nat ->
-            om_dh_share_len:nat ->
-            om_dh_exponent_len:nat ->
-            om_hash_fun: (lbytes om_dh_share_len -> (lbytes om_hash_len)) ->
-            om_exponentiate: (lbytes om_dh_exponent_len -> lbytes om_dh_share_len -> (lbytes om_dh_share_len)) ->
-            om_base_point: lbytes om_dh_share_len ->
-            om_im:ID.index_module{ID.id om_im == lbytes om_dh_share_len} ->
-            om_kim:ID.index_module{ID.id om_kim == i:(lbytes om_dh_share_len * lbytes om_dh_share_len){b2t (smaller' om_dh_share_len (fst i) (snd i))}} ->
-            om_km:Key.key_module om_kim{Key.get_keylen om_kim om_km = om_hash_len} ->
-            om_rgn:Key.log_region ->
-            om:odh_module{
-              om.kim == om_kim /\
-              (let om_km:(km:Key.key_module om.kim{Key.get_keylen om.kim km = om_hash_len}) = om_km in
-              get_hash_length om = om_hash_len
-              /\ get_dh_share_length om = om_dh_share_len
-              /\ get_dh_exponent_length om = om_dh_exponent_len
-              /\ get_index_module om == om_im
-              /\ get_key_index_module om == om_kim
-              /\ (let km:(k:Key.key_module om_kim{Key.get_keylen om_kim k = om_hash_len}) = om_km in
-                let fun_km:(k:Key.key_module om_kim{Key.get_keylen om_kim k = om_hash_len}) = get_key_module om om_kim in
-              fun_km == km)
-              /\ hash_fun om == om_hash_fun
-              /\ dh_exponentiate om == om_exponentiate
-              /\ get_base_point om == om_base_point)
-            }
-
-(**
-  A DH public key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
-  or dishonest).
-*)
-
-//val pkey: om:odh_module -> pkey'
-
-
-(**
-  A DH secret key containing its raw byte representation. All ids of DH keys have to be unfresh and registered (e.g. marked as either honest
-  or dishonest).
-*)
-
-//val skey: om:odh_module -> skey'
-
-
-
-(**
-  A helper function to obtain the raw bytes of a DH public key.
-*)
-val pk_get_share: om:odh_module -> pk:pkey om -> Tot (dh_sh:dh_share om) //{dh_sh = pk.pk_share})
-
-val lemma_pk_get_share_inj: om:odh_module -> pk:pkey om -> Lemma
-  (requires True)
-  (ensures (forall pk' . pk_get_share om pk' == pk_get_share om pk <==> pk' == pk))
-  [SMTPat (pk_get_share om pk)]
-
-val get_skeyGT: om:odh_module -> sk:skey om -> GTot (raw:dh_exponent om) //{raw=sk.sk_exp})
-
-#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
-(**
-A helper function to obtain the share that corresponds to a DH secret key.
-*)
-val sk_get_share: om:odh_module -> sk:skey om -> Tot (dh_sh:dh_share om{dh_sh = share_from_exponent om (get_skeyGT om sk)})
-
-val leak_skey: om:odh_module -> sk:skey om{ID.dishonest om.im (sk_get_share om sk)} -> Tot (raw:dh_exponent om{raw=get_skeyGT om sk})
-
-val keygen: om:odh_module -> ST (dh_pair:(pkey om * skey om){fst dh_pair == get_pkey om (snd dh_pair)})
+val dh_op: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> op:odh_package kp oparam -> sh:share oparam -> exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh} -> ST (key_type (create_id sh exp.sh))
   (requires (fun h0 -> True))
-  (ensures (fun h0 _ h1 -> modifies_none h0 h1))
-
-val coerce_pkey: om:odh_module -> dh_sh:dh_share om{ID.dishonest om.im dh_sh} -> Tot (pk:pkey om{pk_get_share om pk=dh_sh})
-
-(**
-  coerce_keypair allows the adversary to coerce a DH exponent into a DH private key. The corresponding DH public key
-  is generated along with it. Both keys are considered dishonest and the id is considered unfresh after coercion.
-*)
-val coerce_keypair: om:odh_module -> dh_exp:dh_exponent om{ID.dishonest om.im (share_from_exponent om dh_exp)} -> Tot (dh_pair:(k:pkey om{pk_get_share om k = share_from_exponent om dh_exp}) * (k:skey om{get_skeyGT om k=dh_exp}))
-
-
-val compose_ids: om:odh_module -> s1:dh_share om -> s2:dh_share om{s2 <> s1} -> (i:(dh_share om * dh_share om){b2t (smaller om (fst i) (snd i))})
-
-(**
-  GTot specification of the prf_odh function for use in type refinements.
-*)
-val prf_odhGT: om:odh_module -> sk:skey om -> pk:pkey om{compatible_keys om sk pk} -> GTot (ho:hash_output om{ho = hash_fun om (dh_exponentiate om (get_skeyGT om sk) (pk_get_share om pk))})
-
-val lemma_shares: om:odh_module -> sk:skey om -> Lemma
-  (requires True)
-  (ensures (pk_get_share om (get_pkey om sk)) == sk_get_share om sk)
-  [ SMTPat (sk_get_share om sk)]
-
-#set-options "--z3rlimit 1000 --max_ifuel 1 --max_fuel 0"
-val prf_odh: om:odh_module -> sk:skey om -> pk:pkey om{compatible_keys om sk pk} -> ST (k:Key.get_keytype om.kim om.km)
-  (requires (fun h0 ->
-    let i = compose_ids om (pk_get_share om pk) (sk_get_share om sk) in
-    ID.registered om.kim i
-    /\ Key.invariant om.kim om.km h0
-  ))
   (ensures (fun h0 k h1 ->
-    let i = compose_ids om (pk_get_share om pk) (sk_get_share om sk) in True
-    /\ Key.get_index om.kim om.km k = i
-    /\ ((ID.honest om.kim i /\ b2t Flags.prf_odh) ==>
-        modifies (Set.singleton (Key.get_log_region om.kim om.km)) h0 h1)
-    // We should guarantee, that the key is randomly generated. Generally, calls to prf_odh should be idempotent. How to specify that?
-    // Should we have a genPost condition that we guarantee here?
-    /\ ((ID.dishonest om.kim i \/ ~(b2t Flags.prf_odh)) ==>
-        (Key.get_rawGT om.kim om.km k = prf_odhGT om sk pk // Functional correctness.
-        /\ h0 == h1))
-    /\ (modifies (Set.singleton (Key.get_log_region om.kim om.km))h0 h1 \/ h0 == h1)
-    /\ Key.invariant om.kim om.km h1
+    let i = create_id sh exp.sh in
+    let both_honest = sh.h && exp.sh.h in
+    modifies (dh_op_modified_regions op sh exp h0) h0 h1
+    /\ dh_op_log_change op sh exp h0 h1
+    /\ dh_op_functional_spec op sh exp k h1
   ))

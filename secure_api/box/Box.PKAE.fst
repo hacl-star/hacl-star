@@ -1,261 +1,259 @@
-(**
-  This module represents the PKAE cryptographic security game expressed in terms of the underlying cryptobox construction.
-*)
 module Box.PKAE
 
-
 open FStar.Set
-open FStar.HyperHeap
+open FStar.Seq
 open FStar.HyperStack
 open FStar.HyperStack.ST
-open FStar.Monotonic.RRef
-open FStar.Seq
-open FStar.Monotonic.Seq
-open FStar.List.Tot
 
-open Crypto.Symmetric.Bytes
+open FStar.Endianness
 
-open Box.Flags
+open Box.Plain
 
-module MR = FStar.Monotonic.RRef
-module MM = MonotoneMap
-module HS = FStar.HyperStack
-module HH = FStar.HyperHeap
-module HSalsa = Spec.HSalsa20
-module Curve = Spec.Curve25519
-module SPEC = Spec.CryptoBox
-module Plain = Box.Plain
-module Key = Box.Key
-module ID = Box.Index
-module ODH = Box.ODH
-module AE = Box.AE
-module LE = FStar.Endianness
-
-#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 0"
-let nonce = AE.nonce
-let cipher = AE.cipher
-let sub_id  = lbytes Curve.serialized_point_length
-let key_id = (i:(lbytes Curve.serialized_point_length*lbytes Curve.serialized_point_length){b2t (ODH.smaller' Curve.serialized_point_length (fst i) (snd i))})
-let plain = AE.ae_plain
-
-
-let valid_plain_length = AE.valid_plain_length
-let valid_cipher_length = AE.valid_cipher_length
-
-let zero_nonce = Seq.create HSalsa.noncelen (UInt8.uint_to_t 0)
-let hsalsa20_hash input = HSalsa.hsalsa20 input zero_nonce
-
-let base_point:lbytes Curve.serialized_point_length = Curve.base_point
-
-#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 0"
-private noeq type aux_t' (im:index_module) (kim:plain_index_module) (pm:Plain.plain_module) (rgn:log_region) =
-  | AUX:
-    am:AE.ae_module kim{extends (AE.get_message_log_region #kim am) rgn /\ AE.get_pm am == pm} ->
-    om:ODH.odh_module{ODH.get_hash_length om = HSalsa.keylen
-                      /\ ODH.get_dh_share_length om = Curve.serialized_point_length
-                      /\ ODH.get_dh_exponent_length om = Curve.scalar_length
-                      /\ ODH.dh_exponentiate om == Curve.scalarmult
-                      /\ ODH.hash_fun om == hsalsa20_hash
-                      /\ ODH.get_base_point om = base_point
-                      /\ ODH.get_index_module om == im
-                      /\ ODH.get_key_index_module om == kim
-                      } ->
-    km:Key.key_module kim{
-                          km == ODH.get_key_module om kim
-                          /\ km == AE.instantiate_km am
-                          /\ Key.get_keylen kim km == ODH.get_hash_length om
-                          /\ extends (Key.get_log_region kim km) rgn} ->
-    aux_t' im kim pm rgn
-
-let aux_t im kim pm rgn = aux_t' im kim pm rgn
-
-let skey pkm = ODH.skey pkm.aux.om
-let pkey pkm = ODH.pkey pkm.aux.om
-
-let pkey_from_skey pkm sk = ODH.get_pkey pkm.aux.om sk
-let compatible_keys pkm sk pk = ODH.compatible_keys pkm.aux.om sk pk
-
-let enc pkm p n pk sk =
-  SPEC.cryptobox p n (ODH.pk_get_share pkm.aux.om pk) (ODH.get_skeyGT pkm.aux.om sk)
-
-let dec pkm c n pk sk =
-  let p = SPEC.cryptobox_open c n (ODH.pk_get_share pkm.aux.om pk) (ODH.get_skeyGT pkm.aux.om sk) in
-  match p with
-  | Some p' ->
-    let p'':plain = p' in
-    Some p''
-  | None -> None
-
-#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
-let compose_ids pkm i1 i2 = ODH.compose_ids pkm.aux.om i1 i2
-
-let length pkm = AE.length
-
-
-let key_index_module = plain_index_module
-let plain_module = pm:Plain.plain_module{Plain.get_plain pm == plain /\ Plain.valid_length #pm == valid_plain_length}
-
-#set-options "--z3rlimit 600 --max_ifuel 1 --max_fuel 1"
-val message_log_lemma: im:key_index_module -> rgn:log_region{disjoint (ID.get_rgn im) rgn} -> Lemma
-  (requires True)
-  (ensures message_log im rgn === AE.message_log im rgn)
-let message_log_lemma im rgn =
-  assert(FStar.FunctionalExtensionality.feq (message_log_value im) (AE.message_log_value im));
-  assert(FStar.FunctionalExtensionality.feq (message_log_range im) (AE.message_log_range im));
-  let inv = message_log_inv im in
-  let map_t =MM.map' (message_log_key im) (message_log_range im) in
-  let inv_t = map_t -> Type0 in
-  let ae_inv = AE.message_log_inv im in
-  let ae_inv:map_t -> Type0 = ae_inv in
-  assert(FStar.FunctionalExtensionality.feq
-    #map_t #Type
-    inv ae_inv);
-  assert(message_log im rgn == AE.message_log im rgn);
-  ()
-
-
-#set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 0"
-let get_message_log_region pkm = AE.get_message_log_region pkm.aux.am
-
-val coerce: t1:Type -> t2:Type{t1 == t2} -> x:t1 -> t2
-let coerce t1 t2 x = x
-
-let get_message_logGT pkm =
-  let (ae_log:AE.message_log pkm.pim (get_message_log_region pkm)) = AE.get_message_logGT #pkm.pim pkm.aux.am in
-  let (ae_rgn:log_region) = AE.get_message_log_region pkm.aux.am in
-  message_log_lemma pkm.pim ae_rgn;
-  let log:message_log pkm.pim ae_rgn = coerce (AE.message_log pkm.pim ae_rgn) (message_log pkm.pim ae_rgn) ae_log in
-  log
-
-#set-options "--z3rlimit 1000 --max_ifuel 2 --max_fuel 1"
-val create_aux: (im:index_module) ->
-                (kim:ID.index_module{ID.id kim == key_id /\ disjoint (ID.get_rgn im) (ID.get_rgn kim)}) ->
-                (pm:Plain.plain_module{Plain.get_plain pm == AE.ae_plain /\ Plain.valid_length #pm == AE.valid_plain_length}) ->
-                rgn:rid{disjoint rgn (ID.get_rgn kim)/\ disjoint rgn (ID.get_rgn im)} ->
-                ST (aux_t im kim pm rgn)
-                (requires (fun h0 -> True))
-                (ensures (fun h0 aux h1 -> True))
-let create_aux im kim pm rgn =
-  let am = AE.create kim pm rgn in
-  let km = AE.instantiate_km #kim am in
-  let om = ODH.create HSalsa.keylen Curve.serialized_point_length Curve.scalar_length hsalsa20_hash Curve.scalarmult Curve.base_point im kim km rgn in
-  AUX am om km
-
-val lemma_type_equality: t1:Type0 -> t2:Type0 -> pred:(t2 -> t2 -> bool) -> Lemma
-  (requires t1 == t2)
-  (ensures (t1 == t2 ==> i:(t1*t1){pred (fst i) (snd i)} == i:(t2*t2){pred (fst i) (snd i)}))
-let lemma_type_equality t1 t2 pred = ()
-
-#set-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 0"
-let create rgn =
-  let im_id_log_rgn = new_region rgn in
-  let kim_id_log_rgn = new_region rgn in
-  let im = ID.create im_id_log_rgn sub_id in
-  let dh_share_length = Curve.serialized_point_length in
-  lemma_type_equality (sub_id) (lbytes Curve.serialized_point_length) (ODH.smaller' dh_share_length);
-  lemma_type_equality (sub_id) (ID.id im) (ODH.smaller' dh_share_length);
-  let kim = ID.compose kim_id_log_rgn im (ODH.smaller' dh_share_length) in
-  assert(sub_id == lbytes Curve.serialized_point_length);
-  assert(key_id == i:(sub_id*sub_id){b2t (ODH.smaller' dh_share_length (fst i) (snd i))});
-  assert(disjoint im_id_log_rgn kim_id_log_rgn);
-  assert(ID.id kim == key_id);
-  let pm = Plain.create plain AE.valid_plain_length AE.length in
-  assert(FunctionalExtensionality.feq (Plain.valid_length #pm) valid_plain_length);
-  let log_rgn = new_region rgn in
-  let aux = create_aux im kim pm log_rgn in
-  PKAE im kim pm log_rgn aux
-
-let key (pkm:pkae_module) = AE.key pkm.pim
-
-let zero_bytes = AE.create_zero_bytes
-
-let pkey_to_subId #pkm pk = ODH.pk_get_share pkm.aux.om pk
-let pkey_to_subId_inj #pkm pk = ODH.lemma_pk_get_share_inj pkm.aux.om pk
-
-let nonce_is_fresh (pkm:pkae_module) (i:ID.id pkm.pim) (n:nonce) (h:mem) =
-  AE.nonce_is_fresh pkm.aux.am i n h
-
-let invariant pkm =
-  Key.invariant pkm.pim pkm.aux.km
-
-let gen pkm =
-  ODH.keygen pkm.aux.om
-
-#set-options "--z3rlimit 1000 --max_ifuel 0 --max_fuel 0"
-let encrypt pkm n sk pk m =
-  let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey pkm sk)) in
-  let k = ODH.prf_odh pkm.aux.om sk pk in
-  let c = AE.encrypt pkm.aux.am #i n k m in
-  let h = get() in
-  ID.lemma_honest_or_dishonest pkm.pim i;
-  let honest_i = ID.get_honest pkm.pim i in
-  assert(FStar.FunctionalExtensionality.feq (message_log_range pkm.pim) (AE.message_log_range pkm.pim));
-  MM.contains_stable (get_message_logGT pkm) (n,i) (c,m);
-  MR.witness (get_message_logGT pkm) (MM.contains (get_message_logGT pkm) (n,i) (c,m));
-  c
-
-let decrypt pkm n sk pk c =
-  let i = compose_ids pkm (pkey_to_subId #pkm pk) (pkey_to_subId #pkm (pkey_from_skey pkm sk)) in
-  let k = ODH.prf_odh pkm.aux.om sk pk in
-  let m = AE.decrypt pkm.aux.am #i n k c in
-  m
-
-(* low-level wrapper *)
-
-let my_create = create
-
-open FStar.Buffer
-open Hacl.Policies
-module U64 = FStar.UInt64
-type u64   = FStar.UInt64.t
-
-let uint8_p = buffer Hacl.UInt8.t
-
-let buf_to_seq (b:uint8_p): Stack (seq FStar.UInt8.t) (requires (fun h -> live h b)) (ensures (fun h0 s h1 -> live h1 b)) =
-  let ss = to_seq_full b in
-  let sl = seq_to_list ss in
-  let fl = FStar.List.Tot.map declassify_u8 sl in
-  seq_of_list fl
-
-let as_seq h (b:uint8_p) =
-  seq_of_list (FStar.List.Tot.map declassify_u8 (seq_to_list (Buffer.as_seq h b)))
-
-let seq_to_buf (b:uint8_p) (s:seq FStar.UInt8.t): unit =
-  admit()
-
-let pkm = my_create root
-
-val encrypt_low:
-  pkm:pkae_module ->
-  c:uint8_p ->
-  m:uint8_p -> //we might want this to be abstract
-  mlen:u64{let len = U64.v mlen in length c = len /\ len = length m}  ->
-  n:uint8_p ->
-  sk:skey pkm -> //I use the abstract high level keys here
-  pk:pkey pkm ->
-  Stack u32
-    (requires (fun h -> live h c /\ live h m /\ live h n))  //we have to add the security specification here
-    (ensures  (fun h0 z h1 -> modifies_1 c h0 h1 /\ live h1 c /\
-      ( let r = as_seq h1 c in
-        let m = as_seq h1 m in
-        r = SPEC.cryptobox m (as_seq h1 n) (ODH.pk_get_share pkm.aux.om pk) (ODH.get_skeyGT pkm.aux.om sk) )))
-let encrypt_low c m mlen n sk pk =
-  let m = buf_to_seq m in
-  let n = buf_to_seq n in
-  let m = admit() in //conversion from m to abstract plaintext?
-  let c' = encrypt pkm n sk pk m in
-  seq_to_buf c c';
-  0ul
-
-val decrypt_low:
-  m:uint8_p ->
-  c:uint8_p ->
-  mlen:u64  ->
-  n:uint8_p ->
-  pk:uint8_p->
-  sk:uint8_p{disjoint sk pk} ->
-  Stack u32
-    (requires (fun h -> live h c /\ live h m /\ live h n /\ live h pk /\ live h sk))
-    (ensures  (fun h0 z h1 -> modifies_1 m h0 h1 /\ live h1 m))
-let decrypt_low m c mlen n pk sk =
-  admit()
+//module AE = Box.AE
+//module ODH = Box.ODH
+//module MM = FStar.Monotonic.Map
+//module AE_Spec = Spec.SecretBox
+//module ODH_Spec = Spec.Curve25519
+//module H = Spec.HSalsa20
+//
+//assume val random_bytes: n:(n:nat{n<=32}) -> unit -> lbytes n
+//
+//assume val pkae_flag: bool
+//
+//#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 1"
+//// For some reason it doesn't verify if there is an additional refinement on the output of secretbox_open_easy
+//let secretbox_scheme =
+//  AE.ES #(AE_Spec.keylen) #(AE_Spec.noncelen) (fun n -> n / Spec.Salsa20.blocklen < pow2 32) (fun n -> n >= 16 && (n - 16) / Spec.Salsa20.blocklen < pow2 32) (random_bytes 32) AE_Spec.secretbox_easy AE_Spec.secretbox_open_easy
+//
+//let ae_params = AE.GP AE_Spec.keylen AE_Spec.noncelen secretbox_scheme
+//
+//let pp = PP (AE.get_ae_flagGT ae_params) (fun n -> n / Spec.Salsa20.blocklen < pow2 32)
+//
+//let kp = AE.create_ae_key_package ODH.id AE_Spec.keylen
+//
+//let ae_package_log_key = i:ODH.id
+//let ae_package_log_value (rgn:erid) (i:ODH.id) = (ap:AE.ae_package #ODH.id #i #AE_Spec.keylen kp ae_params pp{extends (AE.get_ap_rgn ap) rgn})
+//let ae_package_log_range (rgn:erid) (k:ae_package_log_key) = ae_package_log_value rgn k
+//let ae_package_log_inv (rgn:erid) (f:MM.map' (ae_package_log_key) (ae_package_log_range rgn))  = True
+//
+//let ae_package_log (log_rgn:erid) (ap_rgn:erid) =
+//  MM.t log_rgn (ae_package_log_key) (ae_package_log_range ap_rgn) (ae_package_log_inv ap_rgn)
+//
+//let zero_nonce = Seq.create H.noncelen (UInt8.uint_to_t 0)
+//let hsalsa20_hash input = H.hsalsa20 input zero_nonce
+//
+//let odh_params = ODH.OP (ODH_Spec.serialized_point_length) (ODH_Spec.scalar_length) (H.keylen) (ODH_Spec.base_point) (ODH_Spec.scalarmult) (hsalsa20_hash)
+//
+//noeq abstract type pkae_package =
+//  | PKAE_P :
+//    op_rgn:erid ->
+//    op: ODH.odh_package #AE_Spec.keylen #(AE.key AE_Spec.keylen #ODH.id) kp odh_params{extends (ODH.get_op_rgn op) op_rgn} ->
+//    ap_log_rgn:erid{disjoint op_rgn ap_log_rgn} ->
+//    ap_rgn:erid{disjoint op_rgn ap_rgn /\ disjoint ap_rgn ap_log_rgn /\ disjoint (ODH.get_op_rgn op) ap_rgn} ->
+//    ap_log: ae_package_log ap_log_rgn ap_rgn ->
+//    pkae_package
+//
+//val create_pkae_package: rgn:erid -> ST pkae_package
+//  (requires (fun h0 -> True))
+//  (ensures (fun h0 pkae_p h1 ->
+//    modifies (Set.singleton rgn) h0 h1
+//    /\ extends (ODH.get_op_rgn pkae_p.op) pkae_p.op_rgn
+//  ))
+//let create_pkae_package rgn =
+//  let pkae_rgn = new_region rgn in
+//  let odh_rgn = new_region pkae_rgn in
+//  let op = ODH.create_odh_package kp odh_params odh_rgn in
+//  let ap_log_rgn = new_region pkae_rgn in
+//  let ap_rgn = new_region pkae_rgn in
+//  let ap_log = MM.alloc #ap_log_rgn #ae_package_log_key #(ae_package_log_range ap_rgn) #(ae_package_log_inv ap_rgn) in
+//  PKAE_P odh_rgn op ap_log_rgn ap_rgn ap_log
+//
+//let pkey = ODH.share odh_params
+//let skey = ODH.exponent odh_params
+//let nonce = AE.nonce ae_params
+//let ciphertext = AE.ciphertext ae_params
+//let gen = ODH.gen_dh odh_params
+//
+//#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
+//val get_ap_from_log: pkae_p:pkae_package -> i:ODH.id -> ST (option (ap:ae_package_log_value pkae_p.ap_rgn i))
+//  (requires (fun h0 -> True))
+//  (ensures (fun h0 ap h1 ->
+//    (match sel h0 pkae_p.ap_log i with
+//      | Some ap ->
+//        contains h1 (AE.get_ap_log ap)
+//        /\ MM.defined pkae_p.ap_log i h1
+//        /\ MM.contains pkae_p.ap_log i ap h1
+//        /\ witnessed (MM.defined pkae_p.ap_log i)
+//        /\ witnessed (MM.contains pkae_p.ap_log i ap)
+//      | None -> MM.fresh pkae_p.ap_log i h1)
+//    /\ h0 == h1
+//    /\ ap == MM.sel (sel h1 pkae_p.ap_log) i
+//  ))
+//
+//let get_ap_from_log pkae_p i =
+//  match MM.lookup pkae_p.ap_log i with
+//  | Some ap ->
+//    AE.recall_log ap;
+//    Some ap
+//  | None -> None
+//
+//
+////#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
+////val nonce_freshness_framing_lemma: pkae_p:pkae_package -> i:ODH.id -> n:nonce -> h0:mem -> h1:mem -> Lemma
+////  (requires (
+////    //((modifies (Set.singleton (ODH.get_op_rgn pkae_p.op)) h0 h1 /\ (extends (ODH.get_op_rgn pkae_p.op) pkae_p.op_rgn)) \/ h0 == h1)
+////    (modifies (Set.singleton (ODH.get_op_rgn pkae_p.op)) h0 h1 \/ h0 == h1)
+////    /\ extends (ODH.get_op_rgn pkae_p.op) pkae_p.op_rgn
+////    /\ disjoint (ODH.get_op_rgn pkae_p.op) pkae_p.ap_log_rgn
+////    /\ contains h0 pkae_p.ap_log
+////    /\ (match sel h0 pkae_p.ap_log i with
+////      | Some ap -> contains h0 (AE.get_ap_log ap)
+////      | None -> True)
+////  ))
+////  (ensures (
+////    contains h1 pkae_p.ap_log
+////    /\ (match sel h0 pkae_p.ap_log i with
+////      | Some ap_old ->
+////        let ap_new = Some?.v (sel h1 pkae_p.ap_log i) in
+////        AE.get_ap_log ap_old == AE.get_ap_log ap_new
+////        /\ contains h1 (AE.get_ap_log ap_new)
+////      | None -> True)
+////    ///\ (let ap_option_new = sel h1 pkae_p.ap_log i in
+////    //ap_option_new == ap_option_old
+////    ///\ (Some? ap_option_new)
+////    ///\ AE.get_ap_log (Some?.v ap_option_new) == AE.get_ap_log (Some?.v ap_option_old))
+////  ))
+////let nonce_freshness_framing_lemma pkae_p i n h0 h1 = ()
+//
+//#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
+//val encrypt: pkae_package:pkae_package -> pk:pkey -> sk:skey{ODH.get_share_raw pk <> ODH.get_share_raw (ODH.get_exp_share sk)} -> n:nonce -> p:protected_plain pp (ODH.create_id pk (ODH.get_exp_share sk)) -> ST ciphertext
+//  (requires (fun h0 ->
+//    let i = ODH.create_id pk (ODH.get_exp_share sk) in
+//    match sel h0 pkae_package.ap_log i with
+//    | Some ap ->
+//      contains h0 (AE.get_ap_log ap)
+//      /\ AE.nonce_is_unique ap n h0
+//    | None -> True
+//  ))
+//  (ensures (fun h0 c h1 ->
+//    let i = ODH.create_id pk (ODH.get_exp_share sk) in
+//    let both_honest = ODH.exp_hon sk && ODH.sh_hon pk in
+//    let kp_log = ODH.get_op_log pkae_package.op in
+//    // Describe ap_log state
+//    Some? (sel h1 pkae_package.ap_log i)
+//    /\ (let ap = Some?.v (sel h1 pkae_package.ap_log i) in
+//    (if Some? (sel h0 pkae_package.ap_log i) then
+//      sel h1 pkae_package.ap_log == sel h0 pkae_package.ap_log
+//      /\ sel h1 (AE.get_ap_log ap) == MM.upd (sel h0 (AE.get_ap_log ap)) (n,c) p
+//    else
+//      sel h1 pkae_package.ap_log == MM.upd (sel h0 pkae_package.ap_log) i ap
+//      /\ (forall n' . n' =!= n ==> AE.nonce_is_unique ap n' h1))
+//    // Describe modified memory regions
+//    /\ (let modified_regions_ap_op = Set.union
+//        (AE.encrypt_modified_regions ap)
+//        (ODH.dh_op_modified_regions pkae_package.op pk sk h0)
+//      in
+//      let modified_regions_extend_ap_log = Set.union (Set.singleton pkae_package.ap_rgn) (Set.singleton pkae_package.ap_log_rgn) in
+//      let modified_regions =
+//        if Some? (sel h0 pkae_package.ap_log i) then
+//          modified_regions_ap_op
+//        else
+//          Set.union modified_regions_ap_op modified_regions_extend_ap_log
+//      in
+//      modifies modified_regions h0 h1)
+//    /\ ODH.dh_op_log_change pkae_package.op pk sk h0 h1
+//    // Describe functionality
+//    /\ (let k =
+//        if both_honest && ODH.get_flag() then
+//          Some?.v (MM.sel (sel h1 (ODH.get_op_log pkae_package.op)) i)
+//        else
+//          ODH.(odh_params.hash (odh_params.exponentiate (ODH.get_exponent_raw sk) (ODH.get_share_raw pk)))
+//      in
+//      ODH.dh_op_functional_spec pkae_package.op pk sk k h1
+//    )
+//    /\ ((both_honest /\ ODH.get_flag()) ==>
+//        (let k = Some?.v (MM.sel (sel h1 (ODH.get_op_log pkae_package.op)) i) in
+//        AE.encrypt_functional_spec ap k n c p)
+//      )
+//      // In case we have a dishonest key or we don't idealize, we can't guarantee anything.
+//    )
+//  ))
+//
+//#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 0"
+//let encrypt pkae_package pk sk n p =
+//  let i = ODH.create_id pk (ODH.get_exp_share sk) in
+//  recall pkae_package.ap_log;
+//  let k = ODH.dh_op pkae_package.op pk sk in
+//  let h1 = get() in
+//  ODH.recall_op_log pkae_package.op;
+//  let ap =
+//    match get_ap_from_log pkae_package i with
+//    | Some ap ->
+//      ap
+//    | None ->
+//      let ap = AE.create_ae_package pkae_package.ap_rgn kp ae_params pp in
+//      MM.extend pkae_package.ap_log i ap;
+//      ap
+//  in
+//  let c = AE.encrypt ap k n p in
+//  //assert(
+//  //    let both_honest = ODH.exp_hon sk && ODH.sh_hon pk in
+//  //    (both_honest /\ ODH.get_flag()) ==>
+//  //      (let k' = Some?.v (MM.sel (sel h1 (ODH.get_op_log pkae_package.op)) i) in
+//  //      AE.encrypt_functional_spec ap k n c p
+//  //      )
+//  //    );
+//  //    admit();
+//  //assert(AE.encrypt_functional_spec ap k n c p);
+//  c
+//
+//val decrypt: pkae_package:pkae_package -> pk:pkey -> sk:skey{ODH.get_share_raw pk <> ODH.get_share_raw (ODH.get_exp_share sk)} -> n:nonce -> c:ciphertext -> ST (option (p:protected_plain pp (ODH.create_id pk (ODH.get_exp_share sk))))
+//  (requires (fun h0 ->
+//    let i = ODH.create_id pk (ODH.get_exp_share sk) in
+//    match sel h0 pkae_package.ap_log i with
+//    | Some ap ->
+//      contains h0 (AE.get_ap_log ap)
+//    | None -> True
+//  ))
+//  (ensures (fun h0 c h1 ->
+//    let i = ODH.create_id pk (ODH.get_exp_share sk) in
+//    let both_honest = ODH.exp_hon sk && ODH.sh_hon pk in
+//    let kp_log = ODH.get_op_log pkae_package.op in
+//    match sel h0 pkae_package.ap_log i with
+//    | Some ap ->
+//      ((both_honest /\ ODH.get_flag()) ==>
+//        (MM.defined kp_log i h0 ==>
+//          h0 == h1)
+//        /\ (MM.fresh kp_log i h0 ==>
+//          modifies (Set.singleton (ODH.get_op_rgn pkae_package.op)) h0 h1))
+//      /\ ((~both_honest \/ ~(ODH.get_flag())) ==>
+//          h0 == h1)
+//    | None ->
+//      MM.defined pkae_package.ap_log i h1
+//      /\ (let ap = Some?.v (sel h1 pkae_package.ap_log i) in
+//        sel h1 pkae_package.ap_log == MM.upd (sel h0 pkae_package.ap_log) i ap
+//        /\ ((both_honest /\ ODH.get_flag()) ==>
+//            (MM.defined kp_log i h0 ==>
+//              modifies (Set.union (Set.singleton pkae_package.ap_rgn) (Set.singleton pkae_package.ap_log_rgn)) h0 h1)
+//            /\ (MM.fresh kp_log i h0 ==>
+//              modifies (Set.union (Set.singleton pkae_package.ap_rgn) (Set.union (Set.singleton pkae_package.ap_log_rgn) (Set.singleton (ODH.get_op_rgn pkae_package.op)))) h0 h1))
+//        /\ ((~both_honest \/ ~(ODH.get_flag())) ==>
+//            (modifies (Set.union (Set.singleton pkae_package.ap_rgn) (Set.singleton pkae_package.ap_log_rgn)) h0 h1)))
+//  ))
+//
+//let decrypt pkae_package pk sk n c =
+//  let i = ODH.create_id pk (ODH.get_exp_share sk) in
+//  recall pkae_package.ap_log;
+//  let k = ODH.dh_op pkae_package.op pk sk in
+//  let ap =
+//    match get_ap_from_log pkae_package i with
+//    | Some ap ->
+//      ap
+//    | None ->
+//      let ap = AE.create_ae_package pkae_package.ap_rgn kp ae_params pp in
+//      MM.extend pkae_package.ap_log i ap;
+//      recall pkae_package.ap_log;
+//      AE.recall_log ap;
+//      ap
+//  in
+//  AE.decrypt ap k n c
