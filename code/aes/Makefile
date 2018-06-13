@@ -3,7 +3,7 @@ include ../../Makefile.include
 # Files for verification
 FILES = Hacl.Impl.AES.Bitsliced.fst
 
-KREMLIN_ARGS+=-verbose \
+KREMLIN_ARGS+=-verbose -warn-error +9 \
 	-drop FStar,Prims,LowStar,C.Loops.Spec.Loops,Spec.* \
 	-ccopt -march=native
 
@@ -17,14 +17,14 @@ CFLAGS=-I $(HACL_HOME)/specs -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/code/aes
 # AES
 #
 
-BASE_OBJ = ../../specs/lib/c/Spec_Lib_Print.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
+BASE_OBJ = ../../lib/c/Spec_Lib_Print.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
 
-HACL_LIBS = ../../specs/lib/fst/Spec.Lib.IntTypes.fst ../../specs/lib/fst/Spec.Lib.RawIntTypes.fst ../../specs/lib/c/Spec.Lib.Loops.fst ../../specs/lib/fst/Spec.Lib.IntBuf.fst  ../../specs/lib/c/Spec.Lib.Endian.fst ../../specs/lib/fst/Spec.Lib.IntBuf.LoadStore.fst
+HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst
 
 
 aes-c/out.krml: $(HACL_LIBS) Hacl.Impl.AES.Bitsliced.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"kremlin/c_string.h"' -fsopt "--expose_interfaces" -tmpdir aes-c \
-	-I ../../specs -I ../../specs/lib -I ../../specs/lib/fst -I $(KREMLIN_HOME)/include \
+	-I ../../specs -I ../../lib -I ../../lib/fst -I $(KREMLIN_HOME)/include \
 	-skip-translation $^
 
 
