@@ -187,7 +187,8 @@ let bn_add_f aLen a bLen b i (c, res) =
   lemma_eval_incr aLen res' (i + 1);
   assert (eval_i aLen res' (i + 1) == eval_i aLen res' i + (uint_v res'.[i]) * x_i i); //from eval_i
   assert (eval_i aLen res' (i + 1) == eval_i aLen a i + eval_is_greater_len bLen b i - uint_v c * x_i i + (uint_v a.[i] + uint_v bi + uint_v c - uint_v c' * x_i 1) * x_i i); //expansion
-  assume (eval_i aLen res' (i + 1) == eval_i aLen a i + eval_is_greater_len bLen b i + uint_v a.[i] * x_i i + uint_v bi * x_i i - uint_v c' * x_i 1 * x_i i);
+  assert (eval_i aLen res' (i + 1) == eval_i aLen a i + eval_is_greater_len bLen b i - uint_v c * x_i i + uint_v a.[i] * x_i i + uint_v bi * x_i i + uint_v c * x_i i - uint_v c' * x_i 1 * x_i i);
+  assert (eval_i aLen res' (i + 1) == eval_i aLen a i + eval_is_greater_len bLen b i + uint_v a.[i] * x_i i + uint_v bi * x_i i - uint_v c' * x_i 1 * x_i i);
   lemma_mult_x1_xi i;
   assert (eval_i aLen res' (i + 1) + uint_v c' * x_i (i + 1) == eval_i aLen a i + eval_is_greater_len bLen b i + uint_v a.[i] * x_i i + uint_v bi * x_i i);
   assert (eval_i aLen res' (i + 1) + uint_v c' * x_i (i + 1) == eval_i aLen a (i+1) + eval_is_greater_len bLen b (i+1));
@@ -291,7 +292,8 @@ let bn_sub_f aLen a bLen b i (c, res) =
   lemma_eval_incr aLen res' (i + 1);
   assert (eval_i aLen res' (i + 1) == eval_i aLen res' i + (uint_v res'.[i]) * x_i i); //from eval_i
   assert (eval_i aLen res' (i + 1) == eval_i aLen a i - eval_is_greater_len bLen b i + uint_v c * x_i i + (uint_v a.[i] - uint_v bi - uint_v c + uint_v c' * x_i 1) * x_i i); //expansion
-  assume (eval_i aLen res' (i + 1) == eval_i aLen a i - eval_is_greater_len bLen b i + uint_v a.[i] * x_i i - uint_v bi * x_i i + uint_v c' * x_i 1 * x_i i);
+  assert (eval_i aLen res' (i + 1) == eval_i aLen a i - eval_is_greater_len bLen b i + uint_v c * x_i i + uint_v a.[i] * x_i i - uint_v bi * x_i i - uint_v c * x_i i + uint_v c' * x_i 1 * x_i i);
+  assert (eval_i aLen res' (i + 1) == eval_i aLen a i - eval_is_greater_len bLen b i + uint_v a.[i] * x_i i - uint_v bi * x_i i + uint_v c' * x_i 1 * x_i i);
   lemma_mult_x1_xi i;
   assert (eval_i aLen res' (i + 1) - uint_v c' * x_i (i + 1) == eval_i aLen a i - eval_is_greater_len bLen b i + uint_v a.[i] * x_i i - uint_v bi * x_i i);
   assert (eval_i aLen res' (i + 1) - uint_v c' * x_i (i + 1) == eval_i aLen a (i+1) - eval_is_greater_len bLen b (i+1));
@@ -332,43 +334,153 @@ let bn_sub #nBits #mBits a b =
   let res:bignum nBits = Bignum aLen r in
   res
 
+val bn_mul_f_pred:
+  aLen:size_pos -> a:bignum_i aLen ->
+  l:uint64 -> j:size_nat ->
+  resLen:size_nat{aLen + j < resLen} -> res:bignum_i resLen ->
+  i:size_nat{i <= aLen} -> tuple2 uint64 (bignum_i resLen) -> Tot Type0
+let bn_mul_f_pred aLen a l j resLen res i (c', res') =
+  eval_i resLen res' (i+j) + uint_v c' * x_i (i+j) == eval_i resLen res (i+j) + eval_i aLen a i * uint_v l * x_i j /\ (forall (k:size_nat{i+j <= k /\ k < resLen}). uint_v res'.[k] = uint_v res.[k])
+
+val lemma_mult_xi_xj:
+  i:size_nat -> j:size_nat{i + j < max_size_t} -> Lemma
+  (x_i i * x_i j = x_i (i + j))
+let lemma_mult_xi_xj i j =
+  pow2_plus (64 * i) (64 * j)
+
+val lemma_mult_abcd:
+  a:nat -> b:nat -> c:nat -> d:nat -> Lemma
+  (a * b * c * d = (a * c) * (b * d))
+let lemma_mult_abcd a b c d = ()
+
+val bn_mul_f:
+  aLen:size_pos -> a:bignum_i aLen ->
+  l:uint64 -> j:size_nat ->
+  resLen:size_nat{aLen + j < resLen /\ resLen + 1 < max_size_t} -> res:bignum_i resLen ->
+  Tot (repeatable #(tuple2 uint64 (bignum_i resLen)) #aLen (bn_mul_f_pred aLen a l j resLen res))
+  #reset-options "--z3rlimit 300 --max_fuel 0"
+let bn_mul_f aLen a l j resLen res i (c1, res1) =
+  assert (eval_i resLen res1 (i+j) + uint_v c1 * x_i (i+j) = eval_i resLen res (i+j) + eval_i aLen a i * uint_v l * x_i j && uint_v res1.[i+j] = uint_v res.[i+j]);
+  let (c2, res_ij) = mul_carry_add_u64 a.[i] l c1 res1.[i+j] in
+  assert (uint_v res_ij + uint_v c2 * x_i 1 == uint_v a.[i] * uint_v l + uint_v c1 + uint_v res1.[i+j]);
+  let res2 = res1.[i+j] <- res_ij in
+  lemma_eval_equal1 resLen res2 resLen res1 (i+j);
+  assert (eval_i resLen res2 (i+j) == eval_i resLen res1 (i+j));
+  lemma_eval_incr resLen res2 (i+j+1);
+  assert (eval_i resLen res2 (i+j+1) == eval_i resLen res2 (i+j) + uint_v res2.[i+j] * x_i (i+j)); //from eval_i
+  assert (eval_i resLen res2 (i+j+1) == eval_i resLen res (i+j) + eval_i aLen a i * uint_v l * x_i j - uint_v c1 * x_i (i+j) + uint_v res2.[i+j] * x_i (i+j));
+  assert (eval_i resLen res2 (i+j+1) == eval_i resLen res (i+j) + eval_i aLen a i * uint_v l * x_i j - uint_v c1 * x_i (i+j) +
+	 (uint_v a.[i] * uint_v l + uint_v c1 + uint_v res1.[i+j] - uint_v c2 * x_i 1) * x_i (i+j));
+  assert (eval_i resLen res2 (i+j+1) == eval_i resLen res (i+j) + eval_i aLen a i * uint_v l * x_i j - uint_v c1 * x_i (i+j) +
+	 uint_v a.[i] * uint_v l * x_i (i+j) + uint_v c1 * x_i (i+j) + uint_v res1.[i+j] * x_i (i+j) - uint_v c2 * x_i 1 * x_i (i+j));
+  assert (eval_i resLen res2 (i+j+1) == eval_i resLen res (i+j) + eval_i aLen a i * uint_v l * x_i j +
+	 uint_v a.[i] * uint_v l * x_i (i+j) + uint_v res1.[i+j] * x_i (i+j) - uint_v c2 * x_i 1 * x_i (i+j));
+  lemma_eval_incr resLen res (i+j+1);
+  assert (eval_i resLen res2 (i+j+1) == eval_i resLen res (i+j+1) + eval_i aLen a i * uint_v l * x_i j + uint_v a.[i] * uint_v l * x_i (i+j) - uint_v c2 * x_i 1 * x_i (i+j));
+  assert (i+j+1 < max_size_t);
+  lemma_mult_x1_xi (i+j);
+  //assert (eval_i resLen res2 (i+j+1) + uint_v c2 * x_i (i+j+1) == eval_i resLen res (i+j+1) + eval_i aLen a i * uint_v l * x_i j + uint_v a.[i] * uint_v l * x_i (i+j));
+  lemma_mult_xi_xj i j;
+  //assert (eval_i resLen res2 (i+j+1) + uint_v c2 * x_i (i+j+1) == eval_i resLen res (i+j+1) + eval_i aLen a i * uint_v l * x_i j + uint_v a.[i] * uint_v l * x_i i * x_i j);
+  lemma_mult_abcd (uint_v a.[i]) (uint_v l) (x_i i) (x_i j);
+  //assert (eval_i resLen res2 (i+j+1) + uint_v c2 * x_i (i+j+1) == eval_i resLen res (i+j+1) + eval_i aLen a i * uint_v l * x_i j + (uint_v a.[i] * x_i i) * (uint_v l * x_i j));
+  paren_mul_right (eval_i aLen a i) (uint_v l) (x_i j);
+  distributivity_add_left (eval_i aLen a i) (uint_v a.[i] * x_i i) (uint_v l * x_i j);
+  //assert (eval_i resLen res2 (i+j+1) + uint_v c2 * x_i (i+j+1) == eval_i resLen res (i+j+1) + (eval_i aLen a i + uint_v a.[i] * x_i i) * uint_v l * x_i j);
+  lemma_eval_incr aLen a (i+1);
+  //assert (eval_i resLen res2 (i+j+1) + uint_v c2 * x_i (i+j+1) == eval_i resLen res (i+j+1) + eval_i aLen a (i+1) * uint_v l * x_i j);
+  (c2, res2)
+
+
 val bn_mul_by_limb_addj:
   aLen:size_pos -> a:bignum_i aLen ->
   l:uint64 -> j:size_nat ->
-  resLen:size_pos{aLen + j < resLen} -> res:bignum_i resLen -> Pure (tuple2 uint64 (bignum_i resLen))
+  resLen:size_pos{aLen + j < resLen /\ resLen + 1 < max_size_t} -> res:bignum_i resLen ->
+  Pure (tuple2 uint64 (bignum_i resLen))
   (requires (True))
-  (ensures (fun (c', res') -> eval_i resLen res' (aLen + j) + uint_v c' * x_i (aLen + j) == eval aLen a * uint_v l * x_i j + eval_i resLen res (aLen + j)))
-
+  (ensures (fun (c', res') -> eval_i resLen res' (aLen + j) + uint_v c' * x_i (aLen + j) == eval_i resLen res (aLen + j) + eval aLen a * uint_v l * x_i j))
 let bn_mul_by_limb_addj aLen a l j resLen res =
-  let (c', res') = repeati aLen
-  (fun i (c, res) ->
-    let (c', res_ij) = mul_carry_add_u64 a.[i] l c res.[i+j] in
-    let res' = res.[i+j] <- res_ij in
-    (c', res')
-  ) (u64 0, res) in
-  assume (eval_i resLen res' (aLen + j) + uint_v c' * x_i (aLen + j) == eval aLen a * uint_v l * x_i j + eval_i resLen res (aLen + j));
+  let (c', res') = repeati_inductive aLen
+    (bn_mul_f_pred aLen a l j resLen res)
+    (fun i (c1, res1) ->
+      bn_mul_f aLen a l j resLen res i (c1, res1)
+    ) (u64 0, res) in
+  assert (eval_i resLen res' (aLen + j) + uint_v c' * x_i (aLen + j) == eval aLen a * uint_v l * x_i j + eval_i resLen res (aLen + j));
   (c', res')
+
+val bn_mul_f_pred1:
+  aLen:size_pos -> a:bignum_i aLen ->
+  bLen:size_pos -> b:bignum_i bLen ->
+  resLen:size_pos -> res:bignum_i resLen{resLen = aLen + bLen} ->
+  j:size_nat{j <= bLen} -> res':bignum_i resLen -> Tot Type0
+let bn_mul_f_pred1 aLen a bLen b resLen res j res' = eval_i resLen res' (aLen+j) = eval aLen a * eval_i bLen b j
+
+val bn_mul_f1:
+  aLen:size_pos -> a:bignum_i aLen ->
+  bLen:size_pos -> b:bignum_i bLen ->
+  resLen:size_nat{aLen + bLen = resLen /\ resLen + 1 < max_size_t} -> res:bignum_i resLen ->
+  Tot (repeatable #(bignum_i resLen) #bLen (bn_mul_f_pred1 aLen a bLen b resLen res))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+let bn_mul_f1 aLen a bLen b resLen res j res1 =
+  assert (eval_i resLen res1 (aLen+j) = eval aLen a * eval_i bLen b j);
+  let (c', res') = bn_mul_by_limb_addj aLen a b.[j] j resLen res1 in
+  assert (eval_i resLen res' (aLen+j) + uint_v c' * x_i (aLen+j) == eval_i resLen res1 (aLen+j) + eval aLen a * uint_v b.[j] * x_i j);
+  let res2 = res'.[aLen+j] <- c' in
+  lemma_eval_equal1 resLen res2 resLen res' (aLen+j);
+  assert (eval_i resLen res2 (aLen+j) == eval_i resLen res' (aLen+j));
+  lemma_eval_incr resLen res2 (aLen+j+1);
+  assert (eval_i resLen res2 (aLen+j+1) == eval_i resLen res2 (aLen+j) + uint_v res2.[aLen+j] * x_i (aLen+j)); //from eval_i
+  assert (eval_i resLen res2 (aLen+j+1) == eval_i resLen res1 (aLen+j) + eval aLen a * uint_v b.[j] * x_i j - uint_v c' * x_i (aLen+j) + uint_v res2.[aLen+j] * x_i (aLen+j));
+  assert (eval_i resLen res2 (aLen+j+1) == eval aLen a * eval_i bLen b j + eval aLen a * uint_v b.[j] * x_i j - uint_v c' * x_i (aLen+j) + uint_v res2.[aLen+j] * x_i (aLen+j));
+  assert (uint_v res2.[aLen+j] == uint_v c');
+  assert (eval_i resLen res2 (aLen+j+1) == eval aLen a * eval_i bLen b j + eval aLen a * uint_v b.[j] * x_i j);
+  paren_mul_right (eval aLen a) (uint_v b.[j]) (x_i j);
+  distributivity_add_right (eval aLen a) (eval_i bLen b j) (uint_v b.[j] * x_i j);
+  assert (eval_i resLen res2 (aLen+j+1) == eval aLen a * (eval_i bLen b j + uint_v b.[j] * x_i j));
+  lemma_eval_incr bLen b (j+1);
+  res2
 
 val bn_mul_:
   aLen:size_pos -> a:bignum_i aLen ->
-  bLen:size_pos{aLen + bLen < max_size_t} -> b:bignum_i bLen ->
+  bLen:size_pos{aLen + bLen + 1 < max_size_t} -> b:bignum_i bLen ->
   Tot (res:bignum_i (aLen + bLen){eval (aLen+bLen) res == eval aLen a * eval bLen b})
 let bn_mul_ aLen a bLen b =
   let resLen = aLen + bLen in
   let res = create resLen (u64 0) in
-  let res = repeati bLen
-  (fun j res ->
-    let (c', res') = bn_mul_by_limb_addj aLen a b.[j] j resLen res in
-    let res = res'.[aLen+j] <- c' in
-    res ) res in
-  assume (eval (aLen+bLen) res == eval aLen a * eval bLen b);
-  res
+  lemma_eval_init_seq_is_0 resLen res aLen;
+  assert (eval_i resLen res aLen = eval aLen a * eval_i bLen b 0);
+  let res' = repeati_inductive bLen
+    (bn_mul_f_pred1 aLen a bLen b resLen res)
+    (fun j res1 ->
+      bn_mul_f1 aLen a bLen b resLen res j res1
+    ) res in
+  res'
 
-let bn_mul #n #m a b =
-  assume (a.len + b.len < max_size_t);
-  let r = bn_mul_ a.len a.bn b.len b.bn in
-  assume (eval (a.len + b.len) r < pow2 (n+m));
-  let res:bignum (n+m) = Bignum (a.len+b.len) r in
+val lemma_bn_mul:#n:size_pos -> #m:size_pos -> a:bignum n -> b:bignum m -> Lemma
+  (bn_v a * bn_v b < pow2 (n + m))
+  #reset-options "--z3rlimit 50 --max_fuel 0"
+let lemma_bn_mul #n #m a b =
+  assert (bn_v a * bn_v b < pow2 n * pow2 m);
+  pow2_plus n m
+
+let bn_mul #nBits #mBits a b =
+  let aLen = blocks nBits 64 in
+  assert (nBits <= 64 * aLen);
+  let a_bn = sub a.bn 0 aLen in
+  lemma_eval_equal2 a.len a.bn aLen a_bn a.len;
+  let bLen = blocks mBits 64 in
+  let b_bn = sub b.bn 0 bLen in
+  lemma_eval_equal2 b.len b.bn bLen b_bn b.len;
+  let r = bn_mul_ aLen a_bn bLen b_bn in
+  assert (eval (aLen+bLen) r == eval aLen a_bn * eval bLen b_bn);
+  lemma_bn_mul a b;
+  assert (eval (aLen+bLen) r < pow2 (nBits + mBits));
+  let resLen = blocks (nBits+mBits) 64 in
+  pow2_le_compat (64*resLen) (nBits+mBits);
+  let r1 = sub r 0 resLen in
+  lemma_eval_pow2 (aLen+bLen) resLen r resLen;
+  lemma_eval_equal2 (aLen+bLen) r resLen r1 resLen;
+  let res:bignum (nBits+mBits) = Bignum resLen r1 in
   res
 
 let bn_get_bit #n b ind =
