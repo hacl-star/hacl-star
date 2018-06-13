@@ -146,11 +146,11 @@ qdsa.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.SHA2.fst Spec.Qdsa.fst
 	$(OCAMLOPT) -I qdsa-ml qdsa-ml/Lib_IntTypes.ml qdsa-ml/Lib_RawIntTypes.ml qdsa-ml/Lib_Sequence.ml qdsa-ml/Spec_Curve25519.ml qdsa-ml/Spec_SHA2.ml qdsa-ml/Spec_Qdsa.ml -o qdsa.exe
 	./qdsa.exe
 
-sha2.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst tests/Spec.SHA2.Test.fst
+sha2.exe: $(LIBS_FILES) Spec.SHA2.fst tests/Spec.SHA2.Test.fst
 	mkdir -p sha2-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.SHA2.Test --odir sha2-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2 --extract_module Spec.SHA2.Test --odir sha2-ml $^
 	@echo 'let _ = test()' >> sha2-ml/Spec_SHA2_Test.ml
-	$(OCAMLOPT) -I sha2-ml sha2-ml/Lib_IntTypes.ml sha2-ml/Lib_RawIntTypes.ml sha2-ml/Lib_Sequence.ml sha2-ml/Lib_Stateful.ml sha2-ml/Spec_SHA2.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
+	$(OCAMLOPT) -I sha2-ml $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
 	./sha2.exe
 
 keccak.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Keccak.fst tests/Spec.Keccak.Test.fst
