@@ -16,7 +16,7 @@
         "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882"
       ],
       0,
-      "8435bc67eb28112afd1bda6d46e27d2d"
+      "29d52d9aa71a6ef445cf82b91cf082e0"
     ],
     [
       "Hacl.Bignum.Fsum.fsum_",
@@ -42,7 +42,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "2d8f3110c5cb2a06f53f352262e5260c"
+      "e66a6968781ab87c43433b6e8d5dcc78"
     ],
     [
       "Hacl.Bignum.Fsum.fsum_",
@@ -51,7 +51,9 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "equation_FStar.Buffer.as_seq",
-        "equation_FStar.Buffer.buffer", "equation_Hacl.Bignum.Constants.len",
+        "equation_FStar.Buffer.buffer",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_Hacl.Bignum.Constants.len",
         "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Fsum.red_c", "equation_Hacl.Bignum.Limb.t",
         "equation_Hacl.Bignum.Parameters.clen",
@@ -60,16 +62,15 @@
         "equation_Hacl.Bignum.Parameters.limb",
         "equation_Hacl.Spec.Bignum.Fsum.fsum_spec",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
         "function_token_typing_Hacl.Bignum.Parameters.clen",
         "refinement_interpretation_FStar.UInt32_Tm_refine_6c25b42778726de94cd4dac42edb4860",
-        "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_72d3c6e71283179f002e1558013c4184",
-        "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_d75f0a2f48588e75c2f201ba8af18229",
+        "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_84236c489173a447473e4b8d0799c2df",
+        "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_a418791cf2731d891e2b4f4d28ccfa2c",
         "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_ea0cdb077ae78da455b9677f874da9dd",
         "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882"
       ],
       0,
-      "49fb5537766ed567e554c659afe2e101"
+      "407b297d1774a46f5dbfdf9bf07bf092"
     ]
   ]
 ]
