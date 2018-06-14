@@ -73,7 +73,7 @@ chacha20-c.exe: chacha20-c/out.krml
 	mkdir -p chacha20-c
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-c  -no-prefix Hacl.Test.Chacha20 \
 		-bundle 'Hacl.Impl.Chacha20=Hacl.Impl.*,Lib.*' \
-		$^ -o $@
+		-ccopt '../../lib/c/Lib_Print.o' $^ -o $@
 	./$@
 
 

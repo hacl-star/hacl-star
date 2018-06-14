@@ -149,9 +149,9 @@ let setup st k n =
   st.(index 2) <- u32 Spec.c2;
   st.(index 3) <- u32 Spec.c3;
   let st_k = sub st (index 4) (index 8) in
-  uints_from_bytes_le #U32 #8 st_k k;
+  uints_from_bytes_le #U32 #8 st_k (size 8) k;
   let st_n = sub st (index 13) (index 3) in
-  uints_from_bytes_le #U32 #3 st_n n
+  uints_from_bytes_le #U32 #3 st_n (size 3) n
 
 [@ "c_inline"]
 val chacha20_init:
@@ -195,7 +195,7 @@ let chacha20_key_block b st =
      let st0 = as_lseq st h in
      (fun _ bseq -> bseq == Spec.chacha20_key_block st0))
   (fun st' -> chacha20_core st' st;
-	   uints_to_bytes_le #U32 b st')
+	   uints_to_bytes_le #U32 b (size 16) st')
 
 [@ "c_inline"]
 val chacha20_key_block0: b:lbuffer uint8 64 ->
