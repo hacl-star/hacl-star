@@ -4,14 +4,14 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-open Spec.Lib.IntTypes
-open Spec.Lib.IntSeq
-open Spec.Lib.IntBuf
-open Spec.Lib.IntBuf.Lemmas
-open Spec.Lib.IntBuf.LoadStore
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
+open Lib.Buffer
+open Lib.Buffer.Lemmas
 
 module ST = FStar.HyperStack.ST
-module S = Spec.Lib.IntSeq
+module S = Lib.Sequence
 
 
 ///
@@ -24,12 +24,12 @@ inline_for_extraction let index (x:size_nat) = size x
 let op_String_Access #a #len m b = as_lseq #a #len b m
 
 
-let size_block : size_nat = 16
-let size_key : size_nat = 32
-let size_key_w : size_nat = 16
-let size_nonce : size_nat = 12
-let size_state : size_nat = 16
-let size_transpose : size_nat = 8
+inline_for_extraction let size_block : size_nat = 16
+inline_for_extraction let size_key : size_nat = 32
+inline_for_extraction let size_key_w : size_nat = 16
+inline_for_extraction let size_nonce : size_nat = 12
+inline_for_extraction let size_state : size_nat = 16
+inline_for_extraction let size_transpose : size_nat = 8
 
 let block_t = lbuffer uint8 size_block
 let key_t = lbuffer uint8 size_key

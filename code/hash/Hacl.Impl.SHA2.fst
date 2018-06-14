@@ -4,17 +4,18 @@ open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-open Spec.Lib.IntTypes
-open Spec.Lib.IntBuf
-open Spec.Lib.IntBuf.Lemmas
-open Spec.Lib.IntBuf.LoadStore
+open Lib.IntTypes
+open Lib.Buffer
+open Lib.ByteBuffer
+open Lib.Buffer.Lemmas
 
 open Spec.SHA2
 
 module ST = FStar.HyperStack.ST
-module S = Spec.Lib.IntSeq
+module S = Lib.Sequence
 module Spec = Spec.SHA2
 module Lemmas = Hacl.Impl.Lemmas
+
 
 ///
 /// Helper functions
@@ -30,13 +31,12 @@ val update_sub: #a:Type0 -> #len:size_nat -> #xlen:size_nat -> i:lbuffer a len -
   Stack unit
     (requires (fun h -> live h i /\ live h x))
     (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
-                         /\ h1.[i] == Spec.Lib.IntSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[x]))
+                         /\ h1.[i] == Lib.Sequence.update_sub #a #len h0.[i] (v start) (v n) h0.[x]))
 
 [@ Substitute]
 let update_sub #a #len #olen i start n x =
   let i' = sub i start n in
   copy i' n x
-
 
 
 (* Define algorithm parameters *)
@@ -315,7 +315,7 @@ let update_block p st block =
   alloc #h0 size_block_w (nat_to_uint #p.wt 0) st.hash
   (fun h0 -> (fun _ sv -> True))
   (fun bw ->
-    uints_from_bytes_be bw block;
+    uints_from_bytes_be bw size_block_w block;
     compress p bw st.const_k st.hash
   )
 
@@ -392,7 +392,7 @@ let finish p output s =
   alloc #h0 (size (size_hash p)) (u8 0) output
   (fun h -> (fun _ r -> True))
   (fun full ->
-    uints_to_bytes_le full s.hash;
+    uints_to_bytes_le full (size (size_hash p)) s.hash;
     update_sub output (size 0) (size (size_hash p)) full)
 
 
