@@ -24,7 +24,13 @@
 #define box_NONCEBYTES       24
 
 void print_usage() {
-  printf("Usage: tube send file host:port\n       tube receive port\n       tube keygen\nOptions:\n-k --myprivatekey <64 hex characters>\n-p --peerpublickey <64 hex characters>\n-h --hidesize <number>K | <number>M | <number>G\n");
+	printf("Usage: tube send file host:port\n"
+	       "       tube receive port\n"
+	       "       tube keygen\n"
+	       "Options:\n"
+	       "-k --myprivatekey <64 hex characters>\n"
+	       "-p --peerpublickey <64 hex characters>\n"
+	       "-h --hidesize <number>K | <number>M | <number>G\n");
 }
 
 void readHexLine(uint8_t* str, int len) {
