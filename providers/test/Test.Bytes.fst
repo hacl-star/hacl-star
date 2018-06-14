@@ -6,12 +6,13 @@ open EverCrypt
 open EverCrypt.Bytes
 
 open Test.Vectors
+open FStar.Printf
 
 #set-options "--admit_smt_queries true"
 
 val discard: bool -> St unit
 let discard _ = ()
-let print h s = discard (IO.debug_print_string ("["^ h ^"] "^ s ^"\n"))
+let print h s = discard (FStar.IO.debug_print_string ("["^ h ^"] "^ s ^"\n"))
 
 let success h = print h "Success"; true
 

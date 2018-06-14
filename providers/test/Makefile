@@ -63,12 +63,13 @@ $(EXTRACT_DIR)/Test.c: $(filter-out $(EXTRACT_DIR)/prims.krml ,$(ALL_KRML_FILES)
 	  -skip-compilation \
 	  -drop FStar.Bytes \
 	  -drop LowStar \
-	  -bundle EverCrypt=EverCrypt.* \
+	  -drop EverCrypt -drop EverCrypt.* -I . -I ../generated \
 	  -add-include '"kremlin/testlib.h"' \
 	  -add-include '"kremlin/prims_int.h"' \
 	  -add-include '"kremlin/prims_string.h"' \
 	  -add-include '"kremlin/c_string.h"' \
 	  -add-include '"hacks.h"' \
+	  -add-include '"EverCrypt.h"' \
 	  -ccopt -g
 
 test: $(EXTRACT_DIR)/Test.c

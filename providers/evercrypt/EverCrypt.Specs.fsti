@@ -42,6 +42,20 @@ let sha512_hash_post = fun _ _ _ -> True
 let curve_x25519_pre = fun _ -> False
 let curve_x25519_post = fun _ _ _ -> True
 
+let aes128_create_pre = fun _ -> False
+let aes128_create_post = fun _ _ _ -> True
+let aes128_compute_pre = fun _ -> False
+let aes128_compute_post = fun _ _ _ -> True
+let aes128_free_pre = fun _ -> False
+let aes128_free_post = fun _ _ _ -> True
+
+let aes256_create_pre = fun _ -> False
+let aes256_create_post = fun _ _ _ -> True
+let aes256_compute_pre = fun _ -> False
+let aes256_compute_post = fun _ _ _ -> True
+let aes256_free_pre = fun _ -> False
+let aes256_free_post = fun _ _ _ -> True
+
 let aes128_gcm_encrypt_pre = fun _ -> False
 let aes128_gcm_encrypt_post = fun _ _ _ -> True
 let aes128_gcm_decrypt_pre = fun _ -> False

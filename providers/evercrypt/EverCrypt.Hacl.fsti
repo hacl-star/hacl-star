@@ -71,6 +71,17 @@ val sha512_hash: dst:uint8_p -> src:uint8_p -> len:uint32_t ->
 val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
   Stack unit curve_x25519_pre curve_x25519_post
 
+/// AES block function
+
+val aes128_keyExpansion: key:uint8_p -> w:uint8_p -> sb:uint8_p ->
+  Stack unit aes128_create_pre aes128_create_post
+val aes128_cipher: cipher:uint8_p -> plain:uint8_p -> w:uint8_p -> sb:uint8_p ->
+  Stack unit aes128_compute_pre aes128_compute_post
+
+val aes256_keyExpansion: key:uint8_p -> w:uint8_p -> sb:uint8_p ->
+  Stack unit aes256_create_pre aes256_create_post
+val aes256_cipher: cipher:uint8_p -> plain:uint8_p -> w:uint8_p -> sb:uint8_p ->
+  Stack unit aes256_compute_pre aes256_compute_post
 
 /// Chacha20-Poly1305
 

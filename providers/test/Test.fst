@@ -267,8 +267,40 @@ let test_aes256_gcm v =
 
   pop_frame()
 
+let test_aes_ecb (v:block_cipher_vector) : St unit =
+  push_frame();
+  let key = buffer_of_hex v.rkey in
+  let plain = buffer_of_hex v.plain in
+  let cipher = buffer_of_hex v.enc in
+  let cipher' = B.create 0uy 16ul in
+  let () =
+    match v.block with
+    | AES128 ->
+      let k = EverCrypt.aes128_create key in
+      EverCrypt.aes128_compute k plain cipher';
+      EverCrypt.aes128_free k
+    | AES256 ->
+      let k = EverCrypt.aes256_create key in
+      EverCrypt.aes256_compute k plain cipher';
+      EverCrypt.aes256_free k
+    in
+  TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
+  pop_frame()
 
 /// Test drivers
+
+val test_cipher: list block_cipher_vector -> St unit
+let rec test_cipher v =
+  match v with
+  | [] -> ()
+  | v :: vs ->
+    match v.block with
+    | AES128
+    | AES256 ->
+      let this = test_aes_ecb v in
+      let rest = test_cipher vs in
+      ()
+    | _ -> test_cipher vs
 
 val test_aead: list aead_vector -> St unit
 let rec test_aead v =
@@ -312,19 +344,23 @@ let main (): St C.exit_code =
   Test.Bytes.print "===========Hacl===========" "";
   init (Prefer Hacl);
   test_hash hash_vectors;
+  test_cipher block_cipher_vectors;
   test_aead aead_vectors;
   Test.Bytes.main ();
 /// Vale tests
   Test.Bytes.print "===========Vale===========" "";
   init (Prefer Vale);
   test_aead aead_vectors;
+  test_cipher block_cipher_vectors;
   test_hash hash_vectors;
 // OpenSSL tests
   Test.Bytes.print "==========OpenSSL=========" "";
   init (Prefer OpenSSL);
   test_aead aead_vectors;
+  test_cipher block_cipher_vectors;
   Test.Bytes.print "==========BCrypt==========" "";
   init (Prefer BCrypt);
   test_aead aead_vectors;
+  test_cipher block_cipher_vectors;
   pop_frame ();
   C.EXIT_SUCCESS

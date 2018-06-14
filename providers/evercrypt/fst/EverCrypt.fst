@@ -9,6 +9,7 @@ module ValeGlue = EverCrypt.ValeGlue
 module SC = EverCrypt.StaticConfig
 module AC = EverCrypt.AutoConfig
 module U32 = FStar.UInt32
+module HS = FStar.HyperStack
 
 open EverCrypt.Helpers
 open C.Failure
@@ -158,12 +159,159 @@ let sha512_hash dst src len =
   else
     failwith !$"ERROR: inconsistent configuration"
 
+/// X25519
+
 let x25519 dst secret base =
   let i = AC.x25519_impl () in
   if SC.hacl && i = AC.Hacl then
     Hacl.x25519 dst secret base
   else
     failwith !$"ERROR: inconsistent configuration"
+
+/// AES128-ECB
+
+(* FIXME
+private noeq type _aes128_key =
+  | AES128_OPENSSL: st:Dyn.dyn -> _aes128_key
+  | AES128_BCRYPT: st:Dyn.dyn -> _aes128_key
+  | AES128_VALE: w:uint8_p -> sbox:uint8_p -> _aes128_key
+  | AES128_HACL: w:uint8_p -> sbox:uint8_p -> _aes128_key
+
+let aes128_key = _aes128_key
+*)
+
+let aes128_create k =
+  let i = AC.aes128_impl () in
+  if SC.vale && i = AC.Vale then
+   begin
+    push_frame ();
+    let w    = B.rcreate_mm HS.root 0uy 176ul in
+    let sbox = B.rcreate_mm HS.root 0uy 256ul in
+    Vale.aes128_key_expansion k w sbox;
+    pop_frame ();
+    AES128_VALE w sbox
+   end
+  else if SC.hacl && i = AC.Hacl then
+   begin
+    push_frame ();
+    let w    = B.rcreate_mm HS.root 0uy 176ul in
+    let sbox = B.rcreate_mm HS.root 0uy 256ul in
+    Hacl.aes128_keyExpansion k w sbox;
+    pop_frame ();
+    AES128_HACL w sbox
+   end
+//  else if SC.openssl && i = AC.OpenSSL then
+//    EverCrypt.OpenSSL.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+//  else if SC.bcrypt && i = AC.BCrypt then
+//    EverCrypt.BCrypt.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let aes128_compute k plain cipher =
+  if SC.vale && AES128_VALE? k then
+   begin
+    push_frame ();
+    let AES128_VALE w sbox = k in
+    Vale.aes128_encrypt_one_block cipher plain w sbox;
+    pop_frame ()
+   end
+  else if SC.hacl && AES128_HACL? k then
+   begin
+    push_frame ();
+    let AES128_HACL w sbox = k in
+    Hacl.aes128_cipher cipher plain w sbox;
+    pop_frame ()
+   end
+//  else if SC.openssl && i = AC.OpenSSL then
+//    EverCrypt.OpenSSL.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+//  else if SC.bcrypt && i = AC.BCrypt then
+//    EverCrypt.BCrypt.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let aes128_free k =
+  if SC.vale && AES128_VALE? k then
+   begin
+    push_frame ();
+    let AES128_VALE w sbox = k in
+    Buffer.rfree w;
+    Buffer.rfree sbox;
+    pop_frame ()
+   end
+  else if SC.hacl && AES128_HACL? k then
+   begin
+    push_frame ();
+    let AES128_HACL w sbox = k in
+    Buffer.rfree w;
+    Buffer.rfree sbox;
+    pop_frame ()
+   end
+//  else if SC.openssl && i = AC.OpenSSL then
+//    EverCrypt.OpenSSL.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+//  else if SC.bcrypt && i = AC.BCrypt then
+//    EverCrypt.BCrypt.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+(* FIXME polymorphic C state
+private noeq type _aes256_key =
+  | AES256_OPENSSL: st:Dyn.dyn -> _aes256_key
+  | AES256_BCRYPT: st:Dyn.dyn -> _aes256_key
+  | AES256_HACL: w:uint8_p -> sbox:uint8_p -> _aes256_key
+
+let aes256_key = _aes256_key
+*)
+
+let aes256_create k =
+  let i = AC.aes256_impl () in
+  if SC.hacl && i = AC.Hacl then
+   begin
+    push_frame ();
+    let w    = B.rcreate_mm HS.root 0uy 240ul in
+    let sbox = B.rcreate_mm HS.root 0uy 256ul in
+    Hacl.aes256_keyExpansion k w sbox;
+    pop_frame ();
+    AES256_HACL w sbox
+   end
+//  else if SC.openssl && i = AC.OpenSSL then
+//    EverCrypt.OpenSSL.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+//  else if SC.bcrypt && i = AC.BCrypt then
+//    EverCrypt.BCrypt.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let aes256_compute k plain cipher =
+  if SC.hacl && AES256_HACL? k then
+   begin
+    push_frame ();
+    let AES256_HACL w sbox = k in
+    Hacl.aes256_cipher cipher plain w sbox;
+    pop_frame ()
+   end
+//  else if SC.openssl && i = AC.OpenSSL then
+//    EverCrypt.OpenSSL.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+//  else if SC.bcrypt && i = AC.BCrypt then
+//    EverCrypt.BCrypt.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let aes256_free k =
+  if SC.hacl && AES256_HACL? k then
+   begin
+    push_frame ();
+    let AES256_HACL w sbox = k in
+    Buffer.rfree w;
+    Buffer.rfree sbox;
+    pop_frame ()
+   end
+//  else if SC.openssl && i = AC.OpenSSL then
+//    EverCrypt.OpenSSL.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+//  else if SC.bcrypt && i = AC.BCrypt then
+//    EverCrypt.BCrypt.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+/// AES128-GCM
 
 let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes128_gcm_impl () in
@@ -238,6 +386,8 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   else
     failwith !$"ERROR: inconsistent configuration"
 
+/// AES256-GCM
+
 let aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes256_gcm_impl () in
   if SC.openssl && i = AC.OpenSSL then
@@ -256,12 +406,7 @@ let aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   else
     failwith !$"ERROR: inconsistent configuration"
 
-let chacha20_poly1305_encode_length lb aad_len m_len =
-  let i = AC.chacha20_poly1305_impl () in
-  if SC.hacl && i = AC.Hacl then
-    EverCrypt.Hacl.chacha20_poly1305_encode_length lb aad_len m_len
-  else
-    failwith !$"ERROR: inconsistent configuration"
+/// Chacha20-Poly1305
 
 let chacha20_poly1305_encrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.chacha20_poly1305_impl () in
