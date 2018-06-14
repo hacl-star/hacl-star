@@ -49,13 +49,13 @@ tube-test: tube-star.exe
 		DYLD_LIBRARY_PATH="../../../../snapshots/hacl-c:$(DYLD_LIBRARY_PATH)" \
 		../tube-star.exe receive 5001 \
 			-k dfcf8b782a2a72f65ee24f85fa68ab1a10b3b555751283c5f0bcdb20e1a6e4a8 \
-			-p 4d187de7a95fe760ba7ffc9a1ba4229eea9cd1136fe609bdc58816e3cf4d3350 &
+			-p 4d187de7a95fe760ba7ffc9a1ba4229eea9cd1136fe609bdc58816e3cf4d3350 2>&1 | tee LOG &
 	cd send && echo "banana" > banana.txt; \
 		LD_LIBRARY_PATH="../../../../snapshots/hacl-c:$(LD_LIBRARY_PATH)" \
 		DYLD_LIBRARY_PATH="../../../../snapshots/hacl-c:$(DYLD_LIBRARY_PATH)" \
 		../tube-star.exe send banana.txt localhost:5001 \
 			-k 4d922658eb6d4aef64a83644a18e60e61a57c245aa8e5e9a93926cb2b317ffd7 \
-			-p 223fc224f2c9906fd4bbb1313236ecc4f36ed2f7e95b5fb1deafc459b19ab069
+			-p 223fc224f2c9906fd4bbb1313236ecc4f36ed2f7e95b5fb1deafc459b19ab069 2>&1 | tee LOG
 #	@lsof -i tcp:5001 | awk 'NR!=1 {print $$2}' | xargs kill
 #	@rm -r send receive
 
