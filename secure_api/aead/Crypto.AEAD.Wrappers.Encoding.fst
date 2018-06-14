@@ -34,15 +34,15 @@ open Crypto.AEAD.Invariant
 (** Fresh stack reference *)
 let fresh_sref (#a:Type0) h0 h1 (r:ST.reference a) =
   (r `HS.unused_in` h0) /\
-  HS.frameOf r == HS.(h1.tip) /\
+  HS.frameOf r == HS.get_tip h1 /\
   h1 `HS.contains` r
 
 (** Modifies only fresh buffers on the current stack *)
 let accumulate_modifies_nothing h0 h1 =
   let open HS in
-  modifies_one h0.tip h0 h1
-  /\ Buffer.modifies_buf_0 h0.tip h0 h1
-  /\ h0.tip=h1.tip
+  modifies_one (HS.get_tip h0) h0 h1
+  /\ Buffer.modifies_buf_0 (HS.get_tip h0) h0 h1
+  /\ HS.get_tip h0 == HS.get_tip h1
 
 let accumulate_liveness (#i:MAC.id) (st:CMA.state i) (#aadlen:aadlen_32) (aad:lbuffer (v aadlen))
   (#txtlen:txtlen_32) (cipher:lbuffer (v txtlen)) (h:mem) =

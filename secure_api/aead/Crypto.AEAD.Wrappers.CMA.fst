@@ -51,12 +51,12 @@ let mac_modifies
   let open FStar.Buffer in	  
   let abuf = MAC.as_buffer (CMA.abuf acc) in
   (*
-   * AR: 12/26: HyperStack modifies clauses used to give h0.tip == h1.tip, but that's no longer the case
+   * AR: 12/26: HyperStack modifies clauses used to give (HS.get_tip h0) == h1.tip, but that's no longer the case
    *            So this needs to be added explicitly
    *            But note that it should be easy to prove since ST effect gives it to us directly
    *            For record, this came up in AEAD.Encrypt.reestablish_inv when calling lemma_propagate_inv_mac_wrapper
    *)
-  h0.HS.tip == h1.HS.tip /\
+  (HS.get_tip h0) == (HS.get_tip h1) /\
   (if safeMac i
    then
      let log = CMA.(ilog ak.log) in
@@ -77,7 +77,7 @@ val weaken_mac_modifies: i:id ->
   acc:CMA.accBuffer (i, iv) -> 
   h0:mem -> h1:mem -> Lemma 
   (requires (let abuf = MAC.as_buffer (CMA.abuf acc) in
-             Buffer.frameOf abuf == HS.(h0.tip) /\
+             Buffer.frameOf abuf == HS.get_tip h0 /\
              mac_modifies i iv tbuf ak acc h0 h1))
   (ensures  (let abuf = MAC.as_buffer (CMA.abuf acc) in
              BufferUtils.mac_modifies CMA.(ak.region) abuf tbuf h0 h1))
@@ -181,7 +181,7 @@ private val frame_mac_is_set
      let open CMA in
      let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
      let tag = Buffer.sub cipher_tagged txtlen MAC.taglen in
-     HS.is_stack_region HS.(h0.tip)                 /\
+     HS.is_stack_region (HS.get_tip h0)             /\
      enc_dec_separation st aad plain cipher_tagged  /\
      enc_dec_liveness st aad plain cipher_tagged h0 /\
      aead_liveness st h0                            /\
@@ -225,7 +225,7 @@ private val intro_mac_is_set
      let open CMA in
      let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
      let tag = Buffer.sub cipher_tagged txtlen MAC.taglen in
-     HS.is_stack_region HS.(h0.tip) /\
+     HS.is_stack_region (HS.get_tip h0)             /\
      enc_dec_separation st aad plain cipher_tagged  /\
      enc_dec_liveness st aad plain cipher_tagged h0 /\
      enc_dec_liveness st aad plain cipher_tagged h1 /\
@@ -272,7 +272,7 @@ val mac (#i:EncodingWrapper.mac_id)
      let open CMA in
      let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
      let tag = Buffer.sub cipher_tagged txtlen MAC.taglen in
-     HS.is_stack_region HS.(h0.tip)                 /\
+     HS.is_stack_region (HS.get_tip h0)             /\
      enc_dec_separation st aad plain cipher_tagged  /\
      enc_dec_liveness st aad plain cipher_tagged h0 /\
      EncodingWrapper.ak_acc_tag_separate ak acc tag /\
@@ -443,7 +443,7 @@ val frame_accumulate_ensures: #i:CMA.id -> #rw:rw ->
 let frame_accumulate_ensures #i #rw aead_st ak #aadlen aad #txtlen plain cipher_tagged h0 acc h1 h2 =
   FStar.Buffer.lemma_reveal_modifies_1 (MAC.as_buffer (CMA.abuf acc)) h1 h2;
   let cipher : lbuffer (v txtlen) = Buffer.sub cipher_tagged 0ul txtlen in
-  assert (HS.(h1.tip == h2.tip));
+  assert (HS.get_tip h1 == HS.get_tip h2);
   assert (h1 `HS.contains` (Buffer.content (MAC.as_buffer (CMA.abuf acc))));
   assert (h2 `HS.contains` (Buffer.content (MAC.as_buffer (CMA.abuf acc))));
   assert (Buffer.disjoint_2 (MAC.as_buffer (CMA.abuf acc)) aad cipher);
@@ -648,7 +648,7 @@ val verify : #i:id -> #n:Cipher.iv (alg i) -> st:aead_state i Reader ->
             (requires (fun h -> 
 		    let cipher = Buffer.sub cipher_tagged 0ul plainlen in
 		    let tag = Buffer.sub cipher_tagged plainlen MAC.taglen in 
-		    HS.is_stack_region HS.(h.tip) /\
+		    HS.is_stack_region (HS.get_tip h)             /\
    		    enc_dec_separation st aad plain cipher_tagged /\ 
 		    enc_dec_liveness st aad plain cipher_tagged h /\ 
 		    EncodingWrapper.ak_acc_tag_separate ak acc tag /\

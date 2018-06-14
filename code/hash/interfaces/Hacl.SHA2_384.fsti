@@ -21,6 +21,7 @@ module H8 = Hacl.UInt8
 module H32 = Hacl.UInt32
 module H64 = Hacl.UInt64
 
+module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module Buffer = FStar.Buffer
 module Cast = Hacl.Cast
@@ -81,8 +82,8 @@ val alloc:
   unit ->
   StackInline (state:uint64_p{length state = v size_state})
     (requires (fun h0 -> True))
-    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
-             /\ Map.domain h1.h == Map.domain h0.h))
+    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == (HS.get_tip h1)
+             /\ Map.domain (HS.get_hmap h1) == Map.domain (HS.get_hmap h0)))
 
 
 val init:

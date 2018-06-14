@@ -14,7 +14,18 @@
   #endif
 #endif
 
-void dump(unsigned char buffer[], size_t len)
+void check_result(const char* testname, const unsigned char *actual, const unsigned char *expected, uint32_t length)
+{
+    for (uint32_t i=0; i<length; ++i) {
+        if (actual[i] != expected[i]) {
+            printf("FAIL %s:  actual 0x%2.2x mismatch with expected 0x%2.2x at offset %u\n",
+              testname, actual[i], expected[i], i);
+            exit(1);
+        }
+    }
+}
+
+void dump(const unsigned char buffer[], size_t len)
 {
   size_t i;
   for(i=0; i<len; i++) {
@@ -95,12 +106,26 @@ void coverage(void)
   quic_crypto_encrypt(k, cipher, 0, salt, 13, data, 28);
   dump(cipher, 28+16);
 
+  unsigned char *expected_pnmask = (unsigned char *)"\xa5\x2e\x33\x2b";
+  unsigned char pnmask[4];
+  if(quic_crypto_packet_number_otp(k, cipher, pnmask))
+  {
+    printf("PN encryption mask:\n");
+    dump(pnmask, 4);
+    check_result("PN encryption mask", pnmask, expected_pnmask, sizeof(pnmask));
+  } else {
+    printf("PN encryption failed.\n");
+    exit(1);
+  }
+
   if(quic_crypto_decrypt(k, hash, 0, salt, 13, cipher, 28+16)) {
-    printf("DECRYPT SUCCES: \n");
+    printf("DECRYPT SUCCESS: \n");
     dump(hash, 28);
   } else {
     printf("DECRYPT FAILED.\n");
+    exit(1);
   }
+
   quic_crypto_free_key(k);
 
   s.hash = TLS_hash_SHA256;
@@ -116,8 +141,19 @@ void coverage(void)
   quic_crypto_encrypt(k, cipher, 0x29e255a7, salt, 13, data, 28);
   dump(cipher, 28+16);
 
+  expected_pnmask = (unsigned char *)"\x30\x8a\xc6\xf5";
+  if(quic_crypto_packet_number_otp(k, cipher, pnmask))
+  {
+    printf("PN encryption mask:\n");
+    dump(pnmask, 4);
+    check_result("PN encryption mask", pnmask, expected_pnmask, sizeof(pnmask));
+  } else {
+    printf("PN encryption failed.\n");
+    exit(1);
+  }
+
   if(quic_crypto_decrypt(k, hash, 0x29e255a7, salt, 13, cipher, 28+16)) {
-    printf("DECRYPT SUCCES: \n");
+    printf("DECRYPT SUCCESS: \n");
     dump(hash, 28);
   } else {
     printf("DECRYPT FAILED.\n");
@@ -376,17 +412,6 @@ void dumptofile(FILE *fp, const char buffer[], size_t len)
   }
 }
 
-void check_result(const char* testname, const unsigned char *actual, const unsigned char *expected, uint32_t length)
-{
-    for (uint32_t i=0; i<length; ++i) {
-        if (actual[i] != expected[i]) {
-            printf("FAIL %s:  actual 0x%2.2x mismatch with expected 0x%2.2x at offset %u\n",
-              testname, actual[i], expected[i], i);
-            exit(1);
-        }
-    }
-}
-
 void test_crypto(const quic_secret *secret, const unsigned char *expected_cipher)
 {
     int result;
@@ -454,6 +479,44 @@ const uint8_t expected_server_hs[] = { // server_hs
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 };
 
+void test_pn_encrypt()
+{
+  printf("==== test_pn_encrypt() ====\n");
+  quic_secret client_hs = {0}, server_hs = {0};
+  quic_key *key;
+  int result, i;
+
+  static const uint8_t cid[] = { 0x77, 0x0d, 0xc2, 0x6c, 0x17, 0x50, 0x9b, 0x35 };
+  static const uint8_t salt[] = { 0x9c, 0x10, 0x8f, 0x98, 0x52, 0x0a, 0x5c, 0x5c, 0x32, 0x96, 0x8e, 0x95, 0x0e, 0x8a, 0x2c, 0x5f, 0xe0, 0x6d, 0x6c, 0x38 };
+  static const uint8_t sample[] = { 0x05, 0x80, 0x24, 0xa9, 0x72, 0x75, 0xf0, 0x1d, 0x2a, 0x1e, 0xc9, 0x1f, 0xd1, 0xc2, 0x65, 0xbb };
+  static const uint8_t encrypted_pn[] = { 0x3b, 0xb4, 0xb1, 0x74 };
+  static const uint8_t expected_pn[] = { 0xc0, 0x00, 0x00, 0x00 };
+  uint8_t pnmask[4] = {0};
+
+  result = quic_derive_handshake_secrets(&client_hs, &server_hs, cid, sizeof(cid), salt, sizeof(salt));
+  if (result == 0) {
+      printf("FAIL: quic_derive_handshake_secrets failed\n");
+      exit(1);
+  }
+
+  result = quic_crypto_derive_key(&key, &client_hs);
+  if (result == 0) {
+      printf("FAIL: quic_crypto_derive_key failed\n");
+      exit(1);
+  }
+
+  if(quic_crypto_packet_number_otp(key, sample, pnmask))
+  {
+    printf("PN encryption mask: "); dump(pnmask, 4);
+    for(i = 0; i < 4; i++) pnmask[i] ^= encrypted_pn[i];
+    printf("Decrypted PN: "); dump(pnmask, 4);
+    check_result("decrypted PN", pnmask, expected_pn, sizeof(pnmask));
+  } else {
+    printf("PN encryption failed.\n");
+    exit(1);
+  }
+}
+
 void test_handshake_secrets(void)
 {
     int result;
@@ -506,6 +569,7 @@ void exhaustive(void)
         test_crypto(&secret, testcombinations[i].expected_cipher);
     }
 
+    test_pn_encrypt();
     test_handshake_secrets();
 }
 

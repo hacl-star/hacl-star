@@ -1,11 +1,12 @@
-EVERCRYPT_HOME ?= ../
+EVERCRYPT_HOME ?= ..
 KREMLIN_HOME   ?= ../../../kremlin
+MLCRYPTO_HOME ?= ../../../MLCrypto
 
 EXTRACT_DIR = extract
 CACHE_DIR   = cache
 INCLUDE_PATHS = \
 	$(KREMLIN_HOME)/kremlib \
-	 ../multiplexer
+	 ../evercrypt
 
 UNAME = $(shell uname)
 
@@ -24,7 +25,9 @@ else ifeq ($(UNAME),Linux)
   PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(LD_LIBRARY_PATH)
 endif
 
-all: test
+all:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) test
 
 .depend:
 	fstar.exe \
@@ -78,4 +81,5 @@ clean:
         | xargs rm -f
 
 %.fst-in:
-	@echo --include ../multiplexer --include $(KREMLIN_HOME)/kremlib
+	@echo --include ../evercrypt --include $(KREMLIN_HOME)/kremlib
+

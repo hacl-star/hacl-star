@@ -569,7 +569,7 @@ private val lemma_fmonty_modifies: h0:mem -> h1:mem -> h2:mem -> h3:mem -> h4:me
     (requires (
       fresh_frame h0 h1
       /\ modifies_0 h1 h2
-      /\ modifies (Set.union (Set.singleton h1.tip) (Set.singleton r)) h2 h3
+      /\ modifies (Set.union (Set.singleton (HS.get_tip h1)) (Set.singleton r)) h2 h3
       /\ popped h3 h4))
     (ensures (modifies (Set.singleton r) h0 h4))
 private let lemma_fmonty_modifies h0 h1 h2 h3 h4 r1 =

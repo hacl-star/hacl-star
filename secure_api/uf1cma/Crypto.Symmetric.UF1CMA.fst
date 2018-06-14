@@ -368,7 +368,7 @@ let frame_acc_inv #i st acc h0 h1 =
 val start: #i:id -> st:state i -> StackInline (accBuffer i)
   (requires (fun h -> MAC.norm_r h st.r))
   (ensures  (fun h0 a h1 ->
-    Buffer.frameOf (MAC.as_buffer a.a) == h1.tip /\
+    Buffer.frameOf (MAC.as_buffer a.a) == (HS.get_tip h1) /\
     ((MAC.as_buffer (abuf a)) `Buffer.unused_in` h0) /\
     (mac_log ==>
       HS.sel h1 (alog a) = Seq.createEmpty /\
@@ -608,7 +608,7 @@ private val modifies_verify_aux: #a:Type -> #b:Type -> #c:Type -> #d:Type ->
   (requires (
     disjoint_ref_2 buf1 mref ref /\
     disjoint_ref_1 buf2 mref /\
-    frameOf buf2 == h1.tip /\
+    frameOf buf2 == (HS.get_tip h1) /\
     fresh_frame h0 h1 /\ modifies_0 h1 h2 /\ modifies_2 buf1 buf2 h2 h3))
   (ensures (
     (HS.contains h0 mref ==> (HS.contains h3 mref /\ HS.sel h0 mref == HS.sel h3 mref)) /\

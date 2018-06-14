@@ -45,7 +45,7 @@ let ideal_ensures
        (h0 h1: mem) =
     enc_dec_liveness st aad plain cipher_tag h0 /\
     enc_dec_liveness st aad plain cipher_tag h1 /\
-    HS.(h0.tip = h1.tip) /\
+    HS.get_tip h0 == HS.get_tip h1 /\
     HS.modifies (Set.as_set [st.log_region]) h0 h1 /\
     HS.modifies_ref st.log_region (Set.singleton (HS.as_addr (st_ilog st))) h0 h1 /\ (
     let entry = AEADEntry n (Buffer.as_seq h0 aad)
@@ -134,10 +134,10 @@ val frame_aead_log :
 	      PRF_MAC.prf_mac_ensures i st.prf k_0 x_0 h_push ak h_prf /\
 	      Enxor.modifies_table_above_x_and_buffer st.prf x_1 cipher h_prf h_enx /\
 	      EncodingWrapper.accumulate_modifies_nothing h_enx h_acc /\
-	      Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = h_acc.tip /\
+	      Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = (HS.get_tip h_acc) /\
 	      CMAWrapper.mac_modifies i n tag ak acc h_acc h_mac /\
-	      h_acc.tip = h_mac.tip /\
-	      h_mac.tip = h_ideal.tip))
+	      (HS.get_tip h_acc) = (HS.get_tip h_mac) /\
+	      (HS.get_tip h_mac) = (HS.get_tip h_ideal)))
   (ensures   (safeMac i ==>
  	      HS.sel h_init (st_ilog st) == HS.sel h_mac (st_ilog st)))
 let frame_aead_log i st n #aadlen aad #plainlen plain cipher_tag k_0 ak acc
@@ -178,10 +178,10 @@ val encrypt_write_effect :
 	      BufferUtils.prf_mac_modifies st.log_region st.prf.mac_rgn h_push h_prf /\
 	      Enxor.modifies_table_above_x_and_buffer st.prf x_1 cipher h_prf h_enx /\
 	      EncodingWrapper.accumulate_modifies_nothing h_enx h_acc /\
-	      Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = h_acc.tip /\
+	      Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = (HS.get_tip h_acc) /\
 	      CMAWrapper.mac_modifies i n tag ak acc h_acc h_mac /\
-	      h_acc.tip = h_mac.tip /\
-	      h_mac.tip = h_ideal.tip /\
+	      (HS.get_tip h_acc) = (HS.get_tip h_mac) /\
+	      (HS.get_tip h_mac) = (HS.get_tip h_ideal) /\
 	      (if not (safeMac i)
  	       then h_mac == h_ideal
 	       else ideal_ensures st n aad plain cipher_tag h_mac h_ideal)))
@@ -224,8 +224,8 @@ val reestablish_inv:
   (requires  (let cipher : lbuffer (v plainlen) = Buffer.sub cipher_tag 0ul plainlen in
               enc_dec_separation st aad plain cipher_tag  /\
               enc_dec_liveness st aad plain cipher_tag h0 /\
-	      HS.(is_stack_region h0.tip) /\
-     	      Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.(h0.tip) /\
+	      HS.(is_stack_region (HS.get_tip h0)) /\
+     	      Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.get_tip h0 /\
               inv st h0 /\
 	      (safeMac i ==> is_mac_for_iv st ak h0) /\
               enxor_h0_h1 st n aad plain cipher_tag h0 h1 /\

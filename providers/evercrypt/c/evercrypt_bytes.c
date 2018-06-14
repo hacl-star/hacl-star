@@ -29,14 +29,14 @@ EverCrypt_Bytes_chacha20_poly1305_encrypt(FStar_Bytes_bytes m,
     .cipher = cipher,
     .tag = tag
   };
-  EverCrypt_chacha20_poly1305_encrypt((uint8_t *) cipher.data,
-                                      (uint8_t *) tag.data,
-                                      (uint8_t *) m.data,
-                                      m.length,
+  EverCrypt_chacha20_poly1305_encrypt((uint8_t *) k.data,
+                                      (uint8_t *) n.data,
                                       (uint8_t *) aad.data,
                                       aad.length,
-                                      (uint8_t *) k.data,
-                                      (uint8_t *) n.data);
+                                      (uint8_t *) m.data,
+                                      m.length,
+                                      (uint8_t *) cipher.data,
+                                      (uint8_t *) tag.data);
   return out;
 }
 
@@ -52,17 +52,17 @@ EverCrypt_Bytes_chacha20_poly1305_decrypt(FStar_Bytes_bytes cipher,
     .data = KRML_HOST_CALLOC(cipher.length, 1)
   };
   uint32_t res =
-    EverCrypt_chacha20_poly1305_decrypt((uint8_t *) m.data,
-                                        (uint8_t *) cipher.data,
-                                        m.length,
-                                        (uint8_t *) tag.data,                                 
+    EverCrypt_chacha20_poly1305_decrypt((uint8_t *) k.data,
+                                        (uint8_t *) n.data,
                                         (uint8_t *) aad.data,
                                         aad.length,
-                                        (uint8_t *) k.data,
-                                        (uint8_t *) n.data);
+                                        (uint8_t *) m.data,
+                                        m.length,
+                                        (uint8_t *) cipher.data,
+                                        (uint8_t *) tag.data);
 
-  EverCrypt_Bytes_maybe_plaintext out;
-  if (res == 0) {
+  EverCrypt_Bytes_maybe_plaintext out;  
+  if (res == 1) {
     out.tag = EverCrypt_Bytes_Correct;
     out._0  = m;
   }

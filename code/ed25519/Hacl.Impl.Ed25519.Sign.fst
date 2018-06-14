@@ -138,7 +138,7 @@ val lemma_modifies_3_to_modifies_2:
   h4:HyperStack.mem ->
   b:buffer a -> b':buffer a' -> b'':buffer a'' ->
   Lemma (requires (live h0 b /\ live h0 b' /\ HyperStack.fresh_frame h0 h1 /\ modifies_0 h1 h2 /\
-    b'' `unused_in` h1 /\ live h2 b'' /\ frameOf b'' = FStar.HyperStack.(h1.tip) /\ modifies_3 b b' b'' h2 h3 /\
+    b'' `unused_in` h1 /\ live h2 b'' /\ frameOf b'' = (FStar.HyperStack.get_tip h1) /\ modifies_3 b b' b'' h2 h3 /\
     HyperStack.popped h3 h4 /\ ST.equal_domains h2 h3))
         (ensures (modifies_2 b b' h0 h4))
 

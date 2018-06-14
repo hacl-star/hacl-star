@@ -65,7 +65,6 @@ let leak #i st
   = assume false;
     Crypto.AEAD.leak #i st
 
-
 let encrypt i st n aadlen aad plainlen plain cipher_tag
   = assume false;
     Crypto.AEAD.encrypt i st n aadlen aad plainlen plain cipher_tag

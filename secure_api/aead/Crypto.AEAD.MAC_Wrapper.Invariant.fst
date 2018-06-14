@@ -184,8 +184,8 @@ private val frame_prf_table_mac_modifies
               enc_dec_separation st aad plain ct  /\
               enc_dec_liveness st aad plain ct h0 /\
               aead_liveness st h0 /\
-              HS.(is_stack_region h0.tip) /\
-              Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.(h0.tip) /\
+              HS.(is_stack_region (get_tip h0)) /\
+              Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.get_tip h0 /\
               CMA.(ak.region = PRF.(st.prf.mac_rgn)) /\
               CMAWrapper.mac_modifies i n tag ak acc h0 h1))
   (ensures (let blocks_0 : prf_table st.prf.mac_rgn i = HS.sel h0 (itable i st.prf) in
@@ -248,8 +248,8 @@ val mac_modifies_preserves_norm_keys
               let b = MAC.as_buffer r in
               enc_dec_separation st aad plain ct  /\
               enc_dec_liveness st aad plain ct h0 /\
-              HS.(is_stack_region h0.tip) /\
-              Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.(h0.tip) /\
+              HS.(is_stack_region (get_tip h0)) /\
+              Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.get_tip h0 /\
               CMA.(ak.region = PRF.(st.prf.mac_rgn)) /\
               CMAWrapper.mac_modifies i n tag ak acc h0 h1 /\
               Buffer.frameOf b = PRF.(st.prf.mac_rgn) /\
@@ -290,8 +290,8 @@ val mac_preserves_prf_inv
               enc_dec_separation st aad plain ct  /\
               enc_dec_liveness st aad plain ct h0 /\
               aead_liveness st h0 /\
-              HS.(is_stack_region h0.tip) /\
-              Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.(h0.tip) /\
+              HS.(is_stack_region (get_tip h0)) /\
+              Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.get_tip h0 /\
               CMA.(ak.region = PRF.(st.prf.mac_rgn)) /\
               CMAWrapper.mac_modifies i n tag ak acc h0 h1 /\
               (prf i ==> (
@@ -334,7 +334,7 @@ val lemma_propagate_inv_mac_wrapper
   (h0 h1:mem) : Lemma
   (requires (let tag = Buffer.sub ct plainlen MAC.taglen in	
              CMAWrapper.mac_modifies i nonce tag mac_st acc h0 h1 /\
-             Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.(h0.tip) /\
+             Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.get_tip h0 /\
              mac_wrapper_h0_h1 aead_st nonce aad plain ct mac_st h0 h1))
   (ensures  (enxor_and_maybe_mac true aead_st nonce aad plain ct h1))
 let lemma_propagate_inv_mac_wrapper #i #aadlen #plainlen aead_st nonce aad plain cipher_tagged mac_st acc h0 h1 =

@@ -73,7 +73,7 @@ val log       : #i:_ -> #rw:_ -> s:aead_state i rw{safeMac i} -> HS.mem -> GTot 
 let address   = nat
 let addr_unused_in (r:HS.rid) (a:address) (m0:HS.mem) =
   let open FStar.HyperStack in
-  FStar.Monotonic.Heap.addr_unused_in a (Map.sel m0.h r)
+  FStar.Monotonic.Heap.addr_unused_in a (Map.sel (HS.get_hmap m0) r)
 let contains_addr (rid:HS.rid) (a:address) (m:HS.mem) =
   ~ (addr_unused_in rid a m)
 let fresh_addresses (rid:HS.rid) (addrs:FStar.TSet.set address) (m0:HS.mem) (m1:HS.mem) =
@@ -108,7 +108,7 @@ let fresh_addresses (rid:HS.rid) (addrs:FStar.TSet.set address) (m0:HS.mem) (m1:
 (*         (forall a. a `TSet.mem` refs ==> *)
 (*               (match a with *)
 (*               | AllRefs -> True *)
-(*               | SomeRefs addrs -> FStar.Heap.modifies_t addrs (Map.sel h0.h r) (Map.sel h1.h r))))) *)
+(*               | SomeRefs addrs -> FStar.Heap.modifies_t addrs (Map.sel (HS.get_hmap h0) r) (Map.sel (HS.get_hmap h1) r))))) *)
 
 (* let preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0 = *)
 (*   let open FStar.HyperStack in *)
@@ -119,7 +119,7 @@ let fresh_addresses (rid:HS.rid) (addrs:FStar.TSet.set address) (m0:HS.mem) (m1:
 (*                 match a with *)
 (*                 | AllRefs -> TSet.empty *)
 (*                 | SomeRefs addrs -> TSet.complement addrs in *)
-(*               FStar.Heap.modifies_t mod_refs (Map.sel h0.h r) (Map.sel h1.h r))))) *)
+(*               FStar.Heap.modifies_t mod_refs (Map.sel (HS.get_hmap h0) r) (Map.sel (HS.get_hmap h1) r))))) *)
 
 (* // May cause extraction issues, let's not worry about that for the time being
 module FPLOC = FStar.Modifies
@@ -242,8 +242,8 @@ let enc_dec_liveness (#i:_) (#rw:_) (st:aead_state i rw)
     Buffer.live h aad /\
     Buffer.live h cipher /\
     Plain.live h plain /\
-    log_region st `is_in` h.h /\
-    prf_region st `is_in` h.h
+    log_region st `is_in` (HS.get_hmap h) /\
+    prf_region st `is_in` (HS.get_hmap h)
 
 let entry_of
           (#i: I.id)

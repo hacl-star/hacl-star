@@ -1,5 +1,6 @@
 module Hacl.Impl.Salsa20
 
+module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
@@ -440,7 +441,7 @@ val alloc:
   unit ->
   StackInline state
     (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> (st `unmapped_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip))
+    (ensures (fun h0 st h1 -> (st `unmapped_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == (HS.get_tip h1)))
 [@ CInline]
 let alloc () =
   create (uint32_to_sint32 0ul) 16ul
