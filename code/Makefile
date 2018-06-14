@@ -39,5 +39,12 @@ all-ci: ci
 all-ct: ct
 all-test: test
 
+.PHONY: clean
 clean: $(addsuffix -clean, $(DIRECTORIES) experimental)
 	rm -rf *~ *.exe *.out
+
+SHELL=/bin/bash
+
+.PHONY: clean-
+clean-c:
+	rm -rf {lib/kremlin,*}/*-c/*.{c,h}

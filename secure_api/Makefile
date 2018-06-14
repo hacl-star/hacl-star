@@ -28,7 +28,14 @@ vale_aes_abstract_id:
 hacl_aes_abstract_id:
 	IMPL_CHOICE=hacl_aes_abstract_id $(MAKE) -f Makefile.extract abstract
 
+.PHONY: clean
 clean:
 	rm -rf .depend.extract out/* vale/asm/*.o LowCProvider/*.{cm*,o,a}
+
+SHELL=/bin/bash
+
+.PHONY: clean-c
+clean-c:
+	rm -rf out/*/{extracted,crypto}/*.{c,h}
 
 include $(HACL_HOME)/secure_api/Makefile.common

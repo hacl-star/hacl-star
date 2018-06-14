@@ -248,6 +248,12 @@ clean:
 	rm -rf $(GENERATED_DIR) evercrypt/c/*.o libevercrypt.so libevercrypt.a
 	$(MAKE) -C test clean
 
+SHELL=/bin/bash
+
+.PHONY: clean-c
+clean-c:
+	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
+
 .PHONY: distclean
 distclean: clean
 	rm -rf $(OUT_DIR) $(CACHE_DIR)
