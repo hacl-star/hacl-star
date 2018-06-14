@@ -57,9 +57,16 @@ assume val file_state_: file_handle -> GTot fd_state
 let file_state (h:mem) (fh:fh_ref{live h fh}) : GTot fd_state = file_state_ (get h fh 0)
 assume val file_offset_: file_handle -> GTot u64
 let file_offset (h:mem) (fh:fh_ref{live h fh}) : GTot u64 = file_offset_ (get h fh 0)
+
+// GM: No liveness requirement?
 assume val file_buffer: file_stat -> GTot (b:buffer h8{frameOf b = file_rgn})
 
-let file_sub (m:FStar.HyperStack.mem) (f:file_handle) (i:u64) (j:u64{U64.v j + U64.v i <= length (file_buffer f.stat)}) =
+val file_sub : FStar.HyperStack.mem ->
+               f:file_handle ->
+               i:u64 ->
+               j:u64{U64.v j + U64.v i <= length (file_buffer f.stat)} ->
+               GTot (b:buffer h8{frameOf b = file_rgn})
+let file_sub m f i j =
     B.sub (file_buffer f.stat) (Int.Cast.uint64_to_uint32 i) (Int.Cast.uint64_to_uint32 j)
 
 

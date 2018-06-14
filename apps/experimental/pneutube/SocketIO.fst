@@ -18,7 +18,7 @@ module HS = FStar.HyperStack
 
 
 (* The region in which sockets live *)
-assume val socket_rgn: r:rid{is_eternal_region r /\ file_rgn <> r}
+assume val socket_rgn: r:rid{ST.is_eternal_region r /\ file_rgn <> r}
 type socket_ref = sb:buffer socket{length sb = 1 /\ socket_rgn = (frameOf sb)}
 
 (* The socket state only depends on the socket region *)
