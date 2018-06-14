@@ -118,8 +118,8 @@ let file_recv_loop_2_lt_blocksize fb connb state mut_state seqno len =
 	else  (
           let h4 = ST.get() in
           lemma_reveal_modifies_1 next h3 h4;
-          (* TestLib.perr(20ul); *)SocketError))
-    | SocketError -> (* TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); *)SocketError)
+          TestLib.perr(20ul);SocketError))
+    | SocketError -> TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len);SocketError)
 
 
 #reset-options "--max_fuel 0 --z3rlimit 1000"
@@ -169,8 +169,8 @@ let rec file_recv_loop_2 fb connb state mut_state seqno len =
         else (
           let h2 = ST.get() in
           lemma_reveal_modifies_1 next h h2;
-          (* TestLib.perr(20ul);  *)SocketError) )
-    | SocketError -> (* TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len);  *)SocketError
+          TestLib.perr(20ul); SocketError) )
+    | SocketError -> TestLib.perr(21ul); TestLib.perr(Int.Cast.uint64_to_uint32 len); SocketError
   )
 
 
@@ -223,8 +223,8 @@ let file_recv_enc fb connb state size =
              let nsize' = Hacl.Policies.declassify_u64 nsize in
              let file_size' = Hacl.Policies.declassify_u64 file_size in
              if (U64.((nsize' >=^ 100uL) || (file_size' >=^ 4294967296uL))) then (
-               (* TestLib.perr(Int.Cast.uint64_to_uint32 nsize'); *)
-               (* TestLib.perr(25ul); *)
+               TestLib.perr(Int.Cast.uint64_to_uint32 nsize');
+               TestLib.perr(25ul);
                SocketError
              ) else (
                Math.Lemmas.modulo_lemma (U64.v nsize) (pow2 32);
@@ -235,16 +235,16 @@ let file_recv_enc fb connb state size =
                    (match file_recv_loop_2 fb connb state mut_state seqno size with
                    | SocketOk -> (match file_close fb with
                                   | false -> ( tcp_close connb )
-                                  | true -> (* TestLib.perr(12ul); *)
+                                  | true -> TestLib.perr(12ul);
                                       SocketError )
-                   | SocketError -> (* TestLib.perr(10ul); *)
+                   | SocketError -> TestLib.perr(10ul);
                        SocketError )
-               | FileError -> (* TestLib.perr(9ul); *)
+               | FileError -> TestLib.perr(9ul);
                    SocketError ))
           ) else (
               let h1 = ST.get() in
               lemma_reveal_modifies_2 state mut_state h0 h1;
-              (* TestLib.perr(8ul);  *)
+              TestLib.perr(8ul);
               SocketError ) )
       | SocketError -> SocketError ) in
   pop_frame();
@@ -299,17 +299,17 @@ let rec file_recv_loop fb lhb connb state =
                          if U8.(memcmp pk2 pkB 32ul =^ 0xffuy) then (
 			   file_recv_enc fb connb state hsize
 			   )
-			 else ((* TestLib.perr(7ul); *)SocketError) )
-                      else ((* TestLib.perr(6ul); *)SocketError) )
-                  | SocketError -> (* TestLib.perr(5ul); *)SocketError )
-              | SocketError -> (* TestLib.perr(4ul); *)SocketError )
-          | SocketError -> (* TestLib.perr(3ul); *)SocketError )
-      | SocketError -> (* TestLib.perr(2ul); *)SocketError ))
-  | SocketError -> (* TestLib.perr(1ul); *)SocketError in
+             else (TestLib.perr(7ul);SocketError) )
+                      else (TestLib.perr(6ul);SocketError) )
+                  | SocketError -> TestLib.perr(5ul);SocketError )
+              | SocketError -> TestLib.perr(4ul);SocketError )
+          | SocketError -> TestLib.perr(3ul);SocketError )
+      | SocketError -> TestLib.perr(2ul);SocketError ))
+  | SocketError -> TestLib.perr(1ul);SocketError in
   pop_frame();
   match res with
   | SocketOk -> file_recv_loop  fb lhb connb state
-  | SocketError -> (* TestLib.perr(0ul); *)SocketError
+  | SocketError -> TestLib.perr(0ul);SocketError
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 1000"
@@ -347,7 +347,7 @@ let file_recv p pkA skB =
   | SocketOk -> (
       match file_recv_loop fb lb sb state with
       | SocketOk -> opened FileOk fh.stat sid
-      | SocketError ->  (* TestLib.perr(26ul);  *)opened FileError fh.stat sid )
-  | SocketError ->  (* TestLib.perr(27ul);  *)opened FileError fh.stat sid ) in
+      | SocketError ->  TestLib.perr(26ul); opened FileError fh.stat sid )
+  | SocketError ->  TestLib.perr(27ul); opened FileError fh.stat sid ) in
   pop_frame();
   res

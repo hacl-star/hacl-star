@@ -26,7 +26,7 @@ tube-star.exe: Box.Ideal.fst c_bindings/PaddedFileIO_impl.c c_bindings/SocketIO_
 		-no-prefix Libsodium -add-include '<sodium.h>' -add-include '"testlib.h"' \
 		-add-include '"NaCl.h"' -add-include '"Hacl_Curve25519.h"' \
 		-add-include '"kremlib.h"' -add-include '"prims_int.h"' \
-		-warn-error +9 \
+		-warn-error +9 $(KREMLIN_HOME)/kremlib/testlib.c \
 		-tmpdir tube -o tube-star.exe -ldopt "-lsodium" -ldopt "-lhacl" -ldopt "-L../../../snapshots/hacl-c/"
 
 tube-lax: Hacl.Tube.Receive.fst Hacl.Tube.Send.fst
