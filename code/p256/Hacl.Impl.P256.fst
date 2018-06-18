@@ -1627,42 +1627,43 @@ let p256 outx outy inx iny key =
   let qx = get_x q in
   let qy = get_y q in
   let qz = get_z q in
-  let qx3 = load64_be (Buffer.sub inx 0ul 8ul) in
-  let qx2 = load64_be (Buffer.sub inx 8ul 8ul) in
-  let qx1 = load64_be (Buffer.sub inx 16ul 8ul) in
-  let qx0 = load64_be (Buffer.sub inx 24ul 8ul) in
-  let qy3 = load64_be (Buffer.sub iny 0ul 8ul) in
-  let qy2 = load64_be (Buffer.sub iny 8ul 8ul) in
-  let qy1 = load64_be (Buffer.sub iny 16ul 8ul) in
-  let qy0 = load64_be (Buffer.sub iny 24ul 8ul) in
-  qx.(0ul) <- UInt128.to_u128 qx0;
-  qx.(1ul) <- UInt128.to_u128 qx1;
-  qx.(2ul) <- UInt128.to_u128 qx2;
-  qx.(3ul) <- UInt128.to_u128 qx3;
-  qy.(0ul) <- UInt128.to_u128 qy0;
-  qy.(1ul) <- UInt128.to_u128 qy1;
-  qy.(2ul) <- UInt128.to_u128 qy2;
-  qy.(3ul) <- UInt128.to_u128 qy3;
-  qz.(0ul) <- UInt128.to_u128 1uL;
+  let qx3 = BB.uint_from_bytes_be (sub inx (size 0) (size 8)) in
+  let qx2 = BB.uint_from_bytes_be (sub inx (size 8) (size 8)) in
+  let qx1 = BB.uint_from_bytes_be (sub inx (size 16) (size 8)) in
+  let qx0 = BB.uint_from_bytes_be (sub inx (size 24) (size 8)) in
+  let qy3 = BB.uint_from_bytes_be (sub iny (size 0) (size 8)) in
+  let qy2 = BB.uint_from_bytes_be (sub iny (size 8) (size 8)) in
+  let qy1 = BB.uint_from_bytes_be (sub iny (size 16) (size 8)) in
+  let qy0 = BB.uint_from_bytes_be (sub iny (size 24) (size 8)) in
+  qx.(size 0) <- to_u128 #U64 qx0;
+  qx.(size 1) <- to_u128 #U64 qx1;
+  qx.(size 2) <- to_u128 #U64 qx2;
+  qx.(size 3) <- to_u128 #U64 qx3;
+  qy.(size 0) <- to_u128 #U64 qy0;
+  qy.(size 1) <- to_u128 #U64 qy1;
+  qy.(size 2) <- to_u128 #U64 qy2;
+  qy.(size 3) <- to_u128 #U64 qy3;
+  qz.(size 0) <- u128 1;
   // Create point at infinity
-  let p = create (UInt128.to_u128 0uL) 12ul in
+  let p = create (size 12) (u128 0) in
   let px = get_x p in
   let py = get_y p in
-  px.(0ul) <- UInt128.to_u128 1uL;
-  py.(0ul) <- UInt128.to_u128 1uL;
-  let pp = create (UInt128.to_u128 0uL) 12ul in
-  let ppq = create (UInt128.to_u128 0uL) 12ul in
+  px.(size 0) <- u128 1;
+  py.(size 0) <- u128 1;
+  let pp = create (size 12) (u128 0) in
+  let ppq = create (size 12) (u128 0) in
   point_mul_ pp ppq p q key;
 
-  let x = create 0uL 4ul in
-  let y = create 0uL 4ul in
-  let tmp = create (UInt128.to_u128 0uL) 8ul in
-  let z2 = create (UInt128.to_u128 0uL) 4ul in
-  let z3 = create (UInt128.to_u128 0uL) 4ul in
-  let z2_inv = create (UInt128.to_u128 0uL) 4ul in
-  let z3_inv = create (UInt128.to_u128 0uL) 4ul in
-  let big_x = create (UInt128.to_u128 0uL) 4ul in
-  let big_y = create (UInt128.to_u128 0uL) 4ul in
+  let x = create (size 4) (u64 0) in
+  let y = create (size 4) (u64 0) in
+
+  let tmp = create (size 8) (u128 0) in
+  let z2 = create (size 4) (u128 0) in
+  let z3 = create (size 4) (u128 0) in
+  let z2_inv = create (size 4) (u128 0) in
+  let z3_inv = create (size 4) (u128 0) in
+  let big_x = create (size 4) (u128 0) in
+  let big_y = create (size 4) (u128 0) in
 
   felem_square tmp (get_z p);
   felem_reduce z2 tmp;
@@ -1678,21 +1679,21 @@ let p256 outx outy inx iny key =
   felem_reduce big_y tmp;
   felem_contract y big_y;
 
-  let x0 = x.(0ul) in
-  let x1 = x.(1ul) in
-  let x2 = x.(2ul) in
-  let x3 = x.(3ul) in
-  let y0 = y.(0ul) in
-  let y1 = y.(1ul) in
-  let y2 = y.(2ul) in
-  let y3 = y.(3ul) in
-  store64_be (Buffer.sub outx 0ul 8ul) x3;
-  store64_be (Buffer.sub outx 8ul 8ul) x2;
-  store64_be (Buffer.sub outx 16ul 8ul) x1;
-  store64_be (Buffer.sub outx 24ul 8ul) x0;
-  store64_be (Buffer.sub outy 0ul 8ul) y3;
-  store64_be (Buffer.sub outy 8ul 8ul) y2;
-  store64_be (Buffer.sub outy 16ul 8ul) y1;
-  store64_be (Buffer.sub outy 24ul 8ul) y0;
+  let x0 = x.(size 0) in
+  let x1 = x.(size 1) in
+  let x2 = x.(size 2) in
+  let x3 = x.(size 3) in
+  let y0 = y.(size 0) in
+  let y1 = y.(size 1) in
+  let y2 = y.(size 2) in
+  let y3 = y.(size 3) in
+  BB.uint_to_bytes_be (sub outx (size 0) (size 8)) x3;
+  BB.uint_to_bytes_be (sub outx (size 8) (size 8)) x2;
+  BB.uint_to_bytes_be (sub outx (size 16) (size 8)) x1;
+  BB.uint_to_bytes_be (sub outx (size 24) (size 8)) x0;
+  BB.uint_to_bytes_be (sub outy (size 0) (size 8)) y3;
+  BB.uint_to_bytes_be (sub outy (size 8) (size 8)) y2;
+  BB.uint_to_bytes_be (sub outy (size 16) (size 8)) y1;
+  BB.uint_to_bytes_be (sub outy (size 24) (size 8)) y0;
   pop_frame()
 
