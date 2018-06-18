@@ -1003,6 +1003,46 @@ let smallfelem_is_zero_int small =
   let w = smallfelem_is_zero small in
   to_u32 (to_u64 (w &. (u128 1)))
 
+
+val felem_inv_loop1_iter: tmp:longfelem -> ftmp:felem ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures (fun h0 _ h1 -> True))
+
+let felem_inv_loop1_iter tmp ftmp =
+  felem_square tmp ftmp;
+  felem_reduce ftmp tmp
+
+val felem_inv_loop1: n:size_t -> tmp:longfelem -> ftmp:felem ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures (fun h0 _ h1 -> True))
+let felem_inv_loop1 n tmp ftmp =
+  let h0 = ST.get () in
+  loop_nospec #h0 n tmp
+  (fun i -> felem_inv_loop1_iter tmp ftmp)
+
+
+val felem_inv_loop2_iter: ftmp2:felem -> tmp:longfelem ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures (fun h0 _ h1 -> True))
+
+let felem_inv_loop2_iter ftmp2 tmp =
+  felem_square tmp ftmp2;
+  felem_reduce ftmp2 tmp
+
+
+val felem_inv_loop2: n:size_t -> ftmp:felem -> tmp:longfelem ->
+  Stack unit
+  (requires (fun h -> True))
+  (ensures (fun h0 _ h1 -> True))
+let felem_inv_loop2 n ftmp tmp =
+  let h0 = ST.get () in
+  loop_nospec #h0 n tmp
+  (fun i -> felem_inv_loop2_iter ftmp tmp)
+
+
 val felem_inv:
   out:felem -> input:felem -> Stack unit
     (requires (fun h -> True))
@@ -1042,39 +1082,28 @@ let felem_inv out input =
   felem_mul tmp ftmp e4;
   felem_reduce ftmp tmp;
   felem_assign e8 ftmp;
-  let inv (h1:mem) (i:nat) = True in
-  let f (i:UInt32.t) : Stack unit
-    (requires (fun h -> True))
-    (ensures (fun h0 _ h1 -> True))
-    = felem_square tmp ftmp;
-      felem_reduce ftmp tmp in
-  let f' (i:UInt32.t) : Stack unit
-    (requires (fun h -> True))
-    (ensures (fun h0 _ h1 -> True))
-    = felem_square tmp ftmp2;
-      felem_reduce ftmp2 tmp in
-  for 0ul 8ul inv f;
+  felem_inv_loop1 (size 8) tmp ftmp;
   felem_mul tmp ftmp e8;
   felem_reduce ftmp tmp;
   felem_assign e16 ftmp;
-  for 0ul 16ul inv f;
+  felem_inv_loop1 (size 16) tmp ftmp;
   felem_mul tmp ftmp e16;
   felem_reduce ftmp tmp;
   felem_assign e32 ftmp;
-  for 0ul 32ul inv f;
+  felem_inv_loop1 (size 32) tmp ftmp;
   felem_assign e64 ftmp;
   felem_mul tmp ftmp input;
   felem_reduce ftmp tmp;
-  for 0ul 192ul inv f;
+  felem_inv_loop1 (size 192) tmp ftmp;
   felem_mul tmp e64 e32;
   felem_reduce ftmp2 tmp;
-  for 0ul 16ul inv f';
+  felem_inv_loop2 (size 16) ftmp tmp;
   felem_mul tmp ftmp2 e16;
   felem_reduce ftmp2 tmp;
-  for 0ul 8ul inv f';
+  felem_inv_loop2 (size 8) ftmp tmp;
   felem_mul tmp ftmp2 e8;
   felem_reduce ftmp2 tmp;
-  for 0ul 4ul inv f';
+  felem_inv_loop2 (size 4) ftmp tmp;
   felem_mul tmp ftmp2 e4;
   felem_reduce ftmp2 tmp;
   felem_square tmp ftmp2;
@@ -1100,7 +1129,7 @@ val smallfelem_inv_contract:
     (ensures (fun h0 _ h1 -> True))
 let smallfelem_inv_contract out input =
   push_frame();
-  let tmp = create (UInt128.to_u128 0uL) 4ul in
+  let tmp = create (size 4) (u128 0) in
   smallfelem_expand tmp input;
   felem_inv tmp tmp;
   felem_contract out tmp;
@@ -1119,16 +1148,16 @@ val point_double:
     (ensures (fun h0 _ h1 -> True))
 let point_double x_out y_out z_out x_in y_in z_in =
   push_frame();
-  let tmp = create (UInt128.to_u128 0uL) 8ul in
-  let tmp2 = create (UInt128.to_u128 0) 8ul in
-  let delta = create (UInt128.to_u128 0) 4ul in
-  let gamma = create (UInt128.to_u128 0) 4ul in
-  let beta = create (UInt128.to_u128 0) 4ul in
-  let alpha = create (UInt128.to_u128 0) 4ul in
-  let ftmp = create (UInt128.to_u128 0) 4ul in
-  let ftmp2 = create (UInt128.to_u128 0) 4ul in
-  let small1 = create 0uL 4ul in
-  let small2 = create 0uL 4ul in
+  let tmp = create (size 8) (u128 0) in
+  let tmp2 = create (size 8) (u128 0) in
+  let delta = create (size 4) (u128 0) in
+  let gamma = create (size 4) (u128 0) in
+  let beta = create (size 4) (u128 0) in
+  let alpha = create (size 4) (u128 0) in
+  let ftmp = create (size 4) (u128 0) in
+  let ftmp2 = create (size 4) (u128 0) in
+  let small1 = create (size 4) (u64 0) in
+  let small2 = create (size 4) (u64 0) in
 
   felem_assign ftmp x_in;
   felem_assign ftmp2 x_in;
@@ -1147,7 +1176,7 @@ let point_double x_out y_out z_out x_in y_in z_in =
   felem_sum ftmp2 delta;
   // TODO: check correctness
   felem_assign tmp ftmp2;
-  felem_scalar ftmp2 1ul;
+  felem_scalar ftmp2 (to_shiftval 1);
   felem_sum ftmp2 tmp;
   // END TODO
   felem_mul tmp ftmp ftmp2;
@@ -1157,7 +1186,7 @@ let point_double x_out y_out z_out x_in y_in z_in =
   smallfelem_square tmp small2;
   felem_reduce x_out tmp;
   felem_assign ftmp beta;
-  felem_scalar ftmp 3ul;
+  felem_scalar ftmp (to_shiftval 3);
   felem_diff x_out ftmp;
 
   felem_sum delta gamma;
@@ -1167,11 +1196,11 @@ let point_double x_out y_out z_out x_in y_in z_in =
   felem_reduce z_out tmp;
   felem_diff z_out delta;
 
-  felem_scalar beta 2ul;
+  felem_scalar beta (to_shiftval 2);
   felem_diff_zero107 beta x_out;
   felem_small_mul tmp small2 beta;
   smallfelem_square tmp2 small1;
-  longfelem_scalar tmp2 3ul;
+  longfelem_scalar tmp2 (to_shiftval 3);
   longfelem_diff tmp tmp2;
   felem_reduce_zero105 y_out tmp;
   pop_frame()
@@ -1197,39 +1226,48 @@ let point_double_small x_out y_out z_out x_in y_in z_in =
   pop_frame()
 
 
+val copy_conditional_iter:
+  out:felem -> input:felem -> mask:limb -> i:size_t -> Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> True))
+let copy_conditional_iter out input mask i =
+  let inputi = input.(i) in
+  let outi = out.(i) in
+  let tmp = mask &. (inputi ^. outi) in
+      // let tmp = mask &. input.(FStar.UInt32.(nlimbs' -. 1ul -. i)) in
+  out.(i) <- outi ^. tmp
+
+
 val copy_conditional:
   out:felem -> input:felem -> mask:limb -> Stack unit
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
 let copy_conditional out input mask =
-  let open FStar.UInt128 in
-  let inv (h1:mem) (i:nat) = True in
-  let f (i:UInt32.t) : Stack unit
+  let h0 = ST.get () in
+  loop_nospec #h0 (size nlimbs) out
+  (fun i -> copy_conditional_iter out input mask i)
+
+
+val copy_small_conditional_iter:
+  out:felem -> input:smallfelem -> mask:limb -> i:size_t -> Stack unit
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
-    = let inputi = input.(i) in
-      let outi = out.(i) in
-      let tmp = mask &. (inputi ^^ outi) in
-      // let tmp = mask &. input.(FStar.UInt32.(nlimbs' -. 1ul -. i)) in
-      out.(i) <- outi ^^ tmp in
-  for 0ul nlimbs' inv f
+let copy_small_conditional_iter out input mask i =
+  let mask64 = to_u64 mask in
+  let inputi = input.(i) in
+  let outi = out.(i) in
+  let tmp = (to_u128 (inputi &. mask64) |. (outi &. lognot mask)) in
+  out.(i) <- tmp
+
 
 val copy_small_conditional:
   out:felem -> input:smallfelem -> mask:limb -> Stack unit
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
 let copy_small_conditional out input mask =
-  let open FStar.UInt128 in
-  let mask64 = to_u64 mask in
-  let inv (h1:mem) (i:nat) = True in
-  let f (i:UInt32.t) : Stack unit
-    (requires (fun h -> True))
-    (ensures (fun h0 _ h1 -> True))
-    = let inputi = input.(i) in
-      let outi = out.(i) in
-      let tmp = (to_u128 FStar.UInt64.(inputi &. mask64) |^ (outi &. lognot mask)) in
-      out.(i) <- tmp in
-  for 0ul nlimbs' inv f
+  let h0 = ST.get () in
+  loop_nospec #h0 (size nlimbs) out
+  (fun i -> copy_small_conditional_iter out input mask i)
 
 
 val point_add:
@@ -1296,7 +1334,7 @@ let point_add x3 y3 z3 x1 y1 z1 mixed x2 y2 z2 =
       felem_assign ftmp3 x1;
 
       felem_assign ftmp5 z1;
-      felem_scalar ftmp5 1ul;
+      felem_scalar ftmp5 (to_shiftval 1);
 
       felem_assign ftmp6 y1
     end;
@@ -1319,11 +1357,11 @@ let point_add x3 y3 z3 x1 y1 z1 mixed x2 y2 z2 =
   felem_reduce ftmp5 tmp;
 
   felem_diff_zero107 ftmp5 ftmp6;
-  felem_scalar ftmp5 1ul;
+  felem_scalar ftmp5 (to_shiftval 1);
   felem_shrink small1 ftmp5;
   let y_equal = smallfelem_is_zero small1 in
 
-  let zero = UInt128.to_u128 0uL in
+  let zero = (u128 0) in
   if  ((x_equal <> zero) && (y_equal <> zero) && not(z1_is_zero <> zero) && not(z2_is_zero <> zero)) then
       begin
         point_double x3 y3 z3 x1 y1 z1
@@ -1331,7 +1369,7 @@ let point_add x3 y3 z3 x1 y1 z1 mixed x2 y2 z2 =
   else
       begin
         felem_assign ftmp ftmp4;
-        felem_scalar ftmp 1ul;
+        felem_scalar ftmp (to_shiftval 1);
         felem_square tmp ftmp;
         felem_reduce ftmp tmp;
         felem_mul tmp ftmp4 ftmp;
@@ -1341,14 +1379,14 @@ let point_add x3 y3 z3 x1 y1 z1 mixed x2 y2 z2 =
         smallfelem_square tmp small1;
         felem_reduce x_out tmp;
         felem_assign ftmp3 ftmp4;
-        felem_scalar ftmp4 1ul;
+        felem_scalar ftmp4 (to_shiftval 1);
         felem_sum ftmp4 ftmp2;
         felem_diff x_out ftmp4;
 
         felem_diff_zero107 ftmp3 x_out;
         felem_small_mul tmp small1 ftmp3;
         felem_mul tmp2 ftmp6 ftmp2;
-        longfelem_scalar tmp2 1ul;
+        longfelem_scalar tmp2 (to_shiftval 1);
         longfelem_diff tmp tmp2;
         felem_reduce_zero105 y_out tmp;
 
@@ -1392,122 +1430,133 @@ let point_add_small x3 y3 z3 x1 y1 z1 x2 y2 z2 =
 // Taken from the ED25519 code
 // ============================
 
-type point = b:buffer limb{length b = 12}
+type point = lbuffer limb 12
 
-let get_x (p:point) = Buffer.sub p 0ul 4ul
-let get_y (p:point) = Buffer.sub p 4ul 4ul
-let get_z (p:point) = Buffer.sub p 8ul 4ul
+let get_x (p:point) = sub #limb #12 #4 p (size 0) (size 4)
+let get_y (p:point) = sub #limb #12 #4 p (size 4) (size 4)
+let get_z (p:point) = sub #limb #12 #4 p (size 8) (size 4)
 
 // TODO: implement
 let disjoint_p (p:point) (q:point) = True
 
 private
 val ith_bit:
-  k:buffer Hacl.UInt8.t{length k = 32} ->
-  i:UInt32.t{UInt32.v i < 256} ->
-  Stack Hacl.UInt8.t
+  k:lbuffer uint8 32 ->
+  i:size_t{size_v i < 256} ->
+  Stack uint8
     (requires (fun h -> live h k))
-    (ensures (fun h0 z h1 -> h0 == h1 /\ live h0 k /\
-      Hacl.UInt8.v z == Spec.Ed25519.ith_bit (// reveal_sbytes
-  (as_seq h0 k)) (UInt32.v i)
-      /\ (Hacl.UInt8.v z == 0 \/ Hacl.UInt8.v z == 1)))
+    (ensures (fun h0 z h1 -> True))
+      (* h0 == h1 /\ live h0 k /\ *)
+      (* Hacl.UInt8.v z == Spec.Ed25519.ith_bit (// reveal_sbytes *)
+      (* (as_seq h0 k)) (UInt32.v i) *)
+      (* /\ (Hacl.UInt8.v z == 0 \/ Hacl.UInt8.v z == 1))) *)
 let ith_bit k i =
   assert_norm(pow2 1 = 2);
   assert_norm(pow2 3 = 8);
   assert_norm(pow2 5 = 32);
   assert_norm(pow2 8 = 256);
   let open FStar.UInt32 in
-  let q = i >>^ 3ul in
-  assert(v q = v i / 8);
-  let r = i &. 7ul in
-  UInt.logand_mask (v i) 3;
-  assert(v r = v i % 8);
-  Math.Lemmas.lemma_div_lt (v i) 8 3;
+  let q = i >>. (to_shiftval 3) in
+//  assert(v q = v i / 8);
+  let r :shiftval U8 = to_u32 (i &. (size 7)) in
+//  UInt.logand_mask (v i) 3;
+//  assert(v r = v i % 8);
+//  Math.Lemmas.lemma_div_lt (v i) 8 3;
   let kq = k.(q) in
-  let kq' = Hacl.UInt8.(kq >>^ r) in
-  let z = Hacl.UInt8.(kq' &. Hacl.Cast.uint8_to_sint8 1uy) in
-  UInt.logand_mask (Hacl.UInt8.v kq') 1;
-  assert(Hacl.UInt8.v z = (Hacl.UInt8.v kq / pow2 (v r)) % 2);
+  let kq' = (kq >>. r) in
+  let z = (kq' &. (u8 1)) in
+  (* UInt.logand_mask (Hacl.UInt8.v kq') 1; *)
+  (* assert(Hacl.UInt8.v z = (Hacl.UInt8.v kq / pow2 (v r)) % 2); *)
   z
 
 private
-inline_for_extraction let mk_mask (iswap:UInt128.t{UInt128.v iswap = 0 \/ UInt128.v iswap = 1}) :
-  Tot (z:UInt128.t{if UInt128.v iswap = 1 then UInt128.v z = pow2 64 - 1 else UInt128.v z = 0})
-  = let swap = FStar.UInt128.(to_u128 0uL -%^ iswap) in
+inline_for_extraction let mk_mask (iswap:uint128{uint_v iswap = 0 \/ uint_v iswap = 1}) :
+  Tot (z:uint128{if uint_v iswap = 1 then uint_v z = pow2 64 - 1 else uint_v z = 0})
+  = let swap = ((u128 0) -. iswap) in
     assert_norm((0 - 1) % pow2 64 = pow2 64 - 1);
     assert_norm((0 - 0) % pow2 64 = 0);
     swap
 
+
+
+val swap_cond_inplace_inner:
+  p:point -> q:point{disjoint_p p q} -> iswap:limb{uint_v iswap = 0 \/ uint_v iswap = 1} -> i:size_t ->
+  Stack unit
+    (requires (fun h -> True))
+    (ensures  (fun h0 _ h1 -> True))
+let swap_cond_inplace_inner p q iswap i =
+  let mask = mk_mask iswap in
+  let pi = p.(i) in
+  let qi = q.(i) in
+  let x  = mask &. (pi ^. qi) in
+  let pi' = pi ^. x in
+  let qi' = qi ^. x in
+  p.(i) <- pi';
+  q.(i) <- qi'
+
+
 private
 val swap_cond_inplace:
-  p:point -> q:point{disjoint_p p q} -> i:limb{UInt128.v i = 0 \/ UInt128.v i = 1} ->
+  p:point -> q:point{disjoint_p p q} -> i:limb{uint_v i = 0 \/ uint_v i = 1} ->
   Stack unit
-    (requires (fun h -> live h p /\ live h q /\
-      ( let x1 = as_seq h (get_x p) in
-        let y1 = as_seq h (get_y p) in
-        let z1 = as_seq h (get_z p) in
-        True) /\
-        // red_513 x1 /\ red_513 y1 /\ red_513 z1) /\
-      ( let x2 = as_seq h (get_x q) in
-        let y2 = as_seq h (get_y q) in
-        let z2 = as_seq h (get_z q) in
-        True
-        // red_513 x2 /\ red_513 y2 /\ red_513 z2
-  ) ))
-    (ensures (fun h0 _ h1 -> live h1 p /\ live h1 q /\ modifies_2 p q h0 h1 /\ live h0 p /\ live h0 q /\
-      ( let x1 = as_seq h0 (get_x p) in
-        let y1 = as_seq h0 (get_y p) in
-        let z1 = as_seq h0 (get_z p) in
-        let x2 = as_seq h0 (get_x q) in
-        let y2 = as_seq h0 (get_y q) in
-        let z2 = as_seq h0 (get_z q) in
-        let x1' = as_seq h1 (get_x p) in
-        let y1' = as_seq h1 (get_y p) in
-        let z1' = as_seq h1 (get_z p) in
-        let x2' = as_seq h1 (get_x q) in
-        let y2' = as_seq h1 (get_y q) in
-        let z2' = as_seq h1 (get_z q) in
-        True /\
-      (if UInt128.v i = 1 then (x1' == x2 /\ y1' == y2 /\ z1' == z2 /\
-                                    x2' == x1 /\ y2' == y1 /\ z2' == z1)
-         else (x1' == x1 /\ y1' == y1 /\ z1' == z1 /\
-               x2' == x2 /\ y2' == y2 /\ z2' == z2)))
-    ))
-let swap_cond_inplace p q iswap =
-  let mask = mk_mask iswap in
-  let inv (h1:mem) (i:nat) = True in
-  let f (i:UInt32.t) : Stack unit
     (requires (fun h -> True))
+  (*     live h p /\ live h q /\ *)
+  (*     ( let x1 = as_seq h (get_x p) in *)
+  (*       let y1 = as_seq h (get_y p) in *)
+  (*       let z1 = as_seq h (get_z p) in *)
+  (*       True) /\ *)
+  (*       // red_513 x1 /\ red_513 y1 /\ red_513 z1) /\ *)
+  (*     ( let x2 = as_seq h (get_x q) in *)
+  (*       let y2 = as_seq h (get_y q) in *)
+  (*       let z2 = as_seq h (get_z q) in *)
+  (*       True *)
+  (*       // red_513 x2 /\ red_513 y2 /\ red_513 z2 *)
+  (* ) )) *)
     (ensures (fun h0 _ h1 -> True))
-    = let open FStar.UInt128 in
-      let pi = p.(i) in
-      let qi = q.(i) in
-      let x  = mask &. (pi ^^ qi) in
-      let pi' = pi ^^ x in
-      let qi' = qi ^^ x in
-      p.(i) <- pi';
-      q.(i) <- qi'
-      in
-  for 0ul 12ul inv f
+    (*   live h1 p /\ live h1 q /\ modifies_2 p q h0 h1 /\ live h0 p /\ live h0 q /\ *)
+    (*   ( let x1 = as_seq h0 (get_x p) in *)
+    (*     let y1 = as_seq h0 (get_y p) in *)
+    (*     let z1 = as_seq h0 (get_z p) in *)
+    (*     let x2 = as_seq h0 (get_x q) in *)
+    (*     let y2 = as_seq h0 (get_y q) in *)
+    (*     let z2 = as_seq h0 (get_z q) in *)
+    (*     let x1' = as_seq h1 (get_x p) in *)
+    (*     let y1' = as_seq h1 (get_y p) in *)
+    (*     let z1' = as_seq h1 (get_z p) in *)
+    (*     let x2' = as_seq h1 (get_x q) in *)
+    (*     let y2' = as_seq h1 (get_y q) in *)
+    (*     let z2' = as_seq h1 (get_z q) in *)
+    (*     True /\ *)
+    (*   (if UInt128.v i = 1 then (x1' == x2 /\ y1' == y2 /\ z1' == z2 /\ *)
+    (*                                 x2' == x1 /\ y2' == y1 /\ z2' == z1) *)
+    (*      else (x1' == x1 /\ y1' == y1 /\ z1' == z1 /\ *)
+    (*            x2' == x2 /\ y2' == y2 /\ z2' == z2))) *)
+    (* )) *)
+let swap_cond_inplace p q iswap =
+  let h0 = ST.get () in
+  loop_nospec #h0 (size 12) p // and q (modifies2)
+  (fun i -> swap_cond_inplace_inner p q iswap i)
 
-val loop_step:
+
+val point_mul_loop_step:
+  #klen:size_nat ->
   pp:point ->
   ppq:point ->
   p:point ->
   pq:point ->
-  k:buffer UInt8.t ->
-  i:UInt32.t ->
+  k:lbuffer uint8 klen ->
+  i:size_t ->
   Stack unit
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
-let loop_step pp ppq p pq k i =
+let point_mul_loop_step #klen pp ppq p pq k i =
   push_frame();
-  let x = create 0uL 4ul in
-  let y = create 0uL 4ul in
-  let z = create 0uL 4ul in
+  let x = create (size 4) (u64 0) in
+  let y = create (size 4) (u64 0) in
+  let z = create (size 4) (u64 0) in
   // TODO: change the algorithm, this is an ugly workaround due to OpenSSL's 'point_add' function
   let ith_bit = ith_bit k i in
-  let ith_bit = uint8_to_uint128 ith_bit in
+  let ith_bit = to_u128 ith_bit in
   swap_cond_inplace p pq ith_bit;
   felem_shrink x (get_x pq);
   felem_shrink y (get_y pq);
@@ -1530,42 +1579,51 @@ let loop_step pp ppq p pq k i =
   pop_frame()
 
 
-val point_mul_:
+val point_mul_loop_inner:
+  #klen:size_nat ->
   pp:point ->
   ppq:point ->
   p:point ->
   pq:point ->
-  k:buffer UInt8.t ->
+  k:lbuffer uint8 klen ->
+  i:size_t ->
   Stack unit
-    (requires (fun h -> Buffer.live h k /\ True))
-    (ensures (fun h0 _ h1 -> Buffer.live h0 k))
-let point_mul_ pp ppq p pq k =
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> live h0 k))
+let point_mul_loop_inner #klen pp ppq p pq k i =
+  point_mul_loop_step pp ppq p pq k ((size 256) -. ((size 2) *. i) -. (size 1));
+  point_mul_loop_step p pq pp ppq k ((size 256) -. ((size 2) *. i) -. (size 2))
+
+
+val point_mul_:
+  #klen:size_nat ->
+  pp:point ->
+  ppq:point ->
+  p:point ->
+  pq:point ->
+  k:lbuffer uint8 klen ->
+  Stack unit
+    (requires (fun h -> True))
+    (ensures (fun h0 _ h1 -> live h0 k))
+let point_mul_ #klen pp ppq p pq k =
   let h0 = ST.get() in
-  let inv (h1: HyperStack.mem) (i: nat): Type0 = True
-  in
-  let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < 256) }): Stack unit
-    (requires (fun h -> inv h (UInt32.v i)))
-    (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
-  =
-    loop_step pp ppq p pq k FStar.UInt32.(256ul -. (2ul *^ i) -. 1ul);
-    loop_step p pq pp ppq k FStar.UInt32.(256ul -. (2ul *^ i) -. 2ul)
-  in
-  C.Loops.for 0ul 128ul inv f'
+  loop_nospec #h0 (size 128) p // this is certainly wrong
+  (fun i -> point_mul_loop_inner #klen pp ppq p pq k i)
 
 
 val p256:
-  outx:buffer UInt8.t{length outx = 32} ->
-  outy:buffer UInt8.t{length outy = 32} ->
-  inx:buffer UInt8.t{length inx = 32} ->
-  iny:buffer UInt8.t{length iny = 32} ->
-  key:buffer UInt8.t{length key = 32} ->
+  outx:lbuffer uint8 32 ->
+  outy:lbuffer uint8 32 ->
+  inx:lbuffer uint8 32 ->
+  iny:lbuffer uint8 32 ->
+  key:lbuffer uint8 32 ->
   Stack unit
     (requires (fun h -> True))
     (ensures (fun h0 _ h1 -> True))
 let p256 outx outy inx iny key =
   push_frame();
   // Initial point
-  let q = create (UInt128.to_u128 0uL) 12ul in
+  let q = create (size 12) (u128 0) in
   let qx = get_x q in
   let qy = get_y q in
   let qz = get_z q in
@@ -1637,3 +1695,4 @@ let p256 outx outy inx iny key =
   store64_be (Buffer.sub outy 16ul 8ul) y1;
   store64_be (Buffer.sub outy 24ul 8ul) y0;
   pop_frame()
+
