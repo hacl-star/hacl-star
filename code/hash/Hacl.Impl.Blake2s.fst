@@ -67,6 +67,8 @@ let state_invariant h st =
   /\ h.[st.const_sigma] == Spec.const_sigma
 
 
+let const_iv = 
+  
 (* Definition of constants *)
 inline_for_extraction val create_const_iv: unit -> StackInline iv_t
   (requires (fun h -> True))

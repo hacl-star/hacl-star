@@ -11,7 +11,7 @@ open Lib.ByteSequence
 
 module LSeq = Lib.Sequence
 
-module Buf = FStar.Buffer
+module Buf = LowStar.Buffer
 module U32 = FStar.UInt32
 
 

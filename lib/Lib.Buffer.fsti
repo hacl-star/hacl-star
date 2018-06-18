@@ -10,8 +10,8 @@ module LSeq = Lib.Sequence
 unfold let v = size_v
 
 inline_for_extraction val lbuffer: a:Type0 -> len:size_nat -> Type0
-inline_for_extraction val sub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> Tot (lbuffer a olen)
-let slice #a #len #olen (b:lbuffer a (len)) (start:size_t) (fin:size_t{v fin <= len /\ v start <= v fin /\ v fin - v start == olen}) = sub #a #len #olen b start (sub_mod #SIZE fin start)
+inline_for_extraction val gsub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> GTot (lbuffer a olen)
+let gslice #a #len #olen (b:lbuffer a (len)) (start:size_t) (fin:size_t{v fin <= len /\ v start <= v fin /\ v fin - v start == olen}) = gsub #a #len #olen b start (sub_mod #SIZE fin start)
 noeq type bufitem = | BufItem: #a:Type0 -> #len:size_nat -> buf:lbuffer a (len) -> bufitem
 
 inline_for_extraction val disjoint: #a1:Type0 -> #a2:Type0 -> #len1:size_nat -> #len2:size_nat -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> GTot Type0
@@ -42,6 +42,16 @@ inline_for_extraction val live_list: mem -> list bufitem -> GTot Type0
 inline_for_extraction val disjoint_list: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> list bufitem  -> GTot Type0
 inline_for_extraction val disjoint_lists: list bufitem -> list bufitem  -> GTot Type0
 inline_for_extraction val disjoints: list bufitem  -> GTot Type0
+
+inline_for_extraction val sub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> 
+  Stack (lbuffer a olen)
+    (requires (fun h0 -> live h0 b))
+    (ensures (fun h0 r h1 -> h0 == h1 /\ r == gsub #a #len #olen b start n))
+
+inline_for_extraction val slice: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> fin:size_t{v start <= v fin /\ v fin <= len /\ v fin - v start == olen} -> 
+  Stack (lbuffer a olen)
+    (requires (fun h0 -> live h0 b))
+    (ensures (fun h0 r h1 -> h0 == h1 /\ r == gslice #a #len #olen b start fin))
 
 inline_for_extraction val index: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> i:size_t{v i < len} ->
   Stack a
@@ -306,7 +316,7 @@ val map_blocks: #h0:mem ->
 				  (ensures (fun h _ h' ->
 						   preserves_live h h' /\
 						   (size_v i * v blocksize) + v blocksize <= v (nblocks *. blocksize) /\
-						  (let bufi = sub #a #(nb * bs) #bs buf (i *. blocksize) blocksize in
+						  (let bufi = gsub #a #(nb * bs) #bs buf (i *. blocksize) blocksize in
 						   modifies1 bufi h h' /\
 						   as_seq bufi h' ==
 						   f_spec h (size_v i) (as_seq bufi h))))) ->

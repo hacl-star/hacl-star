@@ -9,15 +9,14 @@ open Lib.Sequence
 
 module LSeq = Lib.Sequence
 
-module Buf = FStar.Buffer
+module Buf = LowStar.Buffer
 module U32 = FStar.UInt32
 
 type lbuffer (a:Type0) (len:size_nat) = b:Buf.buffer a {Buf.length b == len}
-let sub #a #len #olen b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
+let gsub #a #len #olen b start n = admit() //; Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
-let disjoint #a1 #a2 #len1 #len2 b1 b2 : GTot Type0 = Buf.disjoint #a1 #a2 b1 b2
-let live #a #len h b : GTot Type0 = Buf.live h b
-
+let disjoint #a1 #a2 #len1 #len2 b1 b2 : GTot Type0 = admit()
+let live #a #len h b : GTot Type0 = admit()
 let preserves_live h0 h1 = True
 let as_seq #a #len b m = admit()
 let as_lseq #a #len b m = admit()
@@ -30,11 +29,13 @@ let disjoint_list = admit()
 let disjoint_lists = admit()
 let disjoints = admit()
 
+let sub #a #len #olen b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
+let slice #a #len #olen b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 (n -. start))
 let index #a #len b i = Buf.index b (size_to_UInt32 i)
 let upd #a #len b i v = Buf.upd b (size_to_UInt32 i) v
 
-let create #a #len clen init = Buf.create init (size_to_UInt32 clen)
-let createL #a init = Buf.createL init
+let create #a #len clen init = Buf.alloca init (size_to_UInt32 clen)
+let createL #a init = Buf.alloca_of_list init
 let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
   push_frame();
   let buf = create clen init in
