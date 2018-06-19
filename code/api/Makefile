@@ -48,7 +48,7 @@ box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Hacl.Poly1305_64.fsti $(HACL_HOME)/code
 aead-c/Hacl_Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Hacl.Chacha20.fsti Hacl.Chacha20Poly1305.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -I interfaces -tmpdir aead-c Hacl.Chacha20Poly1305.fst -skip-compilation \
 	-add-include '"Hacl_Chacha20.h"' -add-include '"AEAD_Poly1305_64.h"' \
-	-minimal -bundle 'Hacl.Chacha20Poly1305=*' \
+	-minimal -add-include '"kremlib.h"' -bundle 'Hacl.Chacha20Poly1305=*' \
 	# TODO: FIX FOR KREMLIN EXTRACTION ISSUE, CHECK WITH JP
 	$(SED) -i 's/(void \*)(uint8_t)0U, //g' aead-c/Hacl_Chacha20Poly1305.c
 

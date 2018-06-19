@@ -83,18 +83,18 @@ poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
 poly-c/Hacl_Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
 		-no-prefix Hacl.Test.Poly1305_64 \
-		-minimal -bundle 'Hacl_Poly1305_64=*' \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl_Poly1305_64=*' \
 	$^ -o $@
 
 poly-c/AEAD_Poly1305_64.c: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
-		-minimal -bundle 'AEAD.Poly1305_64=*' \
+		-add-include '"kremlib.h"' -minimal -bundle 'AEAD.Poly1305_64=*' \
 	$^ -o $@
 
 poly1305.exe: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) \
 		-drop AEAD_Poly1305_64 -no-prefix Hacl.Test.Poly1305_64 \
-		-minimal -bundle 'Hacl_Poly1305_64=*' \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl_Poly1305_64=*' \
 		$^ -o $@
 	./$@
 

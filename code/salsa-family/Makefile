@@ -45,7 +45,7 @@ chacha-c/out.krml: Hacl.Lib.LoadStore32.fst Hacl.Lib.Create.fst Hacl.Impl.Xor.Le
 
 chacha-c/Hacl_Chacha20.c: chacha-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c \
-		-minimal -bundle 'Hacl.Chacha20=*' \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl.Chacha20=*' \
 		-skip-compilation $^ -o $@
 
 chacha20.exe: chacha-c/out.krml
@@ -62,7 +62,7 @@ salsa-c/out.krml: Hacl.Impl.Salsa20.fst Hacl.Salsa20.fst Hacl.Test.Salsa20.fst
 
 salsa-c/Hacl_Salsa20.c: salsa-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c -skip-compilation \
-		-minimal -bundle 'Hacl.Salsa20=*' \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl.Salsa20=*' \
 		$^ -o $@
 
 salsa20.exe: salsa-c/out.krml
@@ -80,7 +80,7 @@ chacha-vec128-c/out.krml: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20
 chacha-vec128-c/Hacl_Chacha20_Vec128.c: chacha-vec128-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
 		-no-prefix Hacl.UInt32x4 -add-include '"vec128.h"' \
-		-minimal -bundle "Hacl.Chacha20.Vec128=*" \
+		-add-include '"kremlib.h"' -minimal -bundle "Hacl.Chacha20.Vec128=*" \
 		-skip-compilation $^ -o $@
 
 chacha20-vec128.exe: chacha-vec128-c/out.krml
