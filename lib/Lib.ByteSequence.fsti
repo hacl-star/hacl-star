@@ -45,6 +45,3 @@ val uints_to_bytes_be: #t:m_inttype -> #len:size_nat{len `op_Multiply` numbytes 
 val uints_from_bytes_le: #t:m_inttype -> #len:size_nat{len `op_Multiply` numbytes t <= max_size_t} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
 
 val uints_from_bytes_be: #t:m_inttype -> #len:size_nat{len `op_Multiply` numbytes t <= max_size_t} -> lbytes (len `op_Multiply` numbytes t) -> intseq t len
-
-
-

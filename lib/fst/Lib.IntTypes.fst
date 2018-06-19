@@ -124,7 +124,7 @@ let add_mod #t a b =
   | U64 -> (UInt64.add_mod a b)
   | U128 -> (UInt128.add_mod a b)
   | SIZE -> (UInt32.add_mod a b)
-  | NATm m -> (a + b) % m 
+  | NATm m -> (a + b) % m
 
 let add #t a b =
   match t with
@@ -197,7 +197,7 @@ let decr #t a =
   | U128 -> (UInt128.sub a (UInt128.uint_to_t 1))
   | SIZE -> (UInt32.sub a 0x1ul)
   | NATm m -> a - 1
-  
+
 let logxor #t a b =
   match t with
   | U8 -> (UInt8.logxor a b)
@@ -334,7 +334,7 @@ let size_to_uint32 x = x <: UInt32.t
 let nat_mod_v #m x = x
 let modulo x m = modulo_ x m
 
-let div #t x y = 
+let div #t x y =
   match t with
   | SIZE -> FStar.UInt32.div x y
   | NATm m -> x / y
@@ -344,32 +344,32 @@ let mod #t x y =
   | SIZE -> FStar.UInt32.rem x y
   | NATm m -> x % y
 
-let eq #t x y = 
+let eq #t x y =
   match t with
   | SIZE -> FStar.UInt32.eq x y
   | NATm m -> x = y
 
-let ne #t x y = 
+let ne #t x y =
   match t with
   | SIZE -> not (FStar.UInt32.eq x y)
   | NATm m -> x <> y
 
-let lt #t x y = 
+let lt #t x y =
   match t with
   | SIZE -> FStar.UInt32.lt x y
   | NATm m -> x < y
 
-let le #t x y = 
+let le #t x y =
   match t with
   | SIZE -> FStar.UInt32.lte x y
   | NATm m -> x <= y
 
-let gt #t x y = 
+let gt #t x y =
   match t with
   | SIZE -> FStar.UInt32.gt x y
   | NATm m -> x > y
 
-let ge #t x y = 
+let ge #t x y =
   match t with
   | SIZE -> FStar.UInt32.gte x y
   | NATm m -> x >= y

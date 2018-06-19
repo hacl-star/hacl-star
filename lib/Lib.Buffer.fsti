@@ -43,12 +43,12 @@ inline_for_extraction val disjoint_list: #a:Type0 -> #len:size_nat -> b:lbuffer 
 inline_for_extraction val disjoint_lists: list bufitem -> list bufitem  -> GTot Type0
 inline_for_extraction val disjoints: list bufitem  -> GTot Type0
 
-inline_for_extraction val sub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> 
+inline_for_extraction val sub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} ->
   Stack (lbuffer a olen)
     (requires (fun h0 -> live h0 b))
     (ensures (fun h0 r h1 -> h0 == h1 /\ r == gsub #a #len #olen b start n))
 
-inline_for_extraction val slice: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> fin:size_t{v start <= v fin /\ v fin <= len /\ v fin - v start == olen} -> 
+inline_for_extraction val slice: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> fin:size_t{v start <= v fin /\ v fin <= len /\ v fin - v start == olen} ->
   Stack (lbuffer a olen)
     (requires (fun h0 -> live h0 b))
     (ensures (fun h0 r h1 -> h0 == h1 /\ r == gslice #a #len #olen b start fin))

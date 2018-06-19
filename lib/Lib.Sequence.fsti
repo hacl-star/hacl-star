@@ -56,7 +56,7 @@ let slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat)
 
 val update_sub: #a:Type -> #len:size_nat -> i:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}
 
-let update_slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat) (fin:size_nat{start <= fin /\ fin <= len}) (upd:lseq a (fin - start)) = 
+let update_slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat) (fin:size_nat{start <= fin /\ fin <= len}) (upd:lseq a (fin - start)) =
 		 update_sub #a #len i start (fin-start) upd
 
 
@@ -118,7 +118,7 @@ val map_blocks: #a:Type0 ->
 		nblocks:size_nat{nblocks * blocksize <= maxint SIZE} ->
 		f:(i:size_nat{i + 1 <= nblocks} -> lseq a blocksize -> lseq a blocksize) ->
 		inp: lseq a (nblocks * blocksize) ->
-		out:  lseq a (nblocks * blocksize) 
+		out:  lseq a (nblocks * blocksize)
 val reduce_blocks: #a:Type0 -> #b:Type0 ->
 		blocksize:size_nat{blocksize > 0} ->
 		nblocks:size_nat{nblocks * blocksize <= maxint SIZE} ->
@@ -126,5 +126,3 @@ val reduce_blocks: #a:Type0 -> #b:Type0 ->
 		inp: lseq a (nblocks * blocksize) ->
 		init: b ->
 		out:  b
-
-
