@@ -67,10 +67,7 @@ all-ci: bignum-ci specific-ci
 # extract.
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 KREMLIN_ARGS+=-I ../bignum -tmpdir poly-c \
-	-bundle 'Hacl.Spec.*,Hacl.Spe.*' -fparentheses \
-	-drop Prims,LowStar,C.Loops.Spec.Loops,Combinators,C.String,WasmSupport \
-	-drop Hacl.Endianness,Spec.*,Hacl.Bignum.Parameters,Hacl.Endianness,Hacl.Spec,Hacl.Spec.*,Hacl.Spe,Hacl.Spe.*,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.* \
-	$(KREMLIN_TESTLIB)
+	-fparentheses
 
 # Acknowledge the F* dependency graph
 .PHONY: depend
@@ -85,20 +82,19 @@ poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
 # We need one invocation of kremlin for each bundle because of KreMLin bug #43
 poly-c/Hacl_Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
-		-drop AEAD_Poly1305_64 -no-prefix Hacl.Test.Poly1305_64 \
-		-bundle 'Hacl_Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Hacl_Poly1305_64' \
+		-no-prefix Hacl.Test.Poly1305_64 \
+		-minimal -bundle 'Hacl_Poly1305_64=*' \
 	$^ -o $@
 
 poly-c/AEAD_Poly1305_64.c: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
-		-drop Hacl.Poly1305_64,Hacl.Test.Poly1305_64 \
-		-bundle 'AEAD.Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,AEAD.Poly1305_64,Hacl_Poly1305_64,Hacl.Spec.*' \
+		-minimal -bundle 'AEAD.Poly1305_64=*' \
 	$^ -o $@
 
 poly1305.exe: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) \
 		-drop AEAD_Poly1305_64 -no-prefix Hacl.Test.Poly1305_64 \
-		-bundle 'Hacl_Poly1305_64=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Hacl_Poly1305_64' \
+		-minimal -bundle 'Hacl_Poly1305_64=*' \
 		$^ -o $@
 	./$@
 
