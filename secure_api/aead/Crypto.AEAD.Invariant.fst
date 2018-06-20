@@ -847,13 +847,13 @@ let rec counterblocks_slice #i rgn x len from_pos to_pos plain cipher =
 	let ih1 = counterblocks_slice rgn y len from_pos' to_pos plain cipher in
   	let ih2 = counterblocks_slice rgn y (to_pos - from_pos) l (to_pos - from_pos) (Plain.slice plain from_pos to_pos) (Seq.slice cipher from_pos to_pos) in
 	  //slice-slice-1
-	  assert (Seq.equal (as_bytes #i #(to_pos - from_pos') (Plain.slice plain from_pos' to_pos))
-			    (as_bytes #i #(to_pos - from_pos') (Plain.slice (Plain.slice plain from_pos to_pos) l (to_pos - from_pos))));
+	  assert (Seq.equal (as_bytes (Plain.slice plain from_pos' to_pos))
+			    (as_bytes (Plain.slice (Plain.slice plain from_pos to_pos) l (to_pos - from_pos))));
 	  assert (Seq.equal (Seq.slice cipher from_pos' to_pos)
 			    (Seq.slice (Seq.slice cipher from_pos to_pos) l (to_pos - from_pos)));
 	  //slice-slice-2
-          assert (Seq.equal (as_bytes #i #l (Plain.slice (Plain.slice plain from_pos to_pos) 0 l))
-			    (as_bytes #i #l (Plain.slice plain from_pos from_pos')));
+          assert (Seq.equal (as_bytes (Plain.slice (Plain.slice plain from_pos to_pos) 0 l))
+			    (as_bytes (Plain.slice plain from_pos from_pos')));
           assert (Seq.equal (Seq.slice (Seq.slice cipher from_pos to_pos) 0 l)
 			    (Seq.slice cipher from_pos from_pos'))
 

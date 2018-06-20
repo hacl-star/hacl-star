@@ -158,7 +158,7 @@ noeq type state (i:id) =
 
 // boring...
 val itable: i:id {prf i} -> s:state i
-  -> Tot (r:HS.ref (Seq.seq (entry s.mac_rgn i)) {HS.frameOf r == s.rgn})
+  -> Tot (r:ST.ref (Seq.seq (entry s.mac_rgn i)) {HS.frameOf r == s.rgn})
 let itable i s = s.table
 
 val mktable: i:id {prf i} -> rgn:region -> mac_rgn:region{mac_rgn `HS.extends` rgn}
