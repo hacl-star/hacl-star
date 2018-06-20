@@ -225,6 +225,12 @@ rsapss.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.RS
 	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) rsapss-ml/Lib_IntTypes.ml rsapss-ml/Lib_RawIntTypes.ml rsapss-ml/Lib_Sequence.ml rsapss-ml/Lib_Stateful.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
 	./rsapss.exe
 
+pqlib.exe: $(LIBS_FILES) Spec.PQ.Lib.fst tests/Spec.PQ.Lib.Test.fst
+	mkdir -p pqlib-ml
+	$(FSTAR)  --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes  --extract_module Lib.Sequence --extract_module Spec.PQ.Lib --extract_module Spec.PQ.Lib.Test --odir pqlib-ml $^
+	@echo 'let _ = test()' >> pqlib-ml/Spec_PQ_Lib_Test.ml
+	$(OCAMLOPT) -I pqlib-ml $(OCAML_INCLUDES) pqlib-ml/Lib_IntTypes.ml pqlib-ml/Lib_RawIntTypes.ml pqlib-ml/Lib_Sequence.ml pqlib-ml/Spec_PQ_Lib.ml pqlib-ml/Spec_PQ_Lib_Test.ml -o pqlib.exe
+	./pqlib.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
