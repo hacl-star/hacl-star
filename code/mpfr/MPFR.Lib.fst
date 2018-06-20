@@ -1,6 +1,5 @@
 module MPFR.Lib
 open FStar.Mul
-open FStar.Math.Lemmas
 open FStar.HyperStack.All
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -10,6 +9,7 @@ open FStar.UInt64
 module I32 = FStar.Int32
 module U32 = FStar.UInt32
 
+open MPFR.Lemmas
 open MPFR.Lib.Spec
 
 // GENERIC LIBRARY DEFINITIONS
@@ -47,11 +47,16 @@ noeq type mpfr_struct = {
     mpfr_d: buffer mp_limb_t
 }
 
+(* First bit is 1 *)
+let mpfr_d_val0_cond (m:mp_limb_t) = v m >= pow2 63
+(* Ending bits are 0 *)
+let mpfr_d_valn_cond (m:mp_limb_t) (p:mpfr_prec_t) = v m % pow2 (64 - U32.v p) = 0
+
 let valid_struct h (s:mpfr_struct) =
     let l = length s.mpfr_d in
     l >= 1 /\ (l - 1) * 64 < U32.v s.mpfr_prec /\ U32.v s.mpfr_prec <= l * 64 /\
-    v (get h s.mpfr_d 0) >= pow2 63 /\
-    v (get h s.mpfr_d (l - 1)) % pow2 (l * 64 - U32.v s.mpfr_prec) = 0
+    mpfr_d_val0_cond (get h s.mpfr_d 0) /\
+    mpfr_d_valn_cond (get h s.mpfr_d (l - 1)) s.mpfr_prec
 
 (* Conversion to pure struct *)
 val to_val: s:Seq.seq u64 -> Tot nat (decreases (Seq.length s))
@@ -62,7 +67,7 @@ let rec to_val (s:Seq.seq u64) =
 let as_val h (b:buffer mp_limb_t) = to_val (as_seq h b)
 
 val as_pure: h:mem -> s:mpfr_struct{valid_struct h s} ->
-    GTot (ps:mpfr_structP{valid_structP ps /\
+    GTot (ps:floating_point{
              I32.v s.mpfr_sign = ps.sign /\
 	     U32.v s.mpfr_prec = ps.prec /\
 	     I32.v s.mpfr_exp  = ps.exp + ps.prec /\
@@ -71,9 +76,9 @@ let as_pure h s =
     let p = U32.v s.mpfr_prec in
     let l = length s.mpfr_d in
     let m = as_val h s.mpfr_d / pow2 (l * 64 - p) in
-    lemma_div_lt (as_val h s.mpfr_d) (l * 64) (l * 64 - p);
+    lemma_pow2_div_lt (as_val h s.mpfr_d) (l * 64) (l * 64 - p);
     lemma_div_le (pow2 (l * 64 - 1)) (as_val h s.mpfr_d) (pow2 (l * 64 - p));
-    pow2_minus (l * 64 - 1) (l * 64 - p);
+    lemma_pow2_div (l * 64 - 1) (l * 64 - p);
     {sign = I32.v s.mpfr_sign;
      prec = p;
      mant = as_val h s.mpfr_d / pow2 (length s.mpfr_d * 64 - U32.v s.mpfr_prec);
@@ -149,8 +154,7 @@ val mpfr_LIMB_MASK: s:u32{U32.v s < 64} ->
     Tot (r:u64{forall (i:nat{0 <= i /\ i < 64}). i >= 64 - U32.v s <==> nth (v r) i == true})
 let mpfr_LIMB_MASK s =
     let lsh = 1uL <<^ s in
-    pow2_lt_compat 64 (U32.v s);
-    small_modulo_lemma_1 (pow2 (U32.v s)) (pow2 64);
+    lemma_pow2_small_mod (U32.v s) 64;
     lsh -^ 1uL
 
 val mpfr_LIMB_HIGHBIT: s:u64{forall (i:nat{0 <= i /\ i < 64}). i == 0 <==> nth (v s) i == true}
