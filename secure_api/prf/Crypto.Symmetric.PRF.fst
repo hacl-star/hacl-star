@@ -442,7 +442,7 @@ let extends (#rgn:region) (#i:id) (s0:Seq.seq (entry rgn i))
 	     Seq.equal (Seq.slice s1 0 (Seq.length s0)) s0
 
 // modifies a table (at most at x) and a buffer.
-let modifies_x_buffer_1 #i (t:state i) x b h0 h1 =
+let modifies_x_buffer_1 (#i:id) (t:state i) (x:domain_blk i) (b:buffer) (h0 h1:mem) :Type0 =
   Buffer.live h1 b /\
   (if prf i then
     let r = itable i t in
@@ -461,7 +461,7 @@ private val prf_blk:
   i:id -> t:state i -> x:domain_blk i -> len:u32 {len <=^ blocklen i} ->
   output:lbuffer (v len) {Buffer.frameOf output <> t.rgn} -> ST unit
   (requires (fun h0 -> Buffer.live h0 output))
-  (ensures (fun h0 _ h1 -> modifies_x_buffer_1 t x output h0 h1))
+  (ensures (fun h0 _ h1 -> modifies_x_buffer_1 #i t x output h0 h1))
 
 #reset-options "--z3rlimit 100"
 
@@ -486,8 +486,7 @@ let prf_blk i t x len output =
     assert(extends (HS.sel h0 r) (HS.sel h1 r) x);
     store_bytes len output (Seq.slice block zero (v len));
     let h2 = ST.get() in
-    Buffer.lemma_reveal_modifies_1 output h1 h2;
-    ()
+    Buffer.lemma_reveal_modifies_1 output h1 h2
     end
   else getBlock t x len output
 
