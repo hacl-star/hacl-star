@@ -27,6 +27,7 @@ let zqvector_sub #q #n a b =
     c.[i] <- zqsub a.[i] b.[i]
   ) c
 
+let zqmatrix_zero #q #n #m = create m (create n (zqelem #q 0))
 
 let zqmatrix_add #q #n #m a b =
   let c:zqmatrix_t q n m = create m (create n (zqelem #q 0)) in
@@ -42,7 +43,6 @@ let zqmatrix_sub #q #n #m a b =
     c.[i] <- zqvector_sub a.[i] b.[i]
   ) c
 
-
 let zqmatrix_mul #q #n1 #n2 #n3 a b =
   let c:zqmatrix_t q n1 n3 = create n3 (create n1 (zqelem #q 0)) in
   repeati n3
@@ -51,3 +51,12 @@ let zqmatrix_mul #q #n1 #n2 #n3 a b =
       ci.[k] <- repeati n2 (fun j tmp -> zqadd tmp (zqmul ((a.[j]).[k]) ((b.[i]).[j]))) 0
     ) c.[i]
   ) c
+
+(* Lemmas *)
+let matrix_distributivity_add_right #q #n1 #n2 #n3 a b c = admit()
+let matrix_distributivity_add_left #q #n1 #n2 #n3 a b c = admit()
+let matrix_associativity_mul #q #n1 #n2 #n3 #n4 a b c = admit()
+let matrix_associativity_add #q #n1 #n2 a b c = admit()
+let matrix_commutativity_add #q #n1 #n2 a b = admit()
+let matrix_sub_zero #q #n1 #n2 a = admit()
+let matrix_add_zero #q #n1 #n2 a = admit()
