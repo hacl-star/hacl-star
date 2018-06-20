@@ -61,7 +61,7 @@ let rec cmp_bytes_ b1 b2 len tmp =
   UInt.logand_lemma_1 #8 0;
   UInt.logand_lemma_2 #8 0;
   let h0 = ST.get() in
-  let inv h i =
+  let inv h (i: nat) =
     let z = get h tmp 0 in
     live h b1 /\ live h b2 /\ live h tmp /\ modifies_1 tmp h0 h /\ 0 <= i /\ i <= U32.v len /\
     (H8.v z == 255 \/ H8.v z == 0) /\

@@ -257,6 +257,9 @@ val mac_modifies_preserves_norm_keys
               MAC.norm_r h0 r))
   (ensures (MAC.norm_r h1 r))
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+let disjoint_mref_1 (#t:Type) (#u:Type) (#p:_) (a:Buffer.buffer t) (r:ST.mref u p) =
+  Buffer.frameOf a =!= HS.frameOf r \/ Buffer.as_addr a =!= HS.as_addr r
+
 let mac_modifies_preserves_norm_keys #i #j #aadlen #plainlen st n aad plain ct ak acc h0 h1 r =
   let open CMA in
   let tag = Buffer.sub ct plainlen MAC.taglen in	
@@ -265,7 +268,7 @@ let mac_modifies_preserves_norm_keys #i #j #aadlen #plainlen st n aad plain ct a
   assert (Buffer.disjoint b tag);
   assert (Buffer.disjoint b abuf);
   let _ =
-    if safeMac i then assume (Buffer.disjoint_ref_1 b (CMA.(ilog ak.log))) else ()
+    if safeMac i then assume (disjoint_mref_1 b (CMA.(ilog ak.log))) else ()
   in
   match macAlg_of_id i with
   | POLY1305 -> 

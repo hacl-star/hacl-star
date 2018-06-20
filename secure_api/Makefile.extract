@@ -88,13 +88,6 @@ verification: $(addprefix $(CACHE_DIR)/,$(notdir $(addsuffix .checked,$(ALL_FST_
 	$(FSTAR) $<
 	touch $@
 
-# F* doesn't recursively create directories for --odir
-$(OUTPUT_DIR):
-	mkdir -p $@
-
-$(CACHE_DIR):
-	mkdir -p $@
-
 # Filling out the right invocations to generate a .krml
 $(OUTPUT_DIR)/%.krml: | $(OUTPUT_DIR)
 	$(FSTAR) \

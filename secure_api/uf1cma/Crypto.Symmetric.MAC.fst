@@ -485,6 +485,7 @@ let finish #i s a t =
     let dummy_r = Buffer.create 0uL 3ul in
     let dummy_m = C.Nullity.null FStar.UInt8.t (* Buffer.create 42uy 0ul *) in
     let h' = ST.get() in
+    assume (Buffer.disjoint a' dummy_m); //NS: 06/20  FIXME
     PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.mk_state dummy_r a') t dummy_m 0uL s;
     let h'' = ST.get() in
     lemma_modifies_3_2_finish h h' h'' a t;
