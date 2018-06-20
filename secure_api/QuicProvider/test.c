@@ -482,7 +482,13 @@ const uint8_t expected_server_hs[] = { // server_hs
 void test_pn_encrypt()
 {
   printf("==== test_pn_encrypt() ====\n");
-  quic_secret client_hs = {0}, server_hs = {0};
+
+  quic_secret client_hs;
+  memset(&client_hs, 0, sizeof(client_hs));
+
+  quic_secret server_hs;
+  memset(&server_hs, 0, sizeof(server_hs));
+
   quic_key *key;
   int result, i;
 
