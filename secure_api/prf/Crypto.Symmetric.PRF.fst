@@ -344,7 +344,13 @@ let prf_mac i t k_0 x =
   else
     begin
     cut (~(CMA.authId macId));
-    // Changed from rcreate to create to avoid leak
+    //Changed from rcreate to create to avoid leak
+    (*
+     * AR: adding this is_stack_region assume (06/20, NYC hackathon)
+     *     the function's precondition doesn'say this
+     *     need some invariants fixing regarding regions
+     *)
+    assume (HS.is_stack_region (HS.get_tip h0));
     let keyBuffer = Buffer.create (*t.mac_rgn*) 0uy (CMA.keylen i) in
     let h1 = ST.get() in
     Crypto.Indexing.aeadAlg_cipherAlg i;
@@ -480,10 +486,10 @@ let prf_blk i t x len output =
     assert(extends (HS.sel h0 r) (HS.sel h1 r) x);
     store_bytes len output (Seq.slice block zero (v len));
     let h2 = ST.get() in
-    Buffer.lemma_reveal_modifies_1 output h1 h2
+    Buffer.lemma_reveal_modifies_1 output h1 h2;
+    ()
     end
-  else
-    getBlock t x len output
+  else getBlock t x len output
 
 ////////////////////////////////////////////////////////////////////////////////
 //prf_dexor

@@ -675,13 +675,22 @@ let poly1305_finish_spec st m rem' key_s =
 
 private val lemma_mod_distr: acc0:nat -> block:nat -> r0:nat -> Lemma
   (((acc0 + block) * r0) % prime = ((((acc0 % prime) + (block % prime)) % prime) * (r0 % prime)) % prime)
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
-private let lemma_mod_distr acc block r0 =
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 5 --z3cliopt smt.arith.nl=false"
+private let lemma_mod_distr acc0 block r0 =
   let open FStar.Math.Lemmas in
-  lemma_mod_mul_distr_l (acc + block) r0 prime;
-  lemma_mod_mul_distr_l r0 ((acc + block) % prime) prime;
-  lemma_mod_plus_distr_l acc block prime;
-  lemma_mod_plus_distr_l block (acc % prime) prime
+  lemma_mod_mul_distr_l (acc0 + block) r0 prime;
+  assert (((acc0 + block) * r0) % prime = (((acc0 + block) % prime) * r0) % prime);
+  lemma_mod_mul_distr_r ((acc0 + block) % prime) r0 prime;
+  assert ((((acc0 + block) % prime) * r0) % prime =
+    (((acc0 + block) % prime) * (r0 % prime)) % prime
+  );
+  lemma_mod_plus_distr_l acc0 block prime;
+  assert (
+    (((acc0 + block) % prime) * (r0 % prime)) % prime =
+    ((((acc0 % prime) + block) % prime) * (r0 % prime)) % prime
+  );
+  lemma_mod_plus_distr_r (acc0 % prime) block prime
 
 
 #reset-options "--max_fuel 0  --z3rlimit 100"

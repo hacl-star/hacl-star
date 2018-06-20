@@ -48,6 +48,7 @@ val shift_:
     (requires (fun h -> live h output))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
       /\ (forall (i:nat). (i < len - 1) ==> v (get h1 output (i+1)) = v (get h0 output i)) ))
+  
 [@"substitute"]
 let shift_ output =
   let h0 = ST.get() in
@@ -59,7 +60,7 @@ let shift_ output =
   let open FStar.UInt32 in
   let f' (i:UInt32.t{FStar.UInt32.( 0 <= v i /\ v i < len - 1) }): Stack unit
     (requires (fun h -> inv h (UInt32.v i)))
-    (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
+    (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_1 (v i) /\ inv h_2 (v i + 1))))
   = let h = ST.get() in
     assert(forall (j:nat). (j <= len - 1 /\ j > len - 1 - v i) ==> Hacl.Bignum.Limb.v (get h output (j)) = Hacl.Bignum.Limb.v (get h0 output (j-1)));
     assert(forall (j:nat). (j < len - 1 - v i) ==> Hacl.Bignum.Limb.v (get h output (j)) = Hacl.Bignum.Limb.v (get h0 output j));
