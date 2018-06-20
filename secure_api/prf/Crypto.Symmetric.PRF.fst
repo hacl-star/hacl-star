@@ -463,7 +463,7 @@ private val prf_blk:
   (requires (fun h0 -> Buffer.live h0 output))
   (ensures (fun h0 _ h1 -> modifies_x_buffer_1 t x output h0 h1))
 
-#reset-options "--z3rlimit 200"
+#reset-options "--z3rlimit 100"
 
 let zero = 0
 
@@ -486,10 +486,10 @@ let prf_blk i t x len output =
     assert(extends (HS.sel h0 r) (HS.sel h1 r) x);
     store_bytes len output (Seq.slice block zero (v len));
     let h2 = ST.get() in
-    Buffer.lemma_reveal_modifies_1 output h1 h2
+    Buffer.lemma_reveal_modifies_1 output h1 h2;
+    ()
     end
-  else
-    getBlock t x len output
+  else getBlock t x len output
 
 ////////////////////////////////////////////////////////////////////////////////
 //prf_dexor
