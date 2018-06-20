@@ -39,7 +39,7 @@ FSTAR_INCLUDES+=--include ../bignum
 
 # Parameters for interactive mode
 %.fst-in:
-	@echo $(OPTIONS) --hint_info \
+	@echo $(OPTIONS) \
 	$(FSTAR_INCLUDES)
 
 ct: $(addsuffix -lax, $(POLY1305_FILES))
