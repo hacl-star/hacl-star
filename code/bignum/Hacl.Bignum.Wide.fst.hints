@@ -1,5 +1,5 @@
 [
-  "\u0001#≥ƒ\u0017f´1Åƒ\u0000IÀNîú",
+  "2ˇ»Ì˘1&}Ã∑ñW8àúƒ",
   [
     [
       "Hacl.Bignum.Wide.v",
@@ -7,23 +7,30 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@query", "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
       ],
-      0
+      0,
+      "5648be20165c48780c08c4370ccb50b3"
     ],
     [
       "Hacl.Bignum.Wide.add",
       1,
       2,
       1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.word_size",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Parameters.word_size",
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "32f1b03a81d2dd8e1934dd2436decdde"
     ],
     [
       "Hacl.Bignum.Wide.add",
@@ -32,464 +39,320 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Bignum.Parameters.wide_n",
-        "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
-      ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.add",
-      3,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Bignum.Constants.wide",
+        "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide",
         "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Parameters.word_size",
         "equation_Hacl.Bignum.Wide.n", "equation_Hacl.Bignum.Wide.t",
-        "equation_Hacl.Bignum.Wide.v",
+        "equation_Hacl.Bignum.Wide.v", "equation_Hacl.UInt128.t",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Hacl.Bignum.Wide_Tm_refine_d065006285a95c605ee4f75e809434d4"
       ],
-      0
+      0,
+      "dea71a1730a9172e78fa4f064e95edd7"
     ],
     [
       "Hacl.Bignum.Wide.add_mod",
       1,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.add_mod",
-      2,
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
       ],
-      0
+      0,
+      "6e6c1795d118cdba3bffd1a46aa80394"
     ],
     [
       "Hacl.Bignum.Wide.add_mod",
-      3,
+      2,
       2,
       1,
       [
         "@query", "equation_Hacl.Bignum.Wide.n",
         "equation_Hacl.Bignum.Wide.v"
       ],
-      0
+      0,
+      "dbae9b644b0b440b8071ba6192c21f8d"
     ],
     [
       "Hacl.Bignum.Wide.sub",
       1,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.sub",
-      2,
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
       ],
-      0
+      0,
+      "bf60bd37dc528fecf92b71a66a32d116"
     ],
     [
       "Hacl.Bignum.Wide.sub",
-      3,
+      2,
       2,
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Bignum.Constants.wide",
+        "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide",
         "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Parameters.word_size",
         "equation_Hacl.Bignum.Wide.n", "equation_Hacl.Bignum.Wide.t",
-        "equation_Hacl.Bignum.Wide.v",
+        "equation_Hacl.Bignum.Wide.v", "equation_Hacl.UInt128.t",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Hacl.Bignum.Wide_Tm_refine_c2064a4a69f8cb3035baee031e008f88"
       ],
-      0
+      0,
+      "ff8d346036e0dfe9ed6bbbe741e5636b"
     ],
     [
       "Hacl.Bignum.Wide.sub_mod",
       1,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.sub_mod",
-      2,
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
       ],
-      0
+      0,
+      "0879f72392c59b1a29315966f0debb21"
     ],
     [
       "Hacl.Bignum.Wide.sub_mod",
-      3,
+      2,
       2,
       1,
       [
         "@query", "equation_Hacl.Bignum.Wide.n",
         "equation_Hacl.Bignum.Wide.v"
       ],
-      0
+      0,
+      "4dcbfdcda3acd757c298bf0764d6c790"
     ],
     [
       "Hacl.Bignum.Wide.shift_right",
       1,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.shift_right",
-      2,
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_FStar.UInt32.n", "equation_FStar.UInt32.v",
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "equation_FStar.UInt.uint_t",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Wide.n", "lemma_FStar.Buffer.lemma_size",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2",
         "typing_FStar.UInt32.v"
       ],
-      0
+      0,
+      "ac702291ab21fd72cd8ccd9e92538e91"
     ],
     [
       "Hacl.Bignum.Wide.shift_right",
-      3,
+      2,
       2,
       1,
       [
-        "@query", "equation_Hacl.Bignum.Wide.n",
-        "equation_Hacl.Bignum.Wide.v"
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Wide.n", "equation_Hacl.Bignum.Wide.v",
+        "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2"
       ],
-      0
+      0,
+      "256727d5d3a78292a01f0019f9a1eaec"
     ],
     [
       "Hacl.Bignum.Wide.shift_left",
       1,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.shift_left",
-      2,
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.uint_t",
-        "equation_FStar.UInt32.n", "equation_FStar.UInt32.v",
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "lemma_FStar.Buffer.lemma_size", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
+        "equation_Hacl.Bignum.Wide.n", "lemma_FStar.Buffer.lemma_size",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7",
+        "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2",
         "typing_FStar.UInt32.v"
       ],
-      0
+      0,
+      "19edb713463ed0571f990fd6456cbca8"
     ],
     [
       "Hacl.Bignum.Wide.shift_left",
-      3,
       2,
-      1,
-      [
-        "@query", "equation_Hacl.Bignum.Wide.n",
-        "equation_Hacl.Bignum.Wide.v"
-      ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.eq_mask",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_Hacl.Bignum.Parameters.wide_n",
-        "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "haseqFStar.UInt_Tm_refine_81528fa45830671a34dc41538a864b77",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
-      ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.eq_mask",
-      2,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.eq_mask",
-      3,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_Hacl.Bignum.Parameters.wide_n",
-        "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "haseqFStar.UInt_Tm_refine_81528fa45830671a34dc41538a864b77",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
-      ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.eq_mask",
-      4,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.eq_mask",
-      5,
       2,
       1,
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Hacl.Bignum.Parameters.wide_n",
-        "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
+        "equation_Hacl.Bignum.Wide.n", "equation_Hacl.Bignum.Wide.v",
+        "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2"
       ],
-      0
+      0,
+      "ef74d966056065f12163e0a6367f6600"
     ],
     [
       "Hacl.Bignum.Wide.eq_mask",
-      6,
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.n",
+        "equation_Hacl.Bignum.Constants.word_size",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Parameters.word_size",
+        "equation_Hacl.Bignum.Wide.n",
+        "function_token_typing_FStar.UInt32.n",
+        "haseqFStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "902d409bbe7dc8e6acccb60d7c2a42aa"
+    ],
+    [
+      "Hacl.Bignum.Wide.eq_mask",
+      2,
       2,
       1,
       [
         "@query", "equation_Hacl.Bignum.Wide.n",
         "equation_Hacl.Bignum.Wide.v"
       ],
-      0
+      0,
+      "c8d130ba01f33f328335e11345056bc1"
     ],
     [
       "Hacl.Bignum.Wide.gte_mask",
       1,
       2,
       1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.word_size",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Parameters.word_size",
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "77b9bf370582966cc97436f65ab5fa53"
     ],
     [
       "Hacl.Bignum.Wide.gte_mask",
       2,
       2,
       1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.gte_mask",
-      3,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Bignum.Parameters.wide_n",
-        "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
-      ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.gte_mask",
-      4,
-      2,
-      1,
       [
         "@query", "equation_Hacl.Bignum.Wide.n",
         "equation_Hacl.Bignum.Wide.v"
       ],
-      0
+      0,
+      "112d3dd16d856b6b8ff0c6717db0d242"
     ],
     [
       "Hacl.Bignum.Wide.gt_mask",
       1,
       2,
       1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.word_size",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Parameters.word_size",
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "db56a1f57866eeeb42fa0fbc16bacac6"
     ],
     [
       "Hacl.Bignum.Wide.gt_mask",
       2,
       2,
       1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      [
+        "@query", "equation_Hacl.Bignum.Wide.n",
+        "equation_Hacl.Bignum.Wide.v"
+      ],
+      0,
+      "fcf34c32f710912cf5522029d1234e57"
     ],
     [
-      "Hacl.Bignum.Wide.gt_mask",
-      3,
+      "Hacl.Bignum.Wide.lt_mask",
+      1,
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
       ],
-      0
+      0,
+      "2c2556841e2c43d8092d1ca4d6a80cbc"
     ],
     [
-      "Hacl.Bignum.Wide.gt_mask",
-      4,
+      "Hacl.Bignum.Wide.lt_mask",
+      2,
       2,
       1,
       [
         "@query", "equation_Hacl.Bignum.Wide.n",
         "equation_Hacl.Bignum.Wide.v"
       ],
-      0
+      0,
+      "9e4b3e9537e6c5fdd53332562321709e"
     ],
     [
-      "Hacl.Bignum.Wide.lt_mask",
+      "Hacl.Bignum.Wide.lte_mask",
       1,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.lt_mask",
-      2,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.lt_mask",
-      3,
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
       ],
-      0
+      0,
+      "f5477fb3c5f16ec07347d399292d860b"
     ],
     [
-      "Hacl.Bignum.Wide.lt_mask",
-      4,
+      "Hacl.Bignum.Wide.lte_mask",
+      2,
       2,
       1,
       [
         "@query", "equation_Hacl.Bignum.Wide.n",
         "equation_Hacl.Bignum.Wide.v"
       ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.lte_mask",
-      1,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.lte_mask",
-      2,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.lte_mask",
-      3,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Bignum.Parameters.wide_n",
-        "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
-      ],
-      0
-    ],
-    [
-      "Hacl.Bignum.Wide.lte_mask",
-      4,
-      2,
-      1,
-      [
-        "@query", "equation_Hacl.Bignum.Wide.n",
-        "equation_Hacl.Bignum.Wide.v"
-      ],
-      0
+      0,
+      "bff9344aea6e2d8ad35ee15e0c0d6476"
     ],
     [
       "Hacl.Bignum.Wide.op_Plus_Hat",
@@ -497,15 +360,14 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@query", "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
       ],
-      0
+      0,
+      "803c90a3fb6429aae185685cbeca0274"
     ],
     [
       "Hacl.Bignum.Wide.op_Subtraction_Hat",
@@ -513,15 +375,51 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@query", "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Parameters.wide_n",
         "equation_Hacl.Bignum.Parameters.word_size",
-        "equation_Hacl.Bignum.Wide.n",
-        "function_token_typing_Hacl.Bignum.Constants.word_size",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Bignum.Constants_Tm_refine_84f58ba039bb9e7d5e482e16a08331d7"
+        "equation_Hacl.Bignum.Wide.n", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
       ],
-      0
+      0,
+      "eaeee005f77e1cf36191dd7642bfbd71"
+    ],
+    [
+      "Hacl.Bignum.Wide.op_Greater_Greater_Hat",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Wide.n", "lemma_FStar.Buffer.lemma_size",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "9b2193845c69cf7b7cdd1892c9e6794d"
+    ],
+    [
+      "Hacl.Bignum.Wide.op_Less_Less_Hat",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Bignum.Constants.word_size",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Parameters.word_size",
+        "equation_Hacl.Bignum.Wide.n", "lemma_FStar.Buffer.lemma_size",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "148c1c33bbbccd1e9de9908b83778ea9"
     ]
   ]
 ]

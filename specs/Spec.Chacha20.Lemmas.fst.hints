@@ -7,7 +7,8 @@
       2,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      0,
+      "7acb85ae6d9d0e5369df157fbf942d48"
     ],
     [
       "Spec.Chacha20.Lemmas.lemma_seq_cons_4",
@@ -15,21 +16,15 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "data_typing_intro_Prims.Cons@tok",
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "data_typing_intro_Prims.Cons@tok",
         "data_typing_intro_Prims.Nil@tok",
         "equation_FStar.Seq.Properties.createL",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_d2d1ea66f2b3a92c2deb42edcbb784ce",
         "typing_FStar.Seq.Properties.seq_of_list"
       ],
-      0
-    ],
-    [
-      "Spec.Chacha20.Lemmas.lemma_seq_cons_4",
-      3,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      0,
+      "0eb51c5146e2cd370494b21fe799009f"
     ]
   ]
 ]
