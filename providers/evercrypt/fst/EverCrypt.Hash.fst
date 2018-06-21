@@ -6,6 +6,7 @@ open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module M = LowStar.Modifies
+module G = FStar.Ghost
 
 open LowStar.BufferOps
 open FStar.Integers
@@ -16,27 +17,21 @@ let uint32_p = B.buffer uint_32
 let uint64_p = B.buffer uint_64
 
 noeq
-type state_s =
-| SHA256_Hacl: p:uint32_p{ B.length p = 8 } -> state_s
-| SHA256_Vale: p:uint32_p{ B.length p = 8 } -> state_s
-| SHA384_Hacl: p:uint64_p{ B.length p = 8 } -> state_s
+type state_s: (G.erased alg) -> Type0 =
+| SHA256_Hacl: p:uint32_p{ B.length p = 8 } -> state_s (G.hide SHA256)
+| SHA256_Vale: p:uint32_p{ B.length p = 8 } -> state_s (G.hide SHA256)
+| SHA384_Hacl: p:uint64_p{ B.length p = 8 } -> state_s (G.hide SHA384)
 
-let invariant_s _ _ =
+let invariant_s #_ _ _ =
   True
 
-let footprint_s (s: state_s): GTot M.loc =
+let footprint_s #a (s: state_s a): GTot M.loc =
   match s with
   | SHA256_Hacl p -> M.loc_buffer p
   | SHA256_Vale p -> M.loc_buffer p
   | SHA384_Hacl p -> M.loc_buffer p
 
-let alg_of_s = function
-  | SHA256_Hacl _ | SHA256_Vale _ ->
-      SHA256
-  | SHA384_Hacl _ ->
-      SHA384
-
-let repr s h: GTot _ =
+let repr #a s h: GTot _ =
   let s = B.get h s 0 in
   match s with
   | SHA256_Hacl p ->
