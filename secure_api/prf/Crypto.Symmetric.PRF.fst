@@ -360,7 +360,7 @@ let prf_mac i t k_0 x =
     let h2 = ST.get() in
     Buffer.lemma_reveal_modifies_1 keyBuffer h1 h2;
     //assert (Buffer.modifies_1 keyBuffer h1 h2);
-    let r:CMA.erid = t.mac_rgn in
+    let r:ST.erid = t.mac_rgn in
     //let i:CMA.id = macId in
     //let ak:CMA.akey t.mac_rgn (fst i) = k_0 in
     //let k:k:lbuffer (UInt32.v (CMA.keylen (fst i))){Buffer.frameOf k == r} = keyBuffer in
