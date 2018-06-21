@@ -951,7 +951,7 @@ val pad:
                   /\ (let seq_padding = reveal_sbytes (as_seq h1 padding) in
                   seq_padding == Spec.pad (v n * v size_block) (v len))))
 
-#reset-options "--max_fuel 0  --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 200"
 
 [@"substitute"]
 let pad padding n len =
@@ -1003,8 +1003,8 @@ let pad padding n len =
   (**) assert(reveal_sbytes (as_seq h3 zeros) == Seq.create (v pad0len) 0uy);
   (**) assert(reveal_sbytes (as_seq h3 buf1) == Seq.create 1 0x80uy);
   (**) assert(reveal_sbytes (as_seq h3 buf2) == Endianness.big_bytes size_len_8 (H128.v encodedlen));
-  (**) Lemmas.lemma_sub_append_3 h3 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8)//;
-//  (**) Lemmas.lemma_pad_aux h3 n len buf1 zeros buf2
+  (**) Lemmas.lemma_sub_append_3 h3 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8);
+  (**) Lemmas.lemma_pad_aux h3 (Cast.sint32_to_sint64 n) (Cast.sint32_to_sint64 len) buf1 zeros buf2
 
 
 #reset-options "--max_fuel 0  --z3rlimit 100"
@@ -1028,7 +1028,7 @@ val update_last:
                   let prevlen = H64.((H64.v (Seq.index count 0)) * (U32.v size_block)) in
                   reveal_h64s seq_hash_1 == Spec.update_last (reveal_h64s seq_hash_0) prevlen seq_data)))
 
-#reset-options "--max_fuel 0  --z3rlimit 200"
+#reset-options "--max_fuel 0  --z3rlimit 400"
 
 let update_last state data len =
   (**) let hinit = ST.get() in
