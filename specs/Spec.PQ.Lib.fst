@@ -38,13 +38,15 @@ let zqmatrix_zero #q #n #m = create m (create n (zqelem #q 0))
 
 val zqmatrix_add_pred0:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
-  i0:size_nat{i0 < n1} -> j:size_nat{j <= n2} -> res:zqmatrix_t q n1 n2 -> Tot Type0
-let zqmatrix_add_pred0 #q #n1 #n2 a b i0 j res = forall (j1:size_nat{j1 < j}). get res i0 j1 = zqadd (get a i0 j1) (get b i0 j1)
+  i0:size_nat{i0 < n1} -> res0:zqmatrix_t q n1 n2 -> j:size_nat{j <= n2} -> res:zqmatrix_t q n1 n2 -> Tot Type0
+let zqmatrix_add_pred0 #q #n1 #n2 a b i0 res0 j res =
+  (forall (j1:size_nat{j1 < j}). get res i0 j1 = zqadd (get a i0 j1) (get b i0 j1)) /\
+  (forall (i:size_nat{i < n1 /\ i <> i0}) (j:size_nat{j < n2}). get res0 i j = get res i j)
 
 val zqmatrix_add_f0:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
-  i0:size_nat{i0 < n1} -> Tot (repeatable #(zqmatrix_t q n1 n2) #n2 (zqmatrix_add_pred0 #q #n1 #n2 a b i0))
-let zqmatrix_add_f0 #q #n1 #n2 a b i0 j c = set c i0 j (zqadd (get a i0 j) (get b i0 j))
+  i0:size_nat{i0 < n1} -> res0:zqmatrix_t q n1 n2 -> Tot (repeatable #(zqmatrix_t q n1 n2) #n2 (zqmatrix_add_pred0 #q #n1 #n2 a b i0 res0))
+let zqmatrix_add_f0 #q #n1 #n2 a b i0 res0 j c = set c i0 j (zqadd (get a i0 j) (get b i0 j))
 
 val zqmatrix_add_pred1:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
@@ -57,11 +59,8 @@ val zqmatrix_add_f1:
 let zqmatrix_add_f1 #q #n1 #n2 a b i c =
   let res =
     repeati_inductive n2
-    (zqmatrix_add_pred0 #q #n1 #n2 a b i)
-    (fun j c -> zqmatrix_add_f0 #q #n1 #n2 a b i j c) c in
-  assert (forall (j1:size_nat{j1 < n2}). get res i j1 = zqadd (get a i j1) (get b i j1));
-  //assert ((forall (i1:size_nat{i1 < i}) (j:size_nat{j < n2}). get c i1 j == zqadd (get a i1 j) (get b i1 j))); // /\ (forall (j:size_nat{j < n2}). get res i j == zqadd (get a i j) (get b i j)));
-  admit();
+    (zqmatrix_add_pred0 #q #n1 #n2 a b i c)
+    (fun j cj -> zqmatrix_add_f0 #q #n1 #n2 a b i c j cj) c in
   res
 
 let zqmatrix_add #q #n1 #n2 a b =
