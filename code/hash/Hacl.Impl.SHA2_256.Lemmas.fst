@@ -58,6 +58,8 @@ private let uint8_p  = Buffer.buffer uint8_ht
 (* Define word size *)
 inline_for_extraction let size_word = 4ul // Size of the word in bytes
 
+#reset-options "--using_facts_from '-Hacl.UInt128 -Hacl.UInt64 -Hacl.UInt32 -Hacl.UInt16 -Spec.SHA2_256'"
+
 (* Define algorithm parameters *)
 inline_for_extraction let size_hash_w   = 8ul // 8 words (Final hash output size)
 inline_for_extraction let size_block_w  = 16ul  // 16 words (Working data block size)
