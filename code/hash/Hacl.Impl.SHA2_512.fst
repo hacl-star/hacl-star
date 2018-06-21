@@ -983,8 +983,8 @@ let pad padding n len =
   (**) assert(reveal_sbytes (as_seq h3 zeros) == Seq.create (v pad0len) 0uy);
   (**) assert(reveal_sbytes (as_seq h3 buf1) == Seq.create 1 0x80uy);
   (**) assert(reveal_sbytes (as_seq h3 buf2) == Endianness.big_bytes size_len_8 (H128.v encodedlen));
-  (**) Lemmas.lemma_sub_append_3 h3 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8)
-//  (**) Lemmas.lemma_pad_aux h3 n len buf1 zeros buf2
+  (**) Lemmas.lemma_sub_append_3 h3 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8);
+  (**) Lemmas.lemma_pad_aux h3 (Cast.sint32_to_sint64 n) (Cast.sint32_to_sint64 len) buf1 zeros buf2
 
 
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 100"
