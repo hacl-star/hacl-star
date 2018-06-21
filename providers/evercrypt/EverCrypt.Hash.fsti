@@ -18,7 +18,7 @@ let state = B.pointer state_s
 val invariant_s: state_s -> HS.mem -> Type0
 let invariant (s: state) (m: HS.mem) =
   B.live m s /\ invariant_s (B.get m s 0) m
-val footprint_s: state_s -> M.loc
+val footprint_s: state_s -> GTot M.loc
 let footprint (s: state) (m: HS.mem) =
   M.(loc_union (loc_buffer s) (footprint_s (B.get m s 0)))
 
@@ -42,7 +42,8 @@ let alg_of (s: state) (h: HS.mem): GTot alg =
 let repr_of_alg (a: alg) =
   Seq.lseq (type_of a) (size_of a)
 
-val repr: s:state -> h:HS.mem -> repr_of_alg (alg_of s h)
+// TODO: define repr_s?
+val repr: s:state -> h:HS.mem { invariant s h } -> GTot (repr_of_alg (alg_of s h))
 
 
 // TODO: define these over memory locations
