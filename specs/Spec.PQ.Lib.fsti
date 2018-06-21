@@ -18,10 +18,24 @@ val zqmul:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> zqelem_t q
 val zqvector_add:#q:size_pos -> #n:size_pos -> a:zqvector_t q n -> b:zqvector_t q n -> c:zqvector_t q n
 val zqvector_sub:#q:size_pos -> #n:size_pos -> a:zqvector_t q n -> b:zqvector_t q n -> c:zqvector_t q n
 
-val zqmatrix_zero:#q:size_pos -> #n:size_pos -> #m:size_pos -> zqmatrix_t q n m
-val zqmatrix_add:#q:size_pos -> #n:size_pos -> #m:size_pos -> a:zqmatrix_t q n m -> b:zqmatrix_t q n m -> c:zqmatrix_t q n m
-val zqmatrix_sub:#q:size_pos -> #n:size_pos -> #m:size_pos -> a:zqmatrix_t q n m -> b:zqmatrix_t q n m -> c:zqmatrix_t q n m
-val zqmatrix_mul:#q:size_pos -> #n:size_pos -> #m:size_pos -> #k:size_pos -> a:zqmatrix_t q n m -> b:zqmatrix_t q m k -> c:zqmatrix_t q n k
+val get:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> m:zqmatrix_t q n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> res:zqelem_t q
+val set:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> m:zqmatrix_t q n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> v:zqelem_t q -> (res:zqmatrix_t q n1 n2{get res i j == v})
+
+val zqmatrix_zero:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> Pure (zqmatrix_t q n1 n2)
+  (requires True)
+  (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern get res i j} get res i j == zqelem #q 0))
+
+val zqmatrix_add:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> Pure (zqmatrix_t q n1 n2)
+  (requires True)
+  (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern get res i j}  get res i j == zqadd (get a i j) (get b i j)))
+
+val zqmatrix_sub:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> Pure (zqmatrix_t q n1 n2)
+  (requires True)
+  (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern get res i j} get res i j == zqsub (get a i j) (get b i j)))
+
+val zqmatrix_mul:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n2 n3 -> Pure (zqmatrix_t q n1 n3)
+  (requires True)
+  (ensures (fun res -> forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).{:pattern get res i k} get res i k == repeati n2 (fun j tmp -> zqadd tmp (zqmul (get a i j) (get b j k))) (zqelem #q 0)))
 
 (* Lemmas *)
 val matrix_distributivity_add_right:
@@ -52,9 +66,9 @@ val matrix_commutativity_add:
 val matrix_sub_zero:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
   a:zqmatrix_t q n1 n2 -> Lemma
-  (zqmatrix_sub a a == zqmatrix_zero)
+  (zqmatrix_sub a a == zqmatrix_zero #q #n1 #n2)
 
 val matrix_add_zero:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
   a:zqmatrix_t q n1 n2 -> Lemma
-  (zqmatrix_add a zqmatrix_zero == a)
+  (zqmatrix_add a (zqmatrix_zero #q #n1 #n2) == a)

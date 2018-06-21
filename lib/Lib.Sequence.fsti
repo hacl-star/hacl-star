@@ -76,6 +76,11 @@ val repeati_ghost: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> GTot a) 
 
 val repeat: #a:Type -> n:size_nat -> (a -> Tot a) -> a -> Tot (a)
 
+unfold type repeatable (#a:Type) (#n:size_nat) (pred:(i:size_nat{i <= n} -> a -> Tot Type)) = i:size_nat{i < n} -> x:a -> Pure a (requires (pred i x)) (ensures (fun r -> pred (i+1) r))
+
+val repeat_range_inductive: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> pred:(i:size_nat{i <= max} -> a -> Tot Type) -> f:repeatable #a #max pred -> x0:a{pred min x0} -> Tot (res:a{pred max res})
+
+val repeati_inductive: #a:Type -> n:size_nat -> pred:(i:size_nat{i <= n} -> a -> Tot Type) -> f:repeatable #a #n pred -> x0:a{pred 0 x0} -> Tot (res:a{pred n res})
 
 val fold_left_range: #a:Type -> #b:Type -> #len:size_nat -> min:size_nat -> max:size_nat{min <= max /\ max <= len} -> (i:size_nat{i >= min /\ i < max} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b)
 

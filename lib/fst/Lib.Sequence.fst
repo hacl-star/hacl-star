@@ -110,6 +110,16 @@ let rec fold_left_range_ #a #b #len min max f l x =
   | [] -> x
   | h::t -> fold_left_range_ #a #b #(len - 1) (min + 1) max f t (f min h x)
 
+val repeat_range_inductive_:
+  #a:Type -> min:size_nat -> max:size_nat{min <= max} -> pred:(i:size_nat{i <= max} -> a -> Tot Type) -> f:repeatable #a #max pred -> x0:a{pred min x0} -> Tot (res:a{pred max res})
+  (decreases (max - min))
+let rec repeat_range_inductive_ #a min max pred f x =
+  if min = max then x
+  else repeat_range_inductive_ #a (incr min) max pred f (f min x)
+
+let repeat_range_inductive = repeat_range_inductive_
+let repeati_inductive #a = repeat_range_inductive #a 0
+
 let fold_left_range #a #b #len min max f l x =
   fold_left_range_ #a #b #(max - min) min max f (slice #a #len l min max) x
 
