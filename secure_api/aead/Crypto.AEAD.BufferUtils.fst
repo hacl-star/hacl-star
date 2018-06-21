@@ -2,9 +2,9 @@ module Crypto.AEAD.BufferUtils
 
 module ST = FStar.HyperStack.ST
 
-open FStar.HyperStack.All
 open FStar.Set
 open FStar.HyperStack
+open FStar.HyperStack.All
 open FStar.Buffer
 module HS = FStar.HyperStack
 
@@ -139,4 +139,5 @@ val chain_modification: #a:Type ->
 #reset-options "--z3rlimit 1000"
 let chain_modification #a acc cond prf_region mac_region plain h_init h0 h1 h2 h3 h4 =
     Buffer.lemma_reveal_modifies_1 acc h2 h3;
-    FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 plain h3) h4
+    FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 plain h3) h4;
+    assert (HS.modifies_ref mac_region Set.empty h_init (HS.pop h4))
