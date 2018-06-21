@@ -131,7 +131,7 @@ ifeq ($(OS),Windows_NT)
   GCC=x86_64-w64-mingw32-gcc.exe
   MSVC=cl.exe
 else
-  GCC=$(shell which gcc-7 >/dev/null 2>&1 && echo gcc-7 || (which gcc-6 >/dev/null 2>&1 && echo gcc-6 || echo gcc))
+  GCC=$(shell which gcc-8 >/dev/null 2>&1 && echo gcc-8 || (which gcc-7 >/dev/null 2>&1 && echo gcc-7 || echo gcc))
   CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=$(GCC)
   ENABLE_LTO=-flto
 endif
