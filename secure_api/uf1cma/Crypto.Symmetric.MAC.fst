@@ -483,6 +483,9 @@ let lemma_modifies_3_2_finish #a #a' h h' h'' b b' =
 
 #reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
+(*
+ * AR: 06/22, NYC hackathon, adding two buffer disjoint assumes
+ *)
 let finish #i s a t =
   let h0 = ST.get() in
   match alg i with
@@ -495,7 +498,11 @@ let finish #i s a t =
     let dummy_m = C.Nullity.null FStar.UInt8.t (* Buffer.create 42uy 0ul *) in
     let h' = ST.get() in
     assume (Buffer.disjoint a' dummy_m); //NS: 06/20  FIXME
-    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.mk_state dummy_r a') t dummy_m 0uL s;
+    let st = PL.mk_state dummy_r a' in
+    let h' = ST.get () in
+    assume (Buffer.disjoint a' t);
+    assume (Buffer.disjoint a' s);
+    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) st t dummy_m 0uL s;
     let h'' = ST.get() in
     lemma_modifies_3_2_finish h h' h'' a t;
     pop_frame();
@@ -506,6 +513,7 @@ let finish #i s a t =
     FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t) (Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
   | GHASH ->
     let a' : Buffer.buffer UInt128.t = a in
+    assume (Buffer.disjoint a' s);
     GF.finish a' s;
     GF.store128_be t a'.(0ul)
 
