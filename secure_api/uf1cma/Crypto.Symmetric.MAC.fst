@@ -389,6 +389,11 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
 #reset-options "--z3rlimit 150 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1"
+(*
+ * AR: adding two assumes (06/22, NYC hackathon)
+ * one related to disjointness of a and r
+ * and the other for PL.live_st
+ *)
 let update #i r a w =
   begin
   match alg i with
@@ -400,18 +405,20 @@ let update #i r a w =
     let e = Buffer.create GF.zero_128 1ul in
     let h1 = ST.get() in
     e.(0ul) <- GF.load128_be w;
+    assume (disjoint a' r);
     GF.add_and_multiply a' e r';
     let h2 = ST.get() in
     lemma_modifies_0_2 a e h0 h1 h2;
     pop_frame()
-
 
   | POLY1305 ->
     let h0 = ST.get() in
     let a' : Buffer.buffer UInt64.t = a in
     let r' : Buffer.buffer UInt64.t = r in
     let st = PL.mk_state r' a' in
-    let log = PL.poly1305_update (Ghost.hide Seq.createEmpty) st w in
+    let h1 = ST.get () in
+    assume (PL.live_st h1 st);
+    let log = PL.poly1305_update (Ghost.hide Seq.empty) st w in
     ()
     (* begin *)
     (*   push_frame(); *)
