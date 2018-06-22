@@ -1,0 +1,46 @@
+[
+  "Þsê×Òý÷L›\r™T\u001e–w\"",
+  [
+    [
+      "HaclProvider.hash_size",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_HaclProvider.HACL_SHA256",
+        "disc_equation_HaclProvider.HACL_SHA384",
+        "disc_equation_HaclProvider.HACL_SHA512",
+        "fuel_guarded_inversion_HaclProvider.hash_alg"
+      ],
+      0,
+      "afeee4d990f66d39d64a66f87e237edf"
+    ],
+    [
+      "HaclProvider.crypto_hash",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_HaclProvider.hash_size",
+        "fuel_guarded_inversion_HaclProvider.hash_alg",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "10e55057a5ce23bee0f78f079530563a"
+    ],
+    [
+      "HaclProvider.crypto_hmac",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_HaclProvider.hash_size",
+        "fuel_guarded_inversion_HaclProvider.hash_alg",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "3b2b2bab6302f768cbadbf44e496b119"
+    ]
+  ]
+]
