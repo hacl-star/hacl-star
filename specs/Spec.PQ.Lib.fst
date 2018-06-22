@@ -36,58 +36,86 @@ let set #q #n1 #n2 m i j v =   //(m.[j]).[i] <- v
 
 let zqmatrix_zero #q #n #m = create m (create n (zqelem #q 0))
 
-val zqmatrix_add_pred0:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
+val zqmatrix_pred0:
+  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> f:(zqelem_t q -> zqelem_t q -> zqelem_t q) ->
+  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
   i0:size_nat{i0 < n1} -> res0:zqmatrix_t q n1 n2 -> j:size_nat{j <= n2} -> res:zqmatrix_t q n1 n2 -> Tot Type0
-let zqmatrix_add_pred0 #q #n1 #n2 a b i0 res0 j res =
-  (forall (j1:size_nat{j1 < j}). get res i0 j1 = zqadd (get a i0 j1) (get b i0 j1)) /\
+let zqmatrix_pred0 #q #n1 #n2 f a b i0 res0 j res =
+  (forall (j1:size_nat{j1 < j}). get res i0 j1 = f (get a i0 j1) (get b i0 j1)) /\
   (forall (i:size_nat{i < n1 /\ i <> i0}) (j:size_nat{j < n2}). get res0 i j = get res i j)
 
-val zqmatrix_add_f0:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
-  i0:size_nat{i0 < n1} -> res0:zqmatrix_t q n1 n2 -> Tot (repeatable #(zqmatrix_t q n1 n2) #n2 (zqmatrix_add_pred0 #q #n1 #n2 a b i0 res0))
-let zqmatrix_add_f0 #q #n1 #n2 a b i0 res0 j c = set c i0 j (zqadd (get a i0 j) (get b i0 j))
+val zqmatrix_f0:
+  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> f:(zqelem_t q -> zqelem_t q -> zqelem_t q) ->
+  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
+  i0:size_nat{i0 < n1} -> res0:zqmatrix_t q n1 n2 -> Tot (repeatable #(zqmatrix_t q n1 n2) #n2 (zqmatrix_pred0 #q #n1 #n2 f a b i0 res0))
+let zqmatrix_f0 #q #n1 #n2 f a b i0 res0 j c = set c i0 j (f (get a i0 j) (get b i0 j))
 
-val zqmatrix_add_pred1:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
+val zqmatrix_pred1:
+  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> f:(zqelem_t q -> zqelem_t q -> zqelem_t q) ->
+  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
   i:size_nat{i <= n1} -> res:zqmatrix_t q n1 n2 -> Tot Type0
-let zqmatrix_add_pred1 #q #n1 #n2 a b i res = forall (i1:size_nat{i1 < i}) (j:size_nat{j < n2}). get res i1 j == zqadd (get a i1 j) (get b i1 j)
+let zqmatrix_pred1 #q #n1 #n2 f a b i res = forall (i1:size_nat{i1 < i}) (j:size_nat{j < n2}). get res i1 j == f (get a i1 j) (get b i1 j)
 
-val zqmatrix_add_f1:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
-  Tot (repeatable #(zqmatrix_t q n1 n2) #n1 (zqmatrix_add_pred1 #q #n1 #n2 a b))
-let zqmatrix_add_f1 #q #n1 #n2 a b i c =
+val zqmatrix_f1:
+  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> f:(zqelem_t q -> zqelem_t q -> zqelem_t q) ->
+  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 ->
+  Tot (repeatable #(zqmatrix_t q n1 n2) #n1 (zqmatrix_pred1 #q #n1 #n2 f a b))
+let zqmatrix_f1 #q #n1 #n2 f a b i c =
   let res =
     repeati_inductive n2
-    (zqmatrix_add_pred0 #q #n1 #n2 a b i c)
-    (fun j cj -> zqmatrix_add_f0 #q #n1 #n2 a b i c j cj) c in
+    (zqmatrix_pred0 #q #n1 #n2 f a b i c)
+    (fun j cj -> zqmatrix_f0 #q #n1 #n2 f a b i c j cj) c in
   res
 
 let zqmatrix_add #q #n1 #n2 a b =
   let c:zqmatrix_t q n1 n2 = create n2 (create n1 (zqelem #q 0)) in
   repeati_inductive n1
-  (zqmatrix_add_pred1 #q #n1 #n2 a b)
-  (fun i c -> zqmatrix_add_f1 #q #n1 #n2 a b i c) c
+  (zqmatrix_pred1 #q #n1 #n2 zqadd a b)
+  (fun i c -> zqmatrix_f1 #q #n1 #n2 zqadd a b i c) c
 
-let zqmatrix_sub #q #n #m a b =
-  let c:zqmatrix_t q n m = create m (create n (zqelem #q 0)) in
-  let res = repeati m
-    (fun i c ->
-      c.[i] <- zqvector_sub a.[i] b.[i]
-    ) c in
-  admit();
+let zqmatrix_sub #q #n1 #n2 a b =
+  let c:zqmatrix_t q n1 n2 = create n2 (create n1 (zqelem #q 0)) in
+  repeati_inductive n1
+  (zqmatrix_pred1 #q #n1 #n2 zqsub a b)
+  (fun i c -> zqmatrix_f1 #q #n1 #n2 zqsub a b i c) c
+
+val zqmatrix_mul_pred0:
+  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos ->
+  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n2 n3 ->
+  i0:size_nat{i0 < n1} -> res0:zqmatrix_t q n1 n3 -> k:size_nat{k <= n3} -> res:zqmatrix_t q n1 n3 -> Tot Type0
+let zqmatrix_mul_pred0 #q #n1 #n2 #n3 a b i0 res0 k res =
+  (forall (k1:size_nat{k1 < k}). get res i0 k1 = repeati n2 (fun j tmp -> zqadd tmp (zqmul (get a i0 j) (get b j k1))) 0) /\
+  (forall (i:size_nat{i < n1 /\ i <> i0}) (k:size_nat{k < n3}). get res0 i k = get res i k)
+
+val zqmatrix_mul_f0:
+  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos ->
+  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n2 n3 ->
+  i0:size_nat{i0 < n1} -> res0:zqmatrix_t q n1 n3 -> Tot (repeatable #(zqmatrix_t q n1 n3) #n3 (zqmatrix_mul_pred0 #q #n1 #n2 #n3 a b i0 res0))
+let zqmatrix_mul_f0 #q #n1 #n2 #n3 a b i0 res0 k c = set c i0 k (repeati n2 (fun j tmp -> zqadd tmp (zqmul (get a i0 j) (get b j k))) 0)
+
+val zqmatrix_mul_pred1:
+  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos ->
+  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n2 n3 ->
+  i:size_nat{i <= n1} -> res:zqmatrix_t q n1 n3 -> Tot Type0
+let zqmatrix_mul_pred1 #q #n1 #n2 #n3 a b i res =
+  forall (i1:size_nat{i1 < i}) (k:size_nat{k < n3}). get res i1 k == repeati n2 (fun j tmp -> zqadd tmp (zqmul (get a i1 j) (get b j k))) 0
+
+val zqmatrix_mul_f1:
+  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos ->
+  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n2 n3 ->
+  Tot (repeatable #(zqmatrix_t q n1 n3) #n1 (zqmatrix_mul_pred1 #q #n1 #n2 #n3 a b))
+let zqmatrix_mul_f1 #q #n1 #n2 #n3 a b i c =
+  let res =
+    repeati_inductive n3
+    (zqmatrix_mul_pred0 #q #n1 #n2 #n3 a b i c)
+    (fun k ck -> zqmatrix_mul_f0 #q #n1 #n2 #n3 a b i c k ck) c in
   res
 
 let zqmatrix_mul #q #n1 #n2 #n3 a b =
   let c:zqmatrix_t q n1 n3 = create n3 (create n1 (zqelem #q 0)) in
-  let res = repeati n3
-    (fun i c ->
-      c.[i] <- repeati n1 (fun k ci ->
-        ci.[k] <- repeati n2 (fun j tmp -> zqadd tmp (zqmul ((a.[j]).[k]) ((b.[i]).[j]))) 0
-      ) c.[i]
-    ) c in
-  admit();
-  res
+  repeati_inductive n1
+  (zqmatrix_mul_pred1 #q #n1 #n2 #n3 a b)
+  (fun i c -> zqmatrix_mul_f1 #q #n1 #n2 #n3 a b i c) c
 
 val matrix_equality:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
