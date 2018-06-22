@@ -45,8 +45,11 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/code/experimental/aesgcm \
 	$(HACL_HOME)/code/lib/kremlin \
 	$(HACL_HOME)/code/poly1305 \
+	$(HACL_HOME)/code/poly1305/interfaces \
 	$(HACL_HOME)/code/hash \
+	$(HACL_HOME)/code/hash/interfaces \
 	$(HACL_HOME)/code/salsa-family \
+	$(HACL_HOME)/code/salsa-family/interfaces \
 	$(KREMLIN_HOME)/kremlib \
 	$(HACL_HOME)/secure_api \
 	$(HACL_HOME)/secure_api/aead \

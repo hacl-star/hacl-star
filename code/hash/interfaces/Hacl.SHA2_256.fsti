@@ -73,6 +73,16 @@ inline_for_extraction let pos_ws_w     = size_k_w
 inline_for_extraction let pos_whash_w  = size_k_w +^ size_ws_w
 inline_for_extraction let pos_count_w  = size_k_w +^ size_ws_w +^ size_whash_w
 
+type state = s:uint32_p{length s = v size_state}
+
+let slice_k (h: HS.mem) (state: state) =
+  Seq.slice (as_seq h state) (U32.v pos_k_w) (U32.(v pos_k_w + v size_k_w))
+let slice_hash (h: HS.mem) (state: state) =
+  Seq.slice (as_seq h state) (U32.v pos_whash_w) (U32.(v pos_whash_w + v size_whash_w))
+let seq_counter (h: HS.mem) (state: state) =
+  Seq.slice (as_seq h state) (U32.v pos_count_w) (U32.(v pos_count_w + v size_count_w))
+let counter (h: HS.mem) (state: state) =
+  U32.v (Seq.index (seq_counter h state) 0)
 
 [@"c_inline"]
 val alloc:
