@@ -28,6 +28,7 @@ let zqvector_sub #q #n a b =
   ) c
 
 let zqmatrix_t q n m = lseq (zqvector_t q n) m
+let zqmatrix_create q n m = create m (create n (zqelem #q 0))
 
 let get #q #n1 #n2 m i j = (m.[j]).[i]
 
@@ -36,7 +37,7 @@ let set #q #n1 #n2 m i j v =   //(m.[j]).[i] <- v
   let mji = mj.[i] <- v in
   m.[j] <- mji
 
-let zqmatrix_zero #q #n #m = create m (create n (zqelem #q 0))
+let zqmatrix_zero #q #n #m = zqmatrix_create q n m
 
 val zqmatrix_pred0:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos -> f:(zqelem_t q -> zqelem_t q -> zqelem_t q) ->
@@ -70,13 +71,13 @@ let zqmatrix_f1 #q #n1 #n2 f a b i c =
   res
 
 let zqmatrix_add #q #n1 #n2 a b =
-  let c:zqmatrix_t q n1 n2 = create n2 (create n1 (zqelem #q 0)) in
+  let c = zqmatrix_create q n1 n2 in
   repeati_inductive n1
   (zqmatrix_pred1 #q #n1 #n2 zqadd a b)
   (fun i c -> zqmatrix_f1 #q #n1 #n2 zqadd a b i c) c
 
 let zqmatrix_sub #q #n1 #n2 a b =
-  let c:zqmatrix_t q n1 n2 = create n2 (create n1 (zqelem #q 0)) in
+  let c = zqmatrix_create q n1 n2 in
   repeati_inductive n1
   (zqmatrix_pred1 #q #n1 #n2 zqsub a b)
   (fun i c -> zqmatrix_f1 #q #n1 #n2 zqsub a b i c) c
@@ -114,7 +115,7 @@ let zqmatrix_mul_f1 #q #n1 #n2 #n3 a b i c =
   res
 
 let zqmatrix_mul #q #n1 #n2 #n3 a b =
-  let c:zqmatrix_t q n1 n3 = create n3 (create n1 (zqelem #q 0)) in
+  let c = zqmatrix_create q n1 n3 in
   repeati_inductive n1
   (zqmatrix_mul_pred1 #q #n1 #n2 #n3 a b)
   (fun i c -> zqmatrix_mul_f1 #q #n1 #n2 #n3 a b i c) c
