@@ -81,5 +81,12 @@ clean:
         | xargs rm -f
 
 %.fst-in:
-	@echo --include ../evercrypt --include $(KREMLIN_HOME)/kremlib
-
+	@echo $(addprefix --include ,\
+	  ../evercrypt $(KREMLIN_HOME)/kremlib \
+          ../../code/lib/kremlin \
+	  ../../specs \
+	  ../../code/hash \
+	  ../../code/hash/interfaces \
+	  ../../code/curve25519 \
+	  ../../code/curve25519/interfaces \
+	  ../../code/bignum)

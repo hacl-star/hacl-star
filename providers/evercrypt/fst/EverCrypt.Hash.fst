@@ -63,10 +63,11 @@ let repr #a s h: GTot _ =
         counter = ValeGlue.sha256_counter h p
       }
   | SHA384_Hacl p ->
+      let p = T.new_to_old_ghost p in
       {
-        k = Seq.create 80 0UL;
-        hash = Seq.create 8 0UL;
-        counter = 0
+        k = Hacl.SHA2_384.slice_k h p;
+        hash = Hacl.SHA2_384.slice_hash h p;
+        counter = Hacl.SHA2_384.counter h p
       }
 
 let repr_eq (#a:e_alg) (r1 r2: repr_t a) =
@@ -112,11 +113,14 @@ let create a =
   assert (M.(modifies loc_none h0 h2));
   r
 
-#set-options "--z3rlimit 20"
+#set-options "--max_fuel 0"
 
 let init #a s =
   match !*s with
   | SHA256_Hacl p ->
       Hacl.SHA2_256.init (T.new_to_old_st p)
-  | _ ->
+  | SHA384_Hacl p ->
+      Hacl.SHA2_384.init (T.new_to_old_st p)
+  | SHA256_Vale p ->
+      ValeGlue.sha256_init p;
       admit ()
