@@ -1,0 +1,44 @@
+[
+  "ixaíCÔ|$ÖV¢Ÿ‰X\u001bΩ",
+  [
+    [
+      "LowCProvider.aead_create",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_CryptoTypes.aead_cipher__uu___haseq",
+        "equation_CryptoTypes.aeadKeySize",
+        "fuel_guarded_inversion_CryptoTypes.aead_cipher",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "2be0e1ae5addc2758c7c90032fa7a3b1"
+    ],
+    [
+      "LowCProvider.aead_encrypt",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_CryptoTypes.aeadRealIVSize",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "3dfb68e4dfc060a4dea0e07db47db461"
+    ],
+    [
+      "LowCProvider.aead_decrypt",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_CryptoTypes.aeadRealIVSize",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "4867d4d5b58d2c794917d0078ec4fbb3"
+    ]
+  ]
+]

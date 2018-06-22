@@ -1,0 +1,48 @@
+[
+  "<dÿZ€|Á‹\n\u0007¡\u0018ó¼¤Ì",
+  [
+    [
+      "Flag.mac1_implies_mac_log",
+      1,
+      2,
+      1,
+      [ "@query", "equation_Flag.mac1", "projection_inverse_BoxBool_proj_0" ],
+      0,
+      "86972214bd6a9eea194b2e6465323f11"
+    ],
+    [
+      "Flag.mac1_implies_prf",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Flag.mac_log", "lemma_Flag.mac1_implies_mac_log",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "85c983f4e58752e29f3015570a8be47b"
+    ],
+    [
+      "Flag.safeId_implies_mac1",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Flag.safeId", "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "92af9e307661632e79e8dc56024a82f0"
+    ],
+    [
+      "Flag.safeId_implies_cpa",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Flag.safeId", "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "66529aee9117ec0d223606ad85c79831"
+    ]
+  ]
+]
