@@ -7,17 +7,17 @@ open Lib.Sequence
 let size_pos = x:size_nat{x > 0}
 
 val zqelem_t:q:size_pos -> Type0
-val zqvector_t:q:size_pos -> n:size_pos -> Type0
-val zqmatrix_t:q:size_pos -> n:size_pos -> m:size_pos -> Type0
-
 val zqelem:#q:size_pos -> x:nat -> zqelem_t q
-val zqadd:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> zqelem_t q
-val zqsub:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> zqelem_t q
-val zqmul:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> zqelem_t q
+val zqelem_v:#q:size_pos -> x:zqelem_t q -> GTot nat
+val zqadd:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> (r:zqelem_t q{zqelem_v r = (zqelem_v a + zqelem_v b) % q})
+val zqsub:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> (r:zqelem_t q{zqelem_v r = (zqelem_v a + q - zqelem_v b) % q})
+val zqmul:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> (r:zqelem_t q{zqelem_v r = (zqelem_v a * zqelem_v b) % q})
 
+val zqvector_t:q:size_pos -> n:size_pos -> Type0
 val zqvector_add:#q:size_pos -> #n:size_pos -> a:zqvector_t q n -> b:zqvector_t q n -> c:zqvector_t q n
 val zqvector_sub:#q:size_pos -> #n:size_pos -> a:zqvector_t q n -> b:zqvector_t q n -> c:zqvector_t q n
 
+val zqmatrix_t:q:size_pos -> n:size_pos -> m:size_pos -> Type0
 val get:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> m:zqmatrix_t q n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> res:zqelem_t q
 val set:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> m:zqmatrix_t q n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> v:zqelem_t q -> (res:zqmatrix_t q n1 n2{get res i j == v})
 

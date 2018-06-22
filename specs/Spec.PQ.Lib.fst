@@ -3,16 +3,16 @@ module Spec.PQ.Lib
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
+open FStar.Math.Lemmas
 
 let zqelem_t q = x:nat{x < q}
-let zqvector_t q n = lseq (zqelem_t q) n
-let zqmatrix_t q n m = lseq (zqvector_t q n) m
-
 let zqelem #q x = x % q
+let zqelem_v #q x = x
 let zqadd #q a b = zqelem (a + b)
 let zqsub #q a b = zqelem (a + q - b)
 let zqmul #q a b = zqelem (a * b)
 
+let zqvector_t q n = lseq (zqelem_t q) n
 let zqvector_add #q #n a b =
   let c:zqvector_t q n = create n (zqelem #q 0) in
   repeati n
@@ -26,6 +26,8 @@ let zqvector_sub #q #n a b =
   (fun i c ->
     c.[i] <- zqsub a.[i] b.[i]
   ) c
+
+let zqmatrix_t q n m = lseq (zqvector_t q n) m
 
 let get #q #n1 #n2 m i j = (m.[j]).[i]
 
@@ -134,7 +136,10 @@ val lemma_zqadd_associativity:
   (requires True)
   (ensures (zqadd (zqadd a b) c == zqadd a (zqadd b c)))
   [SMTPat (zqadd (zqadd a b) c)]
-let lemma_zqadd_associativity #q a b c = admit()
+let lemma_zqadd_associativity #q a b c =
+  let r = zqadd (zqadd a b) c in
+  lemma_mod_plus_distr_l (zqelem_v a + zqelem_v b) (zqelem_v c) q;
+  lemma_mod_plus_distr_l (zqelem_v b + zqelem_v c) (zqelem_v a) q
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
 let matrix_associativity_add #q #n1 #n2 a b c =
@@ -153,6 +158,7 @@ let matrix_sub_zero #q #n1 #n2 a =
   let r = zqmatrix_sub a a in
   matrix_equality r (zqmatrix_zero #q #n1 #n2)
 
+#reset-options "--z3rlimit 50 --max_fuel 0"
 let matrix_add_zero #q #n1 #n2 a =
   let r = zqmatrix_add a (zqmatrix_zero #q #n1 #n2) in
   matrix_equality #q #n1 #n2 r a
