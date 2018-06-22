@@ -11,8 +11,6 @@ module G = FStar.Ghost
 
 open LowStar.BufferOps
 
-#reset-options "--using_facts_from '* -Hacl -Spec'"
-
 type alg =
 | SHA256
 | SHA384
@@ -86,14 +84,10 @@ val create: a:alg -> ST (state (G.hide a))
     M.(modifies loc_none h0 h1) /\
     fresh_loc (footprint s h1) h0 h1)
 
-#reset-options "--lax"
-
 let init_repr (a: e_alg): GTot (repr_t a) =
   match G.reveal a with
   | SHA256 -> EverCrypt.Spec.SHA2_256.h_0
   | SHA384 -> EverCrypt.Spec.SHA2_384.h_0
-
-#reset-options "--using_facts_from '* -Hacl -Spec'"
 
 val init: #a:e_alg -> s:state a -> ST unit
   (requires (invariant s))
@@ -101,4 +95,4 @@ val init: #a:e_alg -> s:state a -> ST unit
     invariant s h1 /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    repr s h1 === init_repr a))
+    repr s h1 == init_repr a))
