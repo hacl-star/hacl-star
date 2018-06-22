@@ -166,9 +166,11 @@ let update (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
 
 
 let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}) : Tot hash_w (decreases (Seq.length blocks)) =
-  if Seq.length blocks = 0 then hash
+  if Seq.length blocks = 0
+  then hash
   else
     let (block,rem) = Seq.split blocks size_block in
+    assert (length rem % size_block = 0);
     let hash = update hash block in
     update_multi hash rem
 

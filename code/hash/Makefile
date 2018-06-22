@@ -1,4 +1,5 @@
-include ../../Makefile.include
+HACL_HOME?=../..
+include $(HACL_HOME)/Makefile.include
 
 # Files for verification
 SHA2_FILES = \
