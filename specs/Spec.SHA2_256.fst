@@ -22,10 +22,11 @@ let pow2_61 : (x:nat{x == pow2 61}) =
 //
 
 (* Define algorithm parameters *)
+let size_word = 4
 let size_hash_w = 8
 let size_block_w = 16
-let size_hash = 4 * size_hash_w
-let size_block = 4 * size_block_w
+let size_hash = size_word * size_hash_w
+let size_block = size_word * size_block_w
 let size_k_w = 64
 let size_ws_w = size_k_w
 let size_len_8 = 8
