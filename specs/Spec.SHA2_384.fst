@@ -208,6 +208,7 @@ let rec update_multi_append hash blocks1 blocks2 =
       update_multi hash (blocks1 @| blocks2)
     *)
     let b , blocks1' = Seq.split_eq blocks1 size_block in
+    assert (length blocks1' % size_block = 0);
     let b', blocks12 = Seq.split_eq (blocks1 @| blocks2) size_block in
     Seq.append_assoc b blocks1' blocks2;
     Seq.lemma_append_inj b (blocks1' @| blocks2) b' blocks12;
