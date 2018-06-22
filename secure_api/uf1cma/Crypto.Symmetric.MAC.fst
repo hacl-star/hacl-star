@@ -388,7 +388,7 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 150 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1"
 let update #i r a w =
   begin
   match alg i with
@@ -473,6 +473,8 @@ let lemma_modifies_3_2_finish #a #a' h h' h'' b b' =
   lemma_reveal_modifies_0 h h';
   lemma_reveal_modifies_2 b b' h' h'';
   lemma_intro_modifies_3_2 b b' h h''
+
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 let finish #i s a t =
   let h0 = ST.get() in
