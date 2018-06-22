@@ -1123,7 +1123,8 @@ let update_last state data len =
   (* Pop the memory frame *)
   (**) pop_frame();
   (**) let hfin = ST.get() in
-  (**) modifies_popped_1 state hinit h00 h5 hfin
+  (**) modifies_popped_1 state hinit h00 h5 hfin;
+  admit ()
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
