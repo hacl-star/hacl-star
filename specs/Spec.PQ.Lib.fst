@@ -181,50 +181,7 @@ let rec sum_mul_scalar q n f tmp0 sc i =
     sum_mul_scalar q n f (zqadd tmp0 (f i)) sc (i + 1) end
   else ()
 
-// // let rec sum_ q n f tmp0 i =
-// //   if (i < n) then
-// //     sum_ q n f (zqadd tmp0 (f i)) (i + 1)
-// //   else tmp0
-
-// val sum_fubini:
-//   q:size_pos -> n1:size_nat -> n2:size_nat ->
-//   f:(i:size_nat{i < n1} -> j:size_nat{j < n2} -> zqelem_t q) ->
-//   tmp0:zqelem_t q -> k:size_nat{k <= n1} -> Lemma
-//   (requires True)
-//   (ensures (sum_ q n1 (fun i -> sum_ q n2 (fun j -> f i j) tmp0 0) (zqelem 0) k == sum_ q n2 (fun j -> sum_ q n1 (fun i -> f i j) tmp0 k) (zqelem 0) 0))
-//   (decreases (n1 - k))
-//   #reset-options "--z3rlimit 50 --max_fuel 1"
-// let rec sum_fubini q n1 n2 f tmp0 k =
-//   if (k < n1) then begin
-//     //assert (sum_ q n1 (fun i -> sum_ q n2 (fun j -> f i j) tmp0 n2) tmp0 i == sum_ q n1 (fun i -> sum_ q n2 (fun j -> f i j) tmp0 n2) (zqadd tmp0 (sum_ q n2 (fun j -> f i j) tmp0 n2)) (i + 1));
-//     //sum_extensionality q n2 (fun j -> sum_ q n1 (fun i -> f i j) tmp0 i) (fun j -> sum_ q n1 (fun i -> f i j) (zqadd tmp0 (f i j)) (i + 1)) tmp0 n2;
-//     //assert (sum_ q n2 (fun j -> sum_ q n1 (fun i -> f i j) tmp0 i) tmp0 n2 == sum_ q n2 (fun j -> sum_ q n1 (fun i -> f i j) (zqadd tmp0 (sum_ q n2 (fun j -> f i j) tmp0 n2)) i) tmp0 n2);
-//    // sum_fubini q n1 n2 f (zqadd tmp0 (sum_ q n2 (fun j -> f i j) tmp0 n2)) (i + 1);
-//     //assert (sum_ q n1 (fun i -> sum_ q n2 (fun j -> f i j) (zqadd tmp0 (sum_ q n2 (fun j -> f i j) tmp0 n2)) n2) tmp0 i == sum_ q n2 (fun j -> sum_ q n1 (fun i -> f i j) tmp0 i) tmp0 n2)
-//     admit() end
-//   else begin
-//     assert (sum_ q n1 (fun i -> sum_ q n2 (fun j -> f i j) tmp0 0) (zqelem 0) k = zqelem 0);
-//     assert (sum_ q n2 (fun j -> sum_ q n1 (fun i -> f i j) tmp0 k) (zqelem 0) 0 = sum_ q n2 (fun j -> tmp0) (zqelem 0) 0);
-//     admit()
-//   end
-
-//   // assume (sum q n3 (fun j -> sum q n2 (fun l -> zqmul (get a i l) (zqmul (get b l j) (get c j k))) (zqelem 0)) (zqelem 0) ==
-//   // 	     sum q n2 (fun l -> sum q n3 (fun j -> zqmul (get a i l) (zqmul (get b l j) (get c j k))) (zqelem 0)) (zqelem 0));
-
-
 (* Lemmas *)
-// assume val zqmatrix_create_f:
-//   q:size_pos -> n:size_pos -> m:size_pos ->
-//   f:(i:size_nat{i < n} -> j:size_nat{j < m} -> zqelem_t q) ->
-//   Tot (r:zqmatrix_t q n m{forall (i:size_nat{i < n}) (j:size_nat{j < m}).{:pattern get r i j} get r i j == f i j})
-
-// assume val matrix_extensionality:
-//   #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
-//   f:(i:size_nat{i < n1} -> j:size_nat{j < n2} -> zqelem_t q) ->
-//   g:(i:size_nat{i < n1} -> j:size_nat{j < n2} -> zqelem_t q) -> Lemma
-//   (requires (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). f i j == g i j))
-//   (ensures (zqmatrix_create_f q n1 n2 f == zqmatrix_create_f q n1 n2 g))
-
 val matrix_equality:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
   a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> Lemma
@@ -269,16 +226,10 @@ val sum_extensionality':
 let sum_extensionality' n1 n3 q n i k f g =
   sum_extensionality q n f g (zqelem 0) 0
 
-
 #reset-options "--z3rlimit 50 --max_fuel 0"
 let matrix_distributivity_add_right #q #n1 #n2 #n3 a b c =
   let r1 = zqmatrix_add a b in
   let r2 = zqmatrix_mul r1 c in
-  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern (get r1 i j)}
-    get r1 i j == zqadd (get a i j) (get b i j));
-  assert (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).{:pattern (get r2 i k)}
-    get r2 i k ==
-    sum q n2 (fun j -> zqmul (get r1 i j) (get c j k)) (zqelem 0));
   assert (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).
     (forall (j:size_nat{j < n2}).
       (fun j -> zqmul (get r1 i j) (get c j k)) j ==
@@ -296,9 +247,17 @@ let matrix_distributivity_add_right #q #n1 #n2 #n3 a b c =
   assert (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).{:pattern (get r2 i k)}
     get r2 i k ==
     sum q n2 (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) (zqelem 0));
-  assume (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).
+  Classical.forall_intro_2 #(i:size_nat{i < n1}) #(fun i -> k:size_nat{k < n3})
+    #(fun i k -> sum q n2 (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) (zqelem 0) ==
+	       zqadd (sum q n2 (fun j -> zqmul (get a i j) (get c j k)) (zqelem 0)) (sum q n2 (fun j -> zqmul (get b i j) (get c j k)) (zqelem 0)))
+    (fun i k ->
+      (matrix_distributivity_add_right_get #q #n1 #n2 #n3 a b c i k) <:
+      (Lemma
+        (sum q n2 (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) (zqelem 0) ==
+	 zqadd (sum q n2 (fun j -> zqmul (get a i j) (get c j k)) (zqelem 0)) (sum q n2 (fun j -> zqmul (get b i j) (get c j k)) (zqelem 0)))));
+  assert (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).
     sum q n2 (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) (zqelem 0) ==
-	  zqadd (sum q n2 (fun j -> zqmul (get a i j) (get c j k)) (zqelem 0)) (sum q n2 (fun j -> zqmul (get b i j) (get c j k)) (zqelem 0)));
+    zqadd (sum q n2 (fun j -> zqmul (get a i j) (get c j k)) (zqelem 0)) (sum q n2 (fun j -> zqmul (get b i j) (get c j k)) (zqelem 0)));
   let r3 = zqmatrix_mul a c in
   let r4 = zqmatrix_mul b c in
   let r5 = zqmatrix_add r3 r4 in
@@ -312,6 +271,8 @@ val zqadd_distr_left:
 let zqadd_distr_left #q a b c =
   let r = zqmul c (zqadd a b) in
   lemma_mod_mul_distr_l (zqelem_v a + zqelem_v b) (zqelem_v c) q;
+  assert (zqelem_v r = ((zqelem_v a + zqelem_v b) * zqelem_v c) % q);
+  assert (zqelem_v r = (zqelem_v c * (zqelem_v a + zqelem_v b)) % q);
   distributivity_add_right (zqelem_v c) (zqelem_v a) (zqelem_v b);
   modulo_distributivity (zqelem_v c * zqelem_v a) (zqelem_v c * zqelem_v b) q
 
@@ -320,31 +281,49 @@ val matrix_distributivity_add_left_get:
   a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> c:zqmatrix_t q n3 n1 ->
   i:size_nat{i < n3} -> k:size_nat{k < n2} -> Lemma
   (requires True)
-  (ensures (sum q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0) ==
-             zqadd (sum q n1 (fun j -> zqmul (get c i j) (get a j k)) (zqelem 0)) (sum q n1 (fun j -> zqmul (get c i j) (get b j k)) (zqelem 0))))
-  #reset-options "--z3rlimit 100 --max_fuel 0"
+  (ensures (zqadd (sum q n1 (fun j -> zqmul (get c i j) (get a j k)) (zqelem 0)) (sum q n1 (fun j -> zqmul (get c i j) (get b j k)) (zqelem 0)) ==
+	    sum q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0)))
 let matrix_distributivity_add_left_get #q #n1 #n2 #n3 a b c i k =
   sum_linearity q n1 (fun j -> zqmul (get c i j) (get a j k)) (zqelem 0) (fun j -> zqmul (get c i j) (get b j k)) (zqelem 0) 0;
+  assert (zqadd (sum q n1 (fun j -> zqmul (get c i j) (get a j k)) (zqelem 0)) (sum q n1 (fun j -> zqmul (get c i j) (get b j k)) (zqelem 0)) ==
+	  sum q n1 (fun j -> zqadd (zqmul (get c i j) (get a j k)) (zqmul (get c i j) (get b j k))) (zqelem 0));
   sum_extensionality q n1 (fun j -> zqadd (zqmul (get c i j) (get a j k)) (zqmul (get c i j) (get b j k))) (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0) 0
 
 let matrix_distributivity_add_left #q #n1 #n2 #n3 a b c =
   let r1 = zqmatrix_add a b in
   let r2 = zqmatrix_mul c r1 in
-  assume (forall (i:size_nat{i < n3}) (k:size_nat{k < n2}). get r2 i k == sum q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0));
-  assume (forall (i:size_nat{i < n3}) (k:size_nat{k < n2}). sum q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0) ==
-	 zqadd (sum q n1 (fun j -> zqmul (get c i j) (get a j k)) (zqelem 0)) (sum q n1 (fun j -> zqmul (get c i j) (get b j k)) (zqelem 0)));
+  assert (forall (i:size_nat{i < n3}) (k:size_nat{k < n2}).
+    (forall (j:size_nat{j < n1}).
+      (fun j -> zqmul (get c i j) (get r1 j k)) j ==
+      (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) j));
+  Classical.forall_intro_2 #(i:size_nat{i < n3}) #(fun i -> k:size_nat{k < n2})
+    #(fun i k -> sum_ q n1 (fun j -> zqmul (get c i j) (get r1 j k)) (zqelem 0) 0 ==
+               sum_ q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0) 0)
+    (fun i k ->
+      (sum_extensionality' n3 n2 q n1 i k
+        (fun j -> zqmul (get c i j) (get r1 j k))
+        (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k)))) <:
+      (Lemma
+        (sum_ q n1 (fun j -> zqmul (get c i j) (get r1 j k)) (zqelem 0) 0 ==
+         sum_ q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0) 0)));
+  assert (forall (i:size_nat{i < n3}) (k:size_nat{k < n2}).
+    get r2 i k ==
+    sum_ q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0) 0);
+  Classical.forall_intro_2 #(i:size_nat{i < n3}) #(fun i -> k:size_nat{k < n2})
+    #(fun i k -> sum q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0) ==
+	       zqadd (sum q n1 (fun j -> zqmul (get c i j) (get a j k)) (zqelem 0)) (sum q n1 (fun j -> zqmul (get c i j) (get b j k)) (zqelem 0)))
+    (fun i k ->
+      (matrix_distributivity_add_left_get #q #n1 #n2 #n3 a b c i k) <:
+      (Lemma
+	(sum q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0) ==
+         zqadd (sum q n1 (fun j -> zqmul (get c i j) (get a j k)) (zqelem 0)) (sum q n1 (fun j -> zqmul (get c i j) (get b j k)) (zqelem 0)))));
+  assert (forall (i:size_nat{i < n3}) (k:size_nat{k < n2}).
+    sum q n1 (fun j -> zqmul (get c i j) (zqadd (get a j k) (get b j k))) (zqelem 0) ==
+    zqadd (sum q n1 (fun j -> zqmul (get c i j) (get a j k)) (zqelem 0)) (sum q n1 (fun j -> zqmul (get c i j) (get b j k)) (zqelem 0)));
   let r3 = zqmatrix_mul c a in
   let r4 = zqmatrix_mul c b in
   let r5 = zqmatrix_add r3 r4 in
   matrix_equality r2 r5
-
-// val matrix_associativity_mul:
-//   #q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos -> #n4:size_pos ->
-//   a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n2 n3 -> c:zqmatrix_t q n3 n4 -> Lemma
-//   (zqmatrix_mul (zqmatrix_mul a b) c == zqmatrix_mul a (zqmatrix_mul b c))
-
-// zqmul (sum_ q n f tmp0 i) sc == sum_ q n (fun j -> zqmul sc (f j)) (zqmul tmp0 sc) i))
-// let rec sum_mul_scalar q n f tmp0 sc i =
 
 val zqmul_assoc:
   #q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> c:zqelem_t q ->
