@@ -153,11 +153,11 @@ sha2.exe: $(LIBS_FILES) Spec.SHA2.fst tests/Spec.SHA2.Test.fst
 	$(OCAMLOPT) -I sha2-ml $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
 	./sha2.exe
 
-keccak.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Keccak.fst tests/Spec.Keccak.Test.fst
+keccak.exe: $(LIBS_FILES) Spec.Keccak.fst tests/Spec.Keccak.Test.fst
 	mkdir -p keccak-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.Keccak --extract_module Spec.Keccak.Test --odir keccak-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Keccak --extract_module Spec.Keccak.Test --odir keccak-ml $^
 	@echo 'let _ = test()' >> keccak-ml/Spec_Keccak_Test.ml
-	$(OCAMLOPT) -I keccak-ml keccak-ml/Lib_IntTypes.ml keccak-ml/Lib_RawIntTypes.ml keccak-ml/Lib_Sequence.ml keccak-ml/Lib_Stateful.ml keccak-ml/Spec_Keccak.ml keccak-ml/Spec_Keccak_Test.ml -o keccak.exe
+	$(OCAMLOPT) -I keccak-ml $(addprefix keccak-ml/, $(LIBS_ML)) keccak-ml/Spec_Keccak.ml keccak-ml/Spec_Keccak_Test.ml -o keccak.exe
 	./keccak.exe
 
 blake2s.exe: $(LIBS_FILES) Spec.Blake2s.fst tests/Spec.Blake2s.Test.fst

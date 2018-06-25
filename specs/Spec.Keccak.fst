@@ -91,11 +91,11 @@ let storeState (rateInBytes:size_nat{rateInBytes <= 200})
       update_slice block (j * 8) (j*8 + 8) (uint_to_bytes_le #U64 s.[j])) block in
   slice block 0 rateInBytes
 
-let absorb (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
+let absorb (s:state)
+           (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
 	   (inputByteLen:size_nat)
 	   (input:lbytes inputByteLen)
 	   (delimitedSuffix:uint8) : state =
-  let s : state = create 25 (u64 0) in
   let n = inputByteLen / rateInBytes in
   let s : state =
     repeati n (fun i s ->
@@ -141,7 +141,8 @@ let keccak (rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600})
 	   (outputByteLen:size_nat)
 	   : lbytes outputByteLen =
   let rateInBytes : size_nat = rate / 8 in
-  let s = absorb rateInBytes inputByteLen input delimitedSuffix in
+  let s : state = create 25 (u64 0) in  
+  let s = absorb s rateInBytes inputByteLen input delimitedSuffix in
   squeeze s rateInBytes outputByteLen
 
 let shake128 (inputByteLen:size_nat) (input:lbytes inputByteLen) (outputByteLen:size_nat) : lbytes outputByteLen =
