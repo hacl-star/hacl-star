@@ -1,3 +1,5 @@
+FSTAR_HOME=$(HACL_HOME)/../FStar
+
 include ../Makefile.include
 
 .PHONY=all test

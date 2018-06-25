@@ -157,6 +157,7 @@ val sum_extensionality:
   (requires (forall (i:size_nat{i < n}). f i == g i))
   (ensures (sum_ q n f tmp0 i == sum_ q n g tmp0 i))
   (decreases (n - i))
+  [SMTPat (sum_ q n f tmp0 i == sum_ q n g tmp0 i)]
   #reset-options "--z3rlimit 50 --max_fuel 1"
 let rec sum_extensionality q n f g tmp0 i =
   if (i < n) then
@@ -255,12 +256,48 @@ let matrix_distributivity_add_right_get #q #n1 #n2 #n3 a b c i k =
   sum_linearity q n2 (fun j -> zqmul (get a i j) (get c j k)) (zqelem 0) (fun j -> zqmul (get b i j) (get c j k)) (zqelem 0) 0;
   sum_extensionality q n2 (fun j -> zqadd (zqmul (get a i j) (get c j k)) (zqmul (get b i j) (get c j k))) (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) (zqelem 0) 0
 
+val sum_extensionality':
+  n1:size_pos ->
+  n3:size_pos ->
+  q:size_pos ->
+  n:size_nat ->
+  i:size_nat{i < n1} ->
+  k:size_nat{k < n3} ->
+  f:(i:size_nat{i < n} -> zqelem_t q) ->
+  g:(i:size_nat{i < n} -> zqelem_t q){(forall (i:size_nat{i < n}). f i == g i)} ->
+  Lemma (sum_ q n f (zqelem 0) 0 == sum_ q n g (zqelem 0) 0)
+let sum_extensionality' n1 n3 q n i k f g =
+  sum_extensionality q n f g (zqelem 0) 0
+
+
 #reset-options "--z3rlimit 50 --max_fuel 0"
 let matrix_distributivity_add_right #q #n1 #n2 #n3 a b c =
   let r1 = zqmatrix_add a b in
   let r2 = zqmatrix_mul r1 c in
-  assume (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}). get r2 i k == sum q n2 (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) (zqelem 0));
-  assume (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}). sum q n2 (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) (zqelem 0) ==
+  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern (get r1 i j)}
+    get r1 i j == zqadd (get a i j) (get b i j));
+  assert (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).{:pattern (get r2 i k)}
+    get r2 i k ==
+    sum q n2 (fun j -> zqmul (get r1 i j) (get c j k)) (zqelem 0));
+  assert (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).
+    (forall (j:size_nat{j < n2}).
+      (fun j -> zqmul (get r1 i j) (get c j k)) j ==
+      (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) j));
+  Classical.forall_intro_2 #(i:size_nat{i < n1}) #(fun i -> k:size_nat{k < n3})
+    #(fun i k -> sum_ q n2 (fun j -> (zqmul (get r1 i j) (get c j k))) (zqelem 0) 0 ==
+              sum_ q n2 (fun j -> (zqmul (zqadd (get a i j) (get b i j)) (get c j k))) (zqelem 0) 0)
+    (fun i k ->
+      ((sum_extensionality' n1 n3 q n2 i k
+        (fun j -> zqmul (get r1 i j) (get c j k))
+        (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k))) <:
+      (Lemma
+        (sum_ q n2 (fun j -> (zqmul (get r1 i j) (get c j k))) (zqelem 0) 0 ==
+         sum_ q n2 (fun j -> (zqmul (zqadd (get a i j) (get b i j)) (get c j k))) (zqelem 0) 0))));
+  assert (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).{:pattern (get r2 i k)}
+    get r2 i k ==
+    sum q n2 (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) (zqelem 0));
+  assume (forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).
+    sum q n2 (fun j -> zqmul (zqadd (get a i j) (get b i j)) (get c j k)) (zqelem 0) ==
 	  zqadd (sum q n2 (fun j -> zqmul (get a i j) (get c j k)) (zqelem 0)) (sum q n2 (fun j -> zqmul (get b i j) (get c j k)) (zqelem 0)));
   let r3 = zqmatrix_mul a c in
   let r4 = zqmatrix_mul b c in
