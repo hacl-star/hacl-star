@@ -22,6 +22,8 @@ val zqmatrix_create:q:size_pos -> n:size_pos -> m:size_pos -> zqmatrix_t q n m
 val get:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> m:zqmatrix_t q n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> zqelem_t q
 val set:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> m:zqmatrix_t q n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> v:zqelem_t q -> (res:zqmatrix_t q n1 n2{get res i j == v})
 
+val sum:q:size_pos -> n:size_nat -> f:(i:size_nat{i < n} -> zqelem_t q) -> tmp0:zqelem_t q -> zqelem_t q
+
 val zqmatrix_zero:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> Pure (zqmatrix_t q n1 n2)
   (requires True)
   (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern get res i j} get res i j == zqelem #q 0))
@@ -36,7 +38,7 @@ val zqmatrix_sub:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n
 
 val zqmatrix_mul:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n2 n3 -> Pure (zqmatrix_t q n1 n3)
   (requires True)
-  (ensures (fun res -> forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).{:pattern get res i k} get res i k == repeati n2 (fun j tmp -> zqadd tmp (zqmul (get a i j) (get b j k))) (zqelem #q 0)))
+  (ensures (fun res -> forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).{:pattern get res i k} get res i k == sum q n2 (fun j -> zqmul (get a i j) (get b j k)) (zqelem #q 0)))
 
 (* Lemmas *)
 val matrix_distributivity_add_right:
