@@ -11,7 +11,8 @@ type fp_struct = {
 }
 
 (* Condition for validity *)
-type floating_point = s:fp_struct{pow2 (s.prec - 1) <= s.mant /\ s.mant < pow2 s.prec}
+let fp_cond (s:fp_struct) = pow2 (s.prec - 1) <= s.mant /\ s.mant < pow2 s.prec
+type floating_point = s:fp_struct{fp_cond s}
 
 (* Condition for parameters range corresponding to top level code *)
 let mpfr_PREC_MIN_P = 1

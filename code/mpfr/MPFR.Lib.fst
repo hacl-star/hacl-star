@@ -151,13 +151,13 @@ open FStar.UInt
 let mpfr_LIMB_ONE = 1uL
 
 val mpfr_LIMB_MASK: s:u32{U32.v s < 64} ->
-    Tot (r:u64{forall (i:nat{0 <= i /\ i < 64}). i >= 64 - U32.v s <==> nth (v r) i == true})
+    Tot (r:u64{v r = pow2 (U32.v s) - 1})
 let mpfr_LIMB_MASK s =
     let lsh = 1uL <<^ s in
     lemma_pow2_small_mod (U32.v s) 64;
     lsh -^ 1uL
 
-val mpfr_LIMB_HIGHBIT: s:u64{forall (i:nat{0 <= i /\ i < 64}). i == 0 <==> nth (v s) i == true}
+val mpfr_LIMB_HIGHBIT: s:u64{v s = pow2 63}
 let mpfr_LIMB_HIGHBIT =
     assert_norm(pow2_n #64 63 == v 0x8000000000000000uL);
     0x8000000000000000uL
