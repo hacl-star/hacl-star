@@ -92,10 +92,10 @@ let create a =
     match a with
     | SHA256 ->
         if SC.vale && i = AC.Vale then
-          let b = B.malloc HS.root 0ul Hacl.SHA2_256.size_state in
+          let b = B.malloc HS.root 0ul ValeGlue.sha256_size_state in
           SHA256_Vale b
         else
-          let b = B.malloc HS.root 0ul ValeGlue.sha256_size_state in
+          let b = B.malloc HS.root 0ul Hacl.SHA2_256.size_state in
           SHA256_Hacl b
     | SHA384 ->
         let b = B.malloc HS.root 0UL Hacl.SHA2_384.size_state in
