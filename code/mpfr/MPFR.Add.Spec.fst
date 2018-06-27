@@ -33,7 +33,9 @@ let add_exp a b = min a.exp b.exp
 
 val add_prec: a:floating_point ->
               b:floating_point{a.sign = b.sign} ->
-	  Tot nat
+	  Tot (p:nat{let p0 = if a.exp >= b.exp then max (a.prec + a.exp - b.exp) b.prec 
+                                             else max (b.prec + b.exp - a.exp) a.prec in
+	           p0 <= p /\ p <= p0 + 1})
 let add_prec a b =
     let p0 = if a.exp >= b.exp then max (a.prec + a.exp - b.exp) b.prec 
                               else max (b.prec + b.exp - a.exp) a.prec in

@@ -11,7 +11,6 @@ open FStar.Mul
 open MPFR.Lib
 open MPFR.Lib.Spec
 open MPFR.Rounding.Spec
-open MPFR.Add1sp1.Pure
 open MPFR.Lemmas
 
 module I64 = FStar.Int64
@@ -70,7 +69,7 @@ let mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p =
     lemma_pow2_div_lt (v cm) 64 (64 - U32.v p);
     lemma_div_le (pow2 63) (v cm) (pow2 (64 - U32.v p))
 
-let mpfr_add1sp1_gt_cond 
+let mpfr_add1sp1_gt_mant_cond 
     (bx:mpfr_exp_t)
     (bm:mp_limb_t{mpfr_d_val0_cond bm})
     (cx:mpfr_exp_t{I32.v bx > I32.v cx})
@@ -83,205 +82,54 @@ let mpfr_add1sp1_gt_cond
              mant = v cm / pow2 (64 - U32.v p); exp = I32.v cx - U32.v p} in
     mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
     let r = Spec.add b c in
-    v st.am / pow2 (64 - U32.v p) = main_mant r (U32.v p) /\
-    (v st.rb <> 0 <==> rb_spec r (U32.v p)) /\
-    (v st.sb <> 0 <==> sb_spec r (U32.v p))
-(*
-private val mpfr_add1sp1_gt_branch_lemma1:
-    bx:mpfr_exp_t ->
-    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
-    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
-    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
-    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p /\
-        I32.v bx - I32.v cx < U32.v gmp_NUMB_BITS - U32.v p} -> 
-    Lemma (
-        let sh = U32.(gmp_NUMB_BITS -^ p) in
-        let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
-        let d = int32_to_uint32 I32.(bx -^ cx) in
-        let mask = mpfr_LIMB_MASK sh in
-        let am = bm +%^ (cm >>^ d) in
-	let (am, ax) =
-	    if (am <^ bm) then 
-	        (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
-	    else (am, bx) in
-        let rb = am &^ sh_high in
-	let sb = (am &^ mask) ^^ rb in
-	let am = am &^ (lognot mask) in
-	let st = mk_state 0l ax am rb sb in
-	valid_state st p /\ mpfr_add1sp1_gt_cond bx bm cx cm p st)
-*)
-(*
-let mpfr_add1sp1_gt_branch_lemma1 bx bm cx cm p =
+    v st.am / pow2 (64 - U32.v p) = main_mant r (U32.v p)
+    
+let mpfr_add1sp1_gt_rb_cond 
+    (bx:mpfr_exp_t)
+    (bm:mp_limb_t{mpfr_d_val0_cond bm})
+    (cx:mpfr_exp_t{I32.v bx > I32.v cx})
+    (cm:mp_limb_t{mpfr_d_val0_cond cm})
+    (p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p}) 
+    (st:state) =
     let b = {sign = 1; prec = U32.v p;
              mant = v bm / pow2 (64 - U32.v p); exp = I32.v bx - U32.v p} in
     let c = {sign = 1; prec = U32.v p;
              mant = v cm / pow2 (64 - U32.v p); exp = I32.v cx - U32.v p} in
     mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
     let r = Spec.add b c in
-    assert(v bm = b.mant * pow2 (64 - U32.v p));
-    assert(v cm = c.mant * pow2 (64 - U32.v p));
-    let sh = U32.(gmp_NUMB_BITS -^ p) in
-    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
-    let d = int32_to_uint32 I32.(bx -^ cx) in
-    let mask = mpfr_LIMB_MASK sh in
-    FStar.UInt.shift_right_value_lemma #64 (v cm) (U32.v d); 
-    assert(v (cm >>^ d) = FStar.UInt.shift_right (v cm) (U32.v d));
-    admit();
-    assert(v (cm >>^ d) = (v cm) / pow2 (U32.v d));
-    let am = bm +%^ (cm >>^ d) in
-    let (am, ax) =
-	if (am <^ bm) then begin
-	    UInt.logor_ge (v mpfr_LIMB_HIGHBIT) (v (am >>^ 1ul));
-	    (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
-	end else (am, bx) in
-    lemma_ge_pow2_imp_fst_bit am;
-    let rb = am &^ sh_high in
-    let sb = (am &^ mask) ^^ rb in
-    let am = am &^ (lognot mask) in
-    let st = mk_state 0l ax am rb sb in
-    lemma_fst_bit_imp_ge_pow2 am;
-    lemma_tl_zero_imp_mod_pow2 am sh;
-    assume(v st.am / pow2 (64 - U32.v p) = main_mant r (U32.v p) /\
-    (v st.rb <> 0 <==> rb_spec r (U32.v p)) /\
-    (v st.sb <> 0 <==> sb_spec r (U32.v p)))
+    ((v st.rb <> 0) = rb_spec r (U32.v p))
 
-private val mpfr_add1sp1_gt_branch_lemma2:
-    bx:mpfr_exp_t ->
-    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
-    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
-    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
-    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p /\
-        I32.v bx - I32.v cx >= U32.v gmp_NUMB_BITS - U32.v p /\
-	I32.v bx - I32.v cx < U32.v gmp_NUMB_BITS} -> 
-    Lemma (
-        let sh = U32.(gmp_NUMB_BITS -^ p) in
-        let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
-        let d = int32_to_uint32 I32.(bx -^ cx) in
-        let mask = mpfr_LIMB_MASK sh in
-	let sb = cm <<^ U32.(gmp_NUMB_BITS -^ d) in
-	let am = bm +%^ (cm >>^ d) in
-	let (sb, am, ax) =
-	    if am <^ bm then 
-	        (sb |^ (am &^ 1uL), mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
-	    else (sb, am, bx) in
-	let rb = am &^ sh_high in
-	let sb = sb |^ ((am &^ mask) ^^ rb) in
-        let am = am &^ (lognot mask) in
-	let st = mk_state 0l ax am rb sb in
-        valid_state st p /\ mpfr_add1sp1_gt_cond bx bm cx cm p st)
-let mpfr_add1sp1_gt_branch_lemma2 bx bm cx cm p =
-    admit();
-    let sh = U32.(gmp_NUMB_BITS -^ p) in
-    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
-    let d = int32_to_uint32 I32.(bx -^ cx) in
-    let mask = mpfr_LIMB_MASK sh in
-    let sb = cm <<^ U32.(gmp_NUMB_BITS -^ d) in
-    let am = bm +%^ (cm >>^ d) in
-    let (sb, am, bx) =
-	if am <^ bm then begin
-	    UInt.logor_ge (v mpfr_LIMB_HIGHBIT) (v (am >>^ 1ul));
-	    (sb |^ (am &^ 1uL), mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
-	end else (sb, am, bx) in
-    lemma_ge_pow2_imp_fst_bit am;
-    let rb = am &^ sh_high in
-    let sb = sb |^ ((am &^ mask) ^^ rb) in
-    let am = am &^ (lognot mask) in
-    lemma_fst_bit_imp_ge_pow2 am;
-    lemma_tl_zero_imp_mod_pow2 am sh
-
-private val mpfr_add1sp1_gt_branch_lemma3:
-    bx:mpfr_exp_t ->
-    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
-    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
-    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
-    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p /\
-	I32.v bx - I32.v cx >= U32.v gmp_NUMB_BITS} -> 
-    Lemma (let st = mk_state 0l bx bm 0uL 1uL in
-          valid_state st p /\ mpfr_add1sp1_gt_cond bx bm cx cm p st)
-let mpfr_add1sp1_gt_branch_lemma3 bx bm cx cm p = admit()
-*)
-(*
-val mpfr_add1sp1_gt_pvalid_input_lemma:
-    bx:int{bx >= 1 - pow2 30 /\ bx <= pow2 30 - 1} ->
-    bm:nat{bm >= pow2 63 /\ bm < pow2 64} ->
-    cx:int{cx >= 1 - pow2 30 /\ cx <= pow2 30 - 1 /\ bx > cx} ->
-    cm:nat{cm >= pow2 63 /\ cm < pow2 64} ->
-    p:pos{p < 64 /\ mpfr_d_valn_pcond bm p /\ mpfr_d_valn_pcond cm p} -> 
-    Lemma (let b = {sign = 1; prec = p;
-                    mant = bm / pow2 (64 - p); exp = bx - p} in
-           let c = {sign = 1; prec = p;
-	            mant = cm / pow2 (64 - p); exp = cx - p} in
-	   fp_cond b /\ mpfr_range_cond b /\ fp_cond c /\ mpfr_range_cond c)
-	   
-let mpfr_add1sp1_gt_pvalid_input_lemma bx bm cx cm p =
-    lemma_pow2_div 63 (64 - p);
-    let b = {sign = 1; prec = p;
-             mant = bm / pow2 (64 - p); exp = bx - p} in
-    lemma_pow2_div_lt bm 64 (64 - p);
-    lemma_div_le (pow2 63) bm (pow2 (64 - p));
-    let c = {sign = 1; prec = p;
-             mant = cm / pow2 (64 - p); exp = cx - p} in
-    lemma_pow2_div_lt cm 64 (64 - p);
-    lemma_div_le (pow2 63) cm (pow2 (64 - p))
-    
-let mpfr_add1sp1_gt_pcond 
-    (bx:int{bx >= 1 - pow2 30 /\ bx <= pow2 30 - 1})
-    (bm:nat{bm >= pow2 63 /\ bm < pow2 64})
-    (cx:int{cx >= 1 - pow2 30 /\ cx <= pow2 30 - 1 /\ bx > cx})
-    (cm:nat{cm >= pow2 63 /\ cm < pow2 64})
-    (p:pos{p < 64 /\ mpfr_d_valn_pcond bm p /\ mpfr_d_valn_pcond cm p})
-    (pst:pstate) =
-    let b = {sign = 1; prec = p;
-             mant = bm / pow2 (64 - p); exp = bx - p} in
-    let c = {sign = 1; prec = p;
-             mant = cm / pow2 (64 - p); exp = cx - p} in
-    mpfr_add1sp1_gt_pvalid_input_lemma bx bm cx cm p;
+let mpfr_add1sp1_gt_sb_cond 
+    (bx:mpfr_exp_t)
+    (bm:mp_limb_t{mpfr_d_val0_cond bm})
+    (cx:mpfr_exp_t{I32.v bx > I32.v cx})
+    (cm:mp_limb_t{mpfr_d_val0_cond cm})
+    (p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p}) 
+    (st:state) =
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (64 - U32.v p); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (64 - U32.v p); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
     let r = Spec.add b c in
-    pst.pam / pow2 (64 - p) = main_mant r p /\
-    (pst.prb <> 0 <==> rb_spec r p) /\
-    (pst.psb <> 0 <==> sb_spec r p)
-    
-val mpfr_add1sp1_gt_pure:
-    bx:int{bx >= 1 - pow2 30 /\ bx <= pow2 30 - 1} ->
-    bm:nat{bm >= pow2 63 /\ bm < pow2 64} ->
-    cx:int{cx >= 1 - pow2 30 /\ cx <= pow2 30 - 1 /\ bx > cx} ->
-    cm:nat{cm >= pow2 63 /\ cm < pow2 64} ->
-    p:pos{p < 64 /\ mpfr_d_valn_pcond bm p /\ mpfr_d_valn_pcond cm p} -> 
-    Tot (pst:pstate{valid_pstate pst p /\ mpfr_add1sp1_gt_pcond bx bm cx cm p pst})
+    ((v st.sb <> 0) = sb_spec r (U32.v p))
 
-let mpfr_add1sp1_gt_pure bx bm cx cm p =
-    admit();
-    let open FStar.UInt in
-    let sh = 64 - p in
-    let sh_high = shift_left #64 1 (sh - 1) in
-    let d = bx - cx in
-    let mask = pow2 sh - 1 in
-    if d < sh then begin
-        let am = (bm + shift_right #64 cm d) % (pow2 64) in
-	let (am, ax) =
-	    if am < bm then
-	        (logor #64 (pow2 63) (shift_right #64 am 1), bx + 1)
-	    else (am, bx) in
-	let rb = logand #64 am sh_high in
-	let sb = logxor #64 (logand #64 am mask) rb in
-	let am = logand #64 am (lognot #64 mask) in
-	mk_pstate 0 ax am rb sb
-    end else if d < 64 then begin
-        let sb = shift_left #64 cm (64 - d) in
-	let am = (bm + shift_right #64 cm d) % (pow2 64) in
-	let (sb, am, ax) =
-	    if am < bm then
-	        (logor #64 sb (logand #64 am 1), logor #64 (pow2 63) (shift_right #64 am 1), bx + 1)
-            else (sb, am, bx) in
-	let rb = logand #64 am sh_high in
-	let sb = logor #64 sb (logxor #64 (logand #64 am mask) rb) in
-	let am = logand #64 am (lognot #64 mask) in
-	mk_pstate 0 ax am rb sb
-    end else begin
-        mk_pstate 0 bx bm 0 1
-    end
-    *)
-    
+(*
+let mpfr_add1sp1_gt_exp_cond 
+    (bx:mpfr_exp_t)
+    (bm:mp_limb_t{mpfr_d_val0_cond bm})
+    (cx:mpfr_exp_t{I32.v bx > I32.v cx})
+    (cm:mp_limb_t{mpfr_d_val0_cond cm})
+    (p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p}) 
+    (st:state) =
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (64 - U32.v p); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (64 - U32.v p); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
+    let r = Spec.add b c in
+    I32.v st.ax = r.exp
+*)
 
 (* TODO: replace ax by bx *)
 val mpfr_add1sp1_gt_branch1_valid_lemma:
@@ -322,11 +170,188 @@ let mpfr_add1sp1_gt_branch1_valid_lemma bx bm cx cm p sh d =
     let sb = (am &^ mask) ^^ rb in
     let am = am &^ (lognot mask) in
     lemma_fst_bit_imp_ge_pow2 am;
-    lemma_tl_zero_imp_mod_pow2 am sh;
-    let st = mk_state 0l ax am rb sb in
+    lemma_tl_zero_imp_mod_pow2 am (U32.v sh)
+    
+val mpfr_add1sp1_gt_branch1_aux_tm_mod_lemma:
+    bx:mpfr_exp_t ->
+    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
+    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
+    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
+    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p} -> 
+    sh:u32{U32.v sh = U32.v gmp_NUMB_BITS - U32.v p} ->
+    d:u32{U32.v d = I32.v bx - I32.v cx /\ U32.v d < U32.v sh} -> Lemma (
+    let tm = v bm + v cm / pow2 (U32.v d) in
+    tm % pow2 (U32.v sh - U32.v d) = 0)
+
+let mpfr_add1sp1_gt_branch1_aux_tm_mod_lemma bx bm cx cm p sh d =
+    lemma_pow2_mod_mod (v bm) (U32.v sh) (U32.v sh - U32.v d);
+    lemma_pow2_mod_div (v cm) (U32.v sh) (U32.v d);
+    lemma_mod_distr (v bm) (v cm / pow2 (U32.v d)) (pow2 (U32.v sh - U32.v d))
+
+val mpfr_add1sp1_gt_branch1_aux_rm_tm_lemma:
+    bx:mpfr_exp_t ->
+    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
+    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
+    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
+    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p} -> 
+    sh:u32{U32.v sh = U32.v gmp_NUMB_BITS - U32.v p} ->
+    d:u32{U32.v d = I32.v bx - I32.v cx /\ U32.v d < U32.v sh} -> Lemma (
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (U32.v sh); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (U32.v sh); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
+    let r = Spec.add b c in
+    let tm = v bm + v cm / pow2 (U32.v d) in
+    r.mant * pow2 (U32.v sh - U32.v d) = tm)
+
+let mpfr_add1sp1_gt_branch1_aux_rm_tm_lemma bx bm cx cm p sh d =
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (U32.v sh); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (U32.v sh); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
+    let r = Spec.add b c in
+    //! assert(r.mant = (v bm / pow2 (U32.v sh)) * pow2 (U32.v d) + (v cm / pow2 (U32.v sh)));
+    lemma_mul_div (v bm) (pow2 (U32.v d)) (pow2 (U32.v sh));
+    lemma_pow2_div_div (v bm * pow2 (U32.v d)) (U32.v d) (U32.v sh - U32.v d);
+    lemma_multiple_div (v bm) (pow2 (U32.v d));
+    //! assert((v bm / pow2 (U32.v sh)) * pow2 (U32.v d) = v bm / pow2 (U32.v sh - U32.v d));
+    lemma_pow2_div_div (v cm) (U32.v d) (U32.v sh - U32.v d);
+    //! assert(v cm / pow2 (U32.v sh) = (v cm / pow2 (U32.v d)) / pow2 (U32.v sh - U32.v d));
+    lemma_pow2_mod_div (v cm) (U32.v sh) (U32.v d);
+    lemma_div_distr (v cm / pow2 (U32.v d)) (v bm) (pow2 (U32.v sh - U32.v d));
+    let tm = v bm + v cm / pow2 (U32.v d) in
+    //! assert(r.mant = tm / pow2 (U32.v sh - U32.v d));
+    mpfr_add1sp1_gt_branch1_aux_tm_mod_lemma bx bm cx cm p sh d;
+    //! assert(tm % pow2 (U32.v sh - U32.v d) = 0)
+    lemma_mul_div tm (pow2 (U32.v sh - U32.v d)) (pow2 (U32.v sh - U32.v d));
+    lemma_multiple_div tm (pow2 (U32.v sh - U32.v d))
+    
+val mpfr_add1sp1_gt_branch1_aux_am_tm_lemma:
+    bx:mpfr_exp_t ->
+    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
+    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
+    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
+    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p} -> 
+    sh:u32{U32.v sh = U32.v gmp_NUMB_BITS - U32.v p} ->
+    d:u32{U32.v d = I32.v bx - I32.v cx /\ U32.v d < U32.v sh} -> Lemma (
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (U32.v sh); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (U32.v sh); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
+    let r = Spec.add b c in
+    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
+    let mask = mpfr_LIMB_MASK sh in
+    let am = bm +%^ (cm >>^ d) in
+    let (am, ax) = 
+	if am <^ bm then 
+	    (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
+	else (am, bx) in
+    let tm = v bm + v cm / pow2 (U32.v d) in
+    v am * pow2 (r.prec - U32.v d - U32.v p) = tm)
+
+let mpfr_add1sp1_gt_branch1_aux_am_tm_lemma bx bm cx cm p sh d =
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (U32.v sh); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (U32.v sh); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
+    let r = Spec.add b c in
+    let tm = v bm + v cm / pow2 (U32.v d) in
+    mpfr_add1sp1_gt_branch1_aux_rm_tm_lemma bx bm cx cm p sh d;
+    //! assert(r.mant * pow2 (U32.v sh - U32.v d) = tm);
+    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
+    let mask = mpfr_LIMB_MASK sh in
+    let am = bm +%^ (cm >>^ d) in
+    //! assert(v am = tm % pow2 64);
+    let (am, ax) = 
+	if am <^ bm then begin
+	    //! assert(pow2 64 + v am = tm);
+	    //! assert(tm >= pow2 64);
+	    Spec.add_fp_lemma b c;
+	    lemma_pow2_mul r.prec (U32.v sh - U32.v d);
+	    //! assert(tm < pow2 (r.prec + U32.v sh - U32.v d));
+	    //! assert(r.prec > p0);
+	    //! assert(r.prec = p0 + 1);
+	    lemma_div_distr (pow2 64) (v am) 2;
+	    //! assert(pow2 63 + v am / 2 = tm / pow2 (r.prec - p0));
+	    let nam = mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul) in
+	    lemma_logor_disjoint mpfr_LIMB_HIGHBIT (am >>^ 1ul) 63;
+	    //! assert(v nam = tm / pow2 (r.prec - U32.v p - U32.v d));
+	    mpfr_add1sp1_gt_branch1_aux_tm_mod_lemma bx bm cx cm p sh d;
+	    lemma_pow2_mod_mod tm (U32.v sh - U32.v d) (r.prec - U32.v p - U32.v d);
+	    //! assert(tm % pow2 (r.prec - U32.v p - U32.v d) = 0);
+	    lemma_mul_div tm (pow2 (r.prec - U32.v p - U32.v d)) (pow2 (r.prec - U32.v p - U32.v d));
+	    lemma_multiple_div tm (pow2 (r.prec - U32.v p - U32.v d));
+	    //! assert(v nam * pow2 (r.prec - U32.v p - U32.v d) = tm);
+	    (nam, I32.(bx +^ 1l))
+	end else begin
+	    //! assert(tm = v am);
+	    //! assert(tm < pow2 64)
+	    Spec.add_fp_lemma b c;
+	    lemma_pow2_mul (r.prec - 1) (U32.v sh - U32.v d);
+	    //! assert(tm >= pow2 (r.prec - 1 + U32.v sh - U32.v d));
+	    //! assert(r.prec < p0 + 1);
+	    //! assert(r.prec = p0);
+	    //! assert(v am * pow2 (r.prec - p0) = tm);
+	    (am, bx) 
+	end in
     ()
 
-val mpfr_add1sp1_gt_branch1_value_lemma:
+val mpfr_add1sp1_gt_branch1_aux_am_rm_lemma:
+    bx:mpfr_exp_t ->
+    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
+    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
+    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
+    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p} -> 
+    sh:u32{U32.v sh = U32.v gmp_NUMB_BITS - U32.v p} ->
+    d:u32{U32.v d = I32.v bx - I32.v cx /\ U32.v d < U32.v sh} -> Lemma (
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (U32.v sh); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (U32.v sh); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
+    let r = Spec.add b c in
+    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
+    let mask = mpfr_LIMB_MASK sh in
+    let am = bm +%^ (cm >>^ d) in
+    let (am, ax) = 
+	if am <^ bm then 
+	    (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
+	else (am, bx) in
+    v am = r.mant * pow2 (64 - r.prec))
+
+let mpfr_add1sp1_gt_branch1_aux_am_rm_lemma bx bm cx cm p sh d =
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (U32.v sh); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (U32.v sh); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
+    let r = Spec.add b c in
+    let tm = v bm + v cm / pow2 (U32.v d) in
+    mpfr_add1sp1_gt_branch1_aux_rm_tm_lemma bx bm cx cm p sh d;
+    //! assert(r.mant * pow2 (U32.v sh - U32.v d) = tm);
+    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
+    let mask = mpfr_LIMB_MASK sh in
+    let am = bm +%^ (cm >>^ d) in
+    let (am, ax) = 
+	if am <^ bm then begin
+	    (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
+	end else begin
+	    (am, bx) 
+	end in
+    mpfr_add1sp1_gt_branch1_aux_am_tm_lemma bx bm cx cm p sh d;
+    lemma_multiple_div (v am) (pow2 (r.prec - U32.v p - U32.v d));
+    //! assert(v am = tm / pow2 (r.prec - U32.v p - U32.v d));
+    lemma_pow2_mul (64 - r.prec) (r.prec - U32.v p - U32.v d);
+    lemma_paren_mul_right r.mant (pow2 (64 - r.prec)) (pow2 (r.prec - U32.v p - U32.v d));
+    lemma_multiple_div (r.mant * pow2 (64 - r.prec)) (pow2 (r.prec - U32.v p - U32.v d));
+    //! assert(v am = r.mant * pow2 (64 - r.prec));
+    ()
+
+val mpfr_add1sp1_gt_branch1_mant_lemma:
     bx:mpfr_exp_t ->
     bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
     cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
@@ -345,51 +370,158 @@ val mpfr_add1sp1_gt_branch1_value_lemma:
     let sb = (am &^ mask) ^^ rb in
     let am = am &^ (lognot mask) in
     let st = mk_state 0l ax am rb sb in
-    mpfr_add1sp1_gt_cond bx bm cx cm p st)
+    mpfr_add1sp1_gt_mant_cond bx bm cx cm p st)
 
-let mpfr_add1sp1_gt_branch1_value_lemma bx bm cx cm p sh d =
+let mpfr_add1sp1_gt_branch1_mant_lemma bx bm cx cm p sh d =
     let b = {sign = 1; prec = U32.v p;
              mant = v bm / pow2 (U32.v sh); exp = I32.v bx - U32.v p} in
     let c = {sign = 1; prec = U32.v p;
              mant = v cm / pow2 (U32.v sh); exp = I32.v cx - U32.v p} in
     mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
     let r = Spec.add b c in
-    //assert(r.mant = (v bm / pow2 (U32.v sh)) * pow2 (U32.v d) + (v cm / pow2 (U32.v sh)));
-    lemma_mul_div (v bm) (pow2 (U32.v d)) (pow2 (U32.v sh));
-    lemma_div_distr (v bm * pow2 (U32.v d)) (v cm) (pow2 (U32.v sh));
-    //assert(r.mant = (v bm * pow2 (U32.v d) + v cm) / pow2 (U32.v sh));
-    lemma_div_div (v bm * pow2 (U32.v d) + v cm) (pow2 (U32.v sh)) (pow2 (Spec.add_prec b c - U32.v p));
-    lemma_div_div (v bm * pow2 (U32.v d) + v cm) (pow2 (Spec.add_prec b c - U32.v p)) (pow2 (U32.v sh));
-    lemma_pow2_mul (U32.v sh) (Spec.add_prec b c - U32.v p);
-    //assert(main_mant r (U32.v p) = ((v bm * pow2 (U32.v d) + v cm) / pow2 (Spec.add_prec b c - U32.v p)) / pow2 (U32.v sh));
     let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
-    lemma_pow2_small_mod (U32.v sh - 1) 64;
-    //assert(v sh_high = pow2 (U32.v sh - 1));
     let mask = mpfr_LIMB_MASK sh in
-    //assert(v mask = pow2 (U32.v sh) - 1);
+    //! assert(v mask = pow2 (U32.v sh) - 1);
     let am = bm +%^ (cm >>^ d) in
-    //assert(v am = (v bm + (v cm / pow2 (U32.v d))) % pow2 64);
     let (am, ax) = 
 	if am <^ bm then begin
-	    //assert(v am = (v bm + (v cm / pow2 (U32.v d))) - pow2 64);
 	    (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
 	end else begin
-	    //assert(v am = (v bm + (v cm / pow2 (U32.v d))));
 	    (am, bx) 
 	end in
-    assume(v am = (v bm * pow2 (U32.v d) + v cm) / pow2 (Spec.add_prec b c - U32.v p));
-    UInt.nth_lemma #64 (UInt.shift_right #64 (v am) (64 - U32.v p)) (UInt.shift_right #64 (UInt.logand (v am) (UInt.lognot (v mask))) (64 - U32.v p));
-    assert(v am / pow2 (64 - U32.v p) = main_mant r (U32.v p));
+    mpfr_add1sp1_gt_branch1_aux_am_rm_lemma bx bm cx cm p sh d;
+    lemma_multiple_div r.mant (pow2 (64 - r.prec));
+    //! assert(v am / pow2 (64 - r.prec) = r.mant);
+    lemma_pow2_div_div (v am) (64 - r.prec) (r.prec - U32.v p);
+    //! assert(v am / pow2 (64 - U32.v p) = main_mant r (U32.v p));
     let rb = am &^ sh_high in
     let sb = (am &^ mask) ^^ rb in
+    UInt.nth_lemma #64 (UInt.shift_right #64 (v am) (64 - U32.v p)) (UInt.shift_right #64 (UInt.logand (v am) (UInt.lognot (v mask))) (64 - U32.v p));
+    //! assert(v am / pow2 (64 - U32.v p) = v (am &^ lognot mask) / pow2 (64 - U32.v p));
     let am = am &^ (lognot mask) in
-    assert(v am / pow2 (64 - U32.v p) = main_mant r (U32.v p));
-    assume(v rb <> 0 <==> rb_spec r (U32.v p));
-    assume(v sb <> 0 <==> sb_spec r (U32.v p));
     let st = mk_state 0l ax am rb sb in
     ()
     
-
+val mpfr_add1sp1_gt_branch1_rb_lemma:
+    bx:mpfr_exp_t ->
+    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
+    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
+    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
+    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p} -> 
+    sh:u32{U32.v sh = U32.v gmp_NUMB_BITS - U32.v p} ->
+    d:u32{U32.v d = I32.v bx - I32.v cx /\ U32.v d < U32.v sh} -> Lemma (
+    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
+    let mask = mpfr_LIMB_MASK sh in
+    let am = bm +%^ (cm >>^ d) in
+    let (am, ax) = 
+	if am <^ bm then 
+	    (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
+	else (am, bx) in
+    let rb = am &^ sh_high in
+    let sb = (am &^ mask) ^^ rb in
+    let am = am &^ (lognot mask) in
+    let st = mk_state 0l ax am rb sb in
+    mpfr_add1sp1_gt_rb_cond bx bm cx cm p st)
+    
+let mpfr_add1sp1_gt_branch1_rb_lemma bx bm cx cm p sh d =
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (U32.v sh); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (U32.v sh); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
+    let r = Spec.add b c in
+    let tm = v bm + v cm / pow2 (U32.v d) in
+    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
+    lemma_pow2_small_mod (U32.v sh - 1) 64;
+    //! assert(v sh_high = pow2 (U32.v sh - 1));
+    let mask = mpfr_LIMB_MASK sh in
+    let am = bm +%^ (cm >>^ d) in
+    let (am, ax) = 
+	if am <^ bm then begin
+	    (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
+	end else begin
+	    (am, bx) 
+	end in
+    mpfr_add1sp1_gt_branch1_aux_am_rm_lemma bx bm cx cm p sh d;
+    lemma_multiple_div r.mant (pow2 (64 - r.prec));
+    //! assert(v am / pow2 (64 - r.prec) = r.mant);
+    if r.prec = 64 then () else UInt.slice_left_lemma (UInt.to_vec (v am)) r.prec;
+    //! assert(Seq.slice (UInt.to_vec (v am)) 0 r.prec = UInt.to_vec #r.prec r.mant);
+    //! assert(UInt.nth (v am) (U32.v p) = UInt.nth #r.prec r.mant (U32.v p));
+    let rb = am &^ sh_high in
+    lemma_bit_mask_value am sh_high (U32.v p);
+    //! assert(v rb = (if UInt.nth (v am) (U32.v p) then (v sh_high) else 0));
+    if rb_spec r (U32.v p) then assert(v rb <> 0) else assert(v rb = 0);
+    let sb = (am &^ mask) ^^ rb in
+    let am = am &^ (lognot mask) in
+    let st = mk_state 0l ax am rb sb in
+    ()
+    
+val mpfr_add1sp1_gt_branch1_sb_lemma:
+    bx:mpfr_exp_t ->
+    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
+    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
+    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
+    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p} -> 
+    sh:u32{U32.v sh = U32.v gmp_NUMB_BITS - U32.v p} ->
+    d:u32{U32.v d = I32.v bx - I32.v cx /\ U32.v d < U32.v sh} -> Lemma (
+    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
+    let mask = mpfr_LIMB_MASK sh in
+    let am = bm +%^ (cm >>^ d) in
+    let (am, ax) = 
+	if am <^ bm then 
+	    (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
+	else (am, bx) in
+    let rb = am &^ sh_high in
+    let sb = (am &^ mask) ^^ rb in
+    let am = am &^ (lognot mask) in
+    let st = mk_state 0l ax am rb sb in
+    mpfr_add1sp1_gt_sb_cond bx bm cx cm p st)
+    
+let mpfr_add1sp1_gt_branch1_sb_lemma bx bm cx cm p sh d =
+    let b = {sign = 1; prec = U32.v p;
+             mant = v bm / pow2 (U32.v sh); exp = I32.v bx - U32.v p} in
+    let c = {sign = 1; prec = U32.v p;
+             mant = v cm / pow2 (U32.v sh); exp = I32.v cx - U32.v p} in
+    mpfr_add1sp1_gt_valid_input_lemma bx bm cx cm p;
+    let r = Spec.add b c in
+    let tm = v bm + v cm / pow2 (U32.v d) in
+    let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
+    lemma_pow2_small_mod (U32.v sh - 1) 64;
+    //! assert(v sh_high = pow2 (U32.v sh - 1));
+    lemma_bit_mask sh_high (64 - U32.v sh);
+    let mask = mpfr_LIMB_MASK sh in
+    //! assert(v mask = pow2 (U32.v sh) - 1);
+    lemma_tail_mask mask (U32.v sh);
+    let rmask = mpfr_LIMB_MASK U32.(sh -^ 1ul) in
+    UInt.nth_lemma #64 (v (mask ^^ sh_high)) (v rmask);
+    let am = bm +%^ (cm >>^ d) in
+    let (am, ax) = 
+	if am <^ bm then begin
+	    (mpfr_LIMB_HIGHBIT |^ (am >>^ 1ul), I32.(bx +^ 1l))
+	end else begin
+	    (am, bx) 
+	end in
+    let rb = am &^ sh_high in
+    let sb = (am &^ mask) ^^ rb in
+    lemma_xor_and_distr am mask sh_high;
+    //! assert(sb = (am &^ rmask));
+    lemma_tail_mask_value am rmask (U32.v sh - 1);
+    //! assert(v sb = (v am) % pow2 (U32.v sh - 1));
+    mpfr_add1sp1_gt_branch1_aux_am_rm_lemma bx bm cx cm p sh d;
+    lemma_multiple_div r.mant (pow2 (64 - r.prec));
+    lemma_multiple_mod r.mant (pow2 (64 - r.prec));
+    //! assert(v am / pow2 (64 - r.prec) = r.mant);
+    //! assert(v am % pow2 (64 - r.prec) = 0);
+    lemma_pow2_mod_div (v am) (U32.v sh - 1) (64 - r.prec);
+    lemma_pow2_mod_mod (v am) (U32.v sh - 1) (64 - r.prec);
+    //! assert(v sb / pow2 (64 - r.prec) = r.mant % pow2 (r.prec - U32.v p - 1));
+    //! assert(v sb % pow2 (64 - r.prec) = 0);
+    lemma_mul_div (v sb) (pow2 (64 - r.prec)) (pow2 (64 - r.prec));
+    lemma_multiple_div (v sb) (pow2 (64 - r.prec));
+    //! assert(v sb = (r.mant % pow2 (r.prec - U32.v p - 1)) * pow2 (64 - r.prec));
+    ()
+    
 unfold val mpfr_add1sp1_gt_branch1:
     bx:mpfr_exp_t ->
     bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
@@ -398,7 +530,10 @@ unfold val mpfr_add1sp1_gt_branch1:
     p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p} -> 
     sh:u32{U32.v sh = U32.v gmp_NUMB_BITS - U32.v p} ->
     d:u32{U32.v d = I32.v bx - I32.v cx /\ U32.v d < U32.v sh} ->
-    Tot (st:state{valid_state st p /\ mpfr_add1sp1_gt_cond bx bm cx cm p st})
+    Tot (st:state{valid_state st p /\
+                  mpfr_add1sp1_gt_mant_cond bx bm cx cm p st /\
+                  mpfr_add1sp1_gt_rb_cond bx bm cx cm p st /\
+		  mpfr_add1sp1_gt_sb_cond bx bm cx cm p st})
 
 let mpfr_add1sp1_gt_branch1 bx bm cx cm p sh d =
     let b = {sign = 1; prec = U32.v p;
@@ -417,7 +552,9 @@ let mpfr_add1sp1_gt_branch1 bx bm cx cm p sh d =
     let am = am &^ (lognot mask) in
     let st = mk_state 0l ax am rb sb in
     mpfr_add1sp1_gt_branch1_valid_lemma bx bm cx cm p sh d;
-    mpfr_add1sp1_gt_branch1_value_lemma bx bm cx cm p sh d;
+    mpfr_add1sp1_gt_branch1_mant_lemma bx bm cx cm p sh d;
+    mpfr_add1sp1_gt_branch1_rb_lemma bx bm cx cm p sh d;
+    mpfr_add1sp1_gt_branch1_sb_lemma bx bm cx cm p sh d;
     st
 
 unfold val mpfr_add1sp1_gt:
@@ -426,8 +563,12 @@ unfold val mpfr_add1sp1_gt:
     cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
     cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
     p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p} -> 
-    Tot (st:state{valid_state st p /\ mpfr_add1sp1_gt_cond bx bm cx cm p st})
+    Tot (st:state{valid_state st p /\
+                  mpfr_add1sp1_gt_mant_cond bx bm cx cm p st /\
+                  mpfr_add1sp1_gt_rb_cond bx bm cx cm p st /\
+                  mpfr_add1sp1_gt_sb_cond bx bm cx cm p st})
     
+(*
 let mpfr_add1sp1_gt bx bm cx cm p =
     let sh = U32.(gmp_NUMB_BITS -^ p) in
     let sh_high = mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul) in
@@ -457,26 +598,6 @@ let mpfr_add1sp1_gt bx bm cx cm p =
     end else begin
         mk_state 0l bx bm 0uL 1uL
     end
-    
-(*
-val pstate_lemma: 
-    bx:mpfr_exp_t ->
-    bm:mp_limb_t{mpfr_d_val0_cond bm} -> 
-    cx:mpfr_exp_t{I32.v bx > I32.v cx} ->
-    cm:mp_limb_t{mpfr_d_val0_cond cm} -> 
-    p:mpfr_prec_t{U32.v p < U32.v gmp_NUMB_BITS /\ mpfr_d_valn_cond bm p /\ mpfr_d_valn_cond cm p} -> 
-    pst:pstate{pst = mpfr_add1sp1_gt_pure (I32.v bx) (v bm) (I32.v cx) (v cm) (U32.v p)} ->
-    Lemma
-    (let st = mpfr_add1sp1_gt bx bm cx cm p in
-    valid_state st p /\ mpfr_add1sp1_gt_cond bx bm cx cm p st)
-    
-let pstate_lemma bx bm cx cm p pst =
-    let st = mpfr_add1sp1_gt bx bm cx cm p in
-    let pst = mpfr_add1sp1_gt_pure (I32.v bx) (v bm) (I32.v cx) (v cm) (U32.v p) in
-    assert(I32.v st.ax = pst.pax);
-    assert(v st.am = pst.pam);
-    assert(v st.rb = pst.prb);
-    assert(v st.sb = pst.psb)
 *)
 
 val mpfr_add1sp1_any: bx:i32{mpfr_EXP_COND bx} ->
