@@ -181,13 +181,26 @@ let rec sum_mul_scalar q n f tmp0 sc i =
     sum_mul_scalar q n f (zqadd tmp0 (f i)) sc (i + 1) end
   else ()
 
+
 (* Lemmas *)
 val matrix_equality:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
   a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> Lemma
   (requires (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). get a i j == get b i j))
   (ensures  (a == b))
-let matrix_equality #q #n1 #n2 a b = admit()
+let matrix_equality #q #n1 #n2 a b =
+  let open FStar.Tactics in
+  assert (forall (j:size_nat{j < n2}) (i:size_nat{i < n1}). get a i j = index (index a j) i);
+  assert (forall (j:size_nat{j < n2}) (i:size_nat{i < n1}). get b i j = index (index b j) i);
+  assert_by_tactic (a == b)
+    (fun () ->
+      apply_lemma (`eq_elim);
+      apply_lemma (`eq_intro);
+      let j = forall_intro () in
+      apply_lemma (`eq_elim);
+      apply_lemma (`eq_intro);
+      let i = forall_intro () in
+      smt ())
 
 val zqadd_distr_right:
   #q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> c:zqelem_t q -> Lemma

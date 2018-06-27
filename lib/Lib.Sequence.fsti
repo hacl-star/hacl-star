@@ -32,7 +32,21 @@ val to_seq: #a:Type0 -> #len:size_nat -> s:lseq a len -> o:seq a {o == s /\ leng
 
 val index: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len} -> a
 
-val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a -> Pure (lseq a len)
+abstract
+type equal (#a:Type) (#len:size_nat) (s1:lseq a len) (s2:lseq a len) =
+  forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
+
+val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
+  (requires (forall (i:size_nat{i < len}). index s1 i == index s2 i))
+  (ensures  (equal s1 s2))
+
+val eq_elim: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
+  (requires (equal s1 s2))
+  (ensures  (s1 == s2))
+  [SMTPat (equal s1 s2)]
+
+val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a
+  -> Pure (lseq a len)
     (requires True)
     (ensures (fun o -> index o n == x /\
       (forall (i:size_nat). {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)))
