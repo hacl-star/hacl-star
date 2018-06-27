@@ -11,6 +11,9 @@ module G = FStar.Ghost
 
 open LowStar.BufferOps
 
+let uint8_p = B.buffer UInt8.t
+let bytes = Seq.seq UInt8.t
+
 type alg =
 | SHA256
 | SHA384
@@ -116,3 +119,54 @@ val init: #a:e_alg -> s:state a -> ST unit
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     repr s h1 == init_repr a))
+
+let block_size a =
+  match G.reveal a with
+  | SHA256 -> EverCrypt.Spec.SHA2_256.size_block
+  | SHA384 -> EverCrypt.Spec.SHA2_384.size_block
+
+let well_formed (#a:e_alg)
+  (s: state a)
+  (h: HS.mem{invariant s h})
+  (n: nat { n <= pow2 32 })
+=
+  let r = repr s h in
+  match G.reveal a with
+  | SHA256 ->
+      r.k == EverCrypt.Spec.SHA2_256.k /\
+      r.counter < pow2 32 - n
+  | SHA384 ->
+      r.k == EverCrypt.Spec.SHA2_384.k /\
+      r.counter < pow2 32 - n
+
+let update_spec (#a:e_alg)
+  (s:state a)
+  (h0: HS.mem{invariant s h0})
+  (h1: HS.mem{invariant s h1})
+  (data: bytes{Seq.length data = block_size a})
+=
+  let r0 = repr s h0 in
+  let r1 = repr s h1 in
+  match G.reveal a with
+  | SHA256 ->
+      r1.hash = EverCrypt.Spec.SHA2_256.update r0.hash data
+  | SHA384 ->
+      r1.hash = EverCrypt.Spec.SHA2_384.update r0.hash data
+
+// Note: this function relies implicitly on the fact that we are running with
+// code/lib/kremlin and that we know that machine integers and secret integers
+// are the same. In the long run, we should standardize on a secret integer type
+// in F*'s ulib and have evercrypt use it.
+val update: #a:e_alg -> s:state a -> data:uint8_p -> Stack unit
+  (requires (fun h0 ->
+    invariant s h0 /\
+    well_formed s h0 1 /\
+    B.live h0 data /\
+    B.length data = block_size a /\
+    M.(loc_disjoint (footprint s h0) (loc_buffer data))))
+  (ensures (fun h0 _ h1 ->
+    invariant s h1 /\
+    M.(modifies (footprint s h0) h0 h1) /\
+    footprint s h0 == footprint s h1 /\
+    well_formed s h1 0 /\
+    update_spec s h0 h1 (B.as_seq h0 data)))

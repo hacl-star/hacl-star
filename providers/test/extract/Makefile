@@ -24,7 +24,7 @@ endif
 
 -include $(addsuffix .d,$(FILES))
 
-Test.exe: $(addsuffix .o,$(FILES)) $(KREMLIN_HOME)/kremlib/testlib.c $(KREMLIN_HOME)/kremlib/kremstr.c $(KREMLIN_HOME)/kremlib/kremlib.c 
+Test.exe: $(addsuffix .o,$(FILES)) $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 	$(CC) $^ -o $@ $(LDFLAGS) -I $(KREMLIN_HOME)/include
 
 test: Test.exe

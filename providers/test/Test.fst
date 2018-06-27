@@ -313,12 +313,14 @@ let main (): St C.exit_code =
   init (Prefer Hacl);
   test_hash hash_vectors;
   test_aead aead_vectors;
+  Test.Hash.main ();
   Test.Bytes.main ();
 /// Vale tests
   Test.Bytes.print "===========Vale===========" "";
   init (Prefer Vale);
   test_aead aead_vectors;
   test_hash hash_vectors;
+  Test.Hash.main ();
 // OpenSSL tests
   Test.Bytes.print "==========OpenSSL=========" "";
   init (Prefer OpenSSL);
@@ -326,5 +328,6 @@ let main (): St C.exit_code =
   Test.Bytes.print "==========BCrypt==========" "";
   init (Prefer BCrypt);
   test_aead aead_vectors;
+  Test.Hash.main ();
   pop_frame ();
   C.EXIT_SUCCESS

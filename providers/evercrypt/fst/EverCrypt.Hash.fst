@@ -1,6 +1,5 @@
 module EverCrypt.Hash
 
-open EverCrypt.Helpers
 open FStar.HyperStack.ST
 
 module U32  = FStar.UInt32
@@ -80,9 +79,6 @@ let fresh_is_disjoint l1 l2 h0 h1 =
 
 let frame_invariant #a l s h0 h1 =
   let state = deref h0 s in
-  // Note: the Vale functions are still uninterpreted, meaning that we can't
-  // derive that they output is preserved as long as the state is not modified.
-  assume (not (SHA256_Vale? state));
   assert (repr_eq (repr s h0) (repr s h1))
 
 let create a =
@@ -123,4 +119,28 @@ let init #a s =
       Hacl.SHA2_384.init (T.new_to_old_st p)
   | SHA256_Vale p ->
       ValeGlue.sha256_init p;
+      admit ()
+
+#set-options "--z3rlimit 20"
+
+let update #a s (data: B.buffer UInt8.t) =
+  match !*s with
+  | SHA256_Hacl p ->
+      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
+      let p = T.new_to_old_st p in
+      let data = T.new_to_old_st data in
+      // JP: in spite of the assertion above, the transition module does not
+      // seem to allow me to derive this fact
+      assume (FStar.Buffer.disjoint p data);
+      Hacl.SHA2_256.update p data
+  | SHA384_Hacl p ->
+      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
+      let p = T.new_to_old_st p in
+      let data = T.new_to_old_st data in
+      // JP: in spite of the assertion above, the transition module does not
+      // seem to allow me to derive this fact
+      assume (FStar.Buffer.disjoint p data);
+      Hacl.SHA2_384.update p data
+  | SHA256_Vale p ->
+      ValeGlue.sha256_update p data;
       admit ()

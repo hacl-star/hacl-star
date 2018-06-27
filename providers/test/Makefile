@@ -2,11 +2,18 @@ EVERCRYPT_HOME ?= ..
 KREMLIN_HOME   ?= ../../../kremlin
 MLCRYPTO_HOME ?= ../../../MLCrypto
 
+HACL_CODE = ../../code
+
 EXTRACT_DIR = extract
 CACHE_DIR   = cache
 INCLUDE_PATHS = \
-	$(KREMLIN_HOME)/kremlib \
-	 ../evercrypt
+  $(KREMLIN_HOME)/kremlib \
+  ../evercrypt \
+  $(HACL_CODE)/lib/kremlin \
+  $(HACL_CODE)/curve25519/interfaces \
+  $(HACL_CODE)/hash/interfaces \
+  $(HACL_CODE)/api/interfaces \
+  ../../specs
 
 UNAME = $(shell uname)
 
@@ -61,14 +68,11 @@ $(EXTRACT_DIR)/%.krml:
 $(EXTRACT_DIR)/Test.c: $(filter-out $(EXTRACT_DIR)/prims.krml ,$(ALL_KRML_FILES)) | .depend
 	krml $^ -tmpdir $(EXTRACT_DIR) -no-prefix Test \
 	  -skip-compilation \
-	  -drop FStar.Bytes \
-	  -drop LowStar \
+	  -add-include '"kremlin/internal/compat.h"' \
+	  -add-include '"temp.h"' \
+	  -bundle LowStar.* \
+	  -bundle Hacl.Spec.*,Hacl.Spe.*,Spec.* \
 	  -bundle EverCrypt=EverCrypt.* \
-	  -add-include '"kremlin/testlib.h"' \
-	  -add-include '"kremlin/prims_int.h"' \
-	  -add-include '"kremlin/prims_string.h"' \
-	  -add-include '"kremlin/c_string.h"' \
-	  -add-include '"hacks.h"' \
 	  -ccopt -g
 
 test: $(EXTRACT_DIR)/Test.c

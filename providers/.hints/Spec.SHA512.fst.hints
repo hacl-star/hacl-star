@@ -8,7 +8,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "501f8cbbc70bd1cd5b173b06fa21410d"
+      "3db4a7871a4cc78746115ac85bf4bf62"
     ],
     [
       "Spec.SHA512.k",
@@ -20,7 +20,7 @@
         "equation_Spec.SHA2_512.word"
       ],
       0,
-      "429f580e6d7d1f20710752093c08abd4"
+      "da147176b41085817e2e4519a4df2eff"
     ],
     [
       "Spec.SHA512.h_0",
@@ -29,7 +29,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "6a0107a633862e0062df787099e00e7d"
+      "4d99d2246bee56550368ad9790e3c971"
     ],
     [
       "Spec.SHA512.h_0",
@@ -41,7 +41,7 @@
         "equation_Spec.SHA2_512.word"
       ],
       0,
-      "34988f471558c8dc7b24d318464c3ebb"
+      "94759b337d39f9331b371224f362b138"
     ],
     [
       "Spec.SHA512.hash_w",
@@ -50,7 +50,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "d0250e7fdfd50ca66425788e0a244109"
+      "86c6230f6f295392b80e1376fbee122c"
     ],
     [
       "Spec.SHA512.update",
@@ -59,7 +59,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "18df4f67988994693c15cacf5e7b63e8"
+      "b54a05d62e0b059781834332d48718c2"
     ],
     [
       "Spec.SHA512.update",
@@ -79,7 +79,27 @@
         "refinement_interpretation_Spec.SHA512_Tm_refine_dee9067c1f3a6d960fca715401d15b76"
       ],
       0,
-      "7cc5201adb55f466527b463ac1d5a1b9"
+      "7e1ec984da4c1ac9d7edf4c41249d76a"
+    ],
+    [
+      "Spec.SHA512.update",
+      3,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_hash_w",
+        "equation_Spec.SHA2_512.size_word", "equation_Spec.SHA2_512.word",
+        "equation_Spec.SHA512.bytes", "equation_Spec.SHA512.hash_w",
+        "function_token_typing_Spec.SHA2_512.size_block", "int_inversion",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Spec.SHA512_Tm_refine_a38ba213f7d10ad82997d9720a14fea1",
+        "refinement_interpretation_Spec.SHA512_Tm_refine_dee9067c1f3a6d960fca715401d15b76"
+      ],
+      0,
+      "4e961c6192e3534d7a4cca5cc14dfe22"
     ],
     [
       "Spec.SHA512.update_multi",
@@ -88,7 +108,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "770af43175d161ee39dd0eb64b0b1d38"
+      "545bb16c1e05031b3f25ee64725ab327"
     ],
     [
       "Spec.SHA512.update_multi",
@@ -108,7 +128,27 @@
         "refinement_interpretation_Spec.SHA512_Tm_refine_a38ba213f7d10ad82997d9720a14fea1"
       ],
       0,
-      "77223c6c6596ece7104d577642dbb425"
+      "69d10663522410cedc6212f7c082f307"
+    ],
+    [
+      "Spec.SHA512.update_multi",
+      3,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_hash_w",
+        "equation_Spec.SHA2_512.size_word", "equation_Spec.SHA2_512.word",
+        "equation_Spec.SHA512.bytes", "equation_Spec.SHA512.hash_w",
+        "function_token_typing_Spec.SHA2_512.size_block", "int_inversion",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Spec.SHA512_Tm_refine_72a44158134f5e7b753a2d036337ddf7",
+        "refinement_interpretation_Spec.SHA512_Tm_refine_a38ba213f7d10ad82997d9720a14fea1"
+      ],
+      0,
+      "42a2c3a09a3edefddee56ba24703ca8e"
     ],
     [
       "Spec.SHA512.update_last",
@@ -117,7 +157,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "bddcadc1d97d21df03c1f55904f4f299"
+      "00293c16727216402ca87348713084b5"
     ],
     [
       "Spec.SHA512.update_last",
@@ -139,7 +179,29 @@
         "refinement_interpretation_Spec.SHA512_Tm_refine_a38ba213f7d10ad82997d9720a14fea1"
       ],
       0,
-      "aac9ffdfed157384bbd98664a07701d2"
+      "2dbf730d862b68f539a8d39d07843b21"
+    ],
+    [
+      "Spec.SHA512.update_last",
+      3,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.max_input_len_8",
+        "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_hash_w",
+        "equation_Spec.SHA2_512.size_word", "equation_Spec.SHA2_512.word",
+        "equation_Spec.SHA512.bytes", "equation_Spec.SHA512.hash_w",
+        "function_token_typing_Spec.SHA2_512.size_block", "int_inversion",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Spec.SHA512_Tm_refine_23a90157b3c44f7734a90ba76267e1db",
+        "refinement_interpretation_Spec.SHA512_Tm_refine_370146e9d790e2d16268023fc5ba931f",
+        "refinement_interpretation_Spec.SHA512_Tm_refine_a38ba213f7d10ad82997d9720a14fea1"
+      ],
+      0,
+      "425f239e27278827aabdd2fa3153b8d5"
     ],
     [
       "Spec.SHA512.finish",
@@ -148,7 +210,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "56fa1914ee21755aade712edc419cb5e"
+      "9a5ad6ab133620da176bb143d99d560c"
     ],
     [
       "Spec.SHA512.finish",
@@ -165,7 +227,7 @@
         "refinement_interpretation_Spec.SHA512_Tm_refine_a38ba213f7d10ad82997d9720a14fea1"
       ],
       0,
-      "64a0f477fae8cb0c880c3ce39eb1bd1e"
+      "4a8d0467d94facdc2a243a5511631b90"
     ],
     [
       "Spec.SHA512.hash",
@@ -174,7 +236,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "87cc86f61dfaf99aa964de36f2784f77"
+      "ad00e8b5b0b9fed8dd1b94a4aee52ab7"
     ],
     [
       "Spec.SHA512.hash",
@@ -192,7 +254,7 @@
         "refinement_interpretation_Spec.SHA512_Tm_refine_c41ac915e517d287f11b5b0ce03e19bf"
       ],
       0,
-      "536e5c11ef1dbaab19f7c901a17e2433"
+      "ce38ad49fd678b181013315b33aea0f4"
     ]
   ]
 ]
