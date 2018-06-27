@@ -181,13 +181,38 @@ let rec sum_mul_scalar q n f tmp0 sc i =
     sum_mul_scalar q n f (zqadd tmp0 (f i)) sc (i + 1) end
   else ()
 
+// val sum_fubini_:
+//   q:size_pos -> n1:size_pos -> n2:size_pos ->
+//   f:(i:size_nat{i < n1} -> j:size_nat{j < n2} -> zqelem_t q) ->
+//   tmp0:zqelem_t q -> k:size_nat{k < n1} -> Lemma
+//   (requires True)
+//   (ensures (sum_ q n1 (fun i -> sum q n2 (fun j -> f i j) (zqelem 0)) tmp0 k == sum q n2 (fun j -> sum_ q n1 (fun i -> f i j) tmp0 k) (zqelem 0)))
+// let sum_fubini_ q n1 n2 f tmp0 k = admit()
+
 (* Lemmas *)
 val matrix_equality:
   #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
   a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> Lemma
   (requires (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). get a i j == get b i j))
   (ensures  (a == b))
-let matrix_equality #q #n1 #n2 a b = admit()
+let matrix_equality #q #n1 #n2 a b =
+  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). get a i j == get b i j);
+  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). get a i j == (a.[j]).[i]);
+  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). get b i j == (b.[j]).[i]);
+  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). (a.[j]).[i] == (b.[j]).[i]);
+  FStar.Classical.forall_intro #(j:size_nat{j < n2})
+  #(fun j -> a.[j] == b.[j])
+  (fun j -> lemma_eq_intro (a.[j]) (b.[j]) <:
+    (Lemma (a.[j] == b.[j]))
+    );
+  assert (forall (j:size_nat{j < n2}). a.[j] == b.[j]);
+  FStar.Classical.forall_intro #(i:size_nat{i < n1})
+  #(fun i -> equal a b)
+  (fun i -> lemma_eq_intro a b <:
+    (Lemma (equal a b))
+    );
+  assert (equal a b);
+  assert (a == b)
 
 val zqadd_distr_right:
   #q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> c:zqelem_t q -> Lemma

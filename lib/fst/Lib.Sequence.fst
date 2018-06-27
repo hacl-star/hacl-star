@@ -38,6 +38,14 @@ let rec upd_ #a #len l i x =
 
 let upd #a #len s n x = upd_ #a #len s n x
 
+let lemma_eq_intro #a #len s1 s2 = ()
+
+let lemma_eq_refl #a #len s1 s2 = ()
+
+let lemma_eq_elim #a #len s1 s2 =
+  assume (forall (i:nat) (s:lseq a len). i < length s ==> index s i == FStar.List.Tot.index s i);
+  FStar.List.Tot.index_extensionality s1 s2
+
 let create = create_
 
 let createL #a l = l
@@ -190,21 +198,21 @@ let rec concat #a #len1 #len2 s1 s2 =
   | [] -> s2
   | h :: t -> h :: (concat #a #(len1 - 1) #len2 t s2)
 
-let map_blocks #a bs nb f inp = 
+let map_blocks #a bs nb f inp =
   let len = nb * bs in
   let out = inp in
   let out = repeati #(lseq a len) nb
-	    (fun i out ->  
+	    (fun i out ->
 	         update_slice #a out (i * bs) ((i+1) * bs)
 			      (f i (slice #a inp (i * bs) ((i+1) * bs))))
 	    out in
   out
 
-let reduce_blocks #a #b bs nb f inp init = 
+let reduce_blocks #a #b bs nb f inp init =
   let len = nb * bs in
   let acc = init in
   let acc = repeati #b nb
-	    (fun i acc ->   
+	    (fun i acc ->
 	       f i (slice #a inp (i * bs) ((i+1) * bs)) acc)
 	    acc in
   acc
@@ -213,11 +221,11 @@ let reduce_blocks #a #b bs nb f inp init =
 (*
 #reset-options "--z3rlimit 400 --max_fuel 0"
 
-let reduce_blocks #a #b bs inp f g init = 
-  let len = length inp in 
+let reduce_blocks #a #b bs inp f g init =
+  let len = length inp in
   let blocks = len / bs in
   let rem = len % bs in
-  let acc = repeati #b blocks 
+  let acc = repeati #b blocks
 	       (fun i acc -> f i (slice (to_lseq inp) (i * bs) ((i+1) * bs)) acc)
 	    init in
   let acc = g blocks rem (sub (to_lseq inp) (blocks * bs) rem) acc in

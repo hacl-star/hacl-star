@@ -37,6 +37,26 @@ val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len >
     (ensures (fun o -> index o n == x /\
       (forall (i:size_nat). {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)))
 
+abstract type equal (#a:Type) (#len:size_nat) (s1:lseq a len) (s2:lseq a len) =
+  (length s1 = length s2
+   /\ (forall (i:size_nat{i < length s1}).{:pattern (index s1 i); (index s2 i)} (index s1 i == index s2 i)))
+
+val lemma_eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
+     (requires (length s1 = length s2
+               /\ (forall (i:size_nat{i < length s1}).{:pattern (index s1 i); (index s2 i)} (index s1 i == index s2 i))))
+     (ensures (equal s1 s2))
+     [SMTPat (equal s1 s2)]
+
+val lemma_eq_refl: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
+     (requires (s1 == s2))
+     (ensures (equal s1 s2))
+     [SMTPat (equal s1 s2)]
+
+val lemma_eq_elim: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
+     (requires (equal s1 s2))
+     (ensures (s1==s2))
+     [SMTPat (equal s1 s2)]
+
 ///
 /// Allocation functions for sequences
 ///
