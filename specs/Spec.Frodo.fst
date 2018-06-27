@@ -4,6 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+open Lib.RawIntTypes
 
 open Spec.PQ.Lib
 open Spec.Keccak
@@ -40,9 +41,12 @@ let params_n:size_pos = 640
 let params_logq:size_pos = 15
 let params_extracted_bits:size_pos = 2
 let crypto_bytes:size_pos = 16
-let cdf_table_len:size_pos = 12
-let cdf_table: list size_nat = [4727; 13584; 20864; 26113; 29434; 31278; 32176; 32560; 32704; 32751; 32764; 32767]
 let cshake_frodo = cshake128_frodo
+let cdf_table_len:size_pos = 12
+let cdf_table : lseq size_nat cdf_table_len =
+  let cdf_table0: list size_nat = [4727; 13584; 20864; 26113; 29434; 31278; 32176; 32560; 32704; 32751; 32764; 32767] in
+  assert_norm (List.Tot.length cdf_table0 = cdf_table_len);
+  createL cdf_table0
 
 let bytes_seed_a:size_pos = 16
 let params_nbar:size_pos = 8
@@ -68,7 +72,7 @@ assume val frodo_pack:
   n1:size_pos -> n2:size_pos ->
   a:zqmatrix_t params_q n1 n2 ->
   d:size_nat{(d * n1 * n2) / 8 < max_size_t} -> Tot (lbytes ((d * n1 * n2) / 8))
-//let frodo_pack n1 n2 a d = admit()
+//let frodo_pack n1 n2 a d =
 
 assume val frodo_unpack:
   n1:size_pos -> n2:size_pos ->
@@ -76,25 +80,69 @@ assume val frodo_unpack:
   Tot (zqmatrix_t params_q n1 n2)
 //let frodo_unpack n1 n2 d b = admit()
 
-assume val frodo_sample: r:uint16 -> Tot (zqelem_t params_q)
-//let frodo_sample r = admit()
+val frodo_sample: r:uint16 -> Tot (zqelem_t params_q)
+let frodo_sample r =
+  let t = r >>. u32 1 in
+  let e = 0 in
+  let r0 = r &. u16 1 in
 
-assume val frodo_sample_matrix:
-  n1:size_pos -> n2:size_pos ->
+  let e = repeati (cdf_table_len - 1)
+  (fun z e ->
+    let e = if (uint_to_nat t > cdf_table.[z]) then e + 1 else e in e
+  ) e in
+  assume (e < cdf_table_len);
+  let e = (FStar.Math.Lib.powx (-1) (uint_to_nat r0)) * e in
+  assume (-cdf_table_len < e /\ e < cdf_table_len);
+  zqelem (e + params_q)
+
+val frodo_sample_matrix:
+  n1:size_pos -> n2:size_pos{2 * n1 * n2 < max_size_t} ->
   seedLen:size_nat -> seed:lbytes seedLen ->
   ctr:uint16 -> Tot (zqmatrix_t params_q n1 n2)
-//let frodo_sample_matrix n1 n2 seedLen seed ctr = admit()
+let frodo_sample_matrix n1 n2 seedLen seed ctr =
+  let r = cshake_frodo seedLen seed ctr (2 * n1 * n2) in
+  let res = zqmatrix_create params_q n1 n2 in
+  repeati n1
+  (fun i res ->
+    repeati n2
+    (fun j res ->
+      assume (2 * (n2 * i + j) + 2 <= 2 * n1 * n2);
+      let res_ij = sub r (2 * (n2 * i + j)) 2 in
+      set res i j (frodo_sample (uint_from_bytes_le #U16 res_ij))
+    ) res
+  ) res
 
-assume val frodo_sample_matrix_tr:
-  n1:size_pos -> n2:size_pos ->
+val frodo_sample_matrix_tr:
+  n1:size_pos -> n2:size_pos{2 * n1 * n2 < max_size_t} ->
   seedLen:size_nat -> seed:lbytes seedLen ->
   ctr:uint16 -> Tot (zqmatrix_t params_q n1 n2)
-//let frodo_sample_matrix_tr n1 n2 seedLen seed ctr = admit()
+let frodo_sample_matrix_tr n1 n2 seedLen seed ctr =
+  let r = cshake_frodo seedLen seed ctr (2 * n1 * n2) in
+  let res = zqmatrix_create params_q n1 n2 in
+  repeati n1
+  (fun i res ->
+    repeati n2
+    (fun j res ->
+      assume (2 * (n1 * j + i) + 2 <= 2 * n1 * n2);
+      let res_ij = sub r (2 * (n1 * j + i)) 2 in
+      set res i j (frodo_sample (uint_from_bytes_le #U16 res_ij))
+    ) res
+  ) res
 
-assume val frodo_gen_matrix_cshake:
-  n:size_pos -> seedLen:size_nat -> seed:lbytes seedLen ->
+val frodo_gen_matrix_cshake:
+  n:size_pos{2 * n < max_size_t /\ 256 + n < maxint U16} -> seedLen:size_nat -> seed:lbytes seedLen ->
   Tot (zqmatrix_t params_q n n)
-//let frodo_gen_matrix_cshake n seedLen seed = admit()
+let frodo_gen_matrix_cshake n seedLen seed =
+  let res = zqmatrix_create params_q n n in
+  repeati n
+  (fun i res ->
+    let res_i = cshake128_frodo seedLen seed (u16 (256 + i)) (2 * n) in
+    repeati n
+    (fun j res ->
+      let res_ij = uint_from_bytes_le #U16 (sub res_i (j * 2) 2) in
+      set res i j (zqelem #params_q (uint_to_nat res_ij))
+    ) res
+  ) res
 
 let frodo_gen_matrix = frodo_gen_matrix_cshake
 
