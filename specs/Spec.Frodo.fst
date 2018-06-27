@@ -5,6 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
+open FStar.Math.Lemmas
 
 open Spec.PQ.Lib
 open Spec.Keccak
@@ -56,6 +57,33 @@ let crypto_publickeybytes:size_pos  = bytes_seed_a + (params_logq * params_n * p
 let crypto_secretkeybytes:size_pos  = crypto_bytes + crypto_publickeybytes
 let crypto_ciphertextbytes:size_pos = ((params_nbar * params_n + params_nbar * params_nbar) * params_logq) / 8 + crypto_bytes
 
+val ec:k:size_nat{k < pow2 params_extracted_bits} -> Tot (r:size_nat{r < pow2 params_logq})
+let ec k = k * pow2 (params_logq - params_extracted_bits)
+
+val dc:c:size_nat{c < pow2 params_logq} -> Tot (r:size_nat{r < pow2 params_extracted_bits})
+let dc c = ((c + pow2 (params_logq - params_extracted_bits - 1)) / pow2 (params_logq - params_extracted_bits)) % pow2 params_extracted_bits
+
+val lemma_dc_ec:
+  k:size_nat{k < pow2 params_extracted_bits} -> Lemma (dc (ec k) == k)
+  #reset-options "--z3rlimit 50 --max_fuel 0"
+let lemma_dc_ec k =
+  let c = ec k in
+  assert (c == k * pow2 (params_logq - params_extracted_bits));
+  assert (dc c == ((c + pow2 (params_logq - params_extracted_bits - 1)) / pow2 (params_logq - params_extracted_bits)) % pow2 params_extracted_bits);
+  assert (dc c == ((k * pow2 (params_logq - params_extracted_bits) + pow2 (params_logq - params_extracted_bits - 1)) / pow2 (params_logq - params_extracted_bits)) % pow2 params_extracted_bits);
+  pow2_plus 1 (params_logq - params_extracted_bits - 1);
+  //assert (pow2 (params_logq - params_extracted_bits) = pow2 1 * pow2 (params_logq - params_extracted_bits - 1));
+  distributivity_add_left (k * pow2 1) 1 (pow2 (params_logq - params_extracted_bits - 1));
+  //assert (dc c == (((k * pow2 1 + 1) * pow2 (params_logq - params_extracted_bits - 1)) / (pow2 1 * pow2 (params_logq - params_extracted_bits - 1))) % pow2 params_extracted_bits);
+  division_multiplication_lemma ((k * pow2 1 + 1) * pow2 (params_logq - params_extracted_bits - 1))  (pow2 (params_logq - params_extracted_bits - 1)) (pow2 1);
+  //assert (dc c == (((k * pow2 1 + 1) * pow2 (params_logq - params_extracted_bits - 1)) /  pow2 (params_logq - params_extracted_bits - 1) / pow2 1) % pow2 params_extracted_bits);
+  multiple_division_lemma (k * pow2 1 + 1) (pow2 (params_logq - params_extracted_bits - 1));
+  //assert (dc c == ((k * pow2 1 + 1) / pow2 1) % pow2 params_extracted_bits);
+  division_addition_lemma 1 (pow2 1) k;
+  //assert (dc c == (k + 1 / pow2 1) % pow2 params_extracted_bits);
+  small_division_lemma_1 1 (pow2 1);
+  small_modulo_lemma_1 k (pow2 params_extracted_bits)
+
 assume val frodo_key_encode:
   b:size_nat{(params_nbar * params_nbar * b) / 8 < max_size_t} ->
   a:lbytes ((params_nbar * params_nbar * b) / 8) ->
@@ -81,6 +109,7 @@ assume val frodo_unpack:
 //let frodo_unpack n1 n2 d b = admit()
 
 val frodo_sample: r:uint16 -> Tot (zqelem_t params_q)
+#reset-options "--z3rlimit 50 --max_fuel 1"
 let frodo_sample r =
   let t = r >>. u32 1 in
   let e = 0 in
