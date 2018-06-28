@@ -131,8 +131,8 @@ val update_multi:
     (ensures  (fun h0 _ h1 ->
       let seq_data = Hacl.Spec.Endianness.reveal_sbytes (as_seq h0 data) in
       live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1 /\
+      slice_k h1 state == Spec.k /\
       counter h1 state = counter h0 state + v n /\
-      counter h1 state < pow2 32 /\
       slice_hash h1 state == Spec.update_multi (slice_hash h0 state) seq_data))
 
 val update_last:
@@ -148,6 +148,7 @@ val update_last:
       let seq_data = Hacl.Spec.Endianness.reveal_sbytes (as_seq h0 data) in
       let prevlen = U32.(counter h0 state * (v size_block)) in
       live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1 /\
+      slice_k h1 state == Spec.k /\
       slice_hash h1 state = Spec.update_last (slice_hash h0 state) prevlen seq_data))
 
 val finish:

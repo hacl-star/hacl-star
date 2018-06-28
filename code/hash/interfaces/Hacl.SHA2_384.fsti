@@ -171,6 +171,7 @@ val update_last:
                      let prevlen = FStar.Mul.(counter h0 state * U32.v size_block) in
                      live h1 state /\
                      modifies_1 state h0 h1 /\
+                     slice_k h1 state == Spec.k /\
                      slice_hash h1 state == Spec.update_last (slice_hash h0 state) prevlen seq_block))
 
 val finish:

@@ -128,16 +128,32 @@ let block_size a =
 let well_formed (#a:e_alg)
   (s: state a)
   (h: HS.mem{invariant s h})
+=
+  let r = repr s h in
+  match G.reveal a with
+  | SHA256 ->
+      r.k == EverCrypt.Spec.SHA2_256.k
+  | SHA384 ->
+      r.k == EverCrypt.Spec.SHA2_384.k
+
+let bounded_counter (#a:e_alg)
+  (s: state a)
+  (h: HS.mem{invariant s h})
   (n: nat { n <= pow2 32 })
 =
   let r = repr s h in
   match G.reveal a with
   | SHA256 ->
-      r.k == EverCrypt.Spec.SHA2_256.k /\
       r.counter < pow2 32 - n
   | SHA384 ->
-      r.k == EverCrypt.Spec.SHA2_384.k /\
       r.counter < pow2 32 - n
+
+let well_formed_and_counter (#a:e_alg)
+  (s: state a)
+  (h: HS.mem{invariant s h})
+  (n: nat { n <= pow2 32 })
+=
+  well_formed s h /\ bounded_counter s h n
 
 let update_spec (#a:e_alg)
   (s:state a)
@@ -160,7 +176,7 @@ let update_spec (#a:e_alg)
 val update: #a:e_alg -> s:state a -> data:uint8_p -> Stack unit
   (requires (fun h0 ->
     invariant s h0 /\
-    well_formed s h0 1 /\
+    well_formed_and_counter s h0 1 /\
     B.live h0 data /\
     B.length data = block_size a /\
     M.(loc_disjoint (footprint s h0) (loc_buffer data))))
@@ -168,5 +184,117 @@ val update: #a:e_alg -> s:state a -> data:uint8_p -> Stack unit
     invariant s h1 /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    well_formed s h1 0 /\
+    well_formed_and_counter s h1 0 /\
     update_spec s h0 h1 (B.as_seq h0 data)))
+
+let update_multi_spec (#a:e_alg)
+  (s:state a)
+  (h0: HS.mem{invariant s h0})
+  (h1: HS.mem{invariant s h1})
+  (data: bytes{Seq.length data % block_size a = 0})
+=
+  let r0 = repr s h0 in
+  let r1 = repr s h1 in
+  match G.reveal a with
+  | SHA256 ->
+      r1.hash = EverCrypt.Spec.SHA2_256.update_multi r0.hash data
+  | SHA384 ->
+      r1.hash = EverCrypt.Spec.SHA2_384.update_multi r0.hash data
+
+val update_multi: #a:e_alg -> s:state a -> data:uint8_p -> n:UInt32.t -> Stack unit
+  (requires (fun h0 ->
+    invariant s h0 /\
+    well_formed_and_counter s h0 (v n) /\
+    B.live h0 data /\
+    B.length data = block_size a * v n /\
+    M.(loc_disjoint (footprint s h0) (loc_buffer data))))
+  (ensures (fun h0 _ h1 ->
+    invariant s h1 /\
+    M.(modifies (footprint s h0) h0 h1) /\
+    footprint s h0 == footprint s h1 /\
+    well_formed_and_counter s h1 0 /\
+    update_multi_spec s h0 h1 (B.as_seq h0 data)))
+
+// The maximum number of bytes for the input.
+let max_input_length (a: e_alg) =
+  match G.reveal a with
+  | SHA256 ->
+      EverCrypt.Spec.SHA2_256.max_input_len_8
+  | SHA384 ->
+      EverCrypt.Spec.SHA2_384.max_input_len_8
+
+// The size, in bytes, it takes to encode the number of bytes in the message.
+let size_length (a: e_alg) =
+  match G.reveal a with
+  | SHA256 ->
+      EverCrypt.Spec.SHA2_256.size_len_8
+  | SHA384 ->
+      EverCrypt.Spec.SHA2_384.size_len_8
+
+// For the last (possibly partial) block, in so far as I understand, we
+// concatenate the last chunk of data, insert a byte 0x01, then encode the length.
+let last_data_fits (a: e_alg) (length: nat) =
+  length + size_length a + 1 < 2 * block_size a
+
+// Note: conjunction of well_formed and last_data_fits allows deriving the
+// specific precondition for update_last.
+let update_last_spec (#a:e_alg)
+  (s:state a)
+  (h0: HS.mem{invariant s h0})
+  (h1: HS.mem{invariant s h1})
+  (data: bytes{well_formed_and_counter s h0 2 /\ last_data_fits a (Seq.length data)})
+=
+  let r0 = repr s h0 in
+  let r1 = repr s h1 in
+  let counter0 = r0.counter in
+  let len0 = counter0 * block_size a in
+  match G.reveal a with
+  | SHA256 ->
+      r1.hash = EverCrypt.Spec.SHA2_256.update_last r0.hash len0 data
+  | SHA384 ->
+      r1.hash = EverCrypt.Spec.SHA2_384.update_last r0.hash len0 data
+
+val update_last: #a:e_alg -> s:state a -> data:uint8_p -> len:UInt32.t -> Stack unit
+  (requires (fun h0 ->
+    invariant s h0 /\
+    well_formed_and_counter s h0 2 /\
+    B.live h0 data /\
+    B.length data = v len /\
+    last_data_fits a (v len) /\
+    M.(loc_disjoint (footprint s h0) (loc_buffer data))))
+  (ensures (fun h0 _ h1 ->
+    invariant s h1 /\
+    M.(modifies (footprint s h0) h0 h1) /\
+    footprint s h0 == footprint s h1 /\
+    well_formed s h1 /\
+    update_last_spec s h0 h1 (B.as_seq h0 data)))
+
+let hash_size a =
+  match G.reveal a with
+  | SHA256 -> EverCrypt.Spec.SHA2_256.size_hash
+  | SHA384 -> EverCrypt.Spec.SHA2_384.size_hash
+
+let finish_spec (#a:e_alg)
+  (s:state a)
+  (h0: HS.mem{invariant s h0})
+  (dst: bytes{Seq.length dst = hash_size a})
+=
+  let r0 = repr s h0 in
+  match G.reveal a with
+  | SHA256 ->
+      dst = EverCrypt.Spec.SHA2_256.finish r0.hash
+  | SHA384 ->
+      dst = EverCrypt.Spec.SHA2_384.finish r0.hash
+
+val finish: #a:e_alg -> s:state a -> dst:uint8_p -> Stack unit
+  (requires (fun h0 ->
+    invariant s h0 /\
+    well_formed s h0 /\
+    B.live h0 dst /\
+    B.length dst = hash_size a /\
+    M.(loc_disjoint (footprint s h0) (loc_buffer dst))))
+  (ensures (fun h0 _ h1 ->
+    invariant s h1 /\
+    M.(modifies (loc_buffer dst) h0 h1) /\
+    footprint s h0 == footprint s h1 /\
+    finish_spec s h0 (B.as_seq h1 dst)))
