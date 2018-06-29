@@ -144,3 +144,35 @@ val chacha20_poly1305_decrypt: key:uint8_p -> iv:uint8_p ->
   plain:uint8_p -> len:uint32_t ->
   cipher: uint8_p -> tag:uint8_p ->
   ST uint32_t chacha20_poly1305_decrypt_pre chacha20_poly1305_decrypt_post
+
+/// AEAD
+
+(* WIP 
+type aead_alg =
+  | AES128_GCM
+  | AES256_GCM
+  | CHACHA20_POLY1305
+
+val aead_state_s: Type0
+
+[@(CPrologue "#ifndef __EverCrypt_aead_state_s\ntypedef struct EverCrypt_aead_state_s EverCrypt_aead_state_s;\n#endif")]
+let aead_state = B.pointer aead_state_s
+
+val aead_create: alg:aead_alg -> key:uint8_p ->
+  ST aead_state aead_create_pre aead_create_post
+
+val aead_encrypt: key:aead_state -> iv:uint8_p ->
+  ad:uint8_p -> adlen:uint32_t ->
+  plain:uint8_p -> len:uint32_t ->
+  cipher:uint8_p -> tag:uint8_p ->
+  ST unit aead_encrypt_pre aead_encrypt_post
+
+val aead_decrypt: key:aead_state -> iv:uint8_p ->
+  ad:uint8_p -> adlen:uint32_t ->
+  plain:uint8_p -> len:uint32_t ->
+  cipher:uint8_p -> tag:uint8_p ->
+  ST uint32_t aead_decrypt_pre aead_decrypt_post
+
+val aead_free: aead_state ->
+  ST unit aead_free_pre aead_free_post
+*)

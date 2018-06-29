@@ -1,5 +1,6 @@
 module Test
 
+module T = TestLib
 module B = FStar.Buffer
 module U32 = FStar.UInt32
 
@@ -197,7 +198,11 @@ let test_chacha20_poly1305 v =
   let ciphertext'   = B.create 0uy plaintext_len in
   let tag'          = B.create 0uy 16ul in
 
+  let s0 = T.cpucycles () in
   EverCrypt.chacha20_poly1305_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
+  let s1 = T.cpucycles () in
+  
+  T.print_cycles_per_round s0 s1 1ul;
   TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
   TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
 
@@ -226,9 +231,13 @@ let test_aes128_gcm v =
   let ciphertext'   = B.create 0uy plaintext_len in
   let tag'          = B.create 0uy 16ul in
 
+  let s0 = T.cpucycles () in
   EverCrypt.aes128_gcm_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
-  TestLib.compare_and_print !$"of AES-GCM 128 cipher" ciphertext ciphertext' plaintext_len;
-  TestLib.compare_and_print !$"of AES-GCM 128 tag" tag tag' 16ul;
+  let s1 = T.cpucycles () in
+  
+  T.print_cycles_per_round s0 s1 1ul;
+  T.compare_and_print !$"of AES-GCM 128 cipher" ciphertext ciphertext' plaintext_len;
+  T.compare_and_print !$"of AES-GCM 128 tag" tag tag' 16ul;
 
   match EverCrypt.aes128_gcm_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
   | 1ul ->
@@ -255,9 +264,13 @@ let test_aes256_gcm v =
   let ciphertext'   = B.create 0uy plaintext_len in
   let tag'          = B.create 0uy 16ul in
 
+  let s0 = T.cpucycles () in
   EverCrypt.aes256_gcm_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
-  TestLib.compare_and_print !$"of AES-GCM 256 cipher" ciphertext ciphertext' plaintext_len;
-  TestLib.compare_and_print !$"of AES-GCM 256 tag" tag tag' 16ul;
+  let s1 = T.cpucycles () in
+  
+  T.print_cycles_per_round s0 s1 1ul;
+  T.compare_and_print !$"of AES-GCM 256 cipher" ciphertext ciphertext' plaintext_len;
+  T.compare_and_print !$"of AES-GCM 256 tag" tag tag' 16ul;
 
   match EverCrypt.aes256_gcm_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
   | 1ul ->
@@ -273,6 +286,7 @@ let test_aes_ecb (v:block_cipher_vector) : St unit =
   let plain = buffer_of_hex v.plain in
   let cipher = buffer_of_hex v.enc in
   let cipher' = B.create 0uy 16ul in
+  let s0 = T.cpucycles () in
   let () =
     match v.block with
     | AES128 ->
@@ -284,7 +298,9 @@ let test_aes_ecb (v:block_cipher_vector) : St unit =
       EverCrypt.aes256_compute k plain cipher';
       EverCrypt.aes256_free k
     in
-  TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
+  let s1 = T.cpucycles () in
+  T.print_cycles_per_round s0 s1 1ul;
+  T.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
   pop_frame()
 
 /// Test drivers

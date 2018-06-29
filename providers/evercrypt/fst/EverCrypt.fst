@@ -449,3 +449,22 @@ let chacha20_poly1305_decrypt key iv ad adlen plaintext len cipher tag =
     EverCrypt.OpenSSL.chacha20_poly1305_decrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
+
+/// AEAD
+
+(* WIP
+private noeq type _aead_state =
+  | AEAD_AES128_GCM_OPENSSL: st:Dyn.dyn -> _aead_state
+  | AEAD_AES128_GCM_BCRYPT: st:Dyn.dyn -> _aead_state
+  | AEAD_AES128_GCM_VALE: xkey:uint8_p -> _aead_state
+  | AEAD_AES256_GCM_OPENSSL: st:Dyn.dyn -> _aead_state
+  | AEAD_AES256_GCM_BCRYPT: st:Dyn.dyn -> _aead_state
+  | AEAD_AES256_GCM_VALE: xkey:uint8_p -> _aead_state
+  | AEAD_CHACHA20_POLY1305_OPENSSL: st:Dyn.dyn -> _aead_state
+  | AEAD_CHACHA20_POLY1305_HACL: st:Dyn.dyn -> _aead_state
+
+[@(CEpilogue "#define __EverCrypt_aead_state_s")]
+let aead_state_s = _aead_state
+
+
+*)
