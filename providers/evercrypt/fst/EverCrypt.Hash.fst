@@ -210,3 +210,24 @@ let finish #a s dst =
   | SHA256_Vale p ->
       ValeGlue.sha256_finish p dst;
       admit ()
+
+let hash a dst input len =
+  match a with
+  | SHA256 ->
+      let i = AC.sha256_impl () in
+      if SC.vale && i = AC.Vale then begin
+        ValeGlue.sha256_hash dst input len;
+        admit ()
+      end else begin
+        assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer input));
+        let input = T.new_to_old_st input in
+        let dst = T.new_to_old_st dst in
+        assume (FStar.Buffer.disjoint dst input);
+        Hacl.SHA2_256.hash dst input len
+      end
+  | SHA384 ->
+      assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer input));
+      let input = T.new_to_old_st input in
+      let dst = T.new_to_old_st dst in
+      assume (FStar.Buffer.disjoint dst input);
+      Hacl.SHA2_384.hash dst input len

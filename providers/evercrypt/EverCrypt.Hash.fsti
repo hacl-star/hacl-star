@@ -120,14 +120,15 @@ val init: #a:e_alg -> s:state a -> ST unit
     footprint s h0 == footprint s h1 /\
     repr s h1 == init_repr a))
 
-let block_size a =
+let block_size a: GTot _ =
   match G.reveal a with
   | SHA256 -> EverCrypt.Spec.SHA2_256.size_block
   | SHA384 -> EverCrypt.Spec.SHA2_384.size_block
 
 let well_formed (#a:e_alg)
   (s: state a)
-  (h: HS.mem{invariant s h})
+  (h: HS.mem{invariant s h}):
+  GTot _
 =
   let r = repr s h in
   match G.reveal a with
@@ -139,7 +140,8 @@ let well_formed (#a:e_alg)
 let bounded_counter (#a:e_alg)
   (s: state a)
   (h: HS.mem{invariant s h})
-  (n: nat { n <= pow2 32 })
+  (n: nat { n <= pow2 32 }):
+  GTot _
 =
   let r = repr s h in
   match G.reveal a with
@@ -151,7 +153,8 @@ let bounded_counter (#a:e_alg)
 let well_formed_and_counter (#a:e_alg)
   (s: state a)
   (h: HS.mem{invariant s h})
-  (n: nat { n <= pow2 32 })
+  (n: nat { n <= pow2 32 }):
+  GTot _
 =
   well_formed s h /\ bounded_counter s h n
 
@@ -159,7 +162,8 @@ let update_spec (#a:e_alg)
   (s:state a)
   (h0: HS.mem{invariant s h0})
   (h1: HS.mem{invariant s h1})
-  (data: bytes{Seq.length data = block_size a})
+  (data: bytes{Seq.length data = block_size a}):
+  GTot _
 =
   let r0 = repr s h0 in
   let r1 = repr s h1 in
@@ -191,7 +195,8 @@ let update_multi_spec (#a:e_alg)
   (s:state a)
   (h0: HS.mem{invariant s h0})
   (h1: HS.mem{invariant s h1})
-  (data: bytes{Seq.length data % block_size a = 0})
+  (data: bytes{Seq.length data % block_size a = 0}):
+  GTot _
 =
   let r0 = repr s h0 in
   let r1 = repr s h1 in
@@ -216,7 +221,7 @@ val update_multi: #a:e_alg -> s:state a -> data:uint8_p -> n:UInt32.t -> Stack u
     update_multi_spec s h0 h1 (B.as_seq h0 data)))
 
 // The maximum number of bytes for the input.
-let max_input_length (a: e_alg) =
+let max_input_length (a: e_alg): GTot _ =
   match G.reveal a with
   | SHA256 ->
       EverCrypt.Spec.SHA2_256.max_input_len_8
@@ -224,7 +229,7 @@ let max_input_length (a: e_alg) =
       EverCrypt.Spec.SHA2_384.max_input_len_8
 
 // The size, in bytes, it takes to encode the number of bytes in the message.
-let size_length (a: e_alg) =
+let size_length (a: e_alg): GTot _ =
   match G.reveal a with
   | SHA256 ->
       EverCrypt.Spec.SHA2_256.size_len_8
@@ -233,7 +238,7 @@ let size_length (a: e_alg) =
 
 // For the last (possibly partial) block, in so far as I understand, we
 // concatenate the last chunk of data, insert a byte 0x01, then encode the length.
-let last_data_fits (a: e_alg) (length: nat) =
+let last_data_fits (a: e_alg) (length: nat): GTot _ =
   length + size_length a + 1 < 2 * block_size a
 
 // Note: conjunction of well_formed and last_data_fits allows deriving the
@@ -242,7 +247,8 @@ let update_last_spec (#a:e_alg)
   (s:state a)
   (h0: HS.mem{invariant s h0})
   (h1: HS.mem{invariant s h1})
-  (data: bytes{well_formed_and_counter s h0 2 /\ last_data_fits a (Seq.length data)})
+  (data: bytes{well_formed_and_counter s h0 2 /\ last_data_fits a (Seq.length data)}):
+  GTot _
 =
   let r0 = repr s h0 in
   let r1 = repr s h1 in
@@ -269,7 +275,7 @@ val update_last: #a:e_alg -> s:state a -> data:uint8_p -> len:UInt32.t -> Stack 
     well_formed s h1 /\
     update_last_spec s h0 h1 (B.as_seq h0 data)))
 
-let hash_size a =
+let hash_size a: GTot _ =
   match G.reveal a with
   | SHA256 -> EverCrypt.Spec.SHA2_256.size_hash
   | SHA384 -> EverCrypt.Spec.SHA2_384.size_hash
@@ -277,7 +283,8 @@ let hash_size a =
 let finish_spec (#a:e_alg)
   (s:state a)
   (h0: HS.mem{invariant s h0})
-  (dst: bytes{Seq.length dst = hash_size a})
+  (dst: bytes{Seq.length dst = hash_size a}):
+  GTot _
 =
   let r0 = repr s h0 in
   match G.reveal a with
@@ -298,3 +305,22 @@ val finish: #a:e_alg -> s:state a -> dst:uint8_p -> Stack unit
     M.(modifies (loc_buffer dst) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     finish_spec s h0 (B.as_seq h1 dst)))
+
+let hash_spec (a: alg) (input: bytes{Seq.length input < max_input_length (G.hide a)}): GTot _ =
+  match a with
+  | SHA256 ->
+      EverCrypt.Spec.SHA2_256.hash input
+  | SHA384 ->
+      EverCrypt.Spec.SHA2_384.hash input
+
+val hash: a:alg -> dst:uint8_p -> input:uint8_p -> len:uint32_t -> Stack unit
+  (requires (fun h0 ->
+    B.live h0 dst /\
+    B.live h0 input /\
+    B.length input = v len /\
+    v len < max_input_length (G.hide a) /\
+    B.length dst = hash_size (G.hide a) /\
+    M.(loc_disjoint (loc_buffer input) (loc_buffer dst))))
+  (ensures (fun h0 _ h1 ->
+    M.(modifies (loc_buffer dst) h0 h1) /\
+    B.as_seq h1 dst = hash_spec a (B.as_seq h0 input)))
