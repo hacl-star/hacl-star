@@ -166,11 +166,6 @@ let matrix_mul #t #n1 #n2 #n3 a b =
   (fun i c -> matrix_mul_f1 #t #n1 #n2 #n3 a b i c) c
 
 (* Lemmas about the sum function *)
-val uintv_extensionality:
-  #t:numeric_t -> a:uint_t t -> b:uint_t t -> Lemma
-  (requires (uint_v a == uint_v b))
-  (ensures (a == b))
-let uintv_extensionality #t a b = admit()
 
 val sum_linearity:
   #t:numeric_t -> n:size_nat ->

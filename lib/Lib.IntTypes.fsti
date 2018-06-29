@@ -79,6 +79,11 @@ val uint_t: t:inttype -> Type0
 inline_for_extraction
 val uint_v: #t:inttype -> u:uint_t t -> GTot (n:nat{n <= maxint t})
 
+val uintv_extensionality:
+  #t:inttype -> a:uint_t t -> b:uint_t t -> Lemma
+  (requires uint_v a == uint_v b)
+  (ensures  a == b)
+
 ///
 /// Definition of machine integers
 ///

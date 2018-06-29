@@ -38,6 +38,16 @@ let uint_to_nat_ #t (x:uint_t t) : (n:nat{n <= maxint t}) =
 
 let uint_v #t u : nat = uint_to_nat_ u
 
+let uintv_extensionality #t a b =
+  match t with
+  | U8   -> UInt8.v_inj a b
+  | U16  -> UInt16.v_inj a b
+  | U32  -> UInt32.v_inj a b
+  | U64  -> UInt64.v_inj a b
+  | U128 -> UInt128.v_inj a b
+  | SIZE -> UInt32.v_inj a b
+  | NATm m -> ()
+
 (* Declared in .fsti: uint8, uint16, uint32, uint64, uint128 *)
 
 let u8 x : uint8  = UInt8.uint_to_t x
