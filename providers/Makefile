@@ -246,7 +246,7 @@ SHELL=/bin/bash
 
 .PHONY: clean
 clean:
-	rm -rf $(GENERATED_DIR) evercrypt/c/*.o libevercrypt.so libevercrypt.a
+	rm -rf $(GENERATED_DIR) evercrypt/c/*.o libevercrypt.$(SO) libevercrypt.a
 	$(MAKE) -C test clean
 
 .PHONY: clean-c
@@ -256,3 +256,4 @@ clean-c:
 .PHONY: distclean
 distclean: clean
 	rm -rf $(OUT_DIR) $(CACHE_DIR)
+
