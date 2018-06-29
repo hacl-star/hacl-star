@@ -4,74 +4,93 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
-let size_pos = x:size_nat{x > 0}
+//let size_pos = x:size_nat{x > 0}
 
-val zqelem_t:q:size_pos -> Type0
-val zqelem:#q:size_pos -> x:nat -> zqelem_t q
-val zqelem_v:#q:size_pos -> x:zqelem_t q -> GTot nat
-val zqadd:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> (r:zqelem_t q{zqelem_v r = (zqelem_v a + zqelem_v b) % q})
-val zqsub:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> (r:zqelem_t q{zqelem_v r = (zqelem_v a + q - zqelem_v b) % q})
-val zqmul:#q:size_pos -> a:zqelem_t q -> b:zqelem_t q -> (r:zqelem_t q{zqelem_v r = (zqelem_v a * zqelem_v b) % q})
+type numeric_t = inttype
+val numeric:#t:inttype -> x:nat{x <= maxint t} -> uint_t t
 
-val zqvector_t:q:size_pos -> n:size_pos -> Type0
-val zqvector_add:#q:size_pos -> #n:size_pos -> a:zqvector_t q n -> b:zqvector_t q n -> c:zqvector_t q n
-val zqvector_sub:#q:size_pos -> #n:size_pos -> a:zqvector_t q n -> b:zqvector_t q n -> c:zqvector_t q n
-
-val zqmatrix_t:q:size_pos -> n:size_pos -> m:size_pos -> Type0
-val zqmatrix_create:q:size_pos -> n:size_pos -> m:size_pos -> zqmatrix_t q n m
-val get:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> m:zqmatrix_t q n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> zqelem_t q
-val set:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> m:zqmatrix_t q n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> v:zqelem_t q -> (res:zqmatrix_t q n1 n2{get res i j == v})
-
-val sum:q:size_pos -> n:size_nat -> f:(i:size_nat{i < n} -> zqelem_t q) -> tmp0:zqelem_t q -> zqelem_t q
-
-val zqmatrix_zero:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> Pure (zqmatrix_t q n1 n2)
+val vector_t:t:numeric_t -> len:size_nat -> Type0
+val vector_create:t:numeric_t -> len:size_nat -> vector_t t len
+val vget:#t:numeric_t -> #len:size_nat -> a:vector_t t len -> i:size_nat{i < len} -> uint_t t
+val vset:#t:numeric_t -> #len:size_nat -> a:vector_t t len -> i:size_nat{i < len} -> v:uint_t t -> Pure (vector_t t len)
   (requires True)
-  (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern get res i j} get res i j == zqelem #q 0))
+  (ensures (fun res -> vget res i == v /\ (forall (j:size_nat). j < len /\ j <> i ==> vget res j == vget a j)))
 
-val zqmatrix_add:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> Pure (zqmatrix_t q n1 n2)
+val vector_zero:#t:numeric_t -> #len:size_nat -> Pure (vector_t t len)
   (requires True)
-  (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern get res i j} get res i j == zqadd (get a i j) (get b i j)))
+  (ensures (fun res -> forall (i:size_nat{i < len}).{:pattern vget res i} vget res i == numeric #t 0))
 
-val zqmatrix_sub:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> Pure (zqmatrix_t q n1 n2)
+val vector_add:#t:numeric_t -> #len:size_nat -> a:vector_t t len -> b:vector_t t len -> Pure (vector_t t len)
   (requires True)
-  (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern get res i j} get res i j == zqsub (get a i j) (get b i j)))
+  (ensures (fun res -> forall (i:size_nat{i < len}).{:pattern vget res i} vget res i == vget a i +. vget b i))
 
-val zqmatrix_mul:#q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos -> a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n2 n3 -> Pure (zqmatrix_t q n1 n3)
+val vector_sub:#t:numeric_t -> #len:size_nat -> a:vector_t t len -> b:vector_t t len -> Pure (vector_t t len)
   (requires True)
-  (ensures (fun res -> forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).{:pattern get res i k} get res i k == sum q n2 (fun j -> zqmul (get a i j) (get b j k)) (zqelem #q 0)))
+  (ensures (fun res -> forall (i:size_nat{i < len}).{:pattern vget res i} vget res i == vget a i -. vget b i))
+
+val vector_pointwise_mul:#t:numeric_t -> #len:size_nat -> a:vector_t t len -> b:vector_t t len -> Pure (vector_t t len)
+  (requires (t <> U128))
+  (ensures (fun res -> forall (i:size_nat{i < len}).{:pattern vget res i} vget res i == vget a i *. vget b i))
+
+//val vector_mul:#a:numeric_t -> #len1:size_nat -> #len2:size_nat{len1 + len2 < max_size_t} -> v1:vector_t a len1 -> v2:vector_t a len2 -> vector_t a (len1 + len2)
+
+val matrix_t:t:numeric_t -> n1:size_nat -> n2:size_nat -> Type0
+val matrix_create:t:numeric_t -> n1:size_nat -> n2:size_nat -> matrix_t t n1 n2
+val mget:#t:numeric_t -> #n1:size_nat -> #n2:size_nat -> a:matrix_t t n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> uint_t t
+val mset:#t:numeric_t -> #n1:size_nat -> #n2:size_nat -> a:matrix_t t n1 n2 -> i:size_nat{i < n1} -> j:size_nat{j < n2} -> v:uint_t t -> Pure (matrix_t t n1 n2)
+  (requires True)
+  (ensures (fun res -> mget res i j == v /\ (forall (i1:size_nat) (j1:size_nat). i1 < n1 /\ i1 <> i /\ j1 < n2 /\ j1 <> j ==> mget res i1 j1 == mget a i1 j1)))
+
+val sum:#t:numeric_t -> n:size_nat -> f:(i:size_nat{i < n} -> uint_t t) -> tmp0:uint_t t -> uint_t t
+
+val matrix_zero:#t:numeric_t -> #n1:size_nat -> #n2:size_nat -> Pure (matrix_t t n1 n2)
+  (requires True)
+  (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern mget res i j} mget res i j == numeric #t 0))
+
+val matrix_add:#t:numeric_t -> #n1:size_nat -> #n2:size_nat -> a:matrix_t t n1 n2 -> b:matrix_t t n1 n2 -> Pure (matrix_t t n1 n2)
+  (requires True)
+  (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern mget res i j} mget res i j == mget a i j +. mget b i j))
+
+val matrix_sub:#t:numeric_t -> #n1:size_nat -> #n2:size_nat -> a:matrix_t t n1 n2 -> b:matrix_t t n1 n2 -> Pure (matrix_t t n1 n2)
+  (requires True)
+  (ensures (fun res -> forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).{:pattern mget res i j} mget res i j == mget a i j -. mget b i j))
+
+val matrix_mul:#t:numeric_t -> #n1:size_nat -> #n2:size_nat -> #n3:size_nat -> a:matrix_t t n1 n2 -> b:matrix_t t n2 n3 -> Pure (matrix_t t n1 n3)
+  (requires (t <> U128))
+  (ensures (fun res -> forall (i:size_nat{i < n1}) (k:size_nat{k < n3}).{:pattern mget res i k} mget res i k == sum n2 (fun j -> mget a i j *. mget b j k) (numeric #t 0)))
 
 (* Lemmas *)
 val matrix_distributivity_add_right:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos ->
-  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> c:zqmatrix_t q n2 n3 -> Lemma
-  (zqmatrix_mul (zqmatrix_add a b) c == zqmatrix_add (zqmatrix_mul a c) (zqmatrix_mul b c))
+  #t:numeric_t{t <> U128} -> #n1:size_nat -> #n2:size_nat -> #n3:size_nat ->
+  a:matrix_t t n1 n2 -> b:matrix_t t n1 n2 -> c:matrix_t t n2 n3 -> Lemma
+  (matrix_mul (matrix_add a b) c == matrix_add (matrix_mul a c) (matrix_mul b c))
 
 val matrix_distributivity_add_left:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos ->
-  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> c:zqmatrix_t q n3 n1 -> Lemma
-  (zqmatrix_mul c (zqmatrix_add a b) == zqmatrix_add (zqmatrix_mul c a) (zqmatrix_mul c b))
+  #t:numeric_t{t <> U128} -> #n1:size_nat -> #n2:size_nat -> #n3:size_nat ->
+  a:matrix_t t n1 n2 -> b:matrix_t t n1 n2 -> c:matrix_t t n3 n1 -> Lemma
+  (matrix_mul c (matrix_add a b) == matrix_add (matrix_mul c a) (matrix_mul c b))
 
 val matrix_associativity_mul:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos -> #n3:size_pos -> #n4:size_pos ->
-  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n2 n3 -> c:zqmatrix_t q n3 n4 -> Lemma
-  (zqmatrix_mul (zqmatrix_mul a b) c == zqmatrix_mul a (zqmatrix_mul b c))
+  #t:numeric_t{t <> U128} -> #n1:size_nat -> #n2:size_nat -> #n3:size_nat -> #n4:size_nat ->
+  a:matrix_t t n1 n2 -> b:matrix_t t n2 n3 -> c:matrix_t t n3 n4 -> Lemma
+  (matrix_mul (matrix_mul a b) c == matrix_mul a (matrix_mul b c))
 
 val matrix_associativity_add:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
-  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> c:zqmatrix_t q n1 n2 -> Lemma
-  (zqmatrix_add (zqmatrix_add a b) c == zqmatrix_add a (zqmatrix_add b c))
+  #t:numeric_t -> #n1:size_nat -> #n2:size_nat ->
+  a:matrix_t t n1 n2 -> b:matrix_t t n1 n2 -> c:matrix_t t n1 n2 -> Lemma
+  (matrix_add (matrix_add a b) c == matrix_add a (matrix_add b c))
 
 val matrix_commutativity_add:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
-  a:zqmatrix_t q n1 n2 -> b:zqmatrix_t q n1 n2 -> Lemma
-  (zqmatrix_add a b == zqmatrix_add b a)
+  #t:numeric_t -> #n1:size_nat -> #n2:size_nat ->
+  a:matrix_t t n1 n2 -> b:matrix_t t n1 n2 -> Lemma
+  (matrix_add a b == matrix_add b a)
 
 val matrix_sub_zero:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
-  a:zqmatrix_t q n1 n2 -> Lemma
-  (zqmatrix_sub a a == zqmatrix_zero #q #n1 #n2)
+  #t:numeric_t -> #n1:size_nat -> #n2:size_nat ->
+  a:matrix_t t n1 n2 -> Lemma
+  (matrix_sub a a == matrix_zero #t #n1 #n2)
 
 val matrix_add_zero:
-  #q:size_pos -> #n1:size_pos -> #n2:size_pos ->
-  a:zqmatrix_t q n1 n2 -> Lemma
-  (zqmatrix_add a (zqmatrix_zero #q #n1 #n2) == a)
+  #t:numeric_t -> #n1:size_nat -> #n2:size_nat ->
+  a:matrix_t t n1 n2 -> Lemma
+  (matrix_add a (matrix_zero #t #n1 #n2) == a)
