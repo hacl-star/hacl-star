@@ -23,6 +23,26 @@ let sha512_hash dst src len = Hacl.SHA2_512.hash dst src len
 
 let x25519 dst secret base = Hacl.Curve25519.crypto_scalarmult dst secret base
 
+/// AES block function
+
+let aes128_keyExpansion k w sb =
+  push_frame ();
+  Crypto.Symmetric.AES128.mk_sbox sb;
+  Crypto.Symmetric.AES128.keyExpansion k w sb;
+  pop_frame()
+
+let aes128_cipher cipher plain w sb = Crypto.Symmetric.AES128.cipher cipher plain w sb
+
+let aes256_keyExpansion k w sb =
+  push_frame ();
+  Crypto.Symmetric.AES.mk_sbox sb;
+  Crypto.Symmetric.AES.keyExpansion k w sb;
+  pop_frame ()
+
+let aes256_cipher cipher plain w sb = Crypto.Symmetric.AES.cipher cipher plain w sb
+
+/// Chacha20-Poly1305
+
 let chacha20_poly1305_encode_length lb aad_len m_len =
   Hacl.Chacha20Poly1305.encode_length lb aad_len m_len
 let chacha20_poly1305_encrypt c mac m m_len aad aad_len k n =

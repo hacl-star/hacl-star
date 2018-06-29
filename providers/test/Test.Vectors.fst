@@ -147,6 +147,63 @@ let hash_vectors = [{
   }
 ]
 
+/// Cipher block function
+
+type block_cipher =
+  | AES128
+  | AES256
+
+// Funky field names to avoid collisions...
+type block_cipher_vector = {
+  block: block_cipher;
+  rkey: string;
+  plain: string;
+  enc: string;
+}
+
+let block_cipher_vectors = [
+  {
+    block = AES128;
+    rkey = "2b7e151628aed2a6abf7158809cf4f3c";
+    plain = "6bc1bee22e409f96e93d7e117393172a";
+    enc = "3ad77bb40d7a3660a89ecaf32466ef97"
+  }; {
+    block = AES128;
+    rkey = "2b7e151628aed2a6abf7158809cf4f3c";
+    plain = "ae2d8a571e03ac9c9eb76fac45af8e51";
+    enc = "f5d3d58503b9699de785895a96fdbaaf"
+  }; {
+    block = AES128;
+    rkey = "2b7e151628aed2a6abf7158809cf4f3c";
+    plain = "30c81c46a35ce411e5fbc1191a0a52ef";
+    enc = "43b1cd7f598ece23881b00e3ed030688"
+  }; {
+    block = AES128;
+    rkey = "2b7e151628aed2a6abf7158809cf4f3c";
+    plain = "f69f2445df4f9b17ad2b417be66c3710";
+    enc = "7b0c785e27e8ad3f8223207104725dd4"
+  }; {
+    block = AES256;
+    rkey = "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
+    plain = "6bc1bee22e409f96e93d7e117393172a";
+    enc = "f3eed1bdb5d2a03c064b5a7e3db181f8"
+  }; {
+    block = AES256;
+    rkey = "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
+    plain = "ae2d8a571e03ac9c9eb76fac45af8e51";
+    enc = "591ccb10d410ed26dc5ba74a31362870"
+  }; {
+    block = AES256;
+    rkey = "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
+    plain = "30c81c46a35ce411e5fbc1191a0a52ef";
+    enc = "b6ed21b99ca6f4f9f153e7b1beafed1d"
+  }; {
+    block = AES256;
+    rkey = "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
+    plain = "f69f2445df4f9b17ad2b417be66c3710";
+    enc = "23304b7a39f9f3ff067d8d8f9e24ecc7"
+  }]
+
 /// AEAD
 
 type cipher =
