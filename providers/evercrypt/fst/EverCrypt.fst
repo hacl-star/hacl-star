@@ -322,6 +322,19 @@ let aes256_free pk =
     failwith !$"ERROR: inconsistent configuration";
   LB.free pk
 
+/// ChaCha20
+
+let chacha20 key iv ctr plain len cipher =
+  let i = AC.chacha20_impl () in
+  if SC.hacl && i = AC.Hacl then
+   begin
+    push_frame ();
+    EverCrypt.Hacl.chacha20 key iv ctr plain len cipher;
+    pop_frame ()
+   end
+  else 
+    failwith !$"ERROR: inconsistent configuration"
+
 /// AES128-GCM
 
 let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =

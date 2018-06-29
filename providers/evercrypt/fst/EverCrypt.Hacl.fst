@@ -41,6 +41,9 @@ let aes256_keyExpansion k w sb =
 
 let aes256_cipher cipher plain w sb = Crypto.Symmetric.AES.cipher cipher plain w sb
 
+let chacha20 key iv ctr plain len cipher =
+  Hacl.Chacha20.chacha20 cipher plain len key iv ctr
+
 /// Chacha20-Poly1305
 
 let chacha20_poly1305_encode_length lb aad_len m_len =

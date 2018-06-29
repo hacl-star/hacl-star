@@ -302,6 +302,21 @@ let rec test_cipher v =
       ()
     | _ -> test_cipher vs
 
+val test_chacha20: list chacha20_vector -> St unit
+let rec test_chacha20 v =
+  match v with
+  | [] -> ()
+  | v :: vs ->
+    let key = buffer_of_hex v.c20_key in
+    let iv  = buffer_of_hex v.c20_iv in
+    let plain = buffer_of_hex v.c20_plain in
+    let len = Bytes.len (bytes_of_hex v.c20_plain) in
+    let cipher = buffer_of_hex v.c20_cipher in
+    let cipher' = B.create 0uy len in
+    EverCrypt.chacha20 key iv v.c20_ctr plain len cipher';
+    TestLib.compare_and_print !$"of ChaCha20 message" cipher cipher' len;
+    test_chacha20 vs
+
 val test_aead: list aead_vector -> St unit
 let rec test_aead v =
   match v with
@@ -345,6 +360,7 @@ let main (): St C.exit_code =
   init (Prefer Hacl);
   test_hash hash_vectors;
   test_cipher block_cipher_vectors;
+  test_chacha20 chacha20_vectors;
   test_aead aead_vectors;
   Test.Bytes.main ();
 /// Vale tests

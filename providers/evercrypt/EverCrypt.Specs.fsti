@@ -56,6 +56,9 @@ let aes256_compute_post = fun _ _ _ -> True
 let aes256_free_pre = fun _ -> False
 let aes256_free_post = fun _ _ _ -> True
 
+let chacha20_pre = fun _ -> False
+let chacha20_post = fun _ _ _ -> True
+
 let aes128_gcm_encrypt_pre = fun _ -> False
 let aes128_gcm_encrypt_post = fun _ _ _ -> True
 let aes128_gcm_decrypt_pre = fun _ -> False

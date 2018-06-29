@@ -20,6 +20,7 @@ impl sha512_impl = Hacl;
 impl x25519_impl = Hacl;
 impl aes128_impl = Hacl;
 impl aes256_impl = Hacl;
+impl chacha20_impl = Hacl;
 impl aes128_gcm_impl = OpenSSL;
 impl aes256_gcm_impl = OpenSSL;
 impl chacha20_poly1305_impl = Hacl;
@@ -131,6 +132,10 @@ impl EverCrypt_AutoConfig_aes128_impl() {
 
 impl EverCrypt_AutoConfig_aes256_impl() {
   return aes256_impl;
+}
+
+impl EverCrypt_AutoConfig_chacha20_impl() {
+  return chacha20_impl;
 }
 
 impl EverCrypt_AutoConfig_aes256_gcm_impl() {

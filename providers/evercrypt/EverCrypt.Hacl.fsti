@@ -83,6 +83,12 @@ val aes256_keyExpansion: key:uint8_p -> w:uint8_p -> sb:uint8_p ->
 val aes256_cipher: cipher:uint8_p -> plain:uint8_p -> w:uint8_p -> sb:uint8_p ->
   Stack unit aes256_compute_pre aes256_compute_post
 
+/// ChaCha20
+
+val chacha20: key:uint8_p -> iv:uint8_p -> ctr: uint32_t ->
+  plain: uint8_p -> len: uint32_t -> cipher: uint8_p ->
+  Stack unit chacha20_pre chacha20_post
+
 /// Chacha20-Poly1305
 
 val chacha20_poly1305_encode_length: lb:uint8_p -> aad_len:uint32_t -> m_len:uint32_t ->
