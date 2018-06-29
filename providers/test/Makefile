@@ -61,7 +61,7 @@ $(EXTRACT_DIR)/%.krml:
 $(EXTRACT_DIR)/Test.c: $(ALL_KRML_FILES) | .depend
 	krml $^ -tmpdir $(EXTRACT_DIR) -no-prefix Test \
 	  -skip-compilation \
-	  -drop LowStar \
+	  -add-include '"kremlin/internal/compat.h"' \
 	  -bundle EverCrypt=EverCrypt.* \
 	  -ccopt -g
 

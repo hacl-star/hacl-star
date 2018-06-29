@@ -4,6 +4,8 @@ open FStar.HyperStack.ST
 open EverCrypt.Helpers
 open EverCrypt.Specs
 
+module LB = LowStar.Buffer
+
 ///  SHA256
 
 /// Incremental API
@@ -67,14 +69,10 @@ val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
 
 /// AES block function
 
-// FIXME Abstract C type not supported by Kremlin
-// val aes128_key : Type0
+val aes128_key_s: Type0
 
-noeq type aes128_key =
-  | AES128_OPENSSL: st:Dyn.dyn -> aes128_key
-  | AES128_BCRYPT: st:Dyn.dyn -> aes128_key
-  | AES128_VALE: w:uint8_p -> sbox:uint8_p -> aes128_key
-  | AES128_HACL: w:uint8_p -> sbox:uint8_p -> aes128_key
+[@(CPrologue "#ifndef __EverCrypt_aes128_key_s\ntypedef struct EverCrypt_aes128_key_s EverCrypt_aes128_key_s;\n#endif")]
+let aes128_key = LB.pointer aes128_key_s
 
 val aes128_create: key:uint8_p ->
   Stack aes128_key aes128_create_pre aes128_create_post
@@ -86,12 +84,10 @@ val aes128_compute: key:aes128_key ->
 val aes128_free: aes128_key ->
   Stack unit aes128_free_pre aes128_free_post
 
-//val aes256_key : Type0
+val aes256_key_s : Type0
 
-noeq type aes256_key =
-  | AES256_OPENSSL: st:Dyn.dyn -> aes256_key
-  | AES256_BCRYPT: st:Dyn.dyn -> aes256_key
-  | AES256_HACL: w:uint8_p -> sbox:uint8_p -> aes256_key
+[@(CPrologue "#ifndef __EverCrypt_aes256_key_s\ntypedef struct EverCrypt_aes256_key_s EverCrypt_aes256_key_s;\n#endif")]
+let aes256_key = LB.pointer aes256_key_s
 
 val aes256_create: key:uint8_p ->
   Stack aes256_key aes256_create_pre aes256_create_post
