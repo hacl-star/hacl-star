@@ -8,6 +8,9 @@ open Lib.RawIntTypes
 let to_lbytes (s:bytes) = s
 let to_bytes #len (s:lbytes len) = s
 
+private
+let decr (x:size_nat{x > 0}) : size_nat = x - 1
+
 val nat_from_intseq_be_:#t:m_inttype -> #len:size_nat -> b:intseq t len -> Tot (n:nat{n < pow2 (len * bits t)})  (decreases (len))
 let rec nat_from_intseq_be_ #t #len b =
   if len = 0 then 0
