@@ -31,21 +31,23 @@ let le (a:binary_fp) (b:binary_fp) = let elb = min a.exponent b.exponent in eval
  * r.mant * 2 ^ (r.exp - elb) = - a.mant * 2 ^ (a.exp - elb)
  * is equivalent to
  * r.mant * 2 ^ r.exp = - a.mant * 2 ^ a.exp *)
-val neg: a:binary_fp -> Tot (r:binary_fp{
+val fneg: a:binary_fp -> Tot (r:binary_fp{
     let elb = a.exponent in
     r.exponent >= elb /\
     eval_i r elb = - eval_i a elb})
-let neg a = mk_fp (- a.significand) a.exponent
+let fneg a = mk_fp (- a.significand) a.exponent
+
+let fabs a = if ge a zero_fp then a else fneg a
 
 (* Addition post-condition:
  * a.mant * 2 ^ (a.exp - elb) + b.mant * 2 ^ (b.exp - elb) = r.mant * 2 ^ (r.exp - elb)
  * is equivalent to
  * a.mant * 2 ^ a.exp + b.mant * 2 ^ b.exp = r.mant * 2 ^ r.exp *)
-val add: a:binary_fp -> b:binary_fp -> Tot (r:binary_fp{
+val fadd: a:binary_fp -> b:binary_fp -> Tot (r:binary_fp{
     let elb = min a.exponent b.exponent in
     r.exponent >= elb /\
     eval_i a elb + eval_i b elb = eval_i r elb})
-let add a b =
+let fadd a b =
     let elb = min a.exponent b.exponent in
     mk_fp (a.significand * pow2 (a.exponent - elb) + b.significand * pow2 (b.exponent - elb)) elb
     
@@ -53,21 +55,21 @@ let add a b =
  * a.mant * 2 ^ (a.exp - elb) - b.mant * 2 ^ (b.exp - elb) = r.mant * 2 ^ (r.exp - elb)
  * is equivalent to
  * a.mant * 2 ^ a.exp - b.mant * 2 ^ b.exp = r.mant * 2 ^ r.exp *)
-val sub: a:binary_fp -> b:binary_fp -> Tot (r:binary_fp{
+val fsub: a:binary_fp -> b:binary_fp -> Tot (r:binary_fp{
     let elb = min a.exponent b.exponent in
     r.exponent >= elb /\
     eval_i a elb - eval_i b elb = eval_i r elb})
-let sub a b = add a (neg b)
+let fsub a b = fadd a (fneg b)
 
 (* Multiplication post-condition
  * a.mant * 2 ^ (a.exp - elb) * b.mant * 2 ^ (b.exp - elb) = r.mant * 2 ^ (r.exp - 2 * elb)
  * is equivalent to
  * a.mant * 2 ^ a.exp * b.mant * 2 ^ b.exp = r.mant * 2 ^ r.exp *)
-val mul: a:binary_fp -> b:binary_fp -> Tot (r:binary_fp{
+val fmul: a:binary_fp -> b:binary_fp -> Tot (r:binary_fp{
     let elb = min a.exponent b.exponent in
     r.exponent >= 2 * elb /\
     eval_i a elb * eval_i b elb = eval_i r (2 * elb)})
-let mul a b =
+let fmul a b =
     mk_fp (a.significand * b.significand) (a.exponent + b.exponent)
 
 (* Infix notations *)
@@ -76,6 +78,6 @@ unfold let op_Greater_Dot  = gt
 unfold let op_Greater_Equals_Dot = ge
 unfold let op_Less_Dot  = lt
 unfold let op_Less_Equals_Dot = le
-unfold let op_Plus_Dot  = add
-unfold let op_Subtraction_Dot  = sub
-unfold let op_Star_Dot  = mul
+unfold let op_Plus_Dot  = fadd
+unfold let op_Subtraction_Dot  = fsub
+unfold let op_Star_Dot  = fmul

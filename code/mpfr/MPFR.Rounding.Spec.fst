@@ -2,32 +2,86 @@ module MPFR.Rounding.Spec
 
 open FStar.Mul
 open FStar.UInt
-open MPFR.Lemmas
+open MPFR.BinaryFP
 open MPFR.Lib.Spec
+open MPFR.Maths
 
 #set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
-///////////////////////////////////////////////
-//  Some useful implementation for rounding  //
-///////////////////////////////////////////////
+(* ulp definition *)
+let ulp (a:ieee_fp) = unit_fp (a.exp - a.prec)
+let half_ulp (a:ieee_fp) = unit_fp (a.exp - a.prec - 1)
 
-(* When target precision is larger than before *)
-val rnd_large_p: a:floating_point -> p:pos{p >= a.prec} ->
-    Tot (r:floating_point{r.sign = a.sign /\ r.prec = p /\
-        (let elb = min a.exp r.exp in
-	r.mant * pow2 (r.exp - elb) = a.mant * pow2 (a.exp - elb))})
+val add_one_ulp: a:ieee_fp ->
+    Tot (r:ieee_fp{r.prec = a.prec /\ fabs (eval r) =. fabs (eval a) +. ulp a})
+    
+let add_one_ulp a =
+    if a.limb + pow2 (a.len - a.prec) < pow2 a.len then begin
+        lemma_mod_distr a.limb (pow2 (a.len - a.prec)) (pow2 (a.len - a.prec));
+	lemma_log2_le (pow2 (a.len - 1)) (a.limb + pow2 (a.len - a.prec));
+	lemma_log2_lt (a.limb + pow2 (a.len - a.prec)) a.len;
+	{a with limb = a.limb + pow2 (a.len - a.prec)}
+    end else begin
+        lemma_pow2_multiple_le a.limb a.len (a.len - a.prec);
+	lemma_pow2_mul (a.len - 1) 1;
+	lemma_pow2_mod (a.len - 1) (a.len - a.prec);
+	{a with limb = pow2 (a.len - 1); exp = a.exp + 1}
+    end
+
+(* Increase precision *)
+val incr_prec: a:ieee_fp -> p:pos{p >= a.prec} ->
+    Tot (r:ieee_fp{r.prec = p /\ eval r =. eval a})
+    
+let incr_prec a p =
+    if p > a.len then
+        {a with prec = p; limb = a.limb * pow2 (p - a.len); len = p}
+    else begin
+        lemma_pow2_mod_mod a.limb (a.len - a.prec) (a.len - p);
+        {a with prec = p}
+    end
+
+(* Decrease precision, actually RNDZ *)
+val decr_prec: a:ieee_fp -> p:pos{p < a.prec} ->
+    Tot (r:ieee_fp{r.prec = p /\
+        fabs (eval r) <=. fabs (eval a) /\ fabs (eval a) <. fabs (eval r) +. ulp r})
 	
-let rnd_large_p a p =
-    let elb = min a.exp (a.exp + a.prec - p) in
-    lemma_pow2_mul (p - a.prec) a.prec;
-    lemma_pow2_mul (p - a.prec) (a.prec - 1);
-    lemma_pow2_mul (p - a.prec) (a.exp + a.prec - p - elb);
-    {sign = a.sign; prec = p; mant = a.mant * pow2 (p - a.prec); exp = a.exp + a.prec - p}
+let decr_prec a p = 
+    lemma_pow2_le (a.len - p) (a.len - 1);
+    lemma_multiple_mod (a.limb / pow2 (a.len - p)) (pow2 (a.len - p));
+    {a with prec = p; limb = (a.limb / pow2 (a.len - p)) * pow2 (a.len - p)}
 
-(* Splitting the significand when target precision is smaller *)
-let ulp    (a:floating_point) (p:pos{p < a.prec}) = pow2 (a.prec - p)
-let l_mant (a:floating_point) (p:pos{p < a.prec}) = a.mant % ulp a p
-let h_mant (a:floating_point) (p:pos{p < a.prec}) = a.mant - l_mant a p
+(* Split mantissa into high part and low part in order to round it
+ * No need to normalize low_mant as long as it has the same value *)
+val high_mant: a:ieee_fp -> p:pos{p < a.prec} ->
+    Tot (hm:ieee_fp{hm.prec = p /\
+        fabs (eval hm) <=. fabs (eval a) /\ fabs (eval a) <. fabs (eval hm) +. ulp hm})
+	
+let high_mant a p = decr_prec a p
+
+val low_mant: a:ieee_fp -> p:pos{p < a.prec} -> Tot (lm:valid_struct{
+    fabs (eval lm) <. ulp (high_mant a p)  /\ eval lm +. eval (high_mant a p) =. eval a})
+    
+let low_mant a p = 
+    if a.limb % pow2 (a.len - p) = 0 then ()
+    else lemma_log2_lt (a.limb % pow2 (a.len - p)) (a.len - p);
+    {a with limb = a.limb % pow2 (a.len - p)}
+    
+
+////////////////////////////////////////////////////////////////////////////////////
+//  RNDZ Definition: Round to zero                                                //
+//  Given floating point number 'a' and precision 'p', got result r = RNDZ(a, p)  //
+//  Splitting 'a' into two floating point numbers a = a_high + a_low              //
+//  Rounding 'a' to a_high                                                        //
+//  We should always have the following inequality:                               //
+//                   abs r  <=  abs a  <  abs r + ulp r                           //
+////////////////////////////////////////////////////////////////////////////////////
+
+val rndz_def: a:ieee_fp -> p:pos{p < a.prec} ->
+    Tot (r:ieee_fp{r.prec = p /\
+        fabs (eval r) <=. fabs (eval a) /\ fabs (eval a) <. fabs (eval r) +. ulp r})
+	
+let rndz_def a p = high_mant a p
+
 
 //////////////////////////////////////////////////////////////////////////////////////
 //  RNDN Definition: Rounding to the nearest                                        //
@@ -40,180 +94,70 @@ let h_mant (a:floating_point) (p:pos{p < a.prec}) = a.mant - l_mant a p
 //////////////////////////////////////////////////////////////////////////////////////
 
 (* RNDN definition *)
-let even_hm (a:floating_point) (p:pos{p < a.prec}) = ((a.mant / ulp a p) % 2 = 0)
+let is_even (a:ieee_fp) = (nth #a.len a.limb (a.prec - 1) = false)
 
-let rndn_def (a:floating_point) (p:pos): (r:fp_struct{r.sign = a.sign}) =
-    if a.prec <= p then rnd_large_p a p
-    else begin
-        if (l_mant a p < ulp a p / 2 || (l_mant a p = ulp a p / 2 && even_hm a p)) then
-	{sign = a.sign; prec = a.prec; mant = h_mant a p; exp = a.exp} else
-	{sign = a.sign; prec = a.prec; mant = h_mant a p + ulp a p; exp = a.exp}
+let rndn_def (a:ieee_fp) (p:pos{p < a.prec}): Tot (r:ieee_fp{r.prec = p}) =
+    let high, low = high_mant a p, low_mant a p in
+    if ((eval low <. half_ulp high) || (eval low =. half_ulp high && is_even high))
+    then rndz_def a p
+    else add_one_ulp (rndz_def a p)
+
+(* Definitions of round bit and sticky bit which are widely used in RNDN *)
+let rb_def (a:ieee_fp) (p:pos{p < a.prec}): Tot bool = nth #a.len a.limb p
+let sb_def (a:ieee_fp) (p:pos{p < a.prec}): Tot bool = (a.limb % pow2 (a.len - p - 1) <> 0)
+
+val rb_value_lemma: a:ieee_fp -> p:pos{p < a.prec} ->
+    Lemma (a.limb % pow2 (a.len - p - 1) + (if rb_def a p then pow2 (a.len - p - 1) else 0) = a.limb % pow2 (a.len - p))
+
+let rb_value_lemma a p =
+    assert(nth #a.len a.limb p = nth (shift_right #a.len a.limb (a.len - p - 1)) (a.len - 1));
+    lemma_pow2_mod_div a.limb (a.len - p) (a.len - p - 1);
+    lemma_pow2_mod_mod a.limb (a.len - p) (a.len - p - 1)
+
+val rb_sb_lemma: a:ieee_fp -> p:pos{p < a.prec} -> Lemma (
+    let lm_fp = fabs (eval (low_mant a p)) in
+    match rb_def a p, sb_def a p with
+    | false, false -> lm_fp =. zero_fp
+    | false, true  -> lm_fp >. zero_fp /\ lm_fp <. half_ulp (high_mant a p)
+    | true , false -> lm_fp =. half_ulp (high_mant a p)
+    | true , true  -> lm_fp >. half_ulp (high_mant a p) /\ lm_fp <. ulp (high_mant a p))
+    
+let rb_sb_lemma a p =
+    rb_value_lemma a p;
+    if sb_def a p = false then ()
+    else if rb_def a p then begin
+        lemma_mul_lt_right (pow2 (p + 1)) (pow2 (a.len - p - 1)) (a.limb % pow2 (a.len - p));
+	lemma_pow2_mul (a.len - p - 1) (p + 1)
+    end else begin
+        assert(a.limb % pow2 (a.len - p) > 0);
+        lemma_mul_lt_right (pow2 (p + 1)) (a.limb % pow2 (a.len - p)) (pow2 (a.len - p - 1));
+	lemma_pow2_mul (a.len - p - 1) (p + 1)
     end
 
-(* Check if the result has the same value as defined by rndn_def *)
-let rndn_value_cond (a:floating_point) (p:pos) (r:floating_point{r.sign = a.sign}) =
-    let d = rndn_def a p in
-    let elb = min d.exp r.exp in
-    d.mant * pow2 (d.exp - elb) = r.mant * pow2 (r.exp - elb)
-
-(* Check if the original value lies in certain interval *)
-let rndn_range_cond (a:floating_point) (p:pos) (r:floating_point) =
-    let elb = min a.exp r.exp in
-    (r.mant % 2 = 1 ==> 
-        ((r.mant * 2 - 1) * pow2 (r.exp - elb) < a.mant * pow2 (a.exp - elb + 1) /\
-         (r.mant * 2 + 1) * pow2 (r.exp - elb) > a.mant * pow2 (a.exp - elb + 1))) /\
-    (r.mant = pow2 (r.prec - 1) ==>
-        ((r.mant * 4 - 1) * pow2 (r.exp - elb) <= a.mant * pow2 (a.exp - elb + 2) /\
-         (r.mant * 2 + 1) * pow2 (r.exp - elb) >= a.mant * pow2 (a.exp - elb + 1))) /\
-    ((r.mant <> pow2 (r.prec - 1) /\ r.mant % 2 = 0) ==>
-        ((r.mant * 2 - 1) * pow2 (r.exp - elb) <= a.mant * pow2 (a.exp - elb + 1) /\
-         (r.mant * 2 + 1) * pow2 (r.exp - elb) >= a.mant * pow2 (a.exp - elb + 1)))
-
-(* The specification should satisfy two conditions, which are actually equivalent *)
-val rndn_spec: a:floating_point -> p:pos ->
-    Tot (r:floating_point{r.prec = p /\ r.sign = a.sign /\
-                          rndn_value_cond a p r /\ rndn_range_cond a p r})
-
-////////////////////////////////////////////////////////////////
-//  Implementation for each rounding mode                     //
-//  Including implementation of rounding/sticky bit for RNDN  //
-////////////////////////////////////////////////////////////////
-
-(* Getting the first p bits of mantissa *)
-val main_mant: a:floating_point -> p:pos{p < a.prec} -> 
-    Tot (rmant:nat{pow2 (p - 1) <= rmant /\ rmant < pow2 p /\
-        (let rexp = a.exp + a.prec - p in
-	 let elb = min a.exp rexp in
-	 rmant * pow2 (rexp - elb) <= a.mant * pow2 (a.exp - elb) /\
-         a.mant * pow2 (a.exp - elb) < (rmant + 1) * pow2 (rexp - elb))})
-	 
-let main_mant a p =
-    let rexp = a.exp + a.prec - p in
-    let elb = min a.exp rexp in
-    lemma_pow2_div (a.prec - 1) (a.prec - p);
-    lemma_div_le (pow2 (a.prec - 1)) a.mant (pow2 (a.prec - p));
-    lemma_pow2_div_lt a.mant a.prec (a.prec - p);
-    lemma_distr_add_left (a.mant / pow2 (a.prec - p)) 1 (pow2 (rexp - elb));
-    a.mant / pow2 (a.prec - p)
-
-(* Implementation of rounding bit *)
-val rb_spec: a:floating_point -> p:pos -> Tot bool
-let rb_spec a p =
-    if a.prec <= p then false
-    else nth #a.prec a.mant p
-
-(* Proprieties of rounding bit *)
-val rb_spec_mask_lemma: a:floating_point -> p:pos{p < a.prec} ->
-    Lemma (rb_spec a p = (logand a.mant (pow2_n #a.prec (a.prec - p - 1)) = pow2_n #a.prec (a.prec - p - 1)))
+val is_even_lemma: a:ieee_fp -> p:pos{p < a.prec} -> Lemma
+    (is_even (high_mant a p) = (logand #a.len (high_mant a p).limb (pow2 (a.len - p)) = 0))
     
-let rb_spec_mask_lemma a p = 
-    if nth #a.prec a.mant p then 
-        nth_lemma (logand a.mant (pow2_n #a.prec (a.prec - p - 1))) (pow2_n #a.prec (a.prec - p - 1))
+let is_even_lemma a p = 
+    lemma_multiple_div (a.limb / pow2 (a.len - p)) (pow2 (a.len - p));
+    assert(nth #a.len (shift_right #a.len a.limb (a.len - p)) (a.len - 1) =
+           nth #a.len (shift_right #a.len (high_mant a p).limb (a.len - p)) (a.len - 1));
+    if nth #a.len a.limb (p - 1) then 
+        nth_lemma (logand #a.len (high_mant a p).limb (pow2_n #a.len (a.len - p))) (pow2_n #a.len (a.len - p))
     else 
-        nth_lemma (logand a.mant (pow2_n #a.prec (a.prec - p - 1))) (zero a.prec)
+        nth_lemma (logand #a.len (high_mant a p).limb (pow2_n #a.len (a.len - p))) (zero a.len)
 
-val rb_spec_value_lemma: a:floating_point -> p:pos{p < a.prec} ->
-    Lemma (a.mant % pow2 (a.prec - p) = (if rb_spec a p then pow2 (a.prec - p - 1) else 0) +
-                                        a.mant % pow2 (a.prec - p - 1))
-					
-let rb_spec_value_lemma a p =
-    assert(nth #a.prec a.mant p = nth (shift_right #a.prec a.mant (a.prec - p - 1)) (a.prec - 1));
-    lemma_pow2_mod_div a.mant (a.prec - p) (a.prec - p - 1);
-    lemma_pow2_mod_mod a.mant (a.prec - p) (a.prec - p - 1)
-
-(* Implementation of sticky bit *)
-val sb_spec: a:floating_point -> p:pos -> Tot bool
-let sb_spec a p = 
-    if a.prec <= p + 1 then false
-    else (a.mant % pow2 (a.prec - (p + 1)) <> 0)
-
-(* Proprieties of sticky bit *)
-val sb_spec_mask_lemma: a:floating_point -> p:pos{p < a.prec - 1} ->
-    Lemma (sb_spec a p = (logand #a.prec a.mant (pow2_n #a.prec (a.prec - p - 1) - 1) <> 0))
+val rndn_spec: a:ieee_fp -> p:pos{p < a.prec} ->
+    Tot (r:ieee_fp{r.prec = p /\ r = rndn_def a p})
     
-let sb_spec_mask_lemma a p = 
-    lemma_pow2_lt (a.prec - p - 1) a.prec;
-    logand_mask #a.prec a.mant (a.prec - p - 1)
-
-val sb_spec_value_lemma: a:floating_point -> p:pos{p < a.prec} ->
-    Lemma (sb_spec a p = (a.mant % pow2 (a.prec - p - 1) <> 0))
-    
-let sb_spec_value_lemma a p = ()
-
-
-//////////////////////////////////////////////////////////////
-//  Implementation for RNDN                                 //
-//  3 lemmas for different branches in main implementation  //
-//////////////////////////////////////////////////////////////
-(* Two conditions are equivalent *)
-val rndn_value_imp_range_lemma: a:floating_point -> p:pos -> r:floating_point{r.sign = a.sign} -> Lemma
-    (requires (rndn_value_cond a p r))
-    (ensures  (rndn_range_cond a p r))
-
-let rndn_value_imp_range_lemma a p r = admit()
-
-(* Lemmas for RNDN *)
-val rndn_spec_branch1: a:floating_point ->
-    p:pos{p < a.prec /\ (rb_spec a p = false \/ (sb_spec a p = false && main_mant a p % 2 = 0))} ->
-    Tot (r:floating_point{r.prec = p /\ r.sign = a.sign /\
-                          rndn_value_cond a p r /\ rndn_range_cond a p r})
-			  
-let rndn_spec_branch1 a p =
-    let rmant = main_mant a p in
-    let rexp = a.exp + a.prec - p in
-    let r = {sign = a.sign; prec = p; mant = rmant; exp = rexp} in
-    let d = rndn_def a p in
-    let elb = min d.exp rexp in
-    rb_spec_value_lemma a p;
-    sb_spec_value_lemma a p;
-    lemma_pow2_mul (a.prec - p) (d.exp - elb);
-    rndn_value_imp_range_lemma a p r;
-    r
-
-val rndn_spec_branch2: a:floating_point -> 
-    p:pos{p < a.prec /\ rb_spec a p = true /\
-         (sb_spec a p = true \/ (sb_spec a p = false /\ main_mant a p % 2 = 1)) /\
-	 main_mant a p + 1 < pow2 p} ->
-    Tot (r:floating_point{r.prec = p /\ r.sign = a.sign /\
-                          rndn_value_cond a p r /\ rndn_range_cond a p r})
-
-let rndn_spec_branch2 a p =
-    let rmant = main_mant a p + 1 in
-    let rexp = a.exp + a.prec - p in
-    let r = {sign = a.sign; prec = p; mant = rmant; exp = rexp} in
-    let d = rndn_def a p in
-    let elb = min a.exp rexp in
-    rb_spec_value_lemma a p;
-    sb_spec_value_lemma a p;
-    lemma_pow2_mul (a.prec - p) (d.exp - elb);
-    rndn_value_imp_range_lemma a p r;
-    r
-    
-val rndn_spec_branch3: a:floating_point -> 
-    p:pos{p < a.prec /\ rb_spec a p = true /\
-         (sb_spec a p = true \/ (sb_spec a p = false /\ main_mant a p % 2 = 1)) /\
-	 main_mant a p + 1 = pow2 p} ->
-    Tot (r:floating_point{r.prec = p /\ r.sign = a.sign /\
-                          rndn_value_cond a p r /\ rndn_range_cond a p r})
-
-let rndn_spec_branch3 a p =
-    let rmant = pow2 (p - 1) in
-    let rexp = a.exp + a.prec - p + 1 in
-    let r = {sign = a.sign; prec = p; mant = rmant; exp = rexp} in
-    let d = rndn_def a p in
-    let elb = min d.exp rexp in
-    rb_spec_value_lemma a p;
-    sb_spec_value_lemma a p;
-    lemma_pow2_mul (a.prec - p) (d.exp - elb);
-    rndn_value_imp_range_lemma a p r;
-    r
-
-let rndn_spec a p = 
-    if a.prec <= p then
-        rnd_large_p a p
-    else if rb_spec a p = false || (sb_spec a p = false && main_mant a p % 2 = 0) then 
-        rndn_spec_branch1 a p
-    else if main_mant a p + 1 < pow2 p then
-        rndn_spec_branch2 a p
-    else
-        rndn_spec_branch3 a p
+let rndn_spec a p =
+    rb_sb_lemma a p;
+    is_even_lemma a p;
+    if rb_def a p = false || 
+      (sb_def a p = false && logand #a.len (high_mant a p).limb (pow2 (a.len - p)) = 0)
+    then begin
+	assert(eval (low_mant a p) <. half_ulp (high_mant a p) ||
+	      (eval (low_mant a p) =. half_ulp (high_mant a p) && is_even (high_mant a p)));
+	rndz_def a p
+    end else begin
+	add_one_ulp (rndz_def a p)
+    end

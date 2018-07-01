@@ -203,6 +203,14 @@ let lemma_pow2_div_lt a b d =
     lemma_pow2_mod b d;
     lemma_div_lt a (pow2 b) (pow2 d)
 
+val lemma_pow2_multiple_le: a:nat -> b:nat -> d:nat -> Lemma
+    (requires (a < pow2 b /\ d <= b /\ a % pow2 d = 0))
+    (ensures  (a + pow2 d <= pow2 b))
+let lemma_pow2_multiple_le a b d =
+    lemma_pow2_div_lt a b d;
+    lemma_distr_sub_left (pow2 (b - d)) 1 (pow2 d);
+    lemma_pow2_mul (b - d) d
+
 val lemma_pow2_div_div: a:nat -> b:nat -> c:nat -> Lemma
     ((a / pow2 b) / pow2 c = a / pow2 (b + c))
 let lemma_pow2_div_div a b c =
@@ -268,11 +276,21 @@ let rec lemma_log2_div a b =
 	lemma_pow2_div_div a (b - 1) 1;
         lemma_log2_div a (b - 1)
     end
-    
 
 (* Lemmas about bitwise operations *)
+(*
 open FStar.BitVector
 open FStar.UInt
+
+val lemma_bit_mask_value: #n:pos -> a:uint_t n -> mask:uint_t n -> p:nat{p < n} -> Lemma
+    (requires (mask = pow2 (n - p - 1)))
+    (ensures  (logand a mask = (if nth a p then mask else 0)))
+let lemma_bit_mask_value #n a mask p =
+    assert(mask = pow2_n #n (n - p - 1));
+    if nth a p then nth_lemma (logand a mask) mask
+    else nth_lemma (logand a mask) (zero n)
+
+
 open FStar.UInt64
 
 type u64 = FStar.UInt64.t
@@ -322,14 +340,6 @@ val lemma_tail_mask: mask:u64 -> p:pos{p <= 64} -> Lemma
                                         (i >= 64 - p ==> nth (v mask) i = true)))
 let lemma_tail_mask mask p = lemma_pow2_le p p
 
-val lemma_bit_mask_value: a:u64 -> mask:u64 -> p:nat{p < 64} -> Lemma
-    (requires (v mask = pow2 (63 - p)))
-    (ensures  (v (a &^ mask) = (if nth (v a) p then v mask else 0)))
-let lemma_bit_mask_value a mask p =
-    assert(v mask = pow2_n #64 (63 - p));
-    if nth (v a) p then nth_lemma (UInt.logand (v a) (v mask)) (v mask)
-    else nth_lemma (UInt.logand (v a) (v mask)) (zero 64)
-
 val lemma_tail_mask_value: a:u64 -> mask:u64 -> p:nat{p < 64} -> Lemma
     (requires (v mask = pow2 p - 1))
     (ensures  (v (a &^ mask) = v a % pow2 p))
@@ -338,3 +348,4 @@ let lemma_tail_mask_value a mask p =
         assert(v mask = zero 64);
 	nth_lemma (v (a &^ mask)) (zero 64)
     end
+*)
