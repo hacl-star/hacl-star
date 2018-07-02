@@ -60,7 +60,7 @@ extern volatile int timing_alarmed;
  * \note           This value starts at an unspecified origin and
  *                 may wrap around.
  */
-unsigned long timing_hardclock( void );
+uint64_t timing_hardclock( void );
 
 /**
  * \brief          Return the elapsed time in milliseconds

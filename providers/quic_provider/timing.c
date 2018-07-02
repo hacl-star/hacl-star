@@ -63,9 +63,9 @@ struct _hr_time
 
 #define HAVE_HARDCLOCK
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
-    unsigned long tsc;
+    uint64_t tsc;
     __asm   rdtsc
     __asm   mov  [tsc], eax
     return( tsc );
@@ -80,11 +80,13 @@ unsigned long timing_hardclock( void )
 
 #define HAVE_HARDCLOCK
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
     unsigned long lo, hi;
     asm volatile( "rdtsc" : "=a" (lo), "=d" (hi) );
-    return( lo );
+    uint64_t ret = hi;
+    ret <<= 32; ret += lo;
+    return( ret );
 }
 #endif /* !HAVE_HARDCLOCK && MBEDTLS_HAVE_ASM &&
           __GNUC__ && __i386__ */
@@ -94,7 +96,7 @@ unsigned long timing_hardclock( void )
 
 #define HAVE_HARDCLOCK
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
     unsigned long lo, hi;
     asm volatile( "rdtsc" : "=a" (lo), "=d" (hi) );
@@ -108,7 +110,7 @@ unsigned long timing_hardclock( void )
 
 #define HAVE_HARDCLOCK
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
     unsigned long tbl, tbu0, tbu1;
 
@@ -133,7 +135,7 @@ unsigned long timing_hardclock( void )
 #else
 #define HAVE_HARDCLOCK
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
     unsigned long tick;
     asm volatile( "rdpr %%tick, %0;" : "=&r" (tick) );
@@ -148,7 +150,7 @@ unsigned long timing_hardclock( void )
 
 #define HAVE_HARDCLOCK
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
     unsigned long tick;
     asm volatile( ".byte 0x83, 0x41, 0x00, 0x00" );
@@ -163,11 +165,11 @@ unsigned long timing_hardclock( void )
 
 #define HAVE_HARDCLOCK
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
-    unsigned long cc;
+    uint64_t cc = 0;
     asm volatile( "rpcc %0" : "=r" (cc) );
-    return( cc & 0xFFFFFFFF );
+    return( cc );
 }
 #endif /* !HAVE_HARDCLOCK && MBEDTLS_HAVE_ASM &&
           __GNUC__ && __alpha__ */
@@ -177,7 +179,7 @@ unsigned long timing_hardclock( void )
 
 #define HAVE_HARDCLOCK
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
     unsigned long itc;
     asm volatile( "mov %0 = ar.itc" : "=r" (itc) );
@@ -191,13 +193,13 @@ unsigned long timing_hardclock( void )
 
 #define HAVE_HARDCLOCK
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
     LARGE_INTEGER offset;
 
     QueryPerformanceCounter( &offset );
 
-    return( (unsigned long)( offset.QuadPart ) );
+    return( (uint64_t)( offset.QuadPart ) );
 }
 #endif /* !HAVE_HARDCLOCK && _MSC_VER && !EFIX64 && !EFI32 */
 
@@ -208,7 +210,7 @@ unsigned long timing_hardclock( void )
 static int hardclock_init = 0;
 static struct timeval tv_init;
 
-unsigned long timing_hardclock( void )
+uint64_t timing_hardclock( void )
 {
     struct timeval tv_cur;
 

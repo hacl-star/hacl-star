@@ -26,12 +26,14 @@
 
 #include "timing.h"
 #include "EverCrypt.h"
+#include "EverCrypt_AutoConfig.h"
 
 #define HEADER_FORMAT   "  %-24s :  "
 
 #define TIME_AND_TSC( TITLE, BUFSIZE, CODE )                            \
 do {                                                                    \
-    unsigned long ii, jj, tsc;                                          \
+    uint64_t ii, jj, tsc, cnt;                                          \
+    cnt = BUFSIZE < 2048 ? 512 : (BUFSIZE < 8192 ? 256 : 128);          \
                                                                         \
     printf( HEADER_FORMAT, TITLE );                                     \
     fflush( stdout );                                                   \
@@ -43,7 +45,7 @@ do {                                                                    \
     }                                                                   \
                                                                         \
     tsc = timing_hardclock();                                           \
-    for( jj = 0; jj < 1024; jj++ )                                      \
+    for( jj = 0; jj < cnt; jj++ )                                       \
     {                                                                   \
         CODE;                                                           \
     }                                                                   \
@@ -107,8 +109,25 @@ void bench_aead(aead_enc enc, aead_dec dec, const unsigned char *alg, size_t pla
   free(cipher);
 }
 
-int main(int argc, char **argv)
+void run(EverCrypt_AutoConfig_cfg cfg)
 {
+  switch(cfg.preferred)
+  {
+    case EverCrypt_AutoConfig_Hacl:
+      printf(" ================= Prefer Hacl ===================\n");
+      break;
+    case EverCrypt_AutoConfig_Vale:
+      printf(" ================= Prefer Vale ===================\n");
+      break;
+    case EverCrypt_AutoConfig_OpenSSL:
+      printf(" =============== Prefer OpenSSL ==================\n");
+      break;
+    case EverCrypt_AutoConfig_BCrypt:
+      printf(" ================ Prefer BCrypt ==================\n");
+      break;
+  }
+
+  EverCrypt_AutoConfig_init(cfg);
   size_t i;
 
   for(i=4; i<=65536; i<<=1)
@@ -119,6 +138,18 @@ int main(int argc, char **argv)
 
   for(i=4; i<=65536; i<<=1)
     bench_aead(EverCrypt_chacha20_poly1305_encrypt, EverCrypt_chacha20_poly1305_decrypt, "CHA20-P1305", i);
+
+}
+
+int main(int argc, char **argv)
+{
+  EverCrypt_AutoConfig_cfg cfg = { .tag = EverCrypt_AutoConfig_Prefer };
+
+  for(uint8_t i=0; i<4; i++)
+  {
+    cfg.preferred = i;
+    run(cfg);
+  }
 
   return 0;
 }
