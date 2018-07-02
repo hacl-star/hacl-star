@@ -87,6 +87,12 @@ $(LIBQUICCRYPTO): Crypto_HKDF_Crypto_HMAC.o quic_provider.o
 test.exe: $(LIBQUICCRYPTO) test.o
 	$(CC) $(CFLAGS) test.o -o test.exe -L . -lquiccrypto $(LDFLAGS)
 
+benchmark.exe: $(LIBQUICCRYPTO) timing.o benchmark.o
+	$(CC) $(CFLAGS) timing.o benchmark.o -o benchmark.exe -L. -lquiccrypto $(LDFLAGS)
+
+benchmark: benchmark.exe
+	$(EXTRA_PATH) ./benchmark.exe
+
 test: test.exe
 	$(EXTRA_PATH) ./test.exe
 
