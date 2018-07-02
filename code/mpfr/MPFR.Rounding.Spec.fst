@@ -2,7 +2,7 @@ module MPFR.Rounding.Spec
 
 open FStar.Mul
 open FStar.UInt
-open MPFR.BinaryFP
+open MPFR.FloatingPoint
 open MPFR.Lib.Spec
 open MPFR.Maths
 
@@ -98,7 +98,7 @@ let is_even (a:ieee_fp) = (nth #a.len a.limb (a.prec - 1) = false)
 
 let rndn_def (a:ieee_fp) (p:pos{p < a.prec}): Tot (r:ieee_fp{r.prec = p}) =
     let high, low = high_mant a p, low_mant a p in
-    if ((eval low <. half_ulp high) || (eval low =. half_ulp high && is_even high))
+    if ((fabs (eval low) <. half_ulp high) || (fabs (eval low) =. half_ulp high && is_even high))
     then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
@@ -107,20 +107,21 @@ let rb_def (a:ieee_fp) (p:pos{p < a.prec}): Tot bool = nth #a.len a.limb p
 let sb_def (a:ieee_fp) (p:pos{p < a.prec}): Tot bool = (a.limb % pow2 (a.len - p - 1) <> 0)
 
 val rb_value_lemma: a:ieee_fp -> p:pos{p < a.prec} ->
-    Lemma (a.limb % pow2 (a.len - p - 1) + (if rb_def a p then pow2 (a.len - p - 1) else 0) = a.limb % pow2 (a.len - p))
+    Lemma (a.limb % pow2 (a.len - p) = a.limb % pow2 (a.len - p - 1) + (if rb_def a p then pow2 (a.len - p - 1) else 0))
 
 let rb_value_lemma a p =
     assert(nth #a.len a.limb p = nth (shift_right #a.len a.limb (a.len - p - 1)) (a.len - 1));
+    lemma_euclidean (a.limb % pow2 (a.len - p)) (pow2 (a.len - p - 1));
     lemma_pow2_mod_div a.limb (a.len - p) (a.len - p - 1);
     lemma_pow2_mod_mod a.limb (a.len - p) (a.len - p - 1)
 
 val rb_sb_lemma: a:ieee_fp -> p:pos{p < a.prec} -> Lemma (
     let lm_fp = fabs (eval (low_mant a p)) in
-    match rb_def a p, sb_def a p with
-    | false, false -> lm_fp =. zero_fp
-    | false, true  -> lm_fp >. zero_fp /\ lm_fp <. half_ulp (high_mant a p)
-    | true , false -> lm_fp =. half_ulp (high_mant a p)
-    | true , true  -> lm_fp >. half_ulp (high_mant a p) /\ lm_fp <. ulp (high_mant a p))
+    let hulp  = half_ulp (high_mant a p) in
+    ((rb_def a p = false /\ sb_def a p = false) <==> (lm_fp =. zero_fp)) /\
+    ((rb_def a p = false /\ sb_def a p = true ) <==> (lm_fp >. zero_fp /\ lm_fp <. hulp)) /\
+    ((rb_def a p = true  /\ sb_def a p = false) <==> (lm_fp =. hulp)) /\
+    ((rb_def a p = true  /\ sb_def a p = true ) <==> (lm_fp >. hulp)))
     
 let rb_sb_lemma a p =
     rb_value_lemma a p;
@@ -145,9 +146,9 @@ let is_even_lemma a p =
         nth_lemma (logand #a.len (high_mant a p).limb (pow2_n #a.len (a.len - p))) (pow2_n #a.len (a.len - p))
     else 
         nth_lemma (logand #a.len (high_mant a p).limb (pow2_n #a.len (a.len - p))) (zero a.len)
-
+	
 val rndn_spec: a:ieee_fp -> p:pos{p < a.prec} ->
-    Tot (r:ieee_fp{r.prec = p /\ r = rndn_def a p})
+    Tot (r:ieee_fp{r = rndn_def a p})
     
 let rndn_spec a p =
     rb_sb_lemma a p;
@@ -155,8 +156,6 @@ let rndn_spec a p =
     if rb_def a p = false || 
       (sb_def a p = false && logand #a.len (high_mant a p).limb (pow2 (a.len - p)) = 0)
     then begin
-	assert(eval (low_mant a p) <. half_ulp (high_mant a p) ||
-	      (eval (low_mant a p) =. half_ulp (high_mant a p) && is_even (high_mant a p)));
 	rndz_def a p
     end else begin
 	add_one_ulp (rndz_def a p)

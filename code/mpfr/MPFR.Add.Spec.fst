@@ -1,7 +1,7 @@
 module MPFR.Add.Spec
 
 open FStar.Mul
-open MPFR.BinaryFP
+open MPFR.FloatingPoint
 open MPFR.Lib.Spec
 open MPFR.Maths
 

@@ -101,6 +101,7 @@ let lemma_div_distr a b c = lemma_add_div b (a / c) c
 
 val lemma_mod_distr: a:nat -> b:nat -> c:pos -> Lemma
     ((a + b) % c = (a % c + b % c) % c)
+    
 let lemma_mod_distr a b c =
     lemma_euclidean a c;
     //! assert((a + b) / c = ((a / c + b / c) * c + (a % c + b % c)) / c);
@@ -108,6 +109,7 @@ let lemma_mod_distr a b c =
 
 val lemma_div_div: a:nat -> b:pos -> c:pos -> Lemma
     ((a / b) / c = a / (b * c))
+    
 let lemma_div_div a b c =
     lemma_euclidean a b;
     //! assert(a = (a / b) * b + a % b);
@@ -123,6 +125,7 @@ let lemma_div_div a b c =
 val lemma_mul_div: a:nat -> b:nat -> c:pos -> Lemma
     (requires (a % c = 0))
     (ensures  ((a * b) / c = (a / c) * b))
+    
 let lemma_mul_div a b c =
     lemma_euclidean a c;
     //! assert((a * b) / c = ((a / c) * c * b) / c);
@@ -135,6 +138,7 @@ let lemma_mul_mod a b c = lemma_mul_div a b c
     
 val lemma_mod_div: a:nat -> b:pos -> c:pos -> Lemma 
     ((a % (b * c)) / b = (a / b) % c)
+    
 let lemma_mod_div a b c =
     lemma_euclidean a (b * c);
     //! assert(a = (a / (b * c)) * (b * c) + a % (b * c));
@@ -259,23 +263,31 @@ let lemma_log2_lt_inv a b = if a < b then () else lemma_log2_le b a
 val lemma_log2_mul: a:pos -> b:nat -> Lemma
     (ensures (log2 (a * pow2 b) = log2 a + b))
     [SMTPat (log2 (a * pow2 b))]
-let rec lemma_log2_mul a b = 
-    if b = 0 then () else begin
-        lemma_pow2_div b 1;
-	lemma_mul_div (pow2 b) a 2;
-        lemma_log2_mul a (b - 1)
-    end
+let lemma_log2_mul a b =
+    lemma_mul_le_right (pow2 b) (pow2 (log2 a)) a;
+    lemma_pow2_mul (log2 a) b;
+    lemma_log2_le (pow2 (log2 a + b)) (a * pow2 b);
+    //! assert(log2 a + b <= log2 (a * pow2 b));
+    lemma_mul_le_right (pow2 b) a (pow2 (log2 a + 1));
+    lemma_pow2_mul (log2 a + 1) b;
+    lemma_log2_lt (a * pow2 b) (log2 a + 1 + b);
+    //! assert(log2 (a * pow2 b) < log2 a + 1 + b);
+    ()
 
 val lemma_log2_div: a:pos -> b:nat -> Lemma
     (requires (log2 a >= b))
     (ensures  (a / pow2 b > 0 /\ log2 (a / pow2 b) = log2 a - b))
     [SMTPat (log2 (a / pow2 b))]
-let rec lemma_log2_div a b =
-    if b = 0 then () else begin
-        lemma_pow2_div b 1;
-	lemma_pow2_div_div a (b - 1) 1;
-        lemma_log2_div a (b - 1)
-    end
+let lemma_log2_div a b =
+    lemma_div_le (pow2 (log2 a)) a (pow2 b);
+    lemma_pow2_div (log2 a) b;
+    lemma_log2_le (pow2 (log2 a - b)) (a / pow2 b);
+    //! assert(log2 a - b <= log2 (a / pow2 b));
+    lemma_pow2_div_lt a (log2 a + 1) b;
+    lemma_pow2_div (log2 a + 1) b;
+    lemma_log2_lt (a / pow2 b) (log2 a + 1 - b);
+    //! assert(log2 (a / pow2 b) < log2 a + 1 - b);
+    ()
 
 (* Lemmas about bitwise operations *)
 (*

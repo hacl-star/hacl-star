@@ -1,7 +1,7 @@
 module MPFR.Lib.Spec
 
 open FStar.Mul
-open MPFR.BinaryFP
+open MPFR.FloatingPoint
 open MPFR.Maths
 
 #set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
@@ -44,7 +44,7 @@ let eval (fp:fp_struct) = mk_fp (fp.sign * fp.limb) (fp.exp - fp.len)
 /////////////////////////////////////////////////////////////////////////////////////////
 //  Validity Test for ieee_struct                                                      //
 //  A valid struct represents a binary floating point number defined in MPFR.BinaryFP  //
-//  Important function 'eval' maps ieee_fp to binary_fp                                //
+//  Important function 'eval' maps ieee_fp to floating_point                                //
 /////////////////////////////////////////////////////////////////////////////////////////
 
 (* Condition for validity 

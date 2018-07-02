@@ -1,4 +1,4 @@
-module MPFR.BinaryFP
+module MPFR.FloatingPoint
 
 open FStar.Mul
 open MPFR.Maths
@@ -7,7 +7,7 @@ open MPFR.Maths
 
 (* Arbitrary precision floating point number: significand * 2 ^ exponent 
  * this allows multiple representations for one value. *)
-noeq type binary_fp = {significand:int; exponent:int}
+noeq type floating_point = {significand:int; exponent:int}
 
 let mk_fp m x = {significand = m; exponent = x}
     
@@ -21,17 +21,17 @@ let unit_fp x = mk_fp 1 x
 let eval_i fp (elb:int{fp.exponent - elb >= 0}) = fp.significand * pow2 (fp.exponent - elb)
 
 (* Comparison *)
-let eq (a:binary_fp) (b:binary_fp) = let elb = min a.exponent b.exponent in eval_i a elb = eval_i b elb
-let gt (a:binary_fp) (b:binary_fp) = let elb = min a.exponent b.exponent in eval_i a elb > eval_i b elb
-let ge (a:binary_fp) (b:binary_fp) = let elb = min a.exponent b.exponent in eval_i a elb >= eval_i b elb
-let lt (a:binary_fp) (b:binary_fp) = let elb = min a.exponent b.exponent in eval_i a elb < eval_i b elb
-let le (a:binary_fp) (b:binary_fp) = let elb = min a.exponent b.exponent in eval_i a elb <= eval_i b elb
+let eq (a:floating_point) (b:floating_point) = let elb = min a.exponent b.exponent in eval_i a elb = eval_i b elb
+let gt (a:floating_point) (b:floating_point) = let elb = min a.exponent b.exponent in eval_i a elb > eval_i b elb
+let ge (a:floating_point) (b:floating_point) = let elb = min a.exponent b.exponent in eval_i a elb >= eval_i b elb
+let lt (a:floating_point) (b:floating_point) = let elb = min a.exponent b.exponent in eval_i a elb < eval_i b elb
+let le (a:floating_point) (b:floating_point) = let elb = min a.exponent b.exponent in eval_i a elb <= eval_i b elb
 
 (* Negation post-condition:
  * r.mant * 2 ^ (r.exp - elb) = - a.mant * 2 ^ (a.exp - elb)
  * is equivalent to
  * r.mant * 2 ^ r.exp = - a.mant * 2 ^ a.exp *)
-val fneg: a:binary_fp -> Tot (r:binary_fp{
+val fneg: a:floating_point -> Tot (r:floating_point{
     let elb = a.exponent in
     r.exponent >= elb /\
     eval_i r elb = - eval_i a elb})
@@ -43,7 +43,7 @@ let fabs a = if ge a zero_fp then a else fneg a
  * a.mant * 2 ^ (a.exp - elb) + b.mant * 2 ^ (b.exp - elb) = r.mant * 2 ^ (r.exp - elb)
  * is equivalent to
  * a.mant * 2 ^ a.exp + b.mant * 2 ^ b.exp = r.mant * 2 ^ r.exp *)
-val fadd: a:binary_fp -> b:binary_fp -> Tot (r:binary_fp{
+val fadd: a:floating_point -> b:floating_point -> Tot (r:floating_point{
     let elb = min a.exponent b.exponent in
     r.exponent >= elb /\
     eval_i a elb + eval_i b elb = eval_i r elb})
@@ -55,7 +55,7 @@ let fadd a b =
  * a.mant * 2 ^ (a.exp - elb) - b.mant * 2 ^ (b.exp - elb) = r.mant * 2 ^ (r.exp - elb)
  * is equivalent to
  * a.mant * 2 ^ a.exp - b.mant * 2 ^ b.exp = r.mant * 2 ^ r.exp *)
-val fsub: a:binary_fp -> b:binary_fp -> Tot (r:binary_fp{
+val fsub: a:floating_point -> b:floating_point -> Tot (r:floating_point{
     let elb = min a.exponent b.exponent in
     r.exponent >= elb /\
     eval_i a elb - eval_i b elb = eval_i r elb})
@@ -65,11 +65,13 @@ let fsub a b = fadd a (fneg b)
  * a.mant * 2 ^ (a.exp - elb) * b.mant * 2 ^ (b.exp - elb) = r.mant * 2 ^ (r.exp - 2 * elb)
  * is equivalent to
  * a.mant * 2 ^ a.exp * b.mant * 2 ^ b.exp = r.mant * 2 ^ r.exp *)
-val fmul: a:binary_fp -> b:binary_fp -> Tot (r:binary_fp{
+val fmul: a:floating_point -> b:floating_point -> Tot (r:floating_point{
     let elb = min a.exponent b.exponent in
     r.exponent >= 2 * elb /\
     eval_i a elb * eval_i b elb = eval_i r (2 * elb)})
 let fmul a b =
+    let elb = min a.exponent b.exponent in
+    lemma_pow2_mul (a.exponent - elb) (b.exponent - elb);
     mk_fp (a.significand * b.significand) (a.exponent + b.exponent)
 
 (* Infix notations *)
