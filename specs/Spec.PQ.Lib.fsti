@@ -8,6 +8,7 @@ open Lib.Sequence
 
 type numeric_t = inttype
 val numeric:#t:inttype -> x:nat{x <= maxint t} -> uint_t t
+val to_numeric:#t:inttype -> t1:inttype -> x:uint_t t -> r:uint_t t1{uint_v r == uint_v x % modulus t1}
 
 val vector_t:t:numeric_t -> len:size_nat -> Type0
 val vector_create:t:numeric_t -> len:size_nat -> vector_t t len

@@ -16,6 +16,13 @@ let numeric #t x =
   | SIZE -> size x
   | NATm m -> modulo x m
 
+let to_numeric #t t1 x =
+  match t, t1 with
+  | U16, U16 -> x
+  | U16, NATm m -> modulo ((Lib.RawIntTypes.uint_to_nat x) % m) m
+  | NATm m, U16 -> u16 ((Lib.RawIntTypes.uint_to_nat x) % modulus U16)
+  | _ -> admit()
+
 let vector_t t len = lseq (uint_t t) len
 
 let vector_create t len = create len (numeric #t 0)
