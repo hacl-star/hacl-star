@@ -1,7 +1,7 @@
 module MPFR.Add.Spec
 
 open FStar.Mul
-open MPFR.FloatingPoint
+open MPFR.Dyadic
 open MPFR.Lib.Spec
 open MPFR.Maths
 
@@ -21,29 +21,33 @@ let add_sp_ge_limb a b =
     
 val add_sp_ge_exp: a:mpfr_fp -> b:mpfr_fp -> Pure int
     (requires (a.sign = b.sign /\ a.prec = b.prec /\ a.exp >= b.exp))
-    (ensures  (fun rx -> rx - bits (add_sp_ge_limb a b) = (eval a +. eval b).exponent))
+    (ensures  (fun rx -> rx - nb_of_bits (add_sp_ge_limb a b) = (eval a +. eval b).exponent))
 
 let add_sp_ge_exp a b =
     let d = a.exp - b.exp in
-    if add_sp_ge_limb a b < pow2 (bits a.limb + d) then begin 
-	lemma_mul_le_right (pow2 d) (pow2 (bits a.limb - 1)) a.limb;
-	lemma_pow2_mul (bits a.limb - 1) d;
-	lemma_log2_le (pow2 (bits a.limb - 1 + d)) (add_sp_ge_limb a b);
-	lemma_log2_lt (add_sp_ge_limb a b) (bits a.limb + d);
+    if add_sp_ge_limb a b < pow2 (nb_of_bits a.limb + d) then begin 
+	lemma_mul_le_right (pow2 d) (pow2 (nb_of_bits a.limb - 1)) a.limb;
+	lemma_pow2_mul (nb_of_bits a.limb - 1) d;
+	//! assert(pow2 (nb_of_bits a.limb - 1 + d) <= add_sp_ge_limb a b);
+	lemma_log2_le (pow2 (nb_of_bits a.limb - 1 + d)) (add_sp_ge_limb a b);
+	//! assert(add_sp_ge_limb a b < pow2 (nb_of_bits a.limb + d));
+	lemma_log2_lt (add_sp_ge_limb a b) (nb_of_bits a.limb + d);
         a.exp
     end else begin
-	lemma_log2_le (pow2 (bits a.limb + d)) (add_sp_ge_limb a b);
-        lemma_mul_lt_right (pow2 d) a.limb (pow2 (bits a.limb));
-        lemma_pow2_mul (bits a.limb) d;
-	lemma_pow2_le (bits b.limb) (bits a.limb + d);
-        lemma_pow2_double (bits a.limb + d);
-	lemma_log2_lt (add_sp_ge_limb a b) (bits a.limb + d + 1);
+	lemma_log2_le (pow2 (nb_of_bits a.limb + d)) (add_sp_ge_limb a b);
+	//! assert(pow2 (nb_of_bits a.limb + d) <= add_sp_ge_limb a b);
+        lemma_mul_lt_right (pow2 d) a.limb (pow2 (nb_of_bits a.limb));
+        lemma_pow2_mul (nb_of_bits a.limb) d;
+	lemma_pow2_le (nb_of_bits b.limb) (nb_of_bits a.limb + d);
+        lemma_pow2_double (nb_of_bits a.limb + d);
+	//! assert(add_sp_ge_limb a b < pow2 (nb_of_bits a.limb + d + 1));
+	lemma_log2_lt (add_sp_ge_limb a b) (nb_of_bits a.limb + d + 1);
         a.exp + 1
     end
     
 val add_sp_ge_prec: a:mpfr_fp -> b:mpfr_fp -> Pure pos
     (requires (a.sign = b.sign /\ a.prec = b.prec /\ a.exp >= b.exp))
-    (ensures  (fun rp -> bits (add_sp_ge_limb a b) - rp = bits a.limb - a.prec))
+    (ensures  (fun rp -> nb_of_bits (add_sp_ge_limb a b) - rp = nb_of_bits a.limb - a.prec))
     
 let add_sp_ge_prec a b = a.prec + add_sp_ge_exp a b - b.exp
 
@@ -54,4 +58,4 @@ val add_sp: a:mpfr_fp -> b:mpfr_fp -> Pure ieee_fp
     
 let add_sp a b = 
     let a, b = if a.exp >= b.exp then a, b else b, a in
-    mk_ieee a.sign (add_sp_ge_prec a b) (add_sp_ge_exp a b) (add_sp_ge_limb a b) (bits (add_sp_ge_limb a b))
+    mk_ieee a.sign (add_sp_ge_prec a b) (add_sp_ge_exp a b) (add_sp_ge_limb a b) (nb_of_bits (add_sp_ge_limb a b))

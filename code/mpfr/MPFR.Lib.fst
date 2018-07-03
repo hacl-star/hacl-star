@@ -9,32 +9,32 @@ open FStar.UInt64
 module I32 = FStar.Int32
 module U32 = FStar.UInt32
 
-open MPFR.Lemmas
+open MPFR.Maths
 open MPFR.Lib.Spec
+
+#set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 // GENERIC LIBRARY DEFINITIONS
 type i32 = FStar.Int32.t
 type u32 = FStar.UInt32.t
 type u64 = FStar.UInt64.t
 
+let mpfr_SIGN_POS = 1l
+let mpfr_SIGN_NEG = -1l
+
 let gmp_NUMB_BITS = 64ul
 let mpfr_PREC_MIN = 1ul
-let mpfr_PREC_MAX = U32.(gmp_NUMB_BITS -^ 1ul)
-let mpfr_PREC_COND (p:u32) = U32.(mpfr_PREC_MIN <=^ p /\ p <=^ mpfr_PREC_MAX)
+val mpfr_PREC_MAX: p:u32{U32.v p = pow2 31 - 1}
+let mpfr_PREC_MAX = 0x7ffffffful // Note: 0x7ffffefful in original code
 
 val mpfr_EXP_INVALID: x:i32{I32.v x = pow2 30}
 let mpfr_EXP_INVALID = assert_norm(0x40000000 = pow2 30); 0x40000000l
 let mpfr_EMIN = I32.(1l -^ mpfr_EXP_INVALID)
 let mpfr_EMAX = I32.(mpfr_EXP_INVALID -^ 1l)
-let mpfr_EXP_COND (x:i32) = I32.(mpfr_EMIN <=^ x /\ x <=^ mpfr_EMAX)
 
-let mpfr_SIGN_POS = 1l
-let mpfr_SIGN_NEG = -1l
-let mpfr_SIGN_COND (s:i32) = I32.(s =^ mpfr_SIGN_POS \/ s =^ mpfr_SIGN_NEG)
-
-type mpfr_prec_t = p:u32{mpfr_PREC_COND p}
-type mpfr_sign_t = s:i32{mpfr_SIGN_COND s}
-type mpfr_exp_t  = x:i32{mpfr_EXP_COND  x}
+type mpfr_sign_t = s:i32{I32.(s = -1l \/ s = 1l)}
+type mpfr_prec_t = p:u32{mpfr_PREC_COND (U32.v p)}
+type mpfr_exp_t  = x:i32{mpfr_EXP_COND  (I32.v x)}
 type mpfr_uexp_t = u32
 type mp_limb_t = u64
 
@@ -50,39 +50,75 @@ noeq type mpfr_struct = {
 (* First bit is 1 *)
 let mpfr_d_val0_cond (m:mp_limb_t) = v m >= pow2 63
 (* Ending bits are 0 *)
-let mpfr_d_valn_cond (m:mp_limb_t) (p:mpfr_prec_t) = v m % pow2 (64 - U32.v p) = 0
+let mpfr_d_valn_cond (m:mp_limb_t) (p:mpfr_prec_t) = v m % pow2 (arr_size (U32.v p) - U32.v p) = 0
 
-let valid_struct h (s:mpfr_struct) =
+let valid_mpfr_struct h (s:mpfr_struct) =
     let l = length s.mpfr_d in
     l >= 1 /\ (l - 1) * 64 < U32.v s.mpfr_prec /\ U32.v s.mpfr_prec <= l * 64 /\
     mpfr_d_val0_cond (get h s.mpfr_d 0) /\
     mpfr_d_valn_cond (get h s.mpfr_d (l - 1)) s.mpfr_prec
 
 (* Conversion to pure struct *)
-val to_val: s:Seq.seq u64 -> Tot nat (decreases (Seq.length s))
+val to_val: s:Seq.seq u64 -> Tot (n:nat{n < pow2 (Seq.length s * 64)}) (decreases (Seq.length s))
 let rec to_val (s:Seq.seq u64) = 
     if Seq.length s = 0 then 0
-    else (v (Seq.index s 0)) * pow2 ((Seq.length s - 1) * 64) + to_val (Seq.slice s 1 (Seq.length s))
+    else begin
+        lemma_pow2_mul 64 ((Seq.length s - 1) * 64);
+	lemma_distr_sub_left (pow2 64) 1 (pow2 ((Seq.length s - 1) * 64));
+        v (Seq.index s 0) * pow2 ((Seq.length s - 1) * 64) + to_val (Seq.slice s 1 (Seq.length s))
+    end
+
+val to_val_rec_lemma: s:Seq.seq u64{Seq.length s > 0} -> Lemma
+    (to_val s = v (Seq.index s 0) * pow2 ((Seq.length s - 1) * 64) + to_val (Seq.slice s 1 (Seq.length s)))
+let to_val_rec_lemma s = ()
+
+val val0_cond_lemma: s:Seq.seq u64{Seq.length s > 0 /\ mpfr_d_val0_cond (Seq.index s 0)} -> Lemma
+    (to_val s >= pow2 (Seq.length s * 64 - 1))
+let val0_cond_lemma s =
+    to_val_rec_lemma s;
+    lemma_pow2_mul 63 ((Seq.length s - 1) * 64);
+    lemma_pow2_le (Seq.length s * 64 - 1) (63 + (Seq.length s - 1) * 64)
+
+val valn_cond_lemma: s:Seq.seq u64 -> p:mpfr_prec_t{arr_size (U32.v p) = Seq.length s * 64} -> Lemma
+    (requires  (Seq.length s > 0 /\ mpfr_d_valn_cond (Seq.index s (Seq.length s - 1)) p))
+    (ensures   (to_val s % pow2 (Seq.length s * 64 - U32.v p) = 0))
+    (decreases (U32.v p))
+let rec valn_cond_lemma s p = 
+    if U32.v p <= 64 then arr_size_lemma (U32.v p) 64 else begin
+        lemma_pow2_mul ((Seq.length s - 1) * 64 - (Seq.length s) * 64 + U32.v p) ((Seq.length s) * 64 - U32.v p);
+        lemma_multiple_mod (v (Seq.index s 0) * pow2 ((Seq.length s - 1) * 64 - Seq.length s * 64 + U32.v p)) (pow2 (Seq.length s * 64 - U32.v p));
+        assert((v (Seq.index s 0) * pow2 ((Seq.length s - 1) * 64)) % pow2 (Seq.length s * 64 - U32.v p) = 0);
+	arr_size_lemma (U32.v p - 64) ((Seq.length s - 1) * 64);
+	valn_cond_lemma (Seq.slice s 1 (Seq.length s)) (U32.(p -^ 64ul));
+	assert(to_val (Seq.slice s 1 (Seq.length s)) % pow2 (Seq.length s * 64 - U32.v p) = 0);
+        to_val_rec_lemma s;
+	lemma_mod_distr (v (Seq.index s 0) * pow2 ((Seq.length s - 1) * 64)) (to_val (Seq.slice s 1 (Seq.length s))) (pow2 (Seq.length s * 64 - U32.v p))
+    end
 
 let as_val h (b:buffer mp_limb_t) = to_val (as_seq h b)
 
-val as_pure: h:mem -> s:mpfr_struct{valid_struct h s} ->
-    GTot (ps:floating_point{
-             I32.v s.mpfr_sign = ps.sign /\
-	     U32.v s.mpfr_prec = ps.prec /\
-	     I32.v s.mpfr_exp  = ps.exp + ps.prec /\
-             as_val h s.mpfr_d = ps.mant * pow2 (length s.mpfr_d * 64 - U32.v s.mpfr_prec)})
+(* Convert valid mpfr_struct to mpfr_fr *)
+val as_pure: h:mem -> s:mpfr_struct{valid_mpfr_struct h s} ->
+    GTot (ps:mpfr_fp{ps.sign = I32.v s.mpfr_sign /\
+	             ps.prec = U32.v s.mpfr_prec /\
+	             ps.exp  = I32.v s.mpfr_exp  /\
+                     ps.limb = as_val h s.mpfr_d /\
+		     ps.len  = length s.mpfr_d * 64})
+		     
 let as_pure h s =
-    let p = U32.v s.mpfr_prec in
-    let l = length s.mpfr_d in
-    let m = as_val h s.mpfr_d / pow2 (l * 64 - p) in
-    lemma_pow2_div_lt (as_val h s.mpfr_d) (l * 64) (l * 64 - p);
-    lemma_div_le (pow2 (l * 64 - 1)) (as_val h s.mpfr_d) (pow2 (l * 64 - p));
-    lemma_pow2_div (l * 64 - 1) (l * 64 - p);
-    {sign = I32.v s.mpfr_sign;
-     prec = p;
-     mant = as_val h s.mpfr_d / pow2 (length s.mpfr_d * 64 - U32.v s.mpfr_prec);
-     exp  = I32.v s.mpfr_exp - U32.v s.mpfr_prec}
+    let sign = I32.v s.mpfr_sign in
+    let prec = U32.v s.mpfr_prec in
+    let exp  = I32.v s.mpfr_exp  in
+    let limb = as_val h s.mpfr_d in
+    let l    = length s.mpfr_d in
+    arr_size_lemma prec (l * 64);
+    //! assert(arr_size prec = l * 64);
+    val0_cond_lemma (as_seq h s.mpfr_d);
+    //! assert(limb >= pow2 (l * 64 - 1));
+    nb_of_bits_lemma limb (l * 64);
+    //! assert(nb_of_bits limb = l * 64);
+    valn_cond_lemma (as_seq h s.mpfr_d) s.mpfr_prec;
+    mk_ieee sign prec exp limb (l * 64)
 
 (* Struct functions *)
 type mpfr_ptr = b:buffer mpfr_struct{length b = 1}

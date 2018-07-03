@@ -2,7 +2,7 @@ module MPFR.Rounding.Spec
 
 open FStar.Mul
 open FStar.UInt
-open MPFR.FloatingPoint
+open MPFR.Dyadic
 open MPFR.Lib.Spec
 open MPFR.Maths
 
@@ -102,7 +102,7 @@ let rndn_def (a:ieee_fp) (p:pos{p < a.prec}): Tot (r:ieee_fp{r.prec = p}) =
     then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
-(* Definitions of round bit and sticky bit which are widely used in RNDN *)
+(* Definitions of round bit and sticky bit which are widely used to implement RNDN *)
 let rb_def (a:ieee_fp) (p:pos{p < a.prec}): Tot bool = nth #a.len a.limb p
 let sb_def (a:ieee_fp) (p:pos{p < a.prec}): Tot bool = (a.limb % pow2 (a.len - p - 1) <> 0)
 
