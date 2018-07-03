@@ -21,7 +21,20 @@ let test_frodo keypair_len keypaircoins enc_len enccoins ss_len ss_expected =
   let ss_expected:lbytes ss_len = createL ss_expected in
 
   let pk, sk = crypto_kem_keypair keypaircoins in
+  IO.print_string "\n pk: ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list pk);
+  let (sk1, s) = sk in
+  IO.print_string "\n sk1: ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list sk1);
+  IO.print_string "\n matrix S: ";
+  List.iter (fun mi ->
+    List.iter (fun a -> FStar.IO.print_string (UInt16.to_string (u16_to_UInt16 a)); IO.print_string " ") (as_list mi)) (as_list s);
+
+
   let ct, ss1 = crypto_kem_enc enccoins pk in
+  IO.print_string "\n ct: ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list ct);
+
   let ss2 = crypto_kem_dec ct sk in
 
   let r_ss = print_and_compare ss_len ss1 ss2 in
@@ -29,7 +42,7 @@ let test_frodo keypair_len keypaircoins enc_len enccoins ss_len ss_expected =
   r_ss && r_ss1
 
 //
-// Test1. FrodoKEM-640. CSHAKE128
+// Test1. FrodoKEM-64. CSHAKE128
 //
 let test1_keypaircoins = List.Tot.map u8_from_UInt8 [
   0x4buy; 0x62uy; 0x2duy; 0xe1uy; 0x35uy; 0x01uy; 0x19uy; 0xc4uy; 0x5auy; 0x9fuy; 0x2euy; 0x2euy; 0xf3uy; 0xdcuy; 0x5duy; 0xf5uy;
@@ -38,7 +51,7 @@ let test1_keypaircoins = List.Tot.map u8_from_UInt8 [
 let test1_enccoins = List.Tot.map u8_from_UInt8 [
   0x08uy; 0xe2uy; 0x55uy; 0x38uy; 0x48uy; 0x4cuy; 0xd7uy; 0xf1uy; 0x61uy; 0x32uy; 0x48uy; 0xfeuy; 0x6cuy; 0x9fuy; 0x6buy; 0x4euy]
 let test1_ss_expected = List.Tot.map u8_from_UInt8 [
-  0xdauy; 0xa9uy; 0xb2uy; 0x2cuy; 0x55uy; 0xafuy; 0x73uy; 0xa3uy; 0xeauy; 0xa0uy; 0x6duy; 0x08uy; 0x1euy; 0x1auy; 0x56uy; 0x06uy]
+  0xdfuy; 0xc5uy; 0x2auy; 0x95uy; 0x6cuy; 0xe4uy; 0xbcuy; 0xa5uy; 0x53uy; 0x70uy; 0x46uy; 0x5auy; 0x7euy; 0xf8uy; 0x4fuy; 0x68uy]
 
 let test () =
   let result = test_frodo 48 test1_keypaircoins 16 test1_enccoins 16 test1_ss_expected in
