@@ -145,9 +145,26 @@ int main(int argc, char **argv)
 {
   EverCrypt_AutoConfig_cfg cfg = { .tag = EverCrypt_AutoConfig_Prefer };
 
-  for(uint8_t i=0; i<4; i++)
+  if(argc <= 1)
   {
-    cfg.preferred = i;
+    for(uint8_t i=0; i<4; i++)
+    {
+      cfg.preferred = i;
+      run(cfg);
+    }
+  }
+  else
+  {
+    uint8_t alg = 0;
+    if(!memcmp(argv[1], "hacl", 5)) alg = 0;
+    else if(!memcmp(argv[1], "vale", 5)) alg = 1;
+    else if(!memcmp(argv[1], "openssl", 8)) alg = 2;
+    else if(!memcmp(argv[1], "bcrypt", 7)) alg = 3;
+    else {
+      printf("Valid arguments are: hacl, vale, openssl, bcrypt\n");
+      return 1;
+    }
+    cfg.preferred = alg;
     run(cfg);
   }
 
