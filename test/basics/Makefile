@@ -26,7 +26,6 @@ test-sequence.exe: $(LIBS_FILES) Test.Sequence.fst
 	$(FSTAR) --expose_interfaces --codegen OCaml --lax $(LIBS_EX) --extract_module Test.Sequence --odir ml-test $^
 	@echo 'let _ = test()' >> ml-test/Test_Sequence.ml
 	$(OCAMLOPT) -I ml-test $(addprefix ml-test/, $(LIBS_ML))  ml-test/Test_Sequence.ml -o test-sequence.exe
-	./test-sequence.exe
 
 
 
@@ -47,7 +46,15 @@ test-buffer.exe: c-test/Test_Buffer.c ../../lib/c/Lib_Print.o
 	$(CC) $(CFLAGS) -I $(KREMLIN_HOME) -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib/c -L $(KREMLIN_HOME)/kremlib/out -lkremlib -o $@ $^
 
 
-all: test-sequence.exe test-buffer.exe
+
+
+build: test-sequence.exe test-buffer.exe
+
+test:
+	./test-sequence.exe
+	./test-buffer.exe
+
+all: test
 
 clean:
 	rm -rf *~ *.lax *.exe ml-test c-test
