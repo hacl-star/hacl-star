@@ -12,7 +12,7 @@ module U32 = FStar.UInt32
 open MPFR.Maths
 open MPFR.Lib.Spec
 
-#set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 5 --initial_ifuel 0"
 
 // GENERIC LIBRARY DEFINITIONS
 type i32 = FStar.Int32.t
@@ -48,11 +48,11 @@ noeq type mpfr_struct = {
 }
 
 (* First bit is 1 *)
-let mpfr_d_val0_cond (m:mp_limb_t) = v m >= pow2 63
+let mpfr_d_val0_cond (m:mp_limb_t): Type = v m >= pow2 63
 (* Ending bits are 0 *)
-let mpfr_d_valn_cond (m:mp_limb_t) (p:mpfr_prec_t) = v m % pow2 (arr_size (U32.v p) - U32.v p) = 0
+let mpfr_d_valn_cond (m:mp_limb_t) (p:mpfr_prec_t): Type = v m % pow2 (arr_size (U32.v p) - U32.v p) = 0
 
-let valid_mpfr_struct h (s:mpfr_struct) =
+let valid_mpfr_struct h (s:mpfr_struct): Type =
     let l = length s.mpfr_d in
     l >= 1 /\ (l - 1) * 64 < U32.v s.mpfr_prec /\ U32.v s.mpfr_prec <= l * 64 /\
     mpfr_d_val0_cond (get h s.mpfr_d 0) /\
@@ -123,7 +123,6 @@ let as_pure h s =
 (* Struct functions *)
 type mpfr_ptr = b:buffer mpfr_struct{length b = 1}
 
-val mk_mpfr_struct: mpfr_prec_t -> mpfr_sign_t -> mpfr_exp_t -> buffer mp_limb_t -> Tot mpfr_struct
 let mk_mpfr_struct p s e d = {
     mpfr_prec = p;
     mpfr_sign = s;
@@ -133,7 +132,7 @@ let mk_mpfr_struct p s e d = {
 
 val mpfr_SIGN: x:mpfr_ptr -> Stack mpfr_sign_t 
 		(requires (fun h -> live h x))
-		(ensures (fun h0 r h1 -> live h1 x /\ modifies_0 h0 h1 /\
+		(ensures (fun h0 r h1 -> live h1 x /\ h0 == h1 /\
 		            (let xm = Seq.index (as_seq h0 x) 0 in
 			     r == xm.mpfr_sign)))
 let mpfr_SIGN x = 
@@ -142,7 +141,7 @@ let mpfr_SIGN x =
 
 val mpfr_EXP: x:mpfr_ptr -> Stack mpfr_exp_t 
 		(requires (fun h -> live h x))
-		(ensures (fun h0 r h1 -> live h1 x /\ modifies_0 h0 h1 /\
+		(ensures (fun h0 r h1 -> live h1 x /\ h0 == h1 /\
 			    (let xm = Seq.index (as_seq h0 x) 0 in
 			     r == xm.mpfr_exp)))
 let mpfr_EXP x = 
@@ -163,7 +162,7 @@ let mpfr_SET_EXP x e =
 
 val mpfr_MANT: x:mpfr_ptr -> Stack (buffer mp_limb_t)
 		(requires (fun h -> live h x))
-		(ensures (fun h0 r h1 -> live h1 x /\ modifies_0 h0 h1 /\
+		(ensures (fun h0 r h1 -> live h1 x /\ h0 == h1 /\
 			    (let xm = Seq.index (as_seq h0 x) 0 in
 			     r == xm.mpfr_d)))
 let mpfr_MANT x = 
@@ -207,6 +206,6 @@ assume val mpfr_RET: i32 -> Tot i32
 
 assume val mpfr_IS_RNDUTEST_OR_RNDDNOTTEST: mpfr_rnd_t -> i32 -> Tot bool
 
-assume val mpfr_IS_LIKE_RNDZ: mpfr_rnd_t -> i32 -> Tot bool
+assume val mpfr_IS_LIKE_RNDZ: mpfr_rnd_t -> bool -> Tot bool
 
 let mpfr_IS_NEG x = I32.(mpfr_SIGN x <^ 0l)

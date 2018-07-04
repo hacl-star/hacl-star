@@ -15,6 +15,7 @@ val add_sp_ge_limb: a:mpfr_fp -> b:mpfr_fp -> Pure nat
                       rm % pow2 (a.len - a.prec) = 0))
     
 let add_sp_ge_limb a b =
+    lemma_distr_add_right a.sign (a.limb * pow2 (a.exp - b.exp)) (b.limb * pow2 0);
     lemma_mul_mod a.limb (pow2 (a.exp - b.exp)) (pow2 (a.len - a.prec));
     lemma_mod_distr (a.limb * pow2 (a.exp - b.exp)) b.limb (pow2 (a.len - a.prec));
     a.limb * pow2 (a.exp - b.exp) + b.limb
