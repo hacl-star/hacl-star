@@ -70,11 +70,11 @@ let params_q:size_nat =
   pow2 params_logq
 let bytes_mu:size_nat = (params_extracted_bits * params_nbar * params_nbar) / 8
 let crypto_publickeybytes:size_nat  = bytes_seed_a + (params_logq * params_n * params_nbar) / 8
-let crypto_secretkeybytes:size_nat  = crypto_bytes + crypto_publickeybytes
+let crypto_secretkeybytes:size_nat  = crypto_bytes + crypto_publickeybytes + 2 * params_n * params_nbar
 let crypto_ciphertextbytes:size_nat = ((params_nbar * params_n + params_nbar * params_nbar) * params_logq) / 8 + crypto_bytes
 
-unfold type elem_t:numeric_t = NATm params_q
-//unfold type elem_t:numeric_t = U16
+//unfold type elem_t:numeric_t = NATm params_q
+unfold type elem_t:numeric_t = U16
 
 // val ec:k:size_nat{k < pow2 params_extracted_bits} -> Tot (r:size_nat{r < pow2 params_logq})
 // let ec k = k * pow2 (params_logq - params_extracted_bits)
@@ -272,10 +272,37 @@ let frodo_gen_matrix_cshake n seedLen seed =
 
 let frodo_gen_matrix = frodo_gen_matrix_cshake
 
+val matrix_to_lbytes:
+  #n1:size_nat -> #n2:size_nat{2 * n1 * n2 < max_size_t} ->
+  m:matrix_t elem_t n1 n2 -> Tot (lbytes (2 * n1 * n2))
+let matrix_to_lbytes #n1 #n2 m =
+  let res = create (2*n1*n2) (u8 0) in
+  repeati n1
+  (fun i res ->
+    repeati n2
+    (fun j res ->
+      assume (2*(j*n1+i)+2 <= 2*n1*n2);
+      update_sub res (2*(j*n1+i)) 2 (uint_to_bytes_le (to_numeric U16 (mget m i j)))
+    ) res
+  ) res
+
+val matrix_from_lbytes:
+  n1:size_nat -> n2:size_nat{2 * n1 * n2 < max_size_t} ->
+  lbytes (2 * n1 * n2) -> Tot (matrix_t elem_t n1 n2)
+let matrix_from_lbytes n1 n2 b =
+  let res = matrix_create elem_t n1 n2 in
+  repeati n1
+  (fun i res ->
+    repeati n2
+    (fun j res ->
+      assume (2*(j*n1+i)+2 <= 2*n1*n2);
+      mset res i j (to_numeric elem_t (uint_from_bytes_le #U16 (sub b (2*(j*n1+i)) 2)))
+    ) res
+  ) res
+
 val crypto_kem_keypair:
   coins:lbytes (2 * crypto_bytes + bytes_seed_a) ->
-  Tot (tuple2 (lbytes crypto_publickeybytes)
-	      (tuple2 (lbytes crypto_secretkeybytes) (matrix_t elem_t params_n params_nbar)))
+  Tot (tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes))
 let crypto_kem_keypair coins =
   let s = sub coins 0 crypto_bytes in
   let seed_e = sub coins crypto_bytes crypto_bytes in
@@ -289,8 +316,8 @@ let crypto_kem_keypair coins =
   let b = frodo_pack params_n params_nbar b_matrix params_logq in
 
   let pk = concat seed_a b in
-  let sk = concat s pk in
-  (pk, (sk, s_matrix))
+  let sk = concat s (concat pk (matrix_to_lbytes s_matrix)) in
+  (pk, sk)
 
 val crypto_kem_enc:
   coins:lbytes bytes_mu -> pk:lbytes crypto_publickeybytes ->
@@ -324,8 +351,7 @@ let crypto_kem_enc coins pk =
   (ct, ss)
 
 val crypto_kem_dec:
-  ct:lbytes crypto_ciphertextbytes ->
-  sk:tuple2 (lbytes crypto_secretkeybytes) (matrix_t elem_t params_n params_nbar) ->
+  ct:lbytes crypto_ciphertextbytes -> sk:lbytes crypto_secretkeybytes ->
   Tot (lbytes crypto_bytes)
 let crypto_kem_dec ct sk =
   let c1Len = (params_logq * params_nbar * params_n) / 8 in
@@ -334,9 +360,9 @@ let crypto_kem_dec ct sk =
   let c2 = sub ct c1Len c2Len in
   let d = sub ct (c1Len+c2Len) crypto_bytes in
 
-  let sk1, s_matrix = sk in
-  let s = sub sk1 0 crypto_bytes in
-  let pk = sub sk1 crypto_bytes crypto_publickeybytes in
+  let s = sub sk 0 crypto_bytes in
+  let pk = sub sk crypto_bytes crypto_publickeybytes in
+  let s_matrix = matrix_from_lbytes params_n params_nbar (sub sk (crypto_bytes + crypto_publickeybytes) (2*params_n*params_nbar)) in
   let seed_a = sub pk 0 bytes_seed_a in
   let b = sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) in
 
