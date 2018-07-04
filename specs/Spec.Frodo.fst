@@ -9,6 +9,7 @@ open FStar.Math.Lemmas
 
 open Spec.PQ.Lib
 open Spec.Keccak
+open Spec.Frodo.Lemmas
 
 val matrix_eq:
   #t:numeric_t -> #n1:size_nat -> #n2:size_nat ->
@@ -76,37 +77,40 @@ let crypto_ciphertextbytes:size_nat = ((params_nbar * params_n + params_nbar * p
 //unfold type elem_t:numeric_t = NATm params_q
 unfold type elem_t:numeric_t = U16
 
-// val ec:k:size_nat{k < pow2 params_extracted_bits} -> Tot (r:size_nat{r < pow2 params_logq})
-// let ec k = k * pow2 (params_logq - params_extracted_bits)
-
-// val dc:c:size_nat{c < pow2 params_logq} -> Tot (r:size_nat{r < pow2 params_extracted_bits})
-// let dc c = ((c + pow2 (params_logq - params_extracted_bits - 1)) / pow2 (params_logq - params_extracted_bits)) % pow2 params_extracted_bits
-
-// val lemma_dc_ec:
-//   k:size_nat{k < pow2 params_extracted_bits} -> Lemma (dc (ec k) == k)
-//   #reset-options "--z3rlimit 50 --max_fuel 0"
-// let lemma_dc_ec k =
-//   let c = ec k in
-//   assert (c == k * pow2 (params_logq - params_extracted_bits));
-//   assert (dc c == ((c + pow2 (params_logq - params_extracted_bits - 1)) / pow2 (params_logq - params_extracted_bits)) % pow2 params_extracted_bits);
-//   assert (dc c == ((k * pow2 (params_logq - params_extracted_bits) + pow2 (params_logq - params_extracted_bits - 1)) / pow2 (params_logq - params_extracted_bits)) % pow2 params_extracted_bits);
-//   pow2_plus 1 (params_logq - params_extracted_bits - 1);
-//   //assert (pow2 (params_logq - params_extracted_bits) = pow2 1 * pow2 (params_logq - params_extracted_bits - 1));
-//   distributivity_add_left (k * pow2 1) 1 (pow2 (params_logq - params_extracted_bits - 1));
-//   //assert (dc c == (((k * pow2 1 + 1) * pow2 (params_logq - params_extracted_bits - 1)) / (pow2 1 * pow2 (params_logq - params_extracted_bits - 1))) % pow2 params_extracted_bits);
-//   division_multiplication_lemma ((k * pow2 1 + 1) * pow2 (params_logq - params_extracted_bits - 1))  (pow2 (params_logq - params_extracted_bits - 1)) (pow2 1);
-//   //assert (dc c == (((k * pow2 1 + 1) * pow2 (params_logq - params_extracted_bits - 1)) /  pow2 (params_logq - params_extracted_bits - 1) / pow2 1) % pow2 params_extracted_bits);
-//   multiple_division_lemma (k * pow2 1 + 1) (pow2 (params_logq - params_extracted_bits - 1));
-//   //assert (dc c == ((k * pow2 1 + 1) / pow2 1) % pow2 params_extracted_bits);
-//   division_addition_lemma 1 (pow2 1) k;
-//   //assert (dc c == (k + 1 / pow2 1) % pow2 params_extracted_bits);
-//   small_division_lemma_1 1 (pow2 1);
-//   small_modulo_lemma_1 k (pow2 params_extracted_bits)
-
-val ec:b:size_nat{b <= 8} -> k:uint16{uint_v k < pow2 b} -> Tot (r:uint16{uint_v r < pow2 params_logq})
+val ec:
+  b:size_nat{b <= params_logq} -> k:uint16{uint_v k < pow2 b} ->
+  Tot (r:uint16{uint_v r < pow2 params_logq /\ uint_v r = (uint_v k) * pow2 (params_logq - b)})
+  #reset-options "--z3rlimit 50 --max_fuel 0"
 let ec b k =
   let res = k <<. u32 (params_logq - b) in
-  assume (uint_v res < pow2 params_logq);
+  assert (uint_v res = (uint_v k * pow2 (params_logq - b)) % modulus U16);
+  assert (uint_v k * pow2 (params_logq - b) < pow2 b * pow2 (params_logq - b));
+  pow2_plus b (params_logq - b);
+  //assert (uint_v k * pow2 (params_logq - b) < pow2 params_logq);
+  //assert (uint_v res < pow2 params_logq);
+  pow2_le_compat 16 params_logq;
+  //assert (pow2 params_logq <= modulus U16);
+  small_modulo_lemma_2 (uint_v res) (modulus U16);
+  res
+
+val dc:
+  b:size_nat{b < params_logq} -> c:uint16 ->
+  Tot (r:uint16{uint_v r < pow2 b /\ uint_v r = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 b})
+  #reset-options "--z3rlimit 50 --max_fuel 0"
+let dc b c =
+  let res1 = (c +. (u16 1 <<. u32 (params_logq - b - 1))) >>. u32 (params_logq - b) in
+  assert (uint_v res1 = (((uint_v c + pow2 (params_logq - b - 1) % modulus U16) % modulus U16) / pow2 (params_logq - b)) % modulus U16);
+  lemma_mod_plus_distr_l (pow2 (params_logq - b - 1)) (uint_v c) (modulus U16);
+  assert (uint_v res1 = (((uint_v c + pow2 (params_logq - b - 1)) % modulus U16) / pow2 (params_logq - b)) % modulus U16);
+  pow2_modulo_division_lemma_1 (uint_v c + pow2 (params_logq - b - 1)) (params_logq - b) 16;
+  assert (uint_v res1 = (((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 (16 - params_logq + b)) % modulus U16);
+  pow2_modulo_modulo_lemma_1 ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) (16 - params_logq + b) 16;
+  assert (uint_v res1 = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 (16 - params_logq + b));
+  let res = res1 &. ((u16 1 <<. u32 b) -. u16 1) in
+  modulo_pow2_u16 res1 b;
+  assert (uint_v res1 % pow2 b = uint_v (res1 &. ((u16 1 <<. u32 b) -. u16 1)));
+  pow2_modulo_modulo_lemma_1 ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) b (16 - params_logq + b);
+  //assert (uint_v res = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 b);
   res
 
 val frodo_key_encode:
@@ -126,18 +130,12 @@ let frodo_key_encode b a =
       repeati 8
       (fun k res ->
         let ak = (vij >>. u32 (b * k)) &. ((u64 1 <<. u32 b) -. u64 1) in
-        assume (uint_v ak < pow2 b);
+	modulo_pow2_u64 (vij >>. u32 (b * k)) b;
         let resij = ec b (to_u16 ak) in
         mset res i (8*j+k) (to_numeric elem_t resij)
       ) res
     ) res
   ) res
-
-val dc:b:size_nat{b <= 8} -> c:uint16 -> Tot (r:uint16{uint_v r < pow2 params_logq})
-let dc b c =
-  let res = ((c +. (u16 1 <<. u32 (params_logq - b - 1))) >>. u32 (params_logq - b)) &. ((u16 1 <<. u32 b) -. u16 1) in
-  assume (uint_v res < pow2 params_logq);
-  res
 
 val frodo_key_decode:
   b:size_nat{(params_nbar * params_nbar * b) / 8 < max_size_t /\ b <= 8} ->
@@ -161,7 +159,7 @@ let frodo_key_decode b a =
   ) res
 
 val frodo_pack:
-  n1:size_nat -> n2:size_nat{n1 * n2 < max_size_t} ->
+  n1:size_nat -> n2:size_nat{n1 * n2 < max_size_t /\ n2 % 8 = 0} ->
   a:matrix_t elem_t n1 n2 ->
   d:size_nat{(d * n1 * n2) / 8 < max_size_t /\ d <= 16} -> Tot (lbytes ((d * n1 * n2) / 8))
   #reset-options "--z3rlimit 50 --max_fuel 0"
@@ -178,13 +176,13 @@ let frodo_pack n1 n2 a d =
         let aij = to_numeric U16 (mget a i (8*j+k)) in
         templong |. ((to_u128 aij &. maskd) <<. u32 (7*d - d*k))
       ) (u128 0) in
-      assume ((i*n2/8+j)*d + d <= resLen);
+      lemma_matrix_index_repeati n1 n2 d i j;
       update_sub res ((i*n2/8+j)*d) d (sub (uint_to_bytes_be templong) (16 - d) d)
     ) res
   ) res
 
 val frodo_unpack:
-  n1:size_nat -> n2:size_nat ->
+  n1:size_nat -> n2:size_nat{n2 % 8 = 0} ->
   d:size_nat{(d * n1 * n2) / 8 < max_size_t /\ d <= 16} -> b:lbytes ((d * n1 * n2) / 8) ->
   Tot (matrix_t elem_t n1 n2)
 let frodo_unpack n1 n2 d b =
@@ -194,7 +192,7 @@ let frodo_unpack n1 n2 d b =
   (fun i res ->
     repeati (n2 / 8)
     (fun j res ->
-      assume ((i*n2/8+j)*d + d <= (d * n1 * n2) / 8);
+      lemma_matrix_index_repeati n1 n2 d i j;
       let vij = sub b ((i*n2/8+j)*d) d in
       let v16 = create 16 (u8 0) in
       let v16 = uint_from_bytes_be (update_sub v16 (16-d) d vij) in
@@ -231,7 +229,7 @@ let frodo_sample_matrix n1 n2 seedLen seed ctr =
   (fun i res ->
     repeati n2
     (fun j res ->
-      assume (2 * (n2 * i + j) + 2 <= 2 * n1 * n2);
+      lemma_matrix_index_repeati1 n1 n2 i j;
       let res_ij = sub r (2 * (n2 * i + j)) 2 in
       mset res i j (frodo_sample (uint_from_bytes_le #U16 res_ij))
     ) res
@@ -248,7 +246,7 @@ let frodo_sample_matrix_tr n1 n2 seedLen seed ctr =
   (fun i res ->
     repeati n2
     (fun j res ->
-      assume (2 * (n1 * j + i) + 2 <= 2 * n1 * n2);
+      lemma_matrix_index_repeati2 n1 n2 i j;
       let res_ij = sub r (2 * (n1 * j + i)) 2 in
       mset res i j (frodo_sample (uint_from_bytes_le #U16 res_ij))
     ) res
@@ -281,7 +279,7 @@ let matrix_to_lbytes #n1 #n2 m =
   (fun i res ->
     repeati n2
     (fun j res ->
-      assume (2*(j*n1+i)+2 <= 2*n1*n2);
+      lemma_matrix_index_repeati2 n1 n2 i j;
       update_sub res (2*(j*n1+i)) 2 (uint_to_bytes_le (to_numeric U16 (mget m i j)))
     ) res
   ) res
@@ -295,7 +293,7 @@ let matrix_from_lbytes n1 n2 b =
   (fun i res ->
     repeati n2
     (fun j res ->
-      assume (2*(j*n1+i)+2 <= 2*n1*n2);
+      lemma_matrix_index_repeati2 n1 n2 i j;
       mset res i j (to_numeric elem_t (uint_from_bytes_le #U16 (sub b (2*(j*n1+i)) 2)))
     ) res
   ) res
