@@ -1,4 +1,4 @@
-module Test
+module Test.Sequence
 
 open FStar.Mul
 open Lib.IntTypes
