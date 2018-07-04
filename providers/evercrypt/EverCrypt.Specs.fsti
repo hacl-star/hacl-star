@@ -74,3 +74,13 @@ let chacha20_poly1305_encrypt_pre = fun _ -> False
 let chacha20_poly1305_encrypt_post = fun _ _ _ -> True
 let chacha20_poly1305_decrypt_pre = fun _ -> False
 let chacha20_poly1305_decrypt_post = fun _ _ _ -> True
+
+let aead_create_pre = fun _ -> False
+let aead_create_post = fun _ _ _ -> True
+let aead_encrypt_pre = fun _ -> False
+let aead_encrypt_post = fun _ _ _ -> True
+let aead_decrypt_pre = fun _ -> False
+let aead_decrypt_post = fun _ _ _ -> True
+let aead_free_pre = fun _ -> False
+let aead_free_post = fun _ _ _ -> True
+

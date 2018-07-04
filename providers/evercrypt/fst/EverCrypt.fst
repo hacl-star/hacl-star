@@ -3,7 +3,9 @@ module EverCrypt
 module B = FStar.Buffer
 module LB = LowStar.Buffer
 
+module BCrypt = EverCrypt.BCrypt
 module Hacl = EverCrypt.Hacl
+module OpenSSL = EverCrypt.OpenSSL
 module Vale = EverCrypt.Vale
 module ValeGlue = EverCrypt.ValeGlue
 
@@ -337,76 +339,90 @@ let chacha20 key iv ctr plain len cipher =
 
 /// AES128-GCM
 
+// TODO move to ValeGlue
+private inline_for_extraction
+let vale_aes128_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
+  push_frame ();
+  let open EverCrypt.Vale in
+  let iv'        = B.create 0uy 16ul in
+  let plaintext' = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+  let cipher'    = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+  let ad'        = B.create 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
+  B.blit iv 0ul iv' 0ul 12ul;
+  B.blit plaintext 0ul plaintext' 0ul len;
+  B.blit ad 0ul ad' 0ul adlen;
+  let b = B.create ({
+    plain = plaintext';
+    plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
+    aad = ad';
+    aad_len = FStar.Int.Cast.Full.uint32_to_uint64 adlen;
+    iv = iv';
+    expanded_key = xkey;
+    cipher = cipher';
+    tag = tag
+  }) 1ul in
+  Vale.gcm_encrypt b;
+  B.blit cipher' 0ul cipher 0ul len;
+  pop_frame ()
+
+private inline_for_extraction
+let vale_aes128_gcm_decrypt xkey iv ad adlen plaintext len cipher tag =
+  push_frame ();
+  let open EverCrypt.Vale in
+  let iv'        = B.create 0uy 16ul in
+  let plaintext' = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+  let cipher'    = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+  let ad'        = B.create 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
+  B.blit iv 0ul iv' 0ul 12ul;
+  B.blit cipher 0ul cipher' 0ul len;
+  B.blit ad 0ul ad' 0ul adlen;
+  let b = B.create ({
+    plain = cipher';
+    plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
+    aad = ad';
+    aad_len = FStar.Int.Cast.Full.uint32_to_uint64 adlen;
+    iv = iv';
+    expanded_key = xkey;
+    cipher = plaintext';
+    tag = tag
+  }) 1ul in
+  let ret = Vale.gcm_decrypt b in
+  B.blit plaintext' 0ul plaintext 0ul len;
+  pop_frame ();
+  // FIXME: restore tag verification once Vale is fixed
+  //U32.(1ul -^ ret)
+  1ul
+
 let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes128_gcm_impl () in
   if SC.vale && i = AC.Vale then begin
     push_frame ();
-    let open EverCrypt.Vale in
     let expanded   = B.create 0uy 176ul in
-    let iv'        = B.create 0uy 16ul in
-    let plaintext' = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
-    let cipher'    = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
-    let ad'        = B.create 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
-    B.blit iv 0ul iv' 0ul 16ul;
-    B.blit plaintext 0ul plaintext' 0ul len;
-    B.blit ad 0ul ad' 0ul adlen;
     Vale.aes_key_expansion key expanded;
-    let b = B.create ({
-      plain = plaintext';
-      plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
-      aad = ad';
-      aad_len = FStar.Int.Cast.Full.uint32_to_uint64 adlen;
-      iv = iv';
-      expanded_key = expanded;
-      cipher = cipher';
-      tag = tag
-    }) 1ul in
-    Vale.gcm_encrypt b;
-    B.blit cipher' 0ul cipher 0ul len;
+    vale_aes128_gcm_encrypt expanded iv ad adlen plaintext len cipher tag;
     pop_frame ()
   end
   else if SC.openssl && i = AC.OpenSSL then
-    EverCrypt.OpenSSL.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+    OpenSSL.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
   else if SC.bcrypt && i = AC.BCrypt then
-    EverCrypt.BCrypt.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
+    BCrypt.aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 
 let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes128_gcm_impl () in
-  if SC.vale && i = AC.Vale then begin
+  if SC.vale && i = AC.Vale then
+   begin
     push_frame ();
-    let open EverCrypt.Vale in
     let expanded   = B.create 0uy 176ul in
-    let iv'        = B.create 0uy 16ul in
-    let plaintext' = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
-    let cipher'    = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
-    let ad'        = B.create 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
-    B.blit iv 0ul iv' 0ul 16ul;
-    B.blit cipher 0ul cipher' 0ul len;
-    B.blit ad 0ul ad' 0ul adlen;
     Vale.aes_key_expansion key expanded;
-    let b = B.create ({
-      plain = cipher';
-      plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
-      aad = ad';
-      aad_len = FStar.Int.Cast.Full.uint32_to_uint64 adlen;
-      iv = iv';
-      expanded_key = expanded;
-      cipher = plaintext';
-      tag = tag
-    }) 1ul in
-    let ret = Vale.gcm_decrypt b in
-    B.blit plaintext' 0ul plaintext 0ul len;
-    pop_frame ();
-    // FIXME: restore tag verification once Vale is fixed
-    //U32.(1ul -^ ret)
-    1ul
-    end
+    let r = vale_aes128_gcm_decrypt expanded iv ad adlen plaintext len cipher tag in
+    pop_frame (); r
+   end
   else if SC.openssl && i = AC.OpenSSL then
-    EverCrypt.OpenSSL.aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag
+    OpenSSL.aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag
   else if SC.bcrypt && i = AC.BCrypt then
-    EverCrypt.BCrypt.aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag
+    BCrypt.aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 
@@ -415,18 +431,18 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
 let aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes256_gcm_impl () in
   if SC.openssl && i = AC.OpenSSL then
-    EverCrypt.OpenSSL.aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag
+    OpenSSL.aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag
   else if SC.bcrypt && i = AC.BCrypt then
-    EverCrypt.BCrypt.aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag
+    BCrypt.aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 
 let aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes256_gcm_impl () in
   if SC.openssl && i = AC.OpenSSL then
-    EverCrypt.OpenSSL.aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag
+    OpenSSL.aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag
   else if SC.bcrypt && i = AC.BCrypt then
-    EverCrypt.BCrypt.aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag
+    BCrypt.aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 
@@ -435,36 +451,123 @@ let aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag =
 let chacha20_poly1305_encrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.chacha20_poly1305_impl () in
   if SC.hacl && i = AC.Hacl then
-    ignore (EverCrypt.Hacl.chacha20_poly1305_encrypt cipher tag plaintext len ad adlen key iv)
+    ignore (Hacl.chacha20_poly1305_encrypt cipher tag plaintext len ad adlen key iv)
   else if SC.openssl && i = AC.OpenSSL then
-    EverCrypt.OpenSSL.chacha20_poly1305_encrypt key iv ad adlen plaintext len cipher tag
+    OpenSSL.chacha20_poly1305_encrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 
 let chacha20_poly1305_decrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.chacha20_poly1305_impl () in
   if SC.hacl && i = AC.Hacl then
-    U32.(1ul -^ EverCrypt.Hacl.chacha20_poly1305_decrypt plaintext cipher len tag ad adlen key iv)
+    U32.(1ul -^ Hacl.chacha20_poly1305_decrypt plaintext cipher len tag ad adlen key iv)
   else if SC.openssl && i = AC.OpenSSL then
-    EverCrypt.OpenSSL.chacha20_poly1305_decrypt key iv ad adlen plaintext len cipher tag
+    OpenSSL.chacha20_poly1305_decrypt key iv ad adlen plaintext len cipher tag
   else
     failwith !$"ERROR: inconsistent configuration"
 
 /// AEAD
 
-(* WIP
 private noeq type _aead_state =
-  | AEAD_AES128_GCM_OPENSSL: st:Dyn.dyn -> _aead_state
-  | AEAD_AES128_GCM_BCRYPT: st:Dyn.dyn -> _aead_state
+  | AEAD_OPENSSL: st:Dyn.dyn -> _aead_state
+  | AEAD_BCRYPT: st:Dyn.dyn -> _aead_state
   | AEAD_AES128_GCM_VALE: xkey:uint8_p -> _aead_state
-  | AEAD_AES256_GCM_OPENSSL: st:Dyn.dyn -> _aead_state
-  | AEAD_AES256_GCM_BCRYPT: st:Dyn.dyn -> _aead_state
-  | AEAD_AES256_GCM_VALE: xkey:uint8_p -> _aead_state
-  | AEAD_CHACHA20_POLY1305_OPENSSL: st:Dyn.dyn -> _aead_state
-  | AEAD_CHACHA20_POLY1305_HACL: st:Dyn.dyn -> _aead_state
+  | AEAD_CHACHA20_POLY1305_HACL: k:uint8_p -> _aead_state
 
 [@(CEpilogue "#define __EverCrypt_aead_state_s")]
 let aead_state_s = _aead_state
 
+let aead_create alg k =
+  let st: aead_state_s =
+    match alg with
+    | AES128_GCM ->
+      let i = AC.aes128_gcm_impl () in
+      if SC.vale && i = AC.Vale then
+      begin
+	push_frame ();
+	let xk = B.rcreate_mm HS.root 0uy 176ul in
+	Vale.aes_key_expansion k xk;
+	pop_frame ();
+	AEAD_AES128_GCM_VALE xk
+      end
+      else if SC.bcrypt && i = AC.BCrypt then
+	AEAD_BCRYPT (BCrypt.aead_create BCrypt.AES128_GCM k)
+      else if SC.openssl && i = AC.OpenSSL then
+	AEAD_OPENSSL (OpenSSL.aead_create OpenSSL.AES128_GCM k)
+      else
+	failwith !$"ERROR: inconsistent configuration"
+    | AES256_GCM ->
+      let i = AC.aes256_gcm_impl () in
+      if SC.bcrypt && i = AC.BCrypt then
+	AEAD_BCRYPT (BCrypt.aead_create BCrypt.AES256_GCM k)
+      else if SC.openssl && i = AC.OpenSSL then
+	AEAD_OPENSSL (OpenSSL.aead_create OpenSSL.AES256_GCM k)
+      else
+	failwith !$"ERROR: inconsistent configuration"  
+    | CHACHA20_POLY1305 ->
+      let i = AC.chacha20_poly1305_impl () in
+      if SC.hacl && i = AC.Hacl then
+      begin
+	let k0 = B.rcreate_mm HS.root 0uy 32ul in
+	B.blit k 0ul k0 0ul 32ul;
+	AEAD_CHACHA20_POLY1305_HACL k0
+      end
+      else if SC.openssl && i = AC.OpenSSL then
+	AEAD_OPENSSL (OpenSSL.aead_create OpenSSL.CHACHA20_POLY1305 k)
+      else
+	failwith !$"ERROR: inconsistent configuration"
+  in
+  LB.malloc HS.root st 1ul
 
-*)
+let aead_encrypt pkey iv ad adlen plaintext len cipher tag =
+  let k = LB.index pkey 0ul in
+  if SC.vale && AEAD_AES128_GCM_VALE? k then
+    let xk = AEAD_AES128_GCM_VALE?.xkey k in
+    vale_aes128_gcm_encrypt xk iv ad adlen plaintext len cipher tag
+  else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
+    let key = AEAD_CHACHA20_POLY1305_HACL?.k k in
+    ignore (Hacl.chacha20_poly1305_encrypt cipher tag plaintext len ad adlen key iv)
+  else if SC.openssl && AEAD_OPENSSL? k then
+    let key = AEAD_OPENSSL?.st k in
+    OpenSSL.aead_encrypt key iv ad adlen plaintext len cipher tag
+  else if SC.bcrypt && AEAD_BCRYPT? k then
+    let key = AEAD_BCRYPT?.st k in
+    BCrypt.aead_encrypt key iv ad adlen plaintext len cipher tag
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let aead_decrypt pkey iv ad adlen plaintext len cipher tag =
+  let k = LB.index pkey 0ul in
+  if SC.vale && AEAD_AES128_GCM_VALE? k then
+    let xk = AEAD_AES128_GCM_VALE?.xkey k in
+    vale_aes128_gcm_decrypt xk iv ad adlen plaintext len cipher tag
+  else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
+    let key = AEAD_CHACHA20_POLY1305_HACL?.k k in
+    let r = Hacl.chacha20_poly1305_decrypt plaintext cipher len tag ad adlen key iv in
+    U32.(1ul -^ r)
+  else if SC.openssl && AEAD_OPENSSL? k then
+    let key = AEAD_OPENSSL?.st k in
+    OpenSSL.aead_decrypt key iv ad adlen plaintext len cipher tag
+  else if SC.bcrypt && AEAD_BCRYPT? k then
+    let key = AEAD_BCRYPT?.st k in
+    BCrypt.aead_decrypt key iv ad adlen plaintext len cipher tag
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let aead_free pk =
+  let k = LB.index pk 0ul in
+  if SC.vale && AEAD_AES128_GCM_VALE? k then
+    let AEAD_AES128_GCM_VALE xk = k in
+    B.rfree xk
+  else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
+    let AEAD_CHACHA20_POLY1305_HACL key = k in
+    B.rfree key
+  else if SC.openssl && AEAD_OPENSSL? k then
+    OpenSSL.aead_free (AEAD_OPENSSL?.st k)
+  else if SC.bcrypt && AEAD_BCRYPT? k then
+    BCrypt.aead_free (AEAD_BCRYPT?.st k)
+  else
+    failwith !$"ERROR: inconsistent configuration";
+  LB.free pk
+
+    

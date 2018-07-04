@@ -5,7 +5,7 @@ EVERCRYPT_HOME=../../out
 MLCRYPTO_HOME?=../../../../MLCrypto
 OPENSSL_HOME=$(MLCRYPTO_HOME)/openssl
 
-FILES = $(basename $(ALL_C_FILES))
+FILES = $(basename $(filter-out EverCrypt.c, $(ALL_C_FILES)))
 CFLAGS = -I $(KREMLIN_HOME)/include -I ../../generated
 LDFLAGS = -L $(EVERCRYPT_HOME) -levercrypt
 

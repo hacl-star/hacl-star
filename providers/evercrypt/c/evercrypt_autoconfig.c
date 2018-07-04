@@ -104,6 +104,12 @@ void EverCrypt_AutoConfig_init(EverCrypt_AutoConfig_cfg x0) {
   } else {
     aes256_gcm_impl = EverCrypt_StaticConfig_bcrypt ? BCrypt : OpenSSL;
   }
+
+  if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
+    chacha20_poly1305_impl = OpenSSL;
+  } else {
+    chacha20_poly1305_impl = Hacl;
+  }
 }
 
 impl EverCrypt_AutoConfig_sha256_impl() {

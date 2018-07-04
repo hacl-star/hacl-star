@@ -85,16 +85,18 @@ do {                                                                    \
 typedef void (*aead_enc)(uint8_t *key, uint8_t *iv, uint8_t *ad, uint32_t adlen, uint8_t *plain, uint32_t len, uint8_t *cipher, uint8_t *tag);
 typedef uint32_t (*aead_dec)(uint8_t *key, uint8_t *iv, uint8_t *ad, uint32_t adlen, uint8_t *plain, uint32_t len, uint8_t *cipher, uint8_t *tag);
 
-void bench_aead(aead_enc enc, aead_dec dec, const unsigned char *alg, size_t plain_len)
+void bench_aead(EverCrypt_aead_alg a, const unsigned char *alg, size_t plain_len)
 {
   unsigned char tag[16], key[32], iv[12];
   unsigned char *plain = malloc(65536);
   unsigned char *cipher = malloc(65536);
+  EverCrypt_aead_state s = EverCrypt_aead_create(a, key);
+
   char title[128];
   sprintf(title, "ENC %s[%5d]", alg, plain_len);
 
   TIME_AND_TSC(title, plain_len,
-    enc(key, iv, "", 0, plain, plain_len, cipher, tag);
+    EverCrypt_aead_encrypt(s, iv, "", 0, plain, plain_len, cipher, tag);
   );
 
   /*
@@ -105,6 +107,7 @@ void bench_aead(aead_enc enc, aead_dec dec, const unsigned char *alg, size_t pla
   );
   */
 
+  EverCrypt_aead_free(s);
   free(plain);
   free(cipher);
 }
@@ -131,13 +134,13 @@ void run(EverCrypt_AutoConfig_cfg cfg)
   size_t i;
 
   for(i=4; i<=65536; i<<=1)
-    bench_aead(EverCrypt_aes128_gcm_encrypt, EverCrypt_aes128_gcm_decrypt, "AES128-GCM", i);
+    bench_aead(EverCrypt_AES128_GCM, "AES128-GCM", i);
 
   for(i=4; i<=65536; i<<=1)
-    bench_aead(EverCrypt_aes256_gcm_encrypt, EverCrypt_aes256_gcm_decrypt, "AES256-GCM", i);
+    bench_aead(EverCrypt_AES256_GCM, "AES256-GCM", i);
 
   for(i=4; i<=65536; i<<=1)
-    bench_aead(EverCrypt_chacha20_poly1305_encrypt, EverCrypt_chacha20_poly1305_decrypt, "CHA20-P1305", i);
+    bench_aead(EverCrypt_CHACHA20_POLY1305, "CHA20-P1305", i);
 
 }
 
