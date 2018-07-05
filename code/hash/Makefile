@@ -102,7 +102,7 @@ BASE_OBJ = ../../lib/c/Lib_Print.o
 
 #$(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
 
-HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.ByteBuffer.fst
+HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.ByteBuffer.fst ../../lib/Lib.Print.fsti
 
 
 blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
@@ -112,7 +112,7 @@ blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Tes
 
 
 blake2s-c/Hacl_Blake2s.c: blake2s-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"myvoid.h"' -fparentheses -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' \
+	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"../../../lib/c/Lib_Print.h"' -add-include '"C_String.h"' -fparentheses -tmpdir blake2s-c -no-prefix 'Hacl.Test.Blake2s' \
 	-skip-compilation -bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	$^ -o $@
 
@@ -124,7 +124,7 @@ blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
 
 test-blake2s.exe: blake2s-c/Hacl_Blake2s.c blake2s-c/Hacl_Test_Blake2s.c $(BASE_OBJ)
 	cp myvoid.h blake2s-c/
-	$(CC) $(CFLAGS) -I $(KREMLIN_HOME) -I $(KREMLIN_HOME)/kremlib/c -L $(KREMLIN_HOME)/kremlib/out -lkremlib -o $@ $^
+	$(CC) $(CFLAGS) -I $(KREMLIN_HOME) -I $(KREMLIN_HOME)/kremlib/extracted -L $(KREMLIN_HOME)/kremlib/out -lkremlib -o $@ $^
 
 
 
