@@ -111,7 +111,7 @@ let mpfr_add1sp1_gt_branch2 a b c p sh d mask =
 	    sb |^ (a0 &^ 1uL), mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l)
 	else sb, a0, bx in
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
-    let sb = (a0 &^ mask) ^^ rb in
+    let sb = sb |^ ((a0 &^ mask) ^^ rb) in
     ap.(0ul) <- a0 &^ (lognot mask);
     mk_state sh bx rb sb
 
@@ -161,7 +161,7 @@ unfold val mpfr_add1sp1_gt: a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
 
 let mpfr_add1sp1_gt a b c p sh =
     let bx = b.mpfr_exp in
-    let cx = b.mpfr_exp in
+    let cx = c.mpfr_exp in
     let d = int32_to_uint32 I32.(bx -^ cx) in
     let mask = mpfr_LIMB_MASK sh in
     if U32.(d <^ sh) then mpfr_add1sp1_gt_branch1 a b c p sh d mask
@@ -189,8 +189,8 @@ unfold val mpfr_add1sp1_eq: a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
 
 let mpfr_add1sp1_eq a b c p sh =
    let ap = a.mpfr_d in
-   let bp = a.mpfr_d in
-   let cp = a.mpfr_d in
+   let bp = b.mpfr_d in
+   let cp = c.mpfr_d in
    let a0 = (bp.(0ul) >>^ 1ul) +^ (cp.(0ul) >>^ 1ul) in
    let bx = I32.(b.mpfr_exp +^ 1l) in
    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
