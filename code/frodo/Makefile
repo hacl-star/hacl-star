@@ -19,7 +19,7 @@ frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst
 
 
 frodo-c/Hacl_Impl_PQ_Lib.c: frodo-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"../../../lib/c/Lib_Print.h"' -add-include '"C_String.h"' -fparentheses -tmpdir frodo-c \
+	$(KREMLIN) $(KREMLIN_ARGS) -fparentheses -tmpdir frodo-c \
 	-skip-compilation \
 	$^ -o $@
 
