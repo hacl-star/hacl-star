@@ -54,7 +54,8 @@ let main () =
   C.String.print (C.String.of_literal "\nTEST 1\n");
   let test1_result : lbuffer uint8 (size_v test1_expected_len) = create #uint8 (size 32) (u8 0) in
 
-  Hacl.Impl.Blake2s.blake2s #_ #_ #_ test1_result test1_plaintext test1_plaintext_len empty test1_empty_len test1_expected_len;
+  Hacl.Blake2s.blake2s #test1_plaintext_len #test1_empty_len #test1_expected_len
+    test1_result (size 32) test1_plaintext test1_plaintext_len empty test1_empty_len;
   (* Hacl.Impl.Blake2s.blake2s test1_plaintext_len test1_plaintext test1_empty_len empty test1_expected_len test1_result; *)
 
   Lib.Print.print_compare_display test1_expected_len test1_result test1_expected;

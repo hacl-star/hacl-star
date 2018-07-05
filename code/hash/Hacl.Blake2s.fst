@@ -90,7 +90,7 @@ val blake2s:
   -> #vkk: size_t
   -> #vnn: size_t
   -> output: lbuffer uint8 (v vnn)
-  -> outlen:size_t{1 <= v outlen /\ v outlen <= 32 /\ v outlen = v outlen}
+  -> outlen:size_t{1 <= v outlen /\ v outlen <= 32}
   -> input: lbuffer uint8 (v vll)
   -> ilen: size_t{v ilen + 2 * S.size_block <= max_size_t /\ ilen == vll}
   -> key: lbuffer uint8 (v vkk)
@@ -99,5 +99,4 @@ val blake2s:
     (requires (fun h -> True))
     (ensures  (fun h0 _ h1 -> True))
 
-let blake2s #vll #vkk #vnn output outlen input ilen key klen = I.blake2s #vll #vkk #vnn output input ilen klen key outlen
-
+let blake2s #vll #vkk #vnn output outlen input ilen key klen = I.blake2s #vll #vkk #vnn output input ilen key klen outlen

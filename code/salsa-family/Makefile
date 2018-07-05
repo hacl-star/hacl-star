@@ -59,7 +59,7 @@ chacha-c/Hacl_Chacha20.c: chacha-c/out.krml
 chacha20-ml.exe: ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/ml/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst ../../lib/ml/Lib.Endian.fst ../../lib/fst/Lib.IntBuf.LoadStore.fst Hacl.Impl.Chacha20.fst 
 	mkdir -p chacha20-ml
 	$(FSTAR) --include ../../specs --include ../../lib --include ../../lib/fst  --include ../../lib/ml --codegen OCaml --lax --odir chacha20-ml $^
-	$(OCAMLOPT) -I chacha20-ml chacha20-ml/Spec_Lib_Loops.ml chacha20-ml/Hacl_Impl_Chacha20.ml
+	$(OCAMLOPT) -I chacha20-ml chacha20-ml/Lib_Loops.ml chacha20-ml/Hacl_Impl_Chacha20.ml
 
 
 chacha20-c/out.krml: ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.ByteBuffer.fst  Hacl.Impl.Chacha20.fst Hacl.Test.Chacha20.fst
@@ -67,13 +67,17 @@ chacha20-c/out.krml: ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntType
 		-bundle 'Hacl.Impl.Chacha20=Hacl.Impl.*,Lib.*' \
 		-skip-translation $^ -o $@
 
-BASE_OBJ = ../../lib/c/Spec_Lib_Print.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
+BASE_OBJ = ../../lib/c/Lib_Print.o $(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
 
-chacha20-c.exe: chacha20-c/out.krml
+../../lib/c/Lib_Print.o: ../../lib/c/Lib_Print.c
+	$(CC) -c $^ -o $@
+
+chacha20-c.exe: ../../lib/c/Lib_Print.o chacha20-c/out.krml
 	mkdir -p chacha20-c
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-c  -no-prefix Hacl.Test.Chacha20 \
 		-bundle 'Hacl.Impl.Chacha20=Hacl.Impl.*,Lib.*' \
-		-ccopt '../../lib/c/Lib_Print.o' $^ -o $@
+		-skip-linking $^
+	$(CC) ../../lib/c/Lib_Print.o chacha20-c/*.o -o $@
 	./$@
 
 

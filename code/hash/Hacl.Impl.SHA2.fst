@@ -268,7 +268,6 @@ inline_for_extraction val create_const_iv: p:Spec.parameters -> StackInline (iv_
 inline_for_extraction let create_const_iv p = admit() // createL p.const_iv
 
 
-
 (* Definition of constants *)
 inline_for_extraction val create_const_k: p:Spec.parameters -> StackInline (ws_w p)
   (requires (fun h -> True))
