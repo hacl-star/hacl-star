@@ -10,7 +10,7 @@ else
 endif
 
 ifndef FSTAR_HOME
-  FSTAR_HOME:=$(HACL_HOME)/../FStar)
+  FSTAR_HOME:=$(HACL_HOME)/../FStar
 endif
 
 ifndef KREMLIN_HOME
@@ -148,6 +148,7 @@ import-kremlin:
 
 %.fst-lax: %.fst
 	$(FSTAR) --lax $^
+
 %.fsti-lax: %.fsti
 	$(FSTAR) --lax $^
 
@@ -156,16 +157,17 @@ import-kremlin:
 
 %.fst-verify: %.fst
 	$(FSTAR) $<
+
 %.fsti-verify: %.fsti
 	$(FSTAR) $<
 
-%.fst-in: %.fst
+%.fst-in:
 	@echo --hint_info \
 	$(HINTS_ENABLED) \
 	$(OTHERFLAGS) \
 	$(FSTAR_INCLUDES)
 
-%.fsti-in: %.fsti
+%.fsti-in:
 	@echo --hint_info \
 	$(HINTS_ENABLED) \
 	$(OTHERFLAGS) \
@@ -185,20 +187,7 @@ import-kremlin:
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
 %.fsti.reloc.hints: %.fsti
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
-
-# Interactive verification
-%.fst-in: %.fst
-	@echo --hint_info \
-	$(HINTS_ENABLED) \
-	$(OTHERFLAGS) \
-	$(FSTAR_INCLUDES)
-
-%.fsti-in: %.fsti
-	@echo --hint_info \
-	$(HINTS_ENABLED) \
-	$(OTHERFLAGS) \
-	$(FSTAR_INCLUDES)
-
+        
 # Directories
 %.dir-verify: %
 	$(MAKE) -C $^ verify
