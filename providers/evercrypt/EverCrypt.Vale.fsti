@@ -9,7 +9,7 @@ open EverCrypt.Helpers
 
 // Can't use the real ASM names because they are capitalized...
 // name forwarding is in evercrypt_vale_stubs.c with stdcall calls
-val aes128_key_expansion: key:uint8_p -> w:uint8_p -> sbox:uint8_p -> Stack_ unit
+val aes128_key_expansion_sbox: key:uint8_p -> w:uint8_p -> sbox:uint8_p -> Stack_ unit
 val aes128_encrypt_one_block: cipher:uint8_p -> plain: uint8_p -> w:uint8_p -> sbox: uint8_p -> Stack_ unit
 
 noeq
@@ -25,10 +25,19 @@ type gcm_args = {
 }
 
 [@ (CCConv "stdcall") ]
-val aes_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
+val aes128_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm_encrypt: N.pointer gcm_args -> Stack_ unit
+val gcm128_encrypt: N.pointer gcm_args -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm_decrypt: N.pointer gcm_args -> Stack_ uint32_t
+val gcm128_decrypt: N.pointer gcm_args -> Stack_ uint32_t
+
+[@ (CCConv "stdcall") ]
+val aes256_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
+
+[@ (CCConv "stdcall") ]
+val gcm256_encrypt: N.pointer gcm_args -> Stack_ unit
+
+[@ (CCConv "stdcall") ]
+val gcm256_decrypt: N.pointer gcm_args -> Stack_ uint32_t

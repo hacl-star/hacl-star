@@ -190,7 +190,7 @@ let aes128_create k =
       push_frame ();
       let w    = B.rcreate_mm HS.root 0uy 176ul in
       let sbox = B.rcreate_mm HS.root 0uy 256ul in
-      Vale.aes128_key_expansion k w sbox;
+      Vale.aes128_key_expansion_sbox k w sbox;
       pop_frame ();
       AES128_VALE w sbox
     end
@@ -361,7 +361,7 @@ let vale_aes128_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
     cipher = cipher';
     tag = tag
   }) 1ul in
-  Vale.gcm_encrypt b;
+  Vale.gcm128_encrypt b;
   B.blit cipher' 0ul cipher 0ul len;
   pop_frame ()
 
@@ -386,19 +386,17 @@ let vale_aes128_gcm_decrypt xkey iv ad adlen plaintext len cipher tag =
     cipher = plaintext';
     tag = tag
   }) 1ul in
-  let ret = Vale.gcm_decrypt b in
+  let ret = Vale.gcm128_decrypt b in
   B.blit plaintext' 0ul plaintext 0ul len;
   pop_frame ();
-  // FIXME: restore tag verification once Vale is fixed
-  //U32.(1ul -^ ret)
-  1ul
+  U32.(1ul -^ ret)
 
 let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes128_gcm_impl () in
   if SC.vale && i = AC.Vale then begin
     push_frame ();
-    let expanded   = B.create 0uy 176ul in
-    Vale.aes_key_expansion key expanded;
+    let expanded = B.create 0uy 176ul in
+    Vale.aes128_key_expansion key expanded;
     vale_aes128_gcm_encrypt expanded iv ad adlen plaintext len cipher tag;
     pop_frame ()
   end
@@ -414,10 +412,11 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   if SC.vale && i = AC.Vale then
    begin
     push_frame ();
-    let expanded   = B.create 0uy 176ul in
-    Vale.aes_key_expansion key expanded;
+    let expanded = B.create 0uy 176ul in
+    Vale.aes128_key_expansion key expanded;
     let r = vale_aes128_gcm_decrypt expanded iv ad adlen plaintext len cipher tag in
-    pop_frame (); r
+    pop_frame ();
+    r
    end
   else if SC.openssl && i = AC.OpenSSL then
     OpenSSL.aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag
@@ -428,9 +427,68 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
 
 /// AES256-GCM
 
+// TODO move to ValeGlue
+private inline_for_extraction
+let vale_aes256_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
+  push_frame ();
+  let open EverCrypt.Vale in
+  let iv'        = B.create 0uy 16ul in
+  let plaintext' = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+  let cipher'    = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+  let ad'        = B.create 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
+  B.blit iv 0ul iv' 0ul 12ul;
+  B.blit plaintext 0ul plaintext' 0ul len;
+  B.blit ad 0ul ad' 0ul adlen;
+  let b = B.create ({
+    plain = plaintext';
+    plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
+    aad = ad';
+    aad_len = FStar.Int.Cast.Full.uint32_to_uint64 adlen;
+    iv = iv';
+    expanded_key = xkey;
+    cipher = cipher';
+    tag = tag
+  }) 1ul in
+  Vale.gcm256_encrypt b;
+  B.blit cipher' 0ul cipher 0ul len;
+  pop_frame ()
+
+private inline_for_extraction
+let vale_aes256_gcm_decrypt xkey iv ad adlen plaintext len cipher tag =
+  push_frame ();
+  let open EverCrypt.Vale in
+  let iv'        = B.create 0uy 16ul in
+  let plaintext' = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+  let cipher'    = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+  let ad'        = B.create 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
+  B.blit iv 0ul iv' 0ul 12ul;
+  B.blit cipher 0ul cipher' 0ul len;
+  B.blit ad 0ul ad' 0ul adlen;
+  let b = B.create ({
+    plain = cipher';
+    plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
+    aad = ad';
+    aad_len = FStar.Int.Cast.Full.uint32_to_uint64 adlen;
+    iv = iv';
+    expanded_key = xkey;
+    cipher = plaintext';
+    tag = tag
+  }) 1ul in
+  let ret = Vale.gcm256_decrypt b in
+  B.blit plaintext' 0ul plaintext 0ul len;
+  pop_frame ();
+  U32.(1ul -^ ret)
+
 let aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes256_gcm_impl () in
-  if SC.openssl && i = AC.OpenSSL then
+  if SC.vale && i = AC.Vale then begin
+    push_frame ();
+    let expanded = B.create 0uy 240ul in
+    Vale.aes256_key_expansion key expanded;
+    vale_aes256_gcm_encrypt expanded iv ad adlen plaintext len cipher tag;
+    pop_frame ()
+  end
+  else if SC.openssl && i = AC.OpenSSL then
     OpenSSL.aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag
   else if SC.bcrypt && i = AC.BCrypt then
     BCrypt.aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag
@@ -439,7 +497,15 @@ let aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag =
 
 let aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   let i = AC.aes256_gcm_impl () in
-  if SC.openssl && i = AC.OpenSSL then
+  if SC.vale && i = AC.Vale then begin
+    push_frame ();
+    let expanded = B.create 0uy 240ul in
+    Vale.aes256_key_expansion key expanded;
+    let r = vale_aes256_gcm_decrypt expanded iv ad adlen plaintext len cipher tag in
+    pop_frame ();
+    r
+  end
+  else if SC.openssl && i = AC.OpenSSL then
     OpenSSL.aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag
   else if SC.bcrypt && i = AC.BCrypt then
     BCrypt.aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag
@@ -472,6 +538,7 @@ private noeq type _aead_state =
   | AEAD_OPENSSL: st:Dyn.dyn -> _aead_state
   | AEAD_BCRYPT: st:Dyn.dyn -> _aead_state
   | AEAD_AES128_GCM_VALE: xkey:uint8_p -> _aead_state
+  | AEAD_AES256_GCM_VALE: xkey:uint8_p -> _aead_state
   | AEAD_CHACHA20_POLY1305_HACL: k:uint8_p -> _aead_state
 
 [@(CEpilogue "#define __EverCrypt_aead_state_s")]
@@ -486,7 +553,7 @@ let aead_create alg k =
       begin
 	push_frame ();
 	let xk = B.rcreate_mm HS.root 0uy 176ul in
-	Vale.aes_key_expansion k xk;
+	Vale.aes128_key_expansion k xk;
 	pop_frame ();
 	AEAD_AES128_GCM_VALE xk
       end
@@ -498,7 +565,15 @@ let aead_create alg k =
 	failwith !$"ERROR: inconsistent configuration"
     | AES256_GCM ->
       let i = AC.aes256_gcm_impl () in
-      if SC.bcrypt && i = AC.BCrypt then
+      if SC.vale && i = AC.Vale then
+      begin
+	push_frame ();
+	let xk = B.rcreate_mm HS.root 0uy 240ul in
+	Vale.aes256_key_expansion k xk;
+	pop_frame ();
+	AEAD_AES256_GCM_VALE xk
+      end
+      else if SC.bcrypt && i = AC.BCrypt then
 	AEAD_BCRYPT (BCrypt.aead_create BCrypt.AES256_GCM k)
       else if SC.openssl && i = AC.OpenSSL then
 	AEAD_OPENSSL (OpenSSL.aead_create OpenSSL.AES256_GCM k)
@@ -524,6 +599,9 @@ let aead_encrypt pkey iv ad adlen plaintext len cipher tag =
   if SC.vale && AEAD_AES128_GCM_VALE? k then
     let xk = AEAD_AES128_GCM_VALE?.xkey k in
     vale_aes128_gcm_encrypt xk iv ad adlen plaintext len cipher tag
+  else if SC.vale && AEAD_AES256_GCM_VALE? k then
+    let xk = AEAD_AES256_GCM_VALE?.xkey k in
+    vale_aes256_gcm_encrypt xk iv ad adlen plaintext len cipher tag
   else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
     let key = AEAD_CHACHA20_POLY1305_HACL?.k k in
     ignore (Hacl.chacha20_poly1305_encrypt cipher tag plaintext len ad adlen key iv)
@@ -541,6 +619,9 @@ let aead_decrypt pkey iv ad adlen plaintext len cipher tag =
   if SC.vale && AEAD_AES128_GCM_VALE? k then
     let xk = AEAD_AES128_GCM_VALE?.xkey k in
     vale_aes128_gcm_decrypt xk iv ad adlen plaintext len cipher tag
+  else if SC.vale && AEAD_AES256_GCM_VALE? k then
+    let xk = AEAD_AES256_GCM_VALE?.xkey k in
+    vale_aes256_gcm_decrypt xk iv ad adlen plaintext len cipher tag
   else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
     let key = AEAD_CHACHA20_POLY1305_HACL?.k k in
     let r = Hacl.chacha20_poly1305_decrypt plaintext cipher len tag ad adlen key iv in
@@ -559,6 +640,9 @@ let aead_free pk =
   if SC.vale && AEAD_AES128_GCM_VALE? k then
     let AEAD_AES128_GCM_VALE xk = k in
     B.rfree xk
+  else if SC.vale && AEAD_AES256_GCM_VALE? k then
+    let AEAD_AES256_GCM_VALE xk = k in
+    B.rfree xk
   else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
     let AEAD_CHACHA20_POLY1305_HACL key = k in
     B.rfree key
@@ -569,5 +653,3 @@ let aead_free pk =
   else
     failwith !$"ERROR: inconsistent configuration";
   LB.free pk
-
-    
