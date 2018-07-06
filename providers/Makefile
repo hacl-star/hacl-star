@@ -253,6 +253,7 @@ clean:
 .PHONY: clean-c
 clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
+	rm -rf $(CACHE_DIR)/EverCrypt.StaticConfig.fst.checked
 
 .PHONY: distclean
 distclean: clean
