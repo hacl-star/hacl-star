@@ -76,7 +76,7 @@ let matrix_add #n1 #n2 a b =
     )
   )
 
-//modifies a
+//modifies b
 val matrix_sub:
   #n1:size_t -> #n2:size_t ->
   a:matrix_t n1 n2 -> b:matrix_t n1 n2 ->
@@ -94,7 +94,7 @@ let matrix_sub #n1 #n2 a b =
       let aij = mget a i j in
       let bij = mget b i j in
       let res = sub_mod aij bij in
-      mset a i j res
+      mset b i j res
     )
   )
 

@@ -12,20 +12,18 @@ BASE_OBJ = ../../lib/c/Lib_Print.o
 HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.ByteBuffer.fst ../../lib/Lib.Print.fsti
 
 
-frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--expose_interfaces" -tmpdir frodo-c -no-prefix 'Hacl.Impl.Frodo' \
+frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.fst Hacl.Test.Frodo.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -fsopt "--expose_interfaces" -tmpdir frodo-c -no-prefix 'Hacl.Test.Frodo' \
 	-I ../../specs -I ../../lib -I ../../lib/fst -I $(KREMLIN_HOME)/include \
 	-skip-translation $^
 
-
-# frodo-c/Hacl_Impl_PQ_Lib.c: frodo-c/out.krml
-# 	$(KREMLIN) $(KREMLIN_ARGS) -fparentheses -tmpdir frodo-c \
-# 	-skip-compilation \
-# 	$^ -o $@
-
 frodo-c/Hacl_Impl_Frodo.c: frodo-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS)  -fparentheses -tmpdir frodo-c -no-prefix 'Hacl.Impl.Frodo' \
+	$(KREMLIN) $(KREMLIN_ARGS)  -fparentheses -tmpdir frodo-c -no-prefix 'Hacl.Test.Frodo' \
 	-skip-compilation \
+	$^ -o $@
+
+frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir frodo-c -skip-compilation -no-prefix 'Hacl.Test.Frodo' \
 	$^ -o $@
 
 clean:

@@ -11,26 +11,52 @@ open FStar.Math.Lemmas
 open Hacl.Impl.PQ.Lib
 open Hacl.Keccak
 
-// val matrix_eq:
-//   #t:numeric_t -> n1:size_t -> n2:size_t ->
-//   m:size_t{m > 0} ->
-//   a:matrix_t t n1 n2 -> b:matrix_t t n1 n2 -> Tot bool
-// let matrix_eq #t #n1 #n2 m a b =
-//   repeati n1
-//   (fun i res ->
-//     repeati n2
-//     (fun j res ->
-//       res && (uint_to_nat (mget a i j) % m = uint_to_nat (mget b i j) % m)
-//     ) res
-//   ) true
+val eq_u8: a:uint8 -> b:uint8 -> Tot bool
+[@ "substitute"]
+let eq_u8 a b = FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
 
-// val lbytes_eq:
-//   #len:size_nat -> a:lbytes len -> b:lbytes len -> Tot bool
-// let lbytes_eq #len a b =
-//   repeati len
-//   (fun i res ->
-//     res && (uint_to_nat a.[i] = uint_to_nat b.[i])
-//   ) true
+val eq_u16_m:m:uint16 -> a:uint16 -> b:uint16 -> Tot bool
+[@ "substitute"]
+let eq_u16_m m a b = FStar.UInt16.(u16_to_UInt16 (a &. m) =^ u16_to_UInt16 (b &. m))
+
+val matrix_eq:
+  #n1:size_t -> #n2:size_t -> m:size_t{v m > 0} ->
+  a:matrix_t n1 n2 -> b:matrix_t n1 n2 -> Stack bool
+  (requires (fun h -> True))
+  (ensures (fun h0 r h1 -> True))
+  [@"c_inline"]
+let matrix_eq #n1 #n2 m a b =
+  admit();
+  let m = (u16 1 <<. size_to_uint32 m) -. u16 1 in
+  let res:lbuffer bool 1 = create (size 1) (true) in
+  let h0 = FStar.HyperStack.ST.get () in
+  loop_nospec #h0 n1 res
+  (fun i ->
+    loop_nospec #h0 n2 res
+    (fun j ->
+      let a1 = res.(size 0) in
+      let a2 = eq_u16_m m (mget a i j) (mget b i j) in
+      res.(size 0) <- a1 && a2
+    )
+  );
+  res.(size 0)
+
+val lbytes_eq:
+  #len:size_t -> a:lbytes (v len) -> b:lbytes (v len) -> Stack bool
+  (requires (fun h -> True))
+  (ensures (fun h0 r h1 -> True))
+  [@"c_inline"]
+let lbytes_eq #len a b =
+  admit();
+  let res:lbuffer bool 1 = create (size 1) (true) in
+  let h0 = FStar.HyperStack.ST.get () in
+  loop_nospec #h0 len res
+  (fun i ->
+    let a1 = res.(size 0) in
+    let a2 = eq_u8 a.(i) b.(i) in
+    res.(size 0) <- a1 && a2
+  );
+  res.(size 0)
 
 //FrodoKEM-640
 let params_n = size 64 //640
@@ -338,102 +364,133 @@ let crypto_kem_keypair coins pk sk =
   copy (sub sk crypto_bytes crypto_publickeybytes) crypto_publickeybytes pk;
   matrix_to_lbytes s_matrix (sub sk (crypto_bytes +. crypto_publickeybytes) (size 2 *. params_n *. params_nbar))
 
-
-(*)
-val crypto_kem_keypair:
-  coins:lbytes (2 * crypto_bytes + bytes_seed_a) ->
-  Tot (tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes))
-let crypto_kem_keypair coins =
-  let s = sub coins 0 crypto_bytes in
-  let seed_e = sub coins crypto_bytes crypto_bytes in
-  let z = sub coins (2 * crypto_bytes) bytes_seed_a in
-  let seed_a = cshake_frodo bytes_seed_a z (u16 0) bytes_seed_a in
-
-  let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
-  let s_matrix = frodo_sample_matrix_tr params_n params_nbar crypto_bytes seed_e (u16 1) in
-  let e_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) in
-  let b_matrix = matrix_add (matrix_mul a_matrix s_matrix) e_matrix in
-  let b = frodo_pack params_n params_nbar b_matrix params_logq in
-
-  let pk = concat seed_a b in
-  let sk = concat s (concat pk (matrix_to_lbytes s_matrix)) in
-  (pk, sk)
-
+//{v bytes_mu = v ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8)}
 val crypto_kem_enc:
-  coins:lbytes bytes_mu -> pk:lbytes crypto_publickeybytes ->
-  Tot (tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes))
-let crypto_kem_enc coins pk =
-  let seed_a = sub pk 0 bytes_seed_a in
-  let b = sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) in
+  coins:lbytes (v ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8)) ->
+  pk:lbytes (v crypto_publickeybytes) ->
+  ct:lbytes (v crypto_ciphertextbytes) -> ss:lbytes (v crypto_bytes) -> Stack unit
+  (requires (fun h -> True))
+  (ensures (fun h0 r h1 -> True))
+let crypto_kem_enc coins pk ct ss =
+  admit();
+  let seed_a = sub #uint8 #_ #(v bytes_seed_a) pk (size 0) bytes_seed_a in
+  let b = sub #uint8 #_ #(v ((params_logq *. params_n *. params_nbar) /. size 8)) pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
 
-  let g = cshake_frodo (crypto_publickeybytes + bytes_mu) (concat pk coins) (u16 3) (3 * crypto_bytes) in
-  let seed_e = sub g 0 crypto_bytes in
-  let k = sub g crypto_bytes crypto_bytes in
-  let d = sub g (2*crypto_bytes) crypto_bytes in
+  let g:lbytes (v (size 3 *. crypto_bytes)) = create (size 3 *. crypto_bytes) (u8 0) in
+  let pk_coins = create (crypto_publickeybytes +. bytes_mu) (u8 0) in
+  copy (sub pk_coins (size 0) crypto_publickeybytes) crypto_publickeybytes pk;
+  copy (sub pk_coins crypto_publickeybytes bytes_mu) bytes_mu coins;
+  cshake_frodo (crypto_publickeybytes +. bytes_mu) pk_coins (u16 3) (size 3 *. crypto_bytes) g;
+  let seed_e = sub #uint8 #_ #(v crypto_bytes) g (size 0) crypto_bytes in
+  let k = sub #uint8 #_ #(v crypto_bytes) g crypto_bytes crypto_bytes in
+  let d = sub #uint8 #_ #(v crypto_bytes) g (size 2 *.crypto_bytes) crypto_bytes in
 
-  let sp_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 4) in
-  let ep_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 5) in
-  let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
-  let bp_matrix = matrix_add (matrix_mul sp_matrix a_matrix) ep_matrix in
-  let c1 = frodo_pack params_nbar params_n bp_matrix params_logq in
+  let sp_matrix = matrix_create params_nbar params_n in
+  let ep_matrix = matrix_create params_nbar params_n in
+  let a_matrix  = matrix_create params_n params_n in
+  let bp_matrix = matrix_create params_nbar params_n in
 
-  let epp_matrix = frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) in
-  let b_matrix = frodo_unpack params_n params_nbar params_logq b in
-  let v_matrix = matrix_add (matrix_mul sp_matrix b_matrix) epp_matrix in
-  let mu_encode = frodo_key_encode params_extracted_bits coins in
-  let c_matrix = matrix_add v_matrix mu_encode in
-  let c2 = frodo_pack params_nbar params_nbar c_matrix params_logq in
+  frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 4) sp_matrix;
+  frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 5) ep_matrix;
+  frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
+  matrix_mul sp_matrix a_matrix bp_matrix;
+  matrix_add bp_matrix ep_matrix;
+  let c1Len = (params_logq *. params_nbar *. params_n) /. size 8 in
+  frodo_pack params_nbar params_n bp_matrix params_logq (sub ct (size 0) c1Len);
 
-  let ss_init = concat c1 (concat c2 (concat k d)) in
-  let ss_init_len = (params_logq * params_nbar * params_n) / 8 + (params_logq * params_nbar * params_nbar) / 8 + 2 * crypto_bytes in
-  let ss = cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes in
-  let ct = concat c1 (concat c2 d) in
-  (ct, ss)
+  let epp_matrix = matrix_create params_nbar params_nbar in
+  let b_matrix   = matrix_create params_n params_nbar in
+  let v_matrix   = matrix_create params_nbar params_nbar in
+  let mu_encode  = matrix_create params_nbar params_nbar in
+
+  frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) epp_matrix;
+  frodo_unpack params_n params_nbar params_logq b b_matrix;
+  matrix_mul sp_matrix b_matrix v_matrix;
+  matrix_add v_matrix epp_matrix;
+  frodo_key_encode params_extracted_bits coins mu_encode;
+  matrix_add v_matrix mu_encode;
+  let c2Len = (params_logq *. params_nbar *. params_nbar) /. size 8 in
+  frodo_pack params_nbar params_nbar v_matrix params_logq (sub ct c1Len c2Len);
+
+  let ss_init_len = c1Len +. c2Len +. size 2 *. crypto_bytes in
+  let ss_init:lbytes (v ss_init_len) = create ss_init_len (u8 0) in
+  cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
+  copy (sub ct (c1Len +. c2Len) crypto_bytes) crypto_bytes d
 
 val crypto_kem_dec:
-  ct:lbytes crypto_ciphertextbytes -> sk:lbytes crypto_secretkeybytes ->
-  Tot (lbytes crypto_bytes)
-let crypto_kem_dec ct sk =
-  let c1Len = (params_logq * params_nbar * params_n) / 8 in
-  let c2Len = (params_logq * params_nbar * params_nbar) / 8 in
-  let c1 = sub ct 0 c1Len in
-  let c2 = sub ct c1Len c2Len in
-  let d = sub ct (c1Len+c2Len) crypto_bytes in
+  ct:lbytes (v crypto_ciphertextbytes) -> sk:lbytes (v crypto_secretkeybytes) ->
+  ss:lbytes (v crypto_bytes) -> Stack unit
+  (requires (fun h -> True))
+  (ensures (fun h0 r h1 -> True))
+let crypto_kem_dec ct sk ss =
+  admit();
+  let c1Len = (params_logq *. params_nbar *. params_n) /. size 8 in
+  let c2Len = (params_logq *. params_nbar *. params_nbar) /. size 8 in
+  let c1 = sub #uint8 #_ #(v c1Len) ct (size 0) c1Len in
+  let c2 = sub #uint8 #_ #(v c2Len) ct c1Len c2Len in
+  let d = sub #uint8 #_ #(v crypto_bytes) ct (c1Len +. c2Len) crypto_bytes in
 
-  let s = sub sk 0 crypto_bytes in
-  let pk = sub sk crypto_bytes crypto_publickeybytes in
-  let s_matrix = matrix_from_lbytes params_n params_nbar (sub sk (crypto_bytes + crypto_publickeybytes) (2*params_n*params_nbar)) in
-  let seed_a = sub pk 0 bytes_seed_a in
-  let b = sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) in
+  let s_matrix  = matrix_create params_n params_nbar in
+  let bp_matrix = matrix_create params_nbar params_n in
+  let c_matrix  = matrix_create params_nbar params_nbar in
+  let m_matrix  = matrix_create params_nbar params_nbar in
+  let mu_decode_len = params_extracted_bits *. params_nbar *. params_nbar /. size 8 in
+  let mu_decode = create mu_decode_len (u8 0) in
 
-  let bp_matrix = frodo_unpack params_nbar params_n params_logq c1 in
-  let c_matrix = frodo_unpack params_nbar params_nbar params_logq c2 in
-  let m_matrix = matrix_sub c_matrix (matrix_mul bp_matrix s_matrix) in
-  let mu_decode = frodo_key_decode params_extracted_bits m_matrix in
+  let s = sub #uint8 #_ #(v crypto_bytes) sk (size 0) crypto_bytes in
+  let pk = sub #uint8 #_ #(v crypto_publickeybytes) sk crypto_bytes crypto_publickeybytes in
+  matrix_from_lbytes (sub sk (crypto_bytes +. crypto_publickeybytes) (size 2 *. params_n *. params_nbar)) s_matrix;
+  let seed_a = sub #uint8 #_ #(v bytes_seed_a) pk (size 0) bytes_seed_a in
+  let b = sub #uint8 #_ #(v c1Len) pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
 
-  let g = cshake_frodo (crypto_publickeybytes + (params_nbar * params_nbar * params_extracted_bits) / 8) (concat pk mu_decode)  (u16 3) (3 * crypto_bytes) in
-  let seed_ep = sub g 0 crypto_bytes in
-  let kp = sub g crypto_bytes crypto_bytes in
-  let dp = sub g (2*crypto_bytes) crypto_bytes in
+  frodo_unpack params_nbar params_n params_logq c1 bp_matrix;
+  frodo_unpack params_nbar params_nbar params_logq c2 c_matrix;
+  matrix_mul bp_matrix s_matrix m_matrix;
+  matrix_sub c_matrix m_matrix; //modifies m_matrix
+  frodo_key_decode params_extracted_bits m_matrix mu_decode;
 
-  let sp_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_ep (u16 4) in
-  let ep_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_ep (u16 5) in
-  let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
-  let bpp_matrix = matrix_add (matrix_mul sp_matrix a_matrix) ep_matrix in
+  let g:lbytes (v (size 3 *. crypto_bytes)) = create (size 3 *. crypto_bytes) (u8 0) in
+  let pk_mu_decode = create (crypto_publickeybytes +. mu_decode_len) (u8 0) in
+  copy (sub pk_mu_decode (size 0) crypto_publickeybytes) crypto_publickeybytes pk;
+  copy (sub pk_mu_decode crypto_publickeybytes mu_decode_len) mu_decode_len mu_decode;
+  cshake_frodo (crypto_publickeybytes +. mu_decode_len) pk_mu_decode (u16 3) (size 3 *. crypto_bytes) g;
+  let seed_ep = sub #uint8 #_ #(v crypto_bytes) g (size 0) crypto_bytes in
+  let kp = sub #uint8 #_ #(v crypto_bytes)  g crypto_bytes crypto_bytes in
+  let dp = sub #uint8 #_ #(v crypto_bytes) g (size 2 *. crypto_bytes) crypto_bytes in
 
-  let epp_matrix = frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_ep (u16 6) in
-  let b_matrix = frodo_unpack params_n params_nbar params_logq b in
-  let v_matrix = matrix_add (matrix_mul sp_matrix b_matrix) epp_matrix in
+  let sp_matrix  = matrix_create params_nbar params_n in
+  let ep_matrix  = matrix_create params_nbar params_n in
+  let a_matrix   = matrix_create params_n params_n in
+  let bpp_matrix = matrix_create params_nbar params_n in
+  frodo_sample_matrix params_nbar params_n crypto_bytes seed_ep (u16 4) sp_matrix;
+  frodo_sample_matrix params_nbar params_n crypto_bytes seed_ep (u16 5) ep_matrix;
+  frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
+  matrix_mul sp_matrix a_matrix bpp_matrix;
+  matrix_add bpp_matrix ep_matrix;
 
-  let mu_encode = frodo_key_encode params_extracted_bits mu_decode in
-  let cp_matrix = matrix_add v_matrix mu_encode in
+  let epp_matrix = matrix_create params_nbar params_nbar in
+  let b_matrix   = matrix_create params_n params_nbar in
+  let v_matrix   = matrix_create params_nbar params_nbar in
+  frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_ep (u16 6) epp_matrix;
+  frodo_unpack params_n params_nbar params_logq b b_matrix;
+  matrix_mul sp_matrix b_matrix v_matrix;
+  matrix_add v_matrix epp_matrix;
 
-  let ss_init = concat c1 c2 in
-  let ss_init_len = (params_logq * params_nbar * params_n) / 8 + (params_logq * params_nbar * params_nbar) / 8 + 2 * crypto_bytes in
-  let ss_init1:lbytes ss_init_len = concat ss_init (concat kp d) in
-  let ss_init2:lbytes ss_init_len = concat ss_init (concat s d) in
+  let mu_encode = matrix_create params_nbar params_nbar in
+  frodo_key_encode params_extracted_bits mu_decode mu_encode;
+  matrix_add v_matrix mu_encode; //cp_matrix = v_matrix
 
-  let bcond = (lbytes_eq d dp) && (matrix_eq params_q bp_matrix bpp_matrix) && (matrix_eq params_q c_matrix cp_matrix) in
-  let ss_init = if (bcond) then ss_init1 else ss_init2 in
-  let ss = cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes in
-  ss
+  let ss_init_len = c1Len +. c2Len +. size 2 *. crypto_bytes in
+  let ss_init:lbytes (v ss_init_len) = create ss_init_len (u8 0) in
+  copy (sub ss_init (size 0) c1Len) c1Len c1;
+  copy (sub ss_init c1Len c2Len) c2Len c2;
+  copy (sub ss_init (ss_init_len -. crypto_bytes) crypto_bytes) crypto_bytes d;
+
+  //let bcond = (lbytes_eq d dp) && (matrix_eq params_q bp_matrix bpp_matrix) && (matrix_eq params_q c_matrix cp_matrix) in
+  let bcond = true in
+  (if (bcond) then
+    copy (sub ss_init (c1Len +. c2Len) crypto_bytes) crypto_bytes kp
+   else
+    copy (sub ss_init (c1Len +. c2Len) crypto_bytes) crypto_bytes s);
+
+  cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss
