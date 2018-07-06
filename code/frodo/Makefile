@@ -20,18 +20,26 @@ frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.F
 frodo-c/Hacl_Impl_Frodo.c: frodo-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS)  -fparentheses -tmpdir frodo-c -no-prefix 'Hacl.Test.Frodo' \
 	-skip-compilation -bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo' \
+	-drop 'Hacl.Keccak' \
+	-add-include '"../include/Hacl_Keccak.h"' \
+	-add-include '"compat.h"' \
 	$^ -o $@
 
 frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir frodo-c -skip-compilation -no-prefix 'Hacl.Test.Frodo' \
 	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo' \
+	-drop 'Hacl.Keccak' \
+	-add-include '"../include/Hacl_Keccak.h"' \
+	-add-include '"compat.h"' \
 	$^ -o $@
 
+CFLAGS += -I $(KREMLIN_HOME)/include/kremlin/internal -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib/extracted -I $(LWEKE_HOME)/src/sha3 -I $(HACL_HOME)/code/frodo/include -L $(KREMLIN_HOME)/kremlib/out
+
 %.o: %.c
-	$(CC) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 test-frodo.exe: frodo-c/Hacl_Impl_Frodo.c frodo-c/Hacl_Test_Frodo.c $(BASE_OBJ)
-	$(CC) $(CFLAGS) -I $(KREMLIN_HOME) -I $(KREMLIN_HOME)/kremlib/extracted -I $(LWEKE_HOME)/src/sha3 -I $(HACL_HOME)/code/frodo/include -L $(KREMLIN_HOME)/kremlib/out -o $@ $^ -lkremlib
+	$(CC) $(CFLAGS) -o $@ $(KREMLIN_HOME)/kremlib/uint128/FStar_UInt128.c -DKRML_VERIFIED_UINT128 $^ -lkremlib
 
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
