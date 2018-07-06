@@ -14,7 +14,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "88b65b1c0976bf94e987e48ca5d3c125"
+      "94a91f0ccf73f50168d0c28f7a05e2a0"
     ],
     [
       "Hacl.Bignum.Wide.add",
@@ -30,7 +30,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ea9f2f87ce04685e87be163c83b3b310"
+      "eda13c94e551dc2a48c5bb6f5a66c789"
     ],
     [
       "Hacl.Bignum.Wide.add",
@@ -50,7 +50,24 @@
         "refinement_interpretation_Hacl.Bignum.Wide_Tm_refine_d065006285a95c605ee4f75e809434d4"
       ],
       0,
-      "90f77f74a0ba187b2dab713516394ace"
+      "715ebbbbfa28be47af1a6e3082ca2271"
+    ],
+    [
+      "Hacl.Bignum.Wide.add",
+      3,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Bignum.Constants.wide",
+        "equation_Hacl.Bignum.Parameters.wide",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Wide.n", "equation_Hacl.Bignum.Wide.t",
+        "equation_Hacl.Bignum.Wide.v", "equation_Hacl.UInt128.t",
+        "refinement_interpretation_Hacl.Bignum.Wide_Tm_refine_d065006285a95c605ee4f75e809434d4"
+      ],
+      0,
+      "999bce72ca0937dc3b7018833d2e71de"
     ],
     [
       "Hacl.Bignum.Wide.add_mod",
@@ -66,7 +83,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "21679af3f85b8e22c8be7497525a8ce1"
+      "66b494a840aa313b116232b883cdaca2"
     ],
     [
       "Hacl.Bignum.Wide.add_mod",
@@ -78,7 +95,7 @@
         "equation_Hacl.Bignum.Wide.v"
       ],
       0,
-      "2b90ca7e69f962cbf81813ba815ead04"
+      "6a964308c5b295a4ee19f25cb7b1f538"
     ],
     [
       "Hacl.Bignum.Wide.sub",
@@ -94,7 +111,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "f80967066c52e4df3fb76a2de5bade2a"
+      "cae150f8b944a15b0c5c6349030bd5f1"
     ],
     [
       "Hacl.Bignum.Wide.sub",
@@ -114,7 +131,24 @@
         "refinement_interpretation_Hacl.Bignum.Wide_Tm_refine_c2064a4a69f8cb3035baee031e008f88"
       ],
       0,
-      "191e6100864c24badba7da74c3b665e5"
+      "4ff215d7bc12dd97a0b59d1df7ead2c2"
+    ],
+    [
+      "Hacl.Bignum.Wide.sub",
+      3,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Bignum.Constants.wide",
+        "equation_Hacl.Bignum.Parameters.wide",
+        "equation_Hacl.Bignum.Parameters.wide_n",
+        "equation_Hacl.Bignum.Wide.n", "equation_Hacl.Bignum.Wide.t",
+        "equation_Hacl.Bignum.Wide.v", "equation_Hacl.UInt128.t",
+        "refinement_interpretation_Hacl.Bignum.Wide_Tm_refine_c2064a4a69f8cb3035baee031e008f88"
+      ],
+      0,
+      "3b85624e96810e8123ea3fbb3140357b"
     ],
     [
       "Hacl.Bignum.Wide.sub_mod",
@@ -130,7 +164,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ac4140f3cc4d211668864ff1ad97ee73"
+      "51c1f9504ce80a4bee5e2fc6e94dd487"
     ],
     [
       "Hacl.Bignum.Wide.sub_mod",
@@ -142,7 +176,7 @@
         "equation_Hacl.Bignum.Wide.v"
       ],
       0,
-      "3d5ff86782b1649608704b08e04e01fc"
+      "459668393855ec0e0159ced8d53e5b1e"
     ],
     [
       "Hacl.Bignum.Wide.shift_right",
@@ -159,7 +193,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "d0b79ca13252089d0c2fa70acdf0c27c"
+      "2cec4071def10d8f92b961bd6f300ae6"
     ],
     [
       "Hacl.Bignum.Wide.shift_right",
@@ -173,7 +207,7 @@
         "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2"
       ],
       0,
-      "44887c2d61520757bd4b336415782323"
+      "c44371192797afa0ae776a95e1d59021"
     ],
     [
       "Hacl.Bignum.Wide.shift_left",
@@ -193,7 +227,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "4cb4d8850cc2af11a043760e5011f4f9"
+      "859fa389a9199609d88e6c214e4febc0"
     ],
     [
       "Hacl.Bignum.Wide.shift_left",
@@ -207,7 +241,7 @@
         "refinement_interpretation_Hacl.UInt128_Tm_refine_5b2ad87cd68494149f9a9229c91e04a2"
       ],
       0,
-      "0acad085b4c5bd5bf120fe52ac0f2abf"
+      "232a0cc0d2c80ad35c0d3028571ec222"
     ],
     [
       "Hacl.Bignum.Wide.eq_mask",
@@ -228,7 +262,7 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "250a6eac51006dda2a93a7ce480c01b1"
+      "d86e0a5ebd0700cb01e68c43c6d96901"
     ],
     [
       "Hacl.Bignum.Wide.eq_mask",
@@ -240,7 +274,7 @@
         "equation_Hacl.Bignum.Wide.v"
       ],
       0,
-      "3b03aff4143b23fd9bd1d4c09d0c4bf3"
+      "b80efd9d490265766f133eda4d23b4b4"
     ],
     [
       "Hacl.Bignum.Wide.gte_mask",
@@ -256,7 +290,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ca48c7eed75bb4f58186123223c484e3"
+      "408c233c460b8f220b2e0040e1df8a77"
     ],
     [
       "Hacl.Bignum.Wide.gte_mask",
@@ -268,7 +302,7 @@
         "equation_Hacl.Bignum.Wide.v"
       ],
       0,
-      "ef435a8d30c5dac4638721ecc1bb6af4"
+      "de4eec266d21d12f012bfe15b84b7948"
     ],
     [
       "Hacl.Bignum.Wide.gt_mask",
@@ -284,7 +318,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "64e26e1c60c010a10f1ae8e07c073cde"
+      "ba2943bc2f845ff77f076b3e1cb1b8c9"
     ],
     [
       "Hacl.Bignum.Wide.gt_mask",
@@ -296,7 +330,7 @@
         "equation_Hacl.Bignum.Wide.v"
       ],
       0,
-      "c34d9f6ecb2ec195547149f65278000e"
+      "fa7f0aa5d5524153be5f17d21204becb"
     ],
     [
       "Hacl.Bignum.Wide.lt_mask",
@@ -312,7 +346,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "797e8a38e821dafb30e3f3b895e0284b"
+      "fa2525171e074ce404b42ebfa098340c"
     ],
     [
       "Hacl.Bignum.Wide.lt_mask",
@@ -324,7 +358,7 @@
         "equation_Hacl.Bignum.Wide.v"
       ],
       0,
-      "bbe6e1271d96530a6fcd35be03890f25"
+      "33f2ef37bfd15ebdefc500600329b036"
     ],
     [
       "Hacl.Bignum.Wide.lte_mask",
@@ -340,7 +374,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "52a9446b7ea0a074bdeece93434f21fa"
+      "1114f30677bd437c50adabcf5be578f8"
     ],
     [
       "Hacl.Bignum.Wide.lte_mask",
@@ -352,7 +386,7 @@
         "equation_Hacl.Bignum.Wide.v"
       ],
       0,
-      "86b2bd608a8d74038b54d8027eb646c6"
+      "3e8348ea5bafa1fdbe537c1ad0b68ead"
     ],
     [
       "Hacl.Bignum.Wide.op_Plus_Hat",
@@ -367,7 +401,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d5254b8b0d2248ef36ba4ffa19974a2a"
+      "467918b63abb7999024800f9ddb7289d"
     ],
     [
       "Hacl.Bignum.Wide.op_Subtraction_Hat",
@@ -382,7 +416,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "0af57d62cf71687a96315d2f8d054469"
+      "f212d029beea4b13b3b0f4b637f4ff2a"
     ],
     [
       "Hacl.Bignum.Wide.op_Greater_Greater_Hat",
@@ -399,7 +433,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "7c157e750255d80354d435316f34e95a"
+      "6a5c939b860f8b888bc31e004f8513cd"
     ],
     [
       "Hacl.Bignum.Wide.op_Less_Less_Hat",
@@ -419,7 +453,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "6aab4ca46622400f7ccd76eb6803a6d9"
+      "d9f6d3893c0c397dc507fc258dbbf678"
     ]
   ]
 ]

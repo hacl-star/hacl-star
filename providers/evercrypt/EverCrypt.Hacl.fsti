@@ -14,7 +14,6 @@ open FStar.HyperStack.ST
 val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
   Stack unit curve_x25519_pre curve_x25519_post
 
-
 /// Chacha20-Poly1305
 
 val chacha20_poly1305_encode_length: lb:uint8_p -> aad_len:uint32_t -> m_len:uint32_t ->
