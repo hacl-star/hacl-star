@@ -91,7 +91,7 @@ $(CACHE_DIR)/FStar.%.fst.checked: | .depend
 
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
-	  --use_hints --record_hints --hint_info \
+	  --use_hints --record_hints \
 	  --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
