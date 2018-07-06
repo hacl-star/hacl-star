@@ -288,76 +288,12 @@ let lemma_log2_div a b =
     lemma_log2_lt (a / pow2 b) (log2 a + 1 - b);
     //! assert(log2 (a / pow2 b) < log2 a + 1 - b);
     ()
+    
+val nb_of_bits: m:pos -> Tot (p:pos{pow2 (p - 1) <= m /\ m < pow2 p})
+let nb_of_bits m = log2 m + 1
 
-(* Lemmas about bitwise operations *)
-(*
-open FStar.BitVector
-open FStar.UInt
-
-val lemma_bit_mask_value: #n:pos -> a:uint_t n -> mask:uint_t n -> p:nat{p < n} -> Lemma
-    (requires (mask = pow2 (n - p - 1)))
-    (ensures  (logand a mask = (if nth a p then mask else 0)))
-let lemma_bit_mask_value #n a mask p =
-    assert(mask = pow2_n #n (n - p - 1));
-    if nth a p then nth_lemma (logand a mask) mask
-    else nth_lemma (logand a mask) (zero n)
-
-
-open FStar.UInt64
-
-type u64 = FStar.UInt64.t
-
-val lemma_ge_pow2_imp_fst_bit: x:u64 -> Lemma
-    (requires (v x >= pow2 63))
-    (ensures  (nth (v x) 0 = true))
-let lemma_ge_pow2_imp_fst_bit x = admit()
-
-val lemma_fst_bit_imp_ge_pow2: x:u64 -> Lemma
-    (requires (nth (v x) 0 = true))
-    (ensures  (v x >= pow2 63))
-let lemma_fst_bit_imp_ge_pow2 x = admit()
-
-val lemma_tl_zero_imp_mod_pow2: x:u64 -> sh:nat{sh <= 64} -> Lemma
-    (requires (forall (i:nat{64 - sh <= i /\ i < 64}). nth (v x) i = false))
-    (ensures  (v x % pow2 sh = 0))
-let lemma_tl_zero_imp_mod_pow2 x sh = admit()
-
-val lemma_mod_pow2_imp_tl_zero: x:u64 -> sh:nat{sh <= 64} -> Lemma
-    (requires (v x % pow2 sh = 0))
-    (ensures  (forall (i:nat{64 - sh <= i /\ i < 64}). nth (v x) i = false))
-let lemma_mod_pow2_imp_tl_zero x sh = admit()
-
-val lemma_logor_disjoint: a:u64 -> b:u64 -> p:pos{p < 64} -> Lemma
-    (requires (v a % pow2 p = 0 /\ v b < pow2 p))
-    (ensures  (v (a |^ b) = v a + v b))
-let lemma_logor_disjoint a b p = logor_disjoint (v a) (v b) p
-
-val lemma_xor_and_distr: a:u64 -> b:u64 -> c:u64 -> Lemma
-    (v ((a &^ b) ^^ (a &^ c)) = v (a &^ (b ^^ c)))
-let lemma_xor_and_distr a b c =
-    nth_lemma (UInt.logand (v a) (UInt.logxor (v b) (v c))) 
-              (UInt.logxor (UInt.logand (v a) (v b)) (UInt.logand (v a) (v c)))
-
-val lemma_bit_mask: mask:u64 -> p:nat{p < 64} -> Lemma
-    (requires (v mask = pow2 (63 - p)))
-    (ensures  (forall (i:nat{0 <= i /\ i < 64}). (i = p ==> nth (v mask) i = true) /\
-                                        (i <> p ==> nth (v mask) i = false)))
-let lemma_bit_mask mask p = 
-    lemma_pow2_lt (63 - p) 64;
-    nth_lemma (v mask) (UInt.shift_left (one 64) (63 - p))
-
-val lemma_tail_mask: mask:u64 -> p:pos{p <= 64} -> Lemma
-    (requires (v mask = pow2 p - 1))
-    (ensures  (forall (i:nat{0 <= i /\ i < 64}). (i < 64 - p ==> nth (v mask) i = false) /\
-                                        (i >= 64 - p ==> nth (v mask) i = true)))
-let lemma_tail_mask mask p = lemma_pow2_le p p
-
-val lemma_tail_mask_value: a:u64 -> mask:u64 -> p:nat{p < 64} -> Lemma
-    (requires (v mask = pow2 p - 1))
-    (ensures  (v (a &^ mask) = v a % pow2 p))
-let lemma_tail_mask_value a mask p = 
-    if p > 0 then logand_mask (v a) p else begin
-        assert(v mask = zero 64);
-	nth_lemma (v (a &^ mask)) (zero 64)
-    end
-*)
+val lemma_nb_of_bits: m:pos -> p:pos{pow2 (p - 1) <= m /\ m < pow2 p} ->
+    Lemma (nb_of_bits m = p)
+let lemma_nb_of_bits m p =
+    lemma_log2_le (pow2 (p - 1)) m;
+    lemma_log2_lt m p

@@ -9,29 +9,31 @@ open FStar.UInt64
 open FStar.Int.Cast
 open FStar.Mul
 open MPFR.Lib
+open MPFR.Maths
 
 module I64 = FStar.Int64
 module I32 = FStar.Int32
 module U32 = FStar.UInt32
 module Spec = MPFR.Add.Spec
 
-(* TODO: Prove it *)
-#set-options "--lax --z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 assume val mpfr_overflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:i32 ->
     Stack i32
-    (requires (fun h -> live h x /\
+    (requires (fun h -> live h x /\ length x = 1 /\
                      (let xs = Seq.index (as_seq h x) 0 in
 		     let xm = xs.mpfr_d in
-		     live h xm /\ disjoint x xm)))
+		     live h xm /\ disjoint x xm /\ length xm = 1)))
     (ensures  (fun h0 r h1 -> live h1 x /\
-                           (let xs = Seq.index (as_seq h1 x) 0 in
+                           (let xs0 = Seq.index (as_seq h0 x) 0 in
+			   let xs = Seq.index (as_seq h1 x) 0 in
 			   let xm = xs.mpfr_d in
-			   live h1 xm /\ modifies_2 x xm h0 h1)))
+			   live h1 xm /\ xm == xs0.mpfr_d /\
+			   modifies_2 x xm h0 h1)))
 
 noeq type state = {
     sh:mpfr_prec_t;
-    bx:i32;
+    bx:mpfr_exp_t;
     rb:mp_limb_t;
     sb:mp_limb_t
 }
@@ -46,12 +48,12 @@ let mk_state sh bx rb sb = {
 (* TODO: remove abundent inputs *)
 unfold val mpfr_add1sp1_gt_branch1:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
-    p:mpfr_prec_t -> sh:mpfr_prec_t -> d:u32 -> mask:mp_limb_t -> Stack state
+    sh:mpfr_prec_t -> d:u32 -> mask:mp_limb_t -> Stack state
     (requires (fun h -> valid_mpfr_struct h b /\ valid_mpfr_struct h c /\
-		     U32.v p < U32.v gmp_NUMB_BITS - 1 /\
-		     U32.v p = U32.v a.mpfr_prec /\
-		     U32.v p = U32.v b.mpfr_prec /\ U32.v p = U32.v c.mpfr_prec /\
-		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v p /\
+                     U32.v a.mpfr_prec < U32.v gmp_NUMB_BITS - 1 /\
+		     U32.v a.mpfr_prec = U32.v b.mpfr_prec /\
+		     U32.v a.mpfr_prec = U32.v c.mpfr_prec /\
+		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
 		     U32.v d < U32.v sh /\ v mask = pow2 (U32.v sh) - 1 /\
 		     I32.v b.mpfr_exp > I32.v c.mpfr_exp /\
 		     (let am = a.mpfr_d in
@@ -65,7 +67,7 @@ unfold val mpfr_add1sp1_gt_branch1:
 			   live h1 am /\ live h1 bm /\ live h1 cm /\
 		           modifies_1 am h0 h1)))
 
-let mpfr_add1sp1_gt_branch1 a b c p sh d mask =
+let mpfr_add1sp1_gt_branch1 a b c sh d mask =
     let ap = a.mpfr_d in
     let bp = b.mpfr_d in
     let cp = c.mpfr_d in
@@ -80,13 +82,14 @@ let mpfr_add1sp1_gt_branch1 a b c p sh d mask =
 
 unfold val mpfr_add1sp1_gt_branch2:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
-    p:mpfr_prec_t -> sh:mpfr_prec_t -> d:u32 -> mask:mp_limb_t -> Stack state
+    sh:mpfr_prec_t -> d:u32 -> mask:mp_limb_t -> Stack state
     (requires (fun h -> valid_mpfr_struct h b /\ valid_mpfr_struct h c /\
-		     U32.v p < U32.v gmp_NUMB_BITS - 1 /\
-		     U32.v p = U32.v a.mpfr_prec /\
-		     U32.v p = U32.v b.mpfr_prec /\ U32.v p = U32.v c.mpfr_prec /\
-		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v p /\
-		     U32.v d < U32.v gmp_NUMB_BITS /\ v mask = pow2 (U32.v sh) - 1 /\
+                     U32.v a.mpfr_prec < U32.v gmp_NUMB_BITS - 1 /\
+		     U32.v a.mpfr_prec = U32.v b.mpfr_prec /\
+		     U32.v a.mpfr_prec = U32.v c.mpfr_prec /\
+		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
+		     U32.v d >= U32.v sh /\ U32.v d < U32.v gmp_NUMB_BITS /\
+		     v mask = pow2 (U32.v sh) - 1 /\
 		     I32.v b.mpfr_exp > I32.v c.mpfr_exp /\
 		     (let am = a.mpfr_d in
 		     let bm = b.mpfr_d in
@@ -99,7 +102,7 @@ unfold val mpfr_add1sp1_gt_branch2:
 			   live h1 am /\ live h1 bm /\ live h1 cm /\
 		           modifies_1 am h0 h1)))
 
-let mpfr_add1sp1_gt_branch2 a b c p sh d mask =
+let mpfr_add1sp1_gt_branch2 a b c sh d mask =
     let ap = a.mpfr_d in
     let bp = b.mpfr_d in
     let cp = c.mpfr_d in
@@ -116,22 +119,25 @@ let mpfr_add1sp1_gt_branch2 a b c p sh d mask =
     mk_state sh bx rb sb
 
 unfold val mpfr_add1sp1_gt_branch3:
-    a:mpfr_struct -> b:mpfr_struct -> p:mpfr_prec_t -> sh:mpfr_prec_t -> Stack state
-    (requires (fun h -> valid_mpfr_struct h b /\
-		     U32.v p < U32.v gmp_NUMB_BITS - 1 /\
-		     U32.v p = U32.v a.mpfr_prec /\
-		     U32.v p = U32.v b.mpfr_prec /\
-		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v p /\
+    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct -> sh:mpfr_prec_t -> Stack state
+    (requires (fun h -> valid_mpfr_struct h b /\ valid_mpfr_struct h c /\
+                     U32.v a.mpfr_prec < U32.v gmp_NUMB_BITS - 1 /\
+		     U32.v a.mpfr_prec = U32.v b.mpfr_prec /\
+		     U32.v a.mpfr_prec = U32.v c.mpfr_prec /\
+		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
+		     I32.v b.mpfr_exp - I32.v c.mpfr_exp >= U32.v gmp_NUMB_BITS /\
 		     (let am = a.mpfr_d in
 		     let bm = b.mpfr_d in
-		     live h am /\ live h bm /\
-		     length am = 1 /\ length bm = 1)))
+		     let cm = c.mpfr_d in
+		     live h am /\ live h bm /\ live h cm /\
+		     length am = 1 /\ length bm = 1 /\ length cm = 1)))
     (ensures  (fun h0 r h1 -> (let am = a.mpfr_d in
 		           let bm = b.mpfr_d in
-			   live h1 am /\ live h1 bm /\
+			   let cm = c.mpfr_d in
+			   live h1 am /\ live h1 bm /\ live h1 cm /\
 		           modifies_1 am h0 h1)))
 
-let mpfr_add1sp1_gt_branch3 a b p sh =
+let mpfr_add1sp1_gt_branch3 a b _ sh =
     let ap = a.mpfr_d in
     let bp = a.mpfr_d in
     let bx = b.mpfr_exp in
@@ -164,9 +170,9 @@ let mpfr_add1sp1_gt a b c p sh =
     let cx = c.mpfr_exp in
     let d = int32_to_uint32 I32.(bx -^ cx) in
     let mask = mpfr_LIMB_MASK sh in
-    if U32.(d <^ sh) then mpfr_add1sp1_gt_branch1 a b c p sh d mask
-    else if U32.(d <^ gmp_NUMB_BITS) then mpfr_add1sp1_gt_branch2 a b c p sh d mask
-    else mpfr_add1sp1_gt_branch3 a b p sh
+    if U32.(d <^ sh) then mpfr_add1sp1_gt_branch1 a b c sh d mask
+    else if U32.(d <^ gmp_NUMB_BITS) then mpfr_add1sp1_gt_branch2 a b c sh d mask
+    else mpfr_add1sp1_gt_branch3 a b c sh
 
 unfold val mpfr_add1sp1_eq: a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
                        p:mpfr_prec_t -> sh:mpfr_prec_t -> Stack state
@@ -224,38 +230,45 @@ let mpfr_add1sp1_any a b c p =
     else mpfr_add1sp1_gt a c b p sh
 
 unfold val truncate: a:mpfr_ptr -> Stack i32
-    (requires (fun h -> live h a /\
+    (requires (fun h -> live h a /\ length a = 1 /\
                      (let as = Seq.index (as_seq h a) 0 in
 		     let am = as.mpfr_d in
-		     live h am /\ disjoint a am)))
+		     live h am /\ disjoint a am /\ length am = 1)))
     (ensures  (fun h0 r h1 -> h0 == h1))
 
 let truncate a = I32.(0l -^ mpfr_SIGN(a))
     
-unfold val add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> st:state -> Stack i32
-    (requires (fun h -> live h a /\
+unfold val add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t ->
+                        sh:mpfr_prec_t -> bx:mpfr_exp_t -> Stack i32
+    (requires (fun h -> live h a /\ length a = 1 /\
                      (let as = Seq.index (as_seq h a) 0 in
-		     let am = as.mpfr_d in
-		     live h am /\ disjoint a am)))
+		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v as.mpfr_prec /\
+		     I32.v bx = I32.v as.mpfr_exp /\
+		     (let am = as.mpfr_d in
+		     live h am /\ disjoint a am /\ length am = 1))))
     (ensures  (fun h0 r h1 -> live h1 a /\
-                           (let as = Seq.index (as_seq h1 a) 0 in
+                           (let as0 = Seq.index (as_seq h0 a) 0 in
+			   let as = Seq.index (as_seq h1 a) 0 in
 			   let am = as.mpfr_d in
-			   live h1 am /\ modifies_2 a am h0 h1)))
+			   live h1 am /\ am == as0.mpfr_d /\
+			   modifies_2 a am h0 h1)))
 
-let add_one_ulp a rnd_mode st =
-    let sh = st.sh in
-    let bx = st.bx in
-    let rb = st.rb in
-    let sb = st.sb in
+let add_one_ulp a rnd_mode sh bx =
+    let h0 = ST.get() in
     let ap = mpfr_MANT a in
-    ap.(0ul) <- ap.(0ul) +^ (mpfr_LIMB_ONE <<^ sh);
+    ap.(0ul) <- ap.(0ul) +%^ (mpfr_LIMB_ONE <<^ sh);
     if ap.(0ul) =^ 0uL then begin
         ap.(0ul) <- mpfr_LIMB_HIGHBIT;
 	if I32.(bx +^ 1l <=^ mpfr_EMAX) then begin
 	    mpfr_SET_EXP a I32.(bx +^ 1l);
 	    mpfr_SIGN a
 	end else mpfr_overflow a rnd_mode (mpfr_SIGN a)
-    end else mpfr_SIGN a
+    end else begin
+        let h1 = ST.get() in
+	lemma_reveal_modifies_1 ap h0 h1;
+	lemma_intro_modifies_2 a ap h0 h1;
+        mpfr_SIGN a
+    end
 
 unfold val mpfr_add1sp1_round: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> st:state -> Stack i32
     (requires (fun h -> live h a /\
@@ -263,25 +276,27 @@ unfold val mpfr_add1sp1_round: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> st:state -> 
 		     let am = as.mpfr_d in
 		     live h am /\ disjoint a am /\ length am = 1)))
     (ensures  (fun h0 r h1 -> live h1 a /\
-                           (let as = Seq.index (as_seq h1 a) 0 in
+                           (let as0 = Seq.index (as_seq h0 a) 0 in
+			   let as = Seq.index (as_seq h1 a) 0 in
 			   let am = as.mpfr_d in
-			   live h1 am /\ modifies_2 a am h0 h1)))
+			   live h1 am /\ am == as0.mpfr_d /\
+			   modifies_2 a am h0 h1)))
 
 let mpfr_add1sp1_round a rnd_mode st =
     let sh = st.sh in
     let bx = st.bx in
     let rb = st.rb in
     let sb = st.sb in
-    mpfr_SET_EXP a bx;
+    mpfr_SET_EXP a bx; // Maybe set it later in truncate and add_one_ulp?
     if ((rb =^ 0uL && sb =^ 0uL) || (MPFR_RNDF? rnd_mode)) then 0l
     else if (MPFR_RNDN? rnd_mode) then begin
         let ap = mpfr_MANT a in
         let a0 = ap.(0ul) in
         if (rb =^ 0uL || (sb =^ 0uL && ((a0 &^ (mpfr_LIMB_ONE <<^ sh)) =^ 0uL))) then
 	    truncate a
-	else add_one_ulp a rnd_mode st
+	else add_one_ulp a rnd_mode sh bx
     end else if (mpfr_IS_LIKE_RNDZ rnd_mode I32.((mpfr_SIGN a) =^ -1l)) then truncate a
-    else add_one_ulp a rnd_mode st
+    else add_one_ulp a rnd_mode sh bx
 
 val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
                   rnd_mode:mpfr_rnd_t -> p:mpfr_prec_t -> Stack i32
@@ -312,7 +327,7 @@ val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
 		           modifies_2 a am h0 h1)))
 
 let mpfr_add1sp1 a b c rnd_mode p =
-    let st = mpfr_add1sp1_any a.(0ul) b.(0ul) c.(0ul) p in
+    let st = mpfr_add1sp1_any a.(0ul) b.(0ul) c.(0ul) p in // Maybe include (1<<sh) in it too?
     if I32.(st.bx >^ mpfr_EMAX) then begin
         mpfr_overflow a rnd_mode (mpfr_SIGN a)
     end else begin

@@ -1,4 +1,4 @@
-module MPFR.Add.Spec
+module MPFR.Add1.Spec
 
 open FStar.Mul
 open MPFR.Dyadic
@@ -9,7 +9,7 @@ open MPFR.Maths
 
 (* Useful functions when adding two MPFR numbers with same precision
  * and the exponent of the first one is greater than that of the second one *)
-val add_sp_ge_limb: a:mpfr_fp -> b:mpfr_fp -> Pure nat
+val add_sp_ge_limb: a:mpfr_reg_fp -> b:mpfr_reg_fp -> Pure nat
     (requires (a.sign = b.sign /\ a.prec = b.prec /\ a.exp >= b.exp))
     (ensures  (fun rm -> rm = abs (eval a +. eval b).significand /\
                       rm % pow2 (a.len - a.prec) = 0))
@@ -20,7 +20,7 @@ let add_sp_ge_limb a b =
     lemma_mod_distr (a.limb * pow2 (a.exp - b.exp)) b.limb (pow2 (a.len - a.prec));
     a.limb * pow2 (a.exp - b.exp) + b.limb
     
-val add_sp_ge_exp: a:mpfr_fp -> b:mpfr_fp -> Pure int
+val add_sp_ge_exp: a:mpfr_reg_fp -> b:mpfr_reg_fp -> Pure int
     (requires (a.sign = b.sign /\ a.prec = b.prec /\ a.exp >= b.exp))
     (ensures  (fun rx -> rx - nb_of_bits (add_sp_ge_limb a b) = (eval a +. eval b).exponent))
 
