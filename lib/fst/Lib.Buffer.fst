@@ -36,6 +36,8 @@ let upd #a #len b i v = Buf.upd b (size_to_UInt32 i) v
 
 let create #a #len clen init = Buf.alloca init (size_to_UInt32 clen)
 let createL #a init = Buf.alloca_of_list init
+let createL_global #a init = Buf.gcmalloc_of_list HyperStack.root init
+
 let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
   push_frame();
   let buf = create clen init in

@@ -40,15 +40,13 @@ let crypto_bytes = size 16
 let cshake_frodo = cshake128_frodo
 let cdf_table_len = size 12
 
-inline_for_extraction
-val cdf_table: unit -> StackInline (lbuffer uint16 (v cdf_table_len))
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
-let cdf_table () =
+let cdf_table : lbuffer uint16 (v cdf_table_len) =
   let cdf_table0: list uint16 =
     [u16 4727; u16 13584; u16 20864; u16 26113; u16 29434; u16 31278; u16 32176; u16 32560; u16 32704; u16 32751; u16 32764; u16 32767] in
   assert_norm(List.Tot.length cdf_table0 = v cdf_table_len);
-  createL [u16 4727; u16 13584; u16 20864; u16 26113; u16 29434; u16 31278; u16 32176; u16 32560; u16 32704; u16 32751; u16 32764; u16 32767]
+  createL_global
+    [u16 4727; u16 13584; u16 20864; u16 26113; u16 29434; u16 31278;
+     u16 32176; u16 32560; u16 32704; u16 32751; u16 32764; u16 32767]
 
 let bytes_seed_a = size 16
 let params_nbar = size 8
@@ -194,7 +192,6 @@ val frodo_sample: r:uint16 -> Stack uint16
   [@"c_inline"]
 let frodo_sample r =
   admit();
-  let cdf_table:lbuffer uint16 (v cdf_table_len) = cdf_table () in
   let prnd = r >>. u32 1 in
   let sample:lbuffer uint16 1 = create (size 1) (u16 0) in
   let sign = r &. u16 1 in
