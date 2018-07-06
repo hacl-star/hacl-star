@@ -1,7 +1,6 @@
 (** Wrappers around Vale functions; implemented in Low* and extracted using Kremlin *)
 module EverCrypt.ValeGlue
 
-open EverCrypt.Helpers
 open FStar.HyperStack.ST
 
 module U32 = FStar.UInt32
@@ -37,12 +36,12 @@ val sha256_update: state:sha256_state -> data:uint8_p ->
     (requires (fun h0 -> B.live h0 state /\ B.live h0 data))
     (ensures (fun h0 _ h1 -> B.live h1 state /\ M.(modifies (loc_buffer state) h0 h1)))
 
-val sha256_update_multi: state:sha256_state -> data:uint8_p -> n:uint32_t ->
+val sha256_update_multi: state:sha256_state -> data:uint8_p -> n:UInt32.t ->
   Stack unit
     (requires (fun h0 -> B.live h0 state /\ B.live h0 data))
     (ensures (fun h0 _ h1 -> B.live h1 state /\ M.(modifies (loc_buffer state) h0 h1)))
 
-val sha256_update_last: state:sha256_state -> data:uint8_p -> n:uint32_t ->
+val sha256_update_last: state:sha256_state -> data:uint8_p -> n:UInt32.t ->
   Stack unit
     (requires (fun h0 -> B.live h0 state /\ B.live h0 data))
     (ensures (fun h0 _ h1 -> B.live h1 state /\ M.(modifies (loc_buffer state) h0 h1)))
@@ -53,7 +52,7 @@ val sha256_finish: state:sha256_state -> hash:uint8_p ->
     (ensures (fun h0 _ h1 -> B.live h1 state /\ M.(modifies (loc_buffer hash) h0 h1)))
 
 /// All-in one
-val sha256_hash: dst:uint8_p -> data:uint8_p -> n:uint32_t ->
+val sha256_hash: dst:uint8_p -> data:uint8_p -> n:UInt32.t ->
   Stack unit
     (requires (fun h0 -> B.live h0 dst /\ B.live h0 data))
     (ensures (fun h0 _ h1 -> B.live h1 dst /\ M.(modifies (loc_buffer dst) h0 h1)))

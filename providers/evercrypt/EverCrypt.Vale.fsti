@@ -1,6 +1,6 @@
 module EverCrypt.Vale
 
-module N = C.Nullity
+module B = LowStar.Buffer
 
 open EverCrypt.Helpers
 
@@ -23,7 +23,7 @@ type gcm_args = {
 val aes_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm_encrypt: N.pointer gcm_args -> Stack_ unit
+val gcm_encrypt: B.pointer gcm_args -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm_decrypt: N.pointer gcm_args -> Stack_ uint32_t
+val gcm_decrypt: B.pointer gcm_args -> Stack_ uint32_t

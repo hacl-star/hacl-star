@@ -1,6 +1,6 @@
 module EverCrypt
 
-module B = FStar.Buffer
+module B = LowStar.Buffer
 
 module Hacl = EverCrypt.Hacl
 module Vale = EverCrypt.Vale
@@ -12,6 +12,7 @@ module U32 = FStar.UInt32
 
 open EverCrypt.Helpers
 open C.Failure
+open LowStar.BufferOps
 
 let x25519 dst secret base =
   let i = AC.x25519_impl () in
@@ -25,16 +26,16 @@ let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   if SC.vale && i = AC.Vale then begin
     push_frame ();
     let open EverCrypt.Vale in
-    let expanded   = B.create 0uy 176ul in
-    let iv'        = B.create 0uy 16ul in
-    let plaintext' = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
-    let cipher'    = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
-    let ad'        = B.create 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
-    B.blit iv 0ul iv' 0ul 16ul;
-    B.blit plaintext 0ul plaintext' 0ul len;
-    B.blit ad 0ul ad' 0ul adlen;
+    let expanded   = B.alloca 0uy 176ul in
+    let iv'        = B.alloca 0uy 16ul in
+    let plaintext' = B.alloca 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+    let cipher'    = B.alloca 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+    let ad'        = B.alloca 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
+    blit iv 0ul iv' 0ul 16ul;
+    blit plaintext 0ul plaintext' 0ul len;
+    blit ad 0ul ad' 0ul adlen;
     Vale.aes_key_expansion key expanded;
-    let b = B.create ({
+    let b = B.alloca ({
       plain = plaintext';
       plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
       aad = ad';
@@ -45,7 +46,7 @@ let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =
       tag = tag
     }) 1ul in
     Vale.gcm_encrypt b;
-    B.blit cipher' 0ul cipher 0ul len;
+    blit cipher' 0ul cipher 0ul len;
     pop_frame ()
   end
   else if SC.openssl && i = AC.OpenSSL then
@@ -60,16 +61,16 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   if SC.vale && i = AC.Vale then begin
     push_frame ();
     let open EverCrypt.Vale in
-    let expanded   = B.create 0uy 176ul in
-    let iv'        = B.create 0uy 16ul in
-    let plaintext' = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
-    let cipher'    = B.create 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
-    let ad'        = B.create 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
-    B.blit iv 0ul iv' 0ul 16ul;
-    B.blit cipher 0ul cipher' 0ul len;
-    B.blit ad 0ul ad' 0ul adlen;
+    let expanded   = B.alloca 0uy 176ul in
+    let iv'        = B.alloca 0uy 16ul in
+    let plaintext' = B.alloca 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+    let cipher'    = B.alloca 0uy U32.(((len +^ 15ul) /^ 16ul) *^ 16ul) in
+    let ad'        = B.alloca 0uy U32.(((adlen +^ 15ul) /^ 16ul) *^ 16ul) in
+    blit iv 0ul iv' 0ul 16ul;
+    blit cipher 0ul cipher' 0ul len;
+    blit ad 0ul ad' 0ul adlen;
     Vale.aes_key_expansion key expanded;
-    let b = B.create ({
+    let b = B.alloca ({
       plain = cipher';
       plain_len = FStar.Int.Cast.Full.uint32_to_uint64 len;
       aad = ad';
@@ -80,7 +81,7 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
       tag = tag
     }) 1ul in
     let ret = Vale.gcm_decrypt b in
-    B.blit plaintext' 0ul plaintext 0ul len;
+    blit plaintext' 0ul plaintext 0ul len;
     pop_frame ();
     // FIXME: restore tag verification once Vale is fixed
     //U32.(1ul -^ ret)
