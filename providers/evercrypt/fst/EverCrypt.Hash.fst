@@ -129,8 +129,6 @@ let suffix a l = admit()
 /// algorithmic specifications. At that point, we will probably hide
 /// the construction behind the provider interface (since we don't
 /// care about the construction when using or reasoning about them).
-
-
 /// 
 /// ----------agile implementation of hash specification ------------
 
@@ -232,6 +230,7 @@ let create a =
     | SHA384 ->
         let b = B.malloc HS.root 0UL Hacl.SHA2_384.size_state in
         SHA384_Hacl b
+    | _ -> magic() 
   in
   let h1 = ST.get () in
   let r = B.malloc HS.root s 1ul in
@@ -244,6 +243,29 @@ let create a =
   assert (loc_unused_in (M.loc_buffer r) h0);
   assert (M.(modifies loc_none h0 h2));
   r
+
+let well_formed (#a:e_alg)
+  (s: state a)
+  (h: HS.mem{invariant s h}):
+  GTot _
+=
+  let r = repr s h in
+  match G.reveal a with
+  | SHA256 -> r.k == EverCrypt.Spec.SHA2_256.k
+  | SHA384 -> r.k == EverCrypt.Spec.SHA2_384.k
+  | _ -> False
+
+let bounded_counter (#a:e_alg)
+  (s: state a)
+  (h: HS.mem{invariant s h})
+  (n: nat { n <= pow2 32 }):
+  GTot _
+=
+  let r = repr s h in
+  match G.reveal a with
+  | SHA256 -> b2t (r.counter < pow2 32 - n)
+  | SHA384 -> b2t (r.counter < pow2 32 - n)
+  | _ -> False
 
 #set-options "--max_fuel 0"
 
@@ -258,31 +280,6 @@ let init #a s =
       admit ()
 
 #set-options "--z3rlimit 20"
-
-
-let well_formed (#a:e_alg)
-  (s: state a)
-  (h: HS.mem{invariant s h}):
-  GTot _
-=
-  let r = repr s h in
-  match G.reveal a with
-  | SHA256 -> r.k == EverCrypt.Spec.SHA2_256.k
-  | SHA384 -> r.k == EverCrypt.Spec.SHA2_384.k
-  | _ -> admit()
-
-let bounded_counter (#a:e_alg)
-  (s: state a)
-  (h: HS.mem{invariant s h})
-  (n: nat { n <= pow2 32 }):
-  GTot _
-=
-  let r = repr s h in
-  match G.reveal a with
-  | SHA256 -> r.counter < pow2 32 - n
-  | SHA384 -> r.counter < pow2 32 - n
-  | _ -> admit()
-
 
 let update #a s data =
   match !*s with
@@ -306,49 +303,65 @@ let update #a s data =
       ValeGlue.sha256_update p data;
       admit ()
 
-let update_multi #a s data n =
+let update_multi #a s data len =
   match !*s with
   | SHA256_Hacl p ->
+      let n = FStar.UInt32.(len /^ blockLen SHA256) in 
       assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
-      Hacl.SHA2_256.update_multi p data n
+      let h = ST.get() in assume(bounded_counter s h (v n)); 
+      Hacl.SHA2_256.update_multi p data n;
+      assume false //18-07-07 TODO align the specs
   | SHA384_Hacl p ->
+      let n = len / blockLen SHA384 in 
       assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
+      let h = ST.get() in assume(bounded_counter s h (v n)); 
+      assume false; //18-07-07 TODO align the specs
       Hacl.SHA2_384.update_multi p data n
   | SHA256_Vale p ->
+      let n = len / blockLen SHA256 in 
       ValeGlue.sha256_update_multi p data n;
       admit ()
 
-let update_last #a s data len =
+//18-07-07 For SHA384 I was expecting a conversion from 32 to 64 bits
+
+//18-07-07 as long as hacl* uses its internal counter, we should
+// dynamically test that [counter * blockLen == totlen - len]
+let update_last #a s data totlen =
   match !*s with
   | SHA256_Hacl p ->
+      let len = totlen % blockLen SHA256 in
       assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
-      Hacl.SHA2_256.update_last p data len
+      Hacl.SHA2_256.update_last p data len;
+      admit() //18-07-07 TODO align the specs
   | SHA384_Hacl p ->
+      let len = totlen % blockLen SHA384 in
       assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
-      Hacl.SHA2_384.update_last p data len
+      Hacl.SHA2_384.update_last p data len;
+      admit() //18-07-07 TODO align the specs
   | SHA256_Vale p ->
+      let len = totlen % blockLen SHA256 in 
       ValeGlue.sha256_update_last p data len;
-      admit ()
+      admit()
 
 let finish #a s dst =
   match !*s with
@@ -359,7 +372,8 @@ let finish #a s dst =
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p dst);
-      Hacl.SHA2_256.finish p dst
+      Hacl.SHA2_256.finish p dst;
+      admit() //18-07-07 TODO align the specs
   | SHA384_Hacl p ->
       assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer p));
       let p = T.new_to_old_st p in
@@ -367,7 +381,8 @@ let finish #a s dst =
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p dst);
-      Hacl.SHA2_384.finish p dst
+      Hacl.SHA2_384.finish p dst;
+      admit() //18-07-07 TODO align the specs
   | SHA256_Vale p ->
       ValeGlue.sha256_finish p dst;
       admit ()
@@ -384,11 +399,15 @@ let hash a dst input len =
         let input = T.new_to_old_st input in
         let dst = T.new_to_old_st dst in
         assume (FStar.Buffer.disjoint dst input);
-        Hacl.SHA2_256.hash dst input len
+        Hacl.SHA2_256.hash dst input len;
+        admit() //18-07-07 TODO align the specs
       end
   | SHA384 ->
       assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer input));
       let input = T.new_to_old_st input in
       let dst = T.new_to_old_st dst in
       assume (FStar.Buffer.disjoint dst input);
-      Hacl.SHA2_384.hash dst input len
+      Hacl.SHA2_384.hash dst input len;
+      admit() //18-07-07 TODO align the specs
+  | _ -> admit() // how to get a kremlin fatal error?
+

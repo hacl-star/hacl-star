@@ -111,8 +111,12 @@ noextract let rec hash2
   if Seq.length b = 0 then v
   else
     let c,b = Seq.split b (blockLength a) in
+    assert(Seq.length b % blockLength a = 0);
     hash2 (compress v c) b
 
+//18-07-07 this verified interactively but not on the command line;
+//18-07-07 I suspect the hacl* specs make it harder for Z3.
+#set-options "--z3rlimit 300" 
 let lemma_compress 
   (#a: e_alg) 
   (a0: acc a)
@@ -139,6 +143,8 @@ let rec lemma_hash2
     Seq.lemma_eq_intro c c';
     Seq.lemma_eq_intro b' (Seq.append b0' b1);
     lemma_hash2 (hash2 a0 c) b0' b1)
+
+#reset-options 
 
 noextract let hash0 (#a:e_alg) (b:bytes {Seq.length b % blockLength a = 0}) = hash2 (acc0 #a) b
 
@@ -178,9 +184,8 @@ noextract let spec (a:e_alg) (b:hashable a): GTot (lbytes (tagLength a)) =
 /// algorithmic specifications. At that point, we will probably hide
 /// the construction behind the provider interface (since we don't
 /// care about the construction when using or reasoning about them).
-
 /// 
-/// ----------agile interface to hash specifications ----------------
+/// ---------agile interface to hash specifications ----------------
 
 
 
@@ -194,6 +199,7 @@ module G = FStar.Ghost
 open LowStar.BufferOps
 
 let uint8_p = B.buffer UInt8.t
+let uint8_pl (l:nat) = p:uint8_p {B.length p = l}
 
 // abstract implementation state
 val state_s: e_alg -> Type0
@@ -259,14 +265,6 @@ val create: a:alg -> ST (state (G.hide a))
     M.(modifies loc_none h0 h1) /\
     fresh_loc (footprint s h1) h0 h1)
 
-val init: #a:e_alg -> s:state a -> ST unit
-  (requires (invariant s))
-  (ensures (fun h0 _ h1 ->
-    invariant s h1 /\
-    M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1 /\
-    repr s h1 == acc0 #a))
-
 val well_formed: 
   #a:e_alg -> 
   s: state a ->
@@ -285,6 +283,15 @@ let well_formed_and_counter (#a:e_alg)
   GTot _
 =
   well_formed s h /\ bounded_counter s h n
+
+val init: #a:e_alg -> s:state a -> ST unit
+  (requires (invariant s))
+  (ensures (fun h0 _ h1 ->
+    invariant s h1 /\
+    well_formed s h1 /\ //18-07-07 added for usability, pls review
+    M.(modifies (footprint s h0) h0 h1) /\
+    footprint s h0 == footprint s h1 /\
+    repr s h1 == acc0 #a))
 
 // Note: this function relies implicitly on the fact that we are running with
 // code/lib/kremlin and that we know that machine integers and secret integers
@@ -306,21 +313,26 @@ val update: #a:e_alg -> s:state a -> data:uint8_p -> Stack unit
     let r1 = repr s h1 in
     r1 == compress r0 (B.as_seq h0 data))))
 
-val update_multi: #a:e_alg -> s:state a -> data:uint8_p -> n:UInt32.t -> Stack unit
+// new calling convention: we pass the data length in bytes (rather
+// than blocks). I also removed the counter invariant, assuming we
+// will get rid of it.
+val update_multi: 
+  #a:e_alg -> 
+  s:state a -> 
+  blocks:uint8_p {B.length blocks % blockLength a = 0} -> 
+  len: UInt32.t {v len = B.length blocks} -> 
+  Stack unit
   (requires (fun h0 ->
     invariant s h0 /\
-    well_formed_and_counter s h0 (v n) /\
-    B.live h0 data /\
-    B.length data = blockLength a * v n /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer data))))
+    well_formed s h0 /\
+    B.live h0 blocks /\
+    M.(loc_disjoint (footprint s h0) (loc_buffer blocks))))
   (ensures (fun h0 _ h1 ->
     invariant s h1 /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    well_formed_and_counter s h1 0 /\ (
-    let r0 = repr s h0 in 
-    let r1 = repr s h1 in
-    r1 == hash2 r0 (B.as_seq h0 data))))
+    well_formed s h1 /\ 
+    repr s h1 == hash2 (repr s h0) (B.as_seq h0 blocks)))
 
 
 (* see suffix and suffixLength 
@@ -368,7 +380,7 @@ let update_last_spec (#a:e_alg)
       r1.hash = EverCrypt.Spec.SHA2_384.update_last r0.hash len0 data
 *)
 
-// 18-03-05 note the *new length-passing convention!
+// 18-03-05 note the *new* length-passing convention!
 // 18-03-03 it is best to let the caller keep track of lengths.
 // 18-03-03 the last block is *never* complete so there is room for the 1st byte of padding.
 val update_last: 
@@ -416,7 +428,7 @@ val hash: a:alg -> dst:uint8_p -> input:uint8_p -> len:uint32_t -> Stack unit
     B.live h0 dst /\
     B.live h0 input /\
     B.length input = v len /\
-    v len < maxLength a /\
+    v len <= maxLength a /\
     B.length dst = tagLength a /\
     M.(loc_disjoint (loc_buffer input) (loc_buffer dst))))
   (ensures (fun h0 _ h1 ->
