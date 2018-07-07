@@ -91,8 +91,6 @@ val chacha20: key:uint8_p -> iv:uint8_p -> ctr: uint32_t ->
 
 /// Chacha20-Poly1305
 
-val chacha20_poly1305_encode_length: lb:uint8_p -> aad_len:uint32_t -> m_len:uint32_t ->
-  Stack unit chacha20_poly1305_encode_length_pre chacha20_poly1305_encode_length_post
 val chacha20_poly1305_encrypt: c:uint8_p -> mac:uint8_p -> m:uint8_p -> m_len:uint32_t ->
   aad:uint8_p -> aad_len:uint32_t -> k:uint8_p -> n:uint8_p ->
   Stack uint32_t chacha20_poly1305_encrypt_pre chacha20_poly1305_encrypt_post
