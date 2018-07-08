@@ -64,16 +64,19 @@ let mk_struct sign prec exp limb len flag = {
 //  Also the last 'len - prec' bits should be 0s                                         //
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-(* validity for zero *)
+(* validity for zero
+ * flag = MPFR_ZERO and limb = 0 *)
 let valid_zero_cond s = MPFR_ZERO? s.flag /\ s.limb = 0
 
-(* validity for non-zero *)
+(* validity for non-zero 
+ * flag = MPFR_NUM, limb is a 'len'-bit positive integer and last 'len - prec' bits are 0s *)
 let valid_num_cond s =
     MPFR_NUM? s.flag /\ 0 < s.limb /\ s.limb < pow2 s.len /\
     0 < s.prec /\ s.prec <= s.len /\
     s.limb % pow2 (s.len - s.prec) = 0
 
-(* validity for evaluation *)
+(* validity for evaluation
+ * only zeros and regular numbers can be evaluated *)
 let valid_fp_cond s = valid_zero_cond s \/ valid_num_cond s
 
 (* type for fp_struct which can be evaluated *)
@@ -90,7 +93,8 @@ let eval (fp:valid_fp) = mk_fp (fp.sign * fp.limb) (fp.exp - fp.len)
 //  A regular value is called normal when there's no leading zeros  //
 //////////////////////////////////////////////////////////////////////
 
-(* validity for normal number *)
+(* validity for normal number
+ * should be a regular number, and normalized *)
 let normal_fp_cond (s:valid_fp) = valid_num_cond s /\ s.limb >= pow2 (s.len - 1)
 
 (* type for normal number *)
@@ -98,7 +102,7 @@ type normal_fp = s:valid_fp{normal_fp_cond s}
 
 (* constructor for normal number *)
 let mk_normal sign prec exp limb len flag: Pure normal_fp
-    (requires (valid_fp_cond  (mk_struct sign prec exp limb len flag) /\
+    (requires (valid_fp_cond (mk_struct sign prec exp limb len flag) /\
               normal_fp_cond (mk_struct sign prec exp limb len flag)))
     (ensures  (fun _ -> True)) =
     mk_struct sign prec exp limb len flag
@@ -111,22 +115,17 @@ let mk_normal sign prec exp limb len flag: Pure normal_fp
 ////////////////////////////////////////////////////////////////////////////////
 
 (* range limits for precision and exponent *)
-let mpfr_PREC_COND (p:pos) = p < pow2 31
+let mpfr_PREC_COND (p:nat) = 0 < p /\ p < pow2 31
 
 let mpfr_EXP_COND  (x:int) = -pow2 30 < x /\ x < pow2 30
 
-(* Get len from prec for a MPFR number *)
+(* get len from prec for a MPFR number *)
 val prec_to_len: p:pos ->
     Tot (s:pos{s % 64 = 0 /\ s >= p /\ s - 64 < p})
 let prec_to_len p = ((p + 63) / 64) * 64
 
-val prec_to_len_lemma: p:pos -> s:pos{s % 64 = 0 /\ s >= p /\ s - 64 < p} ->
-    Lemma (prec_to_len p = s)
-let prec_to_len_lemma p s =
-    lemma_div_le (p + 63) (s + 63) 64;
-    lemma_div_le s (p + 63) 64
-
-(* validity for normal number of MPFR *)
+(* validity for normal number of MPFR 
+ * len should coordinate with prec and range limits for prec and exp *)
 let mpfr_reg_fp_cond (s:normal_fp) =
     s.len = prec_to_len s.prec /\
     mpfr_PREC_COND s.prec /\
@@ -135,7 +134,8 @@ let mpfr_reg_fp_cond (s:normal_fp) =
 (* type for normal number of MPFR *)
 type mpfr_reg_fp = f:normal_fp{mpfr_reg_fp_cond f}
 
-(* validity for MPFR number allowing sigular values *)
+(* validity for MPFR number allowing sigular values
+ * NaN, Inf, Zeros and normalized regular number *)
 let mpfr_fp_cond (s:fp_struct) =
     MPFR_NAN? s.flag \/ MPFR_INF? s.flag \/ valid_zero_cond s \/ 
     (valid_fp_cond s /\ normal_fp_cond s /\ mpfr_reg_fp_cond s)

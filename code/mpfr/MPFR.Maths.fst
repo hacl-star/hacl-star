@@ -4,8 +4,6 @@ open FStar.Mul
 
 #set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
-(* Comment line which starts with "//!" explains the idea of proving *)
-
 (* Nonlinear arithmetic *)
 val lemma_paren_mul_left: a:int -> b:int -> c:int -> Lemma
     (a * b * c = (a * b) * c)
@@ -84,6 +82,14 @@ val lemma_multiple_mod: a:nat -> b:pos -> Lemma
     ((a * b) % b = 0)
 let lemma_multiple_mod a b = lemma_multiple_div a b
 
+val lemma_mul_mod_zero: a:nat -> b:nat -> c:pos -> Lemma
+    (requires (a % c = 0 \/ b % c = 0))
+    (ensures  ((a * b) % c = 0))
+    (decreases (b % c))
+
+let rec lemma_mul_mod_zero a b c =
+    if b % c > 0 then lemma_mul_mod_zero b a c else lemma_multiple_mod (a * (b / c)) c
+
 val lemma_div_lt: a:nat -> b:nat -> d:pos -> Lemma
     (requires (a < b /\ b % d = 0))
     (ensures  (a / d < b / d))
@@ -106,6 +112,12 @@ let lemma_mod_distr a b c =
     lemma_euclidean a c;
     //! assert((a + b) / c = ((a / c + b / c) * c + (a % c + b % c)) / c);
     lemma_add_mod (a % c + b % c) (a / c + b / c) c
+
+val lemma_mod_distr_zero: a:nat -> b:nat -> c:pos -> Lemma
+    (requires (a % c = 0 /\ b % c = 0))
+    (ensures  ((a + b) % c = 0))
+
+let lemma_mod_distr_zero a b c = lemma_mod_distr a b c
 
 val lemma_div_div: a:nat -> b:pos -> c:pos -> Lemma
     ((a / b) / c = a / (b * c))
@@ -169,6 +181,15 @@ val lemma_pow2_mul: n:nat -> m:nat -> Lemma
     (pow2 n * pow2 m = pow2 (n + m))
 let lemma_pow2_mul n m = FStar.Math.Lemmas.pow2_plus n m
 
+val lemma_pow2_mul_range: a:pos -> b:nat -> n:pos -> Lemma
+    (requires (pow2 (n - 1) <= a /\ a < pow2 n))
+    (ensures  (pow2 (n + b - 1) <= a * pow2 b /\ a * pow2 b < pow2 (n + b)))
+let lemma_pow2_mul_range a b n =
+    lemma_mul_le_right (pow2 b) (pow2 (n - 1)) a;
+    lemma_pow2_mul (n - 1) b;
+    lemma_mul_lt_right (pow2 b) a (pow2 n);
+    lemma_pow2_mul n b
+    
 val lemma_pow2_small_div: n:nat -> m:nat -> Lemma
     (requires (n < m))
     (ensures  (pow2 n / pow2 m = 0))
@@ -206,7 +227,15 @@ let lemma_pow2_div_lt a b d =
     lemma_pow2_div b d;
     lemma_pow2_mod b d;
     lemma_div_lt a (pow2 b) (pow2 d)
-
+    
+val lemma_pow2_div_range: a:pos -> b:nat -> n:pos -> Lemma
+    (requires (n > b /\ pow2 (n - 1) <= a /\ a < pow2 n))
+    (ensures  (pow2 (n - b - 1) <= a / pow2 b /\ a / pow2 b < pow2 (n - b)))
+let lemma_pow2_div_range a b n =
+    lemma_div_le (pow2 (n - 1)) a (pow2 b);
+    lemma_pow2_div (n - 1) b;
+    lemma_pow2_div_lt a n b
+    
 val lemma_pow2_multiple_le: a:nat -> b:nat -> d:nat -> Lemma
     (requires (a < pow2 b /\ d <= b /\ a % pow2 d = 0))
     (ensures  (a + pow2 d <= pow2 b))
@@ -234,66 +263,3 @@ val lemma_pow2_mod_mod: a:nat -> b:nat -> c:nat -> Lemma
 let lemma_pow2_mod_mod a b c =
     lemma_pow2_mul c (b - c);
     lemma_mod_mod a (pow2 c) (pow2 (b - c))
-
-(* Function log2 *)
-val log2: a:pos -> n:nat{pow2 n <= a /\ a < pow2 (n + 1)}
-let rec log2 a = if a = 1 then 0 else log2 (a / 2) + 1
-
-val lemma_log2_pow2: n:nat -> Lemma 
-    (ensures (log2 (pow2 n) = n))
-    [SMTPat (log2 (pow2 n))]
-let rec lemma_log2_pow2 n = if n = 0 then () else lemma_log2_pow2 (n - 1)
-
-val lemma_log2_le: a:pos -> b:pos -> Lemma
-    (requires (a <= b))
-    (ensures  (log2 a <= log2 b))
-let rec lemma_log2_le a b = if a = 1 then () else lemma_log2_le (a / 2) (b / 2)
-
-val lemma_log2_lt: a:pos -> b:nat -> Lemma
-    (requires (a < pow2 b))
-    (ensures  (log2 a < b))
-let rec lemma_log2_lt a b = if a < 2 then () else lemma_log2_lt (a / 2) (b - 1)
-
-val lemma_log2_lt_inv: a:pos -> b:pos -> Lemma
-    (requires (log2 a < log2 b))
-    (ensures  (a < b))
-    [SMTPat (log2 a < log2 b)]
-let lemma_log2_lt_inv a b = if a < b then () else lemma_log2_le b a
-
-val lemma_log2_mul: a:pos -> b:nat -> Lemma
-    (ensures (log2 (a * pow2 b) = log2 a + b))
-    [SMTPat (log2 (a * pow2 b))]
-let lemma_log2_mul a b =
-    lemma_mul_le_right (pow2 b) (pow2 (log2 a)) a;
-    lemma_pow2_mul (log2 a) b;
-    lemma_log2_le (pow2 (log2 a + b)) (a * pow2 b);
-    //! assert(log2 a + b <= log2 (a * pow2 b));
-    lemma_mul_le_right (pow2 b) a (pow2 (log2 a + 1));
-    lemma_pow2_mul (log2 a + 1) b;
-    lemma_log2_lt (a * pow2 b) (log2 a + 1 + b);
-    //! assert(log2 (a * pow2 b) < log2 a + 1 + b);
-    ()
-
-val lemma_log2_div: a:pos -> b:nat -> Lemma
-    (requires (log2 a >= b))
-    (ensures  (a / pow2 b > 0 /\ log2 (a / pow2 b) = log2 a - b))
-    [SMTPat (log2 (a / pow2 b))]
-let lemma_log2_div a b =
-    lemma_div_le (pow2 (log2 a)) a (pow2 b);
-    lemma_pow2_div (log2 a) b;
-    lemma_log2_le (pow2 (log2 a - b)) (a / pow2 b);
-    //! assert(log2 a - b <= log2 (a / pow2 b));
-    lemma_pow2_div_lt a (log2 a + 1) b;
-    lemma_pow2_div (log2 a + 1) b;
-    lemma_log2_lt (a / pow2 b) (log2 a + 1 - b);
-    //! assert(log2 (a / pow2 b) < log2 a + 1 - b);
-    ()
-    
-val nb_of_bits: m:pos -> Tot (p:pos{pow2 (p - 1) <= m /\ m < pow2 p})
-let nb_of_bits m = log2 m + 1
-
-val lemma_nb_of_bits: m:pos -> p:pos{pow2 (p - 1) <= m /\ m < pow2 p} ->
-    Lemma (nb_of_bits m = p)
-let lemma_nb_of_bits m p =
-    lemma_log2_le (pow2 (p - 1)) m;
-    lemma_log2_lt m p
