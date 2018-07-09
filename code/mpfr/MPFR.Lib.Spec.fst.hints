@@ -1,5 +1,5 @@
 [
-  "^µÓ,F;}ä€TÑÉgY\u0006\u0003",
+  "Æ—‚CÝ\u0014/{Û\u000eç)œŠŠC",
   [
     [
       "MPFR.Lib.Spec.fp_struct",
@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "a9659f3e79f1891a0151d594bc3537b2"
+      "27685ae142efa9dfc23d6c7b18db33f7"
     ],
     [
       "MPFR.Lib.Spec.fp_struct",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "1323254f3bcf0c94d455af947b02b0d2"
+      "7b54a74d21724d8d4cc216713b537354"
     ],
     [
       "MPFR.Lib.Spec.fp_struct",
@@ -26,7 +26,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "a2fdd9f4c56dd0130d5d8e2084b78087"
+      "c39bd8bea3e5419a7f5990cad35a2df5"
     ],
     [
       "MPFR.Lib.Spec.fp_struct",
@@ -37,14 +37,15 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_MPFR.Lib.Spec.fp_type_t__uu___haseq",
-        "assumption_Prims.HasEq_int", "equation_Prims.nat",
-        "equation_Prims.pos",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_FStar.UInt32.n",
         "haseqMPFR.Lib.Spec_Tm_refine_60f8b2fc0942c80dc3857c764050209a",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "haseqPrims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "dd42396e0b834c105221324a1f306350"
+      "819cd437e92f0bc79d38bd3e5eb7cc53"
     ],
     [
       "MPFR.Lib.Spec.__proj__Mkfp_struct__item__sign",
@@ -53,7 +54,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "6eea3425d33003637ebcd6227f267162"
+      "8b7224e6ab2fd0108436e8eb683583e1"
     ],
     [
       "MPFR.Lib.Spec.__proj__Mkfp_struct__item__sign",
@@ -62,7 +63,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "16feadf49f14237caf7570d11f0cf0c4"
+      "0330ff425d119d802c5fc712a2ad1a40"
     ],
     [
       "MPFR.Lib.Spec.__proj__Mkfp_struct__item__prec",
@@ -71,7 +72,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "0502c9005cc4eb739158593cc19ccb06"
+      "f1b4fd3765364fad46d729179fdf3729"
     ],
     [
       "MPFR.Lib.Spec.__proj__Mkfp_struct__item__exp",
@@ -80,7 +81,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "e90a3dda7d2c261accca1af114a27db6"
+      "f1ed5902fc48ab69e380b0a7f547f4a4"
     ],
     [
       "MPFR.Lib.Spec.__proj__Mkfp_struct__item__limb",
@@ -89,7 +90,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "e6a68225dd266ec687cef3085119b4c7"
+      "1a9b450033b440de34788bc784fedc1b"
     ],
     [
       "MPFR.Lib.Spec.__proj__Mkfp_struct__item__len",
@@ -98,7 +99,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "11c22ff3ba61e24f20b5ff06b07f143a"
+      "d14e175a5b1556a236d9777998a7b773"
     ],
     [
       "MPFR.Lib.Spec.__proj__Mkfp_struct__item__flag",
@@ -107,7 +108,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "afc620cdacfb465542949f24ffff5aee"
+      "fe2a8264074a3879583d53f8e40c0f9c"
     ],
     [
       "MPFR.Lib.Spec.mk_struct",
@@ -116,7 +117,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "46fa19522eda49ef817734ea730c5608"
+      "741014e352ec19451e74e89063f70ada"
     ],
     [
       "MPFR.Lib.Spec.valid_zero_cond",
@@ -125,7 +126,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "706e51da7765cf9d5c414fbc20728d51"
+      "ae38efe4174fb32afb5162c10d7fe111"
     ],
     [
       "MPFR.Lib.Spec.valid_num_cond",
@@ -141,7 +142,53 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "9dd14c748b8d4a630142417af16d601d"
+      "3840a7aa058f3ac2347ce200fd976299"
+    ],
+    [
+      "MPFR.Lib.Spec.eval_abs",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
+        "equation_MPFR.Dyadic.fabs", "equation_MPFR.Dyadic.fneg",
+        "equation_MPFR.Dyadic.ge", "equation_MPFR.Dyadic.mk_fp",
+        "equation_MPFR.Dyadic.zero_fp", "equation_MPFR.Lib.Spec.eval",
+        "equation_MPFR.Lib.Spec.valid_fp",
+        "equation_MPFR.Lib.Spec.valid_fp_cond",
+        "equation_MPFR.Lib.Spec.valid_num_cond",
+        "equation_MPFR.Lib.Spec.valid_zero_cond", "equation_Prims.min",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_guarded_inversion_MPFR.Lib.Spec.fp_struct",
+        "function_token_typing_FStar.UInt32.n", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Minus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
+        "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
+        "proj_equation_MPFR.Lib.Spec.Mkfp_struct_len",
+        "proj_equation_MPFR.Lib.Spec.Mkfp_struct_limb",
+        "proj_equation_MPFR.Lib.Spec.Mkfp_struct_sign",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
+        "projection_inverse_MPFR.Dyadic.Mkdyadic_significand",
+        "refinement_interpretation_MPFR.Dyadic_Tm_refine_a6d33a04cfc03dd1fb08e3fe0f2af41a",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_58238ff56acdd192f498d18acc0a799b",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_e0206349739457cdb0e328d07023d05a",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_MPFR.Dyadic.fneg",
+        "typing_MPFR.Lib.Spec.__proj__Mkfp_struct__item__limb",
+        "typing_MPFR.Lib.Spec.__proj__Mkfp_struct__item__sign",
+        "typing_MPFR.Lib.Spec.eval", "typing_Prims.pow2"
+      ],
+      0,
+      "89b695175e7990be1aba7ebd9497d5a8"
     ],
     [
       "MPFR.Lib.Spec.normal_fp_cond",
@@ -153,7 +200,7 @@
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "6cd4d26d7a8aaa46fc22529f5d4090e9"
+      "397b9d573ce550adb9ceaa421b5c4068"
     ],
     [
       "MPFR.Lib.Spec.mk_normal",
@@ -171,7 +218,7 @@
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "98b6d6a3eb3f9ab55fe810b786b7ccd8"
+      "b9dfe2526b82464a63b14a00e63f9de0"
     ],
     [
       "MPFR.Lib.Spec.prec_to_len",
@@ -180,7 +227,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "51b3f128870daa12a73d13e53148aebd"
+      "a4a98fb00e942497a365cc9550a96bd5"
     ],
     [
       "MPFR.Lib.Spec.prec_to_len",
@@ -196,7 +243,7 @@
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "c54d70ca4420f86e03164782c0bcd84b"
+      "f0712d38743ca61baa7e518fcf178323"
     ],
     [
       "MPFR.Lib.Spec.mpfr_reg_fp_cond",
@@ -206,16 +253,17 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_MPFR.Lib.Spec.normal_fp",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_MPFR.Lib.Spec.normal_fp",
         "equation_MPFR.Lib.Spec.normal_fp_cond",
         "equation_MPFR.Lib.Spec.valid_fp",
         "equation_MPFR.Lib.Spec.valid_num_cond", "equation_Prims.pos",
+        "function_token_typing_FStar.UInt32.n",
         "haseqPrims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
-        "int_typing",
         "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_cedc0570303b71cc42672e5086472b7c"
       ],
       0,
-      "09e7d1cbd569dca1ef45cb3fc1af5ee6"
+      "eaf46ea4db6ab263b6298aaedc54a4f1"
     ],
     [
       "MPFR.Lib.Spec.mpfr_fp_cond",
@@ -224,7 +272,104 @@
       0,
       [ "@query" ],
       0,
-      "156692bfda89c5a93ceb61450f0a5f87"
+      "62dbe11ce7361b954076586237086f6b"
+    ],
+    [
+      "MPFR.Lib.Spec.mpfr_overflow_bound",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "equation_MPFR.Lib.Spec.mpfr_PREC_COND",
+        "equation_MPFR.Lib.Spec.mpfr_PREC_MIN_spec", "equation_Prims.nat",
+        "equation_Prims.pos", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_28413ded08af0078a17a49d9c4b3e925",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_45e7e07c3384b4b8b6c390becdad16f3"
+      ],
+      0,
+      "b7acceae1e650e8da513ade7363e68fc"
+    ],
+    [
+      "MPFR.Lib.Spec.mpfr_overflow_bound_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "haseqMPFR.Lib.Spec_Tm_refine_a74c1580c7ee5c85bbffc185decab8e5",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_28413ded08af0078a17a49d9c4b3e925",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "fbeae516b2aa495afecefe23d327c5ed"
+    ],
+    [
+      "MPFR.Lib.Spec.mpfr_overflow_bound_lemma",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "disc_equation_MPFR.Lib.Spec.MPFR_NUM",
+        "equality_tok_MPFR.Lib.Spec.MPFR_NUM@tok", "equation_FStar.UInt32.n",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.le",
+        "equation_MPFR.Dyadic.mk_fp", "equation_MPFR.Lib.Spec.eval_abs",
+        "equation_MPFR.Lib.Spec.mk_struct",
+        "equation_MPFR.Lib.Spec.mpfr_EMAX_spec",
+        "equation_MPFR.Lib.Spec.mpfr_EXP_COND",
+        "equation_MPFR.Lib.Spec.mpfr_PREC_COND",
+        "equation_MPFR.Lib.Spec.mpfr_PREC_MIN_spec",
+        "equation_MPFR.Lib.Spec.mpfr_overflow_bound",
+        "equation_MPFR.Lib.Spec.mpfr_reg_fp",
+        "equation_MPFR.Lib.Spec.mpfr_reg_fp_cond",
+        "equation_MPFR.Lib.Spec.normal_fp",
+        "equation_MPFR.Lib.Spec.normal_fp_cond",
+        "equation_MPFR.Lib.Spec.prec_to_len",
+        "equation_MPFR.Lib.Spec.valid_fp",
+        "equation_MPFR.Lib.Spec.valid_fp_cond",
+        "equation_MPFR.Lib.Spec.valid_num_cond",
+        "equation_MPFR.Lib.Spec.valid_zero_cond", "equation_Prims.min",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_guarded_inversion_MPFR.Lib.Spec.fp_struct",
+        "function_token_typing_FStar.UInt32.n",
+        "haseqMPFR.Lib.Spec_Tm_refine_a74c1580c7ee5c85bbffc185decab8e5",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
+        "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
+        "proj_equation_MPFR.Lib.Spec.Mkfp_struct_exp",
+        "proj_equation_MPFR.Lib.Spec.Mkfp_struct_flag",
+        "proj_equation_MPFR.Lib.Spec.Mkfp_struct_len",
+        "proj_equation_MPFR.Lib.Spec.Mkfp_struct_limb",
+        "proj_equation_MPFR.Lib.Spec.Mkfp_struct_prec",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
+        "projection_inverse_MPFR.Dyadic.Mkdyadic_significand",
+        "projection_inverse_MPFR.Lib.Spec.Mkfp_struct_flag",
+        "projection_inverse_MPFR.Lib.Spec.Mkfp_struct_len",
+        "projection_inverse_MPFR.Lib.Spec.Mkfp_struct_limb",
+        "projection_inverse_MPFR.Lib.Spec.Mkfp_struct_prec",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_28413ded08af0078a17a49d9c4b3e925",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_86293af5a6b0716544585d81a5354ba9",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_c1afbaa1e4e55ba4623be2d445a9d221",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_cedc0570303b71cc42672e5086472b7c",
+        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_e0206349739457cdb0e328d07023d05a",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "afb6b61e84e4724d5b3ba5fd7e333351"
     ]
   ]
 ]

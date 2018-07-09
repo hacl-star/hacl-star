@@ -6,7 +6,7 @@ open MPFR.Dyadic
 open MPFR.Lib.Spec
 open MPFR.Maths
 
-#set-options "--z3refresh --z3rlimit 40 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 50 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 (* ulp definition *)
 let ulp_p (a:normal_fp) (p:pos) = unit_fp (a.exp - p)
@@ -15,7 +15,7 @@ let ulp (a:normal_fp) = ulp_p a a.prec
 let ufp (a:normal_fp) = ulp_p a 1
 
 val add_one_ulp: a:normal_fp ->
-    Tot (r:normal_fp{r.prec = a.prec /\ fabs (eval r) =. fabs (eval a) +. ulp a})
+    Tot (r:normal_fp{r.prec = a.prec /\ eval_abs r =. eval_abs a +. ulp a})
     
 let add_one_ulp a =
     if a.limb + pow2 (a.len - a.prec) < pow2 a.len then begin
@@ -48,7 +48,7 @@ let incr_prec a p =
 (* Decrease precision, actually RNDZ *)
 val decr_prec: a:normal_fp -> p:pos{p < a.prec} ->
     Tot (r:normal_fp{r.prec = p /\
-        fabs (eval r) <=. fabs (eval a) /\ fabs (eval a) <. fabs (eval r) +. ulp r})
+        eval_abs r <=. eval_abs a /\ eval_abs a <. eval_abs r +. ulp r})
 	
 let decr_prec a p =
     lemma_pow2_div_range a.limb (a.len - p) a.len;
@@ -61,12 +61,12 @@ let decr_prec a p =
  * No need to normalize low_mant as long as it has the same value *)
 val high_mant: a:normal_fp -> p:pos{p < a.prec} ->
     Tot (hm:normal_fp{hm.prec = p /\
-        fabs (eval hm) <=. fabs (eval a) /\ fabs (eval a) <. fabs (eval hm) +. ulp hm})
+        eval_abs hm <=. eval_abs a /\ eval_abs a <. eval_abs hm +. ulp hm})
 	
 let high_mant a p = decr_prec a p
 
 val low_mant: a:normal_fp -> p:pos{p < a.prec} -> Tot (lm:valid_fp{
-    fabs (eval lm) <. ulp (high_mant a p) /\ eval lm +. eval (high_mant a p) =. eval a})
+    eval_abs lm <. ulp (high_mant a p) /\ eval lm +. eval (high_mant a p) =. eval a})
     
 let low_mant a p = 
     lemma_euclidean a.limb (pow2 (a.len - p));
@@ -89,7 +89,7 @@ let low_mant a p =
 
 val rndz_def: a:normal_fp -> p:pos{p < a.prec} ->
     Tot (r:normal_fp{r.prec = p /\
-        fabs (eval r) <=. fabs (eval a) /\ fabs (eval a) <. fabs (eval r) +. ulp r})
+        eval_abs r <=. eval_abs a /\ eval_abs a <. eval_abs r +. ulp r})
 	
 let rndz_def a p = high_mant a p
 
@@ -109,8 +109,8 @@ let is_even (a:normal_fp) = (nth #a.len a.limb (a.prec - 1) = false)
 
 let rndn_def (a:normal_fp) (p:pos{p < a.prec}): Tot (r:normal_fp{r.prec = p}) =
     let high, low = high_mant a p, low_mant a p in
-    if ((fabs (eval low) <. ulp_p high (p + 1)) ||
-        (fabs (eval low) =. ulp_p high (p + 1) && is_even high))
+    if ((eval_abs low <. ulp_p high (p + 1)) ||
+        (eval_abs low =. ulp_p high (p + 1) && is_even high))
     then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
@@ -128,7 +128,7 @@ let rb_value_lemma a p =
     lemma_pow2_mod_mod a.limb (a.len - p) (a.len - p - 1)
 
 val rb_sb_lemma: a:normal_fp -> p:pos{p < a.prec} -> Lemma (
-    let lm_fp = fabs (eval (low_mant a p)) in
+    let lm_fp = eval_abs (low_mant a p) in
     let hulp  = ulp_p (high_mant a p) (p + 1) in
     ((rb_def a p = false /\ sb_def a p = false) <==> (lm_fp =. zero_fp)) /\
     ((rb_def a p = false /\ sb_def a p = true ) <==> (lm_fp >. zero_fp /\ lm_fp <. hulp)) /\
@@ -168,10 +168,5 @@ let rndn_spec a p =
     is_even_lemma a p;
     if rb_def a p = false || 
       (sb_def a p = false && logand #a.len (high_mant a p).limb (pow2 (a.len - p)) = 0)
-    then begin
-        assert ((fabs (eval low) <. ulp_p high (p + 1)) ||
-                (fabs (eval low) =. ulp_p high (p + 1) && is_even high));
-	rndz_def a p
-    end else begin
-	add_one_ulp (rndz_def a p)
-    end
+    then rndz_def a p
+    else add_one_ulp (rndz_def a p)

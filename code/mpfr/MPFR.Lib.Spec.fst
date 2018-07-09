@@ -87,6 +87,8 @@ type valid_fp = s:fp_struct{valid_fp_cond s}
  * Then multiply it with 2 ^ exp *)
 let eval (fp:valid_fp) = mk_fp (fp.sign * fp.limb) (fp.exp - fp.len)
 
+val eval_abs: fp:valid_fp -> Tot (r:dyadic{r == fabs (eval fp)})
+let eval_abs fp = mk_fp fp.limb (fp.exp - fp.len)
 
 //////////////////////////////////////////////////////////////////////
 //  Normalize a regular value                                       //
@@ -115,9 +117,15 @@ let mk_normal sign prec exp limb len flag: Pure normal_fp
 ////////////////////////////////////////////////////////////////////////////////
 
 (* range limits for precision and exponent *)
-let mpfr_PREC_COND (p:nat) = 0 < p /\ p < pow2 31
+let mpfr_PREC_MIN_spec = 1
+let mpfr_PREC_MAX_spec = pow2 31 - 1
 
-let mpfr_EXP_COND  (x:int) = -pow2 30 < x /\ x < pow2 30
+let mpfr_PREC_COND (p:nat) = mpfr_PREC_MIN_spec <= p /\ p <= mpfr_PREC_MAX_spec
+
+let mpfr_EMIN_spec = 1 - pow2 30
+let mpfr_EMAX_spec = pow2 30 - 1
+
+let mpfr_EXP_COND  (x:int) = mpfr_EMIN_spec <= x /\ x <= mpfr_EMAX_spec
 
 (* get len from prec for a MPFR number *)
 val prec_to_len: p:pos ->
@@ -142,3 +150,36 @@ let mpfr_fp_cond (s:fp_struct) =
 
 (* type for MPFR number *)
 type mpfr_fp = s:fp_struct{mpfr_fp_cond s}
+
+
+/////////////////////////////////////////////////////////////
+//  Useful functions and lemmas for normal number of MPFR  //
+/////////////////////////////////////////////////////////////
+
+(* overflow bound for normal number of MPFR *)
+val mpfr_overflow_bound: p:nat{mpfr_PREC_COND p} -> Tot dyadic
+
+let mpfr_overflow_bound p =
+    let l = prec_to_len p in
+    mk_fp (pow2 l - pow2 (l - p)) (mpfr_EMAX_spec - l)
+
+val mpfr_overflow_bound_lemma: p:nat{mpfr_PREC_COND p} -> f:mpfr_reg_fp{f.prec = p} -> Lemma
+    (eval_abs f <=. mpfr_overflow_bound p)
+    [SMTPat (eval_abs f <=. mpfr_overflow_bound p)]
+
+let mpfr_overflow_bound_lemma p f =
+    let l = prec_to_len p in
+    lemma_pow2_le (l - p) l;
+    lemma_pow2_mod l (l - p);
+    lemma_mod_distr_sub_zero (pow2 l) (pow2 (l - p)) (pow2 (l - p));
+    //! assert((pow2 l - pow2 (l - p)) % pow2 (l - p) = 0);
+    lemma_pow2_le (l - p) (l - 1);
+    lemma_pow2_double (l - 1);
+    //! assert(pow2 l - pow2 (l - p) >= pow2 (l - 1));
+    let b = mk_normal 1 p mpfr_EMAX_spec (pow2 l - pow2 (l - p)) l MPFR_NUM in
+    //! assert(eval b == mpfr_overflow_bound p);
+    let elb = min (f.exp - l) (mpfr_EMAX_spec - l) in
+    lemma_pow2_multiple_le f.limb l (l - p);
+    //! assert(f.limb <= pow2 l - pow2 (l - p));
+    lemma_pow2_le (f.exp - l - elb) (mpfr_EMAX_spec - l - elb);
+    assert(f.limb * pow2 (f.exp - l - elb) <= (pow2 l - pow2 (l - p)) * pow2 (mpfr_EMAX_spec - l - elb))

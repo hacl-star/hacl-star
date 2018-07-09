@@ -11,7 +11,7 @@
         "refinement_interpretation_MPFR.Dyadic_Tm_refine_b20bb07d38c03ea55caa1056dd1cd845"
       ],
       0,
-      "6362b0619cc78f9351918a51b1960d3c"
+      "92c229ca652ddef81b6ad27cdc711295"
     ],
     [
       "MPFR.Dyadic.eq",
@@ -28,7 +28,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d4c3acb5eb5332b27313934f9e1e6ca3"
+      "cd72612449e730e2276af0905d3a43c3"
     ],
     [
       "MPFR.Dyadic.gt",
@@ -45,7 +45,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "7bf5bf5bb8f64b0696b7f6393f119db3"
+      "044fcd1eaf4934708a8dd7d65faa71e1"
     ],
     [
       "MPFR.Dyadic.ge",
@@ -62,7 +62,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1f823555616027a3a0872af95c470a5b"
+      "2659ce001d718ec561c35b9e9ec0f3cf"
     ],
     [
       "MPFR.Dyadic.lt",
@@ -79,7 +79,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "4650f94b9235894c01b6f3ee80b2d5d1"
+      "f8806fa66e689d4ca1c4034e81d6c1ef"
     ],
     [
       "MPFR.Dyadic.le",
@@ -96,7 +96,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "dcc95ba44d62650b95ce58d89cd6c42b"
+      "dc95b26099a38f0396a47f6a49cada3d"
     ],
     [
       "MPFR.Dyadic.fneg",
@@ -110,7 +110,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "dba793fb18461fde08df2f7ff8f5b4bd"
+      "6ca0f2849ef9f58ab2b83694cffaa97b"
     ],
     [
       "MPFR.Dyadic.fneg",
@@ -118,18 +118,26 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.mk_fp",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
+        "equation_MPFR.Dyadic.mk_fp", "equation_Prims.nat",
         "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
+        "function_token_typing_FStar.UInt32.n", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Minus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
-        "projection_inverse_MPFR.Dyadic.Mkdyadic_significand"
+        "projection_inverse_MPFR.Dyadic.Mkdyadic_significand",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_MPFR.Dyadic.__proj__Mkdyadic__item__significand"
       ],
       0,
-      "18b340e13a4715dc3c611e63c090d49d"
+      "9b58e97c3d4f0e3043eb0ed7066d02fb"
     ],
     [
       "MPFR.Dyadic.fadd",
@@ -145,20 +153,19 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c201ef094ade5d0f52495e109b44ca98"
+      "4f87b571d83539eac1ee5dd9fcd3995d"
     ],
     [
       "MPFR.Dyadic.fadd",
       2,
-      1,
-      1,
+      0,
+      0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "data_elim_MPFR.Dyadic.Mkdyadic", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.mk_fp", "equation_Prims.min",
-        "equation_with_fuel_Prims.pow2.fuel_instrumented",
-        "fuel_guarded_inversion_MPFR.Dyadic.dyadic", "int_inversion",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.mk_fp",
+        "equation_Prims.min", "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
@@ -169,7 +176,7 @@
         "projection_inverse_MPFR.Dyadic.Mkdyadic_significand"
       ],
       0,
-      "82b10de2195f0984466dfd365f6f443c"
+      "3710d4fb17df7266c586a8aa4340380e"
     ],
     [
       "MPFR.Dyadic.fsub",
@@ -185,7 +192,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "af05fda77528aaf8dd57264d12041f6f"
+      "b261eed1bcb1b9f0001ec5974014aea9"
     ],
     [
       "MPFR.Dyadic.fsub",
@@ -208,7 +215,7 @@
         "projection_inverse_MPFR.Dyadic.Mkdyadic_significand"
       ],
       0,
-      "2a5162c9ef320a5688270b9cc3206dac"
+      "9c4c2b61a6fc8f357f3a507264bc78b2"
     ],
     [
       "MPFR.Dyadic.fmul",
@@ -224,7 +231,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "6bee1f593e1f0464833525513d510528"
+      "2b35db8f8962cb34a0be847ef8156c3e"
     ],
     [
       "MPFR.Dyadic.fmul",
@@ -232,15 +239,16 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.mk_fp",
-        "equation_Prims.min", "equation_Prims.nat",
-        "fuel_guarded_inversion_MPFR.Dyadic.dyadic", "int_inversion",
-        "int_typing", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
+        "equation_MPFR.Dyadic.mk_fp", "equation_Prims.min",
+        "equation_Prims.nat", "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
+        "function_token_typing_FStar.UInt32.n", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "projection_inverse_BoxBool_proj_0",
@@ -250,7 +258,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "7c5ebe98d7c16ac621472a1d4988e165"
+      "6db523d147cf39d5b6d75276efb336a1"
     ]
   ]
 ]

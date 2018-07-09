@@ -55,8 +55,9 @@ let mk_mpfr_struct p s e d = {
 
 (* precision *)
 let gmp_NUMB_BITS = 64ul
+val mpfr_PREC_MIN: p:u32{U32.v p = mpfr_PREC_MIN_spec}
 let mpfr_PREC_MIN = 1ul
-val mpfr_PREC_MAX: p:u32{U32.v p = pow2 31 - 1}
+val mpfr_PREC_MAX: p:u32{U32.v p = mpfr_PREC_MAX_spec}
 let mpfr_PREC_MAX = 0x7ffffffful // Note: 0x7ffffefful in original code
 
 (* exponent *)
@@ -70,7 +71,9 @@ let mpfr_EXP_INF  = I32.(mpfr_EXP_MIN +^ 3l)
 
 val mpfr_EXP_INVALID: x:i32{I32.v x = pow2 30}
 let mpfr_EXP_INVALID = assert_norm(0x40000000 = pow2 30); 0x40000000l
+val mpfr_EMIN: x:i32{I32.v x = mpfr_EMIN_spec}
 let mpfr_EMIN = I32.(1l -^ mpfr_EXP_INVALID)
+val mpfr_EMAX: x:i32{I32.v x = mpfr_EMAX_spec}
 let mpfr_EMAX = I32.(mpfr_EXP_INVALID -^ 1l)
 
 val mpfr_EXP: x:mpfr_ptr -> Stack mpfr_exp_t 
@@ -205,7 +208,7 @@ let mpfr_valid_struct_cond h (s:mpfr_struct): Type =
 let mpfr_valid_ptr_cond h (a:mpfr_ptr): Type = mpfr_valid_struct_cond h (Seq.index (as_seq h a) 0)
 
 
-#reset-options "--z3refresh --z3rlimit 30 --max_ifuel 0"
+#reset-options "--z3refresh --z3rlimit 30  --max_fuel 1 --max_ifuel 0"
 (* Conversion to pure struct *)
 val to_val: s:Seq.seq u64 -> Tot (n:nat{n < pow2 (Seq.length s * 64)}) (decreases (Seq.length s))
 
@@ -221,6 +224,12 @@ val to_val_rec_lemma: s:Seq.seq u64{Seq.length s > 0} -> Lemma
     (to_val s = v (Seq.index s 0) * pow2 ((Seq.length s - 1) * 64) + to_val (Seq.slice s 1 (Seq.length s)))
     
 let to_val_rec_lemma s = ()
+
+val to_val1_lemma: s:Seq.seq u64{Seq.length s = 1} -> Lemma
+    (to_val s = v (Seq.index s 0))
+    [SMTPat (to_val s)]
+
+let to_val1_lemma s = ()
 
 val val0_cond_lemma: s:Seq.seq u64{Seq.length s > 0 /\ mpfr_d_val0_cond (Seq.index s 0)} -> Lemma
     (to_val s >= pow2 (Seq.length s * 64 - 1))
@@ -251,9 +260,10 @@ let rec valn_cond_lemma s p =
 let as_val h (b:buffer mp_limb_t) = to_val (as_seq h b)
 
 (* Convert valid mpfr_ptr to mpfr_fr *)
-val as_reg_fp: h:mem -> a:mpfr_ptr{mpfr_reg_struct_cond h (Seq.index (as_seq h a) 0)} ->
+let as_struct h (a:mpfr_ptr) = Seq.index (as_seq h a) 0
+
+abstract val as_reg_fp_: h:mem -> s:mpfr_struct{mpfr_reg_struct_cond h s} ->
     GTot (ps:mpfr_reg_fp{
-          let s = Seq.index (as_seq h a) 0 in
           ps.sign = I32.v s.mpfr_sign /\
 	  ps.prec = U32.v s.mpfr_prec /\
 	  ps.exp  = I32.v s.mpfr_exp  /\
@@ -261,8 +271,7 @@ val as_reg_fp: h:mem -> a:mpfr_ptr{mpfr_reg_struct_cond h (Seq.index (as_seq h a
 	  ps.len  = length s.mpfr_d * 64 /\
 	  ps.flag = MPFR_NUM})
 			 
-let as_reg_fp h a =
-    let s = Seq.index (as_seq h a) 0 in
+let as_reg_fp_ h s =
     let sign = I32.v s.mpfr_sign in
     let prec = U32.v s.mpfr_prec in
     let exp  = I32.v s.mpfr_exp  in
@@ -273,13 +282,16 @@ let as_reg_fp h a =
     valn_cond_lemma (as_seq h s.mpfr_d) s.mpfr_prec;
     mk_struct sign prec exp limb (l * 64) MPFR_NUM
 
-val as_fp: h:mem -> a:mpfr_ptr{mpfr_valid_struct_cond h (Seq.index (as_seq h a) 0)} ->
+let as_reg_fp h (a:mpfr_ptr{mpfr_reg_struct_cond h (as_struct h a)}) = as_reg_fp_ h (as_struct h a)
+
+val as_fp_: h:mem -> s:mpfr_struct{mpfr_valid_struct_cond h s} ->
     GTot mpfr_fp
 
-let as_fp h a =
-    let s = Seq.index (as_seq h a) 0 in
+let as_fp_ h s =
     let sign = I32.v s.mpfr_sign in
     if s.mpfr_exp = mpfr_EXP_NAN then mk_struct 1 1 0 0 1 MPFR_NAN
     else if s.mpfr_exp = mpfr_EXP_INF then mk_struct sign 1 0 0 1 MPFR_INF
     else if s.mpfr_exp = mpfr_EXP_ZERO then mk_struct sign 1 0 0 1 MPFR_ZERO
-    else as_reg_fp h a
+    else as_reg_fp_ h s
+
+let as_fp h (a:mpfr_ptr{mpfr_valid_struct_cond h (as_struct h a)}) = as_fp_ h (as_struct h a)

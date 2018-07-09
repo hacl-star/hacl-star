@@ -2,7 +2,7 @@ module MPFR.Maths
 
 open FStar.Mul
 
-#set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 20 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 (* Nonlinear arithmetic *)
 val lemma_paren_mul_left: a:int -> b:int -> c:int -> Lemma
@@ -82,14 +82,6 @@ val lemma_multiple_mod: a:nat -> b:pos -> Lemma
     ((a * b) % b = 0)
 let lemma_multiple_mod a b = lemma_multiple_div a b
 
-val lemma_mul_mod_zero: a:nat -> b:nat -> c:pos -> Lemma
-    (requires (a % c = 0 \/ b % c = 0))
-    (ensures  ((a * b) % c = 0))
-    (decreases (b % c))
-
-let rec lemma_mul_mod_zero a b c =
-    if b % c > 0 then lemma_mul_mod_zero b a c else lemma_multiple_mod (a * (b / c)) c
-
 val lemma_div_lt: a:nat -> b:nat -> d:pos -> Lemma
     (requires (a < b /\ b % d = 0))
     (ensures  (a / d < b / d))
@@ -119,6 +111,18 @@ val lemma_mod_distr_zero: a:nat -> b:nat -> c:pos -> Lemma
 
 let lemma_mod_distr_zero a b c = lemma_mod_distr a b c
 
+val lemma_mod_distr_sub_zero: a:nat -> b:nat -> c:pos -> Lemma
+    (requires (a % c = 0 /\ b % c = 0 /\ a >= b))
+    (ensures  ((a - b) % c = 0))
+
+let lemma_mod_distr_sub_zero a b c = lemma_mod_distr (a - b) b c
+
+val lemma_div_mul: a:nat -> b:pos -> Lemma
+    (requires (a % b = 0))
+    (ensures  ((a / b) * b = a))
+
+let lemma_div_mul a b = ()
+
 val lemma_div_div: a:nat -> b:pos -> c:pos -> Lemma
     ((a / b) / c = a / (b * c))
     
@@ -126,27 +130,30 @@ let lemma_div_div a b c =
     lemma_euclidean a b;
     //! assert(a = (a / b) * b + a % b);
     lemma_euclidean (a / b) c;
-    //! assert(a / b = ((a / b) / c) * c + (a / b) % c);
+    assert(a / b = ((a / b) / c) * c + (a / b) % c);
     //! assert(a = ((a / b) / c) * c * b + ((a / b) % c) * b + a % b);
     lemma_add_div (((a / b) % c) * b + a % b) ((a / b) / c) (b * c);
-    //! assert(a / (b * c) = (a / b) / c + (((a / b) % c) * b + a % b) / (b * c));
+    assert(a / (b * c) = (a / b) / c + (((a / b) % c) * b + a % b) / (b * c));
     lemma_distr_sub_left c 1 b;
     //! assert(((a / b) % c) * b + a % b <= (c - 1) * b + (b - 1));
     lemma_small_div (((a / b) % c) * b + a % b) (b * c)
 
 val lemma_mul_div: a:nat -> b:nat -> c:pos -> Lemma
-    (requires (a % c = 0))
-    (ensures  ((a * b) / c = (a / c) * b))
+    (requires (b % c = 0))
+    (ensures  ((a * b) / c = a * (b / c)))
     
 let lemma_mul_div a b c =
-    lemma_euclidean a c;
-    //! assert((a * b) / c = ((a / c) * c * b) / c);
-    lemma_multiple_div ((a / c) * b) c
+    lemma_euclidean b c;
+    //! assert((a * b) / c = (a * (b / c) * c + a * (b % c)) / c);
+    lemma_multiple_div (a * (b / c)) c
 
-val lemma_mul_mod: a:nat -> b:nat -> c:pos -> Lemma
-    (requires (a % c = 0))
+val lemma_mul_mod_zero: a:nat -> b:nat -> c:pos -> Lemma
+    (requires (a % c = 0 \/ b % c = 0))
     (ensures  ((a * b) % c = 0))
-let lemma_mul_mod a b c = lemma_mul_div a b c
+    (decreases (b % c))
+
+let rec lemma_mul_mod_zero a b c =
+    if b % c > 0 then lemma_mul_mod_zero b a c else lemma_multiple_mod (a * (b / c)) c
     
 val lemma_mod_div: a:nat -> b:pos -> c:pos -> Lemma 
     ((a % (b * c)) / b = (a / b) % c)
@@ -155,10 +162,11 @@ let lemma_mod_div a b c =
     lemma_euclidean a (b * c);
     //! assert(a = (a / (b * c)) * (b * c) + a % (b * c));
     lemma_add_div a (- (a / (b * c)) * c) b;
-    assert((a % (b * c)) / b = a / b - (a / (b * c)) * c);
+    //! assert((a % (b * c)) / b = a / b - (a / (b * c)) * c);
     lemma_div_div a b c;
     //! assert((a % (b * c)) / b = a / b - ((a / b) / c) * c);
-    lemma_euclidean (a / b) c
+    lemma_euclidean (a / b) c;
+    assert((a % (b * c)) / b = (a / b) % c)
 
 val lemma_mod_mod: a:nat -> b:pos -> c:pos -> Lemma
     ((a % (b * c)) % b = a % b)
@@ -223,6 +231,7 @@ let lemma_pow2_double n = ()
 val lemma_pow2_div_lt: a:nat -> b:nat -> d:nat -> Lemma
     (requires (a < pow2 b /\ d <= b))
     (ensures  (a / pow2 d < pow2 (b - d)))
+    
 let lemma_pow2_div_lt a b d = 
     lemma_pow2_div b d;
     lemma_pow2_mod b d;
@@ -231,6 +240,7 @@ let lemma_pow2_div_lt a b d =
 val lemma_pow2_div_range: a:pos -> b:nat -> n:pos -> Lemma
     (requires (n > b /\ pow2 (n - 1) <= a /\ a < pow2 n))
     (ensures  (pow2 (n - b - 1) <= a / pow2 b /\ a / pow2 b < pow2 (n - b)))
+    
 let lemma_pow2_div_range a b n =
     lemma_div_le (pow2 (n - 1)) a (pow2 b);
     lemma_pow2_div (n - 1) b;
@@ -239,20 +249,39 @@ let lemma_pow2_div_range a b n =
 val lemma_pow2_multiple_le: a:nat -> b:nat -> d:nat -> Lemma
     (requires (a < pow2 b /\ d <= b /\ a % pow2 d = 0))
     (ensures  (a + pow2 d <= pow2 b))
+    
 let lemma_pow2_multiple_le a b d =
     lemma_pow2_div_lt a b d;
     lemma_distr_sub_left (pow2 (b - d)) 1 (pow2 d);
     lemma_pow2_mul (b - d) d
 
+val lemma_pow2_div_mul: a:nat -> b:nat -> c:nat -> Lemma
+    (requires (a % pow2 b = 0 /\ b <= c))
+    (ensures  ((a / pow2 b) * pow2 c = a * pow2 (c - b)))
+    
+let lemma_pow2_div_mul a b c = 
+    lemma_pow2_mul b (c - b);
+    lemma_div_mul a (pow2 b)
+
 val lemma_pow2_div_div: a:nat -> b:nat -> c:nat -> Lemma
     ((a / pow2 b) / pow2 c = a / pow2 (b + c))
+    
 let lemma_pow2_div_div a b c =
     lemma_pow2_mul b c;
     lemma_div_div a (pow2 b) (pow2 c)
 
+val lemma_pow2_mul_div: a:nat -> b:nat -> c:nat -> Lemma
+    (requires (b <= c))
+    (ensures  ((a * pow2 b) / pow2 c = a / pow2 (c - b)))
+
+let lemma_pow2_mul_div a b c =
+    lemma_pow2_div_div (a * pow2 b) b (c - b);
+    lemma_multiple_div a (pow2 b)
+
 val lemma_pow2_mod_div: a:nat -> b:nat -> c:nat -> Lemma
     (requires (b >= c))
     (ensures  ((a % pow2 b) / pow2 c = (a / pow2 c) % (pow2 (b - c))))
+    
 let lemma_pow2_mod_div a b c =
     lemma_pow2_mul c (b - c);
     lemma_mod_div a (pow2 c) (pow2 (b - c))
@@ -260,6 +289,72 @@ let lemma_pow2_mod_div a b c =
 val lemma_pow2_mod_mod: a:nat -> b:nat -> c:nat -> Lemma
     (requires (b >= c))
     (ensures  ((a % pow2 b) % pow2 c = a % pow2 c))
+    
 let lemma_pow2_mod_mod a b c =
     lemma_pow2_mul c (b - c);
     lemma_mod_mod a (pow2 c) (pow2 (b - c))
+
+val lemma_pow2_mod_mod_zero: a:nat -> b:nat -> c:nat -> Lemma
+    (requires (a % pow2 b = 0 /\ b >= c))
+    (ensures  (a % pow2 c = 0))
+    
+let lemma_pow2_mod_mod_zero a b c = lemma_pow2_mod_mod a b c
+
+val lemma_bit_length: m:pos -> p1:pos -> p2:pos -> Lemma
+    (requires (pow2 (p1 - 1) <= m /\ m < pow2 p1 /\ pow2 (p2 - 1) <= m /\ m < pow2 p2))
+    (ensures  (p1 = p2))
+
+let lemma_bit_length m p1 p2 =
+    if p1 < p2 then lemma_pow2_le p1 (p2 - 1);
+    if p1 > p2 then lemma_pow2_le p2 (p1 - 1)
+    
+(* UInt64 lemmas *)
+open FStar.UInt64
+
+type u64 = FStar.UInt64.t
+
+val lemma_tl_zero_imp_mod_pow2: x:u64 -> sh:pos{sh < 64} -> Lemma
+    (requires (Seq.slice (UInt.to_vec (v x)) (64 - sh) 64 == BitVector.zero_vec #sh))
+    (ensures  (v x % pow2 sh = 0))
+let lemma_tl_zero_imp_mod_pow2 x sh =
+    UInt.slice_right_lemma (UInt.to_vec (v x)) sh
+
+val lemma_mod_pow2_imp_tl_zero: x:u64 -> sh:pos{sh < 64} -> Lemma
+    (requires (v x % pow2 sh = 0))
+    (ensures  (Seq.slice (UInt.to_vec (v x)) (64 - sh) 64 == BitVector.zero_vec #sh))
+let lemma_mod_pow2_imp_tl_zero x sh = 
+    UInt.slice_right_lemma (UInt.to_vec (v x)) sh;
+    Seq.lemma_eq_intro (UInt.to_vec #sh (UInt.zero sh)) (BitVector.zero_vec #sh)
+
+val lemma_logor_disjoint: a:u64 -> b:u64 -> p:pos{p < 64} -> Lemma
+    (requires (v a % pow2 p = 0 /\ v b < pow2 p))
+    (ensures  (v (a |^ b) = v a + v b))
+let lemma_logor_disjoint a b p = UInt.logor_disjoint (v a) (v b) p
+
+val lemma_lognot_mask_value: mask:u64 -> sh:nat{sh < 64} -> Lemma
+    (requires (v mask = pow2 sh - 1))
+    (ensures  (v (lognot mask) = pow2 64 - pow2 sh))
+let lemma_lognot_mask_value mask sh =
+    Seq.lemma_eq_intro (UInt.to_vec (v (mask |^ (lognot mask)))) (BitVector.ones_vec #64);
+    UInt.nth_lemma (v ((lognot mask) |^ mask)) (UInt.ones 64);
+    if sh = 0 then begin
+        UInt.nth_lemma (v (lognot mask)) (UInt.ones 64)
+    end else begin
+        Seq.lemma_eq_intro (Seq.slice (UInt.to_vec (v (lognot mask))) (64 - sh) 64) (BitVector.zero_vec #sh);
+        lemma_tl_zero_imp_mod_pow2 (lognot mask) sh;
+	lemma_logor_disjoint (lognot mask) mask sh
+    end
+
+val lemma_lognot_mask_mod: a:u64 -> mask:u64 -> sh:nat{sh < 64} -> Lemma
+    (requires (v mask = pow2 sh - 1))
+    (ensures  (v (a &^ (lognot mask)) % pow2 sh = 0))
+let lemma_lognot_mask_mod a mask sh =
+    lemma_lognot_mask_value mask sh;
+    lemma_pow2_mod 64 sh;
+    lemma_pow2_lt sh 64;
+    lemma_mod_distr_sub_zero (pow2 64) (pow2 sh) (pow2 sh);
+    if sh = 0 then () else begin
+        lemma_mod_pow2_imp_tl_zero (lognot mask) sh;
+        Seq.lemma_eq_intro (Seq.slice (UInt.to_vec (v (a &^ (lognot mask)))) (64 - sh) 64) (BitVector.zero_vec #sh);
+	lemma_tl_zero_imp_mod_pow2 (a &^ (lognot mask)) sh
+    end
