@@ -66,8 +66,6 @@ let u64_uL x = x
 
 let u128 x : uint128 = UInt128.uint_to_t x
 
-let u128_uLL x = x
-
 inline_for_extraction
 let size_ x : uint_t SIZE = UInt32.uint_to_t x
 

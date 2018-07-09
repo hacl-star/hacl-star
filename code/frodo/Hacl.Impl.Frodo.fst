@@ -164,7 +164,7 @@ val frodo_pack:
 let frodo_pack n1 n2 a d res =
   admit();
   let maskd = (u16 1 <<. size_to_uint32 d) -. u16 1 in
-  let templong:lbuffer uint128 1 = create (size 1) (u128 0) in
+  let templong:lbuffer uint128 1 = create (size 1) (to_u128 (u64 0)) in
   let v16 = create (size 16) (u8 0) in
   let n28 = n2 /. size 8 in
   let h0 = FStar.HyperStack.ST.get () in
@@ -172,7 +172,7 @@ let frodo_pack n1 n2 a d res =
   (fun i ->
     loop_nospec #h0 n28 res
     (fun j ->
-      templong.(size 0) <- u128 0;
+      templong.(size 0) <- (to_u128 (u64 0));
       loop_nospec #h0 (size 8) templong
       (fun k ->
 	let aij = (mget a i (size 8 *. j +. k)) &. maskd in
