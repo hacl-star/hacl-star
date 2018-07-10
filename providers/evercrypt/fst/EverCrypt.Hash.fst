@@ -3,13 +3,14 @@ module EverCrypt.Hash
 /// ----------agile implementation of hash specification ------------
 /// must be in scope for linking the agile spec to the ad hoc algorithmic specs
 
-let string_of_alg = function
-  | MD5    -> "MD5"
-  | SHA1   -> "SHA1"
-  | SHA224 -> "SHA224"
-  | SHA256 -> "SHA256"
-  | SHA384 -> "SHA384"
-  | SHA512 -> "SHA512"
+let string_of_alg = 
+  let open C.String in function
+  | MD5    -> !$"MD5"
+  | SHA1   -> !$"SHA1"
+  | SHA224 -> !$"SHA224"
+  | SHA256 -> !$"SHA256"
+  | SHA384 -> !$"SHA384"
+  | SHA512 -> !$"SHA512"
 
 
 let type_of a =
@@ -29,6 +30,7 @@ type acc (a: e_alg) = {
   counter: nat;
 }
 
+// 18-07-10 in principle k would suffice.
 let acc0 #a =
   match Ghost.reveal a with
   | SHA256 -> {
@@ -64,34 +66,23 @@ let compress #a st b =
   | _ -> 
     admit()
   
-(* was, partial:
-let update_spec (#a:e_alg)
-  (s:state a)
-  (h0: HS.mem{invariant s h0})
-  (h1: HS.mem{invariant s h1})
-  (data: bytes{Seq.length data = block_size a}):
-  GTot _
-=
-  let r0 = repr s h0 in
-  let r1 = repr s h1 in
-  match G.reveal a with
-  | SHA256 -> r1.hash = EverCrypt.Spec.SHA2_256.update r0.hash data
-  | SHA384 -> r1.hash = EverCrypt.Spec.SHA2_384.update r0.hash data
-*)
+// using the same be library as in hacl*; to be reconsidered.
+// 18-07-10 why do I need type annotations? why passing the same constant 3 types? 
+let extract #a st = 
+  let a = Ghost.reveal a in 
+  match a with 
+  | SHA224 -> Spec.Lib.uint32s_to_be 7 (Seq.slice st.hash 0 7)
+  | SHA256 -> Spec.Lib.uint32s_to_be 8 st.hash 
+  | SHA384 -> Spec.Lib.uint64s_to_be 6 (Seq.slice st.hash 0 6)
+  | SHA512 -> Spec.Lib.uint64s_to_be 8 st.hash 
+  | _      -> admit()
 
-// 18-07-06 hacl* defines finish on the raw buffer contents, so
-// we'd need to define repr first.
-let extract #a st = admit()
-(*
-  match Ghost.reveal a with 
-  | SHA256 -> repr Spec.SHA2_256.finish st 
-  | SHA384 -> Spec.SHA2_384.finish st 
-  | _ -> admit()
-*)
+/// ------ at this point interactive verification dies; using c-c c-l
 
-// 18-07-06 should be provable, despite the two specs having different
-// structures.
+// 18-07-06 TODO; should be provable, despite the two specs having
+// different structures.
 let suffix a l = admit()
+    
 (*
   let l1 = l % blockLength a in 
   let l0 = l - l1 in
@@ -162,7 +153,7 @@ let uint64_p = B.buffer uint_64
 
 noeq
 type state_s: (G.erased alg) -> Type0 =
-| SHA256_Hacl: p:uint32_p{ B.length p = U32.v Hacl.SHA2_256.size_state } -> state_s (G.hide SHA256)
+| SHA256_Hacl: p:uint32_p{ B.length p = U32.v Hacl.SHA2_256.size_state} -> state_s (G.hide SHA256)
 | SHA256_Vale: p:uint32_p{ B.length p = U32.v ValeGlue.sha256_size_state } -> state_s (G.hide SHA256)
 | SHA384_Hacl: p:uint64_p{ B.length p = U32.v Hacl.SHA2_384.size_state } -> state_s (G.hide SHA384)
 
@@ -201,15 +192,14 @@ let repr #a s h: GTot _ =
         hash = Hacl.SHA2_384.slice_hash h p;
         counter = Hacl.SHA2_384.counter h p
       }
-  | _ -> admit()
+  | _ -> admit() 
 
 let repr_eq (#a:e_alg) (r1 r2: acc a) =
   Seq.equal r1.k r2.k /\
   Seq.equal r1.hash r2.hash /\
   r1.counter = r2.counter
 
-let fresh_is_disjoint l1 l2 h0 h1 =
-  ()
+let fresh_is_disjoint l1 l2 h0 h1 = ()
 
 let frame_invariant #a l s h0 h1 =
   let state = deref h0 s in
@@ -230,7 +220,7 @@ let create a =
     | SHA384 ->
         let b = B.malloc HS.root 0UL Hacl.SHA2_384.size_state in
         SHA384_Hacl b
-    | _ -> magic() 
+    | _ ->  magic()  // 18-07-09 TODO use failwith instead
   in
   let h1 = ST.get () in
   let r = B.malloc HS.root s 1ul in
@@ -244,44 +234,56 @@ let create a =
   assert (M.(modifies loc_none h0 h2));
   r
 
-let well_formed (#a:e_alg)
-  (s: state a)
-  (h: HS.mem{invariant s h}):
-  GTot _
-=
-  let r = repr s h in
+let has_k (#a:e_alg) (st:acc a) = 
   match G.reveal a with
-  | SHA256 -> r.k == EverCrypt.Spec.SHA2_256.k
-  | SHA384 -> r.k == EverCrypt.Spec.SHA2_384.k
-  | _ -> False
+  | SHA256 -> st.k == EverCrypt.Spec.SHA2_256.k
+  | SHA384 -> st.k == EverCrypt.Spec.SHA2_384.k
+  | _ -> True
 
-let bounded_counter (#a:e_alg)
-  (s: state a)
-  (h: HS.mem{invariant s h})
-  (n: nat { n <= pow2 32 }):
-  GTot _
-=
-  let r = repr s h in
-  match G.reveal a with
-  | SHA256 -> b2t (r.counter < pow2 32 - n)
-  | SHA384 -> b2t (r.counter < pow2 32 - n)
-  | _ -> False
+let rec lemma_hash2_has_k
+  (#a:e_alg) 
+  (v:acc a {has_k v})
+  (b:bytes {Seq.length b % blockLength a = 0}): 
+  GTot (_:unit{has_k (hash2 v b)}) (decreases (Seq.length b))
+=  
+  if Seq.length b = 0 then ()
+  else
+    let c,b = Seq.split b (blockLength a) in
+    assert(Seq.length b % blockLength a = 0);
+    assert(has_k (compress v c)); 
+    lemma_hash2_has_k (compress v c) b
+
+let lemma_hash0_has_k #a b = lemma_hash2_has_k (acc0 #a) b
+
+let rec lemma_has_counter (#a:e_alg) (b:bytes {Seq.length b % blockLength a = 0}):
+  GTot (_:unit{
+    blockLength a <> 0 /\ 
+    (hash0 #a b).counter == Seq.length b / blockLength a}) 
+= 
+  admit() //TODO, similar
 
 #set-options "--max_fuel 0"
-
 let init #a s =
+  assert_norm(acc0 #a == hash0 #a (Seq.empty #UInt8.t)); 
   match !*s with
-  | SHA256_Hacl p ->
-      Hacl.SHA2_256.init (T.new_to_old_st p)
-  | SHA384_Hacl p ->
-      Hacl.SHA2_384.init (T.new_to_old_st p)
-  | SHA256_Vale p ->
-      ValeGlue.sha256_init p;
-      admit ()
+  | SHA256_Hacl p -> Hacl.SHA2_256.init (T.new_to_old_st p)
+  | SHA384_Hacl p -> Hacl.SHA2_384.init (T.new_to_old_st p)
+  | SHA256_Vale p -> ValeGlue.sha256_init p; admit ()
 
 #set-options "--z3rlimit 20"
-
-let update #a s data =
+let update #a #prior s data =
+  ( let h0 = ST.get() in 
+    let r0 = repr s h0 in 
+    let prior = Ghost.reveal prior in 
+    let fresh = B.as_seq h0 data in 
+    lemma_hash0_has_k #a prior;
+    lemma_has_counter #a prior;
+    lemma_compress r0 fresh;
+    lemma_hash2 (acc0 #a) prior fresh;
+    //TODO 18-07-10 weaken hacl* update to tolerate overflows; they
+    // are now statically prevented in [update_last]
+    assume (r0.counter < pow2 32 - 1));
+    
   match !*s with
   | SHA256_Hacl p ->
       assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
@@ -291,6 +293,7 @@ let update #a s data =
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_256.update p data
+
   | SHA384_Hacl p ->
       assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
@@ -299,11 +302,24 @@ let update #a s data =
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_384.update p data
+
   | SHA256_Vale p ->
       ValeGlue.sha256_update p data;
       admit ()
 
-let update_multi #a s data len =
+
+let update_multi #a #prior s data len =
+  let h0 = ST.get() in 
+  ( let r0 = repr s h0 in 
+    let prior = Ghost.reveal prior in 
+    let fresh = B.as_seq h0 data in 
+    lemma_hash0_has_k #a prior;
+    lemma_has_counter #a prior;
+    lemma_hash2 (acc0 #a) prior fresh;//==> hash0 (Seq.append prior fresh) == hash2 (hash0 prior) fresh
+    //TODO 18-07-10 weaken hacl* update to tolerate overflows; they
+    // are now statically prevented in [update_last]
+  assume (r0.counter + v len / blockLength a < pow2 32 - 1));
+
   match !*s with
   | SHA256_Hacl p ->
       let n = FStar.UInt32.(len /^ blockLen SHA256) in 
@@ -313,9 +329,19 @@ let update_multi #a s data len =
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
-      let h = ST.get() in assume(bounded_counter s h (v n)); 
+      // let h = ST.get() in assume(bounded_counter s h (v n)); 
       Hacl.SHA2_256.update_multi p data n;
-      assume false //18-07-07 TODO align the specs
+
+      ( let h1 = ST.get() in
+        let r0 = repr s h0 in 
+        let r1 = repr s h1 in 
+        let fresh = Buffer.as_seq h0 data in 
+        //TODO 18-07-10 extend Spec.update_multi to align it to hash2,
+        //also specifying the counter update.
+        assume(
+          r1.hash = Spec.SHA2_256.update_multi r0.hash fresh ==>
+          r1 == hash2 r0 fresh)) 
+
   | SHA384_Hacl p ->
       let n = len / blockLen SHA384 in 
       assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
@@ -324,9 +350,19 @@ let update_multi #a s data len =
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
-      let h = ST.get() in assume(bounded_counter s h (v n)); 
-      assume false; //18-07-07 TODO align the specs
-      Hacl.SHA2_384.update_multi p data n
+      //let h = ST.get() in assume(bounded_counter s h (v n)); 
+      Hacl.SHA2_384.update_multi p data n;
+
+      ( let h1 = ST.get() in
+        let r0 = repr s h0 in 
+        let r1 = repr s h1 in 
+        let fresh = Buffer.as_seq h0 data in 
+        //TODO 18-07-10 extend Spec.update_multi to align it to hash2,
+        //also specifying the counter update.
+        assume(
+          r1.hash = Spec.SHA2_384.update_multi r0.hash fresh ==>
+          r1 == hash2 r0 fresh)) 
+      
   | SHA256_Vale p ->
       let n = len / blockLen SHA256 in 
       ValeGlue.sha256_update_multi p data n;
@@ -334,9 +370,20 @@ let update_multi #a s data len =
 
 //18-07-07 For SHA384 I was expecting a conversion from 32 to 64 bits
 
-//18-07-07 as long as hacl* uses its internal counter, we should
-// dynamically test that [counter * blockLen == totlen - len]
-let update_last #a s data totlen =
+//18-07-10 WIP verification 
+let update_last #a #prior s data totlen =
+  let h0 = ST.get() in 
+  ( let r0 = repr s h0 in 
+    let pad = suffix a (v totlen) in //TODO suffix still undefined here, not really exported by hacl*
+    let prior = Ghost.reveal prior in 
+    let fresh = Seq.append (B.as_seq h0 data) pad in
+    lemma_hash0_has_k #a prior;
+    lemma_has_counter #a prior;
+    // lemma_hash2 (acc0 #a) prior fresh;//==> hash0 (Seq.append prior fresh) == hash2 (hash0 prior) fresh
+    //TODO 18-07-10 weaken hacl* update to tolerate overflows; they
+    // are now statically prevented in [update_last]
+    assume (r0.counter + 2 < pow2 32 - 1));
+
   match !*s with
   | SHA256_Hacl p ->
       let len = totlen % blockLen SHA256 in
@@ -347,7 +394,15 @@ let update_last #a s data totlen =
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_256.update_last p data len;
-      admit() //18-07-07 TODO align the specs
+
+      ( let h1 = ST.get() in 
+        let pad = suffix a (v totlen) in //TODO suffix still undefined here & underspecified by hacl*
+        let prior = Ghost.reveal prior in 
+        let fresh = Seq.append (Buffer.as_seq h0 data) pad in
+        assume (hashing s h1 (Seq.append prior fresh));
+        admit()
+        )
+
   | SHA384_Hacl p ->
       let len = totlen % blockLen SHA384 in
       assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
@@ -372,8 +427,7 @@ let finish #a s dst =
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p dst);
-      Hacl.SHA2_256.finish p dst;
-      admit() //18-07-07 TODO align the specs
+      Hacl.SHA2_256.finish p dst
   | SHA384_Hacl p ->
       assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer p));
       let p = T.new_to_old_st p in
@@ -381,8 +435,7 @@ let finish #a s dst =
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p dst);
-      Hacl.SHA2_384.finish p dst;
-      admit() //18-07-07 TODO align the specs
+      Hacl.SHA2_384.finish p dst
   | SHA256_Vale p ->
       ValeGlue.sha256_finish p dst;
       admit ()

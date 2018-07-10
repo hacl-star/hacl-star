@@ -3,6 +3,7 @@ module EverCrypt.Hash.Test
 open FStar.HyperStack.ST
 open FStar.Integers  
 open FStar.Seq
+open EverCrypt.Helpers
 open EverCrypt.Hash
 
 module ST = FStar.HyperStack.ST
@@ -14,7 +15,6 @@ module M = LowStar.Modifies
 /// extracted code & performance, and similarly provide a shared
 /// reference implementation of update_multi.
 
-[@"c_inline"] // due to variable-length stack allocation
 val compute: 
   a: alg ->
   len: UInt32.t -> 
@@ -36,8 +36,8 @@ let compute a len text tag =
   push_frame();
   let s = create a in 
   assert_norm(v len <= maxLength (Ghost.hide a));
-  let ll = FStar.UInt32.(len %^ blockLen a) in
-  let lb = FStar.UInt32.(len -^ ll)in
+  let ll = len % blockLen a in
+  let lb = len - ll in
   let blocks = B.sub text 0ul lb in
   let last = B.offset text lb in
   let h1 = ST.get() in 

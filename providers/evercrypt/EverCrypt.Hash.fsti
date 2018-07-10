@@ -33,7 +33,7 @@ type alg =
 //| SHAKE128 of (n:nat{n >= 8})
 //| SHAKE256 of (n:nat{n >= 16})
 
-val string_of_alg: alg -> string 
+val string_of_alg: alg -> C.String.t
 
 
 /// HMAC/HKDF ALGORITHMS; secure_api makes security assumptions only
@@ -52,7 +52,7 @@ let blockLen = function
 //| SHAKE128 _ -> 168 | SHAKE256 _ -> 136
   
 noextract 
-let blockLength (a: e_alg) = v (blockLen (Ghost.reveal a))
+let blockLength (a: e_alg): GTot nat = v (blockLen (Ghost.reveal a))
 
 let maxTagLen = 64ul
 let tagLen (a:alg) : Tot UInt32.t =
@@ -90,16 +90,18 @@ noextract let hashable (a: e_alg) = b: bytes{ Seq.length b <= maxLength a }
 
 //18-07-06 switching to ghosts for uniformity, but not great at the pure code actually works concretely.
 //18-07-06 a better name than repr_t?
-noextract val acc (a: e_alg): Type0 // noeq, but `noeq val` is not supported)
+noextract val acc (a: e_alg): Type0 
 
 (* sets the initial value of the accumulator *) 
 noextract val acc0 (#a:e_alg): GTot (acc a)
 
 (* hashes one block of data into the accumulator *)
-noextract val compress: #a:e_alg -> acc a -> b: lbytes (blockLength a) -> GTot (acc a)
+// GTot makes noextract redundant.
+noextract val compress: 
+  #a:e_alg -> acc a -> b: lbytes (blockLength a) -> GTot (acc a)
 
 (* extracts the tag from the (possibly larger) accumulator *)
-noextract val extract: #a:e_alg -> acc a -> lbytes (tagLength a)
+noextract val extract: #a:e_alg -> acc a -> GTot (lbytes (tagLength a))
  
 // val hash2: #a:alg -> acc a -> b:bytes {length b % blockLength a = 0} -> acc a (decreases (length b))
 noextract let rec hash2 
@@ -198,9 +200,6 @@ module G = FStar.Ghost
 
 open LowStar.BufferOps
 
-let uint8_p = B.buffer UInt8.t
-let uint8_pl (l:nat) = p:uint8_p {B.length p = l}
-
 // abstract implementation state
 val state_s: e_alg -> Type0
 let state alg = B.pointer (state_s alg)
@@ -218,8 +217,7 @@ let invariant (#a: e_alg) (s: state a) (m: HS.mem) =
   invariant_s (B.get m s 0) m
 
 //18-07-06 as_acc a better name? not really a representation
-val repr: #a:e_alg -> s:state a -> h:HS.mem { invariant s h } ->
-  GTot (acc a)
+val repr: #a:e_alg -> s:state a -> h:HS.mem { invariant s h } -> GTot (acc a)
 
 // Waiting for these to land in LowStar.Modifies
 let loc_in (l: M.loc) (h: HS.mem) =
@@ -265,74 +263,60 @@ val create: a:alg -> ST (state (G.hide a))
     M.(modifies loc_none h0 h1) /\
     fresh_loc (footprint s h1) h0 h1)
 
-val well_formed: 
-  #a:e_alg -> 
-  s: state a ->
-  h: HS.mem{invariant s h} -> GTot Type0
-
-val bounded_counter:
-  #a:e_alg ->
-  s: state a ->
-  h: HS.mem{invariant s h} ->
-  n: nat { n <= pow2 32 } -> GTot Type0
-
-let well_formed_and_counter (#a:e_alg)
-  (s: state a)
-  (h: HS.mem{invariant s h})
-  (n: nat { n <= pow2 32 }):
-  GTot _
-=
-  well_formed s h /\ bounded_counter s h n
+// we use exists b. hashing s h b as our stateful abstract
+// invariant; the existence of b is used only to reason about the
+// internal counter.
+let hashing (#a:e_alg) (s: state a) (h: HS.mem) (b: bytes) =
+  invariant s h /\
+  Seq.length b % blockLength a = 0 /\ 
+  repr s h == hash0 b  
 
 val init: #a:e_alg -> s:state a -> ST unit
-  (requires (invariant s))
-  (ensures (fun h0 _ h1 ->
-    invariant s h1 /\
-    well_formed s h1 /\ //18-07-07 added for usability, pls review
+  (requires invariant s)
+  (ensures fun h0 _ h1 ->
+    hashing s h1 (Seq.empty #UInt8.t) /\ // implies repr s h1 == acc0 #a
     M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1 /\
-    repr s h1 == acc0 #a))
+    footprint s h0 == footprint s h1)
 
 // Note: this function relies implicitly on the fact that we are running with
 // code/lib/kremlin and that we know that machine integers and secret integers
 // are the same. In the long run, we should standardize on a secret integer type
 // in F*'s ulib and have evercrypt use it.
-val update: #a:e_alg -> s:state a -> data:uint8_p -> Stack unit
-  (requires (fun h0 ->
-    invariant s h0 /\
-    well_formed_and_counter s h0 1 /\
-    B.live h0 data /\
-    B.length data = blockLength a /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer data))))
-  (ensures (fun h0 _ h1 ->
-    invariant s h1 /\
+val update: 
+  #a:e_alg -> 
+  #b: Ghost.erased bytes -> 
+  s:state a -> 
+  block:uint8_p {B.length block = blockLength a} -> 
+  Stack unit
+  (requires fun h0 ->
+    hashing s h0 (Ghost.reveal b) /\
+    B.live h0 block /\
+    M.(loc_disjoint (footprint s h0) (loc_buffer block)))
+  (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1 /\
-    well_formed_and_counter s h1 0 /\ (
-    let r0 = repr s h0 in
-    let r1 = repr s h1 in
-    r1 == compress r0 (B.as_seq h0 data))))
+    footprint s h0 == footprint s h1 /\ 
+    hashing s h1 (Seq.append (Ghost.reveal b) (B.as_seq h0 block)))
+//  repr s h1 == compress (repr s h0) (B.as_seq h0 data)
 
 // new calling convention: we pass the data length in bytes (rather
 // than blocks). I also removed the counter invariant, assuming we
 // will get rid of it.
 val update_multi: 
-  #a:e_alg -> 
+  #a:e_alg ->
+  #b: Ghost.erased bytes ->
   s:state a -> 
   blocks:uint8_p {B.length blocks % blockLength a = 0} -> 
   len: UInt32.t {v len = B.length blocks} -> 
   Stack unit
-  (requires (fun h0 ->
-    invariant s h0 /\
-    well_formed s h0 /\
+  (requires fun h0 ->
+    hashing s h0 (Ghost.reveal b) /\
     B.live h0 blocks /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer blocks))))
-  (ensures (fun h0 _ h1 ->
-    invariant s h1 /\
+    M.(loc_disjoint (footprint s h0) (loc_buffer blocks)))
+  (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    well_formed s h1 /\ 
-    repr s h1 == hash2 (repr s h0) (B.as_seq h0 blocks)))
+    hashing s h1 (Seq.append (Ghost.reveal b) (B.as_seq h0 blocks)))
+//  repr s h1 == hash2 (repr s h0) (B.as_seq h0 blocks)
 
 
 (* see suffix and suffixLength 
@@ -384,53 +368,53 @@ let update_last_spec (#a:e_alg)
 // 18-03-03 it is best to let the caller keep track of lengths.
 // 18-03-03 the last block is *never* complete so there is room for the 1st byte of padding.
 val update_last: 
-  #a:e_alg -> 
+  #a:e_alg ->
+  #b:Ghost.erased bytes ->
   s:state a -> 
-  last:uint8_p {
-    B.length last <= blockLength a } -> 
+  last:uint8_p {B.length last < blockLength a } -> 
   total_len:UInt32.t {
     let l = v total_len in 
-    l <= maxLength a /\
-    B.length last = l % blockLength a } -> Stack unit
-  (requires (fun h0 ->
-    invariant s h0 /\
-    well_formed_and_counter s h0 2 /\
+    l = Seq.length (Ghost.reveal b) + B.length last /\
+    l <= maxLength a } -> 
+  Stack unit
+  (requires fun h0 ->
+    hashing s h0 (Ghost.reveal b) /\
     B.live h0 last /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer last))))
-  (ensures (fun h0 _ h1 ->
-    invariant s h1 /\
-    M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1 /\
-    well_formed s h1 /\ (
-    let r0 = repr s h0 in
-    let r1 = repr s h1 in
+    M.(loc_disjoint (footprint s h0) (loc_buffer last)))
+  (ensures fun h0 _ h1 ->
     let last0 = B.as_seq h0 last in 
     let rawbytes = Seq.append last0 (suffix a (v total_len)) in
-    Seq.length rawbytes % blockLength a = 0 (*required by hash2; otherwise brittle*) /\ 
-    r1 == hash2 #a r0 rawbytes)))
+    Seq.length rawbytes % blockLength a = 0 /\ 
+    M.(modifies (footprint s h0) h0 h1) /\
+    footprint s h0 == footprint s h1 /\
+    hashing s h1 (Seq.append (Ghost.reveal b) rawbytes))
 
-val finish: #a:e_alg -> s:state a -> dst:uint8_p -> Stack unit
-  (requires (fun h0 ->
-    invariant s h0 /\
-    well_formed s h0 /\
+val finish: 
+  #a:e_alg -> 
+  s:state a -> 
+  dst:uint8_p {B.length dst = tagLength a} -> 
+  Stack unit
+  (requires fun h0 ->
+    invariant s h0 /\ 
     B.live h0 dst /\
-    B.length dst = tagLength a /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer dst))))
-  (ensures (fun h0 _ h1 ->
+    M.(loc_disjoint (footprint s h0) (loc_buffer dst)))
+  (ensures fun h0 _ h1 ->
     invariant s h1 /\
     M.(modifies (loc_buffer dst) h0 h1) /\
     footprint s h0 == footprint s h1 /\ 
-    B.as_seq h1 dst = extract (repr s h0)))
+    B.as_seq h1 dst = extract (repr s h0))
 
-val hash: a:alg -> dst:uint8_p -> input:uint8_p -> len:uint32_t -> Stack unit
-  (requires (fun h0 ->
-    let a = Ghost.hide a in 
+val hash: 
+  a:alg -> (
+  let a = Ghost.hide a in 
+  dst:uint8_p {B.length dst = tagLength a} -> 
+  input:uint8_p -> 
+  len:uint32_t {B.length input = v len /\ v len <= maxLength a} -> 
+  Stack unit
+  (requires fun h0 ->
     B.live h0 dst /\
     B.live h0 input /\
-    B.length input = v len /\
-    v len <= maxLength a /\
-    B.length dst = tagLength a /\
-    M.(loc_disjoint (loc_buffer input) (loc_buffer dst))))
-  (ensures (fun h0 _ h1 ->
+    M.(loc_disjoint (loc_buffer input) (loc_buffer dst)))
+  (ensures fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst = spec (Ghost.hide a) (B.as_seq h0 input)))
+    B.as_seq h1 dst = spec a (B.as_seq h0 input)))
