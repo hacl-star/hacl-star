@@ -228,12 +228,12 @@ let frodo_sample r =
   (fun j ->
     let tj = cdf_table.(j) in
     let sample0 = sample.(size 0) in
-    sample.(size 0) <- sample0 +. ((tj -. prnd) >>. u32 15)
+    sample.(size 0) <- sample0 +. (to_u16 (to_u32 (tj -. prnd)) >>. u32 15)
   );
   //((-sign) ^. sample.(size 0)) +.sign
   //(FStar.Math.Lib.powx (-1) (uint_to_nat r0)) * e
-  let res = sample.(size 0) in
-  res
+  (lognot sign +. u16 1) ^. sample.(size 0)
+
 
 val frodo_sample_matrix:
   n1:size_t -> n2:size_t{2 * v n1 * v n2 < max_size_t} ->

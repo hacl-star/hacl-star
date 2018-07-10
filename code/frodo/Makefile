@@ -23,19 +23,22 @@ frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
 	-no-prefix 'Hacl.Test.Frodo' \
 	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo' \
 	-drop 'Hacl.Keccak' \
-	-add-include '"../include/Hacl_Keccak.h"' \
-	-add-include '"../../../lib/c/Lib_Print.h"' \
+	-add-include '"extracted/C_Endianness.h"' \
+	-add-include '"Hacl_Keccak.h"' \
+	-add-include '"c/Lib_Print.h"' \
 	$^ -o $@
 
 CFLAGS += -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib \
 	  -I $(LWEKE_HOME)/src/sha3 -I $(HACL_HOME)/code/frodo/include \
-	  -L $(KREMLIN_HOME)/kremlib/out
+	  -I $(HACL_HOME)/lib \
+	  -Wall -Werror -Wno-shift-op-parentheses
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test-frodo.exe: frodo-c/Hacl_Test_Frodo.c frodo-c/Hacl_Impl_Frodo.c $(BASE_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ -lkremlib
+	$(CC) $(CFLAGS) -o $@ $^ \
+	  -L $(KREMLIN_HOME)/kremlib/out -lkremlib
 
 test: test-frodo.exe
 	./test-frodo.exe
