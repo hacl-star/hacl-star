@@ -891,7 +891,8 @@ let hash_vectors: LB.buffer hash_vector = LB.gcmalloc_of_list HS.root
 ]
 
 inline_for_extraction
-let hash_vectors_len = 25ul
+//let hash_vectors_len = 25ul
+let hash_vectors_len = 9ul
 
 /// AEAD
 

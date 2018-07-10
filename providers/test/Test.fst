@@ -35,8 +35,9 @@ let test_one_hash v =
   in
   let output = B.alloca 0uy output_len in
 
-  let input_len = C.String.strlen v.input * v.repeat in
-  let input = B.alloca 0uy input_len in
+  let input_len = C.String.strlen v.input in
+  let total_input_len = input_len * v.repeat in
+  let input = B.alloca 0uy total_input_len in
   C.Loops.for 0ul v.repeat (fun _ _ -> True) (fun i ->
     C.String.memcpy (B.offset input (input_len * i)) v.input input_len
   );
@@ -51,8 +52,8 @@ let test_one_hash v =
     | H.SHA384 -> 128ul
     //| SHA512 -> 128ul
   in
-  let n = U32.div input_len size_block in
-  let r = U32.rem input_len size_block in
+  let n = U32.div total_input_len size_block in
+  let r = U32.rem total_input_len size_block in
 
   (* Get all full blocks and the last block *)
   let input_blocks = B.sub input 0ul (n * size_block) in
@@ -67,8 +68,14 @@ let test_one_hash v =
   // Non-incrementally:
   // EverCrypt.sha256_hash output input len
 
+  let str: C.String.t =
+    match v.hash_alg with
+    | H.SHA256 -> !$"of SHA256"
+    | H.SHA384 -> !$"of SHA384"
+  in
+
   (* Display the result *)
-  TestLib.compare_and_print !$"of SHA???" !!v.output !!output output_len;
+  TestLib.compare_and_print str !!v.output !!output output_len;
 
   pop_frame()
 
