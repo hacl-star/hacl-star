@@ -414,8 +414,12 @@ let crypto_kem_enc coins pk ct ss =
 
   let ss_init_len = c1Len +. c2Len +. size 2 *. crypto_bytes in
   let ss_init:lbytes (v ss_init_len) = create ss_init_len (u8 0) in
+  let c12Len = c1Len +. c2Len in
+  copy (sub ss_init (size 0) c12Len) c12Len (sub #uint8 #_ #(v c12Len) ct (size 0) c12Len);
+  copy (sub ss_init c12Len crypto_bytes) crypto_bytes k;
+  copy (sub ss_init (ss_init_len -. crypto_bytes) crypto_bytes) crypto_bytes d;
   cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
-  copy (sub ct (c1Len +. c2Len) crypto_bytes) crypto_bytes d
+  copy (sub ct c12Len crypto_bytes) crypto_bytes d
 
 val crypto_kem_dec:
   ct:lbytes (v crypto_ciphertextbytes) -> sk:lbytes (v crypto_secretkeybytes) ->
