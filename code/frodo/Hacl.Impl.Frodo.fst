@@ -163,7 +163,7 @@ val frodo_pack:
   [@"c_inline"]
 let frodo_pack n1 n2 a d res =
   admit();
-  let maskd = (u16 1 <<. size_to_uint32 d) -. u16 1 in
+  let maskd = (u32 1 <<. size_to_uint32 d) -. u32 1 in
   let templong:lbuffer uint128 1 = create (size 1) (to_u128 (u64 0)) in
   let v16 = create (size 16) (u8 0) in
   let n28 = n2 /. size 8 in
@@ -175,7 +175,7 @@ let frodo_pack n1 n2 a d res =
       templong.(size 0) <- (to_u128 (u64 0));
       loop_nospec #h0 (size 8) templong
       (fun k ->
-	let aij = (mget a i (size 8 *. j +. k)) &. maskd in
+	let aij = to_u32 (mget a i (size 8 *. j +. k)) &. maskd in
 	templong.(size 0) <- templong.(size 0) |. (to_u128 aij <<. size_to_uint32 (size 7 *. d -. d *. k))
       );
       uint_to_bytes_be #U128 v16 (templong.(size 0));
@@ -193,7 +193,7 @@ val frodo_unpack:
   [@"c_inline"]
 let frodo_unpack n1 n2 d b res =
   admit();
-  let maskd = (u16 1 <<. size_to_uint32 d) -. u16 1 in
+  let maskd = (u32 1 <<. size_to_uint32 d) -. u32 1 in
   let v16 = create (size 16) (u8 0) in
   let n28 = n2 /. size 8 in
   let h0 = FStar.HyperStack.ST.get () in
@@ -205,8 +205,8 @@ let frodo_unpack n1 n2 d b res =
       let templong = uint_from_bytes_be #U128 v16 in
       loop_nospec #h0 (size 8) res
       (fun k ->
-	let resij = to_u16 (templong >>. size_to_uint32 (size 7 *. d -. d *. k)) &. maskd in
-	mset res i (size 8 *. j +. k) resij
+	let resij = to_u32 (templong >>. size_to_uint32 (size 7 *. d -. d *. k)) &. maskd in
+	mset res i (size 8 *. j +. k) (to_u16 resij)
       )
     )
   )
@@ -490,9 +490,10 @@ let crypto_kem_dec ct sk ss =
   copy (sub ss_init c1Len c2Len) c2Len c2;
   copy (sub ss_init (ss_init_len -. crypto_bytes) crypto_bytes) crypto_bytes d;
 
-  //let bcond = (lbytes_eq d dp) && (matrix_eq params_q bp_matrix bpp_matrix) && (matrix_eq params_q c_matrix cp_matrix) in
-  let bcond = true in
-  (if (bcond) then
+  let b1 = lbytes_eq d dp in
+  let b2 = matrix_eq params_q bp_matrix bpp_matrix in
+  let b3 = matrix_eq params_q c_matrix v_matrix in
+  (if (b1 && b2 && b3) then
     copy (sub ss_init (c1Len +. c2Len) crypto_bytes) crypto_bytes kp
    else
     copy (sub ss_init (c1Len +. c2Len) crypto_bytes) crypto_bytes s);
