@@ -6,7 +6,7 @@ MLCRYPTO_HOME?=../../../../MLCrypto
 OPENSSL_HOME=$(MLCRYPTO_HOME)/openssl
 
 FILES = $(basename $(ALL_C_FILES))
-CFLAGS = -I $(KREMLIN_HOME)/include -g -O0
+CFLAGS = -I $(KREMLIN_HOME)/include -g
 LDFLAGS = -L $(EVERCRYPT_HOME) -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))

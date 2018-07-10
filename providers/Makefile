@@ -184,7 +184,7 @@ INCLUDE_DIRS	= $(foreach c,$(ALL_SOURCES),$(dir $(c))) \
 
 
 CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion -g
 
 # GNU Make manual section 4.14
 %.d: %.c
