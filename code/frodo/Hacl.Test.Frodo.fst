@@ -13,17 +13,13 @@ open Hacl.Impl.PQ.Lib
 module Buffer = Lib.Buffer
 
 val test_frodo:
-  keypair_len:size_t -> keypaircoins:lbytes (v keypair_len) ->
-  enc_len:size_t -> enccoins:lbytes (v enc_len) ->
   ss_len:size_t -> ss_expected:lbytes (v ss_len) ->
   pk_len:size_t -> pk_expected:lbytes (v pk_len) ->
   ct_len:size_t -> ct_expected:lbytes (v ct_len) ->
   sk_len:size_t -> sk_expected:lbytes (v sk_len) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
-let test_frodo keypair_len keypaircoins
-	       enc_len enccoins
-	       ss_len ss_expected
+let test_frodo ss_len ss_expected
 	       pk_len pk_expected
 	       ct_len ct_expected
 	       sk_len sk_expected =
@@ -33,9 +29,9 @@ let test_frodo keypair_len keypaircoins
   let ss1 = create ss_len (u8 0) in
   let ct = create ct_len (u8 0) in
   let ss2 = create ss_len (u8 0) in
-  crypto_kem_keypair keypaircoins pk sk;
-  crypto_kem_enc enccoins pk ct ss1;
-  crypto_kem_dec ct sk ss2;
+  crypto_kem_keypair pk sk;
+  crypto_kem_enc ct ss1 pk;
+  crypto_kem_dec ss2 ct sk;
   Lib.Print.print_compare_display pk_len pk pk_expected;
   Lib.Print.print_compare_display sk_len sk sk_expected;
   Lib.Print.print_compare_display ss_len ss1 ss_expected;
@@ -50,14 +46,6 @@ let test_frodo keypair_len keypaircoins
 
 val main: unit -> Stack C.exit_code (requires (fun h -> True)) (ensures (fun h0 _ h1 -> True))
 let main () =
-  let test1_keypaircoins_len = size 48 in
-  let test1_keypaircoins:lbytes (v test1_keypaircoins_len) = createL [
-    u8 0x4b; u8 0x62; u8 0x2d; u8 0xe1; u8 0x35; u8 0x01; u8 0x19; u8 0xc4; u8 0x5a; u8 0x9f; u8 0x2e; u8 0x2e; u8 0xf3; u8 0xdc; u8 0x5d; u8 0xf5;
-    u8 0x0a; u8 0x75; u8 0x9d; u8 0x13; u8 0x8c; u8 0xdf; u8 0xbd; u8 0x64; u8 0xc8; u8 0x1c; u8 0xc7; u8 0xcc; u8 0x2f; u8 0x51; u8 0x33; u8 0x45;
-    u8 0xd5; u8 0xa4; u8 0x5a; u8 0x4c; u8 0xed; u8 0x06; u8 0x40; u8 0x3c; u8 0x55; u8 0x57; u8 0xe8; u8 0x71; u8 0x13; u8 0xcb; u8 0x30; u8 0xea] in
-  let test1_enccoins_len = size 16 in
-  let test1_enccoins:lbytes (v test1_enccoins_len) = createL [
-    u8 0x08; u8 0xe2; u8 0x55; u8 0x38; u8 0x48; u8 0x4c; u8 0xd7; u8 0xf1; u8 0x61; u8 0x32; u8 0x48; u8 0xfe; u8 0x6c; u8 0x9f; u8 0x6b; u8 0x4e] in
   let test1_ss_expected_len = size 16 in
   let test1_ss_expected:lbytes (v test1_ss_expected_len) = createL [
     u8 0xdf; u8 0xc5; u8 0x2a; u8 0x95; u8 0x6c; u8 0xe4; u8 0xbc; u8 0xa5; u8 0x53; u8 0x70; u8 0x46; u8 0x5a; u8 0x7e; u8 0xf8; u8 0x4f; u8 0x68] in
@@ -324,5 +312,5 @@ let main () =
     u8 0xfc; u8 0xff; u8 0x02; u8 0x00; u8 0x01; u8 0x00; u8 0x03; u8 0x00; u8 0x00; u8 0x00; u8 0xff; u8 0xff; u8 0xfb; u8 0xff; u8 0xfd; u8 0xff;
     u8 0x00; u8 0x00; u8 0x02; u8 0x00; u8 0x02; u8 0x00; u8 0xfb; u8 0xff; u8 0xfd; u8 0xff; u8 0xfd; u8 0xff; u8 0xff; u8 0xff; u8 0x01; u8 0x00] in
 
-  test_frodo (size 48) test1_keypaircoins (size 16) test1_enccoins (size 16) test1_ss_expected (size 976) test1_pk_expected (size 1096) test1_ct_expected (size 2016) test1_sk_expected;
+  test_frodo (size 16) test1_ss_expected (size 976) test1_pk_expected (size 1096) test1_ct_expected (size 2016) test1_sk_expected;
   C.EXIT_SUCCESS

@@ -334,14 +334,20 @@ let matrix_from_lbytes #n1 #n2 b res =
     )
   )
 
+assume val randombytes:
+  len:size_t -> res:lbytes (v len) -> Stack unit
+  (requires (fun h -> True))
+  (ensures (fun h0 r h1 -> True))
+
 val crypto_kem_keypair:
-  coins:lbytes (v (size 2 *. crypto_bytes +. bytes_seed_a)){v (size 2 *. crypto_bytes +. bytes_seed_a) < max_size_t} ->
-  pk:lbytes (v crypto_publickeybytes) ->
+  pk:lbytes (v crypto_publickeybytes){v (size 2 *. crypto_bytes +. bytes_seed_a) < max_size_t} ->
   sk:lbytes (v crypto_secretkeybytes) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
-let crypto_kem_keypair coins pk sk =
+let crypto_kem_keypair pk sk =
   admit();
+  let coins = create (size 2 *. crypto_bytes +. bytes_seed_a) (u8 0) in
+  randombytes (size 2 *. crypto_bytes +. bytes_seed_a) coins;
   let seed_a = sub pk (size 0) bytes_seed_a in
   let b = sub pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
   let a_matrix = matrix_create params_n params_n in
@@ -366,13 +372,14 @@ let crypto_kem_keypair coins pk sk =
 
 //{v bytes_mu = v ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8)}
 val crypto_kem_enc:
-  coins:lbytes (v ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8)) ->
-  pk:lbytes (v crypto_publickeybytes) ->
-  ct:lbytes (v crypto_ciphertextbytes) -> ss:lbytes (v crypto_bytes) -> Stack unit
+  ct:lbytes (v crypto_ciphertextbytes) -> ss:lbytes (v crypto_bytes) ->
+  pk:lbytes (v crypto_publickeybytes) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
-let crypto_kem_enc coins pk ct ss =
+let crypto_kem_enc ct ss pk =
   admit();
+  let coins = create ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8) (u8 0) in
+  randombytes ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8) coins;
   let seed_a = sub #uint8 #_ #(v bytes_seed_a) pk (size 0) bytes_seed_a in
   let b = sub #uint8 #_ #(v ((params_logq *. params_n *. params_nbar) /. size 8)) pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
 
@@ -421,12 +428,14 @@ let crypto_kem_enc coins pk ct ss =
   cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
   copy (sub ct c12Len crypto_bytes) crypto_bytes d
 
+//int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned char *sk);
 val crypto_kem_dec:
-  ct:lbytes (v crypto_ciphertextbytes) -> sk:lbytes (v crypto_secretkeybytes) ->
-  ss:lbytes (v crypto_bytes) -> Stack unit
+  ss:lbytes (v crypto_bytes) ->
+  ct:lbytes (v crypto_ciphertextbytes) ->
+  sk:lbytes (v crypto_secretkeybytes) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
-let crypto_kem_dec ct sk ss =
+let crypto_kem_dec ss ct sk =
   admit();
   let c1Len = (params_logq *. params_nbar *. params_n) /. size 8 in
   let c2Len = (params_logq *. params_nbar *. params_nbar) /. size 8 in

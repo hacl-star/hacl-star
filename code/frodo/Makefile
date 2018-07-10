@@ -12,15 +12,16 @@ BASE_OBJ = ../../lib/c/Lib_Print.o $(HACL_HOME)/code/frodo/include/Hacl_Keccak.o
 
 HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.ByteBuffer.fst ../../lib/Lib.Print.fsti
 
+LWEKE_HOME=$(HACL_HOME)/../PQCrypto-LWEKE
 
 frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.fst Hacl.Test.Frodo.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir frodo-c -no-prefix 'Hacl.Test.Frodo' \
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir frodo-c -no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
 	-I ../../specs -I ../../lib -I ../../lib/fst -I $(KREMLIN_HOME)/include \
 	-skip-translation $^
 
 frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir frodo-c -skip-compilation \
-	-no-prefix 'Hacl.Test.Frodo' \
+	-no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
 	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo' \
 	-drop 'Hacl.Keccak' \
 	-add-include '"extracted/C_Endianness.h"' \
