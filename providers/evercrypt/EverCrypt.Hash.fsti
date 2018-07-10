@@ -118,7 +118,7 @@ noextract let rec hash2
 
 //18-07-07 this verified interactively but not on the command line;
 //18-07-07 I suspect the hacl* specs make it harder for Z3.
-#set-options "--z3rlimit 300" 
+#set-options "--z3rlimit 20" 
 let lemma_compress 
   (#a: e_alg) 
   (a0: acc a)

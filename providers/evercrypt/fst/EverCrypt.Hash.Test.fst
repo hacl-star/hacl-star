@@ -43,14 +43,13 @@ let compute a len text tag =
   let h1 = ST.get() in 
   init s; 
   let h10 = ST.get() in 
-  assert(well_formed s h10);
-  assume(bounded_counter s h10 (v lb));
-  assert(invariant s h10);
-  update_multi s blocks lb; 
+  update_multi #(Ghost.hide a) #(Ghost.hide (Seq.empty #UInt8.t)) s blocks lb; 
   let h11 = ST.get() in 
-  assert(well_formed s h11);
-  assume(bounded_counter s h11 2);
-  update_last s last len;
+
+  //18-07-10 improve style on ghosts and lists?
+  FStar.Seq.(lemma_eq_intro (append (empty #UInt8.t) (B.as_seq h10 blocks)) (B.as_seq h10 blocks));
+
+  update_last #(Ghost.hide a) #(Ghost.hide (B.as_seq h11 blocks)) s last len;
   finish s tag;
   let h2 = ST.get() in 
   pop_frame();

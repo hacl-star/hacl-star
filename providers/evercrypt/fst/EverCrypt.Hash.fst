@@ -77,12 +77,15 @@ let extract #a st =
   | SHA512 -> Spec.Lib.uint64s_to_be 8 st.hash 
   | _      -> admit()
 
+#set-options "--lax"
 /// ------ at this point interactive verification dies; using c-c c-l
 
 // 18-07-06 TODO; should be provable, despite the two specs having
 // different structures.
 let suffix a l = admit()
-    
+
+#reset-options 
+
 (*
   let l1 = l % blockLength a in 
   let l0 = l - l1 in
