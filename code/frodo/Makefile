@@ -8,13 +8,13 @@ KREMLIN_ARGS+=-verbose \
 	-ccopt -march=native -warn-error +9
 
 
-BASE_OBJ = ../../lib/c/Lib_Print.o $(HACL_HOME)/code/frodo/include/Hacl_Keccak.o $(LWEKE_HOME)/src/sha3/fips202.o
+BASE_OBJ = ../../lib/c/Lib_Print.o $(HACL_HOME)/code/frodo/include/Hacl_Keccak.o $(LWEKE_HOME)/src/sha3/fips202.o $(LWEKE_HOME)/objs/tests/rng.o $(LWEKE_HOME)/objs/aes/aes_c.o $(LWEKE_HOME)/objs/aes/aes.o
 
 HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.ByteBuffer.fst ../../lib/Lib.Print.fsti
 
 LWEKE_HOME=$(HACL_HOME)/../PQCrypto-LWEKE
 
-frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.fst Hacl.Test.Frodo.fst
+frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.fst Hacl.Test.Frodo.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir frodo-c -no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
 	-I ../../specs -I ../../lib -I ../../lib/fst -I $(KREMLIN_HOME)/include \
 	-skip-translation $^
@@ -22,7 +22,7 @@ frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.F
 frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir frodo-c -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
-	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo' \
+	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo,Hacl.Impl.Frodo.Params' \
 	-drop 'Hacl.Keccak' \
 	-add-include '"extracted/C_Endianness.h"' \
 	-add-include '"Hacl_Keccak.h"' \
@@ -37,12 +37,17 @@ CFLAGS += -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib \
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-test-frodo.exe: frodo-c/Hacl_Test_Frodo.c frodo-c/Hacl_Impl_Frodo.c $(BASE_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ \
-	  -L $(KREMLIN_HOME)/kremlib/out -lkremlib
+test-frodo.exe: frodo-c/Hacl_Test_Frodo.c frodo-c/Hacl_Impl_Frodo.c randombytes.c $(BASE_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
 
 test: test-frodo.exe
 	./test-frodo.exe
+
+AR=ar rcs
+
+lib: $(BASE_OBJ) frodo-c/Hacl_Impl_Frodo.o randombytes.o
+	$(AR) frodo-c/libfrodostar_for_testing.a $^
+	ranlib frodo-c/libfrodostar_for_testing.a
 
 clean:
 	rm -rf *~ *.exe *.exe.dSYM

@@ -13,17 +13,20 @@ open Hacl.Impl.PQ.Lib
 module Buffer = Lib.Buffer
 
 val test_frodo:
+  seed:lbytes 48 ->
   ss_len:size_t -> ss_expected:lbytes (v ss_len) ->
   pk_len:size_t -> pk_expected:lbytes (v pk_len) ->
   ct_len:size_t -> ct_expected:lbytes (v ct_len) ->
   sk_len:size_t -> sk_expected:lbytes (v sk_len) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
-let test_frodo ss_len ss_expected
+let test_frodo seed
+               ss_len ss_expected
 	       pk_len pk_expected
 	       ct_len ct_expected
 	       sk_len sk_expected =
   admit();
+  randombytes_init_(seed);
   let pk = create pk_len (u8 0) in
   let sk = create sk_len (u8 0) in
   let ss1 = create ss_len (u8 0) in
@@ -312,5 +315,8 @@ let main () =
     u8 0xfc; u8 0xff; u8 0x02; u8 0x00; u8 0x01; u8 0x00; u8 0x03; u8 0x00; u8 0x00; u8 0x00; u8 0xff; u8 0xff; u8 0xfb; u8 0xff; u8 0xfd; u8 0xff;
     u8 0x00; u8 0x00; u8 0x02; u8 0x00; u8 0x02; u8 0x00; u8 0xfb; u8 0xff; u8 0xfd; u8 0xff; u8 0xfd; u8 0xff; u8 0xff; u8 0xff; u8 0x01; u8 0x00] in
 
-  test_frodo (size 16) test1_ss_expected (size 976) test1_pk_expected (size 1096) test1_ct_expected (size 2016) test1_sk_expected;
+  let seed:lbytes 48 = createL [
+    u8 0x64; u8 0x33; u8 0x5b; u8 0xf2; u8 0x9e; u8 0x5d; u8 0xe6; u8 0x28; u8 0x42; u8 0xc9; u8 0x41; u8 0x76; u8 0x6b; u8 0xa1; u8 0x29; u8 0xb0; u8 0x64; u8 0x3b; u8 0x5e; u8 0x71; u8 0x21; u8 0xca; u8 0x26; u8 0xcf; u8 0xc1; u8 0x90; u8 0xec; u8 0x7d; u8 0xc3; u8 0x54; u8 0x38; u8 0x30; u8 0x55; u8 0x7f; u8 0xdd; u8 0x5c; u8 0x3; u8 0xcf; u8 0x12; u8 0x3a; u8 0x45; u8 0x6d; u8 0x48; u8 0xef; u8 0xea; u8 0x43; u8 0xc8; u8 0x68 ] in
+
+  test_frodo seed (size 16) test1_ss_expected (size 976) test1_pk_expected (size 1096) test1_ct_expected (size 2016) test1_sk_expected;
   C.EXIT_SUCCESS

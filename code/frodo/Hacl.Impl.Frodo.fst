@@ -11,13 +11,17 @@ open FStar.Math.Lemmas
 open Hacl.Impl.PQ.Lib
 open Hacl.Keccak
 
+include Hacl.Impl.Frodo.Params
+
+let cshake_frodo = cshake128_frodo
+
 val eq_u8: a:uint8 -> b:uint8 -> Tot bool
 [@ "substitute"]
 let eq_u8 a b = FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
 
-val eq_u16_m:m:uint16 -> a:uint16 -> b:uint16 -> Tot bool
+val eq_u32_m:m:uint32 -> a:uint32 -> b:uint32 -> Tot bool
 [@ "substitute"]
-let eq_u16_m m a b = FStar.UInt16.(u16_to_UInt16 (a &. m) =^ u16_to_UInt16 (b &. m))
+let eq_u32_m m a b = FStar.UInt32.(u32_to_UInt32 (a &. m) =^ u32_to_UInt32 (b &. m))
 
 val matrix_eq:
   #n1:size_t -> #n2:size_t -> m:size_t{v m > 0} ->
@@ -27,7 +31,7 @@ val matrix_eq:
   [@"c_inline"]
 let matrix_eq #n1 #n2 m a b =
   admit();
-  let m = (u16 1 <<. size_to_uint32 m) -. u16 1 in
+  let m = (u32 1 <<. size_to_uint32 m) -. u32 1 in
   let res:lbuffer bool 1 = create (size 1) (true) in
   let h0 = FStar.HyperStack.ST.get () in
   loop_nospec #h0 n1 res
@@ -35,7 +39,7 @@ let matrix_eq #n1 #n2 m a b =
     loop_nospec #h0 n2 res
     (fun j ->
       let a1 = res.(size 0) in
-      let a2 = eq_u16_m m (mget a i j) (mget b i j) in
+      let a2 = eq_u32_m m (to_u32 (mget a i j)) (to_u32 (mget b i j)) in
       res.(size 0) <- a1 && a2
     )
   );
@@ -57,26 +61,6 @@ let lbytes_eq #len a b =
     res.(size 0) <- a1 && a2
   );
   res.(size 0)
-
-//FrodoKEM-640
-let params_n = size 64 //640
-let params_logq = size 15
-let params_extracted_bits = size 2
-let crypto_bytes = size 16
-let cshake_frodo = cshake128_frodo
-let cdf_table_len = size 12
-
-let cdf_table : lbuffer uint16 (v cdf_table_len) =
-  let cdf_table0: list uint16 =
-    [u16 4727; u16 13584; u16 20864; u16 26113; u16 29434; u16 31278; u16 32176; u16 32560; u16 32704; u16 32751; u16 32764; u16 32767] in
-  assert_norm(List.Tot.length cdf_table0 = v cdf_table_len);
-  createL_global
-    [u16 4727; u16 13584; u16 20864; u16 26113; u16 29434; u16 31278;
-     u16 32176; u16 32560; u16 32704; u16 32751; u16 32764; u16 32767]
-
-let bytes_seed_a = size 16
-let params_nbar = size 8
-let params_q = size 32768 //2 ** params_logq
 
 let bytes_mu =  normalize_term ((params_extracted_bits *. params_nbar *. params_nbar) /. size 8)
 let crypto_publickeybytes = normalize_term (bytes_seed_a +. (params_logq *. params_n *. params_nbar) /. size 8)
@@ -334,20 +318,25 @@ let matrix_from_lbytes #n1 #n2 b res =
     )
   )
 
-assume val randombytes:
+assume val randombytes_init_:
+  entropy_input:lbytes 48 -> Stack unit
+  (requires (fun h -> True))
+  (ensures (fun h0 r h1 -> True))
+
+assume val randombytes_:
   len:size_t -> res:lbytes (v len) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
 
 val crypto_kem_keypair:
   pk:lbytes (v crypto_publickeybytes){v (size 2 *. crypto_bytes +. bytes_seed_a) < max_size_t} ->
-  sk:lbytes (v crypto_secretkeybytes) -> Stack unit
+  sk:lbytes (v crypto_secretkeybytes) -> Stack uint32
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
 let crypto_kem_keypair pk sk =
   admit();
   let coins = create (size 2 *. crypto_bytes +. bytes_seed_a) (u8 0) in
-  randombytes (size 2 *. crypto_bytes +. bytes_seed_a) coins;
+  randombytes_ (size 2 *. crypto_bytes +. bytes_seed_a) coins;
   let seed_a = sub pk (size 0) bytes_seed_a in
   let b = sub pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
   let a_matrix = matrix_create params_n params_n in
@@ -368,18 +357,19 @@ let crypto_kem_keypair pk sk =
   frodo_pack params_n params_nbar b_matrix params_logq b;
   copy (sub sk (size 0) crypto_bytes) crypto_bytes s;
   copy (sub sk crypto_bytes crypto_publickeybytes) crypto_publickeybytes pk;
-  matrix_to_lbytes s_matrix (sub sk (crypto_bytes +. crypto_publickeybytes) (size 2 *. params_n *. params_nbar))
+  matrix_to_lbytes s_matrix (sub sk (crypto_bytes +. crypto_publickeybytes) (size 2 *. params_n *. params_nbar));
+  (u32 0)
 
 //{v bytes_mu = v ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8)}
 val crypto_kem_enc:
   ct:lbytes (v crypto_ciphertextbytes) -> ss:lbytes (v crypto_bytes) ->
-  pk:lbytes (v crypto_publickeybytes) -> Stack unit
+  pk:lbytes (v crypto_publickeybytes) -> Stack uint32
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
 let crypto_kem_enc ct ss pk =
   admit();
   let coins = create ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8) (u8 0) in
-  randombytes ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8) coins;
+  randombytes_ ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8) coins;
   let seed_a = sub #uint8 #_ #(v bytes_seed_a) pk (size 0) bytes_seed_a in
   let b = sub #uint8 #_ #(v ((params_logq *. params_n *. params_nbar) /. size 8)) pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
 
@@ -426,13 +416,14 @@ let crypto_kem_enc ct ss pk =
   copy (sub ss_init c12Len crypto_bytes) crypto_bytes k;
   copy (sub ss_init (ss_init_len -. crypto_bytes) crypto_bytes) crypto_bytes d;
   cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
-  copy (sub ct c12Len crypto_bytes) crypto_bytes d
+  copy (sub ct c12Len crypto_bytes) crypto_bytes d;
+  (u32 0)
 
 //int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned char *sk);
 val crypto_kem_dec:
   ss:lbytes (v crypto_bytes) ->
   ct:lbytes (v crypto_ciphertextbytes) ->
-  sk:lbytes (v crypto_secretkeybytes) -> Stack unit
+  sk:lbytes (v crypto_secretkeybytes) -> Stack uint32
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
 let crypto_kem_dec ss ct sk =
@@ -500,11 +491,12 @@ let crypto_kem_dec ss ct sk =
   copy (sub ss_init (ss_init_len -. crypto_bytes) crypto_bytes) crypto_bytes d;
 
   let b1 = lbytes_eq d dp in
-  let b2 = matrix_eq params_q bp_matrix bpp_matrix in
-  let b3 = matrix_eq params_q c_matrix v_matrix in
+  let b2 = matrix_eq params_logq bp_matrix bpp_matrix in
+  let b3 = matrix_eq params_logq c_matrix v_matrix in
   (if (b1 && b2 && b3) then
     copy (sub ss_init (c1Len +. c2Len) crypto_bytes) crypto_bytes kp
    else
     copy (sub ss_init (c1Len +. c2Len) crypto_bytes) crypto_bytes s);
 
-  cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss
+  cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
+  (u32 0)
