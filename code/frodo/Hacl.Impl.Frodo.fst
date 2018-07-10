@@ -201,7 +201,7 @@ let frodo_unpack n1 n2 d b res =
   (fun i ->
     loop_nospec #h0 n28 res
     (fun j ->
-      copy (sub v16 (size 16 -. d) d) d (sub #uint8 #_ #(v d) b ((i *. n2 /. size 8 +. j) *. d) d);
+      copy (sub v16 (size 16 -. d) d) d (sub #uint8 #_ #(v d) b ((i *. n28 +. j) *. d) d);
       let templong = uint_from_bytes_be #U128 v16 in
       loop_nospec #h0 (size 8) res
       (fun k ->
@@ -232,7 +232,7 @@ let frodo_sample r =
   );
   //((-sign) ^. sample.(size 0)) +.sign
   //(FStar.Math.Lib.powx (-1) (uint_to_nat r0)) * e
-  (lognot sign +. u16 1) ^. sample.(size 0)
+  ((lognot sign +. u16 1) ^. sample.(size 0)) +! sign
 
 
 val frodo_sample_matrix:
