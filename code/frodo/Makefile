@@ -31,7 +31,7 @@ frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
 CFLAGS += -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib \
 	  -I $(LWEKE_HOME)/src/sha3 -I $(HACL_HOME)/code/frodo/include \
 	  -I $(HACL_HOME)/lib \
-	  -Wall -Werror -Wno-shift-op-parentheses
+	  -Wall -Werror -Wno-parentheses
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
