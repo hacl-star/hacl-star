@@ -1,6 +1,9 @@
 module Hacl.Impl.Frodo
 
 open FStar.HyperStack.All
+open FStar.HyperStack
+open FStar.HyperStack.ST
+
 open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.PQ.Buffer
@@ -10,6 +13,14 @@ open FStar.Math.Lemmas
 open Hacl.Impl.PQ.Lib
 open Hacl.Keccak
 open Hacl.Impl.Frodo.Params
+
+open LowStar.ModifiesPat
+open LowStar.Modifies
+
+module Buf = LowStar.Buffer
+module HS = FStar.HyperStack
+module ST = FStar.HyperStack.ST
+module Seq = FStar.Seq
 
 let cshake_frodo = cshake128_frodo
 
@@ -22,43 +33,49 @@ val eq_u32_m:m:uint32 -> a:uint32 -> b:uint32 -> Tot bool
 let eq_u32_m m a b = FStar.UInt32.(u32_to_UInt32 (a &. m) =^ u32_to_UInt32 (b &. m))
 
 val matrix_eq:
-  #n1:size_t -> #n2:size_t -> m:size_t{v m > 0} ->
+  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
+  m:size_t{0 < v m /\ v m <= 16} ->
   a:matrix_t n1 n2 -> b:matrix_t n1 n2 -> Stack bool
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h a /\ Buf.live h b))
+  (ensures (fun h0 r h1 -> modifies loc_none h0 h1))
   [@"c_inline"]
 let matrix_eq #n1 #n2 m a b =
-  admit();
+  push_frame();
   let m = (u32 1 <<. size_to_uint32 m) -. u32 1 in
   let res:lbuffer bool 1 = create (size 1) (true) in
-  let h0 = FStar.HyperStack.ST.get () in
+  let h0 = ST.get () in
   loop_nospec #h0 n1 res
   (fun i ->
-    loop_nospec #h0 n2 res
+    let h1 = ST.get () in
+    loop_nospec #h1 n2 res
     (fun j ->
       let a1 = res.(size 0) in
       let a2 = eq_u32_m m (to_u32 (mget a i j)) (to_u32 (mget b i j)) in
       res.(size 0) <- a1 && a2
     )
   );
-  res.(size 0)
+  let res = res.(size 0) in
+  pop_frame();
+  res
 
 val lbytes_eq:
   #len:size_t -> a:lbytes len -> b:lbytes len -> Stack bool
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h a /\ Buf.live h b))
+  (ensures (fun h0 r h1 -> modifies loc_none h0 h1))
   [@"c_inline"]
 let lbytes_eq #len a b =
-  admit();
+  push_frame();
   let res:lbuffer bool 1 = create (size 1) (true) in
-  let h0 = FStar.HyperStack.ST.get () in
+  let h0 = ST.get () in
   loop_nospec #h0 len res
   (fun i ->
     let a1 = res.(size 0) in
     let a2 = eq_u8 a.(i) b.(i) in
     res.(size 0) <- a1 && a2
   );
-  res.(size 0)
+  let res = res.(size 0) in
+  pop_frame();
+  res
 
 let bytes_mu =  normalize_term ((params_extracted_bits *. params_nbar *. params_nbar) /. size 8)
 let crypto_publickeybytes = normalize_term (bytes_seed_a +. (params_logq *. params_n *. params_nbar) /. size 8)
@@ -66,17 +83,16 @@ let crypto_secretkeybytes = normalize_term (crypto_bytes +. crypto_publickeybyte
 let crypto_ciphertextbytes = normalize_term (((params_nbar *. params_n +. params_nbar *. params_nbar) *. params_logq) /. size 8 +. crypto_bytes)
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
-val ec:b:size_t -> k:uint16 -> Tot uint16
+val ec:
+  b:size_t{v b < v params_logq} -> k:uint16 -> Tot uint16
   [@ "substitute"]
 let ec b a =
-  assume (v (params_logq -. b) < 16);
   shift_left #U16 a (size_to_uint32 (params_logq -. b))
 
-val dc:b:size_t -> c:uint16 -> Tot uint16
+val dc:
+  b:size_t{v b < v params_logq} -> c:uint16 -> Tot uint16
   [@ "substitute"]
 let dc b c =
-  assume (v (params_logq -. b -. size 1) < 16);
-  assume (v (params_logq -. b) < 16);
   let res1 = (c +. (u16 1 <<. size_to_uint32 (params_logq -. b -. size 1))) >>. size_to_uint32 (params_logq -. b) in
   res1 &. ((u16 1 <<. size_to_uint32 b) -. u16 1)
 
@@ -84,28 +100,42 @@ val frodo_key_encode:
   b:size_t{v ((params_nbar *. params_nbar *. b) /. size 8) < max_size_t /\ v b <= 8} ->
   a:lbytes ((params_nbar *. params_nbar *. b) /. size 8) ->
   res:matrix_t params_nbar params_nbar -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h a /\ Buf.live h res /\ Buf.disjoint a res))
+  (ensures (fun h0 _ h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
   [@"c_inline"]
 let frodo_key_encode b a res =
-  admit();
+  push_frame();
+  let n2 = params_nbar /. size 8 in
   let aLen = (params_nbar *. params_nbar *. b) /. size 8 in
   let v8 = create (size 8) (u8 0) in
-  let h0 = FStar.HyperStack.ST.get () in
-  loop_nospec #h0 params_nbar res
-  (fun i ->
-    loop_nospec #h0 (normalize_term (params_nbar /. size 8)) res
-    (fun j ->
-      copy (sub v8 (size 0) b) b (sub #uint8 #(v aLen) #(v b) a ((i+.j)*.b) b);
-      let vij = uint_from_bytes_le v8 in
-      loop_nospec #h0 (size 8) res
-      (fun k ->
-	let ak = (vij >>. size_to_uint32 (b *. k)) &. ((u64 1 <<. size_to_uint32 b) -. u64 1) in
-        let resij = ec b (to_u16 ak) in
-        mset res i (size 8 *. j +. k) resij
-      )
-    )
-  )
+  let h0 = ST.get () in
+  let inv (h1:mem) (j:nat{j <= v params_nbar}) =
+    Buf.live h1 res /\ Buf.live h1 v8 /\ modifies (loc_union (loc_buffer res) (loc_buffer v8)) h0 h1 in
+  let f' (i:size_t{0 <= v i /\ v i < v params_nbar}): Stack unit
+      (requires (fun h -> inv h (v i)))
+      (ensures (fun _ _ h2 -> inv h2 (v i + 1))) =
+      let h0 = ST.get () in
+      let inv1 (h1:mem) (j:nat{j <= v n2}) =
+        Buf.live h1 res /\ Buf.live h1 v8 /\ modifies (loc_union (loc_buffer res) (loc_buffer v8)) h0 h1 in
+      let f1 (j:size_t{0 <= v j /\ v j < v n2}): Stack unit
+        (requires (fun h -> inv1 h (v j)))
+        (ensures (fun _ _ h2 -> inv1 h2 (v j + 1))) =
+          assume (v ((i +. j) *. b) + v b <= v aLen);
+          copy (sub v8 (size 0) b) b (sub #uint8 #(v aLen) #(v b) a ((i +. j) *. b) b);
+          let vij = uint_from_bytes_le #U64 v8 in
+          let h1 = ST.get () in
+          loop_nospec #h1 (size 8) res
+          (fun k ->
+            assume (v (b *. k) < 64);
+            let ak = (vij >>. size_to_uint32 (b *. k)) &. ((u64 1 <<. size_to_uint32 b) -. u64 1) in
+            let resij = ec b (to_u16 ak) in
+            assume (v (size 8 *. j +. k) < v params_nbar);
+            mset res i (size 8 *. j +. k) resij
+          ) in
+
+      Lib.Loops.for (size 0) n2 inv1 f1 in
+  Lib.Loops.for (size 0) params_nbar inv f';
+  pop_frame()
 
 val frodo_key_decode:
   b:size_t{v ((params_nbar *. params_nbar *. b) /. size 8) < max_size_t /\ v b <= 8} ->

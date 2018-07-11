@@ -5,6 +5,14 @@ open Lib.IntTypes
 open Lib.PQ.Buffer
 open FStar.Mul
 
+open LowStar.ModifiesPat
+open LowStar.Modifies
+
+module Buf = LowStar.Buffer
+module HS = FStar.HyperStack
+module ST = FStar.HyperStack.ST
+module Seq = FStar.Seq
+
 inline_for_extraction
 type numeric_t = uint16
 
@@ -18,51 +26,60 @@ inline_for_extraction
 type matrix_t n1 n2 = lbuffer uint16 (v (n1 *. n2))
 
 val matrix_create:
-  n1:size_t -> n2:size_t ->
+  n1:size_t -> n2:size_t{0 < v (n1 *. n2) /\ v n1 * v n2 < max_size_t} ->
   StackInline (matrix_t n1 n2)
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h0 -> True))
+  (ensures (fun h0 r h1 ->
+    Buf.alloc_post_common (HS.get_tip h0) (v (n1 *. n2)) r h0 h1 /\
+    Buf.as_seq h1 r == Seq.create (v (n1 *. n2)) (u16 0)))
   [@ "substitute"]
 let matrix_create n1 n2 =
   create #uint16 (n1 *. n2) (u16 0)
 
+val lemma_matrix_index:
+  n1:size_nat -> n2:size_nat ->
+  i:size_nat{i < n1} -> j:size_nat{j < n2} ->
+  Lemma (i * n2 + j < n1 * n2)
+  #reset-options "--z3rlimit 50 --max_fuel 0"
+let lemma_matrix_index n1 n2 i j =
+  assert (i * n2 + j <= (n1 - 1) * n2 + n2 - 1)
+
 val mget:
-  #n1:size_t -> #n2:size_t ->
+  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
   a:matrix_t n1 n2 ->
   i:size_t{v i < v n1} -> j:size_t{v j < v n2} -> Stack uint16
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h a))
+  (ensures (fun h0 r h1 -> h0 == h1)) ///\ r == Seq.index (Buf.as_seq h1 a) (v (i *. n2 +. j))))
   [@ "substitute"]
 let mget #n1 #n2 a i j =
-  assume (v (i *. n2 +. j) < v (n1 *. n2));
+  lemma_matrix_index (v n1) (v n2) (v i) (v j);
   a.(i *. n2 +. j)
 
 val mset:
-  #n1:size_t -> #n2:size_t ->
+  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
   a:matrix_t n1 n2 ->
   i:size_t{v i < v n1} -> j:size_t{v j < v n2} ->
   vij:uint16 -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h a))
+  (ensures (fun h0 _ h1 -> Buf.live h1 a /\ modifies (loc_buffer a) h0 h1))
   [@ "substitute"]
 let mset #n1 #n2 a i j vij =
-  assume (v (i *. n2 +. j) < v (n1 *. n2));
+  lemma_matrix_index (v n1) (v n2) (v i) (v j);
   a.(i *. n2 +. j) <- vij
 
-//modifies a
 val matrix_add:
-  #n1:size_t -> #n2:size_t ->
+  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
   a:matrix_t n1 n2 -> b:matrix_t n1 n2 ->
   Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h a /\ Buf.live h b /\ Buf.disjoint a b))
+  (ensures (fun h0 r h1 -> Buf.live h1 a /\ modifies (loc_buffer a) h0 h1))
   [@"c_inline"]
 let matrix_add #n1 #n2 a b =
-  admit();
-  let h0 = FStar.HyperStack.ST.get () in
+  let h0 = ST.get () in
   loop_nospec #h0 n1 a
   (fun i ->
-    loop_nospec #h0 n2 a
+    let h1 = ST.get () in
+    loop_nospec #h1 n2 a
     (fun j ->
       let aij = mget a i j in
       let bij = mget b i j in
@@ -71,20 +88,19 @@ let matrix_add #n1 #n2 a b =
     )
   )
 
-//modifies b
 val matrix_sub:
-  #n1:size_t -> #n2:size_t ->
+  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
   a:matrix_t n1 n2 -> b:matrix_t n1 n2 ->
   Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h a /\ Buf.live h b /\ Buf.disjoint a b))
+  (ensures (fun h0 r h1 -> Buf.live h1 b /\ modifies (loc_buffer b) h0 h1))
   [@"c_inline"]
 let matrix_sub #n1 #n2 a b =
-  admit();
-  let h0 = FStar.HyperStack.ST.get () in
-  loop_nospec #h0 n1 a
+  let h0 = ST.get () in
+  loop_nospec #h0 n1 b
   (fun i ->
-    loop_nospec #h0 n2 a
+    let h1 = ST.get () in
+    loop_nospec #h1 n2 b
     (fun j ->
       let aij = mget a i j in
       let bij = mget b i j in
@@ -97,18 +113,21 @@ val matrix_mul:
   #n1:size_t -> #n2:size_t -> #n3:size_t ->
   a:matrix_t n1 n2 -> b:matrix_t n2 n3 ->
   c:matrix_t n1 n3 -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h ->
+    v n1 * v n2 < max_size_t /\ v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t /\
+    Buf.live h a /\ Buf.live h b /\ Buf.live h c /\ Buf.disjoint a c /\ Buf.disjoint b c))
+  (ensures (fun h0 _ h1 -> Buf.live h1 c /\ modifies (loc_buffer c) h0 h1))
   [@"c_inline"]
 let matrix_mul #n1 #n2 #n3 a b c =
-  admit();
-  let h0 = FStar.HyperStack.ST.get () in
+  let h0 = ST.get () in
   loop_nospec #h0 n1 c
   (fun i ->
-    loop_nospec #h0 n3 c
+    let h1 = ST.get () in
+    loop_nospec #h1 n3 c
     (fun k ->
       mset c i k (u16 0);
-      loop_nospec #h0 n2 c
+      let h2 = ST.get () in
+      loop_nospec #h2 n2 c
       (fun j ->
 	let aij = mget a i j in
 	let bjk = mget b j k in
