@@ -141,153 +141,205 @@ val frodo_key_decode:
   b:size_t{v ((params_nbar *. params_nbar *. b) /. size 8) < max_size_t /\ v b <= 8} ->
   a:matrix_t params_nbar params_nbar ->
   res:lbytes ((params_nbar *. params_nbar *. b) /. size 8) -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h a /\ Buf.live h res /\ Buf.disjoint a res))
+  (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
   [@"c_inline"]
 let frodo_key_decode b a res =
-  admit();
+  push_frame();
+  let n2 = params_nbar /. size 8 in
   let resLen = (params_nbar *. params_nbar *. b) /. size 8 in
   let v8 = create (size 8) (u8 0) in
   let templong:lbuffer uint64 1 = create (size 1) (u64 0) in
-  let h0 = FStar.HyperStack.ST.get () in
-  loop_nospec #h0 params_nbar res
-  (fun i ->
-    loop_nospec #h0 (normalize_term (params_nbar /. size 8)) res
-    (fun j ->
-      templong.(size 0) <- u64 0;
-      loop_nospec #h0 (size 8) templong
-      (fun k ->
-	let aij = dc b (mget a i (size 8 *. j +. k)) in
-	templong.(size 0) <- templong.(size 0) |. (to_u64 aij <<. size_to_uint32 (b *. k))
-      );
-      uint_to_bytes_le #U64 v8 (templong.(size 0));
-      copy (sub res ((i +. j) *. b) b) b (sub #uint8 #8 #(v b) v8 (size 0) b)
-    )
-  )
+  let h0 = ST.get () in
+  let inv (h1:mem) (j:nat{j <= v params_nbar}) =
+    Buf.live h1 res /\ Buf.live h1 v8 /\ Buf.live h1 templong /\
+    modifies (loc_union (loc_buffer res) (loc_union (loc_buffer v8) (loc_buffer templong))) h0 h1 in
+  let f' (i:size_t{0 <= v i /\ v i < v params_nbar}): Stack unit
+      (requires (fun h -> inv h (v i)))
+      (ensures (fun _ _ h2 -> inv h2 (v i + 1))) =
+      let h0 = ST.get () in
+      let inv1 (h1:mem) (j:nat{j <= v n2}) =
+        Buf.live h1 res /\ Buf.live h1 v8 /\ Buf.live h1 templong /\
+        modifies (loc_union (loc_buffer res) (loc_union (loc_buffer v8) (loc_buffer templong))) h0 h1 in
+      let f1 (j:size_t{0 <= v j /\ v j < v n2}): Stack unit
+        (requires (fun h -> inv1 h (v j)))
+        (ensures (fun _ _ h2 -> inv1 h2 (v j + 1))) =
+          templong.(size 0) <- u64 0;
+          let h1 = ST.get () in
+          loop_nospec #h1 (size 8) templong
+          (fun k ->
+            assume (v (size 8 *. j +. k) < v params_nbar);
+            let aij = dc b (mget a i (size 8 *. j +. k)) in
+            assume (v (b *. k) < 64);
+            templong.(size 0) <- templong.(size 0) |. (to_u64 aij <<. size_to_uint32 (b *. k))
+          );
+          uint_to_bytes_le #U64 v8 (templong.(size 0));
+          assume (v ((i +. j) *. b) + v b <= v resLen);
+          copy (sub res ((i +. j) *. b) b) b (sub #uint8 #8 #(v b) v8 (size 0) b) in
+
+      Lib.Loops.for (size 0) n2 inv1 f1 in
+  Lib.Loops.for (size 0) params_nbar inv f';
+  pop_frame()
 
 val frodo_pack:
   n1:size_t -> n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0} ->
   a:matrix_t n1 n2 ->
   d:size_t{v ((d *. n1 *. n2) /. size 8) < max_size_t /\ v d <= 16} ->
   res:lbytes ((d *. n1 *. n2) /. size 8) -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h a /\ Buf.live h res /\ Buf.disjoint a res))
+  (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
   [@"c_inline"]
 let frodo_pack n1 n2 a d res =
-  admit();
+  push_frame();
   let maskd = (u32 1 <<. size_to_uint32 d) -. u32 1 in
   let templong:lbuffer uint128 1 = create (size 1) (to_u128 (u64 0)) in
   let v16 = create (size 16) (u8 0) in
   let n28 = n2 /. size 8 in
-  let h0 = FStar.HyperStack.ST.get () in
-  loop_nospec #h0 n1 res
-  (fun i ->
-    loop_nospec #h0 n28 res
-    (fun j ->
-      templong.(size 0) <- (to_u128 (u64 0));
-      loop_nospec #h0 (size 8) templong
-      (fun k ->
-	let aij = to_u32 (mget a i (size 8 *. j +. k)) &. maskd in
-	templong.(size 0) <- templong.(size 0) |. (to_u128 aij <<. size_to_uint32 (size 7 *. d -. d *. k))
-      );
-      uint_to_bytes_be #U128 v16 (templong.(size 0));
-      copy (sub res ((i *. n2 /. size 8 +. j) *. d) d) d (sub #uint8 #16 #(v d) v16 (size 16 -. d) d)
-    )
-  )
+
+  let h0 = ST.get () in
+  let inv (h1:mem) (j:nat{j <= v n1}) =
+    Buf.live h1 res /\ Buf.live h1 v16 /\ Buf.live h1 templong /\
+    modifies (loc_union (loc_buffer res) (loc_union (loc_buffer v16) (loc_buffer templong))) h0 h1 in
+  let f' (i:size_t{0 <= v i /\ v i < v n1}): Stack unit
+      (requires (fun h -> inv h (v i)))
+      (ensures (fun _ _ h2 -> inv h2 (v i + 1))) =
+      let h0 = ST.get () in
+      let inv1 (h1:mem) (j:nat{j <= v n28}) =
+        Buf.live h1 res /\ Buf.live h1 v16 /\ Buf.live h1 templong /\
+        modifies (loc_union (loc_buffer res) (loc_union (loc_buffer v16) (loc_buffer templong))) h0 h1 in
+      let f1 (j:size_t{0 <= v j /\ v j < v n28}): Stack unit
+        (requires (fun h -> inv1 h (v j)))
+        (ensures (fun _ _ h2 -> inv1 h2 (v j + 1))) =
+          templong.(size 0) <- to_u128 (u64 0);
+          let h1 = ST.get () in
+          loop_nospec #h1 (size 8) templong
+          (fun k ->
+            assume (v (size 8 *. j +. k) < v n2);
+            let aij = to_u32 (mget a i (size 8 *. j +. k)) &. maskd in
+            assume (v (size 7 *. d -. d *. k) < 128);
+            templong.(size 0) <- templong.(size 0) |. (to_u128 aij <<. size_to_uint32 (size 7 *. d -. d *. k))
+          );
+          uint_to_bytes_be #U128 v16 (templong.(size 0));
+          assume (v ((i *. n2 /. size 8 +. j) *. d) + v d <= v ((d *. n1 *. n2) /. size 8));
+          copy (sub res ((i *. n2 /. size 8 +. j) *. d) d) d (sub #uint8 #16 #(v d) v16 (size 16 -. d) d) in
+
+      Lib.Loops.for (size 0) n28 inv1 f1 in
+  Lib.Loops.for (size 0) n1 inv f';
+  pop_frame()
 
 val frodo_unpack:
   n1:size_t -> n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0} ->
   d:size_t{v ((d *. n1 *. n2) /. size 8) < max_size_t /\ v d <= 16} ->
   b:lbytes ((d *. n1 *. n2) /. size 8) ->
   res:matrix_t n1 n2 -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h b /\ Buf.live h res /\ Buf.disjoint b res))
+  (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
   [@"c_inline"]
 let frodo_unpack n1 n2 d b res =
-  admit();
+  push_frame();
   let maskd = (u32 1 <<. size_to_uint32 d) -. u32 1 in
   let v16 = create (size 16) (u8 0) in
   let n28 = n2 /. size 8 in
-  let h0 = FStar.HyperStack.ST.get () in
-  loop_nospec #h0 n1 res
-  (fun i ->
-    loop_nospec #h0 n28 res
-    (fun j ->
-      copy (sub v16 (size 16 -. d) d) d (sub #uint8 #_ #(v d) b ((i *. n28 +. j) *. d) d);
-      let templong = uint_from_bytes_be #U128 v16 in
-      loop_nospec #h0 (size 8) res
-      (fun k ->
-	let resij = to_u32 (templong >>. size_to_uint32 (size 7 *. d -. d *. k)) &. maskd in
-	mset res i (size 8 *. j +. k) (to_u16 resij)
-      )
-    )
-  )
 
+  let h0 = ST.get () in
+  let inv (h1:mem) (j:nat{j <= v n1}) =
+    Buf.live h1 res /\ Buf.live h1 v16 /\ modifies (loc_union (loc_buffer res) (loc_buffer v16)) h0 h1 in
+  let f' (i:size_t{0 <= v i /\ v i < v n1}): Stack unit
+      (requires (fun h -> inv h (v i)))
+      (ensures (fun _ _ h2 -> inv h2 (v i + 1))) =
+      let h0 = ST.get () in
+      let inv1 (h1:mem) (j:nat{j <= v n28}) =
+        Buf.live h1 res /\ Buf.live h1 v16 /\ modifies (loc_union (loc_buffer res) (loc_buffer v16)) h0 h1 in
+      let f1 (j:size_t{0 <= v j /\ v j < v n28}): Stack unit
+        (requires (fun h -> inv1 h (v j)))
+        (ensures (fun _ _ h2 -> inv1 h2 (v j + 1))) =
+          assume (v ((i *. n28 +. j) *. d) + v d <= v ((d *. n1 *. n2) /. size 8));
+          copy (sub v16 (size 16 -. d) d) d (sub #uint8 #_ #(v d) b ((i *. n28 +. j) *. d) d);
+          let templong = uint_from_bytes_be #U128 v16 in
+          let h1 = ST.get () in
+          loop_nospec #h1 (size 8) res // modifies res
+          (fun k ->
+            assume (v (size 7 *. d -. d *. k) < 128);
+            let resij = to_u32 (templong >>. size_to_uint32 (size 7 *. d -. d *. k)) &. maskd in
+            assume (v (size 8 *. j +. k) < v n2);
+            mset res i (size 8 *. j +. k) (to_u16 resij)
+          ) in
+
+      Lib.Loops.for (size 0) n28 inv1 f1 in
+  Lib.Loops.for (size 0) n1 inv f';
+  pop_frame()
 
 val frodo_sample: r:uint16 -> Stack uint16
   (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (ensures (fun h0 r h1 -> modifies loc_none h0 h1))
   [@"c_inline"]
 let frodo_sample r =
-  admit();
+  push_frame();
   let prnd = r >>. u32 1 in
-  let sample:lbuffer uint16 1 = create (size 1) (u16 0) in
   let sign = r &. u16 1 in
-
-  let h0 = FStar.HyperStack.ST.get () in
+  let sample:lbuffer uint16 1 = create (size 1) (u16 0) in
   let ctr = cdf_table_len -. size 1 in
+
+  let h0 = ST.get () in
   loop_nospec #h0 ctr sample
   (fun j ->
+    assume (Buf.live h0 cdf_table); //FIXME!
     let tj = cdf_table.(j) in
     let sample0 = sample.(size 0) in
     sample.(size 0) <- sample0 +. (to_u16 (to_u32 (tj -. prnd)) >>. u32 15)
   );
-  //((-sign) ^. sample.(size 0)) +.sign
-  //(FStar.Math.Lib.powx (-1) (uint_to_nat r0)) * e
-  ((lognot sign +. u16 1) ^. sample.(size 0)) +! sign
-
+  let s0 = sample.(size 0) in
+  let res = ((lognot sign +. u16 1) ^. s0) +. sign in
+  pop_frame();
+  res
 
 val frodo_sample_matrix:
-  n1:size_t -> n2:size_t{2 * v n1 * v n2 < max_size_t} ->
-  seed_len:size_t -> seed:lbytes seed_len -> ctr:uint16 ->
+  n1:size_t -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 < max_size_t} ->
+  seed_len:size_t{v seed_len > 0} -> seed:lbytes seed_len -> ctr:uint16 ->
   res:matrix_t n1 n2 -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h seed /\ Buf.live h res /\ Buf.disjoint seed res))
+  (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
   [@"c_inline"]
 let frodo_sample_matrix n1 n2 seed_len seed ctr res =
-  admit();
+  push_frame();
   let r = create (size 2 *. n1 *. n2) (u8 0) in
   cshake_frodo seed_len seed ctr (size 2 *. n1 *. n2) r;
-  let h0 = FStar.HyperStack.ST.get () in
+  let h0 = ST.get () in
   loop_nospec #h0 n1 res
   (fun i ->
+    let h0 = ST.get () in
     loop_nospec #h0 n2 res
     (fun j ->
+      assume (v (size 2 *. (n2 *. i +. j)) + 2 <= v (size 2 *. n1 *. n2));
       let resij = sub r (size 2 *. (n2 *. i +. j)) (size 2) in
       mset res i j (frodo_sample (uint_from_bytes_le #U16 resij))
     )
-  )
+  );
+  pop_frame()
 
 val frodo_sample_matrix_tr:
-  n1:size_t -> n2:size_t{2 * v n1 * v n2 < max_size_t} ->
-  seed_len:size_t -> seed:lbytes seed_len -> ctr:uint16 ->
+  n1:size_t -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 < max_size_t} ->
+  seed_len:size_t{v seed_len > 0} -> seed:lbytes seed_len -> ctr:uint16 ->
   res:matrix_t n1 n2 -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h seed /\ Buf.live h res /\ Buf.disjoint seed res))
+  (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
   [@"c_inline"]
 let frodo_sample_matrix_tr n1 n2 seed_len seed ctr res =
-  admit();
+  push_frame();
   let r = create (size 2 *. n1 *. n2) (u8 0) in
   cshake_frodo seed_len seed ctr (size 2 *. n1 *. n2) r;
-  let h0 = FStar.HyperStack.ST.get () in
+  let h0 = ST.get () in
   loop_nospec #h0 n1 res
   (fun i ->
+    let h0 = ST.get () in
     loop_nospec #h0 n2 res
     (fun j ->
+      assume (v (size 2 *. (n1 *. j +. i)) + 2 <= v (size 2 *. n1 *. n2));
       let resij = sub r (size 2 *. (n1 *. j +. i)) (size 2) in
       mset res i j (frodo_sample (uint_from_bytes_le #U16 resij))
     )
-  )
+  );
+  pop_frame()
 
 val frodo_gen_matrix_cshake:
   n:size_t{2 * v n < max_size_t} ->
