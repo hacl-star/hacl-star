@@ -1,9 +1,9 @@
 module Hacl.Impl.Frodo.Params
 
 open Lib.IntTypes
-open Lib.Buffer
+open Lib.PQ.Buffer
 
-let params_n = size 640
+let params_n = size 64
 
 let params_logq = size 15
 

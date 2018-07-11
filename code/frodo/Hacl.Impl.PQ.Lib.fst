@@ -2,31 +2,26 @@ module Hacl.Impl.PQ.Lib
 
 open FStar.HyperStack.All
 open Lib.IntTypes
-open Lib.RawIntTypes
-open Lib.Buffer
-open Lib.ByteBuffer
+open Lib.PQ.Buffer
 open FStar.Mul
-open FStar.Math.Lemmas
 
 inline_for_extraction
 type numeric_t = uint16
 
 inline_for_extraction
-let lbytes len = lbuffer uint8 len
+let lbytes len = lbuffer uint8 (v len)
 
-inline_for_extraction
-noextract
+inline_for_extraction noextract
 let v = size_v
 
 inline_for_extraction
-val matrix_t: n1:size_t -> n2:size_t -> Type0
-let matrix_t n1 n2 = lbuffer uint16 (v (n1 *. n2))
+type matrix_t n1 n2 = lbuffer uint16 (v (n1 *. n2))
 
 val matrix_create:
   n1:size_t -> n2:size_t ->
   StackInline (matrix_t n1 n2)
   (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> live h1 r))
+  (ensures (fun h0 r h1 -> True))
   [@ "substitute"]
 let matrix_create n1 n2 =
   create #uint16 (n1 *. n2) (u16 0)
@@ -35,7 +30,7 @@ val mget:
   #n1:size_t -> #n2:size_t ->
   a:matrix_t n1 n2 ->
   i:size_t{v i < v n1} -> j:size_t{v j < v n2} -> Stack uint16
-  (requires (fun h -> live h a))
+  (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
   [@ "substitute"]
 let mget #n1 #n2 a i j =
@@ -47,7 +42,7 @@ val mset:
   a:matrix_t n1 n2 ->
   i:size_t{v i < v n1} -> j:size_t{v j < v n2} ->
   vij:uint16 -> Stack unit
-  (requires (fun h -> live h a))
+  (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
   [@ "substitute"]
 let mset #n1 #n2 a i j vij =
@@ -123,21 +118,3 @@ let matrix_mul #n1 #n2 #n3 a b c =
       )
     )
   )
-
-
-val main: unit -> St unit
-let main _ =
-  push_frame();
-  let m1 = matrix_create (size 2) (size 2) in
-  let m2 = matrix_create (size 2) (size 2) in
-  admit();
-  mset m1 (size 0) (size 0) (u16 0);
-  mset m1 (size 0) (size 1) (u16 1);
-  mset m1 (size 1) (size 0) (u16 2);
-  mset m1 (size 1) (size 1) (u16 3);
-  mset m2 (size 0) (size 0) (u16 0);
-  mset m2 (size 0) (size 1) (u16 1);
-  mset m2 (size 1) (size 0) (u16 2);
-  mset m2 (size 1) (size 1) (u16 3);
-  matrix_add m1 m2;
-  pop_frame()

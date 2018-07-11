@@ -3,15 +3,13 @@ module Hacl.Impl.Frodo
 open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.RawIntTypes
-open Lib.Buffer
-open Lib.ByteBuffer
+open Lib.PQ.Buffer
 open FStar.Mul
 open FStar.Math.Lemmas
 
 open Hacl.Impl.PQ.Lib
 open Hacl.Keccak
-
-include Hacl.Impl.Frodo.Params
+open Hacl.Impl.Frodo.Params
 
 let cshake_frodo = cshake128_frodo
 
@@ -46,7 +44,7 @@ let matrix_eq #n1 #n2 m a b =
   res.(size 0)
 
 val lbytes_eq:
-  #len:size_t -> a:lbytes (v len) -> b:lbytes (v len) -> Stack bool
+  #len:size_t -> a:lbytes len -> b:lbytes len -> Stack bool
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
   [@"c_inline"]
@@ -84,7 +82,7 @@ let dc b c =
 
 val frodo_key_encode:
   b:size_t{v ((params_nbar *. params_nbar *. b) /. size 8) < max_size_t /\ v b <= 8} ->
-  a:lbytes (v ((params_nbar *. params_nbar *. b) /. size 8)) ->
+  a:lbytes ((params_nbar *. params_nbar *. b) /. size 8) ->
   res:matrix_t params_nbar params_nbar -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
@@ -112,7 +110,7 @@ let frodo_key_encode b a res =
 val frodo_key_decode:
   b:size_t{v ((params_nbar *. params_nbar *. b) /. size 8) < max_size_t /\ v b <= 8} ->
   a:matrix_t params_nbar params_nbar ->
-  res:lbytes (v ((params_nbar *. params_nbar *. b) /. size 8)) -> Stack unit
+  res:lbytes ((params_nbar *. params_nbar *. b) /. size 8) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
   [@"c_inline"]
@@ -141,7 +139,7 @@ val frodo_pack:
   n1:size_t -> n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0} ->
   a:matrix_t n1 n2 ->
   d:size_t{v ((d *. n1 *. n2) /. size 8) < max_size_t /\ v d <= 16} ->
-  res:lbytes (v ((d *. n1 *. n2) /. size 8)) -> Stack unit
+  res:lbytes ((d *. n1 *. n2) /. size 8) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
   [@"c_inline"]
@@ -170,7 +168,7 @@ let frodo_pack n1 n2 a d res =
 val frodo_unpack:
   n1:size_t -> n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0} ->
   d:size_t{v ((d *. n1 *. n2) /. size 8) < max_size_t /\ v d <= 16} ->
-  b:lbytes (v ((d *. n1 *. n2) /. size 8)) ->
+  b:lbytes ((d *. n1 *. n2) /. size 8) ->
   res:matrix_t n1 n2 -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
@@ -221,7 +219,7 @@ let frodo_sample r =
 
 val frodo_sample_matrix:
   n1:size_t -> n2:size_t{2 * v n1 * v n2 < max_size_t} ->
-  seed_len:size_t -> seed:lbytes (v seed_len) -> ctr:uint16 ->
+  seed_len:size_t -> seed:lbytes seed_len -> ctr:uint16 ->
   res:matrix_t n1 n2 -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
@@ -242,7 +240,7 @@ let frodo_sample_matrix n1 n2 seed_len seed ctr res =
 
 val frodo_sample_matrix_tr:
   n1:size_t -> n2:size_t{2 * v n1 * v n2 < max_size_t} ->
-  seed_len:size_t -> seed:lbytes (v seed_len) -> ctr:uint16 ->
+  seed_len:size_t -> seed:lbytes seed_len -> ctr:uint16 ->
   res:matrix_t n1 n2 -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
@@ -263,7 +261,7 @@ let frodo_sample_matrix_tr n1 n2 seed_len seed ctr res =
 
 val frodo_gen_matrix_cshake:
   n:size_t{2 * v n < max_size_t} ->
-  seed_len:size_t -> seed:lbytes (v seed_len) ->
+  seed_len:size_t -> seed:lbytes seed_len ->
   res:matrix_t n n -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
@@ -286,7 +284,7 @@ let frodo_gen_matrix = frodo_gen_matrix_cshake
 
 val matrix_to_lbytes:
   #n1:size_t -> #n2:size_t -> m:matrix_t n1 n2 ->
-  res:lbytes (v (size 2 *. n1 *. n2)) -> Stack unit
+  res:lbytes (size 2 *. n1 *. n2) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
   [@"c_inline"]
@@ -302,7 +300,7 @@ let matrix_to_lbytes #n1 #n2 m res =
   )
 
 val matrix_from_lbytes:
-  #n1:size_t -> #n2:size_t -> b:lbytes (v (size 2 *. n1 *. n2)) ->
+  #n1:size_t -> #n2:size_t -> b:lbytes (size 2 *. n1 *. n2) ->
   m:matrix_t n1 n2 -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
@@ -319,18 +317,18 @@ let matrix_from_lbytes #n1 #n2 b res =
   )
 
 assume val randombytes_init_:
-  entropy_input:lbytes 48 -> Stack unit
+  entropy_input:lbytes (size 48) -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
 
 assume val randombytes_:
-  len:size_t -> res:lbytes (v len) -> Stack unit
+  len:size_t -> res:lbytes len -> Stack unit
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
 
 val crypto_kem_keypair:
-  pk:lbytes (v crypto_publickeybytes){v (size 2 *. crypto_bytes +. bytes_seed_a) < max_size_t} ->
-  sk:lbytes (v crypto_secretkeybytes) -> Stack uint32
+  pk:lbytes crypto_publickeybytes{v (size 2 *. crypto_bytes +. bytes_seed_a) < max_size_t} ->
+  sk:lbytes crypto_secretkeybytes -> Stack uint32
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
 let crypto_kem_keypair pk sk =
@@ -344,7 +342,7 @@ let crypto_kem_keypair pk sk =
   let e_matrix = matrix_create params_n params_nbar in
   let b_matrix = matrix_create params_n params_nbar in
 
-  let s:lbytes (v crypto_bytes) = sub coins (size 0) crypto_bytes in
+  let s:lbytes crypto_bytes = sub coins (size 0) crypto_bytes in
   let seed_e = sub coins crypto_bytes crypto_bytes in
   let z = sub coins (size 2 *. crypto_bytes) bytes_seed_a in
   cshake_frodo bytes_seed_a z (u16 0) bytes_seed_a seed_a;
@@ -362,8 +360,8 @@ let crypto_kem_keypair pk sk =
 
 //{v bytes_mu = v ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8)}
 val crypto_kem_enc:
-  ct:lbytes (v crypto_ciphertextbytes) -> ss:lbytes (v crypto_bytes) ->
-  pk:lbytes (v crypto_publickeybytes) -> Stack uint32
+  ct:lbytes crypto_ciphertextbytes -> ss:lbytes crypto_bytes ->
+  pk:lbytes crypto_publickeybytes -> Stack uint32
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
 let crypto_kem_enc ct ss pk =
@@ -373,7 +371,7 @@ let crypto_kem_enc ct ss pk =
   let seed_a = sub #uint8 #_ #(v bytes_seed_a) pk (size 0) bytes_seed_a in
   let b = sub #uint8 #_ #(v ((params_logq *. params_n *. params_nbar) /. size 8)) pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
 
-  let g:lbytes (v (size 3 *. crypto_bytes)) = create (size 3 *. crypto_bytes) (u8 0) in
+  let g:lbytes (size 3 *. crypto_bytes) = create (size 3 *. crypto_bytes) (u8 0) in
   let pk_coins = create (crypto_publickeybytes +. bytes_mu) (u8 0) in
   copy (sub pk_coins (size 0) crypto_publickeybytes) crypto_publickeybytes pk;
   copy (sub pk_coins crypto_publickeybytes bytes_mu) bytes_mu coins;
@@ -410,7 +408,7 @@ let crypto_kem_enc ct ss pk =
   frodo_pack params_nbar params_nbar v_matrix params_logq (sub ct c1Len c2Len);
 
   let ss_init_len = c1Len +. c2Len +. size 2 *. crypto_bytes in
-  let ss_init:lbytes (v ss_init_len) = create ss_init_len (u8 0) in
+  let ss_init:lbytes ss_init_len = create ss_init_len (u8 0) in
   let c12Len = c1Len +. c2Len in
   copy (sub ss_init (size 0) c12Len) c12Len (sub #uint8 #_ #(v c12Len) ct (size 0) c12Len);
   copy (sub ss_init c12Len crypto_bytes) crypto_bytes k;
@@ -419,11 +417,9 @@ let crypto_kem_enc ct ss pk =
   copy (sub ct c12Len crypto_bytes) crypto_bytes d;
   (u32 0)
 
-//int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned char *sk);
 val crypto_kem_dec:
-  ss:lbytes (v crypto_bytes) ->
-  ct:lbytes (v crypto_ciphertextbytes) ->
-  sk:lbytes (v crypto_secretkeybytes) -> Stack uint32
+  ss:lbytes crypto_bytes -> ct:lbytes crypto_ciphertextbytes ->
+  sk:lbytes crypto_secretkeybytes -> Stack uint32
   (requires (fun h -> True))
   (ensures (fun h0 r h1 -> True))
 let crypto_kem_dec ss ct sk =
@@ -453,7 +449,7 @@ let crypto_kem_dec ss ct sk =
   matrix_sub c_matrix m_matrix; //modifies m_matrix
   frodo_key_decode params_extracted_bits m_matrix mu_decode;
 
-  let g:lbytes (v (size 3 *. crypto_bytes)) = create (size 3 *. crypto_bytes) (u8 0) in
+  let g:lbytes (size 3 *. crypto_bytes) = create (size 3 *. crypto_bytes) (u8 0) in
   let pk_mu_decode = create (crypto_publickeybytes +. mu_decode_len) (u8 0) in
   copy (sub pk_mu_decode (size 0) crypto_publickeybytes) crypto_publickeybytes pk;
   copy (sub pk_mu_decode crypto_publickeybytes mu_decode_len) mu_decode_len mu_decode;
@@ -485,7 +481,7 @@ let crypto_kem_dec ss ct sk =
   matrix_add v_matrix mu_encode; //cp_matrix = v_matrix
 
   let ss_init_len = c1Len +. c2Len +. size 2 *. crypto_bytes in
-  let ss_init:lbytes (v ss_init_len) = create ss_init_len (u8 0) in
+  let ss_init:lbytes ss_init_len = create ss_init_len (u8 0) in
   copy (sub ss_init (size 0) c1Len) c1Len c1;
   copy (sub ss_init c1Len c2Len) c2Len c2;
   copy (sub ss_init (ss_init_len -. crypto_bytes) crypto_bytes) crypto_bytes d;
