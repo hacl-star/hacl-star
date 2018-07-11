@@ -22,7 +22,7 @@ let size_of_k a: GTot nat =
   match Ghost.reveal a with
   | SHA256 -> 64
   | SHA384 -> 80
-  | _      -> admit()
+  | _      -> 0 //TBC
 
 type acc (a: e_alg) = {
   k: Seq.lseq (type_of a) (size_of_k a);
@@ -36,14 +36,18 @@ let acc0 #a =
   | SHA256 -> {
       hash = EverCrypt.Spec.SHA2_256.h_0;
       k = EverCrypt.Spec.SHA2_256.k;
-      counter = 0
+      counter = 0 
     }
   | SHA384 -> {
       hash = EverCrypt.Spec.SHA2_384.h_0;
       k = EverCrypt.Spec.SHA2_384.k;
       counter = 0
     }
-  | _ -> admit()
+  | _ -> {
+      hash = Seq.create 8 (if Ghost.reveal a = SHA512 then 0UL else 0ul);
+      k = Seq.empty;
+      counter = 0 
+    }
 
 // 18-07-06 We need a fully-specified refinement: the hacl* spec
 // should state that the counter is incremented by 1 and that the K
@@ -63,28 +67,29 @@ let compress #a st b =
      { k       = EverCrypt.Spec.SHA2_384.k; 
        hash    = EverCrypt.Spec.SHA2_384.update st.hash b;
        counter = st.counter + 1 } 
-  | _ -> 
-    admit()
+  | _ -> st //TBC
   
 // using the same be library as in hacl*; to be reconsidered.
 // 18-07-10 why do I need type annotations? why passing the same constant 3 types? 
 let extract #a st = 
-  let a = Ghost.reveal a in 
-  match a with 
+  match Ghost.reveal a with 
   | SHA224 -> Spec.Lib.uint32s_to_be 7 (Seq.slice st.hash 0 7)
   | SHA256 -> Spec.Lib.uint32s_to_be 8 st.hash 
   | SHA384 -> Spec.Lib.uint64s_to_be 6 (Seq.slice st.hash 0 6)
   | SHA512 -> Spec.Lib.uint64s_to_be 8 st.hash 
-  | _      -> admit()
+  | _      -> Seq.slice (Spec.Lib.uint32s_to_be 8 st.hash) 0 (tagLength a) //TBC
 
-#set-options "--lax"
+let x = 1
+//#set-options "--lax"
 /// ------ at this point interactive verification dies; using c-c c-l
 
 // 18-07-06 TODO; should be provable, despite the two specs having
 // different structures.
-let suffix a l = admit()
+let suffix a l = 
+  //18-07-11 FIXME this is a placeholder
+  Seq.create (suffixLength a l) 0uy
 
-#reset-options 
+//#reset-options 
 
 (*
   let l1 = l % blockLength a in 
