@@ -149,8 +149,8 @@ providers:
 #
 
 ci: .clean-banner .clean-git .clean-snapshots
-#	$(MAKE) verify // Suspend verification from CI
-#	$(MAKE) providers // Suspend verification from CI
+#	$(MAKE) verify # Suspend verification from CI
+	$(MAKE) providers
 	$(MAKE) extract-specs extract-all
 	$(MAKE) build-make
 	$(MAKE) test-all
