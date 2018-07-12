@@ -283,7 +283,7 @@ let frodo_sample r =
   let h0 = ST.get () in
   loop_nospec #h0 ctr sample
   (fun j ->
-    assume (Buf.live h0 cdf_table); //FIXME!
+    recall cdf_table;
     let tj = cdf_table.(j) in
     let sample0 = sample.(size 0) in
     sample.(size 0) <- sample0 +. (to_u16 (to_u32 (tj -. prnd)) >>. u32 15)

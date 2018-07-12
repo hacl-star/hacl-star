@@ -2,8 +2,6 @@ module Lib.PQ.Buffer
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
-open Lib.IntTypes
-open Lib.RawIntTypes
 open LowStar.ModifiesPat
 open LowStar.Modifies
 
@@ -12,8 +10,10 @@ module U32 = FStar.UInt32
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 
-module LSeq = Lib.Sequence
 module Seq = FStar.Seq
+
+open Lib.IntTypes
+open Lib.RawIntTypes
 
 unfold let v = size_v
 
@@ -77,17 +77,29 @@ val createL:
 let createL #a init =
   Buf.alloca_of_list init
 
+val recall
+  (#a:Type)
+  (#len:size_nat)
+  (b:lbuffer a len)
+: Stack unit
+  (requires (fun _ -> Buf.recallable b))
+  (ensures  (fun m0 _ m1 -> m0 == m1 /\ Buf.live m1 b))
+
 inline_for_extraction
 val createL_global:
   #a:Type0 -> init:list a{List.Tot.length init <= max_size_t} ->
   ST (lbuffer a (List.Tot.length init))
   (requires fun h0 -> Buf.alloc_of_list_pre #a init)
-  (ensures  fun h0 r h1 ->
+  (ensures  fun h0 b h1 ->
     let len = FStar.List.Tot.length init in
-    Buf.alloc_post_common HyperStack.root len r h0 h1 /\
-    Buf.as_seq h1 r == Seq.of_list init)
+    Buf.recallable b /\
+    Buf.alloc_post_static HyperStack.root len b /\
+    Buf.alloc_of_list_post len b /\
+    Buf.alloc_post_common HyperStack.root len b h0 h1 /\
+    Buf.as_seq h1 b == Seq.of_list init)
 let createL_global #a init =
   Buf.gcmalloc_of_list HyperStack.root init
+
 
 // val lemma_seq_slice_index:
 //   #a:Type -> s1:Seq.seq a ->
@@ -166,13 +178,12 @@ let loop_nospec #h0 #a #len n buf impl =
 
 inline_for_extraction
 val uint_from_bytes_le:
-  #t:m_inttype ->
+  #t:m_inttype{~(SIZE? t)} ->
   i:lbuffer uint8 (numbytes t) ->
   Stack (uint_t t)
   (requires (fun h0 -> Buf.live h0 i))
   (ensures (fun h0 o h1 -> h0 == h1 /\ Buf.live h1 i))
 let uint_from_bytes_le #t i =
-  admit();
   match t with
   | U8 -> i.(size 0)
   | U16 -> let u = C.load16_le i in u16_from_UInt16 u
@@ -182,12 +193,11 @@ let uint_from_bytes_le #t i =
 
 inline_for_extraction
 val uint_from_bytes_be:
-  #t:m_inttype ->
+  #t:m_inttype{~(SIZE? t)} ->
   i:lbuffer uint8 (numbytes t) -> Stack (uint_t t)
   (requires (fun h0 -> Buf.live h0 i))
   (ensures (fun h0 o h1 -> h0 == h1 /\ Buf.live h1 i))
 let uint_from_bytes_be #t i =
-  admit();
   match t with
   | U8 -> i.(size 0)
   | U16 -> let u = C.load16_be i in u16_from_UInt16 u
@@ -197,13 +207,12 @@ let uint_from_bytes_be #t i =
 
 inline_for_extraction
 val uint_to_bytes_le:
-  #t:m_inttype ->
+  #t:m_inttype{~(SIZE? t)} ->
   o:lbuffer uint8 (numbytes t) ->
   i:uint_t t -> Stack unit
   (requires (fun h0 -> Buf.live h0 o))
   (ensures (fun h0 _ h1 -> Buf.live h1 o /\ modifies (loc_buffer o) h0 h1))
 let uint_to_bytes_le #t o i =
-  admit();
   match t with
   | U8 -> o.(size 0) <- i
   | U16 -> C.store16_le o (u16_to_UInt16 i)
@@ -213,13 +222,12 @@ let uint_to_bytes_le #t o i =
 
 inline_for_extraction
 val uint_to_bytes_be:
-  #t:m_inttype ->
+  #t:m_inttype{~(SIZE? t)} ->
   o:lbuffer uint8 (numbytes t) ->
   i:uint_t t -> Stack unit
   (requires (fun h0 -> Buf.live h0 o))
   (ensures (fun h0 _ h1 -> Buf.live h1 o /\ modifies (loc_buffer o) h0 h1))
 let uint_to_bytes_be #t o i =
-  admit();
   match t with
   | U8 -> o.(size 0) <- i
   | U16 -> C.store16_be o (u16_to_UInt16 i)
