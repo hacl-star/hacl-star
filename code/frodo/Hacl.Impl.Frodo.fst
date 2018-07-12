@@ -342,83 +342,94 @@ let frodo_sample_matrix_tr n1 n2 seed_len seed ctr res =
   pop_frame()
 
 val frodo_gen_matrix_cshake:
-  n:size_t{2 * v n < max_size_t} ->
-  seed_len:size_t -> seed:lbytes seed_len ->
+  n:size_t{0 < 2 * v n /\ 2 * v n < max_size_t /\ v n * v n < max_size_t} ->
+  seed_len:size_t{v seed_len > 0} -> seed:lbytes seed_len ->
   res:matrix_t n n -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h seed /\ Buf.live h res /\ Buf.disjoint seed res))
+  (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
   [@"c_inline"]
 let frodo_gen_matrix_cshake n seed_len seed res =
-  admit();
-  let r = create (size 2 *. n) (u8 0) in
-  let h0 = FStar.HyperStack.ST.get () in
-  loop_nospec #h0 n res
-  (fun i ->
-    cshake128_frodo seed_len seed (u16 256 +. to_u16 i) (size 2 *. n) r;
-    loop_nospec #h0 n res
-    (fun j ->
-      let resij = sub r (size 2 *. j) (size 2) in
-      mset res i j (uint_from_bytes_le #U16 resij)
-    )
-  )
+  push_frame();
+  let r:lbytes (size 2 *. n) = create (size 2 *. n) (u8 0) in
+  let h0 = ST.get () in
+  let inv (h1:mem) (j:nat{j <= v n}) =
+    Buf.live h1 res /\ Buf.live h1 r /\ modifies (loc_union (loc_buffer res) (loc_buffer r)) h0 h1 in
+  let f' (i:size_t{0 <= v i /\ v i < v n}): Stack unit
+    (requires (fun h -> inv h (v i)))
+    (ensures (fun _ _ h2 -> inv h2 (v i + 1))) =
+      let ctr = size_to_uint32 (size 256 +. i) in
+      cshake128_frodo seed_len seed (to_u16 ctr) (size 2 *. n) r;
+      let h0 = ST.get () in
+      loop_nospec #h0 n res //modifies res
+      (fun j ->
+        let resij = sub r (size 2 *. j) (size 2) in
+        mset res i j (uint_from_bytes_le #U16 resij)
+      ) in
+  Lib.Loops.for (size 0) n inv f';
+  pop_frame()
 
 let frodo_gen_matrix = frodo_gen_matrix_cshake
 
 val matrix_to_lbytes:
-  #n1:size_t -> #n2:size_t -> m:matrix_t n1 n2 ->
-  res:lbytes (size 2 *. n1 *. n2) -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
+  m:matrix_t n1 n2 -> res:lbytes (size 2 *. n1 *. n2) -> Stack unit
+  (requires (fun h -> Buf.live h m /\ Buf.live h res /\ Buf.disjoint m res))
+  (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
   [@"c_inline"]
 let matrix_to_lbytes #n1 #n2 m res =
-  admit();
-  let h0 = FStar.HyperStack.ST.get () in
+  let h0 = ST.get () in
   loop_nospec #h0 n1 res
   (fun i ->
+    let h0 = ST.get () in
     loop_nospec #h0 n2 res
     (fun j ->
+      assume (v (size 2 *. (j *. n1 +. i)) + 2 <= v (size 2 *. n1 *. n2));
       uint_to_bytes_le (sub res (size 2 *. (j *. n1 +. i)) (size 2)) (mget m i j)
     )
   )
 
 val matrix_from_lbytes:
-  #n1:size_t -> #n2:size_t -> b:lbytes (size 2 *. n1 *. n2) ->
-  m:matrix_t n1 n2 -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
+  b:lbytes (size 2 *. n1 *. n2) ->
+  res:matrix_t n1 n2 -> Stack unit
+  (requires (fun h -> Buf.live h b /\ Buf.live h res /\ Buf.disjoint b res))
+  (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
   [@"c_inline"]
 let matrix_from_lbytes #n1 #n2 b res =
-  admit();
-  let h0 = FStar.HyperStack.ST.get () in
+  let h0 = ST.get () in
   loop_nospec #h0 n1 res
   (fun i ->
+    let h0 = ST.get () in
     loop_nospec #h0 n2 res
     (fun j ->
+      assume (v (size 2 *. (j *. n1 +. i)) + 2 <= v (size 2 *. n1 *. n2));
       mset res i j (uint_from_bytes_le #U16 (sub b (size 2 *. (j *. n1 +. i)) (size 2)))
     )
   )
 
 assume val randombytes_init_:
   entropy_input:lbytes (size 48) -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h entropy_input))
+  (ensures (fun h0 r h1 -> Buf.live h1 entropy_input))
 
 assume val randombytes_:
   len:size_t -> res:lbytes len -> Stack unit
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h res))
+  (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
 
 val crypto_kem_keypair:
   pk:lbytes crypto_publickeybytes{v (size 2 *. crypto_bytes +. bytes_seed_a) < max_size_t} ->
   sk:lbytes crypto_secretkeybytes -> Stack uint32
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> True))
+  (requires (fun h -> Buf.live h pk /\ Buf.live h sk /\ Buf.disjoint pk sk))
+  (ensures (fun h0 r h1 -> Buf.live h1 pk /\ Buf.live h1 sk /\ modifies (loc_union (loc_buffer pk) (loc_buffer sk)) h0 h1))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
 let crypto_kem_keypair pk sk =
-  admit();
+  push_frame();
   let coins = create (size 2 *. crypto_bytes +. bytes_seed_a) (u8 0) in
   randombytes_ (size 2 *. crypto_bytes +. bytes_seed_a) coins;
   let seed_a = sub pk (size 0) bytes_seed_a in
-  let b = sub pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
+  assume (v (crypto_publickeybytes -. bytes_seed_a) = v (params_logq *. params_n *. params_nbar /. size 8));
+  let b:lbytes (params_logq *. params_n *. params_nbar /. size 8) = sub pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
   let a_matrix = matrix_create params_n params_n in
   let s_matrix = matrix_create params_n params_nbar in
   let e_matrix = matrix_create params_n params_nbar in
@@ -432,12 +443,18 @@ let crypto_kem_keypair pk sk =
   frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
   frodo_sample_matrix_tr params_n params_nbar crypto_bytes seed_e (u16 1) s_matrix;
   frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) e_matrix;
+
   matrix_mul a_matrix s_matrix b_matrix;
   matrix_add b_matrix e_matrix;
+  assume (v params_nbar % 8 = 0);
   frodo_pack params_n params_nbar b_matrix params_logq b;
+  assume (v crypto_bytes < v crypto_secretkeybytes);
   copy (sub sk (size 0) crypto_bytes) crypto_bytes s;
+  assume (v crypto_bytes + v crypto_publickeybytes < v crypto_secretkeybytes);
   copy (sub sk crypto_bytes crypto_publickeybytes) crypto_publickeybytes pk;
+  assume (v crypto_bytes + v crypto_publickeybytes + v (size 2 *. params_n *. params_nbar) = v crypto_secretkeybytes);
   matrix_to_lbytes s_matrix (sub sk (crypto_bytes +. crypto_publickeybytes) (size 2 *. params_n *. params_nbar));
+  pop_frame();
   (u32 0)
 
 //{v bytes_mu = v ((params_nbar *. params_nbar *. params_extracted_bits) /. size 8)}
