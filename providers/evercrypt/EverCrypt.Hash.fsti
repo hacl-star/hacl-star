@@ -118,35 +118,24 @@ noextract let rec hash2
 
 //18-07-07 this verified interactively but not on the command line;
 //18-07-07 I suspect the hacl* specs make it harder for Z3.
-#set-options "--z3rlimit 20" 
+#set-options "--z3rlimit 100" 
 let lemma_compress 
   (#a: e_alg) 
   (a0: acc a)
   (c: lbytes (blockLength a)): 
-  Lemma (compress a0 c == hash2 a0 c) = ()
+  Lemma (Seq.length c % blockLength a = 0 ==> compress a0 c == hash2 a0 c) = ()
 
-let rec lemma_hash2 
-  (#a: e_alg) 
-  (a0: acc a)
-  (b0 b1: (b:bytes{ Seq.length b % blockLength a = 0})): 
-  Lemma 
-    (ensures hash2 a0 (Seq.append b0 b1) == hash2 (hash2 a0 b0) b1)
-    (decreases (Seq.length b0)) 
-=
-  if Seq.length b0 = 0 then (
-    Seq.lemma_empty b0;
-    Seq.append_empty_l b1 )
-  else (
-    let c,b0' = Seq.split b0 (blockLength a) in
-    let c',b' = Seq.split (Seq.append b0 b1) (blockLength a) in
-    Seq.append_assoc c b0' b1;
-    //Seq.lemma_split b0 (blockLength a);
-    //Seq.lemma_eq_intro (Seq.append b0 b1) (Seq.append c' b');
-    Seq.lemma_eq_intro c c';
-    Seq.lemma_eq_intro b' (Seq.append b0' b1);
-    lemma_hash2 (hash2 a0 c) b0' b1)
-
-#reset-options 
+//18-07-12 moved the proof to the .fst to prevent timeouts on the .fsti; now much slower.
+val lemma_hash2: #a: e_alg -> a0: acc a -> b0: bytes -> b1: bytes -> Lemma 
+  (requires 
+    Seq.length b0 % blockLength a = 0 /\
+    Seq.length b1 % blockLength a = 0)
+  (ensures 
+    Seq.length b0 % blockLength a = 0 /\
+    Seq.length b1 % blockLength a = 0 /\
+    Seq.length (Seq.append b0 b1) % blockLength a = 0 /\
+    hash2 a0 (Seq.append b0 b1) == hash2 (hash2 a0 b0) b1)
+  (decreases (Seq.length b0)) 
 
 noextract let hash0 (#a:e_alg) (b:bytes {Seq.length b % blockLength a = 0}) = hash2 (acc0 #a) b
 
@@ -233,6 +222,7 @@ val fresh_is_disjoint: l1:M.loc -> l2:M.loc -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (fresh_loc l1 h0 h1 /\ l2 `loc_in` h0))
   (ensures (M.loc_disjoint l1 l2))
 
+// 18-07-12 why not bundling the next two lemmas? 
 val frame_invariant: #a:e_alg -> l:M.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
     invariant s h0 /\
@@ -316,53 +306,6 @@ val update_multi:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     hashing s h1 (Seq.append (Ghost.reveal b) (B.as_seq h0 blocks)))
-//  repr s h1 == hash2 (repr s h0) (B.as_seq h0 blocks)
-
-
-(* see suffix and suffixLength 
-// The maximum number of bytes for the input.
-let max_input_length (a: e_alg): GTot _ =
-  match G.reveal a with
-  | SHA256 ->
-      EverCrypt.Spec.SHA2_256.max_input_len_8
-  | SHA384 ->
-      EverCrypt.Spec.SHA2_384.max_input_len_8
-
-// The size, in bytes, it takes to encode the number of bytes in the message.
-let size_length (a: e_alg): GTot _ =
-  match G.reveal a with
-  | SHA384 | SHA512 -> 8 
-  | _               -> 4
-
-// For the last (possibly partial) block, in so far as I understand, we
-// concatenate the last chunk of data, insert a byte 0x01, then encode the length.
-let last_data_fits (a: e_alg) (length: nat): GTot _ =
-  length + size_length a + 1 < 2 * block_size a
-*) 
-
-(*
-// Note: conjunction of well_formed and last_data_fits allows deriving the
-// specific precondition for update_last.
-let update_last_spec (#a:e_alg)
-  (s:state a)
-  (h0: HS.mem{invariant s h0})
-  (h1: HS.mem{invariant s h1})
-  (data: bytes{
-    well_formed_and_counter s h0 2 /\ 
-    last_data_fits a (Seq.length data)}):
-  GTot _
-=
-  let r0 = repr s h0 in
-  let r1 = repr s h1 in
-  
-  let counter0 = r0.counter in
-  let len0 = counter0 * block_size a in
-  match G.reveal a with
-  | SHA256 ->
-      r1.hash = EverCrypt.Spec.SHA2_256.update_last r0.hash len0 data
-  | SHA384 ->
-      r1.hash = EverCrypt.Spec.SHA2_384.update_last r0.hash len0 data
-*)
 
 // 18-03-05 note the *new* length-passing convention!
 // 18-03-03 it is best to let the caller keep track of lengths.

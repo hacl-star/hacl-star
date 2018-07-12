@@ -79,48 +79,46 @@ let extract #a st =
   | SHA512 -> Spec.Lib.uint64s_to_be 8 st.hash 
   | _      -> Seq.slice (Spec.Lib.uint32s_to_be 8 st.hash) 0 (tagLength a) //TBC
 
-let x = 1
-//#set-options "--lax"
-/// ------ at this point interactive verification dies; using c-c c-l
+//#set-options "--z3rlimit 500" 
+//18-07-12 this immediately verifies in the .fsti :(
+let rec lemma_hash2 #a a0 b0 b1 = admit()
+(*
+  if Seq.length b0 = 0 then (
+    Seq.lemma_empty b0;
+    Seq.append_empty_l b1 )
+  else (
+    let c,b0' = Seq.split b0 (blockLength a) in
+    let c',b' = Seq.split (Seq.append b0 b1) (blockLength a) in
+    Seq.append_assoc c b0' b1;
+    Seq.lemma_split b0 (blockLength a);
+    Seq.lemma_eq_intro (Seq.append b0 b1) (Seq.append c' b');
+    Seq.lemma_eq_intro c c';
+    Seq.lemma_eq_intro b' (Seq.append b0' b1);
+    lemma_hash2 (hash2 a0 c) b0' b1)
+*)
 
-// 18-07-06 TODO; should be provable, despite the two specs having
-// different structures.
 let suffix a l = 
   //18-07-11 FIXME this is a placeholder
-  Seq.create (suffixLength a l) 0uy
+  //Seq.create (suffixLength a l) 0uy
 
-//#reset-options 
-
-(*
   let l1 = l % blockLength a in 
   let l0 = l - l1 in
+  assert(l0 % blockLength a = 0);
   match Ghost.reveal a with
   | SHA256 -> 
-      assume(l0 % blockLength a == 0);
-      assume(l < Spec.SHA2_256.max_input_len_8); 
+      assert_norm(maxLength a < Spec.SHA2_256.max_input_len_8); 
       let pad = Spec.SHA2_256.pad l0 l1 in
+      // 18-07-06 the two specs have different structures
+      assume(Seq.length pad = suffixLength a l); 
+      pad
+  | SHA384 -> 
+      assume False;
+      // not sure what's wrong with this branch
+      //assume(maxLength a < Spec.SHA2_384.max_input_len_8); 
+      let pad = Spec.SHA2_384.pad l0 l1 in
       assume(Seq.length pad = suffixLength a l);
       pad
   | _ -> admit()
-//| SHA384 -> Spec.SHA2_384.pad l0 l1 
-//| SHA512 -> Spec.SHA2_512.pad l0 l1
-*)
-
-
-(*
-  match G.reveal a with
-  | SHA256 ->
-      r1.hash = EverCrypt.Spec.SHA2_256.update r0.hash data
-  | SHA384 ->
-      r1.hash = EverCrypt.Spec.SHA2_384.update r0.hash data
-
-// from update_multi_spec: 
-  match G.reveal a with
-  | SHA256 ->
-      r1.hash = EverCrypt.Spec.SHA2_256.update_multi r0.hash data
-  | SHA384 ->
-      r1.hash = EverCrypt.Spec.SHA2_384.update_multi r0.hash data
-*)
 
 /// 18-04-07 postponing verified integration with HACL* for now. We
 /// provide below a concise definition of the Merkle-Damgard
@@ -378,11 +376,12 @@ let update_multi #a #prior s data len =
 
 //18-07-07 For SHA384 I was expecting a conversion from 32 to 64 bits
 
-//18-07-10 WIP verification 
+#set-options "--z3rlimit 100"
+//18-07-10 WIP verification; still missing proper spec for padding 
 let update_last #a #prior s data totlen =
   let h0 = ST.get() in 
   ( let r0 = repr s h0 in 
-    let pad = suffix a (v totlen) in //TODO suffix still undefined here, not really exported by hacl*
+    let pad = suffix a (v totlen) in 
     let prior = Ghost.reveal prior in 
     let fresh = Seq.append (B.as_seq h0 data) pad in
     lemma_hash0_has_k #a prior;
@@ -392,6 +391,7 @@ let update_last #a #prior s data totlen =
     // are now statically prevented in [update_last]
     assume (r0.counter + 2 < pow2 32 - 1));
 
+  assert(M.(loc_disjoint (footprint s h0) (loc_buffer data)));
   match !*s with
   | SHA256_Hacl p ->
       let len = totlen % blockLen SHA256 in
@@ -402,15 +402,14 @@ let update_last #a #prior s data totlen =
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_256.update_last p data len;
-
       ( let h1 = ST.get() in 
-        let pad = suffix a (v totlen) in //TODO suffix still undefined here & underspecified by hacl*
+        let pad = suffix a (v totlen) in 
         let prior = Ghost.reveal prior in 
         let fresh = Seq.append (Buffer.as_seq h0 data) pad in
-        assume (hashing s h1 (Seq.append prior fresh));
-        admit()
+        assert(Seq.length fresh % blockLength a = 0);
+        let b = Seq.append prior fresh in 
+        assume(repr s h1 == hash0 b) // Hacl.Spec misses at least the updated counter 
         )
-
   | SHA384_Hacl p ->
       let len = totlen % blockLen SHA384 in
       assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
@@ -419,8 +418,10 @@ let update_last #a #prior s data totlen =
       // JP: in spite of the assertion above, the transition module does not
       // seem to allow me to derive this fact
       assume (FStar.Buffer.disjoint p data);
+      admit();//18-07-12 unclear what's missing here
       Hacl.SHA2_384.update_last p data len;
-      admit() //18-07-07 TODO align the specs
+      admit()
+  
   | SHA256_Vale p ->
       let len = totlen % blockLen SHA256 in 
       ValeGlue.sha256_update_last p data len;
@@ -470,5 +471,5 @@ let hash a dst input len =
       assume (FStar.Buffer.disjoint dst input);
       Hacl.SHA2_384.hash dst input len;
       admit() //18-07-07 TODO align the specs
-  | _ -> admit() // how to get a kremlin fatal error?
-
+  | _ -> 
+      admit() // how to get a kremlin fatal error?
