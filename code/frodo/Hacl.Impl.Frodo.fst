@@ -417,6 +417,48 @@ assume val randombytes_:
   (requires (fun h -> Buf.live h res))
   (ensures (fun h0 r h1 -> Buf.live h1 res /\ modifies (loc_buffer res) h0 h1))
 
+
+val frodo_mul_add_as_plus_e:
+  seed_a:lbytes bytes_seed_a ->
+  s_matrix:matrix_t params_n params_nbar ->
+  e_matrix:matrix_t params_n params_nbar ->
+  b_matrix:matrix_t params_n params_nbar ->  Stack unit
+  (requires (fun h -> Buf.live h seed_a /\ Buf.live h s_matrix /\ 
+    Buf.live h e_matrix /\ Buf.live h b_matrix /\ 
+    Buf.disjoint s_matrix b_matrix /\ Buf.disjoint b_matrix e_matrix))
+  (ensures (fun h0 r h1 -> Buf.live h1 b_matrix /\ modifies (loc_buffer b_matrix) h0 h1))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+  [@"c_inline"]
+let frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix =
+  push_frame();
+  let a_matrix = matrix_create params_n params_n in
+  frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
+  matrix_mul a_matrix s_matrix b_matrix;
+  matrix_add b_matrix e_matrix;
+  pop_frame()
+
+val frodo_mul_add_as_plus_e_pack:
+  seed_a:lbytes bytes_seed_a ->
+  seed_e:lbytes crypto_bytes ->
+  b:lbytes (params_logq *. params_n *. params_nbar /. size 8) ->
+  s:lbytes (size 2 *. params_n *. params_nbar) -> Stack unit
+  (requires (fun h -> Buf.live h seed_a /\ Buf.live h seed_e /\ 
+    Buf.live h s /\ Buf.live h b /\ Buf.disjoint b s))
+  (ensures (fun h0 r h1 -> Buf.live h1 s /\ Buf.live h1 b /\ modifies (loc_union (loc_buffer b) (loc_buffer s)) h0 h1))
+  #reset-options "--z3rlimit 150 --max_fuel 0"
+  [@"c_inline"]
+let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
+  push_frame();
+  let b_matrix = matrix_create params_n params_nbar in
+  let s_matrix = matrix_create params_n params_nbar in
+  let e_matrix = matrix_create params_n params_nbar in
+  frodo_sample_matrix_tr params_n params_nbar crypto_bytes seed_e (u16 1) s_matrix;
+  frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) e_matrix;
+  frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix;
+  frodo_pack params_n params_nbar b_matrix params_logq b;
+  matrix_to_lbytes s_matrix s;
+  pop_frame()
+
 val crypto_kem_keypair:
   pk:lbytes crypto_publickeybytes{v (size 2 *. crypto_bytes +. bytes_seed_a) < max_size_t} ->
   sk:lbytes crypto_secretkeybytes -> Stack uint32
@@ -427,33 +469,19 @@ let crypto_kem_keypair pk sk =
   push_frame();
   let coins = create (size 2 *. crypto_bytes +. bytes_seed_a) (u8 0) in
   randombytes_ (size 2 *. crypto_bytes +. bytes_seed_a) coins;
-  let seed_a = sub pk (size 0) bytes_seed_a in
-  assume (v (crypto_publickeybytes -. bytes_seed_a) = v (params_logq *. params_n *. params_nbar /. size 8));
-  let b:lbytes (params_logq *. params_n *. params_nbar /. size 8) = sub pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
-  let a_matrix = matrix_create params_n params_n in
-  let s_matrix = matrix_create params_n params_nbar in
-  let e_matrix = matrix_create params_n params_nbar in
-  let b_matrix = matrix_create params_n params_nbar in
-
   let s:lbytes crypto_bytes = sub coins (size 0) crypto_bytes in
   let seed_e = sub coins crypto_bytes crypto_bytes in
   let z = sub coins (size 2 *. crypto_bytes) bytes_seed_a in
+
+  let seed_a = sub pk (size 0) bytes_seed_a in
   cshake_frodo bytes_seed_a z (u16 0) bytes_seed_a seed_a;
 
-  frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
-  frodo_sample_matrix_tr params_n params_nbar crypto_bytes seed_e (u16 1) s_matrix;
-  frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) e_matrix;
+  let b:lbytes (params_logq *. params_n *. params_nbar /. size 8) = sub pk bytes_seed_a (crypto_publickeybytes -. bytes_seed_a) in
+  let s_matrix = sub sk (crypto_bytes +. crypto_publickeybytes) (size 2 *. params_n *. params_nbar) in
+  frodo_mul_add_as_plus_e_pack seed_a seed_e b s_matrix;
 
-  matrix_mul a_matrix s_matrix b_matrix;
-  matrix_add b_matrix e_matrix;
-  assume (v params_nbar % 8 = 0);
-  frodo_pack params_n params_nbar b_matrix params_logq b;
-  assume (v crypto_bytes < v crypto_secretkeybytes);
   copy (sub sk (size 0) crypto_bytes) crypto_bytes s;
-  assume (v crypto_bytes + v crypto_publickeybytes < v crypto_secretkeybytes);
   copy (sub sk crypto_bytes crypto_publickeybytes) crypto_publickeybytes pk;
-  assume (v crypto_bytes + v crypto_publickeybytes + v (size 2 *. params_n *. params_nbar) = v crypto_secretkeybytes);
-  matrix_to_lbytes s_matrix (sub sk (crypto_bytes +. crypto_publickeybytes) (size 2 *. params_n *. params_nbar));
   pop_frame();
   (u32 0)
 
