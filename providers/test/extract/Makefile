@@ -15,6 +15,8 @@ else
 LDFLAGS += -lbcrypt
 endif
 
+LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
+
 # See https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
 %.d: %.c
 	@set -e; rm -f $@; \

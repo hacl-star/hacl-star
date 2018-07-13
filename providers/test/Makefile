@@ -65,7 +65,7 @@ $(EXTRACT_DIR)/%.krml:
 # hacks.h defines monomorphized types for `option string` and `uint8_t * uint8_t`, which are
 # needed by fstar_bytes.h, and then includes fstar_bytes.h only if EverCrypt.h has been
 # loaded.
-$(EXTRACT_DIR)/Test.c: $(filter-out $(EXTRACT_DIR)/prims.krml ,$(ALL_KRML_FILES)) | .depend
+$(EXTRACT_DIR)/Test.c: $(ALL_KRML_FILES) | .depend
 	krml $^ -tmpdir $(EXTRACT_DIR) -no-prefix Test \
 	  -skip-compilation \
 	  -add-include '"kremlin/internal/compat.h"' \
