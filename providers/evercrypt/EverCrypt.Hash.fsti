@@ -12,6 +12,7 @@ open FStar.Integers
 /// Agile specification of all supported hash algorithmms.
 
 //open FStar.UInt32
+// 18-07-13 move to EverCrypt.Helpers?
 let bytes = Seq.seq UInt8.t
 type lbytes (l:nat) = b:bytes{ Seq.length b = l }
 
