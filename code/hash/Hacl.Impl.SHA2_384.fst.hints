@@ -1,5 +1,5 @@
 [
-  "Ç\tê∆ß∑öMw\u001flıC‰ó\u0012",
+  "∞ÄoÓµ\u0005Y\u0015\fÊ‡`k8∂—",
   [
     [
       "Hacl.Impl.SHA2_384.size_hash",
@@ -31,7 +31,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v"
       ],
       0,
-      "c8f511337a50930e31e2625f86d3cd12"
+      "21bf16dac2e9f537cba43f2677519e37"
     ],
     [
       "Hacl.Impl.SHA2_384.size_block",
@@ -67,7 +67,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v"
       ],
       0,
-      "b12049726bceb5455f1c7cb1b4b6fed7"
+      "e07e23186402771c49c064628ced0302"
     ],
     [
       "Hacl.Impl.SHA2_384.size_hash_final",
@@ -102,7 +102,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v"
       ],
       0,
-      "bc859fcaf5f3f87acf76fcaf447bc7cb"
+      "7867a0a676ccb51252a10e9fec5f4341"
     ],
     [
       "Hacl.Impl.SHA2_384.size_len_8",
@@ -133,7 +133,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v"
       ],
       0,
-      "042717aa35c71e240416247478039726"
+      "05471a97152f929f8a6dcaecf45090b6"
     ],
     [
       "Hacl.Impl.SHA2_384.size_state",
@@ -175,7 +175,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "22a50d836d82d61463cab825df753eb5"
+      "1525cb9a3a689d759c4f241a37e81a34"
     ],
     [
       "Hacl.Impl.SHA2_384.pos_whash_w",
@@ -213,7 +213,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "47e439b23b597ceb25190bf1bf687230"
+      "d45494b8dbd1e5564a416156ba19d3c6"
     ],
     [
       "Hacl.Impl.SHA2_384.pos_count_w",
@@ -254,7 +254,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "66b36576f342c1ec9ebc75a3049fdd47"
+      "8ece49e971b72cc78d597a1dbea00f74"
     ],
     [
       "Hacl.Impl.SHA2_384.rotate_right64",
@@ -282,7 +282,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "4c25d607e7904b4f83e42d67893a31cb"
+      "fadc0c233394880933aae7908a721b84"
     ],
     [
       "Hacl.Impl.SHA2_384.constants_set_k",
@@ -294,7 +294,89 @@
         "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
       ],
       0,
-      "6b57f34b67a6e63140a6559540b3d46e"
+      "dd9321255efa40750d4d7ee49c0f9fb1"
+    ],
+    [
+      "Hacl.Impl.SHA2_384.assign_k",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Reflection.Data.var", "equation_Prims.eqtype",
+        "equation_Prims.nat",
+        "function_token_typing_FStar.Reflection.Data.var",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "a799c0a354799e9957803e93d0aeb52c"
+    ],
+    [
+      "Hacl.Impl.SHA2_384.assign_k",
+      2,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "equation_FStar.Reflection.Data.var", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt64.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_FStar.Reflection.Data.var",
+        "function_token_typing_FStar.UInt64.n", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "cdb976360214353b7e3e60a1001d98af"
+    ],
+    [
+      "Hacl.Impl.SHA2_384.assign_k",
+      3,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "equation_FStar.Reflection.Data.var", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt64.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_FStar.Reflection.Data.var",
+        "function_token_typing_FStar.UInt64.n", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "04760ace9567d8c08b6c6b164ff2e3f5"
+    ],
+    [
+      "Hacl.Impl.SHA2_384.assign_k",
+      4,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Reflection.Data.var", "equation_Prims.eqtype",
+        "equation_Prims.nat",
+        "function_token_typing_FStar.Reflection.Data.var",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "10dfdf3209a49e6865c3c89aca5206c8"
     ],
     [
       "Hacl.Impl.SHA2_384.constants_set_k",
@@ -347,7 +429,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.v"
       ],
       0,
-      "e71231ada20e0e5301a24c31d0e1ff5d"
+      "4b0060c157eff9aa0d277df5eee2674b"
     ],
     [
       "Hacl.Impl.SHA2_384.constants_set_k",
@@ -395,7 +477,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.v"
       ],
       0,
-      "e6adbc3eee46341a0044b277378cabb5"
+      "8732367fc0d4c5565f6d45998f528258"
     ],
     [
       "Hacl.Impl.SHA2_384.constants_set_h_0",
@@ -407,7 +489,89 @@
         "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
       ],
       0,
-      "fbb8ee55318934eb6c48c35453107c56"
+      "9fa8577afcefcd5a274fc27a514363b6"
+    ],
+    [
+      "Hacl.Impl.SHA2_384.assign_h0",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Reflection.Data.var", "equation_Prims.eqtype",
+        "equation_Prims.nat",
+        "function_token_typing_FStar.Reflection.Data.var",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "84ef1638d1faa2cfdba27a752f811528"
+    ],
+    [
+      "Hacl.Impl.SHA2_384.assign_h0",
+      2,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "equation_FStar.Reflection.Data.var", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt64.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_FStar.Reflection.Data.var",
+        "function_token_typing_FStar.UInt64.n", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "f38efc68fe371b44a7fc8289479eddfa"
+    ],
+    [
+      "Hacl.Impl.SHA2_384.assign_h0",
+      3,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "equation_FStar.Reflection.Data.var", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt64.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_FStar.Reflection.Data.var",
+        "function_token_typing_FStar.UInt64.n", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "e9d18831d504d34f46a53ab79f2d07c5"
+    ],
+    [
+      "Hacl.Impl.SHA2_384.assign_h0",
+      4,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Reflection.Data.var", "equation_Prims.eqtype",
+        "equation_Prims.nat",
+        "function_token_typing_FStar.Reflection.Data.var",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "e408b0c650360708ca0578be7adf0199"
     ],
     [
       "Hacl.Impl.SHA2_384.constants_set_h_0",
@@ -456,7 +620,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "8c49bda1809a7a246eac78ef7860f30e"
+      "c2578a5bef81012ad102fbba2de12c21"
     ],
     [
       "Hacl.Impl.SHA2_384.constants_set_h_0",
@@ -500,7 +664,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "278094f6ff659957d18a26649e5dc87d"
+      "c8d1c24623994a7925ed1e3e86b8d725"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_1_core",
@@ -554,7 +718,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "001d58abd62ecf0d85cc206b6ad5047c"
+      "01084541e1fd47982966fb59eabb2f6e"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_1_core",
@@ -626,7 +790,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "522c91772b62b85ea232c7f0778b06ee"
+      "d823bf3c2af3efdaf2649efa2b13f09e"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_1_core",
@@ -696,7 +860,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.v"
       ],
       0,
-      "e9ce51a576c9b4923a247cb0804ad5ee"
+      "69328f482ee4a7e6929c5cd1e928a7a6"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_1",
@@ -748,7 +912,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "f115245e967900134671c474496c603d"
+      "f6702ea828f1a43d80cdf9f1dce6e553"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_1",
@@ -811,7 +975,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "d52ce20ae90af89a46245d42821b6f38"
+      "7816853ba483ea4ffc322d37744d4f17"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_1",
@@ -869,7 +1033,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "a209717ba53a87b43c71c8103ecda65f"
+      "f4375f2e8c0c0571eadae921cc9ae157"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_2_core",
@@ -923,7 +1087,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "34326be2356aa242fa98edaba27219b3"
+      "e3a5bf2b19310ccaa8f671ca03b26ce1"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_2_core",
@@ -998,7 +1162,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "cca8955efc26b0f4ee0255ae785ae516"
+      "914f9cb0508ec8642bf516b344fa0040"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_2_core",
@@ -1071,7 +1235,7 @@
         "typing_FStar.Monotonic.HyperStack.contains", "typing_FStar.UInt32.v"
       ],
       0,
-      "c1e21580bc45bf228b9bdb2f9a9cf451"
+      "a6eadb9d6ff99134ee5597263c65a7de"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_2",
@@ -1120,7 +1284,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "1351aedc2cca99546776a3a9e3b0695a"
+      "c3fff352e05f515b5cbc5d6001a19012"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_2",
@@ -1180,7 +1344,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "2646609069ed5c954bb968b513907512"
+      "a8ebf5926889028751b576180814adf1"
     ],
     [
       "Hacl.Impl.SHA2_384.ws_part_2",
@@ -1235,7 +1399,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "35aa06594d3274f9c3c83c0d7ea90bdd"
+      "53361371a6b2218537b4e0282677d8ed"
     ],
     [
       "Hacl.Impl.SHA2_384.ws",
@@ -1283,7 +1447,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "b18070823889a0b0f3207b801a4693c6"
+      "91825b51c331675e25b92bffcb176964"
     ],
     [
       "Hacl.Impl.SHA2_384.ws",
@@ -1314,7 +1478,7 @@
         "refinement_interpretation_Hacl.Impl.SHA2_384_Tm_refine_bea49240d32ebe358f850713c8d6e172"
       ],
       0,
-      "f94e31a8b8d09cb4f0223f18e5fc1562"
+      "ced4b64ab803d3b5ad012f7f8d5f042e"
     ],
     [
       "Hacl.Impl.SHA2_384.ws",
@@ -1341,7 +1505,7 @@
         "refinement_interpretation_Hacl.Impl.SHA2_384_Tm_refine_bea49240d32ebe358f850713c8d6e172"
       ],
       0,
-      "b8bb62dcc40d33528b344b039be900a4"
+      "30514b294b98824a66afd951f9691241"
     ],
     [
       "Hacl.Impl.SHA2_384.shuffle_core",
@@ -1394,7 +1558,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "5017a973e62ad8c3ee5efdc9e9107a60"
+      "163163694520cf5a5151c40f02c6bedc"
     ],
     [
       "Hacl.Impl.SHA2_384.shuffle_core",
@@ -1461,7 +1625,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "d1b0a5fe83726473f2f2bff0627a63fc"
+      "ff8263ad209aef76c8c93b0edea295ec"
     ],
     [
       "Hacl.Impl.SHA2_384.shuffle_core",
@@ -1530,7 +1694,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "7d468003348a403e58c6c1fda3c39ae4"
+      "57f91f91d7fe870cc29e0eabad3cd890"
     ],
     [
       "Hacl.Impl.SHA2_384.shuffle",
@@ -1581,7 +1745,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "27aee9faa53e027f7e3687092181eb41"
+      "cb98f7a9c54a0b3156a56b3ba86201e3"
     ],
     [
       "Hacl.Impl.SHA2_384.shuffle",
@@ -1647,7 +1811,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "76d787d6f454b2a064a089610d52a732"
+      "7abdf91e4defd70a6b75a893ff90fd9c"
     ],
     [
       "Hacl.Impl.SHA2_384.shuffle",
@@ -1714,7 +1878,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "a1ef9a96510eb912142926e55e6a9279"
+      "3b6cbf641e62912ee33a7ebc8bbdf7cd"
     ],
     [
       "Hacl.Impl.SHA2_384.sum_hash",
@@ -1739,7 +1903,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "ea735a1a1123842805c1fda6edd6a2c1"
+      "7af12bc2e77c5db448732c8027aebcd9"
     ],
     [
       "Hacl.Impl.SHA2_384.sum_hash",
@@ -1764,7 +1928,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "29264a6aa438b77d06e292670e75b0e1"
+      "711dc1ee7f1e9acad1ef3f8ec8496027"
     ],
     [
       "Hacl.Impl.SHA2_384.sum_hash",
@@ -1785,7 +1949,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "90e5d83703ff6f9bb7a0d74b0df5a144"
+      "161263f946c0573aad8b6e3ffe421859"
     ],
     [
       "Hacl.Impl.SHA2_384.alloc",
@@ -1800,7 +1964,7 @@
         "int_typing"
       ],
       0,
-      "67c6c392122506c3953db7125b12fc93"
+      "90237ba6f6ff5597b6a5c40cc8ff8d71"
     ],
     [
       "Hacl.Impl.SHA2_384.alloc",
@@ -1851,7 +2015,7 @@
         "typing_FStar.StrongExcludedMiddle.strong_excluded_middle"
       ],
       0,
-      "94019cfc260516e519c6194ae317db25"
+      "abe9526a52c3058176af774a9c2a1093"
     ],
     [
       "Hacl.Impl.SHA2_384.init",
@@ -1930,7 +2094,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "095d10291fe3682a4e7355b6b9898135"
+      "cd16405939b93a3351920b9bcebf3b1f"
     ],
     [
       "Hacl.Impl.SHA2_384.init",
@@ -2051,7 +2215,7 @@
         "typing_FStar.UInt64.v", "unit_typing"
       ],
       0,
-      "4bda284d98facd5f0da9f4d53873e517"
+      "6e8d6c5436673862e23cba2850722abe"
     ],
     [
       "Hacl.Impl.SHA2_384.init",
@@ -2164,7 +2328,7 @@
         "typing_FStar.UInt64.v", "unit_typing"
       ],
       0,
-      "47f2b118d0e2ca3e20178a9bcf4bd515"
+      "796af76780b947fef2554cef4ca821b7"
     ],
     [
       "Hacl.Impl.SHA2_384.copy_hash",
@@ -2179,7 +2343,7 @@
         "int_typing"
       ],
       0,
-      "961bfe9ec8f6a0249e599a25ad3c3c6f"
+      "7e79b1c7c953eb56ad86bf51db916dcf"
     ],
     [
       "Hacl.Impl.SHA2_384.copy_hash",
@@ -2224,7 +2388,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "2947dab4d5a3fccf3490bcb67532d82a"
+      "0403cde12e2e624d0c9dc7e938d14481"
     ],
     [
       "Hacl.Impl.SHA2_384.copy_hash",
@@ -2259,7 +2423,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.Buffer.length"
       ],
       0,
-      "33cddb7ef5602dfa73db4a232af15ae1"
+      "34121306c1927c050d829c15ddd22096"
     ],
     [
       "Hacl.Impl.SHA2_384.update_core",
@@ -2331,7 +2495,7 @@
         "typing_FStar.UInt32.mul", "typing_FStar.UInt32.v"
       ],
       0,
-      "631efd8afc2046ebabb427e9ae86d642"
+      "a45ebc223553429a56c0aac3b7f207c1"
     ],
     [
       "Hacl.Impl.SHA2_384.update_core",
@@ -2441,7 +2605,7 @@
         "typing_FStar.UInt32.mul", "typing_FStar.UInt32.v", "unit_typing"
       ],
       0,
-      "5796af98846989659bb66ffa9f3ce2b1"
+      "9659d94dd346311aa395509ee4a47bf3"
     ],
     [
       "Hacl.Impl.SHA2_384.update_core",
@@ -2574,7 +2738,7 @@
         "typing_FStar.UInt32.v", "unit_typing"
       ],
       0,
-      "27c9871817de5fa97832daa21ac36b11"
+      "ef814f475898a25c38129bd8b4471409"
     ],
     [
       "Hacl.Impl.SHA2_384.counter_increment",
@@ -2616,7 +2780,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "498822f23bc058dd7544ee951386eb8f"
+      "4baaf5f80dbb4694ca909f3a360bd070"
     ],
     [
       "Hacl.Impl.SHA2_384.counter_increment",
@@ -2672,7 +2836,7 @@
         "typing_Hacl.Impl.SHA2_384.u32_to_h64"
       ],
       0,
-      "10844fda12ffc404820b9c3e898c764f"
+      "a44bbaf9b40b8cc9cf4e4946b93c500a"
     ],
     [
       "Hacl.Impl.SHA2_384.counter_increment",
@@ -2726,7 +2890,7 @@
         "typing_Hacl.Impl.SHA2_384.u32_to_h64"
       ],
       0,
-      "579586cf9267ce72b77c83e28132328b"
+      "ff4fd3ea17e9e183c92ab5df8cfdb80c"
     ],
     [
       "Hacl.Impl.SHA2_384.update",
@@ -2844,7 +3008,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "3c9334c9be5947e20d978f7ef4eb698d"
+      "714d2b8be596acda1545c2d0388ba027"
     ],
     [
       "Hacl.Impl.SHA2_384.update",
@@ -3034,7 +3198,7 @@
         "typing_FStar.UInt32.v", "unit_typing"
       ],
       0,
-      "d406c5c2713aa767e2524dc0fba56f84"
+      "3df43ac84f8b57431239e307e2841f3e"
     ],
     [
       "Hacl.Impl.SHA2_384.update",
@@ -3235,7 +3399,7 @@
         "unit_typing"
       ],
       0,
-      "3122100d4e48e695a53a12909f4b0693"
+      "19731d922766c4a55272c5df901f9699"
     ],
     [
       "Hacl.Impl.SHA2_384.update_multi",
@@ -3347,7 +3511,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "3b0fdf9588ca60d66924ec6b63ad5dd0"
+      "991589204fafef617b69eac6b8cda2cf"
     ],
     [
       "Hacl.Impl.SHA2_384.update_multi",
@@ -3515,7 +3679,7 @@
         "typing_FStar.UInt64.v", "unit_typing"
       ],
       0,
-      "9c4a11473cec2bba37342d11e26c0a84"
+      "329718b48f353510d2e50700eec2b055"
     ],
     [
       "Hacl.Impl.SHA2_384.update_multi",
@@ -3705,7 +3869,7 @@
         "typing_FStar.UInt64.v", "unit_typing"
       ],
       0,
-      "2ce952ffafc82bb810d5ec4047a589ff"
+      "db73e4a53cbca214b85ed8746cc24bbd"
     ],
     [
       "Hacl.Impl.SHA2_384.pad0_length",
@@ -3761,7 +3925,7 @@
         "typing_FStar.UInt32.v", "typing_Spec.SHA2_384.pad0_length"
       ],
       0,
-      "8ef71ab31caf207670f38f0f9183b957"
+      "53114f7cbec2127473631b575d14e542"
     ],
     [
       "Hacl.Impl.SHA2_384.encode_length",
@@ -3820,7 +3984,7 @@
         "typing_Hacl.UInt128.shift_left", "typing_Hacl.UInt128.v"
       ],
       0,
-      "ffb8e1aebe110f4613f2e014af7f3092"
+      "cef84119b5b11a99bb41c8677971c917"
     ],
     [
       "Hacl.Impl.SHA2_384.set_pad_part1",
@@ -3835,7 +3999,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "9e1b0fde6fa4c1fd683bb4b41d11fe91"
+      "5709245b3d86d09a649398ccec6cc91c"
     ],
     [
       "Hacl.Impl.SHA2_384.set_pad_part1",
@@ -3908,7 +4072,7 @@
         "typing_FStar.UInt8.uint_to_t"
       ],
       0,
-      "ea47817730d559ed02b39adc68e6fe87"
+      "a270caf367a6e5a6a498c3dc27260dd6"
     ],
     [
       "Hacl.Impl.SHA2_384.set_pad_part1",
@@ -3980,7 +4144,7 @@
         "typing_FStar.UInt8.uint_to_t"
       ],
       0,
-      "0c972fc8026b98ba9c9481c012c66998"
+      "b1703e4e46a87346b26ffa699279ccfa"
     ],
     [
       "Hacl.Impl.SHA2_384.set_pad_part2",
@@ -4020,7 +4184,7 @@
         "typing_FStar.UInt32.mul", "typing_FStar.UInt32.uint_to_t"
       ],
       0,
-      "a8cd4d06487235a92210d61d93287e07"
+      "2217fe4b1e03e0bb030f7d84117338db"
     ],
     [
       "Hacl.Impl.SHA2_384.set_pad_part2",
@@ -4082,7 +4246,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "5673417591365b3aafec7c0198781369"
+      "c991647399827d63650211d197a8dc5d"
     ],
     [
       "Hacl.Impl.SHA2_384.set_pad_part2",
@@ -4139,7 +4303,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "c1282b62bf860123a0dd402903d2a570"
+      "aa8158867bf8d603ca25c660f21aaab1"
     ],
     [
       "Hacl.Impl.SHA2_384.lemma_downcast",
@@ -4184,7 +4348,7 @@
         "typing_FStar.Int.Cast.uint64_to_uint32", "typing_FStar.UInt64.v"
       ],
       0,
-      "9bab49a6772bb895f43f5ccfca73417d"
+      "cf1d5bb355bb9987aae1b5ef34a6c99a"
     ],
     [
       "Hacl.Impl.SHA2_384.lemma_padding_bounds",
@@ -4235,7 +4399,7 @@
         "typing_FStar.UInt32.mul", "typing_FStar.UInt32.v"
       ],
       0,
-      "e09c48c3452f1eaaa03bd5d1e1c84a74"
+      "78e8fb2074a7df28b4a9ab51d01200a5"
     ],
     [
       "Hacl.Impl.SHA2_384.lemma_padding_bounds",
@@ -4291,7 +4455,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Impl.SHA2_384.pad0_length"
       ],
       0,
-      "cf6c209e74b333de7302e7f4b8258601"
+      "0967b91d6e68b9271773974924fb3623"
     ],
     [
       "Hacl.Impl.SHA2_384.lemma_padding_bounds",
@@ -4346,7 +4510,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Impl.SHA2_384.pad0_length"
       ],
       0,
-      "385c97e8836eec9b054c2bb96570c304"
+      "f2eba65cc34ff72de498c205f0ec49e3"
     ],
     [
       "Hacl.Impl.SHA2_384.lemma_eq_pad0_downcast",
@@ -4377,7 +4541,7 @@
         "typing_Hacl.Impl.SHA2_384.u64_to_u32"
       ],
       0,
-      "069da9ed555f5456fe77b4d246e14463"
+      "e9b81ebc84069c51c99f8cca90b215c9"
     ],
     [
       "Hacl.Impl.SHA2_384.lemma_eq_pad0_downcast",
@@ -4403,7 +4567,7 @@
         "typing_Hacl.Impl.SHA2_384.u64_to_u32"
       ],
       0,
-      "6d9b6bdd68f1b293746c6440080d59c6"
+      "7fe41bbe7ac2bea16c9f3b100a0a4d9d"
     ],
     [
       "Hacl.Impl.SHA2_384.pad",
@@ -4462,7 +4626,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "1cb5e858d525b5176635862f63b0279a"
+      "dcfb2bc790ec2f8afa71c801189101a2"
     ],
     [
       "Hacl.Impl.SHA2_384.pad",
@@ -4636,7 +4800,7 @@
         "unit_typing"
       ],
       0,
-      "a530678682abe7a2e3b75ffc41bd5fd2"
+      "b5ff8a8e9428e0327e809229ec6ddbbb"
     ],
     [
       "Hacl.Impl.SHA2_384.pad",
@@ -4805,7 +4969,7 @@
         "unit_typing"
       ],
       0,
-      "ddda7a63162d4ab7b3dac6ff8557cfb2"
+      "63e68b838be442287125cf0c556e303e"
     ],
     [
       "Hacl.Impl.SHA2_384.update_last",
@@ -4936,7 +5100,7 @@
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v"
       ],
       0,
-      "a3f16b9589cd3d4a7986f6bf8ab308bb"
+      "feb4f92aca68107abd00daa4eadfdfee"
     ],
     [
       "Hacl.Impl.SHA2_384.update_last",
@@ -4952,7 +5116,7 @@
         "int_typing"
       ],
       0,
-      "e5cbac32234281fe0b618402fda34f3b"
+      "99e13aff50a97e7e688e87cd813e089a"
     ],
     [
       "Hacl.Impl.SHA2_384.update_last",
@@ -5160,7 +5324,7 @@
         "unit_typing"
       ],
       0,
-      "79a936efe64bbd635084b708e0acd752"
+      "034892aee299c0d6282d7a93b4b4a624"
     ],
     [
       "Hacl.Impl.SHA2_384.finish_core",
@@ -5184,7 +5348,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.Buffer.length"
       ],
       0,
-      "d914e144e054c93f67c27bc933ecae72"
+      "20c0d378e640a37e86ce2dd4e900978a"
     ],
     [
       "Hacl.Impl.SHA2_384.finish_core",
@@ -5244,7 +5408,7 @@
         "typing_FStar.UInt32.mul", "typing_FStar.UInt32.v"
       ],
       0,
-      "5d94e93df6f5a4ac7ae05828eb29822f"
+      "51fbd0545e5e515355a8fda6e0d7b557"
     ],
     [
       "Hacl.Impl.SHA2_384.finish_core",
@@ -5300,7 +5464,7 @@
         "typing_FStar.UInt32.mul", "typing_FStar.UInt32.v"
       ],
       0,
-      "d5dd1e526b8c7348476e39521ad4c845"
+      "e09f228b9984ea4210bb415defccf3dd"
     ],
     [
       "Hacl.Impl.SHA2_384.finish",
@@ -5374,7 +5538,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "d7dbba14318c7fa48264b4bc5cc21fc1"
+      "1cecf78bb23ac58d13d7e703effbb766"
     ],
     [
       "Hacl.Impl.SHA2_384.finish",
@@ -5471,7 +5635,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "805b2c937d1159da79a2a492fffbb061"
+      "d6d16a5b92282fca29217bfddc100889"
     ],
     [
       "Hacl.Impl.SHA2_384.finish",
@@ -5564,7 +5728,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "b3e29a6dd255ab32248e37514b3dd5ac"
+      "4341f7db65b9b76389f5afd2a846aa5d"
     ],
     [
       "Hacl.Impl.SHA2_384.hash",
@@ -5587,7 +5751,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "10931ea237f239c928a6bce715510a60"
+      "7d06cc8d9bda510daa4f829a5ccdc6a5"
     ],
     [
       "Hacl.Impl.SHA2_384.hash",
@@ -5718,7 +5882,7 @@
         "unit_typing"
       ],
       0,
-      "23432b91037061abcc0f302c6306dd4c"
+      "f32b44db4decf0236cdc3dfcca54562a"
     ],
     [
       "Hacl.Impl.SHA2_384.hash",
@@ -5853,7 +6017,7 @@
         "unit_typing"
       ],
       0,
-      "3a1e8d1783e4fbc083b19400f862829f"
+      "89f725d8c2032e0723664cf3e1826e78"
     ]
   ]
 ]
