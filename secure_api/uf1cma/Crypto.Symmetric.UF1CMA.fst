@@ -494,6 +494,7 @@ let update #i st acc w =
     MAC.poly_cons #i v vs (MAC.sel_elem h0 st.r)
     end;
   let h1 = ST.get () in
+  assume (Buffer.disjoint_2 (MAC.as_buffer st.r) (MAC.as_buffer acc.a) w);
   MAC.update st.r acc.a w;
   let h2 = ST.get () in
   lemma_reveal_modifies_1 (MAC.as_buffer acc.a) h1 h2;
@@ -654,6 +655,7 @@ let verify #i st acc tag =
   let h1 = ST.get () in
   let computed = Buffer.create 0uy 16ul in
   let h2 = ST.get () in
+  assume (Buffer.disjoint_2 (MAC.as_buffer acc.a) st.s computed);
   MAC.finish st.s acc.a computed;
   let h3 = ST.get () in
   // TODO: should use constant-time comparison
