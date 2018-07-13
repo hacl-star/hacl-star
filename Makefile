@@ -149,9 +149,10 @@ providers:
 #
 
 ci: # .clean-banner .clean-git .clean-snapshots
-#	$(MAKE) verify # Suspend verification from CI
-	$(MAKE) providers
 	$(MAKE) extract-specs extract-all
+	$(MAKE) -C providers/evercrypt
+	$(MAKE) -C providers/evercrypt/test
+	$(MAKE) -C secure_api runtime_switch verify # test both extraction & verification
 	$(MAKE) build-make
 	$(MAKE) test-all
 	$(MAKE) package
