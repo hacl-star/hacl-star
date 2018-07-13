@@ -11,7 +11,7 @@
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "8393ee508e1a85f2365d8916381adbde"
+      "3244b5c6c0a822994fa278022a839df2"
     ],
     [
       "Spec.HMAC.SHA2_256.xor_bytes",
@@ -23,7 +23,7 @@
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "3aabb36f8fc809ff0b1290dd8e1b0c80"
+      "514a05314981b9d8e7825f6ddbcf2f22"
     ],
     [
       "Spec.HMAC.SHA2_256.wrap_key",
@@ -71,7 +71,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "88f5fc0a6a6c6e0f105142c3225ec1c0"
+      "c51a083aeb45b4df3f608fa1e635abfe"
     ],
     [
       "Spec.HMAC.SHA2_256.hmac_core",
@@ -80,7 +80,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "73249f34dd0ced1adc489bb133dd4f9e"
+      "add94e2d65f8d74d28b1b9dea24915cc"
     ],
     [
       "Spec.HMAC.SHA2_256.hmac_core",
@@ -138,7 +138,7 @@
         "typing_Spec.Loops.seq_map2"
       ],
       0,
-      "20693b45f29f808468eb3c9dc13913d0"
+      "5011169faca2f7294a9901a0e4683628"
     ],
     [
       "Spec.HMAC.SHA2_256.hmac_core",
@@ -165,7 +165,8 @@
         "equation_Spec.SHA2_256.size_block_w",
         "equation_Spec.SHA2_256.size_hash",
         "equation_Spec.SHA2_256.size_hash_w",
-        "equation_Spec.SHA2_256.size_k_w", "equation_Spec.SHA2_256.word",
+        "equation_Spec.SHA2_256.size_k_w",
+        "equation_Spec.SHA2_256.size_word", "equation_Spec.SHA2_256.word",
         "function_token_typing_FStar.UInt32.t",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Spec.SHA2_256.h_0",
@@ -196,7 +197,7 @@
         "typing_Spec.Loops.seq_map2"
       ],
       0,
-      "c8435f81700305ea34565dde5c3ab3e5"
+      "ef6c2a2f739ea55e4813b67f1a468403"
     ],
     [
       "Spec.HMAC.SHA2_256.hmac",
@@ -205,7 +206,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "e049049dd04762cad170fd15cd10d848"
+      "fe16869485ca872bcf94a096eccb5537"
     ],
     [
       "Spec.HMAC.SHA2_256.hmac",
@@ -214,7 +215,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "4b856e015d13f0bf911afed76540d270"
+      "ac73cdd2999352fb2396e948c8a22287"
     ],
     [
       "Spec.HMAC.SHA2_256.lemma_eq_hmac",
@@ -272,7 +273,7 @@
         "typing_FStar.UInt8.uint_to_t", "typing_Spec.Loops.seq_map2"
       ],
       0,
-      "52b259698c0784ff66f96872739848e2"
+      "33613ed6a16ef950dde3d60743a06032"
     ],
     [
       "Spec.HMAC.SHA2_256.lemma_eq_hmac",
@@ -300,7 +301,8 @@
         "equation_Spec.SHA2_256.size_block_w",
         "equation_Spec.SHA2_256.size_hash",
         "equation_Spec.SHA2_256.size_hash_w",
-        "equation_Spec.SHA2_256.size_k_w", "equation_Spec.SHA2_256.word",
+        "equation_Spec.SHA2_256.size_k_w",
+        "equation_Spec.SHA2_256.size_word", "equation_Spec.SHA2_256.word",
         "function_token_typing_FStar.UInt32.t",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Spec.SHA2_256.h_0",
@@ -330,7 +332,7 @@
         "typing_FStar.UInt8.uint_to_t", "typing_Spec.Loops.seq_map2"
       ],
       0,
-      "615e7598130698eb6836597a5e16338e"
+      "a41bc514cfbaacd6cc96e9db2e42908d"
     ],
     [
       "Spec.HMAC.SHA2_256.test",
@@ -351,6 +353,7 @@
         "equation_Spec.SHA2_256.size_block_w",
         "equation_Spec.SHA2_256.size_hash",
         "equation_Spec.SHA2_256.size_hash_w",
+        "equation_Spec.SHA2_256.size_word",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Spec.SHA2_256.pow2_61",
         "function_token_typing_Spec.SHA2_256.size_block",
@@ -364,7 +367,7 @@
         "refinement_interpretation_Spec.SHA2_256_Tm_refine_b49ddfaf636afcf06cef07d1e12ced40"
       ],
       0,
-      "42abdcacc9b0fbc66c0733768df383d3"
+      "e11697b34a9575a415c31b575899d084"
     ]
   ]
 ]

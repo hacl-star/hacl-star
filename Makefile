@@ -150,6 +150,7 @@ providers:
 
 ci: # .clean-banner .clean-git .clean-snapshots
 	$(MAKE) extract-specs extract-all
+	$(MAKE) -C code clean-c
 	$(MAKE) -C code extract-c
 	$(MAKE) -C providers/
 	$(MAKE) -C providers/test
