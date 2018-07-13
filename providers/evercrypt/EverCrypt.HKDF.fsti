@@ -15,6 +15,10 @@ open FStar.Seq
 
 noextract let extract a salt ikm = EverCrypt.HMAC.hmac a salt ikm
 
+// [a, prk, info] are fixed.
+// [required] is the number of bytes to be extracted
+// [count] is the number of extracted blocks so far
+// [last] is empty for count=0 then set to the prior tag for chaining.
 noextract let rec expand0 : 
   a: Hash.e_alg ->
   prk: bytes ->
@@ -22,8 +26,9 @@ noextract let rec expand0 :
   required: nat ->
   count: nat -> 
   last: bytes {
+    let chainLength = if count = 0 then 0 else tagLength a in 
     HMAC.keysized a (Seq.length prk) /\
-    length last <= tagLength a /\
+    Seq.length last = chainLength /\ 
     tagLength a + length info + 1 + blockLength a <= maxLength a /\
     count < 255 /\ 
     required <= (255 - count) * tagLength a } -> 
@@ -35,11 +40,11 @@ noextract let rec expand0 :
   let tag = EverCrypt.HMAC.hmac a prk text in 
   if required <= tagLength a 
   then fst (split tag required) 
-  else (tag @| expand0 a prk info (required - tagLength a) count tag)
+  else tag @| expand0 a prk info (required - tagLength a) count tag
 
 noextract let expand:
   a: Hash.e_alg ->
-  prk: bytes ->
+  prk: bytes -> 
   info: bytes ->
   required: nat { 
     HMAC.keysized a (Seq.length prk) /\
