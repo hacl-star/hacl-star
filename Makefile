@@ -148,7 +148,7 @@ providers:
 # CI
 #
 
-ci: .clean-banner .clean-git .clean-snapshots
+ci: # .clean-banner .clean-git .clean-snapshots
 #	$(MAKE) verify # Suspend verification from CI
 	$(MAKE) providers
 	$(MAKE) extract-specs extract-all

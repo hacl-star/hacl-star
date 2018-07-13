@@ -89,9 +89,9 @@ let test_chacha20_poly1305 v =
   let ciphertext'   = B.alloca 0uy v.plaintext_len in
   let tag'          = B.alloca 0uy 16ul in
 
-  let s0 = T.cpucycles () in
+  let s0 = TestLib.cpucycles () in
   EverCrypt.chacha20_poly1305_encrypt v.key v.iv v.aad v.aad_len v.plaintext v.plaintext_len ciphertext' tag';
-  let s1 = T.cpucycles () in
+  let s1 = TestLib.cpucycles () in
   TestLib.print_cycles_per_round s0 s1 1ul;
   TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" !!v.ciphertext !!ciphertext' v.plaintext_len;
   TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" !!v.tag !!tag' 16ul;
@@ -112,10 +112,10 @@ let test_aes128_gcm v =
   let ciphertext'   = B.alloca 0uy v.plaintext_len in
   let tag'          = B.alloca 0uy 16ul in
 
-  let s0 = T.cpucycles () in
+  let s0 = TestLib.cpucycles () in
   EverCrypt.aes128_gcm_encrypt v.key v.iv v.aad v.aad_len v.plaintext v.plaintext_len ciphertext' tag';
-  let s1 = T.cpucycles () in
-  T.print_cycles_per_round s0 s1 1ul;
+  let s1 = TestLib.cpucycles () in
+  TestLib.print_cycles_per_round s0 s1 1ul;
   TestLib.compare_and_print !$"of AES-GCM 128 cipher" !!v.ciphertext !!ciphertext' v.plaintext_len;
   TestLib.compare_and_print !$"of AES-GCM 128 tag" !!v.tag !!tag' 16ul;
 
@@ -139,13 +139,13 @@ let test_aes256_gcm v =
   TestLib.compare_and_print !$"of AES-GCM 256 cipher" !!v.ciphertext !!ciphertext' v.plaintext_len;
   TestLib.compare_and_print !$"of AES-GCM 256 tag" !!v.tag !!tag' 16ul;
 
-  let s0 = Testlib.cpucycles () in
-  EverCrypt.aes256_gcm_encrypt v.key v.iv v.aad v.aad_len plaintext v.plaintext_len ciphertext' tag';
-  let s1 = Testlib.cpucycles () in
-  
-  Testlib.print_cycles_per_round s0 s1 1ul;
-  Testlib.compare_and_print !$"of AES-GCM 256 cipher" ciphertext ciphertext' plaintext_len;
-  Testlib.compare_and_print !$"of AES-GCM 256 tag" tag tag' 16ul;
+  let s0 = TestLib.cpucycles () in
+  EverCrypt.aes256_gcm_encrypt v.key v.iv v.aad v.aad_len v.plaintext v.plaintext_len ciphertext' tag';
+  let s1 = TestLib.cpucycles () in
+
+  TestLib.print_cycles_per_round s0 s1 1ul;
+  TestLib.compare_and_print !$"of AES-GCM 256 cipher" !!v.ciphertext !!ciphertext' v.plaintext_len;
+  TestLib.compare_and_print !$"of AES-GCM 256 tag" !!v.tag !!tag' 16ul;
 
   match EverCrypt.aes256_gcm_decrypt v.key v.iv v.aad v.aad_len plaintext' v.plaintext_len v.ciphertext v.tag with
   | 1ul ->
@@ -155,32 +155,30 @@ let test_aes256_gcm v =
 
   pop_frame()
 
-let test_aes_ecb (v:block_cipher_vector) : St unit =
-  push_frame();
-  let key = buffer_of_hex v.rkey in
-  let plain = buffer_of_hex v.plain in
-  let cipher = buffer_of_hex v.enc in
-  let cipher' = B.create 0uy 16ul in
-  let s0 = T.cpucycles () in
-  let () =
-    match v.block with
-    | AES128 ->
-      let k = EverCrypt.aes128_create key in
-      EverCrypt.aes128_compute k plain cipher';
-      EverCrypt.aes128_free k
-    | AES256 ->
-      let k = EverCrypt.aes256_create key in
-      EverCrypt.aes256_compute k plain cipher';
-      EverCrypt.aes256_free k
-    in
-  let s1 = T.cpucycles () in
-  T.print_cycles_per_round s0 s1 1ul;
-  T.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
-  pop_frame()
+// let test_aes_ecb (v: block_cipher_vector) : St unit =
+  // push_frame();
+  // let key = buffer_of_hex v.rkey in
+  // let plain = buffer_of_hex v.plain in
+  // let cipher = buffer_of_hex v.enc in
+  // let cipher' = B.create 0uy 16ul in
+  // let s0 = T.cpucycles () in
+  // let () =
+  //   match v.block with
+  //   | AES128 ->
+  //     let k = EverCrypt.aes128_create key in
+  //     EverCrypt.aes128_compute k plain cipher';
+  //     EverCrypt.aes128_free k
+  //   | AES256 ->
+  //     let k = EverCrypt.aes256_create key in
+  //     EverCrypt.aes256_compute k plain cipher';
+  //     EverCrypt.aes256_free k
+  //   in
+  // let s1 = T.cpucycles () in
+  // T.print_cycles_per_round s0 s1 1ul;
+  // T.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
+  // pop_frame()
 
 /// Test drivers
-
-
 
 (* val test_cipher: list block_cipher_vector -> St unit *)
 (* let rec test_cipher v = *)
@@ -237,26 +235,27 @@ let rec test_hash len vs =
 
 let main (): St C.exit_code =
   let open EverCrypt in
+  let open C.String in
   push_frame ();
-/// Hacl tests
-  Test.Bytes.print "===========Hacl===========" "";
-<<<<<<< HEAD
+
+  print !$"===========Hacl===========";
   AC.(init (Prefer Hacl));
   test_hash hash_vectors_len hash_vectors;
   test_aead aead_vectors_len aead_vectors;
   Test.Hash.main ();
   Test.Bytes.main ();
-/// Vale tests
-  Test.Bytes.print "===========Vale===========" "";
+  
+  print !$"===========Vale===========";
   AC.(init (Prefer Vale));
   test_aead aead_vectors_len aead_vectors;
   test_hash hash_vectors_len hash_vectors;
   Test.Hash.main ();
-// OpenSSL tests
-  Test.Bytes.print "==========OpenSSL=========" "";
+  
+  print !$"==========OpenSSL=========";
   AC.(init (Prefer OpenSSL));
   test_aead aead_vectors_len aead_vectors;
-  Test.Bytes.print "==========BCrypt==========" "";
+
+  print !$"==========BCrypt==========";
   AC.(init (Prefer BCrypt));
   test_aead aead_vectors_len aead_vectors;
   Test.Hash.main ();

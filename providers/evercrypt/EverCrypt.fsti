@@ -4,6 +4,8 @@ open FStar.HyperStack.ST
 open EverCrypt.Helpers
 open EverCrypt.Specs
 
+module B = LowStar.Buffer
+
 /// Hash algorithms
 
 include EverCrypt.Hash
