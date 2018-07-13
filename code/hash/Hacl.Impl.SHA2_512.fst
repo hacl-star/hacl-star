@@ -142,9 +142,19 @@ private val constants_set_k:
                  /\ (let seq_k = Hacl.Spec.Endianness.reveal_h64s (as_seq h1 k) in
                    seq_k == Spec.k)))
 
-[@"substitute"]
+private
+let assign_k:
+  b:buffer UInt64.t ->
+    Stack unit
+      (requires (fun h0 ->
+        live h0 b /\ length b = List.Tot.length Spec.k_list))
+      (ensures (fun h0 _ h1 ->
+        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.of_list Spec.k_list)) =
+  let open FStar.Tactics in
+  synth_by_tactic (specialize (assignL (normalize_term Spec.k_list)) [`%assignL])
+
 let constants_set_k k =
-  Buffer.assignL Spec.k_list k
+  assign_k k
 
 #reset-options " --z3refresh --max_fuel 0 --z3rlimit 10"
 
@@ -157,9 +167,21 @@ val constants_set_h_0:
              /\ (let seq_h_0 = Hacl.Spec.Endianness.reveal_h64s (as_seq h1 hash) in
                 seq_h_0 == Spec.h_0)))
 
+private
+let assign_h0:
+  b:buffer UInt64.t ->
+    Stack unit
+      (requires (fun h0 ->
+        live h0 b /\ length b = List.Tot.length Spec.h_0_list))
+      (ensures (fun h0 _ h1 ->
+        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.of_list Spec.h_0_list)) =
+  let open FStar.Tactics in
+  synth_by_tactic (specialize (assignL (normalize_term Spec.h_0_list)) [`%assignL])
+
+
 [@"substitute"]
 let constants_set_h_0 hash =
-  Buffer.assignL Spec.h_0_list hash
+  assign_h0 hash
 
 #reset-options " --z3refresh --max_fuel 0 --z3rlimit 20"
 
