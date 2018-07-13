@@ -44,7 +44,7 @@ hmac-sha256-c/out.krml: Hacl.HMAC.SHA2_256.fst Hacl.Test.HMAC.SHA2_256.fst
 
 hmac-sha256-c/Hacl_HMAC_SHA2_256.c: hmac-sha256-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir hmac-sha256-c \
-	-bundle "Hacl.HMAC.SHA2_256=Hacl.Hash.*,Hacl.Impl.*" \
+	-bundle "Hacl.HMAC.SHA2_256=*" -minimal -add-include '"kremlib.h"' \
 	-skip-compilation \
 	$^ -o $@
 
@@ -59,7 +59,7 @@ hmac-sha384-c/out.krml: Hacl.HMAC.SHA2_384.fst
 
 hmac-sha384-c/Hacl_HMAC_SHA2_384.c: hmac-sha384-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir hmac-sha384-c \
-	-bundle "Hacl.HMAC.SHA2_384=Hacl.Hash.*,Hacl.Impl.*" \
+	-bundle "Hacl.HMAC.SHA2_384=*" -minimal -add-include '"kremlib.h"' \
 	-skip-compilation \
 	$^ -o $@
 
@@ -69,6 +69,6 @@ hmac-sha512-c/out.krml: Hacl.HMAC.SHA2_512.fst
 
 hmac-sha512-c/Hacl_HMAC_SHA2_512.c: hmac-sha512-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir hmac-sha512-c \
-	-bundle "Hacl.HMAC.SHA2_512=Hacl.Hash.*,Hacl.Impl.*" \
+	-bundle "Hacl.HMAC.SHA2_512=*" -minimal -add-include '"kremlib.h"' \
 	-skip-compilation \
 	$^ -o $@

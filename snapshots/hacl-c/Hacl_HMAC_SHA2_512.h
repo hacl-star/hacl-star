@@ -22,14 +22,14 @@
  */
 
 
-#include "kremlib.h"
+
 #ifndef __Hacl_HMAC_SHA2_512_H
 #define __Hacl_HMAC_SHA2_512_H
 
-#include "WasmSupport.h"
-#include "C_Endianness.h"
-#include "C.h"
 
+#include "kremlib.h"
+
+extern FStar_UInt128_uint128 FStar_Int_Cast_Full_uint64_to_uint128(uint64_t x0);
 
 void Hacl_HMAC_SHA2_512_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len);
 

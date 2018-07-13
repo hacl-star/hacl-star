@@ -16,12 +16,12 @@ CCOPTS32 = -Ofast -mtune=generic -m32 -fwrapv -fomit-frame-pointer -funroll-loop
 #CCOPTS32 = -Ofast -march=armv8-a+crc -mtune=cortex-a53 -mfpu=neon-fp-armv8 -fwrapv -fomit-frame-pointer -funroll-loops
 
 ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
-  LIBFLAGS=$(CCOPTS) $(CFLAGS) -I .
-  LIBFLAGS32=$(CCOPTS32) $(CFLAGS)
+  LIBFLAGS=$(CCOPTS) $(CFLAGS) -I . -DKRML_VERIFIED_UINT128
+  LIBFLAGS32=$(CCOPTS32) $(CFLAGS) -DKRML_VERIFIED_UINT128
   OTHER=FStar_UInt128.c -shared
 else
-  LIBFLAGS=$(CCOPTS) -fPIC -I .
-  LIBFLAGS32=$(CCOPTS32) -fPIC -DKRML_NOUINT128 -Wno-unused-function
+  LIBFLAGS=$(CCOPTS) -fPIC -I . -DKRML_VERIFIED_UINT128
+  LIBFLAGS32=$(CCOPTS32) -fPIC -Wno-unused-function -DKRML_VERIFIED_UINT128
   OTHER=-shared
 endif
 
@@ -37,7 +37,6 @@ TWEETNACL_HOME ?= $(HACL_HOME)/other_providers/tweetnacl
 #
 
 libhacl.so: $(FILES)
-	$(CC) $(LIBFLAGS) -c FStar_UInt128.c -o FStar_UInt128.o
 	$(CC) $(LIBFLAGS) -c Hacl_Salsa20.c -o Hacl_Salsa20.o
 	$(CC) $(LIBFLAGS) -c Hacl_Chacha20.c -o Hacl_Chacha20.o
 	$(CC) $(LIBFLAGS) -c Hacl_Chacha20_Vec128.c -o Hacl_Chacha20_Vec128.o
@@ -55,8 +54,8 @@ libhacl.so: $(FILES)
 	$(CC) $(LIBFLAGS) -c Hacl_Chacha20Poly1305.c -o Hacl_Chacha20Poly1305.o
 	$(CC) $(LIBFLAGS) -c Hacl_Unverified_Random.c -o Hacl_Unverified_Random.o
 	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/test-files -I . -Wall \
-	FStar_UInt128.o  Hacl_Chacha20_Vec128.c Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_HMAC_SHA2_384.o Hacl_HMAC_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
-	  -o libhacl.so
+	  Hacl_Chacha20_Vec128.c Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_HMAC_SHA2_384.o Hacl_HMAC_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
+	  -o libhacl.so $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
 
 #
@@ -64,7 +63,6 @@ libhacl.so: $(FILES)
 #
 
 libhacl.a: $(FILES)
-	$(CC) $(LIBFLAGS) -c FStar_UInt128.c -o FStar_UInt128.o
 	$(CC) $(LIBFLAGS) -c Hacl_Salsa20.c -o Hacl_Salsa20.o
 	$(CC) $(LIBFLAGS) -c Hacl_Chacha20.c -o Hacl_Chacha20.o
 	$(CC) $(LIBFLAGS) -c Hacl_Chacha20_Vec128.c -o Hacl_Chacha20_Vec128.o
@@ -82,8 +80,8 @@ libhacl.a: $(FILES)
 	$(CC) $(LIBFLAGS) -c Hacl_Chacha20Poly1305.c -o Hacl_Chacha20Poly1305.o
 	$(CC) $(LIBFLAGS) -c Hacl_Unverified_Random.c -o Hacl_Unverified_Random.o
 	$(CC) $(OTHER) $(LIBFLAGS) -I ../../test/test-files -I . -Wall \
-	  Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_HMAC_SHA2_384.o Hacl_HMAC_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
-	  -o libhacl.a
+	  Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_HMAC_SHA2_384.o Hacl_HMAC_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
+	  -o libhacl.a $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
 #
 # Library (32 bits)
@@ -108,15 +106,14 @@ libhacl32.so: $(FILES)
 	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20Poly1305.c -o Hacl_Chacha20Poly1305.o
 	$(CC) $(LIBFLAGS32) -c Hacl_Unverified_Random.c -o Hacl_Unverified_Random.o
 	$(CC) -shared  $(LIBFLAGS32) -I ../../test/test-files -I . -Wall \
-	FStar_UInt128.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_HMAC_SHA2_384.o Hacl_HMAC_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
-	  -o libhacl32.so
+	Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_HMAC_SHA2_384.o Hacl_HMAC_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
+	  -o libhacl32.so $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
 #
 # Library (32 bits), static
 #
 
 libhacl32.a: $(FILES)
-	$(CC) $(LIBFLAGS32) -c FStar_UInt128.c -o FStar_UInt128.o
 	$(CC) $(LIBFLAGS32) -c Hacl_Salsa20.c -o Hacl_Salsa20.o
 	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20.c -o Hacl_Chacha20.o
 	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20_Vec128.c -o Hacl_Chacha20_Vec128.o
@@ -134,8 +131,8 @@ libhacl32.a: $(FILES)
 	$(CC) $(LIBFLAGS32) -c Hacl_Chacha20Poly1305.c -o Hacl_Chacha20Poly1305.o
 	$(CC) $(LIBFLAGS32) -c Hacl_Unverified_Random.c -o Hacl_Unverified_Random.o
 	$(CC) -shared  $(LIBFLAGS32) -I ../../test/test-files -I . -Wall \
-	FStar_UInt128.o Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_HMAC_SHA2_384.o Hacl_HMAC_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o kremlib.c Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
-	  -o libhacl32.a
+	Hacl_Salsa20.o Hacl_Poly1305_32.o Hacl_Poly1305_64.o Hacl_Chacha20.o Hacl_Chacha20_Vec128.o AEAD_Poly1305_64.o Hacl_Chacha20Poly1305.o Hacl_SHA2_256.o Hacl_SHA2_384.o Hacl_SHA2_512.o Hacl_HMAC_SHA2_256.o Hacl_HMAC_SHA2_384.o Hacl_HMAC_SHA2_512.o Hacl_Ed25519.o Hacl_Curve25519.o Hacl_Policies.c NaCl.c Hacl_Unverified_Random.o ../api/haclnacl.c \
+	  -o libhacl32.a $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
 
 unit-tests: libhacl.so

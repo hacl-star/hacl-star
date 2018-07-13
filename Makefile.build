@@ -82,26 +82,19 @@ SNAPSHOT_FILES= \
 	$(addprefix code/hmac/hmac-sha512-c/, Hacl_HMAC_SHA2_512.*) \
 	$(addprefix code/salsa-family/chacha-vec128-c/, Hacl_Chacha20_Vec128.*)
 
-SNAPSHOT_CCOMP_FILES=$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/kremlib.h \
-	code/lib/kremlin/ccomp-c/FStar.c code/lib/kremlin/ccomp-c/FStar.h
-
 snapshot-collect:
 	mkdir -p $(SNAPSHOT_DIR)
 	cp -r $(SNAPSHOT_FILES) $(SNAPSHOT_DIR)/
 	touch $(SNAPSHOT_DIR)/Prims.h
-ifeq ($(SNAPSHOT_DIR),snapshots/hacl-c-compcert)
-	cp $(SNAPSHOT_CCOMP_FILES) $(SNAPSHOT_DIR)/
-else
-endif
 	$(MAKE) -C $(SNAPSHOT_DIR) clean
 
 
 snapshots/snapshot-gcc: clean-c-code
-	$(MAKE) extract-c-code extract-c-code-experimental KOPTS="-drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
+	$(MAKE) extract-c-code extract-c-code-experimental KOPTS="-fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
 	$(MAKE) snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc
 
 snapshots/snapshot-gcc-unrolled: clean-c-code
-	$(MAKE) extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -drop FStar -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
+	$(MAKE) extract-c-code extract-c-code-experimental KOPTS="-funroll-loops 5 -fparentheses" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"
 	$(MAKE) snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-gcc-unrolled
 
 
@@ -115,11 +108,11 @@ snapshots/snapshot-compcert-unrolled: clean-c-code
 
 
 snapshots/snapshot-msvc: clean-c-code
-	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -drop FStar" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
+	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc " HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
 	if $(HAS_CL); then $(MAKE) snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-msvc; fi
 
 snapshots/snapshot-msvc-unrolled: clean-c-code
-	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -fparentheses -funroll-loops 5 -drop FStar" HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
+	if $(HAS_CL); then $(MAKE) extract-c-code extract-c-code-experimental KOPTS="-cc msvc -fparentheses -funroll-loops 5 " HACL_RELEASE="$(HACL_RELEASE)" HACL_LICENSE="$(HACL_LICENSE)"; fi
 	if $(HAS_CL); then $(MAKE) snapshot-collect SNAPSHOT_DIR=snapshots/snapshot-msvc-unrolled; fi
 
 
@@ -146,10 +139,7 @@ SNAPSHOT_HACL_C_FILES = $(addprefix snapshots/snapshot-gcc/, FStar_UInt128.* AEA
 	done
 
 .snapshots/hacl-c/kremlib:
-	cp -r snapshots/kremlib/* snapshots/hacl-c
-	for f in kremlib.h kremlib.c kremdate.c kremstr.c; do \
-		(cat $(HACL_LICENSE) snapshots/kremlib/$$f ) > snapshots/hacl-c/$$f ; \
-	done
+	cp -r $(KREMLIN_HOME)/include/* snapshots/hacl-c
 
 .snapshots/hacl-c/api:
 	for f in HACL.h haclnacl.h haclnacl.c; do \

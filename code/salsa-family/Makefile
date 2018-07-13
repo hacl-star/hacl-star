@@ -74,12 +74,13 @@ salsa20.exe: salsa-c/out.krml
 
 chacha-vec128-c/out.krml: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20.Vec128.fst Hacl.Chacha20.Vec128.fst Hacl.Test.Chacha20.Vec128.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
+	  	-drop Hacl.UInt32x4 \
 		-add-include '"vec128.h"' \
 		-skip-translation $^ -o $@
 
 chacha-vec128-c/Hacl_Chacha20_Vec128.c: chacha-vec128-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
-		-no-prefix Hacl.UInt32x4 -add-include '"vec128.h"' \
+		-drop Hacl.UInt32x4 -add-include '"vec128.h"' \
 		-add-include '"kremlib.h"' -minimal -bundle "Hacl.Chacha20.Vec128=*" \
 		-skip-compilation $^ -o $@
 
