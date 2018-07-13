@@ -18,7 +18,7 @@ val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
 val aes128_key_s: Type0
 
 [@(CPrologue "#ifndef __EverCrypt_aes128_key_s\ntypedef struct EverCrypt_aes128_key_s EverCrypt_aes128_key_s;\n#endif")]
-let aes128_key = LB.pointer aes128_key_s
+let aes128_key = B.pointer aes128_key_s
 
 val aes128_create: key:uint8_p ->
   ST aes128_key aes128_create_pre aes128_create_post
@@ -33,7 +33,7 @@ val aes128_free: aes128_key ->
 val aes256_key_s : Type0
 
 [@(CPrologue "#ifndef __EverCrypt_aes256_key_s\ntypedef struct EverCrypt_aes256_key_s EverCrypt_aes256_key_s;\n#endif")]
-let aes256_key = LB.pointer aes256_key_s
+let aes256_key = B.pointer aes256_key_s
 
 val aes256_create: key:uint8_p ->
   ST aes256_key aes256_create_pre aes256_create_post
@@ -101,7 +101,7 @@ type aead_alg =
 val aead_state_s: Type0
 
 [@(CPrologue "#ifndef __EverCrypt_aead_state_s\ntypedef struct EverCrypt_aead_state_s EverCrypt_aead_state_s;\n#endif")]
-let aead_state = LB.pointer aead_state_s
+let aead_state = B.pointer aead_state_s
 
 val aead_create: alg:aead_alg -> key:uint8_p ->
   ST aead_state aead_create_pre aead_create_post

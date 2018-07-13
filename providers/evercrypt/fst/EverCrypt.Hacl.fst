@@ -11,23 +11,23 @@ let x25519 dst secret base =
 /// AES block function
 
 let aes128_keyExpansion k w sb =
-  push_frame ();
-  Crypto.Symmetric.AES128.mk_sbox sb;
-  Crypto.Symmetric.AES128.keyExpansion k w sb;
-  pop_frame()
+  Crypto.Symmetric.AES128.mk_sbox !!sb;
+  Crypto.Symmetric.AES128.keyExpansion !!k !!w !!sb
 
-let aes128_cipher cipher plain w sb = Crypto.Symmetric.AES128.cipher cipher plain w sb
+let aes128_cipher cipher plain w sb =
+  Crypto.Symmetric.AES128.cipher !!cipher !!plain !!w !!sb
 
 let aes256_keyExpansion k w sb =
-  push_frame ();
-  Crypto.Symmetric.AES.mk_sbox sb;
-  Crypto.Symmetric.AES.keyExpansion k w sb;
-  pop_frame ()
+  Crypto.Symmetric.AES.mk_sbox !!sb;
+  Crypto.Symmetric.AES.keyExpansion !!k !!w !!sb
 
-let aes256_cipher cipher plain w sb = Crypto.Symmetric.AES.cipher cipher plain w sb
+let aes256_cipher cipher plain w sb =
+  Crypto.Symmetric.AES.cipher !!cipher !!plain !!w !!sb
 
 let chacha20 key iv ctr plain len cipher =
-  Hacl.Chacha20.chacha20 cipher plain len key iv ctr
+  let plain: FStar.Buffer.buffer UInt8.t = !!plain in
+  let cipher: FStar.Buffer.buffer UInt8.t = !!cipher in
+  Hacl.Chacha20.chacha20 cipher plain len !!key !!iv ctr
 
 /// Chacha20-Poly1305
 

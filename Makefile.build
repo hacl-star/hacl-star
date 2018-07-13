@@ -58,7 +58,7 @@ clean-c-code:
 SNAPSHOT_DIR = # Substituted by the correct value depending on the compiler
 
 SNAPSHOT_FILES= \
-	snapshots/kremlib/* \
+	$(KREMLIN_HOME)/include \
 	$(addprefix snapshots/api/, HACL.h) \
 	$(addprefix snapshots/api/, haclnacl.*) \
 	$(addprefix snapshots/makefiles/, Makefile) \

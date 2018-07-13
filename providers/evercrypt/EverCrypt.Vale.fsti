@@ -28,16 +28,16 @@ type gcm_args = {
 val aes128_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm128_encrypt: N.pointer gcm_args -> Stack_ unit
+val gcm128_encrypt: B.pointer gcm_args -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm128_decrypt: N.pointer gcm_args -> Stack_ uint32_t
+val gcm128_decrypt: B.pointer gcm_args -> Stack_ uint32_t
 
 [@ (CCConv "stdcall") ]
 val aes256_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm256_encrypt: N.pointer gcm_args -> Stack_ unit
+val gcm256_encrypt: B.pointer gcm_args -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm256_decrypt: N.pointer gcm_args -> Stack_ uint32_t
+val gcm256_decrypt: B.pointer gcm_args -> Stack_ uint32_t
