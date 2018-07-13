@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,11 @@
 #ifndef __Hacl_SHA2_512_H
 #define __Hacl_SHA2_512_H
 
-
+#include "WasmSupport.h"
+#include "C_Endianness.h"
+#include "C.h"
+#include "C_String.h"
+#include "TestLib.h"
 
 
 typedef uint8_t Hacl_SHA2_512_uint8_t;

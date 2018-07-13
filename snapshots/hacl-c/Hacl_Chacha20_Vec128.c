@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,26 @@
 
 
 #include "Hacl_Chacha20_Vec128.h"
+
+extern vec vec_load_le(uint8_t *x0);
+
+extern void vec_store_le(uint8_t *x0, vec x1);
+
+extern vec vec_load128_le(uint8_t *x0);
+
+extern vec vec_load_32x4(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3);
+
+extern vec vec_shuffle_right(vec x0, uint32_t x1);
+
+extern vec vec_rotate_left(vec x0, uint32_t x1);
+
+extern vec vec_add(vec x0, vec x1);
+
+extern vec vec_xor(vec x0, vec x1);
+
+extern vec vec_increment(vec x0);
+
+extern vec vec_zero();
 
 inline static void Hacl_Impl_Chacha20_Vec128_State_state_incr(vec *k)
 {

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -299,20 +299,6 @@ Hacl_Box_ZeroPad_crypto_box_open_easy_afternm(
   uint32_t t = Hacl_Box_ZeroPad_crypto_box_open_detached_afternm(m, c, mac, mlen, n1, k1);
   return t;
 }
-
-Prims_int NaCl_crypto_box_NONCEBYTES = (krml_checked_int_t)24;
-
-Prims_int NaCl_crypto_box_PUBLICKEYBYTES = (krml_checked_int_t)32;
-
-Prims_int NaCl_crypto_box_SECRETKEYBYTES = (krml_checked_int_t)32;
-
-Prims_int NaCl_crypto_box_MACBYTES = (krml_checked_int_t)16;
-
-Prims_int NaCl_crypto_secretbox_NONCEBYTES = (krml_checked_int_t)24;
-
-Prims_int NaCl_crypto_secretbox_KEYBYTES = (krml_checked_int_t)32;
-
-Prims_int NaCl_crypto_secretbox_MACBYTES = (krml_checked_int_t)16;
 
 uint32_t
 NaCl_crypto_secretbox_detached(

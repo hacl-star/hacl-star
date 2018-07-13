@@ -150,8 +150,9 @@ providers:
 
 ci: # .clean-banner .clean-git .clean-snapshots
 	$(MAKE) extract-specs extract-all
-	$(MAKE) -C providers/evercrypt
-	$(MAKE) -C providers/evercrypt/test
+	$(MAKE) -C code extract-c
+	$(MAKE) -C providers/
+	$(MAKE) -C providers/test
 	$(MAKE) -C secure_api runtime_switch verify # test both extraction & verification
 	$(MAKE) build-make
 	$(MAKE) test-all

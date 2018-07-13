@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,38 +21,23 @@
  * SOFTWARE.
  */
 
-#include "kremlib.h"
+
+
 #ifndef __Hacl_Chacha20Poly1305_H
 #define __Hacl_Chacha20Poly1305_H
 
 
-#include "Hacl_Policies.h"
 #include "Hacl_Chacha20.h"
 #include "AEAD_Poly1305_64.h"
+#include "kremlib.h"
 
-extern Prims_int Hacl_Chacha20Poly1305_noncelen;
-
-extern Prims_int Hacl_Chacha20Poly1305_keylen;
-
-extern Prims_int Hacl_Chacha20Poly1305_maclen;
+extern FStar_UInt128_uint128 FStar_Int_Cast_Full_uint64_to_uint128(uint64_t x0);
 
 typedef Hacl_Impl_Poly1305_64_State_poly1305_state Hacl_Chacha20Poly1305_state;
 
 typedef void *Hacl_Chacha20Poly1305_log_t;
 
 void Hacl_Chacha20Poly1305_encode_length(uint8_t *lb, uint32_t aad_len, uint32_t mlen);
-
-uint32_t
-Hacl_Chacha20Poly1305_aead_encrypt_(
-  uint8_t *c,
-  uint8_t *mac,
-  uint8_t *m,
-  uint32_t mlen,
-  uint8_t *aad1,
-  uint32_t aadlen,
-  uint8_t *k1,
-  uint8_t *n1
-);
 
 uint32_t
 Hacl_Chacha20Poly1305_aead_encrypt(
@@ -77,4 +62,6 @@ Hacl_Chacha20Poly1305_aead_decrypt(
   uint8_t *k1,
   uint8_t *n1
 );
+
+#define __Hacl_Chacha20Poly1305_H_DEFINED
 #endif
