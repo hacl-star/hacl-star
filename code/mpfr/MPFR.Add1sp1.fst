@@ -10,15 +10,55 @@ open FStar.Int.Cast
 open FStar.Mul
 open MPFR.Lib
 open MPFR.Lib.Spec
+open MPFR.Add1.Spec
+open MPFR.Round.Spec
 open MPFR.Maths
 
 module I64 = FStar.Int64
 module I32 = FStar.Int32
 module U32 = FStar.UInt32
-module Spec = MPFR.Add1.Spec
-module RND  = MPFR.Round.Spec
 
-#set-options "--z3refresh --z3rlimit 60 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+
+(* specifications for mpfr_add1sp1 *)
+val mpfr_add1sp1_pre_cond: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
+                           p:mpfr_prec_t -> h:mem -> GTot Type0
+    
+let mpfr_add1sp1_pre_cond a b c p h =
+    (* Memory safety *)
+    mpfr_live h a /\ mpfr_live h b /\ mpfr_live h c /\
+    mpfr_disjoint_or_equal h a b /\ mpfr_disjoint_or_equal h a c /\
+    mpfr_disjoint_or_equal h b c /\
+    length (as_struct h a).mpfr_d = 1 /\
+    length (as_struct h b).mpfr_d = 1 /\ length (as_struct h c).mpfr_d = 1 /\
+    (* Functional correctness *)
+    U32.v p > 0 /\ U32.v p < 64 /\ p = (as_struct h a).mpfr_prec /\
+    p = (as_struct h b).mpfr_prec /\ p = (as_struct h c).mpfr_prec /\
+    (as_struct h a).mpfr_sign = (as_struct h b).mpfr_sign /\
+    mpfr_valid_cond h a /\ mpfr_reg_cond h b /\ mpfr_reg_cond h c
+
+val mpfr_add1sp1_post_cond: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
+                            rnd_mode:mpfr_rnd_t -> p:mpfr_reg_prec_t ->
+			    h0:mem{mpfr_add1sp1_pre_cond a b c p h0} ->
+			    f:i32 -> h1:mem -> GTot Type0
+
+let mpfr_add1sp1_post_cond a b c rnd_mode p h0 f h1 =
+    let exact = add1sp_exact (as_fp h0 b) (as_fp h0 c) in
+    (* Memory safety *)
+    mpfr_live h1 a /\ mpfr_live h1 b /\ mpfr_live h1 c /\
+    mpfr_disjoint_or_equal h1 a b /\ mpfr_disjoint_or_equal h1 a c /\
+    mpfr_disjoint_or_equal h1 b c /\ mpfr_modifies a h0 h1 /\
+    (* Functional correctness *)
+    mpfr_valid_cond h1 a /\ 
+    (*mpfr_round_cond exact (U32.v p) rnd_mode (as_fp h1 a) /\*)
+    mpfr_ternary_cond (I32.v f) exact (as_fp h1 a)
+
+val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
+                  rnd_mode:mpfr_rnd_t -> p:mpfr_reg_prec_t -> Stack i32
+    (requires (fun h -> mpfr_add1sp1_pre_cond a b c p h))
+    (ensures  (fun h0 f h1 -> mpfr_add1sp1_post_cond a b c rnd_mode p h0 f h1))
+
+(* implementations *)
 
 (* intermediate results *)
 private type mpfr_tmp_exp_t = x:mpfr_exp_t{I32.(x >=^ mpfr_EMIN /\ x <=^ mpfr_EMAX +^ 1l)}
@@ -37,47 +77,71 @@ let mk_state sh bx rb sb = {
     sb = sb
 }
 
-(* lemmas and implementation for mpfr_add1sp1_gt_branch1 where
- * b.exp > c.exp && d < sh *)
-let mpfr_add1sp1_gt_branch1_precond h a b c sh d mask =
-    mpfr_reg_struct_cond h b /\ mpfr_reg_struct_cond h c /\
-    U32.v a.mpfr_prec < U32.v gmp_NUMB_BITS - 1 /\
+(* pre/post-condition for mpfr_add1sp1_any *)
+let mpfr_add1sp1_common_pre_cond a b c (p:mpfr_reg_prec_t) h =
+    mpfr_reg_cond_ h b /\ mpfr_reg_cond_ h c /\
+    U32.v p < U32.v gmp_NUMB_BITS /\
+    a.mpfr_prec = p /\ b.mpfr_prec = p /\ c.mpfr_prec = p /\
+    live h a.mpfr_d /\ live h b.mpfr_d /\ live h c.mpfr_d /\
+    length a.mpfr_d = 1 /\ length b.mpfr_d = 1 /\ length c.mpfr_d = 1
+
+let mpfr_add1sp1_any_pre_cond a b c (p:mpfr_reg_prec_t) h =
+    a.mpfr_sign = b.mpfr_sign /\
+    mpfr_add1sp1_common_pre_cond a b c p h
+    
+let mpfr_add1sp1_any_post_cond a b c h0 s h1 =
+    let p = U32.v a.mpfr_prec in
+    live h1 a.mpfr_d /\ live h1 b.mpfr_d /\ live h1 c.mpfr_d /\
+    length a.mpfr_d = 1 /\ length b.mpfr_d = 1 /\ length c.mpfr_d = 1 /\
+    modifies_1 a.mpfr_d h0 h1 /\ normal_cond_ h1 a /\
     U32.v a.mpfr_prec = U32.v b.mpfr_prec /\
     U32.v a.mpfr_prec = U32.v c.mpfr_prec /\
-    U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
+    mpfr_reg_cond_ h0 b /\ mpfr_reg_cond_ h0 c /\
+    (let r = add1sp_exact (as_reg_fp_ h0 b) (as_reg_fp_ h0 c) in
+    as_val h1 a.mpfr_d * pow2 (r.len - 64) = (high_mant r p).limb /\
+    U32.v s.sh = U32.v gmp_NUMB_BITS - p /\
+    I32.v s.bx = (high_mant r p).exp /\
+    (v s.rb <> 0 <==> rb_def r p) /\
+    (v s.sb <> 0 <==> sb_def r p))
+
+val mpfr_add1sp1_any_post_cond_comm_lemma:
+    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct -> h0:mem -> s:state -> h1:mem -> Lemma
+    (requires (mpfr_add1sp1_any_post_cond a b c h0 s h1))
+    (ensures  (mpfr_add1sp1_any_post_cond a c b h0 s h1))
+
+let mpfr_add1sp1_any_post_cond_comm_lemma a b c h0 s h1 = ()
+
+(* pre-condition for mpfr_add1sp1_gt where b.exp > c.exp *)
+let mpfr_add1sp1_gt_pre_cond a b c sh h =
     I32.v b.mpfr_exp > I32.v c.mpfr_exp /\
+    U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
+    mpfr_add1sp1_common_pre_cond a b c U32.(gmp_NUMB_BITS -^ sh) h
+
+(* lemmas and implementation for mpfr_add1sp1_gt_branch1 where d < sh *)
+let mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h =
+    mpfr_add1sp1_gt_pre_cond a b c sh h /\
     U32.v d = I32.v b.mpfr_exp - I32.v c.mpfr_exp /\
-    U32.v d < U32.v sh /\ v mask = pow2 (U32.v sh) - 1 /\
-    (let am = a.mpfr_d in
-    let bm = b.mpfr_d in
-    let cm = c.mpfr_d in
-    live h am /\ live h bm /\ live h cm /\
-    length am = 1 /\ length bm = 1 /\ length cm = 1)
+    v mask = pow2 (U32.v sh) - 1 /\
+    U32.v d < U32.v sh
     
 val mpfr_add1sp1_gt_branch1_a0_bx_lemma:
-    h0:mem -> h1:mem ->
-    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    h:mem -> a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Lemma
-    (requires (mpfr_add1sp1_gt_branch1_precond h0 a b c sh d mask))
+    (requires (mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
     (ensures  (
-    let r = Spec.add_sp (as_reg_fp_ h0 b) (as_reg_fp_ h0 c) in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
+    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
     let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h0 bp) 0 in
-    let c0 = Seq.index (as_seq h0 cp) 0 in
+    let b0 = Seq.index (as_seq h b.mpfr_d) 0 in
+    let c0 = Seq.index (as_seq h c.mpfr_d) 0 in
     let a0 = b0 +%^ (c0 >>^ d) in
     let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-    v a0 * pow2 (I32.v bx - I32.v b.mpfr_exp + U32.v d) = r.limb /\
-    I32.v bx = r.len + I32.v b.mpfr_exp - U32.v d - 64))
+    v a0 * pow2 (r.len - 64) = r.limb /\ I32.v bx = r.exp))
 
-let mpfr_add1sp1_gt_branch1_a0_bx_lemma h0 h1 a b c sh d mask =
-    let r = Spec.add_sp (as_reg_fp_ h0 b) (as_reg_fp_ h0 c) in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
+let mpfr_add1sp1_gt_branch1_a0_bx_lemma h a b c sh d mask =
+    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
     let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h0 bp) 0 in
-    let c0 = Seq.index (as_seq h0 cp) 0 in
+    let b0 = Seq.index (as_seq h b.mpfr_d) 0 in
+    let c0 = Seq.index (as_seq h c.mpfr_d) 0 in
     let a0 = b0 +%^ (c0 >>^ d) in
     let t0 = v b0 + v c0 / pow2 (U32.v d) in
     //! assert(v a0 = t0 % pow2 64);
@@ -119,38 +183,37 @@ let mpfr_add1sp1_gt_branch1_a0_bx_lemma h0 h1 a b c sh d mask =
     ()
     
 val mpfr_add1sp1_gt_branch1_value_lemma:
-    h0:mem -> h1:mem ->
-    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    h:mem -> a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Lemma
-    (requires (mpfr_add1sp1_gt_branch1_precond h0 a b c sh d mask))
+    (requires (mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
     (ensures  (
     let p = 64 - U32.v sh in
-    let r = Spec.add_sp (as_reg_fp_ h0 b) (as_reg_fp_ h0 c) in
-    let r = RND.high_mant r p in
+    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
+    let r = high_mant r p in
     let bp = b.mpfr_d in
     let cp = c.mpfr_d in
     let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h0 bp) 0 in
-    let c0 = Seq.index (as_seq h0 cp) 0 in
+    let b0 = Seq.index (as_seq h bp) 0 in
+    let c0 = Seq.index (as_seq h cp) 0 in
     let a0 = b0 +%^ (c0 >>^ d) in
     let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
     let a0 = a0 &^ (lognot mask) in
-    v a0 * pow2 (I32.v bx - I32.v b.mpfr_exp + U32.v d) = r.limb /\
-    I32.v bx = r.len + I32.v b.mpfr_exp - U32.v d - 64))
+    v a0 * pow2 (r.len - 64) = r.limb /\ I32.v bx = r.exp /\
+    v a0 >= pow2 63 /\ v a0 % pow2 (64 - p) = 0))
 
-let mpfr_add1sp1_gt_branch1_value_lemma h0 h1 a b c sh d mask =
+let mpfr_add1sp1_gt_branch1_value_lemma h a b c sh d mask =
     let p = 64 - U32.v sh in
-    let r = Spec.add_sp (as_reg_fp_ h0 b) (as_reg_fp_ h0 c) in
+    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
     let bp = b.mpfr_d in
     let cp = c.mpfr_d in
     let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h0 bp) 0 in
-    let c0 = Seq.index (as_seq h0 cp) 0 in
+    let b0 = Seq.index (as_seq h bp) 0 in
+    let c0 = Seq.index (as_seq h cp) 0 in
     let a0 = b0 +%^ (c0 >>^ d) in
     let t0 = v b0 + v c0 / pow2 (U32.v d) in
     let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-    mpfr_add1sp1_gt_branch1_a0_bx_lemma h0 h1 a b c sh d mask;
-    lemma_pow2_mul_div (v a0) (I32.v bx - I32.v b.mpfr_exp + U32.v d) (r.len - p);
+    mpfr_add1sp1_gt_branch1_a0_bx_lemma h a b c sh d mask;
+    lemma_pow2_mul_div (v a0) (r.len - 64) (r.len - p);
     //! assert(v a0 / pow2 (64 - p) = r.limb / pow2 (r.len - p));
     UInt.nth_lemma #64 (UInt.shift_right #64 (v a0) (64 - p)) (UInt.shift_right #64 (UInt.logand (v a0) (UInt.lognot (v mask))) (64 - p));
     assert(v (a0 &^ lognot mask) / pow2 (64 - p) = r.limb / pow2 (r.len - p));
@@ -159,89 +222,106 @@ let mpfr_add1sp1_gt_branch1_value_lemma h0 h1 a b c sh d mask =
     let a0 = a0 &^ (lognot mask) in
     lemma_pow2_div_mul (v a0) (64 - p) (r.len - p);
     //! assert((v a0 / pow2 (64 - p)) * pow2 (r.len - p) = r.limb / pow2 (r.len - p) * pow2 (r.len - p));
+    let r = high_mant r p in
+    lemma_div_le (pow2 (r.len - 1)) (v a0 * pow2 (r.len - 64)) (pow2 (r.len - 64));
+    lemma_pow2_div (r.len - 1) (r.len - 64);
+    lemma_multiple_div (v a0) (pow2 (r.len - 64));
+    //! assert(v a0 >= pow2 63);
     ()
 
 val mpfr_add1sp1_gt_branch1_rb_lemma:
-    h0:mem -> h1:mem ->
-    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    h:mem -> a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Lemma
-    (requires (mpfr_reg_struct_cond h0 b /\ mpfr_reg_struct_cond h0 c /\
-               U32.v a.mpfr_prec < U32.v gmp_NUMB_BITS - 1 /\
-               U32.v a.mpfr_prec = U32.v b.mpfr_prec /\
-               U32.v a.mpfr_prec = U32.v c.mpfr_prec /\
-               U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-               U32.v d < U32.v sh /\ v mask = pow2 (U32.v sh) - 1 /\
-               I32.v b.mpfr_exp > I32.v c.mpfr_exp /\
-               (let am = a.mpfr_d in
-               let bm = b.mpfr_d in
-               let cm = c.mpfr_d in
-               live h0 am /\ live h0 bm /\ live h0 cm /\
-	       length am = 1 /\ length bm = 1 /\ length cm = 1)))
-    (ensures  (let p = U32.v a.mpfr_prec in
-               let bp = b.mpfr_d in
-               let cp = c.mpfr_d in
-	       let bx = b.mpfr_exp in
-	       let b0 = Seq.index (as_seq h0 bp) 0 in
-	       let c0 = Seq.index (as_seq h0 cp) 0 in
-	       let a0 = b0 +%^ (c0 >>^ d) in
-	       let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-	       let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
-	       let res = Spec.add_sp (as_reg_fp_ h0 b) (as_reg_fp_ h0 c) in
-	       v rb <> 0 <==> RND.rb_def res p))
+    (requires (mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
+    (ensures  (
+    let p = U32.v a.mpfr_prec in
+    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
+    let bp = b.mpfr_d in
+    let cp = c.mpfr_d in
+    let bx = b.mpfr_exp in
+    let b0 = Seq.index (as_seq h bp) 0 in
+    let c0 = Seq.index (as_seq h cp) 0 in
+    let a0 = b0 +%^ (c0 >>^ d) in
+    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
+    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
+    v rb <> 0 <==> rb_def r p))
 
-let mpfr_add1sp1_gt_branch1_rb_lemma h0 h1 a b c sh d mask = admit()
-
+let mpfr_add1sp1_gt_branch1_rb_lemma h a b c sh d mask = 
+    let p = U32.v a.mpfr_prec in
+    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
+    let bp = b.mpfr_d in
+    let cp = c.mpfr_d in
+    let bx = b.mpfr_exp in
+    let b0 = Seq.index (as_seq h bp) 0 in
+    let c0 = Seq.index (as_seq h cp) 0 in
+    let a0 = b0 +%^ (c0 >>^ d) in
+    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
+    mpfr_add1sp1_gt_branch1_a0_bx_lemma h a b c sh d mask;
+    //! assert(v a0 * pow2 (r.len - 64) = r.limb);
+    lemma_multiple_div (v a0) (pow2 (r.len - 64));
+    UInt.slice_left_lemma (UInt.to_vec #r.len r.limb) 64;
+    //! assert(UInt.nth (v a0) p = UInt.nth #r.len r.limb p);
+    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
+    lemma_pow2_small_mod (U32.v sh - 1) 64;
+    //! assert(v (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) = pow2 (U32.v sh - 1));
+    lemma_bit_mask_value a0 (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) p;
+    if rb_def r p then assert(v rb <> 0) else assert(v rb = 0)
+    
 val mpfr_add1sp1_gt_branch1_sb_lemma:
-    h0:mem -> h1:mem ->
-    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    h:mem -> a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Lemma
-    (requires (mpfr_reg_struct_cond h0 b /\ mpfr_reg_struct_cond h0 c /\
-               U32.v a.mpfr_prec < U32.v gmp_NUMB_BITS - 1 /\
-               U32.v a.mpfr_prec = U32.v b.mpfr_prec /\
-               U32.v a.mpfr_prec = U32.v c.mpfr_prec /\
-               U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-               U32.v d < U32.v sh /\ v mask = pow2 (U32.v sh) - 1 /\
-               I32.v b.mpfr_exp > I32.v c.mpfr_exp /\
-               (let am = a.mpfr_d in
-               let bm = b.mpfr_d in
-               let cm = c.mpfr_d in
-               live h0 am /\ live h0 bm /\ live h0 cm /\
-	       length am = 1 /\ length bm = 1 /\ length cm = 1)))
-    (ensures  (let p = U32.v a.mpfr_prec in
-               let bp = b.mpfr_d in
-               let cp = c.mpfr_d in
-	       let bx = b.mpfr_exp in
-	       let b0 = Seq.index (as_seq h0 bp) 0 in
-	       let c0 = Seq.index (as_seq h0 cp) 0 in
-	       let a0 = b0 +%^ (c0 >>^ d) in
-	       let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-	       let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
-	       let sb = (a0 &^ mask) ^^ rb in
-	       let res = Spec.add_sp (as_reg_fp_ h0 b) (as_reg_fp_ h0 c) in
-	       v sb <> 0 <==> RND.sb_def res p))
+    (requires (mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
+    (ensures  (
+    let p = U32.v a.mpfr_prec in
+    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
+    let bp = b.mpfr_d in
+    let cp = c.mpfr_d in
+    let bx = b.mpfr_exp in
+    let b0 = Seq.index (as_seq h bp) 0 in
+    let c0 = Seq.index (as_seq h cp) 0 in
+    let a0 = b0 +%^ (c0 >>^ d) in
+    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
+    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
+    let sb = (a0 &^ mask) ^^ rb in
+    v sb <> 0 <==> sb_def r p))
 
-let mpfr_add1sp1_gt_branch1_sb_lemma h0 h1 a b c sh d mask = admit()
+let mpfr_add1sp1_gt_branch1_sb_lemma h a b c sh d mask =
+    let p = U32.v a.mpfr_prec in
+    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
+    let bp = b.mpfr_d in
+    let cp = c.mpfr_d in
+    let bx = b.mpfr_exp in
+    let b0 = Seq.index (as_seq h bp) 0 in
+    let c0 = Seq.index (as_seq h cp) 0 in
+    let a0 = b0 +%^ (c0 >>^ d) in
+    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
+    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
+    let sb = (a0 &^ mask) ^^ rb in
+    lemma_pow2_small_mod (U32.v sh - 1) 64;
+    //! assert(v (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) = pow2 (U32.v sh - 1));
+    lemma_bit_mask (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) (64 - U32.v sh);
+    lemma_tail_mask mask (U32.v sh);
+    let rmask = mpfr_LIMB_MASK U32.(sh -^ 1ul) in
+    UInt.nth_lemma #64 (v (mask ^^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)))) (v rmask);
+    lemma_xor_and_distr a0 mask (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul));
+    //! assert(sb = (a0 &^ rmask));
+    lemma_tail_mask_value a0 rmask (U32.v sh - 1);
+    //! assert(v sb = (v a0) % pow2 (U32.v sh - 1));
+    lemma_mod_mul (v a0) (pow2 (U32.v sh - 1)) (pow2 (r.len - 64));
+    lemma_pow2_mul (U32.v sh - 1) (r.len - 64);
+    //! assert(v sb * pow2 (r.len - 64) = (v a0 * pow2 (r.len - 64)) % pow2 (r.len - p - 1));
+    mpfr_add1sp1_gt_branch1_a0_bx_lemma h a b c sh d mask;
+    //! assert(v sb * pow2 (r.len - 64) = r.limb % pow2 (r.len - p - 1));
+    lemma_mul_zero (v sb) (pow2 (r.len - 64))
 
 unfold val mpfr_add1sp1_gt_branch1:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Stack state
-    (requires (fun h -> mpfr_add1sp1_gt_branch1_precond h a b c sh d mask))
-    (ensures  (fun h0 s h1 ->
-    let p = U32.v a.mpfr_prec in
-    U32.v s.sh = U32.v gmp_NUMB_BITS - p /\
-    (let am = a.mpfr_d in
-    let bm = b.mpfr_d in
-    let cm = c.mpfr_d in
-    live h1 am /\ live h1 bm /\ live h1 cm /\
-    modifies_1 am h0 h1 /\
-    (let r = Spec.add_sp (as_reg_fp_ h0 b) (as_reg_fp_ h0 c) in
-    I32.v s.bx >= I32.v b.mpfr_exp /\ I32.v s.bx <= I32.v b.mpfr_exp + 1 /\
-    v (Seq.index (as_seq h1 am) 0) * pow2 (I32.v s.bx - I32.v b.mpfr_exp + U32.v d) = (RND.high_mant r p).limb /\
-    (v s.rb <> 0 <==> RND.rb_def r p) /\
-    (v s.sb <> 0 <==> RND.sb_def r p)))))
+    (requires (fun h -> mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
+    (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
 let mpfr_add1sp1_gt_branch1 a b c sh d mask =
-    let h0 = ST.get() in
+    let h = ST.get() in
     let ap = a.mpfr_d in
     let bp = b.mpfr_d in
     let cp = c.mpfr_d in
@@ -252,34 +332,23 @@ let mpfr_add1sp1_gt_branch1 a b c sh d mask =
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
     let sb = (a0 &^ mask) ^^ rb in
     ap.(0ul) <- a0 &^ (lognot mask);
-    let h1 = ST.get() in
-    mpfr_add1sp1_gt_branch1_value_lemma h0 h1 a b c sh d mask;
-    mpfr_add1sp1_gt_branch1_rb_lemma h0 h1 a b c sh d mask;
-    mpfr_add1sp1_gt_branch1_sb_lemma h0 h1 a b c sh d mask;
+    mpfr_add1sp1_gt_branch1_value_lemma h a b c sh d mask;
+    mpfr_add1sp1_gt_branch1_rb_lemma h a b c sh d mask;
+    mpfr_add1sp1_gt_branch1_sb_lemma h a b c sh d mask;
     mk_state sh bx rb sb
+
+(* lemmas and implementation for mpfr_add1sp1_gt_branch1 where sh <= d < 64 *)
+let mpfr_add1sp1_gt_branch2_pre_cond a b c sh d mask h =
+    mpfr_add1sp1_gt_pre_cond a b c sh h /\
+    U32.v d = I32.v b.mpfr_exp - I32.v c.mpfr_exp /\
+    v mask = pow2 (U32.v sh) - 1 /\
+    U32.v d >= U32.v sh /\ U32.v d < U32.v gmp_NUMB_BITS
 
 unfold val mpfr_add1sp1_gt_branch2:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Stack state
-    (requires (fun h -> mpfr_reg_struct_cond h b /\ mpfr_reg_struct_cond h c /\
-                     U32.v a.mpfr_prec < U32.v gmp_NUMB_BITS - 1 /\
-		     U32.v a.mpfr_prec = U32.v b.mpfr_prec /\
-		     U32.v a.mpfr_prec = U32.v c.mpfr_prec /\
-		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-		     U32.v d >= U32.v sh /\ U32.v d < U32.v gmp_NUMB_BITS /\
-		     v mask = pow2 (U32.v sh) - 1 /\
-		     I32.v b.mpfr_exp > I32.v c.mpfr_exp /\
-		     (let am = a.mpfr_d in
-		     let bm = b.mpfr_d in
-		     let cm = c.mpfr_d in
-		     live h am /\ live h bm /\ live h cm /\
-		     length am = 1 /\ length bm = 1 /\ length cm = 1)))
-    (ensures  (fun h0 r h1 -> U32.v r.sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-                           (let am = a.mpfr_d in
-		           let bm = b.mpfr_d in
-		           let cm = c.mpfr_d in
-			   live h1 am /\ live h1 bm /\ live h1 cm /\
-		           modifies_1 am h0 h1)))
+    (requires (fun h -> mpfr_add1sp1_gt_branch2_pre_cond a b c sh d mask h))
+    (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
 let mpfr_add1sp1_gt_branch2 a b c sh d mask =
     let ap = a.mpfr_d in
@@ -295,28 +364,19 @@ let mpfr_add1sp1_gt_branch2 a b c sh d mask =
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
     let sb = sb |^ ((a0 &^ mask) ^^ rb) in
     ap.(0ul) <- a0 &^ (lognot mask);
+    admit();
     mk_state sh bx rb sb
 
-(* TODO: remove abundent inputs *)
+(* lemmas and implementation for mpfr_add1sp1_gt_branch1 where d >= 64 *)
+let mpfr_add1sp1_gt_branch3_pre_cond a b c sh h =
+    mpfr_add1sp1_gt_pre_cond a b c sh h /\
+    I32.v b.mpfr_exp - I32.v c.mpfr_exp >= U32.v gmp_NUMB_BITS
+    
 unfold val mpfr_add1sp1_gt_branch3:
-    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct -> sh:mpfr_reg_prec_t -> Stack state
-    (requires (fun h -> mpfr_reg_struct_cond h b /\ mpfr_reg_struct_cond h c /\
-                     U32.v a.mpfr_prec < U32.v gmp_NUMB_BITS - 1 /\
-		     U32.v a.mpfr_prec = U32.v b.mpfr_prec /\
-		     U32.v a.mpfr_prec = U32.v c.mpfr_prec /\
-		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-		     I32.v b.mpfr_exp - I32.v c.mpfr_exp >= U32.v gmp_NUMB_BITS /\
-		     (let am = a.mpfr_d in
-		     let bm = b.mpfr_d in
-		     let cm = c.mpfr_d in
-		     live h am /\ live h bm /\ live h cm /\
-		     length am = 1 /\ length bm = 1 /\ length cm = 1)))
-    (ensures  (fun h0 r h1 -> U32.v r.sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-                           (let am = a.mpfr_d in
-		           let bm = b.mpfr_d in
-			   let cm = c.mpfr_d in
-			   live h1 am /\ live h1 bm /\ live h1 cm /\
-		           modifies_1 am h0 h1)))
+    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    sh:mpfr_reg_prec_t -> Stack state
+    (requires (fun h -> mpfr_add1sp1_gt_branch3_pre_cond a b c sh h))
+    (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
 let mpfr_add1sp1_gt_branch3 a b _ sh =
     let ap = a.mpfr_d in
@@ -325,56 +385,41 @@ let mpfr_add1sp1_gt_branch3 a b _ sh =
     ap.(0ul) <- bp.(0ul);
     let rb = 0uL in
     let sb = 1uL in
+    admit();
     mk_state sh bx rb sb
 
-unfold val mpfr_add1sp1_gt: a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
-                       p:mpfr_reg_prec_t -> sh:mpfr_reg_prec_t -> Stack state
-    (requires (fun h -> mpfr_reg_struct_cond h b /\ mpfr_reg_struct_cond h c /\
-		     U32.v p < U32.v gmp_NUMB_BITS - 1 /\
-		     U32.v p = U32.v a.mpfr_prec /\
-		     U32.v p = U32.v b.mpfr_prec /\ U32.v p = U32.v c.mpfr_prec /\
-		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v p /\
-		     I32.v b.mpfr_exp > I32.v c.mpfr_exp /\
-		     (let am = a.mpfr_d in
-		     let bm = b.mpfr_d in
-		     let cm = c.mpfr_d in
-		     live h am /\ live h bm /\ live h cm /\
-		     length am = 1 /\ length bm = 1 /\ length cm = 1)))
-    (ensures  (fun h0 r h1 -> U32.v r.sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-                           (let am = a.mpfr_d in
-		           let bm = b.mpfr_d in
-		           let cm = c.mpfr_d in
-			   live h1 am /\ live h1 bm /\ live h1 cm /\
-		           modifies_1 am h0 h1)))
+unfold val mpfr_add1sp1_gt:
+    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    p:mpfr_reg_prec_t -> sh:mpfr_reg_prec_t -> Stack state
+    (requires (fun h -> mpfr_add1sp1_gt_pre_cond a b c sh h))
+    (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1 /\
+                           mpfr_add1sp1_any_post_cond a c b h0 s h1))
 
 let mpfr_add1sp1_gt a b c p sh =
+    let h0 = ST.get() in
     let bx = b.mpfr_exp in
     let cx = c.mpfr_exp in
     let d = int32_to_uint32 I32.(bx -^ cx) in
     let mask = mpfr_LIMB_MASK sh in
+    let s = (
     if U32.(d <^ sh) then mpfr_add1sp1_gt_branch1 a b c sh d mask
     else if U32.(d <^ gmp_NUMB_BITS) then mpfr_add1sp1_gt_branch2 a b c sh d mask
-    else mpfr_add1sp1_gt_branch3 a b c sh
+    else mpfr_add1sp1_gt_branch3 a b c sh) in
+    let h1 = ST.get() in
+    mpfr_add1sp1_any_post_cond_comm_lemma a b c h0 s h1;
+    s
 
-unfold val mpfr_add1sp1_eq: a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
-                       p:mpfr_reg_prec_t -> sh:mpfr_reg_prec_t -> Stack state
-    (requires (fun h -> mpfr_reg_struct_cond h b /\ mpfr_reg_struct_cond h c /\
-		     U32.v p < U32.v gmp_NUMB_BITS - 1 /\
-		     U32.v p = U32.v a.mpfr_prec /\
-		     U32.v p = U32.v b.mpfr_prec /\ U32.v p = U32.v c.mpfr_prec /\
-		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v p /\
-		     I32.v b.mpfr_exp = I32.v c.mpfr_exp /\
-		     (let am = a.mpfr_d in
-		     let bm = b.mpfr_d in
-		     let cm = c.mpfr_d in
-		     live h am /\ live h bm /\ live h cm /\
-		     length am = 1 /\ length bm = 1 /\ length cm = 1)))
-    (ensures  (fun h0 r h1 -> U32.v r.sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-                           (let am = a.mpfr_d in
-		           let bm = b.mpfr_d in
-		           let cm = c.mpfr_d in
-			   live h1 am /\ live h1 bm /\ live h1 cm /\
-		           modifies_1 am h0 h1)))
+(* pre-condition for mpfr_add1sp1_eq where b.exp = c.exp *)
+let mpfr_add1sp1_eq_pre_cond a b c sh h =
+    I32.v b.mpfr_exp = I32.v c.mpfr_exp /\
+    U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
+    mpfr_add1sp1_any_pre_cond a b c U32.(gmp_NUMB_BITS -^ sh) h
+    
+unfold val mpfr_add1sp1_eq:
+    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    p:mpfr_reg_prec_t -> sh:mpfr_reg_prec_t -> Stack state
+    (requires (fun h -> mpfr_add1sp1_eq_pre_cond a b c sh h))
+    (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
 let mpfr_add1sp1_eq a b c p sh =
    let ap = a.mpfr_d in
@@ -385,25 +430,14 @@ let mpfr_add1sp1_eq a b c p sh =
    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
    ap.(0ul) <- a0 ^^ rb;
    let sb = 0uL in
+   admit();
    mk_state sh bx rb sb
 
-unfold val mpfr_add1sp1_any : a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
-                       p:mpfr_reg_prec_t -> Stack state
-    (requires (fun h -> mpfr_reg_struct_cond h b /\ mpfr_reg_struct_cond h c /\
-		     U32.v p < U32.v gmp_NUMB_BITS - 1 /\
-		     U32.v p = U32.v a.mpfr_prec /\
-		     U32.v p = U32.v b.mpfr_prec /\ U32.v p = U32.v c.mpfr_prec /\
-		     (let am = a.mpfr_d in
-		     let bm = b.mpfr_d in
-		     let cm = c.mpfr_d in
-		     live h am /\ live h bm /\ live h cm /\
-		     length am = 1 /\ length bm = 1 /\ length cm = 1)))
-    (ensures  (fun h0 r h1 -> U32.v r.sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-                           (let am = a.mpfr_d in
-		           let bm = b.mpfr_d in
-		           let cm = c.mpfr_d in
-			   live h1 am /\ live h1 bm /\ live h1 cm /\
-		           modifies_1 am h0 h1)))
+unfold val mpfr_add1sp1_any:
+    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    p:mpfr_reg_prec_t -> Stack state
+    (requires (fun h -> mpfr_add1sp1_any_pre_cond a b c p h))
+    (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
 let mpfr_add1sp1_any a b c p =
     let bx = b.mpfr_exp in
@@ -413,31 +447,24 @@ let mpfr_add1sp1_any a b c p =
     else if I32.(bx >^ cx) then mpfr_add1sp1_gt a b c p sh
     else mpfr_add1sp1_gt a c b p sh
 
-unfold val truncate: a:mpfr_ptr -> Stack i32
-    (requires (fun h -> live h a /\ length a = 1 /\
-                     (let as = Seq.index (as_seq h a) 0 in
-		     let am = as.mpfr_d in
-		     live h am /\ disjoint a am /\ length am = 1)))
-    (ensures  (fun h0 r h1 -> h0 == h1))
+(* rounding specifications *)
+unfold val mpfr_truncate: a:mpfr_ptr -> Stack i32
+    (requires (fun h -> mpfr_live h a /\ length (as_struct h a).mpfr_d = 1))
+    (ensures  (fun h0 f h1 -> h0 == h1 /\ f = mpfr_NEG_SIGN (as_struct h1 a).mpfr_sign))
 
-let truncate a = mpfr_NEG_SIGN (mpfr_SIGN(a))
+let mpfr_truncate a = mpfr_NEG_SIGN (mpfr_SIGN(a))
 
-unfold val add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t ->
+unfold val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t ->
                         sh:mpfr_reg_prec_t -> bx:mpfr_tmp_exp_t -> Stack i32
-    (requires (fun h -> live h a /\ length a = 1 /\
-                     (let as = Seq.index (as_seq h a) 0 in
-		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v as.mpfr_prec /\
-		     I32.v bx = I32.v as.mpfr_exp /\
-		     (let am = as.mpfr_d in
-		     live h am /\ disjoint a am /\ length am = 1))))
-    (ensures  (fun h0 r h1 -> live h1 a /\
-                           (let as0 = Seq.index (as_seq h0 a) 0 in
-			   let as = Seq.index (as_seq h1 a) 0 in
-			   let am = as.mpfr_d in
-			   live h1 am /\ am == as0.mpfr_d /\
-			   modifies_2 a am h0 h1)))
+    (requires (fun h -> mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ normal_cond h a /\
+		     U32.v sh = U32.v gmp_NUMB_BITS - U32.v (as_struct h a).mpfr_prec /\
+		     I32.v bx = I32.v (as_struct h a).mpfr_exp))
+    (ensures  (fun h0 f h1 -> mpfr_live h1 a /\ mpfr_modifies a h0 h1 /\ mpfr_valid_cond h1 a /\
+                           normal_to_mpfr_cond (add_one_ulp (as_normal h0 a)) (as_fp h1 a) /\
+                           f = (as_struct h1 a).mpfr_sign))
 
-let add_one_ulp a rnd_mode sh bx =
+let mpfr_add_one_ulp a rnd_mode sh bx =
+    admit();
     let h0 = ST.get() in
     let ap = mpfr_MANT a in
     ap.(0ul) <- ap.(0ul) +%^ (mpfr_LIMB_ONE <<^ sh);
@@ -453,79 +480,67 @@ let add_one_ulp a rnd_mode sh bx =
 	lemma_intro_modifies_2 a ap h0 h1;
         mpfr_SIGN a
     end
+(*
+let mpfr_add1sp1_round_pre_cond exact a st h =
+    let p = U32.v (as_struct h a).mpfr_prec in
+    mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ mpfr_valid_cond h a /\
+    p < 64 /\ exact.len > 64 /\ exact.prec > p /\
+    as_val h (as_struct h a).mpfr_d * pow2 (exact.len - 64) = (high_mant exact p).limb /\
+    U32.v st.sh = U32.v gmp_NUMB_BITS - p /\
+    I32.v st.bx = exact.exp /\
+    (v st.rb <> 0 <==> rb_def exact p) /\
+    (v st.sb <> 0 <==> sb_def exact p)
+
+let mpfr_add1sp1_round_post_cond exact a b c rnd_mode p h0 f h1 =
+    (* Memory safety *)
+    mpfr_live h1 a /\ mpfr_live h1 b /\ mpfr_live h1 c /\
+    mpfr_disjoint_or_equal h1 a b /\ mpfr_disjoint_or_equal h1 a c /\
+    mpfr_disjoint_or_equal h1 b c /\ mpfr_modifies a h0 h1 /\
+    (* Functional correctness *)
+    mpfr_valid_cond h1 a /\ 
+    mpfr_round_cond exact (U32.v p) rnd_mode (as_fp h1 a) /\
+    mpfr_ternary_cond (I32.v f) exact (as_fp h1 a)
+*)
 
 unfold val mpfr_add1sp1_round: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> st:state -> Stack i32
-    (requires (fun h -> live h a /\ length a = 1 /\
-                     (let as = Seq.index (as_seq h a) 0 in
-		     U32.v st.sh = U32.v gmp_NUMB_BITS - U32.v as.mpfr_prec /\
-		     (let am = as.mpfr_d in
-		     live h am /\ disjoint a am /\ length am = 1))))
-    (ensures  (fun h0 r h1 -> live h1 a /\
-                           (let as0 = Seq.index (as_seq h0 a) 0 in
-			   let as = Seq.index (as_seq h1 a) 0 in
-			   let am = as.mpfr_d in
-			   live h1 am /\ am == as0.mpfr_d /\
-			   modifies_2 a am h0 h1)))
+    (requires (fun h -> mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ normal_cond h a))
+    (ensures  (fun h0 f h1 -> 
+    mpfr_live h1 a /\ mpfr_modifies a h0 h1 /\ mpfr_valid_cond h1 a /\
+    (let high = {as_normal h0 a with exp = I32.v st.bx} in
+    normal_to_mpfr_cond (round_rb_sb_spec high (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode) (as_fp h1 a) /\
+    mpfr_ternary_cond (I32.v f) (round_rb_sb_spec high (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode) (as_fp h1 a))))
 
 let mpfr_add1sp1_round a rnd_mode st =
-    let sh = st.sh in
-    let bx = st.bx in
-    let rb = st.rb in
-    let sb = st.sb in
+    admit();
     let ap = mpfr_MANT a in
     let a0 = ap.(0ul) in
     let h0 = ST.get() in
-    mpfr_SET_EXP a bx; // Maybe set it later in truncate and add_one_ulp?
+    mpfr_SET_EXP a st.bx; // Maybe set it later in truncate and add_one_ulp?
     let h1 = ST.get() in
     lemma_reveal_modifies_1 a h0 h1;
     lemma_intro_modifies_2 a ap h0 h1;
-    if ((rb =^ 0uL && sb =^ 0uL) || (MPFR_RNDF? rnd_mode)) then 0l
+    if (st.rb =^ 0uL && st.sb =^ 0uL) then 0l
     else if (MPFR_RNDN? rnd_mode) then begin
-        if (rb =^ 0uL || (sb =^ 0uL && ((a0 &^ (mpfr_LIMB_ONE <<^ sh)) =^ 0uL))) then
-	    truncate a
-	else add_one_ulp a rnd_mode sh bx
-    end else if (mpfr_IS_LIKE_RNDZ rnd_mode I32.((mpfr_SIGN a) =^ -1l)) then truncate a
-    else add_one_ulp a rnd_mode sh bx
+        if (st.rb =^ 0uL || (st.sb =^ 0uL && ((a0 &^ (mpfr_LIMB_ONE <<^ st.sh)) =^ 0uL))) then
+	    mpfr_truncate a
+	else mpfr_add_one_ulp a rnd_mode st.sh st.bx
+    end else if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_SIGN a = mpfr_SIGN_NEG) then mpfr_truncate a
+    else mpfr_add_one_ulp a rnd_mode st.sh st.bx
 
-val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
-                  rnd_mode:mpfr_rnd_t -> p:mpfr_reg_prec_t -> Stack i32
-    (requires (fun h -> live h a /\ live h b /\ live h c /\ 
-		     (let as = Seq.index (as_seq h a) 0 in
-		     let bs = Seq.index (as_seq h b) 0 in
-		     let cs = Seq.index (as_seq h c) 0 in
-		     mpfr_reg_struct_cond h bs /\ mpfr_reg_struct_cond h cs /\
-		     U32.v p < U32.v gmp_NUMB_BITS - 1 /\
-		     U32.v p = U32.v as.mpfr_prec /\
-		     U32.v p = U32.v bs.mpfr_prec /\ U32.v p = U32.v cs.mpfr_prec /\
-		     (let am = as.mpfr_d in
-		     let bm = bs.mpfr_d in
-		     let cm = cs.mpfr_d in
-		     live h am /\ live h bm /\ live h cm /\
-		     disjoint a b /\ disjoint a c /\ disjoint b c /\
-		     disjoint a am /\ disjoint a bm /\ disjoint a cm /\
-		     disjoint b am /\ disjoint b bm /\ disjoint b cm /\
-		     disjoint c am /\ disjoint c bm /\ disjoint c cm /\
-		     disjoint am bm /\ disjoint am cm /\ disjoint bm cm /\
-		     length am = 1 /\ length bm = 1 /\ length cm = 1))))
-    (ensures  (fun h0 r h1 -> live h1 a /\ live h1 b /\ live h1 c /\
-		           (let as0 = Seq.index (as_seq h0 a) 0 in
-			   let as = Seq.index (as_seq h1 a) 0 in
-		           let bs = Seq.index (as_seq h1 b) 0 in
-		           let cs = Seq.index (as_seq h1 c) 0 in
-		           let am = as.mpfr_d in
-		           let bm = bs.mpfr_d in
-		           let cm = cs.mpfr_d in
-			   live h1 am /\ live h1 bm /\ live h1 cm /\
-		           am == as0.mpfr_d /\ modifies_2 a am h0 h1)))
 
 let mpfr_add1sp1 a b c rnd_mode p =
     let h0 = ST.get() in
-    let st = mpfr_add1sp1_any a.(0ul) b.(0ul) c.(0ul) p in // Maybe include (1<<sh) in it too?
+    let st = mpfr_add1sp1_any a.(0ul) b.(0ul) c.(0ul) p in
     let h1 = ST.get() in
     lemma_reveal_modifies_1 (mpfr_MANT a) h0 h1;
     lemma_intro_modifies_2 a (mpfr_MANT a) h0 h1;
+    //round_rb_sb_lemma (add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (U32.v (as_struct h0 a).mpfr_prec) (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode;
     if I32.(st.bx >^ mpfr_EMAX) then begin
+        admit();
         mpfr_overflow a rnd_mode (mpfr_SIGN a)
     end else begin
-        mpfr_add1sp1_round a rnd_mode st
+        let ret = mpfr_add1sp1_round a rnd_mode st in
+	let h2 = ST.get() in
+	mpfr_ternary_cond_lemma (add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (U32.v (as_struct h0 a).mpfr_prec) (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode (I32.v ret) (as_fp h2 a);
+	ret
     end

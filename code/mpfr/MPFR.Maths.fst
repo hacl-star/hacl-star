@@ -13,6 +13,10 @@ val lemma_paren_mul_right: a:int -> b:int -> c:int -> Lemma
     (a * b * c = a * (b * c))
 let lemma_paren_mul_right a b c = ()
 
+val lemma_mul_zero: a:int -> b:pos -> Lemma
+    (a = 0 <==> a * b = 0)
+let lemma_mul_zero a b = ()
+
 val lemma_mul_le_left: a:nat -> b:int -> c:int -> Lemma
     (requires (b <= c))
     (ensures  (a * b <= a * c))
@@ -170,9 +174,22 @@ let lemma_mod_div a b c =
 
 val lemma_mod_mod: a:nat -> b:pos -> c:pos -> Lemma
     ((a % (b * c)) % b = a % b)
+    
 let lemma_mod_mod a b c =
     lemma_euclidean a (b * c);
     lemma_add_mod a (- (a / (b * c)) * c) b
+
+val lemma_mod_mul: a:nat -> b:pos -> c:pos -> Lemma
+    ((a % b) * c = (a * c) % (b * c))
+
+let lemma_mod_mul a b c =
+    lemma_mod_div (a * c) c b;
+    lemma_multiple_div a c;
+    //! assert((a * c) % (c * b) / c = a % b);
+    lemma_mod_mod (a * c) c b;
+    //! assert((a * c) % (c * b) % c = (a * c) % c);
+    lemma_multiple_mod a c;
+    lemma_div_mul ((a * c) % (c * b)) c
 
 (* pow2 proprieties *)
 val lemma_pow2_le: n:nat -> m:nat -> Lemma
@@ -278,6 +295,14 @@ let lemma_pow2_mul_div a b c =
     lemma_pow2_div_div (a * pow2 b) b (c - b);
     lemma_multiple_div a (pow2 b)
 
+val lemma_pow2_mul_mod: a:nat -> b:nat -> c:nat -> Lemma
+    (requires (b <= c))
+    (ensures  ((a * pow2 b) % pow2 c = (a % pow2 (c - b)) * pow2 b))
+
+let lemma_pow2_mul_mod a b c = 
+    lemma_mod_mul a (pow2 (c - b)) (pow2 b);
+    lemma_pow2_mul (c - b) b
+
 val lemma_pow2_mod_div: a:nat -> b:nat -> c:nat -> Lemma
     (requires (b >= c))
     (ensures  ((a % pow2 b) / pow2 c = (a / pow2 c) % (pow2 (b - c))))
@@ -307,12 +332,28 @@ val lemma_bit_length: m:pos -> p1:pos -> p2:pos -> Lemma
 let lemma_bit_length m p1 p2 =
     if p1 < p2 then lemma_pow2_le p1 (p2 - 1);
     if p1 > p2 then lemma_pow2_le p2 (p1 - 1)
+
+
+val lemma_nth_logand: #n:pos -> a:UInt.uint_t n -> i:nat{i < n} -> Lemma
+    (requires (pow2 (n - i - 1) < pow2 n))
+    (ensures  (UInt.nth a i = (UInt.logand a (pow2 (n - i - 1)) <> 0)))
+    
+let lemma_nth_logand #n a i = 
+    lemma_pow2_lt (n - i - 1) n;
+    UInt.nth_lemma (pow2 (n - i - 1)) (UInt.shift_left (UInt.one n) (n - i - 1));
+    if UInt.nth a i then UInt.nth_lemma (UInt.logand a (pow2 (n - i - 1))) (pow2 (n - i - 1))
+    else UInt.nth_lemma (UInt.logand a (pow2 (n - i - 1))) (UInt.zero n)
     
 (* UInt64 lemmas *)
 open FStar.UInt64
 
 type u64 = FStar.UInt64.t
 
+val lemma_xor_and_distr: a:u64 -> b:u64 -> c:u64 -> Lemma
+    (v ((a &^ b) ^^ (a &^ c)) = v (a &^ (b ^^ c)))
+let lemma_xor_and_distr a b c =
+    UInt.nth_lemma (v ((a &^ b) ^^ (a &^ c))) (v (a &^ (b ^^ c)))
+    
 val lemma_tl_zero_imp_mod_pow2: x:u64 -> sh:pos{sh < 64} -> Lemma
     (requires (Seq.slice (UInt.to_vec (v x)) (64 - sh) 64 == BitVector.zero_vec #sh))
     (ensures  (v x % pow2 sh = 0))
@@ -357,4 +398,35 @@ let lemma_lognot_mask_mod a mask sh =
         lemma_mod_pow2_imp_tl_zero (lognot mask) sh;
         Seq.lemma_eq_intro (Seq.slice (UInt.to_vec (v (a &^ (lognot mask)))) (64 - sh) 64) (BitVector.zero_vec #sh);
 	lemma_tl_zero_imp_mod_pow2 (a &^ (lognot mask)) sh
+    end
+    
+val lemma_bit_mask: mask:u64 -> p:nat{p < 64} -> Lemma
+    (requires (v mask = pow2 (63 - p)))
+    (ensures  (forall (i:nat{0 <= i /\ i < 64}). (i = p ==> UInt.nth (v mask) i = true) /\
+                                        (i <> p ==> UInt.nth (v mask) i = false)))
+let lemma_bit_mask mask p = 
+    lemma_pow2_lt (63 - p) 64;
+    UInt.nth_lemma (v mask) (UInt.shift_left (UInt.one 64) (63 - p))
+    
+val lemma_bit_mask_value: a:u64 -> mask:u64 -> p:nat{p < 64} -> Lemma
+    (requires (v mask = pow2 (n - p - 1)))
+    (ensures  (v (a &^ mask) = (if UInt.nth (v a) p then v mask else 0)))
+let lemma_bit_mask_value a mask p =
+    assert(v mask = UInt.pow2_n #n (n - p - 1));
+    if UInt.nth (v a) p then UInt.nth_lemma (v (a &^ mask)) (v mask)
+    else UInt.nth_lemma (v (a &^ mask)) (UInt.zero n)
+    
+val lemma_tail_mask: mask:u64 -> p:pos{p <= 64} -> Lemma
+    (requires (v mask = pow2 p - 1))
+    (ensures  (forall (i:nat{0 <= i /\ i < 64}). (i < 64 - p ==> UInt.nth (v mask) i = false) /\
+                                        (i >= 64 - p ==> UInt.nth (v mask) i = true)))
+let lemma_tail_mask mask p = lemma_pow2_le p p
+
+val lemma_tail_mask_value: a:u64 -> mask:u64 -> p:nat{p < 64} -> Lemma
+    (requires (v mask = pow2 p - 1))
+    (ensures  (v (a &^ mask) = v a % pow2 p))
+let lemma_tail_mask_value a mask p = 
+    if p > 0 then UInt.logand_mask (v a) p else begin
+        assert(v mask = UInt.zero 64);
+	UInt.nth_lemma (v (a &^ mask)) (UInt.zero 64)
     end

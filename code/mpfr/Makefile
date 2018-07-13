@@ -10,16 +10,17 @@ MPFR_FILES=	MPFR.Maths.fst \
 		MPFR.Dyadic.fst \
 		MPFR.Lib.Spec.fst \
 		MPFR.Add1.Spec.fst \
+		MPFR.RoundingMode.fst \
 		MPFR.Round.Spec.fst \
 		MPFR.Lib.fst \
 		MPFR.Add1sp1.fst
 
 # This target is very concise and re-uses the variables defined in
 # Makefile.include. You shouldn't need to call `cp` ever.
-add1sp1: out gen-tests MPFR.Lib.fst MPFR.Add1sp1.fst test/Test_Add1sp1.ml
-	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml MPFR.Lib.fst MPFR.Add1sp1.fst
+add1sp1: out gen-tests MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Add1sp1.fst test/Test_Add1sp1.ml
+	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml MPFR.Add1sp1.fst
 	cp test/Test_Add1sp1.ml out/Test_Add1sp1.ml
-	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_Lib.ml out/MPFR_Add1sp1.ml out/Test_Add1sp1.ml -o out/Add1sp1
+	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Add1sp1.ml out/Test_Add1sp1.ml -o out/Add1sp1
 	out/Add1sp1
 
 %.fst-verify: %.fst

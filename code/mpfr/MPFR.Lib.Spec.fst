@@ -47,7 +47,7 @@ type fp_struct = {
 }
 
 (* constructor *)
-let mk_struct sign prec exp limb len flag = {
+let mk_fp_struct sign prec exp limb len flag = {
     sign = sign;
     prec = prec;
     exp  = exp;
@@ -63,6 +63,10 @@ let mk_struct sign prec exp limb len flag = {
 //  The precision should be positive and not greater than the bit length of significand  //
 //  Also the last 'len - prec' bits should be 0s                                         //
 ///////////////////////////////////////////////////////////////////////////////////////////
+
+(* validity for NaN and Inf *)
+let valid_nan_cond s = MPFR_NAN? s.flag
+let valid_inf_cond s = MPFR_INF? s.flag
 
 (* validity for zero
  * flag = MPFR_ZERO and limb = 0 *)
@@ -85,10 +89,15 @@ type valid_fp = s:fp_struct{valid_fp_cond s}
 (* Evaluation.
  * Firstly add '0.' in front of 'limb' to make it a floating number in (0, 1)
  * Then multiply it with 2 ^ exp *)
-let eval (fp:valid_fp) = mk_fp (fp.sign * fp.limb) (fp.exp - fp.len)
+let eval (fp:valid_fp) = mk_dyadic (fp.sign * fp.limb) (fp.exp - fp.len)
 
 val eval_abs: fp:valid_fp -> Tot (r:dyadic{r == fabs (eval fp)})
-let eval_abs fp = mk_fp fp.limb (fp.exp - fp.len)
+let eval_abs fp = mk_dyadic fp.limb (fp.exp - fp.len)
+
+val eval_eq_lemma: a:valid_fp -> b:valid_fp -> Lemma
+    (requires (eval_abs a =. eval_abs b /\ a.sign = b.sign))
+    (ensures  (eval a =. eval b))
+let eval_eq_lemma a b = ()
 
 //////////////////////////////////////////////////////////////////////
 //  Normalize a regular value                                       //
@@ -104,10 +113,10 @@ type normal_fp = s:valid_fp{normal_fp_cond s}
 
 (* constructor for normal number *)
 let mk_normal sign prec exp limb len flag: Pure normal_fp
-    (requires (valid_fp_cond (mk_struct sign prec exp limb len flag) /\
-              normal_fp_cond (mk_struct sign prec exp limb len flag)))
+    (requires (valid_fp_cond (mk_fp_struct sign prec exp limb len flag) /\
+              normal_fp_cond (mk_fp_struct sign prec exp limb len flag)))
     (ensures  (fun _ -> True)) =
-    mk_struct sign prec exp limb len flag
+    mk_fp_struct sign prec exp limb len flag
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -132,10 +141,12 @@ val prec_to_len: p:pos ->
     Tot (s:pos{s % 64 = 0 /\ s >= p /\ s - 64 < p})
 let prec_to_len p = ((p + 63) / 64) * 64
 
+let mpfr_len_cond (p:pos) (l:nat) = l = prec_to_len p
+
 (* validity for normal number of MPFR 
  * len should coordinate with prec and range limits for prec and exp *)
 let mpfr_reg_fp_cond (s:normal_fp) =
-    s.len = prec_to_len s.prec /\
+    mpfr_len_cond s.prec s.len /\
     mpfr_PREC_COND s.prec /\
     mpfr_EXP_COND s.exp
 
@@ -145,8 +156,9 @@ type mpfr_reg_fp = f:normal_fp{mpfr_reg_fp_cond f}
 (* validity for MPFR number allowing sigular values
  * NaN, Inf, Zeros and normalized regular number *)
 let mpfr_fp_cond (s:fp_struct) =
-    MPFR_NAN? s.flag \/ MPFR_INF? s.flag \/ valid_zero_cond s \/ 
-    (valid_fp_cond s /\ normal_fp_cond s /\ mpfr_reg_fp_cond s)
+    mpfr_len_cond s.prec s.len /\
+    (MPFR_NAN? s.flag \/ MPFR_INF? s.flag \/ valid_zero_cond s \/ 
+    (valid_fp_cond s /\ normal_fp_cond s /\ mpfr_reg_fp_cond s))
 
 (* type for MPFR number *)
 type mpfr_fp = s:fp_struct{mpfr_fp_cond s}
@@ -161,7 +173,7 @@ val mpfr_overflow_bound: p:nat{mpfr_PREC_COND p} -> Tot dyadic
 
 let mpfr_overflow_bound p =
     let l = prec_to_len p in
-    mk_fp (pow2 l - pow2 (l - p)) (mpfr_EMAX_spec - l)
+    mk_dyadic (pow2 l - pow2 (l - p)) (mpfr_EMAX_spec - l)
 
 val mpfr_overflow_bound_lemma: p:nat{mpfr_PREC_COND p} -> f:mpfr_reg_fp{f.prec = p} -> Lemma
     (eval_abs f <=. mpfr_overflow_bound p)
@@ -183,3 +195,23 @@ let mpfr_overflow_bound_lemma p f =
     //! assert(f.limb <= pow2 l - pow2 (l - p));
     lemma_pow2_le (f.exp - l - elb) (mpfr_EMAX_spec - l - elb);
     assert(f.limb * pow2 (f.exp - l - elb) <= (pow2 l - pow2 (l - p)) * pow2 (mpfr_EMAX_spec - l - elb))
+
+(* underflow bound for normal number of MPFR *)
+val mpfr_underflow_bound: p:nat{mpfr_PREC_COND p} -> Tot dyadic
+
+let mpfr_underflow_bound p =
+    let l = prec_to_len p in
+    mk_dyadic (pow2 (l - 1)) (mpfr_EMIN_spec - l)
+
+val mpfr_underflow_bound_lemma: p:nat{mpfr_PREC_COND p} -> f:mpfr_reg_fp{f.prec = p} -> Lemma
+    (eval_abs f >=. mpfr_underflow_bound p)
+    [SMTPat (eval_abs f >=. mpfr_underflow_bound p)]
+
+let mpfr_underflow_bound_lemma p f =
+    let l = prec_to_len p in
+    lemma_pow2_mod (l - 1) (l - p);
+    //! assert(pow2 (l - 1) % pow2 (l - p) = 0);
+    let b = mk_normal 1 p mpfr_EMIN_spec (pow2 (l - 1)) l MPFR_NUM in
+    //! assert(eval b == mpfr_underflow_bound p);
+    let elb = min (f.exp - l) (mpfr_EMIN_spec - l) in
+    lemma_pow2_le (mpfr_EMIN_spec - l - elb) (f.exp - l - elb)

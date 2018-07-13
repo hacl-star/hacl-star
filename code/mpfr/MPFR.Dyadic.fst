@@ -9,12 +9,12 @@ open MPFR.Maths
  * this allows multiple representations for one value. *)
 noeq type dyadic = {significand:int; exponent:int}
 
-let mk_fp m x = {significand = m; exponent = x}
+let mk_dyadic m x = {significand = m; exponent = x}
     
 (* Constants *)
-let zero_fp = mk_fp 0 0
+let zero_fp = mk_dyadic 0 0
 
-let unit_fp x = mk_fp 1 x
+let unit_fp x = mk_dyadic 1 x
 
 (* Evaluation to integer after adding a sufficient large exponent 
  * Maybe evaluate to a real number when F* have one. *)
@@ -35,7 +35,8 @@ val fneg: a:dyadic -> Tot (r:dyadic{
     let elb = a.exponent in
     r.exponent >= elb /\
     eval_i r elb = - eval_i a elb})
-let fneg a = mk_fp (- a.significand) a.exponent
+    
+let fneg a = mk_dyadic (- a.significand) a.exponent
 
 let fabs a = if ge a zero_fp then a else fneg a
 
@@ -47,9 +48,10 @@ val fadd: a:dyadic -> b:dyadic -> Tot (r:dyadic{
     let elb = min a.exponent b.exponent in
     r.exponent >= elb /\
     eval_i a elb + eval_i b elb = eval_i r elb})
+    
 let fadd a b =
     let elb = min a.exponent b.exponent in
-    mk_fp (a.significand * pow2 (a.exponent - elb) + b.significand * pow2 (b.exponent - elb)) elb
+    mk_dyadic (a.significand * pow2 (a.exponent - elb) + b.significand * pow2 (b.exponent - elb)) elb
     
 (* Subtraction post-condition
  * a.mant * 2 ^ (a.exp - elb) - b.mant * 2 ^ (b.exp - elb) = r.mant * 2 ^ (r.exp - elb)
@@ -59,6 +61,7 @@ val fsub: a:dyadic -> b:dyadic -> Tot (r:dyadic{
     let elb = min a.exponent b.exponent in
     r.exponent >= elb /\
     eval_i a elb - eval_i b elb = eval_i r elb})
+    
 let fsub a b = fadd a (fneg b)
 
 (* Multiplication post-condition
@@ -69,10 +72,11 @@ val fmul: a:dyadic -> b:dyadic -> Tot (r:dyadic{
     let elb = min a.exponent b.exponent in
     r.exponent >= 2 * elb /\
     eval_i a elb * eval_i b elb = eval_i r (2 * elb)})
+    
 let fmul a b =
     let elb = min a.exponent b.exponent in
     lemma_pow2_mul (a.exponent - elb) (b.exponent - elb);
-    mk_fp (a.significand * b.significand) (a.exponent + b.exponent)
+    mk_dyadic (a.significand * b.significand) (a.exponent + b.exponent)
 
 (* Infix notations *)
 unfold let op_Equals_Dot  = eq

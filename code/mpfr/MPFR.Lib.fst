@@ -11,8 +11,11 @@ module U32 = FStar.UInt32
 
 open MPFR.Maths
 open MPFR.Lib.Spec
+open MPFR.Round.Spec
 
-#set-options "--z3refresh --z3rlimit 30 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+include MPFR.RoundingMode
+
+#set-options "--z3refresh --z3rlimit 50 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 // GENERIC LIBRARY DEFINITIONS
 type i32 = FStar.Int32.t
@@ -21,15 +24,6 @@ type u64 = FStar.UInt64.t
 
 let mpfr_SIGN_POS = 1l
 let mpfr_SIGN_NEG = -1l
-
-type mpfr_rnd_t = 
-   | MPFR_RNDN 
-   | MPFR_RNDZ
-   | MPFR_RNDU
-   | MPFR_RNDD
-   | MPFR_RNDA
-   | MPFR_RNDF
-   | MPFR_RNDNA
 
 type mpfr_sign_t = s:i32{s = mpfr_SIGN_NEG \/ s = mpfr_SIGN_POS}
 type mpfr_prec_t = p:u32{U32.v p > 0}
@@ -166,8 +160,6 @@ let mpfr_LIMB_HIGHBIT =
     assert_norm(UInt.pow2_n #64 63 = v 0x8000000000000000uL);
     0x8000000000000000uL
 
-assume val mpfr_IS_LIKE_RNDZ: mpfr_rnd_t -> bool -> Tot bool
-
 assume val mpfr_overflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:i32 ->
     Stack i32
     (requires (fun h -> live h x /\ length x = 1 /\
@@ -186,29 +178,33 @@ type mpfr_reg_prec_t = p:u32{mpfr_PREC_COND (U32.v p)}
 type mpfr_reg_exp_t  = x:i32{mpfr_EXP_COND (I32.v x)}
 
 (* First bit is 1 *)
-let mpfr_d_val0_cond (m:mp_limb_t): Type =
+let mpfr_d_val0_cond (m:mp_limb_t): GTot Type0 =
     v m >= pow2 63
 (* Ending bits are 0 *)
-let mpfr_d_valn_cond (m:mp_limb_t) (p:mpfr_reg_prec_t): Type =
+let mpfr_d_valn_cond (m:mp_limb_t) (p:mpfr_prec_t{U32.v p > 0}): GTot Type0 =
     v m % pow2 (prec_to_len (U32.v p) - U32.v p) = 0
-    
-let mpfr_reg_struct_cond h (s:mpfr_struct): Type =
-    mpfr_PREC_COND (U32.v s.mpfr_prec) /\ mpfr_EXP_COND (I32.v s.mpfr_exp) /\
-    (let l = length s.mpfr_d in
-    prec_to_len (U32.v s.mpfr_prec) = l * 64 /\
+
+let normal_cond_ h (s:mpfr_struct): GTot Type0 =
+    prec_to_len (U32.v s.mpfr_prec) = length s.mpfr_d * 64 /\
     mpfr_d_val0_cond (get h s.mpfr_d 0) /\
-    mpfr_d_valn_cond (get h s.mpfr_d (l - 1)) s.mpfr_prec)
+    mpfr_d_valn_cond (get h s.mpfr_d (length s.mpfr_d - 1)) s.mpfr_prec
 
-let mpfr_reg_ptr_cond h (a:mpfr_ptr): Type = mpfr_reg_struct_cond h (Seq.index (as_seq h a) 0)
+let normal_cond h (a:mpfr_ptr): GTot Type0 = normal_cond_ h (Seq.index (as_seq h a) 0)
 
-let mpfr_valid_struct_cond h (s:mpfr_struct): Type =
-    s.mpfr_exp = mpfr_EXP_NAN \/ s.mpfr_exp = mpfr_EXP_INF \/
-    s.mpfr_exp = mpfr_EXP_ZERO \/ mpfr_reg_struct_cond h s
+let mpfr_reg_cond_ h (s:mpfr_struct): GTot Type0 =
+    normal_cond_ h s /\
+    mpfr_PREC_COND (U32.v s.mpfr_prec) /\ mpfr_EXP_COND (I32.v s.mpfr_exp)
 
-let mpfr_valid_ptr_cond h (a:mpfr_ptr): Type = mpfr_valid_struct_cond h (Seq.index (as_seq h a) 0)
+let mpfr_reg_cond h (a:mpfr_ptr): GTot Type0 = mpfr_reg_cond_ h (Seq.index (as_seq h a) 0)
+
+let mpfr_valid_cond_ h (s:mpfr_struct): GTot Type0 =
+    prec_to_len (U32.v s.mpfr_prec) = length s.mpfr_d * 64 /\
+    (s.mpfr_exp = mpfr_EXP_NAN \/ s.mpfr_exp = mpfr_EXP_INF \/
+    s.mpfr_exp = mpfr_EXP_ZERO \/ mpfr_reg_cond_ h s)
+
+let mpfr_valid_cond h (a:mpfr_ptr): GTot Type0 = mpfr_valid_cond_ h (Seq.index (as_seq h a) 0)
 
 
-#reset-options "--z3refresh --z3rlimit 30  --max_fuel 1 --max_ifuel 0"
 (* Conversion to pure struct *)
 val to_val: s:Seq.seq u64 -> Tot (n:nat{n < pow2 (Seq.length s * 64)}) (decreases (Seq.length s))
 
@@ -238,7 +234,7 @@ let val0_cond_lemma s =
     to_val_rec_lemma s;
     lemma_pow2_mul 63 ((Seq.length s - 1) * 64)
     
-val valn_cond_lemma: s:Seq.seq u64 -> p:mpfr_reg_prec_t -> Lemma
+val valn_cond_lemma: s:Seq.seq u64 -> p:mpfr_prec_t{U32.v p > 0} -> Lemma
     (requires  (prec_to_len (U32.v p) = Seq.length s * 64 /\
                 mpfr_d_valn_cond (Seq.index s (Seq.length s - 1)) p))
     (ensures   (to_val s % pow2 (Seq.length s * 64 - U32.v p) = 0))
@@ -262,16 +258,16 @@ let as_val h (b:buffer mp_limb_t) = to_val (as_seq h b)
 (* Convert valid mpfr_ptr to mpfr_fr *)
 let as_struct h (a:mpfr_ptr) = Seq.index (as_seq h a) 0
 
-abstract val as_reg_fp_: h:mem -> s:mpfr_struct{mpfr_reg_struct_cond h s} ->
-    GTot (ps:mpfr_reg_fp{
+val as_normal_: h:mem -> s:mpfr_struct{normal_cond_ h s} ->
+    GTot (ps:normal_fp{
           ps.sign = I32.v s.mpfr_sign /\
 	  ps.prec = U32.v s.mpfr_prec /\
 	  ps.exp  = I32.v s.mpfr_exp  /\
           ps.limb = as_val h s.mpfr_d /\
 	  ps.len  = length s.mpfr_d * 64 /\
 	  ps.flag = MPFR_NUM})
-			 
-let as_reg_fp_ h s =
+
+let as_normal_ h s =
     let sign = I32.v s.mpfr_sign in
     let prec = U32.v s.mpfr_prec in
     let exp  = I32.v s.mpfr_exp  in
@@ -280,18 +276,33 @@ let as_reg_fp_ h s =
     assert(prec_to_len prec = l * 64);
     val0_cond_lemma (as_seq h s.mpfr_d);
     valn_cond_lemma (as_seq h s.mpfr_d) s.mpfr_prec;
-    mk_struct sign prec exp limb (l * 64) MPFR_NUM
+    mk_fp_struct sign prec exp limb (l * 64) MPFR_NUM
 
-let as_reg_fp h (a:mpfr_ptr{mpfr_reg_struct_cond h (as_struct h a)}) = as_reg_fp_ h (as_struct h a)
+let as_normal h (a:mpfr_ptr{normal_cond h a}) = as_normal_ h (as_struct h a)
 
-val as_fp_: h:mem -> s:mpfr_struct{mpfr_valid_struct_cond h s} ->
-    GTot mpfr_fp
+let as_reg_fp_ h (s:mpfr_struct{mpfr_reg_cond_ h s}): GTot mpfr_reg_fp = as_normal_ h s
 
-let as_fp_ h s =
-    let sign = I32.v s.mpfr_sign in
-    if s.mpfr_exp = mpfr_EXP_NAN then mk_struct 1 1 0 0 1 MPFR_NAN
-    else if s.mpfr_exp = mpfr_EXP_INF then mk_struct sign 1 0 0 1 MPFR_INF
-    else if s.mpfr_exp = mpfr_EXP_ZERO then mk_struct sign 1 0 0 1 MPFR_ZERO
+let as_reg_fp h (a:mpfr_ptr{mpfr_reg_cond h a}) = as_reg_fp_ h (as_struct h a)
+
+let as_fp_ h (s:mpfr_struct{mpfr_valid_cond_ h s}): GTot mpfr_fp =
+    let init = mk_fp_struct (I32.v s.mpfr_sign) (U32.v s.mpfr_prec) 0 0 (length s.mpfr_d * 64) MPFR_NAN in
+    if s.mpfr_exp = mpfr_EXP_NAN then init
+    else if s.mpfr_exp = mpfr_EXP_INF then {init with flag = MPFR_INF}
+    else if s.mpfr_exp = mpfr_EXP_ZERO then {init with flag = MPFR_ZERO}
     else as_reg_fp_ h s
 
-let as_fp h (a:mpfr_ptr{mpfr_valid_struct_cond h (as_struct h a)}) = as_fp_ h (as_struct h a)
+let as_fp h (a:mpfr_ptr{mpfr_valid_cond_ h (as_struct h a)}) = as_fp_ h (as_struct h a)
+
+(* Useful expression for specification *)
+let mpfr_live h a = 
+    live h a /\ live h (as_struct h a).mpfr_d /\
+    disjoint a (as_struct h a).mpfr_d
+
+let mpfr_disjoint_or_equal h a b = 
+    disjoint a (as_struct h b).mpfr_d /\ disjoint b (as_struct h a).mpfr_d /\
+    (a == b \/ (disjoint a b /\ disjoint (as_struct h a).mpfr_d (as_struct h b).mpfr_d))
+
+let mpfr_modifies a h0 h1 =
+    (as_struct h0 a).mpfr_prec = (as_struct h1 a).mpfr_prec /\
+    (as_struct h0 a).mpfr_d == (as_struct h1 a).mpfr_d /\
+    modifies_2 a (as_struct h1 a).mpfr_d h0 h1
