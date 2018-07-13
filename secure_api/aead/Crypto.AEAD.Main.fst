@@ -36,8 +36,8 @@ let log #i #rw s h =
 (*
 let fp' = FStar.Pointer.Base.loc
 // inline_for_extraction let fp = FStar.Ghost.erased fp'
-(* let footprint #i #rw s = TSet.empty //TODO: FIXME! *)
-(* let hh_modifies_t (_:FStar.TSet.set HS.rid) (h0:HS.mem) (h1:HS.mem) = True //TODO: FIXME! *)
+let footprint #i #rw s = TSet.empty //TODO: FIXME!
+let hh_modifies_t (_:FStar.TSet.set HS.rid) (h0:HS.mem) (h1:HS.mem) = True //TODO: FIXME!
 let footprint #i #rw s = FStar.Ghost.hide FStar.Pointer.Base.loc_none        //TODO: FIXME!
 let modifies_fp (fp:fp) (h0:HS.mem) (h1:HS.mem): Type0 = True  //TODO: FIXME!
 let preserves_fp (fp:fp) (h0:HS.mem) (h1:HS.mem) : Type0 = True //TODO: FIXME!
