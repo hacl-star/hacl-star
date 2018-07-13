@@ -23,15 +23,15 @@ inline_for_extraction noextract
 let v = size_v
 
 inline_for_extraction
-type matrix_t n1 n2 = lbuffer uint16 (v (n1 *. n2))
+type matrix_t (n1:size_t) (n2:size_t{v n1 * v n2 < max_size_t}) = lbuffer uint16 (v n1 * v n2)
 
 val matrix_create:
-  n1:size_t -> n2:size_t{0 < v (n1 *. n2) /\ v n1 * v n2 < max_size_t} ->
+  n1:size_t -> n2:size_t{0 < v n1 * v n2 /\ v n1 * v n2 < max_size_t} ->
   StackInline (matrix_t n1 n2)
   (requires (fun h0 -> True))
   (ensures (fun h0 r h1 ->
-    Buf.alloc_post_common (HS.get_tip h0) (v (n1 *. n2)) r h0 h1 /\
-    Buf.as_seq h1 r == Seq.create (v (n1 *. n2)) (u16 0)))
+    Buf.alloc_post_common (HS.get_tip h0) (v n1 * v n2) r h0 h1 /\
+    Buf.as_seq h1 r == Seq.create (v n1 * v n2) (u16 0)))
   [@ "substitute"]
 let matrix_create n1 n2 =
   create #uint16 (n1 *. n2) (u16 0)
@@ -110,12 +110,12 @@ let matrix_sub #n1 #n2 a b =
   )
 
 val matrix_mul:
-  #n1:size_t -> #n2:size_t -> #n3:size_t ->
+  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
+  #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t} ->
   a:matrix_t n1 n2 -> b:matrix_t n2 n3 ->
   c:matrix_t n1 n3 -> Stack unit
-  (requires (fun h ->
-    v n1 * v n2 < max_size_t /\ v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t /\
-    Buf.live h a /\ Buf.live h b /\ Buf.live h c /\ Buf.disjoint a c /\ Buf.disjoint b c))
+  (requires (fun h -> Buf.live h a /\ Buf.live h b /\
+    Buf.live h c /\ Buf.disjoint a c /\ Buf.disjoint b c))
   (ensures (fun h0 _ h1 -> Buf.live h1 c /\ modifies (loc_buffer c) h0 h1))
   [@"c_inline"]
 let matrix_mul #n1 #n2 #n3 a b c =
