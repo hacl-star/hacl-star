@@ -372,7 +372,7 @@ bool unit_test_crypto_sign(){
   uint8_t sk[64], pk[32];
   crypto_sign_keypair(pk, sk);
   READ_RANDOM_BYTES(len, plaintext);
-  int a;
+  int a, res;
   bool pass = true;
   long long unsigned int smlen;
   for (int i = 0; i < 256; i++){
@@ -384,8 +384,9 @@ bool unit_test_crypto_sign(){
       printf("crypto_sign failed on input of size %d\n", i);
       break;
     }
-    pass = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, i + 64, pk);
-    if (pass == false) {
+    res = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, i + 64, pk);
+    if (res != 0) {
+      pass = false;
       printf("crypto_sign_open returned value failed on input of size %d\n", i);
       break;
     }
@@ -404,8 +405,9 @@ bool unit_test_crypto_sign(){
     pass = false;
     printf("crypto_sign failed on input of size %d\n.", HACL_UNIT_TESTS_SIZE);
   }
-  pass = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, HACL_UNIT_TESTS_SIZE + 64, pk);
-  if (pass == false) {
+  res = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, HACL_UNIT_TESTS_SIZE + 64, pk);
+  if (res != 0) {
+    pass = false;
     printf("crypto_sign_open returned value failed on input of size %d\n", HACL_UNIT_TESTS_SIZE);
   }
   a = memcmp(hacl_signed_msg, plaintext, HACL_UNIT_TESTS_SIZE * sizeof(uint8_t));
