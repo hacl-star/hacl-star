@@ -49,7 +49,7 @@ extract-c-code-experimental:
 
 # Clean the code directories
 clean-c-code:
-	$(MAKE) -C code clean
+	$(MAKE) -C code clean-c
 
 #
 # Snapshot targets

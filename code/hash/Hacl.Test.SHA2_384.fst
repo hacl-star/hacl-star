@@ -15,10 +15,10 @@ let test_1a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 3ul in
+  [@inline_let] let plaintext_len = 3ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy;
     ] in
@@ -55,10 +55,10 @@ let test_1b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 3ul in
+  [@inline_let] let plaintext_len = 3ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy;
     ] in
@@ -91,10 +91,10 @@ let test_2a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 0ul in
+  [@inline_let] let plaintext_len = 0ul in
   let plaintext = FStar.Buffer.createL [] in
 
   let expected = FStar.Buffer.createL [
@@ -129,10 +129,10 @@ let test_2b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 0ul in
+  [@inline_let] let plaintext_len = 0ul in
   let plaintext = FStar.Buffer.createL [] in
 
   let expected = FStar.Buffer.createL [
@@ -163,10 +163,10 @@ let test_3a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 56ul in
+  [@inline_let] let plaintext_len = 56ul in
   let plaintext = FStar.Buffer.createL [
     0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy;
     0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy;
@@ -209,10 +209,10 @@ let test_3b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 56ul in
+  [@inline_let] let plaintext_len = 56ul in
   let plaintext = FStar.Buffer.createL [
     0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy;
     0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy;
@@ -251,10 +251,10 @@ let test_4a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 112ul in
+  [@inline_let] let plaintext_len = 112ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
       0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
@@ -304,10 +304,10 @@ let test_4b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 112ul in
+  [@inline_let] let plaintext_len = 112ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
       0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
@@ -353,10 +353,10 @@ let test_5 () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 1000000ul in
+  [@inline_let] let plaintext_len = 1000000ul in
   let plaintext = FStar.Buffer.create 0x61uy plaintext_len in
 
   let expected = FStar.Buffer.createL [
@@ -407,10 +407,10 @@ let test_6 () =
   (* Push a new memory frame *)
   (**) push_frame();
 
-  let output_len = 48ul in
+  [@inline_let] let output_len = 48ul in
   let output = FStar.Buffer.create 0uy output_len in
 
-  let plaintext_len = 128ul in
+  [@inline_let] let plaintext_len = 128ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
       0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
