@@ -9,6 +9,8 @@ module HS = FStar.HyperStack
 module I = Crypto.Indexing
 module PRF = Crypto.Symmetric.PRF
 
+#set-options "--z3rlimit 100"
+
 let keylen i = PRF.keylen i
 let statelen i = PRF.statelen i
 inline_for_extraction
