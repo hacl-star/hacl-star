@@ -25,7 +25,7 @@ ifeq ($(OS),Windows_NT)
     EVERCRYPT_HOME_RUN := $(EVERCRYPT_HOME)
     MLCRYPTO_HOME_RUN := $(MLCRYPTO_HOME)
   endif
-  PREFIX = PATH="$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(PATH)"
+  PREFIX = PATH="$(MLCRYPTO_HOME_RUN)/openssl:$(EVERCRYPT_HOME_RUN)/out:$(PATH)"
 else ifeq ($(UNAME),Darwin)
   PREFIX = DYLD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(DYLD_LIBRARY_PATH)
 else ifeq ($(UNAME),Linux)
