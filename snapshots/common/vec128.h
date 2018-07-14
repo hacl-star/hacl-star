@@ -14,6 +14,7 @@
 
 #include <emmintrin.h>
 #include <tmmintrin.h>
+#include <inttypes.h>
 
 #define Hacl_UInt32x4_vec128
 #define Hacl_UInt32x4_vec_size 4
