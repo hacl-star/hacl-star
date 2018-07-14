@@ -148,6 +148,9 @@ providers:
 # CI
 #
 
+# JP: the clean-git target is egregious and prevents any serious work from
+# happening for anyone who wants to actually test ci. Removing it -- if this is
+# really important, it should be done at the level of the CI system.
 ci: # .clean-banner .clean-git .clean-snapshots
 	$(MAKE) extract-specs extract-all
 	$(MAKE) -C code clean-c

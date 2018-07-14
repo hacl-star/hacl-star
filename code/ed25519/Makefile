@@ -128,20 +128,21 @@ all-ci: ci
 
 KREMLIN_ARGS+=-tmpdir ed25519-c \
 		-I ../bignum -I ../curve25519 -I ../hash \
-		-minimal -add-include '"kremlib.h"' -bundle 'Hacl.Ed25519=*'
 
 ed25519-c/out.krml: $(ED25519_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) $(FSTS) -skip-translation
 
 ed25519-c/Hacl_Ed25519.c: ed25519-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation
+	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Ed25519=*'
 
 extract-c: ed25519-c/Hacl_Ed25519.c
 
-ed25519.exe: ed25519-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) $^ \
-	 	-no-prefix 'Hacl.Test.Ed25519' $(KREMLIN_HOME)/kremlib/testlib.c -add-include '"testlib.h"' -I $(KREMLIN_HOME)/include/kremlin \
-		-add-include '"Hacl_Ed25519.h"' -o ed25519.exe
+ed25519.exe: ed25519-c/Hacl_Ed25519.c ed25519-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) \
+	  -no-prefix 'Hacl.Test.Ed25519' -minimal -add-include '"kremlib.h"' \
+	  -bundle 'Hacl.Test.Ed25519=*' -library Hacl.Ed25519 \
+	  $^ -o $@
 
 
 test: ed25519.exe
