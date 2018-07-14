@@ -32,12 +32,14 @@ else ifeq ($(UNAME),Linux)
   PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(LD_LIBRARY_PATH)
 endif
 
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe
+
 all:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) test
 
 .depend:
-	fstar.exe \
+	$(FSTAR) \
 	  $(addprefix --include , $(INCLUDE_PATHS)) \
 	  --cache_dir $(CACHE_DIR) \
 	  --odir $(EXTRACT_DIR) \
@@ -46,7 +48,7 @@ all:
 include .depend
 
 %.checked: | .depend
-	fstar.exe \
+	$(FSTAR) \
 	  --cache_checked_modules \
 	  --cache_dir $(CACHE_DIR) \
 	  --admit_smt_queries true \
@@ -54,7 +56,7 @@ include .depend
 	  $<
 
 $(EXTRACT_DIR)/%.krml:
-	fstar.exe --codegen Kremlin \
+	$(FSTAR) --codegen Kremlin \
 	  --cache_checked_modules \
 	  --cache_dir $(CACHE_DIR) \
 	  $(addprefix --include , $(INCLUDE_PATHS)) \
