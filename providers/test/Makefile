@@ -74,7 +74,7 @@ $(EXTRACT_DIR)/Test.c: $(ALL_KRML_FILES) | .depend
 	  -add-include '"temp.h"' \
 	  -bundle LowStar.* \
 	  -bundle Hacl.Spec.*,Hacl.Spe.*,Spec.* \
-	  -bundle EverCrypt=EverCrypt.* \
+	  -library EverCrypt,EverCrypt.* \
 	  -ccopt -g
 
 test: $(EXTRACT_DIR)/Test.c
