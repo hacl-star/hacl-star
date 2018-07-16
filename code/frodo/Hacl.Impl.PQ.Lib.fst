@@ -2,16 +2,18 @@ module Hacl.Impl.PQ.Lib
 
 open FStar.HyperStack.All
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 open FStar.Mul
 
 open LowStar.ModifiesPat
 open LowStar.Modifies
 
-module Buf = LowStar.Buffer
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
-module Seq = FStar.Seq
+
+module B = Lib.Buffer
+
+module Seq = Lib.Sequences
 
 inline_for_extraction
 type numeric_t = uint16
@@ -30,11 +32,11 @@ val matrix_create:
   StackInline (matrix_t n1 n2)
   (requires (fun h0 -> True))
   (ensures (fun h0 r h1 ->
-    Buf.alloc_post_common (HS.get_tip h0) (v (n1 *. n2)) r h0 h1 /\
-    Buf.as_seq h1 r == Seq.create (v (n1 *. n2)) (u16 0)))
+    B.alloc_post_common (HS.get_tip h0) (v (n1 *. n2)) r h0 h1 /\
+    B.as_seq h1 r == Seq.create (v (n1 *. n2)) (u16 0)))
   [@ "substitute"]
 let matrix_create n1 n2 =
-  create #uint16 (n1 *. n2) (u16 0)
+  alloca #uint16 (n1 *. n2) (u16 0)
 
 val lemma_matrix_index:
   n1:size_nat -> n2:size_nat ->
@@ -48,8 +50,8 @@ val mget:
   #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
   a:matrix_t n1 n2 ->
   i:size_t{v i < v n1} -> j:size_t{v j < v n2} -> Stack uint16
-  (requires (fun h -> Buf.live h a))
-  (ensures (fun h0 r h1 -> h0 == h1)) ///\ r == Seq.index (Buf.as_seq h1 a) (v (i *. n2 +. j))))
+  (requires (fun h -> B.live h a))
+  (ensures (fun h0 r h1 -> h0 == h1)) ///\ r == Seq.index (B.as_seq h1 a) (v (i *. n2 +. j))))
   [@ "substitute"]
 let mget #n1 #n2 a i j =
   lemma_matrix_index (v n1) (v n2) (v i) (v j);
@@ -60,8 +62,8 @@ val mset:
   a:matrix_t n1 n2 ->
   i:size_t{v i < v n1} -> j:size_t{v j < v n2} ->
   vij:uint16 -> Stack unit
-  (requires (fun h -> Buf.live h a))
-  (ensures (fun h0 _ h1 -> Buf.live h1 a /\ modifies (loc_buffer a) h0 h1))
+  (requires (fun h -> B.live h a))
+  (ensures (fun h0 _ h1 -> B.live h1 a /\ modifies (loc_buffer a) h0 h1))
   [@ "substitute"]
 let mset #n1 #n2 a i j vij =
   lemma_matrix_index (v n1) (v n2) (v i) (v j);
@@ -71,8 +73,8 @@ val matrix_add:
   #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
   a:matrix_t n1 n2 -> b:matrix_t n1 n2 ->
   Stack unit
-  (requires (fun h -> Buf.live h a /\ Buf.live h b /\ Buf.disjoint a b))
-  (ensures (fun h0 r h1 -> Buf.live h1 a /\ modifies (loc_buffer a) h0 h1))
+  (requires (fun h -> B.live h a /\ B.live h b /\ B.disjoint a b))
+  (ensures (fun h0 r h1 -> B.live h1 a /\ modifies (loc_buffer a) h0 h1))
   [@"c_inline"]
 let matrix_add #n1 #n2 a b =
   let h0 = ST.get () in
@@ -92,8 +94,8 @@ val matrix_sub:
   #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
   a:matrix_t n1 n2 -> b:matrix_t n1 n2 ->
   Stack unit
-  (requires (fun h -> Buf.live h a /\ Buf.live h b /\ Buf.disjoint a b))
-  (ensures (fun h0 r h1 -> Buf.live h1 b /\ modifies (loc_buffer b) h0 h1))
+  (requires (fun h -> B.live h a /\ B.live h b /\ B.disjoint a b))
+  (ensures (fun h0 r h1 -> B.live h1 b /\ modifies (loc_buffer b) h0 h1))
   [@"c_inline"]
 let matrix_sub #n1 #n2 a b =
   let h0 = ST.get () in
@@ -115,8 +117,8 @@ val matrix_mul:
   c:matrix_t n1 n3 -> Stack unit
   (requires (fun h ->
     v n1 * v n2 < max_size_t /\ v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t /\
-    Buf.live h a /\ Buf.live h b /\ Buf.live h c /\ Buf.disjoint a c /\ Buf.disjoint b c))
-  (ensures (fun h0 _ h1 -> Buf.live h1 c /\ modifies (loc_buffer c) h0 h1))
+    B.live h a /\ B.live h b /\ B.live h c /\ B.disjoint a c /\ B.disjoint b c))
+  (ensures (fun h0 _ h1 -> B.live h1 c /\ modifies (loc_buffer c) h0 h1))
   [@"c_inline"]
 let matrix_mul #n1 #n2 #n3 a b c =
   let h0 = ST.get () in

@@ -1,421 +1,884 @@
+/// This is a specialization of LowStar.Buffer to non-null buffers.
+///
+/// Contrary to LowStar.Buffer, this module uses on Lib.IntTypes.uint32 rather than
+/// UInt32.t for lengths and indices, and Lib.Sequence rather than FStar.Seq for the
+/// underlying ghost representation.
+///
+/// The goal is to cut down the dependencies in the context on clients of this
+/// module, so that neither FStar.UInt or FStar.Seq are brought into context.
+///
+/// Roughly, this module can be obtained by substituting in LowStar.Buffer:
+///
+/// FStar.Seq       -> Lib.Sequence
+/// U32.t           -> Int.size_t
+/// U32.v           -> Int.size_v
+/// U32.add         -> Int.add
+/// U32.sub         -> Int.sub
+/// 0ul             -> Int.size 0
+/// UInt.max_int 32 -> Int.max_size_t
+///
+/// and using the fact that a buffer can't be null to simplify the interface.
+///
 module Lib.Buffer
 
-open FStar.HyperStack
-open FStar.HyperStack.ST
-open Lib.IntTypes
+module HS  = FStar.HyperStack
+module HST = FStar.HyperStack.ST
 
-module LSeq = Lib.Sequence
+module Seq = Lib.Sequence
+module Int = Lib.IntTypes
+
+unfold
+let v = Int.size_v
+
+unfold
+let size_t = Int.size_t
+
+/// Low* buffers
+/// ==============
+///
+/// The workhorse of Low*, this module allows modeling C arrays on the
+/// stack and in the heap.  At compilation time, KreMLin implements
+/// buffers using C arrays, i.e. if Low* type ``t`` is translated into C
+/// type ``u``, then Low* type ``buffer t`` is translated to C type ``u*``.
+///
+/// A Hacl buffer can be empty but never NULL
+
+val buffer (a: Type0) : Tot Type0
 
 
-unfold let v = size_v
+/// ``unused_in b h`` holds only if buffer ``b`` has not been allocated
+/// yet.
 
-inline_for_extraction val lbuffer: a:Type0 -> len:size_nat -> Type0
-inline_for_extraction val gsub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> GTot (lbuffer a olen)
-let gslice #a #len #olen (b:lbuffer a (len)) (start:size_t) (fin:size_t{v fin <= len /\ v start <= v fin /\ v fin - v start == olen}) = gsub #a #len #olen b start (sub_mod #SIZE fin start)
-noeq type bufitem = | BufItem: #a:Type0 -> #len:size_nat -> buf:lbuffer a (len) -> bufitem
+val unused_in (#a: Type) (b: buffer a) (h: HS.mem) : GTot Type0
 
-inline_for_extraction val disjoint: #a1:Type0 -> #a2:Type0 -> #len1:size_nat -> #len2:size_nat -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> GTot Type0
-inline_for_extraction val live: #a:Type0 -> #len:size_nat ->  mem -> lbuffer a len -> GTot Type0
-inline_for_extraction val preserves_live: mem -> mem -> GTot Type0
-inline_for_extraction val as_seq: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> h:mem -> GTot (s:LSeq.seq a{LSeq.length s == len})
-inline_for_extraction val as_lseq: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> h:mem -> GTot (s:LSeq.lseq a len{s == as_seq b h})
 
-let creates1 (#a:Type0) (#len:size_nat) (b:lbuffer a (len)) (h0:mem) (h1:mem) : GTot Type =
- (live h1 b /\
-  (forall (a':Type0) (len':size_nat) (b':lbuffer a' (len')). {:pattern (live h0 b')} live h0 b' ==> (live h1 b' /\ disjoint b b'  /\ disjoint b' b)))
+/// ``live h b`` holds if, and only if, buffer ``b`` is currently
+/// allocated in ``h`` and has not been deallocated yet.
+///
+/// This predicate corresponds to the C notion of "lifetime", and as
+/// such, is a prerequisite for all stateful operations on buffers
+/// (see below), per the C standard:
+///
+///   If an object is referred to outside of its lifetime, the
+///   behavior is undefined.
+///
+///   -- ISO/IEC 9899:2011, Section 6.2.4 paragraph 2
+///
+/// By contrast, it is not required for the ghost versions of those
+/// operators.
 
-let creates2 (#a0:Type0) (#a1:Type0) (#len0:size_nat) (#len1:size_nat) (b0:lbuffer a0 len0) (b1:lbuffer a1 len1) (h0:mem) (h1:mem) : GTot Type =
- (live h1 b0 /\ live h1 b1 /\ disjoint b0 b1 /\
-  (forall (a':Type0) (len':size_nat) (b':lbuffer a' (len')). {:pattern (live h0 b')} live h0 b' ==> (live h1 b' /\ disjoint b0 b' /\ disjoint b' b0 /\ disjoint b' b1 /\ disjoint b1 b')))
+val live (#a: Type) (h: HS.mem) (b: buffer a) : GTot Type0
 
-let rec creates (l:list bufitem) (h0:mem) (h1:mem) : GTot Type =
-  match l with
-  | [] -> True
-  | b::t -> creates1 b.buf h0 h1 /\ creates t h0 h1
+/// A live buffer has already been allocated.
 
-inline_for_extraction val modifies1: #a:Type0 -> #len:size_nat ->  lbuffer a (len) -> mem -> mem -> GTot Type0
-inline_for_extraction val modifies2: #a1:Type0 -> #a2:Type0 -> #len1:size_nat -> #len2:size_nat -> lbuffer a1 (len1) -> lbuffer a2 (len2) -> mem -> mem -> GTot Type0
-inline_for_extraction val modifies3: #a1:Type0 -> #a2:Type0 -> #a3:Type0 -> #len1:size_nat -> #len2:size_nat -> #len3:size_nat -> lbuffer a1 (len1) -> lbuffer a2 (len2) -> lbuffer a3 (len3) -> mem -> mem -> GTot Type0
+val live_not_unused_in (#a: Type) (h: HS.mem) (b: buffer a) : Lemma
+  (requires (live h b /\ b `unused_in` h))
+  (ensures False)
 
-inline_for_extraction val modifies: list bufitem -> mem -> mem -> GTot Type0
-inline_for_extraction val live_list: mem -> list bufitem -> GTot Type0
-inline_for_extraction val disjoint_list: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> list bufitem  -> GTot Type0
-inline_for_extraction val disjoint_lists: list bufitem -> list bufitem  -> GTot Type0
-inline_for_extraction val disjoints: list bufitem  -> GTot Type0
+(* FIXME: the following definition is necessary to isolate the pattern
+   because of unification. In other words, if we attached the pattern
+   to `live_not_unused_in`, then we would not be able to use
+   `FStar.Classical.forall_intro_`n and
+   `FStar.Classical.move_requires` due to unification issues.  Anyway,
+   we plan to isolate patterns in a separate module to clean up the Z3
+   context.
+ *)
 
-inline_for_extraction val sub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} ->
-  Stack (lbuffer a olen)
+let live_not_unused_in' (#a: Type) (h: HS.mem) (b: buffer a) : Lemma
+  (requires (live h b /\ b `unused_in` h))
+  (ensures False)
+  [SMTPat (live h b); SMTPat (b `unused_in` h)]
+= live_not_unused_in h b
+
+/// Buffers live in the HyperStack model, which is an extension of
+/// the HyperHeap model, a hierarchical memory model that divides the
+/// heap into a tree of regions. This coarse-grained separation
+/// allows the programmer to state modifies clauses at the level of
+/// regions, rather than on individual buffers.
+///
+/// The HyperHeap memory model is described:
+///  - in the 2016 POPL paper: https://www.fstar-lang.org/papers/mumon/
+///  - in the relevant section of the F* tutorial: http://www.fstar-lang.org/tutorial/
+///
+/// ``frameOf b`` returns the identifier of the region in which the
+/// buffer ``b`` lives.
+
+val frameOf (#a: Type) (b: buffer a) : GTot HS.rid
+
+
+/// ``as_addr b`` returns the abstract address of the buffer in its
+/// region, as an allocation unit: two buffers that are allocated
+/// separately in the same region will actually have different
+/// addresses, but a sub-buffer of a buffer will actually have the
+/// same address as its enclosing buffer.
+
+val as_addr (#a: Type) (b: buffer a) : GTot nat
+
+
+/// A buffer is unused if, and only if, its address is unused.
+
+val unused_in_equiv (#a: Type) (b: buffer a) (h: HS.mem) : Lemma
+  (ensures (unused_in b h <==> (HS.live_region h (frameOf b) ==> as_addr b `Heap.addr_unused_in` (Map.sel (HS.get_hmap h) (frameOf b)))))
+
+
+/// If a buffer is live, then so is its region.
+
+val live_region_frameOf (#a: Type) (h: HS.mem) (b: buffer a) : Lemma
+  (requires (live h b))
+  (ensures (HS.live_region h (frameOf b)))
+  [SMTPatOr [
+    [SMTPat (live h b)];
+    [SMTPat (HS.live_region h (frameOf b))];
+  ]]
+
+/// The length of a buffer ``b`` is available as a machine integer ``len
+/// b`` or as a mathematical integer ``length b``, but both in ghost
+/// (proof) code only: just like in C, one cannot compute the length
+/// of a buffer at run-time.
+
+val len (#a: Type) (b: buffer a) : GTot size_t
+
+let length (#a: Type) (b: buffer a) : GTot nat = v (len b)
+
+/// For functional correctness, buffers are reflected at the proof
+/// level using sequences, via ``as_seq b h``, which returns the
+/// contents of a given buffer ``b`` in a given heap ``h``. If ``b`` is not
+/// live in ``h``, then the result is unspecified.
+
+val as_seq (#a: Type) (h: HS.mem) (b: buffer a) : GTot (Seq.seq a)
+
+
+/// The contents of a buffer ``b`` has the same length as ``b`` itself.
+
+val length_as_seq (#a: Type) (h: HS.mem) (b: buffer a) : Lemma
+  (Seq.length (as_seq h b) == length b)
+  [SMTPat (Seq.length (as_seq h b))]
+
+
+/// ``get`` is an often-convenient shorthand to index the value of a
+/// given buffer in a given heap, for proof purposes.
+
+let get (#a: Type) (h: HS.mem) (p: buffer a) (i: nat) : Ghost a
+  (requires (i < length p))
+  (ensures (fun _ -> True))
+= Seq.index #a #(length p) (as_seq h p) i
+
+
+/// A buffer ``smaller`` is included in another buffer ``larger``, denoted
+/// as ``includes larger smaller``, if ``smaller`` is a sub-buffer of
+/// ``larger``. (See ``gsub`` below for how to actually construct such a
+/// sub-buffer of a buffer.)
+
+val includes (#a: Type) (larger smaller: buffer a) : GTot Type0
+
+
+/// The liveness of a sub-buffer is exactly equivalent to the liveness
+/// of its enclosing buffer.
+
+val includes_live (#a: Type) (h: HS.mem) (larger smaller: buffer a) : Lemma
+  (requires (larger `includes` smaller))
+  (ensures (live h larger <==> live h smaller))
+  [SMTPatOr [
+    [SMTPat (includes larger smaller); SMTPat (live h larger)];
+    [SMTPat (includes larger smaller); SMTPat (live h smaller)];
+  ]]
+
+
+/// If the contents of a buffer are equal in two given heaps, then so
+/// are the contents of any of its sub-buffers.
+
+val includes_as_seq (#a: Type) (h1 h2: HS.mem) (larger smaller: buffer a) : Lemma
+  (requires (larger `includes` smaller /\ as_seq h1 larger == as_seq h2 larger))
+  (ensures (as_seq h1 smaller == as_seq h2 smaller))
+
+
+/// Inclusion is a preorder.
+
+val includes_refl (#a: Type) (x: buffer a) : Lemma
+  (includes x x)
+  [SMTPat (includes x x)]
+
+val includes_trans (#a: Type) (x y z: buffer a) : Lemma
+  (requires (x `includes` y /\ y `includes` z))
+  (ensures (x `includes` z))
+  [SMTPatOr [
+    [SMTPat (x `includes` y); SMTPat (y `includes` z)];
+    [SMTPat (x `includes` y); SMTPat (x `includes` z)];
+    [SMTPat (y `includes` z); SMTPat (x `includes` z)];
+  ]]
+
+
+/// A buffer and any of its sub-buffers live in the same region, and
+/// at the same address, and are either both null or both not null.
+
+val includes_frameOf_as_addr (#a: Type) (larger smaller: buffer a) : Lemma
+  (requires (larger `includes` smaller))
+  (ensures (frameOf larger == frameOf smaller /\ as_addr larger == as_addr smaller))
+  [SMTPat (larger `includes` smaller)]
+
+
+/// ``gsub`` is the way to carve a sub-buffer out of a given
+/// buffer. ``gsub b i len`` return the sub-buffer of ``b`` starting from
+/// offset ``i`` within ``b``, and with length ``len``. Of course ``i`` and
+/// ``len`` must fit within the length of ``b``.
+///
+/// ``gsub`` is the ghost version, for proof purposes. Its stateful
+/// counterpart is ``sub``, see below.
+
+val gsub (#a: Type) (b: buffer a) (i: size_t) (n: size_t) : Ghost (buffer a)
+  (requires (v i + v n <= length b))
+  (ensures (fun y -> True))
+
+/// A buffer is live exactly at the same time as all of its sub-buffers.
+
+val live_gsub (#a: Type) (h: HS.mem) (b: buffer a) (i: size_t) (n: size_t) : Lemma
+  (requires (v i + v n <= length b))
+  (ensures (live h (gsub b i n) <==> live h b))
+  [SMTPat (live h (gsub b i n))]
+
+
+/// A sub-buffer is included in its enclosing buffer.
+
+val includes_gsub (#a: Type) (b: buffer a) (i: size_t) (n: size_t) : Lemma
+  (requires (v i + v n <= length b))
+  (ensures (b `includes` gsub b i n))
+  [SMTPat (gsub b i n)]
+
+
+/// The length of a sub-buffer is exactly the one provided at ``gsub``.
+
+val len_gsub (#a: Type) (b: buffer a) (i: size_t) (n: size_t) : Lemma
+  (requires (v i + v n <= length b))
+  (ensures (len (gsub b i n) == n))
+  [SMTPatOr [
+    [SMTPat (len (gsub b i n))];
+    [SMTPat (length (gsub b i n))];
+  ]]
+
+
+/// Nesting two ``gsub`` collapses into one ``gsub``, transitively.
+
+val gsub_gsub (#a: Type) (b: buffer a) (i1: size_t) (len1: size_t) (i2: size_t) (len2: size_t) : Lemma
+  (requires (v i1 + v len1 <= length b /\ v i2 + v len2 <= v len1))
+  (ensures (
+    v i1 + v len1 <= length b /\ v i2 + v len2 <= v len1 /\
+    gsub (gsub b i1 len1) i2 len2 == gsub b (Int.add i1 i2) len2
+  ))
+  [SMTPat (gsub (gsub b i1 len1) i2 len2)]
+
+
+/// A buffer ``b`` is equal to its "largest" sub-buffer, at index 0 and
+/// length ``len b``.
+
+val gsub_zero_length (#a: Type) (b: buffer a) : Lemma
+  (b == gsub b (Int.size 0) (len b))
+
+
+/// The contents of a sub-buffer is the corresponding slice of the
+/// contents of its enclosing buffer.
+
+val as_seq_gsub (#a: Type) (h: HS.mem) (b: buffer a) (i: size_t) (len: size_t) : Lemma
+  (requires (v i + v len <= length b))
+  (ensures (as_seq h (gsub b i len) == Seq.slice #a #(length b) (as_seq h b) (v i) (v i + v len)))
+  [SMTPat (as_seq h (gsub b i len))]
+
+
+/// Two buffers are disjoint only if they span disjoint ranges of a
+/// common enclosing buffer, or if they live in different regions or
+/// at different addresses.
+
+val disjoint (#a1 #a2: Type) (b1: buffer a1) (b2: buffer a2) : GTot Type0
+
+
+/// Disjointness is symmetric.
+
+val disjoint_sym (#a1 #a2: Type) (b1: buffer a1) (b2: buffer a2) : Lemma
+  (disjoint b1 b2 <==> disjoint b2 b1)
+  [SMTPat (disjoint b1 b2)]
+
+
+/// If two buffers are disjoint, then so are any of their sub-buffers.
+
+val disjoint_includes_l (#a1 #a2: Type) (b1 b1' : buffer a1) (b2: buffer a2) : Lemma
+  (requires (includes b1 b1' /\ disjoint b1 b2))
+  (ensures (disjoint b1' b2))
+  [SMTPat (disjoint b1' b2); SMTPat (includes b1 b1')]
+
+val disjoint_includes_r (#a1 #a2: Type) (b1 : buffer a1) (b2 b2': buffer a2) : Lemma
+  (requires (includes b2 b2' /\ disjoint b1 b2))
+  (ensures (disjoint b1 b2'))
+  [SMTPat (disjoint b1 b2'); SMTPat (includes b2 b2')]
+
+
+/// A buffer that has not been allocated yet is disjoint from all
+/// buffers that are already currently allocated. Consequently, two
+/// buffers that are allocated separately are disjoint.
+
+val live_unused_in_disjoint (#a1 #a2: Type) (h: HS.mem) (b1: buffer a1) (b2: buffer a2) : Lemma
+  (requires (live h b1 /\ (unused_in b2 h)))
+  (ensures (disjoint b1 b2))
+  [SMTPatOr [
+    [SMTPat (live h b1); SMTPat (disjoint b1 b2)];
+    [SMTPat (live h b1); SMTPat (unused_in b2 h)];
+    [SMTPat (unused_in b2 h); SMTPat (disjoint b1 b2)];
+  ]]
+
+/// If two buffers live in different regions or at different
+/// addresses, then they are disjoint.
+
+val as_addr_disjoint (#a1 #a2: Type) (b1: buffer a1) (b2: buffer a2) : Lemma
+  (requires (frameOf b1 <> frameOf b2 \/ as_addr b1 <> as_addr b2))
+  (ensures (disjoint b1 b2))
+  [SMTPatOr [
+    [SMTPat (disjoint b1 b2)];
+    [SMTPat (frameOf b1); SMTPat (frameOf b2)];
+    [SMTPat (as_addr b1); SMTPat (as_addr b2)];
+  ]]
+
+
+/// If two buffers span disjoint ranges from a common enclosing
+/// buffer, then they are disjoint.
+
+val gsub_disjoint (#a: Type) (b: buffer a) (i1 len1 i2 len2: size_t) : Lemma
+  (requires (
+    v i1 + v len1 <= length b /\
+    v i2 + v len2 <= length b /\
+    (v i1 + v len1 <= v i2 \/ v i2 + v len2 <= v i1)
+  ))
+  (ensures (disjoint (gsub b i1 len1) (gsub b i2 len2)))
+  [SMTPat (disjoint (gsub b i1 len1) (gsub b i2 len2))]
+
+
+/// Useful shorthands for pointers, or maybe-null pointers
+
+inline_for_extraction
+type pointer (t: Type0) =
+  b:buffer t { length b == 1 }
+
+
+/// Two pointers having different contents are disjoint. This is valid
+/// only for pointers, i.e. buffers of size 1.
+
+val pointer_distinct_sel_disjoint
+  (#a: Type)
+  (b1: pointer a)
+  (b2: pointer a)
+  (h: HS.mem)
+: Lemma
+  (requires (
+    live h b1 /\
+    live h b2 /\
+    get h b1 0 =!= get h b2 0
+  ))
+  (ensures (
+    disjoint b1 b2
+  ))
+
+
+/// The following definitions are needed to implement the generic
+/// modifies clause. Those should not be used in client code. They
+/// appear in the interface only because the modifies clause is
+/// defined in another module, ``LowStar.Modifies``.
+
+val abuffer' (region: HS.rid) (addr: nat) : Tot Type0
+
+inline_for_extraction
+let abuffer (region: HS.rid) (addr: nat) : Tot Type0 = Ghost.erased (abuffer' region addr)
+
+val abuffer_preserved (#r: HS.rid) (#a: nat) (b: abuffer r a) (h h' : HS.mem) : GTot Type0
+
+val abuffer_preserved_refl (#r: HS.rid) (#a: nat) (b: abuffer r a) (h : HS.mem) : Lemma
+  (abuffer_preserved b h h)
+
+val abuffer_preserved_trans (#r: HS.rid) (#a: nat) (b: abuffer r a) (h1 h2 h3 : HS.mem) : Lemma
+  (requires (abuffer_preserved b h1 h2 /\ abuffer_preserved b h2 h3))
+  (ensures (abuffer_preserved b h1 h3))
+
+val same_mreference_abuffer_preserved
+  (#r: HS.rid)
+  (#a: nat)
+  (b: abuffer r a)
+  (h1 h2: HS.mem)
+  (f: (
+    (a' : Type) ->
+    (pre: Preorder.preorder a') ->
+    (r': HS.mreference a' pre) ->
+    Lemma
+    (requires (h1 `HS.contains` r' /\ r == HS.frameOf r' /\ a == HS.as_addr r'))
+    (ensures (h2 `HS.contains` r' /\ h1 `HS.sel` r' == h2 `HS.sel` r'))
+  ))
+: Lemma
+  (abuffer_preserved b h1 h2)
+
+val addr_unused_in_abuffer_preserved
+  (#r: HS.rid)
+  (#a: nat)
+  (b: abuffer r a)
+  (h1 h2: HS.mem)
+: Lemma
+  (requires (HS.live_region h1 r ==> a `Heap.addr_unused_in` (Map.sel (HS.get_hmap h1) r)))
+  (ensures (abuffer_preserved b h1 h2))
+
+val abuffer_of_buffer (#t: Type) (b: buffer t) : Tot (abuffer (frameOf b) (as_addr b))
+
+val abuffer_preserved_elim (#t: Type) (b: buffer t) (h h' : HS.mem) : Lemma
+  (requires (abuffer_preserved #(frameOf b) #(as_addr b) (abuffer_of_buffer b) h h' /\ live h b))
+  (ensures (live h' b /\ as_seq h b == as_seq h' b))
+
+let unused_in_abuffer_preserved
+  (#t: Type)
+  (b: buffer t)
+  (h h' : HS.mem)
+: Lemma
+  (requires (b `unused_in` h))
+  (ensures (abuffer_preserved #(frameOf b) #(as_addr b) (abuffer_of_buffer b) h h'))
+= Classical.move_requires (fun b -> live_not_unused_in #t h b) b;
+  //live_null t h;
+  //null_unique b;
+  unused_in_equiv b h;
+  addr_unused_in_abuffer_preserved #(frameOf b) #(as_addr b) (abuffer_of_buffer b) h h'
+
+val abuffer_includes (#r: HS.rid) (#a: nat) (larger smaller: abuffer r a) : GTot Type0
+
+val abuffer_includes_refl (#r: HS.rid) (#a: nat) (b: abuffer r a) : Lemma
+  (b `abuffer_includes` b)
+
+val abuffer_includes_trans (#r: HS.rid) (#a: nat) (b1 b2 b3: abuffer r a) : Lemma
+  (requires (b1 `abuffer_includes` b2 /\ b2 `abuffer_includes` b3))
+  (ensures (b1 `abuffer_includes` b3))
+
+val abuffer_includes_abuffer_preserved (#r: HS.rid) (#a: nat) (larger smaller: abuffer r a) (h1 h2: HS.mem) : Lemma
+  (requires (larger `abuffer_includes` smaller /\ abuffer_preserved larger h1 h2))
+  (ensures (abuffer_preserved smaller h1 h2))
+
+val abuffer_includes_intro (#t: Type) (larger smaller: buffer t) : Lemma
+  (requires (larger `includes` smaller))
+  (ensures (
+    let r = frameOf larger in
+    let a = as_addr larger in
+    abuffer_includes #r #a (abuffer_of_buffer larger) (abuffer_of_buffer smaller)
+  ))
+
+val abuffer_disjoint (#r: HS.rid) (#a: nat) (b1 b2: abuffer r a) : GTot Type0
+
+val abuffer_disjoint_sym (#r: HS.rid) (#a: nat) (b1 b2: abuffer r a) : Lemma
+  (abuffer_disjoint b1 b2 <==> abuffer_disjoint b2 b1)
+
+val abuffer_disjoint_includes (#r: HS.rid) (#a: nat) (larger1 larger2: abuffer r a) (smaller1 smaller2: abuffer r a) : Lemma
+  (requires (abuffer_disjoint larger1 larger2 /\ larger1 `abuffer_includes` smaller1 /\ larger2 `abuffer_includes` smaller2))
+  (ensures (abuffer_disjoint smaller1 smaller2))
+
+val abuffer_disjoint_intro (#t1 #t2: Type) (b1: buffer t1) (b2: buffer t2) : Lemma
+  (requires (disjoint b1 b2 /\ frameOf b1 == frameOf b2 /\ as_addr b1 == as_addr b2))
+  (ensures (
+    let r = frameOf b1 in
+    let a = as_addr b1 in
+    abuffer_disjoint #r #a (abuffer_of_buffer b1) (abuffer_of_buffer b2)
+  ))
+
+val liveness_preservation_intro
+  (#t: Type) (h h' : HS.mem) (b: buffer t)
+  (f: (
+    (t' : Type) ->
+    (pre: Preorder.preorder t') ->
+    (r: HS.mreference t' pre) ->
+    Lemma
+    (requires (HS.frameOf r == frameOf b /\ HS.as_addr r == as_addr b /\ h `HS.contains` r))
+    (ensures (h' `HS.contains` r))
+  ))
+: Lemma
+  (requires (live h b))
+  (ensures (live h' b))
+
+(* Basic, non-compositional modifies clauses, used only to implement the generic modifies clause. DO NOT USE in client code *)
+
+val modifies_0 (h1 h2: HS.mem) : GTot Type0
+
+val modifies_0_live_region (h1 h2: HS.mem) (r: HS.rid) : Lemma
+  (requires (modifies_0 h1 h2 /\ HS.live_region h1 r))
+  (ensures (HS.live_region h2 r))
+
+val modifies_0_mreference (#a: Type) (#pre: Preorder.preorder a) (h1 h2: HS.mem) (r: HS.mreference a pre) : Lemma
+  (requires (modifies_0 h1 h2 /\ h1 `HS.contains` r))
+  (ensures (h2 `HS.contains` r /\ h1 `HS.sel` r == h2 `HS.sel` r))
+
+let modifies_0_abuffer
+  (#r: HS.rid)
+  (#a: nat)
+  (b: abuffer r a)
+  (h1 h2: HS.mem)
+: Lemma
+  (requires (modifies_0 h1 h2))
+  (ensures (abuffer_preserved b h1 h2))
+= same_mreference_abuffer_preserved b h1 h2 (fun a' pre r' -> modifies_0_mreference h1 h2 r')
+
+val modifies_0_unused_in
+  (h1 h2: HS.mem)
+  (r: HS.rid)
+  (n: nat)
+: Lemma
+  (requires (
+    modifies_0 h1 h2 /\
+    HS.live_region h1 r /\ HS.live_region h2 r /\
+    n `Heap.addr_unused_in` (HS.get_hmap h2 `Map.sel` r)
+  ))
+  (ensures (n `Heap.addr_unused_in` (HS.get_hmap h1 `Map.sel` r)))
+
+val modifies_1 (#a: Type) (b: buffer a) (h1 h2: HS.mem) : GTot Type0
+
+val modifies_1_live_region (#a: Type) (b: buffer a) (h1 h2: HS.mem) (r: HS.rid) : Lemma
+  (requires (modifies_1 b h1 h2 /\ HS.live_region h1 r))
+  (ensures (HS.live_region h2 r))
+
+val modifies_1_liveness
+  (#a: Type) (b: buffer a) (h1 h2: HS.mem)
+  (#a': Type) (#pre: Preorder.preorder a') (r' : HS.mreference a' pre)
+: Lemma
+  (requires (modifies_1 b h1 h2 /\ h1 `HS.contains` r'))
+  (ensures (h2 `HS.contains` r'))
+
+val modifies_1_unused_in
+  (#t: Type)
+  (b: buffer t)
+  (h1 h2: HS.mem)
+  (r: HS.rid)
+  (n: nat)
+: Lemma
+  (requires (
+    modifies_1 b h1 h2 /\
+    HS.live_region h1 r /\ HS.live_region h2 r /\
+    n `Heap.addr_unused_in` (HS.get_hmap h2 `Map.sel` r)
+  ))
+  (ensures (n `Heap.addr_unused_in` (HS.get_hmap h1 `Map.sel` r)))
+
+val modifies_1_mreference
+  (#a: Type) (b: buffer a)
+  (h1 h2: HS.mem)
+  (#a': Type) (#pre: Preorder.preorder a') (r' : HS.mreference a' pre)
+: Lemma
+  (requires (modifies_1 b h1 h2 /\ (frameOf b <> HS.frameOf r' \/ as_addr b <> HS.as_addr r') /\ h1 `HS.contains` r'))
+  (ensures (h2 `HS.contains` r' /\ h1 `HS.sel` r' == h2 `HS.sel` r'))
+
+val modifies_1_abuffer
+  (#a: Type) (b : buffer a)
+  (h1 h2: HS.mem)
+  (b' : abuffer (frameOf b) (as_addr b))
+: Lemma
+  (requires (modifies_1 b h1 h2 /\ abuffer_disjoint #(frameOf b) #(as_addr b) (abuffer_of_buffer b) b'))
+  (ensures (abuffer_preserved #(frameOf b) #(as_addr b) b' h1 h2))
+
+val modifies_addr_of
+  (#a: Type)
+  (b: buffer a)
+  (h1 h2: HS.mem)
+: GTot Type0
+
+val modifies_addr_of_live_region (#a: Type) (b: buffer a) (h1 h2: HS.mem) (r: HS.rid) : Lemma
+  (requires (modifies_addr_of b h1 h2 /\ HS.live_region h1 r))
+  (ensures (HS.live_region h2 r))
+
+val modifies_addr_of_mreference
+  (#a: Type) (b: buffer a)
+  (h1 h2: HS.mem)
+  (#a': Type) (#pre: Preorder.preorder a') (r' : HS.mreference a' pre)
+: Lemma
+  (requires (modifies_addr_of b h1 h2 /\ (frameOf b <> HS.frameOf r' \/ as_addr b <> HS.as_addr r') /\ h1 `HS.contains` r'))
+  (ensures (h2 `HS.contains` r' /\ h1 `HS.sel` r' == h2 `HS.sel` r'))
+
+val modifies_addr_of_unused_in
+  (#t: Type)
+  (b: buffer t)
+  (h1 h2: HS.mem)
+  (r: HS.rid)
+  (n: nat)
+: Lemma
+  (requires (
+    modifies_addr_of b h1 h2 /\
+    (r <> frameOf b \/ n <> as_addr b) /\
+    HS.live_region h1 r /\ HS.live_region h2 r /\
+    n `Heap.addr_unused_in` (HS.get_hmap h2 `Map.sel` r)
+  ))
+  (ensures (n `Heap.addr_unused_in` (HS.get_hmap h1 `Map.sel` r)))
+
+
+/// The following stateful operations on buffers do not change the
+/// memory, but, as required by the C standard, they all require the
+/// buffer in question to be live.
+
+
+/// ``sub b i len`` constructs the sub-buffer of ``b`` starting from
+/// offset ``i`` with length ``len``. KreMLin extracts this operation as
+/// ``b + i`` (or, equivalently, ``&b[i]``.)
+
+val sub (#a: Type) (b: buffer a) (i: size_t) (len: size_t) : HST.Stack (buffer a)
+  (requires (fun h -> v i + v len <= length b /\ live h b))
+  (ensures (fun h y h' -> h == h' /\ y == gsub b i len))
+
+
+/// ``offset b i`` construct the tail of the buffer ``b`` starting from
+/// offset ``i``, i.e. the sub-buffer of ``b`` starting from offset ``i``
+/// with length ``U32.sub (len b) i``. KreMLin compiles it as ``b + i`` or
+/// ``&b[i]``.
+///
+/// This stateful operation cannot be derived from ``sub``, because the
+/// length cannot be computed outside of proofs.
+
+val offset (#a: Type) (b: buffer a) (i: size_t) : HST.Stack (buffer a)
+  (requires (fun h -> v i <= length b /\ live h b))
+  (ensures (fun h y h' -> h == h' /\ y == gsub b i (Int.sub (len b) i)))
+
+
+/// ``index b i`` reads the value of ``b`` at offset ``i`` from memory and
+/// returns it. KreMLin compiles it as b[i].
+val index (#a: Type) (b: buffer a) (i: size_t) : HST.Stack a
+  (requires (fun h -> live h b /\ v i < length b))
+  (ensures (fun h y h' -> h == h' /\ y == Seq.index #a #(length b) (as_seq h b) (v i)))
+
+
+/// The following stateful operations on buffers modify the memory,
+/// and, as usual, require the liveness of the buffer.
+
+(* FIXME: their postconditions are using non-compositional modifies
+   clauses, which are automatically converted to compositional
+   modifies clauses by lemmas from LowStar.Modifies through
+   patterns. In a future version, LowStar.Modifies could actually be
+   merged into LowStar.Buffers so that postconditions of those
+   operations would directly be specified in terms of the
+   compositional modifies clauses.
+ *)
+
+/// ``g_upd_seq b s h`` updates the entire buffer `b`'s contents in
+/// heap `h` to correspond to the sequence `s`
+val g_upd_seq (#a:Type)
+              (b:buffer a)
+              (s:Seq.lseq a (length b))
+              (h:HS.mem{live h b})
+  : GTot HS.mem
+
+/// A lemma specifying `g_upd_seq` in terms of its effect on the
+/// buffer's underlying sequence
+val g_upd_seq_as_seq (#a:Type)
+                     (b:buffer a)
+                     (s:Seq.lseq a (length b))
+                     (h:HS.mem{live h b})
+  : Lemma (let h' = g_upd_seq b s h in
+           modifies_1 b h h' /\
+           live h' b /\
+           as_seq h' b == s)
+
+/// ``g_upd b i v h`` updates the buffer `b` in heap `h` at location
+/// `i` writing ``v`` there. This is the spec analog of the stateful
+/// update `upd` below.
+let g_upd (#a:Type)
+          (b:buffer a)
+          (i:nat{i < length b})
+          (v:a)
+          (h:HS.mem{live h b})
+  : GTot HS.mem
+  = g_upd_seq b (Seq.upd #a #(length b) (as_seq h b) i v) h
+
+/// ``upd b i v`` writes ``v`` to the memory, at offset ``i`` of
+/// buffer ``b``. KreMLin compiles it as ``b[i] = v``.
+val upd
+  (#a: Type)
+  (b: buffer a)
+  (i: size_t)
+  (w: a)
+: HST.Stack unit
+  (requires (fun h -> live h b /\ v i < length b))
+  (ensures (fun h _ h' ->
+    modifies_1 b h h' /\
+    live h' b /\
+    as_seq h' b == Seq.upd #a #(length b) (as_seq h b) (v i) w
+  ))
+
+(* FIXME: Comment on `recall` *)
+
+val recallable (#a: Type) (b: buffer a) : GTot Type0
+
+val recallable_includes (#a: Type) (larger smaller: buffer a) : Lemma
+  (requires (larger `includes` smaller))
+  (ensures (recallable larger <==> recallable smaller))
+  [SMTPatOr [
+    [SMTPat (recallable larger); SMTPat (recallable smaller);];
+    [SMTPat (larger `includes` smaller)];
+  ]]
+
+val recall
+  (#a:Type)
+  (b:buffer a)
+: HST.Stack unit
+  (requires (fun _ -> recallable b))
+  (ensures  (fun m0 _ m1 -> m0 == m1 /\ live m1 b))
+
+
+/// Deallocation. A buffer that was allocated by ``malloc`` (see below)
+/// can be ``free`` d.
+
+val freeable (#a: Type) (b: buffer a) : GTot Type0
+
+val free
+  (#a: Type)
+  (b: buffer a)
+: HST.ST unit
+  (requires (fun h0 -> live h0 b /\ freeable b))
+  (ensures (fun h0 _ h1 ->
+    Map.domain (HS.get_hmap h1) `Set.equal` Map.domain (HS.get_hmap h0) /\
+    (HS.get_tip h1) == (HS.get_tip h0) /\
+    modifies_addr_of b h0 h1 /\
+    HS.live_region h1 (frameOf b)
+  ))
+
+/// Allocation. This is the common postcondition of all allocation
+/// operators, which tells that the resulting buffer is fresh, and
+/// specifies its initial contents.
+
+unfold
+let alloc_post_static
+  (#a: Type)
+  (r: HS.rid)
+  (len: nat)
+  (b: buffer a)
+: GTot Type0
+= frameOf b == r /\
+  length b == len
+
+unfold
+let alloc_post_common
+  (#a: Type)
+  (r: HS.rid)
+  (len: nat)
+  (b: buffer a)
+  (h0 h1: HS.mem)
+: GTot Type0
+= alloc_post_static r len b /\
+  b `unused_in` h0 /\
+  live h1 b /\
+  Map.domain (HS.get_hmap h1) `Set.equal` Map.domain (HS.get_hmap h0) /\
+  (HS.get_tip h1) == (HS.get_tip h0) /\
+  modifies_0 h0 h1
+
+/// ``gcmalloc r init len`` allocates a memory-managed buffer of some
+/// positive length ``len`` in an eternal region ``r``. Every cell of this
+/// buffer will have initial contents ``init``. Such a buffer cannot be
+/// freed. In fact, it is eternal: it cannot be deallocated at all.
+
+val gcmalloc
+  (#a: Type)
+  (r: HS.rid)
+  (init: a)
+  (len: size_t)
+: HST.ST (b: buffer a {
+    recallable b /\
+    alloc_post_static r (v len) b
+  } )
+  (requires (fun h -> HST.is_eternal_region r /\ v len > 0))
+  (ensures (fun h b h' ->
+    alloc_post_common r (v len) b h h' /\
+    as_seq h' b == Seq.create (v len) init
+  ))
+
+
+/// ``malloc r init len`` allocates a hand-managed buffer of some
+/// positive length ``len`` in an eternal region ``r``. Every cell of this
+/// buffer will have initial contents ``init``. Such a buffer can be
+/// freed using ``free`` above. Note that the ``freeable`` permission is
+/// only on the whole buffer ``b``, and is not inherited by any of its
+/// strict sub-buffers.
+
+val malloc
+  (#a: Type)
+  (r: HS.rid)
+  (init: a)
+  (len: size_t)
+: HST.ST (buffer a)
+  (requires (fun h -> HST.is_eternal_region r /\ v len > 0))
+  (ensures (fun h b h' ->
+    alloc_post_common r (v len) b h h' /\
+    as_seq h' b == Seq.create (v len) init /\
+    freeable b
+  ))
+
+
+/// ``alloca init len`` allocates a buffer of some positive length ``len``
+/// in the current stack frame. Every cell of this buffer will have
+/// initial contents ``init``. Such a buffer cannot be freed
+/// individually, but is automatically freed as soon as its stack
+/// frame is deallocated by ``HST.pop_frame``.
+
+val alloca
+  (#a: Type)
+  (init: a)
+  (len: size_t)
+: HST.StackInline (buffer a)
+  (requires (fun h -> v len > 0))
+  (ensures (fun h b h' ->
+    alloc_post_common (HS.get_tip h) (v len) b h h' /\
+    as_seq h' b == Seq.create (v len) init
+  ))
+
+
+/// ``alloca_of_list init`` allocates a buffer in the current stack
+/// frame. The initial values of the cells of this buffer are
+/// specified by the ``init`` list, which must be nonempty, and of
+/// length representable as a machine integer.
+
+unfold let alloc_of_list_pre (#a: Type0) (init: list a) : GTot Type0 =
+  normalize (0 < FStar.List.Tot.length init) /\
+  normalize (FStar.List.Tot.length init <= Int.max_size_t)
+
+unfold let alloc_of_list_post (#a: Type) (len: nat) (buf: buffer a) : GTot Type0 =
+  normalize (length buf == len)
+
+val alloca_of_list
+  (#a: Type0)
+  (init: list a)
+: HST.StackInline (buffer a)
+  (requires (fun h -> alloc_of_list_pre #a init))
+  (ensures (fun h b h' ->
+    let len = FStar.List.Tot.length init in
+    alloc_post_common (HS.get_tip h) len b h h' /\
+    as_seq h' b == Seq.of_list init /\
+    alloc_of_list_post #a len b
+  ))
+
+val gcmalloc_of_list
+  (#a: Type0)
+  (r: HS.rid)
+  (init: list a)
+: HST.ST (b: buffer a {
+    let len = FStar.List.Tot.length init in
+    recallable b /\
+    alloc_post_static r len b /\
+    alloc_of_list_post len b
+  } )
+  (requires (fun h -> HST.is_eternal_region r /\ alloc_of_list_pre #a init))
+  (ensures (fun h b h' ->
+    let len = FStar.List.Tot.length init in
+    alloc_post_common r len b h h' /\
+    as_seq h' b == Seq.of_list init
+  ))
+
+
+/// Additional functionality not in LowStar.Buffer
+
+
+let lbuffer (a: Type0) (len: Int.size_nat) = b:buffer a{length b == len}
+
+let gslice #a (b:buffer a) (start:size_t)
+  (fin:size_t{v fin <= length b /\ v start <= v fin}) =
+  gsub #a b start (Int.sub_mod fin start)
+
+val as_lseq: #a:Type0 -> b:buffer a -> h:HS.mem -> GTot (s:Seq.lseq a (length b){s == as_seq h b})
+
+inline_for_extraction
+val slice: #a:Type0 -> b:buffer a -> start:size_t -> fin:size_t{v start <= v fin /\ v fin <= length b} ->
+  HST.Stack (buffer a)
     (requires (fun h0 -> live h0 b))
-    (ensures (fun h0 r h1 -> h0 == h1 /\ r == gsub #a #len #olen b start n))
-
-inline_for_extraction val slice: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> fin:size_t{v start <= v fin /\ v fin <= len /\ v fin - v start == olen} ->
-  Stack (lbuffer a olen)
-    (requires (fun h0 -> live h0 b))
-    (ensures (fun h0 r h1 -> h0 == h1 /\ r == gslice #a #len #olen b start fin))
-
-inline_for_extraction val index: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> i:size_t{v i < len} ->
-  Stack a
-    (requires (fun h0 -> live h0 b))
-	 (ensures (fun h0 r h1 -> h0 == h1 /\ r == LSeq.index #a #(len) (as_seq b h0) (v i)))
-
-inline_for_extraction val upd: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) -> i:size_t{v i < len} -> x:a ->
-  Stack unit
-	 (requires (fun h0 -> live h0 b /\ len > 0))
-	 (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
-		                  /\ as_seq b h1 == LSeq.upd #a #(len) (as_seq b h0) (v i) x))
-
-inline_for_extraction let op_Array_Assignment #a #len = upd #a #len
-inline_for_extraction let op_Array_Access #a #len = index #a #len
-
-
-inline_for_extraction val create: #a:Type0 -> #len:size_nat -> clen:size_t{v clen == len} -> init:a ->
-  StackInline (lbuffer a len)
-    (requires (fun h0 -> True))
-    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
-					           creates1 r h0 h1 /\
-					           modifies1 r h0 h1 /\
-					           as_seq  r h1 == LSeq.create #a (len) init))
-
-inline_for_extraction val createL: #a:Type0 -> init:list a{List.Tot.length init <= max_size_t} ->
-  StackInline (lbuffer a (List.Tot.length init))
-    (requires (fun h0 -> True))
-    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ creates1 r h0 h1
-				            /\ modifies1 r h0 h1
-					         /\ as_seq r h1 == LSeq.createL #a init))
-
-inline_for_extraction val createL_global: #a:Type0 -> init:list a{List.Tot.length init <= max_size_t} ->
-  ST (lbuffer a (List.Tot.length init))
-    (requires fun h0 -> True)
-    (ensures  fun h0 r h1 -> preserves_live h0 h1 /\
-                          creates1 r h0 h1 /\
-                          modifies1 r h0 h1 /\
-                          as_seq r h1 == LSeq.createL #a init)
-
-inline_for_extraction val alloc: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 -> #len:size_nat -> #wlen:size_nat -> clen:size_t{v clen == len} -> init:a ->
-  write:lbuffer w wlen ->
-  spec:(h:mem -> GTot(r:b -> LSeq.lseq w (wlen) -> Type)) ->
-  impl:(buf:lbuffer a len -> Stack b
-    (requires (fun h -> creates1 #a #len buf h0 h /\
-		     preserves_live h0 h /\
-		     modifies1 buf h0 h /\
-		     as_seq buf h == LSeq.create #a (len) init /\
-		     live h0 write))
-    (ensures (fun h r h' -> preserves_live h h' /\ modifies2 buf write h h' /\
-			 spec h0 r (as_seq write h')))) ->
-  Stack b
-    (requires (fun h -> h == h0 /\ live h write))
-    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
-		          modifies1 write h0 h1 /\
-		          spec h0 r (as_seq write h1)))
-
-
-inline_for_extraction val alloc_with: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 -> #len:size_nat -> #wlen:size_nat -> clen:size_t{v clen == len} ->
-  init_spec: LSeq.lseq a len ->
-  init:(unit -> StackInline (lbuffer a len)
-               (requires (fun h -> h == h0))
-               (ensures  (fun h0 r h1 -> creates1 #a #len r h0 h1 /\
-		                                preserves_live h0 h1 /\
-		                                modifies1 r h0 h1 /\
-		                                as_seq r h1 == init_spec))) ->
-  write:lbuffer w wlen ->
-  spec:(h:mem -> GTot(r:b -> LSeq.lseq w (wlen) -> Type)) ->
-  impl:(buf:lbuffer a len -> Stack b
-    (requires (fun h -> creates1 #a #len buf h0 h /\
-		     preserves_live h0 h /\
-		     modifies1 buf h0 h /\
-		     as_seq buf h == init_spec /\
-		     live h0 write))
-    (ensures (fun h r h' -> preserves_live h h' /\ modifies2 buf write h h' /\
-			 spec h0 r (as_seq write h')))) ->
-  Stack b
-    (requires (fun h -> h == h0 /\ live h write))
-    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
-		          modifies1 write h0 h1 /\
-		          spec h0 r (as_seq write h1)))
-
-inline_for_extraction val alloc_nospec: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 -> #len:size_nat -> #wlen:size_nat -> clen:size_t{v clen == len} -> init:a ->
-  write:lbuffer w wlen ->
-  impl:(buf:lbuffer a len -> Stack b
-    (requires (fun h -> creates1 #a #len buf h0 h /\
-		     preserves_live h0 h /\
-		     modifies1 buf h0 h /\
-		     live h0 write))
-    (ensures (fun h r h' -> preserves_live h h' /\ modifies2 buf write h h'))) ->
-  Stack b
-    (requires (fun h -> h == h0 /\ live h write))
-    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
-		          modifies1 write h0 h1))
-
-(* (\** This function will allocate one buffer, write it and write in 2 other buffers, *)
-(*     the value of the first 'write' buffer is functionnally caracterized while the *)
-(*     functionnal behavior of the second 'write2' buffer is discarded *)
-(* *\) *)
-(* inline_for_extraction val alloc_write2_discard: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 -> #w2:Type0 -> #len:size_nat -> #wlen:size_nat -> #wlen2:size_nat -> clen:size_t{v clen == len} -> init:a -> *)
-(*   write:lbuffer w wlen -> *)
-(*   write2:lbuffer w2 wlen2 -> *)
-(*   spec:(h:mem -> GTot(r:b -> LSeq.lseq w (wlen) -> Type)) -> *)
-(*   impl:(buf:lbuffer a len -> Stack b *)
-(*     (requires (fun h -> creates1 #a #len buf h0 h /\ *)
-(*               live h0 write /\ live h0 write2 *)
-(*               /\ disjoint write write2 /\ disjoint write2 write /\ *)
-(* 		          preserves_live h0 h /\ *)
-(* 		          modifies1 buf h0 h /\ *)
-(* 	             as_seq buf h == LSeq.create #a (len) init)) *)
-(*     (ensures (fun h r h' -> preserves_live h h' /\ modifies3 buf write write2 h h' /\ *)
-(* 			 spec h0 r (as_seq write h')))) -> *)
-(*   Stack b *)
-(*     (requires (fun h -> h == h0 /\ live h write /\ live h write2)) *)
-(*     (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ *)
-(* 		          modifies2 write write2 h0 h1 /\ *)
-(* 		          spec h0 r (as_seq write h1))) *)
-
-(* Various Allocation Patterns *)
-
-val map: #a:Type -> #len:size_nat -> clen:size_t{v clen == len} -> f:(a -> Tot a) -> b:lbuffer a (len) ->
-  Stack unit
-    (requires (fun h0 -> live h0 b))
-	 (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b h0 h1
-				            /\ as_seq  b h1 == LSeq.map #a #a #(len) f (as_seq  b h0)))
+    (ensures (fun h0 r h1 -> h0 == h1 /\ r == gslice #a b start fin))
 
 inline_for_extraction
-val map2: #a1:Type -> #a2:Type -> #len:size_nat -> clen:size_t{v clen == len} -> f:(a1 -> a2 -> Tot a1) -> b1:lbuffer a1 len -> b2:lbuffer a2 len ->
-  Stack unit
-	 (requires (fun h0 -> live h0 b1 /\ live h0 b2))
-	 (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 b1 h0 h1
-                        /\ as_seq b1 h1 == LSeq.map2 #a1 #a2 #a1 #(len) f (as_seq b1 h0) (as_seq b2 h0)))
+let op_Array_Assignment #a l = upd #a l
 
 inline_for_extraction
-val copy: #a:Type -> #len:size_nat -> o:lbuffer a len -> clen:size_t{v clen == len}  -> i:lbuffer a len ->
-  Stack unit
-    (requires (fun h0 -> live h0 i /\ live h0 o ))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\
-                          modifies1 o h0 h1 /\
-                          as_seq o h1 == as_seq i h0))
-
-
-
-
-(* EXPERIMENTAL: Various Looping Patterns *)
-
-inline_for_extraction
-val iter_range: #a:Type -> #len:size_nat -> start:size_t -> fin:size_t{v start <= v fin} ->
-  spec:(i:size_nat{v start <= i /\ i < v fin}  -> LSeq.lseq a (len) -> Tot (LSeq.lseq a (len))) ->
-  impl:(i:size_t{v start <= v i /\ v i < v fin}  -> x:lbuffer a (len) -> Stack unit
-    (requires (fun h0 -> live h0 x))
-	 (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\
-				              modifies1 x h0 h1 /\
-					           as_seq  x h1 == spec (v i) (as_seq  x h0)))) ->
-  input:lbuffer a (len) ->
-  Stack unit
-	 (requires (fun h0 -> live h0 input))
-	 (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1 /\
-				              as_seq  input h1 ==  LSeq.repeat_range (v start) (v fin) spec (as_seq  input h0)))
-
-
-inline_for_extraction
-val iteri: #a:Type -> #len:size_nat -> n:size_t ->
-  spec:(i:size_nat{i < v n}  -> LSeq.lseq a (len) -> Tot (LSeq.lseq a (len))) ->
-  impl:(i:size_t{v i < v n}  -> x:lbuffer a (len) -> Stack unit
-    (requires (fun h0 -> live h0 x))
-	 (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\
-				              modifies1 x h0 h1 /\
-					           as_seq  x h1 == spec (v i) (as_seq  x h0)))) ->
-  input:lbuffer a (len) ->
-  Stack unit
-	 (requires (fun h0 -> live h0 input))
-	 (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1 /\
-				              as_seq  input h1 ==  LSeq.repeati (v n) spec (as_seq  input h0)))
-
-
-inline_for_extraction
-val iter: #a:Type -> #len:size_nat -> #clen:size_t{v clen == len} -> n:size_t ->
-  spec:(LSeq.lseq a len -> LSeq.lseq a len) ->
-  impl:(x:lbuffer a len -> Stack unit
-    (requires (fun h0 -> live h0 x))
-    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\
-			  modifies1 x h0 h1 /\
-			 as_seq  x h1 == spec (as_lseq  x h0)))) ->
-  input:lbuffer a len ->
-  Stack unit
-    (requires (fun h0 -> live h0 input))
-	 (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 input h0 h1 /\
-		               as_seq  input h1 ==  LSeq.repeat (v n) spec (as_seq  input h0)))
-
-
-let loop_inv (h0:mem) (h1:mem) (#a:Type) (len:size_nat) (n:size_t)  (buf:lbuffer a len)
-  (spec:(h:mem -> GTot (i:size_nat{i < v n} -> LSeq.lseq a (len) -> Tot (LSeq.lseq a (len))))) (i:size_t{v i <= v n}) : Type =
-  live h0 buf /\ preserves_live h0 h1
-  /\ modifies1 buf h0 h1
-  /\ (let b0 = as_seq  buf h0 in
-    let b1 = as_seq  buf h1 in
-    b1 == LSeq.repeati #(LSeq.lseq a (len)) (v i) (spec h0) b0)
-
-inline_for_extraction
-val loop:
-  #h0:mem ->
-  #a:Type0 ->
-  #len:size_nat ->
-  n:size_t ->
-  buf:lbuffer a len ->
-  spec:(h:mem -> GTot (i:size_nat{i < v n} -> LSeq.lseq a (len) -> Tot (LSeq.lseq a (len)))) ->
-  impl:(i:size_t{v i < v n} -> Stack unit
-    (requires (fun h -> loop_inv h0 h #a len n buf spec i))
-    (ensures (fun _ _ h1 -> loop_inv h0 h1 #a len n buf spec (i +. size 1)))) ->
-  Stack unit
-	 (requires (fun h -> live h buf /\ h0 == h))
-	 (ensures (fun _ _ h1 -> preserves_live h0 h1
-                       /\ modifies1 buf h0 h1
-                       /\ (let b0 = as_seq  buf h0 in
-                       let b1 = as_seq  buf h1 in
-                       b1 == LSeq.repeati #(LSeq.lseq a (len)) (v n) (spec h0) b0)))
-
-
-inline_for_extraction
-val loop_set:
-  #a:Type0 ->
-  #len:size_nat ->
-  buf:lbuffer a len ->
-  start:size_t ->
-  n:size_t{v n + v start <= len} ->
-  init:a ->
-  Stack unit
-	 (requires (fun h -> live h buf))
-	 (ensures (fun h0 _ h1 -> preserves_live h0 h1
-                       /\ modifies1 buf h0 h1
-                       /\ LSeq.sub #a #(len) (as_seq buf h1) (v start) (v n) == LSeq.create #a (len) init))
-
-
-let loop_nospec_inv (h0:mem) (h1:mem) (#a:Type) (len:size_nat) (n:size_nat)  (buf:lbuffer a len) (i:size_nat{i <= n}) : Type =
-  live h0 buf /\ preserves_live h0 h1
-  /\ modifies1 buf h0 h1
-
-
-inline_for_extraction
-val loop_nospec:
-  #h0:mem ->
-  #a:Type0 ->
-  #len:size_nat ->
-  n:size_t ->
-  buf:lbuffer a len ->
-  impl:(i:size_t{v i < v n} -> Stack unit
-    (requires (fun h -> loop_nospec_inv h0 h #a len (v n) buf (v i)))
-	 (ensures (fun _ _ h1 -> loop_nospec_inv h0 h1 #a len (v n) buf (v i + 1)))) ->
-  Stack unit
-	 (requires (fun h -> live h buf /\ h0 == h))
-	 (ensures (fun _ _ h1 -> preserves_live h0 h1
-                       /\ modifies1 buf h0 h1))
-
-open FStar.Mul
-
-#reset-options "--z3rlimit 5000 --max_fuel 0"
-inline_for_extraction
-val map_blocks: #h0:mem ->
-		#a:Type0 ->
-		#bs:size_nat{bs > 0} ->
-		#nb:size_nat{nb * bs <= maxint SIZE} ->
-		blocksize:size_t{size_v blocksize == bs} ->
-		nblocks:size_t{size_v nblocks == nb} ->
-		buf:lbuffer a (nb * bs) ->
-		f_spec:(mem -> GTot (i:size_nat{i + 1 <= nb} -> LSeq.lseq a bs -> LSeq.lseq a bs)) ->
-		f:(i:size_t{size_v i + 1 <= v nblocks} -> Stack unit
-				  (requires (fun h -> live h buf /\
-						   preserves_live h0 h /\
-				                   modifies1 buf h0 h))
-				  (ensures (fun h _ h' ->
-						   preserves_live h h' /\
-						   (size_v i * v blocksize) + v blocksize <= v (nblocks *. blocksize) /\
-						  (let bufi = gsub #a #(nb * bs) #bs buf (i *. blocksize) blocksize in
-						   modifies1 bufi h h' /\
-						   as_seq bufi h' ==
-						   f_spec h (size_v i) (as_seq bufi h))))) ->
-		Stack unit
-		                  (requires (fun h -> h == h0 /\ live h buf))
-				  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 buf h0 h1 /\
-							as_seq buf h1 == LSeq.map_blocks #a bs nb (f_spec h0) (as_seq buf h0)))
-
-(*
-val map_blocks: #h0:mem ->
-		#a:Type0 ->
-		#bs:size_t{bs > 0} ->
-		#nb:size_t{nb * bs <= maxint SIZE} ->
-		blocksize:size_t{size_v blocksize == bs} ->
-		nblocks:size_t{size_v nblocks == nb} ->
-		f_spec:(mem -> GTot (i:size_t{i + 1 <= nb} -> LSeq.lseq a bs -> LSeq.lseq a bs)) ->
-		f:(i:size_t{size_v i + 1 <= nb} -> bufi:lbuffer a bs -> Stack unit
-				  (requires (fun h -> live h bufi /\
-						   preserves_live h0 h /\
-				                   modifies1 bufi h0 h))
-				  (ensures (fun h _ h' ->
-						   preserves_live h h' /\
-						   modifies1 bufi h h' /\
-						   as_seq bufi h' ==
-						   f_spec h0 (size_v i) (as_seq bufi h0)))) ->
-		buf:lbuffer a (nb * bs) ->
-		Stack unit
-		                  (requires (fun h -> h == h0 /\ live h buf))
-				  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 buf h0 h1 /\
-							as_seq buf h1 == LSeq.map_blocks #a bs nb (f_spec h0) (as_seq buf h0)))
-*)
-inline_for_extraction
-val reduce_blocks: #h0:mem ->
-		#a:Type0 ->
-		#r:Type0 ->
-		#bs:size_nat{bs > 0} ->
-		#nb:size_nat{nb * bs <= maxint SIZE} ->
-		#rlen:size_nat ->
-		blocksize:size_t{size_v blocksize == bs} ->
-		nblocks:size_t{size_v nblocks == nb} ->
-		rbuf: lbuffer r rlen ->
-		f_spec:(mem -> i:size_nat{i + 1 <= nb} -> LSeq.lseq a bs -> LSeq.lseq r (rlen) -> LSeq.lseq r (rlen)) ->
-		f:(i:size_t{size_v i + 1 <= nb} -> bufi:lbuffer a bs -> Stack unit
-				  (requires (fun h -> live h bufi /\ live h rbuf /\ disjoint bufi rbuf /\ disjoint rbuf bufi /\
-						   preserves_live h0 h /\
-				                   modifies1 rbuf h0 h))
-				  (ensures (fun h _ h' ->
-						   preserves_live h h' /\
-						   modifies1 rbuf h h' /\
-						   as_seq rbuf h' ==
-							  f_spec h0 (size_v i) (as_seq bufi h0) (as_seq rbuf h)))) ->
-		buf:lbuffer a (nb * bs) ->
-		Stack unit
-		                  (requires (fun h -> h == h0 /\ live h buf /\ live h rbuf))
-				  (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 rbuf h0 h1 /\
-							as_seq rbuf h1 == LSeq.reduce_blocks #a #(LSeq.lseq r (rlen)) (bs) (nb) (f_spec h0) (as_seq buf h0) (as_seq rbuf h0)))
-
-
-
-(*
-val repeat: #a:Type -> #b:Type -> #lift:(mem -> b -> GTot (option a)) ->
-	    n:size_t -> spec:(a -> Tot a) ->
-	    impl:(x:b -> Stack unit (requires (fun h0 -> Some? (lift h0 x))) (ensures (fun h0 _ h1 -> Some? (lift h0 x) /\ Some? (lift h1 x) /\ Some?.v (lift h1 x) == spec (Some?.v (lift h0 x))))) ->
-	    input:b ->
-	    Stack unit
-	    (requires (fun h0 -> Some? (lift h0 input)))
-	    (ensures (fun h0 _ h1 -> Some? (lift h0 input) /\ Some? (lift h1 input) /\
-				  Some?.v (lift h1 input) ==  LSeq.repeat (v n) spec (Some?.v (lift h0 input))))
-
-
-val repeat_range: #a:Type -> #b:Type -> #lift:(mem -> b -> GTot (option a)) ->
-	    start:size_t -> fin:size_t{v start <= v fin} -> spec:(i:size_t{v start <= i /\ i < v fin} -> a -> Tot a) ->
-	    impl:(i:size_t{v start <= v i /\ v i < v fin} -> x:b -> Stack unit
-				   (requires (fun h0 -> Some? (lift h0 x)))
-				   (ensures (fun h0 _ h1 -> Some? (lift h0 x) /\ Some? (lift h1 x) /\
-							 Some?.v (lift h1 x) == spec (v i) (Some?.v (lift h0 x))))) ->
-	    input:b ->
-	    Stack unit
-	    (requires (fun h0 -> Some? (lift h0 input)))
-	    (ensures (fun h0 _ h1 -> Some? (lift h0 input) /\ Some? (lift h1 input) /\
-				  Some?.v (lift h1 input) ==  LSeq.repeat_range (v start) (v fin) spec (Some?.v (lift h0 input))))
-
-val repeati: #a:Type -> #b:Type -> #lift:(mem -> b -> GTot (option a)) ->
-	    n:size_t -> spec:(i:size_t{i < v n} -> a -> Tot a) ->
-	    impl:(i:size_t{v i < v n} -> x:b -> Stack unit
-				   (requires (fun h0 -> Some? (lift h0 x)))
-				   (ensures (fun h0 _ h1 -> Some? (lift h0 x) /\ Some? (lift h1 x) /\
-							 Some?.v (lift h1 x) == spec (v i) (Some?.v (lift h0 x))))) ->
-	    input:b ->
-	    Stack unit
-	    (requires (fun h0 -> Some? (lift h0 input)))
-	    (ensures (fun h0 _ h1 -> Some? (lift h0 input) /\ Some? (lift h1 input) /\
-				  Some?.v (lift h1 input) ==  LSeq.repeati (v n) spec (Some?.v (lift h0 input))))
-*)
+let op_Array_Access #a l = index #a l
