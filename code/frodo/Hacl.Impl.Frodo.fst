@@ -18,6 +18,7 @@ open LowStar.Modifies
 
 module Buf = LowStar.Buffer
 module ST = FStar.HyperStack.ST
+module FLemmas = Spec.Frodo.Lemmas
 
 let cshake_frodo = cshake128_frodo
 
@@ -119,16 +120,13 @@ let frodo_key_encode b a res =
       let f1 (j:size_t{0 <= v j /\ v j < v n2}): Stack unit
         (requires (fun h -> inv1 h (v j)))
         (ensures (fun _ _ h2 -> inv1 h2 (v j + 1))) =
-          assume ((v i + v j) * v b + v b <= v aLen);
           copy (sub v8 (size 0) b) b (sub #uint8 #(v aLen) #(v b) a ((i +! j) *! b) b);
           let vij = uint_from_bytes_le #U64 v8 in
           let h1 = ST.get () in
           loop_nospec #h1 (size 8) res
           (fun k ->
-            //assume (v (b *. k) < 64);
             let ak = (vij >>. size_to_uint32 (b *! k)) &. ((u64 1 <<. size_to_uint32 b) -. u64 1) in
             let resij = ec b (to_u16 ak) in
-            assume (8 * v j + v k < v params_nbar);
             mset res i (size 8 *! j +! k) resij
           ) in
 
@@ -167,12 +165,10 @@ let frodo_key_decode b a res =
           let h1 = ST.get () in
           loop_nospec #h1 (size 8) templong
           (fun k ->
-            assume (8 * v j + v k < v params_nbar);
             let aij = dc b (mget a i (size 8 *! j +! k)) in
             templong.(size 0) <- templong.(size 0) |. (to_u64 aij <<. size_to_uint32 (b *! k))
           );
           uint_to_bytes_le #U64 v8 (templong.(size 0));
-          assume ((v i + v j) * v b + v b <= v resLen);
           copy (sub res ((i +! j) *! b) b) b (sub #uint8 #8 #(v b) v8 (size 0) b) in
 
       Lib.Loops.for (size 0) n2 inv1 f1 in
@@ -213,13 +209,13 @@ let frodo_pack n1 n2 a d res =
           let h1 = ST.get () in
           loop_nospec #h1 (size 8) templong
           (fun k ->
-            assume (8 * v j + v k < v n2);
+            assert (8 * v j + v k < v n2);
             let aij = to_u32 (mget a i (size 8 *! j +! k)) &. maskd in
-            //assume (v (size 7 *. d -. d *. k) < 128);
             templong.(size 0) <- templong.(size 0) |. (to_u128 aij <<. size_to_uint32 (size 7 *! d -! d *! k))
           );
           uint_to_bytes_be #U128 v16 (templong.(size 0));
-          assume (((v i * v n2 / 8 + v j) * v d) + v d <= v resLen);
+	  FLemmas.lemma_matrix_index_repeati (v n1) (v n2) (v d) (v i) (v j);
+	  assert (((v i * v n2 / 8 + v j) * v d) + v d <= v resLen);
           copy (sub res ((i *! n2 /. size 8 +! j) *! d) d) d (sub #uint8 #16 #(v d) v16 (size 16 -! d) d) in
 
       Lib.Loops.for (size 0) n28 inv1 f1 in
@@ -253,17 +249,17 @@ let frodo_unpack n1 n2 d b res =
       let f1 (j:size_t{0 <= v j /\ v j < v n28}): Stack unit
         (requires (fun h -> inv1 h (v j)))
         (ensures (fun _ _ h2 -> inv1 h2 (v j + 1))) =
-	  assume (v i * v n2 < max_size_t);
-	  assume ((v i * v n2 / 8 + v j) * v d < max_size_t);
-	  assume (v ((i *! n2 /. size 8 +! j) *! d) + v d <= v bLen);
-	  let bij = sub #_ #(v bLen) #(v d) b ((i *! n2 /. size 8 +! j) *! d) d in
+          assert (v i * v n2 < v n1 * v n2);
+          FLemmas.lemma_matrix_index_repeati (v n1) (v n2) (v d) (v i) (v j);
+          assert (v ((i *! n2 /. size 8 +! j) *! d) + v d <= v bLen);
+          let bij = sub #_ #(v bLen) #(v d) b ((i *! n2 /. size 8 +! j) *! d) d in
           copy (sub #_ #_ #(v d) v16 (size 16 -! d) d) d bij;
           let templong = uint_from_bytes_be #U128 v16 in
           let h1 = ST.get () in
           loop_nospec #h1 (size 8) res
           (fun k ->
             let resij = to_u32 (templong >>. size_to_uint32 (size 7 *! d -! d *! k)) &. maskd in
-            assume (8 * v j + v k < v n2);
+            assert (8 * v j + v k < v n2);
             mset res i (size 8 *! j +! k) (to_u16 resij)
           ) in
 
@@ -312,7 +308,7 @@ let frodo_sample_matrix n1 n2 seed_len seed ctr res =
     let h0 = ST.get () in
     loop_nospec #h0 n2 res
     (fun j ->
-      assume (2 * (v n2 * v i + v j) + 2 <= 2 * v n1 * v n2);
+      FLemmas.lemma_matrix_index_repeati1 (v n1) (v n2) (v i) (v j);
       let resij = sub r (size 2 *! (n2 *! i +! j)) (size 2) in
       mset res i j (frodo_sample (uint_from_bytes_le #U16 resij))
     )
@@ -336,7 +332,7 @@ let frodo_sample_matrix_tr n1 n2 seed_len seed ctr res =
     let h0 = ST.get () in
     loop_nospec #h0 n2 res
     (fun j ->
-      assume (2 * (v n1 * v j + v i) + 2 <= 2 * v n1 * v n2);
+      FLemmas.lemma_matrix_index_repeati2 (v n1) (v n2) (v i) (v j);
       let resij = sub r (size 2 *! (n1 *! j +! i)) (size 2) in
       mset res i j (frodo_sample (uint_from_bytes_le #U16 resij))
     )
@@ -385,7 +381,8 @@ let matrix_to_lbytes #n1 #n2 m res =
     let h0 = ST.get () in
     loop_nospec #h0 n2 res
     (fun j ->
-      assume (2 * (v j * v n1 + v i) + 2 <= 2 * v n1 * v n2);
+      FLemmas.lemma_matrix_index_repeati2 (v n1) (v n2) (v i) (v j);
+      assert (2 * (v j * v n1 + v i) + 2 <= 2 * v n1 * v n2);
       uint_to_bytes_le (sub res (size 2 *! (j *! n1 +! i)) (size 2)) (mget m i j)
     )
   )
@@ -404,7 +401,8 @@ let matrix_from_lbytes #n1 #n2 b res =
     let h0 = ST.get () in
     loop_nospec #h0 n2 res
     (fun j ->
-      assume (2 * (v j * v n1 + v i) + 2 <= 2 * v n1 * v n2);
+      FLemmas.lemma_matrix_index_repeati2 (v n1) (v n2) (v i) (v j);
+      assert (2 * (v j * v n1 + v i) + 2 <= 2 * v n1 * v n2);
       mset res i j (uint_from_bytes_le #U16 (sub b (size 2 *! (j *! n1 +! i)) (size 2)))
     )
   )
@@ -768,7 +766,7 @@ let crypto_kem_dec ss ct sk =
   assert_norm (v crypto_secretkeybytes = v crypto_bytes + v crypto_publickeybytes + 2 * v params_n * v params_nbar);
   assert_norm (v crypto_publickeybytes = v bytes_seed_a + (v params_logq * v params_n * v params_nbar) / 8);
   assert_norm (v pk_mu_decode_len = v crypto_publickeybytes + v params_nbar * v params_nbar * v params_extracted_bits / 8);
-  
+
   let c1Len = (params_logq *! params_nbar *! params_n) /. size 8 in
   let c2Len = (params_logq *! params_nbar *! params_nbar) /. size 8 in
   let c1 = sub #uint8 #_ #(v c1Len) ct (size 0) c1Len in
