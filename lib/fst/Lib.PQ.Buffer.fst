@@ -77,6 +77,7 @@ val createL:
 let createL #a init =
   Buf.alloca_of_list init
 
+inline_for_extraction
 val recall
   (#a:Type)
   (#len:size_nat)
@@ -84,6 +85,7 @@ val recall
 : Stack unit
   (requires (fun _ -> Buf.recallable b))
   (ensures  (fun m0 _ m1 -> m0 == m1 /\ Buf.live m1 b))
+let recall #a #len b = Buf.recall b
 
 inline_for_extraction
 val createL_global:

@@ -25,22 +25,21 @@ val lemma_mul_acc_comm:
 let lemma_mul_acc_comm a b c = ()
 
 val lemma_matrix_index_repeati:
-  n1:size_nat -> n2:size_nat{n2 % 8 = 0} -> 
+  n1:size_nat -> n2:size_nat{n2 % 8 = 0} ->
   d:size_nat{d * n1 * n2 / 8 < max_size_t} ->
   i:size_nat{i < n1} -> j:size_nat{j < n2 / 8} ->
   Lemma ((i * n2 / 8 + j) * d + d <= d * n1 * n2 / 8)
-  #reset-options "--z3rlimit 50 --max_fuel 0"
+  #reset-options "--z3rlimit 150 --max_fuel 0"
 let lemma_matrix_index_repeati n1 n2 d i j =
   let res = (i * n2 / 8 + j) * d + d in
   assert (i * n2 / 8 + j <= (n1 - 1) * n2 / 8 + n2 / 8 - 1);
-  assert ((i * n2 / 8 + j) * d + d <= ((n1 - 1) * n2 / 8 + n2 / 8 - 1) * d + d);
-  //assert (res <= ((n1 - 1) * n2 / 8 + n2 / 8 - 1) * d + d);
-  assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 + (-n2) / 8 + n2 / 8 - 1);
-  //assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 - 1);
-  //assert ((i * n2 / 8 + j) * d + d <= (n1 * n2 / 8 - 1) * d + d);
+  //assert ((n1 - 1) * n2 / 8 = n1 * n2 / 8 - n2 / 8);
+  assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 - 1);
+  lemma_mult_le_right d (i * n2 / 8 + j) (n1 * n2 / 8 - 1);
+  assert ((i * n2 / 8 + j) * d <= (n1 * n2 / 8 - 1) * d);
+  assert (res <= (n1 * n2 / 8 - 1) * d + d);
   assert ((n1 * n2 / 8 - 1) * d + d = n1 * n2 / 8 * d - d + d);
-  lemma_mul_acc_comm n1 (n2 / 8) d;
-  assert ((i * n2 / 8 + j) * d + d <= d * n1 * n2 / 8)
+  lemma_mul_acc_comm n1 (n2 / 8) d
 
 val lemma_matrix_index_repeati1:
   n1:size_nat -> n2:size_nat ->
@@ -48,9 +47,7 @@ val lemma_matrix_index_repeati1:
   Lemma (2 * (i * n2 + j) + 2 <= 2 * n1 * n2)
   #reset-options "--z3rlimit 50 --max_fuel 0"
 let lemma_matrix_index_repeati1 n1 n2 i j =
-  let res = 2 * (i * n2 + j) + 2 in
   assert (2 * (i * n2 + j) + 2 <= 2 * ((n1 - 1) * n2 + n2 - 1) + 2);
-  assert ((n1 - 1) * n2 + n2 - 1 = n1 * n2 - n2 + n2 - 1);
   assert (2 * (n1 * n2 - 1) + 2 = 2 * n1 * n2 - 2 + 2);
   assert (2 * (i * n2 + j) + 2 <= 2 * n1 * n2)
 
@@ -60,9 +57,7 @@ val lemma_matrix_index_repeati2:
   Lemma (2 * (n1 * j + i) + 2 <= 2 * n1 * n2)
   #reset-options "--z3rlimit 50 --max_fuel 0"
 let lemma_matrix_index_repeati2 n1 n2 i j =
-  let res = 2 * (n1 * j + i) + 2 in
   assert (2 * (n1 * j + i) + 2 <= 2 * (n1 * (n2 - 1) + n1 - 1) + 2);
-  assert (n1 * (n2 - 1) + n1 - 1 = n1 * n2 - n1 + n1 - 1);
   assert (2 * (n1 * n2 - 1) + 2 = 2 * n1 * n2 - 2 + 2);
   assert (2 * (n1 * j + i) + 2 <= 2 * n1 * n2)
 
