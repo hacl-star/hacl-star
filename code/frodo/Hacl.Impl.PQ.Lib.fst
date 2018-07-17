@@ -2,21 +2,23 @@ module Hacl.Impl.PQ.Lib
 
 open FStar.HyperStack.All
 open Lib.IntTypes
-open Lib.Buffer
 open FStar.Mul
 
+open LowStar.Buffer
 open LowStar.ModifiesPat
 open LowStar.Modifies
 
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-module B = Lib.Buffer
+module B = LowStar.Buffer
 
 module Seq = Lib.Sequence
 
 inline_for_extraction
 type numeric_t = uint16
+
+open Lib.PQ.Buffer
 
 inline_for_extraction
 let lbytes len = lbuffer uint8 (v len)
@@ -34,10 +36,11 @@ val matrix_create:
   (ensures (fun h0 r h1 ->
     B.alloc_post_common (HS.get_tip h0) (v n1 * v n2) r h0 h1 /\
     B.as_seq h1 r == Seq.create (v n1 * v n2) (u16 0)))
-  [@ "substitute"]
+[@ "substitute"]
 let matrix_create n1 n2 =
-  alloca #uint16 (n1 *. n2) (u16 0)
+  create #uint16 (n1 *. n2) (u16 0) 
 
+// TODO: Move to Spec.Frodo.Lemmas
 val lemma_matrix_index:
   n1:size_nat -> n2:size_nat ->
   i:size_nat{i < n1} -> j:size_nat{j < n2} ->
@@ -52,7 +55,7 @@ val mget:
   i:size_t{v i < v n1} -> j:size_t{v j < v n2} -> Stack uint16
   (requires (fun h -> B.live h a))
   (ensures (fun h0 r h1 -> h0 == h1)) ///\ r == Seq.index (B.as_seq h1 a) (v (i *. n2 +. j))))
-  [@ "substitute"]
+[@ "substitute"]
 let mget #n1 #n2 a i j =
   lemma_matrix_index (v n1) (v n2) (v i) (v j);
   a.(i *. n2 +. j)

@@ -1,38 +1,84 @@
 module Lib.Sequence
 
-open FStar.Mul
 open Lib.IntTypes
 
+/// Definition of sequences
+
+val seq: a:Type0 -> t:Type0
 let seq a = s:Seq.seq a{Seq.length s <= max_size_t}
 
+unfold
+val length: #a:Type0 -> seq a -> size_nat
 let length #a l = Seq.length l
 
+let lseq (a:Type0) (len:size_nat) = s:seq a{Seq.length s == len}
+
+type intseq (t:m_inttype) (len:size_nat) = lseq (uint_t t) len
+
+val to_lseq: #a:Type0 -> s:seq a -> l:lseq a (Seq.length s){l == s}
 let to_lseq #a s = s
 
+val to_seq: #a:Type0 -> #len:size_nat -> s:lseq a len -> o:seq a {o == s /\ Seq.length o == len}
 let to_seq #a #len s = s
 
+unfold
+val index: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len} -> a
 let index #a #len s n = Seq.index s n
 
+(*
+val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
+  (requires (forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i))
+  (ensures  (equal s1 s2))
+  [SMTPat (equal s1 s2)]
 let eq_intro #a #len s1 s2 =
   assert (forall (i:nat{i < len}).{:pattern (Seq.index s1 i); (Seq.index s2 i)}
     index s1 i == index s2 i);
   Seq.lemma_eq_intro #a s1 s2
 
+val eq_elim: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
+  (requires (equal s1 s2))
+  (ensures  (s1 == s2))
+  [SMTPat (equal s1 s2)]
 let eq_elim #a #len s1 s2 =
   assert (forall (i:nat{i < len}).{:pattern (Seq.index s1 i); (Seq.index s2 i)}
     index s1 i == index s2 i);
   Seq.lemma_eq_elim #a s1 s2
+*)
 
+unfold
+val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a
+  -> Pure (lseq a len)
+    (requires True)
+    (ensures (fun o -> index o n == x /\
+      (forall (i:size_nat). {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)))
 let upd #a #len s n x = Seq.upd #a s n x
 
+
+///
+/// Allocation functions for sequences
+///
+
+val create: #a:Type -> len:size_nat -> init:a -> s:lseq a len{
+    forall (i:size_nat). {:pattern (index s i)} i < len ==> index s i == init}
 let create #a len init = Seq.create #a len init
 
+/// TODO: rename this to of_list. Used in Lib.Buffer
+val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (List.Tot.length l)
 let createL #a l = Seq.createL #a l
 
+
+val of_list: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> seq a
 let of_list #a l = Seq.of_list #a l
 
+unfold
+val sub: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> lseq a n
 let sub #a #len s start n = Seq.slice #a s start (start + n)
 
+let slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat)
+	  (fin:size_nat{start <= fin /\ fin <= len}) =
+	  sub #a #len i start (fin - start)
+
+val update_sub: #a:Type -> #len:size_nat -> i:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}
 let update_sub #a #len s start n x =
   let o =
     Seq.append
@@ -43,38 +89,48 @@ let update_sub #a #len s start n x =
     Seq.index o i == Seq.index s i);
   o
 
+let update_slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat) (fin:size_nat{start <= fin /\ fin <= len}) (upd:lseq a (fin - start)) =
+		 update_sub #a #len i start (fin-start) upd
+
+let op_String_Access #a = Seq.index #a 
+let op_String_Assignment #a = Seq.upd #a
+
+/// Iteration
+
 // 2018.07.13 SZ: TODO
 // Unsure why these functions are in Lib.Sequence; nothing to do with sequences
 
-val repeat_range_: #a:Type
+val repeat_range: #a:Type
   -> min:size_nat
   -> max:size_nat{min <= max}
   -> (s:size_nat{s >= min /\ s < max} -> a -> Tot a)
   -> a
   -> Tot a (decreases (max - min))
-let rec repeat_range_ #a min max f x =
+let rec repeat_range #a min max f x =
   if min = max then x
-  else repeat_range_ #a (min + 1) max f (f min x)
+  else repeat_range #a (min + 1) max f (f min x)
 
-let repeat_range = repeat_range_
-
+val repeati: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> Tot a) -> a -> a
 let repeati #a n = repeat_range #a 0 n
 
+val repeat: #a:Type -> n:size_nat -> (a -> Tot a) -> a -> a
 let repeat #a n f x = repeat_range 0 n (fun i -> f) x
 
-val repeat_range_inductive_: #a:Type
+unfold
+type repeatable (#a:Type) (#n:size_nat) (pred:(i:size_nat{i <= n} -> a -> Tot Type)) = i:size_nat{i < n} -> x:a -> Pure a (requires (pred i x)) (ensures (fun r -> pred (i+1) r))
+
+val repeat_range_inductive: #a:Type
   -> min:size_nat
   -> max:size_nat{min <= max}
   -> pred:(i:size_nat{i <= max} -> a -> Tot Type)
   -> f:repeatable #a #max pred
   -> x0:a{pred min x0}
   -> Tot (res:a{pred max res}) (decreases (max - min))
-let rec repeat_range_inductive_ #a min max pred f x =
+let rec repeat_range_inductive #a min max pred f x =
   if min = max then x
-  else repeat_range_inductive_ #a (min + 1) max pred f (f min x)
+  else repeat_range_inductive #a (min + 1) max pred f (f min x)
 
-let repeat_range_inductive = repeat_range_inductive_
-
+val repeati_inductive: #a:Type -> n:size_nat -> pred:(i:size_nat{i <= n} -> a -> Tot Type) -> f:repeatable #a #n pred -> x0:a{pred 0 x0} -> Tot (res:a{pred n res})
 let repeati_inductive #a = repeat_range_inductive #a 0
 
 val fold_left_range_: #a:Type -> #b:Type -> #len:size_nat
@@ -92,24 +148,27 @@ let rec fold_left_range_ #a #b #len min max f l x =
   | h::t -> fold_left_range_ #a #b #(len - 1) (min + 1) max f t (f min h x)
 *)
 
+val fold_left_range: #a:Type -> #b:Type -> #len:size_nat -> min:size_nat -> max:size_nat{min <= max /\ max <= len} -> (i:size_nat{i >= min /\ i < max} -> a -> b -> Tot b) -> lseq a len -> b -> b
 let fold_left_range #a #b #len min max f l x =
   fold_left_range_ #a #b #(max - min) min max f (slice #a #len l min max) x
 
+val fold_lefti: #a:Type -> #b:Type -> #len:size_nat -> (i:size_nat{i < len} -> a -> b -> Tot b) -> lseq a len -> b -> b
 let fold_lefti #a #b #len = fold_left_range #a #b #len 0 len
 
+val fold_left: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot b) -> lseq a len -> b -> b
 let fold_left #a #b #len f = fold_left_range #a #b #len 0 len (fun i -> f)
 
+val map: #a:Type -> #b:Type -> #len:size_nat -> (a -> Tot b) -> lseq a len -> lseq b len
 let rec map #a #b #len f x =
   admit()
 
+val for_all: #a:Type -> #len:size_nat -> (a -> Tot bool) -> lseq a len -> bool
 let rec for_all #a #len f x = Seq.for_all f x
 
+val map2: #a:Type -> #b:Type -> #c:Type -> #len:size_nat -> (a -> b -> Tot c) -> lseq a len -> lseq b len -> lseq c len
 let rec map2 #a #b #c #len f x y =
   admit()
 
+val for_all2: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> bool
 let rec for_all2 #a #b #len f x y =
   admit()
-
-let as_list #a #len s = Seq.Properties.seq_to_list s
-
-let rec concat #a #len1 #len2 s1 s2 = Seq.append s1 s2
