@@ -14,6 +14,8 @@ open MPFR.Add1.Spec
 open MPFR.Round.Spec
 open MPFR.Maths
 
+open MPFR.Add1sp1.Lemma
+
 module I64 = FStar.Int64
 module I32 = FStar.Int32
 module U32 = FStar.UInt32
@@ -54,16 +56,15 @@ let mpfr_add1sp1_post_cond a b c rnd_mode p h0 f h1 =
     mpfr_ternary_cond (I32.v f) exact (as_fp h1 a)
 
 val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
-                  rnd_mode:mpfr_rnd_t -> p:mpfr_reg_prec_t -> Stack i32
+                  rnd_mode:mpfr_rnd_t -> p:mpfr_prec_t -> Stack i32
     (requires (fun h -> mpfr_add1sp1_pre_cond a b c p h))
     (ensures  (fun h0 f h1 -> mpfr_add1sp1_post_cond a b c rnd_mode p h0 f h1))
 
 (* implementations *)
-
 (* intermediate results *)
 private type mpfr_tmp_exp_t = x:mpfr_exp_t{I32.(x >=^ mpfr_EMIN /\ x <=^ mpfr_EMAX +^ 1l)}
 
-noeq type state = {
+private noeq type state = {
     sh:mpfr_reg_prec_t;
     bx:mpfr_tmp_exp_t;
     rb:mp_limb_t;
@@ -76,18 +77,6 @@ let mk_state sh bx rb sb = {
     rb = rb;
     sb = sb
 }
-
-(* pre/post-condition for mpfr_add1sp1_any *)
-let mpfr_add1sp1_common_pre_cond a b c (p:mpfr_reg_prec_t) h =
-    mpfr_reg_cond_ h b /\ mpfr_reg_cond_ h c /\
-    U32.v p < U32.v gmp_NUMB_BITS /\
-    a.mpfr_prec = p /\ b.mpfr_prec = p /\ c.mpfr_prec = p /\
-    live h a.mpfr_d /\ live h b.mpfr_d /\ live h c.mpfr_d /\
-    length a.mpfr_d = 1 /\ length b.mpfr_d = 1 /\ length c.mpfr_d = 1
-
-let mpfr_add1sp1_any_pre_cond a b c (p:mpfr_reg_prec_t) h =
-    a.mpfr_sign = b.mpfr_sign /\
-    mpfr_add1sp1_common_pre_cond a b c p h
     
 let mpfr_add1sp1_any_post_cond a b c h0 s h1 =
     let p = U32.v a.mpfr_prec in
@@ -101,218 +90,8 @@ let mpfr_add1sp1_any_post_cond a b c h0 s h1 =
     as_val h1 a.mpfr_d * pow2 (r.len - 64) = (high_mant r p).limb /\
     U32.v s.sh = U32.v gmp_NUMB_BITS - p /\
     I32.v s.bx = (high_mant r p).exp /\
-    (v s.rb <> 0 <==> rb_def r p) /\
-    (v s.sb <> 0 <==> sb_def r p))
-
-val mpfr_add1sp1_any_post_cond_comm_lemma:
-    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct -> h0:mem -> s:state -> h1:mem -> Lemma
-    (requires (mpfr_add1sp1_any_post_cond a b c h0 s h1))
-    (ensures  (mpfr_add1sp1_any_post_cond a c b h0 s h1))
-
-let mpfr_add1sp1_any_post_cond_comm_lemma a b c h0 s h1 = ()
-
-(* pre-condition for mpfr_add1sp1_gt where b.exp > c.exp *)
-let mpfr_add1sp1_gt_pre_cond a b c sh h =
-    I32.v b.mpfr_exp > I32.v c.mpfr_exp /\
-    U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-    mpfr_add1sp1_common_pre_cond a b c U32.(gmp_NUMB_BITS -^ sh) h
-
-(* lemmas and implementation for mpfr_add1sp1_gt_branch1 where d < sh *)
-let mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h =
-    mpfr_add1sp1_gt_pre_cond a b c sh h /\
-    U32.v d = I32.v b.mpfr_exp - I32.v c.mpfr_exp /\
-    v mask = pow2 (U32.v sh) - 1 /\
-    U32.v d < U32.v sh
-    
-val mpfr_add1sp1_gt_branch1_a0_bx_lemma:
-    h:mem -> a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
-    sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Lemma
-    (requires (mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
-    (ensures  (
-    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
-    let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h b.mpfr_d) 0 in
-    let c0 = Seq.index (as_seq h c.mpfr_d) 0 in
-    let a0 = b0 +%^ (c0 >>^ d) in
-    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-    v a0 * pow2 (r.len - 64) = r.limb /\ I32.v bx = r.exp))
-
-let mpfr_add1sp1_gt_branch1_a0_bx_lemma h a b c sh d mask =
-    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
-    let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h b.mpfr_d) 0 in
-    let c0 = Seq.index (as_seq h c.mpfr_d) 0 in
-    let a0 = b0 +%^ (c0 >>^ d) in
-    let t0 = v b0 + v c0 / pow2 (U32.v d) in
-    //! assert(v a0 = t0 % pow2 64);
-    let a0, bx =
-        if a0 <^ b0 then begin
-	    //! assert(pow2 64 + v a0 = t0);
-	    lemma_div_distr (pow2 64) (v a0) 2;
-	    //! assert(pow2 63 + v a0 / 2 = t0 / pow2 1);
-	    let a0' = mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul) in
-	    let bx' = I32.(bx +^ 1l) in
-	    lemma_logor_disjoint mpfr_LIMB_HIGHBIT (a0 >>^ 1ul) 63;
-	    //! assert(v a0' = t0 / pow2 1);
-            lemma_pow2_mod_mod_zero (v b0) (U32.v sh) 1;
-            //! assert(v b0 % pow2 1 = 0);
-            lemma_pow2_mod_mod_zero (v c0) (U32.v sh) (U32.v d + 1);
-            lemma_pow2_mod_div (v c0) (U32.v d + 1) (U32.v d);
-	    //! assert(v c0 / pow2 (U32.v d) % pow2 1 = 0);
-	    lemma_mod_distr_zero (v b0) (v c0 / pow2 (U32.v d)) (pow2 1);
-	    //! assert(t0 / pow2 1 * pow2 1 = t0);
-	    lemma_pow2_div_mul t0 1 1;
-	    //! assert(v a0' * pow2 1 = t0);
-	    a0', bx'
-	end else begin
-	    //! assert(v a0 * pow2 0 = t0);
-	    a0, bx
-	end in
-    //! assert(v a0 * pow2 (I32.v bx - I32.v b.mpfr_exp) = t0);
-    lemma_pow2_mod_mod_zero (v c0) (U32.v sh) (U32.v d);
-    lemma_pow2_div_mul (v c0) (U32.v d) (U32.v d);
-    //! assert(v c0 / pow2 (U32.v d) * pow2 (U32.v d) = v c0);
-    lemma_distr_add_left (v b0) (v c0 / pow2 (U32.v d)) (pow2 (U32.v d));
-    //! assert(t0 * pow2 (U32.v d) = r.limb);
-    lemma_paren_mul_right (v a0) (pow2 (I32.v bx - I32.v b.mpfr_exp)) (pow2 (U32.v d));
-    lemma_pow2_mul (I32.v bx - I32.v b.mpfr_exp) (U32.v d);
-    //! assert(v a0 * pow2 (I32.v bx - I32.v b.mpfr_exp + U32.v d) = r.limb);
-    lemma_pow2_mul_range (v a0) (I32.v bx - I32.v b.mpfr_exp + U32.v d) 64;
-    lemma_bit_length r.limb r.len (I32.v bx - I32.v b.mpfr_exp + U32.v d + 64);
-    //! assert(I32.v bx = r.len + I32.v b.mpfr_exp - U32.v d - 64);
-    ()
-    
-val mpfr_add1sp1_gt_branch1_value_lemma:
-    h:mem -> a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
-    sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Lemma
-    (requires (mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
-    (ensures  (
-    let p = 64 - U32.v sh in
-    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
-    let r = high_mant r p in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
-    let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h bp) 0 in
-    let c0 = Seq.index (as_seq h cp) 0 in
-    let a0 = b0 +%^ (c0 >>^ d) in
-    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-    let a0 = a0 &^ (lognot mask) in
-    v a0 * pow2 (r.len - 64) = r.limb /\ I32.v bx = r.exp /\
-    v a0 >= pow2 63 /\ v a0 % pow2 (64 - p) = 0))
-
-let mpfr_add1sp1_gt_branch1_value_lemma h a b c sh d mask =
-    let p = 64 - U32.v sh in
-    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
-    let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h bp) 0 in
-    let c0 = Seq.index (as_seq h cp) 0 in
-    let a0 = b0 +%^ (c0 >>^ d) in
-    let t0 = v b0 + v c0 / pow2 (U32.v d) in
-    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-    mpfr_add1sp1_gt_branch1_a0_bx_lemma h a b c sh d mask;
-    lemma_pow2_mul_div (v a0) (r.len - 64) (r.len - p);
-    //! assert(v a0 / pow2 (64 - p) = r.limb / pow2 (r.len - p));
-    UInt.nth_lemma #64 (UInt.shift_right #64 (v a0) (64 - p)) (UInt.shift_right #64 (UInt.logand (v a0) (UInt.lognot (v mask))) (64 - p));
-    assert(v (a0 &^ lognot mask) / pow2 (64 - p) = r.limb / pow2 (r.len - p));
-    lemma_lognot_mask_mod a0 mask (64 - p);
-    //! assert(v (a0 &^ lognot mask) % pow2 (64 - p) = 0);
-    let a0 = a0 &^ (lognot mask) in
-    lemma_pow2_div_mul (v a0) (64 - p) (r.len - p);
-    //! assert((v a0 / pow2 (64 - p)) * pow2 (r.len - p) = r.limb / pow2 (r.len - p) * pow2 (r.len - p));
-    let r = high_mant r p in
-    lemma_div_le (pow2 (r.len - 1)) (v a0 * pow2 (r.len - 64)) (pow2 (r.len - 64));
-    lemma_pow2_div (r.len - 1) (r.len - 64);
-    lemma_multiple_div (v a0) (pow2 (r.len - 64));
-    //! assert(v a0 >= pow2 63);
-    ()
-
-val mpfr_add1sp1_gt_branch1_rb_lemma:
-    h:mem -> a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
-    sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Lemma
-    (requires (mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
-    (ensures  (
-    let p = U32.v a.mpfr_prec in
-    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
-    let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h bp) 0 in
-    let c0 = Seq.index (as_seq h cp) 0 in
-    let a0 = b0 +%^ (c0 >>^ d) in
-    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
-    v rb <> 0 <==> rb_def r p))
-
-let mpfr_add1sp1_gt_branch1_rb_lemma h a b c sh d mask = 
-    let p = U32.v a.mpfr_prec in
-    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
-    let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h bp) 0 in
-    let c0 = Seq.index (as_seq h cp) 0 in
-    let a0 = b0 +%^ (c0 >>^ d) in
-    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-    mpfr_add1sp1_gt_branch1_a0_bx_lemma h a b c sh d mask;
-    //! assert(v a0 * pow2 (r.len - 64) = r.limb);
-    lemma_multiple_div (v a0) (pow2 (r.len - 64));
-    UInt.slice_left_lemma (UInt.to_vec #r.len r.limb) 64;
-    //! assert(UInt.nth (v a0) p = UInt.nth #r.len r.limb p);
-    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
-    lemma_pow2_small_mod (U32.v sh - 1) 64;
-    //! assert(v (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) = pow2 (U32.v sh - 1));
-    lemma_bit_mask_value a0 (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) p;
-    if rb_def r p then assert(v rb <> 0) else assert(v rb = 0)
-    
-val mpfr_add1sp1_gt_branch1_sb_lemma:
-    h:mem -> a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
-    sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Lemma
-    (requires (mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
-    (ensures  (
-    let p = U32.v a.mpfr_prec in
-    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
-    let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h bp) 0 in
-    let c0 = Seq.index (as_seq h cp) 0 in
-    let a0 = b0 +%^ (c0 >>^ d) in
-    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
-    let sb = (a0 &^ mask) ^^ rb in
-    v sb <> 0 <==> sb_def r p))
-
-let mpfr_add1sp1_gt_branch1_sb_lemma h a b c sh d mask =
-    let p = U32.v a.mpfr_prec in
-    let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
-    let bx = b.mpfr_exp in
-    let b0 = Seq.index (as_seq h bp) 0 in
-    let c0 = Seq.index (as_seq h cp) 0 in
-    let a0 = b0 +%^ (c0 >>^ d) in
-    let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I32.(bx +^ 1l) else a0, bx in
-    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
-    let sb = (a0 &^ mask) ^^ rb in
-    lemma_pow2_small_mod (U32.v sh - 1) 64;
-    //! assert(v (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) = pow2 (U32.v sh - 1));
-    lemma_bit_mask (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) (64 - U32.v sh);
-    lemma_tail_mask mask (U32.v sh);
-    let rmask = mpfr_LIMB_MASK U32.(sh -^ 1ul) in
-    UInt.nth_lemma #64 (v (mask ^^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)))) (v rmask);
-    lemma_xor_and_distr a0 mask (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul));
-    //! assert(sb = (a0 &^ rmask));
-    lemma_tail_mask_value a0 rmask (U32.v sh - 1);
-    //! assert(v sb = (v a0) % pow2 (U32.v sh - 1));
-    lemma_mod_mul (v a0) (pow2 (U32.v sh - 1)) (pow2 (r.len - 64));
-    lemma_pow2_mul (U32.v sh - 1) (r.len - 64);
-    //! assert(v sb * pow2 (r.len - 64) = (v a0 * pow2 (r.len - 64)) % pow2 (r.len - p - 1));
-    mpfr_add1sp1_gt_branch1_a0_bx_lemma h a b c sh d mask;
-    //! assert(v sb * pow2 (r.len - 64) = r.limb % pow2 (r.len - p - 1));
-    lemma_mul_zero (v sb) (pow2 (r.len - 64))
+    (rb_def r p = (v s.rb <> 0)) /\
+    (sb_def r p = (v s.sb <> 0)))
 
 unfold val mpfr_add1sp1_gt_branch1:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
@@ -332,17 +111,11 @@ let mpfr_add1sp1_gt_branch1 a b c sh d mask =
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
     let sb = (a0 &^ mask) ^^ rb in
     ap.(0ul) <- a0 &^ (lognot mask);
-    mpfr_add1sp1_gt_branch1_value_lemma h a b c sh d mask;
-    mpfr_add1sp1_gt_branch1_rb_lemma h a b c sh d mask;
+    mpfr_add1sp1_gt_branch12_value_lemma h a b c sh d mask;
+    mpfr_add1sp1_gt_branch12_rb_lemma h a b c sh d mask;
     mpfr_add1sp1_gt_branch1_sb_lemma h a b c sh d mask;
     mk_state sh bx rb sb
 
-(* lemmas and implementation for mpfr_add1sp1_gt_branch1 where sh <= d < 64 *)
-let mpfr_add1sp1_gt_branch2_pre_cond a b c sh d mask h =
-    mpfr_add1sp1_gt_pre_cond a b c sh h /\
-    U32.v d = I32.v b.mpfr_exp - I32.v c.mpfr_exp /\
-    v mask = pow2 (U32.v sh) - 1 /\
-    U32.v d >= U32.v sh /\ U32.v d < U32.v gmp_NUMB_BITS
 
 unfold val mpfr_add1sp1_gt_branch2:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
@@ -351,6 +124,7 @@ unfold val mpfr_add1sp1_gt_branch2:
     (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
 let mpfr_add1sp1_gt_branch2 a b c sh d mask =
+    let h = ST.get() in
     let ap = a.mpfr_d in
     let bp = b.mpfr_d in
     let cp = c.mpfr_d in
@@ -364,13 +138,11 @@ let mpfr_add1sp1_gt_branch2 a b c sh d mask =
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
     let sb = sb |^ ((a0 &^ mask) ^^ rb) in
     ap.(0ul) <- a0 &^ (lognot mask);
-    admit();
+    mpfr_add1sp1_gt_branch12_value_lemma h a b c sh d mask;
+    mpfr_add1sp1_gt_branch12_rb_lemma h a b c sh d mask;
+    mpfr_add1sp1_gt_branch2_sb_lemma h a b c sh d mask;
     mk_state sh bx rb sb
 
-(* lemmas and implementation for mpfr_add1sp1_gt_branch1 where d >= 64 *)
-let mpfr_add1sp1_gt_branch3_pre_cond a b c sh h =
-    mpfr_add1sp1_gt_pre_cond a b c sh h /\
-    I32.v b.mpfr_exp - I32.v c.mpfr_exp >= U32.v gmp_NUMB_BITS
     
 unfold val mpfr_add1sp1_gt_branch3:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
@@ -378,14 +150,17 @@ unfold val mpfr_add1sp1_gt_branch3:
     (requires (fun h -> mpfr_add1sp1_gt_branch3_pre_cond a b c sh h))
     (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
-let mpfr_add1sp1_gt_branch3 a b _ sh =
+let mpfr_add1sp1_gt_branch3 a b c sh =
+    let h = ST.get() in
     let ap = a.mpfr_d in
-    let bp = a.mpfr_d in
+    let bp = b.mpfr_d in
     let bx = b.mpfr_exp in
     ap.(0ul) <- bp.(0ul);
     let rb = 0uL in
     let sb = 1uL in
-    admit();
+    mpfr_add1sp1_gt_branch3_value_lemma h a b c sh;
+    mpfr_add1sp1_gt_branch3_rb_lemma h a b c sh;
+    mpfr_add1sp1_gt_branch3_sb_lemma h a b c sh;
     mk_state sh bx rb sb
 
 unfold val mpfr_add1sp1_gt:
@@ -396,24 +171,14 @@ unfold val mpfr_add1sp1_gt:
                            mpfr_add1sp1_any_post_cond a c b h0 s h1))
 
 let mpfr_add1sp1_gt a b c p sh =
-    let h0 = ST.get() in
     let bx = b.mpfr_exp in
     let cx = c.mpfr_exp in
     let d = int32_to_uint32 I32.(bx -^ cx) in
     let mask = mpfr_LIMB_MASK sh in
-    let s = (
     if U32.(d <^ sh) then mpfr_add1sp1_gt_branch1 a b c sh d mask
     else if U32.(d <^ gmp_NUMB_BITS) then mpfr_add1sp1_gt_branch2 a b c sh d mask
-    else mpfr_add1sp1_gt_branch3 a b c sh) in
-    let h1 = ST.get() in
-    mpfr_add1sp1_any_post_cond_comm_lemma a b c h0 s h1;
-    s
+    else mpfr_add1sp1_gt_branch3 a b c sh
 
-(* pre-condition for mpfr_add1sp1_eq where b.exp = c.exp *)
-let mpfr_add1sp1_eq_pre_cond a b c sh h =
-    I32.v b.mpfr_exp = I32.v c.mpfr_exp /\
-    U32.v sh = U32.v gmp_NUMB_BITS - U32.v a.mpfr_prec /\
-    mpfr_add1sp1_any_pre_cond a b c U32.(gmp_NUMB_BITS -^ sh) h
     
 unfold val mpfr_add1sp1_eq:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
@@ -422,16 +187,18 @@ unfold val mpfr_add1sp1_eq:
     (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
 let mpfr_add1sp1_eq a b c p sh =
-   let ap = a.mpfr_d in
-   let bp = b.mpfr_d in
-   let cp = c.mpfr_d in
-   let a0 = (bp.(0ul) >>^ 1ul) +^ (cp.(0ul) >>^ 1ul) in
-   let bx = I32.(b.mpfr_exp +^ 1l) in
-   let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
-   ap.(0ul) <- a0 ^^ rb;
-   let sb = 0uL in
-   admit();
-   mk_state sh bx rb sb
+    let h = ST.get() in
+    let ap = a.mpfr_d in
+    let bp = b.mpfr_d in
+    let cp = c.mpfr_d in
+    let a0 = (bp.(0ul) >>^ 1ul) +^ (cp.(0ul) >>^ 1ul) in
+    let bx = I32.(b.mpfr_exp +^ 1l) in
+    let rb = a0 &^ (mpfr_LIMB_ONE <<^ U32.(sh -^ 1ul)) in
+    ap.(0ul) <- a0 ^^ rb;
+    let sb = 0uL in
+    mpfr_add1sp1_eq_value_lemma h a b c sh;
+    mpfr_add1sp1_eq_rb_sb_lemma h a b c sh;
+    mk_state sh bx rb sb
 
 unfold val mpfr_add1sp1_any:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->

@@ -13,6 +13,7 @@ MPFR_FILES=	MPFR.Maths.fst \
 		MPFR.RoundingMode.fst \
 		MPFR.Round.Spec.fst \
 		MPFR.Lib.fst \
+		MPFR.Add1sp1.Lemma.fst \
 		MPFR.Add1sp1.fst
 
 # This target is very concise and re-uses the variables defined in

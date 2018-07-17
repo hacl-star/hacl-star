@@ -173,7 +173,14 @@ let rb_sb_lemma a p =
         lemma_mul_lt_right (pow2 (p + 1)) (a.limb % pow2 (a.len - p)) (pow2 (a.len - p - 1));
 	lemma_pow2_mul (a.len - p - 1) (p + 1)
     end
-	
+
+val sb_bitwise_lemma: a:normal_fp -> p:pos{p < a.prec} -> Lemma
+    (requires (sb_def a p = false))
+    (ensures  (forall (i:nat{p + 1 <= i /\ i < a.len}). nth #a.len a.limb i = false))
+
+let sb_bitwise_lemma a p =
+    lemma_mod_pow2_imp_tl_zero #a.len a.limb (a.len - p - 1)
+
 val rndn_spec: a:normal_fp -> p:pos{p < a.prec} -> Tot normal_fp
     
 let rndn_spec a p =
@@ -276,7 +283,7 @@ val round_rb_sb_lemma: a:normal_fp -> p:pos{p < a.prec} ->
 		   high.limb * pow2 ((high_mant a p).len - high.len) = (high_mant a p).limb} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t -> Lemma
     (eval (round_rb_sb_spec high rb sb rnd_mode) =. eval (round_def a p rnd_mode))
-
+    
 let round_rb_sb_lemma a p high rb sb rnd_mode =
     round_rb_sb_lemma_ a p (high_mant a p) rb sb rnd_mode;
     assume(is_even high = is_even (high_mant a p));
