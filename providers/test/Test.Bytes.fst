@@ -6,7 +6,6 @@ open EverCrypt
 open EverCrypt.Bytes
 open Test.Vectors
 open LowStar.BufferOps
-open FStar.Integers
 
 open C.String
 
@@ -31,16 +30,23 @@ let failure h msg =
   print !$"\n";
   false
 
-val test_chacha20_poly1305: v:aead_vector{v.cipher == CHACHA20_POLY1305} -> St bool
-let test_chacha20_poly1305 v =
+let vec8 = B.buffer UInt8.t * UInt32.t
+let of_vec8 (v: vec8) =
+  let buf, len = v in
+  FStar.Bytes.of_buffer len buf
+
+type aead_vector = cipher * vec8 * vec8 * vec8 * vec8 * vec8 * vec8
+
+let test_chacha20_poly1305 (arg: aead_vector) =
+  let cipher, key, iv, aad, tag, plaintext, ciphertext = arg in
   let open FStar.Bytes in
   let h = !$"Chacha20-Poly1305 bytes" in
-  let key        = of_buffer v.key_len v.key in
-  let iv         = of_buffer v.iv_len v.iv in
-  let aad        = of_buffer v.aad_len v.aad in
-  let tag        = of_buffer v.tag_len v.tag in
-  let plaintext  = of_buffer v.plaintext_len v.plaintext in
-  let ciphertext = of_buffer v.ciphertext_len v.ciphertext in
+  let key        = of_vec8 key in
+  let iv         = of_vec8 iv in
+  let aad        = of_vec8 aad in
+  let tag        = of_vec8 tag in
+  let plaintext  = of_vec8 plaintext in
+  let ciphertext = of_vec8 ciphertext in
   let open EverCrypt.Bytes in
   let { cipher=ciphertext'; tag=tag'} = chacha20_poly1305_encrypt plaintext aad key iv in
   if ciphertext' = ciphertext && tag' = tag then
@@ -55,12 +61,13 @@ let test_chacha20_poly1305 v =
 // TODO: switch to a C loop
 val test_aead: len:UInt32.t -> b:B.buffer aead_vector { B.len b = len } -> St bool
 let rec test_aead len b =
+  let open FStar.Integers in
   if len = 0ul then
     true
   else
     let v = b.(0ul) in
-    match v.cipher with
-    | CHACHA20_POLY1305 ->
+    match v with
+    | CHACHA20_POLY1305, _, _, _, _, _, _ ->
       let this = test_chacha20_poly1305 v in
       let rest = test_aead (len - 1ul) (B.offset b 1ul) in
       this && rest
@@ -68,5 +75,6 @@ let rec test_aead len b =
 
 val main: unit -> St unit
 let main () =
+  let aead_vectors, aead_vectors_len = Test.Vectors.aead_vectors_low in
   let res = test_aead aead_vectors_len aead_vectors in
   if not res then C.exit 1l

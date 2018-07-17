@@ -1,4 +1,4 @@
-module Test.Vectors2
+module Test.Lowstarize
 
 open FStar.Tactics
 open LowStar.BufferOps
@@ -33,7 +33,7 @@ let int_of_hex (c: FStar.Char.char): Tot (c:nat{c<16}) =
   | 'd' | 'D' -> 13
   | 'e' | 'E' -> 14
   | 'f' | 'F' -> 15
-  | _ -> admit ()
+  | _ -> let _ = FStar.IO.debug_print_string "illegal character" in admit ()
 
 noextract
 let uint8_of_hex c1 c2 =
@@ -147,17 +147,19 @@ let is_hex e =
 // TODO: instead of pairs, use a dependent type that ties together an array and
 // its length
 
-noextract
-let gensym (uniq: int): Tac (int * name) =
-  uniq + 1, cur_module () @ [ "low" ^ string_of_int uniq ]
+let gensym = string * nat
 
 noextract
-let mk_gcmalloc_of_list (uniq: int) (arg: term) (l: nat{l < pow2 32}): Tac (int * sigelt * term) =
+let fresh (uniq: gensym): Tac (gensym * name) =
+  (fst uniq, snd uniq + 1), cur_module () @ [ fst uniq ^ string_of_int (snd uniq) ]
+
+noextract
+let mk_gcmalloc_of_list (uniq: gensym) (arg: term) (l: nat{l < pow2 32}): Tac (gensym * sigelt * term) =
   let def: term = pack (Tv_App
     (pack (Tv_App (`LowStar.Buffer.gcmalloc_of_list) (`HS.root, Q_Explicit)))
     (arg, Q_Explicit)
   ) in
-  let uniq, name = gensym uniq in
+  let uniq, name = fresh uniq in
   let fv: fv = pack_fv name in
   let t: term = pack Tv_Unknown in
   let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
@@ -165,7 +167,7 @@ let mk_gcmalloc_of_list (uniq: int) (arg: term) (l: nat{l < pow2 32}): Tac (int 
   uniq, se, `(`#thanks_guido_for_the_workaround, FStar.UInt32.uint_to_t (`@l))
 
 noextract
-let lowstarize_hex (uniq: int) (s: string): Tac (int * sigelt * term) =
+let lowstarize_hex (uniq: gensym) (s: string): Tac (gensym * sigelt * term) =
   if String.length s % 2 <> 0 then
     fail ("The following string has a non-even length: " ^ s)
   else
@@ -183,7 +185,10 @@ let lowstarize_string (s: string): Tac term =
   `(C.String.of_literal (`@s))
 
 noextract
-let rec lowstarize_expr (uniq: int) (e: term): Tac (int * list sigelt * term) =
+let rec lowstarize_expr (uniq: gensym) (e: term): Tac (gensym * list sigelt * term) =
+  let _ = print ("about to normalize: " ^ term_to_string e ^ "\n") in
+  let e = norm_term [ delta; zeta; iota; primops ] e in
+  let _ = print ("hitting: " ^ term_to_string e ^ "\n") in
   if is_hex e then
     let uniq, se, e = lowstarize_hex uniq (must (destruct_hex e)) in
     uniq, [ se ], e
@@ -196,7 +201,7 @@ let rec lowstarize_expr (uniq: int) (e: term): Tac (int * list sigelt * term) =
   else
     uniq, [], e
 
-and lowstarize_list (uniq: int) (es: list term): Tac (int * list sigelt * term) =
+and lowstarize_list (uniq: gensym) (es: list term): Tac (gensym * list sigelt * term) =
   let uniq, ses, es = fold_left (fun (uniq, ses, es) e ->
     let uniq, se, e = lowstarize_expr uniq e in
     uniq, List.Tot.rev_acc se ses, e :: es
@@ -207,7 +212,7 @@ and lowstarize_list (uniq: int) (es: list term): Tac (int * list sigelt * term) 
   let uniq, se, e = mk_gcmalloc_of_list uniq (mk_list es) l in
   uniq, List.rev (se :: ses), e
 
-and lowstarize_tuple (uniq: int) (es: list term): Tac (int * list sigelt * term) =
+and lowstarize_tuple (uniq: gensym) (es: list term): Tac (gensym * list sigelt * term) =
   let uniq, ses, es = fold_left (fun (uniq, ses, es) e ->
     let uniq, se, e = lowstarize_expr uniq e in
     uniq, List.Tot.rev_acc se ses, e :: es
@@ -221,12 +226,14 @@ let lowstarize_toplevel src dst: Tac unit =
   let str = lookup_typ (cur_env ()) (cur_module () @ [ src ]) in
   let str = match str with Some str -> str | _ -> admit () in
   let def = match inspect_sigelt str with Sg_Let _ _ _ _ def -> def | _ -> admit () in
-  let _, ses, def = lowstarize_expr 0 def in
+  let _, ses, def = lowstarize_expr (dst, 0) def in
   let fv: fv = pack_fv (cur_module () @ [ dst ]) in
   let t: term = pack Tv_Unknown in
   let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
   exact (quote (normalize_term (ses @ [ se ])))
 
+(* Tests *)
+(*
 // Some notes: empty lists are not allowed because they give inference errors!
 noextract
 let test_vectors = [
@@ -234,5 +241,9 @@ let test_vectors = [
   h"090a0b0c0d0e0f10", [ h"fe" ], "another test string";
 ]
 
+noextract
+let test_vectors' = List.Tot.map (fun x -> x) test_vectors
+
 #set-options "--lax"
-%splice[] (fun () -> lowstarize_toplevel "test_vectors" "low_test_vectors")
+%splice[] (fun () -> lowstarize_toplevel "test_vectors'" "low_test_vectors")
+*)
