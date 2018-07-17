@@ -6,6 +6,14 @@ open LowStar.BufferOps
 module B = LowStar.Buffer
 module HS = FStar.HyperStack
 
+// We rely on a single user-level function: h, which indicates that the string
+// is hex-encoded. Otherwise, the string becomes a call to C.String.of_literal.
+
+assume new type hex_encoded
+assume val h: string -> hex_encoded
+
+// A bunch of helpers. TODO: fail gracefully if there is a character outside of the hex range.
+
 noextract
 let int_of_hex (c: FStar.Char.char): Tot (c:nat{c<16}) =
   match c with
@@ -39,32 +47,6 @@ let rec as_uint8s acc (cs: list FStar.Char.char{List.Tot.length cs % 2 = 0}): To
   | [] ->
       List.rev acc
 
-noextract
-let gensym (uniq: int): Tac (int * name) =
-  uniq + 1, cur_module () @ [ "low" ^ string_of_int uniq ]
-
-noextract
-let mk_gcmalloc_of_list (uniq: int) (arg: term) (l: nat{l < pow2 32}): Tac (int * sigelt * term) =
-  let def: term = pack (Tv_App
-    (pack (Tv_App (`LowStar.Buffer.gcmalloc_of_list) (`HS.root, Q_Explicit)))
-    (arg, Q_Explicit)
-  ) in
-  let uniq, name = gensym uniq in
-  let fv: fv = pack_fv name in
-  let t: term = pack Tv_Unknown in
-  let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
-  let thanks_guido_for_the_workaround = pack (Tv_FVar fv) in
-  uniq, se, `(`#thanks_guido_for_the_workaround, FStar.UInt32.uint_to_t (`@l))
-
-noextract
-let lowstarize_string (uniq: int) (s: string): Tac (int * sigelt * term) =
-  if String.length s % 2 <> 0 then
-    fail ("The following string has a non-even length: " ^ s)
-  else
-    let constants = as_uint8s [] (String.list_of_string s) in
-    let l = String.length s in
-    assume (l < pow2 32);
-    mk_gcmalloc_of_list uniq (quote constants) (l / 2)
 
 noextract
 let destruct_string e =
@@ -140,10 +122,73 @@ let is_tuple (e: term) =
       false
 
 noextract
+let destruct_hex (e: term) =
+  let hd, tl = collect_app e in
+  if term_eq (`h) hd then begin
+    assume (List.Tot.length tl > 0);
+    destruct_string (fst (List.Tot.hd tl))
+  end else
+    None
+
+noextract
+let is_hex e =
+  is_some (destruct_hex e)
+
+// Main Tactic. This tactic fetches a top-level term and defines another,
+// Low*-ized top-level term for it, where:
+// - hex-encoded strings are lifted as top-level constant uint8 arrays
+// - references to hex-encoded strings are replaced by a pair of the length
+//   of the corresponding array, and a reference to that array
+// - lists are lifted as top-level arrays (using gcmalloc_of_list)
+// - strings that are not marked as hex-encoded are lifted to C.String.t
+// - tuples are traversed transparently
+// - everything else is left as-is
+//
+// TODO: instead of pairs, use a dependent type that ties together an array and
+// its length
+
+noextract
+let gensym (uniq: int): Tac (int * name) =
+  uniq + 1, cur_module () @ [ "low" ^ string_of_int uniq ]
+
+noextract
+let mk_gcmalloc_of_list (uniq: int) (arg: term) (l: nat{l < pow2 32}): Tac (int * sigelt * term) =
+  let def: term = pack (Tv_App
+    (pack (Tv_App (`LowStar.Buffer.gcmalloc_of_list) (`HS.root, Q_Explicit)))
+    (arg, Q_Explicit)
+  ) in
+  let uniq, name = gensym uniq in
+  let fv: fv = pack_fv name in
+  let t: term = pack Tv_Unknown in
+  let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
+  let thanks_guido_for_the_workaround = pack (Tv_FVar fv) in
+  uniq, se, `(`#thanks_guido_for_the_workaround, FStar.UInt32.uint_to_t (`@l))
+
+noextract
+let lowstarize_hex (uniq: int) (s: string): Tac (int * sigelt * term) =
+  if String.length s % 2 <> 0 then
+    fail ("The following string has a non-even length: " ^ s)
+  else
+    let constants = as_uint8s [] (String.list_of_string s) in
+    let l = String.length s in
+    assume (l < pow2 32);
+    mk_gcmalloc_of_list uniq (quote constants) (l / 2)
+
+// Dependency analysis bug: does not go inside quotations (#1496)
+
+module Whatever = C.String
+
+noextract
+let lowstarize_string (s: string): Tac term =
+  `(C.String.of_literal (`@s))
+
+noextract
 let rec lowstarize_expr (uniq: int) (e: term): Tac (int * list sigelt * term) =
-  if is_string e then
-    let uniq, se, e = lowstarize_string uniq (must (destruct_string e)) in
+  if is_hex e then
+    let uniq, se, e = lowstarize_hex uniq (must (destruct_hex e)) in
     uniq, [ se ], e
+  else if is_string e then
+    uniq, [], lowstarize_string (must (destruct_string e))
   else if is_list e then
     lowstarize_list uniq (must (destruct_list e))
   else if is_tuple e then
@@ -185,8 +230,8 @@ let lowstarize_toplevel src dst: Tac unit =
 // Some notes: empty lists are not allowed because they give inference errors!
 noextract
 let test_vectors = [
-  "000102030405060708", [ "ff" ];
-  "090a0b0c0d0e0f10", [ "fe" ];
+  h"000102030405060708", [ h"ff" ], "hello test string";
+  h"090a0b0c0d0e0f10", [ h"fe" ], "another test string";
 ]
 
 #set-options "--lax"
