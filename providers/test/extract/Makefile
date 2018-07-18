@@ -15,6 +15,11 @@ else
 LDFLAGS += -lbcrypt
 endif
 
+ifeq ($(UNAME),Linux)
+  LDFLAGS += -Wl,-z,defs,-z,noexecstack
+endif
+
+
 LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
 # See https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html

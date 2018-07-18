@@ -50,8 +50,8 @@ include .depend
 %.checked: | .depend
 	$(FSTAR) \
 	  --cache_checked_modules \
-	  --cache_dir $(CACHE_DIR) \
 	  --admit_smt_queries true \
+	  --cache_dir $(CACHE_DIR) \
 	  $(addprefix --include , $(INCLUDE_PATHS)) \
 	  $<
 
@@ -73,6 +73,7 @@ $(EXTRACT_DIR)/Test.c: $(ALL_KRML_FILES) | .depend
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -add-include '"temp.h"' \
 	  -bundle LowStar.* \
+	  -bundle Test.Lowstarize \
 	  -bundle Hacl.Spec.*,Hacl.Spe.*,Spec.* \
 	  -library EverCrypt,EverCrypt.* \
 	  -ccopt -g
