@@ -75,7 +75,7 @@ $(EXTRACT_DIR)/Test.c: $(ALL_KRML_FILES) | .depend
 	  -bundle LowStar.* \
 	  -bundle Test.Lowstarize \
 	  -bundle Hacl.Spec.*,Hacl.Spe.*,Spec.* \
-	  -library EverCrypt,EverCrypt.*,C.Failure \
+	  -library EverCrypt,EverCrypt.* \
 	  -ccopt -g
 
 test: $(EXTRACT_DIR)/Test.c
