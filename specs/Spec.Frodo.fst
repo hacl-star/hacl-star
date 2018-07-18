@@ -11,6 +11,8 @@ open Spec.PQ.Lib
 open Spec.Keccak
 open Spec.Frodo.Lemmas
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --using_facts_from '* -FStar.*  +FStar.Pervasives -Spec.* +Spec.Frodo'"
+
 val matrix_eq:
   #t:numeric_t -> #n1:size_nat -> #n2:size_nat ->
   m:size_nat{m > 0} ->
@@ -80,7 +82,6 @@ unfold type elem_t:numeric_t = U16
 val ec:
   b:size_nat{b <= params_logq} -> k:uint16{uint_v k < pow2 b} ->
   Tot (r:uint16{uint_v r < pow2 params_logq /\ uint_v r = (uint_v k) * pow2 (params_logq - b)})
-  #reset-options "--z3rlimit 50 --max_fuel 0"
 let ec b k =
   let res = k <<. u32 (params_logq - b) in
   assert (uint_v res = (uint_v k * pow2 (params_logq - b)) % modulus U16);
@@ -96,7 +97,6 @@ let ec b k =
 val dc:
   b:size_nat{b < params_logq} -> c:uint16 ->
   Tot (r:uint16{uint_v r < pow2 b /\ uint_v r = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 b})
-  #reset-options "--z3rlimit 50 --max_fuel 0"
 let dc b c =
   let res1 = (c +. (u16 1 <<. u32 (params_logq - b - 1))) >>. u32 (params_logq - b) in
   assert (uint_v res1 = (((uint_v c + pow2 (params_logq - b - 1) % modulus U16) % modulus U16) / pow2 (params_logq - b)) % modulus U16);
@@ -117,7 +117,6 @@ val frodo_key_encode:
   b:size_nat{(params_nbar * params_nbar * b) / 8 < max_size_t /\ b <= 8} ->
   a:lbytes ((params_nbar * params_nbar * b) / 8) ->
   Tot (matrix_t elem_t params_nbar params_nbar)
-  #reset-options "--z3rlimit 50 --max_fuel 0"
 let frodo_key_encode b a =
   let res = matrix_create elem_t params_nbar params_nbar in
   repeati params_nbar
@@ -141,7 +140,6 @@ val frodo_key_decode:
   b:size_nat{(params_nbar * params_nbar * b) / 8 < max_size_t /\ b <= 8} ->
   a:matrix_t elem_t params_nbar params_nbar ->
   Tot (lbytes ((params_nbar * params_nbar * b) / 8))
-  #reset-options "--z3rlimit 50 --max_fuel 0"
 let frodo_key_decode b a =
   let resLen = (params_nbar * params_nbar * b) / 8 in
   let res = create resLen (u8 0) in
@@ -162,7 +160,6 @@ val frodo_pack:
   n1:size_nat -> n2:size_nat{n1 * n2 < max_size_t /\ n2 % 8 = 0} ->
   a:matrix_t elem_t n1 n2 ->
   d:size_nat{(d * n1 * n2) / 8 < max_size_t /\ d <= 16} -> Tot (lbytes ((d * n1 * n2) / 8))
-  #reset-options "--z3rlimit 50 --max_fuel 0"
 let frodo_pack n1 n2 a d =
   let maskd = (u128 1 <<. u32 d) -. u128 1 in
   let resLen = (d * n1 * n2) / 8 in
@@ -205,12 +202,10 @@ let frodo_unpack n1 n2 d b =
   ) res
 
 val frodo_sample: r:uint16 -> Tot (uint_t elem_t)
-#reset-options "--z3rlimit 50 --max_fuel 1"
 let frodo_sample r =
   let t = r >>. u32 1 in
   let e = 0 in
   let r0 = r &. u16 1 in
-
   let e = repeati (cdf_table_len - 1)
   (fun z e ->
     let e = if (uint_to_nat t > cdf_table.[z]) then e + 1 else e in e
