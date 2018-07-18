@@ -13,7 +13,7 @@
 
 typedef struct quic_key {
   mitls_aead alg;
-  unsigned char key[32]; 
+  unsigned char key[32];
   unsigned char static_iv[12];
   union {
     unsigned char case_chacha20[32];
@@ -284,7 +284,7 @@ static inline void sn_to_iv(unsigned char *iv, uint64_t sn)
     iv[i] ^= (sn >> (88-(i<<3))) & 255;
 }
 
-int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsigned char *raw_key, const unsigned char *iv)
+int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsigned char *raw_key, const unsigned char *iv, const unsigned char *pne_key)
 {
   quic_key *k = KRML_HOST_MALLOC(sizeof(quic_key));
   if(!k) return 0;
@@ -293,6 +293,13 @@ int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsi
   k->alg = alg;
   memcpy(k->key, raw_key, klen);
   memcpy(k->static_iv, iv, 12);
+
+  if(alg == TLS_aead_AES_128_GCM)
+    k->pne.case_aes128 = EverCrypt_aes128_create(pne_key);
+  else if(alg == TLS_aead_AES_256_GCM)
+    k->pne.case_aes256 = EverCrypt_aes256_create(pne_key);
+  else if(alg == TLS_aead_CHACHA20_POLY1305)
+    memcpy(k->pne.case_chacha20, pne_key, 32);
 
   *key = k;
   return 1;

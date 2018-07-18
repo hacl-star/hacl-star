@@ -51,7 +51,7 @@ int MITLS_CALLCONV quic_crypto_derive_key(/*out*/quic_key **key, const quic_secr
 // and 32 bytes for AES-256 and ChaCha20.
 // Using quic_crypto_derive_key is recommended over quic_crypto_create
 // The created key must be freed with quic_crypto_free_key
-int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsigned char *raw_key, const unsigned char *iv);
+int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsigned char *raw_key, const unsigned char *iv, const unsigned char *pne_key);
 
 // AEAD-encrypts plain with additional data ad, using counter sn,
 // writing plain_len + 16 bytes to the output cipher. The input and

@@ -21,8 +21,8 @@ impl x25519_impl = Hacl;
 impl aes128_impl = Hacl;
 impl aes256_impl = Hacl;
 impl chacha20_impl = Hacl;
-impl aes128_gcm_impl = OpenSSL;
-impl aes256_gcm_impl = OpenSSL;
+impl aes128_gcm_impl = Vale;
+impl aes256_gcm_impl = Vale;
 impl chacha20_poly1305_impl = Hacl;
 
 // https://en.wikipedia.org/wiki/CPUID
