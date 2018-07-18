@@ -364,7 +364,7 @@ inline_for_extraction
 val nat_mod_v: #m:pos -> s:nat_mod m -> n:nat{uint_v #(NATm m) s == n}
 
 inline_for_extraction
-val modulo: x:nat -> m:pos -> s:nat_mod m{uint_v #(NATm m) s == x}
+val modulo: x:nat -> m:pos -> s:nat_mod m{uint_v #(NATm m) s == x % m}
 
 inline_for_extraction
 val div: #t:inttype{t == SIZE \/ NATm? t} -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
