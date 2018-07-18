@@ -12,7 +12,9 @@ type hash_alg =
 | SHA384
 | SHA512
 
-noeq
+#set-options "--lax"
+
+noeq noextract
 type hash_vector = {
   (* The input [input] is repeated [repeat] times. *)
   hash_alg: hash_alg;
@@ -157,9 +159,7 @@ let hash_vectors_tmp = List.Tot.map (fun h ->
   h.hash_alg, h.input, h.output, h.repeat
 ) hash_vectors
 
-#set-options "--lax"
 %splice[] (fun () -> lowstarize_toplevel "hash_vectors_tmp" "hash_vectors_low")
-#reset-options
 
 /// Cipher block function
 
@@ -168,7 +168,7 @@ type block_cipher =
   | AES256
 
 // Funky field names to avoid collisions...
-noeq
+noeq noextract
 type block_cipher_vector = {
   block: block_cipher;
   rkey: hex_encoded;
@@ -225,11 +225,9 @@ let block_cipher_vectors_tmp = List.Tot.map (fun h ->
   h.block, h.rkey, h.plain, h.enc
 ) block_cipher_vectors
 
-#set-options "--lax"
 %splice[] (fun () -> lowstarize_toplevel "block_cipher_vectors_tmp" "block_cipher_vectors_low")
-#reset-options
 
-noeq
+noeq noextract
 type chacha20_vector = {
   c20_key: hex_encoded;
   c20_iv: hex_encoded;
@@ -253,9 +251,7 @@ let chacha20_vectors_tmp = List.Tot.map (fun h ->
   h.c20_key, h.c20_iv, h.c20_ctr, h.c20_plain, h.c20_cipher
 ) chacha20_vectors
 
-#set-options "--lax"
 %splice[] (fun () -> lowstarize_toplevel "chacha20_vectors_tmp" "chacha20_vectors_low")
-#reset-options
 
 /// AEAD
 
@@ -264,7 +260,7 @@ type cipher =
   | AES_256_GCM
   | CHACHA20_POLY1305
 
-noeq
+noeq noextract
 type aead_vector = {
   cipher: cipher;
   key: hex_encoded;
@@ -479,6 +475,4 @@ let aead_vectors_tmp = List.Tot.map (fun h ->
   h.cipher, h.key, h.iv, h.aad, h.tag, h.plaintext, h.ciphertext
 ) aead_vectors
 
-#set-options "--lax"
 %splice[] (fun () -> lowstarize_toplevel "aead_vectors_tmp" "aead_vectors_low")
-#reset-options

@@ -36,17 +36,32 @@ let int_of_hex (c: FStar.Char.char): Tot (c:nat{c<16}) =
   | _ -> let _ = FStar.IO.debug_print_string "illegal character" in admit ()
 
 noextract
-let uint8_of_hex c1 c2 =
-  FStar.UInt8.uint_to_t FStar.Mul.(int_of_hex c1 * 16 + int_of_hex c2)
+let byte_of_hex c1 c2 =
+  FStar.Mul.(int_of_hex c1 * 16 + int_of_hex c2)
 
 noextract
-let rec as_uint8s acc (cs: list FStar.Char.char{List.Tot.length cs % 2 = 0}): Tot (list FStar.UInt8.t) (decreases cs) =
+let mk_int (i: int): term =
+    pack_ln (Tv_Const (C_Int i))
+
+noextract
+let mk_uint8 (x: int): Tac term =
+  pack (Tv_App (pack (Tv_FVar (pack_fv ["FStar";"UInt8";"__uint_to_t"])))
+    (mk_int x, Q_Explicit))
+
+noextract
+let mk_uint32 (x: int): Tac term =
+  pack (Tv_App (pack (Tv_FVar (pack_fv ["FStar";"UInt32";"__uint_to_t"])))
+    (mk_int x, Q_Explicit))
+
+noextract
+let rec as_uint8s acc (cs: list FStar.Char.char{List.Tot.length cs % 2 = 0}):
+  Tac term (decreases cs)
+=
   match cs with
   | c1 :: c2 :: cs ->
-      as_uint8s (uint8_of_hex c1 c2 :: acc) cs
+      as_uint8s (mk_uint8 (byte_of_hex c1 c2) :: acc) cs
   | [] ->
-      List.rev acc
-
+      mk_list (List.rev acc)
 
 noextract
 let destruct_string e =
@@ -154,17 +169,18 @@ let fresh (uniq: gensym): Tac (gensym * name) =
   (fst uniq, snd uniq + 1), cur_module () @ [ fst uniq ^ string_of_int (snd uniq) ]
 
 noextract
-let mk_gcmalloc_of_list (uniq: gensym) (arg: term) (l: nat{l < pow2 32}): Tac (gensym * sigelt * term) =
+let mk_gcmalloc_of_list (uniq: gensym) (arg: term) (l: nat{l < pow2 32}) (t: option term):
+  Tac (gensym * sigelt * term)
+=
   let def: term = pack (Tv_App
     (pack (Tv_App (`LowStar.Buffer.gcmalloc_of_list) (`HS.root, Q_Explicit)))
     (arg, Q_Explicit)
   ) in
   let uniq, name = fresh uniq in
   let fv: fv = pack_fv name in
-  let t: term = pack Tv_Unknown in
+  let t: term = match t with None -> pack Tv_Unknown | Some t -> t in
   let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
-  let thanks_guido_for_the_workaround = pack (Tv_FVar fv) in
-  uniq, se, `(`#thanks_guido_for_the_workaround, FStar.UInt32.uint_to_t (`@l))
+  uniq, se, mktuple_n [ pack (Tv_FVar fv); mk_uint32 l ]
 
 noextract
 let lowstarize_hex (uniq: gensym) (s: string): Tac (gensym * sigelt * term) =
@@ -174,7 +190,8 @@ let lowstarize_hex (uniq: gensym) (s: string): Tac (gensym * sigelt * term) =
     let constants = as_uint8s [] (String.list_of_string s) in
     let l = String.length s in
     assume (l < pow2 32);
-    mk_gcmalloc_of_list uniq (quote constants) (l / 2)
+    let t = pack (Tv_App (`LowStar.Buffer.buffer) (`UInt8.t, Q_Explicit)) in
+    mk_gcmalloc_of_list uniq constants (l / 2) (Some t)
 
 // Dependency analysis bug: does not go inside quotations (#1496)
 
@@ -186,9 +203,7 @@ let lowstarize_string (s: string): Tac term =
 
 noextract
 let rec lowstarize_expr (uniq: gensym) (e: term): Tac (gensym * list sigelt * term) =
-  let _ = print ("about to normalize: " ^ term_to_string e ^ "\n") in
   let e = norm_term [ delta; zeta; iota; primops ] e in
-  let _ = print ("hitting: " ^ term_to_string e ^ "\n") in
   if is_hex e then
     let uniq, se, e = lowstarize_hex uniq (must (destruct_hex e)) in
     uniq, [ se ], e
@@ -209,7 +224,7 @@ and lowstarize_list (uniq: gensym) (es: list term): Tac (gensym * list sigelt * 
   let es = List.rev es in
   let l = List.length es in
   assume (l < pow2 32);
-  let uniq, se, e = mk_gcmalloc_of_list uniq (mk_list es) l in
+  let uniq, se, e = mk_gcmalloc_of_list uniq (mk_list es) l None in
   uniq, List.rev (se :: ses), e
 
 and lowstarize_tuple (uniq: gensym) (es: list term): Tac (gensym * list sigelt * term) =
@@ -245,5 +260,6 @@ noextract
 let test_vectors' = List.Tot.map (fun x -> x) test_vectors
 
 #set-options "--lax"
-%splice[] (fun () -> lowstarize_toplevel "test_vectors'" "low_test_vectors")
+%splice[] (fun () -> lowstarize_toplevel "test_vectors" "low_test_vectors")
+%splice[] (fun () -> lowstarize_toplevel "test_vectors'" "low_test_vectors'")
 *)
