@@ -7,7 +7,7 @@ open Lib.IntTypes
 val seq: a:Type0 -> t:Type0
 let seq a = s:Seq.seq a{Seq.length s <= max_size_t}
 
-unfold
+//unfold
 val length: #a:Type0 -> seq a -> size_nat
 let length #a l = Seq.length l
 
@@ -21,11 +21,14 @@ let to_lseq #a s = s
 val to_seq: #a:Type0 -> #len:size_nat -> s:lseq a len -> o:seq a {o == s /\ Seq.length o == len}
 let to_seq #a #len s = s
 
-unfold
+//unfold
 val index: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len} -> a
 let index #a #len s n = Seq.index s n
 
-(*
+abstract
+type equal (#a:Type) (#len:size_nat) (s1:lseq a len) (s2:lseq a len) =
+ forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
+
 val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
   (requires (forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i))
   (ensures  (equal s1 s2))
@@ -43,9 +46,8 @@ let eq_elim #a #len s1 s2 =
   assert (forall (i:nat{i < len}).{:pattern (Seq.index s1 i); (Seq.index s2 i)}
     index s1 i == index s2 i);
   Seq.lemma_eq_elim #a s1 s2
-*)
 
-unfold
+//unfold
 val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a
   -> Pure (lseq a len)
     (requires True)
@@ -67,10 +69,13 @@ val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (Lis
 let createL #a l = Seq.createL #a l
 
 
-val of_list: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> seq a
-let of_list #a l = Seq.of_list #a l
+val of_list:#a:Type -> l:list a{List.Tot.length l <= maxint U32} -> Tot (seq a)
+let of_list #a l =
+  let r = Seq.of_list #a l in
+  //Seq.lemma_of_list_length #a r l;
+  r
 
-unfold
+//unfold
 val sub: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> lseq a n
 let sub #a #len s start n = Seq.slice #a s start (start + n)
 
@@ -92,8 +97,8 @@ let update_sub #a #len s start n x =
 let update_slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat) (fin:size_nat{start <= fin /\ fin <= len}) (upd:lseq a (fin - start)) =
 		 update_sub #a #len i start (fin-start) upd
 
-let op_String_Access #a = Seq.index #a 
-let op_String_Assignment #a = Seq.upd #a
+let op_String_Access #a #len = index #a #len
+let op_String_Assignment #a #len = upd #a #len
 
 /// Iteration
 
@@ -172,3 +177,11 @@ let rec map2 #a #b #c #len f x y =
 val for_all2: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> bool
 let rec for_all2 #a #b #len f x y =
   admit()
+
+val as_list: #a:Type -> #len:size_nat -> lseq a len -> l:list a{List.Tot.length l = len}
+let as_list #a #len s = Seq.Properties.seq_to_list s
+
+val concat:#a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 <= maxint SIZE} -> lseq a len1 -> lseq a len2 -> lseq a (len1 + len2)
+let concat #a #len1 #len2 s1 s2 = Seq.append s1 s2
+
+let (@|) #a #len1 #len2 s1 s2 = concat #a #len1 #len2 s1 s2

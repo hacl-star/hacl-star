@@ -3,7 +3,7 @@ module Spec.PQ.Lib
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
-open Lib.Sequence.Lemmas
+//open Lib.Sequence.Lemmas
 open FStar.Math.Lemmas
 
 let numeric #t x =
@@ -448,6 +448,7 @@ val lemma_add_zero:
   [SMTPat (a +. numeric #t 0)]
 let lemma_add_zero #t a =
   let r = a +. numeric #t 0 in
+  assert (uint_v r = uint_v a + 0);
   uintv_extensionality (a +. numeric #t 0) a
 
 #reset-options "--z3rlimit 150 --max_fuel 0"

@@ -32,12 +32,17 @@ let test_frodo keypair_len keypaircoins
   let ct, ss1 = crypto_kem_enc enccoins pk in
   let ss2 = crypto_kem_dec ct sk in
 
-  let r_pk = compare pk_len pk_expected pk in
-  let r_sk = compare sk_len sk_expected sk in
-  let r_ct = compare ct_len ct_expected ct in
-  let r_ss = print_and_compare ss_len ss1 ss2 in
-  let r_ss1 = print_and_compare ss_len ss_expected ss2 in
-  r_ss && r_ss1 && r_pk && r_ct && r_sk
+  (*let r_pk = compare pk_len (as_list pk_expected) (as_list pk) in
+  let r_sk = compare sk_len (as_list sk_expected) (as_list sk) in
+  let r_ct = compare ct_len (as_list ct_expected) (as_list ct) in
+  let r_ss = print_and_compare ss_len (as_list ss1) (as_list ss2) in
+  let r_ss1 = print_and_compare ss_len (as_list ss_expected) (as_list ss2) in
+  r_ss && r_ss1 && r_pk && r_ct && r_sk *)
+  (as_list pk = pk_expected) && 
+  (as_list sk = sk_expected) &&
+  (as_list ct = ct_expected) &&
+  (as_list ss1 = as_list ss2) &&
+  (ss2 = ss_expected)
 
 //
 // Test1. FrodoKEM-64. CSHAKE128

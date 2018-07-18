@@ -38,8 +38,7 @@ let lemma_matrix_index_repeati n1 n2 d i j =
   lemma_mult_le_right d (i * n2 / 8 + j) (n1 * n2 / 8 - 1);
   assert ((i * n2 / 8 + j) * d <= (n1 * n2 / 8 - 1) * d);
   assert (res <= (n1 * n2 / 8 - 1) * d + d);
-  assert ((n1 * n2 / 8 - 1) * d + d = n1 * n2 / 8 * d - d + d);
-  lemma_mul_acc_comm n1 (n2 / 8) d
+  assert ((n1 * n2 / 8 - 1) * d + d = n1 * n2 / 8 * d - d + d)
 
 val lemma_matrix_index_repeati1:
   n1:size_nat -> n2:size_nat ->
