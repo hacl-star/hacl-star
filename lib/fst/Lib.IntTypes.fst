@@ -225,7 +225,6 @@ let logand #t a b =
   | U128 -> (UInt128.logand a b)
   | SIZE -> (UInt32.logand a b)
 
-
 let logor #t a b =
   match t with
   | U8 -> (UInt8.logor a b)
@@ -332,14 +331,42 @@ let gte_mask_lemma #t a b d = admit()
 let lt_mask_lemma #t a b d = admit()
 let lte_mask_lemma #t a b d = admit()
 
+#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
+
+private
+val mod_mask_value: #t:m_inttype -> m:shiftval t -> Lemma
+  (uint_v (mod_mask #t m) == pow2 (uint_v m) - 1)
+let mod_mask_value #t m =
+  if uint_v m > 0 then
+    begin
+    let m = uint_v m in
+    pow2_lt_compat (bits t) m;
+    small_modulo_lemma_1 (pow2 m) (pow2 (bits t));
+    assert (FStar.Mul.(1 * pow2 m) == pow2 m);
+    UInt.shift_left_value_lemma #(bits t) 1 m
+    end
+
+let mod_mask_lemma #t a m =
+  mod_mask_value #t m;
+  if uint_v m = 0 then
+    UInt.logand_lemma_1 #(bits t) (uint_v a)
+  else
+    UInt.logand_mask #(bits t) (uint_v a) (uint_v m)
+
+#reset-options "--z3rlimit 100"
+
 (* defined in .fsti: notations +^, -^, ...*)
 
 inline_for_extraction
 let size x = size_ x
+
 inline_for_extraction
 let size_v x = UInt32.v x
+
 let size_to_uint32 x = x <: UInt32.t
+
 let nat_mod_v #m x = x
+
 let modulo x m = modulo_ x m
 
 let div #t x y =

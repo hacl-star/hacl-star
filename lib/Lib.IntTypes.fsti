@@ -278,6 +278,15 @@ val lte_mask_lemma: #t:m_inttype -> a:uint_t t -> b:uint_t t -> d:uint_t t -> Le
     (ensures  ((lte_mask #t a b) `logand` d == (if uint_v a  <= uint_v b then d else nat_to_uint 0)))
     [SMTPat (lte_mask #t a b `logand` d)]
 
+inline_for_extraction
+let mod_mask (#t:m_inttype) (m:shiftval t) : uint_t t =
+  (nat_to_uint 1 `shift_left` m) `sub_mod` nat_to_uint 1
+
+val mod_mask_lemma: #t:m_inttype -> a:uint_t t -> m:shiftval t -> Lemma
+  (requires True)
+  (ensures  uint_v (a `logand` (mod_mask #t m)) == uint_v a % pow2 (uint_v m))
+  [SMTPat (uint_v (a `logand` (mod_mask #t m)))]
+
 ///
 /// Operators available for all machine integers
 ///

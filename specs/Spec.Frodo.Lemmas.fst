@@ -11,13 +11,17 @@ open Spec.PQ.Lib
 
 val modulo_pow2_u16:
   a:uint16 -> b:size_nat{b < 16} -> Lemma
-  (uint_v a % pow2 b = uint_v (a &. ((u16 1 <<. u32 b) -. u16 1)))
-let modulo_pow2_u16 a b = admit()
+  (uint_v a % pow2 b == uint_v (a &. ((u16 1 <<. u32 b) -. u16 1)))
+let modulo_pow2_u16 a b =
+  uintv_extensionality (nat_to_uint 1) (u16 1);
+  mod_mask_lemma #U16 a (u32 b)
 
 val modulo_pow2_u64:
   a:uint64 -> b:size_nat{b < 64} -> Lemma
-  (uint_v a % pow2 b = uint_v (a &. ((u64 1 <<. u32 b) -. u64 1)))
-let modulo_pow2_u64 a b = admit()
+  (uint_v a % pow2 b == uint_v (a &. ((u64 1 <<. u32 b) -. u64 1)))
+let modulo_pow2_u64 a b =
+  uintv_extensionality (nat_to_uint 1) (u64 1);
+  mod_mask_lemma #U64 a (u32 b)
 
 val lemma_mul_acc_comm:
   a:size_nat -> b:size_nat -> c:size_nat -> Lemma
