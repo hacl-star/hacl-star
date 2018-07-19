@@ -227,12 +227,15 @@ let chacha20_vector = vec8 * vec8 * U32.t * vec8 * vec8
 
 let rec test_chacha20 (len: U32.t) (vs: B.buffer chacha20_vector): St unit =
   let open FStar.Integers in
-  if len > 0ul then
+  if len > 0ul then begin
+    push_frame ();
     let (key, key_len), (iv, iv_len), ctr, (plain, plain_len), (cipher, cipher_len) = vs.(0ul) in
-    let cipher' = B.alloca 0uy len in
+    let cipher' = B.alloca 0uy cipher_len in
     EverCrypt.chacha20 key iv ctr plain plain_len cipher';
     TestLib.compare_and_print !$"of ChaCha20 message" !!cipher !!cipher' cipher_len;
+    pop_frame ();
     test_chacha20 (len - 1ul) (B.offset vs 1ul)
+  end
 
 val test_aead: len:U32.t -> vs: B.buffer aead_vector {B.len vs = len }-> St unit
 let rec test_aead len vs =
