@@ -1,7 +1,8 @@
 FSTAR_HOME	?= ../../FStar
 KREMLIN_HOME	?= ../../kremlin
 HACL_HOME	?= ..
-OPENSSL_HOME	?= ../../MLCrypto/openssl
+MLCRYPTO_HOME	?= ../../MLCrypto
+OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
 
 # The noopenssl config no means: enable bcrypt + disable openssl
 ifeq (,$(EVEREST_WINDOWS))
