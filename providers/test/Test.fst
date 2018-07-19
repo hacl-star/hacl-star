@@ -191,58 +191,48 @@ let test_aes256_gcm vec =
 
   pop_frame()
 
-// let test_aes_ecb (v: block_cipher_vector) : St unit =
-  // push_frame();
-  // let key = buffer_of_hex v.rkey in
-  // let plain = buffer_of_hex v.plain in
-  // let cipher = buffer_of_hex v.enc in
-  // let cipher' = B.create 0uy 16ul in
-  // let s0 = T.cpucycles () in
-  // let () =
-  //   match v.block with
-  //   | AES128 ->
-  //     let k = EverCrypt.aes128_create key in
-  //     EverCrypt.aes128_compute k plain cipher';
-  //     EverCrypt.aes128_free k
-  //   | AES256 ->
-  //     let k = EverCrypt.aes256_create key in
-  //     EverCrypt.aes256_compute k plain cipher';
-  //     EverCrypt.aes256_free k
-  //   in
-  // let s1 = T.cpucycles () in
-  // T.print_cycles_per_round s0 s1 1ul;
-  // T.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
-  // pop_frame()
+type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
+
+let test_aes_ecb (v: block_cipher_vector) : St unit =
+  push_frame();
+  let block, (key, key_len), (plain, plain_len), (cipher, cipher_len) = v in
+  let cipher' = B.alloca 0uy 16ul in
+  let s0 = TestLib.cpucycles () in
+  let () =
+    match block with
+    | AES128 ->
+      let k = EverCrypt.aes128_create key in
+      EverCrypt.aes128_compute k plain cipher';
+      EverCrypt.aes128_free k
+    | AES256 ->
+      let k = EverCrypt.aes256_create key in
+      EverCrypt.aes256_compute k plain cipher';
+      EverCrypt.aes256_free k
+    in
+  let s1 = TestLib.cpucycles () in
+  TestLib.print_cycles_per_round s0 s1 1ul;
+  TestLib.compare_and_print !$"of AES128 block" !!cipher !!cipher' 16ul;
+  pop_frame()
 
 /// Test drivers
 
-(* val test_cipher: list block_cipher_vector -> St unit *)
-(* let rec test_cipher v = *)
-(*   match v with *)
-(*   | [] -> () *)
-(*   | v :: vs -> *)
-(*     match v.block with *)
-(*     | AES128 *)
-(*     | AES256 -> *)
-(*       let this = test_aes_ecb v in *)
-(*       let rest = test_cipher vs in *)
-(*       () *)
-(*     | _ -> test_cipher vs *)
+let rec test_cipher (len: U32.t) (vs: B.buffer block_cipher_vector): St unit =
+  let open FStar.Integers in
+  if len > 0ul then
+    let v = vs.(0ul) in
+    test_aes_ecb v;
+    test_cipher (len - 1ul) (B.offset vs 1ul)
 
-(* val test_chacha20: list chacha20_vector -> St unit *)
-(* let rec test_chacha20 v = *)
-(*   match v with *)
-(*   | [] -> () *)
-(*   | v :: vs -> *)
-(*     let key = buffer_of_hex v.c20_key in *)
-(*     let iv  = buffer_of_hex v.c20_iv in *)
-(*     let plain = buffer_of_hex v.c20_plain in *)
-(*     let len = Bytes.len (bytes_of_hex v.c20_plain) in *)
-(*     let cipher = buffer_of_hex v.c20_cipher in *)
-(*     let cipher' = B.create 0uy len in *)
-(*     EverCrypt.chacha20 key iv v.c20_ctr plain len cipher'; *)
-(*     TestLib.compare_and_print !$"of ChaCha20 message" cipher cipher' len; *)
-(*     test_chacha20 vs *)
+let chacha20_vector = vec8 * vec8 * U32.t * vec8 * vec8
+
+let rec test_chacha20 (len: U32.t) (vs: B.buffer chacha20_vector): St unit =
+  let open FStar.Integers in
+  if len > 0ul then
+    let (key, key_len), (iv, iv_len), ctr, (plain, plain_len), (cipher, cipher_len) = vs.(0ul) in
+    let cipher' = B.alloca 0uy len in
+    EverCrypt.chacha20 key iv ctr plain plain_len cipher';
+    TestLib.compare_and_print !$"of ChaCha20 message" !!cipher !!cipher' cipher_len;
+    test_chacha20 (len - 1ul) (B.offset vs 1ul)
 
 val test_aead: len:U32.t -> vs: B.buffer aead_vector {B.len vs = len }-> St unit
 let rec test_aead len vs =
@@ -254,9 +244,9 @@ let rec test_aead len vs =
     | CHACHA20_POLY1305, _, _, _, _, _, _ ->
         test_chacha20_poly1305 v
     | AES_128_GCM, _, _, _, _, _, _ ->
-        () // JP: TODO: FIXME // test_aes128_gcm v
+        test_aes128_gcm v
     | AES_256_GCM, _, _, _, _, _, _ ->
-        () // JP: TODO: FIXME // test_aes256_gcm v
+        test_aes256_gcm v
     | _ ->
         ()
     end;
@@ -278,11 +268,15 @@ let main (): St C.exit_code =
 
   let hash_vectors, hash_vectors_len = hash_vectors_low in
   let aead_vectors, aead_vectors_len = aead_vectors_low in
+  let block_cipher_vectors, block_cipher_vectors_len = block_cipher_vectors_low in
+  let chacha20_vectors, chacha20_vectors_len = chacha20_vectors_low in
 
   print !$"===========Hacl===========";
   AC.(init (Prefer Hacl));
   test_hash hash_vectors_len hash_vectors;
   test_aead aead_vectors_len aead_vectors;
+  test_cipher block_cipher_vectors_len block_cipher_vectors;
+  test_chacha20 chacha20_vectors_len chacha20_vectors;
   Test.Hash.main ();
   Test.Bytes.main ();
   
@@ -290,15 +284,18 @@ let main (): St C.exit_code =
   AC.(init (Prefer Vale));
   test_aead aead_vectors_len aead_vectors;
   test_hash hash_vectors_len hash_vectors;
+  test_cipher block_cipher_vectors_len block_cipher_vectors;
   Test.Hash.main ();
   
   print !$"==========OpenSSL=========";
   AC.(init (Prefer OpenSSL));
   test_aead aead_vectors_len aead_vectors;
+  test_cipher block_cipher_vectors_len block_cipher_vectors;
 
   print !$"==========BCrypt==========";
   AC.(init (Prefer BCrypt));
   test_aead aead_vectors_len aead_vectors;
+  test_cipher block_cipher_vectors_len block_cipher_vectors;
   Test.Hash.main ();
   pop_frame ();
   C.EXIT_SUCCESS
