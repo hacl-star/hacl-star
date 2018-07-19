@@ -30,7 +30,7 @@ val eq_u32_m:m:uint32 -> a:uint32 -> b:uint32 -> Tot bool
 [@ "substitute"]
 let eq_u32_m m a b = FStar.UInt32.(u32_to_UInt32 (a &. m) =^ u32_to_UInt32 (b &. m))
 
-(*
+
 val matrix_eq:
   #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
   m:size_t{0 < v m /\ v m <= 16} ->
@@ -791,4 +791,4 @@ let crypto_kem_dec ss ct sk =
   crypto_kem_dec_ss1 pk_mu_decode bp_matrix c_matrix sk ct ss;
   pop_frame();
   (u32 0)
-*)
+
