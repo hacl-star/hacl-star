@@ -121,7 +121,11 @@ snapshots/snapshot-msvc-unrolled: clean-c-code
 #
 
 HACL_RELEASE=1
+ifeq ($(shell uname -o),Cygwin)
+HACL_LICENSE?=$(cygpath -a -m $(HACL_HOME)/snapshots/licenses/MIT)
+else
 HACL_LICENSE?=$(HACL_HOME)/snapshots/licenses/MIT
+endif
 HACL_LICENSE_NSS?=$(HACL_HOME)/snapshots/licenses/APACHE2
 
 
