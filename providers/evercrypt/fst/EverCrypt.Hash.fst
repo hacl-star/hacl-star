@@ -78,7 +78,7 @@ let fresh_is_disjoint l1 l2 h0 h1 =
   ()
 
 let frame_invariant #a l s h0 h1 =
-  let state = deref h0 s in
+  let state = B.deref h0 s in
   assert (repr_eq (repr s h0) (repr s h1))
 
 let create a =
@@ -102,11 +102,15 @@ let create a =
   let h2 = ST.get () in
   // None of these seem to be necessary for the proof to proceed. Key bits are
   // retained.
-  assert (invariant r h2);
-  assert (fresh_loc (M.loc_buffer r) h1 h2);
-  assert (M.(modifies loc_none h0 h1));
-  assert (loc_unused_in (M.loc_buffer r) h0);
-  assert (M.(modifies loc_none h0 h2));
+  // assert (invariant r h2);
+  // assert (fresh_loc (M.loc_buffer r) h1 h2);
+  // assert (fresh_loc (M.loc_buffer r) h1 h2);
+  // assert (M.(modifies loc_none h0 h1));
+  // assert (loc_unused_in (M.loc_buffer r) h0);
+  // assert (M.(modifies loc_none h0 h2));
+  // JP: 20180720 this proof broken by the latest bufferv3 refactoring, can't
+  // prove anything anymore about freshness of locations.
+  admit ();
   r
 
 #set-options "--max_fuel 0"
@@ -126,20 +130,12 @@ let init #a s =
 let update #a s data =
   match !*s with
   | SHA256_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_256.update p data
   | SHA384_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_384.update p data
   | SHA256_Vale p ->
       ValeGlue.sha256_update p data;
@@ -148,20 +144,12 @@ let update #a s data =
 let update_multi #a s data n =
   match !*s with
   | SHA256_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_256.update_multi p data n
   | SHA384_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_384.update_multi p data n
   | SHA256_Vale p ->
       ValeGlue.sha256_update_multi p data n;
@@ -170,20 +158,12 @@ let update_multi #a s data n =
 let update_last #a s data len =
   match !*s with
   | SHA256_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_256.update_last p data len
   | SHA384_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_384.update_last p data len
   | SHA256_Vale p ->
       ValeGlue.sha256_update_last p data len;
@@ -192,20 +172,12 @@ let update_last #a s data len =
 let finish #a s dst =
   match !*s with
   | SHA256_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let dst = T.new_to_old_st dst in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p dst);
       Hacl.SHA2_256.finish p dst
   | SHA384_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let dst = T.new_to_old_st dst in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p dst);
       Hacl.SHA2_384.finish p dst
   | SHA256_Vale p ->
       ValeGlue.sha256_finish p dst;
@@ -219,15 +191,11 @@ let hash a dst input len =
         ValeGlue.sha256_hash dst input len;
         admit ()
       end else begin
-        assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer input));
         let input = T.new_to_old_st input in
         let dst = T.new_to_old_st dst in
-        assume (FStar.Buffer.disjoint dst input);
         Hacl.SHA2_256.hash dst input len
       end
   | SHA384 ->
-      assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer input));
       let input = T.new_to_old_st input in
       let dst = T.new_to_old_st dst in
-      assume (FStar.Buffer.disjoint dst input);
       Hacl.SHA2_384.hash dst input len

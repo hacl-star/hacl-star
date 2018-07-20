@@ -28,12 +28,12 @@ let state alg = B.pointer (state_s alg)
 // do partial applications in pre- and post-conditions
 val footprint_s: #a:e_alg -> state_s a -> GTot M.loc
 let footprint (#a: e_alg) (s: state a) (m: HS.mem) =
-  M.(loc_union (loc_buffer s) (footprint_s (deref m s)))
+  M.(loc_union (loc_buffer s) (footprint_s (B.deref m s)))
 
 val invariant_s: (#a: e_alg) -> state_s a -> HS.mem -> Type0
 let invariant (#a: e_alg) (s: state a) (m: HS.mem) =
   B.live m s /\
-  M.(loc_disjoint (loc_buffer s) (footprint_s (deref m s))) /\
+  M.(loc_disjoint (loc_buffer s) (footprint_s (B.deref m s))) /\
   invariant_s (B.get m s 0) m
 
 let type_of alg =
