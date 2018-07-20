@@ -18,9 +18,26 @@ val state: a:algorithm -> Type0
 
 (* Functions to access algorithm parameters *)
 (* Enforcing some constraints propagated from HMAC and HKDF *)
-val size_block: a:algorithm -> n:size_nat{n <> 0}
-val size_hash: a:algorithm -> s:size_nat{0 < s /\ s < size_block a /\ s + size_block a <= max_size_t /\ 255 * s <= max_size_t}
-val max_input: a:algorithm -> n:nat{size_hash a + size_block a < n}
+let size_block (a:algorithm) : Tot size_nat =
+  match a with
+  | SHA2_224 -> 64
+  | SHA2_256 -> 64
+  | SHA2_384 -> 128
+  | SHA2_512 -> 128
+
+let size_hash (a:algorithm) : Tot size_nat =
+  match a with
+  | SHA2_224 -> 28
+  | SHA2_256 -> 32
+  | SHA2_384 -> 48
+  | SHA2_512 -> 64
+
+let max_input (a:algorithm) : Tot pos =
+  match a with
+  | SHA2_224 -> pow2 61
+  | SHA2_256 -> pow2 61
+  | SHA2_384 -> pow2 125
+  | SHA2_512 -> pow2 125
 
 (* Ghost function to reveal the content of the abstract state to the post-conditions *)
 val get_st_n: #a:algorithm -> state a -> GTot (size_nat)
