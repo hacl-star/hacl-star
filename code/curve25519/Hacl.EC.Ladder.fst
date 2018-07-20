@@ -1,5 +1,6 @@
 module Hacl.EC.Ladder
 
+module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
@@ -34,7 +35,7 @@ private let lemma_seq #a limb_zero n =
 private let lemma_seq2 () : Lemma (Hacl.Spec.EC.AddAndDouble.red_513 (Seq.create 5 limb_zero)) = ()
 
 val lemma_cmult__modifies: buf:buffer limb -> result:point -> h00:mem -> h0:mem -> h1:mem -> h2:mem -> Lemma
-  (requires (Buffer.live h00 buf /\ live h00 result /\ h00.tip = h0.tip /\ h0.tip = h1.tip /\ h1.tip = h2.tip
+  (requires (Buffer.live h00 buf /\ live h00 result /\ (HS.get_tip h00) = (HS.get_tip h0) /\ (HS.get_tip h0) = (HS.get_tip h1) /\ (HS.get_tip h1) = (HS.get_tip h2)
     /\ modifies_one (frameOf buf) h0 h1 /\ modifies_1 result h1 h2 /\ frameOf buf <> frameOf result
     /\ modifies_1 buf h00 h0))
   (ensures (modifies (Set.union (Set.singleton (frameOf buf)) (Set.singleton (frameOf result))) h00 h2

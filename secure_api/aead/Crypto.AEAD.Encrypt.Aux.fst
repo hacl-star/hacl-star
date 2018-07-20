@@ -105,7 +105,7 @@ let encrypt_ensures_tip (i:id) (st:state i Writer)
 		     (plain: plainBuffer i (v plainlen))
 		     (cipher_tagged:lbuffer (v plainlen + v MAC.taglen))
 		     (h0:mem) (h5:mem) =
-  encrypt_ensures' (Set.as_set [st.log_region; Buffer.frameOf cipher_tagged; HS.(h5.tip)])
+  encrypt_ensures' (Set.as_set [st.log_region; Buffer.frameOf cipher_tagged; HS.get_tip h5])
     i st n aadlen aad plainlen plain cipher_tagged h0 h5
 
 let encrypt_ensures  (i:id) (st:state i Writer)
@@ -130,10 +130,10 @@ val finish_after_mac: h0:mem -> h3:mem -> i:id -> st:state i Writer ->
   (requires (fun h4 -> 
     let cipher = Buffer.sub cipher_tagged 0ul plainlen in
     let x0 = {iv=n; ctr=ctr_0 i} in
-    HS.(h0.tip = h4.tip) /\
-    HH.disjoint (HS.(h4.tip)) st.log_region /\
-    HH.disjoint (HS.(h4.tip)) (Buffer.frameOf cipher_tagged) /\
-    HS.modifies_transitively (Set.as_set [st.log_region; Buffer.frameOf cipher_tagged; HS.(h4.tip)]) h0 h3 /\
+    get_tip h0 = get_tip h4 /\
+    HH.disjoint (HS.get_tip h4) st.log_region /\
+    HH.disjoint (HS.get_tip h4) (Buffer.frameOf cipher_tagged) /\
+    HS.modifies_transitively (Set.as_set [st.log_region; Buffer.frameOf cipher_tagged; HS.get_tip h4]) h0 h3 /\
     HS.modifies_ref st.prf.mac_rgn Set.empty h0 h3 /\
     (prf i ==> none_above ({iv=n; ctr=ctr_0 i}) st.prf h0) /\ // The nonce must be fresh!
     pre_refines_one_entry i st n (v plainlen) plain cipher_tagged h0 h3 /\
@@ -152,7 +152,7 @@ val finish_after_mac: h0:mem -> h3:mem -> i:id -> st:state i Writer ->
     (tag == Buffer.sub cipher_tagged plainlen MAC.taglen) /\
     (mac_log ==> 
       (h3 `HS.contains` CMA.alog acc) /\
-      (HS.frameOf (CMA.alog acc) = HS.(h3.tip)) /\
+      (HS.frameOf (CMA.alog acc) == HS.get_tip h3) /\
       FStar.HyperStack.sel h3 (CMA.alog acc) ==
       encode_both i aadlen (Buffer.as_seq h3 aad) plainlen (Buffer.as_seq h3 cipher)) /\ //from accumulate
     (safeId i ==>
@@ -190,10 +190,10 @@ let encrypt_ensures_push_pop (i:id) (st:state i Writer)
 		    (h:mem) (h0:mem) (h5:mem)
    : Lemma (requires (let open FStar.HyperStack in
 		      fresh_frame h h0 /\
-		      HH.disjoint st.log_region h0.tip /\
-		      HH.disjoint (Buffer.frameOf (Plain.as_buffer plain)) h0.tip /\
-     		      HH.disjoint (Buffer.frameOf aad) h0.tip /\
-      		      HH.disjoint (Buffer.frameOf cipher_tagged) h0.tip /\
+		      HH.disjoint st.log_region (HS.get_tip h0) /\
+		      HH.disjoint (Buffer.frameOf (Plain.as_buffer plain)) (HS.get_tip h0) /\
+     		      HH.disjoint (Buffer.frameOf aad) (HS.get_tip h0) /\
+      		      HH.disjoint (Buffer.frameOf cipher_tagged) (HS.get_tip h0) /\
 		      encrypt_ensures_tip i st n aadlen aad plainlen plain cipher_tagged h0 h5))
 	   (ensures (HS.poppable h5 /\
 		     encrypt_ensures i st n aadlen aad plainlen plain cipher_tagged h (HS.pop h5)))
@@ -220,7 +220,7 @@ let encrypt_ensures_push_pop (i:id) (st:state i Writer)
 (* 		     (plain: plainBuffer i (v plainlen)) *)
 (* 		     (cipher_tagged:lbuffer (v plainlen + v MAC.taglen)) *)
 (* 		     (h0:mem) (h5:mem) = *)
-(*   encrypt_ensures' (Set.as_set [st.log_region; Buffer.frameOf cipher_tagged; HS.(h5.tip)]) *)
+(*   encrypt_ensures' (Set.as_set [st.log_region; Buffer.frameOf cipher_tagged; HS.get_tip h5]) *)
 (*     i st n aadlen aad plainlen plain cipher_tagged h0 h5 *)
 
 

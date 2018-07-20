@@ -67,7 +67,7 @@ test-specs:
 #
 
 test-code:
-	$(MAKE) -C ../code clean
+	$(MAKE) -C ../code clean-c
 	$(MAKE) -C ../code test
 
 #

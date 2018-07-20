@@ -72,7 +72,7 @@ val chain_mods (#i:id) (#n:Cipher.iv (alg i))
 		       HS.fresh_frame h_init h0 /\
 		       BufferUtils.prf_mac_modifies st.log_region st.prf.mac_rgn h0 h1 /\    //prf_mac
 		       EncodingWrapper.accumulate_modifies_nothing h1 h2 /\
-	       	       Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.(h2.tip) /\
+	       	       Buffer.frameOf (MAC.as_buffer (CMA.abuf acc)) = HS.get_tip h2 /\
        		       CMAWrapper.verify_modifies acc h2 h3 /\
 		       (h3 == h4 \/ Dexor.dexor_modifies st.prf x_1 plain h3 h4)))
 	    (ensures  (HS.poppable h4 /\

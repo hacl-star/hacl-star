@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,65 @@
 
 #include "Hacl_Chacha20Poly1305.h"
 
-Prims_int Hacl_Chacha20Poly1305_noncelen = (krml_checked_int_t)12;
+extern uint8_t FStar_UInt8_eq_mask(uint8_t x0, uint8_t x1);
 
-Prims_int Hacl_Chacha20Poly1305_keylen = (krml_checked_int_t)32;
+extern void
+Hacl_Chacha20_chacha20_key_block(uint8_t *x0, uint8_t *x1, uint8_t *x2, uint32_t x3);
 
-Prims_int Hacl_Chacha20Poly1305_maclen = (krml_checked_int_t)16;
+extern void
+Hacl_Chacha20_chacha20(
+  uint8_t *x0,
+  uint8_t *x1,
+  uint32_t x2,
+  uint8_t *x3,
+  uint8_t *x4,
+  uint32_t x5
+);
+
+extern Hacl_Impl_Poly1305_64_State_poly1305_state
+AEAD_Poly1305_64_mk_state(uint64_t *x0, uint64_t *x1);
+
+extern void
+AEAD_Poly1305_64_poly1305_blocks_init(
+  Hacl_Impl_Poly1305_64_State_poly1305_state x0,
+  uint8_t *x1,
+  uint32_t x2,
+  uint8_t *x3
+);
+
+extern void
+AEAD_Poly1305_64_poly1305_blocks_continue(
+  Hacl_Impl_Poly1305_64_State_poly1305_state x0,
+  uint8_t *x1,
+  uint32_t x2
+);
+
+extern void
+AEAD_Poly1305_64_poly1305_blocks_finish(
+  Hacl_Impl_Poly1305_64_State_poly1305_state x0,
+  uint8_t *x1,
+  uint8_t *x2,
+  uint8_t *x3
+);
+
+static uint8_t Hacl_Policies_cmp_bytes_(uint8_t *b1, uint8_t *b2, uint32_t len1, uint8_t *tmp)
+{
+  for (uint32_t i = (uint32_t)0U; i < len1; i = i + (uint32_t)1U)
+  {
+    uint8_t bi1 = b1[i];
+    uint8_t bi2 = b2[i];
+    uint8_t z0 = tmp[0U];
+    tmp[0U] = FStar_UInt8_eq_mask(bi1, bi2) & z0;
+  }
+  return tmp[0U];
+}
+
+static uint8_t Hacl_Policies_cmp_bytes(uint8_t *b1, uint8_t *b2, uint32_t len1)
+{
+  uint8_t tmp = (uint8_t)255U;
+  uint8_t z = Hacl_Policies_cmp_bytes_(b1, b2, len1, &tmp);
+  return ~z;
+}
 
 static void
 Hacl_Chacha20Poly1305_aead_encrypt_poly(
@@ -47,8 +101,8 @@ Hacl_Chacha20Poly1305_aead_encrypt_poly(
   uint64_t tmp1[6U] = { 0U };
   Hacl_Impl_Poly1305_64_State_poly1305_state
   st = AEAD_Poly1305_64_mk_state(tmp1, tmp1 + (uint32_t)3U);
-  (void)AEAD_Poly1305_64_poly1305_blocks_init(st, aad1, aadlen, mk);
-  (void)AEAD_Poly1305_64_poly1305_blocks_continue(st, c, mlen);
+  AEAD_Poly1305_64_poly1305_blocks_init(st, aad1, aadlen, mk);
+  AEAD_Poly1305_64_poly1305_blocks_continue(st, c, mlen);
   AEAD_Poly1305_64_poly1305_blocks_finish(st, lb, mac, key_s);
 }
 
@@ -59,7 +113,7 @@ void Hacl_Chacha20Poly1305_encode_length(uint8_t *lb, uint32_t aad_len, uint32_t
   store64_le(x0, (uint64_t)mlen);
 }
 
-uint32_t
+static uint32_t
 Hacl_Chacha20Poly1305_aead_encrypt_(
   uint8_t *c,
   uint8_t *mac,

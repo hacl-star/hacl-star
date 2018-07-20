@@ -42,21 +42,19 @@ all-ver: verify
 KREMLIN_ARGS+= \
 	-drop Prims,FStar,LowStar,C.Loops.Spec.Loops \
 	-drop Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Endianness,Hacl.Cast,Hacl.Spec.*,Spec.*,Seq.* \
-	$(KREMLIN_TESTLIB) -I $(HACL_HOME)/specs -I $(HACL_HOME)/lib -I $(HACL_HOME)/lib/fst 
-
+	$(KREMLIN_TESTLIB) -I $(HACL_HOME)/specs -I $(HACL_HOME)/lib -I $(HACL_HOME)/lib/fst
 
 
 chacha-c/out.krml: Hacl.Lib.LoadStore32.fst Hacl.Lib.Create.fst Hacl.Impl.Xor.Lemmas.fst Hacl.Impl.Chacha20.fst Hacl.Chacha20.fst Hacl.Test.Chacha20.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c \
-		-bundle 'Hacl.Chacha20=Hacl.Impl.*,Hacl.Chacha20,Hacl.Lib.*' \
 		-skip-translation $^ -o $@
 
 chacha-c/Hacl_Chacha20.c: chacha-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c \
-		-bundle 'Hacl.Chacha20=Hacl.Impl.*,Hacl.Chacha20,Hacl.Lib.*' \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl.Chacha20=*' \
 		-skip-compilation $^ -o $@
 
-chacha20-ml.exe: ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/ml/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst ../../lib/ml/Lib.Endian.fst ../../lib/fst/Lib.IntBuf.LoadStore.fst Hacl.Impl.Chacha20.fst 
+chacha20-ml.exe: ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/ml/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst ../../lib/ml/Lib.Endian.fst ../../lib/fst/Lib.IntBuf.LoadStore.fst Hacl.Impl.Chacha20.fst
 	mkdir -p chacha20-ml
 	$(FSTAR) --include ../../specs --include ../../lib --include ../../lib/fst  --include ../../lib/ml --codegen OCaml --lax --odir chacha20-ml $^
 	$(OCAMLOPT) -I chacha20-ml chacha20-ml/Lib_Loops.ml chacha20-ml/Hacl_Impl_Chacha20.ml
@@ -84,47 +82,48 @@ chacha20-c.exe: ../../lib/c/Lib_Print.o chacha20-c/out.krml
 
 chacha20.exe: chacha-c/out.krml
 	mkdir -p chacha-c
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c  -no-prefix Hacl.Test.Chacha20 \
-		-bundle 'Hacl.Chacha20=Hacl.Chacha20,Hacl.Impl.*,Hacl.Lib.*' \
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c -no-prefix Hacl.Test.Chacha20 \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl.Test.Chacha20=*' \
+		-library Hacl.Chacha20 \
 		$^ -o $@
 	./$@
 
 
 salsa-c/out.krml: Hacl.Impl.Salsa20.fst Hacl.Salsa20.fst Hacl.Test.Salsa20.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c -skip-translation \
-		-bundle 'Hacl.Salsa20=Hacl.Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
 		$^ -o $@
 
 salsa-c/Hacl_Salsa20.c: salsa-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c -skip-compilation \
-		-bundle 'Hacl.Salsa20=Hacl.Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl.Salsa20=*' \
 		$^ -o $@
 
-salsa20.exe: salsa-c/out.krml
+salsa20.exe: salsa-c/Hacl_Salsa20.c salsa-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir salsa-c  -no-prefix Hacl.Test.Salsa20 \
-		-bundle 'Hacl.Salsa20=Hacl.Salsa20,Hacl.Impl.*,Hacl.Lib.*' \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl.Test.Salsa20=*' \
+		-library Hacl.Salsa20 \
 		$^ -o $@
 	./$@
 
 
 chacha-vec128-c/out.krml: Hacl.Impl.Chacha20.Vec128.State.fst Hacl.Impl.Chacha20.Vec128.fst Hacl.Chacha20.Vec128.fst Hacl.Test.Chacha20.Vec128.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
-		-bundle "Hacl.Chacha20.Vec128=Hacl.Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
+	  	-drop Hacl.UInt32x4 \
 		-add-include '"vec128.h"' \
 		-skip-translation $^ -o $@
 
 chacha-vec128-c/Hacl_Chacha20_Vec128.c: chacha-vec128-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c \
-		-no-prefix Hacl.UInt32x4 -add-include '"vec128.h"' -drop Hacl.UInt32x4 \
-		-bundle "Hacl.Chacha20.Vec128=Hacl.Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
+		-drop Hacl.UInt32x4 -add-include '"vec128.h"' \
+		-add-include '"kremlib.h"' -minimal -bundle "Hacl.Chacha20.Vec128=*" \
 		-skip-compilation $^ -o $@
 
-chacha20-vec128.exe: chacha-vec128-c/out.krml
+chacha20-vec128.exe: chacha-vec128-c/Hacl_Chacha20_Vec128.c chacha-vec128-c/out.krml
 	cp ../../snapshots/common/vec128.h .
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-vec128-c -no-prefix Hacl.Test.Chacha20.Vec128 \
-		-no-prefix Hacl.UInt32x4 -add-include '"vec128.h"' -drop Hacl.UInt32x4 \
-		-bundle "Hacl.Chacha20.Vec128=Hacl.Chacha20.Vec128,Hacl.Impl.*,Hacl.Lib.*" \
-		$^ -o $@
+	  -drop Hacl.UInt32x4 -add-include '"vec128.h"' \
+	  -minimal -add-include '"kremlib.h"' -bundle Hacl.Test.Chacha20.Vec128=* \
+	  $^ -o $@
 	./$@
 
 extract-c: chacha-c/Hacl_Chacha20.c salsa-c/Hacl_Salsa20.c chacha-vec128-c/Hacl_Chacha20_Vec128.c

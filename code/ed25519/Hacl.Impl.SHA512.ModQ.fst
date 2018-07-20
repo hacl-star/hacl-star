@@ -14,7 +14,7 @@ open Hacl.UInt64
 open Hacl.Spec.Endianness
 
 private
-val lemma_modifies_0_2: #a:Type -> #a':Type -> h0:HyperStack.mem -> h1:HyperStack.mem -> h2:HyperStack.mem -> b:buffer a -> b':buffer a' -> Lemma (requires (live h0 b /\ b' `unused_in` h0 /\ live h1 b' /\ frameOf b' = FStar.HyperStack.(h0.tip)
+val lemma_modifies_0_2: #a:Type -> #a':Type -> h0:HyperStack.mem -> h1:HyperStack.mem -> h2:HyperStack.mem -> b:buffer a -> b':buffer a' -> Lemma (requires (live h0 b /\ b' `unused_in` h0 /\ live h1 b' /\ frameOf b' = (FStar.HyperStack.get_tip h0)
     /\ modifies_0 h0 h1 /\ modifies_2 b b' h1 h2))
        (ensures (modifies_2_1 b h0 h2))
 let lemma_modifies_0_2 #a #a' h0 h1 h2 b b' =

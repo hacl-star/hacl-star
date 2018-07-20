@@ -14,7 +14,7 @@
         "haseqFStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87"
       ],
       0,
-      "83af5197bc9cee36ba038f7cf9746409"
+      "32a9ffcb9348f2babf6b29e9250408fa"
     ],
     [
       "Hacl.Spec.Endianness.h32_to_u32",
@@ -29,7 +29,7 @@
         "haseqFStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87"
       ],
       0,
-      "a3dea1672680c3ba6e89e6107dbaeaa1"
+      "61e2326edb30cc152fd50ce3b1b33d91"
     ],
     [
       "Hacl.Spec.Endianness.h64_to_u64",
@@ -44,7 +44,7 @@
         "haseqFStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87"
       ],
       0,
-      "bf6e0a1e9145a5bf98d655133abf4dea"
+      "5f9eb8fea042e2b05194566ec4ba07e9"
     ],
     [
       "Hacl.Spec.Endianness.h128_to_u128",
@@ -61,7 +61,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "eda3d38e82e5a19aa2a9e50c054d2f3a"
+      "b2f55dd1d9a6cfcbd3781c08b1a23962"
     ],
     [
       "Hacl.Spec.Endianness.seq_map_",
@@ -77,11 +77,27 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_cd046bc4a887ee7e1b05946e0bf5772b"
       ],
       0,
-      "7b8afc1eaedfe8172028e20b413ee2cc"
+      "8535a2b3e052e39296c8fe4ecbac0d41"
     ],
     [
       "Hacl.Spec.Endianness.seq_map_",
       2,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_cd046bc4a887ee7e1b05946e0bf5772b"
+      ],
+      0,
+      "b1ac07de1f10665e803ffbe4b7821628"
+    ],
+    [
+      "Hacl.Spec.Endianness.seq_map_",
+      3,
       0,
       1,
       [
@@ -112,7 +128,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "f4b9f2e70b84b1751ed6646d1b5259f7"
+      "17e88ba1dd5b3d4513e74d19c07fee19"
     ],
     [
       "Hacl.Spec.Endianness.seq_map",
@@ -127,7 +143,7 @@
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "fdf5e0b1fe27ab633f9826618b305df9"
+      "f9fc057e977c42ce5ed0f8b1e27f18af"
     ],
     [
       "Hacl.Spec.Endianness.seq_map",
@@ -147,7 +163,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "b8dcc907734e5461ba719c8e5039d649"
+      "19fc6f8436c31ed950e02fb33d59ecc2"
     ],
     [
       "Hacl.Spec.Endianness.hlittle_bytes",
@@ -170,7 +186,19 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "791aa328c7aef5e9ea74fc2c65162134"
+      "e39dadf9750309924ece6fa142730e2e"
+    ],
+    [
+      "Hacl.Spec.Endianness.hlittle_bytes",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
+      ],
+      0,
+      "2045a273a39ed4ad0afc9de060e53948"
     ],
     [
       "Hacl.Spec.Endianness.hbig_bytes",
@@ -193,7 +221,19 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "2526df539ef679d72b3cd144e26970c4"
+      "7fa676c6935893de7299926147fd3d18"
+    ],
+    [
+      "Hacl.Spec.Endianness.hbig_bytes",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
+      ],
+      0,
+      "287ec70192f45a545d387a144672b95d"
     ],
     [
       "Hacl.Spec.Endianness.lift_32",
@@ -205,7 +245,7 @@
         "refinement_interpretation_Hacl.Spec.Endianness_Tm_refine_310e7a29569e2d208223322b6967b938"
       ],
       0,
-      "f0a2a7fbe6530659f8def6da522978ec"
+      "754f0e08e235a70b08a9243e21a2f48a"
     ]
   ]
 ]

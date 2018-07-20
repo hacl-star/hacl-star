@@ -2,9 +2,9 @@ module Crypto.AEAD.BufferUtils
 
 module ST = FStar.HyperStack.ST
 
-open FStar.HyperStack.All
 open FStar.Set
 open FStar.HyperStack
+open FStar.HyperStack.All
 open FStar.Buffer
 module HS = FStar.HyperStack
 
@@ -50,16 +50,16 @@ let decrypt_modifies (prf_region:rid) (mac_region:rid)
 
 let accumulate_modifies_nothing h0 h1 = 
   let open HS in
-  modifies_one h0.tip h0 h1
-  /\ Buffer.modifies_buf_0 h0.tip h0 h1
-  /\ h0.tip=h1.tip
+  modifies_one (HS.get_tip h0) h0 h1
+  /\ Buffer.modifies_buf_0 (HS.get_tip h0) h0 h1
+  /\ HS.get_tip h0 == HS.get_tip h1
 
 let mac_modifies (#a:Type) 
 		 (mac_region:rid)
 		 (acc:FStar.Buffer.buffer a)
 		 (cipher:buffer)
 		 (h0 h1 :mem) : GTot Type0 =
-  HS.modifies (Set.as_set [h0.tip; frameOf cipher; mac_region]) h0 h1 /\
+  HS.modifies (Set.as_set [HS.get_tip h0; frameOf cipher; mac_region]) h0 h1 /\
   Buffer.modifies_buf_1 (frameOf cipher) cipher h0 h1
 
 let enxor_modifies (log_region:rid) (cipher:buffer) (h0 h1:mem) : GTot Type0 = 
@@ -81,8 +81,8 @@ val chain_mods_enc: #a:Type ->
 		    h_ideal: mem ->
      Lemma (requires 
 	      Buffer.live h_init cipher /\
-	      prf_region `is_in` h_init.h /\
-	      mac_region `is_in` h_init.h /\
+	      prf_region `is_in` (HS.get_hmap h_init) /\
+	      mac_region `is_in` (HS.get_hmap h_init) /\
 	      is_eternal_region prf_region /\
 	      is_eternal_region (frameOf cipher) /\
 	      prf_region `HS.includes` mac_region /\
@@ -92,9 +92,9 @@ val chain_mods_enc: #a:Type ->
 	      prf_mac_modifies prf_region mac_region h_push h_prf /\
 	      enxor_modifies prf_region cipher h_prf h_enx /\
 	      accumulate_modifies_nothing h_enx h_acc /\
-	      Buffer.frameOf acc = h_acc.tip /\
+	      Buffer.frameOf acc = (HS.get_tip h_acc) /\
 	      mac_modifies mac_region acc cipher h_acc h_mac /\
-	      h_mac.tip = h_ideal.tip /\
+	      (HS.get_tip h_mac) = (HS.get_tip h_ideal) /\
 	      (if cond
  	       then h_mac == h_ideal 
 	       else HS.modifies (Set.as_set [prf_region]) h_mac h_ideal))
@@ -121,8 +121,8 @@ val chain_modification: #a:Type ->
 			h4:mem -> //after dexor
      Lemma (requires 
 	      Buffer.live h_init plain /\
-	      prf_region `is_in` h_init.h /\
-	      mac_region `is_in` h_init.h /\
+	      prf_region `is_in` (HS.get_hmap h_init) /\
+	      mac_region `is_in` (HS.get_hmap h_init) /\
 	      is_eternal_region prf_region /\
 	      is_eternal_region (frameOf plain) /\
 	      prf_region `HS.includes` mac_region /\
@@ -131,7 +131,7 @@ val chain_modification: #a:Type ->
 	      HS.fresh_frame h_init h0 /\                        //push
 	      prf_mac_modifies prf_region mac_region h0 h1 /\    //prf_mac
 	      accumulate_modifies_nothing h1 h2 /\               //accumulate
-	      Buffer.frameOf acc = h2.tip /\
+	      Buffer.frameOf acc = (HS.get_tip h2) /\
 	      Buffer.modifies_1 acc h2 h3 /\                      //verify
 	      (h3 == h4 \/ dexor_modifies cond prf_region plain h3 h4)) //maybe dexor
 	    (ensures (HS.poppable h4 /\
@@ -139,4 +139,5 @@ val chain_modification: #a:Type ->
 #reset-options "--z3rlimit 1000"
 let chain_modification #a acc cond prf_region mac_region plain h_init h0 h1 h2 h3 h4 =
     Buffer.lemma_reveal_modifies_1 acc h2 h3;
-    FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 plain h3) h4
+    FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 plain h3) h4;
+    assert (HS.modifies_ref mac_region Set.empty h_init (HS.pop h4))

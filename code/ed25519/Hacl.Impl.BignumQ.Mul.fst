@@ -1,5 +1,6 @@
 module Hacl.Impl.BignumQ.Mul
 
+module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
@@ -835,7 +836,7 @@ let barrett_reduction__ z t m mu tmp =
 
 private
 val lemma_modifies_0_2_: #a:Type -> #a':Type -> #a'':Type -> h0:mem -> h1:mem -> h2:mem -> b:buffer a -> b':buffer a' -> b'':buffer a'' ->
-  Lemma (requires (live h0 b /\ live h0 b' /\ ~(contains h0 b'') /\ live h1 b'' /\ frameOf b'' = h0.tip
+  Lemma (requires (live h0 b /\ live h0 b' /\ ~(contains h0 b'') /\ live h1 b'' /\ frameOf b'' = (HS.get_tip h0)
     /\ modifies_0 h0 h1 /\ modifies_2 b b' h1 h2))
        (ensures (modifies_3_2 b b' h0 h2))
 let lemma_modifies_0_2_ #a #a' #a'' h0 h1 h2 b b' b'' =

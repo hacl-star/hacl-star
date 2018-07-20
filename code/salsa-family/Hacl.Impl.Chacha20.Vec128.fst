@@ -600,7 +600,7 @@ val chacha20_sum3:
       invariant log h0 st /\
       modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h1 /\
       modifies_buf_1 (frameOf st) st h0 h1 /\
-      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) /\ (
+      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) (FStar.HyperStack.get_hmap h0) (FStar.HyperStack.get_hmap h1) /\ (
       match Ghost.reveal log with | MkLog k n ctr ->
       UInt32.v ctr < pow2 32 - 2 /\
       as_state h1 st == Spec.setup k n (UInt32.v ctr+2) /\
@@ -629,7 +629,7 @@ val lemma_modifies_sum3:
     modifies_1 k2 h4 h5))
         (ensures (modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h5 /\
           modifies_buf_1 (frameOf st) st h0 h5 /\
-          modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h5.h) ))
+          modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) (FStar.HyperStack.get_hmap h0) (FStar.HyperStack.get_hmap h5) ))
 let lemma_modifies_sum3 h0 h1 h2 h3 h4 h5 st k0 k1 k2 =
   lemma_reveal_modifies_1 k0 h0 h1;
   lemma_reveal_modifies_1 st h1 h2;
@@ -690,7 +690,7 @@ val chacha20_core3:
       invariant log h0 st /\
       modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h1 /\
       modifies_buf_1 (frameOf st) st h0 h1 /\
-      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) /\ (
+      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) (FStar.HyperStack.get_hmap h0) (FStar.HyperStack.get_hmap h1) /\ (
       match Ghost.reveal log with | MkLog k n ctr ->
       UInt32.v ctr < pow2 32 - 2 /\
       as_state h1 st == Spec.setup k n (UInt32.v ctr+2) /\
@@ -1118,7 +1118,7 @@ val lemma_live_update3:
   Lemma (requires (live h0 st /\ live h0 k0 /\ live h0 k1 /\ live h0 k2 /\ live h0 buf /\
       modifies_buf_3 (frameOf k0) k0 k1 k2 h0 h1 /\
       modifies_buf_1 (frameOf st) st h0 h1 /\
-      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h0.h) FStar.HyperStack.(h1.h) ))
+      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) (FStar.HyperStack.get_hmap h0) (FStar.HyperStack.get_hmap h1) ))
         (ensures (live h1 buf /\ live h0 buf /\ as_seq h0 buf == as_seq h1 buf))
 let lemma_live_update3 h0 h1 st k0 k1 k2 buf =
   ()
@@ -1171,13 +1171,13 @@ val lemma_modifies_update3:
   h7:HyperStack.mem{HyperStack.popped h6 h7} ->
   output:uint8_p{length output = 192 /\ live h0 output /\ live h1 output /\ live h2 output /\ live h3 output /\ live h4 output /\ live h5 output /\ live h6 output /\ live h7 output} ->
   st:state{live h0 st /\ live h1 st /\ live h2 st /\ live h3 st /\ live h4 st /\ live h5 st /\ live h6 st /\ live h7 st} ->
-  k0:state{k0 `unused_in` h1 /\ frameOf k0 = FStar.HyperStack.(h2.tip) /\ live h2 k0 /\ live h3 k0 /\ live h4 k0 /\ live h5 k0 /\ live h6 k0 /\ disjoint k0 st} ->
-  k1:state{k1 `unused_in` h1 /\ frameOf k1 = FStar.HyperStack.(h2.tip) /\ live h2 k1 /\ live h3 k1 /\ live h4 k1 /\ live h5 k1 /\ live h6 k1 /\ disjoint k1 st /\ disjoint k0 k1} ->
-  k2:state{k2 `unused_in` h1 /\ frameOf k2 = FStar.HyperStack.(h2.tip) /\ live h2 k2 /\ live h3 k2 /\ live h4 k2 /\ live h5 k2 /\ live h6 k2 /\ disjoint st k2 /\ disjoint k0 k2 /\ disjoint k1 k2} ->
+  k0:state{k0 `unused_in` h1 /\ frameOf k0 = (FStar.HyperStack.get_tip h2) /\ live h2 k0 /\ live h3 k0 /\ live h4 k0 /\ live h5 k0 /\ live h6 k0 /\ disjoint k0 st} ->
+  k1:state{k1 `unused_in` h1 /\ frameOf k1 = (FStar.HyperStack.get_tip h2) /\ live h2 k1 /\ live h3 k1 /\ live h4 k1 /\ live h5 k1 /\ live h6 k1 /\ disjoint k1 st /\ disjoint k0 k1} ->
+  k2:state{k2 `unused_in` h1 /\ frameOf k2 = (FStar.HyperStack.get_tip h2) /\ live h2 k2 /\ live h3 k2 /\ live h4 k2 /\ live h5 k2 /\ live h6 k2 /\ disjoint st k2 /\ disjoint k0 k2 /\ disjoint k1 k2} ->
   Lemma (requires (
       modifies_buf_3 (frameOf k0) k0 k1 k2 h2 h3 /\
       modifies_buf_1 (frameOf st) st h2 h3 /\
-      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) FStar.HyperStack.(h3.h) FStar.HyperStack.(h2.h) /\
+      modifies_just (Set.union (Set.singleton (frameOf st)) (Set.singleton (frameOf k0))) (FStar.HyperStack.get_hmap h3) (FStar.HyperStack.get_hmap h2) /\
       modifies_1 (Buffer.sub output 0ul   64ul) h3 h4 /\
       modifies_1 (Buffer.sub output 64ul  64ul) h4 h5 /\
       modifies_1 (Buffer.sub output 128ul 64ul) h5 h6))

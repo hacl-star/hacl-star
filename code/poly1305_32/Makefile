@@ -67,9 +67,7 @@ all-ci: bignum-ci specific-ci
 # extract.
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 KREMLIN_ARGS+=-I ../bignum -tmpdir poly-c \
-	-bundle 'Hacl.Spec.*,Hacl.Spe.*' -fparentheses \
-	-drop FStar,Prims,LowStar,C.Loops.Spec.Loops,Combinators \
-	-drop Hacl.Endianness,Spec.*,Hacl.Bignum.Parameters,Hacl.Endianness,Hacl.Spec,Hacl.Spec.*,Hacl.Spe,Hacl.Spe.*,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.* \
+	-fparentheses \
 	$(KREMLIN_TESTLIB)
 
 poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_32.fst
@@ -77,13 +75,16 @@ poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_32.fst
 
 poly-c/Hacl_Poly1305_32.c: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $^ \
-		-bundle 'Hacl.Poly1305_32=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Hacl.Poly1305_32' \
-		-skip-compilation
+		-bundle 'Hacl.Poly1305_32=*' \
+		-minimal -add-include '"kremlib.h"' -skip-compilation
 
 poly1305.exe: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) \
 		-no-prefix Hacl.Test.Poly1305_32 \
-		-bundle 'Hacl.Poly1305_32=Hacl.Bignum.*,Hacl.Impl.*,Hacl.Standalone.*,Hacl.Poly1305_32' \
+		-bundle 'Hacl.Spec.*,Hacl.Spe.*' \
+		-drop FStar,Prims,LowStar,C.Loops.Spec.Loops,Combinators \
+		-drop Hacl.Endianness,Spec.*,Hacl.Bignum.Parameters,Hacl.Endianness,Hacl.Spec,Hacl.Spec.*,Hacl.Spe,Hacl.Spe.*,Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Seq.* \
+		-bundle 'Hacl.Poly1305_32=*' \
 		$^ -o $@
 	./$@
 

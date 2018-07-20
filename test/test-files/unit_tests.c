@@ -188,13 +188,12 @@ result:
 
 
 bool unit_test_onetimeauth(){
-  // Global length
-  uint64_t len = HACL_UNIT_TESTS_SIZE * sizeof(uint8_t);
   // Scratch buffers
   uint8_t hacl_mac[POLY_MACSIZE], expected_mac[POLY_MACSIZE], key[POLY_KEYSIZE];
   uint8_t *plaintext = malloc(HACL_UNIT_TESTS_SIZE * sizeof (uint8_t));
   // Initializing random plaintext
   READ_RANDOM_BYTES(HACL_UNIT_TESTS_SIZE, plaintext);
+  READ_RANDOM_BYTES(POLY_KEYSIZE, key);
   // Tests
   int a;
   bool pass = true;
@@ -203,6 +202,16 @@ bool unit_test_onetimeauth(){
     tweet_crypto_onetimeauth(expected_mac, plaintext, i, key);
     crypto_onetimeauth(hacl_mac, plaintext, i, key);
     a = memcmp(hacl_mac, expected_mac, 16 * sizeof (uint8_t));
+    /* printf("expected_mac: "); */
+    /* for (int i = 0; i < POLY_MACSIZE; ++i) { */
+    /*   printf("%"PRIx8, expected_mac[i]); */
+    /* } */
+    /* printf("\n"); */
+    /* printf("hacl_mac: "); */
+    /* for (int i = 0; i < POLY_MACSIZE; ++i) { */
+    /*   printf("%"PRIx8, hacl_mac[i]); */
+    /* } */
+    /* printf("\n"); */
     if (a != 0){
       pass = false;
       printf("Poly1305 failed on input of size %d\n.", i);
@@ -227,6 +236,16 @@ bool unit_test_onetimeauth(){
   tweet_crypto_onetimeauth(expected_mac, plaintext, HACL_UNIT_TESTS_SIZE, key);
   crypto_onetimeauth(hacl_mac, plaintext, HACL_UNIT_TESTS_SIZE, key);
   a = memcmp(hacl_mac, expected_mac, 16 * sizeof (uint8_t));
+  /* printf("expected_mac: "); */
+  /* for (int i = 0; i < POLY_MACSIZE; ++i) { */
+  /*   printf("%"PRIx8, expected_mac[i]); */
+  /* } */
+  /* printf("\n"); */
+  /* printf("hacl_mac: "); */
+  /* for (int i = 0; i < POLY_MACSIZE; ++i) { */
+  /*   printf("%"PRIx8, hacl_mac[i]); */
+  /* } */
+  /* printf("\n"); */
   if (a != 0){
     pass = false;
     printf("Poly1305 failed on input of size %d\n.", HACL_UNIT_TESTS_SIZE);
@@ -372,7 +391,7 @@ bool unit_test_crypto_sign(){
   uint8_t sk[64], pk[32];
   crypto_sign_keypair(pk, sk);
   READ_RANDOM_BYTES(len, plaintext);
-  int a;
+  int a, res;
   bool pass = true;
   long long unsigned int smlen;
   for (int i = 0; i < 256; i++){
@@ -384,8 +403,9 @@ bool unit_test_crypto_sign(){
       printf("crypto_sign failed on input of size %d\n", i);
       break;
     }
-    pass = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, i + 64, pk);
-    if (pass == false) {
+    res = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, i + 64, pk);
+    if (res != 0) {
+      pass = false;
       printf("crypto_sign_open returned value failed on input of size %d\n", i);
       break;
     }
@@ -404,8 +424,9 @@ bool unit_test_crypto_sign(){
     pass = false;
     printf("crypto_sign failed on input of size %d\n.", HACL_UNIT_TESTS_SIZE);
   }
-  pass = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, HACL_UNIT_TESTS_SIZE + 64, pk);
-  if (pass == false) {
+  res = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, HACL_UNIT_TESTS_SIZE + 64, pk);
+  if (res != 0) {
+    pass = false;
     printf("crypto_sign_open returned value failed on input of size %d\n", HACL_UNIT_TESTS_SIZE);
   }
   a = memcmp(hacl_signed_msg, plaintext, HACL_UNIT_TESTS_SIZE * sizeof(uint8_t));

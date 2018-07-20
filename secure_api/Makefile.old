@@ -109,7 +109,7 @@ OTHERFLAGS+= \
 --include $(HACL_HOME)/secure_api/vale \
 --include $(HACL_HOME)/secure_api/uf1cma \
 --include $(HACL_HOME)/secure_api/utils \
---include $(HACL_HOME)/secure_api/indexing \
+--include $(HACL_HOME)/secure_api/concrete_specializations/verification \
 --include $(HACL_HOME)/secure_api/ideal_flags \
 --include $(HACL_HOME)/secure_api \
 --include $(HACL_HOME)/specs \
@@ -148,7 +148,7 @@ VERIFY= \
   aead/Crypto.AEAD.Encrypt.Ideal.Invariant \
   aead/Crypto.AEAD.Encrypt \
   aead/Crypto.AEAD \
-  aead/Crypto.Plain
+  Crypto.Plain
 
 EXTRA= \
   Crypto.Symmetric.Poly1305 \

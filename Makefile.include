@@ -58,8 +58,7 @@ KREMLIN_ARGS+=$(KOPTS)
 KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
 
 ifneq (,$(EVEREST_WINDOWS))
-KREMLIN_ARGS+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
-  -add-early-include '"FStar_UInt128.h"'
+KREMLIN_ARGS+=-falloca -ftail-calls
 endif
 
 # Compiler options
@@ -69,13 +68,6 @@ else ifdef USE_CL
   KREMLIN_ARGS+=-cc msvc $(VERBOSE)
 else
   KREMLIN_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
-endif
-
-# Release mode (includes testlib if not release)
-ifdef HACL_RELEASE
-  KREMLIN_TESTLIB=
-else
-  KREMLIN_TESTLIB=-add-include '"kremlin/testlib.h"' $(KREMLIB)/testlib.c
 endif
 
 # License header

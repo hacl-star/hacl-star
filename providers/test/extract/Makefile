@@ -6,7 +6,7 @@ MLCRYPTO_HOME?=../../../../MLCrypto
 OPENSSL_HOME=$(MLCRYPTO_HOME)/openssl
 
 FILES = $(basename $(ALL_C_FILES))
-CFLAGS = -I $(KREMLIN_HOME)/include
+CFLAGS = -I $(KREMLIN_HOME)/include -g
 LDFLAGS = -L $(EVERCRYPT_HOME) -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))
@@ -14,6 +14,13 @@ LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
 else
 LDFLAGS += -lbcrypt
 endif
+
+ifeq ($(UNAME),Linux)
+  LDFLAGS += -Wl,-z,defs,-z,noexecstack
+endif
+
+
+LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
 # See https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
 %.d: %.c
@@ -24,7 +31,7 @@ endif
 
 -include $(addsuffix .d,$(FILES))
 
-Test.exe: $(addsuffix .o,$(FILES)) $(KREMLIN_HOME)/kremlib/testlib.c $(KREMLIN_HOME)/kremlib/kremstr.c $(KREMLIN_HOME)/kremlib/kremlib.c 
+Test.exe: $(addsuffix .o,$(FILES)) $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 	$(CC) $^ -o $@ $(LDFLAGS) -I $(KREMLIN_HOME)/include
 
 test: Test.exe

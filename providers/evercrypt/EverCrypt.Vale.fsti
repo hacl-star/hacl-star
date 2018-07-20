@@ -1,11 +1,16 @@
 module EverCrypt.Vale
 
-module N = C.Nullity
+module B = LowStar.Buffer
 
 open EverCrypt.Helpers
 
 /// This module directly exposes "raw" functions, using attributes to make sure
 /// KreMLin generates the right "extern stdcall" declarations. There is no C code to implement this module, the implementations are provided at link-time.
+
+// Can't use the real ASM names because they are capitalized...
+// name forwarding is in evercrypt_vale_stubs.c with stdcall calls
+val aes128_key_expansion_sbox: key:uint8_p -> w:uint8_p -> sbox:uint8_p -> Stack_ unit
+val aes128_encrypt_one_block: cipher:uint8_p -> plain: uint8_p -> w:uint8_p -> sbox: uint8_p -> Stack_ unit
 
 noeq
 type gcm_args = {
@@ -20,7 +25,19 @@ type gcm_args = {
 }
 
 [@ (CCConv "stdcall") ]
-val gcm_encrypt: N.pointer gcm_args -> Stack_ unit
+val aes128_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val aes_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
+val gcm128_encrypt: B.pointer gcm_args -> Stack_ unit
+
+[@ (CCConv "stdcall") ]
+val gcm128_decrypt: B.pointer gcm_args -> Stack_ uint32_t
+
+[@ (CCConv "stdcall") ]
+val aes256_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
+
+[@ (CCConv "stdcall") ]
+val gcm256_encrypt: B.pointer gcm_args -> Stack_ unit
+
+[@ (CCConv "stdcall") ]
+val gcm256_decrypt: B.pointer gcm_args -> Stack_ uint32_t
