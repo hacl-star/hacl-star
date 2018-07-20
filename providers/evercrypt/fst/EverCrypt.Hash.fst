@@ -35,9 +35,9 @@ type state_s: (G.erased alg) -> Type0 =
 
 let footprint_s #a (s: state_s a): GTot M.loc =
   match s with
-  | SHA256_Hacl p -> M.loc_buffer p
-  | SHA256_Vale p -> M.loc_buffer p
-  | SHA384_Hacl p -> M.loc_buffer p
+  | SHA256_Hacl p -> M.loc_addr_of_buffer p
+  | SHA256_Vale p -> M.loc_addr_of_buffer p
+  | SHA384_Hacl p -> M.loc_addr_of_buffer p
 
 let invariant_s #a s h =
   match s with
@@ -100,21 +100,7 @@ let create a =
         let b = B.malloc HS.root 0UL Hacl.SHA2_384.size_state in
         SHA384_Hacl b
   in
-  let h1 = ST.get () in
-  let r = B.malloc HS.root s 1ul in
-  let h2 = ST.get () in
-  // None of these seem to be necessary for the proof to proceed. Key bits are
-  // retained.
-  // assert (invariant r h2);
-  // assert (fresh_loc (M.loc_buffer r) h1 h2);
-  // assert (fresh_loc (M.loc_buffer r) h1 h2);
-  // assert (M.(modifies loc_none h0 h1));
-  // assert (loc_unused_in (M.loc_buffer r) h0);
-  // assert (M.(modifies loc_none h0 h2));
-  // JP: 20180720 this proof broken by the latest bufferv3 refactoring, can't
-  // prove anything anymore about freshness of locations.
-  admit ();
-  r
+  B.malloc HS.root s 1ul
 
 #set-options "--max_fuel 0"
 
@@ -144,6 +130,8 @@ let update #a s data =
       ValeGlue.sha256_update p data;
       admit ()
 
+#set-options "--z3rlimit 32"
+
 let update_multi #a s data n =
   match !*s with
   | SHA256_Hacl p ->
@@ -157,6 +145,8 @@ let update_multi #a s data n =
   | SHA256_Vale p ->
       ValeGlue.sha256_update_multi p data n;
       admit ()
+
+#set-options "--z3rlimit 20"
 
 let update_last #a s data len =
   match !*s with
@@ -187,26 +177,14 @@ let finish #a s dst =
       admit ()
 
 let free #a s =
-  (match !*s with
+  (match !* s with
   | SHA256_Hacl p ->
       B.free p
   | SHA384_Hacl p ->
       B.free p
   | SHA256_Vale p ->
       B.free p);
-  let h = ST.get () in
-  // 20180720 JP: we seem to be missing something to derive that this buffer is
-  // still live
-  assume (B.live h s);
-  B.free s;
-  // 20180720 JP: waiting on fixes from the LowStar.Buffer library. Need to
-  // change loc_buffer in the footprint / footprint_s to:
-  // +let loc_whole_buffer b =
-  // +  M.(loc_addresses false (B.frameOf b) (Set.singleton (B.as_addr b)))
-  // then: modify the refinements in state / state_s to carry the freeable predicate
-  // then: change to loc_whole_buffer in the invariant
-  // then: have proper patterns for loc_addresses in LowStar.Buffer
-  admit ()
+  B.free s
 
 let hash a dst input len =
   match a with

@@ -28,12 +28,12 @@ let state alg = b:B.pointer (state_s alg) { B.freeable b }
 // do partial applications in pre- and post-conditions
 val footprint_s: #a:e_alg -> state_s a -> GTot M.loc
 let footprint (#a: e_alg) (s: state a) (m: HS.mem) =
-  M.(loc_union (loc_buffer s) (footprint_s (B.deref m s)))
+  M.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
 
 val invariant_s: (#a: e_alg) -> state_s a -> HS.mem -> Type0
 let invariant (#a: e_alg) (s: state a) (m: HS.mem) =
   B.live m s /\
-  M.(loc_disjoint (loc_buffer s) (footprint_s (B.deref m s))) /\
+  M.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
   invariant_s (B.get m s 0) m
 
 let type_of alg =
@@ -306,7 +306,7 @@ val finish: #a:e_alg -> s:state a -> dst:uint8_p -> Stack unit
     footprint s h0 == footprint s h1 /\
     finish_spec s h0 (B.as_seq h1 dst)))
 
-val free: #a:e_alg -> s:state a -> Stack unit
+val free: #a:e_alg -> s:state a -> ST unit
   (requires (fun h0 ->
     invariant s h0))
   (ensures (fun h0 _ h1 ->
