@@ -16,6 +16,7 @@ let main () =
   let len = 34ul in
   let len' = 34uL in
   let keysize = 32ul in
+  [@inline_let]
   let macsize = 16ul in
   let mac = create (0uy) macsize in
   let plaintext = createL [

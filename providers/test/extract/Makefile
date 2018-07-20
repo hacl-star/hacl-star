@@ -5,8 +5,8 @@ EVERCRYPT_HOME=../../out
 MLCRYPTO_HOME?=../../../../MLCrypto
 OPENSSL_HOME=$(MLCRYPTO_HOME)/openssl
 
-FILES = $(basename $(filter-out EverCrypt.c, $(ALL_C_FILES)))
-CFLAGS = -I $(KREMLIN_HOME)/include -I ../../generated
+FILES = $(basename $(ALL_C_FILES))
+CFLAGS = -I $(KREMLIN_HOME)/include -g
 LDFLAGS = -L $(EVERCRYPT_HOME) -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))
@@ -14,6 +14,11 @@ LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
 else
 LDFLAGS += -lbcrypt
 endif
+
+ifeq ($(UNAME),Linux)
+  LDFLAGS += -Wl,-z,defs,-z,noexecstack
+endif
+
 
 LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
@@ -26,7 +31,7 @@ LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
 -include $(addsuffix .d,$(FILES))
 
-Test.exe: $(addsuffix .o,$(FILES))
+Test.exe: $(addsuffix .o,$(FILES)) $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 	$(CC) $^ -o $@ $(LDFLAGS) -I $(KREMLIN_HOME)/include
 
 test: Test.exe

@@ -388,7 +388,12 @@ val update: #i:id -> r:elemB i -> a:elemB i -> w:wordB_16 -> Stack unit
     /\ Buffer.modifies_1 (as_buffer a) h0 h1
     /\ sel_elem h1 a == (sel_elem h0 a +@ encode i (sel_word h0 w)) *@ sel_elem h0 r))
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 150 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 1"
+(*
+ * AR: adding two assumes (06/22, NYC hackathon)
+ * one related to disjointness of a and r
+ * and the other for PL.live_st
+ *)
 let update #i r a w =
   begin
   match alg i with
@@ -400,18 +405,20 @@ let update #i r a w =
     let e = Buffer.create GF.zero_128 1ul in
     let h1 = ST.get() in
     e.(0ul) <- GF.load128_be w;
+    assume (disjoint a' r);
     GF.add_and_multiply a' e r';
     let h2 = ST.get() in
     lemma_modifies_0_2 a e h0 h1 h2;
     pop_frame()
-
 
   | POLY1305 ->
     let h0 = ST.get() in
     let a' : Buffer.buffer UInt64.t = a in
     let r' : Buffer.buffer UInt64.t = r in
     let st = PL.mk_state r' a' in
-    let log = PL.poly1305_update (Ghost.hide Seq.createEmpty) st w in
+    let h1 = ST.get () in
+    assume (PL.live_st h1 st);
+    let log = PL.poly1305_update (Ghost.hide Seq.empty) st w in
     ()
     (* begin *)
     (*   push_frame(); *)
@@ -474,6 +481,11 @@ let lemma_modifies_3_2_finish #a #a' h h' h'' b b' =
   lemma_reveal_modifies_2 b b' h' h'';
   lemma_intro_modifies_3_2 b b' h h''
 
+#reset-options "--z3rlimit 200 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+
+(*
+ * AR: 06/22, NYC hackathon, adding two buffer disjoint assumes
+ *)
 let finish #i s a t =
   let h0 = ST.get() in
   match alg i with
@@ -486,7 +498,11 @@ let finish #i s a t =
     let dummy_m = C.Nullity.null FStar.UInt8.t (* Buffer.create 42uy 0ul *) in
     let h' = ST.get() in
     assume (Buffer.disjoint a' dummy_m); //NS: 06/20  FIXME
-    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) (PL.mk_state dummy_r a') t dummy_m 0uL s;
+    let st = PL.mk_state dummy_r a' in
+    let h' = ST.get () in
+    assume (Buffer.disjoint a' t);
+    assume (Buffer.disjoint a' s);
+    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) st t dummy_m 0uL s;
     let h'' = ST.get() in
     lemma_modifies_3_2_finish h h' h'' a t;
     pop_frame();
@@ -497,6 +513,7 @@ let finish #i s a t =
     FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t) (Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
   | GHASH ->
     let a' : Buffer.buffer UInt128.t = a in
+    assume (Buffer.disjoint a' s);
     GF.finish a' s;
     GF.store128_be t a'.(0ul)
 

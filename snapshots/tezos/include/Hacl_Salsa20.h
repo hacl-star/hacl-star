@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,48 +21,15 @@
  * SOFTWARE.
  */
 
-#include "kremlib.h"
+
+
 #ifndef __Hacl_Salsa20_H
 #define __Hacl_Salsa20_H
 
 
+#include "kremlib.h"
 
-
-
-typedef uint32_t Hacl_Impl_Xor_Lemmas_u32;
-
-typedef uint8_t Hacl_Impl_Xor_Lemmas_u8;
-
-typedef uint32_t Hacl_Lib_Create_h32;
-
-typedef uint8_t *Hacl_Lib_LoadStore32_uint8_p;
-
-typedef uint32_t Hacl_Impl_Salsa20_u32;
-
-typedef uint32_t Hacl_Impl_Salsa20_h32;
-
-typedef uint8_t *Hacl_Impl_Salsa20_uint8_p;
-
-typedef uint32_t *Hacl_Impl_Salsa20_state;
-
-typedef uint32_t Hacl_Impl_Salsa20_idx;
-
-typedef struct 
-{
-  void *k;
-  void *n;
-}
-Hacl_Impl_Salsa20_log_t_;
-
-typedef void *Hacl_Impl_Salsa20_log_t;
-
-typedef uint32_t Hacl_Impl_HSalsa20_h32;
-
-typedef uint32_t Hacl_Impl_HSalsa20_u32;
-
-typedef uint8_t *Hacl_Impl_HSalsa20_uint8_p;
-
-typedef uint32_t *Hacl_Impl_HSalsa20_state;
+extern FStar_UInt128_uint128 FStar_Int_Cast_Full_uint64_to_uint128(uint64_t x0);
 
 typedef uint8_t *Hacl_Salsa20_uint8_p;
 
@@ -81,4 +48,6 @@ Hacl_Salsa20_salsa20(
 );
 
 void Hacl_Salsa20_hsalsa20(uint8_t *output, uint8_t *key, uint8_t *nonce);
+
+#define __Hacl_Salsa20_H_DEFINED
 #endif

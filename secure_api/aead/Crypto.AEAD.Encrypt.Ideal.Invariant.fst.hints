@@ -48,7 +48,42 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "324b0f8b3a5ee491a218ad4bcb848704"
+      "06acce5d353c7d8341ea26c00ebb35fd"
+    ],
+    [
+      "Crypto.AEAD.Encrypt.Ideal.Invariant.safeMac_ideal_writes",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "equation_Crypto.AEAD.Encoding.aadlen_32",
+        "equation_Crypto.AEAD.Encoding.aadmax",
+        "equation_Crypto.AEAD.Encoding.txtlen_32",
+        "equation_Crypto.AEAD.Encoding.txtmax",
+        "equation_Crypto.AEAD.Invariant.nz_ok_len_32",
+        "equation_Crypto.AEAD.Invariant.ok_len_32",
+        "equation_Crypto.AEAD.Invariant.safeMac",
+        "equation_Crypto.Symmetric.MAC.taglen",
+        "equation_Crypto.Symmetric.MAC.wlen", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.lte", "equation_FStar.UInt32.n",
+        "equation_Flag.mac1",
+        "fuel_guarded_inversion_Crypto.AEAD.Invariant.aead_state",
+        "function_token_typing_Crypto.AEAD.Encoding.aadmax",
+        "function_token_typing_Crypto.Symmetric.MAC.wlen",
+        "function_token_typing_FStar.UInt32.n",
+        "lemma_FStar.Buffer.lemma_size", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Crypto.AEAD.Encoding_Tm_refine_e295d1a089abf8fd7758b0cf33f12cde",
+        "refinement_interpretation_Crypto.AEAD.Invariant_Tm_refine_83098ef48b1115bb9f30dcf277c22e4f",
+        "refinement_interpretation_Crypto.AEAD.Invariant_Tm_refine_ca818661a6513900a721353e0479b440",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "typing_FStar.UInt32.lte", "typing_FStar.UInt32.v"
+      ],
+      0,
+      "2d86e23a749283b040f69abaf1a448ef"
     ],
     [
       "Crypto.AEAD.Encrypt.Ideal.Invariant.frame_ideal_writes",
@@ -84,7 +119,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "1fb783807abec14552e5abb7b14ce5fc"
+      "b6f6e84726cf1fa62a7e99e2e02864b8"
     ],
     [
       "Crypto.AEAD.Encrypt.Ideal.Invariant.frame_ideal_writes",
@@ -229,7 +264,28 @@
         "typing_FStar.UInt32.lte", "typing_FStar.UInt32.v", "typing_Flag.prf"
       ],
       0,
-      "3eaf3e65b3f411ca26bed31acab50f29"
+      "9a300b2c2b274e4dd8dced3cb40ffef7"
+    ],
+    [
+      "Crypto.AEAD.Encrypt.Ideal.Invariant.frame_ideal_writes",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Crypto.AEAD.Encoding.aadlen_32",
+        "equation_Crypto.AEAD.Encoding.aadmax",
+        "equation_Crypto.AEAD.Encrypt.Ideal.Invariant.safeMac_ideal_writes",
+        "equation_Crypto.AEAD.Invariant.safeMac",
+        "equation_FStar.UInt32.lte", "equation_Flag.mac1",
+        "fuel_guarded_inversion_Crypto.AEAD.Invariant.aead_state",
+        "function_token_typing_Crypto.AEAD.Encoding.aadmax",
+        "primitive_Prims.op_AmpAmp", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Crypto.AEAD.Encoding_Tm_refine_e295d1a089abf8fd7758b0cf33f12cde",
+        "typing_FStar.UInt32.lte"
+      ],
+      0,
+      "4aba95e5690bf40198a52a6c380de133"
     ],
     [
       "Crypto.AEAD.Encrypt.Ideal.Invariant.fresh_nonces_are_unused_after_ideal",
@@ -266,7 +322,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "e32cab0c6fe3f551e46a98f26f218ef5"
+      "d3691c07161be8ab92c9533f2c07f190"
     ],
     [
       "Crypto.AEAD.Encrypt.Ideal.Invariant.fresh_nonces_are_unused_after_ideal",
@@ -452,7 +508,24 @@
         "typing_Flag.mac1", "typing_Flag.prf", "typing_Flag.safeHS"
       ],
       0,
-      "c049a7cbc8acb0be545036c42ef5e11a"
+      "b5d86f67aa98675cce15c115d7c7d639"
+    ],
+    [
+      "Crypto.AEAD.Encrypt.Ideal.Invariant.fresh_nonces_are_unused_after_ideal",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Crypto.AEAD.Invariant.safeMac",
+        "equation_Crypto.Symmetric.Bytes.mem",
+        "equation_FStar.Monotonic.HyperStack.mem", "equation_Flag.mac1",
+        "fuel_guarded_inversion_Crypto.AEAD.Invariant.aead_state",
+        "primitive_Prims.op_AmpAmp", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Crypto.AEAD.Invariant_Tm_refine_fd230532a345043390a2f1c12036b6fe"
+      ],
+      0,
+      "eb135053c983ec3c07b2baef7982e92c"
     ],
     [
       "Crypto.AEAD.Encrypt.Ideal.Invariant.reestablish_inv",
@@ -479,7 +552,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "6500123490f268339b73f200510e6e61"
+      "02dc09bda80728113bfb36877c551f52"
     ],
     [
       "Crypto.AEAD.Encrypt.Ideal.Invariant.reestablish_inv",
@@ -704,7 +777,32 @@
         "typing_Flag.safeId", "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "5290234b65c56de5d2ab799177ec2ea8"
+      "644ed6a9e0820b9f4213a7bbd15de7a9"
+    ],
+    [
+      "Crypto.AEAD.Encrypt.Ideal.Invariant.reestablish_inv",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Crypto.AEAD.Encrypt.Ideal.Invariant.safeMac_ideal_writes",
+        "equation_Crypto.AEAD.Encrypt.Invariant.enxor_and_maybe_mac",
+        "equation_Crypto.AEAD.Invariant.enc_dec_liveness_and_separation",
+        "equation_Crypto.AEAD.Invariant.inv",
+        "equation_Crypto.AEAD.Invariant.safeMac",
+        "equation_Crypto.Symmetric.Bytes.mem",
+        "equation_FStar.Monotonic.HyperStack.is_stack_region",
+        "equation_FStar.Monotonic.HyperStack.mem", "equation_Flag.mac1",
+        "equation_Flag.mac_log",
+        "fuel_guarded_inversion_Crypto.AEAD.Invariant.aead_state",
+        "primitive_Prims.op_AmpAmp", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_FStar.Monotonic.HyperStack_Tm_refine_9a74d818566e70513bc032cc3b65a144",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.Monotonic.HyperStack.is_stack_region"
+      ],
+      0,
+      "541f72f1d26c7fc6f6562fc9362a2e01"
     ]
   ]
 ]

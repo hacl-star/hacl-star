@@ -509,8 +509,10 @@ let accumulate #i st aadlen aad txtlen cipher =
   let h = ST.get() in
   let acc = CMA.start st in
   let h0 = ST.get() in
+  assume (Buffer.disjoint CMA.(MAC.as_buffer st.r) aad);
   add_bytes st acc aadlen aad;
   let h1 = ST.get() in
+  assume (Buffer.disjoint CMA.(MAC.as_buffer st.r) cipher);
   add_bytes st acc txtlen cipher;
   let h2 = ST.get() in
   assert_norm (16 <= pow2 32 - 1);

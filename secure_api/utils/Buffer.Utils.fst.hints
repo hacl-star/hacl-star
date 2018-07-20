@@ -25,7 +25,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "7154b06cf031868b58701f248b6036fe"
+      "1dd34b6a04a4c90f47a8bf8664e0b1b5"
     ],
     [
       "Buffer.Utils.op_Less_Less_Less",
@@ -51,7 +51,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "4a1b2ce5f64a1912dd84b29440067350"
+      "97d1c4164dd848804701780b607baf65"
     ],
     [
       "Buffer.Utils.xor_bytes_inplace",
@@ -87,7 +87,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "73ebff83ecefe04147a653b1d8eba938"
+      "0251cc324c0d9b533b8f0fdcf8abd8ce"
     ],
     [
       "Buffer.Utils.lemma_euclidean_division",
@@ -100,7 +100,7 @@
         "unit_typing"
       ],
       0,
-      "2ffd559e355b73e26ffa7656793b606a"
+      "f0e5a5ffc36539b40e9013e58f4ae551"
     ],
     [
       "Buffer.Utils.lemma_uint32_of_bytes",
@@ -125,7 +125,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "4881f97f20772cc6d834f4f49c0e1bd9"
+      "c1333b988374f074c5a3f15d8e1ffb05"
     ],
     [
       "Buffer.Utils.uint32_of_bytes",
@@ -139,7 +139,7 @@
         "refinement_interpretation_Buffer.Utils_Tm_refine_5e1e0a09f3b3d21a606c98c84a375ebe"
       ],
       0,
-      "a60c437031ee99e1b5310eca4c4c9c1f"
+      "f268ed9c1ec7714f12abac6eb1e1b743"
     ],
     [
       "Buffer.Utils.uint32_of_bytes",
@@ -192,7 +192,7 @@
         "typing_FStar.UInt32.v", "typing_FStar.UInt8.v"
       ],
       0,
-      "5aa98752341834f8f3e4627abed58a4f"
+      "733e48e8c1c6a8d22178ec887455b414"
     ],
     [
       "Buffer.Utils.bytes_of_uint32s",
@@ -276,7 +276,7 @@
         "typing_Prims.pow2", "unit_inversion", "unit_typing"
       ],
       0,
-      "54371156ab2338413cc672d89db51178"
+      "8bbcfd27417c817230b2733fc4c5462b"
     ],
     [
       "Buffer.Utils.bytes_of_uint32",
@@ -301,7 +301,7 @@
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87"
       ],
       0,
-      "8d5c4fbefa7b384ec0f5dde29f7516b0"
+      "ee567194b5e74eaf389401952987a76b"
     ],
     [
       "Buffer.Utils.bytes_of_uint32",
@@ -351,7 +351,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "00c7d2fae7e9a377a75be484f66abafc"
+      "b61f82a2f8f5cb21422a56f989b8c0d6"
     ],
     [
       "Buffer.Utils.memset",
@@ -377,13 +377,13 @@
         "typing_FStar.Buffer.length"
       ],
       0,
-      "67301e2eebb213dde745492d54247228"
+      "30c951fcf5b5bb4b62084889fd1f7fa0"
     ],
     [
       "Buffer.Utils.memset",
       2,
-      0,
-      0,
+      2,
+      1,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
@@ -407,9 +407,10 @@
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Buffer.Utils_Tm_refine_3f8967b1da0bb0e497f036387e8ab4f4",
+        "refinement_interpretation_Buffer.Utils_Tm_refine_4e73981c013d29ff79efcc6c0e5938dc",
         "refinement_interpretation_Buffer.Utils_Tm_refine_63aa9fde39bc7bb1271615a5d38ab07a",
         "refinement_interpretation_Buffer.Utils_Tm_refine_94bdcb2ec729e4ce028af4aa3ba8439b",
+        "refinement_interpretation_Buffer.Utils_Tm_refine_980b5b6f0a8b098ae1eb0cc059d7fdb3",
         "refinement_interpretation_Buffer.Utils_Tm_refine_be788cd9895644ac07b882afe905c505",
         "refinement_interpretation_Buffer.Utils_Tm_refine_ca2c77f69acff4fca0b44c61a9e317a7",
         "refinement_interpretation_Buffer.Utils_Tm_refine_e10bdfd45b6172f25980910bb1b37322",
@@ -417,7 +418,6 @@
         "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_980b5b6f0a8b098ae1eb0cc059d7fdb3",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_b5ad1dbfbd48faaf34d92bafda76205d",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
@@ -426,7 +426,7 @@
         "typing_FStar.Seq.Base.create", "typing_FStar.UInt32.v"
       ],
       0,
-      "9ff248a6cb709ca5e88661cd73aa8711"
+      "a2bfa3a09264b4319adc42584e88502a"
     ]
   ]
 ]

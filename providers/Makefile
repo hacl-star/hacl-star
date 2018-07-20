@@ -1,7 +1,8 @@
 FSTAR_HOME	?= ../../FStar
 KREMLIN_HOME	?= ../../kremlin
 HACL_HOME	?= ..
-OPENSSL_HOME	?= ../../MLCrypto/openssl
+MLCRYPTO_HOME	?= ../../MLCrypto
+OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
 
 # The noopenssl config no means: enable bcrypt + disable openssl
 ifeq (,$(EVEREST_WINDOWS))
@@ -185,7 +186,7 @@ INCLUDE_DIRS	= $(foreach c,$(ALL_SOURCES),$(dir $(c))) \
 
 
 CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion -g
 
 # GNU Make manual section 4.14
 %.d: %.c

@@ -4,65 +4,13 @@ open FStar.HyperStack.ST
 open EverCrypt.Helpers
 open EverCrypt.Specs
 
-module LB = LowStar.Buffer
+module B = LowStar.Buffer
 
-///  SHA256
+/// Hash algorithms
 
-/// Incremental API
-val sha256_init: state:uint32_p ->
-  Stack unit sha256_init_pre sha256_init_post
-val sha256_update: state:uint32_p -> data:uint8_p ->
-  Stack unit sha256_update_pre sha256_update_post
-val sha256_update_multi: state:uint32_p -> data:uint8_p -> n:uint32_t ->
-  Stack unit sha256_update_multi_pre sha256_update_multi_post
-val sha256_update_last: state:uint32_p -> data:uint8_p -> n:uint32_t ->
-  Stack unit sha256_update_last_pre sha256_update_last_post
-val sha256_finish: state:uint32_p -> data:uint8_p ->
-  Stack unit sha256_finish_pre sha256_finish_post
+include EverCrypt.Hash
 
-/// Standalone API
-val sha256_hash: dst:uint8_p -> src:uint8_p -> len:uint32_t ->
-  Stack unit sha256_hash_pre sha256_hash_post
-
-
-///  SHA384
-
-/// Incremental API
-val sha384_init: state:uint64_p ->
-  Stack unit sha384_init_pre sha384_init_post
-val sha384_update: state:uint64_p -> data:uint8_p ->
-  Stack unit sha384_update_pre sha384_update_post
-val sha384_update_multi: state:uint64_p -> data:uint8_p -> n:uint32_t ->
-  Stack unit sha384_update_multi_pre sha384_update_multi_post
-val sha384_update_last: state:uint64_p -> data:uint8_p -> n:uint32_t ->
-  Stack unit sha384_update_last_pre sha384_update_last_post
-val sha384_finish: state:uint64_p -> data:uint8_p ->
-  Stack unit sha384_finish_pre sha384_finish_post
-
-/// Standalone API
-val sha384_hash: dst:uint8_p -> src:uint8_p -> len:uint32_t ->
-  Stack unit sha384_hash_pre sha384_hash_post
-
-
-///  SHA512
-
-/// Incremental API
-val sha512_init: state:uint64_p ->
-  Stack unit sha512_init_pre sha512_init_post
-val sha512_update: state:uint64_p -> data:uint8_p ->
-  Stack unit sha512_update_pre sha512_update_post
-val sha512_update_multi: state:uint64_p -> data:uint8_p -> n:uint32_t ->
-  Stack unit sha512_update_multi_pre sha512_update_multi_post
-val sha512_update_last: state:uint64_p -> data:uint8_p -> n:uint32_t ->
-  Stack unit sha512_update_last_pre sha512_update_last_post
-val sha512_finish: state:uint64_p -> data:uint8_p ->
-  Stack unit sha512_finish_pre sha512_finish_post
-
-/// Standalone API
-val sha512_hash: dst:uint8_p -> src:uint8_p -> len:uint32_t ->
-  Stack unit sha512_hash_pre sha512_hash_post
-
-/// Curve25519
+/// Curve
 
 val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
   Stack unit curve_x25519_pre curve_x25519_post
@@ -72,7 +20,7 @@ val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
 val aes128_key_s: Type0
 
 [@(CPrologue "#ifndef __EverCrypt_aes128_key_s\ntypedef struct EverCrypt_aes128_key_s EverCrypt_aes128_key_s;\n#endif")]
-let aes128_key = LB.pointer aes128_key_s
+let aes128_key = B.pointer aes128_key_s
 
 val aes128_create: key:uint8_p ->
   ST aes128_key aes128_create_pre aes128_create_post
@@ -87,7 +35,7 @@ val aes128_free: aes128_key ->
 val aes256_key_s : Type0
 
 [@(CPrologue "#ifndef __EverCrypt_aes256_key_s\ntypedef struct EverCrypt_aes256_key_s EverCrypt_aes256_key_s;\n#endif")]
-let aes256_key = LB.pointer aes256_key_s
+let aes256_key = B.pointer aes256_key_s
 
 val aes256_create: key:uint8_p ->
   ST aes256_key aes256_create_pre aes256_create_post
@@ -155,7 +103,7 @@ type aead_alg =
 val aead_state_s: Type0
 
 [@(CPrologue "#ifndef __EverCrypt_aead_state_s\ntypedef struct EverCrypt_aead_state_s EverCrypt_aead_state_s;\n#endif")]
-let aead_state = LB.pointer aead_state_s
+let aead_state = B.pointer aead_state_s
 
 val aead_create: alg:aead_alg -> key:uint8_p ->
   ST aead_state aead_create_pre aead_create_post

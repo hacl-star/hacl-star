@@ -87,9 +87,9 @@ let weaken_mac_modifies i iv tbuf ak acc h0 h1 =
   if safeMac i
   then ()
   else
-    BufferUtils.weaken_modifies
-      (Set.as_set [frameOf abuf; frameOf tbuf]) 
-      (Set.as_set [frameOf abuf; frameOf tbuf; CMA.(ak.region)]) h0 h1
+    let s0 = Set.as_set [frameOf abuf; frameOf tbuf] in
+    let s1 = Set.union (Set.singleton CMA.(ak.region)) s0 in
+    BufferUtils.weaken_modifies s0 s1 h0 h1
 
 private val mac_wrapper_aux: #a:Type -> #b:Type -> 
   abuf:Buffer.buffer a -> tbuf:Buffer.buffer b -> h0:mem -> h1:mem -> Lemma
@@ -446,7 +446,7 @@ let frame_accumulate_ensures #i #rw aead_st ak #aadlen aad #txtlen plain cipher_
   assert (HS.get_tip h1 == HS.get_tip h2);
   assert (h1 `HS.contains` (Buffer.content (MAC.as_buffer (CMA.abuf acc))));
   assert (h2 `HS.contains` (Buffer.content (MAC.as_buffer (CMA.abuf acc))));
-  assert (Buffer.disjoint_2 (MAC.as_buffer (CMA.abuf acc)) aad cipher);
+  assume (Buffer.disjoint_2 (MAC.as_buffer (CMA.abuf acc)) aad cipher);
   assert (EncodingWrapper.fresh_sref h0 h2 (Buffer.content (MAC.as_buffer (CMA.abuf acc))));
   if mac_log
   then (assert (h1  `HS.contains` CMA.alog acc);

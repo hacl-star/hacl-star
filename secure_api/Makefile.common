@@ -46,6 +46,7 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/code/lib/kremlin \
 	$(HACL_HOME)/code/poly1305 \
 	$(HACL_HOME)/code/hash \
+	$(HACL_HOME)/code/hash/interfaces \
 	$(HACL_HOME)/code/salsa-family \
 	$(KREMLIN_HOME)/kremlib \
 	$(HACL_HOME)/secure_api \
@@ -60,6 +61,8 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(CONCRETE_DIR) \
 	$(CONCRETE_DIR)/$(IMPL_CHOICE) \
 	$(HACL_HOME)/secure_api/test)
+	#$(HACL_HOME)/code/salsa-family/interfaces \
+	#$(HACL_HOME)/code/poly1305/interfaces \
 
 FSTAR_FLAGS=$(OTHERFLAGS) \
         --cache_dir $(CACHE_DIR) \

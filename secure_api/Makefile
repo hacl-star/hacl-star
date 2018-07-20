@@ -28,7 +28,7 @@ vale_aes_abstract_id:
 hacl_aes_abstract_id:
 	IMPL_CHOICE=hacl_aes_abstract_id $(MAKE) -f Makefile.extract abstract
 
-verification:
+verify:
 	IMPL_CHOICE=verification VERIFY=1 $(MAKE) -f Makefile.extract verification
 
 .PHONY: clean

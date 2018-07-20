@@ -9,6 +9,8 @@ module HS = FStar.HyperStack
 module I = Crypto.Indexing
 module Plain = Crypto.Plain
 
+#set-options "--z3rlimit 100"
+
 (* Several constants that the interface relies on *)
 type eternal_region =
      rgn:HS.rid {is_eternal_region rgn}

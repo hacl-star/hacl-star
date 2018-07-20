@@ -11,32 +11,22 @@ open Spec.Lib
 
 module Word = FStar.UInt32
 
+let pow2_61 : (x:nat{x == pow2 61}) =
+    assert_norm (pow2 61 == 2305843009213693952);
+    2305843009213693952
 
-val pow2_values: x:nat -> Lemma
-  (requires True)
-  (ensures (let p = pow2 x in
-   match x with
-   | 61 -> p=2305843009213693952
-   | _  -> True))
-  [SMTPat (pow2 x)]
-let pow2_values x =
-   match x with
-   | 61 -> assert_norm (pow2 61 == 2305843009213693952)
-   | _  -> ()
-
-
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 25"
-
+#set-options "--max_fuel 0 --max_ifuel 0"
 
 //
 // SHA-256
 //
 
 (* Define algorithm parameters *)
+let size_word = 4
 let size_hash_w = 8
 let size_block_w = 16
-let size_hash = 4 * size_hash_w
-let size_block = 4 * size_block_w
+let size_hash = size_word * size_hash_w
+let size_block = size_word * size_block_w
 let size_k_w = 64
 let size_ws_w = size_k_w
 let size_len_8 = 8
@@ -61,8 +51,6 @@ let word_logor = Word.logor
 let word_lognot = Word.lognot
 let word_shift_right = Word.shift_right
 
-
-
 let rotate_right (a:word) (s:word {0 < v s /\ v s<32}) : Tot word =
   ((a >>^ s) |^ (a <<^ (32ul -^ s)))
 
@@ -85,32 +73,44 @@ let _sigma0 x = word_logxor (rotate_right x 7ul) (word_logxor (rotate_right x 18
 val _sigma1: x:word -> Tot word
 let _sigma1 x = word_logxor (rotate_right x 17ul) (word_logxor (rotate_right x 19ul) (word_shift_right x 10ul))
 
+[@"opaque_to_smt"]
+inline_for_extraction
+let k_list : l:List.llist Word.t 64 =
+  [@inline_let]
+  let l =
+    [0x428a2f98ul; 0x71374491ul; 0xb5c0fbcful; 0xe9b5dba5ul;
+     0x3956c25bul; 0x59f111f1ul; 0x923f82a4ul; 0xab1c5ed5ul;
+     0xd807aa98ul; 0x12835b01ul; 0x243185beul; 0x550c7dc3ul;
+     0x72be5d74ul; 0x80deb1feul; 0x9bdc06a7ul; 0xc19bf174ul;
+     0xe49b69c1ul; 0xefbe4786ul; 0x0fc19dc6ul; 0x240ca1ccul;
+     0x2de92c6ful; 0x4a7484aaul; 0x5cb0a9dcul; 0x76f988daul;
+     0x983e5152ul; 0xa831c66dul; 0xb00327c8ul; 0xbf597fc7ul;
+     0xc6e00bf3ul; 0xd5a79147ul; 0x06ca6351ul; 0x14292967ul;
+     0x27b70a85ul; 0x2e1b2138ul; 0x4d2c6dfcul; 0x53380d13ul;
+     0x650a7354ul; 0x766a0abbul; 0x81c2c92eul; 0x92722c85ul;
+     0xa2bfe8a1ul; 0xa81a664bul; 0xc24b8b70ul; 0xc76c51a3ul;
+     0xd192e819ul; 0xd6990624ul; 0xf40e3585ul; 0x106aa070ul;
+     0x19a4c116ul; 0x1e376c08ul; 0x2748774cul; 0x34b0bcb5ul;
+     0x391c0cb3ul; 0x4ed8aa4aul; 0x5b9cca4ful; 0x682e6ff3ul;
+     0x748f82eeul; 0x78a5636ful; 0x84c87814ul; 0x8cc70208ul;
+     0x90befffaul; 0xa4506cebul; 0xbef9a3f7ul; 0xc67178f2ul] in
+  assert_norm (List.length l = 64);
+  l
 
-let k : k_w =
-  Seq.Create.create_64
-  0x428a2f98ul 0x71374491ul 0xb5c0fbcful 0xe9b5dba5ul
-  0x3956c25bul 0x59f111f1ul 0x923f82a4ul 0xab1c5ed5ul
-  0xd807aa98ul 0x12835b01ul 0x243185beul 0x550c7dc3ul
-  0x72be5d74ul 0x80deb1feul 0x9bdc06a7ul 0xc19bf174ul
-  0xe49b69c1ul 0xefbe4786ul 0x0fc19dc6ul 0x240ca1ccul
-  0x2de92c6ful 0x4a7484aaul 0x5cb0a9dcul 0x76f988daul
-  0x983e5152ul 0xa831c66dul 0xb00327c8ul 0xbf597fc7ul
-  0xc6e00bf3ul 0xd5a79147ul 0x06ca6351ul 0x14292967ul
-  0x27b70a85ul 0x2e1b2138ul 0x4d2c6dfcul 0x53380d13ul
-  0x650a7354ul 0x766a0abbul 0x81c2c92eul 0x92722c85ul
-  0xa2bfe8a1ul 0xa81a664bul 0xc24b8b70ul 0xc76c51a3ul
-  0xd192e819ul 0xd6990624ul 0xf40e3585ul 0x106aa070ul
-  0x19a4c116ul 0x1e376c08ul 0x2748774cul 0x34b0bcb5ul
-  0x391c0cb3ul 0x4ed8aa4aul 0x5b9cca4ful 0x682e6ff3ul
-  0x748f82eeul 0x78a5636ful 0x84c87814ul 0x8cc70208ul
-  0x90befffaul 0xa4506cebul 0xbef9a3f7ul 0xc67178f2ul
+let k : k_w = Seq.of_list k_list
 
+[@"opaque_to_smt"]
+inline_for_extraction
+let h_0_list : List.llist Word.t 8 =
+  [@inline_let]
+  let l =
+    [0x6a09e667ul; 0xbb67ae85ul; 0x3c6ef372ul; 0xa54ff53aul;
+     0x510e527ful; 0x9b05688cul; 0x1f83d9abul; 0x5be0cd19ul]
+  in
+  assert_norm (List.length l = 8);
+  l
 
-let h_0 : hash_w =
-  Seq.Create.create_8
-  0x6a09e667ul 0xbb67ae85ul 0x3c6ef372ul 0xa54ff53aul
-  0x510e527ful 0x9b05688cul 0x1f83d9abul 0x5be0cd19ul
-
+let h_0 : hash_w = Seq.of_list h_0_list
 
 let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
   if t < size_block_w then b.[t]
@@ -135,11 +135,9 @@ let shuffle_core (block:block_w) (hash:hash_w) (t:counter{t < size_k_w}) : Tot h
   let g = hash.[6] in
   let h = hash.[7] in
 
-  (**) assert(Seq.length k = size_k_w);
   let t1 = h +%^ (_Sigma1 e) +%^ (_Ch e f g) +%^ k.[t] +%^ ws block t in
   let t2 = (_Sigma0 a) +%^ (_Maj a b c) in
 
-  (**) assert(t < Seq.length k);
   Seq.Create.create_8 (t1 +%^ t2) a b c (d +%^ t1) e f g
 
 
@@ -193,23 +191,20 @@ let hash' (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{le
   let blocks = pad 0 (Seq.length input) in
   finish (update_multi h_0 (input @| blocks))
 
+let lemma_modulo (l:nat) (s:nat{s <> 0 /\ l >= s /\ l % s = 0})
+  : Lemma (ensures ((l - s) % s = 0))
+  = Math.Lemmas.lemma_mod_plus (l - s) 1 s
 
-#reset-options "--max_fuel 0 --z3rlimit 10"
+val lemma_update_update_multi:
+           h0:hash_w
+         -> blocks:bytes{Seq.length blocks >= size_block /\ Seq.length blocks % size_block = 0}
+         -> Lemma (ensures (
+                    let (block,rem) = Seq.split blocks size_block in
+                    let h1 = update h0 block in
+                    let h2 = update_multi h1 rem in
+                    h2 == update_multi h0 blocks))
 
-let lemma_modulo (l:nat) (s:nat{s <> 0 /\ l >= s /\ l % s = 0}) : Lemma
-  (ensures ((l - s) % s = 0)) =
-Math.Lemmas.lemma_mod_plus (l - s) 1 s
-
-#reset-options "--max_fuel 0 --z3rlimit 20"
-
-val lemma_update_update_multi: (h0:hash_w) -> (blocks:bytes{Seq.length blocks >= size_block /\ Seq.length blocks % size_block = 0}) -> Lemma
-  (ensures  (let (block,rem) = Seq.split blocks size_block in
-             let h1 = update h0 block in
-             let h2 = update_multi h1 rem in
-             h2 == update_multi h0 blocks))
-
-#reset-options "--max_fuel 1 --z3rlimit 100"
-
+#set-options "--initial_fuel 1 --max_fuel 1"
 let lemma_update_update_multi h0 blocks =
   let (block,rem) = Seq.split blocks size_block in
   assert(size_block <> 0);
@@ -221,22 +216,6 @@ let lemma_update_update_multi h0 blocks =
   let h1 = update h0 block in
   let h2 = update_multi h1 rem in
   Seq.lemma_eq_intro h2 (update_multi h0 blocks)
-
-
-#reset-options "--max_fuel 0 --z3rlimit 10"
-
-val lemma_update_multi_extend: (h0:hash_w) -> (block:bytes{Seq.length block = size_block}) -> (blocks:bytes{Seq.length blocks % size_block = 0}) -> Lemma
-  (ensures (update_multi (update h0 block) blocks == update_multi h0 (block @| blocks)))
-
-let lemma_update_multi_extend h0 block blocks =
-  lemma_update_update_multi h0 (block @| blocks);
-  let a,b = Seq.split (block @| blocks) size_block in
-  Seq.lemma_eq_intro a block;
-  Seq.lemma_eq_intro b blocks;
-  Seq.lemma_eq_intro (update_multi (update h0 block) blocks) (update_multi h0 (block @| blocks))
-
-
-#reset-options "--max_fuel 1 --z3rlimit 100 --using_facts_from FStar --using_facts_from Prims --using_facts_from Spec.SHA2_256"
 
 let lemma_update_multi_empty (h:hash_w) (empty:bytes{Seq.length empty = 0}) : Lemma
   (ensures (update_multi h empty == h)) = ()
@@ -275,11 +254,27 @@ let rec update_multi_append hash blocks1 blocks2 =
       update_multi hash (blocks1 @| blocks2)
     *)
     let b , blocks1' = Seq.split_eq blocks1 size_block in
+    assert (Seq.length blocks1' % size_block == 0); //need this identity on modular arithmetic
     let b', blocks12 = Seq.split_eq (blocks1 @| blocks2) size_block in
     Seq.append_assoc b blocks1' blocks2;
     Seq.lemma_append_inj b (blocks1' @| blocks2) b' blocks12;
     update_multi_append (update hash b) blocks1' blocks2
     end
+
+#set-options "--initial_fuel 0 --max_fuel 0"
+val lemma_update_multi_extend:
+          h0:hash_w
+        -> block:bytes{Seq.length block = size_block}
+        -> blocks:bytes{Seq.length blocks % size_block = 0}
+        -> Lemma (ensures
+                      (update_multi (update h0 block) blocks
+                    == update_multi h0 (block @| blocks)))
+let lemma_update_multi_extend h0 block blocks =
+  lemma_update_update_multi h0 (block @| blocks);
+  let a,b = Seq.split (block @| blocks) size_block in
+  Seq.lemma_eq_intro a block;
+  Seq.lemma_eq_intro b blocks;
+  Seq.lemma_eq_intro (update_multi (update h0 block) blocks) (update_multi h0 (block @| blocks))
 
 val update_update_multi_append:
   hash:hash_w ->
@@ -291,7 +286,39 @@ let update_update_multi_append hash blocks b =
   update_multi_append hash blocks b;
   update_multi_one (update_multi hash blocks) b
 
-#reset-options "--max_fuel 0 --z3rlimit 100"
+val lemma_hash_single_prepend_block: (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length msg = size_hash}) -> Lemma
+  (ensures ((* let n = Seq.length msg / size_block in *)
+            (* let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in *)
+            let hash0 = update h_0 block in
+            let hash1 = update_last hash0 (size_block) msg in
+            finish hash1 == hash (block @| msg)))
+let lemma_hash_single_prepend_block block msg =
+  let n = Seq.length msg / size_block in
+  assert_norm(n = 0);
+  let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
+  lemma_eq_intro msg_blocks Seq.empty;
+  lemma_eq_intro msg_last msg;
+  let hash1 = update h_0 block in
+  let hash2 = update_multi hash1 msg_blocks in // This is 0
+  assert(Seq.length msg_blocks = 0);
+  lemma_update_multi_empty hash1 msg_blocks;
+  assert(update_multi hash1 msg_blocks == hash1);
+  Seq.lemma_eq_intro (update h_0 block) (update_multi hash1 msg_blocks);
+  assert(hash2 == update h_0 block);
+  let hash3 = update_last hash2 (size_block + (n * size_block)) msg_last in
+  let hash4 = finish hash3 in
+  lemma_update_multi_extend h_0 block msg_blocks;
+  lemma_eq_intro (block @| msg) (block @| msg_blocks @| msg_last);
+  assert(hash2 == update_multi h_0 (block @| msg_blocks));
+  let banana = block @| msg in
+  let n' = Seq.length banana / size_block in
+  let (msg_blocks',msg_last') = Seq.split banana (n' * size_block) in
+  Math.Lemmas.distributivity_add_left n 1 size_block;
+  assert(n' == n + 1);
+  Seq.lemma_eq_intro (msg_last') (msg_last);
+  Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
+
+// #reset-options "--max_fuel 0 --z3rlimit 100"
 
 val lemma_hash_all_prepend_block: (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length block + Seq.length msg < max_input_len_8}) -> Lemma
   (ensures (let n = Seq.length msg / size_block in
@@ -320,51 +347,18 @@ let lemma_hash_all_prepend_block block msg =
   Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
 
 
-#reset-options "--max_fuel 0 --z3rlimit 100"
-
-val lemma_hash_single_prepend_block: (block:bytes{Seq.length block = size_block}) -> (msg:bytes{Seq.length msg = size_hash}) -> Lemma
-  (ensures ((* let n = Seq.length msg / size_block in *)
-            (* let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in *)
-            let hash0 = update h_0 block in
-            let hash1 = update_last hash0 (size_block) msg in
-            finish hash1 == hash (block @| msg)))
-
-let lemma_hash_single_prepend_block block msg =
-  let n = Seq.length msg / size_block in
-  assert_norm(n = 0);
-  let (msg_blocks,msg_last) = Seq.split msg (n * size_block) in
-  lemma_eq_intro msg_blocks createEmpty;
-  lemma_eq_intro msg_last msg;
-  let hash1 = update h_0 block in
-  let hash2 = update_multi hash1 msg_blocks in // This is 0
-  assert(Seq.length msg_blocks = 0);
-  lemma_update_multi_empty hash1 msg_blocks;
-  assert(update_multi hash1 msg_blocks == hash1);
-  Seq.lemma_eq_intro (update h_0 block) (update_multi hash1 msg_blocks);
-  assert(hash2 == update h_0 block);
-  let hash3 = update_last hash2 (size_block + (n * size_block)) msg_last in
-  let hash4 = finish hash3 in
-  lemma_update_multi_extend h_0 block msg_blocks;
-  lemma_eq_intro (block @| msg) (block @| msg_blocks @| msg_last);
-  assert(hash2 == update_multi h_0 (block @| msg_blocks));
-  let banana = block @| msg in
-  let n' = Seq.length banana / size_block in
-  let (msg_blocks',msg_last') = Seq.split banana (n' * size_block) in
-  Math.Lemmas.distributivity_add_left n 1 size_block;
-  assert(n' == n + 1);
-  Seq.lemma_eq_intro (msg_last') (msg_last);
-  Seq.lemma_eq_intro (msg_blocks') (block @| msg_blocks)
-
-
+// #reset-options "--max_fuel 0 --z3rlimit 100"
 
 //
 // Test 1
 //
 
+abstract
 let test_plaintext1 = [
   0x61uy; 0x62uy; 0x63uy;
 ]
 
+abstract
 let test_expected1 = [
   0xbauy; 0x78uy; 0x16uy; 0xbfuy; 0x8fuy; 0x01uy; 0xcfuy; 0xeauy;
   0x41uy; 0x41uy; 0x40uy; 0xdeuy; 0x5duy; 0xaeuy; 0x22uy; 0x23uy;
@@ -376,8 +370,10 @@ let test_expected1 = [
 // Test 2
 //
 
+abstract
 let test_plaintext2 = []
 
+abstract
 let test_expected2 = [
   0xe3uy; 0xb0uy; 0xc4uy; 0x42uy; 0x98uy; 0xfcuy; 0x1cuy; 0x14uy;
   0x9auy; 0xfbuy; 0xf4uy; 0xc8uy; 0x99uy; 0x6fuy; 0xb9uy; 0x24uy;
@@ -389,6 +385,7 @@ let test_expected2 = [
 // Test 3
 //
 
+abstract
 let test_plaintext3 = [
   0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy;
   0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy;
@@ -399,6 +396,7 @@ let test_plaintext3 = [
   0x6duy; 0x6euy; 0x6fuy; 0x70uy; 0x6euy; 0x6fuy; 0x70uy; 0x71uy
 ]
 
+abstract
 let test_expected3 = [
   0x24uy; 0x8duy; 0x6auy; 0x61uy; 0xd2uy; 0x06uy; 0x38uy; 0xb8uy;
   0xe5uy; 0xc0uy; 0x26uy; 0x93uy; 0x0cuy; 0x3euy; 0x60uy; 0x39uy;
@@ -411,6 +409,7 @@ let test_expected3 = [
 // Test 4
 //
 
+abstract
 let test_plaintext4 = [
   0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;
   0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy; 0x69uy;
@@ -428,6 +427,7 @@ let test_plaintext4 = [
   0x6euy; 0x6fuy; 0x70uy; 0x71uy; 0x72uy; 0x73uy; 0x74uy; 0x75uy
 ]
 
+abstract
 let test_expected4 = [
   0xcfuy; 0x5buy; 0x16uy; 0xa7uy; 0x78uy; 0xafuy; 0x83uy; 0x80uy;
   0x03uy; 0x6cuy; 0xe5uy; 0x9euy; 0x7buy; 0x04uy; 0x92uy; 0x37uy;
@@ -439,6 +439,7 @@ let test_expected4 = [
 // Test 5
 //
 
+abstract
 let test_expected5 = [
   0xcduy; 0xc7uy; 0x6euy; 0x5cuy; 0x99uy; 0x14uy; 0xfbuy; 0x92uy;
   0x81uy; 0xa1uy; 0xc7uy; 0xe2uy; 0x84uy; 0xd7uy; 0x3euy; 0x67uy;
@@ -451,6 +452,7 @@ let test_expected5 = [
 // Main
 //
 
+abstract
 let test () =
   assert_norm(List.Tot.length test_plaintext1 = 3);
   assert_norm(List.Tot.length test_expected1 = 32);
