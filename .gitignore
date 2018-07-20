@@ -1,5 +1,7 @@
 *~
 *.o
+*.d
+*.cm*
 *.so
 *.exe
 *.exe.dSYM
@@ -51,6 +53,7 @@ code/lib/ml/*.cmx
 code/lib/ml/*.o
 
 code/hash/sha2-c/
+code/hash/sha2-c-test/
 code/hash/sha2-256-c/
 code/hash/sha2-384-c/
 code/hash/sha2-512-c/

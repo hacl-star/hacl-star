@@ -23,59 +23,24 @@
 
 
 
-#ifndef __Hacl_SHA2_256_H
-#define __Hacl_SHA2_256_H
+#ifndef __Hacl_HMAC_SHA2_512_H
+#define __Hacl_HMAC_SHA2_512_H
 
 
 #include "kremlib.h"
 
 extern FStar_UInt128_uint128 FStar_Int_Cast_Full_uint64_to_uint128(uint64_t x0);
 
-extern uint32_t Hacl_SHA2_256_size_word;
+void Hacl_HMAC_SHA2_512_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len);
 
-extern uint32_t Hacl_SHA2_256_size_hash_w;
+void
+Hacl_HMAC_SHA2_512_hmac(
+  uint8_t *mac,
+  uint8_t *key,
+  uint32_t keylen,
+  uint8_t *data,
+  uint32_t datalen
+);
 
-extern uint32_t Hacl_SHA2_256_size_block_w;
-
-extern uint32_t Hacl_SHA2_256_size_hash;
-
-extern uint32_t Hacl_SHA2_256_size_block;
-
-extern uint64_t Hacl_SHA2_256_max_input_len;
-
-extern uint32_t Hacl_SHA2_256_size_k_w;
-
-extern uint32_t Hacl_SHA2_256_size_ws_w;
-
-extern uint32_t Hacl_SHA2_256_size_whash_w;
-
-extern uint32_t Hacl_SHA2_256_size_count_w;
-
-extern uint32_t Hacl_SHA2_256_size_len_8;
-
-extern uint32_t Hacl_SHA2_256_size_state;
-
-extern uint32_t Hacl_SHA2_256_pos_k_w;
-
-extern uint32_t Hacl_SHA2_256_pos_ws_w;
-
-extern uint32_t Hacl_SHA2_256_pos_whash_w;
-
-extern uint32_t Hacl_SHA2_256_pos_count_w;
-
-typedef uint32_t *Hacl_SHA2_256_state;
-
-void Hacl_SHA2_256_init(uint32_t *state);
-
-void Hacl_SHA2_256_update(uint32_t *state, uint8_t *data_8);
-
-void Hacl_SHA2_256_update_multi(uint32_t *state, uint8_t *data, uint32_t n1);
-
-void Hacl_SHA2_256_update_last(uint32_t *state, uint8_t *data, uint32_t len);
-
-void Hacl_SHA2_256_finish(uint32_t *state, uint8_t *hash1);
-
-void Hacl_SHA2_256_hash(uint8_t *hash1, uint8_t *input, uint32_t len);
-
-#define __Hacl_SHA2_256_H_DEFINED
+#define __Hacl_HMAC_SHA2_512_H_DEFINED
 #endif

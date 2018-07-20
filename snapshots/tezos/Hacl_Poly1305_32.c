@@ -24,6 +24,27 @@
 
 #include "Hacl_Poly1305_32.h"
 
+extern uint32_t FStar_UInt32_eq_mask(uint32_t x0, uint32_t x1);
+
+extern uint32_t FStar_UInt32_gte_mask(uint32_t x0, uint32_t x1);
+
+extern FStar_UInt128_uint128
+FStar_UInt128_add_mod(FStar_UInt128_uint128 x0, FStar_UInt128_uint128 x1);
+
+extern FStar_UInt128_uint128
+FStar_UInt128_logand(FStar_UInt128_uint128 x0, FStar_UInt128_uint128 x1);
+
+extern FStar_UInt128_uint128
+FStar_UInt128_logor(FStar_UInt128_uint128 x0, FStar_UInt128_uint128 x1);
+
+extern FStar_UInt128_uint128 FStar_UInt128_shift_left(FStar_UInt128_uint128 x0, uint32_t x1);
+
+extern FStar_UInt128_uint128 FStar_UInt128_shift_right(FStar_UInt128_uint128 x0, uint32_t x1);
+
+extern FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t x0);
+
+extern uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 x0);
+
 inline static void Hacl_Bignum_Modulo_reduce(uint32_t *b)
 {
   uint32_t b0 = b[0U];
@@ -162,6 +183,10 @@ typedef struct Hacl_Impl_Poly1305_32_State_poly1305_state_s
   uint32_t *h;
 }
 Hacl_Impl_Poly1305_32_State_poly1305_state;
+
+extern FStar_UInt128_uint128 load128_le(uint8_t *x0);
+
+extern void store128_le(uint8_t *x0, FStar_UInt128_uint128 x1);
 
 inline static void
 Hacl_Impl_Poly1305_32_poly1305_update(

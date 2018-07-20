@@ -1,312 +1,6 @@
 [
-  "ÿπâ≤“\u0004à\u001e≤`\u001düVÉ7ö",
+  "|É\u0000@‚Z‘‡Å&‚È›\u007f\u000b",
   [
-    [
-      "EverCrypt.Hacl.sha256_init",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha256_init_pre", "equation_Prims.l_False",
-        "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha256_init_pre"
-      ],
-      0,
-      "63105592890c321652f82d37ed1ed5b1"
-    ],
-    [
-      "EverCrypt.Hacl.sha256_update",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha256_update_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha256_update_pre"
-      ],
-      0,
-      "3098e8fc5f858112dfc7eecaa4f364b7"
-    ],
-    [
-      "EverCrypt.Hacl.sha256_update_multi",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha256_update_multi_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha256_update_multi_pre"
-      ],
-      0,
-      "64ea3b80a7562bdbf93c257f467cde0f"
-    ],
-    [
-      "EverCrypt.Hacl.sha256_update_last",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha256_update_last_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha256_update_last_pre"
-      ],
-      0,
-      "cba0385334122248947b7f1fdbf457ac"
-    ],
-    [
-      "EverCrypt.Hacl.sha256_finish",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha256_finish_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha256_finish_pre"
-      ],
-      0,
-      "406ffc976f33dd5c5960d82f8ff8987e"
-    ],
-    [
-      "EverCrypt.Hacl.sha256_hash",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha256_hash_pre", "equation_Prims.l_False",
-        "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha256_hash_pre"
-      ],
-      0,
-      "a9b1eacd93efa3b78f382f5d65e220ee"
-    ],
-    [
-      "EverCrypt.Hacl.sha384_init",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha384_init_pre", "equation_Prims.l_False",
-        "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha384_init_pre"
-      ],
-      0,
-      "fdf090a8911588a3a84ed22a6c5ef394"
-    ],
-    [
-      "EverCrypt.Hacl.sha384_update",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha384_update_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha384_update_pre"
-      ],
-      0,
-      "cc4e8428bf99a934884013669bfa15f1"
-    ],
-    [
-      "EverCrypt.Hacl.sha384_update_multi",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha384_update_multi_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha384_update_multi_pre"
-      ],
-      0,
-      "fd292c83833d7336701ad513a0f2d01f"
-    ],
-    [
-      "EverCrypt.Hacl.sha384_update_last",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha384_update_last_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha384_update_last_pre"
-      ],
-      0,
-      "07dd5ae1f11490fd396a617faa17fdd1"
-    ],
-    [
-      "EverCrypt.Hacl.sha384_finish",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha384_finish_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha384_finish_pre"
-      ],
-      0,
-      "1f3afd9812a9b8379aeb609ecb9f852c"
-    ],
-    [
-      "EverCrypt.Hacl.sha384_hash",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha384_hash_pre", "equation_Prims.l_False",
-        "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha384_hash_pre"
-      ],
-      0,
-      "4851ed6ec8c45177cebd408f8f2b69a6"
-    ],
-    [
-      "EverCrypt.Hacl.sha512_init",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha512_init_pre", "equation_Prims.l_False",
-        "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha512_init_pre"
-      ],
-      0,
-      "e49d3c8565b09ec6fa73269d3a183d78"
-    ],
-    [
-      "EverCrypt.Hacl.sha512_update",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha512_update_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha512_update_pre"
-      ],
-      0,
-      "2562bc22456a362de6fe43917c72898a"
-    ],
-    [
-      "EverCrypt.Hacl.sha512_update_multi",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha512_update_multi_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha512_update_multi_pre"
-      ],
-      0,
-      "66242b4cd05f8cd9b5bec04778f025c0"
-    ],
-    [
-      "EverCrypt.Hacl.sha512_update_last",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha512_update_last_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha512_update_last_pre"
-      ],
-      0,
-      "b5c5753fe24a15a0e6cfe0b4c6477a43"
-    ],
-    [
-      "EverCrypt.Hacl.sha512_finish",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha512_finish_pre",
-        "equation_Prims.l_False", "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha512_finish_pre"
-      ],
-      0,
-      "82195b70b60b2305737eda52c63841aa"
-    ],
-    [
-      "EverCrypt.Hacl.sha512_hash",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "FStar.Monotonic.HyperStack_pretyping_ed25b04ac1a3660bf4cdc8ae577888d8",
-        "equation_EverCrypt.Specs.sha512_hash_pre", "equation_Prims.l_False",
-        "equation_Prims.logical", "false_interp",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
-        "interpretation_EverCrypt.Specs_Tm_abs_886c983ca0884b59e18b11af014002a9",
-        "token_correspondence_EverCrypt.Specs.sha512_hash_pre"
-      ],
-      0,
-      "767070edbefef35e2970ad17d04be2be"
-    ],
     [
       "EverCrypt.Hacl.x25519",
       1,
@@ -322,7 +16,7 @@
         "token_correspondence_EverCrypt.Specs.curve_x25519_pre"
       ],
       0,
-      "cde100766b505c256011a15551270d06"
+      "c3f7164891b6ac93dfddcc156bfbb126"
     ],
     [
       "EverCrypt.Hacl.aes128_keyExpansion",
@@ -337,7 +31,7 @@
         "token_correspondence_EverCrypt.Specs.aes128_create_pre"
       ],
       0,
-      "e71c996efd853228556dd032728a716b"
+      "c54082e89a3a119e70c604262d5af997"
     ],
     [
       "EverCrypt.Hacl.aes128_cipher",
@@ -352,7 +46,7 @@
         "token_correspondence_EverCrypt.Specs.aes128_compute_pre"
       ],
       0,
-      "9103ac23b78e3672f879fefbeccfecb4"
+      "e5fe998275b6ddb9bfbb694e72a76d9b"
     ],
     [
       "EverCrypt.Hacl.aes256_keyExpansion",
@@ -367,7 +61,7 @@
         "token_correspondence_EverCrypt.Specs.aes256_create_pre"
       ],
       0,
-      "ae232bf32e02c42dc31253fd20e2bddd"
+      "7fe4160bb4340052d42e31026cf8af1a"
     ],
     [
       "EverCrypt.Hacl.aes256_cipher",
@@ -382,7 +76,7 @@
         "token_correspondence_EverCrypt.Specs.aes256_compute_pre"
       ],
       0,
-      "960f0775b7634f6191bc41148e65ed2b"
+      "29e2d32c39d5bdca64475a122b9c1967"
     ],
     [
       "EverCrypt.Hacl.chacha20",
@@ -397,7 +91,7 @@
         "token_correspondence_EverCrypt.Specs.chacha20_pre"
       ],
       0,
-      "231184391686f828e5ab3b7ff93d2906"
+      "91d9db9caa8348f9a1dc0ac4c71509b4"
     ],
     [
       "EverCrypt.Hacl.chacha20_poly1305_encrypt",
@@ -414,7 +108,7 @@
         "token_correspondence_EverCrypt.Specs.chacha20_poly1305_encrypt_pre"
       ],
       0,
-      "f43eb904ff652500803172561bcdc0be"
+      "d4aba0d93982318a432b29fd13ce01a9"
     ],
     [
       "EverCrypt.Hacl.chacha20_poly1305_decrypt",
@@ -431,7 +125,7 @@
         "token_correspondence_EverCrypt.Specs.chacha20_poly1305_decrypt_pre"
       ],
       0,
-      "f0179b94024d28607539b4533704bbf0"
+      "000885d23d87185437088a142017c8a1"
     ]
   ]
 ]

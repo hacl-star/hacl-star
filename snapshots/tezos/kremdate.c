@@ -20,28 +20,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-
-
-#ifndef __Hacl_Poly1305_32_H
-#define __Hacl_Poly1305_32_H
-
-
 #include "kremlib.h"
+#include "kremlin/prims_int.h"
 
-extern FStar_UInt128_uint128 FStar_Int_Cast_Full_uint64_to_uint128(uint64_t x0);
+/******************************************************************************/
+/* Implementation of FStar.Date                                               */
+/******************************************************************************/
 
-typedef uint8_t *Hacl_Poly1305_32_uint8_p;
+/* FStar_Date.h has all the extern val's. This is just the implementation. */
 
-typedef uint64_t Hacl_Poly1305_32_uint64_t;
-
-void
-Hacl_Poly1305_32_crypto_onetimeauth(
-  uint8_t *output,
-  uint8_t *input,
-  uint64_t len1,
-  uint8_t *k1
-);
-
-#define __Hacl_Poly1305_32_H_DEFINED
-#endif
+Prims_nat FStar_Date_secondsFromDawn() {
+  return KRML_HOST_TIME();
+}
