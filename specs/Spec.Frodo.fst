@@ -1,33 +1,38 @@
 module Spec.Frodo
 
-open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
+
+open FStar.Mul
 open FStar.Math.Lemmas
 
-open Spec.PQ.Lib
 open Spec.Keccak
+open Spec.Frodo.Matrix.LL
 open Spec.Frodo.Lemmas
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --using_facts_from '* -FStar.*  +FStar.Pervasives -Spec.* +Spec.Frodo'"
 
 val matrix_eq:
-  #t:numeric_t -> #n1:size_nat -> #n2:size_nat ->
+  #n1:size_nat ->
+  #n2:size_nat{n1 * n2 < max_size_t} ->
   m:size_nat{m > 0} ->
-  a:matrix_t t n1 n2 -> b:matrix_t t n1 n2 -> Tot bool
-let matrix_eq #t #n1 #n2 m a b =
+  a:matrix_t n1 n2 ->
+  b:matrix_t n1 n2 -> Tot bool
+let matrix_eq #n1 #n2 m a b =
   repeati n1
   (fun i res ->
     repeati n2
     (fun j res ->
-      res && (uint_to_nat (mget a i j) % m = uint_to_nat (mget b i j) % m)
+      res && (uint_to_nat a.(i, j) % pow2 m = uint_to_nat b.(i, j) % pow2 m)
     ) res
   ) true
 
 val lbytes_eq:
-  #len:size_nat -> a:lbytes len -> b:lbytes len -> Tot bool
+  #len:size_nat ->
+  a:lbytes len ->
+  b:lbytes len -> Tot bool
 let lbytes_eq #len a b =
   repeati len
   (fun i res ->
@@ -76,12 +81,10 @@ let crypto_publickeybytes:size_nat  = bytes_seed_a + (params_logq * params_n * p
 let crypto_secretkeybytes:size_nat  = crypto_bytes + crypto_publickeybytes + 2 * params_n * params_nbar
 let crypto_ciphertextbytes:size_nat = ((params_nbar * params_n + params_nbar * params_nbar) * params_logq) / 8 + crypto_bytes
 
-//unfold type elem_t:numeric_t = NATm params_q
-unfold type elem_t:numeric_t = U16
-
 val ec:
-  b:size_nat{b <= params_logq} -> k:uint16{uint_v k < pow2 b} ->
-  Tot (r:uint16{uint_v r < pow2 params_logq /\ uint_v r = (uint_v k) * pow2 (params_logq - b)})
+  b:size_nat{b <= params_logq} ->
+  k:uint16{uint_v k < pow2 b} ->
+  r:uint16{uint_v r < pow2 params_logq /\ uint_v r = uint_v k * pow2 (params_logq - b)}
 let ec b k =
   let res = k <<. u32 (params_logq - b) in
   assert (uint_v res = (uint_v k * pow2 (params_logq - b)) % modulus U16);
@@ -95,8 +98,9 @@ let ec b k =
   res
 
 val dc:
-  b:size_nat{b < params_logq} -> c:uint16 ->
-  Tot (r:uint16{uint_v r < pow2 b /\ uint_v r = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 b})
+  b:size_nat{b < params_logq} ->
+  c:uint16 ->
+  r:uint16{uint_v r < pow2 b /\ uint_v r = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 b}
 let dc b c =
   let res1 = (c +. (u16 1 <<. u32 (params_logq - b - 1))) >>. u32 (params_logq - b) in
   assert (uint_v res1 = (((uint_v c + pow2 (params_logq - b - 1) % modulus U16) % modulus U16) / pow2 (params_logq - b)) % modulus U16);
@@ -108,40 +112,39 @@ let dc b c =
   assert (uint_v res1 = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 (16 - params_logq + b));
   let res = res1 &. ((u16 1 <<. u32 b) -. u16 1) in
   modulo_pow2_u16 res1 b;
-  assert (uint_v res1 % pow2 b = uint_v (res1 &. ((u16 1 <<. u32 b) -. u16 1)));
+  //assert (uint_v res1 % pow2 b = uint_v (res1 &. ((u16 1 <<. u32 b) -. u16 1)));
   pow2_modulo_modulo_lemma_1 ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) b (16 - params_logq + b);
   //assert (uint_v res = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 b);
   res
 
 val frodo_key_encode:
-  b:size_nat{(params_nbar * params_nbar * b) / 8 < max_size_t /\ b <= 8} ->
-  a:lbytes ((params_nbar * params_nbar * b) / 8) ->
-  Tot (matrix_t elem_t params_nbar params_nbar)
+  b:size_nat{b <= 8} ->
+  a:lbytes (params_nbar * params_nbar * b / 8) ->
+  matrix_t params_nbar params_nbar
 let frodo_key_encode b a =
-  let res = matrix_create elem_t params_nbar params_nbar in
+  let res = matrix_create params_nbar params_nbar in
+  let v8 = create 8 (u8 0) in
   repeati params_nbar
   (fun i res ->
     repeati (params_nbar / 8)
     (fun j res ->
-      let v8 = create 8 (u8 0) in
-      let v8 = update_sub v8 0 b (sub a ((i+j)*b) b) in
+      let v8 = update_sub v8 0 b (sub a ((i + j) * b) b) in
       let vij = uint_from_bytes_le v8 in
       repeati 8
       (fun k res ->
         let ak = (vij >>. u32 (b * k)) &. ((u64 1 <<. u32 b) -. u64 1) in
 	modulo_pow2_u64 (vij >>. u32 (b * k)) b;
-        let resij = ec b (to_u16 ak) in
-        mset res i (8*j+k) (to_numeric elem_t resij)
+        res.(i, 8 * j + k) <- ec b (to_u16 ak)
       ) res
     ) res
   ) res
 
 val frodo_key_decode:
-  b:size_nat{(params_nbar * params_nbar * b) / 8 < max_size_t /\ b <= 8} ->
-  a:matrix_t elem_t params_nbar params_nbar ->
-  Tot (lbytes ((params_nbar * params_nbar * b) / 8))
+  b:size_nat{b <= 8} ->
+  a:matrix_t params_nbar params_nbar ->
+  lbytes (params_nbar * params_nbar * b / 8)
 let frodo_key_decode b a =
-  let resLen = (params_nbar * params_nbar * b) / 8 in
+  let resLen = params_nbar * params_nbar * b / 8 in
   let res = create resLen (u8 0) in
   repeati params_nbar
   (fun i res ->
@@ -149,20 +152,22 @@ let frodo_key_decode b a =
     (fun j res ->
       let templong = repeati 8
       (fun k templong ->
-        let aij = dc b (to_numeric U16 (mget a i (8*j+k))) in
+        let aij = dc b a.(i, 8 * j + k) in
         templong |. (to_u64 aij <<. u32 (b*k))
       ) (u64 0) in
-      update_sub res ((i+j)*b) b (sub (uint_to_bytes_le templong) 0 b)
+      update_sub res ((i + j) * b) b (sub (uint_to_bytes_le templong) 0 b)
     ) res
   ) res
 
 val frodo_pack:
-  n1:size_nat -> n2:size_nat{n1 * n2 < max_size_t /\ n2 % 8 = 0} ->
-  a:matrix_t elem_t n1 n2 ->
-  d:size_nat{(d * n1 * n2) / 8 < max_size_t /\ d <= 16} -> Tot (lbytes ((d * n1 * n2) / 8))
+  n1:size_nat ->
+  n2:size_nat{n1 * n2 < max_size_t /\ n2 % 8 = 0} ->
+  a:matrix_t n1 n2 ->
+  d:size_nat{d * n1 * n2 / 8 < max_size_t /\ d <= 16} ->
+  lbytes (d * n1 * n2 / 8)
 let frodo_pack n1 n2 a d =
   let maskd = (u128 1 <<. u32 d) -. u128 1 in
-  let resLen = (d * n1 * n2) / 8 in
+  let resLen = d * n1 * n2 / 8 in
   let res = create resLen (u8 0) in
   repeati n1
   (fun i res ->
@@ -170,38 +175,39 @@ let frodo_pack n1 n2 a d =
     (fun j res ->
       let templong = repeati 8
       (fun k templong ->
-        let aij = to_numeric U16 (mget a i (8*j+k)) in
-        templong |. ((to_u128 aij &. maskd) <<. u32 (7*d - d*k))
+        let aij = a.(i, 8 * j + k) in
+        templong |. ((to_u128 aij &. maskd) <<. u32 (7 * d - d * k))
       ) (u128 0) in
       lemma_matrix_index_repeati n1 n2 d i j;
-      update_sub res ((i*n2/8+j)*d) d (sub (uint_to_bytes_be templong) (16 - d) d)
+      update_sub res ((i * n2 / 8 + j) * d) d (sub (uint_to_bytes_be templong) (16 - d) d)
     ) res
   ) res
 
 val frodo_unpack:
-  n1:size_nat -> n2:size_nat{n2 % 8 = 0} ->
-  d:size_nat{(d * n1 * n2) / 8 < max_size_t /\ d <= 16} -> b:lbytes ((d * n1 * n2) / 8) ->
-  Tot (matrix_t elem_t n1 n2)
+  n1:size_nat ->
+  n2:size_nat{n1 * n2 < max_size_t /\ n2 % 8 = 0} ->
+  d:size_nat{d * n1 * n2 / 8 < max_size_t /\ d <= 16} ->
+  b:lbytes (d * n1 * n2 / 8) ->
+  matrix_t n1 n2
 let frodo_unpack n1 n2 d b =
   let maskd = (u128 1 <<. u32 d) -. u128 1 in
-  let res = matrix_create elem_t n1 n2 in
+  let res = matrix_create n1 n2 in
+  let v16 = create 16 (u8 0) in
   repeati n1
   (fun i res ->
     repeati (n2 / 8)
     (fun j res ->
       lemma_matrix_index_repeati n1 n2 d i j;
-      let vij = sub b ((i*n2/8+j)*d) d in
-      let v16 = create 16 (u8 0) in
-      let v16 = uint_from_bytes_be (update_sub v16 (16-d) d vij) in
+      let vij = sub b ((i * n2 / 8 + j) * d) d in
+      let v16 = uint_from_bytes_be (update_sub v16 (16 - d) d vij) in
       repeati 8
       (fun k res ->
-        let resij = to_u16 ((v16 >>. u32 (7*d - d*k)) &. maskd) in
-        mset res i (8*j+k) (to_numeric elem_t resij)
+        res.(i, 8 * j + k) <- to_u16 ((v16 >>. u32 (7 * d - d * k)) &. maskd)
       ) res
     ) res
   ) res
 
-val frodo_sample: r:uint16 -> Tot (uint_t elem_t)
+val frodo_sample: r:uint16 -> Tot uint16
 let frodo_sample r =
   let t = r >>. u32 1 in
   let e = 0 in
@@ -211,85 +217,96 @@ let frodo_sample r =
     let e = if (uint_to_nat t > cdf_table.[z]) then e + 1 else e in e
   ) e in
   let e = (FStar.Math.Lib.powx (-1) (uint_to_nat r0)) * e in
-  numeric (e % modulus elem_t)
+  assume (0 <= e /\ e <= maxint U16);
+  u16 e
 
 val frodo_sample_matrix:
-  n1:size_nat -> n2:size_nat{2 * n1 * n2 < max_size_t} ->
-  seedLen:size_nat -> seed:lbytes seedLen ->
-  ctr:uint16 -> Tot (matrix_t elem_t n1 n2)
+  n1:size_nat ->
+  n2:size_nat{2 * n1 * n2 < max_size_t} ->
+  seedLen:size_nat ->
+  seed:lbytes seedLen ->
+  ctr:uint16 ->
+  matrix_t n1 n2
 let frodo_sample_matrix n1 n2 seedLen seed ctr =
   let r = cshake_frodo seedLen seed ctr (2 * n1 * n2) in
-  let res = matrix_create elem_t n1 n2 in
+  let res = matrix_create n1 n2 in
   repeati n1
   (fun i res ->
     repeati n2
     (fun j res ->
       lemma_matrix_index_repeati1 n1 n2 i j;
       let res_ij = sub r (2 * (n2 * i + j)) 2 in
-      mset res i j (frodo_sample (uint_from_bytes_le #U16 res_ij))
+      res.(i, j) <- frodo_sample (uint_from_bytes_le #U16 res_ij)
     ) res
   ) res
 
 val frodo_sample_matrix_tr:
-  n1:size_nat -> n2:size_nat{2 * n1 * n2 < max_size_t} ->
-  seedLen:size_nat -> seed:lbytes seedLen ->
-  ctr:uint16 -> Tot (matrix_t elem_t n1 n2)
+  n1:size_nat ->
+  n2:size_nat{2 * n1 * n2 < max_size_t} ->
+  seedLen:size_nat ->
+  seed:lbytes seedLen ->
+  ctr:uint16 ->
+  matrix_t n1 n2
 let frodo_sample_matrix_tr n1 n2 seedLen seed ctr =
   let r = cshake_frodo seedLen seed ctr (2 * n1 * n2) in
-  let res = matrix_create elem_t n1 n2 in
+  let res = matrix_create n1 n2 in
   repeati n1
   (fun i res ->
     repeati n2
     (fun j res ->
       lemma_matrix_index_repeati2 n1 n2 i j;
       let res_ij = sub r (2 * (n1 * j + i)) 2 in
-      mset res i j (frodo_sample (uint_from_bytes_le #U16 res_ij))
+      res.(i, j) <- frodo_sample (uint_from_bytes_le #U16 res_ij)
     ) res
   ) res
 
 val frodo_gen_matrix_cshake:
-  n:size_nat{2 * n < max_size_t /\ 256 + n < maxint U16} ->
-  seedLen:size_nat -> seed:lbytes seedLen ->
-  Tot (matrix_t elem_t n n)
+  n:size_nat{2 * n < max_size_t /\ 256 + n < maxint U16 /\ n * n < max_size_t} ->
+  seedLen:size_nat ->
+  seed:lbytes seedLen ->
+  matrix_t n n
 let frodo_gen_matrix_cshake n seedLen seed =
-  let res = matrix_create elem_t n n in
+  let res = matrix_create n n in
   repeati n
   (fun i res ->
     let res_i = cshake128_frodo seedLen seed (u16 (256 + i)) (2 * n) in
     repeati n
     (fun j res ->
-      let res_ij = uint_from_bytes_le #U16 (sub res_i (j * 2) 2) in
-      mset res i j (to_numeric elem_t res_ij)
+      res.(i, j) <- uint_from_bytes_le #U16 (sub res_i (j * 2) 2)
     ) res
   ) res
 
 let frodo_gen_matrix = frodo_gen_matrix_cshake
 
 val matrix_to_lbytes:
-  #n1:size_nat -> #n2:size_nat{2 * n1 * n2 < max_size_t} ->
-  m:matrix_t elem_t n1 n2 -> Tot (lbytes (2 * n1 * n2))
+  #n1:size_nat ->
+  #n2:size_nat{2 * n1 * n2 < max_size_t} ->
+  m:matrix_t n1 n2 ->
+  lbytes (2 * n1 * n2)
 let matrix_to_lbytes #n1 #n2 m =
-  let res = create (2*n1*n2) (u8 0) in
+  let res = create (2 * n1 * n2) (u8 0) in
   repeati n1
   (fun i res ->
     repeati n2
     (fun j res ->
       lemma_matrix_index_repeati2 n1 n2 i j;
-      update_sub res (2*(j*n1+i)) 2 (uint_to_bytes_le (to_numeric U16 (mget m i j)))
+      update_sub res (2 * (j * n1 + i)) 2 (uint_to_bytes_le m.(i, j))
     ) res
   ) res
 
 val matrix_from_lbytes:
-  n1:size_nat -> n2:size_nat{2 * n1 * n2 < max_size_t} ->
-  lbytes (2 * n1 * n2) -> Tot (matrix_t elem_t n1 n2)
+  n1:size_nat ->
+  n2:size_nat{2 * n1 * n2 < max_size_t} ->
+  lbytes (2 * n1 * n2) ->
+  matrix_t n1 n2
 let matrix_from_lbytes n1 n2 b =
-  let res = matrix_create elem_t n1 n2 in
+  let res = matrix_create n1 n2 in
   repeati n1
   (fun i res ->
     repeati n2
     (fun j res ->
       lemma_matrix_index_repeati2 n1 n2 i j;
-      mset res i j (to_numeric elem_t (uint_from_bytes_le #U16 (sub b (2*(j*n1+i)) 2)))
+      res.(i, j) <- uint_from_bytes_le #U16 (sub b (2 * (j * n1 + i)) 2)
     ) res
   ) res
 
@@ -313,7 +330,8 @@ let crypto_kem_keypair coins =
   (pk, sk)
 
 val crypto_kem_enc:
-  coins:lbytes bytes_mu -> pk:lbytes crypto_publickeybytes ->
+  coins:lbytes bytes_mu ->
+  pk:lbytes crypto_publickeybytes ->
   Tot (tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes))
 let crypto_kem_enc coins pk =
   let seed_a = sub pk 0 bytes_seed_a in
@@ -344,7 +362,8 @@ let crypto_kem_enc coins pk =
   (ct, ss)
 
 val crypto_kem_dec:
-  ct:lbytes crypto_ciphertextbytes -> sk:lbytes crypto_secretkeybytes ->
+  ct:lbytes crypto_ciphertextbytes ->
+  sk:lbytes crypto_secretkeybytes ->
   Tot (lbytes crypto_bytes)
 let crypto_kem_dec ct sk =
   let c1Len = (params_logq * params_nbar * params_n) / 8 in
@@ -386,7 +405,7 @@ let crypto_kem_dec ct sk =
   let ss_init1:lbytes ss_init_len = concat ss_init (concat kp d) in
   let ss_init2:lbytes ss_init_len = concat ss_init (concat s d) in
 
-  let bcond = (lbytes_eq d dp) && (matrix_eq params_q bp_matrix bpp_matrix) && (matrix_eq params_q c_matrix cp_matrix) in
-  let ss_init = if (bcond) then ss_init1 else ss_init2 in
+  let bcond = (lbytes_eq d dp) && (matrix_eq params_logq bp_matrix bpp_matrix) && (matrix_eq params_logq c_matrix cp_matrix) in
+  let ss_init = if bcond then ss_init1 else ss_init2 in
   let ss = cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes in
   ss

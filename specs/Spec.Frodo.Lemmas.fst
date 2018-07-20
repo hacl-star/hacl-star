@@ -44,11 +44,12 @@ let lemma_matrix_index_repeati n1 n2 d i j =
   assert (res <= (n1 * n2 / 8 - 1) * d + d);
   assert ((n1 * n2 / 8 - 1) * d + d = n1 * n2 / 8 * d - d + d)
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --z3seed 2"
+
 val lemma_matrix_index_repeati1:
   n1:size_nat -> n2:size_nat ->
   i:size_nat{i < n1} -> j:size_nat{j < n2} ->
   Lemma (2 * (i * n2 + j) + 2 <= 2 * n1 * n2)
-  #reset-options "--z3rlimit 50 --max_fuel 0"
 let lemma_matrix_index_repeati1 n1 n2 i j =
   assert (2 * (i * n2 + j) + 2 <= 2 * ((n1 - 1) * n2 + n2 - 1) + 2);
   assert (2 * (n1 * n2 - 1) + 2 = 2 * n1 * n2 - 2 + 2);
@@ -58,11 +59,30 @@ val lemma_matrix_index_repeati2:
   n1:size_nat -> n2:size_nat ->
   i:size_nat{i < n1} -> j:size_nat{j < n2} ->
   Lemma (2 * (n1 * j + i) + 2 <= 2 * n1 * n2)
-  #reset-options "--z3rlimit 50 --max_fuel 0"
 let lemma_matrix_index_repeati2 n1 n2 i j =
   assert (2 * (n1 * j + i) + 2 <= 2 * (n1 * (n2 - 1) + n1 - 1) + 2);
   assert (2 * (n1 * n2 - 1) + 2 = 2 * n1 * n2 - 2 + 2);
   assert (2 * (n1 * j + i) + 2 <= 2 * n1 * n2)
+
+val lemma_matrix_index:
+  n1:size_nat -> n2:size_nat ->
+  i:size_nat{i < n1} -> j:size_nat{j < n2} ->
+  Lemma (i * n2 + j < n1 * n2)
+let lemma_matrix_index n1 n2 i j =
+  assert (i * n2 + j <= (n1 - 1) * n2 + n2 - 1)
+
+val index_neq:
+  #n1:size_nat -> #n2:size_nat -> 
+  i:size_nat{i < n1} -> j:size_nat{j < n2} -> 
+  i':size_nat{i' < n1} -> j':size_nat{j' < n2} -> 
+  Lemma ((i', j') <> (i, j) ==> (i' * n2 + j' <> i * n2 + j /\ i' * n2 + j' < n1 * n2))
+  #reset-options "--z3rlimit 50 --max_fuel 0"
+let index_neq #n1 #n2 i j i' j' =
+  let open FStar.Math.Lemmas in
+  lemma_eucl_div_bound j i n2;
+  lemma_eucl_div_bound j' i' n2;
+  lemma_matrix_index n1 n2 i j;
+  lemma_matrix_index n1 n2 i' j'
 
 // val ec:k:size_nat{k < pow2 params_extracted_bits} -> Tot (r:size_nat{r < pow2 params_logq})
 // let ec k = k * pow2 (params_logq - params_extracted_bits)

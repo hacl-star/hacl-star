@@ -227,18 +227,11 @@ rsapss.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.f
 	$(OCAMLOPT) -I rsapss-ml $(addprefix rsapss-ml/, $(LIBS_ML)) rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
 	./rsapss.exe
 
-pqlib.exe: $(LIBS_FILES) Spec.PQ.Lib.fst tests/Spec.PQ.Lib.Test.fst
-	mkdir -p pqlib-ml
-	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.PQ.Lib --extract_module Spec.PQ.Lib.Test --odir pqlib-ml $^
-	@echo 'let _ = test()' >> pqlib-ml/Spec_PQ_Lib_Test.ml
-	$(OCAMLOPT) -I pqlib-ml $(addprefix pqlib-ml/, $(LIBS_ML)) pqlib-ml/Spec_PQ_Lib.ml pqlib-ml/Spec_PQ_Lib_Test.ml -o pqlib.exe
-	./pqlib.exe
-
-frodo.exe: $(LIBS_FILES) Spec.Keccak.fst Spec.PQ.Lib.fst Spec.Frodo.fst tests/Spec.Frodo.Test.fst
+frodo.exe: $(LIBS_FILES) Spec.Keccak.fst Spec.Frodo.Matrix.LL.fst Spec.Frodo.fst tests/Spec.Frodo.Test.fst
 	mkdir -p frodo-ml
-	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Keccak --extract_module Spec.PQ.Lib --extract_module Spec.Frodo --extract_module Spec.Frodo.Test --odir frodo-ml $^
+	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Keccak --extract_module Spec.Frodo.Matrix.LL --extract_module Spec.Frodo --extract_module Spec.Frodo.Test --odir frodo-ml $^
 	@echo 'let _ = test()' >> frodo-ml/Spec_Frodo_Test.ml
-	$(OCAMLOPT) -I frodo-ml $(addprefix frodo-ml/, $(LIBS_ML)) frodo-ml/Spec_Keccak.ml frodo-ml/Spec_PQ_Lib.ml frodo-ml/Spec_Frodo.ml frodo-ml/Spec_Frodo_Test.ml -o frodo.exe
+	$(OCAMLOPT) -I frodo-ml $(addprefix frodo-ml/, $(LIBS_ML)) frodo-ml/Spec_Keccak.ml frodo-ml/Spec_Frodo_Matrix_LL.ml frodo-ml/Spec_Frodo.ml frodo-ml/Spec_Frodo_Test.ml -o frodo.exe
 	./frodo.exe
 
 clean:
