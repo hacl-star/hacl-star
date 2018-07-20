@@ -87,6 +87,7 @@ let _ = assert_norm (let m' = m.(0,0) <- 4us in m'.(0,0) == 4us)
 *)
 
 
+/// BEGIN Excerpt from Lib.Sequence, lightly edited
 unfold
 type repeatable (#a:Type) (#n:nat) (pred:(i:nat{i <= n} -> a -> Type0)) = 
   i:nat{i < n} -> x:a -> Pure a (requires pred i x) (ensures fun r -> pred (i+1) r)
@@ -112,6 +113,7 @@ val repeati_inductive:
   -> res:a{pred max res}
 let repeati_inductive #a =
   repeat_range_inductive #a 0
+/// END Excerpt from Lib.Sequence, lightly edited
 
 val mmap2:
     #n1:nat    
