@@ -10,7 +10,8 @@ module U32 = FStar.UInt32
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 
-module Seq = FStar.Seq
+//module Seq = FStar.Seq
+module Seq = Lib.Sequence
 
 open Lib.IntTypes
 open Lib.RawIntTypes
@@ -34,7 +35,7 @@ val index:
   #a:Type0 -> #len:size_nat ->
   b:lbuffer a len -> i:size_t{v i < len} -> Stack a
   (requires (fun h0 -> Buf.live h0 b))
-  (ensures (fun h0 r h1 -> h0 == h1 /\ r == Seq.index (Buf.as_seq h1 b) (v i)))
+  (ensures (fun h0 r h1 -> h0 == h1 /\ r == Seq.index #a #len (Buf.as_seq h1 b) (v i)))
 let index #a #len b i =
   Buf.index b (size_to_UInt32 i)
 
@@ -46,7 +47,7 @@ val upd:
   (requires (fun h0 -> Buf.live h0 b))
   (ensures (fun h0 _ h1 ->
     Buf.modifies_1 b h0 h1 /\ Buf.live h1 b /\
-    Buf.as_seq h1 b == Seq.upd (Buf.as_seq h0 b) (v i) x))
+    Buf.as_seq h1 b == Seq.upd #a #len (Buf.as_seq h0 b) (v i) x))
 let upd #a #len b i v =
   Buf.upd b (size_to_UInt32 i) v
 
@@ -152,7 +153,7 @@ let copy #a #len o clen i =
   let h0 = ST.get () in
   LowStar.BufferOps.blit i (size_to_UInt32 (size 0)) o (size_to_UInt32 (size 0)) (size_to_UInt32 clen);
   let h1 = ST.get () in
-  assert (Seq.slice (Buf.as_seq h1 o) 0 len == Seq.slice (Buf.as_seq h0 i) 0 len)
+  assert (Seq.slice #a #len (Buf.as_seq h1 o) 0 len == Seq.slice #a #len (Buf.as_seq h0 i) 0 len)
 
 let loop_nospec_inv (#a:Type) (h0:mem) (h1:mem)
 		    (len:size_nat) (n:size_nat)

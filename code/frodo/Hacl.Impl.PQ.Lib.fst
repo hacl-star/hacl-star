@@ -1,24 +1,24 @@
 module Hacl.Impl.PQ.Lib
 
 open FStar.HyperStack.All
-open Lib.IntTypes
 open FStar.Mul
 
 open LowStar.Buffer
 open LowStar.ModifiesPat
 open LowStar.Modifies
 
+open Lib.IntTypes
+open Lib.PQ.Buffer
+
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 module B = LowStar.Buffer
-
 module Seq = Lib.Sequence
+module M = Spec.Frodo.Matrix.LL
 
 inline_for_extraction
 type numeric_t = uint16
-
-open Lib.PQ.Buffer
 
 inline_for_extraction
 let lbytes len = lbuffer uint8 (v len)
@@ -29,100 +29,246 @@ let v = size_v
 inline_for_extraction
 type matrix_t (n1:size_t) (n2:size_t{v n1 * v n2 < max_size_t}) = lbuffer uint16 (v n1 * v n2)
 
+let as_matrix #n1 #n2 h (m:matrix_t n1 n2) : GTot (M.matrix_t (v n1) (v n2)) = B.as_seq h m
+
+inline_for_extraction noextract
 val matrix_create:
-  n1:size_t -> n2:size_t{0 < v n1 * v n2 /\ v n1 * v n2 < max_size_t} ->
+  n1:size_t ->
+  n2:size_t{0 < v n1 * v n2 /\ v n1 * v n2 < max_size_t} ->
   StackInline (matrix_t n1 n2)
-  (requires (fun h0 -> True))
-  (ensures (fun h0 r h1 ->
-    B.alloc_post_common (HS.get_tip h0) (v n1 * v n2) r h0 h1 /\
-    B.as_seq h1 r == Seq.create (v n1 * v n2) (u16 0)))
-[@ "substitute"]
+    (requires (fun h0 -> True))
+    (ensures (fun h0 r h1 ->
+      B.alloc_post_common (HS.get_tip h0) (v n1 * v n2) r h0 h1 /\
+      as_matrix h1 r == M.matrix_create (v n1) (v n2)))
 let matrix_create n1 n2 =
-  create #uint16 (n1 *. n2) (u16 0) 
+  create #uint16 (n1 *. n2) (u16 0)
 
-// TODO: Move to Spec.Frodo.Lemmas
-val lemma_matrix_index:
-  n1:size_nat -> n2:size_nat ->
-  i:size_nat{i < n1} -> j:size_nat{j < n2} ->
-  Lemma (i * n2 + j < n1 * n2)
-  #reset-options "--z3rlimit 50 --max_fuel 0"
-let lemma_matrix_index n1 n2 i j =
-  assert (i * n2 + j <= (n1 - 1) * n2 + n2 - 1)
-
+inline_for_extraction noextract
 val mget:
-  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
+  #n1:size_t ->
+  #n2:size_t{v n1 * v n2 < max_size_t} ->
   a:matrix_t n1 n2 ->
-  i:size_t{v i < v n1} -> j:size_t{v j < v n2} -> Stack uint16
-  (requires (fun h -> B.live h a))
-  (ensures (fun h0 r h1 -> h0 == h1)) ///\ r == Seq.index (B.as_seq h1 a) (v (i *. n2 +. j))))
-[@ "substitute"]
+  i:size_t{v i < v n1} ->
+  j:size_t{v j < v n2} ->
+  Stack uint16
+    (requires (fun h -> B.live h a))
+    (ensures (fun h0 r h1 -> h0 == h1 /\ r == M.mget #(v n1) #(v n2) (as_matrix h0 a) (v i) (v j)))
 let mget #n1 #n2 a i j =
-  lemma_matrix_index (v n1) (v n2) (v i) (v j);
+  Spec.Frodo.Lemmas.lemma_matrix_index (v n1) (v n2) (v i) (v j);
   a.(i *. n2 +. j)
 
+inline_for_extraction noextract
 val mset:
-  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
+  #n1:size_t ->
+  #n2:size_t{v n1 * v n2 < max_size_t} ->
   a:matrix_t n1 n2 ->
-  i:size_t{v i < v n1} -> j:size_t{v j < v n2} ->
-  vij:uint16 -> Stack unit
-  (requires (fun h -> B.live h a))
-  (ensures (fun h0 _ h1 -> B.live h1 a /\ modifies (loc_buffer a) h0 h1))
-  [@ "substitute"]
+  i:size_t{v i < v n1} ->
+  j:size_t{v j < v n2} ->
+  vij:uint16 ->
+  Stack unit
+    (requires (fun h -> B.live h a))
+    (ensures (fun h0 _ h1 -> B.live h1 a /\ modifies (loc_buffer a) h0 h1 /\
+      B.as_seq h1 a == M.mset #(v n1) #(v n2) (as_matrix h0 a) (v i) (v j) vij))
 let mset #n1 #n2 a i j vij =
-  lemma_matrix_index (v n1) (v n2) (v i) (v j);
+  Spec.Frodo.Lemmas.lemma_matrix_index (v n1) (v n2) (v i) (v j);
   a.(i *. n2 +. j) <- vij
 
-val matrix_add:
-  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
-  a:matrix_t n1 n2 -> b:matrix_t n1 n2 ->
+noextract unfold
+let op_String_Access #n1 #n2 (m:matrix_t n1 n2) (i, j) = mget m i j
+
+noextract unfold
+let op_String_Assignment #n1 #n2 (m:matrix_t n1 n2) (i, j) x = mset m i j x
+
+
+private
+val inv:
+  #n1:size_t ->
+  #n2:size_t{v n1 * v n2 < max_size_t} ->
+  h0:HS.mem ->
+  h1:HS.mem ->
+  h2:HS.mem ->
+  f:(uint16 -> uint16 -> uint16) ->
+  a:matrix_t n1 n2 ->
+  b:matrix_t n1 n2 ->
+  c:matrix_t n1 n2 ->
+  i:size_t{v i < v n1} ->
+  j:size_nat ->
+  Type0
+let inv #n1 #n2 h0 h1 h2 f a b c i j =
+  B.live h2 a /\ B.live h2 b /\ B.live h2 c /\ modifies (loc_buffer c) h0 h2 /\ j <= v n2 /\
+  B.disjoint a c /\ B.disjoint b c /\
+  (forall (i0:size_nat{i0 < v i}) (j:size_nat{j < v n2}). M.mget (as_matrix h2 c) i0 j == M.mget (as_matrix h1 c) i0 j) /\
+  (forall (j0:size_nat{j0 < j}). M.mget (as_matrix h2 c) (v i) j0 == f (M.mget (as_matrix h0 a) (v i) j0) (M.mget (as_matrix h0 b) (v i) j0)) /\
+  as_matrix h0 a == as_matrix h2 a /\ as_matrix h0 b == as_matrix h2 b
+
+inline_for_extraction noextract private
+val matrix_map2_inner:
+  #n1:size_t ->
+  #n2:size_t{v n1 * v n2 < max_size_t} ->
+  h0:HS.mem ->
+  h1:HS.mem ->
+  f:(uint16 -> uint16 -> uint16) ->
+  a:matrix_t n1 n2 ->
+  b:matrix_t n1 n2 ->
+  c:matrix_t n1 n2 ->
+  i:size_t{v i < v n1} ->
+  j:size_t{v j < v n2} ->
   Stack unit
-  (requires (fun h -> B.live h a /\ B.live h b /\ B.disjoint a b))
-  (ensures (fun h0 r h1 -> B.live h1 a /\ modifies (loc_buffer a) h0 h1))
-  [@"c_inline"]
-let matrix_add #n1 #n2 a b =
+    (requires fun h2 -> inv h0 h1 h2 f a b c i (v j))
+    (ensures  fun _ _ h2 -> inv h0 h1 h2 f a b c i (v j + 1))
+let matrix_map2_inner #n1 #n2 h0 h1 f a b c i j =
+  let h0' = ST.get() in
+  push_frame();
+  c.[i, j] <- f a.[i, j] b.[i, j];
+  pop_frame();
+  let h1' = ST.get() in
+  assert (modifies (loc_buffer c) h0' h1')
+
+inline_for_extraction
+val matrix_map2:
+  #n1:size_t ->
+  #n2:size_t{v n1 * v n2 < max_size_t} ->
+  f:(uint16 -> uint16 -> uint16) ->
+  a:matrix_t n1 n2 ->
+  b:matrix_t n1 n2 ->
+  c:matrix_t n1 n2 ->
+  StackInline unit
+    (requires fun h0 -> B.live h0 a /\ B.live h0 b /\ B.live h0 c /\
+      B.disjoint a c /\ B.disjoint b c)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer c) h0 h1 /\
+      as_matrix h1 c == M.matrix_map2 #(v n1) #(v n2) f (as_matrix h0 a) (as_matrix h0 b) )
+let matrix_map2 #n1 #n2 f a b c =
   let h0 = ST.get () in
-  loop_nospec #h0 n1 a
-  (fun i ->
-    let h1 = ST.get () in
-    loop_nospec #h1 n2 a
-    (fun j ->
-      let aij = mget a i j in
-      let bij = mget b i j in
-      let res = add_mod aij bij in
-      mset a i j res
-    )
-  )
+  Lib.Loops.for (size 0) n1
+    (fun h1 i -> B.live h1 a /\ B.live h1 b /\ B.live h1 c /\
+      B.disjoint a c /\ B.disjoint b c /\ modifies (loc_buffer c) h0 h1 /\ i <= v n1 /\
+      (forall (i0:nat{i0 < i}) (j:nat{j < v n2}).
+        M.mget (as_matrix h1 c) i0 j ==
+        f (M.mget (as_matrix h0 a) i0 j) (M.mget (as_matrix h0 b) i0 j)))
+    (fun i ->
+      let h1 = ST.get() in
+      Lib.Loops.for (size 0) n2
+        (fun h2 j -> inv #n1 #n2 h0 h1 h2 f a b c i j)
+        (fun j -> matrix_map2_inner #n1 #n2 h0 h1 f a b c i j)
+    );
+    let h2 = ST.get() in
+    M.extensionality (as_matrix h2 c) (M.matrix_map2 #(v n1) #(v n2) f (as_matrix h0 a) (as_matrix h0 b))
+
+
+val matrix_add:
+  #n1:size_t ->
+  #n2:size_t{v n1 * v n2 < max_size_t} ->
+  a:matrix_t n1 n2 ->
+  b:matrix_t n1 n2 ->
+  Stack unit
+    (requires (fun h -> B.live h a /\ B.live h b /\ B.disjoint a b))
+    (ensures (fun h0 r h1 -> B.live h1 a /\ modifies (loc_buffer a) h0 h1 /\
+      as_matrix h1 a == M.matrix_add #(v n1) #(v n2) (as_matrix h0 a) (as_matrix h0 b)))
+[@"c_inline"]
+let matrix_add #n1 #n2 a b =
+  admit(); //TODO: remove `B.disjoint a c /\ B.disjoint b c` from matrix_map2
+  matrix_map2 #n1 #n2 add_mod a b a
 
 val matrix_sub:
-  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
-  a:matrix_t n1 n2 -> b:matrix_t n1 n2 ->
+  #n1:size_t ->
+  #n2:size_t{v n1 * v n2 < max_size_t} ->
+  a:matrix_t n1 n2 ->
+  b:matrix_t n1 n2 ->
   Stack unit
-  (requires (fun h -> B.live h a /\ B.live h b /\ B.disjoint a b))
-  (ensures (fun h0 r h1 -> B.live h1 b /\ modifies (loc_buffer b) h0 h1))
-  [@"c_inline"]
+   (requires (fun h -> B.live h a /\ B.live h b /\ B.disjoint a b))
+   (ensures (fun h0 r h1 -> B.live h1 b /\ modifies (loc_buffer b) h0 h1 /\
+     as_matrix h1 b == M.matrix_sub #(v n1) #(v n2) (as_matrix h0 a) (as_matrix h0 b)))
+[@"c_inline"]
 let matrix_sub #n1 #n2 a b =
-  let h0 = ST.get () in
-  loop_nospec #h0 n1 b
-  (fun i ->
-    let h1 = ST.get () in
-    loop_nospec #h1 n2 b
-    (fun j ->
-      let aij = mget a i j in
-      let bij = mget b i j in
-      let res = sub_mod aij bij in
-      mset b i j res
-    )
+  admit(); //TODO: remove `B.disjoint a c /\ B.disjoint b c` from matrix_map2
+  matrix_map2 #n1 #n2 sub_mod a b b
+
+(*
+val sum:n:size_nat -> f:(j:size_nat{j < n} -> uint16) -> uint16
+let sum n f = repeati n (fun j res -> res +. f j) (u16 0)
+
+val matrix_mul:
+  #n1:size_nat ->
+  #n2:size_nat{n1 * n2 < max_size_t} ->
+  #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t} ->
+  a:matrix_t n1 n2 ->
+  b:matrix_t n2 n3 ->
+  Tot (c:matrix_t n1 n3{ forall i k. c.(i, k) == sum n2 (fun j -> a.(i, j) *. b.(j, k))})
+let matrix_mul #n1 #n2 #n3 a b =
+  let c = matrix_create n1 n3 in
+  repeati_inductive n1
+  (fun i c -> forall (i1:size_nat{i1 < i}) (k:size_nat{k < n3}). c.(i1, k) == sum n2 (fun j -> a.(i1, j) *. b.(j, k)))
+  (fun i c ->
+    repeati_inductive n3
+    (fun k c0 -> (forall (k1:size_nat{k1 < k}). c0.(i, k1) == sum n2 (fun j -> a.(i, j) *. b.(j, k1))) /\
+               (forall (i1:size_nat{i1 < n1 /\ i <> i1}) (k:size_nat{k < n3}). c0.(i1, k) == c.(i1, k)))
+    (fun k c0 ->
+      c0.(i, k) <- sum n2 (fun j -> a.(i, j) *. b.(j, k))
+    ) c
+  ) c
+*)
+
+(*
+val sum:
+  n:size_t ->
+  f:(j:size_nat{j < v n} -> uint16) ->
+  Stack uint16
+   (requires (fun h -> True))
+   (ensures (fun h0 r h1 -> modifies loc_none h0 h1 /\ r == M.sum (v n) f))
+let sum n f =
+  push_frame();
+  let res:lbuffer uint16 1 = create (size 1) (u16 0) in
+  let h0 = ST.get() in
+  Lib.Loops.for (size 0) n
+  (fun h j -> B.live h res /\ modifies (loc_buffer res) h0 h)
+  (fun j ->
+    let res0 = res.(size 0) in
+    res.(size 0) <- res0 +. f (v j));
+  let res = res.(size 0) in
+  pop_frame();
+  res
+*)
+
+inline_for_extraction noextract private
+val matrix_mul_inner:
+  #n1:size_t ->
+  #n2:size_t{v n1 * v n2 < max_size_t} ->
+  #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t} ->
+  a:matrix_t n1 n2 ->
+  b:matrix_t n2 n3 ->
+  c:matrix_t n1 n3 ->
+  i:size_t{v i < v n1} ->
+  k:size_t{v k < v n3} ->
+  Stack unit
+    (requires (fun h ->
+      B.live h a /\ B.live h b /\ B.live h c /\ B.disjoint a c /\ B.disjoint b c))
+    (ensures (fun h0 _ h1 -> B.live h1 c /\ modifies (loc_buffer c) h0 h1))
+let matrix_mul_inner #n1 #n2 #n3 a b c i k =
+  mset c i k (u16 0);
+  let h0 = ST.get() in
+  Lib.Loops.for (size 0) n2
+  (fun h1 j ->
+    B.live h1 a /\ B.live h1 b /\ B.live h1 c /\ B.disjoint a c /\ B.disjoint b c /\
+    modifies (loc_buffer c) h0 h1)
+  (fun j ->
+    let abij = a.[i, j] *. b.[j, k] in
+    let cik = c.[i, k] in
+    c.[i, k] <- cik +. abij
   )
 
 val matrix_mul:
-  #n1:size_t -> #n2:size_t{v n1 * v n2 < max_size_t} ->
+  #n1:size_t ->
+  #n2:size_t{v n1 * v n2 < max_size_t} ->
   #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t} ->
-  a:matrix_t n1 n2 -> b:matrix_t n2 n3 ->
-  c:matrix_t n1 n3 -> Stack unit
-  (requires (fun h -> B.live h a /\ B.live h b /\
-    B.live h c /\ B.disjoint a c /\ B.disjoint b c))
-  (ensures (fun h0 _ h1 -> B.live h1 c /\ modifies (loc_buffer c) h0 h1))
-  [@"c_inline"]
+  a:matrix_t n1 n2 ->
+  b:matrix_t n2 n3 ->
+  c:matrix_t n1 n3 ->
+  Stack unit
+    (requires (fun h -> B.live h a /\ B.live h b /\
+      B.live h c /\ B.disjoint a c /\ B.disjoint b c))
+    (ensures (fun h0 _ h1 -> B.live h1 c /\ modifies (loc_buffer c) h0 h1))
+[@"c_inline"]
 let matrix_mul #n1 #n2 #n3 a b c =
   let h0 = ST.get () in
   loop_nospec #h0 n1 c
@@ -130,15 +276,6 @@ let matrix_mul #n1 #n2 #n3 a b c =
     let h1 = ST.get () in
     loop_nospec #h1 n3 c
     (fun k ->
-      mset c i k (u16 0);
-      let h2 = ST.get () in
-      loop_nospec #h2 n2 c
-      (fun j ->
-	let aij = mget a i j in
-	let bjk = mget b j k in
-	let cik = mget c i k in
-	let res = cik +. aij *. bjk in
-	mset c i k res
-      )
+      matrix_mul_inner #n1 #n2 #n3 a b c i k
     )
   )
