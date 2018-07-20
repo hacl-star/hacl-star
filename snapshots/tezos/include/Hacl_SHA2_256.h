@@ -22,16 +22,14 @@
  */
 
 
-#include "kremlib.h"
+
 #ifndef __Hacl_SHA2_256_H
 #define __Hacl_SHA2_256_H
 
-#include "WasmSupport.h"
-#include "C_Endianness.h"
-#include "C.h"
-#include "C_String.h"
-#include "TestLib.h"
 
+#include "kremlib.h"
+
+extern FStar_UInt128_uint128 FStar_Int_Cast_Full_uint64_to_uint128(uint64_t x0);
 
 extern uint32_t Hacl_SHA2_256_size_word;
 

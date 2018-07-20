@@ -24,6 +24,17 @@
 
 #include "Hacl_SHA2_384.h"
 
+extern FStar_UInt128_uint128
+FStar_UInt128_add(FStar_UInt128_uint128 x0, FStar_UInt128_uint128 x1);
+
+extern FStar_UInt128_uint128 FStar_UInt128_shift_left(FStar_UInt128_uint128 x0, uint32_t x1);
+
+extern FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t x0);
+
+extern FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x0, uint64_t x1);
+
+extern void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
+
 static void
 Hacl_Hash_Lib_LoadStore_uint64s_from_be_bytes(uint64_t *output, uint8_t *input, uint32_t len)
 {
