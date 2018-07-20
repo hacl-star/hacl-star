@@ -26,9 +26,12 @@ let uint64_p = B.buffer uint_64
 
 noeq
 type state_s: (G.erased alg) -> Type0 =
-| SHA256_Hacl: p:uint32_p{ B.length p = U32.v Hacl.SHA2_256.size_state } -> state_s (G.hide SHA256)
-| SHA256_Vale: p:uint32_p{ B.length p = U32.v ValeGlue.sha256_size_state } -> state_s (G.hide SHA256)
-| SHA384_Hacl: p:uint64_p{ B.length p = U32.v Hacl.SHA2_384.size_state } -> state_s (G.hide SHA384)
+| SHA256_Hacl: p:uint32_p{ B.freeable p /\ B.length p = U32.v Hacl.SHA2_256.size_state } ->
+    state_s (G.hide SHA256)
+| SHA256_Vale: p:uint32_p{ B.freeable p /\ B.length p = U32.v ValeGlue.sha256_size_state } ->
+    state_s (G.hide SHA256)
+| SHA384_Hacl: p:uint64_p{ B.freeable p /\ B.length p = U32.v Hacl.SHA2_384.size_state } ->
+    state_s (G.hide SHA384)
 
 let footprint_s #a (s: state_s a): GTot M.loc =
   match s with
@@ -182,6 +185,28 @@ let finish #a s dst =
   | SHA256_Vale p ->
       ValeGlue.sha256_finish p dst;
       admit ()
+
+let free #a s =
+  (match !*s with
+  | SHA256_Hacl p ->
+      B.free p
+  | SHA384_Hacl p ->
+      B.free p
+  | SHA256_Vale p ->
+      B.free p);
+  let h = ST.get () in
+  // 20180720 JP: we seem to be missing something to derive that this buffer is
+  // still live
+  assume (B.live h s);
+  B.free s;
+  // 20180720 JP: waiting on fixes from the LowStar.Buffer library. Need to
+  // change loc_buffer in the footprint / footprint_s to:
+  // +let loc_whole_buffer b =
+  // +  M.(loc_addresses false (B.frameOf b) (Set.singleton (B.as_addr b)))
+  // then: modify the refinements in state / state_s to carry the freeable predicate
+  // then: change to loc_whole_buffer in the invariant
+  // then: have proper patterns for loc_addresses in LowStar.Buffer
+  admit ()
 
 let hash a dst input len =
   match a with

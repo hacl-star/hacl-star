@@ -22,7 +22,7 @@ type e_alg =
   G.erased alg
 
 val state_s: e_alg -> Type0
-let state alg = B.pointer (state_s alg)
+let state alg = b:B.pointer (state_s alg) { B.freeable b }
 
 // NS: note that the state is the first argument to the invariant so that we can
 // do partial applications in pre- and post-conditions
@@ -305,6 +305,12 @@ val finish: #a:e_alg -> s:state a -> dst:uint8_p -> Stack unit
     M.(modifies (loc_buffer dst) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     finish_spec s h0 (B.as_seq h1 dst)))
+
+val free: #a:e_alg -> s:state a -> Stack unit
+  (requires (fun h0 ->
+    invariant s h0))
+  (ensures (fun h0 _ h1 ->
+    M.(modifies (footprint s h0) h0 h1)))
 
 let hash_spec (a: alg) (input: bytes{Seq.length input < max_input_length (G.hide a)}): GTot _ =
   match a with
