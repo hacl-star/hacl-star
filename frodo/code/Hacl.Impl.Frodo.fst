@@ -41,7 +41,7 @@ val matrix_eq:
 let matrix_eq #n1 #n2 m a b =
   push_frame();
   let m = (u32 1 <<. size_to_uint32 m) -. u32 1 in
-  let res:lbuffer bool 1 = create (size 1) (true) in
+  let res:lbuffer bool 1 = create (size 1) true in
   let h0 = ST.get () in
   loop_nospec #h0 n1 res
   (fun i ->
@@ -417,6 +417,7 @@ assume val randombytes_:
   len:size_t -> res:lbytes len -> Stack unit
   (requires (fun h -> B.live h res))
   (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
+
 
 val frodo_mul_add_as_plus_e:
   seed_a:lbytes bytes_seed_a ->

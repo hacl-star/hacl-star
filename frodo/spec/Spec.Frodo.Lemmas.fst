@@ -9,6 +9,8 @@ open FStar.Math.Lemmas
 
 open Spec.PQ.Lib
 
+#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0 --z3seed 2"
+
 val modulo_pow2_u16:
   a:uint16 -> b:size_nat{b < 16} -> Lemma
   (uint_v a % pow2 b == uint_v (a &. ((u16 1 <<. u32 b) -. u16 1)))
@@ -33,7 +35,6 @@ val lemma_matrix_index_repeati:
   d:size_nat{d * n1 * n2 / 8 < max_size_t} ->
   i:size_nat{i < n1} -> j:size_nat{j < n2 / 8} ->
   Lemma ((i * n2 / 8 + j) * d + d <= d * n1 * n2 / 8)
-  #reset-options "--z3rlimit 150 --max_fuel 0"
 let lemma_matrix_index_repeati n1 n2 d i j =
   let res = (i * n2 / 8 + j) * d + d in
   assert (i * n2 / 8 + j <= (n1 - 1) * n2 / 8 + n2 / 8 - 1);
@@ -43,8 +44,6 @@ let lemma_matrix_index_repeati n1 n2 d i j =
   assert ((i * n2 / 8 + j) * d <= (n1 * n2 / 8 - 1) * d);
   assert (res <= (n1 * n2 / 8 - 1) * d + d);
   assert ((n1 * n2 / 8 - 1) * d + d = n1 * n2 / 8 * d - d + d)
-
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --z3seed 2"
 
 val lemma_matrix_index_repeati1:
   n1:size_nat -> n2:size_nat ->
@@ -64,26 +63,6 @@ let lemma_matrix_index_repeati2 n1 n2 i j =
   assert (2 * (n1 * n2 - 1) + 2 = 2 * n1 * n2 - 2 + 2);
   assert (2 * (n1 * j + i) + 2 <= 2 * n1 * n2)
 
-val lemma_matrix_index:
-  n1:size_nat -> n2:size_nat ->
-  i:size_nat{i < n1} -> j:size_nat{j < n2} ->
-  Lemma (i * n2 + j < n1 * n2)
-let lemma_matrix_index n1 n2 i j =
-  assert (i * n2 + j <= (n1 - 1) * n2 + n2 - 1)
-
-val index_neq:
-  #n1:size_nat -> #n2:size_nat -> 
-  i:size_nat{i < n1} -> j:size_nat{j < n2} -> 
-  i':size_nat{i' < n1} -> j':size_nat{j' < n2} -> 
-  Lemma ((i', j') <> (i, j) ==> (i' * n2 + j' <> i * n2 + j /\ i' * n2 + j' < n1 * n2))
-  #reset-options "--z3rlimit 50 --max_fuel 0"
-let index_neq #n1 #n2 i j i' j' =
-  let open FStar.Math.Lemmas in
-  lemma_eucl_div_bound j i n2;
-  lemma_eucl_div_bound j' i' n2;
-  lemma_matrix_index n1 n2 i j;
-  lemma_matrix_index n1 n2 i' j'
-
 // val ec:k:size_nat{k < pow2 params_extracted_bits} -> Tot (r:size_nat{r < pow2 params_logq})
 // let ec k = k * pow2 (params_logq - params_extracted_bits)
 
@@ -92,7 +71,6 @@ let index_neq #n1 #n2 i j i' j' =
 
 // val lemma_dc_ec:
 //   k:size_nat{k < pow2 params_extracted_bits} -> Lemma (dc (ec k) == k)
-//   #reset-options "--z3rlimit 50 --max_fuel 0"
 // let lemma_dc_ec k =
 //   let c = ec k in
 //   assert (c == k * pow2 (params_logq - params_extracted_bits));

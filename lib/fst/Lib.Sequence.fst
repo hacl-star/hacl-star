@@ -122,12 +122,13 @@ val repeat: #a:Type -> n:size_nat -> (a -> Tot a) -> a -> a
 let repeat #a n f x = repeat_range 0 n (fun i -> f) x
 
 unfold
-type repeatable (#a:Type) (#n:size_nat) (pred:(i:size_nat{i <= n} -> a -> Tot Type)) = i:size_nat{i < n} -> x:a -> Pure a (requires (pred i x)) (ensures (fun r -> pred (i+1) r))
+type repeatable (#a:Type) (#n:size_nat) (pred:(i:size_nat{i <= n} -> a -> Tot Type)) =
+  i:size_nat{i < n} -> x:a -> Pure a (requires (pred i x)) (ensures (fun r -> pred (i+1) r))
 
 val repeat_range_inductive: #a:Type
   -> min:size_nat
   -> max:size_nat{min <= max}
-  -> pred:(i:size_nat{i <= max} -> a -> Tot Type)
+  -> pred:(i:size_nat{i <= max} -> a -> Type)
   -> f:repeatable #a #max pred
   -> x0:a{pred min x0}
   -> Tot (res:a{pred max res}) (decreases (max - min))
@@ -135,8 +136,15 @@ let rec repeat_range_inductive #a min max pred f x =
   if min = max then x
   else repeat_range_inductive #a (min + 1) max pred f (f min x)
 
-val repeati_inductive: #a:Type -> n:size_nat -> pred:(i:size_nat{i <= n} -> a -> Tot Type) -> f:repeatable #a #n pred -> x0:a{pred 0 x0} -> Tot (res:a{pred n res})
-let repeati_inductive #a = repeat_range_inductive #a 0
+val repeati_inductive:
+   #a:Type
+ -> n:size_nat
+ -> pred:(i:size_nat{i <= n} -> a -> Type)
+ -> f:repeatable #a #n pred
+ -> x0:a{pred 0 x0}
+ -> res:a{pred n res}
+let repeati_inductive #a =
+  repeat_range_inductive #a 0
 
 val fold_left_range_: #a:Type -> #b:Type -> #len:size_nat
   -> min:size_nat
