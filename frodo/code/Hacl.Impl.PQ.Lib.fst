@@ -134,7 +134,7 @@ val map2_inner:
     (requires fun h2 -> map2_inner_inv h0 h1 h2 f a b c i (v j))
     (ensures  fun _ _ h2 -> map2_inner_inv h0 h1 h2 f a b c i (v j + 1))
 let map2_inner #n1 #n2 h0 h1 f a b c i j =
-  admit(); // TODO: this worked before porting everything to Lib.*
+  //admit(); // TODO: this worked before porting everything to Lib.*
   c.[i,j] <- f a.[i,j] b.[i,j]
 
 inline_for_extraction

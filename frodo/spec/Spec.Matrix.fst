@@ -57,8 +57,6 @@ let mget #n1 #n2 a i j =
   index_lt n1 n2 i j;
   a.[i * n2 + j]
 
-let op_Array_Access #n1 #n2 (m:matrix n1 n2) (i,j) = mget m i j
-
 val mset:
     #n1:size_nat
   -> #n2:size_nat{n1 * n2 < max_size_t}
@@ -69,12 +67,13 @@ val mset:
   -> Pure (matrix n1 n2)
   (requires True)
   (ensures  fun r ->
-    r.(i,j) == v /\ (forall i' j'. (i', j') <> (i, j) ==> r.(i', j') == a.(i',j')))
+    mget r i j == v /\ (forall i' j'. (i', j') <> (i, j) ==> mget r i' j' == mget a i' j'))
 let mset #n1 #n2 a i j v =
   Classical.forall_intro_2 (index_neq #n1 #n2 i j);
   index_lt n1 n2 i j;
   a.[i * n2 + j] <- v
 
+let op_Array_Access #n1 #n2 (m:matrix n1 n2) (i,j) = mget m i j
 let op_Array_Assignment #n1 #n2 (m:matrix n1 n2) (i,j) x = mset m i j x
 
 val extensionality:
@@ -85,6 +84,7 @@ val extensionality:
   -> Lemma
     (requires forall i j. a.(i,j) == b.(i,j))
     (ensures  a == b)
+#reset-options "--z3rlimit 50 --max_fuel 0"
 let extensionality #n1 #n2 a b =
   Classical.forall_intro_2 (index_lt n1 n2);
   assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). a.(i, j) == a.[i * n2 + j]);
@@ -120,7 +120,7 @@ let map2 #n1 #n2 f a b =
     (fun i c -> forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}). c.(i0,j) == f a.(i0,j) b.(i0,j))
     (fun i c ->
       repeati_inductive n2
-        (fun j c0 -> 
+        (fun j c0 ->
           (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}). c0.(i0,j) == c.(i0,j)) /\
           (forall (j0:size_nat{j0 < j}). c0.(i,j0) == f a.(i,j0) b.(i,j0)))
         (fun j c' -> c'.(i,j) <- f a.(i,j) b.(i,j))
