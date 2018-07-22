@@ -4,15 +4,28 @@ MLCRYPTO_HOME ?= ../../../MLCrypto
 
 HACL_CODE = ../../code
 
+ifeq (,$(EVEREST_WINDOWS))
+CONFIG		?= default
+else
+CONFIG		= noopenssl
+endif
+
 EXTRACT_DIR = extract
 CACHE_DIR   = cache
 INCLUDE_PATHS = \
   $(KREMLIN_HOME)/kremlib \
   ../evercrypt \
+  ../evercrypt/fst \
+  ../evercrypt/config/$(CONFIG) \
   $(HACL_CODE)/lib/kremlin \
+  $(HACL_CODE)/experimental/aesgcm \
   $(HACL_CODE)/curve25519/interfaces \
   $(HACL_CODE)/hash/interfaces \
   $(HACL_CODE)/api/interfaces \
+  $(HACL_CODE)/api \
+  $(HACL_CODE)/salsa-family \
+  $(HACL_CODE)/poly1305 \
+  $(HACL_CODE)/bignum \
   ../../specs
 
 UNAME = $(shell uname)

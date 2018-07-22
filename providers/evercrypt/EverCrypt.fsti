@@ -19,7 +19,6 @@ val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
 
 val aes128_key_s: Type0
 
-[@(CPrologue "#ifndef __EverCrypt_aes128_key_s\ntypedef struct EverCrypt_aes128_key_s EverCrypt_aes128_key_s;\n#endif")]
 let aes128_key = B.pointer aes128_key_s
 
 val aes128_create: key:uint8_p ->
@@ -34,7 +33,6 @@ val aes128_free: aes128_key ->
 
 val aes256_key_s : Type0
 
-[@(CPrologue "#ifndef __EverCrypt_aes256_key_s\ntypedef struct EverCrypt_aes256_key_s EverCrypt_aes256_key_s;\n#endif")]
 let aes256_key = B.pointer aes256_key_s
 
 val aes256_create: key:uint8_p ->

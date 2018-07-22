@@ -28,14 +28,12 @@ let x25519 dst secret base =
 
 /// AES128-ECB
 
-private noeq type _aes128_key =
-  | AES128_OPENSSL: st:Dyn.dyn -> _aes128_key
-  | AES128_BCRYPT: st:Dyn.dyn -> _aes128_key
-  | AES128_VALE: w:uint8_p -> sbox:uint8_p -> _aes128_key
-  | AES128_HACL: w:uint8_p -> sbox:uint8_p -> _aes128_key
-
-[@(CEpilogue "#define __EverCrypt_aes128_key_s")]
-let aes128_key_s = _aes128_key
+[@CAbstractStruct]
+noeq type aes128_key_s =
+  | AES128_OPENSSL: st:Dyn.dyn -> aes128_key_s
+  | AES128_BCRYPT: st:Dyn.dyn -> aes128_key_s
+  | AES128_VALE: w:uint8_p -> sbox:uint8_p -> aes128_key_s
+  | AES128_HACL: w:uint8_p -> sbox:uint8_p -> aes128_key_s
 
 let aes128_create k =
   let i = AC.aes128_impl () in
@@ -92,13 +90,11 @@ let aes128_free pk =
     failwith !$"ERROR: inconsistent configuration";
   B.free pk
 
-private noeq type _aes256_key =
-  | AES256_OPENSSL: st:Dyn.dyn -> _aes256_key
-  | AES256_BCRYPT: st:Dyn.dyn -> _aes256_key
-  | AES256_HACL: w:uint8_p -> sbox:uint8_p -> _aes256_key
-
-[@(CEpilogue "#define __EverCrypt_aes256_key_s")]
-let aes256_key_s = _aes256_key
+[@CAbstractStruct]
+noeq type aes256_key_s =
+  | AES256_OPENSSL: st:Dyn.dyn -> aes256_key_s
+  | AES256_BCRYPT: st:Dyn.dyn -> aes256_key_s
+  | AES256_HACL: w:uint8_p -> sbox:uint8_p -> aes256_key_s
 
 let aes256_create k =
   let i = AC.aes256_impl () in
