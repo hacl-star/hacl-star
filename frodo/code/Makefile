@@ -47,6 +47,7 @@ test-frodo.exe: frodo-c/Hacl_Test_Frodo.c frodo-c/Hacl_Impl_Frodo.c include/rand
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
 
 test: test-frodo.exe
+	@echo Remember to set params_n = 64 in Hacl.Impl.Frodo.Params!
 	./test-frodo.exe
 
 AR=ar rcs
