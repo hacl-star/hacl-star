@@ -16,6 +16,8 @@ module ST  = FStar.HyperStack.ST
 module Seq = Lib.Sequence
 module M   = Spec.Matrix
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 type elem = uint16
 
 inline_for_extraction
@@ -116,8 +118,6 @@ let map2_inner_inv #n1 #n2 h0 h1 h2 f a b c i j =
   (forall (j0:nat{j <= j0 /\ j0 < v n2}). get h2 a (v i) j0 == get h0 a (v i) j0) /\
   (forall (i0:nat{v i < i0 /\ i0 < v n1}) (j:nat{j < v n2}). get h2 a i0 j == get h0 a i0 j)
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
-
 inline_for_extraction noextract private
 val map2_inner:
     #n1:size_t
@@ -134,7 +134,6 @@ val map2_inner:
     (requires fun h2 -> map2_inner_inv h0 h1 h2 f a b c i (v j))
     (ensures  fun _ _ h2 -> map2_inner_inv h0 h1 h2 f a b c i (v j + 1))
 let map2_inner #n1 #n2 h0 h1 f a b c i j =
-  admit(); // TODO: this worked before porting everything to Lib.*
   c.[i,j] <- f a.[i,j] b.[i,j]
 
 inline_for_extraction

@@ -57,6 +57,7 @@ let mget #n1 #n2 a i j =
   index_lt n1 n2 i j;
   a.[i * n2 + j]
 
+unfold
 let op_Array_Access #n1 #n2 (m:matrix n1 n2) (i,j) = mget m i j
 
 val mset:
@@ -75,6 +76,7 @@ let mset #n1 #n2 a i j v =
   index_lt n1 n2 i j;
   a.[i * n2 + j] <- v
 
+unfold
 let op_Array_Assignment #n1 #n2 (m:matrix n1 n2) (i,j) x = mset m i j x
 
 val extensionality:
