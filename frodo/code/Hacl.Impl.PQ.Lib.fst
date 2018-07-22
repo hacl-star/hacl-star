@@ -105,18 +105,14 @@ val map2_inner_inv:
   -> Type0
 let map2_inner_inv #n1 #n2 h0 h1 h2 f a b c i j =
   B.live h2 a /\ B.live h2 b /\ B.live h2 c /\
-  B.disjoint b c /\
   a == c /\
+  B.disjoint b c /\
   modifies (loc_buffer c) h1 h2 /\
   j <= v n2 /\
   (forall (i0:nat{i0 < v i}) (j:nat{j < v n2}). get h2 c i0 j == get h1 c i0 j) /\
   (forall (j0:nat{j0 < j}). get h2 c (v i) j0 == f (get h0 a (v i) j0) (get h2 b (v i) j0)) /\
   (forall (j0:nat{j <= j0 /\ j0 < v n2}). get h2 c (v i) j0 == get h0 c (v i) j0) /\
-  (forall (i0:nat{v i < i0 /\ i0 < v n1}) (j:nat{j < v n2}). get h2 c i0 j == get h0 c i0 j) /\
-
-  (forall (i0:nat{i0 < v i}) (j:nat{j < v n2}). get h2 a i0 j == get h1 a i0 j) /\
-  (forall (j0:nat{j <= j0 /\ j0 < v n2}). get h2 a (v i) j0 == get h0 a (v i) j0) /\
-  (forall (i0:nat{v i < i0 /\ i0 < v n1}) (j:nat{j < v n2}). get h2 a i0 j == get h0 a i0 j)
+  (forall (i0:nat{v i < i0 /\ i0 < v n1}) (j:nat{j < v n2}). get h2 c i0 j == get h0 c i0 j)
 
 inline_for_extraction noextract private
 val map2_inner:
@@ -136,6 +132,11 @@ val map2_inner:
 let map2_inner #n1 #n2 h0 h1 f a b c i j =
   c.[i,j] <- f a.[i,j] b.[i,j]
 
+/// In-place [map2], a == map2 f a b
+///
+/// A non in-place variant can be obtained by weakening the pre-condition to B.disjoint a c,
+/// or the two variants can be merged by requiring (a == c \/ B.disjoint a c) instead of a == c
+/// See commit 91916b8372fa3522061eff5a42d0ebd1d19a8a49
 inline_for_extraction
 val map2:
     #n1:size_t
@@ -145,8 +146,7 @@ val map2:
   -> b:matrix_t n1 n2
   -> c:matrix_t n1 n2
   -> Stack unit
-    (requires fun h0 -> B.live h0 a /\ B.live h0 b /\ B.live h0 c /\
-      a == c /\ B.disjoint b c)
+    (requires fun h0 -> B.live h0 a /\ B.live h0 b /\ B.live h0 c /\ a == c /\ B.disjoint b c)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer c) h0 h1 /\
       as_matrix h1 c == M.map2 #(v n1) #(v n2) f (as_matrix h0 a) (as_matrix h0 b) )
@@ -180,10 +180,11 @@ val matrix_add:
       as_matrix h1 a == M.add (as_matrix h0 a) (as_matrix h0 b))
 [@"c_inline"]
 let matrix_add #n1 #n2 a b =
-  map2 #n1 #n2 add_mod a b a
+  map2 add_mod a b a
 
+inline_for_extraction
 val matrix_sub:
-   #n1:size_t
+    #n1:size_t
   -> #n2:size_t{v n1 * v n2 < max_size_t}
   -> a:matrix_t n1 n2
   -> b:matrix_t n1 n2
@@ -193,8 +194,14 @@ val matrix_sub:
       as_matrix h1 b == M.sub (as_matrix h0 a) (as_matrix h0 b))
 [@"c_inline"]
 let matrix_sub #n1 #n2 a b =
-  admit(); //TODO: Need another version of [map2] or to weaken its precondition
-  map2 #n1 #n2 sub_mod a b b
+  (* Use the in-place variant above by flipping the arguments of [sub_mod] *)
+  (* Requires appplying extensionality *)
+  let h0 = ST.get() in
+  [@ inline_let ]
+  let sub_mod_flipped x y = sub_mod y x in
+  map2 sub_mod_flipped b a b;
+  let h1 = ST.get() in
+  M.extensionality (as_matrix h1 b) (M.sub (as_matrix h0 a) (as_matrix h0 b))
 
 (*
 val sum:n:size_nat -> f:(j:size_nat{j < n} -> uint16) -> uint16
