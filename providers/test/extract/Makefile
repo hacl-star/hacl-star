@@ -19,8 +19,9 @@ ifeq ($(UNAME),Linux)
   LDFLAGS += -Wl,-z,defs,-z,noexecstack
 endif
 
-
 LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
+
+all: test
 
 # See https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
 %.d: %.c

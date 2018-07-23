@@ -85,10 +85,11 @@ $(EXTRACT_DIR)/Test.c: $(ALL_KRML_FILES) | .depend
 	  -skip-compilation \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -add-include '"temp.h"' \
+	  -bundle Hacl.* \
 	  -bundle LowStar.* \
 	  -bundle Test.Lowstarize \
 	  -bundle Hacl.Spec.*,Hacl.Spe.*,Spec.* \
-	  -library EverCrypt,EverCrypt.* \
+	  -library EverCrypt,EverCrypt.*,Hacl.*,AEAD.* \
 	  -ccopt -g
 
 test: $(EXTRACT_DIR)/Test.c
