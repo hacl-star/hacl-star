@@ -3,7 +3,7 @@ module EverCrypt.Hash
 /// ----------agile implementation of hash specification ------------
 /// must be in scope for linking the agile spec to the ad hoc algorithmic specs
 
-let string_of_alg = 
+let string_of_alg =
   let open C.String in function
   | MD5    -> !$"MD5"
   | SHA1   -> !$"SHA1"
@@ -11,7 +11,6 @@ let string_of_alg =
   | SHA256 -> !$"SHA256"
   | SHA384 -> !$"SHA384"
   | SHA512 -> !$"SHA512"
-
 
 let type_of a =
   match Ghost.reveal a with
@@ -36,7 +35,7 @@ let acc0 #a =
   | SHA256 -> {
       hash = EverCrypt.Spec.SHA2_256.h_0;
       k = EverCrypt.Spec.SHA2_256.k;
-      counter = 0 
+      counter = 0
     }
   | SHA384 -> {
       hash = EverCrypt.Spec.SHA2_384.h_0;
@@ -46,7 +45,7 @@ let acc0 #a =
   | _ -> {
       hash = Seq.create 8 (if Ghost.reveal a = SHA512 then 0UL else 0ul);
       k = Seq.empty;
-      counter = 0 
+      counter = 0
     }
 
 // 18-07-06 We need a fully-specified refinement: the hacl* spec
@@ -57,29 +56,29 @@ let acc0 #a =
 // Besides, all of that could be avoided if the state was just the
 // intermediate hash.
 
-let compress #a st b = 
-  match Ghost.reveal a with 
-  | SHA256 -> 
-     { k       = EverCrypt.Spec.SHA2_256.k; 
+let compress #a st b =
+  match Ghost.reveal a with
+  | SHA256 ->
+     { k       = EverCrypt.Spec.SHA2_256.k;
        hash    = EverCrypt.Spec.SHA2_256.update st.hash b;
-       counter = st.counter + 1 } 
-  | SHA384 -> 
-     { k       = EverCrypt.Spec.SHA2_384.k; 
+       counter = st.counter + 1 }
+  | SHA384 ->
+     { k       = EverCrypt.Spec.SHA2_384.k;
        hash    = EverCrypt.Spec.SHA2_384.update st.hash b;
-       counter = st.counter + 1 } 
+       counter = st.counter + 1 }
   | _ -> st //TBC
-  
+
 // using the same be library as in hacl*; to be reconsidered.
-// 18-07-10 why do I need type annotations? why passing the same constant 3 types? 
-let extract #a st = 
-  match Ghost.reveal a with 
+// 18-07-10 why do I need type annotations? why passing the same constant 3 types?
+let extract #a st =
+  match Ghost.reveal a with
   | SHA224 -> Spec.Lib.uint32s_to_be 7 (Seq.slice st.hash 0 7)
-  | SHA256 -> Spec.Lib.uint32s_to_be 8 st.hash 
+  | SHA256 -> Spec.Lib.uint32s_to_be 8 st.hash
   | SHA384 -> Spec.Lib.uint64s_to_be 6 (Seq.slice st.hash 0 6)
-  | SHA512 -> Spec.Lib.uint64s_to_be 8 st.hash 
+  | SHA512 -> Spec.Lib.uint64s_to_be 8 st.hash
   | _      -> Seq.slice (Spec.Lib.uint32s_to_be 8 st.hash) 0 (tagLength a) //TBC
 
-//#set-options "--z3rlimit 500" 
+//#set-options "--z3rlimit 500"
 //18-07-12 this immediately verifies in the .fsti :(
 let rec lemma_hash2 #a a0 b0 b1 = admit()
 (*
@@ -97,24 +96,24 @@ let rec lemma_hash2 #a a0 b0 b1 = admit()
     lemma_hash2 (hash2 a0 c) b0' b1)
 *)
 
-let suffix a l = 
+let suffix a l =
   //18-07-11 FIXME this is a placeholder
   //Seq.create (suffixLength a l) 0uy
 
-  let l1 = l % blockLength a in 
+  let l1 = l % blockLength a in
   let l0 = l - l1 in
   assert(l0 % blockLength a = 0);
   match Ghost.reveal a with
-  | SHA256 -> 
-      assert_norm(maxLength a < Spec.SHA2_256.max_input_len_8); 
+  | SHA256 ->
+      assert_norm(maxLength a < Spec.SHA2_256.max_input_len_8);
       let pad = Spec.SHA2_256.pad l0 l1 in
       // 18-07-06 the two specs have different structures
-      assume(Seq.length pad = suffixLength a l); 
+      assume(Seq.length pad = suffixLength a l);
       pad
-  | SHA384 -> 
+  | SHA384 ->
       assume False;
       // not sure what's wrong with this branch
-      //assume(maxLength a < Spec.SHA2_384.max_input_len_8); 
+      //assume(maxLength a < Spec.SHA2_384.max_input_len_8);
       let pad = Spec.SHA2_384.pad l0 l1 in
       assume(Seq.length pad = suffixLength a l);
       pad
@@ -126,12 +125,8 @@ let suffix a l =
 /// algorithmic specifications. At that point, we will probably hide
 /// the construction behind the provider interface (since we don't
 /// care about the construction when using or reasoning about them).
-/// 
+///
 /// ----------agile implementation of hash specification ------------
-
-
-
-
 
 open FStar.HyperStack.ST
 
@@ -153,6 +148,7 @@ module MP = LowStar.ModifiesPat
 
 open LowStar.BufferOps
 open FStar.Integers
+open C.Failure
 
 let uint32_p = B.buffer uint_32
 let uint64_p = B.buffer uint_64
@@ -201,7 +197,7 @@ let repr #a s h: GTot _ =
         hash = Hacl.SHA2_384.slice_hash h p;
         counter = Hacl.SHA2_384.counter h p
       }
-  | _ -> admit() 
+  | _ -> admit()
 
 let repr_eq (#a:e_alg) (r1 r2: acc a) =
   Seq.equal r1.k r2.k /\
@@ -229,41 +225,42 @@ let create a =
     | SHA384 ->
         let b = B.malloc HS.root 0UL Hacl.SHA2_384.size_state in
         SHA384_Hacl b
-    | _ ->  magic()  // 18-07-09 TODO use failwith instead
+    | _ ->
+        failwith !$"not implemented"
   in
   B.malloc HS.root s 1ul
 
-let has_k (#a:e_alg) (st:acc a) = 
+let has_k (#a:e_alg) (st:acc a) =
   match G.reveal a with
   | SHA256 -> st.k == EverCrypt.Spec.SHA2_256.k
   | SHA384 -> st.k == EverCrypt.Spec.SHA2_384.k
   | _ -> True
 
 let rec lemma_hash2_has_k
-  (#a:e_alg) 
+  (#a:e_alg)
   (v:acc a {has_k v})
-  (b:bytes {Seq.length b % blockLength a = 0}): 
+  (b:bytes {Seq.length b % blockLength a = 0}):
   GTot (_:unit{has_k (hash2 v b)}) (decreases (Seq.length b))
-=  
+=
   if Seq.length b = 0 then ()
   else
     let c,b = Seq.split b (blockLength a) in
     assert(Seq.length b % blockLength a = 0);
-    assert(has_k (compress v c)); 
+    assert(has_k (compress v c));
     lemma_hash2_has_k (compress v c) b
 
 let lemma_hash0_has_k #a b = lemma_hash2_has_k (acc0 #a) b
 
 let rec lemma_has_counter (#a:e_alg) (b:bytes {Seq.length b % blockLength a = 0}):
   GTot (_:unit{
-    blockLength a <> 0 /\ 
-    (hash0 #a b).counter == Seq.length b / blockLength a}) 
-= 
+    blockLength a <> 0 /\
+    (hash0 #a b).counter == Seq.length b / blockLength a})
+=
   admit() //TODO, similar
 
 #set-options "--max_fuel 0"
 let init #a s =
-  assert_norm(acc0 #a == hash0 #a (Seq.empty #UInt8.t)); 
+  assert_norm(acc0 #a == hash0 #a (Seq.empty #UInt8.t));
   match !*s with
   | SHA256_Hacl p -> Hacl.SHA2_256.init (T.new_to_old_st p)
   | SHA384_Hacl p -> Hacl.SHA2_384.init (T.new_to_old_st p)
@@ -271,10 +268,10 @@ let init #a s =
 
 #set-options "--z3rlimit 20"
 let update #a #prior s data =
-  ( let h0 = ST.get() in 
-    let r0 = repr s h0 in 
-    let prior = Ghost.reveal prior in 
-    let fresh = B.as_seq h0 data in 
+  ( let h0 = ST.get() in
+    let r0 = repr s h0 in
+    let prior = Ghost.reveal prior in
+    let fresh = B.as_seq h0 data in
     lemma_hash0_has_k #a prior;
     lemma_has_counter #a prior;
     lemma_compress r0 fresh;
@@ -282,7 +279,7 @@ let update #a #prior s data =
     //TODO 18-07-10 weaken hacl* update to tolerate overflows; they
     // are now statically prevented in [update_last]
     assume (r0.counter < pow2 32 - 1));
-    
+
   match !*s with
   | SHA256_Hacl p ->
       let p = T.new_to_old_st p in
@@ -299,10 +296,10 @@ let update #a #prior s data =
       admit ()
 
 let update_multi #a #prior s data len =
-  let h0 = ST.get() in 
-  ( let r0 = repr s h0 in 
-    let prior = Ghost.reveal prior in 
-    let fresh = B.as_seq h0 data in 
+  let h0 = ST.get() in
+  ( let r0 = repr s h0 in
+    let prior = Ghost.reveal prior in
+    let fresh = B.as_seq h0 data in
     lemma_hash0_has_k #a prior;
     lemma_has_counter #a prior;
     lemma_hash2 (acc0 #a) prior fresh;//==> hash0 (Seq.append prior fresh) == hash2 (hash0 prior) fresh
@@ -312,53 +309,53 @@ let update_multi #a #prior s data len =
 
   match !*s with
   | SHA256_Hacl p ->
-      let n = FStar.UInt32.(len /^ blockLen SHA256) in 
+      let n = FStar.UInt32.(len /^ blockLen SHA256) in
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // let h = ST.get() in assume(bounded_counter s h (v n)); 
+      // let h = ST.get() in assume(bounded_counter s h (v n));
       Hacl.SHA2_256.update_multi p data n;
 
       ( let h1 = ST.get() in
-        let r0 = repr s h0 in 
-        let r1 = repr s h1 in 
-        let fresh = Buffer.as_seq h0 data in 
+        let r0 = repr s h0 in
+        let r1 = repr s h1 in
+        let fresh = Buffer.as_seq h0 data in
         //TODO 18-07-10 extend Spec.update_multi to align it to hash2,
         //also specifying the counter update.
         assume(
           r1.hash = Spec.SHA2_256.update_multi r0.hash fresh ==>
-          r1 == hash2 r0 fresh)) 
+          r1 == hash2 r0 fresh))
 
   | SHA384_Hacl p ->
-      let n = len / blockLen SHA384 in 
+      let n = len / blockLen SHA384 in
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      //let h = ST.get() in assume(bounded_counter s h (v n)); 
+      //let h = ST.get() in assume(bounded_counter s h (v n));
       Hacl.SHA2_384.update_multi p data n;
 
       ( let h1 = ST.get() in
-        let r0 = repr s h0 in 
-        let r1 = repr s h1 in 
-        let fresh = Buffer.as_seq h0 data in 
+        let r0 = repr s h0 in
+        let r1 = repr s h1 in
+        let fresh = Buffer.as_seq h0 data in
         //TODO 18-07-10 extend Spec.update_multi to align it to hash2,
         //also specifying the counter update.
         assume(
           r1.hash = Spec.SHA2_384.update_multi r0.hash fresh ==>
-          r1 == hash2 r0 fresh)) 
-      
+          r1 == hash2 r0 fresh))
+
   | SHA256_Vale p ->
-      let n = len / blockLen SHA256 in 
+      let n = len / blockLen SHA256 in
       ValeGlue.sha256_update_multi p data n;
       admit ()
 
 //18-07-07 For SHA384 I was expecting a conversion from 32 to 64 bits
 
 #set-options "--z3rlimit 100"
-//18-07-10 WIP verification; still missing proper spec for padding 
+//18-07-10 WIP verification; still missing proper spec for padding
 let update_last #a #prior s data totlen =
-  let h0 = ST.get() in 
-  ( let r0 = repr s h0 in 
-    let pad = suffix a (v totlen) in 
-    let prior = Ghost.reveal prior in 
+  let h0 = ST.get() in
+  ( let r0 = repr s h0 in
+    let pad = suffix a (v totlen) in
+    let prior = Ghost.reveal prior in
     let fresh = Seq.append (B.as_seq h0 data) pad in
     lemma_hash0_has_k #a prior;
     lemma_has_counter #a prior;
@@ -374,13 +371,13 @@ let update_last #a #prior s data totlen =
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
       Hacl.SHA2_256.update_last p data len;
-      ( let h1 = ST.get() in 
-        let pad = suffix a (v totlen) in 
-        let prior = Ghost.reveal prior in 
+      ( let h1 = ST.get() in
+        let pad = suffix a (v totlen) in
+        let prior = Ghost.reveal prior in
         let fresh = Seq.append (Buffer.as_seq h0 data) pad in
         assert(Seq.length fresh % blockLength a = 0);
-        let b = Seq.append prior fresh in 
-        assume(repr s h1 == hash0 b) // Hacl.Spec misses at least the updated counter 
+        let b = Seq.append prior fresh in
+        assume(repr s h1 == hash0 b) // Hacl.Spec misses at least the updated counter
         )
   | SHA384_Hacl p ->
       let len = totlen % blockLen SHA384 in
@@ -389,9 +386,9 @@ let update_last #a #prior s data totlen =
       admit();//18-07-12 unclear what's missing here
       Hacl.SHA2_384.update_last p data len;
       admit()
-  
+
   | SHA256_Vale p ->
-      let len = totlen % blockLen SHA256 in 
+      let len = totlen % blockLen SHA256 in
       ValeGlue.sha256_update_last p data len;
       admit()
 
@@ -437,6 +434,6 @@ let hash a dst input len =
       let dst = T.new_to_old_st dst in
       Hacl.SHA2_384.hash dst input len;
       admit() //18-07-07 TODO align the specs
-  | _ -> 
-      admit() // how to get a kremlin fatal error?
-      Hacl.SHA2_384.hash dst input len
+  | _ ->
+      admit ();
+      failwith !$"not implemented"
