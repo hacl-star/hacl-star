@@ -267,7 +267,7 @@ let init #a s =
   | SHA256_Vale p -> ValeGlue.sha256_init p; admit ()
 
 #set-options "--z3rlimit 20"
-let update #a #prior s data =
+let update #a prior s data =
   ( let h0 = ST.get() in
     let r0 = repr s h0 in
     let prior = Ghost.reveal prior in
@@ -295,7 +295,7 @@ let update #a #prior s data =
       ValeGlue.sha256_update p data;
       admit ()
 
-let update_multi #a #prior s data len =
+let update_multi #a prior s data len =
   let h0 = ST.get() in
   ( let r0 = repr s h0 in
     let prior = Ghost.reveal prior in
@@ -351,7 +351,7 @@ let update_multi #a #prior s data len =
 
 #set-options "--z3rlimit 100"
 //18-07-10 WIP verification; still missing proper spec for padding
-let update_last #a #prior s data totlen =
+let update_last #a prior s data totlen =
   let h0 = ST.get() in
   ( let r0 = repr s h0 in
     let pad = suffix a (v totlen) in

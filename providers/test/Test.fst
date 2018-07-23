@@ -1,5 +1,6 @@
 module Test
 
+module G = FStar.Ghost
 module B = LowStar.Buffer
 module U32 = FStar.UInt32
 
@@ -82,8 +83,8 @@ let test_one_hash vec =
 
     (* Call the hash function incrementally *)
     EverCrypt.Hash.init ctx;
-    EverCrypt.Hash.update_multi ctx input_blocks n;
-    EverCrypt.Hash.update_last ctx input_last r;
+    EverCrypt.Hash.update_multi (G.hide Seq.empty) ctx input_blocks n;
+    EverCrypt.Hash.update_last (G.hide Seq.empty) ctx input_last r;
     EverCrypt.Hash.finish ctx output;
 
     // Non-incrementally:
