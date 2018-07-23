@@ -10,7 +10,7 @@ open FStar.HyperStack
 open FStar.Seq
 open FStar.Buffer
 
-open Hacl.Hash.SHA2_512
+open Hacl.Impl.SHA2_512
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 

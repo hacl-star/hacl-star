@@ -1,5 +1,5 @@
 [
-  "£û\u0015çaü∫\u0017/Ÿ Dœæ\u0001\u0012",
+  "påˆªæô\u0007âA‡!¢uﬂ\u0003Ø",
   [
     [
       "Hacl.UInt128.v",
@@ -634,6 +634,57 @@
       2,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt128.uint64_to_uint128",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt64.n",
+        "equation_Hacl.UInt128.n",
+        "haseqHacl.UInt128_Tm_refine_d4e61def6253cbc3d25381806ca6682b",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt128.uint64_to_uint128",
+      2,
+      2,
+      1,
+      [ "@query", "equation_Hacl.UInt128.v" ],
+      0
+    ],
+    [
+      "Hacl.UInt128.uint128_to_uint64",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0
+    ],
+    [
+      "Hacl.UInt128.uint128_to_uint64",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Hacl.UInt128.n",
+        "primitive_Prims.op_AmpAmp", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87"
+      ],
+      0
+    ],
+    [
+      "Hacl.UInt128.uint128_to_uint64",
+      3,
+      2,
+      1,
+      [ "@query", "equation_Hacl.UInt128.v" ],
       0
     ]
   ]

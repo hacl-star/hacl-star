@@ -8,7 +8,7 @@ open FStar.HyperStack.All
 open FStar.UInt128
 module U = FStar.UInt128
 
-let n = 128
+noextract let n = 128
 open FStar.Mul
 
 (* NOTE: anything that you fix/update here should be reflected in [Hacl.IntN.fstp], which is mostly
@@ -109,5 +109,8 @@ inline_for_extraction let mul_wide a b = mul_wide a b
 inline_for_extraction val op_Star_Hat: a:Hacl.UInt64.t -> b:Hacl.UInt64.t -> Tot (c:t{v c = Hacl.UInt64.v a * Hacl.UInt64.v b})
 inline_for_extraction let op_Star_Hat a b = mul_wide a b
 
-(* To input / output constants *)
-assume val of_string: string -> Tot t
+inline_for_extraction val uint64_to_uint128: a:Hacl.UInt64.t -> Tot (b:t{v b = Hacl.UInt64.v a})
+inline_for_extraction let uint64_to_uint128 a = FStar.UInt128.uint64_to_uint128 a
+
+inline_for_extraction val uint128_to_uint64: a:t -> Tot (b:Hacl.UInt64.t{Hacl.UInt64.v b = v a % pow2 64})
+inline_for_extraction let uint128_to_uint64 a = FStar.UInt128.uint128_to_uint64 a

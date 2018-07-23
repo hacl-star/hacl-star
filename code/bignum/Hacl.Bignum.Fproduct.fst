@@ -85,7 +85,7 @@ val shift:
     (ensures (fun h0 _ h1 -> live h0 output /\ live h1 output /\ modifies_1 output h0 h1
       /\ as_seq h1 output == shift_spec (as_seq h0 output)))
 [@"substitute"]
-let rec shift output =
+let shift output =
   let h0 = ST.get() in
   let open FStar.UInt32 in
   let tmp = output.(clen -^ 1ul) in
@@ -108,7 +108,7 @@ val sum_scalar_multiplication_:
       /\ sum_scalar_multiplication_pre_ (as_seq h0 output) (as_seq h0 input) s (len)
       /\ (as_seq h1 output) == sum_scalar_multiplication_spec (as_seq h0 output) (as_seq h0 input) s))
 [@"c_inline"]
-let rec sum_scalar_multiplication_ output input s =
+let sum_scalar_multiplication_ output input s =
   C.Loops.in_place_map2 output input clen (fun x y -> Hacl.Bignum.Wide.(x +%^ (y *^ s)))
 
 
@@ -188,7 +188,7 @@ val carry_limb_:
       /\ carry_limb_pre (as_seq h0 t) 0
       /\ as_seq h1 t == carry_limb_spec (as_seq h0 t)))
 [@"c_inline"]
-let rec carry_limb_ tmp =
+let carry_limb_ tmp =
   let h0 = ST.get() in
   let inv (h1: HyperStack.mem) (j: nat): Type0 =
     live h1 tmp /\ modifies_1 tmp h0 h1 /\ 0 <= j /\ j <= len - 1

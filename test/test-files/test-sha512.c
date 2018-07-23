@@ -1,6 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
-#include "SHA2_512.h"
+#include "Hacl_SHA2_512.h"
 #include "sodium.h"
 #include "tweetnacl.h"
 #include "hacl_test_utils.h"
@@ -114,7 +114,7 @@ int32_t perf_sha512() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    SHA2_512_hash(macs + SIGSIZE * i, plain, len);
+    Hacl_SHA2_512_hash(macs + SIGSIZE * i, plain, len);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

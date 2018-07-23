@@ -44,7 +44,7 @@ X25519_SPECIFIC= \
 	Hacl.EC.Ladder.fst \
 	Hacl.Spec.EC.fst \
 	Hacl.EC.fst \
-	Curve25519.fst
+	Hacl.Curve25519.fst
 
 # Files that are too slow and for which verification speed must improve
 SLOW=
@@ -60,7 +60,7 @@ FSTAR_INCLUDES+=--include ../bignum
 
 ct: $(addsuffix -lax, $(X25519_FILES))
 	# Using the --verify_all argument to lift abstractions, typechecks all dependencies of Curve25519.fst
-	$(FSTAR) --lax --verify_all Curve25519.fst
+	$(FSTAR) --lax --verify_all Hacl.Curve25519.fst
 
 bignum-ver: $(addsuffix -reloc-verify, $(BIGNUM))
 specific-ver: $(addsuffix -verify, $(X25519_SPECIFIC))
@@ -68,7 +68,7 @@ verify: bignum-ver specific-ver
 all-ver: verify
 all-ct: ct
 
-# Hints regeneration                                                          
+# Hints regeneration
 bignum-hints: $(addsuffix .reloc.hints, $(BIGNUM))
 specific-hints: $(addsuffix .hints, $(X25519_SPECIFIC))
 hints: bignum-hints specific-hints
@@ -94,18 +94,18 @@ depend:
 x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
-x25519-c/Curve25519.c x25519-c/Hacl_Test_X25519.c: x25519-c/out.krml
+x25519-c/Hacl_Curve25519.c x25519-c/Hacl_Test_X25519.c: x25519-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -no-prefix Hacl.Test.X25519 \
-	 	-bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
+	 	-bundle 'Hacl.Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
 		-skip-compilation $^ -o $@
 
 x25519.exe: x25519-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -no-prefix Hacl.Test.X25519 \
-	 	-bundle 'Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
+	 	-bundle 'Hacl.Curve25519=Hacl.Bignum,Hacl.Bignum.*,Hacl.EC,Hacl.EC.*' \
 		$^ -o $@
 	./$@
 
-extract-c: x25519-c/Curve25519.c x25519-c/Hacl_Test_X25519.c
+extract-c: x25519-c/Hacl_Curve25519.c x25519-c/Hacl_Test_X25519.c
 
 test: x25519.exe
 
@@ -143,4 +143,4 @@ count-line:
 	cloc --force-lang=ocaml $(X25519_ONLY)
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ x25519-c 
+	rm -rf *.exe *.exe.* *.out *~ x25519-c

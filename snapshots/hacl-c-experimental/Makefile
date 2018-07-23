@@ -17,7 +17,7 @@ test-aead:
 
 test-random:
 	$(CC) -Ofast -march=native -mtune=native -m64 -fwrapv -fomit-frame-pointer -funroll-loops \
-	-I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c cpuid.c drng.c Random.c test-random.c -o test-random.exe
+	-I $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c cpuid.c drng.c Hacl_Random.c test-random.c -o test-random.exe
 	./test-random.exe
 
 test-sha2_256:

@@ -8,6 +8,8 @@ open FStar.Mul
 open Hacl.Bignum.Constants
 
 
+#set-options "--z3rlimit 10"
+
 (** Type of elements of the commutative field Z/pZ where p is prime **)
 type elem = e:int{e >= 0 /\ e < prime}
 
