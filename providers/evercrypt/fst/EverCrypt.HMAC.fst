@@ -4,25 +4,25 @@ module EverCrypt.HMAC
 /// Agile specification
 
 open EverCrypt.Helpers
-open FStar.Seq 
+open FStar.Seq
 
-noextract 
-let wrap (a:e_alg) (key: bytes{length key <= maxLength a}): 
+noextract
+let wrap (a:e_alg) (key: bytes{length key <= maxLength a}):
   GTot (lbseq (blockLength a))
-= 
-  let key0 = if length key <= blockLength a then key else spec a key in 
-  let paddingLength = blockLength a - length key0 in 
+=
+  let key0 = if length key <= blockLength a then key else spec a key in
+  let paddingLength = blockLength a - length key0 in
   key0 @| Seq.create paddingLength 0uy
 
 private let wrap_lemma (a: e_alg) (key: bseq{Seq.length key <= maxLength a}): Lemma
   (requires length key > blockLength a)
   (ensures wrap a key == (
     let key0 = spec a key in
-    let paddingLength = blockLength a - length key0 in 
+    let paddingLength = blockLength a - length key0 in
     key0 @| Seq.create paddingLength 0uy)) = ()
 
-noextract let rec xor (v: bseq) (x: UInt8.t): lbseq (length v) = 
-  init (length v) (fun i -> FStar.UInt8.logxor (index v i) x) 
+noextract let rec xor (v: bseq) (x: UInt8.t): lbseq (length v) =
+  init (length v) (fun i -> FStar.UInt8.logxor (index v i) x)
 //  Spec.Loops.seq_map (fun y -> FStar.UInt8.logxor x y) v
 //18-04-08 not sure why the latter fails.
 
@@ -30,9 +30,9 @@ noextract let rec xor (v: bseq) (x: UInt8.t): lbseq (length v) =
 // [noextract] incompatible with interfaces?!
 let hmac a key data =
   assert(tagLength a + blockLength a <= maxLength a); // avoid?
-  let k = wrap a key in 
+  let k = wrap a key in
   let h1 = spec a (xor k 0x36uy @| data) in
-  let h2 = spec a (xor k 0x5cuy @| h1) in 
+  let h2 = spec a (xor k 0x5cuy @| h1) in
   h2
 
 /// Agile implementation, relying on 3 variants of SHA2 supported by
@@ -52,10 +52,10 @@ val wrap_key:
   key: uint8_p {length key <= maxLength (Ghost.hide a) /\ disjoint output key} ->
   len: UInt32.t {v len = length key} ->
   Stack unit
-    (requires (fun h0 -> 
+    (requires (fun h0 ->
       live h0 output /\ live h0 key /\
       as_seq h0 output == Seq.create (blockLength (Ghost.hide a)) 0uy ))
-    (ensures  (fun h0 _ h1 -> 
+    (ensures  (fun h0 _ h1 ->
       live h1 output /\ live h1 key /\ live h0 output /\ live h0 key /\
       as_seq h0 output == Seq.create (blockLength (Ghost.hide a)) 0uy /\
       LowStar.Modifies.(modifies (loc_buffer output) h0 h1) /\
@@ -81,13 +81,13 @@ assume val blit: #t:Type
 *)
 
 let wrap_key a output key len =
-  let i = if len <= blockLen a then len else tagLen a in 
-  let nkey = sub output 0ul i in 
+  let i = if len <= blockLen a then len else tagLen a in
+  let nkey = sub output 0ul i in
   let pad = sub output i (blockLen a - i) in
   let h0 = ST.get () in
-  if len <= blockLen a then 
+  if len <= blockLen a then
     LowStar.BufferOps.blit key 0ul nkey 0ul len
-  else 
+  else
     Hash.hash a nkey key len;
   let h1 = ST.get () in
   Seq.lemma_eq_intro (as_seq h0 pad) (Seq.create (blockLength (Ghost.hide a) - v i) 0uy);
@@ -98,24 +98,24 @@ let wrap_key a output key len =
 
 val part1:
   a: alg -> (
-  let a = Ghost.hide a in 
-  acc: state a ->  
-  //let uint = state_word a in 
+  let a = Ghost.hide a in
+  acc: state a ->
+  //let uint = state_word a in
   s2: uint8_pl (blockLength a) ->
   data: uint8_p {
-    length data + blockLength a  < pow2 32 /\ 
-    length data + blockLength a  <= maxLength a /\ 
+    length data + blockLength a  < pow2 32 /\
+    length data + blockLength a  <= maxLength a /\
     disjoint data s2} ->
   len: UInt32.t {length data = v len} ->
   ST unit
-    (requires fun h0 -> 
+    (requires fun h0 ->
       LowStar.Modifies.(
-        loc_disjoint (footprint acc h0) (loc_buffer s2) /\ 
-        loc_disjoint (footprint acc h0) (loc_buffer data)) /\ 
+        loc_disjoint (footprint acc h0) (loc_buffer s2) /\
+        loc_disjoint (footprint acc h0) (loc_buffer data)) /\
       invariant acc h0 /\
-      live h0 s2 /\ 
+      live h0 s2 /\
       live h0 data)
-    (ensures  fun h0 _ h1 -> 
+    (ensures  fun h0 _ h1 ->
       Hash.invariant acc h1 /\
       // LowStar.Modifies.(modifies (loc_union (footprint acc h0) (loc_buffer s2)) h0 h1) /\
       (
@@ -128,165 +128,160 @@ let part1 a (acc: state (Ghost.hide a)) key data len =
   let lb = len - ll in
   let blocks = LowStar.Buffer.sub data 0ul lb in
   let last = LowStar.Buffer.offset data lb in
-  Hash.init acc;  
+  Hash.init acc;
   let h0 = ST.get() in //assume(bounded_counter acc h0 1);
-  Hash.update 
-    #(Ghost.hide a) 
-    #(Ghost.hide Seq.empty) 
+  Hash.update
+    (Ghost.hide Seq.empty)
     acc key;
-  let h1 = ST.get() in 
+  let h1 = ST.get() in
   assume( //18-07-12 could not find disjoint-sub lemma
-    LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer data)) 
+    LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer data))
     ==>
-    LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer blocks)) /\ 
-    LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer last)) 
-    ); 
+    LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer blocks)) /\
+    LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer last))
+    );
   assert(
-    let k = LowStar.Buffer.as_seq h0 key in 
+    let k = LowStar.Buffer.as_seq h0 key in
     FStar.Seq.lemma_eq_intro (Seq.append (Seq.empty #UInt8.t) k) k;
     repr acc h1 == hash0 k);
-  Hash.update_multi 
-    #(Ghost.hide a) 
-    #(Ghost.hide (LowStar.Buffer.as_seq h0 key)) 
+  Hash.update_multi
+    (Ghost.hide (LowStar.Buffer.as_seq h0 key))
     acc blocks lb;
   let h2 = ST.get() in
-  Hash.update_last 
-    #(Ghost.hide a) 
-    #(Ghost.hide (Seq.append (LowStar.Buffer.as_seq h0 key) (LowStar.Buffer.as_seq h2 blocks))) 
+  Hash.update_last
+    (Ghost.hide (Seq.append (LowStar.Buffer.as_seq h0 key) (LowStar.Buffer.as_seq h2 blocks)))
     acc last (blockLen a + len);
   let h3 = ST.get() in
   assume(LowStar.Buffer.live h0 key ==> LowStar.Buffer.live h3 key);
   let tag = LowStar.Buffer.sub key 0ul (tagLen a) in (* Salvage memory *)
-  assume(LowStar.Modifies.(loc_disjoint (footprint acc h3) (loc_buffer tag))); 
-  Hash.finish acc tag; 
+  assume(LowStar.Modifies.(loc_disjoint (footprint acc h3) (loc_buffer tag)));
+  Hash.finish acc tag;
   (
-    let a = Ghost.hide a in 
-    let p = blockLength a in 
-    let key1 = as_seq h1 key in 
-    let blocks1 = as_seq h1 blocks in 
-    let acc1 = repr acc h1 in 
+    let a = Ghost.hide a in
+    let p = blockLength a in
+    let key1 = as_seq h1 key in
+    let blocks1 = as_seq h1 blocks in
+    let acc1 = repr acc h1 in
     lemma_compress (acc0 #a) key1;
     assert(acc1 == hash0 key1);
-    let v2 = key1 @| blocks1 in 
-    let acc2 = repr acc h2 in 
+    let v2 = key1 @| blocks1 in
+    let acc2 = repr acc h2 in
     // assert (Seq.length key1 % p = 0);
     // assert (Seq.length blocks1 % p = 0);
     // assert (Seq.length v2 % p = 0);
     lemma_hash2 (acc0 #a) key1 blocks1;
     assert(acc2 == hash0 #a v2);
-    let data1 = as_seq h1 data in  
-    let last1 = as_seq h1 last in 
-    let suffix1 = suffix a (p + v len) in 
+    let data1 = as_seq h1 data in
+    let last1 = as_seq h1 last in
+    let suffix1 = suffix a (p + v len) in
     Seq.lemma_eq_intro data1 (blocks1 @| last1);
-    let acc3 = repr acc h3 in 
-    let ls = Seq.length suffix1 in 
+    let acc3 = repr acc h3 in
+    let ls = Seq.length suffix1 in
     assert((p + v len + ls) % p = 0);
     Math.Lemmas.lemma_mod_plus (v ll + ls) (1 + v len / p) p;
     assert((v ll + ls) % p = 0);
-    lemma_hash2 (acc0 #a) v2 (last1 @| suffix1); 
+    lemma_hash2 (acc0 #a) v2 (last1 @| suffix1);
     assert(acc3 == hash0 #a (v2 @| (last1 @| suffix1)));
-    Seq.append_assoc v2 last1 suffix1; 
+    Seq.append_assoc v2 last1 suffix1;
     Seq.append_assoc key1 blocks1 last1;
     assert(acc3 == hash0 #a ((key1 @| data1) @| suffix1));
     assert(extract acc3 == spec a (key1 @| data1)))
 
-// the two parts have the same stucture; let's keep their proofs in sync. 
+// the two parts have the same stucture; let's keep their proofs in sync.
 [@"substitute"]
 val part2:
   a: alg -> (
-  let a = Ghost.hide a in 
-  acc: state a ->  
+  let a = Ghost.hide a in
+  acc: state a ->
   mac: uint8_pl (tagLength a) ->
   opad: uint8_pl (blockLength a) ->
   tag: uint8_pl (tagLength a) {disjoint mac opad /\ disjoint mac tag} ->
   ST unit
-    (requires fun h0 -> 
-      invariant acc h0 /\ 
+    (requires fun h0 ->
+      invariant acc h0 /\
       LowStar.Buffer.(
-        live h0 mac /\ 
-        live h0 opad /\ 
+        live h0 mac /\
+        live h0 opad /\
         live h0 tag) /\
       LowStar.Modifies.(
-        loc_disjoint (footprint acc h0) (loc_buffer opad) /\ 
-        loc_disjoint (footprint acc h0) (loc_buffer tag) /\ 
-        loc_disjoint (footprint acc h0) (loc_buffer mac))) 
-    (ensures fun h0 _ h1 -> 
+        loc_disjoint (footprint acc h0) (loc_buffer opad) /\
+        loc_disjoint (footprint acc h0) (loc_buffer tag) /\
+        loc_disjoint (footprint acc h0) (loc_buffer mac)))
+    (ensures fun h0 _ h1 ->
       //live h1 mac /\ live h0 mac /\ modifies_2 acc mac h0 h1 /\
-      ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in 
+      ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in
         Seq.length payload <= maxLength a /\
         as_seq h1 mac = spec a payload)))
 
 [@"substitute"]
 let part2 a acc mac opad tag =
-  let totLen = blockLen a + tagLen a in 
+  let totLen = blockLen a + tagLen a in
   assert_norm(v totLen <= maxLength (Ghost.hide a));
   let h0 = ST.get() in
-  //assume(LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer opad))); 
+  //assume(LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer opad)));
   Hash.init acc;
-  Hash.update 
-    #(Ghost.hide a) 
-    #(Ghost.hide Seq.empty) 
-    acc opad; 
-  let h1 = ST.get() in 
+  Hash.update
+    (Ghost.hide Seq.empty)
+    acc opad;
+  let h1 = ST.get() in
   assert(
     footprint acc h1 == footprint acc h0 /\
-    LowStar.Buffer.live h1 mac /\ 
+    LowStar.Buffer.live h1 mac /\
     LowStar.Modifies.(loc_disjoint (footprint acc h1) (loc_buffer mac)) );
   assert(
-    let k = LowStar.Buffer.as_seq h0 opad in 
+    let k = LowStar.Buffer.as_seq h0 opad in
     FStar.Seq.lemma_eq_intro (Seq.append (Seq.empty #UInt8.t) k) k;
     repr acc h1 == hash0 k);
-  Hash.update_last 
-    #(Ghost.hide a) 
-    #(Ghost.hide (LowStar.Buffer.as_seq h1 opad)) 
+  Hash.update_last
+    (Ghost.hide (LowStar.Buffer.as_seq h1 opad))
     acc tag totLen;
-  let h2 = ST.get() in 
+  let h2 = ST.get() in
   assume(// missing lemmas??
     LowStar.Buffer.live h2 mac /\
     LowStar.Modifies.(loc_disjoint (footprint acc h2) (loc_buffer mac)) );
   Hash.finish acc mac;
   (
     let v1 = as_seq h1 opad in
-    let acc1 = repr acc h1 in 
+    let acc1 = repr acc h1 in
     lemma_compress (acc0 #(Ghost.hide a)) v1;
     assert(acc1 == hash0 v1);
-    let tag1 = as_seq h1 tag in 
+    let tag1 = as_seq h1 tag in
     let suffix1 = suffix (Ghost.hide a) (blockLength (Ghost.hide a) + tagLength (Ghost.hide a)) in
-    let acc2 = repr acc h2 in 
-    lemma_hash2 (acc0 #(Ghost.hide a)) v1 (tag1 @| suffix1); 
+    let acc2 = repr acc h2 in
+    lemma_hash2 (acc0 #(Ghost.hide a)) v1 (tag1 @| suffix1);
     Seq.append_assoc v1 tag1 suffix1;
     assert(acc2 == hash0 ((v1 @| tag1) @| suffix1));
     assert(extract acc2 = spec (Ghost.hide a) (v1 @| tag1)))
 
-// similar spec as hmac with keylen = blockLen a 
+// similar spec as hmac with keylen = blockLen a
 val hmac_core:
   a: alg -> (
-  let a = Ghost.hide a in 
+  let a = Ghost.hide a in
   acc: state a -> (
   tag: uint8_pl (tagLength a) ->
   key: uint8_pl (blockLength a) {disjoint key tag} ->
   data: uint8_p{
-    length data + blockLength a < pow2 32 /\ 
+    length data + blockLength a < pow2 32 /\
     length data + blockLength a <= maxLength a /\
     disjoint data key } ->
   datalen: UInt32.t {v datalen = length data} ->
   ST unit
-  (requires fun h0 -> 
+  (requires fun h0 ->
     LowStar.Modifies.(
-      loc_disjoint (footprint acc h0) (loc_buffer tag) /\ 
-      loc_disjoint (footprint acc h0) (loc_buffer key) /\ 
+      loc_disjoint (footprint acc h0) (loc_buffer tag) /\
+      loc_disjoint (footprint acc h0) (loc_buffer key) /\
       loc_disjoint (footprint acc h0) (loc_buffer data)) /\
-    invariant acc h0 /\ 
+    invariant acc h0 /\
     live h0 tag /\ live h0 key /\ live h0 data)
-  (ensures fun h0 _ h1 ->   
+  (ensures fun h0 _ h1 ->
     live h1 tag /\ live h0 tag /\
     live h1 key /\ live h0 key /\
-    live h1 data /\ live h0 data /\ 
+    live h1 data /\ live h0 data /\
     LowStar.Modifies.(modifies (loc_union (footprint acc h0) (loc_buffer tag)) h0 h1) /\
-    ( let k = as_seq h0 key in  
+    ( let k = as_seq h0 key in
       let k1 = xor k 0x36uy in
       let k2 = xor k 0x5cuy in
-      let v1 = spec a (k1 @| as_seq h0 data) in 
+      let v1 = spec a (k1 @| as_seq h0 data) in
       Seq.length (k2 @| v1) <= maxLength a /\
       as_seq h1 tag = spec a (k2 @| v1)))))
 
@@ -298,17 +293,17 @@ val xor_bytes_inplace:
   len: UInt32.t {v len = length a /\ v len = length b} ->
   Stack unit
   (requires fun h0 -> live h0 a /\ live h0 b)
-  (ensures fun h0 _ h1 -> 
+  (ensures fun h0 _ h1 ->
     LowStar.Modifies.(modifies (loc_buffer a) h0 h1))
-let xor_bytes_inplace a b len =     
-  let a = LowStar.ToFStarBuffer.new_to_old_st a in 
-  let b = LowStar.ToFStarBuffer.new_to_old_st b in 
+let xor_bytes_inplace a b len =
+  let a = LowStar.ToFStarBuffer.new_to_old_st a in
+  let b = LowStar.ToFStarBuffer.new_to_old_st b in
   C.Loops.in_place_map2 a b len (fun x y -> UInt8.logxor x y)
 
 // TODO small improvements: part1 and part2 could return their tags in
 // mac, so that we can reuse the pad.
 let hmac_core a acc mac key data len =
-  let h00 = ST.get() in 
+  let h00 = ST.get() in
   push_frame ();
   let ipad = LowStar.Buffer.alloca 0x36uy (blockLen a) in
   let opad = LowStar.Buffer.alloca 0x5cuy (blockLen a) in
@@ -317,52 +312,52 @@ let hmac_core a acc mac key data len =
   let h0 = ST.get() in
   assume(
     // not sure how to frame acc's invariant and footprint through push, alloca, xor_inplace
-    invariant acc h0 /\ 
+    invariant acc h0 /\
     LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer data)) /\
     LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer ipad)) /\
-    LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer opad)) 
+    LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer opad))
     );
-  part1 a acc ipad data len; 
-  let h1 = ST.get() in 
+  part1 a acc ipad data len;
+  let h1 = ST.get() in
   admit();//18-07-12 TODO framing
   let inner = LowStar.Buffer.sub ipad 0ul (tagLen a) in (* salvage memory *)
   part2 a acc mac opad inner;
-  let h2 = ST.get() in 
-  ( 
-    let a = Ghost.hide a in 
-    let k = as_seq h0 key in  
+  let h2 = ST.get() in
+  (
+    let a = Ghost.hide a in
+    let k = as_seq h0 key in
     let k1: lbseq (blockLength a) = xor k 0x36uy in
     let k2: lbseq (blockLength a) = xor k 0x5cuy in
-    let vdata = as_seq h0 data in 
-    let v1: lbseq (tagLength a) = as_seq h1 inner in 
+    let vdata = as_seq h0 data in
+    let v1: lbseq (tagLength a) = as_seq h1 inner in
     assert_norm(blockLength a + tagLength a <= maxLength a);
     assert(Seq.length (k2 @| v1) <= maxLength a);
-    let v2 = as_seq h2 mac in 
+    let v2 = as_seq h2 mac in
 
-    assume(as_seq h0 ipad = k1); 
+    assume(as_seq h0 ipad = k1);
     assume(as_seq h1 opad = k2);
     assert(v1 == spec a (k1 @| vdata));
     assert(v2 == spec a (k2 @| v1))
-    //assert(modifies_2 acc ipad h0 h1); 
+    //assert(modifies_2 acc ipad h0 h1);
     //assert(modifies_2 acc mac h1 h2)
   );
   pop_frame ()
-  // let h3 = ST.get() in 
-  //assume(modifies_2 acc mac h00 h3) //18-04-14 still no convenient way to prove those? 
+  // let h3 = ST.get() in
+  //assume(modifies_2 acc mac h00 h3) //18-04-14 still no convenient way to prove those?
 
 
 let compute a mac key keylen data datalen =
-  push_frame (); 
+  push_frame ();
   assert_norm(pow2 32 <= maxLength (Ghost.hide a));
   let keyblock = LowStar.Buffer.alloca 0x00uy (blockLen a) in
-  let acc = Hash.create a in 
-  let h0 = ST.get() in 
+  let acc = Hash.create a in
+  let h0 = ST.get() in
   wrap_key a keyblock key keylen;
   let h1 = ST.get() in
   Hash.frame_invariant (LowStar.Modifies.loc_buffer keyblock) acc h0 h1;
   Hash.frame_invariant_implies_footprint_preservation (LowStar.Modifies.loc_buffer keyblock) acc h0 h1;
   hmac_core a acc mac keyblock data datalen;
-  let h2 = ST.get() in 
+  let h2 = ST.get() in
   assume(
     //18-07-12 not sure this is provable, even after deallocating acc!
     LowStar.Modifies.(
@@ -375,25 +370,25 @@ let compute a mac key keylen data datalen =
 // monomorphise stack allocations.
 
 let compute a mac key keylen data datalen =
-  push_frame (); 
+  push_frame ();
   assert_norm(pow2 32 <= maxLength a);
   let keyblock = Buffer.create 0x00uy (blockLen a) in
   wrap_key a keyblock key keylen;
-  ( match a with 
-  | SHA256 -> 
+  ( match a with
+  | SHA256 ->
       push_frame();
       // 18-04-15 hardcoding the type to prevent extraction errors :(
-      let acc = Buffer.create #UInt32.t (state_zero a) (state_size a) in 
+      let acc = Buffer.create #UInt32.t (state_zero a) (state_size a) in
       hmac_core SHA256 acc mac keyblock data datalen;
       pop_frame()
-  | SHA384 -> 
+  | SHA384 ->
       push_frame();
-      let acc = Buffer.create #UInt64.t (state_zero a) (state_size a) in 
+      let acc = Buffer.create #UInt64.t (state_zero a) (state_size a) in
       hmac_core SHA384 acc mac keyblock data datalen;
       pop_frame()
-  | SHA512 -> 
+  | SHA512 ->
       push_frame();
-      let acc = Buffer.create #UInt64.t (state_zero a) (state_size a) in 
+      let acc = Buffer.create #UInt64.t (state_zero a) (state_size a) in
       hmac_core SHA512 acc mac keyblock data datalen;
       pop_frame());
   pop_frame ()
@@ -402,15 +397,15 @@ let compute a mac key keylen data datalen =
 // I get an error pointing to `sub_effect DIV ~> GST = lift_div_gst` in HyperStack
 
 let compute a mac key keylen data datalen =
-  push_frame (); 
+  push_frame ();
   let keyblock = Buffer.create 0x00uy (blockLen a) in
   assert_norm(pow2 32 <= maxLength a);
   wrap_key a keyblock key keylen;
-  let acc = 
-    match a with 
-    | SHA256 -> Buffer.rcreate HyperStack.root 0ul (state_size a) 
+  let acc =
+    match a with
+    | SHA256 -> Buffer.rcreate HyperStack.root 0ul (state_size a)
     | SHA384 -> Buffer.rcreate HyperStack.root 0UL (state_size a)
-    | SHA512 -> Buffer.rcreate HyperStack.root 0UL (state_size a) in 
+    | SHA512 -> Buffer.rcreate HyperStack.root 0UL (state_size a) in
   hmac_core SHA256 acc mac keyblock data datalen;
   pop_frame ()
-*)  
+*)
