@@ -278,7 +278,8 @@ let frodo_sample r =
   let sign = r &. u16 1 in
   let sample = create #uint16 #1 (size 1) (u16 0) in
   let h0 = ST.get () in
-  loop_nospec #h0 (cdf_table_len -! size 1) sample
+  let bound = cdf_table_len -! size 1 in
+  loop_nospec #h0 bound sample
   (fun j ->
     recall cdf_table;
     let tj = cdf_table.(j) in
