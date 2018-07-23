@@ -150,5 +150,4 @@ let test() =
   let test_ciphertext = createL test_ciphertext in
   let test_key = createL test_key in
   let test_nonce = createL test_nonce in
-  chacha20_encrypt_bytes test_key test_nonce test_counter test_plaintext
-  = test_ciphertext
+  test_ciphertext = chacha20_encrypt_bytes test_key test_nonce test_counter test_plaintext

@@ -192,18 +192,18 @@ open LowStar.BufferOps
 
 // abstract implementation state
 val state_s: e_alg -> Type0
-let state alg = B.pointer (state_s alg)
+let state alg = b:B.pointer (state_s alg) { B.freeable b }
 
 // NS: note that the state is the first argument to the invariant so that we can
 // do partial applications in pre- and post-conditions
 val footprint_s: #a:e_alg -> state_s a -> GTot M.loc
 let footprint (#a: e_alg) (s: state a) (m: HS.mem) =
-  M.(loc_union (loc_buffer s) (footprint_s (deref m s)))
+  M.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
 
 val invariant_s: (#a: e_alg) -> state_s a -> HS.mem -> Type0
 let invariant (#a: e_alg) (s: state a) (m: HS.mem) =
   B.live m s /\
-  M.(loc_disjoint (loc_buffer s) (footprint_s (deref m s))) /\
+  M.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
   invariant_s (B.get m s 0) m
 
 //18-07-06 as_acc a better name? not really a representation
@@ -348,6 +348,12 @@ val finish:
     footprint s h0 == footprint s h1 /\ 
     B.as_seq h1 dst = extract (repr s h0))
 
+val free: #a:e_alg -> s:state a -> ST unit
+  (requires (fun h0 ->
+    invariant s h0))
+  (ensures (fun h0 _ h1 ->
+    M.(modifies (footprint s h0) h0 h1)))
+
 val hash: 
   a:alg -> (
   let a = Ghost.hide a in 
@@ -362,3 +368,5 @@ val hash:
   (ensures fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
     B.as_seq h1 dst = spec a (B.as_seq h0 input)))
+
+

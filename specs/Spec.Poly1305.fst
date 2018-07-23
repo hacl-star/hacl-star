@@ -89,4 +89,4 @@ let test () : Tot bool =
   let msg      = createL msg in
   let k        = createL k   in
   let expected = createL expected in
-  poly1305 msg k = expected
+  expected = poly1305 msg k

@@ -4,15 +4,28 @@ MLCRYPTO_HOME ?= ../../../MLCrypto
 
 HACL_CODE = ../../code
 
+ifeq (,$(EVEREST_WINDOWS))
+CONFIG		?= default
+else
+CONFIG		= noopenssl
+endif
+
 EXTRACT_DIR = extract
 CACHE_DIR   = cache
 INCLUDE_PATHS = \
   $(KREMLIN_HOME)/kremlib \
   ../evercrypt \
+  ../evercrypt/fst \
+  ../evercrypt/config/$(CONFIG) \
   $(HACL_CODE)/lib/kremlin \
+  $(HACL_CODE)/experimental/aesgcm \
   $(HACL_CODE)/curve25519/interfaces \
   $(HACL_CODE)/hash/interfaces \
   $(HACL_CODE)/api/interfaces \
+  $(HACL_CODE)/api \
+  $(HACL_CODE)/salsa-family \
+  $(HACL_CODE)/poly1305 \
+  $(HACL_CODE)/bignum \
   ../../specs
 
 UNAME = $(shell uname)
@@ -25,19 +38,21 @@ ifeq ($(OS),Windows_NT)
     EVERCRYPT_HOME_RUN := $(EVERCRYPT_HOME)
     MLCRYPTO_HOME_RUN := $(MLCRYPTO_HOME)
   endif
-  PREFIX = PATH="$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(PATH)"
+  PREFIX = PATH="$(MLCRYPTO_HOME_RUN)/openssl:$(EVERCRYPT_HOME_RUN)/out:$(PATH)"
 else ifeq ($(UNAME),Darwin)
   PREFIX = DYLD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(DYLD_LIBRARY_PATH)
 else ifeq ($(UNAME),Linux)
   PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(LD_LIBRARY_PATH)
 endif
 
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe
+
 all:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) test
 
 .depend:
-	fstar.exe \
+	$(FSTAR) \
 	  $(addprefix --include , $(INCLUDE_PATHS)) \
 	  --cache_dir $(CACHE_DIR) \
 	  --odir $(EXTRACT_DIR) \
@@ -46,15 +61,15 @@ all:
 include .depend
 
 %.checked: | .depend
-	fstar.exe \
+	$(FSTAR) \
 	  --cache_checked_modules \
-	  --cache_dir $(CACHE_DIR) \
 	  --admit_smt_queries true \
+	  --cache_dir $(CACHE_DIR) \
 	  $(addprefix --include , $(INCLUDE_PATHS)) \
 	  $<
 
 $(EXTRACT_DIR)/%.krml:
-	fstar.exe --codegen Kremlin \
+	$(FSTAR) --codegen Kremlin \
 	  --cache_checked_modules \
 	  --cache_dir $(CACHE_DIR) \
 	  $(addprefix --include , $(INCLUDE_PATHS)) \
@@ -65,14 +80,16 @@ $(EXTRACT_DIR)/%.krml:
 # hacks.h defines monomorphized types for `option string` and `uint8_t * uint8_t`, which are
 # needed by fstar_bytes.h, and then includes fstar_bytes.h only if EverCrypt.h has been
 # loaded.
-$(EXTRACT_DIR)/Test.c: $(filter-out $(EXTRACT_DIR)/prims.krml ,$(ALL_KRML_FILES)) | .depend
+$(EXTRACT_DIR)/Test.c: $(ALL_KRML_FILES) | .depend
 	krml $^ -tmpdir $(EXTRACT_DIR) -no-prefix Test \
 	  -skip-compilation \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -add-include '"temp.h"' \
+	  -bundle Hacl.* \
 	  -bundle LowStar.* \
+	  -bundle Test.Lowstarize \
 	  -bundle Hacl.Spec.*,Hacl.Spe.*,Spec.* \
-	  -bundle EverCrypt=EverCrypt.* \
+	  -library EverCrypt,EverCrypt.*,Hacl.*,AEAD.* \
 	  -ccopt -g
 
 test: $(EXTRACT_DIR)/Test.c

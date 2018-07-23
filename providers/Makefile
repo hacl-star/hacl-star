@@ -1,7 +1,8 @@
 FSTAR_HOME	?= ../../FStar
 KREMLIN_HOME	?= ../../kremlin
 HACL_HOME	?= ..
-OPENSSL_HOME	?= ../../MLCrypto/openssl
+MLCRYPTO_HOME	?= ../../MLCrypto
+OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
 
 # The noopenssl config no means: enable bcrypt + disable openssl
 ifeq (,$(EVEREST_WINDOWS))
@@ -60,6 +61,7 @@ test:
 FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib evercrypt evercrypt/fst \
   evercrypt/config/$(CONFIG) \
   $(HACL_CODE)/lib/kremlin \
+  $(HACL_CODE)/experimental/aesgcm \
   $(HACL_CODE)/curve25519/interfaces \
   $(HACL_CODE)/hash/interfaces \
   $(HACL_CODE)/api/interfaces \
@@ -147,11 +149,12 @@ HACL_SOURCES	= \
   $(addprefix $(HACL_CODE)/hash/sha2-c/Hacl_SHA2_,256.c 384.c 512.c) \
   $(HACL_CODE)/curve25519/x25519-c/Hacl_Curve25519.c \
   $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
-  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
   $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \
   $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
+  $(HACL_CODE)/poly1305/poly-c/Hacl_Poly1305_64.c \
   $(HACL_CODE)/api/policies-c/Hacl_Policies.c \
   $(HACL_CODE)/api/aead-c/Hacl_Chacha20Poly1305.c
+#  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
 
 EVERCRYPT_SOURCES = \
   $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c EverCrypt_ValeGlue.c) \
@@ -246,13 +249,15 @@ SHELL=/bin/bash
 
 .PHONY: clean
 clean:
-	rm -rf $(GENERATED_DIR) evercrypt/c/*.o libevercrypt.so libevercrypt.a
+	rm -rf $(GENERATED_DIR) evercrypt/c/*.o libevercrypt.$(SO) libevercrypt.a
 	$(MAKE) -C test clean
 
 .PHONY: clean-c
 clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
+	rm -rf $(CACHE_DIR)/EverCrypt.StaticConfig.fst.checked
 
 .PHONY: distclean
 distclean: clean
 	rm -rf $(OUT_DIR) $(CACHE_DIR)
+

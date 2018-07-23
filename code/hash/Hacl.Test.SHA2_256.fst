@@ -17,6 +17,7 @@ let test_1a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
@@ -55,6 +56,7 @@ let test_1b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
@@ -92,6 +94,7 @@ let test_2a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
@@ -128,6 +131,7 @@ let test_2b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
@@ -163,6 +167,7 @@ let test_3a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
@@ -207,6 +212,7 @@ let test_3b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
@@ -250,6 +256,7 @@ let test_4a () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
@@ -301,6 +308,7 @@ let test_4b () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
@@ -351,9 +359,11 @@ let test_5 () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
+  [@inline_let]
   let plaintext_len = 1000000ul in
   let plaintext = FStar.Buffer.create 0x61uy plaintext_len in
 
@@ -406,9 +416,11 @@ let test_6 () =
   (* Push a new memory frame *)
   (**) push_frame();
 
+  [@inline_let]
   let output_len = 32ul in
   let output = FStar.Buffer.create 0uy output_len in
 
+  [@inline_let]
   let plaintext_len = 64ul in
   let plaintext = FStar.Buffer.createL [
       0x61uy; 0x62uy; 0x63uy; 0x64uy; 0x65uy; 0x66uy; 0x67uy; 0x68uy;

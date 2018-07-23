@@ -24,6 +24,8 @@ set(SOURCE_FILES_VERIFIED
    Hacl_SHA2_384.c
    Hacl_SHA2_512.c
    Hacl_HMAC_SHA2_256.c
+   Hacl_HMAC_SHA2_384.c
+   Hacl_HMAC_SHA2_512.c
    Hacl_Salsa20.c
    NaCl.c
    haclnacl.c

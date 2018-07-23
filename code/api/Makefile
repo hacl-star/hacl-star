@@ -42,8 +42,8 @@ policies-c/Hacl_Policies.c: $(HACL_HOME)/code/lib/kremlin/Hacl.Policies.fst
 
 box-c/NaCl.c: $(HACL_HOME)/code/poly1305/Hacl.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Hacl.Salsa20.fsti $(HACL_HOME)/code/curve25519/interfaces/Hacl.Curve25519.fsti Hacl.SecretBox.ZeroPad.fst Hacl.Box.ZeroPad.fst  NaCl.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir box-c NaCl.fst -skip-compilation \
-		-bundle "NaCl=NaCl,Hacl.SecretBox.ZeroPad,Hacl.Box.ZeroPad" \
-		-bundle "Hacl.Policies=Hacl.Policies"
+		-bundle "NaCl=*" -minimal -add-include '"kremlib.h"' \
+		-library "Hacl.Policies"
 
 aead-c/Hacl_Chacha20Poly1305.c: $(HACL_HOME)/code/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/salsa-family/Hacl.Chacha20.fsti Hacl.Chacha20Poly1305.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -I interfaces -tmpdir aead-c Hacl.Chacha20Poly1305.fst -skip-compilation \

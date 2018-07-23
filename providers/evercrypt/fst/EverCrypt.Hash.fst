@@ -159,15 +159,18 @@ let uint64_p = B.buffer uint_64
 
 noeq
 type state_s: (G.erased alg) -> Type0 =
-| SHA256_Hacl: p:uint32_p{ B.length p = U32.v Hacl.SHA2_256.size_state} -> state_s (G.hide SHA256)
-| SHA256_Vale: p:uint32_p{ B.length p = U32.v ValeGlue.sha256_size_state } -> state_s (G.hide SHA256)
-| SHA384_Hacl: p:uint64_p{ B.length p = U32.v Hacl.SHA2_384.size_state } -> state_s (G.hide SHA384)
+| SHA256_Hacl: p:uint32_p{ B.freeable p /\ B.length p = U32.v Hacl.SHA2_256.size_state } ->
+    state_s (G.hide SHA256)
+| SHA256_Vale: p:uint32_p{ B.freeable p /\ B.length p = U32.v ValeGlue.sha256_size_state } ->
+    state_s (G.hide SHA256)
+| SHA384_Hacl: p:uint64_p{ B.freeable p /\ B.length p = U32.v Hacl.SHA2_384.size_state } ->
+    state_s (G.hide SHA384)
 
 let footprint_s #a (s: state_s a): GTot M.loc =
   match s with
-  | SHA256_Hacl p -> M.loc_buffer p
-  | SHA256_Vale p -> M.loc_buffer p
-  | SHA384_Hacl p -> M.loc_buffer p
+  | SHA256_Hacl p -> M.loc_addr_of_buffer p
+  | SHA256_Vale p -> M.loc_addr_of_buffer p
+  | SHA384_Hacl p -> M.loc_addr_of_buffer p
 
 let invariant_s #a s h =
   match s with
@@ -208,7 +211,7 @@ let repr_eq (#a:e_alg) (r1 r2: acc a) =
 let fresh_is_disjoint l1 l2 h0 h1 = ()
 
 let frame_invariant #a l s h0 h1 =
-  let state = deref h0 s in
+  let state = B.deref h0 s in
   assert (repr_eq (repr s h0) (repr s h1))
 
 let create a =
@@ -228,17 +231,7 @@ let create a =
         SHA384_Hacl b
     | _ ->  magic()  // 18-07-09 TODO use failwith instead
   in
-  let h1 = ST.get () in
-  let r = B.malloc HS.root s 1ul in
-  let h2 = ST.get () in
-  // None of these seem to be necessary for the proof to proceed. Key bits are
-  // retained.
-  assert (invariant r h2);
-  assert (fresh_loc (M.loc_buffer r) h1 h2);
-  assert (M.(modifies loc_none h0 h1));
-  assert (loc_unused_in (M.loc_buffer r) h0);
-  assert (M.(modifies loc_none h0 h2));
-  r
+  B.malloc HS.root s 1ul
 
 let has_k (#a:e_alg) (st:acc a) = 
   match G.reveal a with
@@ -292,27 +285,18 @@ let update #a #prior s data =
     
   match !*s with
   | SHA256_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_256.update p data
 
   | SHA384_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_384.update p data
 
   | SHA256_Vale p ->
       ValeGlue.sha256_update p data;
       admit ()
-
 
 let update_multi #a #prior s data len =
   let h0 = ST.get() in 
@@ -329,12 +313,8 @@ let update_multi #a #prior s data len =
   match !*s with
   | SHA256_Hacl p ->
       let n = FStar.UInt32.(len /^ blockLen SHA256) in 
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       // let h = ST.get() in assume(bounded_counter s h (v n)); 
       Hacl.SHA2_256.update_multi p data n;
 
@@ -350,12 +330,8 @@ let update_multi #a #prior s data len =
 
   | SHA384_Hacl p ->
       let n = len / blockLen SHA384 in 
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       //let h = ST.get() in assume(bounded_counter s h (v n)); 
       Hacl.SHA2_384.update_multi p data n;
 
@@ -395,12 +371,8 @@ let update_last #a #prior s data totlen =
   match !*s with
   | SHA256_Hacl p ->
       let len = totlen % blockLen SHA256 in
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       Hacl.SHA2_256.update_last p data len;
       ( let h1 = ST.get() in 
         let pad = suffix a (v totlen) in 
@@ -412,12 +384,8 @@ let update_last #a #prior s data totlen =
         )
   | SHA384_Hacl p ->
       let len = totlen % blockLen SHA384 in
-      assert M.(loc_disjoint (M.loc_buffer data) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p data);
       admit();//18-07-12 unclear what's missing here
       Hacl.SHA2_384.update_last p data len;
       admit()
@@ -430,24 +398,26 @@ let update_last #a #prior s data totlen =
 let finish #a s dst =
   match !*s with
   | SHA256_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let dst = T.new_to_old_st dst in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p dst);
       Hacl.SHA2_256.finish p dst
   | SHA384_Hacl p ->
-      assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer p));
       let p = T.new_to_old_st p in
       let dst = T.new_to_old_st dst in
-      // JP: in spite of the assertion above, the transition module does not
-      // seem to allow me to derive this fact
-      assume (FStar.Buffer.disjoint p dst);
       Hacl.SHA2_384.finish p dst
   | SHA256_Vale p ->
       ValeGlue.sha256_finish p dst;
       admit ()
+
+let free #a s =
+  (match !* s with
+  | SHA256_Hacl p ->
+      B.free p
+  | SHA384_Hacl p ->
+      B.free p
+  | SHA256_Vale p ->
+      B.free p);
+  B.free s
 
 let hash a dst input len =
   match a with
@@ -457,19 +427,16 @@ let hash a dst input len =
         ValeGlue.sha256_hash dst input len;
         admit ()
       end else begin
-        assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer input));
         let input = T.new_to_old_st input in
         let dst = T.new_to_old_st dst in
-        assume (FStar.Buffer.disjoint dst input);
         Hacl.SHA2_256.hash dst input len;
         admit() //18-07-07 TODO align the specs
       end
   | SHA384 ->
-      assert M.(loc_disjoint (M.loc_buffer dst) (M.loc_buffer input));
       let input = T.new_to_old_st input in
       let dst = T.new_to_old_st dst in
-      assume (FStar.Buffer.disjoint dst input);
       Hacl.SHA2_384.hash dst input len;
       admit() //18-07-07 TODO align the specs
   | _ -> 
       admit() // how to get a kremlin fatal error?
+      Hacl.SHA2_384.hash dst input len

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,8 @@
 
 
 #include "Hacl_Policies.h"
+
+extern uint8_t FStar_UInt8_eq_mask(uint8_t x0, uint8_t x1);
 
 uint8_t Hacl_Policies_declassify_u8(uint8_t x)
 {
@@ -58,9 +60,8 @@ uint8_t Hacl_Policies_cmp_bytes_(uint8_t *b1, uint8_t *b2, uint32_t len, uint8_t
 
 uint8_t Hacl_Policies_cmp_bytes(uint8_t *b1, uint8_t *b2, uint32_t len)
 {
-  uint8_t tmp[1U];
-  tmp[0U] = (uint8_t)255U;
-  uint8_t z = Hacl_Policies_cmp_bytes_(b1, b2, len, tmp);
+  uint8_t tmp = (uint8_t)255U;
+  uint8_t z = Hacl_Policies_cmp_bytes_(b1, b2, len, &tmp);
   return ~z;
 }
 

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,15 +20,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+
+
+#ifndef __Hacl_HMAC_SHA2_512_H
+#define __Hacl_HMAC_SHA2_512_H
+
+
 #include "kremlib.h"
-#include "kremlin/prims_int.h"
 
-/******************************************************************************/
-/* Implementation of FStar.Date                                               */
-/******************************************************************************/
+extern FStar_UInt128_uint128 FStar_Int_Cast_Full_uint64_to_uint128(uint64_t x0);
 
-/* FStar_Date.h has all the extern val's. This is just the implementation. */
+void Hacl_HMAC_SHA2_512_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len);
 
-Prims_nat FStar_Date_secondsFromDawn() {
-  return KRML_HOST_TIME();
-}
+void
+Hacl_HMAC_SHA2_512_hmac(
+  uint8_t *mac,
+  uint8_t *key,
+  uint32_t keylen,
+  uint8_t *data,
+  uint32_t datalen
+);
+
+#define __Hacl_HMAC_SHA2_512_H_DEFINED
+#endif
