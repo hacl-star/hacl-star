@@ -17,6 +17,7 @@ val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
 
 /// AES block function
 
+[@CAbstractStruct]
 val aes128_key_s: Type0
 
 let aes128_key = B.pointer aes128_key_s
@@ -31,6 +32,7 @@ val aes128_compute: key:aes128_key ->
 val aes128_free: aes128_key ->
   ST unit aes128_free_pre aes128_free_post
 
+[@CAbstractStruct]
 val aes256_key_s : Type0
 
 let aes256_key = B.pointer aes256_key_s

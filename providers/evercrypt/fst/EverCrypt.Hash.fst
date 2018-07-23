@@ -48,6 +48,8 @@ let invariant_s #a s h =
   | SHA384_Hacl p ->
       B.live h p
 
+#set-options "--z3rlimit 40"
+
 let repr #a s h: GTot _ =
   let s = B.get h s 0 in
   match s with
