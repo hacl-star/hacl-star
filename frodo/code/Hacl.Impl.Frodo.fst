@@ -269,26 +269,26 @@ let frodo_unpack n1 n2 d b res =
   pop_frame()
 
 val frodo_sample: r:uint16 -> Stack uint16
-  (requires (fun h -> True))
-  (ensures (fun h0 r h1 -> modifies loc_none h0 h1))
-  [@"c_inline"]
+  (requires fun h -> True)
+  (ensures  fun h0 r h1 -> modifies loc_none h0 h1)
+[@"c_inline"]
 let frodo_sample r =
   push_frame();
   let prnd = r >>. u32 1 in
   let sign = r &. u16 1 in
-  let sample:lbuffer uint16 1 = create (size 1) (u16 0) in
-  let ctr = cdf_table_len -! size 1 in
-
+  let sample = create #uint16 #1 (size 1) (u16 0) in
   let h0 = ST.get () in
-  loop_nospec #h0 ctr sample
+  loop_nospec #h0 (cdf_table_len -! size 1) sample
   (fun j ->
     recall cdf_table;
     let tj = cdf_table.(j) in
-    let sample0 = sample.(size 0) in
-    sample.(size 0) <- sample0 +. (to_u16 (to_u32 (tj -. prnd)) >>. u32 15)
+    let open LowStar.BufferOps in
+    let sample0 = !*sample in
+    sample *= (sample0 +. (to_u16 (to_u32 (tj -. prnd)) >>. u32 15))
   );
-  let s0 = sample.(size 0) in
-  let res = ((lognot sign +. u16 1) ^. s0) +. sign in
+  let open LowStar.BufferOps in
+  let sample0 = !*sample in
+  let res = ((lognot sign +. u16 1) ^. sample0) +. sign in
   pop_frame();
   res
 

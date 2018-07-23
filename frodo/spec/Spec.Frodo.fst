@@ -219,15 +219,23 @@ let frodo_unpack n1 n2 d b =
 val frodo_sample: r:uint16 -> uint16
 let frodo_sample r =
   let t = r >>. u32 1 in
-  let e = 0 in
   let r0 = r &. u16 1 in
-  let e = repeati (cdf_table_len - 1)
-  (fun z e ->
-    let e = if (uint_to_nat t > cdf_table.[z]) then e + 1 else e in e
-  ) e in
+  mod_mask_lemma r (u32 1);
+  uintv_extensionality (mod_mask (u32 1)) (u16 1);
+  assert (uint_v r0 == 0 \/ uint_v r0 == 1);
+  let e = 0 in
+  let e =
+    repeati_inductive
+      (cdf_table_len - 1)
+      (fun z e -> 0 <= e /\ e <= z /\ z < cdf_table_len)
+      (fun z e -> let e = if (uint_to_nat t > cdf_table.[z]) then e + 1 else e in e)
+      e
+  in
   let e = (FStar.Math.Lib.powx (-1) (uint_to_nat r0)) * e in
-  assume (0 <= e /\ e <= maxint U16);
-  u16 e
+  assert_norm (FStar.Math.Lib.powx (-1) 1 == -1);
+  assert_norm (FStar.Math.Lib.powx (-1) 0 == 1);
+  assert (-cdf_table_len < e /\ e < cdf_table_len);
+  u16 (e % modulus U16)
 
 val frodo_sample_matrix:
     n1:size_nat
