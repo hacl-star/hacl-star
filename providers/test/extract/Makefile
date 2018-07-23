@@ -16,7 +16,7 @@ LDFLAGS += -lbcrypt
 endif
 
 ifeq ($(UNAME),Linux)
-  LDFLAGS += -Wl,-z,defs,-z,noexecstack
+  LDFLAGS += -Wl,-z,defs,-z,noexecstack,--unresolved-symbols=report-all
 endif
 
 LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
