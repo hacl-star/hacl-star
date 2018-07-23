@@ -100,9 +100,9 @@ type aead_alg =
   | AES256_GCM
   | CHACHA20_POLY1305
 
+[@CAbstractStruct]
 val aead_state_s: Type0
 
-[@(CPrologue "#ifndef __EverCrypt_aead_state_s\ntypedef struct EverCrypt_aead_state_s EverCrypt_aead_state_s;\n#endif")]
 let aead_state = B.pointer aead_state_s
 
 val aead_create: alg:aead_alg -> key:uint8_p ->
