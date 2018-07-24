@@ -12,7 +12,8 @@ module LSeq = Lib.Sequence
 module Buf = LowStar.Buffer
 module U32 = FStar.UInt32
 
-type lbuffer (a:Type0) (len:size_nat) = b:Buf.buffer a {Buf.length b == len}
+type buffer (a:Type0) = Buf.buffer a 
+let length (#a:Type0) (b:buffer a) = Buf.length b
 let gsub #a #len #olen b start n = admit() //; Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
 let disjoint #a1 #a2 #len1 #len2 b1 b2 : GTot Type0 = admit()
@@ -29,7 +30,7 @@ let disjoint_list = admit()
 let disjoint_lists = admit()
 let disjoints = admit()
 
-let sub #a #len #olen b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
+let sub #a #len #olen b start n = let b: lbuffer a len = b in Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 let slice #a #len #olen b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 (n -. start))
 let index #a #len b i = Buf.index b (size_to_UInt32 i)
 let upd #a #len b i v = Buf.upd b (size_to_UInt32 i) v

@@ -9,7 +9,11 @@ module LSeq = Lib.Sequence
 
 unfold let v = size_v
 
-inline_for_extraction val lbuffer: a:Type0 -> len:size_nat -> Type0
+
+inline_for_extraction val buffer: a:Type0 -> Type0
+inline_for_extraction val length: #a:Type0 -> buffer a -> GTot size_nat
+inline_for_extraction let lbuffer (a:Type0) (len:size_nat) = b:buffer a{length b == len}
+
 inline_for_extraction val gsub: #a:Type0 -> #len:size_nat -> #olen:size_nat ->  b:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == olen} -> GTot (lbuffer a olen)
 let gslice #a #len #olen (b:lbuffer a (len)) (start:size_t) (fin:size_t{v fin <= len /\ v start <= v fin /\ v fin - v start == olen}) = gsub #a #len #olen b start (sub_mod #SIZE fin start)
 noeq type bufitem = | BufItem: #a:Type0 -> #len:size_nat -> buf:lbuffer a (len) -> bufitem
