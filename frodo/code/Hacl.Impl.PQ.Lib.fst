@@ -221,6 +221,7 @@ val mul_inner:
 let mul_inner #n1 #n2 #n3 a b i k =
   push_frame();
   let h0 = ST.get() in
+  [@ inline_let ]
   let f l = get h0 a (v i) l *. get h0 b l (v k) in
   let f1 j = M.sum_ #(v n2) f j in
   let res = create #uint16 #1 (size 1) (u16 0) in
@@ -296,8 +297,6 @@ let mul_inner1 #n1 #n2 #n3 h0 h1 a b c i k f =
   c.[i,k] <- mul_inner a b i k;
   let h2 = ST.get () in
   assert (get h2 c (v i) (v k) == f (v k))
-
-#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1"
 
 private
 val onemore: p:(nat -> Type0) -> q:(i:nat{p i} -> Type0) -> b:nat{p b} -> Lemma
