@@ -52,25 +52,96 @@ let dc b c =
   //assert (uint_v res = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 b);
   res
 
+
+val ec1:
+    b: size_nat{b <= 8}
+  -> vij:uint64
+  -> k:size_nat{k < 8}
+  -> Pure uint16
+    (requires True)
+    (ensures fun res ->
+      let rk = (uint_v vij / pow2 (b * k)) % pow2 b in
+      pow2_lt_compat 16 b;
+      res == ec b (u16 rk))
+let ec1 b vij k =
+  modulo_pow2_u64 (vij >>. u32 (b * k)) b;
+  let rk = (vij >>. u32 (b * k)) &. ((u64 1 <<. u32 b) -. u64 1) in
+  assert (uint_v rk == uint_v (vij >>. u32 (b * k)) % pow2 b);
+  assert (uint_v (vij >>. u32 (b * k)) == uint_v vij / pow2 (b * k));
+  assert (uint_v rk == (uint_v vij / pow2 (b * k)) % pow2 b);
+  pow2_lt_compat 16 b;
+  uintv_extensionality (to_u16 rk) (u16 ((uint_v vij / pow2 (b * k)) % pow2 b));
+  ec b (to_u16 rk)
+
+val frodo_key_encode1:
+    b: size_nat{b <= 8}
+  -> a: lbytes (params_nbar * params_nbar * b / 8)
+  -> res0: matrix params_nbar params_nbar
+  -> vij:uint64
+  -> i:size_nat{i < params_nbar}
+  -> j:size_nat{j < params_nbar / 8}
+  -> Pure (matrix params_nbar params_nbar)
+    (requires True)
+    (ensures fun res ->
+      (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
+      (forall (k1:size_nat{k1 < 8}). res.(i, 8 * j + k1) == ec1 b vij k1))
+let frodo_key_encode1 b a res0 vij i j =
+  repeati_inductive 8
+    (fun k res ->
+      (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
+      (forall (k1:size_nat{k1 < k}). res.(i, 8 * j + k1) == ec1 b vij k1))
+    (fun k res ->
+      res.(i, 8 * j + k) <- ec1 b vij k
+    ) res0
+
+val frodo_key_encode_inner:
+    b: size_nat{b <= 8}
+  -> a: lbytes (params_nbar * params_nbar * b / 8)
+  -> i:size_nat{i < params_nbar}
+  -> j:size_nat{j < params_nbar / 8}
+  -> k:size_nat{k < 8}
+  -> GTot uint16
+let frodo_key_encode_inner b a i j k =
+  let v8 = Seq.create 8 (u8 0) in
+  let vij = uint_from_bytes_le (update_sub v8 0 b (Seq.sub a ((i + j) * b) b)) in
+  ec1 b vij k
+
+val frodo_key_encode2:
+    b: size_nat{b <= 8}
+  -> a: lbytes (params_nbar * params_nbar * b / 8)
+  -> res0: matrix params_nbar params_nbar
+  -> v8:lbytes 8{v8 == Seq.create 8 (u8 0)}
+  -> i:size_nat{i < params_nbar}
+  -> j:size_nat{j < params_nbar / 8}
+  -> Pure (matrix params_nbar params_nbar)
+    (requires True)
+    (ensures fun res ->
+      (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
+      (forall (k1:size_nat{k1 < 8}). res.(i, 8 * j + k1) == frodo_key_encode_inner b a i j k1))
+let frodo_key_encode2 b a res0 v8 i j =
+  let vij = uint_from_bytes_le (update_sub v8 0 b (Seq.sub a ((i + j) * b) b)) in
+  frodo_key_encode1 b a res0 vij i j
+
 val frodo_key_encode:
     b: size_nat{b <= 8}
   -> a: lbytes (params_nbar * params_nbar * b / 8)
-  -> matrix params_nbar params_nbar
+  -> res:matrix params_nbar params_nbar{forall (i0:size_nat{i0 < params_nbar}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}).
+      res.(i0, 8 * j + k) == frodo_key_encode_inner b a i0 j k}
 let frodo_key_encode b a =
   let res = create params_nbar params_nbar in
   let v8 = Seq.create 8 (u8 0) in
-  repeati params_nbar
+  let n2 = params_nbar / 8 in
+
+  repeati_inductive params_nbar
   (fun i res ->
-    repeati (params_nbar / 8)
-    (fun j res ->
-      let v8 = update_sub v8 0 b (Seq.sub a ((i + j) * b) b) in
-      let vij = uint_from_bytes_le v8 in
-      repeati 8
-      (fun k res ->
-        let ak = (vij >>. u32 (b * k)) &. ((u64 1 <<. u32 b) -. u64 1) in
-	modulo_pow2_u64 (vij >>. u32 (b * k)) b;
-        res.(i, 8 * j + k) <- ec b (to_u16 ak)
-      ) res
+    forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}) (k:size_nat{k < 8}). res.(i0, 8 * j + k) == frodo_key_encode_inner b a i0 j k)
+  (fun i res ->
+    repeati_inductive n2
+    (fun j res0 ->
+      (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
+      (forall (j0:size_nat{j0 < j}) (k:size_nat{k < 8}). res0.(i, 8 * j0 + k) == frodo_key_encode_inner b a i j0 k))
+    (fun j res0 ->
+      frodo_key_encode2 b a res0 v8 i j
     ) res
   ) res
 

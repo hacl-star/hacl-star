@@ -6,7 +6,6 @@ open FStar.HyperStack.ST
 open FStar.Mul
 
 open Lib.IntTypes
-open Lib.RawIntTypes
 open Lib.PQ.Buffer
 
 open Hacl.Impl.PQ.Lib
@@ -18,28 +17,35 @@ open LowStar.Modifies
 module B = LowStar.Buffer
 module ST = FStar.HyperStack.ST
 module FLemmas = Spec.Frodo.Lemmas
+module S = Spec.Frodo.Encode
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
 val ec:
-  b:size_t{v b < v params_logq} -> k:uint16 -> Tot uint16
+    b:size_t{v b < v params_logq}
+  -> k:uint16{uint_v k < pow2 (v b)}
+  -> r:uint16{r == S.ec (v b) k}
   [@ "substitute"]
 let ec b a =
-  shift_left #U16 a (size_to_uint32 (params_logq -. b))
+  a <<. (size_to_uint32 (params_logq -. b))
 
 val dc:
-  b:size_t{v b < v params_logq} -> c:uint16 -> Tot uint16
+    b:size_t{v b < v params_logq}
+  -> c:uint16
+  -> r:uint16{r == S.dc (v b) c}
   [@ "substitute"]
 let dc b c =
   let res1 = (c +. (u16 1 <<. size_to_uint32 (params_logq -. b -. size 1))) >>. size_to_uint32 (params_logq -. b) in
   res1 &. ((u16 1 <<. size_to_uint32 b) -. u16 1)
 
 val frodo_key_encode:
-  b:size_t{v b <= 8} ->
-  a:lbytes ((params_nbar *! params_nbar *! b) /. size 8) ->
-  res:matrix_t params_nbar params_nbar -> Stack unit
-  (requires (fun h -> B.live h a /\ B.live h res /\ B.disjoint a res))
-  (ensures (fun h0 _ h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
-  [@"c_inline"]
+    b:size_t{v b <= 8}
+  -> a:lbytes ((params_nbar *! params_nbar *! b) /. size 8)
+  -> res:matrix_t params_nbar params_nbar
+  -> Stack unit
+    (requires (fun h -> B.live h a /\ B.live h res /\ B.disjoint a res))
+    (ensures (fun h0 _ h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+      as_matrix h1 res == S.frodo_key_encode (v b) (B.as_seq h0 a)))
+[@"c_inline"]
 let frodo_key_encode b a res =
   push_frame();
   let n2 = params_nbar /. size 8 in
@@ -63,8 +69,7 @@ let frodo_key_encode b a res =
           loop_nospec #h1 (size 8) res
           (fun k ->
             let ak = (vij >>. size_to_uint32 (b *! k)) &. ((u64 1 <<. size_to_uint32 b) -. u64 1) in
-            let resij = ec b (to_u16 ak) in
-            mset res i (size 8 *! j +! k) resij
+            mset res i (size 8 *! j +! k) (ec b (to_u16 ak))
           ) in
 
       Lib.Loops.for (size 0) n2 inv1 f1 in
@@ -102,7 +107,8 @@ let frodo_key_decode b a res =
           let h1 = ST.get () in
           loop_nospec #h1 (size 8) templong
           (fun k ->
-            let aij = dc b (mget a i (size 8 *! j +! k)) in
+            let aijk = mget a i (size 8 *! j +! k) in
+            let aij = dc b aijk in
             templong.(size 0) <- templong.(size 0) |. (to_u64 aij <<. size_to_uint32 (b *! k))
           );
           uint_to_bytes_le #U64 v8 (templong.(size 0));
