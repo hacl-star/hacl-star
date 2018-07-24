@@ -96,6 +96,13 @@ val lemma_div_le: a:nat -> b:nat -> d:pos -> Lemma
     (ensures  (a / d <= b / d))
 let lemma_div_le a b d = lemma_add_div (b - a / d * d) (a / d) d
 
+val lemma_multiple_le: a:nat -> b:nat -> d:pos -> Lemma
+    (requires (a < b /\ a % d = 0 /\ b % d = 0))
+    (ensures  (a + d <= b))
+let lemma_multiple_le a b d =
+    lemma_div_lt a b d;
+    lemma_distr_add_left (a / d) 1 d
+
 val lemma_div_distr: a:nat -> b:nat -> c:pos -> Lemma
     (requires (a % c = 0))
     (ensures  ((a + b) / c = a / c + b / c))
@@ -273,9 +280,8 @@ val lemma_pow2_multiple_le: a:nat -> b:nat -> d:nat -> Lemma
     (ensures  (a + pow2 d <= pow2 b))
     
 let lemma_pow2_multiple_le a b d =
-    lemma_pow2_div_lt a b d;
-    lemma_distr_sub_left (pow2 (b - d)) 1 (pow2 d);
-    lemma_pow2_mul (b - d) d
+    lemma_pow2_mod b d;
+    lemma_multiple_le a (pow2 b) (pow2 d)
 
 val lemma_pow2_div_mul: a:nat -> b:nat -> c:nat -> Lemma
     (requires (a % pow2 b = 0 /\ b <= c))
@@ -353,24 +359,35 @@ let lemma_nth_logand #n a i =
     if nth a i then nth_lemma (logand a (pow2 (n - i - 1))) (pow2 (n - i - 1))
     else nth_lemma (logand a (pow2 (n - i - 1))) (zero n)
 
+val slice_left_nth_lemma: #n:pos -> a:uint_t n -> m:pos{m <= n} -> Lemma
+    (forall (i:nat{i < m}). (lemma_pow2_div_lt a n (n - m); nth a i = nth #m (a / pow2 (n - m)) i))
+
+let slice_left_nth_lemma #n a m = if n = m then () else slice_left_lemma (to_vec a) m
+
+val slice_right_nth_lemma: #n:pos -> a:uint_t n -> m:pos{m <= n} -> Lemma
+    (forall (i:nat{i < m}). nth a (n - m + i) = nth #m (a % pow2 m) i)
+
+let slice_right_nth_lemma #n a m = if n = m then () else slice_right_lemma (to_vec a) m
+
 val lemma_logor_disjoint: #n:pos -> a:uint_t n -> b:uint_t n -> Lemma
-    (requires (is_superset_vec (to_vec (lognot a)) (to_vec b)))
+    (requires (forall (i:nat{i < n}). nth a i ==> not (nth b i)))
     (ensures  (logor a b = a + b))
 
 let rec lemma_logor_disjoint #n a b =
     if n = 1 then begin
-        if b = 1 then () else logor_lemma_1 a
+        if nth b 0 = false then () else assert(nth a 0 = false)
     end else begin
-        slice_left_lemma (to_vec a) (n - 1);
-        slice_left_lemma (to_vec b) (n - 1);
-        slice_left_lemma (to_vec (logor a b)) (n - 1);
-        slice_right_lemma (to_vec a) 1;
-        slice_right_lemma (to_vec b) 1;
-        slice_right_lemma (to_vec (logor a b)) 1;
+        slice_left_nth_lemma a (n - 1);
+        slice_left_nth_lemma b (n - 1);
+        slice_left_nth_lemma (logor a b) (n - 1);
+        slice_right_nth_lemma a 1;
+        slice_right_nth_lemma b 1;
+        slice_right_nth_lemma (logor a b) 1;
+	lemma_pow2_div_lt a n 1;
+	lemma_pow2_div_lt b n 1;
 	lemma_logor_disjoint #(n - 1) (a / 2) (b / 2);
 	lemma_logor_disjoint #1 (a % 2) (b % 2);
-	lemma_eq_intro (slice (to_vec (logor a b)) 0 (n - 1)) (to_vec #(n - 1) (logor (a / 2) (b / 2)));
-	lemma_eq_intro (slice (to_vec (logor a b)) (n - 1) n) (to_vec #1 (UInt.logor (a % 2) (b % 2)))
+	nth_lemma (logor a b) (a + b)
     end
 
 val lemma_xor_and_distr: #n:pos -> a:uint_t n -> b:uint_t n -> c:uint_t n -> Lemma
@@ -418,27 +435,6 @@ let lemma_mod_pow2_imp_tl_zero #n x sh =
 	assert(forall (i:nat{n - sh <= i /\ i < n}). index (to_vec x) i = index (slice (to_vec x) (n - sh) n) (i + sh - n))
     end
 
-val lemma_mid_zero_imp_pow2: #n:pos -> x:uint_t n -> a:nat -> b:nat{a <= b /\ b <= n} -> Lemma
-    (requires (forall (i:nat{a <= i /\ i < b}). nth x i = false))
-    (ensures  ((x / pow2 (n - b)) % pow2 (b - a) = 0))
-let lemma_mid_zero_imp_pow2 #n x a b =
-    if b = 0 then () else if b = n then lemma_tl_zero_imp_mod_pow2 x (n - a) else begin
-        slice_left_lemma (to_vec x) b;
-	assert(forall (i:nat{a <= i /\ i < b}). nth #b (x / pow2 (n - b)) i = false);
-	lemma_tl_zero_imp_mod_pow2 #b (x / pow2 (n - b)) (b - a)
-    end
-
-val lemma_pow2_imp_mid_zero: #n:pos -> x:uint_t n -> a:nat -> b:nat{a <= b /\ b <= n} -> Lemma
-    (requires ((x / pow2 (n - b)) % pow2 (b - a) = 0))
-    (ensures  (forall (i:nat{a <= i /\ i < b}). nth x i = false))
-let lemma_pow2_imp_mid_zero #n x a b =
-    if b = 0 then () else if x = 0 || b = n then lemma_mod_pow2_imp_tl_zero x (n - a) else begin
-        lemma_pow2_div_lt x n (n - b);
-        slice_left_lemma (to_vec x) b;
-	lemma_mod_pow2_imp_tl_zero #b (x / pow2 (n - b)) (b - a);
-	assert(forall (i:nat{a <= i /\ i < b}). nth #b (x / pow2 (n - b)) i = false)
-    end
-
 (* UInt64 lemmas *)
 open FStar.UInt64
 
@@ -450,11 +446,6 @@ val lemma_logor_pow2_disjoint: a:u64 -> b:u64 -> p:pos{p < 64} -> Lemma
 let lemma_logor_pow2_disjoint a b p = 
     lemma_mod_pow2_imp_tl_zero (v a) p;
     lemma_lt_pow2_imp_hd_zero (v b) (64 - p);
-    assert(forall (i:nat{i < 64 - p}). nth (v b) i = false);
-    assert(forall (i:nat{i < 64 - p}). index (to_vec (v b)) i = false);
-    assert(forall (i:nat{i >= 64 - p /\ i < 64}). nth (v (lognot a)) i = true);
-    assert(forall (i:nat{i >= 64 - p /\ i < 64}). index (to_vec (v (lognot a))) i = true);
-    assert(is_superset_vec (to_vec (v (lognot a))) (to_vec (v b)));
     lemma_logor_disjoint (v a) (v b)
 
 val lemma_lognot_value: a:u64 -> Lemma

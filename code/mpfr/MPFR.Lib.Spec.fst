@@ -4,7 +4,7 @@ open FStar.Mul
 open MPFR.Dyadic
 open MPFR.Maths
 
-#set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 30 --max_fuel 5 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 (* MPFR uses 'mpfr_sign', 'mpfr_prec', 'mpfr_exp' and 'mpfr_d' to describe a dyadic rational number,
  * it also allows "sigular" values for NaN, +-Inf and +-ZERO.
@@ -24,10 +24,10 @@ open MPFR.Maths
 
 (* indicating regular/sigular value type *)
 type fp_type_t =
-   | MPFR_NUM      (* regular number (excludes zero) *)
-   | MPFR_ZERO     (* +0 or -0                       *)
-   | MPFR_INF      (* +inf or -inf                   *)
-   | MPFR_NAN      (* not a number                   *)
+   | MPFR_NUM      (* regular number (non-zero) *)
+   | MPFR_ZERO     (* +0 or -0                  *)
+   | MPFR_INF      (* +inf or -inf              *)
+   | MPFR_NAN      (* not a number              *)
    
 (* flag: indicates value type, other entries are useless for sigular value (except sign)
  * sign: sign of the value, indicates also the sign of zero and infinity
@@ -91,13 +91,9 @@ type valid_fp = s:fp_struct{valid_fp_cond s}
  * Then multiply it with 2 ^ exp *)
 let eval (fp:valid_fp) = mk_dyadic (fp.sign * fp.limb) (fp.exp - fp.len)
 
-val eval_abs: fp:valid_fp -> Tot (r:dyadic{r == fabs (eval fp)})
+val eval_abs: fp:valid_fp -> Tot (r:dyadic{r == fabs (eval fp) /\ r >=. zero_dyadic /\ r >=. eval fp})
 let eval_abs fp = mk_dyadic fp.limb (fp.exp - fp.len)
 
-val eval_eq_lemma: a:valid_fp -> b:valid_fp -> Lemma
-    (requires (eval_abs a =. eval_abs b /\ a.sign = b.sign))
-    (ensures  (eval a =. eval b))
-let eval_eq_lemma a b = ()
 
 //////////////////////////////////////////////////////////////////////
 //  Normalize a regular value                                       //
@@ -118,6 +114,119 @@ let mk_normal sign prec exp limb len flag: Pure normal_fp
     (ensures  (fun _ -> True)) =
     mk_fp_struct sign prec exp limb len flag
 
+
+val eval_eq_intro_lemma: a:valid_fp -> b:valid_fp -> Lemma
+    (requires (eval_abs a =. eval_abs b /\ a.sign = b.sign))
+    (ensures  (eval a =. eval b))
+    [SMTPat (eval_abs a =. eval_abs b); SMTPat (a.sign = b.sign)]
+let eval_eq_intro_lemma a b = ()
+
+val eval_le_intro_lemma: a:valid_fp -> b:valid_fp -> Lemma
+    (requires (a.sign < b.sign \/
+              (a.sign > b.sign /\ eval_abs a =. zero_dyadic /\ eval_abs b =. zero_dyadic) \/
+              (a.sign = b.sign /\ a.sign = 1 /\ eval_abs a <=. eval_abs b) \/
+	      (a.sign = b.sign /\ a.sign = -1 /\ eval_abs a >=. eval_abs b)))
+    (ensures  (eval a <=. eval b))
+let eval_le_intro_lemma a b = ()
+
+val eval_lt_intro_lemma: a:valid_fp -> b:valid_fp -> Lemma
+    (requires ((a.sign < b.sign /\ ~(eval_abs a =. zero_dyadic /\ eval_abs b =. zero_dyadic)) \/
+              (a.sign = b.sign /\ a.sign = 1 /\ eval_abs a <. eval_abs b) \/
+	      (a.sign = b.sign /\ a.sign = -1 /\ eval_abs a >. eval_abs b)))
+    (ensures  (eval a <. eval b))
+let eval_lt_intro_lemma a b = ()
+
+val eval_eq_reveal_lemma: a:normal_fp -> b:normal_fp -> Lemma
+    (requires (eval a =. eval b))
+    (ensures  (eval_abs a =. eval_abs b /\ a.sign = b.sign /\ a.exp = b.exp /\
+              (forall (i:nat{i < min a.prec b.prec}). UInt.nth #a.len a.limb i = UInt.nth #b.len b.limb i)))
+let eval_eq_reveal_lemma a b =
+    let elb = min (a.exp - a.len) (b.exp - b.len) in
+    lemma_pow2_mul_range a.limb (a.exp - a.len - elb) a.len;
+    lemma_pow2_mul_range b.limb (b.exp - b.len - elb) b.len;
+    lemma_bit_length (a.limb * pow2 (a.exp - a.len - elb)) (a.exp - elb) (b.exp - elb);
+    //! assert(a.exp = b.exp);
+    let mp = min a.prec b.prec in
+    lemma_pow2_mul_div a.limb (a.exp - a.len - elb) (a.exp - mp - elb);
+    lemma_pow2_mul_div b.limb (b.exp - b.len - elb) (b.exp - mp - elb);
+    assert(a.limb / pow2 (a.len - mp) = b.limb / pow2 (b.len - mp));
+    lemma_pow2_div_lt a.limb a.len (a.len - mp);
+    lemma_pow2_div_lt b.limb b.len (b.len - mp);
+    slice_left_nth_lemma #a.len a.limb mp;
+    slice_left_nth_lemma #b.len b.limb mp
+
+val eval_abs_le_reveal_lemma: a:normal_fp -> b:normal_fp -> Lemma
+    (requires (eval_abs a <=. eval_abs b))
+    (ensures  (let elb = min (a.exp - a.len) (b.exp - b.len) in
+               a.exp <= b.exp /\
+	       a.limb * pow2 (a.exp - a.len - elb) <= b.limb * pow2 (b.exp - b.len - elb)))
+
+let eval_abs_le_reveal_lemma a b =
+    let elb = min (a.exp - a.len) (b.exp - b.len) in
+    lemma_pow2_mul_range a.limb (a.exp - a.len - elb) a.len;
+    lemma_pow2_mul_range b.limb (b.exp - b.len - elb) b.len;
+    if a.exp > b.exp then lemma_pow2_le (b.exp - elb) (a.exp - 1 - elb)
+
+val eval_abs_lt_reveal_lemma: a:normal_fp -> b:normal_fp -> Lemma
+    (requires (eval_abs a <. eval_abs b))
+    (ensures  (let elb = min (a.exp - a.len) (b.exp - b.len) in
+               a.exp <= b.exp /\
+	       a.limb * pow2 (a.exp - a.len - elb) < b.limb * pow2 (b.exp - b.len - elb)))
+
+let eval_abs_lt_reveal_lemma a b =
+    let elb = min (a.exp - a.len) (b.exp - b.len) in
+    lemma_pow2_mul_range a.limb (a.exp - a.len - elb) a.len;
+    lemma_pow2_mul_range b.limb (b.exp - b.len - elb) b.len;
+    if a.exp > b.exp then lemma_pow2_le (b.exp - elb) (a.exp - 1 - elb)
+
+val eval_le_reveal_lemma: a:normal_fp -> b:normal_fp -> Lemma
+    (requires (eval a <=. eval b))
+    (ensures  (let elb = min (a.exp - a.len) (b.exp - b.len) in
+               (a.sign < b.sign \/
+               (a.sign = b.sign /\ a.sign = 1 /\ eval_abs a <=. eval_abs b /\
+	        (a.exp <= b.exp /\
+		 a.limb * pow2 (a.exp - a.len - elb) <= b.limb * pow2 (b.exp - b.len - elb))) \/
+               (a.sign = b.sign /\ a.sign = -1 /\ eval_abs a >=. eval_abs b /\
+	        (a.exp >= b.exp /\
+		 a.limb * pow2 (a.exp - a.len - elb) >= b.limb * pow2 (b.exp - b.len - elb))))))
+
+let eval_le_reveal_lemma a b =
+    if a.sign < b.sign || a.sign > b.sign then ()
+    else if a.sign = 1 then eval_abs_le_reveal_lemma a b
+    else eval_abs_le_reveal_lemma b a
+
+val eval_lt_reveal_lemma: a:normal_fp -> b:normal_fp -> Lemma
+    (requires (eval a <. eval b))
+    (ensures  (let elb = min (a.exp - a.len) (b.exp - b.len) in
+               (a.sign < b.sign \/
+               (a.sign = b.sign /\ a.sign = 1 /\ eval_abs a <. eval_abs b /\
+	        (a.exp <= b.exp /\
+		 a.limb * pow2 (a.exp - a.len - elb) < b.limb * pow2 (b.exp - b.len - elb))) \/
+               (a.sign = b.sign /\ a.sign = -1 /\ eval_abs a >. eval_abs b /\
+	        (a.exp >= b.exp /\
+		 a.limb * pow2 (a.exp - a.len - elb) > b.limb * pow2 (b.exp - b.len - elb))))))
+
+let eval_lt_reveal_lemma a b =
+    if a.sign < b.sign || a.sign > b.sign then ()
+    else if a.sign = 1 then eval_abs_lt_reveal_lemma a b
+    else eval_abs_lt_reveal_lemma b a
+
+(* change the length of the limb (no less than prec) keeps the value unchanged *)
+val change_len: a:normal_fp -> l:nat{l >= a.prec} ->
+    Tot (r:normal_fp{r.len = l /\ eval r =. eval a})
+
+let change_len a l =
+    if l >= a.len then begin
+        lemma_pow2_mul_range a.limb (l - a.len) a.len;
+	lemma_pow2_mul_mod a.limb (l - a.len) (l - a.prec);
+        {a with limb = a.limb * pow2 (l - a.len); len = l}
+    end else begin
+        lemma_pow2_div_range a.limb (a.len - l) a.len;
+	lemma_pow2_mod_div a.limb (a.len - a.prec) (a.len - l);
+	lemma_pow2_mod_mod_zero a.limb (a.len - a.prec) (a.len - l);
+	lemma_pow2_div_mul a.limb (a.len - l) (a.len - l);
+        {a with limb = a.limb / pow2 (a.len - l); len = l}
+    end
 
 ////////////////////////////////////////////////////////////////////////////////
 //  Pure version of mpfr_struct                                               //
@@ -163,24 +272,26 @@ let mpfr_fp_cond (s:fp_struct) =
 (* type for MPFR number *)
 type mpfr_fp = s:fp_struct{mpfr_fp_cond s}
 
-
-/////////////////////////////////////////////////////////////
-//  Useful functions and lemmas for normal number of MPFR  //
-/////////////////////////////////////////////////////////////
+	
+////////////////////////////////////////////////////
+//  Overflow and underflow bound for MPFR number  //
+//  Conversion from normal number to MPFR number  //
+////////////////////////////////////////////////////
 
 (* overflow bound for normal number of MPFR *)
-val mpfr_overflow_bound: p:nat{mpfr_PREC_COND p} -> Tot dyadic
+val mpfr_overflow_bound: p:nat{mpfr_PREC_COND p} -> Tot (b:dyadic{b >. zero_dyadic})
 
 let mpfr_overflow_bound p =
     let l = prec_to_len p in
+    lemma_pow2_lt (l - p) l;
     mk_dyadic (pow2 l - pow2 (l - p)) (mpfr_EMAX_spec - l)
 
-val mpfr_overflow_bound_lemma: p:nat{mpfr_PREC_COND p} -> f:mpfr_reg_fp{f.prec = p} -> Lemma
-    (eval_abs f <=. mpfr_overflow_bound p)
-    [SMTPat (eval_abs f <=. mpfr_overflow_bound p)]
+val mpfr_max_value: s:int{s = 1 \/ s = -1} -> p:nat{mpfr_PREC_COND p} ->
+    Tot (m:mpfr_fp{valid_num_cond m /\ m.sign = s /\ eval_abs m =. mpfr_overflow_bound p})
 
-let mpfr_overflow_bound_lemma p f =
+let mpfr_max_value s p = 
     let l = prec_to_len p in
+    lemma_pow2_lt (l - p) l;
     lemma_pow2_le (l - p) l;
     lemma_pow2_mod l (l - p);
     lemma_mod_distr_sub_zero (pow2 l) (pow2 (l - p)) (pow2 (l - p));
@@ -188,30 +299,110 @@ let mpfr_overflow_bound_lemma p f =
     lemma_pow2_le (l - p) (l - 1);
     lemma_pow2_double (l - 1);
     //! assert(pow2 l - pow2 (l - p) >= pow2 (l - 1));
-    let b = mk_normal 1 p mpfr_EMAX_spec (pow2 l - pow2 (l - p)) l MPFR_NUM in
-    //! assert(eval b == mpfr_overflow_bound p);
-    let elb = min (f.exp - l) (mpfr_EMAX_spec - l) in
-    lemma_pow2_multiple_le f.limb l (l - p);
-    //! assert(f.limb <= pow2 l - pow2 (l - p));
-    lemma_pow2_le (f.exp - l - elb) (mpfr_EMAX_spec - l - elb);
-    assert(f.limb * pow2 (f.exp - l - elb) <= (pow2 l - pow2 (l - p)) * pow2 (mpfr_EMAX_spec - l - elb))
+    mk_normal s p mpfr_EMAX_spec (pow2 l - pow2 (l - p)) l MPFR_NUM
+    
 
 (* underflow bound for normal number of MPFR *)
-val mpfr_underflow_bound: p:nat{mpfr_PREC_COND p} -> Tot dyadic
+val mpfr_underflow_bound: p:nat{mpfr_PREC_COND p} -> Tot (b:dyadic{b >. zero_dyadic})
 
 let mpfr_underflow_bound p =
     let l = prec_to_len p in
     mk_dyadic (pow2 (l - 1)) (mpfr_EMIN_spec - l)
 
-val mpfr_underflow_bound_lemma: p:nat{mpfr_PREC_COND p} -> f:mpfr_reg_fp{f.prec = p} -> Lemma
-    (eval_abs f >=. mpfr_underflow_bound p)
-    [SMTPat (eval_abs f >=. mpfr_underflow_bound p)]
+val mpfr_min_value: s:int{s = 1 \/ s = -1} -> p:nat{mpfr_PREC_COND p} ->
+    Tot (m:mpfr_fp{valid_num_cond m /\ m.sign = s /\ eval_abs m =. mpfr_underflow_bound p})
 
-let mpfr_underflow_bound_lemma p f =
+let mpfr_min_value s p = 
     let l = prec_to_len p in
     lemma_pow2_mod (l - 1) (l - p);
     //! assert(pow2 (l - 1) % pow2 (l - p) = 0);
-    let b = mk_normal 1 p mpfr_EMIN_spec (pow2 (l - 1)) l MPFR_NUM in
-    //! assert(eval b == mpfr_underflow_bound p);
-    let elb = min (f.exp - l) (mpfr_EMIN_spec - l) in
-    lemma_pow2_le (mpfr_EMIN_spec - l - elb) (f.exp - l - elb)
+    mk_normal s p mpfr_EMIN_spec (pow2 (l - 1)) l MPFR_NUM
+
+
+(* lemmas about overflow/underflow *)
+val mpfr_overflow_bound_lemma: s:normal_fp{mpfr_PREC_COND s.prec /\ s.exp <= mpfr_EMAX_spec} -> Lemma
+    (eval_abs s <=. mpfr_overflow_bound s.prec /\
+     not (eval_abs s >. mpfr_overflow_bound s.prec))
+
+let mpfr_overflow_bound_lemma s =
+    let p, l = s.prec, prec_to_len s.prec in
+    let s' = change_len s l in
+    let elb = min (s'.exp - l) (mpfr_EMAX_spec - l) in
+    lemma_pow2_multiple_le s'.limb l (l - p);
+    //! assert(s'.limb <= pow2 l - pow2 (l - p));
+    lemma_mul_le_right (pow2 (s'.exp - l - elb)) s'.limb (pow2 l - pow2 (l - p));
+    lemma_pow2_le (s'.exp - l - elb) (mpfr_EMAX_spec - l - elb);
+    lemma_mul_le_left (pow2 l - pow2 (l - p)) (pow2 (s'.exp - l - elb)) (pow2 (mpfr_EMAX_spec - l - elb));
+    assert(eval_abs s' <=. mpfr_overflow_bound s.prec);
+    eval_eq_reveal_lemma s s'
+
+val no_overflow_exp_lemma: s:normal_fp{mpfr_PREC_COND s.prec} -> Lemma
+    (requires (eval_abs s <=. mpfr_overflow_bound s.prec))
+    (ensures  (s.exp <= mpfr_EMAX_spec))
+
+let no_overflow_exp_lemma s =
+    let s' = change_len s (prec_to_len s.prec) in
+    eval_eq_reveal_lemma s s';
+    assert(eval_abs s' <=. mpfr_overflow_bound s'.prec);
+    let elb = min (s'.exp - s'.len) (mpfr_EMAX_spec - s'.len) in
+    lemma_pow2_mul (s'.len - 1) (s'.exp - s'.len - elb);
+    assert(s'.limb * pow2 (s'.exp - s'.len - elb) >= pow2 (s'.exp - elb - 1));
+    lemma_mul_le_right (pow2 (mpfr_EMAX_spec - s'.len - elb)) (pow2 s'.len - pow2 (s'.len - s'.prec)) (pow2 s'.len);
+    lemma_pow2_mul s'.len (mpfr_EMAX_spec - s'.len - elb);
+    if s'.exp - 1 >= mpfr_EMAX_spec then lemma_pow2_le (mpfr_EMAX_spec - elb) (s'.exp - elb - 1)
+
+val mpfr_underflow_bound_lemma: s:normal_fp{mpfr_PREC_COND s.prec /\ s.exp >= mpfr_EMIN_spec} -> Lemma
+    (eval_abs s >=. mpfr_underflow_bound s.prec /\
+     not (eval_abs s <. mpfr_underflow_bound s.prec))
+
+let mpfr_underflow_bound_lemma s =
+    let p, l = s.prec, prec_to_len s.prec in
+    lemma_pow2_mod (l - 1) (l - p);
+    //! assert(pow2 (l - 1) % pow2 (l - p) = 0);
+    let s' = change_len s l in
+    let elb = min (s'.exp - l) (mpfr_EMIN_spec - l) in
+    lemma_pow2_le (mpfr_EMIN_spec - l - elb) (s'.exp - l - elb);
+    assert(eval_abs s' >=. mpfr_underflow_bound s.prec);
+    eval_eq_reveal_lemma s s'
+
+val no_underflow_exp_lemma: s:normal_fp{mpfr_PREC_COND s.prec} -> Lemma
+    (requires (eval_abs s >=. mpfr_underflow_bound s.prec))
+    (ensures  (s.exp >= mpfr_EMIN_spec))
+
+let no_underflow_exp_lemma s =
+    let s' = change_len s (prec_to_len s.prec) in
+    eval_eq_reveal_lemma s s';
+    assert(eval_abs s' >=. mpfr_underflow_bound s'.prec);
+    let elb = min (s'.exp - s'.len) (mpfr_EMIN_spec - s'.len) in
+    lemma_pow2_mul s'.len (s'.exp - s'.len - elb);
+    lemma_pow2_mul (s'.len - 1) (mpfr_EMIN_spec - s'.len - elb);
+    if s'.exp <= mpfr_EMIN_spec - 1 then lemma_pow2_le (s'.exp - elb) (mpfr_EMIN_spec - elb - 1)
+
+
+(* Some normal_fp will convert to singular number of mpfr_fp
+ * This is used to check if the conversion is correct *)
+let normal_to_mpfr_cond (a:normal_fp{mpfr_PREC_COND a.prec})
+                        (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
+    if eval_abs a >. mpfr_overflow_bound a.prec then
+        (MPFR_INF? r.flag /\ r.sign = a.sign)
+    else if eval_abs a <. mpfr_underflow_bound a.prec then
+        (valid_zero_cond r /\ r.sign = a.sign)
+    else
+        (valid_num_cond r /\ eval r =. eval a)
+
+val normal_to_mpfr_cond_refl_lemma: a:mpfr_fp{valid_fp_cond a /\ normal_fp_cond a} -> Lemma
+    (normal_to_mpfr_cond a a)
+    [SMTPat (normal_to_mpfr_cond a a)]
+
+let normal_to_mpfr_cond_refl_lemma a =
+    mpfr_overflow_bound_lemma a;
+    mpfr_underflow_bound_lemma a
+
+val normal_to_mpfr_cond_in_range_lemma: a:normal_fp{mpfr_PREC_COND a.prec} ->
+    r:mpfr_fp{r.prec = a.prec} -> Lemma
+    (requires (normal_to_mpfr_cond a r /\
+               eval_abs a <=. mpfr_overflow_bound a.prec /\
+               eval_abs a >=. mpfr_underflow_bound a.prec))
+    (ensures  (valid_num_cond r /\ eval r =. eval a))
+
+let normal_to_mpfr_cond_in_range_lemma a r = ()

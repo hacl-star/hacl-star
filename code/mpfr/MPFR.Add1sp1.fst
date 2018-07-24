@@ -8,6 +8,7 @@ open FStar.Buffer
 open FStar.UInt64
 open FStar.Int.Cast
 open FStar.Mul
+open MPFR.Dyadic
 open MPFR.Lib
 open MPFR.Lib.Spec
 open MPFR.Add1.Spec
@@ -52,7 +53,7 @@ let mpfr_add1sp1_post_cond a b c rnd_mode p h0 f h1 =
     mpfr_disjoint_or_equal h1 b c /\ mpfr_modifies a h0 h1 /\
     (* Functional correctness *)
     mpfr_valid_cond h1 a /\ 
-    (*mpfr_round_cond exact (U32.v p) rnd_mode (as_fp h1 a) /\*)
+    mpfr_round_cond exact (U32.v p) rnd_mode (as_fp h1 a) /\
     mpfr_ternary_cond (I32.v f) exact (as_fp h1 a)
 
 val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
@@ -179,7 +180,6 @@ let mpfr_add1sp1_gt a b c p sh =
     else if U32.(d <^ gmp_NUMB_BITS) then mpfr_add1sp1_gt_branch2 a b c sh d mask
     else mpfr_add1sp1_gt_branch3 a b c sh
 
-    
 unfold val mpfr_add1sp1_eq:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     p:mpfr_reg_prec_t -> sh:mpfr_reg_prec_t -> Stack state
@@ -210,17 +210,12 @@ let mpfr_add1sp1_any a b c p =
     let bx = b.mpfr_exp in
     let cx = c.mpfr_exp in
     let sh = U32.(gmp_NUMB_BITS -^ p) in
+    let h0 = ST.get() in
     if I32.(bx =^ cx) then mpfr_add1sp1_eq a b c p sh
     else if I32.(bx >^ cx) then mpfr_add1sp1_gt a b c p sh
     else mpfr_add1sp1_gt a c b p sh
 
 (* rounding specifications *)
-unfold val mpfr_truncate: a:mpfr_ptr -> Stack i32
-    (requires (fun h -> mpfr_live h a /\ length (as_struct h a).mpfr_d = 1))
-    (ensures  (fun h0 f h1 -> h0 == h1 /\ f = mpfr_NEG_SIGN (as_struct h1 a).mpfr_sign))
-
-let mpfr_truncate a = mpfr_NEG_SIGN (mpfr_SIGN(a))
-
 unfold val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t ->
                         sh:mpfr_reg_prec_t -> bx:mpfr_tmp_exp_t -> Stack i32
     (requires (fun h -> mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ normal_cond h a /\
@@ -228,7 +223,7 @@ unfold val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t ->
 		     I32.v bx = I32.v (as_struct h a).mpfr_exp))
     (ensures  (fun h0 f h1 -> mpfr_live h1 a /\ mpfr_modifies a h0 h1 /\ mpfr_valid_cond h1 a /\
                            normal_to_mpfr_cond (add_one_ulp (as_normal h0 a)) (as_fp h1 a) /\
-                           f = (as_struct h1 a).mpfr_sign))
+                           f = (as_struct h0 a).mpfr_sign))
 
 let mpfr_add_one_ulp a rnd_mode sh bx =
     admit();
@@ -247,53 +242,38 @@ let mpfr_add_one_ulp a rnd_mode sh bx =
 	lemma_intro_modifies_2 a ap h0 h1;
         mpfr_SIGN a
     end
-(*
-let mpfr_add1sp1_round_pre_cond exact a st h =
-    let p = U32.v (as_struct h a).mpfr_prec in
-    mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ mpfr_valid_cond h a /\
-    p < 64 /\ exact.len > 64 /\ exact.prec > p /\
-    as_val h (as_struct h a).mpfr_d * pow2 (exact.len - 64) = (high_mant exact p).limb /\
-    U32.v st.sh = U32.v gmp_NUMB_BITS - p /\
-    I32.v st.bx = exact.exp /\
-    (v st.rb <> 0 <==> rb_def exact p) /\
-    (v st.sb <> 0 <==> sb_def exact p)
-
-let mpfr_add1sp1_round_post_cond exact a b c rnd_mode p h0 f h1 =
-    (* Memory safety *)
-    mpfr_live h1 a /\ mpfr_live h1 b /\ mpfr_live h1 c /\
-    mpfr_disjoint_or_equal h1 a b /\ mpfr_disjoint_or_equal h1 a c /\
-    mpfr_disjoint_or_equal h1 b c /\ mpfr_modifies a h0 h1 /\
-    (* Functional correctness *)
-    mpfr_valid_cond h1 a /\ 
-    mpfr_round_cond exact (U32.v p) rnd_mode (as_fp h1 a) /\
-    mpfr_ternary_cond (I32.v f) exact (as_fp h1 a)
-*)
 
 unfold val mpfr_add1sp1_round: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> st:state -> Stack i32
-    (requires (fun h -> mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ normal_cond h a))
+    (requires (fun h -> mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ normal_cond h a /\
+    (let high = {as_normal h a with exp = I32.v st.bx} in
+    let p = high.prec in
+    as_val h (as_struct h a).mpfr_d * pow2 (high.len - 64) = high.limb /\
+    U32.v st.sh = U32.v gmp_NUMB_BITS - p /\
+    mpfr_EXP_COND (I32.v st.bx))))
     (ensures  (fun h0 f h1 -> 
     mpfr_live h1 a /\ mpfr_modifies a h0 h1 /\ mpfr_valid_cond h1 a /\
     (let high = {as_normal h0 a with exp = I32.v st.bx} in
-    normal_to_mpfr_cond (round_rb_sb_spec high (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode) (as_fp h1 a) /\
-    mpfr_ternary_cond (I32.v f) (round_rb_sb_spec high (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode) (as_fp h1 a))))
+    normal_to_mpfr_cond (mpfr_add1sp1_round_spec high (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode)
+                        (as_fp h1 a) /\
+    I32.v f = mpfr_add1sp1_ternary_spec high (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode)))
 
 let mpfr_add1sp1_round a rnd_mode st =
-    admit();
     let ap = mpfr_MANT a in
     let a0 = ap.(0ul) in
     let h0 = ST.get() in
     mpfr_SET_EXP a st.bx; // Maybe set it later in truncate and add_one_ulp?
     let h1 = ST.get() in
+    mpfr_add1sp1_is_even_lemma a0 st.sh (as_normal_ h0 ({as_struct h0 a with mpfr_exp = st.bx}));
     lemma_reveal_modifies_1 a h0 h1;
     lemma_intro_modifies_2 a ap h0 h1;
+    normal_to_mpfr_cond_refl_lemma (as_normal h1 a);
     if (st.rb =^ 0uL && st.sb =^ 0uL) then 0l
-    else if (MPFR_RNDN? rnd_mode) then begin
+    else if (MPFR_RNDN? rnd_mode) then
         if (st.rb =^ 0uL || (st.sb =^ 0uL && ((a0 &^ (mpfr_LIMB_ONE <<^ st.sh)) =^ 0uL))) then
-	    mpfr_truncate a
+	    mpfr_NEG_SIGN (mpfr_SIGN a)
 	else mpfr_add_one_ulp a rnd_mode st.sh st.bx
-    end else if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_SIGN a = mpfr_SIGN_NEG) then mpfr_truncate a
+    else if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_SIGN a = mpfr_SIGN_NEG) then mpfr_NEG_SIGN (mpfr_SIGN a)
     else mpfr_add_one_ulp a rnd_mode st.sh st.bx
-
 
 let mpfr_add1sp1 a b c rnd_mode p =
     let h0 = ST.get() in
@@ -301,13 +281,13 @@ let mpfr_add1sp1 a b c rnd_mode p =
     let h1 = ST.get() in
     lemma_reveal_modifies_1 (mpfr_MANT a) h0 h1;
     lemma_intro_modifies_2 a (mpfr_MANT a) h0 h1;
-    //round_rb_sb_lemma (add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (U32.v (as_struct h0 a).mpfr_prec) (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode;
     if I32.(st.bx >^ mpfr_EMAX) then begin
         admit();
         mpfr_overflow a rnd_mode (mpfr_SIGN a)
     end else begin
-        let ret = mpfr_add1sp1_round a rnd_mode st in
+        let f = mpfr_add1sp1_round a rnd_mode st in
 	let h2 = ST.get() in
-	mpfr_ternary_cond_lemma (add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (U32.v (as_struct h0 a).mpfr_prec) (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode (I32.v ret) (as_fp h2 a);
-	ret
+	mpfr_add1sp1_post_cond_lemma (add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (U32.v (as_struct h0 a).mpfr_prec) (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode (I32.v f) (as_fp h2 a);
+	mpfr_modifies_trans_lemma a h0 h1 h2;
+	f
     end

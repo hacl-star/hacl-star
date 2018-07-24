@@ -9,7 +9,7 @@ open MPFR.Maths
 #set-options "--z3refresh --z3rlimit 50 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
    
 (* ulp definition *)
-let ulp_p (a:normal_fp) (p:pos) = unit_fp (a.exp - p)
+let ulp_p (a:normal_fp) (p:pos) = unit_dyadic (a.exp - p)
 
 let ulp (a:normal_fp) = ulp_p a a.prec
 let ufp (a:normal_fp) = ulp_p a 1
@@ -30,6 +30,34 @@ let add_one_ulp a =
 	lemma_pow2_mod (a.len - 1) (a.len - a.prec);
 	//! assert(pow2 (a.len - 1) % pow2 (a.len - a.prec) = 0);
 	{a with limb = pow2 (a.len - 1); exp = a.exp + 1}
+    end
+
+val add_one_ulp_change_len_lemma: a:normal_fp -> l:nat{l >= a.prec} -> Lemma
+    (eval (change_len (add_one_ulp a) l) =. eval (add_one_ulp (change_len a l)))
+
+let add_one_ulp_change_len_lemma a l = 
+    eval_eq_reveal_lemma (add_one_ulp a) (change_len (add_one_ulp a) l);
+    eval_eq_reveal_lemma a (change_len a l);
+    eval_eq_intro_lemma (change_len (add_one_ulp a) l) (add_one_ulp (change_len a l))
+
+val add_one_ulp_lt_lemma: a:normal_fp -> b:normal_fp -> Lemma
+    (requires (a.prec = b.prec /\ eval_abs a >. eval_abs b))
+    (ensures  (eval_abs a >=. eval_abs (add_one_ulp b)))
+    (decreases (abs (a.len - b.len)))
+
+let rec add_one_ulp_lt_lemma a b =
+    if a.len = b.len then begin
+        eval_abs_lt_reveal_lemma b a;
+        lemma_pow2_multiple_le b.limb b.len (b.len - b.prec);
+	let elb = min (a.exp - a.len) (b.exp - b.len) in
+	lemma_mul_mod_zero a.limb (pow2 (a.exp - a.len - elb)) (pow2 (b.len - b.prec));
+	lemma_mul_mod_zero b.limb (pow2 (b.exp - b.len - elb)) (pow2 (b.len - b.prec));
+	lemma_multiple_le (b.limb * pow2 (b.exp - b.len - elb)) (a.limb * pow2 (a.exp - a.len - elb)) (pow2 (b.len - b.prec));
+        assert(eval_abs a >=. eval_abs b +. ulp b)
+    end
+    else begin
+        eval_eq_reveal_lemma a (change_len a b.len);
+	add_one_ulp_lt_lemma (change_len a b.len) b
     end
 
 (* Increase precision *)
@@ -96,7 +124,7 @@ let rndz_def a p = high_mant a p
 (* RNDA definition *)
 val rnda_def: a:normal_fp -> p:pos{p < a.prec} ->
     Tot (r:normal_fp{r.prec = p /\
-        eval_abs r >=. eval_abs a /\ eval_abs a >. eval_abs r -. ulp_p a p})
+        eval_abs r >=. eval_abs a /\ eval_abs a +. ulp_p a p >. eval_abs r})
 
 let rnda_def a p =
     if eval a =. eval (rndz_def a p) then rndz_def a p
@@ -128,7 +156,7 @@ val rndu_def: a:normal_fp -> p:pos{p < a.prec} ->
         eval r >=. eval a /\ eval a >. eval r -. ulp_p a p})
 
 let rndu_def a p =
-    if eval a =. eval (rndz_def a p) || eval a <. zero_fp then rndz_def a p
+    if eval a =. eval (rndz_def a p) || eval a <. zero_dyadic then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
 (* RNDD definition *)
@@ -137,7 +165,7 @@ val rndd_def: a:normal_fp -> p:pos{p < a.prec} ->
         eval r <=. eval a /\ eval a <. eval r +. ulp_p a p})
 
 let rndd_def a p =
-    if eval a =. eval (rndz_def a p) || eval a >. zero_fp then rndz_def a p
+    if eval a =. eval (rndz_def a p) || eval a >. zero_dyadic then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
 
@@ -155,12 +183,12 @@ let rb_value_lemma a p =
     lemma_pow2_mod_mod a.limb (a.len - p) (a.len - p - 1)
 
 val rb_sb_lemma: a:normal_fp -> p:pos{p < a.prec} -> Lemma (
-    let lm_fp = eval_abs (low_mant a p) in
+    let lm = eval_abs (low_mant a p) in
     let hulp  = ulp_p (high_mant a p) (p + 1) in
-    ((rb_def a p = false /\ sb_def a p = false) <==> (lm_fp =. zero_fp)) /\
-    ((rb_def a p = false /\ sb_def a p = true ) <==> (lm_fp >. zero_fp /\ lm_fp <. hulp)) /\
-    ((rb_def a p = true  /\ sb_def a p = false) <==> (lm_fp =. hulp)) /\
-    ((rb_def a p = true  /\ sb_def a p = true ) <==> (lm_fp >. hulp)))
+    ((rb_def a p = false /\ sb_def a p = false) <==> (lm =. zero_dyadic)) /\
+    ((rb_def a p = false /\ sb_def a p = true ) <==> (lm >. zero_dyadic /\ lm <. hulp)) /\
+    ((rb_def a p = true  /\ sb_def a p = false) <==> (lm =. hulp)) /\
+    ((rb_def a p = true  /\ sb_def a p = true ) <==> (lm >. hulp)))
     
 let rb_sb_lemma a p =
     rb_value_lemma a p;
@@ -173,13 +201,6 @@ let rb_sb_lemma a p =
         lemma_mul_lt_right (pow2 (p + 1)) (a.limb % pow2 (a.len - p)) (pow2 (a.len - p - 1));
 	lemma_pow2_mul (a.len - p - 1) (p + 1)
     end
-
-val sb_bitwise_lemma: a:normal_fp -> p:pos{p < a.prec} -> Lemma
-    (requires (sb_def a p = false))
-    (ensures  (forall (i:nat{p + 1 <= i /\ i < a.len}). nth #a.len a.limb i = false))
-
-let sb_bitwise_lemma a p =
-    lemma_mod_pow2_imp_tl_zero #a.len a.limb (a.len - p - 1)
 
 val rndn_spec: a:normal_fp -> p:pos{p < a.prec} -> Tot normal_fp
     
@@ -246,66 +267,11 @@ let round_def (a:normal_fp) (p:pos{p < a.prec}) (rnd_mode:mpfr_rnd_t):
     | MPFR_RNDU -> rndu_def a p
     | MPFR_RNDD -> rndd_def a p
     | MPFR_RNDA -> rnda_def a p
-
-let round_spec (a:normal_fp) (p:pos{p < a.prec}) (rnd_mode:mpfr_rnd_t):
-    Tot (r:normal_fp{r.prec = p}) =
-    let rb, sb = rb_def a p, sb_def a p in
-    if rb = false && sb = false then rndz_def a p
-    else if MPFR_RNDN? rnd_mode then rndn_spec a p
-    else if mpfr_IS_LIKE_RNDZ rnd_mode (a.sign = -1) then rndz_def a p
-    else add_one_ulp (rndz_def a p)
-
-val round_lemma: a:normal_fp -> p:pos{p < a.prec} -> rnd_mode:mpfr_rnd_t -> Lemma
-    (round_spec a p rnd_mode == round_def a p rnd_mode)
-
-let round_lemma a p rnd_mode = rb_sb_lemma a p
-
-let round_rb_sb_spec (high:normal_fp) (rb:bool) (sb:bool) (rnd_mode:mpfr_rnd_t):
-    Tot (r:normal_fp{r.prec = high.prec}) =
-    if rb = false && sb = false then high
-    else if MPFR_RNDN? rnd_mode then begin
-	if rb = false || (sb = false && is_even high)
-	then high
-	else add_one_ulp high
-    end else if mpfr_IS_LIKE_RNDZ rnd_mode (high.sign = -1) then high
-    else add_one_ulp high
-
-val round_rb_sb_lemma_: a:normal_fp -> p:pos{p < a.prec} ->
-                       high:normal_fp{high == high_mant a p} ->
-                       rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
-    Lemma (round_rb_sb_spec high rb sb rnd_mode == round_def a p rnd_mode)
-
-let round_rb_sb_lemma_ a p high rb sb rnd_mode = rb_sb_lemma a p
-
-val round_rb_sb_lemma: a:normal_fp -> p:pos{p < a.prec} ->
-    high:normal_fp{high.prec = p /\ high.sign = a.sign /\
-                   high.exp = (high_mant a p).exp /\ high.len <= (high_mant a p).len /\
-		   high.limb * pow2 ((high_mant a p).len - high.len) = (high_mant a p).limb} ->
-    rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t -> Lemma
-    (eval (round_rb_sb_spec high rb sb rnd_mode) =. eval (round_def a p rnd_mode))
-    
-let round_rb_sb_lemma a p high rb sb rnd_mode =
-    round_rb_sb_lemma_ a p (high_mant a p) rb sb rnd_mode;
-    assume(is_even high = is_even (high_mant a p));
-    assume(eval (add_one_ulp high) =. eval (add_one_ulp (high_mant a p)));
-    assume(eval high =. eval (high_mant a p));
-    assert(eval (round_rb_sb_spec high rb sb rnd_mode) =. eval (round_rb_sb_spec (high_mant a p) rb sb rnd_mode))
-
-(* Some normal_fp will convert to singular number of mpfr_fp
- * This is used to check if the conversion is correct *)
-let normal_to_mpfr_cond (a:normal_fp{mpfr_PREC_COND a.prec})
-                        (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
-    if eval_abs a >. mpfr_overflow_bound a.prec then
-        (MPFR_INF? r.flag /\ r.sign = a.sign)
-    else if eval_abs a <. mpfr_underflow_bound a.prec then
-        (valid_zero_cond r /\ r.sign = a.sign)
-    else
-        (valid_num_cond r /\ eval r =. eval a)
 	
 (* This is used to check if the rounding from a normal_fp to a mpfr_fp is correct *)
 let mpfr_round_cond (a:normal_fp) (p:pos{p < a.prec /\ mpfr_PREC_COND p}) (rnd_mode:mpfr_rnd_t)
-                    (r:mpfr_fp{r.prec = p}): GTot Type0 =
-    normal_to_mpfr_cond (round_def a p rnd_mode) r
+                    (r:mpfr_fp): GTot Type0 =
+    r.prec = p /\ normal_to_mpfr_cond (round_def a p rnd_mode) r
 
 (* Every MPFR function will return an integer, aka ternary value,
  * to indicate if the calculated result is greater or lesser than the exact result.
@@ -314,14 +280,3 @@ let mpfr_ternary_cond (f:int) (a:normal_fp) (r:mpfr_fp): GTot Type0 =
     ((MPFR_INF? r.flag /\ r.sign =  1) \/ (valid_fp_cond r /\ eval r >. eval a) <==> f > 0) /\
     ((MPFR_INF? r.flag /\ r.sign = -1) \/ (valid_fp_cond r /\ eval r <. eval a) <==> f < 0) /\
     ((valid_fp_cond r /\ eval r =. eval a) <==> f = 0)
-
-val mpfr_ternary_cond_lemma: a:normal_fp -> p:pos{p < a.prec} ->
-    high:normal_fp{high.prec = p /\ high.sign = (high_mant a p).sign /\
-                   high.exp = (high_mant a p).exp /\ high.len <= (high_mant a p).len /\
-		   high.limb * pow2 ((high_mant a p).len - high.len) = (high_mant a p).limb} ->
-    rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
-    f:int -> r:mpfr_fp -> Lemma
-    (requires (mpfr_ternary_cond f (round_rb_sb_spec high rb sb rnd_mode) r))
-    (ensures  (mpfr_ternary_cond f a r))
-
-let mpfr_ternary_cond_lemma a p high rb sb rnd_mode f r = admit()

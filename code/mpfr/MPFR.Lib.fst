@@ -306,3 +306,10 @@ let mpfr_modifies a h0 h1 =
     (as_struct h0 a).mpfr_prec = (as_struct h1 a).mpfr_prec /\
     (as_struct h0 a).mpfr_d == (as_struct h1 a).mpfr_d /\
     modifies_2 a (as_struct h1 a).mpfr_d h0 h1
+
+val mpfr_modifies_trans_lemma: a:mpfr_ptr -> h0:mem -> h1:mem -> h2:mem -> Lemma
+    (requires (mpfr_modifies a h0 h1 /\ mpfr_modifies a h1 h2))
+    (ensures  (mpfr_modifies a h0 h2))
+    [SMTPat (mpfr_modifies a h0 h1); SMTPat (mpfr_modifies a h1 h2)]
+
+let mpfr_modifies_trans_lemma a h0 h1 h2 = ()
