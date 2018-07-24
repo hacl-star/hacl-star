@@ -41,48 +41,9 @@ let eckem_generate () =
   kpub, Some kpriv
 
 
+
 (** ECKEM Encryption *)
 val encrypt:
-    #olen: size_nat
-  -> iv: eckem_iv_s
-  -> receiver: eckem_key_public_s
-  -> sender: eckem_key_private_s
-  -> len: size_nat
-  -> plaintext: lbytes len ->
-  Tot (lbytes olen)
-
-let encrypt #olen iv receiver sender len plaintext =
-  let ek: lbytes 32 = Spec.Curve25519.scalarmult receiver sender in
-  let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
-  let key = sub ek 0 Spec.AESGCM.keylen in
-  let c = Spec.AESGCM.aead_encrypt key 12 iv len plaintext 0 empty in
-  c
-
-
-(** ECKEM Decryption *)
-val decrypt:
-    #olen: size_nat
-  -> iv: eckem_iv_s
-  -> sender: eckem_key_public_s
-  -> receiver: eckem_key_private_s
-  -> len: size_nat
-  -> ciphertext: lbytes len ->
-  Tot (lbytes olen)
-
-let decrypt #olen iv sender receiver len ciphertext =
-  let ek: lbytes 32 = Spec.Curve25519.scalarmult sender receiver in
-  let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
-  let key = sub ek 0 Spec.AESGCM.keylen in
-  let p = Spec.AESGCM.aead_decrypt key 12 iv len ciphertext 0 empty in
-  p
-
-
-///
-/// Alternative API
-///
-
-(** ECKEM Encryption *)
-val encrypt2:
     #olen: size_nat
   -> receiver: eckem_key_public_s
   -> sender: eckem_key_private_s
@@ -90,7 +51,7 @@ val encrypt2:
   -> input: lbytes len ->
   Tot (lbytes olen)
 
-let encrypt2 #olen receiver sender len input =
+let encrypt #olen receiver sender len input =
   let iv = crypto_random vsize_eckem_iv in
   let ek: lbytes 32 = Spec.Curve25519.scalarmult receiver sender in
   let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
@@ -103,7 +64,7 @@ let encrypt2 #olen receiver sender len input =
 
 
 (** ECKEM Decryption *)
-val decrypt2:
+val decrypt:
     #olen: size_nat
   -> sender: eckem_key_public_s
   -> receiver: eckem_key_private_s
@@ -111,11 +72,52 @@ val decrypt2:
   -> input: lbytes len ->
   Tot (lbytes olen)
 
-let decrypt2 #olen sender receiver len input =
+let decrypt #olen sender receiver len input =
   let iv = sub input 0 vsize_eckem_iv in
   let ek: lbytes 32 = Spec.Curve25519.scalarmult sender receiver in
   let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
   let key = sub ek 0 Spec.AESGCM.keylen in
   let ciphertext = sub input vsize_eckem_iv (len - vsize_eckem_iv) in
+  let p = Spec.AESGCM.aead_decrypt key 12 iv len ciphertext 0 empty in
+  p
+
+
+///
+/// Alternative API
+///
+
+
+(** ECKEM Encryption *)
+val encrypt_explicit_iv:
+    #olen: size_nat
+  -> iv: eckem_iv_s
+  -> receiver: eckem_key_public_s
+  -> sender: eckem_key_private_s
+  -> len: size_nat
+  -> plaintext: lbytes len ->
+  Tot (lbytes olen)
+
+let encrypt_explicit_iv #olen iv receiver sender len plaintext =
+  let ek: lbytes 32 = Spec.Curve25519.scalarmult receiver sender in
+  let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
+  let key = sub ek 0 Spec.AESGCM.keylen in
+  let c = Spec.AESGCM.aead_encrypt key 12 iv len plaintext 0 empty in
+  c
+
+
+(** ECKEM Decryption *)
+val decrypt_explicit_iv:
+    #olen: size_nat
+  -> iv: eckem_iv_s
+  -> sender: eckem_key_public_s
+  -> receiver: eckem_key_private_s
+  -> len: size_nat
+  -> ciphertext: lbytes len ->
+  Tot (lbytes olen)
+
+let decrypt_explicit_iv #olen iv sender receiver len ciphertext =
+  let ek: lbytes 32 = Spec.Curve25519.scalarmult sender receiver in
+  let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
+  let key = sub ek 0 Spec.AESGCM.keylen in
   let p = Spec.AESGCM.aead_decrypt key 12 iv len ciphertext 0 empty in
   p
