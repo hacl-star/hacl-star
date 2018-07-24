@@ -193,11 +193,11 @@ argon2i.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Argon2i.fst tes
 	./argon2i.exe
 
 
-hmac.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
+hmac.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
 	mkdir -p hmac-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
 	@echo 'let _ = test()' >> hmac-ml/Spec_HMAC_Test.ml
-	$(OCAMLOPT) -I hmac-ml hmac-ml/Lib_IntTypes.ml hmac-ml/Lib_RawIntTypes.ml hmac-ml/Lib_Sequence.ml hmac-ml/Lib_Stateful.ml hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Hash.ml hmac-ml/Spec_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
+	$(OCAMLOPT) -I hmac-ml hmac-ml/Lib_IntTypes.ml hmac-ml/Lib_RawIntTypes.ml hmac-ml/Lib_Sequence.ml hmac-ml/Lib_ByteSequence.ml hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Hash.ml hmac-ml/Spec_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
 	./hmac.exe
 
 hkdf.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst tests/Spec.HKDF.Test.fst

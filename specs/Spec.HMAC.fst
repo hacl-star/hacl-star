@@ -77,7 +77,7 @@ let finish (a:Hash.algorithm) (key:lbytes (Hash.size_block a)) (hash:Hash.state 
   (* Step 6: append "result of step 4" to "result of step 5" *)
   (* Step 7: apply H to "result of step 6" *)
   let hash0 = Hash.update_block a s5 (Hash.init a) in
-  let hash1 = Hash.update_last a 1 (Hash.size_hash a) s4 hash0 in
+  let hash1 = Hash.update_last a (Hash.size_hash a) s4 hash0 in
   let hash2 = Hash.finish a hash1 in
   hash2
 
