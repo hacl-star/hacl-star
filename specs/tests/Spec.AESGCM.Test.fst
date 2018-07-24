@@ -295,12 +295,12 @@ let test () =
   test_aesgcm test1_msg_length (createL test1_msg) test1_aad_length (createL test1_aad) test1_nonce_length (createL test1_nonce) (createL test1_key) (createL test1_expected) 1;
   test_ghash (createL test2_ghash) test2_c_length (createL test2_ciphertext) test2_aad_length (createL test2_aad) (createL test2_key) 2;
   test_aesgcm test2_msg_length (createL test2_msg) test2_aad_length (createL test2_aad) test2_nonce_length (createL test2_nonce) (createL test2_key) (createL test2_expected) 2;
-  (* test_ghash test3_ghash test3_c_length test3_ciphertext test3_aad_length test3_aad test3_key 3; *)
-  (* test_aesgcm test3_msg_length test3_msg test3_aad_length test3_aad test3_nonce_length test3_nonce test3_key test3_expected 3; *)
-  (* test_ghash test4_ghash test4_c_length test4_ciphertext test4_aad_length test4_aad test4_key 4; *)
-  (* test_aesgcm test4_msg_length test4_msg test4_aad_length test4_aad test4_nonce_length test4_nonce test4_key test4_expected 4; *)
-  (* test_ghash test5_ghash test5_c_length test5_ciphertext test5_aad_length test5_aad test5_key 5; *)
-  (* test_aesgcm test5_msg_length test5_msg test5_aad_length test5_aad test5_nonce_length test5_nonce test5_key test5_expected 5; *)
-  (* test_ghash test6_ghash test6_c_length test6_ciphertext test6_aad_length test6_aad test6_key 6; *)
-  (* test_aesgcm test6_msg_length test6_msg test6_aad_length test6_aad test6_nonce_length test6_nonce test6_key test6_expected 6; *)
+  test_ghash (createL test3_ghash) test3_c_length (createL test3_ciphertext) test3_aad_length (createL test3_aad) (createL test3_key) 3;
+  test_aesgcm test3_msg_length (createL test3_msg) test3_aad_length (createL test3_aad) test3_nonce_length (createL test3_nonce) (createL test3_key) (createL test3_expected) 3;
+  test_ghash (createL test4_ghash) test4_c_length (createL test4_ciphertext) test4_aad_length (createL test4_aad) (createL test4_key) 4;
+  test_aesgcm test4_msg_length (createL test4_msg) test4_aad_length (createL test4_aad) test4_nonce_length (createL test4_nonce) (createL test4_key) (createL test4_expected) 4;
+  test_ghash (createL test5_ghash) test5_c_length (createL test5_ciphertext) test5_aad_length (createL test5_aad) (createL test5_key) 5;
+  test_aesgcm test5_msg_length (createL test5_msg) test5_aad_length (createL test5_aad) test5_nonce_length (createL test5_nonce) (createL test5_key) (createL test5_expected) 5;
+  test_ghash (createL test6_ghash) test6_c_length (createL test6_ciphertext) test6_aad_length (createL test6_aad) (createL test6_key) 6;
+  test_aesgcm test6_msg_length (createL test6_msg) test6_aad_length (createL test6_aad) test6_nonce_length (createL test6_nonce) (createL test6_key) (createL test6_expected) 6;
   ()
