@@ -18,6 +18,7 @@ val state: a:algorithm -> Type0
 
 (* Functions to access algorithm parameters *)
 (* Enforcing some constraints propagated from HMAC and HKDF *)
+inline_for_extraction
 let size_block (a:algorithm) : Tot size_nat =
   match a with
   | SHA2_224 -> 64
@@ -25,6 +26,7 @@ let size_block (a:algorithm) : Tot size_nat =
   | SHA2_384 -> 128
   | SHA2_512 -> 128
 
+inline_for_extraction
 let size_hash (a:algorithm) : Tot size_nat =
   match a with
   | SHA2_224 -> 28
