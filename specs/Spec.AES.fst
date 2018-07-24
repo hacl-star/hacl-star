@@ -22,13 +22,13 @@ open Lib.ByteSequence
    let finv a = finv #gf8 (to_elem (u8 0x1b)) a
 *)
 
-(* Specialized imlplementation of GF(8) field
+(* Specialized imlplementation of GF(8) field *)
 
 let elem = uint8
 let to_elem x = x
 let from_elem x = x
 let zero = u8 0
-let fadd (a:uint8) (b:uint8) : uint8 = a ^. b
+(* let fadd (a:uint8) (b:uint8) : uint8 = a ^. b *)
 let fmul (a:uint8) (b:uint8) : uint8 =
   let (p,a,b) =
     repeat 7 (fun (p,a,b) ->
@@ -66,12 +66,13 @@ let sbox input =
   let s = finv input in
   let r: uint8 = logxor #U8 s ((s <<<. u32 1) ^. (s <<<. u32 2) ^. (s <<<. u32 3) ^. (s <<<. u32 4) ^. (u8 99)) in
     r
-*)
+
 
 (* An S-Box circuit taken from Boyar-Peralta: http://cs-www.cs.yale.edu/homes/peralta/CircuitStuff/AESDEPTH16SIZE125 *)
 let (^~.) x y = logand #U8 (lognot #U8 (x ^. y)) (u8 1)
 
-let sbox input =
+(* TODO: re-enable. but this is so slow.... *)
+(* let sbox input =
   let u0 = input >>. u32 7 in
   let u1 = (input &. u8 64) >>. u32 6 in
   let u2 = (input &. u8 32) >>. u32 5 in
@@ -213,7 +214,7 @@ let sbox input =
   let s1 = t109 ^~. t140 in
     //uint8_t output = s0 ^. (s1 << 1) ^. (s2 << 2) ^. (s3 << 3) ^. (s4 << 4) ^. (s5 << 5) ^. (s6 << 6) ^. (s7 << 7);
   let output = s7 ^. (s6 <<. u32 1) ^. (s5 <<. u32 2) ^. (s4 <<. u32 3) ^. (s3 <<. u32 4) ^. (s2 <<. u32 5) ^. (s1 <<. u32 6) ^. (s0 <<. u32 7) in
-  output
+  output *)
 
 
 type block = lseq uint8 16
@@ -373,37 +374,46 @@ let aes128_block (k:block) (n:lseq uint8 12) (c:size_nat) : block =
   let output = block_cipher key_ex input in
   output
 
+let aes128_encrypt_block (k:block) (m:block) : block =
+  let key_ex = key_expansion k in
+  let output = block_cipher key_ex m in
+  output
+
 noeq type aes_state = {
   key_ex: lseq uint8 (11 `op_Multiply` 16);
   block:  lseq uint8 16;
+  ctr:    size_nat;
 }
 
-let aes_init (k:block) (n:lseq uint8 12) : aes_state =
+let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lseq uint8 n_len) : aes_state =
   let input = create 16 (u8 0) in
-  let input = repeati 12 (fun i b -> b.[i] <- n.[i]) input in
+  let input = repeati n_len (fun i b -> b.[i] <- n.[i]) input in
   let key_ex = key_expansion k in
+  let ctr = if n_len = 12 then 0 else 1 in
   {key_ex = key_ex;
-   block  = input}
+   block  = input;
+   ctr    = ctr}
 
 let aes_set_counter (st:aes_state) (c:size_nat) : Tot aes_state =
-  let ctrby = nat_to_bytes_be 4 c in
-  let input = repeati 4 (fun i b -> b.[12+i] <- ctrby.[i]) st.block in
+  let bint = nat_from_bytes_be st.block in
+  let ctr = c - st.ctr in
+  let input = nat_to_bytes_be 16 (bint + ctr) in
   {st with block = input}
 
 let aes_key_block (st:aes_state) : Tot block =
   block_cipher st.key_ex st.block
 
-let aes_key_block0 (k:block) (n:lseq uint8 12) : Tot block =
-  let st = aes_init k n in
+let aes_key_block0 (k:block) (n_len:size_nat{n_len <= 16}) (n:lseq uint8 n_len) : Tot block =
+  let st = aes_init k n_len n in
   aes_key_block st
 
-let aes_key_block1 (k:block) (n:lseq uint8 12) : Tot block =
-  let st = aes_init k n in
+let aes_key_block1 (k:block) (n_len:size_nat{n_len <= 16}) (n:lseq uint8 n_len) : Tot block =
+  let st = aes_init k n_len n in
   let st = aes_set_counter st 1 in
   aes_key_block st
 
 let aes128_cipher =
-  Spec.CTR.Cipher aes_state 16 12 max_size_t 16 aes_init aes_set_counter aes_key_block
+  Spec.CTR.Cipher aes_state 16 max_size_t 16 aes_init aes_set_counter aes_key_block
 
-let aes128_encrypt_bytes key nonce counter n m =
-  Spec.CTR.counter_mode aes128_cipher key nonce counter n m
+let aes128_encrypt_bytes key n_len nonce counter n m =
+  Spec.CTR.counter_mode aes128_cipher key n_len nonce counter n m
