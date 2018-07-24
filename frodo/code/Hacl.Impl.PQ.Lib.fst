@@ -203,98 +203,136 @@ let matrix_sub #n1 #n2 a b =
   let h1 = ST.get() in
   M.extensionality (as_matrix h1 b) (M.sub (as_matrix h0 a) (as_matrix h0 b))
 
-(*
-val sum:n:size_nat -> f:(j:size_nat{j < n} -> uint16) -> uint16
-let sum n f = repeati n (fun j res -> res +. f j) (u16 0)
-
-val matrix_mul:
-  #n1:size_nat ->
-  #n2:size_nat{n1 * n2 < max_size_t} ->
-  #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t} ->
-  a:matrix_t n1 n2 ->
-  b:matrix_t n2 n3 ->
-  Tot (c:matrix_t n1 n3{ forall i k. c.(i, k) == sum n2 (fun j -> a.(i, j) *. b.(j, k))})
-let matrix_mul #n1 #n2 #n3 a b =
-  let c = matrix_create n1 n3 in
-  repeati_inductive n1
-  (fun i c -> forall (i1:size_nat{i1 < i}) (k:size_nat{k < n3}). c.(i1, k) == sum n2 (fun j -> a.(i1, j) *. b.(j, k)))
-  (fun i c ->
-    repeati_inductive n3
-    (fun k c0 -> (forall (k1:size_nat{k1 < k}). c0.(i, k1) == sum n2 (fun j -> a.(i, j) *. b.(j, k1))) /\
-               (forall (i1:size_nat{i1 < n1 /\ i <> i1}) (k:size_nat{k < n3}). c0.(i1, k) == c.(i1, k)))
-    (fun k c0 ->
-      c0.(i, k) <- sum n2 (fun j -> a.(i, j) *. b.(j, k))
-    ) c
-  ) c
-*)
-
-(*
-val sum:
-  n:size_t ->
-  f:(j:size_nat{j < v n} -> uint16) ->
-  Stack uint16
-   (requires (fun h -> True))
-   (ensures (fun h0 r h1 -> modifies loc_none h0 h1 /\ r == M.sum (v n) f))
-let sum n f =
-  push_frame();
-  let res:lbuffer uint16 1 = create (size 1) (u16 0) in
-  let h0 = ST.get() in
-  Lib.Loops.for (size 0) n
-  (fun h j -> B.live h res /\ modifies (loc_buffer res) h0 h)
-  (fun j ->
-    let res0 = res.(size 0) in
-    res.(size 0) <- res0 +. f (v j));
-  let res = res.(size 0) in
-  pop_frame();
-  res
-*)
-
 inline_for_extraction noextract private
 val mul_inner:
-  #n1:size_t ->
-  #n2:size_t{v n1 * v n2 < max_size_t} ->
-  #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t} ->
-  a:matrix_t n1 n2 ->
-  b:matrix_t n2 n3 ->
-  c:matrix_t n1 n3 ->
-  i:size_t{v i < v n1} ->
-  k:size_t{v k < v n3} ->
-  Stack unit
-    (requires (fun h ->
-      B.live h a /\ B.live h b /\ B.live h c /\ B.disjoint a c /\ B.disjoint b c))
-    (ensures (fun h0 _ h1 -> B.live h1 c /\ modifies (loc_buffer c) h0 h1))
-let mul_inner #n1 #n2 #n3 a b c i k =
-  mset c i k (u16 0);
+    #n1:size_t
+  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> a:matrix_t n1 n2
+  -> b:matrix_t n2 n3
+  -> i:size_t{v i < v n1}
+  -> k:size_t{v k < v n3}
+  -> Stack uint16
+    (requires (fun h -> B.live h a /\ B.live h b))
+    (ensures (fun h0 r h1 -> modifies loc_none h0 h1 /\
+      r == M.mul_inner #(v n1) #(v n2) #(v n3) (as_matrix h0 a) (as_matrix h0 b) (v i) (v k)))
+#reset-options "--z3rlimit 50 --max_fuel 1"
+let mul_inner #n1 #n2 #n3 a b i k =
+  push_frame();
   let h0 = ST.get() in
-  Lib.Loops.for (size 0) n2
-  (fun h1 j ->
-    B.live h1 a /\ B.live h1 b /\ B.live h1 c /\ B.disjoint a c /\ B.disjoint b c /\
-    modifies (loc_buffer c) h0 h1)
-  (fun j ->
-    let abij = a.[i, j] *. b.[j, k] in
-    let cik = c.[i, k] in
-    c.[i, k] <- cik +. abij
-  )
+  [@ inline_let ]
+  let f = (fun l -> get h0 a (v i) l *. get h0 b l (v k)) in
+  [@ inline_let ]
+  let f1 (j:size_nat{j <= v n2}) = M.sum_ #(v n2) f j in
+  let res:lbuffer uint16 1 = create (size 1) (u16 0) in
+  let h1 = ST.get() in
+
+  let inv (h2: HS.mem) (i:nat{i <= v n2}): Type0 =
+    B.live h1 res /\ B.live h2 res /\
+    modifies (loc_buffer res) h1 h2 /\
+    B.get h2 res 0 == f1 i in
+  let f' (j:size_t{ 0 <= v j /\ v j < v n2}): Stack unit
+    (requires (fun h -> inv h (v j)))
+    (ensures (fun h_1 _ h_2 -> inv h_2 (v j + 1)))
+  =
+    let aij = mget a i j in
+    let bjk = mget b j k in
+    let res0 = res.(size 0) in
+    res.(size 0) <- res0 +. aij *. bjk in
+  Lib.Loops.for (size 0) n2 inv f';
+  let res = res.(size 0) in
+  M.sum_extensionality (v n2) f (fun l -> get h0 a (v i) l *. get h0 b l (v k)) (v n2);
+  assert (res == M.mul_inner #(v n1) #(v n2) #(v n3) (as_matrix h0 a) (as_matrix h0 b) (v i) (v k));
+  pop_frame();
+  res
+
+private unfold
+val mul_inner_inv:
+  #n1:size_t
+  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> h0:HS.mem
+  -> h1:HS.mem
+  -> h2:HS.mem
+  -> a:matrix_t n1 n2
+  -> b:matrix_t n2 n3
+  -> c:matrix_t n1 n3
+  -> f:(k:size_nat{k < v n3} -> GTot uint16)
+  -> i:size_t{v i < v n1}
+  -> k:size_nat
+  -> Type0
+let mul_inner_inv #n1 #n2 #n3 h0 h1 h2 a b c f i k =
+  B.live h2 a /\ B.live h2 b /\ B.live h2 c /\
+  B.disjoint a c /\ B.disjoint b c /\
+  modifies (loc_buffer c) h1 h2 /\
+  k <= v n3 /\
+  (forall (i1:size_nat{i1 < v i}) (k:size_nat{k < v n3}). get h2 c i1 k == get h1 c i1 k) /\
+  (forall (k1:size_nat{k1 < k}). get h2 c (v i) k1 == f k1) /\
+  (forall (k1:size_nat{k <= k1 /\ k1 < v n3}). get h2 c (v i) k1 == get h0 c (v i) k1) /\
+  (forall (i1:size_nat{v i < i1 /\ i1 < v n1}) (k:size_nat{k < v n3}). get h2 c i1 k == get h0 c i1 k) /\
+  as_matrix h0 a == as_matrix h2 a /\
+  as_matrix h0 b == as_matrix h2 b
+
+inline_for_extraction noextract private
+val mul_inner1:
+  #n1:size_t
+  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> h0:HS.mem
+  -> h1:HS.mem
+  -> a:matrix_t n1 n2
+  -> b:matrix_t n2 n3
+  -> c:matrix_t n1 n3
+  -> i:size_t{v i < v n1}
+  -> k:size_t{v k < v n3}
+  -> f:(k:size_nat{k < v n3} -> GTot (res:uint16{res == M.sum #(v n2) (fun l -> get h0 a (v i) l *. get h0 b l k)}))
+  -> Stack unit
+    (requires fun h2 -> mul_inner_inv #n1 #n2 #n3 h0 h1 h2 a b c f i (v k))
+    (ensures  fun _ _ h2 -> mul_inner_inv #n1 #n2 #n3 h0 h1 h2 a b c f i (v k + 1))
+let mul_inner1 #n1 #n2 #n3 h0 h1 a b c i k f =
+  assert (M.mul_inner #(v n1) #(v n2) #(v n3) (as_matrix h0 a) (as_matrix h0 b) (v i) (v k) ==
+          M.sum #(v n2) (fun l -> get h0 a (v i) l *. get h0 b l (v k)));
+  mset c i k (mul_inner #n1 #n2 #n3 a b i k);
+  let h2 = ST.get () in
+  assert (get h2 c (v i) (v k) == f (v k))
 
 val matrix_mul:
-  #n1:size_t ->
-  #n2:size_t{v n1 * v n2 < max_size_t} ->
-  #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t} ->
-  a:matrix_t n1 n2 ->
-  b:matrix_t n2 n3 ->
-  c:matrix_t n1 n3 ->
-  Stack unit
-    (requires (fun h -> B.live h a /\ B.live h b /\
-      B.live h c /\ B.disjoint a c /\ B.disjoint b c))
-    (ensures (fun h0 _ h1 -> B.live h1 c /\ modifies (loc_buffer c) h0 h1))
+    #n1:size_t
+  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> a:matrix_t n1 n2
+  -> b:matrix_t n2 n3
+  -> c:matrix_t n1 n3
+  -> Stack unit
+    (requires (fun h -> B.live h a /\ B.live h b /\ B.live h c /\
+      B.disjoint a c /\ B.disjoint b c))
+    (ensures (fun h0 _ h1 -> B.live h1 c /\ modifies (loc_buffer c) h0 h1 /\
+      as_matrix h1 c == M.mul #(v n1) #(v n2) #(v n3) (as_matrix h0 a) (as_matrix h0 b)))
+#reset-options "--z3rlimit 50 --max_fuel 1"
 [@"c_inline"]
 let matrix_mul #n1 #n2 #n3 a b c =
   let h0 = ST.get () in
-  loop_nospec #h0 n1 c
-  (fun i ->
-    let h1 = ST.get () in
-    loop_nospec #h1 n3 c
-    (fun k ->
-      mul_inner #n1 #n2 #n3 a b c i k
-    )
-  )
+  [@ inline_let ]
+  let f (i:size_nat{i < v n1}):
+    (k:size_nat{k < v n3} -> GTot (res:uint16{res == M.sum #(v n2) (fun l -> get h0 a i l *. get h0 b l k)}))
+  = fun k -> M.sum #(v n2) (fun l -> get h0 a i l *. get h0 b l k) in
+
+  Lib.Loops.for (size 0) n1
+    (fun h1 i -> B.live h1 a /\ B.live h1 b /\ B.live h1 c /\
+      modifies (loc_buffer c) h0 h1 /\ i <= v n1 /\
+      (forall (i1:nat{i1 < i}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k) /\
+      (forall (i1:nat{i <= i1 /\ i1 < v n1}) (k:nat{k < v n3}). get h1 c i1 k == get h0 c i1 k))
+    (fun i ->
+      let h1 = ST.get() in
+      [@ inline_let ]
+      let f1 = f (v i) in
+      Lib.Loops.for (size 0) n3
+        (fun h2 k -> mul_inner_inv #n1 #n2 #n3 h0 h1 h2 a b c f1 i k)
+        (fun k -> mul_inner1 #n1 #n2 #n3 h0 h1 a b c i k f1);
+      let h1 = ST.get () in
+      assert (forall (i1:nat{i1 < v i}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k);
+      assert (forall (k:nat{k < v n3}). get h1 c (v i) k == f (v i) k);
+      assume (forall (i1:nat{i1 < v i + 1}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k) //FIXME
+    );
+  let h2 = ST.get() in
+  M.extensionality (as_matrix h2 c) (M.mul #(v n1) #(v n2) #(v n3) (as_matrix h0 a) (as_matrix h0 b))

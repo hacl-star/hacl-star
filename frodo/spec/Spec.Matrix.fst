@@ -122,7 +122,7 @@ let map2 #n1 #n2 f a b =
     (fun i c -> forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}). c.(i0,j) == f a.(i0,j) b.(i0,j))
     (fun i c ->
       repeati_inductive n2
-        (fun j c0 -> 
+        (fun j c0 ->
           (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}). c0.(i0,j) == c.(i0,j)) /\
           (forall (j0:size_nat{j0 < j}). c0.(i,j0) == f a.(i,j0) b.(i,j0)))
         (fun j c' -> c'.(i,j) <- f a.(i,j) b.(i,j))
@@ -147,18 +147,31 @@ val sub:
 let sub #n1 #n2 a b =
   map2 sub_mod a b
 
-val sum_:
-    n:size_nat
-  -> f:(j:size_nat{j < n} -> uint16)
-  -> tmp0:uint16
-  -> i:size_nat{i <= n}
-  -> Tot uint16
-  (decreases (n - i))
-let rec sum_ n f tmp0 i =
-  if i < n then sum_ n f (tmp0 +. f i) (i + 1)
-  else tmp0
 
-let sum n f = sum_ n f (u16 0) 0
+val sum_:
+    #n:size_nat
+  -> f:(j:size_nat{j < n} -> GTot uint16)
+  -> i:size_nat{i <= n}
+  -> GTot uint16
+  (decreases i)
+let rec sum_ #n f i =
+  if i = 0 then u16 0
+  else sum_ #n f (i - 1) +. f (i - 1)
+
+let sum #n f = sum_ #n f n
+
+val sum_extensionality:
+  n:size_nat
+  -> f:(i:size_nat{i < n} -> GTot uint16)
+  -> g:(i:size_nat{i < n} -> GTot uint16)
+  -> i:size_nat{i <= n} -> Lemma
+  (requires (forall (i:size_nat{i < n}). f i == g i))
+  (ensures (sum_ #n f i == sum_ #n g i))
+  (decreases i)
+#reset-options "--z3rlimit 50 --max_fuel 1"
+let rec sum_extensionality n f g i =
+  if i = 0 then ()
+  else sum_extensionality n f g (i - 1)
 
 val mul_inner:
     #n1:size_nat
@@ -166,51 +179,39 @@ val mul_inner:
   -> #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t}
   -> a:matrix n1 n2
   -> b:matrix n2 n3
-  -> c:matrix n1 n3
   -> i:size_nat{i < n1}
   -> k:size_nat{k < n3}
-  -> Pure (matrix n1 n3)
-  (requires True)
-  (ensures fun c1 ->
-    c1.(i, k) == sum n2 (fun j -> a.(i, j) *. b.(j, k)) /\
-    (forall (i1:size_nat{i1 < n1 /\ i1 <> i}) (k1:size_nat{k1 < n3 /\ k1 <> k}). c1.(i1, k1) == c.(i1, k1)))
-let mul_inner #n1 #n2 #n3 a b c i k =
-  let c = c.(i, k) <- u16 0 in
-  repeati_inductive n2
-  (fun j c1 -> c1.(i, k) == sum j (fun j -> a.(i, j) *. b.(j, k)) /\
-            (forall (i1:size_nat{i1 < n1 /\ i1 <> i}) (k1:size_nat{k1 < n3 /\ k1 <> k}). c1.(i1, k1) == c.(i1, k1)))
-  (fun j c ->
-    assert (c.(i, k) == sum j (fun j -> a.(i, j) *. b.(j, k)));
-    let c1 = c.(i, k) <- c.(i, k) +. a.(i, j) *. b.(j, k) in
-    assert (c1.(i, k) == sum j (fun j -> a.(i, j) *. b.(j, k)) +. a.(i, j) *. b.(j, k));
-    assume (c1.(i, k) == sum (j + 1) (fun j -> a.(i, j) *. b.(j, k)));
-    c1
-  ) c
+  -> (res:uint16{res == sum #n2 (fun l -> a.(i, l) *. b.(l, k))})
+let mul_inner #n1 #n2 #n3 a b i k =
+  let f = (fun l -> a.(i, l) *. b.(l, k)) in
+  let f1 (j:size_nat{j <= n2}) = sum_ #n2 f j in
+  let res =
+    repeati_inductive n2
+      (fun j res -> res == f1 j)
+      (fun j res ->
+        res +. a.(i, j) *. b.(j, k)
+      ) (u16 0) in
+  sum_extensionality n2 f (fun l -> a.(i, l) *. b.(l, k)) n2;
+  res
 
 val mul:
-  #n1:size_nat ->
-  #n2:size_nat{n1 * n2 < max_size_t} ->
-  #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t} ->
-  a:matrix n1 n2 ->
-  b:matrix n2 n3 ->
-  Tot (c:matrix n1 n3{ forall i k. c.(i, k) == sum n2 (fun j -> a.(i, j) *. b.(j, k))})
-  #reset-options "--z3rlimit 150 --max_fuel 0"
+    #n1:size_nat
+  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t}
+  -> a:matrix n1 n2
+  -> b:matrix n2 n3
+  -> c:matrix n1 n3{ forall i k. c.(i, k) == sum #n2 (fun l -> a.(i, l) *. b.(l, k))}
+  #reset-options "--z3rlimit 50 --max_fuel 1"
 let mul #n1 #n2 #n3 a b =
   let c = create n1 n3 in
+
   repeati_inductive n1
-  (fun i c -> forall (i1:size_nat{i1 < i}) (k:size_nat{k < n3}). c.(i1, k) == sum n2 (fun j -> a.(i1, j) *. b.(j, k)))
-  (fun i c ->
-    repeati_inductive n3
-    (fun k c0 -> (forall (k1:size_nat{k1 < k}). c0.(i, k1) == sum n2 (fun j -> a.(i, j) *. b.(j, k1))) /\
-               (forall (i1:size_nat{i1 < n1 /\ i <> i1}) (k:size_nat{k < n3}). c0.(i1, k) == c.(i1, k)))
-    (fun k c0 ->
-      let c1 = mul_inner #n1 #n2 #n3 a b c0 i k in
-      assume (forall (k1:size_nat{k1 < k + 1}). c1.(i, k1) == sum n2 (fun j -> a.(i, j) *. b.(j, k1)) /\
-      (forall (i1:size_nat{i1 < n1 /\ i <> i1}) (k:size_nat{k < n3}). c1.(i1, k) == c.(i1, k)));
-      //admit();
-      //let c12 = c0.(i, k) <- sum n2 (fun j -> a.(i, j) *. b.(j, k)) in
-      //let c1 = c0.(i, k) <- sum n2 (fun j -> a.(i, j) *. b.(j, k)) in
-      //assume (c1 == c12); // /\ (forall (i1:size_nat{i1 < n1 /\ i1 <> i}) (k1:size_nat{k1 < n3 /\ k1 <> k}). c1.(i1, k1) == c0.(i1, k1)));
-      c1
+    (fun i c -> forall (i1:size_nat{i1 < i}) (k:size_nat{k < n3}). c.(i1, k) == sum #n2 (fun l -> a.(i1, l) *. b.(l, k)))
+    (fun i c ->
+      repeati_inductive n3
+        (fun k c0 -> (forall (k1:size_nat{k1 < k}). c0.(i, k1) == sum #n2 (fun l -> a.(i, l) *. b.(l, k1))) /\
+                   (forall (i1:size_nat{i1 < n1 /\ i <> i1}) (k:size_nat{k < n3}). c0.(i1, k) == c.(i1, k)))
+        (fun k c0 ->
+          c0.(i, k) <- mul_inner #n1 #n2 #n3 a b i k
+        ) c
     ) c
-  ) c
