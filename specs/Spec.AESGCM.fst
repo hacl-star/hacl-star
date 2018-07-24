@@ -1,9 +1,9 @@
 module Spec.AESGCM
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 module AES = Spec.AES
 module GF = Spec.GF128
@@ -12,7 +12,7 @@ let keylen: size_nat =   16
 let blocksize: size_nat = 16
 
 type key = lbytes keylen
-type bytes = s:seq UInt8.t{length s < pow2 32}
+//type bytes = s:seq UInt8.t{length s < pow2 32}
 
 val ghash_:
   gmul_in_len:size_nat ->
@@ -20,6 +20,7 @@ val ghash_:
   tag_k:GF.key ->
   k:GF.key ->
   Tot GF.tag
+
 let ghash_ gmul_in_len gmul_in tag_k k =
   let b0: GF.tag = AES.aes128_encrypt_block k (create blocksize (u8 0)) in
   let h:lbytes blocksize = GF.gmac gmul_in_len gmul_in b0 tag_k in
