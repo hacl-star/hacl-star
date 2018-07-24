@@ -215,3 +215,20 @@ let mul #n1 #n2 #n3 a b =
           c0.(i, k) <- mul_inner #n1 #n2 #n3 a b i k
         ) c
     ) c
+
+val matrix_eq:
+    #n1: size_nat
+  -> #n2: size_nat{n1 * n2 < max_size_t}
+  -> m: size_nat{m > 0}
+  -> a: matrix n1 n2
+  -> b: matrix n1 n2
+  -> bool
+let matrix_eq #n1 #n2 m a b =
+  let open Lib.RawIntTypes in
+  repeati n1
+  (fun i res ->
+    repeati n2
+    (fun j res ->
+      res && (uint_to_nat a.(i, j) % pow2 m = uint_to_nat b.(i, j) % pow2 m)
+    ) res
+  ) true

@@ -16,7 +16,7 @@ HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../
 
 LWEKE_HOME=$(HACL_HOME)/../Frodo/Reference_Implementation/reference/FrodoKEM-640
 
-frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.fst test/Hacl.Test.Frodo.fst
+frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.fst test/Hacl.Test.Frodo.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir frodo-c -no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
 	-I ../../specs -I ../spec -I ../../lib -I ../../lib/fst -I $(KREMLIN_HOME)/include \
 	-skip-translation $^
@@ -24,7 +24,7 @@ frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.F
 frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir frodo-c -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
-	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo,Hacl.Impl.Frodo.Params' \
+	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo,Hacl.Impl.Frodo.*' \
 	-drop 'Hacl.Keccak' \
 	-add-include '"extracted/C_Endianness.h"' \
 	-add-include '"Hacl_Keccak.h"' \

@@ -40,12 +40,13 @@ test: frodo.exe
 frodo.exe: $(LIBS_FILES) $(HACL_HOME)/specs/Spec.Keccak.fst Spec.Matrix.fst Spec.Frodo.fst test/Spec.Frodo.Test.fst
 	mkdir -p frodo-ml
 	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) \
-	  --extract 'Spec.Keccak Spec.Matrix Spec.Frodo.Params Spec.Frodo Spec.Frodo.Test' \
+	  --extract 'Spec.Keccak Spec.Frodo.Keccak Spec.Matrix Spec.Frodo.Params Spec.Frodo.Encode Spec.Frodo.Pack Spec.Frodo Spec.Frodo.Test' \
 	  --odir frodo-ml --expose_interfaces \
 	  $^
 	@echo 'let _ = test()' >> frodo-ml/Spec_Frodo_Test.ml
 	$(OCAMLOPT) -I frodo-ml $(addprefix frodo-ml/, $(LIBS_ML)) \
-	  frodo-ml/Spec_Keccak.ml frodo-ml/Spec_Matrix.ml frodo-ml/Spec_Frodo_Params.ml frodo-ml/Spec_Frodo.ml frodo-ml/Spec_Frodo_Test.ml \
+	  frodo-ml/Spec_Keccak.ml frodo-ml/Spec_Matrix.ml frodo-ml/Spec_Frodo_Params.ml frodo-ml/Spec_Frodo_Keccak.ml frodo-ml/Spec_Frodo_Encode.ml \
+	  frodo-ml/Spec_Frodo_Pack.ml frodo-ml/Spec_Frodo.ml frodo-ml/Spec_Frodo_Test.ml \
           -o frodo.exe
 
 clean:

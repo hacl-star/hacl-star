@@ -336,3 +336,38 @@ let matrix_mul #n1 #n2 #n3 a b c =
     );
   let h2 = ST.get() in
   M.extensionality (as_matrix h2 c) (M.mul #(v n1) #(v n2) #(v n3) (as_matrix h0 a) (as_matrix h0 b))
+
+val eq_u32_m:m:uint32 -> a:uint32 -> b:uint32 -> Tot bool
+[@ "substitute"]
+let eq_u32_m m a b =
+  let open Lib.RawIntTypes in
+  FStar.UInt32.(u32_to_UInt32 (a &. m) =^ u32_to_UInt32 (b &. m))
+
+val matrix_eq:
+  #n1:size_t
+  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> m:size_t{0 < v m /\ v m <= 16}
+  -> a:matrix_t n1 n2
+  -> b:matrix_t n1 n2
+  -> Stack bool
+    (requires (fun h -> B.live h a /\ B.live h b))
+    (ensures (fun h0 r h1 -> modifies loc_none h0 h1))
+[@"c_inline"]
+let matrix_eq #n1 #n2 m a b =
+  push_frame();
+  let m = (u32 1 <<. size_to_uint32 m) -. u32 1 in
+  let res:lbuffer bool 1 = create (size 1) true in
+  let h0 = ST.get () in
+  loop_nospec #h0 n1 res
+  (fun i ->
+    let h1 = ST.get () in
+    loop_nospec #h1 n2 res
+    (fun j ->
+      let a1 = res.(size 0) in
+      let a2 = eq_u32_m m (to_u32 (mget a i j)) (to_u32 (mget b i j)) in
+      res.(size 0) <- a1 && a2
+    )
+  );
+  let res = res.(size 0) in
+  pop_frame();
+  res
