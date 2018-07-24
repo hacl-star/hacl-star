@@ -250,19 +250,23 @@ val test_aesgcm:
 let test_aesgcm text_len text aad_len aad n_len n k expected i =
   IO.print_string " ================================ CIPHER ";
   IO.print_string (UInt8.to_string (u8_to_UInt8 (u8 i)));
-  IO.print_string " ===============================\n";
-  let output = AEAD.aead_encrypt k n_len n text_len text aad_len aad in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
-  if result then IO.print_string "Success!\n"
-  else (
-    IO.print_string "Failure :(\n";
-    IO.print_string   "Expected ciphertext: ";
-//    let test_expected : lbytes key_length = createL expected in
-    List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list expected);
+  IO.print_string " ================================\n";
+  let ciphertext = AEAD.aead_encrypt k n_len n text_len text aad_len aad in
+  let decrypted = AEAD.aead_decrypt k n_len n (text_len + 16) ciphertext aad_len aad in
+  let result0 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) ciphertext expected in
+  let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) decrypted text in
+  if result0 && result1 then IO.print_string "Success!\n"
+  else (IO.print_string "Failure!\n";
+    IO.print_string  "\nExpected ciphertext: ";
+    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (as_list expected);
     IO.print_string "\nComputed ciphertext: ";
-    List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
-    IO.print_string "\n"
-  )
+    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (as_list ciphertext);
+    IO.print_string "\nExpected plaintext: ";
+    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (as_list text);
+    IO.print_string "\nComputed plaintext: ";
+    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (as_list decrypted);
+    IO.print_string "\n")
+
 
 val test_ghash:
   expected:lbytes AEAD.blocksize ->
@@ -273,6 +277,7 @@ val test_ghash:
   k:lbytes key_length ->
   i:size_nat ->
   FStar.All.ML unit
+
 let test_ghash expected text_len text aad_len aad k i =
   IO.print_string " ================================ GHASH ";
   IO.print_string (UInt8.to_string (u8_to_UInt8 (u8 i)));
@@ -283,10 +288,9 @@ let test_ghash expected text_len text aad_len aad k i =
   else (
     IO.print_string "Failure :(\n";
     IO.print_string   "Expected tag: ";
-//    let test_expected : lbytes key_length = createL expected in
-    List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list expected);
+    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (as_list expected);
     IO.print_string "\nComputed tag: ";
-    List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list output);
+    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (as_list output);
     IO.print_string "\n"
   )
 
