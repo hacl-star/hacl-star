@@ -39,4 +39,3 @@ assume val aes_gcm_decrypt:
   -> ciphertext:lbytes len ->
   Tot (lbytes olen)
 
-

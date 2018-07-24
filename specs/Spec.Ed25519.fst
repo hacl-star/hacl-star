@@ -14,9 +14,9 @@ open Spec.Curve25519
 (* Point addition *)
 type aff_point = tuple2 elem elem           // Affine point
 type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
-let fsub (x:elem) (y:elem) = x -. y 
-let fadd (x:elem) (y:elem) = x +. y 
-let fmul (x:elem) (y:elem) = x *. y 
+let fsub (x:elem) (y:elem) = x -. y
+let fadd (x:elem) (y:elem) = x +. y
+let fmul (x:elem) (y:elem) = x *. y
 
 // let sha512 (b:bytes{length b < pow2 32}) : Tot (lbytes 64) =
 //   assert_norm(pow2 32 < pow2 125);
@@ -190,4 +190,3 @@ let verify (public:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes 
             let hA = point_mul 32 (nat_to_bytes_le 32 h) a' in
             point_equal sB (point_add r' hA)
           )))
-
