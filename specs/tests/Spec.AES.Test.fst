@@ -6,7 +6,7 @@ open Lib.Sequence
 open Spec.AES
 
 let test_key = List.map u8 [
-  0x2b; 0x7e; 0x15; 0x16; 0x28; 0xae; 0xd2; 0xa6; 
+  0x2b; 0x7e; 0x15; 0x16; 0x28; 0xae; 0xd2; 0xa6;
   0xab; 0xf7; 0x15; 0x88; 0x09; 0xcf; 0x4f; 0x3c
 ]
 
@@ -61,7 +61,7 @@ let test_ciphertext2 = List.map u8 [
 ]
 
 
-let test() : FStar.All.ML unit = 
+let test() : FStar.All.ML unit =
   let seq = create 256 (u8 0) in
   let seqi = repeati #(lseq uint8 256) 256 (fun i s -> s.[i] <- u8 i) seq in
   (*
