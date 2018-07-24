@@ -24,12 +24,13 @@ type eckem_key_private_s = lbytes vsize_eckem_key_asymmetric
 type eckem_keypair_r = (eckem_key_public_s * option eckem_key_private_s)
 
 
-(** Definition of a ECKEM Ciphertext *)
-noeq type eckem_ciphertext_r (len:size_nat) = {
-  eckem_ciphertext: lbytes len;
-  eckem_key_public: lbytes 32;
-  eckem_iv: eckem_iv_s;
-}
+(** Generation of an EC public private keypair for Curve25519 *)
+val eckem_secret_to_public: eckem_key_private_s -> Tot eckem_key_public_s
+let eckem_secret_to_public kpriv =
+  let basepoint_zeros = create 32 (u8 0) in
+  let basepoint = upd basepoint_zeros 31 (u8 0x09) in
+  Spec.Curve25519.scalarmult kpriv basepoint
+
 
 (** Generation of an EC public private keypair for Curve25519 *)
 val eckem_generate: unit -> Tot eckem_keypair_r
@@ -37,9 +38,8 @@ let eckem_generate () =
   let basepoint_zeros = create 32 (u8 0) in
   let basepoint = upd basepoint_zeros 31 (u8 0x09) in
   let kpriv = crypto_random vsize_eckem_key_asymmetric in
-  let kpub = Spec.Curve25519.scalarmult kpriv basepoint in
+  let kpub = eckem_secret_to_public kpriv in
   kpub, Some kpriv
-
 
 
 (** ECKEM Encryption *)
