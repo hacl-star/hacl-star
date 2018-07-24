@@ -20,22 +20,55 @@ module FLemmas = Spec.Frodo.Lemmas
 module S = Spec.Frodo.Encode
 
 #reset-options "--z3rlimit 50 --max_fuel 0"
+
+inline_for_extraction noextract private
 val ec:
     b:size_t{v b < v params_logq}
   -> k:uint16{uint_v k < pow2 (v b)}
   -> r:uint16{r == S.ec (v b) k}
-  [@ "substitute"]
 let ec b a =
   a <<. (size_to_uint32 (params_logq -. b))
 
+inline_for_extraction noextract private
 val dc:
     b:size_t{v b < v params_logq}
   -> c:uint16
   -> r:uint16{r == S.dc (v b) c}
-  [@ "substitute"]
 let dc b c =
   let res1 = (c +. (u16 1 <<. size_to_uint32 (params_logq -. b -. size 1))) >>. size_to_uint32 (params_logq -. b) in
   res1 &. ((u16 1 <<. size_to_uint32 b) -. u16 1)
+
+inline_for_extraction noextract private
+val ec1:
+    b:size_t{v b <= 8}
+  -> vij:uint64
+  -> k:size_t{v k < 8}
+  -> res:uint16{res == S.ec1 (v b) vij (v k)}
+let ec1 b vij k =
+  FLemmas.modulo_pow2_u64 (vij >>. size_to_uint32 (b *! k)) (v b);
+  let rk = (vij >>. size_to_uint32 (b *! k)) &. ((u64 1 <<. size_to_uint32 b) -. u64 1) in
+  ec b (to_u16 rk)
+
+val matrix_nbar_nbar:
+  h:mem
+  -> res0:matrix_t params_nbar params_nbar
+  -> GTot (Spec.Matrix.matrix Spec.Frodo.Params.params_nbar Spec.Frodo.Params.params_nbar)
+let matrix_nbar_nbar h res0 = admit()
+  //assert (v params_nbar = Spec.Frodo.Params.params_nbar);
+  //as_matrix h res0
+
+val frodo_key_encode1:
+    b:size_t{v b <= 8}
+  -> a:lbytes ((params_nbar *! params_nbar *! b) /. size 8)
+  -> res0:matrix_t params_nbar params_nbar
+  -> vij:uint64
+  -> i:size_t{v i < v params_nbar}
+  -> j:size_t{v j < v params_nbar / 8}
+  -> Stack unit
+    (requires (fun h ->
+      B.live h a /\ B.live h res0 /\ B.disjoint a res0))
+    (ensures (fun h0 _ h1 -> B.live h1 res0 /\ modifies (loc_buffer res0) h0 h1 /\
+      as_matrix h1 res0 == S.frodo_key_encode1 (v b) (B.as_seq h0 a) (matrix_nbar_nbar h0 res0) vij (v i) (v j)))
 
 val frodo_key_encode:
     b:size_t{v b <= 8}
