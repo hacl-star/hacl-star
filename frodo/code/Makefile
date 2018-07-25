@@ -25,7 +25,7 @@ frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir frodo-c -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
 	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo,Hacl.Impl.Frodo.*' \
-	-drop 'Hacl.Keccak' \
+	-drop 'Hacl.Keccak' -drop 'Hacl.Frodo.Params' \
 	-add-include '"extracted/C_Endianness.h"' \
 	-add-include '"Hacl_Keccak.h"' \
 	-add-include '"c/Lib_PQ_Print.h"' \
