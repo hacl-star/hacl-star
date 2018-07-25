@@ -463,6 +463,22 @@ void test_crypto(const quic_secret *secret, const unsigned char *expected_cipher
     printf("PASS\n");
 }
 
+const uint8_t expected_client_hs_13[] =  { // client_hs (draft 13)
+0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x1a,0x97,0xe1,0x18,0xe8,0xfa,0xe1,0x4a,
+0x9e,0x5b,0x89,0x0d,0x4d,0x07,0xe5,0x9b,0xa6,0x2d,0x5e,0x72,0x3b,0x34,0xa8,0x7c,
+0xf3,0x00,0x2c,0x82,0x66,0x02,0x10,0x0c,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+};
+
+const uint8_t expected_server_hs_13[] = { // server_hs (draft 13)
+0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x2c,0x9e,0xff,0xab,0xc3,0xd5,0x46,0xc0,
+0xa2,0xbf,0xbd,0x48,0x1f,0xa3,0x3b,0x60,0x95,0xc5,0x65,0x22,0x0e,0xe0,0x20,0x3d,
+0x8e,0x2c,0x4a,0x8d,0x8c,0xcf,0xfb,0x1f,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+};
+
 const uint8_t expected_client_hs[] =  { // client_hs
 0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x1a,0x96,0x01,0x16,0xaa,0x6c,0xe9,0x36,
 0x88,0x3c,0xb1,0x79,0x97,0x74,0xcc,0x77,0xa4,0x91,0x6c,0xa5,0xbf,0x9c,0x9d,0x0b,
@@ -479,9 +495,9 @@ const uint8_t expected_server_hs[] = { // server_hs
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 };
 
-void test_pn_encrypt()
+void test_pn_encrypt(uint8_t is_draft13)
 {
-  printf("==== test_pn_encrypt() ====\n");
+  printf("==== test_pn_encrypt(%s) ====\n", is_draft13 ? "draft13" : "draft11");
 
   quic_secret client_hs;
   memset(&client_hs, 0, sizeof(client_hs));
@@ -496,12 +512,13 @@ void test_pn_encrypt()
   static const uint8_t salt[] = { 0x9c, 0x10, 0x8f, 0x98, 0x52, 0x0a, 0x5c, 0x5c, 0x32, 0x96, 0x8e, 0x95, 0x0e, 0x8a, 0x2c, 0x5f, 0xe0, 0x6d, 0x6c, 0x38 };
   static const uint8_t sample[] = { 0x05, 0x80, 0x24, 0xa9, 0x72, 0x75, 0xf0, 0x1d, 0x2a, 0x1e, 0xc9, 0x1f, 0xd1, 0xc2, 0x65, 0xbb };
   static const uint8_t encrypted_pn[] = { 0x3b, 0xb4, 0xb1, 0x74 };
+  static const uint8_t expected_pn_13[] = { 0xc3, 0xdd, 0x83, 0x4b };
   static const uint8_t expected_pn[] = { 0xc0, 0x00, 0x00, 0x00 };
   uint8_t pnmask[4] = {0};
 
-  result = quic_derive_handshake_secrets(&client_hs, &server_hs, cid, sizeof(cid), salt, sizeof(salt));
+  result = quic_derive_initial_secrets(&client_hs, &server_hs, cid, sizeof(cid), salt, sizeof(salt), is_draft13);
   if (result == 0) {
-      printf("FAIL: quic_derive_handshake_secrets failed\n");
+      printf("FAIL: quic_derive_initial_secrets failed\n");
       exit(1);
   }
 
@@ -516,18 +533,18 @@ void test_pn_encrypt()
     printf("PN encryption mask: "); dump(pnmask, 4);
     for(i = 0; i < 4; i++) pnmask[i] ^= encrypted_pn[i];
     printf("Decrypted PN: "); dump(pnmask, 4);
-    check_result("decrypted PN", pnmask, expected_pn, sizeof(pnmask));
+    check_result("decrypted PN", pnmask, is_draft13 ? expected_pn_13 : expected_pn, sizeof(pnmask));
   } else {
     printf("PN encryption failed.\n");
     exit(1);
   }
 }
 
-void test_handshake_secrets(void)
+void test_initial_secrets(uint8_t is_draft13)
 {
     int result;
 
-    printf("==== test_handshake_secrets() ====\n");
+    printf("==== test_initial_secrets(%s) ====\n", is_draft13 ? "draft 13" : "draft 11");
 
     quic_secret client_hs;
     memset(&client_hs, 0, sizeof(client_hs));
@@ -537,9 +554,9 @@ void test_handshake_secrets(void)
 
     const unsigned char con_id[12] = {0xff,0xaa,0x55,0x00, 0x80,0x01,0x7f,0xee, 0x81,0x42,0x24,0x18 };
     const unsigned char salt[] = {0xaf,0xc8,0x24,0xec,0x5f,0xc7,0x7e,0xca,0x1e,0x9d,0x36,0xf3,0x7f,0xb2,0xd4,0x65,0x18,0xc3,0x66,0x39};
-    result = quic_derive_handshake_secrets(&client_hs, &server_hs, con_id, sizeof(con_id), salt, sizeof(salt));
+    result = quic_derive_initial_secrets(&client_hs, &server_hs, con_id, sizeof(con_id), salt, sizeof(salt), is_draft13);
     if (result == 0) {
-        printf("FAIL: quic_derive_handshake_secrets failed\n");
+        printf("FAIL: quic_derive_initial_secrets failed\n");
         exit(1);
     }
 
@@ -553,11 +570,11 @@ void test_handshake_secrets(void)
     fclose(fp);
 #else
     // Verify that the computed text matches expectations
-    check_result("quic_derive_handshake_secrets client", (const unsigned char*)&client_hs, (const unsigned char*)&expected_client_hs, sizeof(client_hs));
-    check_result("quic_derive_handshake_secrets server", (const unsigned char*)&server_hs, (const unsigned char*)&expected_server_hs, sizeof(server_hs));
+    check_result("quic_derive_initial_secrets client", (const unsigned char*)&client_hs, (const unsigned char*)(is_draft13 ? &expected_client_hs_13 : &expected_client_hs), sizeof(client_hs));
+    check_result("quic_derive_initial_secrets server", (const unsigned char*)&server_hs, (const unsigned char*)(is_draft13 ? &expected_server_hs_13 : &expected_server_hs), sizeof(server_hs));
 #endif
 
-    printf("==== PASS: test_handshake_secrets ==== \n");
+    printf("==== PASS: test_initial_secrets ==== \n");
 }
 
 void exhaustive(void)
@@ -575,8 +592,8 @@ void exhaustive(void)
         test_crypto(&secret, testcombinations[i].expected_cipher);
     }
 
-    test_pn_encrypt();
-    test_handshake_secrets();
+    for(uint8_t i = 0; i<2; i++) test_pn_encrypt(i);
+    for(uint8_t i = 0; i<2; i++) test_initial_secrets(i);
 }
 
 int CDECL main(int argc, char **argv)

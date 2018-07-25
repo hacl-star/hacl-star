@@ -170,8 +170,8 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
   return 1;
 }
 
-int MITLS_CALLCONV quic_derive_handshake_secrets(quic_secret *client_hs, quic_secret *server_hs,
-   const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len)
+int MITLS_CALLCONV quic_derive_initial_secrets(quic_secret *client_in, quic_secret *server_in,
+   const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len, uint8_t is_draft13)
 {
   quic_secret s0 = {
     .hash = TLS_hash_SHA256,
@@ -196,32 +196,32 @@ int MITLS_CALLCONV quic_derive_handshake_secrets(quic_secret *client_hs, quic_se
   dump(s0.secret, 32);
 #endif
 
-  client_hs->hash = s0.hash;
-  client_hs->ae = s0.ae;
+  client_in->hash = s0.hash;
+  client_in->ae = s0.ae;
 
-  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, "client hs", 32))
+  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, is_draft13 ? "client in" : "client hs", 32))
     return 0;
 
-  if(!quic_crypto_hkdf_expand(s0.hash, (uint8_t *) client_hs->secret, 32, (uint8_t *) s0.secret, 32, info, info_len))
+  if(!quic_crypto_hkdf_expand(s0.hash, (uint8_t *) client_in->secret, 32, (uint8_t *) s0.secret, 32, info, info_len))
     return 0;
 
   #if DEBUG
     printf("Client HS:\n");
-    dump(client_hs->secret, 32);
+    dump(client_in->secret, 32);
   #endif
 
-  server_hs->hash = s0.hash;
-  server_hs->ae = s0.ae;
+  server_in->hash = s0.hash;
+  server_in->ae = s0.ae;
 
-  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, "server hs", 32))
+  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, is_draft13 ? "server in" : "server hs", 32))
     return 0;
 
-  if(!quic_crypto_hkdf_expand(s0.hash, (uint8_t *) server_hs->secret, 32, (uint8_t *) s0.secret, 32, info, info_len))
+  if(!quic_crypto_hkdf_expand(s0.hash, (uint8_t *) server_in->secret, 32, (uint8_t *) s0.secret, 32, info, info_len))
     return 0;
 
   #if DEBUG
     printf("Server HS:\n");
-    dump(server_hs->secret, 32);
+    dump(server_in->secret, 32);
   #endif
 
   return 1;
@@ -394,7 +394,7 @@ int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned c
     uint8_t zero[4] = {0};
     uint32_t ctr = sample[0] + (sample[1] << 8) + (sample[2] << 16) + (sample[3] << 24);
 
-    EverCrypt_chacha20(key->pne.case_chacha20, sample+4, ctr, zero, 4, mask);
+    EverCrypt_chacha20((uint8_t*)key->pne.case_chacha20, sample+4, ctr, zero, 4, mask);
     return 1;
   }
 
