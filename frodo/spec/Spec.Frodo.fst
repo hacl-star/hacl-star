@@ -15,8 +15,9 @@ open Spec.Frodo.Encode
 open Spec.Frodo.Pack
 
 module Seq = Lib.Sequence
+module Matrix = Spec.Matrix
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives -Spec.* +Spec.Frodo +Spec.Frodo.Params'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives -Spec.* +Spec.Frodo +Spec.Frodo.*'"
 
 val lbytes_eq:
     #len: size_nat
@@ -61,7 +62,7 @@ let frodo_sample r =
     repeati_inductive
       (cdf_table_len - 1)
       (fun z e -> 0 <= e /\ e <= z /\ z < cdf_table_len)
-      (fun z e -> let e = if (uint_to_nat t > cdf_table.[z]) then e + 1 else e in e)
+      (fun z e -> let e = if (uint_to_nat t > uint_to_nat cdf_table.[z]) then e + 1 else e in e)
       e
   in
   let e = (FStar.Math.Lib.powx (-1) (uint_to_nat r0)) * e in
