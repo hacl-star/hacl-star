@@ -78,7 +78,7 @@ let setup (k:key) (n:nonce) (st:state) : Tot state =
   let st = st.[15] <- u32 constant3 in
   st
 
-let salsa20_init (k:key) (n:nonce) : Tot state =
+let salsa20_init (k:key) (n_len:size_nat) (n:nonce) : Tot state =
   let st = create 16 (u32 0) in
   let st  = setup k n st in
   st
@@ -92,7 +92,7 @@ let salsa20_key_block (st:state) : Tot block =
   uints_to_bytes_le st'
 
 let salsa20_cipher =
-  Spec.CTR.Cipher state keylen noncelen max_size_t blocklen salsa20_init salsa20_set_counter salsa20_key_block
+  Spec.CTR.Cipher state keylen max_size_t blocklen salsa20_init salsa20_set_counter salsa20_key_block
 
 let salsa20_encrypt_bytes key nonce counter m =
   Spec.CTR.counter_mode salsa20_cipher key nonce counter m

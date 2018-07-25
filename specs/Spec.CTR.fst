@@ -29,12 +29,12 @@ val process_block:
   plain:lbytes enc.block_len ->
   Tot (lbytes enc.block_len)
 
-let process_block enc st0 c plain = 
+let process_block enc st0 c plain =
   let st = enc.set_counter st0 c in
   let k = enc.key_block st in
   let c = xor plain k in
   c
-  
+
 val counter_mode_blocks:
   enc: cipher ->
   st0:enc.state ->
