@@ -55,11 +55,12 @@ val encrypt:
   Tot (lbytes olen)
 
 let encrypt #olen receiver sender len input =
-  let iv = crypto_random vsize_eckem_iv in
+  let kdf_iv = crypto_random vsize_eckem_iv in
   let ek: lbytes 32 = Spec.Curve25519.scalarmult receiver sender in
   let safe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
-  let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
-  let key = sub ek 0 Spec.AESGCM.keylen in
+  let stream = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv kdf_iv 32 ek in
+  let key = sub stream 0 Spec.AESGCM.keylen in
+  let iv = sub stream Spec.AESGCM.keylen 12 in
   let c = Spec.AESGCM.aead_encrypt key 12 iv len input 0 empty in
   let zeros = create (len + vsize_eckem_iv) (u8 0) in
   let out = create (len + vsize_eckem_iv) (u8 0) in
@@ -78,11 +79,12 @@ val decrypt:
   Tot (lbytes olen)
 
 let decrypt #olen sender receiver len input =
-  let iv = sub input 0 vsize_eckem_iv in
+  let kdf_iv = sub input 0 vsize_eckem_iv in
   let ek: lbytes 32 = Spec.Curve25519.scalarmult sender receiver in
   let safe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
-  let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
-  let key = sub ek 0 Spec.AESGCM.keylen in
+  let stream = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv kdf_iv 32 ek in
+  let key = sub stream 0 Spec.AESGCM.keylen in
+  let iv = sub stream Spec.AESGCM.keylen 12 in
   let ciphertext = sub input vsize_eckem_iv (len - vsize_eckem_iv) in
   let out = Spec.AESGCM.aead_decrypt key 12 iv len ciphertext 0 empty in
   let zeros = create (len + vsize_eckem_iv) (u8 0) in
@@ -104,11 +106,12 @@ val encrypt_explicit_iv:
   -> input: lbytes len ->
   Tot (lbytes olen)
 
-let encrypt_explicit_iv #olen iv receiver sender len input =
+let encrypt_explicit_iv #olen kdf_iv receiver sender len input =
   let ek: lbytes 32 = Spec.Curve25519.scalarmult receiver sender in
   let safe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
-  let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
-  let key = sub ek 0 Spec.AESGCM.keylen in
+  let stream = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv kdf_iv 32 ek in
+  let key = sub stream 0 Spec.AESGCM.keylen in
+  let iv = sub stream Spec.AESGCM.keylen 12 in
   let c = Spec.AESGCM.aead_encrypt key 12 iv len input 0 empty in
   let zeros = create (len + vsize_eckem_iv) (u8 0) in
   let out = create (len + vsize_eckem_iv) (u8 0) in
@@ -128,11 +131,12 @@ val decrypt_explicit_iv:
   Tot (lbytes olen)
 
 let decrypt_explicit_iv #olen iv sender receiver len input =
-  let iv = sub input 0 vsize_eckem_iv in
+  let kdf_iv = sub input 0 vsize_eckem_iv in
   let ek: lbytes 32 = Spec.Curve25519.scalarmult sender receiver in
   let safe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
-  let key = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv iv 32 ek in
-  let key = sub ek 0 Spec.AESGCM.keylen in
+  let stream = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv kdf_iv 32 ek in
+  let key = sub stream 0 Spec.AESGCM.keylen in
+  let iv = sub stream Spec.AESGCM.keylen 12 in
   let encrypted_plaintext = sub input vsize_eckem_iv (len - vsize_eckem_iv) in
   let out = Spec.AESGCM.aead_decrypt key 12 iv len input 0 empty in
   let zeros = create (len + vsize_eckem_iv) (u8 0) in
