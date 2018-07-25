@@ -39,6 +39,8 @@ let footprint_s #a (s: state_s a): GTot M.loc =
   | SHA256_Vale p -> M.loc_addr_of_buffer p
   | SHA384_Hacl p -> M.loc_addr_of_buffer p
 
+#set-options "--max_fuel 0 --max_ifuel 1"
+
 let invariant_s #a s h =
   match s with
   | SHA256_Hacl p ->
@@ -104,8 +106,6 @@ let create a =
   in
   B.malloc HS.root s 1ul
 
-#set-options "--max_fuel 0"
-
 let init #a s =
   match !*s with
   | SHA256_Hacl p ->
@@ -116,7 +116,7 @@ let init #a s =
       ValeGlue.sha256_init p;
       admit ()
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 32"
 
 let update #a s data =
   match !*s with
@@ -132,9 +132,11 @@ let update #a s data =
       ValeGlue.sha256_update p data;
       admit ()
 
-#set-options "--z3rlimit 32"
+#set-options "--z3rlimit 48"
 
 let update_multi #a s data n =
+  FStar.Math.Lemmas.swap_mul (block_size a) (v n);
+  FStar.Math.Lemmas.multiple_modulo_lemma (v n) (block_size a);
   match !*s with
   | SHA256_Hacl p ->
       let p = T.new_to_old_st p in
@@ -148,9 +150,12 @@ let update_multi #a s data n =
       ValeGlue.sha256_update_multi p data n;
       admit ()
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 48"
 
 let update_last #a s data len =
+  let h0 = ST.get () in
+  FStar.Math.Lemmas.swap_mul ((repr s h0).counter) (block_size a);
+  FStar.Math.Lemmas.multiple_modulo_lemma ((repr s h0).counter) (block_size a);
   match !*s with
   | SHA256_Hacl p ->
       let p = T.new_to_old_st p in

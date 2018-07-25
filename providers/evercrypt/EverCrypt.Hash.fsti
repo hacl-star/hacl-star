@@ -218,6 +218,7 @@ val update_multi: #a:e_alg -> s:state a -> data:uint8_p -> n:UInt32.t -> Stack u
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     well_formed_and_counter s h1 0 /\
+    Seq.length (B.as_seq h0 data) % block_size a = 0 /\
     update_multi_spec s h0 h1 (B.as_seq h0 data)))
 
 // The maximum number of bytes for the input.
@@ -254,11 +255,13 @@ let update_last_spec (#a:e_alg)
   let r1 = repr s h1 in
   let counter0 = r0.counter in
   let len0 = counter0 * block_size a in
-  match G.reveal a with
-  | SHA256 ->
+  len0 % (block_size a) == 0 /\ (
+    match G.reveal a with
+    | SHA256 ->
       r1.hash = EverCrypt.Spec.SHA2_256.update_last r0.hash len0 data
-  | SHA384 ->
+    | SHA384 ->
       r1.hash = EverCrypt.Spec.SHA2_384.update_last r0.hash len0 data
+  )
 
 val update_last: #a:e_alg -> s:state a -> data:uint8_p -> len:UInt32.t -> Stack unit
   (requires (fun h0 ->
