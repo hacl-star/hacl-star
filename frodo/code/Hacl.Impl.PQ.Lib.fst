@@ -23,7 +23,7 @@ type elem = uint16
 inline_for_extraction
 let lbytes len = lbuffer uint8 (v len)
 
-inline_for_extraction noextract
+inline_for_extraction noextract unfold
 let v = size_v
 
 type matrix_t (n1:size_t) (n2:size_t{v n1 * v n2 < max_size_t}) =

@@ -32,22 +32,6 @@ let lbytes_eq #len a b =
 
 let cshake_frodo = cshake128_frodo
 
-let params_q: size_nat =
-  pow2_lt_compat 32 params_logq;
-  pow2 params_logq
-
-let bytes_mu: size_nat =
-  (params_extracted_bits * params_nbar * params_nbar) / 8
-
-let crypto_publickeybytes: size_nat =
-  bytes_seed_a + (params_logq * params_n * params_nbar) / 8
-
-let crypto_secretkeybytes: size_nat =
-  crypto_bytes + crypto_publickeybytes + 2 * params_n * params_nbar
-
-let crypto_ciphertextbytes: size_nat =
-  ((params_nbar * params_n + params_nbar * params_nbar) * params_logq) / 8 + crypto_bytes
-
 val frodo_sample: r:uint16 -> uint16
 let frodo_sample r =
   let open Lib.RawIntTypes in
@@ -61,7 +45,7 @@ let frodo_sample r =
     repeati_inductive
       (cdf_table_len - 1)
       (fun z e -> 0 <= e /\ e <= z /\ z < cdf_table_len)
-      (fun z e -> let e = if (uint_to_nat t > cdf_table.[z]) then e + 1 else e in e)
+      (fun z e -> let e = if (uint_to_nat t > uint_to_nat cdf_table.[z]) then e + 1 else e in e)
       e
   in
   let e = (FStar.Math.Lib.powx (-1) (uint_to_nat r0)) * e in
@@ -160,6 +144,24 @@ let matrix_from_lbytes n1 n2 b =
     ) res
   ) res
 
+let bytes_mu: size_nat =
+  (params_extracted_bits * params_nbar * params_nbar) / 8
+
+let crypto_publickeybytes: size_nat =
+  bytes_seed_a + (params_logq * params_n * params_nbar) / 8
+
+let crypto_secretkeybytes: size_nat =
+  crypto_bytes + crypto_publickeybytes + 2 * params_n * params_nbar
+
+let crypto_ciphertextbytes: size_nat =
+  ((params_nbar * params_n + params_nbar * params_nbar) * params_logq) / 8 + crypto_bytes
+
+val expand_crypto_ciphertextbytes: unit -> Lemma
+   (crypto_ciphertextbytes == 
+    params_logq * params_nbar * params_n / 8 
+    + (params_logq * params_nbar * params_nbar / 8 + crypto_bytes))
+let expand_crypto_ciphertextbytes _ = ()
+
 val crypto_kem_keypair:
     coins: lbytes (2 * crypto_bytes + bytes_seed_a)
   -> tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes)
@@ -197,7 +199,6 @@ let crypto_kem_enc coins pk =
   let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
   let bp_matrix = Matrix.add (Matrix.mul sp_matrix a_matrix) ep_matrix in
   let c1 = frodo_pack params_nbar params_n bp_matrix params_logq in
-
   let epp_matrix = frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) in
   let b_matrix = frodo_unpack params_n params_nbar params_logq b in
   let v_matrix = Matrix.add (Matrix.mul sp_matrix b_matrix) epp_matrix in
@@ -208,7 +209,8 @@ let crypto_kem_enc coins pk =
   let ss_init = concat c1 (concat c2 (concat k d)) in
   let ss_init_len = (params_logq * params_nbar * params_n) / 8 + (params_logq * params_nbar * params_nbar) / 8 + 2 * crypto_bytes in
   let ss = cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes in
-  let ct = concat c1 (concat c2 d) in
+  expand_crypto_ciphertextbytes ();
+  let ct = concat c1 (concat c2 d) in 
   (ct, ss)
 
 val crypto_kem_dec:
