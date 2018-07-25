@@ -137,3 +137,36 @@ let decrypt_explicit_iv #olen iv sender receiver len input =
   let out = Spec.AESGCM.aead_decrypt key 12 iv len input 0 empty in
   let zeros = create (len + vsize_eckem_iv) (u8 0) in
   if safe then out else zeros
+
+
+///
+/// Alternative Design
+/// ------------------
+/// WIP: The motivation behind this alternative design is that
+/// generating a nonce for each encryption is costly. I beleive
+/// the call to HKDF can be used to derive an fresh nonce without
+/// risking entropy exhaustion by seeding the HKDF call with a
+/// counter. As for a nonce, the counter MUST not be reused.
+/// My expectation is that construction is INT-CTXT IND-CPA secure
+/// which remains to be proven correct.
+///
+
+(** ECKEM Encryption *)
+assume val encrypt_counter:
+    #olen: size_nat
+  -> i: eckem_counter_t
+  -> receiver: eckem_key_public_s
+  -> sender: eckem_key_private_s
+  -> len: size_nat
+  -> plaintext: lbytes len ->
+  Tot (lbytes olen)
+
+(** ECKEM Decryption *)
+assume val decrypt_counter:
+    #olen: size_nat
+  -> i: eckem_counter_t
+  -> sender: eckem_key_public_s
+  -> receiver: eckem_key_private_s
+  -> len: size_nat
+  -> ciphertext: lbytes len ->
+  Tot (lbytes olen)
