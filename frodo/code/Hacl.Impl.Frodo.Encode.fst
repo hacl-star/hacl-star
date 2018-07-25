@@ -53,9 +53,9 @@ val matrix_nbar_nbar:
   h:mem
   -> res0:matrix_t params_nbar params_nbar
   -> GTot (Spec.Matrix.matrix Spec.Frodo.Params.params_nbar Spec.Frodo.Params.params_nbar)
-let matrix_nbar_nbar h res0 = admit()
+let matrix_nbar_nbar h res0 =
   //assert (v params_nbar = Spec.Frodo.Params.params_nbar);
-  //as_matrix h res0
+  as_matrix h res0
 
 val frodo_key_encode1:
     b:size_t{v b <= 8}
