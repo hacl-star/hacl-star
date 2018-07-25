@@ -21,13 +21,12 @@ frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.F
 	-I ../../specs -I ../spec -I ../../lib -I ../../lib/fst -I $(KREMLIN_HOME)/include \
 	-skip-translation $^
 
-frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
+frodo-c/Hacl_Impl_Frodo.c frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir frodo-c -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
 	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo,Hacl.Impl.Frodo.*' \
-	-drop 'Hacl.Keccak' \
+	-library 'Hacl.Keccak' -drop 'Frodo.Params' \
 	-add-include '"extracted/C_Endianness.h"' \
-	-add-include '"Hacl_Keccak.h"' \
 	-add-include '"c/Lib_PQ_Print.h"' \
 	$^ -o $@
 
@@ -36,7 +35,7 @@ frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 
 CFLAGS += -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib \
-	  -I $(LWEKE_HOME)/sha3 -I $(HACL_HOME)/frodo/code/include \
+	  -I $(LWEKE_HOME)/sha3 -I $(HACL_HOME)/frodo/code/frodo-c \
 	  -I $(HACL_HOME)/lib \
 	  -Wall -Werror -Wno-parentheses -Wno-unused-value -Wno-int-to-pointer-cast -Wno-unused-variable
 
@@ -62,3 +61,4 @@ lib: $(BASE_OBJ) frodo-c/Hacl_Impl_Frodo.o include/randombytes.o
 clean:
 	rm -rf *~ *.exe *.exe.dSYM
 	rm -rf frodo-c
+	rm -rf include/*.o
