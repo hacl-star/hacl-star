@@ -43,6 +43,8 @@ CFLAGS += -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib \
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+all: test
+
 test-frodo.exe: frodo-c/Hacl_Test_Frodo.c frodo-c/Hacl_Impl_Frodo.c include/randombytes.c $(BASE_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
 
