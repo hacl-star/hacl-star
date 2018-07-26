@@ -176,6 +176,7 @@ noextract let encode_ad_cipher (i:id) (ad:adata) (l:ok_len i) (cipher:lbytes l) 
 	 corresponding to the fragmentation of the 
 	 plain and cipher into encrypted blocks, 
 	 starting from position x, until to_pos **)
+noextract
 val counterblocks:
   i:id{safeId i} ->
   mac_rgn:eternal_region ->
@@ -187,6 +188,7 @@ val counterblocks:
   cipher:lbytes l ->
   Tot (prf_table mac_rgn i) // each entry e {PRF(e.x.id = x.iv /\ e.x.ctr >= ctr x)}
   (decreases (to_pos - from_pos))
+noextract
 let rec counterblocks i mac_rgn x l from_pos to_pos plain cipher =
   let blockl = v (Cipher.(blocklen (cipherAlg_of_id i))) in
   let remaining = to_pos - from_pos in
@@ -405,8 +407,12 @@ let enc_dec_liveness_and_separation (#i:id) (#rw:rw) (aead_st:aead_state i rw)
     enc_dec_separation aead_st aad plain cipher /\
     aead_liveness aead_st h
 
+//NS 09/21: Added the disjunctive pattern, below. Otherwise this is a very brittle pattern.
+//          It will cause seemingly trivial proofs like
+//               prf_mac_inv .. h ==> prf_mac_inv ... h
+//          to fail in case prf_mac_inv is unfolded
 let prf_mac_inv (#i:id) (#mac_rgn:region) (blocks:prf_table mac_rgn i) (h:mem{prf i}) :Type0 =
-  (forall (x:domain_mac i).{:pattern (find_mac blocks x)}
+  (forall (x:domain_mac i).{:pattern (find_mac blocks x) \/ (PRF.prf_mac_inv blocks x h)}
                       PRF.prf_mac_inv blocks x h)
 
 (*** inv st h:

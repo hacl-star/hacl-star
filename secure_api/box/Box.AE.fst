@@ -56,10 +56,14 @@ let encrypt #rgn #ip #i #key_length #kp #aparams ap k n p =
   let honest_i = get_honesty ip i in
   let c =
     if honest_i && Flags.ae then
-      aparams.scheme.enc_star (length p) k.raw n
+      aparams.scheme.enc_star (length p)
     else
       //lemma_dishonest_not_others
+<<<<<<< HEAD
       aparams.scheme.enc (repr #rgn #ap.pp #ip p) k.raw n
+=======
+      aparams.scheme.enc (repr #rgn #ap.pp #ip #i p) k.raw n
+>>>>>>> 264be060dd19c53ac9ab126eb69544c5fd13e723
   in
   recall ap.log;
   MM.extend ap.log (LOG_KEY i n c) p;

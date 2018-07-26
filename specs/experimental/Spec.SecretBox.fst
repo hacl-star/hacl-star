@@ -9,10 +9,12 @@ open Spec.Lib
 
 let keylen = Spec.Salsa20.keylen
 let noncelen = Spec.HSalsa20.noncelen + Spec.Salsa20.noncelen
+let valid_cipher_length n = n >= 16 && (n - 16) / Spec.Salsa20.blocklen < pow2 32
+let valid_plain_length n = n / Spec.Salsa20.blocklen < pow2 32
 type key = lbytes keylen
 type nonce = lbytes noncelen
-type plain = p:bytes{Seq.length p / Spec.Salsa20.blocklen < pow2 32}
-type cipher = c:bytes{Seq.length c >= 16 /\ (Seq.length c - 16) / Spec.Salsa20.blocklen < pow2 32}
+type plain = p:bytes{valid_plain_length (Seq.length p)}
+type cipher = c:bytes{valid_cipher_length (Seq.length c)}
 type cipher_detached = plain
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30"
@@ -42,7 +44,7 @@ let secretbox_process input k n =
 
 
 val secretbox_detached: p:plain ->
-    k:key -> n:nonce -> Tot (Spec.Poly1305.tag * c:cipher_detached{Seq.length c = Seq.length p})
+    k:key -> n:nonce -> Tot (Spec.Poly1305.tag * c:cipher_detached)
 let secretbox_detached p k n =
     let (mk,ek,n) = secretbox_init k n in
     let cipher = secretbox_process p ek n in
@@ -62,7 +64,7 @@ let secretbox_open_detached c mac k n =
 
 
 val secretbox_easy: p:plain ->
-    k:key -> n:nonce -> Tot (b:cipher{Seq.length b = Seq.length p + 16})
+    k:key -> n:nonce -> Tot (b:cipher)
 let secretbox_easy p k n =
     let (mac,cipher) = secretbox_detached p k n in
     mac @| cipher
@@ -119,7 +121,7 @@ let test() =
     let p:(b:plain{Seq.length b = Seq.length cipher}) = p in
     let out_easy = secretbox_easy p k n in
     let (mac_easy,cipher_easy) = split out_easy 16 in
-    let plain:(option (b:plain{Seq.length b = Seq.length cipher})) = secretbox_open_detached cipher mac k n in
+    let plain:(option (b:plain)) = secretbox_open_detached cipher mac k n in
     let plain_easy = secretbox_open_easy (mac @| cipher) k n in
     match plain, plain_easy with
     | None, _ | _, None -> false

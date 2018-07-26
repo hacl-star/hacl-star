@@ -1,13 +1,10 @@
 module Hacl.Test.SHA2_384
 
-open FStar.HyperStack.All
-
-module ST = FStar.HyperStack.ST
-
 open FStar.Buffer
 open FStar.UInt32
+open FStar.HyperStack.All
 
-module Hash = SHA2_384
+module Hash = Hacl.SHA2_384
 
 
 val test_1a: unit -> ST unit

@@ -17,24 +17,6 @@ noeq type key_package (#rgn:erid) (ip:index_package rgn) (key_length:(n:nat{n<=3
   key_package #rgn ip key_length key_type
 
 #set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
-//val hon: (#inst_id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(inst_id -> Type0)) -> kp:key_package #inst_id key_length key_type -> (kp_hon:(#i:inst_id -> key_type i -> bool){forall i . kp_hon #i === kp.hon #i})
-//let hon #inst_id #key_length #key_type kp = kp.hon
-//
-//val getGT: (#inst_id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(inst_id -> Type0)) -> kp:key_package #inst_id key_length key_type -> (kp_getGT:(#i:inst_id -> k:key_type i -> GTot (lbytes key_length)){kp_getGT == kp.getGT})
-//let getGT #inst_id #key_length #key_type kp = kp.getGT
-//
-//val cget: (#inst_id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(inst_id -> Type0)) -> kp:key_package #inst_id key_length key_type -> (#i:inst_id -> k:key_type i{kp.hon i k = false} -> (raw:lbytes key_length{raw = kp.getGT i k}))
-//let cget #inst_id #key_length #key_type kp = kp.cget
-//
-//val get: (#inst_id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(inst_id -> Type0)) -> kp:key_package #inst_id key_length key_type -> (#i:inst_id -> k:key_type i -> (raw:lbytes key_length{raw = kp.getGT i k}))
-//
-//val gen: (#inst_id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(inst_id -> Type0)) -> kp:key_package #inst_id key_length key_type -> (#i:inst_id -> k:key_type i{kp.hon i k = true})
-//let gen #inst_id #key_length #key_type kp = kp.gen
-//
-//val cset: (#inst_id:eqtype) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(inst_id -> Type0)) -> kp:key_package #inst_id key_length key_type -> (#i:inst_id -> raw:lbytes key_length -> (k:key_type i{raw = kp.getGT i k /\ kp.hon i k = false}))
-//let cset #inst_id #key_length #key_type kp = kp.cset
-
-#set-options "--z3rlimit 300 --max_ifuel 1 --max_fuel 0"
 val create_key_package:
   (#rgn:erid) ->
   (ip:index_package rgn) ->

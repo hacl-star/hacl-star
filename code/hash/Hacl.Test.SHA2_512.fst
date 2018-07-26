@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open FStar.Buffer
 open FStar.UInt32
 
-module Hash = SHA2_512
+module Hash = Hacl.SHA2_512
 
 
 val test_1a: unit -> ST unit

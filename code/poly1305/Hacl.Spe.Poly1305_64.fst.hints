@@ -68,7 +68,6 @@
       ],
       0
     ],
-    [ "Hacl.Spe.Poly1305_64.poly1305_init_spec", 5, 0, 1, [ "@query" ], 0 ],
     [
       "Hacl.Spe.Poly1305_64.lemma_mod_distr",
       1,
@@ -1003,19 +1002,6 @@
       0
     ],
     [
-      "Hacl.Spe.Poly1305_64.poly_def_0",
-      4,
-      1,
-      1,
-      [
-        "@query", "assumption_Prims.HasEq_int",
-        "equation_Hacl.Bignum.Constants.prime",
-        "equation_Spec.Poly1305.elem", "equation_Spec.Poly1305.prime",
-        "haseqHacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
-      ],
-      0
-    ],
-    [
       "Hacl.Spe.Poly1305_64.poly_def_1",
       1,
       1,
@@ -1053,14 +1039,6 @@
     [
       "Hacl.Spe.Poly1305_64.poly_def_1",
       2,
-      1,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Hacl.Spe.Poly1305_64.poly_def_1",
-      3,
       1,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],

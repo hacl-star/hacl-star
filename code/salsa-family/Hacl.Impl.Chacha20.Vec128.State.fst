@@ -32,6 +32,9 @@ type state = b:Buffer.buffer vec{length b = 4}
 let blocks = U32.(vec_size /^ 4ul)
 let vecsizebytes = 16ul
 
+inline_for_extraction
+let zero = vec_zero()
+
 [@ "c_inline"]
 val state_alloc:
   unit ->
@@ -62,14 +65,13 @@ val state_incr:
          st1.[1] == st0.[1] /\
          st1.[2] == st0.[2] /\
          vec_as_seq st1.[3] == (Seq.upd (vec_as_seq st0.[3]) 0 FStar.UInt32.(c +^ 1ul)))
-         (* vec_as_seq st1.[3] == (Spec.Chacha20_vec.op_Plus_Percent_Hat (vec_as_seq st0.[3])) (vec_as_seq one_le)) *)
          ))
 #reset-options "--max_fuel 0 --z3rlimit 100"
 [@ "c_inline"]
 let state_incr k =
   let h0 = ST.get() in
   let k3 = k.(3ul) in
-  k.(3ul) <- vec_add k3 one_le;
+  k.(3ul) <- vec_increment k3;
   let h1 = ST.get() in
   assert(let vec  = vec_as_seq (Seq.index (as_seq h0 k) 3) in
          let vec' = vec_as_seq (Seq.index (as_seq h1 k) 3) in

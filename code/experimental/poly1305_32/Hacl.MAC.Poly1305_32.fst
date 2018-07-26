@@ -320,9 +320,9 @@ val poly1305_last_pass: acc:felem ->
     (ensures (fun h0 _ h1 -> live h0 acc /\ live h1 acc  /\ modifies_1 acc h0 h1
     ))
 let poly1305_last_pass acc =
-  Hacl.Bignum.Fproduct.carry_limb_ acc 0ul;
+  Hacl.Bignum.Fproduct.carry_limb_ acc;
   Hacl.Bignum.Modulo.carry_top acc;
-  Hacl.Bignum.Fproduct.carry_limb_ acc 0ul;
+  Hacl.Bignum.Fproduct.carry_limb_ acc;
   Hacl.Bignum.Modulo.carry_top acc;
   Hacl.Bignum.Fproduct.carry_0_to_1 acc;
   let p26m1 = 0x3fffffful in
@@ -408,8 +408,8 @@ let poly1305_finish_ log st mac m len key_s =
   toField tmp key_s;
   poly1305_finish__ log st mac m len key_s;
   poly1305_last_pass st.h;
-  Hacl.Bignum.Fsum.fsum_ st.h tmp clen;
-  Hacl.Bignum.Fproduct.carry_limb_ st.h 0ul;
+  Hacl.Bignum.Fsum.fsum_ st.h tmp;
+  Hacl.Bignum.Fproduct.carry_limb_ st.h;
   let k0 = load32_le (sub key_s 0ul  4ul) in
   let k1 = load32_le (sub key_s 4ul  4ul) in
   let k2 = load32_le (sub key_s 8ul  4ul) in

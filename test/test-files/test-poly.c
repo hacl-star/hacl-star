@@ -1,6 +1,6 @@
 #include "kremlib.h"
 #include "testlib.h"
-#include "Poly1305_64.h"
+#include "Hacl_Poly1305_64.h"
 #include "sodium.h"
 #include "internal/poly1305.h"
 #include "poly1305_local.h"
@@ -174,9 +174,9 @@ int32_t test_poly()
   uint64_t len_ = (uint64_t )34;
   uint8_t mac[MACSIZE];
   memset(mac, 0, MACSIZE * sizeof mac[0]);
-  Poly1305_64_crypto_onetimeauth(mac, plaintext, 34, key);
+  Hacl_Poly1305_64_crypto_onetimeauth(mac, plaintext, 34, key);
   TestLib_compare_and_print("HACL Poly1305", expected, mac, MACSIZE);
-  Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
+  Hacl_Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
   TestLib_compare_and_print("Sodium Poly1305", expected, mac, MACSIZE);
   return exit_success;
 }
@@ -195,7 +195,7 @@ int32_t perf_poly() {
   t1 = clock();
   a = TestLib_cpucycles_begin();
   for (int i = 0; i < ROUNDS; i++){
-    Poly1305_64_crypto_onetimeauth(macs + MACSIZE * i, plain, len, key);
+    Hacl_Poly1305_64_crypto_onetimeauth(macs + MACSIZE * i, plain, len, key);
   }
   b = TestLib_cpucycles_end();
   t2 = clock();

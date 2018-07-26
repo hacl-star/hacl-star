@@ -5,8 +5,10 @@
 #include <time.h>
 
 #include "haclnacl.h"
+#include "Hacl_Chacha20_Vec128.h"
+#include "Hacl_Unverified_Random.h"
+
 #include "tweetnacl.h"
-#include "hacl_test_utils.h"
 
 #define HACL_UNIT_TESTS_SIZE (1 * 1024)
 #define POLY_MACSIZE 16
@@ -116,6 +118,23 @@ bool unit_test_chacha20(){
     if (a != 0){
       pass = false;
       printf("Chacha20 failed on RFC test of size 114\n.");
+    }
+  return pass;
+}
+
+bool unit_test_chacha20_vec128(){
+  int a;
+  bool pass = true;
+
+  uint8_t ciphertext[114];
+  memset(ciphertext, 0, 114 * sizeof ciphertext[0]);
+  uint32_t counter = (uint32_t )1;
+  Hacl_Chacha20_Vec128_chacha20(ciphertext,chacha_plaintext,114, chacha_key, chacha_nonce, counter);
+
+    a = memcmp(ciphertext, chacha_ciphertext, 114 * sizeof (uint8_t));
+    if (a != 0){
+      pass = false;
+      printf("Chacha20 Vec128 failed on RFC test of size 114\n.");
     }
   return pass;
 }
@@ -353,7 +372,7 @@ bool unit_test_crypto_sign(){
   uint8_t sk[64], pk[32];
   crypto_sign_keypair(pk, sk);
   READ_RANDOM_BYTES(len, plaintext);
-  int a;
+  int a, res;
   bool pass = true;
   long long unsigned int smlen;
   for (int i = 0; i < 256; i++){
@@ -365,8 +384,9 @@ bool unit_test_crypto_sign(){
       printf("crypto_sign failed on input of size %d\n", i);
       break;
     }
-    pass = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, i + 64, pk);
-    if (pass == false) {
+    res = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, i + 64, pk);
+    if (res != 0) {
+      pass = false;
       printf("crypto_sign_open returned value failed on input of size %d\n", i);
       break;
     }
@@ -385,8 +405,9 @@ bool unit_test_crypto_sign(){
     pass = false;
     printf("crypto_sign failed on input of size %d\n.", HACL_UNIT_TESTS_SIZE);
   }
-  pass = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, HACL_UNIT_TESTS_SIZE + 64, pk);
-  if (pass == false) {
+  res = crypto_sign_open(hacl_signed_msg, &smlen, expected_signed_msg, HACL_UNIT_TESTS_SIZE + 64, pk);
+  if (res != 0) {
+    pass = false;
     printf("crypto_sign_open returned value failed on input of size %d\n", HACL_UNIT_TESTS_SIZE);
   }
   a = memcmp(hacl_signed_msg, plaintext, HACL_UNIT_TESTS_SIZE * sizeof(uint8_t));
@@ -533,6 +554,12 @@ int main(){
     printf("Unit tests for IETF Chacha20 succeeded\n");
   } else {
     printf("Unit tests for IETF Chacha20 *** FAILED ***\n");
+  }
+  res = res && unit_test_chacha20_vec128();
+  if (res == true) {
+    printf("Unit tests for IETF Chacha20 Vec128 succeeded\n");
+  } else {
+    printf("Unit tests for IETF Chacha20 Vec128 *** FAILED ***\n");
   }
   res = res && unit_test_aead();
   if (res == true) {

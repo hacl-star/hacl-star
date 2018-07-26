@@ -27,5 +27,5 @@ val fsum_:
     (ensures (fun h0 _ h1 -> red_c h0 a len /\ red_c h0 b len /\ live h1 a /\ modifies_1 a h0 h1
       /\ as_seq h1 a == fsum_spec (as_seq h0 a) (as_seq h0 b)))
 [@"substitute"]
-let rec fsum_ a b =
+let fsum_ a b =
   C.Loops.in_place_map2 a b clen (fun x y -> x +%^ y)

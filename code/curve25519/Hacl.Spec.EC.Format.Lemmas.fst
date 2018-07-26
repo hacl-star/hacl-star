@@ -9,7 +9,7 @@ open FStar.Seq
 open FStar.Endianness
 
 
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
+#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 40"
 
 val lemma_little_endian_split: n:nat -> k:lbytes n -> i:nat{i <= n} ->
   Lemma (little_endian (slice k 0 i) = little_endian k % pow2 (8*i)
