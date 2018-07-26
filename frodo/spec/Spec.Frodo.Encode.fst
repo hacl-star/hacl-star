@@ -13,7 +13,22 @@ open Spec.Frodo.Params
 
 module Seq = Lib.Sequence
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives -Spec.* +Spec.Frodo +Spec.Frodo.Params'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --z3seed 2"
+
+val lemma_matrix_equality_nbar:
+    a:matrix params_nbar params_nbar
+  -> b:matrix params_nbar params_nbar
+  -> Lemma
+      (requires (forall (i:size_nat{i < params_nbar}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). a.(i, 8 * j + k) == b.(i, 8 * j + k)))
+      (ensures a == b)
+let lemma_matrix_equality_nbar a b =
+  assert (forall (i:size_nat{i < params_nbar}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). b.(i, 8 * j + k) == b.[i * params_nbar + j * 8 + k]);
+  assert (forall (i:size_nat{i < params_nbar}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). a.[i * params_nbar + 8 * j + k] == b.[i * params_nbar + j * 8 + k]);
+  assert (forall (i:size_nat{i < params_nbar}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). a.[i * params_nbar + j * 8 + k] == b.[i * params_nbar + j * 8 + k]);
+  assert (forall (l:size_nat{l < params_nbar * params_nbar}). let x = l % params_nbar in l == (l / params_nbar) * params_nbar + x / 8 * 8 + x % 8 /\
+    l / params_nbar < params_nbar /\ l % params_nbar < params_nbar /\ x / 8 < params_nbar / 8 /\ x % 8 < 8);
+  assert (forall (k:size_nat{k < params_nbar * params_nbar}). a.[k] == b.[k]);
+  Lib.Sequence.eq_intro a b
 
 val ec:
     b: size_nat{b <= params_logq}
@@ -52,7 +67,6 @@ let dc b c =
   //assert (uint_v res = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 b);
   res
 
-
 val ec1:
     b: size_nat{b <= 8}
   -> vij:uint64
@@ -83,41 +97,42 @@ val frodo_key_encode1:
   -> Pure (matrix params_nbar params_nbar)
     (requires True)
     (ensures fun res ->
-      (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
+      (forall (i0:size_nat{i0 < params_nbar /\ i0 <> i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
       (forall (k1:size_nat{k1 < 8}). res.(i, 8 * j + k1) == ec1 b vij k1))
 let frodo_key_encode1 b a res0 vij i j =
   repeati_inductive 8
     (fun k res ->
-      (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
+      (forall (i0:size_nat{i0 < params_nbar /\ i0 <> i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
       (forall (k1:size_nat{k1 < k}). res.(i, 8 * j + k1) == ec1 b vij k1))
     (fun k res ->
       res.(i, 8 * j + k) <- ec1 b vij k
     ) res0
 
 val frodo_key_encode_inner:
-    b: size_nat{b <= 8}
-  -> a: lbytes (params_nbar * params_nbar * b / 8)
+    b:size_nat{b <= 8}
+  -> a:lbytes (params_nbar * params_nbar * b / 8)
   -> i:size_nat{i < params_nbar}
   -> j:size_nat{j < params_nbar / 8}
   -> k:size_nat{k < 8}
+  -> v8:lbytes 8{forall (l:size_nat{b <= l /\ l < 8}). v8.[l] == u8 0}
   -> GTot uint16
-let frodo_key_encode_inner b a i j k =
-  let v8 = Seq.create 8 (u8 0) in
-  let vij = uint_from_bytes_le (update_sub v8 0 b (Seq.sub a ((i + j) * b) b)) in
+let frodo_key_encode_inner b a i j k v8 =
+  let v8 = update_sub v8 0 b (Seq.sub a ((i + j) * b) b) in
+  let vij = uint_from_bytes_le v8 in
   ec1 b vij k
 
 val frodo_key_encode2:
     b: size_nat{b <= 8}
   -> a: lbytes (params_nbar * params_nbar * b / 8)
   -> res0: matrix params_nbar params_nbar
-  -> v8:lbytes 8{v8 == Seq.create 8 (u8 0)}
+  -> v8:lbytes 8{forall (k:size_nat{b <= k /\ k < 8}). v8.[k] == u8 0}
   -> i:size_nat{i < params_nbar}
   -> j:size_nat{j < params_nbar / 8}
   -> Pure (matrix params_nbar params_nbar)
     (requires True)
     (ensures fun res ->
       (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
-      (forall (k1:size_nat{k1 < 8}). res.(i, 8 * j + k1) == frodo_key_encode_inner b a i j k1))
+      (forall (k1:size_nat{k1 < 8}). res.(i, 8 * j + k1) == frodo_key_encode_inner b a i j k1 v8))
 let frodo_key_encode2 b a res0 v8 i j =
   let vij = uint_from_bytes_le (update_sub v8 0 b (Seq.sub a ((i + j) * b) b)) in
   frodo_key_encode1 b a res0 vij i j
@@ -126,7 +141,7 @@ val frodo_key_encode:
     b: size_nat{b <= 8}
   -> a: lbytes (params_nbar * params_nbar * b / 8)
   -> res:matrix params_nbar params_nbar{forall (i0:size_nat{i0 < params_nbar}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < 8}).
-      res.(i0, 8 * j + k) == frodo_key_encode_inner b a i0 j k}
+      res.(i0, 8 * j + k) == frodo_key_encode_inner b a i0 j k (Seq.create 8 (u8 0))}
 let frodo_key_encode b a =
   let res = create params_nbar params_nbar in
   let v8 = Seq.create 8 (u8 0) in
@@ -134,12 +149,12 @@ let frodo_key_encode b a =
 
   repeati_inductive params_nbar
   (fun i res ->
-    forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}) (k:size_nat{k < 8}). res.(i0, 8 * j + k) == frodo_key_encode_inner b a i0 j k)
+    forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}) (k:size_nat{k < 8}). res.(i0, 8 * j + k) == frodo_key_encode_inner b a i0 j k v8)
   (fun i res ->
     repeati_inductive n2
     (fun j res0 ->
       (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}) (k:size_nat{k < 8}). res0.(i0, 8 * j + k) == res.(i0, 8 * j + k)) /\
-      (forall (j0:size_nat{j0 < j}) (k:size_nat{k < 8}). res0.(i, 8 * j0 + k) == frodo_key_encode_inner b a i j0 k))
+      (forall (j0:size_nat{j0 < j}) (k:size_nat{k < 8}). res0.(i, 8 * j0 + k) == frodo_key_encode_inner b a i j0 k v8))
     (fun j res0 ->
       frodo_key_encode2 b a res0 v8 i j
     ) res
