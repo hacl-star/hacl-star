@@ -6,7 +6,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
 
-
+inline_for_extraction
 let size_state : size_nat = 12
 let rate : size_nat = 16
 

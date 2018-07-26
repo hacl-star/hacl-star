@@ -10,13 +10,13 @@ open Lib.RawIntTypes
 #set-options "--max_fuel 0 --z3rlimit 100"
 
 (* Constants *)
-let keylen = 32 (* in bytes *)
-let blocklen = 64  (* in bytes *)
-let noncelen = 8   (* in bytes *)
+let size_key = 32 (* in bytes *)
+let size_block = 64  (* in bytes *)
+let size_nonce = 8   (* in bytes *)
 
-type key = lbytes keylen
-type block = lbytes blocklen
-type nonce = lbytes noncelen
+type key = lbytes size_key
+type block = lbytes size_block
+type nonce = lbytes size_nonce
 type counter = size_nat
 
 type state = m:intseq U32 16
@@ -92,7 +92,7 @@ let salsa20_key_block (st:state) : Tot block =
   uints_to_bytes_le st'
 
 let salsa20_cipher =
-  Spec.CTR.Cipher state keylen max_size_t blocklen salsa20_init salsa20_set_counter salsa20_key_block
+  Spec.CTR.Cipher state size_key max_size_t size_block salsa20_init salsa20_set_counter salsa20_key_block
 
 let salsa20_encrypt_bytes key nonce counter m =
   Spec.CTR.counter_mode salsa20_cipher key nonce counter m

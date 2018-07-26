@@ -10,13 +10,13 @@ open Lib.RawIntTypes
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-let keylen = 32 (* in bytes *)
-let blocklen = 64  (* in bytes *)
-let noncelen = 12 (* in bytes *)
+let size_key = 32 (* in bytes *)
+let size_block = 64  (* in bytes *)
+let size_nonce = 12 (* in bytes *)
 
-type key = lbytes keylen
-type block = lbytes blocklen
-type nonce = lbytes noncelen
+type key = lbytes size_key
+type block = lbytes size_block
+type nonce = lbytes size_nonce
 type counter = size_nat
 
 // using @ as a functional substitute for ;
@@ -138,7 +138,7 @@ let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     chacha20_key_block st
 
 let chacha20_cipher =
-  Spec.CTR.Cipher state keylen noncelen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
+  Spec.CTR.Cipher state size_key size_nonce max_size_t size_block chacha20_init chacha20_set_counter chacha20_key_block
 
 let chacha20_encrypt_bytes key nonce counter len m =
   Spec.CTR.counter_mode chacha20_cipher key nonce counter len m

@@ -216,8 +216,9 @@ let (^~.) x y = logand #U8 (lognot #U8 (x ^. y)) (u8 1)
   let output = s7 ^. (s6 <<. u32 1) ^. (s5 <<. u32 2) ^. (s4 <<. u32 3) ^. (s3 <<. u32 4) ^. (s2 <<. u32 5) ^. (s1 <<. u32 6) ^. (s0 <<. u32 7) in
   output *)
 
-
-type block = lseq uint8 16
+inline_for_extraction
+let size_block:size_nat = 16
+type block = lseq uint8 size_block
 
 let subBytes (state:block) : block =
   map sbox state
@@ -318,7 +319,10 @@ let block_cipher (key:lseq uint8 (11 * 16)) (input:block) =
   let state = addRoundKey kn state in
   state
 
-type word = lseq uint8 4
+inline_for_extraction
+let size_word: size_nat = 4
+type word = lseq uint8 size_word
+
 let rotate_word (w:word) : word =
   createL [w.[1];w.[2];w.[3];w.[0]]
 
@@ -381,7 +385,7 @@ let aes128_encrypt_block (k:block) (m:block) : block =
 
 noeq type aes_state = {
   key_ex: lseq uint8 (11 `op_Multiply` 16);
-  block:  lseq uint8 16;
+  block:  lseq uint8 size_block;
   ctr:    size_nat;
 }
 

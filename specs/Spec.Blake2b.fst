@@ -8,17 +8,18 @@ open FStar.All
 open Lib.RawIntTypes
 
 (* Constants *)
+let size_word = 64
+let size_block_w = 16
+let size_word = 8
+let size_block : nat = size_block_w * size_word
 
-let word_size = 64
-let words_block_size = 16
-let bytes_in_word = 8
-let bytes_in_block : nat = words_block_size * bytes_in_word
 let rounds_in_f = 12
-let block_bytes = 128
+
 let r1 = u32 32
 let r2 = u32 24
 let r3 = u32 16
 let r4 = u32 63
+
 let init_list = List.Tot.map u64
   [0x6A09E667F3BCC908; 0xBB67AE8584CAA73B;
    0x3C6EF372FE94F82B; 0xA54FF53A5F1D36F1;
@@ -71,7 +72,7 @@ let blake2_compress h m offset f =
   let v = update_slice v 0 8 h in
   let v = update_slice v 8 16 init_vector in
   let low_offset = to_u64 #U128 offset in
-  let high_offset = to_u64 #U128 (offset >>. u32 word_size) in
+  let high_offset = to_u64 #U128 (offset >>. u32 size_word) in
   let v = v.[12] <- v.[12] ^. low_offset in
   let v = v.[13] <- v.[13] ^. high_offset in
   let v = if f then v.[14] <- v.[14] ^. (u64 0xFFFFFFFFFFFFFFFF) else v in
@@ -96,7 +97,7 @@ let blake2_compress h m offset f =
   in
   h
 
-val blake2b_internal : dd:size_nat{0 < dd /\ dd * bytes_in_block <= max_size_t}  -> d:lbytes (dd * bytes_in_block) -> ll:size_nat -> kk:size_nat{kk<=64} -> nn:size_nat{1 <= nn /\ nn <= 64} -> Tot (lbytes nn)
+val blake2b_internal : dd:size_nat{0 < dd /\ dd * size_block <= max_size_t}  -> d:lbytes (dd * size_block) -> ll:size_nat -> kk:size_nat{kk<=64} -> nn:size_nat{1 <= nn /\ nn <= 64} -> Tot (lbytes nn)
 
 let blake2b_internal dd d ll kk nn =
   let h = init_vector in
@@ -105,39 +106,39 @@ let blake2b_internal dd d ll kk nn =
     repeati (dd -1)
       (fun i h ->
 	let to_compress : intseq U64 16 =
-	  uints_from_bytes_le (sub d (i*bytes_in_block) bytes_in_block)
+	  uints_from_bytes_le (sub d (i*size_block) size_block)
 	in
-	blake2_compress h to_compress (u128 ((i+1)*block_bytes)) false
+	blake2_compress h to_compress (u128 ((i+1)*size_block)) false
       ) h else h
   in
-  let offset : size_nat = (dd-1)*block_bytes in
-  let last_block : intseq U64 16 = uints_from_bytes_le (sub d offset bytes_in_block) in
+  let offset : size_nat = (dd-1)*size_block in
+  let last_block : intseq U64 16 = uints_from_bytes_le (sub d offset size_block) in
   let h = if kk = 0 then
     blake2_compress h last_block (u128  ll) true
     else
-    blake2_compress h last_block (u128 (ll + block_bytes)) true
+    blake2_compress h last_block (u128 (ll + size_block)) true
   in
   sub (uints_to_bytes_le h) 0 nn
 
-val blake2b : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * bytes_in_block } ->  d:lbytes ll ->  kk:size_nat{kk<=64} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 64} -> Tot (lbytes nn)
+val blake2b : ll:size_nat{0 < ll /\ ll <= max_size_t - 2 * size_block } ->  d:lbytes ll ->  kk:size_nat{kk<=64} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 64} -> Tot (lbytes nn)
 
-let blake2b 
+let blake2b
   ll (* size of d in bytes *)
   d (* data to hash *)
   kk (* size of key in bytes *)
-  k (* key *) 
+  k (* key *)
   nn (* size of resulting hash in bytes *) =
-  let data_blocks : size_nat = ((ll - 1) / bytes_in_block) + 1 in
-  let padded_data_length : size_nat = data_blocks * bytes_in_block in
+  let data_blocks : size_nat = ((ll - 1) / size_block) + 1 in
+  let padded_data_length : size_nat = data_blocks * size_block in
   let padded_data = create padded_data_length (u8 0) in
-  let padded_data : lbytes (data_blocks * bytes_in_block) = update_slice padded_data 0 ll d in
+  let padded_data : lbytes (data_blocks * size_block) = update_slice padded_data 0 ll d in
   if kk = 0 then
      blake2b_internal data_blocks padded_data ll kk nn
   else
-     let padded_key = create bytes_in_block (u8 0) in
+     let padded_key = create size_block (u8 0) in
      let padded_key = update_slice padded_key 0 kk k in
-     let data_length : size_nat = bytes_in_block + padded_data_length in
+     let data_length : size_nat = size_block + padded_data_length in
      let data = create data_length (u8 0) in
-     let data = update_slice data 0 bytes_in_block padded_key in
-     let data = update_slice data bytes_in_block data_length padded_data in
+     let data = update_slice data 0 size_block padded_key in
+     let data = update_slice data size_block data_length padded_data in
      blake2b_internal (data_blocks+1) data ll kk nn

@@ -11,11 +11,14 @@ module Poly = Spec.Poly1305
 (* RFC7539: https://tools.ietf.org/html/rfc7539#section-2.8 *)
 #set-options "--max_fuel 0 --z3rlimit 30"
 
-let keylen : size_nat =   32 (* in bytes *)
-let noncelen : size_nat = 12 (* in bytes *)
+inline_for_extraction
+let size_key : size_nat =   32 (* in bytes *)
 
-type key = lbytes keylen
-type nonce = lbytes noncelen
+inline_for_extraction
+let size_nonce : size_nat = 12 (* in bytes *)
+
+type key = lbytes size_key
+type nonce = lbytes size_nonce
 
 let poly1305_padded (len:size_nat) (text:lbytes len) (tmp:lbytes Poly.blocksize) (st:Poly1305.state) : Poly1305.state =
   let n = len / Poly.blocksize in

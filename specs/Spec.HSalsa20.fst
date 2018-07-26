@@ -11,13 +11,18 @@ open Spec.Lib
 
 module Salsa20 = Spec.Salsa20
 
-let keylen = 32 (* in bytes *)
-let blocklen = 64  (* in bytes *)
-let noncelen = 16  (* in bytes *)
+inline_for_extraction
+let size_key = 32 (* in bytes *)
 
-type key = lbytes keylen
-type nonce = lbytes noncelen
-type block = lbytes blocklen
+inline_for_extraction
+let size_block = 64  (* in bytes *)
+
+inline_for_extraction
+let size_nonce = 16  (* in bytes *)
+
+type key = lbytes size_key
+type nonce = lbytes size_nonce
+type block = lbytes size_block
 
 type state = Salsa20.state
 
@@ -33,7 +38,7 @@ let setup (k:key) (n:nonce): state =
 	  (index ns 2)       (index ns 3)      Salsa20.constant2 (index ks 4)
           (index ks 5)       (index ks 6)      (index ks 7)      Salsa20.constant3
 
-let hsalsa20 (k:key) (n:nonce) : Tot key = 
+let hsalsa20 (k:key) (n:nonce) : Tot key =
   let st = setup k n in
   let st' = Spec.Salsa20.rounds st in
   let hs = create_8 st'.[0] st'.[5] st'.[10] st'.[15] st'.[6] st'.[7] st'.[8] st'.[9] in
