@@ -5,14 +5,14 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
+open LowStar.ModifiesPat
+open LowStar.Modifies
+
 open Lib.IntTypes
 open Lib.PQ.Buffer
 
 open Hacl.Impl.PQ.Lib
 open Hacl.Impl.Frodo.Params
-
-open LowStar.ModifiesPat
-open LowStar.Modifies
 
 module B = LowStar.Buffer
 module ST = FStar.HyperStack.ST

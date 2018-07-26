@@ -5,6 +5,9 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
+open LowStar.ModifiesPat
+open LowStar.Modifies
+
 open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.PQ.Buffer
@@ -14,9 +17,6 @@ open Hacl.Keccak
 open Hacl.Impl.Frodo.Params
 open Hacl.Impl.Frodo.Encode
 open Hacl.Impl.Frodo.Pack
-
-open LowStar.ModifiesPat
-open LowStar.Modifies
 
 module B = LowStar.Buffer
 module ST = FStar.HyperStack.ST
