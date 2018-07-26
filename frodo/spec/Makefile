@@ -9,7 +9,14 @@ FSTAR_INCLUDES += $(addprefix --include , $(HACL_HOME)/lib $(HACL_HOME)/lib/fst 
 
 OTHERFLAGS= --cache_checked_modules --cache_dir cache --use_hint_hashes --record_hints
 
-SPECS = Spec.Frodo.Params Spec.Frodo.Lemmas Spec.Frodo Spec.Matrix
+SPECS = \
+  Spec.Frodo.Params \
+  Spec.Frodo.Lemmas \
+  Spec.Frodo.Keccak \
+  Spec.Frodo.Encode \
+  Spec.Frodo.Pack \
+  Spec.Frodo \
+  Spec.Matrix
 
 SPEC_FILES = $(addsuffix .fst, $(SPECS))
 

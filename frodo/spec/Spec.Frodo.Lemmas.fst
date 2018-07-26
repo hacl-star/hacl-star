@@ -1,15 +1,11 @@
 module Spec.Frodo.Lemmas
 
 open FStar.Mul
-open Lib.IntTypes
-open Lib.Sequence
-open Lib.ByteSequence
-open Lib.RawIntTypes
 open FStar.Math.Lemmas
 
-open Spec.PQ.Lib
+open Lib.IntTypes
 
-#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0 --z3seed 2"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 val modulo_pow2_u16:
   a:uint16 -> b:size_nat{b < 16} -> Lemma
@@ -38,12 +34,11 @@ val lemma_matrix_index_repeati:
 let lemma_matrix_index_repeati n1 n2 d i j =
   let res = (i * n2 / 8 + j) * d + d in
   assert (i * n2 / 8 + j <= (n1 - 1) * n2 / 8 + n2 / 8 - 1);
-  //assert ((n1 - 1) * n2 / 8 = n1 * n2 / 8 - n2 / 8);
   assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 - 1);
   lemma_mult_le_right d (i * n2 / 8 + j) (n1 * n2 / 8 - 1);
   assert ((i * n2 / 8 + j) * d <= (n1 * n2 / 8 - 1) * d);
   assert (res <= (n1 * n2 / 8 - 1) * d + d);
-  assert ((n1 * n2 / 8 - 1) * d + d = n1 * n2 / 8 * d - d + d)
+  assert ((n1 * n2 / 8 - 1) * d + d == n1 * n2 / 8 * d - d + d)
 
 val lemma_matrix_index_repeati1:
   n1:size_nat -> n2:size_nat ->
