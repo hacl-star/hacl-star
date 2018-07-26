@@ -102,12 +102,12 @@ hints: $(addsuffix -hints, $(POLY1305_SPECIFIC))
 extract-c:
 	mkdir -p poly-c
 	$(KREMLIN_HOME)/krml -tmpdir poly-c -verbose \
-		-I ../../bignum -I ../../lib/kremlin -I $(FSTAR_HOME)/../kremlin/kremlib \
+		-I ../../bignum -I ../../lib/kremlin -I $(KREMLIN_HOME)/kremlib/compat \
 		Hacl.Test.Poly1305_32.fst \
 		-drop FStar -drop Hacl.Spec -drop Prims -drop Hacl.Cast -drop Hacl.UInt8 -drop Hacl.UInt32 -drop Hacl.UInt64 \
 		-drop Hacl.UInt128  -drop Hacl.Bignum.Constants -drop Hacl.Bignum.Parameters -drop Hacl.Bignum.Limb -drop Hacl.Bignum.Wide \
 		-bundle "Hacl.Spec.\*" -bundle "Poly1305_32=Poly1305_32,Hacl.Bignum.\*,Hacl.MAC.\*" \
-		-add-include '"testlib.h"' $(KREMLIN_HOME)/kremlib/testlib.c \
+		-add-include '"testlib.h"' $(KREMLIN_HOME)/kremlib/c/testlib.c \
 		-ccopt "-D_GNU_SOURCE" \
 		-ccopt -Wno-error=pointer-sign -ccopt -Wno-error=incompatible-pointer-types \
                 -ccopt -Wno-error=format= -no-prefix Hacl.Test.Poly1305_32 -ccopt -flto -ccopt -march=native -o poly1305.exe

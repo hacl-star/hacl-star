@@ -23,5 +23,6 @@ val crypto_onetimeauth:
   key:uint8_p{disjoint mac key /\ length key = 32} ->
   Stack unit
     (requires (fun h -> live h mac /\ live h input /\ live h key))
-    (ensures  (fun h0 _ h1 -> live h1 mac /\ modifies_1 mac h0 h1 /\ live h0 input /\ live h0 key
-      /\ h1.[mac] == Spec.Poly1305.poly1305 h0.[input] h0.[key]))
+    (ensures  (fun h0 _ h1 -> live h1 mac /\ modifies_1 mac h0 h1 /\
+      live h0 input /\ live h0 key /\
+      h1.[mac] == Spec.Poly1305.poly1305 h0.[input] h0.[key]))

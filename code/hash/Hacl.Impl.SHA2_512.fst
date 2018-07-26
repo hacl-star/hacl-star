@@ -149,7 +149,7 @@ let assign_k:
       (requires (fun h0 ->
         live h0 b /\ length b = List.Tot.length Spec.k_list))
       (ensures (fun h0 _ h1 ->
-        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.of_list Spec.k_list)) =
+        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.seq_of_list Spec.k_list)) =
   let open FStar.Tactics in
   synth_by_tactic (specialize (assignL (normalize_term Spec.k_list)) [`%assignL])
 
@@ -174,7 +174,7 @@ let assign_h0:
       (requires (fun h0 ->
         live h0 b /\ length b = List.Tot.length Spec.h_0_list))
       (ensures (fun h0 _ h1 ->
-        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.of_list Spec.h_0_list)) =
+        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.seq_of_list Spec.h_0_list)) =
   let open FStar.Tactics in
   synth_by_tactic (specialize (assignL (normalize_term Spec.h_0_list)) [`%assignL])
 

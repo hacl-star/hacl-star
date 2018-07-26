@@ -58,7 +58,12 @@ test:
 # - verify every F* file in parallel to generate .checked files
 # - extract each .checked file into a .krml file in parallel
 
-FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib evercrypt evercrypt/fst \
+# TODO: some of these directories have no interfaces, meaning that we end up
+# with way too much HACL* code in our verification dependency graph; ideally,
+# every HACL* algorithm should have an interfaces directory that allows us to
+# cut the dependency graph
+
+FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib/compat evercrypt evercrypt/fst \
   evercrypt/config/$(CONFIG) \
   $(HACL_CODE)/lib/kremlin \
   $(HACL_CODE)/experimental/aesgcm \
@@ -114,9 +119,13 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -bundle 'FStar.*' \
-	  -bundle 'C.Loops=C.Loops,Spec.*,Hacl.Spe.*,Hacl.Spec.*,Seq.*,Hacl.Endianness,Hacl.Types,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Constants,Hacl.Cast' \
-	  -bundle 'Hacl.Chacha20=Hacl.Impl.*,Hacl.Chacha20,Hacl.Standalone.Poly1305_64,Hacl.Lib.*,Hacl.Bignum.*' \
+	  -bundle 'Hacl.*' \
+	  -bundle 'Spec.*' \
+	  -bundle 'Hacl.Spec.*' \
+	  -bundle 'Hacl.Spe.*' \
+	  -bundle 'AEAD.*' \
 	  -bundle 'LowStar.*' \
+	  -library 'AEAD.*,Hacl.*' \
 	  -no-prefix 'EverCrypt.Vale' \
 	  -tmpdir generated $^ -warn-error +9
 
@@ -151,6 +160,7 @@ HACL_SOURCES	= \
   $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
   $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \
   $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
+  $(HACL_CODE)/poly1305/poly-c/Hacl_Poly1305_64.c \
   $(HACL_CODE)/api/policies-c/Hacl_Policies.c \
   $(HACL_CODE)/api/aead-c/Hacl_Chacha20Poly1305.c
 #  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \

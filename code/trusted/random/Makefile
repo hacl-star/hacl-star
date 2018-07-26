@@ -22,7 +22,7 @@ MODULES_ASSUMED = Hacl.Trusted.Random.Hardware.Assumed
 MODULE          = Hacl.Trusted.Random.Hardware
 MAIN            = Hacl.Test.Trusted.Random.Hardware
 
-INCLUDES        = $(KREMLIN_HOME)/kremlib
+INCLUDES        = $(KREMLIN_HOME)/kremlib/compat
 EXTRACTED_FILES =  Prims.c FStar.c cpuid.c drng.c Hacl_Trusted_Random_Hardware.c Hacl_Test_Trusted_Random_Hardware.c
 
 
