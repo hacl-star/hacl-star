@@ -57,7 +57,7 @@ val upd:
   -> Stack unit
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 _ h1 ->
-      B.modifies_1 b h0 h1 /\ B.live h1 b /\
+      B.modifies (loc_buffer b) h0 h1 /\ B.live h1 b /\
       B.as_seq h1 b == Seq.upd #a #len (B.as_seq h0 b) (v i) x)
 let upd #a #len b i v =
   B.upd b (size_to_UInt32 i) v
