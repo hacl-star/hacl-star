@@ -124,9 +124,9 @@ aesgcm.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst Spec.GF
 
 curve25519.exe: $(LIBS_FILES) Spec.Curve25519.fst tests/Spec.Curve25519.Test.fst
 	mkdir -p curve25519-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Curve25519 --extract_module Spec.Curve25519.Test --odir curve25519-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence  --extract_module Lib.ByteSequence --extract_module Spec.Curve25519 --extract_module Spec.Curve25519.Test --odir curve25519-ml $^
 	@echo 'let _ = test()' >> curve25519-ml/Spec_Curve25519_Test.ml
-	$(OCAMLOPT) -I curve25519-ml curve25519-ml/Lib_IntTypes.ml curve25519-ml/Lib_Sequence.ml curve25519-ml/Spec_Curve25519.ml curve25519-ml/Spec_Curve25519_Test.ml -o curve25519.exe
+	$(OCAMLOPT) -I curve25519-ml curve25519-ml/Lib_IntTypes.ml curve25519-ml/Lib_Sequence.ml curve25519-ml/Lib_ByteSequence.ml curve25519-ml/Spec_Curve25519.ml curve25519-ml/Spec_Curve25519_Test.ml -o curve25519.exe
 	./curve25519.exe
 
 
@@ -214,20 +214,29 @@ pbkdf2.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Ha
 	$(OCAMLOPT) -I pbkdf2-ml $(OCAML_INCLUDES) pbkdf2-ml/Lib_IntTypes.ml pbkdf2-ml/Lib_RawIntTypes.ml pbkdf2-ml/Lib_Sequence.ml pbkdf2-ml/Lib_Stateful.ml pbkdf2-ml/Spec_SHA2.ml pbkdf2-ml/Spec_Hash.ml pbkdf2-ml/Spec_HMAC.ml pbkdf2-ml/Spec_PBKDF2.ml pbkdf2-ml/Spec_PBKDF2_Test.ml -o pbkdf2.exe
 	./pbkdf2.exe
 
-
-network.exe: $(LIBS_FILES) tests/Spec.Network.Test.fst
-	mkdir -p network-ml
-	$(FSTAR) --include lib --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Network.Test --odir network-ml $^
-	@echo 'let _ = test()' >> network-ml/Spec_Network_Test.ml
-	$(OCAMLOPT) -I network-ml -I ../lib/ml ../lib/ml/Lib_IO_Tcp.ml network-ml/Lib_IntTypes.ml network-ml/Lib_RawIntTypes.ml network-ml/Lib_Sequence.ml network-ml/Spec_Network_Test.ml -o network.exe
-	./network.exe
-
 rsapss.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
 	mkdir -p rsapss-ml
 	$(FSTAR)  --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes  --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSAPSS --extract_module Spec.RSAPSS.Test --odir rsapss-ml $^
 	@echo 'let _ = test()' >> rsapss-ml/Spec_RSAPSS_Test.ml
 	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) rsapss-ml/Lib_IntTypes.ml rsapss-ml/Lib_RawIntTypes.ml rsapss-ml/Lib_Sequence.ml rsapss-ml/Lib_Stateful.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
 	./rsapss.exe
+
+
+
+random.exe: $(LIBS_FILES) Spec.Random.fst tests/Spec.Random.Test.fst
+	$(MAKE) build -C external
+	mkdir -p random-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Random --extract_module Spec.Random.Test --odir random-ml $^
+	@echo 'let _ = test()' >> random-ml/Spec_Random_Test.ml
+	$(OCAMLOPT) -package cryptokit -I external -I random-ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_Sequence.ml random-ml/Lib_ByteSequence.ml external/Spec_Random.ml random-ml/Spec_Random_Test.ml -o random.exe
+	./random.exe
+
+network.exe: $(LIBS_FILES) tests/Spec.Network.Test.fst
+	mkdir -p network-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Network.Test --odir network-ml $^
+	@echo 'let _ = test()' >> network-ml/Spec_Network_Test.ml
+	$(OCAMLOPT) -I network-ml -I ../lib/ml ../lib/ml/Lib_IO_Tcp.ml network-ml/Lib_IntTypes.ml network-ml/Lib_RawIntTypes.ml network-ml/Lib_Sequence.ml network-ml/Spec_Network_Test.ml -o network.exe
+	./network.exe
 
 
 clean:
