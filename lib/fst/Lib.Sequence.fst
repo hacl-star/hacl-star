@@ -83,7 +83,14 @@ let slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat)
 	  (fin:size_nat{start <= fin /\ fin <= len}) =
 	  sub #a #len i start (fin - start)
 
-val update_sub: #a:Type -> #len:size_nat -> i:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}
+val update_sub:
+    #a:Type
+  -> #len:size_nat
+  -> i:lseq a len
+  -> start:size_nat
+  -> n:size_nat{start + n <= len}
+  -> x:lseq a n
+  -> o:lseq a len{sub o start n == x /\ (forall (k:size_nat{0 <= k /\ k < start /\ start + n <= k /\ k < len}). index o k == index i k)}
 let update_sub #a #len s start n x =
   let o =
     Seq.append
