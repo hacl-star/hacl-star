@@ -5,6 +5,7 @@ open FStar.Seq
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
+open Box.Index
 open Box.Key
 
 open FStar.Endianness
@@ -13,11 +14,17 @@ module MM = FStar.Monotonic.Map
 
 val random_bytes: n:nat{n<=32} -> lbytes n
 
+//val random_bytes: n:nat{n<=32} -> ST (lbytes n)
+//  (requires (fun h0 -> True))
+//  (ensures (fun h0 b h1 ->
+//    h0 == h1
+//  ))
+
 noeq type odh_parameters =
   | OP:
-  share_length:(n:nat{n<=32}) ->
-  exponent_length:(n:nat{n<=32}) ->
-  hash_length:(n:nat{n<=32}) ->
+  share_length:(n:nat{n=32}) ->
+  exponent_length:(n:nat{n=32}) ->
+  hash_length:(n:nat{n=32}) ->
   generator:lbytes share_length ->
   exponentiate:(lbytes exponent_length -> lbytes share_length -> lbytes share_length) ->
   hash:(lbytes share_length -> lbytes hash_length) ->
@@ -26,7 +33,6 @@ noeq type odh_parameters =
 abstract type share (oparam:odh_parameters) =
   | SH:
   raw_sh:lbytes oparam.share_length ->
-  h:bool ->
   share oparam
 
 abstract type exponent (oparam:odh_parameters) =
@@ -35,31 +41,41 @@ abstract type exponent (oparam:odh_parameters) =
   sh:share oparam{sh.raw_sh = oparam.exponentiate raw_exp oparam.generator} ->
   exponent oparam
 
-val sh_hon: #oparams:odh_parameters -> sh:share oparams -> GTot (b:bool{b=sh.h})
-
-val exp_hon: #oparams:odh_parameters -> exp:exponent oparams -> GTot (b:bool{b=exp.sh.h})
-
 val get_exp_share: #oparams:odh_parameters -> e:exponent oparams -> sh:share oparams{e.sh = sh}
 
 val get_share_raw: #oparams:odh_parameters -> sh:share oparams -> raw:lbytes oparams.share_length{raw = sh.raw_sh}
 
 val get_exponent_raw: #oparams:odh_parameters -> exp:exponent oparams -> GTot (raw:lbytes oparams.exponent_length{raw = exp.raw_exp})
 
-val gen_dh: (oparam:odh_parameters) -> exponent oparam
+val gen_dh: (#rgn:erid) -> (ip:index_package rgn) -> (oparam:odh_parameters) -> ST (dh_keypair:(exponent oparam*share oparam){(fst dh_keypair).sh=snd dh_keypair})
+  (requires (fun h0 -> True))
+  (ensures (fun h0 (e,sh) h1 ->
+    registered ip (PK_id sh.raw_sh)
+    /\ honest ip (PK_id sh.raw_sh)
+    /\ register_footprint ip h0 h1
+  ))
 
-val coerce_dh_sh: (oparam:odh_parameters) -> (rash_sh:lbytes oparam.share_length) -> sh:share oparam
+val coerce_dh_sh: (#rgn:erid) -> (ip:index_package rgn) -> (oparam:odh_parameters) -> (raw_sh:lbytes oparam.share_length) -> ST (sh:share oparam{sh.raw_sh = raw_sh})
+  (requires (fun h0 ->
+    fresh ip (PK_id raw_sh) h0
+  ))
+  (ensures (fun h0 sh h1 ->
+    registered ip (PK_id raw_sh)
+    /\ dishonest ip (PK_id raw_sh)
+    /\ register_footprint ip h0 h1
+  ))
 
-val coerce_dh_exp: (oparam:odh_parameters) -> (raw_exp:lbytes oparam.exponent_length) -> exp:exponent oparam
-
-let id = id:(bytes*bytes)
-
-val create_id: (#oparam:odh_parameters) -> sh1:share oparam -> sh2:share oparam{sh1.raw_sh <> sh2.raw_sh} -> i:id
-
-#set-options "--z3rlimit 300 --max_ifuel 0 --max_fuel 1"
-val lemma_symmetric_id: (#oparam:odh_parameters) -> sh1:share oparam -> sh2:share oparam{sh1.raw_sh <> sh2.raw_sh} -> Lemma
-  (requires True)
-  (ensures create_id sh1 sh2 = create_id sh2 sh1)
-  [SMTPat (create_id #oparam sh1 sh2)]
+val coerce_dh_exp: (#rgn:erid) -> (ip:index_package rgn) -> (oparam:odh_parameters) -> (raw_exp:lbytes oparam.exponent_length) -> ST (exp:exponent oparam{exp.raw_exp = raw_exp})
+  (requires (fun h0 ->
+    let raw_sh = oparam.exponentiate raw_exp oparam.generator in
+    fresh ip (PK_id raw_sh) h0
+  ))
+  (ensures (fun h0 sh h1 ->
+    let raw_sh = oparam.exponentiate raw_exp oparam.generator in
+    registered ip (PK_id raw_sh)
+    /\ dishonest ip (PK_id raw_sh)
+    /\ register_footprint ip h0 h1
+  ))
 
 let key_package_log_key = id
 let key_package_log_value (i:id) (key_type:(id -> Type0)) = key_type i
@@ -69,51 +85,47 @@ let key_package_log_inv (key_type:(id -> Type0)) (f:MM.map' (key_package_log_key
 let key_package_log (rgn:erid) (key_type:(id -> Type0)) =
   MM.t rgn (key_package_log_key) (key_package_log_range key_type) (key_package_log_inv key_type)
 
-noeq abstract type odh_package (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (kp:key_package key_length key_type) (oparam:odh_parameters{oparam.hash_length = key_length}) =
+noeq abstract type odh_package (#rgn:erid) (#ip:index_package rgn) (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (kp:key_package ip key_length key_type) (oparam:odh_parameters{oparam.hash_length = key_length}) =
   | ODH:
-  rgn:erid ->
-  b:bool ->
-  kp_log:key_package_log rgn key_type ->
-  odh_package #key_length #key_type kp oparam
+  kp_log_rgn:erid{extends kp_log_rgn rgn} ->
+  kp_log:key_package_log kp_log_rgn key_type ->
+  odh_package #rgn #ip #key_length #key_type kp oparam
 
-val get_flag: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> op:odh_package #key_length #key_type kp oparam -> GTot (flag:bool{flag = op.b})
+val get_op_rgn: (#rgn:erid) -> (#ip:index_package rgn) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package ip key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> op:odh_package kp oparam -> (rgn:erid{rgn = op.kp_log_rgn})
 
-val get_op_rgn: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> (op:odh_package #key_length #key_type kp oparam) -> (rgn:erid{rgn = op.rgn})
+val get_op_log: (#rgn:erid) -> (#ip:index_package rgn) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package ip key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> op:odh_package kp oparam -> GTot (log:key_package_log op.kp_log_rgn key_type)
 
-val get_op_log: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> (op:odh_package #key_length #key_type kp oparam) -> GTot (log:key_package_log op.rgn key_type)
-
-val recall_op_log: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> (op:odh_package #key_length #key_type kp oparam) -> ST unit
+val recall_op_log: (#rgn:erid) -> (#ip:index_package rgn) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package ip key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> op:odh_package kp oparam -> ST unit
   (requires (fun h0 -> True))
   (ensures (fun h0 _ h1 ->
     h0 == h1
     /\ contains h1 op.kp_log
   ))
 
-val create_odh_package: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (kp:key_package key_length key_type) -> (oparam:odh_parameters{oparam.hash_length = key_length}) -> (rgn:erid) -> b:bool -> ST (odh_package #key_length #key_type kp oparam)
+val create_odh_package: (#rgn:erid) -> (#ip:index_package rgn) -> (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (kp:key_package ip key_length key_type) -> (oparam:odh_parameters{oparam.hash_length = key_length}) -> ST (odh_package #rgn #ip #key_length #key_type kp oparam)
   (requires (fun h0 -> True))
   (ensures (fun h0 op h1 ->
-    modifies (Set.singleton rgn) h0 h1
-    /\ extends op.rgn rgn
-    /\ b = op.b
+    modifies (Set.singleton op.kp_log_rgn) h0 h1
+    /\ extends op.kp_log_rgn rgn
   ))
 
-let dh_op_modified_regions (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (h0:mem) : (GTot (Set.set rid)) =
-  let i = create_id sh exp.sh in
-  let both_honest = sh.h && exp.sh.h in
-  if both_honest && op.b then
-    match MM.sel (sel h0 op.kp_log) i with
+let dh_op_memory_footprint (#rgn:erid) (#ip:index_package rgn) (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package ip key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (h0:mem) (h1:mem) =
+  let i = compose_id (PK_id sh.raw_sh) (PK_id exp.sh.raw_sh) in
+  let both_honest = honest ip i in
+  ((both_honest /\ Flags.prf_odh) ==>
+    (match MM.sel (sel h0 op.kp_log) i with
     | Some _ ->
-      Set.empty
+      modifies Set.empty h0 h1
     | None ->
-        Set.singleton op.rgn
-  else
-    Set.empty
+      modifies (Set.singleton op.kp_log_rgn) h0 h1))
+  /\ ((~both_honest \/ ~Flags.prf_odh) ==>
+      modifies Set.empty h0 h1)
 
-let dh_op_log_change (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (h0:mem) (h1:mem) =
-  let i = create_id sh exp.sh in
-  let both_honest = sh.h && exp.sh.h in
+let dh_op_log_change (#rgn:erid) (#ip:index_package rgn) (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package ip key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (h0:mem) (h1:mem) =
+  let i = compose_id (PK_id sh.raw_sh) (PK_id exp.sh.raw_sh) in
+  let both_honest = honest ip i in
   contains h0 op.kp_log
-  /\ ((both_honest /\ op.b) ==>
+  /\ ((both_honest /\ Flags.prf_odh) ==>
       (MM.defined op.kp_log i h0 ==>
         Some? (sel h1 op.kp_log i)
         /\ (let k = Some?.v (sel h1 op.kp_log i) in
@@ -125,28 +137,35 @@ let dh_op_log_change (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp
           witnessed (MM.contains op.kp_log i k)
           /\ sel h1 op.kp_log == MM.upd (sel h0 op.kp_log) i k))
     )
-  /\ ((~both_honest \/ ~op.b) ==>
+  /\ ((~both_honest \/ ~Flags.prf_odh) ==>
       sel h1 op.kp_log == sel h0 op.kp_log)
 
 // Do we need/want this?
-let dh_op_functional_spec (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (k:key_type (create_id sh exp.sh)) (h:mem) =
-  let i = create_id sh exp.sh in
-  let both_honest = sh.h && exp.sh.h in
-    ((op.b /\ both_honest) ==>
-      (Some? (MM.sel (sel h op.kp_log) i)
-      /\ k == Some?.v (MM.sel (sel h op.kp_log) i))) // If possible, indicate somehow that k was randomly drawn.
-    /\ (~op.b \/ ~both_honest ==>
-      kp.getGT k == oparam.hash (oparam.exponentiate exp.raw_exp sh.raw_sh)
-      /\ kp.hon k = false)
+let dh_op_functional_spec (#rgn:erid) (#ip:index_package rgn) (#key_length:(n:nat{n<=32})) (#key_type:(id -> Type0)) (#kp:key_package ip key_length key_type) (#oparam:odh_parameters{oparam.hash_length = key_length}) (op:odh_package kp oparam) (sh:share oparam) (exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh}) (k:key_type (compose_id (PK_id sh.raw_sh) (PK_id exp.sh.raw_sh))) (h1:mem) =
+  let i = compose_id (PK_id sh.raw_sh) (PK_id exp.sh.raw_sh) in
+  let both_honest = honest ip i in
+    ((Flags.prf_odh /\ both_honest) ==>
+        (Some? (MM.sel (sel h1 op.kp_log) i)
+        /\ k == Some?.v (MM.sel (sel h1 op.kp_log) i)
+        /\ honest ip i
+      )) // If possible, indicate somehow that k was randomly drawn.
+    /\ (~Flags.prf_odh ==>
+        kp.getGT k == oparam.hash (oparam.exponentiate exp.raw_exp sh.raw_sh)
+        /\ (both_honest ==> honest ip i)
+        /\ ~both_honest ==> dishonest ip i)
 
 
 #set-options "--z3rlimit 300 --max_ifuel 2 --max_fuel 1"
-val dh_op: (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> op:odh_package kp oparam -> sh:share oparam -> exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh} -> ST (key_type (create_id sh exp.sh))
-  (requires (fun h0 -> True))
+val dh_op: (#rgn:erid) -> (#ip:index_package rgn) ->  (#key_length:(n:nat{n<=32})) -> (#key_type:(id -> Type0)) -> (#kp:key_package ip key_length key_type) -> (#oparam:odh_parameters{oparam.hash_length = key_length}) -> op:odh_package kp oparam -> sh:share oparam -> exp:exponent oparam{exp.sh.raw_sh <> sh.raw_sh} -> ST (key_type (compose_id (PK_id sh.raw_sh) (PK_id exp.sh.raw_sh)))
+  (requires (fun h0 ->
+    let i = compose_id (PK_id sh.raw_sh) (PK_id exp.sh.raw_sh) in
+    (kp.flag ==> Flags.prf_odh)
+    /\ registered ip i
+  ))
   (ensures (fun h0 k h1 ->
-    let i = create_id sh exp.sh in
-    let both_honest = sh.h && exp.sh.h in
-    modifies (dh_op_modified_regions op sh exp h0) h0 h1
+    let i = compose_id (PK_id sh.raw_sh) (PK_id exp.sh.raw_sh) in
+    let both_honest = honest ip i in
+    dh_op_memory_footprint op sh exp h0 h1
     /\ dh_op_log_change op sh exp h0 h1
     /\ dh_op_functional_spec op sh exp k h1
   ))

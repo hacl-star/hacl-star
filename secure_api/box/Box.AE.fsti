@@ -18,7 +18,8 @@ module MM = FStar.Monotonic.Map
 
 val random_bytes: n:(n:nat{n<=32}) -> lbytes n
 
-let bytes32 = b:bytes{Seq.length b <= 32}
+let bytes32 = b:bytes
+//let bytes32 = b:bytes{Seq.length b <= 32}
 
 noeq abstract type key (key_length:(n:nat{n<=32})) (i:inst_id) =
      | Key:
@@ -44,7 +45,7 @@ noeq type encryption_scheme (key_length:(n:nat{n<=32})) (nonce_length:(n:nat{n<=
     valid_cipher_length:(nat -> bool) ->
     gen: (unit -> lbytes key_length) ->
     enc: (p:bytes32{valid_plain_length (Seq.length p)} -> k:lbytes key_length -> n:lbytes nonce_length -> c:bytes32{valid_cipher_length (Seq.length c)}) ->
-    enc_star: (plain_length:n32{valid_plain_length plain_length} -> k:lbytes key_length -> n:lbytes nonce_length -> c:bytes32{valid_cipher_length (Seq.length c)}) ->
+    enc_star: (plain_length:n32{valid_plain_length plain_length} -> c:bytes32{valid_cipher_length (Seq.length c)}) ->
     dec: (c:bytes32{valid_cipher_length (Seq.length c)} -> k:lbytes key_length -> n:lbytes nonce_length -> option (p:bytes32{valid_plain_length (Seq.length p)})) ->
 //    correctness: (p:bytes -> k:lbytes key_length -> n:lbytes nonce_length -> Lemma
 //    (requires True)
@@ -129,7 +130,7 @@ let encrypt_log_change (#rgn:erid) (#ip:index_package rgn) (#key_length:(n:nat{n
 let encrypt_functional_spec (#rgn:erid) (#ip:index_package rgn) (#i:inst_id) (#key_length:(n:nat{n<=32})) (#kp:KEY.key_package ip key_length (key key_length)) (#aparams:ae_parameters{aparams.keylength = key_length}) (ap:ae_package kp aparams) (k:key key_length i) (n:nonce aparams) (c:ciphertext aparams) (p:protected_plain ap.pp i) =
   let a = 1 in
   ((honest ip i /\ Flags.ae) ==>
-    (c = aparams.scheme.enc_star (length p) k.raw n))
+    (c = aparams.scheme.enc_star (length p)))
   /\ ((dishonest ip i \/ ~Flags.ae) ==>
     (c = aparams.scheme.enc (repr #rgn #ap.pp #ip #i p) k.raw n))
 
@@ -137,6 +138,7 @@ let encrypt_functional_spec (#rgn:erid) (#ip:index_package rgn) (#i:inst_id) (#k
 val encrypt: #rgn:erid -> #ip:index_package rgn -> #i:inst_id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package ip key_length (key key_length) -> #aparams:ae_parameters{key_length = aparams.keylength} -> ap:ae_package kp aparams -> k:key key_length i -> n:nonce aparams -> p:protected_plain ap.pp i -> ST (ciphertext aparams)
   (requires (fun h0 ->
     (nonce_is_unique ap i n h0)
+    /\ registered ip i
   ))
   (ensures (fun h0 c h1 ->
     encrypt_functional_spec ap k n c p
@@ -177,7 +179,7 @@ let decrypt_functional_spec (#rgn:erid)
 
 val decrypt: #rgn:erid -> #ip:index_package rgn -> #i:inst_id -> #key_length:(n:nat{n<=32}) -> #kp:KEY.key_package ip key_length (key key_length) -> #aparams:ae_parameters{key_length = aparams.keylength} -> ap:ae_package kp aparams -> k:key key_length i -> n:nonce aparams -> c:ciphertext aparams -> ST (option (p:protected_plain ap.pp i))
   (requires (fun h0 ->
-    True
+    registered ip i
   ))
   (ensures (fun h0 p h1 ->
     decrypt_functional_spec ap k n c p h0

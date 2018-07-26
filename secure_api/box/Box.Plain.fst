@@ -7,7 +7,8 @@ open FStar.Endianness
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-let n32 = (n:nat{n<=32})
+let n32 = (n:nat)
+//let n32 = (n:nat{n<=32})
 
 noeq type plain_package =
   | PP:
@@ -15,7 +16,8 @@ noeq type plain_package =
     valid_length:(n32 -> bool) ->
     plain_package
 
-type plain (pp:plain_package) = p:bytes{Seq.length p <= 32 /\ pp.valid_length (Seq.length p)}
+type plain (pp:plain_package) = p:bytes{pp.valid_length (Seq.length p)}
+//type plain (pp:plain_package) = p:bytes{Seq.length p <= 32 /\ pp.valid_length (Seq.length p)}
 abstract type protected_plain (pp:plain_package) (i:inst_id) = plain pp
 
 val length: (#pp:plain_package) -> (#i:inst_id) -> (p:protected_plain pp i) -> n:n32{pp.valid_length n}

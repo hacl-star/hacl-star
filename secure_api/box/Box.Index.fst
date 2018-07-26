@@ -9,6 +9,10 @@ module MM = FStar.Monotonic.Map
 
 let id_length = 32
 
+type cipherAlg =
+  | A
+  | B
+
 type pk = lbytes id_length
 type id =
   | PK_id of pk
@@ -101,6 +105,8 @@ let extend_id_log (#rgn:erid) (ip:index_package rgn) (i:pk_id) (b:bool) (h0:mem)
   /\ witnessed (MM.defined ip.id_log i)
   /\ witnessed (MM.contains ip.id_log i b))
 
+let register_footprint (#rgn:erid) (ip:index_package rgn) (h0:mem) (h1:mem) = 
+  modifies (Set.singleton ip.id_log_rgn) h0 h1
 
 val register: #rgn:erid -> ip:index_package rgn -> i:pk_id -> b:bool -> ST unit
   (requires (fun h0 ->
@@ -110,6 +116,7 @@ val register: #rgn:erid -> ip:index_package rgn -> i:pk_id -> b:bool -> ST unit
     (b ==> honest ip i)
     /\ (~b ==> dishonest ip i)
     /\ extend_id_log ip i b h0 h1
+    /\ register_footprint ip h0 h1
   ))
 let register #rgn ip i b =
   MM.extend ip.id_log i b
@@ -175,18 +182,18 @@ let lemma_honest_not_others #rgn ip i =
   assert(dishonest ip i ==> False)
 
 
-val lemma_honest_or_dishonest: #rgn:erid -> ip:index_package rgn -> (i:id) -> Lemma
-  (requires (
-    registered ip i
-  ))
-  (ensures (
-    ~(dishonest ip i)
-  ))
-  [SMTPat (honest ip i)]
-let lemma_honest_not_others #rgn ip i =
-  let (j:(i:id{honest ip i})) = i in
-  FStar.Classical.impl_intro (lemma_dishonest_and_others_tot ip j);
-  assert(dishonest ip i ==> False)
+//val lemma_honest_or_dishonest: #rgn:erid -> ip:index_package rgn -> (i:id) -> Lemma
+//  (requires (
+//    registered ip i
+//  ))
+//  (ensures (
+//    ~(dishonest ip i)
+//  ))
+//  [SMTPat (honest ip i)]
+//let lemma_honest_or_dishonest #rgn ip i =
+//  let (j:(i:id{honest ip i})) = i in
+//  FStar.Classical.impl_intro (lemma_dishonest_and_others_tot ip j);
+//  assert(dishonest ip i ==> False)
 
 //val lemma_honest_dishonest: #rgn:erid -> ip:index_package rgn -> i:id -> ST unit
 //  (requires (fun h0 ->
