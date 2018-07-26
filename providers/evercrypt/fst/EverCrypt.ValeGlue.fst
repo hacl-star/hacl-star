@@ -9,10 +9,6 @@ module U32 = FStar.UInt32
 
 ///  SHA256
 
-module T = LowStar.ToFStarBuffer
-
-inline_for_extraction noextract
-let (!!) = T.new_to_old_st
 
 /// Incremental API
 let sha256_init state =
@@ -39,7 +35,7 @@ let sha256_finish state hash =
   admit();
   C.Loops.for 0ul 8ul (fun _ _ -> True) (fun i ->
     let out = LowStar.Buffer.sub hash U32.(i *^ 4ul) 4ul in
-    store32_le !!out (htole32 (load32_be !!out)))
+    store32_le out (htole32 (load32_be out)))
 
 /// All-in one
 let sha256_hash state data len =
