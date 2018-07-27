@@ -122,11 +122,20 @@ val lemma_mod_distr_zero: a:nat -> b:nat -> c:pos -> Lemma
 
 let lemma_mod_distr_zero a b c = lemma_mod_distr a b c
 
+val lemma_mod_distr_sub: a:nat -> b:nat -> c:pos -> Lemma
+    (requires (a >= b))
+    (ensures  ((a - b) % c = (a % c - b % c + c) % c))
+
+let lemma_mod_distr_sub a b c =
+    lemma_euclidean a c;
+    //! assert((a - b) / c = ((a / c - b / c - 1) * c + (a % c - b % c + c)) / c);
+    lemma_add_mod (a % c - b % c + c) (a / c - b / c - 1) c
+
 val lemma_mod_distr_sub_zero: a:nat -> b:nat -> c:pos -> Lemma
     (requires (a % c = 0 /\ b % c = 0 /\ a >= b))
     (ensures  ((a - b) % c = 0))
 
-let lemma_mod_distr_sub_zero a b c = lemma_mod_distr (a - b) b c
+let lemma_mod_distr_sub_zero a b c = lemma_mod_distr_sub a b c
 
 val lemma_div_mul: a:nat -> b:pos -> Lemma
     (requires (a % b = 0))

@@ -4,7 +4,7 @@ open FStar.Mul
 open MPFR.Dyadic
 open MPFR.Maths
 
-#set-options "--z3refresh --z3rlimit 30 --max_fuel 5 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 30 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 (* MPFR uses 'mpfr_sign', 'mpfr_prec', 'mpfr_exp' and 'mpfr_d' to describe a dyadic rational number,
  * it also allows "sigular" values for NaN, +-Inf and +-ZERO.
@@ -28,6 +28,8 @@ type fp_type_t =
    | MPFR_ZERO     (* +0 or -0                  *)
    | MPFR_INF      (* +inf or -inf              *)
    | MPFR_NAN      (* not a number              *)
+
+type fp_sign_t = s:int{s = -1 \/ s = 1}
    
 (* flag: indicates value type, other entries are useless for sigular value (except sign)
  * sign: sign of the value, indicates also the sign of zero and infinity
@@ -38,7 +40,7 @@ type fp_type_t =
          the first 'prec' bits can have values while the last 'len - prec' bits should be 0s.
 	 it represents a rational number between 0 and 1 by adding '0.' in front of it *)
 type fp_struct = {
-    sign: s:int{s = -1 \/ s = 1};
+    sign: fp_sign_t;
     prec: pos;
     exp : int;
     limb: nat;
@@ -272,7 +274,19 @@ let mpfr_fp_cond (s:fp_struct) =
 (* type for MPFR number *)
 type mpfr_fp = s:fp_struct{mpfr_fp_cond s}
 
-	
+(* singular values constructor *)
+let mpfr_nan (p:nat{mpfr_PREC_COND p}):
+    Tot (x:mpfr_fp{valid_nan_cond x /\ x.prec = p}) =
+    mk_fp_struct 1 p 0 0 (prec_to_len p) MPFR_NAN
+
+let mpfr_inf (s:fp_sign_t) (p:nat{mpfr_PREC_COND p}):
+    Tot (x:mpfr_fp{valid_inf_cond x /\ x.sign = s /\ x.prec = p}) =
+    mk_fp_struct s p 0 0 (prec_to_len p) MPFR_INF
+
+let mpfr_zero (s:fp_sign_t) (p:nat{mpfr_PREC_COND p}):
+    Tot (x:mpfr_fp{valid_zero_cond x /\ x.sign = s /\ x.prec = p}) =
+    mk_fp_struct s p 0 0 (prec_to_len p) MPFR_ZERO
+
 ////////////////////////////////////////////////////
 //  Overflow and underflow bound for MPFR number  //
 //  Conversion from normal number to MPFR number  //
@@ -286,7 +300,7 @@ let mpfr_overflow_bound p =
     lemma_pow2_lt (l - p) l;
     mk_dyadic (pow2 l - pow2 (l - p)) (mpfr_EMAX_spec - l)
 
-val mpfr_max_value: s:int{s = 1 \/ s = -1} -> p:nat{mpfr_PREC_COND p} ->
+val mpfr_max_value: s:fp_sign_t -> p:nat{mpfr_PREC_COND p} ->
     Tot (m:mpfr_fp{valid_num_cond m /\ m.sign = s /\ eval_abs m =. mpfr_overflow_bound p})
 
 let mpfr_max_value s p = 
@@ -309,7 +323,7 @@ let mpfr_underflow_bound p =
     let l = prec_to_len p in
     mk_dyadic (pow2 (l - 1)) (mpfr_EMIN_spec - l)
 
-val mpfr_min_value: s:int{s = 1 \/ s = -1} -> p:nat{mpfr_PREC_COND p} ->
+val mpfr_min_value: s:fp_sign_t -> p:nat{mpfr_PREC_COND p} ->
     Tot (m:mpfr_fp{valid_num_cond m /\ m.sign = s /\ eval_abs m =. mpfr_underflow_bound p})
 
 let mpfr_min_value s p = 
@@ -320,11 +334,11 @@ let mpfr_min_value s p =
 
 
 (* lemmas about overflow/underflow *)
-val mpfr_overflow_bound_lemma: s:normal_fp{mpfr_PREC_COND s.prec /\ s.exp <= mpfr_EMAX_spec} -> Lemma
+val exp_impl_no_overflow_lemma: s:normal_fp{mpfr_PREC_COND s.prec /\ s.exp <= mpfr_EMAX_spec} -> Lemma
     (eval_abs s <=. mpfr_overflow_bound s.prec /\
      not (eval_abs s >. mpfr_overflow_bound s.prec))
 
-let mpfr_overflow_bound_lemma s =
+let exp_impl_no_overflow_lemma s =
     let p, l = s.prec, prec_to_len s.prec in
     let s' = change_len s l in
     let elb = min (s'.exp - l) (mpfr_EMAX_spec - l) in
@@ -336,11 +350,11 @@ let mpfr_overflow_bound_lemma s =
     assert(eval_abs s' <=. mpfr_overflow_bound s.prec);
     eval_eq_reveal_lemma s s'
 
-val no_overflow_exp_lemma: s:normal_fp{mpfr_PREC_COND s.prec} -> Lemma
+val no_overflow_impl_exp_lemma: s:normal_fp{mpfr_PREC_COND s.prec} -> Lemma
     (requires (eval_abs s <=. mpfr_overflow_bound s.prec))
     (ensures  (s.exp <= mpfr_EMAX_spec))
 
-let no_overflow_exp_lemma s =
+let no_overflow_impl_exp_lemma s =
     let s' = change_len s (prec_to_len s.prec) in
     eval_eq_reveal_lemma s s';
     assert(eval_abs s' <=. mpfr_overflow_bound s'.prec);
@@ -351,11 +365,25 @@ let no_overflow_exp_lemma s =
     lemma_pow2_mul s'.len (mpfr_EMAX_spec - s'.len - elb);
     if s'.exp - 1 >= mpfr_EMAX_spec then lemma_pow2_le (mpfr_EMAX_spec - elb) (s'.exp - elb - 1)
 
-val mpfr_underflow_bound_lemma: s:normal_fp{mpfr_PREC_COND s.prec /\ s.exp >= mpfr_EMIN_spec} -> Lemma
+val exp_impl_overflow_lemma: s:normal_fp{mpfr_PREC_COND s.prec /\ s.exp > mpfr_EMAX_spec} -> Lemma
+    (eval_abs s >. mpfr_overflow_bound s.prec /\
+     not (eval_abs s <=. mpfr_overflow_bound s.prec))
+
+let exp_impl_overflow_lemma s =
+    if (eval_abs s <=. mpfr_overflow_bound s.prec) then no_overflow_impl_exp_lemma s
+
+val overflow_impl_exp_lemma: s:normal_fp{mpfr_PREC_COND s.prec} -> Lemma
+    (requires (eval_abs s >. mpfr_overflow_bound s.prec))
+    (ensures  (s.exp > mpfr_EMAX_spec))
+
+let overflow_impl_exp_lemma s =
+    if s.exp <= mpfr_EMAX_spec then exp_impl_no_overflow_lemma s
+
+val exp_impl_no_underflow_lemma: s:normal_fp{mpfr_PREC_COND s.prec /\ s.exp >= mpfr_EMIN_spec} -> Lemma
     (eval_abs s >=. mpfr_underflow_bound s.prec /\
      not (eval_abs s <. mpfr_underflow_bound s.prec))
 
-let mpfr_underflow_bound_lemma s =
+let exp_impl_no_underflow_lemma s =
     let p, l = s.prec, prec_to_len s.prec in
     lemma_pow2_mod (l - 1) (l - p);
     //! assert(pow2 (l - 1) % pow2 (l - p) = 0);
@@ -365,11 +393,11 @@ let mpfr_underflow_bound_lemma s =
     assert(eval_abs s' >=. mpfr_underflow_bound s.prec);
     eval_eq_reveal_lemma s s'
 
-val no_underflow_exp_lemma: s:normal_fp{mpfr_PREC_COND s.prec} -> Lemma
+val no_underflow_impl_exp_lemma: s:normal_fp{mpfr_PREC_COND s.prec} -> Lemma
     (requires (eval_abs s >=. mpfr_underflow_bound s.prec))
     (ensures  (s.exp >= mpfr_EMIN_spec))
 
-let no_underflow_exp_lemma s =
+let no_underflow_impl_exp_lemma s =
     let s' = change_len s (prec_to_len s.prec) in
     eval_eq_reveal_lemma s s';
     assert(eval_abs s' >=. mpfr_underflow_bound s'.prec);
@@ -378,7 +406,21 @@ let no_underflow_exp_lemma s =
     lemma_pow2_mul (s'.len - 1) (mpfr_EMIN_spec - s'.len - elb);
     if s'.exp <= mpfr_EMIN_spec - 1 then lemma_pow2_le (s'.exp - elb) (mpfr_EMIN_spec - elb - 1)
 
+val exp_impl_underflow_lemma: s:normal_fp{mpfr_PREC_COND s.prec /\ s.exp < mpfr_EMIN_spec} -> Lemma
+    (eval_abs s <. mpfr_underflow_bound s.prec /\
+     not (eval_abs s >=. mpfr_underflow_bound s.prec))
 
+let exp_impl_underflow_lemma s =
+    if eval_abs s >=. mpfr_underflow_bound s.prec then no_underflow_impl_exp_lemma s
+
+val underflow_impl_exp_lemma: s:normal_fp{mpfr_PREC_COND s.prec} -> Lemma
+    (requires (eval_abs s <. mpfr_underflow_bound s.prec))
+    (ensures  (s.exp < mpfr_EMIN_spec))
+
+let underflow_impl_exp_lemma s =
+    if s.exp >= mpfr_EMIN_spec then exp_impl_no_underflow_lemma s
+
+(*
 (* Some normal_fp will convert to singular number of mpfr_fp
  * This is used to check if the conversion is correct *)
 let normal_to_mpfr_cond (a:normal_fp{mpfr_PREC_COND a.prec})
@@ -406,3 +448,4 @@ val normal_to_mpfr_cond_in_range_lemma: a:normal_fp{mpfr_PREC_COND a.prec} ->
     (ensures  (valid_num_cond r /\ eval r =. eval a))
 
 let normal_to_mpfr_cond_in_range_lemma a r = ()
+*)

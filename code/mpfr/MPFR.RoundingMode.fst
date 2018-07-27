@@ -1,5 +1,7 @@
 module MPFR.RoundingMode
 
+#set-options "--z3refresh --z3rlimit 5 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+
 (* rounding modes *)
 type mpfr_rnd_t = 
    | MPFR_RNDN 
