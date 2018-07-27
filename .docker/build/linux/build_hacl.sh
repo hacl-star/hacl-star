@@ -20,7 +20,7 @@ function hacl_test() {
   fetch_mitls # for mitlsffi.h, sigh
   export_home OPENSSL "$(pwd)/mlcrypto/openssl"
   export_home HACL "$(pwd)"
-  make $PARALLEL_OPT ci -k
+  make -j $threads ci -k
 }
 
 function hacl_test_and_hints() {
@@ -36,9 +36,9 @@ function fetch_and_make_kremlin() {
   else
     target="$1"
   fi
-  make -C kremlin $PARALLEL_OPT $target || \
-    (cd kremlin && git clean -fdx && make $PARALLEL_OPT $target)
-  OTHERFLAGS='--admit_smt_queries true' make -C kremlin/kremlib $PARALLEL_OPT
+  make -C kremlin -j $threads $target || \
+    (cd kremlin && git clean -fdx && make -j $threads $target)
+  OTHERFLAGS='--admit_smt_queries true' make -C kremlin/kremlib -j $threads
   export PATH="$(pwd)/kremlin:$PATH"
 }
 
@@ -58,7 +58,7 @@ function fetch_kremlin() {
 
 function fetch_and_make_mlcrypto() {
   fetch_mlcrypto
-  make -C mlcrypto $PARALLEL_OPT
+  make -C mlcrypto -j $threads
 }
 
 function fetch_mlcrypto() {
