@@ -23,7 +23,7 @@ module M    = Spec.Matrix
 module S    = Spec.Frodo.Encode
 module FLemmas = Spec.Frodo.Lemmas
 
-#reset-options "--z3rlimit 50 --max_fuel 0"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract private
 val ec:
@@ -195,7 +195,7 @@ val frodo_key_decode:
   res:lbytes ((params_nbar *! params_nbar *! b) /. size 8) -> Stack unit
   (requires (fun h -> B.live h a /\ B.live h res /\ B.disjoint a res))
   (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let frodo_key_decode b a res =
   push_frame();
   let n2 = params_nbar /. size 8 in
