@@ -47,6 +47,11 @@ $(CACHE_DIR)/Lib.IntTypes.fst.checked: | .depend
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
+$(CACHE_DIR)/Lib.IntTypes.fsti.checked: | .depend
+	$(FSTAR) $< \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
+
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
 	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
