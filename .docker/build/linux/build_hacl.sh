@@ -42,9 +42,37 @@ function fetch_and_make_kremlin() {
   export PATH="$(pwd)/kremlin:$PATH"
 }
 
+# By default, kremlin master works against F* stable. Can also be overridden.
+function fetch_kremlin() {
+  if [ ! -d kremlin ]; then
+    git clone https://github.com/FStarLang/kremlin kremlin
+  fi
+  cd kremlin
+  git fetch origin
+  local ref=$( if [ -f ../.kremlin_version ]; then cat ../.kremlin_version | tr -d '\r\n'; else echo origin/master; fi )
+  echo Switching to KreMLin $ref
+  git reset --hard $ref
+  cd ..
+  export_home KREMLIN "$(pwd)/kremlin"
+}
+
 function fetch_and_make_mlcrypto() {
   fetch_mlcrypto
   make -C mlcrypto $PARALLEL_OPT
+}
+
+function fetch_mlcrypto() {
+  if [ ! -d mlcrypto  ]; then
+    git clone https://github.com/project-everest/MLCrypto mlcrypto
+  fi
+  cd mlcrypto
+  git fetch origin
+  local ref=$( if [ -f ../.mlcrypto_version ]; then cat ../.mlcrypto_version | tr -d '\r\n'; else echo origin/master; fi )
+  echo Switching to MLCrypto $ref
+  git reset --hard $ref
+  git submodule update
+  cd ..
+  export_home MLCRYPTO "$(pwd)/mlcrypto"
 }
 
 # By default, mitls-fstar master works against F* stable. Can also be overridden.
