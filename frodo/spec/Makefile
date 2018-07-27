@@ -1,60 +1,98 @@
-HACL_HOME=../..
-FSTAR_HOME = $(HACL_HOME)/../FStar
+FSTAR_HOME ?= ../../../FStar
+HACL_HOME  ?= ../..
+
+CACHE_DIR  = .cache
+HINT_DIR   = .hints
+OUT_DIR	   = frodo-ml
 
 include $(HACL_HOME)/Makefile.include
 
-.PHONY = all test clean
+all:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) test
 
-FSTAR_INCLUDES += $(addprefix --include , $(HACL_HOME)/lib $(HACL_HOME)/lib/fst $(HACL_HOME)/specs)
+# 1. Generation of .ml files
+# - generate the F* dependency graph via `fstar --dep full`
+# - verify every F* file in parallel to generate .checked files
+# - extract each .checked file into a .ml file in parallel
 
-OTHERFLAGS= --cache_checked_modules --cache_dir cache --use_hint_hashes --record_hints
+FSTAR_INCLUDE_DIRS = \
+  $(HACL_HOME)/specs \
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/lib/fst
 
-SPECS = \
-  Spec.Frodo.Params \
-  Spec.Frodo.Lemmas \
-  Spec.Frodo.Keccak \
-  Spec.Frodo.Encode \
-  Spec.Frodo.Pack \
-  Spec.Frodo \
-  Spec.Matrix
+FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
-SPEC_FILES = $(addsuffix .fst, $(SPECS))
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) \
+  --odir $(OUT_DIR) $(FSTAR_INCLUDES)
 
-LIBS = Lib.IntTypes Lib.RawIntTypes Lib.Sequence Lib.ByteSequence
+ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-LIBS_FILES = $(addprefix $(HACL_HOME)/lib/fst/,$(addsuffix .fst, $(LIBS)))
+ROOTS = Spec.Frodo.Test.fst
 
-LIBS_ML = $(addsuffix .ml, $(subst .,_, $(LIBS)))
+.depend:
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
 
-LIBS_EX = --extract '$(LIBS)'
+include .depend
 
-%.fst-verify: %.fst
-	$(FSTAR) --hint_file hints/$(notdir $(subst .fst,,$<)).hints $<
+# Admit SMT queries for modules in FStar namespace
+$(CACHE_DIR)/FStar.%.fst.checked: | .depend
+	$(FSTAR) --admit_smt_queries true $< && \
+	touch $@
 
-hints: $(addsuffix .hints, $(SPEC_FILES))
+# We need this because F* can't take duplicate modules in the command line
+$(CACHE_DIR)/Lib.IntTypes.fst.checked: | .depend
+	$(FSTAR) $< \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
 
-verify: $(addsuffix -verify, $(SPEC_FILES))
+$(CACHE_DIR)/%.checked: | .depend
+	$(FSTAR) $< \
+	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
 
-all-hints: hints
+# We need this because F* can't take duplicate modules in the command line
+$(OUT_DIR)/Lib_IntTypes.ml: | .depend
+	$(FSTAR) --codegen OCaml \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
 
-all-ver: verify
+$(OUT_DIR)/%.ml: | .depend
+	$(FSTAR) --codegen OCaml \
+	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
 
-all: test
 
-test: frodo.exe
-	./frodo.exe
+# 3. Compilation
 
-frodo.exe: $(LIBS_FILES) $(HACL_HOME)/specs/Spec.Keccak.fst Spec.Matrix.fst Spec.Frodo.fst test/Spec.Frodo.Test.fst
-	mkdir -p frodo-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) \
-	  --extract 'Spec.Keccak Spec.Frodo.Keccak Spec.Matrix Spec.Frodo.Params Spec.Frodo.Encode Spec.Frodo.Pack Spec.Frodo Spec.Frodo.Test' \
-	  --odir frodo-ml --expose_interfaces \
-	  $^
-	@echo 'let _ = test()' >> frodo-ml/Spec_Frodo_Test.ml
-	$(OCAMLOPT) -I frodo-ml $(addprefix frodo-ml/, $(LIBS_ML)) \
-	  frodo-ml/Spec_Keccak.ml frodo-ml/Spec_Matrix.ml frodo-ml/Spec_Frodo_Params.ml frodo-ml/Spec_Frodo_Keccak.ml frodo-ml/Spec_Frodo_Encode.ml \
-	  frodo-ml/Spec_Frodo_Pack.ml frodo-ml/Spec_Frodo.ml frodo-ml/Spec_Frodo_Test.ml \
-          -o frodo.exe
+$(OUT_DIR):
+	mkdir -p $@
 
+%.cmx:
+	$(OCAMLOPT) -I $(OUT_DIR) -c $< -o $@
+
+$(OUT_DIR)/Spec_Frodo_Test.cmx:
+	@echo 'let _ = test()' >> $(OUT_DIR)/Spec_Frodo_Test.ml
+	$(OCAMLOPT) -I $(OUT_DIR) -c $< -o $@
+
+$(OUT_DIR)/test.exe: $(subst .ml,.cmx,$(ALL_ML_FILES)) | $(OUT_DIR)
+	$(OCAMLOPT) -I $(OUT_DIR) -o $(OUT_DIR)/test.exe $(subst .ml,.cmx,$(ALL_ML_FILES))
+
+test: $(OUT_DIR)/test.exe
+	$(OUT_DIR)/test.exe
+
+
+# 4. Clean targets
+
+.PHONY: clean
 clean:
-	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
+	rm -rf $(OUT_DIR)
+
+.PHONY: distclean
+distclean: clean
+	rm -rf $(OUT_DIR) $(CACHE_DIR)

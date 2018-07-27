@@ -102,7 +102,7 @@ let absorb (s:state)
 	  let s = loadState rateInBytes (slice input (i*rateInBytes) (i*rateInBytes + rateInBytes)) s in
 	  state_permute s) s in
   let rem = inputByteLen % rateInBytes in
-  let last = slice input (inputByteLen - rem) inputByteLen in
+  let last: lseq uint8 rem = slice input (inputByteLen - rem) inputByteLen in
   let lastBlock = create rateInBytes (u8 0) in
   let lastBlock = update_slice lastBlock 0 rem last in
   let lastBlock = lastBlock.[rem] <- delimitedSuffix in

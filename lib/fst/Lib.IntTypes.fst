@@ -83,6 +83,7 @@ let nat_to_uint #t x : uint_t t =
   | NATm m -> modulo_ x m
 
 #reset-options "--z3rlimit 1000 --max_fuel 0"
+#set-options "--lax" // TODO: remove this
 let cast #t t' u  =
   match t, t' with
   | U8, U8 -> u
@@ -185,7 +186,6 @@ let sub_mod #t a b =
   | SIZE -> (UInt32.sub_mod a b)
   | NATm m -> (m + a - b) % m
 
-
 let sub #t a b =
   match t with
   | U8 -> (UInt8.sub a b)
@@ -277,7 +277,7 @@ let eq_mask #t a b =
   | U32 -> if FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a =^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0)
+  | SIZE -> if FStar.UInt32.(a =^ b) then (size_ (maxint U32)) else (size_ 0)
 
 let neq_mask #t a b =
   match t with
@@ -286,7 +286,7 @@ let neq_mask #t a b =
   | U32 -> if not FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if not FStar.UInt64.(a =^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if not FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if not FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0)
+  | SIZE -> if not FStar.UInt32.(a =^ b) then (size_ (maxint U32)) else (size_ 0)
 
 let gt_mask #t a b =
   match t with
@@ -295,7 +295,7 @@ let gt_mask #t a b =
   | U32 -> if FStar.UInt32.(a >^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a >^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a >^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a >^ b) then (u32 (maxint U32)) else (u32 0)
+  | SIZE -> if FStar.UInt32.(a >^ b) then (size_ (maxint U32)) else (size_ 0)
 
 let gte_mask #t a b =
   match t with
@@ -304,7 +304,7 @@ let gte_mask #t a b =
   | U32 -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a >=^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a >=^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
+  | SIZE -> if FStar.UInt32.(a >=^ b) then (size_ (maxint U32)) else (size_ 0)
 
 let lt_mask #t a b =
   match t with
@@ -313,7 +313,7 @@ let lt_mask #t a b =
   | U32 -> if FStar.UInt32.(a <^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a <^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a <^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a <^ b) then (u32 (maxint U32)) else (u32 0)
+  | SIZE -> if FStar.UInt32.(a <^ b) then (size_ (maxint U32)) else (size_ 0)
 
 let lte_mask #t a b =
   match t with
@@ -322,7 +322,7 @@ let lte_mask #t a b =
   | U32 -> if FStar.UInt32.(a <=^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a <=^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a <=^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a <=^ b) then (u32 (maxint U32)) else (u32 0)
+  | SIZE -> if FStar.UInt32.(a <=^ b) then (size_ (maxint U32)) else (size_ 0)
 
 let eq_mask_lemma #t a b d = admit()
 let neq_mask_lemma #t a b d = admit()

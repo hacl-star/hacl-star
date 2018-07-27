@@ -179,19 +179,21 @@ val fold_left: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot b) -> lseq 
 let fold_left #a #b #len f = fold_left_range #a #b #len 0 len (fun i -> f)
 
 val map: #a:Type -> #b:Type -> #len:size_nat -> (a -> Tot b) -> lseq a len -> lseq b len
-let rec map #a #b #len f x =
+let map #a #b #len f x =
   admit()
 
 val for_all: #a:Type -> #len:size_nat -> (a -> Tot bool) -> lseq a len -> bool
-let rec for_all #a #len f x = Seq.for_all f x
+let for_all #a #len f x = Seq.for_all f x
 
 val map2: #a:Type -> #b:Type -> #c:Type -> #len:size_nat -> (a -> b -> Tot c) -> lseq a len -> lseq b len -> lseq c len
-let rec map2 #a #b #c #len f x y =
+let map2 #a #b #c #len f x y =
   admit()
 
 val for_all2: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> bool
 let rec for_all2 #a #b #len f x y =
-  admit()
+  if Seq.length x = 0 then true
+  else
+    f (Seq.head x) (Seq.head y) && for_all2 #a #b #(len - 1) f (Seq.tail x) (Seq.tail y)
 
 val as_list: #a:Type -> #len:size_nat -> lseq a len -> l:list a{List.Tot.length l = len}
 let as_list #a #len s = Seq.Properties.seq_to_list s
