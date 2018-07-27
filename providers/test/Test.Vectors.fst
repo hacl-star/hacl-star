@@ -159,7 +159,7 @@ let hash_vectors_tmp = List.Tot.map (fun h ->
   h.hash_alg, h.input, h.output, h.repeat
 ) hash_vectors
 
-%splice[] (fun () -> lowstarize_toplevel "hash_vectors_tmp" "hash_vectors_low")
+%splice[] (lowstarize_toplevel "hash_vectors_tmp" "hash_vectors_low")
 
 /// Cipher block function
 
@@ -225,7 +225,7 @@ let block_cipher_vectors_tmp = List.Tot.map (fun h ->
   h.block, h.rkey, h.plain, h.enc
 ) block_cipher_vectors
 
-%splice[] (fun () -> lowstarize_toplevel "block_cipher_vectors_tmp" "block_cipher_vectors_low")
+%splice[] (lowstarize_toplevel "block_cipher_vectors_tmp" "block_cipher_vectors_low")
 
 noeq noextract
 type chacha20_vector = {
@@ -251,7 +251,7 @@ let chacha20_vectors_tmp = List.Tot.map (fun h ->
   h.c20_key, h.c20_iv, h.c20_ctr, h.c20_plain, h.c20_cipher
 ) chacha20_vectors
 
-%splice[] (fun () -> lowstarize_toplevel "chacha20_vectors_tmp" "chacha20_vectors_low")
+%splice[] (lowstarize_toplevel "chacha20_vectors_tmp" "chacha20_vectors_low")
 
 /// AEAD
 
@@ -475,4 +475,4 @@ let aead_vectors_tmp = List.Tot.map (fun h ->
   h.cipher, h.key, h.iv, h.aad, h.tag, h.plaintext, h.ciphertext
 ) aead_vectors
 
-%splice[] (fun () -> lowstarize_toplevel "aead_vectors_tmp" "aead_vectors_low")
+%splice[] (lowstarize_toplevel "aead_vectors_tmp" "aead_vectors_low")
