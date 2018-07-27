@@ -15,7 +15,6 @@ function export_home() {
 }
 
 function hacl_test() {
-  fetch_and_make_fstar
   fetch_and_make_kremlin
   fetch_and_make_mlcrypto
   fetch_mitls # for mitlsffi.h, sigh
@@ -26,15 +25,6 @@ function hacl_test() {
 
 function hacl_test_and_hints() {
   hacl_test && refresh_hacl_hints
-}
-
-function fetch_and_make_fstar() {
-  fetch_fstar
-  make -C fstar/src/ocaml-output $PARALLEL_OPT || \
-    (git clean -fdx && make -C src/ocaml-output $PARALLEL_OPT) || \
-    exit 255
-  make -C fstar/ulib/ml $PARALLEL_OPT
-  OTHERFLAGS='--admit_smt_queries true' make -C fstar/ulib $PARALLEL_OPT
 }
 
 function fetch_and_make_kremlin() {
