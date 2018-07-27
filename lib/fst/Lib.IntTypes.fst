@@ -1,7 +1,7 @@
 module Lib.IntTypes
 
 (* Declared in .fsti : intsize, bits, maxint *)
-#set-options "--z3rlimit 10 --max_fuel 0"
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
 let pow2_values n =
     assert_norm (pow2 0 = 1);
@@ -184,7 +184,7 @@ let sub_mod #t a b =
   | U64 -> (UInt64.sub_mod a b)
   | U128 -> (UInt128.sub_mod a b)
   | SIZE -> (UInt32.sub_mod a b)
-  | NATm m -> (m + a - b) % m
+  | NATm m -> (a - b) % m
 
 let sub #t a b =
   match t with
