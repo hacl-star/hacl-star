@@ -35,7 +35,7 @@ RUN mkdir ${MYHOME}/FStar/hacl-star
 COPY --chown=everest / ${MYHOME}/FStar/hacl-star/
 WORKDIR ${MYHOME}/FStar/hacl-star
 
-COPY --chown=everest build_hacl.sh ${MYHOME}/FStar/hacl-star/build_miTLS.sh
+COPY --chown=everest build_hacl.sh ${MYHOME}/FStar/hacl-star/build_hacl.sh
 RUN chmod +x build_hacl.sh
 COPY --chown=everest build.sh ${MYHOME}/FStar/hacl-star/build.sh
 RUN chmod +x build.sh
