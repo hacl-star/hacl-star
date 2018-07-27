@@ -244,6 +244,7 @@ let last_data_fits (a: e_alg) (length: nat): GTot _ =
 
 // Note: conjunction of well_formed and last_data_fits allows deriving the
 // specific precondition for update_last.
+#push-options "--z3rlimit 10"
 let update_last_spec (#a:e_alg)
   (s:state a)
   (h0: HS.mem{invariant s h0})
@@ -262,6 +263,7 @@ let update_last_spec (#a:e_alg)
     | SHA384 ->
       r1.hash = EverCrypt.Spec.SHA2_384.update_last r0.hash len0 data
   )
+#pop-options
 
 val update_last: #a:e_alg -> s:state a -> data:uint8_p -> len:UInt32.t -> Stack unit
   (requires (fun h0 ->
