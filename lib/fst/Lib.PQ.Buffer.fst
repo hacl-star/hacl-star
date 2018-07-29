@@ -79,7 +79,7 @@ val create:
 let create #a #len clen init =
   B.alloca init (size_to_UInt32 clen)
 
-inline_for_extraction
+inline_for_extraction noextract
 val createL:
     #a:Type0
   -> init:list a{List.Tot.length init <= max_size_t}
@@ -103,7 +103,7 @@ val recall:
   (ensures  fun m0 _ m1 -> m0 == m1 /\ B.live m1 b)
 let recall #a #len b = B.recall b
 
-inline_for_extraction
+inline_for_extraction noextract
 val createL_global:
     #a:Type0
   -> init:list a{List.Tot.length init <= max_size_t}
@@ -214,7 +214,7 @@ val loop_nospec_inv:
   -> len:size_nat
   -> n:size_nat
   -> buf:lbuffer a len
-  -> i:size_nat{i <= n}
+  -> i:nat
   -> Type0
 let loop_nospec_inv #a h0 h1 len n buf i =
   B.live h0 buf /\ B.live h1 buf /\ modifies (loc_buffer buf) h0 h1
@@ -234,7 +234,7 @@ val loop_nospec:
     (requires fun h -> h0 == h /\ B.live h0 buf)
     (ensures  fun _ _ h1 -> B.live h1 buf /\ modifies (loc_buffer buf) h0 h1)
 let loop_nospec #h0 #a #len n buf impl =
-  let inv h1 (j:nat{j <= v n}) =
+  let inv h1 j =
     loop_nospec_inv #a h0 h1 len (v n) buf j in
   let f' (j:size_t{0 <= v j /\ v j < v n}): Stack unit
       (requires fun h -> inv h (v j))
@@ -242,6 +242,8 @@ let loop_nospec #h0 #a #len n buf impl =
       impl j in
   Lib.Loops.for (size 0) n inv f'
 
+// TODO: Fix this
+#set-options "--admit_smt_queries true"
 
 inline_for_extraction
 val uint_from_bytes_le:
