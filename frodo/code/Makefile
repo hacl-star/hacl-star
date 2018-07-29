@@ -1,64 +1,304 @@
+FSTAR_HOME 	?= ../../../FStar
+KREMLIN_HOME	?= ../../../kremlin
+HACL_HOME	?= ../..
+MLCRYPTO_HOME	?= ../../MLCrypto
+OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
+LWEKE_HOME	?= $(HACL_HOME)/../Frodo/Reference_Implementation/reference/FrodoKEM-640
+
+CACHE_DIR     = .cache
+OUTPUT_DIR    = .output
+HINT_DIR      = .hints
+GENERATED_DIR = frodo-c
+OUT_DIR       = frodo-c
+
+# .checked files
+# .krml files
+# .hints
+# .c, .h, .d
+# .o, .a
+
 include ../../Makefile.include
 
-KREMLIN_ARGS+=-verbose \
-	-drop FStar,Prims,LowStar,C,C.*,C.Loops.Spec.Loops,Spec.*,Lib.*,WasmSupport \
-	-drop Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
-	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create \
-	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
-	-ccopt -march=native -warn-error +9
+#OTHERFLAGS += --admit_smt_queries true
+
+# Manual staging...
+all:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) stage1
+	STAGE=2 $(MAKE) stage2
+
+stage1: $(GENERATED_DIR)/Makefile.include
+
+stage2: $(OUT_DIR)/libfrodostar_for_testing.a $(OUT_DIR)/test.exe
+	@echo Remember to set params_n = 64 in Hacl.Impl.Frodo.Params!
+	$(OUT_DIR)/test.exe
+
+# 1. Generation of the .krml files
+# - generate the F* dependency graph via `fstar --dep full`
+# - verify every F* file in parallel to generate .checked files
+# - extract each .checked file into a .krml file in parallel
+
+FSTAR_INCLUDE_DIRS = \
+  ../spec \
+  $(HACL_KREMLIN) \
+  $(KREMLIB) \
+  $(HACL_HOME)/specs \
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/lib/fst \
+  $(HACL_HOME)/lib/c
 
 
-FSTAR_INCLUDES += --include ../spec
+FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
-BASE_OBJ = ../../lib/c/Lib_PQ_Print.o $(HACL_HOME)/frodo/code/include/Hacl_Keccak.o $(LWEKE_HOME)/objs/sha3/fips202.o $(LWEKE_HOME)/tests/rng.o $(LWEKE_HOME)/objs/aes/aes_c.o $(LWEKE_HOME)/objs/aes/aes.o
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) \
+  --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
 
-HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.PQ.Buffer.fst ../../lib/Lib.Print.fsti
+ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-LWEKE_HOME=$(HACL_HOME)/../Frodo/Reference_Implementation/reference/FrodoKEM-640
+ROOTS = Hacl.Test.Frodo.fst
 
-frodo-c/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.fst test/Hacl.Test.Frodo.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir frodo-c -no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
-	-I ../../specs -I ../spec -I ../../lib -I ../../lib/fst -I $(KREMLIN_HOME)/include \
-	-skip-translation $^
+.PRECIOUS: %.krml
 
-frodo-c/Hacl_Impl_Frodo.c frodo-c/Hacl_Test_Frodo.c: frodo-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_TESTLIB) -tmpdir frodo-c -skip-compilation \
-	-no-prefix 'Hacl.Test.Frodo' -no-prefix 'Hacl.Impl.Frodo' \
-	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo,Hacl.Impl.Frodo.*' \
-	-library 'Hacl.Keccak' -drop 'Frodo.Params' \
+.depend:
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
+
+include .depend
+
+# Admit SMT queries for modules in FStar namespace
+$(CACHE_DIR)/FStar.%.fst.checked: | .depend
+	$(FSTAR) --admit_smt_queries true $< && \
+	touch $@
+
+# We need this because F* can't take duplicate modules in the command line
+$(CACHE_DIR)/Lib.IntTypes.fst.checked: | .depend
+	$(FSTAR) $< \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
+
+$(CACHE_DIR)/Lib.IntTypes.fsti.checked: | .depend
+	$(FSTAR) $< \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
+
+$(CACHE_DIR)/Lib.Loops.fst.checked: | .depend
+	$(FSTAR) $< \
+	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
+
+$(CACHE_DIR)/Lib.Loops.fsti.checked: | .depend
+	$(FSTAR) $< \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
+
+$(CACHE_DIR)/%.checked: | .depend
+	$(FSTAR) $< \
+	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  $(HACL_HOME)/lib/c/Lib.Loops.fst \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
+
+# We need this because F* can't take duplicate modules in the command line
+$(OUTPUT_DIR)/Lib_IntTypes.krml: | .depend
+	$(FSTAR) --codegen Kremlin \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
+
+$(OUTPUT_DIR)/FStar_%.krml: | .depend
+	$(FSTAR) --codegen Kremlin \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
+
+# This mimicks what Kremlin would do when driving F* and passed all .fst in
+# the command-line: it would add `--expose_interfaces` and expose all
+# implementations.
+$(OUTPUT_DIR)/%.krml: | .depend
+	$(FSTAR) --codegen Kremlin \
+	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  $(HACL_HOME)/lib/c/Lib.Loops.fst \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
+
+# 2. Generation of .c files
+
+$(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-no-prefix 'Hacl.Test.Frodo' \
+	-no-prefix 'Hacl.Impl.Frodo' \
+	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo.*,Frodo.Params' \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.*' \
+	-library 'Hacl.Keccak' \
 	-add-include '"extracted/C_Endianness.h"' \
 	-add-include '"c/Lib_PQ_Print.h"' \
-	$^ -o $@
+	-tmpdir $(GENERATED_DIR) \
+	$^
 
-#CC=gcc-7
+# The Makefile is manually staged because GNU Make does not understand
+# dependencies between the Makefiles we include, i.e. it won't first generate
+# the .depend, parse it, then generate Makefile.include, parse it, then
+# generate dependencies among the C files
+ifeq ($(STAGE),2)
+
+# The top-level invocation guarantees that stage1 has been run and this file is
+# there.
+include $(GENERATED_DIR)/Makefile.include
+
+# 3. Collecting all of our source files, and generating corresponding object
+# files.
+
+# TODO: understand why these two targets are broken/possibly switch to a HACL*
+# branch where their compilation is restored.
+# - aead-c: kremlin seems to generate an extra argument, JK had a hack to sed
+#   the code in place
+HACL_SOURCES	= \
+  $(addprefix $(GENERATED_DIR)/,Hacl_Impl_Frodo.c Hacl_Test_Frodo.c)
+
+# This is auto-generated by KreMLin; since the Makefile is staged via the
+# inclusion of Makefile.include, the automated dependency analysis via $(CC) -MM
+# also captures the dependencies between these files.
+#
+# KreMLin sees the fsti's for the various Hacl_* modules and creates .h/.c
+# files for them in generated/. However, we are only interested in the header,
+# and drop these (mostly empty) C files, since the "real" ones are collected via
+# HACL_SOURCES above.
+ALL_OUR_FILES 	    = $(filter-out FStar_*, $(ALL_C_FILES))
+ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
+
+ALL_SOURCES = \
+  $(ALL_GENERATED_FILES) \
+  include/randombytes.c \
+  include/Hacl_Keccak.c \
+  $(HACL_HOME)/lib/c/Lib_PQ_Print.c
+
+$(info ALL_SOURCES is $(ALL_SOURCES))
+
+ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
+	$(LWEKE_HOME)/objs/sha3/fips202.o \
+	$(LWEKE_HOME)/tests/rng.o \
+	$(LWEKE_HOME)/objs/aes/aes_c.o \
+	$(LWEKE_HOME)/objs/aes/aes.o
+
+INCLUDE_DIRS = \
+  $(KREMLIN_HOME)/include \
+  $(KREMLIN_HOME)/kremlib \
+  $(LWEKE_HOME)/sha3 \
+  $(HACL_HOME)/lib
 
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
+CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
 
-CFLAGS += -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib \
-	  -I $(LWEKE_HOME)/sha3 -I $(HACL_HOME)/frodo/code/frodo-c \
-	  -I $(HACL_HOME)/lib \
-	  -Wall -Werror -Wno-parentheses -Wno-unused-value -Wno-int-to-pointer-cast -Wno-unused-variable
+# GNU Make manual section 4.14
+%.d: %.c
+	@set -e; rm -f $@; \
+	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
+	  rm -f $@.$$$$
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+-include $(patsubst %.c,%.d,$(ALL_SOURCES))
 
-all: test
+$(OUT_DIR):
+	mkdir -p $@
 
-test-frodo.exe: frodo-c/Hacl_Test_Frodo.c frodo-c/Hacl_Impl_Frodo.c include/randombytes.c $(BASE_OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
+# 4. Collecting all of the object files into a static library.
 
-test: test-frodo.exe
-	@echo Remember to set params_n = 64 in Hacl.Impl.Frodo.Params!
-	./test-frodo.exe
-
-AR=ar rcs
-
-lib: $(BASE_OBJ) frodo-c/Hacl_Impl_Frodo.o include/randombytes.o
-	$(AR) frodo-c/libfrodostar_for_testing.a $^
-	ranlib frodo-c/libfrodostar_for_testing.a
+$(OUT_DIR)/libfrodostar_for_testing.a: $(ALL_OBJS) | $(OUT_DIR)
+	$(AR) rcs $(OUT_DIR)/libfrodostar_for_testing.a $^
+	ranlib $(OUT_DIR)/libfrodostar_for_testing.a
 	@echo Remember to set params_n = 640 in Hacl.Impl.Frodo.Params!
 
+$(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
+
+.PRECIOUS: %.o
+
+#$(HACL_SOURCES):
+#	$(error "Please run `make -j 8 -C $(HACL_CODE) extract-c` before invoking this Makefile")
+
+
+endif # COMPILE
+
+# 5. Clean targets that do not re-trigger anything except perhaps the generation
+# of the .depend file.
+
+SHELL=/bin/bash
+
+.PHONY: clean
 clean:
-	rm -rf *~ *.exe *.exe.dSYM
-	rm -rf frodo-c
-	rm -rf include/*.o
+	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
+	rm -rf include/*.o include/*.d
+
+.PHONY: clean-c
+clean-c:
+	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
+
+.PHONY: distclean
+distclean: clean
+	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)
+
+
+# Old Makefile, simplified
+
+ifeq ($(OLD),1)
+
+GENERATED_DIR	= frodo-old
+OUT_DIR	   	= frodo-old
+
+INCLUDE_DIRS = \
+  $(KREMLIN_HOME)/include \
+  $(KREMLIN_HOME)/kremlib \
+  $(LWEKE_HOME)/sha3 \
+  $(HACL_HOME)/lib
+
+CFLAGS += -O3 -march=native -mtune=native -funroll-loops
+CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
+
+BASE_OBJ = \
+  ../../lib/c/Lib_PQ_Print.o \
+  include/Hacl_Keccak.o \
+  include/randombytes.o \
+  $(LWEKE_HOME)/objs/sha3/fips202.o \
+  $(LWEKE_HOME)/tests/rng.o \
+  $(LWEKE_HOME)/objs/aes/aes_c.o \
+  $(LWEKE_HOME)/objs/aes/aes.o \
+  $(OUT_DIR)/Hacl_Test_Frodo.o \
+  $(OUT_DIR)/Hacl_Impl_Frodo.o 
+
+HACL_LIBS = \
+  ../../lib/fst/Lib.IntTypes.fst \
+  ../../lib/fst/Lib.RawIntTypes.fst \
+  ../../lib/c/Lib.Loops.fst \
+  ../../lib/fst/Lib.PQ.Buffer.fst
+
+$(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.fst Hacl.Test.Frodo.fst
+	$(KREMLIN) -tmpdir $(OUT_DIR) \
+	-I ../../specs -I ../spec -I ../../lib -I ../../lib/fst \
+	-skip-translation $^
+
+$(OUT_DIR)/Hacl_Impl_Frodo.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-no-prefix 'Hacl.Test.Frodo' \
+	-no-prefix 'Hacl.Impl.Frodo' \
+	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo.*,Frodo.Params' \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.*' \
+	-library 'Hacl.Keccak' \
+	-add-include '"extracted/C_Endianness.h"' \
+	-add-include '"c/Lib_PQ_Print.h"' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
+
+$(OUT_DIR)/test-frodo.exe: $(BASE_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
+
+test: $(OUT_DIR)/test-frodo.exe
+	@echo Remember to set params_n = 64 in Hacl.Impl.Frodo.Params!
+	$(OUT_DIR)/test-frodo.exe
+
+endif

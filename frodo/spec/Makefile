@@ -94,6 +94,8 @@ test: $(OUT_DIR)/test.exe
 
 # 4. Clean targets
 
+SHELL=/bin/bash
+
 .PHONY: clean
 clean:
 	rm -rf $(OUT_DIR)
