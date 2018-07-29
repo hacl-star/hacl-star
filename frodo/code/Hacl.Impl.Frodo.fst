@@ -22,6 +22,19 @@ module B = LowStar.Buffer
 module ST = FStar.HyperStack.ST
 module FLemmas = Spec.Frodo.Lemmas
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
+/// TODO: move these to a standalone .fsti file, they are implemented in include/randombytes.c
+assume val randombytes_init_:
+  entropy_input:lbytes (size 48) -> Stack unit
+  (requires (fun h -> B.live h entropy_input))
+  (ensures (fun h0 r h1 -> B.live h1 entropy_input))
+
+assume val randombytes_:
+  len:size_t -> res:lbytes len -> Stack unit
+  (requires (fun h -> B.live h res))
+  (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
+
 let cshake_frodo = cshake128_frodo
 
 val eq_u8: a:uint8 -> b:uint8 -> Tot bool
@@ -85,7 +98,7 @@ val frodo_sample_matrix:
   res:matrix_t n1 n2 -> Stack unit
   (requires (fun h -> B.live h seed /\ B.live h res /\ B.disjoint seed res))
   (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let frodo_sample_matrix n1 n2 seed_len seed ctr res =
   push_frame();
   let r = create (size 2 *! n1 *! n2) (u8 0) in
@@ -109,7 +122,7 @@ val frodo_sample_matrix_tr:
   res:matrix_t n1 n2 -> Stack unit
   (requires (fun h -> B.live h seed /\ B.live h res /\ B.disjoint seed res))
   (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let frodo_sample_matrix_tr n1 n2 seed_len seed ctr res =
   push_frame();
   let r = create (size 2 *! n1 *! n2) (u8 0) in
@@ -161,7 +174,7 @@ val matrix_to_lbytes:
   m:matrix_t n1 n2 -> res:lbytes (size 2 *! n1 *! n2) -> Stack unit
   (requires (fun h -> B.live h m /\ B.live h res /\ B.disjoint m res))
   (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let matrix_to_lbytes #n1 #n2 m res =
   let h0 = ST.get () in
   loop_nospec #h0 n1 res
@@ -181,7 +194,7 @@ val matrix_from_lbytes:
   res:matrix_t n1 n2 -> Stack unit
   (requires (fun h -> B.live h b /\ B.live h res /\ B.disjoint b res))
   (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let matrix_from_lbytes #n1 #n2 b res =
   let h0 = ST.get () in
   loop_nospec #h0 n1 res
@@ -195,17 +208,6 @@ let matrix_from_lbytes #n1 #n2 b res =
     )
   )
 
-assume val randombytes_init_:
-  entropy_input:lbytes (size 48) -> Stack unit
-  (requires (fun h -> B.live h entropy_input))
-  (ensures (fun h0 r h1 -> B.live h1 entropy_input))
-
-assume val randombytes_:
-  len:size_t -> res:lbytes len -> Stack unit
-  (requires (fun h -> B.live h res))
-  (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
-
-
 val frodo_mul_add_as_plus_e:
   seed_a:lbytes bytes_seed_a ->
   s_matrix:matrix_t params_n params_nbar ->
@@ -215,8 +217,7 @@ val frodo_mul_add_as_plus_e:
     B.live h e_matrix /\ B.live h b_matrix /\ B.disjoint b_matrix seed_a /\
     B.disjoint s_matrix b_matrix /\ B.disjoint b_matrix e_matrix))
   (ensures (fun h0 r h1 -> B.live h1 b_matrix /\ modifies (loc_buffer b_matrix) h0 h1))
-  #reset-options "--z3rlimit 150 --max_fuel 0"
-  [@"c_inline"]
+[@"c_inline"]
 let frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix =
   push_frame();
   let a_matrix = matrix_create params_n params_n in
@@ -236,8 +237,7 @@ val frodo_mul_add_as_plus_e_pack:
     B.disjoint seed_a s /\ B.disjoint seed_e s))
   (ensures (fun h0 r h1 -> B.live h1 s /\ B.live h1 b /\
     modifies (loc_union (loc_buffer b) (loc_buffer s)) h0 h1))
-  #reset-options "--z3rlimit 150 --max_fuel 0"
-  [@"c_inline"]
+[@"c_inline"]
 let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   push_frame();
   let b_matrix = matrix_create params_n params_nbar in
@@ -288,7 +288,7 @@ val frodo_mul_add_sa_plus_e:
     B.disjoint bp_matrix sp_matrix /\ B.disjoint bp_matrix seed_a /\
     B.disjoint bp_matrix seed_e))
   (ensures (fun h0 r h1 -> B.live h1 bp_matrix /\ modifies (loc_buffer bp_matrix) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix =
   push_frame();
   let ep_matrix = matrix_create params_nbar params_n in
@@ -301,6 +301,8 @@ let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix =
   matrix_add bp_matrix ep_matrix;
   pop_frame()
 
+#set-options "--admit_smt_queries true"
+
 val frodo_mul_add_sb_plus_e_plus_mu:
   b:lbytes ((params_logq *! params_n *! params_nbar) /. size 8) ->
   seed_e:lbytes crypto_bytes ->
@@ -312,7 +314,7 @@ val frodo_mul_add_sb_plus_e_plus_mu:
     B.disjoint v_matrix b /\ B.disjoint v_matrix seed_e /\
     B.disjoint v_matrix coins /\ B.disjoint v_matrix sp_matrix))
   (ensures (fun h0 r h1 -> B.live h1 v_matrix /\ modifies (loc_buffer v_matrix) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix =
   push_frame();
   let epp_matrix = matrix_create params_nbar params_nbar in
@@ -326,7 +328,6 @@ let frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix =
   matrix_mul sp_matrix b_matrix v_matrix;
   matrix_add v_matrix epp_matrix;
   matrix_add v_matrix mu_encode;
-
   pop_frame()
 
 val crypto_kem_enc_ct_pack:
@@ -340,7 +341,7 @@ val crypto_kem_enc_ct_pack:
     B.live h coins /\ B.live h b /\ B.live h sp_matrix /\
     B.live h ct))
   (ensures (fun h0 r h1 -> B.live h1 ct /\ modifies (loc_buffer ct) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let crypto_kem_enc_ct_pack seed_a seed_e coins b sp_matrix ct =
   push_frame();
   let c1Len = (params_logq *! params_nbar *! params_n) /. size 8 in
@@ -365,7 +366,7 @@ val crypto_kem_enc_ct:
     B.live h coins /\ B.live h ct /\ B.disjoint g ct /\
     B.disjoint ct pk /\ B.disjoint ct coins))
   (ensures (fun h0 r h1 -> B.live h1 ct /\ modifies (loc_buffer ct) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let crypto_kem_enc_ct pk g coins ct =
   push_frame();
   assert_norm (v crypto_ciphertextbytes = ((v params_nbar * v params_n + v params_nbar * v params_nbar) * v params_logq) / 8 + v crypto_bytes);
@@ -391,7 +392,7 @@ val crypto_kem_enc_ss:
   (requires (fun h -> B.live h g /\ B.live h ct /\ B.live h ss /\
     B.disjoint ct ss /\ B.disjoint g ct /\ B.disjoint g ss))
   (ensures (fun h0 r h1 -> B.live h1 ss /\ modifies (loc_buffer ss) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let crypto_kem_enc_ss g ct ss =
   push_frame();
   assert_norm (v crypto_ciphertextbytes = ((v params_nbar * v params_n + v params_nbar * v params_nbar) * v params_logq) / 8 + v crypto_bytes);
@@ -446,7 +447,7 @@ val frodo_sub_mul_c_minus_bs:
   (requires (fun h -> B.live h sk /\ B.live h bp_matrix /\
     B.live h c_matrix /\ B.live h mu_decode))
   (ensures (fun h0 r h1 -> B.live h1 mu_decode /\ modifies (loc_buffer mu_decode) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let frodo_sub_mul_c_minus_bs sk bp_matrix c_matrix mu_decode =
   push_frame();
   assert_norm (v crypto_secretkeybytes = v crypto_bytes + v crypto_publickeybytes + 2 * v params_n * v params_nbar);
@@ -469,7 +470,7 @@ val crypto_kem_dec_ss:
     B.live h kp_s /\ B.live h ss /\
     B.disjoint ss ct /\ B.disjoint ss g /\ B.disjoint ss kp_s))
   (ensures (fun h0 r h1 -> B.live h1 ss /\ modifies (loc_buffer ss) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let crypto_kem_dec_ss ct g kp_s ss =
   push_frame();
   assert_norm (v crypto_ciphertextbytes = ((v params_nbar * v params_n + v params_nbar * v params_nbar) * v params_logq) / 8 + v crypto_bytes);
@@ -504,7 +505,7 @@ val crypto_kem_dec_ss1:
     B.live h c_matrix /\ B.live h sk /\ B.live h ct /\
     B.live h ss /\ B.disjoint ss ct /\ B.disjoint ss sk))
   (ensures (fun h0 r h1 -> B.live h1 ss /\ modifies (loc_buffer ss) h0 h1))
-  [@"c_inline"]
+[@"c_inline"]
 let crypto_kem_dec_ss1 pk_mu_decode bp_matrix c_matrix sk ct ss =
   push_frame();
   assert_norm (v crypto_ciphertextbytes = ((v params_nbar * v params_n + v params_nbar * v params_nbar) * v params_logq) / 8 + v crypto_bytes);
