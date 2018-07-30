@@ -200,7 +200,7 @@ $(OUT_DIR):
 
 # 4. Collecting all of the object files into a static library.
 
-$(OUT_DIR)/libfrodostar_for_testing.a: $(ALL_OBJS) | $(OUT_DIR)
+$(OUT_DIR)/libfrodostar_for_testing.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o, $(ALL_OBJS)) | $(OUT_DIR)
 	$(AR) rcs $(OUT_DIR)/libfrodostar_for_testing.a $^
 	ranlib $(OUT_DIR)/libfrodostar_for_testing.a
 	@echo Remember to set params_n = 640 in Hacl.Impl.Frodo.Params!
