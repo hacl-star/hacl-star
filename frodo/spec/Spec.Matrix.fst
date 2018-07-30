@@ -7,7 +7,7 @@ open Lib.IntTypes
 
 module Seq = Lib.Sequence
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --z3seed 2"
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0 --z3seed 5 --using_facts_from '* -FStar.Seq'"
 
 /// Auxiliary lemmas
 
@@ -161,14 +161,13 @@ let rec sum_ #n f i =
 let sum #n f = sum_ #n f n
 
 val sum_extensionality:
-  n:size_nat
+    n:size_nat
   -> f:(i:size_nat{i < n} -> GTot uint16)
   -> g:(i:size_nat{i < n} -> GTot uint16)
   -> i:size_nat{i <= n} -> Lemma
-  (requires (forall (i:size_nat{i < n}). f i == g i))
-  (ensures (sum_ #n f i == sum_ #n g i))
+  (requires forall (i:size_nat{i < n}). f i == g i)
+  (ensures  sum_ #n f i == sum_ #n g i)
   (decreases i)
-#reset-options "--z3rlimit 50 --max_fuel 1"
 let rec sum_extensionality n f g i =
   if i = 0 then ()
   else sum_extensionality n f g (i - 1)
@@ -201,7 +200,6 @@ val mul:
   -> a:matrix n1 n2
   -> b:matrix n2 n3
   -> c:matrix n1 n3{ forall i k. c.(i, k) == sum #n2 (fun l -> a.(i, l) *. b.(l, k))}
-  #reset-options "--z3rlimit 50 --max_fuel 1"
 let mul #n1 #n2 #n3 a b =
   let c = create n1 n3 in
 

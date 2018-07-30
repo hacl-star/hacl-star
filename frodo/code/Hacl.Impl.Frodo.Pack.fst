@@ -18,6 +18,8 @@ module B = LowStar.Buffer
 module ST = FStar.HyperStack.ST
 module FLemmas = Spec.Frodo.Lemmas
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
 val frodo_pack:
   n1:size_t -> n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0} ->
   a:matrix_t n1 n2 ->
@@ -25,7 +27,6 @@ val frodo_pack:
   res:lbytes (d *! n1 *! n2 /. size 8) -> Stack unit
   (requires (fun h -> B.live h a /\ B.live h res /\ B.disjoint a res))
   (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
-#reset-options "--z3rlimit 150 --max_fuel 0"
 [@"c_inline"]
 let frodo_pack n1 n2 a d res =
   push_frame();
