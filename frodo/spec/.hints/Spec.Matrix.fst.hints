@@ -1,5 +1,5 @@
 [
-  "ñ/{Œ:\u001eÕâ√a„Ô^YQ",
+  "m\u001a¡Ÿ\u0018\u001bRAU3ù\u0018|\u0014”#",
   [
     [
       "Spec.Matrix.index_lt",
@@ -10,17 +10,17 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.max_size_t", "equation_Prims.nat",
+        "function_token_typing_Lib.IntTypes.max_size_t", "int_inversion",
+        "int_typing", "lemma_Lib.IntTypes.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
         "refinement_interpretation_Lib.Sequence_Tm_refine_9fb20bddb03739771b600ef3c8142523",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "3b81d228b81f5adc54b03e7e0c3a4e34"
+      "57fd2e82839d76313271557eec22bd48"
     ],
     [
       "Spec.Matrix.index_neq",
@@ -31,8 +31,9 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
-        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "assumption_Prims.HasEq_int", "equation_Lib.IntTypes.max_size_t",
+        "equation_Prims.nat",
+        "function_token_typing_Lib.IntTypes.max_size_t",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "int_inversion",
@@ -42,7 +43,7 @@
         "refinement_kinding_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "4d525a58b27e71748d0461c1402acf1b"
+      "d054d7de9faacb6df1075ece4547a1a1"
     ],
     [
       "Spec.Matrix.index_neq",
@@ -50,22 +51,30 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
+        "assumption_Prims.HasEq_int", "equation_Prims.nat",
+        "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "haseqSpec.Matrix_Tm_refine_8b033739c1a35292bba71f91eb73f206",
+        "haseqSpec.Matrix_Tm_refine_98611b0ca6a550c3e1c35f03fa498eed",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
         "refinement_interpretation_Lib.Sequence_Tm_refine_9fb20bddb03739771b600ef3c8142523",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Spec.Matrix_Tm_refine_2233c444b925c9018ebdbd043c61a126"
+        "refinement_interpretation_Spec.Matrix_Tm_refine_2233c444b925c9018ebdbd043c61a126",
+        "refinement_kinding_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_kinding_Spec.Matrix_Tm_refine_8b033739c1a35292bba71f91eb73f206"
       ],
       0,
-      "4fdeb3affc7a26b5510bbbb8e5e1cf03"
+      "309aadd1bf888ec8c52eed44b1d257e3"
     ],
     [
       "Spec.Matrix.matrix",
@@ -73,17 +82,19 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.max_size_t", "equation_Prims.nat",
+        "function_token_typing_Lib.IntTypes.max_size_t", "int_typing",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Matrix_Tm_refine_2233c444b925c9018ebdbd043c61a126"
       ],
       0,
-      "1067b1bfbdaf253041cb213fb7422603"
+      "869677a607c120fcdf8968b1c88cebb0"
     ],
     [
       "Spec.Matrix.create",
@@ -94,8 +105,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n",
+        "equation_Lib.IntTypes.max_size_t", "equation_Prims.nat",
+        "function_token_typing_Lib.IntTypes.max_size_t", "int_typing",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
@@ -103,7 +114,7 @@
         "refinement_interpretation_Spec.Matrix_Tm_refine_2233c444b925c9018ebdbd043c61a126"
       ],
       0,
-      "9c9b474634a15a275da4e8f1b3dcc1ff"
+      "9acaf703a27848a6b005ccfeb8866492"
     ],
     [
       "Spec.Matrix.mget",
@@ -111,25 +122,24 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Lib.IntTypes.uint16",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Prims.nat", "equation_Spec.Matrix.elem",
-        "equation_Spec.Matrix.matrix",
-        "function_token_typing_FStar.UInt32.n",
-        "function_token_typing_Lib.IntTypes.uint16",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "equation_Lib.IntTypes.max_size_t", "equation_Lib.IntTypes.uint16",
+        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
+        "equation_Spec.Matrix.elem", "equation_Spec.Matrix.matrix",
+        "function_token_typing_Lib.IntTypes.max_size_t", "int_typing",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421",
+        "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
         "refinement_interpretation_Lib.Sequence_Tm_refine_9fb20bddb03739771b600ef3c8142523",
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Spec.Matrix_Tm_refine_2233c444b925c9018ebdbd043c61a126",
-        "typing_FStar.Seq.Base.length"
+        "refinement_interpretation_Spec.Matrix_Tm_refine_2233c444b925c9018ebdbd043c61a126"
       ],
       0,
-      "b01a648c85ee2fcb47e33283c08067e1"
+      "4085ab6e5b4eabb7774a76642aa13ec3"
     ],
     [
       "Spec.Matrix.mset",
@@ -140,8 +150,9 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
-        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "assumption_Prims.HasEq_int", "equation_Lib.IntTypes.max_size_t",
+        "equation_Prims.nat",
+        "function_token_typing_Lib.IntTypes.max_size_t",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "haseqSpec.Matrix_Tm_refine_310c2b30742fb4dd0067b4f1a9029085",
         "int_inversion",
@@ -152,7 +163,7 @@
         "refinement_kinding_Spec.Matrix_Tm_refine_310c2b30742fb4dd0067b4f1a9029085"
       ],
       0,
-      "f3c9e1c006ab8f145c58e6465019c79c"
+      "3f4d08d094d53e8e23439794fbbabc47"
     ],
     [
       "Spec.Matrix.mset",
@@ -164,46 +175,32 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
-        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "equation_Lib.IntTypes.uint16", "equation_Lib.Sequence.index",
-        "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.op_String_Access",
-        "equation_Lib.Sequence.op_String_Assignment",
-        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.upd",
-        "equation_Prims.nat", "equation_Spec.Matrix.elem",
-        "equation_Spec.Matrix.matrix", "equation_Spec.Matrix.mget",
-        "function_token_typing_FStar.UInt32.n",
-        "function_token_typing_Lib.IntTypes.uint16",
+        "assumption_Prims.HasEq_int", "equation_Lib.IntTypes.max_size_t",
+        "equation_Lib.IntTypes.uint16",
+        "equation_Lib.Sequence.op_String_Access", "equation_Prims.nat",
+        "equation_Spec.Matrix.elem", "equation_Spec.Matrix.matrix",
+        "equation_Spec.Matrix.mget",
+        "function_token_typing_Lib.IntTypes.max_size_t",
         "function_token_typing_Lib.Sequence.index",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "int_inversion", "int_typing",
-        "lemma_FStar.Seq.Base.lemma_index_upd2",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "int_inversion", "int_typing", "lemma_Lib.IntTypes.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_b5ad1dbfbd48faaf34d92bafda76205d",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421",
         "refinement_interpretation_Lib.Sequence_Tm_refine_9fb20bddb03739771b600ef3c8142523",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Matrix_Tm_refine_2233c444b925c9018ebdbd043c61a126",
         "refinement_interpretation_Spec.Matrix_Tm_refine_310c2b30742fb4dd0067b4f1a9029085",
-        "refinement_interpretation_Spec.Matrix_Tm_refine_3c7e483de155042bb667e662a8582297",
         "refinement_kinding_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "token_correspondence_Lib.Sequence.index",
-        "token_correspondence_Lib.Sequence.op_String_Access",
-        "token_correspondence_Lib.Sequence.op_String_Assignment",
-        "token_correspondence_Lib.Sequence.upd",
-        "typing_FStar.Seq.Base.length"
+        "token_correspondence_Lib.Sequence.op_String_Access"
       ],
       0,
-      "c01e1087e692c65a93561ec486ab7fa9"
+      "d6d921514ddf35a6dbc65c88493d2803"
     ],
     [
       "Spec.Matrix.extensionality",
@@ -212,32 +209,28 @@
       0,
       [ "@query" ],
       0,
-      "29ac3a7029d81c09883ced06473f5516"
+      "00ec4d2c161e4ac9a62afda0939406cc"
     ],
     [
       "Spec.Matrix.extensionality",
       2,
       0,
-      0,
+      1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Lib.IntTypes.uint16",
         "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.op_String_Access",
-        "equation_Lib.Sequence.seq", "equation_Prims.nat",
+        "equation_Lib.Sequence.op_String_Access", "equation_Prims.nat",
         "equation_Spec.Matrix.elem", "equation_Spec.Matrix.matrix",
-        "equation_Spec.Matrix.mget", "function_token_typing_FStar.UInt32.n",
-        "function_token_typing_Lib.IntTypes.uint16",
-        "function_token_typing_Lib.Sequence.index", "int_inversion",
-        "int_typing", "lemma_Lib.IntTypes.pow2_values",
-        "lemma_Lib.Sequence.eq_elim", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "equation_Spec.Matrix.mget",
+        "function_token_typing_Lib.Sequence.index",
+        "function_token_typing_Spec.Matrix.elem", "int_inversion",
+        "int_typing", "lemma_Lib.Sequence.eq_elim",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421",
         "refinement_interpretation_Lib.Sequence_Tm_refine_9fb20bddb03739771b600ef3c8142523",
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Lib.Sequence_Tm_refine_f8f6d66e42a0d70eaffbba069e8d5959",
@@ -245,11 +238,10 @@
         "refinement_interpretation_Spec.Matrix_Tm_refine_2233c444b925c9018ebdbd043c61a126",
         "refinement_interpretation_Spec.Matrix_Tm_refine_310c2b30742fb4dd0067b4f1a9029085",
         "refinement_interpretation_Spec.Matrix_Tm_refine_34d37f37d3a026dfbda14c54d9e62452",
-        "token_correspondence_Lib.Sequence.op_String_Access",
-        "typing_FStar.Seq.Base.length"
+        "token_correspondence_Lib.Sequence.op_String_Access"
       ],
       0,
-      "30149470dd6f16696c3e08112da63535"
+      "86a5b45c3ae54428fec0078921dfff41"
     ],
     [
       "Spec.Matrix.map2",
@@ -258,7 +250,7 @@
       0,
       [ "@query" ],
       0,
-      "00cd2fd806a421dea79ef5334d799731"
+      "adec24aa626d646f181a17b2de309ecd"
     ],
     [
       "Spec.Matrix.map2",
@@ -269,9 +261,9 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_interpretation_Tm_arrow_44faff5d8543c30ad9bf2eeaf1b3abcf",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Lib.IntTypes.uint16",
+        "equation_Lib.IntTypes.max_size_t", "equation_Lib.IntTypes.uint16",
         "equation_Prims.nat", "equation_Spec.Matrix.elem",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
+        "function_token_typing_Lib.IntTypes.max_size_t", "int_inversion",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
@@ -289,7 +281,7 @@
         "typing_Spec.Matrix.mget", "typing_Spec.Matrix.mset"
       ],
       0,
-      "b2d480b39242bac09ad869fe63453102"
+      "c5d213154f4d23c5541197ab01e70e3f"
     ],
     [
       "Spec.Matrix.add",
@@ -298,7 +290,7 @@
       0,
       [ "@query" ],
       0,
-      "95dc365d0f3bbf780b0d18ffb8e0bcfb"
+      "bbf2d47731631ed42fac24509f490aec"
     ],
     [
       "Spec.Matrix.add",
@@ -312,7 +304,7 @@
         "token_correspondence_Lib.IntTypes.op_Plus_Dot"
       ],
       0,
-      "3cfbf34005385f763423f873804815ea"
+      "0cfeb86a58a99204e42bbf9e79ae18af"
     ],
     [
       "Spec.Matrix.sub",
@@ -321,7 +313,7 @@
       0,
       [ "@query" ],
       0,
-      "eb15716cb53f38054490003bff7c59c1"
+      "dea376dfa388ca241313b484a4906c60"
     ],
     [
       "Spec.Matrix.sub",
@@ -336,7 +328,7 @@
         "token_correspondence_Lib.IntTypes.op_Subtraction_Dot"
       ],
       0,
-      "46023cca5771773fd1e1a27ea13e0f45"
+      "af3ccb13b054d3f820fcfe37a35350b8"
     ],
     [
       "Spec.Matrix.sum_",
@@ -348,8 +340,7 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "assumption_Prims.HasEq_int",
         "binder_x_bc63cb4dc7cef182a2817913cc2c5db4_2",
-        "equality_tok_Prims.LexTop@tok", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
         "int_inversion", "int_typing", "lemma_Lib.IntTypes.pow2_values",
         "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
@@ -358,7 +349,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "9c0194dfbc8de74427e8bb37c766bbab"
+      "e3090559c3892c31a89ae03d72dfb481"
     ],
     [
       "Spec.Matrix.sum",
@@ -367,13 +358,13 @@
       0,
       [ "@query" ],
       0,
-      "cd4286fe30cb9bf47dcd5513bd2d3bfc"
+      "23e02377f1b7b150754c4d927530d3c7"
     ],
     [
       "Spec.Matrix.sum_extensionality",
       1,
       1,
-      1,
+      0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Spec.Matrix.sum_.fuel_instrumented",
@@ -393,31 +384,31 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "cb3685d5ccbda70c3ff3ceeaa9383a36"
+      "4e78047390a97f112a50b8a22629f14b"
     ],
     [
       "Spec.Matrix.mul_inner",
       1,
       1,
-      1,
+      0,
       [ "@query" ],
       0,
-      "0a36e169db59585e08e02a40a8db7364"
+      "8fed5a6bc1d0cbc5cb22fdab86174902"
     ],
     [
       "Spec.Matrix.mul_inner",
       2,
       1,
-      1,
+      0,
       [ "@query" ],
       0,
-      "14bde652bb2e87b6a36e0cbc5995f13c"
+      "6f66ef6211b5aa19cfb82a7927feeb00"
     ],
     [
       "Spec.Matrix.mul_inner",
       3,
       1,
-      1,
+      0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
@@ -425,12 +416,14 @@
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Spec.Matrix.sum_.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equality_tok_Lib.IntTypes.U16@tok", "equation_FStar.UInt32.n",
+        "equality_tok_Lib.IntTypes.U16@tok",
+        "equation_Lib.IntTypes.max_size_t",
         "equation_Lib.IntTypes.op_Star_Dot", "equation_Lib.IntTypes.uint16",
         "equation_Prims.nat", "equation_Spec.Matrix.mget",
         "equation_Spec.Matrix.sum",
         "equation_with_fuel_Spec.Matrix.sum_.fuel_instrumented",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
+        "function_token_typing_Lib.IntTypes.max_size_t", "int_inversion",
+        "int_typing",
         "interpretation_Spec.Matrix_Tm_abs_7205e0e077fefba9f5cb774eeda60a04",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
@@ -446,38 +439,38 @@
         "token_correspondence_Lib.IntTypes.op_Star_Dot"
       ],
       0,
-      "797f64f52c0c1733409c437d5a10625b"
+      "6fa603a163de8a494e908a9d75dac817"
     ],
     [
       "Spec.Matrix.mul",
       1,
-      1,
-      1,
+      0,
+      0,
       [ "@query" ],
       0,
-      "ee8631494cd2c3537bbc3f89cefe23cf"
+      "da443a20e3144a6bbb427ca35a51511c"
     ],
     [
       "Spec.Matrix.mul",
       2,
-      1,
-      1,
+      0,
+      0,
       [ "@query" ],
       0,
-      "964e0b52167fd57d1eb7557b03972d70"
+      "abebb1c3723105d503063c473ecb6d5e"
     ],
     [
       "Spec.Matrix.mul",
       3,
-      1,
-      1,
+      0,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "assumption_Prims.HasEq_int", "equation_Lib.IntTypes.max_size_t",
         "equation_Lib.IntTypes.uint16", "equation_Prims.nat",
         "equation_Spec.Matrix.elem", "equation_Spec.Matrix.mul_inner",
-        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_Lib.IntTypes.max_size_t",
         "haseqLib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "int_inversion", "primitive_Prims.op_Addition",
@@ -500,16 +493,16 @@
         "typing_Spec.Matrix.mset", "typing_Spec.Matrix.mul_inner"
       ],
       0,
-      "32007f01a8406895dbf55f3b54bcb5a5"
+      "56b14b3d24729a43eab24ffed3d2982c"
     ],
     [
       "Spec.Matrix.matrix_eq",
       1,
-      1,
-      1,
+      0,
+      0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "763f0f0e6ee3db3aa796227db8b3f96e"
+      "16f23afe8a58e021b4b1c22d87da32e5"
     ]
   ]
 ]
