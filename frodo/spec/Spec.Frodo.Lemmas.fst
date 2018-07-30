@@ -5,7 +5,7 @@ open FStar.Math.Lemmas
 
 open Lib.IntTypes
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val modulo_pow2_u16:
   a:uint16 -> b:size_nat{b < 16} -> Lemma

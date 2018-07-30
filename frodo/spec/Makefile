@@ -29,6 +29,13 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
+%.fst-in:
+	@echo \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints \
+	  $(OTHERFLAGS) \
+	  --cache_checked_modules --cache_dir $(CACHE_DIR) \
+	  --odir $(OUT_DIR) $(FSTAR_INCLUDES)
+
 ROOTS = Spec.Frodo.Test.fst
 
 .depend:
@@ -71,7 +78,6 @@ $(OUT_DIR)/%.ml: | .depend
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
-
 
 # 3. Compilation
 

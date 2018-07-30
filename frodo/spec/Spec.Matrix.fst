@@ -7,7 +7,7 @@ open Lib.IntTypes
 
 module Seq = Lib.Sequence
 
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0 --z3seed 5 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FStar.Pervasives Prims FStar.Math.Lemmas Lib.Sequence Spec.Matrix'"
 
 /// Auxiliary lemmas
 
@@ -31,12 +31,17 @@ val index_neq:
   -> Lemma ((i', j') <> (i, j) ==>
            (i' * n2 + j' <> i * n2 + j /\ i' * n2 + j' < n1 * n2))
 let index_neq #n1 #n2 i j i' j' =
-  let open FStar.Math.Lemmas in
-  lemma_eucl_div_bound j i n2;
-  lemma_eucl_div_bound j' i' n2;
   index_lt n1 n2 i j;
-  index_lt n1 n2 i' j'
-
+  index_lt n1 n2 i' j';
+  if i' = i then
+    assert ((i', j') <> (i, j) ==> j' <> j)
+  else
+    begin
+    let open FStar.Math.Lemmas in
+    lemma_eucl_div_bound j i n2;  
+    lemma_eucl_div_bound j' i' n2
+    end
+  
 /// Matrices as flat sequences
 
 type elem = uint16
@@ -89,11 +94,10 @@ val extensionality:
     (ensures  a == b)
 let extensionality #n1 #n2 a b =
   Classical.forall_intro_2 (index_lt n1 n2);
-  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). a.(i, j) == a.[i * n2 + j]);
-  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). b.(i, j) == b.[i * n2 + j]);
+  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). a.(i, j) == a.[i * n2 + j] /\ b.(i, j) == b.[i * n2 + j]);
   assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). a.[i * n2 + j] == b.[i * n2 + j]);
   assert (forall (k:size_nat{k < n1 * n2}). k == (k / n2) * n2 + k % n2 /\ k / n2 < n1 /\ k % n2 < n2);
-  assert (forall (k:size_nat{k < n1 * n2}). a.[k] == b.[k]);
+  assert (forall (k:size_nat{k < n1 * n2}). index a k == index b k);
   Seq.eq_intro a b
 
 (*
@@ -129,6 +133,9 @@ let map2 #n1 #n2 f a b =
         c)
     c
 
+//TODO: revisit when the "friends" mechanism is in place
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0 --using_facts_from 'FStar.Pervasives Prims FStar.Math.Lemmas Lib.IntTypes Lib.Sequence Spec.Matrix'"
+
 val add:
     #n1:size_nat
   -> #n2:size_nat{n1 * n2 < max_size_t}
@@ -146,7 +153,6 @@ val sub:
   -> c:matrix n1 n2{ forall i j. c.(i,j) == a.(i,j) -. b.(i,j) }
 let sub #n1 #n2 a b =
   map2 sub_mod a b
-
 
 val sum_:
     #n:size_nat
@@ -192,6 +198,8 @@ let mul_inner #n1 #n2 #n3 a b i k =
       ) (u16 0) in
   sum_extensionality n2 f (fun l -> a.(i, l) *. b.(l, k)) n2;
   res
+
+#set-options "--max_fuel 0"
 
 val mul:
     #n1:size_nat

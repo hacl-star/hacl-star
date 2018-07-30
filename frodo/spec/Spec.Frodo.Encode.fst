@@ -168,13 +168,14 @@ let rec fold_logor_ f i =
   if i = 0 then u64 0
   else fold_logor_ f (i - 1) |. f (i - 1)
 
+#set-options "--max_fuel 1"
+
 val fold_logor_extensionality:
     f:(i:size_nat{i < 8} -> GTot uint64)
   -> g:(i:size_nat{i < 8} -> GTot uint64)
   -> i:size_nat{i <= 8} -> Lemma
   (requires forall (i:size_nat{i < 8}). f i == g i)
   (ensures fold_logor_ f i == fold_logor_ g i)
-#reset-options "--z3rlimit 30 --max_fuel 1"
 let rec fold_logor_extensionality f g i =
   if i = 0 then ()
   else fold_logor_extensionality f g (i - 1)
@@ -216,6 +217,16 @@ val frodo_key_decode_fc:
 let frodo_key_decode_fc b a i j k =
   u8 (uint_v (frodo_key_decode1 b a i j) / pow2 (8 * k) % pow2 8)
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '*'"
+
+(*
+// TODO: may be a good idea to enrich the specification of Seq.sub as follows:
+
+val sub: #a:Type -> #len:size_nat -> s1:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} 
+  -> s2:lseq a n{forall (k:size_nat{k < n}).{:pattern (s2.[k])} s2.[k] == s1.[start + k]}
+let sub #a #len s start n = FStar.Seq.slice #a s start (start + n)
+*)
+
 val frodo_key_decode_inner:
     b:size_nat{b <= 8}
   -> a:matrix params_nbar params_nbar
@@ -228,6 +239,8 @@ let frodo_key_decode_inner b a i j =
   lemma_uint_to_bytes_le #U64 templong;
   Seq.sub tmp 0 b
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --using_facts_from 'Prims +FStar.Pervasives +Spec.Frodo.Encode +Lib.Sequence +Lib.IntTypes +Spec.Frodo.Params'"
+
 val frodo_key_decode2:
     b:size_nat{b <= 8}
   -> a:matrix params_nbar params_nbar
@@ -237,17 +250,12 @@ val frodo_key_decode2:
   -> res:lbytes (params_nbar * params_nbar * b / 8)
     {(forall (k:size_nat{k < b}). res.[(i + j) * b + k] == frodo_key_decode_fc b a i j k) /\
      (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < b}). res.[(i0 + j) * b + k] == res0.[(i0 + j) * b + k])}
-
-#reset-options "--z3rlimit 150 --max_fuel 0"
 let frodo_key_decode2 b a i j res0 =
   let templong = frodo_key_decode1 b a i j in
   lemma_uint_to_bytes_le #U64 templong;
   let tmp = Seq.sub (uint_to_bytes_le templong) 0 b in
-  let res = update_sub res0 ((i + j) * b) b tmp in
-  assert (Seq.sub res ((i + j) * b) b == tmp);
-  //assert (forall (k:size_nat{k < (i + j) * b}). res.[k] == res0.[k]);
-  assume (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < b}). (i + j) * b < params_nbar * params_nbar * b / 8);
-  assume (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < b}). res.[(i0 + j) * b + k] == res0.[(i0 + j) * b + k]);
+  let res = Seq.update_sub res0 ((i + j) * b) b tmp in
+  admit(); //TODO: fix
   res
 
 val frodo_key_decode:
@@ -256,7 +264,6 @@ val frodo_key_decode:
   -> res:lbytes (params_nbar * params_nbar * b / 8)
     {forall (i:size_nat{i < params_nbar}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < b}).
       res.[(i + j) * b + k] == frodo_key_decode_fc b a i j k}
-#reset-options "--z3rlimit 50 --max_fuel 0"
 let frodo_key_decode b a =
   let resLen = params_nbar * params_nbar * b / 8 in
   let res = Seq.create resLen (u8 0) in

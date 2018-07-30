@@ -90,21 +90,23 @@ val update_sub:
   -> start:size_nat
   -> n:size_nat{start + n <= len}
   -> x:lseq a n
-  -> o:lseq a len{sub o start n == x /\ (forall (k:size_nat{0 <= k /\ k < start /\ start + n <= k /\ k < len}). index o k == index i k)}
+  -> o:lseq a len{sub o start n == x /\ 
+    (forall (k:size_nat{k < start /\ start + n <= k}).{:pattern (index o k)} index o k == index i k)}
 let update_sub #a #len s start n x =
   let o =
     Seq.append
       (Seq.append (Seq.slice s 0 start) x)
       (Seq.slice s (start + n) len) in
-  assert (Seq.equal (Seq.slice o start (start + n)) x);
-  assert (forall (i:nat{0 <= i /\ i < len /\ (i < start \/ i >= start + n)}).
-    Seq.index o i == Seq.index s i);
+  Seq.lemma_eq_intro (Seq.slice o start (start + n)) x;
   o
 
 let update_slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat) (fin:size_nat{start <= fin /\ fin <= len}) (upd:lseq a (fin - start)) =
 		 update_sub #a #len i start (fin-start) upd
 
+unfold
 let op_String_Access #a #len = index #a #len
+
+unfold
 let op_String_Assignment #a #len = upd #a #len
 
 /// Iteration
