@@ -1,11 +1,14 @@
 # hacl build container
 
-# Define here what FStar base container image hacl build should use.
+# Define on fstar-version.json what FStar base container image
+# hacl build should use.
 # By default it always look for the latest FStar container available
 # In case you would like to reference a specific commit,
 # replace latest with the commit id from github using 12 characters.
-# i.e.: FROM fstar:cbac9b43ab46
-FROM fstar:latest
+# Latest can only be used with branch master,
+# for any other branch please use the specific commit id on the config file.
+ARG COMMITID
+FROM fstar:${COMMITID}
 
 ARG BUILDLOGFILE
 ARG MAXTHREADS
