@@ -15,12 +15,11 @@ function export_home() {
 }
 
 function hacl_test() {
-  fetch_and_make_kremlin
-  fetch_and_make_mlcrypto
-  fetch_mitls # for mitlsffi.h, sigh
-  export_home OPENSSL "$(pwd)/mlcrypto/openssl"
-  export_home HACL "$(pwd)"
-  make -j $threads ci -k
+    fetch_and_make_kremlin && \
+    fetch_and_make_mlcrypto && \
+    fetch_mitls && \
+    export_home OPENSSL "$(pwd)/mlcrypto/openssl" && \
+    make -j $threads ci -k
 }
 
 function hacl_test_and_hints() {
@@ -30,14 +29,14 @@ function hacl_test_and_hints() {
 function fetch_and_make_kremlin() {
   fetch_kremlin
   # Default build target is minimal, unless specified otherwise
-  local target
+  local localTarget
   if [[ $1 == "" ]]; then
-    target="minimal"
+    localTarget="minimal"
   else
-    target="$1"
+    localTarget="$1"
   fi
-  make -C kremlin -j $threads $target || \
-    (cd kremlin && git clean -fdx && make -j $threads $target)
+  make -C kremlin -j $threads $localTarget || \
+    (cd kremlin && git clean -fdx && make -j $threads $localTarget)
   OTHERFLAGS='--admit_smt_queries true' make -C kremlin/kremlib -j $threads
   export PATH="$(pwd)/kremlin:$PATH"
 }
@@ -132,10 +131,11 @@ function refresh_hints() {
 }
 
 function exec_build () {
+    cd hacl-star
 
     export_home FSTAR "$(pwd)/../"
-    result_file=result.txt
-    local status_file="status.txt"
+    result_file="../result.txt"
+    local status_file="../status.txt"
     echo -n false > $status_file
 
     if [ ! -d "secure_api" ]; then
@@ -143,6 +143,9 @@ function exec_build () {
         echo Failure > $result_file
         return
     fi
+
+    export_home HACL "$(pwd)"
+    export_home EVERCRYPT "$(pwd)/providers"
 
     if [[ $target == "hacl-ci" ]]; then
         echo target -> hacl-ci
@@ -164,6 +167,8 @@ function exec_build () {
         echo "Build succeeded"
         echo Success > $result_file
     fi
+
+    cd ..
 }
 
 # Some environment variables we want

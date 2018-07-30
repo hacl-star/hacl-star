@@ -33,11 +33,14 @@ RUN rm -f commitinfofilename.json
 
 RUN mkdir ${MYHOME}/FStar/hacl-star
 COPY --chown=everest / ${MYHOME}/FStar/hacl-star/
-WORKDIR ${MYHOME}/FStar/hacl-star
 
-COPY --chown=everest build_hacl.sh ${MYHOME}/FStar/hacl-star/build_hacl.sh
+# Hacl make calls git clean, which will delete buildlogfile.txt
+# Because of that we will first output on the parent folder
+WORKDIR ${MYHOME}/FStar
+
+COPY --chown=everest build_hacl.sh ${MYHOME}/FStar/build_hacl.sh
 RUN chmod +x build_hacl.sh
-COPY --chown=everest build.sh ${MYHOME}/FStar/hacl-star/build.sh
+COPY --chown=everest build.sh ${MYHOME}/FStar/build.sh
 RUN chmod +x build.sh
 
 RUN echo $(date -u '+%Y-%m-%d %H:%M:%S') >> ${BUILDLOGFILE}
@@ -46,8 +49,8 @@ RUN echo $(date -u '+%Y-%m-%d %H:%M:%S') >> ${BUILDLOGFILE}
 
 # Generate query-stats.
 # List the hints that fail to replay.
-RUN bash -c "../.scripts/query-stats.py -f ${BUILDLOGFILE} -F html -o log_no_replay.html -n all '--filter=fstar_usedhints=+' '--filter=fstar_tag=-' -g"
+RUN bash -c ".scripts/query-stats.py -f ${BUILDLOGFILE} -F html -o log_no_replay.html -n all '--filter=fstar_usedhints=+' '--filter=fstar_tag=-' -g"
 
 # Worst offenders (longest times)
-RUN bash -c "../.scripts/query-stats.py -f ${BUILDLOGFILE} -F html -o log_worst.html -c -g -n 10"
+RUN bash -c ".scripts/query-stats.py -f ${BUILDLOGFILE} -F html -o log_worst.html -c -g -n 10"
 
