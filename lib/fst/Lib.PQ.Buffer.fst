@@ -187,24 +187,9 @@ val update_sub:
     (ensures  fun h0 _ h1 -> B.live h1 dst /\ modifies (loc_buffer dst) h0 h1 /\
       B.as_seq h1 dst == Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 let update_sub #a #len dst start n src =
-  let h0 = ST.get () in
   let b = sub dst start n in
   copy b n src;
-  let h1 = ST.get () in
-
-  assert (B.as_seq h1 b == B.as_seq h0 src);
-  assert (forall (k:size_nat{0 <= k /\ k < v n}). Seq.index #_ #(v n) (B.as_seq h1 b) k == Seq.index #_ #(v n) (B.as_seq h0 src) k);
-  assert (forall (k:size_nat{0 <= k /\ k < v start /\ v start + v n <= k /\ k < len}). Seq.index #_ #len (B.as_seq h1 dst) k == Seq.index #_ #len (B.as_seq h0 dst) k);
-
-  assert (forall (k:size_nat{0 <= k /\ k < v start /\ v start + v n <= k /\ k < len}). Seq.index #_ #len (B.as_seq h1 dst) k ==
-    Seq.index (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src)) k);
-  assert (forall (k:size_nat{v start <= k /\ k < v start + v n}). Seq.index #_ #len (B.as_seq h1 dst) k ==
-    Seq.index (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src)) k);
-
-  assume (forall (k:size_nat{0 <= k /\ k < len}). Seq.index #_ #len (B.as_seq h1 dst) k ==
-    Seq.index (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src)) k); //FIXME
-
-  Seq.eq_intro (B.as_seq h1 dst) (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
+  admit()
 
 inline_for_extraction noextract private
 val loop_nospec_inv:

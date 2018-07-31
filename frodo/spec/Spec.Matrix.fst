@@ -169,10 +169,11 @@ val sum_extensionality:
     n:size_nat
   -> f:(i:size_nat{i < n} -> GTot uint16)
   -> g:(i:size_nat{i < n} -> GTot uint16)
-  -> i:size_nat{i <= n} -> Lemma
-  (requires forall (i:size_nat{i < n}). f i == g i)
-  (ensures  sum_ #n f i == sum_ #n g i)
-  (decreases i)
+  -> i:size_nat{i <= n} 
+  -> Lemma
+    (requires forall (i:size_nat{i < n}). f i == g i)
+    (ensures  sum_ #n f i == sum_ #n g i)
+    (decreases i)
 let rec sum_extensionality n f g i =
   if i = 0 then ()
   else sum_extensionality n f g (i - 1)
@@ -185,13 +186,12 @@ val mul_inner:
   -> b:matrix n2 n3
   -> i:size_nat{i < n1}
   -> k:size_nat{k < n3}
-  -> (res:uint16{res == sum #n2 (fun l -> a.(i, l) *. b.(l, k))})
+  -> res:uint16{res == sum #n2 (fun l -> a.(i, l) *. b.(l, k))}
 let mul_inner #n1 #n2 #n3 a b i k =
-  let f = (fun l -> a.(i, l) *. b.(l, k)) in
-  let f1 (j:size_nat{j <= n2}) = sum_ #n2 f j in
+  let f l = a.(i, l) *. b.(l, k) in
   let res =
     repeati_inductive n2
-      (fun j res -> res == f1 j)
+      (fun j res -> res == sum_ #n2 f j)
       (fun j res ->
         res +. a.(i, j) *. b.(j, k)
       ) (u16 0) in

@@ -144,7 +144,7 @@ val map2:
   -> b:matrix_t n1 n2
   -> c:matrix_t n1 n2
   -> Stack unit
-    (requires fun h0 -> 
+    (requires fun h0 ->
       B.live h0 a /\ B.live h0 b /\ B.live h0 c /\ a == c /\ B.disjoint b c)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer c) h0 h1 /\
@@ -215,7 +215,7 @@ val mul_inner:
   -> k:size_t{v k < v n3}
   -> Stack uint16
     (requires fun h -> B.live h a /\ B.live h b)
-    (ensures  fun h0 r h1 -> 
+    (ensures  fun h0 r h1 ->
       modifies loc_none h0 h1 /\
       r == M.mul_inner (as_matrix h0 a) (as_matrix h0 b) (v i) (v k))
 let mul_inner #n1 #n2 #n3 a b i k =
@@ -223,23 +223,19 @@ let mul_inner #n1 #n2 #n3 a b i k =
   let h0 = ST.get() in
   [@ inline_let ]
   let f l = get h0 a (v i) l *. get h0 b l (v k) in
-  let f1 j = M.sum_ #(v n2) f j in
   let res = create #uint16 #1 (size 1) (u16 0) in
+
   let h1 = ST.get() in
-  let inv h2 (i:nat{i <= v n2}) =
-    B.live h1 res /\ B.live h2 res /\
-    modifies (loc_buffer res) h1 h2 /\
-    B.get h2 res 0 == f1 i in
-  let f' (j:size_t{0 <= v j /\ v j < v n2}) : Stack unit
-    (requires fun h -> inv h (v j))
-    (ensures  fun _ _ h2 -> inv h2 (v j + 1))
-  =
-    let aij = a.[i,j] in
-    let bjk = b.[j,k] in
-    let res0 = !*res in
-    res *= (res0 +. aij *. bjk)
-  in
-  Lib.Loops.for (size 0) n2 inv f';
+  Lib.Loops.for (size 0) n2
+    (fun h2 j -> B.live h1 res /\ B.live h2 res /\
+      modifies (loc_buffer res) h1 h2 /\
+      B.get h2 res 0 == M.sum_ #(v n2) f j)
+    (fun j ->
+      let aij = a.[i,j] in
+      let bjk = b.[j,k] in
+      let res0 = !*res in
+      res *= (res0 +. aij *. bjk)
+    );
   let res = !*res in
   M.sum_extensionality (v n2) f (fun l -> get h0 a (v i) l *. get h0 b l (v k)) (v n2);
   assert (res == M.mul_inner (as_matrix h0 a) (as_matrix h0 b) (v i) (v k));
@@ -271,7 +267,7 @@ let mul_inner_inv #n1 #n2 #n3 h0 h1 h2 a b c f i k =
   (forall (k1:nat{k1 < k}). get h2 c (v i) k1 == f k1) /\
   (forall (k1:nat{k <= k1 /\ k1 < v n3}). get h2 c (v i) k1 == get h0 c (v i) k1) /\
   (forall (i1:nat{v i < i1 /\ i1 < v n1}) (k:nat{k < v n3}). get h2 c i1 k == get h0 c i1 k) /\
-  as_matrix h0 a == as_matrix h2 a /\ 
+  as_matrix h0 a == as_matrix h2 a /\
   as_matrix h0 b == as_matrix h2 b
 
 inline_for_extraction noextract private
@@ -286,7 +282,7 @@ val mul_inner1:
   -> c:matrix_t n1 n3{B.disjoint a c /\ B.disjoint b c}
   -> i:size_t{v i < v n1}
   -> k:size_t{v k < v n3}
-  -> f:(k:nat{k < v n3} 
+  -> f:(k:nat{k < v n3}
        -> GTot (res:uint16{res == M.sum #(v n2) (fun l -> get h0 a (v i) l *. get h0 b l k)}))
   -> Stack unit
     (requires fun h2 -> mul_inner_inv h0 h1 h2 a b c f i (v k))
@@ -312,21 +308,21 @@ val matrix_mul:
   -> b:matrix_t n2 n3
   -> c:matrix_t n1 n3
   -> Stack unit
-    (requires fun h -> 
+    (requires fun h ->
       B.live h a /\ B.live h b /\ B.live h c /\ B.disjoint a c /\ B.disjoint b c)
-    (ensures  fun h0 _ h1 -> 
-      B.live h1 c /\ 
+    (ensures  fun h0 _ h1 ->
+      B.live h1 c /\
       modifies (loc_buffer c) h0 h1 /\
       as_matrix h1 c == M.mul (as_matrix h0 a) (as_matrix h0 b))
 [@"c_inline"]
 let matrix_mul #n1 #n2 #n3 a b c =
   let h0 = ST.get () in
-  let f (i:nat{i < v n1}) (k:nat{k < v n3}) : 
+  let f (i:nat{i < v n1}) (k:nat{k < v n3}) :
     GTot (res:uint16{res == M.sum #(v n2) (fun l -> get h0 a i l *. get h0 b l k)})
-  = M.sum #(v n2) (fun l -> get h0 a i l *. get h0 b l k) 
+  = M.sum #(v n2) (fun l -> get h0 a i l *. get h0 b l k)
   in
   Lib.Loops.for (size 0) n1
-    (fun h1 i -> 
+    (fun h1 i ->
       B.live h1 a /\ B.live h1 b /\ B.live h1 c /\
       modifies (loc_buffer c) h0 h1 /\ i <= v n1 /\
       (forall (i1:nat{i1 < i}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k) /\
@@ -337,7 +333,7 @@ let matrix_mul #n1 #n2 #n3 a b c =
         (fun h2 k -> mul_inner_inv h0 h1 h2 a b c (f (v i)) i k)
         (fun k -> mul_inner1 h0 h1 a b c i k (f (v i)));
       let h1 = ST.get() in
-      let q i1 = forall k. get h1 c i1 k == f i1 k in      
+      let q i1 = forall k. get h1 c i1 k == f i1 k in
       onemore (fun i1 -> i1 < v n1) q (v i)
     );
   let h2 = ST.get() in
