@@ -39,7 +39,7 @@ specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(AES_FILES)))
 ci: bignum-ci specific-ci
 all-ci: ci
 
-KREMLIN_ARGS+=-tmpdir aes128-c \
+KREMLIN_ARGS=-I $(HACL_KREMLIN) -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -tmpdir aes128-c \
 		-I ../bignum -I ../curve25519 -I ../hash \
 
 aes128-c/out.krml: $(AES_FILES)
