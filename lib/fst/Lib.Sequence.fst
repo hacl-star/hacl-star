@@ -76,7 +76,8 @@ let of_list #a l =
   r
 
 //unfold
-val sub: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> lseq a n
+val sub: #a:Type -> #len:size_nat -> s1:lseq a len -> start:size_nat -> n:size_nat{start + n <= len}
+  -> s2:lseq a n{forall (k:size_nat{k < n}).{:pattern (index s2 k)} index s2 k == index s1 (start + k)}
 let sub #a #len s start n = Seq.slice #a s start (start + n)
 
 let slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat)
@@ -91,7 +92,8 @@ val update_sub:
   -> n:size_nat{start + n <= len}
   -> x:lseq a n
   -> o:lseq a len{sub o start n == x /\ 
-    (forall (k:size_nat{k < start /\ start + n <= k}).{:pattern (index o k)} index o k == index i k)}
+    (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < len)}).{:pattern (index o k)}
+      index o k == index i k)}
 let update_sub #a #len s start n x =
   let o =
     Seq.append

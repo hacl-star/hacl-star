@@ -190,7 +190,6 @@ let frodo_key_decode1 b a i j =
   let f (k:size_nat{k < 8}) =
     to_u64 (dc b a.(i, 8 * j + k)) <<. u32 (b * k) in
   let f1 k = fold_logor_ f k in
-  assume ((u64 0 |. f 0) == f1 1);
   let templong =
     repeati_inductive 8
     (fun k templong -> templong == f1 k)
@@ -200,12 +199,7 @@ let frodo_key_decode1 b a i j =
   fold_logor_extensionality f (fun k -> to_u64 (dc b a.(i, 8 * j + k)) <<. u32 (b * k)) 8;
   templong
 
-val lemma_uint_to_bytes_le:
-    #t:m_inttype
-  -> u:uint_t t
-  -> Lemma
-    (forall (i:size_nat{i < numbytes t}). index (uint_to_bytes_le #t u) i == u8 (uint_v u / pow2 (8 * i) % pow2 8))
-let lemma_uint_to_bytes_le #t u = admit()
+#set-options "--max_fuel 0"
 
 val frodo_key_decode_fc:
     b:size_nat{b <= 8}
@@ -217,15 +211,13 @@ val frodo_key_decode_fc:
 let frodo_key_decode_fc b a i j k =
   u8 (uint_v (frodo_key_decode1 b a i j) / pow2 (8 * k) % pow2 8)
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '*'"
-
-(*
-// TODO: may be a good idea to enrich the specification of Seq.sub as follows:
-
-val sub: #a:Type -> #len:size_nat -> s1:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} 
-  -> s2:lseq a n{forall (k:size_nat{k < n}).{:pattern (s2.[k])} s2.[k] == s1.[start + k]}
-let sub #a #len s start n = FStar.Seq.slice #a s start (start + n)
-*)
+//TODO: prove in Lib.Bytesequence
+assume val lemma_uint_to_bytes_le:
+    #t:m_inttype
+  -> u:uint_t t
+  -> Lemma
+    (forall (i:nat{i < numbytes t}).
+      index (uint_to_bytes_le #t u) i == u8 (uint_v u / pow2 (8 * i) % pow2 8))
 
 val frodo_key_decode_inner:
     b:size_nat{b <= 8}
@@ -239,9 +231,28 @@ let frodo_key_decode_inner b a i j =
   lemma_uint_to_bytes_le #U64 templong;
   Seq.sub tmp 0 b
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --using_facts_from 'Prims +FStar.Pervasives +Spec.Frodo.Encode +Lib.Sequence +Lib.IntTypes +Spec.Frodo.Params'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims +FStar.Pervasives +Spec.Frodo.Encode +Lib.Sequence +Lib.IntTypes +Spec.Frodo.Params'"
 
 val frodo_key_decode2:
+    b:size_nat{b <= 8}
+  -> a:matrix params_nbar params_nbar
+  -> i:size_nat{i < params_nbar}
+  -> res0:lbytes (params_nbar * params_nbar * b / 8)
+  -> res:lbytes (params_nbar * params_nbar * b / 8)
+    {(forall (k:size_nat{k < b}). res.[i * b + k] == frodo_key_decode_fc b a i 0 k) /\
+     (forall (i0:size_nat{i0 < i}) (k:size_nat{k < b}).
+       res.[i0 * b + k] == res0.[i0 * b + k])}
+let frodo_key_decode2 b a i res0 =
+  let templong = frodo_key_decode1 b a i 0 in
+  lemma_uint_to_bytes_le #U64 templong;
+  let tmp = Seq.sub (uint_to_bytes_le templong) 0 b in
+  let start:size_nat = i * b in
+  let n:size_nat = b in
+  let res = update_sub res0 start n tmp in
+  assert (forall (k:size_nat{k < b}). res.[i * b + k] == tmp.[k]);
+  res
+
+val frodo_key_decode2':
     b:size_nat{b <= 8}
   -> a:matrix params_nbar params_nbar
   -> i:size_nat{i < params_nbar}
@@ -249,14 +260,10 @@ val frodo_key_decode2:
   -> res0:lbytes (params_nbar * params_nbar * b / 8)
   -> res:lbytes (params_nbar * params_nbar * b / 8)
     {(forall (k:size_nat{k < b}). res.[(i + j) * b + k] == frodo_key_decode_fc b a i j k) /\
-     (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < b}). res.[(i0 + j) * b + k] == res0.[(i0 + j) * b + k])}
-let frodo_key_decode2 b a i j res0 =
-  let templong = frodo_key_decode1 b a i j in
-  lemma_uint_to_bytes_le #U64 templong;
-  let tmp = Seq.sub (uint_to_bytes_le templong) 0 b in
-  let res = Seq.update_sub res0 ((i + j) * b) b tmp in
-  admit(); //TODO: fix
-  res
+     (forall (i0:size_nat{i0 < i}) (j:size_nat{j < params_nbar / 8}) (k:size_nat{k < b}).
+       res.[(i0 + j) * b + k] == res0.[(i0 + j) * b + k])}
+let frodo_key_decode2' b a i j res0 =
+  frodo_key_decode2 b a i res0
 
 val frodo_key_decode:
     b:size_nat{b <= 8}
@@ -278,6 +285,6 @@ let frodo_key_decode b a =
       (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}) (k:size_nat{k < b}). res0.[(i0 + j) * b + k] == res.[(i0 + j) * b + k]) /\
       (forall (j0:size_nat{j0 < j}) (k:size_nat{k < b}). res0.[(i + j0) * b + k] == frodo_key_decode_fc b a i j0 k))
     (fun j res0 ->
-      frodo_key_decode2 b a i j res0
+      frodo_key_decode2' b a i j res0
     ) res
   ) res

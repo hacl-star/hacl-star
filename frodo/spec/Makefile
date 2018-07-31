@@ -30,11 +30,10 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
 %.fst-in:
-	@echo \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints \
-	  $(OTHERFLAGS) \
+	@echo $(OTHERFLAGS) \
 	  --cache_checked_modules --cache_dir $(CACHE_DIR) \
-	  --odir $(OUT_DIR) $(FSTAR_INCLUDES)
+	  --odir $(OUT_DIR) $(FSTAR_INCLUDES) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
 
 ROOTS = Spec.Frodo.Test.fst
 
@@ -44,17 +43,12 @@ ROOTS = Spec.Frodo.Test.fst
 include .depend
 
 # Admit SMT queries for modules in FStar namespace
-$(CACHE_DIR)/FStar.%.fst.checked: | .depend
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/Prims.%.checked: | .depend
 	$(FSTAR) --admit_smt_queries true $< && \
 	touch $@
 
 # We need this because F* can't take duplicate modules in the command line
-$(CACHE_DIR)/Lib.IntTypes.fst.checked: | .depend
-	$(FSTAR) $< \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
-
-$(CACHE_DIR)/Lib.IntTypes.fsti.checked: | .depend
+$(CACHE_DIR)/Lib.IntTypes.%.checked: | .depend
 	$(FSTAR) $< \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@

@@ -28,8 +28,7 @@ val index_neq:
   -> j:nat{j < n2}
   -> i':nat{i' < n1}
   -> j':nat{j' < n2}
-  -> Lemma ((i', j') <> (i, j) ==>
-           (i' * n2 + j' <> i * n2 + j /\ i' * n2 + j' < n1 * n2))
+  -> Lemma (((i', j') <> (i, j) ==> i' * n2 + j' <> i * n2 + j) /\ i' * n2 + j' < n1 * n2)
 let index_neq #n1 #n2 i j i' j' =
   index_lt n1 n2 i j;
   index_lt n1 n2 i' j';
