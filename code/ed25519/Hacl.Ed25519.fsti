@@ -68,3 +68,10 @@ val curve25519_verify:
     (requires (fun h -> live h key /\ live h msg /\ live h signature))
     (ensures (fun h0 b h1 -> live h0 key /\ live h0 msg /\ live h0 signature /\
       modifies_0 h0 h1))
+
+val curve25519_secret_to_public:
+  output:hint8_p{length output = 32} ->
+  secret:hint8_p{length secret = 32 /\ disjoint output secret} ->
+  Stack unit
+    (requires (fun h -> live h output /\ live h secret))
+    (ensures (fun h0 _ h1 -> live h0 output /\ live h0 secret /\ live h1 output /\ modifies_1 output h0 h1))

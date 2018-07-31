@@ -15,3 +15,10 @@ let curve25519_sign signature secret msg len =
 
 let curve25519_verify key msg len signature =
   Hacl.Impl.Ed25519.Verify.curve25519_verify key msg len signature
+
+let curve25519_secret_to_public pk sk = 
+  push_frame();
+  let base = create 0uy 32ul in
+  base.(0ul) <- 9uy;
+  Hacl.Curve25519.crypto_scalarmult pk sk base;
+  pop_frame()
