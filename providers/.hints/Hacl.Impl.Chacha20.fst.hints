@@ -8,7 +8,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "a522f8c945ac14c34d019fe33e29bb51"
+      "e8346c403e6055c808bb1e9bfa2620d5"
     ],
     [
       "Hacl.Impl.Chacha20.rotate_left",
@@ -41,7 +41,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "e5e0cf8a8ed5551794abce7c90ffdb46"
+      "5bc631dc9812087e18ad1fe4ada5836f"
     ],
     [
       "Hacl.Impl.Chacha20.constant_setup_",
@@ -55,7 +55,7 @@
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_875d598b28faef3fdf06357711127e39"
       ],
       0,
-      "a185b589fbc00d1e082f141652310ace"
+      "1e209f01df906cb2b54e515e262e7a94"
     ],
     [
       "Hacl.Impl.Chacha20.constant_setup_",
@@ -114,7 +114,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "edaefdc62a178d0df4dc2d79394927ec"
+      "e210a5a2d04e0e8e127736f1b6369039"
     ],
     [
       "Hacl.Impl.Chacha20.constant_setup_",
@@ -173,7 +173,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "d7726d995b817b06c9b23d74cb449361"
+      "b68b8e10cfdaa1d4126883156a907d55"
     ],
     [
       "Hacl.Impl.Chacha20.constant_setup",
@@ -182,7 +182,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "f4d4d1cf6e80376e9b924aa0dad22ed5"
+      "3ecb9836a7ffdbf2fe32a70a521c3bfe"
     ],
     [
       "Hacl.Impl.Chacha20.constant_setup",
@@ -223,7 +223,7 @@
         "typing_Seq.Create.create_4"
       ],
       0,
-      "eb2711fbbf690d26d42fc21bccd9f5ab"
+      "01469f04841ff6584f844930c6b41ed1"
     ],
     [
       "Hacl.Impl.Chacha20.constant_setup",
@@ -263,7 +263,7 @@
         "typing_Seq.Create.create_4"
       ],
       0,
-      "34ec88bf325e197815a53ad72da617fc"
+      "3d09a7c309213a103c5e37e16ec1ce0a"
     ],
     [
       "Hacl.Impl.Chacha20.keysetup",
@@ -280,7 +280,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "32e31d51f7a5f78a735c6bc324ab169c"
+      "8c74a5349118816a43a3abdb3be381ed"
     ],
     [
       "Hacl.Impl.Chacha20.keysetup",
@@ -294,7 +294,7 @@
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_59174d15900b1aac0e68774108209b07"
       ],
       0,
-      "06156408c1e48d0f56c7b128a5017fc5"
+      "c4cbea92b344000941f533492456488c"
     ],
     [
       "Hacl.Impl.Chacha20.keysetup",
@@ -308,7 +308,7 @@
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_59174d15900b1aac0e68774108209b07"
       ],
       0,
-      "22c2ce868474eededab602d92b400aaa"
+      "39f067931ad90f7ba80d36a8aa0bd3c6"
     ],
     [
       "Hacl.Impl.Chacha20.ivsetup",
@@ -325,7 +325,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "9e4c20c905d728151b99e40927b084f8"
+      "97708996af70926ec69d59459d3654b4"
     ],
     [
       "Hacl.Impl.Chacha20.ivsetup",
@@ -339,7 +339,7 @@
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_775da969fbf3b781de38536591f74a9e"
       ],
       0,
-      "7f10e7409e68d48ecc63709dc4124963"
+      "1f60ea34d195e84b2963298583e0d927"
     ],
     [
       "Hacl.Impl.Chacha20.ivsetup",
@@ -353,7 +353,7 @@
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_775da969fbf3b781de38536591f74a9e"
       ],
       0,
-      "9ac988cbfb22d73062a4b80f7208d239"
+      "bdbd4516d083129c6edccb22a9369087"
     ],
     [
       "Hacl.Impl.Chacha20.ctrsetup",
@@ -362,7 +362,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "7717ce71e8058f0e733f1c760ef4c8bb"
+      "8cf7d5ff06390da60309b2fa47e2969e"
     ],
     [
       "Hacl.Impl.Chacha20.ctrsetup",
@@ -403,7 +403,7 @@
         "typing_FStar.Seq.Base.index"
       ],
       0,
-      "36df80a6d4db5e2438816a5c38084f4d"
+      "2e6bca044fe37a70c82f3b094fdbdce4"
     ],
     [
       "Hacl.Impl.Chacha20.ctrsetup",
@@ -413,19 +413,14 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Spec.Lib_interpretation_Tm_arrow_8540ab936aaf1248e0cfa8ccfb5b2463",
-        "Spec.Lib_interpretation_Tm_arrow_ed7cc76f9b83eac263a15d4df4f0d36f",
         "equation_FStar.Buffer.as_seq", "equation_FStar.Buffer.buffer",
         "equation_FStar.Monotonic.HyperStack.mem", "equation_FStar.UInt32.n",
         "equation_Hacl.Cast.uint32_to_sint32", "equation_Prims.nat",
         "equation_Spec.Chacha20.idx", "equation_Spec.Lib.singleton",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "function_token_typing_FStar.UInt32.n",
-        "function_token_typing_FStar.UInt32.t",
-        "function_token_typing_Spec.Lib.singleton", "int_inversion",
-        "int_typing",
-        "interpretation_Spec.Lib_Tm_abs_7892e8526edecb734606e736ddd40417",
-        "lemma_FStar.Seq.Base.lemma_create_len",
+        "function_token_typing_FStar.UInt32.t", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_create_len",
         "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_index_create",
         "lemma_FStar.Seq.Base.lemma_index_upd1",
@@ -433,17 +428,16 @@
         "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_020d9db380df73a5f2a73abf3abd72c0",
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_0d4da60cb6187749d65a25df63d2ab15",
+        "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_c3648ca469e3493eead18a03a10d0df8",
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_e0f4be5bd72b4187a1ad66a3d3f712e3",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Chacha20_Tm_refine_07355958e2bf14bd0701adebc5e1bebd",
-        "token_correspondence_Spec.Lib.singleton",
         "typing_FStar.Buffer.as_seq", "typing_FStar.Buffer.length",
-        "typing_FStar.Seq.Base.index"
+        "typing_FStar.Seq.Base.index", "typing_Spec.Lib.singleton"
       ],
       0,
-      "2c928e37ca976f374b01594474972564"
+      "ee864a26498421a1f3a645293823f876"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_setup",
@@ -458,7 +452,7 @@
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_e6f73d69171d3f532dd3233ed82d65f8"
       ],
       0,
-      "1a2bbcb3f9e40caa169696a65a2f0fcc"
+      "bc8964139ade55cb54e7215e408ef3a0"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_setup",
@@ -565,7 +559,7 @@
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v"
       ],
       0,
-      "98cfa613c3148d92417a4e34353aec2a"
+      "9636587c82ea1479d9a7afa7de086977"
     ],
     [
       "Hacl.Impl.Chacha20.setup",
@@ -585,7 +579,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "e7360d15e3da0464ba9bdb9ee2f1fe81"
+      "a654fcc2e11af901b30b2072e2b15502"
     ],
     [
       "Hacl.Impl.Chacha20.setup",
@@ -683,7 +677,7 @@
         "typing_Seq.Create.create_1", "unit_typing"
       ],
       0,
-      "2ae081d2b96ba3e7012be4d0c3627cbc"
+      "bf09655798169a5d0044a6c989bb7d6c"
     ],
     [
       "Hacl.Impl.Chacha20.setup",
@@ -781,7 +775,7 @@
         "typing_Seq.Create.create_1", "unit_typing"
       ],
       0,
-      "61ab27310cbaf8cd1e7665d45166ae2d"
+      "036649cc531dc5e0e004a6ace1b7229a"
     ],
     [
       "Hacl.Impl.Chacha20.line",
@@ -806,7 +800,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "fb6c6e332b3a5358621e755b8fee4504"
+      "db12058bdbf8bd6e209dcb1c85467fde"
     ],
     [
       "Hacl.Impl.Chacha20.line",
@@ -850,7 +844,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "42a66c3004598bc0fc0613048be4907a"
+      "4e7fb9b7bec5426c304bebca61c57e60"
     ],
     [
       "Hacl.Impl.Chacha20.quarter_round",
@@ -873,7 +867,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "a80656e251f51feee640985e7b24045d"
+      "6797a80b1d0c20c9b352dde9481ecb15"
     ],
     [
       "Hacl.Impl.Chacha20.quarter_round",
@@ -905,7 +899,7 @@
         "token_correspondence_Spec.Lib.op_At", "typing_FStar.UInt32.v"
       ],
       0,
-      "2769ed3b1b356642b566d84253d683ef"
+      "1025d4c569e40037ca6e3d5599d8b523"
     ],
     [
       "Hacl.Impl.Chacha20.column_round",
@@ -921,7 +915,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "d033b8f8aec81c59de52d4a6a0ac605c"
+      "2550b25fe43b0ea70405ef2baeec23ab"
     ],
     [
       "Hacl.Impl.Chacha20.column_round",
@@ -947,7 +941,7 @@
         "token_correspondence_Spec.Lib.op_At"
       ],
       0,
-      "111a7052a4040165352faedb5902abf6"
+      "83df1765b83d984a0c89676515faf910"
     ],
     [
       "Hacl.Impl.Chacha20.diagonal_round",
@@ -963,7 +957,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "214657dcda231dd403b3bab0a0c4276d"
+      "0fd80daf8411ccb043b4f0b77b022a44"
     ],
     [
       "Hacl.Impl.Chacha20.diagonal_round",
@@ -989,7 +983,7 @@
         "token_correspondence_Spec.Lib.op_At"
       ],
       0,
-      "b358d772be3a2d97963e3210ecd1419f"
+      "0008de7e6bf6b1fd59b39f7a3f9adcc3"
     ],
     [
       "Hacl.Impl.Chacha20.double_round",
@@ -1004,7 +998,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "5cb14eabfe6afd322d824e487d153de3"
+      "6e61d68038b29a005e03f1bf766c0b24"
     ],
     [
       "Hacl.Impl.Chacha20.double_round",
@@ -1029,7 +1023,7 @@
         "token_correspondence_Spec.Lib.op_At"
       ],
       0,
-      "7ab72ace27aa588fc686731643b0a1a2"
+      "20306401b36f6906e5b7b0a6a4d16f45"
     ],
     [
       "Hacl.Impl.Chacha20.double_round",
@@ -1053,7 +1047,7 @@
         "token_correspondence_Spec.Lib.op_At"
       ],
       0,
-      "b073e0d2aae122f3cd85707555d1e6eb"
+      "3c3f9573f614fda9565aab7aa0d44239"
     ],
     [
       "Hacl.Impl.Chacha20.rounds",
@@ -1069,7 +1063,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "8ac38ad8828c59d7544f71cb90442851"
+      "d3c97d5614efd5343e24de54575d6ac7"
     ],
     [
       "Hacl.Impl.Chacha20.rounds",
@@ -1108,7 +1102,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "d612444a05b8c0ad20670056e1b31e59"
+      "19028dd0184bb2e89e135bc3196b55a5"
     ],
     [
       "Hacl.Impl.Chacha20.sum_states",
@@ -1128,7 +1122,7 @@
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_ea0cdb077ae78da455b9677f874da9dd"
       ],
       0,
-      "1502ebb10e1d9c9f14414784d2576328"
+      "d0d4d2e6b0cbdbf48ea528892cdf0bae"
     ],
     [
       "Hacl.Impl.Chacha20.sum_states",
@@ -1142,7 +1136,7 @@
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_ea0cdb077ae78da455b9677f874da9dd"
       ],
       0,
-      "b016b9ee56eeb909336b55e8d70f706f"
+      "9899274117c02587750367e94902d529"
     ],
     [
       "Hacl.Impl.Chacha20.copy_state",
@@ -1151,7 +1145,7 @@
       1,
       [ "@query" ],
       0,
-      "a3998a9d824a657660feb08501e40338"
+      "269846118c309dac8441eff7055df277"
     ],
     [
       "Hacl.Impl.Chacha20.copy_state",
@@ -1181,7 +1175,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "9b384ec3edeb0fea1f06b6e50ffe69d5"
+      "292c6bf2884bc6dcd1ad2a3dd510f859"
     ],
     [
       "Hacl.Impl.Chacha20.log_t_",
@@ -1199,7 +1193,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "09ca514b7c469b8b6feb2c481210b05f"
+      "44c98ba4c62edad4bf96384ee08d4bf5"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_setup_inj",
@@ -1271,7 +1265,7 @@
         "typing_Spec.Chacha20.setup", "typing_Spec.Lib.uint32s_from_le"
       ],
       0,
-      "5de15aa84c01c921e3613636b352c5f1"
+      "640d59c35b88847251ff6d01e1ec9a7e"
     ],
     [
       "Hacl.Impl.Chacha20.invariant",
@@ -1286,7 +1280,7 @@
         "refinement_interpretation_Hacl.Impl.Chacha20_Tm_refine_e6f73d69171d3f532dd3233ed82d65f8"
       ],
       0,
-      "b21085b5482db70c644a72c57adbace7"
+      "d55c1378192365a2a2fe8b394fc912fe"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_invariant",
@@ -1299,7 +1293,7 @@
         "refinement_interpretation_Spec.Chacha20_Tm_refine_aca10fb50cc7162d8b55c168416f714b"
       ],
       0,
-      "1674d964c77ac782e0577b3d7df275ad"
+      "3c09b184fccb33fb222c604247158609"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_invariant",
@@ -1367,7 +1361,7 @@
         "typing_Spec.Lib.uint32s_from_le"
       ],
       0,
-      "439f7043f3c7a8ac4d6a638d5d80cee2"
+      "0e61b5d4750b74d1a96e57e330185157"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_state_counter",
@@ -1381,7 +1375,7 @@
         "typing_Spec.Chacha20.setup"
       ],
       0,
-      "0f03ae7b825f3179fe3281f8c976e4a6"
+      "ac2f7dd2bd48f35f45f61914e2e835ad"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_state_counter",
@@ -1431,7 +1425,7 @@
         "typing_Spec.Lib.uint32s_from_le"
       ],
       0,
-      "629700d6c75c9bebfc6cc24a2413796a"
+      "9c6cca3d8739526d0ab7fd1f6309943c"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_core",
@@ -1452,7 +1446,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "b0e969898236330670b7e34442c2bdcb"
+      "af1f7a04a03ccfc51e1d3161f291ee7d"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_core",
@@ -1535,7 +1529,7 @@
         "typing_Spec.Lib.uint32s_from_le", "unit_typing"
       ],
       0,
-      "0ea683ebc510d9aec4731a232f7e4a6a"
+      "c963e1d6c8ed72fcddd257a5f718a7c6"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_block",
@@ -1544,7 +1538,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "f78570e9963f98f2315d399cb0ac7a63"
+      "bf45f6768bd31c5a470d5566f8d205af"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_block",
@@ -1652,7 +1646,7 @@
         "typing_Hacl.Impl.Chacha20_Tm_abs_5e0f5fb8323a99ebc91eb20cfa9d640e"
       ],
       0,
-      "c6fdb0e2cf62001b9079aa1a94df7bdf"
+      "76c9f02c21c4388e6bbf1338054acc23"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_block",
@@ -1759,7 +1753,7 @@
         "typing_Hacl.Impl.Chacha20_Tm_abs_5e0f5fb8323a99ebc91eb20cfa9d640e"
       ],
       0,
-      "3602f44cc9c245f7f72f41479b081fad"
+      "0420965d8b0a2649afe4fd0309b04a85"
     ],
     [
       "Hacl.Impl.Chacha20.alloc",
@@ -1768,7 +1762,7 @@
       1,
       [ "@query", "equation_FStar.HyperStack.ST.inline_stack_inv" ],
       0,
-      "0d58b2393fe509c6b3cd4b292cb45c3b"
+      "35febeef546ae23f256454a282b012b2"
     ],
     [
       "Hacl.Impl.Chacha20.init",
@@ -1777,7 +1771,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "35ed4b3d7e173a504f3af41736be8e9f"
+      "510b5a0404c4acabcbc1f1df102c23cf"
     ],
     [
       "Hacl.Impl.Chacha20.init",
@@ -1864,7 +1858,7 @@
         "typing_Spec.Lib.uint32s_from_le"
       ],
       0,
-      "8094c2de4a27902d9bf26507bb3f4902"
+      "9be9ac586ba6d710ee17e139709b9149"
     ],
     [
       "Hacl.Impl.Chacha20.init",
@@ -1951,7 +1945,7 @@
         "typing_Spec.Lib.uint32s_from_le"
       ],
       0,
-      "bc83b8c0e384635b18573c7397a15196"
+      "3699fc0f9aac0bffd8fd5e4e470d89c0"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_1",
@@ -2013,7 +2007,7 @@
         "typing_Spec.Chacha20.chacha20_block"
       ],
       0,
-      "3e0b471f397e325e551bbc69d4f979e1"
+      "12c1e32fbd85c01ac4c1f7b15ee6757c"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_1",
@@ -2102,7 +2096,7 @@
         "typing_Spec.Chacha20.chacha20_block"
       ],
       0,
-      "e245c921ae4a1eb8b522420ef19cefab"
+      "4dab5b8c367b2365e6f9551a35924fa2"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_1",
@@ -2190,7 +2184,7 @@
         "typing_FStar.UInt32.v", "typing_Spec.Chacha20.chacha20_block"
       ],
       0,
-      "d965227bec9a3f77490a55bb33b010df"
+      "440a21b4ba3eea7116131d5b53b3c45a"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_2",
@@ -2275,7 +2269,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "888f44d0dd10f7146fb3618e3631eddf"
+      "53fa3aa166f9f095a5750729674ec976"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_2",
@@ -2358,7 +2352,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "0926badeb11a227c9d0721311607f12d"
+      "f5276d76564bd94f9fdeabbf56dd839b"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_2",
@@ -2433,7 +2427,7 @@
         "typing_FStar.UInt32.v", "typing_Spec.Chacha20.chacha20_block"
       ],
       0,
-      "d117787d21b74333326602e6d919f92f"
+      "51cc293646992d7fa710eeda06c56782"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_0",
@@ -2473,7 +2467,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "2ef8e4c9b5130adcd0fc64afe6380ab7"
+      "de0632fda2112c9e08f56193485389c5"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_0",
@@ -2520,7 +2514,7 @@
         "typing_FStar.Seq.Base.createEmpty", "typing_FStar.UInt32.v"
       ],
       0,
-      "937c5357bb43d6893265a564ad04792e"
+      "ba34f0042119648207110847a1833937"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_0",
@@ -2564,7 +2558,7 @@
         "typing_FStar.Seq.Base.empty", "typing_FStar.UInt32.v"
       ],
       0,
-      "ec06ed1a7eab3b631c5b442028b40ba9"
+      "58dfa143dbf82e9d3979109bbbf76cc5"
     ],
     [
       "Hacl.Impl.Chacha20.update",
@@ -2589,7 +2583,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "8f490b9d47b12ceaf47790821bfd38f4"
+      "0df89911a85917d8284bc53ae8ccff5c"
     ],
     [
       "Hacl.Impl.Chacha20.update",
@@ -2759,7 +2753,7 @@
         "unit_typing"
       ],
       0,
-      "6d9bc0e57f0456ac7ade2ead93bf00f5"
+      "8ad2edcda86116cce30993d248b1b312"
     ],
     [
       "Hacl.Impl.Chacha20.update",
@@ -2929,7 +2923,7 @@
         "unit_typing"
       ],
       0,
-      "a42703d892b884cc70ae93a234336c98"
+      "d78d96c7855778eeb8811b312451d5c6"
     ],
     [
       "Hacl.Impl.Chacha20.update_last",
@@ -2986,7 +2980,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v"
       ],
       0,
-      "cce32beba8c348f7aef282de75aa14ee"
+      "5a8c1aaf7440c4fc2adb558bef701bd5"
     ],
     [
       "Hacl.Impl.Chacha20.update_last",
@@ -3114,7 +3108,7 @@
         "typing_FStar.UInt32.v", "unit_typing"
       ],
       0,
-      "f6a483f8a43cbfad511da4123d7c8469"
+      "636cf6ba373b1a6dda11708a72a2dbfd"
     ],
     [
       "Hacl.Impl.Chacha20.update_last",
@@ -3286,7 +3280,7 @@
         "typing_FStar.UInt32.add", "typing_FStar.UInt32.v", "unit_typing"
       ],
       0,
-      "fe6d3a96e05cc674edf70b41d4639dda"
+      "2aa3aa85d6855a5b17828c97ec26ebc6"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_aux_modifies_2",
@@ -3348,7 +3342,7 @@
         "typing_FStar.Set.union"
       ],
       0,
-      "fcbe97d065d07ccec880b7e6d5a79af3"
+      "2a8f92a383e9a19d980cde1b2300c68b"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_def_0",
@@ -3381,7 +3375,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "908a3bf60779aa934c118a3e83b2238d"
+      "1662868841e4cdb80052b78757511da6"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_def_0",
@@ -3409,7 +3403,7 @@
         "typing_FStar.Seq.Base.createEmpty", "typing_FStar.UInt32.v"
       ],
       0,
-      "cdb71f3d7756b0e36deb81e56b94c11b"
+      "565ae502d3504b56ea9ac478d361a945"
     ],
     [
       "Hacl.Impl.Chacha20.lemma_chacha20_counter_mode_def_0",
@@ -3437,7 +3431,7 @@
         "typing_FStar.Seq.Base.empty", "typing_FStar.UInt32.v"
       ],
       0,
-      "cb8489355d9b28c42db87c1f6868e03c"
+      "3e34db1349aae3ccd1f7f1ffa944915f"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_counter_mode_blocks",
@@ -3483,7 +3477,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "813ee107c16193a7bd50b9f0efc15bfb"
+      "190eee8ec8386c2f3d372f98435f5f12"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_counter_mode_blocks",
@@ -3640,7 +3634,7 @@
         "unit_typing"
       ],
       0,
-      "c2c9528c249685425226986d182291a0"
+      "639c69e58afc44923556dec7e3c12a79"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_counter_mode_blocks",
@@ -3800,7 +3794,7 @@
         "unit_typing"
       ],
       0,
-      "fdc06186d31363034ac8f38fd043338e"
+      "7e56b084f95818f8d2f3ec4d8b3ae946"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_counter_mode",
@@ -3834,7 +3828,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "ab96c5ebfeb8959ceb4b3c2c0b3094a7"
+      "aa3139544f0c4f8dc9fd671b5b0180ee"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_counter_mode",
@@ -3985,7 +3979,7 @@
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v"
       ],
       0,
-      "f304417ab19edc7d17ed7ff7edca5429"
+      "e476eac73aa82fe61dd35f2b7bd4da31"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20_counter_mode",
@@ -4131,7 +4125,7 @@
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v"
       ],
       0,
-      "b8ec50285a2779ef8778f120b3b315bf"
+      "76a4a1ddbe189a0dda90d0a20922804b"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20",
@@ -4173,7 +4167,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "d76eea951b65ca99b0f92ad76558ab51"
+      "3b6c3456454fcac098ec7cff3fbaad40"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20",
@@ -4252,7 +4246,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v", "unit_typing"
       ],
       0,
-      "03138128e1e03182ada0ff973bbe0019"
+      "309ef710272d3e28789595e422e2c32e"
     ],
     [
       "Hacl.Impl.Chacha20.chacha20",
@@ -4344,7 +4338,7 @@
         "unit_typing"
       ],
       0,
-      "d1dcd5b733a4bd22c73cf7c26be15c7a"
+      "f0f251355d6f475620a24274fe381747"
     ]
   ]
 ]

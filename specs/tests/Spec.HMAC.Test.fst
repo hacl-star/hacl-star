@@ -7,7 +7,6 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Spec.Lib.Stateful
 
 module Hash = Spec.Hash
 module HMAC = Spec.HMAC
@@ -411,9 +410,9 @@ let test7_expected512 = List.Tot.map u8_from_UInt8 [
 let test () =
 
   IO.print_string "\nTEST 1\n";
-  let test1_key_len : size_t = 20 in
+  let test1_key_len : size_nat = 20 in
   let test1_key : lbytes test1_key_len = createL test1_key in
-  let test1_data_len : size_t = 8 in
+  let test1_data_len : size_nat = 8 in
   let test1_data : lbytes test1_data_len = createL test1_data in
   let test1_expected224 = createL test1_expected224 in
   let test1_expected256 = createL test1_expected256 in
@@ -479,9 +478,9 @@ let test () =
 
 
   IO.print_string "\nTEST 2\n";
-  let test2_key_len : size_t = List.Tot.length test2_key in
+  let test2_key_len : size_nat = List.Tot.length test2_key in
   let test2_key : lbytes test2_key_len = createL test2_key in
-  let test2_data_len : size_t = List.Tot.length test2_data in
+  let test2_data_len : size_nat = List.Tot.length test2_data in
   let test2_data : lbytes test2_data_len = createL test2_data in
   let test2_expected224 = createL test2_expected224 in
   let test2_expected256 = createL test2_expected256 in
@@ -548,9 +547,9 @@ let test () =
 
 
   IO.print_string "\nTEST 3\n";
-  let test3_key_len : size_t = List.Tot.length test3_key in
+  let test3_key_len : size_nat = List.Tot.length test3_key in
   let test3_key : lbytes test3_key_len = createL test3_key in
-  let test3_data_len : size_t = List.Tot.length test3_data in
+  let test3_data_len : size_nat = List.Tot.length test3_data in
   let test3_data : lbytes test3_data_len = createL test3_data in
   let test3_expected224 = createL test3_expected224 in
   let test3_expected256 = createL test3_expected256 in
@@ -617,9 +616,9 @@ let test () =
 
 
   IO.print_string "\nTEST 4\n";
-  let test4_key_len : size_t = List.Tot.length test4_key in
+  let test4_key_len : size_nat = List.Tot.length test4_key in
   let test4_key : lbytes test4_key_len = createL test4_key in
-  let test4_data_len : size_t = List.Tot.length test4_data in
+  let test4_data_len : size_nat = List.Tot.length test4_data in
   let test4_data : lbytes test4_data_len = createL test4_data in
   let test4_expected224 = createL test4_expected224 in
   let test4_expected256 = createL test4_expected256 in
@@ -686,9 +685,9 @@ let test () =
 
 
   IO.print_string "\nTEST 5\n";
-  let test5_key_len : size_t = List.Tot.length test5_key in
+  let test5_key_len : size_nat = List.Tot.length test5_key in
   let test5_key : lbytes test5_key_len = createL test5_key in
-  let test5_data_len : size_t = List.Tot.length test5_data in
+  let test5_data_len : size_nat = List.Tot.length test5_data in
   let test5_data : lbytes test5_data_len = createL test5_data in
   let test5_expected224 : lbytes 16 = createL test5_expected224 in
   let test5_expected256 : lbytes 16 = createL test5_expected256 in
@@ -763,9 +762,9 @@ let test () =
 
 
   IO.print_string "\nTEST 6\n";
-  let test6_key_len : size_t = List.Tot.length test6_key in
+  let test6_key_len : size_nat = List.Tot.length test6_key in
   let test6_key : lbytes test6_key_len = createL test6_key in
-  let test6_data_len : size_t = List.Tot.length test6_data in
+  let test6_data_len : size_nat = List.Tot.length test6_data in
   let test6_data : lbytes test6_data_len = createL test6_data in
   let test6_expected224 = createL test6_expected224 in
   let test6_expected256 = createL test6_expected256 in
@@ -832,9 +831,9 @@ let test () =
 
 
   IO.print_string "\nTEST 7\n";
-  let test7_key_len : size_t = List.Tot.length test7_key in
+  let test7_key_len : size_nat = List.Tot.length test7_key in
   let test7_key : lbytes test7_key_len = createL test7_key in
-  let test7_data_len : size_t = List.Tot.length test7_data in
+  let test7_data_len : size_nat = List.Tot.length test7_data in
   let test7_data : lbytes test7_data_len = createL test7_data in
   let test7_expected224 = createL test7_expected224 in
   let test7_expected256 = createL test7_expected256 in

@@ -7,7 +7,6 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Spec.Lib.Stateful
 
 module Hash = Spec.Hash
 module HMAC = Spec.HMAC
@@ -164,15 +163,15 @@ let test3_expected_okm = List.Tot.map u8_from_UInt8 [
 let test () =
 
   IO.print_string "\nTEST 1\n";
-  let test1_ikm_len : size_t = List.Tot.length test1_ikm in
+  let test1_ikm_len : size_nat = List.Tot.length test1_ikm in
   let test1_ikm : lbytes test1_ikm_len = createL test1_ikm in
-  let test1_salt_len :size_t = List.Tot.length test1_salt in
+  let test1_salt_len :size_nat = List.Tot.length test1_salt in
   let test1_salt : lbytes test1_salt_len = createL test1_salt in
-  let test1_info_len : size_t = List.Tot.length test1_info in
+  let test1_info_len : size_nat = List.Tot.length test1_info in
   let test1_info : lbytes test1_info_len = createL test1_info in
-  let test1_expected_prk_len : size_t = List.Tot.length test1_expected_prk in
+  let test1_expected_prk_len : size_nat = List.Tot.length test1_expected_prk in
   let test1_expected_prk : lbytes test1_expected_prk_len = createL test1_expected_prk in
-  let test1_expected_okm_len : size_t = List.Tot.length test1_expected_okm in
+  let test1_expected_okm_len : size_nat = List.Tot.length test1_expected_okm in
   let test1_expected_okm : lbytes test1_expected_okm_len = createL test1_expected_okm in
   let test1_prk : lbytes test1_expected_prk_len =
     HKDF.hkdf_extract test1_hash test1_salt_len test1_salt test1_ikm_len test1_ikm in
@@ -195,15 +194,15 @@ let test () =
   else IO.print_string "HKDF Expand: Failure :(\n";
 
   IO.print_string "\nTEST 2\n";
-  let test2_ikm_len : size_t = List.Tot.length test2_ikm in
+  let test2_ikm_len : size_nat = List.Tot.length test2_ikm in
   let test2_ikm : lbytes test2_ikm_len = createL test2_ikm in
-  let test2_salt_len :size_t = List.Tot.length test2_salt in
+  let test2_salt_len :size_nat = List.Tot.length test2_salt in
   let test2_salt : lbytes test2_salt_len = createL test2_salt in
-  let test2_info_len : size_t = List.Tot.length test2_info in
+  let test2_info_len : size_nat = List.Tot.length test2_info in
   let test2_info : lbytes test2_info_len = createL test2_info in
-  let test2_expected_prk_len : size_t = List.Tot.length test2_expected_prk in
+  let test2_expected_prk_len : size_nat = List.Tot.length test2_expected_prk in
   let test2_expected_prk : lbytes test2_expected_prk_len = createL test2_expected_prk in
-  let test2_expected_okm_len : size_t = List.Tot.length test2_expected_okm in
+  let test2_expected_okm_len : size_nat = List.Tot.length test2_expected_okm in
   let test2_expected_okm : lbytes test2_expected_okm_len = createL test2_expected_okm in
   let test2_prk : lbytes test2_expected_prk_len =
     HKDF.hkdf_extract test2_hash test2_salt_len test2_salt test2_ikm_len test2_ikm in
@@ -227,15 +226,15 @@ let test () =
 
 
   IO.print_string "\nTEST 3\n";
-  let test3_ikm_len : size_t = List.Tot.length test3_ikm in
+  let test3_ikm_len : size_nat = List.Tot.length test3_ikm in
   let test3_ikm : lbytes test3_ikm_len = createL test3_ikm in
-  let test3_salt_len :size_t = List.Tot.length test3_salt in
+  let test3_salt_len :size_nat = List.Tot.length test3_salt in
   let test3_salt : lbytes test3_salt_len = createL test3_salt in
-  let test3_info_len : size_t = List.Tot.length test3_info in
+  let test3_info_len : size_nat = List.Tot.length test3_info in
   let test3_info : lbytes test3_info_len = createL test3_info in
-  let test3_expected_prk_len : size_t = List.Tot.length test3_expected_prk in
+  let test3_expected_prk_len : size_nat = List.Tot.length test3_expected_prk in
   let test3_expected_prk : lbytes test3_expected_prk_len = createL test3_expected_prk in
-  let test3_expected_okm_len : size_t = List.Tot.length test3_expected_okm in
+  let test3_expected_okm_len : size_nat = List.Tot.length test3_expected_okm in
   let test3_expected_okm : lbytes test3_expected_okm_len = createL test3_expected_okm in
   let test3_prk : lbytes test3_expected_prk_len =
     HKDF.hkdf_extract test3_hash test3_salt_len test3_salt test3_ikm_len test3_ikm in

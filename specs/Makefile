@@ -6,6 +6,10 @@ FSTAR_INCLUDES+=--include $(HACL_HOME)/lib --include $(HACL_HOME)/lib/fst --incl
 
 SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Poly1305.fst \
+		Spec.AES.fst \
+		Spec.AESGCM.fst \
+		Spec.Chacha20.fst \
+		Spec.Chacha20Poly1305.fst \
 		Spec.CTR.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.Curve25519.fst \
@@ -114,16 +118,16 @@ aes.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst tests/Spec
 
 aesgcm.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst Spec.GF128.fst Spec.AESGCM.fst tests/Spec.AESGCM.Test.fst
 	mkdir -p aesgcm-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --extract_module Spec.AESGCM  --extract_module Spec.AESGCM.Test --extract_module Spec.GF128 --odir aesgcm-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --extract_module Spec.AESGCM  --extract_module Spec.AESGCM.Test --extract_module Spec.GF128 --odir aesgcm-ml $^
 	@echo 'let _ = test()' >> aesgcm-ml/Spec_AESGCM_Test.ml
-	$(OCAMLOPT) -I aesgcm-ml $(OCAML_INCLUDES) aesgcm-ml/Lib_IntTypes.ml aesgcm-ml/Lib_Sequence.ml aesgcm-ml/Spec_GaloisField.ml aesgcm-ml/Spec_CTR.ml aesgcm-ml/Spec_AES.ml aesgcm-ml/Spec_GF128.ml aesgcm-ml/Spec_AESGCM.ml aesgcm-ml/Spec_AESGCM_Test.ml -o aesgcm.exe
+	$(OCAMLOPT) -I aesgcm-ml $(OCAML_INCLUDES) aesgcm-ml/Lib_IntTypes.ml aesgcm-ml/Lib_Sequence.ml aesgcm-ml/Lib_ByteSequence.ml aesgcm-ml/Spec_GaloisField.ml aesgcm-ml/Spec_CTR.ml aesgcm-ml/Spec_AES.ml aesgcm-ml/Spec_GF128.ml aesgcm-ml/Spec_AESGCM.ml aesgcm-ml/Spec_AESGCM_Test.ml -o aesgcm.exe
 	./aesgcm.exe
 
 curve25519.exe: $(LIBS_FILES) Spec.Curve25519.fst tests/Spec.Curve25519.Test.fst
 	mkdir -p curve25519-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Curve25519 --extract_module Spec.Curve25519.Test --odir curve25519-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence  --extract_module Lib.ByteSequence --extract_module Spec.Curve25519 --extract_module Spec.Curve25519.Test --odir curve25519-ml $^
 	@echo 'let _ = test()' >> curve25519-ml/Spec_Curve25519_Test.ml
-	$(OCAMLOPT) -I curve25519-ml curve25519-ml/Lib_IntTypes.ml curve25519-ml/Lib_Sequence.ml curve25519-ml/Spec_Curve25519.ml curve25519-ml/Spec_Curve25519_Test.ml -o curve25519.exe
+	$(OCAMLOPT) -I curve25519-ml curve25519-ml/Lib_IntTypes.ml curve25519-ml/Lib_Sequence.ml curve25519-ml/Lib_ByteSequence.ml curve25519-ml/Spec_Curve25519.ml curve25519-ml/Spec_Curve25519_Test.ml -o curve25519.exe
 	./curve25519.exe
 
 
@@ -190,18 +194,18 @@ argon2i.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Argon2i.fst tes
 	./argon2i.exe
 
 
-hmac.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
+hmac.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
 	mkdir -p hmac-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
 	@echo 'let _ = test()' >> hmac-ml/Spec_HMAC_Test.ml
-	$(OCAMLOPT) -I hmac-ml hmac-ml/Lib_IntTypes.ml hmac-ml/Lib_RawIntTypes.ml hmac-ml/Lib_Sequence.ml hmac-ml/Lib_Stateful.ml hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Hash.ml hmac-ml/Spec_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
+	$(OCAMLOPT) -I hmac-ml hmac-ml/Lib_IntTypes.ml hmac-ml/Lib_RawIntTypes.ml hmac-ml/Lib_Sequence.ml hmac-ml/Lib_ByteSequence.ml hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Hash.ml hmac-ml/Spec_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
 	./hmac.exe
 
-hkdf.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst tests/Spec.HKDF.Test.fst
+hkdf.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst tests/Spec.HKDF.Test.fst
 	mkdir -p hkdf-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HKDF --extract_module Spec.HKDF.Test --odir hkdf-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HKDF --extract_module Spec.HKDF.Test --odir hkdf-ml $^
 	@echo 'let _ = test()' >> hkdf-ml/Spec_HKDF_Test.ml
-	$(OCAMLOPT) -I hkdf-ml hkdf-ml/Lib_IntTypes.ml hkdf-ml/Lib_RawIntTypes.ml hkdf-ml/Lib_Sequence.ml hkdf-ml/Lib_Stateful.ml hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Hash.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
+	$(OCAMLOPT) -I hkdf-ml hkdf-ml/Lib_IntTypes.ml hkdf-ml/Lib_RawIntTypes.ml hkdf-ml/Lib_Sequence.ml hkdf-ml/Lib_ByteSequence.ml hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Hash.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
 	./hkdf.exe
 
 pbkdf2.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.PBKDF2.fst tests/Spec.PBKDF2.Test.fst
@@ -211,20 +215,29 @@ pbkdf2.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Ha
 	$(OCAMLOPT) -I pbkdf2-ml $(OCAML_INCLUDES) pbkdf2-ml/Lib_IntTypes.ml pbkdf2-ml/Lib_RawIntTypes.ml pbkdf2-ml/Lib_Sequence.ml pbkdf2-ml/Lib_Stateful.ml pbkdf2-ml/Spec_SHA2.ml pbkdf2-ml/Spec_Hash.ml pbkdf2-ml/Spec_HMAC.ml pbkdf2-ml/Spec_PBKDF2.ml pbkdf2-ml/Spec_PBKDF2_Test.ml -o pbkdf2.exe
 	./pbkdf2.exe
 
-
-network.exe: $(LIBS_FILES) tests/Spec.Network.Test.fst
-	mkdir -p network-ml
-	$(FSTAR) --include lib --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Network.Test --odir network-ml $^
-	@echo 'let _ = test()' >> network-ml/Spec_Network_Test.ml
-	$(OCAMLOPT) -I network-ml -I ../lib/ml ../lib/ml/Lib_IO_Tcp.ml network-ml/Lib_IntTypes.ml network-ml/Lib_RawIntTypes.ml network-ml/Lib_Sequence.ml network-ml/Spec_Network_Test.ml -o network.exe
-	./network.exe
-
 rsapss.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
 	mkdir -p rsapss-ml
 	$(FSTAR)  --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes  --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.RSAPSS --extract_module Spec.RSAPSS.Test --odir rsapss-ml $^
 	@echo 'let _ = test()' >> rsapss-ml/Spec_RSAPSS_Test.ml
 	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) rsapss-ml/Lib_IntTypes.ml rsapss-ml/Lib_RawIntTypes.ml rsapss-ml/Lib_Sequence.ml rsapss-ml/Lib_Stateful.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
 	./rsapss.exe
+
+
+
+random.exe: $(LIBS_FILES) Spec.Random.fst tests/Spec.Random.Test.fst
+	$(MAKE) build -C external
+	mkdir -p random-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Random --extract_module Spec.Random.Test --odir random-ml $^
+	@echo 'let _ = test()' >> random-ml/Spec_Random_Test.ml
+	$(OCAMLOPT) -package cryptokit -I external -I random-ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_Sequence.ml random-ml/Lib_ByteSequence.ml external/Spec_Random.ml random-ml/Spec_Random_Test.ml -o random.exe
+	./random.exe
+
+network.exe: $(LIBS_FILES) tests/Spec.Network.Test.fst
+	mkdir -p network-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Network.Test --odir network-ml $^
+	@echo 'let _ = test()' >> network-ml/Spec_Network_Test.ml
+	$(OCAMLOPT) -I network-ml -I ../lib/ml ../lib/ml/Lib_IO_Tcp.ml network-ml/Lib_IntTypes.ml network-ml/Lib_RawIntTypes.ml network-ml/Lib_Sequence.ml network-ml/Spec_Network_Test.ml -o network.exe
+	./network.exe
 
 
 clean:

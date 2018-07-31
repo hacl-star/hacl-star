@@ -42,7 +42,7 @@ typedef struct quic_key quic_key;
 // (5) erase all secrets used for derivation.
 
 // con_id must be 8 bytes, salt must be the version-specific 20 bytes initial salt
-int MITLS_CALLCONV quic_derive_handshake_secrets(/*out*/ quic_secret *client_hs, /*out*/ quic_secret *server_hs, const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len);
+int MITLS_CALLCONV quic_derive_initial_secrets(/*out*/ quic_secret *client_in, /*out*/ quic_secret *server_in, const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len, uint8_t is_draft13);
 int MITLS_CALLCONV quic_crypto_tls_derive_secret(/*out*/ quic_secret *derived, const quic_secret *secret, const char *label);
 int MITLS_CALLCONV quic_crypto_derive_key(/*out*/quic_key **key, const quic_secret *secret);
 

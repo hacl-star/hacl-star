@@ -28,12 +28,12 @@ let state alg = b:B.pointer (state_s alg) { B.freeable b }
 // do partial applications in pre- and post-conditions
 val footprint_s: #a:e_alg -> state_s a -> GTot M.loc
 let footprint (#a: e_alg) (s: state a) (m: HS.mem) =
-  M.(loc_union (loc_buffer s) (footprint_s (B.deref m s)))
+  M.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
 
 val invariant_s: (#a: e_alg) -> state_s a -> HS.mem -> Type0
 let invariant (#a: e_alg) (s: state a) (m: HS.mem) =
   B.live m s /\
-  M.(loc_disjoint (loc_buffer s) (footprint_s (B.deref m s))) /\
+  M.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
   invariant_s (B.get m s 0) m
 
 let type_of alg =
@@ -218,6 +218,7 @@ val update_multi: #a:e_alg -> s:state a -> data:uint8_p -> n:UInt32.t -> Stack u
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     well_formed_and_counter s h1 0 /\
+    Seq.length (B.as_seq h0 data) % block_size a = 0 /\
     update_multi_spec s h0 h1 (B.as_seq h0 data)))
 
 // The maximum number of bytes for the input.
@@ -243,6 +244,7 @@ let last_data_fits (a: e_alg) (length: nat): GTot _ =
 
 // Note: conjunction of well_formed and last_data_fits allows deriving the
 // specific precondition for update_last.
+#push-options "--z3rlimit 10"
 let update_last_spec (#a:e_alg)
   (s:state a)
   (h0: HS.mem{invariant s h0})
@@ -254,11 +256,14 @@ let update_last_spec (#a:e_alg)
   let r1 = repr s h1 in
   let counter0 = r0.counter in
   let len0 = counter0 * block_size a in
-  match G.reveal a with
-  | SHA256 ->
+  len0 % (block_size a) == 0 /\ (
+    match G.reveal a with
+    | SHA256 ->
       r1.hash = EverCrypt.Spec.SHA2_256.update_last r0.hash len0 data
-  | SHA384 ->
+    | SHA384 ->
       r1.hash = EverCrypt.Spec.SHA2_384.update_last r0.hash len0 data
+  )
+#pop-options
 
 val update_last: #a:e_alg -> s:state a -> data:uint8_p -> len:UInt32.t -> Stack unit
   (requires (fun h0 ->
@@ -306,7 +311,7 @@ val finish: #a:e_alg -> s:state a -> dst:uint8_p -> Stack unit
     footprint s h0 == footprint s h1 /\
     finish_spec s h0 (B.as_seq h1 dst)))
 
-val free: #a:e_alg -> s:state a -> Stack unit
+val free: #a:e_alg -> s:state a -> ST unit
   (requires (fun h0 ->
     invariant s h0))
   (ensures (fun h0 _ h1 ->
