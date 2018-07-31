@@ -93,11 +93,17 @@ let rec repeat_range_ghost_ #a min max f x =
   if min = max then x
   else repeat_range_ghost_ #a (incr min) max f (f min x)
 
+val repeat_range_all_ml_: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (s:size_nat{s >= min /\ s < max} -> a -> FStar.All.ML a) -> a -> FStar.All.ML a
+let rec repeat_range_all_ml_ #a min max f x =
+  if min = max then x
+  else repeat_range_all_ml_ #a (incr min) max f (f min x)
 
 let repeat_range = repeat_range_
 let repeat_range_ghost = repeat_range_ghost_
+let repeat_range_all_ml = repeat_range_all_ml_
 let repeati #a = repeat_range #a 0
 let repeati_ghost #a = repeat_range_ghost #a 0
+let repeati_all_ml #a = repeat_range_all_ml #a 0
 let repeat #a n f x = repeat_range 0 n (fun i -> f) x
 
 
@@ -180,21 +186,21 @@ let rec concat #a #len1 #len2 s1 s2 =
   | [] -> s2
   | h :: t -> h :: (concat #a #(len1 - 1) #len2 t s2)
 
-let map_blocks #a bs nb f inp = 
+let map_blocks #a bs nb f inp =
   let len = nb * bs in
   let out = inp in
   let out = repeati #(lseq a len) nb
-	    (fun i out ->  
+	    (fun i out ->
 	         update_slice #a out (i * bs) ((i+1) * bs)
 			      (f i (slice #a inp (i * bs) ((i+1) * bs))))
 	    out in
   out
 
-let reduce_blocks #a #b bs nb f inp init = 
+let reduce_blocks #a #b bs nb f inp init =
   let len = nb * bs in
   let acc = init in
   let acc = repeati #b nb
-	    (fun i acc ->   
+	    (fun i acc ->
 	       f i (slice #a inp (i * bs) ((i+1) * bs)) acc)
 	    acc in
   acc
@@ -203,11 +209,11 @@ let reduce_blocks #a #b bs nb f inp init =
 (*
 #reset-options "--z3rlimit 400 --max_fuel 0"
 
-let reduce_blocks #a #b bs inp f g init = 
-  let len = length inp in 
+let reduce_blocks #a #b bs inp f g init =
+  let len = length inp in
   let blocks = len / bs in
   let rem = len % bs in
-  let acc = repeati #b blocks 
+  let acc = repeati #b blocks
 	       (fun i acc -> f i (slice (to_lseq inp) (i * bs) ((i+1) * bs)) acc)
 	    init in
   let acc = g blocks rem (sub (to_lseq inp) (blocks * bs) rem) acc in

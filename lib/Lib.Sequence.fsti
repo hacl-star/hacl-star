@@ -68,6 +68,7 @@ val repeat_range: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size
 
 (* BB: I think, this might not be necessary *)
 val repeat_range_ghost: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> GTot a) -> a -> GTot (a)
+val repeat_range_all_ml: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> FStar.All.ML a) -> a -> FStar.All.ML (a)
 
 val repeati: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> Tot a) -> a -> Tot (a)
 
