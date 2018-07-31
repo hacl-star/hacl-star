@@ -202,7 +202,7 @@ assume val lemma_uint_to_bytes_le:
     (forall (i:nat{i < numbytes t}).
       index (uint_to_bytes_le #t u) i == u8 (uint_v u / pow2 (8 * i) % pow2 8))
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims +FStar.Pervasives +Spec.Frodo.Encode +Lib.Sequence +Lib.IntTypes +Spec.Frodo.Params'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.Pervasives Spec.Frodo.Encode Lib.Sequence Lib.IntTypes Spec.Frodo.Params'"
 
 val frodo_key_decode2:
     b:size_nat{b <= 8}
@@ -220,8 +220,6 @@ let frodo_key_decode2 b a i res0 =
   assert (forall (k:size_nat{k < b}). res.[i * b + k] == tmp.[k]);
   res
 
-#reset-options "--z3rlimit 50 --max_fuel  0"
-
 val frodo_key_decode:
     b:size_nat{b <= 8}
   -> a:matrix params_nbar params_nbar
@@ -230,7 +228,6 @@ val frodo_key_decode:
 let frodo_key_decode b a =
   let resLen = params_nbar * params_nbar * b / 8 in
   let res = Seq.create resLen (u8 0) in
-
   repeati_inductive params_nbar
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (k:size_nat{k < b}). res.[i0 * b + k] == frodo_key_decode_fc b a i0 k)
