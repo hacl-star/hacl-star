@@ -32,10 +32,10 @@ type bytes = B.buffer byte
 type lbytes l = b:bytes {length b = l} 
 let v (x:UInt32.t) : nat  = UInt32.v x
 
-(* Parameters for AES-256 *)
+(* Parameters for AES-128 *)
 private inline_for_extraction let nb =  4ul 
-private inline_for_extraction let nk =  8ul // 4, 6, or 8
-private inline_for_extraction let nr = 14ul // 10, 12, or 14
+private inline_for_extraction let nk =  4ul // 4, 6, or 8
+private inline_for_extraction let nr = 10ul // 10, 12, or 14
 
 private inline_for_extraction let blocklen = U32.(4ul *^ nb)
 private inline_for_extraction let keylen   = U32.(4ul *^ nk)

@@ -64,7 +64,7 @@ val curve25519_verify:
   msg:uint8_p ->
   len:UInt32.t{length msg = UInt32.v len /\ length msg < pow2 32 - 64} ->
   signature:uint8_p{length signature = 64} ->
-  Stack bool
+  Stack UInt32.t
     (requires (fun h -> live h key /\ live h msg /\ live h signature))
     (ensures (fun h0 b h1 -> live h0 key /\ live h0 msg /\ live h0 signature /\
       modifies_0 h0 h1))

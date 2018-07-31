@@ -4,13 +4,6 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 
-// FIPS197 ?
-// TODO factor it out in terms of https://en.wikipedia.org/wiki/AES_instruction_set
-// see also https://software.intel.com/sites/default/files/article/165683/aes-wp-2012-09-22-v01.pdf
-
-// TODO this is AES256; 
-// we also need AES128 (nk=4ul, nr=10) and maybe AES192 (nk=6ul,nr=12).
-
 open FStar.Mul
 open FStar.Ghost
 open FStar.HyperStack
@@ -42,7 +35,7 @@ val cbc_encrypt_blocks: out:bytes -> kex:xkey -> prev:block -> msg:bytes{B.lengt
     (requires (fun h0 -> True))
     (ensures (fun h0 _ h1 -> True))
 let rec cbc_encrypt_blocks out kex prev msg len curr tmp = 
-  if curr <> len then ()
+  if curr = len then ()
   else 
     let mblock = B.sub msg curr 16ul in
     let oblock = B.sub out curr 16ul in

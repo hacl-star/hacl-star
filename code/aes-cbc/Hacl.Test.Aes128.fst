@@ -17,11 +17,11 @@ let main () =
 [0x00uy;0x01uy;0x02uy;0x03uy;0x04uy;0x05uy;0x06uy;0x07uy;0x08uy;0x09uy;0x0Auy;0x0Buy;0x0Cuy;0x0Duy;0x0Euy;0x0Fuy] in
   let cip = alloca_of_list
 [0x76uy;0x49uy;0xabuy;0xacuy;0x81uy;0x19uy;0xb2uy;0x46uy;0xceuy;0xe9uy;0x8euy;0x9buy;0x12uy;0xe9uy;0x19uy;0x7duy] in
-  let comp = alloca 0uy 32ul in
+  let comp = alloca 0uy 16ul in
   Hacl.Aes128.aes128_cbc_encrypt comp key iv input 16ul;
   C.String.(print (of_literal "computed aes-cbc:\n"));
-  C.print_bytes comp 32ul;
+  C.print_bytes comp 16ul;
   C.String.(print (of_literal "\nexpected aes-cbc:\n"));
-  C.print_bytes cip 32ul;
+  C.print_bytes cip 16ul;
   pop_frame();
   C.EXIT_SUCCESS

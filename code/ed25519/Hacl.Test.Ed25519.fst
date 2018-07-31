@@ -269,7 +269,7 @@ let main () =
   Hacl.Ed25519.curve25519_secret_to_public pk' sk';
   
   let res = Ed25519.curve25519_verify pk' msg' 12ul sig' in
-  if res then C.String.(print (of_literal "passed verify \n"))
+  if res = 1ul then C.String.(print (of_literal "passed verify \n"))
   else C.String.(print (of_literal "failed verify \n"));
   Ed25519.curve25519_sign sig'' sk' msg' 12ul;
   TestLib.compare_and_print (C.String.of_literal "Ed25519 sig_modified") sig' sig'' 64ul;

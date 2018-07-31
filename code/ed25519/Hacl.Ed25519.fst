@@ -14,7 +14,8 @@ let curve25519_sign signature secret msg len =
   Hacl.Impl.Ed25519.Sign.curve25519_sign signature secret msg len
 
 let curve25519_verify key msg len signature =
-  Hacl.Impl.Ed25519.Verify.curve25519_verify key msg len signature
+  let res = Hacl.Impl.Ed25519.Verify.curve25519_verify key msg len signature in
+  if res then 1ul else 0ul
 
 let curve25519_secret_to_public pk sk = 
   push_frame();
