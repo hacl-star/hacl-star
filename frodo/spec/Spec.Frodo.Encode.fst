@@ -232,5 +232,7 @@ let frodo_key_decode b a =
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (k:size_nat{k < b}). res.[i0 * b + k] == frodo_key_decode_fc b a i0 k)
   (fun i res ->
-      frodo_key_decode2 b a i res
+      // Don't remove. Not a useless let
+      let res = frodo_key_decode2 b a i res in
+      res
   ) res
