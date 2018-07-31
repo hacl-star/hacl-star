@@ -1,4 +1,4 @@
-module Hacl.Impl.Aes128
+module Hacl.Impl.Aes
 
 module ST = FStar.HyperStack.ST
 

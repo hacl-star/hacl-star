@@ -1,4 +1,4 @@
-module Hacl.Aes128
+module Hacl.AesCBC
 
 module ST = FStar.HyperStack.ST
 
@@ -20,7 +20,7 @@ module U32 = FStar.UInt32
 module H8  = FStar.UInt8
 module H32  = FStar.UInt32
 
-open Hacl.Impl.Aes128
+open Hacl.Impl.Aes
 
 val xor_block: out:block -> in1:block -> in2:block -> start:U32.t{U32.v start <= 16} -> Stack unit
     (requires (fun h0 -> True))
@@ -51,7 +51,7 @@ let rec pad tmp b idx =
     if idx = 16ul then ()
     else (tmp.(idx) <- b; pad tmp b U32.(idx +^ 1ul))
     
-let aes128_cbc_encrypt out key iv msg msglen = 
+let aes256_cbc_encrypt out key iv msg msglen = 
   push_frame();
   assert (U32.v 16ul <> 0);
   let fullblocks = U32.((msglen /^ 16ul) *^ 16ul) in
@@ -87,7 +87,7 @@ let rec cbc_decrypt_blocks out kex prev cip len curr tmp =
     xor_block oblock tmp prev 0ul;
     cbc_decrypt_blocks out kex cblock cip len U32.(curr +^ 16ul) tmp
   )
-let aes128_cbc_decrypt out key iv cip ciplen = 
+let aes256_cbc_decrypt out key iv cip ciplen = 
   push_frame();
   assert (U32.v 16ul <> 0);
   let fullblocks = U32.(ciplen -^ 16ul) in
@@ -108,6 +108,8 @@ let aes128_cbc_decrypt out key iv cip ciplen =
   let final = U32.(16ul -^ (uint8_to_uint32 pad)) in
   let out2 = B.sub out fullblocks final in
   blit otmp 0ul out2 0ul final;
-  pop_frame()
+  pop_frame();
+  U32.(fullblocks +^ final)
+
   
 

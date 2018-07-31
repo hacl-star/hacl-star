@@ -1,8 +1,8 @@
 include ../../Makefile.include
 
-AES_FILES=  Hacl.Impl.Aes128.fst \
-	Hacl.Test.Aes128.fst \
-	Hacl.Aes128.fst
+AES_FILES=  Hacl.Impl.Aes.fst \
+	Hacl.Test.AesCBC.fst \
+	Hacl.AesCBC.fst
 
 # Files that are too slow and for which verification speed must improve
 SLOW=
@@ -39,30 +39,30 @@ specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(AES_FILES)))
 ci: bignum-ci specific-ci
 all-ci: ci
 
-KREMLIN_ARGS=-I $(HACL_KREMLIN) -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -tmpdir aes128-c \
+KREMLIN_ARGS=-I $(HACL_KREMLIN) -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -tmpdir aescbc-c \
 		-I ../bignum -I ../curve25519 -I ../hash \
 
-aes128-c/out.krml: $(AES_FILES)
+aescbc-c/out.krml: $(AES_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) $(AES_FILES) -skip-translation
 
-aes128-c/Hacl_Aes128.c: aes128-c/out.krml
+aescbc-c/Hacl_AesCBC.c: aescbc-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Aes128=*'
+	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.AesCBC=*'
 
-extract-c: aes128-c/Hacl_Aes128.c
+extract-c: aescbc-c/Hacl_AesCBC.c
 
-aes128.exe: aes128-c/Hacl_Aes128.c aes128-c/out.krml
+aescbc.exe: aescbc-c/Hacl_AesCBC.c aescbc-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) \
-	  -no-prefix 'Hacl.Test.Aes128' -minimal -add-include '"kremlib.h"' \
-	  -bundle 'Hacl.Test.Aes128=*' -library Hacl.Aes128 \
+	  -no-prefix 'Hacl.Test.AesCBC' -minimal -add-include '"kremlib.h"' \
+	  -bundle 'Hacl.Test.AesCBC=*' -library Hacl.AesCBC \
 	  $^ -o $@
 
 
-test: aes128.exe
+test: aescbc.exe
 	./$^
 
 count-line:
-	cloc --force-lang=ocaml $(AES128_FILES)
+	cloc --force-lang=ocaml $(AES_FILES)
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ aes128-c *.graph
+	rm -rf *.exe *.exe.* *.out *~ aescbc-c *.graph
