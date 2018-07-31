@@ -43,8 +43,8 @@ ROOTS = Spec.Frodo.Test.fst
 include .depend
 
 # Admit SMT queries for modules in FStar namespace
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/Prims.%.checked: | .depend
-	$(FSTAR) --admit_smt_queries true $< && \
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
 # We need this because F* can't take duplicate modules in the command line
@@ -102,4 +102,4 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	rm -rf $(OUT_DIR) $(CACHE_DIR)
+	rm -rf $(CACHE_DIR)
