@@ -392,7 +392,7 @@ private let fcontract_store output input =
   (* UInt.logor_disjoint (v (t4 <<^ 12ul)) (v (t3 >>^ 39ul)) 12; *)
   
 
-private val fcontract: output:uint8_p{length output = 32} -> input:felem{disjoint output input} -> Stack unit
+val fcontract: output:uint8_p{length output = 32} -> input:felem{disjoint output input} -> Stack unit
   (requires (fun h -> Buffer.live h output /\ Buffer.live h input
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h input)))
   (ensures (fun h0 _ h1 -> Buffer.live h0 output /\ Buffer.live h0 input
@@ -400,7 +400,7 @@ private val fcontract: output:uint8_p{length output = 32} -> input:felem{disjoin
     /\ Hacl.Spec.EC.AddAndDouble.red_513 (as_seq h0 input)
     /\ as_seq h1 output == Hacl.Spec.EC.Format.fcontract_spec (as_seq h0 input)
   ))
-private let fcontract output input =
+let fcontract output input =
   fcontract_first_carry_full input;
   fcontract_second_carry_full input;
   fcontract_trim input;

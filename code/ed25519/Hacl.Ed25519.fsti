@@ -47,3 +47,24 @@ val secret_to_public:
     (requires (fun h -> live h output /\ live h secret))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 secret /\ live h1 output /\ modifies_1 output h0 h1 /\
       as_seq h1 output == Spec.Ed25519.secret_to_public h0.[secret]))
+
+
+val curve25519_sign:
+  signature:hint8_p{length signature = 64} ->
+  secret:hint8_p{length secret = 32} ->
+  msg:hint8_p{length msg < pow2 32 - 64} ->
+  len:UInt32.t{UInt32.v len = length msg} ->
+  Stack unit
+    (requires (fun h -> live h signature /\ live h msg /\ live h secret))
+    (ensures (fun h0 _ h1 -> live h0 signature /\ live h0 msg /\ live h0 secret /\
+      live h1 signature /\ modifies_1 signature h0 h1))
+
+val curve25519_verify:
+  key:uint8_p{length key = 32} ->
+  msg:uint8_p ->
+  len:UInt32.t{length msg = UInt32.v len /\ length msg < pow2 32 - 64} ->
+  signature:uint8_p{length signature = 64} ->
+  Stack bool
+    (requires (fun h -> live h key /\ live h msg /\ live h signature))
+    (ensures (fun h0 b h1 -> live h0 key /\ live h0 msg /\ live h0 signature /\
+      modifies_0 h0 h1))

@@ -187,3 +187,28 @@ val verify:
       z == Spec.Ed25519.(verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature))))
 let verify public msg len signature =
   verify_ public msg len signature
+
+let curve25519_verify public msg len signature = 
+  push_frame ();
+  let x = create 0uL 5ul in
+  let xp1 = create 0uL 5ul in
+  let xm1 = create 0uL 5ul in
+  let xinv = create 0uL 5ul in
+  let one = create 0uL 5ul in
+  let ed_y = create 0uL 5ul in
+  let edpub = create 0uy 32ul in
+  one.(0ul) <- 1uL;
+  Hacl.EC.Format.fexpand x public;
+  Buffer.blit x 0ul xm1 0ul 5ul;
+  Hacl.Bignum25519.fdifference xm1 one;
+  Buffer.blit x 0ul xp1 0ul 5ul;
+  Hacl.Bignum25519.fsum xp1 one;
+  Hacl.Bignum25519.inverse xinv xp1;
+  Hacl.Bignum25519.fmul ed_y xm1 xinv;
+  Hacl.EC.Format.fcontract edpub ed_y;
+  edpub.(31ul) <- FStar.UInt8.(edpub.(31ul) |^ (signature.(63ul)  &^ 0x80uy));
+//  signature.(63ul) <- FStar.UInt8.(signature.(63ul) &^ 0x7Fuy);
+  let b = verify edpub msg len signature in
+  pop_frame();
+  b
+  

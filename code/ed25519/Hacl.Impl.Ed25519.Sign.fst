@@ -201,3 +201,38 @@ val sign:
 
 let sign signature secret msg len =
   sign_ signature secret msg len
+
+let sign_modified signature secret msg len =
+  push_frame();
+  let sk = Buffer.sub secret 0ul 32ul in
+  let pk = Buffer.sub secret 32ul 32ul in
+  let pk = Buffer.sub secret 32ul 32ul in
+  let r = Buffer.create 0uL 5ul in
+  let h = Buffer.create 0uL 5ul in
+  let rb = Buffer.create 0uy 32ul in
+  let aq = Buffer.create 0uL 5ul in
+  let ha = Buffer.create 0uL 5ul in
+  let s = Buffer.create 0uL 5ul in
+  let rs' = Buffer.sub signature 0ul 32ul in
+  let s' = Buffer.sub signature 32ul 32ul in
+  Hacl.Impl.SHA512.ModQ.sha512_modq_pre r sk msg len;
+  Hacl.Impl.Store56.store_56 rb r;
+  Hacl.Impl.Ed25519.Sign.Steps.point_mul_g_compress rs' rb;
+  Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2 h rs' pk msg len;
+  Hacl.Impl.Load56.load_32_bytes aq sk;
+  Hacl.Impl.BignumQ.Mul.mul_modq ha h aq;
+  Hacl.Impl.BignumQ.Mul.add_modq s r ha;
+  Hacl.Impl.Store56.store_56 s' s;
+  pop_frame()
+
+let curve25519_sign signature secret msg len = 
+  push_frame ();
+  let ed_key = create 0uy 64ul in
+  blit secret 0ul ed_key 0ul 32ul;
+  let ed_pub = Buffer.sub ed_key 32ul 32ul in
+  Hacl.Impl.Ed25519.Sign.Steps.point_mul_g_compress ed_pub secret;
+  let sign_bit = FStar.UInt8.(ed_key.(63ul) &^ 0x80uy) in
+  sign_modified signature ed_key msg len;
+  signature.(63ul) <- FStar.UInt8.(signature.(63ul) |^ sign_bit);
+  pop_frame()
+  
