@@ -217,7 +217,7 @@ let frodo_key_decode2 b a i res0 =
   lemma_uint_to_bytes_le #U64 templong;
   let tmp = Seq.sub (uint_to_bytes_le templong) 0 b in
   let res = update_sub res0 (i * b) b tmp in
-  assert (forall (k:size_nat{k < b}). res.[i * b + k] == tmp.[k]);
+  assert (forall k. res.[i * b + k] == tmp.[k]);
   res
 
 val frodo_key_decode:
