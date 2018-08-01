@@ -235,7 +235,7 @@ network.exe: $(LIBS_FILES) tests/Spec.Network.Test.fst
 	mkdir -p network-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Network.Test --odir network-ml $^
 	@echo 'let _ = test()' >> network-ml/Spec_Network_Test.ml
-	$(OCAMLOPT) -I network-ml -I ../lib/ml ../lib/ml/Lib_IO_Tcp.ml network-ml/Lib_IntTypes.ml network-ml/Lib_RawIntTypes.ml network-ml/Lib_Sequence.ml network-ml/Spec_Network_Test.ml -o network.exe
+	$(OCAMLOPT) -I network-ml -I ../lib/ml ../lib/ml/Lib_Network.ml network-ml/Lib_IntTypes.ml network-ml/Lib_RawIntTypes.ml network-ml/Lib_Sequence.ml network-ml/Spec_Network_Test.ml -o network.exe
 	./network.exe
 
 
