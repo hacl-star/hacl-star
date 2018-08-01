@@ -1,12 +1,12 @@
 # For simplified Makefiles, define FSTAR_HOME, then include the file below.
-FSTAR_HOME=~/FStar
-FSTAR=fstar.exe
+include ../../Makefile.include
 
-OCAMLPATH=~/FStar/bin
+#FSTAR_HOME=~/.opam/4.05.0/packages.dev/fstar
+#OCAMLPATH=~/FStar/bin
+
+FSTAR=$(FSTAR_HOME)/bin/fstar.exe
 
 all: add1sp1
-
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
 MPFR_FILES=	MPFR.Maths.fst \
 		MPFR.Dyadic.fst \
@@ -18,7 +18,8 @@ MPFR_FILES=	MPFR.Maths.fst \
 		MPFR.Exceptions.Lemma.fst \
 		MPFR.Exceptions.fst \
 		MPFR.Add1sp1.Lemma.fst \
-		MPFR.Add1sp1.fst
+		MPFR.Add1sp1.fst \
+		MPFR.fst
 
 # This target is very concise and re-uses the variables defined in
 # Makefile.include. You shouldn't need to call `cp` ever.
@@ -44,12 +45,34 @@ reg-hints: $(addsuffix -reg-hints, $(MPFR_FILES))
 out:
 	mkdir -p out
 
-gen-tests: test/gen.c test/test_suite_mpfr_add1sp1
+gen-tests: test/gen.c test/add1sp_tests
 	cc -o test/gen test/gen.c -lmpfr -lgmp
 	test/gen
 	rm test/gen
 
+
+KREMLIN_ARGS+=-tmpdir mpfr-c 
+
+mpfr-c/out.krml: $(MPFR_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) $(MPFR_FILES) -skip-translation
+
+mpfr-c/MPFR.c: mpfr-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -bundle 'MPFR=*'
+
+extract-c: mpfr-c/MPFR.c
+
+mpfr.exe: mpfr-c/MPFR.c mpfr-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) \
+	  -no-prefix 'Test.MPFR' -minimal -add-include '"kremlib.h"' \
+	  -bundle 'Test.MPFR=*' -library MPFR \
+	  $^ -o $@
+
+test: mpfr.exe
+	./$^
+
+
 clean:
-	rm -rf out
+	rm -rf out mpfr-c
 	rm -f *~
-	rm -f test/*~
+	rm -f test/*~ 
