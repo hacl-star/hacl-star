@@ -13,3 +13,7 @@ type mpfr_rnd_t =
 val mpfr_IS_LIKE_RNDZ: rnd:mpfr_rnd_t -> neg:bool -> Tot bool
 let mpfr_IS_LIKE_RNDZ rnd neg =
     MPFR_RNDZ? rnd || (MPFR_RNDU? rnd && neg) || (MPFR_RNDD? rnd && not neg)
+
+val mpfr_IS_LIKE_RNDA: rnd:mpfr_rnd_t -> neg:bool -> Tot bool
+let mpfr_IS_LIKE_RNDA rnd neg =
+    MPFR_RNDA? rnd || (MPFR_RNDD? rnd && neg) || (MPFR_RNDD? rnd && not neg)

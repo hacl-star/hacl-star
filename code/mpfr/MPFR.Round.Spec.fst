@@ -14,6 +14,7 @@ let ulp_p (a:normal_fp) (p:pos) = unit_dyadic (a.exp - p)
 let ulp (a:normal_fp) = ulp_p a a.prec
 let ufp (a:normal_fp) = ulp_p a 1
 
+(* add one ulp to a normal number while keeping the precision unchanged *)
 val add_one_ulp: a:normal_fp ->
     Tot (r:normal_fp{r.prec = a.prec /\ eval_abs r =. eval_abs a +. ulp a})
     
@@ -32,28 +33,21 @@ let add_one_ulp a =
 	{a with limb = pow2 (a.len - 1); exp = a.exp + 1}
     end
 
-val add_one_ulp_change_len_lemma: a:normal_fp -> l:nat{l >= a.prec} -> Lemma
-    (eval (change_len (add_one_ulp a) l) =. eval (add_one_ulp (change_len a l)))
-
-let add_one_ulp_change_len_lemma a l = 
-    eval_eq_reveal_lemma (add_one_ulp a) (change_len (add_one_ulp a) l);
-    eval_eq_reveal_lemma a (change_len a l);
-    eval_eq_intro_lemma (change_len (add_one_ulp a) l) (add_one_ulp (change_len a l))
-
+(* no representable number exists between 'a' and 'a + ulp a' *)
 val add_one_ulp_lt_lemma: a:normal_fp -> b:normal_fp -> Lemma
-    (requires (a.prec = b.prec /\ eval_abs a >. eval_abs b))
-    (ensures  (eval_abs a >=. eval_abs (add_one_ulp b)))
+    (requires (a.prec = b.prec /\ eval_abs a <. eval_abs b))
+    (ensures  (eval_abs (add_one_ulp a) <=. eval_abs b))
     (decreases (abs (a.len - b.len)))
 
 let rec add_one_ulp_lt_lemma a b =
     if a.len = b.len then begin
-        eval_abs_lt_reveal_lemma b a;
-        lemma_pow2_multiple_le b.limb b.len (b.len - b.prec);
+        eval_abs_lt_reveal_lemma a b;
+        lemma_pow2_multiple_le a.limb a.len (a.len - a.prec);
 	let elb = min (a.exp - a.len) (b.exp - b.len) in
-	lemma_mul_mod_zero a.limb (pow2 (a.exp - a.len - elb)) (pow2 (b.len - b.prec));
-	lemma_mul_mod_zero b.limb (pow2 (b.exp - b.len - elb)) (pow2 (b.len - b.prec));
-	lemma_multiple_le (b.limb * pow2 (b.exp - b.len - elb)) (a.limb * pow2 (a.exp - a.len - elb)) (pow2 (b.len - b.prec));
-        assert(eval_abs a >=. eval_abs b +. ulp b)
+	lemma_mul_mod_zero a.limb (pow2 (a.exp - a.len - elb)) (pow2 (a.len - a.prec));
+	lemma_mul_mod_zero b.limb (pow2 (b.exp - b.len - elb)) (pow2 (a.len - a.prec));
+	lemma_multiple_le (a.limb * pow2 (a.exp - a.len - elb)) (b.limb * pow2 (b.exp - b.len - elb)) (pow2 (a.len - a.prec));
+        assert(eval_abs a +. ulp a <=. eval_abs b)
     end
     else begin
         eval_eq_reveal_lemma a (change_len a b.len);
@@ -106,32 +100,33 @@ let low_mant a p =
     end
     
 
-////////////////////////////////////////////////////////////////////////////////////
-//  RNDZ Definition: Round to zero                                                //
-//  Given floating point number 'a' and precision 'p', got result r = RNDZ(a, p)  //
-//  Splitting 'a' into two floating point numbers a = a_high + a_low              //
-//  Rounding 'a' to a_high                                                        //
-//  We should always have the following inequality:                               //
-//                   abs r  <=  abs a  <  abs r + ulp r                           //
-////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+//  Rounding with different rounding modes can be done in 2 steps.                   //
+//  1. Firstly round with unbounded precision.                                       // 
+//  2. Then convert the result into MPFR numbers according to the rounding mode,     //
+//     this is used to deal with sigular values when exponent exceeds the limits.    //
+//  Here we give definitions for 5 rounding modes.                                   //
+//  RNDZ: round towards zero           RNDA: round away from zero                    //
+//  RNDU: round towards +infinity      RNDD: round towards -infinity                 //
+//  RNDN: round to the nearest                                                       //
+//  Each mode will have two functions: rndx_def and mpfr_rndx2_cond.                 //
+//  1. rndx_def gives the definition for unbounded precision rounding.               //
+//     Given a normal number 'a' and precision 'p',                                  //
+//     'rndx_def a p' will be the rounding result.                                   //
+//  2. mpfr_rndx2_cond checks if the conversion is correct.                          //
+//     Given a unbounded precision rounding result 'a' and a MPFR number 'r',        //
+//     checks if the conversion from 'a' to 'r' with rounding mode RNDX is correct.  //
+//     We use a condition check because when 'r' is a singular MPFR number,          //
+//     it will have multiple representations, which means there is no definition.    //
+///////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////
-//  RNDN Definition: Rounding to the nearest                                        //
-//  Given floating point number 'a' and precision 'p', got result r = RNDN(a, p)    //
-//  Splitting 'a' into two floating point numbers a = a_high + a_low                //
-//  Rounding 'a' to a_high or a_high + ulp depending on a_low                       //
-//  We should always have the following inequality:                                 //
-//  (r.mant - 0.5) * 2 ^ r.exp <= a.mant * 2 ^ a.exp <= (r.mant + 0.5) * 2 ^ r.exp  //
-//  But it slightly varies according to "round to even rule"                        //
-//////////////////////////////////////////////////////////////////////////////////////
-
+(* RNDZ definition *)
 val rndz_def: a:normal_fp -> p:pos{p <= a.prec} ->
     Tot (r:normal_fp{r.prec = p /\
         eval_abs r <=. eval_abs a /\ eval_abs a <. eval_abs r +. ulp_p a p})
 	
 let rndz_def a p = high_mant a p
 
-(* convert a rounded normal number to a mpfr number *)
 let mpfr_rndz2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
     if eval_abs a >. mpfr_overflow_bound a.prec then
         valid_num_cond r /\ r == mpfr_max_value a.sign a.prec
@@ -149,12 +144,53 @@ let rnda_def a p =
     if eval a =. eval (rndz_def a p) then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
-(* convert a rounded normal number to a mpfr number *)
 let mpfr_rnda2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
     if eval_abs a >. mpfr_overflow_bound a.prec then
         valid_inf_cond r /\ r.sign = a.sign
     else if eval_abs a <. mpfr_underflow_bound a.prec then
         valid_num_cond r /\ r == mpfr_min_value a.sign a.prec
+    else
+        valid_num_cond r /\ eval r =. eval a
+
+(* RNDU definition *)
+val rndu_def: a:normal_fp -> p:pos{p <= a.prec} ->
+    Tot (r:normal_fp{r.prec = p /\
+        eval r >=. eval a /\ eval a >. eval r -. ulp_p a p})
+
+let rndu_def a p =
+    if eval a =. eval (rndz_def a p) || eval a <. zero_dyadic then rndz_def a p
+    else add_one_ulp (rndz_def a p)
+
+let mpfr_rndu2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
+    if eval_abs a >. mpfr_overflow_bound a.prec && a.sign > 0 then
+        valid_inf_cond r /\ r.sign > 0
+    else if eval_abs a >. mpfr_overflow_bound a.prec && a.sign < 0 then
+        valid_num_cond r /\ r == mpfr_max_value (-1) a.prec
+    else if eval_abs a <. mpfr_underflow_bound a.prec && a.sign > 0 then
+        valid_num_cond r /\ r == mpfr_min_value 1 a.prec
+    else if eval_abs a <. mpfr_underflow_bound a.prec && a.sign < 0 then
+        valid_zero_cond r /\ r.sign < 0
+    else
+        valid_num_cond r /\ eval r =. eval a
+
+(* RNDD definition *)
+val rndd_def: a:normal_fp -> p:pos{p <= a.prec} ->
+    Tot (r:normal_fp{r.prec = p /\
+        eval r <=. eval a /\ eval a <. eval r +. ulp_p a p})
+
+let rndd_def a p =
+    if eval a =. eval (rndz_def a p) || eval a >. zero_dyadic then rndz_def a p
+    else add_one_ulp (rndz_def a p)
+
+let mpfr_rndd2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
+    if eval_abs a >. mpfr_overflow_bound a.prec && a.sign > 0 then
+        valid_num_cond r /\ r == mpfr_max_value 1 a.prec
+    else if eval_abs a >. mpfr_overflow_bound a.prec && a.sign < 0 then
+        valid_inf_cond r /\ r.sign < 0
+    else if eval_abs a <. mpfr_underflow_bound a.prec && a.sign > 0 then
+        valid_zero_cond r /\ r.sign > 0
+    else if eval_abs a <. mpfr_underflow_bound a.prec && a.sign < 0 then
+        valid_num_cond r /\ r == mpfr_min_value (-1) a.prec
     else
         valid_num_cond r /\ eval r =. eval a
 
@@ -168,61 +204,18 @@ let rndn_def (a:normal_fp) (p:pos{p <= a.prec}): Tot (r:normal_fp{r.prec = p}) =
     then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
-(* convert a rounded normal number to a mpfr number *)
 let mpfr_rndn2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
     if eval_abs a >. mpfr_overflow_bound a.prec then
         valid_inf_cond r /\ r.sign = a.sign
-    else if eval_abs a <. mpfr_underflow_bound a.prec then
+    else if eval_abs a <=. fdiv_pow2 (mpfr_underflow_bound a.prec) 1 then
         valid_zero_cond r /\ r.sign = a.sign
-    else
-        valid_num_cond r /\ eval r =. eval a
-
-(* RNDU definition *)
-val rndu_def: a:normal_fp -> p:pos{p <= a.prec} ->
-    Tot (r:normal_fp{r.prec = p /\
-        eval r >=. eval a /\ eval a >. eval r -. ulp_p a p})
-
-let rndu_def a p =
-    if eval a =. eval (rndz_def a p) || eval a <. zero_dyadic then rndz_def a p
-    else add_one_ulp (rndz_def a p)
-
-(* convert a rounded normal number to a mpfr number *)
-let mpfr_rndu2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
-    if eval_abs a >. mpfr_overflow_bound a.prec && a.sign = 1 then
-        valid_inf_cond r /\ r.sign = 1
-    else if eval_abs a >. mpfr_overflow_bound a.prec && a.sign = -1 then
-        valid_num_cond r /\ r == mpfr_max_value (-1) a.prec
-    else if eval_abs a <. mpfr_underflow_bound a.prec && a.sign = 1 then
-        valid_num_cond r /\ r == mpfr_min_value 1 a.prec
-    else if eval_abs a <. mpfr_underflow_bound a.prec && a.sign = -1 then
-        valid_zero_cond r /\ r.sign = -1
-    else
-        valid_num_cond r /\ eval r =. eval a
-
-(* RNDD definition *)
-val rndd_def: a:normal_fp -> p:pos{p <= a.prec} ->
-    Tot (r:normal_fp{r.prec = p /\
-        eval r <=. eval a /\ eval a <. eval r +. ulp_p a p})
-
-let rndd_def a p =
-    if eval a =. eval (rndz_def a p) || eval a >. zero_dyadic then rndz_def a p
-    else add_one_ulp (rndz_def a p)
-
-(* convert a rounded normal number to a mpfr number *)
-let mpfr_rndd2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
-    if eval_abs a >. mpfr_overflow_bound a.prec && a.sign = 1 then
-        valid_num_cond r /\ r == mpfr_max_value 1 a.prec
-    else if eval_abs a >. mpfr_overflow_bound a.prec && a.sign = -1 then
-        valid_inf_cond r /\ r.sign = -1
-    else if eval_abs a <. mpfr_underflow_bound a.prec && a.sign = 1 then
-        valid_zero_cond r /\ r.sign = 1
-    else if eval_abs a <. mpfr_underflow_bound a.prec && a.sign = -1 then
-        valid_num_cond r /\ r == mpfr_min_value (-1) a.prec
+    else if eval_abs a <. mpfr_underflow_bound a.prec then
+        valid_num_cond r /\ r == mpfr_min_value a.sign a.prec
     else
         valid_num_cond r /\ eval r =. eval a
 
 
-(* Definitions of round bit and sticky bit which are widely used to implement RNDN *)
+(* Definitions of round bit and sticky bit which are widely used to implement rounding *)
 let rb_def (a:normal_fp) (p:pos{p < a.prec}): Tot bool = nth #a.len a.limb p
 let sb_def (a:normal_fp) (p:pos{p < a.prec}): Tot bool = (a.limb % pow2 (a.len - p - 1) <> 0)
 
@@ -262,9 +255,10 @@ let rb_sb_lemma a p =
 
 open MPFR.RoundingMode
 
-(* Generalized rounding for all rounding modes supported *)
-let round_def (a:normal_fp) (p:pos{p <= a.prec}) (rnd_mode:mpfr_rnd_t):
+(* Generalized rounding for all rounding modes *)
+let round_def (a:normal_fp) (p:pos) (rnd_mode:mpfr_rnd_t):
     Tot (r:normal_fp{r.prec = p}) =
+    if p > a.prec then incr_prec a p else
     match rnd_mode with
     | MPFR_RNDN -> rndn_def a p
     | MPFR_RNDZ -> rndz_def a p
@@ -275,10 +269,9 @@ let round_def (a:normal_fp) (p:pos{p <= a.prec}) (rnd_mode:mpfr_rnd_t):
 val round_sp_lemma: a:normal_fp -> rnd_mode:mpfr_rnd_t -> Lemma
     (round_def a a.prec rnd_mode == a)
     [SMTPat (round_def a a.prec rnd_mode)]
-
 let round_sp_lemma a rnd_mode = ()
 
-(* This is used to check if the rounding from a normal_fp to a mpfr_fp is correct *)
+(* Generalized mpfr_rndx2_cond for all rounding modes *)
 let mpfr_round2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (rnd_mode:mpfr_rnd_t)
                      (r:mpfr_fp): GTot Type0 =
     r.prec = a.prec /\ (
@@ -298,14 +291,17 @@ let mpfr_round2_cond_refl_lemma a rnd_mode =
     exp_impl_no_overflow_lemma a;
     exp_impl_no_underflow_lemma a
 
-let mpfr_round_cond (a:normal_fp) (p:pos{p <= a.prec /\ mpfr_PREC_COND p}) (rnd_mode:mpfr_rnd_t)
+(* Given a normal number 'a', precision 'p', rounding mode 'rnd_mode',
+ * and a MPFR number as rounding result 'r',
+ * check if 'r' is the correct result for RND(a, p, rnd_mode) *)
+let mpfr_round_cond (a:normal_fp) (p:pos{mpfr_PREC_COND p}) (rnd_mode:mpfr_rnd_t)
                     (r:mpfr_fp): GTot Type0 =
     r.prec = p /\ mpfr_round2_cond (round_def a p rnd_mode) rnd_mode r
 
 (* Every MPFR function will return an integer, aka ternary value,
  * to indicate if the calculated result is greater or lesser than the exact result.
  * This is used to check if the ternary value is computed correctly *)
-let mpfr_ternary_cond (f:int) (a:normal_fp) (r:mpfr_fp): GTot Type0 =
-    ((MPFR_INF? r.flag /\ r.sign =  1) \/ (valid_fp_cond r /\ eval r >. eval a) <==> f > 0) /\
-    ((MPFR_INF? r.flag /\ r.sign = -1) \/ (valid_fp_cond r /\ eval r <. eval a) <==> f < 0) /\
-    ((valid_fp_cond r /\ eval r =. eval a) <==> f = 0)
+let mpfr_ternary_cond (t:int) (a:normal_fp) (r:mpfr_fp): GTot Type0 =
+    ((MPFR_INF? r.flag /\ r.sign > 0) \/ (valid_fp_cond r /\ eval r >. eval a) <==> t > 0) /\
+    ((MPFR_INF? r.flag /\ r.sign < 0) \/ (valid_fp_cond r /\ eval r <. eval a) <==> t < 0) /\
+    ((valid_fp_cond r /\ eval r =. eval a) <==> t = 0)

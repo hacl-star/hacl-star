@@ -61,7 +61,8 @@ let lemma_euclidean a b = ()
 val lemma_add_div: a:nat -> n:int -> d:pos -> Lemma
     (requires (a + n * d >= 0))
     (ensures  ((a + n * d) / d = a / d + n))
-let lemma_add_div a n d = assert(a / d + n - 1 < (a + n * d) / d /\ (a + n * d) / d < a / d + n + 1)
+let lemma_add_div a n d =
+    assert(a / d + n - 1 < (a + n * d) / d /\ (a + n * d) / d < a / d + n + 1)
 
 val lemma_add_mod: a:nat -> n:int -> d:pos -> Lemma
     (requires (a + n * d >= 0))
@@ -212,6 +213,16 @@ let lemma_mod_mul a b c =
     lemma_multiple_mod a c;
     lemma_div_mul ((a * c) % (c * b)) c
 
+val lemma_mod_product_zero: a:nat -> b:nat -> c:pos -> d:pos -> Lemma
+    (requires (a % c = 0 /\ b % d = 0))
+    (ensures  ((a * b) % (c * d) = 0))
+
+let lemma_mod_product_zero a b c d = 
+    lemma_mod_mul (a * (b / d)) c d;
+    //! assert((a * (b / d) % c) * d = (a * b) % (c * d));
+    lemma_mul_mod_zero a (b / d) c
+
+
 (* pow2 proprieties *)
 val lemma_pow2_le: n:nat -> m:nat -> Lemma
     (requires (n <= m))
@@ -344,6 +355,14 @@ val lemma_pow2_mod_mod_zero: a:nat -> b:nat -> c:nat -> Lemma
     (ensures  (a % pow2 c = 0))
     
 let lemma_pow2_mod_mod_zero a b c = lemma_pow2_mod_mod a b c
+
+val lemma_pow2_mod_product_zero: a:nat -> b:nat -> c:nat -> d:nat -> Lemma
+    (requires (a % pow2 c = 0 /\ b % pow2 d = 0))
+    (ensures  ((a * b) % pow2 (c + d) = 0))
+
+let lemma_pow2_mod_product_zero a b c d =
+    lemma_pow2_mul c d;
+    lemma_mod_product_zero a b (pow2 c) (pow2 d)
 
 val lemma_bit_length: m:pos -> p1:pos -> p2:pos -> Lemma
     (requires (pow2 (p1 - 1) <= m /\ m < pow2 p1 /\ pow2 (p2 - 1) <= m /\ m < pow2 p2))

@@ -1,6 +1,8 @@
 # For simplified Makefiles, define FSTAR_HOME, then include the file below.
-FSTAR_HOME=~/.opam/4.05.0/packages.dev/fstar
+FSTAR_HOME=~/FStar
 FSTAR=fstar.exe
+
+OCAMLPATH=~/FStar/bin
 
 all: add1sp1
 

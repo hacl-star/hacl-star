@@ -18,7 +18,7 @@ open MPFR.Round.Spec
 
 include MPFR.RoundingMode
 
-#set-options "--z3refresh --z3rlimit 50 --max_fuel 2 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 50 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 // GENERIC LIBRARY DEFINITIONS
 type i32 = FStar.Int32.t
@@ -130,7 +130,6 @@ val to_val_left_slice_lemma: s:Seq.seq u64{Seq.length s > 0} -> Lemma
 
 let rec to_val_left_slice_lemma s =
     if Seq.length s = 1 then () else begin
-        to_val_right_slice_lemma s;
 	let rs = Seq.slice s 1 (Seq.length s) in
         to_val_left_slice_lemma rs;
 	lemma_distr_add_left (pow2 64) (v (Seq.index rs 0)) (to_val (Seq.slice rs 1 (Seq.length rs)));
@@ -310,6 +309,10 @@ let mpfr_CHANGE_SIGN x = mpfr_SET_SIGN x (mpfr_NEG_SIGN (mpfr_SIGN x))
 let mpfr_SET_SAME_SIGN x y = mpfr_SET_SIGN x (mpfr_SIGN y)
 let mpfr_SET_OPPOSITE_SIGN x y = mpfr_SET_SIGN x (mpfr_NEG_SIGN (mpfr_SIGN y))
 
+let mpfr_IS_POS_SIGN s = I32.(s >^ 0l)
+let mpfr_IS_NEG_SIGN s = I32.(s <^ 0l)
+let mpfr_MULT_SIGN (s1:mpfr_sign_t) (s2:mpfr_sign_t): Tot mpfr_sign_t  = I32.(s1 *^ s2)
+
 (* significand *)
 val mpfr_MANT: x:mpfr_ptr -> Stack (buffer mp_limb_t)
     (requires (fun h -> mpfr_live h x))
@@ -319,6 +322,22 @@ val mpfr_MANT: x:mpfr_ptr -> Stack (buffer mp_limb_t)
 let mpfr_MANT x = 
     let f = x.(0ul) in
     f.mpfr_d
+
+val mpn_ZERO: b:buffer mp_limb_t -> l:u32 -> Stack unit
+    (requires (fun h -> live h b /\ length b >= U32.v l))
+    (ensures  (fun h0 _ h1 ->
+        live h1 b /\ modifies_1 b h0 h1 /\
+        (forall (i:nat{i < U32.v l}). Seq.index (as_seq h1 b) i = 0uL) /\
+        (forall (i:nat{i >= U32.v l /\ i < length b}). Seq.index (as_seq h1 b) i = Seq.index (as_seq h0 b) i) /\
+        to_val (Seq.slice (as_seq h1 b) 0 (U32.v l)) = 0))
+
+let rec mpn_ZERO b l =
+    if U32.(l =^ 0ul) then () else begin
+        b.(U32.(l -^ 1ul)) <- 0uL;
+        mpn_ZERO b U32.(l -^ 1ul);
+	let h = ST.get() in
+	to_val_left_slice_lemma (Seq.slice (as_seq h b) 0 (U32.v l))
+    end
 
 (* useful functions *)
 val mpfr_LAST_LIMB: x:mpfr_ptr -> Stack u32
@@ -359,17 +378,16 @@ let mpfr_LIMB_MAX =
 (* set special value *)
 val mpfr_setmax_rec: x:mpfr_ptr -> i:u32 -> Stack unit
     (requires (fun h -> 
-    let p = (as_struct h x).mpfr_prec in
-    mpfr_live h x /\ U32.v i < length (as_struct h x).mpfr_d /\ mpfr_PREC_COND (U32.v p)))
+        let p = (as_struct h x).mpfr_prec in
+        mpfr_live h x /\ U32.v i < length (as_struct h x).mpfr_d /\ mpfr_PREC_COND (U32.v p)))
     (ensures  (fun h0 _ h1 -> 
-    let p = (as_struct h0 x).mpfr_prec in
-    let l = U32.((p -^ 1ul) /^ 64ul +^ 1ul) in
-    mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
-    (as_struct h1 x).mpfr_sign = (as_struct h0 x).mpfr_sign /\
-    (as_struct h1 x).mpfr_exp = (as_struct h0 x).mpfr_exp /\
-    (let xm = as_seq h1 (as_struct h1 x).mpfr_d in
-    v (Seq.index xm 0) = pow2 64 - pow2 (prec_to_len (U32.v p) - U32.v p) /\
-    (forall (j:nat{j > 0 /\ j <= U32.v i}). v (Seq.index xm j) = pow2 64 - 1))))
+        let p = (as_struct h0 x).mpfr_prec in
+        mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
+        (as_struct h1 x).mpfr_sign = (as_struct h0 x).mpfr_sign /\
+        (as_struct h1 x).mpfr_exp = (as_struct h0 x).mpfr_exp /\
+        (let xm = as_seq h1 (as_struct h1 x).mpfr_d in
+        v (Seq.index xm 0) = pow2 64 - pow2 (prec_to_len (U32.v p) - U32.v p) /\
+        (forall (j:nat{j > 0 /\ j <= U32.v i}). v (Seq.index xm j) = pow2 64 - 1))))
 
 let rec mpfr_setmax_rec x i =
     let mant = mpfr_MANT x in
@@ -409,14 +427,15 @@ let rec to_val_setmax_lemma s sh =
 
 val mpfr_setmax: x:mpfr_ptr -> Stack unit
     (requires (fun h -> 
-    let p = (as_struct h x).mpfr_prec in
-    let l = U32.((p -^ 1ul) /^ 64ul +^ 1ul) in
-    mpfr_live h x /\ mpfr_PREC_COND (U32.v p) /\ length (as_struct h x).mpfr_d = U32.v l))
-    (ensures  (fun h0 _ h1 -> mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
-                           (as_struct h1 x).mpfr_sign = (as_struct h0 x).mpfr_sign /\
-			   mpfr_reg_cond h1 x /\
-			   as_reg_fp h1 x == mpfr_max_value (as_reg_fp h1 x).sign (as_reg_fp h1 x).prec /\
-			   eval_abs (as_reg_fp h1 x) =. mpfr_overflow_bound (as_reg_fp h1 x).prec))
+        let p = (as_struct h x).mpfr_prec in
+        let l = U32.((p -^ 1ul) /^ 64ul +^ 1ul) in
+        mpfr_live h x /\ mpfr_PREC_COND (U32.v p) /\ length (as_struct h x).mpfr_d = U32.v l))
+    (ensures  (fun h0 _ h1 -> 
+        mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
+        (as_struct h1 x).mpfr_sign = (as_struct h0 x).mpfr_sign /\
+	mpfr_reg_cond h1 x /\
+	as_reg_fp h1 x == mpfr_max_value (as_reg_fp h1 x).sign (as_reg_fp h1 x).prec /\
+	eval_abs (as_reg_fp h1 x) =. mpfr_overflow_bound (as_reg_fp h1 x).prec))
 
 let mpfr_setmax x =
     mpfr_SET_EXP x mpfr_EMAX;
@@ -433,6 +452,42 @@ let mpfr_setmax x =
     //! assert((pow2 64 - pow2 sh) % (pow2 sh) = 0);
     valn_cond_lemma (as_seq h (as_struct h x).mpfr_d);
     val0_cond_lemma (as_seq h (as_struct h x).mpfr_d) (as_struct h x).mpfr_prec;
-    to_val_setmax_lemma (as_seq h (as_struct h x).mpfr_d) sh;
-    assert(as_reg_fp h x == mpfr_max_value (as_reg_fp h x).sign (as_reg_fp h x).prec);
-    assert(eval_abs (as_reg_fp h x) =. mpfr_overflow_bound (as_reg_fp h x).prec)
+    to_val_setmax_lemma (as_seq h (as_struct h x).mpfr_d) sh
+
+val to_val_setmin_lemma: s:Seq.seq u64{Seq.length s > 0} -> Lemma
+    (requires (v (Seq.index s (Seq.length s - 1)) = pow2 63 /\
+              (forall (i:nat{i < Seq.length s - 1}). v (Seq.index s i) = 0)))
+    (ensures  (to_val s = pow2 (Seq.length s * 64 - 1)))
+    (decreases (Seq.length s))
+
+let rec to_val_setmin_lemma s =
+    if Seq.length s = 1 then () else begin
+        to_val_right_slice_lemma s;
+	lemma_pow2_mul 63 ((Seq.length s - 1) * 64);
+	to_val_setmin_lemma (Seq.slice s 1 (Seq.length s))
+    end
+
+val mpfr_setmin: x:mpfr_ptr -> Stack unit
+    (requires (fun h -> 
+        let p = (as_struct h x).mpfr_prec in
+        let l = U32.((p -^ 1ul) /^ 64ul +^ 1ul) in
+        mpfr_live h x /\ mpfr_PREC_COND (U32.v p) /\ length (as_struct h x).mpfr_d = U32.v l))
+    (ensures  (fun h0 _ h1 -> 
+        mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
+        (as_struct h1 x).mpfr_sign = (as_struct h0 x).mpfr_sign /\
+	mpfr_reg_cond h1 x /\
+	as_reg_fp h1 x == mpfr_min_value (as_reg_fp h1 x).sign (as_reg_fp h1 x).prec /\
+	eval_abs (as_reg_fp h1 x) =. mpfr_underflow_bound (as_reg_fp h1 x).prec))
+
+let mpfr_setmin x =
+    mpfr_SET_EXP x mpfr_EMIN;
+    let xn = mpfr_LAST_LIMB x in
+    let xp = mpfr_MANT x in
+    xp.(xn) <- mpfr_LIMB_HIGHBIT;
+    mpn_ZERO xp xn;
+    let h = ST.get() in
+    lemma_pow2_mod 63 (prec_to_len (U32.v ((as_struct h x).mpfr_prec)) - U32.v ((as_struct h x).mpfr_prec));
+    //! assert((pow2 63) % (pow2 sh) = 0);
+    valn_cond_lemma (as_seq h (as_struct h x).mpfr_d);
+    val0_cond_lemma (as_seq h (as_struct h x).mpfr_d) (as_struct h x).mpfr_prec;
+    to_val_setmin_lemma (as_seq h (as_struct h x).mpfr_d)
