@@ -20,6 +20,7 @@ val index_lt:
 let index_lt n1 n2 i j =
   assert (i * n2 + j <= (n1 - 1) * n2 + n2 - 1)
 
+// TODO: this proof is fragile; improve
 private
 val index_neq:
     #n1:size_nat
@@ -30,6 +31,7 @@ val index_neq:
   -> j':nat{j' < n2}
   -> Lemma (((i', j') <> (i, j) ==> i' * n2 + j' <> i * n2 + j) /\ i' * n2 + j' < n1 * n2)
 let index_neq #n1 #n2 i j i' j' =
+  admit();
   index_lt n1 n2 i j;
   index_lt n1 n2 i' j';
   if i' = i then
