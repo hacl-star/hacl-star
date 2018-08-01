@@ -221,14 +221,11 @@ rsapss.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.RS
 	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) rsapss-ml/Lib_IntTypes.ml rsapss-ml/Lib_RawIntTypes.ml rsapss-ml/Lib_Sequence.ml rsapss-ml/Lib_Stateful.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
 	./rsapss.exe
 
-
-
-random.exe: $(LIBS_FILES) Spec.Random.fst tests/Spec.Random.Test.fst
-	$(MAKE) build -C external
+random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
 	mkdir -p random-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Random --extract_module Spec.Random.Test --odir random-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Random.Test --odir random-ml $^
 	@echo 'let _ = test()' >> random-ml/Spec_Random_Test.ml
-	$(OCAMLOPT) -package cryptokit -I external -I random-ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_Sequence.ml random-ml/Lib_ByteSequence.ml external/Spec_Random.ml random-ml/Spec_Random_Test.ml -o random.exe
+	$(OCAMLOPT) -package cryptokit -I random-ml -I ../lib/ml ../lib/ml/Lib_Random.ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_Sequence.ml random-ml/Lib_ByteSequence.ml random-ml/Spec_Random_Test.ml -o random.exe
 	./random.exe
 
 network.exe: $(LIBS_FILES) tests/Spec.Network.Test.fst
