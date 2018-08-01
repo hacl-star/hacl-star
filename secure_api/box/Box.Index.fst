@@ -55,13 +55,13 @@ let index_log_inv (f:MM.map' (index_log_key) (index_log_range)) = True
 let index_log (rgn:erid) =
   MM.t rgn (index_log_key) (index_log_range) (index_log_inv)
 
-noeq type index_package (rgn:erid) =
+noeq type index_package =
   | IP:
-  id_log_rgn : erid{extends id_log_rgn rgn} ->
+  id_log_rgn : erid ->
   id_log: index_log id_log_rgn ->
-  index_package rgn
+  index_package
 
-val create_index_package: rgn:erid -> ST (index_package rgn)
+val create_index_package: rgn:erid -> ST (index_package)
   (requires (fun h0 -> True))
   (ensures (fun h0 ip h1 ->
     modifies (Set.singleton rgn) h0 h1
@@ -72,43 +72,43 @@ let create_index_package rgn =
   let log = MM.alloc #log_rgn #index_log_key #index_log_range #index_log_inv in
   IP log_rgn log
 
-val fresh: #rgn:erid -> ip:index_package rgn -> i:pk_id -> h:mem -> Type0
-let fresh #rgn ip i h =
+val fresh: ip:index_package -> i:pk_id -> h:mem -> Type0
+let fresh ip i h =
   MM.fresh ip.id_log i h
   //match i with
   //| PK_id i' -> MM.fresh ip.id_log (PK_id i') h
   //| Instance_id i' -> MM.fresh ip.id_log (PK_id (fst i')) h \/ MM.fresh ip.id_log (PK_id (snd i')) h
 
-val registered: #rgn:erid -> ip:index_package rgn -> i:id -> Type0
-let registered #rgn ip i =
+val registered: ip:index_package -> i:id -> Type0
+let registered ip i =
   match i with
   | PK_id i' -> witnessed (MM.defined ip.id_log (PK_id i'))
   | Instance_id i' -> witnessed (MM.defined ip.id_log (PK_id (fst i'))) /\ witnessed (MM.defined ip.id_log (PK_id (snd i')))
 
 #set-options "--z3rlimit 300 --max_ifuel 2 --max_fuel 1"
-val honest: #rgn:erid -> ip:index_package rgn -> i:id -> t:Type0//{t ==> PK_id? i ==> registered_pk ip i}
-let honest #rgn ip i =
+val honest: ip:index_package -> i:id -> t:Type0//{t ==> PK_id? i ==> registered_pk ip i}
+let honest ip i =
   match i with
   | PK_id i' ->
     witnessed (MM.contains ip.id_log (PK_id i') true)
   | Instance_id i' -> witnessed (MM.contains ip.id_log (PK_id (fst i')) true) /\ witnessed (MM.contains ip.id_log (PK_id (snd i')) true)
 
-val dishonest: #rgn:erid -> ip:index_package rgn -> i:id -> Type0
-let dishonest #rgn ip i =
+val dishonest: ip:index_package -> i:id -> Type0
+let dishonest ip i =
   match i with
   | PK_id i' ->
     witnessed (MM.contains ip.id_log (PK_id i') false)
   | Instance_id i' -> witnessed (MM.contains ip.id_log (PK_id (fst i')) false) \/ witnessed (MM.contains ip.id_log (PK_id (snd i')) false)
 
-let extend_id_log (#rgn:erid) (ip:index_package rgn) (i:pk_id) (b:bool) (h0:mem) (h1:mem) =
+let extend_id_log (ip:index_package) (i:pk_id) (b:bool) (h0:mem) (h1:mem) =
   (sel h1 ip.id_log == MM.upd (sel h0 ip.id_log) i b
   /\ witnessed (MM.defined ip.id_log i)
   /\ witnessed (MM.contains ip.id_log i b))
 
-let register_footprint (#rgn:erid) (ip:index_package rgn) (h0:mem) (h1:mem) =
+let register_footprint (ip:index_package) (h0:mem) (h1:mem) =
   modifies (Set.singleton ip.id_log_rgn) h0 h1
 
-val register: #rgn:erid -> ip:index_package rgn -> i:pk_id -> b:bool -> ST unit
+val register: ip:index_package -> i:pk_id -> b:bool -> ST unit
   (requires (fun h0 ->
     MM.fresh ip.id_log i h0
   ))
@@ -118,12 +118,12 @@ val register: #rgn:erid -> ip:index_package rgn -> i:pk_id -> b:bool -> ST unit
     /\ extend_id_log ip i b h0 h1
     /\ register_footprint ip h0 h1
   ))
-let register #rgn ip i b =
+let register ip i b =
   MM.extend ip.id_log i b
 
 
 #set-options "--z3rlimit 300 --max_ifuel 3 --max_fuel 3"
-val get_honesty: #rgn:erid -> ip:index_package rgn -> i:id -> ST bool
+val get_honesty: ip:index_package -> i:id -> ST bool
   (requires (fun h0 ->
     registered ip i
   ))
@@ -133,7 +133,7 @@ val get_honesty: #rgn:erid -> ip:index_package rgn -> i:id -> ST bool
     /\ (~(b2t b) ==> dishonest ip i)
     /\ (PK_id? i ==> MM.contains ip.id_log i b h0)
   ))
-let rec get_honesty #rgn ip i =
+let rec get_honesty ip i =
   match i with
   | PK_id i' ->
     testify (MM.defined ip.id_log (PK_id i'));
@@ -149,13 +149,13 @@ let rec get_honesty #rgn ip i =
     let b2 = get_honesty ip (PK_id (snd i')) in
     b1 && b2
 
-type absurd_honest (#rgn:erid) (ip:index_package rgn) (i:id{dishonest ip i}) = honest ip i
-type absurd_dishonest (#rgn:erid) (ip:index_package rgn) (i:id{honest ip i}) = dishonest ip i
-assume val lemma_honest_and_others_tot: #rgn:erid -> ip:index_package rgn -> i:id{dishonest ip i} -> absurd_honest ip i -> Lemma (False)
-assume val lemma_dishonest_and_others_tot: #rgn:erid -> ip:index_package rgn -> i:id{honest ip i} -> absurd_dishonest ip i -> Lemma (False)
+type absurd_honest (ip:index_package) (i:id{dishonest ip i}) = honest ip i
+type absurd_dishonest (ip:index_package) (i:id{honest ip i}) = dishonest ip i
+assume val lemma_honest_and_others_tot: ip:index_package -> i:id{dishonest ip i} -> absurd_honest ip i -> Lemma (False)
+assume val lemma_dishonest_and_others_tot: ip:index_package -> i:id{honest ip i} -> absurd_dishonest ip i -> Lemma (False)
 
 
-val lemma_dishonest_not_others: #rgn:erid -> ip:index_package rgn -> (i:id) -> Lemma
+val lemma_dishonest_not_others: ip:index_package -> (i:id) -> Lemma
   (requires (
     dishonest ip i
   ))
@@ -163,12 +163,12 @@ val lemma_dishonest_not_others: #rgn:erid -> ip:index_package rgn -> (i:id) -> L
     ~(honest ip i)
   ))
   [SMTPat (dishonest ip i)]
-let lemma_dishonest_not_others #rgn ip i =
+let lemma_dishonest_not_others ip i =
   let (j:(i:id{dishonest ip i})) = i in
   FStar.Classical.impl_intro (lemma_honest_and_others_tot ip j);
   assert(honest ip i==> False)
 
-val lemma_honest_not_others: #rgn:erid -> ip:index_package rgn -> (i:id) -> Lemma
+val lemma_honest_not_others: ip:index_package -> (i:id) -> Lemma
   (requires (
     honest ip i
   ))
@@ -176,13 +176,13 @@ val lemma_honest_not_others: #rgn:erid -> ip:index_package rgn -> (i:id) -> Lemm
     ~(dishonest ip i)
   ))
   [SMTPat (honest ip i)]
-let lemma_honest_not_others #rgn ip i =
+let lemma_honest_not_others ip i =
   let (j:(i:id{honest ip i})) = i in
   FStar.Classical.impl_intro (lemma_dishonest_and_others_tot ip j);
   assert(dishonest ip i ==> False)
 
 
-//val lemma_honest_or_dishonest: #rgn:erid -> ip:index_package rgn -> (i:id) -> Lemma
+//val lemma_honest_or_dishonest: ip:index_package -> (i:id) -> Lemma
 //  (requires (
 //    registered ip i
 //  ))
@@ -190,19 +190,19 @@ let lemma_honest_not_others #rgn ip i =
 //    ~(dishonest ip i)
 //  ))
 //  [SMTPat (honest ip i)]
-//let lemma_honest_or_dishonest #rgn ip i =
+//let lemma_honest_or_dishonest ip i =
 //  let (j:(i:id{honest ip i})) = i in
 //  FStar.Classical.impl_intro (lemma_dishonest_and_others_tot ip j);
 //  assert(dishonest ip i ==> False)
 
-//val lemma_honest_dishonest: #rgn:erid -> ip:index_package rgn -> i:id -> ST unit
+//val lemma_honest_dishonest: ip:index_package -> i:id -> ST unit
 //  (requires (fun h0 ->
 //    ~(honest ip i) /\ registered ip i
 //  ))
 //  (ensures (fun h0 _ h1 ->
 //    (dishonest ip i)
 //  ))
-//let rec lemma_honest_dishonest #rgn ip i =
+//let rec lemma_honest_dishonest ip i =
 //  match i with
 //  | PK_id i' -> testify (MM.defined ip.id_log (PK_id i'));
 //    (match MM.lookup ip.id_log i with

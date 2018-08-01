@@ -9,8 +9,8 @@ open Spec.Lib
 
 let keylen = Spec.Salsa20.keylen
 let noncelen = Spec.HSalsa20.noncelen + Spec.Salsa20.noncelen
-let valid_cipher_length n = n >= 16 && (n - 16) / Spec.Salsa20.blocklen < pow2 32
-let valid_plain_length n = n / Spec.Salsa20.blocklen < pow2 32
+let valid_cipher_length (n:nat) = n >= 16 && (n - 16) / Spec.Salsa20.blocklen < pow2 32
+let valid_plain_length (n:nat) = n / Spec.Salsa20.blocklen < pow2 32
 type key = lbytes keylen
 type nonce = lbytes noncelen
 type plain = p:bytes{valid_plain_length (Seq.length p)}

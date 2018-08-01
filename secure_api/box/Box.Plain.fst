@@ -24,10 +24,10 @@ val length: (#pp:plain_package) -> (#i:inst_id) -> (p:protected_plain pp i) -> n
 let length #pp #i p =
   Seq.length p
 
-val coerce: (#rgn:erid) -> (#pp:plain_package) -> ip:index_package rgn -> (i:inst_id{dishonest ip i \/ ~pp.flag}) -> p:plain pp -> p:protected_plain pp i
-let coerce #pp #rgn i ip p =
+val coerce: (#pp:plain_package) -> ip:index_package -> (i:inst_id{dishonest ip i \/ ~pp.flag}) -> p:plain pp -> p:protected_plain pp i
+let coerce #pp i ip p =
   p
 
-val repr: (#rgn:erid) -> (#pp:plain_package) -> #ip:index_package rgn -> (#i:inst_id{dishonest ip i \/ ~pp.flag}) -> p:protected_plain pp i -> p:plain pp
-let repr #rgn #pp #ip #i p =
+val repr: (#pp:plain_package) -> #ip:index_package -> (#i:inst_id{dishonest ip i \/ ~pp.flag}) -> p:protected_plain pp i -> p:plain pp
+let repr #pp #ip #i p =
   p
