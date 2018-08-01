@@ -119,43 +119,6 @@ val createL_global:
 let createL_global #a init =
   B.gcmalloc_of_list HyperStack.root init
 
-
-// val lemma_seq_slice_index:
-//   #a:Type -> s1:Seq.seq a ->
-//   s2:Seq.seq a{Seq.length s1 = Seq.length s2} ->
-//   j:nat{j < Seq.length s1} -> Lemma
-//   (requires ((Seq.slice s1 0 j == Seq.slice s2 0 j) /\ (Seq.index s1 j == Seq.index s2 j)))
-//   (ensures  (Seq.slice s1 0 (j + 1) == Seq.slice s2 0 (j + 1)))
-// let lemma_seq_slice_index #a s1 s2 j =
-//   Seq.snoc_slice_index s1 0 j;
-//   Seq.snoc_slice_index s2 0 j
-
-// inline_for_extraction
-// val copy:
-//   #a:Type -> #len:size_nat ->
-//   o:lbuffer a len -> clen:size_t{v clen == len} ->
-//   i:lbuffer a len -> Stack unit
-//   (requires (fun h0 -> B.live h0 o /\ B.live h0 i /\ B.disjoint i o))
-//   (ensures (fun h0 _ h1 ->
-//     B.live h1 o /\ B.live h1 i /\ modifies (loc_buffer o) h0 h1 /\
-//     B.as_seq h1 o == B.as_seq h0 i))
-// let copy #a #len o clen i =
-//   let h0 = ST.get() in
-//   let inv (h1:mem) (j:nat{j <= len}) =
-//     B.live h1 o /\ B.live h1 i /\
-//     modifies (loc_buffer o) h0 h1 /\
-//     Seq.slice (B.as_seq h1 o) 0 j == Seq.slice (B.as_seq h0 i) 0 j in
-//   let f' (j:size_t{0 <= v j /\ v j < len}) : Stack unit
-//       (requires (fun h -> inv h (v j)))
-//       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-//       let h1 = ST.get () in
-//       let src_i = i.(j) in
-//       o.(j) <- src_i;
-//       let h2 = ST.get () in
-//       lemma_seq_slice_index (B.as_seq h2 o) (B.as_seq h0 i) (v j);
-//       modifies_trans (loc_buffer o) h0 h1 (loc_buffer o) h2 in
-//   Lib.Loops.for (size 0) clen inv f'
-
 inline_for_extraction
 val copy:
     #a:Type
@@ -179,7 +142,7 @@ val update_sub:
     #a:Type
   -> #len:size_nat
   -> dst:lbuffer a len
-  -> start:size_t{v start < len}
+  -> start:size_t
   -> n:size_t{v start + v n <= len}
   -> src:lbuffer a (v n)
   -> Stack unit
@@ -187,9 +150,15 @@ val update_sub:
     (ensures  fun h0 _ h1 -> B.live h1 dst /\ modifies (loc_buffer dst) h0 h1 /\
       B.as_seq h1 dst == Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 let update_sub #a #len dst start n src =
-  let b = sub dst start n in
-  copy b n src;
-  admit()
+  let h0 = ST.get () in  
+  LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
+  let h1 = ST.get () in
+  assert (forall (k:nat{k < v n}).
+      Seq.index #_ #len (B.as_seq h1 dst) (v start + k) == 
+      Seq.index #_ #(v n) (B.as_seq h0 src) k);
+  Seq.eq_intro 
+    (B.as_seq h1 dst) 
+    (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 
 inline_for_extraction noextract private
 val loop_nospec_inv:
@@ -300,6 +269,7 @@ let uint_to_bytes_be #t o i =
   | U64 -> C.store64_be o (u64_to_UInt64 i)
   | U128 -> C.store128_be o (u128_to_UInt128 i)
 
+// TODO: move to a different module
 assume val print_compare_display:
     len:size_t
   -> lbuffer uint8 (size_v len)
