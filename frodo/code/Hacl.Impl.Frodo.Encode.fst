@@ -102,8 +102,6 @@ let frodo_key_encode2 b a res0 i =
   frodo_key_encode1 b a res0 vi i;
   pop_frame()
 
-#set-options "--z3rlimit 50"
-
 val frodo_key_encode:
     b:size_t{v b <= 8}
   -> a:lbytes (params_nbar *! params_nbar *! b /. size 8)
@@ -131,6 +129,68 @@ let frodo_key_encode b a res =
   S.lemma_matrix_equality_nbar (as_matrix h1 res) (S.frodo_key_encode (v b) (B.as_seq h0 a));
   pop_frame()
 
+inline_for_extraction noextract private
+val frodo_key_decode1:
+    b:size_t{v b <= 8}
+  -> a:matrix_t params_nbar params_nbar
+  -> i:size_t{v i < v params_nbar}
+  -> Stack uint64
+    (requires fun h -> B.live h a)
+    (ensures fun h0 r h1 ->
+      B.live h1 a /\ modifies loc_none h0 h1 /\
+      r == S.frodo_key_decode1 (v b) (as_matrix h0 a) (v i))
+let frodo_key_decode1 b a i = admit();
+  push_frame();
+  let h0 = ST.get () in
+  let templong = create #uint64 #1 (size 1) (u64 0) in
+
+  let h1 = ST.get () in
+  Lib.Loops.for (size 0) (size 8)
+    (fun h2 k -> B.live h1 templong /\ B.live h2 templong /\
+      modifies (loc_buffer templong) h1 h2 /\
+      B.get h2 templong 0 == S.decode_fc (v b) (as_matrix h0 a) (v i) k)
+    (fun k ->
+      let aik = mget a i k in
+      templong.(size 0) <- templong.(size 0) |. (to_u64 (dc b aik) <<. size_to_uint32 (b *! k))
+    );
+  let res = templong.(size 0) in
+  pop_frame();
+  res
+
+inline_for_extraction noextract private
+val frodo_key_decode2:
+    b:size_t{v b <= 8}
+  -> a:matrix_t params_nbar params_nbar
+  -> i:size_t{v i < v params_nbar}
+  -> res:lbytes (params_nbar *! params_nbar *! b /. size 8)
+  -> Stack unit
+    (requires fun h -> B.live h a /\ B.live h res /\ B.disjoint a res)
+    (ensures fun h0 _ h1 ->
+      B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+      B.as_seq h1 res == S.frodo_key_decode2 (v b) (as_matrix h0 a) (v i) (B.as_seq h0 res))
+let frodo_key_decode2 b a i res =
+  push_frame();
+  let templong = frodo_key_decode1 b a i in
+  let v8 = create (size 8) (u8 0) in
+  uint_to_bytes_le #U64 v8 templong;
+  let tmp = sub #uint8 #8 #(v b) v8 (size 0) b in
+  update_sub res (i *! b) b tmp;
+  pop_frame()
+
+val lemma_eq_intro_decode:
+    b:size_nat{b <= 8}
+  -> s1:LSeq.lseq uint8 (v params_nbar * v params_nbar * b / 8)
+  -> s2:LSeq.lseq uint8 (v params_nbar * v params_nbar * b / 8)
+  -> Lemma
+    (requires forall (i:size_nat{i < v params_nbar}) (k:size_nat{k < b}). LSeq.index s1 (i * b + k) == LSeq.index s2 (i * b + k))
+    (ensures  s1 == s2)
+let lemma_eq_intro_decode b s1 s2 =
+  let resLen = v params_nbar * b in
+  assert (forall (i:size_nat{i < v params_nbar}) (k:size_nat{k < b}).
+    LSeq.index s1 (i * b + k) == LSeq.index s2 (i * b + k));
+  assert (forall (l:size_nat{l < resLen}). l == (l / b) * b + l % b /\ l / b < v params_nbar /\ l % b < b);
+  assert (forall (l:size_nat{l < resLen}). LSeq.index s1 l == LSeq.index s2 l);
+  LSeq.eq_intro s1 s2
 
 val frodo_key_decode:
     b:size_t{v b <= 8}
@@ -138,32 +198,21 @@ val frodo_key_decode:
   -> res:lbytes (params_nbar *! params_nbar *! b /. size 8)
   -> Stack unit
     (requires fun h -> B.live h a /\ B.live h res /\ B.disjoint a res)
-    (ensures  fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+      B.as_seq h1 res == S.frodo_key_decode (v b) (as_matrix h0 a))
 [@"c_inline"]
 let frodo_key_decode b a res =
-  push_frame();
   let resLen = params_nbar *! params_nbar *! b /. size 8 in
-
-  let v8 = create (size 8) (u8 0) in
-  let templong:lbuffer uint64 1 = create (size 1) (u64 0) in
-
   let h0 = ST.get () in
-  let inv (h1:mem) (j:nat{j <= v params_nbar}) =
-    B.live h1 res /\ B.live h1 v8 /\ B.live h1 templong /\
-    modifies (loc_union (loc_buffer res) (loc_union (loc_buffer v8) (loc_buffer templong))) h0 h1 in
-  let f' (i:size_t{0 <= v i /\ v i < v params_nbar}): Stack unit
-    (requires (fun h -> inv h (v i)))
-    (ensures (fun _ _ h2 -> inv h2 (v i + 1))) =
-      templong.(size 0) <- u64 0;
-      let h1 = ST.get () in
-      loop_nospec #h1 (size 8) templong
-      (fun k ->
-        let aijk = mget a i k in
-        let aij = dc b aijk in
-        templong.(size 0) <- templong.(size 0) |. (to_u64 aij <<. size_to_uint32 (b *! k))
-      );
-      uint_to_bytes_le #U64 v8 (templong.(size 0));
-      copy (sub res (i *! b) b) b (sub #uint8 #8 #(v b) v8 (size 0) b) in
-
-  Lib.Loops.for (size 0) params_nbar inv f';
-  pop_frame()
+  Lib.Loops.for (size 0) params_nbar
+    (fun h1 i ->
+      B.live h0 a /\ B.live h1 a /\ B.live h0 res /\ B.live h1 res /\
+      modifies (loc_buffer res) h0 h1 /\
+      (forall (i0:size_nat{i0 < i}) (k:size_nat{k < v b}).
+	 LSeq.index #_ #(v resLen) (B.as_seq h1 res) (i0 * v b + k) == S.frodo_key_decode_fc (v b) (B.as_seq h0 a) i0 k))
+    (fun i ->
+      frodo_key_decode2 b a i res
+    );
+  let h1 = ST.get () in
+  lemma_eq_intro_decode (v b) (B.as_seq h1 res) (S.frodo_key_decode (v b) (as_matrix h0 a))
