@@ -1,8 +1,10 @@
 # For simplified Makefiles, define FSTAR_HOME, then include the file below.
 include ../../Makefile.include
 
-#FSTAR_HOME=~/.opam/4.05.0/packages.dev/fstar
-#OCAMLPATH=~/FStar/bin
+#You shoukd set FSTAR_HOME and KREMLIN_HOME to where you cloned those two repos
+#Usually it is better to define these environment variables in the .bash_profile
+#FSTAR_HOME=
+#KREMLIN_HOME=
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe
 
