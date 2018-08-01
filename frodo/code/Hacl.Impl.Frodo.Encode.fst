@@ -146,14 +146,10 @@ let frodo_key_decode1 b a i =
   let h0 = ST.get () in
   let templong = create #uint64 #1 (size 1) (u64 0) in
   let h1 = ST.get () in
-  assert (LSeq.index #_ #1 (B.as_seq h1 templong) 0 == u64 0);
-  assert (LSeq.index #_ #1 (B.as_seq h1 templong) 0 == B.get h1 templong 0);
-  assert (B.get h1 templong 0 == S.decode_fc (v b) (as_matrix h0 a) (v i) 0);
-
   Lib.Loops.for (size 0) (size 8)
     (fun h2 k -> B.live h1 templong /\ B.live h2 templong /\
       modifies (loc_buffer templong) h1 h2 /\
-      B.get h2 templong 0 == S.decode_fc (v b) (as_matrix h0 a) (v i) k)
+      bget h2 templong 0 == S.decode_fc (v b) (as_matrix h0 a) (v i) k)
     (fun k ->
       let aik = mget a i k in
       templong.(size 0) <- templong.(size 0) |. (to_u64 (dc b aik) <<. size_to_uint32 (b *! k))
@@ -215,7 +211,7 @@ let frodo_key_decode b a res =
       B.live h0 a /\ B.live h1 a /\ B.live h0 res /\ B.live h1 res /\
       modifies (loc_buffer res) h0 h1 /\
       (forall (i0:size_nat{i0 < i}) (k:size_nat{k < v b}).
-	 LSeq.index #_ #(v resLen) (B.as_seq h1 res) (i0 * v b + k) == S.frodo_key_decode_fc (v b) (B.as_seq h0 a) i0 k))
+	 bget h1 res (i0 * v b + k) == S.frodo_key_decode_fc (v b) (B.as_seq h0 a) i0 k))
     (fun i ->
       frodo_key_decode2 b a i res
     );
