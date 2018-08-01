@@ -2,6 +2,7 @@ KOPTS+=-add-early-include '"FStar_UInt128.h"'
 KOPTS+=-fnouint128 -drop FStar.UInt128 -falloca -ftail-calls
 CFLAGS+=-DKRML_NOUINT128 -DKRML_SEPARATE_UINT128 # -DKRML_NOSTRUCT_PASSING
 
+KREMLIN_HOME ?= ../../../kremlin
 KREMLIN_ARGS+=-drop LowStar.*
 
 extract-c: uint128-c/FStar_UInt128.h

@@ -4,52 +4,77 @@ open FStar.HyperStack.ST
 
 open EverCrypt
 open EverCrypt.Bytes
-
 open Test.Vectors
+open LowStar.BufferOps
 
+open C.String
+
+module B = LowStar.Buffer
+
+// TODO: remove this
 #set-options "--admit_smt_queries true"
 
-val discard: bool -> St unit
-let discard _ = ()
-let print h s = discard (IO.debug_print_string ("["^ h ^"] "^ s ^"\n"))
+let success h =
+  print !$"[";
+  print h;
+  print !$"] ";
+  print !$"SUCCESS\n";
+  true
 
-let success h = print h "Success"; true
+let failure h msg =
+  print !$"[";
+  print h;
+  print !$"] ";
+  print !$"FAILURE:";
+  print msg;
+  print !$"\n";
+  false
 
-let failure h e = print h e; false
+let vec8 = B.buffer UInt8.t * UInt32.t
+let of_vec8 (v: vec8) =
+  let buf, len = v in
+  FStar.Bytes.of_buffer len buf
 
-val test_chacha20_poly1305: v:aead_vector{v.cipher == CHACHA20_POLY1305} -> St bool
-let test_chacha20_poly1305 v =
+type aead_vector = cipher * vec8 * vec8 * vec8 * vec8 * vec8 * vec8
+
+let test_chacha20_poly1305 (arg: aead_vector) =
+  let cipher, key, iv, aad, tag, plaintext, ciphertext = arg in
   let open FStar.Bytes in
-  let h = "Chacha20-Poly1305 bytes" in
-  let key        = bytes_of_hex v.key in
-  let iv         = bytes_of_hex v.iv in
-  let aad        = bytes_of_hex v.aad in
-  let tag        = bytes_of_hex v.tag in
-  let plaintext  = bytes_of_hex v.plaintext in
-  let ciphertext = bytes_of_hex v.ciphertext in
+  let h = !$"Chacha20-Poly1305 bytes" in
+  let key        = of_vec8 key in
+  let iv         = of_vec8 iv in
+  let aad        = of_vec8 aad in
+  let tag        = of_vec8 tag in
+  let plaintext  = of_vec8 plaintext in
+  let ciphertext = of_vec8 ciphertext in
   let open EverCrypt.Bytes in
   let { cipher=ciphertext'; tag=tag'} = chacha20_poly1305_encrypt plaintext aad key iv in
   if ciphertext' = ciphertext && tag' = tag then
     match chacha20_poly1305_decrypt ciphertext' tag' aad key iv with
     | Correct plaintext' ->
       if plaintext' = plaintext then success h
-      else (failure h "Decryption error: plaintext doesn't match")
+      else (failure h !$"Decryption error: plaintext doesn't match")
     | Error ->
-      failure h "Decryption error: invalid ciphertext or tag"
-  else failure h "Encryption error: ciphertext doesn't match"
+      failure h !$"Decryption error: invalid ciphertext or tag"
+  else failure h !$"Encryption error: ciphertext doesn't match"
 
-val test_aead: list aead_vector -> St bool
-let rec test_aead = function
-  | [] -> true
-  | v :: vs ->
-    match v.cipher with
-    | CHACHA20_POLY1305 ->
+// TODO: switch to a C loop
+val test_aead: len:UInt32.t -> b:B.buffer aead_vector { B.len b = len } -> St bool
+let rec test_aead len b =
+  let open FStar.Integers in
+  if len = 0ul then
+    true
+  else
+    let v = b.(0ul) in
+    match v with
+    | CHACHA20_POLY1305, _, _, _, _, _, _ ->
       let this = test_chacha20_poly1305 v in
-      let rest = test_aead vs in
+      let rest = test_aead (len - 1ul) (B.offset b 1ul) in
       this && rest
-    | _ -> test_aead vs
+    | _ -> test_aead (len - 1ul) (B.offset b 1ul)
 
 val main: unit -> St unit
 let main () =
-  let res = test_aead aead_vectors in
+  let aead_vectors, aead_vectors_len = Test.Vectors.aead_vectors_low in
+  let res = test_aead aead_vectors_len aead_vectors in
   if not res then C.exit 1l

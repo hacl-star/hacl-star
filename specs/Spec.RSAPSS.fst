@@ -140,7 +140,7 @@ let pss_verify #msgLen sLen msg emBits em =
 
   let em_0 = if msBits > 0 then em.[0] &. (u8 0xff <<. u32 msBits) else u8 0 in
   let em_last = em.[emLen - 1] in
-  
+
   if (emLen < sLen + hLen + 2) then false
   else begin
     if (not (uint_to_nat #U8 em_last = 0xbc && uint_to_nat #U8 em_0 = 0)) then false
@@ -148,7 +148,7 @@ let pss_verify #msgLen sLen msg emBits em =
       let (dbLen:size_nat{dbLen > 0}) = emLen - hLen - 1 in
       let maskedDB = slice em 0 dbLen in
       let m1Hash = slice em dbLen (dbLen + hLen) in
-      
+
       let dbMask = mgf_sha256 m1Hash dbLen in
       let db = xor_bytes maskedDB dbMask in
       let db =

@@ -99,7 +99,7 @@ let bufferRepr #i #l b = b
 
 let create (i:id) (zero:UInt8.t) (len:UInt32.t) :
    StackInline (plainBuffer i (v len))
-     (requires (fun h -> is_stack_region h.tip))
+     (requires (fun h -> is_stack_region (get_tip h)))
      (ensures (fun (h0:mem) p h1 ->
        let p' = p in
        let b = as_buffer p in
@@ -107,8 +107,8 @@ let create (i:id) (zero:UInt8.t) (len:UInt32.t) :
        let live = live' in (* to undo shadowing by FStar.Buffer.live *)
          (b `unused_in` h0)
        /\ live h1 p' /\ idx b = 0 /\ length b = v len
-       /\ frameOf b = h0.tip
-       /\ Map.domain h1.h == Map.domain h0.h
+       /\ frameOf b = get_tip h0
+       /\ Map.domain (get_hmap h1) == Map.domain (get_hmap h0)
        /\ modifies_0 h0 h1
        /\ as_seq h1 b == Seq.create (v len) zero
        ))

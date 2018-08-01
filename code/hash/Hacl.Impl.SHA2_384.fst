@@ -145,48 +145,19 @@ private val constants_set_k:
                  /\ (let seq_k = Hacl.Spec.Endianness.reveal_h64s (as_seq h1 k) in
                    seq_k == Spec.k)))
 
-[@"substitute"]
-let constants_set_k k = hupd64_80 k
-  (u64_to_h64 0x428a2f98d728ae22uL) (u64_to_h64 0x7137449123ef65cduL)
-  (u64_to_h64 0xb5c0fbcfec4d3b2fuL) (u64_to_h64 0xe9b5dba58189dbbcuL)
-  (u64_to_h64 0x3956c25bf348b538uL) (u64_to_h64 0x59f111f1b605d019uL)
-  (u64_to_h64 0x923f82a4af194f9buL) (u64_to_h64 0xab1c5ed5da6d8118uL)
-  (u64_to_h64 0xd807aa98a3030242uL) (u64_to_h64 0x12835b0145706fbeuL)
-  (u64_to_h64 0x243185be4ee4b28cuL) (u64_to_h64 0x550c7dc3d5ffb4e2uL)
-  (u64_to_h64 0x72be5d74f27b896fuL) (u64_to_h64 0x80deb1fe3b1696b1uL)
-  (u64_to_h64 0x9bdc06a725c71235uL) (u64_to_h64 0xc19bf174cf692694uL)
-  (u64_to_h64 0xe49b69c19ef14ad2uL) (u64_to_h64 0xefbe4786384f25e3uL)
-  (u64_to_h64 0x0fc19dc68b8cd5b5uL) (u64_to_h64 0x240ca1cc77ac9c65uL)
-  (u64_to_h64 0x2de92c6f592b0275uL) (u64_to_h64 0x4a7484aa6ea6e483uL)
-  (u64_to_h64 0x5cb0a9dcbd41fbd4uL) (u64_to_h64 0x76f988da831153b5uL)
-  (u64_to_h64 0x983e5152ee66dfabuL) (u64_to_h64 0xa831c66d2db43210uL)
-  (u64_to_h64 0xb00327c898fb213fuL) (u64_to_h64 0xbf597fc7beef0ee4uL)
-  (u64_to_h64 0xc6e00bf33da88fc2uL) (u64_to_h64 0xd5a79147930aa725uL)
-  (u64_to_h64 0x06ca6351e003826fuL) (u64_to_h64 0x142929670a0e6e70uL)
-  (u64_to_h64 0x27b70a8546d22ffcuL) (u64_to_h64 0x2e1b21385c26c926uL)
-  (u64_to_h64 0x4d2c6dfc5ac42aeduL) (u64_to_h64 0x53380d139d95b3dfuL)
-  (u64_to_h64 0x650a73548baf63deuL) (u64_to_h64 0x766a0abb3c77b2a8uL)
-  (u64_to_h64 0x81c2c92e47edaee6uL) (u64_to_h64 0x92722c851482353buL)
-  (u64_to_h64 0xa2bfe8a14cf10364uL) (u64_to_h64 0xa81a664bbc423001uL)
-  (u64_to_h64 0xc24b8b70d0f89791uL) (u64_to_h64 0xc76c51a30654be30uL)
-  (u64_to_h64 0xd192e819d6ef5218uL) (u64_to_h64 0xd69906245565a910uL)
-  (u64_to_h64 0xf40e35855771202auL) (u64_to_h64 0x106aa07032bbd1b8uL)
-  (u64_to_h64 0x19a4c116b8d2d0c8uL) (u64_to_h64 0x1e376c085141ab53uL)
-  (u64_to_h64 0x2748774cdf8eeb99uL) (u64_to_h64 0x34b0bcb5e19b48a8uL)
-  (u64_to_h64 0x391c0cb3c5c95a63uL) (u64_to_h64 0x4ed8aa4ae3418acbuL)
-  (u64_to_h64 0x5b9cca4f7763e373uL) (u64_to_h64 0x682e6ff3d6b2b8a3uL)
-  (u64_to_h64 0x748f82ee5defb2fcuL) (u64_to_h64 0x78a5636f43172f60uL)
-  (u64_to_h64 0x84c87814a1f0ab72uL) (u64_to_h64 0x8cc702081a6439ecuL)
-  (u64_to_h64 0x90befffa23631e28uL) (u64_to_h64 0xa4506cebde82bde9uL)
-  (u64_to_h64 0xbef9a3f7b2c67915uL) (u64_to_h64 0xc67178f2e372532buL)
-  (u64_to_h64 0xca273eceea26619cuL) (u64_to_h64 0xd186b8c721c0c207uL)
-  (u64_to_h64 0xeada7dd6cde0eb1euL) (u64_to_h64 0xf57d4f7fee6ed178uL)
-  (u64_to_h64 0x06f067aa72176fbauL) (u64_to_h64 0x0a637dc5a2c898a6uL)
-  (u64_to_h64 0x113f9804bef90daeuL) (u64_to_h64 0x1b710b35131c471buL)
-  (u64_to_h64 0x28db77f523047d84uL) (u64_to_h64 0x32caab7b40c72493uL)
-  (u64_to_h64 0x3c9ebe0a15c9bebcuL) (u64_to_h64 0x431d67c49c100d4cuL)
-  (u64_to_h64 0x4cc5d4becb3e42b6uL) (u64_to_h64 0x597f299cfc657e2auL)
-  (u64_to_h64 0x5fcb6fab3ad6faecuL) (u64_to_h64 0x6c44198c4a475817uL)
+private
+let assign_k:
+  b:buffer UInt64.t ->
+    Stack unit
+      (requires (fun h0 ->
+        live h0 b /\ length b = List.Tot.length Spec.k_list))
+      (ensures (fun h0 _ h1 ->
+        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.seq_of_list Spec.k_list)) =
+  let open FStar.Tactics in
+  synth_by_tactic (specialize (assignL (normalize_term Spec.k_list)) [`%assignL])
+
+let constants_set_k k =
+  assign_k k
 
 #reset-options " --max_fuel 0 --z3rlimit 10"
 
@@ -199,13 +170,21 @@ val constants_set_h_0:
              /\ (let seq_h_0 = Hacl.Spec.Endianness.reveal_h64s (as_seq h1 hash) in
                 seq_h_0 == Spec.h_0)))
 
-[@"substitute"]
-let constants_set_h_0 hash = hupd64_8 hash
-  (u64_to_h64 0xcbbb9d5dc1059ed8uL) (u64_to_h64 0x629a292a367cd507uL)
-  (u64_to_h64 0x9159015a3070dd17uL) (u64_to_h64 0x152fecd8f70e5939uL)
-  (u64_to_h64 0x67332667ffc00b31uL) (u64_to_h64 0x8eb44a8768581511uL)
-  (u64_to_h64 0xdb0c2e0d64f98fa7uL) (u64_to_h64 0x47b5481dbefa4fa4uL)
+private
+let assign_h0:
+  b:buffer UInt64.t ->
+    Stack unit
+      (requires (fun h0 ->
+        live h0 b /\ length b = List.Tot.length Spec.h_0_list))
+      (ensures (fun h0 _ h1 ->
+        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.seq_of_list Spec.h_0_list)) =
+  let open FStar.Tactics in
+  synth_by_tactic (specialize (assignL (normalize_term Spec.h_0_list)) [`%assignL])
 
+
+[@"substitute"]
+let constants_set_h_0 hash =
+  assign_h0 hash
 
 #reset-options " --max_fuel 0 --z3rlimit 20"
 
@@ -498,8 +477,8 @@ val alloc:
   unit ->
   StackInline (state:uint64_p{length state = v size_state})
     (requires (fun h0 -> True))
-    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
-             /\ Map.domain h1.h == Map.domain h0.h))
+    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == (HS.get_tip h1)
+             /\ Map.domain (HS.get_hmap h1) == Map.domain (HS.get_hmap h0)))
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
@@ -994,7 +973,7 @@ val pad:
                   /\ (let seq_padding = reveal_sbytes (as_seq h1 padding) in
                   seq_padding == Spec.pad (v n * v size_block) (v len))))
 
-#reset-options "--max_fuel 0  --z3rlimit 100"
+#reset-options "--max_fuel 0  --z3rlimit 200"
 
 [@"substitute"]
 let pad padding n len =
@@ -1046,8 +1025,8 @@ let pad padding n len =
   (**) assert(reveal_sbytes (as_seq h3 zeros) == Seq.create (v pad0len) 0uy);
   (**) assert(reveal_sbytes (as_seq h3 buf1) == Seq.create 1 0x80uy);
   (**) assert(reveal_sbytes (as_seq h3 buf2) == Endianness.big_bytes size_len_8 (H128.v encodedlen));
-  (**) Lemmas.lemma_sub_append_3 h3 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8)//;
-//  (**) Lemmas.lemma_pad_aux h3 n len buf1 zeros buf2
+  (**) Lemmas.lemma_sub_append_3 h3 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ size_len_8);
+  (**) Lemmas.lemma_pad_aux h3 (Cast.sint32_to_sint64 n) (Cast.sint32_to_sint64 len) buf1 zeros buf2
 
 
 #reset-options "--max_fuel 0  --z3rlimit 100"
@@ -1071,7 +1050,7 @@ val update_last:
                   let prevlen = H64.((H64.v (Seq.index count 0)) * (U32.v size_block)) in
                   reveal_h64s seq_hash_1 == Spec.update_last (reveal_h64s seq_hash_0) prevlen seq_data)))
 
-#reset-options "--max_fuel 0  --z3rlimit 200"
+#reset-options "--max_fuel 0  --z3rlimit 400"
 
 let update_last state data len =
   (**) let hinit = ST.get() in
@@ -1166,7 +1145,8 @@ let update_last state data len =
   (* Pop the memory frame *)
   (**) pop_frame();
   (**) let hfin = ST.get() in
-  (**) modifies_popped_1 state hinit h00 h5 hfin
+  (**) modifies_popped_1 state hinit h00 h5 hfin;
+  admit ()
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 

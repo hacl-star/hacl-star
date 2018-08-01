@@ -1,9 +1,10 @@
 FSTAR_HOME	?= ../../FStar
 KREMLIN_HOME	?= ../../kremlin
 HACL_HOME	?= ..
-OPENSSL_HOME	?= ../../MLCrypto/openssl
+MLCRYPTO_HOME	?= ../../MLCrypto
+OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
 
-# The everest script calls this with CONFIG=noopenssl when -windows is on
+# The noopenssl config no means: enable bcrypt + disable openssl
 ifeq (,$(EVEREST_WINDOWS))
 CONFIG		?= default
 else
@@ -41,9 +42,12 @@ endif
 # Manual staging...
 all:
 	rm -f .depend && $(MAKE) .depend
-	$(MAKE) all_
+	$(MAKE) stage1
+	STAGE=2 $(MAKE) stage2
 
-all_: $(OUT_DIR)/libevercrypt.a $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)/evercrypt.cmxa
+stage1: $(GENERATED_DIR)/Makefile.include
+
+stage2: $(OUT_DIR)/libevercrypt.a $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)/evercrypt.cmxa
 
 .PHONY: test
 test:
@@ -54,9 +58,15 @@ test:
 # - verify every F* file in parallel to generate .checked files
 # - extract each .checked file into a .krml file in parallel
 
-FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib evercrypt evercrypt/fst \
+# TODO: some of these directories have no interfaces, meaning that we end up
+# with way too much HACL* code in our verification dependency graph; ideally,
+# every HACL* algorithm should have an interfaces directory that allows us to
+# cut the dependency graph
+
+FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib/compat evercrypt evercrypt/fst \
   evercrypt/config/$(CONFIG) \
   $(HACL_CODE)/lib/kremlin \
+  $(HACL_CODE)/experimental/aesgcm \
   $(HACL_CODE)/curve25519/interfaces \
   $(HACL_CODE)/hash/interfaces \
   $(HACL_CODE)/api/interfaces \
@@ -81,16 +91,6 @@ ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti
 
 include .depend
 
-# These modules fail with FStar@master.
-# Please delete the target once they are fixed.
-$(CACHE_DIR)/Hacl.Spec.Bignum.Fmul.fst.checked \
-$(CACHE_DIR)/Hacl.Bignum.Fproduct.fst.checked \
-$(CACHE_DIR)/Hacl.Spec.Poly1305_64.fst.checked \
-$(CACHE_DIR)/Hacl.Impl.Chacha20.fst.checked \
-$(CACHE_DIR)/Hacl.Policies.fst.checked: | .depend
-	$(FSTAR) --admit_smt_queries true $< && \
-	touch $@
-
 # Admit SMT queries for modules in FStar namespace
 $(CACHE_DIR)/FStar.%.fst.checked: | .depend
 	$(FSTAR) --admit_smt_queries true $< && \
@@ -110,30 +110,34 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of the .c files
 ifneq (,$(EVEREST_WINDOWS))
-KOPTS		+=-falloca -ftail-calls -fnouint128 -drop FStar.UInt128 \
-  -add-early-include '"FStar_UInt128.h"'
+KOPTS		+=-falloca -ftail-calls
 endif
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
 	  -add-include '"kremlib.h"' \
-	  -add-include '"kremlin/c_string.h"' \
-	  -add-include '"kremlin/prims_int.h"' \
-	  -add-include '"kremlin/prims_string.h"' \
+	  -add-include '"kremlin/internal/compat.h"' \
 	  -bundle 'FStar.*' \
-	  -bundle 'C.Loops=C.Loops,Spec.*,Hacl.Spe.*,Hacl.Spec.*,Seq.*,Hacl.Endianness,Hacl.Types,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Constants,Hacl.Cast' \
-	  -bundle 'Hacl.Chacha20=Hacl.Impl.*,Hacl.Chacha20,Hacl.Standalone.Poly1305_64,Hacl.Lib.*,Hacl.Bignum.*' \
+	  -bundle 'Hacl.*' \
+	  -bundle 'Spec.*' \
+	  -bundle 'Hacl.Spec.*' \
+	  -bundle 'Hacl.Spe.*' \
+	  -bundle 'AEAD.*' \
 	  -bundle 'LowStar.*' \
+	  -library 'AEAD.*,Hacl.*' \
 	  -no-prefix 'EverCrypt.Vale' \
-	  -tmpdir generated $^ -warn-error +9 \
-	  && \
-	touch $@
+	  -tmpdir generated $^ -warn-error +9
 
-# This will generate an error the first time this Makefile is invoked because
-# $(ALL_KRML_FILES) is empty. This is why we need to stage the `all` target.
--include $(GENERATED_DIR)/Makefile.include
+# The Makefile is manually staged because GNU Make does not understand
+# dependencies between the Makefiles we include, i.e. it won't first generate
+# the .depend, parse it, then generate Makefile.include, parse it, then
+# generate dependencies among the C files
+ifeq ($(STAGE),2)
 
+# The top-level invocation guarantees that stage1 has been run and this file is
+# there.
+include $(GENERATED_DIR)/Makefile.include
 
 # 3. Collecting all of our source files, and generating corresponding object
 # files.
@@ -154,11 +158,12 @@ HACL_SOURCES	= \
   $(addprefix $(HACL_CODE)/hash/sha2-c/Hacl_SHA2_,256.c 384.c 512.c) \
   $(HACL_CODE)/curve25519/x25519-c/Hacl_Curve25519.c \
   $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
-  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
   $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \
   $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
-  $(HACL_CODE)/api/aead-c/Hacl_Policies.c \
+  $(HACL_CODE)/poly1305/poly-c/Hacl_Poly1305_64.c \
+  $(HACL_CODE)/api/policies-c/Hacl_Policies.c \
   $(HACL_CODE)/api/aead-c/Hacl_Chacha20Poly1305.c
+#  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
 
 EVERCRYPT_SOURCES = \
   $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c EverCrypt_ValeGlue.c) \
@@ -187,21 +192,11 @@ ALL_OBJS	= $(patsubst %.c,%.o,$(ALL_SOURCES)) $(patsubst %.S,%.o,$(VALE_ASM))
 INCLUDE_DIRS	= $(foreach c,$(ALL_SOURCES),$(dir $(c))) \
   $(HACL_HOME)/secure_api/out/runtime_switch/extracted \
   $(HACL_HOME)/snapshots/common $(KREMLIN_HOME)/include \
-  $(OPENSSL_HOME)/include
+  $(OPENSSL_HOME)/include $(KREMLIN_HOME)
 
 
 CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
-
-ifneq (,$(EVEREST_WINDOWS))
-FSTAR_UINT128	= ../secure_api/out/runtime_switch/uint128/FStar_UInt128.c
-ALL_GENERATED_FILES += $(FSTAR_UINT128)
-INCLUDE_DIRS	+= ../secure_api/out/runtime_switch/uint128
-CFLAGS		+= -DKRML_NOUINT128
-
-$(FSTAR_UINT128):
-	$(error Please run make -C ../secure_api before invoking this Makefile)
-endif
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion -g
 
 # GNU Make manual section 4.14
 %.d: %.c
@@ -210,7 +205,7 @@ endif
 	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
 	  rm -f $@.$$$$
 
--include $(addsuffix .d,$(ALL_SOURCES))
+-include $(patsubst %.c,%.d,$(ALL_SOURCES))
 
 $(OUT_DIR):
 	mkdir -p $@
@@ -227,6 +222,11 @@ ifeq ($(UNAME),Linux)
 LDFLAGS += -ldl -lpthread
 endif
 
+LIBKREMLIB = $(KREMLIN_HOME)/kremlib/out/libkremlib.a
+
+$(LIBKREMLIB):
+	$(error Please run make -C $(KREMLIN_HOME)/kremlib to generate libkremlib.a)
+
 # Note: see
 # https://www.gnu.org/software/make/manual/html_node/Archive-Pitfalls.html#Archive-Pitfalls
 # for why we are not using libhacl.a($(OBJS))
@@ -234,21 +234,13 @@ $(OUT_DIR)/libevercrypt.a: $(ALL_OBJS) | $(OUT_DIR)
 	$(AR) cr $@ $^
 
 $(OUT_DIR)/libevercrypt.$(SO): $(ALL_OBJS) | $(OUT_DIR)
-	$(CC) -shared $^ $(LDFLAGS) -o $@
+	$(CC) -shared $^ $(LDFLAGS) -o $@ $(LIBKREMLIB)
 
 .PRECIOUS: %.o
 
 $(HACL_SOURCES):
 	$(error "Please run `make -j 8 -C $(HACL_CODE) extract-c` before invoking this Makefile")
 
-.PHONY: clean
-clean:
-	rm -rf $(GENERATED_DIR) evercrypt/c/*.o libevercrypt.so libevercrypt.a
-	$(MAKE) -C test clean
-
-.PHONY: distclean
-distclean: clean
-	rm -rf $(OUT_DIR) $(CACHE_DIR)
 
 # 6. An OCaml library that exposes only the bytes-based interface, for now
 
@@ -256,3 +248,25 @@ $(OUT_DIR)/evercrypt.cmxa: evercrypt/ml/EverCrypt_Bytes.ml | $(OUT_DIR)/libeverc
 	ocamlfind mklib -package ctypes,ctypes.foreign -levercrypt -Lout \
 	  $(addprefix -cclib ,$(LDFLAGS)) \
 	  -o $(patsubst %.cmxa,%,$@) $^
+
+endif # COMPILE
+
+# 7. Clean targets that do not re-trigger anything except perhaps the generation
+# of the .depend file.
+
+SHELL=/bin/bash
+
+.PHONY: clean
+clean:
+	rm -rf $(GENERATED_DIR) evercrypt/c/*.o libevercrypt.$(SO) libevercrypt.a
+	$(MAKE) -C test clean
+
+.PHONY: clean-c
+clean-c:
+	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
+	rm -rf $(CACHE_DIR)/EverCrypt.StaticConfig.fst.checked
+
+.PHONY: distclean
+distclean: clean
+	rm -rf $(OUT_DIR) $(CACHE_DIR)
+

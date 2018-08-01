@@ -66,8 +66,8 @@ let enxor_h0_h1
   let dom_0 = {iv=nonce; ctr=PRF.ctr_0 i} in
   let cipher = cbuf cipher_tagged in
   let rgns = Set.as_set [aead_st.prf.rgn; Buffer.frameOf cipher] in
-  HS.(is_stack_region h0.tip) /\
-  HS.(h0.tip = h1.tip)        /\
+  HS.(is_stack_region (HS.get_tip h0)) /\
+  HS.get_tip h0 = HS.get_tip h1        /\
   enxor_pre aead_st nonce aad plain cipher h0                 /\          //enxor_pre holds for h0
   enc_dec_liveness_and_separation aead_st aad plain cipher_tagged h1 /\   //liveness and separation ghold in h1
   (prf i ==>
@@ -114,7 +114,7 @@ let enxor_and_maybe_mac
   (h1:mem) =
   let cipher = cbuf ct in
   let tag = ctag ct in 
-  HS.(is_stack_region h1.tip) /\
+  HS.(is_stack_region (HS.get_tip h1)) /\
   enc_dec_liveness_and_separation aead_st aad plain ct h1 /\
   (safeMac i ==>
    (let aead_entries_1 = HS.sel h1 (st_ilog aead_st) in
@@ -201,15 +201,15 @@ let mac_wrapper_h0_h1
   (h0 h1:mem) =  
   let cipher = cbuf ct in
   let tag = ctag ct in
-  HS.(is_stack_region h0.tip) /\
-  HS.(is_stack_region h1.tip) /\                                //the tip of h0 and h1 are stack regions  
+  HS.(is_stack_region (HS.get_tip h0)) /\
+  HS.(is_stack_region (HS.get_tip h1)) /\                                //the tip of h0 and h1 are stack regions  
   enxor_and_maybe_mac false aead_st nonce aad plain ct h0 /\    //enxor_and_maybe_mac holds for h0 (ensured by enxor)
   enc_dec_liveness_and_separation aead_st aad plain ct h1 /\    //liveness and separation hold for h1
   CMA.(mac_st.region = aead_st.prf.mac_rgn) /\                  //mac_st is in the mac region associated with the mac_rgn of aead_st.prf
   (safeMac i ==>  (
     let open HS in
     let prf_table_1 = HS.sel h1 (itable i aead_st.prf) in
-    HS.modifies (Set.union (Set.singleton h0.tip)
+    HS.modifies (Set.union (Set.singleton (HS.get_tip h0))
                            (Set.union (Set.singleton aead_st.prf.mac_rgn)
 			              (Set.singleton (Buffer.frameOf ct)))) h0 h1 /\               //mac_wrapper modifies the tip of the stack, prf.mac_rgn (it sets the tag in the mac log), and the cipher text region (adds tag to the cipher text buffer)
     HS.modifies_ref aead_st.prf.mac_rgn (Set.singleton (HS.as_addr (CMA.(ilog mac_st.log)))) h0 h1  /\    //in the mac region, it only modifies the mac log associated with mac_st

@@ -19,8 +19,8 @@ typedef struct args
     byte *tag_ptr;
 } args;
 
-extern void aes_key_expansion(byte *key_ptr, byte *key_expansion_ptr);
-extern void gcm_encrypt(args *a);
+extern void aes128_key_expansion(byte *key_ptr, byte *key_expansion_ptr);
+extern void gcm128_encrypt(args *a);
 
 byte key[16] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 byte expanded_key[11 * 16];
@@ -65,10 +65,10 @@ int main(void)
 {
   args a = { plain, 1, auth, 0, iv, expanded_key, out, tag };
   
-  aes_key_expansion(key, expanded_key);
+  aes128_key_expansion(key, expanded_key);
 
   /*
-  gcm_encrypt(&a);
+  gcm128_encrypt(&a);
 
   print_bytes("Ciphertext", out, 16);
   print_bytes("Tag       ", tag, 16);
@@ -95,7 +95,7 @@ int main(void)
       for (int j = 0; j < N; j++)
         {
           cycles_begin(&hi1, &lo1);
-          gcm_encrypt(&a);
+          gcm128_encrypt(&a);
           cycles_end(&hi2, &lo2);
           start = ( ((uint64_t)hi1 << 32) | lo1 ); 
           end   = ( ((uint64_t)hi2 << 32) | lo2 );
@@ -109,7 +109,7 @@ int main(void)
           }            
         }
       nbytes = N * NBLOCKS * 16;
-      printf("AES-128-GCM cycles per byte (%u averaged over %d bytes) is %f\n",
+      printf("AES-128-GCM cycles per byte (%llu averaged over %d bytes) is %f\n",
              total, nbytes, (double)total / nbytes);
       printf("max = %f; min = %f\n",
              (double)max / (NBLOCKS * 16), (double)min / (NBLOCKS * 16));

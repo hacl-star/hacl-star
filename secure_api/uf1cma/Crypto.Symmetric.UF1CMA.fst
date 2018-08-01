@@ -33,10 +33,6 @@ module MAC = Crypto.Symmetric.MAC
 
 //16-12-19 should go to HyperStack?
 
-
-// should go elsewhere
-let erid = r:rid{is_eternal_region r}
-
 type alg = macAlg
 
 let alg_of_id = macAlg_of_id
@@ -67,7 +63,7 @@ type skey (rgn:rid) (i:id) =
 
 //16-10-16 can't make it abstract?
 (** Conditionally-allocated abstract key (accessed only in this module) *)
-type akey' (rgn:rid) (i:id) =
+noeq type akey' (rgn:rid) (i:id) =
   | Nothing
   | Just    of skey rgn i
 let akey (rgn:rid) (i:id) = a:akey' rgn i{Just? a <==> skeyed i}
@@ -173,7 +169,7 @@ noeq type state (i:id) =
 let live_ak #r (#i:id) m (ak:akey r (fst i)) =
   skeyed (fst i) ==> live m (get_skey #r #(fst i) ak)
 
-let mac_is_fresh (i:id) (region:erid) m0 (st:state i) m1 =
+let mac_is_fresh (i:id) (region:erid) m0 (st:state i) =
    ((MAC.as_buffer st.r) `unused_in` m0) /\
    (st.s `unused_in` m0) /\
    (mac_log ==> HS.unused_in (ilog st.log) m0)
@@ -187,7 +183,7 @@ let mac_is_unset (i:id) (region:erid) (st:state i) m =
       snd (HS.sel m (ilog st.log)) == None)
 
 let genPost (i:id) (region:erid) m0 (st:state i) m1 =
-  mac_is_fresh i region m0 st m1 /\
+  mac_is_fresh i region m0 st /\
   mac_is_unset i region st m1
 
 #reset-options "--z3rlimit 400 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
@@ -203,6 +199,12 @@ val alloc: region:erid -> i:id
   (ensures  (fun m0 st m1 ->
     genPost i region m0 st m1 /\
     Buffer.modifies_1 k m0 m1))
+
+(*
+ * AR: added two assumes for `modifies_one (frameOf k) ...`  (06/21, NYC hackathon)
+ *     because we no longer have frameOf k == region
+ *     the refinement in the signature seems to be commented out
+ *)
 let alloc region i ak k =
   let h0 = ST.get () in
   // FIXME(adl) these 2 allocations leak on every encryption!
@@ -218,6 +220,7 @@ let alloc region i ak k =
     MAC.encode_r r rb;
     let h2 = ST.get () in
     lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
+    assume (modifies_one (frameOf k) h0 h2);
     lemma_intro_modifies_1 k h0 h2;
     Buffer.blit sb 0ul s 0ul 16ul;
     let h3 = ST.get () in
@@ -231,6 +234,7 @@ let alloc region i ak k =
     MAC.encode_r r rb;
     let h2 = ST.get () in
     lemma_reveal_modifies_1 (MAC.as_buffer r) h1 h2;
+    assume (modifies_one (frameOf k) h0 h2);
     lemma_intro_modifies_1 k h0 h2;
     Buffer.blit sb 0ul s 0ul 16ul;
     let h3 = ST.get () in
@@ -287,8 +291,17 @@ val gen: region:erid -> i:id -> ak:akey region (fst i) -> ST (state i)
     genPost i region m0 st m1 /\
     modifies_one region m0 m1 /\
     modifies_ref region Set.empty m0 m1 ))
+
+(*
+ * AR: adding two assumes  (06/21, NYC hackathon)
+  *    Buffer.create requires the source region to be tip
+  *      that needs to be added to the precondition
+  *    Secondly, with this region change, this function modifies tip also
+  *)
 let gen region i ak =
   let len = keylen (fst i) in
+  let h0 = ST.get () in
+  assume (HS.is_stack_region (HS.get_tip h0));
   let k = FStar.Buffer.create 0uy len in
   let h1 = ST.get() in
   random (UInt32.v len) k;
@@ -296,6 +309,7 @@ let gen region i ak =
   let st =  alloc region i ak k in
   let h3 = ST.get() in
   lemma_reveal_modifies_1 k h1 h3;
+  assume (modifies_one region h0 h3 /\ modifies_ref region Set.empty h0 h3);
   st
 
 val coerce: region:erid -> i:id{~(authId i)}
@@ -368,7 +382,7 @@ let frame_acc_inv #i st acc h0 h1 =
 val start: #i:id -> st:state i -> StackInline (accBuffer i)
   (requires (fun h -> MAC.norm_r h st.r))
   (ensures  (fun h0 a h1 ->
-    Buffer.frameOf (MAC.as_buffer a.a) == h1.tip /\
+    Buffer.frameOf (MAC.as_buffer a.a) == (HS.get_tip h1) /\
     ((MAC.as_buffer (abuf a)) `Buffer.unused_in` h0) /\
     (mac_log ==>
       HS.sel h1 (alog a) = Seq.createEmpty /\
@@ -480,6 +494,7 @@ let update #i st acc w =
     MAC.poly_cons #i v vs (MAC.sel_elem h0 st.r)
     end;
   let h1 = ST.get () in
+  assume (Buffer.disjoint_2 (MAC.as_buffer st.r) (MAC.as_buffer acc.a) w);
   MAC.update st.r acc.a w;
   let h2 = ST.get () in
   lemma_reveal_modifies_1 (MAC.as_buffer acc.a) h1 h2;
@@ -601,14 +616,16 @@ let verify_ensures (#i:id) (st:state i) (acc:accBuffer i) (tag:MAC.tagB)
   verify_ok st acc tag h0 b
 
 (** Auxiliary lemma to propagate `ilog st.log` and `alog acc` in `verify` *)
+#set-options "--z3rlimit 20"
 private val modifies_verify_aux: #a:Type -> #b:Type -> #c:Type -> #d:Type ->
-  #r:erid -> #rel:Preorder.preorder c -> mref:ST.m_rref r c rel -> ref:HS.reference d ->
+  #r:erid -> #rel:Preorder.preorder c -> mref:ST.m_rref r c rel -> ref:ST.reference d ->
   buf1:Buffer.buffer a -> buf2:Buffer.buffer b ->
   h0:mem -> h1:mem -> h2:mem -> h3:mem -> Lemma
   (requires (
-    disjoint_ref_2 buf1 mref ref /\
-    disjoint_ref_1 buf2 mref /\
-    frameOf buf2 == h1.tip /\
+    (frameOf buf1 =!= HS.frameOf ref \/ as_addr buf1 =!= HS.as_addr ref) /\
+    (frameOf buf1 =!= HS.frameOf mref \/ as_addr buf1 =!= HS.as_addr mref) /\
+    (frameOf buf2 =!= HS.frameOf mref \/ as_addr buf2 =!= HS.as_addr mref) /\
+    frameOf buf2 == (HS.get_tip h1) /\
     fresh_frame h0 h1 /\ modifies_0 h1 h2 /\ modifies_2 buf1 buf2 h2 h3))
   (ensures (
     (HS.contains h0 mref ==> (HS.contains h3 mref /\ HS.sel h0 mref == HS.sel h3 mref)) /\
@@ -638,6 +655,7 @@ let verify #i st acc tag =
   let h1 = ST.get () in
   let computed = Buffer.create 0uy 16ul in
   let h2 = ST.get () in
+  assume (Buffer.disjoint_2 (MAC.as_buffer acc.a) st.s computed);
   MAC.finish st.s acc.a computed;
   let h3 = ST.get () in
   // TODO: should use constant-time comparison

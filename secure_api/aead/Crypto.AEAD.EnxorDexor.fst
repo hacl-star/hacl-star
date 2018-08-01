@@ -428,7 +428,7 @@ val counter_enxor:
     enxor_invariant t x len remaining_len plain cipher h_init h))
   (ensures (fun h0 _ h1 ->
     let open HS in
-    h0.tip = h1.tip /\
+    (HS.get_tip h0) = (HS.get_tip h1) /\
     liveness t plain cipher h1 /\
     iteration_lengths_ok x len remaining_len /\
     // in all cases, we extend the table only at x and its successors.
@@ -490,7 +490,7 @@ val enxor  :
   (requires (fun h ->
              let x = {iv=iv; ctr=otp_offset i} in
              let t = aead_st.prf in
-             HS.(is_stack_region h.tip) /\
+             HS.(is_stack_region (HS.get_tip h)) /\
              enc_dec_separation aead_st aad plain cipher_tag /\
              enc_dec_liveness aead_st aad plain cipher_tag h /\
              inv aead_st h /\

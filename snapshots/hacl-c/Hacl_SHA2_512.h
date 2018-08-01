@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,14 @@
  */
 
 
-#include "kremlib.h"
+
 #ifndef __Hacl_SHA2_512_H
 #define __Hacl_SHA2_512_H
 
 
+#include "kremlib.h"
 
+extern FStar_UInt128_uint128 FStar_Int_Cast_Full_uint64_to_uint128(uint64_t x0);
 
 typedef uint8_t Hacl_SHA2_512_uint8_t;
 

@@ -14,13 +14,9 @@ open Spec.Curve25519
 (* Point addition *)
 type aff_point = tuple2 elem elem           // Affine point
 type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
-let fsub (x:elem) (y:elem) = x -. y 
-let fadd (x:elem) (y:elem) = x +. y 
-let fmul (x:elem) (y:elem) = x *. y 
-
-// let sha512 (b:bytes{length b < pow2 32}) : Tot (lbytes 64) =
-//   assert_norm(pow2 32 < pow2 125);
-//   hash b
+let fsub (x:elem) (y:elem) = x -. y
+let fadd (x:elem) (y:elem) = x +. y
+let fmul (x:elem) (y:elem) = x *. y
 
 let modp_inv (x:elem) : Tot elem =
   x ** (prime - 2)
@@ -173,21 +169,22 @@ let verify (public:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes 
   match a' with
   | None -> false
   | Some a' -> (
-      let rs = slice signature 0 32 in
-      let r' = point_decompress rs in
-      match r' with
-      | None -> false
-      | Some r' -> (
-          let s = nat_from_bytes_le (slice signature 32 64) in
-          if s >= q then false
-          else (
-            let rs_public_msg = create (64 + len) (u8 0) in
-            let rs_public_msg = update_sub rs_public_msg 0 32 rs in
-            let rs_public_msg = update_sub rs_public_msg 32 32 public in
-            let rs_public_msg = update_sub rs_public_msg 64 len msg in
-            let h = sha512_modq (64 + len) rs_public_msg in
-            let sB = point_mul 32 (nat_to_bytes_le 32 s) g in
-            let hA = point_mul 32 (nat_to_bytes_le 32 h) a' in
-            point_equal sB (point_add r' hA)
-          )))
-
+    let rs = slice signature 0 32 in
+    let r' = point_decompress rs in
+    match r' with
+    | None -> false
+    | Some r' -> (
+      let s = nat_from_bytes_le (slice signature 32 64) in
+      if s >= q then false
+      else (
+        let rs_public_msg = create (64 + len) (u8 0) in
+        let rs_public_msg = update_sub rs_public_msg 0 32 rs in
+        let rs_public_msg = update_sub rs_public_msg 32 32 public in
+        let rs_public_msg = update_sub rs_public_msg 64 len msg in
+        let h = sha512_modq (64 + len) rs_public_msg in
+        let sB = point_mul 32 (nat_to_bytes_le 32 s) g in
+        let hA = point_mul 32 (nat_to_bytes_le 32 h) a' in
+        point_equal sB (point_add r' hA)
+      )
+    )
+  )

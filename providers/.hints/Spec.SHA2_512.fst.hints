@@ -1,23 +1,23 @@
 [
-  "\u0001†oýÄ“f\u0019\u0007‹Ôo\u000eîÛœ",
+  "\u0015W«\u00079\bz5´ü0¨º\u0000Œ.",
   [
     [
-      "Spec.SHA2_512.pow2_values",
+      "Spec.SHA2_512.pow2_61",
       1,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0,
-      "dfc7fa8f5598542ba94bd333a5680978"
-    ],
-    [
-      "Spec.SHA2_512.pow2_values",
-      2,
       2,
       1,
       [ "@query" ],
       0,
-      "c8c5a9fd5a7f1407ac527c8856efcc56"
+      "71736d95c6610826760641b3816b2ff5"
+    ],
+    [
+      "Spec.SHA2_512.pow2_125",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "0a6a95efd35f2d7e6e4e35b6daa6fef7"
     ],
     [
       "Spec.SHA2_512.hash_w",
@@ -26,7 +26,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "44739937d5fafdd6a2609196fab73e44"
+      "51301a69a0863910149b544ab7377bef"
     ],
     [
       "Spec.SHA2_512.k_w",
@@ -35,7 +35,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "d053e8ab1762a1ee9123f5827d782a43"
+      "fda647ba3e59598fced855aa7fa71da4"
     ],
     [
       "Spec.SHA2_512.ws_w",
@@ -44,7 +44,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "2b4b63b2ff5d25a03d36bfcd4742e76f"
+      "70db1c0b8b093913fc160c05f077ac07"
     ],
     [
       "Spec.SHA2_512.block_w",
@@ -53,7 +53,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "bd81b19653228785fef8024e32c079cb"
+      "38383307d93ab50717064239094b90f4"
     ],
     [
       "Spec.SHA2_512.rotate_right",
@@ -84,25 +84,63 @@
         "typing_FStar.UInt32.v", "typing_FStar.UInt64.v"
       ],
       0,
-      "adbbcc6203a7d9fc3a67497555d1c742"
+      "0a0d7c7c5c9ca5248b4f276648667123"
+    ],
+    [
+      "Spec.SHA2_512.k_list",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "e81112fcdc3a404a8863ac2736af1d99"
     ],
     [
       "Spec.SHA2_512.k",
       1,
-      0,
+      2,
       1,
-      [ "@query", "equation_Spec.SHA2_512.size_k_w" ],
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@query", "equation_FStar.List.Tot.Properties.llist",
+        "equation_Spec.SHA2_512.size_k_w", "equation_Spec.SHA2_512.word",
+        "function_token_typing_FStar.UInt64.t",
+        "function_token_typing_Spec.SHA2_512.k_list",
+        "lemma_FStar.Seq.Base.lemma_of_list_length",
+        "refinement_interpretation_FStar.List.Tot.Properties_Tm_refine_fbb3412f12fd58a91571022d7c9fa36d"
+      ],
       0,
-      "6f03ceb45aa4bef00fe6e30e181688a2"
+      "d573ff8b432fa10a9d7148f857b49d04"
+    ],
+    [
+      "Spec.SHA2_512.h_0_list",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "7ad960ad9ac2ccbdc0f62e2eb9d30523"
     ],
     [
       "Spec.SHA2_512.h_0",
       1,
-      0,
+      2,
       1,
-      [ "@query", "equation_Spec.SHA2_512.size_hash_w" ],
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@query", "equation_FStar.List.Tot.Properties.llist",
+        "equation_Spec.SHA2_512.size_hash_w", "equation_Spec.SHA2_512.word",
+        "function_token_typing_FStar.UInt64.t",
+        "function_token_typing_Spec.SHA2_512.h_0_list",
+        "lemma_FStar.Seq.Base.lemma_of_list_length",
+        "refinement_interpretation_FStar.List.Tot.Properties_Tm_refine_fbb3412f12fd58a91571022d7c9fa36d"
+      ],
       0,
-      "d1bc1ab198806e6f764b6f8065f2a54f"
+      "4e4b52021cacb4074387a85d63ae65ec"
     ],
     [
       "Spec.SHA2_512.ws",
@@ -124,13 +162,13 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "4a9bde819878942563668ad9c435c30e"
+      "eb70c1ea4780df064912d8bc2d777051"
     ],
     [
       "Spec.SHA2_512.shuffle_core",
@@ -138,22 +176,18 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
         "equation_Prims.nat", "equation_Spec.SHA2_512.counter",
         "equation_Spec.SHA2_512.hash_w", "equation_Spec.SHA2_512.k",
         "equation_Spec.SHA2_512.k_w", "equation_Spec.SHA2_512.size_hash_w",
         "equation_Spec.SHA2_512.size_k_w", "equation_Spec.SHA2_512.word",
-        "function_token_typing_FStar.UInt32.n",
         "function_token_typing_Spec.SHA2_512.k",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "7967f28c931ff81a408c6cc40ed12f04"
+      "c3566d34b955b02a55bc849e4e23e844"
     ],
     [
       "Spec.SHA2_512.shuffle",
@@ -166,7 +200,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "3ec91244af3a59143bd7912edf707433"
+      "b918bb5cc718041876d58f80164a05fd"
     ],
     [
       "Spec.SHA2_512.update",
@@ -185,11 +219,33 @@
         "function_token_typing_FStar.UInt32.n",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b"
+        "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "86e69d97f7d47ae3ab61f0a7e6f24ef3"
+      "29e56c9b93fa161aadec794c92d83871"
+    ],
+    [
+      "Spec.SHA2_512.update",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.hash_w",
+        "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_hash_w",
+        "equation_Spec.SHA2_512.size_word", "equation_Spec.SHA2_512.word",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "int_typing", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
+      ],
+      0,
+      "9c6385eb025a4549e6fa63d766b82dc6"
     ],
     [
       "Spec.SHA2_512.update_multi",
@@ -206,8 +262,8 @@
         "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
-        "equation_Spec.SHA2_512.size_block",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "function_token_typing_FStar.Int16.n",
@@ -224,13 +280,56 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0",
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "523041a078e5a1d9554473559bfe3e53"
+      "4ceba7d04c6f6aca145c189c0435d31b"
+    ],
+    [
+      "Spec.SHA2_512.update_multi",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "assumption_Prims.HasEq_int", "b2t_def",
+        "binder_x_ddd15c2db35601be1669783aa4579c6e_1", "bool_inversion",
+        "equality_tok_Prims.LexTop@tok", "equation_FStar.Int16.n",
+        "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_word",
+        "function_token_typing_FStar.Int16.n",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Spec.SHA2_512.size_block", "int_inversion",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0",
+        "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "8781ef8af8c6c77db604da25163d502b"
     ],
     [
       "Spec.SHA2_512.pad0_length",
@@ -249,7 +348,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "81eeaaf5f72c77f6fe75deffdd1ca082"
+      "36a8e3a1899fbaed9e8bbd9fe2e4974b"
     ],
     [
       "Spec.SHA2_512.pad",
@@ -266,9 +365,9 @@
         "equation_FStar.Seq.Base.op_At_Bar", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.SHA2_512.h_0",
-        "equation_Spec.SHA2_512.hash_w",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.SHA2_512.h_0", "equation_Spec.SHA2_512.hash_w",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.pad0_length",
         "equation_Spec.SHA2_512.size_block",
@@ -295,10 +394,11 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_FStar.UInt8_Tm_refine_22871ed0ff70fd094ad3e8d742624d47",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_7e10d6c36b18f81a912b18a391ae2a16",
@@ -311,7 +411,78 @@
         "typing_Prims.pow2", "typing_Spec.SHA2_512.pad0_length"
       ],
       0,
-      "61b6f08e54ac4d33bc124d758286880b"
+      "b891dc0f9bb1522674df4da7f2525a79"
+    ],
+    [
+      "Spec.SHA2_512.pad",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "b2t_def", "bool_inversion",
+        "bool_typing", "equation_FStar.Endianness.bytes",
+        "equation_FStar.Endianness.lbytes", "equation_FStar.Int16.n",
+        "equation_FStar.List.Tot.Properties.llist",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.SHA2_512.h_0", "equation_Spec.SHA2_512.hash_w",
+        "equation_Spec.SHA2_512.max_input_len_8",
+        "equation_Spec.SHA2_512.pad0_length",
+        "equation_Spec.SHA2_512.pow2_125",
+        "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_hash",
+        "equation_Spec.SHA2_512.size_hash_w",
+        "equation_Spec.SHA2_512.size_len_8",
+        "equation_Spec.SHA2_512.size_len_ul_8",
+        "equation_Spec.SHA2_512.size_word", "equation_Spec.SHA2_512.word",
+        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
+        "function_token_typing_FStar.Int16.n",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt64.t",
+        "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Spec.SHA2_512.h_0",
+        "function_token_typing_Spec.SHA2_512.h_0_list",
+        "function_token_typing_Spec.SHA2_512.pow2_125",
+        "function_token_typing_Spec.SHA2_512.size_block",
+        "function_token_typing_Spec.SHA2_512.size_hash",
+        "function_token_typing_Spec.SHA2_512.size_len_ul_8", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
+        "refinement_interpretation_FStar.List.Tot.Properties_Tm_refine_fbb3412f12fd58a91571022d7c9fa36d",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_FStar.UInt8_Tm_refine_22871ed0ff70fd094ad3e8d742624d47",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_7e10d6c36b18f81a912b18a391ae2a16",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_a4df189f69fb195ae1b5deb795ef1612",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_c81318e5b330c178718c5352aa9b09fe",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_cc8d9da8c2b44f224f16794bbab40669",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_fdf85447de400383e22368c8fb70359b",
+        "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.create",
+        "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.v",
+        "typing_FStar.UInt8.uint_to_t", "typing_Prims.pow2",
+        "typing_Spec.SHA2_512.pad0_length"
+      ],
+      0,
+      "1a73eed155da2cc5d4548f9d432b1ce2"
     ],
     [
       "Spec.SHA2_512.update_last",
@@ -322,8 +493,8 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_Prims.HasEq_int", "equation_FStar.Seq.Base.op_At_Bar",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "equation_Spec.SHA2_512.bytes",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
@@ -333,6 +504,7 @@
         "lemma_FStar.Seq.Base.lemma_len_append",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_44304dac64b137336a833f6350b8bde7",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_a4df189f69fb195ae1b5deb795ef1612",
@@ -340,7 +512,36 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "795f12bb8da9a5ebea7b8ff625e15263"
+      "f034c5c227aec55aa21821dd2ae41978"
+    ],
+    [
+      "Spec.SHA2_512.update_last",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes",
+        "equation_Spec.SHA2_512.max_input_len_8",
+        "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_word",
+        "function_token_typing_FStar.UInt8.t", "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_44304dac64b137336a833f6350b8bde7",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_a4df189f69fb195ae1b5deb795ef1612",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_e7e481b021e7311f96dc76d6e1f247d9",
+        "typing_FStar.Seq.Base.length"
+      ],
+      0,
+      "cba3287a28a2c06d432ef52a9f1b7850"
     ],
     [
       "Spec.SHA2_512.finish",
@@ -356,7 +557,7 @@
         "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "0486bf7ce4c68c530ecd2ba55e2ddc79"
+      "71b224737513be276d28ebb9ba853851"
     ],
     [
       "Spec.SHA2_512.hash",
@@ -371,8 +572,8 @@
         "equation_FStar.Int16.n", "equation_FStar.Seq.Properties.split",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "equation_Spec.SHA2_512.bytes",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
@@ -391,12 +592,13 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_3421154546287b0f0c012dd3d63b4945",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_0b4eea63038be23ac97553bb7c8a71cc",
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits"
       ],
       0,
-      "06f13ca4b160befbb5cab871d71b5e7b"
+      "736cd85c99b9cfecd4affd8cb2a6c4b8"
     ],
     [
       "Spec.SHA2_512.hash'",
@@ -407,8 +609,8 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_Prims.HasEq_int", "equation_FStar.Seq.Base.op_At_Bar",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "equation_Spec.SHA2_512.bytes",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
@@ -418,13 +620,14 @@
         "lemma_FStar.Seq.Base.lemma_len_append",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_0b4eea63038be23ac97553bb7c8a71cc",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_44304dac64b137336a833f6350b8bde7",
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "0505dab370595ed7d7cac0915b6a5a67"
+      "2ad1d7a51d493b691c0a7504ec1a73bd"
     ],
     [
       "Spec.SHA2_512.lemma_update_multi_partial",
@@ -436,8 +639,8 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_Prims.HasEq_int", "equation_FStar.Seq.Base.op_At_Bar",
         "equation_FStar.Seq.Properties.split", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
-        "equation_Spec.SHA2_512.size_block",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "function_token_typing_FStar.UInt32.n",
@@ -461,12 +664,55 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_fc23478da47a55195c078139853eda29",
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar"
       ],
       0,
-      "2d91c957b3dc4d4f1a6bca1479343ffc"
+      "1e441df75982ecc7090e4d3a5e2da6fb"
+    ],
+    [
+      "Spec.SHA2_512.lemma_update_multi_partial",
+      2,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_FStar.Seq.Properties.split", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
+        "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_word",
+        "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Spec.SHA2_512.size_block",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "int_inversion", "int_typing", "lemma_FStar.Seq.Base.lemma_eq_elim",
+        "lemma_FStar.Seq.Base.lemma_index_app1",
+        "lemma_FStar.Seq.Base.lemma_index_app2",
+        "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_03127b5d59ee3055620018693b4264e8",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_fc23478da47a55195c078139853eda29",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar"
+      ],
+      0,
+      "f5a4324b691735db396d11cf1af376c0"
     ],
     [
       "Spec.SHA2_512.lemma_modulo",
@@ -485,7 +731,25 @@
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_972881ea72dfd3af9984702eb82a2318"
       ],
       0,
-      "07846247eeecab308911eac1e0bf730e"
+      "a5fd20edcfccfd60ba857e56539d29b4"
+    ],
+    [
+      "Spec.SHA2_512.lemma_modulo",
+      2,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_Prims.nat", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_972881ea72dfd3af9984702eb82a2318"
+      ],
+      0,
+      "90aad5d7fa60557182d0dc614bb75de2"
     ],
     [
       "Spec.SHA2_512.lemma_update_update_multi",
@@ -496,8 +760,9 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_Prims.HasEq_int", "equation_FStar.Seq.Properties.split",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
+        "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "function_token_typing_FStar.UInt32.n",
@@ -511,12 +776,13 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_fc23478da47a55195c078139853eda29",
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "66da2843012a6e28009ed16bf1d6152f"
+      "94398b09ca72adc1893d8c3a4cf7bf07"
     ],
     [
       "Spec.SHA2_512.lemma_update_update_multi",
@@ -529,9 +795,9 @@
         "@fuel_irrelevance_Spec.SHA2_512.update_multi.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_Prims.HasEq_int", "equation_FStar.Seq.Properties.split",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.hash_w",
-        "equation_Spec.SHA2_512.size_block",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
+        "equation_Spec.SHA2_512.hash_w", "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_hash_w",
         "equation_Spec.SHA2_512.size_word", "equation_Spec.SHA2_512.word",
@@ -547,14 +813,58 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_FStar.BitVector_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_fc23478da47a55195c078139853eda29",
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "e8a659a9cfab79de3d4604186e9020e1"
+      "6f1c0beaf428a81056afe23ef383f01d"
+    ],
+    [
+      "Spec.SHA2_512.lemma_update_update_multi",
+      3,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_correspondence_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "@fuel_irrelevance_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int",
+        "equation_FStar.List.Tot.Properties.llist",
+        "equation_FStar.Seq.Properties.split", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
+        "equation_Spec.SHA2_512.hash_w", "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_hash_w",
+        "equation_Spec.SHA2_512.size_word", "equation_Spec.SHA2_512.word",
+        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
+        "equation_with_fuel_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Spec.SHA2_512.h_0_list",
+        "function_token_typing_Spec.SHA2_512.size_block", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_disEquality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_FStar.List.Tot.Properties_Tm_refine_fbb3412f12fd58a91571022d7c9fa36d",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_fc23478da47a55195c078139853eda29",
+        "typing_FStar.Seq.Base.length"
+      ],
+      0,
+      "8a87e8f7a70fc01874ecae41b5499eb8"
     ],
     [
       "Spec.SHA2_512.lemma_update_multi_extend",
@@ -563,8 +873,8 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_FStar.Seq.Base.op_At_Bar", "equation_Spec.SHA2_512.bytes",
-        "equation_Spec.SHA2_512.size_block",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.eqtype",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "function_token_typing_FStar.UInt8.t",
@@ -572,10 +882,11 @@
         "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0"
       ],
       0,
-      "490bf49bfa5185eff9d0be170cb85252"
+      "ab86ef037179a48e2c3201941e126eab"
     ],
     [
       "Spec.SHA2_512.lemma_update_multi_extend",
@@ -591,8 +902,8 @@
         "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
-        "equation_Spec.SHA2_512.size_block",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "function_token_typing_FStar.Int16.n",
@@ -619,6 +930,7 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_fc23478da47a55195c078139853eda29",
@@ -626,7 +938,59 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "1b3d472bf294fb7c6c2323e18b354f20"
+      "c57017a4043794b7b5e6dfeba05a7cb7"
+    ],
+    [
+      "Spec.SHA2_512.lemma_update_multi_extend",
+      3,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "equation_FStar.Int16.n",
+        "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_word",
+        "function_token_typing_FStar.Int16.n",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Spec.SHA2_512.size_block", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_eq_elim",
+        "lemma_FStar.Seq.Base.lemma_index_app1",
+        "lemma_FStar.Seq.Base.lemma_index_app2",
+        "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_03127b5d59ee3055620018693b4264e8",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_fc23478da47a55195c078139853eda29",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar",
+        "typing_FStar.UInt.fits"
+      ],
+      0,
+      "cd9d62003499bc7d1049288170c6ccd8"
     ],
     [
       "Spec.SHA2_512.lemma_update_multi_empty",
@@ -648,7 +1012,28 @@
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_92c2d2165b7e8b740babaf9b8bbb5e03"
       ],
       0,
-      "a0ef44a1800c8aca320027441b793687"
+      "e6c6869342d309eefc7e33795ed365f8"
+    ],
+    [
+      "Spec.SHA2_512.lemma_update_multi_empty",
+      2,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_word",
+        "equation_with_fuel_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "int_typing", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_92c2d2165b7e8b740babaf9b8bbb5e03"
+      ],
+      0,
+      "0e5adb35a1a1df3006d0e95aaf6afaf2"
     ],
     [
       "Spec.SHA2_512.update_multi_one",
@@ -666,8 +1051,9 @@
         "equation_FStar.Int16.n", "equation_FStar.Seq.Properties.split",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
+        "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "equation_with_fuel_Spec.SHA2_512.update_multi.fuel_instrumented",
@@ -687,12 +1073,58 @@
         "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_b913a3f691ca99086652e0a655e72f17",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_cd046bc4a887ee7e1b05946e0bf5772b",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_FStar.Seq.Base.createEmpty", "typing_FStar.Seq.Base.length",
         "typing_FStar.UInt.fits"
       ],
       0,
-      "4c8881133c7650dc09adaeee4c4d249d"
+      "24990b68609b3d363fda806083ddfe0b"
+    ],
+    [
+      "Spec.SHA2_512.update_multi_one",
+      2,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_correspondence_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "b2t_def", "bool_inversion", "equation_FStar.Int16.n",
+        "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_word",
+        "equation_with_fuel_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "function_token_typing_FStar.Int16.n",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt8.t", "int_typing",
+        "lemma_FStar.Seq.Properties.slice_is_empty",
+        "lemma_FStar.Seq.Properties.slice_length",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_b913a3f691ca99086652e0a655e72f17",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_cd046bc4a887ee7e1b05946e0bf5772b",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_FStar.Seq.Base.empty", "typing_FStar.Seq.Base.length",
+        "typing_FStar.UInt.fits"
+      ],
+      0,
+      "49300f8b9b04d7dad2e32d38285b962f"
     ],
     [
       "Spec.SHA2_512.update_multi_append",
@@ -701,18 +1133,19 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_FStar.Seq.Base.op_At_Bar", "equation_Spec.SHA2_512.bytes",
-        "equation_Spec.SHA2_512.size_block",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.eqtype",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "function_token_typing_FStar.UInt8.t",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0"
       ],
       0,
-      "e80f82af1dd2a94af828068829174b26"
+      "eeaf3fdbdf93b43b87d0f6386ebc0dfc"
     ],
     [
       "Spec.SHA2_512.update_multi_append",
@@ -737,8 +1170,8 @@
         "equation_FStar.Seq.Properties.split_eq", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
-        "equation_Spec.SHA2_512.size_block",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "equation_with_fuel_Spec.SHA2_512.update_multi.fuel_instrumented",
@@ -765,6 +1198,7 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_03127b5d59ee3055620018693b4264e8",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_b1fb36b34e4444e16cec8fce5ac3ec26",
@@ -774,7 +1208,75 @@
         "typing_FStar.UInt.fits", "well-founded-ordering-on-nat"
       ],
       0,
-      "1e3b7006a64b5102baf3aee22a41cc7a"
+      "8cc676d5d489b07767e929984671d793"
+    ],
+    [
+      "Spec.SHA2_512.update_multi_append",
+      3,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_correspondence_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "@query", "assumption_Prims.HasEq_int", "b2t_def",
+        "binder_x_ddd15c2db35601be1669783aa4579c6e_1",
+        "binder_x_ddd15c2db35601be1669783aa4579c6e_2", "bool_inversion",
+        "equality_tok_Prims.LexTop@tok", "equation_FStar.Endianness.bytes",
+        "equation_FStar.Int16.n", "equation_FStar.List.Tot.Properties.llist",
+        "equation_FStar.Pervasives.Native.fst",
+        "equation_FStar.Pervasives.Native.snd",
+        "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_FStar.Seq.Properties.split",
+        "equation_FStar.Seq.Properties.split_eq", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_word",
+        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
+        "equation_with_fuel_Spec.SHA2_512.update_multi.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list",
+        "function_token_typing_FStar.Endianness.bytes",
+        "function_token_typing_FStar.Int16.n",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Spec.SHA2_512.k_list",
+        "function_token_typing_Spec.SHA2_512.size_block", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_eq_elim",
+        "lemma_FStar.Seq.Base.lemma_eq_refl",
+        "lemma_FStar.Seq.Base.lemma_index_app2",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_FStar.List.Tot.Properties_Tm_refine_fbb3412f12fd58a91571022d7c9fa36d",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_03127b5d59ee3055620018693b4264e8",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_b1fb36b34e4444e16cec8fce5ac3ec26",
+        "typing_FStar.Pervasives.Native.fst",
+        "typing_FStar.Pervasives.Native.snd", "typing_FStar.Seq.Base.append",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar",
+        "typing_FStar.UInt.fits", "well-founded-ordering-on-nat"
+      ],
+      0,
+      "39e3c66430039fee6bb5789d1492a0c8"
     ],
     [
       "Spec.SHA2_512.update_update_multi_append",
@@ -783,8 +1285,8 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_FStar.Seq.Base.op_At_Bar", "equation_Spec.SHA2_512.bytes",
-        "equation_Spec.SHA2_512.size_block",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.eqtype",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "function_token_typing_FStar.UInt8.t",
@@ -792,10 +1294,11 @@
         "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0"
       ],
       0,
-      "8b22483a2a62e2bf9238de0b8331a677"
+      "b62232eb03d642823b530d041129d866"
     ],
     [
       "Spec.SHA2_512.update_update_multi_append",
@@ -811,7 +1314,23 @@
         "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b"
       ],
       0,
-      "8d3a02ef4c618cca2a1862658395e54e"
+      "46a5a95ed7020a36096a7a2b797e2c93"
+    ],
+    [
+      "Spec.SHA2_512.update_update_multi_append",
+      3,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Spec.SHA2_512.bytes",
+        "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_word", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b"
+      ],
+      0,
+      "b02166128d0cb47ccdd1a9eaf54867ed"
     ],
     [
       "Spec.SHA2_512.lemma_eq_incremental",
@@ -824,7 +1343,8 @@
         "assumption_FStar.Seq.Base.seq__uu___haseq",
         "assumption_FStar.UInt8.t__uu___haseq", "assumption_Prims.HasEq_int",
         "equation_FStar.Seq.Base.op_At_Bar", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
@@ -834,6 +1354,7 @@
         "lemma_FStar.Seq.Base.lemma_len_append",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_c6abbc2ff9370e6771bfced9eafb4fd0",
@@ -841,7 +1362,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "fa174e988f0412819b531e832a358c04"
+      "6d8484bd3831d918ec2f4cc6703c11c7"
     ],
     [
       "Spec.SHA2_512.lemma_eq_incremental",
@@ -852,18 +1373,37 @@
         "@MaxIFuel_assumption", "@query",
         "assumption_FStar.Seq.Base.seq__uu___haseq",
         "assumption_FStar.UInt8.t__uu___haseq", "assumption_Prims.HasEq_int",
-        "equation_FStar.Seq.Base.op_At_Bar", "equation_Spec.SHA2_512.bytes",
-        "equation_Spec.SHA2_512.size_block",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.eqtype",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
         "equation_Spec.SHA2_512.size_word",
         "function_token_typing_FStar.UInt8.t",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_c6abbc2ff9370e6771bfced9eafb4fd0"
       ],
       0,
-      "f95ce61f21a28ac7b6e28d3da73b610f"
+      "b382f66c276b9ebdc2c464c36786a1b2"
+    ],
+    [
+      "Spec.SHA2_512.lemma_eq_incremental",
+      3,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.eqtype",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.size_block",
+        "function_token_typing_FStar.UInt8.t",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_917a473678625266298701878a3ae2c0",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_c6abbc2ff9370e6771bfced9eafb4fd0"
+      ],
+      0,
+      "9e4d8b72a74ed89be58e1b3875a2ea5b"
     ],
     [
       "Spec.SHA2_512.lemma_hash_def",
@@ -878,8 +1418,8 @@
         "equation_FStar.Int16.n", "equation_FStar.Seq.Properties.split",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "equation_Spec.SHA2_512.bytes",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
@@ -898,12 +1438,13 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_3421154546287b0f0c012dd3d63b4945",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_0b4eea63038be23ac97553bb7c8a71cc",
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits"
       ],
       0,
-      "9bc49a4e18ea334da56214345c6b562d"
+      "af0d7cd6f6e07c08ab07239c426fd0f5"
     ],
     [
       "Spec.SHA2_512.lemma_hash_def",
@@ -912,7 +1453,7 @@
       1,
       [ "@query", "equation_Spec.SHA2_512.hash" ],
       0,
-      "901da67ffba32df15ef8794b2ceb5cdd"
+      "29af2f1ac38758fc363606f419344494"
     ],
     [
       "Spec.SHA2_512.lemma_hash_def2",
@@ -928,7 +1469,8 @@
         "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
@@ -948,12 +1490,13 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_3421154546287b0f0c012dd3d63b4945",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_0b4eea63038be23ac97553bb7c8a71cc",
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits"
       ],
       0,
-      "3db79b23ff74ce8bdb30af349bacfa04"
+      "6151fad23c3b95c3221e4c40f9356ed1"
     ],
     [
       "Spec.SHA2_512.lemma_hash_def2",
@@ -969,7 +1512,8 @@
         "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
@@ -997,13 +1541,14 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_3421154546287b0f0c012dd3d63b4945",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_0b4eea63038be23ac97553bb7c8a71cc",
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar",
         "typing_FStar.UInt.fits"
       ],
       0,
-      "2c1201f1dbc435e7c9e39d282bcbe2e8"
+      "7cf3e84448c670607d7a3c861691d712"
     ],
     [
       "Spec.SHA2_512.lemma_hash_prepend",
@@ -1019,7 +1564,8 @@
         "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
@@ -1040,12 +1586,13 @@
         "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_3421154546287b0f0c012dd3d63b4945",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_d1e9294894e57d611b6aaecb84be73ba",
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits"
       ],
       0,
-      "010c04e6b7d03b114f6acf0b3b07ca9e"
+      "74cc8cdc1ab404127370b1a03f16dc18"
     ],
     [
       "Spec.SHA2_512.lemma_hash_prepend",
@@ -1061,8 +1608,8 @@
         "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.bytes",
-        "equation_Spec.SHA2_512.hash",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.hash",
         "equation_Spec.SHA2_512.max_input_len_8",
         "equation_Spec.SHA2_512.size_block",
         "equation_Spec.SHA2_512.size_block_w",
@@ -1076,6 +1623,7 @@
         "lemma_FStar.Seq.Base.lemma_index_slice",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.Seq.Properties.slice_length",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
@@ -1091,6 +1639,7 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_3421154546287b0f0c012dd3d63b4945",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_9aeba65f90a1788edee37473efe4fa6f",
         "refinement_interpretation_Spec.SHA2_512_Tm_refine_a4df189f69fb195ae1b5deb795ef1612",
@@ -1099,7 +1648,63 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "293f6b4fd94dc9b5af5ad61c155ef36c"
+      "8bd959afc9272a0428d75448f46e6f45"
+    ],
+    [
+      "Spec.SHA2_512.lemma_hash_prepend",
+      3,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "b2t_def", "bool_inversion",
+        "equation_FStar.Int16.n", "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.bytes", "equation_Spec.SHA2_512.hash",
+        "equation_Spec.SHA2_512.max_input_len_8",
+        "equation_Spec.SHA2_512.size_block",
+        "equation_Spec.SHA2_512.size_block_w",
+        "equation_Spec.SHA2_512.size_word",
+        "function_token_typing_FStar.Int16.n",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt8.t", "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_eq_elim",
+        "lemma_FStar.Seq.Base.lemma_index_app1",
+        "lemma_FStar.Seq.Base.lemma_index_app2",
+        "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.Seq.Properties.slice_length",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_03127b5d59ee3055620018693b4264e8",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_3421154546287b0f0c012dd3d63b4945",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_9aeba65f90a1788edee37473efe4fa6f",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_d1e9294894e57d611b6aaecb84be73ba",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_e7b77d50811b5c6349bb40ae0ad4ec50",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar",
+        "typing_FStar.UInt.fits"
+      ],
+      0,
+      "6420afa987f7d914f9b89855fea64c04"
     ],
     [
       "Spec.SHA2_512.test",
@@ -1107,19 +1712,21 @@
       0,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
         "assumption_FStar.Seq.Base.seq__uu___haseq",
         "assumption_FStar.UInt8.t__uu___haseq", "assumption_Prims.HasEq_int",
-        "equation_Prims.nat", "equation_Spec.SHA2_512.max_input_len_8",
-        "function_token_typing_FStar.UInt8.t", "int_typing",
-        "lemma_Spec.SHA2_512.pow2_values", "primitive_Prims.op_Equality",
-        "projection_inverse_BoxBool_proj_0",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.SHA2_512.max_input_len_8",
+        "equation_Spec.SHA2_512.pow2_125",
+        "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Spec.SHA2_512.pow2_125",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Spec.SHA2_512_Tm_refine_fdf85447de400383e22368c8fb70359b"
       ],
       0,
-      "88df8d99658e0c4f32e235c50edf6d4b"
+      "a2745f756336cf21382ccfb5885f9130"
     ]
   ]
 ]

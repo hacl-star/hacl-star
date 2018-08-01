@@ -643,8 +643,8 @@ let mk_state r h = MkState r h
 val alloc:
   unit -> StackInline poly1305_state
     (requires (fun h -> True))
-    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st /\ frameOf st.h == h0.tip
-      /\ frameOf st.r = h0.tip /\ (st.r `unused_in` h0) /\ (st.h `unused_in` h0)))
+    (ensures (fun h0 st h1 -> modifies_0 h0 h1 /\ live_st h1 st /\ frameOf st.h == get_tip h0
+      /\ frameOf st.r = get_tip h0 /\ (st.r `unused_in` h0) /\ (st.h `unused_in` h0)))
 let alloc () =
   let buf = create limb_zero U32.(clen +^ clen) in
   let r = sub buf 0ul clen in

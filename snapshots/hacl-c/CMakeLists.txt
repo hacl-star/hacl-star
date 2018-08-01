@@ -16,6 +16,8 @@ set(SOURCE_FILES_VERIFIED
     Hacl_Curve25519.c
     Hacl_Ed25519.c
     Hacl_HMAC_SHA2_256.c
+    Hacl_HMAC_SHA2_384.c
+    Hacl_HMAC_SHA2_512.c
     Hacl_Policies.c
     Hacl_Poly1305_32.c
     Hacl_Poly1305_64.c
@@ -46,6 +48,8 @@ set(HEADER_FILES
     Hacl_Curve25519.h
     Hacl_Ed25519.h
     Hacl_HMAC_SHA2_256.h
+    Hacl_HMAC_SHA2_384.h
+    Hacl_HMAC_SHA2_512.h
     Hacl_Policies.h
     Hacl_Poly1305_32.h
     Hacl_Poly1305_64.h

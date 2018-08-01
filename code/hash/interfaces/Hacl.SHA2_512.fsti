@@ -15,6 +15,7 @@ open FStar.UInt32
 open Hacl.Spec.Endianness
 
 (* Definition of aliases for modules *)
+module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module Spec = Spec.SHA512
 module U8 = FStar.UInt8
@@ -70,8 +71,8 @@ val alloc:
   unit ->
   StackInline (state:uint64_p{length state = v size_state})
     (requires (fun h0 -> True))
-    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
-             /\ Map.domain h1.h == Map.domain h0.h))
+    (ensures (fun h0 st h1 -> ~(contains h0 st) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == (HS.get_tip h1)
+             /\ Map.domain (HS.get_hmap h1) == Map.domain (HS.get_hmap h0)))
 
 
 val init:

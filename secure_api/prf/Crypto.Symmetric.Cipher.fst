@@ -230,6 +230,7 @@ let compute i output st n counter len =
       let h4 = ST.get() in
       let output_block = Buffer.create 0uy (blocklen AES128) in
       let h5 = ST.get() in
+      allow_inversion aesImpl; //The ifuel is set to 0; but we need to invert aesImpl to prove the pattern matching below exhaustive
       begin
       match aesImpl_of_id i with
        | HaclAES -> AES128.cipher output_block ctr_block w sbox

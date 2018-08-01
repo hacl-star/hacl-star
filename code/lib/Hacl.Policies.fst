@@ -61,7 +61,7 @@ let rec cmp_bytes_ b1 b2 len tmp =
   UInt.logand_lemma_1 #8 0;
   UInt.logand_lemma_2 #8 0;
   let h0 = ST.get() in
-  let inv h i =
+  let inv h (i: nat) =
     let z = get h tmp 0 in
     live h b1 /\ live h b2 /\ live h tmp /\ modifies_1 tmp h0 h /\ 0 <= i /\ i <= U32.v len /\
     (H8.v z == 255 \/ H8.v z == 0) /\
@@ -82,10 +82,10 @@ let rec cmp_bytes_ b1 b2 len tmp =
       let s2  = as_seq h0 (sub b2 0ul U32.(i +^ 1ul)) in
       let s1' = as_seq h0 (sub b1 0ul i) in
       let s2' = as_seq h0 (sub b2 0ul i) in
-      assert (forall (j:nat{j < U32.v i}).{:pattern (Seq.index s1 j); (Seq.index s2 j)}
-        Seq.index s1  j == Seq.index s1' j /\
-        Seq.index s2  j == Seq.index s2' j /\
-        Seq.index s1' j == Seq.index s2' j);
+      assert (Seq.equal s1' s2');
+      assert FStar.Seq.(index s1 (U32.v i) == index s2 (U32.v i));
+      assert (Seq.equal s1 (Seq.snoc s1' (Seq.index s1 (U32.v i))));
+      assert (Seq.equal s2 (Seq.snoc s2' (Seq.index s2 (U32.v i))));
       Seq.lemma_eq_intro s1 s2
       end
     else if H8.v z0 = 0 then

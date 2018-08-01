@@ -3,7 +3,7 @@ HACL_HOME=..
 # The main Makefile that knows which combinations of targets are possible/valid.
 all:
 	rm -f .depend.*
-	$(MAKE) runtime_switch vale_aes_concrete_id hacl_aes_concrete_id vale_aes_abstract_id hacl_aes_abstract_id
+	$(MAKE) runtime_switch vale_aes_concrete_id hacl_aes_concrete_id vale_aes_abstract_id hacl_aes_abstract_id verify
 
 # The following targets are not parallel and must occur at most once in
 # parallel:
@@ -28,7 +28,17 @@ vale_aes_abstract_id:
 hacl_aes_abstract_id:
 	IMPL_CHOICE=hacl_aes_abstract_id $(MAKE) -f Makefile.extract abstract
 
+verify:
+	IMPL_CHOICE=verification VERIFY=1 $(MAKE) -f Makefile.extract verification
+
+.PHONY: clean
 clean:
 	rm -rf .depend.extract out/* vale/asm/*.o LowCProvider/*.{cm*,o,a}
+
+SHELL=/bin/bash
+
+.PHONY: clean-c
+clean-c:
+	rm -rf out/*/{extracted,crypto}/*.{c,h}
 
 include $(HACL_HOME)/secure_api/Makefile.common

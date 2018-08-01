@@ -48,8 +48,8 @@ let mk_buf_t (len:nat) =
        let open FStar.Buffer in
        (b `unused_in` h0)
        /\ live h1 b /\ idx b = 0 /\ Buffer.length b = len
-       /\ frameOf b = h0.tip
-       /\ Map.domain h1.h == Map.domain h0.h
+       /\ frameOf b = (HS.get_tip h0)
+       /\ Map.domain (HS.get_hmap h1) == Map.domain (HS.get_hmap h0)
        /\ modifies_0 h0 h1
        ))
 

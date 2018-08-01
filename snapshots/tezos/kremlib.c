@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,14 +23,13 @@
 #include "kremlib.h"
 #include <stdlib.h>
 
+intptr_t nullptr = (intptr_t) NULL;
+
+/* DEPRECATED */
 int exit_success = EXIT_SUCCESS;
 int exit_failure = EXIT_FAILURE;
 
-void print_string(const char *s) {
-  printf("%s", s);
-}
-
-void print_bytes(uint8_t *b, uint32_t len) {
+void print_bytes(const uint8_t *b, uint32_t len) {
   uint32_t i;
   for (i = 0; i < len; i++){
     printf("%02x", b[i]);

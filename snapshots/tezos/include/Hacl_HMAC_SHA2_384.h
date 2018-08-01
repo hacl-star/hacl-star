@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,19 +20,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+
+
+#ifndef __Hacl_HMAC_SHA2_384_H
+#define __Hacl_HMAC_SHA2_384_H
+
+
 #include "kremlib.h"
-#include <stdlib.h>
 
-intptr_t nullptr = (intptr_t) NULL;
+extern FStar_UInt128_uint128 FStar_Int_Cast_Full_uint64_to_uint128(uint64_t x0);
 
-/* DEPRECATED */
-int exit_success = EXIT_SUCCESS;
-int exit_failure = EXIT_FAILURE;
+void Hacl_HMAC_SHA2_384_hmac_core(uint8_t *mac, uint8_t *key, uint8_t *data, uint32_t len);
 
-void print_bytes(const uint8_t *b, uint32_t len) {
-  uint32_t i;
-  for (i = 0; i < len; i++){
-    printf("%02x", b[i]);
-  }
-  printf("\n");
-}
+void
+Hacl_HMAC_SHA2_384_hmac(
+  uint8_t *mac,
+  uint8_t *key,
+  uint32_t keylen,
+  uint8_t *data,
+  uint32_t datalen
+);
+
+#define __Hacl_HMAC_SHA2_384_H_DEFINED
+#endif

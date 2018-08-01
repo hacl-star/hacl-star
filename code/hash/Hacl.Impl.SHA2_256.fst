@@ -139,27 +139,21 @@ private val constants_set_k:
                  /\ (let seq_k = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 k) in
                    seq_k == Spec.k)))
 
-[@"substitute"]
-let constants_set_k k = hupd_64 k
-  (u32_to_h32 0x428a2f98ul) (u32_to_h32 0x71374491ul) (u32_to_h32 0xb5c0fbcful) (u32_to_h32 0xe9b5dba5ul)
-  (u32_to_h32 0x3956c25bul) (u32_to_h32 0x59f111f1ul) (u32_to_h32 0x923f82a4ul) (u32_to_h32 0xab1c5ed5ul)
-  (u32_to_h32 0xd807aa98ul) (u32_to_h32 0x12835b01ul) (u32_to_h32 0x243185beul) (u32_to_h32 0x550c7dc3ul)
-  (u32_to_h32 0x72be5d74ul) (u32_to_h32 0x80deb1feul) (u32_to_h32 0x9bdc06a7ul) (u32_to_h32 0xc19bf174ul)
-  (u32_to_h32 0xe49b69c1ul) (u32_to_h32 0xefbe4786ul) (u32_to_h32 0x0fc19dc6ul) (u32_to_h32 0x240ca1ccul)
-  (u32_to_h32 0x2de92c6ful) (u32_to_h32 0x4a7484aaul) (u32_to_h32 0x5cb0a9dcul) (u32_to_h32 0x76f988daul)
-  (u32_to_h32 0x983e5152ul) (u32_to_h32 0xa831c66dul) (u32_to_h32 0xb00327c8ul) (u32_to_h32 0xbf597fc7ul)
-  (u32_to_h32 0xc6e00bf3ul) (u32_to_h32 0xd5a79147ul) (u32_to_h32 0x06ca6351ul) (u32_to_h32 0x14292967ul)
-  (u32_to_h32 0x27b70a85ul) (u32_to_h32 0x2e1b2138ul) (u32_to_h32 0x4d2c6dfcul) (u32_to_h32 0x53380d13ul)
-  (u32_to_h32 0x650a7354ul) (u32_to_h32 0x766a0abbul) (u32_to_h32 0x81c2c92eul) (u32_to_h32 0x92722c85ul)
-  (u32_to_h32 0xa2bfe8a1ul) (u32_to_h32 0xa81a664bul) (u32_to_h32 0xc24b8b70ul) (u32_to_h32 0xc76c51a3ul)
-  (u32_to_h32 0xd192e819ul) (u32_to_h32 0xd6990624ul) (u32_to_h32 0xf40e3585ul) (u32_to_h32 0x106aa070ul)
-  (u32_to_h32 0x19a4c116ul) (u32_to_h32 0x1e376c08ul) (u32_to_h32 0x2748774cul) (u32_to_h32 0x34b0bcb5ul)
-  (u32_to_h32 0x391c0cb3ul) (u32_to_h32 0x4ed8aa4aul) (u32_to_h32 0x5b9cca4ful) (u32_to_h32 0x682e6ff3ul)
-  (u32_to_h32 0x748f82eeul) (u32_to_h32 0x78a5636ful) (u32_to_h32 0x84c87814ul) (u32_to_h32 0x8cc70208ul)
-  (u32_to_h32 0x90befffaul) (u32_to_h32 0xa4506cebul) (u32_to_h32 0xbef9a3f7ul) (u32_to_h32 0xc67178f2ul)
+#reset-options
 
+private
+let assign_k:
+  b:buffer UInt32.t ->
+    Stack unit
+      (requires (fun h0 ->
+        live h0 b /\ length b = List.Tot.length Spec.k_list))
+      (ensures (fun h0 _ h1 ->
+        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.seq_of_list Spec.k_list)) =
+  let open FStar.Tactics in
+  synth_by_tactic (specialize (assignL (normalize_term Spec.k_list)) [`%assignL])
 
-#reset-options " --max_fuel 0 --z3rlimit 10"
+let constants_set_k k =
+  assign_k k
 
 [@"substitute"]
 val constants_set_h_0:
@@ -170,11 +164,21 @@ val constants_set_h_0:
              /\ (let seq_h_0 = Hacl.Spec.Endianness.reveal_h32s (as_seq h1 hash) in
                 seq_h_0 == Spec.h_0)))
 
-[@"substitute"]
-let constants_set_h_0 hash = hupd_8 hash
-  (u32_to_h32 0x6a09e667ul) (u32_to_h32 0xbb67ae85ul) (u32_to_h32 0x3c6ef372ul) (u32_to_h32 0xa54ff53aul)
-  (u32_to_h32 0x510e527ful) (u32_to_h32 0x9b05688cul) (u32_to_h32 0x1f83d9abul) (u32_to_h32 0x5be0cd19ul)
+private
+let assign_h0:
+  b:buffer UInt32.t ->
+    Stack unit
+      (requires (fun h0 ->
+        live h0 b /\ length b = List.Tot.length Spec.h_0_list))
+      (ensures (fun h0 _ h1 ->
+        live h1 b /\ modifies_1 b h0 h1 /\ as_seq h1 b == Seq.seq_of_list Spec.h_0_list)) =
+  let open FStar.Tactics in
+  synth_by_tactic (specialize (assignL (normalize_term Spec.h_0_list)) [`%assignL])
 
+
+[@"substitute"]
+let constants_set_h_0 hash =
+  assign_h0 hash
 
 #set-options " --max_fuel 0 --z3rlimit 20"
 
@@ -461,8 +465,8 @@ val alloc:
   unit ->
   StackInline (state:uint32_p{length state = v size_state})
     (requires (fun h0 -> True))
-    (ensures (fun h0 st h1 -> (st `unused_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == h1.tip
-             /\ Map.domain h1.h == Map.domain h0.h))
+    (ensures (fun h0 st h1 -> (st `unused_in` h0) /\ live h1 st /\ modifies_0 h0 h1 /\ frameOf st == HS.get_tip h1
+             /\ Map.domain (HS.get_hmap h1) == Map.domain (HS.get_hmap h0)))
 
 [@"c_inline"]
 let alloc () = Buffer.create (u32_to_h32 0ul) size_state
