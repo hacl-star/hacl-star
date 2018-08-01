@@ -102,6 +102,8 @@ let frodo_key_encode2 b a res0 i =
   frodo_key_encode1 b a res0 vi i;
   pop_frame()
 
+#set-options "--max_fuel 1"
+
 val frodo_key_encode:
     b:size_t{v b <= 8}
   -> a:lbytes (params_nbar *! params_nbar *! b /. size 8)
@@ -139,12 +141,15 @@ val frodo_key_decode1:
     (ensures fun h0 r h1 ->
       B.live h1 a /\ modifies loc_none h0 h1 /\
       r == S.frodo_key_decode1 (v b) (as_matrix h0 a) (v i))
-let frodo_key_decode1 b a i = admit();
+let frodo_key_decode1 b a i =
   push_frame();
   let h0 = ST.get () in
   let templong = create #uint64 #1 (size 1) (u64 0) in
-
   let h1 = ST.get () in
+  assert (LSeq.index #_ #1 (B.as_seq h1 templong) 0 == u64 0);
+  assert (LSeq.index #_ #1 (B.as_seq h1 templong) 0 == B.get h1 templong 0);
+  assert (B.get h1 templong 0 == S.decode_fc (v b) (as_matrix h0 a) (v i) 0);
+
   Lib.Loops.for (size 0) (size 8)
     (fun h2 k -> B.live h1 templong /\ B.live h2 templong /\
       modifies (loc_buffer templong) h1 h2 /\
