@@ -4,28 +4,15 @@ MLCRYPTO_HOME ?= ../../../MLCrypto
 
 HACL_CODE = ../../code
 
-ifeq (,$(EVEREST_WINDOWS))
-CONFIG		?= default
-else
-CONFIG		= noopenssl
-endif
-
 EXTRACT_DIR = extract
 CACHE_DIR   = cache
 INCLUDE_PATHS = \
   $(KREMLIN_HOME)/kremlib \
   ../evercrypt \
-  ../evercrypt/fst \
-  ../evercrypt/config/$(CONFIG) \
   $(HACL_CODE)/lib/kremlin \
-  $(HACL_CODE)/experimental/aesgcm \
   $(HACL_CODE)/curve25519/interfaces \
   $(HACL_CODE)/hash/interfaces \
   $(HACL_CODE)/api/interfaces \
-  $(HACL_CODE)/api \
-  $(HACL_CODE)/salsa-family \
-  $(HACL_CODE)/poly1305 \
-  $(HACL_CODE)/bignum \
   ../../specs
 
 UNAME = $(shell uname)
@@ -85,11 +72,10 @@ $(EXTRACT_DIR)/Test.c: $(ALL_KRML_FILES) | .depend
 	  -skip-compilation \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -add-include '"temp.h"' \
-	  -bundle Hacl.* \
 	  -bundle LowStar.* \
 	  -bundle Test.Lowstarize \
 	  -bundle Hacl.Spec.*,Hacl.Spe.*,Spec.* \
-	  -library EverCrypt,EverCrypt.*,Hacl.*,AEAD.* \
+	  -library EverCrypt,EverCrypt.* \
 	  -ccopt -g
 
 test: $(EXTRACT_DIR)/Test.c

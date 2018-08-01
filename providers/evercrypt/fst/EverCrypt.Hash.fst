@@ -168,11 +168,15 @@ let footprint_s #a (s: state_s a): GTot M.loc =
   | SHA256_Vale p -> M.loc_addr_of_buffer p
   | SHA384_Hacl p -> M.loc_addr_of_buffer p
 
+#set-options "--max_fuel 0 --max_ifuel 1"
+
 let invariant_s #a s h =
   match s with
   | SHA256_Hacl p -> B.live h p
   | SHA256_Vale p -> B.live h p
   | SHA384_Hacl p -> B.live h p
+
+#set-options "--z3rlimit 40"
 
 let repr #a s h: GTot _ =
   let s = B.get h s 0 in
@@ -279,7 +283,7 @@ let update #a prior s data =
     //TODO 18-07-10 weaken hacl* update to tolerate overflows; they
     // are now statically prevented in [update_last]
     assume (r0.counter < pow2 32 - 1));
-
+    
   match !*s with
   | SHA256_Hacl p ->
       let p = T.new_to_old_st p in
@@ -306,6 +310,12 @@ let update_multi #a prior s data len =
     //TODO 18-07-10 weaken hacl* update to tolerate overflows; they
     // are now statically prevented in [update_last]
   assume (r0.counter + v len / blockLength a < pow2 32 - 1));
+
+//=======
+//#set-options "--z3rlimit 48"
+//
+//  FStar.Math.Lemmas.swap_mul (block_size a) (v n);
+//  FStar.Math.Lemmas.multiple_modulo_lemma (v n) (block_size a);
 
   match !*s with
   | SHA256_Hacl p ->
@@ -365,6 +375,10 @@ let update_last #a prior s data totlen =
     assume (r0.counter + 2 < pow2 32 - 1));
 
   assert(M.(loc_disjoint (footprint s h0) (loc_buffer data)));
+
+//  FStar.Math.Lemmas.swap_mul ((repr s h0).counter) (block_size a);
+//  FStar.Math.Lemmas.multiple_modulo_lemma ((repr s h0).counter) (block_size a);
+
   match !*s with
   | SHA256_Hacl p ->
       let len = totlen % blockLen SHA256 in

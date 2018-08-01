@@ -6,9 +6,6 @@ module U32 = FStar.UInt32
 
 module T = LowStar.ToFStarBuffer
 
-inline_for_extraction noextract
-let (!!) = T.new_to_old_st
-
 open FStar.HyperStack.ST
 open FStar.Bytes
 open EverCrypt.Helpers
@@ -97,7 +94,7 @@ let test_one_hash vec =
     in
 
     (* Display the result *)
-    TestLib.compare_and_print str !!output !!output output_len;
+    TestLib.compare_and_print str output output output_len;
 
     pop_frame()
   end
@@ -122,12 +119,12 @@ let test_chacha20_poly1305 vec =
   EverCrypt.chacha20_poly1305_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
   let s1 = TestLib.cpucycles () in
   TestLib.print_cycles_per_round s0 s1 1ul;
-  TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" !!ciphertext !!ciphertext' plaintext_len;
-  TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" !!tag !!tag' 16ul;
+  TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
+  TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
 
   match EverCrypt.chacha20_poly1305_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
   | 1ul ->
-    TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" !!plaintext !!plaintext' plaintext_len
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len
   | _ ->
     C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
 
@@ -149,12 +146,12 @@ let test_aes128_gcm vec =
   EverCrypt.aes128_gcm_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
   let s1 = TestLib.cpucycles () in
   TestLib.print_cycles_per_round s0 s1 1ul;
-  TestLib.compare_and_print !$"of AES-GCM 128 cipher" !!ciphertext !!ciphertext' plaintext_len;
-  TestLib.compare_and_print !$"of AES-GCM 128 tag" !!tag !!tag' 16ul;
+  TestLib.compare_and_print !$"of AES-GCM 128 cipher" ciphertext ciphertext' plaintext_len;
+  TestLib.compare_and_print !$"of AES-GCM 128 tag" tag tag' 16ul;
 
   match EverCrypt.aes128_gcm_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
   | 1ul ->
-    TestLib.compare_and_print !$"of AES-GCM 128 plaintext" !!plaintext !!plaintext' plaintext_len
+    TestLib.compare_and_print !$"of AES-GCM 128 plaintext" plaintext plaintext' plaintext_len
   | _ ->
     C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
 
@@ -173,20 +170,20 @@ let test_aes256_gcm vec =
   let tag'          = B.alloca 0uy 16ul in
 
   EverCrypt.aes256_gcm_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
-  TestLib.compare_and_print !$"of AES-GCM 256 cipher" !!ciphertext !!ciphertext' plaintext_len;
-  TestLib.compare_and_print !$"of AES-GCM 256 tag" !!tag !!tag' 16ul;
+  TestLib.compare_and_print !$"of AES-GCM 256 cipher" ciphertext ciphertext' plaintext_len;
+  TestLib.compare_and_print !$"of AES-GCM 256 tag" tag tag' 16ul;
 
   let s0 = TestLib.cpucycles () in
   EverCrypt.aes256_gcm_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
   let s1 = TestLib.cpucycles () in
 
   TestLib.print_cycles_per_round s0 s1 1ul;
-  TestLib.compare_and_print !$"of AES-GCM 256 cipher" !!ciphertext !!ciphertext' plaintext_len;
-  TestLib.compare_and_print !$"of AES-GCM 256 tag" !!tag !!tag' 16ul;
+  TestLib.compare_and_print !$"of AES-GCM 256 cipher" ciphertext ciphertext' plaintext_len;
+  TestLib.compare_and_print !$"of AES-GCM 256 tag" tag tag' 16ul;
 
   match EverCrypt.aes256_gcm_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
   | 1ul ->
-    TestLib.compare_and_print !$"of AES-GCM 256 plaintext" !!plaintext !!plaintext' plaintext_len
+    TestLib.compare_and_print !$"of AES-GCM 256 plaintext" plaintext plaintext' plaintext_len
   | _ ->
     C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
 
@@ -212,7 +209,7 @@ let test_aes_ecb (v: block_cipher_vector) : St unit =
     in
   let s1 = TestLib.cpucycles () in
   TestLib.print_cycles_per_round s0 s1 1ul;
-  TestLib.compare_and_print !$"of AES128 block" !!cipher !!cipher' 16ul;
+  TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
   pop_frame()
 
 /// Test drivers
@@ -233,7 +230,7 @@ let rec test_chacha20 (len: U32.t) (vs: B.buffer chacha20_vector): St unit =
     let (key, key_len), (iv, iv_len), ctr, (plain, plain_len), (cipher, cipher_len) = vs.(0ul) in
     let cipher' = B.alloca 0uy cipher_len in
     EverCrypt.chacha20 key iv ctr plain plain_len cipher';
-    TestLib.compare_and_print !$"of ChaCha20 message" !!cipher !!cipher' cipher_len;
+    TestLib.compare_and_print !$"of ChaCha20 message" cipher cipher' cipher_len;
     pop_frame ();
     test_chacha20 (len - 1ul) (B.offset vs 1ul)
   end

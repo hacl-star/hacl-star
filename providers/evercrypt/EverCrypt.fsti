@@ -17,6 +17,7 @@ val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
 
 /// AES block function
 
+[@CAbstractStruct]
 val aes128_key_s: Type0
 
 let aes128_key = B.pointer aes128_key_s
@@ -31,6 +32,7 @@ val aes128_compute: key:aes128_key ->
 val aes128_free: aes128_key ->
   ST unit aes128_free_pre aes128_free_post
 
+[@CAbstractStruct]
 val aes256_key_s : Type0
 
 let aes256_key = B.pointer aes256_key_s
@@ -98,9 +100,9 @@ type aead_alg =
   | AES256_GCM
   | CHACHA20_POLY1305
 
+[@CAbstractStruct]
 val aead_state_s: Type0
 
-[@(CPrologue "#ifndef __EverCrypt_aead_state_s\ntypedef struct EverCrypt_aead_state_s EverCrypt_aead_state_s;\n#endif")]
 let aead_state = B.pointer aead_state_s
 
 val aead_create: alg:aead_alg -> key:uint8_p ->
