@@ -8,7 +8,7 @@ open Lib.ByteSequence
 
 
 (* Aliases *)
-module TCP = Spec.Lib.IO.Tcp
+module TCP = Lib.Network
 
 
 let test_client_hello = List.Tot.map u8_from_UInt8 [
@@ -30,6 +30,6 @@ let test() =
       | Error _ -> IO.print_string "Failed to receive !\n"
       | Correct (l,out) ->
         IO.print_string "Success to receive !\n";
-        IO.print_lbytes l (as_list out);
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list out);
         IO.print_newline ())
     end
