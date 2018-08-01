@@ -1,6 +1,8 @@
 # For simplified Makefiles, define FSTAR_HOME, then include the file below.
-FSTAR_HOME=~/.opam/4.05.0/packages.dev/fstar
+FSTAR_HOME=~/FStar
 FSTAR=fstar.exe
+
+OCAMLPATH=~/FStar/bin
 
 all: add1sp1
 
@@ -13,15 +15,17 @@ MPFR_FILES=	MPFR.Maths.fst \
 		MPFR.RoundingMode.fst \
 		MPFR.Round.Spec.fst \
 		MPFR.Lib.fst \
+		MPFR.Exceptions.Lemma.fst \
+		MPFR.Exceptions.fst \
 		MPFR.Add1sp1.Lemma.fst \
 		MPFR.Add1sp1.fst
 
 # This target is very concise and re-uses the variables defined in
 # Makefile.include. You shouldn't need to call `cp` ever.
-add1sp1: out gen-tests MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Add1sp1.fst test/Test_Add1sp1.ml
+add1sp1: out gen-tests MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Exceptions.fst MPFR.Add1sp1.fst test/Test_Add1sp1.ml
 	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml MPFR.Add1sp1.fst
 	cp test/Test_Add1sp1.ml out/Test_Add1sp1.ml
-	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Add1sp1.ml out/Test_Add1sp1.ml -o out/Add1sp1
+	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Add1sp1.ml out/Test_Add1sp1.ml -o out/Add1sp1
 	out/Add1sp1
 
 %.fst-verify: %.fst
