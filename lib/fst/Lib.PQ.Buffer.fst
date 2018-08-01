@@ -65,6 +65,9 @@ let upd #a #len b i v =
 inline_for_extraction let op_Array_Assignment #a #len = upd #a #len
 inline_for_extraction let op_Array_Access #a #len = index #a #len
 
+unfold
+let bget #a #n h (b:lbuffer a n) i = Seq.index #_ #n (B.as_seq h b) i
+
 inline_for_extraction
 val create:
     #a:Type0
@@ -153,9 +156,7 @@ let update_sub #a #len dst start n src =
   let h0 = ST.get () in  
   LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
   let h1 = ST.get () in
-  assert (forall (k:nat{k < v n}).
-      Seq.index #_ #len (B.as_seq h1 dst) (v start + k) == 
-      Seq.index #_ #(v n) (B.as_seq h0 src) k);
+  assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
   Seq.eq_intro 
     (B.as_seq h1 dst) 
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
