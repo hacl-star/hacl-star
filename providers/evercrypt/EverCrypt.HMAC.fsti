@@ -48,7 +48,7 @@ val compute:
     live h1 key /\ live h0 key /\
     live h1 data /\ live h0 data /\
     LowStar.Modifies.(modifies (loc_buffer tag) h0 h1) /\
-    t( length data + blockLength (Ghost.hide a) <= maxLength (Ghost.hide a) /\ (* required for subtyping the RHS below *)
-      as_seq h1 tag == hmac (Ghost.hide a) (as_seq h0 key) (as_seq h0 data)))
+    length data + blockLength (Ghost.hide a) <= maxLength (Ghost.hide a) /\ (* required for subtyping the RHS below *)
+      as_seq h1 tag == hmac (Ghost.hide a) (as_seq h0 key) (as_seq h0 data))
 
 //18-07-13 pick uniform names? hash{spec} vs compute{hmac}

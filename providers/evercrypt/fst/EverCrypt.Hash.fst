@@ -3,6 +3,9 @@ module EverCrypt.Hash
 /// ----------agile implementation of hash specification ------------
 /// must be in scope for linking the agile spec to the ad hoc algorithmic specs
 
+//18-08-01 required for re-typechecking the .fsti :( 
+#set-options "--z3rlimit 200"
+
 let string_of_alg =
   let open C.String in function
   | MD5    -> !$"MD5"
@@ -47,6 +50,7 @@ let acc0 #a =
       k = Seq.empty;
       counter = 0
     }
+
 
 // 18-07-06 We need a fully-specified refinement: the hacl* spec
 // should state that the counter is incremented by 1 and that the K
@@ -176,7 +180,7 @@ let invariant_s #a s h =
   | SHA256_Vale p -> B.live h p
   | SHA384_Hacl p -> B.live h p
 
-#set-options "--z3rlimit 40"
+//#set-options "--z3rlimit 40"
 
 let repr #a s h: GTot _ =
   let s = B.get h s 0 in
@@ -246,21 +250,26 @@ let rec lemma_hash2_has_k
   (b:bytes {Seq.length b % blockLength a = 0}):
   GTot (_:unit{has_k (hash2 v b)}) (decreases (Seq.length b))
 =
-  if Seq.length b = 0 then ()
+  if Seq.length b = 0 then 
+    assert_norm(hash2 v b == v)
   else
-    let c,b = Seq.split b (blockLength a) in
-    assert(Seq.length b % blockLength a = 0);
-    assert(has_k (compress v c));
-    lemma_hash2_has_k (compress v c) b
+    let c,b' = Seq.split b (blockLength a) in
+    Seq.lemma_eq_intro b (Seq.append c b');
+    lemma_hash2_has_k (compress v c) b';
+    lemma_hash2 v c b';
+    lemma_compress v c
+    // assert(Seq.length b' % blockLength a = 0);
+    // assert(has_k (compress v c));
+    // assert(hash2 v b == hash2 (compress v c) b')
 
 let lemma_hash0_has_k #a b = lemma_hash2_has_k (acc0 #a) b
 
 let rec lemma_has_counter (#a:e_alg) (b:bytes {Seq.length b % blockLength a = 0}):
   GTot (_:unit{
     blockLength a <> 0 /\
-    (hash0 #a b).counter == Seq.length b / blockLength a})
+    (hash0 #a b).counter == Seq.length b / blockLength a}) (decreases (Seq.length b))
 =
-  admit() //TODO, similar
+  admit() //TODO, similar, unnecessary once we get rid of the internal counter
 
 #set-options "--max_fuel 0"
 let init #a s =
@@ -299,6 +308,8 @@ let update #a prior s data =
       ValeGlue.sha256_update p data;
       admit ()
 
+//#set-options "--lax"
+#set-options "--z3rlimit 300" 
 let update_multi #a prior s data len =
   let h0 = ST.get() in
   ( let r0 = repr s h0 in
@@ -311,15 +322,9 @@ let update_multi #a prior s data len =
     // are now statically prevented in [update_last]
   assume (r0.counter + v len / blockLength a < pow2 32 - 1));
 
-//=======
-//#set-options "--z3rlimit 48"
-//
-//  FStar.Math.Lemmas.swap_mul (block_size a) (v n);
-//  FStar.Math.Lemmas.multiple_modulo_lemma (v n) (block_size a);
-
   match !*s with
   | SHA256_Hacl p ->
-      let n = FStar.UInt32.(len /^ blockLen SHA256) in
+      let n = len / blockLen SHA256 in
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
       // let h = ST.get() in assume(bounded_counter s h (v n));
@@ -359,7 +364,6 @@ let update_multi #a prior s data len =
 
 //18-07-07 For SHA384 I was expecting a conversion from 32 to 64 bits
 
-#set-options "--z3rlimit 100"
 //18-07-10 WIP verification; still missing proper spec for padding
 let update_last #a prior s data totlen =
   let h0 = ST.get() in
@@ -375,10 +379,6 @@ let update_last #a prior s data totlen =
     assume (r0.counter + 2 < pow2 32 - 1));
 
   assert(M.(loc_disjoint (footprint s h0) (loc_buffer data)));
-
-//  FStar.Math.Lemmas.swap_mul ((repr s h0).counter) (block_size a);
-//  FStar.Math.Lemmas.multiple_modulo_lemma ((repr s h0).counter) (block_size a);
-
   match !*s with
   | SHA256_Hacl p ->
       let len = totlen % blockLen SHA256 in
@@ -422,12 +422,9 @@ let finish #a s dst =
 
 let free #a s =
   (match !* s with
-  | SHA256_Hacl p ->
-      B.free p
-  | SHA384_Hacl p ->
-      B.free p
-  | SHA256_Vale p ->
-      B.free p);
+  | SHA256_Hacl p -> B.free p
+  | SHA384_Hacl p -> B.free p
+  | SHA256_Vale p -> B.free p);
   B.free s
 
 let hash a dst input len =
