@@ -53,7 +53,9 @@ $(CACHE_DIR)/Lib.IntTypes.%.checked: | .depend
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
-$(CACHE_DIR)/%.checked: | .depend
+# We verify and cache Lib.IntTypes first; otherwise a parallel build may
+# verify Lib.IntTypes several times.
+$(CACHE_DIR)/%.checked: | .depend $(CACHE_DIR)/Lib.IntTypes.fst.checked
 	$(FSTAR) $< \
 	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
