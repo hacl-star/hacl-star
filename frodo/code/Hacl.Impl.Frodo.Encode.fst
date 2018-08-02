@@ -158,6 +158,8 @@ let frodo_key_decode1 b a i =
   pop_frame();
   res
 
+#set-options "--max_fuel 0"
+
 inline_for_extraction noextract private
 val frodo_key_decode2:
     b:size_t{v b <= 8}
