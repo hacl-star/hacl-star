@@ -297,6 +297,7 @@ let mpfr_add1sp1 a b c rnd_mode p =
     lemma_reveal_modifies_1 (mpfr_MANT a) h0 h1;
     lemma_intro_modifies_2 a (mpfr_MANT a) h0 h1;
     if I32.(st.bx >^ mpfr_EMAX) then begin
+        let s = mpfr_SIGN a in
         let t = mpfr_overflow a rnd_mode (mpfr_SIGN a) in
 	let h2 = ST.get() in
 	mpfr_overflow_post_cond_lemma (add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (U32.v (as_struct h0 a).mpfr_prec) rnd_mode (I32.v t) (as_fp h2 a);

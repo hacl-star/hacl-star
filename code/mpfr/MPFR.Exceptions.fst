@@ -21,7 +21,6 @@ open MPFR.Exceptions.Lemma
 
 #set-options "--z3refresh --z3rlimit 30 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
-inline_for_extraction
 val mpfr_overflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:mpfr_sign_t ->
     Stack i32
     (requires (fun h -> 
@@ -38,7 +37,6 @@ val mpfr_overflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:mpfr_sign_t ->
 	as_fp h1 x == mpfr_overflow_spec exact (U32.v p) rnd_mode /\
 	I32.v t = mpfr_overflow_ternary_spec exact (U32.v p) rnd_mode)))
 
-inline_for_extraction
 let mpfr_overflow x rnd_mode sign =
     mpfr_SET_SIGN x sign;
     if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_IS_NEG_SIGN sign) then begin
@@ -49,7 +47,6 @@ let mpfr_overflow x rnd_mode sign =
 	sign
     end
 
-inline_for_extraction
 val mpfr_underflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:mpfr_sign_t ->
     Stack i32
     (requires (fun h -> 
@@ -66,7 +63,6 @@ val mpfr_underflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:mpfr_sign_t ->
 	as_fp h1 x == mpfr_underflow_spec exact (U32.v p) rnd_mode /\
 	I32.v t = mpfr_underflow_ternary_spec exact (U32.v p) rnd_mode)))
 
-inline_for_extraction
 let mpfr_underflow x rnd_mode sign =
     mpfr_SET_SIGN x sign;
     if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_IS_NEG_SIGN sign) then begin

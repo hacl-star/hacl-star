@@ -244,8 +244,7 @@ inline_for_extraction val mpfr_EXP: x:mpfr_ptr -> Stack mpfr_exp_t
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\
                           r = (as_struct h1 x).mpfr_exp))
 inline_for_extraction let mpfr_EXP x = 
-    let f = x.(0ul) in
-    f.mpfr_exp
+    (x.(0ul)).mpfr_exp
 
 inline_for_extraction val mpfr_SET_EXP: x:mpfr_ptr -> e:mpfr_exp_t -> Stack unit
     (requires (fun h -> mpfr_live h x))
@@ -256,8 +255,7 @@ inline_for_extraction val mpfr_SET_EXP: x:mpfr_ptr -> e:mpfr_exp_t -> Stack unit
 
 inline_for_extraction let mpfr_SET_EXP x e = 
     let h0 = ST.get() in
-    let f = x.(0ul) in
-    x.(0ul) <- {f with mpfr_exp = e};
+    x.(0ul) <- {x.(0ul) with mpfr_exp = e};
     let h1 = ST.get() in
     lemma_reveal_modifies_1 x h0 h1;
     lemma_intro_modifies_2 x (as_struct h1 x).mpfr_d h0 h1
@@ -277,8 +275,7 @@ inline_for_extraction val mpfr_SIGN: x:mpfr_ptr -> Stack mpfr_sign_t
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\
                            r = (as_struct h1 x).mpfr_sign))
 inline_for_extraction let mpfr_SIGN x = 
-    let f = x.(0ul) in
-    f.mpfr_sign
+    (x.(0ul)).mpfr_sign
 
 inline_for_extraction val mpfr_SET_SIGN: x:mpfr_ptr -> s:mpfr_sign_t -> Stack unit
     (requires (fun h -> mpfr_live h x))
@@ -289,8 +286,7 @@ inline_for_extraction val mpfr_SET_SIGN: x:mpfr_ptr -> s:mpfr_sign_t -> Stack un
 			   
 inline_for_extraction let mpfr_SET_SIGN x s = 
     let h0 = ST.get() in
-    let f = x.(0ul) in
-    x.(0ul) <- {f with mpfr_sign = s};
+    x.(0ul) <- {x.(0ul) with mpfr_sign = s};
     let h1 = ST.get() in
     lemma_reveal_modifies_1 x h0 h1;
     lemma_intro_modifies_2 x (as_struct h1 x).mpfr_d h0 h1
@@ -332,8 +328,7 @@ inline_for_extraction val mpfr_MANT: x:mpfr_ptr -> Stack (buffer mp_limb_t)
 			   r == (as_struct h1 x).mpfr_d))
 
 inline_for_extraction let mpfr_MANT x = 
-    let f = x.(0ul) in
-    f.mpfr_d
+    (x.(0ul)).mpfr_d
 
 inline_for_extraction val mpn_ZERO: b:buffer mp_limb_t -> l:u32 -> Stack unit
     (requires (fun h -> live h b /\ length b >= U32.v l))
@@ -373,9 +368,8 @@ inline_for_extraction let mpfr_LIMB_ONE = 1uL
 inline_for_extraction val mpfr_LIMB_MASK: s:u32{U32.v s < 64} ->
     Tot (r:u64{v r = pow2 (U32.v s) - 1})
 inline_for_extraction let mpfr_LIMB_MASK s =
-    let lsh = 1uL <<^ s in
     lemma_pow2_small_mod (U32.v s) 64;
-    lsh -^ 1uL
+    (1uL <<^ s) -^ 1uL
 
 inline_for_extraction val mpfr_LIMB_HIGHBIT: s:u64{v s = pow2 63}
 inline_for_extraction let mpfr_LIMB_HIGHBIT =
