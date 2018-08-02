@@ -83,7 +83,7 @@ let extract #a st =
   | _      -> Seq.slice (Spec.Lib.uint32s_to_be 8 st.hash) 0 (tagLength a) //TBC
 
 //#set-options "--z3rlimit 500"
-//18-07-12 this immediately verifies in the .fsti :(
+//18-07-12 this immediately verifies from the .fsti :(
 let rec lemma_hash2 #a a0 b0 b1 = admit()
 (*
   if Seq.length b0 = 0 then (
@@ -101,9 +101,6 @@ let rec lemma_hash2 #a a0 b0 b1 = admit()
 *)
 
 let suffix a l =
-  //18-07-11 FIXME this is a placeholder
-  //Seq.create (suffixLength a l) 0uy
-
   let l1 = l % blockLength a in
   let l0 = l - l1 in
   assert(l0 % blockLength a = 0);
@@ -134,7 +131,6 @@ let suffix a l =
 
 open FStar.HyperStack.ST
 
-module U32  = FStar.UInt32
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module M = LowStar.Modifies
@@ -159,11 +155,11 @@ let uint64_p = B.buffer uint_64
 
 noeq
 type state_s: (G.erased alg) -> Type0 =
-| SHA256_Hacl: p:uint32_p{ B.freeable p /\ B.length p = U32.v Hacl.SHA2_256.size_state } ->
+| SHA256_Hacl: p:uint32_p{ B.freeable p /\ B.length p = v Hacl.SHA2_256.size_state } ->
     state_s (G.hide SHA256)
-| SHA256_Vale: p:uint32_p{ B.freeable p /\ B.length p = U32.v ValeGlue.sha256_size_state } ->
+| SHA256_Vale: p:uint32_p{ B.freeable p /\ B.length p = v ValeGlue.sha256_size_state } ->
     state_s (G.hide SHA256)
-| SHA384_Hacl: p:uint64_p{ B.freeable p /\ B.length p = U32.v Hacl.SHA2_384.size_state } ->
+| SHA384_Hacl: p:uint64_p{ B.freeable p /\ B.length p = v Hacl.SHA2_384.size_state } ->
     state_s (G.hide SHA384)
 
 let footprint_s #a (s: state_s a): GTot M.loc =

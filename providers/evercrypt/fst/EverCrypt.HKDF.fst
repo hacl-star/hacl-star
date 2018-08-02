@@ -52,7 +52,9 @@ private val hkdf_expand_loop:
 #set-options "--z3rlimit 100"
 let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
   push_frame ();
-  admit (); // 20180723 JP: proof definitely not going through
+  // admit (); // 20180723 JP: proof definitely not going through
+  //18-08-02 it does go through using emacs
+  
   let tlen = tagLen a in
   let tag = sub hashed 0ul tlen in
   let info_counter = offset hashed tlen in

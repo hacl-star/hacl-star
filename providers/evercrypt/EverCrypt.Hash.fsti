@@ -346,7 +346,7 @@ val finish:
     invariant s h1 /\
     M.(modifies (loc_buffer dst) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    B.as_seq h1 dst = extract (repr s h0))
+    B.as_seq h1 dst == extract (repr s h0))
 
 val free: #a:e_alg -> s:state a -> ST unit
   (requires (fun h0 ->

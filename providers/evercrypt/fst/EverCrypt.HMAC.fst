@@ -4,6 +4,7 @@ module EverCrypt.HMAC
 /// Agile specification
 
 open EverCrypt.Helpers
+open FStar.Integers
 open FStar.Seq
 
 noextract
@@ -21,18 +22,48 @@ private let wrap_lemma (a: e_alg) (key: bseq{Seq.length key <= maxLength a}): Le
     let paddingLength = blockLength a - length key0 in
     key0 @| Seq.create paddingLength 0uy)) = ()
 
-noextract let rec xor (v: bseq) (x: UInt8.t): lbseq (length v) =
-  init (length v) (fun i -> FStar.UInt8.logxor (index v i) x)
-//  Spec.Loops.seq_map (fun y -> FStar.UInt8.logxor x y) v
-//18-04-08 not sure why the latter fails.
+// seems to help tame polymorphism in the proof
+inline_for_extraction 
+let xor8 (x y: uint8_t): uint8_t = x ^^ y
 
+noextract let rec xor (x: uint8_t) (v: bseq): lbseq (length v) =
+  Spec.Loops.seq_map #uint8_t (xor8 x) v
+
+let rec xor_lemma (x: uint8_t) (v: bseq) : Lemma (requires True)
+  (ensures (xor x v == Spec.Loops.seq_map2 xor8 (create (length v) x) v))
+  (decreases (length v)) = 
+  let l = length v in 
+  if l = 0 then () else (
+    let xs  = create l x in 
+    let xs' = create (l-1) x in 
+    lemma_eq_intro (tail xs) xs';
+    xor_lemma x (tail v))
+(*    
+    assert(// by induction
+      xor (tail v) y == Spec.Loops.seq_map2 xor8 (tail v) ys');
+    assert(// by definition
+      Spec.Loops.seq_map (fun x -> xor8 x y) v ==
+      cons 
+        (xor8 (head v) y) 
+        (Spec.Loops.seq_map (fun x -> xor8 x y) (tail v)));
+    assert(// by definition 
+      xor v y ==
+      cons 
+        (xor8 (head v) y) 
+        (xor (tail v) y));
+    assert(// by definition 
+      Spec.Loops.seq_map2 xor8 v ys ==
+      cons 
+        (xor8 (head v) (head ys)) 
+        (Spec.Loops.seq_map2 xor8 (tail v) (tail ys)));
+*)
 
 // [noextract] incompatible with interfaces?!
 let hmac a key data =
-  assert(tagLength a + blockLength a <= maxLength a); // avoid?
+  assert(tagLength a + blockLength a <= maxLength a); // avoidable?
   let k = wrap a key in
-  let h1 = spec a (xor k 0x36uy @| data) in
-  let h2 = spec a (xor k 0x5cuy @| h1) in
+  let h1 = spec a (xor 0x36uy k @| data) in
+  let h2 = spec a (xor 0x5cuy k @| h1) in
   h2
 
 /// Agile implementation, relying on 3 variants of SHA2 supported by
@@ -61,26 +92,8 @@ val wrap_key:
       LowStar.Modifies.(modifies (loc_buffer output) h0 h1) /\
       as_seq h1 output = wrap (Ghost.hide a) (as_seq h0 key) ))
 
-(*
-// missing in LowStar.Buffer, not sure about modifies clause
-assume val blit: #t:Type
-  -> a:buffer t
-  -> idx_a:UInt32.t{v idx_a <= length a}
-  -> b:buffer t{disjoint a b}
-  -> idx_b:UInt32.t{v idx_b <= length b}
-  -> len:UInt32.t{v idx_a + v len <= length a /\ v idx_b + v len <= length b}
-  -> Stack unit
-    (requires (fun h -> live h a /\ live h b))
-    (ensures  (fun h0 _ h1 -> live h0 b /\ live h0 a /\ live h1 b /\ live h1 a /\ modifies_1 b h0 h1
-      /\ Seq.slice (as_seq h1 b) (v idx_b) (v idx_b + v len) ==
-        Seq.slice (as_seq h0 a) (v idx_a) (v idx_a + v len)
-      /\ Seq.slice (as_seq h1 b) 0 (v idx_b) ==
-        Seq.slice (as_seq h0 b) 0 (v idx_b)
-      /\ Seq.slice (as_seq h1 b) (v idx_b+v len) (length b) ==
-        Seq.slice (as_seq h0 b) (v idx_b+v len) (length b) ))
-*)
-
 let wrap_key a output key len =
+  [@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
   let i = if len <= blockLen a then len else tagLen a in
   let nkey = sub output 0ul i in
   let pad = sub output i (blockLen a - i) in
@@ -117,14 +130,16 @@ val part1:
       live h0 data)
     (ensures  fun h0 _ h1 ->
       live h1 s2 /\ live h1 data /\
-      Hash.invariant acc h1 /\
+      invariant acc h1 /\ 
+      footprint acc h1 == footprint acc h0 /\ //18-08-02 avoidable? this footprint is constant!
       LowStar.Modifies.(modifies (loc_union (footprint acc h0) (loc_buffer s2)) h0 h1) /\
       (
       let hash0 = Seq.slice (as_seq h1 s2) 0 (tagLength a) in
       hash0 == spec a (Seq.append (as_seq h0 s2) (as_seq h0 data)))))
 
-//18-07-12 could not find existing lemma: loc_disjoint_gsub_buffer is not enough! 
-assume val loc_disjoint_gsub_buffer1
+(*
+//18-07-12 required to guide the proof?
+let loc_disjoint_gsub_buffer1
   (#t: Type)
   (l0: loc)
   (b: buffer t)
@@ -138,8 +153,8 @@ assume val loc_disjoint_gsub_buffer1
   (ensures (
     UInt32.v i + UInt32.v len <= length b /\
     loc_disjoint l0 (loc_buffer (gsub b i len))
-  ))
-  //[SMTPat (gsub b i len)] // ? FIXME 
+  )) = ()
+*)
 
 #reset-options "--max_fuel 0 --z3rlimit 1000"
 let part1 a (acc: state (Ghost.hide a)) key data len =
@@ -218,12 +233,13 @@ val part2:
         live h0 opad /\
         live h0 tag) /\
       LowStar.Modifies.(
+        //18-08-02 anything more compact? 
         loc_disjoint (footprint acc h0) (loc_buffer opad) /\
         loc_disjoint (footprint acc h0) (loc_buffer tag) /\
         loc_disjoint (footprint acc h0) (loc_buffer mac)))
     (ensures fun h0 _ h1 ->
       live h1 mac /\ live h1 opad /\ live h1 tag /\ 
-      invariant acc h1 /\
+      invariant acc h1 /\ footprint acc h1 == footprint acc h0 /\
       LowStar.Modifies.(modifies (loc_union (footprint acc h0) (loc_buffer mac)) h0 h1) /\
       ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in
         Seq.length payload <= maxLength a /\
@@ -290,13 +306,15 @@ val hmac_core:
     invariant acc h0 /\
     live h0 tag /\ live h0 key /\ live h0 data)
   (ensures fun h0 _ h1 ->
+    // 18-08-02  proving those should be trivial, but yields a timeout 
+    invariant acc h1 /\ footprint acc h1 == footprint acc h0 /\
     live h1 tag /\ live h0 tag /\
     live h1 key /\ live h0 key /\
     live h1 data /\ live h0 data /\
     LowStar.Modifies.(modifies (loc_union (footprint acc h0) (loc_buffer tag)) h0 h1) /\
     ( let k = as_seq h0 key in
-      let k1 = xor k 0x36uy in
-      let k2 = xor k 0x5cuy in
+      let k1 = xor 0x36uy k in
+      let k2 = xor 0x5cuy k in
       let v1 = spec a (k1 @| as_seq h0 data) in
       Seq.length (k2 @| v1) <= maxLength a /\
       as_seq h1 tag == spec a (k2 @| v1)))))
@@ -305,98 +323,97 @@ val hmac_core:
 // below, we only XOR with a constant bytemask.
 val xor_bytes_inplace:
   a: uint8_p ->
-  b: uint8_p{ disjoint a b } ->
+  b: uint8_p {disjoint a b} ->
   len: UInt32.t {v len = length a /\ v len = length b} ->
   Stack unit
   (requires fun h0 -> live h0 a /\ live h0 b)
   (ensures fun h0 _ h1 ->
-    LowStar.Modifies.(modifies (loc_buffer a) h0 h1))
+    LowStar.Modifies.(modifies (loc_buffer a) h0 h1) /\
+    as_seq h1 a == Spec.Loops.seq_map2 xor8 (as_seq h0 a) (as_seq h0 b))
 let xor_bytes_inplace a b len =
   let a = LowStar.ToFStarBuffer.new_to_old_st a in
   let b = LowStar.ToFStarBuffer.new_to_old_st b in
-  C.Loops.in_place_map2 a b len (fun x y -> UInt8.logxor x y)
+  C.Loops.in_place_map2 a b len xor8
 
 // TODO small improvements: part1 and part2 could return their tags in
 // mac, so that we can reuse the pad.
-let hmac_core a acc mac key data len =
+
+[@"substitute"]
+let hmac_core a acc tag key data len =
   let h00 = ST.get() in
   push_frame ();
   let h01 = ST.get() in 
-  assume(invariant acc h00 ==> invariant acc h01); //?
+  fresh_frame_modifies h00 h01; //18-08-02 a trigger would be nice!
+  Hash.frame_invariant (LowStar.Modifies.loc_none) acc h00 h01;
+  // assert(invariant acc h01);
   let ipad = LowStar.Buffer.alloca 0x36uy (blockLen a) in
   let h02 = ST.get() in 
-  assume(loc_in (footprint acc h01) h01);//?
+  assume(loc_in (footprint acc h01) h01);//18-08-02 how to prove it?
   fresh_is_disjoint (loc_buffer ipad) (footprint acc h01)  h01 h02;
   let opad = LowStar.Buffer.alloca 0x5cuy (blockLen a) in
   xor_bytes_inplace ipad key (blockLen a);
   xor_bytes_inplace opad key (blockLen a);
   let h0 = ST.get() in
-  assume(loc_in (footprint acc h0) h0);//?
+  assume(loc_in (footprint acc h0) h0);//18-08-02 how to prove it? 
   LowStar.Modifies.(frame_invariant (loc_union (loc_buffer ipad) (loc_buffer opad)) acc h01 h0);
-  // assert(invariant acc h0);
-  // assert(
-  //   // not sure how to frame acc's invariant and footprint through push_frame, alloca, xor_inplace
-  //   LowStar.Modifies.(
-  //     loc_disjoint (footprint acc h0) (loc_buffer data) /\
-  //     loc_disjoint (footprint acc h0) (loc_buffer ipad) /\
-  //     loc_disjoint (footprint acc h0) (loc_buffer opad))
-  //   );
   part1 a acc ipad data len;
   let h1 = ST.get() in
-  assert(live h1 ipad);//18-07-12 TODO framing
   let inner = sub ipad 0ul (tagLen a) in (* salvage memory *)
-  assume(
-    live h1 mac /\ live h1 opad /\ 
-    LowStar.Modifies.(
-      loc_disjoint (footprint acc h1) (loc_buffer data) /\
-      loc_disjoint (footprint acc h1) (loc_buffer ipad) /\
-      loc_disjoint (footprint acc h1) (loc_buffer opad) /\
-      loc_disjoint (footprint acc h1) (loc_buffer mac))
-    );
-  part2 a acc mac opad inner;
+  part2 a acc tag opad inner;
   let h2 = ST.get() in
+  pop_frame ();
   (
+    let h3 = ST.get() in
     let a = Ghost.hide a in
     let k = as_seq h0 key in
-    let k1: lbseq (blockLength a) = xor k 0x36uy in
-    let k2: lbseq (blockLength a) = xor k 0x5cuy in
+    let k1: lbseq (blockLength a) = xor 0x36uy k in
+    let k2: lbseq (blockLength a) = xor 0x5cuy k in
     let vdata = as_seq h0 data in
     let v1: lbseq (tagLength a) = as_seq h1 inner in
     assert_norm(blockLength a + tagLength a <= maxLength a);
     assert(Seq.length (k2 @| v1) <= maxLength a);
-    let v2 = as_seq h2 mac in
-
-    assume(as_seq h0 ipad = k1);
-    assume(as_seq h1 opad = k2);
+    let v2 = as_seq h2 tag in
+    xor_lemma 0x36uy k;
+    xor_lemma 0x5cuy k;
+    // assert(k1 == as_seq h0 ipad);
+    // assert(k2 == as_seq h1 opad);
     assert(v1 == spec a (k1 @| vdata));
     assert(v2 == spec a (k2 @| v1));
-    //assert(modifies_2 acc ipad h0 h1);
-    //assert(modifies_2 acc mac h1 h2)
-    assert(live h1 key);
-    assert(live h1 data);
-    //assert(footprint acc h1 == footprint acc h0);
     LowStar.Modifies.(
-      let fp2 = loc_union (footprint acc h1) (loc_buffer mac) in 
-      assert(modifies fp2 h1 h2); 
-      //assert(loc_disjoint (footprint acc h1) (loc_buffer key));
-      assert(loc_disjoint (loc_buffer mac) (loc_buffer key))
-      //assert(loc_disjoint fp2 (loc_buffer data)));
-    // assert(live h2 key);      
-    // assert(live h2 mac)
-  ));
-  pop_frame ();
-  
-  let h3 = ST.get() in
-  admit() 
-(* still missing some framing, 
-  assume(
-    live h3 key /\
-    LowStar.Modifies.(modifies (loc_union (footprint acc h0) (loc_buffer mac)) h00 h3)
-    )
-  //assume(modifies_2 acc mac h00 h3) //18-04-14 still no convenient way to prove those?
-*)
+      let fpa = footprint acc h0 in 
+      let fp0 = loc_union (loc_buffer ipad) (loc_buffer opad) in 
+      let fp1 = loc_union fpa (loc_buffer ipad) in 
+      let fp2 = loc_union fpa (loc_buffer tag) in 
+      let fp = loc_union fp0 fp2 in
+      // assert(modifies fp0 h01 h0);
+      // assert(modifies fp1 h0 h1);
+      // assert(modifies fp2 h1 h2); 
+      // assert(modifies (loc_union fp1 fp2) h0 h2);
+      // assert(modifies (loc_union fp0 (loc_union fp1 fp2)) h01 h2);
+      // assert(modifies fp2 h00 h3)
+      // assert(loc_disjoint (footprint acc h0) (loc_buffer data));
+      // assert(loc_disjoint (loc_buffer tag) (loc_buffer data));
+      // assert(loc_disjoint fp2 (loc_buffer data))
+      // assert(footprint acc h0 == footprint acc h1);
+      // assert(live h2 key);      
+      // assert(live h2 tag)
+
+      //18-08-02 I tried includes instead of equalities, but still stuck. Anything simpler? 
+      // assume(fp `loc_includes` loc_union fp0 (loc_union fp1 fp2));
+      // assume(loc_all_regions_from false (HyperStack.get_tip h01) `loc_includes` fp0);
+      assume(modifies (loc_union (loc_all_regions_from false (HyperStack.get_tip h01)) fp2) h01 h2);
+      modifies_fresh_frame_popped h00 h01 fp2 h2 h3;
+
+      //18-08-02 missing lemma? data and tag have the same base type.
+      assume(as_addr data = as_addr tag /\ live h2 tag ==> live h2 data);
+
+      //18-08-02 separate problem: how to move those across pop?
+      assume(
+        invariant acc h2 /\ footprint acc h2 == footprint acc h00 ==>
+        invariant acc h3 /\ footprint acc h3 == footprint acc h00) ))
 
 let compute a mac key keylen data datalen =
+  let h00 = ST.get() in 
   push_frame ();
   assert_norm(pow2 32 <= maxLength (Ghost.hide a));
   let keyblock = LowStar.Buffer.alloca 0x00uy (blockLen a) in
@@ -408,14 +425,17 @@ let compute a mac key keylen data datalen =
   Hash.frame_invariant_implies_footprint_preservation (LowStar.Modifies.loc_buffer keyblock) acc h0 h1;
   hmac_core a acc mac keyblock data datalen;
   let h2 = ST.get() in
-  assume(
-    //18-07-12 not sure this is provable, even after deallocating acc!
-    LowStar.Modifies.(
-      modifies (loc_union (footprint acc h1) (loc_buffer mac)) h1 h2 ==>
-      modifies (loc_buffer mac) h1 h2));
-  pop_frame ()
+  Hash.free acc;
+  pop_frame ();
+  let h3 = ST.get() in 
+  LowStar.Modifies.(
+    assert(modifies (loc_union (footprint acc h1) (loc_buffer mac)) h1 h2);
+    //18-08-02 not provable from the current postcondition of Hash.free 
+    assume(modifies (loc_buffer mac) h00 h3 ))
 
-(* was:
+
+
+(* 18-08-02 older stuff. Was:
 // not much point in separating hmac_core? verbose, but it helps
 // monomorphise stack allocations.
 
