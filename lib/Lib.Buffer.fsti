@@ -87,6 +87,13 @@ inline_for_extraction val createL: #a:Type0 -> init:list a{List.Tot.length init 
 				            /\ modifies1 r h0 h1
 					         /\ as_seq r h1 == LSeq.createL #a init))
 
+inline_for_extraction val createG: #a:Type0 -> init:list a{List.Tot.length init <= max_size_t} ->
+  StackInline (lbuffer a ((List.Tot.length init)))
+    (requires (fun h0 -> True))
+    (ensures (fun h0 r h1 -> preserves_live h0 h1 /\ creates1 r h0 h1
+				            /\ modifies1 r h0 h1
+					         /\ as_seq r h1 == LSeq.createL #a init))
+
 inline_for_extraction val alloc: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Type0 -> #len:size_nat -> #wlen:size_nat -> clen:size_t{v clen == len} -> init:a ->
   write:lbuffer w wlen ->
   spec:(h:mem -> GTot(r:b -> LSeq.lseq w (wlen) -> Type)) ->
