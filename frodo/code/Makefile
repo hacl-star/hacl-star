@@ -51,6 +51,10 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
   --cache_checked_modules --cache_dir $(CACHE_DIR) \
   --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
 
+FSTARR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
+  --cache_dir $(CACHE_DIR) \
+  --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
+
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
 ROOTS = Hacl.Test.Frodo.fst
@@ -58,67 +62,62 @@ ROOTS = Hacl.Test.Frodo.fst
 .PRECIOUS: %.krml
 
 .depend:
-	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
 include .depend
 
-# Admit SMT queries for modules in FStar namespace
-$(CACHE_DIR)/FStar.%.fst.checked: | .depend
-	$(FSTAR) --admit_smt_queries true $< && \
+# Admit SMT queries for modules in FStar and LowStar namespaces
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-# We need this because F* can't take duplicate modules in the command line
-$(CACHE_DIR)/Lib.IntTypes.fst.checked: | .depend
-	$(FSTAR) $< \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+$(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-# We need this because F* can't handle a .fsti with --expose_interfaces
-$(CACHE_DIR)/Lib.IntTypes.fsti.checked: | .depend
-	$(FSTAR) $< \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
-
-# We need this because F* can't take duplicate modules in the command line
-$(CACHE_DIR)/Lib.Loops.fst.checked: | .depend
-	$(FSTAR) $< \
-	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
-
-# We need this because F* can't handle a .fsti with --expose_interfaces
-$(CACHE_DIR)/Lib.Loops.fsti.checked: | .depend
-	$(FSTAR) $< \
+$(CACHE_DIR)/Lib.RawIntTypes.fst.checked: $(CACHE_DIR)/Lib.IntTypes.fst.checked
+$(CACHE_DIR)/Lib.RawIntTypes.fst.checked: | .depend
+	$(FSTARR) $< \
+	  --expose_interfaces \
+	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
-	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	  $(HACL_HOME)/lib/c/Lib.Loops.fst \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
-# We need this because F* can't take duplicate modules in the command line
-$(OUTPUT_DIR)/Lib_IntTypes.krml: | .depend
-	$(FSTAR) --codegen Kremlin \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-# We need this so we can reuse .checked files in FStar/ulib
-$(OUTPUT_DIR)/FStar_%.krml: | .depend
-	$(FSTAR) --codegen Kremlin \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-# This mimicks what Kremlin would do when driving F* and passed all .fst in
-# the command-line: it would add `--expose_interfaces` and expose all
+# We mimick what Kremlin would do when it is driving F* and it is given all
+# .fst in the command-line: it would add `--expose_interfaces` and expose all
 # implementations.
-$(OUTPUT_DIR)/%.krml: | .depend
-	$(FSTAR) --codegen Kremlin \
-	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+
+$(OUTPUT_DIR)/FStar_%.krml $(OUTPUT_DIR)/LowStar_%.krml $(OUTPUT_DIR)/C%.krml: | .depend
+	$(FSTARR) --codegen Kremlin \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
+
+$(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml: | .depend
+	$(FSTARR) --codegen Kremlin \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
+
+$(OUTPUT_DIR)/Lib_RawIntTypes.krml: $(OUTPUT_DIR)/Lib_IntTypes.krml
+$(OUTPUT_DIR)/Lib_RawIntTypes.krml: | .depend
+	$(FSTARR) --codegen Kremlin \
+	  --expose_interfaces \
+	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
+
+$(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
+	$(FSTARR) --codegen Kremlin \
+	  --expose_interfaces \
+	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	  $(HACL_HOME)/lib/c/Lib.Loops.fst \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
@@ -126,15 +125,17 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
+# We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
 	-no-prefix 'Hacl.Impl.Frodo' \
-	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo.*,Frodo.Params' \
+	-bundle 'Hacl.Impl.Frodo=Frodo.Params,Hacl.Impl.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
-	-library 'Hacl.Keccak' \
-	-add-include '"extracted/C_Endianness.h"' \
+	-bundle 'C=C.Endianness' \
+	-library 'Hacl.Keccak,C,FStar' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
 	-add-include '"c/Lib_PQ_Print.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
@@ -156,10 +157,10 @@ include $(GENERATED_DIR)/Makefile.include
 # inclusion of Makefile.include, the automated dependency analysis via $(CC) -MM
 # also captures the dependencies between these files.
 #
-# KreMLin sees the fsti's for the various Lib_* modules and creates .h/.c
+# KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
 # files for them in $(GENERATED_DIR). However, we are only interested in the header,
 # and drop these (mostly empty) C files.
-ALL_OUR_FILES 	    = $(filter-out FStar_*, $(ALL_C_FILES))
+ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c Hacl_Keccak.c C.c, $(ALL_C_FILES))
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
@@ -167,8 +168,6 @@ ALL_SOURCES = \
   include/randombytes.c \
   include/Hacl_Keccak.c \
   $(HACL_HOME)/lib/c/Lib_PQ_Print.c
-
-$(info ALL_SOURCES is $(ALL_SOURCES))
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
 	$(LWEKE_HOME)/objs/sha3/fips202.o \
@@ -206,6 +205,7 @@ $(OUT_DIR)/libfrodostar_for_testing.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o
 	@echo Remember to set params_n = 640 in Hacl.Impl.Frodo.Params!
 
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
+	$(info ALL_SOURCES is $(ALL_SOURCES))
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
 
 .PRECIOUS: %.o
@@ -274,11 +274,12 @@ $(OUT_DIR)/Hacl_Impl_Frodo.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
 	-no-prefix 'Hacl.Impl.Frodo' \
-	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo.*,Frodo.Params' \
+	-bundle 'Hacl.Impl.Frodo=Frodo.Params,Hacl.Impl.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
-	-library 'Hacl.Keccak' \
-	-add-include '"extracted/C_Endianness.h"' \
+	-bundle 'C=C.Endianness' \
+	-library 'Hacl.Keccak,C,FStar' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
 	-add-include '"c/Lib_PQ_Print.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
@@ -291,3 +292,4 @@ test: $(OUT_DIR)/test-frodo.exe
 	$(OUT_DIR)/test-frodo.exe
 
 endif
+
