@@ -28,7 +28,7 @@ all:
 stage1: $(GENERATED_DIR)/Makefile.include
 
 stage2: $(OUT_DIR)/libfrodostar_for_testing.a $(OUT_DIR)/test.exe
-	@echo Remember to set params_n = 64 in Hacl.Impl.Frodo.Params!
+	@echo Remember to set params_n = 64 in Frodo.Params!
 	$(OUT_DIR)/test.exe
 
 # 1. Generation of .krml files
@@ -91,22 +91,26 @@ $(CACHE_DIR)/%.checked: | .depend
 # We mimick what Kremlin would do when it is driving F* and it is given all
 # .fst in the command-line: it would add `--expose_interfaces` and expose all
 # implementations.
+#
+# We need to additionally expose Lib.Loops and Lib.RawIntTypes for the
+# compilation to succeed and be as if Kremlin was given all files at the
+# same time. This means stale cache files, so we use --lax
 
 $(OUTPUT_DIR)/FStar_%.krml $(OUTPUT_DIR)/LowStar_%.krml $(OUTPUT_DIR)/C%.krml: | .depend
-	$(FSTARR) --codegen Kremlin \
+	$(FSTARR) --codegen Kremlin --lax \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
 $(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml: | .depend
-	$(FSTARR) --codegen Kremlin \
+	$(FSTARR) --codegen Kremlin --lax \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
 $(OUTPUT_DIR)/Lib_RawIntTypes.krml: $(OUTPUT_DIR)/Lib_IntTypes.krml
 $(OUTPUT_DIR)/Lib_RawIntTypes.krml: | .depend
-	$(FSTARR) --codegen Kremlin \
+	$(FSTAR) --codegen Kremlin --lax \
 	  --expose_interfaces \
 	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
@@ -114,7 +118,7 @@ $(OUTPUT_DIR)/Lib_RawIntTypes.krml: | .depend
 	touch $@
 
 $(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
-	$(FSTARR) --codegen Kremlin \
+	$(FSTAR) --codegen Kremlin --lax \
 	  --expose_interfaces \
 	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
@@ -203,7 +207,7 @@ $(OUT_DIR):
 $(OUT_DIR)/libfrodostar_for_testing.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o, $(ALL_OBJS)) | $(OUT_DIR)
 	$(AR) rcs $(OUT_DIR)/libfrodostar_for_testing.a $^
 	ranlib $(OUT_DIR)/libfrodostar_for_testing.a
-	@echo Remember to set params_n = 640 in Hacl.Impl.Frodo.Params!
+	@echo Remember to set params_n = 640 in Frodo.Params!
 
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
