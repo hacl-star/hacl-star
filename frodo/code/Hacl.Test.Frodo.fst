@@ -10,6 +10,7 @@ open Lib.PQ.Buffer
 
 open Hacl.Impl.Frodo
 open Hacl.Impl.PQ.Lib
+open Hacl.Frodo.Random
 open Frodo.Params
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
@@ -57,6 +58,7 @@ let test_frodo seed ss_expected pk_expected ct_expected sk_expected =
 /// Test1. FrodoKEM-64. CSHAKE128
 
 let test1_ss_expected: b:lbytes crypto_bytes{ recallable b } =
+  [@ inline_let]
   let l =
     [u8 0xdf; u8 0xc5; u8 0x2a; u8 0x95; u8 0x6c; u8 0xe4; u8 0xbc; u8 0xa5;
      u8 0x53; u8 0x70; u8 0x46; u8 0x5a; u8 0x7e; u8 0xf8; u8 0x4f; u8 0x68]
@@ -68,6 +70,7 @@ let test1_ss_expected: b:lbytes crypto_bytes{ recallable b } =
 #set-options "--lax"
 
 let test1_pk_expected: b:lbytes crypto_publickeybytes{ recallable b } =
+  [@ inline_let]
   let l: list uint8 =
     [u8 0x92; u8 0x44; u8 0x4d; u8 0x91; u8 0xa2; u8 0xad; u8 0xad; u8 0x05; u8 0x2c; u8 0xa2; u8 0x3d; u8 0xe5; u8 0xfb; u8 0x9d; u8 0xf9; u8 0xe1;
      u8 0x95; u8 0xe3; u8 0x8f; u8 0xc2; u8 0x21; u8 0xb8; u8 0xb8; u8 0x34; u8 0x14; u8 0xfb; u8 0xd3; u8 0xef; u8 0x7c; u8 0xa2; u8 0x6b; u8 0x36;
@@ -135,6 +138,7 @@ let test1_pk_expected: b:lbytes crypto_publickeybytes{ recallable b } =
   createL_global l
 
 let test1_ct_expected: b:lbytes crypto_ciphertextbytes{ recallable b } =
+  [@ inline_let]
   let l:list uint8 =
    [u8 0x9d; u8 0x0e; u8 0x6e; u8 0xec; u8 0xc3; u8 0xd0; u8 0xa5; u8 0x9f; u8 0xba; u8 0xf9; u8 0xfb; u8 0xc9; u8 0x30; u8 0x42; u8 0x58; u8 0x2a;
     u8 0xf6; u8 0x5b; u8 0x14; u8 0x49; u8 0xec; u8 0x17; u8 0x96; u8 0xac; u8 0x33; u8 0x1e; u8 0xe9; u8 0x13; u8 0x66; u8 0x01; u8 0x88; u8 0x3a;
@@ -210,6 +214,7 @@ let test1_ct_expected: b:lbytes crypto_ciphertextbytes{ recallable b } =
   createL_global l
 
 let test1_sk_expected: b:lbytes crypto_secretkeybytes{ recallable b } =
+  [@ inline_let]
   let l: list uint8 =
    [u8 0x4b; u8 0x62; u8 0x2d; u8 0xe1; u8 0x35; u8 0x01; u8 0x19; u8 0xc4; u8 0x5a; u8 0x9f; u8 0x2e; u8 0x2e; u8 0xf3; u8 0xdc; u8 0x5d; u8 0xf5;
     u8 0x92; u8 0x44; u8 0x4d; u8 0x91; u8 0xa2; u8 0xad; u8 0xad; u8 0x05; u8 0x2c; u8 0xa2; u8 0x3d; u8 0xe5; u8 0xfb; u8 0x9d; u8 0xf9; u8 0xe1;
@@ -344,6 +349,7 @@ let test1_sk_expected: b:lbytes crypto_secretkeybytes{ recallable b } =
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 let seed: b:lbytes (size 48){ recallable b } =
+  [@ inline_let]
   let l =
    [u8 0x64; u8 0x33; u8 0x5b; u8 0xf2; u8 0x9e; u8 0x5d; u8 0xe6; u8 0x28;
     u8 0x42; u8 0xc9; u8 0x41; u8 0x76; u8 0x6b; u8 0xa1; u8 0x29; u8 0xb0;

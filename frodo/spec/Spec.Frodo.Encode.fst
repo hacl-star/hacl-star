@@ -155,33 +155,28 @@ let rec fold_logor_ f i =
 
 #set-options "--max_fuel 1"
 
-val fold_logor_extensionality:
-    f:(i:size_nat{i < 8} -> GTot uint64)
-  -> g:(i:size_nat{i < 8} -> GTot uint64)
-  -> i:size_nat{i <= 8}
-  -> Lemma
-    (requires forall (i:size_nat{i < 8}). f i == g i)
-    (ensures fold_logor_ f i == fold_logor_ g i)
-let rec fold_logor_extensionality f g i =
-  if i = 0 then ()
-  else fold_logor_extensionality f g (i - 1)
+val decode_fc:
+    b:size_nat{b <= 8}
+  -> a:matrix params_nbar params_nbar
+  -> i:size_nat{i < params_nbar}
+  -> k:size_nat{k <= 8}
+  -> GTot uint64
+let decode_fc b a i k =
+  let f (k:size_nat{k < 8}) =
+    to_u64 (dc b a.(i, k)) <<. u32 (b * k) in
+  fold_logor_ f k
 
 val frodo_key_decode1:
     b:size_nat{b <= 8}
   -> a:matrix params_nbar params_nbar
   -> i:size_nat{i < params_nbar}
-  -> res:uint64{res == fold_logor_ (fun k -> to_u64 (dc b a.(i, k)) <<. u32 (b * k)) 8}
+  -> res:uint64{res == decode_fc b a i 8}
 let frodo_key_decode1 b a i =
-  let f (k:size_nat{k < 8}) =
-    to_u64 (dc b a.(i, k)) <<. u32 (b * k) in
-  let templong =
-    repeati_inductive 8
-    (fun k templong -> templong == fold_logor_ f k)
+  repeati_inductive 8
+    (fun k templong -> templong == decode_fc b a i k)
     (fun k templong ->
-      templong |. f k
-    ) (u64 0) in
-  fold_logor_extensionality f (fun k -> to_u64 (dc b a.(i, k)) <<. u32 (b * k)) 8;
-  templong
+      templong |. to_u64 (dc b a.(i, k)) <<. u32 (b * k)
+    ) (u64 0)
 
 #set-options "--max_fuel 0"
 
