@@ -17,11 +17,11 @@ let zero : elem = to_elem 0
 
 
 (* Poly1305 parameters *)
-let blocksize : size_nat = 16
-let keysize   : size_nat = 32
-type block = lbytes blocksize
-type tag   = lbytes blocksize
-type key   = lbytes keysize
+let size_block : size_nat = 16
+let size_key   : size_nat = 32
+type block = lbytes size_block
+type tag   = lbytes size_block
+type key   = lbytes size_key
 
 
 noeq type state = {
@@ -34,24 +34,24 @@ let set_acc (st:state) (acc:elem) =
   {st with acc = acc}
 
 (* Poly1305 specification *)
-let update1 (len:size_nat{len <= blocksize}) (b:lbytes len) (st:state) : state =
+let update1 (len:size_nat{len <= size_block}) (b:lbytes len) (st:state) : state =
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
   let n = to_elem (pow2 (8 * len)) +. to_elem (nat_from_bytes_le b) in
   let acc = (n +. st.acc) *. st.r in
   set_acc st acc
 
-let update_blocks (n:size_nat{n * blocksize <= max_size_t}) (text:lbytes (n * blocksize)) (st:state) : state =
-  reduce_blocks blocksize n (fun i -> update1 16) text st
+let update_blocks (n:size_nat{n * size_block <= max_size_t}) (text:lbytes (n * size_block)) (st:state) : state =
+  reduce_blocks size_block n (fun i -> update1 16) text st
 
 let poly (len:size_nat) (text:lbytes len) (st:state) : state =
-  let n = len / blocksize in
-  let rem = len % blocksize in
-  let blocks = slice text 0 (n * blocksize) in
+  let n = len / size_block in
+  let rem = len % size_block in
+  let blocks = slice text 0 (n * size_block) in
   let st = update_blocks n blocks st in
   if rem = 0 then st
   else
-    let last = slice text (n * blocksize) len in
+    let last = slice text (n * size_block) len in
     update1 rem last st
 
 let finish (st:state) : tag =

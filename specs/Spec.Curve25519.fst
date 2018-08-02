@@ -25,8 +25,12 @@ let rec ( ** ) (e:elem) (n:pos) : Tot elem (decreases n) =
     else e *. ((e *. e) ** ((n-1)/2))
 
 (* Type aliases *)
-type scalar = lbytes 32
-type serialized_point = lbytes 32
+inline_for_extraction
+let size_key: size_nat = 32
+
+type scalar = lbytes size_key
+type serialized_point = lbytes size_key
+
 noeq type proj_point = | Proj: x:elem -> z:elem -> proj_point
 
 let decodeScalar25519 (k:scalar) =
@@ -35,7 +39,7 @@ let decodeScalar25519 (k:scalar) =
   let k :scalar = k.[31] <- ((k.[31] &. u8 127) |. u8 64) in k
 
 let decodePoint (u:serialized_point) =
-  to_elem (nat_from_bytes_le u % pow2 255) 
+  to_elem (nat_from_bytes_le u % pow2 255)
 
 let add_and_double qx nq nqp1 =
   let x_1 = qx in

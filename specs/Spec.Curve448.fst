@@ -34,8 +34,11 @@ let rec ( ** ) (e:elem) (n:pos) : Tot elem (decreases n) =
     else e `fmul` ((e `fmul` e) ** ((n-1)/2))
 
 (* Type aliases *)
-type scalar = lbytes 56
-type serialized_point = lbytes 56
+inline_for_extraction
+let size_key: size_nat = 56
+
+type scalar = lbytes size_key
+type serialized_point = lbytes size_key
 type proj_point = | Proj: x:elem -> z:elem -> proj_point
 
 let decodeScalar448 (k:scalar) =

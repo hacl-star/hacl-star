@@ -9,8 +9,8 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Spec.Poly1305.Lemmas
 
-noeq type finite_field (bits:size_nat) = 
-  | MkFF: elem:Type0 -> 
+noeq type finite_field (bits:size_nat) =
+  | MkFF: elem:Type0 ->
 	  to_elem: (n:nat{n < pow2 bits} -> e:elem) ->
 	  from_elem: (e:elem -> n:nat{n < pow2 bits}) ->
 //	  bytes_to_elem: (b:bytes{8 * length b < pow2 bits} -> e:elem) ->
@@ -21,11 +21,12 @@ noeq type finite_field (bits:size_nat) =
 	  finite_field bits
 
 (* Poly1305 parameters *)
-let blocksize : size_nat = 16
-let keysize   : size_nat = 32
-type block = lbytes blocksize
-type tag   = lbytes blocksize
-type key   = lbytes keysize
+let size_block : size_nat = 16
+let size_key   : size_nat = 32
+
+type block = lbytes size_block
+type tag   = lbytes size_block
+type key   = lbytes size_key
 
 
 noeq type state (ff:finite_field 130) = {
@@ -38,7 +39,7 @@ let set_acc #ff (st:state ff) (acc:ff.elem) =
   {st with acc = acc}
 
 (* Poly1305 specification *)
-let update1 #ff (len:size_nat{len <= blocksize}) (b:lbytes len) (st:state ff) : state ff =
+let update1 #ff (len:size_nat{len <= size_block}) (b:lbytes len) (st:state ff) : state ff =
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
   Math.Lemmas.pow2_lt_compat 130 (8 * len);
@@ -46,19 +47,19 @@ let update1 #ff (len:size_nat{len <= blocksize}) (b:lbytes len) (st:state ff) : 
   let n = ff.add (ff.to_elem (pow2 (8 * len))) (ff.to_elem (nat_from_bytes_le b)) in
   let acc = ff.mul (ff.add n st.acc) st.r in
   set_acc st acc
-  
 
-let update_blocks #ff (n:size_nat{n * blocksize <= max_size_t}) (text:lbytes (n * blocksize)) (st:state ff) : state ff =
-  reduce_blocks blocksize n (fun i -> update1 16) text st
+
+let update_blocks #ff (n:size_nat{n * size_block <= max_size_t}) (text:lbytes (n * size_block)) (st:state ff) : state ff =
+  reduce_blocks size_block n (fun i -> update1 16) text st
 
 let poly #ff (len:size_nat) (text:lbytes len) (st:state ff) : state ff =
-  let n = len / blocksize in
-  let rem = len % blocksize in
-  let blocks = slice text 0 (n * blocksize) in
+  let n = len / size_block in
+  let rem = len % size_block in
+  let blocks = slice text 0 (n * size_block) in
   let st = update_blocks n blocks st in
   if rem = 0 then st
   else
-    let last = slice text (n * blocksize) len in
+    let last = slice text (n * size_block) len in
     update1 rem last st
 
 let finish #ff (st:state ff) : tag =
@@ -95,14 +96,14 @@ let poly1305_generic (#ff:finite_field 130) (len:size_nat) (msg:lbytes len) (k:k
 let prime =  pow2 130 - 5
 unfold type elem = nat_mod prime
 inline_for_extraction
-let to_elem (x:nat) : elem = x `modulo` prime 
+let to_elem (x:nat) : elem = x `modulo` prime
 inline_for_extraction
 let from_elem (x:elem) : n:nat{n < pow2 130} = nat_mod_v #prime x
 inline_for_extraction
 let zero : elem = to_elem 0
 
 inline_for_extraction
-let poly1305_field : finite_field 130 = 
+let poly1305_field : finite_field 130 =
     MkFF elem to_elem from_elem zero (+.) ( *. )
 
 inline_for_extraction
@@ -112,34 +113,34 @@ let poly1305 (len:size_nat) (msg:lbytes len) (k:key) : tag =
 (***** LOW LEVEL 64-bit SPEC *****)
 
 type elem2 = s:lseq uint64 3
-let mask44 = (((u64 1) <<. (u32 44)) -. (u64 1)) 
+let mask44 = (((u64 1) <<. (u32 44)) -. (u64 1))
 let mask42 = (((u64 1) <<. (u32 42)) -. (u64 1))
 
-let zero2 : elem2 = 
+let zero2 : elem2 =
   create 3 (u64 0)
 
-let to_elem2 (n:nat{n < pow2 130}) : elem2 = 
+let to_elem2 (n:nat{n < pow2 130}) : elem2 =
     repeati 3 (fun i acc ->
       acc.[i] <- u64 ((n / pow2 (i * 44)) % pow2 44)) zero2
 //      acc.[0] <- u64 ((n / pow2 (i * 44)) % pow2 44)) zero2
 
-let from_elem2 (s:elem2) : (n:nat{n < pow2 130}) = 
+let from_elem2 (s:elem2) : (n:nat{n < pow2 130}) =
     repeati 3 (fun i acc ->
       acc + (uint_to_nat s.[i] * pow2 (i * 44))) 0
 
-let add2 (s1:elem2) (s2:elem2) : elem2 = 
+let add2 (s1:elem2) (s2:elem2) : elem2 =
   repeati 3 (fun i acc -> acc.[i] <- s1.[i] +. s2.[i]) zero2
 
 [@ Substitute]
 inline_for_extraction
-let mul_wide44 (a:uint64) (b:uint64) : tuple2 uint64 uint64 = 
+let mul_wide44 (a:uint64) (b:uint64) : tuple2 uint64 uint64 =
   let o = mul_wide a b in
   let l = (to_u64 o) &. mask44 in
   let h = to_u64 (o >>. (u32 44)) in
   (h,l)
 
-let mul2 (s1:elem2) (s2:elem2) : elem2 = 
-  let s4 = repeati 3 (fun i acc -> 
+let mul2 (s1:elem2) (s2:elem2) : elem2 =
+  let s4 = repeati 3 (fun i acc ->
        repeati 3 (fun j acc ->
                    let s2j = s2.[(3 + j - i) % 3] in
 		   let s2j = if i <= j then s2j else u64 20 *. s2j in
@@ -157,8 +158,8 @@ let mul2 (s1:elem2) (s2:elem2) : elem2 =
 			let acc = acc.[i+1] <- acc.[i+1] +. (acc.[i] >>. (u32 44)) in
 			acc.[i] <- acc.[i] &. mask44) s4 in
   slice s4 0 3
-  
-let poly1305_field2 : finite_field 130 = 
+
+let poly1305_field2 : finite_field 130 =
   MkFF elem2 to_elem2 from_elem2 zero2 add2 mul2
 
 let poly1305_2 (len:size_nat) (msg:lbytes len) (k:key) : tag =
@@ -167,31 +168,31 @@ let poly1305_2 (len:size_nat) (msg:lbytes len) (k:key) : tag =
 (***** LOW LEVEL 64-bit SPEC *****)
 
 type elem3 = s:lseq uint32 5
-let mask26 = (((u32 1) <<. (u32 26)) -. (u32 1)) 
-let zero3 : elem3 = 
+let mask26 = (((u32 1) <<. (u32 26)) -. (u32 1))
+let zero3 : elem3 =
   create 5 (u32 0)
 
-let to_elem3 (n:nat{n < pow2 130}) : elem3 = 
+let to_elem3 (n:nat{n < pow2 130}) : elem3 =
     repeati 5 (fun i acc ->
       acc.[i] <- u32 ((n / pow2 (i * 26)) % pow2 26)) zero3
 
-let from_elem3 (s:elem3) : (n:nat{n < pow2 130}) = 
+let from_elem3 (s:elem3) : (n:nat{n < pow2 130}) =
     repeati 5 (fun i acc ->
       acc + (uint_to_nat s.[i] * pow2 (i * 26))) 0
 
-let add3 (s1:elem3) (s2:elem3) : elem3 = 
+let add3 (s1:elem3) (s2:elem3) : elem3 =
     repeati 5 (fun i acc -> acc.[i] <- s1.[i] +. s2.[i]) zero3
 
 [@ Substitute]
 inline_for_extraction
-let mul_wide26 (a:uint32) (b:uint32) : tuple2 uint32 uint32 = 
+let mul_wide26 (a:uint32) (b:uint32) : tuple2 uint32 uint32 =
   let o = (to_u64 a) *. (to_u64 b) in
   let l = (to_u32 o) &. mask26 in
   let h = to_u32 (o >>. (u32 26)) in
   (h,l)
 
-let mul3 (s1:elem3) (s2:elem3) : elem3 = 
-  let s6 = repeati 5 (fun i acc -> 
+let mul3 (s1:elem3) (s2:elem3) : elem3 =
+  let s6 = repeati 5 (fun i acc ->
        repeati 5 (fun j acc ->
                    let s2j = s2.[(5 + j - i) % 5] in
 		   let s2j = if i <= j then s2j else u32 5 *. s2j in
@@ -210,8 +211,8 @@ let mul3 (s1:elem3) (s2:elem3) : elem3 =
 			let acc = acc.[i+1] <- acc.[i+1] +. (acc.[i] >>. (u32 26)) in
 			acc.[i] <- acc.[i] &. mask26) s6 in
   slice s6 0 5
-  
-let poly1305_field3 : finite_field 130 = 
+
+let poly1305_field3 : finite_field 130 =
   MkFF elem3 to_elem3 from_elem3 zero3 add3 mul3
 
 let poly1305_3 (len:size_nat) (msg:lbytes len) (k:key) : tag =

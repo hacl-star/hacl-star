@@ -6,6 +6,14 @@ open Lib.Sequence
 open Lib.ByteSequence
 open FStar.Mul
 
+
+inline_for_extraction
+let size_state: size_nat = 25
+
+type state = lseq uint64 size_state
+type index = n:size_nat{n < 5}
+
+
 let lfsr86540 (lfsr:uint8) : tuple2 uint8 bool =
   let lfsr1 : uint8 = logand #U8 lfsr (u8 1) in
   let result : bool = u8_to_UInt8 lfsr1 <> 0uy in
@@ -15,13 +23,11 @@ let lfsr86540 (lfsr:uint8) : tuple2 uint8 bool =
   else
     lfsr', result
 
-type state = lseq uint64 25
-type index = n:size_nat{n < 5}
 
-let readLane (s:state) (x:index) (y:index) : uint64 = 
+let readLane (s:state) (x:index) (y:index) : uint64 =
   s.[x + 5 * y]
 
-let writeLane (s:state ) (x:index) (y:index) (v:uint64) : state = 
+let writeLane (s:state ) (x:index) (y:index) (v:uint64) : state =
   s.[x + 5 * y] <- v
 
 #set-options "--max_fuel 0 --z3rlimit 100"
@@ -57,7 +63,7 @@ let state_permute1 (s:state) (lfsr:uint8) : tuple2 state uint8 =
     repeati 5 (fun y s ->
       repeati 5 (fun x s ->
         writeLane s x y ((readLane temp x y) ^. (logand #U64 (lognot (readLane temp ((x+1)%5) y)) (readLane temp ((x+2)%5) y)))) s) s_pi_rho in
-							
+
   let (s_iota,lfsr) =
     repeati 7 (fun j (s,lfsr) ->
       Math.Lemmas.pow2_le_compat 6 j;
