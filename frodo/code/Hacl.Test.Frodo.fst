@@ -6,6 +6,7 @@ open Lib.PQ.Buffer
 
 open Hacl.Impl.Frodo
 open Hacl.Impl.PQ.Lib
+open Hacl.Frodo.Random
 
 val test_frodo:
   seed:lbytes (size 48) ->

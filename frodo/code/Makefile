@@ -130,7 +130,8 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
 	-no-prefix 'Hacl.Impl.Frodo' \
-	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo.*,Frodo.Params' \
+	-no-prefix 'Hacl.Frodo.Random' \
+	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo.*,Frodo.Params,Hacl.Frodo.Random' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-library 'Hacl.Keccak' \
@@ -274,7 +275,8 @@ $(OUT_DIR)/Hacl_Impl_Frodo.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
 	-no-prefix 'Hacl.Impl.Frodo' \
-	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo.*,Frodo.Params' \
+	-no-prefix 'Hacl.Frodo.Random' \
+	-bundle 'Hacl.Impl.Frodo=Hacl.Impl.PQ.Lib,Hacl.Impl.Frodo.*,Frodo.Params,Hacl.Frodo.Random' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-library 'Hacl.Keccak' \

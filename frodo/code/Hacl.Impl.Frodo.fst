@@ -14,6 +14,7 @@ open Lib.PQ.Buffer
 
 open Hacl.Impl.PQ.Lib
 open Hacl.Keccak
+open Hacl.Frodo.Random
 open Hacl.Impl.Frodo.Params
 open Hacl.Impl.Frodo.Encode
 open Hacl.Impl.Frodo.Pack
@@ -23,17 +24,6 @@ module ST = FStar.HyperStack.ST
 module FLemmas = Spec.Frodo.Lemmas
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
-
-/// TODO: move these to a standalone .fsti file, they are implemented in include/randombytes.c
-assume val randombytes_init_:
-  entropy_input:lbytes (size 48) -> Stack unit
-  (requires (fun h -> B.live h entropy_input))
-  (ensures (fun h0 r h1 -> B.live h1 entropy_input))
-
-assume val randombytes_:
-  len:size_t -> res:lbytes len -> Stack unit
-  (requires (fun h -> B.live h res))
-  (ensures (fun h0 r h1 -> B.live h1 res /\ modifies (loc_buffer res) h0 h1))
 
 let cshake_frodo = cshake128_frodo
 
