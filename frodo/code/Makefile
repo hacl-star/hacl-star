@@ -130,7 +130,8 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
 	-no-prefix 'Hacl.Impl.Frodo' \
-	-bundle 'Hacl.Impl.Frodo=Frodo.Params,Hacl.Impl.*' \
+	-no-prefix 'Hacl.Frodo.Random' \
+	-bundle 'Hacl.Impl.Frodo=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.Random' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
@@ -274,7 +275,8 @@ $(OUT_DIR)/Hacl_Impl_Frodo.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
 	-no-prefix 'Hacl.Impl.Frodo' \
-	-bundle 'Hacl.Impl.Frodo=Frodo.Params,Hacl.Impl.*' \
+	-no-prefix 'Hacl.Frodo.Random' \
+	-bundle 'Hacl.Impl.Frodo=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.Random' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
@@ -292,4 +294,3 @@ test: $(OUT_DIR)/test-frodo.exe
 	$(OUT_DIR)/test-frodo.exe
 
 endif
-
