@@ -6,7 +6,7 @@ open MPFR.Dyadic
 open MPFR.Lib.Spec
 open MPFR.Maths
 
-#set-options "--z3refresh --z3rlimit 50 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 40 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
    
 (* ulp definition *)
 let ulp_p (a:normal_fp) (p:pos) = unit_dyadic (a.exp - p)
@@ -290,6 +290,18 @@ val mpfr_round2_cond_refl_lemma: a:mpfr_fp{valid_fp_cond a /\ normal_fp_cond a} 
 let mpfr_round2_cond_refl_lemma a rnd_mode =
     exp_impl_no_overflow_lemma a;
     exp_impl_no_underflow_lemma a
+
+val mpfr_round2_cond_in_range_lemma: a:normal_fp{mpfr_PREC_COND a.prec /\ mpfr_EXP_COND a.exp} ->
+    rnd_mode:mpfr_rnd_t -> r:mpfr_fp -> Lemma
+    (requires (mpfr_round2_cond a rnd_mode r))
+    (ensures  (valid_num_cond r /\ eval a =. eval r))
+
+let mpfr_round2_cond_in_range_lemma a rnd_mode r =
+    exp_impl_no_overflow_lemma a;
+    exp_impl_no_underflow_lemma a;
+    if MPFR_RNDN? rnd_mode then
+        eval_abs_lt_intro_lemma ({mpfr_min_value 1 a.prec with exp = mpfr_EMIN_spec - 1}) a
+    else ()
 
 (* Given a normal number 'a', precision 'p', rounding mode 'rnd_mode',
  * and a MPFR number as rounding result 'r',

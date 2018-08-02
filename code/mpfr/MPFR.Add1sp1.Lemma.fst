@@ -629,15 +629,14 @@ val mpfr_truncate_ternary_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
     p:pos{p < a.prec /\ mpfr_PREC_COND p} ->
     high:normal_fp{high.prec = p /\ eval high =. eval (high_mant a p)} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
-    f:int -> r:mpfr_fp{r.prec = p} -> Lemma
+    t:int -> r:mpfr_fp{r.prec = p} -> Lemma
     (requires (mpfr_round2_cond high rnd_mode r /\
-               f = (if rb = false && sb = false then 0 else -a.sign)))
-    (ensures  (mpfr_ternary_cond f a r))
+               t = (if rb = false && sb = false then 0 else -a.sign)))
+    (ensures  (mpfr_ternary_cond t a r))
 
-let mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode f r =
+let mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode t r =
     eval_eq_reveal_lemma high (high_mant a p);
-    exp_impl_no_overflow_lemma high;
-    exp_impl_no_underflow_lemma high;
+    mpfr_round2_cond_in_range_lemma (high_mant a p) rnd_mode r;
     rb_sb_lemma a p;
     if rb = false && sb = false then eval_eq_intro_lemma a (high_mant a p)
     else if a.sign > 0 then eval_lt_intro_lemma (high_mant a p) a
@@ -653,17 +652,19 @@ val mpfr_add_one_ulp_ternary_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
     p:pos{p < a.prec /\ mpfr_PREC_COND p} ->
     high:normal_fp{high.prec = p /\ eval high =. eval (high_mant a p) /\
                    eval_abs (high_mant a p) <. eval_abs a} ->
-    rnd_mode:mpfr_rnd_t -> f:int -> r:mpfr_fp{r.prec = p} -> Lemma
+    rnd_mode:mpfr_rnd_t -> t:int -> r:mpfr_fp{r.prec = p} -> Lemma
     (requires (mpfr_round2_cond (add_one_ulp high) rnd_mode r /\
-               f = mpfr_add1sp1_add_one_ulp_ternary_spec high rnd_mode))
-    (ensures  (mpfr_ternary_cond f a r))
+               t = mpfr_add1sp1_add_one_ulp_ternary_spec high rnd_mode))
+    (ensures  (mpfr_ternary_cond t a r))
 
-let mpfr_add_one_ulp_ternary_cond_lemma a p high rnd_mode f r =
+let mpfr_add_one_ulp_ternary_cond_lemma a p high rnd_mode t r =
     eval_eq_reveal_lemma high (high_mant a p);
     exp_impl_no_overflow_lemma high;
     exp_impl_no_underflow_lemma high;
     if eval_abs high <. mpfr_overflow_bound p then begin
         add_one_ulp_lt_lemma high (mpfr_max_value 1 p);
+	no_overflow_impl_exp_lemma (add_one_ulp high);
+	mpfr_round2_cond_in_range_lemma (add_one_ulp high) rnd_mode r;
 	if a.sign > 0 then eval_lt_intro_lemma a (add_one_ulp high)
 	else eval_lt_intro_lemma (add_one_ulp high) a
     end else begin
@@ -691,27 +692,27 @@ val mpfr_ternary_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
                    high.exp = (high_mant a p).exp /\ high.len <= (high_mant a p).len /\
 		   high.limb * pow2 (a.len - high.len) = (high_mant a p).limb} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
-    f:int -> r:mpfr_fp{r.prec = p} -> Lemma
+    t:int -> r:mpfr_fp{r.prec = p} -> Lemma
     (requires (mpfr_round2_cond (mpfr_add1sp1_round_spec high rb sb rnd_mode) rnd_mode r /\
-               f = mpfr_add1sp1_ternary_spec high rb sb rnd_mode))
-    (ensures  (mpfr_ternary_cond f a r))
+               t = mpfr_add1sp1_ternary_spec high rb sb rnd_mode))
+    (ensures  (mpfr_ternary_cond t a r))
 
-let mpfr_ternary_cond_lemma a p high rb sb rnd_mode f r =
+let mpfr_ternary_cond_lemma a p high rb sb rnd_mode t r =
     assert(eval_abs high =. eval_abs (high_mant a p));
     if rb = false && sb = false then
-        mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode f r
+        mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode t r
     else if MPFR_RNDN? rnd_mode then begin
 	if rb = false || (sb = false && is_even high)
-	then mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode f r
+	then mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode t r
 	else begin
             rb_sb_lemma a p;
-            mpfr_add_one_ulp_ternary_cond_lemma a p high rnd_mode f r
+            mpfr_add_one_ulp_ternary_cond_lemma a p high rnd_mode t r
 	end
     end else if mpfr_IS_LIKE_RNDZ rnd_mode (high.sign < 0) then
-        mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode f r
+        mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode t r
     else begin
         rb_sb_lemma a p;
-        mpfr_add_one_ulp_ternary_cond_lemma a p high rnd_mode f r
+        mpfr_add_one_ulp_ternary_cond_lemma a p high rnd_mode t r
     end
 
 (* correctness by using high part of significand, rounding/sticky bit *)
@@ -721,12 +722,12 @@ val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
                    high.exp = (high_mant a p).exp /\ high.len <= (high_mant a p).len /\
 		   high.limb * pow2 (a.len - high.len) = (high_mant a p).limb} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
-    f:int -> r:mpfr_fp{r.prec = p} -> Lemma
+    t:int -> r:mpfr_fp{r.prec = p} -> Lemma
     (requires (mpfr_round2_cond (mpfr_add1sp1_round_spec high rb sb rnd_mode) rnd_mode r /\
-               f = mpfr_add1sp1_ternary_spec high rb sb rnd_mode))
+               t = mpfr_add1sp1_ternary_spec high rb sb rnd_mode))
     (ensures  (mpfr_round_cond a p rnd_mode r /\
-               mpfr_ternary_cond f a r))
+               mpfr_ternary_cond t a r))
 
-let mpfr_add1sp1_round_post_cond_lemma a p high rb sb rnd_mode f r =
+let mpfr_add1sp1_round_post_cond_lemma a p high rb sb rnd_mode t r =
     mpfr_round_cond_lemma a p high rb sb rnd_mode r;
-    mpfr_ternary_cond_lemma a p high rb sb rnd_mode f r
+    mpfr_ternary_cond_lemma a p high rb sb rnd_mode t r

@@ -222,6 +222,7 @@ let mpfr_modifies_trans_lemma a h0 h1 h2 = ()
 
 (* Access to entries *)
 (* precision *)
+inline_for_extraction
 val mpfr_PREC: x:mpfr_ptr -> Stack mpfr_prec_t 
     (requires (fun h -> mpfr_live h x))
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\
@@ -230,15 +231,17 @@ let mpfr_PREC x =
     let f = x.(0ul) in
     f.mpfr_prec
     
-val mpfr_GET_PREC: x:mpfr_ptr -> Stack mpfr_reg_prec_t 
+inline_for_extraction
+val mpfr_GET_PREC: x:mpfr_ptr -> Stack mpfr_prec_t 
     (requires (fun h -> mpfr_live h x /\ mpfr_PREC_COND (U32.v (as_struct h x).mpfr_prec)))
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\
-                          r = (as_struct h1 x).mpfr_prec))
+                          r = (as_struct h1 x).mpfr_prec /\ mpfr_PREC_COND (U32.v r)))
 let mpfr_GET_PREC x = 
     let f = x.(0ul) in
     f.mpfr_prec
 
 (* exponent *)
+inline_for_extraction
 val mpfr_EXP: x:mpfr_ptr -> Stack mpfr_exp_t 
     (requires (fun h -> mpfr_live h x))
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\
@@ -247,6 +250,7 @@ let mpfr_EXP x =
     let f = x.(0ul) in
     f.mpfr_exp
 
+inline_for_extraction
 val mpfr_SET_EXP: x:mpfr_ptr -> e:mpfr_exp_t -> Stack unit
     (requires (fun h -> mpfr_live h x))
     (ensures  (fun h0 _ h1 -> mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
@@ -263,14 +267,15 @@ let mpfr_SET_EXP x e =
     lemma_intro_modifies_2 x (as_struct h1 x).mpfr_d h0 h1
 
 let mpfr_IS_NAN   x = mpfr_EXP x = mpfr_EXP_NAN
-let mpfr_SET_NAN  x = mpfr_SET_EXP x mpfr_EXP_NAN
+inline_for_extraction let mpfr_SET_NAN  x = mpfr_SET_EXP x mpfr_EXP_NAN
 let mpfr_IS_INF   x = mpfr_EXP x = mpfr_EXP_INF
-let mpfr_SET_INF  x = mpfr_SET_EXP x mpfr_EXP_INF
+inline_for_extraction let mpfr_SET_INF  x = mpfr_SET_EXP x mpfr_EXP_INF
 let mpfr_IS_ZERO  x = mpfr_EXP x = mpfr_EXP_ZERO
-let mpfr_SET_ZERO x = mpfr_SET_EXP x mpfr_EXP_ZERO
+inline_for_extraction let mpfr_SET_ZERO x = mpfr_SET_EXP x mpfr_EXP_ZERO
 let mpfr_NOTZERO  x = not (mpfr_IS_ZERO x)
 
 (* sign *)
+inline_for_extraction
 val mpfr_SIGN: x:mpfr_ptr -> Stack mpfr_sign_t 
     (requires (fun h -> mpfr_live h x))
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\
@@ -279,6 +284,7 @@ let mpfr_SIGN x =
     let f = x.(0ul) in
     f.mpfr_sign
 
+inline_for_extraction
 val mpfr_SET_SIGN: x:mpfr_ptr -> s:mpfr_sign_t -> Stack unit
     (requires (fun h -> mpfr_live h x))
     (ensures  (fun h0 _ h1 -> mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
@@ -294,26 +300,41 @@ let mpfr_SET_SIGN x s =
     lemma_reveal_modifies_1 x h0 h1;
     lemma_intro_modifies_2 x (as_struct h1 x).mpfr_d h0 h1
 
+inline_for_extraction
 let mpfr_NEG_SIGN s = if s = mpfr_SIGN_POS then mpfr_SIGN_NEG else mpfr_SIGN_POS
 
+inline_for_extraction
+val mpfr_IS_POS: x:mpfr_ptr -> Stack bool
+    (requires (fun h -> mpfr_live h x /\ mpfr_valid_cond h x))
+    (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ mpfr_valid_cond h1 x /\ h0 == h1 /\
+                           r = I32.((as_struct h1 x).mpfr_sign >^ 0l)))
+
 let mpfr_IS_POS x = I32.(mpfr_SIGN x >^ 0l)
+
+inline_for_extraction
+val mpfr_IS_NEG: x:mpfr_ptr -> Stack bool
+    (requires (fun h -> mpfr_live h x /\ mpfr_valid_cond h x))
+    (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ mpfr_valid_cond h1 x /\ h0 == h1 /\
+                           r = I32.((as_struct h1 x).mpfr_sign <^ 0l)))
+
 let mpfr_IS_NEG x = I32.(mpfr_SIGN x <^ 0l)
 
 let mpfr_IS_STRICTPOS x = mpfr_NOTZERO x /\ mpfr_IS_POS x
 let mpfr_IS_STRICTNEG x = mpfr_NOTZERO x /\ mpfr_IS_NEG x
 
-let mpfr_SET_POS x = mpfr_SET_SIGN x mpfr_SIGN_POS
-let mpfr_SET_NEG x = mpfr_SET_SIGN x mpfr_SIGN_NEG
+inline_for_extraction let mpfr_SET_POS x = mpfr_SET_SIGN x mpfr_SIGN_POS
+inline_for_extraction let mpfr_SET_NEG x = mpfr_SET_SIGN x mpfr_SIGN_NEG
 
 let mpfr_CHANGE_SIGN x = mpfr_SET_SIGN x (mpfr_NEG_SIGN (mpfr_SIGN x))
 let mpfr_SET_SAME_SIGN x y = mpfr_SET_SIGN x (mpfr_SIGN y)
 let mpfr_SET_OPPOSITE_SIGN x y = mpfr_SET_SIGN x (mpfr_NEG_SIGN (mpfr_SIGN y))
 
-let mpfr_IS_POS_SIGN s = I32.(s >^ 0l)
-let mpfr_IS_NEG_SIGN s = I32.(s <^ 0l)
-let mpfr_MULT_SIGN (s1:mpfr_sign_t) (s2:mpfr_sign_t): Tot mpfr_sign_t  = I32.(s1 *^ s2)
+inline_for_extraction let mpfr_IS_POS_SIGN s = I32.(s >^ 0l)
+inline_for_extraction let mpfr_IS_NEG_SIGN s = I32.(s <^ 0l)
+inline_for_extraction let mpfr_MULT_SIGN (s1:mpfr_sign_t) (s2:mpfr_sign_t): Tot mpfr_sign_t  = I32.(s1 *^ s2)
 
 (* significand *)
+inline_for_extraction
 val mpfr_MANT: x:mpfr_ptr -> Stack (buffer mp_limb_t)
     (requires (fun h -> mpfr_live h x))
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\
@@ -323,6 +344,7 @@ let mpfr_MANT x =
     let f = x.(0ul) in
     f.mpfr_d
 
+inline_for_extraction
 val mpn_ZERO: b:buffer mp_limb_t -> l:u32 -> Stack unit
     (requires (fun h -> live h b /\ length b >= U32.v l))
     (ensures  (fun h0 _ h1 ->
@@ -340,6 +362,7 @@ let rec mpn_ZERO b l =
     end
 
 (* useful functions *)
+inline_for_extraction
 val mpfr_LAST_LIMB: x:mpfr_ptr -> Stack u32
     (requires (fun h -> mpfr_live h x /\ mpfr_PREC_COND (U32.v (as_struct h x).mpfr_prec)))
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\
@@ -348,6 +371,7 @@ val mpfr_LAST_LIMB: x:mpfr_ptr -> Stack u32
 let mpfr_LAST_LIMB x =
     U32.((mpfr_GET_PREC x -^ 1ul) /^ gmp_NUMB_BITS)
 
+inline_for_extraction
 val mpfr_LIMB_SIZE: x:mpfr_ptr -> Stack u32
     (requires (fun h -> mpfr_live h x /\ mpfr_PREC_COND (U32.v (as_struct h x).mpfr_prec)))
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\
@@ -356,8 +380,10 @@ val mpfr_LIMB_SIZE: x:mpfr_ptr -> Stack u32
 let mpfr_LIMB_SIZE x = U32.(mpfr_LAST_LIMB x +^ 1ul)
 
 (* special value *)
+inline_for_extraction
 let mpfr_LIMB_ONE = 1uL
 
+inline_for_extraction
 val mpfr_LIMB_MASK: s:u32{U32.v s < 64} ->
     Tot (r:u64{v r = pow2 (U32.v s) - 1})
 let mpfr_LIMB_MASK s =
@@ -365,17 +391,20 @@ let mpfr_LIMB_MASK s =
     lemma_pow2_small_mod (U32.v s) 64;
     lsh -^ 1uL
     
+inline_for_extraction
 val mpfr_LIMB_HIGHBIT: s:u64{v s = pow2 63}
 let mpfr_LIMB_HIGHBIT =
     assert_norm(UInt.pow2_n #64 63 = v 0x8000000000000000uL);
     0x8000000000000000uL
 
+inline_for_extraction
 val mpfr_LIMB_MAX: s:u64{v s = pow2 64 - 1}
 let mpfr_LIMB_MAX =
     assert_norm(pow2 64 - 1 = v 0xffffffffffffffffuL);
     0xffffffffffffffffuL
 
 (* set special value *)
+inline_for_extraction
 val mpfr_setmax_rec: x:mpfr_ptr -> i:u32 -> Stack unit
     (requires (fun h -> 
         let p = (as_struct h x).mpfr_prec in

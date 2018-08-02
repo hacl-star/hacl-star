@@ -206,8 +206,9 @@ let mpfr_add_one_ulp a rnd_mode sh bx =
 	    mpfr_SET_EXP a I32.(bx +^ 1l);
 	    let h2 = ST.get() in
 	    lemma_pow2_mod 63 (U32.v sh);
-	    exp_impl_no_overflow_lemma (as_normal h2 a);
 	    eval_abs_lt_intro_lemma (as_normal h0 a) (mpfr_max_value (as_normal h0 a).sign (as_normal h0 a).prec);
+	    eval_eq_intro_lemma (add_one_ulp (as_normal h0 a)) (as_normal h2 a);
+	    //! assert(mpfr_round2_cond (add_one_ulp (as_normal h0 a)) rnd_mode (as_fp h2 a));
 	    mpfr_modifies_trans_lemma a h0 h1 h2;
 	    mpfr_SIGN a
 	end else begin
@@ -259,7 +260,6 @@ let mpfr_add1sp1_round a rnd_mode st =
 	else mpfr_add_one_ulp a rnd_mode st.sh st.bx
     else if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_IS_NEG a) then mpfr_NEG_SIGN (mpfr_SIGN a)
     else mpfr_add_one_ulp a rnd_mode st.sh st.bx
-
 
 (* specifications for mpfr_add1sp1 *)
 val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
