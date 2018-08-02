@@ -289,7 +289,10 @@ val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
 
 let mpfr_add1sp1 a b c rnd_mode p =
     let h0 = ST.get() in
-    let st = mpfr_add1sp1_any a.(0ul) b.(0ul) c.(0ul) p in
+    let a0 = a.(0ul) in
+    let b0 = b.(0ul) in
+    let c0 = c.(0ul) in
+    let st = mpfr_add1sp1_any a0 b0 c0 p in
     let h1 = ST.get() in
     lemma_reveal_modifies_1 (mpfr_MANT a) h0 h1;
     lemma_intro_modifies_2 a (mpfr_MANT a) h0 h1;
