@@ -348,13 +348,18 @@ let hmac_core a acc tag key data len =
   // assert(invariant acc h01);
   let ipad = LowStar.Buffer.alloca 0x36uy (blockLen a) in
   let h02 = ST.get() in 
-  assume(loc_in (footprint acc h01) h01);//18-08-02 how to prove it?
+//  assert (loc_in (footprint acc h01) h01);//18-08-02 how to prove it?
+    // TR: now works thanks to Hash.invariant_loc_in_footprint
   fresh_is_disjoint (loc_buffer ipad) (footprint acc h01)  h01 h02;
   let opad = LowStar.Buffer.alloca 0x5cuy (blockLen a) in
   xor_bytes_inplace ipad key (blockLen a);
   xor_bytes_inplace opad key (blockLen a);
   let h0 = ST.get() in
-  assume(loc_in (footprint acc h0) h0);//18-08-02 how to prove it? 
+  modifies_address_liveness_insensitive_unused_in h01 h0;
+//  assert(loc_in (footprint acc h0) h0);//18-08-02 how to prove it?
+    // TR: now works thanks to
+    // modifies_address_liveness_insensitive_unused_in: if no
+    // deallocations are performed, then all livenesses are preserved.
   LowStar.Modifies.(frame_invariant (loc_union (loc_buffer ipad) (loc_buffer opad)) acc h01 h0);
   part1 a acc ipad data len;
   let h1 = ST.get() in
@@ -380,34 +385,24 @@ let hmac_core a acc tag key data len =
     assert(v1 == spec a (k1 @| vdata));
     assert(v2 == spec a (k2 @| v1));
     LowStar.Modifies.(
-      let fpa = footprint acc h0 in 
-      let fp0 = loc_union (loc_buffer ipad) (loc_buffer opad) in 
-      let fp1 = loc_union fpa (loc_buffer ipad) in 
-      let fp2 = loc_union fpa (loc_buffer tag) in 
-      let fp = loc_union fp0 fp2 in
-      // assert(modifies fp0 h01 h0);
-      // assert(modifies fp1 h0 h1);
-      // assert(modifies fp2 h1 h2); 
-      // assert(modifies (loc_union fp1 fp2) h0 h2);
-      // assert(modifies (loc_union fp0 (loc_union fp1 fp2)) h01 h2);
-      // assert(modifies fp2 h00 h3)
-      // assert(loc_disjoint (footprint acc h0) (loc_buffer data));
-      // assert(loc_disjoint (loc_buffer tag) (loc_buffer data));
-      // assert(loc_disjoint fp2 (loc_buffer data))
-      // assert(footprint acc h0 == footprint acc h1);
-      // assert(live h2 key);      
-      // assert(live h2 tag)
-
-      //18-08-02 I tried includes instead of equalities, but still stuck. Anything simpler? 
-      // assume(fp `loc_includes` loc_union fp0 (loc_union fp1 fp2));
-      // assume(loc_all_regions_from false (HyperStack.get_tip h01) `loc_includes` fp0);
-      assume(modifies (loc_union (loc_all_regions_from false (HyperStack.get_tip h01)) fp2) h01 h2);
-      modifies_fresh_frame_popped h00 h01 fp2 h2 h3;
+      // TR: modifies clause now automatically proven thanks to
+      // pattern provided in Hash.loc_includes_union_l_footprint
 
       //18-08-02 missing lemma? data and tag have the same base type.
-      assume(as_addr data = as_addr tag /\ live h2 tag ==> live h2 data);
+//      assume(as_addr data = as_addr tag /\ live h2 tag ==> live h2 data);
+      // TR: We don't need this lemma. In fact, here is a generic way
+      // of proving that liveness of buffers is preserved: any
+      // modified location that does not necessarily have its liveness
+      // preserved (e.g. an abstract footprint) shall be disjoint from
+      // any location whose liveness we want to preserve.
+      modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 tag;
+      modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 key;
+      modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 data;
 
       //18-08-02 separate problem: how to move those across pop?
+      //TR: I have a solution to this problem, but I need to add a
+      //lemma into LowStar.Buffer: any existing memory location
+      //(loc_not_unused_in) is disjoint from a fresh frame
       assume(
         invariant acc h2 /\ footprint acc h2 == footprint acc h00 ==>
         invariant acc h3 /\ footprint acc h3 == footprint acc h00) ))
@@ -431,6 +426,9 @@ let compute a mac key keylen data datalen =
   LowStar.Modifies.(
     assert(modifies (loc_union (footprint acc h1) (loc_buffer mac)) h1 h2);
     //18-08-02 not provable from the current postcondition of Hash.free 
+    //TR: In fact, I have to generalize
+    //`modifies_only_live_addresses`, to a lemma saying that all
+    //loc_unused_in locations can be removed from a modifies clause
     assume(modifies (loc_buffer mac) h00 h3 ))
 
 

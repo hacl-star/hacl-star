@@ -210,6 +210,8 @@ let repr_eq (#a:e_alg) (r1 r2: acc a) =
 
 let fresh_is_disjoint l1 l2 h0 h1 = ()
 
+let invariant_loc_in_footprint #a s m = ()
+
 let frame_invariant #a l s h0 h1 =
   let state = B.deref h0 s in
   assert (repr_eq (repr s h0) (repr s h1))

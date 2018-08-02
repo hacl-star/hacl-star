@@ -200,6 +200,26 @@ val footprint_s: #a:e_alg -> state_s a -> GTot M.loc
 let footprint (#a: e_alg) (s: state a) (m: HS.mem) =
   M.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
 
+// TR: the following pattern is necessary because, if we generically
+// add such a pattern directly on `loc_includes_union_l`, then
+// verification will blowup whenever both sides of `loc_includes` are
+// `loc_union`s. We would like to break all unions on the
+// right-hand-side of `loc_includes` first, using
+// `loc_includes_union_r`.  Here the pattern is on `footprint_s`,
+// because we already expose the fact that `footprint` is a
+// `loc_union`. (In other words, the pattern should be on every
+// smallest location that is not exposed to be a `loc_union`.)
+
+let loc_includes_union_l_footprint_s
+  (l1 l2: M.loc) (#a: e_alg) (s: state_s a)
+: Lemma
+  (requires (
+    M.loc_includes l1 (footprint_s s) \/ M.loc_includes l2 (footprint_s s)
+  ))
+  (ensures (M.loc_includes (M.loc_union l1 l2) (footprint_s s)))
+  [SMTPat (M.loc_includes (M.loc_union l1 l2) (footprint_s s))]
+= M.loc_includes_union_l l1 l2 (footprint_s s)
+
 val invariant_s: (#a: e_alg) -> state_s a -> HS.mem -> Type0
 let invariant (#a: e_alg) (s: state a) (m: HS.mem) =
   B.live m s /\
@@ -223,12 +243,30 @@ val fresh_is_disjoint: l1:M.loc -> l2:M.loc -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (fresh_loc l1 h0 h1 /\ l2 `loc_in` h0))
   (ensures (M.loc_disjoint l1 l2))
 
+// TR: this lemma is necessary to prove that the footprint is disjoint
+// from any fresh memory location.
+
+val invariant_loc_in_footprint
+  (#a: e_alg)
+  (s: state a)
+  (m: HS.mem)
+: Lemma
+  (requires (invariant s m))
+  (ensures (loc_in (footprint s m) m))
+  [SMTPat (invariant s m)]
+
+// TR: frame_invariant, just like all lemmas eliminating `modifies`
+// clauses, should have `modifies_inert` as a precondition instead of
+// `modifies`, in order to use it in all cases where a modifies clause
+// is produced but should not be composed with `modifies_trans` for
+// pattern reasons (e.g. push_frame, pop_frame)
+
 // 18-07-12 why not bundling the next two lemmas?
 val frame_invariant: #a:e_alg -> l:M.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
     invariant s h0 /\
     M.loc_disjoint l (footprint s h0) /\
-    M.modifies l h0 h1))
+    M.modifies_inert l h0 h1))
   (ensures (
     invariant s h1 /\
     repr s h0 == repr s h1))
@@ -241,7 +279,7 @@ let frame_invariant_implies_footprint_preservation
   (requires (
     invariant s h0 /\
     M.loc_disjoint l (footprint s h0) /\
-    M.modifies l h0 h1))
+    M.modifies_inert l h0 h1))
   (ensures (
     footprint s h1 == footprint s h0))
 =
