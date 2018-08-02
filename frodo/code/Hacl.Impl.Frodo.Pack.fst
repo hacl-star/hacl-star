@@ -5,8 +5,7 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.ModifiesPat
-open LowStar.Modifies
+open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.PQ.Buffer
@@ -66,6 +65,8 @@ let frodo_pack n1 n2 a d res =
       Lib.Loops.for (size 0) n28 inv1 f1 in
   Lib.Loops.for (size 0) n1 inv f';
   pop_frame()
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
 val frodo_unpack:
   n1:size_t -> n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0} ->
