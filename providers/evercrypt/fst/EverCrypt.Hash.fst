@@ -3,7 +3,7 @@ module EverCrypt.Hash
 /// ----------agile implementation of hash specification ------------
 /// must be in scope for linking the agile spec to the ad hoc algorithmic specs
 
-//18-08-01 required for re-typechecking the .fsti :( 
+//18-08-01 required for re-typechecking the .fsti :(
 #set-options "--z3rlimit 200"
 
 let string_of_alg =
@@ -248,7 +248,7 @@ let rec lemma_hash2_has_k
   (b:bytes {Seq.length b % blockLength a = 0}):
   GTot (_:unit{has_k (hash2 v b)}) (decreases (Seq.length b))
 =
-  if Seq.length b = 0 then 
+  if Seq.length b = 0 then
     assert_norm(hash2 v b == v)
   else
     let c,b' = Seq.split b (blockLength a) in
@@ -290,7 +290,7 @@ let update #a prior s data =
     //TODO 18-07-10 weaken hacl* update to tolerate overflows; they
     // are now statically prevented in [update_last]
     assume (r0.counter < pow2 32 - 1));
-    
+
   match !*s with
   | SHA256_Hacl p ->
       let p = T.new_to_old_st p in
@@ -307,7 +307,7 @@ let update #a prior s data =
       admit ()
 
 //#set-options "--lax"
-#set-options "--z3rlimit 300" 
+#set-options "--z3rlimit 300"
 let update_multi #a prior s data len =
   let h0 = ST.get() in
   ( let r0 = repr s h0 in

@@ -44,8 +44,8 @@ let test_one_hash vec =
     let tlen: UInt32.t = H.tagLen a in
 
 // to avoid double-extraction of failwith
-//  let expected: uint8_pl (v tlen) = 
-//    if expected_len = tlen 
+//  let expected: uint8_pl (v tlen) =
+//    if expected_len = tlen
 //    then expected
 //    else failwith !$"Wrong output length" in
     let computed = B.alloca 0uy tlen in
@@ -63,7 +63,7 @@ let test_one_hash vec =
     let ctx = EverCrypt.Hash.create a in
 
     (* Compute the number of blocks to process *)
-    let size_block: UInt32.t = H.blockLen a in 
+    let size_block: UInt32.t = H.blockLen a in
     let n = U32.div total_input_len size_block in
     let r = U32.rem total_input_len size_block in
 
@@ -76,19 +76,19 @@ let test_one_hash vec =
     EverCrypt.Hash.update_multi (G.hide Seq.empty) ctx input_blocks n;
     EverCrypt.Hash.update_last (G.hide Seq.empty) ctx input_last r;
     EverCrypt.Hash.finish ctx computed;
-    *) 
+    *)
 
     let str: C.String.t = H.string_of_alg a in
 
     //18-08-03 scopes?!!
-    // Incrementally: 
+    // Incrementally:
     // EverCrypt.Hash.Test.compute a input_len input computed;
     // TestLib.compare_and_print str expected computed tlen;
 
     // Non-incrementally:
     EverCrypt.Hash.hash a computed total_input total_input_len;
     TestLib.compare_and_print str expected computed tlen;
- 
+
     pop_frame()
   )
 
@@ -105,10 +105,10 @@ let test_one_hmac vec =
 
     push_frame();
 
-//  if expectedlen <> H.tagLen ha then failwith !$"Wrong output length"; 
+//  if expectedlen <> H.tagLen ha then failwith !$"Wrong output length";
 
     let computed = B.alloca 0uy (H.tagLen ha) in
-    let str = EverCrypt.Hash.string_of_alg ha  in 
+    let str = EverCrypt.Hash.string_of_alg ha  in
     EverCrypt.HMAC.compute ha computed key keylen data datalen;
     TestLib.compare_and_print str expected computed (H.tagLen ha);
 
@@ -309,14 +309,14 @@ let main (): St C.exit_code =
   test_chacha20 chacha20_vectors_len chacha20_vectors;
   Test.Hash.main ();
   Test.Bytes.main ();
-  
+
   print !$"===========Vale===========\n";
   AC.(init (Prefer Vale));
   test_aead aead_vectors_len aead_vectors;
   test_hash hash_vectors_len hash_vectors;
   test_cipher block_cipher_vectors_len block_cipher_vectors;
   Test.Hash.main ();
-  
+
   print !$"==========OpenSSL=========\n";
   AC.(init (Prefer OpenSSL));
   test_aead aead_vectors_len aead_vectors;

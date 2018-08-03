@@ -23,39 +23,39 @@ private let wrap_lemma (a: e_alg) (key: bseq{Seq.length key <= maxLength a}): Le
     key0 @| Seq.create paddingLength 0uy)) = ()
 
 // better than Integer's [^^] to tame polymorphism in the proof?
-inline_for_extraction 
+inline_for_extraction
 let xor8 (x y: uint8_t): uint8_t = x ^^ y
 
-noextract 
+noextract
 let xor (x: uint8_t) (v: bseq): lbseq (length v) =
   Spec.Loops.seq_map (xor8 x) v
 
 let rec xor_lemma (x: uint8_t) (v: bseq) : Lemma (requires True)
   (ensures (xor x v == Spec.Loops.seq_map2 xor8 (create (length v) x) v))
-  (decreases (length v)) = 
-  let l = length v in 
+  (decreases (length v)) =
+  let l = length v in
   if l = 0 then () else (
-    let xs  = create l x in 
-    let xs' = create (l-1) x in 
+    let xs  = create l x in
+    let xs' = create (l-1) x in
     lemma_eq_intro (tail xs) xs';
     xor_lemma x (tail v))
-(*    
+(*
     assert(// by induction
       xor (tail v) y == Spec.Loops.seq_map2 xor8 (tail v) ys');
     assert(// by definition
       Spec.Loops.seq_map (fun x -> xor8 x y) v ==
-      cons 
-        (xor8 (head v) y) 
+      cons
+        (xor8 (head v) y)
         (Spec.Loops.seq_map (fun x -> xor8 x y) (tail v)));
-    assert(// by definition 
+    assert(// by definition
       xor v y ==
-      cons 
-        (xor8 (head v) y) 
+      cons
+        (xor8 (head v) y)
         (xor (tail v) y));
-    assert(// by definition 
+    assert(// by definition
       Spec.Loops.seq_map2 xor8 v ys ==
-      cons 
-        (xor8 (head v) (head ys)) 
+      cons
+        (xor8 (head v) (head ys))
         (Spec.Loops.seq_map2 xor8 (tail v) (tail ys)));
 *)
 
@@ -68,7 +68,7 @@ let hmac a key data =
 
 
 
-/// Agile implementation 
+/// Agile implementation
 
 open FStar.HyperStack.ST
 open FStar.Integers
@@ -131,7 +131,7 @@ val part1:
       live h0 data)
     (ensures  fun h0 _ h1 ->
       live h1 s2 /\ live h1 data /\
-      invariant acc h1 /\ 
+      invariant acc h1 /\
       footprint acc h1 == footprint acc h0 /\ //18-08-02 avoidable? this footprint is constant!
       modifies (loc_union (footprint acc h0) (loc_buffer s2)) h0 h1 /\
       (
@@ -149,7 +149,7 @@ let loc_disjoint_gsub_buffer1
 : Lemma
   (requires (
     UInt32.v i + UInt32.v len <= length b /\
-    loc_disjoint l0 (loc_buffer b) 
+    loc_disjoint l0 (loc_buffer b)
   ))
   (ensures (
     UInt32.v i + UInt32.v len <= length b /\
@@ -187,7 +187,7 @@ let part1 a (acc: state (Ghost.hide a)) key data len =
   // assert(LowStar.Buffer.live h3 key);
   let tag = sub key 0ul (tagLen a) in (* Salvage memory *)
   Hash.finish acc tag;
-  let h4 = ST.get() in 
+  let h4 = ST.get() in
   (
     modifies_trans (footprint acc h0) h0 h3 (loc_buffer key) h4; // should this implicitly trigger?
     let a = Ghost.hide a in
@@ -233,13 +233,13 @@ val part2:
     (requires fun h0 ->
       invariant acc h0 /\
       live h0 mac /\ live h0 opad /\ live h0 tag /\
-      //18-08-02 anything more compact? 
+      //18-08-02 anything more compact?
       disjoint mac opad /\ disjoint mac tag /\
       loc_disjoint (footprint acc h0) (loc_buffer opad) /\
       loc_disjoint (footprint acc h0) (loc_buffer tag) /\
       loc_disjoint (footprint acc h0) (loc_buffer mac))
     (ensures fun h0 _ h1 ->
-      live h1 mac /\ live h1 opad /\ live h1 tag /\ 
+      live h1 mac /\ live h1 opad /\ live h1 tag /\
       invariant acc h1 /\ footprint acc h1 == footprint acc h0 /\
       modifies (loc_union (footprint acc h0) (loc_buffer mac)) h0 h1 /\
       ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in
@@ -286,7 +286,7 @@ let part2 a acc mac opad tag =
 val hmac_core:
   a: alg -> (
   let a = Ghost.hide a in
-  acc: state a -> 
+  acc: state a ->
   tag: uint8_pl (tagLength a) ->
   key: uint8_pl (blockLength a) {disjoint key tag} ->
   data: uint8_p{
@@ -337,13 +337,13 @@ let xor_bytes_inplace a b len =
 let hmac_core a acc tag key data len =
   let h00 = ST.get() in
   push_frame ();
-  let h01 = ST.get() in 
+  let h01 = ST.get() in
   fresh_frame_modifies h00 h01; //18-08-02 a trigger would be nice!
   Hash.frame_invariant loc_none acc h00 h01;
   // assert(invariant acc h01);
   let ipad = alloca 0x36uy (blockLen a) in
-  let h02 = ST.get() in 
-  //  assert (loc_in (footprint acc h01) h01); 
+  let h02 = ST.get() in
+  //  assert (loc_in (footprint acc h01) h01);
   // TR: now works thanks to Hash.invariant_loc_in_footprint
   fresh_is_disjoint (loc_buffer ipad) (footprint acc h01)  h01 h02;
   let opad = alloca 0x5cuy (blockLen a) in
@@ -401,10 +401,10 @@ let hmac_core a acc tag key data len =
     assume(
       invariant acc h2 /\ footprint acc h2 == footprint acc h00 ==>
       invariant acc h3 /\ footprint acc h3 == footprint acc h00) )
-      
+
 
 let compute a mac key keylen data datalen =
-  let h00 = ST.get() in 
+  let h00 = ST.get() in
   push_frame ();
   assert_norm(pow2 32 <= maxLength (Ghost.hide a));
   let keyblock = alloca 0x00uy (blockLen a) in
@@ -418,10 +418,10 @@ let compute a mac key keylen data datalen =
   let h2 = ST.get() in
   Hash.free acc;
   pop_frame ();
-  let h20 = ST.get() in 
+  let h20 = ST.get() in
   assert(modifies (loc_union (footprint acc h1) (loc_buffer mac)) h1 h2);
   assume(modifies (loc_buffer mac) h00 h20)
-  //18-08-02 not provable from the current postcondition of Hash.free 
+  //18-08-02 not provable from the current postcondition of Hash.free
   //TR: In fact, I have to generalize
   //`modifies_only_live_addresses`, to a lemma saying that all
   //loc_unused_in locations can be removed from a modifies clause
