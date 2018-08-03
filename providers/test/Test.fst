@@ -84,7 +84,10 @@ let test_one_hash vec =
     // TestLib.compare_and_print str expected computed tlen;
 
     // Non-incrementally:
-    EverCrypt.Hash.hash a computed total_input total_input_len;
+    if AC.(sha256_impl () = Vale) then
+      EverCrypt.Hash.Test.compute a total_input_len total_input computed
+    else
+      EverCrypt.Hash.hash a computed total_input total_input_len;
     TestLib.compare_and_print str expected computed tlen;
     pop_frame()
   )
