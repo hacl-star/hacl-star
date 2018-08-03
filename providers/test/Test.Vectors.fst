@@ -5,7 +5,7 @@ open EverCrypt.Hash
 
 /// Hash algorithms
 
-type hash_alg = EverCrypt.Hash.alg 
+type hash_alg = EverCrypt.Hash.alg
 
 #set-options "--lax"
 
@@ -167,19 +167,19 @@ type hmac_vector = {
   output: hex_encoded;
 }
 
-// selected test vectors from 
+// selected test vectors from
 // https://tools.ietf.org/html/rfc4231#section-4.2
-// pls extend me! 
-noextract 
+// pls extend me!
+noextract
 let hmac_vectors = [{
     ha     = SHA256;
     key    = h"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b";
-    data   = h"4869205468657265"; 
+    data   = h"4869205468657265";
     output = h"b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
   }; {
     ha     = SHA384;
     key    = h"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b";
-    data   = h"4869205468657265"; 
+    data   = h"4869205468657265";
     output = h"afd03944d84895626b0825f4ab46907f15f9dadbe4101ec682aa034c7cebc59cfaea9ea9076ede7f4af152e8b2fa9cb6";
   }]
 

@@ -83,47 +83,26 @@ int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, unsigned char *okm, uint
   return 1;
 }
 
-int MITLS_CALLCONV quic_crypto_hkdf_tls_label(quic_hash a, unsigned char *info, size_t *info_len, const char *label)
+int MITLS_CALLCONV quic_crypto_hkdf_label(quic_hash a, unsigned char *info, size_t *info_len, const char *label, uint16_t out_len)
 {
   size_t label_len = strlen(label);
   uint32_t hlen = (a == TLS_hash_SHA256 ? 32 : (a == TLS_hash_SHA384 ? 48 : 64));
   unsigned char *hash = alloca(hlen);
 
-  if(a < TLS_hash_SHA256 || !info || !hash || label_len > 249)
+  if(a < TLS_hash_SHA256 || !info || !hash || label_len > 180)
     return 0;
 
-  info[0] = 0;
-  info[1] = hlen;
-  info[2] = label_len + 6;
-  memcpy(info+3, "tls13 ", 6);
-  memcpy(info+9, label, label_len);
-
-  if(!quic_crypto_hash(a, hash, (const unsigned char*)label, 0))
-    return 0;
-
-  info[9+label_len] = hlen;
-  memcpy(info + label_len + 10, hash, hlen);
-  *info_len = label_len + 10 + hlen;
-
-  return 1;
-}
-
-int MITLS_CALLCONV quic_crypto_hkdf_quic_label(quic_hash a, unsigned char *info, size_t *info_len, const char *label, uint16_t key_len)
-{
-  uint32_t hlen = (a == TLS_hash_SHA256 ? 32 :
-    (a == TLS_hash_SHA384 ? 48 : 64));
-  size_t label_len = strlen(label);
-
-  if(a < TLS_hash_SHA256 || !info || label_len > 249)
-    return 0;
-
-  info[0] = key_len >> 8;
-  info[1] = key_len & 255;
-  info[2] = (char)(label_len + 5);
-  memcpy(info+3, "QUIC ", 5);
+  info[0] = out_len >> 8;
+  info[1] = out_len & 255;
+  info[2] = label_len + 5;
+  memcpy(info+3, "quic ", 5);
   memcpy(info+8, label, label_len);
-  *info_len = label_len + 8;
+  info[8+label_len] = 0; // hlen;
 
+//  if(!quic_crypto_hash(a, info + label_len + 9, (const unsigned char*)label, 0))
+//    return 0;
+
+  *info_len = 9 + label_len; // + hlen;
   return 1;
 }
 
@@ -135,7 +114,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
   unsigned char info[323] = {0};
   size_t info_len;
 
-  if(!quic_crypto_hkdf_tls_label(secret->hash, info, &info_len, label))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, label, hlen))
     return 0;
 
   derived->hash = secret->hash;
@@ -155,7 +134,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
   dump(tmp, hlen);
 #endif
 
-  if(!quic_crypto_hkdf_tls_label(secret->hash, info, &info_len, "exporter"))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, "exporter", hlen))
     return 0;
 
   if(!quic_crypto_hkdf_expand(secret->hash, (uint8_t *) derived->secret, hlen,
@@ -171,7 +150,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
 }
 
 int MITLS_CALLCONV quic_derive_initial_secrets(quic_secret *client_in, quic_secret *server_in,
-   const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len, uint8_t is_draft13)
+   const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len)
 {
   quic_secret s0 = {
     .hash = TLS_hash_SHA256,
@@ -199,7 +178,7 @@ int MITLS_CALLCONV quic_derive_initial_secrets(quic_secret *client_in, quic_secr
   client_in->hash = s0.hash;
   client_in->ae = s0.ae;
 
-  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, is_draft13 ? "client in" : "client hs", 32))
+  if(!quic_crypto_hkdf_label(s0.hash, info, &info_len, "client in", 32))
     return 0;
 
   if(!quic_crypto_hkdf_expand(s0.hash, (uint8_t *) client_in->secret, 32, (uint8_t *) s0.secret, 32, info, info_len))
@@ -213,7 +192,7 @@ int MITLS_CALLCONV quic_derive_initial_secrets(quic_secret *client_in, quic_secr
   server_in->hash = s0.hash;
   server_in->ae = s0.ae;
 
-  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, is_draft13 ? "server in" : "server hs", 32))
+  if(!quic_crypto_hkdf_label(s0.hash, info, &info_len, "server in", 32))
     return 0;
 
   if(!quic_crypto_hkdf_expand(s0.hash, (uint8_t *) server_in->secret, 32, (uint8_t *) s0.secret, 32, info, info_len))
@@ -240,17 +219,17 @@ int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secre
   unsigned char pnkey[32];
   size_t info_len;
 
-  if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "key", klen))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, "key", klen))
     return 0;
   if(!quic_crypto_hkdf_expand(secret->hash, key->key, klen, (uint8_t *) secret->secret, slen, info, info_len))
     return 0;
 
-  if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "iv", 12))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, "iv", 12))
     return 0;
   if(!quic_crypto_hkdf_expand(secret->hash, key->static_iv, 12, (uint8_t *) secret->secret, slen, info, info_len))
     return 0;
 
-  if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "pn", klen))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, "pn", klen))
     return 0;
   if(!quic_crypto_hkdf_expand(secret->hash, pnkey, klen, (uint8_t *) secret->secret, slen, info, info_len))
     return 0;

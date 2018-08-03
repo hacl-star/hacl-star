@@ -36,9 +36,10 @@ CCOMP_OPTS=-O3 -DKRML_NOUINT128 -DKRML_NOSTRUCT_PASSING -finline-asm -D_BSD_SOUR
 all:
 	$(MAKE) test-code           # Previously 'make -C ../code test'
 	$(MAKE) test-libhacl.so     # Previously 'make unit-tests' for 'hacl-c'
-ifeq ($(UNAME), Linux)
-	$(MAKE) test-libhacl32.so   # CI-Windows doesn't support 32bit and 64bit at the same time
-endif
+
+#ifeq ($(UNAME), Linux)
+#	$(MAKE) test-libhacl32.so   # CI-Windows doesn't support 32bit and 64bit at the same time
+#endif
 
 
 # Improvements
