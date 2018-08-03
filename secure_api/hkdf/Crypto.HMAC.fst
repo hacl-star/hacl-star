@@ -1,319 +1,487 @@
-(* Agile HMAC *)
+(* Agile HKDF *)
 module Crypto.HMAC
 
-/// Agile specification
-
-type alg = Hash.alg13
-
-open FStar.Seq 
-
-noextract 
-let wrap (a:alg) (key: bseq{Seq.length key <= maxLength a}): 
-  Tot (lbseq (blockLength a))
-= 
-  let key0 = if length key <= blockLength a then key else spec a key in 
-  let paddingLength = blockLength a - length key0 in 
-  key0 @| Seq.create paddingLength 0uy
-
-private let wrap_lemma (a: alg) (key: bseq{Seq.length key <= maxLength a}): Lemma
-  (requires length key > blockLength a)
-  (ensures wrap a key == (
-    let key0 = spec a key in
-    let paddingLength = blockLength a - length key0 in 
-    key0 @| Seq.create paddingLength 0uy)) = ()
-
-noextract let rec xor (v: bseq) (x: UInt8.t): lbseq (length v) = 
-  init (length v) (fun i -> FStar.UInt8.logxor (index v i) x) 
-//  Spec.Loops.seq_map (fun y -> FStar.UInt8.logxor x y) v
-//18-04-08 not sure why the latter fails.
-
-
-// [noextract] incompatible with interfaces?!
-let hmac a key data =
-  assert(tagLength a + blockLength a <= maxLength a); // avoid?
-  let k = wrap a key in 
-  let h1 = spec a (xor k 0x36uy @| data) in
-  let h2 = spec a (xor k 0x5cuy @| h1) in 
-  h2
-
-/// Agile implementation, relying on 3 variants of SHA2 supported by
-/// HACL*.
-
-open FStar.HyperStack.All
-open FStar.UInt32
-open FStar.Buffer
-
 module ST = FStar.HyperStack.ST
+open FStar.HyperStack.All
 
-(* we rely on the output being zero-initialized for the correctness of padding *)
+open FStar.HyperStack
+open FStar.Buffer
+open Buffer.Utils
+
+module HS = FStar.HyperStack
+
+open FStar.UInt32
+open Crypto.Symmetric.Bytes
+open Crypto.Indexing
+
+open C.Loops
+
+(* Definition of aliases for modules *)
+module U8 = FStar.UInt8
+module U32 = FStar.UInt32
+module U64 = FStar.UInt64
+
+module Spec_H256 = Spec.SHA2_256
+module H256 = Hacl.Impl.SHA2_256
+module Spec_H384 = Spec.SHA2_384
+module H384 = Hacl.Impl.SHA2_384
+module Spec_H512 = Spec.SHA2_512
+module H512 = Hacl.Impl.SHA2_512
+
+module Spec_HMAC256 = Spec.HMAC.SHA2_256
+
+private let uint8_t  = FStar.UInt8.t
+private let uint32_t = FStar.UInt32.t
+private let uint32_p = Buffer.buffer uint32_t
+private let uint8_p  = Buffer.buffer uint8_t
+private let uint64_t = FStar.UInt64.t
+private let uint64_p = Buffer.buffer uint64_t
+
+//
+// HMAC-SHA2-256
+//
+
+// ADL lax prototype for QUIC deadline
+#set-options "--lax"
+
+//#reset-options "--max_fuel 0 --z3rlimit 10"
+let xor_bytes_inplace a b len =
+  C.Loops.in_place_map2 a b len (fun x y -> U8.logxor x y)
+
+type alg =
+  | SHA256
+  | SHA384
+  | SHA512
+
+//#reset-options "--initial_ifuel 2 --initial_fuel 0 --z3rlimit 20"
+let block_size : alg -> Tot uint32_t = function
+  | SHA256 -> H256.size_block
+  | SHA384 -> H384.size_block
+  | SHA512 -> H512.size_block
+
+let hash_size: alg -> Tot uint32_t = function
+  | SHA256 -> H256.size_hash
+  | SHA384 -> H384.size_hash_final // Note that `size_hash` is 64, not 48
+  | SHA512 -> H512.size_hash
+
+// FIXME(adl): hash state allocation
+// The type of state a is a buffer of uint32 for SHA256
+// but a buffer of uint64 for SHA384 and SHA512
+// This is hard to do in KreMLin (see Crypto.Symmetric.PRF)
+// Instead we fake a u64[n] by allocation a u32[2*n]
+// and rely on the implicit cast in C
+inline_for_extraction let state_size: alg -> Tot uint32_t = function
+  | SHA256 -> H256.size_state
+  | SHA384 -> U32.mul 2ul H384.size_state
+  | SHA512 -> U32.mul 2ul H512.size_state
+
+//#reset-options "--initial_ifuel 2 --initial_fuel 2 --z3rlimit 30"
+noextract let max_byte_length : alg -> Tot nat = function
+  | SHA256 -> Spec_H256.max_input_len_8
+  | SHA384 -> Spec_H384.max_input_len_8
+  | SHA512 -> Spec_H512.max_input_len_8
+
+//#reset-options "--initial_fuel 0 --initial_ifuel 0 --z3rlimit 20"
+let correct_wrap_key (a:alg)
+  (key:Seq.seq uint8_t{Seq.length key < max_byte_length a})
+  (wrapped:Seq.seq uint8_t{Seq.length wrapped = v (block_size a)}) : GTot Type =
+  match a with
+  | SHA256 -> Spec_HMAC256.wrap_key key == wrapped
+  | SHA384 -> True // Spec missing
+  | SHA512 -> True // Spec missing
+
+let correct_agile_hash (a:alg)
+  (input:Seq.seq uint8_t{Seq.length input < max_byte_length a})
+  (digest:Seq.seq uint8_t{Seq.length digest = v (hash_size a)})
+  : GTot Type =
+  match a with
+  | SHA256 -> Spec_H256.hash input == digest
+  | SHA384 -> Spec_H384.hash input == digest
+  | SHA512 -> Spec_H512.hash input == digest
+
 [@"substitute"]
 val wrap_key:
-  a: alg ->
-  output: lbptr (blockLength a) ->
-  key: bptr {length key <= maxLength a /\ disjoint output key} ->
-  len: UInt32.t {v len = length key} ->
+  a      : alg ->
+  output : uint8_p  {length output = v (block_size a)} ->
+  key    : uint8_p  {disjoint output key} ->
+  len    : uint32_t {v len = length key /\ v len < max_byte_length a} ->
   Stack unit
-    (requires (fun h0 -> 
-      live h0 output /\ live h0 key /\
-      as_seq h0 output == Seq.create (blockLength a) 0uy ))
-    (ensures  (fun h0 _ h1 -> 
-      live h1 output /\ live h1 key /\ live h0 output /\ live h0 key /\
-      as_seq h0 output == Seq.create (blockLength a) 0uy /\
-      modifies_1 output h0 h1 /\
-      as_seq h1 output = wrap a (as_seq h0 key) ))
+    (requires (fun h -> live h output /\ live h key /\
+      (as_seq h output) == Seq.create (v (block_size a)) 0uy))
+    (ensures  (fun h0 _ h1 -> live h1 output /\ live h1 key /\ live h0 output /\ live h0 key
+      /\ modifies_1 output h0 h1
+      /\ as_seq h0 output == Seq.create (v (block_size a)) 0uy
+      /\ correct_wrap_key a (as_seq h0 key) (as_seq h1 output)))
 
+let agile_hash (a:alg) (output:uint8_p{length output = v (hash_size a)})
+  (input:uint8_p{length input < max_byte_length a /\ disjoint output input})
+  (len:uint32_t{v len = length output})
+  : Stack unit
+  (requires fun h -> live h input /\ live h output
+    /\ (as_seq h output) == Seq.create (v (hash_size a)) 0uy)
+  (ensures fun h0 () h1 -> live h1 output /\ live h1 input
+    /\ modifies_1 output h0 h1
+    /\ as_seq h1 input == as_seq h0 input
+    /\ correct_agile_hash a (as_seq h1 input) (as_seq h1 output))
+  =
+  match a with
+  | SHA256 -> H256.hash output input len
+  | SHA384 -> H384.hash output input len
+  | SHA512 -> H512.hash output input len
+
+//#reset-options "--max_fuel 0  --z3rlimit 250"
 [@"substitute"]
 let wrap_key a output key len =
-  let i = if len <=^ blockLen a then len else tagLen a in 
-  let nkey = sub output 0ul i in 
-  let pad = sub output i (blockLen a -^ i) in
-  let h0 = ST.get () in
-  if len <=^ blockLen a then 
-    blit key 0ul nkey 0ul len
-  else 
-    Hash.compute a len key nkey;
-  let h1 = ST.get () in
-  Seq.lemma_eq_intro (as_seq h0 pad) (Seq.create (blockLength a - v i) 0uy);
-  Seq.lemma_split (as_seq h1 output) (v i)
+ (**) let h0 = ST.get () in
+  if len <=^ block_size a then
+   begin
+    (**) assert(v (block_size a) - v len >= 0);
+    (**) assert(as_seq h0 output == Seq.create (v (block_size a)) 0uy);
+    Buffer.blit key 0ul output 0ul len;
+    (**) let h1 = ST.get () in
+    (**) Seq.lemma_eq_intro (Seq.slice (as_seq h1 output) 0 (v len)) (as_seq h0 key);
+    (**) assert(Seq.slice (as_seq h1 output) 0 (v len) == as_seq h0 key);
+    (**) Seq.lemma_eq_intro (Seq.slice (as_seq h1 output) (v len) (v (block_size a))) (Seq.create (v (block_size a) - v len) 0uy);
+    (**) assert(Seq.slice (as_seq h1 output) (v len) (v (block_size a)) == Seq.create (v (block_size a) - v len) 0uy);
+    (**) Seq.lemma_eq_intro (as_seq h1 output) (Seq.append (as_seq h0 key) (Seq.create (v (block_size a) - v len) 0uy));
+    (**) assert(as_seq h1 output == Seq.append (as_seq h0 key) (Seq.create (v (block_size a) - v len) 0uy))
+   end
+  else
+   begin
+    (**) assert(v (block_size a) - v (hash_size a) >= 0);
+    (**) assert(as_seq h0 output == Seq.create (v (block_size a)) 0uy);
+    (**) Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 (v (hash_size a))) (Seq.create (v (hash_size a)) 0uy);
+    (**) assert(Seq.slice (as_seq h0 output) 0 (v (hash_size a)) == Seq.create (v (hash_size a)) 0uy);
+    (**) Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) (v (hash_size a)) (v (block_size a))) (Seq.create (v (block_size a) - v (hash_size a)) 0uy);
+    (**) assert(Seq.slice (as_seq h0 output) (v (hash_size a)) (v (block_size a)) == Seq.create (v (block_size a) - v (hash_size a)) 0uy);
+    let nkey = Buffer.sub output 0ul (hash_size a) in
+    agile_hash a nkey key len
+//    (**) let h1' = ST.get () in
+//    (**) assert(as_seq h1' nkey == );
+//    (**) assert(Seq.slice (as_seq h1' output) 0 (v (hash_size a)) == Spec_Hash.hash (as_seq h0 key));
+//    (**) no_upd_lemma_1 h0 h1' (Buffer.sub output 0ul (hash_size a)) (Buffer.sub output (hash_size a) ((block_size a) -^ (hash_size a)));
+//    (**) Seq.lemma_eq_intro (Seq.slice (reveal_sbytes (as_seq h1' output)) (v (hash_size a)) (v (block_size a))) (Seq.create (v (block_size a) - v (hash_size a)) 0uy);
+//    (**) assert(Seq.slice (reveal_sbytes (as_seq h1' output)) (v (hash_size a)) (v (block_size a)) == Seq.create (v (block_size a) - v (hash_size a)) 0uy);
+//    (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1' output)) (Seq.append (reveal_sbytes (as_seq h1' nkey)) (Seq.create (v (block_size a) - v (hash_size a)) 0uy));
+//    (**) assert(reveal_sbytes (as_seq h1' output) == Seq.append (reveal_sbytes (as_seq h1' nkey)) (Seq.create (v (block_size a) - v (hash_size a)) 0uy))
+   end
 
-// we pre-allocate the variable-type, variable length hash state,
-// to avoid both verification and extraction problems.
+//#reset-options " --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 10"
+let counter_pos: alg -> Tot uint32_t = function
+  | SHA256 -> H256.pos_count_w
+  | SHA384 -> H384.pos_count_w
+  | SHA512 -> H512.pos_count_w
 
-[@"substitute"]
-val part1:
+//#reset-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 10"
+let counter_size: alg -> Tot uint32_t = function
+  | SHA256 -> H256.size_count_w
+  | SHA384 -> H384.size_count_w
+  | SHA512 -> H512.size_count_w
+
+type state (a:alg) =
+  (match a with
+  | SHA256 -> st:uint32_p{length st = v (H256.size_state)}
+  | SHA384 -> st:uint64_p{length st = v (H384.size_state)}
+  | SHA512 -> st:uint64_p{length st = v (H512.size_state)})
+
+//#reset-options "--max_fuel 0  --z3rlimit 50"
+val lemma_alloc:
   a: alg ->
-  acc: state a -> ( 
-  let uint = state_word a in 
-  s2: lbptr (blockLength a) ->
-  data: bptr {
-    length data + blockLength a  < pow2 32 /\ 
-    length data + blockLength a  <= maxLength a /\ 
-    disjoint data s2} ->
-  len: UInt32.t {length data = v len} ->
-  Stack unit
-    (requires (fun h0 -> 
-      disjoint #uint acc s2 /\ 
-      disjoint #uint acc data /\ 
-      live #uint h0 acc /\ 
-      live h0 s2 /\ live h0 data))
-    (ensures  (fun h0 _ h1 -> 
-      live h1 s2 /\ live h0 s2 /\ live h1 data /\ live h0 data /\ 
-      modifies_2 #uint acc s2 h0 h1 /\ (
-      let hash0 = Seq.slice (as_seq h1 s2) 0 (tagLength a) in
-      hash0 == spec a (Seq.append (as_seq h0 s2) (as_seq h0 data))))))
- 
-#reset-options "--max_fuel 0 --z3rlimit 1000"
+  s: state a ->
+  Lemma
+    (requires (s == Seq.create (v (state_size a)) 0ul))
+    (ensures (
+      let seq_counter = Seq.slice s (U32.v (counter_pos a)) (U32.(v (counter_pos a) + v (counter_size a))) in
+      let counter = Seq.index seq_counter 0 in
+      U32.v counter = 0))
+let lemma_alloc a s = ()
+
+//#reset-options "--max_fuel 0  --z3rlimit 20"
 [@"substitute"]
-let part1 a (acc: state a) key data len =
-  let ll = len %^ blockLen a in
-  let lb = len -^ ll in
-  let blocks = Buffer.sub data 0ul lb in
-  let last = Buffer.offset data lb in
-  Hash.init a acc;  
-  Hash.update a acc key;
-  let h1 = ST.get() in 
-  Hash.update_multi a acc blocks lb;
-  let h2 = ST.get() in
-  Hash.update_last a acc last (blockLen a +^ len);
-  let h3 = ST.get() in
-  let tag = Buffer.sub key 0ul (tagLen a) in (* Salvage memory *)
-  Hash.extract a acc tag; 
-  (
-    let p = blockLength a in 
-    let key1 = as_seq h1 key in 
-    let blocks1 = as_seq h1 blocks in 
-    let acc1 = as_acc h1 acc in 
-    lemma_compress (acc0 #a) key1;
-    assert(acc1 == hash0 #a key1);
-    let v2 = key1 @| blocks1 in 
-    let acc2 = as_acc h2 acc in 
-    // assert (Seq.length key1 % p = 0);
-    // assert (Seq.length blocks1 % p = 0);
-    // assert (Seq.length v2 % p = 0);
-    lemma_hash2 (acc0 #a) key1 blocks1;
-    assert(acc2 == hash0 #a v2);
-    let data1 = as_seq h1 data in  
-    let last1 = as_seq h1 last in 
-    let suffix1 = suffix a (p + v len) in 
-    Seq.lemma_eq_intro data1 (blocks1 @| last1);
-    let acc3 = as_acc h3 acc in 
-    let ls = Seq.length suffix1 in 
-    assert((p + v len + ls) % p = 0);
-    Math.Lemmas.lemma_mod_plus (v ll + ls) (1 + v len / p) p;
-    assert((v ll + ls) % p = 0);
-    lemma_hash2 (acc0 #a) v2 (last1 @| suffix1); 
-    assert(acc3 == hash0 #a (v2 @| (last1 @| suffix1)));
-    Seq.append_assoc v2 last1 suffix1; 
-    Seq.append_assoc key1 blocks1 last1;
-    assert(acc3 == hash0 #a ((key1 @| data1) @| suffix1));
-    assert(finish acc3 == spec a (key1 @| data1)))
-
-// the two parts have the same stucture; let's keep their proofs in sync. 
-[@"substitute"]
-val part2:
-  a: alg ->
-  acc: state a ->  
-  mac: lbptr (tagLength a) ->
-  opad: lbptr (blockLength a) ->
-  tag: lbptr (tagLength a) {disjoint mac opad /\ disjoint mac tag} ->
+val hmac_part1:
+  a    : alg ->
+  s2   : uint8_p {length s2 = v (block_size a)} ->
+  data : uint8_p  {length data + v (block_size a) < pow2 32 /\ disjoint data s2} ->
+  len  : uint32_t {length data = v len} ->
   Stack unit
-    (requires fun h0 -> 
-      disjoint acc opad /\ 
-      disjoint acc tag /\ 
-      disjoint acc mac /\ 
-      live h0 acc /\ 
-      live h0 mac /\ live h0 opad /\ live h0 tag)
-    (ensures fun h0 _ h1 -> 
-      live h1 mac /\ live h0 mac /\ modifies_2 acc mac h0 h1 /\
-      ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in 
-        Seq.length payload <= maxLength a /\
-        as_seq h1 mac = spec a payload))
-
-[@"substitute"]
-let part2 a acc mac opad tag =
-  let totLen = blockLen a +^ tagLen a in 
-  assert_norm(v totLen <= maxLength a);
-  Hash.init a acc;
-  Hash.update a acc opad; 
-  let h1 = ST.get() in 
-  Hash.update_last a acc tag totLen;
-  let h2 = ST.get() in 
-  Hash.extract a acc mac;
-  (
-    let v1 = as_seq h1 opad in
-    let acc1 = as_acc h1 acc in 
-    lemma_compress (acc0 #a) v1;
-    assert(acc1 == hash0 #a v1);
-    let tag1 = as_seq h1 tag in 
-    let suffix1 = suffix a (blockLength a + tagLength a) in
-    let acc2 = as_acc h2 acc in 
-    lemma_hash2 (acc0 #a) v1 (tag1 @| suffix1); 
-    Seq.append_assoc v1 tag1 suffix1;
-    assert(acc2 == hash0 #a ((v1 @| tag1) @| suffix1));
-    assert(finish acc2 = spec a (v1 @| tag1)))
-
-// similar spec as hmac with keylen = blockLen a 
-val hmac_core:
-  a: alg ->
-  acc: state a -> (
-  tag: lbptr (tagLength a) ->
-  key: lbptr (blockLength a) {disjoint key tag} ->
-  data: bptr{
-    length data + blockLength a < pow2 32 /\ 
-    length data + blockLength a <= maxLength a /\
-    disjoint data key } ->
-  datalen: UInt32.t {v datalen = length data} ->
-  Stack unit
-  (requires fun h0 -> 
-    disjoint acc tag /\ 
-    disjoint acc key /\ 
-    disjoint acc data /\ 
-    live h0 acc /\ 
-    live h0 tag /\ live h0 key /\ live h0 data)
-  (ensures fun h0 _ h1 ->   
-    live h1 tag /\ live h0 tag /\
-    live h1 key /\ live h0 key /\
-    live h1 data /\ live h0 data /\ 
-    modifies_2 acc tag h0 h1 /\
-    ( let k = as_seq h0 key in  
-      let k1 = xor k 0x36uy in
-      let k2 = xor k 0x5cuy in
-      let v1 = spec a (k1 @| as_seq h0 data) in 
-      Seq.length (k2 @| v1) <= maxLength a /\
-      as_seq h1 tag = spec a (k2 @| v1))))
-
-// todo functional correctness.
-// below, we only XOR with a constant bytemask.
-val xor_bytes_inplace:
-  a: bptr ->
-  b: bptr{ disjoint a b } ->
-  len: UInt32.t {v len = length a /\ v len = length b} ->
-  Stack unit
-  (requires fun h0 -> live h0 a /\ live h0 b)
-  (ensures fun h0 _ h1 -> 
-    modifies_1 a h0 h1)
-let xor_bytes_inplace a b len =     
-  C.Loops.in_place_map2 a b len (fun x y -> UInt8.logxor x y)
-
-// TODO small improvements: part1 and part2 could return their tags in
-// mac, so that we can reuse the pad.
-[@"substitute"]
-let hmac_core a acc mac key data len =
-  let h00 = ST.get() in 
-  push_frame ();
-  let ipad = Buffer.create 0x36uy (blockLen a) in
-  let opad = Buffer.create 0x5cuy (blockLen a) in
-  xor_bytes_inplace ipad key (blockLen a);
-  xor_bytes_inplace opad key (blockLen a);
-  let h0 = ST.get() in
-  part1 a acc ipad data len; 
-  let h1 = ST.get() in 
-  let inner = Buffer.sub ipad 0ul (tagLen a) in (* salvage memory *)
-  part2 a acc mac opad inner;
-  let h2 = ST.get() in 
-  ( 
-    let k = as_seq h0 key in  
-    let k1: lbseq (blockLength a) = xor k 0x36uy in
-    let k2: lbseq (blockLength a) = xor k 0x5cuy in
-    let vdata = as_seq h0 data in 
-    let v1: lbseq (tagLength a) = as_seq h1 inner in 
-    assert_norm(blockLength a + tagLength a <= maxLength a);
-    assert(Seq.length (k2 @| v1) <= maxLength a);
-    let v2 = as_seq h2 mac in 
-
-    assume(as_seq h0 ipad = k1); 
-    assume(as_seq h1 opad = k2);
-    assert(v1 == spec a (k1 @| vdata));
-    assert(v2 == spec a (k2 @| v1));
-
-    assert(modifies_2 acc ipad h0 h1); 
-    assert(modifies_2 acc mac h1 h2));
-  pop_frame ();
-  let h3 = ST.get() in 
-  assume(modifies_2 acc mac h00 h3) //18-04-14 still no convenient way to prove those? 
-
-
-// not much point in separating hmac_core? verbose, but it helps
-// monomorphise stack allocations.
-
-let compute a mac key keylen data datalen =
-  push_frame (); 
-  assert_norm(pow2 32 <= maxLength a);
-  let keyblock = Buffer.create 0x00uy (blockLen a) in
-  wrap_key a keyblock key keylen;
-  ( match a with 
-  | SHA256 -> 
-      push_frame();
-      // 18-04-15 hardcoding the type to prevent extraction errors :(
-      let acc = Buffer.create #UInt32.t (state_zero a) (state_size a) in 
-      hmac_core SHA256 acc mac keyblock data datalen;
-      pop_frame()
-  | SHA384 -> 
-      push_frame();
-      let acc = Buffer.create #UInt64.t (state_zero a) (state_size a) in 
-      hmac_core SHA384 acc mac keyblock data datalen;
-      pop_frame()
-  | SHA512 -> 
-      push_frame();
-      let acc = Buffer.create #UInt64.t (state_zero a) (state_size a) in 
-      hmac_core SHA512 acc mac keyblock data datalen;
-      pop_frame());
-  pop_frame ()
+        (requires (fun h ->  live h s2 /\ live h data))
+        (ensures  (fun h0 _ h1 -> live h1 s2 /\ live h0 s2
+                             /\ live h1 data /\ live h0 data /\ modifies_1 s2 h0 h1
+                             /\ (let hash0 = Seq.slice (as_seq h1 s2) 0 (v (hash_size a)) in
+                             correct_agile_hash a (Seq.append (as_seq h0 s2) (as_seq h0 data)) hash0)))
 
 (*
-// 18-04-11 this alternative is leaky and does not typecheck.
-// I get an error pointing to `sub_effect DIV ~> GST = lift_div_gst` in HyperStack
+let agile_alloc (a:alg) : Stack (st:state a)
+  (requires fun h -> True)
+  (ensures fun h0 () h1 -> True)
+  =
+  match a with
+  | SHA256 -> Buffer.create 0ul (state_size a)
+  | SHA384 -> Buffer.create 0uL (state_size a)
+  | SHA512 -> Buffer.create 0uL (state_size a)
+*)
 
-let compute a mac key keylen data datalen =
-  push_frame (); 
-  let keyblock = Buffer.create 0x00uy (blockLen a) in
-  assert_norm(pow2 32 <= maxLength a);
-  wrap_key a keyblock key keylen;
-  let acc = 
-    match a with 
-    | SHA256 -> Buffer.rcreate HyperStack.root 0ul (state_size a) 
-    | SHA384 -> Buffer.rcreate HyperStack.root 0UL (state_size a)
-    | SHA512 -> Buffer.rcreate HyperStack.root 0UL (state_size a) in 
-  hmac_core SHA256 acc mac keyblock data datalen;
-  pop_frame ()
-*)  
+let agile_init (a:alg) (st:state a) : Stack unit
+ (requires fun h -> True)
+ (ensures fun h0 () h1 -> True)
+  //live h1 st /\ modifies_1 st h0 h1)
+ =
+ match a with
+ | SHA256 -> H256.init st
+ | SHA384 -> H384.init st
+ | SHA512 -> H512.init st
+
+let agile_update (a:alg) (st:state a)
+  (input:uint8_p {length input = v (block_size a)})
+  : Stack unit (requires fun h -> True)
+  (ensures fun h0 () h1 -> True)
+   //live h1 st /\ modifies_1 st h0 h1)
+  =
+  match a with
+  | SHA256 -> H256.update st input
+  | SHA384 -> H384.update st input
+  | SHA512 -> H512.update st input
+
+let agile_update_last (a:alg) (st:state a)
+  (input:uint8_p {length input = v (block_size a)})
+  (len:uint32_t {v len = length input})
+  : Stack unit (requires fun h -> True)
+  (ensures fun h0 () h1 -> True)
+   //live h1 st /\ modifies_1 st h0 h1)
+  =
+  match a with
+  | SHA256 -> H256.update_last st input len
+  | SHA384 -> H384.update_last st input len
+  | SHA512 -> H512.update_last st input len
+
+let agile_finish (a:alg) (st:state a)
+  (hash:uint8_p {length hash = v (hash_size a)})
+  : Stack unit (requires fun h -> True)
+  (ensures fun h0 () h1 -> True)
+   //live h1 st /\ modifies_1 st h0 h1)
+  =
+  match a with
+  | SHA256 -> H256.finish st hash
+  | SHA384 -> H384.finish st hash
+  | SHA512 -> H512.finish st hash
+
+let agile_update_multi (a:alg) (st:state a)
+  (input:uint8_p {length input % v (block_size a) = 0})
+  (nblocks:uint32_t{op_Multiply (v nblocks) (v (block_size a)) = length input})
+  : Stack unit (requires fun h -> True)
+  (ensures fun h0 () h1 -> True)
+   //live h1 st /\ modifies_1 st h0 h1)
+  =
+  match a with
+  | SHA256 -> H256.update_multi st input nblocks
+  | SHA384 -> H384.update_multi st input nblocks
+  | SHA512 -> H512.update_multi st input nblocks
+
+//#reset-options "--max_fuel 0  --z3rlimit 200"
+[@"substitute"]
+let hmac_part1 a s2 data len =
+
+  (* Push a new memory frame *)
+  (**) push_frame ();
+  (**) let h0 = ST.get () in
+
+  (* Allocate memory for the Hash function state *)
+  // let state0 = Hash.alloc () in
+  let state0 = Buffer.create 0ul (state_size a) in
+  (**) let h = ST.get() in
+//  (**) lemma_alloc (reveal_h32s (as_seq h state0));
+  (**) no_upd_lemma_0 h0 h s2;
+  (**) no_upd_lemma_0 h0 h data;
+
+  (* Step 3: append data to "result of step 2" *)
+  (* Step 4: apply Hash to "result of step 3" *)
+  (**) assert((block_size a) <> 0ul);
+  (**) Math.Lemmas.lemma_div_mod (v len) (v (block_size a));
+  let n0 = U32.div len (block_size a) in
+  let r0 = U32.rem len (block_size a) in
+  let blocks0 = Buffer.sub data 0ul (n0 *^ (block_size a)) in
+  let last0 = Buffer.offset data (n0 *^ (block_size a)) in
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) 0 (U32.v (n0 *^ (block_size a)))) (as_seq h blocks0);
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) (U32.v (n0 *^ (block_size a))) (length data)) (as_seq h last0);
+  agile_init a state0;
+//  (**) let h' = ST.get() in
+//  (**) no_upd_lemma_1 h h' state0 s2;
+//  (**) no_upd_lemma_1 h h' state0 data;
+//  (**) no_upd_lemma_1 h h' state0 blocks0;
+//  (**) no_upd_lemma_1 h h' state0 last0;
+  agile_update a state0 s2;
+//  (**) let h'' = ST.get() in
+//  (**) no_upd_lemma_1 h' h'' state0 blocks0;
+//  (**) no_upd_lemma_1 h' h'' state0 last0;
+  agile_update_multi a state0 blocks0 n0;
+//  (**) let h''' = ST.get() in
+//  (**) no_upd_lemma_1 h'' h''' state0 last0;
+  agile_update_last a state0 last0 r0;
+  (**) let h1 = ST.get () in
+
+  let h'''' = ST.get() in
+  let hash0 = Buffer.sub s2 0ul (hash_size a) in (* Salvage memory *)
+  agile_finish a state0 hash0; (* s4 = hash (s2 @| data) *)
+//  (**) Spec_Hash.lemma_hash_all_prepend_block (reveal_sbytes (as_seq h0 s2)) (reveal_sbytes (as_seq h0 data));
+
+  (* Pop the memory frame *)
+  (**) pop_frame ()
+
+
+//#reset-options "--max_fuel 0  --z3rlimit 20"
+[@"substitute"]
+val hmac_part2:
+  a   : alg ->
+  mac : uint8_p {length mac = v (hash_size a)} ->
+  s5  : uint8_p {length s5 = v (block_size a) /\ disjoint s5 mac} ->
+  s4  : uint8_p {length s4 = v (hash_size a) /\ disjoint s4 mac /\ disjoint s4 s5} ->
+  Stack unit
+        (requires (fun h -> True)) //live h mac /\ live h s5 /\ live h s4))
+        (ensures  (fun h0 _ h1 -> live h1 mac /\ live h0 mac))
+
+ ///\ live h1 s5 /\ live h0 s5
+ ///\ live h1 s4 /\ live h0 s4 /\ modifies_1 mac h0 h1
+ ///\ (reveal_sbytes (as_seq h1 mac) == Spec_Hash.hash (Seq.append (reveal_sbytes (as_seq h0 s5)) (reveal_sbytes (as_seq h0 s4))))))
+
+//#reset-options "--max_fuel 0  --z3rlimit 200"
+[@"substitute"]
+let hmac_part2 a mac s5 s4 =
+  assert_norm(pow2 32 = 0x100000000);
+  let hinit = ST.get() in
+
+  (* Push a new memory frame *)
+  (**) push_frame ();
+  (**) let h0 = ST.get () in
+
+  (* Allocate memory for the Hash function state *)
+  (* let state1 = Hash.alloc () in *)
+  let state1 = Buffer.create 0ul (state_size a) in
+
+  (* Step 6: append "result of step 4" to "result of step 5" *)
+  (* Step 7: apply H to "result of step 6" *)
+  (**) let h = ST.get() in
+  (**) no_upd_lemma_0 h0 h s5;
+  (**) no_upd_lemma_0 h0 h s4;
+  (**) no_upd_lemma_0 h0 h mac;
+//  (**) lemma_alloc (reveal_h32s (as_seq h state1));
+  agile_init a state1;
+  (**) let h' = ST.get() in
+//  (**) assert(
+//       let st_h0 = Seq.slice (as_seq h' state1) (U32.v Hash.pos_whash_w) (U32.(v Hash.pos_whash_w + v Hash.size_whash_w)) in
+//       reveal_h32s st_h0 == Spec_Hash.h_0);
+  (**) no_upd_lemma_1 h h' state1 s5;
+  (**) no_upd_lemma_1 h h' state1 s4;
+  (**) no_upd_lemma_1 h h' state1 mac;
+  agile_update a state1 s5; (* s5 = opad *)
+  (**) let h'' = ST.get() in
+//  (**) assert(
+//       let st_h0 = Seq.slice (as_seq h'' state1) (U32.v Hash.pos_whash_w) (U32.(v Hash.pos_whash_w + v Hash.size_whash_w)) in
+//       reveal_h32s st_h0 == Spec_Hash.(update h_0 (reveal_sbytes (as_seq h0 s5))));
+  (**) no_upd_lemma_1 h' h'' state1 s4;
+  (**) no_upd_lemma_1 h' h'' state1 mac;
+  (**) assert(as_seq h'' s4 == as_seq hinit s4);
+  agile_update_last a state1 s4 (hash_size a);
+  (**) let h''' = ST.get() in
+  (**) no_upd_lemma_1 h' h'' state1 s4;
+  (**) no_upd_lemma_1 h' h'' state1 mac;
+  (**) assert(live h''' mac);
+  agile_finish a state1 mac; //(* s7 = hash (s5 @| s4) *)
+//  (**) let h1 = ST.get() in
+//  (**) Spec_Hash.lemma_hash_single_prepend_block (reveal_sbytes (as_seq h0 s5)) (reveal_sbytes (as_seq h0 s4));
+//  Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 mac)) (Spec_Hash.hash (Seq.append (reveal_sbytes (as_seq h0 s5)) (reveal_sbytes (as_seq h0 s4))));
+//  (**) assert(reveal_sbytes (as_seq h1 mac) == Spec_Hash.hash (Seq.append (reveal_sbytes (as_seq h0 s5)) (reveal_sbytes (as_seq h0 s4))));
+  (* Pop the memory frame *)
+  (**) pop_frame ()
+
+
+//#reset-options "--max_fuel 0  --z3rlimit 20"
+val hmac_core:
+  a    : alg ->
+  mac  : uint8_p  {length mac = v (hash_size a)} ->
+  key  : uint8_p  {length key = v (block_size a) /\ disjoint key mac} ->
+  data : uint8_p  {length data + v (block_size a) < pow2 32 /\ disjoint data mac /\ disjoint data key} ->
+  len  : uint32_t {length data = v len} ->
+  Stack unit
+        (requires (fun h -> live h mac /\ live h key /\ live h data))
+        (ensures  (fun h0 _ h1 -> live h1 mac /\ live h0 mac
+                             /\ live h1 key /\ live h0 key
+                             /\ live h1 data /\ live h0 data /\ modifies_1 mac h0 h1))
+//                             /\ (reveal_sbytes (as_seq h1 mac) == Spec.hmac_core (reveal_sbytes (as_seq h0 key)) (reveal_sbytes (as_seq h0 data)))))
+
+//#reset-options "--max_fuel 0  --z3rlimit 150"
+
+let hmac_core a mac key data len =
+
+  let h00 = ST.get () in
+  (* Push a new memory frame *)
+  (**) push_frame ();
+  let h0 = ST.get () in
+
+  (* Initialize constants *)
+  let ipad = Buffer.create 0x36uy (block_size a) in
+  let opad = Buffer.create 0x5cuy (block_size a) in
+
+  (**) let h1 = ST.get () in
+//  (**) assert(reveal_sbytes (as_seq h1 ipad) == Seq.create (v (block_size a)) 0x36uy);
+//  (**) assert(reveal_sbytes (as_seq h1 opad) == Seq.create (v (block_size a)) 0x5cuy);
+
+  (* Step 2: xor "result of step 1" with ipad *)
+  xor_bytes_inplace ipad key (block_size a);
+  (**) let h2 = ST.get () in
+//  (**) assert(reveal_sbytes (as_seq h2 ipad) == Spec.xor_bytes (reveal_sbytes (as_seq h1 ipad)) (reveal_sbytes (as_seq h0 key)));
+
+  (* Step 3: append data to "result of step 2" *)
+  (* Step 4: apply Hash to "result of step 3" *)
+  hmac_part1 a ipad data len; (* s2 = ipad *)
+  let s4 = Buffer.sub ipad 0ul (hash_size a) in (* Salvage memory *)
+  (**) let h3 = ST.get () in
+//  (**) Seq.lemma_eq_intro (as_seq h3 (Buffer.sub ipad 0ul (hash_size a))) (Seq.slice (as_seq h3 ipad) 0 (v (hash_size a)));
+//  (**) assert(reveal_sbytes (as_seq h3 s4) == Spec_Hash.hash (Seq.append (reveal_sbytes (as_seq h2 ipad)) (reveal_sbytes (as_seq h0 data))));
+//  (**) assert(reveal_sbytes (as_seq h3 s4) == Spec_Hash.hash (Seq.append (Spec.xor_bytes (reveal_sbytes (as_seq h1 ipad)) (reveal_sbytes (as_seq h0 key))) (reveal_sbytes (as_seq h0 data))));
+
+  (* Step 5: xor "result of step 1" with opad *)
+  xor_bytes_inplace opad key (block_size a);
+  (**) let h4 = ST.get () in
+//  (**) assert(reveal_sbytes (as_seq h4 opad) == Spec.xor_bytes (reveal_sbytes (as_seq h1 opad)) (reveal_sbytes (as_seq h0 key)));
+
+  (* Step 6: append "result of step 4" to "result of step 5" *)
+  (* Step 7: apply H to "result of step 6" *)
+  hmac_part2 a mac opad s4; (* s5 = opad *)
+  (**) let h5 = ST.get () in
+//  (**) assert(reveal_sbytes (as_seq h5 mac) == Spec.hmac_core (reveal_sbytes (as_seq h0 key)) (reveal_sbytes (as_seq h0 data)));
+
+  (* Pop the memory frame *)
+  (**) pop_frame ()
+
+//#reset-options "--max_fuel 0  --z3rlimit 20"
+val hmac:
+  a       : alg ->
+  mac     : uint8_p  {length mac = v (hash_size a)} ->
+  key     : uint8_p  {length key = v (block_size a) /\ disjoint key mac} ->
+  keylen  : uint32_t {v keylen = length key} ->
+  data    : uint8_p  {length data + v (block_size a) < pow2 32 /\ disjoint data mac /\ disjoint data key} ->
+  datalen : uint32_t {v datalen = length data} ->
+  Stack unit
+        (requires (fun h -> live h mac /\ live h key /\ live h data))
+        (ensures  (fun h0 _ h1 -> live h1 mac /\ live h0 mac
+                             /\ live h1 key /\ live h0 key
+                             /\ live h1 data /\ live h0 data /\ modifies_1 mac h0 h1))
+//                             /\ (reveal_sbytes (as_seq h1 mac) == Spec.hmac (reveal_sbytes (as_seq h0 key)) (reveal_sbytes (as_seq h0 data)))))
+
+//#reset-options "--max_fuel 0  --z3rlimit 25"
+let hmac a mac key keylen data datalen =
+
+  (* Push a new memory frame *)
+  (**) push_frame ();
+
+  (* Allocate memory for the wrapped key *)
+  let nkey = Buffer.create 0x00uy (block_size a) in
+
+  (* Call the key wrapping function *)
+  wrap_key a nkey key keylen;
+
+  (* Call the core HMAC function *)
+  hmac_core a mac nkey data datalen;
+
+  (* Pop the memory frame *)
+  (**) pop_frame ()
