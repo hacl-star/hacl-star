@@ -4,6 +4,7 @@ module G = FStar.Ghost
 module B = LowStar.Buffer
 module U32 = FStar.UInt32
 
+
 module T = LowStar.ToFStarBuffer
 
 open FStar.HyperStack.ST
@@ -28,30 +29,26 @@ noextract unfold inline_for_extraction let (!$) = C.String.((!$))
 open C.Failure
 
 let supported_hash_algorithm = function
-  | SHA256 | SHA384 -> true
+  | H.SHA256 | H.SHA384 -> true
   | _ -> false
-
-let as_alg = function
-  | SHA256 -> H.SHA256
-  | SHA384 -> H.SHA384
-  | _ -> failwith !$"unsupported alg"
 
 val test_one_hash: hash_vector -> St unit
 let test_one_hash vec =
   let open FStar.Integers in
-  let hash_alg, input, (output, output_len), repeat = vec in
+  let a, input, (expected, expected_len), repeat = vec in
 
-  if supported_hash_algorithm hash_alg then begin
+  if supported_hash_algorithm a then (
 
     push_frame();
 
-    let output_len: UInt32.t =
-      match hash_alg with
-      | SHA256 -> 32ul
-      | SHA384 -> 48ul
-      | _ -> failwith !$"Unsupported algorithm"
-    in
-    let output = B.alloca 0uy output_len in
+    let tlen: UInt32.t = H.tagLen a in
+
+// to avoid double-extraction of failwith
+//  let expected: uint8_pl (v tlen) = 
+//    if expected_len = tlen 
+//    then expected
+//    else failwith !$"Wrong output length" in
+    let computed = B.alloca 0uy tlen in
 
     let input_len = C.String.strlen input in
     let total_input_len = input_len * repeat in
@@ -60,17 +57,13 @@ let test_one_hash vec =
       C.String.memcpy (B.offset total_input (input_len * i)) input input_len
     );
 
+    //18-08-03  this duplicated code now verified in EverCrypt.Hash.Test (and was a bit out of date)
+    (*
     (* Allocate memory for state *)
-    let a: H.alg = as_alg hash_alg in
     let ctx = EverCrypt.Hash.create a in
 
     (* Compute the number of blocks to process *)
-    let size_block: UInt32.t =
-      match hash_alg with
-      | SHA256 -> 64ul
-      | SHA384 -> 128ul
-      | _ -> failwith !$"Unsupported algorithm"
-    in
+    let size_block: UInt32.t = H.blockLen a in 
     let n = U32.div total_input_len size_block in
     let r = U32.rem total_input_len size_block in
 
@@ -82,22 +75,56 @@ let test_one_hash vec =
     EverCrypt.Hash.init ctx;
     EverCrypt.Hash.update_multi (G.hide Seq.empty) ctx input_blocks n;
     EverCrypt.Hash.update_last (G.hide Seq.empty) ctx input_last r;
-    EverCrypt.Hash.finish ctx output;
+    EverCrypt.Hash.finish ctx computed;
+    *) 
+
+    let str: C.String.t = H.string_of_alg a in
+
+    //18-08-03 scopes?!!
+    // Incrementally: 
+    // EverCrypt.Hash.Test.compute a input_len input computed;
+    // TestLib.compare_and_print str expected computed tlen;
 
     // Non-incrementally:
-    // EverCrypt.sha256_hash output input len
-
-    let str: C.String.t =
-      match hash_alg with
-      | SHA256 -> !$"of SHA256"
-      | SHA384 -> !$"of SHA384"
-    in
-
-    (* Display the result *)
-    TestLib.compare_and_print str output output output_len;
-
+    EverCrypt.Hash.hash a computed total_input total_input_len;
+    TestLib.compare_and_print str expected computed tlen;
+ 
     pop_frame()
-  end
+  )
+
+/// HMAC
+
+let hmac_vector = hash_alg * vec8 * vec8 * vec8
+
+val test_one_hmac: hmac_vector -> St unit
+let test_one_hmac vec =
+  let open FStar.Integers in
+  let ha, (key,keylen), (data,datalen), (expected,expectedlen) = vec in
+
+  if supported_hash_algorithm ha then (
+
+    push_frame();
+
+//  if expectedlen <> H.tagLen ha then failwith !$"Wrong output length"; 
+
+    let computed = B.alloca 0uy (H.tagLen ha) in
+    let str = EverCrypt.Hash.string_of_alg ha  in 
+    EverCrypt.HMAC.compute ha computed key keylen data datalen;
+    TestLib.compare_and_print str expected computed (H.tagLen ha);
+
+    pop_frame() )
+
+val test_hmac: len:U32.t -> vs: B.buffer hmac_vector {B.len vs = len } -> St unit
+let rec test_hmac len vs =
+
+  C.String.print !$"HMAC\n";
+
+  let open FStar.Integers in
+  if len > 0ul then
+    let v = vs.(0ul) in
+    test_one_hmac v;
+    test_hmac (len - 1ul) (B.offset vs 1ul)
+
 
 /// ChaCha20-Poly1305
 
@@ -268,32 +295,34 @@ let main (): St C.exit_code =
   push_frame ();
 
   let hash_vectors, hash_vectors_len = hash_vectors_low in
+  let hmac_vectors, hmac_vectors_len = hmac_vectors_low in
   let aead_vectors, aead_vectors_len = aead_vectors_low in
   let block_cipher_vectors, block_cipher_vectors_len = block_cipher_vectors_low in
   let chacha20_vectors, chacha20_vectors_len = chacha20_vectors_low in
 
-  print !$"===========Hacl===========";
+  print !$"===========Hacl===========\n";
   AC.(init (Prefer Hacl));
   test_hash hash_vectors_len hash_vectors;
+  test_hmac hmac_vectors_len hmac_vectors;
   test_aead aead_vectors_len aead_vectors;
   test_cipher block_cipher_vectors_len block_cipher_vectors;
   test_chacha20 chacha20_vectors_len chacha20_vectors;
   Test.Hash.main ();
   Test.Bytes.main ();
   
-  print !$"===========Vale===========";
+  print !$"===========Vale===========\n";
   AC.(init (Prefer Vale));
   test_aead aead_vectors_len aead_vectors;
   test_hash hash_vectors_len hash_vectors;
   test_cipher block_cipher_vectors_len block_cipher_vectors;
   Test.Hash.main ();
   
-  print !$"==========OpenSSL=========";
+  print !$"==========OpenSSL=========\n";
   AC.(init (Prefer OpenSSL));
   test_aead aead_vectors_len aead_vectors;
   test_cipher block_cipher_vectors_len block_cipher_vectors;
 
-  print !$"==========BCrypt==========";
+  print !$"==========BCrypt==========\n";
   AC.(init (Prefer BCrypt));
   test_aead aead_vectors_len aead_vectors;
   test_cipher block_cipher_vectors_len block_cipher_vectors;

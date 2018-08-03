@@ -92,10 +92,14 @@ let expand_label #a prk label hv length =
   expand prk (format a label hv length) length
 
 let expand_secret #a prk label hv = expand_label prk label hv (tagLength a)
-*)
+
 /// Details specific to QUIC; could move to its own module
 
 //18-04-10 TODO code in Low* [quic_provider.quic_crypto_hkdf_quic_label]
+
+*)
+
+
 
 
 /// IMPLEMENTATION

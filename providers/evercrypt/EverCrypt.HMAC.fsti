@@ -20,7 +20,7 @@ let keysized (a:e_alg) (l:nat) =
 
 (* ghost specification; its algorithmic definition is given in the .fst *)
 noextract val hmac:
-  a: e_alg -> //18-07-09 can't mix refinements nad erasure??
+  a: e_alg -> //18-07-09 can't mix refinements and erasure??
   key: bseq{ keysized a (Seq.length key) } ->
   data: bseq{ Seq.length data + blockLength a <= maxLength a } ->
   GTot (lbseq (tagLength a))
@@ -44,9 +44,9 @@ val compute:
   ST unit
   (requires fun h0 -> live h0 tag /\ live h0 key /\ live h0 data)
   (ensures fun h0 _ h1 ->
-    live h1 tag /\ live h0 tag /\
-    live h1 key /\ live h0 key /\
-    live h1 data /\ live h0 data /\
+    live h1 tag /\ 
+    live h1 key /\ 
+    live h1 data /\ 
     LowStar.Modifies.(modifies (loc_buffer tag) h0 h1) /\
     length data + blockLength (Ghost.hide a) <= maxLength (Ghost.hide a) /\ (* required for subtyping the RHS below *)
       as_seq h1 tag == hmac (Ghost.hide a) (as_seq h0 key) (as_seq h0 data))

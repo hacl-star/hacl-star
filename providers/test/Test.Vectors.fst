@@ -5,12 +5,7 @@ open EverCrypt.Hash
 
 /// Hash algorithms
 
-type hash_alg =
-| SHA1
-| MD5
-| SHA256
-| SHA384
-| SHA512
+type hash_alg = EverCrypt.Hash.alg 
 
 #set-options "--lax"
 
@@ -160,6 +155,42 @@ let hash_vectors_tmp = List.Tot.map (fun h ->
 ) hash_vectors
 
 %splice[] (lowstarize_toplevel "hash_vectors_tmp" "hash_vectors_low")
+
+
+/// HMAC
+
+noeq noextract
+type hmac_vector = {
+  ha: hash_alg;
+  key: hex_encoded;
+  data: hex_encoded;
+  output: hex_encoded;
+}
+
+// selected test vectors from 
+// https://tools.ietf.org/html/rfc4231#section-4.2
+// pls extend me! 
+noextract 
+let hmac_vectors = [{
+    ha     = SHA256;
+    key    = h"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b";
+    data   = h"4869205468657265"; 
+    output = h"b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
+  }; {
+    ha     = SHA384;
+    key    = h"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b";
+    data   = h"4869205468657265"; 
+    output = h"afd03944d84895626b0825f4ab46907f15f9dadbe4101ec682aa034c7cebc59cfaea9ea9076ede7f4af152e8b2fa9cb6";
+  }]
+
+noextract
+let hmac_vectors_tmp = List.Tot.map (fun h ->
+  h.ha, h.key, h.data, h.output
+) hmac_vectors
+
+%splice[] (lowstarize_toplevel "hmac_vectors_tmp" "hmac_vectors_low")
+
+
 
 /// Cipher block function
 
