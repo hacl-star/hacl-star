@@ -44,6 +44,7 @@ all:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
+	$(MAKE) -C quic_provider
 
 stage1: $(GENERATED_DIR)/Makefile.include
 
