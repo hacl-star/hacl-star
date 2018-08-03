@@ -40,9 +40,7 @@ let test_one_hash vec =
   if supported_hash_algorithm a then (
 
     push_frame();
-
     let tlen: UInt32.t = H.tagLen a in
-
 // to avoid double-extraction of failwith
 //  let expected: uint8_pl (v tlen) = 
 //    if expected_len = tlen 
@@ -88,7 +86,6 @@ let test_one_hash vec =
     // Non-incrementally:
     EverCrypt.Hash.hash a computed total_input total_input_len;
     TestLib.compare_and_print str expected computed tlen;
- 
     pop_frame()
   )
 
@@ -104,9 +101,7 @@ let test_one_hmac vec =
   if supported_hash_algorithm ha then (
 
     push_frame();
-
 //  if expectedlen <> H.tagLen ha then failwith !$"Wrong output length"; 
-
     let computed = B.alloca 0uy (H.tagLen ha) in
     let str = EverCrypt.Hash.string_of_alg ha  in 
     EverCrypt.HMAC.compute ha computed key keylen data datalen;
@@ -124,6 +119,41 @@ let rec test_hmac len vs =
     let v = vs.(0ul) in
     test_one_hmac v;
     test_hmac (len - 1ul) (B.offset vs 1ul)
+
+/// HKDF
+
+let hkdf_vector = hash_alg * vec8 * vec8 * vec8 * vec8 * vec8
+
+val test_one_hkdf: hkdf_vector -> St unit
+let test_one_hkdf vec =
+  let open FStar.Integers in
+  let ha, (ikm,ikmlen), (salt,saltlen), (info,infolen), (expected_prk,prklen), (expected_okm,okmlen) = vec in
+
+  if supported_hash_algorithm ha then (
+
+    push_frame();
+
+    // TODO test vector length validation
+
+    let str = EverCrypt.Hash.string_of_alg ha  in 
+    let computed_prk = B.alloca 0uy (H.tagLen ha) in
+    EverCrypt.HKDF.hkdf_extract ha computed_prk salt saltlen ikm ikmlen;
+    TestLib.compare_and_print str expected_prk computed_prk (H.tagLen ha);
+
+    let computed_okm = B.alloca 0uy okmlen in
+    EverCrypt.HKDF.hkdf_expand ha computed_okm computed_prk prklen info infolen okmlen;
+    TestLib.compare_and_print str expected_okm computed_okm okmlen;
+
+    pop_frame() )
+
+val test_hkdf: len:U32.t -> vs: B.buffer hkdf_vector {B.len vs = len } -> St unit
+let rec test_hkdf len vs =
+  C.String.print !$"HKDF\n";
+  let open FStar.Integers in
+  if len > 0ul then
+    let v = vs.(0ul) in
+    test_one_hkdf v;
+    test_hkdf (len - 1ul) (B.offset vs 1ul)
 
 
 /// ChaCha20-Poly1305
@@ -296,6 +326,7 @@ let main (): St C.exit_code =
 
   let hash_vectors, hash_vectors_len = hash_vectors_low in
   let hmac_vectors, hmac_vectors_len = hmac_vectors_low in
+  let hkdf_vectors, hkdf_vectors_len = hkdf_vectors_low in
   let aead_vectors, aead_vectors_len = aead_vectors_low in
   let block_cipher_vectors, block_cipher_vectors_len = block_cipher_vectors_low in
   let chacha20_vectors, chacha20_vectors_len = chacha20_vectors_low in
@@ -304,6 +335,7 @@ let main (): St C.exit_code =
   AC.(init (Prefer Hacl));
   test_hash hash_vectors_len hash_vectors;
   test_hmac hmac_vectors_len hmac_vectors;
+  test_hkdf hkdf_vectors_len hkdf_vectors;
   test_aead aead_vectors_len aead_vectors;
   test_cipher block_cipher_vectors_len block_cipher_vectors;
   test_chacha20 chacha20_vectors_len chacha20_vectors;

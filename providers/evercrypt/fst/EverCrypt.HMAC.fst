@@ -99,15 +99,16 @@ let wrap_key a output key len =
   [@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
   let i = if len <= blockLen a then len else tagLen a in
   let nkey = sub output 0ul i in
-  let pad = sub output i (blockLen a - i) in
   let h0 = ST.get () in
   if len <= blockLen a then
     blit key 0ul nkey 0ul len
   else
     Hash.hash a nkey key len;
-  let h1 = ST.get () in
-  Seq.lemma_eq_intro (as_seq h0 pad) (Seq.create (blockLength (Ghost.hide a) - v i) 0uy);
-  Seq.lemma_split (as_seq h1 output) (v i)
+  let h1 = ST.get () in (
+    let pad = sub output i (blockLen a - i) in
+    Seq.lemma_eq_intro (as_seq h0 pad) (Seq.create (blockLength (Ghost.hide a) - v i) 0uy);
+    Seq.lemma_split (as_seq h1 output) (v i)
+  )
 
 // we pre-allocate the variable-type, variable length hash state,
 // to avoid both verification and extraction problems.
