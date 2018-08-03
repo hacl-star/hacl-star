@@ -82,7 +82,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES))
 
-ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti
+ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst EverCrypt.Hash.Test.fst
 
 .PRECIOUS: %.krml
 
@@ -99,7 +99,7 @@ $(CACHE_DIR)/FStar.%.fst.checked: | .depend
 
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
-	  --use_hints --record_hints --hint_info \
+	  --use_hints --record_hints \
 	  --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
@@ -197,7 +197,7 @@ INCLUDE_DIRS	= $(foreach c,$(ALL_SOURCES),$(dir $(c))) \
 
 
 CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion -g
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-infinite-recursion -g
 
 # GNU Make manual section 4.14
 %.d: %.c
