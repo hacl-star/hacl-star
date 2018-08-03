@@ -396,13 +396,13 @@ let hmac_core a acc tag key data len =
     modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 data;
 
     //18-08-02 How to move those across pop?
-    //TR: I have a solution to this problem, but I need to add a
-    //lemma into LowStar.Buffer: any existing memory location
-    //(loc_not_unused_in) is disjoint from a fresh frame
-    assume(
-      invariant acc h2 /\ footprint acc h2 == footprint acc h00 ==>
-      invariant acc h3 /\ footprint acc h3 == footprint acc h00) )
-
+    // assume(
+    //   invariant acc h2 /\ footprint acc h2 == footprint acc h00 ==>
+    //   invariant acc h3 /\ footprint acc h3 == footprint acc h00) )
+    // TR: now works thanks to:
+    // LowStar.Buffer.fresh_frame_loc_not_unused_in_disjoint
+    frame_invariant (loc_region_only false (HyperStack.get_tip h1)) acc h2 h3
+  )
 
 let compute a mac key keylen data datalen =
   let h00 = ST.get() in
@@ -419,13 +419,11 @@ let compute a mac key keylen data datalen =
   let h2 = ST.get() in
   Hash.free acc;
   pop_frame ();
-  let h20 = ST.get() in
-  assert(modifies (loc_union (footprint acc h1) (loc_buffer mac)) h1 h2);
-  assume(modifies (loc_buffer mac) h00 h20)
   //18-08-02 not provable from the current postcondition of Hash.free
-  //TR: In fact, I have to generalize
-  //`modifies_only_live_addresses`, to a lemma saying that all
-  //loc_unused_in locations can be removed from a modifies clause
+  // TR: modifies clause now proven by erasing all memory locations
+  // that were unused in h00:
+  let hf = ST.get () in
+  LowStar.Buffer.modifies_only_not_unused_in (loc_buffer mac) h00 hf
 
 
 
