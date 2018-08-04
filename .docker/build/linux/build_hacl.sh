@@ -131,7 +131,7 @@ function refresh_hints() {
 }
 
 function exec_build() {
-    cd hacl-starß
+    cd hacl-star
 
     export_home FSTAR "$(pwd)/../"
     result_file="../result.txt"
