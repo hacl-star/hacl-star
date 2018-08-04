@@ -106,7 +106,7 @@ function refresh_hints() {
     local hints_dir="$4"
 
     # Figure out the branch
-    CI_BRANCH=${$branchname##refs/heads/}
+    CI_BRANCH=$branchname
     echo "Current branch_name=$CI_BRANCH"
 
     # Add all the hints, even those not under version control
