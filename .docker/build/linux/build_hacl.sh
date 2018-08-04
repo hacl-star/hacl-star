@@ -108,7 +108,7 @@ function refresh_hints() {
     if [[ $BUILD_SOURCEBRANCHNAME != "" ]]; then
         CI_BRANCH=${BUILD_SOURCEBRANCHNAME##refs/heads/}
         echo "... running in a VSTS environment, branch=$CI_BRANCH"
-    elseß
+    else
         echo "... trying to figure out the current branch"
         CI_BRANCH=$(git symbolic-ref HEAD) # fails if not on a branch
         CI_BRANCH=${CI_BRANCH##refs/heads/}
