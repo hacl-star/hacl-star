@@ -25,7 +25,7 @@ ifeq ($(OS),Windows_NT)
     # altered to include by default the mingw64 native DLLs. We also need to
     # find dllcorecrypto.dll; it is in the current directory, which Windows
     # always uses to search for DLLs.
-    EXTRA_PATH = PATH="/usr/$(MARCH)-w64-mingw32/sys-root/mingw/bin/:$(OPENSSL_HOME):$(PATH)"
+    EXTRA_PATH = PATH="/usr/$(MARCH)-w64-mingw32/sys-root/mingw/bin/:$(OPENSSL_HOME):$(abspath ../out):$(PATH)"
     EXTRA_OPTS =
     AR = $(MARCH)-w64-mingw32-ar
     CC = $(MARCH)-w64-mingw32-gcc
