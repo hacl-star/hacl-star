@@ -7,7 +7,7 @@ open EverCrypt.Hash
 
 type hash_alg = EverCrypt.Hash.alg
 
-#set-options "--lax"
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 noeq noextract
 type hash_vector = {
