@@ -31,7 +31,7 @@ ifeq ($(OS),Windows_NT)
     CC = $(MARCH)-w64-mingw32-gcc
 else
     LIBQUICCRYPTO=libquiccrypto.so
-    EXTRA_PATH = LD_LIBRARY_PATH=.
+    EXTRA_PATH = LD_LIBRARY_PATH=../out,.
     UNAME_S := $(shell uname -s)
     AR = ar
     ifeq ($(UNAME_S),Darwin)
