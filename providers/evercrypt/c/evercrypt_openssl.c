@@ -51,15 +51,17 @@ static int openssl_aead(EVP_CIPHER_CTX *ctx,
     handleErrors();
 
   // Set additional authenticated data
-  if (1 != EVP_CipherUpdate(ctx, NULL, &len, aad, aad_len))
+  if (aad_len > 0 && 1 != EVP_CipherUpdate(ctx, NULL, &len, aad, aad_len))
     handleErrors();
 
   // Process the plaintext
-  if (enc && 1 != EVP_CipherUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
+  if (enc && plaintext_len > 0
+      && 1 != EVP_CipherUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
     handleErrors();
 
   // Process the ciphertext
-  if (!enc && 1 != EVP_CipherUpdate(ctx, plaintext, &len, ciphertext, plaintext_len))
+  if (!enc && plaintext_len > 0
+      && 1 != EVP_CipherUpdate(ctx, plaintext, &len, ciphertext, plaintext_len))
     handleErrors();
 
   // Set the tag

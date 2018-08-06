@@ -196,7 +196,7 @@ INCLUDE_DIRS	= $(foreach c,$(ALL_SOURCES),$(dir $(c))) \
   $(OPENSSL_HOME)/include $(KREMLIN_HOME)
 
 
-CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
+CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror -Wno-unknown-warning-option \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-infinite-recursion -g
 
 # GNU Make manual section 4.14

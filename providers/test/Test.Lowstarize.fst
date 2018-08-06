@@ -12,11 +12,34 @@ module HS = FStar.HyperStack
 assume new type hex_encoded
 assume val h: string -> hex_encoded
 
-// A bunch of helpers. TODO: fail gracefully if there is a character outside of the hex range.
+// A bunch of helpers
+noextract
+val is_hex_digit: Char.char -> bool
+let is_hex_digit = function
+  | '0'
+  | '1'
+  | '2'
+  | '3'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | 'a' | 'A'
+  | 'b' | 'B'
+  | 'c' | 'C'
+  | 'd' | 'D'
+  | 'e' | 'E'
+  | 'f' | 'F' -> true
+  | _ -> false
 
 noextract
-let int_of_hex (c: FStar.Char.char): Tot (c:nat{c<16}) =
-  match c with
+type hex_digit = c:Char.char{is_hex_digit c}
+
+noextract
+val int_of_hex: c:hex_digit -> int
+let int_of_hex = function
   | '0' -> 0
   | '1' -> 1
   | '2' -> 2
@@ -33,15 +56,15 @@ let int_of_hex (c: FStar.Char.char): Tot (c:nat{c<16}) =
   | 'd' | 'D' -> 13
   | 'e' | 'E' -> 14
   | 'f' | 'F' -> 15
-  | _ -> let _ = FStar.IO.debug_print_string "illegal character" in admit ()
 
 noextract
-let byte_of_hex c1 c2 =
-  FStar.Mul.(int_of_hex c1 * 16 + int_of_hex c2)
+val byte_of_hex: a:hex_digit -> b:hex_digit -> int
+let byte_of_hex a b =
+  FStar.Mul.(int_of_hex a * 16 + int_of_hex b)
 
 noextract
 let mk_int (i: int): term =
-    pack_ln (Tv_Const (C_Int i))
+  pack_ln (Tv_Const (C_Int i))
 
 noextract
 let mk_uint8 (x: int): Tac term =
@@ -54,7 +77,9 @@ let mk_uint32 (x: int): Tac term =
     (mk_int x, Q_Explicit))
 
 noextract
-let rec as_uint8s acc (cs: list FStar.Char.char{List.Tot.length cs % 2 = 0}):
+let rec as_uint8s acc
+  (cs:list Char.char{normalize (List.Tot.length cs % 2 = 0) /\
+                     normalize (List.Tot.for_all is_hex_digit cs)}):
   Tac term (decreases cs)
 =
   match cs with
@@ -62,6 +87,11 @@ let rec as_uint8s acc (cs: list FStar.Char.char{List.Tot.length cs % 2 = 0}):
       as_uint8s (mk_uint8 (byte_of_hex c1 c2) :: acc) cs
   | [] ->
       mk_list (List.rev acc)
+
+noextract unfold
+type hex_string =
+  s:string{normalize (String.strlen s % 2 = 0) /\
+           normalize (List.Tot.for_all is_hex_digit (String.list_of_string s))}
 
 noextract
 let destruct_string e =
@@ -183,15 +213,21 @@ let mk_gcmalloc_of_list (uniq: gensym) (arg: term) (l: nat{l < pow2 32}) (t: opt
   uniq, se, mktuple_n [ pack (Tv_FVar fv); mk_uint32 l ]
 
 noextract
-let lowstarize_hex (uniq: gensym) (s: string): Tac (gensym * sigelt * term) =
-  if String.length s % 2 <> 0 then
-    fail ("The following string has a non-even length: " ^ s)
+let lowstarize_hex (uniq: gensym) (s: string): Tac (gensym * option sigelt * term) =
+  if String.length s % 2 <> 0
+     || not (List.Tot.for_all is_hex_digit (String.list_of_string s)) then
+    fail ("Invalid hex string: " ^ s)
   else
     let constants = as_uint8s [] (String.list_of_string s) in
     let l = String.length s in
     assume (l < pow2 32);
     let t = pack (Tv_App (`LowStar.Buffer.buffer) (`UInt8.t, Q_Explicit)) in
-    mk_gcmalloc_of_list uniq constants (l / 2) (Some t)
+    if l = 0 then
+      let null: term = pack (Tv_App (`LowStar.Buffer.null) (`UInt8.t, Q_Implicit)) in
+      uniq, None, mktuple_n [ null; mk_uint32 0 ]
+    else
+      let uniq, se, e = mk_gcmalloc_of_list uniq constants (l / 2) (Some t) in
+      uniq, Some se, e
 
 // Dependency analysis bug: does not go inside quotations (#1496)
 
@@ -206,7 +242,9 @@ let rec lowstarize_expr (uniq: gensym) (e: term): Tac (gensym * list sigelt * te
   let e = norm_term [ delta; zeta; iota; primops ] e in
   if is_hex e then
     let uniq, se, e = lowstarize_hex uniq (must (destruct_hex e)) in
-    uniq, [ se ], e
+    match se with
+    | None -> uniq, [], e
+    | Some se -> uniq, [se], e
   else if is_string e then
     uniq, [], lowstarize_string (must (destruct_string e))
   else if is_list e then
@@ -247,8 +285,9 @@ let lowstarize_toplevel src dst: Tac unit =
   let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
   exact (quote (normalize_term (ses @ [ se ])))
 
-(* Tests *)
 (*
+/// Tests
+
 // Some notes: empty lists are not allowed because they give inference errors!
 noextract
 let test_vectors = [
@@ -256,10 +295,8 @@ let test_vectors = [
   h"090a0b0c0d0e0f10", [ h"fe" ], "another test string";
 ]
 
-noextract
 let test_vectors' = List.Tot.map (fun x -> x) test_vectors
 
-#set-options "--lax"
-%splice[] (fun () -> lowstarize_toplevel "test_vectors" "low_test_vectors")
-%splice[] (fun () -> lowstarize_toplevel "test_vectors'" "low_test_vectors'")
+%splice[] (lowstarize_toplevel "test_vectors" "low_test_vectors")
+%splice[] (lowstarize_toplevel "test_vectors_" "low_test_vectors")
 *)
