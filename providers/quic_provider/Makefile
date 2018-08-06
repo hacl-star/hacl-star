@@ -56,7 +56,7 @@ else
 LIB_MACHINE=x86
 endif
 
-CFLAGS += -I $(KREMLIN_HOME)/include -I ../generated
+CFLAGS += -I $(KREMLIN_HOME)/include -I ../include
 LDFLAGS += -L ../out -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))
