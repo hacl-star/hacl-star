@@ -39,6 +39,13 @@ RUN rm -f commitinfofilename.json
 RUN mkdir ${MYHOME}/FStar/hacl-star
 COPY --chown=everest / ${MYHOME}/FStar/hacl-star/
 
+# Do another cleanup
+RUN rm ${MYHOME}/FStar/hacl-star/Dockerfile
+RUN rm ${MYHOME}/FStar/hacl-star/build_hacl.sh
+RUN rm ${MYHOME}/FStar/hacl-star/build.sh
+RUN rm ${MYHOME}/FStar/hacl-star/id_rsa
+RUN rm ${MYHOME}/FStar/hacl-star/commitinfofilename.json
+
 # Hacl make calls git clean, which will delete buildlogfile.txt
 # Because of that we will first output on the parent folder
 WORKDIR ${MYHOME}/FStar
