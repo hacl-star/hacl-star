@@ -553,8 +553,8 @@ void test_initial_secrets()
     fclose(fp);
 #else
     // Verify that the computed text matches expectations
-    check_result("quic_derive_initial_secrets client", (const unsigned char*)&client_hs, &expected_client_hs, sizeof(client_hs));
-    check_result("quic_derive_initial_secrets server", (const unsigned char*)&server_hs, &expected_server_hs, sizeof(server_hs));
+    check_result("quic_derive_initial_secrets client", (const unsigned char*)&client_hs, (const unsigned char*)&expected_client_hs, sizeof(client_hs));
+    check_result("quic_derive_initial_secrets server", (const unsigned char*)&server_hs, (const unsigned char*)&expected_server_hs, sizeof(server_hs));
 #endif
 
     printf("==== PASS: test_initial_secrets ==== \n");

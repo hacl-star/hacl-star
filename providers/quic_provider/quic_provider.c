@@ -274,9 +274,9 @@ int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsi
   memcpy(k->static_iv, iv, 12);
 
   if(alg == TLS_aead_AES_128_GCM)
-    k->pne.case_aes128 = EverCrypt_aes128_create(pne_key);
+    k->pne.case_aes128 = EverCrypt_aes128_create((uint8_t*)pne_key);
   else if(alg == TLS_aead_AES_256_GCM)
-    k->pne.case_aes256 = EverCrypt_aes256_create(pne_key);
+    k->pne.case_aes256 = EverCrypt_aes256_create((uint8_t*)pne_key);
   else if(alg == TLS_aead_CHACHA20_POLY1305)
     memcpy(k->pne.case_chacha20, pne_key, 32);
 
@@ -293,15 +293,15 @@ int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, unsigned char *cipher, uin
 
   if(key->alg == TLS_aead_AES_128_GCM)
   {
-    EverCrypt_aes128_gcm_encrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    EverCrypt_aes128_gcm_encrypt(key->key, iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, plain_len, cipher, (cipher+plain_len));
   }
   else if(key->alg == TLS_aead_AES_256_GCM)
   {
-    EverCrypt_aes256_gcm_encrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    EverCrypt_aes256_gcm_encrypt(key->key, iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, plain_len, cipher, (cipher+plain_len));
   }
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
-    EverCrypt_chacha20_poly1305_encrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    EverCrypt_chacha20_poly1305_encrypt(key->key, iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, plain_len, cipher, (cipher+plain_len));
   }
 
 #if DEBUG
@@ -329,15 +329,15 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
 
   if(key->alg == TLS_aead_AES_128_GCM)
   {
-    r = EverCrypt_aes128_gcm_decrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    r = EverCrypt_aes128_gcm_decrypt(key->key, iv, (uint8_t*)ad, ad_len, plain, plain_len, (uint8_t*)cipher, (uint8_t*)(cipher+plain_len));
   }
   else if(key->alg == TLS_aead_AES_256_GCM)
   {
-    r = EverCrypt_aes256_gcm_decrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    r = EverCrypt_aes256_gcm_decrypt(key->key, iv, (uint8_t*)ad, ad_len, plain, plain_len, (uint8_t*)cipher, (uint8_t*)(cipher+plain_len));
   }
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
-    r = EverCrypt_chacha20_poly1305_decrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    r = EverCrypt_chacha20_poly1305_decrypt(key->key, iv, (uint8_t*)ad, ad_len, plain, plain_len, (uint8_t*)cipher, (uint8_t*)(cipher+plain_len));
   }
 
 #if DEBUG
@@ -356,14 +356,14 @@ int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned c
   unsigned char block[16];
   if(key->alg == TLS_aead_AES_128_GCM)
   {
-    EverCrypt_aes128_compute(key->pne.case_aes128, sample, block);
+    EverCrypt_aes128_compute(key->pne.case_aes128, (uint8_t*)sample, block);
     memcpy(mask, block, 4);
     return 1;
   }
 
   if(key->alg == TLS_aead_AES_256_GCM)
   {
-    EverCrypt_aes256_compute(key->pne.case_aes256, sample, block);
+    EverCrypt_aes256_compute(key->pne.case_aes256, (uint8_t*)sample, block);
     memcpy(mask, block, 4);
     return 1;
   }
@@ -373,7 +373,7 @@ int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned c
     uint8_t zero[4] = {0};
     uint32_t ctr = sample[0] + (sample[1] << 8) + (sample[2] << 16) + (sample[3] << 24);
 
-    EverCrypt_chacha20((uint8_t*)key->pne.case_chacha20, sample+4, ctr, zero, 4, mask);
+    EverCrypt_chacha20((uint8_t*)key->pne.case_chacha20, (uint8_t*)sample+4, ctr, zero, 4, mask);
     return 1;
   }
 
