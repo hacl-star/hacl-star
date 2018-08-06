@@ -84,7 +84,7 @@ test: $(EXTRACT_DIR)/Test.c
 
 clean:
 	rm -rf .depend cache
-	-@find $(EXTRACT_DIR) -type f -and -not -name Makefile -and -not -name .gitignore -and -not -name hacks.h \
+	-@find $(EXTRACT_DIR) -type f -and -not -name Makefile -and -not -name .gitignore -and -not -name temp.h \
         | xargs rm -f
 
 %.fst-in:
