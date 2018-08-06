@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#if (defined(_WIN32) || defined(_WIN64))
+#  include <malloc.h>
+#else
+#  include <alloca.h>
+#endif
+
 #include "kremlib.h"
 #include "Crypto_HKDF_Crypto_HMAC.h"
 #include "EverCrypt.h"
