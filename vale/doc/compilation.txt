@@ -1,0 +1,4 @@
+# Make sure PATH is sufficient to run OCaml compiler before using --FSTAR-EXTRACT
+scons --FSTAR-EXTRACT obj/aesgcm.asm obj/aesgcm-gcc.S obj/aesgcm-linux.S obj/aesgcm-macos.S
+# On Windows, PLATFORM must be set to X64 to generate TestAesGcm.exe
+scons --FSTAR-EXTRACT obj/TestAesGcm.exe
