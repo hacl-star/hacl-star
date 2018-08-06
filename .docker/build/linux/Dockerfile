@@ -18,6 +18,8 @@ ARG COMMITID
 
 RUN export FSTAR_HOME=${MYHOME}/FStar
 
+WORKDIR ${MYHOME}/FStar
+
 # Do some cleanup
 RUN rm -rf hacl-star
 RUN rm -rf hacl-star-old
@@ -45,10 +47,6 @@ RUN rm ${MYHOME}/FStar/hacl-star/build_hacl.sh
 RUN rm ${MYHOME}/FStar/hacl-star/build.sh
 RUN rm ${MYHOME}/FStar/hacl-star/id_rsa
 RUN rm ${MYHOME}/FStar/hacl-star/commitinfofilename.json
-
-# Hacl make calls git clean, which will delete buildlogfile.txt
-# Because of that we will first output on the parent folder
-WORKDIR ${MYHOME}/FStar
 
 # ADD SSH KEY
 RUN mkdir -p ${MYHOME}/.ssh
