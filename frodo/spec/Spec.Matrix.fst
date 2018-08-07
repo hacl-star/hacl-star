@@ -2,10 +2,12 @@ module Spec.Matrix
 
 open FStar.Mul
 
-open Lib.Sequence
 open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
 module Seq = Lib.Sequence
+module Lemmas = Spec.Frodo.Lemmas
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FStar.Pervasives Prims FStar.Math.Lemmas Lib.Sequence Spec.Matrix'"
 
@@ -39,10 +41,10 @@ let index_neq #n1 #n2 i j i' j' =
   else
     begin
     let open FStar.Math.Lemmas in
-    lemma_eucl_div_bound j i n2;  
+    lemma_eucl_div_bound j i n2;
     lemma_eucl_div_bound j' i' n2
     end
-  
+
 /// Matrices as flat sequences
 
 type elem = uint16
@@ -171,7 +173,7 @@ val sum_extensionality:
     n:size_nat
   -> f:(i:size_nat{i < n} -> GTot uint16)
   -> g:(i:size_nat{i < n} -> GTot uint16)
-  -> i:size_nat{i <= n} 
+  -> i:size_nat{i <= n}
   -> Lemma
     (requires forall (i:size_nat{i < n}). f i == g i)
     (ensures  sum_ #n f i == sum_ #n g i)
@@ -224,11 +226,11 @@ let mul #n1 #n2 #n3 a b =
     ) c
 
 val matrix_eq:
-    #n1: size_nat
-  -> #n2: size_nat{n1 * n2 < max_size_t}
-  -> m: size_nat{m > 0}
-  -> a: matrix n1 n2
-  -> b: matrix n1 n2
+    #n1:size_nat
+  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> m:size_nat{m > 0}
+  -> a:matrix n1 n2
+  -> b:matrix n1 n2
   -> bool
 let matrix_eq #n1 #n2 m a b =
   let open Lib.RawIntTypes in
@@ -239,3 +241,35 @@ let matrix_eq #n1 #n2 m a b =
       res && (uint_to_nat a.(i, j) % pow2 m = uint_to_nat b.(i, j) % pow2 m)
     ) res
   ) true
+
+val matrix_to_lbytes:
+    #n1:size_nat
+  -> #n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> m:matrix n1 n2
+  -> lbytes (2 * n1 * n2)
+let matrix_to_lbytes #n1 #n2 m =
+  let res = Seq.create (2 * n1 * n2) (u8 0) in
+  repeati n1
+  (fun i res ->
+    repeati n2
+    (fun j res ->
+      Lemmas.lemma_matrix_index_repeati2 n1 n2 i j;
+      update_sub res (2 * (j * n1 + i)) 2 (uint_to_bytes_le m.(i, j))
+    ) res
+  ) res
+
+val matrix_from_lbytes:
+    n1:size_nat
+  -> n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> lbytes (2 * n1 * n2)
+  -> matrix n1 n2
+let matrix_from_lbytes n1 n2 b =
+  let res = create n1 n2 in
+  repeati n1
+  (fun i res ->
+    repeati n2
+    (fun j res ->
+      Lemmas.lemma_matrix_index_repeati2 n1 n2 i j;
+      res.(i, j) <- uint_from_bytes_le (Seq.sub b (2 * (j * n1 + i)) 2)
+    ) res
+  ) res

@@ -91,7 +91,7 @@ val update_sub:
   -> start:size_nat
   -> n:size_nat{start + n <= len}
   -> x:lseq a n
-  -> o:lseq a len{sub o start n == x /\ 
+  -> o:lseq a len{sub o start n == x /\
     (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < len)}).{:pattern (index o k)}
       index o k == index i k)}
 let update_sub #a #len s start n x =
@@ -156,6 +156,18 @@ val repeati_inductive:
  -> res:a{pred n res}
 let repeati_inductive #a =
   repeat_range_inductive #a 0
+
+val lbytes_eq:
+    #len:size_nat
+  -> a:lseq uint8 len
+  -> b:lseq uint8 len
+  -> bool
+let lbytes_eq #len a b =
+  let open Lib.RawIntTypes in
+  repeati len
+  (fun i res ->
+    res && (uint_to_nat a.[i] = uint_to_nat b.[i])
+  ) true
 
 val fold_left_range_: #a:Type -> #b:Type -> #len:size_nat
   -> min:size_nat

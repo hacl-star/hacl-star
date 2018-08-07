@@ -133,9 +133,9 @@ $(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
-	-no-prefix 'Hacl.Impl.Frodo' \
+	-no-prefix 'Hacl.Impl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
-	-bundle 'Hacl.Impl.Frodo=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.Random' \
+	-bundle 'Hacl.Impl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.Random' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
@@ -262,7 +262,7 @@ BASE_OBJ = \
   $(LWEKE_HOME)/objs/aes/aes_c.o \
   $(LWEKE_HOME)/objs/aes/aes.o \
   $(OUT_DIR)/Hacl_Test_Frodo.o \
-  $(OUT_DIR)/Hacl_Impl_Frodo.o 
+  $(OUT_DIR)/Hacl_Impl_Frodo_KEM.o
 
 HACL_LIBS = \
   ../../lib/fst/Lib.IntTypes.fst \
@@ -270,17 +270,17 @@ HACL_LIBS = \
   ../../lib/c/Lib.Loops.fst \
   ../../lib/fst/Lib.PQ.Buffer.fst
 
-$(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.fst Hacl.Test.Frodo.fst
+$(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.Sample.fst Hacl.Impl.Frodo.Gen.fst Hacl.Impl.Frodo.KEM.fst Hacl.Test.Frodo.fst
 	$(KREMLIN) -tmpdir $(OUT_DIR) \
 	-I ../../specs -I ../spec -I ../../lib -I ../../lib/fst \
 	-skip-translation $^
 
-$(OUT_DIR)/Hacl_Impl_Frodo.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
+$(OUT_DIR)/Hacl_Impl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
-	-no-prefix 'Hacl.Impl.Frodo' \
+	-no-prefix 'Hacl.Impl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
-	-bundle 'Hacl.Impl.Frodo=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.Random' \
+	-bundle 'Hacl.Impl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.Random' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \

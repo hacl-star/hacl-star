@@ -153,12 +153,12 @@ val update_sub:
     (ensures  fun h0 _ h1 -> B.live h1 dst /\ modifies (loc_buffer dst) h0 h1 /\
       B.as_seq h1 dst == Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 let update_sub #a #len dst start n src =
-  let h0 = ST.get () in  
+  let h0 = ST.get () in
   LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
   let h1 = ST.get () in
   assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-  Seq.eq_intro 
-    (B.as_seq h1 dst) 
+  Seq.eq_intro
+    (B.as_seq h1 dst)
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 
 inline_for_extraction noextract private
@@ -196,6 +196,35 @@ let loop_nospec #h0 #a #len n buf impl =
       (ensures  fun _ _ h2 -> inv h2 (v j + 1)) =
       impl j in
   Lib.Loops.for (size 0) n inv f'
+
+inline_for_extraction noextract
+val eq_u8: a:uint8 -> b:uint8 -> Tot bool
+let eq_u8 a b =
+  let open FStar.UInt8 in
+  let open Lib.RawIntTypes in
+  u8_to_UInt8 a =^ u8_to_UInt8 b
+
+inline_for_extraction
+val lbytes_eq:
+     #len:size_t
+  -> a:lbuffer uint8 (v len)
+  -> b:lbuffer uint8 (v len)
+  -> Stack bool
+    (requires fun h -> live h a /\ live h b)
+    (ensures  fun h0 r h1 -> modifies loc_none h0 h1)
+let lbytes_eq #len a b =
+  push_frame();
+  let res:lbuffer bool 1 = create (size 1) true in
+  let h0 = ST.get () in
+  loop_nospec #h0 len res
+  (fun i ->
+    let a1 = res.(size 0) in
+    let a2 = eq_u8 a.(i) b.(i) in
+    res.(size 0) <- a1 && a2
+  );
+  let res = res.(size 0) in
+  pop_frame();
+  res
 
 // TODO: Fix this
 #set-options "--admit_smt_queries true"

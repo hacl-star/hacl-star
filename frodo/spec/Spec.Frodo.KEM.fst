@@ -1,4 +1,4 @@
-module Spec.Frodo
+module Spec.Frodo.KEM
 
 open Lib.IntTypes
 open Lib.Sequence
@@ -13,136 +13,16 @@ open Spec.Frodo.Lemmas
 open Spec.Frodo.Params
 open Spec.Frodo.Encode
 open Spec.Frodo.Pack
+open Spec.Frodo.Sample
+open Spec.Frodo.Gen
 
 module Seq = Lib.Sequence
+module Matrix = Spec.Matrix
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
 
-val lbytes_eq:
-    #len: size_nat
-  -> a: lbytes len
-  -> b: lbytes len
-  -> bool
-let lbytes_eq #len a b =
-  let open Lib.RawIntTypes in
-  repeati len
-  (fun i res ->
-    res && (uint_to_nat a.[i] = uint_to_nat b.[i])
-  ) true
-
 let cshake_frodo = cshake128_frodo
-
-val frodo_sample: r:uint16 -> uint16
-let frodo_sample r =
-  let open Lib.RawIntTypes in
-  let t = r >>. u32 1 in
-  let r0 = r &. u16 1 in
-  mod_mask_lemma r (u32 1);
-  uintv_extensionality (mod_mask (u32 1)) (u16 1);
-  assert (uint_v r0 == 0 \/ uint_v r0 == 1);
-  let e = 0 in
-  let e =
-    repeati_inductive
-      (cdf_table_len - 1)
-      (fun z e -> 0 <= e /\ e <= z /\ z < cdf_table_len)
-      (fun z e -> let e = if (uint_to_nat t > uint_to_nat cdf_table.[z]) then e + 1 else e in e)
-      e
-  in
-  let e = (FStar.Math.Lib.powx (-1) (uint_to_nat r0)) * e in
-  assert_norm (FStar.Math.Lib.powx (-1) 1 == -1);
-  assert_norm (FStar.Math.Lib.powx (-1) 0 == 1);
-  assert (-cdf_table_len < e /\ e < cdf_table_len);
-  u16 (e % modulus U16)
-
-val frodo_sample_matrix:
-    n1:size_nat
-  -> n2:size_nat{2 * n1 * n2 < max_size_t}
-  -> seedLen:size_nat
-  -> seed:lbytes seedLen
-  -> ctr:uint16
-  -> matrix n1 n2
-let frodo_sample_matrix n1 n2 seedLen seed ctr =
-  let r = cshake_frodo seedLen seed ctr (2 * n1 * n2) in
-  let res = Matrix.create n1 n2 in
-  repeati n1
-  (fun i res ->
-    repeati n2
-    (fun j res ->
-      lemma_matrix_index_repeati1 n1 n2 i j;
-      let res_ij = Seq.sub r (2 * (n2 * i + j)) 2 in
-      res.(i, j) <- frodo_sample (uint_from_bytes_le #U16 res_ij)
-    ) res
-  ) res
-
-val frodo_sample_matrix_tr:
-    n1: size_nat
-  -> n2: size_nat{2 * n1 * n2 < max_size_t}
-  -> seedLen: size_nat
-  -> seed: lbytes seedLen
-  -> ctr:uint16
-  -> matrix n1 n2
-let frodo_sample_matrix_tr n1 n2 seedLen seed ctr =
-  let r = cshake_frodo seedLen seed ctr (2 * n1 * n2) in
-  let res = Matrix.create n1 n2 in
-  repeati n1
-  (fun i res ->
-    repeati n2
-    (fun j res ->
-      lemma_matrix_index_repeati2 n1 n2 i j;
-      let res_ij = Seq.sub r (2 * (n1 * j + i)) 2 in
-      res.(i, j) <- frodo_sample (uint_from_bytes_le res_ij)
-    ) res
-  ) res
-
-val frodo_gen_matrix_cshake:
-    n: size_nat{2 * n < max_size_t /\ 256 + n < maxint U16 /\ n * n < max_size_t}
-  -> seedLen: size_nat
-  -> seed: lbytes seedLen
-  -> matrix n n
-let frodo_gen_matrix_cshake n seedLen seed =
-  let res = Matrix.create n n in
-  repeati n
-  (fun i res ->
-    let res_i = cshake128_frodo seedLen seed (u16 (256 + i)) (2 * n) in
-    repeati n
-    (fun j res ->
-      res.(i, j) <- uint_from_bytes_le (Seq.sub res_i (j * 2) 2)
-    ) res
-  ) res
-
 let frodo_gen_matrix = frodo_gen_matrix_cshake
-
-val matrix_to_lbytes:
-    #n1: size_nat
-  -> #n2: size_nat{2 * n1 * n2 < max_size_t}
-  -> m: matrix n1 n2
-  -> lbytes (2 * n1 * n2)
-let matrix_to_lbytes #n1 #n2 m =
-  let res = Seq.create (2 * n1 * n2) (u8 0) in
-  repeati n1
-  (fun i res ->
-    repeati n2
-    (fun j res ->
-      lemma_matrix_index_repeati2 n1 n2 i j;
-      update_sub res (2 * (j * n1 + i)) 2 (uint_to_bytes_le m.(i, j))
-    ) res
-  ) res
-
-val matrix_from_lbytes:
-    n1: size_nat
-  -> n2: size_nat{2 * n1 * n2 < max_size_t}
-  -> lbytes (2 * n1 * n2)
-  -> matrix n1 n2
-let matrix_from_lbytes n1 n2 b =
-  let res = Matrix.create n1 n2 in
-  repeati n1
-  (fun i res ->
-    repeati n2
-    (fun j res ->
-      lemma_matrix_index_repeati2 n1 n2 i j;
-      res.(i, j) <- uint_from_bytes_le (Seq.sub b (2 * (j * n1 + i)) 2)
-    ) res
-  ) res
 
 let bytes_mu: size_nat =
   (params_extracted_bits * params_nbar * params_nbar) / 8
@@ -157,8 +37,8 @@ let crypto_ciphertextbytes: size_nat =
   ((params_nbar * params_n + params_nbar * params_nbar) * params_logq) / 8 + crypto_bytes
 
 val expand_crypto_ciphertextbytes: unit -> Lemma
-   (crypto_ciphertextbytes == 
-    params_logq * params_nbar * params_n / 8 
+   (crypto_ciphertextbytes ==
+    params_logq * params_nbar * params_n / 8
     + (params_logq * params_nbar * params_nbar / 8 + crypto_bytes))
 let expand_crypto_ciphertextbytes _ = ()
 
@@ -210,7 +90,7 @@ let crypto_kem_enc coins pk =
   let ss_init_len = (params_logq * params_nbar * params_n) / 8 + (params_logq * params_nbar * params_nbar) / 8 + 2 * crypto_bytes in
   let ss = cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes in
   expand_crypto_ciphertextbytes ();
-  let ct = concat c1 (concat c2 d) in 
+  let ct = concat c1 (concat c2 d) in
   (ct, ss)
 
 //TODO: fix

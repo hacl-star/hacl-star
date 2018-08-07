@@ -15,6 +15,7 @@ module HS  = FStar.HyperStack
 module ST  = FStar.HyperStack.ST
 module Seq = Lib.Sequence
 module M   = Spec.Matrix
+module Lemmas = Spec.Frodo.Lemmas
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -233,10 +234,10 @@ let mul_inner #n1 #n2 #n3 a b i k =
     (fun j ->
       let aij = a.[i,j] in
       let bjk = b.[j,k] in
-      let res0 = !*res in
-      res *= (res0 +. aij *. bjk)
+      let res0 = res.(size 0) in
+      res.(size 0) <- res0 +. aij *. bjk
     );
-  let res = !*res in
+  let res = res.(size 0) in
   M.sum_extensionality (v n2) f (fun l -> get h0 a (v i) l *. get h0 b l (v k)) (v n2);
   assert (res == M.mul_inner (as_matrix h0 a) (as_matrix h0 b) (v i) (v k));
   pop_frame();
@@ -367,11 +368,55 @@ let matrix_eq #n1 #n2 m a b =
     let h1 = ST.get() in
     loop_nospec #h1 #bool #1 n2 res
     (fun j ->
-      let a1 = !*res in
+      let a1 = res.(size 0) in
       let a2 = eq_u32_m m (to_u32 (mget a i j)) (to_u32 (mget b i j)) in
-      res *= (a1 && a2)
+      res.(size 0) <- a1 && a2
     )
   );
-  let res = !*res in
+  let res = res.(size 0) in
   pop_frame();
   res
+
+val matrix_to_lbytes:
+    #n1:size_t
+  -> #n2:size_t{2 * v n1 < max_size_t /\ 2 * v n1 * v n2 < max_size_t}
+  -> m:matrix_t n1 n2
+  -> res:lbytes (size 2 *! n1 *! n2)
+  -> Stack unit
+    (requires fun h -> live h m /\ live h res /\ disjoint m res)
+    (ensures  fun h0 r h1 -> live h1 res /\ modifies (loc_buffer res) h0 h1)
+[@"c_inline"]
+let matrix_to_lbytes #n1 #n2 m res =
+  let h0 = ST.get () in
+  loop_nospec #h0 n1 res
+  (fun i ->
+    let h0 = ST.get () in
+    loop_nospec #h0 n2 res
+    (fun j ->
+      Lemmas.lemma_matrix_index_repeati2 (v n1) (v n2) (v i) (v j);
+      assert (2 * (v j * v n1 + v i) + 2 <= 2 * v n1 * v n2);
+      uint_to_bytes_le (sub res (size 2 *! (j *! n1 +! i)) (size 2)) (mget m i j)
+    )
+  )
+
+val matrix_from_lbytes:
+    #n1:size_t
+  -> #n2:size_t{2 * v n1 < max_size_t /\ 2 * v n1 * v n2 < max_size_t}
+  -> b:lbytes (size 2 *! n1 *! n2)
+  -> res:matrix_t n1 n2
+  -> Stack unit
+    (requires fun h -> live h b /\ live h res /\ disjoint b res)
+    (ensures  fun h0 r h1 -> live h1 res /\ modifies (loc_buffer res) h0 h1)
+[@"c_inline"]
+let matrix_from_lbytes #n1 #n2 b res =
+  let h0 = ST.get () in
+  loop_nospec #h0 n1 res
+  (fun i ->
+    let h0 = ST.get () in
+    loop_nospec #h0 n2 res
+    (fun j ->
+      Lemmas.lemma_matrix_index_repeati2 (v n1) (v n2) (v i) (v j);
+      //assert (2 * (v j * v n1 + v i) + 2 <= 2 * v n1 * v n2);
+      mset res i j (uint_from_bytes_le #U16 (sub b (size 2 *! (j *! n1 +! i)) (size 2)))
+    )
+  )
