@@ -286,12 +286,13 @@ no_extraction_files = [File(x) for x in [
 # Note that the entries below are prefixes of blacklisted files
 #
 min_test_suite_blacklist = [File(x) for x in [
-  'obj/crypto/aes/x64/X64.GCMencrypt.fst',
-  'obj/crypto/aes/x64/X64.GCMdecrypt.fst',
-  'obj/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.fst',
-  'obj/crypto/aes/x64/X64.GHash',
-  'obj/crypto/aes/x64/X64.GCTR.fst',
-  'obj/crypto/aes/x64/X64.AES.fst'
+  'obj/code/crypto/aes/x64/X64.GCMencrypt.fst',
+  'obj/code/crypto/aes/x64/X64.GCMdecrypt.fst',
+  'obj/code/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.fst',
+  'obj/code/crypto/aes/x64/X64.GHash',
+  'obj/code/crypto/aes/x64/X64.GCTR.fst',
+  'obj/code/crypto/aes/x64/X64.AES.fst',
+  'obj/code/thirdPartyPorts/Intel/aes/x64/X64.AESCTR',
 ]]
 
 manual_dependencies = {
@@ -695,7 +696,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   hintfile = to_hint_file(sourcefile)
   outs = []
   if min_test and on_black_list(sourcefile, min_test_suite_blacklist):
-    print(f'Skipping {sourcefile} because it is on the min_test_suite_blacklist defined in SConscript')
+    print(f'Skipping {sourcefile} because it is on min_test_suite_blacklist')
     return outs
   if record_hints:
     temptargetfiles.append(hintfile)
