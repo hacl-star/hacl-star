@@ -6,7 +6,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-open Spec.Frodo
+open Spec.Frodo.KEM
 open Spec.Frodo.Params
 
 let print_and_compare (#len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) =

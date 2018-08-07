@@ -153,7 +153,7 @@ let rec fold_logor_ f i =
   if i = 0 then u64 0
   else fold_logor_ f (i - 1) |. f (i - 1)
 
-#set-options "--max_fuel 1"
+#set-options "--max_fuel 1 --max_ifuel 1"
 
 val decode_fc:
     b:size_nat{b <= 8}
