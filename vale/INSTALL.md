@@ -6,6 +6,8 @@ Our code relies on the following tools, which must be installed before building:
     * ```sudo apt install scons```
   * On Mac OS X (tested with El Capitan, 10.11.6), you can install the Python/SCons dependencies with:
     * ```brew install scons```
+  * Note: if you run SCons under Cygwin, you might want to also install the Python `pywin32` module (via `pip`),
+    which our SCons file will detect and use to stop Cygwin child processes when SCons stops
 * The [Vale tool](https://github.com/project-everest/vale)
   * Download the latest [Vale binary release](https://github.com/project-everest/vale/releases) zip file
   * Set the `VALE_HOME` environment variable to the unzipped binaries directory (e.g., `VALE_HOME = vale-release-x.y.z`)
