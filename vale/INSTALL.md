@@ -17,7 +17,7 @@ Our code relies on the following tools, which must be installed before building:
   * (See the [HACL* installation guide](../INSTALL.md) for directions on installing F*, KreMLin, and Z3 and setting environment variables)
 * An installed C/C++ compiler, used by SCons to compile C/C++ files
 
-Once these tools are installed, running SCons in the `Vale` directory will
+Once these tools are installed, running SCons in the `vale` directory will
 build and verify the Vale cryptographic library:
 * To build all sources in the [specs](./specs) and [code](./src) directory:
   * ```python.exe scons.py```
@@ -25,7 +25,8 @@ build and verify the Vale cryptographic library:
   * On Windows, set the `PLATFORM` environment variable to `X64`
   * ```python.exe scons.py --FSTAR-EXTRACT obj/aesgcm.asm obj/aesgcm-gcc.S obj/aesgcm-linux.S obj/aesgcm-macos.S```
   * ```python.exe scons.py --FSTAR-EXTRACT obj/TestAesGcm.exe```
+* To build in parallel, add the `-j` option (e.g., `-j 4` for 4-way parallelism).
+  Any warnings about needing `pywin32` can be ignored.
 * To see additional generic and Vale-specific options,
   including options to configure where to find Vale, KreMLin, F*, and Z3:
   * ```python.exe scons.py -h```
-

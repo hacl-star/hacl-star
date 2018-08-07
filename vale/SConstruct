@@ -163,6 +163,7 @@ AddOption('--FSTAR-EXTRACT', dest = 'fstar_extract', default = False, action = '
 AddOption('--MIN-TEST', dest = 'min_test', default = False, action = 'store_true',
   help = "Only run on a minimal set of test files")
 
+is_help = GetOption('help')
 vale_path = Dir(GetOption('vale_path')).abspath
 kremlin_path = Dir(GetOption('kremlin_path')).abspath
 fstar_path = Dir(GetOption('fstar_path')).abspath
@@ -199,32 +200,33 @@ if (sys.platform == 'win32' and os.getenv('PLATFORM') == 'X64') or platform.mach
 common_env['TARGET_ARCH'] = target_arch
 
 mono = ''
-if sys.platform == 'win32':
-  import importlib.util
-  common_env.Replace(CCPDBFLAGS = '/Zi /Fd${TARGET.base}.pdb')
-  # Use kremlib.h without primitive support for uint128_t.
-  common_env.Append(CCFLAGS = ['/Ox', '/Gz', '/DKRML_NOUINT128'])
-  common_env.Append(LINKFLAGS = ['/DEBUG'])
-  if os.getenv('PLATFORM') == 'X64':
-    common_env['AS'] = 'ml64'
-  if 'SHELL' in os.environ and importlib.util.find_spec('win32job') != None and importlib.util.find_spec('win32api'):
-    # Special job handling for cygwin so that child processes exit when the parent process exits
-    import win32job
-    import win32api
-    hdl = win32job.CreateJobObject(None, "")
-    win32job.AssignProcessToJobObject(hdl, win32api.GetCurrentProcess())
-    extended_info = win32job.QueryInformationJobObject(None, win32job.JobObjectExtendedLimitInformation)
-    extended_info['BasicLimitInformation']['LimitFlags'] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-    win32job.SetInformationJobObject(hdl, win32job.JobObjectExtendedLimitInformation, extended_info)
-else:
-  common_env.Append(CCFLAGS = ['-O3', '-flto', '-g', '-DKRML_NOUINT128', '-std=c++11'])
-  mono = 'mono'
+if not is_help:
+  if sys.platform == 'win32':
+    import importlib.util
+    common_env.Replace(CCPDBFLAGS = '/Zi /Fd${TARGET.base}.pdb')
+    # Use kremlib.h without primitive support for uint128_t.
+    common_env.Append(CCFLAGS = ['/Ox', '/Gz', '/DKRML_NOUINT128'])
+    common_env.Append(LINKFLAGS = ['/DEBUG'])
+    if os.getenv('PLATFORM') == 'X64':
+      common_env['AS'] = 'ml64'
+    if 'SHELL' in os.environ and importlib.util.find_spec('win32job') != None and importlib.util.find_spec('win32api'):
+      # Special job handling for cygwin so that child processes exit when the parent process exits
+      import win32job
+      import win32api
+      hdl = win32job.CreateJobObject(None, "")
+      win32job.AssignProcessToJobObject(hdl, win32api.GetCurrentProcess())
+      extended_info = win32job.QueryInformationJobObject(None, win32job.JobObjectExtendedLimitInformation)
+      extended_info['BasicLimitInformation']['LimitFlags'] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+      win32job.SetInformationJobObject(hdl, win32job.JobObjectExtendedLimitInformation, extended_info)
+  else:
+    common_env.Append(CCFLAGS = ['-O3', '-flto', '-g', '-DKRML_NOUINT128', '-std=c++11'])
+    mono = 'mono'
 
-if sys.platform == 'win32':
-  # fstar.exe relies on libgmp-10.dll
-  gmp_dll = FindFile('libgmp-10.dll', os.environ['PATH'].split(';'))
-  if gmp_dll != None:
-    common_env.PrependENVPath('PATH', os.path.dirname(str(gmp_dll)))
+  if sys.platform == 'win32':
+    # fstar.exe relies on libgmp-10.dll
+    gmp_dll = FindFile('libgmp-10.dll', os.environ['PATH'].split(';'))
+    if gmp_dll != None:
+      common_env.PrependENVPath('PATH', os.path.dirname(str(gmp_dll)))
 
 # Helper class to specify per-file command-line options for verification.
 class BuildOptions:
@@ -388,7 +390,7 @@ if not verify:
 
 # Find Z3 for F*
 found_z3 = False
-if verify:
+if verify and not is_help:
   fstar_z3 = GetOption('fstar_z3')
   if fstar_z3 == '':
     fstar_z3 = File('tools/Z3/z3.exe').path if sys.platform == 'win32' else 'tools/Z3/z3'
@@ -980,47 +982,48 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
 #
 ##################################################################################################
 
-atexit.register(report_verification_failures)
-env = common_env
+if not is_help:
+  atexit.register(report_verification_failures)
+  env = common_env
 
-# Create obj directory and any subdirectories needed during dependency analysis
-# (SCons will create other subdirectories during build)
-distutils.dir_util.mkpath('obj')
-distutils.dir_util.mkpath('obj/external')
-distutils.dir_util.mkpath('obj/cache_checked')
+  # Create obj directory and any subdirectories needed during dependency analysis
+  # (SCons will create other subdirectories during build)
+  distutils.dir_util.mkpath('obj')
+  distutils.dir_util.mkpath('obj/external')
+  distutils.dir_util.mkpath('obj/cache_checked')
 
-# Check F* and Z3 versions
-if not fstar_my_version:
-  check_fstar_version()
-if verify and not fstar_z3_my_version:
-  if not found_z3:
-    print_error_exit('Could not find z3 executable.  Either put z3 in your path, or put it in the directory tools/Z3/, or use the --FSTARZ3=<z3-executable> option.')
-  check_z3_version(fstar_z3)
+  # Check F* and Z3 versions
+  if not fstar_my_version:
+    check_fstar_version()
+  if verify and not fstar_z3_my_version:
+    if not found_z3:
+      print_error_exit('Could not find z3 executable.  Either put z3 in your path, or put it in the directory tools/Z3/, or use the --FSTARZ3=<z3-executable> option.')
+    check_z3_version(fstar_z3)
 
-# HACK: copy external files
-for x in ['CanonCommSwaps.fst', 'CanonCommMonoid.fst', 'CanonCommSemiring.fst']:
-  source = f'{fstar_path}/examples/tactics/{x}'
-  target = f'obj/external/{x}'
-  shutil.copy(source, target)
-for x in ['C.Loops.fst', 'Spec.Loops.fst']:
-  source = f'{kremlin_path}/kremlib/{x}'
-  target = f'obj/external/{x}'
-  shutil.copy(source, target)
+  # HACK: copy external files
+  for x in ['CanonCommSwaps.fst', 'CanonCommMonoid.fst', 'CanonCommSemiring.fst']:
+    source = f'{fstar_path}/examples/tactics/{x}'
+    target = f'obj/external/{x}'
+    shutil.copy(source, target)
+  for x in ['C.Loops.fst', 'Spec.Loops.fst']:
+    source = f'{kremlin_path}/kremlib/{x}'
+    target = f'obj/external/{x}'
+    shutil.copy(source, target)
 
-print('Processing source files')
-process_files_in(env, verify_paths)
-compute_fstar_deps(env, verify_paths, compute_include_paths(src_include_paths, obj_include_paths, 'obj/dummies'))
+  print('Processing source files')
+  process_files_in(env, verify_paths)
+  compute_fstar_deps(env, verify_paths, compute_include_paths(src_include_paths, obj_include_paths, 'obj/dummies'))
 
-if fstar_extract:
-  # Build AES-GCM
-  aesgcm_asm = extract_assembly_code(env, 'aesgcm', File('code/crypto/aes/x64/Main.ml'),
-    File('code/crypto/aes/x64/X64.GCMdecrypt.vaf'), File('code/lib/util/CmdLineParser.ml'))
-  if env['TARGET_ARCH'] == 'amd64':
-    aesgcmasm_obj = env.Object('obj/aesgcmasm_openssl', aesgcm_asm[0])
-    aesgcmtest_src = File('code/crypto/aes/x64/TestAesGcm.cpp')
-    aesgcmtest_cpp = to_obj_dir(aesgcmtest_src)
-    CopyFile(aesgcmtest_cpp, aesgcmtest_src)
-    aesgcmtest_exe = env.Program(source = [aesgcmasm_obj, aesgcmtest_cpp], target = 'obj/TestAesGcm.exe')
+  if fstar_extract:
+    # Build AES-GCM
+    aesgcm_asm = extract_assembly_code(env, 'aesgcm', File('code/crypto/aes/x64/Main.ml'),
+      File('code/crypto/aes/x64/X64.GCMdecrypt.vaf'), File('code/lib/util/CmdLineParser.ml'))
+    if env['TARGET_ARCH'] == 'amd64':
+      aesgcmasm_obj = env.Object('obj/aesgcmasm_openssl', aesgcm_asm[0])
+      aesgcmtest_src = File('code/crypto/aes/x64/TestAesGcm.cpp')
+      aesgcmtest_cpp = to_obj_dir(aesgcmtest_src)
+      CopyFile(aesgcmtest_cpp, aesgcmtest_src)
+      aesgcmtest_exe = env.Program(source = [aesgcmasm_obj, aesgcmtest_cpp], target = 'obj/TestAesGcm.exe')
 
-if dump_args:
-  print_dump_args()
+  if dump_args:
+    print_dump_args()
