@@ -74,6 +74,10 @@ static bool MPFR_RoundingMode_mpfr_IS_LIKE_RNDZ(MPFR_RoundingMode_mpfr_rnd_t rnd
     || MPFR_RoundingMode_uu___is_MPFR_RNDD(rnd) && !neg;
 }
 
+static uint32_t MPFR_Lib_gmp_NUMB_BITS = (uint32_t)64U;
+
+static int32_t MPFR_Lib_mpfr_EMAX = (int32_t)0x40000000 - (int32_t)1;
+
 static void MPFR_Lib_mpfr_setmax_rec(MPFR_Lib_mpfr_struct *x, uint32_t i)
 {
   uint64_t *mant = x->mpfr_d;
@@ -82,8 +86,8 @@ static void MPFR_Lib_mpfr_setmax_rec(MPFR_Lib_mpfr_struct *x, uint32_t i)
     MPFR_Lib_mpfr_struct f0 = x[0U];
     uint32_t p = f0.mpfr_prec;
     MPFR_Lib_mpfr_struct f = x[0U];
-    uint32_t l = (f.mpfr_prec - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-    mant[i] = (uint64_t)0xffffffffffffffffU << l * (uint32_t)64U - p;
+    uint32_t l = (f.mpfr_prec - (uint32_t)1U) / MPFR_Lib_gmp_NUMB_BITS + (uint32_t)1U;
+    mant[i] = (uint64_t)0xffffffffffffffffU << l * MPFR_Lib_gmp_NUMB_BITS - p;
   }
   else
   {
@@ -99,30 +103,30 @@ MPFR_Exceptions_mpfr_overflow(
   int32_t sign
 )
 {
-  MPFR_Lib_mpfr_struct uu___55_108 = x[0U];
+  MPFR_Lib_mpfr_struct uu___55_107 = x[0U];
   x[0U] =
     (
       (MPFR_Lib_mpfr_struct){
-        .mpfr_prec = uu___55_108.mpfr_prec,
+        .mpfr_prec = uu___55_107.mpfr_prec,
         .mpfr_sign = sign,
-        .mpfr_exp = uu___55_108.mpfr_exp,
-        .mpfr_d = uu___55_108.mpfr_d
+        .mpfr_exp = uu___55_107.mpfr_exp,
+        .mpfr_d = uu___55_107.mpfr_d
       }
     );
   if (MPFR_RoundingMode_mpfr_IS_LIKE_RNDZ(rnd_mode, sign < (int32_t)0))
   {
-    MPFR_Lib_mpfr_struct uu___54_164 = x[0U];
+    MPFR_Lib_mpfr_struct uu___54_163 = x[0U];
     x[0U] =
       (
         (MPFR_Lib_mpfr_struct){
-          .mpfr_prec = uu___54_164.mpfr_prec,
-          .mpfr_sign = uu___54_164.mpfr_sign,
-          .mpfr_exp = (int32_t)0x40000000 - (int32_t)1,
-          .mpfr_d = uu___54_164.mpfr_d
+          .mpfr_prec = uu___54_163.mpfr_prec,
+          .mpfr_sign = uu___54_163.mpfr_sign,
+          .mpfr_exp = MPFR_Lib_mpfr_EMAX,
+          .mpfr_d = uu___54_163.mpfr_d
         }
       );
     MPFR_Lib_mpfr_struct f = x[0U];
-    MPFR_Lib_mpfr_setmax_rec(x, (f.mpfr_prec - (uint32_t)1U) / (uint32_t)64U);
+    MPFR_Lib_mpfr_setmax_rec(x, (f.mpfr_prec - (uint32_t)1U) / MPFR_Lib_gmp_NUMB_BITS);
     if (sign == (int32_t)1)
       return (int32_t)-1;
     else
@@ -130,14 +134,14 @@ MPFR_Exceptions_mpfr_overflow(
   }
   else
   {
-    MPFR_Lib_mpfr_struct uu___54_325 = x[0U];
+    MPFR_Lib_mpfr_struct uu___54_321 = x[0U];
     x[0U] =
       (
         (MPFR_Lib_mpfr_struct){
-          .mpfr_prec = uu___54_325.mpfr_prec,
-          .mpfr_sign = uu___54_325.mpfr_sign,
+          .mpfr_prec = uu___54_321.mpfr_prec,
+          .mpfr_sign = uu___54_321.mpfr_sign,
           .mpfr_exp = (int32_t)-0x80000000 + (int32_t)3,
-          .mpfr_d = uu___54_325.mpfr_d
+          .mpfr_d = uu___54_321.mpfr_d
         }
       );
     return sign;
@@ -188,7 +192,7 @@ MPFR_Add1sp1_mpfr_add1sp1(
   MPFR_Lib_mpfr_struct c0 = c[0U];
   int32_t bx = b0.mpfr_exp;
   int32_t cx = c0.mpfr_exp;
-  uint32_t sh = (uint32_t)64U - p;
+  uint32_t sh = MPFR_Lib_gmp_NUMB_BITS - p;
   MPFR_Add1sp1_state st;
   if (bx == cx)
   {
@@ -240,13 +244,13 @@ MPFR_Add1sp1_mpfr_add1sp1(
       else
       {
         MPFR_Add1sp1_state ite;
-        if (d < (uint32_t)64U)
+        if (d < MPFR_Lib_gmp_NUMB_BITS)
         {
           uint64_t *ap = a0.mpfr_d;
           uint64_t *bp = b0.mpfr_d;
           uint64_t *cp = c0.mpfr_d;
           int32_t bx2 = b0.mpfr_exp;
-          uint64_t sb = cp[0U] << (uint32_t)64U - d;
+          uint64_t sb = cp[0U] << MPFR_Lib_gmp_NUMB_BITS - d;
           uint64_t a01 = bp[0U] + (cp[0U] >> d);
           K___uint64_t_uint64_t_int32_t scrut;
           if (a01 < bp[0U])
@@ -317,13 +321,13 @@ MPFR_Add1sp1_mpfr_add1sp1(
       else
       {
         MPFR_Add1sp1_state ite;
-        if (d < (uint32_t)64U)
+        if (d < MPFR_Lib_gmp_NUMB_BITS)
         {
           uint64_t *ap = a0.mpfr_d;
           uint64_t *bp = c0.mpfr_d;
           uint64_t *cp = b0.mpfr_d;
           int32_t bx2 = c0.mpfr_exp;
-          uint64_t sb = cp[0U] << (uint32_t)64U - d;
+          uint64_t sb = cp[0U] << MPFR_Lib_gmp_NUMB_BITS - d;
           uint64_t a01 = bp[0U] + (cp[0U] >> d);
           K___uint64_t_uint64_t_int32_t scrut;
           if (a01 < bp[0U])
@@ -361,7 +365,7 @@ MPFR_Add1sp1_mpfr_add1sp1(
     }
     st = ite0;
   }
-  if (st.bx > (int32_t)0x40000000 - (int32_t)1)
+  if (st.bx > MPFR_Lib_mpfr_EMAX)
   {
     int32_t t = MPFR_Exceptions_mpfr_overflow(a, rnd_mode, a->mpfr_sign);
     return t;
@@ -370,14 +374,14 @@ MPFR_Add1sp1_mpfr_add1sp1(
   {
     uint64_t *ap = a->mpfr_d;
     uint64_t a01 = ap[0U];
-    MPFR_Lib_mpfr_struct uu___54_3479 = a[0U];
+    MPFR_Lib_mpfr_struct uu___54_3461 = a[0U];
     a[0U] =
       (
         (MPFR_Lib_mpfr_struct){
-          .mpfr_prec = uu___54_3479.mpfr_prec,
-          .mpfr_sign = uu___54_3479.mpfr_sign,
+          .mpfr_prec = uu___54_3461.mpfr_prec,
+          .mpfr_sign = uu___54_3461.mpfr_sign,
           .mpfr_exp = st.bx,
-          .mpfr_d = uu___54_3479.mpfr_d
+          .mpfr_d = uu___54_3461.mpfr_d
         }
       );
     if (st.rb == (uint64_t)0U && st.sb == (uint64_t)0U)
@@ -400,16 +404,16 @@ MPFR_Add1sp1_mpfr_add1sp1(
         if (ap1[0U] == (uint64_t)0U)
         {
           ap1[0U] = (uint64_t)0x8000000000000000U;
-          if (st.bx + (int32_t)1 <= (int32_t)0x40000000 - (int32_t)1)
+          if (st.bx + (int32_t)1 <= MPFR_Lib_mpfr_EMAX)
           {
-            MPFR_Lib_mpfr_struct uu___54_3577 = a[0U];
+            MPFR_Lib_mpfr_struct uu___54_3556 = a[0U];
             a[0U] =
               (
                 (MPFR_Lib_mpfr_struct){
-                  .mpfr_prec = uu___54_3577.mpfr_prec,
-                  .mpfr_sign = uu___54_3577.mpfr_sign,
+                  .mpfr_prec = uu___54_3556.mpfr_prec,
+                  .mpfr_sign = uu___54_3556.mpfr_sign,
                   .mpfr_exp = st.bx + (int32_t)1,
-                  .mpfr_d = uu___54_3577.mpfr_d
+                  .mpfr_d = uu___54_3556.mpfr_d
                 }
               );
             return a->mpfr_sign;
@@ -435,16 +439,16 @@ MPFR_Add1sp1_mpfr_add1sp1(
       if (ap1[0U] == (uint64_t)0U)
       {
         ap1[0U] = (uint64_t)0x8000000000000000U;
-        if (st.bx + (int32_t)1 <= (int32_t)0x40000000 - (int32_t)1)
+        if (st.bx + (int32_t)1 <= MPFR_Lib_mpfr_EMAX)
         {
-          MPFR_Lib_mpfr_struct uu___54_3784 = a[0U];
+          MPFR_Lib_mpfr_struct uu___54_3760 = a[0U];
           a[0U] =
             (
               (MPFR_Lib_mpfr_struct){
-                .mpfr_prec = uu___54_3784.mpfr_prec,
-                .mpfr_sign = uu___54_3784.mpfr_sign,
+                .mpfr_prec = uu___54_3760.mpfr_prec,
+                .mpfr_sign = uu___54_3760.mpfr_sign,
                 .mpfr_exp = st.bx + (int32_t)1,
-                .mpfr_d = uu___54_3784.mpfr_d
+                .mpfr_d = uu___54_3760.mpfr_d
               }
             );
           return a->mpfr_sign;

@@ -52,11 +52,11 @@ inline_for_extraction let mk_mpfr_struct p s e d = {
 
 (* range settings *)
 (* precision *)
-inline_for_extraction let gmp_NUMB_BITS = 64ul
-inline_for_extraction val mpfr_PREC_MIN: p:u32{U32.v p = mpfr_PREC_MIN_spec}
-inline_for_extraction let mpfr_PREC_MIN = 1ul
-inline_for_extraction val mpfr_PREC_MAX: p:u32{U32.v p = mpfr_PREC_MAX_spec}
-inline_for_extraction let mpfr_PREC_MAX = 0x7ffffffful // Note: 0x7ffffefful in original code
+let gmp_NUMB_BITS = 64ul
+val mpfr_PREC_MIN: p:u32{U32.v p = mpfr_PREC_MIN_spec}
+let mpfr_PREC_MIN = 1ul
+val mpfr_PREC_MAX: p:u32{U32.v p = mpfr_PREC_MAX_spec}
+let mpfr_PREC_MAX = 0x7ffffffful // Note: 0x7ffffefful in original code
 
 (* exponent *)
 inline_for_extraction val mpfr_EXP_MIN: x:i32{I32.v x = -pow2 31}
@@ -69,10 +69,10 @@ inline_for_extraction let mpfr_EXP_INF  = I32.(mpfr_EXP_MIN +^ 3l)
 
 inline_for_extraction val mpfr_EXP_INVALID: x:i32{I32.v x = pow2 30}
 inline_for_extraction let mpfr_EXP_INVALID = assert_norm(0x40000000 = pow2 30); 0x40000000l
-inline_for_extraction val mpfr_EMIN: x:i32{I32.v x = mpfr_EMIN_spec}
-inline_for_extraction let mpfr_EMIN = I32.(1l -^ mpfr_EXP_INVALID)
-inline_for_extraction val mpfr_EMAX: x:i32{I32.v x = mpfr_EMAX_spec}
-inline_for_extraction let mpfr_EMAX = I32.(mpfr_EXP_INVALID -^ 1l)
+val mpfr_EMIN: x:i32{I32.v x = mpfr_EMIN_spec}
+let mpfr_EMIN = I32.(1l -^ mpfr_EXP_INVALID)
+val mpfr_EMAX: x:i32{I32.v x = mpfr_EMAX_spec}
+let mpfr_EMAX = I32.(mpfr_EXP_INVALID -^ 1l)
 
 (* validity and regularity *)
 type mpfr_reg_prec_t = p:u32{mpfr_PREC_COND (U32.v p)}

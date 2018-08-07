@@ -59,7 +59,7 @@ let mpfr_add1sp1_any_post_cond a b c h0 s h1 =
     (rb_def r p = (v s.rb <> 0)) /\
     (sb_def r p = (v s.sb <> 0)))
 
-unfold val mpfr_add1sp1_gt_branch1:
+inline_for_extraction val mpfr_add1sp1_gt_branch1:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Stack state
     (requires (fun h -> mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
@@ -83,7 +83,7 @@ let mpfr_add1sp1_gt_branch1 a b c sh d mask =
     mk_state sh bx rb sb
 
 
-unfold val mpfr_add1sp1_gt_branch2:
+inline_for_extraction val mpfr_add1sp1_gt_branch2:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     sh:mpfr_reg_prec_t -> d:u32 -> mask:mp_limb_t -> Stack state
     (requires (fun h -> mpfr_add1sp1_gt_branch2_pre_cond a b c sh d mask h))
@@ -110,7 +110,7 @@ let mpfr_add1sp1_gt_branch2 a b c sh d mask =
     mk_state sh bx rb sb
 
     
-unfold val mpfr_add1sp1_gt_branch3:
+inline_for_extraction val mpfr_add1sp1_gt_branch3:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     sh:mpfr_reg_prec_t -> Stack state
     (requires (fun h -> mpfr_add1sp1_gt_branch3_pre_cond a b c sh h))
@@ -129,7 +129,7 @@ let mpfr_add1sp1_gt_branch3 a b c sh =
     mpfr_add1sp1_gt_branch3_sb_lemma h a b c sh;
     mk_state sh bx rb sb
 
-unfold val mpfr_add1sp1_gt:
+inline_for_extraction val mpfr_add1sp1_gt:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     p:mpfr_reg_prec_t -> sh:mpfr_reg_prec_t -> Stack state
     (requires (fun h -> mpfr_add1sp1_gt_pre_cond a b c sh h))
@@ -145,7 +145,7 @@ let mpfr_add1sp1_gt a b c p sh =
     else if U32.(d <^ gmp_NUMB_BITS) then mpfr_add1sp1_gt_branch2 a b c sh d mask
     else mpfr_add1sp1_gt_branch3 a b c sh
 
-unfold val mpfr_add1sp1_eq:
+inline_for_extraction val mpfr_add1sp1_eq:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     p:mpfr_reg_prec_t -> sh:mpfr_reg_prec_t -> Stack state
     (requires (fun h -> mpfr_add1sp1_eq_pre_cond a b c sh h))
@@ -165,7 +165,7 @@ let mpfr_add1sp1_eq a b c p sh =
     mpfr_add1sp1_eq_rb_sb_lemma h a b c sh;
     mk_state sh bx rb sb
 
-unfold val mpfr_add1sp1_any:
+inline_for_extraction val mpfr_add1sp1_any:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
     p:mpfr_reg_prec_t -> Stack state
     (requires (fun h -> mpfr_add1sp1_any_pre_cond a b c p h))
@@ -181,7 +181,7 @@ let mpfr_add1sp1_any a b c p =
     else mpfr_add1sp1_gt a c b p sh
 
 (* rounding specifications *)
-unfold val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t ->
+inline_for_extraction val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t ->
                              sh:mpfr_reg_prec_t -> bx:mpfr_exp_t -> Stack i32
     (requires (fun h -> 
     mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\
@@ -231,7 +231,7 @@ let mpfr_add_one_ulp a rnd_mode sh bx =
         mpfr_SIGN a
     end
 
-unfold val mpfr_add1sp1_round: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> st:state -> Stack i32
+inline_for_extraction val mpfr_add1sp1_round: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> st:state -> Stack i32
     (requires (fun h -> mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ normal_cond h a /\
     (let high = {as_normal h a with exp = I32.v st.bx} in
     let p = high.prec in
