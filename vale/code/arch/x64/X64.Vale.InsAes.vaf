@@ -1,0 +1,93 @@
+include "X64.Vale.InsBasic.vaf"
+include "X64.Vale.InsVector.vaf"
+
+module X64.Vale.InsAes
+
+#verbatim{:interface}
+open Words_s
+open Types_s
+open Arch.Types
+open AES_s
+open Math.Poly2_s
+open Math.Poly2.Bits_s
+open X64.Machine_s
+open X64.Vale.State
+open X64.Vale.Decls
+open X64.Vale.QuickCode
+#endverbatim
+
+#verbatim
+open Types_s
+open X64.Machine_s
+open X64.Vale
+open X64.Vale.State
+open X64.Vale.StateLemmas
+open X64.Vale.Decls
+module S = X64.Bytes_Semantics_s
+module TS = X64.Taint_Semantics_s
+module P = X64.Print_s
+#reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 20"
+#endverbatim
+
+procedure{:quick exportOnly}
+    {:instruction Ins(TS.TaintedIns(tuple(S.Pclmulqdq(dst, src, (if dstHi then 1 else 0) + (if srcHi then 16 else 0)), list(), list()), Public))}
+    Pclmulqdq(inout dst:xmm, src:xmm, inline dstHi:bool, inline srcHi:bool)
+    modifies efl;
+    ensures
+        dst == old(to_quad32(mul(
+            of_double32(if dstHi then quad32_double_hi(dst) else quad32_double_lo(dst)),
+            of_double32(if srcHi then quad32_double_hi(src) else quad32_double_lo(src)))));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc(dst, src), list(), list()), Public))}{:quick exportOnly}
+          AESNI_enc(inout dst:xmm, src:xmm)
+  modifies efl;
+  ensures
+    dst == old(quad32_xor(mix_columns_LE(sub_bytes(shift_rows_LE(dst))), src));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc_last(dst, src), list(), list()), Public))}{:quick exportOnly}
+          AESNI_enc_last(inout dst:xmm, src:xmm)
+  modifies efl;
+  ensures
+    dst == old(quad32_xor(sub_bytes(shift_rows_LE(dst)), src));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_dec(dst, src), list(), list()), Public))}{:quick exportOnly}
+          AESNI_dec(inout dst:xmm, src:xmm)
+  modifies efl;
+  ensures
+    dst == old(quad32_xor(inv_mix_columns_LE(inv_sub_bytes(inv_shift_rows_LE(dst))), src));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_dec_last(dst, src), list(), list()), Public))}{:quick exportOnly}
+          AESNI_dec_last(inout dst:xmm, src:xmm)
+  modifies efl;
+  ensures
+    dst == old(quad32_xor(inv_sub_bytes(inv_shift_rows_LE(dst)), src));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_imc(dst, src), list(), list()), Public))}{:quick exportOnly}
+          AESNI_imc(inout dst:xmm, src:xmm)
+  modifies efl;
+  ensures
+    dst == old(inv_mix_columns_LE(src));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_keygen_assist(dst, src, imm), list(), list()), Public))}{:quick exportOnly}
+          AESNI_keygen_assist(inout dst:xmm, src:xmm, inline imm:imm8)
+  modifies efl;
+  ensures
+    dst == old(Mkfour(sub_word(src.lo1),
+                      ixor(rot_word_LE(sub_word(src.lo1)), imm),
+                      sub_word(src.hi3),
+                      ixor(rot_word_LE(sub_word(src.hi3)), imm)));
+{
+}
+
