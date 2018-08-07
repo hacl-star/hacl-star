@@ -102,7 +102,7 @@ $(OUTPUT_DIR)/FStar_%.krml $(OUTPUT_DIR)/LowStar_%.krml $(OUTPUT_DIR)/C%.krml: |
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-$(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml: | .depend
+$(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml $(OUTPUT_DIR)/Lib_IntTypes.krml: | .depend
 	$(FSTARR) --codegen Kremlin --lax \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
@@ -290,11 +290,11 @@ $(OUT_DIR)/Hacl_Impl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.kr
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
-$(OUT_DIR)/test-frodo.exe: $(BASE_OBJ)
+$(OUT_DIR)/test.exe: $(BASE_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
 
-test: $(OUT_DIR)/test-frodo.exe
+test: $(OUT_DIR)/test.exe
 	@echo Remember to set params_n = 64 in Hacl.Impl.Frodo.Params!
-	$(OUT_DIR)/test-frodo.exe
+	$(OUT_DIR)/test.exe
 
 endif
