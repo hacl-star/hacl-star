@@ -8,7 +8,7 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.PQ.Buffer
 
-open Hacl.Impl.Frodo
+open Hacl.Impl.Frodo.KEM
 open Hacl.Impl.PQ.Lib
 open Hacl.Frodo.Random
 open Frodo.Params
