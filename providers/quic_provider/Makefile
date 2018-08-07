@@ -31,13 +31,14 @@ ifeq ($(OS),Windows_NT)
     CC = $(MARCH)-w64-mingw32-gcc
 else
     LIBQUICCRYPTO=libquiccrypto.so
-    EXTRA_PATH = LD_LIBRARY_PATH=$(OPENSSL_HOME):../out:.:$(LD_LIBRARY_PATH)
     UNAME_S := $(shell uname -s)
     AR = ar
     ifeq ($(UNAME_S),Darwin)
+	EXTRA_PATH = DYLD_LIBRARY_PATH=$(OPENSSL_HOME):../out:.:$(DYLD_LIBRARY_PATH)
         EXTRA_OPTS =
         ARCH = osx
     else
+	EXTRA_PATH = LD_LIBRARY_PATH=$(OPENSSL_HOME):../out:.:$(LD_LIBRARY_PATH)
         EXTRA_OPTS = -thread -ccopt -fPIC
         ARCH = x86_64
     endif
