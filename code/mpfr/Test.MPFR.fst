@@ -33,7 +33,7 @@ val test_add1sp1: mpfr_sign_t -> mp_limb_t -> mpfr_exp_t -> mp_limb_t -> mpfr_ex
     (ensures  (fun h0 r h1 -> True))
 
 let test_add1sp1 s bp bx cp cx rnd_mode p rp rx rt =
-    print_string "Testing: \n";
+    print_string "Testing add1sp1: \n";
     print_i32 s; print_u64 bp; print_i32 bx; print_u64 cp; print_i32 cx; print_rnd rnd_mode;
     print_u32 p; print_u64 rp; print_i32 rx; print_i32 rt;
     print_string "\n";

@@ -8,7 +8,7 @@ include ../../Makefile.include
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe
 
-all: add1sp1-test-ocaml
+all: test-ocaml
 
 MPFR_FILES=	MPFR.Maths.fst \
 		MPFR.Dyadic.fst \
@@ -35,17 +35,17 @@ add1sp1-full-tests: out gen-add1sp1-tests MPFR.RoundingMode.fst MPFR.Lib.fst MPF
 	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Add1sp1.ml out/Test_Add1sp1.ml -o out/Add1sp1
 	out/Add1sp1
 
-add1sp1-test-ocaml: out MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Exceptions.fst MPFR.Add1sp1.fst MPFR.fst Test.MPFR.fst
-	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml Test.MPFR.fst
-	echo "let _ = main ()" >> out/Test_MPFR.ml
-	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Add1sp1.ml out/MPFR.ml out/Test_MPFR.ml -o out/Test_MPFR
-	out/Test_MPFR
-
 mul-1-full-tests: out gen-mul-1-tests MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Exceptions.fst MPFR.Umul_ppmm.fst MPFR.Mul_1.fst test/Test_Mul_1.ml
 	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml MPFR.Mul_1.fst
 	cp test/Test_Mul_1.ml out/Test_Mul_1.ml
 	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Umul_ppmm.ml out/MPFR_Mul_1.ml out/Test_Mul_1.ml -o out/Mul_1
 	out/Mul_1
+
+test-ocaml: out MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Exceptions.fst MPFR.Add1sp1.fst MPFR.Umul_ppmm.fst MPFR.Mul_1.fst MPFR.fst Test.MPFR.fst
+	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml Test.MPFR.fst
+	echo "let _ = main ()" >> out/Test_MPFR.ml
+	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Add1sp1.ml out/MPFR_Umul_ppmm.ml out/MPFR_Mul_1.ml out/MPFR.ml out/Test_MPFR.ml -o out/Test_MPFR
+	out/Test_MPFR
 
 %.fst-verify: %.fst
 	$(FSTAR) --use_hints $*.fst

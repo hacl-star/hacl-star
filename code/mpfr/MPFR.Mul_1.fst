@@ -28,7 +28,7 @@ module U32 = FStar.UInt32
 
 open FStar.Mul
 
-unfold val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sh:mpfr_prec_t -> ax:mpfr_reg_exp_t ->
+inline_for_extraction val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sh:mpfr_prec_t -> ax:mpfr_reg_exp_t ->
     Stack i32
     (requires (fun h ->
         mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ U32.v sh + U32.v (as_struct h a).mpfr_prec = 64 /\
@@ -45,7 +45,7 @@ let mpfr_add_one_ulp a rnd_mode sh ax =
 	else (mpfr_SET_EXP a I32.(ax +^ 1l); mpfr_SIGN a)
     end else mpfr_SIGN a
 
-unfold val mpfr_mul_1_rounding: a:mpfr_ptr -> sh:mpfr_prec_t -> ax:mpfr_reg_exp_t -> 
+inline_for_extraction val mpfr_mul_1_rounding: a:mpfr_ptr -> sh:mpfr_prec_t -> ax:mpfr_reg_exp_t -> 
     rb:mp_limb_t -> sb:mp_limb_t -> rnd_mode:mpfr_rnd_t -> Stack i32
     (requires (fun h ->
         mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ U32.v sh + U32.v (as_struct h a).mpfr_prec = 64 /\
@@ -66,7 +66,7 @@ let mpfr_mul_1_rounding a sh ax rb sb rnd_mode =
     else if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_IS_NEG a) then mpfr_NEG_SIGN (mpfr_SIGN a)
     else mpfr_add_one_ulp a rnd_mode sh ax
 
-unfold val mpfr_mul_1_round: a:mpfr_ptr -> sh:mpfr_prec_t -> ax:mpfr_exp_t ->
+inline_for_extraction val mpfr_mul_1_round: a:mpfr_ptr -> sh:mpfr_prec_t -> ax:mpfr_exp_t ->
     rb:mp_limb_t -> sb:mp_limb_t -> mask:mp_limb_t -> rnd_mode:mpfr_rnd_t -> Stack i32
     (requires (fun h ->
         mpfr_live h a))
@@ -77,10 +77,12 @@ let mpfr_mul_1_round a sh ax rb sb mask rnd_mode =
     admit();
     let ap = mpfr_MANT a in
     let a0 = ap.(0ul) in
-    if I32.(ax <^ mpfr_EMIN) then begin
+    if I32.(ax >^ mpfr_EMAX) then mpfr_overflow a rnd_mode (mpfr_SIGN a)
+    else if I32.(ax <^ mpfr_EMIN) then begin
+        let aneg = mpfr_IS_NEG a in
         if I32.(ax =^ mpfr_EMIN -^ 1l) && a0 =^ lognot mask &&
 	   ((MPFR_RNDN? rnd_mode && rb >^ 0uL) ||
-	    (((rb |^ sb) >^ 0uL) && mpfr_IS_LIKE_RNDA rnd_mode (mpfr_IS_NEG a))) 
+	    (((rb |^ sb) >^ 0uL) && mpfr_IS_LIKE_RNDA rnd_mode aneg)) 
 	then mpfr_mul_1_rounding a sh ax rb sb rnd_mode
 	else if MPFR_RNDN? rnd_mode &&
 	        (I32.(ax <^ mpfr_EMIN -^ 1l) ||

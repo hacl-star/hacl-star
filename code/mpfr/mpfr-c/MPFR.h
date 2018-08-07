@@ -37,5 +37,14 @@ extern int32_t
   uint32_t x4
 );
 
+extern int32_t
+(*MPFR_mpfr_mul_1)(
+  MPFR_Lib_mpfr_struct *x0,
+  MPFR_Lib_mpfr_struct *x1,
+  MPFR_Lib_mpfr_struct *x2,
+  MPFR_RoundingMode_mpfr_rnd_t x3,
+  uint32_t x4
+);
+
 #define __MPFR_H_DEFINED
 #endif
