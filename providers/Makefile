@@ -82,7 +82,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES))
 
-ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst EverCrypt.Hash.Test.fst
+ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
 
 .PRECIOUS: %.krml
 
