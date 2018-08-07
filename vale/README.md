@@ -1,8 +1,8 @@
-Vale (Verified Assembly Language for Everest)
-=============================================
+Vale (Verified Assembly Language for Everest) cryptographic libraries
+=====================================================================
 
-This directory contains Vale code, i.e., formally verified high-performance
-assembly language code, with an emphasis on cryptographic code.  It relies
+This directory contains the Vale cryptographic libraries, i.e., formally verified high-performance
+cryptographic code in assembly language.  It relies
 on the [Vale tool](https://github.com/project-everest/vale) to produce
 code and proofs in [F\*](https://github.com/FStarLang/FStar).
 
@@ -22,9 +22,7 @@ See the [CODE](./CODE.md) file for more details on the various files in this dir
 
 # Documentation
 
-See the [documentation](./doc/compilation.txt) for commands necessary to extract the assembly langugae.
-
-You can also see our academic paper describing Vale:
+You can see our academic paper describing Vale:
 
 > [Vale: Verifying High-Performance Cryptographic Assembly Code](https://project-everest.github.io/assets/vale2017.pdf)
 > Barry Bond, Chris Hawblitzel, Manos Kapritsos, K. Rustan M. Leino, Jacob R. Lorch, Bryan Parno, Ashay Rane, Srinath Setty, Laure Thompson.
