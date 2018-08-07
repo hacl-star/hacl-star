@@ -96,10 +96,9 @@ let test_one_hash vec =
       let total_input = B.null in
       assert_norm (v total_input_len <= EverCrypt.Hash.maxLength (Ghost.hide a));
 
-      if AC.(sha256_impl () = Vale) then
-        compute a total_input_len total_input computed
-      else
-        EverCrypt.Hash.hash a computed total_input total_input_len
+      match AC.sha256_impl() with
+      | AC.Vale -> compute a total_input_len total_input computed
+      | _       -> EverCrypt.Hash.hash a computed total_input total_input_len
       end
     else
       begin
@@ -115,10 +114,9 @@ let test_one_hash vec =
       );
       assert_norm (v total_input_len <= EverCrypt.Hash.maxLength (Ghost.hide a));
 
-      if AC.(sha256_impl () = Vale) then
-        compute a total_input_len total_input computed
-      else
-        EverCrypt.Hash.hash a computed total_input total_input_len;
+      match AC.sha256_impl() with
+      | AC.Vale -> compute a total_input_len total_input computed
+      | _       -> EverCrypt.Hash.hash a computed total_input total_input_len;
       pop_frame()
       end;
 
