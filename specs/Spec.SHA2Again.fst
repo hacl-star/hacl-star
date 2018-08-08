@@ -326,7 +326,7 @@ let update_multi_zero (a: hash_alg) (h: hash_w a): Lemma
 =
   ()
 
-#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 20"
+#set-options "--z3rlimit 50"
 
 let update_multi_one (a: hash_alg) (h: hash_w a) (input: bytes):
   Lemma
@@ -342,28 +342,23 @@ let update_multi_one (a: hash_alg) (h: hash_w a) (input: bytes):
   assert (S.equal rem S.empty);
   update_multi_zero a (update a h block)
 
-#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 50"
-
 let update_multi_block (a: hash_alg) (h: hash_w a) (input: bytes):
   Lemma
     (requires (
       S.length input % size_block a = 0 /\
       S.length input < max_input8 a /\
-      S.length input >= size_block a
+      size_block a <= S.length input
     ))
     (ensures (
       let input1, input2 = S.split input (size_block a) in
+      assert (S.length input2 = S.length input - S.length input1);
+      Math.Lemmas.modulo_distributivity (S.length input2) (S.length input1) (size_block a);
+      assert (S.length input2 % size_block a = 0);
       (update_multi a (update_multi a h input1) input2) ==
       (update_multi a h input)
     ))
 =
-  if S.length input = 0 then
-    false_elim ()
-  else
-    let block, rem = S.split input (size_block a) in
-    assert (S.length block = size_block a);
-    update_multi_one a h block;
-    ()
+  ()
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
@@ -377,6 +372,9 @@ let rec update_multi_associative (a: hash_alg) (h: hash_w a) (input: bytes) (len
     ))
     (ensures (
       let input1, input2 = S.split input len in
+      assert (S.length input2 = S.length input - S.length input1);
+      Math.Lemmas.modulo_distributivity (S.length input2) (S.length input1) (size_block a);
+      assert (S.length input2 % size_block a = 0);
       S.equal
         (update_multi a (update_multi a h input1) input2)
         (update_multi a h input)
@@ -390,7 +388,7 @@ let rec update_multi_associative (a: hash_alg) (h: hash_w a) (input: bytes) (len
     assert (S.equal i_r input);
     update_multi_zero a h
   end else if len = size_block a then begin
-    admit ()
+    update_multi_block a h input
   end else begin
     assert (len >= size_block a);
     let i0, i1 = S.split i_l (len - size_block a) in
