@@ -124,10 +124,10 @@ let word_shift_right: t:hash_alg -> Tot (a:word t -> s:U32.t -> Pure (word t)
   | SHA2_224 | SHA2_256 -> U32.shift_right
   | SHA2_384 | SHA2_512 -> U64.shift_right
 
-let rotate_right32 (x:U32.t) (s:U32.t{0 < U32.v s /\ U32.v s < 32}) : Tot U32.t =
+let rotate_right32 (x:U32.t) (s:U32.t{0 < U32.v s /\ U32.v s < 32}): Tot U32.t =
   U32.((x >>^ s) |^ (x <<^ (32ul -^ s)))
 
-let rotate_right64 (a:U64.t) (s:U32.t{0 < U32.v s /\ U32.v s < 64}) : Tot U64.t =
+let rotate_right64 (a:U64.t) (s:U32.t{0 < U32.v s /\ U32.v s < 64}): Tot U64.t =
   U64.((a >>^ s) |^ (a <<^ (U32.sub 64ul s)))
 
 let word_rotate_right: a:hash_alg -> Tot (word a -> s:U32.t{0 < U32.v s /\ U32.v s < word_n a} -> Tot (word a)) = function
@@ -209,7 +209,7 @@ unfold
 let (.[]) = S.index
 
 (* Scheduling function *)
-let rec ws (a:hash_alg) (b:block_w a) (t:counter{t < size_k_w a}) : Tot (word a) =
+let rec ws (a:hash_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
   if t < size_block_w then b.[t]
   else
     let t16 = ws a b (t - 16) in
@@ -223,7 +223,7 @@ let rec ws (a:hash_alg) (b:block_w a) (t:counter{t < size_k_w a}) : Tot (word a)
 
 
 (* Core shuffling function *)
-let shuffle_core (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}) : Tot (hash_w a) =
+let shuffle_core (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}): Tot (hash_w a) =
   (**) assert(7 <= S.length hash);
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -244,11 +244,11 @@ let shuffle_core (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < s
 
 
 (* Full shuffling function *)
-let shuffle (a:hash_alg) (hash:hash_w a) (block:block_w a) : Tot (hash_w a) =
+let shuffle (a:hash_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
   Spec.Loops.repeat_range_spec 0 (size_ws_w a) (shuffle_core a block) hash
 
 (* Compression function *)
-let update (a:hash_alg) (hash:hash_w a) (block:bytes{S.length block = size_block a}) : Tot (hash_w a) =
+let update (a:hash_alg) (hash:hash_w a) (block:bytes{S.length block = size_block a}): Tot (hash_w a) =
   let block_w = words_from_be a size_block_w block in
   let hash_1 = shuffle a hash block_w in
   Spec.Loops.seq_map2 (fun x y -> word_add_mod a x y) hash hash_1
@@ -271,11 +271,11 @@ let rec update_multi
     update_multi a hash rem
 
 (* Compute the length for the zeroed part of the padding *)
-let pad0_length (a:hash_alg) (len:nat) : Tot (n:nat{(len + 1 + n + (size_len_8 a)) % (size_block a) = 0}) =
+let pad0_length (a:hash_alg) (len:nat): Tot (n:nat{(len + 1 + n + (size_len_8 a)) % (size_block a) = 0}) =
   ((size_block a) - (len + (size_len_8 a) + 1)) % (size_block a)
 
 (* Compute the padding *)
-let pad (a:hash_alg) (prevlen:nat{prevlen % (size_block a) = 0}) (len:nat{prevlen + len < (max_input8 a)}) : Tot (b:bytes{(S.length b + len) % (size_block a) = 0}) =
+let pad (a:hash_alg) (prevlen:nat{prevlen % (size_block a) = 0}) (len:nat{prevlen + len < (max_input8 a)}): Tot (b:bytes{(S.length b + len) % (size_block a) = 0}) =
   let total_len = prevlen + len in
   let firstbyte = S.create 1 0x80uy in
   let zeros = S.create (pad0_length a len) 0uy in
@@ -291,26 +291,137 @@ let pad (a:hash_alg) (prevlen:nat{prevlen % (size_block a) = 0}) (len:nat{prevle
   S.(firstbyte @| zeros @| encodedlen)
 
 (* Compress full blocks, then pad the partial block and compress the last block *)
-let update_last (a:hash_alg) (hash:hash_w a) (prevlen:nat{prevlen % (size_block a) = 0}) (input:bytes{(S.length input) + prevlen < (max_input8 a)}) : Tot (hash_w a) =
+let update_last (a:hash_alg) (hash:hash_w a) (prevlen:nat{prevlen % (size_block a) = 0}) (input:bytes{(S.length input) + prevlen < (max_input8 a)}): Tot (hash_w a) =
   let blocks = pad a prevlen (S.length input) in
   update_multi a hash S.(input @| blocks)
 
-
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
-let finish (a:hash_alg) (hashw:hash_w a) : Tot (hash:bytes{S.length hash = (size_hash a)}) =
+let finish (a:hash_alg) (hashw:hash_w a): Tot (hash:bytes{S.length hash = (size_hash a)}) =
   let hash_final_w = S.slice hashw 0 (size_hash_final_w a) in
   words_to_be a (size_hash_final_w a) hash_final_w
 
 
 (* Hash function using the incremental definition *)
-let hash (a:hash_alg) (input:bytes{S.length input < (max_input8 a)}) : Tot (hash:bytes{S.length hash = (size_hash a)}) =
+let hash (a:hash_alg) (input:bytes{S.length input < (max_input8 a)}):
+  Tot (hash:bytes{S.length hash = (size_hash a)})
+=
   let n = S.length input / (size_block a) in
   let (bs,l) = S.split input (n * (size_block a)) in
   let hash = update_multi a (h0 a) bs in
   let hash = update_last a hash (n * (size_block a)) l in
   finish a hash
 
-(* Hash function using the padding function first *)
-let hash' (a:hash_alg) (input:bytes{S.length input < (max_input8 a)}) : Tot (hash:bytes{S.length hash = (size_hash a)}) =
+(* Hash function using the padding function first. Closer to the NIST spec, but
+   less amenable to implementing directly. *)
+let hash_nist (a:hash_alg) (input:bytes{S.length input < (max_input8 a)}):
+  Tot (hash:bytes{S.length hash = (size_hash a)})
+=
   let blocks = pad a 0 (S.length input) in
   finish a (update_multi a (h0 a) S.(input @| blocks))
+
+(* Now proving that these two are equivalent. *)
+
+let update_multi_zero (a: hash_alg) (h: hash_w a): Lemma
+  (ensures (S.equal (update_multi a h S.empty) h))
+=
+  ()
+
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 20"
+
+let update_multi_one (a: hash_alg) (h: hash_w a) (input: bytes):
+  Lemma
+    (requires (
+      S.length input = size_block a
+    ))
+    (ensures (
+      S.equal (update a h input) (update_multi a h input)
+    ))
+=
+  let block, rem = S.split input (size_block a) in
+  assert (S.length rem = 0);
+  assert (S.equal rem S.empty);
+  update_multi_zero a (update a h block)
+
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 50"
+
+let update_multi_block (a: hash_alg) (h: hash_w a) (input: bytes):
+  Lemma
+    (requires (
+      S.length input % size_block a = 0 /\
+      S.length input < max_input8 a /\
+      S.length input >= size_block a
+    ))
+    (ensures (
+      let input1, input2 = S.split input (size_block a) in
+      (update_multi a (update_multi a h input1) input2) ==
+      (update_multi a h input)
+    ))
+=
+  if S.length input = 0 then
+    false_elim ()
+  else
+    let block, rem = S.split input (size_block a) in
+    assert (S.length block = size_block a);
+    update_multi_one a h block;
+    ()
+
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+
+let rec update_multi_associative (a: hash_alg) (h: hash_w a) (input: bytes) (len: nat):
+  Lemma
+    (requires (
+      len % size_block a = 0 /\
+      S.length input % size_block a = 0 /\
+      S.length input < max_input8 a /\
+      len <= S.length input
+    ))
+    (ensures (
+      let input1, input2 = S.split input len in
+      S.equal
+        (update_multi a (update_multi a h input1) input2)
+        (update_multi a h input)
+    ))
+    (decreases (
+      %[ S.length input; len ]))
+=
+  let i_l, i_r = S.split input len in
+  if len = 0 then begin
+    assert (S.equal i_l S.empty);
+    assert (S.equal i_r input);
+    update_multi_zero a h
+  end else if len = size_block a then begin
+    admit ()
+  end else begin
+    assert (len >= size_block a);
+    let i0, i1 = S.split i_l (len - size_block a) in
+    assert (S.length i1 = size_block a);
+    assert (S.length i0 = S.length i_l - S.length i1);
+    Math.Lemmas.modulo_distributivity (S.length i0) (S.length i1) (size_block a);
+    assert (S.length i0 % size_block a = 0);
+    let i2, i3 = S.split input (len - size_block a) in
+    assert (S.length i2 % size_block a = 0);
+    assert (S.length i3 = S.length input - S.length i2);
+    Math.Lemmas.modulo_distributivity (S.length i2) (S.length i3) (size_block a);
+    assert (S.length i3 % size_block a = 0);
+    update_multi_associative a h i_l (len - size_block a);
+    assert (S.equal
+      (update_multi a (update_multi a h i_l) i_r)
+      (update_multi a (update_multi a (update_multi a h i0) i1) i_r));
+    assert (S.split i3 (size_block a) == (i1, i_r));
+    assert (S.length i3 < S.length input);
+    update_multi_associative a (update_multi a h i0) i3 (size_block a);
+    assert (S.equal
+      (update_multi a (update_multi a (update_multi a h i0) i1) i_r)
+      (update_multi a (update_multi a h i0) i3));
+    assert (S.split input (len - size_block a) == (i0, i3));
+    update_multi_associative a h input (len - size_block a);
+    assert (S.equal
+      (update_multi a (update_multi a h i0) i3)
+      (update_multi a h input))
+  end
+
+let hash_is_hash_nist (a: hash_alg) (input: bytes { S.length input < max_input8 a }):
+  Lemma (ensures (hash_nist a input == hash a input))
+=
+
+  ()
