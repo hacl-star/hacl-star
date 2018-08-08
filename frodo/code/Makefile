@@ -117,6 +117,15 @@ $(OUTPUT_DIR)/Lib_RawIntTypes.krml: | .depend
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
+$(OUTPUT_DIR)/Lib_Loops.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
+	$(FSTAR) --codegen Kremlin --lax \
+	  --expose_interfaces \
+	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
+
 $(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
 	$(FSTAR) --codegen Kremlin --lax \
 	  --expose_interfaces \
