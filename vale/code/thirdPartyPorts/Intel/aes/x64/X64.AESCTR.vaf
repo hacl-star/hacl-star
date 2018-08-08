@@ -425,22 +425,23 @@ procedure {:quick} aes_counter_loop(
 
     ensures
         modifies_buffer128(out_b, old(mem), mem);
-        validSrcAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
+        validSrcAddrs128(mem, out_ptr, out_b, old(num_quad_blocks) * 4, memTaint, Secret);
 
-        r9  ==  plain_ptr + 16 * len;
-        r10 == out_ptr + 16 * len;
+        r9  == plain_ptr + 64 * old(num_quad_blocks);
+        r10 == out_ptr   + 64 * old(num_quad_blocks);
 
         // GCTR
         //buffer128_as_seq(mem, out_b) == gctr_encrypt_LE(old(icb), buffer128_as_seq(old(mem), plain_b), alg, key);
-        gctr_partial(alg, len, buffer128_as_seq(mem, plain_b), buffer128_as_seq(mem, out_b), key, old(icb));
-        icb == inc32(old(icb), old(len));
+        gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(icb));
+        //icb == inc32(old(icb), old(len));
 
-        // GHash
-        len == 0 ==> hash == old(hash);
-        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
+//        // GHash
+//        len == 0 ==> hash == old(hash);
+//        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
 {
     // Create the XMM constants
     InitPshufb64Mask(mask64, rax);
+
     ZeroXmm(four);
     PinsrdImm(four, 4, 0, rax);
     PinsrdImm(four, 4, 2, rax);
