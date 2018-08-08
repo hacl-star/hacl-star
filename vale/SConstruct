@@ -131,9 +131,9 @@ AddOption('--FSTAR-PATH', dest = 'fstar_path', type = 'string', default = fstar_
 AddOption('--FSTAR-Z3', dest = 'fstar_z3', type = 'string', default = '', action = 'store',
   help = 'Specify the path to z3 or z3.exe for F*')
 AddOption('--FSTAR-MY-VERSION', dest = 'fstar_my_version', default = False, action = 'store_true',
-  help = 'Use version of F* that does not necessarily match .fstar_version')
-AddOption('--FSTAR-Z3-MY-VERSION', dest = 'fstar_z3_my_version', default = False, action = 'store_true',
-  help = 'Use version of Z3 that does not necessarily match .fstar_z3_version')
+  help = 'Use version of F* that does not necessarily match .tested_fstar_version')
+AddOption('--Z3-MY-VERSION', dest = 'z3_my_version', default = False, action = 'store_true',
+  help = 'Use version of Z3 that does not necessarily match .tested_z3_version')
 AddOption('--RECORD-HINTS', dest = 'record_hints', default = False, action = 'store_true',
   help = 'Record new F* .hints files into the hints directory')
 AddOption('--USE-HINTS', dest = 'use_hints', default = False, action = 'store_true',
@@ -173,7 +173,7 @@ kremlin_user_args = GetOption('kremlin_user_args')
 c_user_args = GetOption('c_user_args')
 openssl_path = GetOption('openssl_path')
 fstar_my_version = GetOption('fstar_my_version')
-fstar_z3_my_version = GetOption('fstar_z3_my_version')
+z3_my_version = GetOption('z3_my_version')
 fstar_extract = GetOption('fstar_extract')
 record_hints = GetOption('record_hints')
 use_hints = GetOption('use_hints')
@@ -525,7 +525,7 @@ def on_black_list(file, list):
 
 def check_fstar_version():
   import subprocess
-  fstar_version_file = ".fstar_version"
+  fstar_version_file = ".tested_fstar_version"
   if os.path.isfile(fstar_version_file):
     with open(fstar_version_file, 'r') as myfile:
       lines = myfile.read().splitlines()
@@ -541,39 +541,36 @@ def check_fstar_version():
     print_error(f'Expected F* version commit={version}, but fstar --version returned the following:')
     for line in lines:
       print_error('  ' + line)
-    print_error_exit(f'Get F* version {version} from https://github.com/FStarLang/FStar, modify .fstar_version, or use the --FSTAR-MY-VERSION option to override')
+    print_error_exit(
+      f'Get F* version {version} from https://github.com/FStarLang/FStar,' +
+      f' modify .tested_fstar_version, or use the --FSTAR-MY-VERSION option to override.' +
+      f' (We try to update the F* version frequently; feel free to change .tested_fstar_version' +
+      f' to a more recent F* version as long as the build still succeeds with the new version.' +
+      f' We try to maintain the invariant that the build succeeds with the F* version in .tested_fstar_version.)')
 
 def check_z3_version(fstar_z3):
   import subprocess
-  z3_version_file = ".fstar_z3_version"
+  z3_version_file = ".tested_z3_version"
   if os.path.isfile(z3_version_file):
     with open(z3_version_file, 'r') as myfile:
       lines = myfile.read().splitlines()
     version = lines[0]
-    versions = version.split('.')
     cmd = [fstar_z3, '--version']
     o = subprocess.check_output(cmd, stderr = subprocess.STDOUT).decode('ascii')
     lines = o.splitlines()
     line = lines[0]
     for word in line.split(' '):
       if '.' in word:
-        nums = word.split('.')
-        higher = False
-        lower = False
-        for i in range(min(len(nums), len(versions))):
-          if nums[i] < versions[i]:
-            lower = True
-            break
-          if nums[i] > versions[i]:
-            higher = True
-            break
-        if higher or (not lower and len(nums) >= len(versions)):
+        if word == version:
           return
         break
-    print_error(f'Expected Z3 version >= {version}, but z3 --version returned the following:')
+    print_error(f'Expected Z3 version {version}, but z3 --version returned the following:')
     for line in lines:
       print_error('  ' + line)
-    print_error_Exit('Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested, modify .fstar_z3_version, or use the --FSTAR-Z3-MY-VERSION option to override')
+    print_error_exit(
+      'Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested,' +
+      ' modify .tested_z3_version, or use the --Z3-MY-VERSION option to override.' +
+      ' (We rarely change the Z3 version; we strongly recommend using the expected version of Z3.)')
 
 def print_dump_args():
   print('Currently using the following F* args:')
@@ -995,7 +992,7 @@ if not is_help:
   # Check F* and Z3 versions
   if not fstar_my_version:
     check_fstar_version()
-  if verify and not fstar_z3_my_version:
+  if verify and not z3_my_version:
     if not found_z3:
       print_error_exit('Could not find z3 executable.  Either put z3 in your path, or put it in the directory tools/Z3/, or use the --FSTARZ3=<z3-executable> option.')
     check_z3_version(fstar_z3)
