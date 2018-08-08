@@ -108,6 +108,7 @@ let lemma_quad32_xor_commutes (x y:quad32) :Lemma
   (quad32_xor x y = quad32_xor y x)
   =
   //lemma_nat32_xor_commutes_forall() // REVIEW: Why doesn't this work?
+  Opaque_s.reveal_opaque quad32_xor_def;
   let Mkfour x0 x1 x2 x3 = x in
   let Mkfour y0 y1 y2 y3 = y in
   lemma_nat32_xor_commutes x0 y0;

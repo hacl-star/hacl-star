@@ -234,7 +234,7 @@ procedure{:quick} aes_ctr_loop_body(
 
         icb_BE.lo0 == 0;
     reads key_ptr; iv; mask64; four; memTaint;
-    modifies r10; const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
+    modifies const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
              tmp_xmm; plain_ptr; num_quad_blocks; out_ptr; efl; mem;
     ensures
         // Valid ptrs and buffers
@@ -379,6 +379,69 @@ procedure{:quick} aes_ctr_loop_body(
     Add64(plain_ptr, 64);
     Add64(out_ptr, 64);
 }
+
+/*
+procedure {:quick} aes_counter_loop(
+    inline alg:algorithm,
+    ghost in_b:buffer128,
+    ghost out_b:buffer128,
+    ghost key:aes_key_LE(alg),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128
+    )
+    lets plain_ptr @= rdi; num_quad_blocks @= r8; out_ptr @= rsi; key_ptr @= r9;
+         const2_1 @= xmm1; const4_3 @= xmm2; iv @= xmm0; mask64 @= xmm3; four @= xmm4;
+         rk1 @= xmm8; rk2 @= xmm9; rk3 @= xmm10; rk4 @= xmm7;        // Round keys
+         ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+         tmp_xmm @= xmm5;
+    
+    reads key_ptr; iv; mask64; four; memTaint;
+    modifies const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
+             tmp_xmm; 
+             rax; plain_ptr; num_quad_blocks; out_ptr; efl; mem;
+
+    requires
+        // There's at least one block of four left to do
+        0 < num_quad_blocks < pow2_32 - 4;
+
+        // Valid ptrs and buffers
+        validSrcAddrs128(mem, plain_ptr,  plain_b, num_quad_blocks * 4, memTaint, Secret);
+        validDstAddrs128(mem, out_ptr,    out_b,   num_quad_blocks * 4, memTaint, Secret);
+        plain_ptr + num_quad_blocks * 64 < pow2_64;
+        out_ptr   + num_quad_blocks * 64 < pow2_64;
+        buffer_length(plain_b)  <= buffer_length(out_b);
+
+        // AES reqs
+        aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
+
+    ensures
+        modifies_buffer128(out_b, old(mem), mem);
+        validSrcAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
+
+        r9  ==  plain_ptr + 16 * len;
+        r10 == out_ptr + 16 * len;
+
+        // GCTR
+        //buffer128_as_seq(mem, out_b) == gctr_encrypt_LE(old(icb), buffer128_as_seq(old(mem), plain_b), alg, key);
+        gctr_partial(alg, len, buffer128_as_seq(mem, plain_b), buffer128_as_seq(mem, out_b), key, old(icb));
+        icb == inc32(old(icb), old(len));
+
+        // GHash
+        len == 0 ==> hash == old(hash);
+        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
+{
+    // Create the XMM constants
+    InitPshufb64Mask(mask64, rax);
+    ZeroXmm(four);
+    PinsrdImm(four, 4, 0, rax);
+    PinsrdImm(four, 4, 2, rax);
+
+    // Initialize the counters
+    Mov128(const2_1, iv);
+    Mov128(const4_3, iv);
+
+}
+*/
 
 // TODO: Add XMM memory operands, so we can avoid using xmm3 to hold constants
 /*

@@ -139,11 +139,15 @@ let simd_round_key_256 (prev0 prev1:quad32) (rcon:nat32) (round:int) : quad32 =
   q *^^ Mkfour r r r r
 
 // SIMD version of round_key_256 is equivalent to scalar round_key_256
+#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_simd_round_key (prev0 prev1:quad32) (rcon:nat32) (round:int) : Lemma
   (simd_round_key_256 prev0 prev1 rcon round == round_key_256_rcon prev0 prev1 rcon round)
   =
+  reveal_opaque quad32_xor_def;
+  reveal_opaque reverse_bytes_nat32_def;
   commute_rot_word_sub_word prev1.hi3;
   Arch.Types.xor_lemmas ()
+#pop-options
 
 let lemma_round_key_256_rcon_odd (prev0 prev1:quad32) (rcon:nat32) (round:int) : Lemma
   (requires ~(round % 2 == 0))

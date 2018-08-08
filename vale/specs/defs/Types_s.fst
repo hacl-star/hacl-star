@@ -34,7 +34,8 @@ let byte_to_twobits (b:nat8) : bits_of_byte = nat_to_four_unfold 2 b
 type double32 = two nat32
 type quad32 = four nat32
 
-let quad32_xor (x y:quad32) : quad32 = four_map2 nat32_xor x y
+let quad32_xor_def (x y:quad32) : quad32 = four_map2 nat32_xor x y
+let quad32_xor  = make_opaque quad32_xor_def
 
 let select_word (q:quad32) (selector:twobits) : nat32 = four_select q selector
 let insert_nat32 (q:quad32) (n:nat32) (i:twobits) : quad32 = four_insert q n i
@@ -80,8 +81,9 @@ let le_bytes_to_seq_quad32_def (b:seq nat8{length b % 16 == 0}) : seq quad32 =
   seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE b)
 let le_bytes_to_seq_quad32 = make_opaque le_bytes_to_seq_quad32_def
 
-let reverse_bytes_nat32 (n:nat32) : nat32 =
+let reverse_bytes_nat32_def (n:nat32) : nat32 =
   be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))
+let reverse_bytes_nat32 = make_opaque reverse_bytes_nat32_def  
 
 assume val reverse_bytes_quad32 (q:quad32) : quad32
 
