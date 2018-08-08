@@ -42,6 +42,7 @@ let inverses64_def_aux (x:UInt64.t)
   : Lemma (get64_def (put64_def x) == x)
   = ()
 
+#reset-options "--z3rlimit 30"
 let inverses64_def_aux' (x:Seq.lseq U8.t 8)
   : Lemma (put64_def (get64_def x) `Seq.equal` x)
   = reveal_opaque get32_def;
@@ -51,6 +52,7 @@ let inverses64_def_aux' (x:Seq.lseq U8.t 8)
     get64_def_alt_equiv (put64_def (get64_def x));
     inverses64_def_aux (get64_def x)
 
+#reset-options "--z3rlimit 20"
 let inverses64 (u:unit) =
   reveal_opaque get64_def;
   reveal_opaque put64_def;

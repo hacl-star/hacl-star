@@ -460,6 +460,7 @@ let nat32_xor_bytewise_3 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   nat32_xor_bytewise_3_helper2 x x' t t';
   ()
 
+#push-options "--z3rlimit 50"
 let nat32_xor_bytewise_4 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   (requires
     k == four_to_nat 8 s /\
@@ -476,9 +477,10 @@ let nat32_xor_bytewise_4 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   let Mkfour s0' s1' s2' s3' = s' in
   let Mkfour t0 t1 t2 t3 = t in
   let Mkfour t0' t1' t2' t3' = t' in
-  assert_norm (four_to_nat 8 t  == four_to_nat_unfold 8 t );
   assert_norm (four_to_nat 8 t' == four_to_nat_unfold 8 t');
+  assert_norm (four_to_nat 8 t  == four_to_nat_unfold 8 t );
   ()
+#pop-options
 
 let nat32_xor_bytewise (k k' m:nat32) (s s' t t':seq4 nat8) (n:nat) : Lemma
   (requires
@@ -538,6 +540,8 @@ let quad32_xor_bytewise (q q' r:quad32) (n:nat{ n <= 16 }) : Lemma
   lemma_slices_le_quad32_to_bytes (quad32_xor q r);
   lemma_slices_le_quad32_to_bytes (quad32_xor q' r);
   lemma_slice_orig_index s s' 0 n;
+  reveal_opaque quad32_xor_def;
+  reveal_opaque reverse_bytes_nat32_def;
   if n < 4 then nat32_xor_bytewise q.lo0 q'.lo0 r.lo0 (slice s 0 4) (slice s' 0 4) (slice t 0 4) (slice t' 0 4) n
   else
   (

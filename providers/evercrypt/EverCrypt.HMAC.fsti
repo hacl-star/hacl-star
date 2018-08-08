@@ -11,7 +11,9 @@ let ha = a: alg {a = SHA256 \/ a = SHA384 \/ a = SHA512}
 let e_ha = Ghost.erased ha
 
 //18-07-09 rename to Hash's bytes and lbytes?
+noextract
 type bseq = Seq.seq UInt8.t
+noextract
 let lbseq (l:nat) = b:bseq {Seq.length b = l}
 
 let keysized (a:e_alg) (l:nat) =

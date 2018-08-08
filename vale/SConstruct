@@ -131,9 +131,9 @@ AddOption('--FSTAR-PATH', dest = 'fstar_path', type = 'string', default = fstar_
 AddOption('--FSTAR-Z3', dest = 'fstar_z3', type = 'string', default = '', action = 'store',
   help = 'Specify the path to z3 or z3.exe for F*')
 AddOption('--FSTAR-MY-VERSION', dest = 'fstar_my_version', default = False, action = 'store_true',
-  help = 'Use version of F* that does not necessarily match .fstar_version')
-AddOption('--FSTAR-Z3-MY-VERSION', dest = 'fstar_z3_my_version', default = False, action = 'store_true',
-  help = 'Use version of Z3 that does not necessarily match .fstar_z3_version')
+  help = 'Use version of F* that does not necessarily match .tested_fstar_version')
+AddOption('--Z3-MY-VERSION', dest = 'z3_my_version', default = False, action = 'store_true',
+  help = 'Use version of Z3 that does not necessarily match .tested_z3_version')
 AddOption('--RECORD-HINTS', dest = 'record_hints', default = False, action = 'store_true',
   help = 'Record new F* .hints files into the hints directory')
 AddOption('--USE-HINTS', dest = 'use_hints', default = False, action = 'store_true',
@@ -173,7 +173,7 @@ kremlin_user_args = GetOption('kremlin_user_args')
 c_user_args = GetOption('c_user_args')
 openssl_path = GetOption('openssl_path')
 fstar_my_version = GetOption('fstar_my_version')
-fstar_z3_my_version = GetOption('fstar_z3_my_version')
+z3_my_version = GetOption('z3_my_version')
 fstar_extract = GetOption('fstar_extract')
 record_hints = GetOption('record_hints')
 use_hints = GetOption('use_hints')
@@ -286,12 +286,13 @@ no_extraction_files = [File(x) for x in [
 # Note that the entries below are prefixes of blacklisted files
 #
 min_test_suite_blacklist = [File(x) for x in [
-  'obj/crypto/aes/x64/X64.GCMencrypt.fst',
-  'obj/crypto/aes/x64/X64.GCMdecrypt.fst',
-  'obj/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.fst',
-  'obj/crypto/aes/x64/X64.GHash',
-  'obj/crypto/aes/x64/X64.GCTR.fst',
-  'obj/crypto/aes/x64/X64.AES.fst'
+  'obj/code/crypto/aes/x64/X64.GCMencrypt.fst',
+  'obj/code/crypto/aes/x64/X64.GCMdecrypt.fst',
+  'obj/code/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.fst',
+  'obj/code/crypto/aes/x64/X64.GHash',
+  'obj/code/crypto/aes/x64/X64.GCTR.fst',
+  'obj/code/crypto/aes/x64/X64.AES.fst',
+  'obj/code/thirdPartyPorts/Intel/aes/x64/X64.AESCTR',
 ]]
 
 manual_dependencies = {
@@ -330,7 +331,6 @@ verify_options = [
 
   # Disable verification by adding 'filename': None
   ('code/crypto/aes/x64/Low.GCMencrypt.fst', None), # TODO: timeout in gcm_core
-  ('code/thirdPartyPorts/Intel/aes/x64/X64.AESCTR.vaf', None), # TODO: slow
 
   # Interop stubs
   ('code/arch/x64/interop/AESEncryptBlock_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
@@ -525,7 +525,7 @@ def on_black_list(file, list):
 
 def check_fstar_version():
   import subprocess
-  fstar_version_file = ".fstar_version"
+  fstar_version_file = ".tested_fstar_version"
   if os.path.isfile(fstar_version_file):
     with open(fstar_version_file, 'r') as myfile:
       lines = myfile.read().splitlines()
@@ -541,39 +541,36 @@ def check_fstar_version():
     print_error(f'Expected F* version commit={version}, but fstar --version returned the following:')
     for line in lines:
       print_error('  ' + line)
-    print_error_exit(f'Get F* version {version} from https://github.com/FStarLang/FStar, modify .fstar_version, or use the --FSTAR-MY-VERSION option to override')
+    print_error_exit(
+      f'Get F* version {version} from https://github.com/FStarLang/FStar,' +
+      f' modify .tested_fstar_version, or use the --FSTAR-MY-VERSION option to override.' +
+      f' (We try to update the F* version frequently; feel free to change .tested_fstar_version' +
+      f' to a more recent F* version as long as the build still succeeds with the new version.' +
+      f' We try to maintain the invariant that the build succeeds with the F* version in .tested_fstar_version.)')
 
 def check_z3_version(fstar_z3):
   import subprocess
-  z3_version_file = ".fstar_z3_version"
+  z3_version_file = ".tested_z3_version"
   if os.path.isfile(z3_version_file):
     with open(z3_version_file, 'r') as myfile:
       lines = myfile.read().splitlines()
     version = lines[0]
-    versions = version.split('.')
     cmd = [fstar_z3, '--version']
     o = subprocess.check_output(cmd, stderr = subprocess.STDOUT).decode('ascii')
     lines = o.splitlines()
     line = lines[0]
     for word in line.split(' '):
       if '.' in word:
-        nums = word.split('.')
-        higher = False
-        lower = False
-        for i in range(min(len(nums), len(versions))):
-          if nums[i] < versions[i]:
-            lower = True
-            break
-          if nums[i] > versions[i]:
-            higher = True
-            break
-        if higher or (not lower and len(nums) >= len(versions)):
+        if word == version:
           return
         break
-    print_error(f'Expected Z3 version >= {version}, but z3 --version returned the following:')
+    print_error(f'Expected Z3 version {version}, but z3 --version returned the following:')
     for line in lines:
       print_error('  ' + line)
-    print_error_Exit('Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested, modify .fstar_z3_version, or use the --FSTAR-Z3-MY-VERSION option to override')
+    print_error_exit(
+      'Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested,' +
+      ' modify .tested_z3_version, or use the --Z3-MY-VERSION option to override.' +
+      ' (We rarely change the Z3 version; we strongly recommend using the expected version of Z3.)')
 
 def print_dump_args():
   print('Currently using the following F* args:')
@@ -695,7 +692,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   hintfile = to_hint_file(sourcefile)
   outs = []
   if min_test and on_black_list(sourcefile, min_test_suite_blacklist):
-    print(f'Skipping {sourcefile} because it is on the min_test_suite_blacklist defined in SConscript')
+    print(f'Skipping {sourcefile} because it is on min_test_suite_blacklist')
     return outs
   if record_hints:
     temptargetfiles.append(hintfile)
@@ -824,7 +821,7 @@ def process_files_in(env, directories):
   fstar_include_paths = compute_include_paths(src_include_paths, obj_include_paths, 'obj')
   fstar_includes = compute_includes(src_include_paths, obj_include_paths, 'obj')
   if is_single_vaf:
-    process_vale_file(env, single_vaf, fstar_includes)
+    process_vale_file(env, File(single_vaf), fstar_includes)
   else:
     for file in fsts:
       process_fstar_file(env, file, fstar_includes)
@@ -995,7 +992,7 @@ if not is_help:
   # Check F* and Z3 versions
   if not fstar_my_version:
     check_fstar_version()
-  if verify and not fstar_z3_my_version:
+  if verify and not z3_my_version:
     if not found_z3:
       print_error_exit('Could not find z3 executable.  Either put z3 in your path, or put it in the directory tools/Z3/, or use the --FSTARZ3=<z3-executable> option.')
     check_z3_version(fstar_z3)

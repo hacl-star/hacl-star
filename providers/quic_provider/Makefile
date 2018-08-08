@@ -1,6 +1,7 @@
 FSTAR_HOME ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 MITLS_HOME ?= ../../../mitls-fstar
+MLCRYPTO_HOME ?= ../../../MLCrypto
 OPENSSL_HOME ?= $(MLCRYPTO_HOME)/openssl
 
 MARCH?=x86_64

@@ -18,20 +18,6 @@ let set_xmm_taint (ts:taintState) (xmm:xmm) (taint:taint) : taintState =
 
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 80"
 
-val quad32_xor_lemma: (x:quad32) -> Lemma (quad32_xor x x == Mkfour 0 0 0 0)
-
-let quad32_xor_lemma x =
-  assert (quad32_xor x x == Mkfour (nat32_xor x.lo0 x.lo0) (nat32_xor x.lo1 x.lo1)
-    (nat32_xor x.hi2 x.hi2) (nat32_xor x.hi3 x.hi3));
-  TypesNative_s.reveal_ixor 32 x.lo0 x.lo0;
-  TypesNative_s.reveal_ixor 32 x.lo1 x.lo1;
-  TypesNative_s.reveal_ixor 32 x.hi2 x.hi2;
-  TypesNative_s.reveal_ixor 32 x.hi3 x.hi3;
-  FStar.UInt.logxor_self #32 x.lo0;
-  FStar.UInt.logxor_self #32 x.lo1;
-  FStar.UInt.logxor_self #32 x.hi2;
-  FStar.UInt.logxor_self #32 x.hi3
-
 val check_if_pxor_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.Pxor? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
 
@@ -39,7 +25,7 @@ let check_if_pxor_leakage_free ins ts =
   let S.Pxor dst src, _, _ = ins.ops in
   if src = dst then begin
     let ts' = set_xmm_taint ts dst Public in
-    Classical.forall_intro quad32_xor_lemma;
+    Arch.Types.lemma_quad32_xor();
     true, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
   end
   else begin

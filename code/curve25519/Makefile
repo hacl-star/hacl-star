@@ -96,7 +96,7 @@ x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
 x25519-c/Hacl_Test_X25519.c: x25519-c/Hacl_Curve25519.c
 
 x25519-c/Hacl_Curve25519.c:  x25519-c/out.krml
-	$(KREMLIN) -I ../bignum -tmpdir x25519-c \
+	$(KREMLIN) $(KREMLIN_ARGS) -I ../bignum -tmpdir x25519-c \
 	 	-bundle 'Hacl.Curve25519=*' \
 		-minimal -add-include '"kremlib.h"' \
 		-skip-compilation $^ -o $@

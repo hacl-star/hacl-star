@@ -14,7 +14,7 @@ let nat32_to_nat8s (n:nat32) : nat8*nat8*nat8*nat8 =
   let v4 = n % 0x100 in
   (v1, v2, v3, v4)
 
-#reset-options "--z3rlimit 60"
+#reset-options "--z3rlimit 70"
 let nat32_to_nat8s_to_nat32 (v1 v2 v3 v4:nat8) :
   Lemma (nat32_to_nat8s (nat8s_to_nat32 v1 v2 v3 v4) = (v1, v2, v3, v4))
   =
@@ -47,13 +47,14 @@ let nat64_to_nat8s (n:nat64) : nat8*nat8*nat8*nat8*nat8*nat8*nat8*nat8 =
   let (v5, v6, v7, v8) = nat32_to_nat8s upper in
   (v1, v2, v3, v4, v5, v6, v7, v8)
 
-#reset-options "--z3rlimit 60"
+#push-options "--z3rlimit 60 --z3refresh"
 let nat64_to_nat8s_to_nat64_alt (v1 v2 v3 v4 v5 v6 v7 v8:nat8) :
   Lemma (nat64_to_nat8s (nat8s_to_nat64_alt v1 v2 v3 v4 v5 v6 v7 v8) == (v1, v2, v3, v4, v5, v6, v7, v8))
   =
   nat32_to_nat8s_to_nat32 v1 v2 v3 v4;
   nat32_to_nat8s_to_nat32 v5 v6 v7 v8;
   ()
+#pop-options
 
 let nat64_to_nat8s_to_nat64 (v1 v2 v3 v4 v5 v6 v7 v8:nat8) :
   Lemma (nat64_to_nat8s (nat8s_to_nat64 v1 v2 v3 v4 v5 v6 v7 v8) == (v1, v2, v3, v4, v5, v6, v7, v8))

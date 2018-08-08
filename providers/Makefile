@@ -16,6 +16,7 @@ OUTPUT_DIR	= .output
 HINT_DIR	= .hints
 GENERATED_DIR	= generated
 OUT_DIR		= out
+INCLUDE_DIR	= include
 
 HACL_CODE	= $(HACL_HOME)/code
 HACL_SPEC	= $(HACL_HOME)/specs
@@ -46,7 +47,7 @@ all:
 	STAGE=2 $(MAKE) stage2
 	$(MAKE) -C quic_provider
 
-stage1: $(GENERATED_DIR)/Makefile.include
+stage1: $(GENERATED_DIR)/Makefile.include $(INCLUDE_DIR)/EverCrypt.h
 
 stage2: $(OUT_DIR)/libevercrypt.a $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)/evercrypt.cmxa
 
@@ -128,7 +129,22 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -bundle 'LowStar.*' \
 	  -library 'AEAD.*,Hacl.*' \
 	  -no-prefix 'EverCrypt.Vale' \
-	  -tmpdir generated $^ -warn-error +9
+	  -tmpdir $(GENERATED_DIR) $^ -warn-error @9
+
+$(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
+	  $(KOPTS) \
+	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.HKDF+EverCrypt.HMAC=* \
+	  -library EverCrypt,EverCrypt.* \
+	  -add-include '<inttypes.h>' \
+	  -add-include '<stdbool.h>' \
+	  -add-include '<kremlin/internal/types.h>' \
+	  -add-include '<kremlin/internal/compat.h>' \
+	  -tmpdir $(INCLUDE_DIR) $^
+	rm -rf $(INCLUDE_DIR)/Makefile.include $(INCLUDE_DIR)/*.c
+	mv $(INCLUDE_DIR)/EverCrypt_EverCrypt_Bytes_EverCrypt_HKDF_EverCrypt_HMAC.h $@
+
+
 
 # The Makefile is manually staged because GNU Make does not understand
 # dependencies between the Makefiles we include, i.e. it won't first generate
