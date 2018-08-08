@@ -153,7 +153,7 @@ providers:
 # really important, it should be done at the level of the CI system.
 ci: # .clean-banner .clean-git .clean-snapshots
 	$(MAKE) extract-specs
-	# $(MAKE) -C extract-all
+	$(MAKE) -C extract-all
 	# $(MAKE) -C code clean-c
 	# $(MAKE) -C code extract-c
 	# $(MAKE) -C providers/
