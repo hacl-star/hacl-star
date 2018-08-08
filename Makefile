@@ -152,15 +152,16 @@ providers:
 # happening for anyone who wants to actually test ci. Removing it -- if this is
 # really important, it should be done at the level of the CI system.
 ci: # .clean-banner .clean-git .clean-snapshots
-	$(MAKE) extract-specs extract-all
-	$(MAKE) -C code clean-c
-	$(MAKE) -C code extract-c
-	$(MAKE) -C providers/
-	$(MAKE) -C providers/test
-	$(MAKE) -C secure_api runtime_switch verify # test both extraction & verification
-	$(MAKE) build-make
-	$(MAKE) test-all
-	$(MAKE) package
+	$(MAKE) extract-specs
+	# $(MAKE) -C extract-all
+	# $(MAKE) -C code clean-c
+	# $(MAKE) -C code extract-c
+	# $(MAKE) -C providers/
+	# $(MAKE) -C providers/test
+	# $(MAKE) -C secure_api runtime_switch verify # test both extraction & verification
+	# $(MAKE) build-make
+	# $(MAKE) test-all
+	# $(MAKE) package
 
 #
 # Clean
