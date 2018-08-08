@@ -186,6 +186,9 @@ procedure {:quick} aes_4rounds_4way(
 // Intel's LOOP_4
 procedure{:quick} aes_ctr_loop_body(
     inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions
+    ghost old_plain_ptr:nat64,
+    ghost old_out_ptr:nat64,
+    ghost old_num_quad_blocks:nat64,
     ghost count:nat32,
     ghost plain_b:buffer128,
     ghost out_b:buffer128,
@@ -204,13 +207,18 @@ procedure{:quick} aes_ctr_loop_body(
         tmp_xmm @= xmm5;
     requires
         // There's at least one block of four left to do
-        num_quad_blocks > 0;
+        0 < num_quad_blocks <= old_num_quad_blocks;
+        
+        // We've already done count blocks
+        count == old_num_quad_blocks - num_quad_blocks;
 
         // Valid ptrs and buffers
-        validSrcAddrs128(mem, plain_ptr,  plain_b, num_quad_blocks * 4, memTaint, Secret);
-        validDstAddrs128(mem, out_ptr,    out_b,   num_quad_blocks * 4, memTaint, Secret);
-        plain_ptr + num_quad_blocks * 64 < pow2_64;
-        out_ptr   + num_quad_blocks * 64 < pow2_64;
+        validSrcAddrs128(mem, old_plain_ptr,  plain_b, old_num_quad_blocks * 4, memTaint, Secret);
+        validDstAddrs128(mem, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memTaint, Secret);
+        plain_ptr == old_plain_ptr + count * 64;
+        out_ptr == old_out_ptr + count * 64;
+        old_plain_ptr + old_num_quad_blocks * 64 < pow2_64;
+        old_out_ptr + old_num_quad_blocks * 64 < pow2_64;
         buffer_length(plain_b)  <= buffer_length(out_b);
 
         // XMM constants are correct
@@ -218,48 +226,46 @@ procedure{:quick} aes_ctr_loop_body(
         four == Mkfour(4, 0, 4, 0);
 
         // Counters are correct
-        count < pow2_32 - 4;
-        const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(count, 1)), iv.hi2, reverse_bytes_nat32(add_wrap(count, 0)));
-        const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(count, 3)), iv.hi2, reverse_bytes_nat32(add_wrap(count, 2)));
+        4*count < pow2_32 - 4;  // Simplifies the statement of add_wrap in the postcondition below
+        const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 1))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 0))));
+        const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 3))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 2))));
 
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
         // GCM reqs
         iv == reverse_bytes_quad32(icb_BE);
-        // ==> iv.lo0 == reverse_bytes_nat32(icb_BE.hi3)
-        // ==> iv.lo1 == reverse_bytes_nat32(icb_BE.hi2)
-        // ==> iv.hi2 == reverse_bytes_nat32(icb_BE.lo1)
-        // ==> iv.hi3 == reverse_bytes_nat32(icb_BE.lo0)
 
-        icb_BE.lo0 == 0;
+        // GCTR progress
+        gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
+
     reads key_ptr; iv; mask64; four; memTaint;
     modifies const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
              tmp_xmm; plain_ptr; num_quad_blocks; out_ptr; efl; mem;
     ensures
         // Valid ptrs and buffers
-        validSrcAddrs128(mem, old(plain_ptr),  plain_b, old(num_quad_blocks) * 4, memTaint, Secret);
-        validDstAddrs128(mem, old(out_ptr),    out_b,   old(num_quad_blocks) * 4, memTaint, Secret);
+        validSrcAddrs128(mem, old_plain_ptr,  plain_b, old_num_quad_blocks * 4, memTaint, Secret);
+        validDstAddrs128(mem, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memTaint, Secret);
         plain_ptr == old(plain_ptr) + 64;
         out_ptr   == old(out_ptr)   + 64;
         num_quad_blocks == old(num_quad_blocks) - 1;
 
         // Counters are incremented
-        const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(count + 4, 1)), iv.hi2, reverse_bytes_nat32(add_wrap(count + 4, 0)));
-        const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(count + 4, 3)), iv.hi2, reverse_bytes_nat32(add_wrap(count + 4, 2)));
+        const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 1))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 0))));
+        const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 3))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 2))));
 
         // GCTR progress
-        gctr_partial(alg, 4, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, inc32(icb_BE, count));
+        gctr_partial(alg, 4*count+4, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
 {
-    Mov128(ctr1, iv);        // ctr1==12==13==14 == LSB: nonce | ivec_lo | ivec_hi | 0
+    Mov128(ctr1, iv);        // ctr1==12==13==14 == LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | bswap(icb_BE.lo1) | bswap(icb_BE.lo0)
     Mov128(ctr2, iv);
     Mov128(ctr3, iv);
     Mov128(ctr4, iv);
 
-    Shufpd(ctr1, const2_1, 2); // ctr1 = LSB: nonce | ivec_lo | ivec_hi | bswap(count)
-    Shufpd(ctr2, const2_1, 0); // ctr2 = LSB: nonce | ivec_lo | ivec_hi | bswap(count+1)
-    Shufpd(ctr3, const4_3, 2); // ctr3 = LSB: nonce | ivec_lo | ivec_hi | bswap(count+2)
-    Shufpd(ctr4, const4_3, 0); // ctr4 = LSB: nonce | ivec_lo | ivec_hi | bswap(count+3)
+    Shufpd(ctr1, const2_1, 2); // ctr1 = LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | iv.hi2 == bswap(icb_BE.lo1) | bswap(4*count)
+    Shufpd(ctr2, const2_1, 0); // ctr2 = LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | iv.hi2 == bswap(icb_BE.lo1) | bswap(4*count+1)
+    Shufpd(ctr3, const4_3, 2); // ctr3 = LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | iv.hi2 == bswap(icb_BE.lo1) | bswap(4*count+2)
+    Shufpd(ctr4, const4_3, 0); // ctr4 = LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | iv.hi2 == bswap(icb_BE.lo1) | bswap(4*count+3)
 
     reveal_reverse_bytes_quad32(icb_BE);
     reveal_reverse_bytes_quad32(ctr1);
@@ -286,6 +292,7 @@ procedure{:quick} aes_ctr_loop_body(
     Paddd(const4_3, four);        // const4_3 = LSB: 8 | bswap(ivec_hi) | 7 | bswap(ivec_hi)
 
     // Begin AES block encrypt by xor'ing four blocks of counters with the key block 0
+    // At this point, we're computing aes_encrypt_LE of bswap(inc32(icb_BE, 4*count + 0..3)) == aes_encrypt_BE of inc32(icb_BE, 4*count + 0..3)
     Pxor(ctr1, rk1);
     Pxor(ctr2, rk1);
     Pxor(ctr3, rk1);
@@ -347,6 +354,7 @@ procedure{:quick} aes_ctr_loop_body(
     }
 
     // Intel's LAST_4
+    //assert ctr1 == rounds(quad32_xor(old_ctr1, index(round_keys, 0), round_keys, nr(alg) - 1));
 
     // Compute the last AES round for each of the four counters
     AESNI_enc_last(ctr1, rk3);
@@ -354,24 +362,25 @@ procedure{:quick} aes_ctr_loop_body(
     AESNI_enc_last(ctr3, rk3);
     AESNI_enc_last(ctr4, rk3);
 
+
     commute_sub_bytes_shift_rows_forall();
 
     // Xor the plaintext with the encrypted counter
     // TODO: Intel does this using XMM operands
-    Load128_buffer(tmp_xmm, plain_ptr,  0, Secret, plain_b, 0);
+    Load128_buffer(tmp_xmm, plain_ptr,  0, Secret, plain_b, 4*count + 0);
     Pxor(ctr1, tmp_xmm);
-    Load128_buffer(tmp_xmm, plain_ptr, 16, Secret, plain_b, 1);
+    Load128_buffer(tmp_xmm, plain_ptr, 16, Secret, plain_b, 4*count + 1);
     Pxor(ctr2, tmp_xmm);
-    Load128_buffer(tmp_xmm, plain_ptr, 32, Secret, plain_b, 2);
+    Load128_buffer(tmp_xmm, plain_ptr, 32, Secret, plain_b, 4*count + 2);
     Pxor(ctr3, tmp_xmm);
-    Load128_buffer(tmp_xmm, plain_ptr, 48, Secret, plain_b, 3);
+    Load128_buffer(tmp_xmm, plain_ptr, 48, Secret, plain_b, 4*count + 3);
     Pxor(ctr4, tmp_xmm);
 
     // Store the cipher text in output
-    Store128_buffer(out_ptr, ctr1,  0, Secret, out_b, 0);
-    Store128_buffer(out_ptr, ctr2, 16, Secret, out_b, 1);
-    Store128_buffer(out_ptr, ctr3, 32, Secret, out_b, 2);
-    Store128_buffer(out_ptr, ctr4, 48, Secret, out_b, 3);
+    Store128_buffer(out_ptr, ctr1,  0, Secret, out_b, 4*count + 0);
+    Store128_buffer(out_ptr, ctr2, 16, Secret, out_b, 4*count + 1);
+    Store128_buffer(out_ptr, ctr3, 32, Secret, out_b, 4*count + 2);
+    Store128_buffer(out_ptr, ctr4, 48, Secret, out_b, 4*count + 3);
 
     lemma_quad32_xor_commutes_forall();
 
