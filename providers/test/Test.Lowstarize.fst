@@ -169,8 +169,7 @@ let is_tuple (e: term) =
 noextract
 let destruct_hex (e: term) =
   let hd, tl = collect_app e in
-  if term_eq (`h) hd then begin
-    assume (List.Tot.length tl > 0);
+  if term_eq (`h) hd && List.Tot.length tl > 0 then begin
     destruct_string (fst (List.Tot.hd tl))
   end else
     None
@@ -198,8 +197,12 @@ noextract
 let fresh (uniq: gensym): Tac (gensym * name) =
   (fst uniq, snd uniq + 1), cur_module () @ [ fst uniq ^ string_of_int (snd uniq) ]
 
+noeq
+type lbuffer (a:Type0) =
+  | LB: len:UInt32.t -> b:B.buffer a{B.len b == len /\ B.recallable b} -> lbuffer a
+
 noextract
-let mk_gcmalloc_of_list (uniq: gensym) (arg: term) (l: nat{l < pow2 32}) (t: option term):
+let mk_gcmalloc_of_list (uniq: gensym) (arg: term) (l:int) (t: option term):
   Tac (gensym * sigelt * term)
 =
   let def: term = pack (Tv_App
@@ -210,7 +213,7 @@ let mk_gcmalloc_of_list (uniq: gensym) (arg: term) (l: nat{l < pow2 32}) (t: opt
   let fv: fv = pack_fv name in
   let t: term = match t with None -> pack Tv_Unknown | Some t -> t in
   let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
-  uniq, se, mktuple_n [ pack (Tv_FVar fv); mk_uint32 l ]
+  uniq, se, mk_e_app (`LB) [mk_uint32 l; pack (Tv_FVar fv)]
 
 noextract
 let lowstarize_hex (uniq: gensym) (s: string): Tac (gensym * option sigelt * term) =
@@ -219,14 +222,12 @@ let lowstarize_hex (uniq: gensym) (s: string): Tac (gensym * option sigelt * ter
     fail ("Invalid hex string: " ^ s)
   else
     let constants = as_uint8s [] (String.list_of_string s) in
-    let l = String.length s in
-    assume (l < pow2 32);
-    let t = pack (Tv_App (`LowStar.Buffer.buffer) (`UInt8.t, Q_Explicit)) in
-    if l = 0 then
-      let null: term = pack (Tv_App (`LowStar.Buffer.null) (`UInt8.t, Q_Implicit)) in
-      uniq, None, mktuple_n [ null; mk_uint32 0 ]
+    if String.length s = 0 then
+      let null = pack (Tv_App (`LowStar.Buffer.null) (`UInt8.t, Q_Implicit)) in
+      uniq, None, mk_e_app (`LB) [mk_uint32 0; null]
     else
-      let uniq, se, e = mk_gcmalloc_of_list uniq constants (l / 2) (Some t) in
+      let l = normalize_term (String.length s / 2) in
+      let uniq, se, e = mk_gcmalloc_of_list uniq constants l None in
       uniq, Some se, e
 
 // Dependency analysis bug: does not go inside quotations (#1496)
@@ -261,7 +262,6 @@ and lowstarize_list (uniq: gensym) (es: list term): Tac (gensym * list sigelt * 
   ) (uniq, [], []) es in
   let es = List.rev es in
   let l = List.length es in
-  assume (l < pow2 32);
   let uniq, se, e = mk_gcmalloc_of_list uniq (mk_list es) l None in
   uniq, List.rev (se :: ses), e
 
@@ -277,17 +277,17 @@ noextract
 let lowstarize_toplevel src dst: Tac unit =
   // lookup_typ does not lookup a type but any arbitrary term, hence the name
   let str = lookup_typ (cur_env ()) (cur_module () @ [ src ]) in
-  let str = match str with Some str -> str | _ -> admit () in
-  let def = match inspect_sigelt str with Sg_Let _ _ _ _ def -> def | _ -> admit () in
+  let str = must str in
+  let def = match inspect_sigelt str with Sg_Let _ _ _ _ def -> def | _ -> fail "must" in
   let _, ses, def = lowstarize_expr (dst, 0) def in
   let fv: fv = pack_fv (cur_module () @ [ dst ]) in
   let t: term = pack Tv_Unknown in
   let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
   exact (quote (normalize_term (ses @ [ se ])))
 
-(*
-/// Tests
 
+/// Tests
+(*
 // Some notes: empty lists are not allowed because they give inference errors!
 noextract
 let test_vectors = [
@@ -295,8 +295,5 @@ let test_vectors = [
   h"090a0b0c0d0e0f10", [ h"fe" ], "another test string";
 ]
 
-let test_vectors' = List.Tot.map (fun x -> x) test_vectors
-
 %splice[] (lowstarize_toplevel "test_vectors" "low_test_vectors")
-%splice[] (lowstarize_toplevel "test_vectors_" "low_test_vectors")
 *)

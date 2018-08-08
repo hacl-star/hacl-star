@@ -331,7 +331,7 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
   if(cipher_len < quic_crypto_tag_length(key))
     return 0;
 
-  uint32_t r, plain_len = cipher_len - quic_crypto_tag_length(key);
+  uint32_t r = 0, plain_len = cipher_len - quic_crypto_tag_length(key);
 
   if(key->alg == TLS_aead_AES_128_GCM)
   {

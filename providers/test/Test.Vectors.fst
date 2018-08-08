@@ -154,8 +154,8 @@ let hash_vectors_tmp = List.Tot.map (fun h ->
   h.hash_alg, h.input, h.output, h.repeat
 ) hash_vectors
 
+// 2018.08.06 SZ: I can't verify this in interactive mode but verifies from the command-line
 %splice[] (lowstarize_toplevel "hash_vectors_tmp" "hash_vectors_low")
-
 
 /// HMAC
 
