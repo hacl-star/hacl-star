@@ -821,7 +821,7 @@ def process_files_in(env, directories):
   fstar_include_paths = compute_include_paths(src_include_paths, obj_include_paths, 'obj')
   fstar_includes = compute_includes(src_include_paths, obj_include_paths, 'obj')
   if is_single_vaf:
-    process_vale_file(env, single_vaf, fstar_includes)
+    process_vale_file(env, File(single_vaf), fstar_includes)
   else:
     for file in fsts:
       process_fstar_file(env, file, fstar_includes)
