@@ -73,11 +73,13 @@ val gen_inner_inv:
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
   -> res:matrix_t n n
+  -> r:lbytes (size 2 *! n)
   -> i:size_nat{i <= v n}
   -> Type0
-let gen_inner_inv h0 h1 n seed_len seed res i =
-  B.live h1 res /\ B.live h1 seed /\ disjoint seed res /\
-  modifies (loc_buffer res) h0 h1 /\ as_seq h0 seed == as_seq h1 seed /\
+let gen_inner_inv h0 h1 n seed_len seed res r i =
+  B.live h1 r /\ B.live h1 res /\ B.live h1 seed /\
+  disjoint seed res /\ disjoint seed r /\ disjoint r res /\
+  modifies (loc_union (loc_buffer res) (loc_buffer r)) h0 h1 /\ as_seq h0 seed == as_seq h1 seed /\
   (forall (i0:size_nat{i0 < i}) (j:size_nat{j < v n}). get h1 res i0 j == S.frodo_gen_matrix_cshake_fc (v n) (v seed_len) (as_seq h0 seed) i0 j) /\
   (forall (i0:size_nat{i <= i0 /\ i0 < v n}) (j:size_nat{j < v n}). get h1 res i0 j == get h0 res i0 j)
 
@@ -88,14 +90,13 @@ val frodo_gen_matrix_cshake_inner:
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
   -> res:matrix_t n n
+  -> r:lbytes (size 2 *! n)
   -> i:size_t{v i < v n}
   -> Stack unit
-    (requires fun h1 -> gen_inner_inv h0 h1 n seed_len seed res (v i))
-    (ensures  fun _ _ h1 -> gen_inner_inv h0 h1 n seed_len seed res (v i + 1))
-let frodo_gen_matrix_cshake_inner h0 n seed_len seed res i =
+    (requires fun h1 -> gen_inner_inv h0 h1 n seed_len seed res r (v i))
+    (ensures  fun _ _ h1 -> gen_inner_inv h0 h1 n seed_len seed res r (v i + 1))
+let frodo_gen_matrix_cshake_inner h0 n seed_len seed res r i =
   let h0 = ST.get () in
-  push_frame ();
-  let r = create (size 2 *! n) (u8 0) in
   let ctr = size_to_uint32 (size 256 +. i) in
   uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. i))) (u16 (256 + v i));
   cshake128_frodo seed_len seed (to_u16 ctr) (size 2 *! n) r;
@@ -103,9 +104,8 @@ let frodo_gen_matrix_cshake_inner h0 n seed_len seed res i =
   Lib.Loops.for (size 0) n
     (fun h2 j -> gen_inv h0 h1 h2 n seed_len seed r res i j)
     (fun j -> frodo_gen_matrix_cshake_fc h0 h1 n seed_len seed r res i j);
-  pop_frame ();
   let h2 = ST.get () in
-  assert (gen_inner_inv h0 h2 n seed_len seed res (v i + 1))
+  assert (gen_inner_inv h0 h2 n seed_len seed res r (v i + 1))
 
 val frodo_gen_matrix_cshake:
     n:size_t{0 < v n /\ 2 * v n < max_size_t /\ 256 + v n < maxint U16 /\ v n * v n < max_size_t}
@@ -119,9 +119,12 @@ val frodo_gen_matrix_cshake:
       as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 [@"c_inline"]
 let frodo_gen_matrix_cshake n seed_len seed res =
+  push_frame ();
+  let r = create (size 2 *! n) (u8 0) in
   let h0 = ST.get () in
   Lib.Loops.for (size 0) n
-    (fun h1 i -> gen_inner_inv h0 h1 n seed_len seed res i)
-    (fun i -> frodo_gen_matrix_cshake_inner h0 n seed_len seed res i);
+    (fun h1 i -> gen_inner_inv h0 h1 n seed_len seed res r i)
+    (fun i -> frodo_gen_matrix_cshake_inner h0 n seed_len seed res r i);
+  pop_frame ();
   let h1 = ST.get () in
   Spec.Matrix.extensionality (as_matrix h1 res) (S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
