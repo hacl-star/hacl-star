@@ -21,6 +21,8 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
 		Spec.HMAC.fst \
+		Spec.HKDF.fst \
+		Spec.ECIES.fst \
 		Spec.HSalsa20.fst
 
 LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.Sequence.fst Lib.ByteSequence.fst
@@ -34,7 +36,7 @@ all-hints: hints
 all-ver: verify
 
 all: test
-test: Chacha20.exe Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Curve25519.exe Curve448.exe SHA2.exe Ed25519.exe HMAC.exe HKDF.exe
+test: Chacha20.exe Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Curve25519.exe Curve448.exe SHA2.exe Ed25519.exe hmac.exe hkdf.exe
 
 
 %.exe: $(LIBS_FILES) Spec.%.fst tests/Spec.%.Test.fst
@@ -192,7 +194,6 @@ argon2i.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Argon2i.fst tes
 	@echo 'let _ = test()' >> argon2i-ml/Spec_Argon2i_Test.ml
 	$(OCAMLOPT) -I argon2i-ml argon2i-ml/Lib_IntTypes.ml argon2i-ml/Lib_RawIntTypes.ml argon2i-ml/Lib_Sequence.ml argon2i-ml/Lib_Stateful.ml argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
 	./argon2i.exe
-
 
 hmac.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
 	mkdir -p hmac-ml
