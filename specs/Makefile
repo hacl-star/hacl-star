@@ -45,7 +45,7 @@ all: test
 
 test: test-unified-target test-individual-target
 
-test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe Keccak.exe SHA2.exe Blake2s.exe
+test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe Keccak.exe SHA2.exe Blake2s.exe Blake2b.exe
 test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe
 
 clean:
@@ -173,14 +173,6 @@ qdsa.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.SHA2.fst Spec.Qdsa.fst
 	@echo 'let _ = test()' >> qdsa-ml/Spec_Qdsa.ml
 	$(OCAMLOPT) -I qdsa-ml qdsa-ml/Lib_IntTypes.ml qdsa-ml/Lib_RawIntTypes.ml qdsa-ml/Lib_Sequence.ml qdsa-ml/Spec_Curve25519.ml qdsa-ml/Spec_SHA2.ml qdsa-ml/Spec_Qdsa.ml -o qdsa.exe
 	./qdsa.exe
-
-# NOT Under CI
-blake2b.exe: $(LIBS_FILES) Spec.Blake2b.fst tests/Spec.Blake2b.Test.fst
-	mkdir -p blake2b-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Blake2b --extract_module Spec.Blake2b.Test --odir blake2b-ml $^
-	@echo 'let _ = test()' >> blake2b-ml/Spec_Blake2b_Test.ml
-	$(OCAMLOPT) -I blake2b-ml blake2b-ml/Lib_IntTypes.ml blake2b-ml/Lib_RawIntTypes.ml blake2b-ml/Lib_Sequence.ml blake2b-ml/Lib_ByteSequence.ml blake2b-ml/Spec_Blake2b.ml blake2b-ml/Spec_Blake2b_Test.ml -o blake2b.exe
-	./blake2b.exe
 
 # NOT Under CI
 argon2i.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
