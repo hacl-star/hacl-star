@@ -159,8 +159,8 @@ ci:
 	# $(MAKE) -C providers/test
 	# $(MAKE) -C secure_api runtime_switch verify # test both extraction & verification
 	# $(MAKE) test-all
-	$(MAKE) build-make
-	$(MAKE) package
+	# $(MAKE) build-make
+	# $(MAKE) package
 
 #
 # Clean
