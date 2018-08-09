@@ -107,7 +107,7 @@ let constants : list uint32 = [c0;c1;c2;c3]
 
 #reset-options "--z3rlimit 100"
 // JK: I have to add those assertions to typechecks, would be nice to get rid of it
-let chacha20_init (k:key) (n:nonce) : Tot state =
+let chacha20_init (k:key) (n_len:size_nat) (n:nonce) : Tot state =
   assert_norm(List.Tot.length constants == 4);
   let constants : vec = createL #uint32 constants in
   let key_part_1:vec =  uints_from_bytes_le #U32 (slice k 0 16)  in
@@ -133,12 +133,12 @@ let chacha20_key_block (st:state): Tot block =
 
 
 let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
-    let st = chacha20_init k n in
+    let st = chacha20_init k noncelen n in
     let st = chacha20_set_counter st c in
     chacha20_key_block st
 
 let chacha20_cipher =
-  Spec.CTR.Cipher state keylen noncelen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
+  Spec.CTR.Cipher state keylen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
 
 let chacha20_encrypt_bytes key nonce counter len m =
   Spec.CTR.counter_mode chacha20_cipher key nonce counter len m
