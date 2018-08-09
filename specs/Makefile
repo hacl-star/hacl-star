@@ -175,11 +175,11 @@ qdsa.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.SHA2.fst Spec.Qdsa.fst
 	./qdsa.exe
 
 # NOT Under CI
-blake2b.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Blake2b.fst tests/Spec.Blake2b.Test.fst
+blake2b.exe: $(LIBS_FILES) Spec.Blake2b.fst tests/Spec.Blake2b.Test.fst
 	mkdir -p blake2b-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2b --extract_module Spec.Blake2b.Test --odir blake2b-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Blake2b --extract_module Spec.Blake2b.Test --odir blake2b-ml $^
 	@echo 'let _ = test()' >> blake2b-ml/Spec_Blake2b_Test.ml
-	$(OCAMLOPT) -I blake2b-ml blake2b-ml/Lib_IntTypes.ml blake2b-ml/Lib_RawIntTypes.ml blake2b-ml/Lib_Sequence.ml blake2b-ml/Lib_Stateful.ml blake2b-ml/Spec_Blake2b.ml blake2b-ml/Spec_Blake2b_Test.ml -o blake2b.exe
+	$(OCAMLOPT) -I blake2b-ml blake2b-ml/Lib_IntTypes.ml blake2b-ml/Lib_RawIntTypes.ml blake2b-ml/Lib_Sequence.ml blake2b-ml/Lib_ByteSequence.ml blake2b-ml/Spec_Blake2b.ml blake2b-ml/Spec_Blake2b_Test.ml -o blake2b.exe
 	./blake2b.exe
 
 # NOT Under CI
