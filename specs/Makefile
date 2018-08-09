@@ -46,7 +46,7 @@ all: test
 test: test-unified-target test-individual-target
 
 test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe Keccak.exe SHA2.exe Blake2s.exe
-test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe kyber.exe aes.exe aesgcm.exe rsapss.exe
+test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
@@ -85,6 +85,14 @@ Ed25519.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Curve25519.fst Spec.Ed25519.fst te
 	@echo 'let _ = test()' >> Ed25519-ml/Spec_Ed25519_Test.ml
 	$(OCAMLOPT) -I Ed25519-ml $(addprefix Ed25519-ml/, $(LIBS_ML)) Ed25519-ml/Spec_SHA2.ml Ed25519-ml/Spec_Curve25519.ml Ed25519-ml/Spec_Ed25519.ml Ed25519-ml/Spec_Ed25519_Test.ml -o Ed25519.exe
 	./Ed25519.exe
+
+# Under CI
+gf128.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.GF128.fst tests/Spec.GF128.Test.fst
+	mkdir -p gf128-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.GF128 --extract_module Spec.GF128.Test --odir gf128-ml $^
+	@echo 'let _ = test()' >> gf128-ml/Spec_GF128_Test.ml
+	$(OCAMLOPT) -I gf128-ml $(OCAML_INCLUDES) $(addprefix gf128-ml/, $(LIBS_ML)) gf128-ml/Spec_GaloisField.ml gf128-ml/Spec_GF128.ml gf128-ml/Spec_GF128_Test.ml -o gf128.exe
+	./gf128.exe
 
 # Under CI
 aes.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst tests/Spec.AES.Test.fst
@@ -136,14 +144,6 @@ rsapss.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.f
 #
 # NOT UNDER CI
 #
-
-# NOT Under CI
-gf128.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.GF128.fst tests/Spec.GF128.Test.fst
-	mkdir -p gf128-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.GF128 --extract_module Spec.GF128.Test --odir gf128-ml $^
-	@echo 'let _ = test()' >> gf128-ml/Spec_GF128_Test.ml
-	$(OCAMLOPT) -I gf128-ml $(OCAML_INCLUDES) $(addprefix gf128-ml/, $(LIBS_ML)) gf128-ml/Spec_GaloisField.ml gf128-ml/Spec_GF128.ml gf128-ml/Spec_GF128_Test.ml -o gf128.exe
-	./gf128.exe
 
 # NOT Under CI
 noise.exe: $(LIBS_FILES) Spec.Noise.fst
