@@ -38,20 +38,43 @@ let xor_lemmas () =
   FStar.Classical.forall_intro_3 lemma_BitwiseXorAssociative;
   ()
 
+#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_quad32_xor () =
+  reveal_opaque quad32_xor_def;
+  reveal_opaque reverse_bytes_nat32_def;
   xor_lemmas()
+  (*
+  let helper (q:quad32) : Lemma (quad32_xor q q == Mkfour 0 0 0 0) =
+    let q' = quad32_xor q q in
+    reveal_opaque quad32_xor_def;
+    reveal_opaque reverse_bytes_nat32_def;
+    // REVIEW: Why are these necessary?
+    assert (q'.lo0 == nat32_xor q.lo0 q.lo0);
+    assert (q'.lo1 == nat32_xor q.lo1 q.lo1);
+    assert (q'.hi2 == nat32_xor q.hi2 q.hi2);
+    assert (q'.hi3 == nat32_xor q.hi3 q.hi3);
+    xor_lemmas()
+  in
+  FStar.Classical.forall_intro helper
+  *)
+#pop-options
 
 let lemma_reverse_reverse_bytes_nat32 (n:nat32) :
   Lemma (reverse_bytes_nat32 (reverse_bytes_nat32 n) == n)
   =
+  reveal_opaque reverse_bytes_nat32_def;
   let r = reverse_seq (nat32_to_be_bytes n) in
   be_bytes_to_nat32_to_be_bytes r;
   ()
 
+#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_reverse_bytes_quad32 (q:quad32) =
+  reveal_opaque quad32_xor_def;
+  reveal_opaque reverse_bytes_nat32_def;
   reveal_reverse_bytes_quad32 q;
   reveal_reverse_bytes_quad32 (reverse_bytes_quad32 q);
   ()
+#pop-options
 
 let lemma_reverse_reverse_bytes_nat32_seq (s:seq nat32) :
   Lemma (ensures reverse_bytes_nat32_seq (reverse_bytes_nat32_seq s) == s)

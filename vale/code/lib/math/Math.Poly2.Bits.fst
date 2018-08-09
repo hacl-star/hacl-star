@@ -8,6 +8,8 @@ let lemma_add128 a b =
   lemma_reverse_define_all ();
   lemma_add_define_all ();
   lemma_ixor_nth_all 32;
+  Opaque_s.reveal_opaque quad32_xor_def;
+  Opaque_s.reveal_opaque reverse_bytes_nat32_def;
   lemma_quad32_vec_equal (to_quad32 (a +. b)) (quad32_xor (to_quad32 a) (to_quad32 b));
   ()
 

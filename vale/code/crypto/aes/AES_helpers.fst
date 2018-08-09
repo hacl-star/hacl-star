@@ -113,11 +113,15 @@ let simd_round_key_128 (prev:quad32) (rcon:nat32) : quad32 =
   q *^^ Mkfour r r r r
 
 // SIMD version of round_key_128 is equivalent to scalar round_key_128
+#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_simd_round_key (prev:quad32) (rcon:nat32) : Lemma
   (simd_round_key_128 prev rcon == round_key_128_rcon prev rcon)
   =
+  reveal_opaque quad32_xor_def;
+  reveal_opaque reverse_bytes_nat32_def;  
   commute_rot_word_sub_word prev.hi3;
   Arch.Types.xor_lemmas ()
+#pop-options
 
 let commute_sub_bytes_shift_rows_forall () :
   Lemma (forall q . {:pattern sub_bytes (shift_rows_LE q) \/ shift_rows_LE (sub_bytes q) }
