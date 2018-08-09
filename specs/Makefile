@@ -46,7 +46,7 @@ all: test
 test: test-unified-target test-individual-target
 
 test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe Keccak.exe SHA2.exe Blake2s.exe Blake2b.exe
-test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe
+test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
@@ -133,6 +133,14 @@ hkdf.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst 
 	$(OCAMLOPT) -I hkdf-ml hkdf-ml/Lib_IntTypes.ml hkdf-ml/Lib_RawIntTypes.ml hkdf-ml/Lib_Sequence.ml hkdf-ml/Lib_ByteSequence.ml hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Hash.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
 	./hkdf.exe
 
+# NOT Under CI
+argon2i.exe: $(LIBS_FILES) Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
+	mkdir -p argon2i-ml
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Blake2b --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
+	@echo 'let _ = test()' >> argon2i-ml/Spec_Argon2i_Test.ml
+	$(OCAMLOPT) -I argon2i-ml argon2i-ml/Lib_IntTypes.ml argon2i-ml/Lib_RawIntTypes.ml argon2i-ml/Lib_Sequence.ml argon2i-ml/Lib_ByteSequence.ml argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
+	./argon2i.exe
+
 # Under CI
 rsapss.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
 	mkdir -p rsapss-ml
@@ -173,14 +181,6 @@ qdsa.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.SHA2.fst Spec.Qdsa.fst
 	@echo 'let _ = test()' >> qdsa-ml/Spec_Qdsa.ml
 	$(OCAMLOPT) -I qdsa-ml qdsa-ml/Lib_IntTypes.ml qdsa-ml/Lib_RawIntTypes.ml qdsa-ml/Lib_Sequence.ml qdsa-ml/Spec_Curve25519.ml qdsa-ml/Spec_SHA2.ml qdsa-ml/Spec_Qdsa.ml -o qdsa.exe
 	./qdsa.exe
-
-# NOT Under CI
-argon2i.exe: $(LIBS_FILES) Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
-	mkdir -p argon2i-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Blake2b --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
-	@echo 'let _ = test()' >> argon2i-ml/Spec_Argon2i_Test.ml
-	$(OCAMLOPT) -I argon2i-ml argon2i-ml/Lib_IntTypes.ml argon2i-ml/Lib_RawIntTypes.ml argon2i-ml/Lib_Sequence.ml argon2i-ml/Lib_ByteSequence.ml argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
-	./argon2i.exe
 
 # NOT Under CI
 pbkdf2.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.PBKDF2.fst tests/Spec.PBKDF2.Test.fst
