@@ -11,8 +11,8 @@ open LowStar.BufferOps
 open Lib.IntTypes
 open Lib.PQ.Buffer
 
-open Hacl.Impl.PQ.Lib
 open Hacl.Keccak
+open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
 
 module ST = FStar.HyperStack.ST

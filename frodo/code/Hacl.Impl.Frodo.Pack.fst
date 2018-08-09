@@ -10,7 +10,7 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.PQ.Buffer
 
-open Hacl.Impl.PQ.Lib
+open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
 
 module ST = FStar.HyperStack.ST

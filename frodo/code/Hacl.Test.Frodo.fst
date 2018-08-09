@@ -9,14 +9,14 @@ open Lib.IntTypes
 open Lib.PQ.Buffer
 
 open Hacl.Impl.Frodo.KEM
-open Hacl.Impl.PQ.Lib
+open Hacl.Impl.Matrix
 open Hacl.Frodo.Random
 open Frodo.Params
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val test_frodo:
-    seed:lbytes (size 48)
+    seed:lbuffer uint8 48
   -> ss_expected:lbytes crypto_bytes
   -> pk_expected:lbytes crypto_publickeybytes
   -> ct_expected:lbytes crypto_ciphertextbytes
@@ -355,7 +355,7 @@ let test1_sk_expected: b:lbytes crypto_secretkeybytes{ recallable b } =
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-let seed: b:lbytes (size 48){ recallable b } =
+let seed: b:lbuffer uint8 48{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
    normalize_term (List.Tot.map u8

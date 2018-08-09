@@ -1,4 +1,4 @@
-module Hacl.Impl.PQ.Lib
+module Hacl.Impl.Matrix
 
 open FStar.HyperStack.ST
 open FStar.Mul

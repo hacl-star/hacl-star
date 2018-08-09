@@ -11,14 +11,14 @@ open LowStar.BufferOps
 open Lib.IntTypes
 open Lib.PQ.Buffer
 
-open Hacl.Impl.PQ.Lib
 open Hacl.Keccak
-open Hacl.Frodo.Random
+open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
 open Hacl.Impl.Frodo.Encode
 open Hacl.Impl.Frodo.Pack
 open Hacl.Impl.Frodo.Sample
 open Hacl.Impl.Frodo.Gen
+open Hacl.Frodo.Random
 open Hacl.Frodo.Clear
 
 module ST = FStar.HyperStack.ST
@@ -294,7 +294,7 @@ let crypto_kem_enc ct ss pk =
 
   crypto_kem_enc_ct pk g coins ct;
   crypto_kem_enc_ss g ct ss;
-  clear_words_u8 (size 2 *! crypto_bytes) (sub g (size 0) (size 2 *! crypto_bytes));
+  clear_words_u8 (size 2 *! crypto_bytes) (sub #_ #_ #(2 * v crypto_bytes) g (size 0) (size 2 *! crypto_bytes));
   pop_frame();
   u32 0
 
@@ -414,7 +414,7 @@ let crypto_kem_dec_ss1 pk_mu_decode bp_matrix c_matrix sk ct ss =
   let kp_s = if (b1 && b2 && b3) then kp else s in
   crypto_kem_dec_ss ct g kp_s ss;
   clear_words_u16 (params_nbar *! params_n) sp_matrix;
-  clear_words_u8 (size 2 *! crypto_bytes) (sub g (size 0) (size 2 *! crypto_bytes));
+  clear_words_u8 (size 2 *! crypto_bytes) (sub #_ #_ #(2 * v crypto_bytes) g (size 0) (size 2 *! crypto_bytes));
   pop_frame()
 
 val crypto_kem_dec:

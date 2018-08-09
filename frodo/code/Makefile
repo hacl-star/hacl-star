@@ -282,7 +282,7 @@ HACL_LIBS = \
   ../../lib/c/Lib.Loops.fst \
   ../../lib/fst/Lib.PQ.Buffer.fst
 
-$(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.PQ.Lib.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.Sample.fst Hacl.Impl.Frodo.Gen.fst Hacl.Impl.Frodo.KEM.fst Hacl.Test.Frodo.fst
+$(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.Matrix.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.Sample.fst Hacl.Impl.Frodo.Gen.fst Hacl.Impl.Frodo.KEM.fst Hacl.Test.Frodo.fst
 	$(KREMLIN) -tmpdir $(OUT_DIR) \
 	-I ../../specs -I ../spec -I ../../lib -I ../../lib/fst \
 	-skip-translation $^
