@@ -106,7 +106,7 @@ procedure {:quick} gcm_one_pass_blocks(
 
         // GHash
         len == 0 ==> hash == old(hash);
-        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(old(buffer128_as_seq(mem, in_b)), len));
+        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(old(buffer128_as_seq(mem, in_b)), len));
 {
     Mov64(rdx, 0);
     Mov64(r9, in_ptr);
@@ -151,7 +151,7 @@ procedure {:quick} gcm_one_pass_blocks(
             gctr_partial(alg, rdx, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old(icb));
 
             rdx == 0 ==> hash == old(hash);
-            rdx > 0 ==> hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, in_b), rdx));
+            rdx > 0 ==> hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, in_b), rdx));
 
 //            forall j :: 0 <= j < rdx ==>
 //                        buffer128_read(out_b, j, mem) ==
@@ -243,7 +243,7 @@ procedure {:quick} gcm_one_pass(
         let cipher_padded_bytes := pad_to_128_bits(cipher);
         let cipher_padded_quads := le_bytes_to_seq_quad32(cipher_padded_bytes);
         old(num_bytes) > 0 ==> length(cipher_padded_quads) > 0 /\
-            hash == ghash_incremental(h, old(hash), cipher_padded_quads);
+            hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), cipher_padded_quads);
 {
     if (num_bytes > 0) {
         lemma_poly_bits64();
@@ -259,7 +259,7 @@ procedure {:quick} gcm_one_pass(
 
         if (rsi == 0) {
             gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
-            ghash_incremental_bytes_no_extra(in_b, old(hash), old(in_ptr), old(num_bytes), hash, h);
+            ghash_incremental_bytes_no_extra(in_b, old(hash), old(in_ptr), old(num_bytes), hash, reverse_bytes_quad32(h));
             bytes_to_quad_size_no_extra_bytes(old(num_bytes));
             //assert icb == inc32(old(icb), bytes_to_quad_size(old(num_bytes)));
 
@@ -372,8 +372,8 @@ procedure {:quick} gcm_core_part1(
         let cipher_padded_quads := le_bytes_to_seq_quad32(cipher_padded_bytes);
 
         y_0 == Mkfour(0, 0, 0, 0);
-        y_auth == ghash_incremental0(h, y_0, auth_padded_quads);
-        y_cipher == ghash_incremental0(h, y_auth, cipher_padded_quads);
+        y_auth == ghash_incremental0(reverse_bytes_quad32(h), y_0, auth_padded_quads);
+        y_cipher == ghash_incremental0(reverse_bytes_quad32(h), y_auth, cipher_padded_quads);
         xmm1 == y_cipher;
 
         // Intermediate IV state
@@ -382,17 +382,18 @@ procedure {:quick} gcm_core_part1(
         // Other intermediate facts
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
         xmm11 == h;
-        h == aes_encrypt_LE(alg, key, y_0);
+        h == reverse_bytes_quad32(aes_encrypt_LE(alg, key, y_0));
 {
+    InitPshufbMask(xmm8, r12);
     // let h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
     ZeroXmm(xmm0);
     AESEncryptBlock(alg, xmm0, key, round_keys, keys_b); // h = xmm0 = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
+    Pshufb(xmm0, xmm8);
     h := xmm0;
     Mov128(xmm11, xmm0);     // Save a copy of h
 
     // let j0_BE = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
     // (inc32 j0 1)
-    InitPshufbMask(xmm8, r12);
     Pshufb(iv, xmm8); // to big endian
     PinsrdImm(iv, 2, 0, r12);
     // assert iv == inc32(Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3), 1);
@@ -413,7 +414,7 @@ procedure {:quick} gcm_core_part1(
     ghost var auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
 //
 //    assert y_0 == Mkfour(0,0,0,0);
-//    assert y_auth   == ghash_incremental0(h, y_0, auth_padded_quads);
+//    assert y_auth   == ghash_incremental0(reverse_bytes_quad32(h), y_0, auth_padded_quads);
 //
     // let c = gctr_encrypt_LE (inc32 j0 1) p alg key in
     Mov64(rax, cipher_ptr);
@@ -540,7 +541,7 @@ procedure {:quick} gcm_core(
 
     ghost var cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
     ghost var cipher_padded_quads := le_bytes_to_seq_quad32(pad_to_128_bits(cipher));
-    lemma_hash_append3(h, y_0, y_auth, y_cipher, y_final,
+    lemma_hash_append3(reverse_bytes_quad32(h), y_0, y_auth, y_cipher, y_final,
                        auth_padded_quads, //buffer128_as_seq(mem, auth_b),
                        cipher_padded_quads, //buffer128_as_seq(mem, out_b),
                        create(1, length_quad32));
