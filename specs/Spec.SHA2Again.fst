@@ -305,7 +305,7 @@ let update_multi_block (a: hash_alg) (h: hash_w a) (input: bytes):
 =
   ()
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 val update_multi_associative:
   a: hash_alg ->
@@ -429,21 +429,24 @@ let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input < max_
 
 (** Abstract Hash API *)
 
-let hashing (a: hash_alg) (l: bytes_blocks a) =
-  h:hash_w a{ h == update_multi a (h0 a) l }
+let state = hash_w
 
-let hashed (a: hash_alg) (l: bytes { S.length l < max_input8 a }) =
-  h:hash_w a { h == update_last a (h0 a) 0 l }
+let hashes a h l =
+  h == update_multi a (h0 a) l
 
-let init a = h0 a
+let hashed a h l =
+  h == update_last a (h0 a) 0 l
 
-let compress a l h l' =
+let init a =
+  h0 a
+
+let compress a h l l' =
   // update_multi_associative'
   update_multi a h l'
 
-let compress_last a l h l' =
+let compress_last a h l l' =
   // update_last_multi_canonical
   update_last a h (S.length l) l'
 
-let extract a l h =
+let extract a h l =
   finish a h

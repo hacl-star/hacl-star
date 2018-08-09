@@ -67,29 +67,31 @@ let bytes_hash a =
 (* The NIST specification. *)
 val hash: a:hash_alg -> input:bytes { S.length input < max_input8 a } -> bytes_hash a
 
+val state: hash_alg -> Type0
+
 (* The abstract, incremental state after hashing b bytes *)
-val hashing: a:hash_alg -> l:bytes_blocks a -> Type0
+val hashes: a:hash_alg -> h:state a -> l:bytes_blocks a -> Type0
 
 (* The abstract, incremental state after calling compress_last *)
-val hashed: a:hash_alg -> l:bytes { S.length l < max_input8 a } -> Type0
+val hashed: a:hash_alg -> h:state a -> l:bytes { S.length l < max_input8 a } -> Type0
 
-val init: a:hash_alg -> hashing a Seq.empty
+val init: a:hash_alg -> s:state a { hashes a s Seq.empty }
 
 val compress: a:hash_alg ->
-  l:bytes_blocks a ->
-  h:hashing a l ->
+  h:state a ->
+  l:bytes_blocks a { hashes a h l } ->
   l':bytes_blocks a ->
-  hashing a (S.append l l')
+  h':state a { hashes a h' (S.append l l') }
 
 val compress_last:
   a:hash_alg ->
-  l:bytes_blocks a ->
-  h:hashing a l ->
-  l': bytes { S.length l + S.length l' < max_input8 a } ->
-  hashed a (S.append l l')
+  h:state a ->
+  l:bytes_blocks a { hashes a h l } ->
+  l':bytes { S.length l + S.length l' < max_input8 a } ->
+  h':state a { hashed a h' (S.append l l') }
 
 val extract:
   a:hash_alg ->
-  l:bytes { S.length l < max_input8 a } ->
-  h:hashed a l ->
+  h:state a ->
+  l:bytes { S.length l < max_input8 a /\ hashed a h l } ->
   b:bytes { b = hash a l }

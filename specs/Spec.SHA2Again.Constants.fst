@@ -26,9 +26,17 @@ let k224_256_l: List.llist UInt32.t 64 =
   assert_norm (List.length l = 64);
   l
 
+let reveal_t (#t: Type) (#n: nat) (s: Seq.lseq t n) (l: List.llist t n) = unit ->
+  Lemma (ensures (s == Seq.seq_of_list l))
+
+let revealable #t #n (l: List.llist t n) = (s: Seq.lseq t n & reveal_t s l)
+
 [@"opaque_to_smt"]
-let k224_256: Seq.lseq UInt32.t 64 =
-  Seq.seq_of_list k224_256_l
+let _bug_224_256: revealable k224_256_l =
+  (| Seq.seq_of_list k224_256_l, (fun () -> ()) |)
+
+let k224_256 = dfst _bug_224_256
+let k224_256_reveal = dsnd _bug_224_256
 
 [@"opaque_to_smt"]
 inline_for_extraction
@@ -60,8 +68,11 @@ let k384_512_l: List.llist UInt64.t 80 =
   l
 
 [@"opaque_to_smt"]
-let k384_512: Seq.lseq UInt64.t 80 =
-  Seq.seq_of_list k384_512_l
+let _bug_384_512: revealable k384_512_l =
+  (| Seq.seq_of_list k384_512_l, (fun () -> ()) |)
+
+let k384_512 = dfst _bug_384_512
+let k384_512_reveal = dsnd _bug_384_512
 
 // H0 vectors, i.e. initial values of the accumulator
 
@@ -77,7 +88,11 @@ let h224_l: List.llist UInt32.t 8 =
   l
 
 [@"opaque_to_smt"]
-let h224: Seq.lseq UInt32.t 8 = Seq.seq_of_list h224_l
+let _bug_224: revealable h224_l =
+  (| Seq.seq_of_list h224_l, (fun () -> ()) |)
+
+let h224 = dfst _bug_224
+let h224_reveal = dsnd _bug_224
 
 [@"opaque_to_smt"]
 inline_for_extraction
@@ -91,7 +106,11 @@ let h256_l: List.llist UInt32.t 8 =
   l
 
 [@"opaque_to_smt"]
-let h256: Seq.lseq UInt32.t 8 = Seq.seq_of_list h256_l
+let _bug_256: revealable h256_l =
+  (| Seq.seq_of_list h256_l, (fun () -> ()) |)
+
+let h256 = dfst _bug_256
+let h256_reveal = dsnd _bug_256
 
 [@"opaque_to_smt"]
 inline_for_extraction
@@ -105,8 +124,11 @@ let h384_l: List.llist UInt64.t 8 =
   l
 
 [@"opaque_to_smt"]
-let h384: Seq.lseq UInt64.t 8 =
-  Seq.seq_of_list h384_l
+let _bug_384: revealable h384_l =
+  (| Seq.seq_of_list h384_l, (fun () -> ()) |)
+
+let h384 = dfst _bug_384
+let h384_reveal = dsnd _bug_384
 
 [@"opaque_to_smt"]
 inline_for_extraction
@@ -120,5 +142,8 @@ let h512_l: List.llist UInt64.t 8 =
   l
 
 [@"opaque_to_smt"]
-let h512: Seq.lseq UInt64.t 8 =
-  Seq.seq_of_list h512_l
+let _bug_512: revealable h512_l =
+  (| Seq.seq_of_list h512_l, (fun () -> ()) |)
+
+let h512 = dfst _bug_512
+let h512_reveal = dsnd _bug_512
