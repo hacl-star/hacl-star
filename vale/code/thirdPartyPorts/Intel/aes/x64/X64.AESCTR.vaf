@@ -57,30 +57,33 @@ procedure {:quick exportOnly} aes_round_4way(
     ghost init4:quad32,
     ghost round_keys:seq(quad32)
     )
+    lets
+        ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     modifies
-        xmm11; xmm12; xmm13; xmm14; efl;
+        ctr1; ctr2; ctr3; ctr4;
+        efl;
     requires
         1 <= n < nr(alg) <= length(round_keys);
-        xmm11 == rounds(init1, round_keys, n - 1);
-        xmm12 == rounds(init2, round_keys, n - 1);
-        xmm13 == rounds(init3, round_keys, n - 1);
-        xmm14 == rounds(init4, round_keys, n - 1);
+        ctr1 == rounds(init1, round_keys, n - 1);
+        ctr2 == rounds(init2, round_keys, n - 1);
+        ctr3 == rounds(init3, round_keys, n - 1);
+        ctr4 == rounds(init4, round_keys, n - 1);
         round_key == index(round_keys, n);
         11 != @round_key;
         12 != @round_key;
         13 != @round_key;
         14 != @round_key;
     ensures
-        xmm11 == rounds(init1, round_keys, n);
-        xmm12 == rounds(init2, round_keys, n);
-        xmm13 == rounds(init3, round_keys, n);
-        xmm14 == rounds(init4, round_keys, n);
+        ctr1 == rounds(init1, round_keys, n);
+        ctr2 == rounds(init2, round_keys, n);
+        ctr3 == rounds(init3, round_keys, n);
+        ctr4 == rounds(init4, round_keys, n);
 {
     commute_sub_bytes_shift_rows_forall();
-    AESNI_enc(xmm11, round_key);
-    AESNI_enc(xmm12, round_key);
-    AESNI_enc(xmm13, round_key);
-    AESNI_enc(xmm14, round_key);
+    AESNI_enc(ctr1, round_key);
+    AESNI_enc(ctr2, round_key);
+    AESNI_enc(ctr3, round_key);
+    AESNI_enc(ctr4, round_key);
 }
 
 procedure {:quick} aes_2rounds_4way(
@@ -92,26 +95,30 @@ procedure {:quick} aes_2rounds_4way(
     ghost init4:quad32,
     ghost round_keys:seq(quad32)
     )
+    lets
+        rk1 @= xmm8; rk2 @= xmm9;                                   // Round keys
+        ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     reads
-        xmm8; xmm9;
+        rk1; rk2;
     modifies
-        xmm11; xmm12; xmm13; xmm14; efl;
+        ctr1; ctr2; ctr3; ctr4;
+        efl;
     requires
         1 <= n < nr(alg) - 1 && nr(alg) <= length(round_keys);
-        xmm11 == rounds(init1, round_keys, n - 1);
-        xmm12 == rounds(init2, round_keys, n - 1);
-        xmm13 == rounds(init3, round_keys, n - 1);
-        xmm14 == rounds(init4, round_keys, n - 1);
-        xmm8  == index(round_keys, n);
-        xmm9  == index(round_keys, n + 1);
+        ctr1 == rounds(init1, round_keys, n - 1);
+        ctr2 == rounds(init2, round_keys, n - 1);
+        ctr3 == rounds(init3, round_keys, n - 1);
+        ctr4 == rounds(init4, round_keys, n - 1);
+        rk1  == index(round_keys, n);
+        rk2  == index(round_keys, n + 1);
     ensures
-        xmm11 == rounds(init1, round_keys, n + 1);
-        xmm12 == rounds(init2, round_keys, n + 1);
-        xmm13 == rounds(init3, round_keys, n + 1);
-        xmm14 == rounds(init4, round_keys, n + 1);
+        ctr1 == rounds(init1, round_keys, n + 1);
+        ctr2 == rounds(init2, round_keys, n + 1);
+        ctr3 == rounds(init3, round_keys, n + 1);
+        ctr4 == rounds(init4, round_keys, n + 1);
 {
-    aes_round_4way(alg, n,     xmm8,  init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 1, xmm9,  init1, init2, init3, init4, round_keys);
+    aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
+    aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
 }
 
 procedure {:quick} aes_3rounds_4way(
@@ -123,28 +130,32 @@ procedure {:quick} aes_3rounds_4way(
     ghost init4:quad32,
     ghost round_keys:seq(quad32)
     )
+    lets
+        rk2 @= xmm9; rk3 @= xmm10; rk4 @= xmm7;                     // Round keys
+        ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     reads
-        xmm7; xmm9; xmm10;
+        rk2; rk3; rk4;
     modifies
-        xmm11; xmm12; xmm13; xmm14; efl;
+        ctr1; ctr2; ctr3; ctr4;
+        efl;
     requires
         1 <= n < nr(alg) - 2 && nr(alg) <= length(round_keys);
-        xmm11 == rounds(init1, round_keys, n - 1);
-        xmm12 == rounds(init2, round_keys, n - 1);
-        xmm13 == rounds(init3, round_keys, n - 1);
-        xmm14 == rounds(init4, round_keys, n - 1);
-        xmm9  == index(round_keys, n + 0);
-        xmm10 == index(round_keys, n + 1);
-        xmm7  == index(round_keys, n + 2);
+        ctr1 == rounds(init1, round_keys, n - 1);
+        ctr2 == rounds(init2, round_keys, n - 1);
+        ctr3 == rounds(init3, round_keys, n - 1);
+        ctr4 == rounds(init4, round_keys, n - 1);
+        rk2  == index(round_keys, n + 0);
+        rk3 == index(round_keys, n + 1);
+        rk4  == index(round_keys, n + 2);
     ensures
-        xmm11 == rounds(init1, round_keys, n + 2);
-        xmm12 == rounds(init2, round_keys, n + 2);
-        xmm13 == rounds(init3, round_keys, n + 2);
-        xmm14 == rounds(init4, round_keys, n + 2);
+        ctr1 == rounds(init1, round_keys, n + 2);
+        ctr2 == rounds(init2, round_keys, n + 2);
+        ctr3 == rounds(init3, round_keys, n + 2);
+        ctr4 == rounds(init4, round_keys, n + 2);
 {
-    aes_round_4way(alg, n + 0, xmm9,  init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 1, xmm10, init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 2, xmm7,  init1, init2, init3, init4, round_keys);
+    aes_round_4way(alg, n + 0, rk2,  init1, init2, init3, init4, round_keys);
+    aes_round_4way(alg, n + 1, rk3, init1, init2, init3, init4, round_keys);
+    aes_round_4way(alg, n + 2, rk4,  init1, init2, init3, init4, round_keys);
 }
 
 procedure {:quick} aes_4rounds_4way(
@@ -156,30 +167,34 @@ procedure {:quick} aes_4rounds_4way(
     ghost init4:quad32,
     ghost round_keys:seq(quad32)
     )
+    lets
+        rk1 @= xmm8; rk2 @= xmm9; rk3 @= xmm10; rk4 @= xmm7;        // Round keys
+        ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     reads
-        xmm7; xmm8; xmm9; xmm10;
+        rk1; rk2; rk3; rk4;
     modifies
-        xmm11; xmm12; xmm13; xmm14; efl;
+        ctr1; ctr2; ctr3; ctr4;
+        efl;
     requires
         1 <= n < nr(alg) - 3 && nr(alg) <= length(round_keys);
-        xmm11 == rounds(init1, round_keys, n - 1);
-        xmm12 == rounds(init2, round_keys, n - 1);
-        xmm13 == rounds(init3, round_keys, n - 1);
-        xmm14 == rounds(init4, round_keys, n - 1);
-        xmm8  == index(round_keys, n);
-        xmm9  == index(round_keys, n + 1);
-        xmm10 == index(round_keys, n + 2);
-        xmm7  == index(round_keys, n + 3);
+        ctr1 == rounds(init1, round_keys, n - 1);
+        ctr2 == rounds(init2, round_keys, n - 1);
+        ctr3 == rounds(init3, round_keys, n - 1);
+        ctr4 == rounds(init4, round_keys, n - 1);
+        rk1  == index(round_keys, n);
+        rk2  == index(round_keys, n + 1);
+        rk3 == index(round_keys, n + 2);
+        rk4  == index(round_keys, n + 3);
     ensures
-        xmm11 == rounds(init1, round_keys, n + 3);
-        xmm12 == rounds(init2, round_keys, n + 3);
-        xmm13 == rounds(init3, round_keys, n + 3);
-        xmm14 == rounds(init4, round_keys, n + 3);
+        ctr1 == rounds(init1, round_keys, n + 3);
+        ctr2 == rounds(init2, round_keys, n + 3);
+        ctr3 == rounds(init3, round_keys, n + 3);
+        ctr4 == rounds(init4, round_keys, n + 3);
 {
-    aes_round_4way(alg, n,     xmm8,  init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 1, xmm9,  init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 2, xmm10, init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 3, xmm7,  init1, init2, init3, init4, round_keys);
+    aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
+    aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
+    aes_round_4way(alg, n + 2, rk3, init1, init2, init3, init4, round_keys);
+    aes_round_4way(alg, n + 3, rk4,  init1, init2, init3, init4, round_keys);
 }
 
 #reset-options "--z3rlimit 181"
