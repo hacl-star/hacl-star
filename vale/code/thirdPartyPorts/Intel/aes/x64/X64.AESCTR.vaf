@@ -433,20 +433,22 @@ procedure {:quick} aes_counter_loop(
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
     ensures
-//        modifies_buffer128(out_b, old(mem), mem);
-//        validSrcAddrs128(mem, out_ptr, out_b, old(num_quad_blocks) * 4, memTaint, Secret);
-//
-//        r9  == plain_ptr + 64 * old(num_quad_blocks);
-//        r10 == out_ptr   + 64 * old(num_quad_blocks);
-//
-//        // GCTR
-//        //buffer128_as_seq(mem, out_b) == gctr_encrypt_LE(old(icb), buffer128_as_seq(old(mem), plain_b), alg, key);
-//        gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(icb));
-//        //icb == inc32(old(icb), old(len));
-//
-////        // GHash
-////        len == 0 ==> hash == old(hash);
-////        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
+        modifies_buffer128(out_b, old(mem), mem);
+        validSrcAddrs128(mem, old(out_ptr), out_b, old(num_quad_blocks) * 4, memTaint, Secret);
+
+        plain_ptr == old(plain_ptr) + 64 * old(num_quad_blocks);
+        out_ptr   == old(out_ptr)   + 64 * old(num_quad_blocks);
+
+        // GCTR
+        gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(reverse_bytes_quad32(iv)));
+
+        // TODO:
+        //icb == inc32(old(icb), old(len));
+
+        // TODO:
+//        // GHash
+//        len == 0 ==> hash == old(hash);
+//        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
 {
     // Initialize the counters
     Mov128(const2_1, iv);
