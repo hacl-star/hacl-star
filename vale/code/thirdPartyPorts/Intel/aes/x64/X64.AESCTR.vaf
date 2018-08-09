@@ -389,10 +389,9 @@ procedure{:quick} aes_ctr_loop_body(
     Add64(out_ptr, 64);
 }
 
-/*
 procedure {:quick} aes_counter_loop(
     inline alg:algorithm,
-    ghost in_b:buffer128,
+    ghost plain_b:buffer128,
     ghost out_b:buffer128,
     ghost key:aes_key_LE(alg),
     ghost round_keys:seq(quad32),
@@ -404,8 +403,8 @@ procedure {:quick} aes_counter_loop(
          ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
          tmp_xmm @= xmm5;
     
-    reads key_ptr; iv; mask64; four; memTaint;
-    modifies const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
+    reads key_ptr; iv; memTaint;
+    modifies mask64; four; const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
              tmp_xmm; 
              rax; plain_ptr; num_quad_blocks; out_ptr; efl; mem;
 
@@ -424,21 +423,46 @@ procedure {:quick} aes_counter_loop(
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
     ensures
-        modifies_buffer128(out_b, old(mem), mem);
-        validSrcAddrs128(mem, out_ptr, out_b, old(num_quad_blocks) * 4, memTaint, Secret);
-
-        r9  == plain_ptr + 64 * old(num_quad_blocks);
-        r10 == out_ptr   + 64 * old(num_quad_blocks);
-
-        // GCTR
-        //buffer128_as_seq(mem, out_b) == gctr_encrypt_LE(old(icb), buffer128_as_seq(old(mem), plain_b), alg, key);
-        gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(icb));
-        //icb == inc32(old(icb), old(len));
-
-//        // GHash
-//        len == 0 ==> hash == old(hash);
-//        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
+//        modifies_buffer128(out_b, old(mem), mem);
+//        validSrcAddrs128(mem, out_ptr, out_b, old(num_quad_blocks) * 4, memTaint, Secret);
+//
+//        r9  == plain_ptr + 64 * old(num_quad_blocks);
+//        r10 == out_ptr   + 64 * old(num_quad_blocks);
+//
+//        // GCTR
+//        //buffer128_as_seq(mem, out_b) == gctr_encrypt_LE(old(icb), buffer128_as_seq(old(mem), plain_b), alg, key);
+//        gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(icb));
+//        //icb == inc32(old(icb), old(len));
+//
+////        // GHash
+////        len == 0 ==> hash == old(hash);
+////        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
 {
+    // Initialize the counters
+    Mov128(const2_1, iv);
+
+    InitPshufbDupMask(mask64, rax); // borrow the mask64 xmm for other masks
+    PshufbDup(const2_1, mask64);    // const2_1 = LSB: r(iv.hi3) | r(iv.hi2) | r(iv.hi3) | r(iv.h2)
+    Mov128(const4_3, const2_1);
+    ZeroXmm(tmp_xmm);
+    PinsrdImm(tmp_xmm, 1, 2, rax);  // tmp_xmm = LSB: 0 | 0 | 1 | 0
+    Paddd(const2_1, tmp_xmm);       // const2_1 = LSB: r(iv.hi3) | r(iv.hi2) | r(iv.hi3) + 1 | r(iv.h2)
+    assert const2_1 == Mkfour(reverse_bytes_nat32(iv.hi3),reverse_bytes_nat32(iv.hi2),add_wrap(reverse_bytes_nat32(iv.hi3), 1),reverse_bytes_nat32(iv.hi2));
+
+    PinsrdImm(tmp_xmm, 3, 2, rax);  
+    PinsrdImm(tmp_xmm, 2, 0, rax);  // tmp_xmm = LSB: 2 | 0 | 3 | 0
+    Paddd(const4_3, tmp_xmm);       // const4_3 = LSB: r(iv.hi3) + 2 | r(iv.hi2) | r(iv.hi3) + 3 | r(iv.h2)
+
+    InitPshufbMask(mask64, rax);    // REVIEW: Require this is already in place?
+    reveal_reverse_bytes_quad32(const2_1);
+    Pshufb(const2_1, mask64);       // const2_1 = LSB: iv.hi2 | r( r(iv.hi3) + 1) | iv.hi2 | iv.hi3
+
+    reveal_reverse_bytes_quad32(const4_3);
+    Pshufb(const4_3, mask64);       // const4_3 = LSB: iv.hi2 | r( r(iv.hi3) + 3) | iv.hi2 | r( r(iv.hi3) + 2)
+
+    reveal_reverse_bytes_quad32(iv);
+    reveal_reverse_bytes_quad32(reverse_bytes_quad32(iv));
+
     // Create the XMM constants
     InitPshufb64Mask(mask64, rax);
 
@@ -446,12 +470,9 @@ procedure {:quick} aes_counter_loop(
     PinsrdImm(four, 4, 0, rax);
     PinsrdImm(four, 4, 2, rax);
 
-    // Initialize the counters
-    Mov128(const2_1, iv);
-    Mov128(const4_3, iv);
+    aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), 0, plain_b, out_b, key, round_keys, keys_b, reverse_bytes_quad32(iv));
 
 }
-*/
 
 // TODO: Add XMM memory operands, so we can avoid using xmm3 to hold constants
 /*
@@ -507,6 +528,7 @@ procedure {:quick} aes_ctr_inner(
     Mov128(xmm2, xmm0);             // Copy xmm0 into xmm2
     InitPshufbDupMask(xmm3, rax);   // xmm3 := dup_mask
     PshufbDup(xmm2, xmm3);          // LSB: 0 | bswap(ivec_hi) | 0 | bswap(ivec_hi)
+    ZeroXmm(xmm3);
     PinsrdImm(xmm3, 2, 0, rax);
     PinsrdImm(xmm3, 1, 2, rax);     // xmm3 := TWO_N_ONE
     Paddd(xmm2, xmm3);
