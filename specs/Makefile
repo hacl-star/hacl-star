@@ -168,14 +168,6 @@ poly1305_ml.exe: $(LIBS_FILES) Spec.Poly1305.Generic.fst tests/Spec.Poly1305.Gen
 	./poly1305_generic.exe
 
 # NOT Under CI
-sbox.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.Sbox.fst
-	mkdir -p sbox-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module FStar.BitVector --extract_module Spec.GaloisField --extract_module Spec.Sbox --odir sbox-ml $^
-	@echo 'let _ = test()' >> sbox-ml/Spec_Sbox.ml
-	$(OCAMLOPT) -I sbox-ml $(OCAML_INCLUDES) sbox-ml/Lib_IntTypes.ml sbox-ml/Lib_Sequence.ml sbox-ml/Spec_GaloisField.ml sbox-ml/Spec_Sbox.ml -o sbox.exe
-	./sbox.exe
-
-# NOT Under CI
 qdsa.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.SHA2.fst Spec.Qdsa.fst
 	$(FSTAR) --lax --codegen OCaml --include lib --include lemmas --extract_module Lib.IntTypes --extract_module Lib.Sequence --extract_module Spec.Qdsa --extract_module Spec.Curve25519 --extract_module Spec.SHA2 --extract_module Lib.RawIntTypes  --odir qdsa-ml $^
 	@echo 'let _ = test()' >> qdsa-ml/Spec_Qdsa.ml
