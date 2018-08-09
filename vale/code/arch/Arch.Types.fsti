@@ -82,6 +82,12 @@ val push_pop_xmm (x y:quad32) : Lemma
   (let x' = insert_nat64 (insert_nat64 y (hi64 x) 1) (lo64 x) 0 in
    x == x')
 
+val lemma_insrq_extrq_relations (x y:quad32) :  
+  Lemma (let z = insert_nat64 x (lo64 y) 0 in
+         z == Mkfour y.lo0 y.lo1 x.hi2 x.hi3 /\
+        (let z = insert_nat64 x (hi64 y) 1 in
+         z == Mkfour x.lo0 x.lo1 y.hi2 y.hi3))
+        
 val le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) == create 1 b)
 

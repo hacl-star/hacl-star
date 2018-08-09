@@ -197,11 +197,12 @@ procedure{:quick} aes_ctr_loop_body(
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
 
-    ghost icb_BE:quad32
+    ghost icb_BE:quad32,
+    ghost iv:quad32
     )
     lets
-        plain_ptr @= rdi; num_quad_blocks @= r8; out_ptr @= rsi; key_ptr @= r9;
-        const2_1 @= xmm1; const4_3 @= xmm2; iv @= xmm0; mask64 @= xmm3; four @= xmm4;
+        plain_ptr @= rdi; num_quad_blocks @= r8; out_ptr @= rsi; key_ptr @= r9; iv_lower64 @= r10;
+        const2_1 @= xmm1; const4_3 @= xmm2; mask64 @= xmm3; four @= xmm4;
         rk1 @= xmm8; rk2 @= xmm9; rk3 @= xmm10; rk4 @= xmm7;        // Round keys
         ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
         tmp_xmm @= xmm5;
@@ -236,11 +237,12 @@ procedure{:quick} aes_ctr_loop_body(
 
         // GCM reqs
         iv == reverse_bytes_quad32(icb_BE);
+        iv_lower64 == lo64(iv);
 
         // GCTR progress
         gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
 
-    reads key_ptr; iv; mask64; four; memTaint;
+    reads key_ptr; iv_lower64; mask64; four; memTaint;
     modifies const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
              tmp_xmm; plain_ptr; num_quad_blocks; out_ptr; efl; mem;
     ensures
@@ -264,10 +266,18 @@ procedure{:quick} aes_ctr_loop_body(
         // GCTR progress
         gctr_partial(alg, 4*count+4, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
 {
-    Mov128(ctr1, iv);        // ctr1==12==13==14 == LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | bswap(icb_BE.lo1) | bswap(icb_BE.lo0)
-    Mov128(ctr2, iv);
-    Mov128(ctr3, iv);
-    Mov128(ctr4, iv);
+    lemma_insrq_extrq_relations(ctr1, iv);
+    lemma_insrq_extrq_relations(ctr2, iv);
+    lemma_insrq_extrq_relations(ctr3, iv);
+    lemma_insrq_extrq_relations(ctr4, iv);
+    Pinsrq(ctr1, iv_lower64, 0);  // ctr1==12==13==14 == LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | * | *
+    Pinsrq(ctr2, iv_lower64, 0);
+    Pinsrq(ctr3, iv_lower64, 0);
+    Pinsrq(ctr4, iv_lower64, 0);
+//    Mov128(ctr1, iv);        // ctr1==12==13==14 == LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | bswap(icb_BE.lo1) | bswap(icb_BE.lo0)
+//    Mov128(ctr2, iv);
+//    Mov128(ctr3, iv);
+//    Mov128(ctr4, iv);
 
     Shufpd(ctr1, const2_1, 2); // ctr1 = LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | iv.hi2 == bswap(icb_BE.lo1) | bswap(4*count)
     Shufpd(ctr2, const2_1, 0); // ctr2 = LSB: bswap(icb_BE.hi3) | bswap(icb_BE.hi2) | iv.hi2 == bswap(icb_BE.lo1) | bswap(4*count+1)
@@ -404,16 +414,17 @@ procedure {:quick} aes_counter_loop(
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128
     )
-    lets plain_ptr @= rdi; num_quad_blocks @= r8; out_ptr @= rsi; key_ptr @= r9;
+    lets plain_ptr @= rdi; num_quad_blocks @= r8; out_ptr @= rsi; key_ptr @= r9; iv_lower64 @= r10;
          const2_1 @= xmm1; const4_3 @= xmm2; iv @= xmm0; mask64 @= xmm3; four @= xmm4;
          rk1 @= xmm8; rk2 @= xmm9; rk3 @= xmm10; rk4 @= xmm7;        // Round keys
          ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
          tmp_xmm @= xmm5;
     
-    reads key_ptr; iv; memTaint;
-    modifies mask64; four; const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
+    reads key_ptr; memTaint;
+    modifies mask64; four; iv; const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
              tmp_xmm; 
-             rax; plain_ptr; num_quad_blocks; out_ptr; efl; mem;
+             rax; plain_ptr; num_quad_blocks; out_ptr; iv_lower64;
+             efl; mem;
 
     requires
         // There's at least one block of four left to do
@@ -443,7 +454,7 @@ procedure {:quick} aes_counter_loop(
         gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(reverse_bytes_quad32(iv)));
 
         // TODO:
-        //icb == inc32(old(icb), old(len));
+        //iv == inc32(old(iv), 4*old(num_quad_blocks));
 
         // TODO:
 //        // GHash
@@ -475,6 +486,9 @@ procedure {:quick} aes_counter_loop(
     reveal_reverse_bytes_quad32(iv);
     reveal_reverse_bytes_quad32(reverse_bytes_quad32(iv));
 
+    // Store rest of iv in a 64-bit register
+    Pextrq(iv_lower64, iv, 0);
+
     // Create the XMM constants
     InitPshufb64Mask(mask64, rax);
 
@@ -484,6 +498,7 @@ procedure {:quick} aes_counter_loop(
 
     ghost var count:nat := 0;
     ghost var icb_BE:quad32 := reverse_bytes_quad32(iv);
+    ghost var old_iv := iv;
     
     while (num_quad_blocks > 0) 
         invariant 
@@ -514,23 +529,29 @@ procedure {:quick} aes_counter_loop(
             // Counters are correct
             num_quad_blocks > 0 ==> 4*count < pow2_32 - 4;  
             num_quad_blocks <= 0 ==> 4*count < pow2_32;  
-            const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 1))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 0))));
-            const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 3))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 2))));
+            const2_1 == Mkfour(old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 1))), old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 0))));
+            const4_3 == Mkfour(old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 3))), old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 2))));
 
             // AES reqs
             aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
             // GCM reqs
-            iv == reverse_bytes_quad32(icb_BE);
+            old_iv == reverse_bytes_quad32(icb_BE);
+            iv_lower64 == lo64(old_iv);
 
             // GCTR progress
             gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {
-        aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE);
+        aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE, old_iv);
         count := count + 1;
     }
 
+    Mov128(iv, const2_1);
+    Pinsrq(iv, iv_lower64, 0);
+    lemma_insrq_extrq_relations(iv, old(iv));
+    assert {:quick_type} 4*old(num_quad_blocks) < pow2_32;
+    assert iv == Mkfour(old(iv.lo0), old(iv.lo1), old(iv.hi2), reverse_bytes_nat32(add_wrap(icb_BE.lo0, 4*old(num_quad_blocks))));
 }
 
 // TODO: Add XMM memory operands, so we can avoid using xmm3 to hold constants
