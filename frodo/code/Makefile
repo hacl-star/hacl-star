@@ -144,7 +144,8 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'Hacl.Test.Frodo' \
 	-no-prefix 'Hacl.Impl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
-	-bundle 'Hacl.Impl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.Random' \
+	-no-prefix 'Hacl.Frodo.Clear' \
+	-bundle 'Hacl.Impl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
@@ -181,6 +182,7 @@ ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
   include/randombytes.c \
   include/Hacl_Keccak.c \
+  include/clearwords.c \
   $(HACL_HOME)/lib/c/Lib_PQ_Print.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
@@ -266,6 +268,7 @@ BASE_OBJ = \
   ../../lib/c/Lib_PQ_Print.o \
   include/Hacl_Keccak.o \
   include/randombytes.o \
+  include/clearwords.o \
   $(LWEKE_HOME)/objs/sha3/fips202.o \
   $(LWEKE_HOME)/tests/rng.o \
   $(LWEKE_HOME)/objs/aes/aes_c.o \
@@ -289,7 +292,8 @@ $(OUT_DIR)/Hacl_Impl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.kr
 	-no-prefix 'Hacl.Test.Frodo' \
 	-no-prefix 'Hacl.Impl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
-	-bundle 'Hacl.Impl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.Random' \
+	-no-prefix 'Hacl.Frodo.Clear' \
+	-bundle 'Hacl.Impl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
