@@ -175,11 +175,11 @@ qdsa.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.SHA2.fst Spec.Qdsa.fst
 	./qdsa.exe
 
 # NOT Under CI
-argon2i.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
+argon2i.exe: $(LIBS_FILES) Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
 	mkdir -p argon2i-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2b --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Blake2b --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
 	@echo 'let _ = test()' >> argon2i-ml/Spec_Argon2i_Test.ml
-	$(OCAMLOPT) -I argon2i-ml argon2i-ml/Lib_IntTypes.ml argon2i-ml/Lib_RawIntTypes.ml argon2i-ml/Lib_Sequence.ml argon2i-ml/Lib_Stateful.ml argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
+	$(OCAMLOPT) -I argon2i-ml argon2i-ml/Lib_IntTypes.ml argon2i-ml/Lib_RawIntTypes.ml argon2i-ml/Lib_Sequence.ml argon2i-ml/Lib_ByteSequence.ml argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
 	./argon2i.exe
 
 # NOT Under CI
