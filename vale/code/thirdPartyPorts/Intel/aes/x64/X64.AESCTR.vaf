@@ -189,7 +189,7 @@ procedure{:quick} aes_ctr_loop_body(
     ghost old_plain_ptr:nat64,
     ghost old_out_ptr:nat64,
     ghost old_num_quad_blocks:nat64,
-    ghost count:nat32,
+    ghost count:nat,
     ghost plain_b:buffer128,
     ghost out_b:buffer128,
 
@@ -220,6 +220,7 @@ procedure{:quick} aes_ctr_loop_body(
         old_plain_ptr + old_num_quad_blocks * 64 < pow2_64;
         old_out_ptr + old_num_quad_blocks * 64 < pow2_64;
         buffer_length(plain_b)  <= buffer_length(out_b);
+        buffers_disjoint128(out_b, keys_b);
 
         // XMM constants are correct
         mask64 == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
@@ -243,12 +244,18 @@ procedure{:quick} aes_ctr_loop_body(
     modifies const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
              tmp_xmm; plain_ptr; num_quad_blocks; out_ptr; efl; mem;
     ensures
+        // Framing
+        modifies_buffer128(out_b, old(mem), mem);
+
         // Valid ptrs and buffers
         validSrcAddrs128(mem, old_plain_ptr,  plain_b, old_num_quad_blocks * 4, memTaint, Secret);
         validDstAddrs128(mem, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memTaint, Secret);
         plain_ptr == old(plain_ptr) + 64;
         out_ptr   == old(out_ptr)   + 64;
         num_quad_blocks == old(num_quad_blocks) - 1;
+        
+        // AES reqs
+        aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
         // Counters are incremented
         const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 1))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 0))));
@@ -410,7 +417,7 @@ procedure {:quick} aes_counter_loop(
 
     requires
         // There's at least one block of four left to do
-        0 < num_quad_blocks < pow2_32 - 4;
+        0 < num_quad_blocks && 4*num_quad_blocks < pow2_32 - 4;
 
         // Valid ptrs and buffers
         validSrcAddrs128(mem, plain_ptr,  plain_b, num_quad_blocks * 4, memTaint, Secret);
@@ -418,6 +425,9 @@ procedure {:quick} aes_counter_loop(
         plain_ptr + num_quad_blocks * 64 < pow2_64;
         out_ptr   + num_quad_blocks * 64 < pow2_64;
         buffer_length(plain_b)  <= buffer_length(out_b);
+
+        buffers_disjoint128(out_b, keys_b);
+        buffers_disjoint128(plain_b, out_b);        // TODO: Remove this requirement
 
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
@@ -470,7 +480,54 @@ procedure {:quick} aes_counter_loop(
     PinsrdImm(four, 4, 0, rax);
     PinsrdImm(four, 4, 2, rax);
 
-    aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), 0, plain_b, out_b, key, round_keys, keys_b, reverse_bytes_quad32(iv));
+    ghost var count:nat := 0;
+    ghost var icb_BE:quad32 := reverse_bytes_quad32(iv);
+    
+    while (num_quad_blocks > 0) 
+        invariant 
+            0 < old(num_quad_blocks) && 4*old(num_quad_blocks) < pow2_32 - 4;
+            0 <= num_quad_blocks <= old(num_quad_blocks);
+            count == old(num_quad_blocks) - num_quad_blocks;
+            0 <= count <= pow2_32 - 4;
+        
+            // Framing
+            modifies_buffer128(out_b, old(mem), mem);
+            buffer128_as_seq(mem, plain_b) == old(buffer128_as_seq(mem, plain_b));  // REVIEW: Shouldn't this follow from above + disjoint?
+
+            // Valid ptrs and buffers
+            validSrcAddrs128(mem, old(plain_ptr),  plain_b, old(num_quad_blocks * 4), memTaint, Secret);
+            validDstAddrs128(mem, old(out_ptr),    out_b,   old(num_quad_blocks * 4), memTaint, Secret);
+            plain_ptr == old(plain_ptr) + count * 64;
+            out_ptr == old(out_ptr) + count * 64;
+            old(plain_ptr) + old(num_quad_blocks) * 64 < pow2_64;
+            old(out_ptr) + old(num_quad_blocks) * 64 < pow2_64;
+            buffer_length(plain_b)  <= buffer_length(out_b);
+            buffers_disjoint128(out_b, keys_b);
+            buffers_disjoint128(plain_b, out_b);        // TODO: Remove this requirement
+
+            // XMM constants are correct
+            mask64 == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
+            four == Mkfour(4, 0, 4, 0);
+
+            // Counters are correct
+            num_quad_blocks > 0 ==> 4*count < pow2_32 - 4;  
+            num_quad_blocks <= 0 ==> 4*count < pow2_32;  
+            const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 1))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 0))));
+            const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 3))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 2))));
+
+            // AES reqs
+            aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
+
+            // GCM reqs
+            iv == reverse_bytes_quad32(icb_BE);
+
+            // GCTR progress
+            gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
+        decreases num_quad_blocks;
+    {
+        aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE);
+        count := count + 1;
+    }
 
 }
 
