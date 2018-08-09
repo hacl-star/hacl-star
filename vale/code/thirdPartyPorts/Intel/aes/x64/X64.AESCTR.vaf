@@ -443,6 +443,9 @@ procedure {:quick} aes_counter_loop(
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
+        // GCM reqs
+        mask64 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
     ensures
         modifies_buffer128(out_b, old(mem), mem);
         validSrcAddrs128(mem, old(out_ptr), out_b, old(num_quad_blocks) * 4, memTaint, Secret);
@@ -451,16 +454,19 @@ procedure {:quick} aes_counter_loop(
         out_ptr   == old(out_ptr)   + 64 * old(num_quad_blocks);
 
         // GCTR
-        gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(reverse_bytes_quad32(iv)));
+        gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(iv));
 
-        // TODO:
-        //iv == inc32(old(iv), 4*old(num_quad_blocks));
+        iv == old(inc32(iv, 4*num_quad_blocks));
 
+        mask64 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
         // TODO:
 //        // GHash
 //        len == 0 ==> hash == old(hash);
 //        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
 {
+    // To interface with our existing code, start by reversing the IV
+    Pshufb(iv, mask64);
+
     // Initialize the counters
     Mov128(const2_1, iv);
 
@@ -498,7 +504,7 @@ procedure {:quick} aes_counter_loop(
 
     ghost var count:nat := 0;
     ghost var icb_BE:quad32 := reverse_bytes_quad32(iv);
-    ghost var old_iv := iv;
+    ghost var old_iv:quad32 := iv;
     
     while (num_quad_blocks > 0) 
         invariant 
@@ -549,9 +555,17 @@ procedure {:quick} aes_counter_loop(
 
     Mov128(iv, const2_1);
     Pinsrq(iv, iv_lower64, 0);
-    lemma_insrq_extrq_relations(iv, old(iv));
+    lemma_insrq_extrq_relations(iv, old_iv);
     assert {:quick_type} 4*old(num_quad_blocks) < pow2_32;
-    assert iv == Mkfour(old(iv.lo0), old(iv.lo1), old(iv.hi2), reverse_bytes_nat32(add_wrap(icb_BE.lo0, 4*old(num_quad_blocks))));
+    //assert iv == Mkfour(old_iv.lo0, old_iv.lo1, old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, 4*old(num_quad_blocks))));
+    // Reversed: iv == Mkfour(r (r (add_wrap(r(old_iv.hi3), 4*old(num_quad_blocks)))), r(old_iv.hi2), r(old_iv.lo1), r(old_iv.lo0));
+    //              == Mkfour( add_wrap(old(iv.lo0, 4*old(num_quad_blocks))), old(iv.lo2), old(iv.hi2), old(iv).hi3));
+    //              == inc32(old(iv), 4*old(num_quad_blocks))
+    reveal_reverse_bytes_quad32(iv);
+    InitPshufbMask(mask64, rax);
+    Pshufb(iv, mask64);
+    //assert iv == old(inc32(iv, 4*num_quad_blocks));
+   
 }
 
 // TODO: Add XMM memory operands, so we can avoid using xmm3 to hold constants
