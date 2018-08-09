@@ -363,7 +363,6 @@ let update_multi_block (a: hash_alg) (h: hash_w a) (input: bytes):
   Lemma
     (requires (
       S.length input % size_block a = 0 /\
-      S.length input < max_input8 a /\
       size_block a <= S.length input
     ))
     (ensures (
@@ -374,12 +373,11 @@ let update_multi_block (a: hash_alg) (h: hash_w a) (input: bytes):
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
-let rec update_multi_associative (a: hash_alg) (h: hash_w a) (input: bytes) (len: nat):
+val update_multi_associative: a: hash_alg -> h: hash_w a -> input: bytes -> len: nat ->
   Lemma
     (requires (
       len % size_block a = 0 /\
       S.length input % size_block a = 0 /\
-      S.length input < max_input8 a /\
       len <= S.length input
     ))
     (ensures (
@@ -387,7 +385,8 @@ let rec update_multi_associative (a: hash_alg) (h: hash_w a) (input: bytes) (len
       S.equal (update_multi a (update_multi a h input1) input2) (update_multi a h input)))
     (decreases (
       %[ S.length input; len ]))
-=
+
+let rec update_multi_associative a h input len =
   let i_l, i_r = S.split input len in
   let n = len / size_block a in
   if len = 0 then begin
@@ -404,7 +403,37 @@ let rec update_multi_associative (a: hash_alg) (h: hash_w a) (input: bytes) (len
     update_multi_associative a h input (len - size_block a)
   end
 
+#set-options "--max_fuel 0"
+
+let pad0_length_mod (a: hash_alg) (prev_len: nat) (len: nat): Lemma
+  (requires (
+    prev_len % size_block a = 0))
+  (ensures (
+    pad0_length a (prev_len + len) = pad0_length a len))
+=
+  ()
+
 let hash_is_hash_nist (a: hash_alg) (input: bytes { S.length input < max_input8 a }):
   Lemma (ensures (hash_nist a input == hash a input))
 =
+  let open FStar.Mul in
+  let n = S.length input / size_block a in
+  // From hash_nist:
+  let padded_input = S.(input @| pad a 0 (S.length input)) in
+  let blocks, rest = split_block a padded_input n in
+  update_multi_associative a (h0 a) padded_input (n * size_block a);
+  assert (hash_nist a input == finish a (update_multi a (update_multi a (h0 a) blocks) rest));
+  // From hash:
+  let blocks', rest' = S.split input (n * size_block a) in
+  assert (hash a input ==
+    finish a (update_last a (update_multi a (h0 a) blocks') (n * size_block a) rest'));
+  // Then.
+  assert (Seq.equal blocks blocks');
+  pad0_length_mod a (S.length blocks') (S.length rest');
+  assert (pad a 0 (S.length input) == pad a (S.length blocks') (S.length rest'));
+  assert (Seq.equal rest S.(rest' @| pad a 0 (length input)));
+  assert (
+    let padding = pad a 0 (S.length input) in
+    hash a input ==
+    finish a (update_multi a (update_multi a (h0 a) blocks) rest));
   ()
