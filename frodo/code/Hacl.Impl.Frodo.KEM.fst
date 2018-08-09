@@ -19,6 +19,7 @@ open Hacl.Impl.Frodo.Encode
 open Hacl.Impl.Frodo.Pack
 open Hacl.Impl.Frodo.Sample
 open Hacl.Impl.Frodo.Gen
+open Hacl.Frodo.Clear
 
 module ST = FStar.HyperStack.ST
 module Lemmas = Spec.Frodo.Lemmas
@@ -85,6 +86,8 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix;
   frodo_pack params_n params_nbar b_matrix params_logq b;
   matrix_to_lbytes s_matrix s;
+  clear_words_u16 (params_n *! params_nbar) s_matrix;
+  clear_words_u16 (params_n *! params_nbar) e_matrix;
   pop_frame()
 
 val crypto_kem_keypair:
@@ -137,6 +140,7 @@ let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix =
 
   matrix_mul sp_matrix a_matrix bp_matrix;
   matrix_add bp_matrix ep_matrix;
+  clear_words_u16 (params_nbar *! params_n) ep_matrix;
   pop_frame()
 
 val frodo_mul_add_sb_plus_e_plus_mu:
@@ -166,6 +170,7 @@ let frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix =
   matrix_mul sp_matrix b_matrix v_matrix;
   matrix_add v_matrix epp_matrix;
   matrix_add v_matrix mu_encode;
+  clear_words_u16 (params_nbar *! params_nbar) epp_matrix;
   pop_frame()
 
 val crypto_kem_enc_ct_pack:
@@ -195,6 +200,7 @@ let crypto_kem_enc_ct_pack seed_a seed_e coins b sp_matrix ct =
   let v_matrix = matrix_create params_nbar params_nbar in
   frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix;
   frodo_pack params_nbar params_nbar v_matrix params_logq (sub ct c1Len c2Len);
+  clear_words_u16 (params_nbar *! params_nbar) v_matrix;
   pop_frame()
 
 val crypto_kem_enc_ct:
@@ -224,6 +230,7 @@ let crypto_kem_enc_ct pk g coins ct =
   crypto_kem_enc_ct_pack seed_a seed_e coins b sp_matrix ct;
   let d = sub #uint8 #_ #(v crypto_bytes) g (size 2 *! crypto_bytes) crypto_bytes in
   copy (sub ct c12Len crypto_bytes) crypto_bytes d;
+  clear_words_u16 (params_nbar *! params_n) sp_matrix;
   pop_frame()
 
 val crypto_kem_enc_ss:
@@ -287,6 +294,7 @@ let crypto_kem_enc ct ss pk =
 
   crypto_kem_enc_ct pk g coins ct;
   crypto_kem_enc_ss g ct ss;
+  clear_words_u8 (size 2 *! crypto_bytes) (sub g (size 0) (size 2 *! crypto_bytes));
   pop_frame();
   u32 0
 
@@ -405,6 +413,8 @@ let crypto_kem_dec_ss1 pk_mu_decode bp_matrix c_matrix sk ct ss =
   let b3 = matrix_eq params_logq c_matrix v_matrix in
   let kp_s = if (b1 && b2 && b3) then kp else s in
   crypto_kem_dec_ss ct g kp_s ss;
+  clear_words_u16 (params_nbar *! params_n) sp_matrix;
+  clear_words_u8 (size 2 *! crypto_bytes) (sub g (size 0) (size 2 *! crypto_bytes));
   pop_frame()
 
 val crypto_kem_dec:
