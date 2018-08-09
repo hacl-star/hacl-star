@@ -146,14 +146,6 @@ rsapss.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.f
 #
 
 # NOT Under CI
-noise.exe: $(LIBS_FILES) Spec.Noise.fst
-	mkdir -p noise-ml
-	$(FSTAR) --expose_interfaces --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes  --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Noise --odir noise-ml $^
-	@echo 'let _ = test()' >> noise-ml/Spec_Noise.ml
-	$(OCAMLOPT) -I noise-ml $(addprefix noise-ml/, $(LIBS_ML)) noise-ml/Spec_Noise.ml -o noise.exe
-	./noise.exe
-
-# NOT Under CI
 chacha20_vec.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Chacha20_vec.fst tests/Spec.Chacha20_vec.Test.fst
 	mkdir -p chacha20_vec-ml
 	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.CTR --extract_module Spec.Chacha20_vec --extract_module Spec.Chacha20_vec.Test --odir chacha20_vec-ml $^
