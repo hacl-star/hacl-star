@@ -5,42 +5,18 @@ module U64 = FStar.UInt64
 module C = Spec.SHA2Again.Constants
 module S = FStar.Seq
 
-(* List the Hash algorithms *)
-type hash_alg =
-  | SHA2_224
-  | SHA2_256
-  | SHA2_384
-  | SHA2_512
+(** This module contains:
+  - base definitions and types for the SHA algorithms
+  - definitions for padding, chopping up input data in blocks and computing the
+    final hash; see `h0`, `update_multi`, `pad` and `hash`
+  - computing the hash incrementally where the padding is done only at the end,
+    an alternate style that turns out to be useful when implementing the API,
+    see `update_last` and `hash_incremental`
+  - a presentation that leaves everything abstract until the final call, useful
+    for implementing cryptographic constructions (e.g. HKDF), see `init`, `compress`, `compress_last` and `extract`
+*)
 
-(* Defines the size of the word for each algorithm *)
-inline_for_extraction
-let size_word: hash_alg -> Tot nat = function
-  | SHA2_224 | SHA2_256 -> 4
-  | SHA2_384 | SHA2_512 -> 8
-
-(* Number of words for intermediate hash *)
-let size_hash_w = 8
-
-(* Number of words for final hash *)
-inline_for_extraction
-let size_hash_final_w: hash_alg -> Tot nat = function
-  | SHA2_224 -> 7
-  | SHA2_256 -> 8
-  | SHA2_384 -> 6
-  | SHA2_512 -> 8
-
-(* Define the final hash length in bytes *)
-let size_hash a =
-  let open FStar.Mul in
-  size_word a * size_hash_final_w a
-
-(* Number of words for a block size *)
-let size_block_w = 16
-
-(* Define the size block in bytes *)
-let size_block a =
-  let open FStar.Mul in
-  size_word a * size_block_w
+(** Constants and helpers *)
 
 (* Define the length of the constants *)
 inline_for_extraction
@@ -62,14 +38,6 @@ let size_len_ul_8: a:hash_alg -> Tot (n:U32.t{U32.v n = size_len_8 a}) = functio
   | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
 
-(* Define the maximum input length in bytes *)
-inline_for_extraction
-let max_input8: hash_alg -> Tot nat = function
-  | SHA2_224 | SHA2_256 -> pow2 61
-  | SHA2_384 | SHA2_512 -> pow2 125
-
-(* Definition of main types *)
-type bytes = m:S.seq UInt8.t
 
 inline_for_extraction
 let word: hash_alg -> Tot Type0 = function
@@ -195,20 +163,22 @@ let _sigma1 a x = word_logxor a (word_rotate_right a x (op0 a).e3)
                                 (word_logxor a (word_rotate_right a x (op0 a).e4)
                                                (word_shift_right a x (op0 a).e5))
 
+let h0: a:hash_alg -> Tot (m:hash_w a) = function
+  | SHA2_224 -> C.h224
+  | SHA2_256 -> C.h256
+  | SHA2_384 -> C.h384
+  | SHA2_512 -> C.h512
+
 let k0: a:hash_alg -> Tot (m:S.seq (word a) {S.length m = size_k_w a}) = function
   | SHA2_224 -> C.k224_256
   | SHA2_256 -> C.k224_256
   | SHA2_384 -> C.k384_512
   | SHA2_512 -> C.k384_512
 
-let h0: a:hash_alg -> Tot (m:S.seq (word a) {S.length m = size_hash_w}) = function
-  | SHA2_224 -> C.h224
-  | SHA2_256 -> C.h256
-  | SHA2_384 -> C.h384
-  | SHA2_512 -> C.h512
-
 unfold
 let (.[]) = S.index
+
+(** Specifying SHA, close to the NIST spec *)
 
 (* Scheduling function *)
 let rec ws (a:hash_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
@@ -222,7 +192,6 @@ let rec ws (a:hash_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) 
     let s1 = _sigma1 a t2 in
     let s0 = _sigma0 a t15 in
     (word_add_mod a s1 (word_add_mod a t7 (word_add_mod a s0 t16)))
-
 
 (* Core shuffling function *)
 let shuffle_core (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}): Tot (hash_w a) =
@@ -255,18 +224,11 @@ let update (a:hash_alg) (hash:hash_w a) (block:bytes{S.length block = size_block
   let hash_1 = shuffle a hash block_w in
   Spec.Loops.seq_map2 (fun x y -> word_add_mod a x y) hash hash_1
 
+(* A helper that deals with the modulo proof obligation to make things go smoothly. *)
 let split_block (a: hash_alg)
-  (blocks: bytes)
-  (n: nat):
-  Pure
-    (bytes * bytes)
-    (requires (
-      S.length blocks % size_block a = 0 /\
-      n <= S.length blocks / size_block a))
-    (ensures (fun ret ->
-      let block, rem = ret in
-      S.length rem % size_block a = 0 /\
-      S.length block % size_block a = 0))
+  (blocks: bytes_blocks a)
+  (n: nat{n <= S.length blocks / size_block a}):
+  Tot (bytes_blocks a * bytes_blocks a)
 =
   let block, rem = S.split blocks FStar.Mul.(n * size_block a) in
   assert (S.length rem = S.length blocks - S.length block);
@@ -278,7 +240,7 @@ let split_block (a: hash_alg)
 let rec update_multi
   (a:hash_alg)
   (hash:hash_w a)
-  (blocks:bytes{S.length blocks % size_block a = 0}):
+  (blocks:bytes_blocks a):
   Tot (hash_w a) (decreases (S.length blocks))
 =
   if S.length blocks = 0 then
@@ -309,55 +271,27 @@ let pad (a:hash_alg) (prevlen:nat{prevlen % (size_block a) = 0}) (len:nat{prevle
   let encodedlen = Endianness.big_bytes (size_len_ul_8 a) (total_len * 8) in
   S.(firstbyte @| zeros @| encodedlen)
 
-(* Compress full blocks, then pad the partial block and compress the last block *)
-let update_last (a:hash_alg) (hash:hash_w a) (prevlen:nat{prevlen % (size_block a) = 0}) (input:bytes{(S.length input) + prevlen < (max_input8 a)}): Tot (hash_w a) =
-  let blocks = pad a prevlen (S.length input) in
-  update_multi a hash S.(input @| blocks)
-
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
 let finish (a:hash_alg) (hashw:hash_w a): Tot (hash:bytes{S.length hash = (size_hash a)}) =
   let hash_final_w = S.slice hashw 0 (size_hash_final_w a) in
   words_to_be a (size_hash_final_w a) hash_final_w
 
-(* Hash function using the incremental definition *)
+(* This one is close to the NIST standard. *)
 let hash (a:hash_alg) (input:bytes{S.length input < (max_input8 a)}):
-  Tot (hash:bytes{S.length hash = (size_hash a)})
-=
-  let open FStar.Mul in
-  let n = S.length input / (size_block a) in
-  let (bs,l) = S.split input (n * (size_block a)) in
-  let hash = update_multi a (h0 a) bs in
-  let hash = update_last a hash (n * (size_block a)) l in
-  finish a hash
-
-(* Hash function using the padding function first. Closer to the NIST spec, but
-   less amenable to implementing directly. *)
-let hash_nist (a:hash_alg) (input:bytes{S.length input < (max_input8 a)}):
   Tot (hash:bytes{S.length hash = (size_hash a)})
 =
   let blocks = pad a 0 (S.length input) in
   finish a (update_multi a (h0 a) S.(input @| blocks))
 
-(* Now proving that these two are equivalent. *)
+(** Lemmas about the behavior of update_multi / update_last *)
 
 let update_multi_zero (a: hash_alg) (h: hash_w a): Lemma
   (ensures (S.equal (update_multi a h S.empty) h))
+  [ SMTPat (update_multi a h S.empty) ]
 =
   ()
 
 #set-options "--z3rlimit 50"
-
-let update_multi_one (a: hash_alg) (h: hash_w a) (input: bytes):
-  Lemma
-    (requires (
-      S.length input = size_block a
-    ))
-    (ensures (
-      S.equal (update a h input) (update_multi a h input)
-    ))
-=
-  let block, rem = split_block a input 1 in
-  update_multi_zero a (update a h block)
 
 let update_multi_block (a: hash_alg) (h: hash_w a) (input: bytes):
   Lemma
@@ -371,9 +305,13 @@ let update_multi_block (a: hash_alg) (h: hash_w a) (input: bytes):
 =
   ()
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-val update_multi_associative: a: hash_alg -> h: hash_w a -> input: bytes -> len: nat ->
+val update_multi_associative:
+  a: hash_alg ->
+  h: hash_w a ->
+  input: bytes ->
+  len: nat ->
   Lemma
     (requires (
       len % size_block a = 0 /\
@@ -403,7 +341,41 @@ let rec update_multi_associative a h input len =
     update_multi_associative a h input (len - size_block a)
   end
 
+(* In a form more suitable to SMTPat *)
+let update_multi_associative' (a: hash_alg)
+  (h: hash_w a)
+  (input1: bytes_blocks a)
+  (input2: bytes_blocks a):
+  Lemma (ensures (
+    let input = S.append input1 input2 in
+    S.equal (update_multi a (update_multi a h input1) input2) (update_multi a h input)))
+  [ SMTPat (update_multi a (update_multi a h input1) input2) ]
+=
+  let input = S.append input1 input2 in
+  let input1', input2' = split_block a input (S.length input1 / size_block a) in
+  assert (Seq.equal input1 input1');
+  assert (Seq.equal input2 input2');
+  update_multi_associative a h input (S.length input1)
+
 #set-options "--max_fuel 0"
+
+
+(** Alternate Hash API that is close to the implementation, shown to be equivalent. *)
+
+(* Compress full blocks, then pad the partial block and compress the last block *)
+let update_last (a:hash_alg) (hash:hash_w a) (prevlen:nat{prevlen % (size_block a) = 0}) (input:bytes{(S.length input) + prevlen < (max_input8 a)}): Tot (hash_w a) =
+  let blocks = pad a prevlen (S.length input) in
+  update_multi a hash S.(input @| blocks)
+
+let hash_incremental (a:hash_alg) (input:bytes{S.length input < (max_input8 a)}):
+  Tot (hash:bytes{S.length hash = (size_hash a)})
+=
+  let open FStar.Mul in
+  let n = S.length input / (size_block a) in
+  let (bs,l) = S.split input (n * (size_block a)) in
+  let hash = update_multi a (h0 a) bs in
+  let hash = update_last a hash (n * (size_block a)) l in
+  finish a hash
 
 let pad0_length_mod (a: hash_alg) (prev_len: nat) (len: nat): Lemma
   (requires (
@@ -413,19 +385,36 @@ let pad0_length_mod (a: hash_alg) (prev_len: nat) (len: nat): Lemma
 =
   ()
 
-let hash_is_hash_nist (a: hash_alg) (input: bytes { S.length input < max_input8 a }):
-  Lemma (ensures (hash_nist a input == hash a input))
+val update_last_multi_canonical_form: a:hash_alg ->
+  input1: bytes_blocks a ->
+  input2: bytes ->
+  Lemma
+    (requires (
+      S.length input1 + S.length input2 < max_input8 a))
+    (ensures (
+      update_last a (update_multi a (h0 a) input1) (S.length input1) input2 ==
+      update_last a (h0 a) 0 (S.append input1 input2)))
+    [ SMTPat (update_last a (update_multi a (h0 a) input1) (S.length input1) input2) ]
+
+let update_last_multi_canonical_form a input1 input2 =
+  let padding1 = pad a (S.length input1) (S.length input2) in
+  let padding2 = pad a 0 (S.length (S.append input1 input2)) in
+  assert (Seq.equal padding1 padding2);
+  assert (S.(equal ((input1 @| input2) @| padding2) (input1 @| input2 @| padding2)))
+
+let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input < max_input8 a }):
+  Lemma (ensures (hash a input == hash_incremental a input))
 =
   let open FStar.Mul in
   let n = S.length input / size_block a in
-  // From hash_nist:
+  // From hash:
   let padded_input = S.(input @| pad a 0 (S.length input)) in
   let blocks, rest = split_block a padded_input n in
   update_multi_associative a (h0 a) padded_input (n * size_block a);
-  assert (hash_nist a input == finish a (update_multi a (update_multi a (h0 a) blocks) rest));
-  // From hash:
+  assert (hash a input == finish a (update_multi a (update_multi a (h0 a) blocks) rest));
+  // From hash_incremental:
   let blocks', rest' = S.split input (n * size_block a) in
-  assert (hash a input ==
+  assert (hash_incremental a input ==
     finish a (update_last a (update_multi a (h0 a) blocks') (n * size_block a) rest'));
   // Then.
   assert (Seq.equal blocks blocks');
@@ -434,6 +423,27 @@ let hash_is_hash_nist (a: hash_alg) (input: bytes { S.length input < max_input8 
   assert (Seq.equal rest S.(rest' @| pad a 0 (length input)));
   assert (
     let padding = pad a 0 (S.length input) in
-    hash a input ==
+    hash_incremental a input ==
     finish a (update_multi a (update_multi a (h0 a) blocks) rest));
   ()
+
+(** Abstract Hash API *)
+
+let hashing (a: hash_alg) (l: bytes_blocks a) =
+  h:hash_w a{ h == update_multi a (h0 a) l }
+
+let hashed (a: hash_alg) (l: bytes { S.length l < max_input8 a }) =
+  h:hash_w a { h == update_last a (h0 a) 0 l }
+
+let init a = h0 a
+
+let compress a l h l' =
+  // update_multi_associative'
+  update_multi a h l'
+
+let compress_last a l h l' =
+  // update_last_multi_canonical
+  update_last a h (S.length l) l'
+
+let extract a l h =
+  finish a h
