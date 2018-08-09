@@ -3,10 +3,10 @@ module Spec.GF128.Test
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
 
 open FStar.Mul
-open Spec.Lib.IntTypes
-open Spec.Lib.RawIntTypes
-open Spec.Lib.IntSeq
-open Spec.Lib.Stateful
+open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 open Spec.GaloisField
 
 module GF = Spec.GF128
@@ -80,8 +80,8 @@ let test () =
   IO.print_string (Printf.sprintf "%d" y_int);
   IO.print_string "\n";
 
-  let output = GF.gmul test1_gmul_c_length test1_gmul_ciphertext test1_gmul_hash_key in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test1_gmul_expected in
+  let output = GF.gmul test1_gmul_c_length (createL test1_gmul_ciphertext) (createL test1_gmul_hash_key) in
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output (createL test1_gmul_expected) in
   IO.print_string   "Expected hash: ";
   let test_expected : lbytes key_length = createL test1_gmul_expected in
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
@@ -90,8 +90,8 @@ let test () =
   if result then IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n";
 
-  let output = GF.gmul test2_gmul_c_length test2_gmul_ciphertext test2_gmul_hash_key in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test2_gmul_expected in
+  let output = GF.gmul test2_gmul_c_length (createL test2_gmul_ciphertext) (createL test2_gmul_hash_key) in
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output (createL test2_gmul_expected) in
   IO.print_string   "Expected hash: ";
   let test_expected : lbytes key_length = createL test2_gmul_expected in
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
@@ -100,8 +100,8 @@ let test () =
   if result then IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n";
 
-  let output = GF.gmul test3_gmul_c_length test3_gmul_ciphertext test3_gmul_hash_key in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test3_gmul_expected in
+  let output = GF.gmul test3_gmul_c_length (createL test3_gmul_ciphertext) (createL test3_gmul_hash_key) in
+  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output (createL test3_gmul_expected) in
   IO.print_string   "Expected hash: ";
   let test_expected : lbytes key_length = createL test3_gmul_expected in
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a));  IO.print_string ":") (as_list test_expected);
