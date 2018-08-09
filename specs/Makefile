@@ -183,11 +183,11 @@ qdsa.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.SHA2.fst Spec.Qdsa.fst
 	./qdsa.exe
 
 # NOT Under CI
-pbkdf2.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.PBKDF2.fst tests/Spec.PBKDF2.Test.fst
+pbkdf2.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.PBKDF2.fst tests/Spec.PBKDF2.Test.fst
 	mkdir -p pbkdf2-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.PBKDF2 --extract_module Spec.PBKDF2.Test --odir pbkdf2-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.PBKDF2 --extract_module Spec.PBKDF2.Test --odir pbkdf2-ml $^
 	@echo 'let _ = test()' >> pbkdf2-ml/Spec_PBKDF2_Test.ml
-	$(OCAMLOPT) -I pbkdf2-ml $(OCAML_INCLUDES) pbkdf2-ml/Lib_IntTypes.ml pbkdf2-ml/Lib_RawIntTypes.ml pbkdf2-ml/Lib_Sequence.ml pbkdf2-ml/Lib_Stateful.ml pbkdf2-ml/Spec_SHA2.ml pbkdf2-ml/Spec_Hash.ml pbkdf2-ml/Spec_HMAC.ml pbkdf2-ml/Spec_PBKDF2.ml pbkdf2-ml/Spec_PBKDF2_Test.ml -o pbkdf2.exe
+	$(OCAMLOPT) -I pbkdf2-ml $(OCAML_INCLUDES) pbkdf2-ml/Lib_IntTypes.ml pbkdf2-ml/Lib_RawIntTypes.ml pbkdf2-ml/Lib_Sequence.ml pbkdf2-ml/Lib_ByteSequence.ml pbkdf2-ml/Spec_SHA2.ml pbkdf2-ml/Spec_Hash.ml pbkdf2-ml/Spec_HMAC.ml pbkdf2-ml/Spec_PBKDF2.ml pbkdf2-ml/Spec_PBKDF2_Test.ml -o pbkdf2.exe
 	./pbkdf2.exe
 
 # NOT Under CI
