@@ -2,6 +2,7 @@
 #define __KREMLIN_ENDIAN_H
 
 #include <string.h>
+#include <inttypes.h>
 
 /******************************************************************************/
 /* Implementing C.fst (part 2: endian-ness macros)                            */
