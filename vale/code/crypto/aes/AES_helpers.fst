@@ -128,3 +128,25 @@ let commute_sub_bytes_shift_rows_forall () :
          sub_bytes (shift_rows_LE q) == shift_rows_LE (sub_bytes q))
   =
   FStar.Classical.forall_intro commute_sub_bytes_shift_rows
+
+let rounds_opaque = make_opaque rounds
+
+let init_rounds_opaque (init:quad32) (round_keys:seq quad32) : 
+  Lemma (length round_keys > 0 ==> rounds_opaque init round_keys 0 == init)
+  =
+  reveal_opaque rounds
+
+#push-options "--max_ifuel 2 --initial_ifuel 2"  // REVIEW: Why do we need this?  Extra inversion to deal with opaque?
+let finish_cipher (alg:algorithm) (input:quad32) (round_keys:seq quad32) : 
+  Lemma(length round_keys == (nr alg) + 1 ==>
+        length round_keys > 0 /\ nr alg > 1 /\   // REVIEW: Why are these needed?
+           (let state = quad32_xor input (index round_keys 0) in
+            let state = rounds_opaque state round_keys (nr alg - 1) in            
+            let state = shift_rows_LE state in
+            let state = sub_bytes state in
+            let state = quad32_xor state (index round_keys (nr alg)) in
+            state == cipher alg input round_keys))
+  = 
+  reveal_opaque rounds;
+  commute_sub_bytes_shift_rows_forall()
+#pop-options  

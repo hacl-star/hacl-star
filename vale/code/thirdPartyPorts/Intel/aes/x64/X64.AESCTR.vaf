@@ -6,7 +6,7 @@ include "../../../../arch/x64/X64.Vale.InsAes.vaf"
 module X64.AESCTR
 
 #verbatim{:interface}{:implementation}
-//open Opaque_s
+open Opaque_s
 open Words_s
 open Types_s
 open FStar.Seq
@@ -58,27 +58,28 @@ procedure {:quick exportOnly} aes_round_4way(
     ghost round_keys:seq(quad32)
     )
     lets
-        ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+        ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     modifies
         ctr1; ctr2; ctr3; ctr4;
         efl;
     requires
         1 <= n < nr(alg) <= length(round_keys);
-        ctr1 == rounds(init1, round_keys, n - 1);
-        ctr2 == rounds(init2, round_keys, n - 1);
-        ctr3 == rounds(init3, round_keys, n - 1);
-        ctr4 == rounds(init4, round_keys, n - 1);
+        ctr1 == rounds_opaque(init1, round_keys, n - 1);
+        ctr2 == rounds_opaque(init2, round_keys, n - 1);
+        ctr3 == rounds_opaque(init3, round_keys, n - 1);
+        ctr4 == rounds_opaque(init4, round_keys, n - 1);
         round_key == index(round_keys, n);
-        11 != @round_key;
+         2 != @round_key;
         12 != @round_key;
         13 != @round_key;
         14 != @round_key;
     ensures
-        ctr1 == rounds(init1, round_keys, n);
-        ctr2 == rounds(init2, round_keys, n);
-        ctr3 == rounds(init3, round_keys, n);
-        ctr4 == rounds(init4, round_keys, n);
+        ctr1 == rounds_opaque(init1, round_keys, n);
+        ctr2 == rounds_opaque(init2, round_keys, n);
+        ctr3 == rounds_opaque(init3, round_keys, n);
+        ctr4 == rounds_opaque(init4, round_keys, n);
 {
+    reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     AESNI_enc(ctr1, round_key);
     AESNI_enc(ctr2, round_key);
@@ -96,8 +97,8 @@ procedure {:quick} aes_2rounds_4way(
     ghost round_keys:seq(quad32)
     )
     lets
-        rk1 @= xmm8; rk2 @= xmm9;                                   // Round keys
-        ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+        rk1 @= xmm3; rk2 @= xmm4;                                   // Round keys
+        ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     reads
         rk1; rk2;
     modifies
@@ -105,17 +106,17 @@ procedure {:quick} aes_2rounds_4way(
         efl;
     requires
         1 <= n < nr(alg) - 1 && nr(alg) <= length(round_keys);
-        ctr1 == rounds(init1, round_keys, n - 1);
-        ctr2 == rounds(init2, round_keys, n - 1);
-        ctr3 == rounds(init3, round_keys, n - 1);
-        ctr4 == rounds(init4, round_keys, n - 1);
+        ctr1 == rounds_opaque(init1, round_keys, n - 1);
+        ctr2 == rounds_opaque(init2, round_keys, n - 1);
+        ctr3 == rounds_opaque(init3, round_keys, n - 1);
+        ctr4 == rounds_opaque(init4, round_keys, n - 1);
         rk1  == index(round_keys, n);
         rk2  == index(round_keys, n + 1);
     ensures
-        ctr1 == rounds(init1, round_keys, n + 1);
-        ctr2 == rounds(init2, round_keys, n + 1);
-        ctr3 == rounds(init3, round_keys, n + 1);
-        ctr4 == rounds(init4, round_keys, n + 1);
+        ctr1 == rounds_opaque(init1, round_keys, n + 1);
+        ctr2 == rounds_opaque(init2, round_keys, n + 1);
+        ctr3 == rounds_opaque(init3, round_keys, n + 1);
+        ctr4 == rounds_opaque(init4, round_keys, n + 1);
 {
     aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
     aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
@@ -131,8 +132,8 @@ procedure {:quick} aes_3rounds_4way(
     ghost round_keys:seq(quad32)
     )
     lets
-        rk2 @= xmm9; rk3 @= xmm10; rk4 @= xmm7;                     // Round keys
-        ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+        rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;                     // Round keys
+        ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     reads
         rk2; rk3; rk4;
     modifies
@@ -140,18 +141,18 @@ procedure {:quick} aes_3rounds_4way(
         efl;
     requires
         1 <= n < nr(alg) - 2 && nr(alg) <= length(round_keys);
-        ctr1 == rounds(init1, round_keys, n - 1);
-        ctr2 == rounds(init2, round_keys, n - 1);
-        ctr3 == rounds(init3, round_keys, n - 1);
-        ctr4 == rounds(init4, round_keys, n - 1);
+        ctr1 == rounds_opaque(init1, round_keys, n - 1);
+        ctr2 == rounds_opaque(init2, round_keys, n - 1);
+        ctr3 == rounds_opaque(init3, round_keys, n - 1);
+        ctr4 == rounds_opaque(init4, round_keys, n - 1);
         rk2  == index(round_keys, n + 0);
         rk3 == index(round_keys, n + 1);
         rk4  == index(round_keys, n + 2);
     ensures
-        ctr1 == rounds(init1, round_keys, n + 2);
-        ctr2 == rounds(init2, round_keys, n + 2);
-        ctr3 == rounds(init3, round_keys, n + 2);
-        ctr4 == rounds(init4, round_keys, n + 2);
+        ctr1 == rounds_opaque(init1, round_keys, n + 2);
+        ctr2 == rounds_opaque(init2, round_keys, n + 2);
+        ctr3 == rounds_opaque(init3, round_keys, n + 2);
+        ctr4 == rounds_opaque(init4, round_keys, n + 2);
 {
     aes_round_4way(alg, n + 0, rk2,  init1, init2, init3, init4, round_keys);
     aes_round_4way(alg, n + 1, rk3, init1, init2, init3, init4, round_keys);
@@ -168,8 +169,8 @@ procedure {:quick} aes_4rounds_4way(
     ghost round_keys:seq(quad32)
     )
     lets
-        rk1 @= xmm8; rk2 @= xmm9; rk3 @= xmm10; rk4 @= xmm7;        // Round keys
-        ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+        rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
+        ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     reads
         rk1; rk2; rk3; rk4;
     modifies
@@ -177,19 +178,19 @@ procedure {:quick} aes_4rounds_4way(
         efl;
     requires
         1 <= n < nr(alg) - 3 && nr(alg) <= length(round_keys);
-        ctr1 == rounds(init1, round_keys, n - 1);
-        ctr2 == rounds(init2, round_keys, n - 1);
-        ctr3 == rounds(init3, round_keys, n - 1);
-        ctr4 == rounds(init4, round_keys, n - 1);
+        ctr1 == rounds_opaque(init1, round_keys, n - 1);
+        ctr2 == rounds_opaque(init2, round_keys, n - 1);
+        ctr3 == rounds_opaque(init3, round_keys, n - 1);
+        ctr4 == rounds_opaque(init4, round_keys, n - 1);
         rk1  == index(round_keys, n);
         rk2  == index(round_keys, n + 1);
         rk3 == index(round_keys, n + 2);
         rk4  == index(round_keys, n + 3);
     ensures
-        ctr1 == rounds(init1, round_keys, n + 3);
-        ctr2 == rounds(init2, round_keys, n + 3);
-        ctr3 == rounds(init3, round_keys, n + 3);
-        ctr4 == rounds(init4, round_keys, n + 3);
+        ctr1 == rounds_opaque(init1, round_keys, n + 3);
+        ctr2 == rounds_opaque(init2, round_keys, n + 3);
+        ctr3 == rounds_opaque(init3, round_keys, n + 3);
+        ctr4 == rounds_opaque(init4, round_keys, n + 3);
 {
     aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
     aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
@@ -197,10 +198,10 @@ procedure {:quick} aes_4rounds_4way(
     aes_round_4way(alg, n + 3, rk4,  init1, init2, init3, init4, round_keys);
 }
 
-#reset-options "--z3rlimit 181"
+#reset-options "--z3rlimit 150"
 // Intel's LOOP_4
 procedure{:quick} aes_ctr_loop_body(
-    inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions
+    inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost old_plain_ptr:nat64,
     ghost old_out_ptr:nat64,
     ghost old_num_quad_blocks:nat64,
@@ -216,11 +217,11 @@ procedure{:quick} aes_ctr_loop_body(
     ghost iv:quad32
     )
     lets
-        plain_ptr @= rdi; num_quad_blocks @= r8; out_ptr @= rsi; key_ptr @= r9; iv_lower64 @= r10;
-        const2_1 @= xmm1; const4_3 @= xmm2; mask64 @= xmm3; four @= xmm4;
-        rk1 @= xmm8; rk2 @= xmm9; rk3 @= xmm10; rk4 @= xmm7;        // Round keys
-        ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
-        tmp_xmm @= xmm5;
+        plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
+        const2_1 @= xmm9; const4_3 @= xmm10; mask64 @= xmm0; four @= xmm15;
+        rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
+        ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+        tmp_xmm @= xmm7;
     requires
         // There's at least one block of four left to do
         0 < num_quad_blocks <= old_num_quad_blocks;
@@ -325,6 +326,11 @@ procedure{:quick} aes_ctr_loop_body(
 
     // Begin AES block encrypt by xor'ing four blocks of counters with the key block 0
     // At this point, we're computing aes_encrypt_LE of bswap(inc32(icb_BE, 4*count + 0..3)) == aes_encrypt_BE of inc32(icb_BE, 4*count + 0..3)
+    ghost var in1 := ctr1;
+    ghost var in2 := ctr2;
+    ghost var in3 := ctr3;
+    ghost var in4 := ctr4;
+
     Pxor(ctr1, rk1);
     Pxor(ctr2, rk1);
     Pxor(ctr3, rk1);
@@ -337,6 +343,10 @@ procedure{:quick} aes_ctr_loop_body(
     Pshufb64(const2_1, mask64);      // const2_1 = LSB: ivec_hi | bswap(6) | ivec_hi | bswap(5)
     Pshufb64(const4_3, mask64);      // const4_3 = LSB: ivec_hi | bswap(8) | ivec_hi | bswap(7)
 
+    init_rounds_opaque(init1, round_keys);
+    init_rounds_opaque(init2, round_keys);
+    init_rounds_opaque(init3, round_keys);
+    init_rounds_opaque(init4, round_keys);
     // Compute three AES rounds for all four counters
     aes_3rounds_4way(alg, 1, init1, init2, init3, init4, round_keys);
 
@@ -394,9 +404,6 @@ procedure{:quick} aes_ctr_loop_body(
     AESNI_enc_last(ctr3, rk3);
     AESNI_enc_last(ctr4, rk3);
 
-
-    commute_sub_bytes_shift_rows_forall();
-
     // Xor the plaintext with the encrypted counter
     // TODO: Intel does this using XMM operands
     Load128_buffer(tmp_xmm, plain_ptr,  0, Secret, plain_b, 4*count + 0);
@@ -415,8 +422,13 @@ procedure{:quick} aes_ctr_loop_body(
     Store128_buffer(out_ptr, ctr4, 48, Secret, out_b, 4*count + 3);
 
     lemma_quad32_xor_commutes_forall();
+    //commute_sub_bytes_shift_rows_forall();
+    finish_cipher(alg, in1, round_keys);
+    finish_cipher(alg, in2, round_keys);
+    finish_cipher(alg, in3, round_keys);
+    finish_cipher(alg, in4, round_keys);
 
-    Sub64(r8, 1);
+    Sub64(rdx, 1);
     Add64(plain_ptr, 64);
     Add64(out_ptr, 64);
 }
@@ -429,15 +441,14 @@ procedure {:quick} aes_counter_loop(
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128
     )
-    lets plain_ptr @= rdi; num_quad_blocks @= r8; out_ptr @= rsi; key_ptr @= r9; iv_lower64 @= r10;
-         const2_1 @= xmm1; const4_3 @= xmm2; iv @= xmm0; mask64 @= xmm3; four @= xmm4;
-         rk1 @= xmm8; rk2 @= xmm9; rk3 @= xmm10; rk4 @= xmm7;        // Round keys
-         ctr1 @= xmm11; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
-         tmp_xmm @= xmm5;
+    lets plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
+         const2_1 @= xmm9; const4_3 @= xmm10; iv @= xmm7; mask64 @= xmm0; four @= xmm15;
+         rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
+         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+         mask @= xmm8;
     
-    reads key_ptr; memTaint;
+    reads mask; key_ptr; memTaint; 
     modifies mask64; four; iv; const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
-             tmp_xmm; 
              rax; plain_ptr; num_quad_blocks; out_ptr; iv_lower64;
              efl; mem;
 
@@ -459,7 +470,7 @@ procedure {:quick} aes_counter_loop(
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
         // GCM reqs
-        mask64 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
     ensures
         modifies_buffer128(out_b, old(mem), mem);
@@ -473,14 +484,16 @@ procedure {:quick} aes_counter_loop(
 
         iv == old(inc32(iv, 4*num_quad_blocks));
 
-        mask64 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
         // TODO:
 //        // GHash
 //        len == 0 ==> hash == old(hash);
 //        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
 {
     // To interface with our existing code, start by reversing the IV
-    Pshufb(iv, mask64);
+    Pshufb(iv, mask);
+
+    // TODO: Optimize some of the shuffles below by copying iv before doing the shuffle above
 
     // Initialize the counters
     Mov128(const2_1, iv);
@@ -488,21 +501,20 @@ procedure {:quick} aes_counter_loop(
     InitPshufbDupMask(mask64, rax); // borrow the mask64 xmm for other masks
     PshufbDup(const2_1, mask64);    // const2_1 = LSB: r(iv.hi3) | r(iv.hi2) | r(iv.hi3) | r(iv.h2)
     Mov128(const4_3, const2_1);
-    ZeroXmm(tmp_xmm);
-    PinsrdImm(tmp_xmm, 1, 2, rax);  // tmp_xmm = LSB: 0 | 0 | 1 | 0
-    Paddd(const2_1, tmp_xmm);       // const2_1 = LSB: r(iv.hi3) | r(iv.hi2) | r(iv.hi3) + 1 | r(iv.h2)
+    ZeroXmm(rk1);
+    PinsrdImm(rk1, 1, 2, rax);  // rk1 = LSB: 0 | 0 | 1 | 0
+    Paddd(const2_1, rk1);       // const2_1 = LSB: r(iv.hi3) | r(iv.hi2) | r(iv.hi3) + 1 | r(iv.h2)
     assert const2_1 == Mkfour(reverse_bytes_nat32(iv.hi3),reverse_bytes_nat32(iv.hi2),add_wrap(reverse_bytes_nat32(iv.hi3), 1),reverse_bytes_nat32(iv.hi2));
 
-    PinsrdImm(tmp_xmm, 3, 2, rax);  
-    PinsrdImm(tmp_xmm, 2, 0, rax);  // tmp_xmm = LSB: 2 | 0 | 3 | 0
-    Paddd(const4_3, tmp_xmm);       // const4_3 = LSB: r(iv.hi3) + 2 | r(iv.hi2) | r(iv.hi3) + 3 | r(iv.h2)
+    PinsrdImm(rk1, 3, 2, rax);  
+    PinsrdImm(rk1, 2, 0, rax);  // rk1 = LSB: 2 | 0 | 3 | 0
+    Paddd(const4_3, rk1);       // const4_3 = LSB: r(iv.hi3) + 2 | r(iv.hi2) | r(iv.hi3) + 3 | r(iv.h2)
 
-    InitPshufbMask(mask64, rax);    // REVIEW: Require this is already in place?
     reveal_reverse_bytes_quad32(const2_1);
-    Pshufb(const2_1, mask64);       // const2_1 = LSB: iv.hi2 | r( r(iv.hi3) + 1) | iv.hi2 | iv.hi3
+    Pshufb(const2_1, mask);       // const2_1 = LSB: iv.hi2 | r( r(iv.hi3) + 1) | iv.hi2 | iv.hi3
 
     reveal_reverse_bytes_quad32(const4_3);
-    Pshufb(const4_3, mask64);       // const4_3 = LSB: iv.hi2 | r( r(iv.hi3) + 3) | iv.hi2 | r( r(iv.hi3) + 2)
+    Pshufb(const4_3, mask);       // const4_3 = LSB: iv.hi2 | r( r(iv.hi3) + 3) | iv.hi2 | r( r(iv.hi3) + 2)
 
     reveal_reverse_bytes_quad32(iv);
     reveal_reverse_bytes_quad32(reverse_bytes_quad32(iv));
@@ -577,145 +589,7 @@ procedure {:quick} aes_counter_loop(
     //              == Mkfour( add_wrap(old(iv.lo0, 4*old(num_quad_blocks))), old(iv.lo2), old(iv.hi2), old(iv).hi3));
     //              == inc32(old(iv), 4*old(num_quad_blocks))
     reveal_reverse_bytes_quad32(iv);
-    InitPshufbMask(mask64, rax);
-    Pshufb(iv, mask64);
+    Pshufb(iv, mask);
     //assert iv == old(inc32(iv, 4*num_quad_blocks));
    
 }
-
-// TODO: Add XMM memory operands, so we can avoid using xmm3 to hold constants
-/*
-procedure {:quick} aes_ctr_inner(
-    inline alg:algorithm,
-    ghost plain_b:buffer128,
-    ghost out_b:buffer128,
-
-    ghost key:aes_key_LE(alg),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
-    lets
-        plain_ptr @= rdi; num_bytes @= r8; out_ptr @= rsi; key_ptr @= r9;
-        ivec @= rdx; nonce @= rcx; tmp_xmm @= xmm5; // r12 = num_rounds (nr)
-    requires
-        validSrcAddrs128(mem, plain_ptr,  plain_b,  bytes_to_quad_size(num_bytes), memTaint, Secret);
-        validDstAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
-        plain_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-        out_ptr + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-        buffer_length(plain_b)  <= buffer_length(out_b);
-        num_bytes < pow2_32;
-        nonce < pow2_32;
-
-        // AES reqs
-        aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
-    reads key_ptr; ivec; nonce; memTaint;
-    modifies rax; r10; xmm0; xmm1; xmm2; xmm3; plain_ptr; num_bytes; out_ptr; tmp_xmm; efl; mem;
-    ensures
-        true;
-{
-    lemma_poly_bits64();
-
-    Mov64(r10, r8);
-    Shr64(r8, 4);   // r8 := num_bytes / 16 == num_blocks
-    And64(r10, 15); // r10 := num_bytes % 16 (note that Intel uses Shl64(r10, 60))
-    assert r8 == old(num_bytes) / 16;
-    assert r10 == old(num_bytes) % 16;
-    if (r10 > 0) {
-        Add64(r8, 1);  // Add one to account for trailing blocks
-    }
-    ghost var num_blocks := r8;
-
-    // Intel: NO_PARTS_4
-    Mov64(r10, r8);
-    And64(r10, 3); // r10 := num_blocks % 4 (note that Intel uses Shl64(r10, 60); Shr64(r10,60))
-    assert r10 == num_blocks % 4;
-
-    // Initialize masks and counters
-    Pinsrq(xmm0, nonce, 1);     // Put ivec in the upper 64 bits of xmm0
-    Pinsrd(xmm0, rcx, 1);       // Put nonce in the upper 32 bits of the lower 64 bits of xmm0
-    Psrldq(xmm0, 4);
-    Mov128(xmm2, xmm0);             // Copy xmm0 into xmm2
-    InitPshufbDupMask(xmm3, rax);   // xmm3 := dup_mask
-    PshufbDup(xmm2, xmm3);          // LSB: 0 | bswap(ivec_hi) | 0 | bswap(ivec_hi)
-    ZeroXmm(xmm3);
-    PinsrdImm(xmm3, 2, 0, rax);
-    PinsrdImm(xmm3, 1, 2, rax);     // xmm3 := TWO_N_ONE
-    Paddd(xmm2, xmm3);
-    Mov128(xmm1, xmm2);
-    PinsrdImm(xmm3, 2, 2, rax);     // xmm3 := TWO_N_TWO
-    Paddd(xmm2, xmm3);
-    InitPshufb64Mask(xmm3, rax);
-    Pshufb64(xmm1, xmm3);           // xmm1 == LSB: ivec_hi | bswap(2) | ivec_hi | bswap(1)
-    Pshufb64(xmm2, xmm3);           // xmm2 == LSB: ivec_hi | bswap(4) | ivec_hi | bswap(3)
-
-    Shr64(r8, 2);
-    assert r8 == num_blocks / 4;
-/*
-    if (r8 > 0) {
-//        Sub64(plain_ptr, 64);     // TODO: We would need to prove that plain_ptr >= 64...
-//        Sub64(out_ptr, 64);
-        //aes_ctr_loop();
-    }
-
-    // Intel: REMAINDER_4
-    if (r10 != 0) {
-        Shufpd(xmm0, xmm1, 2);      // xmm0 := LSB: 4 | nonce | ivec + 1
-
-        while (r10 > 0) {
-            // BP: This isn't doing anything particularly interesting w.r.t. AES
-            //     We can probably replace almost all of this with AESEncryptBlock
-
-            // Intel: IN_LOOP_4
-            Mov128(xmm11, xmm0);    // Save a copy of current counter value (xmm0) in xmm11
-            Pshufb64(xmm0, mask);
-
-            // Load next four key blocks (TODO: Intel does this via XMM memory operands)
-            Load128_buffer(xmm8,  key_ptr,  0, Secret, keys_b, 0);
-            Load128_buffer(xmm9,  key_ptr, 16, Secret, keys_b, 1);
-            Load128_buffer(xmm10, key_ptr, 32, Secret, keys_b, 2);
-            Load128_buffer(xmm7,  key_ptr, 48, Secret, keys_b, 3);
-
-            Pxor(xmm11, xmm8);   // Start encrypting xmm11
-            Paddd(xmm0, one);    // Increment the counter by 1
-            AESNI_enc(xmm11, xmm9);   // Compute AES round 1
-            AESNI_enc(xmm11, xmm10);  // Compute AES round 2
-            Pshufb64(xmm0, mask);     // Bswap the upper and lower 64-bit slots of xmm0
-            AESNI_enc(xmm11, xmm7);   // Compute AES round 3
-
-            // Load next four key blocks (TODO: Intel does this via XMM memory operands)
-            Load128_buffer(xmm8,  key_ptr,  64, Secret, keys_b, 4);
-            Load128_buffer(xmm9,  key_ptr,  80, Secret, keys_b, 5);
-            Load128_buffer(xmm10, key_ptr,  96, Secret, keys_b, 6);
-            Load128_buffer(xmm7,  key_ptr, 112, Secret, keys_b, 7);
-
-            AESNI_enc(xmm11, xmm8);   // Compute AES round 4
-            AESNI_enc(xmm11, xmm9);   // Compute AES round 5
-            AESNI_enc(xmm11, xmm10);  // Compute AES round 6
-            AESNI_enc(xmm11, xmm7);   // Compute AES round 7
-
-            // Load the next three round key blocks
-            Load128_buffer(xmm8,  key_ptr, 128, Secret, keys_b, 7);
-            Load128_buffer(xmm9,  key_ptr, 144, Secret, keys_b, 8);
-            Load128_buffer(xmm10, key_ptr, 160, Secret, keys_b, 9);
-
-            AESNI_enc(xmm11, xmm8);   // Compute AES round 8
-            AESNI_enc(xmm11, xmm9);   // Compute AES round 9
-
-            // TODO: AES_192 and AES_256 would do more work here
-
-            // Intel: IN_LAST_4
-            AESNI_enc_last(xmm11, xmm10);   // Compute the final AES round
-            // Load the plain text
-            // TODO: Intel does this using XMM operands
-            Load128_buffer(tmp_xmm, plain_ptr,  0, Secret, plain_b, 0); // TODO: Fix indexing
-            Pxor(xmm11, tmp_xmm);
-            // Store the cipher text in output
-            Store128_buffer(out_ptr, xmm11,  0, Secret, out_b, 0);  // TODO: Fix indexing
-            Add64(plain_ptr, 16);
-            Add64(out_ptr, 16);
-            Sub64(r10, 1);
-        }
-    }
-*/
-}
-*/
