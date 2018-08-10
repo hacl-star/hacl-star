@@ -25,7 +25,7 @@ RUN rm -rf mitls-fstar
 RUN rm -rf vale
 
 RUN rm -f build.sh
-RUN rm -f build_fstar.sh
+RUN rm -f build_helper.sh
 RUN rm -f buildlogfile.txt
 RUN rm -f log_no_replay.html
 RUN rm -f log_worst.html
@@ -41,13 +41,13 @@ COPY --chown=everest / ${MYHOME}/FStar/hacl-star/
 # Because of that we will first output on the parent folder
 WORKDIR ${MYHOME}/FStar
 
-COPY --chown=everest build_hacl.sh ${MYHOME}/FStar/build_hacl.sh
-RUN chmod +x build_hacl.sh
 COPY --chown=everest build.sh ${MYHOME}/FStar/build.sh
 RUN chmod +x build.sh
+COPY --chown=everest build_helper.sh ${MYHOME}/FStar/build_helper.sh
+RUN chmod +x build_helper.sh
 
 RUN echo $(date -u '+%Y-%m-%d %H:%M:%S') >> ${BUILDLOGFILE}
-RUN ./build.sh ${TARGET} ${BUILDLOGFILE} ${MAXTHREADS} || true
+RUN ./build_helper.sh ${TARGET} ${BUILDLOGFILE} ${MAXTHREADS} || true
 RUN echo $(date -u '+%Y-%m-%d %H:%M:%S') >> ${BUILDLOGFILE}
 
 # Generate query-stats.
