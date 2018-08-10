@@ -27,10 +27,17 @@ val hashes: a:Spec.hash_alg ->
   (l:Spec.bytes_blocks a) ->
   Type0
 
-val init: a:Spec.hash_alg -> ST.StackInline (state a)
+val alloca: a:Spec.hash_alg -> unit -> ST.StackInline (state a)
   (requires (fun h ->
     HS.is_stack_region (HS.get_tip h)))
   (ensures (fun h0 s h1 ->
     M.(modifies M.loc_none h0 h1) /\
     B.live h1 s /\
+    hashes a (B.as_seq h1 s) S.empty))
+
+val init: a:Spec.hash_alg -> (s: state a) -> ST.Stack unit
+  (requires (fun h ->
+    B.live h s))
+  (ensures (fun h0 _ h1 ->
+    M.(modifies (loc_buffer s) h0 h1) /\
     hashes a (B.as_seq h1 s) S.empty))
