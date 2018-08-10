@@ -1,6 +1,7 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
+include "../../../thirdPartyPorts/Intel/aes/x64/X64.AESCTR.vaf"
 include "X64.AES.vaf"
 include "X64.GF128_Mul.vaf"
 include "X64.GCTR.vaf"
@@ -40,6 +41,7 @@ open X64.Vale.InsAes
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open X64.GF128_Mul
+open X64.AESCTR
 #endverbatim
 
 #verbatim{:interface}
@@ -184,6 +186,79 @@ procedure {:quick} gcm_one_pass_blocks(
 //// Call a helpful lemma
 //    gctr_partial_completed(alg, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old(icb));
 }
+
+procedure {:quick} {:verify true} gcm_one_pass_blocks_opt(
+    inline alg:algorithm,
+    ghost in_b:buffer128,
+    ghost out_b:buffer128,
+    ghost key:aes_key_LE(alg),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128
+    )
+    lets in_ptr @= rax; out_ptr @= rbx; len @= rcx; icb @= xmm7; mask @= xmm8; hash @= xmm1; one @= xmm10; h @= xmm11;
+
+    reads
+        r8; h; memTaint;
+
+    modifies
+        in_ptr; out_ptr; len; rdx; rdi; r9; r10; r12; 
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; mask; xmm9; one; 
+        xmm12; xmm13; xmm14; xmm15;
+        mem; efl;
+
+    requires
+        // GCTR reqs
+        buffers_disjoint128(in_b, out_b);
+        buffers_disjoint128(keys_b, out_b);
+        validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
+        validDstAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
+        in_ptr  + 16 * len < pow2_64;
+        out_ptr + 16 * len < pow2_64;
+        buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        // AES reqs
+        alg = AES_128 || alg = AES_256;
+        length(round_keys) == nr(alg) + 1;
+        round_keys == key_to_round_keys_LE(alg, key);
+        r8 == buffer_addr(keys_b, mem);
+        validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
+        buffer128_as_seq(mem, keys_b) == round_keys;
+    ensures
+//        modifies_buffer128(out_b, old(mem), mem);
+//        validSrcAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
+//
+//        r9  ==  in_ptr + 16 * len;
+//        r10 == out_ptr + 16 * len;
+//
+//        // GCTR
+//        gctr_partial(alg, len, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old(icb));
+//        icb == inc32(old(icb), old(len));
+//
+//        // GHash
+//        len == 0 ==> hash == old(hash);
+//        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
+{
+    // len == # of blocks, so we need to figure out how many sets of four blocks we have
+    Mov64(rdx, len);
+    Shr64(rdx, 2);
+    And64(len, 3);
+    lemma_poly_bits64();
+    //assert rdx == old(len) / 4;
+    //assert len == old(len) % 4;
+
+    if (rdx > 0) {
+        // TODO: Align registers to avoid all of this pointer copying
+        Mov64(r9, in_ptr);
+        Mov64(r10, out_ptr);
+        aes_counter_loop(alg, in_b, out_b, key, round_keys, keys_b);
+        Mov64(in_ptr, r9);
+        Mov64(out_ptr, r10);
+    }
+
+    gcm_one_pass_blocks(alg, in_b, out_b, key, round_keys, keys_b);
+}
+
 
 #reset-options "--z3rlimit 30"
 procedure {:quick} gcm_one_pass(
