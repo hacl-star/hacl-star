@@ -210,8 +210,9 @@ let shuffle_core (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < s
   let t2 = word_add_mod a (_Sigma0 a a0) (_Maj a a0 b0 c0) in
 
   (**) assert(t < S.length (k0 a));
-  // JP: was a S.create: understand if the post-condition was really needed
-  S.seq_of_list [ word_add_mod a t1 t2; a0; b0; c0; word_add_mod a d0 t1; e0; f0; g0 ]
+  let l = [ word_add_mod a t1 t2; a0; b0; c0; word_add_mod a d0 t1; e0; f0; g0 ] in
+  assert_norm (List.Tot.length l = 8);
+  S.seq_of_list l
 
 
 (* Full shuffling function *)
