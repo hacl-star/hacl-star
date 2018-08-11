@@ -22,7 +22,7 @@ LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
 all: test
 
-ALL_SOURCES = Test.c TestLib.c
+ALL_SOURCES = Test.c
 
 $(info All sources are $(ALL_SOURCES))
 

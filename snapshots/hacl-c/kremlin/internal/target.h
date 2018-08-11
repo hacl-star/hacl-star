@@ -90,5 +90,10 @@ inline static int32_t krml_time() {
     }                                                                          \
   } while (0)
 
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#  define KRML_HOST_SNPRINTF(buf, sz, fmt, arg) _snprintf_s(buf, sz, _TRUNCATE, fmt, arg)
+#else
+#  define KRML_HOST_SNPRINTF(buf, sz, fmt, arg) snprintf(buf, sz, fmt, arg)
+#endif
 
 #endif
