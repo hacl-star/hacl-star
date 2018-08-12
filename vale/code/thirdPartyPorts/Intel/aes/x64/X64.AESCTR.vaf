@@ -203,7 +203,7 @@ procedure {:quick} aes_4rounds_4way(
 
 #reset-options "--z3rlimit 250"
 // Intel's LOOP_4
-procedure{:quick} {:verify true} aes_ctr_loop_body(
+procedure{:quick} aes_ctr_loop_body(
     inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost old_plain_ptr:nat64,
     ghost old_out_ptr:nat64,
@@ -464,7 +464,7 @@ procedure{:quick} {:verify true} aes_ctr_loop_body(
     Add64(out_ptr, 64);
 }
 
-procedure {:quick} aes_counter_loop(
+procedure {:quick} {:verify true} aes_counter_loop(
     inline alg:algorithm,
     ghost plain_b:buffer128,
     ghost out_b:buffer128,
@@ -509,17 +509,16 @@ procedure {:quick} aes_counter_loop(
 
         plain_ptr == old(plain_ptr) + 64 * old(num_quad_blocks);
         out_ptr   == old(out_ptr)   + 64 * old(num_quad_blocks);
+        
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // GCTR
         gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(iv));
-
         iv == old(inc32(iv, 4*num_quad_blocks));
 
-        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-        // TODO:
-//        // GHash
-//        len == 0 ==> hash == old(hash);
-//        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, out_b), len));
+        // GHash
+        length(slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks))) > 0 /\ 
+        hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks)));
 {
     // To interface with our existing code, start by reversing the IV
     Pshufb(iv, mask);
@@ -587,6 +586,7 @@ procedure {:quick} aes_counter_loop(
             buffers_disjoint128(plain_b, out_b);        // TODO: Remove this requirement
 
             // XMM constants are correct
+            mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
             mask64 == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
             four == Mkfour(4, 0, 4, 0);
 
@@ -604,6 +604,8 @@ procedure {:quick} aes_counter_loop(
             iv_lower64 == lo64(old_iv);
 
             // GCTR progress
+            length(slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks))) > 0;
+            hash == ghash_incremental0(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, out_b), 4*count));
             gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {
