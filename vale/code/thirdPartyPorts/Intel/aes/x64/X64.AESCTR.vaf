@@ -437,33 +437,27 @@ procedure{:quick} {:verify true} aes_ctr_loop_body(
     finish_cipher(alg, in3, round_keys);
     finish_cipher(alg, in4, round_keys);
 
+    assert slice_work_around(buffer128_as_seq(mem, out_b), 4*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 4*count));   // OBSERVE
+
     // Compute GHash on the four outputs
     ghost var h_in_0 := ctr1;
     compute_ghash_incremental_register();
-//    lemma_hash_append(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, out_b), 4*count), create(1, h_in_0));
-//    ghost var hash_input_0 := append(slice_work_around(buffer128_as_seq(mem, out_b), 4*count), create(1, h_in_0));
     ghost var hash0 := hash;
 
     Mov128(ctr1, ctr2);
     ghost var h_in_1 := ctr1;
     compute_ghash_incremental_register();
-//    lemma_hash_append(reverse_bytes_quad32(h), hash_0, hash_input_0, create(1, h_in_1));
-//    ghost var hash_input_1 := append(hash_input_0, create(1, h_in_1));
     ghost var hash1 := hash;
 
     Mov128(ctr1, ctr3);
     ghost var h_in_2 := ctr1;
     compute_ghash_incremental_register();
-//    lemma_hash_append(reverse_bytes_quad32(h), hash_1, hash_input_1, create(1, h_in_2));
-//    ghost var hash_input_2 := append(hash_input_1, create(1, h_in_2));
     ghost var hash2 := hash;
 
     Mov128(ctr1, ctr4);
     ghost var h_in_3 := ctr1;
     compute_ghash_incremental_register();
-//    lemma_hash_append(reverse_bytes_quad32(h), hash_2, hash_input_2, create(1, h_in_3));
-//    //ghost var hash_input_3 := append(hash_input_2, create(1, h_in_3));
-    lemma_ghash_registers(h, hash_init, old(hash), hash0, hash1, hash2, hash, h_in_0, h_in_1, h_in_2, h_in_3, buffer128_as_seq(mem, out_b), 4*count);
+    lemma_ghash_registers(reverse_bytes_quad32(h), hash_init, old(hash), hash0, hash1, hash2, hash, h_in_0, h_in_1, h_in_2, h_in_3, buffer128_as_seq(mem, out_b), 4*count);
 
     Sub64(rdx, 1);
     Add64(plain_ptr, 64);

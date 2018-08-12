@@ -356,6 +356,14 @@ let validDstAddrs128 (m:M.mem) (addr:int) (b:M.buffer128) (len:int) (memTaint:M.
     M.buffer_addr b m == addr /\
     M.valid_taint_buf128 b m memTaint t
 
+let validSrcAddrsOffset128 (m:M.mem) (addr offset:int) (b:M.buffer128) (len:int) (memTaint:M.memtaint) (t:taint) =
+    buffer_readable m b /\
+    len <= buffer_length b /\
+    M.buffer_addr b m + offset == addr /\
+    M.valid_taint_buf128 b m memTaint t
+
+let validDstAddrsOffset128 = validSrcAddrsOffset128
+
 let valid_stack_slots (m:M.mem) (rsp:int) (b:M.buffer64) (num_slots:int) (memTaint:M.memtaint) =
     M.valid_taint_buf64 b m memTaint Public /\
     buffer_readable m b /\
