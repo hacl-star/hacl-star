@@ -787,7 +787,8 @@ procedure {:quick} gcm_decrypt_stdcall(
     )
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm10; xmm11;
+        rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15; 
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         rbp; rdi; rsi;
         mem; efl; rsp;
     lets
@@ -825,7 +826,7 @@ procedure {:quick} gcm_decrypt_stdcall(
         validDstAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(cipher_num_bytes), memTaint, Secret);
         validDstAddrs128(mem, tag_ptr, tag_b, 1, memTaint, Secret);
 
-        valid_stack_slots(mem, rsp, stack_b, if win then 18 else 8, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, if win then 28 else 8, memTaint);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
 
         cipher_ptr + 16 * bytes_to_quad_size(cipher_num_bytes) < pow2_64;
@@ -882,8 +883,13 @@ procedure {:quick} gcm_decrypt_stdcall(
         win ==> xmm6  == old(xmm6);
         win ==> xmm7  == old(xmm7);
         win ==> xmm8  == old(xmm8);
+        win ==> xmm9  == old(xmm9);
         win ==> xmm10 == old(xmm10);
         win ==> xmm11 == old(xmm11);
+        win ==> xmm12 == old(xmm12);
+        win ==> xmm13 == old(xmm13);
+        win ==> xmm14 == old(xmm14);
+        win ==> xmm15 == old(xmm15);
 
         // Linux:
         !win ==> rbx == old(rbx);
@@ -903,6 +909,7 @@ procedure {:quick} gcm_decrypt_stdcall(
     callee_save_registers(win, stack_b);
     gcm_decrypt_stdcall_inner(alg, args_b, iv_BE, cipher_b, auth_b, iv_b, out_b, tag_b, key, round_keys, keys_b);
     Mov64(rdx, rax);        // Save a copy of rax == result
-    callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm10), old(xmm11));
+    callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
+                             old(xmm12), old(xmm13), old(xmm14), old(xmm15));
     Mov64(rax, rdx);
 }
