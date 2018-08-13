@@ -546,12 +546,19 @@ val matrix_from_lbytes:
   -> res:matrix_t n1 n2
   -> Stack unit
     (requires fun h -> live h b /\ live h res /\ disjoint b res)
-    (ensures  fun h0 r h1 -> live h1 res /\ modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+      B.as_seq h1 res == M.matrix_from_lbytes (v n1) (v n2) (B.as_seq h0 b))
 [@"c_inline"]
 let matrix_from_lbytes #n1 #n2 b res =
   let h0 = ST.get () in
   let n = n1 *! n2 in
-  loop_nospec #h0 n res
+  Lib.Loops.for (size 0) n
+  (fun h1 i ->
+    B.live h1 b /\ B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+    (forall (i0:size_nat{i0 < i}). bget h1 res i0 == M.matrix_from_lbytes_fc (v n1) (v n2) (B.as_seq h0 b) i0))
   (fun i ->
     res.(i) <- uint_from_bytes_le #U16 (sub b (size 2 *! i) (size 2))
-  )
+  );
+  let h1 = ST.get () in
+  Seq.eq_intro (B.as_seq h1 res) (M.matrix_from_lbytes (v n1) (v n2) (B.as_seq h0 b))
