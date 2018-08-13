@@ -464,7 +464,7 @@ procedure{:quick} aes_ctr_loop_body(
     Add64(out_ptr, 64);
 }
 
-procedure {:quick} {:verify true} aes_counter_loop(
+procedure {:quick} aes_counter_loop(
     inline alg:algorithm,
     ghost plain_b:buffer128,
     ghost out_b:buffer128,

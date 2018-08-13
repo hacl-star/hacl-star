@@ -277,10 +277,10 @@ procedure {:quick} gcm_one_pass(
     lets in_ptr @= rax; out_ptr @= rbx; num_bytes @= rcx; icb @= xmm7; mask @= xmm8; hash @= xmm1; one @= xmm10; h @= xmm11;
 
     reads
-        r8; out_ptr; mask; h; memTaint;
+        r8; h; memTaint;
 
     modifies
-        in_ptr; num_bytes; rdx; rsi; r9; r10; r12; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; one; mem; efl;
+        in_ptr; out_ptr; num_bytes; rdx; rdi; rsi; r9; r10; r12; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; mask; xmm9; one; xmm12; xmm13; xmm14; xmm15; mem; efl;
 
     requires
         // GCTR reqs
@@ -388,11 +388,10 @@ procedure {:quick} gcm_core_part1(
     iv @= xmm7;
 
     reads
-        out_ptr; plain_ptr; keys_ptr; plain_num_bytes; auth_num_bytes; memTaint;
+        plain_ptr; keys_ptr; plain_num_bytes; auth_num_bytes; memTaint;
 
     modifies
-        rax; rcx; rdx; rsi; r9; r10; r12; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm10; xmm11; iv; mask;
-        xmm6;
+        rax; out_ptr; rcx; rdx; rdi; rsi; r9; r10; r12; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; iv; mask; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         mem; efl;
 
 
@@ -675,11 +674,10 @@ procedure {:quick} gcm_core(
     iv @= xmm7;
 
     reads
-        out_ptr; plain_ptr; keys_ptr; plain_num_bytes; auth_num_bytes; memTaint;
+        plain_ptr; keys_ptr; plain_num_bytes; auth_num_bytes; memTaint;
 
     modifies
-        rax; rcx; rdx; rsi; r9; r10; r12; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm10; xmm11; iv; mask;
-        xmm6;
+        rax; out_ptr; rcx; rdx; rdi; rsi; r9; r10; r12; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; iv; mask; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         mem; efl;
 
 
@@ -903,7 +901,7 @@ procedure {:quick} gcm_encrypt_stdcall_inner(
     )
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rsi; r8; r9; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm10; xmm11;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         mem; efl;
     lets
         args_ptr := r9;
@@ -1008,9 +1006,9 @@ procedure {:quick} gcm_encrypt_stdcall(
     )
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm10; xmm11;
-        rbp; rdi; rsi;
-        mem; efl; rsp;
+        rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15; 
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        mem; efl; 
     lets
         args_ptr := if win then rcx else rdi;
 
@@ -1149,9 +1147,9 @@ procedure {:quick} gcm_encrypt2_stdcall(
     )
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        rbp; rdi; rsi;
-        mem; efl; rsp;
+        rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15; 
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        mem; efl; 
     lets
         plain_ptr        := if win then rcx else rdi;
         auth_ptr         := if win then r8  else rdx;
