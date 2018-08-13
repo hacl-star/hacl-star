@@ -59,7 +59,7 @@ let frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix =
   push_frame();
   let a_matrix = matrix_create params_n params_n in
   frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
-  matrix_mul a_matrix s_matrix b_matrix;
+  matrix_mul_s a_matrix s_matrix b_matrix;
   matrix_add b_matrix e_matrix;
   pop_frame()
 
@@ -81,7 +81,7 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   let b_matrix = matrix_create params_n params_nbar in
   let s_matrix = matrix_create params_n params_nbar in
   let e_matrix = matrix_create params_n params_nbar in
-  frodo_sample_matrix_tr params_n params_nbar crypto_bytes seed_e (u16 1) s_matrix;
+  frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) s_matrix;
   frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) e_matrix;
   frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix;
   frodo_pack params_n params_nbar b_matrix params_logq b;
@@ -318,7 +318,7 @@ let frodo_sub_mul_c_minus_bs sk bp_matrix c_matrix mu_decode =
     s_matrix;
 
   let m_matrix = matrix_create params_nbar params_nbar in
-  matrix_mul bp_matrix s_matrix m_matrix;
+  matrix_mul_s bp_matrix s_matrix m_matrix;
   matrix_sub c_matrix m_matrix;
   frodo_key_decode params_extracted_bits m_matrix mu_decode;
   pop_frame()
