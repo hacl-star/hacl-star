@@ -32,9 +32,6 @@ let size_block a =
   let open FStar.Mul in
   size_word a * size_block_w
 
-(* Number of words for intermediate hash *)
-let size_hash_w = 8
-
 (* Number of words for final hash *)
 inline_for_extraction
 let size_hash_final_w: hash_alg -> Tot nat = function

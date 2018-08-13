@@ -13,7 +13,8 @@ module S = FStar.Seq
     an alternate style that turns out to be useful when implementing the API,
     see `update_last` and `hash_incremental`
   - a presentation that leaves everything abstract until the final call, useful
-    for implementing cryptographic constructions (e.g. HKDF), see `init`, `compress`, `compress_last` and `extract`
+    for implementing cryptographic constructions (e.g. HKDF), see `init`,
+    `compress`, `compress_last` and `extract`
 *)
 
 (** Constants and helpers *)
@@ -38,6 +39,8 @@ let size_len_ul_8: a:hash_alg -> Tot (n:U32.t{U32.v n = size_len_8 a}) = functio
   | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
 
+(* Number of words for intermediate hash *)
+let size_hash_w = 8
 
 inline_for_extraction
 let word: hash_alg -> Tot Type0 = function
