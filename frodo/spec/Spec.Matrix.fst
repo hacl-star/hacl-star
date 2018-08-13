@@ -281,22 +281,52 @@ let mul_s #n1 #n2 #n3 a b =
         ) c
     ) c
 
+val fold_land_:
+    #n:size_nat
+  -> f:(j:size_nat{j < n} -> GTot bool)
+  -> i:size_nat{i <= n}
+  -> GTot bool
+let rec fold_land_ #n f i =
+  if i = 0 then true
+  else f (i - 1) && fold_land_ #n f (i - 1)
+
+val eq_m:m:size_nat -> a:uint16 -> b:uint16 -> Tot bool
+let eq_m m a b =
+  let open Lib.RawIntTypes in
+  uint_to_nat a % (pow2 m) = uint_to_nat b % (pow2 m)
+
+#set-options "--max_fuel 1"
+
+val matrix_eq_fc:
+    #n1:size_nat
+  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> m:size_nat{0 < m /\ m <= 16}
+  -> a:matrix n1 n2
+  -> b:matrix n1 n2
+  -> i:size_nat{i <= n1 * n2}
+  -> GTot bool
+let matrix_eq_fc #n1 #n2 m a b i =
+  let f i = eq_m m a.[i] b.[i] in
+  fold_land_ #(n1 * n2) (fun i -> eq_m m a.[i] b.[i]) i
+
 val matrix_eq:
     #n1:size_nat
   -> #n2:size_nat{n1 * n2 < max_size_t}
-  -> m:size_nat{m > 0}
+  -> m:size_nat{0 < m /\ m <= 16}
   -> a:matrix n1 n2
   -> b:matrix n1 n2
-  -> bool
+  -> res:bool{res == matrix_eq_fc #n1 #n2 m a b (n1 * n2)}
 let matrix_eq #n1 #n2 m a b =
   let open Lib.RawIntTypes in
-  repeati n1
-  (fun i res ->
-    repeati n2
-    (fun j res ->
-      res && (uint_to_nat a.(i, j) % pow2 m = uint_to_nat b.(i, j) % pow2 m)
-    ) res
-  ) true
+  let res =
+    repeati_inductive (n1 * n2)
+    (fun i res -> res == matrix_eq_fc #n1 #n2 m a b i)
+    (fun i res ->
+      res && eq_m m a.[i] b.[i]
+    ) true in
+  res
+
+#set-options "--max_fuel 0"
 
 //TODO: prove in Lib.Bytesequence
 assume val lemma_uint_to_bytes_le:

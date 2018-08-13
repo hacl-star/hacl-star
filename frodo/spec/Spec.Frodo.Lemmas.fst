@@ -14,6 +14,13 @@ let modulo_pow2_u16 a b =
   uintv_extensionality (nat_to_uint 1) (u16 1);
   mod_mask_lemma #U16 a (u32 b)
 
+val modulo_pow2_u32:
+  a:uint32 -> b:size_nat{b < 32} -> Lemma
+  (uint_v a % pow2 b == uint_v (a &. ((u32 1 <<. u32 b) -. u32 1)))
+let modulo_pow2_u32 a b =
+  uintv_extensionality (nat_to_uint 1) (u32 1);
+  mod_mask_lemma #U32 a (u32 b)
+
 val modulo_pow2_u64:
   a:uint64 -> b:size_nat{b < 64} -> Lemma
   (uint_v a % pow2 b == uint_v (a &. ((u64 1 <<. u32 b) -. u64 1)))

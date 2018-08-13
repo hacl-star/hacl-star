@@ -470,12 +470,24 @@ let matrix_mul_s #n1 #n2 #n3 a b c =
 
 (* the end of the special matrix multiplication *)
 
-val eq_u32_m:m:uint32 -> a:uint32 -> b:uint32 -> Tot bool
+val eq_u32_m:
+    m:size_t{0 < v m /\ v m <= 16}
+  -> a:uint16
+  -> b:uint16
+  -> res:bool{res == M.eq_m (v m) a b}
 [@ "substitute"]
 let eq_u32_m m a b =
   let open Lib.RawIntTypes in
   let open FStar.UInt32 in
-  u32_to_UInt32 (a &. m) =^ u32_to_UInt32 (b &. m)
+  [@inline_let]
+  let m1 = size_to_uint32 m in
+  [@inline_let]
+  let res = u32_to_UInt32 (to_u32 a &. ((u32 1 <<. m1) -. u32 1)) =^ u32_to_UInt32 (to_u32 b &. (u32 1 <<. m1) -. u32 1) in
+  Lemmas.modulo_pow2_u32 (to_u32 a) (uint_v m1);
+  Lemmas.modulo_pow2_u32 (to_u32 b) (uint_v m1);
+  res
+
+#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
 
 val matrix_eq:
     #n1:size_t
@@ -485,22 +497,24 @@ val matrix_eq:
   -> b:matrix_t n1 n2
   -> Stack bool
     (requires fun h -> B.live h a /\ B.live h b)
-    (ensures  fun h0 r h1 -> modifies loc_none h0 h1)
+    (ensures  fun h0 r h1 -> modifies loc_none h0 h1 /\
+      r == M.matrix_eq #(v n1) #(v n2) (v m) (as_matrix h0 a) (as_matrix h0 b))
 [@"c_inline"]
 let matrix_eq #n1 #n2 m a b =
   push_frame();
-  let m = (u32 1 <<. size_to_uint32 m) -. u32 1 in
   let res = create #bool #1 (size 1) true in
+
+  let n = n1 *! n2 in
   let h0 = ST.get() in
-  loop_nospec #h0 #bool #1 n1 res
+  Lib.Loops.for (size 0) n
+  (fun h1 i ->
+    B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+    B.get h1 res 0 == M.matrix_eq_fc #(v n1) #(v n2) (v m) (as_matrix h0 a) (as_matrix h0 b) i)
   (fun i ->
-    let h1 = ST.get() in
-    loop_nospec #h1 #bool #1 n2 res
-    (fun j ->
-      let a1 = res.(size 0) in
-      let a2 = eq_u32_m m (to_u32 (mget a i j)) (to_u32 (mget b i j)) in
-      res.(size 0) <- a1 && a2
-    )
+    let ai = a.(i) in
+    let bi = b.(i) in
+    let a1 = res.(size 0) in
+    res.(size 0) <- a1 && eq_u32_m m ai bi
   );
   let res = res.(size 0) in
   pop_frame();
