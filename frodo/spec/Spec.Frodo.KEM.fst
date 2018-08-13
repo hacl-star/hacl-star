@@ -52,9 +52,9 @@ let crypto_kem_keypair coins =
   let seed_a = cshake_frodo bytes_seed_a z (u16 0) bytes_seed_a in
 
   let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
-  let s_matrix = frodo_sample_matrix_tr params_n params_nbar crypto_bytes seed_e (u16 1) in
+  let s_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) in
   let e_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) in
-  let b_matrix = Matrix.add (Matrix.mul a_matrix s_matrix) e_matrix in
+  let b_matrix = Matrix.add (Matrix.mul_s a_matrix s_matrix) e_matrix in
   let b = frodo_pack params_n params_nbar b_matrix params_logq in
 
   let pk = concat seed_a b in
@@ -116,7 +116,7 @@ let crypto_kem_dec ct sk =
 
   let bp_matrix = frodo_unpack params_nbar params_n params_logq c1 in
   let c_matrix = frodo_unpack params_nbar params_nbar params_logq c2 in
-  let m_matrix = Matrix.sub c_matrix (Matrix.mul bp_matrix s_matrix) in
+  let m_matrix = Matrix.sub c_matrix (Matrix.mul_s bp_matrix s_matrix) in
   let mu_decode = frodo_key_decode params_extracted_bits m_matrix in
 
   let g = cshake_frodo (crypto_publickeybytes + (params_nbar * params_nbar * params_extracted_bits) / 8) (concat pk mu_decode)  (u16 3) (3 * crypto_bytes) in

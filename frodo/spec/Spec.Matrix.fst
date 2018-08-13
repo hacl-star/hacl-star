@@ -225,6 +225,62 @@ let mul #n1 #n2 #n3 a b =
         ) c
     ) c
 
+val mget_s:
+    #n1:size_nat
+  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> a:matrix n1 n2
+  -> i:size_nat{i < n1}
+  -> j:size_nat{j < n2}
+  -> elem
+let mget_s #n1 #n2 a i j =
+  assert (j * n1 + i <= (n2 - 1) * n1 + n1 - 1);
+  a.[j * n1 + i]
+
+#set-options "--max_fuel 1"
+
+val mul_inner_s:
+    #n1:size_nat
+  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t}
+  -> a:matrix n1 n2
+  -> b:matrix n2 n3
+  -> i:size_nat{i < n1}
+  -> k:size_nat{k < n3}
+  -> res:uint16{res == sum #n2 (fun l -> a.(i, l) *. mget_s b l k)}
+let mul_inner_s #n1 #n2 #n3 a b i k =
+  let f l = a.(i, l) *. mget_s b l k in
+  let res =
+    repeati_inductive n2
+      (fun j res -> res == sum_ #n2 f j)
+      (fun j res ->
+        res +. a.(i, j) *. mget_s b j k
+      ) (u16 0) in
+  sum_extensionality n2 f (fun l -> a.(i, l) *. mget_s b l k) n2;
+  res
+
+#set-options "--max_fuel 0"
+
+val mul_s:
+    #n1:size_nat
+  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t}
+  -> a:matrix n1 n2
+  -> b:matrix n2 n3
+  -> c:matrix n1 n3{ forall i k. c.(i, k) == sum #n2 (fun l -> a.(i, l) *. mget_s b l k)}
+let mul_s #n1 #n2 #n3 a b =
+  let c = create n1 n3 in
+
+  repeati_inductive n1
+    (fun i c -> forall (i1:size_nat{i1 < i}) (k:size_nat{k < n3}). c.(i1, k) == sum #n2 (fun l -> a.(i1, l) *. mget_s b l k))
+    (fun i c ->
+      repeati_inductive n3
+        (fun k c0 -> (forall (k1:size_nat{k1 < k}). c0.(i, k1) == sum #n2 (fun l -> a.(i, l) *. mget_s b l k1)) /\
+                   (forall (i1:size_nat{i1 < n1 /\ i <> i1}) (k:size_nat{k < n3}). c0.(i1, k) == c.(i1, k)))
+        (fun k c0 ->
+          c0.(i, k) <- mul_inner_s #n1 #n2 #n3 a b i k
+        ) c
+    ) c
+
 val matrix_eq:
     #n1:size_nat
   -> #n2:size_nat{n1 * n2 < max_size_t}
@@ -242,112 +298,16 @@ let matrix_eq #n1 #n2 m a b =
     ) res
   ) true
 
-
-//TODO: prove in Lib.Bytesequence
-assume val lemma_uint_to_bytes_le:
-    #t:m_inttype
-  -> u:uint_t t
-  -> Lemma
-    (forall (i:nat{i < numbytes t}). index (uint_to_bytes_le #t u) i == u8 (uint_v u / pow2 (8 * i) % pow2 8))
-
-
-val matrix_to_lbytes_fc:
-    #n1:size_nat
-  -> #n2:size_nat{2 * n1 * n2 < max_size_t}
-  -> m:matrix n1 n2
-  -> res:lbytes (2 * n1 * n2)
-  -> i:size_nat{i < n1}
-  -> j:size_nat{j < n2}
-  -> k:size_nat{k < 2}
-  -> Type0
-let matrix_to_lbytes_fc #n1 #n2 m res i j k =
-  let l = 2 * (j * n1 + i) + k in
-  Lemmas.lemma_matrix_index_repeati2 n1 n2 i j;
-  res.[l] == u8 (uint_v m.(i, j) / pow2 (8 * k) % pow2 8)
-
-val matrix_to_lbytes_inner:
-    #n1:size_nat{0 < n1}
-  -> #n2:size_nat{0 < n2 /\ 2 * n1 * n2 < max_size_t}
-  -> m:matrix n1 n2
-  -> l:size_nat{l + 2 <= 2 * n1 * n2}
-  -> i:size_nat{i < n1}
-  -> j:size_nat{j < n2 /\ l == 2 * (j * n1 + i)}
-  -> res0:lbytes (2 * n1 * n2)
-  -> res:lbytes (2 * n1 * n2)
-    {(forall (l0:size_nat{l0 < l}). res.[l0] == res0.[l0]) /\
-     (forall (k:size_nat{k < 2}). res.[l + k] == u8 (uint_v m.(i, j) / pow2 (8 * k) % pow2 8))}
-let matrix_to_lbytes_inner #n1 #n2 m l i j res0 =
-  lemma_uint_to_bytes_le m.(i, j);
-  update_sub res0 l 2 (uint_to_bytes_le m.(i, j))
-
-val lemma_matrix_to_lbytes1:
-    #n1:size_nat
-  -> #n2:size_nat{2 * n1 * n2 < max_size_t}
-  -> m:matrix n1 n2
-  -> res0:lbytes (2 * n1 * n2)
-  -> res1:lbytes (2 * n1 * n2)
-  -> i:size_nat{i < n1}
-  -> j:size_nat{j < n2}
-  -> Lemma
-    (requires
-      (let _ = Lemmas.lemma_matrix_index_repeati2 n1 n2 i j in
-      (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res0 i0 j k) /\
-      (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). res1.[2 * (j * n1 + i0) + k] == res0.[2 * (j * n1 + i0) + k]) /\
-      (forall (k:size_nat{k < 2}). matrix_to_lbytes_fc m res1 i j k)))
-    (ensures
-      (forall (i0:size_nat{i0 < i + 1}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res1 i0 j k))
-let lemma_matrix_to_lbytes1 #n1 #n2 m res0 res1 i j = admit()
-
-#set-options "--z3rlimit 100"
-
-val lemma_matrix_to_lbytes2:
-    #n1:size_nat
-  -> #n2:size_nat{2 * n1 * n2 < max_size_t}
-  -> m:matrix n1 n2
-  -> res:lbytes (2 * n1 * n2)
-  -> res1:lbytes (2 * n1 * n2)
-  -> j:size_nat{j < n2}
-  -> Lemma
-    (requires
-      ((forall (l:size_nat{l < 2 * n1 * j}). exists (j0:nat{j0 < n2}) (i:nat{i < n1}) (k:nat{k < 2}).
-       let _ = Lemmas.lemma_matrix_index_repeati2 n1 n2 i j0 in
-       l == 2 * (j0 * n1 + i) + k /\ matrix_to_lbytes_fc m res i j0 k) /\
-      (forall (l:size_nat{l < 2 * n1 * j}). res1.[l] == res.[l]) /\
-      (forall (i:size_nat{i < n1}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res1 i j k)))
-    (ensures
-      forall (l:size_nat{l < 2 * n1 * (j + 1)}). exists (j0:nat{j0 < n2}) (i:nat{i < n1}) (k:nat{k < 2}).
-       l == 2 * (j0 * n1 + i) + k /\ matrix_to_lbytes_fc m res1 i j0 k)
-let lemma_matrix_to_lbytes2 #n1 #n2 m res res1 j = admit()
-
-#set-options "--z3rlimit 50"
-
 val matrix_to_lbytes:
-    #n1:size_nat{0 < n1}
-  -> #n2:size_nat{0 < n2 /\ 2 * n1 * n2 < max_size_t}
+    #n1:size_nat
+  -> #n2:size_nat{2 * n1 * n2 < max_size_t}
   -> m:matrix n1 n2
-  -> res:lbytes (2 * n1 * n2)
-    {forall (l:size_nat{l < 2 * n1 * n2}). exists (j:nat{j < n2}) (i:nat{i < n1}) (k:nat{k < 2}). l == 2 * (j * n1 + i) + k /\
-    res.[l] == u8 (uint_v m.(i, j) / pow2 (8 * k) % pow2 8)}
+  -> lbytes (2 * n1 * n2)
 let matrix_to_lbytes #n1 #n2 m =
   let res = Seq.create (2 * n1 * n2) (u8 0) in
-
-  repeati_inductive n2
-  (fun j res ->
-    forall (l:size_nat{l < 2 * n1 * j}). exists (j0:nat{j0 < n2}) (i:nat{i < n1}) (k:nat{k < 2}).
-     l == 2 * (j0 * n1 + i) + k /\ matrix_to_lbytes_fc m res i j0 k)
-  (fun j res ->
-    let res1 = repeati_inductive n1
-    (fun i res0 ->
-      (forall (l:size_nat{l < 2 * n1 * j}). res0.[l] == res.[l]) /\
-      (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res0 i0 j k))
-    (fun i res0 ->
-     Lemmas.lemma_matrix_index_repeati2 n1 n2 i j;
-     let res1 = matrix_to_lbytes_inner m (2 * (j * n1 + i)) i j res0 in
-     lemma_matrix_to_lbytes1 #n1 #n2 m res0 res1 i j;
-     res1
-    ) res in
-    lemma_matrix_to_lbytes2 #n1 #n2 m res res1 j;
-    res1
+  repeati (n1 * n2)
+  (fun i res ->
+    update_sub res (2 * i) 2 (uint_to_bytes_le m.[i])
   ) res
 
 val matrix_from_lbytes:
@@ -357,11 +317,7 @@ val matrix_from_lbytes:
   -> matrix n1 n2
 let matrix_from_lbytes n1 n2 b =
   let res = create n1 n2 in
-  repeati n1
+  repeati (n1 * n2)
   (fun i res ->
-    repeati n2
-    (fun j res ->
-      Lemmas.lemma_matrix_index_repeati2 n1 n2 i j;
-      res.(i, j) <- uint_from_bytes_le (Seq.sub b (2 * (j * n1 + i)) 2)
-    ) res
+    res.[i] <- uint_from_bytes_le (Seq.sub b (2 * i) 2)
   ) res
