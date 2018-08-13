@@ -356,10 +356,10 @@ let validDstAddrs128 (m:M.mem) (addr:int) (b:M.buffer128) (len:int) (memTaint:M.
     M.buffer_addr b m == addr /\
     M.valid_taint_buf128 b m memTaint t
 
-let validSrcAddrsOffset128 (m:M.mem) (addr offset:int) (b:M.buffer128) (len:int) (memTaint:M.memtaint) (t:taint) =
+let validSrcAddrsOffset128 (m:M.mem) (addr:int) (b:M.buffer128) (offset len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m + offset == addr /\
+    offset + len <= buffer_length b /\
+    M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
     M.valid_taint_buf128 b m memTaint t
 
 let validDstAddrsOffset128 = validSrcAddrsOffset128

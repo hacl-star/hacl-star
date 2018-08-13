@@ -167,7 +167,6 @@ let lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:se
   lemma_hash_append2 h y_init y0 y1 (slice input 0 bound) r0;
 
   let s = (slice input 0 bound) @| (create 1 r0) in
-//  assert (y1 == ghash_incremental h y_init s);
   lemma_hash_append2 h y_init y1 y2 s r1;
   let s = s @| (create 1 r1) in
   lemma_hash_append2 h y_init y2 y3 s r2;
@@ -175,5 +174,14 @@ let lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:se
   lemma_hash_append2 h y_init y3 y4 s r3;
   let s = s @| (create 1 r3) in  
   assert (equal s (slice input 0 (bound + 4)));
-  //admit();
   ()
+
+(*
+let lemma_slice_extension (s:seq quad32) (bound:int) (q:quad32) : Lemma
+  (requires 0 <= bound /\ bound + 1 <= length s /\ 
+            index_work_around_quad32 (slice_work_around s (bound + 1)) bound == q)
+  (ensures equal (slice_work_around s (bound + 1))
+                 (append (slice_work_around s bound) (create 1 q)))
+  =
+  ()
+*)   
