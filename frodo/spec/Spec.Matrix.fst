@@ -350,6 +350,35 @@ let lemma_matrix_to_lbytes #n1 #n2 m res res1 i =
     (Lemma (res.[2 * i0 + k] == u8 (uint_v m.[i0] / pow2 (8 * k) % pow2 8)))
   )
 
+val lemma_matrix_to_lbytes_ext:
+    #n1:size_nat
+  -> #n2:size_nat{2 * n1 < max_size_t /\ 2 * n1 * n2 < max_size_t}
+  -> m:matrix n1 n2
+  -> res1:lbytes (2 * n1 * n2)
+  -> res2:lbytes (2 * n1 * n2)
+  -> Lemma
+    (requires
+      (forall (i:size_nat{i < n1 * n2}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res1 i k) /\
+      (forall (i:size_nat{i < n1 * n2}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res2 i k))
+    (ensures res1 == res2)
+let lemma_matrix_to_lbytes_ext #n1 #n2 m res1 res2 =
+  Classical.forall_intro_2 #(i:size_nat{i < n1 * n2}) #(fun i -> k:size_nat{k < 2})
+  (fun i k ->
+    (lemma_matrix_to_lbytes_fc #n1 #n2 m res1 i k) <:
+    (Lemma (res1.[2 * i + k] == u8 (uint_v m.[i] / pow2 (8 * k) % pow2 8)))
+  );
+  Classical.forall_intro_2 #(i:size_nat{i < n1 * n2}) #(fun i -> k:size_nat{k < 2})
+  (fun i k ->
+    (lemma_matrix_to_lbytes_fc #n1 #n2 m res2 i k) <:
+    (Lemma (res2.[2 * i + k] == u8 (uint_v m.[i] / pow2 (8 * k) % pow2 8)))
+  );
+  assert (forall (i:size_nat{i < n1 * n2}) (k:size_nat{k < 2}). res1.[2 * i + k] == res1.[i * 2 + k]);
+  assert (forall (i:size_nat{i < n1 * n2}) (k:size_nat{k < 2}). res1.[i * 2 + k] == res2.[i * 2 + k]);
+  assert (forall (i:size_nat{i < 2 * n1 * n2}). i == (i / 2) * 2 + i % 2 /\ i / 2 < n1 * n2 /\ i % 2 < 2);
+  assert (forall (i:size_nat{i < 2 * n1 * n2}). index res1 i == index res2 i);
+  eq_intro res1 res2;
+  eq_elim res1 res2
+
 val matrix_to_lbytes:
     #n1:size_nat
   -> #n2:size_nat{2 * n1 * n2 < max_size_t}

@@ -506,7 +506,7 @@ let matrix_eq #n1 #n2 m a b =
   pop_frame();
   res
 
-#set-options "--z3rlimit 50"
+#reset-options "--z3rlimit 150 --max_fuel 0"
 
 val matrix_to_lbytes:
     #n1:size_t
@@ -515,15 +515,29 @@ val matrix_to_lbytes:
   -> res:lbytes (size 2 *! n1 *! n2)
   -> Stack unit
     (requires fun h -> live h m /\ live h res /\ disjoint m res)
-    (ensures  fun h0 r h1 -> live h1 res /\ modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 r h1 ->
+      live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+      B.as_seq h1 res == M.matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m))
 [@"c_inline"]
 let matrix_to_lbytes #n1 #n2 m res =
   let h0 = ST.get () in
   let n = n1 *! n2 in
-  loop_nospec #h0 n res
+  Lib.Loops.for (size 0) n
+  (fun h1 i ->
+    B.live h1 m /\ B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+    (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). M.matrix_to_lbytes_fc (as_matrix h0 m) (B.as_seq h1 res) i0 k))
   (fun i ->
-    uint_to_bytes_le (sub res (size 2 *! i) (size 2)) m.(i)
-  )
+    M.lemma_uint_to_bytes_le (Seq.index #uint16 #(v n1 * v n2) (B.as_seq h0 m) (v i));
+    let h0 = ST.get () in
+    let tmp = sub res (size 2 *! i) (size 2) in
+    uint_to_bytes_le tmp m.(i);
+    let h1 = ST.get () in
+    assume (forall (i0:size_nat{i0 < 2 * v i}). Seq.index #uint8 #(2 * v n1 * v n2) (B.as_seq h0 res) i0 ==
+      Seq.index #uint8 #(2 * v n1 * v n2) (B.as_seq h1 res) i0); //FIXME
+    M.lemma_matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m) (B.as_seq h0 res) (B.as_seq h1 res) (v i)
+  );
+  let h1 = ST.get () in
+  M.lemma_matrix_to_lbytes_ext #(v n1) #(v n2) (as_matrix h0 m) (B.as_seq h1 res) (M.matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m))
 
 val matrix_from_lbytes:
     #n1:size_t
