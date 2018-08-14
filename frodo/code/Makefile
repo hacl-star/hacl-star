@@ -250,7 +250,7 @@ $(OUT_DIR):
 
 $(OUT_DIR)/libfrodo_for_testing.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o, $(ALL_OBJS)) | $(OUT_DIR)
 	$(AR) rcs -S $(OUT_DIR)/libfrodo_for_testing.a $^
-	ranlib -no_warning_for_no_symbols $(OUT_DIR)/libfrodo_for_testing.a
+	ranlib $(OUT_DIR)/libfrodo_for_testing.a
 
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
