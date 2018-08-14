@@ -32,11 +32,7 @@ SPEC_FILES=	Spec.Chacha20.Lemmas.fst \
 		Spec.Poly1305.Lemmas.fst \
 		Spec.Salsa20.fst \
 		Spec.SHA2.fst \
-		Spec.SHA2Again.fst \
-		Spec.SHA2_256.fst \
-		Spec.SHA2_384.fst \
-		Spec.SHA2_512.fst \
-		Spec.HMAC.fst \
+		Spec.SHA2.Constants.fst \
 		Spec.Ed25519.fst
 
 hints: $(addsuffix .hints, $(SPEC_FILES))

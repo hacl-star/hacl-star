@@ -1,4 +1,4 @@
-module Spec.SHA2Again.Constants
+module Spec.SHA2.Constants
 
 // K shuffling vectors
 
