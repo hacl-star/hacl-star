@@ -1,7 +1,7 @@
 FSTAR_HOME 	?= ../../../FStar
 KREMLIN_HOME	?= ../../../kremlin
 HACL_HOME	?= ../..
-LWEKE_HOME	?= $(HACL_HOME)/../Frodo/Reference_Implementation/reference/FrodoKEM-640
+LWEKE_HOME	?= ../NIST/Reference_Implementation/reference/FrodoKEM-640
 
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
@@ -15,21 +15,48 @@ OUT_DIR       = frodo-c
 # .c, .h, .d
 # .o, .a
 
-include ../../Makefile.include
+KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
 
-#OTHERFLAGS += --admit_smt_queries true
+KREMLIN=$(KREMLIN_HOME)/krml
 
 # Manual staging...
 all:
+	sed -i.bak 's/params_n = size 640/params_n = size 64 /g' ../spec/Frodo.Params.fst
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
-	STAGE=2 $(MAKE) stage2
+	STAGE=2 $(MAKE) stage2-test
+
+lib:
+	sed -i.bak 's/params_n = size 64 /params_n = size 640/g' ../spec/Frodo.Params.fst
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) stage1
+	STAGE=2 $(MAKE) stage2-lib
 
 stage1: $(GENERATED_DIR)/Makefile.include
 
-stage2: $(OUT_DIR)/libfrodostar_for_testing.a $(OUT_DIR)/test.exe
-	@echo Remember to set params_n = 64 in Frodo.Params!
+stage2-test: $(OUT_DIR)/test.exe
 	$(OUT_DIR)/test.exe
+
+stage2-lib: $(OUT_DIR)/libfrodo_for_testing.a
+
+KATS: $(OUT_DIR)/libfrodo_for_testing.a \
+	$(LWEKE_HOME)/objs/sha3/fips202.o \
+	$(LWEKE_HOME)/tests/rng.o \
+	$(LWEKE_HOME)/objs/aes/aes_c.o \
+	$(LWEKE_HOME)/objs/aes/aes.o
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 KATS-fstar
+	(cd $(LWEKE_HOME); frodo/PQCtestKAT_kem_cshake)
+
+benchmark: $(OUT_DIR)/libfrodo_for_testing.a \
+	$(LWEKE_HOME)/objs/sha3/fips202.o \
+	$(LWEKE_HOME)/tests/rng.o \
+	$(LWEKE_HOME)/objs/aes/aes_c.o \
+	$(LWEKE_HOME)/objs/aes/aes.o
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 KATS-fstar
+	(cd $(LWEKE_HOME); frodo/test_KEM)
+
+$(LWEKE_HOME)/%.o:
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 $^
 
 # 1. Generation of .krml files
 # - generate the F* dependency graph via `fstar --dep full`
@@ -39,7 +66,7 @@ stage2: $(OUT_DIR)/libfrodostar_for_testing.a $(OUT_DIR)/test.exe
 FSTAR_INCLUDE_DIRS = \
   ../spec \
   $(HACL_KREMLIN) \
-  $(KREMLIB) \
+  $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/fst \
@@ -56,6 +83,12 @@ FSTARR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
   --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
+
+%.fst-in:
+	@echo --cache_checked_modules --cache_dir $(CACHE_DIR) \
+	$(FSTAR_INCLUDES) \
+	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
 
 ROOTS = Hacl.Test.Frodo.fst
 
@@ -215,10 +248,9 @@ $(OUT_DIR):
 
 # 4. Collecting all of the object files into a static library.
 
-$(OUT_DIR)/libfrodostar_for_testing.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o, $(ALL_OBJS)) | $(OUT_DIR)
-	$(AR) rcs $(OUT_DIR)/libfrodostar_for_testing.a $^
-	ranlib $(OUT_DIR)/libfrodostar_for_testing.a
-	@echo Remember to set params_n = 640 in Frodo.Params!
+$(OUT_DIR)/libfrodo_for_testing.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o, $(ALL_OBJS)) | $(OUT_DIR)
+	$(AR) rcs -S $(OUT_DIR)/libfrodo_for_testing.a $^
+	ranlib -no_warning_for_no_symbols $(OUT_DIR)/libfrodo_for_testing.a
 
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
@@ -307,7 +339,6 @@ $(OUT_DIR)/test.exe: $(BASE_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
 
 test: $(OUT_DIR)/test.exe
-	@echo Remember to set params_n = 64 in Hacl.Impl.Frodo.Params!
 	$(OUT_DIR)/test.exe
 
 endif
