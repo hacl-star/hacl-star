@@ -30,30 +30,22 @@ lib:
 	sed -i.bak 's/params_n = size 64 /params_n = size 640/g' ../spec/Frodo.Params.fst
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
-	STAGE=2 $(MAKE) stage2-lib
+	STAGE=2 RAND_OBJ=$(LWEKE_HOME)/objs/random/random.o $(MAKE) stage2-lib
 
 stage1: $(GENERATED_DIR)/Makefile.include
 
 stage2-test: $(OUT_DIR)/test.exe
 	$(OUT_DIR)/test.exe
 
-stage2-lib: $(OUT_DIR)/libfrodo_for_testing.a
+stage2-lib: $(OUT_DIR)/libfrodo_for_testing.a $(OUT_DIR)/libfrodo.a
 
-KATS: $(OUT_DIR)/libfrodo_for_testing.a \
-	$(LWEKE_HOME)/objs/sha3/fips202.o \
-	$(LWEKE_HOME)/tests/rng.o \
-	$(LWEKE_HOME)/objs/aes/aes_c.o \
-	$(LWEKE_HOME)/objs/aes/aes.o
+KATs: $(OUT_DIR)/libfrodo_for_testing.a
 	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 KATS-fstar
-	(cd $(LWEKE_HOME); frodo/PQCtestKAT_kem_cshake)
+	(cd $(LWEKE_HOME); frodo/PQCtestKAT_kem_cshake_fstar)
 
-benchmark: $(OUT_DIR)/libfrodo_for_testing.a \
-	$(LWEKE_HOME)/objs/sha3/fips202.o \
-	$(LWEKE_HOME)/tests/rng.o \
-	$(LWEKE_HOME)/objs/aes/aes_c.o \
-	$(LWEKE_HOME)/objs/aes/aes.o
+benchmark: $(OUT_DIR)/libfrodo.a
 	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 tests-fstar
-	(cd $(LWEKE_HOME); frodo/test_KEM)
+	(cd $(LWEKE_HOME); frodo/test_KEM_fstar)
 
 $(LWEKE_HOME)/%.o:
 	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 $*.o
@@ -213,14 +205,14 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  include/randombytes.c \
+  include/rng.c \
+  include/random.c \
   include/Hacl_Keccak.c \
   include/clearwords.c \
   $(HACL_HOME)/lib/c/Lib_PQ_Print.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
 	$(LWEKE_HOME)/objs/sha3/fips202.o \
-	$(LWEKE_HOME)/tests/rng.o \
 	$(LWEKE_HOME)/objs/aes/aes_c.o \
 	$(LWEKE_HOME)/objs/aes/aes.o
 
@@ -248,9 +240,14 @@ $(OUT_DIR):
 
 # 4. Collecting all of the object files into a static library.
 
-$(OUT_DIR)/libfrodo_for_testing.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o, $(ALL_OBJS)) | $(OUT_DIR)
+$(OUT_DIR)/libfrodo_for_testing.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o include/random.o, $(ALL_OBJS)) $(LWEKE_HOME)/tests/rng.o | $(OUT_DIR)
 	$(AR) rcs -S $(OUT_DIR)/libfrodo_for_testing.a $^
 	ranlib $(OUT_DIR)/libfrodo_for_testing.a
+
+$(OUT_DIR)/libfrodo.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o include/rng.o, $(ALL_OBJS)) $(LWEKE_HOME)/objs/random/random.o \
+ | $(OUT_DIR)
+	$(AR) rcs -S $(OUT_DIR)/libfrodo.a $^
+	ranlib $(OUT_DIR)/libfrodo.a
 
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
@@ -299,7 +296,7 @@ CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
 BASE_OBJ = \
   ../../lib/c/Lib_PQ_Print.o \
   include/Hacl_Keccak.o \
-  include/randombytes.o \
+  include/rng.o \
   include/clearwords.o \
   $(LWEKE_HOME)/objs/sha3/fips202.o \
   $(LWEKE_HOME)/tests/rng.o \
