@@ -56,7 +56,7 @@ benchmark: $(OUT_DIR)/libfrodo_for_testing.a \
 	(cd $(LWEKE_HOME); frodo/test_KEM)
 
 $(LWEKE_HOME)/%.o:
-	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 $^
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 $*.o
 
 # 1. Generation of .krml files
 # - generate the F* dependency graph via `fstar --dep full`
