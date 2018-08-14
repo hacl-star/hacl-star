@@ -52,7 +52,7 @@ benchmark: $(OUT_DIR)/libfrodo_for_testing.a \
 	$(LWEKE_HOME)/tests/rng.o \
 	$(LWEKE_HOME)/objs/aes/aes_c.o \
 	$(LWEKE_HOME)/objs/aes/aes.o
-	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 test-fstar
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 tests-fstar
 	(cd $(LWEKE_HOME); frodo/test_KEM)
 
 $(LWEKE_HOME)/%.o:
