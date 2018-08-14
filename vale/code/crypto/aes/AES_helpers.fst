@@ -130,6 +130,7 @@ let commute_sub_bytes_shift_rows_forall () :
   FStar.Classical.forall_intro commute_sub_bytes_shift_rows
 
 let rounds_opaque = make_opaque rounds
+let cipher_opaque = make_opaque cipher
 
 let init_rounds_opaque (init:quad32) (round_keys:seq quad32) : 
   Lemma (length round_keys > 0 ==> rounds_opaque init round_keys 0 == init)
@@ -145,8 +146,9 @@ let finish_cipher (alg:algorithm) (input:quad32) (round_keys:seq quad32) :
             let state = shift_rows_LE state in
             let state = sub_bytes state in
             let state = quad32_xor state (index round_keys (nr alg)) in
-            state == cipher alg input round_keys))
+            state == cipher_opaque alg input round_keys))
   = 
   reveal_opaque rounds;
+  reveal_opaque cipher;
   commute_sub_bytes_shift_rows_forall()
 #pop-options  

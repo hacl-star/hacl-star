@@ -48,6 +48,15 @@ let aes_reqs (alg:algorithm) (key:aes_key_LE(alg)) (round_keys:seq(quad32)) (key
 
 #endverbatim
 
+#verbatim{:implementation}
+
+let finish_aes_encrypt_le (alg:algorithm) (input_LE:quad32) (key:aes_key_LE alg) : 
+  Lemma(aes_encrypt_le alg key input_LE == cipher_opaque alg input_LE (key_to_round_keys_LE alg key))
+  =
+  reveal_opaque aes_encrypt_LE_def;
+  reveal_opaque cipher
+#endverbatim
+
 // TODO: Write one procedure that unrolls to these variants?
 // These procedures help walk F* through the recursive definition of rounds
 procedure {:quick exportOnly} aes_round_4way(
@@ -436,6 +445,10 @@ procedure{:quick} aes_ctr_loop_body(
     finish_cipher(alg, in2, round_keys);
     finish_cipher(alg, in3, round_keys);
     finish_cipher(alg, in4, round_keys);
+    finish_aes_encrypt_le(alg, in1, key);
+    finish_aes_encrypt_le(alg, in2, key);
+    finish_aes_encrypt_le(alg, in3, key);
+    finish_aes_encrypt_le(alg, in4, key);
 
     assert slice_work_around(buffer128_as_seq(mem, out_b), 4*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 4*count));   // OBSERVE
 

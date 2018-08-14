@@ -171,6 +171,7 @@ procedure {:quick} gcm_one_pass_blocks(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
+        reveal_opaque(aes_encrypt_LE_def);
 
         Load128_buffer(xmm2, r9, 0, Secret, in_b, block_offset + rdx);
         Pxor(xmm2, xmm0);

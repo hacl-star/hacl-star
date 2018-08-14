@@ -24,7 +24,7 @@ open X64.Vale.QuickCodes
 open Arch.Types
 //open AES_helpers
 open AES256_helpers
-//open Opaque_s
+open Opaque_s
 open X64.AES128
 open X64.AES256
 open GCTR
@@ -215,6 +215,7 @@ procedure{:quick} AESEncryptBlockStdcall_BE(
     {
         Store128_buffer(rdi, xmm0, 0, Secret, output_buffer, 0);
     }
+    reveal_opaque(aes_encrypt_LE_def);
 }
 
 
