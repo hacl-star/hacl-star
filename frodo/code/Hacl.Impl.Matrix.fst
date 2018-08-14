@@ -356,8 +356,7 @@ val mget_s:
       modifies loc_none h0 h1 /\
       x == M.mget_s (as_matrix h0 a) (v i) (v j))
 let mget_s #n1 #n2 a i j =
-  assert (v j * v n1 + v i <= (v n2 - 1) * v n1 + v n1 - 1);
-  assert (v (j *. n1 +. i) <= (v n2 - 1) * v n1 + v n1 - 1);
+  M.index_lt_s (v n1) (v n2) (v i) (v j);
   a.(j *. n1 +. i)
 
 unfold

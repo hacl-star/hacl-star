@@ -2,7 +2,7 @@ module Frodo.Params
 
 open Lib.IntTypes
 
-unfold let params_n = size 64 // 640
+unfold let params_n = size 640
 
 unfold let params_logq = size 15
 

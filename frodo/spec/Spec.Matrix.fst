@@ -22,6 +22,15 @@ val index_lt:
 let index_lt n1 n2 i j =
   assert (i * n2 + j <= (n1 - 1) * n2 + n2 - 1)
 
+val index_lt_s:
+    n1:size_nat
+  -> n2:size_nat
+  -> i:size_nat{i < n1}
+  -> j:size_nat{j < n2}
+  -> Lemma (j * n1 + i < n1 * n2)
+let index_lt_s n1 n2 i j =
+  assert (j * n1 + i <= (n2 - 1) * n1 + n1 - 1)
+
 // TODO: this proof is fragile; improve
 private
 val index_neq:
