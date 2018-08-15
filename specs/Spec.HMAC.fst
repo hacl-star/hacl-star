@@ -22,7 +22,7 @@ let xor_bytes b0 b1 = Spec.Lib.map2 (fun x y -> U8.logxor x y) b0 b1
 
 #reset-options "--max_fuel 0 --z3rlimit 25"
 
-val wrap_key: a:Hash.Helpers.hash_alg -> key:bytes{Seq.length key < Hash.Helpers.max_input8 a} -> Tot (okey:bytes{Seq.length okey = Hash.Helpers.size_block a})
+val wrap_key: a:Hash.Helpers.sha2_alg -> key:bytes{Seq.length key < Hash.Helpers.max_input8 a} -> Tot (okey:bytes{Seq.length okey = Hash.Helpers.size_block a})
 let wrap_key a key =
   if Seq.length key <= Hash.Helpers.size_block a then
     let pad = Seq.create ((Hash.Helpers.size_block a) - (Seq.length key)) 0uy in
@@ -37,7 +37,7 @@ let wrap_key a key =
 #reset-options "--max_fuel 0 --z3rlimit 10"
 
 val hmac_core:
-  a:Hash.Helpers.hash_alg ->
+  a:Hash.Helpers.sha2_alg ->
   key  :bytes{Seq.length key = Hash.Helpers.size_block a} ->
   data :bytes{Seq.length data + Hash.Helpers.size_block a < Hash.Helpers.max_input8 a} ->
   Tot (mac:bytes{Seq.length mac = Hash.Helpers.size_hash a})
@@ -83,7 +83,7 @@ let hmac_core a key data =
 #reset-options "--max_fuel 0 --z3rlimit 10"
 
 val hmac:
-  a    :Hash.Helpers.hash_alg ->
+  a    :Hash.Helpers.sha2_alg ->
   key  :bytes{Seq.length key < Hash.Helpers.max_input8 a} ->
   data :bytes{Seq.length data + Hash.Helpers.size_block a < Hash.Helpers.max_input8 a} ->
   Tot (mac:bytes{Seq.length mac = Hash.Helpers.size_hash a})

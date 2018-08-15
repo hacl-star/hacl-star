@@ -402,7 +402,7 @@ open Spec.Hash.Helpers
 //
 
 type vec =
-  | Vec: a:hash_alg ->
+  | Vec: a:sha2_alg ->
     key  :bytes{Seq.length key < max_input8 a} ->
     data :bytes{Seq.length data + size_block a < max_input8 a} ->
     mac:bytes{Seq.length mac = size_hash a} ->

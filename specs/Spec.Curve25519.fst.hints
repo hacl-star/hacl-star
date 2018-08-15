@@ -18,7 +18,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "0c4d5596169d1828532e286029e50dca"
+      "8f66a095b3a6711b74a663633d749fbc"
     ],
     [
       "Spec.Curve25519.fsub",
@@ -37,7 +37,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "db3a2bdcf1ed193439ee8ddcedf46c10"
+      "76c0a1f9c8b0b18ab124b876fa267d3a"
     ],
     [
       "Spec.Curve25519.fmul",
@@ -56,7 +56,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "67e095845c8d66388856adbfcfa3880f"
+      "b3627abec7d5008650e7194987d2aa74"
     ],
     [
       "Spec.Curve25519.zero",
@@ -75,7 +75,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "f49a7acc9d9dac311d81408bb5b84e73"
+      "d6eeb70be3a10c817f377b8c8b11673e"
     ],
     [
       "Spec.Curve25519.one",
@@ -92,7 +92,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "59a48925cb6c8e5d62e235a14e4d440e"
+      "3ffbea39f3a9517fa149b67020614c5d"
     ],
     [
       "Spec.Curve25519.op_Star_Star",
@@ -117,7 +117,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "66de377a16d455c764db2b419be77be4"
+      "23ff22e02d763e8b4883b344a6615a02"
     ],
     [
       "Spec.Curve25519.proj_point",
@@ -133,7 +133,7 @@
         "int_typing"
       ],
       0,
-      "d79495065c746dcdc7037e2cc328ef23"
+      "369b939462c5f05f1408775819ce54e8"
     ],
     [
       "Spec.Curve25519.decodeScalar25519",
@@ -152,10 +152,12 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_2ca062977a42c36634b89c1c4f193f79",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "token_correspondence_FStar.Seq.Base.upd",
+        "token_correspondence_Spec.Lib.op_String_Assignment"
       ],
       0,
-      "ad914779df775c4759d33465e3f9537e"
+      "ec202e66664907023f68b0a75b96ac1c"
     ],
     [
       "Spec.Curve25519.decodePoint",
@@ -172,7 +174,7 @@
         "refinement_interpretation_Spec.Curve25519_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
       ],
       0,
-      "f88a833a284df1621891c8a8f28dd7dc"
+      "63924fa49e3bec94999f3c8ca8395db3"
     ],
     [
       "Spec.Curve25519.add_and_double",
@@ -193,7 +195,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "c0ef5e8a5cbe542a26638caeff6efd9e"
+      "c50d0e73406d6f642c09f37e332a1d04"
     ],
     [
       "Spec.Curve25519.ith_bit",
@@ -212,7 +214,7 @@
         "refinement_interpretation_Spec.Curve25519_Tm_refine_8b3cfa65827a3d573ef1ab994460c428"
       ],
       0,
-      "b992b47ce3aaa48d330b60dd9ac1645b"
+      "b3dbebf0809a2bb90518d2a2fcc316ef"
     ],
     [
       "Spec.Curve25519.montgomery_ladder_",
@@ -230,7 +232,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "ed7fc21ac3af66f83f81f1b159d4099f"
+      "a355da170425cdc09c34f99fda66cbfe"
     ],
     [
       "Spec.Curve25519.encodePoint",
@@ -258,7 +260,7 @@
         "typing_FStar.Mul.op_Star"
       ],
       0,
-      "1c85d90c7c259c98ff7f44fcbc888b21"
+      "09ede301b42b05754e6e9b8b86340e5a"
     ],
     [
       "Spec.Curve25519.scalarmult",
@@ -268,6 +270,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Seq.Base_interpretation_Tm_arrow_3f7384d3c722d62fc7756abe087bf592",
+        "FStar.Seq.Base_interpretation_Tm_arrow_bdcbfedb2f96eeeeff6f38aed48c66a0",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "bool_inversion", "bool_typing", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
@@ -280,6 +284,8 @@
         "equation_Spec.Curve25519.prime", "equation_Spec.Curve25519.scalar",
         "equation_Spec.Lib.lbytes", "equation_Spec.Lib.op_String_Access",
         "equation_Spec.Lib.op_String_Assignment",
+        "function_token_typing_FStar.Seq.Base.index",
+        "function_token_typing_FStar.Seq.Base.upd",
         "function_token_typing_FStar.UInt64.n",
         "function_token_typing_FStar.UInt8.n",
         "function_token_typing_FStar.UInt8.t",
@@ -301,13 +307,16 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Curve25519_Tm_refine_64fde586cd61a9af199b0a72fdba45d1",
+        "token_correspondence_FStar.Seq.Base.index",
+        "token_correspondence_FStar.Seq.Base.upd",
+        "token_correspondence_Spec.Lib.op_String_Access",
+        "token_correspondence_Spec.Lib.op_String_Assignment",
         "typing_FStar.Seq.Base.index", "typing_FStar.UInt.fits",
         "typing_FStar.UInt8.logand", "typing_FStar.UInt8.logor",
-        "typing_FStar.UInt8.uint_to_t", "typing_Spec.Lib.op_String_Access",
-        "typing_Spec.Lib.op_String_Assignment"
+        "typing_FStar.UInt8.uint_to_t"
       ],
       0,
-      "7b5337c0331c175035a036ab0c8222c5"
+      "81ee7588eb417f839eca8aeb67ec5894"
     ],
     [
       "Spec.Curve25519.test",
@@ -323,7 +332,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "1eb6735167881746d72c55ace438153a"
+      "57985fe9cbf6e9145eca311456e87de0"
     ]
   ]
 ]

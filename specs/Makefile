@@ -2,7 +2,7 @@ include ../Makefile.include
 
 OUTPUT_DIR = extracted
 
-FSTAR += --record_hints --odir $(OUTPUT_DIR)
+FSTAR += --record_hints --odir $(OUTPUT_DIR) --cache_checked_modules
 
 # TODO: move the specification tests to their own files so that we don't pollute
 # the specs with huge definitions in the scope
@@ -34,7 +34,6 @@ $(OUTPUT_DIR)/%.ml:
 	$(FSTAR) $(subst .checked,,$<) --codegen OCaml --extract_module $(subst .fst.checked,,$(notdir $<))
 
 all: $(ALL_CHECKED_FILES)
-	echo $^
 
 test: $(subst .,_,$(patsubst %.fst,test-%,$(ROOTS)))
 
