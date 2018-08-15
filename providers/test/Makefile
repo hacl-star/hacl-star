@@ -68,14 +68,11 @@ $(EXTRACT_DIR)/%.krml:
 # needed by fstar_bytes.h, and then includes fstar_bytes.h only if EverCrypt.h has been
 # loaded.
 $(EXTRACT_DIR)/Test.c: $(ALL_KRML_FILES) | .depend
-	krml $^ -tmpdir $(EXTRACT_DIR) -no-prefix Test \
+	krml $(KOPTS) $^ -tmpdir $(EXTRACT_DIR) -no-prefix Test \
 	  -skip-compilation \
 	  -add-include '"kremlin/internal/compat.h"' \
-	  -add-include '"temp.h"' \
 	  -add-include '"kremlib.h"' \
-	  -minimal \
-	  -bundle 'Test=*' \
-	  -falloca -ftail-calls \
+	  -minimal -bundle 'Test=*' \
 	  -library 'EverCrypt,EverCrypt.*' \
 	  -ccopt -g
 

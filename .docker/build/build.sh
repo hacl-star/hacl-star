@@ -90,6 +90,31 @@ function fetch_mitls() {
     export_home MITLS "$(pwd)/mitls-fstar"
 }
 
+function fetch_vale() {
+    # NOTE: the name of the directory where Vale is downloaded MUST NOT be vale, because the latter already exists
+    # so let's call it valebin
+    if [ ! -d valebin ]; then
+        git clone https://github.com/project-everest/vale valebin
+    fi
+    cd valebin
+    git fetch origin
+    local ref=$(if [ -f ../.vale_version ]; then cat ../.vale_version | tr -d '\r\n'; else echo origin/master; fi)
+    echo Switching to Vale $ref
+    git reset --hard $ref
+    cd ..
+    export_home VALE "$(pwd)/valebin"
+}
+
+function fetch_and_make_vale() {
+    fetch_vale
+    python3.6 $(which scons) -C valebin -j $threads
+}
+
+function hacl_vale_test() {
+    fetch_and_make_vale
+    python3.6 $(which scons) -C vale -j $threads --FSTAR-MY-VERSION
+}
+
 function refresh_hacl_hints() {
     refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
 }
@@ -154,7 +179,9 @@ function exec_build() {
 
     if [[ $target == "hacl-ci" ]]; then
         echo target - >hacl-ci
-        hacl_test && echo -n true >$status_file
+        hacl_test &&
+        hacl_vale_test &&
+        echo -n true >$status_file
     elif [[ $target == "hacl-nightly" ]]; then
         echo target - >hacl-nightly
         export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"

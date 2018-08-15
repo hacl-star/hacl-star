@@ -4,7 +4,7 @@ open Views
 
 #reset-options "--z3rlimit 100 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 
-let nat32_to_nat8s (n:nat32) : nat8*nat8*nat8*nat8 =
+let nat32_to_nat8s_def (n:nat32) : nat8*nat8*nat8*nat8 =
   let v1 = n % 0x100 in
   let n = n / 0x100 in
   let v2 = n % 0x100 in
@@ -13,12 +13,13 @@ let nat32_to_nat8s (n:nat32) : nat8*nat8*nat8*nat8 =
   let n = n / 0x100 in
   let v4 = n % 0x100 in
   (v1, v2, v3, v4)
+let nat32_to_nat8s = make_opaque nat32_to_nat8s_def
 
 #reset-options "--z3rlimit 70"
 let nat32_to_nat8s_to_nat32 (v1 v2 v3 v4:nat8) :
   Lemma (nat32_to_nat8s (nat8s_to_nat32 v1 v2 v3 v4) = (v1, v2, v3, v4))
   =
-  ()
+  reveal_opaque nat32_to_nat8s_def
 
 let nat8s_to_nat32_injective (v1 v2 v3 v4 v1' v2' v3' v4':nat8) :
   Lemma (nat8s_to_nat32 v1 v2 v3 v4 == nat8s_to_nat32 v1' v2' v3' v4' ==>
@@ -47,15 +48,15 @@ let nat64_to_nat8s (n:nat64) : nat8*nat8*nat8*nat8*nat8*nat8*nat8*nat8 =
   let (v5, v6, v7, v8) = nat32_to_nat8s upper in
   (v1, v2, v3, v4, v5, v6, v7, v8)
 
-#push-options "--z3rlimit 60 --z3refresh"
+#reset-options "--z3rlimit 100 --max_fuel 0 --initial_fuel 0 --max_ifuel 0 --initial_ifuel 0"
 let nat64_to_nat8s_to_nat64_alt (v1 v2 v3 v4 v5 v6 v7 v8:nat8) :
   Lemma (nat64_to_nat8s (nat8s_to_nat64_alt v1 v2 v3 v4 v5 v6 v7 v8) == (v1, v2, v3, v4, v5, v6, v7, v8))
   =
   nat32_to_nat8s_to_nat32 v1 v2 v3 v4;
   nat32_to_nat8s_to_nat32 v5 v6 v7 v8;
   ()
-#pop-options
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --initial_fuel 0 --max_ifuel 0 --initial_ifuel 0"
 let nat64_to_nat8s_to_nat64 (v1 v2 v3 v4 v5 v6 v7 v8:nat8) :
   Lemma (nat64_to_nat8s (nat8s_to_nat64 v1 v2 v3 v4 v5 v6 v7 v8) == (v1, v2, v3, v4, v5, v6, v7, v8))
   =

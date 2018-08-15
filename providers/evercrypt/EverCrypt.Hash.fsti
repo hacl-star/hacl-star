@@ -191,6 +191,7 @@ module G = FStar.Ghost
 open LowStar.BufferOps
 
 // abstract implementation state
+[@CAbstractStruct]
 val state_s: e_alg -> Type0
 let state alg = b:B.pointer (state_s alg) { B.freeable b }
 

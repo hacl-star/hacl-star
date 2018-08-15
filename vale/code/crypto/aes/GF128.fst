@@ -121,14 +121,8 @@ let lemma_gf128_constant_rev q =
   let s0_32 = slice s 0 32 in
   let s0_8 = slice s0_32 0 8 in
   let s8_32 = slice s0_32 8 32 in
-  let l = [true; true; true; false; false; false; false; true] in
-  let sl = seq_of_list l in
-  assert_norm (List.length l == 8);
-  assert (equal sl s0_8);
   assert (equal s8_32 (UInt.to_vec #24 (UInt.zero 24)));
-  Collections.Lists.lemma_from_list_be l;
-  assert_norm (Collections.Lists.from_list_be l == 0xe1);
-  assert (UInt.from_vec #8 sl == 0xe1);
+  assert_norm (UInt.from_vec #8 s0_8 == 0xe1);
   UInt.from_vec_propriety #32 s0_32 8;
   assert_norm (pow2 24 == 0x1000000);
   assert (UInt.from_vec #32 s0_32 == 0xe1000000);
