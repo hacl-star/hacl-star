@@ -1,11 +1,11 @@
-module Spec.SHA2
+module Spec.SHA1
 
 open Spec.Hash.Helpers
 
-val init: a:hash_alg -> init_t a
+val init: init_t SHA1
 
-val update: a: hash_alg -> update_t a
+val update: update_t SHA1
 
-val pad: a:hash_alg -> pad_t a
+val pad: pad_t SHA1
 
-val finish: a:hash_alg -> finish_t a
+val finish: finish_t SHA1
