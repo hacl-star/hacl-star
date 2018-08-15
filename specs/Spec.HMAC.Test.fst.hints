@@ -1,0 +1,114 @@
+[
+  "\u001dÑgƒp≤>Ó\u00176!\u0014ì\u0004ùz",
+  [
+    [
+      "Spec.HMAC.Test.vec",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "a6ba67ef46cd18b381068d4157f2e16c"
+    ],
+    [
+      "Spec.HMAC.Test.vec",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "eabbb73a20bd8af643e4094579e331a3"
+    ],
+    [
+      "Spec.HMAC.Test.vec",
+      3,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "7eec35e1e58c4acdc35fb0c2c784b6ba"
+    ],
+    [
+      "Spec.HMAC.Test.vec",
+      4,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.Seq.Base.seq__uu___haseq",
+        "assumption_FStar.UInt8.t__uu___haseq",
+        "assumption_Spec.Hash.Helpers.hash_alg__uu___haseq",
+        "equation_Prims.eqtype", "equation_Spec.Hash.Helpers.bytes",
+        "function_token_typing_FStar.UInt8.t",
+        "haseqSpec.HMAC_Tm_refine_48379845263043af04478e700333b2cd",
+        "haseqSpec.Hash.Helpers_Tm_refine_dd4ce66854291bb687dde5b21498f813",
+        "haseqSpec.Hash.Nist_Tm_refine_72ad445a20659a11d3fd7fe74f19a040",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "1cd1d1f0ed981aad2f1e8ae6269855c9"
+    ],
+    [
+      "Spec.HMAC.Test.__proj__Vec__item__key",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Spec.HMAC.Test.Vec_a",
+        "projection_inverse_Spec.HMAC.Test.Vec_a"
+      ],
+      0,
+      "eeed9410fcba7fb3e05e0a6e109818b2"
+    ],
+    [
+      "Spec.HMAC.Test.__proj__Vec__item__data",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Spec.HMAC.Test.Vec_a",
+        "projection_inverse_Spec.HMAC.Test.Vec_a"
+      ],
+      0,
+      "fd8b41c58ec31d2ff7572cd2c54fa907"
+    ],
+    [
+      "Spec.HMAC.Test.__proj__Vec__item__mac",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "530802b6df2889175d545ce9024f0dba"
+    ],
+    [
+      "Spec.HMAC.Test.__proj__Vec__item__mac",
+      2,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "proj_equation_Spec.HMAC.Test.Vec_a",
+        "projection_inverse_Spec.HMAC.Test.Vec_a"
+      ],
+      0,
+      "1e687d39f45c36a7d13ee843da2e784d"
+    ],
+    [
+      "Spec.HMAC.Test.test_one",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.Seq.Base.seq__uu___haseq",
+        "assumption_FStar.UInt8.t__uu___haseq", "assumption_Prims.HasEq_int",
+        "equation_Prims.eqtype", "function_token_typing_FStar.UInt8.t",
+        "haseqSpec.HMAC.Test_Tm_refine_8f0b1052a1cda114e029e7fc44ec020a",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "a5588e42c1c1dd79bc7384148af2a622"
+    ]
+  ]
+]

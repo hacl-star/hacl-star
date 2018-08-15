@@ -9,5 +9,5 @@ module S = FStar.Seq
 let hash (a:hash_alg) (input:bytes{S.length input < max_input8 a}):
   Tot (hash:bytes{Seq.length hash = size_hash a})
 =
-  let blocks = pad a (S.length input) in
-  finish a (update_multi a (init a) S.(input @| blocks))
+  let padding = pad a (S.length input) in
+  finish a (update_multi a (init a) S.(input @| padding))

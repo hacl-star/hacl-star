@@ -1,4 +1,4 @@
-module Spec.SHA2.Test
+module Spec.Hash.Test
 
 open FStar.Seq
 module Hash = Spec.SHA2

@@ -1,0 +1,128 @@
+[
+  "˜™\u001a…\fÝ'!ša5·b`w®",
+  [
+    [
+      "Spec.Hash.Helpers.max_input8",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Hash.Helpers.SHA2_224",
+        "disc_equation_Spec.Hash.Helpers.SHA2_256",
+        "disc_equation_Spec.Hash.Helpers.SHA2_384",
+        "disc_equation_Spec.Hash.Helpers.SHA2_512",
+        "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
+      ],
+      0,
+      "b027523b53f5f70e41a3b31c5e77462a"
+    ],
+    [
+      "Spec.Hash.Helpers.size_word",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Hash.Helpers.SHA2_224",
+        "disc_equation_Spec.Hash.Helpers.SHA2_256",
+        "disc_equation_Spec.Hash.Helpers.SHA2_384",
+        "disc_equation_Spec.Hash.Helpers.SHA2_512",
+        "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
+      ],
+      0,
+      "1d7b73c4208c2e66a560baf8c7d91fab"
+    ],
+    [
+      "Spec.Hash.Helpers.size_hash_final_w",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Hash.Helpers.SHA2_224",
+        "disc_equation_Spec.Hash.Helpers.SHA2_256",
+        "disc_equation_Spec.Hash.Helpers.SHA2_384",
+        "disc_equation_Spec.Hash.Helpers.SHA2_512",
+        "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
+      ],
+      0,
+      "cfb1492ff0f91f88b71c16240ed0fd1b"
+    ],
+    [
+      "Spec.Hash.Helpers.word",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Hash.Helpers.SHA2_224",
+        "disc_equation_Spec.Hash.Helpers.SHA2_256",
+        "disc_equation_Spec.Hash.Helpers.SHA2_384",
+        "disc_equation_Spec.Hash.Helpers.SHA2_512",
+        "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
+      ],
+      0,
+      "f9ebe85c390c52659365e5224a30f4b2"
+    ],
+    [
+      "Spec.Hash.Helpers.hash_w",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "f050fe7a6eba422912c864d2ecf4d744"
+    ],
+    [
+      "Spec.Hash.Helpers.bytes_blocks",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "equation_Spec.Hash.Helpers.size_block",
+        "equation_Spec.Hash.Helpers.size_block_w",
+        "equation_Spec.Hash.Helpers.size_word",
+        "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "f06f73c6041db1d79dd88370e18f5aac"
+    ],
+    [
+      "Spec.Hash.Helpers.bytes_hash",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "c23bb340247efc173afe9ccde7c10616"
+    ],
+    [
+      "Spec.Hash.Helpers.update_t",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "6eb5ac343cd0eb81ceeda010e5ab6656"
+    ],
+    [
+      "Spec.Hash.Helpers.pad_t",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "equation_Spec.Hash.Helpers.size_block",
+        "equation_Spec.Hash.Helpers.size_block_w",
+        "equation_Spec.Hash.Helpers.size_word",
+        "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "50932a4b4a38511c8609abe10e086346"
+    ]
+  ]
+]
