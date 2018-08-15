@@ -6,8 +6,8 @@ open Words_s
 open Words.Two_s
 open Words.Four_s
 open Types_s
+open X64.CryptoInstructions_s
 open FStar.Seq.Base
-open Spec.SHA2Again
 
 type uint64 = UInt64.t
 
@@ -411,7 +411,6 @@ let update_cf_of (new_cf new_of:bool) :st unit =
   s <-- get;
   set ( { s with flags = update_cf (update_of s.flags new_of) new_cf } )
 
-#push-options "--z3rlimit 60"
 (* Core definition of instruction semantics *)
 let eval_ins (ins:ins) : st unit =
   s <-- get;
@@ -682,71 +681,18 @@ let eval_ins (ins:ins) : st unit =
   | SHA256_rnds2 dst src ->
     let src1_q = eval_xmm dst s in
     let src2_q = eval_xmm src s in
-    let wk_q  = eval_xmm 0 s in
-    let open FStar.UInt32 in   // Interop with UInt-based SHA spec
-    let a0  = uint_to_t src2_q.hi3 in
-    let b0  = uint_to_t src2_q.hi2 in
-    let c0  = uint_to_t src1_q.hi3 in
-    let d0  = uint_to_t src1_q.hi2 in
-    let e0  = uint_to_t src2_q.lo1 in
-    let f0  = uint_to_t src2_q.lo0 in
-    let g0  = uint_to_t src1_q.lo1 in
-    let h0  = uint_to_t src1_q.lo0 in
-    let wk0 = uint_to_t wk_q.lo0 in
-    let wk1 = uint_to_t wk_q.lo1 in
-
-    let update (a b c d e f g h wk : word SHA2_256) =
-      let a' = add_mod (_Ch SHA2_256 e f g) 
-               (add_mod (_Sigma1 SHA2_256 e) 
-               (add_mod wk 
-               (add_mod h 
-               (add_mod (_Maj SHA2_256 a b c) 
-                        (_Sigma0 SHA2_256 a)))))  in
-      let b' = a in
-      let c' = b in
-      let d' = c in
-      let e' = add_mod (_Ch SHA2_256 e f g)
-               (add_mod (_Sigma1 SHA2_256 e)
-               (add_mod wk 
-               (add_mod h 
-                        d))) in
-      let f' = e in
-      let g' = f in
-      let h' = g in
-      (a', b', c', d', e', f', g', h')
-    in   
-    let a1,b1,c1,d1,e1,f1,g1,h1 = update a0 b0 c0 d0 e0 f0 g0 h0 wk0 in
-    let a2,b2,c2,d2,e2,f2,g2,h2 = update a1 b1 c1 d1 e1 f1 g1 h1 wk1 in
-    let dst_q = Mkfour (v f2) (v e2) (v b2) (v a2) in
-    update_xmm_preserve_flags dst dst_q
+    let wk_q  = eval_xmm 0 s in    
+    update_xmm_preserve_flags dst (sha256_rnds2_spec src1_q src2_q wk_q)
 
   | SHA256_msg1 dst src ->
     let src1 = eval_xmm dst s in
     let src2 = eval_xmm src s in
-    let open FStar.UInt32 in   // Interop with UInt-based SHA spec
-    let w4 = uint_to_t src2.lo0 in
-    let w3 = uint_to_t src1.hi3 in
-    let w2 = uint_to_t src1.hi2 in
-    let w1 = uint_to_t src1.lo1 in
-    let w0 = uint_to_t src1.lo0 in
-    let dst_q = Mkfour (v (add_mod w0 (_sigma0 SHA2_256 w1)))
-                       (v (add_mod w1 (_sigma0 SHA2_256 w2)))
-                       (v (add_mod w2 (_sigma0 SHA2_256 w3)))
-                       (v (add_mod w3 (_sigma0 SHA2_256 w4))) in
-    update_xmm_preserve_flags dst dst_q
+    update_xmm_preserve_flags dst (sha256_msg1_spec src1 src2)
 
   | SHA256_msg2 dst src ->
     let src1 = eval_xmm dst s in
     let src2 = eval_xmm src s in
-    let open FStar.UInt32 in   // Interop with UInt-based SHA spec
-    let w14 = uint_to_t src2.hi2 in
-    let w15 = uint_to_t src2.hi3 in
-    let w16 = add_mod (uint_to_t src1.lo0) (_sigma1 SHA2_256 w14) in
-    let w17 = add_mod (uint_to_t src1.lo1) (_sigma1 SHA2_256 w15) in
-    let w18 = add_mod (uint_to_t src1.hi2) (_sigma1 SHA2_256 w16) in
-    let w19 = add_mod (uint_to_t src1.hi3) (_sigma1 SHA2_256 w17) in
-    let dst_q = Mkfour (v w16) (v w17) (v w18) (v w19) in
-    update_xmm_preserve_flags dst dst_q
+    update_xmm_preserve_flags dst (sha256_msg2_spec src1 src2)
 
 
 (*
@@ -783,4 +729,3 @@ and eval_while b c fuel s0 =
     | Some s1 ->
       if s1.ok then eval_while b c (fuel - 1) s1  // success: continue to next iteration
       else Some s1  // failure: propagate failure immediately
-#pop-options

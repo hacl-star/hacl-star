@@ -8,6 +8,7 @@ open Words_s
 open Types_s
 open Arch.Types
 open Spec.SHA2Again
+open SHA_helpers
 open X64.Machine_s
 open X64.Vale.State
 open X64.Vale.Decls
@@ -28,17 +29,17 @@ open X64.Vale.Decls
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 module P = X64.Print_s
-#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
+//#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
 #endverbatim
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pxor(dst, src), list(), list()), Public))}{:quick exportOnly} {:verify true}
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pxor(dst, src), list(), list()), Public))}{:quick exportOnly} 
           SHA256_rnds2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w(SHA2_256))
-//  reads xmm0;
+  reads xmm0;
   requires 
     true;
-//    t + 1 < size_k_w(SHA2_256);
-//    xmm0.lo0 == v(add_mod(index(k0(SHA2_256),t),   ws(SHA2_256, block, t)));
-//    xmm0.lo1 == v(add_mod(index(k0(SHA2_256),t+1), ws(SHA2_256, block, t + 1)));
+    t + 1 < size_k_w(SHA2_256);
+    xmm0.lo0 == v(add_mod(index(k0(SHA2_256),t),   ws_opaque(SHA2_256, block, t)));
+    xmm0.lo1 == v(add_mod(index(k0(SHA2_256),t+1), ws_opaque(SHA2_256, block, t + 1)));
   ensures
 //    let a0 := old(uint_to_t(src.hi3)) in
 //    let b0 := old(uint_to_t(src.hi2)) in
@@ -55,14 +56,14 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pxor(dst, src), list(), list())
     //dst == old(Mkfour(v(index(hash2, 5)), v(index(hash2, 4)), v(index(hash2, 1)), v(index(hash2, 0))));
 {
     ghost var a0 := old(uint_to_t(src.hi3));
-//    ghost var b0 := old(uint_to_t(src.hi2));
-//    ghost var c0 := old(uint_to_t(dst.hi3));
-//    ghost var d0 := old(uint_to_t(dst.hi2));
-//    ghost var e0 := old(uint_to_t(src.lo1));
-//    ghost var f0 := old(uint_to_t(src.lo0));
-//    ghost var g0 := old(uint_to_t(dst.lo1));
-//    ghost var h0 := old(uint_to_t(dst.lo0));
-//    ghost var hash0 := createL(list(a0, b0, c0, d0, e0, f0, g0, h0));
+    ghost var b0 := old(uint_to_t(src.hi2));
+    ghost var c0 := old(uint_to_t(dst.hi3));
+    ghost var d0 := old(uint_to_t(dst.hi2));
+    ghost var e0 := old(uint_to_t(src.lo1));
+    ghost var f0 := old(uint_to_t(src.lo0));
+    ghost var g0 := old(uint_to_t(dst.lo1));
+    ghost var h0 := old(uint_to_t(dst.lo0));
+    ghost var hash0 := createL(list(a0, b0, c0, d0, e0, f0, g0, h0));
 //
 //    lemma_index_is_nth(hash0, 0);
 //    lemma_index_is_nth(hash0, 1);
