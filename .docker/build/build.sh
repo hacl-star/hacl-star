@@ -19,6 +19,7 @@ function hacl_test() {
     fetch_and_make_kremlin &&
         fetch_and_make_mlcrypto &&
         fetch_mitls &&
+        fetch_and_make_vale &&
         export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
         make -j $threads ci -k
 }
@@ -110,11 +111,6 @@ function fetch_and_make_vale() {
     python3.6 $(which scons) -C valebin -j $threads
 }
 
-function hacl_vale_test() {
-    fetch_and_make_vale
-    python3.6 $(which scons) -C vale -j $threads --FSTAR-MY-VERSION
-}
-
 function refresh_hacl_hints() {
     refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
 }
@@ -180,7 +176,6 @@ function exec_build() {
     if [[ $target == "hacl-ci" ]]; then
         echo target - >hacl-ci
         hacl_test &&
-        hacl_vale_test &&
         echo -n true >$status_file
     elif [[ $target == "hacl-nightly" ]]; then
         echo target - >hacl-nightly
