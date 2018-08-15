@@ -266,6 +266,12 @@ let equiv_eval_psrldq (s:state) (ins:S.ins{S.Psrldq? ins}) : Lemma (
   s_hi.state.S.ok ==> s_hi.state == s_bytes) =
   ()
 
+let equiv_eval_palignr (s:state) (ins:S.ins{S.Palignr? ins}) : Lemma (
+  let s_hi = run (eval_ins ins) s in
+  let s_bytes = S.run (S.eval_ins ins) s.state in
+  s_hi.state.S.ok ==> s_hi.state == s_bytes) =
+  ()
+
 let equiv_eval_shufpd (s:state) (ins:S.ins{S.Shufpd? ins}) : Lemma (
   let s_hi = run (eval_ins ins) s in
   let s_bytes = S.run (S.eval_ins ins) s.state in
@@ -377,6 +383,24 @@ let equiv_eval_aesni_keygen (s:state) (ins:S.ins{S.AESNI_keygen_assist? ins}) : 
   s_hi.state.S.ok ==> s_hi.state == s_bytes) =
   ()
 
+let equiv_eval_sha256_rnds2 (s:state) (ins:S.ins{S.SHA256_rnds2? ins}) : Lemma (
+  let s_hi = run (eval_ins ins) s in
+  let s_bytes = S.run (S.eval_ins ins) s.state in
+  s_hi.state.S.ok ==> s_hi.state == s_bytes) =
+  ()
+
+let equiv_eval_sha256_msg1 (s:state) (ins:S.ins{S.SHA256_msg1? ins}) : Lemma (
+  let s_hi = run (eval_ins ins) s in
+  let s_bytes = S.run (S.eval_ins ins) s.state in
+  s_hi.state.S.ok ==> s_hi.state == s_bytes) =
+  ()
+
+let equiv_eval_sha256_msg2 (s:state) (ins:S.ins{S.SHA256_msg2? ins}) : Lemma (
+  let s_hi = run (eval_ins ins) s in
+  let s_bytes = S.run (S.eval_ins ins) s.state in
+  s_hi.state.S.ok ==> s_hi.state == s_bytes) =
+  ()
+
 let equiv_eval_ins s ins = match ins with
   | S.Mov64 _ _ -> equiv_eval_mov s ins
   | S.Add64 _ _ -> equiv_eval_add s ins
@@ -399,6 +423,7 @@ let equiv_eval_ins s ins = match ins with
   | S.Pslld _ _ -> equiv_eval_pslld s ins
   | S.Psrld _ _ -> equiv_eval_psrld s ins
   | S.Psrldq _ _ -> equiv_eval_psrldq s ins
+  | S.Palignr _ _ _ -> equiv_eval_palignr s ins
   | S.Shufpd _ _ _ -> equiv_eval_shufpd s ins
   | S.Pshufb _ _ -> equiv_eval_pshufb s ins
   | S.Pshufd _ _ _ -> equiv_eval_pshufd s ins
@@ -415,7 +440,10 @@ let equiv_eval_ins s ins = match ins with
   | S.AESNI_dec_last _ _ -> equiv_eval_aesni_dec_last s ins
   | S.AESNI_imc _ _ -> equiv_eval_aesni_imc s ins
   | S.AESNI_keygen_assist _ _ _ -> equiv_eval_aesni_keygen s ins
-
+  | S.SHA256_rnds2 _ _ -> equiv_eval_sha256_rnds2 s ins
+  | S.SHA256_msg1 _ _ -> equiv_eval_sha256_msg1 s ins  
+  | S.SHA256_msg2 _ _ -> equiv_eval_sha256_msg2 s ins  
+  
 val monotone_ok_ins (ins:S.ins) (s:state) : Lemma (
   let s_hi = run (eval_ins ins) s in
   let s_bytes = S.run (S.eval_ins ins) s.state in
