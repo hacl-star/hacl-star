@@ -1,15 +1,14 @@
-module Hacl.SHA2Again
+module Hacl.Hash.Incremental
 
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-module C = Spec.SHA2Again.Constants
 module S = FStar.Seq
 module B = LowStar.Buffer
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module M = LowStar.Modifies
 
-module Spec = Spec.SHA2Again
+module Spec = Spec.Hash
 
 (** Lifting words, state and abstract predicates in the stateful style. *)
 
