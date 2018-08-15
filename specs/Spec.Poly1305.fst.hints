@@ -35,13 +35,16 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "equation_Spec.Poly1305.prime", "int_typing",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.UInt32.n", "equation_Prims.nat",
+        "equation_Spec.Poly1305.prime",
+        "function_token_typing_FStar.UInt32.n", "int_typing",
         "lemma_Spec.Poly1305.Lemmas.lemma_prime_value",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "53b76d818ad436a563325357cb817a0d"
+      "a84ab59ad1b970ab9e672d3917a2126f"
     ],
     [
       "Spec.Poly1305.one",
@@ -51,13 +54,14 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_Prims.nat", "equation_Spec.Poly1305.prime", "int_typing",
         "lemma_Spec.Poly1305.Lemmas.lemma_prime_value",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "2609b481918b55a1d1df8d2ae430afcf"
+      "35a548643a148ad52dbd5324d6f7055c"
     ],
     [
       "Spec.Poly1305.word_16",
@@ -138,12 +142,12 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.Endianness.little_endian.fuel_instrumented",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "equation_FStar.Endianness.bytes",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt128.n", "equation_FStar.UInt8.t",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "equation_FStar.Endianness.bytes", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt128.n",
         "equation_Prims.nat", "equation_Spec.Poly1305.word_16",
-        "function_token_typing_FStar.UInt128.n",
+        "function_token_typing_FStar.UInt128.n", "int_typing",
         "lemma_FStar.Endianness.lemma_little_endian_lt_2_128",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
@@ -156,7 +160,7 @@
         "typing_FStar.Endianness.little_endian"
       ],
       0,
-      "75f4ff96ece8271461ab92cf704db231"
+      "a07a357bb06b1794b89f18ff8cc8d79c"
     ],
     [
       "Spec.Poly1305.finish",
@@ -195,7 +199,9 @@
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.Seq.Properties.slice_is_empty",
         "lemma_FStar.Seq.Properties.slice_length",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -208,11 +214,11 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Poly1305_Tm_refine_c8500698cff12d8153fe57b0a2ccbbcd",
-        "typing_FStar.Math.Lib.min", "typing_FStar.Seq.Base.createEmpty",
+        "typing_FStar.Math.Lib.min", "typing_FStar.Seq.Base.empty",
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "b5663d2ce8875f2b08c61366e5de586f"
+      "cd3a9c9788d3a4760dfb5f41b6d19b5a"
     ],
     [
       "Spec.Poly1305.poly1305",
@@ -248,11 +254,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-<<<<<<< HEAD
       "c96a794f62e5adb0d616063b2ae1e279"
-=======
-      "f8fd4ec0ed836a86c95920d51114fe50"
->>>>>>> origin/fstar-master
     ],
     [
       "Spec.Poly1305.test",

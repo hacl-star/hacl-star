@@ -4,8 +4,12 @@ OUTPUT_DIR = extracted
 
 FSTAR += --record_hints --odir $(OUTPUT_DIR)
 
-# TODO: move the specification tests to their own files so that this becomes a
-# single wildcard
+# TODO: move the specification tests to their own files so that we don't pollute
+# the specs with huge definitions in the scope
+#
+# NOTE: we assume every single one of these files defines a function named test,
+# of type unit -> bool -- this Makefile will auto-generate test drivers  based
+# on that assumption
 ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
   Spec.Salsa20.fst Spec.Chacha20Poly1305.fst $(wildcard Spec.*.Test.fst) \
   Spec.Ed25519.fst
