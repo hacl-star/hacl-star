@@ -5,8 +5,6 @@ open Spec.Hash
 
 module S = FStar.Seq
 
-#set-options "--log_queries"
-
 (* This one is close to the NIST standard. *)
 let hash (a:hash_alg) (input:bytes{S.length input < max_input8 a}):
   Tot (hash:bytes{Seq.length hash = size_hash a})

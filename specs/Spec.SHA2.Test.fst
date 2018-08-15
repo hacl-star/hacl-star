@@ -225,28 +225,46 @@ let test5_expected224 = [
 // ]
 
 
+open Spec.Hash.Nist
+open Spec.Hash.Helpers
 
 //
 // Main
 //
 
+type vec =
+  | Vec: a:hash_alg ->
+      plain:list UInt8.t { List.Tot.length plain < max_input8 a } ->
+      hash:list UInt8.t { List.Tot.length hash = size_hash a } ->
+      vec
+
+#set-options "--admit_smt_queries true"
+let test_vectors: list vec = [
+  Vec SHA2_224 test1_plaintext test1_expected224;
+  Vec SHA2_224 test2_plaintext test2_expected224;
+  Vec SHA2_224 test3_plaintext test3_expected224;
+  Vec SHA2_224 test4_plaintext test4_expected224;
+
+  Vec SHA2_256 test1_plaintext test1_expected256;
+  Vec SHA2_256 test2_plaintext test2_expected256;
+  Vec SHA2_256 test3_plaintext test3_expected256;
+  Vec SHA2_256 test4_plaintext test4_expected256;
+
+  Vec SHA2_384 test1_plaintext test1_expected384;
+  Vec SHA2_384 test2_plaintext test2_expected384;
+  Vec SHA2_384 test3_plaintext test3_expected384;
+  Vec SHA2_384 test4_plaintext test4_expected384;
+
+  Vec SHA2_512 test1_plaintext test1_expected512;
+  Vec SHA2_512 test2_plaintext test2_expected512;
+  Vec SHA2_512 test3_plaintext test3_expected512;
+  Vec SHA2_512 test4_plaintext test4_expected512
+]
+#reset-options
+
+let test_one (v: vec) =
+  let Vec a plain tag = v in
+  hash a (Seq.seq_of_list plain) = Seq.seq_of_list tag
+
 let test () =
-  (Hash.hash Hash.SHA2_224 (createL test1_plaintext) = createL test1_expected224) &&
-  (Hash.hash Hash.SHA2_224 (createL test2_plaintext) = createL test2_expected224) &&
-  (Hash.hash Hash.SHA2_224 (createL test3_plaintext) = createL test3_expected224) &&
-  (Hash.hash Hash.SHA2_224 (createL test4_plaintext) = createL test4_expected224) &&
-
-  (Hash.hash Hash.SHA2_256 (createL test1_plaintext) = createL test1_expected256) &&
-  (Hash.hash Hash.SHA2_256 (createL test2_plaintext) = createL test2_expected256) &&
-  (Hash.hash Hash.SHA2_256 (createL test3_plaintext) = createL test3_expected256) &&
-  (Hash.hash Hash.SHA2_256 (createL test4_plaintext) = createL test4_expected256) &&
-
-  (Hash.hash Hash.SHA2_384 (createL test1_plaintext) = createL test1_expected384) &&
-  (Hash.hash Hash.SHA2_384 (createL test2_plaintext) = createL test2_expected384) &&
-  (Hash.hash Hash.SHA2_384 (createL test3_plaintext) = createL test3_expected384) &&
-  (Hash.hash Hash.SHA2_384 (createL test4_plaintext) = createL test4_expected384) &&
-
-  (Hash.hash Hash.SHA2_512 (createL test1_plaintext) = createL test1_expected512) &&
-  (Hash.hash Hash.SHA2_512 (createL test2_plaintext) = createL test2_expected512) &&
-  (Hash.hash Hash.SHA2_512 (createL test3_plaintext) = createL test3_expected512) &&
-  (Hash.hash Hash.SHA2_512 (createL test4_plaintext) = createL test4_expected512)
+  List.Tot.for_all test_one test_vectors

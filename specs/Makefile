@@ -1,12 +1,42 @@
 include ../Makefile.include
 
+FSTAR += --record_hints
+
+# TODO: move the specification tests to their own files
+ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
+  Spec.Salsa20.fst Spec.Chacha20Poly1305.fst $(wildcard Spec.*.Test.fst) \
+  Spec.Ed25519.fst
+
+# TODO: decide what to do with the following (excluded) specs:
+#  Spec.HMAC.SHA2_256.fst Spec.HMAC.SHA2_384.fst Spec.HMAC.SHA2_512.fst
+
+# Stage 0: always generate the dependency file
+.PHONY: .depend
+.depend:
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
+
+include .depend
+
+ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
+
+%.checked:
+	$(FSTAR) $< --use_hints --record_hints && \
+	touch $@
+
+all: $(ALL_CHECKED_FILES)
+	echo $^
+
+test: $(ALL_ML_FILES)
+
+################################################################################
+
 .PHONY=lib all
 
 # OCaml variables
 OCAMLOPT := $(OCAMLOPT) -w -8-20-26-28-10
 OCAML_INCLUDES=-I ../code/lib/ml ../code/lib/ml/hacllib.cmxa
 
-all: lib
+all_: lib
 	$(MAKE)	poly1305.exe chacha20.exe salsa20.exe chacha20poly1305.exe gf128.exe ed25519.exe curve25519.exe sha2_256.exe sha2_384.exe sha2_512.exe hmac_sha2_256.exe hmac_sha2_384.exe hmac_sha2_512.exe sha2.exe hmac_sha2.exe
 
 lib:

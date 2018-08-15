@@ -55,7 +55,7 @@ let word: hash_alg -> Tot Type0 = function
   | SHA2_384 | SHA2_512 -> UInt64.t
 
 (* The working state *)
-let hash_w   a = m:Seq.seq (word a) {Seq.length m = size_hash_w}
+let hash_w a = m:Seq.seq (word a) {Seq.length m = size_hash_w}
 
 
 (** The data format taken and returned by the hash specifications. *)
