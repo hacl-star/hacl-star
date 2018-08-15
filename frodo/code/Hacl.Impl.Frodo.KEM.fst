@@ -26,10 +26,10 @@ module Lemmas = Spec.Frodo.Lemmas
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-inline_for_extraction unfold
+inline_for_extraction noextract unfold
 let cshake_frodo = cshake128_frodo
 
-inline_for_extraction unfold
+inline_for_extraction noextract unfold
 let frodo_gen_matrix = frodo_gen_matrix_cshake
 
 let bytes_mu =
@@ -166,17 +166,16 @@ val frodo_mul_add_sa_plus_e:
   -> seed_e:lbytes crypto_bytes
   -> sp_matrix:matrix_t params_nbar params_n
   -> bp_matrix:matrix_t params_nbar params_n
+  -> a_matrix:matrix_t params_n params_n
   -> Stack unit
     (requires fun h ->
       live h seed_a /\ live h seed_e /\ live h bp_matrix /\ live h sp_matrix /\
       disjoint bp_matrix sp_matrix /\ disjoint bp_matrix seed_a /\ disjoint bp_matrix seed_e)
     (ensures  fun h0 r h1 -> live h1 bp_matrix /\ modifies (loc_buffer bp_matrix) h0 h1)
 [@"c_inline"]
-let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix =
-  assert (v params_nbar * v params_n % 2 == 0);
+let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix a_matrix =
   push_frame();
   let ep_matrix = matrix_create params_nbar params_n in
-  let a_matrix  = matrix_create params_n params_n in
 
   frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
   frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 5) ep_matrix;
@@ -238,7 +237,8 @@ let crypto_kem_enc_ct_pack seed_a seed_e coins b sp_matrix ct =
   let c2Len = (params_logq *! params_nbar *! params_nbar) /. size 8 in
 
   let bp_matrix = matrix_create params_nbar params_n in
-  frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix;
+  let a_matrix = matrix_create params_n params_n in
+  frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix a_matrix;
   assert_norm (v crypto_ciphertextbytes =
     ((v params_nbar * v params_n + v params_nbar * v params_nbar)
       * v params_logq) / 8 + v crypto_bytes);
@@ -450,7 +450,8 @@ let crypto_kem_dec_ss1 pk_mu_decode bp_matrix c_matrix sk ct ss =
   frodo_sample_matrix params_nbar params_n crypto_bytes seed_ep (u16 4) sp_matrix;
 
   let bpp_matrix = matrix_create params_nbar params_n in
-  frodo_mul_add_sa_plus_e seed_a seed_ep sp_matrix bpp_matrix;
+  let a_matrix = matrix_create params_n params_n in
+  frodo_mul_add_sa_plus_e seed_a seed_ep sp_matrix bpp_matrix a_matrix;
 
   let v_matrix   = matrix_create params_nbar params_nbar in
   let mu_decode  = sub pk_mu_decode crypto_publickeybytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8) in

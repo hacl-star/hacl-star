@@ -45,7 +45,9 @@ val matrix_create:
       B.alloc_post_common (HS.get_tip h0) (v n1 * v n2) a h0 h1 /\
       as_matrix h1 a == M.create (v n1) (v n2))
 let matrix_create n1 n2 =
-  create (n1 *. n2) (u16 0)
+  [@inline_let]
+  let len = size (normalize_term (v n1 * v n2)) in
+  create len (u16 0)
 
 inline_for_extraction noextract
 val mget:
@@ -168,7 +170,6 @@ let map2 #n1 #n2 f a b c =
     let h2 = ST.get() in
     M.extensionality (as_matrix h2 c) (M.map2 f (as_matrix h0 a) (as_matrix h0 b))
 
-inline_for_extraction
 val matrix_add:
     #n1:size_t
   -> #n2:size_t{v n1 * v n2 < max_size_t}
@@ -182,7 +183,6 @@ val matrix_add:
 let matrix_add #n1 #n2 a b =
   map2 add_mod a b a
 
-inline_for_extraction
 val matrix_sub:
     #n1:size_t
   -> #n2:size_t{v n1 * v n2 < max_size_t}

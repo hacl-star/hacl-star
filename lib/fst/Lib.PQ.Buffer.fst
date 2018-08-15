@@ -80,7 +80,7 @@ val create:
       B.alloc_post_common (HS.get_tip h0) len r h0 h1 /\
       B.as_seq h1 r == Seq.create len init)
 let create #a #len clen init =
-  B.alloca init (size_to_UInt32 clen)
+  B.alloca init (normalize_term (size_to_UInt32 clen))
 
 inline_for_extraction noextract
 val createL:
