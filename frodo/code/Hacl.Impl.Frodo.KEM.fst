@@ -26,9 +26,10 @@ module Lemmas = Spec.Frodo.Lemmas
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+inline_for_extraction unfold
 let cshake_frodo = cshake128_frodo
 
-unfold
+inline_for_extraction unfold
 let frodo_gen_matrix = frodo_gen_matrix_cshake
 
 let bytes_mu =
@@ -43,6 +44,17 @@ let crypto_secretkeybytes =
 
 let crypto_ciphertextbytes =
   normalize_term (((params_nbar *! params_n +! params_nbar *! params_nbar) *! params_logq) /. size 8 +! crypto_bytes)
+
+inline_for_extraction noextract
+val clear_matrix:
+    #n1:size_t
+  -> #n2:size_t{v n1 * v n2 < max_size_t /\ v n1 * v n2 % 2 = 0}
+  -> m:matrix_t n1 n2
+  -> Stack unit
+    (requires fun h -> live h m)
+    (ensures  fun h0 _ h1 -> modifies (loc_buffer m) h0 h1)
+let clear_matrix #n1 #n2 m =
+  clear_words_u16 (n1 *! n2) m
 
 val frodo_mul_add_as_plus_e:
     seed_a:lbytes bytes_seed_a
@@ -75,19 +87,6 @@ val frodo_mul_add_as_plus_e_pack:
       disjoint seed_a s /\ disjoint seed_e s)
     (ensures (fun h0 r h1 ->
       modifies (loc_union (loc_buffer s) (loc_buffer b)) h0 h1))
-
-val clear_matrix:
-    #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t /\ v n1 * v n2 % 2 = 0}
-  -> m:matrix_t n1 n2
-  -> Stack unit
-    (requires fun h -> live h m)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer m) h0 h1)
-let clear_matrix #n1 #n2 m =
-  clear_words_u16 (n1 *! n2) m
-
-#set-options "--z3rlimit 50"
-
 [@"c_inline"]
 let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   // TODO: this proof is fragile; fix.

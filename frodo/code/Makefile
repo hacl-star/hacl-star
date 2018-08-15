@@ -167,6 +167,12 @@ $(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
+	-no-prefix 'Hacl.Impl.Matrix' \
+	-no-prefix 'Hacl.Impl.Frodo.Params' \
+	-no-prefix 'Hacl.Impl.Frodo.Pack' \
+	-no-prefix 'Hacl.Impl.Frodo.Encode' \
+	-no-prefix 'Hacl.Impl.Frodo.Sample' \
+	-no-prefix 'Hacl.Impl.Frodo.Gen' \
 	-no-prefix 'Hacl.Impl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
 	-no-prefix 'Hacl.Frodo.Clear' \
@@ -319,6 +325,12 @@ $(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.Matrix.fst Hacl.Keccak.fsti Hacl.Imp
 $(OUT_DIR)/Hacl_Impl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
+	-no-prefix 'Hacl.Impl.Matrix' \
+	-no-prefix 'Hacl.Impl.Frodo.Params' \
+	-no-prefix 'Hacl.Impl.Frodo.Pack' \
+	-no-prefix 'Hacl.Impl.Frodo.Encode' \
+	-no-prefix 'Hacl.Impl.Frodo.Sample' \
+	-no-prefix 'Hacl.Impl.Frodo.Gen' \
 	-no-prefix 'Hacl.Impl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
 	-no-prefix 'Hacl.Frodo.Clear' \
