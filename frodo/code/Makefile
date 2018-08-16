@@ -1,7 +1,7 @@
 FSTAR_HOME 	?= ../../../FStar
 KREMLIN_HOME	?= ../../../kremlin
 HACL_HOME	?= ../..
-LWEKE_HOME	?= ../NIST/Reference_Implementation/reference/FrodoKEM-640
+LWEKE_HOME	?= ../NIST/Additional_Implementations/x64/FrodoKEM-640
 
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
@@ -218,9 +218,10 @@ ALL_SOURCES = \
   $(HACL_HOME)/lib/c/Lib_PQ_Print.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
+        $(LWEKE_HOME)/objs/aes/aes.o \
 	$(LWEKE_HOME)/objs/sha3/fips202.o \
-	$(LWEKE_HOME)/objs/aes/aes_c.o \
-	$(LWEKE_HOME)/objs/aes/aes.o
+	$(LWEKE_HOME)/objs/sha3/fips202x4.o \
+	$(LWEKE_HOME)/objs/sha3/keccak4x/KeccakP-1600-times4-SIMD256.o
 
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
@@ -228,7 +229,7 @@ INCLUDE_DIRS = \
   $(LWEKE_HOME)/sha3 \
   $(HACL_HOME)/lib
 
-CFLAGS += -O3 -march=native -mtune=native -funroll-loops
+CFLAGS += -O3 -flto -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
 

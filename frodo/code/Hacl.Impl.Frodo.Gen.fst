@@ -128,3 +128,48 @@ let frodo_gen_matrix_cshake n seed_len seed res =
   pop_frame ();
   let h1 = ST.get () in
   Spec.Matrix.extensionality (as_matrix h1 res) (S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
+
+val frodo_gen_matrix_cshake_4x:
+    n:size_t{0 < v n /\ 2 * v n < max_size_t /\ 256 + v n < maxint U16 /\ v n * v n < max_size_t}
+  -> seed_len:size_t{v seed_len > 0}
+  -> seed:lbytes seed_len
+  -> res:matrix_t n n
+  -> Stack unit
+    (requires fun h -> live h seed /\ live h res /\ disjoint seed res)
+    (ensures  fun h0 _ h1 ->
+      live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+      as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
+[@"c_inline"]
+let frodo_gen_matrix_cshake_4x n seed_len seed res =
+  push_frame ();
+  let r = create (size 4 *! size 2 *! n) (u8 0) in
+  let r0 = sub r (size 0 *! n) n in
+  let r1 = sub r (size 1 *! n) n in
+  let r2 = sub r (size 2 *! n) n in
+  let r3 = sub #_ #(8 * v n) r (size 3 *! n) n in
+  let n4 = n /. size 4 in
+  Lib.Loops.for (size 0) n4
+    (fun h1 i -> True)
+    (fun i -> 
+     let ctr0 = size_to_uint32 (size 256 +. size 4 *! i +. size 0) in
+     let ctr1 = size_to_uint32 (size 256 +. size 4 *! i +. size 1) in
+     let ctr2 = size_to_uint32 (size 256 +. size 4 *! i +. size 2) in
+     let ctr3 = size_to_uint32 (size 256 +. size 4 *! i +. size 3) in
+     cshake128_frodo_4x seed_len seed 
+       (to_u16 ctr0) (to_u16 ctr1) (to_u16 ctr2) (to_u16 ctr3)
+       (size 2 *! n) r0 r1 r2 r3;
+     Lib.Loops.for (size 0) n
+       (fun h2 j -> True)
+       (fun j -> 
+         let resij0 = sub r0 (size 2 *! j) (size 2) in
+         let resij1 = sub r1 (size 2 *! j) (size 2) in
+         let resij2 = sub r2 (size 2 *! j) (size 2) in
+         let resij3 = sub r3 (size 2 *! j) (size 2) in
+         mset res (i +! size 0) j (uint_from_bytes_le resij0);
+         mset res (i +! size 1) j (uint_from_bytes_le resij1);
+         mset res (i +! size 2) j (uint_from_bytes_le resij2);
+         mset res (i +! size 3) j (uint_from_bytes_le resij3)
+       )
+    );
+  pop_frame ();
+  admit()
