@@ -6,6 +6,27 @@ open Words_s
 open Words.Four_s
 open Spec.SHA2Again
 
+let sha256_rnds2_spec_update (a b c d e f g h wk : word SHA2_256) =
+  let open FStar.UInt32 in   // Interop with UInt-based SHA spec
+  let a' = add_mod (_Ch SHA2_256 e f g) 
+           (add_mod (_Sigma1 SHA2_256 e) 
+           (add_mod wk 
+           (add_mod h 
+           (add_mod (_Maj SHA2_256 a b c) 
+                    (_Sigma0 SHA2_256 a)))))  in
+  let b' = a in
+  let c' = b in
+  let d' = c in
+  let e' = add_mod (_Ch SHA2_256 e f g)
+           (add_mod (_Sigma1 SHA2_256 e)
+           (add_mod wk 
+           (add_mod h 
+                    d))) in
+  let f' = e in
+  let g' = f in
+  let h' = g in
+  (a', b', c', d', e', f', g', h')
+
 let sha256_rnds2_spec_def (src1 src2 wk:quad32) : quad32 =
     let open FStar.UInt32 in   // Interop with UInt-based SHA spec
     let a0  = uint_to_t src2.hi3 in
@@ -18,29 +39,8 @@ let sha256_rnds2_spec_def (src1 src2 wk:quad32) : quad32 =
     let h0  = uint_to_t src1.lo0 in
     let wk0 = uint_to_t wk.lo0 in
     let wk1 = uint_to_t wk.lo1 in
-
-    let update (a b c d e f g h wk : word SHA2_256) =
-      let a' = add_mod (_Ch SHA2_256 e f g) 
-               (add_mod (_Sigma1 SHA2_256 e) 
-               (add_mod wk 
-               (add_mod h 
-               (add_mod (_Maj SHA2_256 a b c) 
-                        (_Sigma0 SHA2_256 a)))))  in
-      let b' = a in
-      let c' = b in
-      let d' = c in
-      let e' = add_mod (_Ch SHA2_256 e f g)
-               (add_mod (_Sigma1 SHA2_256 e)
-               (add_mod wk 
-               (add_mod h 
-                        d))) in
-      let f' = e in
-      let g' = f in
-      let h' = g in
-      (a', b', c', d', e', f', g', h')
-    in   
-    let a1,b1,c1,d1,e1,f1,g1,h1 = update a0 b0 c0 d0 e0 f0 g0 h0 wk0 in
-    let a2,b2,c2,d2,e2,f2,g2,h2 = update a1 b1 c1 d1 e1 f1 g1 h1 wk1 in
+    let a1,b1,c1,d1,e1,f1,g1,h1 = sha256_rnds2_spec_update a0 b0 c0 d0 e0 f0 g0 h0 wk0 in
+    let a2,b2,c2,d2,e2,f2,g2,h2 = sha256_rnds2_spec_update a1 b1 c1 d1 e1 f1 g1 h1 wk1 in
     let dst = Mkfour (v f2) (v e2) (v b2) (v a2) in
     dst
 
