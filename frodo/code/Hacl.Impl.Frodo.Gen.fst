@@ -44,7 +44,7 @@ let gen_inv h0 h1 h2 n seed_len seed r res i j =
   (forall (j0:size_nat{j0 < j}). get h2 res (v i) j0 == S.frodo_gen_matrix_cshake_fc (v n) (v seed_len) (as_seq h0 seed) (v i) j0) /\
   (forall (j0:size_nat{j <= j0 /\ j0 < v n}). get h2 res (v i) j0 == get h0 res (v i) j0) /\
   (forall (i0:size_nat{v i < i0 /\ i0 < v n}) (j:size_nat{j < v n}). get h2 res i0 j == get h0 res i0 j) /\
-  as_seq h1 r == Spec.Frodo.Keccak.cshake128_frodo (v seed_len) (as_seq h0 seed) (u16 (256 + v i)) (2 * v n) /\
+  as_seq h1 r == Spec.Frodo.Keccak.cshake256_frodo (v seed_len) (as_seq h0 seed) (u16 (256 + v i)) (2 * v n) /\
   as_seq h1 r == as_seq h2 r
 
 inline_for_extraction noextract private
@@ -99,7 +99,7 @@ let frodo_gen_matrix_cshake_inner h0 n seed_len seed res r i =
   let h0 = ST.get () in
   let ctr = size_to_uint32 (size 256 +. i) in
   uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. i))) (u16 (256 + v i));
-  cshake128_frodo seed_len seed (to_u16 ctr) (size 2 *! n) r;
+  cshake256_frodo seed_len seed (to_u16 ctr) (size 2 *! n) r;
   let h1 = ST.get () in
   Lib.Loops.for (size 0) n
     (fun h2 j -> gen_inv h0 h1 h2 n seed_len seed r res i j)
@@ -155,7 +155,7 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
      let ctr1 = size_to_uint32 (size 256 +. size 4 *! i +. size 1) in
      let ctr2 = size_to_uint32 (size 256 +. size 4 *! i +. size 2) in
      let ctr3 = size_to_uint32 (size 256 +. size 4 *! i +. size 3) in
-     cshake128_frodo_4x seed_len seed 
+     cshake256_frodo_4x seed_len seed 
        (to_u16 ctr0) (to_u16 ctr1) (to_u16 ctr2) (to_u16 ctr3)
        (size 2 *! n) r0 r1 r2 r3;
      Lib.Loops.for (size 0) n

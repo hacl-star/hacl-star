@@ -27,7 +27,7 @@ module Lemmas = Spec.Frodo.Lemmas
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract unfold
-let cshake_frodo = cshake128_frodo
+let cshake_frodo = cshake256_frodo
 
 inline_for_extraction noextract unfold
 let frodo_gen_matrix = frodo_gen_matrix_cshake 

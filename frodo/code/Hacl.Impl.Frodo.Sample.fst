@@ -23,7 +23,7 @@ module B = LowStar.Buffer
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-let cshake_frodo = cshake128_frodo
+let cshake_frodo = cshake256_frodo
 
 val frodo_sample: r:uint16 -> Stack uint16
   (requires fun h -> True)
