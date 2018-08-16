@@ -2,7 +2,7 @@ module Interop_Printer
 
 #set-options "--initial_fuel 4 --initial_ifuel 2 --max_fuel 4 --max_ifuel 2"
 
-type base_type =
+type base_type = 
   | TUInt8
   | TUInt64
   | TUInt128
@@ -64,7 +64,7 @@ let rec print_args_list = function
 
 let rec print_args_names = function
   | [] -> ""
-  | (a, _, _)::q -> a ^ " " ^ print_args_names q
+  | (a, _, _)::q -> a ^ " " ^ print_args_names q  
 
 let rec print_args_names_reveal = function
   | [] -> ""
@@ -74,7 +74,7 @@ let rec print_args_names_reveal = function
 
 let rec print_buffers_list = function
   | [] -> "[]"
-  | (a,ty, _)::q ->
+  | (a,ty, _)::q -> 
     (if TBuffer? ty then a ^ "::" else "") ^
     print_buffers_list q
 
@@ -87,7 +87,7 @@ let rec liveness heap args =
   let args = List.Tot.Base.filter is_buffer args in
   let rec aux heap = function
   | [] -> "True"
-  | [(a,TBuffer ty, _)] -> "live " ^ heap ^ " " ^ a
+  | [(a,TBuffer ty, _)] -> "live " ^ heap ^ " " ^ a 
   | [(a, TBase ty, _)] | [(a, TGhost ty, _)] -> "" // Should not happen
   | (a, TBuffer ty, _)::q -> "live " ^ heap ^ " " ^ a ^ " /\\ " ^ aux heap q
   | (a, TBase ty, _)::q | (a, TGhost ty, _)::q -> aux heap q // Should not happen
@@ -111,11 +111,19 @@ let namelist_of_args args =
   | [] -> ""
   | [a, _, _] -> a
   | (a, _, _)::q -> a ^ ";" ^ aux q in
-  "[" ^ aux args ^ "]"
+  "[" ^ aux args ^ "]" 
 
-let disjoint (args:list arg) =  //AR: added an annotation, see #1502
+(* Only called with a list of buffer args *)
+let rec disj_disjoint a = function
+  | [] -> ""
+  | (b, _, _)::q -> "  disjoint_or_eq " ^ a ^ " " ^ b ^ " /\ \n" ^ disj_disjoint a q
+
+let disjoint args =
   let args = List.Tot.Base.filter is_buffer args in
-  "bufs_disjoint " ^ namelist_of_args args
+  let rec aux (args: list arg) = match args with
+  | [] -> ""
+  | (a, _, _)::q -> disj_disjoint a q ^ aux q in
+  aux args
 
 let reg_to_low = function
   | "rax" -> "Rax"
@@ -147,11 +155,11 @@ let print_low_calling_stack (args:list arg) (stkstart) =
 let print_low_calling_args os target (args:list arg) stkstart =
   let rec aux regs (args:list arg) =
   match regs, args with
-    | [], q -> "    | _ -> init_regs r end in\n" ^ print_low_calling_stack q stkstart
-    | _, [] -> "    | _ -> init_regs r end in\n"
+    | [], q -> "    | _ -> init_regs r end)\n" ^ print_low_calling_stack q stkstart
+    | _, [] -> "    | _ -> init_regs r end)\n"
     | re, (_, TGhost _, _)::q -> aux re q // We ignore ghost parameters
-    | r1::rn, (a, ty, _)::q -> "    | " ^ (reg_to_low r1) ^ " -> " ^
-      (if TBuffer? ty then "addr_" ^ a else a) ^
+    | r1::rn, (a, ty, _)::q -> "    | " ^ (reg_to_low r1) ^ " -> " ^ 
+      (if TBuffer? ty then "addr_" ^ a else a) ^ 
       "\n" ^ aux rn q
   in aux (calling_registers os target) args
 
@@ -169,7 +177,7 @@ let xmm_to_low = function
   | "xmm4" -> "4"
   | "xmm5" -> "5"
   | "xmm6" -> "6"
-  | "xmm7" -> "7"
+  | "xmm7" -> "7"  
   | "xmm8" -> "8"
   | "xmm9" -> "9"
   | "xmm10" -> "10"
@@ -179,7 +187,7 @@ let xmm_to_low = function
   | "xmm14" -> "14"
   | "xmm15" -> "15"
   | _ -> "error"
-
+  
 let print_low_xmm_callee_saved os target =
   let rec aux = function
     | [] -> ""
@@ -211,25 +219,33 @@ let taint_of_label = function
   | Sec -> "Secret"
   | Pub -> "Public"
 
-let create_taint_fun (args:list arg) =
+let create_taint_fun (args:list arg) = 
   let rec aux args = match args with
   | [] -> "    Public "
   | (a, TBuffer _, t)::q -> "    if StrongExcludedMiddle.strong_excluded_middle (x == "^a^") then " ^ taint_of_label t ^ " else\n" ^ aux q
   | _::q -> aux q
   in "  let taint_func (x:b8) : GTot taint =\n" ^ aux args ^ "in\n"
 
-let create_state os target args stack slots stkstart =
+let create_state target args stack slots stkstart =
   create_taint_fun args ^
   "  let buffers = " ^ (if stack then "stack_b::" else "") ^ print_buffers_list args ^ " in\n" ^
   "  let (mem:mem) = {addrs = addrs; ptrs = buffers; hs = h0} in\n" ^
   generate_low_addrs args ^
   (if stack then "  let addr_stack:nat64 = addrs stack_b + " ^ (string_of_int (slots `op_Multiply` 8)) ^ " in\n" else "") ^
-  "  let regs = fun r -> begin match r with\n" ^
-  (if stack then "    | Rsp -> addr_stack\n" else "") ^
-  (print_low_calling_args os target args stkstart) ^
-  "  let xmms = init_xmms in\n" ^
+  "  let regs = if is_win then (
+    fun r -> begin match r with\n" ^
+    (if stack then "    | Rsp -> addr_stack\n" else "") ^
+    (print_low_calling_args Windows target args stkstart) ^
+  "  else (\n" ^
+  "    fun r -> begin match r with\n" ^
+    (if stack then "    | Rsp -> addr_stack\n" else "") ^
+    (print_low_calling_args Linux target args stkstart) ^  
+  "  in let xmms = init_xmms in\n"
+
+(*
   "  let s0 = {ok = true; regs = regs; xmms = xmms; flags = 0; mem = mem; memTaint = create_valid_memtaint mem buffers taint_func} in\n" ^
   print_length_t (if stack then ("stack_b", TBuffer TUInt64, Pub)::args else args)
+*)
 
 let print_vale_bufferty = function
   | TUInt8 -> "buffer8"
@@ -238,7 +254,7 @@ let print_vale_bufferty = function
 
 let print_vale_ty = function
   | TUInt8 -> "nat8"
-  | TUInt64 -> "nat64"
+  | TUInt64 -> "nat64"  
   | TUInt128 -> "quad32"
 
 let print_vale_full_ty = function
@@ -250,13 +266,111 @@ let rec print_args_vale_list = function
   | [] -> ""
   | (a,ty, _)::q -> "(" ^ a ^ ":" ^ print_vale_full_ty ty ^ ") " ^ print_args_vale_list q
 
-let translate_lowstar os target (func:func_ty) =
+let rec print_disjoint_stack (args:list arg) = match args with
+  | [] -> ""
+  | (a, TBuffer _, _)::q -> "  assert(Interop.disjoint stack_b " ^ a ^ ");\n" ^ print_disjoint_stack q
+  | _ :: q -> print_disjoint_stack q
+
+let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_stack:int) (slots:int) (additional:int) =
   let name, args, Stk slots = func in
-  let additional = (if os = Windows then 5 else 0) in
+  // let additional = (if os = Windows then 5 else 0) in
+  let buffer_args = List.Tot.Base.filter is_buffer args in
+    // let nbr_stack_args = List.Tot.Base.length real_args - 
+  //   List.Tot.Base.length (calling_registers os target) in
+  // let length_stack = (slots + additional + nbr_stack_args) `op_Multiply` 8 in
+  // let stack_needed = length_stack > 0 in
+  // let fuel_value = string_of_int (List.Tot.Base.length buffer_args + 3) in
+  let implies_precond = if stack_needed then "B.length stack_b == " ^ string_of_int length_stack ^
+    " /\ live h0 stack_b /\ buf_disjoint_from stack_b " ^ (namelist_of_args (buffer_args)) ^ " /\ "
+  else "" in
+  let stack_precond memname = if stack_needed then
+    "/\ B.length stack_b == " ^ string_of_int length_stack ^
+    " /\ live " ^ memname ^ " stack_b /\ buf_disjoint_from stack_b " ^ (namelist_of_args (buffer_args))
+  else "" in
+  "let create_initial_trusted_state is_win " ^ (print_args_names args) ^ "stack_b " ^
+  "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ stack_precond "h0" ^ "}) : GTot TS.traceState =\n" ^
+  create_state target args stack_needed slots (slots+additional) ^
+  "  let (s_b:BS.state) = {BS.ok = true; BS.regs = regs; BS.xmms = xmms; BS.flags = 0;
+       BS.mem = Interop.down_mem h0 addrs buffers} in\n" ^
+  "  let s0:X64.Memory_s.state = {ME.state = s_b; ME.mem = mem} in\n" ^
+  "  {TS.state = s0; TS.trace = []; TS.memTaint = create_valid_memtaint mem buffers taint_func}\n\n" ^
+  "let create_initial_vale_state is_win " ^ (print_args_names args) ^ "stack_b " ^
+  "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ stack_precond "h0" ^ "}) : GTot va_state =\n" ^
+  create_state target args stack_needed slots (slots+additional) ^
+  "  {ok = true; regs = regs; xmms = xmms; flags = 0; mem = mem;
+      memTaint = create_valid_memtaint mem buffers taint_func}\n\n" ^
+  "let create_lemma is_win " ^ (print_args_names args) ^ "stack_b (h0:HS.mem{pre_cond h0 " ^
+    (print_args_names args) ^ stack_precond "h0" ^ "}) : Lemma\n" ^
+    "  (state_of_S (create_initial_trusted_state is_win " ^ print_args_names args ^ 
+    "stack_b h0) == create_initial_vale_state is_win " ^ print_args_names args ^ "stack_b h0) =\n" ^
+  "    let s_init = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
+  "    let s0 = state_of_S s_init in\n" ^
+  "    let s1 = create_initial_vale_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
+  "    assert (FunctionalExtensionality.feq s1.regs (regs' s_init.TS.state));\n" ^
+  "    assert (FunctionalExtensionality.feq s1.xmms (xmms' s_init.TS.state));\n" ^
+  "    lemma_of_ok s_init;\n" ^
+  "    lemma_of_regs s_init;\n" ^
+  "    lemma_of_flags s_init;\n" ^
+  "    lemma_of_xmms s_init;\n" ^
+  "    lemma_of_mem s_init;\n" ^
+  "    lemma_of_memTaint s_init;\n" ^  
+  "    ()\n\n" ^
+  "// TODO: Prove these two lemmas if they are not proven automatically\n" ^
+  "let implies_pre (is_win:bool) (h0:HS.mem) " ^ (print_args_list args) ^ 
+  (if stack_needed then " (stack_b:b8) " else "") ^
+  ": Lemma\n" ^
+  "  (requires pre_cond h0 " ^ (print_args_names args) ^ stack_precond "h0" ^ ")\n" ^
+  "  (ensures (\n" ^ implies_precond ^ "(\n" ^
+  "  let s0 = create_initial_vale_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
+  print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^
+  "  va_pre (va_code_" ^ name ^ " is_win) s0 is_win" ^ 
+  (if stack_needed then " stack_b " else " ") ^
+  (print_args_names_reveal args) ^ "))) =\n" ^
+  print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^ 
+  (if stack_needed then print_disjoint_stack args else "") ^
+  "  ()\n\n" ^
+  "let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel) " ^ (print_args_list args) ^
+  (if stack_needed then " (stack_b:b8)" else "") ^
+  " : Lemma\n" ^
+  "  (requires pre_cond va_s0.mem.hs " ^ (print_args_names args) ^ stack_precond "va_s0.mem.hs" ^ "/\\\n" ^
+  "    va_post (va_code_" ^ name ^ " is_win) va_s0 va_sM va_fM is_win" ^
+  (if stack_needed then " stack_b " else " ") ^
+  (print_args_names_reveal args) ^ ")\n" ^
+  "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs " ^ (print_args_names args) ^ ") =\n" ^
+  print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^ 
+  "  ()\n\n" ^
+  "val lemma_ghost_" ^ name ^ ": is_win:bool -> " ^ (print_low_args_and args) ^ 
+  (if stack_needed then " stack_b:b8 -> " else "") ^
+    "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ 
+    stack_precond "h0" ^
+    "}) ->\n" ^
+  "  Ghost (TS.traceState * nat * HS.mem)\n" ^
+  "    (requires True)\n" ^ 
+  "    (ensures (fun (s1, f1, h1) ->\n" ^
+  "      (let s0 = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
+  "      Some s1 == TS.taint_eval_code (va_code_" ^ name ^ " is_win) f1 s0 /\\\n" ^
+  "      Interop.correct_down h1 addrs " ^ (namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::args))  ^ " s1.TS.state.ME.state.BS.mem /\\\n" ^
+  "      post_cond h0 h1 " ^ (print_args_names args) ^ " /\\\n" ^
+  "      calling_conventions is_win s0 s1)\n" ^
+  "    ))\n\n" ^
+  "let lemma_ghost_" ^ name ^ " is_win " ^ (print_args_names args) ^
+  (if stack_needed then "stack_b " else "") ^ "h0 =\n" ^
+  print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^
+  "  implies_pre is_win h0 " ^ (print_args_names args) ^ "stack_b;\n" ^
+  "  let s0 = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
+  "  create_lemma is_win " ^ print_args_names args ^ "stack_b h0;\n" ^
+  "  let s_v, f_v = va_lemma_" ^ name ^ " (va_code_" ^ name ^ " is_win) (state_of_S s0) is_win" ^
+  (if stack_needed then " stack_b " else " ") ^
+  print_args_names_reveal args ^ " in\n" ^
+  "  implies_post is_win (state_of_S s0) s_v f_v " ^ print_args_names args ^ "stack_b;\n" ^
+  "  Some?.v (TS.taint_eval_code (va_code_" ^ name ^ " is_win) f_v s0), f_v, s_v.mem.hs\n\n"
+
+let translate_lowstar target (func:func_ty) =
+  let name, args, Stk slots = func in
+  let additional = 5 in
   let buffer_args = List.Tot.Base.filter is_buffer args in
   let real_args = List.Tot.Base.filter not_ghost args in
-  let nbr_stack_args = List.Tot.Base.length real_args -
-    List.Tot.Base.length (calling_registers os target) in
+  let nbr_stack_args = List.Tot.Base.length real_args - 4 in
   let length_stack = (slots + additional + nbr_stack_args) `op_Multiply` 8 in
   let stack_needed = length_stack > 0 in
   let fuel_value = string_of_int (List.Tot.Base.length buffer_args + 3) in
@@ -268,99 +382,61 @@ let translate_lowstar os target (func:func_ty) =
     " /\ live " ^ memname ^ " stack_b /\ buf_disjoint_from stack_b " ^ (namelist_of_args (buffer_args))
   else "" in
   let separator0 = if (List.Tot.Base.length buffer_args = 0) then "" else " /\\ " in
-  let separator1 = if (List.Tot.Base.length buffer_args <= 1) then "" else " /\\ " in
+  let separator1 = if (List.Tot.Base.length buffer_args <= 1) then "" else " /\\ " in  
   "module Vale_" ^ name ^
   "\n\nopen X64.Machine_s\nopen X64.Memory\nopen X64.Vale.State\nopen X64.Vale.Decls\n\n" ^
-  "val va_code_" ^ name ^ ": unit -> va_code\n\n" ^
-  "//TODO: Fill this
-  //va_pre and va_post should correspond to the pre- and postconditions generated by Vale\n" ^
-  "let va_pre (va_b0:va_code) (va_s0:va_state)" ^ (if stack_needed then " (stack_b:buffer64)\n" else "\n") ^
-  (print_args_vale_list args) ^ " = True\n\n" ^
-  "let va_post (va_b0:va_code) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel)" ^
+  "val va_code_" ^ name ^ ": bool -> va_code\n\n" ^
+  "let va_code_" ^ name ^ " = va_code_" ^ name ^ "\n\n" ^
+  "//va_pre and va_post should correspond to the pre- and postconditions generated by Vale\n" ^
+  "let va_pre (va_b0:va_code) (va_s0:va_state) (win:bool)" ^ (if stack_needed then " (stack_b:buffer64)\n" else "\n") ^
+  (print_args_vale_list args) ^ " = va_req_" ^ name ^ " va_b0 va_s0 win " ^ 
+  (if stack_needed then "stack_b " else "") ^
+  (print_args_names args) ^ "\n\n" ^
+  "let va_post (va_b0:va_code) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel) (win:bool) " ^
   (if stack_needed then " (stack_b:buffer64)\n" else "\n") ^
-  (print_args_vale_list args) ^ " = True\n\n" ^
-  "val va_lemma_" ^ name ^ "(va_b0:va_code) (va_s0:va_state)" ^
+  (print_args_vale_list args) ^ " = va_ens_" ^ name ^ " va_b0 va_s0 win " ^
+  (if stack_needed then "stack_b " else "") ^
+  (print_args_names args) ^
+  "va_sM va_fM\n\n" ^
+  "val va_lemma_" ^ name ^ "(va_b0:va_code) (va_s0:va_state) (win:bool)" ^
   (if stack_needed then " (stack_b:buffer64)\n" else "\n") ^
   (print_args_vale_list args) ^ ": Ghost ((va_sM:va_state) * (va_fM:va_fuel))\n  " ^
-  "(requires va_pre va_b0 va_s0 " ^ (if stack_needed then "stack_b " else "") ^
+  "(requires va_pre va_b0 va_s0 win " ^ (if stack_needed then "stack_b " else "") ^
   (print_args_names args) ^ ")\n  " ^
-  "(ensures (fun (va_sM, va_fM) -> va_post va_b0 va_s0 va_sM va_fM " ^
+  "(ensures (fun (va_sM, va_fM) -> va_post va_b0 va_s0 va_sM va_fM win " ^ 
   (if stack_needed then "stack_b " else "") ^
   (print_args_names args) ^ "))" ^
-  "\n\n\n\n" ^
+  "\n\n" ^
+  "let va_lemma_" ^ name ^ " = va_lemma_" ^ name ^
+  "\n\n" ^
   "module " ^ name ^
-  "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nmodule S8 = SecretByte\nopen Interop\nopen Words_s\nopen Types_s\nopen X64.Machine_s\nopen X64.Memory_s\nopen X64.Vale.State\nopen X64.Vale.Decls\nopen BufferViewHelpers\nopen Interop_assumptions\n#set-options \"--z3rlimit 40\"\n\n" ^
+  "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Words_s\nopen Types_s\nopen X64.Machine_s\nopen X64.Memory_s\nopen X64.Vale.State\nopen X64.Vale.Decls\nopen BufferViewHelpers\nopen Interop_assumptions\n\n" ^
   "open Vale_" ^ name ^ "\n\n" ^
-  "let b8 = B.buffer UInt8.t\n" ^
-  "let s8 = B.buffer S8.t\n\n" ^
-   "let rec loc_locs_disjoint_rec (l:b8) (ls:list b8) : Type0 =\n" ^
-   "  match ls with\n" ^
-   "  | [] -> True\n" ^
-   "  | h::t -> M.loc_disjoint (M.loc_buffer l) (M.loc_buffer h) /\ loc_locs_disjoint_rec l t\n\n" ^
-  "let rec locs_disjoint_rec (ls:list b8) : Type0 =\n"^
-  "  match ls with\n"^
-  "  | [] -> True\n" ^
-  "  | h::t -> loc_locs_disjoint_rec h t /\ locs_disjoint_rec t\n\n" ^
-  "unfold\nlet bufs_disjoint (ls:list b8) : Type0 = normalize (locs_disjoint_rec ls)\n\n" ^
-  "unfold\nlet buf_disjoint_from (b:b8) (ls:list b8) : Type0 = normalize (loc_locs_disjoint_rec b ls)\n\n" ^
   "// TODO: Complete with your pre- and post-conditions\n" ^
-  "let pre_cond (h:HS.mem) " ^ (print_args_list args) ^ "= " ^ (liveness "h" args) ^ separator1 ^ (disjoint args) ^ separator0 ^ (print_lengths args) ^ "\n" ^
-  "let post_cond (h0:HS.mem) (h1:HS.mem) " ^ (print_args_list args) ^ "= "
-    ^ (liveness "h0" args) ^ " /\\ " ^ (liveness "h1" args) ^ separator0 ^ (print_lengths args) ^ "\n\n" ^
-  "#set-options \"--initial_fuel " ^ fuel_value ^ " --max_fuel " ^ fuel_value ^ " --initial_ifuel 2 --max_ifuel 2\"\n" ^
-  "// TODO: Prove these two lemmas if they are not proven automatically\n" ^
-  "let implies_pre (h0:HS.mem) " ^ (print_args_list args) ^
-  (if stack_needed then " (stack_b:b8) " else "") ^
-  ": Lemma\n" ^
-  "  (requires pre_cond h0 " ^ (print_args_names args) ^ stack_precond "h0" ^ ")\n" ^
-  "  (ensures (\n" ^ implies_precond ^ "(" ^
-  (create_state os target args stack_needed slots (slots + additional)) ^
-  "  va_pre (va_code_" ^ name ^ " ()) s0 " ^
-  (if stack_needed then "stack_b " else "") ^
-  (print_args_names_reveal args) ^ "))) =\n" ^
-  print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^
-  "  ()\n\n" ^
-  "let implies_post (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel) " ^ (print_args_list args) ^
-  (if stack_needed then " (stack_b:b8)" else "") ^
-  " : Lemma\n" ^
-  "  (requires pre_cond va_s0.mem.hs " ^ (print_args_names args) ^ stack_precond "va_s0.mem.hs" ^ "/\\\n" ^
-  "    va_post (va_code_" ^ name ^ " ()) va_s0 va_sM va_fM " ^
-  (if stack_needed then "stack_b " else "") ^
-  (print_args_names_reveal args) ^ ")\n" ^
-  "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs " ^ (print_args_names args) ^ ") =\n" ^
-  print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^
-  "  ()\n\n" ^
+  "let pre_cond (h:HS.mem) " ^ (print_args_list args) ^ "= " ^ (liveness "h" args) ^ separator1 ^ (disjoint args) ^ (print_lengths args) ^ "\n\n" ^
+  "let post_cond (h:HS.mem) (h:HS.mem) " ^ (print_args_list args) ^ "= " 
+    ^ (liveness "h" args) ^ " /\\ " ^ (liveness "h'" args) ^ separator0 ^ (print_lengths args) ^ "\n\n" ^
   "val " ^ name ^ ": " ^ (print_low_args args) ^
   "\n\t(requires (fun h -> pre_cond h " ^ (print_args_names args) ^ "))\n\t" ^
-  "(ensures (fun h0 _ h1 -> post_cond h0 h1 " ^ (print_args_names args) ^ "))\n\n" ^
-  "val ghost_" ^ name ^ ": " ^ (print_low_args_and args) ^
-  (if stack_needed then " stack_b:b8 -> " else "") ^
-    "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^
-    stack_precond "h0" ^
-    "}) -> GTot (h1:HS.mem{post_cond h0 h1 " ^ (print_args_names args) ^ "})\n\n" ^
-  "let ghost_" ^ name ^ " " ^ (print_args_names args) ^
-  (if stack_needed then "stack_b " else "") ^ "h0 =\n" ^
-  (create_state os target args stack_needed slots (slots+additional)) ^
-  "  implies_pre h0 " ^ (print_args_names args) ^
-  (if stack_needed then "stack_b " else "") ^ ";\n" ^
-  "  let s1, f1 = va_lemma_" ^ name ^ " (va_code_" ^ name ^ " ()) s0 " ^
-  (if stack_needed then "stack_b " else "") ^
-  print_args_names_reveal args ^ " in\n" ^
-  "  // Ensures that the Vale execution was correct\n" ^
-  "  assert(s1.ok);\n" ^
-  "  // Ensures that the callee_saved registers are correct\n" ^
-  (print_low_callee_saved os target) ^ (print_low_xmm_callee_saved os target) ^
-  "  // Ensures that va_code_" ^ name ^ " is actually Vale code, and that s1 is the result of executing this code\n" ^
-  "  assert (va_ensure_total (va_code_" ^ name ^ " ()) s0 s1 f1);\n" ^
-  "  implies_post s0 s1 f1 " ^ (print_args_names args) ^
-  (if stack_needed then "stack_b " else "") ^ ";\n" ^
-  "  s1.mem.hs\n\n" ^
+  "(ensures (fun h0 _ h1 -> post_cond h0 h1 " ^ (print_args_names args) ^ "))\n\n" ^    
+  "module " ^ name ^
+  "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Words_s\nopen Types_s\nopen X64.Machine_s\nopen X64.Memory_s\nopen X64.Vale.State\nopen X64.Vale.Decls\nopen BufferViewHelpers\nopen Interop_assumptions\nopen X64.Vale.StateLemmas\nopen X64.Vale.Lemmas\nmodule TS = X64.Taint_Semantics_s\nmodule ME = X64.Memory_s\nmodule BS = X64.Bytes_Semantics_s\n#set-options \"--z3rlimit 60\"\n\n" ^
+  "open Vale_" ^ name ^ "\n\n" ^
+
+  "#set-options \"--initial_fuel " ^ fuel_value ^ " --max_fuel " ^ fuel_value ^ " --initial_ifuel 2 --max_ifuel 2\"\n" ^
+  
+  translate_core_lowstar target func stack_needed length_stack slots additional ^
+  "#set-options \"--max_fuel 0 --max_ifuel 0\"\n\n" ^
   "let " ^ name ^ " " ^ (print_args_names args) ^ " =\n" ^
   (if stack_needed then "  push_frame();\n" ^
     "  let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t " ^ string_of_int length_stack ^ ") in\n"  else "") ^
-  "  st_put (fun h -> pre_cond h " ^ (print_args_names args) ^ stack_precond "h" ^ ") (ghost_" ^ name ^ " " ^ (print_args_names args) ^
-  (if stack_needed then "stack_b);\n  pop_frame()\n" else ")\n")
-
+  "  st_put\n    (fun h -> pre_cond h " ^ (print_args_names args) ^ stack_precond "h" ^ ")
+  (fun h -> let _, _, h1 =
+    if win then lemma_ghost_" ^ name ^ " true " ^ (print_args_names args) ^ "stack_b h
+    else lemma_ghost_" ^ name ^ " false " ^ (print_args_names args) ^ "stack_b h
+  in h1);\n" ^
+  "  pop_frame()\n"
+  
 let print_vale_arg = function
   | (a, ty, _) -> "ghost " ^ a ^ ":" ^ print_vale_full_ty ty
 
@@ -369,12 +445,25 @@ let rec print_vale_args = function
   | [arg] -> print_vale_arg arg
   | arg::q -> print_vale_arg arg ^ ", " ^ print_vale_args q
 
-let rec print_vale_loc_buff = function
+let rec print_vale_disjoint_or_eq_aux a = function
   | [] -> ""
-  | [(_, TBase _, _)] | [(_, TGhost _, _)] -> ""
-  | [(a, TBuffer _, _)] -> "loc_buffer("^a^")"
-  | (a, TBuffer _, _)::q -> "loc_buffer("^a^"), " ^ print_vale_loc_buff q
-  | a::q -> print_vale_loc_buff q
+  | (b, TBuffer _, _)::q -> "        locs_disjoint(list(loc_buffer("^a^"), loc_buffer("^b^"))) \/ "^a^ " == "^b ^ ";\n"^ print_vale_disjoint_or_eq_aux a q
+  | _::q -> print_vale_disjoint_or_eq_aux a q
+
+let rec print_vale_disjoint_or_eq = function
+  | [] -> ""
+  | (a, TBuffer _, _)::q -> print_vale_disjoint_or_eq_aux a q ^ print_vale_disjoint_or_eq q
+  | a::q -> print_vale_disjoint_or_eq q
+
+let rec print_vale_disjoint_aux a = function
+  | [] -> ""
+  | (b, TBuffer _, _)::q -> "        locs_disjoint(list(loc_buffer("^a^"), loc_buffer("^b^")));\n" ^ print_vale_disjoint_aux a q
+  | _::q -> print_vale_disjoint_aux a q
+
+let rec print_vale_disjoint = function
+  | [] -> ""
+  | (a, TBuffer _, _)::q -> print_vale_disjoint_aux a q ^ print_vale_disjoint q
+  | a::q -> print_vale_disjoint q
 
 let rec print_buff_readable = function
   | [] -> ""
@@ -396,47 +485,67 @@ let print_vale_arg_value = function
   | (a, TBuffer ty, _) -> "buffer_addr(" ^ a ^ ", mem)"
   | (a, TBase ty, _) -> a
 
-let print_vale_calling_stack sstart (args:list arg) =
+let print_vale_calling_stack is_win sstart (args:list arg) =
   let rec aux (i:nat) (args:list arg) : Tot string (decreases %[args])  =
   match args with
   | [] -> ""
-  | a::q -> "        buffer_read(stack_b, " ^ (string_of_int (sstart + i)) ^ ", mem) == " ^  print_vale_arg_value a ^ ";\n" ^ aux (i+1) q
+  | a::q -> "        " ^ is_win ^ " " ^ "buffer_read(stack_b, " ^ (string_of_int (sstart + i)) ^ ", mem) == " ^  print_vale_arg_value a ^ ";\n" ^ aux (i+1) q
   in aux 0 args
 
-let print_calling_args os target sstart (args:list arg) =
+let print_calling_args_aux is_win os target sstart (args:list arg) =
   let rec aux regs (args:list arg) =
   match regs, args with
-    | [], q -> print_vale_calling_stack sstart q
+    | [], q -> print_vale_calling_stack is_win sstart q
     | _, [] -> ""
-    | r1::rn, a::q -> "        " ^ r1 ^ " == " ^ print_vale_arg_value a ^ ";\n" ^ aux rn q
+    | r1::rn, a::q -> "        " ^ is_win ^ " " ^ r1 ^ " == " ^ print_vale_arg_value a ^ ";\n" ^ aux rn q
   in aux (calling_registers os target) args
 
-let print_callee_saved os target =
+
+let print_calling_args target sstart (args:list arg) =
+  // Windows calling conventions
+  print_calling_args_aux "win ==>" Windows target sstart args ^
+  // Linux calling conventions
+  print_calling_args_aux "!win ==>" Linux target sstart args
+
+let print_callee_saved_aux is_win os target =
   let rec aux = function
     | [] -> ""
-    | a::q -> "        " ^ a ^ " == old(" ^ a ^ ");\n" ^ aux q
+    | a::q -> "        " ^ is_win ^ " " ^ a ^ " == old(" ^ a ^ ");\n" ^ aux q
   in aux (callee_saved os target)
 
-let print_xmm_callee_saved os target =
+let print_callee_saved target =
+  // Windows calling conventions
+  print_callee_saved_aux "win ==> " Windows target ^
+  // Linux calling conventions
+  print_callee_saved_aux "!win ==> " Linux target
+
+let print_xmm_callee_saved_aux is_win os target =
   let rec aux = function
     | [] -> ""
-    | a::q -> "        " ^ a ^ " == old(" ^ a ^ ");\n" ^ aux q
+    | a::q -> "        " ^ is_win ^ " " ^ a ^ " == old(" ^ a ^ ");\n" ^ aux q
   in aux (xmm_callee_saved os target)
 
-let translate_vale os target (func:func_ty) =
+let print_xmm_callee_saved target =
+  print_xmm_callee_saved_aux "win ==> " Windows target ^
+  print_xmm_callee_saved_aux "!win ==> " Linux target
+
+let translate_vale target (func:func_ty) =
   let name, args, Stk slots = func in
   let real_args = List.Tot.Base.filter not_ghost args in
-  let stack_before_args = slots + (if os = Windows then 5 else 0) in // Account for shadow space on windows
-  let nbr_stack_args = stack_before_args + List.Tot.Base.length real_args -
-    List.Tot.Base.length (calling_registers os target) in
-  let stack_needed = nbr_stack_args > 0 in
+  let stack_before_args = slots + 5 in // Account for shadow space on windows
+  let nbr_stack_args = stack_before_args + List.Tot.Base.length real_args - 
+    4 in
+  let stack_needed = nbr_stack_args > 0 in  
   let args = if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args in
   "module Vale_" ^ name ^
-  "\n#verbatim{:interface}{:implementation}\n" ^
-  "\nopen X64.Machine_s\nopen X64.Memory_s\nopen X64.Vale.State\nopen X64.Vale.Decls\n#set-options \"--z3rlimit 20\"\n#endverbatim\n\n" ^
-  "procedure {:quick} " ^ name ^ "(" ^ print_vale_args args ^")\n" ^
-  "    requires/ensures\n" ^
-  "        locs_disjoint(list(" ^ print_vale_loc_buff args ^ "));\n" ^
+  "\n#verbatim{:interface}{:implementation}\n" ^ 
+  "\nopen X64.Machine_s\nopen X64.Memory\nopen X64.Vale.State\nopen X64.Vale.Decls\n#set-options \"--z3rlimit 20\"\n#endverbatim\n\n" ^
+  "procedure {:quick}{:exportSpecs} " ^ name ^ "(inline win:bool," ^ print_vale_args args ^")\n" ^
+  "    requires\n" ^
+  // By default, buffer arguments are disjoint or equal
+  print_vale_disjoint_or_eq (List.Tot.Base.tl args) ^
+  // stack_b is disjoint from all other buffers
+  print_vale_disjoint_aux "stack_b" (List.Tot.Base.tl args) ^
   print_buff_readable args ^
   print_valid_taints args ^
   (if stack_needed then
@@ -444,8 +553,9 @@ let translate_vale os target (func:func_ty) =
   "        valid_stack_slots(mem, rsp, stack_b, " ^ (string_of_int slots) ^ ", memTaint);\n"
   else "") ^
   // stack_b and ghost args are not real arguments
-  print_calling_args os target stack_before_args real_args ^
-  "    ensures\n" ^ print_callee_saved os target ^ print_xmm_callee_saved os target ^
+  print_calling_args target stack_before_args real_args ^
+  "    ensures\n" ^ print_callee_saved target ^ print_xmm_callee_saved target ^
+  "    reads memTaint;\n" ^
   "    modifies\n" ^
   "        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;\n" ^
   "        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;\n" ^
