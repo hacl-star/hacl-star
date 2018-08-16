@@ -1,33 +1,33 @@
 module Box.Plain
 
-open Box.Key
 open Box.Index
 
 open FStar.Endianness
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-let n32 = (n:nat)
-//let n32 = (n:nat{n<=32})
-
 noeq type plain_package =
   | PP:
     flag:Type0 ->
-    valid_length:(n32 -> bool) ->
+    valid_plain_length:(nat -> bool) ->
+    valid_cipher_length:(nat -> bool) ->
+    valid_nonce_length:(nat -> bool) ->
     plain_package
 
-type plain (pp:plain_package) = p:bytes{pp.valid_length (Seq.length p)}
-//type plain (pp:plain_package) = p:bytes{Seq.length p <= 32 /\ pp.valid_length (Seq.length p)}
-abstract type protected_plain (pp:plain_package) (i:inst_id) = plain pp
+type plain (pp:plain_package) = p:bytes{pp.valid_plain_length (Seq.length p)}
+type nonce (pp:plain_package) = p:bytes{pp.valid_nonce_length (Seq.length p)}
+type cipher (pp:plain_package) = p:bytes{pp.valid_cipher_length (Seq.length p)}
 
-val length: (#pp:plain_package) -> (#i:inst_id) -> (p:protected_plain pp i) -> n:n32{pp.valid_length n}
-let length #pp #i p =
+abstract type protected_plain (#ip:index_package) (pp:plain_package) (i:id ip) = plain pp
+
+val length: (#ip:index_package) -> (#pp:plain_package) -> (#i:id ip) -> (p:protected_plain pp i) -> n:nat{pp.valid_plain_length n}
+let length #ip #pp #i p =
   Seq.length p
 
-val coerce: (#pp:plain_package) -> ip:index_package -> (i:inst_id{dishonest ip i \/ ~pp.flag}) -> p:plain pp -> p:protected_plain pp i
-let coerce #pp i ip p =
+val coerce: (#ip:index_package) -> (#pp:plain_package) -> (i:id ip{corrupt i \/ ~pp.flag}) -> p:plain pp -> p:protected_plain pp i
+let coerce #ip #pp i p =
   p
 
-val repr: (#pp:plain_package) -> #ip:index_package -> (#i:inst_id{dishonest ip i \/ ~pp.flag}) -> p:protected_plain pp i -> p:plain pp
-let repr #pp #ip #i p =
+val repr: (#ip:index_package) -> (#pp:plain_package) -> (#i:id ip{corrupt i \/ ~pp.flag}) -> p:protected_plain pp i -> p:plain pp
+let repr #ip #pp #i p =
   p

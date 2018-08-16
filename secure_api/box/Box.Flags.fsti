@@ -1,7 +1,9 @@
 module Box.Flags
 
-val prf_odh : b:bool
+val model: b:bool
 
-val ae: b:bool{b ==> prf_odh}
+val prf_odh : b:bool{b ==> model}
 
-val pkae : b:bool{b <==> prf_odh /\ ae}
+val ae: b:bool{b ==> model /\ prf_odh}
+
+val pkae : b:bool{(b <==> (prf_odh /\ ae)) /\ (b ==> model)}

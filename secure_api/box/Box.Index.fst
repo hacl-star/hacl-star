@@ -6,6 +6,7 @@ open FStar.HyperStack.ST
 open FStar.Endianness
 
 module MM = FStar.Monotonic.Map
+module Flags = Box.Flags
 
 #set-options "--z3rlimit 300 --max_ifuel 2 --max_fuel 1"
 let index_log_key (t:Type0{hasEq t}) = i:t
@@ -13,8 +14,12 @@ let index_log_value = bool
 let index_log_range (#t:Type0{hasEq t}) (k:index_log_key t) = index_log_value
 let index_log_inv (#t:Type0{hasEq t}) (f:MM.map' (index_log_key t) (index_log_range)) = True
 
-let index_log (t:Type0{hasEq t}) (rgn:erid) =
-  MM.t rgn (index_log_key t) (index_log_range) (index_log_inv)
+let i_index_log (t:eqtype) (rgn:erid) = MM.t rgn (index_log_key t) (index_log_range) (index_log_inv)
+let index_log (t:eqtype) (rgn:erid) =
+  if Flags.model then
+    i_index_log t rgn
+  else
+    unit
 
 noeq
 type index_package =
@@ -64,60 +69,96 @@ private let fresh_predicate =
     (#rgn:erid)
     (#t:eqtype)
     (i:t)
-    (log:index_log t rgn) ->
+    (log:i_index_log t rgn) ->
     MM.fresh log i h
-val fresh: #ip:index_package -> i:id ip -> h:mem -> Type0
+val fresh: #ip:index_package{Leaf_IP? ip} -> i:id ip -> h:mem -> Type0
 let fresh #ip i h =
-  apply_predicate i (fresh_predicate h) CONJ
+  if Flags.model then
+    apply_predicate i (fresh_predicate h) CONJ
+  else
+    False
 
+#set-options "--z3rlimit 300 --max_ifuel 4 --max_fuel 3"
 private let registered_predicate =
   fun (#rgn:erid)
     (#t:eqtype)
     (i:t)
-    (log:index_log t rgn) ->
+    (log:i_index_log t rgn) ->
     witnessed (MM.defined log i)
 val registered: #ip:index_package -> i:id ip -> t:Type0{
-  t /\ Leaf_IP? ip ==>
+  t /\ Flags.model /\ Leaf_IP? ip ==>
   (match ip with
-  | Leaf_IP t rgn log -> witnessed (MM.defined log i))
+  | Leaf_IP t rgn log ->
+    (let log:i_index_log t rgn = log in
+    witnessed (MM.defined log i)))
   }
 let registered #ip i =
-  apply_predicate i registered_predicate CONJ
+  if Flags.model then
+    apply_predicate i registered_predicate CONJ
+  else
+    True
 
 private let honest_predicate =
   fun (#rgn:erid)
     (#t:eqtype)
     (i:t)
-    (log:index_log t rgn) ->
+    (log:i_index_log t rgn) ->
     witnessed (MM.contains log i true)
 val honest: #ip:index_package -> i:id ip -> Type0
 let honest #ip i =
-  apply_predicate i honest_predicate CONJ
+  if Flags.model then
+    apply_predicate i honest_predicate CONJ
+  else
+    True
 
 private let corrupt_predicate =
   fun (#rgn:erid)
     (#t:eqtype)
     (i:t)
-    (log:index_log t rgn) ->
+    (log:i_index_log t rgn) ->
     witnessed (MM.contains log i false)
 val corrupt: #ip:index_package -> i:id ip -> Type0
 let corrupt #ip i =
-  apply_predicate i corrupt_predicate DISJ
+  if Flags.model then
+    apply_predicate i corrupt_predicate DISJ
+  else
+    True
 
-val create_leaf_index_package: rgn:erid -> t:Type0{hasEq t} -> ST (ip:index_package{Leaf_IP? ip})
+let create_leaf_index_package_footprint (rgn:erid) (t:eqtype) (ip:index_package{Leaf_IP? ip}) (h0:mem) (h1:mem) =
+  match ip with
+  | Leaf_IP t' rgn' log' ->
+    t == t'
+    /\ Flags.model ==>
+      (let log: i_index_log t' rgn' = log' in
+      (modifies (Set.singleton rgn) h0 h1
+      /\ extends rgn' rgn
+      /\ contains h1 log
+      /\ (forall i . fresh #ip i h1)))
+
+val create_leaf_index_package: rgn:erid -> t:eqtype -> ST (ip:index_package)
   (requires (fun h0 -> True))
   (ensures (fun h0 ip h1 ->
-    match ip with
-    | Leaf_IP t' rgn' log ->
-    t == t'
-    /\ modifies (Set.singleton rgn) h0 h1
-    /\ extends rgn' rgn
-    /\ contains h1 log
-    /\ (forall i . fresh #ip i h1)
+    Leaf_IP? ip
+    /\ (match ip with
+      | Leaf_IP t' rgn' log' ->
+      t == t'
+      /\ (if Flags.model then
+          (let log: i_index_log t' rgn' = log' in
+          (modifies (Set.singleton rgn) h0 h1
+          /\ extends rgn' rgn
+          /\ contains h1 log
+          /\ (forall i . fresh #ip i h1)))
+        else
+          modifies_none h0 h1))
   ))
 let create_leaf_index_package rgn t =
   let log_rgn = new_region rgn in
-  let log = MM.alloc #log_rgn #(index_log_key t) #(index_log_range #t) #index_log_inv in
+  let log =
+    if Flags.model then
+      MM.alloc #log_rgn #(index_log_key t) #(index_log_range #t) #index_log_inv
+    else
+      ()
+  in
   Leaf_IP t log_rgn log
 
 val create_node_index_package: l:list index_package{l =!= []} -> ST (ip:index_package{Node_IP? ip})
@@ -132,9 +173,11 @@ val extend_id_log: (#ip:index_package{Leaf_IP? ip}) -> (i:id ip) -> (b:bool) -> 
 let extend_id_log #ip i b h0 h1 =
   match ip with
   | Leaf_IP t rgn log ->
-    (sel h1 log == MM.upd (sel h0 log) i b
-    /\ witnessed (MM.defined log i)
+    Flags.model ==>
+    (let log: i_index_log t rgn = log in
+    witnessed (MM.defined log i)
     /\ witnessed (MM.contains log i b)
+    /\ sel h1 log == MM.upd (sel h0 log) i b
     )
 
 let register_footprint (ip:index_package{Leaf_IP? ip}) (h0:mem) (h1:mem) =
@@ -144,7 +187,7 @@ let register_footprint (ip:index_package{Leaf_IP? ip}) (h0:mem) (h1:mem) =
 
 val register: #ip:index_package{Leaf_IP? ip} -> i:id ip -> b:bool -> ST unit
   (requires (fun h0 ->
-    fresh i h0
+    Flags.model /\ fresh i h0
   ))
   (ensures (fun h0 _ h1 ->
     extend_id_log i b h0 h1
@@ -156,6 +199,7 @@ val register: #ip:index_package{Leaf_IP? ip} -> i:id ip -> b:bool -> ST unit
 let register #ip i b =
   match ip with
   | Leaf_IP t rgn log ->
+    let log: i_index_log t rgn = log in
     MM.extend log i b;
     assert(b ==> apply_predicate i honest_predicate CONJ);
     assert(~b ==> apply_predicate i corrupt_predicate DISJ)
@@ -172,7 +216,8 @@ val get_honesty: #ip:index_package -> i:id ip -> ST bool
   ))
 val all_get_honesty: #ips:list index_package{ips =!= []} -> i:unfold_id ips -> ST bool
   (requires (fun h0 ->
-    all_apply_predicate #ips i registered_predicate CONJ
+    Flags.model
+    /\ all_apply_predicate #ips i registered_predicate CONJ
   ))
   (ensures (fun h0 b h1 ->
     h0 == h1
@@ -180,23 +225,29 @@ val all_get_honesty: #ips:list index_package{ips =!= []} -> i:unfold_id ips -> S
     /\ (~(b2t b) ==> all_apply_predicate #ips i corrupt_predicate DISJ)
   ))
 let rec get_honesty #ip i =
-  match ip with
-  | Leaf_IP t rgn log ->
-    testify (MM.defined log i);
-    (match MM.lookup log i with
-    | Some b -> (
-      (if b then
-        testify (MM.contains log i true)
-      else
-        testify (MM.contains log i false));
-      assert(b2t b ==> apply_predicate i honest_predicate CONJ);
-      assert(~(b2t b) ==> apply_predicate i corrupt_predicate DISJ);
-      b))
-  | Node_IP ips ->
-    let b = all_get_honesty #ips i in
-    assert(b2t b ==> all_apply_predicate #ips i honest_predicate CONJ);
-    assert(~(b2t b) ==> all_apply_predicate #ips i corrupt_predicate DISJ);
-    b
+  if Flags.model then
+    begin
+    match ip with
+    | Leaf_IP t rgn log ->
+      let log: i_index_log t rgn = log in
+      testify (MM.defined log i);
+      (match MM.lookup log i with
+      | Some b -> (
+        (if b then
+          testify (MM.contains log i true)
+        else
+          testify (MM.contains log i false));
+        assert(b2t b ==> apply_predicate i honest_predicate CONJ);
+        assert(~(b2t b) ==> apply_predicate i corrupt_predicate DISJ);
+        b))
+    | Node_IP ips ->
+      let b = all_get_honesty #ips i in
+      assert(b2t b ==> all_apply_predicate #ips i honest_predicate CONJ);
+      assert(~(b2t b) ==> all_apply_predicate #ips i corrupt_predicate DISJ);
+      b
+    end
+  else
+    false
 and all_get_honesty #ips i =
   match ips with
   | [ip'] -> get_honesty #ip' i
