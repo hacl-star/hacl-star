@@ -155,7 +155,7 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
      let ctr1 = size_to_uint32 (size 256 +. size 4 *! i +. size 1) in
      let ctr2 = size_to_uint32 (size 256 +. size 4 *! i +. size 2) in
      let ctr3 = size_to_uint32 (size 256 +. size 4 *! i +. size 3) in
-     cshake256_frodo_4x seed_len seed 
+     cshake128_frodo_4x seed_len seed 
        (to_u16 ctr0) (to_u16 ctr1) (to_u16 ctr2) (to_u16 ctr3)
        (size 2 *! n) r0 r1 r2 r3;
      Lib.Loops.for (size 0) n
