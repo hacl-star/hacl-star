@@ -6,7 +6,7 @@ KREMLIN_HOME = ../../../../../../kremlin
 USE_OPENSSL ?= FALSE
 GENERATION_A ?= CSHAKE128
 
-CC=gcc
+CC?=gcc
 ifeq "$(CC)" "gcc"
     COMPILER=gcc
 else ifeq "$(CC)" "clang"

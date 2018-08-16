@@ -1,7 +1,16 @@
 FSTAR_HOME 	?= ../../../FStar
 KREMLIN_HOME	?= ../../../kremlin
 HACL_HOME	?= ../..
-LWEKE_HOME	?= ../NIST/Additional_Implementations/x64/FrodoKEM-640
+
+ifeq ($(TARGET),x64)
+  LWEKE_HOME = ../NIST/Additional_Implementations/x64/FrodoKEM-640
+  FIPS202    = $(addprefix $(LWEKE_HOME)/objs/sha3/,fips202.o fips202x4.o keccak4x/KeccakP-1600-times4-SIMD256.o)
+  KECCAK     = x64/Hacl_Keccak.c
+else
+  LWEKE_HOME ?= ../NIST/Reference_Implementation/reference/FrodoKEM-640
+  FIPS202    = $(LWEKE_HOME)/objs/sha3/fips202.o
+  KECCAK     = Hacl_Keccak.c
+endif
 
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
@@ -28,9 +37,17 @@ all:
 
 lib:
 	sed -i.bak 's/params_n = size 64 /params_n = size 640/g' ../spec/Frodo.Params.fst
+	sed -i.bak 's/frodo_gen_matrix_cshake_4x/frodo_gen_matrix_cshake /g' Hacl.Impl.Frodo.KEM.fst
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
-	STAGE=2 RAND_OBJ=$(LWEKE_HOME)/objs/random/random.o $(MAKE) stage2-lib
+	STAGE=2 $(MAKE) stage2-lib
+
+lib64:
+	sed -i.bak 's/params_n = size 64 /params_n = size 640/g' ../spec/Frodo.Params.fst
+	sed -i.bak 's/frodo_gen_matrix_cshake /frodo_gen_matrix_cshake_4x/g' Hacl.Impl.Frodo.KEM.fst
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) stage1
+	STAGE=2 TARGET=x64 $(MAKE) stage2-lib
 
 stage1: $(GENERATED_DIR)/Makefile.include
 
@@ -213,15 +230,13 @@ ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
   include/rng.c \
   include/random.c \
-  include/Hacl_Keccak.c \
+  include/$(KECCAK) \
   include/clearwords.c \
   $(HACL_HOME)/lib/c/Lib_PQ_Print.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
         $(LWEKE_HOME)/objs/aes/aes.o \
-	$(LWEKE_HOME)/objs/sha3/fips202.o \
-	$(LWEKE_HOME)/objs/sha3/fips202x4.o \
-	$(LWEKE_HOME)/objs/sha3/keccak4x/KeccakP-1600-times4-SIMD256.o
+	$(FIPS202)
 
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
@@ -229,7 +244,7 @@ INCLUDE_DIRS = \
   $(LWEKE_HOME)/sha3 \
   $(HACL_HOME)/lib
 
-CFLAGS += -O3 -flto -march=native -mtune=native -funroll-loops
+CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
 
@@ -305,9 +320,8 @@ BASE_OBJ = \
   include/Hacl_Keccak.o \
   include/rng.o \
   include/clearwords.o \
-  $(LWEKE_HOME)/objs/sha3/fips202.o \
+  $(FIPS202) \
   $(LWEKE_HOME)/tests/rng.o \
-  $(LWEKE_HOME)/objs/aes/aes_c.o \
   $(LWEKE_HOME)/objs/aes/aes.o \
   $(OUT_DIR)/Hacl_Test_Frodo.o \
   $(OUT_DIR)/Hacl_Impl_Frodo_KEM.o

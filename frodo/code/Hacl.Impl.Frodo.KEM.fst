@@ -30,7 +30,7 @@ inline_for_extraction noextract unfold
 let cshake_frodo = cshake128_frodo
 
 inline_for_extraction noextract unfold
-let frodo_gen_matrix = frodo_gen_matrix_cshake
+let frodo_gen_matrix = frodo_gen_matrix_cshake 
 
 let bytes_mu =
   normalize_term ((params_extracted_bits *! params_nbar *! params_nbar) /. size 8)
