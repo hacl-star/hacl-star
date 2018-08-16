@@ -21,7 +21,7 @@ function hacl_test() {
         fetch_mitls &&
         fetch_and_make_vale &&
         export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
-        make -j $threads ci -k
+        env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads ci -k
 }
 
 function hacl_test_and_hints() {

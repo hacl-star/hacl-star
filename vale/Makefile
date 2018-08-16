@@ -1,7 +1,14 @@
-JOBS=$(shell echo $(MAKEFLAGS) | grep -o '\(^\| \)-j[0-9]*')
+# TODO: find or write a SCons plugin that uses the jobserver offered
+# by GNU Make 4.2 onwards (--jobserver-auth in MAKEFLAGS)
+#
+# For now, the VALE_SCONS_PARALLEL_OPT environment variable (which
+# CANNOT be a Make variable) will control the parallel factor for
+# SCons tasks.
 
 all:
-	./run_scons.sh $(JOBS) --FSTAR-MY-VERSION
+	# Protect against injection of malicious options
+	test -z "$$VALE_SCONS_PARALLEL_OPT" || { echo "$$VALE_SCONS_PARALLEL_OPT" | grep '^-j *[0-9]\+$$' ; }
+	./run_scons.sh $$VALE_SCONS_PARALLEL_OPT --FSTAR-MY-VERSION
 
 clean:
 	./run_scons.sh --clean
