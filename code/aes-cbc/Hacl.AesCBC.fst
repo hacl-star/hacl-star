@@ -87,7 +87,9 @@ let rec cbc_decrypt_blocks out kex prev cip len curr tmp =
     xor_block oblock tmp prev 0ul;
     cbc_decrypt_blocks out kex cblock cip len U32.(curr +^ 16ul) tmp
   )
-let aes256_cbc_decrypt out key iv cip ciplen = 
+
+
+let aes256_cbc_decrypt_old out key iv cip ciplen = 
   push_frame();
   assert (U32.v 16ul <> 0);
   let fullblocks = U32.(ciplen -^ 16ul) in
@@ -110,6 +112,22 @@ let aes256_cbc_decrypt out key iv cip ciplen =
   blit otmp 0ul out2 0ul final;
   pop_frame();
   U32.(fullblocks +^ final)
+
+  
+
+
+let aes256_cbc_decrypt out key iv cip ciplen = 
+  push_frame();
+  let kex = B.alloca 0uy xkeylen in
+  let tmp = B.alloca 0uy 16ul in
+  let ltmp = B.alloca 0uy 16ul in
+  let otmp = B.alloca 0uy 16ul in
+  keyExpansion key kex;
+  cbc_decrypt_blocks out kex iv cip ciplen 0ul tmp;
+  let pad = U32.(out.(ciplen -^ 1ul)) in
+  let final = U32.(16ul -^ (uint8_to_uint32 pad)) in
+  pop_frame();
+  U32.(ciplen -^ 16ul +^ final)
 
   
 
