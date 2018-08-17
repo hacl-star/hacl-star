@@ -17,6 +17,13 @@ let quad32_shl32 (q:quad32) : quad32 =
   let Mkfour v0 v1 v2 v3 = q in
   Mkfour 0 v0 v1 v2
 
+let add_wrap_quad32 (q0 q1:quad32) : quad32 =
+  let open Words_s in
+  Mkfour (add_wrap q0.lo0 q1.lo0)
+         (add_wrap q0.lo1 q1.lo1)
+         (add_wrap q0.hi2 q1.hi2)
+         (add_wrap q0.hi3 q1.hi3) 
+
 val lemma_BitwiseXorCommutative (x y:nat32) : Lemma (x *^ y == y *^ x)
 val lemma_BitwiseXorWithZero (n:nat32) : Lemma (n *^ 0 == n)
 val lemma_BitwiseXorCancel (n:nat32) : Lemma (n *^ n == 0)

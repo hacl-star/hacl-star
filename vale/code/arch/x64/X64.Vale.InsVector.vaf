@@ -54,11 +54,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Paddd(dst, src), list(), list()
           Paddd(inout dst:xmm, src:xmm)
     modifies efl;
     ensures
-        dst == old(Mkfour(
-            add_wrap(dst.lo0, src.lo0),
-            add_wrap(dst.lo1, src.lo1),
-            add_wrap(dst.hi2, src.hi2),
-            add_wrap(dst.hi3, src.hi3)));
+        dst == old(add_wrap_quad32(dst, src));
 {
 }
 

@@ -7,6 +7,7 @@ open Types_s
 open Words_s
 open FStar.Seq
 open FStar.UInt32  // Interop with UInt-based SHA spec
+open Arch.Types
 
 unfold
 let (.[]) = FStar.Seq.index
@@ -89,6 +90,7 @@ let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:co
   let h0 = hash.[7] in
   let t1 = word_add_mod a h0 (word_add_mod a (_Sigma1 a e0) (word_add_mod a (_Ch a e0 f0 g0) (word_add_mod a (k0 a).[t] (ws a block t)))) in
   let t2 = word_add_mod a (_Sigma0 a a0) (_Maj a a0 b0 c0) in         
+  admit();
   assert(h.[0] == word_add_mod a t1 t2);
   assert(h.[1] == a0);
   assert(h.[2] == b0);
@@ -104,8 +106,7 @@ let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:co
 //  assert_norm(h.[4] == word_add_mod a d0 t1);
 //  assert_norm(h.[5] == e0);
 //  assert_norm(h.[6] == f0);
-//  assert_norm(h.[7] == g0);
-  admit();
+//  assert_norm(h.[7] == g0); 
   ()
 
 
@@ -150,3 +151,210 @@ let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_2
   ()
   
 //#pop-options
+
+let ws_quad32 (t:counter) (block:block_w SHA2_256) : quad32 =
+    if t < size_k_w SHA2_256 - 3 then
+       Mkfour (v (ws_opaque SHA2_256 block t))
+              (v (ws_opaque SHA2_256 block (t+1)))
+              (v (ws_opaque SHA2_256 block (t+2)))
+              (v (ws_opaque SHA2_256 block (t+3)))
+    else 
+       Mkfour 0 0 0 0
+
+let _sigma0_quad32 (q:quad32) : quad32 =
+  Mkfour (v (_sigma0 SHA2_256 (uint_to_t q.lo0)))
+         (v (_sigma0 SHA2_256 (uint_to_t q.lo1)))
+         (v (_sigma0 SHA2_256 (uint_to_t q.hi2)))
+         (v (_sigma0 SHA2_256 (uint_to_t q.hi3)))
+
+let ws_partial_def (t:counter) (block:block_w SHA2_256) : quad32 =
+    if 16 <= t && t < size_k_w SHA2_256 then
+       (let init = ws_quad32 (t-16) block in
+        let sigma0_in = ws_quad32 (t-15) block in
+        let sigma0_out = _sigma0_quad32 sigma0_in in
+        add_wrap_quad32 init sigma0_out)
+    else 
+       Mkfour 0 0 0 0
+
+let ws_partial = make_opaque ws_partial_def
+
+let lemma_add_wrap_is_add_mod (n0 n1:nat32) :
+  Lemma (add_wrap n0 n1 == v(add_mod (uint_to_t n0) (uint_to_t n1)))
+  =
+  ()
+
+let add_mod_quad32 (q0 q1:quad32) : quad32 =
+  Mkfour (v (add_mod (uint_to_t q0.lo0) (uint_to_t q1.lo0)))
+         (v (add_mod (uint_to_t q0.lo1) (uint_to_t q1.lo1)))
+         (v (add_mod (uint_to_t q0.hi2) (uint_to_t q1.hi2)))
+         (v (add_mod (uint_to_t q0.hi3) (uint_to_t q1.hi3)))
+
+let lemma_add_wrap_quad32_is_add_mod_quad32 (q0 q1:quad32) :
+  Lemma (add_mod_quad32 q0 q1 == add_wrap_quad32 q0 q1)
+  =
+  ()
+
+let lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
+  (requires 16 <= t /\ t < size_k_w(SHA2_256) /\
+            dst == ws_quad32 (t-16) block /\
+            src.lo0 == v(ws_opaque SHA2_256 block (t-12)))
+  (ensures sha256_msg1_spec dst src == ws_partial t block)
+  =
+  reveal_opaque sha256_msg1_spec_def;
+  let init = ws_quad32 (t-16) block in
+  let sigma0_in = ws_quad32 (t-15) block in
+  let sigma0_out = _sigma0_quad32 sigma0_in in
+  lemma_add_wrap_quad32_is_add_mod_quad32 init sigma0_out;
+  reveal_opaque ws_partial_def;
+  ()
+  
+let lemma_add_mod_commutes (x y:UInt32.t) :
+  Lemma (add_mod x y == add_mod y x)
+  =
+  ()
+
+let lemma_add_mod32_associates (x y z:int) :
+  Lemma ( ((x + y % pow2_32) + z) % pow2_32 == (x + ((y + z) % pow2_32)) % pow2_32 )
+  =
+  ()
+
+#push-options "--z3rlimit 20"
+let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
+  Lemma (add_mod x (add_mod y z) == add_mod (add_mod x y) z)
+  =
+  //assert (add_mod y z == uint_to_t ((v y + v z) % pow2_32));
+  //assert (add_mod x (add_mod y z) == uint_to_t ((v x + v (uint_to_t ((v y + v z) % pow2_32))) % pow2_32));
+  lemma_add_mod32_associates (v x) (v y) (v z);
+  (*
+  assert (uint_to_t ((v x + v (uint_to_t ((v y + v z) % pow2_32))) % pow2_32) ==
+          uint_to_t (((v x + v y % pow2_32) + v z) % pow2_32));
+          *)
+  assert (add_mod (add_mod x y) z == uint_to_t (((v x + v y % pow2_32) + v z) % pow2_32));
+  //admit();
+  ()
+#pop-options
+
+let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
+  Lemma (add_mod a (add_mod b (add_mod c d)) == add_mod (add_mod b (add_mod d c)) a)
+  =
+  lemma_add_mod_commutes (add_mod b (add_mod d c)) a;
+  assert (add_mod (add_mod b (add_mod d c)) a == add_mod a (add_mod b (add_mod d c)));
+  lemma_add_mod_commutes c d;
+  assert (add_mod a (add_mod b (add_mod d c)) == add_mod a (add_mod b (add_mod c d)));
+  ()
+
+let ws_computed (a:hash_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
+  if t < size_block_w then ws_opaque a b t
+  else
+    let t16 = ws_opaque a b (t - 16) in
+    let t15 = ws_opaque a b (t - 15) in
+    let t7  = ws_opaque a b (t - 7) in
+    let t2  = ws_opaque a b (t - 2) in
+    let s1 = _sigma1 a t2 in
+    let s0 = _sigma0 a t15 in
+    (word_add_mod a s1 (word_add_mod a t7 (word_add_mod a s0 t16)))
+
+let lemma_ws_computed_is_ws (b:block_w SHA2_256) (t:counter{t < size_k_w SHA2_256}) :
+  Lemma (ws_computed SHA2_256 b t == ws SHA2_256 b t)
+  =
+  if t < size_block_w then (
+    assert (ws_computed SHA2_256 b t == ws_opaque SHA2_256 b t);
+    reveal_opaque ws;
+    assert (ws_opaque SHA2_256 b t == ws SHA2_256 b t);
+    ()
+  ) else (
+    let t16 = ws_opaque SHA2_256 b (t - 16) in
+    let t15 = ws_opaque SHA2_256 b (t - 15) in
+    let t7  = ws_opaque SHA2_256 b (t - 7) in
+    let t2  = ws_opaque SHA2_256 b (t - 2) in
+    let s1 = _sigma1 SHA2_256 t2 in
+    let s0 = _sigma0 SHA2_256 t15 in
+    lemma_add_mod_ws_rearrangement s1 t7 s0 t16;
+    reveal_opaque ws;
+    ()
+  );
+  ()
+
+let add_wrap_quad32 (q0 q1:quad32) : quad32 =
+  Mkfour (v (add_mod (uint_to_t q0.lo0) (uint_to_t q1.lo0)))
+         (v (add_mod (uint_to_t q0.lo1) (uint_to_t q1.lo1)))
+         (v (add_mod (uint_to_t q0.hi2) (uint_to_t q1.hi2)))
+         (v (add_mod (uint_to_t q0.hi3) (uint_to_t q1.hi3))) 
+
+let test  (t:counter{t < size_k_w SHA2_256 - 3}) (block:block_w SHA2_256) : nat32 =
+  let c:UInt32.t = ws_computed SHA2_256 block t in
+  v c
+
+let test2 (u:UInt32.t) : nat32 =
+  v u
+
+#reset-options "--z3rlimit 20"
+let ws_computed_quad32 (t:counter{t < size_k_w SHA2_256 - 3}) (block:block_w SHA2_256) : quad32 =
+       Mkfour (v (ws_computed SHA2_256 block t))
+              (v (ws_computed SHA2_256 block (t+1)))
+              (v (ws_computed SHA2_256 block (t+2)))
+              (v (ws_computed SHA2_256 block (t+3)))
+
+let test (src1 src2:quad32) (t:counter{t >= 16 /\ t < size_k_w SHA2_256}) (block:block_w SHA2_256) =
+    assume (src2.lo0 == v (ws_opaque SHA2_256 block t - 12));
+    assume (src1.hi2 == v (ws_opaque SHA2_256 block (t-2)));
+    assume (src1.hi3 == v (ws_opaque SHA2_256 block (t-1))); 
+    let dst = ws_quad32 (t-16) block in
+    let w = sha256_msg1_spec_def dst src2 in
+    let mid = ws_quad32 (t - 7) block in
+    let added = add_mod_quad32 mid w in
+    let final = sha256_msg2_spec_def added in
+    assert (final == ws_computed_quad32 t block);
+    ()
+
+(*
+#push-options "--z3rlimit 10"
+let lemma_sha256_msg2 (dst src:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
+  (requires 16 <= t /\ t < size_k_w(SHA2_256) /\
+            src.hi2 == v (ws_opaque SHA2_256 block (t-2)) /\
+            src.hi3 == v (ws_opaque SHA2_256 block (t-1)) /\
+            (let w = ws_partial t block in
+             let mid = ws_quad32 (t-7) block in
+             dst == add_wrap_quad32 mid w))
+  (ensures sha256_msg2_spec dst src == ws_quad32 t block)
+  =
+  reveal_opaque sha256_msg2_spec_def;
+  let init = ws_quad32 (t-16) block in
+  let sigma0_in = ws_quad32 (t-15) block in
+  //assert (t - 15 < size_k_w SHA2_256 - 3);
+  let sigma0_out = _sigma0_quad32 sigma0_in in
+  let w = ws_partial t block in
+  let mid = ws_quad32 (t-7) block in
+  lemma_add_wrap_quad32_is_add_mod_quad32 mid w;
+  assert (dst == add_mod_quad32 mid w);
+  //
+  let result = sha256_msg2_spec dst src in
+  //assert (result.lo0 == v (add_mod (uint_to_t dst.lo0) (_sigma1 SHA2_256 (uint_to_t src.hi2))));
+  //assert (sigma0_in.lo0 == v (ws_opaque SHA2_256 block (t-15)));
+  reveal_opaque ws_partial_def;
+  lemma_add_wrap_quad32_is_add_mod_quad32 init sigma0_out;
+  assert (w == add_mod_quad32 init sigma0_out);
+  (*
+  assert (dst.lo0 == add_wrap (v (ws_opaque SHA2_256 block (t-7))) (add_wrap init.lo0 sigma0_out.lo0));
+  assert (sigma0_out.lo0 == (v (_sigma0 SHA2_256 (uint_to_t sigma0_in.lo0))));
+  assert (sigma0_out.lo0 == (v (_sigma0 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-15)))))));
+  assert (init.lo0 ==  (v (ws_opaque SHA2_256 block (t-16))));
+  assert (dst.lo0 == add_wrap (v (ws_opaque SHA2_256 block (t-7))) 
+                    (add_wrap (v (ws_opaque SHA2_256 block (t-16)))
+                              (v (_sigma0 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-15))))))));  
+  assert (result.lo0 == v (add_mod (uint_to_t dst.lo0) 
+                                   (_sigma1 SHA2_256 (uint_to_t src.hi2))));
+  assert (result.lo0 == v (add_mod (uint_to_t dst.lo0) 
+                                   (_sigma1 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-2)))))));
+  *)
+  (*                                   
+  assert (result.lo0 == v (add_mod (uint_to_t (add_wrap (v (ws_opaque SHA2_256 block (t-7))) 
+                                                        (add_wrap #32 (v (ws_opaque SHA2_256 block (t-16)))
+                                                                  (v (_sigma0 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-15)))))))))
+                                   (_sigma1 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-2)))))));
+  *)
+//  reveal_opaque ws;
+  admit();
+  ()
+#pop-options
+*)

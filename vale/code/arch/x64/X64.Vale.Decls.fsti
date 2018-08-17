@@ -580,3 +580,4 @@ let max_one_mem (o1 o2:va_operand) : Type0 =
   match (o1, o2) with
   | (TMem _ _, TMem _ _) -> False
   | _ -> True
+
