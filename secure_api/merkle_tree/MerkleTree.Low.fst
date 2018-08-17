@@ -169,8 +169,8 @@ val insert_value:
 	   modifies (BV.buf_vector_rloc ivs) h0 h1 /\
 	   BV.bv_inv hash_size h1 ivs /\
 	   // correctness
-	   S.equal (BV.as_seq h1 hash_size ivs)
-		   (High.insert_values (BV.as_seq h0 hash_size vs)
+	   S.equal (values_lift h1 ivs)
+		   (High.insert_values (values_lift h0 vs)
 				       (B.as_seq h0 nv))))
 let insert_value vs nv =
   BV.insert_copy 0uy hash_size vs nv
@@ -178,7 +178,7 @@ let insert_value vs nv =
 val insert_iroots:
   irs:hash_vec{V.size_of irs = 32ul} ->
   cpos:uint32_t{cpos < 32ul} ->
-  irps:uint32_t{U32.v irps < pow2 (U32.v (32ul - cpos)) - 1} ->
+  irps:uint32_t{U32.v irps < pow2 (32 - U32.v cpos) - 1} ->
   acc:hash ->
   HST.ST unit
 	 (requires (fun h0 -> 
@@ -189,22 +189,86 @@ val insert_iroots:
 	   // memory safety
 	   modifies (loc_union (B.loc_buffer acc) 
 			       (BV.buf_vector_rloc irs)) h0 h1 /\
-	   BV.bv_inv hash_size h1 irs))
+	   BV.bv_inv hash_size h1 irs /\
 	   // correctness
-	   // S.equal (S.slice (BV.as_seq h1 hash_size irs) (U32.v cpos) 32)
-	   // 	   (High.insert_iroots
-	   // 	     (U32.v irps)
-	   // 	     (S.slice (BV.as_seq h0 hash_size irs) (U32.v cpos) 32)
-	   // 	     (B.as_seq h0 acc))))
+	   S.equal (High.iroots_compactify
+	   	     (32 - U32.v cpos) (U32.v irps + 1)
+	   	     (S.slice (BV.as_seq h1 hash_size irs) (U32.v cpos) 32))
+	   	   (High.insert_iroots
+	   	     (U32.v irps)
+	   	     (High.iroots_compactify
+	   	       (32 - U32.v cpos) (U32.v irps)
+	   	       (S.slice (BV.as_seq h0 hash_size irs) (U32.v cpos) 32))
+	   	     (B.as_seq h0 acc))))
 #set-options "--z3rlimit 40"
+
 let rec insert_iroots irs cpos irps acc =
   if irps % 2ul = 0ul
-  then BV.assign_copy hash_size irs cpos acc
+  // then (// let hh0 = HST.get () in
+  //      BV.assign_copy hash_size irs cpos acc)
+  //      // assert (S.equal (High.iroots_compactify
+  //      // 		      (32 - U32.v cpos - 1) (U32.v irps / 2)
+  //      // 		      (S.slice (BV.as_seq hh0 hash_size irs)
+  //      // 			       (U32.v cpos + 1) 32))
+  //      // 		    (High.iroots_compactify
+  //      //   	   	      (32 - U32.v cpos) (U32.v irps)
+  //      // 	   	      (S.slice (BV.as_seq hh0 hash_size irs) 
+  //      // 			       (U32.v cpos) 32))))
+  then admit ()
   else (let hh0 = HST.get () in
        hash_from_hashes (V.index irs cpos) acc acc;
        let hh1 = HST.get () in
+       assert (B.as_seq hh1 acc ==
+       	      High.hash_from_hashes (B.as_seq hh0 (V.get hh0 irs cpos))
+       				    (B.as_seq hh0 acc));
        as_seq_preserved hash_size irs (B.loc_buffer acc) hh0 hh1;
-       insert_iroots irs (cpos + 1ul) (irps / 2ul) acc)
+       assert (S.equal (BV.as_seq hh0 hash_size irs)
+		       (BV.as_seq hh1 hash_size irs));
+       insert_iroots irs (cpos + 1ul) (irps / 2ul) acc;
+       let hh2 = HST.get () in
+
+       assert (S.equal (High.iroots_compactify
+	   	         (32 - U32.v cpos - 1) (U32.v irps / 2 + 1)
+	   		 (S.slice (BV.as_seq hh2 hash_size irs)
+				  (U32.v cpos + 1) 32))
+	   	       (High.insert_iroots
+	   		 (U32.v irps / 2)
+	   		 (High.iroots_compactify
+	   		   (32 - U32.v cpos - 1) (U32.v irps / 2)
+	   		   (S.slice (BV.as_seq hh0 hash_size irs)
+				    (U32.v cpos + 1) 32))
+	   		 (B.as_seq hh1 acc)));
+       High.insert_iroots_rec (U32.v irps) 
+       	   		      (High.iroots_compactify
+	   			(32 - U32.v cpos) (U32.v irps)
+	   			(S.slice (BV.as_seq hh0 hash_size irs)
+					 (U32.v cpos) 32))
+	   		      (B.as_seq hh0 acc);
+
+       remainder_by_two_add_one_2 (U32.v irps);
+       High.iroots_compactify_even_rec
+       	 (32 - U32.v cpos) (U32.v irps + 1)
+       	 (S.slice (BV.as_seq hh2 hash_size irs) (U32.v cpos) 32);
+       // assert (S.equal (High.iroots_compactify
+       // 		         (32 - U32.v cpos) (U32.v irps + 1)
+       // 	   		 (S.slice (BV.as_seq hh2 hash_size irs) 
+       // 				  (U32.v cpos) 32))
+       // 		       (High.iroots_compactify
+       // 	   	         (32 - U32.v cpos - 1) (U32.v irps / 2 + 1)
+       // 	   		 (S.slice (BV.as_seq hh2 hash_size irs)
+       // 				  (U32.v cpos + 1) 32)));
+				  
+       assume (S.equal (High.iroots_compactify
+		         (32 - U32.v cpos) (U32.v irps + 1)
+	   		 (S.slice (BV.as_seq hh2 hash_size irs) (U32.v cpos) 32))
+		       (High.insert_iroots
+			 (U32.v irps / 2)
+			 (S.tail
+	   		   (High.iroots_compactify
+	   	       	     (32 - U32.v cpos) (U32.v irps)
+	   	       	     (S.slice (BV.as_seq hh0 hash_size irs)
+		       		      (U32.v cpos) 32)))
+	   		 (B.as_seq hh1 acc))))
 
 val insert:
   mt:mt_ptr -> nv:hash ->
