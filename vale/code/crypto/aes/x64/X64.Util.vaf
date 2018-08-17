@@ -188,48 +188,80 @@ procedure {:quick} mk_quad32_lo0_be_1_buffer_win(ghost stack_b:buffer64, ghost b
 }
 
 
-
-procedure {:quick} quad32_xor_buffer(
-  ghost src1:buffer128,
-  ghost src2:buffer128,
-  ghost dst:buffer128)
+procedure {:quick}{:exportSpecs} quad32_xor_buffer(inline win:bool,ghost stack_b:buffer64, ghost src1:buffer128, ghost src2:buffer128, ghost dst:buffer128)
     requires
         buffers_disjoint128(src1, src2) \/ src1 == src2;
         buffers_disjoint128(src1, dst) \/ src1 == dst;
         buffers_disjoint128(src2, dst) \/ src2 == dst;
+        buffer_readable(mem, stack_b);
         buffer_readable(mem, src1);
         buffer_readable(mem, src2);
         buffer_readable(mem, dst);
+        valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(src1, mem, memTaint, Secret);
         valid_taint_buf128(src2, mem, memTaint, Secret);
         valid_taint_buf128(dst, mem, memTaint, Secret);
-        rdi == buffer_addr(src1, mem);
-        rsi == buffer_addr(src2, mem);
-        rdx == buffer_addr(dst, mem);
+        buffer_length(stack_b) >= 4;
+        valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
+        win ==> rcx == buffer_addr(src1, mem);
+        win ==> rdx == buffer_addr(src2, mem);
+        win ==> r8 == buffer_addr(dst, mem);
+        !win ==> rdi == buffer_addr(src1, mem);
+        !win ==> rsi == buffer_addr(src2, mem);
+        !win ==> rdx == buffer_addr(dst, mem);
+
         buffer_length(src1) == 1;
         buffer_length(src2) == 1;
-        buffer_length(dst) == 1;
-   ensures
-        rbx == old(rbx);
-        rbp == old(rbp);
-        r12 == old(r12);
-        r13 == old(r13);
-        r14 == old(r14);
-        r15 == old(r15);
+        buffer_length(dst) == 1; 
+    ensures
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
 
         modifies_buffer128(dst, old(mem), mem);
         buffer128_read(dst, 0, mem) == quad32_xor(buffer128_read(src1, 0, old(mem)), buffer128_read(src2, 0, old(mem)));
+
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         efl; mem;
 {
+    inline if (win) {
+        Load128_buffer(xmm1, rcx, 0, Secret, src1, 0);
+        Load128_buffer(xmm2, rdx, 0, Secret, src2, 0);
+        Pxor(xmm1, xmm2);
+        Store128_buffer(r8, xmm1, 0, Secret, dst, 0);
+    } else {
         Load128_buffer(xmm1, rdi, 0, Secret, src1, 0);
         Load128_buffer(xmm2, rsi, 0, Secret, src2, 0);
         Pxor(xmm1, xmm2);
-        Store128_buffer(rdx, xmm1, 0, Secret, dst, 0);
+        Store128_buffer(rdx, xmm1, 0, Secret, dst, 0);      
+    }
 }
+
 
 procedure {:quick} quad32_xor_buffer_win(ghost stack_b:buffer64, ghost src1:buffer128, ghost src2:buffer128, ghost dst:buffer128)
     requires

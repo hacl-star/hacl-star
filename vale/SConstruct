@@ -315,16 +315,15 @@ verify_options = [
   ('code/lib/util/operator.vaf', BuildOptions(fstar_default_args, vale_includes = '')),
 
   # Any use of expose_interfaces requires adding to manual_dependencies
-  ('code/arch/x64/X64.Vale.InsLemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsBasic.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsMem.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsVector.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsAes.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.StateLemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.StateLemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.Lemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.Lemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.Decls.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('obj/code/arch/x64/X64.Vale.InsBasic.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
+#  ('obj/code/arch/x64/X64.Vale.InsMem.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
+#  ('obj/code/arch/x64/X64.Vale.InsVector.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
+#  ('obj/code/arch/x64/X64.Vale.InsAes.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.StateLemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.StateLemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.Lemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.Lemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.Decls.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
 
   # Special treatment for sensitive modules
   ('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
@@ -336,7 +335,8 @@ verify_options = [
   ('code/arch/x64/interop/*_win.fsti', None),
 
   # Interop stubs
-  ('code/arch/x64/interop/Memcpy.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', '').replace('--cache_checked_modules', '').replace('--cache_dir obj/cache_checked', ''))),
+  ('code/arch/x64/interop/Memcpy.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
+  ('code/arch/x64/interop/Quad32_xor.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
 #  ('code/arch/x64/interop/AESEncryptBlock_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
 #  ('code/arch/x64/interop/AESEncryptBE_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
 #  ('code/arch/x64/interop/Gcm_load_xor_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
