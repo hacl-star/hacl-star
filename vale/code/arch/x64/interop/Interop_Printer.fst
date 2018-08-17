@@ -294,6 +294,22 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
        BS.mem = Interop.down_mem h0 addrs buffers} in\n" ^
   "  let s0:X64.Memory_s.state = {ME.state = s_b; ME.mem = mem} in\n" ^
   "  {TS.state = s0; TS.trace = []; TS.memTaint = create_valid_memtaint mem buffers taint_func}\n\n" ^
+  "val lemma_ghost_" ^ name ^ ": is_win:bool -> " ^ (print_low_args_and args) ^ 
+  (if stack_needed then " stack_b:b8 -> " else "") ^
+    "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ 
+    stack_precond "h0" ^
+    "}) ->\n" ^
+  "  Ghost (TS.traceState * nat * HS.mem)\n" ^
+  "    (requires True)\n" ^ 
+  "    (ensures (fun (s1, f1, h1) ->\n" ^
+  "      (let s0 = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
+  "      Some s1 == TS.taint_eval_code (va_code_" ^ name ^ " is_win) f1 s0 /\\\n" ^
+  "      Interop.correct_down h1 addrs " ^ (namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::args))  ^ " s1.TS.state.ME.state.BS.mem /\\\n" ^
+  "      post_cond h0 h1 " ^ (print_args_names args) ^ " /\\\n" ^
+  "      calling_conventions is_win s0 s1)\n" ^
+  "    ))\n\n" ^
+  "// ===============================================================================================\n" ^
+  "//  Everything below this line is untrusted\n\n" ^
   "let create_initial_vale_state is_win " ^ (print_args_names args) ^ "stack_b " ^
   "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ stack_precond "h0" ^ "}) : GTot va_state =\n" ^
   create_state target args stack_needed slots (slots+additional) ^
@@ -339,20 +355,6 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs " ^ (print_args_names args) ^ ") =\n" ^
   print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^ 
   "  ()\n\n" ^
-  "val lemma_ghost_" ^ name ^ ": is_win:bool -> " ^ (print_low_args_and args) ^ 
-  (if stack_needed then " stack_b:b8 -> " else "") ^
-    "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ 
-    stack_precond "h0" ^
-    "}) ->\n" ^
-  "  Ghost (TS.traceState * nat * HS.mem)\n" ^
-  "    (requires True)\n" ^ 
-  "    (ensures (fun (s1, f1, h1) ->\n" ^
-  "      (let s0 = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
-  "      Some s1 == TS.taint_eval_code (va_code_" ^ name ^ " is_win) f1 s0 /\\\n" ^
-  "      Interop.correct_down h1 addrs " ^ (namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::args))  ^ " s1.TS.state.ME.state.BS.mem /\\\n" ^
-  "      post_cond h0 h1 " ^ (print_args_names args) ^ " /\\\n" ^
-  "      calling_conventions is_win s0 s1)\n" ^
-  "    ))\n\n" ^
   "let lemma_ghost_" ^ name ^ " is_win " ^ (print_args_names args) ^
   (if stack_needed then "stack_b " else "") ^ "h0 =\n" ^
   print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^
