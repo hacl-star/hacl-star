@@ -105,6 +105,7 @@ let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:co
 //  assert_norm(h.[5] == e0);
 //  assert_norm(h.[6] == f0);
 //  assert_norm(h.[7] == g0);
+  admit();
   ()
 
 
@@ -115,7 +116,7 @@ let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_2
             xmm0.lo1 == v (add_mod (index (k0 SHA2_256) (t+1)) (ws_opaque SHA2_256 block (t+1))))
   (ensures (let hash0 = make_hash abef cdgh in
             let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
-            let hash2 = shuffle_core_opaque SHA2_256 block hash1 t in
+            let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t + 1) in
             hash2 == make_hash (sha256_rnds2_spec cdgh abef xmm0) abef))
   =
   reveal_opaque ws;

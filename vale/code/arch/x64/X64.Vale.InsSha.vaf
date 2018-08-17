@@ -26,63 +26,26 @@ open X64.Vale
 open X64.Vale.State
 open X64.Vale.StateLemmas
 open X64.Vale.Decls
+open X64.CryptoInstructions_s
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 module P = X64.Print_s
 //#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
+//#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --initial_ifuel 2 --z3rlimit 60"
 #endverbatim
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pxor(dst, src), list(), list()), Public))}{:quick exportOnly} 
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src), list(), list()), Public))}{:quick exportOnly} 
           SHA256_rnds2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w(SHA2_256))
   reads xmm0;
   requires 
-    true;
     t + 1 < size_k_w(SHA2_256);
     xmm0.lo0 == v(add_mod(index(k0(SHA2_256),t),   ws_opaque(SHA2_256, block, t)));
     xmm0.lo1 == v(add_mod(index(k0(SHA2_256),t+1), ws_opaque(SHA2_256, block, t + 1)));
   ensures
-//    let a0 := old(uint_to_t(src.hi3)) in
-//    let b0 := old(uint_to_t(src.hi2)) in
-//    let c0 := old(uint_to_t(dst.hi3)) in
-//    let d0 := old(uint_to_t(dst.hi2)) in
-//    let e0 := old(uint_to_t(src.lo1)) in
-//    let f0 := old(uint_to_t(src.lo0)) in
-//    let g0 := old(uint_to_t(dst.lo1)) in
-//    let h0 := old(uint_to_t(dst.lo0)) in
-//    let hash0 := createL(list(a0, b0, c0, d0, e0, f0, g0, h0)) in
-    true;
-    //let hash1 := shuffle_core(SHA2_256, block, hash0, t) in
-    //let hash2 := shuffle_core(SHA2_256, block, hash1, t + 1) in
-    //dst == old(Mkfour(v(index(hash2, 5)), v(index(hash2, 4)), v(index(hash2, 1)), v(index(hash2, 0))));
+    let hash0 := old(make_hash(src, dst)) in
+    let hash1 := shuffle_core_opaque(SHA2_256, block, hash0, t) in
+    let hash2 := shuffle_core_opaque(SHA2_256, block, hash1, t + 1) in
+    hash2 == make_hash(dst, old(src));
 {
-    ghost var a0 := old(uint_to_t(src.hi3));
-    ghost var b0 := old(uint_to_t(src.hi2));
-    ghost var c0 := old(uint_to_t(dst.hi3));
-    ghost var d0 := old(uint_to_t(dst.hi2));
-    ghost var e0 := old(uint_to_t(src.lo1));
-    ghost var f0 := old(uint_to_t(src.lo0));
-    ghost var g0 := old(uint_to_t(dst.lo1));
-    ghost var h0 := old(uint_to_t(dst.lo0));
-    ghost var hash0 := createL(list(a0, b0, c0, d0, e0, f0, g0, h0));
-//
-//    lemma_index_is_nth(hash0, 0);
-//    lemma_index_is_nth(hash0, 1);
-//    lemma_index_is_nth(hash0, 2);
-//    lemma_index_is_nth(hash0, 3);
-//    lemma_index_is_nth(hash0, 4);
-//    lemma_index_is_nth(hash0, 5);
-//    lemma_index_is_nth(hash0, 6);
-//    lemma_index_is_nth(hash0, 7);
-//
-//    assert index(hash0, 0) == old(uint_to_t(src.hi3));
-//    assert index(hash0, 1) == old(uint_to_t(src.hi2));
-//    assert index(hash0, 2) == old(uint_to_t(dst.hi3));
-//    assert index(hash0, 3) == old(uint_to_t(dst.hi2));
-//    assert index(hash0, 4) == old(uint_to_t(src.lo1));
-//    assert index(hash0, 5) == old(uint_to_t(src.lo0));
-//    assert index(hash0, 6) == old(uint_to_t(dst.lo1));
-//    assert index(hash0, 7) == old(uint_to_t(dst.lo0));
-//
-//    assume false;
+    lemma_sha256_rnds2(old(src), old(dst), old(xmm0), t, block);
 }
-
