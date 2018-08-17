@@ -12,7 +12,7 @@ module Spec = Spec.SHA2
 
 open Spec.Hash.Helpers
 
-val static_fp: M.loc
+val static_fp: unit -> GTot M.loc
 
 let word (a: sha2_alg) =
   match a with
@@ -34,7 +34,7 @@ val alloca: a:sha2_alg -> alloca_t a
 
 let init_t (a:sha2_alg) = (s: state a) -> ST.Stack unit
   (requires (fun h ->
-    M.loc_disjoint (B.loc_addr_of_buffer s) static_fp /\
+    M.loc_disjoint (B.loc_addr_of_buffer s) (static_fp ()) /\
     B.live h s))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer s) h0 h1) /\

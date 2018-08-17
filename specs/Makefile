@@ -19,6 +19,7 @@ ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
 
 # Always generate the dependency file
 .PHONY: .depend
+.PRECIOUS: .depend
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness' > $@
 
@@ -29,6 +30,9 @@ ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 %.checked:
 	$(FSTAR) $< && \
 	touch $@
+
+$(OUTPUT_DIR)/%_AutoTest.ml:
+	echo "if not ($*.test ()) then (print_endline \"$* failed\"; exit 1)" > $@
 
 $(OUTPUT_DIR)/%.ml:
 	$(FSTAR) $(subst .checked,,$<) --codegen OCaml --extract_module $(subst .fst.checked,,$(notdir $<))
@@ -44,16 +48,13 @@ OCAMLOPT += -I $(OUTPUT_DIR) -I $(HACL_KREMLIN)
 
 # Can't be super subtle here... because the F* dependency analysis doesn't give
 # us a way to name the cmx dependencies of a given module
-ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | tac))
+ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | tail -r))
 
 $(OUTPUT_DIR)/%_AutoTest.exe: $(ALL_CMX_FILES) $(OUTPUT_DIR)/%_AutoTest.ml
 	$(OCAMLOPT) $^ -o $@
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -o $@
-
-$(OUTPUT_DIR)/%_AutoTest.ml:
-	echo "if not ($*.test ()) then (print_endline \"$* failed\"; exit 1)" > $@
 
 clean:
 	rm -rf $(OUTPUT_DIR)

@@ -10,6 +10,7 @@ module ST = FStar.HyperStack.ST
 module T = FStar.Tactics
 
 open Spec.Hash.Helpers
+open LowStar.BufferOps
 
 friend Spec.SHA2
 
@@ -30,7 +31,7 @@ let k384_512 = B.gcmalloc_of_list HS.root C.k384_512_l
    that their buffers are disjoint from our top-level readonly state. *)
 
 (* The total footprint of our morally readonly data. *)
-let static_fp =
+let static_fp () =
   M.loc_union
     (M.loc_union (M.loc_addr_of_buffer k224_256) (M.loc_addr_of_buffer k384_512))
     (M.loc_union
@@ -47,7 +48,7 @@ val recall_static_fp: unit -> ST.Stack unit
   (requires (fun _ -> True))
   (ensures (fun h0 _ h1 ->
     M.(modifies loc_none h0 h1) /\
-    static_fp `loc_in` h1))
+    static_fp () `loc_in` h1))
 
 let recall_static_fp () =
   B.recall h224;
@@ -55,20 +56,13 @@ let recall_static_fp () =
   B.recall h384;
   B.recall h512;
   B.recall k224_256;
-  B.recall k384_512;
-  let h = ST.get () in
-  assert (M.loc_union
-    (M.loc_union (M.loc_addr_of_buffer k224_256) (M.loc_addr_of_buffer k384_512))
-    (M.loc_union
-      (M.loc_union (M.loc_addr_of_buffer h224) (M.loc_addr_of_buffer h256))
-      (M.loc_union (M.loc_addr_of_buffer h384) (M.loc_addr_of_buffer h512))) `loc_in` h);
-  admit ()
+  B.recall k384_512
 
 (* This succeeds: *)
 (* let test (): ST.St unit =
   recall_static_fp ();
   let b = B.malloc HS.root 0ul 1ul in
-  assert M.(loc_disjoint (loc_addr_of_buffer b) static_fp) *)
+  assert M.(loc_disjoint (loc_addr_of_buffer b) (static_fp ())) *)
 
 let alloca a () =
   [@ inline_let ]
@@ -88,19 +82,82 @@ let alloca_384: alloca_t SHA2_384 =
 let alloca_512: alloca_t SHA2_512 =
   T.(synth_by_tactic (specialize (alloca SHA2_512) [`%alloca]))
 
+#set-options "--max_fuel 0 --max_ifuel 0"
+
 let init a s =
   match a with
-  | SHA2_224 -> B.recall h224; B.blit h224 0ul s 0ul 8ul
-  | SHA2_256 -> B.recall h256; B.blit h256 0ul s 0ul 8ul
-  | SHA2_384 -> B.recall h384; B.blit h384 0ul s 0ul 8ul
-  | SHA2_512 -> B.recall h512; B.blit h512 0ul s 0ul 8ul
+  | SHA2_224 ->
+      B.recall h224;
+      // waiting for monotonicity:
+      let h = ST.get () in
+      assume (B.as_seq h h224 == S.seq_of_list C.h224_l);
+      B.blit h224 0ul s 0ul 8ul
+  | SHA2_256 ->
+      B.recall h256;
+      // waiting for monotonicity:
+      let h = ST.get () in
+      assume (B.as_seq h h256 == S.seq_of_list C.h256_l);
+      B.blit h256 0ul s 0ul 8ul
+  | SHA2_384 ->
+      B.recall h384;
+      // waiting for monotonicity:
+      let h = ST.get () in
+      assume (B.as_seq h h384 == S.seq_of_list C.h384_l);
+      B.blit h384 0ul s 0ul 8ul
+  | SHA2_512 ->
+      B.recall h512;
+      // waiting for monotonicity:
+      let h = ST.get () in
+      assume (B.as_seq h h512 == S.seq_of_list C.h512_l);
+      B.blit h512 0ul s 0ul 8ul
 
-let init_224: init_t Spec.SHA2_224 =
-  T.(synth_by_tactic (specialize (init Spec.SHA2_224) [`%init]))
-let init_256: init_t Spec.SHA2_256 =
-  T.(synth_by_tactic (specialize (init Spec.SHA2_256) [`%init]))
-let init_384: init_t Spec.SHA2_384 =
-  T.(synth_by_tactic (specialize (init Spec.SHA2_384) [`%init]))
-let init_512: init_t Spec.SHA2_512 =
-  T.(synth_by_tactic (specialize (init Spec.SHA2_512) [`%init]))
+let init_224: init_t SHA2_224 =
+  T.(synth_by_tactic (specialize (init SHA2_224) [`%init]))
+let init_256: init_t SHA2_256 =
+  T.(synth_by_tactic (specialize (init SHA2_256) [`%init]))
+let init_384: init_t SHA2_384 =
+  T.(synth_by_tactic (specialize (init SHA2_384) [`%init]))
+let init_512: init_t SHA2_512 =
+  T.(synth_by_tactic (specialize (init SHA2_512) [`%init]))
 
+let block_w (a: sha2_alg) =
+  b:B.buffer (word a) { B.length b = size_block_w }
+
+#set-options "--max_fuel 1"
+
+val ws (a: sha2_alg) (b: block_w a) (t: U32.t { U32.v t < Spec.size_k_w a }):
+  ST.Stack (word a)
+    (requires (fun h -> B.live h b))
+    (ensures (fun h0 w h1 ->
+      B.live h1 b /\
+      M.(modifies loc_none h0 h1) /\
+      w == Spec.ws a (B.as_seq h0 b) (U32.v t)))
+let rec ws a b t =
+  if U32.lt t 16ul then
+    b.(t)
+  else
+    let t16 = ws a b (U32.sub t 16ul) in
+    let t15 = ws a b (U32.sub t 15ul) in
+    let t7  = ws a b (U32.sub t 7ul) in
+    let t2  = ws a b (U32.sub t 2ul) in
+
+    let s1 = Spec._sigma1 a t2 in
+    let s0 = Spec._sigma0 a t15 in
+    Spec.word_add_mod a s1 (Spec.word_add_mod a t7 (Spec.word_add_mod a s0 t16))
+
+#set-options "--max_fuel 0"
+
+let hash_w (a: sha2_alg) =
+  b:B.buffer (word a) { B.length b = size_hash_w a }
+
+val shuffle_core (a: sha2_alg)
+  (block: block_w a)
+  (hash: hash_w a)
+  (t: U32.t { U32.v t < Spec.size_k_w a }):
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h block /\ B.live h hash /\
+      B.disjoint block hash))
+    (ensures (fun h0 _ h1 ->
+      M.(modifies (loc_buffer hash) h0 h1) /\
+      B.as_seq h1 hash == Spec.shuffle_core a (B.as_seq h0 block) (B.as_seq h0 hash) (U32.v t)))
