@@ -152,6 +152,23 @@ let rec iroots_compactify_0 sz irs =
   if sz = 0 then ()
   else iroots_compactify_0 (sz - 1) (S.tail irs)
 
+val iroots_compactify_even_rec:
+  sz:nat{sz <> 0} -> irps:nat{irps < pow2 sz} ->
+  irs:hash_seq{S.length irs = sz}  ->
+  Lemma (requires (irps % 2 = 0))
+	(ensures (S.equal (iroots_compactify sz irps irs)
+			  (iroots_compactify (sz - 1) (irps / 2) (S.tail irs))))
+let iroots_compactify_even_rec sz irps irs = ()
+
+val iroots_compactify_odd_rec:
+  sz:nat{sz <> 0} -> irps:nat{irps < pow2 sz} ->
+  irs:hash_seq{S.length irs = sz}  ->
+  Lemma (requires (irps % 2 <> 0))
+	(ensures (S.equal (iroots_compactify sz irps irs)
+			  (S.cons (S.head irs)
+				  (iroots_compactify (sz - 1) (irps / 2) (S.tail irs)))))
+let iroots_compactify_odd_rec sz irps irs = ()
+
 val compress_hashes_half:
   hs:hash_seq{S.length hs % 2 = 0} -> 
   GTot (chs:hash_seq{S.length chs = S.length hs / 2})
@@ -226,6 +243,17 @@ let rec insert_iroots irps irs acc =
   then S.cons acc irs
   else (let nacc = hash_from_hashes (S.index irs 0) acc in
        insert_iroots (irps / 2) (S.tail irs) nacc)
+
+val insert_iroots_rec:
+  irps:nat ->
+  irs:hash_seq{S.length irs = num_iroots_of irps} ->
+  acc:hash ->
+  Lemma (requires (irps % 2 <> 0))
+	(ensures (S.equal (insert_iroots irps irs acc)
+			  (insert_iroots (irps / 2) (S.tail irs)
+					 (hash_from_hashes
+					   (S.index irs 0) acc))))
+let insert_iroots_rec irps irs acc = ()
 
 val insert_ok_case_odd_lhs:
   values:hash_seq ->
