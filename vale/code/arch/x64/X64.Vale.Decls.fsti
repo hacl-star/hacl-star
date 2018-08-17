@@ -32,7 +32,7 @@ let va_if (#a:Type) (b:bool) (x:(_:unit{b}) -> GTot a) (y:(_:unit{~b}) -> GTot a
 
 (* Define a tainted operand to wrap the base operand type *)
 [@va_qattr]
-type tainted_operand =
+type tainted_operand:eqtype =
 | TConst: n:int -> tainted_operand
 | TReg: r:reg -> tainted_operand
 | TMem: m:maddr -> t:taint -> tainted_operand

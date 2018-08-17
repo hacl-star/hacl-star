@@ -8,13 +8,13 @@ open Words.Four_s
 open Types_s
 open FStar.Seq.Base
 
-type uint64 = UInt64.t
+type uint64:eqtype = UInt64.t
 
 type heap = Map.t int nat8
 let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
 
-type ins =
+type ins:eqtype =
   | Mov64      : dst:operand -> src:operand -> ins
   | Add64      : dst:operand -> src:operand -> ins
   | AddLea64   : dst:operand -> src1:operand -> src2:operand -> ins
@@ -53,7 +53,7 @@ type ins =
   | AESNI_imc           : dst:xmm -> src:xmm -> ins
   | AESNI_keygen_assist : dst:xmm -> src:xmm -> imm8 -> ins
 
-type ocmp =
+type ocmp:eqtype =
   | OEq: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
   | ONe: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
   | OLe: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
@@ -61,8 +61,8 @@ type ocmp =
   | OLt: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
   | OGt: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
 
-type code = precode ins ocmp
-type codes = list code
+type code:eqtype = precode ins ocmp
+type codes:eqtype = list code
 
 noeq type state = {
   ok: bool;

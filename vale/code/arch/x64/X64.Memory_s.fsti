@@ -12,17 +12,17 @@ unfold let nat32 = Words_s.nat32
 unfold let nat64 = Words_s.nat64
 unfold let quad32 = Types_s.quad32
 
-type base_typ =
+type base_typ:eqtype =
 | TUInt8
 | TUInt16
 | TUInt32
 | TUInt64
 | TUInt128
 
-type typ =
+type typ:eqtype =
 | TBase: (b:base_typ) -> typ
 
-let type_of_base_typ (t:base_typ) : Tot Type0 =
+let type_of_base_typ (t:base_typ) : Tot eqtype =
   match t with
   | TUInt8 -> nat8
   | TUInt16 -> nat16
@@ -30,7 +30,7 @@ let type_of_base_typ (t:base_typ) : Tot Type0 =
   | TUInt64 -> nat64
   | TUInt128 -> quad32
 
-let type_of_typ (t:typ) : Tot Type0 =
+let type_of_typ (t:typ) : Tot eqtype =
   match t with
   | TBase b -> type_of_base_typ b
 
