@@ -241,7 +241,7 @@ let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
   assert(12 <= i /\ i < 16 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q3) (i % 4))
 
 
-#reset-options "--smtencoding.elim_box true --z3rlimit 40 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
+#reset-options "--smtencoding.elim_box true --z3rlimit 60 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 let lemma_pad_to_32_bits_helper (s s'':seq4 nat8) (n:nat) : Lemma
   (requires
     n <= 2 /\

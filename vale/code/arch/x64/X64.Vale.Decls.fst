@@ -9,6 +9,8 @@ module P = X64.Print_s
 module BS = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
+friend X64.Memory
+
 #reset-options "--z3cliopt smt.arith.nl=true"
 let lemma_mul_in_bounds (x y:nat64) : Lemma (requires x `op_Multiply` y < pow2_64) (ensures FStar.UInt.mul_mod #64 x y == x `op_Multiply` y) = ()
 

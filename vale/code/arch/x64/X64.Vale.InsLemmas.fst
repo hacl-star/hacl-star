@@ -3,6 +3,10 @@ module X64.Vale.InsLemmas
 open X64.Vale.StateLemmas
 open X64.Taint_Semantics
 
+friend X64.Vale.StateLemmas
+friend X64.Vale.Decls
+friend X64.Memory
+
 let lemma_valid_taint64_operand m t s =
   let open X64.Taint_Semantics_s in
   let tainted_mem:X64.Memory_s.memtaint = (state_to_S s).memTaint in

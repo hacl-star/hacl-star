@@ -26,6 +26,10 @@ open X64.Vale.Decls
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 module P = X64.Print_s
+
+friend X64.Vale.StateLemmas
+friend X64.Vale.Decls
+friend X64.Memory
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 20"
 #endverbatim
 
