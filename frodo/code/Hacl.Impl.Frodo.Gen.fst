@@ -99,7 +99,7 @@ let frodo_gen_matrix_cshake_inner h0 n seed_len seed res r i =
   let h0 = ST.get () in
   let ctr = size_to_uint32 (size 256 +. i) in
   uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. i))) (u16 (256 + v i));
-  cshake256_frodo seed_len seed (to_u16 ctr) (size 2 *! n) r;
+  cshake128_frodo seed_len seed (to_u16 ctr) (size 2 *! n) r;
   let h1 = ST.get () in
   Lib.Loops.for (size 0) n
     (fun h2 j -> gen_inv h0 h1 h2 n seed_len seed r res i j)
@@ -137,39 +137,50 @@ val frodo_gen_matrix_cshake_4x:
   -> Stack unit
     (requires fun h -> live h seed /\ live h res /\ disjoint seed res)
     (ensures  fun h0 _ h1 ->
-      live h1 res /\ modifies (loc_buffer res) h0 h1 /\
-      as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
+      live h1 res /\ modifies (loc_buffer res) h0 h1)
+      // TODO: Verify this
+      // as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 [@"c_inline"]
 let frodo_gen_matrix_cshake_4x n seed_len seed res =
   push_frame ();
-  let r = create (size 4 *! size 2 *! n) (u8 0) in
-  let r0 = sub r (size 0 *! n) n in
-  let r1 = sub r (size 1 *! n) n in
-  let r2 = sub r (size 2 *! n) n in
-  let r3 = sub #_ #(8 * v n) r (size 3 *! n) n in
+  let r: lbuffer uint8 (8 * v n) = create (size 8 *! n) (u8 0) in  
+  let r0 = sub r (size 0 *! n) (size 2 *! n) in
+  let r1 = sub r (size 2 *! n) (size 2 *! n) in
+  let r2 = sub r (size 4 *! n) (size 2 *! n) in
+  let r3 = sub r (size 6 *! n) (size 2 *! n) in
   let n4 = n /. size 4 in
+  assert(B.loc_pairwise_disjoint 
+        [loc_buffer seed; loc_buffer r0; loc_buffer r1; 
+         loc_buffer r2; loc_buffer r3]);
+  let h0 = ST.get() in
   Lib.Loops.for (size 0) n4
-    (fun h1 i -> True)
+    (fun h1 i -> 
+      B.modifies (loc_union (loc_buffer res) (loc_buffer r)) h0 h1 /\
+      B.live h1 seed /\ B.live h1 res /\
+      B.live h1 r0 /\ B.live h1 r1 /\ B.live h1 r2 /\ B.live h1 r3)
     (fun i -> 
      let ctr0 = size_to_uint32 (size 256 +. size 4 *! i +. size 0) in
      let ctr1 = size_to_uint32 (size 256 +. size 4 *! i +. size 1) in
      let ctr2 = size_to_uint32 (size 256 +. size 4 *! i +. size 2) in
-     let ctr3 = size_to_uint32 (size 256 +. size 4 *! i +. size 3) in
+     let ctr3 = size_to_uint32 (size 256 +. size 4 *! i +. size 3) in     
      cshake128_frodo_4x seed_len seed 
        (to_u16 ctr0) (to_u16 ctr1) (to_u16 ctr2) (to_u16 ctr3)
        (size 2 *! n) r0 r1 r2 r3;
+     let h1' = ST.get() in
      Lib.Loops.for (size 0) n
-       (fun h2 j -> True)
+       (fun h2 j -> 
+          B.modifies (loc_union (loc_buffer res) (loc_buffer r)) h1' h2 /\
+          B.live h2 seed /\ B.live h2 res /\ 
+          B.live h2 r0 /\ B.live h2 r1 /\ B.live h2 r2 /\ B.live h2 r3)
        (fun j -> 
          let resij0 = sub r0 (size 2 *! j) (size 2) in
          let resij1 = sub r1 (size 2 *! j) (size 2) in
          let resij2 = sub r2 (size 2 *! j) (size 2) in
          let resij3 = sub r3 (size 2 *! j) (size 2) in
-         mset res (i +! size 0) j (uint_from_bytes_le resij0);
-         mset res (i +! size 1) j (uint_from_bytes_le resij1);
-         mset res (i +! size 2) j (uint_from_bytes_le resij2);
-         mset res (i +! size 3) j (uint_from_bytes_le resij3)
+         mset res (size 4 *! i +! size 0) j (uint_from_bytes_le resij0);
+         mset res (size 4 *! i +! size 1) j (uint_from_bytes_le resij1);
+         mset res (size 4 *! i +! size 2) j (uint_from_bytes_le resij2);
+         mset res (size 4 *! i +! size 3) j (uint_from_bytes_le resij3)
        )
     );
-  pop_frame ();
-  admit()
+  pop_frame ()

@@ -1,6 +1,12 @@
 ####  Makefile for compilation on Linux  ####
 
-CC=gcc
+FRODO_HOME = ../../../..
+KREMLIN_HOME = ../../../../../../kremlin
+
+USE_OPENSSL ?= FALSE
+GENERATION_A ?= CSHAKE128
+
+CC?=gcc
 ifeq "$(CC)" "gcc"
     COMPILER=gcc
 else ifeq "$(CC)" "clang"
@@ -98,6 +104,9 @@ lib976: $(KEM_FRODO976_OBJS) $(RAND_OBJS) $(AES_OBJS) $(AES_NI_OBJS) $(SHAKE_OBJ
 tests: lib976 tests/ds_benchmark.h
 	$(CC) $(CFLAGS) -L./frodo tests/test_KEM976.c -lfrodo $(LDFLAGS) -o frodo/test_KEM
 
+tests-fstar: lib976 tests/ds_benchmark.h
+	        $(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c -L$(KREMLIN_HOME)/kremlib/out tests/test_KEM976.c -lfrodo -lkremlib $(LDFLAGS) -o frodo/test_KEM_fstar $(ARM_SETTING)
+
 
 lib976_for_KATs: $(KEM_FRODO976_OBJS) $(AES_OBJS) $(AES_NI_OBJS) $(SHAKE_OBJS) $(SHAKEx4_OBJS)
 	$(AR) frodo/libfrodo_for_testing.a $^
@@ -108,6 +117,13 @@ ifeq "$(GENERATION_A)" "CSHAKE128"
 	$(CC) $(CFLAGS) -L./frodo tests/PQCtestKAT_kem_cshake.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo/PQCtestKAT_kem_cshake
 else
 	$(CC) $(CFLAGS) -L./frodo tests/PQCtestKAT_kem.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo/PQCtestKAT_kem
+endif
+
+KATS-fstar:
+ifeq "$(GENERATION_A)" "CSHAKE128"
+	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem_cshake.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_cshake_fstar $(ARM_SETTING)
+else
+	@echo Unimplmeneted: FrodoKEM-AES in F*
 endif
 
 check: tests

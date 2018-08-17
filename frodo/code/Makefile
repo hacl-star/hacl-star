@@ -3,12 +3,12 @@ KREMLIN_HOME	?= ../../../kremlin
 HACL_HOME	?= ../..
 
 ifeq ($(TARGET),x64)
-  LWEKE_HOME = ../NIST/Additional_Implementations/x64/FrodoKEM-640
-  FIPS202    = $(addprefix $(LWEKE_HOME)/objs/sha3/,fips202.o fips202x4.o keccak4x/KeccakP-1600-times4-SIMD256.o)
+  LWEKE_HOME = ../NIST/Additional_Implementations/x64/FrodoKEM-976
+  OBJS       = $(addprefix $(LWEKE_HOME)/objs/,aes/aes_ni.o sha3/fips202.o sha3/fips202x4.o sha3/keccak4x/KeccakP-1600-times4-SIMD256.o)
   KECCAK     = x64/Hacl_Keccak.c
 else
-  LWEKE_HOME ?= ../NIST/Reference_Implementation/reference/FrodoKEM-640
-  FIPS202    = $(LWEKE_HOME)/objs/sha3/fips202.o
+  LWEKE_HOME ?= ../NIST/Reference_Implementation/reference/FrodoKEM-976
+  OBJS       = $(LWEKE_HOME)/objs/aes/aes_c.o $(LWEKE_HOME)/objs/sha3/fips202.o
   KECCAK     = Hacl_Keccak.c
 endif
 
@@ -236,7 +236,7 @@ ALL_SOURCES = \
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
         $(LWEKE_HOME)/objs/aes/aes.o \
-	$(FIPS202)
+	$(OBJS)
 
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
