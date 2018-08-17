@@ -1,5 +1,6 @@
 module Memcpy
 
+
 open LowStar.Buffer
 module B = LowStar.Buffer
 module BV = LowStar.BufferView
@@ -27,7 +28,6 @@ friend SecretByte
 friend X64.Memory_s
 friend X64.Memory
 friend X64.Vale.Decls
-
 #set-options "--z3rlimit 60"
 
 open Vale_memcpy
@@ -60,6 +60,20 @@ let create_initial_trusted_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 d
        BS.mem = Interop.down_mem h0 addrs buffers} in
   let s0:X64.Memory_s.state = {ME.state = s_b; ME.mem = mem} in
   {TS.state = s0; TS.trace = []; TS.memTaint = create_valid_memtaint mem buffers taint_func}
+
+val lemma_ghost_memcpy: is_win:bool -> dst:s8 -> src:s8 ->  stack_b:b8 -> (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) ->
+  Ghost (TS.traceState * nat * HS.mem)
+    (requires True)
+    (ensures (fun (s1, f1, h1) ->
+      (let s0 = create_initial_trusted_state is_win dst src stack_b h0 in
+      Some s1 == TS.taint_eval_code (va_code_memcpy is_win) f1 s0 /\
+      Interop.correct_down h1 addrs [stack_b;dst;src] s1.TS.state.ME.state.BS.mem /\
+      post_cond h0 h1 dst src  /\
+      calling_conventions is_win s0 s1)
+    ))
+
+// ===============================================================================================
+//  Everything below this line is untrusted
 
 let create_initial_vale_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) : GTot va_state =
   let taint_func (x:b8) : GTot taint =
@@ -102,7 +116,6 @@ let create_lemma is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.leng
     lemma_of_memTaint s_init;
     ()
 
-// TODO: Prove these two lemmas if they are not proven automatically
 let implies_pre (is_win:bool) (h0:HS.mem) (dst:s8) (src:s8)  (stack_b:b8) : Lemma
   (requires pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src])
   (ensures (
@@ -135,17 +148,6 @@ let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel)
   assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) src)) (BV.as_seq va_sM.mem.hs src_b));  
   assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) dst)) (BV.as_seq va_sM.mem.hs dst_b));    
   ()
-
-val lemma_ghost_memcpy: is_win:bool -> dst:s8 -> src:s8 ->  stack_b:b8 -> (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) ->
-  Ghost (TS.traceState * nat * HS.mem)
-    (requires True)
-    (ensures (fun (s1, f1, h1) ->
-      (let s0 = create_initial_trusted_state is_win dst src stack_b h0 in
-      Some s1 == TS.taint_eval_code (va_code_memcpy is_win) f1 s0 /\
-      Interop.correct_down h1 addrs [stack_b;dst;src] s1.TS.state.ME.state.BS.mem /\
-      post_cond h0 h1 dst src  /\
-      calling_conventions is_win s0 s1)
-    ))
 
 let lemma_ghost_memcpy is_win dst src stack_b h0 =
   length_t_eq (TBase TUInt64) stack_b;
