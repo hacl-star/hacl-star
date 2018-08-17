@@ -782,6 +782,7 @@ def process_vale_file(env, file, fstar_includes):
       target = file_drop_extension(to_obj_dir(file))
       target_fst = f'{target}.fst.verified'
       target_fsti = f'{target}.fsti.verified'
+      Depends(f'{target_fst}.tmp', target_fsti)
       verify_fstar_file(fst_options, target_fst, fst, fstar_includes)
       verify_fstar_file(fsti_options, target_fsti, fsti, fstar_includes)
       if fstar_extract:
