@@ -28,7 +28,7 @@ module H8  = FStar.UInt8
 module H32  = FStar.UInt32
 
 
-type bytes = B.buffer byte
+type bytes = B.buffer U8.t
 type lbytes l = b:bytes {length b = l} 
 let v (x:UInt32.t) : nat  = UInt32.v x
 
