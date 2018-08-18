@@ -2,7 +2,7 @@
 # Main HACL* Makefile
 #
 
-.PHONY: display verify test providers clean dependencies
+.PHONY: display verify test providers clean dependencies secure_api.build providers.build code.build vale.build specs.build
 
 all: display
 
@@ -148,16 +148,26 @@ providers:
 # CI
 #
 
+specs.build: extract-specs extract-all
+
+code.build: specs.build
+	+$(MAKE) -C code clean-c
+	+$(MAKE) -C code extract-c
+
+providers.build: code.build vale.build
+	+$(MAKE) -C providers/
+	+$(MAKE) -C providers/test
+
+secure_api.build: code.build
+	+$(MAKE) -C secure_api runtime_switch verify # test both extraction & verification
+
+vale.build:
+	+$(MAKE) -C vale
+
 # JP: the clean-git target is egregious and prevents any serious work from
 # happening for anyone who wants to actually test ci. Removing it -- if this is
 # really important, it should be done at the level of the CI system.
-ci: # .clean-banner .clean-git .clean-snapshots
-	$(MAKE) extract-specs extract-all
-	$(MAKE) -C code clean-c
-	$(MAKE) -C code extract-c
-	$(MAKE) -C providers/
-	$(MAKE) -C providers/test
-	$(MAKE) -C secure_api runtime_switch verify # test both extraction & verification
+ci: providers.build secure_api.build # .clean-banner .clean-git .clean-snapshots
 	$(MAKE) build-make
 	$(MAKE) test-all
 	$(MAKE) package

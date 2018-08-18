@@ -65,8 +65,8 @@ let extract_taint3 (o1 o2 o3:tainted_operand) : taint =
 unfold let va_bool = bool
 unfold let va_prop = Type0
 unfold let va_int = int
-val ins : Type0
-val ocmp : Type0
+val ins : eqtype
+val ocmp : eqtype
 unfold let va_code = precode ins ocmp
 unfold let va_codes = list va_code
 let va_tl (cs:va_codes) : Ghost va_codes (requires Cons? cs) (ensures fun tl -> tl == Cons?.tl cs) = Cons?.tl cs
