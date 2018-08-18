@@ -8,38 +8,32 @@ FSTAR_INCLUDES+= \
 	--include $(HACL_HOME)/specs/lemmas \
 	--expose_interfaces
 
-SPEC_FILES=	Spec.Chacha20.fst \
-		Spec.Poly1305.fst \
-		Spec.AES.fst \
-		Spec.AESGCM.fst \
-		Spec.Chacha20.fst \
-		Spec.Chacha20Poly1305.fst \
-		Spec.CTR.fst \
-		Spec.Chacha20Poly1305.fst \
-		Spec.Curve25519.fst \
-		Spec.Curve448.fst \
-		Spec.Salsa20.fst \
-		Spec.SHA2.fst \
-		Spec.Ed25519.fst \
-		Spec.Chacha20_vec.fst \
-		Spec.GaloisField.fst \
-		Spec.GF128.fst \
-		Spec.HMAC.fst \
-		Spec.HKDF.fst \
-		Spec.ECIES.fst \
-		Spec.HSalsa20.fst
+
+#
+# HACL Library files
+#
 
 LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.Sequence.fst Lib.ByteSequence.fst
-LIBS_FILES= $(addprefix ../lib/fst/, $(LIBS))
-LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_Sequence.ml Lib_ByteSequence.ml
-LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=))
+LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_Sequence.ml Lib_ByteSequence.ml Lib_Random.ml
+LIBS_FILES = $(addprefix $(HACL_HOME)/lib/fst/, $(LIBS))
+LIBS_MODULES = $(LIBS:.fst=)
+LIBS_EX = $(addprefix --extract_module , $(LIB_MODULES)))
+
+#
+# HACL Crypto files
+#
+
+HACL = Spec.Curve25519.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst Spec.CTR.fst Spec.AES.fst Spec.GaloisField.fst Spec.GF128.fst Spec.AESGCM.fst Spec.ECIES.fst Spec.Ed25519.fst
+HACL_ML = Spec_Curve25519.ml Spec_SHA2.ml Spec_Hash.ml Spec_HMAC.ml Spec_HKDF.ml Spec_CTR.ml Spec_AES.ml Spec_GaloisField.ml Spec_GF128.ml Spec_AESGCM.ml Spec_ECIES.ml Spec_Ed25519.ml
+HACL_FILES = $(addprefix $(HACL_HOME)/specs/, $(HACL))
+HACL_MODULES = $(HACL:.fst=)
 
 #
 # Main targets
 #
 
-hints: $(addsuffix .hints, $(SPEC_FILES))
-verify: $(addsuffix -verify, $(SPEC_FILES))
+hints: $(addsuffix .hints, $(HACL))
+verify: $(addsuffix -verify, $(HACL))
 
 all: test
 
@@ -205,3 +199,26 @@ network.exe: $(LIBS_FILES) tests/Spec.Network.Test.fst
 	@echo 'let _ = test()' >> network-ml/Spec_Network_Test.ml
 	$(OCAMLOPT) -I network-ml -I ../lib/ml ../lib/ml/Lib_Network.ml network-ml/Lib_IntTypes.ml network-ml/Lib_RawIntTypes.ml network-ml/Lib_Sequence.ml network-ml/Spec_Network_Test.ml -o network.exe
 	./network.exe
+
+#
+# OCaml Library
+#
+
+ml-libhacl: $(LIBS_FILES) $(HACL_FILES)
+	mkdir -p ml-libhacl
+	$(FSTAR) --codegen OCaml --lax --expose_interfaces \
+		$(addprefix --extract_module , $(LIBS_MODULES)) \
+		$(addprefix --extract_module , $(HACL_MODULES)) \
+		--odir ml-libhacl $^
+	cp $(HACL_HOME)/lib/ml/* ml-libhacl
+
+libhacl.cmxa: ml-libhacl
+	$(OCAMLOPT) -I ml-libhacl -package cryptokit -c \
+		$(addprefix ml-libhacl/, $(LIBS_ML)) \
+		$(addprefix ml-libhacl/, $(HACL_ML))
+	ocamlopt -a ml-libhacl/*.cmx -linkall -o libhacl.cmxa
+
+test-build:
+	$(OCAMLOPT) -I . -I ml-test -package cryptokit \
+		$(addprefix ml-test/, $(PROJECT_ML) Test.ml) -linkall libhacl.cmxa \
+		-o test.exe
