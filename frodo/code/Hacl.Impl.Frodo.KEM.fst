@@ -23,20 +23,21 @@ module ST = FStar.HyperStack.ST
 module Lemmas = Spec.Frodo.Lemmas
 module S = Spec.Frodo.KEM
 module M = Spec.Matrix
+module LSeq = Lib.Sequence
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-let bytes_mu =
+let bytes_mu :r:size_t{v r == S.bytes_mu} =
   normalize_term (params_extracted_bits *! params_nbar *! params_nbar /. size 8)
 
-let crypto_publickeybytes =
+let crypto_publickeybytes :r:size_t{v r == S.crypto_publickeybytes} =
   normalize_term (bytes_seed_a +! params_logq *! params_n *! params_nbar /. size 8)
 
-let crypto_secretkeybytes =
+let crypto_secretkeybytes :r:size_t{v r == S.crypto_secretkeybytes} =
   assert_norm (v crypto_bytes + v crypto_publickeybytes + 2 * v params_n * v params_nbar < max_size_t);
   normalize_term (crypto_bytes +! crypto_publickeybytes +! size 2 *! params_n *! params_nbar)
 
-let crypto_ciphertextbytes =
+let crypto_ciphertextbytes :r:size_t{v r == S.crypto_ciphertextbytes} =
   normalize_term ((params_nbar *! params_n +! params_nbar *! params_nbar) *! params_logq /. size 8 +! crypto_bytes)
 
 inline_for_extraction noextract
@@ -135,6 +136,45 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   clear_matrix_se s_matrix e_matrix;
   pop_frame()
 
+inline_for_extraction noextract
+val crypto_kem_keypair_:
+     coins:lbytes (size 2 *! crypto_bytes +! bytes_seed_a)
+  -> pk:lbytes crypto_publickeybytes
+  -> sk:lbytes crypto_secretkeybytes
+  -> Stack unit
+    (requires fun h ->
+      live h pk /\ live h sk /\ live h coins /\
+      disjoint pk sk /\ disjoint coins sk /\ disjoint coins pk)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_union (loc_buffer pk) (loc_buffer sk)) h0 h1 /\
+      (let pk_s, sk_s = S.crypto_kem_keypair (as_seq h0 coins) (as_seq h0 pk) (as_seq h0 sk) in
+      as_seq h1 pk == pk_s /\ as_seq h1 sk == sk_s))
+let crypto_kem_keypair_ coins pk sk =
+  let h0 = ST.get () in
+  let s:lbytes crypto_bytes = sub coins (size 0) crypto_bytes in
+  let seed_e = sub coins crypto_bytes crypto_bytes in
+  let z = sub coins (size 2 *! crypto_bytes) bytes_seed_a in
+
+  let seed_a = sub pk (size 0) bytes_seed_a in
+  cshake_frodo bytes_seed_a z (u16 0) bytes_seed_a seed_a;
+
+  let b:lbytes (params_logq *! params_n *! params_nbar /. size 8) = sub pk bytes_seed_a (crypto_publickeybytes -! bytes_seed_a) in
+  let s_bytes = sub sk (crypto_bytes +! crypto_publickeybytes) (size 2 *! params_n *! params_nbar) in
+  frodo_mul_add_as_plus_e_pack seed_a seed_e b s_bytes;
+  let h1 = ST.get () in
+  S.lemma_updade_pk (as_seq h1 seed_a) (as_seq h1 b) (as_seq h0 pk) (as_seq h1 pk);
+
+  assert (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h1 sk)
+    (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar) == as_seq h1 s_bytes);
+  update_sub sk (size 0) crypto_bytes s;
+  let h2 = ST.get () in
+  LSeq.eq_intro (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h2 sk) (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar)) (as_seq h1 s_bytes);
+  update_sub sk crypto_bytes crypto_publickeybytes pk;
+  let h3 = ST.get () in
+  LSeq.eq_intro (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h3 sk) 0 (v crypto_bytes)) (as_seq h1 s);
+  LSeq.eq_intro (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h3 sk) (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar)) (as_seq h1 s_bytes);
+  S.lemma_updade_sk (as_seq h1 s) (as_seq h1 pk) (as_seq h1 s_bytes) (as_seq h0 sk) (as_seq h3 sk)
+
 val crypto_kem_keypair:
     pk:lbytes crypto_publickeybytes
   -> sk:lbytes crypto_secretkeybytes
@@ -146,21 +186,7 @@ let crypto_kem_keypair pk sk =
   push_frame();
   let coins = create (size 2 *! crypto_bytes +! bytes_seed_a) (u8 0) in
   randombytes_ (size 2 *! crypto_bytes +! bytes_seed_a) coins;
-  let s:lbytes crypto_bytes = sub coins (size 0) crypto_bytes in
-  let seed_e = sub coins crypto_bytes crypto_bytes in
-  let z = sub coins (size 2 *! crypto_bytes) bytes_seed_a in
-
-  assert_norm (v crypto_publickeybytes = v bytes_seed_a + v params_logq * v params_n * v params_nbar / 8);
-  let seed_a = sub pk (size 0) bytes_seed_a in
-  cshake_frodo bytes_seed_a z (u16 0) bytes_seed_a seed_a;
-
-  let b:lbytes (params_logq *! params_n *! params_nbar /. size 8) = sub pk bytes_seed_a (crypto_publickeybytes -! bytes_seed_a) in
-  assert_norm (v crypto_secretkeybytes = v crypto_bytes + v crypto_publickeybytes + 2 * v params_n * v params_nbar);
-  let s_bytes = sub sk (crypto_bytes +! crypto_publickeybytes) (size 2 *! params_n *! params_nbar) in
-  frodo_mul_add_as_plus_e_pack seed_a seed_e b s_bytes;
-
-  update_sub sk (size 0) crypto_bytes s;
-  update_sub sk crypto_bytes crypto_publickeybytes pk;
+  crypto_kem_keypair_ coins pk sk;
   pop_frame();
   u32 0
 

@@ -69,6 +69,21 @@ let update_pk seed_a b pk =
   eq_intro (Seq.sub pk 0 bytes_seed_a) seed_a;
   pk
 
+val lemma_updade_pk:
+    seed_a:lbytes bytes_seed_a
+  -> b:lbytes (params_logq * params_n * params_nbar / 8)
+  -> pk0:lbytes crypto_publickeybytes
+  -> pk:lbytes crypto_publickeybytes
+  -> Lemma
+    (requires
+      Seq.sub pk 0 bytes_seed_a == seed_a /\
+      Seq.sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) == b)
+    (ensures pk == update_pk seed_a b pk0)
+let lemma_updade_pk seed_a b pk0 pk =
+  let pk1 = update_pk seed_a b pk0 in
+  FStar.Seq.Properties.lemma_split pk bytes_seed_a;
+  FStar.Seq.Properties.lemma_split pk1 bytes_seed_a
+
 val update_sk:
     s:lbytes crypto_bytes
   -> pk:lbytes crypto_publickeybytes
@@ -86,6 +101,25 @@ let update_sk s pk s_bytes sk =
   eq_intro (Seq.sub sk 0 crypto_bytes) s;
   eq_intro (Seq.sub sk crypto_bytes crypto_publickeybytes) pk;
   sk
+
+val lemma_updade_sk:
+    s:lbytes crypto_bytes
+  -> pk:lbytes crypto_publickeybytes
+  -> s_bytes:lbytes (2 * params_n * params_nbar)
+  -> sk0:lbytes crypto_secretkeybytes
+  -> sk:lbytes crypto_secretkeybytes
+  -> Lemma
+    (requires
+      Seq.sub sk 0 crypto_bytes == s /\
+      Seq.sub sk crypto_bytes crypto_publickeybytes == pk /\
+      Seq.sub sk (crypto_bytes + crypto_publickeybytes) (2 * params_n * params_nbar) == s_bytes)
+    (ensures sk == update_sk s pk s_bytes sk0)
+let lemma_updade_sk s pk s_bytes sk0 sk =
+  let sk1 = update_sk s pk s_bytes sk0 in
+  FStar.Seq.Properties.lemma_split (Seq.sub sk 0 (crypto_bytes + crypto_publickeybytes)) crypto_bytes;
+  FStar.Seq.Properties.lemma_split (Seq.sub sk1 0 (crypto_bytes + crypto_publickeybytes)) crypto_bytes;
+  FStar.Seq.Properties.lemma_split sk (crypto_bytes + crypto_publickeybytes);
+  FStar.Seq.Properties.lemma_split sk1 (crypto_bytes + crypto_publickeybytes)
 
 #set-options "--max_ifuel 1"
 
