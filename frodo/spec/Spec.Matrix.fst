@@ -378,10 +378,13 @@ val lemma_matrix_to_lbytes:
   -> Lemma
     (requires
       (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res i0 k) /\
-      (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). res1.[2 * i0 + k] == res.[2 * i0 + k]))
+      (Seq.sub #_ #(2 * n1 * n2) res1 0 (2 * i) == Seq.sub #_ #(2 * n1 * n2) res 0 (2 * i)))
     (ensures
       (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res1 i0 k))
 let lemma_matrix_to_lbytes #n1 #n2 m res res1 i =
+  assert (Seq.sub #_ #(2 * n1 * n2) res1 0 (2 * i) == Seq.sub #_ #(2 * n1 * n2) res 0 (2 * i));
+  assert (forall (i0:size_nat{i0 < 2 * i}). res1.[i0] == index (Seq.sub #_ #(2 * n1 * n2) res1 0 (2 * i)) i0);
+  assert (forall (i0:size_nat{i0 < 2 * i}). res1.[i0] == res.[i0]);
   Classical.forall_intro_2 #(i0:size_nat{i0 < i}) #(fun i -> k:size_nat{k < 2})
   #(fun i0 k -> res.[2 * i0 + k] == u8 (uint_v m.[i0] / pow2 (8 * k) % pow2 8))
   (fun i0 k ->
@@ -433,6 +436,7 @@ let matrix_to_lbytes #n1 #n2 m =
   (fun i res ->
     lemma_uint_to_bytes_le m.[i];
     let res1 = update_sub res (2 * i) 2 (uint_to_bytes_le m.[i]) in
+    eq_intro (Seq.sub res1 0 (2 * i)) (Seq.sub res 0 (2 * i));
     lemma_matrix_to_lbytes #n1 #n2 m res res1 i;
     res1
   ) res

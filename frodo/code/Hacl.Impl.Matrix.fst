@@ -541,12 +541,12 @@ let matrix_to_lbytes #n1 #n2 m res =
     (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). M.matrix_to_lbytes_fc (as_matrix h0 m) (B.as_seq h1 res) i0 k))
   (fun i ->
     M.lemma_uint_to_bytes_le (Seq.index #uint16 #(v n1 * v n2) (B.as_seq h0 m) (v i));
-    let h0 = ST.get () in
     let tmp = sub res (size 2 *! i) (size 2) in
+    let h0 = ST.get () in
     uint_to_bytes_le tmp m.(i);
     let h1 = ST.get () in
-    assume (forall (i0:size_nat{i0 < 2 * v i}). Seq.index #uint8 #(2 * v n1 * v n2) (B.as_seq h0 res) i0 ==
-      Seq.index #uint8 #(2 * v n1 * v n2) (B.as_seq h1 res) i0); //FIXME
+    modifies_buffer_elim ((sub #_ #(2 * v n1 * v n2) #(2 * v i) res (size 0) (size 2 *! i))) (loc_buffer tmp) h0 h1;
+    //assert (Seq.sub #_ #(2 * v n1 * v n2) (as_seq h1 res) 0 (2 * v i) == Seq.sub #_ #(2 * v n1 * v n2) (as_seq h0 res) 0 (2 * v i));
     M.lemma_matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m) (B.as_seq h0 res) (B.as_seq h1 res) (v i)
   );
   let h1 = ST.get () in
