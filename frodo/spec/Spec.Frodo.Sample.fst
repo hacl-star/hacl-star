@@ -6,14 +6,11 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 open Spec.Matrix
-open Spec.Frodo.Keccak
 open Spec.Frodo.Lemmas
 open Spec.Frodo.Params
 
 module Seq = Lib.Sequence
 module Matrix = Spec.Matrix
-
-let cshake_frodo = cshake128_frodo
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
 

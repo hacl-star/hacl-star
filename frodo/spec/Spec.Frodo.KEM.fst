@@ -8,21 +8,16 @@ open FStar.Mul
 open FStar.Math.Lemmas
 
 open Spec.Matrix
-open Spec.Frodo.Keccak
 open Spec.Frodo.Lemmas
 open Spec.Frodo.Params
 open Spec.Frodo.Encode
 open Spec.Frodo.Pack
 open Spec.Frodo.Sample
-open Spec.Frodo.Gen
 
 module Seq = Lib.Sequence
 module Matrix = Spec.Matrix
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
-
-let cshake_frodo = cshake128_frodo
-let frodo_gen_matrix = frodo_gen_matrix_cshake
 
 let bytes_mu: size_nat =
   (params_extracted_bits * params_nbar * params_nbar) / 8

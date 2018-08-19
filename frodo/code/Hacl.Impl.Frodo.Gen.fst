@@ -13,7 +13,6 @@ open Lib.PQ.Buffer
 
 open Hacl.Keccak
 open Hacl.Impl.Matrix
-open Hacl.Impl.Frodo.Params
 
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack

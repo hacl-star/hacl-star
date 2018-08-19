@@ -11,13 +11,11 @@ open LowStar.BufferOps
 open Lib.IntTypes
 open Lib.PQ.Buffer
 
-open Hacl.Keccak
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
 open Hacl.Impl.Frodo.Encode
 open Hacl.Impl.Frodo.Pack
 open Hacl.Impl.Frodo.Sample
-open Hacl.Impl.Frodo.Gen
 open Hacl.Frodo.Random
 open Hacl.Frodo.Clear
 
@@ -25,12 +23,6 @@ module ST = FStar.HyperStack.ST
 module Lemmas = Spec.Frodo.Lemmas
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
-
-inline_for_extraction noextract unfold
-let cshake_frodo = cshake256_frodo
-
-inline_for_extraction noextract unfold
-let frodo_gen_matrix = frodo_gen_matrix_cshake 
 
 let bytes_mu =
   normalize_term ((params_extracted_bits *! params_nbar *! params_nbar) /. size 8)

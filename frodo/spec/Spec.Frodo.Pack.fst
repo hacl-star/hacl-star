@@ -9,7 +9,6 @@ open FStar.Math.Lemmas
 
 open Spec.Matrix
 open Spec.Frodo.Lemmas
-open Spec.Frodo.Params
 
 module Seq = Lib.Sequence
 

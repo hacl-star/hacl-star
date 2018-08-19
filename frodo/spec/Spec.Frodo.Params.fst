@@ -25,3 +25,7 @@ let cdf_table: lseq uint16 cdf_table_len =
 let bytes_seed_a = v bytes_seed_a
 
 let params_nbar = v params_nbar
+
+let cshake_frodo = Spec.Frodo.Keccak.cshake128_frodo
+
+let frodo_gen_matrix = Spec.Frodo.Gen.frodo_gen_matrix_cshake
