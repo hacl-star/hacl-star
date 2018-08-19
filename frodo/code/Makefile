@@ -304,6 +304,7 @@ ifeq ($(OLD),1)
 
 GENERATED_DIR	= frodo-old
 OUT_DIR	   	= frodo-old
+LWEKE_HOME      = ../NIST/Reference_Implementation/reference/FrodoKEM-640
 
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
@@ -323,6 +324,8 @@ BASE_OBJ = \
   $(FIPS202) \
   $(LWEKE_HOME)/tests/rng.o \
   $(LWEKE_HOME)/objs/aes/aes.o \
+  $(LWEKE_HOME)/objs/aes/aes_c.o \
+  $(LWEKE_HOME)/objs/sha3/fips202.o \
   $(OUT_DIR)/Hacl_Test_Frodo.o \
   $(OUT_DIR)/Hacl_Impl_Frodo_KEM.o
 
