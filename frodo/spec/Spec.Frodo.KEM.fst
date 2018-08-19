@@ -13,6 +13,7 @@ open Spec.Frodo.Params
 open Spec.Frodo.Encode
 open Spec.Frodo.Pack
 open Spec.Frodo.Sample
+open Spec.Frodo.Clear
 
 module Seq = Lib.Sequence
 module Matrix = Spec.Matrix
@@ -47,8 +48,63 @@ val expand_crypto_ciphertextbytes: unit -> Lemma
     + (params_logq * params_nbar * params_nbar / 8 + crypto_bytes))
 let expand_crypto_ciphertextbytes _ = ()
 
-//TODO: fix
-#set-options "--admit_smt_queries true"
+val clear_matrix:
+    #n1:size_nat
+  -> #n2:size_nat{n1 * n2 < max_size_t /\ n1 * n2 % 2 = 0}
+  -> m:matrix n1 n2
+  -> matrix n1 n2
+let clear_matrix #n1 #n2 m =
+  clear_words_u16 (n1 * n2) m
+
+val update_pk:
+    seed_a:lbytes bytes_seed_a
+  -> b:lbytes (params_logq * params_n * params_nbar / 8)
+  -> pk:lbytes crypto_publickeybytes
+  -> res:lbytes crypto_publickeybytes
+    {Seq.sub res 0 bytes_seed_a == seed_a /\
+     Seq.sub res bytes_seed_a (crypto_publickeybytes - bytes_seed_a) == b}
+let update_pk seed_a b pk =
+  let pk = update_sub pk 0 bytes_seed_a seed_a in
+  let pk = update_sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) b in
+  eq_intro (Seq.sub pk 0 bytes_seed_a) seed_a;
+  pk
+
+val update_sk:
+    s:lbytes crypto_bytes
+  -> pk:lbytes crypto_publickeybytes
+  -> s_bytes:lbytes (2 * params_n * params_nbar)
+  -> sk:lbytes crypto_secretkeybytes
+  -> res:lbytes crypto_secretkeybytes
+    {Seq.sub res 0 crypto_bytes == s /\
+     Seq.sub res crypto_bytes crypto_publickeybytes == pk /\
+     Seq.sub res (crypto_bytes + crypto_publickeybytes) (2 * params_n * params_nbar) == s_bytes}
+let update_sk s pk s_bytes sk =
+  let sk = update_sub sk 0 crypto_bytes s in
+  let sk = update_sub sk crypto_bytes crypto_publickeybytes pk in
+  eq_intro (Seq.sub sk 0 crypto_bytes) s;
+  let sk = update_sub sk (crypto_bytes + crypto_publickeybytes) (2 * params_n * params_nbar) s_bytes in
+  eq_intro (Seq.sub sk 0 crypto_bytes) s;
+  eq_intro (Seq.sub sk crypto_bytes crypto_publickeybytes) pk;
+  sk
+
+#set-options "--max_ifuel 1"
+
+val frodo_mul_add_as_plus_e_pack:
+    seed_a:lbytes bytes_seed_a
+  -> seed_e:lbytes crypto_bytes
+  -> tuple2 (lbytes (params_logq * params_n * params_nbar / 8)) (lbytes (2 * params_n * params_nbar))
+let frodo_mul_add_as_plus_e_pack seed_a seed_e =
+  let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
+  let s_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) in
+  let e_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) in
+  let b_matrix = Matrix.add (Matrix.mul_s a_matrix s_matrix) e_matrix in
+  let b = frodo_pack b_matrix params_logq in
+  let s_bytes = matrix_to_lbytes s_matrix in
+  let s_matrix = clear_matrix s_matrix in
+  let e_matrix = clear_matrix e_matrix in
+  b, s_bytes
+
+#set-options "--max_ifuel 0"
 
 val crypto_kem_keypair:
     coins:lbytes (2 * crypto_bytes + bytes_seed_a)
@@ -61,20 +117,14 @@ let crypto_kem_keypair coins pk sk =
   let z = Seq.sub coins (2 * crypto_bytes) bytes_seed_a in
   let seed_a = cshake_frodo bytes_seed_a z (u16 0) bytes_seed_a in
 
-  let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
-  let s_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) in
-  let e_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) in
-  let b_matrix = Matrix.add (Matrix.mul_s a_matrix s_matrix) e_matrix in
-  let b = frodo_pack b_matrix params_logq in
-  let s_bytes = matrix_to_lbytes s_matrix in
+  let b, s_bytes = frodo_mul_add_as_plus_e_pack seed_a seed_e in
 
-  let pk = update_sub pk 0 bytes_seed_a seed_a in
-  let pk = update_sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) b in
-
-  let sk = update_sub sk 0 crypto_bytes s in
-  let sk = update_sub sk crypto_bytes crypto_publickeybytes pk in
-  let sk = update_sub sk (crypto_bytes + crypto_publickeybytes) (2 * params_n * params_nbar) s_bytes in
+  let pk = update_pk seed_a b pk in
+  let sk = update_sk s pk s_bytes sk in
   pk, sk
+
+//TODO: fix
+#set-options "--admit_smt_queries true"
 
 val crypto_kem_enc:
     coins:lbytes bytes_mu
