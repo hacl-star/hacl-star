@@ -15,20 +15,23 @@ open Hacl.Impl.Frodo.Params
 
 module ST = FStar.HyperStack.ST
 module Lemmas = Spec.Frodo.Lemmas
+module S = Spec.Frodo.Pack
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val frodo_pack:
-    n1:size_t
-  -> n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0}
+    #n1:size_t
+  -> #n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0}
   -> a:matrix_t n1 n2
   -> d:size_t{v d * v n1 < max_size_t /\ v d * v n1 * v n2 < max_size_t /\ v d <= 16}
   -> res:lbytes (d *! n1 *! n2 /. size 8)
   -> Stack unit
-  (requires fun h -> live h a /\ live h res /\ disjoint a res)
-  (ensures  fun h0 r h1 -> live h1 res /\ modifies (loc_buffer res) h0 h1)
+    (requires fun h -> live h a /\ live h res /\ disjoint a res)
+    (ensures  fun h0 _ h1 ->
+      live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+      as_seq h1 res == S.frodo_pack (as_matrix h0 a) (v d))
 [@"c_inline"]
-let frodo_pack n1 n2 a d res =
+let frodo_pack #n1 #n2 a d res = admit();
   assert (uint_v (size_to_uint32 d) < bits U32);
   assert (uint_v (size_to_uint32 (size 7 *! d)) < bits U128);
   push_frame();
@@ -82,20 +85,21 @@ val frodo_unpack:
     n1:size_t
   -> n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0}
   -> d:size_t{v d * v n1 < max_size_t /\ v d * v n1 * v n2 < max_size_t /\ v d <= 16
-    /\ uint_v (size_to_uint32 d) < bits U32 
+    /\ uint_v (size_to_uint32 d) < bits U32
     /\ uint_v (size_to_uint32 (size 7 *! d)) < bits U128}
   -> b:lbytes (d *! n1 *! n2 /. size 8)
   -> res:matrix_t n1 n2
   -> Stack unit
-  (requires fun h -> live h b /\ live h res /\ disjoint b res)
-  (ensures  fun h0 r h1 -> modifies (loc_buffer res) h0 h1)
+    (requires fun h -> live h b /\ live h res /\ disjoint b res)
+    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1 /\
+      as_seq h1 res == S.frodo_unpack (v n1) (v n2) (v d) (as_seq h0 b))
 [@"c_inline"]
 let frodo_unpack n1 n2 d b res =
   // TODO: This proof is fragile. It verifies in interactive mode but not from
   // the command-line. FIX
   admit();
   assert (uint_v (size_to_uint32 d) < bits U32);
-  assert (uint_v (size_to_uint32 (size 7 *! d)) < bits U128);  
+  assert (uint_v (size_to_uint32 (size 7 *! d)) < bits U128);
   push_frame();
   let maskd = (u32 1 <<. size_to_uint32 d) -. u32 1 in
   let v16 = create (size 16) (u8 0) in

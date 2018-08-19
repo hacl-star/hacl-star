@@ -15,12 +15,12 @@ module Seq = Lib.Sequence
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives -Spec.* +Spec.Frodo +Spec.Frodo.Params'"
 
 val frodo_pack:
-    n1: size_nat
-  -> n2: size_nat{n1 * n2 < max_size_t /\ n2 % 8 = 0}
+    #n1: size_nat
+  -> #n2: size_nat{n1 * n2 < max_size_t /\ n2 % 8 = 0}
   -> a: matrix n1 n2
   -> d: size_nat{d * n1 * n2 / 8 < max_size_t /\ d <= 16}
   -> lbytes (d * n1 * n2 / 8)
-let frodo_pack n1 n2 a d =
+let frodo_pack #n1 #n2 a d =
   let maskd = (u128 1 <<. u32 d) -. u128 1 in
   let resLen = d * n1 * n2 / 8 in
   let res = Seq.create resLen (u8 0) in

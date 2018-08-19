@@ -93,7 +93,7 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) s_matrix;
   frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) e_matrix;
   frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix;
-  frodo_pack params_n params_nbar b_matrix params_logq b;
+  frodo_pack b_matrix params_logq b;
   matrix_to_lbytes s_matrix s;
   clear_matrix s_matrix;
   clear_matrix e_matrix;
@@ -234,11 +234,11 @@ let crypto_kem_enc_ct_pack seed_a seed_e coins b sp_matrix ct =
   assert_norm (v crypto_ciphertextbytes =
     ((v params_nbar * v params_n + v params_nbar * v params_nbar)
       * v params_logq) / 8 + v crypto_bytes);
-  frodo_pack params_nbar params_n bp_matrix params_logq (sub ct (size 0) c1Len);
+  frodo_pack bp_matrix params_logq (sub ct (size 0) c1Len);
 
   let v_matrix = matrix_create params_nbar params_nbar in
   frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix;
-  frodo_pack params_nbar params_nbar v_matrix params_logq (sub ct c1Len c2Len);
+  frodo_pack v_matrix params_logq (sub ct c1Len c2Len);
   clear_matrix v_matrix;
   pop_frame()
 

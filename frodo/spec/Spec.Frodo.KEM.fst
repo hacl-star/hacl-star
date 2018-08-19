@@ -50,7 +50,7 @@ let crypto_kem_keypair coins =
   let s_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) in
   let e_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) in
   let b_matrix = Matrix.add (Matrix.mul_s a_matrix s_matrix) e_matrix in
-  let b = frodo_pack params_n params_nbar b_matrix params_logq in
+  let b = frodo_pack b_matrix params_logq in
 
   let pk = concat seed_a b in
   let sk = concat s (concat pk (matrix_to_lbytes s_matrix)) in
@@ -73,13 +73,13 @@ let crypto_kem_enc coins pk =
   let ep_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 5) in
   let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
   let bp_matrix = Matrix.add (Matrix.mul sp_matrix a_matrix) ep_matrix in
-  let c1 = frodo_pack params_nbar params_n bp_matrix params_logq in
+  let c1 = frodo_pack bp_matrix params_logq in
   let epp_matrix = frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) in
   let b_matrix = frodo_unpack params_n params_nbar params_logq b in
   let v_matrix = Matrix.add (Matrix.mul sp_matrix b_matrix) epp_matrix in
   let mu_encode = frodo_key_encode params_extracted_bits coins in
   let c_matrix = Matrix.add v_matrix mu_encode in
-  let c2 = frodo_pack params_nbar params_nbar c_matrix params_logq in
+  let c2 = frodo_pack c_matrix params_logq in
 
   let ss_init = concat c1 (concat c2 (concat k d)) in
   let ss_init_len = (params_logq * params_nbar * params_n) / 8 + (params_logq * params_nbar * params_nbar) / 8 + 2 * crypto_bytes in
