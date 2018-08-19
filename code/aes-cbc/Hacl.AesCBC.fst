@@ -44,13 +44,21 @@ let rec cbc_encrypt_blocks out kex prev msg len curr tmp =
     cbc_encrypt_blocks out kex oblock msg len U32.(curr +^ 16ul) tmp
   )
   
-val pad: tmp:block -> b:U8.t -> idx:U32.t{U32.v idx <= 16} -> Stack unit
+val padPKCS: tmp:block -> len:U32.t{U32.v len <= 16} -> idx:U32.t{U32.v idx <= 16} -> Stack unit
 	 (requires (fun h -> True))
 	 (ensures (fun h0 _ h1 -> True))
-let rec pad tmp b idx = 
+let rec padPKCS tmp len idx = 
     if idx = 16ul then ()
-    else (tmp.(idx) <- b; pad tmp b U32.(idx +^ 1ul))
-    
+    else (tmp.(idx) <- uint32_to_uint8 len; padPKCS tmp len U32.(idx +^ 1ul))
+
+val padISO: tmp:block -> len:U32.t{U32.v len <= 16} -> idx:U32.t{U32.v idx <= 16} -> Stack unit
+	 (requires (fun h -> True))
+	 (ensures (fun h0 _ h1 -> True))
+let padISO tmp b idx = 
+    tmp.(idx) <- 0x80uy
+
+let pad = padISO
+
 let aes256_cbc_encrypt out key iv msg msglen = 
   push_frame();
   assert (U32.v 16ul <> 0);
@@ -69,7 +77,7 @@ let aes256_cbc_encrypt out key iv msg msglen =
                  else iv in 
   let ltmp = B.alloca 0uy 16ul in
   blit last 0ul ltmp 0ul final;
-  pad ltmp (uint32_to_uint8 U32.(16ul -^ final)) final;
+  pad ltmp U32.(16ul -^ final) final;
   xor_block ltmp ltmp lastfull 0ul;
   cipher otmp ltmp kex;
   blit otmp 0ul out2 0ul 16ul;
@@ -114,6 +122,22 @@ let aes256_cbc_decrypt_old out key iv cip ciplen =
   U32.(fullblocks +^ final)
 
   
+val unpadPKCS: tmp:block -> idx:U32.t{U32.v idx <= 16} -> Stack (len:U32.t{U32.v len <= 16})
+	 (requires (fun h -> True))
+	 (ensures (fun h0 _ h1 -> True))
+let unpadPKCS tmp idx = 
+  let pad = tmp.(15ul) in
+  uint8_to_uint32 pad
+
+val unpadISO: tmp:block ->  idx:U32.t{U32.v idx <= 16} -> Stack (len:U32.t{U32.v len <= 16})
+	 (requires (fun h -> True))
+	 (ensures (fun h0 _ h1 -> True))
+let rec unpadISO tmp idx = 
+    if U8.(tmp.(idx) = 0x00uy) then unpadISO tmp (U32.(idx -^ 1ul))
+    else if U8.(tmp.(idx) = 0x80uy) then idx
+    else 0ul 
+
+let unpad = unpadISO
 
 
 let aes256_cbc_decrypt out key iv cip ciplen = 
@@ -122,10 +146,6 @@ let aes256_cbc_decrypt out key iv cip ciplen =
   let tmp = B.alloca 0uy 16ul in
   keyExpansion key kex;
   cbc_decrypt_blocks out kex iv cip ciplen 0ul tmp;
-  let pad = U32.(out.(ciplen -^ 1ul)) in
-  let pad32 = uint8_to_uint32 pad in
+  let unpad = unpad out U32.(ciplen -^ 1ul) in
   pop_frame();
-  U32.(ciplen -^ pad)
-
-  
-
+  unpad
