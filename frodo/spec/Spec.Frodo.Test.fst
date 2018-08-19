@@ -11,23 +11,23 @@ open Spec.Frodo.Params
 
 let print_and_compare (#len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) =
   IO.print_string "\n\nResult:   ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) 
+  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a)))
     (as_list test_result);
   IO.print_string "\nExpected: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) 
+  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a)))
     (as_list test_expected);
   for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result
 
 let compare (#len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) =
   for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result
 
-let test_frodo 
+let test_frodo
   (keypaircoins:list uint8{List.Tot.length keypaircoins == 2 * crypto_bytes + bytes_seed_a})
   (enccoins:list uint8{List.Tot.length enccoins == bytes_mu})
   ss_expected
   pk_expected
   ct_expected
-  sk_expected 
+  sk_expected
 =
   let keypaircoins = createL keypaircoins in
   let enccoins = createL enccoins in
@@ -35,16 +35,21 @@ let test_frodo
   let pk_expected = createL pk_expected in
   let ct_expected = createL ct_expected in
   let sk_expected = createL sk_expected in
-  let pk, sk = crypto_kem_keypair keypaircoins in
-  let ct, ss1 = crypto_kem_enc enccoins pk in
-  let ss2 = crypto_kem_dec ct sk in
+  let pk = create crypto_publickeybytes (u8 0) in
+  let sk = create crypto_secretkeybytes (u8 0) in
+  let ct = create crypto_ciphertextbytes (u8 0) in
+  let ss1 = create crypto_bytes (u8 0) in
+  let ss2 = create crypto_bytes (u8 0) in
+  let pk, sk = crypto_kem_keypair keypaircoins pk sk in
+  let ct, ss1 = crypto_kem_enc enccoins pk ct ss1 in
+  let ss2 = crypto_kem_dec ct sk ss2 in
   let r_pk = compare pk_expected pk in
   let r_sk = compare sk_expected sk in
   let r_ct = compare ct_expected ct in
   let r_ss = print_and_compare ss1 ss2 in
   let r_ss1 = print_and_compare ss_expected ss2 in
   r_pk && r_sk && r_ct && r_ss && r_ss1
-  
+
 //
 // Test1. FrodoKEM-64. CSHAKE128
 //
@@ -321,15 +326,15 @@ let test1_sk_expected = List.Tot.map u8_from_UInt8 [
   0x00uy; 0x00uy; 0x02uy; 0x00uy; 0x02uy; 0x00uy; 0xfbuy; 0xffuy; 0xfduy; 0xffuy; 0xfduy; 0xffuy; 0xffuy; 0xffuy; 0x01uy; 0x00uy ]
 
 let test () =
-  let result = test_frodo 
-    test1_keypaircoins 
-    test1_enccoins 
-    test1_ss_expected 
-    test1_pk_expected 
-    test1_ct_expected 
-    test1_sk_expected 
+  let result = test_frodo
+    test1_keypaircoins
+    test1_enccoins
+    test1_ss_expected
+    test1_pk_expected
+    test1_ct_expected
+    test1_sk_expected
   in
-  if result then 
+  if result then
     IO.print_string "\n\nFrodoKEM : Success!\n"
-  else 
+  else
     IO.print_string "\n\nFrodoKEM: Failure :(\n"
