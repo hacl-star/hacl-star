@@ -84,9 +84,7 @@ let frodo_pack #n1 #n2 a d res = admit();
 val frodo_unpack:
     n1:size_t
   -> n2:size_t{v n1 * v n2 < max_size_t /\ v n2 % 8 = 0}
-  -> d:size_t{v d * v n1 < max_size_t /\ v d * v n1 * v n2 < max_size_t /\ v d <= 16
-    /\ uint_v (size_to_uint32 d) < bits U32
-    /\ uint_v (size_to_uint32 (size 7 *! d)) < bits U128}
+  -> d:size_t{v d * v n1 < max_size_t /\ v d * v n1 * v n2 < max_size_t /\ v d <= 16}
   -> b:lbytes (d *! n1 *! n2 /. size 8)
   -> res:matrix_t n1 n2
   -> Stack unit
