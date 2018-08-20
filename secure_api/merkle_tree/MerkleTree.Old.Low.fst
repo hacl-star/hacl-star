@@ -1,4 +1,4 @@
-module MerkleTree.Low
+module MerkleTree.Old.Low
 
 // TODO: Use `EverCrypt.Hash` directly
 // open EverCrypt.Hash
@@ -11,7 +11,7 @@ open FStar.Seq
 open FStar.Integers
 open FStar.Ghost
 
-open MerkleTree.High
+open MerkleTree.Old.High
 open LowStar.Vector
 open LowStar.BufVector
 
@@ -26,7 +26,7 @@ module V = LowStar.Vector
 module BV = LowStar.BufVector
 module S = FStar.Seq
 
-module High = MerkleTree.High
+module High = MerkleTree.Old.High
 
 module U32 = FStar.UInt32
 module U8 = FStar.UInt8

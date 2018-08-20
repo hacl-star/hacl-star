@@ -1,9 +1,9 @@
 #include "stdint.h"
-#include "ext/MerkleTree_Low.h"
+#include "ext/MerkleTree_Old_Low.h"
 
-typedef MerkleTree_Low_hash hash_t;
+typedef MerkleTree_Old_Low_hash hash_t;
 
-typedef MerkleTree_Low_merkle_tree merkle_tree;
+typedef MerkleTree_Old_Low_merkle_tree merkle_tree;
 typedef merkle_tree *mt_ptr;
 
 mt_ptr create();

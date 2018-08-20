@@ -1,24 +1,24 @@
 #include "merkle_tree.h"
-#include "ext/MerkleTree_Low.h"
+#include "ext/MerkleTree_Old_Low.h"
 
 mt_ptr create()
 {
-  return MerkleTree_Low_create_merkle_tree();
+  return MerkleTree_Old_Low_create_merkle_tree();
 }
 
 void insert(mt_ptr mt, hash_t v)
 {
-  MerkleTree_Low_insert(mt, v);
+  MerkleTree_Old_Low_insert(mt, v);
 }
 
 void get_root(mt_ptr mt, hash_t root)
 {
-  MerkleTree_Low_get_root(mt, root);
+  MerkleTree_Old_Low_get_root(mt, root);
 }
 
 void free_mt(mt_ptr mt)
 {
-  MerkleTree_Low_free_merkle_tree(mt);
+  MerkleTree_Old_Low_free_merkle_tree(mt);
 }
 
 int main()
