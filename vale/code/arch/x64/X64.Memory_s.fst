@@ -9,6 +9,8 @@ module BV = LowStar.BufferView
 module S = X64.Bytes_Semantics_s
 module H = FStar.Heap
 
+friend SecretByte
+
 #reset-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 
 let b8 = B.buffer UInt8.t

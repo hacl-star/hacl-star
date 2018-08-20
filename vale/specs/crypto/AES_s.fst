@@ -30,7 +30,7 @@ assume val commute_sub_bytes_shift_rows (q:quad32) : Lemma
 assume val commute_rot_word_sub_word (x:nat32) : Lemma
   (rot_word_LE (sub_word x) == sub_word (rot_word_LE x))
 
-type algorithm = | AES_128 | AES_192 | AES_256
+type algorithm:eqtype = | AES_128 | AES_192 | AES_256
 
 let aes_rcon (i:int) : nat32 =
   if i = 0 then 0x01 else
@@ -61,8 +61,8 @@ unfold let nr(alg:algorithm) =
   | AES_192 -> 12
   | AES_256 -> 14
 
-type aes_key_LE (alg:algorithm) : Type0 = s:(seq nat32){length s == nk alg}
-type aes_key (alg:algorithm) : Type0 = s:(seq nat8){length s == 4 * nk alg}
+type aes_key_LE (alg:algorithm) : eqtype = s:(seq nat32){length s == nk alg}
+type aes_key (alg:algorithm) : eqtype = s:(seq nat8){length s == 4 * nk alg}
 
 let round (state round_key:quad32) =
   let s = sub_bytes state in
