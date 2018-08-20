@@ -5,7 +5,7 @@ open Words_s
 open Words.Four_s
 open Words.Seq_s
 open FStar.Mul
-open Meta
+open Util.Meta
 
 let seq_to_seq_four_to_seq_LE  (#a:Type) (x:seq (four a)) :
   Lemma (seq_to_seq_four_LE (seq_four_to_seq_LE x) == x)
