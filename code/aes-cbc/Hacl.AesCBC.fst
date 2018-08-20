@@ -57,7 +57,7 @@ val padISO: tmp:block -> len:U32.t{U32.v len <= 16} -> idx:U32.t{U32.v idx <= 16
 let padISO tmp b idx = 
     tmp.(idx) <- 0x80uy
 
-inline_for_extraction let pad tmp len idx = padISO tmp len idx
+inline_for_extraction let pad tmp len idx = padPKCS tmp len idx
 
 let aes256_cbc_encrypt out key iv msg msglen = 
   push_frame();
@@ -128,7 +128,7 @@ let rec unpadISO tmp idx =
 
       
 
-inline_for_extraction let unpad tmp idx = unpadISO tmp idx
+inline_for_extraction let unpad tmp idx = unpadPKCS tmp idx
 
 
 let aes256_cbc_decrypt out key iv cip ciplen = 
