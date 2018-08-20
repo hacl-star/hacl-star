@@ -34,6 +34,9 @@ module U8 = FStar.UInt8
 type hash = B.buffer uint8_t
 type hash_vec = BV.buf_vector uint8_t
 
+val hash_size: uint32_t
+let hash_size = 32ul
+
 // TODO: When `EverCrypt.Hash` is connected if we define it.
 assume val hash_from_hashes: 
   src1:hash -> src2:hash -> dst:hash -> 
