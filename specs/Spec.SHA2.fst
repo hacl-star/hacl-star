@@ -17,6 +17,7 @@ let size_k_w: sha2_alg -> Tot nat = function
   | SHA2_384 | SHA2_512 -> 80
 
 (* Define the length of scheduling block *)
+inline_for_extraction
 let size_ws_w = size_k_w
 
 (* Define the length of the encoded lenght in the padding *)

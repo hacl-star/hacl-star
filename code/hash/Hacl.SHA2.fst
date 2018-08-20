@@ -145,10 +145,33 @@ let rec ws a b t =
     let s0 = Spec._sigma0 a t15 in
     Spec.word_add_mod a s1 (Spec.word_add_mod a t7 (Spec.word_add_mod a s0 t16))
 
-#set-options "--max_fuel 0"
+#set-options "--max_fuel 0 --z3rlimit 50"
 
 let hash_w (a: sha2_alg) =
   b:B.buffer (word a) { B.length b = size_hash_w a }
+
+val k0 (a: sha2_alg): ST.Stack (B.buffer (word a))
+  (requires (fun _ -> True))
+  (ensures (fun h0 b h1 ->
+    B.length b = Spec.size_k_w a /\
+    B.live h1 b /\
+    M.(modifies loc_none h0 h1) /\
+    B.as_seq h1 b == Spec.k0 a))
+let k0 a =
+  match a with
+  | SHA2_224 | SHA2_256 ->
+      B.recall k224_256;
+      let h = ST.get () in
+      assume (B.as_seq h k224_256 == S.seq_of_list C.k224_256_l);
+      k224_256
+  | SHA2_384 | SHA2_512 ->
+      B.recall k384_512;
+      let h = ST.get () in
+      assume (B.as_seq h k384_512 == S.seq_of_list C.k384_512_l);
+      k384_512
+
+inline_for_extraction unfold
+let add = Spec.word_add_mod
 
 val shuffle_core (a: sha2_alg)
   (block: block_w a)
@@ -161,3 +184,46 @@ val shuffle_core (a: sha2_alg)
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer hash) h0 h1) /\
       B.as_seq h1 hash == Spec.shuffle_core a (B.as_seq h0 block) (B.as_seq h0 hash) (U32.v t)))
+
+let shuffle_core a block hash t =
+  let a0 = hash.(0ul) in
+  let b0 = hash.(1ul) in
+  let c0 = hash.(2ul) in
+  let d0 = hash.(3ul) in
+  let e0 = hash.(4ul) in
+  let f0 = hash.(5ul) in
+  let g0 = hash.(6ul) in
+  let h0 = hash.(7ul) in
+
+  let t1 = add a h0 (add a (Spec._Sigma1 a e0) (add a (Spec._Ch a e0 f0 g0) (add a (k0 a).(t) (ws a block t)))) in
+  let t2 = add a (Spec._Sigma0 a a0) (Spec._Maj a a0 b0 c0) in
+
+  hash.(0ul) <- add a t1 t2;
+  hash.(1ul) <- a0;
+  hash.(2ul) <- b0;
+  hash.(3ul) <- c0;
+  hash.(4ul) <- add a d0 t1;
+  hash.(5ul) <- e0;
+  hash.(6ul) <- f0;
+  hash.(7ul) <- g0;
+
+  let h = ST.get () in
+  [@inline_let]
+  let l = [ add a t1 t2; a0; b0; c0; add a d0 t1; e0; f0; g0 ] in
+  assert_norm (List.Tot.length l = 8);
+  S.intro_of_list #(word a) (B.as_seq h hash) l
+
+val shuffle: a:sha2_alg -> block:block_w a -> hash:hash_w a ->
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h block /\ B.live h hash /\
+      B.disjoint block hash))
+    (ensures (fun h0 _ h1 ->
+      M.(modifies (loc_buffer hash) h0 h1 /\
+      B.as_seq h1 hash == Spec.shuffle a (B.as_seq h0 hash) (B.as_seq h0 block))))
+
+inline_for_extraction
+let size_ws_w (a: sha2_alg) = U32.uint_to_t (Spec.size_ws_w a)
+
+let shuffle a block hash =
+  C.Loops.repeat_range 8ul 0ul (size_ws_w a) (shuffle_core a block) hash
