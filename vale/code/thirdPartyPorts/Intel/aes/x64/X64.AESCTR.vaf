@@ -321,6 +321,59 @@ procedure {:quick} aes_ctr_encrypt(
     finish_aes_encrypt_le(alg, in4, key);
 }
 
+procedure {:quick} aes_ctr_ghash(
+    ghost old_out_ptr:nat64,
+    ghost old_num_quad_blocks:nat64,
+    ghost count:nat,
+    ghost out_b:buffer128,
+    ghost hash_init:quad32
+    )
+    lets
+        rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
+        ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+        mask @= xmm8; hash @= xmm1; h @= xmm11; 
+    requires
+        0 <= count < old_num_quad_blocks;
+        validDstAddrs128(mem, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memTaint, Secret);
+        
+        // XMM constants are correct
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        // Partial GCM progress
+        hash == ghash_incremental0(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*count));
+
+        ctr1 == index(buffer128_as_seq(mem, out_b), 4*count+0);
+        ctr2 == index(buffer128_as_seq(mem, out_b), 4*count+1);
+        ctr3 == index(buffer128_as_seq(mem, out_b), 4*count+2);
+        ctr4 == index(buffer128_as_seq(mem, out_b), 4*count+3);
+
+    reads mask; h; ctr2; ctr3; ctr4; mem; memTaint;
+    modifies hash; rk4; rk1; rk2; rk3; ctr1; r12; efl; 
+    ensures
+        hash == ghash_incremental(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*(count+1)));
+{
+    // Compute GHash on the four outputs
+    ghost var h_in_0 := ctr1;
+    compute_ghash_incremental_register();
+    ghost var hash0 := hash;
+
+    Mov128(ctr1, ctr2);
+    ghost var h_in_1 := ctr1;
+    compute_ghash_incremental_register();
+    ghost var hash1 := hash;
+
+    Mov128(ctr1, ctr3);
+    ghost var h_in_2 := ctr1;
+    compute_ghash_incremental_register();
+    ghost var hash2 := hash;
+
+    Mov128(ctr1, ctr4);
+    ghost var h_in_3 := ctr1;
+    compute_ghash_incremental_register();
+    lemma_ghash_registers(reverse_bytes_quad32(h), hash_init, old(hash), hash0, hash1, hash2, hash, h_in_0, h_in_1, h_in_2, h_in_3, buffer128_as_seq(mem, out_b), 4*count);
+
+}
+
 #reset-options "--z3rlimit 400"
 // Intel's LOOP_4
 procedure{:quick} aes_ctr_loop_body(
@@ -493,24 +546,7 @@ procedure{:quick} aes_ctr_loop_body(
     assert slice_work_around(buffer128_as_seq(mem, out_b), 4*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 4*count));   // OBSERVE
 
     // Compute GHash on the four outputs
-    ghost var h_in_0 := ctr1;
-    compute_ghash_incremental_register();
-    ghost var hash0 := hash;
-
-    Mov128(ctr1, ctr2);
-    ghost var h_in_1 := ctr1;
-    compute_ghash_incremental_register();
-    ghost var hash1 := hash;
-
-    Mov128(ctr1, ctr3);
-    ghost var h_in_2 := ctr1;
-    compute_ghash_incremental_register();
-    ghost var hash2 := hash;
-
-    Mov128(ctr1, ctr4);
-    ghost var h_in_3 := ctr1;
-    compute_ghash_incremental_register();
-    lemma_ghash_registers(reverse_bytes_quad32(h), hash_init, old(hash), hash0, hash1, hash2, hash, h_in_0, h_in_1, h_in_2, h_in_3, buffer128_as_seq(mem, out_b), 4*count);
+    aes_ctr_ghash(old_out_ptr, old_num_quad_blocks, count, out_b, hash_init);
 
     Sub64(rdx, 1);
     Add64(plain_ptr, 64);
