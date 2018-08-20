@@ -1,4 +1,4 @@
-module MerkleTree.High
+module MerkleTree.Old.High
 
 open FStar.All
 open FStar.Ghost
