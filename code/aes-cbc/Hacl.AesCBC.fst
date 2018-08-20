@@ -137,9 +137,12 @@ let aes256_cbc_decrypt out key iv cip ciplen =
   let tmp = B.alloca 0uy 16ul in
   keyExpansion key kex;
   cbc_decrypt_blocks out kex iv cip ciplen 0ul tmp;
-  let unpad = unpad out U32.(ciplen -^ 1ul) in
+  let pad32 = unpad out U32.(ciplen -^ 1ul) in
+  let ztmp = B.alloca 0uy 16ul in
+  let msglen = U32.(ciplen -^ pad32) in
+  blit ztmp 0ul out msglen pad32;
   pop_frame();
-  unpad
+  msglen
 
 let aes256_cbc_decrypt_no_pad out key iv cip ciplen = 
   push_frame();
