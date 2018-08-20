@@ -94,11 +94,17 @@ val remainder_by_two_sub_one_2:
 	(ensures ((n - 1) % 2 = 0))
 let remainder_by_two_sub_one_2 n = ()
 
-val div_by_two_same_odd:
+val div_by_two_same_odd_1:
   n:nat ->
   Lemma (requires (n % 2 <> 0))
 	(ensures (n / 2 = (n - 1) / 2))
-let div_by_two_same_odd n = ()
+let div_by_two_same_odd_1 n = ()
+
+val div_by_two_same_odd_2:
+  n:nat ->
+  Lemma (requires (n % 2 <> 0))
+	(ensures ((n + 1) / 2 = n / 2 + 1))
+let div_by_two_same_odd_2 n = ()
 
 /// The Merkle root of a full binary tree
 
@@ -169,6 +175,14 @@ val iroots_compactify_odd_rec:
 				  (iroots_compactify (sz - 1) (irps / 2) (S.tail irs)))))
 let iroots_compactify_odd_rec sz irps irs = ()
 
+val iroots_compactify_odd_rec_tail:
+  sz:nat{sz <> 0} -> irps:nat{irps < pow2 sz} ->
+  irs:hash_seq{S.length irs = sz}  ->
+  Lemma (requires (irps % 2 <> 0))
+	(ensures (S.equal (S.tail (iroots_compactify sz irps irs))
+			  (iroots_compactify (sz - 1) (irps / 2) (S.tail irs))))
+let iroots_compactify_odd_rec_tail sz irps irs = ()
+
 val compress_hashes_half:
   hs:hash_seq{S.length hs % 2 = 0} -> 
   GTot (chs:hash_seq{S.length chs = S.length hs / 2})
@@ -217,13 +231,15 @@ val merkle_tree_ok: mt:merkle_tree -> GTot bool
 let merkle_tree_ok mt =
   MT?.iroots mt = iroots_of_hashes (MT?.values mt)
 
-type good_merkle_tree = mt:merkle_tree{merkle_tree_ok mt}
-
 /// Creating a merkle tree instance
 
-val create_merkle_tree: unit -> Tot good_merkle_tree
+val create_merkle_tree: unit -> Tot merkle_tree
 let create_merkle_tree _ = 
   MT S.empty S.empty
+
+val create_merkle_tree_ok:
+  unit -> Lemma (merkle_tree_ok (create_merkle_tree ()))
+let create_merkle_tree_ok _ = ()
 
 /// Insertion
 
@@ -293,7 +309,16 @@ val insert_ok_case_odd_rhs:
 let insert_ok_case_odd_rhs values e =
   compress_hashes_half_snoc values e
 
-val insert_ok:
+val insert: 
+  mt:merkle_tree{merkle_tree_ok mt} ->
+  e:hash -> Tot merkle_tree
+let insert mt e =
+  let values = MT?.values mt in
+  let iroots = MT?.iroots mt in
+  MT (insert_values values e)
+     (insert_iroots (S.length values) iroots e)
+
+val insert_ok_:
   values:hash_seq ->
   iroots:hash_seq{iroots = iroots_of_hashes values} ->
   e:hash ->
@@ -303,7 +328,7 @@ val insert_ok:
 		   (iroots_of_hashes (S.snoc values e))))
 	(decreases (S.length iroots))
 #set-options "--z3rlimit 40"
-let rec insert_ok values iroots e =
+let rec insert_ok_ values iroots e =
   if S.length values = 0 then ()
   else if S.length values % 2 = 0 then ()
   else (iroots_of_hashes_head values;
@@ -312,19 +337,18 @@ let rec insert_ok values iroots e =
        insert_ok_case_odd_rhs values e;
        compress_hashes_half_snoc values e;
        remainder_by_two_sub_one_2 (S.length values);
-       div_by_two_same_odd (S.length values);
-       insert_ok 
+       div_by_two_same_odd_1 (S.length values);
+       insert_ok_ 
 	 (compress_hashes_half (S.slice values 0 (S.length values - 1)))
 	 (S.tail iroots)
 	 (hash_from_hashes (S.head iroots) e))
 
-val insert: mt:good_merkle_tree -> e:hash -> Tot good_merkle_tree
-let insert mt e =
-  let values = MT?.values mt in
-  let iroots = MT?.iroots mt in
-  insert_ok values iroots e;
-  MT (insert_values values e)
-     (insert_iroots (S.length values) iroots e)
+val insert_ok:
+  mt:merkle_tree -> e:hash ->
+  Lemma (requires (merkle_tree_ok mt))
+	(ensures (merkle_tree_ok (insert mt e)))
+let insert_ok mt e =
+  insert_ok_ (MT?.values mt) (MT?.iroots mt) e
 
 /// Getting the Merkle root
 
@@ -349,8 +373,8 @@ let rec merkle_root_of_iroots nvalues irs acc actd =
 	    merkle_root_of_iroots (nvalues / 2) (S.tail irs) nacc true))
 
 val get_root:
-  mt:good_merkle_tree{S.length (MT?.values mt) > 0} -> rt:hash -> 
-  Tot hash
+  mt:merkle_tree{merkle_tree_ok mt /\ S.length (MT?.values mt) > 0} ->
+  rt:hash -> Tot hash
 let get_root mt rt =
   merkle_root_of_iroots
     (S.length (MT?.values mt))

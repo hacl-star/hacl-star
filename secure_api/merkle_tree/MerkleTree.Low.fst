@@ -137,7 +137,7 @@ val create_merkle_tree: unit ->
 	   merkle_tree_safe h1 mt /\
 	   // correctness
 	   mt_ptr_lift h1 mt == High.create_merkle_tree ()))
-#set-options "--z3rlimit 10"
+#reset-options "--z3rlimit 10"
 let create_merkle_tree _ =
   let mt_region = BV.new_region_ root in
   let mt_values_region = BV.new_region_ mt_region in 
@@ -200,44 +200,28 @@ val insert_iroots:
 	   	       (32 - U32.v cpos) (U32.v irps)
 	   	       (S.slice (BV.as_seq h0 hash_size irs) (U32.v cpos) 32))
 	   	     (B.as_seq h0 acc))))
-#set-options "--z3rlimit 40"
 
+#reset-options "--z3rlimit 120"
 let rec insert_iroots irs cpos irps acc =
   if irps % 2ul = 0ul
-  // then (// let hh0 = HST.get () in
-  //      BV.assign_copy hash_size irs cpos acc)
-  //      // assert (S.equal (High.iroots_compactify
-  //      // 		      (32 - U32.v cpos - 1) (U32.v irps / 2)
-  //      // 		      (S.slice (BV.as_seq hh0 hash_size irs)
-  //      // 			       (U32.v cpos + 1) 32))
-  //      // 		    (High.iroots_compactify
-  //      //   	   	      (32 - U32.v cpos) (U32.v irps)
-  //      // 	   	      (S.slice (BV.as_seq hh0 hash_size irs) 
-  //      // 			       (U32.v cpos) 32))))
-  then admit ()
+  then (let hh0 = HST.get () in
+       BV.assign_copy hash_size irs cpos acc;
+       assert (S.equal (High.iroots_compactify
+       		         (32 - U32.v cpos - 1) (U32.v irps / 2)
+       			 (S.slice (BV.as_seq hh0 hash_size irs)
+       				  (U32.v cpos + 1) 32))
+       		       (High.iroots_compactify
+			 (32 - U32.v cpos) (U32.v irps)
+       	   		 (S.slice (BV.as_seq hh0 hash_size irs) 
+       				  (U32.v cpos) 32))))
   else (let hh0 = HST.get () in
        hash_from_hashes (V.index irs cpos) acc acc;
        let hh1 = HST.get () in
-       assert (B.as_seq hh1 acc ==
-       	      High.hash_from_hashes (B.as_seq hh0 (V.get hh0 irs cpos))
-       				    (B.as_seq hh0 acc));
        as_seq_preserved hash_size irs (B.loc_buffer acc) hh0 hh1;
-       assert (S.equal (BV.as_seq hh0 hash_size irs)
-		       (BV.as_seq hh1 hash_size irs));
        insert_iroots irs (cpos + 1ul) (irps / 2ul) acc;
        let hh2 = HST.get () in
 
-       assert (S.equal (High.iroots_compactify
-	   	         (32 - U32.v cpos - 1) (U32.v irps / 2 + 1)
-	   		 (S.slice (BV.as_seq hh2 hash_size irs)
-				  (U32.v cpos + 1) 32))
-	   	       (High.insert_iroots
-	   		 (U32.v irps / 2)
-	   		 (High.iroots_compactify
-	   		   (32 - U32.v cpos - 1) (U32.v irps / 2)
-	   		   (S.slice (BV.as_seq hh0 hash_size irs)
-				    (U32.v cpos + 1) 32))
-	   		 (B.as_seq hh1 acc)));
+       // Induction hypothesis
        High.insert_iroots_rec (U32.v irps) 
        	   		      (High.iroots_compactify
 	   			(32 - U32.v cpos) (U32.v irps)
@@ -245,30 +229,30 @@ let rec insert_iroots irs cpos irps acc =
 					 (U32.v cpos) 32))
 	   		      (B.as_seq hh0 acc);
 
+       // LHS equality from IH to the post-condition
        remainder_by_two_add_one_2 (U32.v irps);
        High.iroots_compactify_even_rec
        	 (32 - U32.v cpos) (U32.v irps + 1)
        	 (S.slice (BV.as_seq hh2 hash_size irs) (U32.v cpos) 32);
-       // assert (S.equal (High.iroots_compactify
-       // 		         (32 - U32.v cpos) (U32.v irps + 1)
-       // 	   		 (S.slice (BV.as_seq hh2 hash_size irs) 
-       // 				  (U32.v cpos) 32))
-       // 		       (High.iroots_compactify
-       // 	   	         (32 - U32.v cpos - 1) (U32.v irps / 2 + 1)
-       // 	   		 (S.slice (BV.as_seq hh2 hash_size irs)
-       // 				  (U32.v cpos + 1) 32)));
-				  
-       assume (S.equal (High.iroots_compactify
-		         (32 - U32.v cpos) (U32.v irps + 1)
-	   		 (S.slice (BV.as_seq hh2 hash_size irs) (U32.v cpos) 32))
-		       (High.insert_iroots
-			 (U32.v irps / 2)
-			 (S.tail
-	   		   (High.iroots_compactify
-	   	       	     (32 - U32.v cpos) (U32.v irps)
-	   	       	     (S.slice (BV.as_seq hh0 hash_size irs)
-		       		      (U32.v cpos) 32)))
-	   		 (B.as_seq hh1 acc))))
+       div_by_two_same_odd_2 (U32.v irps);
+       assert (S.equal (High.iroots_compactify
+       		         (32 - U32.v cpos) (U32.v irps + 1)
+       	   		 (S.slice (BV.as_seq hh2 hash_size irs) 
+       				  (U32.v cpos) 32))
+       		       (High.iroots_compactify
+       	   	         (32 - U32.v cpos - 1) (U32.v irps / 2 + 1)
+       	   		 (S.slice (BV.as_seq hh2 hash_size irs)
+       				  (U32.v cpos + 1) 32)));
+
+       // RHS equality from IH to the post-condition
+       assert (S.equal (S.tail (S.slice (BV.as_seq hh0 hash_size irs)
+		       			(U32.v cpos) 32))
+	   	       (S.slice (BV.as_seq hh0 hash_size irs)
+				(U32.v cpos + 1) 32));
+
+       iroots_compactify_odd_rec_tail
+	 (32 - U32.v cpos) (U32.v irps)
+	 (S.slice (BV.as_seq hh0 hash_size irs) (U32.v cpos) 32))
 
 val insert:
   mt:mt_ptr -> nv:hash ->
@@ -277,29 +261,45 @@ val insert:
 	   BV.buffer_inv_live hash_size h0 nv /\
 	   HH.disjoint (B.frameOf mt) (B.frameOf nv) /\
 	   merkle_tree_safe h0 mt /\
+	   High.merkle_tree_ok (mt_ptr_lift h0 mt) /\
 	   not (V.is_full (MT?.values (B.get h0 mt 0)))))
 	 (ensures (fun h0 _ h1 -> 
 	   // memory safety
-	   merkle_tree_safe h1 mt))
+	   merkle_tree_safe h1 mt /\
 	   // correctness
-	   // mt_ptr_lift h1 mt == 
-	   // High.insert (mt_ptr_lift h0 mt) (B.as_seq h0 nv)))
-#set-options "--z3rlimit 40"
+	   mt_ptr_lift h1 mt == 
+	   High.insert (mt_ptr_lift h0 mt) (B.as_seq h0 nv)))
+#reset-options "--z3rlimit 120"
 let insert mt nv =
+
+  let hh0 = HST.get () in
+
   let mtv = B.index mt 0ul in
   let values = MT?.values mtv in
   let nvalues = V.size_of values in
   let ivalues = insert_value values nv in
   let iroots = MT?.iroots mtv in
+
+  let hh1 = HST.get () in
+  BV.as_seq_preserved 
+    hash_size iroots (BV.buf_vector_rloc ivalues) hh0 hh1;
   insert_iroots iroots 0ul nvalues nv;
+
   assert (loc_disjoint 
 	   (BV.buf_vector_rloc ivalues)
 	   (loc_union (B.loc_buffer nv) (buf_vector_rloc iroots)));
+
+  let hh2 = HST.get () in
   B.upd mt 0ul (MT ivalues iroots);
+
+  let hh3 = HST.get () in
+
   assert (loc_disjoint (BV.buf_vector_rloc ivalues)
-		       (B.loc_buffer mt));
+  		       (B.loc_buffer mt));
   assert (loc_disjoint (BV.buf_vector_rloc iroots)
-		       (B.loc_buffer mt))
+  		       (B.loc_buffer mt));
+  as_seq_preserved hash_size ivalues (B.loc_buffer mt) hh2 hh3;
+  as_seq_preserved hash_size iroots (B.loc_buffer mt) hh2 hh3
 
 /// Getting the Merkle root
 
@@ -335,6 +335,13 @@ val merkle_root_of_iroots:
 	   // memory safety
 	   modifies (B.loc_buffer acc) h0 h1))
 	   // correctness
+	   // B.as_seq h1 acc ==
+	   // High.merkle_root_of_iroots
+	   //   (U32.v irps)
+	   //   (High.iroots_compactify
+	   //     (32 - U32.v cpos) (U32.v irps)
+	   //     (S.slice (BV.as_seq h1 hash_size irs) (U32.v cpos) 32))
+	   //   (B.as_seq h0 acc) actd))
 let rec merkle_root_of_iroots irs cpos irps acc actd =
   if cpos = 31ul 
   then compress_or_init actd acc (V.index irs cpos)
