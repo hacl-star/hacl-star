@@ -110,7 +110,7 @@ let rec cbc_decrypt_blocks out kex prev cip len curr tmp =
 val unpadPKCS: tmp:block -> idx:U32.t{U32.v idx <= U32.v blocklen} -> Stack (len:U32.t{U32.v len <= U32.v blocklen})
 	 (requires (fun h -> live h tmp))
 	 (ensures (fun h0 _ h1 -> True))
-let unpadPKCS tmp idx = 
+let rec unpadPKCS tmp idx = 
   let pad = tmp.(U32.(blocklen -^ 1ul)) in
   let pad32 = uint8_to_uint32 pad in
   if U32.(pad32 <=^ blocklen) then pad32
