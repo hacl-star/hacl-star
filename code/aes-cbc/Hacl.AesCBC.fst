@@ -59,7 +59,7 @@ let padISO tmp b idx =
 
 inline_for_extraction let pad tmp len idx = padISO tmp len idx
 
-let aes256_cbc_encrypt_with_padding out key iv msg msglen = 
+let aes256_cbc_encrypt out key iv msg msglen = 
   push_frame();
   assert (U32.v 16ul <> 0);
   let fullblocks = U32.((msglen /^ 16ul) *^ 16ul) in
@@ -84,7 +84,7 @@ let aes256_cbc_encrypt_with_padding out key iv msg msglen =
   pop_frame()
 
 
-let aes256_cbc_encrypt out key iv msg msglen = 
+let aes256_cbc_encrypt_no_pad out key iv msg msglen = 
   push_frame();
   assert (U32.v 16ul <> 0);
   let kex = B.alloca 0uy xkeylen in
@@ -131,7 +131,7 @@ let rec unpadISO tmp idx =
 inline_for_extraction let unpad tmp idx = unpadISO tmp idx
 
 
-let aes256_cbc_decrypt_with_padding out key iv cip ciplen = 
+let aes256_cbc_decrypt out key iv cip ciplen = 
   push_frame();
   let kex = B.alloca 0uy xkeylen in
   let tmp = B.alloca 0uy 16ul in
@@ -141,7 +141,7 @@ let aes256_cbc_decrypt_with_padding out key iv cip ciplen =
   pop_frame();
   unpad
 
-let aes256_cbc_decrypt out key iv cip ciplen = 
+let aes256_cbc_decrypt_no_pad out key iv cip ciplen = 
   push_frame();
   let kex = B.alloca 0uy xkeylen in
   let tmp = B.alloca 0uy 16ul in
