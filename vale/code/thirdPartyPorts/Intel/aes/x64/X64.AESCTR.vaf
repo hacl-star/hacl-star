@@ -323,7 +323,7 @@ procedure {:quick} aes_ctr_encrypt(
 
 #reset-options "--z3rlimit 400"
 // Intel's LOOP_4
-procedure{:quick} {:verify true} aes_ctr_loop_body(
+procedure{:quick} aes_ctr_loop_body(
     inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost old_plain_ptr:nat64,
     ghost old_out_ptr:nat64,
