@@ -131,7 +131,7 @@ let rec unpadISO tmp idx =
 inline_for_extraction let unpad tmp idx = unpadPKCS tmp idx
 
 
-let aes256_cbc_decrypt out key iv cip ciplen = 
+let aes256_cbc_decrypt_pad out key iv cip ciplen = 
   push_frame();
   let kex = B.alloca 0uy xkeylen in
   let tmp = B.alloca 0uy 16ul in
@@ -152,3 +152,27 @@ let aes256_cbc_decrypt_no_pad out key iv cip ciplen =
   cbc_decrypt_blocks out kex iv cip ciplen 0ul tmp;
   pop_frame();
   ciplen
+
+let aes256_cbc_decrypt out key iv cip ciplen = 
+  push_frame();
+  assert (U32.v 16ul <> 0);
+  let fullblocks = U32.(ciplen -^ 16ul) in
+  let final = 16ul in
+  let cip1 = B.sub cip 0ul fullblocks in
+  let last = B.sub cip fullblocks final in
+  let out1 = B.sub out 0ul fullblocks in
+  let kex = B.alloca 0uy xkeylen in
+  let tmp = B.alloca 0uy 16ul in
+  let ltmp = B.alloca 0uy 16ul in
+  let otmp = B.alloca 0uy 16ul in
+  keyExpansion key kex;
+  let lastfull = if (fullblocks <> 0ul) then B.sub cip1 U32.(fullblocks -^ 16ul) 16ul else iv in
+  cbc_decrypt_blocks out1 kex iv cip1 fullblocks 0ul tmp;
+  inv_cipher ltmp last kex;
+  xor_block otmp ltmp lastfull 0ul;
+  let pad = otmp.(15ul) in
+  let final = U32.(16ul -^ (uint8_to_uint32 pad)) in
+  let out2 = B.sub out fullblocks final in
+  blit otmp 0ul out2 0ul final;
+  pop_frame();
+  U32.(fullblocks +^ final)
