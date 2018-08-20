@@ -22,17 +22,17 @@ module H32  = FStar.UInt32
 
 open Hacl.Impl.Aes
 
-val xor_block: out:block -> in1:block -> in2:block -> start:U32.t{U32.v start <= 16} -> Stack unit
-    (requires (fun h0 -> True))
+val xor_block: out:block -> in1:block -> in2:block -> start:U32.t{U32.v start <= U32.v blocklen} -> Stack unit
+    (requires (fun h0 -> live h0 in1 /\ live h0 in2 /\ live h0 out))
     (ensures (fun h0 _ h1 -> True))
 let rec xor_block out in1 in2 start = 
-    if start = 16ul then ()
+    if start = blocklen then ()
     else (out.(start) <- U8.(in1.(start) ^^ in2.(start));
 	  xor_block out in1 in2 U32.(start +^ 1ul))
      
     
-val cbc_encrypt_blocks: out:bytes -> kex:xkey -> prev:block -> msg:bytes{B.length msg == B.length out} -> len:U32.t ->  curr:U32.t{U32.v curr <= U32.v len} -> tmp:block -> Stack unit
-    (requires (fun h0 -> True))
+val cbc_encrypt_blocks: out:bytes -> kex:xkey -> prev:block -> msg:bytes{B.length msg == B.length out} -> len:U32.t{B.length msg == U32.v len}  ->  curr:U32.t{U32.v curr <= U32.v len} -> tmp:block -> Stack unit
+    (requires (fun h0 -> live h0 out /\ live h0 prev /\ live h0 msg /\ live h0 tmp))
     (ensures (fun h0 _ h1 -> True))
 let rec cbc_encrypt_blocks out kex prev msg len curr tmp = 
   if curr = len then ()
@@ -44,20 +44,20 @@ let rec cbc_encrypt_blocks out kex prev msg len curr tmp =
     cbc_encrypt_blocks out kex oblock msg len U32.(curr +^ 16ul) tmp
   )
   
-val padPKCS: tmp:block -> len:U32.t{U32.v len <= 16} -> idx:U32.t{U32.v idx <= 16} -> Stack unit
+val padPKCS: tmp:block -> len:U32.t{U32.v len <= U32.v blocklen} -> idx:U32.t{U32.v idx <= U32.v blocklen} -> Stack unit
 	 (requires (fun h -> True))
 	 (ensures (fun h0 _ h1 -> True))
 let rec padPKCS tmp len idx = 
-    if idx = 16ul then ()
+    if idx = blocklen then ()
     else (tmp.(idx) <- uint32_to_uint8 len; padPKCS tmp len U32.(idx +^ 1ul))
 
 val padISO: tmp:block -> len:U32.t{U32.v len <= 16} -> idx:U32.t{U32.v idx <= 16} -> Stack unit
-	 (requires (fun h -> True))
+	 (requires (fun h -> live h tmp /\ B.length tmp == 16))
 	 (ensures (fun h0 _ h1 -> True))
 let padISO tmp b idx = 
     tmp.(idx) <- 0x80uy
 
-let pad = padISO
+inline_for_extraction let pad tmp len idx = padISO tmp len idx
 
 let aes256_cbc_encrypt out key iv msg msglen = 
   push_frame();
@@ -122,22 +122,28 @@ let aes256_cbc_decrypt_old out key iv cip ciplen =
   U32.(fullblocks +^ final)
 
   
-val unpadPKCS: tmp:block -> idx:U32.t{U32.v idx <= 16} -> Stack (len:U32.t{U32.v len <= 16})
-	 (requires (fun h -> True))
+val unpadPKCS: tmp:block -> idx:U32.t{U32.v idx <= U32.v blocklen} -> Stack (len:U32.t{U32.v len <= U32.v blocklen})
+	 (requires (fun h -> live h tmp))
 	 (ensures (fun h0 _ h1 -> True))
 let unpadPKCS tmp idx = 
-  let pad = tmp.(15ul) in
-  uint8_to_uint32 pad
+  let pad = tmp.(U32.(blocklen -^ 1ul)) in
+  let pad32 = uint8_to_uint32 pad in
+  if U32.(pad32 <=^ blocklen) then pad32
+  else 0ul
 
-val unpadISO: tmp:block ->  idx:U32.t{U32.v idx <= 16} -> Stack (len:U32.t{U32.v len <= 16})
-	 (requires (fun h -> True))
+val unpadISO: tmp:block ->  idx:U32.t{U32.v idx < U32.v blocklen} -> Stack (len:U32.t{U32.v len < U32.v blocklen})
+	 (requires (fun h -> live h tmp))
 	 (ensures (fun h0 _ h1 -> True))
 let rec unpadISO tmp idx = 
-    if U8.(tmp.(idx) = 0x00uy) then unpadISO tmp (U32.(idx -^ 1ul))
-    else if U8.(tmp.(idx) = 0x80uy) then idx
-    else 0ul 
+    let t = tmp.(idx) in
+   if t = 0x80uy then idx 
+   else if t <> 0x00uy then 0ul
+   else if idx = 0x0ul then 0ul
+   else unpadISO tmp U32.(idx -^ 1ul)
 
-let unpad = unpadISO
+      
+
+inline_for_extraction let unpad tmp idx = unpadISO tmp idx
 
 
 let aes256_cbc_decrypt out key iv cip ciplen = 

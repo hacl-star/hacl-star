@@ -37,8 +37,8 @@ private inline_for_extraction let nb =  4ul
 private inline_for_extraction let nk =  8ul // 4, 6, or 8
 private inline_for_extraction let nr = 14ul // 10, 12, or 14
 
-private inline_for_extraction let blocklen = U32.(4ul *^ nb)
-private inline_for_extraction let keylen   = U32.(4ul *^ nk)
+inline_for_extraction let blocklen = U32.(4ul *^ nb)
+inline_for_extraction let keylen   = U32.(4ul *^ nk)
 inline_for_extraction let xkeylen  = U32.(4ul *^ nb *^ (nr +^ 1ul)) // 176, 208, or 240
 
 type block = lbytes (v blocklen)
