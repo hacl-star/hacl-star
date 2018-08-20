@@ -13,7 +13,7 @@ KREMLIN_ARGS+=-tmpdir $(EXT_TO) \
 .PHONY: all ext clean
 
 ext:
-	-$(KREMLIN) $(KREMLIN_ARGS) ../MerkleTree.Old.Low.fst lib/connect.c lib/Hacl_SHA2_256.c merkle_tree.c
+	-$(KREMLIN) $(KREMLIN_ARGS) ../MerkleTree.Old.Low.fst lib/connect.c lib/Hacl_SHA2_256.c merkle_tree_old.c
 
 clean:
 	rm -f a.out

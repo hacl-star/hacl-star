@@ -1,4 +1,4 @@
-#include "merkle_tree.h"
+#include "merkle_tree_old.h"
 #include "ext/MerkleTree_Old_Low.h"
 
 mt_ptr create()
