@@ -87,6 +87,18 @@ let ec1 b x k =
   uintv_extensionality (to_u16 rk) (u16 (uint_v x / pow2 (b * k) % pow2 b));
   ec b (to_u16 rk)
 
+val frodo_key_encode_fc:
+    b:size_nat{b <= 8}
+  -> a:lbytes (params_nbar * params_nbar * b / 8)
+  -> i:size_nat{i < params_nbar}
+  -> k:size_nat{k < 8}
+  -> GTot uint16
+let frodo_key_encode_fc b a i k =
+  let v8 = Seq.create 8 (u8 0) in
+  let v8 = update_sub v8 0 b (Seq.sub a (i * b) b) in
+  let x = uint_from_bytes_le v8 in
+  ec1 b x k
+
 val frodo_key_encode1:
     b:size_nat{b <= 8}
   -> a:lbytes (params_nbar * params_nbar * b / 8)
@@ -105,18 +117,6 @@ let frodo_key_encode1 b a res0 x i =
       res.(i, k) <- ec1 b x k
     ) res0
 
-val frodo_key_encode_inner:
-    b:size_nat{b <= 8}
-  -> a:lbytes (params_nbar * params_nbar * b / 8)
-  -> i:size_nat{i < params_nbar}
-  -> k:size_nat{k < 8}
-  -> GTot uint16
-let frodo_key_encode_inner b a i k =
-  let v8 = Seq.create 8 (u8 0) in
-  let v8 = update_sub v8 0 b (Seq.sub a (i * b) b) in
-  let x = uint_from_bytes_le v8 in
-  ec1 b x k
-
 val frodo_key_encode2:
     b:size_nat{b <= 8}
   -> a:lbytes (params_nbar * params_nbar * b / 8)
@@ -124,7 +124,7 @@ val frodo_key_encode2:
   -> i:size_nat{i < params_nbar}
   -> res:matrix params_nbar params_nbar
     {(forall (i0:size_nat{i0 < i}) (k:size_nat{k < 8}). res0.(i0, k) == res.(i0, k)) /\
-     (forall (k:size_nat{k < 8}). res.(i, k) == frodo_key_encode_inner b a i k)}
+     (forall (k:size_nat{k < 8}). res.(i, k) == frodo_key_encode_fc b a i k)}
 let frodo_key_encode2 b a res0 i =
   let v8 = Seq.create 8 (u8 0) in
   let x = uint_from_bytes_le (update_sub v8 0 b (Seq.sub a (i * b) b)) in
@@ -134,13 +134,15 @@ val frodo_key_encode:
     b:size_nat{b <= 8}
   -> a:lbytes (params_nbar * params_nbar * b / 8)
   -> res:matrix params_nbar params_nbar
-    {forall (i:size_nat{i < params_nbar}) (k:size_nat{k < 8}). res.(i, k) == frodo_key_encode_inner b a i k}
+    {forall (i:size_nat{i < params_nbar}) (k:size_nat{k < 8}).
+     res.(i, k) == frodo_key_encode_fc b a i k}
 let frodo_key_encode b a =
   let res = create params_nbar params_nbar in
 
   repeati_inductive params_nbar
   (fun i res ->
-    (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 8}). res.(i0, k) == frodo_key_encode_inner b a i0 k))
+    (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 8}).
+     res.(i0, k) == frodo_key_encode_fc b a i0 k))
   (fun i res ->
       frodo_key_encode2 b a res i
   ) res
@@ -197,7 +199,7 @@ assume val lemma_uint_to_bytes_le:
     (forall (i:nat{i < numbytes t}).
       index (uint_to_bytes_le #t u) i == u8 (uint_v u / pow2 (8 * i) % pow2 8))
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.Pervasives Spec.Frodo.Encode Lib.Sequence Lib.IntTypes Spec.Frodo.Params'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.Pervasives Spec.Frodo.Encode Lib.Sequence Lib.IntTypes Spec.Frodo.Params'"
 
 val frodo_key_decode2:
     b:size_nat{b <= 8}
@@ -219,13 +221,15 @@ val frodo_key_decode:
     b:size_nat{b <= 8}
   -> a:matrix params_nbar params_nbar
   -> res:lbytes (params_nbar * params_nbar * b / 8)
-    {forall (i:size_nat{i < params_nbar}) (k:size_nat{k < b}). res.[i * b + k] == frodo_key_decode_fc b a i k}
+    {forall (i:size_nat{i < params_nbar}) (k:size_nat{k < b}).
+     res.[i * b + k] == frodo_key_decode_fc b a i k}
 let frodo_key_decode b a =
   let resLen = params_nbar * params_nbar * b / 8 in
   let res = Seq.create resLen (u8 0) in
   repeati_inductive params_nbar
   (fun i res ->
-    forall (i0:size_nat{i0 < i}) (k:size_nat{k < b}). res.[i0 * b + k] == frodo_key_decode_fc b a i0 k)
+    forall (i0:size_nat{i0 < i}) (k:size_nat{k < b}).
+    res.[i0 * b + k] == frodo_key_decode_fc b a i0 k)
   (fun i res ->
       // Don't remove. Not a useless let
       let res = frodo_key_decode2 b a i res in

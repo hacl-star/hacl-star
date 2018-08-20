@@ -121,7 +121,7 @@ let frodo_key_encode b a res =
   (fun h1 i ->
     B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
     (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 8}).
-      get h1 res i0 k == S.frodo_key_encode_inner (v b) (B.as_seq h0 a) i0 k) /\
+      get h1 res i0 k == S.frodo_key_encode_fc (v b) (B.as_seq h0 a) i0 k) /\
     (forall (i0:size_nat{i <= i0 /\ i0 < v params_nbar}) (k:size_nat{k < 8}).
       get h1 res i0 k == get h0 res i0 k))
   (fun i ->
