@@ -23,7 +23,7 @@ void mt_get_root(mt_ptr mt, hash_t root);
  * @param idx The index of the target hash
  * @param[out] root A signed root by the server
  * @param[out] path A resulting Merkle path that contains the leaf hash
- * @return The number of elements in the tree when the path is generated
+ * @return The maximum index + 1. This number represents the depth of `path`.
  */
 uint32_t mt_get_path(mt_ptr mt, uint32_t idx, signed_hash root, hash_t *path);
 
@@ -31,7 +31,7 @@ void mt_flush(mt_ptr mt);
 void mt_flush_to(mt_ptr mt, uint32_t idx);
 
 /** Client-side verification
- * @param idx The index of the target hash
- * @param n The number of elements in the tree when the path is generated
+ * @param k The index of the target hash
+ * @param j The maximum index + 1 of the tree when the path is generated
  */
-bool mt_verify(uint32_t idx, uint32_t n, hash_t *path, signed_hash root);
+bool mt_verify(uint32_t k, uint32_t j, hash_t *path, signed_hash root);

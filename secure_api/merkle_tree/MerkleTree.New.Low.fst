@@ -49,11 +49,10 @@ assume val hash_2:
 /// Low-level Merkle tree data structure
 
 // A Merkle tree `MT i j hs` stores all necessary hashes to generate
-// a Merkle path for each element from the index `i` to `j`. Thus `j` is the
-// number of elements of the tree as well. `hs` is a 2-dim store for hashes,
-// where `hs[0]` contains leaf hash values.
+// a Merkle path for each element from the index `i` to `j-1`. 
+// `hs` is a 2-dim store for hashes, where `hs[0]` contains leaf hash values.
 noeq type merkle_tree = 
-| MT: i:uint32_t -> j:uint32_t{j >= i} ->
+| MT: i:uint32_t -> j:uint32_t{j > i} ->
       hs:B.buffer hash_vec{B.length hs = U32.n} ->
       merkle_tree
 
@@ -83,7 +82,7 @@ let create_mt _ =
   let mt_region = BV.new_region_ HH.root in
   let hs = B.malloc mt_region (BV.create_empty uint8_t) 32ul in
   create_mt_ hs 32ul;
-  MT 0ul 0ul hs
+  MT 0ul 1ul hs
 
 /// Destruction (free)
 
@@ -123,7 +122,8 @@ let rec insert_ lv j hs acc =
   if j % 2ul = 0ul then 
     B.upd hs lv (V.insert (B.index hs lv) acc)
   else
-    (hash_2 (V.back (B.index hs lv)) acc acc;
+    (B.upd hs lv (V.insert (B.index hs lv) acc);
+    hash_2 (V.back (B.index hs lv)) acc acc;
     insert_ (lv + 1ul) (j / 2ul) hs acc)
 
 // Caution: current impl. manipulates the content in `v`
@@ -146,7 +146,7 @@ val mt_get_path_:
   hs:B.buffer hash_vec{B.length hs = U32.n} ->
   lv:uint32_t{lv < 32ul} ->
   i:uint32_t -> j:uint32_t ->
-  k:uint32_t{i <= k && k <= j} ->
+  k:uint32_t{i <= k && k < j} ->
   path:B.buffer hash{B.length path = U32.n} ->
   acc:hash ->
   HST.ST unit
@@ -157,7 +157,7 @@ let rec mt_get_path_ hs lv i j k path acc =
 
 val mt_get_path:
   mt:merkle_tree -> 
-  idx:uint32_t{MT?.i mt <= idx && idx <= MT?.j mt} ->
+  idx:uint32_t{MT?.i mt <= idx && idx < MT?.j mt} ->
   root:hash ->
   path:B.buffer hash{B.length path = U32.n} ->
   HST.ST uint32_t
@@ -171,7 +171,7 @@ let mt_get_path mt idx root path =
 
 // TODO: need to think about flushing after deciding a proper data structure
 //       for `MT?.hs`.
-
+// NOTE: flush "until" `idx`
 val mt_flush_to:
   mt:merkle_tree ->
   idx:uint32_t{idx <= MT?.j mt} ->
@@ -192,21 +192,21 @@ let mt_flush mt =
 
 val mt_verify_:
   lv:uint32_t{lv < 32ul} ->
-  idx:uint32_t ->
-  n:uint32_t{idx <= n} ->
+  k:uint32_t ->
+  j:uint32_t{j = 0ul || k < j} ->
   path:B.buffer hash{B.length path = U32.n} ->
   acc:hash ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let rec mt_verify_ lv idx n path acc =
+let rec mt_verify_ lv k j path acc =
   admit ();
-  if n = 0ul then ()
-  else 
-    (if idx % 2ul = 1ul
-    then (if idx + 1ul < n 
+  if j = 0ul then ()
+  else
+    (if k % 2ul = 1ul
+    then (if k + 1ul < j
 	 then hash_2 acc (B.index path lv) acc
 	 else ())
     else hash_2 (B.index path lv) acc acc;
-    mt_verify_ (lv + 1ul) (idx / 2ul) (n / 2ul) path acc)
+    mt_verify_ (lv + 1ul) (k / 2ul) (j / 2ul) path acc)
 
