@@ -13,13 +13,13 @@ open Lib.Sequence
 val clear_words_u16:
     nwords:size_nat{nwords % 2 == 0}
   -> b:seq uint16{nwords <= length b}
-  -> res:seq uint16{nwords <= length res /\ length b == length res}
+  -> res:lseq uint16 (length b)
 let clear_words_u16 nwords b =
   create (length b) (u16 0)
 
 val clear_words_u8:
     nwords:size_nat{nwords % 4 == 0}
   -> b:seq uint8{nwords <= length b}
-  -> res:seq uint8{nwords <= length res /\ length b == length res}
+  -> res:lseq uint8 (length b)
 let clear_words_u8 nwords b =
   create (length b) (u8 0)
