@@ -7,6 +7,9 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 open Spec.Frodo.KEM
+open Spec.Frodo.KEM.KeyGen
+open Spec.Frodo.KEM.Encaps
+open Spec.Frodo.KEM.Decaps
 open Spec.Frodo.Params
 
 let print_and_compare (#len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) =

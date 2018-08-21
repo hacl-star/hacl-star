@@ -191,9 +191,13 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'Hacl.Impl.Frodo.Sample' \
 	-no-prefix 'Hacl.Impl.Frodo.Gen' \
 	-no-prefix 'Hacl.Impl.Frodo.KEM' \
+	-no-prefix 'Hacl.Impl.Frodo.KEM.KeyGen' \
+	-no-prefix 'Hacl.Impl.Frodo.KEM.Encaps' \
+	-no-prefix 'Hacl.Impl.Frodo.KEM.Decaps' \
+	-no-prefix 'Hacl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
 	-no-prefix 'Hacl.Frodo.Clear' \
-	-bundle 'Hacl.Impl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.*' \
+	-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
@@ -335,7 +339,7 @@ HACL_LIBS = \
   ../../lib/c/Lib.Loops.fst \
   ../../lib/fst/Lib.PQ.Buffer.fst
 
-$(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.Matrix.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.Sample.fst Hacl.Impl.Frodo.Gen.fst Hacl.Impl.Frodo.KEM.fst Hacl.Test.Frodo.fst
+$(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.Matrix.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.Sample.fst Hacl.Impl.Frodo.Gen.fst Hacl.Impl.Frodo.KEM.fst Hacl.Impl.Frodo.KEM.KeyGen.fst Hacl.Impl.Frodo.KEM.Encaps.fst Hacl.Impl.Frodo.KEM.Decaps.fst Hacl.Frodo.KEM.fst Hacl.Test.Frodo.fst
 	$(KREMLIN) -tmpdir $(OUT_DIR) \
 	-I ../../specs -I ../spec -I ../../lib -I ../../lib/fst \
 	-skip-translation $^
@@ -350,6 +354,10 @@ $(OUT_DIR)/Hacl_Impl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.kr
 	-no-prefix 'Hacl.Impl.Frodo.Sample' \
 	-no-prefix 'Hacl.Impl.Frodo.Gen' \
 	-no-prefix 'Hacl.Impl.Frodo.KEM' \
+	-no-prefix 'Hacl.Impl.Frodo.KEM.KeyGen' \
+	-no-prefix 'Hacl.Impl.Frodo.KEM.Encaps' \
+	-no-prefix 'Hacl.Impl.Frodo.KEM.Decaps' \
+	-no-prefix 'Hacl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
 	-no-prefix 'Hacl.Frodo.Clear' \
 	-bundle 'Hacl.Impl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.*' \

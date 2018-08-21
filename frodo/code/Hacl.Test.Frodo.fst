@@ -9,6 +9,7 @@ open Lib.IntTypes
 open Lib.PQ.Buffer
 
 open Hacl.Impl.Frodo.KEM
+open Hacl.Frodo.KEM
 open Hacl.Impl.Matrix
 open Hacl.Frodo.Random
 open Frodo.Params
