@@ -308,8 +308,8 @@ val crypto_kem_enc_ct_pack_c1:
   -> sp_matrix:matrix params_nbar params_n
   -> lbytes (params_logq * params_nbar * params_n / 8)
 let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix =
+  assert_norm (params_n % 8 = 0);
   let bp_matrix = frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix in
-  assume (params_n % 8 = 0);
   let c1 = frodo_pack bp_matrix params_logq in
   c1
 
