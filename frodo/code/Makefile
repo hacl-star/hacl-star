@@ -1,22 +1,30 @@
-FSTAR_HOME 	?= ../../../FStar
-KREMLIN_HOME	?= ../../../kremlin
-HACL_HOME	?= ../..
+FSTAR_HOME   ?= ../../../FStar
+KREMLIN_HOME ?= ../../../kremlin
+HACL_HOME    ?= ../..
+
+VARIANT      ?= 640-cSHAKE
+
+ifeq ($(VARIANT),640-cSHAKE)
+  KEM_DIR = FrodoKEM-640
+else
+  KEM_DIR = FrodoKEM-976
+endif
 
 ifeq ($(TARGET),x64)
-  LWEKE_HOME = ../NIST/Additional_Implementations/x64/FrodoKEM-976
+  LWEKE_HOME = ../NIST/Additional_Implementations/x64/$(KEM_DIR)
   OBJS       = $(addprefix $(LWEKE_HOME)/objs/,aes/aes_ni.o sha3/fips202.o sha3/fips202x4.o sha3/keccak4x/KeccakP-1600-times4-SIMD256.o)
   KECCAK     = x64/Hacl_Keccak.c
 else
-  LWEKE_HOME ?= ../NIST/Reference_Implementation/reference/FrodoKEM-976
+  LWEKE_HOME ?= ../NIST/Reference_Implementation/reference/$(KEM_DIR)
   OBJS       = $(LWEKE_HOME)/objs/aes/aes_c.o $(LWEKE_HOME)/objs/sha3/fips202.o
   KECCAK     = Hacl_Keccak.c
 endif
 
-CACHE_DIR     = .cache
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
-GENERATED_DIR = frodo-c
-OUT_DIR       = frodo-c
+CACHE_DIR     = .cache.$(VARIANT)
+OUTPUT_DIR    = .output.$(VARIANT)
+HINT_DIR      = .hints.$(VARIANT)
+GENERATED_DIR = frodo-c.$(VARIANT)
+OUT_DIR	      = frodo-c.$(VARIANT)
 
 # .checked files
 # .krml files
@@ -30,21 +38,18 @@ KREMLIN=$(KREMLIN_HOME)/krml
 
 # Manual staging...
 all:
-	sed -i.bak 's/params_n = size 640/params_n = size 64 /g' ../spec/Frodo.Params.fst
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2-test
 
 lib:
-	sed -i.bak 's/params_n = size 64 /params_n = size 640/g' ../spec/Frodo.Params.fst
-	sed -i.bak 's/frodo_gen_matrix_cshake_4x/frodo_gen_matrix_cshake /g' Hacl.Impl.Frodo.KEM.fst
+	sed -i.bak 's/frodo_gen_matrix_cshake_4x/frodo_gen_matrix_cshake /g' Hacl.Impl.Frodo.Params.fst
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2-lib
 
 lib64:
-	sed -i.bak 's/params_n = size 64 /params_n = size 640/g' ../spec/Frodo.Params.fst
-	sed -i.bak 's/frodo_gen_matrix_cshake /frodo_gen_matrix_cshake_4x/g' Hacl.Impl.Frodo.KEM.fst
+	sed -i.bak 's/frodo_gen_matrix_cshake /frodo_gen_matrix_cshake_4x/g' Hacl.Impl.Frodo.Params.fst
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 TARGET=x64 $(MAKE) stage2-lib
@@ -74,6 +79,7 @@ $(LWEKE_HOME)/%.o:
 
 FSTAR_INCLUDE_DIRS = \
   ../spec \
+  ../spec/params-$(VARIANT) \
   $(HACL_KREMLIN) \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
@@ -97,6 +103,11 @@ ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 	@echo --cache_checked_modules --cache_dir $(CACHE_DIR) \
 	$(FSTAR_INCLUDES) \
 	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo --cache_checked_modules --cache_dir $(CACHE_DIR) \
+	$(FSTAR_INCLUDES) \
+	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
 
 ROOTS = Hacl.Test.Frodo.fst
@@ -275,7 +286,7 @@ $(OUT_DIR)/libfrodo.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o include/rng.o, 
 	$(AR) rcs -S $(OUT_DIR)/libfrodo.a $^
 	ranlib $(OUT_DIR)/libfrodo.a
 
-$(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
+$(OUT_DIR)/test.exe: $(filter-out include/random.o, $(ALL_OBJS)) $(LWEKE_HOME)/tests/rng.o | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
 
@@ -308,7 +319,6 @@ ifeq ($(OLD),1)
 
 GENERATED_DIR	= frodo-old
 OUT_DIR	   	= frodo-old
-LWEKE_HOME      = ../NIST/Reference_Implementation/reference/FrodoKEM-640
 
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
@@ -325,12 +335,11 @@ BASE_OBJ = \
   include/Hacl_Keccak.o \
   include/rng.o \
   include/clearwords.o \
-  $(FIPS202) \
+  $(OBJS) \
   $(LWEKE_HOME)/tests/rng.o \
   $(LWEKE_HOME)/objs/aes/aes.o \
-  $(OBJS) \
   $(OUT_DIR)/Hacl_Test_Frodo.o \
-  $(OUT_DIR)/Hacl_Impl_Frodo_KEM.o
+  $(OUT_DIR)/Hacl_Frodo_KEM.o
 
 HACL_LIBS = \
   ../../lib/fst/Lib.IntTypes.fst \
@@ -340,10 +349,10 @@ HACL_LIBS = \
 
 $(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.Matrix.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.Sample.fst Hacl.Impl.Frodo.Gen.fst Hacl.Impl.Frodo.KEM.fst Hacl.Impl.Frodo.KEM.KeyGen.fst Hacl.Impl.Frodo.KEM.Encaps.fst Hacl.Impl.Frodo.KEM.Decaps.fst Hacl.Frodo.KEM.fst Hacl.Test.Frodo.fst
 	$(KREMLIN) -tmpdir $(OUT_DIR) \
-	-I ../../specs -I ../spec -I ../../lib -I ../../lib/fst \
+	-I ../spec/params-$(VARIANT) -I ../../specs -I ../spec -I ../../lib -I ../../lib/fst \
 	-skip-translation $^
 
-$(OUT_DIR)/Hacl_Impl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
+$(OUT_DIR)/Hacl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.Frodo' \
 	-no-prefix 'Hacl.Impl.Matrix' \
@@ -359,7 +368,7 @@ $(OUT_DIR)/Hacl_Impl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.kr
 	-no-prefix 'Hacl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
 	-no-prefix 'Hacl.Frodo.Clear' \
-	-bundle 'Hacl.Impl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.*' \
+	-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \

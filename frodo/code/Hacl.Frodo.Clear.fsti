@@ -8,8 +8,6 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.PQ.Buffer
 
-module S = Spec.Frodo.Clear
-
 // REMARK:
 // The C implementation clears one 32-bit word at a time, so we need [len] 
 // to be such that we clear an exact multiple of 32-bit words.
@@ -21,7 +19,8 @@ val clear_words_u16:
   -> Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer b) h0 h1 /\ 
-      as_seq h1 b == S.clear_words_u16 (v nwords) (as_seq h0 b))
+      as_seq h1 (gsub #_ #(length b) #(v nwords) b (size 0) nwords) == 
+      Seq.create (v nwords) (u16 0))
 
 val clear_words_u8:
     nwords:size_t{v nwords % 4 == 0}
@@ -29,4 +28,5 @@ val clear_words_u8:
   -> Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer b) h0 h1 /\
-      as_seq h1 b == S.clear_words_u8 (v nwords) (as_seq h0 b))
+      as_seq h1 (gsub #_ #(length b) #(v nwords) b (size 0) nwords) == 
+      Seq.create (v nwords) (u8 0))

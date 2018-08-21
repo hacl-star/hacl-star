@@ -47,7 +47,6 @@ val clear_matrix:
   -> m:matrix_t n1 n2
   -> Stack unit
     (requires fun h -> live h m)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer m) h0 h1 /\
-      as_matrix h1 m == S.clear_matrix (as_matrix h0 m))
+    (ensures  fun h0 _ h1 -> modifies (loc_buffer m) h0 h1)
 let clear_matrix #n1 #n2 m =
   clear_words_u16 (n1 *! n2) m

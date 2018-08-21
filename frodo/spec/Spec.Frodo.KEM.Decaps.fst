@@ -14,7 +14,6 @@ open Spec.Frodo.KEM
 open Spec.Frodo.Encode
 open Spec.Frodo.Pack
 open Spec.Frodo.Sample
-open Spec.Frodo.Clear
 
 module Seq = Lib.Sequence
 module Matrix = Spec.Matrix

@@ -10,4 +10,4 @@ let cdf_table: b:lbuffer uint16 (v cdf_table_len) { LowStar.Buffer.recallable b 
 
 let cshake_frodo = Hacl.Keccak.cshake128_frodo
 
-let frodo_gen_matrix = Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake
+let frodo_gen_matrix = Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake // 4x

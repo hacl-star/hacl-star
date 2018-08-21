@@ -21,6 +21,17 @@ unfold let v = size_v
 
 type lbuffer (a:Type0) (len:size_nat) = b:B.buffer a {B.length b == len}
 
+val gsub:
+    #a:Type0
+  -> #len:size_nat
+  -> #olen:size_nat
+  -> b:lbuffer a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= len /\ v n == olen}
+  -> GTot (lbuffer a olen)
+let gsub #a #len #olen b start n =
+  B.gsub b (size_to_UInt32 start) (size_to_UInt32 n)
+
 inline_for_extraction
 val sub:
     #a:Type0

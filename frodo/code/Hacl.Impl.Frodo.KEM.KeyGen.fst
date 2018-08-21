@@ -51,7 +51,7 @@ let frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix =
 
 inline_for_extraction noextract
 val frodo_mul_add_as_plus_e_pack_inner:
-     seed_a:lbytes bytes_seed_a
+    seed_a:lbytes bytes_seed_a
   -> s_matrix:matrix_t params_n params_nbar
   -> e_matrix:matrix_t params_n params_nbar
   -> b:lbytes (params_logq *! params_n *! params_nbar /. size 8)
@@ -73,16 +73,13 @@ let frodo_mul_add_as_plus_e_pack_inner seed_a s_matrix e_matrix b =
 
 inline_for_extraction noextract
 val clear_matrix_se:
-     s:matrix_t params_n params_nbar
+    s:matrix_t params_n params_nbar
   -> e:matrix_t params_n params_nbar
   -> Stack unit
     (requires fun h -> live h s /\ live h e /\ disjoint s e)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer s) (loc_buffer e)) h0 h1 /\
-      as_matrix h1 s == Spec.Frodo.KEM.clear_matrix (as_matrix h0 s) /\
-      as_matrix h1 e == Spec.Frodo.KEM.clear_matrix (as_matrix h0 e))
+    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer s) (loc_buffer e)) h0 h1)
 let clear_matrix_se s e =
-  assert (v params_n * v params_nbar % 2 = 0);
+  assert_norm (v params_n * v params_nbar % 2 = 0);
   clear_matrix s;
   clear_matrix e
 
@@ -99,7 +96,8 @@ val frodo_mul_add_as_plus_e_pack:
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc_buffer s) (loc_buffer b)) h0 h1 /\
       (let b_sp, s_bytes_sp = S.frodo_mul_add_as_plus_e_pack (as_seq h0 seed_a) (as_seq h0 seed_e) in
-      as_seq h1 b == b_sp /\ as_seq h1 s == s_bytes_sp))
+      as_seq h1 b == b_sp /\ 
+      as_seq h1 s == s_bytes_sp))
 [@"c_inline"]
 let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   push_frame();
@@ -114,7 +112,7 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
 
 inline_for_extraction noextract
 val crypto_kem_keypair_:
-     coins:lbytes (size 2 *! crypto_bytes +! bytes_seed_a)
+    coins:lbytes (size 2 *! crypto_bytes +! bytes_seed_a)
   -> pk:lbytes crypto_publickeybytes
   -> sk:lbytes crypto_secretkeybytes
   -> Stack unit

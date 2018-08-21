@@ -1,9 +1,10 @@
 FSTAR_HOME ?= ../../../FStar
 HACL_HOME  ?= ../..
 
-CACHE_DIR  = .cache
-HINT_DIR   = .hints
-OUT_DIR	   = frodo-ml
+VARIANT    ?= 640-cSHAKE
+CACHE_DIR  = .cache.$(VARIANT)
+HINT_DIR   = .hints.$(VARIANT)
+OUT_DIR	   = frodo-ml.$(VARIANT)
 
 include $(HACL_HOME)/Makefile.include
 
@@ -17,6 +18,7 @@ all:
 # - extract each .checked file into a .ml file in parallel
 
 FSTAR_INCLUDE_DIRS = \
+  params-$(VARIANT) \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/fst
@@ -81,6 +83,10 @@ $(OUT_DIR):
 	mkdir -p $@
 
 %.cmx:
+	$(OCAMLOPT) -I $(OUT_DIR) -c $< -o $@
+
+$(OUT_DIR)/Spec_Frodo_Params.cmx:
+	sed -i.bak 's/Prims.parse_int "640"/Prims.parse_int "64"/g' $<
 	$(OCAMLOPT) -I $(OUT_DIR) -c $< -o $@
 
 $(OUT_DIR)/Spec_Frodo_Test.cmx:

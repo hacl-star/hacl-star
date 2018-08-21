@@ -14,7 +14,6 @@ open Spec.Frodo.KEM
 open Spec.Frodo.Encode
 open Spec.Frodo.Pack
 open Spec.Frodo.Sample
-open Spec.Frodo.Clear
 
 module Seq = Lib.Sequence
 module Matrix = Spec.Matrix
@@ -86,24 +85,22 @@ let lemma_updade_sk s pk s_bytes sk0 sk =
   FStar.Seq.Properties.lemma_split sk (crypto_bytes + crypto_publickeybytes);
   FStar.Seq.Properties.lemma_split sk1 (crypto_bytes + crypto_publickeybytes)
 
-#set-options "--max_ifuel 1"
+let crypto_publicmatrixbytes: size_nat =
+  params_logq * params_n * params_nbar / 8
 
 val frodo_mul_add_as_plus_e_pack:
     seed_a:lbytes bytes_seed_a
   -> seed_e:lbytes crypto_bytes
-  -> tuple2 (lbytes (params_logq * params_n * params_nbar / 8)) (lbytes (2 * params_n * params_nbar))
+  -> tuple2 (lbytes crypto_publicmatrixbytes) (lbytes (2 * params_n * params_nbar))
 let frodo_mul_add_as_plus_e_pack seed_a seed_e =
   let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
   let s_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) in
+  let s_bytes = matrix_to_lbytes s_matrix in
   let e_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) in
   let b_matrix = Matrix.add (Matrix.mul_s a_matrix s_matrix) e_matrix in
+  assert_norm (params_logq * params_n * params_nbar / 8 < max_size_t);
   let b = frodo_pack b_matrix params_logq in
-  let s_bytes = matrix_to_lbytes s_matrix in
-  let s_matrix = clear_matrix s_matrix in
-  let e_matrix = clear_matrix e_matrix in
   b, s_bytes
-
-#set-options "--max_ifuel 0"
 
 val crypto_kem_keypair:
     coins:lbytes (2 * crypto_bytes + bytes_seed_a)
