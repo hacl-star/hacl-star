@@ -14,7 +14,6 @@ open Spec.Frodo.KEM
 open Spec.Frodo.Encode
 open Spec.Frodo.Pack
 open Spec.Frodo.Sample
-open Spec.Frodo.Clear
 
 module Seq = Lib.Sequence
 module Matrix = Spec.Matrix
@@ -124,8 +123,6 @@ let update_ss c12 kd ss =
   let ss = cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes in
   ss
 
-#set-options "--max_ifuel 1"
-
 val frodo_mul_add_sa_plus_e:
     seed_a:lbytes bytes_seed_a
   -> seed_e:lbytes crypto_bytes
@@ -136,7 +133,6 @@ let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix =
   let ep_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 5) in
   let b_matrix  = Matrix.add (Matrix.mul sp_matrix a_matrix) ep_matrix in
   //assert (params_nbar * params_n % 2 = 0);
-  let ep_matrix = clear_matrix ep_matrix in
   b_matrix
 
 val frodo_mul_add_sb_plus_e:
@@ -148,7 +144,6 @@ let frodo_mul_add_sb_plus_e b seed_e sp_matrix =
   let b_matrix = frodo_unpack params_n params_nbar params_logq b in
   let epp_matrix = frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) in
   let v_matrix = Matrix.add (Matrix.mul sp_matrix b_matrix) epp_matrix in
-  let epp_matrix = clear_matrix epp_matrix in
   v_matrix
 
 val frodo_mul_add_sb_plus_e_plus_mu:
@@ -163,8 +158,6 @@ let frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix =
   let v_matrix  = Matrix.add v_matrix mu_encode in
   v_matrix
 
-#set-options "--max_ifuel 0"
-
 val crypto_kem_enc_ct_pack_c1:
     seed_a:lbytes bytes_seed_a
   -> seed_e:lbytes crypto_bytes
@@ -172,7 +165,6 @@ val crypto_kem_enc_ct_pack_c1:
   -> lbytes (params_logq * params_nbar * params_n / 8)
 let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix =
   let bp_matrix = frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix in
-  assume (params_n % 8 = 0);
   let c1 = frodo_pack bp_matrix params_logq in
   c1
 
@@ -185,10 +177,7 @@ val crypto_kem_enc_ct_pack_c2:
 let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix =
   let v_matrix = frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix in
   let c2 = frodo_pack v_matrix params_logq in
-  let v_matrix = clear_matrix v_matrix in
   c2
-
-#set-options "--max_ifuel 1"
 
 val crypto_kem_enc_ct:
     pk:lbytes crypto_publickeybytes
@@ -196,7 +185,7 @@ val crypto_kem_enc_ct:
   -> coins:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
   -> ct:lbytes crypto_ciphertextbytes
   -> lbytes crypto_ciphertextbytes
-let crypto_kem_enc_ct pk g coins ct = admit(); //FIXME
+let crypto_kem_enc_ct pk g coins ct =
   let seed_a = Seq.sub pk 0 bytes_seed_a in
   let b = Seq.sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) in
   let seed_e = Seq.sub g 0 crypto_bytes in
@@ -207,10 +196,7 @@ let crypto_kem_enc_ct pk g coins ct = admit(); //FIXME
   let c2 = crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix in
 
   let ct = update_ct c1 c2 d ct in
-  let sp_matrix = clear_matrix sp_matrix in
   ct
-
-#set-options "--max_ifuel 0"
 
 val crypto_kem_enc:
     coins:lbytes bytes_mu
