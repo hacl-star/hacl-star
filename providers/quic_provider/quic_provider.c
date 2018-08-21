@@ -241,7 +241,7 @@ int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secre
     return 0;
 
 #if DEBUG
-   printf("KEY: "); dump(dkey, klen);
+   printf("KEY: "); dump(key->key, klen);
    printf("IV: "); dump(key->static_iv, 12);
    printf("PNE: "); dump(pnkey, klen);
 #endif
