@@ -324,8 +324,7 @@ BASE_OBJ = \
   $(FIPS202) \
   $(LWEKE_HOME)/tests/rng.o \
   $(LWEKE_HOME)/objs/aes/aes.o \
-  $(LWEKE_HOME)/objs/aes/aes_c.o \
-  $(LWEKE_HOME)/objs/sha3/fips202.o \
+  $(OBJS) \
   $(OUT_DIR)/Hacl_Test_Frodo.o \
   $(OUT_DIR)/Hacl_Impl_Frodo_KEM.o
 
