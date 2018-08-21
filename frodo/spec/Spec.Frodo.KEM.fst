@@ -46,3 +46,5 @@ val clear_matrix:
   -> matrix n1 n2
 let clear_matrix #n1 #n2 m =
   clear_words_u16 (n1 * n2) m
+
+  assert_norm (params_n % 8 = 0);

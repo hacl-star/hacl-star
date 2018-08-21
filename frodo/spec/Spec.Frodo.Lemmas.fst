@@ -40,7 +40,7 @@ val lemma_matrix_index_repeati:
   i:size_nat{i < n1} -> j:size_nat{j < n2 / 8} ->
   Lemma ((i * n2 / 8 + j) * d + d <= d * n1 * n2 / 8)
 let lemma_matrix_index_repeati n1 n2 d i j =
-  admit();
+  admit(); // Fragile proof
   let res = (i * n2 / 8 + j) * d + d in
   assert (i * n2 / 8 + j <= (n1 - 1) * n2 / 8 + n2 / 8 - 1);
   assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 - 1);

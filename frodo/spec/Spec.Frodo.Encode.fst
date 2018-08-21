@@ -191,14 +191,6 @@ val frodo_key_decode_fc:
 let frodo_key_decode_fc b a i k =
   u8 (uint_v (frodo_key_decode1 b a i) / pow2 (8 * k) % pow2 8)
 
-//TODO: prove in Lib.Bytesequence
-assume val lemma_uint_to_bytes_le:
-    #t:m_inttype
-  -> u:uint_t t
-  -> Lemma
-    (forall (i:nat{i < numbytes t}).
-      index (uint_to_bytes_le #t u) i == u8 (uint_v u / pow2 (8 * i) % pow2 8))
-
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.Pervasives Spec.Frodo.Encode Lib.Sequence Lib.IntTypes Spec.Frodo.Params'"
 
 val frodo_key_decode2:
