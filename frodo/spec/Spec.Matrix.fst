@@ -42,7 +42,7 @@ val index_neq:
   -> j':nat{j' < n2}
   -> Lemma (((i', j') <> (i, j) ==> i' * n2 + j' <> i * n2 + j) /\ i' * n2 + j' < n1 * n2)
 let index_neq #n1 #n2 i j i' j' =
-  admit();
+  admit(); // Fragile proof
   index_lt n1 n2 i j;
   index_lt n1 n2 i' j';
   if i' = i then
@@ -337,8 +337,7 @@ let matrix_eq #n1 #n2 m a b =
 
 #set-options "--max_fuel 0"
 
-//TODO: prove in Lib.Bytesequence
-assume val lemma_uint_to_bytes_le:
+assume val lemma_uint_to_bytes_le: //TODO: prove in Lib.Bytesequence
     #t:m_inttype
   -> u:uint_t t
   -> Lemma
