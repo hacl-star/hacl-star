@@ -48,11 +48,16 @@ assume val hash_2:
 
 /// Low-level Merkle tree data structure
 
+// A Merkle tree `MT i j hs` stores all necessary hashes to generate
+// a Merkle path for each element from the index `i` to `j`. Thus `j` is the
+// number of elements of the tree as well. `hs` is a 2-dim store for hashes,
+// where `hs[0]` contains leaf hash values.
 noeq type merkle_tree = 
-| MT: hs:B.buffer hash_vec{B.length hs = U32.n} ->
+| MT: i:uint32_t -> j:uint32_t{j >= i} ->
+      hs:B.buffer hash_vec{B.length hs = U32.n} ->
       merkle_tree
 
-/// Initialization
+/// Construction
 
 val create_mt_: 
   hs:B.buffer hash_vec{B.length hs = U32.n} ->
@@ -78,11 +83,130 @@ let create_mt _ =
   let mt_region = BV.new_region_ HH.root in
   let hs = B.malloc mt_region (BV.create_empty uint8_t) 32ul in
   create_mt_ hs 32ul;
-  MT hs
+  MT 0ul 0ul hs
+
+/// Destruction (free)
+
+val free_mt_:
+  lv:uint32_t{lv <= 32ul} ->
+  hs:B.buffer hash_vec{B.length hs = U32.n} ->
+  HST.ST unit
+	 (requires (fun h0 -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let rec free_mt_ lv hs =
+  admit ();
+  if lv = 0ul then ()
+  else (V.free (B.index hs (lv - 1ul));
+       free_mt_ (lv - 1ul) hs)
+
+val free_mt: merkle_tree ->
+  HST.ST unit
+	 (requires (fun _ -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let free_mt mt =
+  admit ();
+  free_mt_ 32ul (MT?.hs mt);
+  B.free (MT?.hs mt)
 
 /// Insertion
 
-// Think: is it better to have a library for 2-dim values (hashes)
-//        to control memory safety / disjointness (by region)?
+val insert_:
+  lv:uint32_t{lv < 32ul} ->
+  j:uint32_t ->
+  hs:B.buffer hash_vec{B.length hs = U32.n} ->
+  acc:hash ->
+  HST.ST unit
+	 (requires (fun h0 -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let rec insert_ lv j hs acc =
+  admit ();
+  if j % 2ul = 0ul then 
+    B.upd hs lv (V.insert (B.index hs lv) acc)
+  else
+    (hash_2 (V.back (B.index hs lv)) acc acc;
+    insert_ (lv + 1ul) (j / 2ul) hs acc)
 
+// Caution: current impl. manipulates the content in `v`
+//          as an accumulator.
+val insert:
+  mt:merkle_tree -> v:hash ->
+  HST.ST merkle_tree
+	 (requires (fun h0 -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let rec insert mt v =
+  admit ();
+  insert_ 0ul (MT?.j mt) (MT?.hs mt) v;
+  MT (MT?.i mt)
+     (MT?.j mt + 1ul)
+     (MT?.hs mt)
+
+/// Getting the Merkle root and path
+
+val mt_get_path_:
+  hs:B.buffer hash_vec{B.length hs = U32.n} ->
+  lv:uint32_t{lv < 32ul} ->
+  i:uint32_t -> j:uint32_t ->
+  k:uint32_t{i <= k && k <= j} ->
+  path:B.buffer hash{B.length path = U32.n} ->
+  acc:hash ->
+  HST.ST unit
+	 (requires (fun h0 -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let rec mt_get_path_ hs lv i j k path acc =
+  admit ()
+
+val mt_get_path:
+  mt:merkle_tree -> 
+  idx:uint32_t{MT?.i mt <= idx && idx <= MT?.j mt} ->
+  root:hash ->
+  path:B.buffer hash{B.length path = U32.n} ->
+  HST.ST uint32_t
+	 (requires (fun h0 -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let mt_get_path mt idx root path =
+  mt_get_path_ (MT?.hs mt) 0ul (MT?.i mt) (MT?.j mt) idx path root;
+  MT?.j mt
+
+/// Flushing
+
+// TODO: need to think about flushing after deciding a proper data structure
+//       for `MT?.hs`.
+
+val mt_flush_to:
+  mt:merkle_tree ->
+  idx:uint32_t{idx <= MT?.j mt} ->
+  HST.ST unit
+	 (requires (fun h0 -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let mt_flush_to mt idx = ()
+
+val mt_flush:
+  mt:merkle_tree ->
+  HST.ST unit
+	 (requires (fun h0 -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let mt_flush mt =
+  mt_flush_to mt (MT?.j mt)
+
+/// Client-side verification
+
+val mt_verify_:
+  lv:uint32_t{lv < 32ul} ->
+  idx:uint32_t ->
+  n:uint32_t{idx <= n} ->
+  path:B.buffer hash{B.length path = U32.n} ->
+  acc:hash ->
+  HST.ST unit
+	 (requires (fun h0 -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let rec mt_verify_ lv idx n path acc =
+  admit ();
+  if n = 0ul then ()
+  else 
+    (if idx % 2ul = 1ul
+    then (if idx + 1ul < n 
+	 then hash_2 acc (B.index path lv) acc
+	 else ())
+    else hash_2 (B.index path lv) acc acc;
+    mt_verify_ (lv + 1ul) (idx / 2ul) (n / 2ul) path acc)
 
