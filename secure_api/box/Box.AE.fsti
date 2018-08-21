@@ -33,7 +33,7 @@ val gen: key_length:(n:nat{n<=32}) -> #ip:index_package -> i:id ip -> k:key key_
 
 val coerce: #key_length:(n:nat{n<=32}) -> #ip:index_package -> i:id ip{~Flags.ae \/ corrupt i} -> raw:lbytes key_length -> k:key key_length i{k.raw = raw}
 
-val create_ae_key_package: ip:index_package -> key_length:(n:nat{n<=32}) -> KEY.key_package ip
+val create_ae_key_package: ip:index_package -> key_length:(n:nat{n<=32}) -> kp:KEY.key_package ip{kp.KEY.key_length = key_length /\ kp.KEY.key_type == key #ip key_length}
 
 // Definition AE package
 

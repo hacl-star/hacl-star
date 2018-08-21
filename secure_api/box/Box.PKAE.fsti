@@ -16,14 +16,14 @@ module MM = FStar.Monotonic.Map
 let n32 = n:nat{n <= 32}
 let bytes32 = b:bytes{Seq.length b <= 32}
 
-let plain_package = pp:plain_package{pp.flag == Flags.pkae}
+val pp : pp:plain_package{pp.flag == Flags.pkae}
 
-noeq type public_key_encryption_scheme (public_key_length:n32) (secret_key_length:n32) (pp:plain_package)=
+noeq type public_key_encryption_scheme (public_key_length:n32) (secret_key_length:n32) =
   | PKES:
     gen: (unit -> lbytes secret_key_length*lbytes public_key_length) ->
-    enc: (p:plain pp -> sk:lbytes secret_key_length -> pk:lbytes public_key_length -> n:nonce pp -> c:cipher pp) ->
+    enc: (p:plain pp -> n:nonce pp -> pk:lbytes public_key_length -> sk:lbytes secret_key_length -> c:cipher pp) ->
     enc_star: (plain_length:nat{pp.valid_plain_length plain_length} -> c:cipher pp) ->
-    dec: (c:cipher pp -> sk:lbytes secret_key_length -> pk:lbytes public_key_length -> n:nonce pp -> option (p:plain pp)) ->
+    dec: (c:cipher pp -> n:nonce pp -> pk:lbytes public_key_length -> sk:lbytes secret_key_length -> option (p:plain pp)) ->
 //    correctness: (p:bytes -> k:lbytes key_length -> n:lbytes nonce_length -> Lemma
 //    (requires True)
 //    (ensures (
@@ -32,37 +32,51 @@ noeq type public_key_encryption_scheme (public_key_length:n32) (secret_key_lengt
 //      /\ Some?.v dec_result == p
 //    ))
       //    ) ->
-    public_key_encryption_scheme public_key_length secret_key_length pp
+    public_key_encryption_scheme public_key_length secret_key_length
 
-noeq type pkae_parameters (pp:plain_package) =
+noeq type pkae_parameters =
   | PK_Param:
   public_key_length: n32 ->
   secret_key_length: n32 ->
-  pke_scheme: public_key_encryption_scheme public_key_length secret_key_length pp ->
-  pkae_parameters pp
+  pke_scheme: public_key_encryption_scheme public_key_length secret_key_length ->
+  pkae_parameters
 
-let index_package (#pp:plain_package) (pkp:pkae_parameters pp) = ip:index_package{
+val pkp: pkae_parameters
+
+let pkae_index_package = ip:index_package{
   Leaf_IP? ip
   /\ (match ip with
     | Leaf_IP t rgn log -> t == lbytes pkp.public_key_length)
+  /\ id ip == lbytes pkp.public_key_length
   }
 
-val pkey : #pp:plain_package -> pkae_parameters pp -> Type0
-val get_pkey_raw: #pp:plain_package -> #pkp:pkae_parameters pp -> pkey pkp -> Tot (lbytes pkp.public_key_length)
+val pkey : Type0
+val get_pkey_raw: pkey -> Tot (lbytes pkp.public_key_length)
 //val get_pkey_id: (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package pkp) -> pk:pkey pkp -> Tot (i:id ip)
 
-val skey : #pp:plain_package -> pkae_parameters pp -> Type0
-val get_skey_raw: #pp:plain_package -> #pkp:pkae_parameters pp -> skey pkp -> GTot (lbytes pkp.secret_key_length)
-val get_pkey_raw_from_skey_raw: #pp:plain_package -> #pkp:pkae_parameters pp -> lbytes pkp.secret_key_length -> lbytes pkp.public_key_length
-val get_pkey_from_skey: #pp:plain_package -> #pkp:pkae_parameters pp -> sk:skey pkp -> pk:pkey pkp{get_pkey_raw pk = get_pkey_raw_from_skey_raw (get_skey_raw sk)}
+val skey : Type0
+val get_skey_raw: skey -> GTot (lbytes pkp.secret_key_length)
+val get_pkey_raw_from_skey_raw: lbytes pkp.secret_key_length -> lbytes pkp.public_key_length
+val get_pkey_from_skey: sk:skey -> pk:pkey{get_pkey_raw pk = get_pkey_raw_from_skey_raw (get_skey_raw sk)}
 //val get_skey_id: #pp:plain_package -> #pkp:pkae_parameters pp -> ip:index_package pkp -> sk:skey pkp -> Tot (i:id ip{i = get_pkey_id (get_pkey_from_skey sk)})
 
-let compatible_keys (#pp:plain_package) (#pkp:pkae_parameters pp) (sk:skey pkp) (pk:pkey pkp) = get_pkey_raw pk <> get_pkey_raw (get_pkey_from_skey sk)
+let compatible_keys (sk:skey) (pk:pkey) = get_pkey_raw pk <> get_pkey_raw (get_pkey_from_skey sk)
 
-let composed_ip (#pp:plain_package) (#pkp:pkae_parameters pp) (ip:index_package pkp) = Node_IP [ip;ip]
-let composed_id (#pp:plain_package) (#pkp:pkae_parameters pp) (pk1:pkey pkp) (pk2:pkey pkp{
+#set-options "--z3rlimit 30 --max_ifuel 2 --max_fuel 2"
+let compose_ip (ip:pkae_index_package) : ip':index_package{
+  ip' == Node_IP [ip;ip]
+  /\ id ip == lbytes pkp.public_key_length
+  /\ id ip' == id ip * id ip
+  /\ id ip' == lbytes pkp.public_key_length * lbytes pkp.public_key_length
+} =
+  let ip' = Node_IP [ip;ip] in
+  assert(unfold_id [ip;ip] == id ip * id ip);
+  assert(unfold_id [ip;ip] == id ip');
+  ip'
+
+let composed_id (ip:pkae_index_package) (pk1:pkey) (pk2:pkey{
     get_pkey_raw pk1 <> get_pkey_raw pk2
-  }) :(lbytes pkp.public_key_length * lbytes pkp.public_key_length) =
+  }) : (id (compose_ip ip)) =
   let pk1_raw = get_pkey_raw pk1 in
   let pk2_raw = get_pkey_raw pk2 in
   let le_sh1 = little_endian pk1_raw in
@@ -73,9 +87,9 @@ let composed_id (#pp:plain_package) (#pkp:pkae_parameters pp) (pk1:pkey pkp) (pk
   else
     pk2_raw,pk1_raw
 
-val pkae_package: (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (ip:index_package pkp) -> Type u#1
+val pkae_package: (ip:pkae_index_package) -> Type u#1
 
-val create_pkae_package: (#pp:plain_package) -> (pkp:pkae_parameters pp) -> (ip:index_package pkp) -> rgn:erid -> ST (pkae_package ip)
+val create_pkae_package: (ip:pkae_index_package) -> rgn:erid -> ST (pkae_package ip)
   (requires (fun h0 -> True))
   (ensures (fun h0 pkae_p h1 ->
     modifies (Set.singleton rgn) h0 h1
@@ -83,9 +97,9 @@ val create_pkae_package: (#pp:plain_package) -> (pkp:pkae_parameters pp) -> (ip:
 
 
 
-val gen_footprint: (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package pkp) -> pkae_package ip -> h0:mem -> h1:mem -> Type0
+val gen_footprint: (#ip:pkae_index_package) -> pkae_package ip -> h0:mem -> h1:mem -> Type0
 
-val gen : (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package pkp) -> pkae_p:pkae_package ip -> ST (keypair:(skey pkp*pkey pkp))
+val gen : (#ip:pkae_index_package) -> pkae_p:pkae_package ip -> ST (keypair:(skey*pkey))
   (requires (fun h0 ->
     Flags.model
   ))
@@ -96,9 +110,9 @@ val gen : (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package
     /\ gen_footprint pkae_p h0 h1
   ))
 
-val coerce_pkey_footprint: (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package pkp) -> pkae_p:pkae_package ip -> pk_raw:lbytes pkp.public_key_length -> h0:mem -> h1:mem -> Type0
+val coerce_pkey_footprint: (#ip:pkae_index_package) -> pkae_p:pkae_package ip -> pk_raw:lbytes pkp.public_key_length -> h0:mem -> h1:mem -> Type0
 
-val coerce_pkey : (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package pkp) -> pkae_p:pkae_package ip -> pk_raw:lbytes pkp.public_key_length -> ST (pk:pkey pkp)
+val coerce_pkey : (#ip:pkae_index_package) -> pkae_p:pkae_package ip -> pk_raw:lbytes pkp.public_key_length -> ST (pk:pkey)
   (requires (fun h0 ->
     corrupt #ip pk_raw
     /\ registered #ip pk_raw
@@ -108,9 +122,9 @@ val coerce_pkey : (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index
     /\ coerce_pkey_footprint pkae_p pk_raw h0 h1
   ))
 
-val coerce_skey_footprint: (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package pkp) -> pkae_p:pkae_package ip -> sk_raw:lbytes pkp.secret_key_length -> h0:mem -> h1:mem -> Type0
+val coerce_skey_footprint: (#ip:pkae_index_package) -> pkae_p:pkae_package ip -> sk_raw:lbytes pkp.secret_key_length -> h0:mem -> h1:mem -> Type0
 
-val coerce_skey : (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package pkp) -> pkae_p:pkae_package ip -> sk_raw:lbytes pkp.secret_key_length -> ST (sk:skey pkp)
+val coerce_skey : (#ip:pkae_index_package) -> pkae_p:pkae_package ip -> sk_raw:lbytes pkp.secret_key_length -> ST (sk:skey)
   (requires (fun h0 ->
     let pk_raw = get_pkey_raw_from_skey_raw sk_raw in
     corrupt #ip pk_raw
@@ -122,100 +136,101 @@ val coerce_skey : (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index
     /\ coerce_skey_footprint pkae_p sk_raw h0 h1
   ))
 
-val get_log_rgn: (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package pkp) -> (pkae_p:pkae_package ip) -> Tot (rgn:erid)
+val get_log_rgn: (#ip:pkae_index_package) -> (pkae_p:pkae_package ip) -> Tot (rgn:erid)
 
-val get_log: (#pp:plain_package) -> (#pkp:pkae_parameters pp) -> (#ip:index_package pkp) -> (pkae_p:pkae_package ip) -> GTot (Mem.message_log (composed_ip ip) pp (get_log_rgn pkae_p))
+val get_log: (#ip:pkae_index_package) -> (pkae_p:pkae_package ip) -> GTot (Mem.message_log (compose_ip ip) pp (get_log_rgn pkae_p))
 
-let nonce_is_unique (#pp:plain_package) (#pkp:pkae_parameters pp) (#ip:index_package pkp) (pkae_p:pkae_package ip) i n h0 =
+let nonce_is_unique (#ip:pkae_index_package) (pkae_p:pkae_package ip) i n h0 =
   Flags.model ==>
-    (let log: i_message_log (composed_ip ip) pp (get_log_rgn pkae_p) = get_log pkae_p in
+    (let log: i_message_log (compose_ip ip) pp (get_log_rgn pkae_p) = get_log pkae_p in
     forall c . MM.fresh log (i,n,c) h0)
 
-let extended_message_log (#pp:plain_package) (#pkp:pkae_parameters pp) (#ip:index_package pkp) (pkae_p:pkae_package ip) (i:id (composed_ip ip)) (n:nonce pp) (c:cipher pp) (p:protected_plain pp i) (h0:mem) (h1:mem) =
+let extended_message_log
+  (#ip:pkae_index_package)
+  (pkae_p:pkae_package ip)
+  (pk:pkey)
+  (sk:skey{compatible_keys sk pk})
+  (n:nonce pp)
+  (c:cipher pp)
+  (p:protected_plain #(compose_ip ip) pp (composed_id ip pk (get_pkey_from_skey sk)))
+  (h0:mem) (h1:mem) =
+  let i = composed_id ip pk (get_pkey_from_skey sk) in
   if Flags.model then
     let log_key = i,n,c in
     let log_value = p in
-    let log: i_message_log (composed_ip ip) pp (get_log_rgn pkae_p) = get_log pkae_p in
+    let log: i_message_log (compose_ip ip) pp (get_log_rgn pkae_p) = get_log pkae_p in
     sel h1 log == MM.upd (sel h0 log) log_key log_value
     /\ witnessed (MM.defined log log_key)
     /\ witnessed (MM.contains log log_key log_value)
   else
     True
 
-val encrypt_footprint:
-  (#pp:plain_package) ->
-  (#pkp:pkae_parameters pp) ->
-  (#ip:index_package pkp) ->
-  (pkae_p:pkae_package ip) ->
-  (pk:pkey pkp) ->
-  (sk:skey pkp{compatible_keys sk pk}) ->
-  (n:nonce pp) ->
-  (c:cipher pp) ->
-  (p:protected_plain #(composed_ip ip) pp (composed_id pk (get_pkey_from_skey sk))) ->
-  (h0:mem) ->
-  (h1:mem) ->
-  Type0
+//val encrypt_footprint:
+//  (#ip:pkae_index_package) ->
+//  (pkae_p:pkae_package ip) ->
+//  (pk:pkey) ->
+//  (sk:skey{compatible_keys sk pk}) ->
+//  (n:nonce pp) ->
+//  (c:cipher pp) ->
+//  (p:protected_plain #(compose_ip ip) pp (composed_id ip pk (get_pkey_from_skey sk))) ->
+//  (h0:mem) ->
+//  (h1:mem) ->
+//  Type0
 
 val decrypt_footprint:
-  (#pp:plain_package) ->
-  (#pkp:pkae_parameters pp) ->
-  (#ip:index_package pkp) ->
+  (#ip:pkae_index_package) ->
   (pkae_p:pkae_package ip) ->
-  (pk:pkey pkp) ->
-  (sk:skey pkp{compatible_keys sk pk}) ->
+  (pk:pkey) ->
+  (sk:skey{compatible_keys sk pk}) ->
   (n:nonce pp) ->
   (c:cipher pp) ->
-  (option (p:protected_plain #(composed_ip ip) pp (composed_id pk (get_pkey_from_skey sk)))) ->
+  (option (p:protected_plain #(compose_ip ip) pp (composed_id ip pk (get_pkey_from_skey sk)))) ->
   (h0:mem) ->
   (h1:mem) ->
   Type0
 
 #set-options "--z3rlimit 30 --max_ifuel 2 --max_fuel 2"
 val encrypt:
-  #pp:plain_package ->
-  #pkp:pkae_parameters pp ->
-  #ip:index_package pkp ->
+  #ip:pkae_index_package ->
   pkae_p:pkae_package ip ->
-  pk:pkey pkp ->
-  sk:skey pkp{compatible_keys sk pk} ->
+  pk:pkey ->
+  sk:skey{compatible_keys sk pk} ->
   n:nonce pp ->
-  p:protected_plain #(composed_ip ip) pp (composed_id pk (get_pkey_from_skey sk)) ->
+  p:protected_plain #(compose_ip ip) pp (composed_id ip pk (get_pkey_from_skey sk)) ->
   ST (cipher pp)
   (requires (fun h0 ->
-    let i = composed_id pk (get_pkey_from_skey sk) in
+    let i = composed_id ip pk (get_pkey_from_skey sk) in
     nonce_is_unique pkae_p i n h0
-    /\ registered #(composed_ip ip) i
+    /\ registered #(compose_ip ip) i
   ))
   (ensures (fun h0 c h1 ->
-    let i = composed_id pk (get_pkey_from_skey sk) in
+    let i = composed_id ip pk (get_pkey_from_skey sk) in
     encrypt_footprint pkae_p pk sk n c p h0 h1
-    /\ ((honest #(composed_ip ip) i /\ Flags.pkae) ==>
+    /\ ((honest #(compose_ip ip) i /\ Flags.pkae) ==>
       c == pkp.pke_scheme.enc_star (Plain.length p))
-    /\ ((corrupt #(composed_ip ip) i \/ ~(Flags.pkae)) ==>
-      c == pkp.pke_scheme.enc (Plain.repr #(composed_ip ip) #pp  p) (get_skey_raw sk) (get_pkey_raw pk) n)
-    /\ extended_message_log pkae_p i n c p h0 h1
+    /\ ((corrupt #(compose_ip ip) i \/ ~(Flags.pkae)) ==>
+      c == pkp.pke_scheme.enc (Plain.repr #(compose_ip ip) #pp  p) n (get_pkey_raw pk) (get_skey_raw sk))
+    /\ extended_message_log pkae_p pk sk n c p h0 h1
   ))
 
 val decrypt:
-  #pp:plain_package ->
-  #pkp:pkae_parameters pp ->
-  #ip:index_package pkp ->
+  #ip:pkae_index_package ->
   pkae_p:pkae_package ip ->
-  pk:pkey pkp ->
-  sk:skey pkp{compatible_keys sk pk} ->
+  pk:pkey ->
+  sk:skey{compatible_keys sk pk} ->
   n:nonce pp ->
   c:cipher pp ->
-  ST (option (p:protected_plain #(composed_ip ip) pp (composed_id pk (get_pkey_from_skey sk))))
+  ST (option (p:protected_plain #(compose_ip ip) pp (composed_id ip pk (get_pkey_from_skey sk))))
   (requires (fun h0 ->
-    let i = composed_id pk (get_pkey_from_skey sk) in
-    registered #(composed_ip ip) i
+    let i = composed_id ip pk (get_pkey_from_skey sk) in
+    registered #(compose_ip ip) i
   ))
   (ensures (fun h0 option_p h1 ->
-    let i:id (composed_ip ip) = composed_id pk (get_pkey_from_skey sk) in
-    let option_spec = pkp.pke_scheme.dec c (get_skey_raw sk) (get_pkey_raw pk) n in
+    let i:id (compose_ip ip) = composed_id ip pk (get_pkey_from_skey sk) in
+    let option_spec = pkp.pke_scheme.dec c n (get_pkey_raw pk) (get_skey_raw sk) in
     decrypt_footprint pkae_p pk sk n c option_p h0 h1
     /\ ((honest i /\ Flags.pkae) ==>
-      (let log: i_message_log (composed_ip ip) pp (get_log_rgn pkae_p) = get_log pkae_p in
+      (let log: i_message_log (compose_ip ip) pp (get_log_rgn pkae_p) = get_log pkae_p in
       MM.sel (sel h0 log) (i,n,c) == option_p))
     /\ ((corrupt i \/ ~(Flags.pkae)) ==>
       (Some? option_spec ==>

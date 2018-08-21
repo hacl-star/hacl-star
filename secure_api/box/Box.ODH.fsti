@@ -55,9 +55,9 @@ val create_odh_index_package: rgn:erid -> oparams:odh_parameters -> ST (odh_inde
     create_leaf_index_package_footprint rgn (lbytes oparams.share_length) ip h0 h1
   ))
 
-val gen_dh_footprint: oparams:odh_parameters -> ip:odh_index_package oparams -> h0:mem -> h1:mem -> Type0
+val gen_dh_footprint: #oparams:odh_parameters -> ip:odh_index_package oparams -> h0:mem -> h1:mem -> Type0
 
-val gen_dh: (oparams:odh_parameters) -> (ip:odh_index_package oparams) -> ST (dh_keypair:(exponent oparams*share oparams))
+val gen_dh: (#oparams:odh_parameters) -> (ip:odh_index_package oparams) -> ST (dh_keypair:(exponent oparams*share oparams))
   (requires (fun h0 ->
     Flags.model))
   (ensures (fun h0 dh_pair h1 ->
@@ -66,23 +66,23 @@ val gen_dh: (oparams:odh_parameters) -> (ip:odh_index_package oparams) -> ST (dh
     e.sh == sh
     /\ registered i
     /\ honest i
-    /\ gen_dh_footprint oparams ip h0 h1
+    /\ gen_dh_footprint #oparams ip h0 h1
   ))
 
-val coerce_dh_sh_footprint: (oparams:odh_parameters) -> (ip:odh_index_package oparams) -> (raw_sh:lbytes oparams.share_length) -> h0:mem -> h1:mem -> Type0
+val coerce_dh_sh_footprint: (#oparams:odh_parameters) -> (ip:odh_index_package oparams) -> (raw_sh:lbytes oparams.share_length) -> h0:mem -> h1:mem -> Type0
 
-val coerce_dh_sh: (oparams:odh_parameters) -> (ip:odh_index_package oparams) -> (raw_sh:lbytes oparams.share_length) -> ST (sh:share oparams{sh.raw_sh = raw_sh})
+val coerce_dh_sh: (#oparams:odh_parameters) -> (ip:odh_index_package oparams) -> (raw_sh:lbytes oparams.share_length) -> ST (sh:share oparams{sh.raw_sh = raw_sh})
   (requires (fun h0 ->
     registered #ip raw_sh
     /\ corrupt #ip raw_sh
   ))
   (ensures (fun h0 sh h1 ->
-    coerce_dh_sh_footprint oparams ip raw_sh h0 h1
+    coerce_dh_sh_footprint #oparams ip raw_sh h0 h1
   ))
 
-val coerce_dh_exp_footprint: (oparams:odh_parameters) -> (ip:odh_index_package oparams) -> (raw_exp:lbytes oparams.exponent_length) -> h0:mem -> h1:mem -> Type0
+val coerce_dh_exp_footprint: (#oparams:odh_parameters) -> (ip:odh_index_package oparams) -> (raw_exp:lbytes oparams.exponent_length) -> h0:mem -> h1:mem -> Type0
 
-val coerce_dh_exp: (oparams:odh_parameters) -> (ip:odh_index_package oparams) -> (raw_exp:lbytes oparams.exponent_length) -> ST (exp:exponent oparams{exp.raw_exp = raw_exp})
+val coerce_dh_exp: (#oparams:odh_parameters) -> (ip:odh_index_package oparams) -> (raw_exp:lbytes oparams.exponent_length) -> ST (exp:exponent oparams{exp.raw_exp = raw_exp})
   (requires (fun h0 ->
     let raw_sh = oparams.exponentiate raw_exp oparams.generator in
     registered #ip raw_sh
@@ -90,7 +90,7 @@ val coerce_dh_exp: (oparams:odh_parameters) -> (ip:odh_index_package oparams) ->
   ))
   (ensures (fun h0 sh h1 ->
     let raw_sh = oparams.exponentiate raw_exp oparams.generator in
-    coerce_dh_exp_footprint oparams ip raw_exp h0 h1
+    coerce_dh_exp_footprint #oparams ip raw_exp h0 h1
   ))
 
 let key_log_key (ip:index_package) = id ip

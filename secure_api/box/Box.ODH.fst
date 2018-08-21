@@ -25,11 +25,11 @@ let get_exponent_raw #oparams exp = exp.raw_exp
 let create_odh_index_package rgn oparams =
   create_leaf_index_package rgn (lbytes oparams.share_length)
 
-let gen_dh_footprint oparams ip h0 h1 =
+let gen_dh_footprint #oparams ip h0 h1 =
   register_footprint ip h0 h1
 
 #set-options "--z3rlimit 50 --max_ifuel 2 --max_fuel 2 --print_implicits"
-let gen_dh oparams ip =
+let gen_dh #oparams ip =
   let raw_exp = random_bytes oparams.exponent_length in
   let raw_sh = oparams.exponentiate raw_exp oparams.generator in
   let h0 = get() in
@@ -39,16 +39,16 @@ let gen_dh oparams ip =
   let exp = EXP raw_exp sh in
   exp,sh
 
-let coerce_dh_sh_footprint oparams ip raw_sh h0 h1 =
+let coerce_dh_sh_footprint #oparams ip raw_sh h0 h1 =
   register_footprint ip h0 h1
 
-let coerce_dh_sh oparam ip raw_sh =
+let coerce_dh_sh #oparam ip raw_sh =
   SH raw_sh
 
-let coerce_dh_exp_footprint oparams ip raw_sh h0 h1 =
+let coerce_dh_exp_footprint #oparams ip raw_sh h0 h1 =
   register_footprint ip h0 h1
 
-let coerce_dh_exp oparam ip raw_exp =
+let coerce_dh_exp #oparam ip raw_exp =
   let raw_sh = oparam.exponentiate raw_exp oparam.generator in
   let sh = SH raw_sh in
   EXP raw_exp sh

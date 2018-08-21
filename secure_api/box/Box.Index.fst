@@ -24,7 +24,7 @@ let index_log (t:eqtype) (rgn:erid) =
 noeq
 type index_package =
   | Leaf_IP:
-    t:eqtype u#0 ->
+    t:Type u#0{hasEq t} ->
     rgn : erid ->
     log: index_log t rgn ->
     index_package
@@ -32,8 +32,8 @@ type index_package =
     children:list index_package{children =!= []} ->
     index_package
 
-val id: ip:index_package -> eqtype u#0
-val unfold_id: l:list index_package{l =!= []} -> eqtype u#0
+val id: ip:index_package -> t:Type u#0{hasEq t}
+val unfold_id: l:list index_package{l =!= []} -> t:Type u#0{hasEq t}
 
 let rec id ip =
   match ip with
@@ -42,6 +42,17 @@ let rec id ip =
 and unfold_id = function
   | [ip] -> id ip
   | hd :: tl -> id hd * unfold_id tl
+
+#set-options "--z3rlimit 300 --max_ifuel 2 --max_fuel 2"
+val compose_ips: (ip1:index_package) -> (ip2:index_package) -> ip:index_package{
+  ip == Node_IP [ip1;ip2]
+  /\ id ip == id ip1 * id ip2
+  }
+let compose_ips ip1 ip2 =
+  let ip = Node_IP [ip1;ip2] in
+  assert(unfold_id [ip1;ip2] == id ip1 * id ip2);
+  assert(unfold_id [ip1;ip2] == id ip);
+  ip
 
 type logical_operator =
   | CONJ
