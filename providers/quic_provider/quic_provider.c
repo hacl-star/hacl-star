@@ -311,7 +311,7 @@ int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, unsigned char *cipher, uin
   }
 
 #if DEBUG
-  printf("ENCRYPT\nIV="); dump(iv, 12);
+  printf("ENCRYPT %s\nIV=", key->alg == TLS_aead_AES_128_GCM ? "AES128-GCM" : (key->alg == TLS_aead_AES_256_GCM ? "AES256-GCM" : "CHACHA20-POLY1305")); dump(iv, 12);
   printf("STATIC="); dump(key->static_iv, 12);
   printf("AD="); dump(ad, ad_len);
   printf("PLAIN="); dump(plain, plain_len);
