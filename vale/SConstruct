@@ -330,7 +330,6 @@ verify_options = [
 
   # Disable verification by adding 'filename': None
   ('code/crypto/aes/x64/Low.GCMencrypt.fst', None), # TODO: timeout in gcm_core
-#  ('code/thirdPartyPorts/Intel/aes/x64/X64.AESCTR.vaf', None), # TODO: non-terminating verification in .fsti
   ('code/arch/x64/interop/*_win.fst', None),
   ('code/arch/x64/interop/*_win.fsti', None),
 
