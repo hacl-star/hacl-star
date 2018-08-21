@@ -27,8 +27,8 @@ void mt_get_root(mt_ptr mt, hash_t root);
  */
 uint32_t mt_get_path(mt_ptr mt, uint32_t idx, signed_hash root, hash_t *path);
 
-void mt_flush();
-void mt_flush_to(uint32_t idx);
+void mt_flush(mt_ptr mt);
+void mt_flush_to(mt_ptr mt, uint32_t idx);
 
 /** Client-side verification
  * @param idx The index of the target hash
