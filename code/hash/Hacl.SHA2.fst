@@ -8,6 +8,7 @@ module B = LowStar.Buffer
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module T = FStar.Tactics
+module H = Spec.Hash.Helpers
 
 open Spec.Hash.Helpers
 open LowStar.BufferOps
@@ -226,4 +227,9 @@ inline_for_extraction
 let size_ws_w (a: sha2_alg) = U32.uint_to_t (Spec.size_ws_w a)
 
 let shuffle a block hash =
-  C.Loops.repeat_range 8ul 0ul (size_ws_w a) (shuffle_core a block) hash
+  let h = ST.get () in
+  [@ inline_let ]
+  let f_spec (s: H.hash_w a) (i: nat { i < Spec.size_ws_w a }): GTot (H.hash_w a) =
+    Spec.shuffle_core a (B.as_seq h block) s i
+  in
+  C.Loops.repeat_range 8ul 0ul (size_ws_w a) f_spec hash shuffle_core
