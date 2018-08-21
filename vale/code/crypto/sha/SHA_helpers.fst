@@ -218,21 +218,24 @@ let lemma_add_mod32_associates (x y z:int) :
   =
   ()
 
-#push-options "--z3rlimit 20"
+//#push-options "--z3rlimit 20"
 let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
   Lemma (add_mod x (add_mod y z) == add_mod (add_mod x y) z)
   =
+  //let open FStar.UInt in
+  assert_norm (pow2 32 == pow2_32);
+  //assume (False);
   //assert (add_mod y z == uint_to_t ((v y + v z) % pow2_32));
   //assert (add_mod x (add_mod y z) == uint_to_t ((v x + v (uint_to_t ((v y + v z) % pow2_32))) % pow2_32));
-  lemma_add_mod32_associates (v x) (v y) (v z);
+  //lemma_add_mod32_associates (v x) (v y) (v z);
   (*
   assert (uint_to_t ((v x + v (uint_to_t ((v y + v z) % pow2_32))) % pow2_32) ==
           uint_to_t (((v x + v y % pow2_32) + v z) % pow2_32));
           *)
-  assert (add_mod (add_mod x y) z == uint_to_t (((v x + v y % pow2_32) + v z) % pow2_32));
+  //assert (add_mod (add_mod x y) z == uint_to_t (((v x + v y % pow2_32) + v z) % pow2_32));
   //admit();
   ()
-#pop-options
+//#pop-options
 
 let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
   Lemma (add_mod a (add_mod b (add_mod c d)) == add_mod (add_mod b (add_mod d c)) a)
@@ -281,9 +284,17 @@ let add_wrap_quad32 (q0 q1:quad32) : quad32 =
          (v (add_mod (uint_to_t q0.hi2) (uint_to_t q1.hi2)))
          (v (add_mod (uint_to_t q0.hi3) (uint_to_t q1.hi3))) 
 
-let test  (t:counter{t < size_k_w SHA2_256 - 3}) (block:block_w SHA2_256) : nat32 =
+let ws_computed_opaque = make_opaque ws_computed
+
+let test_pass  (t:counter{t < size_k_w SHA2_256 - 3}) (block:block_w SHA2_256) : nat32 =
+  let c:UInt32.t = ws_computed_opaque SHA2_256 block t in
+  v c
+
+#push-options "--max_fuel 0"
+let test_fail  (t:counter{t < size_k_w SHA2_256 - 3}) (block:block_w SHA2_256) : nat32 =
   let c:UInt32.t = ws_computed SHA2_256 block t in
   v c
+#pop-options
 
 let test2 (u:UInt32.t) : nat32 =
   v u
@@ -294,7 +305,7 @@ let ws_computed_quad32 (t:counter{t < size_k_w SHA2_256 - 3}) (block:block_w SHA
               (v (ws_computed SHA2_256 block (t+1)))
               (v (ws_computed SHA2_256 block (t+2)))
               (v (ws_computed SHA2_256 block (t+3)))
-
+(*
 let test (src1 src2:quad32) (t:counter{t >= 16 /\ t < size_k_w SHA2_256}) (block:block_w SHA2_256) =
     assume (src2.lo0 == v (ws_opaque SHA2_256 block t - 12));
     assume (src1.hi2 == v (ws_opaque SHA2_256 block (t-2)));
@@ -306,7 +317,7 @@ let test (src1 src2:quad32) (t:counter{t >= 16 /\ t < size_k_w SHA2_256}) (block
     let final = sha256_msg2_spec_def added in
     assert (final == ws_computed_quad32 t block);
     ()
-
+*)
 (*
 #push-options "--z3rlimit 10"
 let lemma_sha256_msg2 (dst src:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
