@@ -589,9 +589,9 @@ let dexor_modifies_trans (#i:id) (#len:u32) (t:PRF.state i)
 
 (*+ dexor_modifies_widen:
         weakening a modifies clause to cover a wider range of a buffer *)
-let dexor_modifies_widen (#i:id) (#len:u32) (t:PRF.state i)
+let dexor_modifies_widen (#i:id) (#lenpb:u32) (t:PRF.state i)
                          (x:PRF.domain i{ctr_0 i <^ x.ctr})
-                         (pb:plainBuffer i (v len))
+                         (pb:plainBuffer i (v lenpb))
                          (from:u32{FStar.Buffer.(v from + idx (Plain.as_buffer pb)) < pow2 n})
                          (len:u32{FStar.Buffer.(v len <= length (Plain.as_buffer pb) /\
                                   v from + v len <= length (Plain.as_buffer pb))})
