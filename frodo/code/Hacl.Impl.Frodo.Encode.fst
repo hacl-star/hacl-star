@@ -27,7 +27,7 @@ module FLemmas = Spec.Frodo.Lemmas
 
 inline_for_extraction noextract private
 val ec:
-    b:size_t{v b < v params_logq}
+    b:size_t{0 < v b /\ v b < v params_logq}
   -> k:uint16{uint_v k < pow2 (v b)}
   -> r:uint16{r == S.ec (v b) k}
 let ec b a =
@@ -35,7 +35,7 @@ let ec b a =
 
 inline_for_extraction noextract private
 val dc:
-    b:size_t{v b < v params_logq}
+    b:size_t{0 < v b /\ v b < v params_logq}
   -> c:uint16
   -> r:uint16{r == S.dc (v b) c}
 let dc b c =
@@ -44,7 +44,7 @@ let dc b c =
 
 inline_for_extraction noextract private
 val ec1:
-    b:size_t{v b <= 8}
+    b:size_t{0 < v b /\ v b <= 8}
   -> x:uint64
   -> k:size_t{v k < 8}
   -> res:uint16{res == S.ec1 (v b) x (v k)}
@@ -55,7 +55,7 @@ let ec1 b x k =
 
 inline_for_extraction noextract private
 val frodo_key_encode1:
-    b:size_t{v b <= 8}
+    b:size_t{0 < v b /\ v b <= 8}
   -> a:lbytes (params_nbar *! params_nbar *! b /. size 8)
   -> res0:matrix_t params_nbar params_nbar
   -> vi:uint64
@@ -83,7 +83,7 @@ let frodo_key_encode1 b a res0 vi i =
 
 inline_for_extraction noextract private
 val frodo_key_encode2:
-    b:size_t{v b <= 8}
+    b:size_t{0 < v b /\ v b <= 8}
   -> a:lbytes (params_nbar *! params_nbar *! b /. size 8)
   -> res0:matrix_t params_nbar params_nbar
   -> i:size_t{v i < v params_nbar}
@@ -105,7 +105,7 @@ let frodo_key_encode2 b a res0 i =
 #set-options "--max_fuel 1"
 
 val frodo_key_encode:
-    b:size_t{v b <= 8}
+    b:size_t{0 < v b /\ v b <= 8}
   -> a:lbytes (params_nbar *! params_nbar *! b /. size 8)
   -> res:matrix_t params_nbar params_nbar
   -> Stack unit
@@ -133,7 +133,7 @@ let frodo_key_encode b a res =
 
 inline_for_extraction noextract private
 val frodo_key_decode1:
-    b:size_t{v b <= 8}
+    b:size_t{0 < v b /\ v b <= 8}
   -> a:matrix_t params_nbar params_nbar
   -> i:size_t{v i < v params_nbar}
   -> Stack uint64
@@ -162,7 +162,7 @@ let frodo_key_decode1 b a i =
 
 inline_for_extraction noextract private
 val frodo_key_decode2:
-    b:size_t{v b <= 8}
+    b:size_t{0 < v b /\ v b <= 8}
   -> a:matrix_t params_nbar params_nbar
   -> i:size_t{v i < v params_nbar}
   -> res:lbytes (params_nbar *! params_nbar *! b /. size 8)
@@ -181,7 +181,7 @@ let frodo_key_decode2 b a i res =
   pop_frame()
 
 val lemma_eq_intro_decode:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> s1:LSeq.lseq uint8 (v params_nbar * v params_nbar * b / 8)
   -> s2:LSeq.lseq uint8 (v params_nbar * v params_nbar * b / 8)
   -> Lemma
@@ -196,7 +196,7 @@ let lemma_eq_intro_decode b s1 s2 =
   LSeq.eq_intro s1 s2
 
 val frodo_key_decode:
-    b:size_t{v b <= 8}
+    b:size_t{0 < v b /\ v b <= 8}
   -> a:matrix_t params_nbar params_nbar
   -> res:lbytes (params_nbar *! params_nbar *! b /. size 8)
   -> Stack unit
