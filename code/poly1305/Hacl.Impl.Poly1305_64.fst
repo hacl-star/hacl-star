@@ -189,7 +189,7 @@ val poly1305_init_:
 let poly1305_init_ st key =
   poly1305_encode_r st.r (sub key 0ul 16ul);
   poly1305_start st.h;
-  let log = hide (Seq.createEmpty #Spec.Poly1305.word) in
+  let log = hide (Seq.empty #Spec.Poly1305.word) in
   log
 
 

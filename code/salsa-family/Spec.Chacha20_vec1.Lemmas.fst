@@ -987,7 +987,7 @@ let lemma_double_round_def s =
 (*              ==> Seq.index (Seq.seq_of_list l) i == List.Tot.index l i) *)
 (* let rec lemma_seq_of_list #a l = *)
 (*   match l with *)
-(*   | [] -> Seq.lemma_eq_intro (Seq.seq_of_list l) Seq.createEmpty *)
+(*   | [] -> Seq.lemma_eq_intro (Seq.seq_of_list l) Seq.empty *)
 (*   | hd::tl -> ( *)
 (*     lemma_seq_of_list #a tl; *)
 (*     Seq.lemma_eq_intro (Seq.seq_of_list l) (Seq.cons hd (Seq.seq_of_list tl)) *)

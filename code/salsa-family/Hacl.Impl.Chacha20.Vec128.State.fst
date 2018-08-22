@@ -262,7 +262,7 @@ let lemma_ctr_ivsetup iv =
   assert(Seq.index (Spec.Lib.uint32s_from_le 3 iv) 1 == Spec.Lib.uint32_from_le (Seq.slice iv 4 8));
   Spec.Lib.lemma_uint32s_from_le_def_1 1 (Seq.slice iv 0 4);
   Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 4) 0 4) (Seq.slice iv 0 4);
-  Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 4) 0 0) Seq.createEmpty;
+  Seq.lemma_eq_intro (Seq.slice (Seq.slice iv 0 4) 0 0) Seq.empty;
   Spec.Lib.lemma_uint32s_from_le_def_0 0 (Seq.slice iv 0 0)
 
 

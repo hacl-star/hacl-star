@@ -47,7 +47,7 @@ let append_assoc #a s1 s2 s3 = ()
 
 private val encode_bytes_empty: txt:Seq.seq U8.t -> Lemma
     (requires Seq.length txt == 0)
-    (ensures  encode_bytes (txt) == Seq.createEmpty)
+    (ensures  encode_bytes (txt) == Seq.empty)
     [SMTPat (encode_bytes (txt)); SMTPat (Seq.length txt == 0)]
 let encode_bytes_empty txt = ()
 
@@ -123,8 +123,8 @@ let rec lemma_encode_bytes_append s1 s2 l =
   )
 
 private val lemma_append_empty: #a:Type -> s:seq a -> Lemma
-  (s @| createEmpty #a == s)
-let lemma_append_empty #a s = Seq.lemma_eq_intro s (s @| createEmpty #a)
+  (s @| Seq.empty #a == s)
+let lemma_append_empty #a s = Seq.lemma_eq_intro s (s @| Seq.empty #a)
      
 
 #reset-options "--max_fuel 0 --z3rlimit 100"

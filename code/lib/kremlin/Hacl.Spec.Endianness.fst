@@ -45,7 +45,7 @@ private let rec seq_map_ #a #b f s j s' =
 abstract val seq_map: #a:Type -> #b:Type -> f:(a -> GTot b) -> s:Seq.seq a ->
   GTot (s':Seq.seq b{Seq.length s' = Seq.length s /\ (forall (i:nat). i < Seq.length s ==> Seq.index s' i == f (Seq.index s i))})
 let seq_map #a #b f s =
-  if Seq.length s = 0 then Seq.createEmpty #b
+  if Seq.length s = 0 then Seq.empty #b
   else seq_map_ f s 0 (Seq.create (Seq.length s) (f (Seq.index s 0)))
 
 

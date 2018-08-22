@@ -23,7 +23,7 @@ val counter_mode_blocks3:
       (decreases (len))
 #reset-options "--z3rlimit 20 --max_fuel 0"
 let rec counter_mode_blocks3 key nonce counter plain len =
-  if len = 0 then Seq.createEmpty #UInt8.t
+  if len = 0 then Seq.empty #UInt8.t
   else (
     assert(length plain >= 192);
     let prefix, block = split plain (length plain - 192) in
@@ -67,7 +67,7 @@ let counter_mode_blocks key nonce counter plain len =
   else if rest3 = 1 then
     let mask   = Spec.Chacha20_vec.chacha20_block key nonce (counter + 3 * len3) in
     xor #64 plain3' mask
-  else createEmpty in
+  else empty in
   cipher3 @| cipher3'
 
 val counter_mode:
@@ -91,7 +91,7 @@ let counter_mode key nonce counter plain =
       let mask = slice mask 0 part_len in
       assert(length last_block = part_len);
       xor #part_len last_block mask
-    else createEmpty in
+    else empty in
   cipher_blocks @| cipher_last_block
 
 
@@ -129,7 +129,7 @@ val lemma_counter_mode_blocks_def0:
   plain:seq UInt8.t{length plain = 0} ->
   Lemma (Spec.CTR.counter_mode_blocks Spec.Chacha20_vec.chacha20_ctx
                                       Spec.Chacha20_vec.chacha20_cipher k n c plain ==
-         createEmpty)
+         empty)
 #reset-options "--z3rlimit 200 --max_fuel 1"
 let lemma_counter_mode_blocks_def0 k n c plain = ()
 
@@ -165,7 +165,7 @@ val lemma_counter_mode_blocks3_def0:
   n:nonce Spec.Chacha20_vec.chacha20_ctx ->
   c:counter Spec.Chacha20_vec.chacha20_ctx ->
   plain:seq UInt8.t{length plain = 0} ->
-  Lemma (counter_mode_blocks3 k n c plain 0 == createEmpty)
+  Lemma (counter_mode_blocks3 k n c plain 0 == empty)
 #reset-options "--z3rlimit 200 --max_fuel 1"
 let lemma_counter_mode_blocks3_def0 k n c plain = ()
 
@@ -301,8 +301,8 @@ let lemma_counter_mode_blocks_eq k n c plain len =
     assert(rest3 = 0);
     let x = Spec.CTR.counter_mode_blocks Spec.Chacha20_vec.chacha20_ctx Spec.Chacha20_vec.chacha20_cipher k n c plain in
     let x' = counter_mode_blocks k n c plain len in
-    lemma_eq_intro cipher3 (cipher3 @| createEmpty);
-    lemma_eq_intro cipher3 (cipher3 @| createEmpty);
+    lemma_eq_intro cipher3 (cipher3 @| empty);
+    lemma_eq_intro cipher3 (cipher3 @| empty);
     lemma_eq_intro plain plain3)
 
 

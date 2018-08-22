@@ -327,7 +327,7 @@ val poly1305_init_spec: key:Seq.seq H8.t{Seq.length key = 16} ->
 let poly1305_init_spec key =
   let r = poly1305_encode_r_spec key in
   let h = poly1305_start_spec () in
-  MkState r h (Seq.createEmpty)
+  MkState r h (Seq.empty)
 
 
 val poly1305_update_spec: st:poly1305_state_{red_26 (MkState?.r st) /\ red_y (MkState?.h st)} ->
