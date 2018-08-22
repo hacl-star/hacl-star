@@ -16,7 +16,7 @@ let u8  = FStar.UInt8.t
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 private
-val little_bytes_def_0: unit -> Lemma (little_bytes 0ul 0 == Seq.createEmpty)
+val little_bytes_def_0: unit -> Lemma (little_bytes 0ul 0 == Seq.empty)
 private
 val little_bytes_def_1: len:UInt32.t{0 < UInt32.v len} -> n:nat{n < pow2 (8*UInt32.v len)} ->
   Lemma (n / 256 < pow2 (8 * (UInt32.v len - 1)) /\

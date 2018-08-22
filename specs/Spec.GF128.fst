@@ -72,7 +72,7 @@ val encode_bytes: txt:bytes -> Tot (text) (decreases (Seq.length txt))
 let rec encode_bytes txt =
   let l = Seq.length txt in
   if l = 0 then
-    Seq.createEmpty
+    Seq.empty
   else
     let l0 = FStar.Math.Lib.min l 16 in
     let w, txt = Seq.split txt l0 in

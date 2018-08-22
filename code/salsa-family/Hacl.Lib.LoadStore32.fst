@@ -60,7 +60,7 @@ let rec uint32s_from_le_bytes output input len =
                        (Spec.Lib.uint32s_from_le (v i + 1) (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (4 * (v i + 1)))))
   in
   Spec.Lib.lemma_uint32s_from_le_def_0 0 (reveal_sbytes (Seq.slice (as_seq h0 input) 0 0));
-  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.createEmpty;
+  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
   C.Loops.for 0ul len inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (UInt32.v len)) (as_seq h output);
@@ -117,7 +117,7 @@ let rec uint32s_to_le_bytes output input len =
                        (Spec.Lib.uint32s_to_le (v i + 1) (reveal_h32s (Seq.slice (as_seq h0 input) 0 (v i + 1))))
   in
   Spec.Lib.lemma_uint32s_to_le_def_0 0 (reveal_h32s (Seq.slice (as_seq h0 input) 0 0));
-  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.createEmpty;
+  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
   C.Loops.for 0ul len inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (4 * UInt32.v len)) (as_seq h output);
