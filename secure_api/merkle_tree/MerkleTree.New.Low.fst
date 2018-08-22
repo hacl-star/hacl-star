@@ -31,7 +31,7 @@ type hash = uint8_p
 type hash_vec = BV.buf_vector uint8_t
 
 val hash_size: uint32_t
-let hash_size = EHS.tagLen EHS.SHA256
+let hash_size = 32ul // EHS.tagLen EHS.SHA256
 
 /// Compression of two hashes
 
@@ -65,13 +65,15 @@ let hash_2 src1 src2 dst =
 // A Merkle tree `MT i j hs` stores all necessary hashes to generate
 // a Merkle path for each element from the index `i` to `j-1`. 
 // `hs` is a 2-dim store for hashes, where `hs[0]` contains leaf hash values.
-// `ths` is a store for "rightmost" hashes, manipulated only when required to
-// calculate some merkle paths that need the rightmost hashes as a part of them.
+// `rhs` is a store for "rightmost" hashes, manipulated only when required to
+// calculate some merkle parhs that need the rightmost hashes as a part of them.
 noeq type merkle_tree = 
 | MT: i:uint32_t -> j:uint32_t{j > i} ->
       hs:B.buffer hash_vec{B.length hs = 32} ->
-      ths:hash_vec{V.size_of ths = 32ul} ->
+      rhs_ok:bool -> rhs:hash_vec{V.size_of rhs = 32ul} ->
       merkle_tree
+
+type mt_ptr = B.pointer merkle_tree
 
 /// Construction
 
@@ -92,15 +94,15 @@ let rec create_mt_ hs depth =
        create_mt_ hs (depth - 1ul))
 
 val create_mt: unit ->
-  HST.ST merkle_tree
+  HST.ST mt_ptr
 	 (requires (fun _ -> true))
 	 (ensures (fun h0 mt h1 -> true))
 let create_mt _ =
   let mt_region = BV.new_region_ HH.root in
   let hs = B.malloc mt_region (BV.create_empty uint8_t) 32ul in
   create_mt_ hs 32ul;
-  let ths = BV.create 0uy hash_size 32ul in
-  MT 0ul 1ul hs ths
+  let rhs = BV.create 0uy hash_size 32ul in
+  B.malloc HH.root (MT 0ul 1ul hs true rhs) 1ul
 
 /// Destruction (free)
 
@@ -116,15 +118,17 @@ let rec free_mt_ lv hs =
   else (BV.free hash_size (B.index hs (lv - 1ul));
        free_mt_ (lv - 1ul) hs)
 
-val free_mt: merkle_tree ->
+val free_mt: mt_ptr ->
   HST.ST unit
 	 (requires (fun _ -> true))
 	 (ensures (fun h0 _ h1 -> true))
 let free_mt mt =
   admit ();
-  free_mt_ 32ul (MT?.hs mt);
-  BV.free hash_size (MT?.ths mt);
-  B.free (MT?.hs mt)
+  let mtv = B.index mt 0ul in
+  free_mt_ 32ul (MT?.hs mtv);
+  BV.free hash_size (MT?.rhs mtv);
+  B.free (MT?.hs mtv);
+  B.free mt
 
 /// Insertion
 
@@ -148,75 +152,82 @@ let rec insert_ lv j hs acc =
 // Caution: current impl. manipulates the content in `v`
 //          as an accumulator.
 val insert:
-  mt:merkle_tree -> v:hash ->
-  HST.ST merkle_tree
+  mt:mt_ptr -> v:hash ->
+  HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
 let rec insert mt v =
   admit ();
-  insert_ 0ul (MT?.j mt) (MT?.hs mt) v;
-  MT (MT?.i mt)
-     (MT?.j mt + 1ul)
-     (MT?.hs mt)
-     (MT?.ths mt)
+  let mtv = B.index mt 0ul in
+  insert_ 0ul (MT?.j mtv) (MT?.hs mtv) v;
+  B.upd mt 0ul 
+    (MT (MT?.i mtv) 
+	(MT?.j mtv + 1ul)
+	(MT?.hs mtv)
+	false // `rhs` is always deprecated right after an insertion.
+	(MT?.rhs mtv))
 
 /// Getting the Merkle root and path
 
-val fill_rightmost:
+val fill_rhs:
   lv:uint32_t{lv < 32ul} ->
   hs:B.buffer hash_vec{B.length hs = 32} ->
-  ths:hash_vec{V.size_of ths = 32ul} ->
+  rhs:hash_vec{V.size_of rhs = 32ul} ->
   j:uint32_t ->
   acc:hash -> actd:bool ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let rec fill_rightmost lv hs ths j acc actd =
+let rec fill_rhs lv hs rhs j acc actd =
   admit ();
   if j = 0ul then ()
   else if j % 2ul = 0ul
-  then fill_rightmost (lv + 1ul) hs ths (j / 2ul) acc actd
+  then fill_rhs (lv + 1ul) hs rhs (j / 2ul) acc actd
   else (
     (if actd
     then (hash_2 (V.index (B.index hs lv) (j - 1ul)) acc acc;
-	 BV.assign_copy hash_size ths (lv + 1ul) acc)
+	 BV.assign_copy hash_size rhs (lv + 1ul) acc)
     else B.blit (V.index (B.index hs lv) (j - 1ul)) 0ul acc 0ul hash_size);
-    fill_rightmost (lv + 1ul) hs ths (j / 2ul) acc true)
+    fill_rhs (lv + 1ul) hs rhs (j / 2ul) acc true)
 
-// Assuming the rightmost hashes (`ths`) are already calculated
 val mt_get_path_:
   lv:uint32_t{lv < 32ul} ->
   hs:B.buffer hash_vec{B.length hs = 32} ->
-  ths:hash_vec{V.size_of ths = 32ul} ->
+  rhs:hash_vec{V.size_of rhs = 32ul} ->
   j:uint32_t -> k:uint32_t{j = 0ul || k < j} ->
   path:B.buffer hash{B.length path = 32} ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let rec mt_get_path_ lv hs ths j k path =
+let rec mt_get_path_ lv hs rhs j k path =
   admit ();
   if j = 0ul then ()
   else if k % 2ul = 0ul 
   then (if k + 1ul < j
        then (B.upd path lv (V.index (B.index hs lv) (k + 1ul));
-	    mt_get_path_ (lv + 1ul) hs ths (j / 2ul) (k / 2ul) path)
-       else (B.upd path lv (V.index ths lv);
-	    mt_get_path_ (lv + 1ul) hs ths (j / 2ul) (k / 2ul) path))
+	    mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path)
+       else (B.upd path lv (V.index rhs lv);
+	    mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path))
   else (B.upd path lv (V.index (B.index hs lv) (k - 1ul));
-       mt_get_path_ (lv + 1ul) hs ths (j / 2ul) (k / 2ul) path)
+       mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path)
 
 val mt_get_path:
-  mt:merkle_tree -> 
-  idx:uint32_t{MT?.i mt <= idx && idx < MT?.j mt} ->
+  mt:mt_ptr -> 
+  idx:uint32_t -> // {MT?.i mt <= idx && idx < MT?.j mt}
   root:hash ->
   path:B.buffer hash{B.length path = 32} ->
   HST.ST uint32_t
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
 let mt_get_path mt idx root path =
-  fill_rightmost 0ul (MT?.hs mt) (MT?.ths mt) (MT?.j mt) root false;
-  mt_get_path_ 0ul (MT?.hs mt) (MT?.ths mt) (MT?.j mt) idx path;
-  MT?.j mt
+  admit ();
+  let mtv = B.index mt 0ul in
+  if not (MT?.rhs_ok mtv) then
+    (fill_rhs 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv) root false;
+    B.upd mt 0ul (MT (MT?.i mtv) (MT?.j mtv) (MT?.hs mtv) true (MT?.rhs mtv)))
+  else ();
+  mt_get_path_ 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv) idx path;
+  MT?.j mtv
 
 /// Flushing
 
@@ -224,20 +235,22 @@ let mt_get_path mt idx root path =
 //       data structure for `MT?.hs`.
 // NOTE: flush "until" `idx`
 val mt_flush_to:
-  mt:merkle_tree ->
-  idx:uint32_t{idx <= MT?.j mt} ->
+  mt:mt_ptr ->
+  idx:uint32_t ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
 let mt_flush_to mt idx = ()
 
 val mt_flush:
-  mt:merkle_tree ->
+  mt:mt_ptr ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
 let mt_flush mt =
-  mt_flush_to mt (MT?.j mt)
+  admit ();
+  let mtv = B.index mt 0ul in
+  mt_flush_to mt (MT?.j mtv)
 
 /// Client-side verification
 
