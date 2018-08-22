@@ -35,16 +35,30 @@ let hash_size = EHS.tagLen EHS.SHA256
 
 /// Compression of two hashes
 
-assume val hash_2: 
+val hash_2: 
   src1:hash -> src2:hash -> dst:hash ->
   HST.ST unit
 	 (requires (fun h0 ->
 	   BV.buffer_inv_live hash_size h0 src1 /\
 	   BV.buffer_inv_live hash_size h0 src2 /\
 	   BV.buffer_inv_live hash_size h0 dst))
-	 (ensures (fun h0 _ h1 ->
-	   // memory safety
-	   modifies (B.loc_buffer dst) h0 h1))
+	 (ensures (fun h0 _ h1 -> true))
+let hash_2 src1 src2 dst =
+  admit ();
+  HST.push_frame ();
+  let st = EHS.create EHS.SHA256 in
+  EHS.init st;
+
+  let sb1 = B.alloca 0uy (EHS.blockLen EHS.SHA256) in
+  let sb2 = B.alloca 0uy (EHS.blockLen EHS.SHA256) in
+  B.blit src1 0ul sb1 0ul hash_size;
+  B.blit src2 0ul sb2 0ul hash_size;
+
+  EHS.update (Ghost.hide S.empty) st sb1;
+  let hh1 = HST.get () in
+  EHS.update (Ghost.hide (B.as_seq hh1 sb1)) st sb2;
+  EHS.finish st dst;
+  HST.pop_frame ()
 
 /// Low-level Merkle tree data structure
 
