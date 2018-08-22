@@ -156,6 +156,25 @@
       "b38cd0c28840f90311c8dc88f47f7f7e"
     ],
     [
+      "Spec.Chacha20.chacha20_cipher",
+      1,
+      0,
+      1,
+      [
+        "@query", "equation_Spec.Chacha20.blocklen",
+        "equation_Spec.Chacha20.chacha20_ctx",
+        "equation_Spec.Chacha20.keylen", "equation_Spec.Chacha20.noncelen",
+        "primitive_Prims.op_Multiply",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_blocklen",
+        "proj_equation_Spec.CTR.Mkblock_cipher_ctx_incr",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_blocklen",
+        "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_incr"
+      ],
+      0,
+      "5e1ff31938b5ab2a674db8f795807d82"
+    ],
+    [
       "Spec.Chacha20.chacha20_encrypt_bytes",
       1,
       0,
@@ -169,7 +188,7 @@
         "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_blocklen"
       ],
       0,
-      "f6ae353d1fee12179682e09b844a7c3f"
+      "928687875012307e3e5821da35d53610"
     ],
     [
       "Spec.Chacha20.test",
@@ -218,7 +237,7 @@
         "typing_FStar.Seq.Properties.createL"
       ],
       0,
-      "111a7aabb2dba122a1172dcaa182e58c"
+      "ddd865dcfaa47fc3721a092f013ae5fe"
     ]
   ]
 ]
