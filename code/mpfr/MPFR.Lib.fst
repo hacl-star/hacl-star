@@ -355,6 +355,11 @@ let rec mpn_ZERO b l =
     end
 
 (* useful functions *)
+val mpfr_RET: t:i32 -> Stack i32
+    (requires (fun h -> True))
+    (ensures  (fun h0 r h1 -> h0 == h1 /\ r = t))
+let mpfr_RET t = t
+
 inline_for_extraction val mpfr_LAST_LIMB: x:mpfr_ptr -> Stack u32
     (requires (fun h -> mpfr_live h x /\ mpfr_PREC_COND (U32.v (as_struct h x).mpfr_prec)))
     (ensures  (fun h0 r h1 -> mpfr_live h1 x /\ h0 == h1 /\

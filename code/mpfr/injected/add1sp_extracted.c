@@ -146,6 +146,7 @@ typedef struct K___uint64_t_uint64_t_int32_t_s
 K___uint64_t_uint64_t_int32_t;
 
 #define MPFR_Lib_mpfr_struct __mpfr_struct
+#define MPFR_Lib_mpfr_RET(I) ((I) != 0 ? ((__gmpfr_flags |= MPFR_FLAGS_INEXACT), (I)) : 0)
 #define MPFR_Exceptions_mpfr_overflow mpfr_overflow
 #define mpfr_prec _mpfr_prec
 #define mpfr_exp _mpfr_exp
@@ -349,18 +350,18 @@ mpfr_add1sp1 (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mpfr_rnd_t rnd_mode,
   {
     uint64_t *ap = a->mpfr_d;
     uint64_t a01 = ap[0U];
-    MPFR_Lib_mpfr_struct uu___72_3461 = a[0U];
+    MPFR_Lib_mpfr_struct uu___62_3483 = a[0U];
     a[0U] =
       (
         (MPFR_Lib_mpfr_struct){
-          .mpfr_prec = uu___72_3461.mpfr_prec,
-          .mpfr_sign = uu___72_3461.mpfr_sign,
+          .mpfr_prec = uu___62_3483.mpfr_prec,
+          .mpfr_sign = uu___62_3483.mpfr_sign,
           .mpfr_exp = st.bx,
-          .mpfr_d = uu___72_3461.mpfr_d
+          .mpfr_d = uu___62_3483.mpfr_d
         }
       );
     if (st.rb == (uint64_t)0U && st.sb == (uint64_t)0U)
-      return (int32_t)0;
+      return MPFR_Lib_mpfr_RET((int32_t)0);
     else if (MPFR_RoundingMode_uu___is_MPFR_RNDN(rnd_mode))
       if
       (
@@ -368,10 +369,14 @@ mpfr_add1sp1 (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mpfr_rnd_t rnd_mode,
         == (uint64_t)0U
         || (st.sb == (uint64_t)0U && (a01 & (uint64_t)1U << st.sh) == (uint64_t)0U)
       )
+      {
+        int32_t ite;
         if (a->mpfr_sign == (int32_t)1)
-          return (int32_t)-1;
+          ite = (int32_t)-1;
         else
-          return (int32_t)1;
+          ite = (int32_t)1;
+        return MPFR_Lib_mpfr_RET(ite);
+      }
       else
       {
         uint64_t *ap1 = a->mpfr_d;
@@ -381,32 +386,36 @@ mpfr_add1sp1 (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mpfr_rnd_t rnd_mode,
           ap1[0U] = (uint64_t)0x8000000000000000U;
           if (st.bx + (int32_t)1 <= MPFR_Lib_mpfr_EMAX)
           {
-            MPFR_Lib_mpfr_struct uu___72_3556 = a[0U];
+            MPFR_Lib_mpfr_struct uu___62_3579 = a[0U];
             a[0U] =
               (
                 (MPFR_Lib_mpfr_struct){
-                  .mpfr_prec = uu___72_3556.mpfr_prec,
-                  .mpfr_sign = uu___72_3556.mpfr_sign,
+                  .mpfr_prec = uu___62_3579.mpfr_prec,
+                  .mpfr_sign = uu___62_3579.mpfr_sign,
                   .mpfr_exp = st.bx + (int32_t)1,
-                  .mpfr_d = uu___72_3556.mpfr_d
+                  .mpfr_d = uu___62_3579.mpfr_d
                 }
               );
-            return a->mpfr_sign;
+            return MPFR_Lib_mpfr_RET(a->mpfr_sign);
           }
           else
           {
             int32_t t = MPFR_Exceptions_mpfr_overflow(a, rnd_mode, a->mpfr_sign);
-            return t;
+            return MPFR_Lib_mpfr_RET(t);
           }
         }
         else
-          return a->mpfr_sign;
+          return MPFR_Lib_mpfr_RET(a->mpfr_sign);
       }
     else if (MPFR_RoundingMode_mpfr_IS_LIKE_RNDZ(rnd_mode, a->mpfr_sign < (int32_t)0))
+    {
+      int32_t ite;
       if (a->mpfr_sign == (int32_t)1)
-        return (int32_t)-1;
+        ite = (int32_t)-1;
       else
-        return (int32_t)1;
+        ite = (int32_t)1;
+      return MPFR_Lib_mpfr_RET(ite);
+    }
     else
     {
       uint64_t *ap1 = a->mpfr_d;
@@ -416,32 +425,29 @@ mpfr_add1sp1 (mpfr_ptr a, mpfr_srcptr b, mpfr_srcptr c, mpfr_rnd_t rnd_mode,
         ap1[0U] = (uint64_t)0x8000000000000000U;
         if (st.bx + (int32_t)1 <= MPFR_Lib_mpfr_EMAX)
         {
-          MPFR_Lib_mpfr_struct uu___72_3760 = a[0U];
+          MPFR_Lib_mpfr_struct uu___62_3786 = a[0U];
           a[0U] =
             (
               (MPFR_Lib_mpfr_struct){
-                .mpfr_prec = uu___72_3760.mpfr_prec,
-                .mpfr_sign = uu___72_3760.mpfr_sign,
+                .mpfr_prec = uu___62_3786.mpfr_prec,
+                .mpfr_sign = uu___62_3786.mpfr_sign,
                 .mpfr_exp = st.bx + (int32_t)1,
-                .mpfr_d = uu___72_3760.mpfr_d
+                .mpfr_d = uu___62_3786.mpfr_d
               }
             );
-          return a->mpfr_sign;
+          return MPFR_Lib_mpfr_RET(a->mpfr_sign);
         }
         else
         {
           int32_t t = MPFR_Exceptions_mpfr_overflow(a, rnd_mode, a->mpfr_sign);
-          return t;
+          return MPFR_Lib_mpfr_RET(t);
         }
       }
       else
-        return a->mpfr_sign;
+        return MPFR_Lib_mpfr_RET(a->mpfr_sign);
     }
   }
 }
-
-
-
 
 
 /* same as mpfr_add1sp, but for p = GMP_NUMB_BITS */

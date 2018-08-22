@@ -210,14 +210,14 @@ let mpfr_add_one_ulp a rnd_mode sh bx =
 	    eval_eq_intro_lemma (add_one_ulp (as_normal h0 a)) (as_normal h2 a);
 	    //! assert(mpfr_round2_cond (add_one_ulp (as_normal h0 a)) rnd_mode (as_fp h2 a));
 	    mpfr_modifies_trans_lemma a h0 h1 h2;
-	    mpfr_SIGN a
+	    mpfr_RET (mpfr_SIGN a)
 	end else begin
 	    assert(eval_abs (as_normal h0 a) == mpfr_overflow_bound (U32.v (as_struct h0 a).mpfr_prec));
 	    let t = mpfr_overflow a rnd_mode (mpfr_SIGN a) in
 	    let h2 = ST.get() in
 	    mpfr_overflow_post_cond_lemma (add_one_ulp (as_normal h0 a)) (add_one_ulp (as_normal h0 a)).prec rnd_mode (I32.v t) (as_fp h2 a);
 	    mpfr_modifies_trans_lemma a h0 h1 h2;
-	    t
+	    mpfr_RET t
 	end
     end else begin
         let h1 = ST.get() in
@@ -228,7 +228,7 @@ let mpfr_add_one_ulp a rnd_mode sh bx =
         exp_impl_no_overflow_lemma (as_normal h1 a);
 	lemma_reveal_modifies_1 ap h0 h1;
 	lemma_intro_modifies_2 a ap h0 h1;
-        mpfr_SIGN a
+        mpfr_RET (mpfr_SIGN a)
     end
 
 inline_for_extraction val mpfr_add1sp1_round: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> st:state -> Stack i32
@@ -253,12 +253,13 @@ let mpfr_add1sp1_round a rnd_mode st =
     let h1 = ST.get() in
     mpfr_add1sp1_is_even_lemma a0 st.sh (as_normal_ h0 ({as_struct h0 a with mpfr_exp = st.bx}));
     mpfr_round2_cond_refl_lemma (as_normal h1 a) rnd_mode;
-    if (st.rb =^ 0uL && st.sb =^ 0uL) then 0l
+    if (st.rb =^ 0uL && st.sb =^ 0uL) then mpfr_RET 0l
     else if (MPFR_RNDN? rnd_mode) then
         if (st.rb =^ 0uL || (st.sb =^ 0uL && ((a0 &^ (mpfr_LIMB_ONE <<^ st.sh)) =^ 0uL))) then
-	    mpfr_NEG_SIGN (mpfr_SIGN a)
+	    mpfr_RET (mpfr_NEG_SIGN (mpfr_SIGN a))
 	else mpfr_add_one_ulp a rnd_mode st.sh st.bx
-    else if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_IS_NEG a) then mpfr_NEG_SIGN (mpfr_SIGN a)
+    else if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_IS_NEG a) then
+        mpfr_RET (mpfr_NEG_SIGN (mpfr_SIGN a))
     else mpfr_add_one_ulp a rnd_mode st.sh st.bx
 
 (* specifications for mpfr_add1sp1 *)
