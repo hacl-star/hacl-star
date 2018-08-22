@@ -11,8 +11,8 @@ open AES_s
 open FStar.Seq
 
 // length plain < pow2_32 / 4096 <= spec max of 2**39 - 256;
-type gctr_plain_LE = p:seq nat8 { 4096 * length p < pow2_32 }
-type gctr_plain_internal_LE = p:seq quad32
+type gctr_plain_LE:eqtype = p:seq nat8 { 4096 * length p < pow2_32 }
+type gctr_plain_internal_LE:eqtype = p:seq quad32
 
 let inc32 (cb:quad32) (i:int) : quad32 =
   Mkfour ((cb.lo0 + i) % pow2_32) cb.lo1 cb.hi2 cb.hi3

@@ -130,6 +130,7 @@ let rec gctr_indexed_helper (icb:quad32) (plain:gctr_plain_internal_LE)
       let helper (j:int) :
         Lemma ((0 <= j /\ j < length plain) ==> (index cipher j == quad32_xor (index plain j) (aes_encrypt_BE alg key (inc32 icb (i + j)) )))
         =
+        reveal_opaque aes_encrypt_LE_def;
         if 0 < j && j < length plain then (
           gctr_indexed_helper icb tl alg key (i+1);
           assert(index r_cipher (j-1) == quad32_xor (index tl (j-1)) (aes_encrypt_BE alg key (inc32 icb (i + 1 + j - 1)) )) // OBSERVE
@@ -679,6 +680,7 @@ let gctr_encrypt_one_block (icb_BE plain:quad32) (alg:algorithm) (key:aes_key_LE
           (let icb_LE = reverse_bytes_quad32 (inc32 icb_BE 0) in
            quad32_xor (head plain_quads_LE) (aes_encrypt_LE alg key icb_LE)));
   assert (gctr_encrypt_block icb_BE (head plain_quads_LE) alg key 0 == quad32_xor plain (aes_encrypt_LE alg key (reverse_bytes_quad32 icb_BE)));
+  reveal_opaque aes_encrypt_LE_def;
   assert (gctr_encrypt_block icb_BE (head plain_quads_LE) alg key 0 == quad32_xor plain (aes_encrypt_BE alg key icb_BE));
   assert (gctr_encrypt_block icb_BE (head plain_quads_LE) alg key 0 == quad32_xor plain encrypted_icb);
   assert(gctr_encrypt_recursive icb_BE (tail p_seq) alg key 1 == empty);   // OBSERVE

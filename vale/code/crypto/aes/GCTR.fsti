@@ -24,9 +24,11 @@ val gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algo
          let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_LE) 0 in
          cipher = gctr_encrypt_LE icb_BE (make_gctr_plain_LE plain) alg key)
 
+let aes_encrypt_le = make_opaque aes_encrypt_LE_def
+
 let aes_encrypt_BE (alg:algorithm) (key:aes_key_LE alg) (p_BE:quad32) =
   let p_LE = reverse_bytes_quad32 p_BE in
-  aes_encrypt_LE alg key p_LE
+  aes_encrypt_le alg key p_LE
 
 let gctr_partial (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:aes_key_LE alg) (icb:quad32) =
   let bound = min bound (min (length plain) (length cipher)) in

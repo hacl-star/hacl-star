@@ -32,7 +32,7 @@ let va_if (#a:Type) (b:bool) (x:(_:unit{b}) -> GTot a) (y:(_:unit{~b}) -> GTot a
 
 (* Define a tainted operand to wrap the base operand type *)
 [@va_qattr]
-type tainted_operand =
+type tainted_operand:eqtype =
 | TConst: n:int -> tainted_operand
 | TReg: r:reg -> tainted_operand
 | TMem: m:maddr -> t:taint -> tainted_operand
@@ -65,8 +65,8 @@ let extract_taint3 (o1 o2 o3:tainted_operand) : taint =
 unfold let va_bool = bool
 unfold let va_prop = Type0
 unfold let va_int = int
-val ins : Type0
-val ocmp : Type0
+val ins : eqtype
+val ocmp : eqtype
 unfold let va_code = precode ins ocmp
 unfold let va_codes = list va_code
 let va_tl (cs:va_codes) : Ghost va_codes (requires Cons? cs) (ensures fun tl -> tl == Cons?.tl cs) = Cons?.tl cs
@@ -355,6 +355,14 @@ let validDstAddrs128 (m:M.mem) (addr:int) (b:M.buffer128) (len:int) (memTaint:M.
     len <= buffer_length b /\
     M.buffer_addr b m == addr /\
     M.valid_taint_buf128 b m memTaint t
+
+let validSrcAddrsOffset128 (m:M.mem) (addr:int) (b:M.buffer128) (offset len:int) (memTaint:M.memtaint) (t:taint) =
+    buffer_readable m b /\
+    offset + len <= buffer_length b /\
+    M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
+    M.valid_taint_buf128 b m memTaint t
+
+let validDstAddrsOffset128 = validSrcAddrsOffset128
 
 let valid_stack_slots (m:M.mem) (rsp:int) (b:M.buffer64) (num_slots:int) (memTaint:M.memtaint) =
     M.valid_taint_buf64 b m memTaint Public /\

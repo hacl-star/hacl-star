@@ -42,8 +42,9 @@ let extract_operands (i:ins) : (list operand * list operand) =
   | S.Pop dst -> [dst], [OMem (MReg Rsp 0)]
   | _ -> [], []
 
-type tainted_ins = |TaintedIns: ops:(ins * list operand * list operand){let i, d, s = ops in (d,s) = extract_operands i}
-                                -> t:taint -> tainted_ins
+type tainted_ins:eqtype = 
+  |TaintedIns: ops:(ins * list operand * list operand){let i, d, s = ops in (d,s) = extract_operands i}
+             -> t:taint -> tainted_ins
 
 let operand_obs (s:traceState) (o:operand) : list observation =
   match o with
@@ -143,7 +144,7 @@ let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
   {state = s; trace = ts.trace; memTaint = memTaint}
   end
 
-type tainted_ocmp = |TaintedOCmp: o:ocmp -> ot:taint -> tainted_ocmp
+type tainted_ocmp:eqtype = |TaintedOCmp: o:ocmp -> ot:taint -> tainted_ocmp
 
 let get_fst_ocmp (o:ocmp) = match o with
   | S.OEq o1 _ | S.ONe o1 _ | S.OLe o1 _ | S.OGe o1 _ | S.OLt o1 _ | S.OGt o1 _ -> o1
@@ -156,8 +157,8 @@ let taint_eval_ocmp (ts:traceState) (c:tainted_ocmp) : GTot (traceState * bool) 
   let s = run (check (valid_ocmp c.o);; check (taint_match (get_fst_ocmp c.o) t ts.memTaint);; check (taint_match (get_snd_ocmp c.o) t ts.memTaint)) ts.state in
     {ts with state = s}, eval_ocmp s c.o
 
-type tainted_code = precode tainted_ins tainted_ocmp
-type tainted_codes = list tainted_code
+type tainted_code:eqtype = precode tainted_ins tainted_ocmp
+type tainted_codes:eqtype = list tainted_code
 
 val taint_eval_code: c:tainted_code -> fuel:nat -> s:traceState -> GTot (option traceState)
 (decreases %[fuel; c; 1])

@@ -139,6 +139,27 @@ let push_pop_xmm (x y:quad32) : Lemma
 //   assert (nat_to_two 32 (hi64 x) == two_select (four_to_two_two x) 1);
    ()
 
+let lemma_insrq_extrq_relations (x y:quad32) :  
+  Lemma (let z = insert_nat64 x (lo64 y) 0 in
+         z == Mkfour y.lo0 y.lo1 x.hi2 x.hi3 /\
+        (let z = insert_nat64 x (hi64 y) 1 in
+         z == Mkfour x.lo0 x.lo1 y.hi2 y.hi3))
+  =
+  let open Words.Two in
+  let z = insert_nat64 x (lo64 y) 0 in
+  //assert (q'.hi2 == q.hi2);
+  //assert (q'.hi3 == q.hi3);
+  //assert (q' == two_two_to_four (two_insert (four_to_two_two q) (nat_to_two 32 (lo64 q)) 0));
+  //assert (q' == two_two_to_four (two_insert (four_to_two_two q) (nat_to_two 32 (two_to_nat 32 (two_select (four_to_two_two q) 0))) 0));
+  let Mktwo n1 n2 = two_select (four_to_two_two y) 0 in
+  nat_to_two_to_nat n1 n2;
+  let Mktwo n1 n2 = two_select (four_to_two_two y) 1 in
+  nat_to_two_to_nat n1 n2;
+  //assert (q' == two_two_to_four (two_insert (four_to_two_two q) (two_select (four_to_two_two q) 0) 0));
+  //assert (q'.lo1 == q.lo1);
+  //assert (q == q');
+  ()
+
 #reset-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
 let le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) == create 1 b)

@@ -31,7 +31,10 @@ let extra_bytes_helper (n:nat) : Lemma
 
 #reset-options "--smtencoding.elim_box true --z3rlimit 25 --max_ifuel 1 --initial_fuel 0 --max_fuel 1"
 let bytes_to_quad_size_no_extra_bytes num_bytes = ()
-let no_extra_bytes_helper s num_bytes = ()
+
+let no_extra_bytes_helper s num_bytes =
+  assert (slice (le_seq_quad32_to_bytes s) 0 num_bytes == le_seq_quad32_to_bytes s); // TODO: this shouldn't be necessary
+  ()
 
 let le_seq_quad32_to_bytes_tail_prefix (s:seq quad32) (num_bytes:nat) =
   let num_extra = num_bytes % 16 in
@@ -238,7 +241,7 @@ let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
   assert(12 <= i /\ i < 16 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q3) (i % 4))
 
 
-#reset-options "--smtencoding.elim_box true --z3rlimit 40 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
+#reset-options "--smtencoding.elim_box true --z3rlimit 60 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 let lemma_pad_to_32_bits_helper (s s'':seq4 nat8) (n:nat) : Lemma
   (requires
     n <= 2 /\

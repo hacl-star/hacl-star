@@ -152,7 +152,7 @@ let get32_injective (s1 s2:Seq.lseq U8.t 4) :
     =
     inverses32()
   in
-  Meta.generic_injective_proof #(Seq.lseq U8.t 4) #UInt32.t get32 put32 specific
+  Util.Meta.generic_injective_proof #(Seq.lseq U8.t 4) #UInt32.t get32 put32 specific
 
 *)
 

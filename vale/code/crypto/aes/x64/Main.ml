@@ -37,7 +37,7 @@ let _ =
   else X64_GCMencrypt.va_code_gcm_make_length_quad_buffer ()));
       ("Quad32_xor_win_quad32_xor_buffer_win", (fun win ->
   if win then X64_Util.va_code_quad32_xor_buffer_win ()
-  else X64_Util.va_code_quad32_xor_buffer ()));
+  else X64_Util.va_code_quad32_xor_buffer win));
       ("Reverse_quad32_win_reverse_bytes_quad32_buffer_win", (fun win ->
   if win then X64_Util.va_code_reverse_bytes_quad32_buffer_win ()
   else X64_Util.va_code_reverse_bytes_quad32_buffer ()))
