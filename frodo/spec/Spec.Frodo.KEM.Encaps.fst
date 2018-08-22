@@ -21,7 +21,7 @@ module Matrix = Spec.Matrix
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
 
 val update_ct:
-    c1:lbytes (params_logq * params_nbar * params_n / 8)
+     c1:lbytes (params_logq * params_nbar * params_n / 8)
   -> c2:lbytes (params_logq * params_nbar * params_nbar / 8)
   -> d:lbytes crypto_bytes
   -> ct:lbytes crypto_ciphertextbytes
@@ -46,7 +46,7 @@ let update_ct c1 c2 d ct =
   ct
 
 val lemma_update_ct:
-    c1:lbytes (params_logq * params_nbar * params_n / 8)
+     c1:lbytes (params_logq * params_nbar * params_n / 8)
   -> c2:lbytes (params_logq * params_nbar * params_nbar / 8)
   -> d:lbytes crypto_bytes
   -> ct0:lbytes crypto_ciphertextbytes
@@ -72,47 +72,20 @@ let lemma_update_ct c1 c2 d ct0 ct =
   FStar.Seq.Properties.lemma_split ct1 (c1Len + c2Len)
 
 val update_ss_init:
-    c12:lbytes (params_logq * params_nbar * params_n / 8 + params_logq * params_nbar * params_nbar / 8)
+    c12:lbytes (crypto_ciphertextbytes - crypto_bytes)
   -> kd:lbytes (crypto_bytes + crypto_bytes)
   -> ss_init:lbytes (crypto_ciphertextbytes + crypto_bytes)
   -> res:lbytes (crypto_ciphertextbytes + crypto_bytes)
-    {let c1Len = params_logq * params_nbar * params_n / 8 in
-     let c2Len = params_logq * params_nbar * params_nbar / 8 in
-     expand_crypto_ciphertextbytes ();
-     Seq.sub res 0 (c1Len + c2Len) == c12 /\
-     Seq.sub res (c1Len + c2Len) (crypto_bytes + crypto_bytes) == kd}
+    {Seq.sub res 0 (crypto_ciphertextbytes - crypto_bytes) == c12 /\
+     Seq.sub res (crypto_ciphertextbytes - crypto_bytes) (crypto_bytes + crypto_bytes) == kd}
 let update_ss_init c12 kd ss_init =
-  expand_crypto_ciphertextbytes ();
-  let c1Len = params_logq * params_nbar * params_n / 8 in
-  let c2Len = params_logq * params_nbar * params_nbar / 8 in
-  let ss_init = update_sub ss_init 0 (c1Len + c2Len) c12 in
-  let ss_init = update_sub ss_init (c1Len + c2Len) (crypto_bytes + crypto_bytes) kd in
-  eq_intro (Seq.sub ss_init 0 (c1Len + c2Len)) c12;
+  let ss_init = update_sub ss_init 0 (crypto_ciphertextbytes - crypto_bytes) c12 in
+  let ss_init = update_sub ss_init (crypto_ciphertextbytes - crypto_bytes) (crypto_bytes + crypto_bytes) kd in
+  eq_intro (Seq.sub ss_init 0 (crypto_ciphertextbytes - crypto_bytes)) c12;
   ss_init
 
-val lemma_updade_ss_init:
-    c12:lbytes (params_logq * params_nbar * params_n / 8 + params_logq * params_nbar * params_nbar / 8)
-  -> kd:lbytes (crypto_bytes + crypto_bytes)
-  -> ss_init0:lbytes (crypto_ciphertextbytes + crypto_bytes)
-  -> ss_init:lbytes (crypto_ciphertextbytes + crypto_bytes)
-  -> Lemma
-    (requires (
-      let c1Len = params_logq * params_nbar * params_n / 8 in
-      let c2Len = params_logq * params_nbar * params_nbar / 8 in
-      expand_crypto_ciphertextbytes ();
-      Seq.sub ss_init 0 (c1Len + c2Len) == c12 /\
-      Seq.sub ss_init (c1Len + c2Len) (crypto_bytes + crypto_bytes) == kd))
-    (ensures ss_init == update_ss_init c12 kd ss_init0)
-let lemma_updade_ss_init c12 kd ss_init0 ss_init =
-  let ss_init1 = update_ss_init c12 kd ss_init0 in
-  let c1Len = params_logq * params_nbar * params_n / 8 in
-  let c2Len = params_logq * params_nbar * params_nbar / 8 in
-  expand_crypto_ciphertextbytes ();
-  FStar.Seq.Properties.lemma_split ss_init (c1Len + c2Len);
-  FStar.Seq.Properties.lemma_split ss_init1 (c1Len + c2Len)
-
 val update_ss:
-    c12:lbytes (params_logq * params_nbar * params_n / 8 + params_logq * params_nbar * params_nbar / 8)
+    c12:lbytes (crypto_ciphertextbytes - crypto_bytes)
   -> kd:lbytes (crypto_bytes + crypto_bytes)
   -> ss:lbytes crypto_bytes
   -> res:lbytes crypto_bytes
@@ -124,7 +97,7 @@ let update_ss c12 kd ss =
   ss
 
 val frodo_mul_add_sa_plus_e:
-    seed_a:lbytes bytes_seed_a
+     seed_a:lbytes bytes_seed_a
   -> seed_e:lbytes crypto_bytes
   -> sp_matrix:matrix params_nbar params_n
   -> matrix params_nbar params_n
@@ -191,7 +164,6 @@ val crypto_kem_enc_ct_inner:
 let crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d ct =
   let c1 = crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix in
   let c2 = crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix in
-
   let ct = update_ct c1 c2 d ct in
   ct
 
@@ -230,12 +202,9 @@ val crypto_kem_enc_1:
   -> pk:lbytes crypto_publickeybytes
   -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
 let crypto_kem_enc_1 g coins ct ss pk =
-  expand_crypto_ciphertextbytes ();
   let ct = crypto_kem_enc_ct pk g coins ct in
 
-  let c1Len = params_logq * params_nbar * params_n / 8 in
-  let c2Len = params_logq * params_nbar * params_nbar / 8 in
-  let c12 = Seq.sub ct 0 (c1Len + c2Len) in
+  let c12 = Seq.sub ct 0 (crypto_ciphertextbytes - crypto_bytes) in
   let kd = Seq.sub g crypto_bytes (crypto_bytes + crypto_bytes) in
   let ss = update_ss c12 kd ss in
   ct, ss
@@ -247,7 +216,6 @@ val crypto_kem_enc:
   -> ss:lbytes crypto_bytes
   -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
 let crypto_kem_enc coins pk ct ss =
-  expand_crypto_ciphertextbytes ();
   let pk_coins = Seq.create (crypto_publickeybytes + bytes_mu) (u8 0) in
   let g = crypto_kem_enc_0 coins pk pk_coins in
 
