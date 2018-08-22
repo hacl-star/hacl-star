@@ -4,6 +4,7 @@ module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module C = Spec.SHA2.Constants
 module S = FStar.Seq
+module E = FStar.Kremlin.Endianness
 
 open Spec.Hash.Helpers
 
@@ -41,13 +42,13 @@ let block_w  (a: sha2_alg) = m:S.seq (word a) {S.length m = size_block_w}
 let counter = nat
 
 (* Define word based operators *)
-let words_to_be: a:sha2_alg -> Tot (len:nat -> s:S.seq (word a){S.length s = len} -> Tot (Spec.Lib.lbytes FStar.Mul.(size_word a * len))) = function
-  | SHA2_224 | SHA2_256 -> Spec.Lib.uint32s_to_be
-  | SHA2_384 | SHA2_512 -> Spec.Lib.uint64s_to_be
+let words_to_be: a:sha2_alg -> Tot (s:S.seq (word a) -> Tot (Spec.Lib.lbytes FStar.Mul.(size_word a * S.length s))) = function
+  | SHA2_224 | SHA2_256 -> E.be_of_seq_uint32
+  | SHA2_384 | SHA2_512 -> E.be_of_seq_uint64
 
 let words_from_be: a:sha2_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(size_word a * len) -> Tot (s:S.seq (word a){S.length s = len})) = function
-  | SHA2_224 | SHA2_256 -> Spec.Lib.uint32s_from_be
-  | SHA2_384 | SHA2_512 -> Spec.Lib.uint64s_from_be
+  | SHA2_224 | SHA2_256 -> E.seq_uint32_of_be
+  | SHA2_384 | SHA2_512 -> E.seq_uint64_of_be
 
 let word_add_mod: a:sha2_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> U32.add_mod
@@ -239,4 +240,4 @@ let pad (a:sha2_alg)
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
 let finish (a:sha2_alg) (hashw:hash_w a): Tot (hash:bytes{S.length hash = (size_hash a)}) =
   let hash_final_w = S.slice hashw 0 (size_hash_final_w a) in
-  words_to_be a (size_hash_final_w a) hash_final_w
+  words_to_be a hash_final_w
