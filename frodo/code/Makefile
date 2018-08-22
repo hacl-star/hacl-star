@@ -37,7 +37,9 @@ KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
 KREMLIN=$(KREMLIN_HOME)/krml
 
 # Manual staging...
-all:
+all: lib
+
+test:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2-test
