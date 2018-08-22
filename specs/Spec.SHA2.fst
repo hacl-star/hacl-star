@@ -17,7 +17,7 @@ let size_k_w: sha2_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> 64
   | SHA2_384 | SHA2_512 -> 80
 
-(* Define the length of the encoded lenght in the padding *)
+(* Define the length of the encoded length in the padding *)
 inline_for_extraction
 let size_len_8: sha2_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> 8
