@@ -43,30 +43,29 @@ val hash_2:
 	   BV.buffer_inv_live hash_size h0 src2 /\
 	   BV.buffer_inv_live hash_size h0 dst))
 	 (ensures (fun h0 _ h1 -> true))
+#reset-options "--z3rlimit 20"
 let hash_2 src1 src2 dst =
-  admit ();
-  HST.push_frame ();
+  // HST.push_frame ();
+  let cb = B.malloc HH.root 0uy (EHS.blockLen EHS.SHA256) in
+  // let cb = B.alloca 0uy (EHS.blockLen EHS.SHA256) in
+  B.blit src1 0ul cb 0ul hash_size;
+  B.blit src2 0ul cb 32ul hash_size;
   let st = EHS.create EHS.SHA256 in
   EHS.init st;
-
-  let sb1 = B.alloca 0uy (EHS.blockLen EHS.SHA256) in
-  let sb2 = B.alloca 0uy (EHS.blockLen EHS.SHA256) in
-  B.blit src1 0ul sb1 0ul hash_size;
-  B.blit src2 0ul sb2 0ul hash_size;
-
-  EHS.update (Ghost.hide S.empty) st sb1;
-  let hh1 = HST.get () in
-  EHS.update (Ghost.hide (B.as_seq hh1 sb1)) st sb2;
-  EHS.finish st dst;
-  HST.pop_frame ()
+  EHS.update (Ghost.hide S.empty) st cb;
+  EHS.finish st dst
+  // HST.pop_frame ()
 
 /// Low-level Merkle tree data structure
 
-// A Merkle tree `MT i j hs` stores all necessary hashes to generate
-// a Merkle path for each element from the index `i` to `j-1`. 
-// `hs` is a 2-dim store for hashes, where `hs[0]` contains leaf hash values.
-// `rhs` is a store for "rightmost" hashes, manipulated only when required to
-// calculate some merkle parhs that need the rightmost hashes as a part of them.
+// A Merkle tree `MT i j hs rhs_ok rhs` stores all necessary hashes to generate
+// a Merkle path for each element from the index `i` to `j-1`.
+// - Parameters
+// `hs`: a 2-dim store for hashes, where `hs[0]` contains leaf hash values.
+// `rhs_ok`: to check the rightmost hashes are up-to-date
+// `rhs`: a store for "rightmost" hashes, manipulated only when required to
+//        calculate some merkle parhs that need the rightmost hashes
+//        as a part of them.
 noeq type merkle_tree = 
 | MT: i:uint32_t -> j:uint32_t{j > i} ->
       hs:B.buffer hash_vec{B.length hs = 32} ->
@@ -130,6 +129,19 @@ let free_mt mt =
   B.free (MT?.hs mtv);
   B.free mt
 
+/// Utilities
+
+val copy_hash:
+  src:hash -> dst:hash ->
+  HST.ST unit
+	 (requires (fun h0 -> 
+	   BV.buffer_inv_live hash_size h0 src /\
+	   BV.buffer_inv_live hash_size h0 dst /\
+	   B.disjoint src dst))
+	 (ensures (fun h0 _ h1 -> true))
+let copy_hash src dst =
+  B.blit src 0ul dst 0ul hash_size
+
 /// Insertion
 
 val insert_:
@@ -142,15 +154,12 @@ val insert_:
 	 (ensures (fun h0 _ h1 -> true))
 let rec insert_ lv j hs acc =
   admit ();
-  if j % 2ul = 0ul then 
-    B.upd hs lv (V.insert (B.index hs lv) acc)
-  else
-    (B.upd hs lv (V.insert (B.index hs lv) acc);
-    hash_2 (V.back (B.index hs lv)) acc acc;
-    insert_ (lv + 1ul) (j / 2ul) hs acc)
+  B.upd hs lv (V.insert (B.index hs lv) acc);
+  if j % 2ul = 1ul
+  then (hash_2 (V.back (B.index hs lv)) acc acc;
+       insert_ (lv + 1ul) (j / 2ul) hs acc)
 
-// Caution: current impl. manipulates the content in `v`
-//          as an accumulator.
+// Caution: current impl. manipulates the content in `v`.
 val insert:
   mt:mt_ptr -> v:hash ->
   HST.ST unit
@@ -161,7 +170,7 @@ let rec insert mt v =
   let mtv = B.index mt 0ul in
   insert_ 0ul (MT?.j mtv) (MT?.hs mtv) v;
   B.upd mt 0ul 
-    (MT (MT?.i mtv) 
+    (MT (MT?.i mtv)
 	(MT?.j mtv + 1ul)
 	(MT?.hs mtv)
 	false // `rhs` is always deprecated right after an insertion.
@@ -169,7 +178,10 @@ let rec insert mt v =
 
 /// Getting the Merkle root and path
 
-val fill_rhs:
+// Construct the rightmost hashes for a given (incomplete) Merkle tree.
+// This function also calculates the Merkle root, which is the final
+// accumulator value.
+val construct_rhs:
   lv:uint32_t{lv < 32ul} ->
   hs:B.buffer hash_vec{B.length hs = 32} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
@@ -178,18 +190,25 @@ val fill_rhs:
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let rec fill_rhs lv hs rhs j acc actd =
+let rec construct_rhs lv hs rhs j acc actd =
   admit ();
   if j = 0ul then ()
   else if j % 2ul = 0ul
-  then fill_rhs (lv + 1ul) hs rhs (j / 2ul) acc actd
+  then
+    // If `j` is even, it already has a rightmost hash of (lv + 1ul)
+    construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc actd
   else (
     (if actd
     then (hash_2 (V.index (B.index hs lv) (j - 1ul)) acc acc;
 	 BV.assign_copy hash_size rhs (lv + 1ul) acc)
-    else B.blit (V.index (B.index hs lv) (j - 1ul)) 0ul acc 0ul hash_size);
-    fill_rhs (lv + 1ul) hs rhs (j / 2ul) acc true)
+    else copy_hash (V.index (B.index hs lv) (j - 1ul)) acc);
+    construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc true)
 
+// Construct a Merkle path for a given index `k`, hashes `hs`, 
+// and rightmost hashes `rhs`.
+// Caution: current impl. copies "pointers" in the Merkle tree 
+//          to the output path.
+(** TODO: this is WRONG when some rightmost hashes are involved *)
 val mt_get_path_:
   lv:uint32_t{lv < 32ul} ->
   hs:B.buffer hash_vec{B.length hs = 32} ->
@@ -202,14 +221,13 @@ val mt_get_path_:
 let rec mt_get_path_ lv hs rhs j k path =
   admit ();
   if j = 0ul then ()
-  else if k % 2ul = 0ul 
-  then (if k + 1ul < j
-       then (B.upd path lv (V.index (B.index hs lv) (k + 1ul));
-	    mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path)
-       else (B.upd path lv (V.index rhs lv);
-	    mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path))
-  else (B.upd path lv (V.index (B.index hs lv) (k - 1ul));
-       mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path)
+  else 
+    (if k % 2ul = 0ul 
+    then (if k + 1ul < j
+	 then B.upd path lv (V.index (B.index hs lv) (k + 1ul))
+	 else B.upd path lv (V.index rhs lv))
+    else B.upd path lv (V.index (B.index hs lv) (k - 1ul));
+    mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path)
 
 val mt_get_path:
   mt:mt_ptr -> 
@@ -223,7 +241,7 @@ let mt_get_path mt idx root path =
   admit ();
   let mtv = B.index mt 0ul in
   if not (MT?.rhs_ok mtv) then
-    (fill_rhs 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv) root false;
+    (construct_rhs 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv) root false;
     B.upd mt 0ul (MT (MT?.i mtv) (MT?.j mtv) (MT?.hs mtv) true (MT?.rhs mtv)))
   else ();
   mt_get_path_ 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv) idx path;
