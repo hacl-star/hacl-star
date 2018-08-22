@@ -49,8 +49,8 @@ let mpfr_add_one_ulp a rnd_mode sh ax =
     if ap.(0ul) =^ 0uL then begin
         ap.(0ul) <- mpfr_LIMB_HIGHBIT;
 	if I32.(ax +^ 1l >^ mpfr_EMAX) then mpfr_overflow a rnd_mode (mpfr_SIGN a)
-	else (mpfr_SET_EXP a I32.(ax +^ 1l); mpfr_SIGN a)
-    end else mpfr_SIGN a
+	else (mpfr_SET_EXP a I32.(ax +^ 1l); mpfr_RET (mpfr_SIGN a))
+    end else mpfr_RET (mpfr_SIGN a)
 
 inline_for_extraction val mpfr_mul_1_rounding: a:mpfr_ptr -> sh:mpfr_prec_t -> ax:mpfr_tmp_exp_t -> 
     rb:mp_limb_t -> sb:mp_limb_t -> rnd_mode:mpfr_rnd_t -> Stack i32
@@ -67,12 +67,13 @@ let mpfr_mul_1_rounding a sh ax rb sb rnd_mode =
     let h0 = ST.get() in
     mpfr_SET_EXP a ax;
     let h1 = ST.get() in
-    if rb =^ 0uL && sb =^ 0uL then 0l
+    if rb =^ 0uL && sb =^ 0uL then mpfr_RET 0l
     else if MPFR_RNDN? rnd_mode then
         if (rb =^ 0uL || (sb =^ 0uL && ((a0 &^ (mpfr_LIMB_ONE <<^ sh)) =^ 0uL))) then
-	    mpfr_NEG_SIGN (mpfr_SIGN a)
+	    mpfr_RET (mpfr_NEG_SIGN (mpfr_SIGN a))
 	else mpfr_add_one_ulp a rnd_mode sh ax
-    else if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_IS_NEG a) then mpfr_NEG_SIGN (mpfr_SIGN a)
+    else if mpfr_IS_LIKE_RNDZ rnd_mode (mpfr_IS_NEG a) then 
+        mpfr_RET (mpfr_NEG_SIGN (mpfr_SIGN a))
     else mpfr_add_one_ulp a rnd_mode sh ax
 
 inline_for_extraction val mpfr_mul_1_round: a:mpfr_ptr -> sh:mpfr_prec_t -> ax:mpfr_exp_t ->
