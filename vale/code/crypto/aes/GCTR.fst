@@ -461,7 +461,7 @@ let nat32_xor_bytewise_3 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   nat32_xor_bytewise_3_helper2 x x' t t';
   ()
 
-#push-options "--z3rlimit 50"
+#reset-options "--z3rlimit 50"
 let nat32_xor_bytewise_4 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   (requires
     k == four_to_nat 8 s /\
@@ -481,7 +481,7 @@ let nat32_xor_bytewise_4 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   assert_norm (four_to_nat 8 t' == four_to_nat_unfold 8 t');
   assert_norm (four_to_nat 8 t  == four_to_nat_unfold 8 t );
   ()
-#pop-options
+#reset-options
 
 let nat32_xor_bytewise (k k' m:nat32) (s s' t t':seq4 nat8) (n:nat) : Lemma
   (requires
