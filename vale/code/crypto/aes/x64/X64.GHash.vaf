@@ -512,6 +512,8 @@ procedure {:quick} compute_pad_to_128_bits()
         // Restore the lower 64 bits
         Pinsrq(io, tmp, 0);
 
+        lemma_lo64_properties();
+        lemma_hi64_properties();
         pad_to_128_bits_lower(old(io), num_bytes);
     } else {
         assert num_bytes - 8 >= 0;      // TODO: Shouldn't need this with the new type checker
@@ -532,6 +534,8 @@ procedure {:quick} compute_pad_to_128_bits()
 
         // Restore the upper 64 bits
         Pinsrq(io, tmp, 1);
+        lemma_lo64_properties();
+        lemma_hi64_properties();
         pad_to_128_bits_upper(old(io), num_bytes);
     }
 }

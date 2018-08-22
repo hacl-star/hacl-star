@@ -290,8 +290,9 @@ let lemma_mod_n_8_lower1 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures lo64 q % pow2 (8 * n) == q.lo0 % pow2 (8 * n))
   =
+  reveal_opaque lo64_def;
   let Mkfour _ _ _ _ = q in // avoid ifuel
-  let f (n:nat{n <= 4}) = lo64 q % pow2 (8 * n) == q.lo0 % pow2 (8 * n) in
+  let f (n:nat{n <= 4}) = lo64_def q % pow2 (8 * n) == q.lo0 % pow2 (8 * n) in
   assert_norm (f 0);
   assert_norm (f 1);
   assert_norm (f 2);
@@ -303,8 +304,9 @@ let lemma_mod_n_8_lower2_helper (q:quad32) (n:nat) : Lemma
   (requires n <= 2)
   (ensures lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)))
   =
+  reveal_opaque lo64_def;
   let Mkfour _ _ _ _ = q in // avoid ifuel
-  let f (n:nat{n <= 4}) = lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
+  let f (n:nat{n <= 4}) = lo64_def q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
   assert_norm (f 2);
   assert_norm (f 1);
   assert_norm (f 0);
@@ -314,9 +316,10 @@ let lemma_mod_n_8_lower2 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)))
   =
+  reveal_opaque lo64_def;
   if n <= 2 then lemma_mod_n_8_lower2_helper q n else
   let Mkfour _ _ _ _ = q in // avoid ifuel
-  let f (n:nat{n <= 4}) = lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
+  let f (n:nat{n <= 4}) = lo64_def q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
   assert_norm (f 4);
   assert_norm (f 3);
   ()
@@ -325,6 +328,8 @@ let lemma_mod_n_8_upper1 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures hi64 q % pow2 (8 * n) == q.hi2 % pow2 (8 * n))
   =
+  reveal_opaque hi64_def;
+  reveal_opaque lo64_def;
   let Mkfour _ _ q2 q3 = q in
   lemma_mod_n_8_lower1 (Mkfour q2 q3 0 0) n
 
@@ -332,6 +337,8 @@ let lemma_mod_n_8_upper2 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures hi64 q % pow2 (8 * (4 + n)) == q.hi2 + 0x100000000 * (q.hi3 % pow2 (8 * n)))
   =
+  reveal_opaque hi64_def;
+  reveal_opaque lo64_def;
   let Mkfour _ _ q2 q3 = q in
   lemma_mod_n_8_lower2 (Mkfour q2 q3 0 0) n
 
@@ -439,6 +446,7 @@ let pad_to_128_bits_lower (q:quad32) (num_bytes:int) =
   let s = le_quad32_to_bytes q in
   let s' = slice s 0 n in
   let q' = insert_nat64 (insert_nat64 q 0 1) new_lo 0 in
+  reveal_opaque insert_nat64;
   let s'' = pad_to_128_bits s' in
   let q'' = le_bytes_to_quad32 s'' in
 
@@ -487,6 +495,7 @@ let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
   let s = le_quad32_to_bytes q in
   let s' = slice s 0 n in
   let q' = insert_nat64 q new_hi 1 in
+  reveal_opaque insert_nat64;
   let s'' = pad_to_128_bits s' in
   let q'' = le_bytes_to_quad32 s'' in
 

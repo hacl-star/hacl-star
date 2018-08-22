@@ -699,8 +699,8 @@ procedure {:quick} aes_counter_loop(
     }
 
     Mov128(iv, const2_1);
-    Pinsrq(iv, iv_lower64, 0);
     lemma_insrq_extrq_relations(iv, old_iv);
+    Pinsrq(iv, iv_lower64, 0);
     assert {:quick_type} 4*old(num_quad_blocks) < pow2_32;
     //assert iv == Mkfour(old_iv.lo0, old_iv.lo1, old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, 4*old(num_quad_blocks))));
     // Reversed: iv == Mkfour(r (r (add_wrap(r(old_iv.hi3), 4*old(num_quad_blocks)))), r(old_iv.hi2), r(old_iv.lo1), r(old_iv.lo0));
@@ -709,5 +709,4 @@ procedure {:quick} aes_counter_loop(
     reveal_reverse_bytes_quad32(iv);
     Pshufb(iv, mask);
     //assert iv == old(inc32(iv, 4*num_quad_blocks));
-   
 }
