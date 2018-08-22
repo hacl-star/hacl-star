@@ -138,6 +138,15 @@ val ws (a: sha2_alg) (b: block_w a) (ws: ws_w a):
 
 // A detour with three sequence lemmas required for the proof below to go through.
 
+let index_slice (#a: Type) (s: S.seq a) (j: nat) (i: nat):
+  Lemma
+    (requires (
+      i < j /\ j <= S.length s))
+    (ensures (S.index (S.slice s 0 j) i == S.index s i))
+  [ SMTPat (S.index (S.slice s 0 j) i) ]
+=
+  ()
+
 let init_next (#a: Type) (s: S.seq a) (f: (i:nat { i < S.length s }) -> a) (i: nat):
   Lemma
     (requires (
@@ -146,7 +155,9 @@ let init_next (#a: Type) (s: S.seq a) (f: (i:nat { i < S.length s }) -> a) (i: n
       S.index s i == f i))
     (ensures (S.equal (S.slice s 0 (i + 1)) (S.init (i + 1) f)))
 =
-  admit ()
+  assert (forall j. j < i ==> S.index (S.slice s 0 i) j == f j);
+  assert (forall j. j < i ==> S.index (S.slice s 0 (i + 1)) j == f j);
+  assert (S.index (S.slice s 0 (i + 1)) i == f i)
 
 let init_index (#a: Type) (j: nat) (f: (i:nat { i < j }) -> a) (i: nat):
   Lemma
@@ -154,15 +165,6 @@ let init_index (#a: Type) (j: nat) (f: (i:nat { i < j }) -> a) (i: nat):
       i < j))
     (ensures (S.index (S.init j f) i == f i))
   [ SMTPat (S.index (S.init j f) i) ]
-=
-  ()
-
-let index_slice (#a: Type) (s: S.seq a) (j: nat) (i: nat):
-  Lemma
-    (requires (
-      i < j /\ j <= S.length s))
-    (ensures (S.index (S.slice s 0 j) i == S.index s i))
-  [ SMTPat (S.index (S.slice s 0 j) i) ]
 =
   ()
 
