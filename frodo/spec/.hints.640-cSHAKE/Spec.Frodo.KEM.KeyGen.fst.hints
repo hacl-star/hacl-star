@@ -54,7 +54,7 @@
         "typing_FStar.Seq.Base.length", "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "0ccf22fb8daee45fb95c43e7a2c49af8"
+      "9def6a1e0b812ac37105030ac0190889"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.update_pk",
@@ -95,7 +95,7 @@
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_fdcc3d87ad7e44154abdccb1991a003f"
       ],
       0,
-      "cf3a5b407c1b78b05e5fc63cee5199d5"
+      "e8a02a40728e823bd9bcad9108f517a9"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.update_pk",
@@ -125,9 +125,10 @@
         "function_token_typing_Spec.Frodo.KEM.crypto_publickeybytes",
         "function_token_typing_Spec.Frodo.Params.crypto_bytes",
         "function_token_typing_Spec.Frodo.Params.params_n", "int_inversion",
-        "lemma_Lib.IntTypes.pow2_values", "lemma_Lib.Sequence.eq_elim",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "int_typing", "lemma_Lib.IntTypes.pow2_values",
+        "lemma_Lib.Sequence.eq_elim", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Frodo.Params_Tm_refine_321166b4c5153e283ddf50c874777e9d",
         "refinement_interpretation_Frodo.Params_Tm_refine_6fba118e8c6bc1504f4e9db492085f22",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
@@ -153,7 +154,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "ea73f600359d3d77df967377b47b0ccb"
+      "399156eedb42c269f61dcf6d1a4e12cd"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.lemma_updade_pk",
@@ -208,7 +209,7 @@
         "typing_FStar.Seq.Base.length", "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "a35ba03a0709b44af190e146ff75ea95"
+      "2e2ab7fb155f897037e4464aed3a27fe"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.lemma_updade_pk",
@@ -249,7 +250,7 @@
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_fdcc3d87ad7e44154abdccb1991a003f"
       ],
       0,
-      "0138c8fb991f2b1c0ed31e29acb4b3b9"
+      "c7258e36f9a5073c44e9ceaab985183f"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.lemma_updade_pk",
@@ -295,7 +296,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "08fa9e657e8b49689dd0db192e486fd8"
+      "c90321074341a4ab706eca10bac07cf6"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.update_sk",
@@ -333,7 +334,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "7cec54585551aab96bb7f271067529ea"
+      "135c6e3b38a1284b5a5fcdf1e7d18c42"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.update_sk",
@@ -370,7 +371,7 @@
         "typing_Spec.Frodo.KEM.crypto_publickeybytes"
       ],
       0,
-      "f92a2cf4c301bb7bbe968bfe30fcdecf"
+      "dd732a4389853f0deb0f23efa4785f6a"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.update_sk",
@@ -440,7 +441,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "29c299271fef58c49a6c39a84b20a311"
+      "6e078c7b738c04c1476020750e69f232"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.lemma_updade_sk",
@@ -478,7 +479,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "7de6102c64e7de8823141fff3968175d"
+      "bdde81f4d5ce996775b46f20e7dc9575"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.lemma_updade_sk",
@@ -515,7 +516,7 @@
         "typing_Spec.Frodo.KEM.crypto_publickeybytes"
       ],
       0,
-      "08c18584b97da3130bf60c8ae16c47e4"
+      "d6dfa371e4467ea437305cbf7d7b5389"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.lemma_updade_sk",
@@ -525,15 +526,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "bool_typing",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_FStar.Pervasives.Native.fst",
         "equation_FStar.Pervasives.Native.snd",
-        "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
-        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
+        "equation_FStar.Seq.Properties.split", "equation_FStar.UInt32.n",
         "equation_Frodo.Params.crypto_bytes",
         "equation_Frodo.Params.params_n",
         "equation_Frodo.Params.params_nbar",
@@ -557,11 +555,12 @@
         "function_token_typing_Spec.Frodo.Params.params_n",
         "function_token_typing_Spec.Frodo.Params.params_nbar",
         "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.Seq.Properties.slice_slice",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
         "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_BoxBool_proj_0",
@@ -570,6 +569,7 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_3421154546287b0f0c012dd3d63b4945",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_528d1ac7a4a801fe55aa0f436f85ad2a",
         "refinement_interpretation_Frodo.Params_Tm_refine_321166b4c5153e283ddf50c874777e9d",
         "refinement_interpretation_Frodo.Params_Tm_refine_6fba118e8c6bc1504f4e9db492085f22",
@@ -587,13 +587,16 @@
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_c8a3fba89dac713f03248a02febd4657",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_fdcc3d87ad7e44154abdccb1991a003f",
-        "typing_FStar.Seq.Base.length", "typing_Lib.Sequence.update_sub",
+        "typing_FStar.Pervasives.Native.fst",
+        "typing_FStar.Pervasives.Native.snd", "typing_FStar.Seq.Base.length",
+        "typing_FStar.Seq.Base.seq", "typing_FStar.Seq.Properties.split",
+        "typing_Lib.Sequence.update_sub",
         "typing_Spec.Frodo.KEM.crypto_publickeybytes",
         "typing_Spec.Frodo.Params.crypto_bytes",
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "f6fd70207b0ed8181b0fcf54269a014f"
+      "d07bf8f236bdc0ffd86fa3df7c5e937f"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.crypto_publicmatrixbytes",
@@ -634,7 +637,7 @@
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_fdcc3d87ad7e44154abdccb1991a003f"
       ],
       0,
-      "eae44b22bb74953202687b8132255d96"
+      "bc472497bc9bc6f59cbe4ccf4b9c6b19"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.frodo_mul_add_as_plus_e_pack",
@@ -673,7 +676,7 @@
         "typing_Spec.Frodo.KEM.KeyGen.crypto_publicmatrixbytes"
       ],
       0,
-      "68ed85797475d09da7db139adc940eee"
+      "2e207962ae24e7bd91aa35ae6e1e19e7"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.frodo_mul_add_as_plus_e_pack",
@@ -723,7 +726,7 @@
         "typing_Spec.Frodo.KEM.KeyGen.crypto_publicmatrixbytes"
       ],
       0,
-      "2e33700ab7f949f56d45cdcc1f36eb4f"
+      "85739f5e58c140b2749c069f04b6642f"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.crypto_kem_keypair",
@@ -757,7 +760,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "b8513dc241730f68e3d39f99cec1ca27"
+      "c9b612c21741d16af777349516c4d488"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.crypto_kem_keypair",
@@ -791,7 +794,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "07c7826e0ec986ddd832b3f3168d59c6"
+      "827403ad29af4f629570709d19cfdbf2"
     ],
     [
       "Spec.Frodo.KEM.KeyGen.crypto_kem_keypair",
@@ -843,7 +846,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "0d1ea7b7cef7c7728066c415ff399588"
+      "0245eb90aba8ef184b01698541470082"
     ]
   ]
 ]

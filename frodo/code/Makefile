@@ -45,7 +45,6 @@ test:
 	STAGE=2 $(MAKE) stage2-test
 
 lib:
-	sed -i.bak 's/frodo_gen_matrix_cshake_4x/frodo_gen_matrix_cshake /g' Hacl.Impl.Frodo.Params.fst
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2-lib
@@ -55,6 +54,7 @@ lib64:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 TARGET=x64 $(MAKE) stage2-lib
+	sed -i.bak 's/frodo_gen_matrix_cshake_4x/frodo_gen_matrix_cshake /g' Hacl.Impl.Frodo.Params.fst
 
 stage1: $(GENERATED_DIR)/Makefile.include
 
