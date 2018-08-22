@@ -12,18 +12,25 @@ open Arch.Types
 unfold
 let (.[]) = FStar.Seq.index
 
+#reset-options "--max_fuel 0 --max_ifuel 0"
+
+// Define these specific converters here, so that F* only reasons about 
+// the correctness of the conversion once, rather that at every call site
+let vv (u:UInt32.t) : nat32 = v u
+let to_uint32 (n:nat32) : UInt32.t = uint_to_t n
+
 let ws_opaque = make_opaque ws
 let shuffle_core_opaque = make_opaque shuffle_core
 
 let make_hash_def (abef cdgh:quad32) : hash_w SHA2_256 =
-    let a = uint_to_t abef.hi3 in
-    let b = uint_to_t abef.hi2 in
-    let c = uint_to_t cdgh.hi3 in
-    let d = uint_to_t cdgh.hi2 in
-    let e = uint_to_t abef.lo1 in
-    let f = uint_to_t abef.lo0 in
-    let g = uint_to_t cdgh.lo1 in
-    let h = uint_to_t cdgh.lo0 in
+    let a = to_uint32 abef.hi3 in
+    let b = to_uint32 abef.hi2 in
+    let c = to_uint32 cdgh.hi3 in
+    let d = to_uint32 cdgh.hi2 in
+    let e = to_uint32 abef.lo1 in
+    let f = to_uint32 abef.lo0 in
+    let g = to_uint32 cdgh.lo1 in
+    let h = to_uint32 cdgh.lo0 in
     let hash = seq_of_list [a; b; c; d; e; f; g; h] in
     assert_norm (length hash == 8);
     assert_norm (index hash 2 == c);
@@ -34,28 +41,28 @@ let make_hash = make_opaque make_hash_def
 let make_hash_properties (abef cdgh:quad32) : 
   Lemma (let hash = make_hash abef cdgh in
          length hash == 8 /\
-         hash.[0] == uint_to_t abef.hi3 /\
-         hash.[1] == uint_to_t abef.hi2 /\
-         hash.[2] == uint_to_t cdgh.hi3 /\
-         hash.[3] == uint_to_t cdgh.hi2 /\
-         hash.[4] == uint_to_t abef.lo1 /\
-         hash.[5] == uint_to_t abef.lo0 /\
-         hash.[6] == uint_to_t cdgh.lo1 /\
-         hash.[7] == uint_to_t cdgh.lo0)
+         hash.[0] == to_uint32 abef.hi3 /\
+         hash.[1] == to_uint32 abef.hi2 /\
+         hash.[2] == to_uint32 cdgh.hi3 /\
+         hash.[3] == to_uint32 cdgh.hi2 /\
+         hash.[4] == to_uint32 abef.lo1 /\
+         hash.[5] == to_uint32 abef.lo0 /\
+         hash.[6] == to_uint32 cdgh.lo1 /\
+         hash.[7] == to_uint32 cdgh.lo0)
   = 
   reveal_opaque make_hash_def;
   let hash = make_hash abef cdgh in
   let hash' = make_hash_def abef cdgh in
   assert(hash == hash');
   assert_norm (length hash' == 8);
-  assert_norm(hash'.[0] == uint_to_t abef.hi3); 
-  assert_norm(hash'.[1] == uint_to_t abef.hi2); 
-  assert_norm(hash'.[2] == uint_to_t cdgh.hi3); 
-  assert_norm(hash'.[3] == uint_to_t cdgh.hi2); 
-  assert_norm(hash'.[4] == uint_to_t abef.lo1); 
-  assert_norm(hash'.[5] == uint_to_t abef.lo0); 
-  assert_norm(hash'.[6] == uint_to_t cdgh.lo1); 
-  assert_norm(hash'.[7] == uint_to_t cdgh.lo0);
+  assert_norm(hash'.[0] == to_uint32 abef.hi3); 
+  assert_norm(hash'.[1] == to_uint32 abef.hi2); 
+  assert_norm(hash'.[2] == to_uint32 cdgh.hi3); 
+  assert_norm(hash'.[3] == to_uint32 cdgh.hi2); 
+  assert_norm(hash'.[4] == to_uint32 abef.lo1); 
+  assert_norm(hash'.[5] == to_uint32 abef.lo0); 
+  assert_norm(hash'.[6] == to_uint32 cdgh.lo1); 
+  assert_norm(hash'.[7] == to_uint32 cdgh.lo0);
   ()
 
 let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}) :
@@ -113,13 +120,16 @@ let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:co
 //#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 2 --initial_ifuel 2 --z3rlimit 30"  
 let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
   (requires t + 1 < size_k_w SHA2_256 /\
-            xmm0.lo0 == v (add_mod (index (k0 SHA2_256) t)     (ws_opaque SHA2_256 block t)) /\
-            xmm0.lo1 == v (add_mod (index (k0 SHA2_256) (t+1)) (ws_opaque SHA2_256 block (t+1))))
+            xmm0.lo0 == vv (add_mod (index (k0 SHA2_256) t)     (ws_opaque SHA2_256 block t)) /\
+            xmm0.lo1 == vv (add_mod (index (k0 SHA2_256) (t+1)) (ws_opaque SHA2_256 block (t+1))))
   (ensures (let hash0 = make_hash abef cdgh in
             let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
             let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t + 1) in
             hash2 == make_hash (sha256_rnds2_spec cdgh abef xmm0) abef))
   =
+  admit();
+
+
   reveal_opaque ws;
   reveal_opaque shuffle_core;
   reveal_opaque make_hash_def;
@@ -137,7 +147,7 @@ let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_2
                  hash0.[5]
                  hash0.[6]
                  hash0.[7]
-                 (uint_to_t xmm0.lo0) 
+                 (to_uint32 xmm0.lo0) 
   in
   //assert_norm (hash0.[0] == b1);  // Fails
   assert (b1 == hash0.[0]);   // Passes
@@ -147,25 +157,31 @@ let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_2
 
   make_hash_properties (sha256_rnds2_spec cdgh abef xmm0) abef;
   
-  admit();
+  
   ()
   
 //#pop-options
 
 let ws_quad32 (t:counter) (block:block_w SHA2_256) : quad32 =
     if t < size_k_w SHA2_256 - 3 then
-       Mkfour (v (ws_opaque SHA2_256 block t))
-              (v (ws_opaque SHA2_256 block (t+1)))
-              (v (ws_opaque SHA2_256 block (t+2)))
-              (v (ws_opaque SHA2_256 block (t+3)))
+       Mkfour (vv (ws_opaque SHA2_256 block t))
+              (vv (ws_opaque SHA2_256 block (t+1)))
+              (vv (ws_opaque SHA2_256 block (t+2)))
+              (vv (ws_opaque SHA2_256 block (t+3)))
     else 
        Mkfour 0 0 0 0
 
 let _sigma0_quad32 (q:quad32) : quad32 =
-  Mkfour (v (_sigma0 SHA2_256 (uint_to_t q.lo0)))
-         (v (_sigma0 SHA2_256 (uint_to_t q.lo1)))
-         (v (_sigma0 SHA2_256 (uint_to_t q.hi2)))
-         (v (_sigma0 SHA2_256 (uint_to_t q.hi3)))
+  Mkfour (vv (_sigma0 SHA2_256 (to_uint32 q.lo0)))
+         (vv (_sigma0 SHA2_256 (to_uint32 q.lo1)))
+         (vv (_sigma0 SHA2_256 (to_uint32 q.hi2)))
+         (vv (_sigma0 SHA2_256 (to_uint32 q.hi3)))
+
+let _sigma1_quad32 (q:quad32) : quad32 =
+  Mkfour (vv (_sigma1 SHA2_256 (to_uint32 q.lo0)))
+         (vv (_sigma1 SHA2_256 (to_uint32 q.lo1)))
+         (vv (_sigma1 SHA2_256 (to_uint32 q.hi2)))
+         (vv (_sigma1 SHA2_256 (to_uint32 q.hi3)))
 
 let ws_partial_def (t:counter) (block:block_w SHA2_256) : quad32 =
     if 16 <= t && t < size_k_w SHA2_256 then
@@ -179,25 +195,27 @@ let ws_partial_def (t:counter) (block:block_w SHA2_256) : quad32 =
 let ws_partial = make_opaque ws_partial_def
 
 let lemma_add_wrap_is_add_mod (n0 n1:nat32) :
-  Lemma (add_wrap n0 n1 == v(add_mod (uint_to_t n0) (uint_to_t n1)))
+  Lemma (add_wrap n0 n1 == vv (add_mod (to_uint32 n0) (to_uint32 n1)))
   =
+  assert_norm (pow2 32 == pow2_32);
   ()
 
 let add_mod_quad32 (q0 q1:quad32) : quad32 =
-  Mkfour (v (add_mod (uint_to_t q0.lo0) (uint_to_t q1.lo0)))
-         (v (add_mod (uint_to_t q0.lo1) (uint_to_t q1.lo1)))
-         (v (add_mod (uint_to_t q0.hi2) (uint_to_t q1.hi2)))
-         (v (add_mod (uint_to_t q0.hi3) (uint_to_t q1.hi3)))
+  Mkfour (vv (add_mod (to_uint32 q0.lo0) (to_uint32 q1.lo0)))
+         (vv (add_mod (to_uint32 q0.lo1) (to_uint32 q1.lo1)))
+         (vv (add_mod (to_uint32 q0.hi2) (to_uint32 q1.hi2)))
+         (vv (add_mod (to_uint32 q0.hi3) (to_uint32 q1.hi3)))
 
 let lemma_add_wrap_quad32_is_add_mod_quad32 (q0 q1:quad32) :
   Lemma (add_mod_quad32 q0 q1 == add_wrap_quad32 q0 q1)
   =
+  FStar.Classical.forall_intro_2 lemma_add_wrap_is_add_mod;
   ()
 
 let lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
   (requires 16 <= t /\ t < size_k_w(SHA2_256) /\
             dst == ws_quad32 (t-16) block /\
-            src.lo0 == v(ws_opaque SHA2_256 block (t-12)))
+            src.lo0 == vv(ws_opaque SHA2_256 block (t-12)))
   (ensures sha256_msg1_spec dst src == ws_partial t block)
   =
   reveal_opaque sha256_msg1_spec_def;
@@ -218,31 +236,26 @@ let lemma_add_mod32_associates (x y z:int) :
   =
   ()
 
-//#push-options "--z3rlimit 20"
 let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
   Lemma (add_mod x (add_mod y z) == add_mod (add_mod x y) z)
   =
-  //let open FStar.UInt in
   assert_norm (pow2 32 == pow2_32);
-  //assume (False);
-  //assert (add_mod y z == uint_to_t ((v y + v z) % pow2_32));
-  //assert (add_mod x (add_mod y z) == uint_to_t ((v x + v (uint_to_t ((v y + v z) % pow2_32))) % pow2_32));
-  //lemma_add_mod32_associates (v x) (v y) (v z);
-  (*
-  assert (uint_to_t ((v x + v (uint_to_t ((v y + v z) % pow2_32))) % pow2_32) ==
-          uint_to_t (((v x + v y % pow2_32) + v z) % pow2_32));
-          *)
-  //assert (add_mod (add_mod x y) z == uint_to_t (((v x + v y % pow2_32) + v z) % pow2_32));
-  //admit();
-  ()
-//#pop-options
+  //assert (add_mod y z == to_uint32 ((vv y + vv z) % pow2_32));
+  //assert (add_mod x (add_mod y z) == to_uint32 ((vv x + vv (to_uint32 ((vv y + vv z) % pow2_32))) % pow2_32));
+  lemma_add_mod32_associates (vv x) (vv y) (vv z);
+  //assert (to_uint32 ((vv x + vv (to_uint32 ((vv y + vv z) % pow2_32))) % pow2_32) ==
+  //        to_uint32 (((vv x + vv y % pow2_32) + vv z) % pow2_32));
+  admit() // TODO: This proof is flaky.  Some combination of the asserts above will make it go through, but the combo varies day by day
+
 
 let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
-  Lemma (add_mod a (add_mod b (add_mod c d)) == add_mod (add_mod b (add_mod d c)) a)
+  Lemma (add_mod a (add_mod b (add_mod c d)) == add_mod (add_mod (add_mod d c) b) a)
   =
-  lemma_add_mod_commutes (add_mod b (add_mod d c)) a;
-  assert (add_mod (add_mod b (add_mod d c)) a == add_mod a (add_mod b (add_mod d c)));
-  lemma_add_mod_commutes c d;
+  lemma_add_mod_commutes (add_mod (add_mod d c) b) a;
+  assert (add_mod (add_mod (add_mod d c) b) a == add_mod a (add_mod (add_mod d c) b));
+  lemma_add_mod_commutes (add_mod d c) b;
+  assert (add_mod a (add_mod (add_mod d c) b) == add_mod a (add_mod b (add_mod d c)));
+  lemma_add_mod_commutes d c;
   assert (add_mod a (add_mod b (add_mod d c)) == add_mod a (add_mod b (add_mod c d)));
   ()
 
@@ -255,8 +268,9 @@ let ws_computed (a:hash_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (wor
     let t2  = ws_opaque a b (t - 2) in
     let s1 = _sigma1 a t2 in
     let s0 = _sigma0 a t15 in
-    (word_add_mod a s1 (word_add_mod a t7 (word_add_mod a s0 t16)))
+    (word_add_mod a (word_add_mod a (word_add_mod a t16 s0) t7) s1)
 
+#push-options "--max_fuel 1"
 let lemma_ws_computed_is_ws (b:block_w SHA2_256) (t:counter{t < size_k_w SHA2_256}) :
   Lemma (ws_computed SHA2_256 b t == ws SHA2_256 b t)
   =
@@ -277,95 +291,106 @@ let lemma_ws_computed_is_ws (b:block_w SHA2_256) (t:counter{t < size_k_w SHA2_25
     ()
   );
   ()
-
-let add_wrap_quad32 (q0 q1:quad32) : quad32 =
-  Mkfour (v (add_mod (uint_to_t q0.lo0) (uint_to_t q1.lo0)))
-         (v (add_mod (uint_to_t q0.lo1) (uint_to_t q1.lo1)))
-         (v (add_mod (uint_to_t q0.hi2) (uint_to_t q1.hi2)))
-         (v (add_mod (uint_to_t q0.hi3) (uint_to_t q1.hi3))) 
-
-let ws_computed_opaque = make_opaque ws_computed
-
-let test_pass  (t:counter{t < size_k_w SHA2_256 - 3}) (block:block_w SHA2_256) : nat32 =
-  let c:UInt32.t = ws_computed_opaque SHA2_256 block t in
-  v c
-
-#push-options "--max_fuel 0"
-let test_fail  (t:counter{t < size_k_w SHA2_256 - 3}) (block:block_w SHA2_256) : nat32 =
-  let c:UInt32.t = ws_computed SHA2_256 block t in
-  v c
 #pop-options
 
-let test2 (u:UInt32.t) : nat32 =
-  v u
+let lemma_ws_computed_is_ws_opaque (b:block_w SHA2_256) (t:counter{t < size_k_w SHA2_256}) :
+  Lemma (ws_computed SHA2_256 b t == ws_opaque SHA2_256 b t)
+  =
+  lemma_ws_computed_is_ws b t;
+  reveal_opaque ws;
+  ()
 
-#reset-options "--z3rlimit 20"
+
 let ws_computed_quad32 (t:counter{t < size_k_w SHA2_256 - 3}) (block:block_w SHA2_256) : quad32 =
-       Mkfour (v (ws_computed SHA2_256 block t))
-              (v (ws_computed SHA2_256 block (t+1)))
-              (v (ws_computed SHA2_256 block (t+2)))
-              (v (ws_computed SHA2_256 block (t+3)))
-(*
-let test (src1 src2:quad32) (t:counter{t >= 16 /\ t < size_k_w SHA2_256}) (block:block_w SHA2_256) =
-    assume (src2.lo0 == v (ws_opaque SHA2_256 block t - 12));
-    assume (src1.hi2 == v (ws_opaque SHA2_256 block (t-2)));
-    assume (src1.hi3 == v (ws_opaque SHA2_256 block (t-1))); 
-    let dst = ws_quad32 (t-16) block in
-    let w = sha256_msg1_spec_def dst src2 in
-    let mid = ws_quad32 (t - 7) block in
-    let added = add_mod_quad32 mid w in
-    let final = sha256_msg2_spec_def added in
-    assert (final == ws_computed_quad32 t block);
-    ()
-*)
-(*
-#push-options "--z3rlimit 10"
-let lemma_sha256_msg2 (dst src:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
-  (requires 16 <= t /\ t < size_k_w(SHA2_256) /\
-            src.hi2 == v (ws_opaque SHA2_256 block (t-2)) /\
-            src.hi3 == v (ws_opaque SHA2_256 block (t-1)) /\
-            (let w = ws_partial t block in
+       Mkfour (vv (ws_computed SHA2_256 block t))
+              (vv (ws_computed SHA2_256 block (t+1)))
+              (vv (ws_computed SHA2_256 block (t+2)))
+              (vv (ws_computed SHA2_256 block (t+3)))
+
+let lemma_ws_computed_is_ws_quad32 (b:block_w SHA2_256) (t:counter{t < size_k_w SHA2_256 - 3}) :
+  Lemma (ws_computed_quad32 t b == ws_quad32 t b)
+  =
+  let w = ws_computed_quad32 t b in
+  let w' = ws_quad32 t b in
+  lemma_ws_computed_is_ws_opaque b t;
+  lemma_ws_computed_is_ws_opaque b (t+1);
+  lemma_ws_computed_is_ws_opaque b (t+2);
+  lemma_ws_computed_is_ws_opaque b (t+3);  
+  ()
+
+#push-options "--z3rlimit 30"
+let lemma_ws_computed_quad32 (t:counter{16 <= t /\ t < size_k_w SHA2_256 - 4}) (block:block_w SHA2_256) :
+  Lemma (let t_minus_16 = ws_quad32 (t-16) block in
+         let t_minus_15 = ws_quad32 (t-15) block in
+         let t_minus_7 = ws_quad32 (t - 7) block in
+         let t_minus_2 = ws_quad32 (t - 2) block in        
+         let m1 = add_mod_quad32 t_minus_16 (_sigma0_quad32 t_minus_15) in
+         let m2 = add_mod_quad32 m1 t_minus_7 in
+         let m3 = add_mod_quad32 m2 (_sigma1_quad32 t_minus_2) in
+         m3 == ws_computed_quad32 t block )
+  =
+  ()
+#pop-options  
+
+let sha256_msg1_spec_t (t:counter{t < size_k_w SHA2_256 - 1}) (block:block_w SHA2_256) : quad32 =
+  let init = ws_quad32 t block in
+  let next = ws_quad32 (t + 1) block in
+  let msg1 = add_mod_quad32 init (_sigma0_quad32 next) in
+  msg1
+
+let lemma_sha256_msg1_spec_t_partial (t:counter) (block:block_w SHA2_256) : Lemma
+  (requires 16 <= t /\ t < size_k_w SHA2_256 - 4)
+  (ensures ws_partial t block == sha256_msg1_spec_t (t-16) block)
+  =
+  reveal_opaque ws_partial_def;
+  let init = ws_quad32 (t-16) block in
+  let next = ws_quad32 (t-15) block in
+  lemma_add_wrap_quad32_is_add_mod_quad32 init (_sigma0_quad32 next);
+  ()
+          
+let lemma_sha256_msg1_spec_t (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
+  (requires t < size_k_w SHA2_256 - 4 /\
+            src1 == ws_quad32 t block /\
+            src2.lo0 == vv (ws_opaque SHA2_256 block (t+4)))
+  (ensures sha256_msg1_spec_t t block == sha256_msg1_spec src1 src2)
+  =
+  reveal_opaque sha256_msg1_spec_def;
+  ()
+
+#push-options "--z3rlimit 30"
+let lemma_sha256_step2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
+  (requires 16 <= t /\ t < size_k_w(SHA2_256) - 4 /\
+            src2.hi2 == vv (ws_opaque SHA2_256 block (t-2)) /\
+            src2.hi3 == vv (ws_opaque SHA2_256 block (t-1)) /\
+            (let w = sha256_msg1_spec_t (t-16) block in
              let mid = ws_quad32 (t-7) block in
-             dst == add_wrap_quad32 mid w))
-  (ensures sha256_msg2_spec dst src == ws_quad32 t block)
+             src1 == add_mod_quad32 w mid))
+  (ensures sha256_msg2_spec src1 src2 == ws_computed_quad32 t block)
   =
   reveal_opaque sha256_msg2_spec_def;
-  let init = ws_quad32 (t-16) block in
-  let sigma0_in = ws_quad32 (t-15) block in
-  //assert (t - 15 < size_k_w SHA2_256 - 3);
-  let sigma0_out = _sigma0_quad32 sigma0_in in
-  let w = ws_partial t block in
+  let w = sha256_msg1_spec_t (t-16) block in
   let mid = ws_quad32 (t-7) block in
-  lemma_add_wrap_quad32_is_add_mod_quad32 mid w;
-  assert (dst == add_mod_quad32 mid w);
-  //
-  let result = sha256_msg2_spec dst src in
-  //assert (result.lo0 == v (add_mod (uint_to_t dst.lo0) (_sigma1 SHA2_256 (uint_to_t src.hi2))));
-  //assert (sigma0_in.lo0 == v (ws_opaque SHA2_256 block (t-15)));
-  reveal_opaque ws_partial_def;
-  lemma_add_wrap_quad32_is_add_mod_quad32 init sigma0_out;
-  assert (w == add_mod_quad32 init sigma0_out);
-  (*
-  assert (dst.lo0 == add_wrap (v (ws_opaque SHA2_256 block (t-7))) (add_wrap init.lo0 sigma0_out.lo0));
-  assert (sigma0_out.lo0 == (v (_sigma0 SHA2_256 (uint_to_t sigma0_in.lo0))));
-  assert (sigma0_out.lo0 == (v (_sigma0 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-15)))))));
-  assert (init.lo0 ==  (v (ws_opaque SHA2_256 block (t-16))));
-  assert (dst.lo0 == add_wrap (v (ws_opaque SHA2_256 block (t-7))) 
-                    (add_wrap (v (ws_opaque SHA2_256 block (t-16)))
-                              (v (_sigma0 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-15))))))));  
-  assert (result.lo0 == v (add_mod (uint_to_t dst.lo0) 
-                                   (_sigma1 SHA2_256 (uint_to_t src.hi2))));
-  assert (result.lo0 == v (add_mod (uint_to_t dst.lo0) 
-                                   (_sigma1 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-2)))))));
-  *)
-  (*                                   
-  assert (result.lo0 == v (add_mod (uint_to_t (add_wrap (v (ws_opaque SHA2_256 block (t-7))) 
-                                                        (add_wrap #32 (v (ws_opaque SHA2_256 block (t-16)))
-                                                                  (v (_sigma0 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-15)))))))))
-                                   (_sigma1 SHA2_256 (uint_to_t (v (ws_opaque SHA2_256 block (t-2)))))));
-  *)
-//  reveal_opaque ws;
-  admit();
+  let final = sha256_msg2_spec src1 src2 in
+  lemma_ws_computed_is_ws_opaque block (t);
+  lemma_ws_computed_is_ws_opaque block (t+1);
   ()
 #pop-options
-*)
+
+let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
+  (requires 16 <= t /\ t < size_k_w(SHA2_256) - 4 /\
+            (let step1 = ws_partial t block in
+             let t_minus_7 = ws_quad32 (t-7) block in
+             src1 == add_wrap_quad32 step1 t_minus_7 /\
+
+             src2.hi2 == vv (ws_opaque SHA2_256 block (t-2)) /\
+             src2.hi3 == vv (ws_opaque SHA2_256 block (t-1))))
+  (ensures sha256_msg2_spec src1 src2 == ws_quad32 t block)
+  =
+  let step1 = ws_partial t block in
+  let t_minus_7 = ws_quad32 (t-7) block in
+  lemma_sha256_msg1_spec_t_partial t block;
+  // ==> step1 == sha256_msg1_spec_t (t-16) block
+  lemma_add_wrap_quad32_is_add_mod_quad32 step1 t_minus_7;
+  lemma_sha256_step2 src1 src2 t block;
+  lemma_ws_computed_is_ws_quad32 block t;
+  ()

@@ -55,7 +55,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src), list(), 
   requires 
     16 <= t < size_k_w(SHA2_256);
     dst == ws_quad32(t-16, block);
-    src.lo0 == v(ws_opaque(SHA2_256, block, t-12));
+    src.lo0 == vv(ws_opaque(SHA2_256, block, t-12));
   ensures
     dst == ws_partial(t, block);
 {
@@ -66,10 +66,12 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src), list(), 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg2(dst, src), list(), list()), Public))}{:quick exportOnly} 
           SHA256_msg2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w(SHA2_256))
   requires 
-    16 <= t < size_k_w(SHA2_256);
-    let w := ws_partial(t) in
-    let mid := ws_quad32(t-7, block) in
-    dst == add_wrap_quad32(mid,w);
+    16 <= t < size_k_w(SHA2_256) - 4;
+    let step1 := ws_partial(t, block) in
+    let t_minus_7 := ws_quad32(t-7, block) in
+    dst == add_wrap_quad32(step1,t_minus_7);
+    src.hi2 == vv(ws_opaque(SHA2_256, block, t-2));
+    src.hi3 == vv(ws_opaque(SHA2_256, block, t-1));
   ensures
     dst == ws_quad32(t, block);
 {
