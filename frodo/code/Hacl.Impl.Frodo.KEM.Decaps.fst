@@ -114,6 +114,7 @@ val get_bpp_cp_matrices:
       disjoint g cp_matrix /\ disjoint sk cp_matrix /\ disjoint bpp_matrix cp_matrix)
     (ensures fun h0 _ h1 -> modifies (loc_union (loc_buffer bpp_matrix) (loc_buffer cp_matrix)) h0 h1)
 let get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix  =
+  assert_norm (v params_nbar * v params_n % 2 = 0);
   push_frame();
   Spec.Frodo.KEM.expand_crypto_publickeybytes ();
   Spec.Frodo.KEM.expand_crypto_secretkeybytes ();
@@ -127,7 +128,6 @@ let get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix  =
   frodo_mul_add_sa_plus_e_main seed_a seed_ep sp_matrix bpp_matrix;
 
   frodo_mul_add_sb_plus_e_plus_mu b seed_ep mu_decode sp_matrix cp_matrix;
-  assume (v params_nbar * v params_n % 2 = 0);
   clear_matrix sp_matrix;
   pop_frame()
 

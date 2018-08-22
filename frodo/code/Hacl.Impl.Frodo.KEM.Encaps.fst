@@ -209,6 +209,9 @@ let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix c1 =
   frodo_pack bp_matrix params_logq c1;
   pop_frame()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq
+  -Spec.Frodo.KEM.Encaps'"
+
 inline_for_extraction noextract
 val crypto_kem_enc_ct_pack_c2_inner:
     seed_e:lbytes crypto_bytes
@@ -228,9 +231,14 @@ val crypto_kem_enc_ct_pack_c2_inner:
       as_matrix h1 v_matrix == S.frodo_mul_add_sb_plus_e_plus_mu (as_seq h0 b) (as_seq h0 seed_e) (as_seq h0 coins) (as_matrix h0 sp_matrix) /\
       as_seq h1 c2 == Spec.Frodo.Pack.frodo_pack (as_matrix h1 v_matrix) (v params_logq))
 let crypto_kem_enc_ct_pack_c2_inner seed_e coins b sp_matrix c2 v_matrix =
+  let n1 = params_nbar in
+  let n2 = params_nbar in
+  let d = params_logq in
+  assert_norm (v d * v n1 < max_size_t /\ (v d * v n1) * v n2 < max_size_t /\ v d <= 16);
   frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix;
-  assert (v params_nbar % 8 = 0);
   frodo_pack v_matrix params_logq c2
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val crypto_kem_enc_ct_pack_c2:
@@ -392,11 +400,10 @@ val crypto_kem_enc_1:
       (let ct_s, ss_s = S.crypto_kem_enc_1 (as_seq h0 g) (as_seq h0 coins) (as_seq h0 ct) (as_seq h0 ss) (as_seq h0 pk) in
       as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
 let crypto_kem_enc_1 g coins ct ss pk =
+  assert_norm (2 * v crypto_bytes % 4 = 0);
   crypto_kem_enc_ct pk g coins ct;
   crypto_kem_enc_ss g ct ss;
-  assume (2 * v crypto_bytes % 4 = 0);
   clear_words_u8 (size 2 *! crypto_bytes) (sub #_ #_ #(2 * v crypto_bytes) g (size 0) (size 2 *! crypto_bytes))
-
 
 inline_for_extraction noextract
 val crypto_kem_enc_:

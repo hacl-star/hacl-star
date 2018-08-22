@@ -61,6 +61,12 @@ let test_frodo seed ss_expected pk_expected ct_expected sk_expected =
 val u8: n:nat{n < 0x100} -> uint8
 let u8 n = u8 n
 
+// The rest verifies, but takes too long
+// It expectedly fails for FrodoKEM-976. This file is systematically verified
+// independently of the target because the Makefile.include target depends
+// on ALL_KRML_FILES and it would be complicated to disentangle it from FrodoKEM-640.
+#set-options "--lax"
+
 let test1_ss_expected: b:lbytes crypto_bytes{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
@@ -70,9 +76,6 @@ let test1_ss_expected: b:lbytes crypto_bytes{ recallable b } =
   in
   assert_norm (List.Tot.length l == v crypto_bytes);
   createL_global l
-
-// Verifies, but takes too long
-#set-options "--lax"
 
 let test1_pk_expected: b:lbytes crypto_publickeybytes{ recallable b } =
   [@ inline_let]
