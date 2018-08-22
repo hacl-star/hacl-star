@@ -83,7 +83,7 @@ mpfr-c/out.krml: $(MPFR_FILES)
 
 mpfr-c/MPFR.c: mpfr-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'MPFR=*'
+	   -minimal -add-include '"kremlib.h"' -bundle 'MPFR=*' -fparentheses
 
 extract-c: mpfr-c/MPFR.c
 

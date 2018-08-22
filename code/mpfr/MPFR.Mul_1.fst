@@ -28,36 +28,45 @@ module U32 = FStar.UInt32
 
 open FStar.Mul
 
-inline_for_extraction val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sh:mpfr_prec_t -> ax:mpfr_reg_exp_t ->
+private type mpfr_tmp_exp_t = x:mpfr_exp_t{I32.(x >=^ mpfr_EMIN -^ 1l /\ x <=^ mpfr_EMAX)}
+
+inline_for_extraction val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sh:mpfr_prec_t -> ax:mpfr_tmp_exp_t ->
     Stack i32
     (requires (fun h ->
-        mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ U32.v sh + U32.v (as_struct h a).mpfr_prec = 64 /\
-	mpfr_valid_cond h a))
+        mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\
+	U32.v sh + U32.v (as_struct h a).mpfr_prec = 64 /\
+	normal_cond h a))
     (ensures  (fun h0 t h1 ->
-        mpfr_live h1 a))
+        mpfr_live h1 a /\ mpfr_modifies a h0 h1))
 
 let mpfr_add_one_ulp a rnd_mode sh ax =
+    let h0 = ST.get() in
     let ap = mpfr_MANT a in
     ap.(0ul) <- ap.(0ul) +%^ (mpfr_LIMB_ONE <<^ sh);
+    let h1 = ST.get() in
+    lemma_reveal_modifies_1 ap h0 h1;
+    lemma_intro_modifies_2 a ap h0 h1;
     if ap.(0ul) =^ 0uL then begin
         ap.(0ul) <- mpfr_LIMB_HIGHBIT;
 	if I32.(ax +^ 1l >^ mpfr_EMAX) then mpfr_overflow a rnd_mode (mpfr_SIGN a)
 	else (mpfr_SET_EXP a I32.(ax +^ 1l); mpfr_SIGN a)
     end else mpfr_SIGN a
 
-inline_for_extraction val mpfr_mul_1_rounding: a:mpfr_ptr -> sh:mpfr_prec_t -> ax:mpfr_reg_exp_t -> 
+inline_for_extraction val mpfr_mul_1_rounding: a:mpfr_ptr -> sh:mpfr_prec_t -> ax:mpfr_tmp_exp_t -> 
     rb:mp_limb_t -> sb:mp_limb_t -> rnd_mode:mpfr_rnd_t -> Stack i32
     (requires (fun h ->
-        mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\ U32.v sh + U32.v (as_struct h a).mpfr_prec = 64 /\
-	mpfr_valid_cond h a /\ mpfr_EXP_COND (I32.v ax)))
+        mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\
+	U32.v sh + U32.v (as_struct h a).mpfr_prec = 64 /\
+	normal_cond_ h ({as_struct h a with mpfr_exp = ax})))
     (ensures  (fun h0 t h1 ->
-        mpfr_live h1 a))
+        mpfr_live h1 a /\ mpfr_modifies a h0 h1))
 
 let mpfr_mul_1_rounding a sh ax rb sb rnd_mode =
-    admit();
     let ap = mpfr_MANT a in
     let a0 = ap.(0ul) in
+    let h0 = ST.get() in
     mpfr_SET_EXP a ax;
+    let h1 = ST.get() in
     if rb =^ 0uL && sb =^ 0uL then 0l
     else if MPFR_RNDN? rnd_mode then
         if (rb =^ 0uL || (sb =^ 0uL && ((a0 &^ (mpfr_LIMB_ONE <<^ sh)) =^ 0uL))) then
@@ -69,12 +78,13 @@ let mpfr_mul_1_rounding a sh ax rb sb rnd_mode =
 inline_for_extraction val mpfr_mul_1_round: a:mpfr_ptr -> sh:mpfr_prec_t -> ax:mpfr_exp_t ->
     rb:mp_limb_t -> sb:mp_limb_t -> mask:mp_limb_t -> rnd_mode:mpfr_rnd_t -> Stack i32
     (requires (fun h ->
-        mpfr_live h a))
+        mpfr_live h a /\ length (as_struct h a).mpfr_d = 1 /\
+	U32.v sh + U32.v (as_struct h a).mpfr_prec = 64 /\
+	normal_cond_ h ({as_struct h a with mpfr_exp = ax})))
     (ensures  (fun h0 t h1 ->
-        mpfr_live h1 a))
+        mpfr_live h1 a /\ mpfr_modifies a h0 h1))
 
 let mpfr_mul_1_round a sh ax rb sb mask rnd_mode =
-    admit();
     let ap = mpfr_MANT a in
     let a0 = ap.(0ul) in
     if I32.(ax >^ mpfr_EMAX) then mpfr_overflow a rnd_mode (mpfr_SIGN a)
@@ -84,7 +94,7 @@ let mpfr_mul_1_round a sh ax rb sb mask rnd_mode =
 	   ((MPFR_RNDN? rnd_mode && rb >^ 0uL) ||
 	    (((rb |^ sb) >^ 0uL) && mpfr_IS_LIKE_RNDA rnd_mode aneg)) 
 	then mpfr_mul_1_rounding a sh ax rb sb rnd_mode
-	else if MPFR_RNDN? rnd_mode &&
+        else if MPFR_RNDN? rnd_mode &&
 	        (I32.(ax <^ mpfr_EMIN -^ 1l) ||
 		 (a0 =^ mpfr_LIMB_HIGHBIT && ((rb |^ sb) =^ 0uL)))
         then mpfr_underflow a MPFR_RNDZ (mpfr_SIGN a)
@@ -109,14 +119,13 @@ val mpfr_mul_1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
         (* Memory safety *)
         mpfr_live h1 a /\ mpfr_live h1 b /\ mpfr_live h1 c /\
         mpfr_disjoint_or_equal h1 a b /\ mpfr_disjoint_or_equal h1 a c /\
-        mpfr_disjoint_or_equal h1 b c /\ mpfr_modifies a h0 h1 /\
+        mpfr_disjoint_or_equal h1 b c /\ mpfr_modifies a h0 h1 (*/\
         (* Functional correctness *)
         mpfr_valid_cond h1 a /\ 
         mpfr_round_cond exact (U32.v p) rnd_mode (as_fp h1 a) /\
-        mpfr_ternary_cond (I32.v t) exact (as_fp h1 a)))
+        mpfr_ternary_cond (I32.v t) exact (as_fp h1 a)*)))
 
 let mpfr_mul_1 a b c rnd_mode p =
-    admit();
     let ap = mpfr_MANT a in
     let bp = mpfr_MANT b in
     let cp = mpfr_MANT c in
@@ -134,4 +143,6 @@ let mpfr_mul_1 a b c rnd_mode p =
     let sb = sb |^ ((a0 &^ mask) ^^ rb) in
     ap.(0ul) <- a0 &^ (lognot mask);
     mpfr_SET_SIGN a (mpfr_MULT_SIGN (mpfr_SIGN b) (mpfr_SIGN c));
+    let h = ST.get() in
+    assume(normal_cond_ h ({as_struct h a with mpfr_exp = ax}));
     mpfr_mul_1_round a sh ax rb sb mask rnd_mode

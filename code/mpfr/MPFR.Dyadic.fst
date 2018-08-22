@@ -3,7 +3,7 @@ module MPFR.Dyadic
 open FStar.Mul
 open MPFR.Maths
 
-#set-options "--z3refresh --z3rlimit 20 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 30 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 (* Arbitrary precision floating point number: significand * 2 ^ exponent 
  * this allows multiple representations for one value. *)
@@ -241,7 +241,8 @@ let fadd_eq_lemma a b c =
     lemma_pow2_mul (a.exponent - elbac) (elbac - elb);
     lemma_pow2_mul (c.exponent - elbac) (elbac - elb);
     lemma_pow2_mul (b.exponent - elbbc) (elbbc - elb);
-    lemma_pow2_mul (c.exponent - elbbc) (elbbc - elb)
+    lemma_pow2_mul (c.exponent - elbbc) (elbbc - elb);
+    assert(a +. b =. a +. c)
 
 val fadd_comm_lemma: a:dyadic -> b:dyadic -> Lemma
     (a +. b =. b +. a)

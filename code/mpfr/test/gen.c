@@ -33,7 +33,9 @@ int main(int argc, char* argv[])
 	      fc -> _mpfr_sign, fc -> _mpfr_d[0], fc -> _mpfr_exp,
 	      rnd, p,
 	      fr -> _mpfr_sign, fr -> _mpfr_d[0],
-	      (fr -> _mpfr_exp != -9223372036854775805 ? fr -> _mpfr_exp : 2147483651),
+	      (fr -> _mpfr_exp > -9223372036854775805 ?
+	              fr -> _mpfr_exp :
+	              fr -> _mpfr_exp + 9223372036854775807 - 2147483647),
 	      inex);
     }
 

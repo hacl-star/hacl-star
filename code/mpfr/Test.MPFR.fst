@@ -14,18 +14,20 @@ open MPFR
 
 #set-options "--z3refresh --lax --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
+let cprint x = C.String.print (C.String.of_literal x)
+
 let cmod x = if x > 2147483647 then x - 4294967296 else x
 
-let print_u32 x = print_string (string_of_int (U32.v x)); print_string " "
-let print_i32 x = print_string (string_of_int (cmod (I32.v x))); print_string " "
-let print_u64 x = print_string (string_of_int (U64.v x)); print_string " "
+let print_u32 x = cprint (string_of_int (U32.v x)); cprint " "
+let print_i32 x = cprint (string_of_int (cmod (I32.v x))); cprint " "
+let print_u64 x = cprint (string_of_int (U64.v x)); cprint " "
 
 let print_rnd rnd = match rnd with
-    | MPFR_RNDN -> print_string "MPFR_RNDN "
-    | MPFR_RNDZ -> print_string "MPFR_RNDZ "
-    | MPFR_RNDA -> print_string "MPFR_RNDA "
-    | MPFR_RNDU -> print_string "MPFR_RNDU "
-    | MPFR_RNDD -> print_string "MPFR_RNDD "
+    | MPFR_RNDN -> cprint "MPFR_RNDN "
+    | MPFR_RNDZ -> cprint "MPFR_RNDZ "
+    | MPFR_RNDA -> cprint "MPFR_RNDA "
+    | MPFR_RNDU -> cprint "MPFR_RNDU "
+    | MPFR_RNDD -> cprint "MPFR_RNDD "
 
 val test_add1sp1: mpfr_sign_t -> mp_limb_t -> mpfr_exp_t -> mp_limb_t -> mpfr_exp_t -> mpfr_rnd_t ->
     mpfr_prec_t -> mp_limb_t -> mpfr_exp_t -> I32.t -> ST bool
@@ -33,10 +35,10 @@ val test_add1sp1: mpfr_sign_t -> mp_limb_t -> mpfr_exp_t -> mp_limb_t -> mpfr_ex
     (ensures  (fun h0 r h1 -> True))
 
 let test_add1sp1 s bp bx cp cx rnd_mode p rp rx rt =
-    print_string "Testing add1sp1: \n";
+    cprint "Testing add1sp1: \n";
     print_i32 s; print_u64 bp; print_i32 bx; print_u64 cp; print_i32 cx; print_rnd rnd_mode;
     print_u32 p; print_u64 rp; print_i32 rx; print_i32 rt;
-    print_string "\n";
+    cprint "\n";
     push_frame();
     let bm = createL [bp] in
     let bs = mk_mpfr_struct p s bx bm in
@@ -50,17 +52,17 @@ let test_add1sp1 s bp bx cp cx rnd_mode p rp rx rt =
     let ap = am.(0ul) in
     let ax = mpfr_EXP c in
     pop_frame ();
-    print_string "Result: \n";
+    cprint "Result: \n";
     print_i32 asign;
     print_u64 ap;
     print_i32 ax;
     print_i32 at;
     if ((U64.(ap =^ rp) && I32.(ax =^ rx)) || (I32.(ax =^ mpfr_EXP_INF) && I32.(ax =^ rx))) && 
          I32.(asign =^ s) && I32.(at =^ rt) then begin
-        print_string "YES!!!\n";
+        cprint "YES!!!\n";
 	true
     end else begin
-        print_string "no...\n";
+        cprint "no...\n";
 	false
     end
     
@@ -87,8 +89,8 @@ let main () =
     let t3 = test3 () in
     let t4 = test4 () in
     if t1 && t2 && t3 && t4 then
-        print_string "\n === Congratulations!!! WE MADE IT!!! ===\n"
+        cprint "\n === Congratulations!!! WE MADE IT!!! ===\n"
     else 
-        print_string "\n I'm so sorry, but the tests failed...\n";
+        cprint "\n I'm so sorry, but the tests failed...\n";
     pop_frame();
     0
