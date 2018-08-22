@@ -371,3 +371,34 @@ let shuffle a block hash ws =
   in
   Spec.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
   C.Loops.for 0ul (size_k_w a) inv f
+
+val update: a:sha2_alg ->
+  hash:hash_w a ->
+  block:B.buffer U8.t { B.length block = size_block a } ->
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h hash /\ B.live h block /\ B.disjoint hash block))
+    (ensures (fun h0 _ h1 ->
+      M.(modifies (loc_buffer hash) h0 h1) /\
+      B.as_seq h1 hash == Spec.update a (B.as_seq h0 hash) (B.as_seq h0 block)))
+
+let zero (a: sha2_alg): word a =
+  match a with
+  | SHA2_224 | SHA2_256 -> 0ul
+  | SHA2_384 | SHA2_512 -> 0UL
+
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+let update a hash block =
+  ST.push_frame ();
+  let h0 = ST.get () in
+  let hash1: hash_w a = B.alloca (zero a) 8ul in
+  let computed_ws: ws_w a = B.alloca (zero a) (UInt32.uint_to_t (Spec.size_k_w a)) in
+  ws a block computed_ws;
+  B.blit hash 0ul hash1 0ul 8ul;
+  let h1 = ST.get () in
+  assert (S.equal (B.as_seq h1 hash1) (B.as_seq h0 hash));
+  assert (S.equal (B.as_seq h1 hash) (B.as_seq h0 hash));
+  shuffle a (G.hide block) hash1 computed_ws;
+  C.Loops.in_place_map2 hash hash1 8ul (add a);
+  ST.pop_frame ()

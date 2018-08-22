@@ -205,7 +205,7 @@ let init = h0
 let update (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block a}): Tot (hash_w a) =
   let block_w = words_from_be a size_block_w block in
   let hash_1 = shuffle a hash block_w in
-  Spec.Loops.seq_map2 (fun x y -> word_add_mod a x y) hash hash_1
+  Spec.Loops.seq_map2 (word_add_mod a) hash hash_1
 
 (* Compute the length for the zeroed part of the padding *)
 let pad0_length (a:sha2_alg) (len:nat): Tot (n:nat{(len + 1 + n + size_len_8 a) % size_block a = 0}) =
