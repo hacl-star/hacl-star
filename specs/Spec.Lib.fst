@@ -31,7 +31,7 @@ inline_for_extraction
 let op_String_Assignment = Seq.upd
 
 unfold inline_for_extraction
-let iter n f x = Spec.Loops.repeat_spec n f x
+let iter n f x = Spec.Loops.repeat n f x
 
 unfold inline_for_extraction
 let map2 f s1 s2 = Spec.Loops.seq_map2 f s1 s2

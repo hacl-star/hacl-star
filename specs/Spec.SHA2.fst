@@ -196,7 +196,7 @@ let shuffle_core (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < s
 
 (* Full shuffling function *)
 let shuffle (a:sha2_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
-  Spec.Loops.repeat_range_spec 0 (size_k_w a) (shuffle_core a block) hash
+  Spec.Loops.repeat_range 0 (size_k_w a) (shuffle_core a block) hash
 
 let init = h0
 
