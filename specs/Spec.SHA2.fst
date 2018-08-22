@@ -10,15 +10,11 @@ open Spec.Hash.Helpers
 (* The core compression, padding and extraction functions for all SHA2
  * algorithms. *)
 
-(* Define the length of the constants *)
+(* Define the length of the constants. Also the number of scheduling rounds. *)
 inline_for_extraction
 let size_k_w: sha2_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> 64
   | SHA2_384 | SHA2_512 -> 80
-
-(* Define the length of scheduling block *)
-inline_for_extraction
-let size_ws_w = size_k_w
 
 (* Define the length of the encoded lenght in the padding *)
 inline_for_extraction
@@ -41,7 +37,6 @@ let v' (#a: sha2_alg) (x:word a) = match a with
   | SHA2_384 | SHA2_512 -> U64.v x
 
 let k_w      (a: sha2_alg) = m:S.seq (word a) {S.length m = size_k_w a}
-let ws_w     (a: sha2_alg) = m:S.seq (word a) {S.length m = size_ws_w a}
 let block_w  (a: sha2_alg) = m:S.seq (word a) {S.length m = size_block_w}
 let counter = nat
 
@@ -201,7 +196,7 @@ let shuffle_core (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < s
 
 (* Full shuffling function *)
 let shuffle (a:sha2_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
-  Spec.Loops.repeat_range_spec 0 (size_ws_w a) (shuffle_core a block) hash
+  Spec.Loops.repeat_range_spec 0 (size_k_w a) (shuffle_core a block) hash
 
 let init = h0
 

@@ -9,6 +9,7 @@ module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module T = FStar.Tactics
 module H = Spec.Hash.Helpers
+module G = FStar.Ghost
 
 open Spec.Hash.Helpers
 open LowStar.BufferOps
@@ -208,11 +209,11 @@ let shuffle_core a block hash t =
   hash.(6ul) <- f0;
   hash.(7ul) <- g0;
 
-  let h = ST.get () in
-  [@inline_let]
-  let l = [ add a t1 t2; a0; b0; c0; add a d0 t1; e0; f0; g0 ] in
-  assert_norm (List.Tot.length l = 8);
-  S.intro_of_list #(word a) (B.as_seq h hash) l
+  (**) let h = ST.get () in
+  (**) [@inline_let]
+  (**) let l = [ add a t1 t2; a0; b0; c0; add a d0 t1; e0; f0; g0 ] in
+  (**) assert_norm (List.Tot.length l = 8);
+  (**) S.intro_of_list #(word a) (B.as_seq h hash) l
 
 val shuffle: a:sha2_alg -> block:block_w a -> hash:hash_w a ->
   ST.Stack unit
@@ -224,12 +225,30 @@ val shuffle: a:sha2_alg -> block:block_w a -> hash:hash_w a ->
       B.as_seq h1 hash == Spec.shuffle a (B.as_seq h0 hash) (B.as_seq h0 block))))
 
 inline_for_extraction
-let size_ws_w (a: sha2_alg) = U32.uint_to_t (Spec.size_ws_w a)
+let size_k_w (a: sha2_alg) = U32.uint_to_t (Spec.size_k_w a)
 
 let shuffle a block hash =
-  let h = ST.get () in
-  [@ inline_let ]
-  let f_spec (s: H.hash_w a) (i: nat { i < Spec.size_ws_w a }): GTot (H.hash_w a) =
-    Spec.shuffle_core a (B.as_seq h block) s i
+  let h0 = ST.get () in
+  let inv (h1: HS.mem) (i: nat) =
+    let block = B.as_seq h0 block in
+    M.(modifies (loc_buffer hash) h0 h1) /\
+    i <= Spec.size_k_w a /\
+    B.as_seq h1 hash ==
+      Spec.Loops.repeat_range_spec 0 i (Spec.shuffle_core a block) (B.as_seq h0 hash)
   in
-  C.Loops.repeat_range 8ul 0ul (size_ws_w a) f_spec hash shuffle_core
+  let f (i: U32.t { U32.(0 <= v i /\ v i < Spec.size_k_w a)}):
+    ST.Stack unit
+      (requires (fun h -> inv h (U32.v i)))
+      (ensures (fun h0 _ h1 ->
+        U32.(inv h0 (v i) /\ inv h1 (v i + 1))))
+  =
+    let h1 = ST.get () in
+    shuffle_core a block hash i;
+    let h2 = ST.get () in
+    let block0 = B.as_seq h0 block in
+    let hash0 = B.as_seq h0 hash in
+    Spec.Loops.lemma_repeat_range_spec 0 (U32.v i + 1) (Spec.shuffle_core a block0)
+      hash0
+  in
+  Spec.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core a (B.as_seq h0 block)) (B.as_seq h0 hash);
+  C.Loops.for 0ul (size_k_w a) inv f
