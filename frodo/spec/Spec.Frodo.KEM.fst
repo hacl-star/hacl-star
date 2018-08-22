@@ -34,4 +34,6 @@ val expand_crypto_ciphertextbytes: unit -> Lemma
    (crypto_ciphertextbytes ==
     params_logq * params_nbar * params_n / 8
     + (params_logq * params_nbar * params_nbar / 8 + crypto_bytes))
-let expand_crypto_ciphertextbytes _ = ()
+let expand_crypto_ciphertextbytes _ =
+  assert ((params_nbar * params_n + params_nbar * params_nbar) * params_logq =
+    params_logq * params_nbar * params_n + params_logq * params_nbar * params_nbar)
