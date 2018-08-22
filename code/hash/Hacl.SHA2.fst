@@ -16,6 +16,8 @@ open LowStar.BufferOps
 
 friend Spec.SHA2
 
+#set-options "--max_fuel 0 --max_ifuel 0"
+
 (** Top-level constant arrays for the various SHA2 algorithms. *)
 
 (* NOTE: we don't have monotonicity yet so there will be various assumes. *)
@@ -66,6 +68,10 @@ let recall_static_fp () =
   let b = B.malloc HS.root 0ul 1ul in
   assert M.(loc_disjoint (loc_addr_of_buffer b) (static_fp ())) *)
 
+(** Alloca *)
+
+#set-options "--max_fuel 1"
+
 let alloca a () =
   [@ inline_let ]
   let l: list (word a) = Spec.(match a with
@@ -74,6 +80,8 @@ let alloca a () =
     | SHA2_384 -> C.h384_l
     | SHA2_512 -> C.h512_l) in
   B.alloca_of_list l
+
+#set-options "--max_fuel 0"
 
 let alloca_224: alloca_t SHA2_224 =
   T.(synth_by_tactic (specialize (alloca SHA2_224) [`%alloca]))
@@ -84,7 +92,7 @@ let alloca_384: alloca_t SHA2_384 =
 let alloca_512: alloca_t SHA2_512 =
   T.(synth_by_tactic (specialize (alloca SHA2_512) [`%alloca]))
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+(** Init *)
 
 let init a s =
   match a with
@@ -122,21 +130,7 @@ let init_384: init_t SHA2_384 =
 let init_512: init_t SHA2_512 =
   T.(synth_by_tactic (specialize (init SHA2_512) [`%init]))
 
-let block_w (a: sha2_alg) =
-  b:B.buffer (word a) { B.length b = size_block_w }
-
-let ws_w a = b:B.buffer (word a) { B.length b = Spec.size_k_w a }
-
-val ws (a: sha2_alg) (b: block_w a) (ws: ws_w a):
-  ST.Stack unit
-    (requires (fun h ->
-      B.live h b /\ B.live h ws /\ B.disjoint b ws))
-    (ensures (fun h0 _ h1 ->
-      let b = B.as_seq h0 b in
-      M.(modifies (loc_buffer ws) h0 h1) /\
-      B.as_seq h1 ws == S.init (Spec.size_k_w a) (Spec.ws a b)))
-
-// A detour with three sequence lemmas required for the proof below to go through.
+(** Three sequence lemmas required for the pre-computation of Spec.ws *)
 
 let index_slice (#a: Type) (s: S.seq a) (j: nat) (i: nat):
   Lemma
@@ -167,6 +161,22 @@ let init_index (#a: Type) (j: nat) (f: (i:nat { i < j }) -> a) (i: nat):
   [ SMTPat (S.index (S.init j f) i) ]
 =
   ()
+
+(** Update *)
+
+let block_w (a: sha2_alg) =
+  b:B.buffer (word a) { B.length b = size_block_w }
+
+let ws_w a = b:B.buffer (word a) { B.length b = Spec.size_k_w a }
+
+val ws (a: sha2_alg) (b: block_w a) (ws: ws_w a):
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h b /\ B.live h ws /\ B.disjoint b ws))
+    (ensures (fun h0 _ h1 ->
+      let b = B.as_seq h0 b in
+      M.(modifies (loc_buffer ws) h0 h1) /\
+      B.as_seq h1 ws == S.init (Spec.size_k_w a) (Spec.ws a b)))
 
 #set-options "--max_fuel 1"
 
