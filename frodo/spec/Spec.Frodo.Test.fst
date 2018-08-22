@@ -42,10 +42,9 @@ let test_frodo
   let sk = create crypto_secretkeybytes (u8 0) in
   let ct = create crypto_ciphertextbytes (u8 0) in
   let ss1 = create crypto_bytes (u8 0) in
-  let ss2 = create crypto_bytes (u8 0) in
   let pk, sk = crypto_kem_keypair keypaircoins pk sk in
   let ct, ss1 = crypto_kem_enc enccoins pk ct ss1 in
-  let ss2 = crypto_kem_dec ct sk ss2 in
+  let ss2 = crypto_kem_dec ct sk in
   let r_pk = compare pk_expected pk in
   let r_sk = compare sk_expected sk in
   let r_ct = compare ct_expected ct in
