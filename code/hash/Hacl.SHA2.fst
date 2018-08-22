@@ -200,7 +200,7 @@ let index_be (a: sha2_alg) (b: B.buffer UInt8.t) (i: UInt32.t):
   | SHA2_224 | SHA2_256 -> C.Endianness.index_32_be b i
   | SHA2_384 | SHA2_512 -> C.Endianness.index_64_be b i
 
-#set-options "--max_fuel 1 --z3rlimit 50"
+#set-options "--max_fuel 1 --z3rlimit 80"
 
 let ws a b ws =
   let h0 = ST.get () in
@@ -250,7 +250,7 @@ let ws a b ws =
   in
   C.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f
 
-#set-options "--max_fuel 0"
+#set-options "--max_fuel 0 --z3rlimit 20"
 
 let hash_w (a: sha2_alg) =
   b:B.buffer (word a) { B.length b = size_hash_w a }
@@ -369,36 +369,99 @@ let shuffle a block hash ws =
     (**) Spec.Loops.repeat_range_induction 0 (U32.v i + 1) (Spec.shuffle_core a block)
       hash
   in
-  Spec.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
+  (**) Spec.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
   C.Loops.for 0ul (size_k_w a) inv f
 
-val update: a:sha2_alg ->
-  hash:hash_w a ->
-  block:B.buffer U8.t { B.length block = size_block a } ->
-  ST.Stack unit
-    (requires (fun h ->
-      B.live h hash /\ B.live h block /\ B.disjoint hash block))
-    (ensures (fun h0 _ h1 ->
-      M.(modifies (loc_buffer hash) h0 h1) /\
-      B.as_seq h1 hash == Spec.update a (B.as_seq h0 hash) (B.as_seq h0 block)))
 
 let zero (a: sha2_alg): word a =
   match a with
   | SHA2_224 | SHA2_256 -> 0ul
   | SHA2_384 | SHA2_512 -> 0UL
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 let update a hash block =
-  ST.push_frame ();
-  let h0 = ST.get () in
+  (**) ST.push_frame ();
+  (**) let h0 = ST.get () in
   let hash1: hash_w a = B.alloca (zero a) 8ul in
   let computed_ws: ws_w a = B.alloca (zero a) (UInt32.uint_to_t (Spec.size_k_w a)) in
   ws a block computed_ws;
   B.blit hash 0ul hash1 0ul 8ul;
-  let h1 = ST.get () in
-  assert (S.equal (B.as_seq h1 hash1) (B.as_seq h0 hash));
-  assert (S.equal (B.as_seq h1 hash) (B.as_seq h0 hash));
+  (**) let h1 = ST.get () in
+  (**) assert (S.equal (B.as_seq h1 hash1) (B.as_seq h0 hash));
+  (**) assert (S.equal (B.as_seq h1 hash) (B.as_seq h0 hash));
   shuffle a (G.hide block) hash1 computed_ws;
   C.Loops.in_place_map2 hash hash1 8ul (add a);
-  ST.pop_frame ()
+  (**) ST.pop_frame ()
+
+let update_224: update_t SHA2_224 =
+  T.(synth_by_tactic (specialize (update SHA2_224) [`%update]))
+let update_256: update_t SHA2_256 =
+  T.(synth_by_tactic (specialize (update SHA2_256) [`%update]))
+let update_384: update_t SHA2_384 =
+  T.(synth_by_tactic (specialize (update SHA2_384) [`%update]))
+let update_512: update_t SHA2_512 =
+  T.(synth_by_tactic (specialize (update SHA2_512) [`%update]))
+
+
+(** Padding *)
+
+val pad (a: sha2_alg) (len: word a) (dst: B.buffer U8.t):
+  ST.Stack unit
+    (requires (fun h ->
+      Spec.v' #a len < max_input8 a /\
+      B.live h dst /\
+      B.length dst = pad_length a (Spec.v' #a len)))
+    (ensures (fun h0 _ h1 ->
+      M.(modifies (loc_buffer dst) h0 h1) /\
+      B.as_seq h1 dst == Spec.pad a (Spec.v' #a len)))
+
+let pad0_len (a: sha2_alg) (len: word a): Tot (n:U32.t { U32.v n = pad0_length a (Spec.v' #a len) }) =
+  admit ()
+
+let create_next (#a: Type) (s: S.seq a) (v: a) (i: nat):
+  Lemma
+    (requires (
+      i < S.length s /\
+      S.equal (S.slice s 0 i) (S.create i v) /\
+      S.index s i == v))
+    (ensures (S.equal (S.slice s 0 (i + 1)) (S.create (i + 1) v)))
+=
+  assert (forall j. j < i ==> S.index (S.slice s 0 i) j == v);
+  assert (forall j. j < i ==> S.index (S.slice s 0 (i + 1)) j == v);
+  assert (S.index (S.slice s 0 (i + 1)) i == v)
+
+#set-options "--z3rlimit 50"
+
+(* let pad a len dst =
+  dst.(0ul) <- 0x80uy;
+  let h0 = ST.get () in
+  let len_zero = pad0_len a len in
+  let dst_zero = B.sub dst 1ul len_zero in
+  let inv h1 (i: nat) =
+    M.(modifies (loc_buffer dst_zero) h0 h1) /\
+    i <= U32.v len_zero /\
+    S.equal (S.slice (B.as_seq h1 dst_zero) 0 i) (S.slice (S.create (U32.v len_zero) 0uy) 0 i)
+  in
+  let f (i:U32.t { U32.(0 <= v i /\ v i < U32.v len_zero)}):
+    ST.Stack unit
+      (requires (fun h -> inv h (U32.v i)))
+      (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 U32.(v i + 1)))
+    =
+    dst_zero.(i) <- 0uy;
+    let h' = ST.get () in
+    create_next (B.as_seq h' dst_zero) 0uy (U32.v i)
+  in
+  C.Loops.for 0ul (pad0_len a len) inv f;
+  begin match a with
+  | SHA2_224 | SHA2_256 ->
+      let dst_len = B.sub dst U32.(1ul +^ len_zero) 4ul in
+      assert (U32.v len <= pow2 61);
+      assert_norm FStar.Mul.(pow2 61 * 8 == pow2 64);
+      FStar.Math.Lemmas.lemma_mult_le_right 8 (U32.v len) (pow2 61);
+      C.Endianness.store32_be dst_len U64.(len *^ 8ul)
+  | SHA2_384 | SHA2_512 ->
+      admit ()
+  end;
+  admit ()
+*)

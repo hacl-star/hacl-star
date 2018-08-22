@@ -1,5 +1,6 @@
 module Hacl.SHA2
 
+module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module S = FStar.Seq
@@ -32,7 +33,7 @@ let alloca_t (a: sha2_alg) = unit -> ST.StackInline (state a)
 
 val alloca: a:sha2_alg -> alloca_t a
 
-let init_t (a:sha2_alg) = (s: state a) -> ST.Stack unit
+let init_t (a:sha2_alg) = s:state a -> ST.Stack unit
   (requires (fun h ->
     M.loc_disjoint (B.loc_addr_of_buffer s) (static_fp ()) /\
     B.live h s))
@@ -41,3 +42,15 @@ let init_t (a:sha2_alg) = (s: state a) -> ST.Stack unit
     B.as_seq h1 s = Spec.init a))
 
 val init: a:sha2_alg -> init_t a
+
+let update_t (a:sha2_alg) =
+  s:state a ->
+  block:B.buffer U8.t { B.length block = size_block a } ->
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h s /\ B.live h block /\ B.disjoint s block))
+    (ensures (fun h0 _ h1 ->
+      M.(modifies (loc_buffer s) h0 h1) /\
+      B.as_seq h1 s == Spec.update a (B.as_seq h0 s) (B.as_seq h0 block)))
+
+val update: a:sha2_alg -> update_t a

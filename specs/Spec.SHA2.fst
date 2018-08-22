@@ -17,12 +17,6 @@ let size_k_w: sha2_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> 64
   | SHA2_384 | SHA2_512 -> 80
 
-(* Define the length of the encoded length in the padding *)
-inline_for_extraction
-let size_len_8: sha2_alg -> Tot nat = function
-  | SHA2_224 | SHA2_256 -> 8
-  | SHA2_384 | SHA2_512 -> 16
-
 inline_for_extraction
 let size_len_ul_8: a:sha2_alg -> Tot (n:U32.t{U32.v n = size_len_8 a}) = function
   | SHA2_224 | SHA2_256 -> 8ul
@@ -207,9 +201,6 @@ let update (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block
   let hash_1 = shuffle a hash block_w in
   Spec.Loops.seq_map2 (word_add_mod a) hash hash_1
 
-(* Compute the length for the zeroed part of the padding *)
-let pad0_length (a:sha2_alg) (len:nat): Tot (n:nat{(len + 1 + n + size_len_8 a) % size_block a = 0}) =
-  (size_block a - (len + size_len_8 a + 1)) % size_block a
 
 let max_input_size_len (a: sha2_alg): Lemma
   (ensures FStar.Mul.(max_input8 a * 8 = pow2 (size_len_8 a * 8)))
@@ -234,7 +225,7 @@ let pad (a:sha2_alg)
   let total_len_bits = total_len * 8 in
   // Saves the need for high fuel + makes hint replayable.
   max_input_size_len a;
-  let encodedlen = Endianness.big_bytes (size_len_ul_8 a) (total_len * 8) in
+  let encodedlen = E.n_to_be (size_len_ul_8 a) (total_len * 8) in
   S.(firstbyte @| zeros @| encodedlen)
 
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)

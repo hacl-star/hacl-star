@@ -29,6 +29,12 @@ let max_input8: hash_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> pow2 61
   | SHA2_384 | SHA2_512 -> pow2 125
 
+(* Define the length of the encoded length in the padding *)
+let size_len_8: sha2_alg -> Tot nat = function
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256 -> 8
+  | SHA2_384 | SHA2_512 -> 16
+
 (* Defines the size of the word for each algorithm *)
 let size_word: hash_alg -> Tot nat = function
   | MD5 | SHA1
@@ -73,6 +79,14 @@ let word: hash_alg -> Tot Type0 = function
 
 (* The working state *)
 let hash_w a = m:Seq.seq (word a) {Seq.length m = size_hash_w a}
+
+(* Number of zeroes that should go into the padding *)
+let pad0_length (a:sha2_alg) (len:nat): Tot (n:nat{(len + 1 + n + size_len_8 a) % size_block a = 0}) =
+  (size_block a - (len + size_len_8 a + 1)) % size_block a
+
+(* Total length for the padding, a.k.a. the suffix length. *)
+let pad_length (a: sha2_alg) (len: nat): Tot (n:nat { (len + n) % size_block a = 0 }) =
+  pad0_length a len + 1 + size_len_8 a
 
 
 (** The data format taken and returned by the hash specifications. *)
