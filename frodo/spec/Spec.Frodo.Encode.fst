@@ -33,7 +33,7 @@ let lemma_matrix_equality_nbar a b =
   Lib.Sequence.eq_intro a b
 
 val ec:
-    b:size_nat{b <= params_logq}
+    b:size_nat{0 < b /\ b <= params_logq}
   -> k:uint16{uint_v k < pow2 b}
   -> r:uint16{uint_v r < pow2 params_logq /\ uint_v r == uint_v k * pow2 (params_logq - b)}
 let ec b k =
@@ -49,7 +49,7 @@ let ec b k =
   res
 
 val dc:
-    b:size_nat{b < params_logq}
+    b:size_nat{0 < b /\ b < params_logq}
   -> c:uint16
   -> r:uint16{uint_v r < pow2 b /\
              uint_v r = (uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b) % pow2 b}
@@ -64,13 +64,12 @@ let dc b c =
   //assert (uint_v res1 = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 (16 - params_logq + b));
   let res = res1 &. ((u16 1 <<. u32 b) -. u16 1) in
   modulo_pow2_u16 res1 b;
-  //assert (uint_v res1 % pow2 b = uint_v (res1 &. ((u16 1 <<. u32 b) -. u16 1)));
+  assert (uint_v res1 % pow2 b = uint_v (res1 &. ((u16 1 <<. u32 b) -. u16 1)));
   pow2_modulo_modulo_lemma_1 ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) b (16 - params_logq + b);
-  //assert (uint_v res = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 b);
   res
 
 val ec1:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> x:uint64
   -> k:size_nat{k < 8}
   -> res:uint16
@@ -88,7 +87,7 @@ let ec1 b x k =
   ec b (to_u16 rk)
 
 val frodo_key_encode_fc:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> a:lbytes (params_nbar * params_nbar * b / 8)
   -> i:size_nat{i < params_nbar}
   -> k:size_nat{k < 8}
@@ -100,7 +99,7 @@ let frodo_key_encode_fc b a i k =
   ec1 b x k
 
 val frodo_key_encode1:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> a:lbytes (params_nbar * params_nbar * b / 8)
   -> res0:matrix params_nbar params_nbar
   -> x:uint64
@@ -118,7 +117,7 @@ let frodo_key_encode1 b a res0 x i =
     ) res0
 
 val frodo_key_encode2:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> a:lbytes (params_nbar * params_nbar * b / 8)
   -> res0:matrix params_nbar params_nbar
   -> i:size_nat{i < params_nbar}
@@ -131,7 +130,7 @@ let frodo_key_encode2 b a res0 i =
   frodo_key_encode1 b a res0 x i
 
 val frodo_key_encode:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> a:lbytes (params_nbar * params_nbar * b / 8)
   -> res:matrix params_nbar params_nbar
     {forall (i:size_nat{i < params_nbar}) (k:size_nat{k < 8}).
@@ -158,7 +157,7 @@ let rec fold_logor_ f i =
 #set-options "--max_fuel 1"
 
 val decode_fc:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> a:matrix params_nbar params_nbar
   -> i:size_nat{i < params_nbar}
   -> k:size_nat{k <= 8}
@@ -169,7 +168,7 @@ let decode_fc b a i k =
   fold_logor_ f k
 
 val frodo_key_decode1:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> a:matrix params_nbar params_nbar
   -> i:size_nat{i < params_nbar}
   -> res:uint64{res == decode_fc b a i 8}
@@ -177,13 +176,14 @@ let frodo_key_decode1 b a i =
   repeati_inductive 8
     (fun k templong -> templong == decode_fc b a i k)
     (fun k templong ->
+      assert_norm (b * k <= pow2 32);
       templong |. to_u64 (dc b a.(i, k)) <<. u32 (b * k)
     ) (u64 0)
 
 #set-options "--max_fuel 0"
 
 val frodo_key_decode_fc:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> a:matrix params_nbar params_nbar
   -> i:size_nat{i < params_nbar}
   -> k:size_nat{k < b}
@@ -194,7 +194,7 @@ let frodo_key_decode_fc b a i k =
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.Pervasives Spec.Frodo.Encode Lib.Sequence Lib.IntTypes Spec.Frodo.Params'"
 
 val frodo_key_decode2:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> a:matrix params_nbar params_nbar
   -> i:size_nat{i < params_nbar}
   -> res0:lbytes (params_nbar * params_nbar * b / 8)
@@ -210,7 +210,7 @@ let frodo_key_decode2 b a i res0 =
   res
 
 val frodo_key_decode:
-    b:size_nat{b <= 8}
+    b:size_nat{0 < b /\ b <= 8}
   -> a:matrix params_nbar params_nbar
   -> res:lbytes (params_nbar * params_nbar * b / 8)
     {forall (i:size_nat{i < params_nbar}) (k:size_nat{k < b}).
