@@ -2,6 +2,7 @@ FSTAR_HOME ?= ../../../FStar
 HACL_HOME  ?= ../..
 
 VARIANT    ?= 640-cSHAKE
+
 CACHE_DIR  = .cache.$(VARIANT)
 HINT_DIR   = .hints.$(VARIANT)
 OUT_DIR	   = frodo-ml.$(VARIANT)
@@ -97,7 +98,11 @@ $(OUT_DIR)/test.exe: $(subst .ml,.cmx,$(ALL_ML_FILES)) | $(OUT_DIR)
 	$(OCAMLOPT) -I $(OUT_DIR) -o $(OUT_DIR)/test.exe $(subst .ml,.cmx,$(ALL_ML_FILES))
 
 test: $(OUT_DIR)/test.exe
+ifeq ($(VARIANT),640-cSHAKE)
 	$(OUT_DIR)/test.exe
+else
+	@echo Sorry, no test vectors for FrodoKEM-976 spec yet
+endif
 
 
 # 4. Clean targets
