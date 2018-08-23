@@ -3,12 +3,15 @@ HACL_HOME  ?= ../..
 
 VARIANT    ?= 640-cSHAKE
 
-ifeq ($(VARIANT),640-cSHAKE)
-  $(info ========= Building FrodoKEM-640-cSHAKE =========)
+ifeq ($(VARIANT),64-cSHAKE)
+  # Info banners break interactive mode
+  #$(info ========= Building FrodoKEM-64-cSHAKE ==========)
+else ifeq ($(VARIANT),640-cSHAKE)
+  #$(info ========= Building FrodoKEM-640-cSHAKE =========)
 else ifeq ($(VARIANT),976-cSHAKE)
-  $(info ========= Building FrodoKEM-976-cSHAKE =========)
+  #$(info ========= Building FrodoKEM-976-cSHAKE =========)
 else
-  $(error ERROR: VARIANT must be either 640-cSHAKE or 976-cSHAKE)
+  $(error ERROR: VARIANT must be one of 64-cSHAKE, 640-cSHAKE or 976-cSHAKE)
 endif
 
 CACHE_DIR  = .cache.$(VARIANT)
@@ -19,7 +22,14 @@ include $(HACL_HOME)/Makefile.include
 
 all:
 	rm -f .depend && $(MAKE) .depend
+ifeq ($(VARIANT),64-cSHAKE)
 	$(MAKE) test
+else
+	$(MAKE) verify
+endif
+
+verify: $(addprefix $(CACHE_DIR)/,Spec.Frodo.KEM.KeyGen.fst.checked Spec.Frodo.KEM.Encaps.fst.checked Spec.Frodo.KEM.Decaps.fst.checked)
+	@echo SUCCESS!
 
 # 1. Generation of .ml files
 # - generate the F* dependency graph via `fstar --dep full`
@@ -94,10 +104,6 @@ $(OUT_DIR):
 %.cmx:
 	$(OCAMLOPT) -I $(OUT_DIR) -c $< -o $@
 
-$(OUT_DIR)/Spec_Frodo_Params.cmx:
-	sed -i.bak 's/Prims.parse_int "640"/Prims.parse_int "64"/g' $<
-	$(OCAMLOPT) -I $(OUT_DIR) -c $< -o $@
-
 $(OUT_DIR)/Spec_Frodo_Test.cmx:
 	@echo 'let _ = test()' >> $(OUT_DIR)/Spec_Frodo_Test.ml
 	$(OCAMLOPT) -I $(OUT_DIR) -c $< -o $@
@@ -106,11 +112,7 @@ $(OUT_DIR)/test.exe: $(subst .ml,.cmx,$(ALL_ML_FILES)) | $(OUT_DIR)
 	$(OCAMLOPT) -I $(OUT_DIR) -o $(OUT_DIR)/test.exe $(subst .ml,.cmx,$(ALL_ML_FILES))
 
 test: $(OUT_DIR)/test.exe
-ifeq ($(VARIANT),640-cSHAKE)
 	$(OUT_DIR)/test.exe
-else
-	@echo Sorry, no test vectors for FrodoKEM-976 spec yet
-endif
 
 
 # 4. Clean targets
