@@ -19,8 +19,9 @@ function hacl_test() {
     fetch_and_make_kremlin &&
         fetch_and_make_mlcrypto &&
         fetch_mitls &&
+        fetch_and_make_vale &&
         export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
-        make -j $threads ci -k
+        env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads ci -k
 }
 
 function hacl_test_and_hints() {
@@ -90,6 +91,26 @@ function fetch_mitls() {
     export_home MITLS "$(pwd)/mitls-fstar"
 }
 
+function fetch_vale() {
+    # NOTE: the name of the directory where Vale is downloaded MUST NOT be vale, because the latter already exists
+    # so let's call it valebin
+    if [ ! -d valebin ]; then
+        git clone https://github.com/project-everest/vale valebin
+    fi
+    cd valebin
+    git fetch origin
+    local ref=$(if [ -f ../.vale_version ]; then cat ../.vale_version | tr -d '\r\n'; else echo origin/master; fi)
+    echo Switching to Vale $ref
+    git reset --hard $ref
+    cd ..
+    export_home VALE "$(pwd)/valebin"
+}
+
+function fetch_and_make_vale() {
+    fetch_vale
+    python3.6 $(which scons) -C valebin -j $threads
+}
+
 function refresh_hacl_hints() {
     refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
 }
@@ -154,7 +175,8 @@ function exec_build() {
 
     if [[ $target == "hacl-ci" ]]; then
         echo target - >hacl-ci
-        hacl_test && echo -n true >$status_file
+        hacl_test &&
+        echo -n true >$status_file
     elif [[ $target == "hacl-nightly" ]]; then
         echo target - >hacl-nightly
         export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
