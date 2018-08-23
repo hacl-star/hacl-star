@@ -3,15 +3,19 @@ module Hacl.SHA2
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-module C = Spec.SHA2.Constants
+module U128 = FStar.UInt128
+
+module Cast = FStar.Int.Cast.Full
+module Constants = Spec.SHA2.Constants
+module Tactics = FStar.Tactics
+module Helpers = Spec.Hash.Helpers
+module Endianness = FStar.Kremlin.Endianness
+
 module S = FStar.Seq
 module B = LowStar.Buffer
+module G = FStar.Ghost
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
-module T = FStar.Tactics
-module H = Spec.Hash.Helpers
-module G = FStar.Ghost
-module E = FStar.Kremlin.Endianness
 
 open Spec.Hash.Helpers
 open LowStar.BufferOps
@@ -23,13 +27,13 @@ friend Spec.SHA2
 (** Top-level constant arrays for the SHA2 algorithms. *)
 
 (* NOTE: we don't have monotonicity yet so there will be various assumes. *)
-let h224 = B.gcmalloc_of_list HS.root C.h224_l
-let h256 = B.gcmalloc_of_list HS.root C.h256_l
-let h384 = B.gcmalloc_of_list HS.root C.h384_l
-let h512 = B.gcmalloc_of_list HS.root C.h512_l
+let h224 = B.gcmalloc_of_list HS.root Constants.h224_l
+let h256 = B.gcmalloc_of_list HS.root Constants.h256_l
+let h384 = B.gcmalloc_of_list HS.root Constants.h384_l
+let h512 = B.gcmalloc_of_list HS.root Constants.h512_l
 
-let k224_256 = B.gcmalloc_of_list HS.root C.k224_256_l
-let k384_512 = B.gcmalloc_of_list HS.root C.k384_512_l
+let k224_256 = B.gcmalloc_of_list HS.root Constants.k224_256_l
+let k384_512 = B.gcmalloc_of_list HS.root Constants.k384_512_l
 
 (* We believe it'll be hard to get, "for free", within this module:
      readonly h224 /\ writable client_state ==> disjoint h224 client_state
@@ -77,22 +81,22 @@ let recall_static_fp () =
 let alloca a () =
   [@ inline_let ]
   let l: list (word a) = Spec.(match a with
-    | SHA2_224 -> C.h224_l
-    | SHA2_256 -> C.h256_l
-    | SHA2_384 -> C.h384_l
-    | SHA2_512 -> C.h512_l) in
+    | SHA2_224 -> Constants.h224_l
+    | SHA2_256 -> Constants.h256_l
+    | SHA2_384 -> Constants.h384_l
+    | SHA2_512 -> Constants.h512_l) in
   B.alloca_of_list l
 
 #set-options "--max_fuel 0"
 
 let alloca_224: alloca_t SHA2_224 =
-  T.(synth_by_tactic (specialize (alloca SHA2_224) [`%alloca]))
+  Tactics.(synth_by_tactic (specialize (alloca SHA2_224) [`%alloca]))
 let alloca_256: alloca_t SHA2_256 =
-  T.(synth_by_tactic (specialize (alloca SHA2_256) [`%alloca]))
+  Tactics.(synth_by_tactic (specialize (alloca SHA2_256) [`%alloca]))
 let alloca_384: alloca_t SHA2_384 =
-  T.(synth_by_tactic (specialize (alloca SHA2_384) [`%alloca]))
+  Tactics.(synth_by_tactic (specialize (alloca SHA2_384) [`%alloca]))
 let alloca_512: alloca_t SHA2_512 =
-  T.(synth_by_tactic (specialize (alloca SHA2_512) [`%alloca]))
+  Tactics.(synth_by_tactic (specialize (alloca SHA2_512) [`%alloca]))
 
 (** Init *)
 
@@ -102,35 +106,35 @@ let init a s =
       B.recall h224;
       // waiting for monotonicity:
       let h = ST.get () in
-      assume (B.as_seq h h224 == S.seq_of_list C.h224_l);
+      assume (B.as_seq h h224 == S.seq_of_list Constants.h224_l);
       B.blit h224 0ul s 0ul 8ul
   | SHA2_256 ->
       B.recall h256;
       // waiting for monotonicity:
       let h = ST.get () in
-      assume (B.as_seq h h256 == S.seq_of_list C.h256_l);
+      assume (B.as_seq h h256 == S.seq_of_list Constants.h256_l);
       B.blit h256 0ul s 0ul 8ul
   | SHA2_384 ->
       B.recall h384;
       // waiting for monotonicity:
       let h = ST.get () in
-      assume (B.as_seq h h384 == S.seq_of_list C.h384_l);
+      assume (B.as_seq h h384 == S.seq_of_list Constants.h384_l);
       B.blit h384 0ul s 0ul 8ul
   | SHA2_512 ->
       B.recall h512;
       // waiting for monotonicity:
       let h = ST.get () in
-      assume (B.as_seq h h512 == S.seq_of_list C.h512_l);
+      assume (B.as_seq h h512 == S.seq_of_list Constants.h512_l);
       B.blit h512 0ul s 0ul 8ul
 
 let init_224: init_t SHA2_224 =
-  T.(synth_by_tactic (specialize (init SHA2_224) [`%init]))
+  Tactics.(synth_by_tactic (specialize (init SHA2_224) [`%init]))
 let init_256: init_t SHA2_256 =
-  T.(synth_by_tactic (specialize (init SHA2_256) [`%init]))
+  Tactics.(synth_by_tactic (specialize (init SHA2_256) [`%init]))
 let init_384: init_t SHA2_384 =
-  T.(synth_by_tactic (specialize (init SHA2_384) [`%init]))
+  Tactics.(synth_by_tactic (specialize (init SHA2_384) [`%init]))
 let init_512: init_t SHA2_512 =
-  T.(synth_by_tactic (specialize (init SHA2_512) [`%init]))
+  Tactics.(synth_by_tactic (specialize (init SHA2_512) [`%init]))
 
 (** Three sequence lemmas required for the pre-computation of Spec.ws *)
 
@@ -200,7 +204,7 @@ let index_be (a: sha2_alg) (b: B.buffer UInt8.t) (i: UInt32.t):
   | SHA2_224 | SHA2_256 -> C.Endianness.index_32_be b i
   | SHA2_384 | SHA2_512 -> C.Endianness.index_64_be b i
 
-#set-options "--max_fuel 1 --z3rlimit 80"
+#set-options "--max_fuel 1 --z3rlimit 100"
 
 let ws a b ws =
   let h0 = ST.get () in
@@ -267,12 +271,12 @@ let k0 a =
   | SHA2_224 | SHA2_256 ->
       B.recall k224_256;
       let h = ST.get () in
-      assume (B.as_seq h k224_256 == S.seq_of_list C.k224_256_l);
+      assume (B.as_seq h k224_256 == S.seq_of_list Constants.k224_256_l);
       k224_256
   | SHA2_384 | SHA2_512 ->
       B.recall k384_512;
       let h = ST.get () in
-      assume (B.as_seq h k384_512 == S.seq_of_list C.k384_512_l);
+      assume (B.as_seq h k384_512 == S.seq_of_list Constants.k384_512_l);
       k384_512
 
 inline_for_extraction unfold
@@ -366,8 +370,7 @@ let shuffle a block hash ws =
     (**) let block = G.reveal block in
     (**) let block = block_words_be a h0 block in
     (**) let hash = B.as_seq h0 hash in
-    (**) Spec.Loops.repeat_range_induction 0 (U32.v i + 1) (Spec.shuffle_core a block)
-      hash
+    (**) Spec.Loops.repeat_range_induction 0 (U32.v i + 1) (Spec.shuffle_core a block) hash
   in
   (**) Spec.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
   C.Loops.for 0ul (size_k_w a) inv f
@@ -395,29 +398,15 @@ let update a hash block =
   (**) ST.pop_frame ()
 
 let update_224: update_t SHA2_224 =
-  T.(synth_by_tactic (specialize (update SHA2_224) [`%update]))
+  Tactics.(synth_by_tactic (specialize (update SHA2_224) [`%update]))
 let update_256: update_t SHA2_256 =
-  T.(synth_by_tactic (specialize (update SHA2_256) [`%update]))
+  Tactics.(synth_by_tactic (specialize (update SHA2_256) [`%update]))
 let update_384: update_t SHA2_384 =
-  T.(synth_by_tactic (specialize (update SHA2_384) [`%update]))
+  Tactics.(synth_by_tactic (specialize (update SHA2_384) [`%update]))
 let update_512: update_t SHA2_512 =
-  T.(synth_by_tactic (specialize (update SHA2_512) [`%update]))
+  Tactics.(synth_by_tactic (specialize (update SHA2_512) [`%update]))
 
-
-(** Padding *)
-
-val pad (a: sha2_alg) (len: word a) (dst: B.buffer U8.t):
-  ST.Stack unit
-    (requires (fun h ->
-      Spec.v' #a len < max_input8 a /\
-      B.live h dst /\
-      B.length dst = pad_length a (Spec.v' #a len)))
-    (ensures (fun h0 _ h1 ->
-      M.(modifies (loc_buffer dst) h0 h1) /\
-      B.as_seq h1 dst == Spec.pad a (Spec.v' #a len)))
-
-let pad0_len (a: sha2_alg) (len: word a): Tot (n:U32.t { U32.v n = pad0_length a (Spec.v' #a len) }) =
-  admit ()
+(** One lemma needed for our for loop for padding *)
 
 let create_next (#a: Type) (s: S.seq a) (v: a) (i: nat):
   Lemma
@@ -431,11 +420,78 @@ let create_next (#a: Type) (s: S.seq a) (v: a) (i: nat):
   assert (forall j. j < i ==> S.index (S.slice s 0 (i + 1)) j == v);
   assert (S.index (S.slice s 0 (i + 1)) i == v)
 
-#set-options "--z3rlimit 50"
 
-(* let pad a len dst =
-  dst.(0ul) <- 0x80uy;
+(** Padding *)
+
+let size_word (a: sha2_alg): n:U32.t { U32.v n = size_word a } =
+  match a with
+  | SHA2_224 | SHA2_256 -> 4ul
+  | SHA2_384 | SHA2_512 -> 8ul
+
+let size_block (a: sha2_alg): n:U32.t { U32.v n = size_block a } =
+  U32.(size_word a *^ 16ul)
+
+let size_len (a: sha2_alg): n:U32.t { U32.v n = size_len_8 a } =
+  match a with
+  | SHA2_224 | SHA2_256 -> 8ul
+  | SHA2_384 | SHA2_512 -> 16ul
+
+#set-options "--z3rlimit 50"
+val store_len: a:sha2_alg -> len:len_t a -> b:B.buffer U8.t ->
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h b /\
+      B.length b = Helpers.size_len_8 a))
+    (ensures (fun h0 _ h1 ->
+      M.(modifies (loc_buffer b) h0 h1) /\
+      B.as_seq h1 b == Endianness.n_to_be (size_len a) (len_v a len)))
+let store_len a len b =
+  match a with
+  | SHA2_224 | SHA2_256 ->
+      C.Endianness.store64_be b len;
+      let h = ST.get () in
+      Endianness.n_to_be_be_to_n 8ul (B.as_seq h b)
+  | SHA2_384 | SHA2_512 ->
+      C.Endianness.store128_be b len;
+      let h = ST.get () in
+      Endianness.n_to_be_be_to_n 16ul (B.as_seq h b)
+
+#set-options "--z3rlimit 100"
+
+// JP: the two lemmas below are extremely fragile; TODO: use FStar.Math.Lemmas.lemma_modulo
+let len_mod_32 (a: sha2_alg) (len: len_t a):
+  Tot (n:U32.t { U32.v n = len_v a len % Helpers.size_block a })
+=
+  match a with
+  | SHA2_224 | SHA2_256 ->
+      Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (size_block a)))
+  | _ ->
+      let len = Cast.uint128_to_uint64 len in
+      Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (size_block a)))
+
+let pad0_len (a: sha2_alg) (len: len_t a):
+  Tot (n:U32.t { U32.v n = pad0_length a (len_v a len) })
+=
+  let open U32 in
+  (size_block a +^ size_block a -^ (size_len a +^ 1ul +^ len_mod_32 a len)) %^ size_block a
+
+val pad (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
+  ST.Stack unit
+    (requires (fun h ->
+      len_v a len < max_input8 a /\
+      B.live h dst /\
+      B.length dst = pad_length a (len_v a len)))
+    (ensures (fun h0 _ h1 ->
+      M.(modifies (loc_buffer dst) h0 h1) /\
+      B.as_seq h1 dst == Spec.pad a (len_v a len)))
+
+let pad a len dst =
+  (* i) Append a single 1 bit. *)
+  let dst_bit = B.sub dst 0ul 1ul in
+  dst_bit.(0ul) <- 0x80uy;
   let h0 = ST.get () in
+  assert (S.equal (S.slice (B.as_seq h0 dst) 0 1) (S.create 1 0x80uy));
+  (* ii) Fill with zeroes *)
   let len_zero = pad0_len a len in
   let dst_zero = B.sub dst 1ul len_zero in
   let inv h1 (i: nat) =
@@ -453,15 +509,37 @@ let create_next (#a: Type) (s: S.seq a) (v: a) (i: nat):
     create_next (B.as_seq h' dst_zero) 0uy (U32.v i)
   in
   C.Loops.for 0ul (pad0_len a len) inv f;
+  let h1 = ST.get () in
+  assert (
+    let pad0_length = pad0_length a (len_v a len) in
+    S.equal (S.slice (B.as_seq h1 dst) 1 (1 + pad0_length)) (S.create pad0_length 0uy));
+  (* iii) Encoded length *)
+  let dst_len = B.sub dst U32.(1ul +^ len_zero) (size_len a) in
   begin match a with
   | SHA2_224 | SHA2_256 ->
-      let dst_len = B.sub dst U32.(1ul +^ len_zero) 4ul in
-      assert (U32.v len <= pow2 61);
-      assert_norm FStar.Mul.(pow2 61 * 8 == pow2 64);
-      FStar.Math.Lemmas.lemma_mult_le_right 8 (U32.v len) (pow2 61);
-      C.Endianness.store32_be dst_len U64.(len *^ 8ul)
+      let dst_len = B.sub dst U32.(1ul +^ len_zero) 8ul in
+      assume FStar.Mul.(U64.(v (shift_left len 3ul)) = U64.v len * 8);
+      store_len a U64.(shift_left len 3ul) dst_len
   | SHA2_384 | SHA2_512 ->
-      admit ()
+      let dst_len = B.sub dst U32.(1ul +^ len_zero) 16ul in
+      assume FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
+      store_len a U128.(shift_left len 3ul) dst_len
   end;
-  admit ()
-*)
+  let h2 = ST.get () in
+  assert (
+    let pad0_length = pad0_length a (len_v a len) in
+    let s = B.as_seq h2 dst in
+    let s1 = S.create 1 0x80uy in
+    let s2 = S.create pad0_length 0uy in
+    let s3 = Endianness.n_to_be (Spec.size_len_ul_8 a) FStar.Mul.(len_v a len * 8) in
+    Spec.max_input_size_len a;
+    S.equal (S.slice s 0 1) s1 /\
+    S.equal (S.slice s 1 (1 + pad0_length)) s2 /\
+    S.equal (S.slice s (1 + pad0_length) (1 + pad0_length + size_len_8 a)) s3 /\
+    S.length s = 1 + pad0_length + size_len_8 a /\
+    (len_v a len + 1 + pad0_length + size_len_8 a) % Helpers.size_block a = 0 /\
+    (S.length s + len_v a len) % Helpers.size_block a = 0 /\
+    S.equal s (S.append s1 (S.append s2 s3)) /\
+    True);
+  ()
+

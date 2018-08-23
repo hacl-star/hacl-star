@@ -6,9 +6,8 @@ module Spec.Hash.Helpers
  * init / update / pad / finish that any algorithm must implement in order to be
  * turned into a complete hash construction. *)
 
-(** Helpers for sizes, definition of the working state, etc. *)
+(** Supported hash algorithms. *)
 
-(* All the hash algorithms currently supported by our specifications. *)
 type hash_alg =
   | SHA2_224
   | SHA2_256
@@ -23,19 +22,43 @@ let is_sha2 = function
 
 let sha2_alg = a:hash_alg { is_sha2 a }
 
-(* Define the maximum input length in bytes *)
+(** Maximum input data length. *)
+
+(* In bytes. *)
 let max_input8: hash_alg -> Tot nat = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> pow2 61
   | SHA2_384 | SHA2_512 -> pow2 125
 
-(* Define the length of the encoded length in the padding *)
-let size_len_8: sha2_alg -> Tot nat = function
+(* A type that can hold a maximum length. *)
+let len_t: hash_alg -> Type = function
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256 -> UInt64.t
+  | SHA2_384 | SHA2_512 -> UInt128.t
+
+val len_v: a:hash_alg -> len_t a -> nat
+let len_v = function
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256 -> UInt64.v
+  | SHA2_384 | SHA2_512 -> UInt128.v
+
+(* Number of bytes occupied by a len_t, i.e. the size of the encoded length in
+   the padding. *)
+let size_len_8: hash_alg -> Tot nat = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> 8
   | SHA2_384 | SHA2_512 -> 16
 
-(* Defines the size of the word for each algorithm *)
+(** Working state of the algorithms. *)
+
+(* Internally, hash functions operate on a series of machine words. *)
+inline_for_extraction
+let word: hash_alg -> Tot Type0 = function
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256 -> UInt32.t
+  | SHA2_384 | SHA2_512 -> UInt64.t
+
+(* In bytes *)
 let size_word: hash_alg -> Tot nat = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> 4
@@ -48,6 +71,16 @@ let size_block_w = 16
 let size_block a =
   let open FStar.Mul in
   size_word a * size_block_w
+
+(* Number of words for intermediate hash, i.e. the working state. *)
+let size_hash_w a =
+  match a with
+  | MD5 -> 4
+  | SHA1 -> 5
+  | _ -> 8
+
+(* The working state *)
+let hash_w a = m:Seq.seq (word a) {Seq.length m = size_hash_w a}
 
 (* Number of words for final hash *)
 inline_for_extraction
@@ -64,21 +97,7 @@ let size_hash a =
   let open FStar.Mul in
   size_word a * size_hash_final_w a
 
-(* Number of words for intermediate hash *)
-let size_hash_w a =
-  match a with
-  | MD5 -> 4
-  | SHA1 -> 5
-  | _ -> 8
-
-inline_for_extraction
-let word: hash_alg -> Tot Type0 = function
-  | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> UInt32.t
-  | SHA2_384 | SHA2_512 -> UInt64.t
-
-(* The working state *)
-let hash_w a = m:Seq.seq (word a) {Seq.length m = size_hash_w a}
+(** Padding *)
 
 (* Number of zeroes that should go into the padding *)
 let pad0_length (a:sha2_alg) (len:nat): Tot (n:nat{(len + 1 + n + size_len_8 a) % size_block a = 0}) =
