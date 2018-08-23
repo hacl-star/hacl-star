@@ -643,14 +643,21 @@
     [
       "Crypto.Symmetric.UF1CMA.__proj__State__item__log",
       1,
-      0,
-      0,
+      2,
+      1,
       [
-        "@query", "proj_equation_Crypto.Symmetric.UF1CMA.State_region",
-        "projection_inverse_Crypto.Symmetric.UF1CMA.State_region"
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Crypto.Symmetric.UF1CMA.log_ref",
+        "equation_FStar.HyperStack.ST.erid",
+        "equation_FStar.HyperStack.ST.is_eternal_region",
+        "equation_FStar.Monotonic.HyperStack.is_eternal_color",
+        "equation_Flag.mac_log", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_FStar.HyperStack.ST_Tm_refine_08d14059b664746699a12b0c359d3b8d",
+        "typing_FStar.Monotonic.HyperHeap.color",
+        "typing_FStar.Monotonic.HyperStack.is_eternal_color"
       ],
       0,
-      "3a97ac6d073effa389f7bea2360d2d44"
+      "55fff1ab2efb364f87a10aeebaecf2d0"
     ],
     [
       "Crypto.Symmetric.UF1CMA.mac_is_unset",
@@ -913,7 +920,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "3b1a4de1c47cbdeecd081107b3ad6a71"
+      "c3dd6b7139bc60022f82691f1f7d6b78"
     ],
     [
       "Crypto.Symmetric.UF1CMA.gen",
@@ -1085,11 +1092,24 @@
       0,
       0,
       [
-        "@query", "proj_equation_Crypto.Symmetric.UF1CMA.Acc_a",
-        "projection_inverse_Crypto.Symmetric.UF1CMA.Acc_a"
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Crypto.Symmetric.UF1CMA.irtext",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.uint_t",
+        "equation_Flag.mac_log", "equation_Hacl.Bignum.Constants.len",
+        "equation_Hacl.Bignum.Parameters.clen",
+        "equation_Hacl.Bignum.Parameters.len",
+        "function_token_typing_Hacl.Bignum.Constants.len",
+        "function_token_typing_Hacl.Bignum.Parameters.clen", "int_typing",
+        "lemma_FStar.Buffer.lemma_size",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_FStar.UInt32_Tm_refine_6c25b42778726de94cd4dac42edb4860",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.clen"
       ],
       0,
-      "67755a32096c27306d8c33b5bc61882b"
+      "ff87123a2a1c266d2583422e95795ec3"
     ],
     [
       "Crypto.Symmetric.UF1CMA.alog",
@@ -1840,7 +1860,7 @@
         "typing_FStar.UInt128.t", "typing_FStar.UInt32.v"
       ],
       0,
-      "f676977c5564d059b5adda8c02f84e4b"
+      "1305d6fa9d2c85415875741418e25274"
     ],
     [
       "Crypto.Symmetric.UF1CMA.modifies_bufs_and_ref",
@@ -1887,7 +1907,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "f43f6ad999a88ca6e3e78bd18061044d"
+      "f4931f6d3075c69c1859320fbf55cb73"
     ],
     [
       "Crypto.Symmetric.UF1CMA.mac",
@@ -1933,7 +1953,7 @@
         "typing_FStar.Monotonic.HyperStack.is_mm"
       ],
       0,
-      "1208a139af796400fe5e5cb9f386f6af"
+      "6ff9ac0dce086936914390af63249379"
     ],
     [
       "Crypto.Symmetric.UF1CMA.mac",
@@ -2007,7 +2027,7 @@
         "typing_FStar.UInt128.t", "unit_inversion", "unit_typing"
       ],
       0,
-      "c541aad1424fa5fe9db548ac71728b0e"
+      "4f42af890fdc296b6cc37e40ebf326fb"
     ],
     [
       "Crypto.Symmetric.UF1CMA.verify_ok",

@@ -109,7 +109,7 @@ let k_list: l:List.Tot.llist Word.t 80 =
   assert_norm (List.Tot.length l = 80);
   l
 
-let k : k_w = Seq.of_list k_list
+let k : k_w = Seq.seq_of_list k_list
 
 [@"opaque_to_smt"]
 inline_for_extraction
@@ -122,7 +122,7 @@ let h_0_list : List.Tot.llist Word.t 8 =
   assert_norm (List.Tot.length l = 8);
   l
 
-let h_0 : hash_w = Seq.of_list h_0_list
+let h_0 : hash_w = Seq.seq_of_list h_0_list
 
 let rec ws (b:block_w) (t:counter{t < size_k_w}) : Tot word =
   if t < size_block_w then b.[t]

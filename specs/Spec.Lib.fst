@@ -106,7 +106,7 @@ let lemma_uint32_from_to_bij (b:lbytes 4) : Lemma
 
 val uint32s_from_le: len:nat -> b:lbytes (4 * len) -> Tot (s:seq UInt32.t{length s = len}) (decreases len)
 let rec uint32s_from_le len src =
-  if len = 0 then createEmpty
+  if len = 0 then Seq.empty
   else (
     let prefix, last = split src (4 * len - 4) in
     snoc (uint32s_from_le (len-1) prefix) (uint32_from_le last)
@@ -114,7 +114,7 @@ let rec uint32s_from_le len src =
 
     (* uint32s_from_le (len - 1)  *)
 (* let rec uint32s_from_le len src = *)
-(*   if len = 0 then Seq.createEmpty #UInt32.t *)
+(*   if len = 0 then Seq.empty #UInt32.t *)
 (*   else *)
 (*     let h = slice src 0 4 in *)
 (*     let t = slice src 4 (4*len) in *)
@@ -123,7 +123,7 @@ let rec uint32s_from_le len src =
 
 val uint32s_to_le: len:nat -> s:seq UInt32.t{length s = len} -> Tot (lbytes (4 * len))  (decreases len)
 let rec uint32s_to_le len src =
-  if len = 0 then createEmpty
+  if len = 0 then Seq.empty
   else (
     let prefix = slice src 0 (len - 1) in
     let last   = index src (len - 1) in
@@ -132,7 +132,7 @@ let rec uint32s_to_le len src =
 
 val uint64s_from_le: len:nat -> b:lbytes (8 * len) -> Tot (s:seq UInt64.t{length s = len}) (decreases len)
 let rec uint64s_from_le len src =
-  if len = 0 then createEmpty
+  if len = 0 then Seq.empty
   else (
     let prefix, last = split src (8 * len - 8) in
     snoc (uint64s_from_le (len-1) prefix) (uint64_from_le last)
@@ -140,7 +140,7 @@ let rec uint64s_from_le len src =
 
 val uint64s_to_le: len:nat -> s:seq UInt64.t{length s = len} -> Tot (lbytes (8 * len))  (decreases len)
 let rec uint64s_to_le len src =
-  if len = 0 then createEmpty
+  if len = 0 then Seq.empty
   else (
     let prefix = slice src 0 (len - 1) in
     let last   = index src (len - 1) in
@@ -150,7 +150,7 @@ let rec uint64s_to_le len src =
 
 val uint32s_from_be: len:nat -> b:lbytes (4 * len) -> Tot (s:seq UInt32.t{length s = len}) (decreases len)
 let rec uint32s_from_be len src =
-  if len = 0 then createEmpty
+  if len = 0 then Seq.empty
   else (
     let prefix, last = split src (4 * len - 4) in
     snoc (uint32s_from_be (len-1) prefix) (uint32_from_be last)
@@ -158,7 +158,7 @@ let rec uint32s_from_be len src =
 
 val uint32s_to_be: len:nat -> s:seq UInt32.t{length s = len} -> Tot (lbytes (4 * len))  (decreases len)
 let rec uint32s_to_be len src =
-  if len = 0 then createEmpty
+  if len = 0 then Seq.empty
   else (
     let prefix = slice src 0 (len - 1) in
     let last   = index src (len - 1) in
@@ -167,7 +167,7 @@ let rec uint32s_to_be len src =
 
 val uint64s_from_be: len:nat -> b:lbytes (8 * len) -> Tot (s:seq UInt64.t{length s = len}) (decreases len)
 let rec uint64s_from_be len src =
-  if len = 0 then createEmpty
+  if len = 0 then Seq.empty
   else (
     let prefix, last = split src (8 * len - 8) in
     snoc (uint64s_from_be (len-1) prefix) (uint64_from_be last)
@@ -175,7 +175,7 @@ let rec uint64s_from_be len src =
 
 val uint64s_to_be: len:nat -> s:seq UInt64.t{length s = len} -> Tot (lbytes (8 * len))  (decreases len)
 let rec uint64s_to_be len src =
-  if len = 0 then createEmpty
+  if len = 0 then Seq.empty
   else (
     let prefix = slice src 0 (len - 1) in
     let last   = index src (len - 1) in
@@ -186,7 +186,7 @@ let rec uint64s_to_be len src =
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 let lemma_uint32s_from_le_def_0 (len:nat{len = 0}) (b:lbytes (4*len)) : Lemma
-  (uint32s_from_le len b == Seq.createEmpty)
+  (uint32s_from_le len b == Seq.empty)
   = ()
 let lemma_uint32s_from_le_def_1 (len:nat{len > 0}) (b:lbytes (4*len)) : Lemma
   (uint32s_from_le len b == Seq.snoc (uint32s_from_le (len-1) (slice b 0 (4*len - 4)))
@@ -196,7 +196,7 @@ let lemma_uint32s_from_le_def_1 (len:nat{len > 0}) (b:lbytes (4*len)) : Lemma
 
 
 let lemma_uint32s_to_le_def_0 (len:nat{len = 0}) (s:seq UInt32.t{length s = len}) : Lemma
-  (uint32s_to_le len s == Seq.createEmpty)
+  (uint32s_to_le len s == Seq.empty)
   = ()
 let lemma_uint32s_to_le_def_1 (len:nat{len > 0}) (s:seq UInt32.t{length s = len}) : Lemma
   (uint32s_to_le len s == Seq.append (uint32s_to_le (len-1) (slice s 0 (len-1)))
@@ -205,7 +205,7 @@ let lemma_uint32s_to_le_def_1 (len:nat{len > 0}) (s:seq UInt32.t{length s = len}
 
 
 let lemma_uint32s_from_be_def_0 (len:nat{len = 0}) (b:lbytes (4*len)) : Lemma
-  (uint32s_from_be len b == Seq.createEmpty)
+  (uint32s_from_be len b == Seq.empty)
   = ()
 let lemma_uint32s_from_be_def_1 (len:nat{len > 0}) (b:lbytes (4*len)) : Lemma
   (uint32s_from_be len b == Seq.snoc (uint32s_from_be (len-1) (slice b 0 (4*len - 4)))
@@ -215,7 +215,7 @@ let lemma_uint32s_from_be_def_1 (len:nat{len > 0}) (b:lbytes (4*len)) : Lemma
 
 
 let lemma_uint32s_to_be_def_0 (len:nat{len = 0}) (s:seq UInt32.t{length s = len}) : Lemma
-  (uint32s_to_be len s == Seq.createEmpty)
+  (uint32s_to_be len s == Seq.empty)
   = ()
 let lemma_uint32s_to_be_def_1 (len:nat{len > 0}) (s:seq UInt32.t{length s = len}) : Lemma
   (uint32s_to_be len s == Seq.append (uint32s_to_be (len-1) (slice s 0 (len-1)))
@@ -224,7 +224,7 @@ let lemma_uint32s_to_be_def_1 (len:nat{len > 0}) (s:seq UInt32.t{length s = len}
 
 
 let lemma_uint64s_from_be_def_0 (len:nat{len = 0}) (b:lbytes (8*len)) : Lemma
-  (uint64s_from_be len b == Seq.createEmpty)
+  (uint64s_from_be len b == Seq.empty)
   = ()
 let lemma_uint64s_from_be_def_1 (len:nat{len > 0}) (b:lbytes (8*len)) : Lemma
   (uint64s_from_be len b == Seq.snoc (uint64s_from_be (len-1) (slice b 0 (8*len - 8)))
@@ -234,7 +234,7 @@ let lemma_uint64s_from_be_def_1 (len:nat{len > 0}) (b:lbytes (8*len)) : Lemma
 
 
 let lemma_uint64s_to_be_def_0 (len:nat{len = 0}) (s:seq UInt64.t{length s = len}) : Lemma
-  (uint64s_to_be len s == Seq.createEmpty)
+  (uint64s_to_be len s == Seq.empty)
   = ()
 let lemma_uint64s_to_be_def_1 (len:nat{len > 0}) (s:seq UInt64.t{length s = len}) : Lemma
   (uint64s_to_be len s == Seq.append (uint64s_to_be (len-1) (slice s 0 (len-1)))
@@ -279,7 +279,7 @@ let rec lemma_uint32s_from_le_bij (len:nat) (b:lbytes (4 * len)) : Lemma
   (ensures  (uint32s_to_le len (uint32s_from_le len b) == b))
   = if len = 0 then (
       lemma_uint32s_from_le_def_0 0 b;
-      lemma_uint32s_to_le_def_0 0 (createEmpty);
+      lemma_uint32s_to_le_def_0 0 (Seq.empty);
       lemma_eq_intro (uint32s_to_le len (uint32s_from_le len b)) b
     ) else (
       lemma_uint32s_from_le_def_1 len b;
@@ -328,7 +328,7 @@ let rec lemma_uint32s_to_le_bij (len:nat) (b:seq UInt32.t{length b = len}) : Lem
   (ensures  (uint32s_from_le len (uint32s_to_le len b) == b))
   = if len = 0 then (
       lemma_uint32s_to_le_def_0 0 b;
-      lemma_uint32s_from_le_def_0 0 (createEmpty);
+      lemma_uint32s_from_le_def_0 0 (Seq.empty);
       lemma_eq_intro (uint32s_from_le len (uint32s_to_le len b)) b
     ) else (
       lemma_uint32s_to_le_def_1 len b;
@@ -359,8 +359,8 @@ let rec lemma_uint32s_from_le_slice len b n =
   if n = len then (
     lemma_uint32s_from_le_def_0 0 (slice b (4*len) (4*len));
     lemma_eq_intro (slice b 0 (length b)) b;
-    lemma_eq_intro (uint32s_from_le 0 (slice b (4*len) (4*len))) createEmpty;
-    lemma_eq_intro (uint32s_from_le len b @| createEmpty) (uint32s_from_le len b)
+    lemma_eq_intro (uint32s_from_le 0 (slice b (4*len) (4*len))) Seq.empty;
+    lemma_eq_intro (uint32s_from_le len b @| Seq.empty) (uint32s_from_le len b)
   ) else (
     lemma_uint32s_from_le_def_1 len b;
     lemma_uint32s_from_le_def_1 (len - n) (slice b (4 * n) (4 * len));
@@ -385,8 +385,8 @@ let rec lemma_uint32s_to_le_slice len b n =
   if n = len then (
     lemma_uint32s_to_le_def_0 0 (slice b len len);
     lemma_eq_intro (slice b 0 (length b)) b;
-    lemma_eq_intro (uint32s_to_le 0 (slice b len len)) createEmpty;
-    lemma_eq_intro (uint32s_to_le len b @| createEmpty) (uint32s_to_le len b)
+    lemma_eq_intro (uint32s_to_le 0 (slice b len len)) Seq.empty;
+    lemma_eq_intro (uint32s_to_le len b @| Seq.empty) (uint32s_to_le len b)
   ) else (
     lemma_uint32s_to_le_def_1 len b;
     lemma_uint32s_to_le_def_1 (len-n) (slice b n (len));
