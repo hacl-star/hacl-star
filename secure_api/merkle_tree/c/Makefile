@@ -1,19 +1,30 @@
+FSTAR=fstar.exe
 KREMLIN=Kremlin.native
-EXT_TO=./ext
 
-KREMLIN_ARGS+=-tmpdir $(EXT_TO) \
-	-drop FStar,Prims,C,C.*,C.Loops.Spec.Loops,Spec.*,Lib.*,WasmSupport \
-	-drop Hacl.Cast,Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128 \
-	-drop Hacl.Spec.Endianness,Hacl.Endianness,Seq.Create \
-	-drop Hacl.Impl.SHA2_256.Lemmas,Hacl.Impl.SHA2_384.Lemmas,Hacl.Impl.SHA2_512.Lemmas \
-	-drop MerkleTree.Old.High \
-	-I ../
-# -ccopt -march=native -warn-error +9
+EXT_DIR=./ext
 
-.PHONY: all ext clean
+TARGETS=../MerkleTree.New.Low.fst \
+  ../../../providers/evercrypt/fst/EverCrypt.Hash.fst
 
-ext:
-	-$(KREMLIN) $(KREMLIN_ARGS) ../MerkleTree.Old.Low.fst lib/connect.c lib/Hacl_SHA2_256.c merkle_tree_old.c
+.PHONY: new clean
+
+new:
+	$(KREMLIN) $(TARGETS) \
+	-no-prefix 'MerkleTree.New.Low' \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.*' \
+	-bundle 'EverCrypt.Hash,Hacl.Impl.*' \
+	-drop WasmSupport \
+	-tmpdir $(EXT_DIR) \
+	-I ../ \
+	-I ../../../providers/evercrypt/ \
+	-I ../../../providers/evercrypt/fst/ \
+	-I ../../../providers/evercrypt/config/default/ \
+	-I ../../../code/hash/ \
+	-I ../../../code/lib/ \
+	-I ../../../specs/ \
+	-I ../../../../kremlin/kremlib/compat/
+# -I ../../../../kremlin/kremlib/ \
 
 clean:
 	rm -f a.out
