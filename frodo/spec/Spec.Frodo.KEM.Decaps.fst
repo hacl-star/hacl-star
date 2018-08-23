@@ -38,7 +38,7 @@ val frodo_sub_mul_c_minus_bs:
   -> bp_matrix:matrix params_nbar params_n
   -> c_matrix:matrix params_nbar params_nbar
   -> lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
-let frodo_sub_mul_c_minus_bs sk bp_matrix c_matrix = admit(); //FIX
+let frodo_sub_mul_c_minus_bs sk bp_matrix c_matrix =
   let m_matrix = frodo_sub_mul_c_minus_bs_inner sk bp_matrix c_matrix in
   let mu_decode = frodo_key_decode params_extracted_bits m_matrix in
   mu_decode
