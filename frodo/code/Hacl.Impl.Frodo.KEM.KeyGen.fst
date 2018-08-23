@@ -96,7 +96,7 @@ val frodo_mul_add_as_plus_e_pack:
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc_buffer s) (loc_buffer b)) h0 h1 /\
       (let b_sp, s_bytes_sp = S.frodo_mul_add_as_plus_e_pack (as_seq h0 seed_a) (as_seq h0 seed_e) in
-      as_seq h1 b == b_sp /\ 
+      as_seq h1 b == b_sp /\
       as_seq h1 s == s_bytes_sp))
 [@"c_inline"]
 let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
@@ -121,7 +121,7 @@ val crypto_kem_keypair_:
       disjoint pk sk /\ disjoint coins sk /\ disjoint coins pk)
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc_buffer pk) (loc_buffer sk)) h0 h1 /\
-      (let pk_s, sk_s = S.crypto_kem_keypair (as_seq h0 coins) (as_seq h0 pk) (as_seq h0 sk) in
+      (let pk_s, sk_s = S.crypto_kem_keypair (as_seq h0 coins) in
       as_seq h1 pk == pk_s /\ as_seq h1 sk == sk_s))
 let crypto_kem_keypair_ coins pk sk =
   let h0 = ST.get () in
@@ -136,7 +136,7 @@ let crypto_kem_keypair_ coins pk sk =
   let s_bytes = sub sk (crypto_bytes +! crypto_publickeybytes) (size 2 *! params_n *! params_nbar) in
   frodo_mul_add_as_plus_e_pack seed_a seed_e b s_bytes;
   let h1 = ST.get () in
-  S.lemma_updade_pk (as_seq h1 seed_a) (as_seq h1 b) (as_seq h0 pk) (as_seq h1 pk);
+  S.lemma_updade_pk (as_seq h1 seed_a) (as_seq h1 b) (as_seq h1 pk);
 
   assert (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h1 sk)
     (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar) == as_seq h1 s_bytes);
@@ -147,7 +147,7 @@ let crypto_kem_keypair_ coins pk sk =
   let h3 = ST.get () in
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h3 sk) 0 (v crypto_bytes)) (as_seq h1 s);
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h3 sk) (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar)) (as_seq h1 s_bytes);
-  S.lemma_updade_sk (as_seq h1 s) (as_seq h1 pk) (as_seq h1 s_bytes) (as_seq h0 sk) (as_seq h3 sk)
+  S.lemma_updade_sk (as_seq h1 s) (as_seq h1 pk) (as_seq h1 s_bytes) (as_seq h3 sk)
 
 inline_for_extraction noextract
 val crypto_kem_keypair:
