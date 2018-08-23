@@ -17,11 +17,12 @@ function export_home() {
 
 function hacl_test() {
     fetch_and_make_kremlin &&
-        fetch_and_make_mlcrypto &&
-        fetch_mitls &&
-        fetch_and_make_vale &&
-        export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
-        env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads ci -k
+        make -j $threads ci -k
+        #fetch_and_make_mlcrypto &&
+        #fetch_mitls &&
+        #fetch_and_make_vale &&
+        #export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
+        #env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads ci -k
 }
 
 function hacl_test_and_hints() {
