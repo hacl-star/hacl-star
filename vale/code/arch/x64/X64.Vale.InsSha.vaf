@@ -30,6 +30,10 @@ open X64.CryptoInstructions_s
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 module P = X64.Print_s
+
+friend X64.Vale.StateLemmas
+friend X64.Vale.Decls
+friend X64.Memory
 //#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
 //#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --initial_ifuel 2 --z3rlimit 60"
 #endverbatim
@@ -39,8 +43,8 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src), list(),
   reads xmm0;
   requires 
     t + 1 < size_k_w(SHA2_256);
-    xmm0.lo0 == v(add_mod(index(k0(SHA2_256),t),   ws_opaque(SHA2_256, block, t)));
-    xmm0.lo1 == v(add_mod(index(k0(SHA2_256),t+1), ws_opaque(SHA2_256, block, t + 1)));
+    xmm0.lo0 == vv(add_mod(index(k0(SHA2_256),t),   ws_opaque(SHA2_256, block, t)));
+    xmm0.lo1 == vv(add_mod(index(k0(SHA2_256),t+1), ws_opaque(SHA2_256, block, t + 1)));
   ensures
     let hash0 := old(make_hash(src, dst)) in
     let hash1 := shuffle_core_opaque(SHA2_256, block, hash0, t) in

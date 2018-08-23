@@ -187,7 +187,7 @@ let lemma_add_mod_e (a b c d e f g h wk:word SHA2_256) :
   ()
 
 let lemma_sha256_rnds2_spec_update_is_shuffle_core (hash:hash_w SHA2_256) (wk:word SHA2_256) (t:counter) (block:block_w SHA2_256) : Lemma
-   (requires t < size_k_w SHA2_256 /\ wk == add_mod (k0 SHA2_256).[t] (ws SHA2_256 block t))
+   (requires t < size_k_w SHA2_256 /\ wk == add_mod (k0 SHA2_256).[t] (ws_opaque SHA2_256 block t))
    (ensures (let a', b', c', d', e', f', g', h' = 
                  sha256_rnds2_spec_update hash.[0] hash.[1] hash.[2] hash.[3] 
                                           hash.[4] hash.[5] hash.[6] hash.[7] wk in
@@ -202,6 +202,7 @@ let lemma_sha256_rnds2_spec_update_is_shuffle_core (hash:hash_w SHA2_256) (wk:wo
   let u = seq_of_list l in
   let c = shuffle_core_opaque SHA2_256 block hash t in
   reveal_opaque shuffle_core;
+  reveal_opaque ws;
   shuffle_core_properties SHA2_256 block hash t;
   elim_of_list l;
   lemma_add_mod_a hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk;
@@ -217,7 +218,7 @@ let sha256_rnds2_spec_update_core_quad32 (abef cdgh:quad32) (wk:word SHA2_256) (
   (abef', cdgh')
 
 let lemma_rnds_quad32 (abef cdgh:quad32) (wk:word SHA2_256) (block:block_w SHA2_256) (t:counter{t < size_k_w SHA2_256}) : Lemma
-  (requires wk == add_mod (k0 SHA2_256).[t] (ws SHA2_256 block t))
+  (requires wk == add_mod (k0 SHA2_256).[t] (ws_opaque SHA2_256 block t))
   (ensures sha256_rnds2_spec_update_core_quad32 abef cdgh wk block t == sha256_rnds2_spec_update_quad32 abef cdgh wk)
   =
   let hash0 = make_hash abef cdgh in
@@ -230,12 +231,54 @@ let lemma_rnds_quad32 (abef cdgh:quad32) (wk:word SHA2_256) (block:block_w SHA2_
   lemma_sha256_rnds2_spec_update_is_shuffle_core hash0 wk t block;
   ()
 
-//#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 2 --initial_ifuel 2 --z3rlimit 30"  
-#push-options "--z3rlimit 30"  
+#push-options "--z3rlimit 10"
+let lemma_rnds2_spec_quad32_is_shuffle_core_x2 (abef cdgh:quad32) (wk0 wk1:word SHA2_256) (block:block_w SHA2_256) (t:counter{t < size_k_w SHA2_256 - 1}) : Lemma
+  (requires wk0 == add_mod (k0 SHA2_256).[t] (ws_opaque SHA2_256 block t) /\
+            wk1 == add_mod (k0 SHA2_256).[t+1] (ws_opaque SHA2_256 block (t+1)))
+  (ensures (let hash0 = make_hash abef cdgh in
+            let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
+            let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t + 1) in
+            let abef', cdgh' = sha256_rnds2_spec_update_quad32 abef cdgh wk0 in
+            let abef'', cdgh'' = sha256_rnds2_spec_update_quad32 abef' cdgh' wk1 in
+            hash2 == make_hash abef'' cdgh''))
+  =
+  let hash0 = make_hash abef cdgh in
+  let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
+  let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t + 1) in
+  let abef', cdgh' = sha256_rnds2_spec_update_quad32 abef cdgh wk0 in
+  let abef'', cdgh'' = sha256_rnds2_spec_update_quad32 abef' cdgh' wk1 in
+  lemma_rnds_quad32 abef cdgh wk0 block t;
+  lemma_rnds_quad32 abef' cdgh' wk1 block (t+1);
+  assert (equal (make_hash abef' cdgh') hash1);
+  assert (equal (make_hash abef'' cdgh'') hash2);
+  ()
+#pop-options
+
+let sha256_rnds2_spec_update_quad32_x2_shifts (abef cdgh:quad32) (wk0 wk1:word SHA2_256) : 
+  Lemma ((let abef', cdgh' = sha256_rnds2_spec_update_quad32 abef cdgh wk0 in
+          let abef'', cdgh'' = sha256_rnds2_spec_update_quad32 abef' cdgh' wk1 in
+          cdgh'' == abef))
+  =
+  ()
+
+let sha256_rnds2_spec_quad32_is_shuffle_core_x2 (abef cdgh wk:quad32) (block:block_w SHA2_256) (t:counter{t < size_k_w SHA2_256 - 1}) : Lemma
+  (requires wk.lo0 == vv (add_mod (k0 SHA2_256).[t]   (ws_opaque SHA2_256 block t)) /\
+            wk.lo1 == vv (add_mod (k0 SHA2_256).[t+1] (ws_opaque SHA2_256 block (t+1))))
+  (ensures (let hash0 = make_hash abef cdgh in
+            let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
+            let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t + 1) in
+            let abef' = sha256_rnds2_spec_quad32 cdgh abef wk in
+            hash2 == make_hash abef' abef))
+  =
+  lemma_rnds2_spec_quad32_is_shuffle_core_x2 abef cdgh (to_uint32 wk.lo0) (to_uint32 wk.lo1) block t;
+  sha256_rnds2_spec_update_quad32_x2_shifts abef cdgh (to_uint32 wk.lo0) (to_uint32 wk.lo1);
+  ()
+
+// Top-level proof for the SHA256_rnds2 instruction
 let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
   (requires t + 1 < size_k_w SHA2_256 /\
-            xmm0.lo0 == vv (add_mod (index (k0 SHA2_256) t)     (ws_opaque SHA2_256 block t)) /\
-            xmm0.lo1 == vv (add_mod (index (k0 SHA2_256) (t+1)) (ws_opaque SHA2_256 block (t+1))))
+            xmm0.lo0 == vv (add_mod (k0 SHA2_256).[t]   (ws_opaque SHA2_256 block t)) /\
+            xmm0.lo1 == vv (add_mod (k0 SHA2_256).[t+1] (ws_opaque SHA2_256 block (t+1))))
   (ensures (let hash0 = make_hash abef cdgh in
             let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
             let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t + 1) in
@@ -244,16 +287,11 @@ let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_2
   let hash0 = make_hash abef cdgh in
   let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
   let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t+1) in
-  reveal_opaque ws;
-  //reveal_opaque shuffle_core;
-  reveal_opaque sha256_rnds2_spec_def;
-  shuffle_core_properties SHA2_256 block hash0 t;
-  lemma_sha256_rnds2_spec_update_is_shuffle_core hash0 (to_uint32 xmm0.lo0) t block;
-  lemma_sha256_rnds2_spec_update_is_shuffle_core hash1 (to_uint32 xmm0.lo1) (t+1) block;  
-  //admit();
+  sha256_rnds2_spec_quad32_is_shuffle_core_x2 abef cdgh xmm0 block t;
+  lemma_sha256_rnds2_spec_quad32 cdgh abef xmm0;
   ()
   
-//#pop-options
+(* Proof work for the SHA256_msg* instructions *)
 
 let ws_quad32 (t:counter) (block:block_w SHA2_256) : quad32 =
     if t < size_k_w SHA2_256 - 3 then
