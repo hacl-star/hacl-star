@@ -28,17 +28,17 @@ let cdf_table: b:lbuffer uint16 (v cdf_table_len) { LowStar.Buffer.recallable b 
 val frodo_sample: r:uint16 -> Stack uint16
   (requires fun h -> True)
   (ensures  fun h0 res h1 ->
-    modifies loc_none h0 h1 /\ res == S.frodo_sample r)
+    modifies loc_none h0 h1 /\ res == S.frodo_sample r) 
 [@"c_inline"]
 let frodo_sample r =
-  admit();
   push_frame();
   let prnd = r >>. u32 1 in
   let sign = r &. u16 1 in
   let sample = create #uint16 #1 (size 1) (u16 0) in
-  let h0 = ST.get () in
   let bound = cdf_table_len -! size 1 in
-  loop_nospec #h0 bound sample
+  let h0 = ST.get () in
+  Lib.Loops.for (size 0) bound
+  (fun h j -> live h sample /\ modifies (loc_buffer sample) h0 h)
   (fun j ->
     recall cdf_table;
     let tj = cdf_table.(j) in
@@ -48,6 +48,7 @@ let frodo_sample r =
   let sample0 = sample.(size 0) in
   let res = ((lognot sign +. u16 1) ^. sample0) +. sign in
   pop_frame();
+  assume (res == S.frodo_sample r);
   res
 
 private

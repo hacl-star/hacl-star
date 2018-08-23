@@ -5,10 +5,8 @@ HACL_HOME    ?= ../..
 VARIANT      ?= 640-cSHAKE
 
 ifeq ($(VARIANT),640-cSHAKE)
-  $(info ========= Building FrodoKEM-640-cSHAKE =========)
   KEM_DIR = FrodoKEM-640
 else ifeq ($(VARIANT),976-cSHAKE)
-  $(info ========= Building FrodoKEM-976-cSHAKE =========)
   KEM_DIR = FrodoKEM-976
 else
   $(error ERROR: VARIANT must be either 640-cSHAKE or 976-cSHAKE)
