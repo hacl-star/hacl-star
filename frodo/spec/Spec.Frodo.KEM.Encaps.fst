@@ -24,7 +24,6 @@ val update_ct:
      c1:lbytes (params_logq * params_nbar * params_n / 8)
   -> c2:lbytes (params_logq * params_nbar * params_nbar / 8)
   -> d:lbytes crypto_bytes
-  -> ct:lbytes crypto_ciphertextbytes
   -> res:lbytes crypto_ciphertextbytes
     {let c1Len = params_logq * params_nbar * params_n / 8 in
      let c2Len = params_logq * params_nbar * params_nbar / 8 in
@@ -32,11 +31,11 @@ val update_ct:
      Seq.sub res 0 c1Len == c1 /\
      Seq.sub res c1Len c2Len == c2 /\
      Seq.sub res (c1Len + c2Len) crypto_bytes == d}
-let update_ct c1 c2 d ct =
+let update_ct c1 c2 d =
   expand_crypto_ciphertextbytes ();
   let c1Len = params_logq * params_nbar * params_n / 8 in
   let c2Len = params_logq * params_nbar * params_nbar / 8 in
-
+  let ct = Seq.create crypto_ciphertextbytes (u8 0) in
   let ct = update_sub ct 0 c1Len c1 in
   let ct = update_sub ct c1Len c2Len c2 in
   eq_intro (Seq.sub ct 0 c1Len) c1;
@@ -49,7 +48,6 @@ val lemma_update_ct:
      c1:lbytes (params_logq * params_nbar * params_n / 8)
   -> c2:lbytes (params_logq * params_nbar * params_nbar / 8)
   -> d:lbytes crypto_bytes
-  -> ct0:lbytes crypto_ciphertextbytes
   -> ct:lbytes crypto_ciphertextbytes
   -> Lemma
     (requires (
@@ -59,9 +57,9 @@ val lemma_update_ct:
       Seq.sub ct 0 c1Len == c1 /\
       Seq.sub ct c1Len c2Len == c2 /\
       Seq.sub ct (c1Len + c2Len) crypto_bytes == d))
-    (ensures ct == update_ct c1 c2 d ct0)
-let lemma_update_ct c1 c2 d ct0 ct =
-  let ct1 = update_ct c1 c2 d ct0 in
+    (ensures ct == update_ct c1 c2 d)
+let lemma_update_ct c1 c2 d ct =
+  let ct1 = update_ct c1 c2 d in
   let c1Len = params_logq * params_nbar * params_n / 8 in
   let c2Len = params_logq * params_nbar * params_nbar / 8 in
   expand_crypto_ciphertextbytes ();
@@ -74,11 +72,12 @@ let lemma_update_ct c1 c2 d ct0 ct =
 val update_ss_init:
     c12:lbytes (crypto_ciphertextbytes - crypto_bytes)
   -> kd:lbytes (crypto_bytes + crypto_bytes)
-  -> ss_init:lbytes (crypto_ciphertextbytes + crypto_bytes)
   -> res:lbytes (crypto_ciphertextbytes + crypto_bytes)
     {Seq.sub res 0 (crypto_ciphertextbytes - crypto_bytes) == c12 /\
      Seq.sub res (crypto_ciphertextbytes - crypto_bytes) (crypto_bytes + crypto_bytes) == kd}
-let update_ss_init c12 kd ss_init =
+let update_ss_init c12 kd =
+  let ss_init_len = crypto_ciphertextbytes + crypto_bytes in
+  let ss_init = Seq.create ss_init_len (u8 0) in
   let ss_init = update_sub ss_init 0 (crypto_ciphertextbytes - crypto_bytes) c12 in
   let ss_init = update_sub ss_init (crypto_ciphertextbytes - crypto_bytes) (crypto_bytes + crypto_bytes) kd in
   eq_intro (Seq.sub ss_init 0 (crypto_ciphertextbytes - crypto_bytes)) c12;
@@ -87,13 +86,10 @@ let update_ss_init c12 kd ss_init =
 val update_ss:
     c12:lbytes (crypto_ciphertextbytes - crypto_bytes)
   -> kd:lbytes (crypto_bytes + crypto_bytes)
-  -> ss:lbytes crypto_bytes
   -> res:lbytes crypto_bytes
-let update_ss c12 kd ss =
-  let ss_init_len = crypto_ciphertextbytes + crypto_bytes in
-  let ss_init = Seq.create ss_init_len (u8 0) in
-  let ss_init = update_ss_init c12 kd ss_init in
-  let ss = cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes in
+let update_ss c12 kd =
+  let ss_init = update_ss_init c12 kd in
+  let ss = cshake_frodo (crypto_ciphertextbytes + crypto_bytes) ss_init (u16 7) crypto_bytes in
   ss
 
 val frodo_mul_add_sa_plus_e:
@@ -159,65 +155,56 @@ val crypto_kem_enc_ct_inner:
   -> coins:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
   -> sp_matrix:matrix params_nbar params_n
   -> d:lbytes crypto_bytes
-  -> ct:lbytes crypto_ciphertextbytes
   -> lbytes crypto_ciphertextbytes
-let crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d ct =
+let crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d =
   let c1 = crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix in
   let c2 = crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix in
-  let ct = update_ct c1 c2 d ct in
+  let ct = update_ct c1 c2 d in
   ct
 
 val crypto_kem_enc_ct:
     pk:lbytes crypto_publickeybytes
   -> g:lbytes (3 * crypto_bytes)
   -> coins:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
-  -> ct:lbytes crypto_ciphertextbytes
   -> lbytes crypto_ciphertextbytes
-let crypto_kem_enc_ct pk g coins ct =
+let crypto_kem_enc_ct pk g coins =
   let seed_a = Seq.sub pk 0 bytes_seed_a in
   let b = Seq.sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) in
   let seed_e = Seq.sub g 0 crypto_bytes in
   let d = Seq.sub g (2 * crypto_bytes) crypto_bytes in
 
   let sp_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 4) in
-  let ct = crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d ct in
+  let ct = crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d in
   ct
 
 val crypto_kem_enc_0:
     coins:lbytes bytes_mu
   -> pk:lbytes crypto_publickeybytes
-  -> pk_coins:lbytes (crypto_publickeybytes + bytes_mu)
   -> lbytes (3 * crypto_bytes)
-let crypto_kem_enc_0 coins pk pk_coins =
+let crypto_kem_enc_0 coins pk =
+  let pk_coins = Seq.create (crypto_publickeybytes + bytes_mu) (u8 0) in
   let pk_coins = update_sub pk_coins 0 crypto_publickeybytes pk in
   let pk_coins = update_sub pk_coins crypto_publickeybytes bytes_mu coins in
   let g = cshake_frodo (crypto_publickeybytes + bytes_mu) pk_coins (u16 3) (3 * crypto_bytes) in
   g
 
 val crypto_kem_enc_1:
-    g:lbytes (3 * crypto_bytes)
+     g:lbytes (3 * crypto_bytes)
   -> coins:lbytes bytes_mu
-  -> ct:lbytes crypto_ciphertextbytes
-  -> ss:lbytes crypto_bytes
   -> pk:lbytes crypto_publickeybytes
   -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
-let crypto_kem_enc_1 g coins ct ss pk =
-  let ct = crypto_kem_enc_ct pk g coins ct in
-
+let crypto_kem_enc_1 g coins pk =
+  let ct = crypto_kem_enc_ct pk g coins in
   let c12 = Seq.sub ct 0 (crypto_ciphertextbytes - crypto_bytes) in
   let kd = Seq.sub g crypto_bytes (crypto_bytes + crypto_bytes) in
-  let ss = update_ss c12 kd ss in
+  let ss = update_ss c12 kd in
   ct, ss
 
 val crypto_kem_enc:
     coins:lbytes bytes_mu
   -> pk:lbytes crypto_publickeybytes
-  -> ct:lbytes crypto_ciphertextbytes
-  -> ss:lbytes crypto_bytes
   -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
-let crypto_kem_enc coins pk ct ss =
-  let pk_coins = Seq.create (crypto_publickeybytes + bytes_mu) (u8 0) in
-  let g = crypto_kem_enc_0 coins pk pk_coins in
-
-  let ct, ss = crypto_kem_enc_1 g coins ct ss pk in
+let crypto_kem_enc coins pk =
+  let g = crypto_kem_enc_0 coins pk in
+  let ct, ss = crypto_kem_enc_1 g coins pk in
   ct, ss
