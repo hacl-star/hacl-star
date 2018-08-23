@@ -10,6 +10,7 @@ module Constants = Spec.SHA2.Constants
 module Tactics = FStar.Tactics
 module Helpers = Spec.Hash.Helpers
 module Endianness = FStar.Kremlin.Endianness
+module Math = FStar.Math.Lemmas
 
 module S = FStar.Seq
 module B = LowStar.Buffer
@@ -456,24 +457,33 @@ let store_len a len b =
       let h = ST.get () in
       Endianness.n_to_be_be_to_n 16ul (B.as_seq h b)
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 20"
 
-// JP: the two lemmas below are extremely fragile; TODO: use FStar.Math.Lemmas.lemma_modulo
 let len_mod_32 (a: sha2_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = len_v a len % Helpers.size_block a })
 =
+  assert (size_block a <> 0ul);
   match a with
   | SHA2_224 | SHA2_256 ->
+      Math.lemma_mod_lt (U64.v len) (U32.v (size_block a));
+      Math.modulo_lemma (U64.v len % U32.v (size_block a)) (pow2 32);
       Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (size_block a)))
   | _ ->
+      // this case is more difficult because we do: (len % pow2 64) % size_block
+      // and then we need to show it's equal to len % size_block
       let len = Cast.uint128_to_uint64 len in
+      Math.lemma_mod_lt (U64.v len) (U32.v (size_block a));
+      Math.modulo_lemma (U64.v len % U32.v (size_block a)) (pow2 32);
       Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (size_block a)))
 
+#set-options "--z3rlimit 100"
+
+// JP: TODO: make this proof more robust with some (?) suitable lemma from FStar.Math.Lemmas
 let pad0_len (a: sha2_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = pad0_length a (len_v a len) })
 =
   let open U32 in
-  (size_block a +^ size_block a -^ (size_len a +^ 1ul +^ len_mod_32 a len)) %^ size_block a
+  ((size_block a +^ size_block a) -^ (size_len a +^ 1ul +^ len_mod_32 a len)) %^ size_block a
 
 val pad (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
   ST.Stack unit
@@ -528,11 +538,11 @@ let pad a len dst =
   let h2 = ST.get () in
   assert (
     let pad0_length = pad0_length a (len_v a len) in
+    Spec.max_input_size_len a;
     let s = B.as_seq h2 dst in
     let s1 = S.create 1 0x80uy in
     let s2 = S.create pad0_length 0uy in
     let s3 = Endianness.n_to_be (Spec.size_len_ul_8 a) FStar.Mul.(len_v a len * 8) in
-    Spec.max_input_size_len a;
     S.equal (S.slice s 0 1) s1 /\
     S.equal (S.slice s 1 (1 + pad0_length)) s2 /\
     S.equal (S.slice s (1 + pad0_length) (1 + pad0_length + size_len_8 a)) s3 /\
