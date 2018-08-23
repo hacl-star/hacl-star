@@ -22,24 +22,8 @@ let to_uint32 (n:nat32) : UInt32.t = uint_to_t n
 let ws_opaque = make_opaque ws
 let shuffle_core_opaque = make_opaque shuffle_core
 
-let make_hash_def (abef cdgh:quad32) : hash_w SHA2_256 =
-    let a = to_uint32 abef.hi3 in
-    let b = to_uint32 abef.hi2 in
-    let c = to_uint32 cdgh.hi3 in
-    let d = to_uint32 cdgh.hi2 in
-    let e = to_uint32 abef.lo1 in
-    let f = to_uint32 abef.lo0 in
-    let g = to_uint32 cdgh.lo1 in
-    let h = to_uint32 cdgh.lo0 in
-    let hash = seq_of_list [a; b; c; d; e; f; g; h] in
-    assert_norm (length hash == 8);
-    assert_norm (index hash 2 == c);
-    hash
-
-let make_hash = make_opaque make_hash_def
-
-let make_hash_properties (abef cdgh:quad32) : 
-  Lemma (let hash = make_hash abef cdgh in
+let make_hash_def (abef cdgh:quad32) :
+    (hash:hash_w SHA2_256 {
          length hash == 8 /\
          hash.[0] == to_uint32 abef.hi3 /\
          hash.[1] == to_uint32 abef.hi2 /\
@@ -48,25 +32,27 @@ let make_hash_properties (abef cdgh:quad32) :
          hash.[4] == to_uint32 abef.lo1 /\
          hash.[5] == to_uint32 abef.lo0 /\
          hash.[6] == to_uint32 cdgh.lo1 /\
-         hash.[7] == to_uint32 cdgh.lo0)
-  = 
-  reveal_opaque make_hash_def;
-  let hash = make_hash abef cdgh in
-  let hash' = make_hash_def abef cdgh in
-  assert(hash == hash');
-  assert_norm (length hash' == 8);
-  assert_norm(hash'.[0] == to_uint32 abef.hi3); 
-  assert_norm(hash'.[1] == to_uint32 abef.hi2); 
-  assert_norm(hash'.[2] == to_uint32 cdgh.hi3); 
-  assert_norm(hash'.[3] == to_uint32 cdgh.hi2); 
-  assert_norm(hash'.[4] == to_uint32 abef.lo1); 
-  assert_norm(hash'.[5] == to_uint32 abef.lo0); 
-  assert_norm(hash'.[6] == to_uint32 cdgh.lo1); 
-  assert_norm(hash'.[7] == to_uint32 cdgh.lo0);
-  ()
+         hash.[7] == to_uint32 cdgh.lo0    
+    } ) =
+    let a = to_uint32 abef.hi3 in
+    let b = to_uint32 abef.hi2 in
+    let c = to_uint32 cdgh.hi3 in
+    let d = to_uint32 cdgh.hi2 in
+    let e = to_uint32 abef.lo1 in
+    let f = to_uint32 abef.lo0 in
+    let g = to_uint32 cdgh.lo1 in
+    let h = to_uint32 cdgh.lo0 in
+    let l = [a; b; c; d; e; f; g; h] in
+    let hash = seq_of_list l in
+    assert_norm (length hash == 8);
+    elim_of_list l;
+    //assert_norm (index hash 2 == c);
+    hash
+
+let make_hash = make_opaque make_hash_def
 
 let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}) :
-    Lemma(let h = shuffle_core a block hash t in
+    Lemma(let h = shuffle_core_opaque a block hash t in
           let a0 = hash.[0] in
           let b0 = hash.[1] in
           let c0 = hash.[2] in
@@ -86,6 +72,7 @@ let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:co
           h.[6] == f0 /\
           h.[7] == g0)
   =
+  reveal_opaque shuffle_core;
   let h = shuffle_core a block hash t in
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -97,27 +84,154 @@ let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:co
   let h0 = hash.[7] in
   let t1 = word_add_mod a h0 (word_add_mod a (_Sigma1 a e0) (word_add_mod a (_Ch a e0 f0 g0) (word_add_mod a (k0 a).[t] (ws a block t)))) in
   let t2 = word_add_mod a (_Sigma0 a a0) (_Maj a a0 b0 c0) in         
-  admit();
-  assert(h.[0] == word_add_mod a t1 t2);
-  assert(h.[1] == a0);
-  assert(h.[2] == b0);
-  assert(h.[3] == c0);
-  assert(h.[4] == word_add_mod a d0 t1);
-  assert(h.[5] == e0);
-  assert(h.[6] == f0);
-  assert(h.[7] == g0);
-//  assert_norm(h.[0] == word_add_mod a t1 t2);
-//  assert_norm(h.[1] == a0);
-//  assert_norm(h.[2] == b0);
-//  assert_norm(h.[3] == c0);
-//  assert_norm(h.[4] == word_add_mod a d0 t1);
-//  assert_norm(h.[5] == e0);
-//  assert_norm(h.[6] == f0);
-//  assert_norm(h.[7] == g0); 
+  let l = [ word_add_mod a t1 t2; a0; b0; c0; word_add_mod a d0 t1; e0; f0; g0 ] in
+  assert (h == seq_of_list l);
+  elim_of_list l;
+  ()
+
+let sha256_rnds2_spec_update_quad32 (abef cdgh:quad32) (wk:word SHA2_256) : (quad32*quad32) =
+  let hash0 = make_hash abef cdgh in
+  let a', b', c', d', e', f', g', h' = sha256_rnds2_spec_update hash0.[0] hash0.[1] hash0.[2] hash0.[3] hash0.[4] hash0.[5] hash0.[6] hash0.[7] wk in
+  let abef' = Mkfour (vv f') (vv e') (vv b') (vv a') in
+  let cdgh' = Mkfour (vv h') (vv g') (vv d') (vv c') in
+  (abef', cdgh')
+
+let sha256_rnds2_spec_quad32 (src1 src2 wk:quad32) : quad32 =
+  let abef', cdgh'   = sha256_rnds2_spec_update_quad32 src2 src1   (to_uint32 wk.lo0) in
+  let abef'', cdgh'' = sha256_rnds2_spec_update_quad32 abef' cdgh' (to_uint32 wk.lo1) in
+  abef''
+
+let lemma_sha256_rnds2_spec_quad32 (src1 src2 wk:quad32) :
+  Lemma (sha256_rnds2_spec src1 src2 wk == sha256_rnds2_spec_quad32 src1 src2 wk)
+  =
+  reveal_opaque sha256_rnds2_spec_def;
+  ()
+
+let lemma_add_mod_commutes (x y:UInt32.t) :
+  Lemma (add_mod x y == add_mod y x)
+  =
+  ()
+
+let lemma_add_mod32_associates (x y z:int) :
+  Lemma ( ((x + y % pow2_32) + z) % pow2_32 == (x + ((y + z) % pow2_32)) % pow2_32 )
+  =
+  ()
+
+let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
+  Lemma (add_mod x (add_mod y z) == add_mod (add_mod x y) z)
+  =
+  assert_norm (pow2 32 == pow2_32);
+  //assert (add_mod y z == to_uint32 ((vv y + vv z) % pow2_32));
+  //assert (add_mod x (add_mod y z) == to_uint32 ((vv x + vv (to_uint32 ((vv y + vv z) % pow2_32))) % pow2_32));
+  lemma_add_mod32_associates (vv x) (vv y) (vv z);
+  //assert (to_uint32 ((vv x + vv (to_uint32 ((vv y + vv z) % pow2_32))) % pow2_32) ==
+  //        to_uint32 (((vv x + vv y % pow2_32) + vv z) % pow2_32));
+  admit() // TODO: This proof is flaky.  Some combination of the asserts above will make it go through, but the combo varies day by day
+
+// Walk F* through the math steps required to rearrange all of the add_mods
+let lemma_add_mod_a (a b c d e f g h wk:word SHA2_256) : 
+  Lemma ( let u = add_mod (_Ch SHA2_256 e f g) 
+                  (add_mod (_Sigma1 SHA2_256 e) 
+                  (add_mod wk 
+                  (add_mod h 
+                  (add_mod (_Maj SHA2_256 a b c) 
+                           (_Sigma0 SHA2_256 a))))) in
+          let t1 = add_mod h (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk)) in
+          let t2 = add_mod (_Sigma0 SHA2_256 a) (_Maj SHA2_256 a b c) in                      
+          let core = add_mod t1 t2 in
+          u == core)
+  =
+  let t1 = add_mod h (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk)) in
+  let t2 = add_mod (_Sigma0 SHA2_256 a) (_Maj SHA2_256 a b c) in                      
+  let core = add_mod t1 t2 in
+  lemma_add_mod_commutes (_Sigma0 SHA2_256 a) (_Maj SHA2_256 a b c);
+  assert (t2 == add_mod (_Maj SHA2_256 a b c) (_Sigma0 SHA2_256 a));
+  lemma_add_mod_commutes h (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk));
+  assert (t1 == add_mod (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk)) h);
+  lemma_add_mod_associates_U32 (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk)) h (add_mod (_Maj SHA2_256 a b c) (_Sigma0 SHA2_256 a));
+  assert (core == add_mod (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk)) (add_mod h (add_mod (_Maj SHA2_256 a b c) (_Sigma0 SHA2_256 a))));
+  lemma_add_mod_associates_U32 (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g) wk;
+  // ==> add_mod (add_mod (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g)) wk)
+  lemma_add_mod_commutes (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g);
+  // ==> add_mod (add_mod (_Ch SHA2_256 e f g) (_Sigma1 SHA2_256 e)) wk)
+  lemma_add_mod_associates_U32 (add_mod (_Ch SHA2_256 e f g) (_Sigma1 SHA2_256 e)) wk (add_mod h (add_mod (_Maj SHA2_256 a b c) (_Sigma0 SHA2_256 a)));
+  assert (core == add_mod (add_mod (_Ch SHA2_256 e f g) (_Sigma1 SHA2_256 e)) (add_mod wk (add_mod h (add_mod (_Maj SHA2_256 a b c) (_Sigma0 SHA2_256 a)))));
+  lemma_add_mod_associates_U32 (_Ch SHA2_256 e f g) (_Sigma1 SHA2_256 e) (add_mod wk (add_mod h (add_mod (_Maj SHA2_256 a b c) (_Sigma0 SHA2_256 a))));
+  ()
+
+let lemma_add_mod_e (a b c d e f g h wk:word SHA2_256) : 
+  Lemma ( let u = add_mod (_Ch SHA2_256 e f g)
+                  (add_mod (_Sigma1 SHA2_256 e)
+                  (add_mod wk 
+                  (add_mod h 
+                           d))) in
+          let t1 = add_mod h (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk)) in
+          let core = add_mod d t1 in
+          u == core)
+  =
+  let t1 = add_mod h (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk)) in
+  let core = add_mod d t1 in
+  lemma_add_mod_commutes h (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk));
+  // t1 == add_mod (add_mod (_Sigma1 SHA2_256 e) (add_mod (_Ch SHA2_256 e f g) wk)) h);
+  lemma_add_mod_commutes d t1;
+  // core == add_mod t1 d
+  lemma_add_mod_associates_U32 (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g) wk;
+  assert (t1 == add_mod (add_mod (add_mod (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g)) wk) h);
+  lemma_add_mod_associates_U32 (add_mod (add_mod (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g)) wk) h d;
+  assert (core == add_mod (add_mod (add_mod (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g)) wk) (add_mod h d));
+  lemma_add_mod_associates_U32 (add_mod (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g)) wk (add_mod h d);
+  assert (core == add_mod (add_mod (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g)) (add_mod wk (add_mod h d)));
+  lemma_add_mod_commutes (_Sigma1 SHA2_256 e) (_Ch SHA2_256 e f g);
+  lemma_add_mod_associates_U32 (_Ch SHA2_256 e f g) (_Sigma1 SHA2_256 e)  (add_mod wk (add_mod h d));
+  assert (core == add_mod (_Ch SHA2_256 e f g) (add_mod (_Sigma1 SHA2_256 e) (add_mod wk (add_mod h d))));
+  ()
+
+let lemma_sha256_rnds2_spec_update_is_shuffle_core (hash:hash_w SHA2_256) (wk:word SHA2_256) (t:counter) (block:block_w SHA2_256) : Lemma
+   (requires t < size_k_w SHA2_256 /\ wk == add_mod (k0 SHA2_256).[t] (ws SHA2_256 block t))
+   (ensures (let a', b', c', d', e', f', g', h' = 
+                 sha256_rnds2_spec_update hash.[0] hash.[1] hash.[2] hash.[3] 
+                                          hash.[4] hash.[5] hash.[6] hash.[7] wk in
+             let u = seq_of_list [a'; b'; c'; d'; e'; f'; g'; h'] in
+             let c = shuffle_core_opaque SHA2_256 block hash t in
+             u == c))
+  =
+  let a', b', c', d', e', f', g', h' = 
+                 sha256_rnds2_spec_update hash.[0] hash.[1] hash.[2] hash.[3] 
+                                          hash.[4] hash.[5] hash.[6] hash.[7] wk in
+  let l = [a'; b'; c'; d'; e'; f'; g'; h'] in                                          
+  let u = seq_of_list l in
+  let c = shuffle_core_opaque SHA2_256 block hash t in
+  reveal_opaque shuffle_core;
+  shuffle_core_properties SHA2_256 block hash t;
+  elim_of_list l;
+  lemma_add_mod_a hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk;
+  lemma_add_mod_e hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk;  
   ()
 
 
+let sha256_rnds2_spec_update_core_quad32 (abef cdgh:quad32) (wk:word SHA2_256) (block:block_w SHA2_256) (t:counter{t < size_k_w SHA2_256}) : (quad32*quad32) =
+  let hash0 = make_hash abef cdgh in
+  let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
+  let abef' = Mkfour (vv hash1.[5]) (vv hash1.[4]) (vv hash1.[1]) (vv hash1.[0]) in
+  let cdgh' = Mkfour (vv hash1.[7]) (vv hash1.[6]) (vv hash1.[3]) (vv hash1.[2]) in
+  (abef', cdgh')
+
+let lemma_rnds_quad32 (abef cdgh:quad32) (wk:word SHA2_256) (block:block_w SHA2_256) (t:counter{t < size_k_w SHA2_256}) : Lemma
+  (requires wk == add_mod (k0 SHA2_256).[t] (ws SHA2_256 block t))
+  (ensures sha256_rnds2_spec_update_core_quad32 abef cdgh wk block t == sha256_rnds2_spec_update_quad32 abef cdgh wk)
+  =
+  let hash0 = make_hash abef cdgh in
+  let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
+  let a', b', c', d', e', f', g', h' = 
+                 sha256_rnds2_spec_update hash0.[0] hash0.[1] hash0.[2] hash0.[3] 
+                                          hash0.[4] hash0.[5] hash0.[6] hash0.[7] wk in
+  let l = [a'; b'; c'; d'; e'; f'; g'; h'] in                                      
+  elim_of_list l;
+  lemma_sha256_rnds2_spec_update_is_shuffle_core hash0 wk t block;
+  ()
+
 //#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 2 --initial_ifuel 2 --z3rlimit 30"  
+#push-options "--z3rlimit 30"  
 let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
   (requires t + 1 < size_k_w SHA2_256 /\
             xmm0.lo0 == vv (add_mod (index (k0 SHA2_256) t)     (ws_opaque SHA2_256 block t)) /\
@@ -126,38 +240,17 @@ let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_2
             let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
             let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t + 1) in
             hash2 == make_hash (sha256_rnds2_spec cdgh abef xmm0) abef))
-  =
-  admit();
-
-
-  reveal_opaque ws;
-  reveal_opaque shuffle_core;
-  reveal_opaque make_hash_def;
+  =  
   let hash0 = make_hash abef cdgh in
   let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
-  let hash1' = shuffle_core SHA2_256 block hash0 t in
-  let hash2 = shuffle_core_opaque SHA2_256 block hash1 t in
-  make_hash_properties abef cdgh;
-  let a1,b1,c1,d1,e1,f1,g1,h1 = sha256_rnds2_spec_update 
-                 hash0.[0]
-                 hash0.[1]
-                 hash0.[2]
-                 hash0.[3]
-                 hash0.[4]
-                 hash0.[5]
-                 hash0.[6]
-                 hash0.[7]
-                 (to_uint32 xmm0.lo0) 
-  in
-  //assert_norm (hash0.[0] == b1);  // Fails
-  assert (b1 == hash0.[0]);   // Passes
-  //assert (b1 == hash1'.[1]);  // Fails
-  assert_norm (b1 == hash1'.[1]); 
-//  assert_norm (hash1'.[1] == b1);
-
-  make_hash_properties (sha256_rnds2_spec cdgh abef xmm0) abef;
-  
-  
+  let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t+1) in
+  reveal_opaque ws;
+  //reveal_opaque shuffle_core;
+  reveal_opaque sha256_rnds2_spec_def;
+  shuffle_core_properties SHA2_256 block hash0 t;
+  lemma_sha256_rnds2_spec_update_is_shuffle_core hash0 (to_uint32 xmm0.lo0) t block;
+  lemma_sha256_rnds2_spec_update_is_shuffle_core hash1 (to_uint32 xmm0.lo1) (t+1) block;  
+  //admit();
   ()
   
 //#pop-options
@@ -226,27 +319,6 @@ let lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w SHA2_256) : Le
   reveal_opaque ws_partial_def;
   ()
   
-let lemma_add_mod_commutes (x y:UInt32.t) :
-  Lemma (add_mod x y == add_mod y x)
-  =
-  ()
-
-let lemma_add_mod32_associates (x y z:int) :
-  Lemma ( ((x + y % pow2_32) + z) % pow2_32 == (x + ((y + z) % pow2_32)) % pow2_32 )
-  =
-  ()
-
-let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
-  Lemma (add_mod x (add_mod y z) == add_mod (add_mod x y) z)
-  =
-  assert_norm (pow2 32 == pow2_32);
-  //assert (add_mod y z == to_uint32 ((vv y + vv z) % pow2_32));
-  //assert (add_mod x (add_mod y z) == to_uint32 ((vv x + vv (to_uint32 ((vv y + vv z) % pow2_32))) % pow2_32));
-  lemma_add_mod32_associates (vv x) (vv y) (vv z);
-  //assert (to_uint32 ((vv x + vv (to_uint32 ((vv y + vv z) % pow2_32))) % pow2_32) ==
-  //        to_uint32 (((vv x + vv y % pow2_32) + vv z) % pow2_32));
-  admit() // TODO: This proof is flaky.  Some combination of the asserts above will make it go through, but the combo varies day by day
-
 
 let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
   Lemma (add_mod a (add_mod b (add_mod c d)) == add_mod (add_mod (add_mod d c) b) a)
