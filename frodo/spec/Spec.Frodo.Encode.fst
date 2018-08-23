@@ -48,6 +48,8 @@ let ec b k =
   small_modulo_lemma_2 (uint_v res) (modulus U16);
   res
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --smtencoding.nl_arith_repr wrapped"
+
 val dc:
     b:size_nat{0 < b /\ b < params_logq}
   -> c:uint16
