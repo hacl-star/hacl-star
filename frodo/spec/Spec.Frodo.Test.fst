@@ -12,7 +12,13 @@ open Spec.Frodo.KEM.Encaps
 open Spec.Frodo.KEM.Decaps
 open Spec.Frodo.Params
 
-let print_and_compare (#len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) =
+open FStar.All
+
+#reset-options "--max_fuel 0 --max_ifuel 1"
+
+let print_and_compare (#len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) 
+  : ML bool
+=
   IO.print_string "\n\nResult:   ";
   List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a)))
     (as_list test_result);
@@ -27,10 +33,11 @@ let compare (#len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) 
 let test_frodo
   (keypaircoins:list uint8{List.Tot.length keypaircoins == 2 * crypto_bytes + bytes_seed_a})
   (enccoins:list uint8{List.Tot.length enccoins == bytes_mu})
-  ss_expected
-  pk_expected
-  ct_expected
-  sk_expected
+  (ss_expected:list uint8{List.Tot.length ss_expected == crypto_bytes})
+  (pk_expected:list uint8{List.Tot.length pk_expected == crypto_publickeybytes})
+  (ct_expected:list uint8{List.Tot.length ct_expected == crypto_ciphertextbytes})
+  (sk_expected:list uint8{List.Tot.length sk_expected == crypto_secretkeybytes})
+  : ML bool
 =
   let keypaircoins = createL keypaircoins in
   let enccoins = createL enccoins in
@@ -323,7 +330,13 @@ let test1_sk_expected = List.Tot.map u8_from_UInt8 [
   0xfcuy; 0xffuy; 0x02uy; 0x00uy; 0x01uy; 0x00uy; 0x03uy; 0x00uy; 0x00uy; 0x00uy; 0xffuy; 0xffuy; 0xfbuy; 0xffuy; 0xfduy; 0xffuy;
   0x00uy; 0x00uy; 0x02uy; 0x00uy; 0x02uy; 0x00uy; 0xfbuy; 0xffuy; 0xfduy; 0xffuy; 0xfduy; 0xffuy; 0xffuy; 0xffuy; 0x01uy; 0x00uy ]
 
-let test () =
+let test () : ML unit =
+  assert_norm (List.Tot.length test1_keypaircoins == 2 * crypto_bytes + bytes_seed_a);
+  assert_norm (List.Tot.length test1_enccoins == bytes_mu);
+  assert_norm (List.Tot.length test1_ss_expected == crypto_bytes);
+  assert_norm (List.Tot.length test1_pk_expected == crypto_publickeybytes);
+  assert_norm (List.Tot.length test1_ct_expected == crypto_ciphertextbytes);
+  assert_norm (List.Tot.length test1_sk_expected == crypto_secretkeybytes); 
   let result = test_frodo
     test1_keypaircoins
     test1_enccoins
