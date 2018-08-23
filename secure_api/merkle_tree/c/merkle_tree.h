@@ -8,7 +8,7 @@ extern signed_hash;
 typedef merkle_tree *mt_ptr;
 
 /// Construction and destruction (free)
-mt_ptr create_mt();
+mt_ptr create_mt(hash_t init);
 void free_mt(mt_ptr mt);
 
 /// Insertion

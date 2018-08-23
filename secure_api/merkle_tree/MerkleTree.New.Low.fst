@@ -43,18 +43,18 @@ val hash_2:
 	   BV.buffer_inv_live hash_size h0 src2 /\
 	   BV.buffer_inv_live hash_size h0 dst))
 	 (ensures (fun h0 _ h1 -> true))
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40"
 let hash_2 src1 src2 dst =
-  // HST.push_frame ();
-  let cb = B.malloc HH.root 0uy (EHS.blockLen EHS.SHA256) in
-  // let cb = B.alloca 0uy (EHS.blockLen EHS.SHA256) in
+  HST.push_frame ();
+  // let cb = B.malloc HH.root 0uy (EHS.blockLen EHS.SHA256) in
+  let cb = B.alloca 0uy (EHS.blockLen EHS.SHA256) in
   B.blit src1 0ul cb 0ul hash_size;
   B.blit src2 0ul cb 32ul hash_size;
   let st = EHS.create EHS.SHA256 in
   EHS.init st;
   EHS.update (Ghost.hide S.empty) st cb;
-  EHS.finish st dst
-  // HST.pop_frame ()
+  EHS.finish st dst;
+  HST.pop_frame ()
 
 /// Low-level Merkle tree data structure
 
@@ -92,14 +92,16 @@ let rec create_mt_ hs depth =
        B.upd hs (depth - 1ul) hv;
        create_mt_ hs (depth - 1ul))
 
-val create_mt: unit ->
+val create_mt: init:hash ->
   HST.ST mt_ptr
 	 (requires (fun _ -> true))
 	 (ensures (fun h0 mt h1 -> true))
-let create_mt _ =
+let create_mt init =
+  admit ();
   let mt_region = BV.new_region_ HH.root in
   let hs = B.malloc mt_region (BV.create_empty uint8_t) 32ul in
   create_mt_ hs 32ul;
+  B.upd hs 0ul (BV.insert_copy 0uy hash_size (B.index hs 0ul) init);
   let rhs = BV.create 0uy hash_size 32ul in
   B.malloc HH.root (MT 0ul 1ul hs true rhs) 1ul
 
@@ -179,7 +181,7 @@ let rec insert mt v =
 /// Getting the Merkle root and path
 
 // Construct the rightmost hashes for a given (incomplete) Merkle tree.
-// This function also calculates the Merkle root, which is the final
+// This function calculates the Merkle root as well, which is the final
 // accumulator value.
 val construct_rhs:
   lv:uint32_t{lv < 32ul} ->
@@ -219,7 +221,7 @@ val mt_get_path_:
 	 (ensures (fun h0 _ h1 -> true))
 let rec mt_get_path_ lv hs rhs j k path =
   admit ();
-  if j = 0ul then ()
+  if j <= 1ul then ()
   else 
     (if k % 2ul = 0ul
     then (if k = j then ()
@@ -285,7 +287,7 @@ val mt_verify_:
 	 (ensures (fun h0 _ h1 -> true))
 let rec mt_verify_ k j path ppos acc =
   admit ();
-  if j = 0ul then ()
+  if j <= 1ul then ()
   else (if k % 2ul = 0ul
        then (if k = j then mt_verify_ (k / 2ul) (j / 2ul) path ppos acc
 	    else (hash_2 acc (V.index path ppos) acc;
