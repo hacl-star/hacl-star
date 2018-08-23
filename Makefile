@@ -150,11 +150,14 @@ providers:
 
 ci: .clean-banner .clean-git .clean-snapshots
 #	$(MAKE) verify // Suspend verification from CI
-	$(MAKE) providers
-	$(MAKE) extract-specs extract-all
-	$(MAKE) build-make
-	$(MAKE) test-all
-	$(MAKE) package
+#	$(MAKE) providers
+#	$(MAKE) extract-specs extract-all
+#	$(MAKE) build-make
+#	$(MAKE) test-all
+#	$(MAKE) package
+	$(MAKE) VARIANT=64-cSHAKE -C frodo/spec
+	$(MAKE) -C frodo/spec
+	$(MAKE) -C frodo/code
 
 #
 # Clean
