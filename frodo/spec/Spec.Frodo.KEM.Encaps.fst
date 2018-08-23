@@ -93,7 +93,7 @@ let update_ss c12 kd ss =
   let ss_init_len = crypto_ciphertextbytes + crypto_bytes in
   let ss_init = Seq.create ss_init_len (u8 0) in
   let ss_init = update_ss_init c12 kd ss_init in
-  let ss = cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes in
+  let ss = frodo_prf_spec ss_init_len ss_init (u16 7) crypto_bytes in
   ss
 
 val frodo_mul_add_sa_plus_e:
@@ -191,7 +191,7 @@ val crypto_kem_enc_0:
 let crypto_kem_enc_0 coins pk pk_coins =
   let pk_coins = update_sub pk_coins 0 crypto_publickeybytes pk in
   let pk_coins = update_sub pk_coins crypto_publickeybytes bytes_mu coins in
-  let g = cshake_frodo (crypto_publickeybytes + bytes_mu) pk_coins (u16 3) (3 * crypto_bytes) in
+  let g = frodo_prf_spec (crypto_publickeybytes + bytes_mu) pk_coins (u16 3) (3 * crypto_bytes) in
   g
 
 val crypto_kem_enc_1:

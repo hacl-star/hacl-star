@@ -3,6 +3,14 @@ HACL_HOME  ?= ../..
 
 VARIANT    ?= 640-cSHAKE
 
+ifeq ($(VARIANT),640-cSHAKE)
+  $(info ========= Building FrodoKEM-640-cSHAKE =========)
+else ifeq ($(VARIANT),976-cSHAKE)
+  $(info ========= Building FrodoKEM-976-cSHAKE =========)
+else
+  $(error ERROR: VARIANT must be either 640-cSHAKE or 976-cSHAKE)
+endif
+
 CACHE_DIR  = .cache.$(VARIANT)
 HINT_DIR   = .hints.$(VARIANT)
 OUT_DIR	   = frodo-ml.$(VARIANT)

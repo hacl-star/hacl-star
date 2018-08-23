@@ -7,12 +7,18 @@ open Lib.ByteSequence
 
 open Spec.Matrix
 open Spec.Frodo.Lemmas
-open Spec.Frodo.Params
+open Frodo.Params
 
 module Seq = Lib.Sequence
 module Matrix = Spec.Matrix
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
+
+let cdf_table_len = size_v cdf_table_len
+
+let cdf_table: lseq uint16 cdf_table_len = 
+  assert_norm (List.Tot.length cdf_list == cdf_table_len);
+  Seq.createL cdf_list
 
 val frodo_sample: r:uint16 -> uint16
 let frodo_sample r =
@@ -55,12 +61,12 @@ val frodo_sample_matrix:
   -> seed:lbytes seedLen
   -> ctr:uint16
   -> res:matrix n1 n2
-    {let r = cshake_frodo seedLen seed ctr (2 * n1 * n2) in
+    {let r = frodo_prf_spec seedLen seed ctr (2 * n1 * n2) in
      (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).
      res.(i, j) == frodo_sample_matrix_fc n1 n2 r i j)}
 let frodo_sample_matrix n1 n2 seedLen seed ctr =
   let res = Matrix.create n1 n2 in
-  let r = cshake_frodo seedLen seed ctr (2 * n1 * n2) in
+  let r = frodo_prf_spec seedLen seed ctr (2 * n1 * n2) in
   repeati_inductive n1
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}).

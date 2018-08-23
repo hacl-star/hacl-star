@@ -173,10 +173,10 @@ val frodo_key_decode1:
   -> i:size_nat{i < params_nbar}
   -> res:uint64{res == decode_fc b a i 8}
 let frodo_key_decode1 b a i =
+  assert_norm (64 <= pow2 32);
   repeati_inductive 8
     (fun k templong -> templong == decode_fc b a i k)
     (fun k templong ->
-      assert_norm (b * k <= pow2 32);
       templong |. to_u64 (dc b a.(i, k)) <<. u32 (b * k)
     ) (u64 0)
 

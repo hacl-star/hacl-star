@@ -5,19 +5,25 @@ HACL_HOME    ?= ../..
 VARIANT      ?= 640-cSHAKE
 
 ifeq ($(VARIANT),640-cSHAKE)
+  $(info ========= Building FrodoKEM-640-cSHAKE =========)
   KEM_DIR = FrodoKEM-640
-else
+else ifeq ($(VARIANT),976-cSHAKE)
+  $(info ========= Building FrodoKEM-976-cSHAKE =========)
   KEM_DIR = FrodoKEM-976
+else
+  $(error ERROR: VARIANT must be either 640-cSHAKE or 976-cSHAKE)
 endif
 
 ifeq ($(TARGET),x64)
   LWEKE_HOME = ../NIST/Additional_Implementations/x64/$(KEM_DIR)
   OBJS       = $(addprefix $(LWEKE_HOME)/objs/,aes/aes_ni.o sha3/fips202.o sha3/fips202x4.o sha3/keccak4x/KeccakP-1600-times4-SIMD256.o)
   KECCAK     = x64/Hacl_Keccak.c
-else
+else ifeq ($(TARGET),)
   LWEKE_HOME ?= ../NIST/Reference_Implementation/reference/$(KEM_DIR)
   OBJS       = $(LWEKE_HOME)/objs/aes/aes_c.o $(LWEKE_HOME)/objs/sha3/fips202.o
   KECCAK     = Hacl_Keccak.c
+else
+  $(error ERROR: TARGET must be either unset or x64)
 endif
 
 CACHE_DIR     = .cache.$(VARIANT)
@@ -49,13 +55,6 @@ lib:
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2-lib
 
-lib64:
-	sed -i.bak 's/frodo_gen_matrix_cshake /frodo_gen_matrix_cshake_4x/g' Hacl.Impl.Frodo.Params.fst
-	rm -f .depend && $(MAKE) .depend
-	$(MAKE) stage1
-	STAGE=2 TARGET=x64 $(MAKE) stage2-lib
-	sed -i.bak 's/frodo_gen_matrix_cshake_4x/frodo_gen_matrix_cshake /g' Hacl.Impl.Frodo.Params.fst
-
 stage1: $(GENERATED_DIR)/Makefile.include
 
 stage2-test: $(OUT_DIR)/test.exe
@@ -80,6 +79,7 @@ $(LWEKE_HOME)/%.o:
 # - extract each .checked file into a .krml file in parallel
 
 FSTAR_INCLUDE_DIRS = \
+  params-$(VARIANT)$(TARGET) \
   ../spec \
   ../spec/params-$(VARIANT) \
   $(HACL_KREMLIN) \
@@ -121,8 +121,8 @@ ROOTS = Hacl.Test.Frodo.fst
 
 include .depend
 
-# Admit SMT queries for modules in FStar and LowStar namespaces
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked: | .depend
+# Admit SMT queries for modules in FStar, LowStar, C, and Spec namespaces
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked $(CACHE_DIR)/Spec.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
@@ -351,7 +351,7 @@ HACL_LIBS = \
 
 $(OUT_DIR)/out.krml: $(HACL_LIBS) Hacl.Impl.Matrix.fst Hacl.Keccak.fsti Hacl.Impl.Frodo.Params.fst Hacl.Impl.Frodo.Encode.fst Hacl.Impl.Frodo.Pack.fst Hacl.Impl.Frodo.Sample.fst Hacl.Impl.Frodo.Gen.fst Hacl.Impl.Frodo.KEM.fst Hacl.Impl.Frodo.KEM.KeyGen.fst Hacl.Impl.Frodo.KEM.Encaps.fst Hacl.Impl.Frodo.KEM.Decaps.fst Hacl.Frodo.KEM.fst Hacl.Test.Frodo.fst
 	$(KREMLIN) -tmpdir $(OUT_DIR) \
-	-I ../spec/params-$(VARIANT) -I ../../specs -I ../spec -I ../../lib -I ../../lib/fst \
+	-I params-$(VARIANT)$(TARGET) ../spec/params-$(VARIANT) -I ../../specs -I ../spec -I ../../lib -I ../../lib/fst \
 	-skip-translation $^
 
 $(OUT_DIR)/Hacl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml

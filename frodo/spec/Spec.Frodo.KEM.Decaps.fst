@@ -57,7 +57,7 @@ let get_dec_ss ct kp_s =
   let ss_init = update_sub ss_init 0 (crypto_ciphertextbytes - crypto_bytes) c12 in
   let ss_init = update_sub ss_init (crypto_ciphertextbytes - crypto_bytes) crypto_bytes kp_s in
   let ss_init = update_sub ss_init crypto_ciphertextbytes crypto_bytes d in
-  let ss = cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes in
+  let ss = frodo_prf_spec ss_init_len ss_init (u16 7) crypto_bytes in
   ss
 
 val get_bpp_cp_matrices:
@@ -116,7 +116,7 @@ let crypto_kem_dec_ss mu_decode bp_matrix c_matrix sk ct =
   let pk_mu_decode = update_sub pk_mu_decode 0 crypto_publickeybytes pk in
   let pk_mu_decode = update_sub pk_mu_decode crypto_publickeybytes mu_decode_len mu_decode in
 
-  let g = cshake_frodo pk_mu_decode_len pk_mu_decode (u16 3) (3 * crypto_bytes) in
+  let g = frodo_prf_spec pk_mu_decode_len pk_mu_decode (u16 3) (3 * crypto_bytes) in
   let ss = crypto_kem_dec_ss_inner mu_decode g bp_matrix c_matrix sk ct in
   ss
 

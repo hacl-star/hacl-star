@@ -22,6 +22,9 @@ module B = LowStar.Buffer
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+let cdf_table: b:lbuffer uint16 (v cdf_table_len) { LowStar.Buffer.recallable b } =
+  LowStar.Buffer.gcmalloc_of_list HyperStack.root cdf_list
+
 val frodo_sample: r:uint16 -> Stack uint16
   (requires fun h -> True)
   (ensures  fun h0 res h1 ->

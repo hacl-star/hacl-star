@@ -111,7 +111,7 @@ let crypto_kem_keypair coins pk sk =
   let s = Seq.sub coins 0 crypto_bytes in
   let seed_e = Seq.sub coins crypto_bytes crypto_bytes in
   let z = Seq.sub coins (2 * crypto_bytes) bytes_seed_a in
-  let seed_a = cshake_frodo bytes_seed_a z (u16 0) bytes_seed_a in
+  let seed_a = frodo_prf_spec bytes_seed_a z (u16 0) bytes_seed_a in
 
   let b, s_bytes = frodo_mul_add_as_plus_e_pack seed_a seed_e in
 
