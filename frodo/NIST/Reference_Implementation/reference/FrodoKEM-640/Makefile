@@ -116,6 +116,7 @@ else
 endif
 
 KATS-fstar: 
+	mkdir -p frodo
 ifeq "$(GENERATION_A)" "CSHAKE128"
 	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.640-cSHAKE -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem_cshake.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_cshake_fstar $(ARM_SETTING)
 else
