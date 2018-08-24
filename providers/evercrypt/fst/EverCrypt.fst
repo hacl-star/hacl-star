@@ -152,7 +152,8 @@ let chacha20 key iv ctr plain len cipher =
 
 // TODO move to ValeGlue
 private inline_for_extraction
-let vale_aes128_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
+let vale_aes128_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
+                            (plaintext:uint8_p) (len:uint32_t) (cipher:uint8_p) (tag:uint8_p) =
   push_frame ();
   let open EverCrypt.Vale in
   let iv'        = B.alloca 0uy 16ul in
@@ -177,7 +178,8 @@ let vale_aes128_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
   pop_frame ()
 
 private inline_for_extraction
-let vale_aes128_gcm_decrypt xkey iv ad adlen plaintext len cipher tag =
+let vale_aes128_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
+                            (plaintext:uint8_p) (len:uint32_t) (cipher:uint8_p) (tag:uint8_p) =
   push_frame ();
   let open EverCrypt.Vale in
   let iv'        = B.alloca 0uy 16ul in
@@ -240,7 +242,8 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
 
 // TODO move to ValeGlue
 private inline_for_extraction
-let vale_aes256_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
+let vale_aes256_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
+                            (plaintext:uint8_p) (len:uint32_t) (cipher:uint8_p) (tag:uint8_p) =
   push_frame ();
   let open EverCrypt.Vale in
   let iv'        = B.alloca 0uy 16ul in
@@ -265,7 +268,8 @@ let vale_aes256_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
   pop_frame ()
 
 private inline_for_extraction
-let vale_aes256_gcm_decrypt xkey iv ad adlen plaintext len cipher tag =
+let vale_aes256_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
+                            (plaintext:uint8_p) (len:uint32_t) (cipher:uint8_p) (tag:uint8_p) =
   push_frame ();
   let open EverCrypt.Vale in
   let iv'        = B.alloca 0uy 16ul in

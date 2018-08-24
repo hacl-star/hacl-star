@@ -11,7 +11,7 @@
         "haseqEverCrypt.ValeGlue_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
       ],
       0,
-      "1e22db99a1cacd480a7a9cfe107b25f9"
+      "44b93e094bce380bcae21fdd907205ab"
     ],
     [
       "EverCrypt.ValeGlue.sha256_slice_k",
@@ -20,6 +20,7 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "FStar.UInt32_pretyping_041e3a67a2d2b51fd702f1f88cfc3b44",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "bool_inversion", "bool_typing",
         "equation_EverCrypt.ValeGlue.sha256_size_state",
@@ -31,20 +32,19 @@
         "equation_FStar.Set.eqtype", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_FStar.UInt32.n", "equation_FStar.UInt64.n",
+        "equation_FStar.UInt32.n", "equation_LowStar.Buffer.buffer",
         "equation_Prims.nat",
         "function_token_typing_EverCrypt.ValeGlue.sha256_size_state",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_FStar.Monotonic.HyperHeap.rid",
         "function_token_typing_FStar.UInt32.n",
-        "function_token_typing_FStar.UInt32.t",
-        "function_token_typing_FStar.UInt64.n", "int_typing",
+        "function_token_typing_FStar.UInt32.t", "int_typing",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Seq.Base.lemma_create_len", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_EverCrypt.ValeGlue_Tm_refine_6cbf7f077415f8204894f004aaf29954",
+        "refinement_interpretation_EverCrypt.ValeGlue_Tm_refine_1145899b864f091251496d63bfd26db5",
         "refinement_interpretation_FStar.Monotonic.HyperStack_Tm_refine_9a74d818566e70513bc032cc3b65a144",
         "refinement_interpretation_FStar.UInt32_Tm_refine_6c25b42778726de94cd4dac42edb4860",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
@@ -53,10 +53,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
-        "typing_LowStar.Buffer.length"
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "2d6580a674e0b0e9cc288de3a84880a9"
+      "33327d0eee78f22e6d1cc6110a9138dd"
     ],
     [
       "EverCrypt.ValeGlue.sha256_slice_hash",
@@ -65,6 +66,7 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "FStar.UInt32_pretyping_041e3a67a2d2b51fd702f1f88cfc3b44",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "bool_inversion", "bool_typing",
         "equation_EverCrypt.ValeGlue.sha256_size_state",
@@ -77,7 +79,7 @@
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_FStar.UInt32.n", "equation_FStar.UInt8.n",
-        "equation_Prims.nat",
+        "equation_LowStar.Buffer.buffer", "equation_Prims.nat",
         "function_token_typing_EverCrypt.ValeGlue.sha256_size_state",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_FStar.Monotonic.HyperHeap.rid",
@@ -89,7 +91,7 @@
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_EverCrypt.ValeGlue_Tm_refine_6cbf7f077415f8204894f004aaf29954",
+        "refinement_interpretation_EverCrypt.ValeGlue_Tm_refine_1145899b864f091251496d63bfd26db5",
         "refinement_interpretation_FStar.Monotonic.HyperStack_Tm_refine_9a74d818566e70513bc032cc3b65a144",
         "refinement_interpretation_FStar.UInt32_Tm_refine_6c25b42778726de94cd4dac42edb4860",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
@@ -98,10 +100,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
-        "typing_LowStar.Buffer.length"
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "a05c61b7c2ed45c865af339a0ed1d50b"
+      "f42e4febf8d3bc691d48fc032707a58d"
     ]
   ]
 ]
