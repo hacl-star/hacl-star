@@ -26,7 +26,7 @@ module S = Spec.Frodo.KEM.Encaps
 module M = Spec.Matrix
 module LSeq = Lib.Sequence
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq  -Spec'"
 
 val frodo_mul_add_sa_plus_e:
     seed_a:lbytes bytes_seed_a
@@ -48,6 +48,7 @@ val frodo_mul_add_sa_plus_e:
       as_matrix h1 bp_matrix == M.add (M.mul (as_matrix h0 sp_matrix) (as_matrix h1 a_matrix)) (as_matrix h0 ep_matrix))
 [@"c_inline"]
 let frodo_mul_add_sa_plus_e seed_a sp_matrix ep_matrix bp_matrix a_matrix =
+  assert_norm (0 < v params_n /\ 2 * v params_n < max_size_t /\ 256 + v params_n < maxint U16 /\ v params_n * v params_n < max_size_t);
   frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
   matrix_mul sp_matrix a_matrix bp_matrix;
   matrix_add bp_matrix ep_matrix

@@ -42,6 +42,7 @@ val frodo_mul_add_as_plus_e:
       as_matrix h1 b_matrix == M.add (M.mul_s a_matrix (as_matrix h0 s_matrix)) (as_matrix h0 e_matrix)))
 [@"c_inline"]
 let frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix =
+  assert_norm (0 < v params_n /\ 2 * v params_n < max_size_t /\ 256 + v params_n < maxint U16 /\ v params_n * v params_n < max_size_t);
   push_frame();
   let a_matrix = matrix_create params_n params_n in
   frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
