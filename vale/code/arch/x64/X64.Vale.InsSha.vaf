@@ -43,8 +43,8 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src), list(),
   reads xmm0;
   requires 
     t + 1 < size_k_w(SHA2_256);
-    xmm0.lo0 == vv(add_mod(index(k0(SHA2_256),t),   ws_opaque(SHA2_256, block, t)));
-    xmm0.lo1 == vv(add_mod(index(k0(SHA2_256),t+1), ws_opaque(SHA2_256, block, t + 1)));
+    xmm0.lo0 == add_wrap(vv(index(k0(SHA2_256),t)),   vv(ws_opaque(SHA2_256, block, t)));
+    xmm0.lo1 == add_wrap(vv(index(k0(SHA2_256),t+1)), vv(ws_opaque(SHA2_256, block, t + 1)));
   ensures
     let hash0 := old(make_hash(src, dst)) in
     let hash1 := shuffle_core_opaque(SHA2_256, block, hash0, t) in

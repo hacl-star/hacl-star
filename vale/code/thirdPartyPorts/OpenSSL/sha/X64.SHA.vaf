@@ -1,0 +1,95 @@
+include "../../../arch/x64/X64.Vale.InsBasic.vaf"
+//include "../../../arch/x64/X64.Vale.InsMem.vaf"
+include "../../../arch/x64/X64.Vale.InsVector.vaf"
+include "../../../arch/x64/X64.Vale.InsSha.vaf"
+
+module X64.SHA
+
+#verbatim{:interface}{:implementation}
+open Opaque_s
+open Types_s
+open Words_s
+open FStar.Seq
+open X64.Machine_s
+open X64.Memory
+open X64.Vale.State
+open X64.Vale.Decls
+open X64.Vale.InsBasic
+//open X64.Vale.InsMem
+open X64.Vale.InsVector
+open X64.Vale.InsSha
+open X64.Vale.QuickCode
+open X64.Vale.QuickCodes
+open Arch.Types
+open SHA_helpers
+#endverbatim
+
+#reset-options "--z3rlimit 20"
+
+procedure {:quick} preamble(
+        ghost ctx_b:buffer128
+    )
+    lets
+        ctx @= rdi; tmp_reg @= rax;
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        tmp_xmm @= xmm7; bswap @= xmm8; 
+    reads
+        ctx; mem; memTaint;
+    modifies
+        tmp_reg;
+        Wi; abef; cdgh; tmp_xmm; bswap; 
+        efl;
+    requires
+        validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
+    ensures
+        bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        let abcd := buffer128_read(ctx_b, 0, mem) in
+        let efgh := buffer128_read(ctx_b, 1, mem) in
+        abef == Mkfour(efgh.lo1, efgh.lo0, abcd.lo1, abcd.lo0) /\ // LSB: FEBA
+        cdgh == Mkfour(efgh.hi3, efgh.hi2, abcd.hi3, abcd.hi2);   // LSB: HGDC
+        //make_hash(abef, cdgh) == // 0: HGFEDCBA
+{
+    // At the C level, ctx_b is an array of 8 32-bit values: ABCDEFGH
+    // We load these out of memory using litte-endian loads, 
+    // but SHA spec is big endian, so we need to do some swaps
+    Load128_buffer(abef, ctx,  0, Secret, ctx_b, 0);  // abef := LSB: ABCD 
+    Load128_buffer(cdgh, ctx, 16, Secret, ctx_b, 1);  // cdgh := LSB: EFGH
+    InitPshufbMask(tmp_xmm, tmp_reg);
+
+    Pshufd(Wi, abef, 0x1b);                           //   Wi := LSB: DCBA
+    Pshufd(abef, abef, 0xb1);                         // abef := LSB: BADC
+    Pshufd(cdgh, cdgh, 0x1b);                         // cdgh := LSB: HGFE
+    
+    Mov128(bswap, tmp_xmm);     // OpenSSL: offload   // bswap holds mask (why go via tmp?)
+    Palignr8(abef, cdgh, 8);                          // abef := LSB: FEBA == abef in big endian
+    // OpenSSL uses punpcklqdq here:
+    Shufpd(cdgh, Wi, 0);                              // cdgh := LSB: HGDC == cdgh in big endian
+}
+
+procedure {:quick} loop_body(
+        ghost ctx_b:buffer128,
+        ghost in_b:buffer128,
+        ghost k_b:buffer128
+    )
+    lets
+        ctx @= rdi; inp @= rsi; num @= rdx; tbl @= rcx;
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
+        tmp @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
+    reads
+        ctx; inp; tbl; mem; memTaint;
+    modifies
+        num;
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp; bswap; abef_save; cdgh_save;
+        efl;
+    requires
+        validSrcAddrs128(mem, inp,   in_b,  4, memTaint, Secret);
+        validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
+        validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
+    ensures
+        true;
+{
+
+}
+
+

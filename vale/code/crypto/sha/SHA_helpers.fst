@@ -128,6 +128,12 @@ let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
   //        to_uint32 (((vv x + vv y % pow2_32) + vv z) % pow2_32));
   admit() // TODO: This proof is flaky.  Some combination of the asserts above will make it go through, but the combo varies day by day
 
+let lemma_add_wrap_is_add_mod (n0 n1:nat32) :
+  Lemma (add_wrap n0 n1 == vv (add_mod (to_uint32 n0) (to_uint32 n1)))
+  =
+  assert_norm (pow2 32 == pow2_32);
+  ()
+
 // Walk F* through the math steps required to rearrange all of the add_mods
 let lemma_add_mod_a (a b c d e f g h wk:word SHA2_256) : 
   Lemma ( let u = add_mod (_Ch SHA2_256 e f g) 
@@ -277,8 +283,8 @@ let sha256_rnds2_spec_quad32_is_shuffle_core_x2 (abef cdgh wk:quad32) (block:blo
 // Top-level proof for the SHA256_rnds2 instruction
 let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
   (requires t + 1 < size_k_w SHA2_256 /\
-            xmm0.lo0 == vv (add_mod (k0 SHA2_256).[t]   (ws_opaque SHA2_256 block t)) /\
-            xmm0.lo1 == vv (add_mod (k0 SHA2_256).[t+1] (ws_opaque SHA2_256 block (t+1))))
+            xmm0.lo0 == add_wrap (vv (k0 SHA2_256).[t]  ) (vv (ws_opaque SHA2_256 block t)) /\
+            xmm0.lo1 == add_wrap (vv (k0 SHA2_256).[t+1]) (vv (ws_opaque SHA2_256 block (t+1))))
   (ensures (let hash0 = make_hash abef cdgh in
             let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
             let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t + 1) in
@@ -324,12 +330,6 @@ let ws_partial_def (t:counter) (block:block_w SHA2_256) : quad32 =
        Mkfour 0 0 0 0
 
 let ws_partial = make_opaque ws_partial_def
-
-let lemma_add_wrap_is_add_mod (n0 n1:nat32) :
-  Lemma (add_wrap n0 n1 == vv (add_mod (to_uint32 n0) (to_uint32 n1)))
-  =
-  assert_norm (pow2 32 == pow2_32);
-  ()
 
 let add_mod_quad32 (q0 q1:quad32) : quad32 =
   Mkfour (vv (add_mod (to_uint32 q0.lo0) (to_uint32 q1.lo0)))
