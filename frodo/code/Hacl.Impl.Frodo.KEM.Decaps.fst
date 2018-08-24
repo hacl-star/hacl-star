@@ -131,6 +131,62 @@ let get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix =
   pop_frame()
 
 inline_for_extraction noextract
+val crypto_kem_dec_ss_cond:
+     d:lbytes crypto_bytes
+  -> dp:lbytes crypto_bytes
+  -> bp_matrix:matrix_t params_nbar params_n
+  -> bpp_matrix:matrix_t params_nbar params_n
+  -> c_matrix:matrix_t params_nbar params_nbar
+  -> cp_matrix:matrix_t params_nbar params_nbar
+  -> Stack bool
+    (requires fun h ->
+      live h d /\ live h dp /\ live h bp_matrix /\
+      live h bpp_matrix /\ live h c_matrix /\ live h cp_matrix)
+    (ensures  fun h0 r h1 -> modifies loc_none h0 h1 /\
+      r == S.crypto_kem_dec_ss_cond (as_seq h0 d) (as_seq h0 dp) (as_matrix h0 bp_matrix)
+	(as_matrix h0 bpp_matrix) (as_matrix h0 c_matrix) (as_matrix h0 cp_matrix))
+let crypto_kem_dec_ss_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix =
+  let h0 = ST.get () in
+  let b1 = lbytes_eq d dp in
+  assume (b1 == Lib.Sequence.lbytes_eq #(v crypto_bytes) (as_seq h0 d) (as_seq h0 dp));
+  let b2 = matrix_eq params_logq bp_matrix bpp_matrix in
+  let b3 = matrix_eq params_logq c_matrix cp_matrix in
+  let res = b1 && b2 && b3 in
+  res
+
+inline_for_extraction noextract
+val crypto_kem_dec_ss_cond_main:
+    mu_decode:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
+  -> g:lbytes (size 3 *! crypto_bytes)
+  -> bp_matrix:matrix_t params_nbar params_n
+  -> c_matrix:matrix_t params_nbar params_nbar
+  -> sk:lbytes crypto_secretkeybytes
+  -> ct:lbytes crypto_ciphertextbytes
+  -> ss:lbytes crypto_bytes
+  -> Stack bool
+    (requires fun h ->
+      live h mu_decode /\ live h bp_matrix /\ live h g /\
+      live h c_matrix /\ live h sk /\ live h ct /\ live h ss /\
+      disjoint ss ct /\ disjoint ss sk /\ disjoint ss mu_decode /\
+      disjoint ss bp_matrix /\ disjoint ss c_matrix /\ disjoint ss g)
+    (ensures fun h0 r h1 -> modifies loc_none h0 h1 /\
+     (let bpp_matrix, cp_matrix = S.get_bpp_cp_matrices (as_seq h0 g) (as_seq h0 mu_decode) (as_seq h0 sk) in
+      let dp = LSeq.sub #_ #(3 * v crypto_bytes) (as_seq h0 g) (2 * v crypto_bytes) (v crypto_bytes) in
+      let d = LSeq.sub #_ #(v crypto_ciphertextbytes) (as_seq h0 ct) (v crypto_ciphertextbytes - v crypto_bytes) (v crypto_bytes) in
+      r == S.crypto_kem_dec_ss_cond d dp (as_matrix h0 bp_matrix) bpp_matrix (as_matrix h0 c_matrix) cp_matrix))
+let crypto_kem_dec_ss_cond_main mu_decode g bp_matrix c_matrix sk ct ss =
+  push_frame ();
+  let dp = sub #uint8 #_ #(v crypto_bytes) g (size 2 *! crypto_bytes) crypto_bytes in
+  let d = sub #uint8 #_ #(v crypto_bytes) ct (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes in
+
+  let bpp_matrix = matrix_create params_nbar params_n in
+  let cp_matrix  = matrix_create params_nbar params_nbar in
+  get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix;
+  let b = crypto_kem_dec_ss_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix in
+  pop_frame ();
+  b
+
+inline_for_extraction noextract
 val crypto_kem_dec_ss_inner:
     mu_decode:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
   -> g:lbytes (size 3 *! crypto_bytes)
@@ -148,28 +204,35 @@ val crypto_kem_dec_ss_inner:
     (ensures fun h0 _ h1 -> modifies (loc_buffer ss) h0 h1 /\
       as_seq h1 ss == S.crypto_kem_dec_ss_inner (as_seq h0 mu_decode) (as_seq h0 g)
       (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix) (as_seq h0 sk) (as_seq h0 ct))
-let crypto_kem_dec_ss_inner mu_decode g bp_matrix c_matrix sk ct ss = admit();
-  push_frame();
-  Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
-  Spec.Frodo.KEM.expand_crypto_secretkeybytes ();
-
-  let dp = sub #uint8 #_ #(v crypto_bytes) g (size 2 *! crypto_bytes) crypto_bytes in
-  let d = sub #uint8 #_ #(v crypto_bytes) ct (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes in
+let crypto_kem_dec_ss_inner mu_decode g bp_matrix c_matrix sk ct ss =
   let kp = sub #uint8 #_ #(v crypto_bytes) g crypto_bytes crypto_bytes in
   let s = sub #uint8 #_ #(v crypto_bytes) sk (size 0) crypto_bytes in
- 
-  let bpp_matrix = matrix_create params_nbar params_n in
-  let cp_matrix  = matrix_create params_nbar params_nbar in
-  let h0 = ST.get () in
-  get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix;
-  let b1 = lbytes_eq d dp in
-  //assume (b1 == Lib.Sequence.lbytes_eq #(v crypto_bytes) (as_seq h0 d) (as_seq h0 dp));
-  let b2 = matrix_eq params_logq bp_matrix bpp_matrix in
-  assert (b2 == M.matrix_eq (v params_logq) (as_matrix h0 bp_matrix) (as_matrix h0 bpp_matrix));
-  let b3 = matrix_eq params_logq c_matrix cp_matrix in
-  assert (b3 == M.matrix_eq (v params_logq) (as_matrix h0 c_matrix) (as_matrix h0 cp_matrix));
-  let kp_s = if (b1 && b2 && b3) then kp else s in
-  get_dec_ss ct kp_s ss;
+  let b = crypto_kem_dec_ss_cond_main mu_decode g bp_matrix c_matrix sk ct ss in
+  let kp_s = if b then kp else s in
+  get_dec_ss ct kp_s ss
+
+val crypto_kem_dec_g:
+    mu_decode:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
+  -> sk:lbytes crypto_secretkeybytes
+  -> g:lbytes (size 3 *! crypto_bytes)
+  -> Stack unit
+    (requires fun h ->
+      live h mu_decode /\ live h sk /\ live h g /\
+      disjoint mu_decode g /\ disjoint sk g)
+    (ensures fun h0 _ h1 -> modifies (loc_buffer g) h0 h1)
+let crypto_kem_dec_g mu_decode sk g =
+  let mu_decode_len = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
+  let pk_mu_decode_len = crypto_publickeybytes +! mu_decode_len in
+  assert_norm (v pk_mu_decode_len =
+    v crypto_publickeybytes + v params_nbar * v params_nbar * v params_extracted_bits / 8);
+
+  push_frame();
+  let pk_mu_decode = create pk_mu_decode_len (u8 0) in
+  let pk = sub #uint8 #_ #(v crypto_publickeybytes) sk crypto_bytes crypto_publickeybytes in
+  update_sub pk_mu_decode (size 0) crypto_publickeybytes pk;
+  update_sub pk_mu_decode crypto_publickeybytes mu_decode_len mu_decode;
+
+  cshake_frodo pk_mu_decode_len pk_mu_decode (u16 3) (size 3 *! crypto_bytes) g;
   pop_frame()
 
 val crypto_kem_dec_ss:
@@ -187,21 +250,11 @@ val crypto_kem_dec_ss:
       disjoint ss bp_matrix /\ disjoint ss c_matrix)
     (ensures fun h0 _ h1 -> modifies (loc_buffer ss) h0 h1)
 [@"c_inline"]
-let crypto_kem_dec_ss mu_decode bp_matrix c_matrix sk ct ss = admit();
-  let mu_decode_len = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
-  let pk_mu_decode_len = crypto_publickeybytes +! mu_decode_len in
-  assert_norm (v pk_mu_decode_len =
-    v crypto_publickeybytes + v params_nbar * v params_nbar * v params_extracted_bits / 8);
-
+let crypto_kem_dec_ss mu_decode bp_matrix c_matrix sk ct ss =
+  assert_norm (2 * v crypto_bytes % 4 = 0);
   push_frame();
-  let pk_mu_decode = create pk_mu_decode_len (u8 0) in
-  let pk = sub #uint8 #_ #(v crypto_publickeybytes) sk crypto_bytes crypto_publickeybytes in
-  update_sub pk_mu_decode (size 0) crypto_publickeybytes pk;
-  update_sub pk_mu_decode crypto_publickeybytes mu_decode_len mu_decode;
-
   let g = create (size 3 *! crypto_bytes) (u8 0) in
-  cshake_frodo pk_mu_decode_len pk_mu_decode (u16 3) (size 3 *! crypto_bytes) g;
-
+  crypto_kem_dec_g mu_decode sk g;
   crypto_kem_dec_ss_inner mu_decode g bp_matrix c_matrix sk ct ss;
   clear_words_u8 (size 2 *! crypto_bytes) (sub #_ #_ #(2 * v crypto_bytes) g (size 0) (size 2 *! crypto_bytes));
   pop_frame()

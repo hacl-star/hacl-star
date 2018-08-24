@@ -76,7 +76,21 @@ let get_bpp_cp_matrices g mu_decode sk =
   let cp_matrix = frodo_mul_add_sb_plus_e_plus_mu b seed_ep mu_decode sp_matrix in
   bpp_matrix, cp_matrix
 
-inline_for_extraction noextract
+val crypto_kem_dec_ss_cond:
+     d:lbytes crypto_bytes
+  -> dp:lbytes crypto_bytes
+  -> bp_matrix:matrix params_nbar params_n
+  -> bpp_matrix:matrix params_nbar params_n
+  -> c_matrix:matrix params_nbar params_nbar
+  -> cp_matrix:matrix params_nbar params_nbar
+  -> bool
+let crypto_kem_dec_ss_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix =
+  let b1 = lbytes_eq d dp in
+  let b2 = matrix_eq params_logq bp_matrix bpp_matrix in
+  let b3 = matrix_eq params_logq c_matrix cp_matrix in
+  let res = b1 && b2 && b3 in
+  res
+
 val crypto_kem_dec_ss_inner:
     mu_decode:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
   -> g:lbytes (3 * crypto_bytes)
@@ -94,10 +108,8 @@ let crypto_kem_dec_ss_inner mu_decode g bp_matrix c_matrix sk ct =
   let s  = Seq.sub #_ #crypto_secretkeybytes sk 0 crypto_bytes in
 
   let bpp_matrix, cp_matrix = get_bpp_cp_matrices g mu_decode sk in
-  let b1 = lbytes_eq d dp in
-  let b2 = matrix_eq params_logq bp_matrix bpp_matrix in
-  let b3 = matrix_eq params_logq c_matrix cp_matrix in
-  let kp_s = if (b1 && b2 && b3) then kp else s in
+  let b = crypto_kem_dec_ss_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix in
+  let kp_s = if b then kp else s in
   let ss = get_dec_ss ct kp_s in
   ss
 
