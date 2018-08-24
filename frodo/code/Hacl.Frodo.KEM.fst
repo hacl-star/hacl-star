@@ -43,6 +43,6 @@ val crypto_kem_dec:
   -> Stack uint32
     (requires fun h ->
       live h ss /\ live h ct /\ live h sk /\
-      disjoint ss ct /\ disjoint ss sk)
+      disjoint ss ct /\ disjoint ss sk /\ disjoint ct sk)
     (ensures  fun h0 r h1 -> live h1 ss /\ modifies (loc_buffer ss) h0 h1)
 let crypto_kem_dec ss ct sk = Hacl.Impl.Frodo.KEM.Decaps.crypto_kem_dec ss ct sk
