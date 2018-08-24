@@ -26,7 +26,7 @@ module S = Spec.Frodo.KEM.Encaps
 module M = Spec.Matrix
 module LSeq = Lib.Sequence
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq  -Spec'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq -Spec'"
 
 val frodo_mul_add_sa_plus_e:
     seed_a:lbytes bytes_seed_a
@@ -76,6 +76,9 @@ let frodo_mul_add_sa_plus_e_inner seed_a sp_matrix ep_matrix bp_matrix a_matrix 
   frodo_mul_add_sa_plus_e seed_a sp_matrix ep_matrix bp_matrix a_matrix;
   assert_norm (v params_nbar * v params_n % 2 = 0);
   clear_matrix ep_matrix
+
+//TODO: remove once _aseem_monotonic_buffers it's merged
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val frodo_mul_add_sa_plus_e_main:
@@ -261,6 +264,9 @@ let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix c2 =
   crypto_kem_enc_ct_pack_c2_inner seed_e coins b sp_matrix c2 v_matrix;
   clear_matrix v_matrix;
   pop_frame()
+
+//TODO: remove once _aseem_monotonic_buffers it's merged
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val crypto_kem_enc_ct_inner:

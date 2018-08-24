@@ -81,6 +81,9 @@ let frodo_key_encode1 b a res0 vi i =
   let h2 = ST.get () in
   S.lemma_matrix_equality_nbar (as_matrix h2 res0) (S.frodo_key_encode1 (v b) (B.as_seq h0 a) (as_matrix h0 res0) vi (v i))
 
+//TODO: remove once _aseem_monotonic_buffers it's merged
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract private
 val frodo_key_encode2:
     b:size_t{0 < v b /\ v b <= 8}

@@ -23,7 +23,13 @@ module B = LowStar.Buffer
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+val gcmalloc_of_list_pre_eq: #a:Type -> l1:list a -> l2:list a -> Lemma
+  (requires gcmalloc_of_list_pre l1 /\ l1 == l2)
+  (ensures  gcmalloc_of_list_pre l2)
+let gcmalloc_of_list_pre_eq #a l1 l2 = ()
+
 let cdf_table: b:lbuffer uint16 (v cdf_table_len) { LowStar.Buffer.recallable b } =
+  gcmalloc_of_list_pre_eq (norm [delta_only [`%cdf_list]] cdf_list) cdf_list;
   LowStar.Buffer.gcmalloc_of_list HyperStack.root cdf_list
 
 val frodo_sample: r:uint16 -> Stack uint16
@@ -72,6 +78,9 @@ let gen_inv h0 h1 h2 n1 n2 r res i j =
   (forall (j0:size_nat{j <= j0 /\ j0 < v n2}). get h2 res (v i) j0 == get h0 res (v i) j0) /\
   (forall (i0:size_nat{v i < i0 /\ i0 < v n1}) (j:size_nat{j < v n2}). get h2 res i0 j == get h0 res i0 j) /\
   as_seq h0 r == as_seq h2 r
+
+//TODO: remove once _aseem_monotonic_buffers it's merged
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract private
 val frodo_sample_matrix_fc:

@@ -47,6 +47,9 @@ let gen_inv h0 h1 h2 n seed_len seed r res i j =
   as_seq h1 r == Spec.Frodo.Keccak.cshake128_frodo (v seed_len) (as_seq h0 seed) (u16 (256 + v i)) (2 * v n) /\
   as_seq h1 r == as_seq h2 r
 
+//TODO: remove once _aseem_monotonic_buffers it's merged
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract private
 val frodo_gen_matrix_cshake_fc:
     h0:HS.mem
