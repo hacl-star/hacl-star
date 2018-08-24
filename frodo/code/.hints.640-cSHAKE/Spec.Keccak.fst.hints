@@ -21,7 +21,7 @@
         "refinement_interpretation_Spec.Keccak_Tm_refine_a9b951955f93eaf8ee639e86915fb33c"
       ],
       0,
-      "56d5e84a23cccce6b84e53a8c9c68cb5"
+      "e8ae9c7a382fdffd8cd580dfb7545e39"
     ],
     [
       "Spec.Keccak.state",
@@ -40,7 +40,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "2df6dc20641cceec4097d5fc0f256e47"
+      "4ce268bcdda473d266cfef797e8f1062"
     ],
     [
       "Spec.Keccak.readLane",
@@ -63,7 +63,7 @@
         "refinement_interpretation_Spec.Keccak_Tm_refine_a4e16c3a6b2957d2afd09b2bef33bc47"
       ],
       0,
-      "638b5cbde539064afbe3645cfbd86416"
+      "4765173eb388991864fb85a5f2fbfd12"
     ],
     [
       "Spec.Keccak.writeLane",
@@ -86,7 +86,7 @@
         "refinement_interpretation_Spec.Keccak_Tm_refine_a4e16c3a6b2957d2afd09b2bef33bc47"
       ],
       0,
-      "c9ca12de8ae8d653c07ae556b9b459d7"
+      "a96b8528258e78974c9cd4793abd6729"
     ],
     [
       "Spec.Keccak.state_permute1",
@@ -119,7 +119,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "86c6315059b9b5762a7a49397ac483b9"
+      "68b2296ac07088ae2ec7b1dad8c8ef7b"
     ],
     [
       "Spec.Keccak.state_permute",
@@ -137,7 +137,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "59060da83296d892bb3274ad199d0dcd"
+      "2d05a2870b8adf6b4a0174a320b824de"
     ],
     [
       "Spec.Keccak.loadState",
@@ -150,6 +150,7 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt32.n",
+        "equation_Lib.ByteSequence.lbytes",
         "equation_Lib.IntTypes.machineint", "equation_Lib.IntTypes.uint64",
         "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Prims.nat",
@@ -166,7 +167,7 @@
         "refinement_interpretation_Spec.Keccak_Tm_refine_e30a40c067661dfb9dbacb8842511313"
       ],
       0,
-      "b009046c53376d6a1b79abdeedeb8f37"
+      "c1867f8a004942ddea09b1ee3c767e61"
     ],
     [
       "Spec.Keccak.storeState",
@@ -178,33 +179,22 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U64",
-        "equality_tok_Lib.IntTypes.U64@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt32.n",
         "equation_Lib.IntTypes.machineint", "equation_Lib.IntTypes.uint64",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.slice",
-        "equation_Lib.Sequence.sub", "equation_Prims.nat",
-        "equation_Spec.Keccak.state", "function_token_typing_FStar.UInt32.n",
-        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
-        "refinement_interpretation_Lib.IntTypes_Tm_refine_733eca0dea657618ec34a4c717fb8719",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "equation_Spec.Keccak.state",
+        "function_token_typing_FStar.UInt32.n", "int_inversion",
+        "int_typing", "lemma_Lib.IntTypes.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421",
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Keccak_Tm_refine_1525955c18d6cccf6fcd769bad1e1e24",
-        "refinement_interpretation_Spec.Keccak_Tm_refine_48836f4de1214ecad50786fd0bf12f00",
-        "refinement_interpretation_Spec.Keccak_Tm_refine_cd773a91063b9ec20f66999f1257f349",
-        "refinement_interpretation_Spec.Keccak_Tm_refine_d606390dad408ca37fe75930beb4bb02",
-        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.U8@tok"
+        "refinement_interpretation_Spec.Keccak_Tm_refine_48836f4de1214ecad50786fd0bf12f00"
       ],
       0,
-      "59ae70f48b26256bf8cfd1c347b67d7a"
+      "8abaadb9e92396df67ef8308459290d8"
     ],
     [
       "Spec.Keccak.absorb",
@@ -219,21 +209,23 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
         "equation_Lib.ByteSequence.lbytes",
         "equation_Lib.IntTypes.machineint", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_Lib.IntTypes.pow2_values",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "int_inversion", "int_typing", "lemma_Lib.IntTypes.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
+        "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421",
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Keccak_Tm_refine_5e67ff2c43a435256211895457041a82",
         "refinement_interpretation_Spec.Keccak_Tm_refine_9f7a55429d542167f8413f57f5646f31",
+        "refinement_interpretation_Spec.Keccak_Tm_refine_aba41f06644912a145f49fbf9eab75b8",
         "refinement_interpretation_Spec.Keccak_Tm_refine_fffae317d46d7f3e4a22b0d9d6fb2c0d"
       ],
       0,
-      "ba148f52847308d8e6c15831ad811321"
+      "c80d9169c3ca114a397145186e4a8c5b"
     ],
     [
       "Spec.Keccak.squeeze",
@@ -258,7 +250,7 @@
         "refinement_interpretation_Spec.Keccak_Tm_refine_fffae317d46d7f3e4a22b0d9d6fb2c0d"
       ],
       0,
-      "7370b6edc2c4f926c079c6d178579369"
+      "0429a1273bc1721d4d67502960e8aaaa"
     ],
     [
       "Spec.Keccak.keccak",
@@ -277,7 +269,7 @@
         "refinement_interpretation_Spec.Keccak_Tm_refine_3e6173b55401d01670911567d8c211ba"
       ],
       0,
-      "ccdb89556816c823de342eb1992b761a"
+      "ff5c7fdc39570627a865f68750828344"
     ],
     [
       "Spec.Keccak.shake128",
@@ -295,7 +287,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "c73fd8b3d1a517289b74d0401698b14e"
+      "aebd6cd26b88f19fa3be71e0de5ceb5a"
     ],
     [
       "Spec.Keccak.shake256",
@@ -313,7 +305,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "a3d84e238a31a47ead4261cddb4a39be"
+      "35594f8ed237fa1b84fe354adcde9731"
     ],
     [
       "Spec.Keccak.sha3_224",
@@ -331,7 +323,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "3bd6079ccbe7b35fc183f5e08f2772c5"
+      "b14594a2213c130cc55faae41bbc94d6"
     ],
     [
       "Spec.Keccak.sha3_256",
@@ -349,7 +341,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "2cdb524d52a30d5b5d4628fdcb198366"
+      "74d12826b0c17ab3c5040d790648fa0f"
     ],
     [
       "Spec.Keccak.sha3_384",
@@ -367,7 +359,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "da266e8b751cacb21f6a16c360d89947"
+      "d7cb3132f389de9b2487a2cd1e9453a4"
     ],
     [
       "Spec.Keccak.sha3_512",
@@ -385,7 +377,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "5e64b19634975562e6df3693063bc7b6"
+      "26db8d97afbf7ea87da17432c31a4f2f"
     ]
   ]
 ]
