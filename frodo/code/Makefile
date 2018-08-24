@@ -155,7 +155,7 @@ $(OUTPUT_DIR)/FStar_%.krml $(OUTPUT_DIR)/LowStar_%.krml $(OUTPUT_DIR)/C%.krml: |
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-$(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml $(OUTPUT_DIR)/Lib_IntTypes.krml: | .depend
+$(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml $(OUTPUT_DIR)/Lib_IntTypes.krml $(OUTPUT_DIR)/Lib_Endianness.krml: | .depend
 	$(FSTARR) --codegen Kremlin --lax \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
