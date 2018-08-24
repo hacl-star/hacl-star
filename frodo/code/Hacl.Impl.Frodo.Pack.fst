@@ -9,6 +9,7 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.PQ.Buffer
+open Lib.Endianness
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params

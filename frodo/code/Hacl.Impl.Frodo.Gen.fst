@@ -10,6 +10,7 @@ open LowStar.BufferOps
 
 open Lib.IntTypes
 open Lib.PQ.Buffer
+open Lib.Endianness
 
 open Hacl.Keccak
 open Hacl.Impl.Matrix

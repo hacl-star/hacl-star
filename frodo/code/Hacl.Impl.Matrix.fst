@@ -4,11 +4,11 @@ open FStar.HyperStack.ST
 open FStar.Mul
 
 open LowStar.BufferOps
-open LowStar.Modifies
-open LowStar.ModifiesPat
+open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.PQ.Buffer
+open Lib.Endianness
 
 module B   = LowStar.Buffer
 module HS  = FStar.HyperStack

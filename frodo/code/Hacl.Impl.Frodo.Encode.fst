@@ -5,11 +5,11 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.ModifiesPat
-open LowStar.Modifies
+open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.PQ.Buffer
+open Lib.Endianness
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params

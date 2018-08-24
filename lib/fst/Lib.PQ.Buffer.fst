@@ -3,8 +3,7 @@ module Lib.PQ.Buffer
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-open LowStar.ModifiesPat
-open LowStar.Modifies
+open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.RawIntTypes
@@ -236,79 +235,6 @@ let lbytes_eq #len a b =
   let res = res.(size 0) in
   pop_frame();
   res
-
-// TODO: Fix this
-#set-options "--admit_smt_queries true"
-
-inline_for_extraction
-val uint_from_bytes_le:
-    #t:m_inttype{~(SIZE? t)}
-  -> i:lbuffer uint8 (numbytes t)
-  -> Stack (uint_t t)
-    (requires fun h0 -> B.live h0 i)
-    (ensures  fun h0 o h1 ->
-      h0 == h1 /\ B.live h1 i /\
-      o == ByteSeq.uint_from_bytes_le #t (B.as_seq h0 i))
-let uint_from_bytes_le #t i =
-  match t with
-  | U8 -> i.(size 0)
-  | U16 -> let u = C.load16_le i in u16_from_UInt16 u
-  | U32 -> let u = C.load32_le i in u32_from_UInt32 u
-  | U64 -> let u = C.load64_le i in u64_from_UInt64 u
-  | U128 -> let u = C.load128_le i in u128_from_UInt128 u
-
-inline_for_extraction
-val uint_from_bytes_be:
-    #t:m_inttype{~(SIZE? t)}
-  -> i:lbuffer uint8 (numbytes t)
-  -> Stack (uint_t t)
-    (requires fun h0 -> B.live h0 i)
-    (ensures  fun h0 o h1 ->
-      h0 == h1 /\ B.live h1 i /\
-      o == ByteSeq.uint_from_bytes_be #t (B.as_seq h0 i))
-let uint_from_bytes_be #t i =
-  match t with
-  | U8 -> i.(size 0)
-  | U16 -> let u = C.load16_be i in u16_from_UInt16 u
-  | U32 -> let u = C.load32_be i in u32_from_UInt32 u
-  | U64 -> let u = C.load64_be i in u64_from_UInt64 u
-  | U128 -> let u = C.load128_be i in u128_from_UInt128 u
-
-inline_for_extraction
-val uint_to_bytes_le:
-    #t:m_inttype{~(SIZE? t)}
-  -> o:lbuffer uint8 (numbytes t)
-  -> i:uint_t t
-  -> Stack unit
-    (requires fun h0 -> B.live h0 o)
-    (ensures  fun h0 _ h1 ->
-      B.live h1 o /\ modifies (loc_buffer o) h0 h1 /\
-      B.as_seq h1 o == ByteSeq.uint_to_bytes_le #t i)
-let uint_to_bytes_le #t o i =
-  match t with
-  | U8 -> o.(size 0) <- i
-  | U16 -> C.store16_le o (u16_to_UInt16 i)
-  | U32 -> C.store32_le o (u32_to_UInt32 i)
-  | U64 -> C.store64_le o (u64_to_UInt64 i)
-  | U128 -> C.store128_le o (u128_to_UInt128 i)
-
-inline_for_extraction
-val uint_to_bytes_be:
-    #t:m_inttype{~(SIZE? t)}
-  -> o:lbuffer uint8 (numbytes t)
-  -> i:uint_t t
-  -> Stack unit
-    (requires fun h0 -> B.live h0 o)
-    (ensures  fun h0 _ h1 ->
-      B.live h1 o /\ modifies (loc_buffer o) h0 h1 /\
-      B.as_seq h1 o == ByteSeq.uint_to_bytes_be #t i)
-let uint_to_bytes_be #t o i =
-  match t with
-  | U8 -> o.(size 0) <- i
-  | U16 -> C.store16_be o (u16_to_UInt16 i)
-  | U32 -> C.store32_be o (u32_to_UInt32 i)
-  | U64 -> C.store64_be o (u64_to_UInt64 i)
-  | U128 -> C.store128_be o (u128_to_UInt128 i)
 
 // TODO: move to a different module
 assume val print_compare_display:
