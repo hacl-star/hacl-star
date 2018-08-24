@@ -22,6 +22,8 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open Arch.Types
 open SHA_helpers
+open Spec.SHA2Again
+open GCM_helpers
 #endverbatim
 
 #reset-options "--z3rlimit 20"
@@ -42,6 +44,8 @@ procedure {:quick} preamble(
     requires
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
     ensures
+        // Why is this stored twice?
+        tmp_xmm == bswap;
         bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
         let abcd := buffer128_read(ctx_b, 0, mem) in
         let efgh := buffer128_read(ctx_b, 1, mem) in
@@ -66,7 +70,8 @@ procedure {:quick} preamble(
     Shufpd(cdgh, Wi, 0);                              // cdgh := LSB: HGDC == cdgh in big endian
 }
 
-procedure {:quick} loop_body(
+#reset-options "--z3rlimit 40"
+procedure {:quick} loop_rounds_0_15(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128
@@ -75,20 +80,48 @@ procedure {:quick} loop_body(
         ctx @= rdi; inp @= rsi; num @= rdx; tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
-        tmp @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
+        tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
         ctx; inp; tbl; mem; memTaint;
     modifies
         num;
-        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp; bswap; abef_save; cdgh_save;
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
         efl;
     requires
         validSrcAddrs128(mem, inp,   in_b,  4, memTaint, Secret);
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
+
+        // Why is this stored twice?
+        tmp_xmm == bswap;
+        bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        k_reqs(buffer128_as_seq(mem, k_b));
     ensures
         true;
 {
+    // Load 4 128-bit message chunks == 16 32-bit chunks
+    Load128_buffer(msg0, inp,  0, Secret, in_b, 0);
+    Load128_buffer(msg1, inp, 16, Secret, in_b, 1);
+    Load128_buffer(msg2, inp, 32, Secret, in_b, 2);
+    Pshufb(msg0, tmp_xmm);       // Convert msg0 to big endian
+    Load128_buffer(msg3, inp, 48, Secret, in_b, 3);
+
+    
+    Load128_buffer(Wi, tbl, 0, Secret, k_b, 0);  // Load K values from memory
+    Paddd(msg0, Wi);            // Combine the round constant with the message block
+
+    Pshufb(msg1, tmp_xmm);      // Convert msg1 to big endian
+    Mov128(cdgh_save, cdgh);    // Save a copy
+
+    // Create a ghost message block to pass to all of the sha256* instructions and lemmas
+    ghost var input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4);
+    ghost var input_BE := seq_map(reverse_bytes_quad32, input_LE);
+    ghost var block:block_w(SHA2_256) := quads_to_block(input);
+    lemma_quads_to_block(input);
+
+    // Do two rounds of SHA, drawing on state in ABEF, CDGH, and WK in lower64 of XMM0
+    SHA256_rnds2(cdgh, abef, 0, block);
 
 }
 

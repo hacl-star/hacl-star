@@ -343,6 +343,7 @@ let lemma_add_wrap_quad32_is_add_mod_quad32 (q0 q1:quad32) :
   FStar.Classical.forall_intro_2 lemma_add_wrap_is_add_mod;
   ()
 
+// Top-level proof for the SHA256_msg1 instruction
 let lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
   (requires 16 <= t /\ t < size_k_w(SHA2_256) /\
             dst == ws_quad32 (t-16) block /\
@@ -486,6 +487,7 @@ let lemma_sha256_step2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) :
   ()
 #pop-options
 
+// Top-level proof for the SHA256_msg2 instruction
 let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
   (requires 16 <= t /\ t < size_k_w(SHA2_256) - 4 /\
             (let step1 = ws_partial t block in
@@ -503,4 +505,32 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : 
   lemma_add_wrap_quad32_is_add_mod_quad32 step1 t_minus_7;
   lemma_sha256_step2 src1 src2 t block;
   lemma_ws_computed_is_ws_quad32 block t;
+  ()
+
+(* Abbreviations and lemmas for the code itself *)
+let k_reqs (k_seq:seq quad32) : Type0 =
+  length k_seq == 64 / 4 /\
+  (forall i . 0 <= i /\ i < (64/4) ==> 
+    (k_seq.[i]).lo0 == vv (k0 SHA2_256).[4 `op_Multiply` i] /\
+    (k_seq.[i]).lo1 == vv (k0 SHA2_256).[4 `op_Multiply` i + 1] /\
+    (k_seq.[i]).hi2 == vv (k0 SHA2_256).[4 `op_Multiply` i + 2] /\
+    (k_seq.[i]).hi3 == vv (k0 SHA2_256).[4 `op_Multiply` i + 3])
+  
+let quads_to_block (qs:seq quad32) : block_w SHA2_256
+  =
+  let nat32_seq = Words.Seq_s.seq_four_to_seq_LE qs in
+  let f (n:nat{n < 16}) : UInt32.t = to_uint32 (if n < length nat32_seq then nat32_seq.[n] else 0) in
+  init 16 f
+
+#reset-options "--z3rlimit 20"
+let lemma_quads_to_block (qs:seq quad32) : Lemma
+  (requires length qs == 4)
+  (ensures (let block = quads_to_block qs in
+            forall i . 0 <= i /\ i < 4 ==>
+              (qs.[i]).lo0 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 0)) /\
+              (qs.[i]).lo1 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 1)) /\
+              (qs.[i]).hi2 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 2)) /\
+              (qs.[i]).hi3 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 3))))
+  =  
+  reveal_opaque ws;
   ()
