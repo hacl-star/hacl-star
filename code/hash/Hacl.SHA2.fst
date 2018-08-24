@@ -499,8 +499,9 @@ let pad a len dst =
   (* i) Append a single 1 bit. *)
   let dst_bit = B.sub dst 0ul 1ul in
   dst_bit.(0ul) <- 0x80uy;
-  let h0 = ST.get () in
-  assert (S.equal (S.slice (B.as_seq h0 dst) 0 1) (S.create 1 0x80uy));
+  (**) let h0 = ST.get () in
+  (**) assert (S.equal (S.slice (B.as_seq h0 dst) 0 1) (S.create 1 0x80uy));
+
   (* ii) Fill with zeroes *)
   let len_zero = pad0_len a len in
   let dst_zero = B.sub dst 1ul len_zero in
@@ -515,41 +516,54 @@ let pad a len dst =
       (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 U32.(v i + 1)))
     =
     dst_zero.(i) <- 0uy;
-    let h' = ST.get () in
-    create_next (B.as_seq h' dst_zero) 0uy (U32.v i)
+    (**) let h' = ST.get () in
+    (**) create_next (B.as_seq h' dst_zero) 0uy (U32.v i)
   in
   C.Loops.for 0ul (pad0_len a len) inv f;
-  let h1 = ST.get () in
-  assert (
-    let pad0_length = pad0_length a (len_v a len) in
-    S.equal (S.slice (B.as_seq h1 dst) 1 (1 + pad0_length)) (S.create pad0_length 0uy));
+  (**) let h1 = ST.get () in
+  (**) assert (
+  (**)   let pad0_length = pad0_length a (len_v a len) in
+  (**)   S.equal (S.slice (B.as_seq h1 dst) 1 (1 + pad0_length)) (S.create pad0_length 0uy));
+
   (* iii) Encoded length *)
   let dst_len = B.sub dst U32.(1ul +^ len_zero) (size_len a) in
   begin match a with
   | SHA2_224 | SHA2_256 ->
       let dst_len = B.sub dst U32.(1ul +^ len_zero) 8ul in
-      assume FStar.Mul.(U64.(v (shift_left len 3ul)) = U64.v len * 8);
+      (**) FStar.UInt.shift_left_value_lemma #64 (U64.v len) 3;
+      (**) assert (len_v a len <= pow2 61 - 1);
+      (**) assert_norm FStar.Mul.((pow2 61 - 1) * 8 < pow2 64);
+      (**) assert_norm (pow2 3 = 8);
+      (**) assert FStar.Mul.(U64.v len * 8 < pow2 64);
+      (**) assert FStar.Mul.(FStar.UInt.shift_left #64 (len_v a len) 3 < pow2 64);
+      (**) assert FStar.Mul.(U64.(v (shift_left len 3ul)) = U64.v len * 8);
       store_len a U64.(shift_left len 3ul) dst_len
   | SHA2_384 | SHA2_512 ->
       let dst_len = B.sub dst U32.(1ul +^ len_zero) 16ul in
-      assume FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
+      (**) FStar.UInt.shift_left_value_lemma #128 (U128.v len) 3;
+      (**) assert (len_v a len <= pow2 125 - 1);
+      (**) assert_norm FStar.Mul.((pow2 125 - 1) * 8 < pow2 128);
+      (**) assert_norm (pow2 3 = 8);
+      (**) assert FStar.Mul.(U128.v len * 8 < pow2 128);
+      (**) assert FStar.Mul.(FStar.UInt.shift_left #128 (len_v a len) 3 < pow2 128);
+      (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
       store_len a U128.(shift_left len 3ul) dst_len
   end;
-  let h2 = ST.get () in
-  assert (
-    let pad0_length = pad0_length a (len_v a len) in
-    Spec.max_input_size_len a;
-    let s = B.as_seq h2 dst in
-    let s1 = S.create 1 0x80uy in
-    let s2 = S.create pad0_length 0uy in
-    let s3 = Endianness.n_to_be (Spec.size_len_ul_8 a) FStar.Mul.(len_v a len * 8) in
-    S.equal (S.slice s 0 1) s1 /\
-    S.equal (S.slice s 1 (1 + pad0_length)) s2 /\
-    S.equal (S.slice s (1 + pad0_length) (1 + pad0_length + size_len_8 a)) s3 /\
-    S.length s = 1 + pad0_length + size_len_8 a /\
-    (len_v a len + 1 + pad0_length + size_len_8 a) % Helpers.size_block a = 0 /\
-    (S.length s + len_v a len) % Helpers.size_block a = 0 /\
-    S.equal s (S.append s1 (S.append s2 s3)) /\
-    True);
+  (**) let h2 = ST.get () in
+  (**) assert (
+  (**)   let pad0_length = pad0_length a (len_v a len) in
+  (**)   Spec.max_input_size_len a;
+  (**)   let s = B.as_seq h2 dst in
+  (**)   let s1 = S.create 1 0x80uy in
+  (**)   let s2 = S.create pad0_length 0uy in
+  (**)   let s3 = Endianness.n_to_be (Spec.size_len_ul_8 a) FStar.Mul.(len_v a len * 8) in
+  (**)   S.equal (S.slice s 0 1) s1 /\
+  (**)   S.equal (S.slice s 1 (1 + pad0_length)) s2 /\
+  (**)   S.equal (S.slice s (1 + pad0_length) (1 + pad0_length + size_len_8 a)) s3 /\
+  (**)   S.length s = 1 + pad0_length + size_len_8 a /\
+  (**)   (len_v a len + 1 + pad0_length + size_len_8 a) % Helpers.size_block a = 0 /\
+  (**)   (S.length s + len_v a len) % Helpers.size_block a = 0 /\
+  (**)   S.equal s (S.append s1 (S.append s2 s3)) /\
+  (**)   True);
   ()
 
