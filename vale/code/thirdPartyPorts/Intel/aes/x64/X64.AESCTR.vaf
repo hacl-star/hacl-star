@@ -38,7 +38,7 @@ open GHash
 #verbatim{:interface}
 
 let aes_reqs (alg:algorithm) (key:aes_key_LE(alg)) (round_keys:seq(quad32)) (keys_b:buffer128)
-             (key_ptr:nat64) (mem:mem) (memTaint:memtaint) : Type0 =
+             (key_ptr:nat64) (mem:mem) (memTaint:memtaint) : prop0 =
     (alg = AES_128 || alg = AES_256) /\
     length(round_keys) == nr(alg) + 1 /\
     round_keys == key_to_round_keys_LE alg key /\

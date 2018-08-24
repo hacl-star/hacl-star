@@ -1,5 +1,6 @@
 module X64.Memory
 
+open Prop_s
 open X64.Machine_s
 
 val heap : Type u#1
@@ -35,15 +36,15 @@ let type_of_typ (t:typ) : Tot eqtype =
 
 val buffer (t:typ) : Type0
 val buffer_as_seq (#t:typ) (h:mem) (b:buffer t) : GTot (Seq.seq (type_of_typ t))
-val buffer_readable (#t:typ) (h:mem) (b:buffer t) : GTot Type0
+val buffer_readable (#t:typ) (h:mem) (b:buffer t) : GTot prop0
 val buffer_length (#t:typ) (b:buffer t) : GTot nat
 val loc : Type u#0
 val loc_none : loc
 val loc_union (s1 s2:loc) : GTot loc
 val loc_buffer (#t:typ) (b:buffer t) : GTot loc
-val loc_disjoint (s1 s2:loc) : GTot Type0
-val loc_includes (s1 s2:loc) : GTot Type0
-val modifies (s:loc) (h1 h2:mem) : GTot Type0
+val loc_disjoint (s1 s2:loc) : GTot prop0
+val loc_includes (s1 s2:loc) : GTot prop0
+val modifies (s:loc) (h1 h2:mem) : GTot prop0
 
 unfold let buffer8 = buffer (TBase TUInt8)
 unfold let buffer16 = buffer (TBase TUInt16)
@@ -53,21 +54,21 @@ unfold let buffer128 = buffer (TBase TUInt128)
 
 val buffer_addr : #t:typ -> b:buffer t -> h:mem -> GTot int
 
-let rec loc_locs_disjoint_rec (l:loc) (ls:list loc) : Type0 =
+let rec loc_locs_disjoint_rec (l:loc) (ls:list loc) : prop0 =
   match ls with
   | [] -> True
   | h::t -> loc_disjoint l h /\ loc_disjoint h l /\ loc_locs_disjoint_rec l t
 
-let rec locs_disjoint_rec (ls:list loc) : Type0 =
+let rec locs_disjoint_rec (ls:list loc) : prop0 =
   match ls with
   | [] -> True
   | h::t -> loc_locs_disjoint_rec h t /\ locs_disjoint_rec t
 
 unfold
-let locs_disjoint (ls:list loc) : Type0 = normalize (locs_disjoint_rec ls)
+let locs_disjoint (ls:list loc) : prop0 = normalize (locs_disjoint_rec ls)
 
 // equivalent to modifies; used to prove modifies clauses via modifies_goal_directed_trans
-val modifies_goal_directed (s:loc) (h1 h2:mem) : GTot Type0
+val modifies_goal_directed (s:loc) (h1 h2:mem) : GTot prop0
 val lemma_modifies_goal_directed (s:loc) (h1 h2:mem) : Lemma
   (modifies s h1 h2 == modifies_goal_directed s h1 h2)
 
@@ -288,8 +289,8 @@ val lemma_valid_store_mem128: i:int -> v:quad32 -> h:mem -> Lemma (
 
 val memtaint: Type u#0
 
-val valid_taint_buf64: (b:buffer64) -> (mem:mem) -> (memTaint:memtaint) -> (taint:taint) -> GTot Type0
-val valid_taint_buf128: (b:buffer128) -> (mem:mem) -> (memTaint:memtaint) -> (taint:taint) -> GTot Type0
+val valid_taint_buf64 (b:buffer64) (mem:mem) (memTaint:memtaint) (taint:taint) : GTot prop0
+val valid_taint_buf128 (b:buffer128) (mem:mem) (memTaint:memtaint) (taint:taint) : GTot prop0
 
 val modifies_valid_taint64 (b:buffer64) (p:loc) (h h':mem) (memTaint:memtaint) (t:taint) : Lemma
   (requires
