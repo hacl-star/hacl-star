@@ -157,11 +157,12 @@ ci: .clean-banner .clean-git .clean-snapshots
 #	$(MAKE) package
 	$(MAKE) -C frodo/spec VARIANT=64-cSHAKE
 	$(MAKE) -C frodo/spec VARIANT=640-cSHAKE
-#	$(MAKE) -C frodo/spec VARIANT=976-cSHAKE
-# 	$(MAKE) -C frodo/code VARIANT=640-cSHAKE TARGET=    lib benchmark test
-# 	$(MAKE) -C frodo/code VARIANT=640-cSHAKE TARGET=x64 lib benchmark test
-# 	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=    lib benchmark test
-# 	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=x64 lib benchmark test
+	$(MAKE) -C frodo/code VARIANT=640-cSHAKE TARGET=x64 lib
+	$(MAKE) -C frodo/code VARIANT=640-cSHAKE TARGET=x64 benchmark KATs
+	$(MAKE) -C frodo/NIST/Additional_Implementations/x64/FrodoKEM-640 tests
+	frodo/NIST/Additional_Implementations/x64/FrodoKEM-640/frodo/test_KEM
+#	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=    lib benchmark KATs
+#	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=x64 lib benchmark KATs
 
 #
 # Clean

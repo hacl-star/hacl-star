@@ -120,11 +120,11 @@ ROOTS = Hacl.Test.Frodo.fst
 include .depend
 
 # Admit SMT queries for modules in FStar, LowStar, C, and Spec namespaces
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked $(CACHE_DIR)/Spec.%.checked: | .depend
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked $(CACHE_DIR)/Spec.Frodo.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-$(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked: | .depend
+$(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/Spec.Matrix.fst.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
@@ -184,6 +184,7 @@ $(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
 	  --expose_interfaces \
 	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	  $(HACL_HOME)/lib/fst/Lib.Endianness.fst \
 	  $(HACL_HOME)/lib/c/Lib.Loops.fst \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
