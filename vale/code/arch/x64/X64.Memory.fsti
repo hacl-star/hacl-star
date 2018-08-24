@@ -64,7 +64,9 @@ let rec locs_disjoint_rec (ls:list loc) : Type0 =
   | h::t -> loc_locs_disjoint_rec h t /\ locs_disjoint_rec t
 
 unfold
-let locs_disjoint (ls:list loc) : Type0 = normalize (locs_disjoint_rec ls)
+let locs_disjoint (ls:list loc) : Type0 =
+  norm [iota; zeta; delta; delta_only [`%loc_locs_disjoint_rec;
+                                       `%locs_disjoint_rec]] (locs_disjoint_rec ls)
 
 // equivalent to modifies; used to prove modifies clauses via modifies_goal_directed_trans
 val modifies_goal_directed (s:loc) (h1 h2:mem) : GTot Type0
