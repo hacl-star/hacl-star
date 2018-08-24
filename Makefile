@@ -149,20 +149,30 @@ providers:
 #
 
 ci: .clean-banner .clean-git .clean-snapshots
-#	$(MAKE) verify // Suspend verification from CI
-#	$(MAKE) providers
-#	$(MAKE) extract-specs extract-all
-#	$(MAKE) build-make
-#	$(MAKE) test-all
-#	$(MAKE) package
 	$(MAKE) -C frodo/spec VARIANT=64-cSHAKE
-	$(MAKE) -C frodo/spec VARIANT=640-cSHAKE
+#	$(MAKE) -C frodo/spec VARIANT=640-cSHAKE
+#	$(MAKE) -C frodo/spec VARIANT=976-cSHAKE
+# ====================================================================
 	$(MAKE) -C frodo/code VARIANT=640-cSHAKE TARGET= lib
 	$(MAKE) -C frodo/code VARIANT=640-cSHAKE TARGET= benchmark KATs
 	$(MAKE) -C frodo/NIST/Reference_Implementation/reference/FrodoKEM-640 tests
 	frodo/NIST/Reference_Implementation/reference/FrodoKEM-640/frodo/test_KEM
-#	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=    lib benchmark KATs
-#	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=x64 lib benchmark KATs
+# ====================================================================
+	$(MAKE) -C frodo/code VARIANT=640-cSHAKE TARGET=x64 lib
+	$(MAKE) -C frodo/code VARIANT=640-cSHAKE TARGET=x64 benchmark KATs
+	$(MAKE) -C frodo/NIST/Additional_Implementations/x64/FrodoKEM-640 tests
+	frodo/NIST/Additional_Implementations/x64/FrodoKEM-640/frodo/test_KEM
+# ====================================================================
+#	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=    lib
+#	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=    benchmark KATs
+#	$(MAKE) -C frodo/NIST/Reference_Implementation/reference/FrodoKEM-976 tests
+#	frodo/NIST/Reference_Implementation/reference/FrodoKEM-976/frodo/test_KEM
+# ====================================================================
+#	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=x64 lib
+#	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=x64 benchmark KATs
+#	$(MAKE) -C frodo/NIST/Additional_Implementations/x64/FrodoKEM-976 tests
+#	frodo/NIST/Additional_Implementations/x64/FrodoKEM-976/frodo/test_KEM
+
 
 #
 # Clean

@@ -96,8 +96,8 @@ endif
 endif
 
 lib640: $(KEM_FRODO640_OBJS) $(RAND_OBJS) $(AES_OBJS) $(AES_NI_OBJS) $(SHAKE_OBJS) $(SHAKEx4_OBJS)
-	rm -rf frodo
-	mkdir frodo
+	#rm -rf frodo
+	mkdir -p frodo
 	$(AR) frodo/libfrodo.a $^
 	$(RANLIB) frodo/libfrodo.a
 
@@ -120,6 +120,7 @@ else
 endif
 
 KATS-fstar:
+	mkdir -p frodo
 ifeq "$(GENERATION_A)" "CSHAKE128"
 	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.640-cSHAKE -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem_cshake.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_cshake_fstar $(ARM_SETTING)
 else
