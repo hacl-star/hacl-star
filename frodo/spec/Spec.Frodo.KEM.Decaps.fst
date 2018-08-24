@@ -113,6 +113,21 @@ let crypto_kem_dec_ss_inner mu_decode g bp_matrix c_matrix sk ct =
   let ss = get_dec_ss ct kp_s in
   ss
 
+val crypto_kem_dec_g:
+    mu_decode:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
+  -> sk:lbytes crypto_secretkeybytes
+  -> lbytes (3 * crypto_bytes)
+let crypto_kem_dec_g mu_decode sk =
+  let mu_decode_len = params_nbar * params_nbar * params_extracted_bits / 8 in
+  let pk_mu_decode_len = crypto_publickeybytes + mu_decode_len in
+  let pk_mu_decode = Seq.create pk_mu_decode_len (u8 0) in
+  let pk = Seq.sub sk crypto_bytes crypto_publickeybytes in
+  let pk_mu_decode = update_sub pk_mu_decode 0 crypto_publickeybytes pk in
+  let pk_mu_decode = update_sub pk_mu_decode crypto_publickeybytes mu_decode_len mu_decode in
+
+  let g = frodo_prf_spec pk_mu_decode_len pk_mu_decode (u16 3) (3 * crypto_bytes) in
+  g
+
 val crypto_kem_dec_ss:
     mu_decode:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
   -> bp_matrix:matrix params_nbar params_n
@@ -121,22 +136,14 @@ val crypto_kem_dec_ss:
   -> ct:lbytes crypto_ciphertextbytes
   -> ss:lbytes crypto_bytes
 let crypto_kem_dec_ss mu_decode bp_matrix c_matrix sk ct =
-  let pk = Seq.sub sk crypto_bytes crypto_publickeybytes in
-  let mu_decode_len = params_nbar * params_nbar * params_extracted_bits / 8 in
-  let pk_mu_decode_len = crypto_publickeybytes + mu_decode_len in
-  let pk_mu_decode = Seq.create pk_mu_decode_len (u8 0) in
-  let pk_mu_decode = update_sub pk_mu_decode 0 crypto_publickeybytes pk in
-  let pk_mu_decode = update_sub pk_mu_decode crypto_publickeybytes mu_decode_len mu_decode in
-
-  let g = frodo_prf_spec pk_mu_decode_len pk_mu_decode (u16 3) (3 * crypto_bytes) in
+  let g = crypto_kem_dec_g mu_decode sk in
   let ss = crypto_kem_dec_ss_inner mu_decode g bp_matrix c_matrix sk ct in
   ss
 
-val crypto_kem_dec:
+val get_bp_c_matrices:
     ct:lbytes crypto_ciphertextbytes
-  -> sk:lbytes crypto_secretkeybytes
-  -> ss:lbytes crypto_bytes
-let crypto_kem_dec ct sk =
+  -> tuple2 (matrix params_nbar params_n) (matrix params_nbar params_nbar)
+let get_bp_c_matrices ct =
   let c1Len = params_logq * params_nbar * params_n / 8 in
   let c2Len = params_logq * params_nbar * params_nbar / 8 in
   let c1 = Seq.sub ct 0 c1Len in
@@ -144,6 +151,14 @@ let crypto_kem_dec ct sk =
 
   let bp_matrix = frodo_unpack params_nbar params_n params_logq c1 in
   let c_matrix  = frodo_unpack params_nbar params_nbar params_logq c2 in
+  bp_matrix, c_matrix
+
+val crypto_kem_dec:
+    ct:lbytes crypto_ciphertextbytes
+  -> sk:lbytes crypto_secretkeybytes
+  -> ss:lbytes crypto_bytes
+let crypto_kem_dec ct sk =
+  let bp_matrix, c_matrix = get_bp_c_matrices ct in
   let mu_decode = frodo_sub_mul_c_minus_bs sk bp_matrix c_matrix in
   let ss = crypto_kem_dec_ss mu_decode bp_matrix c_matrix sk ct in
   ss
