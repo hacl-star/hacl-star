@@ -160,7 +160,7 @@ ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) -C frodo/code VARIANT=640-cSHAKE lib
 	$(MAKE) -C frodo/code VARIANT=640-cSHAKE benchmark KATs
 	$(MAKE) -C frodo/NIST/Reference_Implementation/reference/FrodoKEM-640 tests
-	frodo/NIST/Reference_Implementation/reference/FrodoKEM-640/test_KEM
+	frodo/NIST/Reference_Implementation/reference/FrodoKEM-640/frodo/test_KEM
 #	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=    lib benchmark KATs
 #	$(MAKE) -C frodo/code VARIANT=976-cSHAKE TARGET=x64 lib benchmark KATs
 
