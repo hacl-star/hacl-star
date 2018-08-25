@@ -50,6 +50,7 @@ test:
 
 lib:
 	rm -f .depend && $(MAKE) .depend
+	rm -f $(OUTPUT_DIR)/Hacl_Impl_Frodo_Params.krml
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2-lib
 
