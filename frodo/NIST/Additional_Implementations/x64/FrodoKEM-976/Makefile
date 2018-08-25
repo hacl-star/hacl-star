@@ -1,7 +1,7 @@
 ####  Makefile for compilation on Linux  ####
 
 FRODO_HOME = ../../../..
-KREMLIN_HOME = ../../../../../../kremlin
+KREMLIN_HOME ?= ../../../../../../kremlin
 
 USE_OPENSSL ?= FALSE
 GENERATION_A ?= CSHAKE128
