@@ -134,6 +134,11 @@ let lemma_add_wrap_is_add_mod (n0 n1:nat32) :
   assert_norm (pow2 32 == pow2_32);
   ()
 
+let add_wrap_commutes (x y:nat32) :
+  Lemma(add_wrap x y == add_wrap y x)
+  =
+  ()
+
 // Walk F* through the math steps required to rearrange all of the add_mods
 let lemma_add_mod_a (a b c d e f g h wk:word SHA2_256) : 
   Lemma ( let u = add_mod (_Ch SHA2_256 e f g) 
@@ -284,7 +289,7 @@ let sha256_rnds2_spec_quad32_is_shuffle_core_x2 (abef cdgh wk:quad32) (block:blo
 let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
   (requires t + 1 < size_k_w SHA2_256 /\
             xmm0.lo0 == add_wrap (vv (k0 SHA2_256).[t]  ) (vv (ws_opaque SHA2_256 block t)) /\
-            xmm0.lo1 == add_wrap (vv (k0 SHA2_256).[t+1]) (vv (ws_opaque SHA2_256 block (t+1))))
+            xmm0.lo1 == add_wrap (vv (k0 SHA2_256).[t+1]) (vv (ws_opaque SHA2_256 block (t+1))) )
   (ensures (let hash0 = make_hash abef cdgh in
             let hash1 = shuffle_core_opaque SHA2_256 block hash0 t in
             let hash2 = shuffle_core_opaque SHA2_256 block hash1 (t + 1) in
@@ -507,10 +512,11 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : 
   lemma_ws_computed_is_ws_quad32 block t;
   ()
 
+open GCM_helpers
 (* Abbreviations and lemmas for the code itself *)
 let k_reqs (k_seq:seq quad32) : Type0 =
   length k_seq == 64 / 4 /\
-  (forall i . 0 <= i /\ i < (64/4) ==> 
+  (forall i . {:pattern (index_work_around_quad32 k_seq i)} 0 <= i /\ i < (64/4) ==> 
     (k_seq.[i]).lo0 == vv (k0 SHA2_256).[4 `op_Multiply` i] /\
     (k_seq.[i]).lo1 == vv (k0 SHA2_256).[4 `op_Multiply` i + 1] /\
     (k_seq.[i]).hi2 == vv (k0 SHA2_256).[4 `op_Multiply` i + 2] /\
@@ -526,7 +532,7 @@ let quads_to_block (qs:seq quad32) : block_w SHA2_256
 let lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
   (ensures (let block = quads_to_block qs in
-            forall i . 0 <= i /\ i < 4 ==>
+            forall i . {:pattern (index_work_around_quad32 qs i)} 0 <= i /\ i < 4 ==>
               (qs.[i]).lo0 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 0)) /\
               (qs.[i]).lo1 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 1)) /\
               (qs.[i]).hi2 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 2)) /\
@@ -534,3 +540,4 @@ let lemma_quads_to_block (qs:seq quad32) : Lemma
   =  
   reveal_opaque ws;
   ()
+

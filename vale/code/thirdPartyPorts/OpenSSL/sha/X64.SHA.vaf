@@ -91,6 +91,7 @@ procedure {:quick} loop_rounds_0_15(
         validSrcAddrs128(mem, inp,   in_b,  4, memTaint, Secret);
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
+        inp + 0x40 < pow2_64;
 
         // Why is this stored twice?
         tmp_xmm == bswap;
@@ -100,28 +101,51 @@ procedure {:quick} loop_rounds_0_15(
     ensures
         true;
 {
+    // Create a ghost message block to pass to all of the sha256* instructions and lemmas
+    ghost var input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4);
+    ghost var input_BE := reverse_bytes_quad32_seq(input_LE);
+    ghost var block:block_w(SHA2_256) := quads_to_block(input_BE);
+    lemma_quads_to_block(input_BE);
+
+    ghost var ks := buffer128_as_seq(mem, k_b);
+
     // Load 4 128-bit message chunks == 16 32-bit chunks
     Load128_buffer(msg0, inp,  0, Secret, in_b, 0);
     Load128_buffer(msg1, inp, 16, Secret, in_b, 1);
     Load128_buffer(msg2, inp, 32, Secret, in_b, 2);
     Pshufb(msg0, tmp_xmm);       // Convert msg0 to big endian
+    assert msg0 == index_work_around_quad32(input_BE, 0);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
+    assert msg0.lo0 == vv(ws_opaque(SHA2_256, block, 0));
     Load128_buffer(msg3, inp, 48, Secret, in_b, 3);
-
     
     Load128_buffer(Wi, tbl, 0, Secret, k_b, 0);  // Load K values from memory
-    Paddd(msg0, Wi);            // Combine the round constant with the message block
+    assert Wi == index_work_around_quad32(ks, 0);
+    assert Wi.lo0 == vv(index(k0(SHA2_256), 0));
+//    assert Wi.lo1 == vv(index(k0(SHA2_256), 1));
+    Paddd(Wi, msg0);            // Combine the round constant with the message block
+    assert Wi.lo0 == add_wrap(vv(index(k0(SHA2_256), 0)), vv(ws_opaque(SHA2_256, block, 0)));
+//    assert msg0.lo1 == add_wrap(vv(ws_opaque(SHA2_256, block, 1)), vv(index(k0(SHA2_256), 1)));
+//    assert msg0.hi2 == add_wrap(vv(ws_opaque(SHA2_256, block, 2)), vv(index(k0(SHA2_256), 2)));
+//    assert msg0.hi3 == add_wrap(vv(ws_opaque(SHA2_256, block, 3)), vv(index(k0(SHA2_256), 3)));
 
     Pshufb(msg1, tmp_xmm);      // Convert msg1 to big endian
-    Mov128(cdgh_save, cdgh);    // Save a copy
-
-    // Create a ghost message block to pass to all of the sha256* instructions and lemmas
-    ghost var input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4);
-    ghost var input_BE := seq_map(reverse_bytes_quad32, input_LE);
-    ghost var block:block_w(SHA2_256) := quads_to_block(input);
-    lemma_quads_to_block(input);
+    Mov128(cdgh_save, cdgh);    // Save a copy   TODO: Why?
 
     // Do two rounds of SHA, drawing on state in ABEF, CDGH, and WK in lower64 of XMM0
     SHA256_rnds2(cdgh, abef, 0, block);
+    Pshufd(Wi, Wi, 0x0e);       // Move upper-64 into lower-64 of Wi, lining up the next two WK values
+    Mov128(abef_save, abef);    // Save a copy   TODO: Why?
+    SHA256_rnds2(abef, cdgh, 2, block);
+
+    // Repeat above, except we also do some message expansion
+    //Load128_buffer(Wi, tbl, 16, Secret, k_b, 1);  // Load K values from memory
+    //Paddd(Wi, msg1);
+    //Pshufb(msg2, tmp);
+    //SHA256_rnds2(cdgh, abef, 2, block);
+    //Pshufd(Wi, Wi, 0x0e);
+    //Add64(inp, 0x40); 
+    //SHA256_msg1(msg0, msg1);
+    //SHA256_rnds2(abef, cdgh, 3, block);
 
 }
 
