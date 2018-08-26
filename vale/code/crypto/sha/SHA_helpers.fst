@@ -285,8 +285,7 @@ let sha256_rnds2_spec_quad32_is_shuffle_core_x2 (abef cdgh wk:quad32) (block:blo
   sha256_rnds2_spec_update_quad32_x2_shifts abef cdgh (to_uint32 wk.lo0) (to_uint32 wk.lo1);
   ()
 
-// Top-level proof for the SHA256_rnds2 instruction
-let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
+let lemma_sha256_rnds2_two_steps (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_256) : Lemma
   (requires t + 1 < size_k_w SHA2_256 /\
             xmm0.lo0 == add_wrap (vv (k0 SHA2_256).[t]  ) (vv (ws_opaque SHA2_256 block t)) /\
             xmm0.lo1 == add_wrap (vv (k0 SHA2_256).[t+1]) (vv (ws_opaque SHA2_256 block (t+1))) )
@@ -301,7 +300,22 @@ let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_2
   sha256_rnds2_spec_quad32_is_shuffle_core_x2 abef cdgh xmm0 block t;
   lemma_sha256_rnds2_spec_quad32 cdgh abef xmm0;
   ()
-  
+
+// Top-level proof for the SHA256_rnds2 instruction
+let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_256) (hash_in:hash_w SHA2_256) : Lemma
+  (requires t + 1 < size_k_w SHA2_256 /\
+            xmm0.lo0 == add_wrap (vv (k0 SHA2_256).[t]  ) (vv (ws_opaque SHA2_256 block t)) /\
+            xmm0.lo1 == add_wrap (vv (k0 SHA2_256).[t+1]) (vv (ws_opaque SHA2_256 block (t+1))) /\ 
+            make_hash abef cdgh == Spec.Loops.repeat_range_spec 0 t (shuffle_core_opaque SHA2_256 block) hash_in
+            )
+  (ensures make_hash (sha256_rnds2_spec cdgh abef xmm0) abef ==
+           Spec.Loops.repeat_range_spec 0 (t+2) (shuffle_core_opaque SHA2_256 block) hash_in)
+  =
+  lemma_sha256_rnds2_two_steps abef cdgh xmm0 t block;
+  Spec.Loops.lemma_repeat_range_spec 0 (t + 1) (shuffle_core_opaque SHA2_256 block) hash_in;
+  Spec.Loops.lemma_repeat_range_spec 0 (t + 2) (shuffle_core_opaque SHA2_256 block) hash_in;
+  ()
+
 (* Proof work for the SHA256_msg* instructions *)
 
 let ws_quad32 (t:counter) (block:block_w SHA2_256) : quad32 =

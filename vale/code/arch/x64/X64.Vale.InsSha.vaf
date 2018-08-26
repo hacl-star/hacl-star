@@ -17,6 +17,7 @@ open X64.Vale.InsVector
 open FStar.UInt32
 
 open FStar.Seq
+open Spec.Loops
 #endverbatim
 
 #verbatim
@@ -39,19 +40,17 @@ friend X64.Memory
 #endverbatim
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src), list(), list()), Public))}{:quick exportOnly} 
-          SHA256_rnds2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w(SHA2_256))
+          SHA256_rnds2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w(SHA2_256), ghost hash_orig:hash_w(SHA2_256))
   reads xmm0;
   requires 
     t + 1 < size_k_w(SHA2_256);
     xmm0.lo0 == add_wrap(vv(index(k0(SHA2_256),t)),   vv(ws_opaque(SHA2_256, block, t)));
     xmm0.lo1 == add_wrap(vv(index(k0(SHA2_256),t+1)), vv(ws_opaque(SHA2_256, block, t + 1)));
+    make_hash(src, dst)      == repeat_range_spec(0, t,   shuffle_core_opaque(SHA2_256, block), hash_orig);
   ensures
-    let hash0 := old(make_hash(src, dst)) in
-    let hash1 := shuffle_core_opaque(SHA2_256, block, hash0, t) in
-    let hash2 := shuffle_core_opaque(SHA2_256, block, hash1, t + 1) in
-    hash2 == make_hash(dst, old(src));
+    make_hash(dst, old(src)) == repeat_range_spec(0, t+2, shuffle_core_opaque(SHA2_256, block), hash_orig);
 {
-    lemma_sha256_rnds2(old(src), old(dst), old(xmm0), t, block);
+    lemma_sha256_rnds2(old(src), old(dst), old(xmm0), t, block, hash_orig);
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src), list(), list()), Public))}{:quick exportOnly} 
