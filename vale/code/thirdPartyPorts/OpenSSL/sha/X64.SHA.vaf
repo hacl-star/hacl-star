@@ -109,7 +109,7 @@ procedure {:quick} loop_rounds_0_15(
         msg0 == ws_quad32(16, block) /\
         msg1 == add_wrap_quad32(ws_partial(20, block), ws_quad32(13, block)) /\
         msg2 == ws_partial(24, block) /\
-        msg3 == index_work_around_quad32(input_BE, 3);
+        msg3 == ws_quad32(12, block);
 
         // tmp_xmm == Don't care
         // bswap
@@ -191,32 +191,52 @@ procedure {:quick} loop_rounds_0_15(
     SHA256_rnds2(abef, cdgh, 14, block, hash_orig);
 }
 
-/*
-procedure {:quick} loop_rounds_0_15(
+procedure {:quick} loop_rounds_16_55_body(
+        inline i:nat,
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
-        ghost k_b:buffer128
+        ghost k_b:buffer128,
+        ghost block:block_w(SHA2_256),
+        ghost hash_orig:hash_w(SHA2_256)
     )
     lets
-        ctx @= rdi; inp @= rsi; num @= rdx; tbl @= rcx;
+        tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
-        ctx; tbl; mem; memTaint;
+        tbl; mem; memTaint;
     modifies
-        num; inp; 
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
         efl;
     requires
-        validSrcAddrs128(mem, inp,   in_b,  4, memTaint, Secret);
-        validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
-        inp + 0x40 < pow2_64;
 
-        // Why is this stored twice?
-        tmp_xmm == bswap;
-        bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        4 <= i /\ i < 13;
 
         k_reqs(buffer128_as_seq(mem, k_b));
-*/
+
+        make_hash(abef, cdgh) == repeat_range_spec(0, 4*i, shuffle_core_opaque(SHA2_256, block), hash_orig);
+
+        msg0 == ws_quad32(4*i, block) /\
+        msg1 == add_wrap_quad32(ws_partial(4*(i+1), block), ws_quad32(4*(i-1)+1, block)) /\
+        msg2 == ws_partial(4*(i+2), block) /\
+        msg3 == ws_quad32(4*(i-1), block);
+
+    ensures
+        true;
+{
+    ghost var ks := buffer128_as_seq(mem, k_b);
+    Load128_buffer(Wi, tbl, 16*i, Secret, k_b, i);  // Load K values from memory
+    assert Wi == index_work_around_quad32(ks, i);
+    
+    Paddd(Wi, msg0);
+    SHA256_msg2(msg1, msg0, 4*(i+1), block);
+    SHA256_rnds2(cdgh, abef, 4*i, block, hash_orig);
+    Pshufd(Wi, Wi, 0x0e);
+    Mov128(tmp_xmm, msg1);
+    Palignr4(tmp_xmm, msg0, 4);
+    Paddd(msg2, tmp_xmm);
+    SHA256_msg1(msg3, msg0, 4*(i + 3), block);
+    SHA256_rnds2(abef, cdgh, 4*i + 2, block, hash_orig);
+}
