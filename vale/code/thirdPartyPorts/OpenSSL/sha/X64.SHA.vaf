@@ -82,9 +82,9 @@ procedure {:quick} loop_rounds_0_15(
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
-        ctx; inp; tbl; mem; memTaint;
+        ctx; tbl; mem; memTaint;
     modifies
-        num;
+        num; inp; 
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
         efl;
     requires
@@ -99,6 +99,7 @@ procedure {:quick} loop_rounds_0_15(
 
         k_reqs(buffer128_as_seq(mem, k_b));
     ensures
+        inp == old(inp) + 0x40;
         true;
 {
     // Create a ghost message block to pass to all of the sha256* instructions and lemmas
@@ -115,20 +116,21 @@ procedure {:quick} loop_rounds_0_15(
     Load128_buffer(msg2, inp, 32, Secret, in_b, 2);
     Pshufb(msg0, tmp_xmm);       // Convert msg0 to big endian
     assert msg0 == index_work_around_quad32(input_BE, 0);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
-    assert msg0.lo0 == vv(ws_opaque(SHA2_256, block, 0));
+    //assert msg0.lo0 == vv(ws_opaque(SHA2_256, block, 0));
     Load128_buffer(msg3, inp, 48, Secret, in_b, 3);
     
     Load128_buffer(Wi, tbl, 0, Secret, k_b, 0);  // Load K values from memory
     assert Wi == index_work_around_quad32(ks, 0);
-    assert Wi.lo0 == vv(index(k0(SHA2_256), 0));
+    //assert Wi.lo0 == vv(index(k0(SHA2_256), 0));
 //    assert Wi.lo1 == vv(index(k0(SHA2_256), 1));
     Paddd(Wi, msg0);            // Combine the round constant with the message block
-    assert Wi.lo0 == add_wrap(vv(index(k0(SHA2_256), 0)), vv(ws_opaque(SHA2_256, block, 0)));
+    //assert Wi.lo0 == add_wrap(vv(index(k0(SHA2_256), 0)), vv(ws_opaque(SHA2_256, block, 0)));
 //    assert msg0.lo1 == add_wrap(vv(ws_opaque(SHA2_256, block, 1)), vv(index(k0(SHA2_256), 1)));
 //    assert msg0.hi2 == add_wrap(vv(ws_opaque(SHA2_256, block, 2)), vv(index(k0(SHA2_256), 2)));
 //    assert msg0.hi3 == add_wrap(vv(ws_opaque(SHA2_256, block, 3)), vv(index(k0(SHA2_256), 3)));
 
     Pshufb(msg1, tmp_xmm);      // Convert msg1 to big endian
+    assert msg1 == index_work_around_quad32(input_BE, 1);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
     Mov128(cdgh_save, cdgh);    // Save a copy   TODO: Why?
 
     // Do two rounds of SHA, drawing on state in ABEF, CDGH, and WK in lower64 of XMM0
@@ -138,15 +140,43 @@ procedure {:quick} loop_rounds_0_15(
     SHA256_rnds2(abef, cdgh, 2, block);
 
     // Repeat above, except we also do some message expansion
-    //Load128_buffer(Wi, tbl, 16, Secret, k_b, 1);  // Load K values from memory
-    //Paddd(Wi, msg1);
-    //Pshufb(msg2, tmp);
-    //SHA256_rnds2(cdgh, abef, 2, block);
-    //Pshufd(Wi, Wi, 0x0e);
-    //Add64(inp, 0x40); 
-    //SHA256_msg1(msg0, msg1);
-    //SHA256_rnds2(abef, cdgh, 3, block);
+    Load128_buffer(Wi, tbl, 16, Secret, k_b, 1);  // Load K values from memory
+    assert Wi == index_work_around_quad32(ks, 1);
+    Paddd(Wi, msg1);
+    Pshufb(msg2, tmp_xmm);
+    assert msg2 == index_work_around_quad32(input_BE, 2);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
+    SHA256_rnds2(cdgh, abef, 4, block);
+    Pshufd(Wi, Wi, 0x0e);
+    Add64(inp, 0x40); 
+    SHA256_msg1(msg0, msg1, 16, block);     // Do a partial step of message expansion
+    SHA256_rnds2(abef, cdgh, 6, block);
 
+    // Repeat again
+    Load128_buffer(Wi, tbl, 32, Secret, k_b, 2);  // Load K values from memory
+    assert Wi == index_work_around_quad32(ks, 2);
+    Paddd(Wi, msg2);
+    Pshufb(msg3, tmp_xmm);
+    assert msg3 == index_work_around_quad32(input_BE, 3);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
+    SHA256_rnds2(cdgh, abef, 8, block);
+    Pshufd(Wi, Wi, 0x0e);
+    Mov128(tmp_xmm, msg3);                  // We don't need the mask any more, but why save msg3?
+    Palignr4(tmp_xmm, msg2, 4);
+    Paddd(msg0, tmp_xmm);
+    SHA256_msg1(msg1, msg2, 20, block);     // Do another partial step of message expansion
+    SHA256_rnds2(abef, cdgh, 10, block);
+
+    // Repeat a final time
+    Load128_buffer(Wi, tbl, 48, Secret, k_b, 3);  // Load K values from memory
+    assert Wi == index_work_around_quad32(ks, 3);
+    Paddd(Wi, msg3);
+    SHA256_msg2(msg0, msg3, 16, block);      // Finalize the message expansion
+    SHA256_rnds2(cdgh, abef, 12, block);
+    Pshufd(Wi, Wi, 0x0e);
+    Mov128(tmp_xmm, msg0);                  // Why save msg0?
+    Palignr4(tmp_xmm, msg3, 4);
+    Paddd(msg1, tmp_xmm);
+    SHA256_msg1(msg2, msg3, 24, block);     // Do another partial step of message expansion
+    SHA256_rnds2(abef, cdgh, 14, block);
 }
 
 

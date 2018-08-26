@@ -536,7 +536,8 @@ let lemma_quads_to_block (qs:seq quad32) : Lemma
               (qs.[i]).lo0 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 0)) /\
               (qs.[i]).lo1 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 1)) /\
               (qs.[i]).hi2 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 2)) /\
-              (qs.[i]).hi3 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 3))))
+              (qs.[i]).hi3 == vv (ws_opaque SHA2_256 block (4 `op_Multiply` i + 3)) /\
+              qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
   =  
   reveal_opaque ws;
   ()
