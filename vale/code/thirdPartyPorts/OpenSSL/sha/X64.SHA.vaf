@@ -203,11 +203,11 @@ procedure {:quick} loop_rounds_16_55_body(
         tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
-        tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
+        tmp_xmm @= xmm7;
     reads
         tbl; mem; memTaint;
     modifies
-        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
         efl;
     requires
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
@@ -224,7 +224,12 @@ procedure {:quick} loop_rounds_16_55_body(
         msg3 == ws_quad32(4*(i-1), block);
 
     ensures
-        true;
+        make_hash(abef, cdgh) == repeat_range_spec(0, 4*(i+1), shuffle_core_opaque(SHA2_256, block), hash_orig);
+
+        msg1 == ws_quad32(4*(i+1), block);
+        msg2 == add_wrap_quad32(ws_partial(4*(i+2), block), ws_quad32(4*(i)+1, block));
+        msg3 == ws_partial(4*(i+3), block);
+        msg0 == ws_quad32(4*(i), block);
 {
     ghost var ks := buffer128_as_seq(mem, k_b);
     Load128_buffer(Wi, tbl, 16*i, Secret, k_b, i);  // Load K values from memory
@@ -239,4 +244,27 @@ procedure {:quick} loop_rounds_16_55_body(
     Paddd(msg2, tmp_xmm);
     SHA256_msg1(msg3, msg0, 4*(i + 3), block);
     SHA256_rnds2(abef, cdgh, 4*i + 2, block, hash_orig);
+}
+
+// TODO: OpenSSL does this without any moves by renaming variables.  
+//       We can do the same once Vale quick-mode supports that,
+//       or we can rewrite the procedure above in non-quick mode
+procedure {:quick} {:verify true} msg_shift()
+    lets
+        msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
+        Wi @= xmm0; tmp_xmm @= xmm7;
+    modifies
+        msg0; msg1; msg2; msg3; tmp_xmm; Wi;
+    ensures
+        msg0 == old(msg1);
+        msg1 == old(msg2);
+        msg2 == old(msg3);
+        msg3 == old(msg0);
+{
+    Mov128(tmp_xmm, msg0);
+    Mov128(Wi, msg3);
+    Mov128(msg0, msg1);
+    Mov128(msg1, msg2);
+    Mov128(msg3, tmp_xmm);
+    Mov128(msg2, Wi);
 }
