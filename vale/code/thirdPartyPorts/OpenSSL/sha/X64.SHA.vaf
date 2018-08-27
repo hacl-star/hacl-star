@@ -66,7 +66,7 @@ procedure {:quick} preamble(
     Pshufd(cdgh, cdgh, 0x1b);                         // cdgh := LSB: HGFE
     
     Mov128(bswap, tmp_xmm);     // OpenSSL: offload   // bswap holds mask (why go via tmp?)
-    Palignr8(abef, cdgh, 8);                          // abef := LSB: FEBA == abef in big endian
+    Palignr8(abef, cdgh);                             // abef := LSB: FEBA == abef in big endian
     // OpenSSL uses punpcklqdq here:
     Shufpd(cdgh, Wi, 0);                              // cdgh := LSB: HGDC == cdgh in big endian
 }
@@ -112,7 +112,6 @@ procedure {:quick} loop_rounds_0_15(
         msg3 == ws_quad32(12, block);
 
         // tmp_xmm == Don't care
-        // bswap
         abef_save == old(abef);
         cdgh_save == old(cdgh);
         
@@ -143,12 +142,12 @@ procedure {:quick} loop_rounds_0_15(
 
     Pshufb(msg1, tmp_xmm);      // Convert msg1 to big endian
     assert msg1 == index_work_around_quad32(input_BE, 1);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
-    Mov128(cdgh_save, cdgh);    // Save a copy   TODO: Why?
+    Mov128(cdgh_save, cdgh);    // Save a copy of the original hash value to add at the end 
 
     // Do two rounds of SHA, drawing on state in ABEF, CDGH, and WK in lower64 of XMM0
     SHA256_rnds2(cdgh, abef, 0, block, hash_orig);
     Pshufd(Wi, Wi, 0x0e);       // Move upper-64 into lower-64 of Wi, lining up the next two WK values
-    Mov128(abef_save, abef);    // Save a copy   TODO: Why?
+    Mov128(abef_save, abef);    // Save a copy of the original hash value to add at the end
     SHA256_rnds2(abef, cdgh, 2, block, hash_orig);
 
     // Repeat above, except we also do some message expansion
@@ -172,7 +171,7 @@ procedure {:quick} loop_rounds_0_15(
     SHA256_rnds2(cdgh, abef, 8, block, hash_orig);
     Pshufd(Wi, Wi, 0x0e);
     Mov128(tmp_xmm, msg3);                  // We don't need the mask any more, but why save msg3?
-    Palignr4(tmp_xmm, msg2, 4);
+    Palignr4(tmp_xmm, msg2);
     Paddd(msg0, tmp_xmm);
     SHA256_msg1(msg1, msg2, 20, block);     // Do another partial step of message expansion
     SHA256_rnds2(abef, cdgh, 10, block, hash_orig);
@@ -185,16 +184,14 @@ procedure {:quick} loop_rounds_0_15(
     SHA256_rnds2(cdgh, abef, 12, block, hash_orig);
     Pshufd(Wi, Wi, 0x0e);
     Mov128(tmp_xmm, msg0);                  // Why save msg0?
-    Palignr4(tmp_xmm, msg3, 4);
+    Palignr4(tmp_xmm, msg3);
     Paddd(msg1, tmp_xmm);
     SHA256_msg1(msg2, msg3, 24, block);     // Do another partial step of message expansion
     SHA256_rnds2(abef, cdgh, 14, block, hash_orig);
 }
 
-procedure {:quick} loop_rounds_16_55_body(
+procedure {:quick} loop_rounds_16_51_body(
         inline i:nat,
-        ghost ctx_b:buffer128,
-        ghost in_b:buffer128,
         ghost k_b:buffer128,
         ghost block:block_w(SHA2_256),
         ghost hash_orig:hash_w(SHA2_256)
@@ -210,7 +207,7 @@ procedure {:quick} loop_rounds_16_55_body(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
         efl;
     requires
-        validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
+        validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
         4 <= i /\ i < 13;
 
@@ -240,7 +237,7 @@ procedure {:quick} loop_rounds_16_55_body(
     SHA256_rnds2(cdgh, abef, 4*i, block, hash_orig);
     Pshufd(Wi, Wi, 0x0e);
     Mov128(tmp_xmm, msg1);
-    Palignr4(tmp_xmm, msg0, 4);
+    Palignr4(tmp_xmm, msg0);
     Paddd(msg2, tmp_xmm);
     SHA256_msg1(msg3, msg0, 4*(i + 3), block);
     SHA256_rnds2(abef, cdgh, 4*i + 2, block, hash_orig);
@@ -249,7 +246,7 @@ procedure {:quick} loop_rounds_16_55_body(
 // TODO: OpenSSL does this without any moves by renaming variables.  
 //       We can do the same once Vale quick-mode supports that,
 //       or we can rewrite the procedure above in non-quick mode
-procedure {:quick} {:verify true} msg_shift()
+procedure {:quick} msg_shift()
     lets
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         Wi @= xmm0; tmp_xmm @= xmm7;
@@ -267,4 +264,77 @@ procedure {:quick} {:verify true} msg_shift()
     Mov128(msg1, msg2);
     Mov128(msg3, tmp_xmm);
     Mov128(msg2, Wi);
+}
+
+
+
+// TODO: Wrap the above in a recursive loop that calls loop_rounds_16_55_body, then msg_shift
+
+
+
+procedure {:quick} {:verify true} loop_rounds_52_64(
+        ghost k_b:buffer128,
+        ghost block:block_w(SHA2_256),
+        ghost hash_orig:hash_w(SHA2_256)
+        )
+    lets
+        tbl @= rcx; num @= rdx;
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
+        tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
+    reads
+        tbl; bswap; abef_save; cdgh_save; mem; memTaint;
+    modifies
+        num;
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
+        efl;
+    requires
+        validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
+
+        num > 0;
+
+        k_reqs(buffer128_as_seq(mem, k_b));
+
+        make_hash(abef, cdgh) == repeat_range_spec(0, 52, shuffle_core_opaque(SHA2_256, block), hash_orig);
+
+        msg0 == ws_quad32(52, block); 
+        msg1 == add_wrap_quad32(ws_partial(56, block), ws_quad32(49, block));
+        msg2 == ws_partial(60, block);
+        msg3 == ws_quad32(48, block);
+    ensures
+        tmp_xmm == old(bswap);
+        num == old(num) - 1;
+{
+    ghost var ks := buffer128_as_seq(mem, k_b);
+    Load128_buffer(Wi, tbl, 16*13, Secret, k_b, 13);  // Load K values from memory
+    assert Wi == index_work_around_quad32(ks, 13);
+    Paddd(Wi, msg0);
+    SHA256_msg2(msg1, msg0, 4*(13+1), block);
+    SHA256_rnds2(cdgh, abef, 4*13, block, hash_orig);
+    Pshufd(Wi, Wi, 0x0e);
+    Mov128(tmp_xmm, msg1);
+    Palignr4(tmp_xmm, msg0);
+    SHA256_rnds2(abef, cdgh, 4*13+2, block, hash_orig);
+    Paddd(msg2, tmp_xmm);
+    
+    Load128_buffer(Wi, tbl, 16*14, Secret, k_b, 14);  // Load K values from memory
+    assert Wi == index_work_around_quad32(ks, 14);
+    Paddd(Wi, msg1);
+    SHA256_rnds2(cdgh, abef, 4*14, block, hash_orig);
+    Pshufd(Wi, Wi, 0x0e);
+    SHA256_msg2(msg2, msg1, 4*(14+1), block);
+    Mov128(tmp_xmm, bswap);
+    SHA256_rnds2(abef, cdgh, 4*14+2, block, hash_orig);
+
+    Load128_buffer(Wi, tbl, 16*15, Secret, k_b, 15);  // Load K values from memory
+    assert Wi == index_work_around_quad32(ks, 15);
+    Paddd(Wi, msg2);
+    SHA256_rnds2(cdgh, abef, 4*15, block, hash_orig);
+    Pshufd(Wi, Wi, 0x0e);
+    Sub64(num, 1);
+    SHA256_rnds2(abef, cdgh, 4*15+2, block, hash_orig);
+    //assert make_hash(abef, cdgh) == shuffle(SHA2_256, hash_orig, block);
+
+    Paddd(cdgh, cdgh_save);
+    Paddd(abef, abef_save);
 }

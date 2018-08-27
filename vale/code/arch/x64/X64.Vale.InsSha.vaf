@@ -69,7 +69,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src), list(), 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg2(dst, src), list(), list()), Public))}{:quick exportOnly} 
           SHA256_msg2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w(SHA2_256))
   requires 
-    16 <= t < size_k_w(SHA2_256) - 4;
+    16 <= t < size_k_w(SHA2_256) - 3;
     let step1 := ws_partial(t, block) in
     let t_minus_7 := ws_quad32(t-7, block) in
     dst == add_wrap_quad32(step1,t_minus_7);

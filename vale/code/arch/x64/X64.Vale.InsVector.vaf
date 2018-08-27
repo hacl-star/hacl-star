@@ -96,18 +96,16 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Psrldq(dst, amt), list(), list(
 }
 
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, amount), list(), list()), Public))}{:quick exportOnly}
-          Palignr4(inout dst:xmm, src:xmm, inline amount:imm8)
-    requires amount == 4;
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, 4), list(), list()), Public))}{:quick exportOnly}
+          Palignr4(inout dst:xmm, src:xmm)
     modifies efl;
     ensures
         dst == old(Mkfour(src.lo1, src.hi2, src.hi3, dst.lo0));
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, amount), list(), list()), Public))}{:quick exportOnly}
-          Palignr8(inout dst:xmm, src:xmm, inline amount:imm8)
-    requires amount == 8;
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, 8), list(), list()), Public))}{:quick exportOnly}
+          Palignr8(inout dst:xmm, src:xmm)
     modifies efl;
     ensures
         dst == old(Mkfour(src.hi2, src.hi3, dst.lo0, dst.lo1));
