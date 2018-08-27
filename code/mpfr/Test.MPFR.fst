@@ -6,6 +6,7 @@ open FStar.Buffer
 
 module U64 = FStar.UInt64
 module U32 = FStar.UInt32
+module I64 = FStar.Int64
 module I32 = FStar.Int32
 
 open MPFR.Lib
@@ -16,10 +17,8 @@ open MPFR
 
 let cprint x = C.String.print (C.String.of_literal x)
 
-let cmod x = if x > 2147483647 then x - 4294967296 else x
-
-let print_u32 x = cprint (string_of_int (U32.v x)); cprint " "
-let print_i32 x = cprint (string_of_int (cmod (I32.v x))); cprint " "
+let print_i32 x = cprint (string_of_int (I32.v x)); cprint " "
+let print_i64 x = cprint (string_of_int (I64.v x)); cprint " "
 let print_u64 x = cprint (string_of_int (U64.v x)); cprint " "
 
 let print_rnd rnd = match rnd with
@@ -36,8 +35,8 @@ val test_add1sp1: mpfr_sign_t -> mp_limb_t -> mpfr_exp_t -> mp_limb_t -> mpfr_ex
 
 let test_add1sp1 s bp bx cp cx rnd_mode p rp rx rt =
     cprint "Testing add1sp1: \n";
-    print_i32 s; print_u64 bp; print_i32 bx; print_u64 cp; print_i32 cx; print_rnd rnd_mode;
-    print_u32 p; print_u64 rp; print_i32 rx; print_i32 rt;
+    print_i32 s; print_u64 bp; print_i64 bx; print_u64 cp; print_i64 cx; print_rnd rnd_mode;
+    print_i64 p; print_u64 rp; print_i64 rx; print_i32 rt;
     cprint "\n";
     push_frame();
     let bm = createL [bp] in
@@ -55,9 +54,9 @@ let test_add1sp1 s bp bx cp cx rnd_mode p rp rx rt =
     cprint "Result: \n";
     print_i32 asign;
     print_u64 ap;
-    print_i32 ax;
+    print_i64 ax;
     print_i32 at;
-    if ((U64.(ap =^ rp) && I32.(ax =^ rx)) || (I32.(ax =^ mpfr_EXP_INF) && I32.(ax =^ rx))) && 
+    if ((U64.(ap =^ rp) && I64.(ax =^ rx)) || (I64.(ax =^ mpfr_EXP_INF) && I64.(ax =^ rx))) && 
          I32.(asign =^ s) && I32.(at =^ rt) then begin
         cprint "YES!!!\n";
 	true
@@ -67,16 +66,16 @@ let test_add1sp1 s bp bx cp cx rnd_mode p rp rx rt =
     end
     
 let test1 () =
-    test_add1sp1 1l 9223372036854775808uL 53l 9223372036854775808uL 0l MPFR_RNDN 53ul 9223372036854775808uL 53l (-1l)
+    test_add1sp1 1l 9223372036854775808uL 53L 9223372036854775808uL 0L MPFR_RNDN 53L 9223372036854775808uL 53L (-1l)
     
 let test2 () =
-    test_add1sp1 (-1l) 9223372036854775808uL 0l 9223372036854775808uL 5l MPFR_RNDU 1ul 9223372036854775808uL 5l 1l
+    test_add1sp1 (-1l) 9223372036854775808uL 0L 9223372036854775808uL 5L MPFR_RNDU 1L 9223372036854775808uL 5L 1l
 
 let test3 () =
-    test_add1sp1 1l 13835058055282163712uL 1073741823l 13835058055282163712uL 1073741822l MPFR_RNDN 2ul 9223372036854779904uL mpfr_EXP_INF 1l
+    test_add1sp1 1l 13835058055282163712uL 1073741823L 13835058055282163712uL 1073741822L MPFR_RNDN 2L 9223372036854779904uL mpfr_EXP_INF 1l
 
 let test4 () =
-    test_add1sp1 1l 11284843200441646272uL 12l 14910977271964212488uL (-1l) MPFR_RNDD 62ul 11286663388096915340uL 12l (-1l)
+    test_add1sp1 1l 11284843200441646272uL 12L 14910977271964212488uL (-1L) MPFR_RNDD 62L 11286663388096915340uL 12L (-1l)
 
 val main: unit -> ST int
     (requires (fun h -> True))

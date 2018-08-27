@@ -9,7 +9,7 @@ open FStar.UInt64
 
 module ST = FStar.HyperStack.ST
 module I32 = FStar.Int32
-module U32 = FStar.UInt32
+module I64 = FStar.Int64
 
 open MPFR.Maths
 open MPFR.Dyadic
@@ -25,17 +25,17 @@ val mpfr_overflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:mpfr_sign_t ->
     Stack i32
     (requires (fun h -> 
         let p = (as_struct h x).mpfr_prec in
-        let l = (U32.v p - 1) / 64 + 1 in
-        mpfr_live h x /\ mpfr_PREC_COND (U32.v p) /\
+        let l = (I64.v p - 1) / 64 + 1 in
+        mpfr_live h x /\ mpfr_PREC_COND (I64.v p) /\
 	length (as_struct h x).mpfr_d = l))
     (ensures  (fun h0 t h1 ->
         let p = (as_struct h1 x).mpfr_prec in
         mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
         mpfr_valid_cond h1 x /\ (as_struct h1 x).mpfr_sign = sign /\
 	(forall (exact:normal_fp{exact.sign = I32.v sign /\ exact.exp > mpfr_EMAX_spec /\
-	                    exact.prec >= U32.v p}).
-	as_fp h1 x == mpfr_overflow_spec exact (U32.v p) rnd_mode /\
-	I32.v t = mpfr_overflow_ternary_spec exact (U32.v p) rnd_mode)))
+	                    exact.prec >= I64.v p}).
+	as_fp h1 x == mpfr_overflow_spec exact (I64.v p) rnd_mode /\
+	I32.v t = mpfr_overflow_ternary_spec exact (I64.v p) rnd_mode)))
 
 let mpfr_overflow x rnd_mode sign =
     mpfr_SET_SIGN x sign;
@@ -51,17 +51,17 @@ val mpfr_underflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:mpfr_sign_t ->
     Stack i32
     (requires (fun h -> 
         let p = (as_struct h x).mpfr_prec in
-        let l = (U32.v p - 1) / 64 + 1 in
-        mpfr_live h x /\ mpfr_PREC_COND (U32.v p) /\
+        let l = (I64.v p - 1) / 64 + 1 in
+        mpfr_live h x /\ mpfr_PREC_COND (I64.v p) /\
 	length (as_struct h x).mpfr_d = l))
     (ensures  (fun h0 t h1 ->
         let p = (as_struct h1 x).mpfr_prec in
         mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
         mpfr_valid_cond h1 x /\ (as_struct h1 x).mpfr_sign = sign /\
 	(forall (exact:normal_fp{exact.sign = I32.v sign /\ exact.exp < mpfr_EMIN_spec /\
-	                    exact.prec >= U32.v p}).
-	as_fp h1 x == mpfr_underflow_spec exact (U32.v p) rnd_mode /\
-	I32.v t = mpfr_underflow_ternary_spec exact (U32.v p) rnd_mode)))
+	                    exact.prec >= I64.v p}).
+	as_fp h1 x == mpfr_underflow_spec exact (I64.v p) rnd_mode /\
+	I32.v t = mpfr_underflow_ternary_spec exact (I64.v p) rnd_mode)))
 
 let mpfr_underflow x rnd_mode sign =
     mpfr_SET_SIGN x sign;

@@ -21,9 +21,9 @@ typedef uint8_t MPFR_RoundingMode_mpfr_rnd_t;
 
 typedef struct MPFR_Lib_mpfr_struct_s
 {
-  uint32_t mpfr_prec;
+  int64_t mpfr_prec;
   int32_t mpfr_sign;
-  int32_t mpfr_exp;
+  int64_t mpfr_exp;
   uint64_t *mpfr_d;
 }
 MPFR_Lib_mpfr_struct;
@@ -34,7 +34,7 @@ extern int32_t
   MPFR_Lib_mpfr_struct *x1,
   MPFR_Lib_mpfr_struct *x2,
   MPFR_RoundingMode_mpfr_rnd_t x3,
-  uint32_t x4
+  int64_t x4
 );
 
 extern int32_t
@@ -43,7 +43,7 @@ extern int32_t
   MPFR_Lib_mpfr_struct *x1,
   MPFR_Lib_mpfr_struct *x2,
   MPFR_RoundingMode_mpfr_rnd_t x3,
-  uint32_t x4
+  int64_t x4
 );
 
 #define __MPFR_H_DEFINED

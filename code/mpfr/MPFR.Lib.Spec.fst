@@ -261,21 +261,23 @@ let change_len a l =
 //  The bit length of limb must be a multiple of 64 and as small as possible  //
 ////////////////////////////////////////////////////////////////////////////////
 
+let gnb = 64
+
 (* range limits for precision and exponent *)
 let mpfr_PREC_MIN_spec = 1
-let mpfr_PREC_MAX_spec = pow2 31 - 1
+let mpfr_PREC_MAX_spec = pow2 63 - 257
 
-let mpfr_PREC_COND (p:nat) = mpfr_PREC_MIN_spec <= p /\ p <= mpfr_PREC_MAX_spec
+let mpfr_PREC_COND (p:int) = mpfr_PREC_MIN_spec <= p /\ p <= mpfr_PREC_MAX_spec
 
-let mpfr_EMIN_spec = 1 - pow2 30
-let mpfr_EMAX_spec = pow2 30 - 1
+let mpfr_EMIN_spec = 1 - pow2 62
+let mpfr_EMAX_spec = pow2 62 - 1
 
 let mpfr_EXP_COND  (x:int) = mpfr_EMIN_spec <= x /\ x <= mpfr_EMAX_spec
 
 (* get len from prec for a MPFR number *)
 val prec_to_len: p:pos ->
-    Tot (s:pos{s % 64 = 0 /\ s >= p /\ s - 64 < p})
-let prec_to_len p = ((p + 63) / 64) * 64
+    Tot (s:pos{s % gnb = 0 /\ s >= p /\ s - gnb < p})
+let prec_to_len p = ((p + gnb - 1) / gnb) * gnb
 
 let mpfr_len_cond (p:pos) (l:nat) = l = prec_to_len p
 
