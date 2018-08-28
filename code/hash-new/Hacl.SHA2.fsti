@@ -23,6 +23,7 @@ let word (a: sha2_alg) =
 type state (a: sha2_alg) =
   b:B.buffer (word a) { B.length b = size_hash_w a }
 
+inline_for_extraction
 let alloca_t (a: sha2_alg) = unit -> ST.StackInline (state a)
   (requires (fun h ->
     HS.is_stack_region (HS.get_tip h)))
@@ -31,8 +32,12 @@ let alloca_t (a: sha2_alg) = unit -> ST.StackInline (state a)
     B.live h1 s /\
     B.as_seq h1 s = Spec.init a))
 
-val alloca: a:sha2_alg -> alloca_t a
+val alloca_224: alloca_t SHA2_224
+val alloca_256: alloca_t SHA2_256
+val alloca_384: alloca_t SHA2_384
+val alloca_512: alloca_t SHA2_512
 
+inline_for_extraction
 let init_t (a:sha2_alg) = s:state a -> ST.Stack unit
   (requires (fun h ->
     M.loc_disjoint (B.loc_addr_of_buffer s) (static_fp ()) /\
@@ -41,8 +46,12 @@ let init_t (a:sha2_alg) = s:state a -> ST.Stack unit
     M.(modifies (loc_buffer s) h0 h1) /\
     Seq.equal (B.as_seq h1 s) (Spec.init a)))
 
-val init: a:sha2_alg -> init_t a
+val init_224: init_t SHA2_224
+val init_256: init_t SHA2_256
+val init_384: init_t SHA2_384
+val init_512: init_t SHA2_512
 
+inline_for_extraction
 let update_t (a:sha2_alg) =
   s:state a ->
   block:B.buffer U8.t { B.length block = size_block a } ->
@@ -53,4 +62,23 @@ let update_t (a:sha2_alg) =
       M.(modifies (loc_buffer s) h0 h1) /\
       B.as_seq h1 s == Spec.update a (B.as_seq h0 s) (B.as_seq h0 block)))
 
-val update: a:sha2_alg -> update_t a
+val update_224: update_t SHA2_224
+val update_256: update_t SHA2_256
+val update_384: update_t SHA2_384
+val update_512: update_t SHA2_512
+
+inline_for_extraction
+let pad_t (a: sha2_alg) = len:len_t a -> dst:B.buffer U8.t ->
+  ST.Stack unit
+    (requires (fun h ->
+      len_v a len < max_input8 a /\
+      B.live h dst /\
+      B.length dst = pad_length a (len_v a len)))
+    (ensures (fun h0 _ h1 ->
+      M.(modifies (loc_buffer dst) h0 h1) /\
+      B.as_seq h1 dst == Spec.pad a (len_v a len)))
+
+val pad_224: pad_t SHA2_224
+val pad_256: pad_t SHA2_256
+val pad_384: pad_t SHA2_384
+val pad_512: pad_t SHA2_512

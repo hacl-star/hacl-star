@@ -23,7 +23,7 @@ include .depend
 
 verify: $(ALL_CHECKED_FILES)
 
-extract: $(OUTPUT_DIR)/Makefile.include
+extract: # $(OUTPUT_DIR)/Makefile.include
 
 # Backwards compat target name
 extract-c: extract old-extract-c
@@ -52,5 +52,6 @@ $(OUTPUT_DIR)/%.krml:
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-$(OUTPUT_DIR)/Makefile.include: $(ALL_CHECKED_FILES)
-	$(KRML) -tmpdir $(OUTPUT_DIR) -skip-compilation $^
+$(OUTPUT_DIR)/Makefile.include: $(ALL_KRML_FILES)
+	$(KRML) -tmpdir $(OUTPUT_DIR) -skip-compilation -bundle Spec.* $^ \
+	  -warn-error +9

@@ -44,38 +44,47 @@ let words_from_be: a:sha2_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(si
   | SHA2_224 | SHA2_256 -> E.seq_uint32_of_be
   | SHA2_384 | SHA2_512 -> E.seq_uint64_of_be
 
+inline_for_extraction
 let word_add_mod: a:sha2_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> U32.add_mod
   | SHA2_384 | SHA2_512 -> U64.add_mod
 
+inline_for_extraction
 let word_logxor: a:sha2_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> U32.logxor
   | SHA2_384 | SHA2_512 -> U64.logxor
 
+inline_for_extraction
 let word_logand: a:sha2_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> U32.logand
   | SHA2_384 | SHA2_512 -> U64.logand
 
+inline_for_extraction
 let word_logor: a:sha2_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> U32.logor
   | SHA2_384 | SHA2_512 -> U64.logor
 
+inline_for_extraction
 let word_lognot: a:sha2_alg -> Tot ((word a) -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> U32.lognot
   | SHA2_384 | SHA2_512 -> U64.lognot
 
+inline_for_extraction
 let word_shift_right: t:sha2_alg -> Tot (a:word t -> s:U32.t -> Pure (word t)
   (requires (FStar.Mul.(U32.v s < 8 * size_word t)))
   (ensures (fun c -> v' c = (v' a / (pow2 (U32.v s)))))) = function
   | SHA2_224 | SHA2_256 -> U32.shift_right
   | SHA2_384 | SHA2_512 -> U64.shift_right
 
+inline_for_extraction
 let rotate_right32 (x:U32.t) (s:U32.t{0 < U32.v s /\ U32.v s < 32}): Tot U32.t =
   U32.((x >>^ s) |^ (x <<^ (32ul -^ s)))
 
+inline_for_extraction
 let rotate_right64 (a:U64.t) (s:U32.t{0 < U32.v s /\ U32.v s < 64}): Tot U64.t =
   U64.((a >>^ s) |^ (a <<^ (U32.sub 64ul s)))
 
+inline_for_extraction
 let word_rotate_right: a:sha2_alg -> Tot (word a -> s:U32.t{0 < U32.v s /\ U32.v s < word_n a} -> Tot (word a)) = function
   | SHA2_224 | SHA2_256 -> rotate_right32
   | SHA2_384 | SHA2_512 -> rotate_right64

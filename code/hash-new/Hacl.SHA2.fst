@@ -87,6 +87,9 @@ let recall_static_fp () =
 
 #set-options "--max_fuel 1"
 
+noextract
+val alloca: a:sha2_alg -> alloca_t a
+noextract
 let alloca a () =
   [@ inline_let ]
   let l: list (word a) = Spec.(match a with
@@ -109,13 +112,16 @@ let alloca_512: alloca_t SHA2_512 =
 
 (** Init *)
 
+noextract
+val init: a:sha2_alg -> init_t a
+noextract
 let init a s =
   match a with
   | SHA2_224 ->
       B.recall h224;
       // waiting for monotonicity:
       let h = ST.get () in
-      assume (B.as_seq h h224 == S.seq_of_list Constants.h224_l);      
+      assume (B.as_seq h h224 == S.seq_of_list Constants.h224_l);
       B.blit h224 0ul s 0ul 8ul
   | SHA2_256 ->
       B.recall h256;
@@ -186,17 +192,20 @@ let init_next (#a: Type) (s: S.seq a) (f: (i:nat { i < S.length s }) -> a) (i: n
 
 (** Update *)
 
+inline_for_extraction
 let block_w (a: sha2_alg) =
   b:B.buffer (word a) { B.length b = size_block_w }
 
 let block_b (a: sha2_alg) =
   b:B.buffer U8.t { FStar.Mul.(B.length b = size_block_w * size_word a) }
 
+inline_for_extraction
 let ws_w a = b:B.buffer (word a) { B.length b = Spec.size_k_w a }
 
 let block_words_be (a: sha2_alg) (h: HS.mem) (b: block_b a) =
   Spec.words_from_be a size_block_w (B.as_seq h b)
 
+inline_for_extraction
 val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
   ST.Stack unit
     (requires (fun h ->
@@ -206,6 +215,7 @@ val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
       M.(modifies (loc_buffer ws) h0 h1) /\
       B.as_seq h1 ws == S.init (Spec.size_k_w a) (Spec.ws a b)))
 
+inline_for_extraction
 let index_be (a: sha2_alg) (b: B.buffer UInt8.t) (i: UInt32.t):
   ST.Stack (word a)
     (requires (fun h ->
@@ -222,6 +232,7 @@ let index_be (a: sha2_alg) (b: B.buffer UInt8.t) (i: UInt32.t):
 
 #set-options "--max_fuel 1 --z3rlimit 100"
 
+inline_for_extraction
 let ws a b ws =
   let h0 = ST.get () in
   let inv h1 (i: nat): Type0 =
@@ -272,9 +283,11 @@ let ws a b ws =
 
 #set-options "--max_fuel 0 --z3rlimit 20"
 
+inline_for_extraction
 let hash_w (a: sha2_alg) =
   b:B.buffer (word a) { B.length b = size_hash_w a }
 
+inline_for_extraction
 val k0 (a: sha2_alg): ST.Stack (B.buffer (word a))
   (requires (fun _ -> True))
   (ensures (fun h0 b h1 ->
@@ -298,6 +311,7 @@ let k0 a =
 inline_for_extraction unfold
 let add = Spec.word_add_mod
 
+inline_for_extraction
 val shuffle_core (a: sha2_alg)
   (block: G.erased (block_b a))
   (hash: hash_w a)
@@ -317,6 +331,7 @@ val shuffle_core (a: sha2_alg)
       B.as_seq h1 hash == Spec.shuffle_core a b (B.as_seq h0 hash) (U32.v t)))
 
 #set-options "--z3rlimit 50"
+inline_for_extraction
 let shuffle_core a block hash ws t =
   let a0 = hash.(0ul) in
   let b0 = hash.(1ul) in
@@ -347,6 +362,7 @@ let shuffle_core a block hash ws t =
   (**) assert_norm (List.Tot.length l = 8);
   (**) S.intro_of_list #(word a) (B.as_seq h hash) l
 
+inline_for_extraction
 val shuffle: a:sha2_alg -> block:G.erased (block_b a) -> hash:hash_w a -> ws:ws_w a ->
   ST.Stack unit
     (requires (fun h ->
@@ -364,6 +380,7 @@ val shuffle: a:sha2_alg -> block:G.erased (block_b a) -> hash:hash_w a -> ws:ws_
 inline_for_extraction
 let size_k_w (a: sha2_alg) = U32.uint_to_t (Spec.size_k_w a)
 
+inline_for_extraction
 let shuffle a block hash ws =
   let h0 = ST.get () in
   let inv (h1: HS.mem) (i: nat) =
@@ -392,6 +409,7 @@ let shuffle a block hash ws =
   C.Loops.for 0ul (size_k_w a) inv f
 
 
+inline_for_extraction
 let zero (a: sha2_alg): word a =
   match a with
   | SHA2_224 | SHA2_256 -> 0ul
@@ -399,6 +417,9 @@ let zero (a: sha2_alg): word a =
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
+noextract
+val update: a:sha2_alg -> update_t a
+noextract
 let update a hash block =
   (**) ST.push_frame ();
   (**) let h0 = ST.get () in
@@ -437,20 +458,24 @@ let create_next (#a: Type) (s: S.seq a) (v: a) (i: nat):
 
 (** Padding *)
 
+inline_for_extraction
 let size_word (a: sha2_alg): n:U32.t { U32.v n = size_word a } =
   match a with
   | SHA2_224 | SHA2_256 -> 4ul
   | SHA2_384 | SHA2_512 -> 8ul
 
+inline_for_extraction
 let size_block (a: sha2_alg): n:U32.t { U32.v n = size_block a } =
   U32.(size_word a *^ 16ul)
 
+inline_for_extraction
 let size_len (a: sha2_alg): n:U32.t { U32.v n = size_len_8 a } =
   match a with
   | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
 
 #set-options "--z3rlimit 50"
+inline_for_extraction
 val store_len: a:sha2_alg -> len:len_t a -> b:B.buffer U8.t ->
   ST.Stack unit
     (requires (fun h ->
@@ -459,6 +484,7 @@ val store_len: a:sha2_alg -> len:len_t a -> b:B.buffer U8.t ->
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer b) h0 h1) /\
       B.as_seq h1 b == Endianness.n_to_be (size_len a) (len_v a len)))
+inline_for_extraction
 let store_len a len b =
   match a with
   | SHA2_224 | SHA2_256 ->
@@ -472,6 +498,7 @@ let store_len a len b =
 
 #set-options "--z3rlimit 20"
 
+inline_for_extraction
 let len_mod_32 (a: sha2_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = len_v a len % Helpers.size_block a })
 =
@@ -484,6 +511,7 @@ let len_mod_32 (a: sha2_alg) (len: len_t a):
   | _ ->
       // this case is more difficult because we do: (len % pow2 64) % size_block
       // and then we need to show it's equal to len % size_block
+      [@inline_let]
       let len = Cast.uint128_to_uint64 len in
       Math.lemma_mod_lt (U64.v len) (U32.v (size_block a));
       Math.modulo_lemma (U64.v len % U32.v (size_block a)) (pow2 32);
@@ -493,6 +521,7 @@ let len_mod_32 (a: sha2_alg) (len: len_t a):
 
 // JP: this proof works instantly in interactive mode, not in batch mode unless
 // there's a high rlimit
+inline_for_extraction
 let pad0_len (a: sha2_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = pad0_length a (len_v a len) })
 =
@@ -525,21 +554,13 @@ let pad0_len (a: sha2_alg) (len: len_t a):
     (- (U32.v (size_len a) + 1 + U32.v (len_mod_32 a len)))
     (U32.v (size_block a))
     (U32.v (size_block a) + U32.v (size_block a));
+  [@inline_let]
   let r = (size_block a +^ size_block a) -^ (size_len a +^ 1ul +^ len_mod_32 a len) in
   r %^ size_block a
 
 #set-options "--z3rlimit 20"
 
-val pad (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
-  ST.Stack unit
-    (requires (fun h ->
-      len_v a len < max_input8 a /\
-      B.live h dst /\
-      B.length dst = pad_length a (len_v a len)))
-    (ensures (fun h0 _ h1 ->
-      M.(modifies (loc_buffer dst) h0 h1) /\
-      B.as_seq h1 dst == Spec.pad a (len_v a len)))
-
+inline_for_extraction
 let pad_1 (a: sha2_alg) (dst: B.buffer U8.t):
   ST.Stack unit
     (requires (fun h ->
@@ -550,6 +571,7 @@ let pad_1 (a: sha2_alg) (dst: B.buffer U8.t):
 =
   dst.(0ul) <- 0x80uy
 
+inline_for_extraction
 let pad_2 (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
   ST.Stack unit
     (requires (fun h ->
@@ -576,6 +598,7 @@ let pad_2 (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
   in
   C.Loops.for 0ul (pad0_len a len) inv f
 
+inline_for_extraction
 let pad_3 (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
   ST.Stack unit
     (requires (fun h ->
@@ -608,6 +631,9 @@ let pad_3 (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
       store_len a U128.(shift_left len 3ul) dst
   end
 
+noextract
+val pad: a:sha2_alg -> pad_t a
+noextract
 let pad a len dst =
   (* i) Append a single 1 bit. *)
   let dst1 = B.sub dst 0ul 1ul in
@@ -631,3 +657,13 @@ let pad a len dst =
   (**)   let s3 = S.slice s (1 + pad0_length) (1 + pad0_length + size_len_8 a) in
   (**)   S.equal s (S.append s1 (S.append s2 s3)) /\
   (**)   True)
+
+let pad_224: pad_t SHA2_224 =
+  Tactics.(synth_by_tactic (specialize (pad SHA2_224) [`%pad]))
+let pad_256: pad_t SHA2_256 =
+  Tactics.(synth_by_tactic (specialize (pad SHA2_256) [`%pad]))
+let pad_384: pad_t SHA2_384 =
+  Tactics.(synth_by_tactic (specialize (pad SHA2_384) [`%pad]))
+let pad_512: pad_t SHA2_512 =
+  Tactics.(synth_by_tactic (specialize (pad SHA2_512) [`%pad]))
+

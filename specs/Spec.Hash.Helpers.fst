@@ -31,6 +31,7 @@ let max_input8: hash_alg -> Tot nat = function
   | SHA2_384 | SHA2_512 -> pow2 125
 
 (* A type that can hold a maximum length. *)
+inline_for_extraction
 let len_t: hash_alg -> Type = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> UInt64.t
