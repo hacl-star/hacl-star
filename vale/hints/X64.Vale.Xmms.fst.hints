@@ -1,0 +1,36 @@
+[
+  "§æ„H0B‡·’0‚≈¿DÊ·",
+  [
+    [
+      "X64.Vale.Xmms.lemma_equal_intro",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_FStar.FunctionalExtensionality.feq",
+        "equation_Types_s.quad32", "equation_X64.Machine_s.xmm",
+        "equation_X64.Vale.Xmms.equal"
+      ],
+      0,
+      "0cfc22b313151f9cebf1012658a51616"
+    ],
+    [
+      "X64.Vale.Xmms.lemma_equal_elim",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.FunctionalExtensionality.Extensionality",
+        "equation_FStar.FunctionalExtensionality.efun",
+        "equation_Prims.eqtype", "equation_Types_s.quad32",
+        "equation_X64.Machine_s.xmm", "equation_X64.Vale.Xmms.equal",
+        "equation_X64.Vale.Xmms.t", "function_token_typing_Types_s.quad32",
+        "function_token_typing_X64.Machine_s.xmm",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "e3a14370de07cbf49f9076151347a055"
+    ]
+  ]
+]
