@@ -30,13 +30,13 @@ friend Spec.SHA2
 (** Top-level constant arrays for the SHA2 algorithms. *)
 
 (* NOTE: we don't have monotonicity yet so there will be various assumes. *)
-let h224 = B.gcmalloc_of_list HS.root Constants.h224_l
-let h256 = B.gcmalloc_of_list HS.root Constants.h256_l
-let h384 = B.gcmalloc_of_list HS.root Constants.h384_l
-let h512 = B.gcmalloc_of_list HS.root Constants.h512_l
+let h224 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.h224_l]] Constants.h224_l)
+let h256 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.h256_l]] Constants.h256_l)
+let h384 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.h384_l]] Constants.h384_l)
+let h512 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.h512_l]] Constants.h512_l)
 
-let k224_256 = B.gcmalloc_of_list HS.root Constants.k224_256_l
-let k384_512 = B.gcmalloc_of_list HS.root Constants.k384_512_l
+let k224_256 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.k224_256_l]] Constants.k224_256_l)
+let k384_512 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.k384_512_l]] Constants.k384_512_l)
 
 (* We believe it'll be hard to get, "for free", within this module:
      readonly h224 /\ writable client_state ==> disjoint h224 client_state
@@ -109,7 +109,7 @@ let init a s =
       B.recall h224;
       // waiting for monotonicity:
       let h = ST.get () in
-      assume (B.as_seq h h224 == S.seq_of_list Constants.h224_l);
+      assume (B.as_seq h h224 == S.seq_of_list Constants.h224_l);      
       B.blit h224 0ul s 0ul 8ul
   | SHA2_256 ->
       B.recall h256;

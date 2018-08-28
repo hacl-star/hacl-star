@@ -39,7 +39,7 @@ let init_t (a:sha2_alg) = s:state a -> ST.Stack unit
     B.live h s))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer s) h0 h1) /\
-    B.as_seq h1 s = Spec.init a))
+    Seq.equal (B.as_seq h1 s) (Spec.init a)))
 
 val init: a:sha2_alg -> init_t a
 
