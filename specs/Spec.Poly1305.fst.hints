@@ -12,7 +12,7 @@
         "refinement_interpretation_Spec.Poly1305_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
       ],
       0,
-      "dd6c6ebf62ea2afb9085672782201cf0"
+      "70534a1c23013aab77dfc0f044eb6561"
     ],
     [
       "Spec.Poly1305.fmul",
@@ -25,7 +25,7 @@
         "refinement_interpretation_Spec.Poly1305_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
       ],
       0,
-      "01abaaf631dd327409de9b403800e31a"
+      "858365b49beb755aa270a0dfc297acc2"
     ],
     [
       "Spec.Poly1305.zero",
@@ -44,7 +44,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "ff8773589500855ceb7131cabb2be015"
+      "5e3c63a6f820ad7c65d486eab4306f1b"
     ],
     [
       "Spec.Poly1305.one",
@@ -61,7 +61,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "ee60264f9973ef765b4f0a72c929db54"
+      "62e26192bd575be4960034368f90ad2d"
     ],
     [
       "Spec.Poly1305.word_16",
@@ -70,7 +70,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "13718c9c3ecd3c23235c2d1a32e47e80"
+      "879860f58231fdec7f726a07724ed53a"
     ],
     [
       "Spec.Poly1305.encode",
@@ -99,7 +99,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "c72cd254006340f8af50bfbe368cb226"
+      "1cc879e7a8dff9ba4e05856e4f8f8541"
     ],
     [
       "Spec.Poly1305.poly",
@@ -131,7 +131,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "6c1f0c6598174bd276f0a576a0abb422"
+      "31cedf9ca4e81a56b5bff9c29fa5e086"
     ],
     [
       "Spec.Poly1305.encode_r",
@@ -160,7 +160,7 @@
         "typing_FStar.Endianness.little_endian"
       ],
       0,
-      "18bd7868a40b5d55daf8abe5c349864c"
+      "dee473732a0cfcf5acad30f2876dac42"
     ],
     [
       "Spec.Poly1305.finish",
@@ -181,7 +181,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "8b30fd2249c9127bab7e353c5dd1d201"
+      "73d6196b27cf5e185dc5dd268b4610f9"
     ],
     [
       "Spec.Poly1305.encode_bytes",
@@ -218,7 +218,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "2edc6bf8ff2c581a478baf17dce051ad"
+      "328ff649ad8d893e7f006a8797af1bbc"
     ],
     [
       "Spec.Poly1305.poly1305",
@@ -233,9 +233,8 @@
         "equation_FStar.Endianness.lbytes", "equation_FStar.Int16.n",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.Poly1305.key",
-        "equation_Spec.Poly1305.prime",
+        "equation_FStar.UInt.uint_t", "equation_Prims.nat",
+        "equation_Spec.Poly1305.key", "equation_Spec.Poly1305.prime",
         "function_token_typing_FStar.Int16.n",
         "function_token_typing_FStar.UInt8.t", "int_typing",
         "lemma_FStar.Seq.Base.lemma_len_slice",
@@ -248,13 +247,12 @@
         "refinement_interpretation_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Poly1305.Lemmas_Tm_refine_aca10fb50cc7162d8b55c168416f714b",
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "1dcc66bfbf4d5c217b0370f075720def"
+      "2f8fbbfec9d050a2ac2367d929b6b9e6"
     ],
     [
       "Spec.Poly1305.test",
@@ -270,7 +268,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "213f251d37be08129b5d2b5834c60005"
+      "2ea2fa387c056f5d21188bdfafc43f58"
     ]
   ]
 ]

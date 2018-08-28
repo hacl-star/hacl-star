@@ -1,8 +1,11 @@
-OUTPUT_DIR = extracted
+include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
 HACL_HOME ?= ..
 
+OUTPUT_DIR = extracted
+
 INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/lib/kremlin
+
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
@@ -30,7 +33,7 @@ all: $(ALL_CHECKED_FILES)
 .PHONY: .depend
 .PRECIOUS: .depend
 .depend:
-	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness' > $@
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
 include .depend
 
@@ -54,7 +57,7 @@ test: $(subst .,_,$(patsubst %.fst,test-%,$(ROOTS)))
 test-%: $(OUTPUT_DIR)/%_AutoTest.exe
 	$<
 
-OCAMLOPT += -I $(OUTPUT_DIR) -I $(HACL_KREMLIN)
+OCAMLOPT += -I $(OUTPUT_DIR) -I $(HACL_HOME)/code/lib/kremlin
 
 TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 
