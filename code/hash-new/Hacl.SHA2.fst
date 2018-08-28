@@ -484,7 +484,10 @@ let len_mod_32 (a: sha2_alg) (len: len_t a):
       Math.modulo_lemma (U64.v len % U32.v (size_block a)) (pow2 32);
       Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (size_block a)))
 
-// JP: TODO: make this proof more robust with some (?) suitable lemma from FStar.Math.Lemmas
+#set-options "--z3rlimit 100"
+
+// JP: this proof works instantly in interactive mode, not in batch mode unless
+// there's z3refresh
 let pad0_len (a: sha2_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = pad0_length a (len_v a len) })
 =
@@ -520,6 +523,8 @@ let pad0_len (a: sha2_alg) (len: len_t a):
   let r = (size_block a +^ size_block a) -^ (size_len a +^ 1ul +^ len_mod_32 a len) in
   r %^ size_block a
 
+#set-options "--z3rlimit 50"
+
 val pad (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
   ST.Stack unit
     (requires (fun h ->
@@ -530,43 +535,55 @@ val pad (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
       M.(modifies (loc_buffer dst) h0 h1) /\
       B.as_seq h1 dst == Spec.pad a (len_v a len)))
 
-#set-options "--z3rlimit 300"
+let pad_1 (a: sha2_alg) (dst: B.buffer U8.t):
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h dst /\ B.length dst = 1))
+    (ensures (fun h0 _ h1 ->
+      B.(modifies (loc_buffer dst) h0 h1) /\
+      S.equal (B.as_seq h1 dst) (S.create 1 0x80uy)))
+=
+  dst.(0ul) <- 0x80uy
 
-let pad a len dst =
-  (* i) Append a single 1 bit. *)
-  let dst_bit = B.sub dst 0ul 1ul in
-  dst_bit.(0ul) <- 0x80uy;
-  (**) let h0 = ST.get () in
-  (**) assert (S.equal (S.slice (B.as_seq h0 dst) 0 1) (S.create 1 0x80uy));
-
-  (* ii) Fill with zeroes *)
+let pad_2 (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h dst /\ B.length dst = pad0_length a (len_v a len)))
+    (ensures (fun h0 _ h1 ->
+      B.(modifies (loc_buffer dst) h0 h1) /\
+      S.equal (B.as_seq h1 dst) (S.create (pad0_length a (len_v a len)) 0uy)))
+=
+  let h0 = ST.get () in
   let len_zero = pad0_len a len in
-  let dst_zero = B.sub dst 1ul len_zero in
   let inv h1 (i: nat) =
-    M.(modifies (loc_buffer dst_zero) h0 h1) /\
+    M.(modifies (loc_buffer dst) h0 h1) /\
     i <= U32.v len_zero /\
-    S.equal (S.slice (B.as_seq h1 dst_zero) 0 i) (S.slice (S.create (U32.v len_zero) 0uy) 0 i)
+    S.equal (S.slice (B.as_seq h1 dst) 0 i) (S.slice (S.create (U32.v len_zero) 0uy) 0 i)
   in
   let f (i:U32.t { U32.(0 <= v i /\ v i < U32.v len_zero)}):
     ST.Stack unit
       (requires (fun h -> inv h (U32.v i)))
       (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 U32.(v i + 1)))
     =
-    dst_zero.(i) <- 0uy;
+    dst.(i) <- 0uy;
     (**) let h' = ST.get () in
-    (**) create_next (B.as_seq h' dst_zero) 0uy (U32.v i)
+    (**) create_next (B.as_seq h' dst) 0uy (U32.v i)
   in
-  C.Loops.for 0ul (pad0_len a len) inv f;
-  (**) let h1 = ST.get () in
-  (**) assert (
-  (**)   let pad0_length = pad0_length a (len_v a len) in
-  (**)   S.equal (S.slice (B.as_seq h1 dst) 1 (1 + pad0_length)) (S.create pad0_length 0uy));
+  C.Loops.for 0ul (pad0_len a len) inv f
 
-  (* iii) Encoded length *)
-  let dst_len = B.sub dst U32.(1ul +^ len_zero) (size_len a) in
+let pad_3 (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
+  ST.Stack unit
+    (requires (fun h ->
+      len_v a len < max_input8 a /\
+      B.live h dst /\ B.length dst = size_len_8 a))
+    (ensures (fun h0 _ h1 ->
+      Spec.max_input_size_len a;
+      B.(modifies (loc_buffer dst) h0 h1) /\
+      S.equal (B.as_seq h1 dst)
+        (Endianness.n_to_be (Spec.size_len_ul_8 a) FStar.Mul.(len_v a len * 8))))
+=
   begin match a with
   | SHA2_224 | SHA2_256 ->
-      let dst_len = B.sub dst U32.(1ul +^ len_zero) 8ul in
       (**) FStar.UInt.shift_left_value_lemma #64 (U64.v len) 3;
       (**) assert (len_v a len <= pow2 61 - 1);
       (**) assert_norm FStar.Mul.((pow2 61 - 1) * 8 < pow2 64);
@@ -574,9 +591,8 @@ let pad a len dst =
       (**) assert FStar.Mul.(U64.v len * 8 < pow2 64);
       (**) assert FStar.Mul.(FStar.UInt.shift_left #64 (len_v a len) 3 < pow2 64);
       (**) assert FStar.Mul.(U64.(v (shift_left len 3ul)) = U64.v len * 8);
-      store_len a U64.(shift_left len 3ul) dst_len
+      store_len a U64.(shift_left len 3ul) dst
   | SHA2_384 | SHA2_512 ->
-      let dst_len = B.sub dst U32.(1ul +^ len_zero) 16ul in
       (**) FStar.UInt.shift_left_value_lemma #128 (U128.v len) 3;
       (**) assert (len_v a len <= pow2 125 - 1);
       (**) assert_norm FStar.Mul.((pow2 125 - 1) * 8 < pow2 128);
@@ -584,24 +600,45 @@ let pad a len dst =
       (**) assert FStar.Mul.(U128.v len * 8 < pow2 128);
       (**) assert FStar.Mul.(FStar.UInt.shift_left #128 (len_v a len) 3 < pow2 128);
       (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
-      store_len a U128.(shift_left len 3ul) dst_len
-  end;
+      store_len a U128.(shift_left len 3ul) dst
+  end
+
+#set-options "--z3rlimit 20"
+
+let lemma_slice (#a: Type) (s: S.seq a) (i: nat): Lemma
+  (requires (i <= S.length s))
+  (ensures (S.equal (S.append (S.slice s 0 i) (S.slice s i (S.length s))) s))
+  [ SMTPat (S.append (S.slice s 0 i) (S.slice s i (S.length s))) ]
+=
+  ()
+
+let lemma_slice_ijk (#a: Type) (s: S.seq a) (i j k: nat): Lemma
+  (requires (i <= j /\ j <= k /\ k <= S.length s))
+  (ensures (S.equal (S.append (S.slice s i j) (S.slice s j k)) (S.slice s i k)))
+  [ SMTPat (S.append (S.slice s i j) (S.slice s j k)) ]
+=
+  ()
+
+let pad a len dst =
+  (* i) Append a single 1 bit. *)
+  let dst1 = B.sub dst 0ul 1ul in
+  pad_1 a dst1;
+
+  (* ii) Fill with zeroes *)
+  let dst2 = B.sub dst 1ul (pad0_len a len) in
+  pad_2 a len dst2;
+
+  (* iii) Encoded length *)
+  let dst3 = B.sub dst U32.(1ul +^ (pad0_len a len)) (size_len a) in
+  pad_3 a len dst3;
 
   (**) let h2 = ST.get () in
   (**) assert (
   (**)   let pad0_length = pad0_length a (len_v a len) in
   (**)   Spec.max_input_size_len a;
   (**)   let s = B.as_seq h2 dst in
-  (**)   let s1 = S.create 1 0x80uy in
-  (**)   let s2 = S.create pad0_length 0uy in
-  (**)   let s3 = Endianness.n_to_be (Spec.size_len_ul_8 a) FStar.Mul.(len_v a len * 8) in
-  (**)   S.equal (S.slice s 0 1) s1 /\
-  (**)   S.equal (S.slice s 1 (1 + pad0_length)) s2 /\
-  (**)   S.equal (S.slice s (1 + pad0_length) (1 + pad0_length + size_len_8 a)) s3 /\
-  (**)   S.length s = 1 + pad0_length + size_len_8 a /\
-  (**)   (len_v a len + 1 + pad0_length + size_len_8 a) % Helpers.size_block a = 0 /\
-  (**)   (S.length s + len_v a len) % Helpers.size_block a = 0 /\
+  (**)   let s1 = S.slice s 0 1 in
+  (**)   let s2 = S.slice s 1 (1 + pad0_length) in
+  (**)   let s3 = S.slice s (1 + pad0_length) (1 + pad0_length + size_len_8 a) in
   (**)   S.equal s (S.append s1 (S.append s2 s3)) /\
-  (**)   True);
-  ()
-
+  (**)   True)
