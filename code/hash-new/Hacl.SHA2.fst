@@ -30,13 +30,19 @@ friend Spec.SHA2
 (** Top-level constant arrays for the SHA2 algorithms. *)
 
 (* NOTE: we don't have monotonicity yet so there will be various assumes. *)
-let h224 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.h224_l]] Constants.h224_l)
-let h256 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.h256_l]] Constants.h256_l)
-let h384 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.h384_l]] Constants.h384_l)
-let h512 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.h512_l]] Constants.h512_l)
+let h224 = B.gcmalloc_of_list HS.root
+  (norm [delta_only [`%Constants.h224_l]] Constants.h224_l)
+let h256 = B.gcmalloc_of_list HS.root
+  (norm [delta_only [`%Constants.h256_l]] Constants.h256_l)
+let h384 = B.gcmalloc_of_list HS.root
+  (norm [delta_only [`%Constants.h384_l]] Constants.h384_l)
+let h512 = B.gcmalloc_of_list HS.root
+  (norm [delta_only [`%Constants.h512_l]] Constants.h512_l)
 
-let k224_256 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.k224_256_l]] Constants.k224_256_l)
-let k384_512 = B.gcmalloc_of_list HS.root (norm [delta_only [`%Constants.k384_512_l]] Constants.k384_512_l)
+let k224_256 = B.gcmalloc_of_list HS.root
+  (norm [delta_only [`%Constants.k224_256_l]] Constants.k224_256_l)
+let k384_512 = B.gcmalloc_of_list HS.root
+  (norm [delta_only [`%Constants.k384_512_l]] Constants.k384_512_l)
 
 (* We believe it'll be hard to get, "for free", within this module:
      readonly h224 /\ writable client_state ==> disjoint h224 client_state
@@ -478,14 +484,41 @@ let len_mod_32 (a: sha2_alg) (len: len_t a):
       Math.modulo_lemma (U64.v len % U32.v (size_block a)) (pow2 32);
       Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (size_block a)))
 
-#set-options "--z3rlimit 100"
-
 // JP: TODO: make this proof more robust with some (?) suitable lemma from FStar.Math.Lemmas
 let pad0_len (a: sha2_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = pad0_length a (len_v a len) })
 =
   let open U32 in
-  ((size_block a +^ size_block a) -^ (size_len a +^ 1ul +^ len_mod_32 a len)) %^ size_block a
+  (* 1. *)
+  Math.lemma_mod_mod (U32.v (len_mod_32 a len)) (len_v a len) (Helpers.size_block a);
+  assert (U32.v (len_mod_32 a len) % U32.v (size_block a) =
+    len_v a len % U32.v (size_block a));
+  assert ((- U32.v (len_mod_32 a len)) % U32.v (size_block a) =
+    (- len_v a len) % (U32.v (size_block a)));
+  Math.modulo_add (U32.v (size_block a)) (- U32.v (size_len a) - 1)
+    (- U32.v (len_mod_32 a len)) (- len_v a len);
+  assert ((- (U32.v (size_len a) + 1 + U32.v (len_mod_32 a len))) % U32.v (size_block a) =
+    (- (U32.v (size_len a) + 1 + len_v a len)) % (U32.v (size_block a)));
+  (* 2. *)
+  Math.lemma_mod_plus (U32.v (size_block a)) 1 (U32.v (size_block a));
+  assert ((U32.v (size_block a) + U32.v (size_block a)) % U32.v (size_block a) =
+    (U32.v (size_block a)) % U32.v (size_block a));
+  (* Combine 1 and 2 *)
+  Math.modulo_add (U32.v (size_block a))
+    (U32.v (size_block a))
+    (- (U32.v (size_len a) + 1 + U32.v (len_mod_32 a len)))
+    (- (U32.v (size_len a) + 1 + len_v a len));
+  assert (
+    (U32.v (size_block a) - (U32.v (size_len a) + 1 + U32.v (len_mod_32 a len))) %
+      U32.v (size_block a) =
+    (U32.v (size_block a) - (U32.v (size_len a) + 1 + len_v a len)) %
+      U32.v (size_block a));
+  Math.modulo_add (U32.v (size_block a))
+    (- (U32.v (size_len a) + 1 + U32.v (len_mod_32 a len)))
+    (U32.v (size_block a))
+    (U32.v (size_block a) + U32.v (size_block a));
+  let r = (size_block a +^ size_block a) -^ (size_len a +^ 1ul +^ len_mod_32 a len) in
+  r %^ size_block a
 
 val pad (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
   ST.Stack unit
@@ -496,6 +529,8 @@ val pad (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer dst) h0 h1) /\
       B.as_seq h1 dst == Spec.pad a (len_v a len)))
+
+#set-options "--z3rlimit 300"
 
 let pad a len dst =
   (* i) Append a single 1 bit. *)
@@ -551,6 +586,7 @@ let pad a len dst =
       (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
       store_len a U128.(shift_left len 3ul) dst_len
   end;
+
   (**) let h2 = ST.get () in
   (**) assert (
   (**)   let pad0_length = pad0_length a (len_v a len) in

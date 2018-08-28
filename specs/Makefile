@@ -31,7 +31,6 @@ all: $(ALL_CHECKED_FILES)
 
 # Always generate the dependency file
 .PHONY: .depend
-.PRECIOUS: .depend %.exe
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
