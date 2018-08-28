@@ -86,7 +86,7 @@ val load_bytes: l:UInt32.t -> buf:lbuffer (v l) -> Stack (lbytes (v l))
                          Seq.equal r (sel_bytes h1 l buf)))
 let rec load_bytes l buf =
   if l = 0ul then
-    Seq.createEmpty
+    Seq.empty
   else
     let b = Buffer.index buf 0ul in
     let t = load_bytes (l -^ 1ul) (Buffer.sub buf 1ul (l -^ 1ul)) in
@@ -444,7 +444,7 @@ noextract val uint32_bytes:
 
 let rec uint32_bytes len n =
   if len = 0ul then
-    let e = Seq.createEmpty #UInt8.t in
+    let e = Seq.empty #UInt8.t in
     assert_norm(0 = little_endian e);
     e
   else
@@ -469,7 +469,7 @@ noextract val uint32_be:
 
 let rec uint32_be len n =
   if len = 0ul then
-    let e = Seq.createEmpty #UInt8.t in
+    let e = Seq.empty #UInt8.t in
     assert_norm(0 = big_endian e);
     e
   else
@@ -495,7 +495,7 @@ inline_for_extraction val little_bytes:
 inline_for_extraction let little_bytes len n = FStar.Endianness.little_bytes len n
 (* let rec little_bytes len n =  *)
 (*   if len = 0ul then  *)
-(*     Seq.createEmpty  *)
+(*     Seq.empty  *)
 (*   else *)
 (*     let len = len -^ 1ul in  *)
 (*     let byte = UInt8.uint_to_t (n % 256) in *)
@@ -515,7 +515,7 @@ val big_bytes:
   Tot (b:lbytes (v len) {n == big_endian b}) (decreases (v len))
 let rec big_bytes len n =
   if len = 0ul then
-    Seq.createEmpty
+    Seq.empty
   else
     let len = len -^ 1ul in
     let byte = UInt8.uint_to_t (n % 256) in
