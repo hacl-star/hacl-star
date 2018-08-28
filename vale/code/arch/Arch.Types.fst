@@ -423,7 +423,7 @@ let le_bytes_to_quad32_to_bytes (q:quad32) :
   assert (q == q');
   ()
 
-// let be_quad32_to_bytes (q:quad32) : seqn 16 nat8 =
+// let be_quad32_to_bytes (q:quad32) : seq16 nat8 =
 //   seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE q))
 
 // be_bytes_to_quad32 (be_quad32_to_bytes q)

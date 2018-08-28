@@ -1,6 +1,29 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
+include{:fstar}{:open} "Opaque_s"
+include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "Words_s"
+include{:fstar}{:open} "Words.Seq_s"
+include{:fstar}{:open} "Types_s"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "AES_s"
+include{:fstar}{:open} "GCTR_s"
+include{:fstar}{:open} "GCTR"
+include{:fstar}{:open} "GCM"
+include{:fstar}{:open} "GHash_s"
+include{:fstar}{:open} "GHash"
+include{:fstar}{:open} "GCM_s"
+include{:fstar}{:open} "GF128_s"
+include{:fstar}{:open} "GF128"
+include{:fstar}{:open} "X64.Poly1305.Math"
+include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.Vale.QuickCodes"
 
 module X64.Util
 
@@ -331,7 +354,7 @@ procedure {:quick} gcm_load_xor_store_buffer(
   ghost cipher_b:buffer128,
   ghost offset:nat64,
   ghost num_blocks:nat64,
-  ghost key:aes_key_LE(AES_128),
+  ghost key:seq(nat32),
   ghost iv:quad32)
     requires/ensures
         buffer_readable(mem, plain_b);
@@ -352,6 +375,7 @@ procedure {:quick} gcm_load_xor_store_buffer(
         buffer_length(cipher_b) == buffer_length(plain_b);
         buffer_length(mask_b) == 1;
 
+        is_aes_key_LE(AES_128, key);
         let mask := buffer128_read(mask_b, 0, mem);
         let plain := buffer128_as_seq(mem, plain_b);
         let cipher := buffer128_as_seq(mem, cipher_b);
@@ -401,7 +425,7 @@ procedure {:quick} gcm_load_xor_store_buffer_win(
   ghost cipher_b:buffer128,
   ghost offset:nat64,
   ghost num_blocks:nat64,
-  ghost key:aes_key_LE(AES_128),
+  ghost key:seq(nat32),
   ghost iv:quad32)
     requires/ensures
         buffer_readable(mem, plain_b);
@@ -426,6 +450,7 @@ procedure {:quick} gcm_load_xor_store_buffer_win(
         buffer_length(cipher_b) == buffer_length(plain_b);
         buffer_length(mask_b) == 1;
 
+        is_aes_key_LE(AES_128, key);
         let mask := buffer128_read(mask_b, 0, mem);
         let plain := buffer128_as_seq(mem, plain_b);
         let cipher := buffer128_as_seq(mem, cipher_b);
