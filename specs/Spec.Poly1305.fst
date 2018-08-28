@@ -47,7 +47,7 @@ let finish (a:elem) (s:word_16) : Tot tag =
   little_bytes 16ul n
 
 let rec encode_bytes (txt:bytes) : Tot text (decreases (length txt)) =
-  if length txt = 0 then createEmpty
+  if length txt = 0 then Seq.empty
   else
     let w, txt = split txt (min (length txt) 16) in
     append_last (encode_bytes txt) w

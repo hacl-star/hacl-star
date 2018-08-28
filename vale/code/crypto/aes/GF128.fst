@@ -8,6 +8,7 @@ let lemma_of_double32_degree (d:double32) =
 let lemma_of_quad32_degree (q:quad32) =
   reveal_of_quad32 q
 
+#reset-options "--z3rlimit 30"
 let lemma_to_of_quad32 q =
   reveal_of_quad32 q;
   reveal_to_quad32 (of_quad32 q);
@@ -29,6 +30,7 @@ let lemma_to_of_quad32 q =
   assert (equal s2 s2');
   assert (equal s3 s3');
   ()
+#reset-options
 
 let lemma_of_to_quad32 a =
   reveal_to_quad32 a;

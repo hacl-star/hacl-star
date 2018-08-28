@@ -158,7 +158,7 @@ let append_assoc #a s1 s2 s3 = ()
 
 val encode_bytes_empty: txt:Seq.seq H8.t -> Lemma
     (requires Seq.length txt == 0)
-    (ensures  encode_bytes (reveal_sbytes txt) == Seq.createEmpty)
+    (ensures  encode_bytes (reveal_sbytes txt) == Seq.empty)
     [SMTPat (encode_bytes (reveal_sbytes txt)); SMTPatT (Seq.length txt == 0)]
 let encode_bytes_empty txt = ()
 
@@ -205,8 +205,8 @@ let rec encode_bytes_append len s w =
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 
 val lemma_append_empty: #a:Type -> s:seq a -> Lemma
-  (s @| createEmpty #a == s)
-let lemma_append_empty #a s = Seq.lemma_eq_intro s (s @| createEmpty #a)
+  (s @| empty #a == s)
+let lemma_append_empty #a s = Seq.lemma_eq_intro s (s @| empty #a)
      
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"

@@ -7,6 +7,8 @@ module BS = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 
+friend X64.Memory
+
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 20"
 
 val eval_code_eq_all (c:code) (f:fuel) : Lemma

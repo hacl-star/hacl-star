@@ -93,7 +93,7 @@ import SCons.Util
 import atexit
 import platform
 import fnmatch
-import distutils.dir_util
+import pathlib
 import shutil
 
 if sys.version_info < (3, 6):
@@ -296,16 +296,6 @@ min_test_suite_blacklist = [File(x) for x in [
 ]]
 
 manual_dependencies = {
-  'obj/code/arch/x64/X64.Vale.InsLemmas.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsBasic.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsMem.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsVector.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsAes.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsMem.fst.tmp': 'src/code/arch/x64/X64.Memory.fst',
-  'obj/code/arch/x64/X64.Vale.InsVector.fst.tmp': 'src/code/arch/x64/X64.Memory.fst',
-  'obj/code/arch/x64/X64.Vale.StateLemmas.fsti.tmp': 'src/code/arch/x64/X64.Memory.fst',
-  'obj/code/arch/x64/X64.Vale.StateLemmas.fst.tmp': 'src/code/arch/x64/X64.Memory.fst',
-  'obj/code/arch/x64/X64.Memory_s.fst.tmp': 'src/code/arch/SecretByte.fst',
 }
 
 #
@@ -315,38 +305,41 @@ verify_options = [
   ('code/lib/util/operator.vaf', BuildOptions(fstar_default_args, vale_includes = '')),
 
   # Any use of expose_interfaces requires adding to manual_dependencies
-  ('code/arch/x64/X64.Vale.InsLemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsBasic.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsMem.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsVector.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsAes.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.StateLemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.StateLemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.Lemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.Lemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.Decls.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('obj/code/arch/x64/X64.Vale.InsBasic.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
+#  ('obj/code/arch/x64/X64.Vale.InsMem.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
+#  ('obj/code/arch/x64/X64.Vale.InsVector.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
+#  ('obj/code/arch/x64/X64.Vale.InsAes.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.StateLemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.StateLemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.Lemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.Lemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/X64.Vale.Decls.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
 
   # Special treatment for sensitive modules
   ('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
 
   # Disable verification by adding 'filename': None
   ('code/crypto/aes/x64/Low.GCMencrypt.fst', None), # TODO: timeout in gcm_core
+  ('code/arch/x64/interop/*_win.fst', None),
+  ('code/arch/x64/interop/*_win.fsti', None),
 
   # Interop stubs
-  ('code/arch/x64/interop/AESEncryptBlock_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/AESEncryptBE_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Gcm_load_xor_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Gcm_make_length_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/GCTR_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/GHash_extra_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/GHash_one_block_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/GHash_stdcall_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Inc32_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Mk_quad32_1_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Quad32_xor_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Reverse_quad32_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Zero_quad32_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-
+  ('code/arch/x64/interop/Memcpy.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
+  ('code/arch/x64/interop/Quad32_xor.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
+#  ('code/arch/x64/interop/AESEncryptBlock_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/AESEncryptBE_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/Gcm_load_xor_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/Gcm_make_length_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/GCTR_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/GHash_extra_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/GHash_one_block_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/GHash_stdcall_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/Inc32_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/Mk_quad32_1_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/Quad32_xor_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/Reverse_quad32_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/arch/x64/interop/Zero_quad32_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
 
   ('code/*/*.fst', BuildOptions(fstar_default_args)),
@@ -359,13 +352,13 @@ verify_options = [
   ('.fsti', BuildOptions(fstar_default_args + ' --use_two_phase_tc false')),
 
   # Needed to significantly speed up verification of interop files (and use the checked Memory_s.fst with expose_interfaces)
-  ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native') + ' --expose_interfaces SecretByte.fst')),
-  ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native') + ' --expose_interfaces SecretByte.fst')),
+  ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
+  ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
 
   ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding)),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding)),
-  ('code/arch/x64/X64.Memory_s.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst')),
+  ('code/arch/x64/X64.Memory_s.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
   ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
   ('code/arch/Memory_s.fst', BuildOptions(fstar_default_args.replace('--use_extracted_interfaces true', ''))),
   ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', ''))),
@@ -430,6 +423,7 @@ fsti_map = {}  # map module names to .fsti File nodes (or .fst File nodes if no 
 vale_include_re = re.compile(r'include((?:\s*\{\:(?:\w|[ ])*\})*)\s*"(\S+)"', re.M)
 vale_from_base_re = re.compile(r'\{\:\s*from\s*BASE\s*\}')
 vale_open_re = re.compile(r'open\s+([a-zA-Z0-9_.]+)')
+vale_friend_re = re.compile(r'friend\s+([a-zA-Z0-9_.]+)')
 vale_import_re = re.compile(r'module\s+[a-zA-Z0-9_]+\s*[=]\s*([a-zA-Z0-9_.]+)')
 
 if (not sys.stdout.isatty()) or no_color:
@@ -642,7 +636,7 @@ def add_include_dir_for_file(include_paths, file):
   d = str(file.dir)
   if not (d in include_paths):
     include_paths.append(d)
-    distutils.dir_util.mkpath(str(to_obj_dir(file).dir))
+    pathlib.Path(str(to_obj_dir(file).dir)).mkdir(parents = True, exist_ok = True)
 
 def include_fstar_file(env, file):
   options = get_build_options(file)
@@ -656,7 +650,7 @@ def include_vale_file(env, file):
   options = get_build_options(file)
   add_include_dir_for_file(obj_include_paths, file)
   dummy_dir = File(f'obj/dummies/{file_drop_extension(file)}').dir
-  distutils.dir_util.mkpath(str(dummy_dir))
+  pathlib.Path(str(dummy_dir)).mkdir(parents = True, exist_ok = True)
   if options != None:
     add_module_for_file(file)
     module_name = file_module_name(file)
@@ -665,7 +659,7 @@ def include_vale_file(env, file):
       # The F* dependency analysis runs before .vaf files are converted to .fst/.fsti files,
       # so generate a dummy .fst/.fsti file pair for each .vaf file for the F* dependency analysis.
       dummy_file = File(f'obj/dummies/{file_drop_extension(file)}{extension}')
-      distutils.dir_util.mkpath(str(dummy_file.dir))
+      pathlib.Path(str(dummy_file.dir)).mkdir(parents = True, exist_ok = True)
       with open(str(dummy_file), 'w') as myfile:
         myfile.write(f'module {module_name}' + '\n')
 
@@ -736,20 +730,26 @@ def vale_dependency_scan(env, file):
   dirname = os.path.dirname(str(file))
   vaf_includes = vale_include_re.findall(contents)
   fst_includes = vale_open_re.findall(contents) + vale_import_re.findall(contents)
+  fst_friends = vale_friend_re.findall(contents)
   obj_file_base = file_drop_extension(to_obj_dir(file))
+  obj_tmp = [f'{obj_file_base}.fst.verified.tmp']
   obj_tmps = [f'{obj_file_base}.fst.verified.tmp', f'{obj_file_base}.fsti.verified.tmp']
   for (attrs, inc) in vaf_includes:
     f = os.path.join('code' if vale_from_base_re.search(attrs) else dirname, inc)
     # if A.vaf includes B.vaf, then manually establish these dependencies:
-    #   A.fst.verified  depends on B.fsti
-    #   A.fsti.verified depends on B.fsti
+    #   A.fst.verified.tmp  depends on B.fsti.verified
+    #   A.fsti.verified.tmp depends on B.fsti.verified
     f_base = file_drop_extension(to_obj_dir(File(f)))
     f_fsti = File(f_base + '.fsti.verified')
     Depends(obj_tmps, f_fsti)
     add_ml_dependencies([obj_file_base + '.fst'], [f_base + '.fst'])
   for inc in fst_includes:
     if inc in fsti_map:
-      Depends(obj_tmps, [fsti_map[inc]])
+      Depends(obj_tmps, f'{to_obj_dir(fsti_map[inc])}.verified')
+      add_ml_dependencies([obj_file_base + '.fst'], [fsti_map[inc]])
+  for inc in fst_friends:
+    if inc in fsti_map:
+      Depends(obj_tmp, re.sub('\.fsti$', '.fst.verified', str(to_obj_dir(fsti_map[inc]))))
       add_ml_dependencies([obj_file_base + '.fst'], [fsti_map[inc]])
 
 # Translate Vale .vaf to F* .fst/fsti pair
@@ -782,6 +782,7 @@ def process_vale_file(env, file, fstar_includes):
       target = file_drop_extension(to_obj_dir(file))
       target_fst = f'{target}.fst.verified'
       target_fsti = f'{target}.fsti.verified'
+      Depends(f'{target_fst}.tmp', target_fsti)
       verify_fstar_file(fst_options, target_fst, fst, fstar_includes)
       verify_fstar_file(fsti_options, target_fsti, fsti, fstar_includes)
       if fstar_extract:
@@ -831,6 +832,8 @@ def process_files_in(env, directories):
       process_fstar_file(env, File(file), fstar_includes)
     for file in vafs:
       process_vale_file(env, file, fstar_includes)
+    for target in manual_dependencies:
+      Depends(target, manual_dependencies[target])
 
 def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_file):
   # OCaml depends on many libraries and executables; we have to assume they are in the user's PATH:
@@ -985,9 +988,9 @@ if not is_help:
 
   # Create obj directory and any subdirectories needed during dependency analysis
   # (SCons will create other subdirectories during build)
-  distutils.dir_util.mkpath('obj')
-  distutils.dir_util.mkpath('obj/external')
-  distutils.dir_util.mkpath('obj/cache_checked')
+  pathlib.Path('obj').mkdir(parents = True, exist_ok = True)
+  pathlib.Path('obj/external').mkdir(parents = True, exist_ok = True)
+  pathlib.Path('obj/cache_checked').mkdir(parents = True, exist_ok = True)
 
   # Check F* and Z3 versions
   if not fstar_my_version:

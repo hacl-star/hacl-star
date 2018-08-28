@@ -150,3 +150,38 @@ let lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (
   assert (input_quads == full_blocks @| (create 1 final_padded));
 
   ()
+
+let lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:seq quad32) (bound:nat): Lemma
+  (requires length input >= bound + 4 /\
+            r0 == index input (bound + 0) /\
+            r1 == index input (bound + 1) /\
+            r2 == index input (bound + 2) /\
+            r3 == index input (bound + 3) /\
+            y0 == ghash_incremental0 h y_init (slice input 0 bound) /\
+            y1 == ghash_incremental h y0 (create 1 r0) /\
+            y2 == ghash_incremental h y1 (create 1 r1) /\
+            y3 == ghash_incremental h y2 (create 1 r2) /\
+            y4 == ghash_incremental h y3 (create 1 r3))
+  (ensures y4 == ghash_incremental h y_init (slice input 0 (bound + 4)))
+  =
+  lemma_hash_append2 h y_init y0 y1 (slice input 0 bound) r0;
+
+  let s = (slice input 0 bound) @| (create 1 r0) in
+  lemma_hash_append2 h y_init y1 y2 s r1;
+  let s = s @| (create 1 r1) in
+  lemma_hash_append2 h y_init y2 y3 s r2;
+  let s = s @| (create 1 r2) in
+  lemma_hash_append2 h y_init y3 y4 s r3;
+  let s = s @| (create 1 r3) in  
+  assert (equal s (slice input 0 (bound + 4)));
+  ()
+
+(*
+let lemma_slice_extension (s:seq quad32) (bound:int) (q:quad32) : Lemma
+  (requires 0 <= bound /\ bound + 1 <= length s /\ 
+            index_work_around_quad32 (slice_work_around s (bound + 1)) bound == q)
+  (ensures equal (slice_work_around s (bound + 1))
+                 (append (slice_work_around s bound) (create 1 q)))
+  =
+  ()
+*)   

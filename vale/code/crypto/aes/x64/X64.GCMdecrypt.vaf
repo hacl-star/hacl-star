@@ -106,7 +106,7 @@ procedure {:quick} gcm_one_pass_blocks(
 
         // GHash
         len == 0 ==> hash == old(hash);
-        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(h, old(hash), slice_work_around(old(buffer128_as_seq(mem, in_b)), len));
+        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(old(buffer128_as_seq(mem, in_b)), len));
 {
     Mov64(rdx, 0);
     Mov64(r9, in_ptr);
@@ -151,7 +151,7 @@ procedure {:quick} gcm_one_pass_blocks(
             gctr_partial(alg, rdx, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old(icb));
 
             rdx == 0 ==> hash == old(hash);
-            rdx > 0 ==> hash == ghash_incremental(h, old(hash), slice_work_around(buffer128_as_seq(mem, in_b), rdx));
+            rdx > 0 ==> hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, in_b), rdx));
 
 //            forall j :: 0 <= j < rdx ==>
 //                        buffer128_read(out_b, j, mem) ==
@@ -172,6 +172,7 @@ procedure {:quick} gcm_one_pass_blocks(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b); // Clobbers xmm0 and xmm2
+        reveal_opaque(aes_encrypt_LE_def);
 
         Pxor(xmm3, xmm0);
         Store128_buffer(r10, xmm3, 0, Secret, out_b, rdx);
@@ -243,7 +244,7 @@ procedure {:quick} gcm_one_pass(
         let cipher_padded_bytes := pad_to_128_bits(cipher);
         let cipher_padded_quads := le_bytes_to_seq_quad32(cipher_padded_bytes);
         old(num_bytes) > 0 ==> length(cipher_padded_quads) > 0 /\
-            hash == ghash_incremental(h, old(hash), cipher_padded_quads);
+            hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), cipher_padded_quads);
 {
     if (num_bytes > 0) {
         lemma_poly_bits64();
@@ -259,7 +260,7 @@ procedure {:quick} gcm_one_pass(
 
         if (rsi == 0) {
             gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
-            ghash_incremental_bytes_no_extra(in_b, old(hash), old(in_ptr), old(num_bytes), hash, h);
+            ghash_incremental_bytes_no_extra(in_b, old(hash), old(in_ptr), old(num_bytes), hash, reverse_bytes_quad32(h));
             bytes_to_quad_size_no_extra_bytes(old(num_bytes));
             //assert icb == inc32(old(icb), bytes_to_quad_size(old(num_bytes)));
 
@@ -372,8 +373,8 @@ procedure {:quick} gcm_core_part1(
         let cipher_padded_quads := le_bytes_to_seq_quad32(cipher_padded_bytes);
 
         y_0 == Mkfour(0, 0, 0, 0);
-        y_auth == ghash_incremental0(h, y_0, auth_padded_quads);
-        y_cipher == ghash_incremental0(h, y_auth, cipher_padded_quads);
+        y_auth == ghash_incremental0(reverse_bytes_quad32(h), y_0, auth_padded_quads);
+        y_cipher == ghash_incremental0(reverse_bytes_quad32(h), y_auth, cipher_padded_quads);
         xmm1 == y_cipher;
 
         // Intermediate IV state
@@ -382,17 +383,18 @@ procedure {:quick} gcm_core_part1(
         // Other intermediate facts
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
         xmm11 == h;
-        h == aes_encrypt_LE(alg, key, y_0);
+        h == reverse_bytes_quad32(aes_encrypt_LE(alg, key, y_0));
 {
+    InitPshufbMask(xmm8, r12);
     // let h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
     ZeroXmm(xmm0);
     AESEncryptBlock(alg, xmm0, key, round_keys, keys_b); // h = xmm0 = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
+    Pshufb(xmm0, xmm8);
     h := xmm0;
     Mov128(xmm11, xmm0);     // Save a copy of h
 
     // let j0_BE = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
     // (inc32 j0 1)
-    InitPshufbMask(xmm8, r12);
     Pshufb(iv, xmm8); // to big endian
     PinsrdImm(iv, 2, 0, r12);
     // assert iv == inc32(Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3), 1);
@@ -413,7 +415,7 @@ procedure {:quick} gcm_core_part1(
     ghost var auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
 //
 //    assert y_0 == Mkfour(0,0,0,0);
-//    assert y_auth   == ghash_incremental0(h, y_0, auth_padded_quads);
+//    assert y_auth   == ghash_incremental0(reverse_bytes_quad32(h), y_0, auth_padded_quads);
 //
     // let c = gctr_encrypt_LE (inc32 j0 1) p alg key in
     Mov64(rax, cipher_ptr);
@@ -540,7 +542,7 @@ procedure {:quick} gcm_core(
 
     ghost var cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
     ghost var cipher_padded_quads := le_bytes_to_seq_quad32(pad_to_128_bits(cipher));
-    lemma_hash_append3(h, y_0, y_auth, y_cipher, y_final,
+    lemma_hash_append3(reverse_bytes_quad32(h), y_0, y_auth, y_cipher, y_final,
                        auth_padded_quads, //buffer128_as_seq(mem, auth_b),
                        cipher_padded_quads, //buffer128_as_seq(mem, out_b),
                        create(1, length_quad32));
@@ -786,7 +788,8 @@ procedure {:quick} gcm_decrypt_stdcall(
     )
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm10; xmm11;
+        rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15; 
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         rbp; rdi; rsi;
         mem; efl; rsp;
     lets
@@ -824,7 +827,7 @@ procedure {:quick} gcm_decrypt_stdcall(
         validDstAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(cipher_num_bytes), memTaint, Secret);
         validDstAddrs128(mem, tag_ptr, tag_b, 1, memTaint, Secret);
 
-        valid_stack_slots(mem, rsp, stack_b, if win then 18 else 8, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, if win then 28 else 8, memTaint);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
 
         cipher_ptr + 16 * bytes_to_quad_size(cipher_num_bytes) < pow2_64;
@@ -881,8 +884,13 @@ procedure {:quick} gcm_decrypt_stdcall(
         win ==> xmm6  == old(xmm6);
         win ==> xmm7  == old(xmm7);
         win ==> xmm8  == old(xmm8);
+        win ==> xmm9  == old(xmm9);
         win ==> xmm10 == old(xmm10);
         win ==> xmm11 == old(xmm11);
+        win ==> xmm12 == old(xmm12);
+        win ==> xmm13 == old(xmm13);
+        win ==> xmm14 == old(xmm14);
+        win ==> xmm15 == old(xmm15);
 
         // Linux:
         !win ==> rbx == old(rbx);
@@ -902,6 +910,7 @@ procedure {:quick} gcm_decrypt_stdcall(
     callee_save_registers(win, stack_b);
     gcm_decrypt_stdcall_inner(alg, args_b, iv_BE, cipher_b, auth_b, iv_b, out_b, tag_b, key, round_keys, keys_b);
     Mov64(rdx, rax);        // Save a copy of rax == result
-    callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm10), old(xmm11));
+    callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
+                             old(xmm12), old(xmm13), old(xmm14), old(xmm15));
     Mov64(rax, rdx);
 }

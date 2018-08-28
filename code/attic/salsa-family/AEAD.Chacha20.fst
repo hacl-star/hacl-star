@@ -32,7 +32,7 @@ val chacha20_key_block:
 let chacha20_key_block block k n ctr =
   let st = alloc () in
   let _  = setup st k n ctr in
-  let _  = chacha20_block (Ghost.hide (MkLog Seq.createEmpty Seq.createEmpty)) block st ctr in
+  let _  = chacha20_block (Ghost.hide (MkLog Seq.empty Seq.createEmpty)) block st ctr in
   ()
 
 val chacha20:

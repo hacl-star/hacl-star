@@ -26,13 +26,13 @@ assume val ishr : #n:nat -> a:natN n -> s:int -> natN n
 // Alias
 unfold let nat32_xor (x y:nat32) : nat32 = ixor x y
 
-type twobits = natN 4
-type bits_of_byte = four twobits
+type twobits:eqtype = natN 4
+type bits_of_byte:eqtype = four twobits
 
 let byte_to_twobits (b:nat8) : bits_of_byte = nat_to_four_unfold 2 b
 
-type double32 = two nat32
-type quad32 = four nat32
+type double32:eqtype = two nat32
+type quad32:eqtype = four nat32
 
 let quad32_xor_def (x y:quad32) : quad32 = four_map2 nat32_xor x y
 let quad32_xor  = make_opaque quad32_xor_def
