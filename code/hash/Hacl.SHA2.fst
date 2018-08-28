@@ -11,7 +11,9 @@ module Tactics = FStar.Tactics
 module Helpers = Spec.Hash.Helpers
 module Endianness = FStar.Kremlin.Endianness
 module Math = FStar.Math.Lemmas
+module Spec = Spec.SHA2
 
+module M = LowStar.Modifies
 module S = FStar.Seq
 module B = LowStar.Buffer
 module G = FStar.Ghost
