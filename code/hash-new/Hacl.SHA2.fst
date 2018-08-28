@@ -145,14 +145,32 @@ let init_384: init_t SHA2_384 =
 let init_512: init_t SHA2_512 =
   Tactics.(synth_by_tactic (specialize (init SHA2_512) [`%init]))
 
-(** Three sequence lemmas required for the pre-computation of Spec.ws *)
+(** Two sequence lemmas required for pad, among others. *)
 
-let index_slice (#a: Type) (s: S.seq a) (j: nat) (i: nat):
+let lemma_slice (#a: Type) (s: S.seq a) (i: nat): Lemma
+  (requires (i <= S.length s))
+  (ensures (S.equal (S.append (S.slice s 0 i) (S.slice s i (S.length s))) s))
+  [ SMTPat (S.append (S.slice s 0 i) (S.slice s i (S.length s))) ]
+=
+  ()
+
+let lemma_slice_ijk (#a: Type) (s: S.seq a) (i j k: nat): Lemma
+  (requires (i <= j /\ j <= k /\ k <= S.length s))
+  (ensures (S.equal (S.append (S.slice s i j) (S.slice s j k)) (S.slice s i k)))
+  [ SMTPat (S.append (S.slice s i j) (S.slice s j k)) ]
+=
+  ()
+
+(** Two sequence lemmas required for the pre-computation of Spec.ws *)
+
+// Note: a similar lemma exists in FStar.Seq.Base but yields a forall in the
+// ensures clauses which doesn't work, really.
+let init_index (#a: Type) (j: nat) (f: (i:nat { i < j }) -> a) (i: nat):
   Lemma
     (requires (
-      i < j /\ j <= S.length s))
-    (ensures (S.index (S.slice s 0 j) i == S.index s i))
-  [ SMTPat (S.index (S.slice s 0 j) i) ]
+      i < j))
+    (ensures (S.index (S.init j f) i == f i))
+  [ SMTPat (S.index (S.init j f) i) ]
 =
   ()
 
@@ -164,18 +182,7 @@ let init_next (#a: Type) (s: S.seq a) (f: (i:nat { i < S.length s }) -> a) (i: n
       S.index s i == f i))
     (ensures (S.equal (S.slice s 0 (i + 1)) (S.init (i + 1) f)))
 =
-  assert (forall j. j < i ==> S.index (S.slice s 0 i) j == f j);
-  assert (forall j. j < i ==> S.index (S.slice s 0 (i + 1)) j == f j);
-  assert (S.index (S.slice s 0 (i + 1)) i == f i)
-
-let init_index (#a: Type) (j: nat) (f: (i:nat { i < j }) -> a) (i: nat):
-  Lemma
-    (requires (
-      i < j))
-    (ensures (S.index (S.init j f) i == f i))
-  [ SMTPat (S.index (S.init j f) i) ]
-=
-  ()
+  lemma_slice_ijk s 0 i (i + 1)
 
 (** Update *)
 
@@ -425,9 +432,7 @@ let create_next (#a: Type) (s: S.seq a) (v: a) (i: nat):
       S.index s i == v))
     (ensures (S.equal (S.slice s 0 (i + 1)) (S.create (i + 1) v)))
 =
-  assert (forall j. j < i ==> S.index (S.slice s 0 i) j == v);
-  assert (forall j. j < i ==> S.index (S.slice s 0 (i + 1)) j == v);
-  assert (S.index (S.slice s 0 (i + 1)) i == v)
+  lemma_slice_ijk s 0 i (i + 1)
 
 
 (** Padding *)
@@ -487,7 +492,7 @@ let len_mod_32 (a: sha2_alg) (len: len_t a):
 #set-options "--z3rlimit 100"
 
 // JP: this proof works instantly in interactive mode, not in batch mode unless
-// there's z3refresh
+// there's a high rlimit
 let pad0_len (a: sha2_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = pad0_length a (len_v a len) })
 =
@@ -523,7 +528,7 @@ let pad0_len (a: sha2_alg) (len: len_t a):
   let r = (size_block a +^ size_block a) -^ (size_len a +^ 1ul +^ len_mod_32 a len) in
   r %^ size_block a
 
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 20"
 
 val pad (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
   ST.Stack unit
@@ -602,22 +607,6 @@ let pad_3 (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
       (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
       store_len a U128.(shift_left len 3ul) dst
   end
-
-#set-options "--z3rlimit 20"
-
-let lemma_slice (#a: Type) (s: S.seq a) (i: nat): Lemma
-  (requires (i <= S.length s))
-  (ensures (S.equal (S.append (S.slice s 0 i) (S.slice s i (S.length s))) s))
-  [ SMTPat (S.append (S.slice s 0 i) (S.slice s i (S.length s))) ]
-=
-  ()
-
-let lemma_slice_ijk (#a: Type) (s: S.seq a) (i j k: nat): Lemma
-  (requires (i <= j /\ j <= k /\ k <= S.length s))
-  (ensures (S.equal (S.append (S.slice s i j) (S.slice s j k)) (S.slice s i k)))
-  [ SMTPat (S.append (S.slice s i j) (S.slice s j k)) ]
-=
-  ()
 
 let pad a len dst =
   (* i) Append a single 1 bit. *)
