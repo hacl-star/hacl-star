@@ -19,7 +19,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
 # on that assumption
 ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
   Spec.Salsa20.fst Spec.Chacha20Poly1305.fst $(wildcard Spec.*.Test.fst) \
-  Spec.Ed25519.fst
+  Spec.Ed25519.fst # Spec.SHA1.fst Spec.MD5.fst # WIP
 
 # TODO: decide what to do with the following (excluded) specs:
 #  Spec.HMAC.SHA2_256.fst Spec.HMAC.SHA2_384.fst Spec.HMAC.SHA2_512.fst
@@ -31,7 +31,7 @@ all: $(ALL_CHECKED_FILES)
 
 # Always generate the dependency file
 .PHONY: .depend
-.PRECIOUS: .depend
+.PRECIOUS: .depend %.exe
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
@@ -65,6 +65,7 @@ TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 # us a way to name the cmx dependencies of a given module
 ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
 
+.PRECIOUS: $(OUTPUT_DIR)/%_AutoTest.exe
 $(OUTPUT_DIR)/%_AutoTest.exe: $(ALL_CMX_FILES) $(OUTPUT_DIR)/%_AutoTest.ml
 	$(OCAMLOPT) $^ -o $@
 

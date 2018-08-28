@@ -125,7 +125,9 @@ let update h l =
 
 (* Section 5.1.1: padding *)
 
-let pad = magic ()
+let pad l =
+  let l = 64 - l % 64 in
+  Seq.create l 0uy
 
 (* Section 6.1.2: no truncation needed *)
 
