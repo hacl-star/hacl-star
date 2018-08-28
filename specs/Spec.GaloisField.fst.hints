@@ -12,11 +12,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-<<<<<<< HEAD
-      "fbcc54f6f546a16264bc9dd9b9aab120"
-=======
-      "ebae1b08b43a1f399fdbf76536f86b05"
->>>>>>> origin/fstar-master
+      "77cf5646ad3cb4fbb20ca59e792d8c3c"
     ],
     [
       "Spec.GaloisField.field",
@@ -29,11 +25,7 @@
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-<<<<<<< HEAD
-      "7cc5ec0d74073987665121cea4ad6c62"
-=======
-      "54162a0af4df06d688ce794a7d4f852f"
->>>>>>> origin/fstar-master
+      "69e3d35a28ce6f46de0caa83bd4df5e7"
     ],
     [
       "Spec.GaloisField.field",
@@ -46,11 +38,7 @@
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-<<<<<<< HEAD
-      "2fc08e2a43c5dbecad659084dbcf46a4"
-=======
-      "3e051d7c2923c45b162fc4a1eec3070d"
->>>>>>> origin/fstar-master
+      "40ac1837d629f269268a093d21d0e927"
     ],
     [
       "Spec.GaloisField.field",
@@ -59,15 +47,12 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "int_inversion", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-<<<<<<< HEAD
-      "dc004c6db75243d99eb35de82463efeb"
-=======
-      "4c2e85b891d15785d09e472e8e5ae278"
->>>>>>> origin/fstar-master
+      "3c459b87a782e95641fa903ff8087aca"
     ],
     [
       "Spec.GaloisField.field",
@@ -88,11 +73,7 @@
         "primitive_Prims.op_Addition", "primitive_Prims.op_Subtraction"
       ],
       0,
-<<<<<<< HEAD
-      "0b41c91b61a85215c6d4a261b2578e0d"
-=======
-      "bbfa38860d6055b061fef62bd6819f53"
->>>>>>> origin/fstar-master
+      "33f50c726d55775a844bc43843c72a21"
     ],
     [
       "Spec.GaloisField.__proj__GF__item__irred",
@@ -108,11 +89,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits"
       ],
       0,
-<<<<<<< HEAD
-      "b5129003450fdeaefc637b409ffc210a"
-=======
-      "085fea08c0eae0cc0c4fb9c48d4f8076"
->>>>>>> origin/fstar-master
+      "cdf8e33ea9049121f3a6b8d765f73539"
     ],
     [
       "Spec.GaloisField.__proj__GF__item__irred",
@@ -122,22 +99,20 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "data_elim_Spec.GaloisField.GF", "equation_FStar.UInt32.n",
-        "equation_Prims.pos",
+        "data_elim_Spec.GaloisField.GF", "equation_FStar.BitVector.bv_t",
+        "equation_FStar.UInt32.n", "equation_Prims.pos",
+        "equation_Spec.GaloisField.polynomial",
         "fuel_guarded_inversion_Spec.GaloisField.field",
         "function_token_typing_FStar.UInt32.n",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_bits",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_bits",
+        "projection_inverse_Spec.GaloisField.GF_irred",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-<<<<<<< HEAD
-      "39de9445f4bd008f6a44ba0d8a267cb6"
-=======
-      "13e0928c5216eca38a56316318021ee2"
->>>>>>> origin/fstar-master
+      "72b5f32e0d157cebadeb773b08a65446"
     ],
     [
       "Spec.GaloisField.mk_field",
@@ -150,11 +125,7 @@
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-<<<<<<< HEAD
-      "6e191667e142fe997ec1b747b5c2cee0"
-=======
-      "78f9355fedac289f8502f7773da2f82b"
->>>>>>> origin/fstar-master
+      "2b477fd8009b7e45a2baff381c5b9c88"
     ],
     [
       "Spec.GaloisField.felem",
@@ -163,29 +134,16 @@
       1,
       [ "@query" ],
       0,
-<<<<<<< HEAD
-      "f61ee494f5123fdb9d34753b3e0d8558"
-=======
-      "cceb09fcb2451cc0b69e7ff61d50abfe"
->>>>>>> origin/fstar-master
+      "dad6ce7c3fc81519eff7dd8eb51773da"
     ],
     [
       "Spec.GaloisField.to_felem",
       1,
       2,
       1,
-      [
-        "@query", "equation_Prims.pos",
-        "proj_equation_Spec.GaloisField.GF_bits",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
-        "typing_Spec.GaloisField.__proj__GF__item__bits"
-      ],
+      [ "@query" ],
       0,
-<<<<<<< HEAD
-      "48e3887a6bdbedca6a1024ca6e19df82"
-=======
-      "747fcb11b21aba6176c20d82ac082581"
->>>>>>> origin/fstar-master
+      "2d74246c5bd52d0b828bb9b39638750f"
     ],
     [
       "Spec.GaloisField.to_felem",
@@ -194,11 +152,7 @@
       1,
       [ "@query" ],
       0,
-<<<<<<< HEAD
-      "fbd16125d84a1dcada4fd4467e78fb57"
-=======
-      "de7686ffda16e8f377ed428fcf2834af"
->>>>>>> origin/fstar-master
+      "246ef23f1f6429c69df4ba98bc01e8a6"
     ],
     [
       "Spec.GaloisField.from_felem",
@@ -207,11 +161,7 @@
       1,
       [ "@query" ],
       0,
-<<<<<<< HEAD
-      "5a9d0397156ddc7dba8b17d9bda1b855"
-=======
-      "a570950e1e72563b1af59866890fa13b"
->>>>>>> origin/fstar-master
+      "c8bf2fef281e59b08af5c797e1ecc834"
     ],
     [
       "Spec.GaloisField.one",
@@ -225,11 +175,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits"
       ],
       0,
-<<<<<<< HEAD
-      "e8242843ac0378698533d23ced80dcfb"
-=======
-      "09fa2edc5b88c08e2dee6587d245ec91"
->>>>>>> origin/fstar-master
+      "cb0a74a0d72352e706407237173883ce"
     ],
     [
       "Spec.GaloisField.add_comm",
@@ -264,11 +210,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits"
       ],
       0,
-<<<<<<< HEAD
-      "5a232576c78bb20a99b1cce604dbbf96"
-=======
-      "06fdb139f0a5b1fdf03da54e21fecbf3"
->>>>>>> origin/fstar-master
+      "709de84bd72ec44d048c910a8a4dd693"
     ],
     [
       "Spec.GaloisField.add_asso",
@@ -307,11 +249,7 @@
         "typing_Spec.GaloisField.fadd"
       ],
       0,
-<<<<<<< HEAD
-      "f1faed133ed43102a2610d4dd9079349"
-=======
-      "c2c499161b937acd30e5b78c6f23130b"
->>>>>>> origin/fstar-master
+      "e21b9ed5970454dea7a248dd32856191"
     ],
     [
       "Spec.GaloisField.add_zero",
@@ -327,11 +265,7 @@
         "proj_equation_Spec.GaloisField.GF_bits"
       ],
       0,
-<<<<<<< HEAD
-      "8ca7de7d3f3ac1519b3ee9f29539ec8a"
-=======
-      "651526fa431651799f0f61913e41dc09"
->>>>>>> origin/fstar-master
+      "1c6a76ea7f637e3f5bc07cfcd05be861"
     ],
     [
       "Spec.GaloisField.add_zero",
@@ -339,46 +273,15 @@
       2,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_FStar.BitVector.logxor_vec.fuel_instrumented",
-        "@fuel_irrelevance_FStar.BitVector.logxor_vec.fuel_instrumented",
-        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
-        "Spec.GaloisField_interpretation_Tm_arrow_a3662d68abfe43fc72a68aef5d4b0cc9",
-        "assumption_FStar.Seq.Base.seq__uu___haseq",
-        "assumption_Prims.HasEq_bool", "bool_inversion", "bool_typing",
-        "equation_FStar.BitVector.bv_t", "equation_FStar.BitVector.zero_vec",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "equation_Spec.GaloisField.fadd", "equation_Spec.GaloisField.felem",
-        "equation_Spec.GaloisField.op_Plus_At",
-        "equation_Spec.GaloisField.zero",
-        "fuel_guarded_inversion_Spec.GaloisField.field",
-        "function_token_typing_FStar.UInt32.n",
+        "@query", "assumption_FStar.Seq.Base.seq__uu___haseq",
+        "assumption_Prims.HasEq_bool", "equation_FStar.BitVector.bv_t",
+        "equation_Spec.GaloisField.felem",
         "function_token_typing_Prims.bool",
-        "function_token_typing_Spec.GaloisField.fadd",
         "haseqFStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "int_inversion", "lemma_FStar.BitVector.logxor_vec_definition",
-        "lemma_FStar.Seq.Base.lemma_eq_elim",
-        "lemma_FStar.Seq.Base.lemma_index_create",
-        "primitive_Prims.op_disEquality",
-        "proj_equation_Spec.GaloisField.GF_bits",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Spec.GaloisField_Tm_refine_3da648c6210d05df459edc3e0e276b34",
-        "refinement_interpretation_Spec.GaloisField_Tm_refine_be1b6e65bd5b5136aae62a8ab5650d41",
-        "token_correspondence_Spec.GaloisField.fadd",
-        "token_correspondence_Spec.GaloisField.op_Plus_At",
-        "typing_FStar.Seq.Base.index", "typing_FStar.Seq.Base.length",
-        "typing_Spec.GaloisField.__proj__GF__item__bits"
+        "proj_equation_Spec.GaloisField.GF_bits"
       ],
       0,
-<<<<<<< HEAD
-      "929efc43f63599c2d0bb7924cf12efa6"
-=======
-      "b88bee38afff92a3023dd8c49af796e9"
->>>>>>> origin/fstar-master
+      "45f9d1a09246c356fe52ef843b4b21e4"
     ],
     [
       "Spec.GaloisField.add_zero",
@@ -419,11 +322,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits"
       ],
       0,
-<<<<<<< HEAD
-      "4e346e721fb5647eddd5ec001c702ab0"
-=======
-      "89949206e8731043ec3ac5e4168918fd"
->>>>>>> origin/fstar-master
+      "36f16d41b75a1a523e98170f8c18fe29"
     ],
     [
       "Spec.GaloisField.shift_reduce",
@@ -445,11 +344,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits"
       ],
       0,
-<<<<<<< HEAD
-      "678ac03efabbc3a0b72932a76a098401"
-=======
-      "80e7e7a5a7185b86acdee91ca766cf33"
->>>>>>> origin/fstar-master
+      "4e579c724d480f281219cef1de09b099"
     ],
     [
       "Spec.GaloisField.cond_fadd",
@@ -463,11 +358,7 @@
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-<<<<<<< HEAD
-      "72a23b58ed297fa299e085a114bc9351"
-=======
-      "1c48f6a4e508d5006ebedefcec832c84"
->>>>>>> origin/fstar-master
+      "266cdbdf56dcbe47f9873e8b64857762"
     ],
     [
       "Spec.GaloisField.cond_fadd_lemma",
@@ -483,11 +374,7 @@
         "proj_equation_Spec.GaloisField.GF_bits"
       ],
       0,
-<<<<<<< HEAD
-      "5330cbeb6b5ce433c35c1200090b4109"
-=======
-      "6938555dd6c738d30642393b85140229"
->>>>>>> origin/fstar-master
+      "e7ad68e4beebfb8c23a53e3fe871de29"
     ],
     [
       "Spec.GaloisField.cond_fadd_lemma",
@@ -512,11 +399,7 @@
         "token_correspondence_Spec.GaloisField.op_Plus_At"
       ],
       0,
-<<<<<<< HEAD
-      "d9b44e064eba6cd58ed712ce16ceb80d"
-=======
-      "abd79d7748c7a6a0c430a419b21462ce"
->>>>>>> origin/fstar-master
+      "717da04397b9cffd5a5b9002a1b215f6"
     ],
     [
       "Spec.GaloisField.fmul_loop",
@@ -544,11 +427,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-<<<<<<< HEAD
-      "fb5b7d4c7349ce98bcfd609d5a9c40f2"
-=======
-      "6bc0e2257a3977aafdaeb9e892a34db6"
->>>>>>> origin/fstar-master
+      "65655769007d77ffee304b100b536802"
     ],
     [
       "Spec.GaloisField.fmul",
@@ -562,11 +441,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits"
       ],
       0,
-<<<<<<< HEAD
-      "cf4e7e36ae5895a862138fb1dbac2982"
-=======
-      "0232058eb93f9a2c821d56c6e56707ad"
->>>>>>> origin/fstar-master
+      "23316f753c2c64a91ff56d3e4ec74cdb"
     ],
     [
       "Spec.GaloisField.irr",
@@ -583,19 +458,15 @@
         "equation_FStar.UInt32.n", "equation_FStar.UInt8.n",
         "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
         "function_token_typing_FStar.UInt8.n",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-<<<<<<< HEAD
-      "04f137307efba027fcdc436fd606e08b"
-=======
-      "4c87297043d92d49e40d396791c8d26d"
->>>>>>> origin/fstar-master
+      "96b41a0153d66b1a26f8083ce72d661b"
     ],
     [
       "Spec.GaloisField.a",
@@ -625,11 +496,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-<<<<<<< HEAD
-      "3985c514b5898d9c1d7083b975855678"
-=======
-      "834ebfae56a65e36909854435455aa78"
->>>>>>> origin/fstar-master
+      "76577fdc8ef25b5a2c537a1c336671d2"
     ],
     [
       "Spec.GaloisField.b",
@@ -659,11 +526,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-<<<<<<< HEAD
-      "a5e9245792118ac5f422f0936fa17554"
-=======
-      "5ea70767df77b194aef63986676c2cde"
->>>>>>> origin/fstar-master
+      "9e25ce8476c12a9196a26a412380a6da"
     ],
     [
       "Spec.GaloisField.a_plus_b",
@@ -693,11 +556,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-<<<<<<< HEAD
-      "0b14b08343d0ed67479f4aa86a6ea288"
-=======
-      "aff82ece0b18bf7fe633f771e91e902c"
->>>>>>> origin/fstar-master
+      "780e598c0da73d2a828f2dd31db25aef"
     ],
     [
       "Spec.GaloisField.test",
@@ -719,11 +578,7 @@
         "projection_inverse_Spec.GaloisField.GF_bits"
       ],
       0,
-<<<<<<< HEAD
-      "38f8ddb949676fb68a618c10d88b568f"
-=======
-      "a1a1983956a098499d76e7c06f556b83"
->>>>>>> origin/fstar-master
+      "aac7fa47028542eaeca1e7e8e67e0c3b"
     ]
   ]
 ]
