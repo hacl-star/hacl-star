@@ -1329,11 +1329,120 @@ let valid128_64 ptr s =
   FStar.Math.Lemmas.distributivity_add_right 8 (2 `op_Multiply` i) 1;
   FStar.Math.Lemmas.paren_add_right (h.addrs b) (8 `op_Multiply` (2 `op_Multiply` i)) 8
 
+open Views
+
+private
+let load128_64_aux (s:Seq.lseq SecretByte.t 16) : Lemma
+  (let v = get128 s in
+   let v_lo = get64 (Seq.slice s 0 8) in
+   let v_hi = get64 (Seq.slice s 8 16) in
+   v.lo0 + 0x100000000 `op_Multiply` v.lo1 == UInt64.v v_lo /\
+   v.hi2 + 0x100000000 `op_Multiply` v.hi3 == UInt64.v v_hi) = 
+   Opaque_s.reveal_opaque get128_def;
+   Opaque_s.reveal_opaque get64_def;
+   ()
+
+let buffer_read_get128 (b:buffer128) (i:nat{i < buffer_length b}) (h:mem) : Lemma
+  (length_t_eq (TBase TUInt128) b;
+  buffer_read b i h ==
+    get128 (Seq.slice (B.as_seq h.hs b) (16 `op_Multiply` i) (16 `op_Multiply` i + 16))) =
+  length_t_eq (TBase TUInt128) b;
+  let vb = BV.mk_buffer_view b uint128_view in
+  BV.as_buffer_mk_buffer_view b uint128_view;
+  BV.get_view_mk_buffer_view b uint128_view;
+  BV.get_sel h.hs vb i;
+  BV.as_seq_sel h.hs vb i;
+  ()
+
+let buffer_read_get64_1 (b:buffer64) (i:nat{2 `op_Multiply` i < buffer_length b}) (h:mem) : Lemma
+  (requires 16 `op_Multiply` i + 16 <= B.length b)
+  (ensures (length_t_eq (TBase TUInt64) b;
+  buffer_read b (2 `op_Multiply` i) h ==
+    UInt64.v (get64 (Seq.slice (Seq.slice (B.as_seq h.hs b) (16 `op_Multiply` i) (16 `op_Multiply` i + 16)) 0 8)))) =
+  length_t_eq (TBase TUInt64) b;
+  let j = 2 `op_Multiply` i in
+  let vb = BV.mk_buffer_view b uint64_view in
+  BV.as_buffer_mk_buffer_view b uint64_view;
+  BV.get_view_mk_buffer_view b uint64_view;
+  BV.get_sel h.hs vb j;
+  BV.as_seq_sel h.hs vb j;
+  ()
+
+let buffer_read_get64_2 (b:buffer64) (i:nat{2 `op_Multiply` i + 1 < buffer_length b}) (h:mem) : Lemma
+  (requires 16 `op_Multiply` i + 16 <= B.length b)
+  (ensures (length_t_eq (TBase TUInt64) b;
+  buffer_read b (2 `op_Multiply` i + 1) h ==
+    UInt64.v (get64 (Seq.slice (Seq.slice (B.as_seq h.hs b) (16 `op_Multiply` i) (16 `op_Multiply` i + 16)) 8 16)))) =
+  length_t_eq (TBase TUInt64) b;
+  let j = 2 `op_Multiply` i + 1 in
+  let vb = BV.mk_buffer_view b uint64_view in
+  BV.as_buffer_mk_buffer_view b uint64_view;
+  BV.get_view_mk_buffer_view b uint64_view;
+  BV.get_sel h.hs vb j;
+  BV.as_seq_sel h.hs vb j;
+  ()
+
+let load128_math1 (i64 i128 base ptr:nat) : Lemma
+  (requires (base + 8 `op_Multiply` i64 == base + 16 `op_Multiply` i128))
+  (ensures (i64 == 2 `op_Multiply` i128)) = ()
+
+let load128_math2 (i64 i128 base ptr:nat) : Lemma
+  (requires (base + 8 `op_Multiply` i64 == base + 16 `op_Multiply` i128 + 8))
+  (ensures (i64 == 2 `op_Multiply` i128 + 1)) = ()
+
+let load128_64_same_buffers (ptr:int) (s:state) : Lemma
+  (requires (valid_mem128 ptr s.mem))
+  (ensures (
+    let h = s.mem in
+    valid128_64 ptr s;
+    let b64_1 = get_addr_ptr (TBase TUInt64) ptr h h.ptrs in
+    let b64_2 = get_addr_ptr (TBase TUInt64) (ptr+8) h h.ptrs in
+    let b128 =  get_addr_ptr (TBase TUInt128) ptr h h.ptrs in
+    b64_1 == b128 /\ b64_2 == b128)) =
+  let h = s.mem in
+  valid128_64 ptr s;
+  let b64_1 = get_addr_ptr (TBase TUInt64) ptr h h.ptrs in
+  let b64_2 = get_addr_ptr (TBase TUInt64) (ptr+8) h h.ptrs in
+  let b128 =  get_addr_ptr (TBase TUInt128) ptr h h.ptrs in    
+  load_buffer_read (TBase TUInt64) ptr h h.ptrs;
+  load_buffer_read (TBase TUInt64) (ptr+8) h h.ptrs;
+  load_buffer_read (TBase TUInt128) ptr h h.ptrs;  
+  assert (Interop.disjoint_or_eq b64_1 b128);
+  assert (Interop.disjoint_or_eq b64_2 b128);
+  length_t_eq (TBase TUInt64) b64_1;
+  length_t_eq (TBase TUInt64) b64_2;
+  length_t_eq (TBase TUInt128) b128
+
 let load128_64 ptr s =
-  let v = load_mem128 ptr s.mem in
-  let v_lo = load_mem64 ptr s.mem in
-  let v_hi = load_mem64 (ptr+8) s.mem in
-  admit()
+  let h = s.mem in
+  let v = load_mem128 ptr h in
+  let v_lo = load_mem64 ptr h in
+  let v_hi = load_mem64 (ptr+8) h in
+  valid128_64 ptr s;
+  load_buffer_read (TBase TUInt64) ptr h h.ptrs;
+  load_buffer_read (TBase TUInt64) (ptr+8) h h.ptrs;
+  load_buffer_read (TBase TUInt128) ptr h h.ptrs;
+  let b64_1 = get_addr_ptr (TBase TUInt64) ptr h h.ptrs in
+  let i64_1 = get_addr_in_ptr (TBase TUInt64) (buffer_length b64_1) (buffer_addr b64_1 h) ptr 0 in
+  let b64_2 = get_addr_ptr (TBase TUInt64) (ptr+8) h h.ptrs in
+  let i64_2 = get_addr_in_ptr (TBase TUInt64) (buffer_length b64_2) (buffer_addr b64_2 h) (ptr+8) 0 in
+  let b128 = get_addr_ptr (TBase TUInt128) ptr h h.ptrs in
+  let i128 = get_addr_in_ptr (TBase TUInt128) (buffer_length b128) (buffer_addr b128 h) ptr 0 in
+  // The three buffers are actually the same since they overlap
+  load128_64_same_buffers ptr s;
+  length_t_eq (TBase TUInt64) b64_1;
+  length_t_eq (TBase TUInt64) b64_2;
+  length_t_eq (TBase TUInt128) b128;
+  // Simplify the context to prove i64_1 = 2 * i128 and i64_2 = 2 * i128 + 1
+  load128_math1 i64_1 i128 (buffer_addr b128 h) ptr;
+  load128_math2 i64_2 i128 (buffer_addr b128 h) ptr;
+  let s = B.as_seq h.hs b128 in
+  let s = Seq.slice s (16 `op_Multiply` i128) (16 `op_Multiply` i128 + 16) in
+  load128_64_aux s;
+  buffer_read_get128 b128 i128 h;
+  buffer_read_get64_1 b64_1 i128 h;
+  buffer_read_get64_2 b64_2 i128 h;
+  ()
 
 let store128_64 ptr v s = admit()
 
