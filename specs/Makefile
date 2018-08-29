@@ -30,7 +30,6 @@ ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 all: $(ALL_CHECKED_FILES)
 
 # Always generate the dependency file
-.PHONY: .depend
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
