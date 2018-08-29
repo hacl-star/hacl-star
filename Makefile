@@ -152,6 +152,7 @@ specs.build: extract-specs extract-all
 
 code.build: specs.build
 	+$(MAKE) -C code clean-c
+	+$(MAKE) -C code verify
 	+$(MAKE) -C code extract-c
 
 providers.build: code.build vale.build

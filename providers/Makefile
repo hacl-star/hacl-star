@@ -76,7 +76,8 @@ FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib/compat evercrypt evercrypt/fst \
   $(HACL_CODE)/salsa-family \
   $(HACL_CODE)/poly1305 \
   $(HACL_CODE)/bignum \
-  $(HACL_SPEC)
+  $(HACL_SPEC) \
+  $(HACL_HOME)/specs/old # REMOVE ASAP
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \

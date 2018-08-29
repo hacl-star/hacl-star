@@ -7,7 +7,8 @@
       2,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      0,
+      "a092f2fd9c3cab389121f99753bdd83e"
     ],
     [
       "Spec.Curve25519.Lemmas.lemma_prime_value",
@@ -15,47 +16,22 @@
       2,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Spec.Curve25519.Lemmas.lemma_prime_value",
-      3,
-      2,
-      1,
-      [
-        "@query", "equation_Prims.nat",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
-      ],
-      0
-    ],
-    [
-      "Spec.Curve25519.Lemmas.lemma_prime_value",
-      4,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      0,
+      "426eeca0de90845a14b4938928b84146"
     ],
     [
       "Spec.Curve25519.Lemmas.lemma_div_n",
       1,
       2,
       1,
-      [ "@query", "projection_inverse_BoxInt_proj_0" ],
-      0
-    ],
-    [
-      "Spec.Curve25519.Lemmas.lemma_div_n",
-      2,
-      2,
-      1,
       [
-        "@query", "equation_Prims.nat", "int_inversion",
-        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "unit_typing"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Division",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
-      0
+      0,
+      "50957e594007f2d327020a65f795e31f"
     ],
     [
       "Spec.Curve25519.Lemmas.lemma_pow2_256",
@@ -63,7 +39,8 @@
       2,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      0,
+      "ef1491b3fe3cec887dc7bc4db1bd8049"
     ],
     [
       "Spec.Curve25519.Lemmas.lemma_pow2_256",
@@ -71,26 +48,8 @@
       2,
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
-      0
-    ],
-    [
-      "Spec.Curve25519.Lemmas.lemma_pow2_256",
-      3,
-      2,
-      1,
-      [
-        "@query", "equation_Prims.nat",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
-      ],
-      0
-    ],
-    [
-      "Spec.Curve25519.Lemmas.lemma_pow2_256",
-      4,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0
+      0,
+      "f6bf5da7ed72bd14bf622e417a00e939"
     ]
   ]
 ]
