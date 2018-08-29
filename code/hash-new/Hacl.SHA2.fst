@@ -57,9 +57,6 @@ let static_fp () =
       (M.loc_union (M.loc_addr_of_buffer h224) (M.loc_addr_of_buffer h256))
       (M.loc_union (M.loc_addr_of_buffer h384) (M.loc_addr_of_buffer h512)))
 
-let loc_in (l: M.loc) (h: HS.mem) =
-  M.(loc_not_unused_in h `loc_includes` l)
-
 let recall_static_fp () =
   B.recall h224;
   B.recall h256;
@@ -667,18 +664,6 @@ let pad_384: pad_t SHA2_384 =
 let pad_512: pad_t SHA2_512 =
   Tactics.(synth_by_tactic (specialize (pad SHA2_512) [`%pad]))
 
-let hash_t (a: sha2_alg) = b:B.buffer U8.t { B.length b = size_hash a }
-
-inline_for_extraction
-let finish_t (a: sha2_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
-  (requires (fun h ->
-    B.disjoint s dst /\
-    B.live h s /\
-    B.live h dst))
-  (ensures (fun h0 _ h1 ->
-    M.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst == Spec.finish a (B.as_seq h0 s)))
-
 inline_for_extraction
 let size_hash_final_w (a: sha2_alg): n:U32.t { U32.v n = size_hash_final_w a } =
   match a with
@@ -749,7 +734,7 @@ let be_of_seq_uint64_base (s1: S.seq U64.t) (s2: S.seq U8.t): Lemma
 =
   ()
 
-#set-options "--max_fuel 0"
+#set-options "--max_fuel 0 --z3rlimit 50"
 
 noextract
 val finish: a:sha2_alg -> finish_t a
@@ -789,3 +774,12 @@ let finish a s dst =
           (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
   in
   C.Loops.for 0ul (size_hash_final_w a) inv f
+
+let finish_224: finish_t SHA2_224 =
+  Tactics.(synth_by_tactic (specialize (finish SHA2_224) [`%finish]))
+let finish_256: finish_t SHA2_256 =
+  Tactics.(synth_by_tactic (specialize (finish SHA2_256) [`%finish]))
+let finish_384: finish_t SHA2_384 =
+  Tactics.(synth_by_tactic (specialize (finish SHA2_384) [`%finish]))
+let finish_512: finish_t SHA2_512 =
+  Tactics.(synth_by_tactic (specialize (finish SHA2_512) [`%finish]))

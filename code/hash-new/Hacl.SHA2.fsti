@@ -17,6 +17,9 @@ open Spec.Hash.Helpers
 
 val static_fp: unit -> GTot M.loc
 
+let loc_in (l: M.loc) (h: HS.mem) =
+  M.(loc_not_unused_in h `loc_includes` l)
+
 (* A useful lemma for clients, to be called at any time before performing an
    allocation, hence giving them "for free" that their allocation is disjoint from
    our top-level arrays. *)
@@ -100,3 +103,20 @@ val pad_224: pad_t SHA2_224
 val pad_256: pad_t SHA2_256
 val pad_384: pad_t SHA2_384
 val pad_512: pad_t SHA2_512
+
+let hash_t (a: sha2_alg) = b:B.buffer U8.t { B.length b = size_hash a }
+
+inline_for_extraction
+let finish_t (a: sha2_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
+  (requires (fun h ->
+    B.disjoint s dst /\
+    B.live h s /\
+    B.live h dst))
+  (ensures (fun h0 _ h1 ->
+    M.(modifies (loc_buffer dst) h0 h1) /\
+    B.as_seq h1 dst == Spec.finish a (B.as_seq h0 s)))
+
+val finish_224: finish_t SHA2_224
+val finish_256: finish_t SHA2_256
+val finish_384: finish_t SHA2_384
+val finish_512: finish_t SHA2_512
