@@ -687,7 +687,7 @@ let size_hash_final_w (a: sha2_alg): n:U32.t { U32.v n = size_hash_final_w a } =
   | SHA2_384 -> 6ul
   | SHA2_512 -> 8ul
 
-#set-options "--max_fuel 1 --z3rlimit 50"
+#set-options "--max_fuel 1 --z3rlimit 20"
 
 let rec be_of_seq_uint32_append (s1 s2: S.seq U32.t): Lemma
   (ensures (
