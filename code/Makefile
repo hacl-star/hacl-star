@@ -7,17 +7,16 @@ old-%:
 
 # 0. Paths and includes
 
-include Makefile.common
-
 ROOTS=$(HACL_HOME)/code/hash-new/Hacl.SHA2.fst
 
 ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 
-.PHONY: .depend
 .depend:
 	@$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
 include .depend
+
+include Makefile.common
 
 # 1. Top-level entry points for this Makefile
 
