@@ -1,50 +1,56 @@
-all: extract-c ct verify
+all: verify extract test
 
-# The bignum directory is not included because it is independently
-# checked by curve25519 and poly1305 with specific parameters
-DIRECTORIES=salsa-family poly1305 poly1305_32 curve25519 api hmac ed25519 hash lib lib/kremlin
-TOOSLOW=experimental
+# Old targets, backwards-compat:
+.PHONY: old-%
+old-%:
+	$(MAKE) -f Makefile.old $*
 
-%-c: %
-	$(MAKE) -C $< extract-c
+# 0. Paths and includes
 
-%-test: %
-	$(MAKE) -C $< test
+ROOTS=$(HACL_HOME)/code/hash-new/Hacl.SHA2.fst
 
-%-ver: %
-	$(MAKE) -C $< all-ver
+ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 
-%-ct: %
-	$(MAKE) -C $< all-ct
+.depend:
+	@$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
-%-ci: %
-	$(MAKE) -C $< all-ci
+include .depend
 
-%-hints: %
-	$(MAKE) -C $< hints
+include Makefile.common
 
-%-clean: %
-	$(MAKE) -C $< clean
+# 1. Top-level entry points for this Makefile
 
-verify: $(addsuffix -ver, $(filter-out $(TOOSLOW),$(DIRECTORIES)))
-test: $(addsuffix -test, $(DIRECTORIES))
-ct: $(addsuffix -ct, $(DIRECTORIES))
-extract-c: $(addsuffix -c, $(filter-out bignum, $(DIRECTORIES)))
-hints: $(addsuffix -hints, $(DIRECTORIES))
-ci: $(addsuffix -ci, $(filter-out $(TOOSLOW),$(DIRECTORIES)))
+verify: $(ALL_CHECKED_FILES)
 
-all-verify: verify
-all-hints: hints
-all-ci: ci
-all-ct: ct
-all-test: test
+extract: # $(OUTPUT_DIR)/Makefile.include
 
-.PHONY: clean
-clean: $(addsuffix -clean, $(DIRECTORIES) experimental)
-	rm -rf *~ *.exe *.out
+# Backwards compat target name
+extract-c: extract old-extract-c
 
-SHELL=/bin/bash
+clean: clean-c
+	find $(DIRS) -iname '*.checked' | xargs rm -rf
 
-.PHONY: clean-
-clean-c:
-	rm -rf {lib/kremlin,*}/*-c/*.{c,h}
+clean-c: old-clean-c
+	rm -rf $(OUTPUT_DIR)
+
+test:
+
+# 2. Verification
+
+%.checked:
+	$(FSTAR) $< && \
+	touch $@
+
+# 3. Extraction
+
+.PRECIOUS: %.krml
+
+$(OUTPUT_DIR)/%.krml:
+	$(FSTAR) --codegen Kremlin \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
+
+$(OUTPUT_DIR)/Makefile.include: $(ALL_KRML_FILES)
+	$(KRML) -tmpdir $(OUTPUT_DIR) -skip-compilation -bundle Spec.* $^ \
+	  -warn-error +9
