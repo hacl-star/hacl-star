@@ -1,7 +1,7 @@
 HACL_HOME?=../..
 include $(HACL_HOME)/Makefile.include
 
-INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/specs
+INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/specs $(HACL_HOME)/specs/old
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
 # JP: override the parent target to NOT include the compat directory
