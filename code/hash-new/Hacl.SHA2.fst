@@ -295,6 +295,7 @@ val k0 (a: sha2_alg): ST.Stack (B.buffer (word a))
     B.live h1 b /\
     M.(modifies loc_none h0 h1) /\
     B.as_seq h1 b == Spec.k0 a))
+inline_for_extraction
 let k0 a =
   match a with
   | SHA2_224 | SHA2_256 ->
@@ -435,13 +436,13 @@ let update a hash block =
   (**) ST.pop_frame ()
 
 let update_224: update_t SHA2_224 =
-  Tactics.(synth_by_tactic (specialize (update SHA2_224) [`%update]))
+  Tactics.(synth_by_tactic (specialize (update SHA2_224) [`%update; `%shuffle; `%shuffle_core; `%ws]))
 let update_256: update_t SHA2_256 =
-  Tactics.(synth_by_tactic (specialize (update SHA2_256) [`%update]))
+  Tactics.(synth_by_tactic (specialize (update SHA2_256) [`%update; `%shuffle; `%shuffle_core; `%ws]))
 let update_384: update_t SHA2_384 =
-  Tactics.(synth_by_tactic (specialize (update SHA2_384) [`%update]))
+  Tactics.(synth_by_tactic (specialize (update SHA2_384) [`%update; `%shuffle; `%shuffle_core; `%ws]))
 let update_512: update_t SHA2_512 =
-  Tactics.(synth_by_tactic (specialize (update SHA2_512) [`%update]))
+  Tactics.(synth_by_tactic (specialize (update SHA2_512) [`%update; `%shuffle; `%shuffle_core; `%ws]))
 
 (** One lemma needed for our for loop for padding *)
 

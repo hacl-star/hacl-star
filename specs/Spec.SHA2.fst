@@ -119,31 +119,43 @@ let op0: a:sha2_alg -> Tot ops = function
 
 
 (* Definition of the SHA2 word functions *)
+inline_for_extraction
 val _Ch: a:sha2_alg -> x:(word a) -> y:(word a) -> z:(word a) -> Tot (word a)
+inline_for_extraction
 let _Ch a x y z = word_logxor a (word_logand a x y)
                                 (word_logand a (word_lognot a x) z)
 
+inline_for_extraction
 val _Maj: a:sha2_alg -> x:(word a) -> y:(word a) -> z:(word a) -> Tot (word a)
+inline_for_extraction
 let _Maj a x y z = word_logxor a (word_logand a x y)
                                  (word_logxor a (word_logand a x z)
                                                 (word_logand a y z))
 
+inline_for_extraction
 val _Sigma0: a:sha2_alg -> x:(word a) -> Tot (word a)
+inline_for_extraction
 let _Sigma0 a x = word_logxor a (word_rotate_right a x (op0 a).c0)
                                 (word_logxor a (word_rotate_right a x (op0 a).c1)
                                                (word_rotate_right a x (op0 a).c2))
 
+inline_for_extraction
 val _Sigma1: a:sha2_alg -> x:(word a) -> Tot (word a)
+inline_for_extraction
 let _Sigma1 a x = word_logxor a (word_rotate_right a x (op0 a).c3)
                                 (word_logxor a (word_rotate_right a x (op0 a).c4)
                                                (word_rotate_right a x (op0 a).c5))
 
+inline_for_extraction
 val _sigma0: a:sha2_alg -> x:(word a) -> Tot (word a)
+inline_for_extraction
 let _sigma0 a x = word_logxor a (word_rotate_right a x (op0 a).e0)
                                 (word_logxor a (word_rotate_right a x (op0 a).e1)
                                                (word_shift_right a x (op0 a).e2))
 
+inline_for_extraction
 val _sigma1: a:sha2_alg -> x:(word a) -> Tot (word a)
+inline_for_extraction
 let _sigma1 a x = word_logxor a (word_rotate_right a x (op0 a).e3)
                                 (word_logxor a (word_rotate_right a x (op0 a).e4)
                                                (word_shift_right a x (op0 a).e5))
