@@ -66,6 +66,9 @@ let extract_taint3 (o1 o2 o3:tainted_operand) : taint =
 unfold let va_bool = bool
 unfold let va_prop = prop0
 unfold let va_int = int
+let va_int_at_least (k:int) = i:int{i >= k}
+let va_int_at_most (k:int) = i:int{i <= k}
+let va_int_range (k1 k2:int) = i:int{k1 <= i /\ i <= k2}
 val ins : eqtype
 val ocmp : eqtype
 unfold let va_code = precode ins ocmp
@@ -131,6 +134,7 @@ val va_fuel_default : unit -> va_fuel
 [@va_qattr] unfold let va_op_xmm_xmm(x:xmm) : va_operand_xmm = x
 [@va_qattr] unfold let va_op_opr_reg (r:reg) : va_operand = TReg r
 [@va_qattr] unfold let va_op_opr64_reg (r:reg) : va_operand = TReg r
+[@va_qattr] unfold let va_op_reg64_reg (r:reg) : va_operand = TReg r
 [@va_qattr] unfold let va_const_operand (n:int) = TConst n
 [@va_qattr] unfold let va_const_opr64 (n:int) = TConst n
 [@va_qattr] unfold let va_const_shift_amt (n:int) : va_shift_amt = TConst n

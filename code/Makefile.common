@@ -1,0 +1,31 @@
+# This Makefile can be safely included from sub-directories for the purposes of
+# defining the .fst-in targets.
+
+include $(FSTAR_HOME)/ulib/ml/Makefile.include
+
+HACL_HOME ?= ..
+KREMLIN_HOME ?= ../../kremlin
+
+DIRS=$(HACL_HOME)/code/hash-new
+
+INCLUDES = \
+  $(DIRS) \
+  $(KREMLIN_HOME)/kremlib \
+  $(HACL_HOME)/code/lib/kremlin \
+  $(HACL_HOME)/specs
+
+# 1. FStar
+
+OUTPUT_DIR = extracted
+
+FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
+
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
+  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES)
+
+%.fst-in:
+	@echo $(FSTAR_INCLUDES)
+
+# 2. Kremlin
+
+KRML = $(KREMLIN_HOME)/krml

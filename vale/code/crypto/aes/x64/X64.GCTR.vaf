@@ -2,10 +2,29 @@ include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "X64.AES.vaf"
+include{:fstar}{:open} "Opaque_s"
+include{:fstar}{:open} "Words_s"
+include{:fstar}{:open} "Types_s"
+include{:fstar}{:open} "Arch.Types"
+include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "AES_s"
+include{:fstar}{:open} "GCTR_s"
+include{:fstar}{:open} "GCTR"
+include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "X64.Poly1305.Math"
+include{:fstar}{:open} "Words.Two_s"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.Vale.QuickCodes"
 
 module X64.GCTR
 
 #verbatim{:interface}{:implementation}
+module GCTR = GCTR
+open Opaque_s
 open Words_s
 open Types_s
 open Arch.Types
@@ -46,7 +65,7 @@ procedure {:quick} init_ctr()
     lemma_quad32_xor();
 }
 
-procedure {:quick exportOnly} inc32(inout dst:xmm, one:xmm)
+procedure {:quick exportOnly} Inc32(inout dst:xmm, one:xmm)
     requires
         one == Mkfour(1, 0, 0, 0);
     modifies
@@ -84,7 +103,7 @@ procedure {:quick} inc32_buffer(ghost iv_b:buffer128)
         Load128_buffer(xmm1, rdi, 0, Secret, iv_b, 0);
         ZeroXmm(xmm2);
         PinsrdImm(xmm2, 1, 0, rax);
-        inc32(xmm1, xmm2);
+        Inc32(xmm1, xmm2);
         Store128_buffer(rdi, xmm1, 0, Secret, iv_b, 0);
 }
 
@@ -132,7 +151,7 @@ procedure {:quick} inc32_buffer_win(ghost stack_b:buffer64, ghost iv_b:buffer128
         Load128_buffer(xmm1, rcx, 0, Secret, iv_b, 0);
         ZeroXmm(xmm2);
         PinsrdImm(xmm2, 1, 0, rax);
-        inc32(xmm1, xmm2);
+        Inc32(xmm1, xmm2);
         Store128_buffer(rcx, xmm1, 0, Secret, iv_b, 0);
 }
 
@@ -140,7 +159,7 @@ procedure {:quick} inc32_buffer_win(ghost stack_b:buffer64, ghost iv_b:buffer128
 // GCTR encrypt one block
 procedure {:quick} gctr_register(
     inline alg:algorithm,
-    ghost key:aes_key_LE(alg),
+    ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128
     )
@@ -152,6 +171,7 @@ procedure {:quick} gctr_register(
     requires
         // AES reqs
         alg = AES_128 || alg = AES_256;
+        is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
         round_keys == key_to_round_keys_LE(alg, key);
         r8 == buffer_addr(keys_b, mem);
@@ -166,8 +186,8 @@ procedure {:quick} gctr_register(
     InitPshufbMask(xmm2, r12);
     Pshufb(xmm0, xmm2);
     AESEncryptBlock(alg, reverse_bytes_quad32(icb_BE), key, round_keys, keys_b);
-    Opaque_s.reveal_opaque(aes_encrypt_LE_def);
-    assert xmm0 == aes_encrypt_LE(alg, key, reverse_bytes_quad32(icb_BE));
+    reveal aes_encrypt_LE_def;
+    //assert xmm0 == aes_encrypt_LE(alg, key, reverse_bytes_quad32(icb_BE));
 
     Pxor(xmm1, xmm0);
 
@@ -182,7 +202,7 @@ procedure {:quick} gctr_core(
     ghost icb_BE:quad32,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
-    ghost key:aes_key_LE(alg),
+    ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128
     )
@@ -207,6 +227,7 @@ procedure {:quick} gctr_core(
 
         // AES reqs
         alg = AES_128 || alg = AES_256;
+        is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
         round_keys == key_to_round_keys_LE(alg, key);
         r8 == buffer_addr(keys_b, mem);
@@ -248,6 +269,7 @@ procedure {:quick} gctr_core(
 
             // AES reqs
             alg = AES_128 || alg = AES_256;
+            is_aes_key_LE(alg, key);
             length(round_keys) == nr(alg) + 1;
             round_keys == key_to_round_keys_LE(alg, key);
             r8 == buffer_addr(keys_b, mem);
@@ -272,7 +294,7 @@ procedure {:quick} gctr_core(
         Mov128(xmm0, icb);
         Pshufb(xmm0, xmm1);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-        Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+        reveal aes_encrypt_LE_def;
 
         Load128_buffer(xmm2, r9, 0, Secret, in_b, rdx);
         Pxor(xmm2, xmm0);
@@ -281,7 +303,7 @@ procedure {:quick} gctr_core(
         Add64(rdx, 1);
         Add64(r9, 16);
         Add64(r10, 16);
-        inc32(icb, xmm4);
+        Inc32(icb, xmm4);
     }
 
 //    // Call a helpful lemma
@@ -294,7 +316,7 @@ procedure {:quick} gctr_bytes_extra_work(
     ghost icb_BE:quad32,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
-    ghost key:aes_key_LE(alg),
+    ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
     ghost orig_in_ptr:nat64,
@@ -320,6 +342,7 @@ procedure {:quick} gctr_bytes_extra_work(
 
         // AES reqs
         alg = AES_128 || alg = AES_256;
+        is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
         round_keys == key_to_round_keys_LE(alg, key);
         r8 == buffer_addr(keys_b, mem);
@@ -354,9 +377,9 @@ procedure {:quick} gctr_bytes_extra_work(
     Mov128(xmm1, xmm2);
     gctr_register(alg, key, round_keys, keys_b);
 
-    assert xmm1 == gctr_encrypt_block(icb, final_quad_LE, alg, key, 0);
+    //assert xmm1 == gctr_encrypt_block(icb, final_quad_LE, alg, key, 0);
     gctr_encrypt_block_offset(icb_BE, final_quad_LE, alg, key, num_blocks);
-    assert xmm1 == gctr_encrypt_block(icb_BE, final_quad_LE, alg, key, num_blocks);
+    //assert xmm1 == gctr_encrypt_block(icb_BE, final_quad_LE, alg, key, num_blocks);
 
     // Write it back out
     Store128_buffer(r10, xmm1, 0, Secret, out_b, num_blocks);
@@ -370,7 +393,7 @@ procedure {:quick} gctr_bytes_extra(
     ghost icb_BE:quad32,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
-    ghost key:aes_key_LE(alg),
+    ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
     ghost orig_in_ptr:nat64,
@@ -396,6 +419,7 @@ procedure {:quick} gctr_bytes_extra(
 
         // AES reqs
         alg = AES_128 || alg = AES_256;
+        is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
         round_keys == key_to_round_keys_LE(alg, key);
         r8 == buffer_addr(keys_b, mem);
@@ -448,7 +472,7 @@ procedure {:quick} gctr_bytes_extra_stdcall(
   ghost num_bytes:nat64,
   ghost iv_old:quad32,
   ghost iv_b:buffer128,
-  ghost key:aes_key_LE(alg),
+  ghost key:seq(nat32),
   ghost keys_b:buffer128,
   ghost cipher_b:buffer128)
     requires/ensures
@@ -480,8 +504,9 @@ procedure {:quick} gctr_bytes_extra_stdcall(
         256 * bytes_to_quad_size(num_bytes) < pow2_32;
 
         alg = AES_128 || alg = AES_256;
+        is_aes_key_LE(alg, key);
         buffer_length(keys_b) == nr(alg) + 1;
-        buffer_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
+        buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
 
         // Extra reqs
         let num_blocks := num_bytes / 16;
@@ -549,7 +574,7 @@ procedure {:quick} gctr_bytes_extra_buffer_win(
   ghost num_bytes:nat64,
   ghost iv_old:(quad32),
   ghost iv_b:buffer128,
-  ghost key:aes_key_LE(alg),
+  ghost key:seq(nat32),
   ghost keys_b:buffer128,
   ghost cipher_b:buffer128)
     requires/ensures
@@ -571,7 +596,7 @@ procedure {:quick} gctr_bytes_extra_buffer_win(
         rdx == num_bytes;
         r8 == buffer_addr(iv_b, mem);
         r9 == buffer_addr(keys_b, mem);
-        buffer_read(stack_b, 5, mem) == buffer_addr(cipher_b, mem);
+        buffer64_read(stack_b, 5, mem) == buffer_addr(cipher_b, mem);
 
 
         buffer_length(plain_b) == bytes_to_quad_size(num_bytes);
@@ -585,8 +610,9 @@ procedure {:quick} gctr_bytes_extra_buffer_win(
         256 * bytes_to_quad_size(num_bytes) < pow2_32;
 
         alg = AES_128 || alg = AES_256;
+        is_aes_key_LE(alg, key);
         buffer_length(keys_b) == nr(alg) + 1;
-        buffer_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
+        buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
 
         // Extra reqs
         let num_blocks := num_bytes / 16;
@@ -638,7 +664,7 @@ procedure {:quick} gctr_bytes_extra_buffer_win(
         efl; mem;
 {
         ghost var orig_in_ptr := rcx;
-        ghost var orig_out_ptr := buffer_read(stack_b, 5, mem);
+        ghost var orig_out_ptr := buffer64_read(stack_b, 5, mem);
         ghost var round_keys := buffer128_as_seq(mem, keys_b);
 
         // Shuffle parameters around to avoid clobbering incoming arguments
@@ -685,7 +711,7 @@ procedure {:quick} gctr_bytes_no_extra(
     ghost icb_BE:quad32,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
-    ghost key:aes_key_LE(alg),
+    ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
     ghost orig_in_ptr:nat64,
@@ -706,6 +732,7 @@ procedure {:quick} gctr_bytes_no_extra(
 
         // AES reqs
         alg = AES_128 || alg = AES_256;
+        is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
         round_keys == key_to_round_keys_LE(alg, key);
 //        r8 == buffer_addr(keys_b, mem);
@@ -745,7 +772,7 @@ procedure {:quick} gctr_bytes(
     ghost icb_BE:quad32,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
-    ghost key:aes_key_LE(alg),
+    ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128
     )
@@ -772,6 +799,7 @@ procedure {:quick} gctr_bytes(
 
         // AES reqs
         alg = AES_128 || alg = AES_256;
+        is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
         round_keys == key_to_round_keys_LE(alg, key);
         r8 == buffer_addr(keys_b, mem);

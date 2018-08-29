@@ -12,7 +12,7 @@
         "projection_inverse_LowStar.BufferView.View_n"
       ],
       0,
-      "80f1ee396af73cbfd7c70cc3a92293d1"
+      "cbc91a9feb0087d51d6644fc341bc3e6"
     ],
     [
       "Memcpy.create_initial_trusted_state",
@@ -67,7 +67,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "71e74127b206e785920e448a2b428912"
+      "b8069cebe43e6a3677238f40c697558d"
     ],
     [
       "Memcpy.lemma_ghost_memcpy",
@@ -76,7 +76,7 @@
       2,
       [ "@query", "equation_SecretByte.t" ],
       0,
-      "2955c2ac7022760441fb096686fdc34e"
+      "f11d472c8472b1fe65c0e75f64a1eeee"
     ],
     [
       "Memcpy.create_initial_vale_state",
@@ -158,7 +158,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_xmms"
       ],
       0,
-      "7725d632b325f5d24deafa8df8a2f5ff"
+      "f644c1ca8124aa35530cc18e8c39191b"
     ],
     [
       "Memcpy.implies_pre",
@@ -171,14 +171,14 @@
         "@query", "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
         "bool_inversion", "constructor_distinct_Prims.Cons",
+        "constructor_distinct_Prims.Nil",
         "constructor_distinct_X64.Machine_s.Rcx",
         "constructor_distinct_X64.Machine_s.Rdi",
         "constructor_distinct_X64.Machine_s.Rdx",
         "constructor_distinct_X64.Machine_s.Rsi",
         "constructor_distinct_X64.Machine_s.Rsp",
         "constructor_distinct_X64.Memory.TUInt64",
-        "data_elim_X64.Vale.State.Mkstate",
-        "data_typing_intro_X64.Memory.TBase@tok", "eq2-interp",
+        "data_elim_X64.Vale.State.Mkstate", "eq2-interp",
         "equality_tok_X64.Machine_s.Public@tok",
         "equality_tok_X64.Machine_s.Rcx@tok",
         "equality_tok_X64.Machine_s.Rdi@tok",
@@ -204,7 +204,7 @@
         "equation_X64.Memory.buffer_length",
         "equation_X64.Memory.buffer_readable",
         "equation_X64.Memory.loc_buffer", "equation_X64.Memory.loc_disjoint",
-        "equation_X64.Memory.m_of_typ",
+        "equation_X64.Memory.m_of_typ", "equation_X64.Memory.tuint64",
         "equation_X64.Memory.valid_taint_buf64", "equation_X64.Memory_s.b8",
         "equation_X64.Memory_s.buffer", "equation_X64.Memory_s.buffer_addr",
         "equation_X64.Memory_s.buffer_length",
@@ -220,11 +220,12 @@
         "equation_X64.Vale.Decls.valid_stack_slots",
         "equation_X64.Vale.Regs.t",
         "equation_with_fuel_FStar.List.Tot.Base.memP.fuel_instrumented",
-        "fuel_guarded_inversion_Prims.list",
+        "false_interp", "fuel_guarded_inversion_Prims.list",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_FStar.Monotonic.HyperHeap.rid",
         "function_token_typing_Interop.b8",
         "function_token_typing_SecretByte.t",
+        "function_token_typing_X64.Memory.tuint64",
         "function_token_typing_X64.Memory_s.uint64_view", "int_inversion",
         "interpretation_Memcpy_Tm_abs_582ecf6ba1cfd9163b86c253def5f1ec",
         "interpretation_Memcpy_Tm_abs_6317a96182d160a25cfff69d39b3d091",
@@ -250,7 +251,7 @@
         "projection_inverse_LowStar.BufferView.View_n",
         "projection_inverse_Prims.Cons_a",
         "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl",
+        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
         "projection_inverse_X64.Memory.TBase_b",
         "projection_inverse_X64.Memory_s.Mkmem__addrs",
         "projection_inverse_X64.Memory_s.Mkmem__ptrs",
@@ -286,8 +287,7 @@
         "typing_X64.Memory_s.create_valid_memtaint",
         "typing_X64.Taint_Semantics_s.__proj__MktraceState__item__state",
         "typing_X64.Vale.StateLemmas.state_to_S",
-        "typing_tok_X64.Machine_s.Rsp@tok",
-        "typing_tok_X64.Memory.TUInt64@tok", "unit_typing"
+        "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
       "2e60b21a78d74ec6e788d64f19aa8b6f"
@@ -331,8 +331,7 @@
         "constructor_distinct_X64.Memory_s.TUInt64",
         "constructor_distinct_X64.Memory_s.TUInt8",
         "data_elim_X64.Memory_s.Mkmem_", "data_elim_X64.Vale.State.Mkstate",
-        "data_typing_intro_X64.Memory.TBase@tok", "eq2-interp",
-        "equality_tok_X64.Machine_s.R10@tok",
+        "eq2-interp", "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
         "equality_tok_X64.Machine_s.R13@tok",
@@ -364,12 +363,13 @@
         "equation_Vale_memcpy.va_code_memcpy",
         "equation_Vale_memcpy.va_post", "equation_Views.view64",
         "equation_Words_s.nat64", "equation_X64.Memory.buffer",
-        "equation_X64.Memory.buffer_as_seq",
+        "equation_X64.Memory.buffer64", "equation_X64.Memory.buffer_as_seq",
         "equation_X64.Memory.buffer_length",
         "equation_X64.Memory.buffer_readable",
         "equation_X64.Memory.loc_buffer", "equation_X64.Memory.m_of_typ",
         "equation_X64.Memory.mem", "equation_X64.Memory.modifies",
-        "equation_X64.Memory_s.b8", "equation_X64.Memory_s.buffer",
+        "equation_X64.Memory.tuint64", "equation_X64.Memory_s.b8",
+        "equation_X64.Memory_s.buffer",
         "equation_X64.Memory_s.buffer_as_seq",
         "equation_X64.Memory_s.buffer_length",
         "equation_X64.Memory_s.buffer_readable",
@@ -390,6 +390,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_FStar.UInt64.t",
         "function_token_typing_Words_s.nat64",
+        "function_token_typing_X64.Memory.tuint64",
         "function_token_typing_X64.Memory_s.uint64_view", "int_inversion",
         "interpretation_Memcpy_Tm_abs_6f727ff71112e858987b9640d6b92af8",
         "interpretation_X64.Memory_s_Tm_abs_86f18423b85ab1c51516efb3edbe5b37",
@@ -422,8 +423,7 @@
         "typing_Memcpy_Tm_abs_6f727ff71112e858987b9640d6b92af8",
         "typing_X64.Memory.m_of_typ",
         "typing_X64.Memory_s_Tm_abs_86f18423b85ab1c51516efb3edbe5b37",
-        "typing_X64.Vale.State.__proj__Mkstate__item__mem",
-        "typing_tok_X64.Memory.TUInt64@tok"
+        "typing_X64.Vale.State.__proj__Mkstate__item__mem"
       ],
       0,
       "9b99193a927048dbfe6938d5af12bd76"

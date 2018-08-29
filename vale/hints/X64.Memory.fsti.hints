@@ -1,5 +1,5 @@
 [
-  "”ìÕÒˆ±QïŒ@D÷†\u0001œÏ",
+  "ß¯\u0001¼-¨©?¹\u000bÙ[i\u001e#ª",
   [
     [
       "X64.Memory.typ",
@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_X64.Memory.base_typ__uu___haseq" ],
       0,
-      "e30e7ecb9c360139d412e8959cad8a2c"
+      "2447e1a6b1a8eaf9b5de5b8bd6023650"
     ],
     [
       "X64.Memory.type_of_base_typ",
@@ -70,7 +70,7 @@
       0,
       [ "@query", "lemma_X64.Memory.buffer_length_buffer_as_seq" ],
       0,
-      "8ef6d3917bdc7fd873b3f84158b7ac5e"
+      "991b9db4904e0ca4a8369cdb5ee85c3a"
     ],
     [
       "X64.Memory.buffer_write",
@@ -90,24 +90,25 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "constructor_distinct_X64.Memory.TUInt64",
-        "data_typing_intro_X64.Memory.TBase@tok",
         "equality_tok_X64.Memory.TUInt64@tok", "equation_Prims.l_and",
         "equation_Prims.nat", "equation_Prims.squash",
         "equation_Words_s.nat64", "equation_Words_s.natN",
-        "equation_Words_s.pow2_1", "equation_X64.Memory.type_of_base_typ",
+        "equation_Words_s.pow2_1", "equation_X64.Memory.buffer64",
+        "equation_X64.Memory.tuint64",
+        "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ",
-        "function_token_typing_Words_s.pow2_1", "l_and-interp",
+        "function_token_typing_Words_s.pow2_1",
+        "function_token_typing_X64.Memory.tuint64", "l_and-interp",
         "lemma_X64.Memory.buffer_length_buffer_as_seq",
         "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_X64.Memory.TBase_b",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_tok_X64.Memory.TUInt64@tok"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "49bef46967def0c9518ea8b606fd9344"
+      "a5970653464de44045d8eb881da9f408"
     ],
     [
       "X64.Memory.lemma_store_mem64",
@@ -120,7 +121,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "654fd9b99aaafeb79431cc7c6a74b647"
+      "03661ca06d66dbc7af5f05e608147158"
     ],
     [
       "X64.Memory.lemma_store_mem128",
@@ -133,7 +134,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "4df56658232b6040d2dfd71c5c0597fc"
+      "02f610e870f15eef20a569683e1e59ee"
     ],
     [
       "X64.Memory.lemma_store_load_mem64",

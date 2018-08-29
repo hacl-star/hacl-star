@@ -1,6 +1,20 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../arch/x64/X64.Vale.InsAes.vaf"
+include{:fstar}{:open} "Types_s"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "Math.Poly2_s"
+include{:fstar}{:open} "Math.Poly2"
+include{:fstar}{:open} "Math.Poly2.Bits_s"
+include{:fstar}{:open} "Math.Poly2.Bits"
+include{:fstar}{:open} "Math.Poly2.Lemmas"
+include{:fstar}{:open} "GF128_s"
+include{:fstar}{:open} "GF128"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.Vale.QuickCodes"
 
 module X64.GF128_Mul
 

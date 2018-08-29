@@ -10,6 +10,7 @@ let seqn (n:nat) (a:Type) : Type = s:seq a{length s == n}
 let seq2 (a:Type) = seqn 2 a
 let seq4 (a:Type) = seqn 4 a
 let seq8 (a:Type) = seqn 8 a
+let seq16 (a:Type) = seqn 16 a
 
 let seq_to_two_LE (#a:Type) (s:seq2 a) : two a =
   Mktwo (index s 0) (index s 1)

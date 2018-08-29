@@ -408,6 +408,7 @@ else:
   fstar_z3_path = ''
 
 vale_exe = File(f'{vale_path}/bin/vale.exe')
+import_fstar_types_exe = File(f'{vale_path}/bin/importFStarTypes.exe')
 fstar_exe = File(f'{fstar_path}/bin/fstar.exe')
 
 ##################################################################################################
@@ -421,10 +422,14 @@ src_include_paths = []  # string paths in sources where .fst, .fsti are found
 obj_include_paths = []  # string paths in obj/, but omitting the 'obj/' prefix
 ml_out_deps = {}
 fsti_map = {}  # map module names to .fsti File nodes (or .fst File nodes if no .fsti exists)
+dump_deps = {}  # map F* type .dump file names x.dump to sets of .dump file names that x.dump depends on
+vaf_dump_deps = {} # map .vaf file names x.vaf to sets of .dump file names that x.vaf depends on
+vaf_vaf_deps = {} # map .vaf file names x.vaf to sets of y.vaf file names that x.vaf depends on
 
 # match 'include {:attr1} ... {:attrn} "filename"'
 # where attr may be 'verbatim' or 'from BASE'
 vale_include_re = re.compile(r'include((?:\s*\{\:(?:\w|[ ])*\})*)\s*"(\S+)"', re.M)
+vale_fstar_re = re.compile(r'\{\:\s*fstar\s*\}')
 vale_from_base_re = re.compile(r'\{\:\s*from\s*BASE\s*\}')
 vale_open_re = re.compile(r'open\s+([a-zA-Z0-9_.]+)')
 vale_friend_re = re.compile(r'friend\s+([a-zA-Z0-9_.]+)')
@@ -455,7 +460,9 @@ def print_error_exit(s):
 
 # Given a File node for dir/dir/.../m.extension, return m
 def file_module_name(file):
-  return os.path.splitext(file.name)[0]
+  name = file.name
+  name = name[:1].upper() + name[1:] # capitalize first letter, as expected for F* module names
+  return os.path.splitext(name)[0]
 
 # Return '.vaf', '.fst', etc.
 def file_extension(file):
@@ -687,22 +694,27 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   stderrfile = File(f'{targetfile}.stderr')
   temptargetfile = File(f'{targetfile}.tmp')
   temptargetfiles = [temptargetfile]
+  dumptargetfile = File(re.sub('\.verified$', '.dump', str(targetfile)))
   hintfile = to_hint_file(sourcefile)
-  outs = []
   if min_test and on_black_list(sourcefile, min_test_suite_blacklist):
     print(f'Skipping {sourcefile} because it is on min_test_suite_blacklist')
-    return outs
   if record_hints:
     temptargetfiles.append(hintfile)
   elif use_hints and os.path.isfile(str(hintfile)):
     Depends(temptargetfiles, hintfile)
-  temptargets = env.Command(temptargetfiles, sourcefile,
+  env.Command(temptargetfiles, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
     f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile}' +
     f' 1> {temptargetfile} 2> {stderrfile}')
-  temptarget = temptargets[0]
-  outs.append(CopyFile(targetfile, temptarget))
-  return outs
+  CopyFile(targetfile, temptargetfile)
+  dump_module_flag = '--dump_module ' + file_module_name(sourcefile)
+  dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
+    ' --print_bound_var_types --ugly ' + dump_module_flag)
+  env.Command(dumptargetfile, sourcefile,
+    f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path}' +
+    f' {fstar_includes} {" ".join(fstar_user_args)}' +
+    f' {dump_flags} 1>{dumptargetfile} 2>&1')
+  Depends(dumptargetfile, targetfile)
 
 def extract_fstar_file(options, sourcefile, fstar_includes):
   env = options.env
@@ -736,20 +748,34 @@ def vale_dependency_scan(env, file):
   fst_includes = vale_open_re.findall(contents) + vale_import_re.findall(contents)
   fst_friends = vale_friend_re.findall(contents)
   obj_file_base = file_drop_extension(to_obj_dir(file))
+  vaf_dump_deps[str(file)] = set()
+  vaf_vaf_deps[str(file)] = set()
+  fst_fsti = [f'{obj_file_base}.fst', f'{obj_file_base}.fsti']
   obj_tmp = [f'{obj_file_base}.fst.verified.tmp']
   obj_tmps = [f'{obj_file_base}.fst.verified.tmp', f'{obj_file_base}.fsti.verified.tmp']
+  typesfile = File(f'{obj_file_base}.types.vaf')
   for (attrs, inc) in vaf_includes:
-    f = os.path.join('code' if vale_from_base_re.search(attrs) else dirname, inc)
-    # if A.vaf includes B.vaf, then manually establish these dependencies:
-    #   A.fst.verified.tmp  depends on B.fsti.verified
-    #   A.fsti.verified.tmp depends on B.fsti.verified
-    f_base = file_drop_extension(to_obj_dir(File(f)))
-    f_fsti = File(f_base + '.fsti.verified')
-    Depends(obj_tmps, f_fsti)
-    add_ml_dependencies([obj_file_base + '.fst'], [f_base + '.fst'])
+    if vale_fstar_re.search(attrs):
+      dumpsourcebase = to_obj_dir(File(f'{fsti_map[inc]}'))
+      dumpsourcefile = File(f'{dumpsourcebase}.dump')
+      if is_our_file(dumpsourcebase):
+        vaf_dump_deps[str(file)].add(str(dumpsourcefile))
+      else:
+        print_error_exit(f'TODO: not implemented: .vaf includes extern F* file {inc}')
+    else:
+      f = os.path.join('code' if vale_from_base_re.search(attrs) else dirname, inc)
+      # if A.vaf includes B.vaf, then manually establish these dependencies:
+      #   A.fst.verified.tmp  depends on B.fsti.verified
+      #   A.fsti.verified.tmp depends on B.fsti.verified
+      vaf_vaf_deps[str(file)].add(str(File(f)))
+      f_base = file_drop_extension(to_obj_dir(File(f)))
+      f_fsti = File(f_base + '.fsti.verified')
+      Depends(obj_tmps, f_fsti)
+      add_ml_dependencies([obj_file_base + '.fst'], [f_base + '.fst'])
+  Depends(fst_fsti, typesfile)
   for inc in fst_includes:
     if inc in fsti_map:
-      Depends(obj_tmps, f'{to_obj_dir(fsti_map[inc])}.verified')
+      Depends(obj_tmps, to_obj_dir(File(f'{fsti_map[inc]}.verified')))
       add_ml_dependencies([obj_file_base + '.fst'], [fsti_map[inc]])
   for inc in fst_friends:
     if inc in fsti_map:
@@ -766,8 +792,10 @@ def translate_vale_file(options, source_vaf):
   target_fsti = File(target + '.fsti')
   targets = [target_fst, target_fsti]
   opt_vale_includes = vale_includes if options.vale_includes == None else options.vale_includes
+  types_include = ''
+  types_include = f'-include {target}.types.vaf'
   env.Command(targets, source_vaf,
-    f'{mono} {vale_exe} -fstarText {opt_vale_includes}' +
+    f'{mono} {vale_exe} -fstarText -typecheck {types_include} {opt_vale_includes}' +
     f' -in {source_vaf} -out {target_fst} -outi {target_fsti}' +
     f' {vale_scons_args} {" ".join(vale_user_args)}')
   return targets
@@ -791,6 +819,27 @@ def process_vale_file(env, file, fstar_includes):
       verify_fstar_file(fsti_options, target_fsti, fsti, fstar_includes)
       if fstar_extract:
         extract_fstar_file(fst_options, fst, fstar_includes)
+
+def compute_module_types(env, source_vaf):
+  source_base = file_drop_extension(to_obj_dir(File(source_vaf)))
+  types_vaf = f'{source_base}.types.vaf'
+  done = set()
+  dumps = []
+  def collect_dumps_in_order(x):
+    if not (x in done):
+      done.add(x)
+      for y in sorted(dump_deps[x]):
+        # if x depends on y, y must appear first
+        collect_dumps_in_order(y)
+      x_vaf = re.sub('\.dump$', '.types.vaf', x)
+      Depends(types_vaf, x)
+      dumps.append(x)
+  for vaf in sorted(vaf_vaf_deps[source_vaf] | {source_vaf}):
+    for x in sorted(vaf_dump_deps[vaf]):
+      collect_dumps_in_order(x)
+  dumps_string = " ".join(['-in ' + str(x) for x in dumps])
+  Depends(types_vaf, import_fstar_types_exe)
+  Command(types_vaf, dumps, f'{mono} {import_fstar_types_exe} {dumps_string} > {types_vaf}')
 
 def recursive_glob(env, pattern, strings = False):
   matches = []
@@ -950,6 +999,9 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
       fstar_deps_ok = False
     if len(line) == 0:
       pass
+    elif '(Warning ' in line:
+      # example: "(Warning 307) logic qualifier is deprecated"
+      pass
     else:
       # lines are of the form:
       #   a1.fst a2.fst ... : b1.fst b2.fst ...
@@ -971,6 +1023,28 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
       targets_ver = [to_obj_dir(File(re.sub('\.fst$', '.fst.verified.tmp', re.sub('\.fsti$', '.fsti.verified.tmp', x)))) for x in targets if is_our_file(File(x))]
       Depends(targets_ver, sources_ver)
       add_ml_dependencies(targets, sources)
+      # Computing types from F* files
+      # Dump F* types for for each of a1.fst a2.fst ... into a1.fst.dump, a2.fst.dump, ...
+      # Targets that we don't verify go in obj/external
+      for t in targets:
+        if is_our_file(File(t)):
+          dumptargetfile = str(to_obj_dir(t + '.dump'))
+        else:
+          # Compute types of an external module, assuming it was compiled with default arguments
+          dumptargetfile = 'obj/external/' + os.path.split(t)[1] + '.dump'
+          dump_module_flag = '--dump_module ' + file_module_name(File(t))
+          dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
+            ' --print_bound_var_types --ugly ' + dump_module_flag)
+          env.Command(dumptargetfile, t,
+            f'{fstar_exe} {t} {fstar_z3_path}' +
+            f' {dump_flags} 1>{dumptargetfile} 2>&1')
+        if not (dumptargetfile in dump_deps):
+          dump_deps[dumptargetfile] = set()
+        for s in sources:
+          if is_our_file(File(s)):
+            dump_deps[dumptargetfile].add(str(to_obj_dir(s + '.dump')))
+          else:
+            dump_deps[dumptargetfile].add('obj/external/' + os.path.split(s)[1] + '.dump')
   if fstar_deps_ok:
     # Save results in depsBackupFile
     with open(depsBackupFile, 'w') as myfile:
@@ -1017,6 +1091,8 @@ if not is_help:
   print('Processing source files')
   process_files_in(env, verify_paths)
   compute_fstar_deps(env, verify_paths, compute_include_paths(src_include_paths, obj_include_paths, 'obj/dummies'))
+  for x in vaf_dump_deps:
+    compute_module_types(env, x)
 
   if fstar_extract:
     # Build AES-GCM

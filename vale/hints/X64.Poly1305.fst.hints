@@ -1,14 +1,48 @@
 [
-  "\u0000S\u007fI§«á.ûq◊\u0000ÒùXA",
+  "çkÿHÃ\u0003#©†7©∫C∂%£",
   [
     [
       "X64.Poly1305.va_qcode_poly1305_multiply",
       1,
       1,
       0,
-      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "equality_tok_X64.Machine_s.R11@tok",
+        "equality_tok_X64.Machine_s.R14@tok",
+        "equality_tok_X64.Machine_s.Rbp@tok",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R11@tok",
+        "typing_tok_X64.Machine_s.R14@tok",
+        "typing_tok_X64.Machine_s.Rbp@tok",
+        "typing_tok_X64.Machine_s.Rbx@tok"
+      ],
       0,
-      "97dc816ac6e38a60d16303295e030e13"
+      "50d6b51aeb0e08a79b0d8a7d24d4dbf2"
+    ],
+    [
+      "X64.Poly1305.va_qcode_poly1305_multiply",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_X64.Vale.Decls.va_int_range",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa"
+      ],
+      0,
+      "a84e6a548922365853b97ef800f26bbf"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_multiply",
@@ -17,11 +51,43 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
         "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
-        "b2t_def", "bool_inversion", "eq2-interp",
+        "equality_tok_X64.Machine_s.R11@tok",
+        "equality_tok_X64.Machine_s.R14@tok",
+        "equality_tok_X64.Machine_s.Rbp@tok",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R11@tok",
+        "typing_tok_X64.Machine_s.R14@tok",
+        "typing_tok_X64.Machine_s.Rbp@tok",
+        "typing_tok_X64.Machine_s.Rbx@tok"
+      ],
+      0,
+      "6d0a3bc9b58dc9f69ce44585398da916"
+    ],
+    [
+      "X64.Poly1305.va_lemma_poly1305_multiply",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.Decls_interpretation_Tm_arrow_5cb353d9ab33862004c1725908c13ad6",
+        "X64.Vale.Decls_interpretation_Tm_arrow_639ecd65f24036b2755b1abf9a0387bf",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "b2t_def", "bool_inversion", "bool_typing", "eq2-interp",
         "equality_tok_X64.Machine_s.R10@tok",
+        "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R14@tok",
         "equality_tok_X64.Machine_s.R8@tok",
         "equality_tok_X64.Machine_s.R9@tok",
@@ -46,6 +112,7 @@
         "equation_X64.Vale.State.update_reg",
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_Prims.bool",
+        "function_token_typing_Prims.int",
         "function_token_typing_Words_s.nat64",
         "function_token_typing_Words_s.pow2_64",
         "function_token_typing_X64.Memory.mem",
@@ -79,13 +146,14 @@
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.Vale.Decls_Tm_refine_7b9fa918ce77b9e5adc73f4acd17e337",
         "refinement_interpretation_X64.Vale.QuickCodes_Tm_refine_00c6eb06022ce986d35ccb5a1bfdb9ee",
         "refinement_interpretation_X64.Vale.QuickCodes_Tm_refine_2a09f2450e26fe8d9312d402cf7d7936",
         "refinement_kinding_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "string_typing",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_Prims.eq2", "typing_Prims.l_and", "typing_Types_s.add_wrap",
-        "typing_X64.Vale.Decls.va_upd_flags",
+        "typing_X64.Vale.Decls.va_if", "typing_X64.Vale.Decls.va_upd_flags",
         "typing_X64.Vale.Decls.va_upd_ok",
         "typing_X64.Vale.Decls.va_upd_reg",
         "typing_X64.Vale.QuickCodes.all_regs_match",
@@ -100,6 +168,7 @@
         "typing_X64.Vale.State.__proj__Mkstate__item__xmms",
         "typing_X64.Vale.State_Tm_abs_b432dd076715d8e83dd110306b23bf05",
         "typing_tok_X64.Machine_s.R10@tok",
+        "typing_tok_X64.Machine_s.R11@tok",
         "typing_tok_X64.Machine_s.R14@tok",
         "typing_tok_X64.Machine_s.R8@tok", "typing_tok_X64.Machine_s.R9@tok",
         "typing_tok_X64.Machine_s.Rax@tok",
@@ -108,7 +177,36 @@
         "typing_tok_X64.Machine_s.Rdx@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "a46a056f794784b8748ee5890872b2f8"
+      "9a4ffdc0a75c56178ac71cd80d998871"
+    ],
+    [
+      "X64.Poly1305.va_wp_poly1305_multiply",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "equality_tok_X64.Machine_s.R11@tok",
+        "equality_tok_X64.Machine_s.R14@tok",
+        "equality_tok_X64.Machine_s.Rbp@tok",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R11@tok",
+        "typing_tok_X64.Machine_s.R14@tok",
+        "typing_tok_X64.Machine_s.Rbp@tok",
+        "typing_tok_X64.Machine_s.Rbx@tok"
+      ],
+      0,
+      "3b1f6e1dd3352b7971f35f5203a8bc53"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_multiply",
@@ -148,7 +246,7 @@
         "typing_tok_X64.Machine_s.Rdx@tok"
       ],
       0,
-      "3714e27405a2aa110f4fb3f09105f7c5"
+      "d98c05560bd2c2638c0baf54c9f46911"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_multiply",
@@ -162,7 +260,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "70360613ee0fb71a13550104ba9732d3"
+      "601c0f6f712f684135cfd8eb291bb1e2"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_multiply",
@@ -174,7 +272,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "75659cccc2ad065492bb069843755c76"
+      "d58214f6a56a9dc5f94bca6f78379172"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_multiply",
@@ -244,20 +342,80 @@
         "typing_tok_X64.Machine_s.Rdx@tok", "unit_typing"
       ],
       0,
-      "c60ff46f2681285bb57ddb63fdd8743d"
+      "cc75ac12ad7cc63f1f93d7fb47b0fb6b"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_reduce",
       1,
       1,
       0,
-      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "equality_tok_X64.Machine_s.R10@tok",
+        "equality_tok_X64.Machine_s.R14@tok",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R10@tok",
+        "typing_tok_X64.Machine_s.R14@tok",
+        "typing_tok_X64.Machine_s.Rbx@tok"
+      ],
       0,
-      "f8b38dfbe74cb6fcc6ad8466342e3ff8"
+      "060af9cacf7f8506fbea831c56ace394"
+    ],
+    [
+      "X64.Poly1305.va_qcode_poly1305_reduce",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_X64.Vale.Decls.va_int_range",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa"
+      ],
+      0,
+      "f43683c22b605ddcff8b293b9664f3f8"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_reduce",
       1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "equality_tok_X64.Machine_s.R10@tok",
+        "equality_tok_X64.Machine_s.R14@tok",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.Poly1305_Tm_refine_42ae1552033cb62fd1ad2bc41e8f9afc",
+        "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R10@tok",
+        "typing_tok_X64.Machine_s.R14@tok",
+        "typing_tok_X64.Machine_s.Rbx@tok"
+      ],
+      0,
+      "71daf9b37bb01769b1d6969c8f8c74d9"
+    ],
+    [
+      "X64.Poly1305.va_lemma_poly1305_reduce",
+      2,
       1,
       0,
       [
@@ -348,7 +506,34 @@
         "typing_tok_X64.Machine_s.Rbx@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "e17026eaafee32e8edbe3af6111e0da0"
+      "fea4e9c7d8ad4138ecfbc8a0137df2db"
+    ],
+    [
+      "X64.Poly1305.va_wp_poly1305_reduce",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "equality_tok_X64.Machine_s.R10@tok",
+        "equality_tok_X64.Machine_s.R14@tok",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R10@tok",
+        "typing_tok_X64.Machine_s.R14@tok",
+        "typing_tok_X64.Machine_s.Rbx@tok"
+      ],
+      0,
+      "c34b9e858476f83f929a02f1cd8d5086"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_reduce",
@@ -384,7 +569,7 @@
         "typing_tok_X64.Machine_s.Rbx@tok"
       ],
       0,
-      "ff1b380058dbf44a7a761edcfbca6f13"
+      "1f97a3eba7bb9c83c6aba59757c841aa"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_reduce",
@@ -398,7 +583,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "7c43c7fbf50753154209cdb2dc0a79fa"
+      "9fefbc313e73afa65623c8df24d0b80a"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_reduce",
@@ -410,7 +595,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "0be53740ce0d983d97bfcdd6d9eaf959"
+      "07aba583d341401221214bad9390cd56"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_reduce",
@@ -419,15 +604,13 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
         "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
         "bool_inversion", "eq2-interp", "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R14@tok",
         "equality_tok_X64.Machine_s.Rax@tok",
         "equality_tok_X64.Machine_s.Rbp@tok",
-        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.eq2",
-        "equation_Prims.squash", "equation_Words_s.nat64",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Words_s.nat64",
         "equation_X64.Poly1305.va_wpCompute_poly1305_reduce",
         "equation_X64.Poly1305.va_wp_poly1305_reduce",
         "equation_X64.Vale.Decls.va_ensure_total",
@@ -439,7 +622,6 @@
         "equation_X64.Vale.QuickCode.t_ensure", "equation_X64.Vale.Regs.t",
         "equation_X64.Vale.State.state_eq",
         "equation_X64.Vale.State.update_reg",
-        "fuel_guarded_inversion_Prims.equals",
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "int_inversion", "int_typing",
@@ -460,12 +642,8 @@
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
-        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "refinement_interpretation_X64.Poly1305_Tm_refine_5610927fcfe31f7e6f7655eea2f6bc71",
         "token_correspondence_X64.Poly1305.va_wpCompute_poly1305_reduce",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
-        "typing_X64.Poly1305.va_code_poly1305_reduce",
-        "typing_X64.Poly1305.va_lemma_poly1305_reduce",
         "typing_X64.Vale.Decls.va_upd_ok",
         "typing_X64.Vale.State.__proj__Mkstate__item__flags",
         "typing_X64.Vale.State.__proj__Mkstate__item__ok",
@@ -475,14 +653,73 @@
         "typing_tok_X64.Machine_s.R14@tok",
         "typing_tok_X64.Machine_s.Rax@tok",
         "typing_tok_X64.Machine_s.Rbp@tok",
-        "typing_tok_X64.Machine_s.Rbx@tok", "unit_typing"
+        "typing_tok_X64.Machine_s.Rbx@tok"
       ],
       0,
-      "1b337d8c34ffe7584091992f2f2b7da9"
+      "85d7ae268b2918d9b4c03574d185fa05"
+    ],
+    [
+      "X64.Poly1305.va_qcode_poly1305_iteration",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "equality_tok_X64.Machine_s.R11@tok",
+        "equality_tok_X64.Machine_s.R14@tok",
+        "equality_tok_X64.Machine_s.Rbp@tok",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R11@tok",
+        "typing_tok_X64.Machine_s.R14@tok",
+        "typing_tok_X64.Machine_s.Rbp@tok",
+        "typing_tok_X64.Machine_s.Rbx@tok"
+      ],
+      0,
+      "285d3ee5a4288c68a9967932e268df68"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_iteration",
       1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "equality_tok_X64.Machine_s.R11@tok",
+        "equality_tok_X64.Machine_s.R14@tok",
+        "equality_tok_X64.Machine_s.Rbp@tok",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "int_inversion", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.Poly1305_Tm_refine_3b044cd1a20f930f5fda1e7c5c605d01",
+        "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R11@tok",
+        "typing_tok_X64.Machine_s.R14@tok",
+        "typing_tok_X64.Machine_s.Rbp@tok",
+        "typing_tok_X64.Machine_s.Rbx@tok"
+      ],
+      0,
+      "f5e0dc2817f491543b895efcd0babed2"
+    ],
+    [
+      "X64.Poly1305.va_lemma_poly1305_iteration",
+      2,
       1,
       0,
       [
@@ -578,7 +815,36 @@
         "typing_tok_X64.Machine_s.Rdx@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "67a4912de6fc8da6f48c87f99eea5091"
+      "d73751ae11549804abba2f0422ba48f0"
+    ],
+    [
+      "X64.Poly1305.va_wp_poly1305_iteration",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "equality_tok_X64.Machine_s.R11@tok",
+        "equality_tok_X64.Machine_s.R14@tok",
+        "equality_tok_X64.Machine_s.Rbp@tok",
+        "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R11@tok",
+        "typing_tok_X64.Machine_s.R14@tok",
+        "typing_tok_X64.Machine_s.Rbp@tok",
+        "typing_tok_X64.Machine_s.Rbx@tok"
+      ],
+      0,
+      "cc2bc880d94c37754e61430438012022"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_iteration",
@@ -619,7 +885,7 @@
         "typing_tok_X64.Machine_s.Rdx@tok"
       ],
       0,
-      "00c8433261d92bb9e68f583321eb58e3"
+      "62216d0564a211e1529257b342a6b976"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_iteration",
@@ -633,7 +899,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "99b183c41a4835e56b9c97d79bc7ea3b"
+      "ac6e7147f9457db87beba5f4303161e7"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_iteration",
@@ -645,7 +911,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "82f461ef3084cfcde7eeaa8e371a138a"
+      "957e07487a05829250d52b959781d0bd"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_iteration",
@@ -695,11 +961,8 @@
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
-        "refinement_interpretation_X64.Poly1305_Tm_refine_41bcc3d3da414fae1d86fcaaeeca6551",
         "token_correspondence_X64.Poly1305.va_wpCompute_poly1305_iteration",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
-        "typing_X64.Poly1305.va_code_poly1305_iteration",
-        "typing_X64.Poly1305.va_lemma_poly1305_iteration",
         "typing_X64.Vale.Decls.va_upd_ok",
         "typing_X64.Vale.State.__proj__Mkstate__item__flags",
         "typing_X64.Vale.State.__proj__Mkstate__item__ok",
@@ -711,10 +974,10 @@
         "typing_tok_X64.Machine_s.Rax@tok",
         "typing_tok_X64.Machine_s.Rbp@tok",
         "typing_tok_X64.Machine_s.Rbx@tok",
-        "typing_tok_X64.Machine_s.Rdx@tok", "unit_typing"
+        "typing_tok_X64.Machine_s.Rdx@tok"
       ],
       0,
-      "e7ceebe14518c603f11e868f60627f8a"
+      "a11bb8b8555a9b167f32216b9f373df2"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_blocks_body",
@@ -726,7 +989,7 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "3c95f25587fe34f16e2d0aa0beedbf62"
+      "4cf4ad93d77c42fd56df1f885861df24"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_blocks_body",
@@ -736,21 +999,17 @@
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_X64.Memory.TUInt64",
-        "data_typing_intro_X64.Memory.TBase@tok",
         "equality_tok_X64.Memory.TUInt64@tok", "equation_Prims.nat",
         "equation_Words_s.nat64", "equation_Words_s.natN",
         "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ",
-        "lemma_X64.Memory.buffer_length_buffer_as_seq",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_X64.Memory.TBase_b",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_X64.Vale.State.__proj__Mkstate__item__mem",
-        "typing_tok_X64.Memory.TUInt64@tok"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "6c3805700c645bf8735a456e4e5033c3"
+      "e948d14811cdc4278e6f76a5a8639cfb"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_blocks_body",
@@ -760,21 +1019,21 @@
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_X64.Memory.TUInt64",
-        "data_typing_intro_X64.Memory.TBase@tok",
         "equality_tok_X64.Memory.TUInt64@tok", "equation_Prims.nat",
         "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Memory.buffer64", "equation_X64.Memory.tuint64",
         "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ",
+        "function_token_typing_X64.Memory.tuint64",
         "lemma_X64.Memory.buffer_length_buffer_as_seq",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_X64.Memory.TBase_b",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_X64.Vale.State.__proj__Mkstate__item__mem",
-        "typing_tok_X64.Memory.TUInt64@tok"
+        "typing_X64.Vale.State.__proj__Mkstate__item__mem"
       ],
       0,
-      "bee855f378a80acd24aec8b09b326066"
+      "302ceec52aaac0d93d21cf0a2d4ae1e5"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_blocks_body",
@@ -783,7 +1042,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "351599e77dbf63c0803c1e4abacc393f"
+      "d505bffa1abb363221f4caf8c5de0016"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_blocks_body",
@@ -792,7 +1051,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "1cccae3e8da2a8158b4879542461423a"
+      "c91037f79d6196e21f57bc00947d21c4"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_blocks_body",
@@ -800,12 +1059,13 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "@MaxIFuel_assumption", "@query",
+        "equation_X64.Vale.Decls.va_int_range",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_c42d7927e44e0f393ec040dac09bfa8d"
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa"
       ],
       0,
-      "a05454496c3f565009aeef0fa51993c5"
+      "781d01603cb1dac812adc93a13503430"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_blocks_body",
@@ -834,11 +1094,11 @@
         "constructor_distinct_X64.Machine_s.Rsi",
         "constructor_distinct_X64.Memory.TUInt64",
         "constructor_distinct_X64.Vale.Decls.TReg",
-        "data_typing_intro_X64.Memory.TBase@tok",
         "disc_equation_X64.Vale.Decls.TReg", "eq2-interp",
         "equality_tok_Prims.LexTop@tok",
         "equality_tok_X64.Machine_s.Public@tok",
         "equality_tok_X64.Machine_s.R10@tok",
+        "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
         "equality_tok_X64.Machine_s.R13@tok",
         "equality_tok_X64.Machine_s.R14@tok",
@@ -857,7 +1117,9 @@
         "equation_Prims.l_imp", "equation_Prims.logical",
         "equation_Prims.nat", "equation_Prims.squash",
         "equation_Types_s.add_wrap", "equation_Words_s.nat64",
-        "equation_Words_s.natN", "equation_X64.Memory.type_of_base_typ",
+        "equation_Words_s.natN", "equation_Words_s.pow2_64",
+        "equation_X64.Memory.buffer64", "equation_X64.Memory.tuint64",
+        "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ", "equation_X64.Poly1305.Math.modp",
         "equation_X64.Poly1305.Util.validSrcAddrs64",
         "equation_X64.Vale.Decls.va_ensure_total",
@@ -875,12 +1137,13 @@
         "equation_X64.Vale.State.update_reg",
         "equation_with_fuel_X64.Poly1305.Util.poly1305_heap_blocks_.fuel_instrumented",
         "fuel_guarded_inversion_X64.Vale.State.state",
-        "function_token_typing_Poly1305.Spec_s.modp_",
         "function_token_typing_Prims.bool",
         "function_token_typing_Prims.int",
         "function_token_typing_Words_s.nat64",
+        "function_token_typing_Words_s.pow2_64",
         "function_token_typing_X64.Memory.mem",
         "function_token_typing_X64.Memory.memtaint",
+        "function_token_typing_X64.Memory.tuint64",
         "function_token_typing_X64.Vale.QuickCodes.range1",
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "int_inversion", "int_typing",
@@ -929,8 +1192,9 @@
         "token_correspondence_Poly1305.Spec_s.modp_",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_Prims.eq2", "typing_Prims.l_and", "typing_Types_s.add_wrap",
-        "typing_X64.Memory.buffer_as_seq", "typing_X64.Memory.buffer_read",
-        "typing_X64.Memory.load_mem64", "typing_X64.Poly1305.Math.modp",
+        "typing_X64.Memory.buffer_addr", "typing_X64.Memory.buffer_as_seq",
+        "typing_X64.Memory.buffer_read", "typing_X64.Memory.load_mem64",
+        "typing_X64.Poly1305.Math.modp",
         "typing_X64.Poly1305.Util.poly1305_heap_blocks",
         "typing_X64.Poly1305.Util.validSrcAddrs64",
         "typing_X64.Vale.Decls.va_upd_flags",
@@ -951,6 +1215,7 @@
         "typing_X64.Vale.State_Tm_abs_b432dd076715d8e83dd110306b23bf05",
         "typing_tok_Prims.LexTop@tok", "typing_tok_X64.Machine_s.Public@tok",
         "typing_tok_X64.Machine_s.R10@tok",
+        "typing_tok_X64.Machine_s.R11@tok",
         "typing_tok_X64.Machine_s.R12@tok",
         "typing_tok_X64.Machine_s.R13@tok",
         "typing_tok_X64.Machine_s.R14@tok",
@@ -962,12 +1227,11 @@
         "typing_tok_X64.Machine_s.Rcx@tok",
         "typing_tok_X64.Machine_s.Rdi@tok",
         "typing_tok_X64.Machine_s.Rdx@tok",
-        "typing_tok_X64.Machine_s.Rsi@tok",
-        "typing_tok_X64.Memory.TUInt64@tok", "unit_inversion", "unit_typing",
+        "typing_tok_X64.Machine_s.Rsi@tok", "unit_inversion", "unit_typing",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "d77a5346a64894b5df64f7a06d43467f"
+      "b96b98fd7195fbff3db6d8dc5274a5a8"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_blocks_body",
@@ -977,9 +1241,22 @@
       [
         "@MaxIFuel_assumption", "@query",
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "bool_inversion", "constructor_distinct_X64.Machine_s.R10",
+        "constructor_distinct_X64.Machine_s.R12",
+        "constructor_distinct_X64.Machine_s.R13",
+        "constructor_distinct_X64.Machine_s.R14",
+        "constructor_distinct_X64.Machine_s.R15",
+        "constructor_distinct_X64.Machine_s.R8",
+        "constructor_distinct_X64.Machine_s.R9",
+        "constructor_distinct_X64.Machine_s.Rax",
+        "constructor_distinct_X64.Machine_s.Rbp",
+        "constructor_distinct_X64.Machine_s.Rbx",
+        "constructor_distinct_X64.Machine_s.Rdx",
+        "constructor_distinct_X64.Machine_s.Rsi",
         "data_typing_intro_FStar.Pervasives.Native.Mktuple2@tok",
         "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
+        "equality_tok_X64.Machine_s.R13@tok",
         "equality_tok_X64.Machine_s.R14@tok",
         "equality_tok_X64.Machine_s.R15@tok",
         "equality_tok_X64.Machine_s.R8@tok",
@@ -997,23 +1274,31 @@
         "equation_X64.Vale.State.update_reg",
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_Prims.int", "function_token_typing_Prims.nat",
-        "int_inversion", "int_typing",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "int_inversion",
         "interpretation_X64.Vale.State_Tm_abs_b432dd076715d8e83dd110306b23bf05",
         "primitive_Prims.op_Equality",
         "proj_equation_X64.Vale.State.Mkstate_flags",
+        "proj_equation_X64.Vale.State.Mkstate_mem",
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "proj_equation_X64.Vale.State.Mkstate_ok",
         "proj_equation_X64.Vale.State.Mkstate_regs",
+        "proj_equation_X64.Vale.State.Mkstate_xmms",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_X64.Vale.State.Mkstate_flags",
+        "projection_inverse_X64.Vale.State.Mkstate_mem",
+        "projection_inverse_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
+        "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_X64.Vale.Decls.va_upd_flags",
         "typing_X64.Vale.Decls.va_upd_ok",
         "typing_X64.Vale.Decls.va_upd_reg",
+        "typing_X64.Vale.State.__proj__Mkstate__item__ok",
         "typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_X64.Vale.State_Tm_abs_b432dd076715d8e83dd110306b23bf05",
         "typing_tok_X64.Machine_s.R10@tok",
@@ -1028,7 +1313,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "5d177db08ebe9b2bfd2faecc0afec01e"
+      "dfaa3f1705334a65ee7253ea56ee9359"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_blocks_body",
@@ -1043,7 +1328,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "198003e04fccb51fa70bf32bd11db6ba"
+      "89a68940d7fd7e5be609b62c75d5d0e7"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_blocks_body",
@@ -1055,7 +1340,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "f48c78b8fed7fef83011418d61f3725b"
+      "5ebf6d0e3b3b34b64083ad65aaf8ce18"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_blocks_body",
@@ -1067,7 +1352,8 @@
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
         "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
-        "eq2-interp", "equality_tok_X64.Machine_s.R10@tok",
+        "eq2-interp", "equality_tok_X64.Machine_s.Public@tok",
+        "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
         "equality_tok_X64.Machine_s.R14@tok",
@@ -1081,9 +1367,11 @@
         "equality_tok_X64.Machine_s.Rsi@tok", "equation_Prims.eq2",
         "equation_Prims.nat", "equation_Prims.squash",
         "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Poly1305.Util.validSrcAddrs64",
         "equation_X64.Poly1305.va_wpCompute_poly1305_blocks_body",
         "equation_X64.Poly1305.va_wp_poly1305_blocks_body",
         "equation_X64.Vale.Decls.va_ensure_total",
+        "equation_X64.Vale.Decls.va_int_range",
         "equation_X64.Vale.Decls.va_require_total",
         "equation_X64.Vale.Decls.va_state_eq",
         "equation_X64.Vale.Decls.va_upd_flags",
@@ -1118,10 +1406,14 @@
         "projection_inverse_X64.Vale.State.Mkstate_regs",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa",
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.Poly1305_Tm_refine_9182dfd91f94ad57edbb7e265aff454d",
         "token_correspondence_X64.Poly1305.va_wpCompute_poly1305_blocks_body",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_X64.Poly1305.va_code_poly1305_blocks_body",
+        "typing_X64.Poly1305.va_lemma_poly1305_blocks_body",
         "typing_X64.Vale.State.__proj__Mkstate__item__flags",
         "typing_X64.Vale.State.__proj__Mkstate__item__ok",
         "typing_X64.Vale.State.__proj__Mkstate__item__regs",
@@ -1139,7 +1431,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok", "unit_typing"
       ],
       0,
-      "04d855ea080dfd41a98851a0f2a80ba6"
+      "57c644e1d739a3d0df8669bcbbc8cc4a"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_blocks_while",
@@ -1156,6 +1448,7 @@
         "constructor_distinct_X64.Machine_s.OReg",
         "constructor_distinct_X64.Machine_s.R10",
         "constructor_distinct_X64.Machine_s.R11",
+        "constructor_distinct_X64.Machine_s.R12",
         "constructor_distinct_X64.Machine_s.R13",
         "constructor_distinct_X64.Machine_s.R14",
         "constructor_distinct_X64.Machine_s.R15",
@@ -1176,7 +1469,6 @@
         "disc_equation_X64.Machine_s.While",
         "disc_equation_X64.Vale.Decls.TMem", "eq2-interp",
         "equality_tok_Prims.LexTop@tok",
-        "equality_tok_X64.Machine_s.Public@tok",
         "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
@@ -1191,7 +1483,6 @@
         "equality_tok_X64.Machine_s.Rdx@tok",
         "equality_tok_X64.Machine_s.Rsi@tok", "equation_Prims.nat",
         "equation_Words_s.nat64", "equation_Words_s.natN",
-        "equation_X64.Poly1305.Util.validSrcAddrs64",
         "equation_X64.Poly1305.va_code_poly1305_blocks_while",
         "equation_X64.Poly1305.va_transparent_code_poly1305_blocks_while",
         "equation_X64.Vale.Decls.va_ensure_total",
@@ -1261,11 +1552,9 @@
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "refinement_interpretation_X64.Poly1305_Tm_refine_9182dfd91f94ad57edbb7e265aff454d",
         "refinement_interpretation_X64.Vale.Decls_Tm_refine_a9c2dd93789dfdc3508bc2337efa878e",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
-        "true_interp", "typing_X64.Poly1305.va_lemma_poly1305_blocks_body",
-        "typing_X64.Vale.Decls.va_upd_flags",
+        "true_interp", "typing_X64.Vale.Decls.va_upd_flags",
         "typing_X64.Vale.Decls.va_upd_ok",
         "typing_X64.Vale.Decls.va_upd_reg",
         "typing_X64.Vale.State.__proj__Mkstate__item__flags",
@@ -1288,7 +1577,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "34e56c769ed4f1aeed962d27e7521b3e"
+      "254246277f7ac072ff3b6904ee2c894c"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_blocks_while",
@@ -1332,7 +1621,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_Prims.int", "function_token_typing_Prims.nat",
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
-        "int_inversion",
+        "int_inversion", "int_typing",
         "interpretation_X64.Vale.State_Tm_abs_b432dd076715d8e83dd110306b23bf05",
         "primitive_Prims.op_Equality",
         "proj_equation_X64.Vale.State.Mkstate_flags",
@@ -1370,7 +1659,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "18d45c33708fddfcc72c88aa0331a18d"
+      "dd60627c0355dfed35f4f421491ced88"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_blocks_while",
@@ -1386,7 +1675,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "82eb0be2be7338a511ff4b7c6fc2a346"
+      "8a49100d8d98970c4ba73cdb52959f55"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_blocks_while",
@@ -1398,7 +1687,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "c31738f927fc5825cdf1819a8dce3564"
+      "7e85e70285d007752d93827c639a3e31"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_blocks_while",
@@ -1479,7 +1768,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "b68bd517b3a9658105f4f70f16180852"
+      "92a2082b777f79cb331cb84587cfa06a"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_blocks",
@@ -1488,7 +1777,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "207b837ca2da79fb961db47fe8b66efd"
+      "a3e5f80d5e918c0eb45982b9b832c56a"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_blocks",
@@ -1504,7 +1793,6 @@
         "b2t_def", "bool_inversion",
         "constructor_distinct_X64.Machine_s.OReg",
         "constructor_distinct_X64.Memory.TUInt64",
-        "data_typing_intro_X64.Memory.TBase@tok",
         "disc_equation_X64.Machine_s.OReg", "eq2-interp",
         "equality_tok_X64.Machine_s.Public@tok",
         "equality_tok_X64.Machine_s.R10@tok",
@@ -1526,6 +1814,7 @@
         "equation_Prims.squash", "equation_Prop_s.prop0",
         "equation_Words_s.nat64", "equation_Words_s.natN",
         "equation_Words_s.pow2_1", "equation_Words_s.pow2_2",
+        "equation_X64.Memory.buffer64", "equation_X64.Memory.tuint64",
         "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ", "equation_X64.Poly1305.Math.modp",
         "equation_X64.Poly1305.Util.modifies_buffer_specific",
@@ -1549,6 +1838,7 @@
         "function_token_typing_Words_s.pow2_2",
         "function_token_typing_X64.Memory.mem",
         "function_token_typing_X64.Memory.memtaint",
+        "function_token_typing_X64.Memory.tuint64",
         "function_token_typing_X64.Vale.QuickCodes.range1",
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "int_inversion", "int_typing", "l_and-interp",
@@ -1599,7 +1889,7 @@
         "refinement_kinding_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "string_typing",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
-        "typing_FStar.Seq.Base.length",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.upd",
         "typing_FStar.StrongExcludedMiddle.strong_excluded_middle",
         "typing_Prims.eq2", "typing_Prims.l_and",
         "typing_X64.Memory.buffer_as_seq", "typing_X64.Memory.buffer_read",
@@ -1632,11 +1922,10 @@
         "typing_tok_X64.Machine_s.Rbp@tok",
         "typing_tok_X64.Machine_s.Rbx@tok",
         "typing_tok_X64.Machine_s.Rdx@tok",
-        "typing_tok_X64.Machine_s.Rsi@tok",
-        "typing_tok_X64.Memory.TUInt64@tok", "unit_inversion", "unit_typing"
+        "typing_tok_X64.Machine_s.Rsi@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "c83920e4e892935c1d02cd971ff31540"
+      "3a6196172904950a0d38d79baa882308"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_blocks",
@@ -1691,7 +1980,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "143fb87a3195eb8297532543cf67d88c"
+      "efeb3b9bdf224180a3bead5ec6600a1e"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_blocks",
@@ -1702,10 +1991,11 @@
         "@MaxIFuel_assumption", "@query", "eq2-interp",
         "equation_X64.Poly1305.va_wp_poly1305_blocks",
         "equation_X64.Vale.Decls.va_require_total",
-        "fuel_guarded_inversion_X64.Vale.State.state"
+        "fuel_guarded_inversion_X64.Vale.State.state", "int_inversion",
+        "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "42f16398db9b9dea5d05e5cc014f0c9c"
+      "85a50cabf8b2b475894c4f0cbc67e7fc"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_blocks",
@@ -1717,7 +2007,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "3c71a4c1c9a92f8740fab0db4616f04a"
+      "8a1aa274a010da344f984415cf810cec"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_blocks",
@@ -1730,8 +2020,7 @@
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
         "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
         "bool_inversion", "constructor_distinct_X64.Memory.TUInt64",
-        "data_typing_intro_X64.Memory.TBase@tok", "eq2-interp",
-        "equality_tok_X64.Machine_s.R10@tok",
+        "eq2-interp", "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
         "equality_tok_X64.Machine_s.R13@tok",
@@ -1747,6 +2036,7 @@
         "equality_tok_X64.Memory.TUInt64@tok", "equation_Prims.eq2",
         "equation_Prims.squash", "equation_Words_s.nat64",
         "equation_Words_s.pow2_1", "equation_Words_s.pow2_2",
+        "equation_X64.Memory.buffer64", "equation_X64.Memory.tuint64",
         "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ",
         "equation_X64.Poly1305.va_wpCompute_poly1305_blocks",
@@ -1765,6 +2055,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_Words_s.pow2_1",
         "function_token_typing_Words_s.pow2_2",
+        "function_token_typing_X64.Memory.tuint64",
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "int_inversion", "int_typing",
         "lemma_X64.Vale.Regs.lemma_equal_elim",
@@ -1801,11 +2092,10 @@
         "typing_tok_X64.Machine_s.R8@tok", "typing_tok_X64.Machine_s.R9@tok",
         "typing_tok_X64.Machine_s.Rax@tok",
         "typing_tok_X64.Machine_s.Rdx@tok",
-        "typing_tok_X64.Machine_s.Rsi@tok",
-        "typing_tok_X64.Memory.TUInt64@tok", "unit_typing"
+        "typing_tok_X64.Machine_s.Rsi@tok", "unit_typing"
       ],
       0,
-      "9aedaca8b2d2c1851c9e5213443e89d7"
+      "7224dbb1b2de128003517737bab23c49"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_last_block",
@@ -1817,19 +2107,21 @@
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
         "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
         "equality_tok_X64.Machine_s.R15@tok", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Words_s.nat64",
-        "equation_Words_s.natN", "equation_X64.Vale.Regs.t",
+        "equation_Prims.pos", "equation_Words_s.nat128",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Decls.va_int_range", "equation_X64.Vale.Regs.t",
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "refinement_interpretation_Prims_Tm_refine_c42d7927e44e0f393ec040dac09bfa8d",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_tok_X64.Machine_s.R15@tok"
       ],
       0,
-      "c71693c4176d5fe0290a4e475b69e156"
+      "00e009630e8cff21d39a16b8e4e170be"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_last_block",
@@ -1838,7 +2130,7 @@
       0,
       [ "@query" ],
       0,
-      "b527bbfad2216b9c411e36b6df8b9701"
+      "81bdbd79db3a02db9d36fd94873ae65b"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_last_block",
@@ -1861,7 +2153,7 @@
         "typing_tok_X64.Machine_s.R15@tok"
       ],
       0,
-      "9bc499ce2664134b0287447b2dbd80ab"
+      "d994fc77a8a952ad6add5dd2471c3faf"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_last_block",
@@ -1874,7 +2166,7 @@
         "refinement_interpretation_Prims_Tm_refine_c42d7927e44e0f393ec040dac09bfa8d"
       ],
       0,
-      "a49dc3ad3b322424f5746ed978130c66"
+      "96aca27aff8fd34bf637ba6445a6ef45"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_last_block",
@@ -1883,7 +2175,7 @@
       0,
       [ "@query" ],
       0,
-      "281de9c5c1522dfcd241b7a20844b090"
+      "1591399e89f4c68f606f20d90f5d4955"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_last_block",
@@ -1892,7 +2184,7 @@
       0,
       [ "@query" ],
       0,
-      "120495c0b3c328054693c92ce734712f"
+      "157aeae9105144c02ffcc097a6f435f4"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_last_block",
@@ -1907,7 +2199,7 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "34e724265191d7ac5a4cde942e2448d0"
+      "ea3a4128a5ccfad29a8b3c18077bbc4d"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_last_block",
@@ -1920,7 +2212,7 @@
         "refinement_interpretation_Prims_Tm_refine_c42d7927e44e0f393ec040dac09bfa8d"
       ],
       0,
-      "55cc20bcdae51a37426069a2a0fe7560"
+      "85c2693807b052e6013fa9232fa63ed4"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_last_block",
@@ -1929,11 +2221,14 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_c42d7927e44e0f393ec040dac09bfa8d"
+        "equation_X64.Vale.Decls.va_int_at_least",
+        "equation_X64.Vale.Decls.va_int_range",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa",
+        "refinement_interpretation_X64.Vale.Decls_Tm_refine_47109dd5837e560f72664f314778a899"
       ],
       0,
-      "d17dec59115500d20a0b19c295aa8da5"
+      "93436572f88f452ae749e43b7b89fc07"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_last_block",
@@ -1943,17 +2238,25 @@
       [
         "@MaxIFuel_assumption", "@query",
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
-        "equality_tok_X64.Machine_s.R15@tok", "equation_Prims.nat",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "equality_tok_X64.Machine_s.R15@tok",
+        "equality_tok_X64.Machine_s.Rax@tok", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Words_s.nat128",
         "equation_Words_s.nat64", "equation_Words_s.natN",
-        "equation_X64.Vale.Regs.t", "projection_inverse_BoxInt_proj_0",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Prims_Tm_refine_c42d7927e44e0f393ec040dac09bfa8d",
+        "refinement_interpretation_X64.Poly1305_Tm_refine_e1c042e6ab22caba4caea160bbb5a2aa",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
-        "typing_X64.Vale.State.__proj__Mkstate__item__regs",
-        "typing_tok_X64.Machine_s.R15@tok"
+        "typing_tok_X64.Machine_s.R15@tok",
+        "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "2a8ad10b004b98763282a06a14468f01"
+      "4c25ccdb7f44a5fe39473be7fd8fcbfc"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_last_block",
@@ -1961,7 +2264,8 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
         "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
@@ -1979,8 +2283,9 @@
         "equation_Poly1305.Spec_s.modp_", "equation_Prims.eq2",
         "equation_Prims.l_and", "equation_Prims.logical",
         "equation_Prims.nat", "equation_Prims.pos", "equation_Prims.squash",
-        "equation_Types_s.add_wrap", "equation_Words_s.nat64",
-        "equation_Words_s.natN", "equation_Words_s.pow2_64",
+        "equation_Types_s.add_wrap", "equation_Words_s.nat128",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_Words_s.pow2_64",
         "equation_X64.Poly1305.Math.lowerUpper128",
         "equation_X64.Poly1305.Math.lowerUpper128_opaque",
         "equation_X64.Poly1305.Math.lowerUpper192",
@@ -1988,6 +2293,7 @@
         "equation_X64.Poly1305.Math.modp",
         "equation_X64.Vale.Decls.va_ensure_total",
         "equation_X64.Vale.Decls.va_if",
+        "equation_X64.Vale.Decls.va_int_range",
         "equation_X64.Vale.Decls.va_require_total",
         "equation_X64.Vale.Decls.va_state_eq",
         "equation_X64.Vale.Decls.va_upd_flags",
@@ -2013,7 +2319,7 @@
         "lemma_X64.Vale.Regs.lemma_equal_elim",
         "lemma_X64.Vale.Xmms.lemma_equal_elim",
         "primitive_Prims.op_GreaterThanOrEqual",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_LessThan",
         "proj_equation_X64.Vale.State.Mkstate_flags",
         "proj_equation_X64.Vale.State.Mkstate_mem",
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
@@ -2032,6 +2338,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_regs",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "refinement_interpretation_Prims_Tm_refine_c42d7927e44e0f393ec040dac09bfa8d",
         "refinement_interpretation_X64.Vale.QuickCodes_Tm_refine_00c6eb06022ce986d35ccb5a1bfdb9ee",
@@ -2044,10 +2351,7 @@
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_Prims.eq2", "typing_Prims.l_and", "typing_Prims.pow2",
         "typing_Types_s.add_wrap", "typing_Types_s.iand",
-        "typing_Types_s.ishl",
-        "typing_X64.Poly1305.Math.lowerUpper128_opaque",
-        "typing_X64.Poly1305.Math.lowerUpper192_opaque",
-        "typing_X64.Vale.Decls.va_upd_flags",
+        "typing_Types_s.ishl", "typing_X64.Vale.Decls.va_upd_flags",
         "typing_X64.Vale.Decls.va_upd_ok",
         "typing_X64.Vale.Decls.va_upd_reg",
         "typing_X64.Vale.QuickCodes.all_regs_match",
@@ -2072,7 +2376,7 @@
         "typing_tok_X64.Machine_s.Rdx@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "7d1bc63b763ec889c257840aebd93b9d"
+      "b1f7848b4c53aa9ea79e96efa1f3dbf8"
     ],
     [
       "X64.Poly1305.va_wp_poly1305_last_block",
@@ -2082,24 +2386,31 @@
       [
         "@MaxIFuel_assumption", "@query",
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
         "equality_tok_X64.Machine_s.R15@tok",
+        "equality_tok_X64.Machine_s.Rax@tok",
         "equality_tok_X64.Machine_s.Rbp@tok",
         "equality_tok_X64.Machine_s.Rbx@tok", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Words_s.nat128",
         "equation_Words_s.nat64", "equation_Words_s.natN",
         "equation_X64.Vale.Decls.va_upd_flags",
         "equation_X64.Vale.Decls.va_upd_reg", "equation_X64.Vale.Regs.t",
         "equation_X64.Vale.State.update_reg",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "proj_equation_X64.Vale.State.Mkstate_regs",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Prims_Tm_refine_c42d7927e44e0f393ec040dac09bfa8d",
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_X64.Vale.State_Tm_abs_b432dd076715d8e83dd110306b23bf05",
-        "typing_tok_X64.Machine_s.R15@tok"
+        "typing_tok_X64.Machine_s.R15@tok",
+        "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "bd2ab6371f6925c1122061f987e92733"
+      "4219ee2611d29dddbba7c58667a9052d"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_last_block",
@@ -2143,7 +2454,7 @@
         "typing_tok_X64.Machine_s.Rcx@tok", "unit_typing"
       ],
       0,
-      "ffec2a554a972140222bf177ab55c756"
+      "adee302f4be6cd23b08fe24bf6d850d5"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_last_block",
@@ -2157,7 +2468,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "f1096e7e037f0e71db95ceb0a2413ec1"
+      "67d626a2e27a294bcfef215f38f1f09b"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_last_block",
@@ -2169,7 +2480,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "9918f963a0b42a50ebb2ce0f14dd0a0c"
+      "37768623f0e1388067fc8170fbdccb3e"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_last_block",
@@ -2205,7 +2516,6 @@
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "lemma_X64.Vale.Regs.lemma_equal_elim",
         "lemma_X64.Vale.Xmms.lemma_equal_elim",
-        "primitive_Prims.op_LessThan",
         "proj_equation_X64.Vale.State.Mkstate_flags",
         "proj_equation_X64.Vale.State.Mkstate_mem",
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
@@ -2239,7 +2549,7 @@
         "typing_tok_X64.Machine_s.Rdx@tok", "unit_typing"
       ],
       0,
-      "2527061a7df5867f494788b569e26953"
+      "d7ea039dde22105ac38c268ec80b5c8d"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_reduce_last",
@@ -2346,7 +2656,7 @@
         "typing_tok_X64.Machine_s.Rbx@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "ead146dea233e3ac267df0f38ad73876"
+      "a73b804c7862acc88adc8b73676320ff"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_reduce_last",
@@ -2388,7 +2698,7 @@
         "unit_typing"
       ],
       0,
-      "57032661791f4c8183849c3e36e03854"
+      "eaf14743ad423e40121dc44c1ccf6f1c"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_reduce_last",
@@ -2402,7 +2712,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "661f5cd548d88a83e5d52b2a230d7e72"
+      "5714bb999f5697b9462532c1d5ff9b21"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_reduce_last",
@@ -2414,7 +2724,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "7542d498f9805399d37a225a3709e5d7"
+      "f4f9dc4a77e2caf7f58ae558ef69f305"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_reduce_last",
@@ -2479,11 +2789,29 @@
         "typing_tok_X64.Machine_s.Rbx@tok", "unit_typing"
       ],
       0,
-      "f35866b915c3c4b897ec0d049fe62b2d"
+      "a2988acc2f5d80a0686e0ea3f5491293"
+    ],
+    [
+      "X64.Poly1305.va_qcode_poly1305_add_key_s",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "187d44451baa867929f8d6540e4c2573"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_add_key_s",
       1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "fa6f2cfb27141250706468543f66bd54"
+    ],
+    [
+      "X64.Poly1305.va_lemma_poly1305_add_key_s",
+      2,
       1,
       0,
       [
@@ -2564,7 +2892,16 @@
         "typing_tok_X64.Machine_s.Rbx@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "2fbe4f68335de16a18590009d3c85729"
+      "7934cfca9338168e232fc3ecb8bb9745"
+    ],
+    [
+      "X64.Poly1305.va_wp_poly1305_add_key_s",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "e7b301f5b5981e9fc73e0e0d152d6dc2"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_add_key_s",
@@ -2583,7 +2920,7 @@
         "typing_tok_X64.Machine_s.Rbx@tok", "unit_typing"
       ],
       0,
-      "3a1340714ceb3ac88c1fd81437a86d4c"
+      "71c84d4c036f56513c0d845ff0938381"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_add_key_s",
@@ -2597,7 +2934,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "a112115cad12249e40b0a37f2291b8db"
+      "3c4421a5d03c0a881a4196b422bc0b4a"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_add_key_s",
@@ -2609,7 +2946,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "110e51901d52462de70e2b97b6afe98d"
+      "954f60c9b05899f67ee274069bb4a54f"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_add_key_s",
@@ -2665,7 +3002,7 @@
         "typing_tok_X64.Machine_s.Rbx@tok", "unit_typing"
       ],
       0,
-      "0c38a76b7b4575eea944aad009c5a949"
+      "6a5c303c51ca214228e899d810e80ced"
     ],
     [
       "X64.Poly1305.reveal_logand128",
@@ -2688,20 +3025,48 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "e9a82137321a57030dceaea7d9d53c78"
+      "5b08e725bb08cd62b54c9b2adc76de6e"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_impl",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+      ],
       0,
-      "b39581e7f01b3c4533279386818d2e47"
+      "1fb5a1de7f0e610ff791c643ecfddb58"
     ],
     [
       "X64.Poly1305.va_qcode_poly1305_impl",
       2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_X64.Vale.Decls.va_int_range",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa"
+      ],
+      0,
+      "4b87546bc41f7b3af84465d101f17996"
+    ],
+    [
+      "X64.Poly1305.va_qcode_poly1305_impl",
+      3,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "c31c6e84f4076c9789090d6f25a61ea8"
+    ],
+    [
+      "X64.Poly1305.va_qcode_poly1305_impl",
+      4,
       1,
       0,
       [
@@ -2720,7 +3085,7 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "8101c5fc69a455caaf97cd345b331a03"
+      "78fa2fb1485bddac5e495bad4f0578ec"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305_impl",
@@ -2729,6 +3094,7 @@
       0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
@@ -2737,7 +3103,6 @@
         "b2t_def", "bool_inversion", "bool_typing",
         "constructor_distinct_X64.Machine_s.OReg",
         "constructor_distinct_X64.Memory.TUInt64",
-        "data_typing_intro_X64.Memory.TBase@tok",
         "disc_equation_X64.Machine_s.OReg", "eq2-interp",
         "equality_tok_X64.Machine_s.Public@tok",
         "equality_tok_X64.Machine_s.R10@tok",
@@ -2763,6 +3128,7 @@
         "equation_Prop_s.prop0", "equation_Words_s.nat128",
         "equation_Words_s.nat64", "equation_Words_s.natN",
         "equation_Words_s.pow2_1", "equation_Words_s.pow2_2",
+        "equation_X64.Memory.buffer64", "equation_X64.Memory.tuint64",
         "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ",
         "equation_X64.Poly1305.Math.bare_r",
@@ -2776,6 +3142,7 @@
         "equation_X64.Poly1305.Util.modifies_buffer_specific",
         "equation_X64.Poly1305.Util.readable_words",
         "equation_X64.Poly1305.Util.seqTo128",
+        "equation_X64.Poly1305.Util.seqTo128_app",
         "equation_X64.Poly1305.Util.validSrcAddrs64",
         "equation_X64.Vale.Decls.va_ensure_total",
         "equation_X64.Vale.Decls.va_require_total",
@@ -2797,6 +3164,7 @@
         "function_token_typing_Words_s.pow2_2",
         "function_token_typing_X64.Memory.mem",
         "function_token_typing_X64.Memory.memtaint",
+        "function_token_typing_X64.Memory.tuint64",
         "function_token_typing_X64.Poly1305.Util.seqTo128",
         "function_token_typing_X64.Vale.QuickCodes.range1",
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
@@ -2855,13 +3223,16 @@
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_FStar.Seq.Base.upd",
         "typing_FStar.StrongExcludedMiddle.strong_excluded_middle",
-        "typing_FStar.UInt.fits", "typing_Prims.eq2", "typing_Prims.l_and",
-        "typing_X64.Memory.buffer_as_seq", "typing_X64.Memory.buffer_read",
-        "typing_X64.Memory.buffer_readable",
+        "typing_FStar.UInt.fits", "typing_Poly1305.Spec_s.poly1305_hash",
+        "typing_Prims.eq2", "typing_Prims.l_and",
+        "typing_X64.Memory.buffer_addr", "typing_X64.Memory.buffer_as_seq",
+        "typing_X64.Memory.buffer_read", "typing_X64.Memory.buffer_readable",
         "typing_X64.Memory.buffer_write", "typing_X64.Memory.loc_buffer",
         "typing_X64.Poly1305.Math.lowerUpper128_opaque",
-        "typing_X64.Poly1305.Math.lowerUpper192_opaque",
         "typing_X64.Poly1305.Math.mod2_128",
+        "typing_X64.Poly1305.Util.poly1305_heap_blocks",
+        "typing_X64.Poly1305.Util.seqTo128_app",
+        "typing_X64.Poly1305.Util_Tm_abs_24cb0ded4bd6e58be223fa3b238658e3",
         "typing_X64.Vale.Decls.va_upd_flags",
         "typing_X64.Vale.Decls.va_upd_mem",
         "typing_X64.Vale.Decls.va_upd_ok",
@@ -2891,11 +3262,10 @@
         "typing_tok_X64.Machine_s.Rcx@tok",
         "typing_tok_X64.Machine_s.Rdi@tok",
         "typing_tok_X64.Machine_s.Rdx@tok",
-        "typing_tok_X64.Machine_s.Rsi@tok",
-        "typing_tok_X64.Memory.TUInt64@tok", "unit_inversion", "unit_typing"
+        "typing_tok_X64.Machine_s.Rsi@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "2f09a63550c31e4f8f3fbf582882baea"
+      "415be4f9d84f2bbef83d05d01de9d34c"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305_impl",
@@ -2953,7 +3323,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "1014384e93f9df39df16c43317b7b371"
+      "aa1c74476f6cb20389f0685e31ae3be4"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305_impl",
@@ -2967,7 +3337,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "aaced61ca158394c61613494969a6108"
+      "b9ce3e9fd53c69df6cfd04e0e941c3f1"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_impl",
@@ -2979,7 +3349,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "a6859e9a03c9e4308dbbcf8085a5b32f"
+      "95918e781ad653e007e2df448247a927"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305_impl",
@@ -3060,11 +3430,59 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "c8b253948f6d625daca391715f3dcbee"
+      "05b9785770fcd1e20d17469c29e6644e"
+    ],
+    [
+      "X64.Poly1305.va_qcode_poly1305",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+      ],
+      0,
+      "dd61814407fdd21776f4f46b089c1c98"
     ],
     [
       "X64.Poly1305.va_lemma_poly1305",
       1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
+        "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
+        "bool_inversion", "equality_tok_X64.Machine_s.Public@tok",
+        "equality_tok_X64.Machine_s.R8@tok",
+        "equality_tok_X64.Machine_s.Rcx@tok",
+        "equality_tok_X64.Machine_s.Rdi@tok",
+        "equality_tok_X64.Machine_s.Rdx@tok", "equation_Prims.nat",
+        "equation_Words_s.nat128", "equation_Words_s.nat64",
+        "equation_Words_s.natN",
+        "equation_X64.Poly1305.Util.validSrcAddrs64",
+        "equation_X64.Vale.Regs.t",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "int_inversion", "proj_equation_X64.Vale.State.Mkstate_mem",
+        "proj_equation_X64.Vale.State.Mkstate_memTaint",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.Poly1305_Tm_refine_1c56027f4b21697f79b699b345384e9d",
+        "typing_tok_X64.Machine_s.R8@tok",
+        "typing_tok_X64.Machine_s.Rcx@tok",
+        "typing_tok_X64.Machine_s.Rdi@tok",
+        "typing_tok_X64.Machine_s.Rdx@tok"
+      ],
+      0,
+      "27e1fc94ac62357a30c5bcddd0693fbc"
+    ],
+    [
+      "X64.Poly1305.va_lemma_poly1305",
+      2,
       1,
       0,
       [
@@ -3074,7 +3492,6 @@
         "X64.Vale.State_interpretation_Tm_arrow_4a4e21a0b7022b1a162c1de94795bfa0",
         "bool_inversion", "constructor_distinct_X64.Machine_s.OReg",
         "constructor_distinct_X64.Memory.TUInt64",
-        "data_typing_intro_X64.Memory.TBase@tok",
         "disc_equation_X64.Machine_s.OReg", "eq2-interp",
         "equality_tok_X64.Machine_s.Public@tok",
         "equality_tok_X64.Machine_s.R10@tok",
@@ -3097,6 +3514,7 @@
         "equation_Prop_s.prop0", "equation_Words_s.nat128",
         "equation_Words_s.nat64", "equation_Words_s.natN",
         "equation_Words_s.pow2_2", "equation_Words_s.pow2_4",
+        "equation_X64.Memory.buffer64", "equation_X64.Memory.tuint64",
         "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ",
         "equation_X64.Poly1305.Math.lowerUpper128_opaque",
@@ -3124,15 +3542,20 @@
         "function_token_typing_Words_s.pow2_4",
         "function_token_typing_X64.Memory.mem",
         "function_token_typing_X64.Memory.memtaint",
+        "function_token_typing_X64.Memory.tuint64",
         "function_token_typing_X64.Vale.QuickCodes.range1",
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "int_inversion", "int_typing",
+        "interpretation_X64.Poly1305_Tm_abs_0b66e0c9ef1242dc3b23c5432e3ee558",
         "interpretation_X64.Poly1305_Tm_abs_0e5aa016f2cda84a4fafe5ddd2276ba1",
         "interpretation_X64.Poly1305_Tm_abs_0f8a7630284e3d909f1e4faae9d6f5a9",
         "interpretation_X64.Poly1305_Tm_abs_13f8863e26b08630de15e50499b9d05a",
+        "interpretation_X64.Poly1305_Tm_abs_162069d58855e5c52a88859ba57de152",
         "interpretation_X64.Poly1305_Tm_abs_3565669092ab8ef06b9620ab034d19c7",
+        "interpretation_X64.Poly1305_Tm_abs_3fa08013c5542e34acc350b16c432752",
         "interpretation_X64.Poly1305_Tm_abs_5742ebd6a7416006fb4a1cc7876e63eb",
         "interpretation_X64.Poly1305_Tm_abs_6fd5bc743550b4878fe3248ee4e1639e",
+        "interpretation_X64.Poly1305_Tm_abs_cd8d3542f2779db6ee2642cb0ddcd4ca",
         "interpretation_X64.Poly1305_Tm_abs_e5a93c9446ad271e3bf107620f80fd58",
         "interpretation_X64.Poly1305_Tm_abs_fd4bc823ad4bec22c290ec636ede0b63",
         "l_and-interp", "lemma_FStar.Seq.Base.lemma_index_upd1",
@@ -3184,20 +3607,15 @@
         "token_correspondence_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_FStar.StrongExcludedMiddle.strong_excluded_middle",
         "typing_Poly1305.Spec_s.poly1305_hash", "typing_Prims.eq2",
-        "typing_Prims.l_and", "typing_X64.Memory.buffer_as_seq",
-        "typing_X64.Memory.buffer_read", "typing_X64.Memory.buffer_readable",
+        "typing_Prims.l_and", "typing_X64.Memory.buffer_addr",
+        "typing_X64.Memory.buffer_as_seq", "typing_X64.Memory.buffer_read",
+        "typing_X64.Memory.buffer_readable",
         "typing_X64.Memory.buffer_write", "typing_X64.Memory.loc_buffer",
         "typing_X64.Memory.modifies",
         "typing_X64.Poly1305.Math.lowerUpper128_opaque",
         "typing_X64.Poly1305.Util.validSrcAddrs64",
         "typing_X64.Poly1305.Util_Tm_abs_24cb0ded4bd6e58be223fa3b238658e3",
-        "typing_X64.Poly1305_Tm_abs_0b66e0c9ef1242dc3b23c5432e3ee558",
-        "typing_X64.Poly1305_Tm_abs_0f8a7630284e3d909f1e4faae9d6f5a9",
-        "typing_X64.Poly1305_Tm_abs_162069d58855e5c52a88859ba57de152",
-        "typing_X64.Poly1305_Tm_abs_3fa08013c5542e34acc350b16c432752",
-        "typing_X64.Poly1305_Tm_abs_cd8d3542f2779db6ee2642cb0ddcd4ca",
-        "typing_X64.Poly1305_Tm_abs_fd4bc823ad4bec22c290ec636ede0b63",
-        "typing_X64.Vale.Decls.va_if", "typing_X64.Vale.Decls.va_upd_flags",
+        "typing_X64.Vale.Decls.va_upd_flags",
         "typing_X64.Vale.Decls.va_upd_mem",
         "typing_X64.Vale.Decls.va_upd_ok",
         "typing_X64.Vale.Decls.va_upd_reg",
@@ -3226,11 +3644,33 @@
         "typing_tok_X64.Machine_s.Rcx@tok",
         "typing_tok_X64.Machine_s.Rdi@tok",
         "typing_tok_X64.Machine_s.Rdx@tok",
-        "typing_tok_X64.Machine_s.Rsi@tok",
-        "typing_tok_X64.Memory.TUInt64@tok", "unit_typing"
+        "typing_tok_X64.Machine_s.Rsi@tok", "unit_typing"
       ],
       0,
-      "fcd6e09829adb1897b9f0ff53ded9276"
+      "9840dc8b3f6142971cb5156cbfe6c50a"
+    ],
+    [
+      "X64.Poly1305.va_wp_poly1305",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equation_Prims.nat", "equation_Words_s.nat64",
+        "equation_Words_s.natN", "equation_X64.Vale.Decls.va_if",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_Words_s.nat64",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "typing_X64.Poly1305_Tm_abs_0b66e0c9ef1242dc3b23c5432e3ee558",
+        "typing_X64.Poly1305_Tm_abs_0f8a7630284e3d909f1e4faae9d6f5a9",
+        "typing_X64.Poly1305_Tm_abs_162069d58855e5c52a88859ba57de152",
+        "typing_X64.Poly1305_Tm_abs_fd4bc823ad4bec22c290ec636ede0b63",
+        "typing_X64.Vale.Decls.va_if", "unit_typing"
+      ],
+      0,
+      "04856b88cb2c81907e18645bed8ebb47"
     ],
     [
       "X64.Poly1305.va_wpMonotone_poly1305",
@@ -3293,7 +3733,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "5a119cc229852bc81b79b3a500e0775b"
+      "d24ff63c7d841e0cc254c86ed51d51da"
     ],
     [
       "X64.Poly1305.va_wpCompute_poly1305",
@@ -3322,7 +3762,7 @@
         "typing_X64.Vale.State.__proj__Mkstate__item__ok", "unit_typing"
       ],
       0,
-      "dc00e597aff07189922a3d57c45baeb3"
+      "9ac8537e86c5ea5065673e0169539804"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305",
@@ -3334,7 +3774,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "42a128d1045a9a703c9c6eedbb1aaab8"
+      "f6d87a97330b45cca0d835f3aeed5334"
     ],
     [
       "X64.Poly1305.va_wpProof_poly1305",
@@ -3426,7 +3866,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok", "unit_typing"
       ],
       0,
-      "eb51ea28e98ec8f62a887a73066ebdcd"
+      "9cb16adff8ade1d18a2d3d8bd851e09a"
     ]
   ]
 ]

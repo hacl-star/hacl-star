@@ -46,11 +46,18 @@ val loc_disjoint (s1 s2:loc) : GTot prop0
 val loc_includes (s1 s2:loc) : GTot prop0
 val modifies (s:loc) (h1 h2:mem) : GTot prop0
 
-unfold let buffer8 = buffer (TBase TUInt8)
-unfold let buffer16 = buffer (TBase TUInt16)
-unfold let buffer32 = buffer (TBase TUInt32)
-unfold let buffer64 = buffer (TBase TUInt64)
-unfold let buffer128 = buffer (TBase TUInt128)
+// Named abbreviations for Vale type system:
+unfold let tuint8 = TBase TUInt8
+unfold let tuint16 = TBase TUInt16
+unfold let tuint32 = TBase TUInt32
+unfold let tuint64 = TBase TUInt64
+unfold let tuint128 = TBase TUInt128
+
+let buffer8 = buffer tuint8
+let buffer16 = buffer tuint16
+let buffer32 = buffer tuint32
+let buffer64 = buffer tuint64
+let buffer128 = buffer tuint128
 
 val buffer_addr : #t:typ -> b:buffer t -> h:mem -> GTot int
 

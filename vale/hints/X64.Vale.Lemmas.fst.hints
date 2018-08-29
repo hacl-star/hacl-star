@@ -36,7 +36,7 @@
         "typing_X64.Vale.StateLemmas.state_to_S"
       ],
       0,
-      "4ed307e38c574c6eca43720c4e7a4635"
+      "421064ae20bc7960b921c09749beea11"
     ],
     [
       "X64.Vale.Lemmas.eval_while_eq_all",
@@ -45,7 +45,7 @@
       0,
       [ "@query" ],
       0,
-      "ae5a097d70f7b2e45690cb1e55b05ba9"
+      "4935249f3500f5c24f6235e78474fc39"
     ],
     [
       "X64.Vale.Lemmas.eval_code_eq_all",
@@ -466,6 +466,8 @@
         "interpretation_X64.Taint_Semantics_s_Tm_abs_7619f561636f40b97cdd77c1b146c0e3",
         "interpretation_X64.Taint_Semantics_s_Tm_abs_b5473b0bfbde72d631464b64317be381",
         "kinding_X64.Machine_s.observation@tok",
+        "kinding_X64.Taint_Semantics_s.tainted_ins@tok",
+        "kinding_X64.Taint_Semantics_s.tainted_ocmp@tok",
         "kinding_X64.Taint_Semantics_s.traceState@tok",
         "lemma_FStar.Pervasives.invertOption",
         "lemma_X64.Vale.Lemmas.eval_code_eq",
@@ -488,7 +490,6 @@
         "proj_equation_X64.Taint_Semantics_s.MktraceState_trace",
         "proj_equation_X64.Taint_Semantics_s.TaintedOCmp_o",
         "proj_equation_X64.Taint_Semantics_s.TaintedOCmp_ot",
-        "proj_equation_X64.Vale.State.Mkstate_ok",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
@@ -530,6 +531,7 @@
         "typing_FStar.Pervasives.Native.uu___is_None",
         "typing_FStar.Pervasives.Native.uu___is_Some",
         "typing_X64.Bytes_Semantics_s.__proj__Mkstate__item__ok",
+        "typing_X64.Machine_s.uu___is_Ins",
         "typing_X64.Memory_s.__proj__Mkstate___item__state",
         "typing_X64.Semantics_s.eval_ocmp",
         "typing_X64.Semantics_s.valid_operand",
@@ -1758,7 +1760,7 @@
       0,
       [ "@query" ],
       0,
-      "31b96b1c768c47355d37d0dfde58b02d"
+      "26864c6f0030c936d4deea6643d684ad"
     ],
     [
       "X64.Vale.Lemmas.lemma_whileMerge_total",
@@ -1775,7 +1777,6 @@
         "X64.Machine_s_pretyping_4fe0207725d630b675b9df5323836271",
         "X64.Semantics_s_interpretation_Tm_arrow_6dd4b2d408ebb27b698bdc002d931e9e",
         "bool_inversion", "bool_typing",
-        "constructor_distinct_FStar.Pervasives.Native.None",
         "constructor_distinct_FStar.Pervasives.Native.Some",
         "data_elim_FStar.Pervasives.Native.Mktuple2",
         "data_elim_FStar.Pervasives.Native.Some",

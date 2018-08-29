@@ -13,6 +13,32 @@ open Words.Two_s
 unfold let ( *^ ) = nat32_xor
 unfold let ( *^^ ) = quad32_xor
 
+unfold let add_wrap32 (x:nat32) (y:nat32) : nat32 = add_wrap x y
+unfold let add_wrap64 (x:nat64) (y:nat64) : nat64 = add_wrap x y
+
+unfold let iand32 (a:nat32) (b:nat32) : nat32 = iand a b
+unfold let ixor32 (a:nat32) (b:nat32) : nat32 = ixor a b
+unfold let ior32 (a:nat32) (b:nat32) : nat32 = ior a b
+unfold let inot32 (a:nat32) : nat32 = inot a
+unfold let ishl32 (a:nat32) (s:int) : nat32 = ishl a s
+unfold let ishr32 (a:nat32) (s:int) : nat32 = ishr a s
+
+unfold let iand64 (a:nat64) (b:nat64) : nat64 = iand a b
+unfold let ixor64 (a:nat64) (b:nat64) : nat64 = ixor a b
+unfold let ior64 (a:nat64) (b:nat64) : nat64 = ior a b
+unfold let inot64 (a:nat64) : nat64 = inot a
+unfold let ishl64 (a:nat64) (s:int) : nat64 = ishl a s
+unfold let ishr64 (a:nat64) (s:int) : nat64 = ishr a s
+
+unfold let iand128 (a:nat128) (b:nat128) : nat128 = iand a b
+unfold let ixor128 (a:nat128) (b:nat128) : nat128 = ixor a b
+unfold let ior128 (a:nat128) (b:nat128) : nat128 = ior a b
+unfold let inot128 (a:nat128) : nat128 = inot a
+unfold let ishl128 (a:nat128) (s:int) : nat128 = ishl a s
+unfold let ishr128 (a:nat128) (s:int) : nat128 = ishr a s
+
+unfold let two_to_nat32 (x:two nat32) : nat64 = two_to_nat 32 x
+
 let quad32_shl32 (q:quad32) : quad32 =
   let Mkfour v0 v1 v2 v3 = q in
   Mkfour 0 v0 v1 v2
@@ -49,7 +75,7 @@ val lemma_reverse_reverse_bytes_nat32_seq (s:seq nat32) :
   Lemma (reverse_bytes_nat32_seq (reverse_bytes_nat32_seq s) == s)
   [SMTPat (reverse_bytes_nat32_seq (reverse_bytes_nat32_seq s))]
 
-unfold let quad32_to_seq (q:quad32) = four_to_seq_LE q
+unfold let quad32_to_seq (q:quad32) : seq nat32 = four_to_seq_LE q
 
 let insert_nat64_opaque = Opaque_s.make_opaque insert_nat64
 
@@ -136,7 +162,7 @@ val le_bytes_to_seq_quad_of_singleton (q:quad32) (b:seq nat8 { length b == 16 })
 val le_bytes_to_quad32_to_bytes (q:quad32) :
   Lemma(le_bytes_to_quad32 (le_quad32_to_bytes q) == q)
 
-let be_quad32_to_bytes (q:quad32) : seqn 16 nat8 =
+let be_quad32_to_bytes (q:quad32) : seq16 nat8 =
   seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE q))
 
 val be_bytes_to_quad32_to_bytes (q:quad32) :

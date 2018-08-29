@@ -19,7 +19,7 @@
         "refinement_interpretation_X64.Poly1305.Util_Tm_refine_ea48d89f14cd2ee78d89b37e82320004"
       ],
       0,
-      "4c094b8e32e706a8ecc9ea58cc94a0fc"
+      "88cb9d19898ecbe7b27b728e14bb0613"
     ],
     [
       "X64.Poly1305.Util.poly1305_heap_blocks'",
@@ -37,7 +37,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "d57c1ed678c79da80f5e541fceac2463"
+      "58c820a047ca4c30f91d64a7a4c6c532"
     ],
     [
       "X64.Poly1305.Util.poly1305_heap_blocks",
@@ -115,24 +115,25 @@
         "@fuel_irrelevance_X64.Poly1305.Util.poly1305_heap_blocks_.fuel_instrumented",
         "@query", "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "assumption_Prims.HasEq_int", "b2t_def",
+        "binder_x_3bdcb6bb207baff342c79c1e9bd7ae5b_4",
         "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_0",
         "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_1",
         "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_2",
         "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_5",
         "binder_x_7cd0d2b3aea3c2460bdef379d24a38b9_3",
-        "binder_x_8dc2b33041924f8071afee19ddcd8058_4",
         "constructor_distinct_X64.Memory.TUInt64",
-        "data_typing_intro_X64.Memory.TBase@tok",
         "equality_tok_Prims.LexTop@tok",
         "equality_tok_X64.Memory.TUInt64@tok", "equation_Prims.squash",
         "equation_Words_s.nat128", "equation_Words_s.nat64",
+        "equation_X64.Memory.buffer64", "equation_X64.Memory.tuint64",
         "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ", "equation_X64.Poly1305.Math.modp",
         "equation_X64.Poly1305.Util.seqTo128",
         "equation_with_fuel_Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
         "equation_with_fuel_X64.Poly1305.Util.poly1305_heap_blocks_.fuel_instrumented",
         "function_token_typing_Opaque_s.make_opaque",
-        "function_token_typing_Poly1305.Spec_s.modp_", "int_inversion",
+        "function_token_typing_Poly1305.Spec_s.modp_",
+        "function_token_typing_X64.Memory.tuint64", "int_inversion",
         "int_typing",
         "interpretation_X64.Poly1305.Util_Tm_abs_e89777fc434bad510411bebacd23566a",
         "l_and-interp", "lemma_X64.Memory.buffer_length_buffer_as_seq",
@@ -145,11 +146,10 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_X64.Memory.TBase_b",
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "typing_tok_X64.Memory.TUInt64@tok", "unit_typing",
-        "well-founded-ordering-on-nat"
+        "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "4e151f78786e211fcfe91071980024e5"
+      "3134e443e5f67352a5359fe85da50ef0"
     ],
     [
       "X64.Poly1305.Util.buffers_readable",
@@ -158,13 +158,13 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "binder_x_5dba9d96735081e8c583ccb891d71d16_1",
+        "binder_x_45b5651ccff53142641c62adf4cca7a0_1",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equality_tok_Prims.LexTop@tok", "fuel_guarded_inversion_Prims.list",
-        "subterm_ordering_Prims.Cons"
+        "equality_tok_Prims.LexTop@tok", "equation_X64.Memory.buffer64",
+        "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "a384175beac33a6257645ad4ec5805c2"
+      "486ab0511da4a988d8a4dc7c3f60596c"
     ]
   ]
 ]

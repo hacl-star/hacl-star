@@ -395,39 +395,58 @@ let test7_expected512 = [
   0x65uy; 0xc9uy; 0x74uy; 0x40uy; 0xfauy; 0x8cuy; 0x6auy; 0x58uy
 ]
 
+open Spec.Hash.Helpers
+
 //
 // Main
 //
 
+type vec =
+  | Vec: a:sha2_alg ->
+    key  :bytes{Seq.length key < max_input8 a} ->
+    data :bytes{Seq.length data + size_block a < max_input8 a} ->
+    mac:bytes{Seq.length mac = size_hash a} ->
+    vec
+
+#set-options "--admit_smt_queries true"
+let test_vectors: list vec = [
+  Vec SHA2_224 (createL test1_key) (createL test1_data) (createL test1_expected224);
+  Vec SHA2_224 (createL test2_key) (createL test2_data) (createL test2_expected224);
+  Vec SHA2_224 (createL test3_key) (createL test3_data) (createL test3_expected224);
+  Vec SHA2_224 (createL test4_key) (createL test4_data) (createL test4_expected224);
+//Vec h.SHA2_224 (createL test5_key) (createL test5_data(= createL test5_expected22;&&
+  Vec SHA2_224 (createL test6_key) (createL test6_data) (createL test6_expected224);
+  Vec SHA2_224 (createL test7_key) (createL test7_data) (createL test7_expected224);
+
+  Vec SHA2_256 (createL test1_key) (createL test1_data) (createL test1_expected256);
+  Vec SHA2_256 (createL test2_key) (createL test2_data) (createL test2_expected256);
+  Vec SHA2_256 (createL test3_key) (createL test3_data) (createL test3_expected256);
+  Vec SHA2_256 (createL test4_key) (createL test4_data) (createL test4_expected256);
+//Vec h.SHA2_256 (createL test5_key) (createL test5_data(= createL test5_expected25;&&
+  Vec SHA2_256 (createL test6_key) (createL test6_data) (createL test6_expected256);
+  Vec SHA2_256 (createL test7_key) (createL test7_data) (createL test7_expected256);
+
+  Vec SHA2_384 (createL test1_key) (createL test1_data) (createL test1_expected384);
+  Vec SHA2_384 (createL test2_key) (createL test2_data) (createL test2_expected384);
+  Vec SHA2_384 (createL test3_key) (createL test3_data) (createL test3_expected384);
+  Vec SHA2_384 (createL test4_key) (createL test4_data) (createL test4_expected384);
+//Vec h.SHA2_384 (createL test5_key) (createL test5_data(= createL test5_expected38;&&
+  Vec SHA2_384 (createL test6_key) (createL test6_data) (createL test6_expected384);
+  Vec SHA2_384 (createL test7_key) (createL test7_data) (createL test7_expected384);
+
+  Vec SHA2_512 (createL test1_key) (createL test1_data) (createL test1_expected512);
+  Vec SHA2_512 (createL test2_key) (createL test2_data) (createL test2_expected512);
+  Vec SHA2_512 (createL test3_key) (createL test3_data) (createL test3_expected512);
+  Vec SHA2_512 (createL test4_key) (createL test4_data) (createL test4_expected512);
+//Vec h.SHA2_512 (createL test5_key) (createL test5_data(= createL test5_expected51;&&
+  Vec SHA2_512 (createL test6_key) (createL test6_data) (createL test6_expected512);
+  Vec SHA2_512 (createL test7_key) (createL test7_data) (createL test7_expected512)
+]
+#reset-options
+
+let test_one (v: vec) =
+  let Vec a key data mac = v in
+  HMAC.hmac a key data = mac
+
 let test () =
-  (HMAC.hmac Hash.SHA2_224 (createL test1_key) (createL test1_data) = createL test1_expected224) &&
-  (HMAC.hmac Hash.SHA2_224 (createL test2_key) (createL test2_data) = createL test2_expected224) &&
-  (HMAC.hmac Hash.SHA2_224 (createL test3_key) (createL test3_data) = createL test3_expected224) &&
-  (HMAC.hmac Hash.SHA2_224 (createL test4_key) (createL test4_data) = createL test4_expected224) &&
-//  (HMAC.hmac Hash.SHA2_224 (createL test5_key) (createL test5_data) = createL test5_expected224) &&
-  (HMAC.hmac Hash.SHA2_224 (createL test6_key) (createL test6_data) = createL test6_expected224) &&
-  (HMAC.hmac Hash.SHA2_224 (createL test7_key) (createL test7_data) = createL test7_expected224) &&
-
-  (HMAC.hmac Hash.SHA2_256 (createL test1_key) (createL test1_data) = createL test1_expected256) &&
-  (HMAC.hmac Hash.SHA2_256 (createL test2_key) (createL test2_data) = createL test2_expected256) &&
-  (HMAC.hmac Hash.SHA2_256 (createL test3_key) (createL test3_data) = createL test3_expected256) &&
-  (HMAC.hmac Hash.SHA2_256 (createL test4_key) (createL test4_data) = createL test4_expected256) &&
-//  (HMAC.hmac Hash.SHA2_256 (createL test5_key) (createL test5_data) = createL test5_expected256) &&
-  (HMAC.hmac Hash.SHA2_256 (createL test6_key) (createL test6_data) = createL test6_expected256) &&
-  (HMAC.hmac Hash.SHA2_256 (createL test7_key) (createL test7_data) = createL test7_expected256) &&
-
-  (HMAC.hmac Hash.SHA2_384 (createL test1_key) (createL test1_data) = createL test1_expected384) &&
-  (HMAC.hmac Hash.SHA2_384 (createL test2_key) (createL test2_data) = createL test2_expected384) &&
-  (HMAC.hmac Hash.SHA2_384 (createL test3_key) (createL test3_data) = createL test3_expected384) &&
-  (HMAC.hmac Hash.SHA2_384 (createL test4_key) (createL test4_data) = createL test4_expected384) &&
-//  (HMAC.hmac Hash.SHA2_384 (createL test5_key) (createL test5_data) = createL test5_expected384) &&
-  (HMAC.hmac Hash.SHA2_384 (createL test6_key) (createL test6_data) = createL test6_expected384) &&
-  (HMAC.hmac Hash.SHA2_384 (createL test7_key) (createL test7_data) = createL test7_expected384) &&
-
-  (HMAC.hmac Hash.SHA2_512 (createL test1_key) (createL test1_data) = createL test1_expected512) &&
-  (HMAC.hmac Hash.SHA2_512 (createL test2_key) (createL test2_data) = createL test2_expected512) &&
-  (HMAC.hmac Hash.SHA2_512 (createL test3_key) (createL test3_data) = createL test3_expected512) &&
-  (HMAC.hmac Hash.SHA2_512 (createL test4_key) (createL test4_data) = createL test4_expected512) &&
-//  (HMAC.hmac Hash.SHA2_512 (createL test5_key) (createL test5_data) = createL test5_expected512) &&
-  (HMAC.hmac Hash.SHA2_512 (createL test6_key) (createL test6_data) = createL test6_expected512) &&
-  (HMAC.hmac Hash.SHA2_512 (createL test7_key) (createL test7_data) = createL test7_expected512)
+  List.Tot.for_all test_one test_vectors
