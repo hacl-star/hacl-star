@@ -10,6 +10,7 @@ module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
 module B = LowStar.Buffer
 module V = LowStar.Vector
+module RV = LowStar.RVector
 
 /// `LowStar.Buffer` is regional
 
@@ -19,8 +20,10 @@ let buffer_region_of #a v =
   B.frameOf v
 
 val buffer_r_invariant:
-  #a:Type -> h:HS.mem -> v:B.buffer a -> GTot Type0
-let buffer_r_invariant #a h v = True
+  #a:Type -> len:UInt32.t{len > 0ul} ->
+  h:HS.mem -> v:B.buffer a -> GTot Type0
+let buffer_r_invariant #a len h v =
+  B.len v = len
 
 val buffer_r_live:
   #a:Type -> h:HS.mem -> v:B.buffer a -> GTot Type0
@@ -46,10 +49,11 @@ let buffer_r_freeable #a h v =
 
 val buffer_r_init: 
   #a:Type -> ia:a -> len:UInt32.t{len > 0ul} -> r:erid ->
-  HST.ST (b:B.buffer a{B.len b = len})
+  HST.ST (b:B.buffer a)
     (requires (fun h0 -> true))
     (ensures (fun h0 v h1 -> 
       modifies loc_none h0 h1 /\
+      buffer_r_invariant len h1 v /\
       buffer_r_live h1 v /\ buffer_r_freeable h1 v /\
       buffer_region_of v = r))
 let buffer_r_init #a ia len r =
@@ -57,10 +61,10 @@ let buffer_r_init #a ia len r =
 
 val buffer_r_copy:
   #a:Type -> len:UInt32.t{len > 0ul} -> 
-  src:B.buffer a{B.len src = len} -> 
-  dst:B.buffer a{B.len dst = len} ->
+  src:B.buffer a -> dst:B.buffer a ->
   HST.ST unit
     (requires (fun h0 ->
+      buffer_r_invariant len h0 src /\ buffer_r_invariant len h0 dst /\
       buffer_r_live h0 src /\ buffer_r_live h0 dst /\
       HH.disjoint (buffer_region_of src) (buffer_region_of dst)))
     (ensures (fun h0 _ h1 ->
@@ -81,10 +85,10 @@ let buffer_r_free #a v =
 
 val buffer_regional: 
   #a:Type -> ia:a -> len:UInt32.t{len > 0ul} ->
-  regional (b:B.buffer a{B.len b = len})
+  regional (b:B.buffer a)
 let buffer_regional #a ia len =
   Rgl (buffer_region_of #a)
-      (buffer_r_invariant #a)
+      (buffer_r_invariant #a len)
       (buffer_r_live #a)
       (buffer_r_live_preserved #a)
       (buffer_r_freeable #a)
@@ -160,12 +164,13 @@ let vector_r_copy #a #rg src dst =
 val vector_r_free:
   #a:Type -> #rg:regional a -> v:rvector rg ->
   HST.ST unit
-    (requires (fun h0 -> vector_r_live h0 v /\ vector_r_freeable h0 v))
+    (requires (fun h0 ->
+      vector_r_invariant h0 v /\
+      vector_r_live h0 v /\ vector_r_freeable h0 v))
     (ensures (fun h0 _ h1 ->
       modifies (loc_all_regions_from false (vector_region_of v)) h0 h1))
 let vector_r_free #a #rg v =
-  admit ();
-  LowStar.RVector.free v
+  RV.free v
 
 val vector_regional: 
   #a:Type -> ia:a -> rg:regional a -> regional (rvector rg)
@@ -178,4 +183,11 @@ let vector_regional #a ia rg =
       (vector_r_init #a #rg ia)
       (vector_r_copy #a #rg)
       (vector_r_free #a #rg)
+
+// An instantiation: `LowStar.Buffer` of `LowStar.RVector` is regional.
+
+val buffer_vector_regional:
+  #a:Type -> ia:a -> len:UInt32.t{len > 0ul} ->
+  regional (rvector #(B.buffer a) (buffer_regional ia len))
+
 

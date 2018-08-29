@@ -9,7 +9,9 @@ open FStar.Mul
 open LowStar.Modifies
 open LowStar.BufferOps
 open LowStar.Vector
-open LowStar.BufVector
+// open LowStar.BufVector
+open LowStar.RVector
+open LowStar.RVector.Instances
 
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
@@ -18,7 +20,9 @@ module HH = FStar.Monotonic.HyperHeap
 
 module B = LowStar.Buffer
 module V = LowStar.Vector
-module BV = LowStar.BufVector
+// module BV = LowStar.BufVector
+module RV = LowStar.RVector
+module RVI = LowStar.RVector.Instances
 module S = FStar.Seq
 
 module U32 = FStar.UInt32
@@ -27,11 +31,16 @@ module U8 = FStar.UInt8
 module EHS = EverCrypt.Hash
 module EHL = EverCrypt.Helpers
 
-type hash = uint8_p
-type hash_vec = BV.buf_vector uint8_t
-
 val hash_size: uint32_t
 let hash_size = 32ul // EHS.tagLen EHS.SHA256
+
+type hash = uint8_p
+
+val hreg: RV.regional hash
+let hreg = RVI.buffer_regional 0uy hash_size
+
+val bhreg: RV.regional (RV.rvector #hash hreg)
+let bhreg = RVI.buffer_vector_regional 0uy hash_size
 
 /// Compression of two hashes
 
@@ -39,9 +48,11 @@ val hash_2:
   src1:hash -> src2:hash -> dst:hash ->
   HST.ST unit
 	 (requires (fun h0 ->
-	   BV.buffer_inv_live hash_size h0 src1 /\
-	   BV.buffer_inv_live hash_size h0 src2 /\
-	   BV.buffer_inv_live hash_size h0 dst))
+	   RV.elem_live hreg h0 src1 /\ RV.elem_live hreg h0 src2 /\
+	   RV.elem_live hreg h0 dst /\
+	   RVI.buffer_r_invariant hash_size h0 src1 /\
+	   RVI.buffer_r_invariant hash_size h0 src2 /\
+	   RVI.buffer_r_invariant hash_size h0 dst))
 	 (ensures (fun h0 _ h1 -> true))
 #reset-options "--z3rlimit 40"
 let hash_2 src1 src2 dst =
@@ -58,6 +69,9 @@ let hash_2 src1 src2 dst =
 
 /// Low-level Merkle tree data structure
 
+type hash_vec = RV.rvector hreg
+type hash_vv = RV.rvector bhreg
+
 // A Merkle tree `MT i j hs rhs_ok rhs` stores all necessary hashes to generate
 // a Merkle path for each element from the index `i` to `j-1`.
 // - Parameters
@@ -68,8 +82,9 @@ let hash_2 src1 src2 dst =
 //        as a part of them.
 noeq type merkle_tree = 
 | MT: i:uint32_t -> j:uint32_t{j > i} ->
-      hs:B.buffer hash_vec{B.length hs = 32} ->
-      rhs_ok:bool -> rhs:hash_vec{V.size_of rhs = 32ul} ->
+      hs:hash_vv{V.size_of hs = 32ul} ->
+      rhs_ok:bool ->
+      rhs:hash_vec{V.size_of hs = 32ul} ->
       merkle_tree
 
 type mt_ptr = B.pointer merkle_tree
@@ -77,19 +92,19 @@ type mt_ptr = B.pointer merkle_tree
 /// Construction
 
 val create_mt_: 
-  hs:B.buffer hash_vec{B.length hs = 32} ->
+  hs:hash_vv{V.size_of hs = 32ul} ->
   depth:uint32_t{depth <= 32ul} ->
   HST.ST unit
 	 (requires (fun h0 -> 
-	   B.live h0 hs /\
-	   HST.is_eternal_region (B.frameOf hs)))
+	   V.live h0 hs /\
+	   HST.is_eternal_region (V.frameOf hs)))
 	 (ensures (fun h0 mt h1 -> true))
 	 (decreases (U32.v depth))
 let rec create_mt_ hs depth =
   if depth = 0ul then ()
-  else (let dr = BV.new_region_ (B.frameOf hs) in
-       let hv = BV.create_reserve hash_size 1ul dr in
-       B.upd hs (depth - 1ul) hv;
+  else (let dr = RV.new_region_ (V.frameOf hs) in
+       let hv = RV.create_reserve hreg (B.null #uint8_t) 1ul dr in
+       V.assign hs (depth - 1ul) hv;
        create_mt_ hs (depth - 1ul))
 
 val create_mt: init:hash ->
@@ -98,37 +113,24 @@ val create_mt: init:hash ->
 	 (ensures (fun h0 mt h1 -> true))
 let create_mt init =
   admit ();
-  let mt_region = BV.new_region_ HH.root in
-  let hs = B.malloc mt_region (BV.create_empty uint8_t) 32ul in
+  let mt_region = RV.new_region_ HH.root in
+  let hs = RV.create_rid bhreg (RV.create_empty hreg) 32ul mt_region in
   create_mt_ hs 32ul;
-  B.upd hs 0ul (BV.insert_copy 0uy hash_size (B.index hs 0ul) init);
-  let rhs = BV.create 0uy hash_size 32ul in
+  V.assign hs 0ul (RV.insert_copy (V.index hs 0ul) init);
+  let rhs = RV.create hreg (B.null #uint8_t) 32ul in
   B.malloc HH.root (MT 0ul 1ul hs true rhs) 1ul
 
 /// Destruction (free)
 
-val free_mt_:
-  lv:uint32_t{lv <= 32ul} ->
-  hs:B.buffer hash_vec{B.length hs = 32} ->
+val free_mt: mt:mt_ptr ->
   HST.ST unit
-	 (requires (fun h0 -> true))
-	 (ensures (fun h0 _ h1 -> true))
-let rec free_mt_ lv hs =
-  admit ();
-  if lv = 0ul then ()
-  else (BV.free hash_size (B.index hs (lv - 1ul));
-       free_mt_ (lv - 1ul) hs)
-
-val free_mt: mt_ptr ->
-  HST.ST unit
-	 (requires (fun _ -> true))
+	 (requires (fun h0 -> B.live h0 mt))
 	 (ensures (fun h0 _ h1 -> true))
 let free_mt mt =
   admit ();
   let mtv = B.index mt 0ul in
-  free_mt_ 32ul (MT?.hs mtv);
-  BV.free hash_size (MT?.rhs mtv);
-  B.free (MT?.hs mtv);
+  RV.free (MT?.hs mtv);
+  RV.free (MT?.rhs mtv);
   B.free mt
 
 /// Utilities
@@ -136,29 +138,32 @@ let free_mt mt =
 val copy_hash:
   src:hash -> dst:hash ->
   HST.ST unit
-	 (requires (fun h0 -> 
-	   BV.buffer_inv_live hash_size h0 src /\
-	   BV.buffer_inv_live hash_size h0 dst /\
-	   B.disjoint src dst))
+	 (requires (fun h0 ->
+	   RV.elem_live hreg h0 src /\
+	   RV.elem_live hreg h0 dst /\
+	   RVI.buffer_r_invariant hash_size h0 src /\
+	   RVI.buffer_r_invariant hash_size h0 dst /\
+	   HH.disjoint (Rgl?.region_of hreg src) 
+		       (Rgl?.region_of hreg dst)))
 	 (ensures (fun h0 _ h1 -> true))
 let copy_hash src dst =
-  B.blit src 0ul dst 0ul hash_size
+  RV.Rgl?.r_copy hreg src dst
 
 /// Insertion
 
 val insert_:
   lv:uint32_t{lv < 32ul} ->
   j:uint32_t ->
-  hs:B.buffer hash_vec{B.length hs = 32} ->
+  hs:hash_vv{V.size_of hs = 32ul} ->
   acc:hash ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
 let rec insert_ lv j hs acc =
   admit ();
-  B.upd hs lv (V.insert (B.index hs lv) acc);
+  RV.assign_copy hs lv (RV.insert_copy (V.index hs lv) acc);
   if j % 2ul = 1ul
-  then (hash_2 (V.back (B.index hs lv)) acc acc;
+  then (hash_2 (V.back (V.index hs lv)) acc acc;
        insert_ (lv + 1ul) (j / 2ul) hs acc)
 
 // Caution: current impl. manipulates the content in `v`.
@@ -185,7 +190,7 @@ let rec insert mt v =
 // accumulator value.
 val construct_rhs:
   lv:uint32_t{lv < 32ul} ->
-  hs:B.buffer hash_vec{B.length hs = 32} ->
+  hs:hash_vv{V.size_of hs = 32ul} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
   j:uint32_t ->
   acc:hash -> actd:bool ->
@@ -201,9 +206,9 @@ let rec construct_rhs lv hs rhs j acc actd =
     construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc actd
   else (
     (if actd
-    then (hash_2 (V.index (B.index hs lv) (j - 1ul)) acc acc;
-	 BV.assign_copy hash_size rhs (lv + 1ul) acc)
-    else copy_hash (V.index (B.index hs lv) (j - 1ul)) acc);
+    then (hash_2 (V.index (V.index hs lv) (j - 1ul)) acc acc;
+	 RV.assign_copy rhs (lv + 1ul) acc)
+    else copy_hash (V.index (V.index hs lv) (j - 1ul)) acc);
     construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc true)
 
 // Construct a Merkle path for a given index `k`, hashes `hs`, 
@@ -212,7 +217,7 @@ let rec construct_rhs lv hs rhs j acc actd =
 //          to the output path.
 val mt_get_path_:
   lv:uint32_t{lv < 32ul} ->
-  hs:B.buffer hash_vec{B.length hs = 32} ->
+  hs:hash_vv{V.size_of hs = 32ul} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
   j:uint32_t -> k:uint32_t{j = 0ul || k <= j} ->
   path:B.pointer (V.vector hash) ->
@@ -227,10 +232,10 @@ let rec mt_get_path_ lv hs rhs j k path =
     then (if k = j then ()
 	 else if k + 1ul < j
 	 then B.upd path 0ul (V.insert (B.index path 0ul)
-				       (V.index (B.index hs lv) (k + 1ul)))
+				       (V.index (V.index hs lv) (k + 1ul)))
 	 else B.upd path 0ul (V.insert (B.index path 0ul) (V.index rhs lv)))
     else B.upd path 0ul (V.insert (B.index path 0ul) 
-				  (V.index (B.index hs lv) (k - 1ul)));
+				  (V.index (V.index hs lv) (k - 1ul)));
     mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path)
 
 val mt_get_path:
