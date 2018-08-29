@@ -60,15 +60,6 @@ let static_fp () =
 let loc_in (l: M.loc) (h: HS.mem) =
   M.(loc_not_unused_in h `loc_includes` l)
 
-(* A useful lemma for clients, to be called at any time before performing an
-   allocation, hence giving them "for free" that their allocation is disjoint from
-   our top-level arrays. *)
-val recall_static_fp: unit -> ST.Stack unit
-  (requires (fun _ -> True))
-  (ensures (fun h0 _ h1 ->
-    M.(modifies loc_none h0 h1) /\
-    static_fp () `loc_in` h1))
-
 let recall_static_fp () =
   B.recall h224;
   B.recall h256;
@@ -189,6 +180,14 @@ let init_next (#a: Type) (s: S.seq a) (f: (i:nat { i < S.length s }) -> a) (i: n
     (ensures (S.equal (S.slice s 0 (i + 1)) (S.init (i + 1) f)))
 =
   lemma_slice_ijk s 0 i (i + 1)
+
+(** One lemma required for the commutations of seq_uint*_of_be and append. *)
+
+let tail_cons (#a: Type) (hd: a) (tl: S.seq a): Lemma
+  (ensures (S.equal (S.tail (S.cons hd tl)) tl))
+  [ SMTPat (S.tail (S.cons hd tl)) ]
+=
+  ()
 
 (** Update *)
 
@@ -668,3 +667,125 @@ let pad_384: pad_t SHA2_384 =
 let pad_512: pad_t SHA2_512 =
   Tactics.(synth_by_tactic (specialize (pad SHA2_512) [`%pad]))
 
+let hash_t (a: sha2_alg) = b:B.buffer U8.t { B.length b = size_hash a }
+
+inline_for_extraction
+let finish_t (a: sha2_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
+  (requires (fun h ->
+    B.disjoint s dst /\
+    B.live h s /\
+    B.live h dst))
+  (ensures (fun h0 _ h1 ->
+    M.(modifies (loc_buffer dst) h0 h1) /\
+    B.as_seq h1 dst == Spec.finish a (B.as_seq h0 s)))
+
+inline_for_extraction
+let size_hash_final_w (a: sha2_alg): n:U32.t { U32.v n = size_hash_final_w a } =
+  match a with
+  | SHA2_224 -> 7ul
+  | SHA2_256 -> 8ul
+  | SHA2_384 -> 6ul
+  | SHA2_512 -> 8ul
+
+#set-options "--max_fuel 1 --z3rlimit 50"
+
+let rec be_of_seq_uint32_append (s1 s2: S.seq U32.t): Lemma
+  (ensures (
+    S.equal (Endianness.be_of_seq_uint32 (S.append s1 s2))
+      (S.append (Endianness.be_of_seq_uint32 s1) (Endianness.be_of_seq_uint32 s2))))
+  (decreases (
+    S.length s1))
+  [ SMTPat (S.append (Endianness.be_of_seq_uint32 s1) (Endianness.be_of_seq_uint32 s2)) ]
+=
+  let open Endianness in
+  if S.length s1 = 0 then begin
+    assert (S.equal (be_of_seq_uint32 s1) S.empty);
+    assert (S.equal (S.append s1 s2) s2);
+    ()
+  end else begin
+    assert (S.equal (S.append s1 s2) (S.cons (S.head s1) (S.append (S.tail s1) s2)));
+    assert (S.equal (be_of_seq_uint32 (S.append s1 s2))
+      (S.append (be_of_uint32 (S.head s1)) (be_of_seq_uint32 (S.append (S.tail s1) s2))));
+    be_of_seq_uint32_append (S.tail s1) s2
+  end
+
+let be_of_seq_uint32_base (s1: S.seq U32.t) (s2: S.seq U8.t): Lemma
+  (requires (
+    S.length s1 = 1 /\
+    S.length s2 = 4 /\
+    Endianness.be_to_n s2 = U32.v (S.index s1 0)))
+  (ensures (S.equal s2 (Endianness.be_of_seq_uint32 s1)))
+  [ SMTPat (Endianness.be_to_n s2 = U32.v (S.index s1 0)) ]
+=
+  ()
+
+let rec be_of_seq_uint64_append (s1 s2: S.seq U64.t): Lemma
+  (ensures (
+    S.equal (Endianness.be_of_seq_uint64 (S.append s1 s2))
+      (S.append (Endianness.be_of_seq_uint64 s1) (Endianness.be_of_seq_uint64 s2))))
+  (decreases (
+    S.length s1))
+  [ SMTPat (S.append (Endianness.be_of_seq_uint64 s1) (Endianness.be_of_seq_uint64 s2)) ]
+=
+  let open Endianness in
+  if S.length s1 = 0 then begin
+    assert (S.equal (be_of_seq_uint64 s1) S.empty);
+    assert (S.equal (S.append s1 s2) s2);
+    ()
+  end else begin
+    assert (S.equal (S.append s1 s2) (S.cons (S.head s1) (S.append (S.tail s1) s2)));
+    assert (S.equal (be_of_seq_uint64 (S.append s1 s2))
+      (S.append (be_of_uint64 (S.head s1)) (be_of_seq_uint64 (S.append (S.tail s1) s2))));
+    be_of_seq_uint64_append (S.tail s1) s2
+  end
+
+let be_of_seq_uint64_base (s1: S.seq U64.t) (s2: S.seq U8.t): Lemma
+  (requires (
+    S.length s1 = 1 /\
+    S.length s2 = 8 /\
+    Endianness.be_to_n s2 = U64.v (S.index s1 0)))
+  (ensures (S.equal s2 (Endianness.be_of_seq_uint64 s1)))
+  [ SMTPat (Endianness.be_to_n s2 = U64.v (S.index s1 0)) ]
+=
+  ()
+
+#set-options "--max_fuel 0"
+
+noextract
+val finish: a:sha2_alg -> finish_t a
+noextract
+let finish a s dst =
+  let open FStar.Mul in
+  let h0 = ST.get () in
+  let inv (h: HS.mem) (i: nat) =
+    let hash_w = B.as_seq h s in
+    let hash = B.as_seq h dst in
+    i <= Helpers.size_hash_final_w a /\
+    B.live h dst /\ B.live h s /\
+    M.(modifies (loc_buffer dst) h0 h) /\
+    S.equal (S.slice hash 0 (i * Helpers.size_word a))
+      (Spec.words_to_be a (S.slice hash_w 0 i))
+  in
+  let f (i: U32.t { U32.(0 <= v i /\ v i < Helpers.size_hash_final_w a) }): ST.Stack unit
+    (requires (fun h -> inv h (U32.v i)))
+    (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 (U32.v i + 1)))
+  =
+    match a with
+    | SHA2_224 | SHA2_256 ->
+        let dst0 = B.sub dst 0ul U32.(4ul *^ i) in
+        let dsti = B.sub dst U32.(4ul *^ i) 4ul in
+        C.Endianness.store32_be dsti s.(i);
+        let h2 = ST.get () in
+        be_of_seq_uint32_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
+        be_of_seq_uint32_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
+          (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
+    | SHA2_384 | SHA2_512 ->
+        let dst0 = B.sub dst 0ul U32.(8ul *^ i) in
+        let dsti = B.sub dst U32.(8ul *^ i) 8ul in
+        C.Endianness.store64_be dsti s.(i);
+        let h2 = ST.get () in
+        be_of_seq_uint64_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
+        be_of_seq_uint64_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
+          (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
+  in
+  C.Loops.for 0ul (size_hash_final_w a) inv f

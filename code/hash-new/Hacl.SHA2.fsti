@@ -13,7 +13,21 @@ module Spec = Spec.SHA2
 
 open Spec.Hash.Helpers
 
+(** This module uses top-level arrays behind an abstract footprint *)
+
 val static_fp: unit -> GTot M.loc
+
+(* A useful lemma for clients, to be called at any time before performing an
+   allocation, hence giving them "for free" that their allocation is disjoint from
+   our top-level arrays. *)
+val recall_static_fp: unit -> ST.Stack unit
+  (requires (fun _ -> True))
+  (ensures (fun h0 _ h1 ->
+    M.(modifies loc_none h0 h1) /\
+    static_fp () `loc_in` h1))
+
+
+(** We need to reveal the definition of the internal state for clients to use it *)
 
 let word (a: sha2_alg) =
   match a with
@@ -22,6 +36,10 @@ let word (a: sha2_alg) =
 
 type state (a: sha2_alg) =
   b:B.buffer (word a) { B.length b = size_hash_w a }
+
+
+(** A series of functions; we only expose the monomorphic variants, and leave it
+  * up to EverCrypt.Hash to perform multiplexing. *)
 
 inline_for_extraction
 let alloca_t (a: sha2_alg) = unit -> ST.StackInline (state a)
