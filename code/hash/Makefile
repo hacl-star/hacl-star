@@ -1,13 +1,6 @@
 HACL_HOME?=../..
 include $(HACL_HOME)/Makefile.include
 
-INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/specs $(HACL_HOME)/specs/old
-FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
-
-# JP: override the parent target to NOT include the compat directory
-%.fst-in:
-	@echo $(FSTAR_INCLUDES)
-
 # Files for verification
 SHA2_FILES = \
 	Hacl.Hash.Lib.LoadStore.fst \
