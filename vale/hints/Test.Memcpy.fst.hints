@@ -20,7 +20,6 @@
         "constructor_distinct_X64.Machine_s.Rsp",
         "constructor_distinct_X64.Memory.TUInt64",
         "constructor_distinct_X64.Vale.Decls.TReg",
-        "data_typing_intro_X64.Memory.TBase@tok",
         "data_typing_intro_X64.Vale.Decls.TReg@tok",
         "disc_equation_Prims.Cons", "disc_equation_X64.Machine_s.Block",
         "disc_equation_X64.Machine_s.OReg", "eq2-interp",
@@ -31,7 +30,9 @@
         "equality_tok_X64.Memory.TUInt64@tok", "equation_Prims.nat",
         "equation_Prop_s.prop0", "equation_Test.Memcpy.va_code_Copy16",
         "equation_Test.Memcpy.va_transparent_code_Copy16",
-        "equation_Words_s.nat64", "equation_X64.Memory.type_of_base_typ",
+        "equation_Words_s.nat64", "equation_X64.Memory.buffer64",
+        "equation_X64.Memory.tuint64",
+        "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ",
         "equation_X64.Vale.Decls.va_ensure_total",
         "equation_X64.Vale.Decls.va_is_dst_opr64",
@@ -47,6 +48,7 @@
         "equation_X64.Vale.State.update_reg",
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_Words_s.nat64",
+        "function_token_typing_X64.Memory.tuint64",
         "function_token_typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "int_inversion", "int_typing",
         "interpretation_X64.Vale.State_Tm_abs_b432dd076715d8e83dd110306b23bf05",
@@ -62,8 +64,7 @@
         "lemma_X64.Memory.modifies_goal_directed_trans2",
         "lemma_X64.Vale.Regs.lemma_equal_elim",
         "lemma_X64.Vale.Xmms.lemma_equal_elim",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual", "proj_equation_Prims.Cons_hd",
+        "primitive_Prims.op_Equality", "proj_equation_Prims.Cons_hd",
         "proj_equation_Prims.Cons_tl",
         "proj_equation_X64.Machine_s.Block_block",
         "proj_equation_X64.Vale.State.Mkstate_flags",
@@ -111,11 +112,10 @@
         "typing_X64.Vale.State.__proj__Mkstate__item__xmms",
         "typing_tok_X64.Machine_s.Rax@tok",
         "typing_tok_X64.Machine_s.Rcx@tok",
-        "typing_tok_X64.Machine_s.Rsi@tok",
-        "typing_tok_X64.Memory.TUInt64@tok"
+        "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "2f70ebdaa92373d6ea8578c367a99fe9"
+      "1333bdb5e2dc83824f4c4cc06d30963d"
     ]
   ]
 ]
