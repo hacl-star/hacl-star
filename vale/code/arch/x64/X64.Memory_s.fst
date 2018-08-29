@@ -1315,8 +1315,7 @@ let equiv_load_mem128 ptr s =
   lemma_load_mem128 b i h;
   ()
 
-let valid128_64 ptr s =
-  let h = s.mem in
+let valid128_64 ptr h =
   let b = get_addr_ptr (TBase TUInt128) ptr h h.ptrs in
   let i = get_addr_in_ptr (TBase TUInt128) (buffer_length b) (buffer_addr b h) ptr 0 in
   let b:b8 = b in
@@ -1390,17 +1389,15 @@ let load128_math2 (i64 i128 base ptr:nat) : Lemma
   (requires (base + 8 `op_Multiply` i64 == base + 16 `op_Multiply` i128 + 8))
   (ensures (i64 == 2 `op_Multiply` i128 + 1)) = ()
 
-let load128_64_same_buffers (ptr:int) (s:state) : Lemma
-  (requires (valid_mem128 ptr s.mem))
+let load128_64_same_buffers (ptr:int) (h:mem) : Lemma
+  (requires (valid_mem128 ptr h))
   (ensures (
-    let h = s.mem in
-    valid128_64 ptr s;
+    valid128_64 ptr h;
     let b64_1 = get_addr_ptr (TBase TUInt64) ptr h h.ptrs in
     let b64_2 = get_addr_ptr (TBase TUInt64) (ptr+8) h h.ptrs in
     let b128 =  get_addr_ptr (TBase TUInt128) ptr h h.ptrs in
     b64_1 == b128 /\ b64_2 == b128)) =
-  let h = s.mem in
-  valid128_64 ptr s;
+  valid128_64 ptr h;
   let b64_1 = get_addr_ptr (TBase TUInt64) ptr h h.ptrs in
   let b64_2 = get_addr_ptr (TBase TUInt64) (ptr+8) h h.ptrs in
   let b128 =  get_addr_ptr (TBase TUInt128) ptr h h.ptrs in    
@@ -1413,12 +1410,11 @@ let load128_64_same_buffers (ptr:int) (s:state) : Lemma
   length_t_eq (TBase TUInt64) b64_2;
   length_t_eq (TBase TUInt128) b128
 
-let load128_64 ptr s =
-  let h = s.mem in
+let load128_64 ptr h =
   let v = load_mem128 ptr h in
   let v_lo = load_mem64 ptr h in
   let v_hi = load_mem64 (ptr+8) h in
-  valid128_64 ptr s;
+  valid128_64 ptr h;
   load_buffer_read (TBase TUInt64) ptr h h.ptrs;
   load_buffer_read (TBase TUInt64) (ptr+8) h h.ptrs;
   load_buffer_read (TBase TUInt128) ptr h h.ptrs;
@@ -1429,7 +1425,7 @@ let load128_64 ptr s =
   let b128 = get_addr_ptr (TBase TUInt128) ptr h h.ptrs in
   let i128 = get_addr_in_ptr (TBase TUInt128) (buffer_length b128) (buffer_addr b128 h) ptr 0 in
   // The three buffers are actually the same since they overlap
-  load128_64_same_buffers ptr s;
+  load128_64_same_buffers ptr h;
   length_t_eq (TBase TUInt64) b64_1;
   length_t_eq (TBase TUInt64) b64_2;
   length_t_eq (TBase TUInt128) b128;
@@ -1444,7 +1440,88 @@ let load128_64 ptr s =
   buffer_read_get64_2 b64_2 i128 h;
   ()
 
-let store128_64 ptr v s = admit()
+let store128_64_valid ptr v s = ()
+
+private
+let store128_addr_in_ptr (t:typ) (ptr i:int) (v:quad32)
+  (h:mem{valid_mem_aux t ptr h.ptrs h /\ valid_mem_aux t i h.ptrs h}) : Lemma 
+   (let h' = store_mem128 ptr v h in
+    (get_addr_ptr t i h h.ptrs == get_addr_ptr t i h' h'.ptrs)) =
+  let h' = store_mem128 ptr v h in
+  let rec aux (ps:list b8{valid_mem_aux t i ps h}) : Lemma
+    (get_addr_ptr t i h ps == get_addr_ptr t i h' ps) =
+  match ps with
+    | a::q -> if valid_buffer t i a h then () else aux q
+  in
+  aux h.ptrs
+
+open BufferViewHelpers
+
+let store128_64_frame_aux (b128:buffer128) (b64:buffer64) 
+  (i:nat{i < buffer_length b128}) 
+  (j:nat{j < buffer_length b64}) 
+  (h h':mem) : Lemma
+  (requires buffer_read b128 i h == buffer_read b128 i h' /\ b128 == b64 /\ i = j/2)
+  (ensures buffer_read b64 j h == buffer_read b64 j h') =
+  length_t_eq (TBase TUInt128) b128;
+  buffer_read_get128 b128 i h;
+  buffer_read_get128 b128 i h';
+  if j % 2 = 0 then begin
+    buffer_read_get64_1 b64 i h;    
+    buffer_read_get64_1 b64 i h'
+  end
+  else begin
+    buffer_read_get64_2 b64 i h;    
+    buffer_read_get64_2 b64 i h'
+  end
+
+let store128_64_math1 (base i i128 j ptr:int) : Lemma
+  (requires base + 16 `op_Multiply` i128 == ptr /\ base + 8 `op_Multiply` j == i /\ i <> ptr /\ i <> ptr + 8)
+  (ensures i128 <> j/2) = ()
+
+let store128_64_math2 (b128:buffer128) (b64:buffer64) (j:nat) : Lemma
+  (requires b128 == b64 /\ j < buffer_length b64)
+  (ensures j/2 < buffer_length b128) =
+  length_t_eq (TBase TUInt64) b64;
+  length_t_eq (TBase TUInt128) b128
+
+let store128_64_frame ptr v s =
+  let h = s.mem in
+  let h' = store_mem128 ptr v h in
+  valid128_64 ptr h;
+  let b128 = get_addr_ptr (TBase TUInt128) ptr h h.ptrs in
+  let i128 = get_addr_in_ptr (TBase TUInt128) (buffer_length b128) (buffer_addr b128 h) ptr 0 in
+  store_buffer_write (TBase TUInt128) ptr v h h.ptrs;
+  assert (B.modifies (B.loc_buffer b128) h.hs h'.hs);
+  let aux (i:int) : Lemma
+    (requires i <> ptr /\ i <> ptr+8 /\ valid_mem64 i h)
+    (ensures load_mem64 i h == load_mem64 i h') =
+    load_buffer_read (TBase TUInt64) i h h.ptrs;
+    load_buffer_read (TBase TUInt64) i h' h'.ptrs;
+    let b = get_addr_ptr (TBase TUInt64) i h h.ptrs in
+    let j = get_addr_in_ptr (TBase TUInt64) (buffer_length b) (buffer_addr b h) i 0 in
+    store128_addr_in_ptr (TBase TUInt64) ptr i v h;
+    assert (Interop.disjoint_or_eq b b128);
+    if StrongExcludedMiddle.strong_excluded_middle (b =!= b128) then begin
+      assert (Seq.equal (buffer_as_seq h b) (buffer_as_seq h' b));
+      ()
+    end
+    else begin
+      let i' = j/2 in
+      let base = buffer_addr b h in
+      // Make this an auxiliary lemma to simplify context
+      store128_64_math1 base i i128 j ptr;
+      store128_64_math2 b128 b j;
+      store128_64_frame_aux b128 b i' j h h'
+    end
+  in Classical.forall_intro (Classical.move_requires aux)
+
+
+let store128_64_load ptr v s =
+  let h = store_mem128 ptr v s.mem in
+  lemma_store_load_mem128 ptr v s.mem;
+  load128_64 ptr h
+
 
 open X64.Machine_s
 
@@ -1474,7 +1551,7 @@ let same_memTaint (t:typ) (b:buffer t) (mem0 mem1:mem) (memT0 memT1:memtaint) : 
 
 
 let same_memTaint64 b mem0 mem1 memtaint0 memtaint1 =
-  same_memTaint (TBase TUInt64) b mem0 mem1 memtaint0 memtaint1
+same_memTaint (TBase TUInt64) b mem0 mem1 memtaint0 memtaint1
 
 let same_memTaint128 b mem0 mem1 memtaint0 memtaint1 =
   same_memTaint (TBase TUInt128) b mem0 mem1 memtaint0 memtaint1

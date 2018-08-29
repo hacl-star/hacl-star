@@ -300,8 +300,8 @@ let load64_128_eq ptr1 ptr2 s1 s2 =
   let v_hi2 = load_mem64 (ptr2+8) s2.state.mem in
   let v1 = load_mem128 ptr1 s1.state.mem in
   let v2 = load_mem128 ptr2 s2.state.mem in
-  load128_64 ptr1 s1.state;
-  load128_64 ptr2 s2.state;
+  load128_64 ptr1 s1.state.mem;
+  load128_64 ptr2 s2.state.mem;
   nat32_64_inj v1.lo0 v1.lo1 v_lo1;
   nat32_64_inj v1.hi2 v1.hi3 v_hi1
 
@@ -327,34 +327,25 @@ let lemma_if_movdqu_leakage_free_aux ins ts s1 s2 fuel =
       let v1_2 = v1.hi2 + 0x100000000 `op_Multiply` v1.hi3 in
       let v2_1 = v2.lo0 + 0x100000000 `op_Multiply` v2.lo1 in
       let v2_2 = v2.hi2 + 0x100000000 `op_Multiply` v2.hi3 in
-      store128_64 ptr1 v1 s1.state;
-      store128_64 ptr2 v2 s2.state;
-      valid128_64 ptr1 s1.state;
-      valid128_64 ptr2 s2.state;
-      let mem1 = store_mem64 (ptr1+8) v1_2 s1.state.mem in
-      let mem2 = store_mem64 (ptr2+8) v2_2 s2.state.mem in
-      lemma_store_load_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_store_load_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_valid_store_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_valid_store_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_frame_store_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_frame_store_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_store_load_mem64 ptr1 v1_1 mem1;
-      lemma_store_load_mem64 ptr2 v2_1 mem2;
-      lemma_valid_store_mem64 ptr1 v1_1 mem1;
-      lemma_valid_store_mem64 ptr2 v2_1 mem2;
-      lemma_frame_store_mem64 ptr1 v1_1 mem1;
-      lemma_frame_store_mem64 ptr2 v2_1 mem2
+      store128_64_valid ptr1 v1 s1.state;
+      store128_64_valid ptr2 v2 s2.state;
+      store128_64_frame ptr1 v1 s1.state;
+      store128_64_frame ptr2 v2 s2.state;
+      store128_64_load ptr1 v1 s1.state;
+      store128_64_load ptr2 v2 s2.state;
+      valid128_64 ptr1 s1.state.mem;
+      valid128_64 ptr2 s2.state.mem
    end
- | Mov128Mem m -> begin
+ | Mov128Mem m ->
+  begin
     let ptr1 = eval_maddr m s1.state in
     let ptr2 = eval_maddr m s2.state in
     if not (valid_mem128 ptr1 s1.state.mem) || not (valid_mem128 ptr2 s2.state.mem) then ()
     else (
-    valid128_64 ptr1 s1.state;
-    valid128_64 ptr2 s2.state;
-    load128_64 ptr1 s1.state;
-    load128_64 ptr2 s2.state;
+    valid128_64 ptr1 s1.state.mem;
+    valid128_64 ptr2 s2.state.mem;
+    load128_64 ptr1 s1.state.mem;
+    load128_64 ptr2 s2.state.mem;
     load64_128_eq ptr1 ptr2 s1 s2;
     match dst with
     | Mov128Xmm _ -> ()
@@ -370,24 +361,14 @@ let lemma_if_movdqu_leakage_free_aux ins ts s1 s2 fuel =
       let ptr2 = eval_maddr m s2.state in
       if not (valid_mem128 ptr1 s1.state.mem) || not (valid_mem128 ptr2 s2.state.mem) then ()
       else (
-      store128_64 ptr1 v1 s1.state;
-      store128_64 ptr2 v2 s2.state;
-      valid128_64 ptr1 s1.state;
-      valid128_64 ptr2 s2.state;
-      let mem1 = store_mem64 (ptr1+8) v1_2 s1.state.mem in
-      let mem2 = store_mem64 (ptr2+8) v2_2 s2.state.mem in
-      lemma_store_load_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_store_load_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_valid_store_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_valid_store_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_frame_store_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_frame_store_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_store_load_mem64 ptr1 v1_1 mem1;
-      lemma_store_load_mem64 ptr2 v2_1 mem2;
-      lemma_valid_store_mem64 ptr1 v1_1 mem1;
-      lemma_valid_store_mem64 ptr2 v2_1 mem2;
-      lemma_frame_store_mem64 ptr1 v1_1 mem1;
-      lemma_frame_store_mem64 ptr2 v2_1 mem2
+      store128_64_valid ptr1 v1 s1.state;
+      store128_64_valid ptr2 v2 s2.state;
+      store128_64_frame ptr1 v1 s1.state;
+      store128_64_frame ptr2 v2 s2.state;
+      store128_64_load ptr1 v1 s1.state;
+      store128_64_load ptr2 v2 s2.state;      
+      valid128_64 ptr1 s1.state.mem;
+      valid128_64 ptr2 s2.state.mem
       )
     end
     )
@@ -421,4 +402,3 @@ let check_if_xmm_ins_consumes_fixed_time ins ts =
     | S.AESNI_dec_last dst src -> check_if_aesni_dec_last_leakage_free ins ts
     | S.AESNI_imc dst src -> check_if_aesni_imc_leakage_free ins ts
     | S.AESNI_keygen_assist dst src imm -> check_if_aesni_keygen_leakage_free ins ts
-
