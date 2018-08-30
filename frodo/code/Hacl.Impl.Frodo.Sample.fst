@@ -32,31 +32,65 @@ let cdf_table: b:lbuffer uint16 (v cdf_table_len) { LowStar.Buffer.recallable b 
   gcmalloc_of_list_pre_eq (norm [delta_only [`%cdf_list]] cdf_list) cdf_list;
   LowStar.Buffer.gcmalloc_of_list HyperStack.root cdf_list
 
+inline_for_extraction noextract
+val frodo_sample_f:
+    t:uint16
+  -> i:size_t{v i < v cdf_table_len}
+  -> Stack uint16
+     (requires fun h -> True)
+     (ensures  fun h0 r h1 ->
+       modifies loc_none h0 h1 /\ uint_v r == S.frodo_sample_f t (v i))
+let frodo_sample_f t i =
+  recall cdf_table;
+  let ti = cdf_table.(i) in admit();
+  to_u16 (to_u32 (ti -. t)) >>. u32 15
+
+inline_for_extraction noextract
+val frodo_sample_res:
+    sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
+  -> sample:uint16{uint_v sample < v cdf_table_len}
+  -> res:uint16{res == S.frodo_sample_res sign (uint_v sample)}
+let frodo_sample_res sign sample =
+  let res = ((lognot sign +. u16 1) ^. sample) +. sign in
+  admit();
+  res
+
+#set-options "--max_fuel 1"
+
 val frodo_sample: r:uint16 -> Stack uint16
   (requires fun h -> True)
   (ensures  fun h0 res h1 ->
-    modifies loc_none h0 h1 /\ res == S.frodo_sample r) 
+    modifies loc_none h0 h1 /\ res == S.frodo_sample r)
 [@"c_inline"]
 let frodo_sample r =
   push_frame();
   let prnd = r >>. u32 1 in
   let sign = r &. u16 1 in
+  mod_mask_lemma r (u32 1);
+  uintv_extensionality (mod_mask (u32 1)) (u16 1);
+  assert (uint_v sign == 0 \/ uint_v sign == 1);
+
   let sample = create #uint16 #1 (size 1) (u16 0) in
+  let h = ST.get () in
+  assert (Lib.Sequence.index #_ #1 (as_seq h sample) 0 == u16 0);
+  assert (B.get h sample 0 == u16 0);
   let bound = cdf_table_len -! size 1 in
   let h0 = ST.get () in
   Lib.Loops.for (size 0) bound
-  (fun h j -> live h sample /\ modifies (loc_buffer sample) h0 h)
-  (fun j ->
-    recall cdf_table;
-    let tj = cdf_table.(j) in
+  (fun h i -> modifies (loc_buffer sample) h0 h /\
+    uint_v (B.get h sample 0) == S.frodo_sample_fc prnd i)
+  (fun i ->
     let sample0 = sample.(size 0) in
-    sample.(size 0) <- sample0 +. (to_u16 (to_u32 (tj -. prnd)) >>. u32 15)
+    let samplei = frodo_sample_f prnd i in
+    sample.(size 0) <- samplei +. sample0
   );
   let sample0 = sample.(size 0) in
-  let res = ((lognot sign +. u16 1) ^. sample0) +. sign in
+  assert (uint_v sample0 == S.frodo_sample_fc prnd (v bound));
+  let res = frodo_sample_res sign sample0 in
   pop_frame();
-  assume (res == S.frodo_sample r);
   res
+
+#set-options "--max_fuel 0"
 
 private
 val gen_inv:
