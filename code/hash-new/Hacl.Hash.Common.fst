@@ -53,6 +53,7 @@ val store_len: a:hash_alg -> len:len_t a -> b:B.buffer U8.t ->
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer b) h0 h1) /\
       B.as_seq h1 b == Endianness.n_to_be (size_len_ul a) (len_v a len)))
+
 inline_for_extraction
 let store_len a len b =
   match a with
