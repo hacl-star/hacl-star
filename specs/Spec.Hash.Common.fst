@@ -1,4 +1,4 @@
-module Spec.Hash.Padding
+module Spec.Hash.Common
 
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
@@ -29,6 +29,6 @@ let pad (a:hash_alg)
 (** Extracting the hash, which we call "finish" *)
 
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
-let finish (a:sha2_alg) (hashw:hash_w a): Tot (hash:bytes{S.length hash = (size_hash a)}) =
+let finish (a:hash_alg) (hashw:hash_w a): Tot (hash:bytes{S.length hash = (size_hash a)}) =
   let hash_final_w = S.slice hashw 0 (size_hash_final_w a) in
   words_to_be a hash_final_w

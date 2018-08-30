@@ -211,6 +211,6 @@ let update (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-let pad = Spec.Hash.Padding.pad
+let pad = Spec.Hash.Common.pad
 
-let finish = Spec.Hash.Padding.finish
+let finish = Spec.Hash.Common.finish

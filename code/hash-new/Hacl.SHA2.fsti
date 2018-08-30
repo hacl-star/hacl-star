@@ -13,6 +13,8 @@ module Spec = Spec.SHA2
 
 open Spec.Hash.Helpers
 
+include Hacl.Hash.Common
+
 (** This module uses top-level arrays behind an abstract footprint *)
 
 val static_fp: unit -> GTot M.loc
@@ -28,17 +30,6 @@ val recall_static_fp: unit -> ST.Stack unit
   (ensures (fun h0 _ h1 ->
     M.(modifies loc_none h0 h1) /\
     static_fp () `loc_in` h1))
-
-
-(** We need to reveal the definition of the internal state for clients to use it *)
-
-let word (a: sha2_alg) =
-  match a with
-  | SHA2_224 | SHA2_256 -> U32.t
-  | SHA2_384 | SHA2_512 -> U64.t
-
-type state (a: sha2_alg) =
-  b:B.buffer (word a) { B.length b = size_hash_w a }
 
 
 (** A series of functions; we only expose the monomorphic variants, and leave it
@@ -88,33 +79,10 @@ val update_256: update_t SHA2_256
 val update_384: update_t SHA2_384
 val update_512: update_t SHA2_512
 
-inline_for_extraction
-let pad_t (a: sha2_alg) = len:len_t a -> dst:B.buffer U8.t ->
-  ST.Stack unit
-    (requires (fun h ->
-      len_v a len < max_input8 a /\
-      B.live h dst /\
-      B.length dst = pad_length a (len_v a len)))
-    (ensures (fun h0 _ h1 ->
-      M.(modifies (loc_buffer dst) h0 h1) /\
-      B.as_seq h1 dst == Spec.pad a (len_v a len)))
-
 val pad_224: pad_t SHA2_224
 val pad_256: pad_t SHA2_256
 val pad_384: pad_t SHA2_384
 val pad_512: pad_t SHA2_512
-
-let hash_t (a: sha2_alg) = b:B.buffer U8.t { B.length b = size_hash a }
-
-inline_for_extraction
-let finish_t (a: sha2_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
-  (requires (fun h ->
-    B.disjoint s dst /\
-    B.live h s /\
-    B.live h dst))
-  (ensures (fun h0 _ h1 ->
-    M.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst == Spec.finish a (B.as_seq h0 s)))
 
 val finish_224: finish_t SHA2_224
 val finish_256: finish_t SHA2_256
