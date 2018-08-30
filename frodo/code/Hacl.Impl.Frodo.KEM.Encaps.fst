@@ -48,7 +48,7 @@ val frodo_mul_add_sa_plus_e:
       as_matrix h1 bp_matrix == M.add (M.mul (as_matrix h0 sp_matrix) (as_matrix h1 a_matrix)) (as_matrix h0 ep_matrix))
 [@"c_inline"]
 let frodo_mul_add_sa_plus_e seed_a sp_matrix ep_matrix bp_matrix a_matrix =
-  assert_norm (0 < v params_n /\ 2 * v params_n < max_size_t /\ 256 + v params_n < maxint U16 /\ v params_n * v params_n < max_size_t);
+  assert_norm (0 < v params_n /\ 2 * v params_n <= max_size_t /\ 256 + v params_n < maxint U16 /\ v params_n * v params_n <= max_size_t);
   frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
   matrix_mul sp_matrix a_matrix bp_matrix;
   matrix_add bp_matrix ep_matrix
@@ -238,7 +238,7 @@ let crypto_kem_enc_ct_pack_c2_inner seed_e coins b sp_matrix c2 v_matrix =
   let n1 = params_nbar in
   let n2 = params_nbar in
   let d = params_logq in
-  assert_norm (v d * v n1 < max_size_t /\ (v d * v n1) * v n2 < max_size_t /\ v d <= 16);
+  assert_norm (v d * v n1 <= max_size_t /\ (v d * v n1) * v n2 <= max_size_t /\ v d <= 16);
   frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix;
   frodo_pack v_matrix params_logq c2
 

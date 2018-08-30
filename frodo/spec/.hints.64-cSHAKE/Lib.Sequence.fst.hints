@@ -11,7 +11,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421"
       ],
       0,
-      "30bcad33262cce67d06e3d420b14675f"
+      "802afa4f7fbb20e6bc9295e792f28f44"
     ],
     [
       "Lib.Sequence.to_lseq",
@@ -59,7 +59,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "765a4cb918e2390b1d9823d1bc9e9242"
+      "0164088024ae2556dbd31f5c3f73952b"
     ],
     [
       "Lib.Sequence.eq_elim",
@@ -83,7 +83,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "da878d4386d75608da4bf44a56c711f3"
+      "79d320e708042b45115b8fa789d4b1b0"
     ],
     [
       "Lib.Sequence.upd",
@@ -213,7 +213,8 @@
         "equation_FStar.UInt32.n", "equation_Lib.Sequence.index",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
-        "int_inversion", "lemma_FStar.Seq.Base.lemma_index_slice",
+        "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_index_slice",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
@@ -371,7 +372,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "e955ada36bb2f7cdf5dbdb05f410ee56"
+      "0723969e784decae643f100e4d8d45b2"
     ],
     [
       "Lib.Sequence.repeati",
@@ -387,7 +388,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "dcbce6baf3540123981d27077ce2a4f7"
+      "95148ad747d30828ff2d80783e1c0b0d"
     ],
     [
       "Lib.Sequence.repeat",
@@ -510,7 +511,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "c590c37a88098cea970d036bfe003b8e"
+      "24e99371fabe37815b11bd434292b339"
     ],
     [
       "Lib.Sequence.lbytes_eq",
@@ -583,7 +584,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "524166e91f5bbfda13ee63fec1d10ce2"
+      "1046cdddc99e33aee8fd0b3e549ee780"
     ],
     [
       "Lib.Sequence.fold_left",
@@ -607,15 +608,23 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "assumption_Prims.HasEq_int", "b2t_def",
         "binder_x_349626d14d9b8d1db32f63e6cac6b37f_4",
         "binder_x_9541be9f05adfeb956af3d7200ab2b69_5",
         "binder_x_f8c6a133425648ea4ea89406776f2797_2",
         "binder_x_fe28d8bcde588226b4e538b35321de05_0",
-        "binder_x_fe28d8bcde588226b4e538b35321de05_1",
-        "equation_FStar.Seq.Properties.tail", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Prims.nat", "int_inversion",
-        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
+        "binder_x_fe28d8bcde588226b4e538b35321de05_1", "bool_inversion",
+        "equation_FStar.Seq.Properties.tail", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -625,7 +634,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421",
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "well-founded-ordering-on-nat"
+        "typing_FStar.UInt.fits", "well-founded-ordering-on-nat"
       ],
       0,
       "c5aac59c6f0f86189c85c1d884625912"

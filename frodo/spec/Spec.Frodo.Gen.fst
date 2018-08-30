@@ -14,7 +14,7 @@ module Seq = Lib.Sequence
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val frodo_gen_matrix_cshake_fc:
-    n:size_nat{2 * n < max_size_t /\ 256 + n < maxint U16 /\ n * n < max_size_t}
+    n:size_nat{2 * n <= max_size_t /\ 256 + n < maxint U16 /\ n * n <= max_size_t}
   -> seedLen:size_nat
   -> seed:lbytes seedLen
   -> i:size_nat{i < n}
@@ -25,7 +25,7 @@ let frodo_gen_matrix_cshake_fc n seedLen seed i j =
   uint_from_bytes_le (Seq.sub res_i (j * 2) 2)
 
 val frodo_gen_matrix_cshake:
-    n:size_nat{2 * n < max_size_t /\ 256 + n < maxint U16 /\ n * n < max_size_t}
+    n:size_nat{2 * n <= max_size_t /\ 256 + n < maxint U16 /\ n * n <= max_size_t}
   -> seedLen:size_nat
   -> seed:lbytes seedLen
   -> res:matrix n n

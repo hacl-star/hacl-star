@@ -1,5 +1,5 @@
 [
-  "è=ñù{¥!ã“æÉÂû0G$",
+  "\u0010ù≠\u0016∑∞\u001aë\u0013R,yËE√π",
   [
     [
       "Spec.Frodo.Sample.cdf_table",
@@ -13,7 +13,7 @@
         "typing_Spec.Frodo.Sample.cdf_table_len"
       ],
       0,
-      "8bb33a2e43b23821772161b9d509fa96"
+      "00fd398bd675fb3b4ae7030c67bc3199"
     ],
     [
       "Spec.Frodo.Sample.frodo_sample",
@@ -115,7 +115,7 @@
         "typing_tok_Lib.IntTypes.U16@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "58914063eec7fce29ee682e702509360"
+      "19688ea9d6cb3a51e07fbe0a618bccf4"
     ],
     [
       "Spec.Frodo.Sample.frodo_sample_matrix_fc",
@@ -130,10 +130,10 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Spec.Matrix_Tm_refine_b011a76e95ca594ffe8d8448a8efbf43"
+        "refinement_interpretation_Spec.Matrix_Tm_refine_98d9a787a6a7407316abfa13763cdfd5"
       ],
       0,
-      "8d84f70594e147a1019cb0274d75f90e"
+      "025e9bfe589f3546ba4641e080137bb4"
     ],
     [
       "Spec.Frodo.Sample.frodo_sample_matrix_fc",
@@ -148,10 +148,10 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Spec.Matrix_Tm_refine_b011a76e95ca594ffe8d8448a8efbf43"
+        "refinement_interpretation_Spec.Matrix_Tm_refine_98d9a787a6a7407316abfa13763cdfd5"
       ],
       0,
-      "62efc8896c67a456d169b9db1354a928"
+      "2118cf127f369197493ae0a03a07848b"
     ],
     [
       "Spec.Frodo.Sample.frodo_sample_matrix_fc",
@@ -191,7 +191,7 @@
         "typing_Spec.Frodo.Sample.cdf_table_len"
       ],
       0,
-      "9613100b0e1b115bf80fc3cce98b3545"
+      "0bb250eb106c18ee4c665482dd33d19c"
     ],
     [
       "Spec.Frodo.Sample.frodo_sample_matrix",
@@ -202,23 +202,16 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Lib.IntTypes.uint16",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Prims.nat", "equation_Spec.Matrix.elem",
-        "equation_Spec.Matrix.matrix",
-        "function_token_typing_FStar.UInt32.n",
-        "function_token_typing_Lib.IntTypes.uint16", "int_inversion",
+        "equation_FStar.UInt32.n", "equation_Prims.nat",
+        "function_token_typing_FStar.UInt32.n", "int_inversion",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Spec.Matrix_Tm_refine_b011a76e95ca594ffe8d8448a8efbf43",
-        "typing_FStar.Seq.Base.length"
+        "refinement_interpretation_Spec.Matrix_Tm_refine_98d9a787a6a7407316abfa13763cdfd5"
       ],
       0,
-      "686d6dd6cbc1ac7feda203f7d89f50dd"
+      "297794c3a113828309cb905c84d73f76"
     ],
     [
       "Spec.Frodo.Sample.frodo_sample_matrix",
@@ -230,20 +223,22 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U16",
-        "equality_tok_Lib.IntTypes.U16@tok", "equation_FStar.UInt32.n",
+        "equality_tok_Lib.IntTypes.U16@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
         "equation_Frodo.Params.cdf_table_len",
         "equation_Lib.IntTypes.machineint", "equation_Lib.IntTypes.u16",
-        "equation_Lib.IntTypes.uint16", "equation_Lib.Sequence.create",
+        "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.uint_t", "equation_Lib.Sequence.create",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Prims.nat", "equation_Spec.Frodo.Sample.cdf_table_len",
         "equation_Spec.Frodo.Sample.frodo_sample_matrix_fc",
         "equation_Spec.Matrix.create", "equation_Spec.Matrix.elem",
-        "equation_Spec.Matrix.matrix",
+        "equation_Spec.Matrix.matrix", "equation_Spec.Matrix.mget",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_Frodo.Params.cdf_table_len",
         "function_token_typing_Lib.IntTypes.uint16",
         "function_token_typing_Spec.Frodo.Sample.cdf_table_len",
-        "int_inversion", "lemma_Lib.IntTypes.pow2_values",
+        "int_inversion", "int_typing", "lemma_Lib.IntTypes.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
@@ -260,14 +255,14 @@
         "refinement_interpretation_Spec.Frodo.Sample_Tm_refine_8cc4573879591728c10c54dc640aa425",
         "refinement_interpretation_Spec.Frodo.Sample_Tm_refine_acc200f4791aaf0e4b01f76a955e25ec",
         "refinement_interpretation_Spec.Matrix_Tm_refine_0398237f0a815b3722620ac3777b6618",
-        "refinement_interpretation_Spec.Matrix_Tm_refine_2233c444b925c9018ebdbd043c61a126",
         "refinement_interpretation_Spec.Matrix_Tm_refine_310c2b30742fb4dd0067b4f1a9029085",
-        "refinement_interpretation_Spec.Matrix_Tm_refine_b011a76e95ca594ffe8d8448a8efbf43",
+        "refinement_interpretation_Spec.Matrix_Tm_refine_5a0ea60a53cdb317e297993ea3e915da",
+        "refinement_interpretation_Spec.Matrix_Tm_refine_98d9a787a6a7407316abfa13763cdfd5",
         "typing_FStar.Seq.Base.length",
         "typing_Spec.Frodo.Sample.cdf_table_len", "typing_Spec.Matrix.mset"
       ],
       0,
-      "10aaf200e5c052ba949e7e901315ce55"
+      "548bcb71fe9db24a491a1db721d5c80d"
     ]
   ]
 ]

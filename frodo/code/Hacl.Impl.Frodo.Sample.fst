@@ -98,7 +98,7 @@ val gen_inv:
   -> h1:HS.mem
   -> h2:HS.mem
   -> n1:size_t
-  -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 < max_size_t}
+  -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 <= max_size_t}
   -> r:lbytes (size 2 *! n1 *! n2)
   -> res:matrix_t n1 n2
   -> i:size_t{v i < v n1}
@@ -121,7 +121,7 @@ val frodo_sample_matrix_fc:
     h0:HS.mem
   -> h1:HS.mem
   -> n1:size_t
-  -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 < max_size_t}
+  -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 <= max_size_t}
   -> r:lbytes (size 2 *! n1 *! n2)
   -> res0:matrix_t n1 n2
   -> i:size_t{v i < v n1}
@@ -139,7 +139,7 @@ val sample_inner_inv:
     h0:HS.mem
   -> h1:HS.mem
   -> n1:size_t
-  -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 < max_size_t}
+  -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 <= max_size_t}
   -> r:lbytes (size 2 *! n1 *! n2)
   -> res:matrix_t n1 n2
   -> i:size_nat{i <= v n1}
@@ -152,7 +152,7 @@ let sample_inner_inv h0 h1 n1 n2 r res i =
 
 val frodo_sample_matrix:
     n1:size_t
-  -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 < max_size_t}
+  -> n2:size_t{0 < 2 * v n1 * v n2 /\ 2 * v n1 * v n2 <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
   -> ctr:uint16

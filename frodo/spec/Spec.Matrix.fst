@@ -35,7 +35,7 @@ let index_lt_s n1 n2 i j =
 private
 val index_neq:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> i:size_nat{i < n1}
   -> j:nat{j < n2}
   -> i':nat{i' < n1}
@@ -58,14 +58,14 @@ let index_neq #n1 #n2 i j i' j' =
 
 type elem = uint16
 
-type matrix (n1:size_nat) (n2:size_nat{n1 * n2 < max_size_t}) = Seq.lseq elem (n1 * n2)
+type matrix (n1:size_nat) (n2:size_nat{n1 * n2 <= max_size_t}) = Seq.lseq elem (n1 * n2)
 
-val create: n1:size_nat -> n2:size_nat{n1 * n2 < max_size_t} -> matrix n1 n2
+val create: n1:size_nat -> n2:size_nat{n1 * n2 <= max_size_t} -> matrix n1 n2
 let create n1 n2 = Seq.create (n1 * n2) (u16 0)
 
 val mget:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> a:matrix n1 n2
   -> i:size_nat{i < n1}
   -> j:size_nat{j < n2}
@@ -79,7 +79,7 @@ let op_Array_Access #n1 #n2 (m:matrix n1 n2) (i,j) = mget m i j
 
 val mset:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> a:matrix n1 n2
   -> i:size_nat{i < n1}
   -> j:size_nat{j < n2}
@@ -98,7 +98,7 @@ let op_Array_Assignment #n1 #n2 (m:matrix n1 n2) (i,j) x = mset m i j x
 
 val extensionality:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> a:matrix n1 n2
   -> b:matrix n1 n2
   -> Lemma
@@ -127,7 +127,7 @@ let _ = assert_norm (let m' = m.(0,0) <- 4us in m'.(0,0) == 4us)
 
 val map2:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> f:(elem -> elem -> elem)
   -> a:matrix n1 n2
   -> b:matrix n1 n2
@@ -150,7 +150,7 @@ let map2 #n1 #n2 f a b =
 
 val add:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> a:matrix n1 n2
   -> b:matrix n1 n2
   -> c:matrix n1 n2{ forall i j. c.(i,j) == a.(i,j) +. b.(i,j) }
@@ -159,7 +159,7 @@ let add #n1 #n2 a b =
 
 val sub:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> a:matrix n1 n2
   -> b:matrix n1 n2
   -> c:matrix n1 n2{ forall i j. c.(i,j) == a.(i,j) -. b.(i,j) }
@@ -193,8 +193,8 @@ let rec sum_extensionality n f g i =
 
 val mul_inner:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
-  -> #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
+  -> #n3:size_nat{n1 * n3 <= max_size_t /\ n2 * n3 <= max_size_t}
   -> a:matrix n1 n2
   -> b:matrix n2 n3
   -> i:size_nat{i < n1}
@@ -215,8 +215,8 @@ let mul_inner #n1 #n2 #n3 a b i k =
 
 val mul:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
-  -> #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
+  -> #n3:size_nat{n1 * n3 <= max_size_t /\ n2 * n3 <= max_size_t}
   -> a:matrix n1 n2
   -> b:matrix n2 n3
   -> c:matrix n1 n3{ forall i k. c.(i, k) == sum #n2 (fun l -> a.(i, l) *. b.(l, k))}
@@ -236,7 +236,7 @@ let mul #n1 #n2 #n3 a b =
 
 val mget_s:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> a:matrix n1 n2
   -> i:size_nat{i < n1}
   -> j:size_nat{j < n2}
@@ -249,8 +249,8 @@ let mget_s #n1 #n2 a i j =
 
 val mul_inner_s:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
-  -> #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
+  -> #n3:size_nat{n1 * n3 <= max_size_t /\ n2 * n3 <= max_size_t}
   -> a:matrix n1 n2
   -> b:matrix n2 n3
   -> i:size_nat{i < n1}
@@ -271,8 +271,8 @@ let mul_inner_s #n1 #n2 #n3 a b i k =
 
 val mul_s:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
-  -> #n3:size_nat{n1 * n3 < max_size_t /\ n2 * n3 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
+  -> #n3:size_nat{n1 * n3 <= max_size_t /\ n2 * n3 <= max_size_t}
   -> a:matrix n1 n2
   -> b:matrix n2 n3
   -> c:matrix n1 n3{ forall i k. c.(i, k) == sum #n2 (fun l -> a.(i, l) *. mget_s b l k)}
@@ -308,7 +308,7 @@ let eq_m m a b =
 
 val matrix_eq_fc:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> m:size_nat{0 < m /\ m <= 16}
   -> a:matrix n1 n2
   -> b:matrix n1 n2
@@ -320,7 +320,7 @@ let matrix_eq_fc #n1 #n2 m a b i =
 
 val matrix_eq:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 < max_size_t}
+  -> #n2:size_nat{n1 * n2 <= max_size_t}
   -> m:size_nat{0 < m /\ m <= 16}
   -> a:matrix n1 n2
   -> b:matrix n1 n2
@@ -346,7 +346,7 @@ assume val lemma_uint_to_bytes_le: //TODO: prove in Lib.Bytesequence
 
 val matrix_to_lbytes_fc:
     #n1:size_nat
-  -> #n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> #n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> m:matrix n1 n2
   -> res:lbytes (2 * n1 * n2)
   -> i:size_nat{i < n1 * n2}
@@ -357,7 +357,7 @@ let matrix_to_lbytes_fc #n1 #n2 m res i k =
 
 val lemma_matrix_to_lbytes_fc:
     #n1:size_nat
-  -> #n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> #n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> m:matrix n1 n2
   -> res:lbytes (2 * n1 * n2)
   -> i:size_nat{i < n1 * n2}
@@ -369,7 +369,7 @@ let lemma_matrix_to_lbytes_fc #n1 #n2 m res i k = ()
 
 val lemma_matrix_to_lbytes:
     #n1:size_nat
-  -> #n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> #n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> m:matrix n1 n2
   -> res:lbytes (2 * n1 * n2)
   -> res1:lbytes (2 * n1 * n2)
@@ -393,7 +393,7 @@ let lemma_matrix_to_lbytes #n1 #n2 m res res1 i =
 
 val lemma_matrix_to_lbytes_ext:
     #n1:size_nat
-  -> #n2:size_nat{2 * n1 < max_size_t /\ 2 * n1 * n2 < max_size_t}
+  -> #n2:size_nat{2 * n1 <= max_size_t /\ 2 * n1 * n2 <= max_size_t}
   -> m:matrix n1 n2
   -> res1:lbytes (2 * n1 * n2)
   -> res2:lbytes (2 * n1 * n2)
@@ -422,7 +422,7 @@ let lemma_matrix_to_lbytes_ext #n1 #n2 m res1 res2 =
 
 val matrix_to_lbytes:
     #n1:size_nat
-  -> #n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> #n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> m:matrix n1 n2
   -> res:lbytes (2 * n1 * n2)
     {forall (i:size_nat{i < n1 * n2}) (k:size_nat{k < 2}).
@@ -442,7 +442,7 @@ let matrix_to_lbytes #n1 #n2 m =
 
 val matrix_from_lbytes_fc:
     n1:size_nat
-  -> n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> b:lbytes (2 * n1 * n2)
   -> i:size_nat{i < n1 * n2}
   -> GTot uint16
@@ -451,7 +451,7 @@ let matrix_from_lbytes_fc n1 n2 b i =
 
 val matrix_from_lbytes:
     n1:size_nat
-  -> n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> b:lbytes (2 * n1 * n2)
   -> res:matrix n1 n2
     {forall (i:size_nat{i < n1 * n2}).

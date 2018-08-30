@@ -66,18 +66,18 @@ val get_bpp_cp_matrices:
   -> sk:lbytes crypto_secretkeybytes
   -> tuple2 (matrix params_nbar params_n) (matrix params_nbar params_nbar)
 let get_bpp_cp_matrices g mu_decode sk =
+  assert_norm (params_nbar * params_nbar <= max_size_t);
   let pk = Seq.sub sk crypto_bytes crypto_publickeybytes in
   let seed_a = Seq.sub pk 0 bytes_seed_a in
   let b = Seq.sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) in
   let seed_ep = Seq.sub g 0 crypto_bytes in
-
   let sp_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_ep (u16 4) in
   let bpp_matrix = frodo_mul_add_sa_plus_e seed_a seed_ep sp_matrix in
   let cp_matrix = frodo_mul_add_sb_plus_e_plus_mu b seed_ep mu_decode sp_matrix in
   bpp_matrix, cp_matrix
 
 val crypto_kem_dec_ss_cond:
-     d:lbytes crypto_bytes
+    d:lbytes crypto_bytes
   -> dp:lbytes crypto_bytes
   -> bp_matrix:matrix params_nbar params_n
   -> bpp_matrix:matrix params_nbar params_n
@@ -106,7 +106,6 @@ let crypto_kem_dec_ss_inner mu_decode g bp_matrix c_matrix sk ct =
   let d  = Seq.sub #_ #crypto_ciphertextbytes ct (crypto_ciphertextbytes - crypto_bytes) crypto_bytes in
   let kp = Seq.sub #_ #(3 * crypto_bytes) g crypto_bytes crypto_bytes in
   let s  = Seq.sub #_ #crypto_secretkeybytes sk 0 crypto_bytes in
-
   let bpp_matrix, cp_matrix = get_bpp_cp_matrices g mu_decode sk in
   let b = crypto_kem_dec_ss_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix in
   let kp_s = if b then kp else s in
@@ -124,7 +123,6 @@ let crypto_kem_dec_g mu_decode sk =
   let pk = Seq.sub sk crypto_bytes crypto_publickeybytes in
   let pk_mu_decode = update_sub pk_mu_decode 0 crypto_publickeybytes pk in
   let pk_mu_decode = update_sub pk_mu_decode crypto_publickeybytes mu_decode_len mu_decode in
-
   let g = frodo_prf_spec pk_mu_decode_len pk_mu_decode (u16 3) (3 * crypto_bytes) in
   g
 
@@ -148,9 +146,8 @@ let get_bp_c_matrices ct =
   let c2Len = params_logq * params_nbar * params_nbar / 8 in
   let c1 = Seq.sub ct 0 c1Len in
   let c2 = Seq.sub ct c1Len c2Len in
-
-  let bp_matrix = frodo_unpack params_nbar params_n params_logq c1 in
-  let c_matrix  = frodo_unpack params_nbar params_nbar params_logq c2 in
+  let bp_matrix = frodo_unpack #params_nbar #params_n params_logq c1 in
+  let c_matrix  = frodo_unpack #params_nbar #params_nbar params_logq c2 in
   bp_matrix, c_matrix
 
 val crypto_kem_dec:

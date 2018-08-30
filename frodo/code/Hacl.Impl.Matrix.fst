@@ -27,7 +27,7 @@ let lbytes len = lbuffer uint8 (v len)
 inline_for_extraction noextract unfold
 let v = size_v
 
-type matrix_t (n1:size_t) (n2:size_t{v n1 * v n2 < max_size_t}) =
+type matrix_t (n1:size_t) (n2:size_t{v n1 * v n2 <= max_size_t}) =
   lbuffer elem (v n1 * v n2)
 
 /// It's important to mark it as [unfold] for triggering patterns in [LowStar]
@@ -38,7 +38,7 @@ let as_matrix #n1 #n2 h (m:matrix_t n1 n2) : GTot (M.matrix (v n1) (v n2)) =
 inline_for_extraction noextract
 val matrix_create:
     n1:size_t
-  -> n2:size_t{0 < v n1 * v n2 /\ v n1 * v n2 < max_size_t}
+  -> n2:size_t{0 < v n1 * v n2 /\ v n1 * v n2 <= max_size_t}
   -> StackInline (matrix_t n1 n2)
     (requires fun h0 -> True)
     (ensures  fun h0 a h1 ->
@@ -52,7 +52,7 @@ let matrix_create n1 n2 =
 inline_for_extraction noextract
 val mget:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> a:matrix_t n1 n2
   -> i:size_t{v i < v n1}
   -> j:size_t{v j < v n2}
@@ -68,7 +68,7 @@ let mget #n1 #n2 a i j =
 inline_for_extraction noextract
 val mset:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> a:matrix_t n1 n2
   -> i:size_t{v i < v n1}
   -> j:size_t{v j < v n2}
@@ -95,7 +95,7 @@ let get #n1 #n2 h (m:matrix_t n1 n2) i j = M.mget (as_matrix h m) i j
 private unfold
 val map2_inner_inv:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> h0:HS.mem
   -> h1:HS.mem
   -> h2:HS.mem
@@ -118,7 +118,7 @@ let map2_inner_inv #n1 #n2 h0 h1 h2 f a b c i j =
 inline_for_extraction noextract private
 val map2_inner:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> h0:HS.mem
   -> h1:HS.mem
   -> f:(elem -> elem -> elem)
@@ -141,7 +141,7 @@ let map2_inner #n1 #n2 h0 h1 f a b c i j =
 inline_for_extraction
 val map2:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> f:(uint16 -> uint16 -> uint16)
   -> a:matrix_t n1 n2
   -> b:matrix_t n1 n2
@@ -172,7 +172,7 @@ let map2 #n1 #n2 f a b c =
 
 val matrix_add:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> a:matrix_t n1 n2
   -> b:matrix_t n1 n2
   -> Stack unit
@@ -185,7 +185,7 @@ let matrix_add #n1 #n2 a b =
 
 val matrix_sub:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> a:matrix_t n1 n2
   -> b:matrix_t n1 n2
   -> Stack unit
@@ -208,8 +208,8 @@ let matrix_sub #n1 #n2 a b =
 inline_for_extraction noextract private
 val mul_inner:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
-  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
+  -> #n3:size_t{v n2 * v n3 <= max_size_t /\ v n1 * v n3 <= max_size_t}
   -> a:matrix_t n1 n2
   -> b:matrix_t n2 n3
   -> i:size_t{v i < v n1}
@@ -248,8 +248,8 @@ let mul_inner #n1 #n2 #n3 a b i k =
 private unfold
 val mul_inner_inv:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
-  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
+  -> #n3:size_t{v n2 * v n3 <= max_size_t /\ v n1 * v n3 <= max_size_t}
   -> h0:HS.mem
   -> h1:HS.mem
   -> h2:HS.mem
@@ -274,8 +274,8 @@ let mul_inner_inv #n1 #n2 #n3 h0 h1 h2 a b c f i k =
 inline_for_extraction noextract private
 val mul_inner1:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
-  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
+  -> #n3:size_t{v n2 * v n3 <= max_size_t /\ v n1 * v n3 <= max_size_t}
   -> h0:HS.mem
   -> h1:HS.mem
   -> a:matrix_t n1 n2
@@ -303,8 +303,8 @@ let onemore p q b = ()
 
 val matrix_mul:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
-  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
+  -> #n3:size_t{v n2 * v n3 <= max_size_t /\ v n1 * v n3 <= max_size_t}
   -> a:matrix_t n1 n2
   -> b:matrix_t n2 n3
   -> c:matrix_t n1 n3
@@ -346,7 +346,7 @@ let matrix_mul #n1 #n2 #n3 a b c =
 inline_for_extraction noextract
 val mget_s:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> a:matrix_t n1 n2
   -> i:size_t{v i < v n1}
   -> j:size_t{v j < v n2}
@@ -367,8 +367,8 @@ let get_s #n1 #n2 h (m:matrix_t n1 n2) i j = M.mget_s (as_matrix h m) i j
 inline_for_extraction noextract private
 val mul_inner_s:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
-  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
+  -> #n3:size_t{v n2 * v n3 <= max_size_t /\ v n1 * v n3 <= max_size_t}
   -> a:matrix_t n1 n2
   -> b:matrix_t n2 n3
   -> i:size_t{v i < v n1}
@@ -407,8 +407,8 @@ let mul_inner_s #n1 #n2 #n3 a b i k =
 inline_for_extraction noextract private
 val mul_inner1_s:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
-  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
+  -> #n3:size_t{v n2 * v n3 <= max_size_t /\ v n1 * v n3 <= max_size_t}
   -> h0:HS.mem
   -> h1:HS.mem
   -> a:matrix_t n1 n2
@@ -430,8 +430,8 @@ let mul_inner1_s #n1 #n2 #n3 h0 h1 a b c i k f =
 
 val matrix_mul_s:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
-  -> #n3:size_t{v n2 * v n3 < max_size_t /\ v n1 * v n3 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
+  -> #n3:size_t{v n2 * v n3 <= max_size_t /\ v n1 * v n3 <= max_size_t}
   -> a:matrix_t n1 n2
   -> b:matrix_t n2 n3
   -> c:matrix_t n1 n3
@@ -490,7 +490,7 @@ let eq_u32_m m a b =
 
 val matrix_eq:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> m:size_t{0 < v m /\ v m <= 16}
   -> a:matrix_t n1 n2
   -> b:matrix_t n1 n2
@@ -523,7 +523,7 @@ let matrix_eq #n1 #n2 m a b =
 
 val matrix_to_lbytes:
     #n1:size_t
-  -> #n2:size_t{2 * v n1 < max_size_t /\ 2 * v n1 * v n2 < max_size_t}
+  -> #n2:size_t{2 * v n1 <= max_size_t /\ 2 * v n1 * v n2 <= max_size_t}
   -> m:matrix_t n1 n2
   -> res:lbytes (size 2 *! n1 *! n2)
   -> Stack unit
@@ -554,7 +554,7 @@ let matrix_to_lbytes #n1 #n2 m res =
 
 val matrix_from_lbytes:
     #n1:size_t
-  -> #n2:size_t{2 * v n1 < max_size_t /\ 2 * v n1 * v n2 < max_size_t}
+  -> #n2:size_t{2 * v n1 <= max_size_t /\ 2 * v n1 * v n2 <= max_size_t}
   -> b:lbytes (size 2 *! n1 *! n2)
   -> res:matrix_t n1 n2
   -> Stack unit

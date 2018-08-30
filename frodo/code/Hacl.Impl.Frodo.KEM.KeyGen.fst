@@ -40,9 +40,8 @@ val frodo_mul_add_as_plus_e:
     (ensures  fun h0 _ h1 -> modifies (loc_buffer b_matrix) h0 h1 /\
       (let a_matrix = Spec.Frodo.Params.frodo_gen_matrix (v params_n) (v bytes_seed_a) (as_seq h0 seed_a) in
       as_matrix h1 b_matrix == M.add (M.mul_s a_matrix (as_matrix h0 s_matrix)) (as_matrix h0 e_matrix)))
-[@"c_inline"]
 let frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix =
-  assert_norm (0 < v params_n /\ 2 * v params_n < max_size_t /\ 256 + v params_n < maxint U16 /\ v params_n * v params_n < max_size_t);
+  assert_norm (0 < v params_n /\ 2 * v params_n <= max_size_t /\ 256 + v params_n < maxint U16 /\ v params_n * v params_n <= max_size_t);
   push_frame();
   let a_matrix = matrix_create params_n params_n in
   frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
@@ -140,7 +139,7 @@ let crypto_kem_keypair_ coins pk sk =
   let s_bytes = sub sk (crypto_bytes +! crypto_publickeybytes) (size 2 *! params_n *! params_nbar) in
   frodo_mul_add_as_plus_e_pack seed_a seed_e b s_bytes;
   let h1 = ST.get () in
-  S.lemma_updade_pk (as_seq h1 seed_a) (as_seq h1 b) (as_seq h1 pk);
+  S.lemma_update_pk (as_seq h1 seed_a) (as_seq h1 b) (as_seq h1 pk);
 
   assert (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h1 sk)
     (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar) == as_seq h1 s_bytes);
@@ -151,7 +150,7 @@ let crypto_kem_keypair_ coins pk sk =
   let h3 = ST.get () in
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h3 sk) 0 (v crypto_bytes)) (as_seq h1 s);
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h3 sk) (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar)) (as_seq h1 s_bytes);
-  S.lemma_updade_sk (as_seq h1 s) (as_seq h1 pk) (as_seq h1 s_bytes) (as_seq h3 sk)
+  S.lemma_update_sk (as_seq h1 s) (as_seq h1 pk) (as_seq h1 s_bytes) (as_seq h3 sk)
 
 inline_for_extraction noextract
 val crypto_kem_keypair:

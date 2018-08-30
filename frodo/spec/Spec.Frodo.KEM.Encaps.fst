@@ -93,7 +93,7 @@ let update_ss c12 kd =
   ss
 
 val frodo_mul_add_sa_plus_e:
-     seed_a:lbytes bytes_seed_a
+    seed_a:lbytes bytes_seed_a
   -> seed_e:lbytes crypto_bytes
   -> sp_matrix:matrix params_nbar params_n
   -> matrix params_nbar params_n
@@ -105,18 +105,18 @@ let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix =
   b_matrix
 
 val frodo_mul_add_sb_plus_e:
-     b:lbytes (params_logq * params_n * params_nbar / 8)
+    b:lbytes (params_logq * params_n * params_nbar / 8)
   -> seed_e:lbytes crypto_bytes
   -> sp_matrix:matrix params_nbar params_n
   -> matrix params_nbar params_nbar
 let frodo_mul_add_sb_plus_e b seed_e sp_matrix =
-  let b_matrix = frodo_unpack params_n params_nbar params_logq b in
+  let b_matrix = frodo_unpack #params_n #params_nbar params_logq b in
   let epp_matrix = frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) in
   let v_matrix = Matrix.add (Matrix.mul sp_matrix b_matrix) epp_matrix in
   v_matrix
 
 val frodo_mul_add_sb_plus_e_plus_mu:
-     b:lbytes (params_logq * params_n * params_nbar / 8)
+    b:lbytes (params_logq * params_n * params_nbar / 8)
   -> seed_e:lbytes crypto_bytes
   -> coins:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
   -> sp_matrix:matrix params_nbar params_n
@@ -149,7 +149,7 @@ let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix =
   c2
 
 val crypto_kem_enc_ct_inner:
-     seed_a:lbytes bytes_seed_a
+    seed_a:lbytes bytes_seed_a
   -> seed_e:lbytes crypto_bytes
   -> b:lbytes (params_logq * params_n * params_nbar / 8)
   -> coins:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
@@ -189,7 +189,7 @@ let crypto_kem_enc_0 coins pk =
   g
 
 val crypto_kem_enc_1:
-     g:lbytes (3 * crypto_bytes)
+    g:lbytes (3 * crypto_bytes)
   -> coins:lbytes bytes_mu
   -> pk:lbytes crypto_publickeybytes
   -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)

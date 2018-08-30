@@ -71,7 +71,7 @@ let frodo_sample r =
 
 val frodo_sample_matrix_fc:
     n1:size_nat
-  -> n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> r:lbytes (2 * n1 * n2)
   -> i:size_nat{i < n1}
   -> j:size_nat{j < n2}
@@ -82,7 +82,7 @@ let frodo_sample_matrix_fc n1 n2 r i j =
 
 val frodo_sample_matrix:
     n1:size_nat
-  -> n2:size_nat{2 * n1 * n2 < max_size_t}
+  -> n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> seedLen:size_nat
   -> seed:lbytes seedLen
   -> ctr:uint16

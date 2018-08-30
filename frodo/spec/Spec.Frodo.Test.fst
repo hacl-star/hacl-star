@@ -20,10 +20,10 @@ let print_and_compare (#len:size_nat) (test_expected:lbytes len) (test_result:lb
   : ML bool
 =
   IO.print_string "\n\nResult:   ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a)))
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)))
     (as_list test_result);
   IO.print_string "\nExpected: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a)))
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)))
     (as_list test_expected);
   for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result
 

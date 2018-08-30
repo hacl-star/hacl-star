@@ -34,7 +34,7 @@ let crypto_publickeybytes :r:size_t{v r == S.crypto_publickeybytes} =
   normalize_term (bytes_seed_a +! params_logq *! params_n *! params_nbar /. size 8)
 
 let crypto_secretkeybytes :r:size_t{v r == S.crypto_secretkeybytes} =
-  assert_norm (v crypto_bytes + v crypto_publickeybytes + 2 * v params_n * v params_nbar < max_size_t);
+  assert_norm (v crypto_bytes + v crypto_publickeybytes + 2 * v params_n * v params_nbar <= max_size_t);
   normalize_term (crypto_bytes +! crypto_publickeybytes +! size 2 *! params_n *! params_nbar)
 
 let crypto_ciphertextbytes :r:size_t{v r == S.crypto_ciphertextbytes} =
@@ -43,7 +43,7 @@ let crypto_ciphertextbytes :r:size_t{v r == S.crypto_ciphertextbytes} =
 inline_for_extraction noextract
 val clear_matrix:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 < max_size_t /\ v n1 * v n2 % 2 = 0}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t /\ v n1 * v n2 % 2 = 0}
   -> m:matrix_t n1 n2
   -> Stack unit
     (requires fun h -> live h m)

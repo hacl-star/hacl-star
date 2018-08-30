@@ -28,7 +28,7 @@ val gen_inv:
     h0:HS.mem
   -> h1:HS.mem
   -> h2:HS.mem
-  -> n:size_t{2 * v n < max_size_t /\ 256 + v n < maxint U16 /\ v n * v n < max_size_t}
+  -> n:size_t{2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
   -> r:lbytes (size 2 *! n)
@@ -54,7 +54,7 @@ inline_for_extraction noextract private
 val frodo_gen_matrix_cshake_fc:
     h0:HS.mem
   -> h1:HS.mem
-  -> n:size_t{2 * v n < max_size_t /\ 256 + v n < maxint U16 /\ v n * v n < max_size_t}
+  -> n:size_t{2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
   -> r:lbytes (size 2 *! n)
@@ -72,7 +72,7 @@ private
 val gen_inner_inv:
     h0:HS.mem
   -> h1:HS.mem
-  -> n:size_t{2 * v n < max_size_t /\ 256 + v n < maxint U16 /\ v n * v n < max_size_t}
+  -> n:size_t{2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
   -> res:matrix_t n n
@@ -88,7 +88,7 @@ let gen_inner_inv h0 h1 n seed_len seed res r i =
 inline_for_extraction noextract private
 val frodo_gen_matrix_cshake_inner:
     h0:HS.mem
-  -> n:size_t{0 < 2 * v n /\ 2 * v n < max_size_t /\ 256 + v n < maxint U16 /\ v n * v n < max_size_t}
+  -> n:size_t{0 < 2 * v n /\ 2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
   -> res:matrix_t n n
@@ -110,7 +110,7 @@ let frodo_gen_matrix_cshake_inner h0 n seed_len seed res r i =
     (fun j -> frodo_gen_matrix_cshake_fc h0 h1 n seed_len seed r res i j)
 
 val frodo_gen_matrix_cshake:
-    n:size_t{0 < v n /\ 2 * v n < max_size_t /\ 256 + v n < maxint U16 /\ v n * v n < max_size_t}
+    n:size_t{0 < v n /\ 2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
   -> res:matrix_t n n
@@ -132,7 +132,7 @@ let frodo_gen_matrix_cshake n seed_len seed res =
   Spec.Matrix.extensionality (as_matrix h1 res) (S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 
 val frodo_gen_matrix_cshake_4x:
-    n:size_t{0 < v n /\ 2 * v n < max_size_t /\ 256 + v n < maxint U16 /\ v n * v n < max_size_t}
+    n:size_t{0 < v n /\ 2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
   -> res:matrix_t n n
