@@ -8,8 +8,8 @@ HACL_HOME ?= ../..
 CACHE_DIR = .cache
 OUTPUT_DIR = .output
 HINT_DIR = .hints
-GENERATED_DIR = merkle-tree-c
-OUT_DIR = merkle-tree-c
+GENERATED_DIR = c
+OUT_DIR = bin
 
 KREMLIN=$(KREMLIN_HOME)/krml
 KREMLIB=$(KREMLIN_HOME)/kremlib
@@ -121,6 +121,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-I $(HACL_HOME)/providers/evercrypt \
 	-I $(HACL_HOME)/providers/evercrypt/config/default \
 	-tmpdir $(GENERATED_DIR) \
+	-warn-error +9 \
 	$^
 
 # The Makefile is manually staged because GNU Make does not understand
