@@ -8,7 +8,7 @@ module ST = FStar.HyperStack.ST
 
 module M = LowStar.Modifies
 module B = LowStar.Buffer
-module Spec = Spec.Hash.Padding
+module Spec = Spec.Hash.Common
 
 open Spec.Hash.Helpers
 

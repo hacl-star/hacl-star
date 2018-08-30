@@ -170,7 +170,7 @@ val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
       B.as_seq h1 ws == S.init (Spec.size_k_w a) (Spec.ws a b)))
 
 inline_for_extraction
-let index_be (a: sha2_alg) (b: B.buffer UInt8.t) (i: UInt32.t):
+let index_be (a: sha2_alg) (b: B.buffer UInt8.t) (i: U32.t):
   ST.Stack (word a)
     (requires (fun h ->
       B.length b % size_word a = 0 /\
@@ -379,7 +379,7 @@ let update a hash block =
   (**) ST.push_frame ();
   (**) let h0 = ST.get () in
   let hash1: hash_w a = B.alloca (zero a) 8ul in
-  let computed_ws: ws_w a = B.alloca (zero a) (UInt32.uint_to_t (Spec.size_k_w a)) in
+  let computed_ws: ws_w a = B.alloca (zero a) (U32.uint_to_t (Spec.size_k_w a)) in
   ws a block computed_ws;
   B.blit hash 0ul hash1 0ul 8ul;
   (**) let h1 = ST.get () in
