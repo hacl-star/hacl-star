@@ -267,12 +267,52 @@ procedure {:quick} msg_shift()
 }
 
 
+procedure {:recursive} {:verify true} loop_rounds_16_51(
+        inline i:nat,
+        ghost k_b:buffer128,
+        ghost block:block_w(SHA2_256),
+        ghost hash_orig:hash_w(SHA2_256)
+    )
+    lets
+        tbl @= rcx;
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
+        tmp_xmm @= xmm7;
+    reads
+        tbl; mem; memTaint;
+    modifies
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
+        efl;
+    requires
+        validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
-// TODO: Wrap the above in a recursive loop that calls loop_rounds_16_55_body, then msg_shift
+        4 <= i /\ i < 13;
 
+        k_reqs(buffer128_as_seq(mem, k_b));
 
+        make_hash(abef, cdgh) == repeat_range_spec(0, 4*4, shuffle_core_opaque(SHA2_256, block), hash_orig);
 
-procedure {:quick} {:verify true} loop_rounds_52_64(
+        msg0 == ws_quad32(4*4, block) /\
+        msg1 == add_wrap_quad32(ws_partial(4*(4+1), block), ws_quad32(4*(4-1)+1, block)) /\
+        msg2 == ws_partial(4*(4+2), block) /\
+        msg3 == ws_quad32(4*(4-1), block);
+
+    ensures
+        make_hash(abef, cdgh) == repeat_range_spec(0, 4*(i+1), shuffle_core_opaque(SHA2_256, block), hash_orig);
+
+        msg0 == ws_quad32(4*(i+1), block);
+        msg1 == add_wrap_quad32(ws_partial(4*(i+2), block), ws_quad32(4*(i)+1, block));
+        msg2 == ws_partial(4*(i+3), block);
+        msg3 == ws_quad32(4*(i), block);
+{
+    inline if (i > 4) {
+        loop_rounds_16_51(i-1, k_b, block, hash_orig);
+    }
+    loop_rounds_16_51_body(i, k_b, block, hash_orig);
+    msg_shift();
+}
+
+procedure {:quick} loop_rounds_52_64(
         ghost k_b:buffer128,
         ghost block:block_w(SHA2_256),
         ghost hash_orig:hash_w(SHA2_256)
@@ -304,6 +344,8 @@ procedure {:quick} {:verify true} loop_rounds_52_64(
     ensures
         tmp_xmm == old(bswap);
         num == old(num) - 1;
+
+        // TODO: Add postcondition about the fact that make_hash(abef, cdgh) is update
 {
     ghost var ks := buffer128_as_seq(mem, k_b);
     Load128_buffer(Wi, tbl, 16*13, Secret, k_b, 13);  // Load K values from memory
