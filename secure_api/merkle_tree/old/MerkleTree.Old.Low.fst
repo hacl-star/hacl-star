@@ -142,7 +142,7 @@ val create_merkle_tree: unit ->
 	   mt_ptr_lift h1 mt == High.create_merkle_tree ()))
 #reset-options "--z3rlimit 10"
 let create_merkle_tree _ =
-  let mt_region = BV.new_region_ root in
+  let mt_region = BV.new_region_ HH.root in
   let mt_values_region = BV.new_region_ mt_region in 
   let values = BV.create_reserve hash_size 1ul mt_values_region in
   let mt_iroots_region = BV.new_region_ mt_region in 
