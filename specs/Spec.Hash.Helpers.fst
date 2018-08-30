@@ -22,6 +22,7 @@ let is_sha2 = function
 
 let sha2_alg = a:hash_alg { is_sha2 a }
 
+
 (** Maximum input data length. *)
 
 (* In bytes. *)
@@ -30,7 +31,7 @@ let max_input8: hash_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> pow2 61
   | SHA2_384 | SHA2_512 -> pow2 125
 
-(* A type that can hold a maximum length. *)
+(* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
 let len_t: hash_alg -> Type = function
   | MD5 | SHA1
@@ -49,6 +50,24 @@ let size_len_8: hash_alg -> Tot nat = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> 8
   | SHA2_384 | SHA2_512 -> 16
+
+(* Same thing, as a machine integer *)
+inline_for_extraction
+let size_len_ul_8: a:hash_alg -> Tot (n:UInt32.t{UInt32.v n = size_len_8 a}) = function
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
+  | SHA2_384 | SHA2_512 -> 16ul
+
+(* A useful lemma for all the operations that involve going from bytes to bits. *)
+let max_input_size_len (a: hash_alg): Lemma
+  (ensures FStar.Mul.(max_input8 a * 8 = pow2 (size_len_8 a * 8)))
+=
+  let open FStar.Mul in
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
+      assert_norm (max_input8 a * 8 = pow2 (size_len_8 a * 8))
+  | SHA2_384 | SHA2_512 ->
+      assert_norm (max_input8 a * 8 = pow2 (size_len_8 a * 8))
+
 
 (** Working state of the algorithms. *)
 
@@ -98,15 +117,30 @@ let size_hash a =
   let open FStar.Mul in
   size_word a * size_hash_final_w a
 
+
 (** Padding *)
 
 (* Number of zeroes that should go into the padding *)
-let pad0_length (a:sha2_alg) (len:nat): Tot (n:nat{(len + 1 + n + size_len_8 a) % size_block a = 0}) =
+let pad0_length (a:hash_alg) (len:nat): Tot (n:nat{(len + 1 + n + size_len_8 a) % size_block a = 0}) =
   (size_block a - (len + size_len_8 a + 1)) % size_block a
 
 (* Total length for the padding, a.k.a. the suffix length. *)
-let pad_length (a: sha2_alg) (len: nat): Tot (n:nat { (len + n) % size_block a = 0 }) =
+let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % size_block a = 0 }) =
   pad0_length a len + 1 + size_len_8 a
+
+
+(** Endian-ness *)
+
+module E = FStar.Kremlin.Endianness
+
+(* Define word based operators *)
+let words_to_be: a:hash_alg -> Tot (s:Seq.seq (word a) -> Tot (Spec.Lib.lbytes FStar.Mul.(size_word a * Seq.length s))) = function
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> E.be_of_seq_uint32
+  | SHA2_384 | SHA2_512 -> E.be_of_seq_uint64
+
+let words_from_be: a:hash_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(size_word a * len) -> Tot (s:Seq.seq (word a){Seq.length s = len})) = function
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> E.seq_uint32_of_be
+  | SHA2_384 | SHA2_512 -> E.seq_uint64_of_be
 
 
 (** The data format taken and returned by the hash specifications. *)

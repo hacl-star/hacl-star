@@ -199,7 +199,7 @@ inline_for_extraction
 let ws_w a = b:B.buffer (word a) { B.length b = Spec.size_k_w a }
 
 let block_words_be (a: sha2_alg) (h: HS.mem) (b: block_b a) =
-  Spec.words_from_be a size_block_w (B.as_seq h b)
+  words_from_be a size_block_w (B.as_seq h b)
 
 inline_for_extraction
 val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
@@ -220,7 +220,7 @@ let index_be (a: sha2_alg) (b: B.buffer UInt8.t) (i: UInt32.t):
       U32.v i < B.length b / size_word a))
     (ensures (fun h0 r h1 ->
        M.(modifies loc_none h0 h1) /\
-       r = S.index (Spec.words_from_be a (B.length b / size_word a) (B.as_seq h0 b)) (U32.v i)))
+       r = S.index (words_from_be a (B.length b / size_word a) (B.as_seq h0 b)) (U32.v i)))
 =
   match a with
   | SHA2_224 | SHA2_256 -> C.Endianness.index_32_be b i
@@ -602,10 +602,10 @@ let pad_3 (a: sha2_alg) (len: len_t a) (dst: B.buffer U8.t):
       len_v a len < max_input8 a /\
       B.live h dst /\ B.length dst = size_len_8 a))
     (ensures (fun h0 _ h1 ->
-      Spec.max_input_size_len a;
+      max_input_size_len a;
       B.(modifies (loc_buffer dst) h0 h1) /\
       S.equal (B.as_seq h1 dst)
-        (Endianness.n_to_be (Spec.size_len_ul_8 a) FStar.Mul.(len_v a len * 8))))
+        (Endianness.n_to_be (size_len_ul_8 a) FStar.Mul.(len_v a len * 8))))
 =
   begin match a with
   | SHA2_224 | SHA2_256 ->
@@ -647,7 +647,7 @@ let pad a len dst =
   (**) let h2 = ST.get () in
   (**) assert (
   (**)   let pad0_length = pad0_length a (len_v a len) in
-  (**)   Spec.max_input_size_len a;
+  (**)   max_input_size_len a;
   (**)   let s = B.as_seq h2 dst in
   (**)   let s1 = S.slice s 0 1 in
   (**)   let s2 = S.slice s 1 (1 + pad0_length) in
@@ -749,7 +749,7 @@ let finish a s dst =
     B.live h dst /\ B.live h s /\
     M.(modifies (loc_buffer dst) h0 h) /\
     S.equal (S.slice hash 0 (i * Helpers.size_word a))
-      (Spec.words_to_be a (S.slice hash_w 0 i))
+      (words_to_be a (S.slice hash_w 0 i))
   in
   let f (i: U32.t { U32.(0 <= v i /\ v i < Helpers.size_hash_final_w a) }): ST.Stack unit
     (requires (fun h -> inv h (U32.v i)))
@@ -783,3 +783,4 @@ let finish_384: finish_t SHA2_384 =
   Tactics.(synth_by_tactic (specialize (finish SHA2_384) [`%finish]))
 let finish_512: finish_t SHA2_512 =
   Tactics.(synth_by_tactic (specialize (finish SHA2_512) [`%finish]))
+
