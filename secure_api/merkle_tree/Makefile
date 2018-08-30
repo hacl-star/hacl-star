@@ -1,3 +1,6 @@
+# This Makefile is borrowed heavily from:
+# https://github.com/project-everest/hacl-star/blob/frodo_sn/frodo/code/Makefile
+
 FSTAR_HOME ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 HACL_HOME ?= ../..
@@ -5,8 +8,8 @@ HACL_HOME ?= ../..
 CACHE_DIR = .cache
 OUTPUT_DIR = .output
 HINT_DIR = .hints
-GENERATED_DIR = merkle-tree-new-c
-OUT_DIR = merkle-tree-new-c
+GENERATED_DIR = merkle-tree-c
+OUT_DIR = merkle-tree-c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 KREMLIB=$(KREMLIN_HOME)/kremlib
@@ -110,8 +113,9 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Hacl.Impl.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
+	-bundle 'LowStar.*' \
 	-library 'EverCrypt' \
-	-drop 'Spec,Lib,C.Loops.*' \
+	-drop 'Spec,Lib,C.*,C.Loops.*' \
 	-I $(HACL_HOME)/specs \
 	-I $(HACL_HOME)/code/lib \
 	-I $(HACL_HOME)/providers/evercrypt \

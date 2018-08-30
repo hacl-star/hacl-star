@@ -194,7 +194,8 @@ let rec construct_rhs lv hs rhs j acc actd =
     (if actd
     then (hash_2 (V.index (V.index hs lv) (j - 1ul)) acc acc;
 	 RV.assign_copy hcpy rhs (lv + 1ul) acc)
-    else Cpy?.copy hcpy (V.index (V.index hs lv) (j - 1ul)) acc);
+    else (let copy = Cpy?.copy hcpy in
+	 copy (V.index (V.index hs lv) (j - 1ul)) acc));
     construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc true)
 
 // Construct a Merkle path for a given index `k`, hashes `hs`, 
