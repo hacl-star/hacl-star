@@ -52,7 +52,7 @@ let buffer_r_sep #a len v p h0 h1 =
 		       (loc_buffer v));
   B.modifies_buffer_elim v p h0 h1
 
-val buffer_r_init: 
+val buffer_r_init:
   #a:Type -> ia:a -> len:UInt32.t{len > 0ul} -> r:erid ->
   HST.ST (b:B.buffer a)
     (requires (fun h0 -> true))
@@ -87,10 +87,10 @@ val buffer_copy:
 let buffer_copy #a len src dst =
   B.blit src 0ul dst 0ul len
 
-inline_for_extraction val buffer_regional: 
+val buffer_regional:
   #a:Type -> ia:a -> len:UInt32.t{len > 0ul} ->
   regional (B.buffer a)
-inline_for_extraction let buffer_regional #a ia len =
+let buffer_regional #a ia len =
   Rgl (buffer_region_of #a)
       (buffer_cv a)
       (buffer_repr a)
@@ -100,10 +100,10 @@ inline_for_extraction let buffer_regional #a ia len =
       (buffer_r_init #a ia len)
       (buffer_r_free #a len)
 
-inline_for_extraction val buffer_copyable: 
+val buffer_copyable:
   #a:Type -> ia:a -> len:UInt32.t{len > 0ul} ->
   copyable (B.buffer a) (buffer_regional ia len)
-inline_for_extraction let buffer_copyable #a ia len =
+let buffer_copyable #a ia len =
   Cpy (buffer_copy len)
 
 /// If `a` is regional, then `rvector a` is also regional
@@ -152,7 +152,8 @@ val vector_r_init:
       vector_region_of v = r))
 let vector_r_init #a #rg r =
   let nrid = new_region_ r in
-  let ia = Rgl?.r_init rg nrid in
+  let r_init = Rgl?.r_init rg in
+  let ia = r_init nrid in
   V.create_reserve 1ul ia r
 
 val vector_r_free:
@@ -164,9 +165,9 @@ val vector_r_free:
 let vector_r_free #a #rg v =
   RV.free v
 
-inline_for_extraction val vector_regional: 
+val vector_regional: 
   #a:Type -> rg:regional a -> regional (rvector rg)
-inline_for_extraction let vector_regional #a rg =
+let vector_regional #a rg =
   Rgl (vector_region_of #a #rg)
       (vector_cv #a rg)
       (vector_repr #a rg)
@@ -178,9 +179,9 @@ inline_for_extraction let vector_regional #a rg =
 
 // An instantiation: `LowStar.Buffer` of `LowStar.RVector` is regional.
 
-inline_for_extraction val buffer_vector_regional:
+val buffer_vector_regional:
   #a:Type -> ia:a -> len:UInt32.t{len > 0ul} ->
   regional (rvector #(B.buffer a) (buffer_regional ia len))
-inline_for_extraction let buffer_vector_regional #a ia len =
+let buffer_vector_regional #a ia len =
   vector_regional (buffer_regional ia len)
 
