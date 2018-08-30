@@ -97,6 +97,7 @@ let op384_512: ops = {
   e3 = 19ul; e4 = 61ul; e5 =  6ul
 }
 
+inline_for_extraction
 let op0: a:sha2_alg -> Tot ops = function
   | SHA2_224 -> op224_256
   | SHA2_256 -> op224_256
