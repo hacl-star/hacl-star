@@ -148,6 +148,8 @@ providers:
 # CI
 #
 
+CC = gcc-6
+
 ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) -C frodo/spec VARIANT=64-cSHAKE
 #	$(MAKE) -C frodo/spec VARIANT=640-cSHAKE
