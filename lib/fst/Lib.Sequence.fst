@@ -157,14 +157,37 @@ val repeati_inductive:
 let repeati_inductive #a =
   repeat_range_inductive #a 0
 
+val fold_land_:
+    #n:size_nat
+  -> f:(j:size_nat{j < n} -> GTot bool)
+  -> i:size_nat{i <= n}
+  -> GTot bool
+let rec fold_land_ #n f i =
+  if i = 0 then true
+  else f (i - 1) && fold_land_ #n f (i - 1)
+
+#set-options "--max_fuel 1"
+
+val lbytes_eq_fc:
+    #len:size_nat
+  -> a:lseq uint8 len
+  -> b:lseq uint8 len
+  -> i:size_nat{i <= len}
+  -> GTot bool
+let lbytes_eq_fc #len a b i =
+  let open Lib.RawIntTypes in
+  let f i = uint_to_nat a.[i] = uint_to_nat b.[i] in
+  fold_land_ #len f i
+
 val lbytes_eq:
     #len:size_nat
   -> a:lseq uint8 len
   -> b:lseq uint8 len
-  -> bool
+  -> res:bool{res == lbytes_eq_fc #len a b len}
 let lbytes_eq #len a b =
   let open Lib.RawIntTypes in
-  repeati len
+  repeati_inductive len
+  (fun i res -> res == lbytes_eq_fc #len a b i)
   (fun i res ->
     res && (uint_to_nat a.[i] = uint_to_nat b.[i])
   ) true

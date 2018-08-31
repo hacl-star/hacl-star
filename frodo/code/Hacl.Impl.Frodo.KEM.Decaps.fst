@@ -151,7 +151,6 @@ val crypto_kem_dec_ss_cond:
 let crypto_kem_dec_ss_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix =
   let h0 = ST.get () in
   let b1 = lbytes_eq d dp in
-  assume (b1 == Lib.Sequence.lbytes_eq #(v crypto_bytes) (as_seq h0 d) (as_seq h0 dp));
   let b2 = matrix_eq params_logq bp_matrix bpp_matrix in
   let b3 = matrix_eq params_logq c_matrix cp_matrix in
   let res = b1 && b2 && b3 in

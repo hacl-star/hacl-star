@@ -221,12 +221,16 @@ val lbytes_eq:
   -> b:lbuffer uint8 (v len)
   -> Stack bool
     (requires fun h -> live h a /\ live h b)
-    (ensures  fun h0 r h1 -> modifies loc_none h0 h1)
+    (ensures  fun h0 r h1 -> modifies loc_none h0 h1 /\
+      r == Seq.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b))
 let lbytes_eq #len a b =
   push_frame();
   let res:lbuffer bool 1 = create (size 1) true in
   let h0 = ST.get () in
-  loop_nospec #h0 len res
+  Lib.Loops.for (size 0) len
+  (fun h1 i ->
+    B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+    B.get h1 res 0 == Seq.lbytes_eq_fc #(v len) (as_seq h0 a) (as_seq h0 b) i)
   (fun i ->
     let a1 = res.(size 0) in
     let a2 = eq_u8 a.(i) b.(i) in
