@@ -15,6 +15,7 @@ open FStar.Mul
 
 #set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100"
 
+noextract
 let mk_update_multi a update s blocks n_blocks =
   let h0 = ST.get () in
   let inv (h: HS.mem) (i: nat) =

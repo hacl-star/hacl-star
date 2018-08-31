@@ -13,6 +13,7 @@ open FStar.Mul
 
 include Hacl.SHA2
 
+inline_for_extraction
 let blocks_t (a: hash_alg) =
   b:B.buffer U8.t { B.length b % size_block a = 0 }
 
@@ -43,6 +44,7 @@ let update_multi_t (a: hash_alg) =
       Seq.equal (B.as_seq h1 s)
         (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks))))
 
+noextract
 val mk_update_multi: a:hash_alg -> update:update_t a -> update_multi_t a
 
 val update_multi_sha2_224: update_multi_t SHA2_224
