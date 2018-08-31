@@ -9,6 +9,9 @@ module ST = FStar.HyperStack.ST
 open Hacl.Hash.Common
 open Spec.Hash.Common
 open Spec.Hash.Helpers
+open FStar.Mul
+
+include Hacl.SHA2
 
 let blocks_t (a: hash_alg) =
   b:B.buffer U8.t { B.length b % size_block a = 0 }
@@ -25,11 +28,13 @@ let update_t (a:hash_alg) =
       B.(modifies (loc_buffer s) h0 h1) /\
       B.as_seq h1 s == Spec.Hash.update a (B.as_seq h0 s) (B.as_seq h0 block)))
 
+// Note: we cannot take more than 4GB of data because we are currently
+// constrained by the size of buffers...
 inline_for_extraction
 let update_multi_t (a: hash_alg) =
   s:state a ->
   blocks:blocks_t a ->
-  n:U64.t { B.length blocks / size_block a = U64.v n } ->
+  n:U32.t { B.length blocks = size_block a * U32.v n } ->
   ST.Stack unit
     (requires (fun h ->
       B.live h s /\ B.live h blocks /\ B.disjoint s blocks))

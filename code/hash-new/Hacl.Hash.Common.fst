@@ -27,22 +27,6 @@ open Hacl.Hash.Lemmas
 
 (** Padding *)
 
-inline_for_extraction
-let size_word_ul (a: hash_alg): n:U32.t { U32.v n = size_word a } =
-  match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 4ul
-  | SHA2_384 | SHA2_512 -> 8ul
-
-inline_for_extraction
-let size_block_ul (a: hash_alg): n:U32.t { U32.v n = size_block a } =
-  U32.(size_word_ul a *^ 16ul)
-
-inline_for_extraction
-let size_len_ul (a: hash_alg): n:U32.t { U32.v n = size_len_8 a } =
-  match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
-  | SHA2_384 | SHA2_512 -> 16ul
-
 #set-options "--z3rlimit 50"
 inline_for_extraction
 val store_len: a:hash_alg -> len:len_t a -> b:B.buffer U8.t ->
