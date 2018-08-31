@@ -17,7 +17,7 @@ open MPFR.Lib
 open MPFR.Exceptions
 
 open MPFR.Exceptions.Lemma
-//open MPFR.Add1sp1.Lemma
+//open MPFR.Mul_1.Lemma
 
 module ST = FStar.HyperStack.ST
 module I64 = FStar.Int64
@@ -27,6 +27,9 @@ module U32 = FStar.UInt32
 #set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 open FStar.Mul
+
+(* Not fully proven yet. But extracted code passes MPFR test suite.
+ * However the injected mpfr_mul_1 might be broken in this version (not up-to-date). *)
 
 private type mpfr_tmp_exp_t = x:mpfr_exp_t{I64.(x >=^ mpfr_EMIN -^ 1L /\ x <=^ mpfr_EMAX)}
 
