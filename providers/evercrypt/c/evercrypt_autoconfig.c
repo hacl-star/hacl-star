@@ -150,6 +150,10 @@ impl EverCrypt_AutoConfig_x25519_impl() {
   return x25519_impl;
 }
 
+impl EverCrypt_AutoConfig_random_impl() {
+  return random_impl;
+}
+
 impl EverCrypt_AutoConfig_aes128_gcm_impl() {
   return aes128_gcm_impl;
 }

@@ -44,7 +44,7 @@
 
 #if IS_WINDOWS
 
-static BCRYPT_ALG_HANDLE g_hAlgRandom;
+static BCRYPT_ALG_HANDLE g_hAlgRandom = NULL;
 
 static uint32_t bcrypt_rng_init(void)
 {
@@ -68,6 +68,14 @@ static uint32_t bcrypt_rng_init(void)
 
 static void bcrypt_rng_sample(uint32_t len, uint8_t *out)
 {
+  // Try to lazily initialize the RNG if it wasn't done
+  // by the user. If it fails, the app crashes.
+  if(g_hAlgRandom == NULL)
+  {
+    if(!bcrypt_rng_init())
+      handleErrors();
+  }
+  
   NTSTATUS st = BCryptGenRandom(g_hAlgRandom, out, len, 0);
   
   if (!NT_SUCCESS(st)) {
