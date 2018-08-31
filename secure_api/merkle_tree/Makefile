@@ -9,14 +9,14 @@ CACHE_DIR = .cache
 OUTPUT_DIR = .output
 HINT_DIR = .hints
 GENERATED_DIR = c
-OUT_DIR = bin
+OUT_DIR = c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 KREMLIB=$(KREMLIN_HOME)/kremlib
 
-all: lib
+all: build_lib
 
-lib:
+build_lib:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
