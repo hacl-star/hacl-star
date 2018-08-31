@@ -23,6 +23,22 @@ type state (a: hash_alg) =
   b:B.buffer (word a) { B.length b = size_hash_w a }
 
 inline_for_extraction
+let size_word_ul (a: hash_alg): n:U32.t { U32.v n = size_word a } =
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 4ul
+  | SHA2_384 | SHA2_512 -> 8ul
+
+inline_for_extraction
+let size_block_ul (a: hash_alg): n:U32.t { U32.v n = size_block a } =
+  U32.(size_word_ul a *^ 16ul)
+
+inline_for_extraction
+let size_len_ul (a: hash_alg): n:U32.t { U32.v n = size_len_8 a } =
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
+  | SHA2_384 | SHA2_512 -> 16ul
+
+inline_for_extraction
 let pad_t (a: hash_alg) = len:len_t a -> dst:B.buffer U8.t ->
   ST.Stack unit
     (requires (fun h ->

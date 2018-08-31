@@ -487,3 +487,45 @@ let aead_free pk =
   else
     failwith !$"ERROR: inconsistent configuration";
   B.free pk
+
+/// DH
+
+[@CAbstractStruct]
+private noeq type _dh_state =
+  | DH_OPENSSL: st:Dyn.dyn -> _dh_state
+  | DUMMY // Necessary placeholder or discriminators are not defined
+
+let dh_state_s = _dh_state
+
+let dh_load_group dh_p dh_p_len dh_g dh_g_len dh_q dh_q_len =
+  let i = AC.dh_impl () in
+  let st: dh_state_s =
+    if SC.openssl && i = AC.OpenSSL then
+      DH_OPENSSL (OpenSSL.dh_load_group dh_p dh_p_len dh_g dh_g_len dh_q dh_q_len)
+    else
+      failwith !$"ERROR: inconsistent configuration"
+  in
+  B.malloc HS.root st 1ul
+
+let dh_free_group st =
+  let i = AC.dh_impl () in
+  let s : _dh_state = !*st in
+  if SC.openssl && DH_OPENSSL? s then
+    OpenSSL.dh_free_group (DH_OPENSSL?.st s)
+  else
+    failwith !$"ERROR: inconsistent configuration";
+  B.free st
+
+let dh_keygen st secret public =
+  let s = !*st in
+  if SC.openssl && DH_OPENSSL? s then
+    OpenSSL.dh_keygen (DH_OPENSSL?.st s) secret public
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let dh_compute st public public_len out =
+  let s = !*st in
+  if SC.openssl && DH_OPENSSL? s then
+    OpenSSL.dh_compute (DH_OPENSSL?.st s) public public_len out
+  else
+    failwith !$"ERROR: inconsistent configuration"

@@ -26,6 +26,7 @@ val chacha20_impl: getter impl
 val aes128_gcm_impl: getter impl
 val aes256_gcm_impl: getter impl
 val chacha20_poly1305_impl: getter impl
+val dh_impl: getter impl
 
 /// By default, EverCrypt calls into Hacl whenever available, and defaults to
 /// OpenSSL for the algorithms that are not yet implemented by HACL.

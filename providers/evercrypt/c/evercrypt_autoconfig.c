@@ -25,6 +25,7 @@ impl chacha20_impl = Hacl;
 impl aes128_gcm_impl = Vale;
 impl aes256_gcm_impl = Vale;
 impl chacha20_poly1305_impl = Hacl;
+impl dh_impl = OpenSSL;
 
 // https://en.wikipedia.org/wiki/CPUID
 #ifdef _MSC_VER
@@ -176,4 +177,8 @@ impl EverCrypt_AutoConfig_aes256_gcm_impl() {
 
 impl EverCrypt_AutoConfig_chacha20_poly1305_impl() {
   return chacha20_poly1305_impl;
+}
+
+impl EverCrypt_AutoConfig_dh_impl() {
+  return dh_impl;
 }
