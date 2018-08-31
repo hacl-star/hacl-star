@@ -18,6 +18,7 @@ impl sha256_impl = Vale;
 impl sha384_impl = Hacl;
 impl sha512_impl = Hacl;
 impl x25519_impl = Hacl;
+impl random_impl = BCrypt;
 impl aes128_impl = Hacl;
 impl aes256_impl = Hacl;
 impl chacha20_impl = Hacl;
@@ -86,6 +87,15 @@ void EverCrypt_AutoConfig_init(EverCrypt_AutoConfig_cfg x0) {
   }
 
   // AES128-GCM: best = Vale (IF AES-NI), fallback = OpenSSL or BCrypt
+  if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
+    random_impl = OpenSSL;
+  } else if (EverCrypt_StaticConfig_bcrypt && prefer_bcrypt) {
+    random_impl = BCrypt;
+  } else {
+    random_impl = EverCrypt_StaticConfig_bcrypt ? BCrypt : OpenSSL;
+  }
+  
+  // AES128-GCM: best = Vale (IF AES-NI), fallback = OpenSSL or BCrypt
   if (has_aesni && EverCrypt_StaticConfig_vale && prefer_vale) {
     aes128_gcm_impl = Vale;
   } else if (EverCrypt_StaticConfig_bcrypt && prefer_bcrypt) {
@@ -138,6 +148,10 @@ impl EverCrypt_AutoConfig_sha512_impl() {
 
 impl EverCrypt_AutoConfig_x25519_impl() {
   return x25519_impl;
+}
+
+impl EverCrypt_AutoConfig_random_impl() {
+  return random_impl;
 }
 
 impl EverCrypt_AutoConfig_aes128_gcm_impl() {

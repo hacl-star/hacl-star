@@ -26,6 +26,35 @@ let x25519 dst secret base =
   else
     failwith !$"ERROR: inconsistent configuration"
 
+/// Random sampling
+
+let random_init () =
+  let i = AC.random_impl () in
+  if SC.openssl && i = AC.OpenSSL then
+    OpenSSL.random_init ()
+  else if SC.bcrypt && i = AC.BCrypt then
+    BCrypt.random_init ()
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let random_sample len out =
+  let i = AC.random_impl () in
+  if SC.openssl && i = AC.OpenSSL then
+    OpenSSL.random_sample len out
+  else if SC.bcrypt && i = AC.BCrypt then
+    BCrypt.random_sample len out
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let random_cleanup () =
+  let i = AC.random_impl () in
+  if SC.openssl && i = AC.OpenSSL then
+    ()
+  else if SC.bcrypt && i = AC.BCrypt then
+    BCrypt.random_cleanup ()
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
 /// AES128-ECB
 
 [@CAbstractStruct]

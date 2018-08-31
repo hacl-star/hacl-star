@@ -1,4 +1,5 @@
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 #include <inttypes.h>
 
 #include "kremlin/internal/target.h"
@@ -16,6 +17,23 @@
   do {                                                                         \
     KRML_HOST_EPRINTF("Error at %s:%d\n", __FILE__, __LINE__);                   \
   } while (0)
+
+
+/* OpenSSL PRNG */
+
+uint32_t EverCrypt_OpenSSL_random_init()
+{
+  if(RAND_status()) return 1;
+  return RAND_poll();
+}
+
+void EverCrypt_OpenSSL_random_sample(uint32_t len, uint8_t *out)
+{
+  if(1 != RAND_bytes(out, len))
+    handleErrors();
+}
+
+/* OpenSSL AEAD */
 
 EVP_CIPHER_CTX *openssl_create(const EVP_CIPHER *alg, uint8_t *key)
 {

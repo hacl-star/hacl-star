@@ -399,6 +399,17 @@ let rec test_aead (LB len vs) =
     B.recall vs;
     test_aead (LB (len - 1ul) (B.offset vs 1ul))
 
+let rec test_rng (ctr:UInt32.t) : St unit =
+  let open FStar.Integers in
+  if ctr = 0ul then ()
+  else
+   begin
+    let b = B.alloca 0uy 32ul in
+    EverCrypt.random_sample 32ul b;
+    C.print_bytes b 32ul;
+    test_rng (ctr - 1ul)
+   end
+
 let main (): St C.exit_code =
   let open EverCrypt in
   let open C.String in
@@ -431,6 +442,21 @@ let main (): St C.exit_code =
   AC.(init (Prefer BCrypt));
   test_aead aead_vectors_low;
   test_cipher block_cipher_vectors_low;
+
+  print !$"\n  HASHING TESTS\n";
   Test.Hash.main ();
+  
+  print !$"\n  PSEUDO-RANDOM GENERATOR\n";
+  if EverCrypt.random_init () = 1ul then
+   begin
+    test_rng 10ul;
+    EverCrypt.random_cleanup ()
+   end
+  else
+   begin
+    print !$"Failed to seed the PRNG!\n";
+    C.portable_exit 3l
+   end;
+  
   pop_frame ();
   C.EXIT_SUCCESS

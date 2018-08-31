@@ -22,7 +22,7 @@ include Makefile.common
 
 verify: $(ALL_CHECKED_FILES)
 
-extract: # $(OUTPUT_DIR)/Makefile.include
+extract: $(OUTPUT_DIR)/Makefile.include
 
 # Backwards compat target name
 extract-c: extract old-extract-c

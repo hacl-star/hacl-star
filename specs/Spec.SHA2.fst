@@ -18,11 +18,6 @@ let size_k_w: sha2_alg -> Tot nat = function
   | SHA2_384 | SHA2_512 -> 80
 
 inline_for_extraction
-let size_len_ul_8: a:sha2_alg -> Tot (n:U32.t{U32.v n = size_len_8 a}) = function
-  | SHA2_224 | SHA2_256 -> 8ul
-  | SHA2_384 | SHA2_512 -> 16ul
-
-inline_for_extraction
 let word_n: sha2_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> 32
   | SHA2_384 | SHA2_512 -> 64
@@ -34,15 +29,6 @@ let v' (#a: sha2_alg) (x:word a) = match a with
 let k_w      (a: sha2_alg) = m:S.seq (word a) {S.length m = size_k_w a}
 let block_w  (a: sha2_alg) = m:S.seq (word a) {S.length m = size_block_w}
 let counter = nat
-
-(* Define word based operators *)
-let words_to_be: a:sha2_alg -> Tot (s:S.seq (word a) -> Tot (Spec.Lib.lbytes FStar.Mul.(size_word a * S.length s))) = function
-  | SHA2_224 | SHA2_256 -> E.be_of_seq_uint32
-  | SHA2_384 | SHA2_512 -> E.be_of_seq_uint64
-
-let words_from_be: a:sha2_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(size_word a * len) -> Tot (s:S.seq (word a){S.length s = len})) = function
-  | SHA2_224 | SHA2_256 -> E.seq_uint32_of_be
-  | SHA2_384 | SHA2_512 -> E.seq_uint64_of_be
 
 inline_for_extraction
 let word_add_mod: a:sha2_alg -> Tot ((word a) -> (word a) -> Tot (word a)) = function
@@ -111,6 +97,7 @@ let op384_512: ops = {
   e3 = 19ul; e4 = 61ul; e5 =  6ul
 }
 
+inline_for_extraction
 let op0: a:sha2_alg -> Tot ops = function
   | SHA2_224 -> op224_256
   | SHA2_256 -> op224_256
@@ -223,33 +210,8 @@ let update (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block
   Spec.Loops.seq_map2 (word_add_mod a) hash hash_1
 
 
-let max_input_size_len (a: sha2_alg): Lemma
-  (ensures FStar.Mul.(max_input8 a * 8 = pow2 (size_len_8 a * 8)))
-=
-  let open FStar.Mul in
-  match a with
-  | SHA2_224 | SHA2_256 ->
-      assert_norm (max_input8 a * 8 = pow2 (size_len_8 a * 8))
-  | SHA2_384 | SHA2_512 ->
-      assert_norm (max_input8 a * 8 = pow2 (size_len_8 a * 8))
-
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-(* Compute the padding *)
-let pad (a:sha2_alg)
-  (total_len:nat{total_len < max_input8 a}):
-  Tot (b:bytes{(S.length b + total_len) % size_block a = 0})
-=
-  let open FStar.Mul in
-  let firstbyte = S.create 1 0x80uy in
-  let zeros = S.create (pad0_length a total_len) 0uy in
-  let total_len_bits = total_len * 8 in
-  // Saves the need for high fuel + makes hint replayable.
-  max_input_size_len a;
-  let encodedlen = E.n_to_be (size_len_ul_8 a) (total_len * 8) in
-  S.(firstbyte @| zeros @| encodedlen)
+let pad = Spec.Hash.Common.pad
 
-(* Unflatten the hash from the sequence of words to bytes up to the correct size *)
-let finish (a:sha2_alg) (hashw:hash_w a): Tot (hash:bytes{S.length hash = (size_hash a)}) =
-  let hash_final_w = S.slice hashw 0 (size_hash_final_w a) in
-  words_to_be a hash_final_w
+let finish = Spec.Hash.Common.finish
