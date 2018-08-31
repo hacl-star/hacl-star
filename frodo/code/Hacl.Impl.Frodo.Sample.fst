@@ -34,7 +34,7 @@ let cdf_table: b:lbuffer uint16 (v cdf_table_len) { LowStar.Buffer.recallable b 
 
 inline_for_extraction noextract
 val frodo_sample_f:
-    t:uint16
+     t:uint16{uint_v t < pow2 15}
   -> i:size_t{v i < v cdf_table_len}
   -> Stack uint16
      (requires fun h -> True)
@@ -42,17 +42,21 @@ val frodo_sample_f:
        modifies loc_none h0 h1 /\ uint_v r == S.frodo_sample_f t (v i))
 let frodo_sample_f t i =
   recall cdf_table;
-  let ti = cdf_table.(i) in admit();
+  let ti = cdf_table.(i) in
+  let h = ST.get () in
+  assume (as_seq h cdf_table == S.cdf_table);
+  S.lemma_frodo_sample0 (v i);
+  S.lemma_frodo_sample1 t ti;
   to_u16 (to_u32 (ti -. t)) >>. u32 15
 
 inline_for_extraction noextract
 val frodo_sample_res:
-    sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
+     sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
   -> sample:uint16{uint_v sample < v cdf_table_len}
   -> res:uint16{res == S.frodo_sample_res sign (uint_v sample)}
 let frodo_sample_res sign sample =
   let res = ((lognot sign +. u16 1) ^. sample) +. sign in
-  admit();
+  S.lemma_frodo_sample2 sign sample;
   res
 
 #set-options "--max_fuel 1"

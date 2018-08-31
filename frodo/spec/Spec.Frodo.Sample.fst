@@ -20,6 +20,27 @@ let cdf_table: lseq uint16 cdf_table_len =
   assert_norm (List.Tot.length cdf_list == cdf_table_len);
   Seq.createL cdf_list
 
+val lemma_frodo_sample0:
+  i:size_nat{i < cdf_table_len}
+  -> Lemma (uint_v (cdf_table.[i]) < pow2 15)
+let lemma_frodo_sample0 i = lemma_cdf_list i
+
+val lemma_frodo_sample1:
+    a:uint16{uint_v a < pow2 15}
+ -> b:uint16{uint_v b < pow2 15}
+ -> Lemma
+     (let c0 = if Lib.RawIntTypes.(uint_to_nat a > uint_to_nat b) then 1 else 0 in
+      let c1 = to_u16 (to_u32 (b -. a)) >>. u32 15 in
+      uint_v c1 == c0)
+let lemma_frodo_sample1 a b =
+  let c = to_u16 (to_u32 (b -. a)) in
+  assert (uint_v c < modulus U16);
+  FStar.Math.Lemmas.lemma_div_lt (uint_v c) 16 15;
+  let c1 = c >>. u32 15 in
+  assert (uint_v c1 = uint_v c / pow2 15);
+  FStar.Math.Lemmas.pow2_minus 16 15;
+  assert (uint_v c1 = 0 \/ uint_v c1 = 1)
+
 val frodo_sample_f:
     t:uint16
   -> i:size_nat{i < cdf_table_len}
@@ -39,7 +60,7 @@ let rec frodo_sample_fc t i =
   else frodo_sample_f t (i - 1) + frodo_sample_fc t (i - 1)
 
 val frodo_sample_res:
-    r0:uint16{uint_v r0 == 0 \/ uint_v r0 == 1}
+     sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
   -> e:nat{e < cdf_table_len}
   -> res:uint16
 let frodo_sample_res r0 e =
@@ -50,6 +71,12 @@ let frodo_sample_res r0 e =
   assert_norm (powx (-1) 0 == 1);
   assert (-cdf_table_len < e /\ e < cdf_table_len);
   u16 (e % modulus U16)
+
+val lemma_frodo_sample2:
+    sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
+  -> e:uint16{uint_v e < cdf_table_len}
+  -> Lemma (((lognot sign +. u16 1) ^. e) +. sign == frodo_sample_res sign (uint_v e))
+let lemma_frodo_sample2 sign e = admit()
 
 #set-options "--max_fuel 1"
 

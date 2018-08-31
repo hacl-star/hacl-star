@@ -23,3 +23,22 @@ unfold let params_nbar = size 8
 unfold let frodo_prf_spec = Spec.Frodo.Keccak.cshake128_frodo
 
 unfold let frodo_gen_matrix = Spec.Frodo.Gen.frodo_gen_matrix_cshake
+
+val lemma_cdf_list:
+  i:size_nat{i < List.Tot.length cdf_list}
+  -> Lemma (uint_v (List.Tot.index cdf_list i) < pow2 15)
+let lemma_cdf_list i =
+  assert_norm (List.Tot.length cdf_list = 12);
+  assert_norm (uint_v (List.Tot.index cdf_list 0) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 1) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 2) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 3) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 4) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 5) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 6) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 7) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 8) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 9) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 10) < pow2 15);
+  assert_norm (uint_v (List.Tot.index cdf_list 11) < pow2 15)
+
