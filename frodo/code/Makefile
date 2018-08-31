@@ -116,7 +116,7 @@ ROOTS = Hacl.Test.Frodo.fst
 .PRECIOUS: %.krml
 
 .depend:
-	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec -Frodo.KEM' > $@
 
 include .depend
 
@@ -215,7 +215,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
 	-library 'Hacl.Keccak,C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
 	-add-include '"c/Lib_PQ_Print.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
@@ -375,7 +375,7 @@ $(OUT_DIR)/Hacl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
 	-library 'Hacl.Keccak,C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
 	-add-include '"c/Lib_PQ_Print.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^

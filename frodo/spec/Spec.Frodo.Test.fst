@@ -45,8 +45,8 @@ let test_frodo
   let pk_expected = createL pk_expected in
   let ct_expected = createL ct_expected in
   let sk_expected = createL sk_expected in
-  let pk, sk = crypto_kem_keypair keypaircoins in
-  let ct, ss1 = crypto_kem_enc enccoins pk in
+  let pk, sk = crypto_kem_keypair_ keypaircoins in
+  let ct, ss1 = crypto_kem_enc_ enccoins pk in
   let ss2 = crypto_kem_dec ct sk in
   let r_pk = compare pk_expected pk in
   let r_sk = compare sk_expected sk in

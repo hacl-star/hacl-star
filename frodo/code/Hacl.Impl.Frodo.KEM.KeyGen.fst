@@ -124,7 +124,7 @@ val crypto_kem_keypair_:
       disjoint pk sk /\ disjoint coins sk /\ disjoint coins pk)
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc_buffer pk) (loc_buffer sk)) h0 h1 /\
-      (let pk_s, sk_s = S.crypto_kem_keypair (as_seq h0 coins) in
+      (let pk_s, sk_s = S.crypto_kem_keypair_ (as_seq h0 coins) in
       as_seq h1 pk == pk_s /\ as_seq h1 sk == sk_s))
 let crypto_kem_keypair_ coins pk sk =
   let h0 = ST.get () in
@@ -158,8 +158,10 @@ val crypto_kem_keypair:
   -> sk:lbytes crypto_secretkeybytes
   -> Stack uint32
     (requires fun h -> live h pk /\ live h sk /\ disjoint pk sk)
-    (ensures  fun h0 r h1 -> live h1 pk /\ live h1 sk /\
-      modifies (loc_union (loc_buffer pk) (loc_buffer sk)) h0 h1)
+    (ensures  fun h0 r h1 ->
+      modifies (loc_union (loc_buffer pk) (loc_buffer sk)) h0 h1 /\
+      (let pk_s, sk_s = S.crypto_kem_keypair () in
+      as_seq h1 pk == pk_s /\ as_seq h1 sk == sk_s))
 let crypto_kem_keypair pk sk =
   push_frame();
   let coins = create (size 2 *! crypto_bytes +! bytes_seed_a) (u8 0) in

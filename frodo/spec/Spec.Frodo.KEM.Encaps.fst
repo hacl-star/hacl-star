@@ -200,11 +200,19 @@ let crypto_kem_enc_1 g coins pk =
   let ss = update_ss c12 kd in
   ct, ss
 
-val crypto_kem_enc:
+val crypto_kem_enc_:
     coins:lbytes bytes_mu
   -> pk:lbytes crypto_publickeybytes
   -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
-let crypto_kem_enc coins pk =
+let crypto_kem_enc_ coins pk =
   let g = crypto_kem_enc_0 coins pk in
   let ct, ss = crypto_kem_enc_1 g coins pk in
   ct, ss
+
+val crypto_kem_enc:
+    pk:lbytes crypto_publickeybytes
+  -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
+let crypto_kem_enc pk =
+  let bytes_mu = params_nbar * params_nbar * params_extracted_bits / 8 in
+  let coins = Spec.Frodo.Random.randombytes_ bytes_mu in
+  crypto_kem_enc_ coins pk

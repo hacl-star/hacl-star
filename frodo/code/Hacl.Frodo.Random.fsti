@@ -18,4 +18,6 @@ val randombytes_:
   -> res:lbuffer uint8 (v len)
   -> Stack unit
     (requires fun h -> live h res)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer res) h0 h1 /\
+      as_seq h1 res == Spec.Frodo.Random.randombytes_ (v len))

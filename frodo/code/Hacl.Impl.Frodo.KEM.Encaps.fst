@@ -423,13 +423,13 @@ val crypto_kem_enc_:
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk /\
       disjoint coins ss /\ disjoint coins ct /\ disjoint coins pk)
     (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer ct) (loc_buffer ss)) h0 h1 /\
-      (let ct_s, ss_s = S.crypto_kem_enc (as_seq h0 coins) (as_seq h0 pk) in
+      (let ct_s, ss_s = S.crypto_kem_enc_ (as_seq h0 coins) (as_seq h0 pk) in
       as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
 let crypto_kem_enc_ coins ct ss pk =
   push_frame();
   let bytes_mu = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
   let g:lbytes (size 3 *! crypto_bytes) = create (size 3 *! crypto_bytes) (u8 0) in
-  
+
   crypto_kem_enc_0 coins pk g;
   crypto_kem_enc_1 g coins ct ss pk;
   pop_frame()
@@ -443,7 +443,10 @@ val crypto_kem_enc:
     (requires fun h ->
       live h ct /\ live h ss /\ live h pk /\
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer ct) (loc_buffer ss)) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_union (loc_buffer ct) (loc_buffer ss)) h0 h1 /\
+      (let ct_s, ss_s = S.crypto_kem_enc (as_seq h0 pk) in
+      as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
 let crypto_kem_enc ct ss pk =
   push_frame();
   let bytes_mu = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in

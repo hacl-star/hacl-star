@@ -100,10 +100,10 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e =
   let b = frodo_pack b_matrix params_logq in
   b, s_bytes
 
-val crypto_kem_keypair:
+val crypto_kem_keypair_:
     coins:lbytes (2 * crypto_bytes + bytes_seed_a)
   -> tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes)
-let crypto_kem_keypair coins =
+let crypto_kem_keypair_ coins =
   assert (bytes_seed_a + crypto_publicmatrixbytes = crypto_publickeybytes);
   let s = Seq.sub coins 0 crypto_bytes in
   let seed_e = Seq.sub coins crypto_bytes crypto_bytes in
@@ -113,3 +113,8 @@ let crypto_kem_keypair coins =
   let pk = update_pk seed_a b in
   let sk = update_sk s pk s_bytes in
   pk, sk
+
+val crypto_kem_keypair: unit -> tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes)
+let crypto_kem_keypair () =
+  let coins = Spec.Frodo.Random.randombytes_ (2 * crypto_bytes + bytes_seed_a) in
+  crypto_kem_keypair_ coins
