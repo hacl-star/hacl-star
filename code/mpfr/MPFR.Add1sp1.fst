@@ -61,16 +61,17 @@ let mpfr_add1sp1_any_post_cond a b c h0 s h1 =
 
 inline_for_extraction val mpfr_add1sp1_gt_branch1:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    ap:buffer mp_limb_t -> bp:buffer mp_limb_t -> cp:buffer mp_limb_t ->
+    bx:mpfr_reg_exp_t ->
     sh:mpfr_reg_prec_t -> d:i64 -> mask:mp_limb_t -> Stack state
-    (requires (fun h -> mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
+    (requires (fun h -> 
+        ap == a.mpfr_d /\ bp == b.mpfr_d /\ cp == c.mpfr_d /\
+	bx = b.mpfr_exp /\
+	mpfr_add1sp1_gt_branch1_pre_cond a b c sh d mask h))
     (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
-let mpfr_add1sp1_gt_branch1 a b c sh d mask =
+let mpfr_add1sp1_gt_branch1 a b c ap bp cp bx sh d mask =
     let h = ST.get() in
-    let ap = a.mpfr_d in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
-    let bx = b.mpfr_exp in
     let a0 = bp.(0ul) +%^ (cp.(0ul) >>^ (int64_to_uint32 d)) in
     let a0, bx = if a0 <^ bp.(0ul) then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I64.(bx +^ 1L)
 	         else a0, bx in
@@ -82,19 +83,19 @@ let mpfr_add1sp1_gt_branch1 a b c sh d mask =
     mpfr_add1sp1_gt_branch1_sb_lemma h a b c sh d mask;
     mk_state sh bx rb sb
 
-
 inline_for_extraction val mpfr_add1sp1_gt_branch2:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    ap:buffer mp_limb_t -> bp:buffer mp_limb_t -> cp:buffer mp_limb_t ->
+    bx:mpfr_reg_exp_t ->
     sh:mpfr_reg_prec_t -> d:i64 -> mask:mp_limb_t -> Stack state
-    (requires (fun h -> mpfr_add1sp1_gt_branch2_pre_cond a b c sh d mask h))
+    (requires (fun h -> 
+        ap == a.mpfr_d /\ bp == b.mpfr_d /\ cp == c.mpfr_d /\
+	bx = b.mpfr_exp /\
+	mpfr_add1sp1_gt_branch2_pre_cond a b c sh d mask h))
     (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
-let mpfr_add1sp1_gt_branch2 a b c sh d mask =
+let mpfr_add1sp1_gt_branch2 a b c ap bp cp bx sh d mask =
     let h = ST.get() in
-    let ap = a.mpfr_d in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
-    let bx = b.mpfr_exp in
     let sb = cp.(0ul) <<^ (int64_to_uint32 I64.(gmp_NUMB_BITS -^ d)) in
     let a0 = bp.(0ul) +%^ (cp.(0ul) >>^ (int64_to_uint32 d)) in
     let sb, a0, bx =
@@ -108,19 +109,20 @@ let mpfr_add1sp1_gt_branch2 a b c sh d mask =
     mpfr_add1sp1_gt_branch12_rb_lemma h a b c sh d mask;
     mpfr_add1sp1_gt_branch2_sb_lemma h a b c sh d mask;
     mk_state sh bx rb sb
-
     
 inline_for_extraction val mpfr_add1sp1_gt_branch3:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    ap:buffer mp_limb_t -> bp:buffer mp_limb_t ->
+    bx:mpfr_reg_exp_t ->
     sh:mpfr_reg_prec_t -> Stack state
-    (requires (fun h -> mpfr_add1sp1_gt_branch3_pre_cond a b c sh h))
+    (requires (fun h -> 
+        ap == a.mpfr_d /\ bp == b.mpfr_d /\
+	bx = b.mpfr_exp /\
+        mpfr_add1sp1_gt_branch3_pre_cond a b c sh h))
     (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
-let mpfr_add1sp1_gt_branch3 a b c sh =
+let mpfr_add1sp1_gt_branch3 a b c ap bp bx sh =
     let h = ST.get() in
-    let ap = a.mpfr_d in
-    let bp = b.mpfr_d in
-    let bx = b.mpfr_exp in
     ap.(0ul) <- bp.(0ul);
     let rb = 0uL in
     let sb = 1uL in
@@ -131,33 +133,39 @@ let mpfr_add1sp1_gt_branch3 a b c sh =
 
 inline_for_extraction val mpfr_add1sp1_gt:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    ap:buffer mp_limb_t -> bp:buffer mp_limb_t -> cp:buffer mp_limb_t ->
+    bx:mpfr_reg_exp_t -> cx:mpfr_reg_exp_t ->
     p:mpfr_reg_prec_t -> sh:mpfr_reg_prec_t -> Stack state
-    (requires (fun h -> mpfr_add1sp1_gt_pre_cond a b c sh h))
-    (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1 /\
-                           mpfr_add1sp1_any_post_cond a c b h0 s h1))
+    (requires (fun h -> 
+        ap == a.mpfr_d /\ bp == b.mpfr_d /\ cp == c.mpfr_d /\
+	bx = b.mpfr_exp /\ cx = c.mpfr_exp /\
+	mpfr_add1sp1_gt_pre_cond a b c sh h))
+    (ensures  (fun h0 s h1 -> 
+        mpfr_add1sp1_any_post_cond a b c h0 s h1 /\
+        mpfr_add1sp1_any_post_cond a c b h0 s h1))
 
-let mpfr_add1sp1_gt a b c p sh =
-    let bx = b.mpfr_exp in
-    let cx = c.mpfr_exp in
+let mpfr_add1sp1_gt a b c ap bp cp bx cx p sh =
     let d = I64.(bx -^ cx) in
     let mask = mpfr_LIMB_MASK (int64_to_uint32 sh) in
-    if I64.(d <^ sh) then mpfr_add1sp1_gt_branch1 a b c sh d mask
-    else if I64.(d <^ gmp_NUMB_BITS) then mpfr_add1sp1_gt_branch2 a b c sh d mask
-    else mpfr_add1sp1_gt_branch3 a b c sh
+    if I64.(d <^ sh) then mpfr_add1sp1_gt_branch1 a b c ap bp cp bx sh d mask
+    else if I64.(d <^ gmp_NUMB_BITS) then mpfr_add1sp1_gt_branch2 a b c ap bp cp bx sh d mask
+    else mpfr_add1sp1_gt_branch3 a b c ap bp bx sh
 
 inline_for_extraction val mpfr_add1sp1_eq:
     a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    ap:buffer mp_limb_t -> bp:buffer mp_limb_t -> cp:buffer mp_limb_t ->
+    bx:mpfr_reg_exp_t ->
     p:mpfr_reg_prec_t -> sh:mpfr_reg_prec_t -> Stack state
-    (requires (fun h -> mpfr_add1sp1_eq_pre_cond a b c sh h))
+    (requires (fun h -> 
+        ap == a.mpfr_d /\ bp == b.mpfr_d /\ cp == c.mpfr_d /\
+	bx = b.mpfr_exp /\
+	mpfr_add1sp1_eq_pre_cond a b c sh h))
     (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
 
-let mpfr_add1sp1_eq a b c p sh =
+let mpfr_add1sp1_eq a b c ap bp cp bx p sh =
     let h = ST.get() in
-    let ap = a.mpfr_d in
-    let bp = b.mpfr_d in
-    let cp = c.mpfr_d in
     let a0 = (bp.(0ul) >>^ 1ul) +^ (cp.(0ul) >>^ 1ul) in
-    let bx = I64.(b.mpfr_exp +^ 1L) in
+    let bx = I64.(bx +^ 1L) in
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ (int64_to_uint32 I64.(sh -^ 1L))) in
     ap.(0ul) <- a0 ^^ rb;
     let sb = 0uL in
@@ -166,19 +174,25 @@ let mpfr_add1sp1_eq a b c p sh =
     mk_state sh bx rb sb
 
 inline_for_extraction val mpfr_add1sp1_any:
-    a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
+    a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
     p:mpfr_reg_prec_t -> Stack state
-    (requires (fun h -> mpfr_add1sp1_any_pre_cond a b c p h))
-    (ensures  (fun h0 s h1 -> mpfr_add1sp1_any_post_cond a b c h0 s h1))
+    (requires (fun h ->
+        mpfr_live h a /\ mpfr_live h b /\ mpfr_live h c /\
+        mpfr_add1sp1_any_pre_cond (as_struct h a) (as_struct h b) (as_struct h c) p h))
+    (ensures  (fun h0 s h1 ->
+        mpfr_add1sp1_any_post_cond (as_struct h0 a) (as_struct h0 b) (as_struct h0 c) h0 s h1))
 
 let mpfr_add1sp1_any a b c p =
-    let bx = b.mpfr_exp in
-    let cx = c.mpfr_exp in
+    let bx = mpfr_GET_EXP b in
+    let cx = mpfr_GET_EXP c in
+    let ap = mpfr_MANT a in
+    let bp = mpfr_MANT b in
+    let cp = mpfr_MANT c in
     let sh = I64.(gmp_NUMB_BITS -^ p) in
     let h0 = ST.get() in
-    if I64.(bx =^ cx) then mpfr_add1sp1_eq a b c p sh
-    else if I64.(bx >^ cx) then mpfr_add1sp1_gt a b c p sh
-    else mpfr_add1sp1_gt a c b p sh
+    if I64.(bx =^ cx) then mpfr_add1sp1_eq a.(0ul) b.(0ul) c.(0ul) ap bp cp bx p sh
+    else if I64.(bx >^ cx) then mpfr_add1sp1_gt a.(0ul) b.(0ul) c.(0ul) ap bp cp bx cx p sh
+    else mpfr_add1sp1_gt a.(0ul) c.(0ul) b.(0ul) ap cp bp cx bx p sh
 
 (* rounding specifications *)
 inline_for_extraction val mpfr_add_one_ulp: a:mpfr_ptr -> rnd_mode:mpfr_rnd_t ->
@@ -291,10 +305,7 @@ val mpfr_add1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
 
 let mpfr_add1sp1 a b c rnd_mode p =
     let h0 = ST.get() in
-    let a0 = a.(0ul) in
-    let b0 = b.(0ul) in
-    let c0 = c.(0ul) in
-    let st = mpfr_add1sp1_any a0 b0 c0 p in
+    let st = mpfr_add1sp1_any a b c p in
     let h1 = ST.get() in
     lemma_reveal_modifies_1 (mpfr_MANT a) h0 h1;
     lemma_intro_modifies_2 a (mpfr_MANT a) h0 h1;

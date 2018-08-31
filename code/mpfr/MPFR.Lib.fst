@@ -278,7 +278,9 @@ inline_for_extraction val mpfr_EXP: x:mpfr_ptr -> Stack mpfr_exp_t
 let mpfr_EXP x = 
     (x.(0ul)).mpfr_exp
 
-inline_for_extraction val mpfr_SET_EXP: x:mpfr_ptr -> e:mpfr_exp_t -> Stack unit
+inline_for_extraction let mpfr_GET_EXP = mpfr_EXP
+
+val mpfr_SET_EXP: x:mpfr_ptr -> e:mpfr_exp_t -> Stack unit
     (requires (fun h -> mpfr_live h x))
     (ensures  (fun h0 _ h1 -> mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
                            (as_struct h1 x).mpfr_exp = e /\
@@ -323,7 +325,7 @@ let mpfr_SET_SIGN x s =
     lemma_reveal_modifies_1 x h0 h1;
     lemma_intro_modifies_2 x (as_struct h1 x).mpfr_d h0 h1
 
-inline_for_extraction let mpfr_NEG_SIGN s = if s = mpfr_SIGN_POS then mpfr_SIGN_NEG else mpfr_SIGN_POS
+let mpfr_NEG_SIGN s = if s = mpfr_SIGN_POS then mpfr_SIGN_NEG else mpfr_SIGN_POS
 
 inline_for_extraction val mpfr_IS_POS: x:mpfr_ptr -> Stack bool
     (requires (fun h -> mpfr_live h x /\ (normal_cond h x \/ singular_cond h x)))

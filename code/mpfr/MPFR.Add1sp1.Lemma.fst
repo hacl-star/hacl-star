@@ -24,7 +24,7 @@ module U32 = FStar.UInt32
 (* intermediate results *)
 private type mpfr_tmp_exp_t = x:mpfr_exp_t{I64.(x >=^ mpfr_EMIN /\ x <=^ mpfr_EMAX +^ 1L)}
 
-(* pre/post-condition for mpfr_add1sp1_any *)
+(* pre-condition for mpfr_add1sp1_any *)
 let mpfr_add1sp1_common_pre_cond a b c (p:mpfr_prec_t) h =
     mpfr_reg_cond_ h b /\ mpfr_reg_cond_ h c /\
     0 < I64.v p /\ I64.v p < I64.v gmp_NUMB_BITS /\
