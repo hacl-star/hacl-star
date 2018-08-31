@@ -252,16 +252,16 @@ let finish a s dst =
         let dsti = B.sub dst U32.(4ul *^ i) 4ul in
         C.Endianness.store32_be dsti s.(i);
         let h2 = ST.get () in
-        be_of_seq_uint32_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
-        be_of_seq_uint32_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
+        Endianness.be_of_seq_uint32_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
+        Endianness.be_of_seq_uint32_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
           (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
     | SHA2_384 | SHA2_512 ->
         let dst0 = B.sub dst 0ul U32.(8ul *^ i) in
         let dsti = B.sub dst U32.(8ul *^ i) 8ul in
         C.Endianness.store64_be dsti s.(i);
         let h2 = ST.get () in
-        be_of_seq_uint64_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
-        be_of_seq_uint64_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
+        Endianness.be_of_seq_uint64_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
+        Endianness.be_of_seq_uint64_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
           (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
   in
   C.Loops.for 0ul (size_hash_final_w a) inv f
