@@ -125,11 +125,8 @@ let update h l =
 
 (* Section 5.1.1: padding *)
 
-let pad l =
-  let l = 64 - l % 64 in
-  Seq.create l 0uy
+let pad = Spec.Hash.Common.pad SHA1
 
 (* Section 6.1.2: no truncation needed *)
 
-let finish h =
-  E.be_of_seq_uint32 h
+let finish = Spec.Hash.Common.finish _

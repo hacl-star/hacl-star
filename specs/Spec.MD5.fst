@@ -250,18 +250,10 @@ let update abcd x =
     Seq.index abcd id `U32.add_mod` Seq.index aabbccdd id;
   ]
 
-(* Sections 3.1 and 3.2
-   TODO: replace with a shared specification
-*)
+(* Sections 3.1 and 3.2 *)
 
-let pad l =
-  let l = 64 - l % 64 in
-  Seq.create l 0uy
+let pad = Spec.Hash.Common.pad MD5
 
 (* Section 3.5 *)
 
-let finish x =
-  E.be_of_seq_uint32 x
-
-let test () =
-  true
+let finish = Spec.Hash.Common.finish _
