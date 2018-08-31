@@ -309,17 +309,19 @@ define WASM_EXPORTED_FUNCTIONS
 endef
 
 snapshots/hacl-c-wasm: snapshots-remove-intermediates
-	$(MAKE) snapshots/hacl-c
-	rm -rf snapshots/hacl-c-wasm
-	mkdir -p snapshots/hacl-c-wasm/build
-	cp $(SNAPSHOT_HACL_C_FILES) snapshots/hacl-c-wasm/build
-	emcc -O3 -DKRML_NOUINT128 -Wno-implicit-function-declaration \
+	cp -r snapshots/hacl-c/ snapshots/hacl-c-wasm/build
+	rm -f snapshots/hacl-c-wasm/build/Hacl_Chacha20_Vec128.*
+	emcc -O3 -DKRML_VERIFIED_UINT128 -Wno-implicit-function-declaration \
 			-Wno-bitwise-op-parentheses -Wno-shift-op-parentheses \
 			-s WASM=1 -s MODULARIZE=1 -s 'EXPORT_NAME="HaclLoader"'  \
 			-o snapshots/hacl-c-wasm/HaclLoader.js \
 			-s EXPORTED_FUNCTIONS='[$(WASM_EXPORTED_FUNCTIONS)]' \
-			-I snapshots/hacl-c-wasm/build snapshots/hacl-c-wasm/build/*.c
-	rm -rf snapshots/hacl-c-wasm/build
+			-I snapshots/hacl-c-wasm/build snapshots/hacl-c-wasm/build/*.c \
+			$(KREMLIN_HOME)/kremlib/extracted/FStar_UInt64.c \
+			$(KREMLIN_HOME)/kremlib/extracted/FStar_UInt32.c \
+			$(KREMLIN_HOME)/kremlib/extracted/FStar_UInt8.c \
+			$(KREMLIN_HOME)/kremlib/c/fstar_uint128.c \
+			-I $(KREMLIN_HOME)/kremlib/extracted \
 
 #
 # Build, refresh and clean targets for all snapshots
