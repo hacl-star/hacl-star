@@ -9,9 +9,8 @@ open FStar.Mul
 open LowStar.Modifies
 open LowStar.BufferOps
 open LowStar.Vector
-// open LowStar.BufVector
 open LowStar.RVector
-open LowStar.RVector.Instances
+// open LowStar.RVector.Instances
 
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
@@ -20,10 +19,9 @@ module HH = FStar.Monotonic.HyperHeap
 
 module B = LowStar.Buffer
 module V = LowStar.Vector
-// module BV = LowStar.BufVector
-module RV = LowStar.RVector
-module RVI = LowStar.RVector.Instances
 module S = FStar.Seq
+module RV = LowStar.RVector
+// module RVI = LowStar.RVector.Instances
 
 module U32 = FStar.UInt32
 module U8 = FStar.UInt8
@@ -32,18 +30,183 @@ module EHS = EverCrypt.Hash
 module EHL = EverCrypt.Helpers
 
 val hash_size: uint32_t
-let hash_size = 32ul // EHS.tagLen EHS.SHA256
+let hash_size = EHS.tagLen EHS.SHA256
 
 type hash = uint8_p
 
-val hreg: RV.regional hash
-let hreg = RVI.buffer_regional 0uy hash_size
+// We cannot use `LowStar.RVector.Instances`, where we have some general
+// instantiations of `regional`, e.g., if `rg:regional a` then
+// `regional (rvector rg)`. In FStar we can use this, but KreMLin currently
+// cannot deal with this and gives a number of errors.
+// So we temporarily instantiate some `regional`s manually below, which is
+// extractable to C by KreMLin.
 
-val hcpy: RV.copyable hash hreg
-let hcpy = RVI.buffer_copyable 0uy hash_size
+/// Some instantiations of `regional` used in Merkle tree
+/// 1. `hash` is regional
 
-val bhreg: RV.regional (RV.rvector #hash hreg)
-let bhreg = RVI.buffer_vector_regional 0uy hash_size
+val hash_region_of:
+  v:hash -> GTot HH.rid
+let hash_region_of v =
+  B.frameOf v
+
+val hash_cv: unit -> Tot hash
+let hash_cv _ = B.null
+
+val hash_repr: Type0
+let hash_repr = S.seq uint8_t
+
+val hash_r_repr:
+  h:HS.mem -> v:hash -> GTot hash_repr
+let hash_r_repr h v = B.as_seq h v
+
+val hash_r_inv: h:HS.mem -> v:hash -> GTot Type0
+let hash_r_inv h v =
+  B.live h v /\ B.freeable v /\ 
+  B.len v = hash_size
+
+val hash_r_sep:
+  v:hash -> p:loc -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (hash_r_inv h0 v /\
+		  loc_disjoint 
+		    (loc_all_regions_from false 
+		      (hash_region_of v)) p /\
+		  modifies p h0 h1))
+	(ensures (hash_r_inv h1 v /\
+		 hash_r_repr h0 v == hash_r_repr h1 v))
+let hash_r_sep v p h0 h1 =
+  assert (loc_includes (loc_all_regions_from false (hash_region_of v))
+		       (loc_buffer v));
+  B.modifies_buffer_elim v p h0 h1
+
+val hash_r_init:
+  r:erid ->
+  HST.ST hash
+    (requires (fun h0 -> true))
+    (ensures (fun h0 v h1 -> 
+      modifies loc_none h0 h1 /\
+      hash_r_inv h1 v /\
+      hash_region_of v = r))
+let hash_r_init r =
+  B.malloc r 0uy hash_size
+
+val hash_r_free:
+  v:hash ->
+  HST.ST unit
+    (requires (fun h0 -> hash_r_inv h0 v))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc_all_regions_from false (hash_region_of v)) h0 h1))
+let hash_r_free v =
+  B.free v
+
+val hash_copy:
+  src:hash -> dst:hash ->
+  HST.ST unit
+    (requires (fun h0 ->
+      hash_r_inv h0 src /\ hash_r_inv h0 dst /\
+      HH.disjoint (hash_region_of src) (hash_region_of dst)))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc_all_regions_from false (hash_region_of dst)) h0 h1 /\
+      hash_r_inv h1 dst /\
+      hash_r_repr h1 dst == hash_r_repr h0 src))
+let hash_copy src dst =
+  B.blit src 0ul dst 0ul hash_size
+
+// `hash_cv ()` is is also a trick to extract the C code using KreMLin.
+// If we just define and use `hash_cv` as a constant, then gcc complains with
+// the error "initializer element is not a compile-time constant".
+val hreg: regional hash
+let hreg =
+  Rgl hash_region_of
+      (hash_cv ())
+      hash_repr
+      hash_r_repr
+      hash_r_inv
+      hash_r_sep
+      hash_r_init
+      hash_r_free
+
+val hcpy: copyable hash hreg
+let hcpy = Cpy hash_copy
+
+type hash_vec = RV.rvector hreg
+
+/// 2. `rvector hash` is regional
+
+val hash_vec_region_of: 
+  v:hash_vec -> GTot HH.rid
+let hash_vec_region_of v = V.frameOf v
+
+val hash_vec_cv: hash_vec
+let hash_vec_cv = V.create_empty hash
+
+val hash_vec_repr: Type0
+let hash_vec_repr = S.seq (S.seq uint8_t)
+
+val seq_map: 
+  #a:Type0 -> #b:Type0 -> f:(a -> GTot b) -> 
+  s:S.seq a -> GTot (S.seq b) (decreases (S.length s))
+let rec seq_map #a #b f s =
+  if S.length s = 0 then S.empty
+  else S.cons (f (S.head s)) (seq_map f (S.tail s))
+
+val hash_vec_r_repr:
+  h:HS.mem -> v:hash_vec -> GTot hash_vec_repr
+let hash_vec_r_repr h v =
+  seq_map (hash_r_repr h) (V.as_seq h v)
+
+val hash_vec_r_inv:
+  h:HS.mem -> v:hash_vec -> GTot Type0
+let hash_vec_r_inv h v = rv_inv h v
+
+val hash_vec_r_sep:
+  v:hash_vec -> p:loc -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (hash_vec_r_inv h0 v /\
+		  loc_disjoint 
+		    (loc_all_regions_from false (hash_vec_region_of v))
+		    p /\
+		  modifies p h0 h1))
+	(ensures (hash_vec_r_inv h1 v /\
+		 hash_vec_r_repr h0 v == hash_vec_r_repr h1 v))
+let hash_vec_r_sep v p h0 h1 =
+  admit ()
+
+val hash_vec_r_init: 
+  r:erid ->
+  HST.ST (v:hash_vec)
+    (requires (fun h0 -> true))
+    (ensures (fun h0 v h1 -> 
+      modifies loc_none h0 h1 /\
+      hash_vec_r_inv h1 v /\
+      hash_vec_region_of v = r))
+let hash_vec_r_init r =
+  let nrid = new_region_ r in
+  let r_init = Rgl?.r_init hreg in
+  let ia = r_init nrid in
+  V.create_reserve 1ul ia r
+
+val hash_vec_r_free:
+  v:hash_vec ->
+  HST.ST unit
+    (requires (fun h0 -> hash_vec_r_inv h0 v))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc_all_regions_from false (hash_vec_region_of v)) h0 h1))
+let hash_vec_r_free v =
+  RV.free v
+
+val bhreg: regional hash_vec
+let bhreg =
+  Rgl hash_vec_region_of
+      hash_vec_cv
+      hash_vec_repr
+      hash_vec_r_repr
+      hash_vec_r_inv
+      hash_vec_r_sep
+      hash_vec_r_init
+      hash_vec_r_free
+
+type hash_vv = RV.rvector bhreg
+
+/// The Merkle tree implementation begins here.
 
 /// Compression of two hashes
 
@@ -70,9 +233,6 @@ let hash_2 src1 src2 dst =
   HST.pop_frame ()
 
 /// Low-level Merkle tree data structure
-
-type hash_vec = RV.rvector hreg
-type hash_vv = RV.rvector bhreg
 
 // A Merkle tree `MT i j hs rhs_ok rhs` stores all necessary hashes to generate
 // a Merkle path for each element from the index `i` to `j-1`.
