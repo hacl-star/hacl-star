@@ -73,3 +73,39 @@ val aead_decrypt: key:Dyn.dyn -> iv:uint8_p ->
 
 val aead_free: key:Dyn.dyn ->
   St unit
+
+/// DH
+
+val dh_load_group:
+  dh_p: uint8_p ->
+  dh_p_len: uint32_t ->
+  dh_g: uint8_p ->
+  dh_g_len: uint32_t ->
+  dh_q: uint8_p ->
+  dh_q_len: uint32_t ->
+  ST Dyn.dyn
+  (requires fun h0 -> True)
+  (ensures fun h0 _ h1 -> modifies_none h0 h1)
+
+val dh_free_group:
+  st: Dyn.dyn ->
+  ST unit
+  (requires fun h0 -> True)
+  (ensures fun h0 _ h1 -> modifies_none h0 h1)
+
+val dh_keygen:
+  st: Dyn.dyn ->
+  secret: uint8_p ->
+  public: uint8_p ->
+  ST (uint32_t * uint32_t)
+  (requires fun h0 -> True)
+  (ensures fun h0 _ h1 -> modifies_none h0 h1)
+  
+val dh_compute:
+  st: Dyn.dyn ->
+  public: uint8_p ->
+  public_len: uint32_t ->
+  out: uint8_p ->
+  ST uint32_t
+  (requires fun h0 -> True)
+  (ensures fun h0 _ h1 -> modifies_none h0 h1)

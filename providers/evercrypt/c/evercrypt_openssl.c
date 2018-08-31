@@ -1,5 +1,7 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+#include <openssl/dh.h>
+#include <openssl/ec.h>
 #include <inttypes.h>
 
 #include "kremlin/internal/target.h"
@@ -183,4 +185,54 @@ uint32_t EverCrypt_OpenSSL_aead_decrypt(void* ctx, uint8_t *iv, uint8_t *aad, ui
 void EverCrypt_OpenSSL_aead_free(void* ctx)
 {
   openssl_free((EVP_CIPHER_CTX *)ctx);
+}
+
+/* Diffie-Hellman */
+
+void* EverCrypt_OpenSSL_dh_load_group(
+  uint8_t *dh_p,  uint32_t dh_p_len,
+  uint8_t *dh_g,  uint32_t dh_g_len,
+  uint8_t *dh_q,  uint32_t dh_q_len)
+{
+  DH *dh = DH_new();
+  if(dh == NULL) handleErrors();
+
+  BIGNUM *p = BN_bin2bn(dh_p, dh_p_len, NULL);
+  BIGNUM *g = BN_bin2bn(dh_g, dh_g_len, NULL);
+  BIGNUM *q = dh_q_len ? BN_bin2bn(dh_q, dh_q_len, NULL) : NULL;
+  DH_set0_pqg(dh, p, q, g);
+  
+  return (void*)dh;
+}
+
+void EverCrypt_OpenSSL_dh_free_group(void *g)
+{
+  DH_free((DH*)g);
+}
+
+K___uint32_t_uint32_t EverCrypt_OpenSSL_dh_keygen(void *g, uint8_t *priv, uint8_t *pub)
+{
+  const BIGNUM *opub, *opriv;
+  DH_get0_key((DH*)g, &opub, &opriv);
+  BN_bn2bin(opub, pub);
+  BN_bn2bin(opriv, priv);
+  K___uint32_t_uint32_t ret =
+    {
+     .fst = BN_num_bytes(opriv),
+     .snd = BN_num_bytes(opub)
+    };
+  return ret;
+}
+
+uint32_t EverCrypt_OpenSSL_dh_compute(void *g,
+  uint8_t *pub, uint32_t pub_len,
+  uint8_t *out)
+{
+  BIGNUM *opub = BN_bin2bn(pub, pub_len, NULL);
+  
+  if(DH_compute_key(out, opub, (DH*)g) < 0)
+    handleErrors();
+  
+  BN_free(opub);
+  return DH_size((DH*)g);
 }
