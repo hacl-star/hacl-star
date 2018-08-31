@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
 #if (defined(_WIN32) || defined(_WIN64))
 #  include <malloc.h>
 #else
@@ -311,7 +310,9 @@ int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, unsigned char *cipher, uin
   }
 
 #if DEBUG
-  printf("ENCRYPT %s\nIV=", key->alg == TLS_aead_AES_128_GCM ? "AES128-GCM" : (key->alg == TLS_aead_AES_256_GCM ? "AES256-GCM" : "CHACHA20-POLY1305")); dump(iv, 12);
+  printf("ENCRYPT %s\n", key->alg == TLS_aead_AES_128_GCM ? "AES128-GCM" : (key->alg == TLS_aead_AES_256_GCM ? "AES256-GCM" : "CHACHA20-POLY1305"));
+  printf("KEY="); dump(key->key, key->alg == TLS_aead_AES_128_GCM ? 16 : 32);
+  printf("NONCE="); dump(iv, 12);
   printf("STATIC="); dump(key->static_iv, 12);
   printf("AD="); dump(ad, ad_len);
   printf("PLAIN="); dump(plain, plain_len);
@@ -347,7 +348,9 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
   }
 
 #if DEBUG
-  printf("DECRYPT %s\nIV=", r?"OK":"BAD"); dump(iv, 12);
+  printf("DECRYPT %X->%X %s\n", cipher, plain, r?"OK":"BAD");
+  printf("KEY="); dump(key->key, key->alg == TLS_aead_AES_128_GCM ? 16 : 32);
+  printf("NONCE="); dump(iv, 12);
   printf("STATIC="); dump(key->static_iv, 12);
   printf("AD="); dump(ad, ad_len);
   printf("CIPHER="); dump(cipher, cipher_len);

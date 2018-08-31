@@ -6,6 +6,14 @@ open FStar.HyperStack.ST
 
 /// An OpenSSL provider that implements a subset of EverCrypt.fsti
 
+val random_init: unit ->
+  ST uint32_t random_init_pre random_init_post
+
+val random_sample: len:uint32_t -> out:uint8_p ->
+  ST unit random_sample_pre random_sample_post
+
+val random_cleanup: unit ->
+  ST unit random_cleanup_pre random_cleanup_post
 
 val aes128_gcm_encrypt: key:uint8_p -> iv:uint8_p ->
   ad:uint8_p -> adlen:uint32_t ->

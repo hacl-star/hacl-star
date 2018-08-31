@@ -44,6 +44,42 @@
 
 #if IS_WINDOWS
 
+static BCRYPT_ALG_HANDLE g_hAlgRandom;
+
+static uint32_t bcrypt_rng_init(void)
+{
+  NTSTATUS st = BCryptOpenAlgorithmProvider(
+    &g_hAlgRandom,
+    BCRYPT_RNG_ALGORITHM,
+    NULL,
+#ifdef _KERNEL_MODE
+    BCRYPT_PROV_DISPATCH
+#else
+    0
+#endif
+  );
+  
+  if (!NT_SUCCESS(st)) {
+    return 0;
+  }
+
+  return 1;
+}
+
+static void bcrypt_rng_sample(uint32_t len, uint8_t *out)
+{
+  NTSTATUS st = BCryptGenRandom(g_hAlgRandom, out, len, 0);
+  
+  if (!NT_SUCCESS(st)) {
+    handleErrors();
+  }
+}
+
+static void bcrypt_rng_cleanup(void)
+{
+  BCryptCloseAlgorithmProvider(g_hAlgRandom, 0);
+}
+
 static BCRYPT_KEY_HANDLE bcrypt_create(BCRYPT_ALG_HANDLE alg, uint8_t *key, ULONG key_size)
 {
   BCRYPT_KEY_HANDLE hKey = NULL;
@@ -92,6 +128,21 @@ static void bcrypt_free(BCRYPT_KEY_HANDLE hKey)
 #define BCRYPT_ALG_HANDLE uint8_t
 #define BCRYPT_AES_GCM_ALG_HANDLE 0
 
+static uint32_t bcrypt_rng_init(void)
+{
+  return 0;
+}
+
+static void bcrypt_rng_sample(uint32_t len, uint8_t *out)
+{
+  handleErrors();
+}
+
+static void bcrypt_rng_cleanup(void)
+{
+  handleErrors();
+}
+
 static BCRYPT_KEY_HANDLE bcrypt_create(BCRYPT_ALG_HANDLE alg, uint8_t key, ULONG key_size)
 {
   return NULL;
@@ -111,6 +162,21 @@ static void bcrypt_free(BCRYPT_KEY_HANDLE hKey)
 }
 
 #endif // IS_WINDOWS
+
+uint32_t EverCrypt_BCrypt_random_init(void)
+{
+  return bcrypt_rng_init();
+}
+
+void EverCrypt_BCrypt_random_sample(uint32_t len, uint8_t *out)
+{
+  bcrypt_rng_sample(len, out);
+}
+
+void EverCrypt_BCrypt_random_cleanup(void)
+{
+  bcrypt_rng_cleanup();
+}
 
 void EverCrypt_BCrypt_aes128_gcm_encrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,
                                           uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)

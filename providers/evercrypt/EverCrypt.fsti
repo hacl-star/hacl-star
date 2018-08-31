@@ -10,10 +10,21 @@ module B = LowStar.Buffer
 
 include EverCrypt.Hash
 
-/// Curve
+/// Curve25519
 
 val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
   Stack unit curve_x25519_pre curve_x25519_post
+
+/// Random sampling
+
+val random_init: unit ->
+  ST uint32_t random_init_pre random_init_post
+
+val random_sample: len:uint32_t -> out:uint8_p ->
+  ST unit random_sample_pre random_sample_post
+
+val random_cleanup: unit ->
+  ST unit random_cleanup_pre random_cleanup_post
 
 /// AES block function
 

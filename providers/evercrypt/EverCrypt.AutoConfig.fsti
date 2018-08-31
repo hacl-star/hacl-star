@@ -19,6 +19,7 @@ val sha256_impl: getter impl
 val sha384_impl: getter impl
 val sha512_impl: getter impl
 val x25519_impl: getter impl
+val random_impl: getter impl
 val aes128_impl: getter impl
 val aes256_impl: getter impl
 val chacha20_impl: getter impl
