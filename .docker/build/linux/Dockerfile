@@ -8,7 +8,7 @@
 # Latest can only be used with branch master,
 # for any other branch please use the specific commit id on the config file.
 ARG COMMITID
-FROM fstar:${COMMITID}
+FROM fstar-linux:${COMMITID}
 
 ARG BUILDLOGFILE
 ARG MAXTHREADS
