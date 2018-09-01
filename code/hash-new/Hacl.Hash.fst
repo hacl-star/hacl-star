@@ -8,6 +8,8 @@ module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module Tactics = FStar.Tactics
 
+module MD5 = Hacl.MD5
+
 open Hacl.Hash.Common
 open Hacl.Hash.Lemmas
 open Spec.Hash

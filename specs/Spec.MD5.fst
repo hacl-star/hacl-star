@@ -2,28 +2,35 @@ module Spec.MD5
 
 (* Source: https://tools.ietf.org/html/rfc1321 *)
 
+module U32 = FStar.UInt32
+
 (* Section 3.3 *)
 
-let init = Seq.seq_of_list [
+inline_for_extraction
+let init_as_list : list U32.t = [
   0x01234567ul;
   0x89abcdeful;
   0xfedcba98ul;
   0x76543210ul;
 ]
 
+let init = Seq.seq_of_list init_as_list
+
 (* Section 3.4 *)
 
-module U32 = FStar.UInt32
-
+inline_for_extraction
 let f (x y z: U32.t) : Tot U32.t =
   (x `U32.logand` y) `U32.logor` (U32.lognot x `U32.logand` z)
 
+inline_for_extraction
 let g (x y z: U32.t) : Tot U32.t =
   (x `U32.logand` z) `U32.logor` (y `U32.logand` U32.lognot z)
 
+inline_for_extraction
 let h (x y z: U32.t) : Tot U32.t =
   x `U32.logxor` y `U32.logxor` z
 
+inline_for_extraction
 let i (x y z: U32.t) : Tot U32.t =
   y `U32.logxor` (x `U32.logor` U32.lognot z)
 
@@ -115,10 +122,14 @@ let x_t = Seq.lseq U32.t 16
 
 let t_idx = (n: nat { 1 <= n /\ n <= 64 } )
 
+inline_for_extraction
 let rotate_idx = (n_:U32.t{0 < U32.v n_ /\ U32.v n_ < 32})
 
-let (<<<) (x:U32.t) (n_ : rotate_idx): Tot U32.t =
+inline_for_extraction
+let rotl (x:U32.t) (n_ : rotate_idx): Tot U32.t =
   U32.((x <<^ n_) |^ (x >>^ (32ul -^ n_)))
+
+let (<<<) = rotl
 
 let round_op_gen (f: (U32.t -> U32.t -> U32.t -> Tot U32.t)) (abcd: abcd_t) (x: x_t) (a b c d: abcd_idx) (k: x_idx) (s: rotate_idx) (i: t_idx) : Tot abcd_t =
   let va = Seq.index abcd a in
@@ -236,19 +247,33 @@ let round4 (abcd: abcd_t) (x: x_t) : Tot abcd_t =
 
 module E = FStar.Kremlin.Endianness
 
-let update abcd x =
-  let x = E.seq_uint32_of_be 16 x in
-  let aabbccdd = abcd in
+let rounds (abcd: abcd_t) (x: x_t) : Tot abcd_t =
   let abcd = round1 abcd x in
   let abcd = round2 abcd x in
   let abcd = round3 abcd x in
   let abcd = round4 abcd x in
-  Seq.seq_of_list [
-    Seq.index abcd ia `U32.add_mod` Seq.index aabbccdd ia;
-    Seq.index abcd ib `U32.add_mod` Seq.index aabbccdd ib;
-    Seq.index abcd ic `U32.add_mod` Seq.index aabbccdd ic;
-    Seq.index abcd id `U32.add_mod` Seq.index aabbccdd id;
-  ]
+  abcd
+
+let overwrite (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot abcd_t =
+  let abcd : abcd_t = Seq.upd abcd ia a' in
+  let abcd : abcd_t = Seq.upd abcd ib b' in
+  let abcd : abcd_t = Seq.upd abcd ic c' in
+  let abcd : abcd_t = Seq.upd abcd id d' in
+  abcd
+
+let update abcd x =
+  let x = E.seq_uint32_of_be 16 x in
+  let aa = Seq.index abcd ia in
+  let bb = Seq.index abcd ib in
+  let cc = Seq.index abcd ic in
+  let dd = Seq.index abcd id in
+//  let aabbccdd = abcd in
+  let abcd = rounds abcd x in
+  overwrite abcd
+    (Seq.index abcd ia `U32.add_mod` aa)
+    (Seq.index abcd ib `U32.add_mod` bb)
+    (Seq.index abcd ic `U32.add_mod` cc)
+    (Seq.index abcd id `U32.add_mod` dd)
 
 (* Sections 3.1 and 3.2 *)
 
