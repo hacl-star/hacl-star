@@ -574,8 +574,11 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256)
   let hash_1 = shuffle_opaque SHA2_256 hash_orig block in
   reveal_opaque shuffle;
   reveal_opaque shuffle_core;
-  assert (hash_1 == shuffle SHA2_256 hash_orig block);
+  //assert (hash_1 == shuffle SHA2_256 hash_orig block);
   let h = make_hash src1 src2 in
+  //assert (shuffle_core_opaque == shuffle_core);
+  //assert_norm (shuffle_core_opaque == shuffle_core);
+  //assert (FStar.FunctionalExtensionality.feq shuffle_core shuffle_core_opaque);
   //assert (FStar.FunctionalExtensionality.feq (shuffle_core_opaque SHA2_256 block) (shuffle_core SHA2_256 block));
   //assert (shuffle_core_opaque SHA2_256 block == shuffle_core SHA2_256 block);
   (*
