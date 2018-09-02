@@ -18,24 +18,43 @@ static inline void fadd(elem_t e1, const elem_t e2) {
   *e1 = _mm_xor_si128(*e1, *e2);
 }
 
+
 static inline void fmul(elem_t e1, elem_t e2) {
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
+  __m128i lo, hi, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
+
+#ifdef KARATSUBA
+  lo = _mm_clmulepi64_si128(*e1, *e2, 0x00);
+  hi = _mm_clmulepi64_si128(*e1, *e2, 0x11);
+
+  tmp0 = _mm_shuffle_epi32(*e1, 78);
+  tmp0 = _mm_xor_si128(tmp0, *e1);
+  tmp1 = _mm_shuffle_epi32(*e2, 78);
+  tmp1 = _mm_xor_si128(tmp1, *e2);
+  tmp2 = _mm_clmulepi64_si128(tmp0, tmp1, 0x00);
+
+  tmp2 = _mm_xor_si128(tmp2, lo);
+  tmp2 = _mm_xor_si128(tmp2, hi);
+  tmp3 = _mm_slli_si128(tmp2, 8);
+  tmp2 = _mm_srli_si128(tmp2, 8);
+  lo = _mm_xor_si128(tmp3, lo);
+  hi = _mm_xor_si128(tmp2, hi);
+#else
+  lo = _mm_clmulepi64_si128(*e1, *e2, 0x00);
+  tmp0 = _mm_clmulepi64_si128(*e1, *e2, 0x10);
+  tmp1 = _mm_clmulepi64_si128(*e1, *e2, 0x01);
+  hi = _mm_clmulepi64_si128(*e1, *e2, 0x11);
+
+  tmp0 = _mm_xor_si128(tmp0, tmp1);
+  tmp1 = _mm_srli_si128(tmp0, 8);
+  tmp0 = _mm_slli_si128(tmp0, 8);
+  lo = _mm_xor_si128(lo, tmp0);
+  hi = _mm_xor_si128(hi, tmp1);
+#endif
   
-  tmp3 = _mm_clmulepi64_si128(*e1, *e2, 0x00);
-  tmp4 = _mm_clmulepi64_si128(*e1, *e2, 0x10);
-  tmp5 = _mm_clmulepi64_si128(*e1, *e2, 0x01);
-  tmp6 = _mm_clmulepi64_si128(*e1, *e2, 0x11);
-
-  tmp4 = _mm_xor_si128(tmp4, tmp5);
-  tmp5 = _mm_slli_si128(tmp4, 8);
-  tmp4 = _mm_srli_si128(tmp4, 8);
-  tmp3 = _mm_xor_si128(tmp3, tmp5);
-  tmp6 = _mm_xor_si128(tmp6, tmp4);
-
-  tmp7 = _mm_srli_epi32(tmp3, 31);
-  tmp8 = _mm_srli_epi32(tmp6, 31);
-  tmp3 = _mm_slli_epi32(tmp3, 1);
-  tmp6 = _mm_slli_epi32(tmp6, 1);
+  tmp7 = _mm_srli_epi32(lo, 31);
+  tmp8 = _mm_srli_epi32(hi, 31);
+  tmp3 = _mm_slli_epi32(lo, 1);
+  tmp6 = _mm_slli_epi32(hi, 1);
 
   tmp9 = _mm_srli_si128(tmp7, 12);
   tmp8 = _mm_slli_si128(tmp8, 4);

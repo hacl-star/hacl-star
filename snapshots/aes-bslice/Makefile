@@ -12,11 +12,15 @@ gf128_test.exe: gf128.c gf128_test.c
 	$(CC) $(CCOPTS) gf128.c gf128_test.c -o gf128_test.exe
 	./gf128_test.exe
 
+gf128_bear_test.exe: gf128_bear_ctmul64.c gf128_test.c
+	$(CC) $(CCOPTS) gf128.c gf128_test.c -o gf128_bear_test.exe
+	./gf128_bear_test.exe
+
 gf128_ni_test.exe: gf128_ni.c gf128_test.c
 	$(CC) $(CCOPTS) gf128_ni.c gf128_test.c -o gf128_ni_test.exe
 	./gf128_ni_test.exe
 
-gf128_ni_test.exe: gf128_ni4.c gf128_test.c
+gf128_ni4_test.exe: gf128_ni4.c gf128_test.c
 	$(CC) $(CCOPTS) gf128_ni4.c gf128_test.c -o gf128_ni4_test.exe
 	./gf128_ni4_test.exe
 
@@ -48,6 +52,10 @@ aes_bslice_test.exe: aes_bslice.c aes_test.c
 aes_bslice4_test.exe: aes_bslice4.c aes_test.c
 	$(CC) $(CCOPTS) aes_bslice4.c aes_test.c -o aes_bslice4_test.exe
 	./aes_bslice4_test.exe
+
+aes_generic4_test.exe: aes_generic4.c aes_test.c
+	$(CC) $(CCOPTS) aes_generic4.c aes_test.c -o aes_generic4_test.exe
+	./aes_generic4_test.exe
 
 aes_bslice8_test.exe: aes_bslice8.c aes_test.c
 	$(CC) $(CCOPTS) aes_bslice8.c aes_test.c -o aes_bslice8_test.exe

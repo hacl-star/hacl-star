@@ -45,12 +45,12 @@ void reduce4 (elem_t acc, elem_t r4, elem_t b4)
   tmp4 = _mm_shuffle_epi32(b4[0], 78);
   tmp0 = _mm_xor_si128(tmp0, r4[0]);
   tmp4 = _mm_xor_si128(tmp4, b4[0]);
+
   tmp1 = _mm_shuffle_epi32(r4[1], 78);
   tmp5 = _mm_shuffle_epi32(b4[1], 78);
   tmp1 = _mm_xor_si128(tmp1, r4[1]);
   tmp5 = _mm_xor_si128(tmp5, b4[1]);
   tmp2 = _mm_shuffle_epi32(r4[2], 78);
-
   tmp6 = _mm_shuffle_epi32(b4[2], 78);
   tmp2 = _mm_xor_si128(tmp2, r4[2]);
   tmp6 = _mm_xor_si128(tmp6, b4[2]);
@@ -58,6 +58,7 @@ void reduce4 (elem_t acc, elem_t r4, elem_t b4)
   tmp7 = _mm_shuffle_epi32(b4[3], 78);
   tmp3 = _mm_xor_si128(tmp3, r4[3]);
   tmp7 = _mm_xor_si128(tmp7, b4[3]);
+
   tmp0 = _mm_clmulepi64_si128(tmp0, tmp4, 0x00);
   tmp1 = _mm_clmulepi64_si128(tmp1, tmp5, 0x00);
   tmp2 = _mm_clmulepi64_si128(tmp2, tmp6, 0x00);
