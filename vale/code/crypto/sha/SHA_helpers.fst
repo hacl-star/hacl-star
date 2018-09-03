@@ -19,8 +19,8 @@ let (.[]) = FStar.Seq.index
 let vv (u:UInt32.t) : nat32 = v u
 let to_uint32 (n:nat32) : UInt32.t = uint_to_t n
 
-let ws_opaque = make_opaque ws
-let shuffle_core_opaque = make_opaque shuffle_core
+unfold let ws_opaque = make_opaque ws
+unfold let shuffle_core_opaque = make_opaque shuffle_core
 
 let make_hash_def (abef cdgh:quad32) :
     (hash:hash_w SHA2_256 {
@@ -49,7 +49,7 @@ let make_hash_def (abef cdgh:quad32) :
     //assert_norm (index hash 2 == c);
     hash
 
-let make_hash = make_opaque make_hash_def
+unfold let make_hash = make_opaque make_hash_def
 
 let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}) :
     Lemma(let h = shuffle_core_opaque a block hash t in
@@ -348,7 +348,7 @@ let ws_partial_def (t:counter) (block:block_w SHA2_256) : quad32 =
     else 
        Mkfour 0 0 0 0
 
-let ws_partial = make_opaque ws_partial_def
+unfold let ws_partial = make_opaque ws_partial_def
 
 let add_mod_quad32 (q0 q1:quad32) : quad32 =
   Mkfour (vv (add_mod (to_uint32 q0.lo0) (to_uint32 q1.lo0)))
@@ -542,7 +542,7 @@ let quads_to_block (qs:seq quad32) : block_w SHA2_256
   let f (n:nat{n < 16}) : UInt32.t = to_uint32 (if n < length nat32_seq then nat32_seq.[n] else 0) in
   init 16 f
 
-#reset-options "--z3rlimit 20"
+#push-options "--z3rlimit 20 --max_fuel 1"
 let lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
   (ensures (let block = quads_to_block qs in
@@ -555,40 +555,54 @@ let lemma_quads_to_block (qs:seq quad32) : Lemma
   =  
   reveal_opaque ws;
   ()
+#pop-options
 
-let shuffle_opaque = make_opaque shuffle
+let translate_hash_update (h0 h1 a0 a1:quad32) : 
+  Lemma (let h0' = add_wrap_quad32 a0 h0 in
+         let h1' = add_wrap_quad32 a1 h1 in
+         let h = make_hash h0 h1 in
+         let a = make_hash a0 a1 in
+         let h' = make_hash h0' h1' in
+         let mapped = Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) h a in
+         mapped == h')
+  =
+  admit()
+         
+unfold let shuffle_opaque = make_opaque shuffle
   
-let update (a:hash_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
+let update_block (a:hash_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
   let hash_1 = shuffle_opaque a hash block in
   Spec.Loops.seq_map2 (fun x y -> word_add_mod a x y) hash hash_1
 
-let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) 
-                 (hash_orig:hash_w SHA2_256) : Lemma
-  (requires hash_orig == make_hash h0 h1 /\
-            make_hash src1 src2 == 
-            Spec.Loops.repeat_range_spec 0 64 (shuffle_core_opaque SHA2_256 block) hash_orig /\
-            src1' == add_wrap_quad32 src1 h0 /\
-            src2' == add_wrap_quad32 src2 h1)
-  (ensures  make_hash src1' src2' == update SHA2_256 hash_orig block)
+let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) : Lemma
+  (requires (let hash_orig = make_hash h0 h1 in
+             make_hash src1 src2 == 
+             Spec.Loops.repeat_range_spec 0 64 (shuffle_core_opaque SHA2_256 block) hash_orig /\
+             src1' == add_wrap_quad32 src1 h0 /\
+             src2' == add_wrap_quad32 src2 h1))
+  (ensures (let hash_orig = make_hash h0 h1 in
+            make_hash src1' src2' == update_block SHA2_256 hash_orig block))
   =
+  let hash_orig = make_hash h0 h1 in
   let hash_1 = shuffle_opaque SHA2_256 hash_orig block in
   reveal_opaque shuffle;
   reveal_opaque shuffle_core;
   //assert (hash_1 == shuffle SHA2_256 hash_orig block);
   let h = make_hash src1 src2 in
-  //assert (shuffle_core_opaque == shuffle_core);
+  assert (shuffle_core_opaque == shuffle_core);
   //assert_norm (shuffle_core_opaque == shuffle_core);
-  //assert (FStar.FunctionalExtensionality.feq shuffle_core shuffle_core_opaque);
+  //let open FStar.FunctionalExtensionality in
+  //assert (feq shuffle_core shuffle_core_opaque);
   //assert (FStar.FunctionalExtensionality.feq (shuffle_core_opaque SHA2_256 block) (shuffle_core SHA2_256 block));
-  //assert (shuffle_core_opaque SHA2_256 block == shuffle_core SHA2_256 block);
-  (*
+  assert (shuffle_core_opaque SHA2_256 block == shuffle_core SHA2_256 block);
   assert (Spec.Loops.repeat_range_spec 0 64 (shuffle_core_opaque SHA2_256 block) hash_orig ==
           Spec.Loops.repeat_range_spec 0 64 (shuffle_core SHA2_256 block) hash_orig);
+  assert (make_hash src1 src2 == shuffle SHA2_256 hash_orig block); 
   //assert (h == hash_1);
-  let h' = make_hash src1' src2' in
-  let u = update SHA2_256 hash_orig block in
+  //let h' = make_hash src1' src2' in
+  //let u = update SHA2_256 hash_orig block in
   //assert (equal h' u);
-  *)
+  translate_hash_update src1 src2 h0 h1;
   admit();
   ()
             

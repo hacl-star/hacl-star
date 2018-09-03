@@ -73,24 +73,22 @@ procedure {:quick} preamble(
 
 #reset-options "--z3rlimit 40"
 procedure {:quick} loop_rounds_0_15(
-        ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128
     )
     lets
-        ctx @= rdi; inp @= rsi; tbl @= rcx;
+        inp @= rsi; tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
-        ctx; tbl; mem; memTaint;
+        tbl; mem; memTaint;
     modifies
         inp; 
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
         validSrcAddrs128(mem, inp,   in_b,  4, memTaint, Secret);
-        validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40 < pow2_64;
 
@@ -352,8 +350,7 @@ procedure {:quick exportOnly} loop_rounds_16_51(
 
 procedure {:quick} loop_rounds_52_64(
         ghost k_b:buffer128,
-        ghost block:block_w(SHA2_256),
-        ghost hash_orig:hash_w(SHA2_256)
+        ghost block:block_w(SHA2_256)
         )
     lets
         tbl @= rcx; num @= rdx;
@@ -373,6 +370,7 @@ procedure {:quick} loop_rounds_52_64(
 
         k_reqs(buffer128_as_seq(mem, k_b));
 
+        let hash_orig := make_hash(abef_save, cdgh_save) in
         make_hash(abef, cdgh) == repeat_range_spec(0, 52, shuffle_core_opaque(SHA2_256, block), hash_orig);
 
         msg0 == ws_quad32(52, block); 
@@ -382,9 +380,11 @@ procedure {:quick} loop_rounds_52_64(
     ensures
         tmp_xmm == old(bswap);
         num == old(num) - 1;
-
-        // TODO: Add postcondition about the fact that make_hash(abef, cdgh) is update
+        let hash_orig := make_hash(abef_save, cdgh_save) in
+        make_hash(abef, cdgh) == update_block(SHA2_256, hash_orig, block);
 {
+    ghost var hash_orig := make_hash(abef_save, cdgh_save);
+
     ghost var ks := buffer128_as_seq(mem, k_b);
     Load128_buffer(Wi, tbl, 16*13, Secret, k_b, 13);  // Load K values from memory
     assert Wi == index_work_around_quad32(ks, 13);
@@ -415,12 +415,105 @@ procedure {:quick} loop_rounds_52_64(
     SHA256_rnds2(abef, cdgh, 4*15+2, block, hash_orig);
     //assert make_hash(abef, cdgh) == shuffle(SHA2_256, hash_orig, block);
 
+    ghost var abef_shuffle := abef;
+    ghost var cdgh_shuffle := cdgh;
+
     Paddd(cdgh, cdgh_save);
     Paddd(abef, abef_save);
+
+    update_lemma(abef_shuffle, cdgh_shuffle, abef, cdgh, abef_save, cdgh_save, block);
 }
 
 
 procedure {:quick} loop_rounds(
+        ghost in_b:buffer128,
+        ghost k_b:buffer128
+    )
+    lets
+        num @= rdx; inp @= rsi; tbl @= rcx;
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
+        tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
+    reads
+        tbl; bswap; mem; memTaint;
+    modifies
+        inp; num;
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
+        efl;
+    requires
+        validSrcAddrs128(mem, inp,   in_b,  4, memTaint, Secret);
+        validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
+        inp + 0x40 < pow2_64;
+
+        num > 0;
+
+        tmp_xmm == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        k_reqs(buffer128_as_seq(mem, k_b));
+    ensures
+        inp == old(inp) + 0x40;
+        let input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4) in
+        let input_BE := reverse_bytes_quad32_seq(input_LE) in
+        let block:block_w(SHA2_256) := quads_to_block(input_BE) in
+        let hash_orig := old(make_hash(abef, cdgh)) in
+        make_hash(abef, cdgh) == update_block(SHA2_256, hash_orig, block);
+        num == old(num) - 1;
+{
+    // Create a ghost message block to pass to all of the sha256* instructions and lemmas
+    ghost var input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4);
+    ghost var input_BE := reverse_bytes_quad32_seq(input_LE);
+    ghost var block:block_w(SHA2_256) := quads_to_block(input_BE);
+
+    ghost var hash_orig := make_hash(abef, cdgh);
+
+    loop_rounds_0_15(in_b, k_b);
+    loop_rounds_16_51(k_b, block, hash_orig);
+    loop_rounds_52_64(k_b, block);
+}
+
+
+/*
+procedure {:quick} loop(
+        ghost in_b:buffer128,
+        ghost k_b:buffer128
+    )
+    lets
+        num @= rdx; inp @= rsi; tbl @= rcx;
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
+        tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
+    reads
+        tbl; bswap; mem; memTaint;
+    modifies
+        inp; num;
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
+        efl;
+    requires
+        validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
+        validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
+        inp + 0x40*num < pow2_64;
+
+        num > 0;
+
+        tmp_xmm == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        k_reqs(buffer128_as_seq(mem, k_b));
+    ensures
+        inp == old(inp) + 0x40*num;
+//        let input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4) in
+//        let input_BE := reverse_bytes_quad32_seq(input_LE) in
+//        let block:block_w(SHA2_256) := quads_to_block(input_BE) in
+//        let hash_orig := old(make_hash(abef, cdgh)) in
+//        make_hash(abef, cdgh) == update_block(SHA2_256, hash_orig, block);
+        num == 0;
+{
+
+}
+
+
+procedure {:quick} loop(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128
@@ -437,7 +530,7 @@ procedure {:quick} loop_rounds(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
-        validSrcAddrs128(mem, inp,   in_b,  4, memTaint, Secret);
+        validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40 < pow2_64;
@@ -453,17 +546,7 @@ procedure {:quick} loop_rounds(
         let input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4) in
         let input_BE := reverse_bytes_quad32_seq(input_LE) in
         let block:block_w(SHA2_256) := quads_to_block(input_BE) in
-        //make_hash(abef, cdgh) == repeat_range_spec(0, 16, shuffle_core_opaque(SHA2_256, block), old(make_hash(abef, cdgh))) /\
+        let hash_orig := old(make_hash(abef, cdgh)) in
+        make_hash(abef, cdgh) == update_block(SHA2_256, hash_orig, block);
         num == old(num) - 1;
-{
-    // Create a ghost message block to pass to all of the sha256* instructions and lemmas
-    ghost var input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4);
-    ghost var input_BE := reverse_bytes_quad32_seq(input_LE);
-    ghost var block:block_w(SHA2_256) := quads_to_block(input_BE);
-
-    ghost var hash_orig := make_hash(abef, cdgh);
-
-    loop_rounds_0_15(ctx_b, in_b, k_b);
-    loop_rounds_16_51(k_b, block, hash_orig);
-    loop_rounds_52_64(k_b, block, hash_orig);
-}
+*/
