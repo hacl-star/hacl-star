@@ -8,6 +8,7 @@ open LowStar.RVector
 module HH = FStar.Monotonic.HyperHeap
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
+module MHS = FStar.Monotonic.HyperStack
 module S = FStar.Seq
 module B = LowStar.Buffer
 module V = LowStar.Vector
@@ -52,14 +53,23 @@ let buffer_r_sep #a len v p h0 h1 =
 		       (loc_buffer v));
   B.modifies_buffer_elim v p h0 h1
 
+val buffer_irepr: 
+  #a:Type0 -> ia:a -> len:UInt32.t{len > 0ul} ->
+  Ghost.erased (buffer_repr a)
+let buffer_irepr #a ia len =
+  Ghost.hide (S.create (UInt32.v len) ia)
+
 val buffer_r_init:
   #a:Type -> ia:a -> len:UInt32.t{len > 0ul} -> r:erid ->
   HST.ST (b:B.buffer a)
     (requires (fun h0 -> true))
     (ensures (fun h0 v h1 -> 
+      Set.subset (Map.domain (MHS.get_hmap h0))
+                 (Map.domain (MHS.get_hmap h1)) /\
       modifies loc_none h0 h1 /\
       buffer_r_inv len h1 v /\
-      buffer_region_of v = r))
+      buffer_region_of v = r /\
+      buffer_r_repr h1 v == Ghost.reveal (buffer_irepr ia len)))
 let buffer_r_init #a ia len r =
   B.malloc r ia len
 
@@ -97,6 +107,7 @@ let buffer_regional #a ia len =
       (buffer_r_repr #a)
       (buffer_r_inv #a len)
       (buffer_r_sep #a len)
+      (buffer_irepr #a ia len)
       (buffer_r_init #a ia len)
       (buffer_r_free #a len)
 
@@ -117,12 +128,12 @@ val vector_cv:
 let vector_cv #a rg = V.create_empty a
 
 val vector_repr: #a:Type0 -> rg:regional a -> Tot Type0
-let vector_repr #a rg = S.seq a
+let vector_repr #a rg = S.seq (Rgl?.repr rg)
 
 val vector_r_repr:
   #a:Type -> #rg:regional a -> h:HS.mem -> v:rvector rg ->
   GTot (vector_repr rg)
-let vector_r_repr #a #rg h v = V.as_seq h v
+let vector_r_repr #a #rg h v = RV.as_seq h v
 
 val vector_r_inv:
   #a:Type -> #rg:regional a -> 
@@ -140,21 +151,32 @@ val vector_r_sep:
 	(ensures (vector_r_inv h1 v /\
 		 vector_r_repr h0 v == vector_r_repr h1 v))
 let vector_r_sep #a #rg v p h0 h1 =
-  admit ()
+  RV.rv_inv_preserved v p h0 h1;
+  RV.as_seq_preserved v p h0 h1
+
+val vector_irepr:
+  #a:Type -> rg:regional a -> Ghost.erased (vector_repr rg)
+let vector_irepr #a rg =
+  Ghost.hide (S.create 1 (Ghost.reveal (Rgl?.irepr rg)))
 
 val vector_r_init: 
   #a:Type -> #rg:regional a -> r:erid ->
   HST.ST (v:rvector rg)
     (requires (fun h0 -> true))
     (ensures (fun h0 v h1 -> 
+      Set.subset (Map.domain (MHS.get_hmap h0))
+                 (Map.domain (MHS.get_hmap h1)) /\
       modifies loc_none h0 h1 /\
       vector_r_inv h1 v /\
-      vector_region_of v = r))
+      vector_region_of v = r /\
+      vector_r_repr h1 v == Ghost.reveal (vector_irepr rg)))
 let vector_r_init #a #rg r =
   let nrid = new_region_ r in
   let r_init = Rgl?.r_init rg in
   let ia = r_init nrid in
-  V.create_reserve 1ul ia r
+  let init = V.create_reserve 1ul ia r in
+  admit ();
+  init
 
 val vector_r_free:
   #a:Type -> #rg:regional a -> v:rvector rg ->
@@ -174,6 +196,7 @@ let vector_regional #a rg =
       (vector_r_repr #a #rg)
       (vector_r_inv #a #rg)
       (vector_r_sep #a #rg)
+      (vector_irepr #a rg)
       (vector_r_init #a #rg)
       (vector_r_free #a #rg)
 

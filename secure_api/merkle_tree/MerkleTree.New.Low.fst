@@ -79,14 +79,21 @@ let hash_r_sep v p h0 h1 =
 		       (loc_buffer v));
   B.modifies_buffer_elim v p h0 h1
 
+val hash_irepr: Ghost.erased hash_repr
+let hash_irepr =
+  Ghost.hide (S.create (U32.v hash_size) 0uy)
+
 val hash_r_init:
   r:erid ->
   HST.ST hash
     (requires (fun h0 -> true))
     (ensures (fun h0 v h1 -> 
+      Set.subset (Map.domain (MHS.get_hmap h0))
+                 (Map.domain (MHS.get_hmap h1)) /\
       modifies loc_none h0 h1 /\
       hash_r_inv h1 v /\
-      hash_region_of v = r))
+      hash_region_of v = r /\
+      hash_r_repr h1 v == Ghost.reveal hash_irepr))
 let hash_r_init r =
   B.malloc r 0uy hash_size
 
@@ -123,6 +130,7 @@ let hreg =
       hash_r_repr
       hash_r_inv
       hash_r_sep
+      hash_irepr
       hash_r_init
       hash_r_free
 
@@ -143,17 +151,10 @@ let hash_vec_cv = V.create_empty hash
 val hash_vec_repr: Type0
 let hash_vec_repr = S.seq (S.seq uint8_t)
 
-val seq_map: 
-  #a:Type0 -> #b:Type0 -> f:(a -> GTot b) -> 
-  s:S.seq a -> GTot (S.seq b) (decreases (S.length s))
-let rec seq_map #a #b f s =
-  if S.length s = 0 then S.empty
-  else S.cons (f (S.head s)) (seq_map f (S.tail s))
-
 val hash_vec_r_repr:
   h:HS.mem -> v:hash_vec -> GTot hash_vec_repr
 let hash_vec_r_repr h v =
-  seq_map (hash_r_repr h) (V.as_seq h v)
+  RV.as_seq h v
 
 val hash_vec_r_inv:
   h:HS.mem -> v:hash_vec -> GTot Type0
@@ -169,17 +170,26 @@ val hash_vec_r_sep:
 	(ensures (hash_vec_r_inv h1 v /\
 		 hash_vec_r_repr h0 v == hash_vec_r_repr h1 v))
 let hash_vec_r_sep v p h0 h1 =
-  admit ()
+  RV.rv_inv_preserved v p h0 h1;
+  RV.as_seq_preserved v p h0 h1
+
+val hash_vec_irepr: Ghost.erased hash_vec_repr
+let hash_vec_irepr =
+  Ghost.hide (S.create 1 (Ghost.reveal hash_irepr))
 
 val hash_vec_r_init: 
   r:erid ->
   HST.ST (v:hash_vec)
     (requires (fun h0 -> true))
     (ensures (fun h0 v h1 -> 
+      Set.subset (Map.domain (MHS.get_hmap h0))
+                 (Map.domain (MHS.get_hmap h1)) /\
       modifies loc_none h0 h1 /\
       hash_vec_r_inv h1 v /\
-      hash_vec_region_of v = r))
+      hash_vec_region_of v = r /\
+      hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr))
 let hash_vec_r_init r =
+  admit ();
   let nrid = new_region_ r in
   let r_init = Rgl?.r_init hreg in
   let ia = r_init nrid in
@@ -202,6 +212,7 @@ let bhreg =
       hash_vec_r_repr
       hash_vec_r_inv
       hash_vec_r_sep
+      hash_vec_irepr
       hash_vec_r_init
       hash_vec_r_free
 
