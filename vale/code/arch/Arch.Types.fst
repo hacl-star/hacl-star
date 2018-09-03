@@ -117,6 +117,45 @@ let lemma_equality_check_helper_hi (q:quad32) :
   ()
 *)
 
+let lemma_insert_nat64_properties (q:quad32) (n:nat64) : 
+  Lemma ( (let q' = insert_nat64_opaque q n 0 in
+            q'.hi2 == q.hi2 /\
+            q'.hi3 == q.hi3) /\
+           (let q' = insert_nat64_opaque q n 1 in
+            q'.lo0 == q.lo0 /\
+            q'.lo1 == q.lo1))
+  =
+  Opaque_s.reveal_opaque insert_nat64;
+  ()
+
+let lemma_lo64_properties (_:unit) :
+  Lemma (forall (q0 q1:quad32) . (q0.lo0 == q1.lo0 /\ q0.lo1 == q1.lo1) <==> (lo64 q0 == lo64 q1))
+  =
+  reveal_opaque lo64_def;
+  let helper (q0 q1:quad32) : Lemma ((q0.lo0 == q1.lo0 /\ q0.lo1 == q1.lo1) <==> (lo64 q0 == lo64 q1)) =
+    let Mktwo n1 n2 = two_select (four_to_two_two q0) 0 in
+    nat_to_two_to_nat n1 n2;
+    let Mktwo n1 n2 = two_select (four_to_two_two q1) 0 in
+    nat_to_two_to_nat n1 n2;
+    ()
+  in
+  FStar.Classical.forall_intro_2 helper;
+  ()
+
+let lemma_hi64_properties (_:unit) :
+  Lemma (forall (q0 q1:quad32) . (q0.hi2 == q1.hi2 /\ q0.hi3 == q1.hi3) <==> (hi64 q0 == hi64 q1))
+  =
+  reveal_opaque hi64_def;
+  let helper (q0 q1:quad32) : Lemma ((q0.hi2 == q1.hi2 /\ q0.hi3 == q1.hi3) <==> (hi64 q0 == hi64 q1)) =
+    let Mktwo n1 n2 = two_select (four_to_two_two q0) 1 in
+    nat_to_two_to_nat n1 n2;
+    let Mktwo n1 n2 = two_select (four_to_two_two q1) 1 in
+    nat_to_two_to_nat n1 n2;
+    ()
+  in
+  FStar.Classical.forall_intro_2 helper;
+  ()
+
 let lemma_equality_check_helper (q:quad32) :
   Lemma ((q.lo0 == 0 /\ q.lo1 == 0 ==> lo64 q == 0) /\
          ((not (q.lo0 = 0) \/ not (q.lo1 = 0)) ==> not (lo64 q = 0)) /\
@@ -128,25 +167,35 @@ let lemma_equality_check_helper (q:quad32) :
   =
 //  lemma_equality_check_helper_lo q;
 //  lemma_equality_check_helper_hi q;
+  reveal_opaque lo64_def;
+  reveal_opaque hi64_def;
   assert (forall (x:two nat32).{:pattern (two_to_nat 32 x)} two_to_nat 32 x == two_to_nat_unfold 32 x);
   ()
 
 
 let push_pop_xmm (x y:quad32) : Lemma
-  (let x' = insert_nat64 (insert_nat64 y (hi64 x) 1) (lo64 x) 0 in
+  (let x' = insert_nat64_opaque (insert_nat64_opaque y (hi64 x) 1) (lo64 x) 0 in
    x == x')
    =
 //   assert (nat_to_two 32 (hi64 x) == two_select (four_to_two_two x) 1);
-   ()
+  reveal_opaque insert_nat64;
+  reveal_opaque lo64_def;
+  reveal_opaque hi64_def;
+  ()
 
+#push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_insrq_extrq_relations (x y:quad32) :  
-  Lemma (let z = insert_nat64 x (lo64 y) 0 in
+  Lemma (let z = insert_nat64_opaque x (lo64 y) 0 in
          z == Mkfour y.lo0 y.lo1 x.hi2 x.hi3 /\
-        (let z = insert_nat64 x (hi64 y) 1 in
+        (let z = insert_nat64_opaque x (hi64 y) 1 in
          z == Mkfour x.lo0 x.lo1 y.hi2 y.hi3))
   =
   let open Words.Two in
-  let z = insert_nat64 x (lo64 y) 0 in
+  let z = insert_nat64_opaque x (lo64 y) 0 in
+  reveal_opaque insert_nat64;
+  reveal_opaque lo64_def;
+  reveal_opaque hi64_def;
+  assert (z == insert_nat64 x (lo64_def y) 0);
   //assert (q'.hi2 == q.hi2);
   //assert (q'.hi3 == q.hi3);
   //assert (q' == two_two_to_four (two_insert (four_to_two_two q) (nat_to_two 32 (lo64 q)) 0));
@@ -374,7 +423,7 @@ let le_bytes_to_quad32_to_bytes (q:quad32) :
   assert (q == q');
   ()
 
-// let be_quad32_to_bytes (q:quad32) : seqn 16 nat8 =
+// let be_quad32_to_bytes (q:quad32) : seq16 nat8 =
 //   seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE q))
 
 // be_bytes_to_quad32 (be_quad32_to_bytes q)
@@ -444,6 +493,7 @@ let seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) : seq (four a) =
 let seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) : seq nat32 =
   seq_map (four_to_nat 8) (seq_to_seq_four_LE x)
 *)
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
 let rec append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))
   =

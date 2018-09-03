@@ -1,6 +1,7 @@
 module X64.Poly1305.Util
 
 open FStar.Mul
+open Prop_s
 open Opaque_s
 open Poly1305.Spec_s
 open X64.Machine_s
@@ -46,6 +47,7 @@ let seqTo128 (s:Seq.seq nat64) : t_seqTo128 =
     else
       42
   in f
+let seqTo128_app (s:Seq.seq nat64) (i:int) : nat128 = seqTo128 s i
 
 let rec lemma_poly1305_heap_hash_blocks_alt (h:int) (pad:int) (r:int) (m:mem) (b:buffer64) (n:int) : Lemma
   (requires 0 <= n /\ n + n <= buffer_length b /\ n + n <= Seq.length (buffer64_as_seq m b))
@@ -77,7 +79,7 @@ let validSrcAddrs64 (m:mem) (addr:int) (b:buffer64) (len:int) (memTaint:memtaint
     buffer_addr b m == addr /\
     valid_taint_buf64 b m memTaint t
 
-let modifies_buffer_specific (b:buffer64) (h1 h2:mem) (start last:nat) : GTot Type0 =
+let modifies_buffer_specific (b:buffer64) (h1 h2:mem) (start last:nat) : GTot prop0 =
     modifies_buffer b h1 h2 /\
     // TODO: Consider replacing this with: modifies (loc_buffer (gsub_buffer b i len)) h1 h2
     (forall (i:nat) . {:pattern (Seq.index (buffer_as_seq h2 b) i)}

@@ -3,10 +3,32 @@ include "../../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../../arch/x64/X64.Vale.InsAes.vaf"
 include "../../../../crypto/aes/x64/X64.GHash.vaf"
+include{:fstar}{:open} "Prop_s"
+include{:fstar}{:open} "Opaque_s"
+include{:fstar}{:open} "Words_s"
+include{:fstar}{:open} "Types_s"
+include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "AES_s"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.Vale.QuickCodes"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "AES_helpers"
+include{:fstar}{:open} "X64.Poly1305.Math"
+include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "GCTR_s"
+include{:fstar}{:open} "GCTR"
+include{:fstar}{:open} "Arch.TypesNative"
+include{:fstar}{:open} "GHash"
 
 module X64.AESCTR
 
 #verbatim{:interface}{:implementation}
+module GHash = GHash
+open Prop_s
 open Opaque_s
 open Words_s
 open Types_s
@@ -36,32 +58,36 @@ open GHash
 #endverbatim
 
 #verbatim{:interface}
-
-let aes_reqs (alg:algorithm) (key:aes_key_LE(alg)) (round_keys:seq(quad32)) (keys_b:buffer128)
-             (key_ptr:nat64) (mem:mem) (memTaint:memtaint) : Type0 =
-    (alg = AES_128 || alg = AES_256) /\
-    length(round_keys) == nr(alg) + 1 /\
-    round_keys == key_to_round_keys_LE alg key /\
-    key_ptr == buffer_addr keys_b mem /\
-    validSrcAddrs128 mem key_ptr keys_b (nr alg + 1) memTaint Secret /\
-    buffer128_as_seq mem keys_b == round_keys
-
-#endverbatim
-
-#verbatim{:implementation}
-
-let finish_aes_encrypt_le (alg:algorithm) (input_LE:quad32) (key:aes_key_LE alg) : 
-  Lemma(aes_encrypt_le alg key input_LE == cipher_opaque alg input_LE (key_to_round_keys_LE alg key))
+let aes_reqs
+  (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
+  (key_ptr:nat64) (mem:memory) (memTaint:memtaint) : prop0
   =
-  reveal_opaque aes_encrypt_LE_def;
-  reveal_opaque cipher
+  (alg = AES_128 || alg = AES_256) /\
+  is_aes_key_LE alg key /\
+  length(round_keys) == nr(alg) + 1 /\
+  round_keys == key_to_round_keys_LE alg key /\
+  key_ptr == buffer_addr keys_b mem /\
+  validSrcAddrs128 mem key_ptr keys_b (nr alg + 1) memTaint Secret /\
+  buffer128_as_seq mem keys_b == round_keys
 #endverbatim
+function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
+    key_ptr:nat64, mem:memory, memTaint:memtaint) : prop extern;
+
+ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32, ghost key:seq(nat32))
+    requires
+        is_aes_key_LE(alg, key);
+    ensures
+        aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
+{
+    reveal aes_encrypt_LE_def;
+    reveal cipher;
+}
 
 // TODO: Write one procedure that unrolls to these variants?
 // These procedures help walk F* through the recursive definition of rounds
 procedure {:quick exportOnly} aes_round_4way(
     ghost alg:algorithm,
-    ghost n:int,
+    ghost n:pos,
     round_key:xmm,
     ghost init1:quad32,
     ghost init2:quad32,
@@ -91,7 +117,7 @@ procedure {:quick exportOnly} aes_round_4way(
         ctr3 == rounds_opaque(init3, round_keys, n);
         ctr4 == rounds_opaque(init4, round_keys, n);
 {
-    reveal_opaque(rounds);
+    reveal rounds;
     commute_sub_bytes_shift_rows_forall();
     AESNI_enc(ctr1, round_key);
     AESNI_enc(ctr2, round_key);
@@ -101,7 +127,7 @@ procedure {:quick exportOnly} aes_round_4way(
 
 procedure {:quick} aes_2rounds_4way(
     ghost alg:algorithm,
-    ghost n:int,
+    ghost n:pos,
     ghost init1:quad32,
     ghost init2:quad32,
     ghost init3:quad32,
@@ -136,7 +162,7 @@ procedure {:quick} aes_2rounds_4way(
 
 procedure {:quick} aes_3rounds_4way(
     ghost alg:algorithm,
-    ghost n:int,
+    ghost n:pos,
     ghost init1:quad32,
     ghost init2:quad32,
     ghost init3:quad32,
@@ -173,7 +199,7 @@ procedure {:quick} aes_3rounds_4way(
 
 procedure {:quick} aes_4rounds_4way(
     ghost alg:algorithm,
-    ghost n:int,
+    ghost n:pos,
     ghost init1:quad32,
     ghost init2:quad32,
     ghost init3:quad32,
@@ -212,7 +238,7 @@ procedure {:quick} aes_4rounds_4way(
 
 procedure {:quick} aes_ctr_encrypt(
     inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    ghost key:aes_key_LE(alg),
+    ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
     ghost in1:quad32,
@@ -321,6 +347,59 @@ procedure {:quick} aes_ctr_encrypt(
     finish_aes_encrypt_le(alg, in4, key);
 }
 
+procedure {:quick} aes_ctr_ghash(
+    ghost old_out_ptr:nat64,
+    ghost old_num_quad_blocks:nat64,
+    ghost count:nat,
+    ghost out_b:buffer128,
+    ghost hash_init:quad32
+    )
+    lets
+        rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
+        ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+        mask @= xmm8; hash @= xmm1; h @= xmm11; 
+    requires
+        0 <= count < old_num_quad_blocks;
+        validDstAddrs128(mem, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memTaint, Secret);
+        
+        // XMM constants are correct
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        // Partial GCM progress
+        hash == ghash_incremental0(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*count));
+
+        ctr1 == index(buffer128_as_seq(mem, out_b), 4*count+0);
+        ctr2 == index(buffer128_as_seq(mem, out_b), 4*count+1);
+        ctr3 == index(buffer128_as_seq(mem, out_b), 4*count+2);
+        ctr4 == index(buffer128_as_seq(mem, out_b), 4*count+3);
+
+    reads mask; h; ctr2; ctr3; ctr4; mem; memTaint;
+    modifies hash; rk4; rk1; rk2; rk3; ctr1; r12; efl; 
+    ensures
+        hash == ghash_incremental(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*(count+1)));
+{
+    // Compute GHash on the four outputs
+    ghost var h_in_0 := ctr1;
+    compute_ghash_incremental_register();
+    ghost var hash0 := hash;
+
+    Mov128(ctr1, ctr2);
+    ghost var h_in_1 := ctr1;
+    compute_ghash_incremental_register();
+    ghost var hash1 := hash;
+
+    Mov128(ctr1, ctr3);
+    ghost var h_in_2 := ctr1;
+    compute_ghash_incremental_register();
+    ghost var hash2 := hash;
+
+    Mov128(ctr1, ctr4);
+    ghost var h_in_3 := ctr1;
+    compute_ghash_incremental_register();
+    lemma_ghash_registers(reverse_bytes_quad32(h), hash_init, old(hash), hash0, hash1, hash2, hash, h_in_0, h_in_1, h_in_2, h_in_3, buffer128_as_seq(mem, out_b), 4*count);
+
+}
+
 #reset-options "--z3rlimit 400"
 // Intel's LOOP_4
 procedure{:quick} aes_ctr_loop_body(
@@ -332,7 +411,7 @@ procedure{:quick} aes_ctr_loop_body(
     ghost plain_b:buffer128,
     ghost out_b:buffer128,
 
-    ghost key:aes_key_LE(alg),
+    ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
 
@@ -370,9 +449,9 @@ procedure{:quick} aes_ctr_loop_body(
         four == Mkfour(4, 0, 4, 0);
 
         // Counters are correct
-        4*count < pow2_32 - 4;  // Simplifies the statement of add_wrap in the postcondition below
-        const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 1))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 0))));
-        const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 3))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 2))));
+        4*count < pow2_32 - 4;  // Simplifies the statement of add_wrap32 in the postcondition below
+        const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 1))), iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 0))));
+        const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 3))), iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 2))));
 
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
@@ -404,8 +483,8 @@ procedure{:quick} aes_ctr_loop_body(
 
         // Counters are incremented
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-        const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 1))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 0))));
-        const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 3))), iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count + 4, 2))));
+        const2_1 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 1))), iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 0))));
+        const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 3))), iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 2))));
 
         // GCTR progress
         gctr_partial(alg, 4*count+4, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
@@ -460,10 +539,6 @@ procedure{:quick} aes_ctr_loop_body(
     Pxor(ctr2, rk1);
     Pxor(ctr3, rk1);
     Pxor(ctr4, rk1);
-    ghost var init1 := ctr1;
-    ghost var init2 := ctr2;
-    ghost var init3 := ctr3;
-    ghost var init4 := ctr4;
 
     Pshufb64(const2_1, mask64);      // const2_1 = LSB: ivec_hi | bswap(6) | ivec_hi | bswap(5)
     Pshufb64(const4_3, mask64);      // const4_3 = LSB: ivec_hi | bswap(8) | ivec_hi | bswap(7)
@@ -493,24 +568,7 @@ procedure{:quick} aes_ctr_loop_body(
     assert slice_work_around(buffer128_as_seq(mem, out_b), 4*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 4*count));   // OBSERVE
 
     // Compute GHash on the four outputs
-    ghost var h_in_0 := ctr1;
-    compute_ghash_incremental_register();
-    ghost var hash0 := hash;
-
-    Mov128(ctr1, ctr2);
-    ghost var h_in_1 := ctr1;
-    compute_ghash_incremental_register();
-    ghost var hash1 := hash;
-
-    Mov128(ctr1, ctr3);
-    ghost var h_in_2 := ctr1;
-    compute_ghash_incremental_register();
-    ghost var hash2 := hash;
-
-    Mov128(ctr1, ctr4);
-    ghost var h_in_3 := ctr1;
-    compute_ghash_incremental_register();
-    lemma_ghash_registers(reverse_bytes_quad32(h), hash_init, old(hash), hash0, hash1, hash2, hash, h_in_0, h_in_1, h_in_2, h_in_3, buffer128_as_seq(mem, out_b), 4*count);
+    aes_ctr_ghash(old_out_ptr, old_num_quad_blocks, count, out_b, hash_init);
 
     Sub64(rdx, 1);
     Add64(plain_ptr, 64);
@@ -521,7 +579,7 @@ procedure {:quick} aes_counter_loop(
     inline alg:algorithm,
     ghost plain_b:buffer128,
     ghost out_b:buffer128,
-    ghost key:aes_key_LE(alg),
+    ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128
     )
@@ -587,7 +645,7 @@ procedure {:quick} aes_counter_loop(
     ZeroXmm(rk1);
     PinsrdImm(rk1, 1, 2, rax);  // rk1 = LSB: 0 | 0 | 1 | 0
     Paddd(const2_1, rk1);       // const2_1 = LSB: r(iv.hi3) | r(iv.hi2) | r(iv.hi3) + 1 | r(iv.h2)
-    assert const2_1 == Mkfour(reverse_bytes_nat32(iv.hi3),reverse_bytes_nat32(iv.hi2),add_wrap(reverse_bytes_nat32(iv.hi3), 1),reverse_bytes_nat32(iv.hi2));
+    assert const2_1 == Mkfour(reverse_bytes_nat32(iv.hi3), reverse_bytes_nat32(iv.hi2), add_wrap32(reverse_bytes_nat32(iv.hi3), 1), reverse_bytes_nat32(iv.hi2));
 
     PinsrdImm(rk1, 3, 2, rax);  
     PinsrdImm(rk1, 2, 0, rax);  // rk1 = LSB: 2 | 0 | 3 | 0
@@ -646,8 +704,8 @@ procedure {:quick} aes_counter_loop(
             // Counters are correct
             num_quad_blocks > 0 ==> 4*count < pow2_32 - 4;  
             num_quad_blocks <= 0 ==> 4*count < pow2_32;  
-            const2_1 == Mkfour(old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 1))), old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 0))));
-            const4_3 == Mkfour(old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 3))), old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, add_wrap(4*count, 2))));
+            const2_1 == Mkfour(old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 1))), old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 0))));
+            const4_3 == Mkfour(old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 3))), old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 2))));
 
             // AES reqs
             aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
@@ -667,15 +725,14 @@ procedure {:quick} aes_counter_loop(
     }
 
     Mov128(iv, const2_1);
-    Pinsrq(iv, iv_lower64, 0);
     lemma_insrq_extrq_relations(iv, old_iv);
+    Pinsrq(iv, iv_lower64, 0);
     assert {:quick_type} 4*old(num_quad_blocks) < pow2_32;
-    //assert iv == Mkfour(old_iv.lo0, old_iv.lo1, old_iv.hi2, reverse_bytes_nat32(add_wrap(icb_BE.lo0, 4*old(num_quad_blocks))));
-    // Reversed: iv == Mkfour(r (r (add_wrap(r(old_iv.hi3), 4*old(num_quad_blocks)))), r(old_iv.hi2), r(old_iv.lo1), r(old_iv.lo0));
-    //              == Mkfour( add_wrap(old(iv.lo0, 4*old(num_quad_blocks))), old(iv.lo2), old(iv.hi2), old(iv).hi3));
+    //assert iv == Mkfour(old_iv.lo0, old_iv.lo1, old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, 4*old(num_quad_blocks))));
+    // Reversed: iv == Mkfour(r (r (add_wrap32(r(old_iv.hi3), 4*old(num_quad_blocks)))), r(old_iv.hi2), r(old_iv.lo1), r(old_iv.lo0));
+    //              == Mkfour( add_wrap32(old(iv.lo0, 4*old(num_quad_blocks))), old(iv.lo2), old(iv.hi2), old(iv).hi3));
     //              == inc32(old(iv), 4*old(num_quad_blocks))
     reveal_reverse_bytes_quad32(iv);
     Pshufb(iv, mask);
     //assert iv == old(inc32(iv, 4*num_quad_blocks));
-   
 }

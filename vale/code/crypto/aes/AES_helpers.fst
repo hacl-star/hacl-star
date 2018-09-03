@@ -36,7 +36,10 @@ let round_key_128_rcon (prev:quad32) (rcon:nat32) : quad32 =
 let round_key_128 (prev:quad32) (round:nat) : quad32 =
   round_key_128_rcon prev (aes_rcon (round - 1))
 
-let rec expand_key_128_def (key:aes_key_LE AES_128) (round:nat) : quad32 =
+let rec expand_key_128_def (key:seq nat32) (round:nat) : Pure quad32
+  (requires is_aes_key_LE AES_128 key)
+  (ensures fun _ -> True)
+  =
   if round = 0 then Mkfour key.[0] key.[1] key.[2] key.[3]
   else round_key_128 (expand_key_128_def key (round - 1)) round
 
@@ -82,8 +85,8 @@ let rec lemma_expand_append (key:aes_key_LE AES_128) (size1:nat) (size2:nat) : L
 
 #reset-options "--z3rlimit 10"
 // quad32 key expansion is equivalent to nat32 key expansion
-let rec lemma_expand_key_128 (key:aes_key_LE AES_128) (size:nat) : Lemma
-  (requires size <= 11)
+let rec lemma_expand_key_128 (key:seq nat32) (size:nat) : Lemma
+  (requires size <= 11 /\ is_aes_key_LE AES_128 key)
   (ensures (
     let s = key_schedule_to_round_keys size (expand_key AES_128 key 44) in
     (forall (i:nat).{:pattern (expand_key_128 key i) \/ (expand_key_128_def key i)}

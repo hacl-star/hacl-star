@@ -1,11 +1,12 @@
 module Math.Poly2.Defs
+open Prop_s
 open FStar.Seq
 open Math.Poly2.Defs_s
 unfold let max = FStar.Math.Lib.max
 
 #reset-options "--z3rlimit 10"
 
-let poly_equal (a b:poly) : Type0 =
+let poly_equal (a b:poly) : prop0 =
   (forall (i:nat).{:pattern a.[i] \/ b.[i]} a.[i] == b.[i])
 
 unfold let ( =. ) = poly_equal

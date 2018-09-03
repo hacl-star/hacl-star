@@ -21,7 +21,10 @@ let quad32_shl32 (q:quad32) : quad32 =
   let Mkfour v0 v1 v2 v3 = q in
   Mkfour 0 v0 v1 v2
 
-let make_AES256_key (k0 k1:quad32) : aes_key_LE (AES_256) =
+let make_AES256_key (k0 k1:quad32) : Pure (seq nat32)
+  (requires True)
+  (ensures fun key -> is_aes_key_LE AES_256 key)
+  =
   append (quad32_to_seq k0) (quad32_to_seq k1)
 
 // Redefine key expansion in terms of quad32 values rather than nat32 values,
@@ -40,7 +43,10 @@ let round_key_256_rcon (prev0 prev1:quad32) (rcon:nat32) (round:int) : quad32 =
 let round_key_256 (prev0 prev1:quad32) (round:nat) : quad32 =
   round_key_256_rcon prev0 prev1 (aes_rcon (round / 2 - 1)) round
 
-let rec expand_key_256_def (key:aes_key_LE AES_256) (round:nat) : quad32 =
+let rec expand_key_256_def (key:seq nat32) (round:nat) : Pure quad32
+  (requires is_aes_key_LE AES_256 key)
+  (ensures fun _ -> True)
+  =
   if round = 0 then Mkfour key.[0] key.[1] key.[2] key.[3]
   else if round = 1 then Mkfour key.[4] key.[5] key.[6] key.[7]
   else round_key_256 (expand_key_256_def key (round - 2)) (expand_key_256_def key (round - 1)) round
@@ -63,7 +69,7 @@ let lemma_expand_key_256_0 (key:aes_key_LE AES_256) : Lemma
   reveal_opaque expand_key_def
 
 open FStar.Mul
-#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 30"
+#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 60"
 let lemma_expand_key_256_i (key:aes_key_LE AES_256) (i:nat) : Lemma
   (requires
     1 < i /\ i < 15
@@ -104,8 +110,8 @@ let rec lemma_expand_append (key:aes_key_LE AES_256) (size1:nat) (size2:nat) : L
   if size1 < size2 then lemma_expand_append key size1 (size2 - 1)
 
 // quad32 key expansion is equivalent to nat32 key expansion
-let rec lemma_expand_key_256 (key:aes_key_LE AES_256) (size:nat) : Lemma
-  (requires size <= 15)
+let rec lemma_expand_key_256 (key:seq nat32) (size:nat) : Lemma
+  (requires size <= 15 /\ is_aes_key_LE AES_256 key)
   (ensures (
     let s = key_schedule_to_round_keys size (expand_key AES_256 key 60) in
     (forall (i:nat).{:pattern (expand_key_256 key i)} i < size ==> expand_key_256 key i == s.[i])

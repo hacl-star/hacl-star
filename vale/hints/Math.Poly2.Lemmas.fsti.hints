@@ -1,0 +1,83 @@
+[
+  "Î\u0006ëâÐÚÐ•µÁ\u0012ý•‡\\4",
+  [
+    [
+      "Math.Poly2.Lemmas.lemma_one_define",
+      1,
+      1,
+      0,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "fcadae65ceb73df4272653e615615cd1"
+    ],
+    [
+      "Math.Poly2.Lemmas.lemma_monomial_define",
+      1,
+      1,
+      0,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "71ec11798dd7615bf2f94f103543ba4e"
+    ],
+    [
+      "Math.Poly2.Lemmas.lemma_of_list_degree",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_typing",
+        "equation_Prims.nat", "function_token_typing_Prims.bool",
+        "int_inversion", "int_typing",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "typing_FStar.List.Tot.Base.length"
+      ],
+      0,
+      "6e8366148c86064d67ceb615e39b57bd"
+    ],
+    [
+      "Math.Poly2.Lemmas.lemma_add_define",
+      1,
+      1,
+      0,
+      [ "@query", "assumption_Prims.HasEq_bool" ],
+      0,
+      "d64e72770113e4c9b57a927b17074376"
+    ],
+    [
+      "Math.Poly2.Lemmas.lemma_add_define_all",
+      1,
+      1,
+      0,
+      [ "@query", "assumption_Prims.HasEq_bool" ],
+      0,
+      "4d0fcd837ce0e04a2834db0f91bfd3b1"
+    ],
+    [
+      "Math.Poly2.Lemmas.lemma_mul_monomials",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+      ],
+      0,
+      "00f5e8990d25c8a11eedbf185d49248f"
+    ],
+    [
+      "Math.Poly2.Lemmas.lemma_mul_reverse_shift_1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+      ],
+      0,
+      "ab3b38e65cd6ac13d865c162c67554e7"
+    ]
+  ]
+]

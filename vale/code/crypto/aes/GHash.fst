@@ -13,21 +13,27 @@ open Collections.Seqs
 open FStar.Seq
 
 #reset-options "--use_two_phase_tc true"
-let rec ghash_incremental_def (h_LE:quad32) (y_prev:quad32) (x:ghash_plain_LE) : Tot quad32 (decreases %[length x]) =
-  let y_i_minus_1 =
-    (if length x = 1 then
-       y_prev
-     else
-       ghash_incremental_def h_LE y_prev (all_but_last x)) in
+let rec ghash_incremental_def (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Tot quad32 (decreases %[length x]) =
+  if length x = 0 then y_prev else
+  let y_i_minus_1 = ghash_incremental_def h_LE y_prev (all_but_last x) in
   let x_i = last x in
   let xor_LE = quad32_xor y_i_minus_1 x_i in
   gf128_mul_LE xor_LE h_LE
 
 let ghash_incremental = make_opaque ghash_incremental_def
 
-let rec ghash_incremental_to_ghash (h:quad32) (x:ghash_plain_LE) :
-  Lemma(ensures ghash_incremental h (Mkfour 0 0 0 0) x == ghash_LE h x)
-       (decreases %[length x])
+// avoids need for extra fuel
+let lemma_ghash_incremental_def_0 (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Lemma
+  (requires length x == 0)
+  (ensures ghash_incremental_def h_LE y_prev x == y_prev)
+  [SMTPat (ghash_incremental_def h_LE y_prev x)]
+  =
+  ()
+
+let rec ghash_incremental_to_ghash (h:quad32) (x:seq quad32) : Lemma
+  (requires length x > 0)
+  (ensures ghash_incremental h (Mkfour 0 0 0 0) x == ghash_LE h x)
+  (decreases %[length x])
   =
   reveal_opaque ghash_incremental_def;
   reveal_opaque ghash_LE_def;

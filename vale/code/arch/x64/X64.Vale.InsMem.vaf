@@ -1,4 +1,12 @@
 include "X64.Vale.InsBasic.vaf"
+include{:fstar}{:open} "Types_s"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Memory_s"
+include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
 
 module X64.Vale.InsMem
 
@@ -32,7 +40,7 @@ friend X64.Memory
 
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
 
-procedure{:operand} Mem_in(base:opr, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint) returns(o:opr)
+procedure{:operand} Mem_in(base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint) returns(o:opr)
     reads
         mem;
     extern;
@@ -59,9 +67,9 @@ procedure{:instruction mk_taint_ins2(S.Mov64, dst, TMem(MReg(get_reg(src), offse
         dst == buffer64_read(b, index, mem);
         valid_taint_buf64(b, mem, memTaint, t);
 {
-    lemma_valid_mem64(b, index, mem);
-    lemma_load_mem64(b, index, mem);
-    lemma_valid_taint64(b, memTaint, mem, index, t);
+    lemma_valid_mem64(b, #nat(index), mem);
+    lemma_load_mem64(b, #nat(index), mem);
+    lemma_valid_taint64(#buffer64_s(b), #memTaint_t(memTaint), #mem_s(mem), #nat(index), t);
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.Mov64(OMem(MReg(get_reg(dst), offset)), t_op_to_op(src)),
@@ -86,10 +94,10 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Mov64(OMem(MReg(get_reg(dst), o
         mem == old(buffer64_write(b, index, src, mem));
         valid_taint_buf64(b, mem, memTaint, t);
 {
-    lemma_valid_mem64(b, index, old(mem));
-    lemma_store_mem64(b, index, old(src), old(mem));
-    lemma_valid_taint64(b, old(memTaint), old(mem), index, t);
-    same_memTaint64(b, old(mem), mem, old(memTaint), memTaint);
+    lemma_valid_mem64(b, #nat(index), old(mem));
+    lemma_store_mem64(b, #nat(index), old(src), old(mem));
+    lemma_valid_taint64(#buffer64_s(b), old(#memTaint_t(memTaint)), old(#mem_s(mem)), #nat(index), t);
+    same_memTaint64(#buffer64_s(b), old(#mem_s(mem)), #mem_s(mem), old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst)), list(t_op_to_op(dst)), list(OMem(MReg(Rsp, 0)))), Public))}
@@ -109,9 +117,9 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst)), list(t_op
         dst == buffer64_read(b, index, mem);
         rsp == old(rsp) + 8;
 {
-    lemma_valid_mem64(b, index, mem);
-    lemma_load_mem64(b, index, mem);
-    lemma_valid_taint64(b, old(memTaint), old(mem), index, Public);
+    lemma_valid_mem64(b, #nat(index), mem);
+    lemma_load_mem64(b, #nat(index), mem);
+    lemma_valid_taint64(#buffer64_s(b), old(#memTaint_t(memTaint)), old(#mem_s(mem)), #nat(index), Public);
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src)), list(), list(t_op_to_op(src))), Public))}
@@ -133,9 +141,9 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src)), list(), 
         mem == old(buffer64_write(b, index, src, mem));
         rsp == old(rsp) - 8;
 {
-    lemma_valid_mem64(b, index, old(mem));
-    lemma_store_mem64(b, index, old(src), old(mem));
-    lemma_valid_taint64(b, old(memTaint), old(mem), index, Public);
-    same_memTaint64(b, old(mem), mem, old(memTaint), memTaint);
+    lemma_valid_mem64(b, #nat(index), old(mem));
+    lemma_store_mem64(b, #nat(index), old(src), old(mem));
+    lemma_valid_taint64(#buffer64_s(b), old(#memTaint_t(memTaint)), old(#mem_s(mem)), #nat(index), Public);
+    same_memTaint64(#buffer64_s(b), old(#mem_s(mem)), #mem_s(mem), old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 

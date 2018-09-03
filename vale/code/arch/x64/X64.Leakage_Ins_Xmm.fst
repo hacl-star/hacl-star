@@ -413,7 +413,7 @@ let check_if_xmm_ins_consumes_fixed_time ins ts =
     | S.Pcmpeqd _ _ -> check_if_pcmpeqd_leakage_free ins ts
     | S.Pextrq _ _ _ -> check_if_pextrq_leakage_free ins ts
     | S.VPSLLDQ dst src count -> check_if_vpslldq_leakage_free ins ts
-    | S.MOVDQU dst src -> false, ts
+    | S.MOVDQU dst src -> check_if_movdqu_leakage_free ins ts
     | S.Pclmulqdq dst src imm -> check_if_pclmuldqd_leakage_free ins ts
     | S.AESNI_enc dst src -> check_if_aesni_enc_leakage_free ins ts
     | S.AESNI_enc_last dst src -> check_if_aesni_enc_last_leakage_free ins ts
