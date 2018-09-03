@@ -378,6 +378,32 @@ let rec test_chacha20 (LB len vs) =
     test_chacha20 (LB (len - 1ul) (B.offset vs 1ul))
   end
 
+let test_aead_st (v:aead_vector) : St unit =
+  push_frame();
+
+  let alg, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
+    (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = v
+  in
+
+  let cipher = match alg with
+    | CHACHA20_POLY1305 -> EverCrypt.CHACHA20_POLY1305
+    | AES_128_GCM -> EverCrypt.AES128_GCM
+    | AES_256_GCM -> EverCrypt.AES256_GCM in
+  let st = EverCrypt.aead_create cipher key in
+  let plaintext'    = B.alloca 0uy plaintext_len in
+  let ciphertext'   = B.alloca 0uy plaintext_len in
+  let tag' = B.alloca 0uy tag_len in
+  
+  EverCrypt.aead_encrypt st iv aad aad_len plaintext plaintext_len ciphertext' tag';
+  (match EverCrypt.aead_decrypt st iv aad aad_len plaintext' plaintext_len ciphertext' tag' with
+  | 1ul ->
+    TestLib.compare_and_print !$"of AEAD cipher" ciphertext ciphertext' plaintext_len;
+    TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
+    TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
+  | _ -> C.portable_exit 1l);
+  EverCrypt.aead_free st;
+  pop_frame ()
+
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0 --using_facts_from '* -Test.Vectors'"
 
 val test_aead: lbuffer aead_vector -> St unit
@@ -386,6 +412,7 @@ let rec test_aead (LB len vs) =
   else
     let _ = B.recall vs in
     let v = vs.(0ul) in
+    test_aead_st v;
     begin match v with
     | CHACHA20_POLY1305, _, _, _, _, _, _ ->
       test_chacha20_poly1305 v
