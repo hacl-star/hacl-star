@@ -1,6 +1,7 @@
 module MerkleTree.New.Low
 
-open EverCrypt.Hash
+open EverCrypt
+// open EverCrypt.Hash
 open EverCrypt.Helpers
 
 open FStar.All
