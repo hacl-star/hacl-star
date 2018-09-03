@@ -13,8 +13,12 @@ INCLUDE_DIRS = \
 CC_ARGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
 
-LD_ARGS += -L $(MERKLE_TREE_HOME) -lmerkletree
-LD_ARGS += -L $(EVERCRYPT_HOME) -levercrypt
+LD_ARGS += $(MERKLE_TREE_HOME)/libmerkletree.a
+
+# Do not use below: if used, the loader tries to use "libevercrypt.so" and gives an error.
+# LD_ARGS += -L $(EVERCRYPT_HOME) -levercrypt
+LD_ARGS += $(EVERCRYPT_HOME)/libevercrypt.a
+
 LD_ARGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
 
 IN_TEST_C = merkle_tree_test.c
