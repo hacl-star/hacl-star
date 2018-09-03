@@ -23,7 +23,7 @@ build_lib:
 
 stage1: $(GENERATED_DIR)/Makefile.include
 
-stage2: $(OUT_DIR)/merkle_tree.a
+stage2: $(OUT_DIR)/libmerkletree.a
 
 # 1. Generation of .krml files
 # - generate the F* dependency graph via `fstar --dep full`
@@ -34,10 +34,9 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/code/lib \
   $(HACL_HOME)/providers/evercrypt \
-  $(HACL_HOME)/providers/evercrypt/config/default \
   $(KREMLIN_HOME)/kremlib
-
 #$(HACL_HOME)/providers/evercrypt/fst
+#$(HACL_HOME)/providers/evercrypt/config/default
 #$(KREMLIN_HOME)/kremlib/compat
 
 FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
@@ -110,19 +109,19 @@ KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'MerkleTree.New.Low' \
-	-bundle 'Hacl.Impl.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'LowStar.*' \
-	-library 'EverCrypt' \
+	-library 'EverCrypt,EverCrypt.*' \
 	-drop 'Spec,Lib,C.*,C.Loops.*' \
 	-I $(HACL_HOME)/specs \
 	-I $(HACL_HOME)/code/lib \
 	-I $(HACL_HOME)/providers/evercrypt \
-	-I $(HACL_HOME)/providers/evercrypt/config/default \
 	-tmpdir $(GENERATED_DIR) \
 	-warn-error +9 \
 	$^
+# -bundle 'Hacl.Impl.*' \
+# -I $(HACL_HOME)/providers/evercrypt/config/default
 
 # The Makefile is manually staged because GNU Make does not understand
 # dependencies between the Makefiles we include, i.e. it won't first generate
@@ -176,8 +175,8 @@ $(OUT_DIR):
 
 # 4. Collecting all of the object files into a static library.
 
-$(OUT_DIR)/merkle_tree.a: $(ALL_OBJS) | $(OUT_DIR)
-	$(AR) rcs -S $(OUT_DIR)/merkle_tree.a $^
+$(OUT_DIR)/libmerkletree.a: $(ALL_OBJS) | $(OUT_DIR)
+	$(AR) rcs $(OUT_DIR)/libmerkletree.a $^
 
 .PRECIOUS: %.o
 
