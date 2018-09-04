@@ -74,7 +74,8 @@ procedure {:quick} preamble(
 #reset-options "--z3rlimit 40"
 procedure {:quick} loop_rounds_0_15(
         ghost in_b:buffer128,
-        ghost k_b:buffer128
+        ghost k_b:buffer128,
+        ghost offset:nat
     )
     lets
         inp @= rsi; tbl @= rcx;
@@ -88,7 +89,7 @@ procedure {:quick} loop_rounds_0_15(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
-        validSrcAddrs128(mem, inp,   in_b,  4, memTaint, Secret);
+        validSrcAddrsOffset128(mem, inp,   in_b, offset, 4, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40 < pow2_64;
 
@@ -97,7 +98,7 @@ procedure {:quick} loop_rounds_0_15(
         k_reqs(buffer128_as_seq(mem, k_b));
     ensures
         inp == old(inp) + 0x40;
-        let input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4) in
+        let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), offset, offset+4) in
         let input_BE := reverse_bytes_quad32_seq(input_LE) in
         let block:block_w(SHA2_256) := quads_to_block(input_BE) in
         // Wi == Don't care
@@ -114,7 +115,7 @@ procedure {:quick} loop_rounds_0_15(
         
 {
     // Create a ghost message block to pass to all of the sha256* instructions and lemmas
-    ghost var input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4);
+    ghost var input_LE := slice_workaround(buffer128_as_seq(mem, in_b), offset, offset+4);
     ghost var input_BE := reverse_bytes_quad32_seq(input_LE);
     ghost var block:block_w(SHA2_256) := quads_to_block(input_BE);
     lemma_quads_to_block(input_BE);
@@ -126,12 +127,12 @@ procedure {:quick} loop_rounds_0_15(
     ghost var ks := buffer128_as_seq(mem, k_b);
 
     // Load 4 128-bit message chunks == 16 32-bit chunks
-    Load128_buffer(msg0, inp,  0, Secret, in_b, 0);
-    Load128_buffer(msg1, inp, 16, Secret, in_b, 1);
-    Load128_buffer(msg2, inp, 32, Secret, in_b, 2);
+    Load128_buffer(msg0, inp,  0, Secret, in_b, offset+0);
+    Load128_buffer(msg1, inp, 16, Secret, in_b, offset+1);
+    Load128_buffer(msg2, inp, 32, Secret, in_b, offset+2);
     Pshufb(msg0, tmp_xmm);       // Convert msg0 to big endian
     assert msg0 == index_work_around_quad32(input_BE, 0);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
-    Load128_buffer(msg3, inp, 48, Secret, in_b, 3);
+    Load128_buffer(msg3, inp, 48, Secret, in_b, offset+3);
     
     Load128_buffer(Wi, tbl, 0, Secret, k_b, 0);  // Load K values from memory
     assert Wi == index_work_around_quad32(ks, 0);
@@ -427,7 +428,9 @@ procedure {:quick} loop_rounds_52_64(
 
 procedure {:quick} loop_rounds(
         ghost in_b:buffer128,
-        ghost k_b:buffer128
+        ghost k_b:buffer128,
+        ghost offset:nat,
+        ghost hash_orig:hash_w(SHA2_256)
     )
     lets
         num @= rdx; inp @= rsi; tbl @= rcx;
@@ -441,7 +444,7 @@ procedure {:quick} loop_rounds(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
-        validSrcAddrs128(mem, inp,   in_b,  4, memTaint, Secret);
+        validSrcAddrsOffset128(mem, inp,   in_b, offset, 4, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40 < pow2_64;
 
@@ -451,29 +454,36 @@ procedure {:quick} loop_rounds(
         bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         k_reqs(buffer128_as_seq(mem, k_b));
+
+        let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), 0, offset) in
+        let input_BE := reverse_bytes_quad32_seq(input_LE) in
+        make_hash(abef, cdgh) == update_multi_quads(input_BE, hash_orig);
     ensures
         inp == old(inp) + 0x40;
-        let input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4) in
-        let input_BE := reverse_bytes_quad32_seq(input_LE) in
-        let block:block_w(SHA2_256) := quads_to_block(input_BE) in
-        let hash_orig := old(make_hash(abef, cdgh)) in
-        make_hash(abef, cdgh) == update_block(SHA2_256, hash_orig, block);
         num == old(num) - 1;
+        tmp_xmm == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), 0, offset + 4) in
+        let input_BE := reverse_bytes_quad32_seq(input_LE) in
+        make_hash(abef, cdgh) == update_multi_quads(input_BE, hash_orig);
+
 {
     // Create a ghost message block to pass to all of the sha256* instructions and lemmas
-    ghost var input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4);
+    ghost var input_LE := slice_workaround(buffer128_as_seq(mem, in_b), offset, offset+4);
     ghost var input_BE := reverse_bytes_quad32_seq(input_LE);
     ghost var block:block_w(SHA2_256) := quads_to_block(input_BE);
 
-    ghost var hash_orig := make_hash(abef, cdgh);
+    ghost var hash_init := make_hash(abef, cdgh);
 
-    loop_rounds_0_15(in_b, k_b);
-    loop_rounds_16_51(k_b, block, hash_orig);
+    loop_rounds_0_15(in_b, k_b, offset);
+    loop_rounds_16_51(k_b, block, hash_init);
     loop_rounds_52_64(k_b, block);
+
+    lemma_update_multi_quads(buffer128_as_seq(mem, in_b), hash_orig, offset);
 }
 
 
-/*
 procedure {:quick} loop(
         ghost in_b:buffer128,
         ghost k_b:buffer128
@@ -501,19 +511,43 @@ procedure {:quick} loop(
 
         k_reqs(buffer128_as_seq(mem, k_b));
     ensures
-        inp == old(inp) + 0x40*num;
-//        let input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4) in
-//        let input_BE := reverse_bytes_quad32_seq(input_LE) in
-//        let block:block_w(SHA2_256) := quads_to_block(input_BE) in
-//        let hash_orig := old(make_hash(abef, cdgh)) in
-//        make_hash(abef, cdgh) == update_block(SHA2_256, hash_orig, block);
+        inp == old(inp) + 0x40*old(num);
         num == 0;
+        let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), 0, 4*old(num)) in
+        let input_BE := reverse_bytes_quad32_seq(input_LE) in
+        make_hash(abef, cdgh) == update_multi_quads(input_BE, old(make_hash(abef, cdgh)));
 {
+    ghost var hash_orig:hash_w(SHA2_256) := make_hash(abef, cdgh);
 
+    ghost var count:nat := 0;
+    while (num > 0) 
+        invariant
+            validSrcAddrs128(mem, old(inp),   in_b,  4*old(num), memTaint, Secret);
+            validSrcAddrs128(mem,      tbl,    k_b,          16, memTaint, Secret);
+
+            old(inp) + 0x40*old(num) < pow2_64;
+
+            num == old(num) - count;
+            inp == old(inp) + 0x40 * count;
+
+            tmp_xmm == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+            bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+            k_reqs(buffer128_as_seq(mem, k_b));
+
+            let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), 0, count*4) in
+            let input_BE := reverse_bytes_quad32_seq(input_LE) in
+            make_hash(abef, cdgh) == update_multi_quads(input_BE, hash_orig);
+        decreases num;
+    {
+        loop_rounds(in_b, k_b, count*4, hash_orig);
+        count := count + 1;
+    }
 }
 
 
-procedure {:quick} loop(
+/*
+procedure {:quick} sha_update(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128
@@ -524,16 +558,16 @@ procedure {:quick} loop(
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
-        ctx; tbl; bswap; mem; memTaint;
+        ctx; tbl; mem; memTaint;
     modifies
         inp; num;
-        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
         efl;
     requires
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
-        inp + 0x40 < pow2_64;
+        inp + 0x40*num < pow2_64;
 
         num > 0;
 
@@ -547,6 +581,9 @@ procedure {:quick} loop(
         let input_BE := reverse_bytes_quad32_seq(input_LE) in
         let block:block_w(SHA2_256) := quads_to_block(input_BE) in
         let hash_orig := old(make_hash(abef, cdgh)) in
-        make_hash(abef, cdgh) == update_block(SHA2_256, hash_orig, block);
-        num == old(num) - 1;
+{
+    preamble(ctx_b);
+    loop(in_b, k_b);
+}
+
 */

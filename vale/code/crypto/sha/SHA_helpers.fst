@@ -605,7 +605,81 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) :
   translate_hash_update src1 src2 h0 h1;
   admit();
   ()
-            
-            
-  
 
+
+let rec update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) : Tot (hash_w SHA2_256) (decreases (length s))
+  =
+  if length s < 4 then
+    hash_orig
+  else
+    let prefix, qs = split s (length s - 4) in
+    let h_prefix = update_multi_quads prefix hash_orig in
+    let hash = update_block SHA2_256 h_prefix (quads_to_block qs) in
+    hash
+
+#push-options "--max_fuel 1"  // Without this, F* refuses to do even one unfolding of update_multi_quads :(
+let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) (bound:nat) : Lemma
+    (requires bound + 4 <= length s)
+    (ensures (let prefix_LE = slice s 0 bound in
+              let prefix_BE = reverse_bytes_quad32_seq prefix_LE in
+              let h_prefix = update_multi_quads prefix_BE hash_orig in
+              let block_quads_LE = slice s bound (bound + 4) in
+              let block_quads_BE = reverse_bytes_quad32_seq block_quads_LE in
+              let input_LE = slice s 0 (bound+4) in
+              let input_BE = reverse_bytes_quad32_seq input_LE in
+              let h = update_block SHA2_256 h_prefix (quads_to_block block_quads_BE) in
+              h == update_multi_quads input_BE hash_orig))
+  =
+  if bound = 0 then ()
+  else ();
+  admit()
+#pop-options  
+
+(*
+let rec update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) : Tot (hash_w SHA2_256) (decreases (length s))
+  =
+  if length s < 4 then
+     hash_orig
+  else
+     let qs, rem = split s 4 in
+     let hash = update_block SHA2_256 hash_orig (quads_to_block qs) in
+     update_multi_quads rem hash
+
+#push-options "--max_fuel 1"  // Without this, F* refuses to do even one unfolding of update_multi_quads :(
+let rec update_multi_quads_associates (s:seq quad32) (hash_orig:hash_w SHA2_256) (pivot:nat) : Lemma
+  (requires length s % 4 == 0 /\ pivot % 4 == 0 /\ pivot <= length s)
+  (ensures (let left,right = split s pivot in
+            let h_left = update_multi_quads left hash_orig in
+            let h_right = update_multi_quads right h_left in
+            update_multi_quads s hash_orig == h_right))
+  (decreases (
+      %[ length s; pivot ]))
+  =
+  let left,right = split s pivot in
+  let h_left = update_multi_quads left hash_orig in
+  let h_right = update_multi_quads right h_left in
+  if pivot = 0 then begin
+    ()
+  end else begin
+    update_multi_quads_associates left hash_orig pivot;
+    admit()
+  end;
+  ()
+#pop-options
+
+let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) (bound:nat) : Lemma
+    (requires bound + 4 <= length s)
+    (ensures (let prefix = update_multi_quads (slice s 0 bound) hash_orig in
+              let h = update_block SHA2_256 prefix (quads_to_block (slice s bound (bound + 4))) in
+              h == update_multi_quads (slice s 0 (bound + 4)) hash_orig))
+  =
+  if bound = 0 then ()
+  else (
+    let prefix = update_multi_quads (slice s 0 bound) hash_orig in
+    let h = update_block SHA2_256 prefix (quads_to_block (slice s bound (bound + 4))) in
+    assert (length s > 4);
+    admit()
+  );
+  admit();
+  ()
+*)
