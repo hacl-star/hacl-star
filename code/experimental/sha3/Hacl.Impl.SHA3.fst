@@ -30,6 +30,7 @@ let state = lbuffer uint64 25
 inline_for_extraction noextract
 let index = n:size_t{v n < 5}
 
+[@"c_inline"]
 let lfsr86540 (lfsr:uint8) : tuple2 uint8 bool =
   let open Lib.RawIntTypes in
   let lfsr1 = lfsr &. u8 1 in
@@ -66,6 +67,7 @@ val state_theta:
   -> Stack unit
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+[@"c_inline"]
 let state_theta s =
   push_frame();
   let _C:lbuffer uint64 5 = create (size 5) (u64 0) in
@@ -97,6 +99,7 @@ val state_pi_rho:
   -> Stack unit
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+[@"c_inline"]
 let state_pi_rho s =
   push_frame();
   let x:lbuffer size_t 1 = create (size 1) (size 1) in
@@ -133,6 +136,7 @@ val state_chi:
   -> Stack unit
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+[@"c_inline"]
 let state_chi s =
   push_frame ();
   let temp:state = create (size 25) (u64 0) in
@@ -156,6 +160,7 @@ val state_iota:
   -> Stack uint8
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+[@"c_inline"]
 let state_iota s lfsr =
   push_frame();
   let lfsr:lbytes 1 = create (size 1) lfsr in
@@ -183,6 +188,7 @@ val state_permute1:
   -> Stack uint8
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+[@"c_inline"]
 let state_permute1 s lfsr =
   state_theta s;
   state_pi_rho s;
@@ -194,6 +200,7 @@ val state_permute:
   -> Stack unit
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+[@"c_inline"]
 let state_permute s =
   push_frame();
   let lfsr:lbytes 1 = create (size 1) (u8 0x01) in
@@ -216,6 +223,7 @@ val loadState:
   -> Stack unit
     (requires fun h -> live h input /\ live h s /\ disjoint input s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+[@"c_inline"]
 let loadState rateInBytes input s =
   push_frame();
   let block:lbytes 200 = create (size 200) (u8 0) in
@@ -237,6 +245,7 @@ val storeState:
   -> Stack unit
     (requires fun h -> live h s /\ live h res /\ disjoint s res)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+[@"c_inline"]
 let storeState rateInBytes s res =
   push_frame();
   let block:lbytes 200 = create (size 200) (u8 0) in
@@ -292,6 +301,7 @@ val absorb:
   -> Stack unit
     (requires fun h -> live h s /\ live h input /\ disjoint s input)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+[@"c_inline"]
 let absorb s rateInBytes inputByteLen input delimitedSuffix =
   let open Lib.RawIntTypes in
   let n = inputByteLen /. rateInBytes in
@@ -316,6 +326,7 @@ val squeeze:
   -> Stack unit
     (requires fun h -> live h s /\ live h output /\ disjoint s output)
     (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1)
+[@"c_inline"]
 let squeeze s rateInBytes outputByteLen output =
   let outBlocks = outputByteLen /. rateInBytes in
   let remOut = outputByteLen %. rateInBytes in
