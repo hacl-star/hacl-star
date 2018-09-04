@@ -51,6 +51,35 @@ let make_hash_def (abef cdgh:quad32) :
 
 unfold let make_hash = make_opaque make_hash_def
 
+let make_ordered_hash_def (abcd efgh:quad32) :
+  (hash:hash_w SHA2_256 {
+         length hash == 8 /\
+         hash.[0] == to_uint32 abcd.lo0 /\
+         hash.[1] == to_uint32 abcd.lo1 /\
+         hash.[2] == to_uint32 abcd.hi2 /\
+         hash.[3] == to_uint32 abcd.hi3 /\
+         hash.[4] == to_uint32 efgh.lo0 /\
+         hash.[5] == to_uint32 efgh.lo1 /\
+         hash.[6] == to_uint32 efgh.hi2 /\
+         hash.[7] == to_uint32 efgh.hi3      
+   })
+  =
+    let a = to_uint32 abcd.lo0 in
+    let b = to_uint32 abcd.lo1 in
+    let c = to_uint32 abcd.hi2 in
+    let d = to_uint32 abcd.hi3 in
+    let e = to_uint32 efgh.lo0 in
+    let f = to_uint32 efgh.lo1 in
+    let g = to_uint32 efgh.hi2 in
+    let h = to_uint32 efgh.hi3 in
+    let l = [a; b; c; d; e; f; g; h] in
+    let hash = seq_of_list l in
+    assert_norm (length hash == 8);
+    elim_of_list l;
+    hash  
+
+unfold let make_ordered_hash = make_opaque make_ordered_hash_def
+
 let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}) :
     Lemma(let h = shuffle_core_opaque a block hash t in
           let a0 = hash.[0] in

@@ -51,12 +51,14 @@ procedure {:quick} preamble(
         let abcd := buffer128_read(ctx_b, 0, mem) in
         let efgh := buffer128_read(ctx_b, 1, mem) in
         abef == Mkfour(efgh.lo1, efgh.lo0, abcd.lo1, abcd.lo0) /\ // LSB: FEBA
-        cdgh == Mkfour(efgh.hi3, efgh.hi2, abcd.hi3, abcd.hi2);   // LSB: HGDC
-        //make_hash(abef, cdgh) == // 0: HGFEDCBA
+        cdgh == Mkfour(efgh.hi3, efgh.hi2, abcd.hi3, abcd.hi2) /\   // LSB: HGDC
+        make_hash(abef, cdgh) == make_ordered_hash(abcd, efgh);
 {
     // At the C level, ctx_b is an array of 8 32-bit values: ABCDEFGH
     // We load these out of memory using litte-endian loads, 
     // but SHA spec is big endian, so we need to do some swaps
+    ghost var abcd := buffer128_read(ctx_b, 0, mem);
+    ghost var efgh := buffer128_read(ctx_b, 1, mem);
     Load128_buffer(abef, ctx,  0, Secret, ctx_b, 0);  // abef := LSB: ABCD 
     Load128_buffer(cdgh, ctx, 16, Secret, ctx_b, 1);  // cdgh := LSB: EFGH
     InitPshufbMask(tmp_xmm, tmp_reg);
@@ -69,6 +71,7 @@ procedure {:quick} preamble(
     Palignr8(abef, cdgh);                             // abef := LSB: FEBA == abef in big endian
     // OpenSSL uses punpcklqdq here:
     Shufpd(cdgh, Wi, 0);                              // cdgh := LSB: HGDC == cdgh in big endian
+    assert equal(make_hash(abef, cdgh), make_ordered_hash(abcd, efgh));
 }
 
 #reset-options "--z3rlimit 40"
@@ -545,29 +548,71 @@ procedure {:quick} loop(
     }
 }
 
+procedure {:quick} epilogue(
+        ghost ctx_b:buffer128
+    )
+    lets
+        ctx @= rdi;
+        abef @= xmm1; cdgh @= xmm2; 
+        tmp_xmm @= xmm7; 
+    reads
+        ctx; memTaint;
+    modifies
+        abef; cdgh; tmp_xmm; 
+        mem; efl;
+    requires
+        validDstAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
+    ensures
+        let abcd := old(Mkfour(abef.hi3, abef.hi2, cdgh.hi3, cdgh.hi2)) in
+        let efgh := old(Mkfour(abef.lo1, abef.lo0, cdgh.lo1, cdgh.lo0)) in
+        abcd == buffer128_read(ctx_b, 0, mem) /\
+        efgh == buffer128_read(ctx_b, 1, mem) /\
+        make_hash(old(abef), old(cdgh)) == make_ordered_hash(abcd, efgh);
 
-/*
+        // Framing
+        modifies_buffer128(ctx_b, old(mem), mem);
+{   
+    // Initially:
+    // abef == LSB: FEBA
+    // cdgh == LSB: HGDC
+
+    Pshufd(cdgh, cdgh, 0xb1);       // cdgh := LSB: GHCD
+    Pshufd(tmp_xmm, abef, 0x1b);    // tmp_xmm := LSB: ABEF
+    Pshufd(abef, abef, 0xb1);       // abef := LSB: EFAB
+    // OpenSSL uses punpcklqdq here:
+    Shufpd(abef, cdgh, 3);          // abef := LSB: ABCD
+    Palignr8(cdgh, tmp_xmm);        // cdgh := LSB: EFGH
+
+    Store128_buffer(ctx, abef, 0, Secret, ctx_b, 0);
+    Store128_buffer(ctx, cdgh, 16, Secret, ctx_b, 1);
+    ghost var abcd := buffer128_read(ctx_b, 0, mem);
+    ghost var efgh := buffer128_read(ctx_b, 1, mem);
+    assert equal(make_hash(old(abef), old(cdgh)), make_ordered_hash(abcd, efgh));
+}
+
+
 procedure {:quick} sha_update(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128
     )
     lets
-        num @= rdx; ctx @= rdi; inp @= rsi; tbl @= rcx;
+        tmp_reg @= rax; tbl @= rcx; num @= rdx; ctx @= rdi; inp @= rsi; 
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
-        ctx; tbl; mem; memTaint;
+        ctx; tbl; memTaint;
     modifies
-        inp; num;
+        inp; num; rax;
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
-        efl;
+        mem; efl;
     requires
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40*num < pow2_64;
+        buffers_disjoint128(ctx_b, in_b);
 
         num > 0;
 
@@ -576,14 +621,22 @@ procedure {:quick} sha_update(
 
         k_reqs(buffer128_as_seq(mem, k_b));
     ensures
-        inp == old(inp) + 0x40;
-        let input_LE := slice_work_around(buffer128_as_seq(mem, in_b), 4) in
+        inp == old(inp) + 0x40*old(num);
+        let abcd  := old(buffer128_read(ctx_b, 0, mem)) in
+        let efgh  := old(buffer128_read(ctx_b, 1, mem)) in
+        let abcd' :=     buffer128_read(ctx_b, 0, mem)  in
+        let efgh' :=     buffer128_read(ctx_b, 1, mem)  in
+
+        let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), 0, 4*old(num)) in
         let input_BE := reverse_bytes_quad32_seq(input_LE) in
-        let block:block_w(SHA2_256) := quads_to_block(input_BE) in
-        let hash_orig := old(make_hash(abef, cdgh)) in
+
+        make_ordered_hash(abcd', efgh') == update_multi_quads(input_BE, make_ordered_hash(abcd, efgh));
+
+        // Framing
+        modifies_buffer128(ctx_b, old(mem), mem);
 {
     preamble(ctx_b);
     loop(in_b, k_b);
+    epilogue(ctx_b);
 }
 
-*/
