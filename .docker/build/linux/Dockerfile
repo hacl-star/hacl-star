@@ -8,7 +8,7 @@
 # Latest can only be used with branch master,
 # for any other branch please use the specific commit id on the config file.
 ARG COMMITID
-FROM fstar:${COMMITID}
+FROM fstar-linux:${COMMITID}
 
 ARG BUILDLOGFILE
 ARG MAXTHREADS
@@ -29,7 +29,7 @@ RUN rm -rf mitls-fstar
 RUN rm -rf vale
 
 RUN rm -f build.sh
-RUN rm -f build_fstar.sh
+RUN rm -f build_helper.sh
 RUN rm -f buildlogfile.txt
 RUN rm -f log_no_replay.html
 RUN rm -f log_worst.html
@@ -43,7 +43,7 @@ COPY --chown=everest / ${MYHOME}/FStar/hacl-star/
 
 # Do another cleanup
 RUN rm ${MYHOME}/FStar/hacl-star/Dockerfile
-RUN rm ${MYHOME}/FStar/hacl-star/build_hacl.sh
+RUN rm ${MYHOME}/FStar/hacl-star/build_helper.sh
 RUN rm ${MYHOME}/FStar/hacl-star/build.sh
 RUN rm ${MYHOME}/FStar/hacl-star/id_rsa
 RUN rm ${MYHOME}/FStar/hacl-star/commitinfofilename.json
@@ -56,14 +56,14 @@ COPY --chown=everest id_rsa ${MYHOME}/.ssh/id_rsa
 RUN chmod 600 ${MYHOME}/.ssh/id_rsa
 RUN eval $(ssh-agent)
 
-COPY --chown=everest build_hacl.sh ${MYHOME}/FStar/build_hacl.sh
-RUN chmod +x build_hacl.sh
 COPY --chown=everest build.sh ${MYHOME}/FStar/build.sh
 RUN chmod +x build.sh
+COPY --chown=everest build_helper.sh ${MYHOME}/FStar/build_helper.sh
+RUN chmod +x build_helper.sh
 
 RUN echo $(date -u '+%Y-%m-%d %H:%M:%S') >> ${BUILDLOGFILE}
 RUN echo "FStar version => ${COMMITID}" >> ${BUILDLOGFILE}
-RUN ./build.sh ${TARGET} ${BUILDLOGFILE} ${MAXTHREADS} ${BRANCHNAME} || true
+RUN ./build_helper.sh ${TARGET} ${BUILDLOGFILE} ${MAXTHREADS} ${BRANCHNAME} || true
 RUN echo $(date -u '+%Y-%m-%d %H:%M:%S') >> ${BUILDLOGFILE}
 
 # Generate query-stats.
