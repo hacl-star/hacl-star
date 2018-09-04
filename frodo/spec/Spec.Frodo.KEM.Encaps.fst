@@ -210,9 +210,10 @@ let crypto_kem_enc_ coins pk =
   ct, ss
 
 val crypto_kem_enc:
-    pk:lbytes crypto_publickeybytes
+    state: Spec.Frodo.Random.state_t
+  -> pk:lbytes crypto_publickeybytes
   -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
-let crypto_kem_enc pk =
+let crypto_kem_enc state pk =
   let bytes_mu = params_nbar * params_nbar * params_extracted_bits / 8 in
-  let coins = Spec.Frodo.Random.randombytes_ bytes_mu in
+  let coins, _ = Spec.Frodo.Random.randombytes_ state bytes_mu in
   crypto_kem_enc_ coins pk

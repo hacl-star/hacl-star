@@ -114,7 +114,8 @@ let crypto_kem_keypair_ coins =
   let sk = update_sk s pk s_bytes in
   pk, sk
 
-val crypto_kem_keypair: unit -> tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes)
-let crypto_kem_keypair () =
-  let coins = Spec.Frodo.Random.randombytes_ (2 * crypto_bytes + bytes_seed_a) in
+val crypto_kem_keypair: state:Spec.Frodo.Random.state_t
+  -> tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes)
+let crypto_kem_keypair state =
+  let coins, _ = Spec.Frodo.Random.randombytes_ state (2 * crypto_bytes + bytes_seed_a) in
   crypto_kem_keypair_ coins
