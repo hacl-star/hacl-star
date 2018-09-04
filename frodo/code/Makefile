@@ -86,7 +86,8 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/fst \
-  $(HACL_HOME)/lib/c
+  $(HACL_HOME)/lib/c \
+  $(HACL_HOME)/code/experimental/sha3
 
 FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -210,11 +211,14 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'Hacl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
 	-no-prefix 'Hacl.Frodo.Clear' \
-	-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.*,Hacl.Frodo.*' \
+	-no-prefix 'Hacl.Keccak' \
+	-no-prefix 'Hacl.Impl.SHA3' \
+	-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Frodo.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
-	-library 'Hacl.Keccak,C,FStar' \
+	-bundle 'Hacl.Keccak=Hacl.Impl.SHA3,Hacl.Keccak' \
+	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
 	-add-include '"c/Lib_PQ_Print.h"' \
 	-tmpdir $(GENERATED_DIR) \
@@ -240,14 +244,13 @@ include $(GENERATED_DIR)/Makefile.include
 # KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
 # files for them in $(GENERATED_DIR). However, we are only interested in the header,
 # and drop these (mostly empty) C files.
-ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c Hacl_Keccak.c C.c, $(ALL_C_FILES))
+ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
   include/rng.c \
   include/random.c \
-  include/$(KECCAK) \
   include/clearwords.c \
   $(HACL_HOME)/lib/c/Lib_PQ_Print.c
 
@@ -259,7 +262,8 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
   $(KREMLIN_HOME)/kremlib \
   $(LWEKE_HOME)/sha3 \
-  $(HACL_HOME)/lib
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/code/experimental/sha3
 
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
