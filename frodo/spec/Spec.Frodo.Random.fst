@@ -3,7 +3,8 @@ module Spec.Frodo.Random
 open Lib.IntTypes
 open Lib.Sequence
 
-//val randombytes_init_: entropy_input:lseq uint8 48 -> unit
+let state_t = seq uint8
 
-val randombytes_: len:size_nat -> res:lseq uint8 len
-let randombytes_ len = create len (u8 0) //Just to extract the spec
+assume val randombytes_init_: entropy_input:lseq uint8 48 -> state_t
+
+assume val randombytes_: state:state_t -> len:size_nat -> (lseq uint8 len * state_t)
