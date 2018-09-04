@@ -23,7 +23,7 @@ val crypto_kem_keypair:
   -> sk:lbytes crypto_secretkeybytes
   -> Stack uint32
     (requires fun h -> 
-      live h state /\ live h pk /\ live h sk /\ 
+      live h pk /\ live h sk /\
       disjoint pk sk /\ disjoint state pk /\ disjoint state sk)
     (ensures  fun h0 r h1 ->
       modifies (loc_union (loc_buffer state) (loc_union (loc_buffer pk) (loc_buffer sk))) h0 h1 /\
@@ -38,7 +38,7 @@ val crypto_kem_enc:
   -> pk:lbytes crypto_publickeybytes
   -> Stack uint32
     (requires fun h ->
-      live h state /\ live h ct /\ live h ss /\ live h pk /\
+      live h ct /\ live h ss /\ live h pk /\
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk /\
       disjoint state ct /\ disjoint state ss /\ disjoint state pk)
     (ensures  fun h0 _ h1 ->

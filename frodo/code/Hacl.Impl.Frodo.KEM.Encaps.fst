@@ -440,7 +440,7 @@ val crypto_kem_enc:
   -> pk:lbytes crypto_publickeybytes
   -> Stack uint32
     (requires fun h ->
-      live h state /\ disjoint state ct /\ disjoint state ss /\ disjoint state pk /\
+      disjoint state ct /\ disjoint state ss /\ disjoint state pk /\
       live h ct /\ live h ss /\ live h pk /\
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk)
     (ensures  fun h0 _ h1 ->
@@ -448,9 +448,11 @@ val crypto_kem_enc:
       (let ct_s, ss_s = S.crypto_kem_enc (as_seq h0 state) (as_seq h0 pk) in
       as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
 let crypto_kem_enc ct ss pk =
+  LowStar.Buffer.recall state;
   push_frame();
   let bytes_mu = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
   let coins = create (params_nbar *! params_nbar *! params_extracted_bits /. size 8) (u8 0) in
+  LowStar.Buffer.recall state;
   randombytes_ bytes_mu coins;
   crypto_kem_enc_ coins ct ss pk;
   pop_frame();

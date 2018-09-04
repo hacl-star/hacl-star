@@ -14,7 +14,7 @@ open Hacl.Impl.Matrix
 open Hacl.Frodo.Random
 open Frodo.Params
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq -Spec.Frodo.KEM.KeyGen -Spec.Frodo.KEM.Encaps -Spec.Frodo.KEM.Decaps'"
 
 val test_frodo:
     seed:lbuffer uint8 48
@@ -27,6 +27,7 @@ val test_frodo:
     live h seed /\ live h ss_expected /\ live h pk_expected /\ live h ct_expected /\ live h sk_expected)
   (ensures  fun h0 r h1 -> True)
 let test_frodo seed ss_expected pk_expected ct_expected sk_expected =
+  LowStar.Buffer.recall state;
   push_frame();
   randombytes_init_ seed;
   let pk_len = crypto_publickeybytes in
@@ -61,10 +62,10 @@ let test_frodo seed ss_expected pk_expected ct_expected sk_expected =
 val u8: n:nat{n < 0x100} -> uint8
 let u8 n = u8 n
 
-// The rest verifies, but takes too long
-// It expectedly fails for FrodoKEM-976. This file is systematically verified
+// The rest verifies for params_n = 64, but takes too long
+// It expectedly fails for FrodoKEM-{640,976}. This file is systematically verified
 // independently of the target because the Makefile.include target depends
-// on ALL_KRML_FILES and it would be complicated to disentangle it from FrodoKEM-640.
+// on ALL_KRML_FILES and it would be complicated to disentangle it.
 #set-options "--lax"
 
 let test1_ss_expected: b:lbytes crypto_bytes{ recallable b } =

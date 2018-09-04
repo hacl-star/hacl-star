@@ -14,7 +14,7 @@ val state: b:buffer uint8{ recallable b }
 val randombytes_init_:
     entropy_input:lbuffer uint8 48
   -> Stack unit
-    (requires fun h -> live h entropy_input /\ live h state)
+    (requires fun h -> live h entropy_input)
     (ensures  fun h0 _ h1 -> 
       modifies (loc_buffer state) h0 h1 /\
       as_seq h1 state == S.randombytes_init_ (as_seq h0 entropy_input))
@@ -23,9 +23,8 @@ val randombytes_:
     len:size_t
   -> res:lbuffer uint8 (v len)
   -> Stack unit
-    (requires fun h -> live h res /\ live h state)
+    (requires fun h -> live h res)
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc_buffer res) (loc_buffer state)) h0 h1 /\
-      as_seq h1 res == fst (S.randombytes_ (as_seq h0 state) (v len)) /\
-      as_seq h1 state == snd (S.randombytes_ (as_seq h0 state) (v len)))
-
+      (let r, st = S.randombytes_ (as_seq h0 state) (v len) in
+       r == as_seq h1 res /\ st == as_seq h1 state))
