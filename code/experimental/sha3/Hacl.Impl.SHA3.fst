@@ -30,16 +30,23 @@ let state = lbuffer uint64 25
 inline_for_extraction noextract
 let index = n:size_t{v n < 5}
 
+val lfsr86540:
+    lfsr:lbytes 1
+  -> Stack bool
+    (requires fun h -> live h lfsr)
+    (ensures  fun h0 _ h1 -> modifies (loc_buffer lfsr) h0 h1)
 [@"c_inline"]
-let lfsr86540 (lfsr:uint8) : tuple2 uint8 bool =
+let lfsr86540 lfsr =
   let open Lib.RawIntTypes in
-  let lfsr1 = lfsr &. u8 1 in
+  let lfsr0 = lfsr.(size 0) in
+  let lfsr1 = lfsr0 &. u8 1 in
   let result = u8_to_UInt8 lfsr1 <> 0uy in
-  let lfsr' = lfsr <<. u32 1 in
-  if u8_to_UInt8 (lfsr &. u8 0x80) <> 0uy then
-    lfsr' ^. u8 0x71, result
-  else
-    lfsr', result
+  let lfsr' = lfsr0 <<. u32 1 in
+  let lfsr' =
+    if u8_to_UInt8 (lfsr0 &. u8 0x80) <> 0uy
+    then lfsr' ^. u8 0x71 else lfsr' in
+  lfsr.(size 0) <- lfsr';
+  result
 
 inline_for_extraction noextract
 val readLane:
@@ -94,12 +101,14 @@ let state_theta s =
   );
   pop_frame()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+inline_for_extraction noextract
 val state_pi_rho:
      s:state
   -> Stack unit
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
-[@"c_inline"]
 let state_pi_rho s =
   push_frame();
   let x:lbuffer size_t 1 = create (size 1) (size 1) in
@@ -131,12 +140,12 @@ let state_pi_rho s =
   );
   pop_frame()
 
+inline_for_extraction noextract
 val state_chi:
      s:state
   -> Stack unit
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
-[@"c_inline"]
 let state_chi s =
   push_frame ();
   let temp:state = create (size 25) (u64 0) in
@@ -154,16 +163,14 @@ let state_chi s =
   );
   pop_frame ()
 
+inline_for_extraction noextract
 val state_iota:
      s:state
-  -> lfsr:uint8
-  -> Stack uint8
-    (requires fun h -> live h s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
-[@"c_inline"]
+  -> lfsr:lbytes 1
+  -> Stack unit
+    (requires fun h -> live h s /\ live h lfsr /\ disjoint s lfsr)
+    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer s) (loc_buffer lfsr)) h0 h1)
 let state_iota s lfsr =
-  push_frame();
-  let lfsr:lbytes 1 = create (size 1) lfsr in
   let h0 = ST.get () in
   Lib.Loops.for (size 0) (size 7)
   (fun h1 j ->
@@ -172,22 +179,18 @@ let state_iota s lfsr =
   (fun j ->
     let bitPosition = (u32 1 <<. size_to_uint32 j) -. u32 1 in
     assume (uint_v bitPosition < 64);
-    let lfsr1, result = lfsr86540 lfsr.(size 0) in
+    let result = lfsr86540 lfsr in
     (if result then
       writeLane s (size 0) (size 0)
-	(readLane s (size 0) (size 0) ^. (u64 1 <<. bitPosition)));
-    lfsr.(size 0) <- lfsr1
-  );
-  let res = lfsr.(size 0) in
-  pop_frame();
-  res
+	(readLane s (size 0) (size 0) ^. (u64 1 <<. bitPosition)))
+  )
 
 val state_permute1:
      s:state
-  -> lfsr:uint8
-  -> Stack uint8
-    (requires fun h -> live h s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+  -> lfsr:lbytes 1
+  -> Stack unit
+    (requires fun h -> live h s /\ live h lfsr /\ disjoint s lfsr)
+    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer s) (loc_buffer lfsr)) h0 h1)
 [@"c_inline"]
 let state_permute1 s lfsr =
   state_theta s;
@@ -210,7 +213,7 @@ let state_permute s =
     live h1 lfsr /\ live h1 s /\
     modifies (loc_union (loc_buffer lfsr) (loc_buffer s)) h0 h1)
   (fun i ->
-    lfsr.(size 0) <- state_permute1 s lfsr.(size 0)
+    state_permute1 s lfsr
   );
   pop_frame()
 
