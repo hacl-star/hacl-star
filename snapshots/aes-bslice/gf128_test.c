@@ -32,8 +32,8 @@ static __inline__ cycles cpucycles_end(void)
 
 extern void ghash(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 
-#define ROUNDS 1024
-#define SIZE   8192
+#define ROUNDS 10240
+#define SIZE   16384
 
 int main() {
   int in_len = 92;

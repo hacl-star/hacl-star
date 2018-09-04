@@ -6,7 +6,7 @@
 #include <smmintrin.h>
 #include "endianness.h"
 
-#define INTERLEAVE 4
+#define INTERLEAVE 8
 typedef __m128i* state_t;
 typedef __m128i key1_t;
 typedef __m128i* keyex_t;
