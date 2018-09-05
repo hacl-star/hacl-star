@@ -38,6 +38,13 @@ let buffer_r_inv #a len h v =
   B.live h v /\ B.freeable v /\ 
   B.len v = len
 
+val buffer_r_inv_reg:
+  #a:Type -> len:UInt32.t{len > 0ul} ->
+  h:HS.mem -> v:B.buffer a ->
+  Lemma (requires (buffer_r_inv len h v))
+	(ensures (MHS.live_region h (buffer_region_of v)))
+let buffer_r_inv_reg #a len h v = ()
+
 val buffer_r_sep:
   #a:Type -> len:UInt32.t{len > 0ul} ->
   v:B.buffer a -> p:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -106,6 +113,7 @@ let buffer_regional #a ia len =
       (buffer_repr a)
       (buffer_r_repr #a)
       (buffer_r_inv #a len)
+      (buffer_r_inv_reg #a len)
       (buffer_r_sep #a len)
       (buffer_irepr #a ia len)
       (buffer_r_init #a ia len)
@@ -139,6 +147,13 @@ val vector_r_inv:
   #a:Type -> #rg:regional a -> 
   h:HS.mem -> v:rvector rg -> GTot Type0
 let vector_r_inv #a #rg h v = rv_inv h v
+
+val vector_r_inv_reg:
+  #a:Type -> #rg:regional a -> 
+  h:HS.mem -> v:rvector rg ->
+  Lemma (requires (vector_r_inv h v))
+	(ensures (MHS.live_region h (vector_region_of v)))
+let vector_r_inv_reg #a #rg h v = ()    
 
 val vector_r_sep:
   #a:Type -> #rg:regional a ->
@@ -195,6 +210,7 @@ let vector_regional #a rg =
       (vector_repr #a rg)
       (vector_r_repr #a #rg)
       (vector_r_inv #a #rg)
+      (vector_r_inv_reg #a #rg)
       (vector_r_sep #a #rg)
       (vector_irepr #a rg)
       (vector_r_init #a #rg)

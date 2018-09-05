@@ -27,6 +27,7 @@ OUT_TEST = merkle_tree_test
 .PHONY: all clean
 
 all:
+	make -C ../
 	$(CC) $(CC_ARGS) $(IN_TEST_C) -o $(OUT_TEST) $(LD_ARGS)
 
 clean:
