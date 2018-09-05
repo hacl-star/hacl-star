@@ -6,22 +6,43 @@
 
 #include "Hacl_SHA3.h"
 
-inline static bool lfsr86540(uint8_t *lfsr)
-{
-  uint8_t lfsr0 = lfsr[0U];
-  uint8_t lfsr1 = lfsr0 & (uint8_t)1U;
-  bool result = lfsr1 != (uint8_t)0U;
-  uint8_t lfsr_ = lfsr0 << (uint32_t)1U;
-  uint8_t lfsr_1;
-  if ((lfsr0 & (uint8_t)0x80U) != (uint8_t)0U)
-    lfsr_1 = lfsr_ ^ (uint8_t)0x71U;
-  else
-    lfsr_1 = lfsr_;
-  lfsr[0U] = lfsr_1;
-  return result;
-}
+#if defined(_MSC_VER)
+#define SHA3_CONST(x) x
+#else
+#define SHA3_CONST(x) x##L
+#endif
 
-inline static void state_theta(uint64_t *s)
+#include "x86intrin.h"
+
+#define ROTL(x,y) __rolq(x,y)
+
+static const unsigned keccakf_rotc[24] = {
+    1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62,
+    18, 39, 61, 20, 44
+};
+
+
+static const unsigned keccakf_piln[24] = {
+    10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20,
+    14, 22, 9, 6, 1
+};
+
+static const uint64_t keccakf_rndc[24] = {
+    SHA3_CONST(0x0000000000000001UL), SHA3_CONST(0x0000000000008082UL),
+    SHA3_CONST(0x800000000000808aUL), SHA3_CONST(0x8000000080008000UL),
+    SHA3_CONST(0x000000000000808bUL), SHA3_CONST(0x0000000080000001UL),
+    SHA3_CONST(0x8000000080008081UL), SHA3_CONST(0x8000000000008009UL),
+    SHA3_CONST(0x000000000000008aUL), SHA3_CONST(0x0000000000000088UL),
+    SHA3_CONST(0x0000000080008009UL), SHA3_CONST(0x000000008000000aUL),
+    SHA3_CONST(0x000000008000808bUL), SHA3_CONST(0x800000000000008bUL),
+    SHA3_CONST(0x8000000000008089UL), SHA3_CONST(0x8000000000008003UL),
+    SHA3_CONST(0x8000000000008002UL), SHA3_CONST(0x8000000000000080UL),
+    SHA3_CONST(0x000000000000800aUL), SHA3_CONST(0x800000008000000aUL),
+    SHA3_CONST(0x8000000080008081UL), SHA3_CONST(0x8000000000008080UL),
+    SHA3_CONST(0x0000000080000001UL), SHA3_CONST(0x8000000080008008UL)
+};
+
+inline static void state_permute1(uint64_t *s, int round)
 {
   uint64_t _C[5U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)1U)
@@ -36,57 +57,39 @@ inline static void state_theta(uint64_t *s)
     _D =
       _C[(i0 + (uint32_t)4U)
       % (uint32_t)5U]
-      ^ (uu____0 << (uint32_t)1U | uu____0 >> (uint32_t)63U);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)1U)
-      s[i0 + (uint32_t)5U * i] = s[i0 + (uint32_t)5U * i] ^ _D;
+      ^ ROTL(uu____0,1);
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)5U)
+      s[i0 + i] = s[i0 + i] ^ _D;
   }
-}
-
-inline static void state_permute1(uint64_t *s, uint8_t *lfsr)
-{
-  state_theta(s);
-  uint32_t x = (uint32_t)1U;
-  uint32_t y = (uint32_t)0U;
   uint64_t current = s[1U];
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)24U; i = i + (uint32_t)1U)
   {
-    uint32_t x0 = x;
-    uint32_t y0 = y;
     uint64_t current0 = current;
-    uint32_t r = (i + (uint32_t)1U) * (i + (uint32_t)2U) / (uint32_t)2U % (uint32_t)64U;
-    uint32_t _Y = ((uint32_t)2U * x0 + (uint32_t)3U * y0) % (uint32_t)5U;
-    uint64_t temp = s[y0 + (uint32_t)5U * _Y];
-    s[y0 + (uint32_t)5U * _Y] = current0 << r | current0 >> (uint32_t)64U - r;
-    x = y0;
-    y = _Y;
+    uint32_t r = keccakf_rotc[i];
+    uint32_t _Y = keccakf_piln[i];
+    uint64_t temp = s[_Y];
+    s[_Y] = ROTL(current0,r);
     current = temp;
   }
   uint64_t temp[25U] = { 0U };
   memcpy(temp, s, (uint32_t)25U * sizeof s[0U]);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)5U; i0 = i0 + (uint32_t)1U)
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)5U; i0 = i0 + (uint32_t)5U)
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)1U)
-      s[i + (uint32_t)5U * i0] =
+      s[i + i0] =
         temp[i
-        + (uint32_t)5U * i0]
+        + i0]
         ^
           ~temp[(i + (uint32_t)1U)
           % (uint32_t)5U
-          + (uint32_t)5U * i0]
-          & temp[(i + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * i0];
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)7U; i = i + (uint32_t)1U)
-  {
-    uint32_t bitPosition = ((uint32_t)1U << i) - (uint32_t)1U;
-    bool result = lfsr86540(lfsr);
-    if (result)
-      s[0U] = s[0U] ^ (uint64_t)1U << bitPosition;
-  }
+          + i0]
+          & temp[(i + (uint32_t)2U) % (uint32_t)5U + i0];
+  s[0U] = s[0U] ^ keccakf_rndc[round];
 }
 
 inline static void state_permute(uint64_t *s)
 {
-  uint8_t lfsr = (uint8_t)0x01U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)24U; i = i + (uint32_t)1U)
-    state_permute1(s, &lfsr);
+    state_permute1(s, i);
 }
 
 inline static void loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
