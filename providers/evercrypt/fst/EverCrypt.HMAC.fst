@@ -7,15 +7,13 @@ open EverCrypt.Helpers
 open FStar.Integers
 open FStar.Seq
 
-noextract
-let wrap (a:e_alg) (key: bytes{length key <= maxLength a}):
-  GTot (lbseq (blockLength a))
+let wrap (a:alg) (key: bytes{length key <= maxLength a}): GTot (lbseq (blockLength a))
 =
   let key0 = if length key <= blockLength a then key else spec a key in
   let paddingLength = blockLength a - length key0 in
   key0 @| Seq.create paddingLength 0uy
 
-private let wrap_lemma (a: e_alg) (key: bseq{Seq.length key <= maxLength a}): Lemma
+private let wrap_lemma (a:alg) (key: bseq{Seq.length key <= maxLength a}): Lemma
   (requires length key > blockLength a)
   (ensures wrap a key == (
     let key0 = spec a key in
@@ -26,8 +24,7 @@ private let wrap_lemma (a: e_alg) (key: bseq{Seq.length key <= maxLength a}): Le
 inline_for_extraction
 let xor8 (x y: uint8_t): uint8_t = x ^^ y
 
-noextract
-let xor (x: uint8_t) (v: bseq): lbseq (length v) =
+let xor (x: uint8_t) (v: bseq): GTot (lbseq (length v)) =
   Spec.Loops.seq_map (xor8 x) v
 
 let rec xor_lemma (x: uint8_t) (v: bseq) : Lemma (requires True)
@@ -82,18 +79,18 @@ module ST = FStar.HyperStack.ST
 [@"substitute"]
 val wrap_key:
   a: ha ->
-  output: uint8_pl (blockLength (Ghost.hide a)) ->
-  key: uint8_p {length key <= maxLength (Ghost.hide a) /\ disjoint output key} ->
+  output: uint8_pl (blockLength a) ->
+  key: uint8_p {length key <= maxLength a /\ disjoint output key} ->
   len: UInt32.t {v len = length key} ->
   Stack unit
     (requires fun h0 ->
       live h0 output /\ live h0 key /\
-      as_seq h0 output == Seq.create (blockLength (Ghost.hide a)) 0uy)
+      as_seq h0 output == Seq.create (blockLength a) 0uy)
     (ensures fun h0 _ h1 ->
       live h1 output /\ live h1 key /\ live h0 output /\ live h0 key /\
-      as_seq h0 output == Seq.create (blockLength (Ghost.hide a)) 0uy /\
+      as_seq h0 output == Seq.create (blockLength a) 0uy /\
       modifies (loc_buffer output) h0 h1 /\
-      as_seq h1 output = wrap (Ghost.hide a) (as_seq h0 key) )
+      as_seq h1 output = wrap a (as_seq h0 key) )
 
 let wrap_key a output key len =
   [@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
@@ -106,7 +103,7 @@ let wrap_key a output key len =
     Hash.hash a nkey key len;
   let h1 = ST.get () in (
     let pad = sub output i (blockLen a - i) in
-    Seq.lemma_eq_intro (as_seq h0 pad) (Seq.create (blockLength (Ghost.hide a) - v i) 0uy);
+    Seq.lemma_eq_intro (as_seq h0 pad) (Seq.create (blockLength a - v i) 0uy);
     Seq.lemma_split (as_seq h1 output) (v i)
   )
 
@@ -114,13 +111,12 @@ let wrap_key a output key len =
 // to avoid both verification and extraction problems.
 
 val part1:
-  a: alg -> (
-  let a = Ghost.hide a in
+  a: alg -> 
   acc: state a ->
   s2: uint8_pl (blockLength a) ->
   data: uint8_p {
-    length data + blockLength a  < pow2 32 /\
-    length data + blockLength a  <= maxLength a /\
+    length data + blockLength a  < pow2 32 /\ (*required by 32-bit length for update_last *)
+    // length data + blockLength a <= maxLength a /\ (*always true*)
     disjoint data s2} ->
   len: UInt32.t {length data = v len} ->
   ST unit
@@ -137,39 +133,23 @@ val part1:
       modifies (loc_union (footprint acc h0) (loc_buffer s2)) h0 h1 /\
       (
       let hash0 = Seq.slice (as_seq h1 s2) 0 (tagLength a) in
-      hash0 == spec a (Seq.append (as_seq h0 s2) (as_seq h0 data)))))
-
-(*
-//18-07-12 helpful to guide the proof?
-let loc_disjoint_gsub_buffer1
-  (#t: Type)
-  (l0: loc)
-  (b: buffer t)
-  (i: UInt32.t)
-  (len: UInt32.t)
-: Lemma
-  (requires (
-    UInt32.v i + UInt32.v len <= length b /\
-    loc_disjoint l0 (loc_buffer b)
-  ))
-  (ensures (
-    UInt32.v i + UInt32.v len <= length b /\
-    loc_disjoint l0 (loc_buffer (gsub b i len))
-  )) = ()
-*)
+      length data + blockLength a <= maxLength a /\ (*always true, required by spec below*)
+      hash0 == spec a (Seq.append (as_seq h0 s2) (as_seq h0 data))))
 
 #reset-options "--max_fuel 0 --z3rlimit 1000" // without hints
 
 // we use auxiliary functions only for clarity and proof modularity
 [@"substitute"]
-let part1 a (acc: state (Ghost.hide a)) key data len =
+let part1 a (acc: state a) key data len =
+  assert_norm(pow2 32 + blockLength a <= maxLength a);
   let ll = len % blockLen a in
   let lb = len - ll in
   let blocks = sub data 0ul lb in
   let last = offset data lb in
-  Hash.init acc;
+  Hash.init #(Ghost.hide a) acc;
   let h0 = ST.get() in //assume(bounded_counter acc h0 1);
   Hash.update
+    #(Ghost.hide a)
     (Ghost.hide Seq.empty)
     acc key;
   let h1 = ST.get() in
@@ -178,20 +158,22 @@ let part1 a (acc: state (Ghost.hide a)) key data len =
     FStar.Seq.lemma_eq_intro (Seq.append (Seq.empty #UInt8.t) k) k;
     repr acc h1 == hash0 k);
   Hash.update_multi
+    #(Ghost.hide a)
     (Ghost.hide (as_seq h0 key))
     acc blocks lb;
   let h2 = ST.get() in
-  Hash.update_last
+  assert_norm(blockLength a + v len <= maxLength a);
+  Hash.update_last 
+    #(Ghost.hide a)
     (Ghost.hide (Seq.append (as_seq h0 key) (as_seq h2 blocks)))
     acc last (blockLen a + len);
   let h3 = ST.get() in
   // assert(LowStar.Buffer.live h3 key);
   let tag = sub key 0ul (tagLen a) in (* Salvage memory *)
-  Hash.finish acc tag;
+  Hash.finish #(Ghost.hide a) acc tag;
   let h4 = ST.get() in
   (
     modifies_trans (footprint acc h0) h0 h3 (loc_buffer key) h4; // should this implicitly trigger?
-    let a = Ghost.hide a in
     let p = blockLength a in
     let key1 = as_seq h1 key in
     let blocks1 = as_seq h1 blocks in
@@ -224,8 +206,7 @@ let part1 a (acc: state (Ghost.hide a)) key data len =
 // the two parts have the same stucture; let's keep their proofs in sync.
 [@"substitute"]
 val part2:
-  a: alg -> (
-  let a = Ghost.hide a in
+  a: alg -> 
   acc: state a ->
   mac: uint8_pl (tagLength a) ->
   opad: uint8_pl (blockLength a) ->
@@ -245,16 +226,16 @@ val part2:
       modifies (loc_union (footprint acc h0) (loc_buffer mac)) h0 h1 /\
       ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in
         Seq.length payload <= maxLength a /\
-        as_seq h1 mac = spec a payload)))
+        as_seq h1 mac = spec a payload))
 
 [@"substitute"]
 let part2 a acc mac opad tag =
   let totLen = blockLen a + tagLen a in
-  assert_norm(v totLen <= maxLength (Ghost.hide a));
+  assert_norm(v totLen <= maxLength a);
   let h0 = ST.get() in
   //assume(LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer opad)));
-  Hash.init acc;
-  Hash.update (Ghost.hide Seq.empty) acc opad;
+  Hash.init #(Ghost.hide a) acc;
+  Hash.update #(Ghost.hide a) (Ghost.hide Seq.empty) acc opad;
   let h1 = ST.get() in
   // assert(
   //   footprint acc h1 == footprint acc h0 /\
@@ -264,35 +245,34 @@ let part2 a acc mac opad tag =
     let k = as_seq h0 opad in
     FStar.Seq.lemma_eq_intro (Seq.append (Seq.empty #UInt8.t) k) k;
     repr acc h1 == hash0 k);
-  Hash.update_last (Ghost.hide (as_seq h1 opad)) acc tag totLen;
+  Hash.update_last #(Ghost.hide a) (Ghost.hide (as_seq h1 opad)) acc tag totLen;
   let h2 = ST.get() in
   // assert(
   //   LowStar.Buffer.live h2 mac /\
   //   LowStar.Modifies.(loc_disjoint (footprint acc h2) (loc_buffer mac)) );
-  Hash.finish acc mac;
+  Hash.finish #(Ghost.hide a) acc mac;
   (
     let v1 = as_seq h1 opad in
     let acc1 = repr acc h1 in
-    lemma_compress (acc0 #(Ghost.hide a)) v1;
+    lemma_compress (acc0 #a) v1;
     assert(acc1 == hash0 v1);
     let tag1 = as_seq h1 tag in
-    let suffix1 = suffix (Ghost.hide a) (blockLength (Ghost.hide a) + tagLength (Ghost.hide a)) in
+    let suffix1 = suffix a (blockLength a + tagLength a) in
     let acc2 = repr acc h2 in
-    lemma_hash2 (acc0 #(Ghost.hide a)) v1 (tag1 @| suffix1);
+    lemma_hash2 (acc0 #a) v1 (tag1 @| suffix1);
     Seq.append_assoc v1 tag1 suffix1;
     assert(acc2 == hash0 ((v1 @| tag1) @| suffix1));
-    assert(extract acc2 = spec (Ghost.hide a) (v1 @| tag1)))
+    assert(extract acc2 = spec a (v1 @| tag1)))
 
 // similar spec as hmac with keylen = blockLen a
 val hmac_core:
-  a: alg -> (
-  let a = Ghost.hide a in
+  a: alg -> 
   acc: state a ->
   tag: uint8_pl (tagLength a) ->
   key: uint8_pl (blockLength a) {disjoint key tag} ->
   data: uint8_p{
-    length data + blockLength a < pow2 32 /\
-    length data + blockLength a <= maxLength a /\
+    length data + blockLength a < pow2 32 /\ (*required for 32-bit allocation*)
+    // length data + blockLength a <= maxLength a /\ (*always true*)
     disjoint data key } ->
   datalen: UInt32.t {v datalen = length data} ->
   ST unit
@@ -311,6 +291,7 @@ val hmac_core:
     ( let k = as_seq h0 key in
       let k1 = xor 0x36uy k in
       let k2 = xor 0x5cuy k in
+      length data + blockLength a <= maxLength a /\ ( (*always true*)
       let v1 = spec a (k1 @| as_seq h0 data) in
       Seq.length (k2 @| v1) <= maxLength a /\
       as_seq h1 tag == spec a (k2 @| v1))))
@@ -365,7 +346,6 @@ let hmac_core a acc tag key data len =
   pop_frame ();
   (
     let h3 = ST.get() in
-    let a = Ghost.hide a in
     let k = as_seq h0 key in
     let k1: lbseq (blockLength a) = xor 0x36uy k in
     let k2: lbseq (blockLength a) = xor 0x5cuy k in
@@ -407,7 +387,8 @@ let hmac_core a acc tag key data len =
 let compute a mac key keylen data datalen =
   let h00 = ST.get() in
   push_frame ();
-  assert_norm(pow2 32 <= maxLength (Ghost.hide a));
+  assert_norm(pow2 32 + blockLength a <= maxLength a);
+  assert(length data + blockLength a <= maxLength a);
   let keyblock = alloca 0x00uy (blockLen a) in
   let acc = Hash.create a in
   let h0 = ST.get() in
@@ -417,12 +398,11 @@ let compute a mac key keylen data datalen =
   Hash.frame_invariant_implies_footprint_preservation (loc_buffer keyblock) acc h0 h1;
   hmac_core a acc mac keyblock data datalen;
   let h2 = ST.get() in
-  Hash.free acc;
+  Hash.free #(Ghost.hide a) acc;
   pop_frame ();
-  //18-08-02 not provable from the current postcondition of Hash.free
-  // TR: modifies clause now proven by erasing all memory locations
-  // that were unused in h00:
   let hf = ST.get () in
+  // TR: modifies clause proven by erasing all memory locations that
+  // were unused in h00:
   LowStar.Buffer.modifies_only_not_unused_in (loc_buffer mac) h00 hf
 
 

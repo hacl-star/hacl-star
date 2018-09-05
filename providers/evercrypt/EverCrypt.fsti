@@ -104,19 +104,73 @@ val chacha20_poly1305_decrypt: key:uint8_p -> iv:uint8_p ->
   cipher: uint8_p -> tag:uint8_p ->
   ST uint32_t chacha20_poly1305_decrypt_pre chacha20_poly1305_decrypt_post
 
-/// AEAD
+/// Agile Block and Stream Ciphers (adapted from CoreCrypto, TBC)
+
+type block_cipher_alg =
+  | AES128_CBC
+  | AES256_CBC
+  | TDES_EDE_CBC
+
+let block_cipher_keyLen = function
+  | AES128_CBC   -> 16ul
+  | AES256_CBC   -> 32ul
+  | TDES_EDE_CBC  -> 24ul
+
+let block_cipher_blockLen = function
+  | AES128_CBC   -> 16ul
+  | AES256_CBC   -> 16ul
+  | TDES_EDE_CBC ->  8ul
+
+type stream_cipher_alg = 
+  | RC4_128
+
+/// Agile AEAD
 
 type aead_alg =
   | AES128_GCM
   | AES256_GCM
   | CHACHA20_POLY1305
+  // the algorithms below are used in TLS 1.3 but not yet supported by
+  // EverCrypt or miTLS; they are included e.g. for parsing
+  | AES128_CCM  // "Counter with CBC-Message Authentication Code"
+  | AES256_CCM
+  | AES128_CCM8 // variant with truncated 8-byte tags
+  | AES256_CCM8
+
+let supported_aead_alg (a:aead_alg): GTot bool = 
+  match a with 
+  | AES128_GCM
+  | AES256_GCM
+  | CHACHA20_POLY1305 -> true
+  | _ -> false
+
+let aead_keyLen = function
+  | AES128_GCM        -> 16ul
+  | AES256_GCM        -> 32ul
+  | CHACHA20_POLY1305 -> 32ul
+  | AES128_CCM        -> 16ul
+  | AES128_CCM8       -> 16ul
+  | AES256_CCM        -> 32ul
+  | AES256_CCM8       -> 32ul
+
+let aead_tagLen = function
+  | AES128_CCM8       ->  8ul
+  | AES256_CCM8       ->  8ul
+  | AES128_GCM        -> 16ul
+  | AES256_GCM        -> 16ul
+  | CHACHA20_POLY1305 -> 16ul
+  | AES128_CCM        -> 16ul
+  | AES256_CCM        -> 16ul
+
+let aead_ivLen (a:aead_alg) = 12ul
+
 
 [@CAbstractStruct]
 val aead_state_s: Type0
 
 let aead_state = B.pointer aead_state_s
 
-val aead_create: alg:aead_alg -> key:uint8_p ->
+val aead_create: a:aead_alg {supported_aead_alg a} -> key:uint8_p ->
   ST aead_state aead_create_pre aead_create_post
 
 val aead_encrypt: key:aead_state -> iv:uint8_p ->
