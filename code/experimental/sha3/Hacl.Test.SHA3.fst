@@ -53,7 +53,7 @@ val test_shake128:
 let test_shake128 msg_len msg out_len expected =
   push_frame ();
   let test = create out_len (u8 0) in
-  shake128 msg_len msg out_len test;
+  shake128_hacl msg_len msg out_len test;
   print_compare_display out_len test expected;
   pop_frame ()
 
@@ -68,7 +68,7 @@ val test_shake256:
 let test_shake256 msg_len msg out_len expected =
   push_frame ();
   let test = create out_len (u8 0) in
-  shake256 msg_len msg out_len test;
+  shake256_hacl msg_len msg out_len test;
   print_compare_display out_len test expected;
   pop_frame ()
 

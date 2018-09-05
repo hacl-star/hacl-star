@@ -19,7 +19,7 @@ module B = LowStar.Buffer
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-val shake128:
+val shake128_hacl:
      inputByteLen:size_t
   -> input:lbytes (v inputByteLen)
   -> outputByteLen:size_t
@@ -28,10 +28,10 @@ val shake128:
      (requires fun h ->
        live h input /\ live h output /\ disjoint input output)
      (ensures  fun h0 _ h1 -> modifies (loc_buffer output) h0 h1)
-let shake128 inputByteLen input outputByteLen output =
+let shake128_hacl inputByteLen input outputByteLen output =
   keccak (size 1344) (size 256) inputByteLen input (u8 0x1F) outputByteLen output
 
-val shake256:
+val shake256_hacl:
      inputByteLen:size_t
   -> input:lbytes (v inputByteLen)
   -> outputByteLen:size_t
@@ -40,7 +40,7 @@ val shake256:
      (requires fun h ->
        live h input /\ live h output /\ disjoint input output)
      (ensures  fun h0 _ h1 -> modifies (loc_buffer output) h0 h1)
-let shake256 inputByteLen input outputByteLen output =
+let shake256_hacl inputByteLen input outputByteLen output =
   keccak (size 1088) (size 512) inputByteLen input (u8 0x1F) outputByteLen output
 
 val sha3_224:
