@@ -61,7 +61,7 @@ inline static void state_permute1(uint64_t *s, int round)
       _C[(i0 + (uint32_t)4U)
       % (uint32_t)5U]
       ^ ROTL(uu____0,1);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)5U)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)25U; i = i + (uint32_t)5U)
       s[i0 + i] = s[i0 + i] ^ _D;
   }
   uint64_t current = s[1U];
@@ -76,7 +76,7 @@ inline static void state_permute1(uint64_t *s, int round)
   }
   uint64_t temp[25U] = { 0U };
   memcpy(temp, s, (uint32_t)25U * sizeof s[0U]);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)5U; i0 = i0 + (uint32_t)5U)
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)25U; i0 = i0 + (uint32_t)5U)
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)1U)
       s[i + i0] =
         temp[i
