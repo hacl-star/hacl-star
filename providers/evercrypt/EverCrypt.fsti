@@ -160,9 +160,8 @@ val dh_free_group:
 
 val dh_keygen:
   st: dh_state ->
-  secret: uint8_p ->
-  public: uint8_p ->
-  ST (uint32_t * uint32_t)
+  out: uint8_p ->
+  ST uint32_t
   (requires fun h0 -> False)
   (ensures fun h0 _ h1 -> True)
 
@@ -170,6 +169,49 @@ val dh_compute:
   st: dh_state ->
   public: uint8_p ->
   public_len: uint32_t ->
+  out: uint8_p ->
+  ST uint32_t
+  (requires fun h0 -> False)
+  (ensures fun h0 _ h1 -> True)
+
+/// ECDH
+
+type ec_curve =
+  | ECC_P256
+  | ECC_P384
+  | ECC_P521
+  | ECC_X25519
+  | ECC_X448
+
+[@CAbstractStruct]
+val ecdh_state_s: Type0
+
+let ecdh_state = B.pointer ecdh_state_s
+
+val ecdh_load_curve:
+  g: ec_curve ->
+  ST ecdh_state
+  (requires fun h0 -> False)
+  (ensures fun h0 _ h1 -> True)
+
+val ecdh_free_curve:
+  st: ecdh_state ->
+  ST unit
+  (requires fun h0 -> False)
+  (ensures fun h0 _ h1 -> True)
+
+val ecdh_keygen:
+  st: ecdh_state ->
+  outx: uint8_p ->
+  outy: uint8_p ->
+  ST unit
+  (requires fun h0 -> False)
+  (ensures fun h0 _ h1 -> True)
+
+val ecdh_compute:
+  st: ecdh_state ->
+  inx: uint8_p ->
+  iny: uint8_p ->
   out: uint8_p ->
   ST uint32_t
   (requires fun h0 -> False)

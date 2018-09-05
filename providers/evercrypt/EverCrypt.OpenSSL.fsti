@@ -95,9 +95,8 @@ val dh_free_group:
 
 val dh_keygen:
   st: Dyn.dyn ->
-  secret: uint8_p ->
-  public: uint8_p ->
-  ST (uint32_t * uint32_t)
+  out: uint8_p ->
+  ST uint32_t
   (requires fun h0 -> True)
   (ensures fun h0 _ h1 -> modifies_none h0 h1)
   
@@ -109,3 +108,42 @@ val dh_compute:
   ST uint32_t
   (requires fun h0 -> True)
   (ensures fun h0 _ h1 -> modifies_none h0 h1)
+
+/// ECDH
+
+type ec_curve =
+  | ECC_P256
+  | ECC_P384
+  | ECC_P521
+  | ECC_X25519
+  | ECC_X448
+
+val ecdh_load_curve:
+  g: ec_curve ->
+  ST Dyn.dyn
+  (requires fun h0 -> False)
+  (ensures fun h0 _ h1 -> True)
+
+val ecdh_free_curve:
+  st: Dyn.dyn ->
+  ST unit
+  (requires fun h0 -> False)
+  (ensures fun h0 _ h1 -> True)
+
+val ecdh_keygen:
+  st: Dyn.dyn ->
+  outx: uint8_p ->
+  outy: uint8_p ->
+  ST unit
+  (requires fun h0 -> False)
+  (ensures fun h0 _ h1 -> True)
+
+val ecdh_compute:
+  st: Dyn.dyn ->
+  inx: uint8_p ->
+  iny: uint8_p ->
+  out: uint8_p ->
+  ST uint32_t
+  (requires fun h0 -> False)
+  (ensures fun h0 _ h1 -> True)
+

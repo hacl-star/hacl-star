@@ -493,7 +493,7 @@ let aead_free pk =
 [@CAbstractStruct]
 private noeq type _dh_state =
   | DH_OPENSSL: st:Dyn.dyn -> _dh_state
-  | DUMMY // Necessary placeholder or discriminators are not defined
+  | DH_DUMMY // Necessary placeholder or discriminators are not defined
 
 let dh_state_s = _dh_state
 
@@ -516,10 +516,10 @@ let dh_free_group st =
     failwith !$"ERROR: inconsistent configuration";
   B.free st
 
-let dh_keygen st secret public =
+let dh_keygen st public =
   let s = !*st in
   if SC.openssl && DH_OPENSSL? s then
-    OpenSSL.dh_keygen (DH_OPENSSL?.st s) secret public
+    OpenSSL.dh_keygen (DH_OPENSSL?.st s) public
   else
     failwith !$"ERROR: inconsistent configuration"
 
@@ -529,3 +529,52 @@ let dh_compute st public public_len out =
     OpenSSL.dh_compute (DH_OPENSSL?.st s) public public_len out
   else
     failwith !$"ERROR: inconsistent configuration"
+
+/// DH
+
+[@CAbstractStruct]
+private noeq type _ecdh_state =
+  | ECDH_OPENSSL: st:Dyn.dyn -> _ecdh_state
+  | ECDH_DUMMY // Necessary placeholder or discriminators are not defined
+
+let ecdh_state_s = _ecdh_state
+
+let ecdh_load_curve g =
+  let i = AC.dh_impl () in
+  let st: ecdh_state_s =
+    if SC.openssl && i = AC.OpenSSL then
+      let g' = match g with
+        | ECC_P256 -> OpenSSL.ECC_P256
+	| ECC_P384 -> OpenSSL.ECC_P384
+	| ECC_P521 -> OpenSSL.ECC_P521
+	| ECC_X25519 -> OpenSSL.ECC_X25519
+	| ECC_X448 -> OpenSSL.ECC_X448 in
+      ECDH_OPENSSL (OpenSSL.ecdh_load_curve g')
+    else
+      failwith !$"ERROR: inconsistent configuration"
+  in
+  B.malloc HS.root st 1ul
+
+let ecdh_free_curve st =
+  let i = AC.dh_impl () in
+  let s : _ecdh_state = !*st in
+  if SC.openssl && ECDH_OPENSSL? s then
+    OpenSSL.ecdh_free_curve (ECDH_OPENSSL?.st s)
+  else
+    failwith !$"ERROR: inconsistent configuration";
+  B.free st
+
+let ecdh_keygen st outx outy =
+  let s = !*st in
+  if SC.openssl && ECDH_OPENSSL? s then
+    OpenSSL.ecdh_keygen (ECDH_OPENSSL?.st s) outx outy
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let ecdh_compute st inx iny out =
+  let s = !*st in
+  if SC.openssl && ECDH_OPENSSL? s then
+    OpenSSL.ecdh_compute (ECDH_OPENSSL?.st s) inx iny out
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
