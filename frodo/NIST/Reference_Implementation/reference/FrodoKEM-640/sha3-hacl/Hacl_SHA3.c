@@ -45,7 +45,7 @@ static const uint64_t keccakf_rndc[24] = {
     SHA3_CONST(0x0000000080000001UL), SHA3_CONST(0x8000000080008008UL)
 };
 
-inline static void state_permute1(uint64_t *s, int round)
+static void state_permute1(uint64_t *s, int round)
 {
   uint64_t _C[5U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)1U)
@@ -89,13 +89,13 @@ inline static void state_permute1(uint64_t *s, int round)
   s[0U] = s[0U] ^ keccakf_rndc[round];
 }
 
-inline static void state_permute(uint64_t *s)
+static void state_permute(uint64_t *s)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)24U; i = i + (uint32_t)1U)
     state_permute1(s, i);
 }
 
-inline static void loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
+static void loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 {
   uint8_t block[200U] = { 0U };
   memcpy(block, input, rateInBytes * sizeof input[0U]);
@@ -107,7 +107,7 @@ inline static void loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
   }
 }
 
-inline static void storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res)
+static void storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res)
 {
   uint8_t block[200U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)25U; i = i + (uint32_t)1U)
@@ -115,7 +115,7 @@ inline static void storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res)
   memcpy(res, block, rateInBytes * sizeof block[0U]);
 }
 
-inline static void
+static void
 absorb(
   uint64_t *s,
   uint32_t rateInBytes,
@@ -149,7 +149,7 @@ absorb(
   state_permute(s);
 }
 
-inline static void
+static void
 squeeze(uint64_t *s, uint32_t rateInBytes, uint32_t outputByteLen, uint8_t *output)
 {
   uint32_t outBlocks = outputByteLen / rateInBytes;
