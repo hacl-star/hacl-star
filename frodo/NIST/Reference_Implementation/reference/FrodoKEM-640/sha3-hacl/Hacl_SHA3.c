@@ -14,7 +14,10 @@
 
 #include "x86intrin.h"
 
-#define ROTL(x,y) __rolq(x,y)
+//#define ROTL(x,y) __rolq(x,y)
+//#define ROTL(x,y) ((x << y) | (x >> (63-y)))
+#define ROTL(x, y) \
+	(((x) << (y)) | ((x) >> ((sizeof(uint64_t)*8) - (y))))
 
 static const unsigned keccakf_rotc[24] = {
     1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62,
