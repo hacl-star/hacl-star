@@ -65,6 +65,12 @@ let hash_r_inv h v =
   B.live h v /\ B.freeable v /\ 
   B.len v = hash_size
 
+val hash_r_inv_reg:
+  h:HS.mem -> v:hash ->
+  Lemma (requires (hash_r_inv h v))
+	(ensures (MHS.live_region h (hash_region_of v)))
+let hash_r_inv_reg h v = ()
+
 val hash_r_sep:
   v:hash -> p:loc -> h0:HS.mem -> h1:HS.mem ->
   Lemma (requires (hash_r_inv h0 v /\
@@ -129,6 +135,7 @@ let hreg =
       hash_repr
       hash_r_repr
       hash_r_inv
+      hash_r_inv_reg
       hash_r_sep
       hash_irepr
       hash_r_init
@@ -159,6 +166,12 @@ let hash_vec_r_repr h v =
 val hash_vec_r_inv:
   h:HS.mem -> v:hash_vec -> GTot Type0
 let hash_vec_r_inv h v = rv_inv h v
+
+val hash_vec_r_inv_reg:
+  h:HS.mem -> v:hash_vec ->
+  Lemma (requires (hash_vec_r_inv h v))
+	(ensures (MHS.live_region h (hash_vec_region_of v)))
+let hash_vec_r_inv_reg h v = ()
 
 val hash_vec_r_sep:
   v:hash_vec -> p:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -211,6 +224,7 @@ let bhreg =
       hash_vec_repr
       hash_vec_r_repr
       hash_vec_r_inv
+      hash_vec_r_inv_reg
       hash_vec_r_sep
       hash_vec_irepr
       hash_vec_r_init
