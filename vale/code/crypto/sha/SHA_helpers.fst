@@ -586,16 +586,23 @@ let lemma_quads_to_block (qs:seq quad32) : Lemma
   ()
 #pop-options
 
-let translate_hash_update (h0 h1 a0 a1:quad32) : 
-  Lemma (let h0' = add_wrap_quad32 a0 h0 in
-         let h1' = add_wrap_quad32 a1 h1 in
+let translate_hash_update (h0 h1 h0' h1' a0 a1:quad32) : Lemma
+  (requires h0' == add_wrap_quad32 a0 h0 /\
+            h1' == add_wrap_quad32 a1 h1) 
+  (ensures (
          let h = make_hash h0 h1 in
          let a = make_hash a0 a1 in
          let h' = make_hash h0' h1' in
          let mapped = Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) h a in
-         mapped == h')
+         mapped == h'))
   =
-  admit()
+  let h = make_hash h0 h1 in
+  let a = make_hash a0 a1 in
+  let h' = make_hash h0' h1' in
+  let mapped = Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) h a in
+  FStar.Classical.forall_intro_2 lemma_add_wrap_is_add_mod;
+  assert (equal mapped h');
+  ()
          
 unfold let shuffle_opaque = make_opaque shuffle
   
@@ -616,23 +623,15 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) :
   let hash_1 = shuffle_opaque SHA2_256 hash_orig block in
   reveal_opaque shuffle;
   reveal_opaque shuffle_core;
-  //assert (hash_1 == shuffle SHA2_256 hash_orig block);
   let h = make_hash src1 src2 in
   assert (shuffle_core_opaque == shuffle_core);
-  //assert_norm (shuffle_core_opaque == shuffle_core);
-  //let open FStar.FunctionalExtensionality in
-  //assert (feq shuffle_core shuffle_core_opaque);
-  //assert (FStar.FunctionalExtensionality.feq (shuffle_core_opaque SHA2_256 block) (shuffle_core SHA2_256 block));
   assert (shuffle_core_opaque SHA2_256 block == shuffle_core SHA2_256 block);
   assert (Spec.Loops.repeat_range_spec 0 64 (shuffle_core_opaque SHA2_256 block) hash_orig ==
           Spec.Loops.repeat_range_spec 0 64 (shuffle_core SHA2_256 block) hash_orig);
   assert (make_hash src1 src2 == shuffle SHA2_256 hash_orig block); 
-  //assert (h == hash_1);
-  //let h' = make_hash src1' src2' in
-  //let u = update SHA2_256 hash_orig block in
-  //assert (equal h' u);
-  translate_hash_update src1 src2 h0 h1;
-  admit();
+  assert (make_hash src1 src2 == shuffle_opaque SHA2_256 hash_orig block);
+  translate_hash_update src1 src2 src1' src2' h0 h1;
+  assert (equal (make_hash src1' src2') (update_block SHA2_256 hash_orig block));
   ()
 
 
