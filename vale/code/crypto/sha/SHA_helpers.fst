@@ -697,3 +697,15 @@ let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) (bou
     ()
   )  
 #pop-options  
+
+let le_bytes_to_hash (b:seq nat8) : hash_w SHA2_256 =
+  if length b <> 32 then   
+     (let f (n:nat{n < 8}) : UInt32.t = to_uint32 0 in
+     init 8 f)
+  else (
+     let open Words.Seq_s in
+     Spec.Loops.seq_map to_uint32 (seq_nat8_to_seq_nat32_LE b)
+  )
+        
+
+//let lemma_to_bytes 

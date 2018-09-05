@@ -507,8 +507,6 @@ procedure {:quick} loop(
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40*num < pow2_64;
 
-        num > 0;
-
         tmp_xmm == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
         bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
@@ -591,7 +589,7 @@ procedure {:quick} epilogue(
 }
 
 
-procedure {:quick} sha_update(
+procedure {:quick} {:verify true} sha_update(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128
@@ -614,11 +612,6 @@ procedure {:quick} sha_update(
         inp + 0x40*num < pow2_64;
         buffers_disjoint128(ctx_b, in_b);
 
-        num > 0;
-
-        tmp_xmm == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-        bswap == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-
         k_reqs(buffer128_as_seq(mem, k_b));
     ensures
         inp == old(inp) + 0x40*old(num);
@@ -640,3 +633,45 @@ procedure {:quick} sha_update(
     epilogue(ctx_b);
 }
 
+/*
+procedure {:quick} sha_update_bytes(
+        ghost ctx_b:buffer128,
+        ghost in_b:buffer128,
+        ghost k_b:buffer128
+    )
+    lets
+        tmp_reg @= rax; tbl @= rcx; num @= rdx; ctx @= rdi; inp @= rsi; 
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
+        tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
+    reads
+        ctx; tbl; memTaint;
+    modifies
+        inp; num; rax;
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
+        mem; efl;
+    requires
+        validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
+        validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
+        validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
+        inp + 0x40*num < pow2_64;
+        buffers_disjoint128(ctx_b, in_b);
+        buffer_length(ctx_b) == 2;
+        buffer_length(in_b) == 4*num;
+
+        k_reqs(buffer128_as_seq(mem, k_b));
+    ensures
+        inp == old(inp) + 0x40*old(num);
+
+        let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
+        let hash_out :=     le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b)));
+
+        let input_LE := le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)) in
+        hash_out == update_multi(SHA2_256, hash_in, input_LE);
+
+        // Framing
+        modifies_buffer128(ctx_b, old(mem), mem);
+{
+    sha_update(ctx_b, in_b, k_b);
+}
+*/
