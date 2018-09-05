@@ -646,6 +646,25 @@ let rec update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) : Tot (has
     let hash = update_block SHA2_256 h_prefix (quads_to_block qs) in
     hash
 
+#push-options "--max_fuel 1" 
+let lemma_slice_commutes_reverse_bytes_quad32_seq (s:seq quad32) (pivot:nat) : Lemma
+  (requires pivot <= length s)
+  (ensures  slice (reverse_bytes_quad32_seq s) 0 pivot == reverse_bytes_quad32_seq (slice s 0 pivot))
+  =
+  let rs = reverse_bytes_quad32_seq s in
+  let srs = slice (reverse_bytes_quad32_seq s) 0 pivot in
+  let ss = slice s 0 pivot in
+  let rss = reverse_bytes_quad32_seq ss in
+  if pivot = 0 then (
+    assert (equal ss empty);
+    assert (equal srs empty);
+    assert (equal empty (reverse_bytes_quad32_seq empty));
+    ()
+  ) else (
+    assert (equal srs rss)
+  )
+#pop-options
+
 #push-options "--max_fuel 1"  // Without this, F* refuses to do even one unfolding of update_multi_quads :(
 let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) (bound:nat) : Lemma
     (requires bound + 4 <= length s)
@@ -659,56 +678,23 @@ let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) (bou
               let h = update_block SHA2_256 h_prefix (quads_to_block block_quads_BE) in
               h == update_multi_quads input_BE hash_orig))
   =
-  if bound = 0 then ()
-  else ();
-  admit()
-#pop-options  
-
-(*
-let rec update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) : Tot (hash_w SHA2_256) (decreases (length s))
-  =
-  if length s < 4 then
-     hash_orig
-  else
-     let qs, rem = split s 4 in
-     let hash = update_block SHA2_256 hash_orig (quads_to_block qs) in
-     update_multi_quads rem hash
-
-#push-options "--max_fuel 1"  // Without this, F* refuses to do even one unfolding of update_multi_quads :(
-let rec update_multi_quads_associates (s:seq quad32) (hash_orig:hash_w SHA2_256) (pivot:nat) : Lemma
-  (requires length s % 4 == 0 /\ pivot % 4 == 0 /\ pivot <= length s)
-  (ensures (let left,right = split s pivot in
-            let h_left = update_multi_quads left hash_orig in
-            let h_right = update_multi_quads right h_left in
-            update_multi_quads s hash_orig == h_right))
-  (decreases (
-      %[ length s; pivot ]))
-  =
-  let left,right = split s pivot in
-  let h_left = update_multi_quads left hash_orig in
-  let h_right = update_multi_quads right h_left in
-  if pivot = 0 then begin
-    ()
-  end else begin
-    update_multi_quads_associates left hash_orig pivot;
-    admit()
-  end;
-  ()
-#pop-options
-
-let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) (bound:nat) : Lemma
-    (requires bound + 4 <= length s)
-    (ensures (let prefix = update_multi_quads (slice s 0 bound) hash_orig in
-              let h = update_block SHA2_256 prefix (quads_to_block (slice s bound (bound + 4))) in
-              h == update_multi_quads (slice s 0 (bound + 4)) hash_orig))
-  =
+  let prefix_LE = slice s 0 bound in
+  let prefix_BE = reverse_bytes_quad32_seq prefix_LE in
+  let h_prefix = update_multi_quads prefix_BE hash_orig in
+  let block_quads_LE = slice s bound (bound + 4) in
+  let block_quads_BE = reverse_bytes_quad32_seq block_quads_LE in
+  let input_LE = slice s 0 (bound+4) in
+  let input_BE = reverse_bytes_quad32_seq input_LE in
+  let h = update_block SHA2_256 h_prefix (quads_to_block block_quads_BE) in
+  lemma_slice_commutes_reverse_bytes_quad32_seq s bound;
+  lemma_slice_commutes_reverse_bytes_quad32_seq s (bound + 4);
+  assert (prefix_BE == slice (reverse_bytes_quad32_seq s) 0 bound);
+  assert (input_BE == slice (reverse_bytes_quad32_seq s) 0 (bound + 4));
   if bound = 0 then ()
   else (
-    let prefix = update_multi_quads (slice s 0 bound) hash_orig in
-    let h = update_block SHA2_256 prefix (quads_to_block (slice s bound (bound + 4))) in
-    assert (length s > 4);
-    admit()
-  );
-  admit();
-  ()
-*)
+    let prefix, qs = split input_BE (length input_BE - 4) in
+    assert (equal prefix prefix_BE);
+    assert (equal qs block_quads_BE);
+    ()
+  )  
+#pop-options  
