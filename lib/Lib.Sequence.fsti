@@ -110,8 +110,10 @@ val as_list: #a:Type -> #len:size_nat -> lseq a len -> l:list a{List.Tot.length 
 /// Experimental functions
 ///
 
-val concat: #a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 <= maxint SIZE} -> lseq a len1 -> lseq a len2 -> lseq a (len1 + len2)
-let (@|) #a #len1 #len2 s1 s2 = concat #a #len1 #len2 s1 s2
+//val concat: #a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 <= maxint SIZE} -> lseq a len1 -> lseq a len2 -> lseq a (len1 + len2)
+
+val concat: #a:Type -> x:seq a -> y:seq a{length x + length y <= maxint SIZE} -> r:seq a{length r = length x + length y}
+let (@|) #a s1 s2 = concat #a s1 s2
 
 open FStar.Mul
 val map_blocks: #a:Type0 ->
