@@ -352,18 +352,23 @@ val construct_rhs:
   rhs:hash_vec{V.size_of rhs = 32ul} ->
   j:uint32_t ->
   acc:hash ->
+  actd:bool ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let rec construct_rhs lv hs rhs j acc =
+let rec construct_rhs lv hs rhs j acc actd =
   admit ();
+  let copy = Cpy?.copy hcpy in
   if j = 0ul then ()
   else 
-    (if j % 2ul = 0ul
-    then ()
-    else (RV.assign_copy hcpy rhs lv acc;
-	 hash_2 (V.index (V.index hs lv) (j - 1ul)) acc acc);
-    construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc)
+    (if j % 2ul = 0ul 
+    then (RV.assign_copy hcpy rhs lv (V.index (V.index hs lv) (j - 1ul));
+	 construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc actd)
+    else (if actd
+    	 then (RV.assign_copy hcpy rhs lv acc;
+	      hash_2 (V.index (V.index hs lv) (j - 1ul)) acc acc)
+	 else (copy (V.index (V.index hs lv) (j - 1ul)) acc);
+	 construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc true))
 
 // Construct a Merkle path for a given index `k`, hashes `hs`, 
 // and rightmost hashes `rhs`.
@@ -380,18 +385,18 @@ val mt_get_path_:
 	 (ensures (fun h0 _ h1 -> true))
 let rec mt_get_path_ lv hs rhs j k path =
   admit ();
-  if j <= 1ul then ()
+  if j = 0ul then ()
   else
     (if k % 2ul = 1ul
     then B.upd path 0ul (V.insert (B.index path 0ul)
 				  (V.index (V.index hs lv) (k - 1ul)))
     else
-      (if k + 1ul = j then ()
-      else if k + 2ul = j 
+      (if k = j then ()
+      else if k + 1ul = j
       then B.upd path 0ul (V.insert (B.index path 0ul) (V.index rhs lv))
       else B.upd path 0ul (V.insert (B.index path 0ul)
   	 			    (V.index (V.index hs lv) (k + 1ul))));
-    mt_get_path_ (lv + 1ul) hs rhs ((j + 1ul) / 2ul) (k / 2ul) path)
+    mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path)
 
 val mt_get_path:
   mt:mt_p -> 
@@ -408,10 +413,10 @@ let mt_get_path mt idx ih path root =
   let mtv = B.index mt 0ul in
   if not (MT?.rhs_ok mtv) then
     (copy (V.index (V.index (MT?.hs mtv) 0ul) (MT?.j mtv - 1ul)) root;
-    construct_rhs 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv - 1ul) root;
+    construct_rhs 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv) root false;
     B.upd mt 0ul (MT (MT?.i mtv) (MT?.j mtv) (MT?.hs mtv) true (MT?.rhs mtv)))
   else ();
-  mt_get_path_ 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv) idx path;
+  mt_get_path_ 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv - 1) idx path;
   copy (V.index (V.index (MT?.hs mtv) 0ul) idx) ih;
   MT?.j mtv
 
