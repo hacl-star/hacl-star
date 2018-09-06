@@ -4,13 +4,11 @@
 #include <sys/types.h> 
 #include "endianness.h"
 
+#define INTERLEAVE 8
 typedef uint64_t* state_t;
 typedef uint64_t* key1_t;
 typedef uint64_t* keyex_t;
 
-//#define static static inline __attribute((always_inline))
-
-#define INTERLEAVE 8
 
 static uint64_t transpose64(uint64_t x) {
   uint64_t y = 0;
@@ -66,9 +64,9 @@ static  void to_transpose_block_high(state_t out, uint8_t* in) {
   fst = transpose64(fst);
   snd = transpose64(snd);
   for (int i = 0; i < 8; i++) {
-    uint64_t u = (fst >> (8*i)) & 0xff;
-    u ^= ((snd >> 8*i) & 0xff) << 8;
-    u = (u << 12) | (u << 24) | (u << 36) | (u << 48);
+    uint64_t u = (fst >> 8*i) & 0xff;
+    u ^= ((snd >> 8*i) & 0xff) << 32;
+    u = (u << 12) | (u << 24);
     u = u & 0xf000f000f000f000;
     out[i] = u;
   }
