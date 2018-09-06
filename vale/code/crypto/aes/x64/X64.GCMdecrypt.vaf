@@ -1,6 +1,7 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
+include "../../../lib/util/x64/X64.Stack.vaf"
 include "X64.AES.vaf"
 include "X64.GF128_Mul.vaf"
 include "X64.GCTR.vaf"
@@ -44,6 +45,7 @@ open X64.Vale.QuickCodes
 open X64.GF128_Mul
 open X64.GCMencrypt
 open X64.Util
+open X64.Stack
 #endverbatim
 
 #verbatim{:interface}

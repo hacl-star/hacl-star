@@ -707,100 +707,14 @@ let lemma_update_multi_quads_short (s:seq quad32) (hash_orig:hash_w SHA2_256) : 
   ()
 #pop-options
 
-//#push-options "--z3rlimit 20"
-let rec lemma_update_multi_equiv (hash:hash_w SHA2_256) (blocks:bytes{length blocks % size_block SHA2_256 = 0}) :
-  Lemma (requires True)        
-        (ensures (let nat8s = seq_U8_to_seq_nat8 blocks in
-         length nat8s % 16 == 0 /\
-        (let quads = reverse_bytes_quad32_seq (le_bytes_to_seq_quad32 nat8s) in
-         update_multi SHA2_256 hash blocks == update_multi_quads quads hash)))
-        (decreases (length blocks)) 
+(*+ TODO +*)
+let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
+  (requires length qs == 4 /\ length input2 == 64 /\
+            qs == reverse_bytes_quad32_seq quads /\
+            input2 == seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
+  (ensures  quads_to_block qs == words_from_be SHA2_256 size_block_w input2)
   =
-  let nat8s = seq_U8_to_seq_nat8 blocks in
-  assert (length nat8s == length blocks);
-  assert (length nat8s % 64 == 0);
-  let quads = reverse_bytes_quad32_seq (le_bytes_to_seq_quad32 nat8s) in
-  assert_norm (size_block SHA2_256 == 64);
-  let open FStar.Mul in
-  let num_blocks = length blocks / 64 in
-  if length blocks = 0 then (
-    update_multi_zero SHA2_256 hash;
-    assert (equal blocks empty);
-    assert (equal (update_multi SHA2_256 hash blocks) hash);
-    assert (equal nat8s empty);
-    lemma_le_bytes_to_seq_quad32_empty nat8s;
-    assert (equal (le_bytes_to_seq_quad32 nat8s) empty);
-    assert (length (le_bytes_to_seq_quad32 nat8s) == 0);
-    assert (length quads == 0);
-    lemma_update_multi_quads_short quads hash;
-    assert (equal (update_multi_quads quads hash) hash);
-    assert (equal (update_multi SHA2_256 hash blocks) (update_multi_quads quads hash));
-    ()
-  ) else (
-    assert (num_blocks > 0);
-  //;
-
-    let pivot = (num_blocks - 1) * 64 in
-    
-    let input1,input2 = split_block SHA2_256 blocks (pivot / 64) in
-    let h_bytes1 = update_multi SHA2_256 hash input1 in
-    let h_bytes2 = update_multi SHA2_256 h_bytes1 input2 in
-    update_multi_associative SHA2_256 hash blocks pivot;
-    assert (update_multi SHA2_256 hash blocks == h_bytes2);
-    lemma_update_multi_equiv hash input1;
-    let nat8s1 = seq_U8_to_seq_nat8 input1 in
-    let quads1 = reverse_bytes_quad32_seq (le_bytes_to_seq_quad32 nat8s1) in
-    assert (update_multi SHA2_256 hash input1 == update_multi_quads quads1 hash);
-    // ==> h_bytes1 == update_multi_quads quads1 hash
-
-    lemma_le_bytes_to_seq_quad32_length nat8s;
-    lemma_update_multi_quads_unfold quads hash;
-    let prefix, qs = split quads (length quads - 4) in
-    let h_prefix = update_multi_quads prefix hash in
-    let hash_full = update_block SHA2_256 h_prefix (quads_to_block qs) in
-    assert (update_multi_quads quads hash == hash_full);
-
-    // Move the slice from the inside of quads1 defn to the outside, to prove equality with prefix
-    assert (quads1 == reverse_bytes_quad32_seq (le_bytes_to_seq_quad32 (seq_U8_to_seq_nat8 (slice blocks 0 pivot))));
-    assert (equal (seq_U8_to_seq_nat8 (slice blocks 0 pivot)) (slice (seq_U8_to_seq_nat8 blocks) 0 pivot));
-    assert (quads1 == reverse_bytes_quad32_seq (le_bytes_to_seq_quad32 (slice (seq_U8_to_seq_nat8 blocks) 0 pivot)));
-    slice_commutes_le_bytes_to_seq_quad32 (seq_U8_to_seq_nat8 blocks) (pivot / 16);
-    lemma_le_bytes_to_seq_quad32_length (seq_U8_to_seq_nat8 blocks);
-    assert (quads1 == reverse_bytes_quad32_seq (slice (le_bytes_to_seq_quad32 (seq_U8_to_seq_nat8 blocks)) 0 (pivot / 16)));
-    let open Collections.Seqs in
-    slice_seq_map_commute reverse_bytes_quad32 (le_bytes_to_seq_quad32 (seq_U8_to_seq_nat8 blocks)) 0 (pivot / 16);
-    assert (quads1 == slice (reverse_bytes_quad32_seq (le_bytes_to_seq_quad32 (seq_U8_to_seq_nat8 blocks))) 0 (pivot / 16));
-    assert (pivot / 16 == length quads - 4);
-    assert (prefix == slice (reverse_bytes_quad32_seq (le_bytes_to_seq_quad32 nat8s)) 0 (length quads - 4));
-    //Goal: 
-    assert (quads1 == prefix);
-    // ==>
-    assert (h_prefix == h_bytes1);
-
-    // Now we need to prove:
-    // update_block SHA2_256 h_prefix (quads_to_block qs) in
-    // ==
-    // update_multi SHA2_256 h_bytes1 input2
-    update_multi_one SHA2_256 h_bytes1 input2;
-    // update SHA2_256 h_bytes1 input2
-    lemma_update_block_equiv SHA2_256 h_bytes1 input2;
-    // update_block SHA2_256 h_bytes1 (words_from_be SHA2_256 size_block_w input2)
-
-    // So we need to prove that:
-    // quads_to_block qs
-    // == 
-    // quads_to_block (slice quads (length quads - 4) (length quads))
-    // quads_to_block (slice (reverse_bytes_quad32_seq (le_bytes_to_seq_quad32 (seq_U8_to_seq_nat8 blocks))) (length quads - 4) (length quads))
-
-    // words_from_be SHA2_256 size_block_w (slice blocks pivot (length blocks))
-    // words_from_be SHA2_256 size_block_w (slice blocks pivot (length nat8s))
-    // words_from_be SHA2_256 size_block_w input2
-    assume (quads_to_block qs == words_from_be SHA2_256 size_block_w input2);
-    ()
-  )
-//#pop-options
-
-//
+  admit()
 
 let rec lemma_update_multi_equiv_vale (hash hash':hash_w SHA2_256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
@@ -814,8 +728,116 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash_w SHA2_256) (quads:seq qu
            hash' == update_multi SHA2_256 hash blocks)
         (decreases (length quads)) 
   =
+  let open FStar.Mul in
   assert (length blocks % 64 == 0);
-  admit()
+  if length quads = 0 then begin
+    lemma_le_seq_quad32_to_bytes_length quads;
+    //assert (length nat8s == 0);
+    //assert (length r_quads == 0);
+    lemma_update_multi_quads_short r_quads hash;
+    //assert (hash' == hash);
+    //assert (length blocks == 0);
+    assert (equal blocks empty);
+    update_multi_zero SHA2_256 hash;
+    //assert (update_multi SHA2_256 hash blocks == hash);
+    ()
+  end else begin
+    let num_blocks = (length quads) / 4 in
+    let bytes_pivot = (num_blocks - 1) * 64 in
+
+    // Use associativity of update_multi to rearrange recursion to better match update_multi_quads' recursion
+    let input1,input2 = split_block SHA2_256 blocks (bytes_pivot / 64) in
+    let h_bytes1 = update_multi SHA2_256 hash input1 in
+    let h_bytes2 = update_multi SHA2_256 h_bytes1 input2 in
+    update_multi_associative SHA2_256 hash blocks bytes_pivot;
+    assert (h_bytes2 == update_multi SHA2_256 hash blocks);
+  
+    // Unfold update_multi_quads one level, so we can start matching parts up    
+    let prefix, qs = split r_quads (length r_quads - 4) in
+    let h_prefix = update_multi_quads prefix hash in
+    let h_final = update_block SHA2_256 h_prefix (quads_to_block qs) in
+    lemma_update_multi_quads_unfold r_quads hash;
+    // hash' == update_multi_quads r_quads hash == h_final
+
+    (*+ Goal: h_bytes_2 == h_final +*)
+
+    (* Step 1: Show that h_prefix == h_bytes1 *)
+
+    // Inductive hypothesis says that we roughly line up on input1  
+    let r_prefix = reverse_bytes_quad32_seq prefix in
+    lemma_update_multi_equiv_vale hash h_prefix r_prefix prefix 
+                             (le_seq_quad32_to_bytes r_prefix) 
+                             (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix));
+    assert (h_prefix == update_multi SHA2_256 hash (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix)));    
+    // To show that h_prefix == h_bytes1, we need to show that:
+    // seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix) == input1
+    // calc {
+    //   input1
+    //   slice blocks 0 bytes_pivot
+    //   slice ( (le_seq_quad32_to_bytes quads)) 0 bytes_pivot
+    assert (equal (slice (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads)) 0 bytes_pivot)
+                  (seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads) 0 bytes_pivot)));
+    //   seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads) 0 bytes_pivot)
+    slice_commutes_le_seq_quad32_to_bytes0 quads (bytes_pivot / 16);
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads 0 (bytes_pivot / 16)))
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads 0 ((num_blocks - 1) * 4)))
+    assert (bytes_pivot / 16 == length quads - 4);
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads 0 (length quads - 4)))
+    //
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads 0 (length quads - 4)))))
+    assert (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq (slice quads 0 (length quads - 4))) == slice quads 0 (length quads - 4));
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq (slice quads 0 (length quads - 4)))))
+    Collections.Seqs.slice_seq_map_commute reverse_bytes_quad32 quads 0 (length quads - 4);
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (reverse_bytes_quad32_seq (slice (reverse_bytes_quad32_seq quads) 0 (length quads - 4)))
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix)
+    // }   
+    // assert (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix) == input1); // Conclusion of the calc
+    assert (h_prefix == h_bytes1);  // Conclusion of Step 1
+
+    // To invoke lemma_endian_relation below, 
+    // we need to show (1):
+    // calc {
+    //   qs
+    Collections.Seqs.slice_seq_map_commute reverse_bytes_quad32 quads (length quads - 4) (length quads);
+    //   slice (reverse_bytes_quad32_seq quads) (length quads - 4) (length quads))
+    //   reverse_bytes_quad32_seq (slice quads (length quads - 4) (length quads))
+    // }
+    // And (2):
+    // calc {
+    //   input2
+    //   slice blocks bytes_pivot (length blocks)
+    //   slice (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads)) bytes_pivot (length blocks)
+    assert (equal (slice (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads)) bytes_pivot (length blocks))
+                  (seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads)  bytes_pivot (length blocks))));
+    //   seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads) bytes_pivot (length blocks))
+    slice_commutes_le_seq_quad32_to_bytes quads (bytes_pivot/16) ((length blocks)/16);
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads bytes_pivot/16 (length blocks)/16)
+    //
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads (length quads - 4) (length quads))))
+    // }
+    //assert (input2 == seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads (length quads - 4) (length quads))));  // Conclusion of the calc
+
+    (* Step 2: Show that update_block SHA2_256 h_prefix (quads_to_block qs) == update_multi SHA2_256 h_bytes1 input2 *) 
+    // calc {
+    //   update_block SHA2_256 h_prefix (quads_to_block qs)
+    //     { from Step 1 }
+    //   update_block SHA2_256 h_bytes1 (quads_to_block qs)
+    //
+    lemma_endian_relation (slice quads (length quads - 4) (length quads)) qs 
+                          input2;  // ==> quads_to_block qs == words_from_be SHA2_256 size_block_w input2
+    //   update_block SHA2_256 h_bytes1 (words_from_be SHA2_256 16 input2)
+    lemma_update_block_equiv SHA2_256 h_bytes1 input2;
+    //   update SHA2_256 h_bytes1 input2
+    update_multi_one SHA2_256 h_bytes1 input2;
+    //   update_multi SHA2_256 h_bytes1 input2
+    // }
+    //
+    // assert (update_block SHA2_256 h_prefix (quads_to_block qs) == update_multi SHA2_256 h_bytes1 input2); // Conclusion of calc
+    // assert (h_final == h_bytes2); // Conclusion of Goal    
+    ()    
+  end
+  
+  
 
   
 //
@@ -891,39 +913,6 @@ let lemma_le_bytes_to_hash_quads (s:seq quad32) : Lemma
   let rhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in  
   lemma_le_bytes_to_hash_quads_part1 s;
   assert (rhs == Spec.Loops.seq_map to_uint32 (Words.Seq_s.seq_four_to_seq_LE s));
-  (*
-  let s4 = Words.Seq_s.seq_four_to_seq_LE s in
-  assert (s4.[0] == (s.[0]).lo0);
-  
-  assert (s4.[1] == (s.[0]).lo1);
-  assert (s4.[2] == (s.[0]).hi2);
-  assert (s4.[3] == (s.[0]).hi3);
-  assert (s4.[4] == (s.[1]).lo0);
-  assert (s4.[5] == (s.[1]).lo1);
-  assert (s4.[6] == (s.[1]).hi2);
-  assert (s4.[7] == (s.[1]).hi3);
-
-  let s4_to_uint32 = Spec.Loops.seq_map to_uint32 s4 in
-  assert (s4_to_uint32.[0] == to_uint32 (s.[0]).lo0);
-  assert (s4_to_uint32.[1] == to_uint32 (s.[0]).lo1);
-  assert (s4_to_uint32.[2] == to_uint32 (s.[0]).hi2);
-  assert (s4_to_uint32.[3] == to_uint32 (s.[0]).hi3);
-  assert (s4_to_uint32.[4] == to_uint32 (s.[1]).lo0);
-  assert (s4_to_uint32.[5] == to_uint32 (s.[1]).lo1);
-  assert (s4_to_uint32.[6] == to_uint32 (s.[1]).hi2);
-  assert (s4_to_uint32.[7] == to_uint32 (s.[1]).hi3);  
-  
-  assert (rhs.[0] == to_uint32 (s.[0]).lo0);
-  assert (rhs.[1] == to_uint32 (s.[0]).lo1);
-  assert (rhs.[2] == to_uint32 (s.[0]).hi2);
-  assert (rhs.[3] == to_uint32 (s.[0]).hi3);
-  assert (rhs.[4] == to_uint32 (s.[1]).lo0);
-  assert (rhs.[5] == to_uint32 (s.[1]).lo1);
-  assert (rhs.[6] == to_uint32 (s.[1]).hi2);
-  assert (rhs.[7] == to_uint32 (s.[1]).hi3);  
-  assert (length rhs == 8);
-  //admit()
-  *)
   ()
 #pop-options
 

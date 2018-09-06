@@ -153,7 +153,16 @@ val be_bytes_to_quad32_to_bytes (q:quad32) :
 let reverse_bytes_quad32_seq (s:seq quad32) : seq quad32 =
   seq_map reverse_bytes_quad32 s
 
+val lemma_reverse_reverse_bytes_quad32_seq (s:seq quad32) :
+  Lemma (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s) == s)
+  [SMTPat (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s))]
+
 open FStar.Mul
+
+val lemma_le_seq_quad32_to_bytes_length (s:seq quad32) : 
+  Lemma(length (le_seq_quad32_to_bytes s) == (length s) * 16)
+  
+
 val slice_commutes_seq_four_to_seq_LE (#a:Type) (s:seq (four a)) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
   Lemma(slice (seq_four_to_seq_LE s) (n * 4) (n' * 4) ==
         seq_four_to_seq_LE (slice s n n'))
