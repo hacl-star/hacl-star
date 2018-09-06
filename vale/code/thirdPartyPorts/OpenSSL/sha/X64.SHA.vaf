@@ -589,7 +589,7 @@ procedure {:quick} epilogue(
 }
 
 
-procedure {:quick} {:verify true} sha_update(
+procedure {:quick} sha_update(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128
@@ -633,8 +633,8 @@ procedure {:quick} {:verify true} sha_update(
     epilogue(ctx_b);
 }
 
-/*
-procedure {:quick} sha_update_bytes(
+#reset-options "--z3rlimit 50"
+procedure {:quick} {:verify true} sha_update_bytes(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128
@@ -666,12 +666,32 @@ procedure {:quick} sha_update_bytes(
         let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
         let hash_out :=     le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b)));
 
-        let input_LE := le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)) in
+        let input_LE := seq_nat8_to_seq_U8(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b))) in
+        length(input_LE) % 64 == 0 /\
         hash_out == update_multi(SHA2_256, hash_in, input_LE);
 
         // Framing
         modifies_buffer128(ctx_b, old(mem), mem);
 {
     sha_update(ctx_b, in_b, k_b);
+    ghost var old_ctx := old(buffer128_as_seq(mem, ctx_b));
+    ghost var new_ctx :=     buffer128_as_seq(mem, ctx_b);
+    lemma_hash_to_bytes(old_ctx);
+    lemma_hash_to_bytes(new_ctx);
+    ghost var hash_in  := le_bytes_to_hash(le_seq_quad32_to_bytes(old_ctx));
+    ghost var hash_out := le_bytes_to_hash(le_seq_quad32_to_bytes(new_ctx));
+
+    // Lots of OBSERVE below
+    assert {:quick_type} length(old_ctx) == 2;
+    assert {:quick_type} length(new_ctx) == 2;
+    assert old(buffer128_read(ctx_b, 0, mem)) == index(old_ctx, 0);
+    assert old(buffer128_read(ctx_b, 1, mem)) == index(old_ctx, 1);
+    assert     buffer128_read(ctx_b, 0, mem)  == index(new_ctx, 0);
+    assert     buffer128_read(ctx_b, 1, mem)  == index(new_ctx, 1);
+
+    ghost var input_LE := slice_workaround(buffer128_as_seq(mem, in_b), 0, 4*old(num));
+    ghost var input_BE := reverse_bytes_quad32_seq(input_LE);
+    assert hash_out == update_multi_quads(input_BE, hash_in);
+    lemma_update_multi_equiv_vale(hash_in, hash_out, input_LE, input_BE, le_seq_quad32_to_bytes(input_LE),
+                                  seq_nat8_to_seq_U8(le_seq_quad32_to_bytes(input_LE)));
 }
-*/
