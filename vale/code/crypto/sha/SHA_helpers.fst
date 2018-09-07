@@ -21,7 +21,8 @@ let to_uint32 (n:nat32) : UInt32.t = uint_to_t n
 
 unfold let ws_opaque = make_opaque ws
 unfold let shuffle_core_opaque = make_opaque shuffle_core
-
+unfold let update_multi_opaque = make_opaque update_multi
+  
 let make_hash_def (abef cdgh:quad32) :
     (hash:hash_w SHA2_256 {
          length hash == 8 /\
