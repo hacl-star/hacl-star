@@ -179,7 +179,20 @@ static inline void poly4(elem_t acc0, elem_t acc1, elem_t acc2, elem_t acc3,
   uint64_t tmp2[2] = {0};
   uint64_t tmp3[2] = {0};
   int blocks = tlen / 64;
-  for (int i = 0; i < blocks; i++) {
+  if (blocks > 0) {
+    encode(tmp0,text);
+    encode(tmp1,text+16);
+    encode(tmp2,text+32);
+    encode(tmp3,text+48);
+    acc0[0] = tmp0[0];
+    acc0[1] = tmp0[1];
+    acc1[0] = tmp1[0];
+    acc1[1] = tmp1[1];
+    acc2[0] = tmp2[0];
+    acc2[1] = tmp2[1];
+    acc3[0] = tmp3[0];
+    acc3[1] = tmp3[1];
+  for (int i = 1; i < blocks; i++) {
     encode(tmp0,text+64*i);
     encode(tmp1,text+64*i+16);
     encode(tmp2,text+64*i+32);
@@ -201,6 +214,7 @@ static inline void poly4(elem_t acc0, elem_t acc1, elem_t acc2, elem_t acc3,
   fadd(acc0,acc1);
   fadd(acc0,acc2);
   fadd(acc0,acc3);
+  }
   if (tlen % 64 > 0) {
     int blocks16 = (tlen % 64) / 16;
     for (int j = 0; j < blocks16; j++) {
@@ -218,12 +232,13 @@ static inline void poly4(elem_t acc0, elem_t acc1, elem_t acc2, elem_t acc3,
   }
 }
 
+
 void ghash(uint8_t* tag, uint8_t* text, int tlen, uint8_t* key) {
   uint64_t k[2] = {0};
+  encode(k,key);
   uint64_t k2[2] = {0};
   uint64_t k3[2] = {0};
   uint64_t k4[2] = {0};
-  encode(k,key);
   k2[0] = k[0];
   k2[1] = k[1];
   k3[0] = k[0];
