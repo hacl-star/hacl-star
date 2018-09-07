@@ -3,6 +3,7 @@ module MerkleTree.New.Low
 open EverCrypt
 // open EverCrypt.Hash
 open EverCrypt.Helpers
+open EverCrypt.AutoConfig
 
 open FStar.All
 open FStar.Integers
@@ -34,6 +35,10 @@ val hash_size: uint32_t
 let hash_size = EHS.tagLen EHS.SHA256
 
 type hash = uint8_p
+
+val hash_cfg: EverCrypt.AutoConfig.impl -> HST.St unit
+let hash_cfg i = 
+  EverCrypt.AutoConfig.init (EverCrypt.AutoConfig.Prefer i)
 
 // We cannot use `LowStar.RVector.Instances`, where we have some general
 // instantiations of `regional`, e.g., if `rg:regional a` then
