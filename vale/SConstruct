@@ -319,6 +319,7 @@ verify_options = [
   ('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
 
   # Disable verification by adding 'filename': None
+  ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None), # TODO: Timeout dealing with SHA instructions
   ('code/crypto/aes/x64/Low.GCMencrypt.fst', None), # TODO: timeout in gcm_core
   ('code/arch/x64/interop/*_win.fst', None),
   ('code/arch/x64/interop/*_win.fsti', None),

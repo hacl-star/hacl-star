@@ -79,6 +79,15 @@ let check_if_shufpd_leakage_free ins ts =
   let ts' = set_xmm_taint ts dst taint in
   true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
 
+val check_if_palignr_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.Palignr? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
+
+let check_if_palignr_leakage_free ins ts =
+  let S.Palignr dst src _, _, _ = ins.ops in
+  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
+  let ts' = set_xmm_taint ts dst taint in
+  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
+
 val check_if_pshufb_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.Pshufb? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
 
@@ -255,6 +264,38 @@ let check_if_aesni_keygen_leakage_free ins ts =
   let ts' = set_xmm_taint ts dst taint in
   true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
 
+val check_if_sha256_rnds2_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.SHA256_rnds2? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
+
+#push-options "--max_fuel 0 --max_ifuel 0"
+open X64.CryptoInstructions_s
+open Opaque_s
+let check_if_sha256_rnds2_leakage_free ins ts =
+  let S.SHA256_rnds2 dst src, _, _ = ins.ops in
+  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
+  let ts' = set_xmm_taint ts dst taint in
+  reveal_opaque sha256_rnds2_spec_def;
+  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
+#pop-options
+
+val check_if_sha256_msg1_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.SHA256_msg1? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
+     
+let check_if_sha256_msg1_leakage_free ins ts =
+  let S.SHA256_msg1 dst src, _, _ = ins.ops in
+  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
+  let ts' = set_xmm_taint ts dst taint in
+  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
+
+val check_if_sha256_msg2_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.SHA256_msg2? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
+     
+let check_if_sha256_msg2_leakage_free ins ts =
+  let S.SHA256_msg2 dst src, _, _ = ins.ops in
+  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
+  let ts' = set_xmm_taint ts dst taint in
+  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
+
 val check_if_movdqu_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.MOVDQU? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
 
@@ -405,6 +446,7 @@ let check_if_xmm_ins_consumes_fixed_time ins ts =
     | S.Pslld dst amt -> check_if_pslld_leakage_free ins ts
     | S.Psrld dst amt -> check_if_psrld_leakage_free ins ts
     | S.Psrldq _ _ -> check_if_psrldq_leakage_free ins ts
+    | S.Palignr _ _ _ -> check_if_palignr_leakage_free ins ts
     | S.Shufpd _ _ _ -> check_if_shufpd_leakage_free ins ts
     | S.Pshufb dst src -> check_if_pshufb_leakage_free ins ts
     | S.Pshufd dst src permutation -> check_if_pshufd_leakage_free ins ts
@@ -421,4 +463,6 @@ let check_if_xmm_ins_consumes_fixed_time ins ts =
     | S.AESNI_dec_last dst src -> check_if_aesni_dec_last_leakage_free ins ts
     | S.AESNI_imc dst src -> check_if_aesni_imc_leakage_free ins ts
     | S.AESNI_keygen_assist dst src imm -> check_if_aesni_keygen_leakage_free ins ts
-
+    | S.SHA256_rnds2 _ _ -> check_if_sha256_rnds2_leakage_free ins ts
+    | S.SHA256_msg1 _ _ -> check_if_sha256_msg1_leakage_free ins ts
+    | S.SHA256_msg2 _ _ -> check_if_sha256_msg2_leakage_free ins ts

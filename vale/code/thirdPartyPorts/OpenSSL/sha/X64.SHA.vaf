@@ -703,6 +703,7 @@ procedure {:quick}{:exportSpecs} sha_update_bytes_stdcall(
         ghost stack_b:buffer64, 
         ghost ctx_b:buffer128, 
         ghost in_b:buffer128, 
+        ghost num_val:nat64,
         ghost k_b:buffer128
     )
     lets 
@@ -731,6 +732,7 @@ procedure {:quick}{:exportSpecs} sha_update_bytes_stdcall(
         ctx_ptr == buffer_addr(ctx_b, mem);
          in_ptr == buffer_addr(in_b, mem);
           k_ptr == buffer_addr(k_b, mem);
+        num_val == num;
 
         buffer_length(k_b) >= 16;
         in_ptr + 0x40*num < pow2_64;
