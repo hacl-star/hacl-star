@@ -4,6 +4,7 @@ include Hacl.Hash.Common
 open Spec.Hash.Helpers
 
 module B = LowStar.Buffer
+module IB = LowStar.ImmutableBuffer
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
 module Spec = Spec.MD5
@@ -15,8 +16,8 @@ module CE = C.Endianness
 friend Spec.MD5
 
 (** Top-level constant arrays for the MD5 algorithm. *)
-let h0 = B.gcmalloc_of_list HS.root Spec.init_as_list
-let t = B.gcmalloc_of_list HS.root Spec.t_as_list
+let h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
+let t = IB.igcmalloc_of_list HS.root Spec.t_as_list
 
 (* We believe it'll be hard to get, "for free", within this module:
      readonly h224 /\ writable client_state ==> disjoint h224 client_state
@@ -35,10 +36,7 @@ let recall_static_fp () =
   B.recall t
 
 let init s =
-  B.recall h0;
-  // waiting for monotonicity
-  let h = HST.get () in
-  assume (B.as_seq h h0 == Seq.seq_of_list Spec.init_as_list);
+  IB.recall_contents h0 (Seq.seq_of_list Spec.init_as_list);
   B.blit h0 0ul s 0ul 4ul
 
 inline_for_extraction
@@ -86,10 +84,7 @@ val round_op_gen
 
 let round_op_gen f abcd x a b c d k s i =
   let h = HST.get () in
-  B.recall t;
-  // waiting for monotonicity
-  let h_ = HST.get () in
-  assume (B.as_seq h_ t == Spec.t);
+  IB.recall_contents t Spec.t;
   assert_norm (64 / 4 == 16);
   assert_norm (64 % 4 == 0);
   let sx = Ghost.hide (E.seq_uint32_of_be 16 (B.as_seq h x)) in
