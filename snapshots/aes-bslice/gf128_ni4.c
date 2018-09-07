@@ -115,16 +115,16 @@ void reduce4 (elem_t acc, elem_t r4, elem_t b4)
 #endif
 
   /* LEFT SHIFT BY [x3:x2:x1:x0] by 1 */
-  tmp7 = _mm_srli_epi32(lo, 31);
-  tmp8 = _mm_srli_epi32(hi, 31);
-  tmp3 = _mm_slli_epi32(lo, 1);
-  tmp6 = _mm_slli_epi32(hi, 1);
-  tmp9 = _mm_srli_si128(tmp7, 12);
-  tmp8 = _mm_slli_si128(tmp8, 4);
-  tmp7 = _mm_slli_si128(tmp7, 4);
-  tmp3 = _mm_or_si128(tmp3, tmp7);
-  tmp6 = _mm_or_si128(tmp6, tmp8);
-  tmp6 = _mm_or_si128(tmp6, tmp9);
+  /* tmp7 = _mm_srli_epi32(lo, 31); */
+  /* tmp8 = _mm_srli_epi32(hi, 31); */
+  /* tmp3 = _mm_slli_epi32(lo, 1); */
+  /* tmp6 = _mm_slli_epi32(hi, 1); */
+  /* tmp9 = _mm_srli_si128(tmp7, 12); */
+  /* tmp8 = _mm_slli_si128(tmp8, 4); */
+  /* tmp7 = _mm_slli_si128(tmp7, 4); */
+  /* tmp3 = _mm_or_si128(tmp3, tmp7); */
+  /* tmp6 = _mm_or_si128(tmp6, tmp8); */
+  /* tmp6 = _mm_or_si128(tmp6, tmp9); */
 
   /* /\* LEFT SHIFT [x0:0] BY 63,62,57 and xor with [x1:x0] *\/ */
   /* tmp7 = _mm_slli_epi32(tmp3, 31); */
@@ -145,6 +145,22 @@ void reduce4 (elem_t acc, elem_t r4, elem_t b4)
   /* tmp2 = _mm_xor_si128(tmp2, tmp8); */
   /* tmp3 = _mm_xor_si128(tmp3, tmp2); */
 
+ /* LEFT SHIFT BY [x3:x2:x1:x0] by 1 */
+  tmp7 = _mm_srli_epi64(lo, 63);
+  tmp9 = _mm_slli_si128(tmp7, 8);
+  tmp3 = _mm_slli_epi64(lo, 1);
+  tmp3 = _mm_or_si128(tmp3, tmp9);
+
+  tmp8 = _mm_srli_epi64(hi, 63);
+  tmp8 = _mm_slli_si128(tmp8, 8);
+  tmp6 = _mm_slli_epi64(hi, 1);
+  tmp6 = _mm_or_si128(tmp6, tmp8);
+  
+  tmp7 = _mm_srli_epi64(lo, 63); // we can save this shift
+  tmp7 = _mm_srli_si128(tmp7, 8);
+  tmp6 = _mm_or_si128(tmp6, tmp7);
+
+
   /* LEFT SHIFT [x0:0] BY 63,62,57 and xor with [x1:x0] */
   tmp7 = _mm_slli_epi64(tmp3, 63);
   tmp8 = _mm_slli_epi64(tmp3, 62);
@@ -161,10 +177,11 @@ void reduce4 (elem_t acc, elem_t r4, elem_t b4)
   tmp5 = _mm_srli_epi64(tmp3, 7);
   tmp2 = _mm_xor_si128(tmp2, tmp4);
   tmp2 = _mm_xor_si128(tmp2, tmp5);
+  
   tmp2 = _mm_xor_si128(tmp2, tmp8);
   tmp3 = _mm_xor_si128(tmp3, tmp2);
 
-  /* XOR [x1:x0] with [x3:x2] */  
+  /* XOR [x1:x0] with [x3:x2] */
   tmp6 = _mm_xor_si128(tmp6, tmp3);
   *acc = tmp6;
 }

@@ -209,11 +209,11 @@ type rotval  (t:m_inttype) = u:uint32{uint_v #U32 u > 0 /\ uint_v #U32 u < bits 
 
 inline_for_extraction
 val shift_right: #t:m_inttype -> a:uint_t t -> b:shiftval t ->
-    c:uint_t t{uint_v #t c ==  uint_v #t a / pow2 (uint_v #U32 b)}
+    c:uint_t t//{uint_v #t c ==  uint_v #t a / pow2 (uint_v #U32 b)}
 
 inline_for_extraction
 val shift_left: #t:m_inttype -> a:uint_t t -> b:shiftval t ->
-    c:uint_t t{uint_v #t c == (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % modulus t}
+    c:uint_t t//{uint_v #t c == (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % modulus t}
 
 inline_for_extraction
 val rotate_right: #t:m_inttype -> a:uint_t t -> b:rotval t -> uint_t t

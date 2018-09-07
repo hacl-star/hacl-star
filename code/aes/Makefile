@@ -2,7 +2,7 @@ include ../../Makefile.include
 
 AES_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	Hacl.Impl.Aes.fst \
+	Hacl.Impl.Aes.BitSlice.fst \
 	Hacl.Test.AesCBC.fst \
 	Hacl.AesCBC.fst
 
@@ -47,47 +47,64 @@ specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(AES_FILES)))
 ci: bignum-ci specific-ci
 all-ci: ci
 
-KREMLIN_ARGS=-warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -tmpdir aescbc-c \
-		-I ../bignum -I ../curve25519 -I ../hash \
+KREMLIN_ARGS=-warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native'
 
-aescbc-c/out.krml: $(AES_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) $(AES_FILES) -skip-translation
+aes-c/out.krml: $(AES_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-c $(AES_FILES) -skip-translation
 
-aescbc-c/Hacl_AesCBC.c: aescbc-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation \
+aes-c/Hacl_AesCBC.c: aes-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-c $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.AesCBC=*'
 
-extract-c: aescbc-c/Hacl_AesCBC.c
+extract-c: aes-c/Hacl_AesCBC.c
 
-aescbc.exe: aescbc-c/Hacl_AesCBC.c aescbc-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) \
+aes-bitslice.exe: aes-c/Hacl_AesCBC.c aes-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-c  \
 	  -no-prefix 'Hacl.Test.AesCBC' -minimal -add-include '"kremlib.h"' \
 	  -bundle 'Hacl.Test.AesCBC=*' -library Hacl.AesCBC \
 	  $^ -o $@
 
 
-test: aescbc.exe
+test: aes-bitslice.exe
 	./$^
 
 
-KREMLIN_ARGS=-warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -tmpdir aesni-c -ccopt '-march=native' 
-
-
 aesni-c/out.krml: $(AESNI_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) $(AESNI_FILES) -skip-translation
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesni-c $(AESNI_FILES) -skip-translation
 
 aesni-c/Hacl_AesCTR.c: aesni-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation \
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesni-c  $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.AesCTR=*'
 aesni.exe: aesni-c/Hacl_AesCTR.c aesni-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) \
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesni-c \
 	  -no-prefix 'Hacl.Test.AesNI' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
 	  -bundle 'Hacl.Test.AesNI=*' -library Hacl.AesCTR -library Lib.Vec128 \
 	  $^ -o $@
+
+
+GF128NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	Hacl.Impl.Gf128.NI.fst \
+	Hacl.Gf128.fst \
+	Hacl.Test.Gf128NI.fst 
+
+gf128ni-c/out.krml: $(GF128NI_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128ni-c $(GF128NI_FILES) -skip-translation
+
+gf128ni-c/Hacl_Gf128.c: gf128ni-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128ni-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Gf128=*'
+gf128ni.exe: gf128ni-c/Hacl_Gf128.c gf128ni-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128ni-c \
+	  -no-prefix 'Hacl.Test.Gf128NI' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
+	  -bundle 'Hacl.Test.Gf128NI=*' -library Hacl.Gf128 -library Lib.Vec128 \
+	  $^ -o $@
+
+
 
 
 count-line:
 	cloc --force-lang=ocaml $(AES_FILES)
 
 clean:
-	rm -rf *.exe *.exe.* *.out *~ aescbc-c *.graph
+	rm -rf *.exe *.exe.* *.out *~ aescbc-c aesni-c gf128ni-c *.graph

@@ -148,9 +148,9 @@ val key_expansion_step: next:key1 -> prev:key1 -> ST unit
 let key_expansion_step next prev = 
     next.(size 0) <- vec128_shuffle32 next.(size 0) (vec128_shuffle32_spec (u8 3) (u8 3) (u8 3) (u8 3));
     let key = prev.(size 0) in
-    let key = vec128_xor key (vec128_shift_left key (u32 32)) in
-    let key = vec128_xor key (vec128_shift_left key (u32 32)) in
-    let key = vec128_xor key (vec128_shift_left key (u32 32)) in
+    let key = vec128_xor key (vec128_shift_left key (size 32)) in
+    let key = vec128_xor key (vec128_shift_left key (size 32)) in
+    let key = vec128_xor key (vec128_shift_left key (size 32)) in
     next.(size 0) <- vec128_xor next.(size 0) key
 
 
@@ -225,44 +225,68 @@ let aes128_block st keyx nonce counter =
     st.(size 3) <- vec128_insert32 nonce.(size 0) counter3 (u8 3);
     block_cipher st keyx
 
+inline_for_extraction noextract
+val aes128_alloc: unit -> StackInline (keyex * key1)
+			     (requires (fun h -> True))
+			     (ensures (fun h0 (x,y) h1 -> live h1 x /\ live h1 y))
+let aes128_alloc () = 
+  let keyex = alloca vec128_zero 11ul in
+  let nonce = alloca vec128_zero 1ul in
+  (keyex,nonce)
+
+val aes128_init: keyx:keyex -> nvec:key1 -> key:skey -> nonce:lbytes 12 -> ST unit
+			     (requires (fun h -> live h keyx /\ live h nonce /\ live h nvec /\ live h key))
+			     (ensures (fun h0 b h1 -> modifies (loc_union (loc_buffer keyx) (loc_buffer nvec)) h0 h1))
+let aes128_init keyx (nvec:key1) key nonce = 
+  push_frame();
+  key_expansion keyx key;
+  let nb = alloca 0uy 16ul in
+  blit nonce (size 0) nb (size 0) (size 12);
+  nvec.(size 0) <- vec128_load_le nb;
+  pop_frame()
+
+
+val aes128_update4: out:lbytes 64 -> inp:lbytes 64 -> keyx:keyex -> nvec:key1 -> counter:size_t -> ST unit
+			     (requires (fun h -> live h out /\ live h inp /\ live h keyx /\ live h nvec))
+			     (ensures (fun h0 b h1 -> modifies (loc_buffer out) h0 h1))
+let aes128_update4 out inp keyx nvec ctr =
+  push_frame();
+  let st = alloca vec128_zero 4ul in
+  aes128_block st keyx nvec ctr;
+  st.(size 0) <- vec128_xor st.(size 0) (vec128_load_le (sub inp (size 0) (size 16)));
+  st.(size 1) <- vec128_xor st.(size 1) (vec128_load_le (sub inp (size 16) (size 16)));
+  st.(size 2) <- vec128_xor st.(size 2) (vec128_load_le (sub inp (size 32) (size 16)));
+  st.(size 3) <- vec128_xor st.(size 3) (vec128_load_le (sub inp (size 48) (size 16)));
+  vec128_store_le (sub out (size 0) (size 16)) st.(size 0);
+  vec128_store_le (sub out (size 16) (size 16)) st.(size 1);
+  vec128_store_le (sub out (size 32) (size 16)) st.(size 2);
+  vec128_store_le (sub out (size 48) (size 16)) st.(size 3);
+  pop_frame()
+
 val aes128_ctr: out:bytes -> inp:bytes -> len:size_t -> key:skey -> nonce:lbytes 12 -> counter:size_t -> ST unit
 			     (requires (fun h -> live h out /\ live h inp /\ live h key /\ live h nonce))
 			     (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
 let aes128_ctr out inp len key nonce counter = 
   push_frame();
-  let kex = alloca vec128_zero 11ul in
-  key_expansion kex key;
-  let st = alloca vec128_zero 4ul in
-  let nb = alloca 0uy 16ul in
-  blit nonce (size 0) nb (size 0) (size 12);
-  let nvec = alloca vec128_zero 1ul in
-  nvec.(size 0) <- vec128_load_le nb;
-
+  let (kex,nvec) = aes128_alloc () in
+  aes128_init kex nvec key nonce;
   let blocks64 = len /. size 64 in
   let h0 = ST.get() in
   loop_nospec #h0 blocks64 out 
     (fun i -> 
-      aes128_block st kex nvec (counter +. (i *. size 4));
-      st.(size 0) <- vec128_xor st.(size 0) (vec128_load_le (sub inp (i *. size 64) (size 16)));
-      st.(size 1) <- vec128_xor st.(size 1) (vec128_load_le (sub inp (size 16 +. (i *. size 64)) (size 16)));
-      st.(size 2) <- vec128_xor st.(size 2) (vec128_load_le (sub inp (size 32 +. (i *. size 64)) (size 16)));
-      st.(size 3) <- vec128_xor st.(size 3) (vec128_load_le (sub inp (size 48 +. (i *. size 64)) (size 16)));
-      vec128_store_le (sub out (i *. size 64) (size 16)) st.(size 0);
-      vec128_store_le (sub out (size 16 +. (i *. size 64)) (size 16)) st.(size 1);
-      vec128_store_le (sub out (size 32 +. (i *. size 64)) (size 16)) st.(size 2);
-      vec128_store_le (sub out (size 48 +. (i *. size 64)) (size 16)) st.(size 3));
-
-  let kb = alloca 0uy 64ul in
+      let ctr = counter +. (i *. size 4) in
+      let ib = sub inp (i *. size 64) (size 64) in
+      let ob = sub out (i *. size 64) (size 64) in
+      aes128_update4 ob ib kex nvec ctr);
   let rem = len %. size 64 in
   if (rem >. size 0) then (
-    aes128_block st kex nvec (counter +. (blocks64 *. size 4));
-    vec128_store_le (sub kb (size 0) (size 16)) st.(size 0);
-    vec128_store_le (sub kb (size 16) (size 16)) st.(size 1);
-    vec128_store_le (sub kb (size 32) (size 16)) st.(size 2);
-    vec128_store_le (sub kb (size 48) (size 16)) st.(size 3);
-    let start = blocks64 *. size 64 in
-    loop_nospec #h0 rem out
-	(fun j -> out.(start +. j) <- FStar.UInt8.(inp.(start +. j) ^^ kb.(j))));
+      let ctr = counter +. (blocks64 *. size 4) in
+      let ib = sub inp (blocks64 *. size 64) rem in
+      let ob = sub out (blocks64 *. size 64) rem in
+      let last = alloca 0uy 64ul in
+      blit ib (size 0) last (size 0) rem;
+      aes128_update4 last last kex nvec ctr;
+      blit last (size 0) ob (size 0) rem);
   pop_frame()
 
 let aes128_encrypt out inp in_len k n c = aes128_ctr out inp in_len k n c

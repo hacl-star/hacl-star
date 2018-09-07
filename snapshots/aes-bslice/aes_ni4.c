@@ -6,7 +6,7 @@
 #include <smmintrin.h>
 #include "endianness.h"
 
-#define INTERLEAVE 8
+#define INTERLEAVE 4
 typedef __m128i* state_t;
 typedef __m128i key1_t;
 typedef __m128i* keyex_t;
@@ -93,8 +93,7 @@ static void aes128_ctr(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_
   for (int i = 0; i < blocks; i++) {
     aes128_block(kb,kex,nvec,c+(INTERLEAVE*i));
     for (int j = 0; j < INTERLEAVE; j++) {
-      kb[j] = _mm_xor_si128(kb[j],_mm_loadu_si128((__m128i*)&in[blocksize*i + 16*j]));
-      _mm_storeu_si128((__m128i*)&out[blocksize*i + 16*j],kb[j]);
+      _mm_storeu_si128((__m128i*)&out[blocksize*i + 16*j],_mm_xor_si128(kb[j],_mm_loadu_si128((__m128i*)&in[blocksize*i + 16*j])));
     }
   }
 

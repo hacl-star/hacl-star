@@ -9,8 +9,8 @@ module LSeq = Lib.Sequence
 
 unfold let v = size_v
 
-
-inline_for_extraction val buffer: a:Type0 -> Type0
+let buffer a = LowStar.Buffer.buffer a
+//inline_for_extraction val buffer: a:Type0 -> Type0
 inline_for_extraction val length: #a:Type0 -> buffer a -> GTot size_nat
 inline_for_extraction let lbuffer (a:Type0) (len:size_nat) = b:buffer a{length b == len}
 
@@ -19,7 +19,7 @@ let gslice #a #len #olen (b:lbuffer a (len)) (start:size_t) (fin:size_t{v fin <=
 noeq type bufitem = | BufItem: #a:Type0 -> #len:size_nat -> buf:lbuffer a (len) -> bufitem
 
 inline_for_extraction val disjoint: #a1:Type0 -> #a2:Type0 -> #len1:size_nat -> #len2:size_nat -> b1:lbuffer a1 len1 -> b2:lbuffer a2 len2 -> GTot Type0
-inline_for_extraction val live: #a:Type0 -> #len:size_nat ->  mem -> lbuffer a len -> GTot Type0
+inline_for_extraction val live: #a:Type0 -> mem -> buffer a -> GTot Type0
 inline_for_extraction val preserves_live: mem -> mem -> GTot Type0
 inline_for_extraction val as_seq: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> h:mem -> GTot (s:LSeq.seq a{LSeq.length s == len})
 inline_for_extraction val as_lseq: #a:Type0 -> #len:size_nat -> b:lbuffer a len -> h:mem -> GTot (s:LSeq.lseq a len{s == as_seq b h})

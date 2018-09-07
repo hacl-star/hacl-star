@@ -12,7 +12,7 @@ module LSeq = Lib.Sequence
 module Buf = LowStar.Buffer
 module U32 = FStar.UInt32
 
-type buffer (a:Type0) = Buf.buffer a 
+//type buffer (a:Type0) = Buf.buffer a 
 let length (#a:Type0) (b:buffer a) = Buf.length b
 let gsub #a #len #olen b start n = admit() //; Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 

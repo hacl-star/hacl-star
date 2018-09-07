@@ -52,7 +52,7 @@ let main () =
   TestLib.compare_and_print (C.String.of_literal "AES-CBC encryption 1") cip1 comp1 16ul;
   let dec1 = alloca 0uy 16ul in
   let len1 = Hacl.AesCBC.aes256_cbc_decrypt dec1 key1 iv1 comp1 (size 32) in
-  if len1 <> 16ul then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
+  if len1 <> size 16 then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
   TestLib.compare_and_print (C.String.of_literal "AES-CBC decryption 1") input1 dec1 16ul;
 
   
@@ -71,7 +71,7 @@ let main () =
   TestLib.compare_and_print (C.String.of_literal "AES-CBC encryption 2") cip2 comp2 80ul;
   let dec2 = alloca 0uy 64ul in
   let len2 = Hacl.AesCBC.aes256_cbc_decrypt dec2 key2 iv2 comp2 (size 80) in
-  if len2 <> 64ul then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
+  if len2 <> size 64 then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
   TestLib.compare_and_print (C.String.of_literal "AES-CBC decryption 2") input2 dec2 64ul;
 
   
@@ -92,7 +92,7 @@ let main () =
   TestLib.compare_and_print (C.String.of_literal "AES-CBC encryption 3") cip3 comp3 160ul;
   let dec3 = alloca 0uy 159ul in
   let len3 = Hacl.AesCBC.aes256_cbc_decrypt dec3 key3 iv3 comp3 (size 160) in
-  if len3 <> 159ul then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
+  if len3 <> size 159 then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
   TestLib.compare_and_print (C.String.of_literal "AES-CBC decryption 3") input3 dec3 159ul;
   
   pop_frame();

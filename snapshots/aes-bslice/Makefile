@@ -12,6 +12,10 @@ gf128_test.exe: gf128.c gf128_test.c
 	$(CC) $(CCOPTS) gf128.c gf128_test.c -o gf128_test.exe
 	./gf128_test.exe
 
+gf128_4_test.exe: gf128_4.c gf128_test.c
+	$(CC) $(CCOPTS) gf128_4.c gf128_test.c -o gf128_4_test.exe
+	./gf128_4_test.exe
+
 gf128_u128_test.exe: gf128_u128.c gf128_test.c
 	$(CC) $(CCOPTS) gf128_u128.c gf128_test.c -o gf128_u128_test.exe
 	./gf128_u128_test.exe
