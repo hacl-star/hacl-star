@@ -118,7 +118,8 @@ inline_for_extraction noextract
 val createL_global:
     #a:Type0
   -> init:list a{List.Tot.length init <= max_size_t}
-  -> ST (lbuffer a (normalize_term (List.Tot.length init)))
+  -> ST (b:lbuffer a (normalize_term (List.Tot.length init)){
+    frameOf b == HyperStack.root /\ recallable b})
     (requires fun h0 -> B.gcmalloc_of_list_pre #a init)
     (ensures  fun h0 b h1 ->
       B.alloc_post_mem_common b h0 h1 (Seq.of_list init))

@@ -19,7 +19,6 @@ module Lemmas = Spec.Frodo.Lemmas
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-unfold
 type elem = uint16
 
 inline_for_extraction
@@ -44,6 +43,7 @@ val matrix_create:
     (requires fun h0 -> True)
     (ensures  fun h0 a h1 ->
       B.alloc_post_mem_common a h0 h1 (as_matrix h1 a) /\
+      B.frameOf a == HS.get_tip h0 /\
       as_matrix h1 a == M.create (v n1) (v n2))
 let matrix_create n1 n2 =
   [@inline_let]
