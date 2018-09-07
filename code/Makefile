@@ -7,7 +7,7 @@ old-%:
 
 # 0. Paths and includes
 
-ROOTS=$(HACL_HOME)/code/hash-new/Hacl.SHA2.fst
+ROOTS=$(HACL_HOME)/code/hash-new/Hacl.Hash.fst
 
 ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 
@@ -22,7 +22,7 @@ include Makefile.common
 
 verify: $(ALL_CHECKED_FILES)
 
-extract: # $(OUTPUT_DIR)/Makefile.include
+extract: $(OUTPUT_DIR)/Makefile.include
 
 # Backwards compat target name
 extract-c: extract old-extract-c

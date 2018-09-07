@@ -13,15 +13,27 @@ module Spec = Spec.SHA2
 
 open Spec.Hash.Helpers
 
+include Hacl.Hash.Common
+
+(** This module uses top-level arrays behind an abstract footprint *)
+
 val static_fp: unit -> GTot M.loc
 
-let word (a: sha2_alg) =
-  match a with
-  | SHA2_224 | SHA2_256 -> U32.t
-  | SHA2_384 | SHA2_512 -> U64.t
+let loc_in (l: M.loc) (h: HS.mem) =
+  M.(loc_not_unused_in h `loc_includes` l)
 
-type state (a: sha2_alg) =
-  b:B.buffer (word a) { B.length b = size_hash_w a }
+(* A useful lemma for clients, to be called at any time before performing an
+   allocation, hence giving them "for free" that their allocation is disjoint from
+   our top-level arrays. *)
+val recall_static_fp: unit -> ST.Stack unit
+  (requires (fun _ -> True))
+  (ensures (fun h0 _ h1 ->
+    M.(modifies loc_none h0 h1) /\
+    static_fp () `loc_in` h1))
+
+
+(** A series of functions; we only expose the monomorphic variants, and leave it
+  * up to EverCrypt.Hash to perform multiplexing. *)
 
 inline_for_extraction
 let alloca_t (a: sha2_alg) = unit -> ST.StackInline (state a)
@@ -67,18 +79,12 @@ val update_256: update_t SHA2_256
 val update_384: update_t SHA2_384
 val update_512: update_t SHA2_512
 
-inline_for_extraction
-let pad_t (a: sha2_alg) = len:len_t a -> dst:B.buffer U8.t ->
-  ST.Stack unit
-    (requires (fun h ->
-      len_v a len < max_input8 a /\
-      B.live h dst /\
-      B.length dst = pad_length a (len_v a len)))
-    (ensures (fun h0 _ h1 ->
-      M.(modifies (loc_buffer dst) h0 h1) /\
-      B.as_seq h1 dst == Spec.pad a (len_v a len)))
-
 val pad_224: pad_t SHA2_224
 val pad_256: pad_t SHA2_256
 val pad_384: pad_t SHA2_384
 val pad_512: pad_t SHA2_512
+
+val finish_224: finish_t SHA2_224
+val finish_256: finish_t SHA2_256
+val finish_384: finish_t SHA2_384
+val finish_512: finish_t SHA2_512

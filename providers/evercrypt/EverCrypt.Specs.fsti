@@ -3,6 +3,13 @@ module EverCrypt.Specs
 let curve_x25519_pre = fun _ -> False
 let curve_x25519_post = fun _ _ _ -> True
 
+let random_init_pre = fun _ -> False
+let random_init_post = fun _ _ _ -> True
+let random_sample_pre = fun _ -> False
+let random_sample_post = fun _ _ _ -> True
+let random_cleanup_pre = fun _ -> False
+let random_cleanup_post = fun _ _ _ -> True
+
 let aes128_create_pre = fun _ -> False
 let aes128_create_post = fun _ _ _ -> True
 let aes128_compute_pre = fun _ -> False
