@@ -29,18 +29,20 @@ open Hacl.Hash.Common
 friend Spec.SHA2
 friend Hacl.Hash.Common
 
+
+module IB = LowStar.ImmutableBuffer
+
 #set-options "--max_fuel 0 --max_ifuel 0"
 
 (** Top-level constant arrays for the SHA2 algorithms. *)
 
-(* NOTE: we don't have monotonicity yet so there will be various assumes. *)
-let h224 = B.gcmalloc_of_list HS.root Constants.h224_l
-let h256 = B.gcmalloc_of_list HS.root Constants.h256_l
-let h384 = B.gcmalloc_of_list HS.root Constants.h384_l
-let h512 = B.gcmalloc_of_list HS.root Constants.h512_l
+let h224 = IB.igcmalloc_of_list HS.root Constants.h224_l
+let h256 = IB.igcmalloc_of_list HS.root Constants.h256_l
+let h384 = IB.igcmalloc_of_list HS.root Constants.h384_l
+let h512 = IB.igcmalloc_of_list HS.root Constants.h512_l
 
-let k224_256 = B.gcmalloc_of_list HS.root Constants.k224_256_l
-let k384_512 = B.gcmalloc_of_list HS.root Constants.k384_512_l
+let k224_256 = IB.igcmalloc_of_list HS.root Constants.k224_256_l
+let k384_512 = IB.igcmalloc_of_list HS.root Constants.k384_512_l
 
 (* We believe it'll be hard to get, "for free", within this module:
      readonly h224 /\ writable client_state ==> disjoint h224 client_state
@@ -104,28 +106,16 @@ noextract
 let init a s =
   match a with
   | SHA2_224 ->
-      B.recall h224;
-      // waiting for monotonicity:
-      let h = ST.get () in
-      assume (B.as_seq h h224 == S.seq_of_list Constants.h224_l);
+      IB.recall_contents h224 (S.seq_of_list Constants.h224_l);
       B.blit h224 0ul s 0ul 8ul
   | SHA2_256 ->
-      B.recall h256;
-      // waiting for monotonicity:
-      let h = ST.get () in
-      assume (B.as_seq h h256 == S.seq_of_list Constants.h256_l);
+      IB.recall_contents h256 (S.seq_of_list Constants.h256_l);
       B.blit h256 0ul s 0ul 8ul
   | SHA2_384 ->
-      B.recall h384;
-      // waiting for monotonicity:
-      let h = ST.get () in
-      assume (B.as_seq h h384 == S.seq_of_list Constants.h384_l);
+      IB.recall_contents h384 (S.seq_of_list Constants.h384_l);
       B.blit h384 0ul s 0ul 8ul
   | SHA2_512 ->
-      B.recall h512;
-      // waiting for monotonicity:
-      let h = ST.get () in
-      assume (B.as_seq h h512 == S.seq_of_list Constants.h512_l);
+      IB.recall_contents h512 (S.seq_of_list Constants.h512_l);
       B.blit h512 0ul s 0ul 8ul
 
 let init_224: init_t SHA2_224 =
@@ -236,7 +226,7 @@ let hash_w (a: sha2_alg) =
   b:B.buffer (word a) { B.length b = size_hash_w a }
 
 inline_for_extraction
-val k0 (a: sha2_alg): ST.Stack (B.buffer (word a))
+val k0 (a: sha2_alg): ST.Stack (IB.ibuffer (word a))
   (requires (fun _ -> True))
   (ensures (fun h0 b h1 ->
     B.length b = Spec.size_k_w a /\
@@ -247,14 +237,10 @@ inline_for_extraction
 let k0 a =
   match a with
   | SHA2_224 | SHA2_256 ->
-      B.recall k224_256;
-      let h = ST.get () in
-      assume (B.as_seq h k224_256 == S.seq_of_list Constants.k224_256_l);
+      IB.recall_contents k224_256 (S.seq_of_list Constants.k224_256_l);
       k224_256
   | SHA2_384 | SHA2_512 ->
-      B.recall k384_512;
-      let h = ST.get () in
-      assume (B.as_seq h k384_512 == S.seq_of_list Constants.k384_512_l);
+      IB.recall_contents k384_512 (S.seq_of_list Constants.k384_512_l);
       k384_512
 
 inline_for_extraction unfold
