@@ -81,7 +81,7 @@ $(LIBFILE): $(LIBQUICCRYPTO)
 	"$(VS_BIN)/lib.exe" /nologo /def:libquiccrypto.def /out:$(LIBFILE) /machine:$(LIB_MACHINE)
 endif
 
-$(LIBQUICCRYPTO): Crypto_HKDF_Crypto_HMAC.o quic_provider.o
+$(LIBQUICCRYPTO): quic_provider.o
 	$(CC) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
 
 test.exe: $(LIBQUICCRYPTO) test.o

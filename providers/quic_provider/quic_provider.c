@@ -10,7 +10,6 @@
 #endif
 
 #include "kremlib.h"
-#include "Crypto_HKDF_Crypto_HMAC.h"
 #include "EverCrypt.h"
 #include "quic_provider.h"
 
@@ -55,12 +54,13 @@ static void dump_secret(const quic_secret *s)
 #endif
 
 #define CONVERT_ALG(a) \
-  (a == TLS_hash_SHA256 ? Crypto_HMAC_SHA256 : \
-    (a == TLS_hash_SHA384 ? Crypto_HMAC_SHA384 : Crypto_HMAC_SHA512))
+  (a == TLS_hash_SHA256 ? EverCrypt_Hash_SHA256 : \
+     (a == TLS_hash_SHA384 ? EverCrypt_Hash_SHA384 : EverCrypt_Hash_SHA512))
 
-int MITLS_CALLCONV quic_crypto_hash(quic_hash a, /*out*/ unsigned char *hash, const unsigned char *data, size_t len){
+int MITLS_CALLCONV quic_crypto_hash(quic_hash a, /*out*/ unsigned char *hash, const unsigned char *data, size_t len)
+{
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HMAC_agile_hash(CONVERT_ALG(a), (uint8_t*) hash, (uint8_t*)data, len);
+  EverCrypt_Hash_hash(CONVERT_ALG(a), (uint8_t*)hash, (uint8_t*)data, len);
   return 1;
 }
 
@@ -68,7 +68,7 @@ int MITLS_CALLCONV quic_crypto_hmac(quic_hash a, unsigned char *mac,
                      const unsigned char *key, uint32_t key_len,
                      const unsigned char *data, uint32_t data_len) {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HMAC_hmac(CONVERT_ALG(a), (uint8_t*) mac, (uint8_t*)key, key_len, (uint8_t*)data, data_len);
+  EverCrypt_HMAC_compute(CONVERT_ALG(a), (uint8_t*)mac, (uint8_t*)key, key_len, (uint8_t*)data, data_len);
   return 1;
 }
 
@@ -77,14 +77,14 @@ int MITLS_CALLCONV quic_crypto_hkdf_extract(quic_hash a, unsigned char *prk,
                              const unsigned char *ikm, uint32_t ikm_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HKDF_hkdf_extract(CONVERT_ALG(a), (uint8_t*) prk, (uint8_t*)salt, salt_len, (uint8_t*)ikm, ikm_len);
+  EverCrypt_HKDF_hkdf_extract(CONVERT_ALG(a), (uint8_t*) prk, (uint8_t*)salt, salt_len, (uint8_t*)ikm, ikm_len);
   return 1;
 }
 
 int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, unsigned char *okm, uint32_t olen, const unsigned char *prk, uint32_t prk_len, const unsigned char *info, uint32_t info_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HKDF_hkdf_expand(CONVERT_ALG(a), (uint8_t*) okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
+  EverCrypt_HKDF_hkdf_expand(CONVERT_ALG(a), (uint8_t*) okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
   return 1;
 }
 
