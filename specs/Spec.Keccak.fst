@@ -6,17 +6,10 @@ open Lib.Sequence
 open Lib.ByteSequence
 open FStar.Mul
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 type state = lseq uint64 25
 type index = n:size_nat{n < 5}
-
-let lfsr86540 (lfsr:uint8) : tuple2 uint8 bool =
-  let lfsr1 = lfsr &. u8 1 in
-  let result = u8_to_UInt8 lfsr1 <> 0uy in
-  let lfsr' = lfsr <<. u32 1 in
-  if u8_to_UInt8 (lfsr &. u8 0x80) <> 0uy then
-    lfsr' ^. u8 0x71, result
-  else
-    lfsr', result
 
 let readLane (s:state) (x:index) (y:index) : uint64 =
   s.[x + 5 * y]
@@ -24,7 +17,35 @@ let readLane (s:state) (x:index) (y:index) : uint64 =
 let writeLane (s:state ) (x:index) (y:index) (v:uint64) : state =
   s.[x + 5 * y] <- v
 
-#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) : uint64 =
+  (a <<. b) |. (a >>. (u32 64 -. b))
+
+let keccak_rotc: lseq uint32 24 =
+  let rotc_list: list uint32 =
+    [u32 1; u32 3; u32 6; u32 10; u32 15; u32 21; u32 28; u32 36;
+     u32 45; u32 55; u32 2; u32 14; u32 27; u32 41; u32 56; u32 8;
+     u32 25; u32 43; u32 62; u32 18; u32 39; u32 61; u32 20; u32 44] in
+  assert_norm (List.Tot.length rotc_list == 24);
+  createL rotc_list
+
+let keccak_piln: lseq size_nat 24 =
+  let piln_list: list size_nat = List.Tot.map size_v
+    [size 10; size 7; size 11; size 17; size 18; size 3; size 5; size 16;
+     size 8; size 21; size 24; size 4; size 15; size 23; size 19; size 13;
+     size 12; size 2; size 20; size 14; size 22; size 9; size 6; size 1] in
+  assert_norm (List.Tot.length piln_list == 24);
+  createL piln_list
+
+let keccak_rndc: lseq uint64 24 =
+  let rndc_list: list uint64 =
+    [u64 0x0000000000000001; u64 0x0000000000008082; u64 0x800000000000808a; u64 0x8000000080008000;
+     u64 0x000000000000808b; u64 0x0000000080000001; u64 0x8000000080008081; u64 0x8000000000008009;
+     u64 0x000000000000008a; u64 0x0000000000000088; u64 0x0000000080008009; u64 0x000000008000000a;
+     u64 0x000000008000808b; u64 0x800000000000008b; u64 0x8000000000008089; u64 0x8000000000008003;
+     u64 0x8000000000008002; u64 0x8000000000000080; u64 0x000000000000800a; u64 0x800000008000000a;
+     u64 0x8000000080008081; u64 0x8000000000008080; u64 0x0000000080000001; u64 0x8000000080008008] in
+  assert_norm (List.Tot.length rndc_list == 24);
+  createL rndc_list
 
 let state_theta (s:state) : state  =
   let _C = create 5 (u64 0) in
@@ -38,28 +59,25 @@ let state_theta (s:state) : state  =
 	readLane s x 4
     ) _C in
   repeati 5 (fun x s ->
-    let _D = _C.[(x + 4) % 5] ^. (_C.[(x + 1) % 5] <<<. u32 1) in
+    let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (u32 1)) in
     repeati 5 (fun y s ->
       writeLane s x y (readLane s x y ^. _D)
     ) s
   ) s
 
 let state_pi_rho (s_theta:state) : state  =
-  let x : index = 1 in
-  let y : index = 0 in
-  let current : uint64 = readLane s_theta x y in
-  let _, _, _, s_pi_rho =
-    repeati 24 (fun t (tup: tuple4 index index uint64 state) ->
-      let x, y, current, s = tup in
-      let r : r:uint32{uint_v r < 64} = u32 (((t + 1) * (t + 2) / 2) % 64) in
-      let _Y: index = (2 * x + 3 * y) % 5 in
-      let x = y in
-      let y = _Y in
-      let temp = readLane s x y in
-      let s = writeLane s x y (current <<<. r) in
+  let current : uint64 = readLane s_theta 1 0 in
+  let _, s_pi_rho =
+    repeati 24 (fun i (current, s) ->
+      let r = keccak_rotc.[i] in
+      let _Y = keccak_piln.[i] in
+      assume (_Y < 25);
+      let temp = s.[_Y] in
+      assume (0 < uint_v r /\ uint_v r < 64);
+      let s = s.[_Y] <- rotl current r in
       let current = temp in
-      x, y, current, s
-    ) (x, y, current, s_theta) in
+      current, s
+    ) (current, s_theta) in
   s_pi_rho
 
 let state_chi (s_pi_rho:state) : state  =
@@ -72,31 +90,20 @@ let state_chi (s_pi_rho:state) : state  =
     ) s
   ) s_pi_rho
 
-let state_iota (s_chi:state) (lfsr:uint8) : tuple2 state uint8 =
-  repeati 7 (fun j (s, lfsr) ->
-    Math.Lemmas.pow2_le_compat 6 j;
-    assert_norm (pow2 6 = 64);
-    let bitPosition = u32 (pow2 j - 1) in
-    let lfsr, result = lfsr86540 lfsr in
-    if result then
-      writeLane s 0 0 (readLane s 0 0 ^. (u64 1 <<. bitPosition)), lfsr
-    else s, lfsr
-  ) (s_chi, lfsr)
+let state_iota (s:state) (round:size_nat{round < 24}) : state =
+  writeLane s 0 0 (readLane s 0 0 ^. keccak_rndc.[round])
 
-let state_permute1 (s:state) (lfsr:uint8) : tuple2 state uint8 =
+let state_permute1 (s:state) (round:size_nat{round < 24}) : state =
   let s_theta = state_theta s in
   let s_pi_rho = state_pi_rho s_theta in
   let s_chi = state_chi s_pi_rho in
-  let s_iota, lfsr = state_iota s_chi lfsr in
-  s_iota, lfsr
+  let s_iota = state_iota s_chi round in
+  s_iota
 
 let state_permute (s:state) : state =
-  let lfsr = u8 0x01 in
-  let s, lfsr =
-    repeat 24 (fun (s, lfsr) ->
-      state_permute1 s lfsr
-    ) (s, lfsr) in
-  s
+  repeati 24 (fun i s ->
+    state_permute1 s i
+  ) s
 
 let loadState (rateInBytes:size_nat{rateInBytes <= 200})
 	      (input:lbytes rateInBytes)
@@ -117,31 +124,45 @@ let storeState (rateInBytes:size_nat{rateInBytes <= 200})
     ) block in
   sub block 0 rateInBytes
 
+let absorb_last (s:state)
+                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
+                (inputByteLen:size_nat)
+                (input:lbytes inputByteLen)
+                (delimitedSuffix:uint8) : state =
+  let lastBlock = create rateInBytes (u8 0) in
+  let rem = inputByteLen % rateInBytes in
+  let last: lseq uint8 rem = sub input (inputByteLen - rem) rem in
+  let lastBlock = update_sub lastBlock 0 rem last in
+  let lastBlock = lastBlock.[rem] <- delimitedSuffix in
+  let s = loadState rateInBytes lastBlock s in
+  s
+
+let absorb_next (s:state)
+                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}) : state =
+  let nextBlock = create rateInBytes (u8 0) in
+  let nextBlock = nextBlock.[rateInBytes - 1] <- u8 0x80 in
+  let s = loadState rateInBytes nextBlock s in
+  let s = state_permute s in
+  s
+
 let absorb (s:state)
            (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
 	   (inputByteLen:size_nat)
 	   (input:lbytes inputByteLen)
 	   (delimitedSuffix:uint8) : state =
   let n = inputByteLen / rateInBytes in
+  let rem = inputByteLen % rateInBytes in
   let s : state =
     repeati n (fun i s ->
+      assume (i * rateInBytes + rateInBytes <= inputByteLen);
       let s = loadState rateInBytes (sub input (i * rateInBytes) rateInBytes) s in
       state_permute s
     ) s in
-  let rem = inputByteLen % rateInBytes in
-  let last: lseq uint8 rem = sub input (inputByteLen - rem) rem in
-  let lastBlock = create rateInBytes (u8 0) in
-  let lastBlock = update_sub lastBlock 0 rem last in
-  let lastBlock = lastBlock.[rem] <- delimitedSuffix in
-  let s = loadState rateInBytes lastBlock s in
-
+  let s = absorb_last s rateInBytes inputByteLen input delimitedSuffix in
   let s =
     if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) && (rem = rateInBytes - 1))
     then state_permute s else s in
-  let nextBlock = create rateInBytes (u8 0) in
-  let nextBlock = nextBlock.[rateInBytes - 1] <- u8 0x80 in
-  let s = loadState rateInBytes nextBlock s in
-  let s = state_permute s in
+  let s = absorb_next s rateInBytes in
   s
 
 let squeeze (s:state)
@@ -150,14 +171,15 @@ let squeeze (s:state)
 	    : lbytes outputByteLen =
   let output = create outputByteLen (u8 0) in
   let outBlocks = outputByteLen / rateInBytes in
+  let remOut = outputByteLen % rateInBytes in
   let s, output =
     repeati outBlocks (fun i (s, o) ->
       let block = storeState rateInBytes s in
+      assume (i * rateInBytes + rateInBytes <= outputByteLen);
       let o = update_sub o (i * rateInBytes) rateInBytes block in
       let s = state_permute s in
       s, o
     ) (s, output) in
-  let remOut = outputByteLen % rateInBytes in
   let outBlock = storeState remOut s in
   update_sub output (outputByteLen - remOut) remOut outBlock
 
