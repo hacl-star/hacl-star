@@ -423,7 +423,7 @@ let le_bytes_to_quad32_to_bytes (q:quad32) :
   assert (q == q');
   ()
 
-// let be_quad32_to_bytes (q:quad32) : seqn 16 nat8 =
+// let be_quad32_to_bytes (q:quad32) : seq16 nat8 =
 //   seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE q))
 
 // be_bytes_to_quad32 (be_quad32_to_bytes q)
@@ -505,6 +505,7 @@ let seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) : seq (four a) =
 let seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) : seq nat32 =
   seq_map (four_to_nat 8) (seq_to_seq_four_LE x)
 *)
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
 let rec append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))
   =

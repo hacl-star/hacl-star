@@ -77,6 +77,11 @@ private val lemma_aux: a:nat -> b:nat -> c:nat -> Lemma
 let lemma_aux a b c =
   assert_norm((pow2 44 - 1) + pow2 44 * (pow2 44 - 1) + (pow2 40 - 1) * pow2 88 < pow2 128)
 
+// don't ask, don't tell
+val lemma_mod_plus_distr_l': a:nat -> b:nat -> p:pos -> Lemma
+  ((a + b) % p = ((a % p) + b) % p)
+let lemma_mod_plus_distr_l' a b p =
+  Math.Lemmas.lemma_mod_plus_distr_l a b p
 
 val lemma_bignum_to_128:
   h0:limb{v h0 < pow2 44} -> h1:limb{v h1 < pow2 44} -> h2:limb{v h2 < pow2 42} ->
@@ -85,7 +90,7 @@ val lemma_bignum_to_128:
 let lemma_bignum_to_128 h0 h1 h2 =
   lemma_bignum_to_128_ h0 h1 h2;
   let z = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128 in
-  Math.Lemmas.lemma_mod_plus_distr_l (pow2 88 * v h2) (v h0 + pow2 44 * v h1) (pow2 128);
+  lemma_mod_plus_distr_l' (pow2 88 * v h2) (v h0 + pow2 44 * v h1) (pow2 128);
   Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 128 88;
   Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v h2) 128 88;
   cut (z = (v h0 + pow2 44 * v h1 + (v h2 % pow2 40) * pow2 88) % pow2 128);
@@ -329,7 +334,7 @@ val poly1305_init_spec: key:Seq.seq H8.t{Seq.length key = 16} ->
 let poly1305_init_spec key =
   let r = poly1305_encode_r_spec key in
   let h = poly1305_start_spec () in
-  MkState r h (Seq.createEmpty)
+  MkState r h (Seq.empty)
 
 
 val poly1305_update_spec: st:poly1305_state_{red_44 (MkState?.r st) /\ red_45 (MkState?.h st)} ->

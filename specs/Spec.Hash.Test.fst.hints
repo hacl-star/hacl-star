@@ -1,0 +1,102 @@
+[
+  "š\u001a\u007f';4X\tÜ+\u0015×\f„è›",
+  [
+    [
+      "Spec.Hash.Test.vec",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "e107dcfdaec994b64814b8b6e30cbde5"
+    ],
+    [
+      "Spec.Hash.Test.vec",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "04e452f03478e92ded8bbf9b9ddafd8b"
+    ],
+    [
+      "Spec.Hash.Test.vec",
+      3,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "41bb5b4f12e387dbddcf5fa3e49f4bd2"
+    ],
+    [
+      "Spec.Hash.Test.vec",
+      4,
+      2,
+      1,
+      [
+        "@query", "assumption_FStar.UInt8.t__uu___haseq",
+        "assumption_Prims.list__uu___haseq",
+        "assumption_Spec.Hash.Helpers.hash_alg__uu___haseq",
+        "function_token_typing_FStar.UInt8.t",
+        "haseqSpec.Hash.Test_Tm_refine_978cf5367793c057f7abcd970a178ee0",
+        "haseqSpec.Hash.Test_Tm_refine_caff3a9f7a4b1bd89563812dfb458a10"
+      ],
+      0,
+      "8599a3cee58ae2d8f8ede3e457ae6f34"
+    ],
+    [
+      "Spec.Hash.Test.__proj__Vec__item__plain",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Spec.Hash.Test.Vec_a",
+        "projection_inverse_Spec.Hash.Test.Vec_a"
+      ],
+      0,
+      "b78b9a5c8377fa614822c2283ab9ea08"
+    ],
+    [
+      "Spec.Hash.Test.__proj__Vec__item__hash",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "b089adbe7eac416631da387e3514d089"
+    ],
+    [
+      "Spec.Hash.Test.__proj__Vec__item__hash",
+      2,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "proj_equation_Spec.Hash.Test.Vec_a",
+        "projection_inverse_Spec.Hash.Test.Vec_a"
+      ],
+      0,
+      "56d4d1c5dc6974110000ac82d1d6cb95"
+    ],
+    [
+      "Spec.Hash.Test.test_one",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_FStar.Seq.Base.seq__uu___haseq",
+        "assumption_FStar.UInt8.t__uu___haseq", "assumption_Prims.HasEq_int",
+        "equation_FStar.UInt32.n", "equation_Prims.nat",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt8.t",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "haseqSpec.Hash.Test_Tm_refine_518db22cd6353d1c82282d6b70fddc4a",
+        "refinement_interpretation_Spec.Hash.Test_Tm_refine_caff3a9f7a4b1bd89563812dfb458a10"
+      ],
+      0,
+      "3f58fac0d33d64abc0798a0ae117bde4"
+    ]
+  ]
+]

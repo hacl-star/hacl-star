@@ -1,5 +1,6 @@
 module X64.Memory_s
 
+open Prop_s
 open X64.Machine_s
 module S = X64.Bytes_Semantics_s
 
@@ -36,15 +37,15 @@ let type_of_typ (t:typ) : Tot eqtype =
 
 val buffer (t:typ) : Type0
 val buffer_as_seq (#t:typ) (h:mem) (b:buffer t) : GTot (Seq.seq (type_of_typ t))
-val buffer_readable (#t:typ) (h:mem) (b:buffer t) : GTot Type0
+val buffer_readable (#t:typ) (h:mem) (b:buffer t) : GTot prop0
 val buffer_length (#t:typ) (b:buffer t) : GTot nat
 val loc : Type u#0
 val loc_none : loc
 val loc_union (s1 s2:loc) : GTot loc
 val loc_buffer (#t:typ) (b:buffer t) : GTot loc
-val loc_disjoint (s1 s2:loc) : GTot Type0
-val loc_includes (s1 s2:loc) : GTot Type0
-val modifies (s:loc) (h1 h2:mem) : GTot Type0
+val loc_disjoint (s1 s2:loc) : GTot prop0
+val loc_includes (s1 s2:loc) : GTot prop0
+val modifies (s:loc) (h1 h2:mem) : GTot prop0
 
 unfold let buffer8 = buffer (TBase TUInt8)
 unfold let buffer16 = buffer (TBase TUInt16)
@@ -58,7 +59,7 @@ noeq type state' = {
   mem: mem;
 }
 
-val valid_state (s:state') : Type0
+val valid_state (s:state') : prop0
 
 val frame_valid (s1:state') : Lemma
    (forall s2. s1.state.S.mem == s2.state.S.mem /\ s1.mem == s2.mem ==>
@@ -75,21 +76,21 @@ val same_heap: (s1:state) -> (s2:state) -> Lemma (
 
 val buffer_addr : #t:typ -> b:buffer t -> h:mem -> GTot int
 
-let rec loc_locs_disjoint_rec (l:loc) (ls:list loc) : Type0 =
+let rec loc_locs_disjoint_rec (l:loc) (ls:list loc) : prop0 =
   match ls with
   | [] -> True
   | h::t -> loc_disjoint l h /\ loc_disjoint h l /\ loc_locs_disjoint_rec l t
 
-let rec locs_disjoint_rec (ls:list loc) : Type0 =
+let rec locs_disjoint_rec (ls:list loc) : prop0 =
   match ls with
   | [] -> True
   | h::t -> loc_locs_disjoint_rec h t /\ locs_disjoint_rec t
 
 unfold
-let locs_disjoint (ls:list loc) : Type0 = normalize (locs_disjoint_rec ls)
+let locs_disjoint (ls:list loc) : prop0 = normalize (locs_disjoint_rec ls)
 
 // equivalent to modifies; used to prove modifies clauses via modifies_goal_directed_trans
-val modifies_goal_directed (s:loc) (h1 h2:mem) : GTot Type0
+val modifies_goal_directed (s:loc) (h1 h2:mem) : GTot prop0
 val lemma_modifies_goal_directed (s:loc) (h1 h2:mem) : Lemma
   (modifies s h1 h2 == modifies_goal_directed s h1 h2)
 
@@ -339,30 +340,40 @@ val equiv_load_mem128: ptr:int -> s:state -> Lemma
 open Types_s
 open Words_s
 
-val valid128_64 (ptr:int) (s:state) : Lemma
-  (requires valid_mem128 ptr s.mem)
-  (ensures valid_mem64 ptr s.mem /\ valid_mem64 (ptr+8) s.mem)
+val valid128_64 (ptr:int) (h:mem) : Lemma
+  (requires valid_mem128 ptr h)
+  (ensures valid_mem64 ptr h /\ valid_mem64 (ptr+8) h)
 
-val load128_64 (ptr:int) (s:state) : Lemma
-  (requires valid_mem128 ptr s.mem)
+val load128_64 (ptr:int) (h:mem) : Lemma
+  (requires valid_mem128 ptr h)
   (ensures
-    (let v = load_mem128 ptr s.mem in
-     let v_lo = load_mem64 ptr s.mem in
-     let v_hi = load_mem64 (ptr+8) s.mem in
+    (let v = load_mem128 ptr h in
+     let v_lo = load_mem64 ptr h in
+     let v_hi = load_mem64 (ptr+8) h in
      v.lo0 + 0x100000000 `op_Multiply` v.lo1 == v_lo /\
      v.hi2 + 0x100000000 `op_Multiply` v.hi3 == v_hi))
 
-val store128_64 (ptr:int) (v:quad32) (s:state) : Lemma
+val store128_64_valid (ptr:int) (v:quad32) (s:state) : Lemma
+  (forall i. valid_mem64 i s.mem <==> valid_mem64 i (store_mem128 ptr v s.mem))
+
+val store128_64_frame (ptr:int) (v:quad32) (s:state) : Lemma
   (requires valid_mem128 ptr s.mem)
-  (ensures store_mem128 ptr v s.mem == store_mem64 ptr (v.lo0 + 0x100000000 `op_Multiply` v.lo1)
-    (store_mem64 (ptr+8) (v.hi2 + 0x100000000 `op_Multiply` v.hi3) s.mem))
+  (ensures (forall i. i <> ptr /\ i <> ptr + 8 /\ valid_mem64 i s.mem ==>
+    load_mem64 i s.mem == load_mem64 i (store_mem128 ptr v s.mem)))
+
+val store128_64_load (ptr:int) (v:quad32) (s:state) : Lemma
+  (requires valid_mem128 ptr s.mem)
+  (ensures (
+    let h = store_mem128 ptr v s.mem in
+    load_mem64 ptr h = v.lo0 + 0x100000000 `op_Multiply` v.lo1 /\
+    load_mem64 (ptr+8) h = v.hi2 + 0x100000000 `op_Multiply` v.hi3))
 
 //Memtaint related functions
 
 type memtaint = memTaint_t
 
-val valid_taint_buf64 (b:buffer64) (mem:mem) (memTaint:memtaint) (t:taint) : GTot Type0
-val valid_taint_buf128 (b:buffer128) (mem:mem) (memTaint:memtaint) (t:taint) : GTot Type0
+val valid_taint_buf64 (b:buffer64) (mem:mem) (memTaint:memtaint) (t:taint) : GTot prop0
+val valid_taint_buf128 (b:buffer128) (mem:mem) (memTaint:memtaint) (t:taint) : GTot prop0
 
 val lemma_valid_taint64: (b:buffer64) ->
                          (memTaint:memtaint) ->

@@ -26,6 +26,35 @@ let x25519 dst secret base =
   else
     failwith !$"ERROR: inconsistent configuration"
 
+/// Random sampling
+
+let random_init () =
+  let i = AC.random_impl () in
+  if SC.openssl && i = AC.OpenSSL then
+    OpenSSL.random_init ()
+  else if SC.bcrypt && i = AC.BCrypt then
+    BCrypt.random_init ()
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let random_sample len out =
+  let i = AC.random_impl () in
+  if SC.openssl && i = AC.OpenSSL then
+    OpenSSL.random_sample len out
+  else if SC.bcrypt && i = AC.BCrypt then
+    BCrypt.random_sample len out
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let random_cleanup () =
+  let i = AC.random_impl () in
+  if SC.openssl && i = AC.OpenSSL then
+    ()
+  else if SC.bcrypt && i = AC.BCrypt then
+    BCrypt.random_cleanup ()
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
 /// AES128-ECB
 
 [@CAbstractStruct]
@@ -152,7 +181,8 @@ let chacha20 key iv ctr plain len cipher =
 
 // TODO move to ValeGlue
 private inline_for_extraction
-let vale_aes128_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
+let vale_aes128_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
+                            (plaintext:uint8_p) (len:uint32_t) (cipher:uint8_p) (tag:uint8_p) =
   push_frame ();
   let open EverCrypt.Vale in
   let iv'        = B.alloca 0uy 16ul in
@@ -177,7 +207,8 @@ let vale_aes128_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
   pop_frame ()
 
 private inline_for_extraction
-let vale_aes128_gcm_decrypt xkey iv ad adlen plaintext len cipher tag =
+let vale_aes128_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
+                            (plaintext:uint8_p) (len:uint32_t) (cipher:uint8_p) (tag:uint8_p) =
   push_frame ();
   let open EverCrypt.Vale in
   let iv'        = B.alloca 0uy 16ul in
@@ -240,7 +271,8 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
 
 // TODO move to ValeGlue
 private inline_for_extraction
-let vale_aes256_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
+let vale_aes256_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
+                            (plaintext:uint8_p) (len:uint32_t) (cipher:uint8_p) (tag:uint8_p) =
   push_frame ();
   let open EverCrypt.Vale in
   let iv'        = B.alloca 0uy 16ul in
@@ -265,7 +297,8 @@ let vale_aes256_gcm_encrypt xkey iv ad adlen plaintext len cipher tag =
   pop_frame ()
 
 private inline_for_extraction
-let vale_aes256_gcm_decrypt xkey iv ad adlen plaintext len cipher tag =
+let vale_aes256_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
+                            (plaintext:uint8_p) (len:uint32_t) (cipher:uint8_p) (tag:uint8_p) =
   push_frame ();
   let open EverCrypt.Vale in
   let iv'        = B.alloca 0uy 16ul in
@@ -454,3 +487,94 @@ let aead_free pk =
   else
     failwith !$"ERROR: inconsistent configuration";
   B.free pk
+
+/// DH
+
+[@CAbstractStruct]
+private noeq type _dh_state =
+  | DH_OPENSSL: st:Dyn.dyn -> _dh_state
+  | DH_DUMMY // Necessary placeholder or discriminators are not defined
+
+let dh_state_s = _dh_state
+
+let dh_load_group dh_p dh_p_len dh_g dh_g_len dh_q dh_q_len =
+  let i = AC.dh_impl () in
+  let st: dh_state_s =
+    if SC.openssl && i = AC.OpenSSL then
+      DH_OPENSSL (OpenSSL.dh_load_group dh_p dh_p_len dh_g dh_g_len dh_q dh_q_len)
+    else
+      failwith !$"ERROR: inconsistent configuration"
+  in
+  B.malloc HS.root st 1ul
+
+let dh_free_group st =
+  let i = AC.dh_impl () in
+  let s : _dh_state = !*st in
+  if SC.openssl && DH_OPENSSL? s then
+    OpenSSL.dh_free_group (DH_OPENSSL?.st s)
+  else
+    failwith !$"ERROR: inconsistent configuration";
+  B.free st
+
+let dh_keygen st public =
+  let s = !*st in
+  if SC.openssl && DH_OPENSSL? s then
+    OpenSSL.dh_keygen (DH_OPENSSL?.st s) public
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let dh_compute st public public_len out =
+  let s = !*st in
+  if SC.openssl && DH_OPENSSL? s then
+    OpenSSL.dh_compute (DH_OPENSSL?.st s) public public_len out
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+/// DH
+
+[@CAbstractStruct]
+private noeq type _ecdh_state =
+  | ECDH_OPENSSL: st:Dyn.dyn -> _ecdh_state
+  | ECDH_DUMMY // Necessary placeholder or discriminators are not defined
+
+let ecdh_state_s = _ecdh_state
+
+let ecdh_load_curve g =
+  let i = AC.dh_impl () in
+  let st: ecdh_state_s =
+    if SC.openssl && i = AC.OpenSSL then
+      let g' = match g with
+        | ECC_P256 -> OpenSSL.ECC_P256
+	| ECC_P384 -> OpenSSL.ECC_P384
+	| ECC_P521 -> OpenSSL.ECC_P521
+	| ECC_X25519 -> OpenSSL.ECC_X25519
+	| ECC_X448 -> OpenSSL.ECC_X448 in
+      ECDH_OPENSSL (OpenSSL.ecdh_load_curve g')
+    else
+      failwith !$"ERROR: inconsistent configuration"
+  in
+  B.malloc HS.root st 1ul
+
+let ecdh_free_curve st =
+  let i = AC.dh_impl () in
+  let s : _ecdh_state = !*st in
+  if SC.openssl && ECDH_OPENSSL? s then
+    OpenSSL.ecdh_free_curve (ECDH_OPENSSL?.st s)
+  else
+    failwith !$"ERROR: inconsistent configuration";
+  B.free st
+
+let ecdh_keygen st outx outy =
+  let s = !*st in
+  if SC.openssl && ECDH_OPENSSL? s then
+    OpenSSL.ecdh_keygen (ECDH_OPENSSL?.st s) outx outy
+  else
+    failwith !$"ERROR: inconsistent configuration"
+
+let ecdh_compute st inx iny out =
+  let s = !*st in
+  if SC.openssl && ECDH_OPENSSL? s then
+    OpenSSL.ecdh_compute (ECDH_OPENSSL?.st s) inx iny out
+  else
+    failwith !$"ERROR: inconsistent configuration"
+

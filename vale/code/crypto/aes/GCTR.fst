@@ -14,10 +14,10 @@ open GCM_helpers
 open FStar.Math.Lemmas
 open Collections.Seqs
 
-let gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) (key:aes_key_LE alg) (i:int) =
+let gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) (key:seq nat32) (i:int) =
   ()
 
-let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algorithm) (key:aes_key_LE alg) =
+let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algorithm) (key:seq nat32) =
   reveal_opaque le_bytes_to_seq_quad32_def;
   reveal_opaque gctr_encrypt_LE_def;
   let plain = slice_work_around (le_seq_quad32_to_bytes plain_LE) 0 in
@@ -150,11 +150,11 @@ let rec gctr_indexed (icb:quad32) (plain:gctr_plain_internal_LE)
   assert(equal cipher c)  // OBSERVE: Invoke extensionality lemmas
 
 
-let gctr_partial_completed (alg:algorithm) (plain cipher:seq quad32) (key:aes_key_LE alg) (icb:quad32) =
+let gctr_partial_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) =
   gctr_indexed icb plain alg key cipher;
   ()
 
-let gctr_partial_to_full_basic (icb_BE:quad32) (plain:seq quad32) (alg:algorithm) (key:aes_key_LE alg) (cipher:seq quad32) =
+let gctr_partial_to_full_basic (icb_BE:quad32) (plain:seq quad32) (alg:algorithm) (key:seq nat32) (cipher:seq quad32) =
   reveal_opaque gctr_encrypt_LE_def;
   let p = le_seq_quad32_to_bytes plain in
   assert (length p % 16 == 0);
@@ -461,7 +461,7 @@ let nat32_xor_bytewise_3 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   nat32_xor_bytewise_3_helper2 x x' t t';
   ()
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 50 --smtencoding.nl_arith_repr boxwrap --smtencoding.l_arith_repr boxwrap"
 let nat32_xor_bytewise_4 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   (requires
     k == four_to_nat 8 s /\
@@ -608,7 +608,7 @@ let step2 (s:seq nat8 {  0 < length s /\ length s < 16 }) (q:quad32) (icb_BE:qua
 #reset-options "--z3rlimit 30"
 open FStar.Seq.Properties
 
-let gctr_partial_to_full_advanced (icb_BE:quad32) (plain:seq quad32) (cipher:seq quad32) (alg:algorithm) (key:aes_key_LE alg) (num_bytes:nat) =
+let gctr_partial_to_full_advanced (icb_BE:quad32) (plain:seq quad32) (cipher:seq quad32) (alg:algorithm) (key:seq nat32) (num_bytes:nat) =
   reveal_opaque gctr_encrypt_LE_def;
   let num_blocks = num_bytes / 16 in
   let plain_bytes = slice (le_seq_quad32_to_bytes plain) 0 num_bytes in
@@ -658,7 +658,7 @@ let gctr_partial_to_full_advanced (icb_BE:quad32) (plain:seq quad32) (cipher:seq
   ()
 
 
-let gctr_encrypt_one_block (icb_BE plain:quad32) (alg:algorithm) (key:aes_key_LE alg) =
+let gctr_encrypt_one_block (icb_BE plain:quad32) (alg:algorithm) (key:seq nat32) =
   reveal_opaque gctr_encrypt_LE_def;
   assert(inc32 icb_BE 0 == icb_BE);
   let encrypted_icb = aes_encrypt_BE alg key icb_BE in

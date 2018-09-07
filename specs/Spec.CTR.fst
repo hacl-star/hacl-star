@@ -38,7 +38,7 @@ let rec counter_mode_blocks ctx block_enc key nonce counter plain =
   let len  = length plain in
   let len' = len / (ctx.blocklen * ctx.incr) in
   Math.Lemmas.lemma_div_mod len (ctx.blocklen * ctx.incr) ;
-  if len = 0 then Seq.createEmpty #UInt8.t
+  if len = 0 then Seq.empty #UInt8.t
   else (
     let prefix, block = split plain (len - ctx.blocklen * ctx.incr) in    
       (* TODO: move to a single lemma for clarify *)
@@ -79,5 +79,5 @@ let counter_mode ctx block_enc key nonce counter plain =
       let mask = slice mask 0 part_len in
       assert(length last_block = part_len);
       xor #part_len last_block mask
-    else createEmpty in
+    else Seq.empty in
   cipher_blocks @| cipher_last_block

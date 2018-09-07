@@ -1,11 +1,32 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
+include "../../../arch/x64/X64.Vale.InsAes.vaf"
 include "X64.GF128_Mul.vaf"
+include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "Words_s"
+include{:fstar}{:open} "Types_s"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "AES_s"
+include{:fstar}{:open} "GHash_s"
+include{:fstar}{:open} "GHash"
+include{:fstar}{:open} "GF128_s"
+include{:fstar}{:open} "GF128"
+include{:fstar}{:open} "GCTR_s"
+include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "Math.Poly2_s"
+include{:fstar}{:open} "X64.Poly1305.Math"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.Vale.QuickCodes"
 
 module X64.GHash
 
 #verbatim{:interface}{:implementation}
+module GHash = GHash // REVIEW: it's strange to have to do this to refer to GHash.*
 open Opaque_s
 open FStar.Seq
 open Words_s
@@ -98,9 +119,10 @@ procedure {:quick} compute_ghash_incremental_register()
     lemma_to_of_quad32(reverse_bytes_quad32(io));   // Help satisfy precondition
     lemma_to_of_quad32(h);    // Help satisfy precondition
     ReduceMul128_LE(gf128_of_quad32(reverse_bytes_quad32(io)), gf128_of_quad32(h));    // io := Y_i * H
-    reveal_opaque(ghash_incremental_def);
+    reveal ghash_incremental_def;
 }
 
+#reset-options "--z3rlimit 30"
 procedure {:quick} ghash_incremental_one_block_buffer(
   ghost h_b:buffer128,
   ghost hash_b:buffer128,
@@ -339,7 +361,7 @@ procedure {:quick} compute_ghash_incremental(
 
             Add64(rdx, 1);
             Add64(r9, 16);
-            reveal_opaque(ghash_incremental_def);
+            reveal ghash_incremental_def;
         }
     }
 }
@@ -407,7 +429,7 @@ procedure {:quick} compute_ghash_incremental_partial(
 
             Add64(rdx, 1);
             Add64(r9, 16);
-            reveal_opaque(ghash_incremental_def);
+            reveal ghash_incremental_def;
         }
     }
 }
@@ -521,7 +543,7 @@ procedure {:quick} compute_pad_to_128_bits()
         Mov64(tmp, num_bytes);
         Sub64(tmp, 8);      // Don't count the lower 64 bits
         Shl64(tmp, 3);      // tmp == 8 (bits/byte) * (num_bytes - 8)
-        lemma_bytes_shift_power2(num_bytes - 8);
+        lemma_bytes_shift_power2(#nat64(num_bytes - 8));
         assert tmp == 8 * (num_bytes - 8);
         Mov64(mask, 1);
         Shl64(mask, tmp);
@@ -529,8 +551,8 @@ procedure {:quick} compute_pad_to_128_bits()
         Pextrq(tmp, io, 1);
         ghost var old_upper128 := tmp;
         And64(tmp, mask);
-        lemma_bytes_and_mod(old_upper128, num_bytes - 8); // ==>
-        assert num_bytes - 8 >= 0 /\ tmp == old_upper128 % (pow2((num_bytes - 8) * 8));
+        lemma_bytes_and_mod(old_upper128, #nat64(num_bytes - 8)); // ==>
+        // assert num_bytes - 8 >= 0 /\ tmp == old_upper128 % (pow2((num_bytes - 8) * 8));
 
         // Restore the upper 64 bits
         Pinsrq(io, tmp, 1);
@@ -1059,7 +1081,7 @@ procedure {:quick} ghash_core(
     ensures
         len == 0 ==> rdx == old(rdx) /\ r9 == old(r9) /\ xmm1 == old(xmm1) /\ output == old(output);
         len > 0 ==> length(buffer128_as_seq(mem, in_b)) > 0 /\ 
-                    output == ghash_LE(reverse_bytes_quad32(h), buffer128_as_seq(mem, in_b));
+                    output == ghash_LE(reverse_bytes_quad32(h), #ghash_plain_LE(buffer128_as_seq(mem, in_b)));
 {
     if (len != 0) {
         compute_Y0();
@@ -1067,4 +1089,3 @@ procedure {:quick} ghash_core(
         ghash_incremental_to_ghash(reverse_bytes_quad32(h), buffer128_as_seq(mem, in_b));
     }
 }
-

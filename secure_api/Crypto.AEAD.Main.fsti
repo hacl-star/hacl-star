@@ -166,7 +166,7 @@ val gen (i:I.id)
                 fresh_addresses prf_rgn fresh h0 h1 // /\
                 // footprint s == as_set [(log_rgn, AllRefs); (prf_rgn, SomeRefs fresh)]
              ) /\
-             (safeMac i ==> log s h1 == Seq.createEmpty) /\
+             (safeMac i ==> log s h1 == Seq.empty) /\
              invariant s h1
     ))
 

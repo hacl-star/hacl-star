@@ -1424,7 +1424,7 @@ let chacha20_counter_mode_blocks3 log output plain len st =
     (**) lemma_modifies_2_trans output st h0 h h';
     ()
     in
-  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) (Seq.createEmpty);
+  Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) (Seq.empty);
   Spec.CTR3.lemma_counter_mode_blocks3_def0 (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr) (Seq.slice (reveal_sbytes (as_seq h0 plain)) 0 0);
   C.Loops.for 0ul len inv f';
   let h1 = ST.get() in
@@ -1511,7 +1511,7 @@ let chacha20_counter_mode_blocks log output plain len st =
     let h3 = ST.get() in
     no_upd_lemma_1 h2 h3 st output
   ) else (
-    Seq.lemma_eq_intro (as_seq h1 output') (Seq.append (as_seq h1 output) (Seq.createEmpty))
+    Seq.lemma_eq_intro (as_seq h1 output') (Seq.append (as_seq h1 output) (Seq.empty))
   )
 
 
@@ -1557,7 +1557,7 @@ let chacha20_counter_mode log output plain len st =
     ())
   else ();
   let h = ST.get() in
-  Seq.lemma_eq_intro (Seq.append (as_seq h output') Seq.createEmpty) (as_seq h output');
+  Seq.lemma_eq_intro (Seq.append (as_seq h output') Seq.empty) (as_seq h output');
   Seq.lemma_eq_intro (as_seq h output) (Seq.append (as_seq h output') (as_seq h output''));
   Seq.lemma_eq_intro (as_seq h0 plain) (Seq.append (as_seq h0 plain') (as_seq h0 plain''));
   Seq.lemma_eq_intro (reveal_sbytes (as_seq h output)) (Spec.CTR3.counter_mode (Ghost.reveal log).k (Ghost.reveal log).n (U32.v (Ghost.reveal log).ctr) (reveal_sbytes (as_seq h0 plain)));

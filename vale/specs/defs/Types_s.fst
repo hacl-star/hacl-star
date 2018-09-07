@@ -55,15 +55,15 @@ let nat32_to_be_bytes (n:nat32) : b:seq4 nat8 { be_bytes_to_nat32 b == n } =
 assume val be_bytes_to_nat32_to_be_bytes (b:seq4 nat8) :
   Lemma (nat32_to_be_bytes (be_bytes_to_nat32 b) == b)
 
-let le_bytes_to_quad32_def (b:seqn 16 nat8) : quad32 =
+let le_bytes_to_quad32_def (b:seq nat8) : Pure quad32 (requires length b == 16) (ensures fun _ -> True) =
   seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE b))
 let le_bytes_to_quad32 = make_opaque le_bytes_to_quad32_def
 
-let be_bytes_to_quad32_def (b:seqn 16 nat8) : quad32 =
+let be_bytes_to_quad32_def (b:seq nat8) : Pure quad32 (requires length b == 16) (ensures fun _ -> True) =
   seq_to_four_BE (seq_map (four_to_nat 8) (seq_to_seq_four_BE b))
 let be_bytes_to_quad32 = make_opaque be_bytes_to_quad32_def
 
-let le_quad32_to_bytes_def (b:quad32) : seqn 16 nat8 =
+let le_quad32_to_bytes_def (b:quad32) : Pure (seq nat8) (requires True) (ensures fun s -> length s == 16) =
   seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))
 let le_quad32_to_bytes = make_opaque le_quad32_to_bytes_def
 
@@ -77,7 +77,7 @@ let le_seq_quad32_to_bytes_length (s:seq quad32) : Lemma
   =
   reveal_opaque le_seq_quad32_to_bytes_def
 
-let le_bytes_to_seq_quad32_def (b:seq nat8{length b % 16 == 0}) : seq quad32 =
+let le_bytes_to_seq_quad32_def (b:seq nat8) : Pure (seq quad32) (requires length b % 16 == 0) (ensures fun _ -> True) =
   seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE b)
 let le_bytes_to_seq_quad32 = make_opaque le_bytes_to_seq_quad32_def
 

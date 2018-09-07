@@ -1,4 +1,7 @@
 #include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <openssl/dh.h>
+#include <openssl/ec.h>
 #include <inttypes.h>
 
 #include "kremlin/internal/target.h"
@@ -16,6 +19,23 @@
   do {                                                                         \
     KRML_HOST_EPRINTF("Error at %s:%d\n", __FILE__, __LINE__);                   \
   } while (0)
+
+
+/* OpenSSL PRNG */
+
+uint32_t EverCrypt_OpenSSL_random_init()
+{
+  if(RAND_status()) return 1;
+  return RAND_poll();
+}
+
+void EverCrypt_OpenSSL_random_sample(uint32_t len, uint8_t *out)
+{
+  if(1 != RAND_bytes(out, len))
+    handleErrors();
+}
+
+/* OpenSSL AEAD */
 
 EVP_CIPHER_CTX *openssl_create(const EVP_CIPHER *alg, uint8_t *key)
 {
@@ -166,3 +186,135 @@ void EverCrypt_OpenSSL_aead_free(void* ctx)
 {
   openssl_free((EVP_CIPHER_CTX *)ctx);
 }
+
+/* Diffie-Hellman */
+
+void* EverCrypt_OpenSSL_dh_load_group(
+  uint8_t *dh_p,  uint32_t dh_p_len,
+  uint8_t *dh_g,  uint32_t dh_g_len,
+  uint8_t *dh_q,  uint32_t dh_q_len)
+{
+  DH *dh = DH_new();
+  if(dh == NULL) handleErrors();
+
+  BIGNUM *p = BN_bin2bn(dh_p, dh_p_len, NULL);
+  BIGNUM *g = BN_bin2bn(dh_g, dh_g_len, NULL);
+  BIGNUM *q = dh_q_len ? BN_bin2bn(dh_q, dh_q_len, NULL) : NULL;
+  DH_set0_pqg(dh, p, q, g);
+  
+  return (void*)dh;
+}
+
+void EverCrypt_OpenSSL_dh_free_group(void *g)
+{
+  DH_free((DH*)g);
+}
+
+uint32_t EverCrypt_OpenSSL_dh_keygen(void *st, uint8_t *pub)
+{
+  DH *dh = (DH*)st;
+  const BIGNUM *opub, *opriv;
+  DH_generate_key(dh);
+  DH_get0_key(dh, &opub, &opriv);
+  BN_bn2bin(opub, pub);
+  return BN_num_bytes(opub);
+}
+
+uint32_t EverCrypt_OpenSSL_dh_compute(void *g,
+  uint8_t *pub, uint32_t pub_len,
+  uint8_t *out)
+{
+  BIGNUM *opub = BN_bin2bn(pub, pub_len, NULL);
+  
+  if(DH_compute_key(out, opub, (DH*)g) < 0)
+    handleErrors();
+  
+  BN_free(opub);
+  return DH_size((DH*)g);
+}
+
+void* EverCrypt_OpenSSL_ecdh_load_curve(EverCrypt_OpenSSL_ec_curve g)
+{
+  EC_KEY *k = NULL;
+  switch (g) {
+    case EverCrypt_OpenSSL_ECC_P256:
+      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_X9_62_prime256v1));
+      break;
+    case EverCrypt_OpenSSL_ECC_P384:
+      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_secp384r1));
+      break;
+    case EverCrypt_OpenSSL_ECC_P521:
+      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_secp521r1));
+      break;
+    case EverCrypt_OpenSSL_ECC_X25519:
+      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_X25519));
+      break;
+    case EverCrypt_OpenSSL_ECC_X448:
+      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_X448));
+      break;
+  }
+  return (void*)k;
+}
+
+void EverCrypt_OpenSSL_ecdh_free_curve(void* st)
+{
+  EC_KEY_free((EC_KEY*)st);
+}
+
+void EverCrypt_OpenSSL_ecdh_keygen(void* st, uint8_t *outx, uint8_t *outy)
+{
+  EC_KEY *k = (EC_KEY*)st;
+  EC_KEY_generate_key(k);
+  
+  const EC_GROUP *g = EC_KEY_get0_group(k);
+  const EC_POINT *p = EC_KEY_get0_public_key(k);
+  BIGNUM *x = BN_new(), *y = BN_new();
+  EC_POINT_get_affine_coordinates_GFp(g, p, x, y, NULL);
+  
+  BN_bn2bin(x, outx);
+  BN_bn2bin(y, outy);
+  BN_free(y);
+  BN_free(x);
+}
+
+uint32_t EverCrypt_OpenSSL_ecdh_compute(void* st,
+  uint8_t *inx, uint8_t *iny, uint8_t *out)
+{
+  EC_KEY *k = (EC_KEY*)st;
+  const EC_GROUP *g = EC_KEY_get0_group(k);
+  EC_POINT *pp = EC_POINT_new(g);
+  
+  size_t field_size = EC_GROUP_get_degree(g);
+  size_t len = (field_size + 7) / 8;
+  
+  BIGNUM *px = BN_bin2bn(inx, len, NULL);
+  BIGNUM *py = BN_bin2bn(iny, len, NULL);
+  EC_POINT_set_affine_coordinates_GFp(g, pp, px, py, NULL);
+  
+  uint32_t olen = ECDH_compute_key((uint8_t *)out, len, pp, k, NULL);
+  EC_POINT_free(pp);
+  return olen;
+}
+
+/*
+bool CoreCrypto_ec_is_on_curve_(CoreCrypto_ec_params *x0,
+                               CoreCrypto_ec_point *x1) {
+
+  EC_KEY *k = key_of_core_crypto_curve(x0->curve);
+  const EC_GROUP *group = EC_KEY_get0_group(k);
+
+  EC_POINT *point = EC_POINT_new(group);
+  BIGNUM *ppx = BN_bin2bn((uint8_t *)x1->ecx.data, x1->ecx.length, NULL);
+  BIGNUM *ppy = BN_bin2bn((uint8_t *)x1->ecy.data, x1->ecy.length, NULL);
+  EC_POINT_set_affine_coordinates_GFp(group, point, ppx, ppy, NULL);
+
+  bool ret = EC_POINT_is_on_curve(group, point, NULL);
+
+  BN_free(ppy);
+  BN_free(ppx);
+  EC_POINT_free(point);
+  EC_KEY_free(k);
+  return ret;
+}
+
+*/

@@ -424,7 +424,7 @@ let lemma_slices_le_quad32_to_bytes (q:quad32) : Lemma
   reveal_opaque le_quad32_to_bytes_def;
   ()
 
-let lemma_slices_le_bytes_to_quad32 (s:seqn 16 nat8) : Lemma
+let lemma_slices_le_bytes_to_quad32 (s:seq16 nat8) : Lemma
   (ensures (
     let q = le_bytes_to_quad32 s in
     q.lo0 == four_to_nat 8 (seq_to_four_LE (slice s 0 4)) /\

@@ -76,7 +76,8 @@ FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib/compat evercrypt evercrypt/fst \
   $(HACL_CODE)/salsa-family \
   $(HACL_CODE)/poly1305 \
   $(HACL_CODE)/bignum \
-  $(HACL_SPEC)
+  $(HACL_SPEC) \
+  $(HACL_HOME)/specs/old # REMOVE ASAP
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
@@ -134,7 +135,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
-	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.HKDF+EverCrypt.HMAC=* \
+	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=* \
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \
@@ -142,7 +143,7 @@ $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
 	  -add-include '<kremlin/internal/compat.h>' \
 	  -tmpdir $(INCLUDE_DIR) $^
 	rm -rf $(INCLUDE_DIR)/Makefile.include $(INCLUDE_DIR)/*.c
-	mv $(INCLUDE_DIR)/EverCrypt_EverCrypt_Bytes_EverCrypt_HKDF_EverCrypt_HMAC.h $@
+	mv $(INCLUDE_DIR)/EverCrypt_EverCrypt_Bytes_EverCrypt_AutoConfig_EverCrypt_HKDF_EverCrypt_HMAC_EverCrypt_Hash.h $@
 
 
 

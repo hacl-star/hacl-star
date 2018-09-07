@@ -15,7 +15,7 @@ unfold type gcm_auth_LE = gctr_plain_LE
 
 #reset-options "--z3rlimit 30"
 // little-endian, except for iv_BE
-let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seqn 16 nat8) (plain:seq nat8) (auth:seq nat8) :
+let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seq16 nat8) (plain:seq nat8) (auth:seq nat8) :
   Pure (tuple2 (seq nat8) (seq nat8))
     (requires
       4096 * length plain < pow2_32 /\
@@ -46,9 +46,10 @@ let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seqn 16 nat8) (plai
 //REVIEW: unexpectedly, the following fails:
 //  let fails () : Lemma (gcm_encrypt_LE == make_opaque gcm_encrypt_LE_def) = ()
 //So we do this instead:
-let gcm_encrypt_LE (alg:algorithm) (key:aes_key alg) (iv:seqn 16 nat8) (plain:seq nat8) (auth:seq nat8) :
+let gcm_encrypt_LE (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (plain:seq nat8) (auth:seq nat8) :
   Pure (tuple2 (seq nat8) (seq nat8))
     (requires
+      is_aes_key alg key /\
       4096 * length plain < pow2_32 /\
       4096 * length auth < pow2_32
     )
@@ -56,7 +57,7 @@ let gcm_encrypt_LE (alg:algorithm) (key:aes_key alg) (iv:seqn 16 nat8) (plain:se
   =
   make_opaque (gcm_encrypt_LE_def alg key iv plain auth)
 
-let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seqn 16 nat8) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
+let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seq16 nat8) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
   Pure (tuple2 (seq nat8) (bool))
     (requires
       4096 * length cipher < pow2_32 /\
@@ -83,9 +84,10 @@ let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seqn 16 nat8) (ciph
 
   (p, t = tag)
 
-let gcm_decrypt_LE (alg:algorithm) (key:aes_key alg) (iv:seqn 16 nat8) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
+let gcm_decrypt_LE (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
   Pure (tuple2 (seq nat8) (bool))
     (requires
+      is_aes_key alg key /\
       4096 * length cipher < pow2_32 /\
       4096 * length auth < pow2_32
     )

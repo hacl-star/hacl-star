@@ -40,13 +40,17 @@ let rec locs_disjoint_rec (ls:list s8) : Type0 =
   | h::t -> loc_locs_disjoint_rec h t /\ locs_disjoint_rec t
 
 unfold
-let bufs_disjoint (ls:list s8) : Type0 = normalize (locs_disjoint_rec ls)
+let bufs_disjoint (ls:list s8) : Type0 =
+  norm [iota; zeta; delta; delta_only [`%loc_locs_disjoint_rec;
+                                       `%locs_disjoint_rec]] (locs_disjoint_rec ls)
 
 unfold
-let buf_disjoint_from (b:s8) (ls:list s8) : Type0 = normalize (loc_locs_disjoint_rec b ls)
+let buf_disjoint_from (b:s8) (ls:list s8) : Type0 =
+  norm [iota; zeta; delta; delta_only [`%loc_locs_disjoint_rec;
+                                       `%locs_disjoint_rec]] (loc_locs_disjoint_rec b ls)
 
 unfold
-let disjoint ptr1 ptr2 = M.loc_disjoint (M.loc_buffer ptr1) (M.loc_buffer ptr2)
+let disjoint (#a:Type0) (ptr1 ptr2:B.buffer a) = M.loc_disjoint (M.loc_buffer ptr1) (M.loc_buffer ptr2)
 
 unfold
 let disjoint_or_eq ptr1 ptr2 = disjoint ptr1 ptr2 \/ ptr1 == ptr2
@@ -64,7 +68,7 @@ type addr_map = (m:(b8 -> nat64){
   (forall (b:b8). m b + B.length b < pow2_64)})
 
 unfold
-let list_live mem ptrs = forall p . List.memP p ptrs ==> B.live mem p
+let list_live (#a:Type0) mem (ptrs:list (B.buffer a)) = forall p . List.memP p ptrs ==> B.live mem p
 
 (* Additional hypotheses, which should be added to the corresponding libraries at some point *)
 
