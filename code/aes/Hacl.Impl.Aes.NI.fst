@@ -256,30 +256,55 @@ let aes_alloc rounds =
   let nonce = alloca vec128_zero 1ul in
   (keyex,nonce)
 
+
+inline_for_extraction
+val aes_init_nonce: nvec:key1 -> nonce:lbytes 12 -> ST unit
+			     (requires (fun h -> live h nonce /\ live h nvec))
+			     (ensures (fun h0 b h1 -> modifies (loc_buffer nvec) h0 h1))
+let aes_init_nonce nvec nonce = 
+  push_frame();
+  let nb = alloca 0uy 16ul in
+  blit nonce (size 0) nb (size 0) (size 12);
+  nvec.(size 0) <- vec128_load_le nb;
+  pop_frame()
+
+
+inline_for_extraction
 val aes128_init: keyx:keyex -> nvec:key1 -> key:skey -> nonce:lbytes 12 -> ST unit
 			     (requires (fun h -> live h keyx /\ live h nonce /\ live h nvec /\ live h key))
 			     (ensures (fun h0 b h1 -> modifies (loc_union (loc_buffer keyx) (loc_buffer nvec)) h0 h1))
 let aes128_init keyx (nvec:key1) key nonce = 
   push_frame();
   key_expansion128 keyx key ; 
-  let nb = alloca 0uy 16ul in
-  blit nonce (size 0) nb (size 0) (size 12);
-  nvec.(size 0) <- vec128_load_le nb;
+  aes_init_nonce nvec nonce;
   pop_frame()
 
 
+inline_for_extraction
+val aes128_key_block: kb:lbytes 16 -> keyx:keyex -> nvec:key1 -> counter:size_t -> ST unit
+			     (requires (fun h -> live h kb /\ live h keyx /\ live h nvec))
+			     (ensures (fun h0 _ h1 -> live h1 kb /\ live h1 nvec /\ live h1 keyx /\ modifies (loc_buffer kb) h0 h1))
+let aes128_key_block kb keyx nvec counter = 
+    push_frame();
+    let st = alloca vec128_zero 4ul in
+    aes_block st keyx nvec counter (size 10);
+    vec128_store_le kb st.(size 0);
+    pop_frame()
+    
+
+
+inline_for_extraction
 val aes256_init: keyx:keyex -> nvec:key1 -> key:skey -> nonce:lbytes 12 -> ST unit
 			     (requires (fun h -> live h keyx /\ live h nonce /\ live h nvec /\ live h key))
 			     (ensures (fun h0 b h1 -> modifies (loc_union (loc_buffer keyx) (loc_buffer nvec)) h0 h1))
 let aes256_init keyx (nvec:key1) key nonce = 
   push_frame();
   key_expansion256 keyx key ; 
-  let nb = alloca 0uy 16ul in
-  blit nonce (size 0) nb (size 0) (size 12);
-  nvec.(size 0) <- vec128_load_le nb;
+  aes_init_nonce nvec nonce;
   pop_frame()
 
 
+inline_for_extraction
 val aes_update4: out:lbytes 64 -> inp:lbytes 64 -> keyx:keyex -> nvec:key1 -> counter:size_t -> rounds:size_t -> ST unit
 			     (requires (fun h -> live h out /\ live h inp /\ live h keyx /\ live h nvec))
 			     (ensures (fun h0 b h1 -> modifies (loc_buffer out) h0 h1))
@@ -297,10 +322,10 @@ let aes_update4 out inp keyx nvec ctr rounds =
   vec128_store_le (sub out (size 48) (size 16)) st.(size 3);
   pop_frame()
 
-val aes_ctr: out:bytes -> inp:bytes -> len:size_t -> keyx:keyex -> nvec:key1 -> counter:size_t -> ST unit
+val aes_ctr: out:bytes -> inp:bytes -> len:size_t -> keyx:keyex -> nvec:key1 -> counter:size_t -> rounds:size_t -> ST unit
 			     (requires (fun h -> live h out /\ live h inp /\ live h keyx /\ live h nvec))
 			     (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
-let aes_ctr out inp len kex nvec counter = 
+let aes_ctr out inp len kex nvec counter rounds = 
   push_frame();
   let blocks64 = len /. size 64 in
   let h0 = ST.get() in
@@ -309,7 +334,7 @@ let aes_ctr out inp len kex nvec counter =
       let ctr = counter +. (i *. size 4) in
       let ib = sub inp (i *. size 64) (size 64) in
       let ob = sub out (i *. size 64) (size 64) in
-      aes_update4 ob ib kex nvec ctr (size 10));
+      aes_update4 ob ib kex nvec ctr rounds);
   let rem = len %. size 64 in
   if (rem >. size 0) then (
       let ctr = counter +. (blocks64 *. size 4) in
@@ -317,7 +342,7 @@ let aes_ctr out inp len kex nvec counter =
       let ob = sub out (blocks64 *. size 64) rem in
       let last = alloca 0uy 64ul in
       blit ib (size 0) last (size 0) rem;
-      aes_update4 last last kex nvec ctr (size 10);
+      aes_update4 last last kex nvec ctr rounds;
       blit last (size 0) ob (size 0) rem);
   pop_frame()
 
@@ -325,7 +350,7 @@ let aes128_ctr_encrypt out inp in_len k n c =
   push_frame();
   let (kex,nvec) = aes_alloc (size 10) in
   aes128_init kex nvec k n;
-  aes_ctr out inp in_len kex nvec c;
+  aes_ctr out inp in_len kex nvec c (size 10);
   pop_frame()
 
 let aes128_ctr_decrypt out inp in_len k n c = 
@@ -335,7 +360,7 @@ let aes256_ctr_encrypt out inp in_len k n c =
   push_frame();
   let (kex,nvec) = aes_alloc (size 14) in
   aes256_init kex nvec k n;
-  aes_ctr out inp in_len kex nvec c;
+  aes_ctr out inp in_len kex nvec c (size 14);
   pop_frame()
 
 let aes256_ctr_decrypt out inp in_len k n c = 

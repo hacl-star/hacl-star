@@ -227,13 +227,32 @@ let decode x y =
 
 
 inline_for_extraction
-val update: acc:felem -> x:felem -> y:felem -> Stack unit
+val update: acc:felem -> x:lbytes 16 -> y:felem -> Stack unit
 	  (requires (fun h -> live h x /\ live h y /\ live h acc))
 	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ live h1 acc /\ modifies (loc_buffer acc) h0 h1))
 
 let update acc x y = 
-    fadd acc x;
-    fmul acc y
+    push_frame();
+    let elem = alloca vec128_zero 1ul in
+    encode elem x;  
+    fadd acc elem;
+    fmul acc y;
+    pop_frame()
+    
+
+
+inline_for_extraction
+val update_last: acc:felem -> x:bytes -> len:size_t{size_v len == length x} -> y:felem -> Stack unit
+	  (requires (fun h -> live h x /\ live h y /\ live h acc))
+	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ live h1 acc /\ modifies (loc_buffer acc) h0 h1))
+
+let update_last acc x l y = 
+    push_frame();
+    let elem = alloca vec128_zero 1ul in
+    encode_last elem x l;  
+    fadd acc elem;
+    fmul acc y;
+    pop_frame()
 
 
 inline_for_extraction
@@ -242,71 +261,67 @@ val poly: acc:felem -> text:bytes -> len:size_t{length text == size_v len} -> r:
 	  (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
 let poly acc text len r = 
     push_frame ();
-    let elem = alloca vec128_zero 1ul in
     let blocks = len /. size 16 in
     let h0 = ST.get() in
     loop_nospec #h0 blocks acc 
-      (fun i -> encode elem (sub text (i *. size 16) (size 16)); 
-             update acc elem r
-      );
+      (fun i -> update acc (sub text (i *. size 16) (size 16)) r);
     let rem = len %. size 16 in
     if (rem >. size 0) then (
        let last = sub text (blocks *. size 16) rem in
-       encode_last elem last rem;
-       update acc elem r
-    );
+       update_last acc last rem r);
     pop_frame()
 
 
 inline_for_extraction
-val poly4: acc:felem -> text:bytes -> len:size_t{length text == size_v len} -> r:felem -> Stack unit
-	  (requires (fun h -> live h acc /\ live h text /\ live h r))
+val poly4: acc:felem -> text:bytes -> len:size_t{length text == size_v len} -> r4:felem4 -> Stack unit
+	  (requires (fun h -> live h acc /\ live h text /\ live h r4))
 	  (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
-let poly4 acc text len r = 
+let poly4 acc text len r4 = 
     push_frame ();
     let tmp = alloca vec128_zero 1ul in
     let b4 = alloca vec128_zero 4ul in
-    let r4 = alloca vec128_zero 4ul in
-    let r_4 = sub r4 (size 0) (size 1) in
-    let r_3 = sub r4 (size 1) (size 1) in
-    let r_2 = sub r4 (size 2) (size 1) in
-    r4.(size 0) <- r.(size 0);
-    r4.(size 1) <- r.(size 0);
-    r4.(size 2) <- r.(size 0);
-    r4.(size 3) <- r.(size 0);
-    fmul r_2 r;
-    fmul r_3 r_2;
-    fmul r_4 r_3;
-
     let blocks = len /. size 64 in
     let h0 = ST.get() in
     loop_nospec #h0 blocks acc 
       (fun i -> encode4 b4 (sub text (i *. size 64) (size 64)); 
              fadd_mul4 acc b4 r4);
     let rem = len %. size 64 in
-    let blocks16 = rem /. size 16 in
-    let h0 = ST.get() in
-    loop_nospec #h0 blocks16 acc 
-      (fun i -> encode tmp (sub text ((i *. size 16) +. (blocks *. size 64)) (size 16));
-	     update acc tmp r);
-    let rem = rem %. size 16 in
-    if (rem >. size 0) then (
-       let last = sub text ((blocks16 *. size 16) +. (blocks *. size 64)) rem in
-       encode_last tmp last rem;
-       update acc tmp r
-    );
+    let last = sub text (blocks *. size 64) rem in
+    poly acc last rem (sub r4 (size 3) (size 1));
     pop_frame()
 
-inline_for_extraction
+val gcm_alloc: unit -> StackInline (felem * felem4)
+	  (requires (fun h -> True))
+	  (ensures (fun h0 (x,y) h1 -> modifies (loc_union (loc_buffer x) (loc_buffer y)) h0 h1))
+let gcm_alloc () = 
+  let acc = alloca vec128_zero 1ul in
+  let r4 = alloca vec128_zero 4ul in
+  (acc,r4)
+
+val gcm_init: acc:felem -> r4:felem4 -> key:lbytes 16 -> Stack unit
+	  (requires (fun h -> live h acc /\ live h r4 /\ live h key))
+	  (ensures (fun h0 _ h1 -> modifies (loc_union (loc_buffer acc) (loc_buffer r4)) h0 h1))
+let gcm_init acc r4 key = 
+    let r_4 = sub r4 (size 0) (size 1) in
+    let r_3 = sub r4 (size 1) (size 1) in
+    let r_2 = sub r4 (size 2) (size 1) in
+    let r   = sub r4 (size 3) (size 1) in
+    encode r key;
+    r4.(size 0) <- r.(size 0);
+    r4.(size 1) <- r.(size 0);
+    r4.(size 2) <- r.(size 0);
+    fmul r_2 r;
+    fmul r_3 r_2;
+    fmul r_4 r_3
+    
+  
 val ghash: tag:lbytes 16 -> text:bytes -> len:size_t{length text == size_v len} -> key:lbytes 16 -> Stack unit
 	  (requires (fun h -> live h tag /\ live h text /\ live h key))
 	  (ensures (fun h0 _ h1 -> modifies (loc_buffer tag) h0 h1))
-
 let ghash tag text len key = 
   push_frame();
-  let r = alloca vec128_zero 1ul in
-  let acc = alloca vec128_zero 1ul in
-  encode r key;
-  poly4 acc text len r;
+  let (acc,r4) = gcm_alloc () in
+  gcm_init acc r4 key;
+  poly4 acc text len r4;
   decode tag acc;
   pop_frame()

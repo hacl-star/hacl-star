@@ -107,6 +107,7 @@ gf128-ni.exe: gf128-ni-c/Hacl_Gf128.c gf128-ni-c/out.krml
 	  $^ -o $@
 
 
+
 GF128_PRE_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	Hacl.Impl.Gf128.PreComp.fst \
@@ -132,6 +133,33 @@ gf128-test: gf128-ni.exe gf128-pre.exe
 gf128-perf: gf128-ni.exe gf128-pre.exe
 	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128.c  gf128-pre-c/Hacl_Gf128_PreComp.c $(KREMLIN_HOME)/kremlib/c/testlib.o gf128_test.c -o gf128-perf.exe
 	./gf128-perf.exe
+
+
+AESGCM_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	Hacl.Impl.Aes.NI.fst \
+	Hacl.Impl.Gf128.NI.fst \
+	Hacl.Impl.AesGCM.fst \
+	Hacl.Test.AesGCM.fst 
+
+aesgcm-ni-c/out.krml: $(AESGCM_NI_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-ni-c $(AESGCM_NI_FILES) -skip-translation
+
+aesgcm-ni-c/Hacl_Impl_AesGCM.c: aesgcm-ni-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-ni-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Impl.AesGCM=*'
+aesgcm-ni.exe: aesgcm-ni-c/Hacl_Impl_AesGCM.c aesgcm-ni-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-ni-c \
+	  -no-prefix 'Hacl.Test.AesGCM' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
+	  -bundle 'Hacl.Test.AesGCM=*' -library Hacl.AesGCM -library Lib.Vec128 \
+	  $^ -o $@
+aesgcm-test: aesgcm-ni.exe
+	./aesgcm-ni.exe
+
+aesgcm-perf: aesgcm-ni.exe
+	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_Impl_AesGCM.c $(KREMLIN_HOME)/kremlib/c/testlib.o aesgcm_test.c -o aesgcm-perf.exe
+	./aesgcm-perf.exe
+
 
 
 all: aes-bitslice.exe aes-ni.exe gf128ni.exe
