@@ -269,12 +269,25 @@ verify_paths = [
   'specs',
 ]
 
+class ExternalFile:
+  def __init__ (self, filename):
+    self.filename = filename
+
+  def obj_name(self):
+    return 'obj/external/' + os.path.basename(self.filename)
+
 external_files = [
-  'obj/external/CanonCommSwaps.fst',
-  'obj/external/CanonCommMonoid.fst',
-  'obj/external/CanonCommSemiring.fst',
-  'obj/external/C.Loops.fst',
-  'obj/external/Spec.Loops.fst',
+  ExternalFile(f'{fstar_path}/examples/tactics/CanonCommSwaps.fst'),
+  ExternalFile(f'{fstar_path}/examples/tactics/CanonCommMonoid.fst'),
+  ExternalFile(f'{fstar_path}/examples/tactics/CanonCommSemiring.fst'),
+  ExternalFile(f'{kremlin_path}/kremlib/C.Loops.fst'),
+  ExternalFile(f'{kremlin_path}/kremlib/Spec.Loops.fst'),
+  ExternalFile(f'{kremlin_path}/kremlib/FStar.Kremlin.Endianness.fst'),
+  ExternalFile('../specs/Spec.SHA2.fst'),
+  ExternalFile('../specs/Spec.SHA2.Constants.fst'),
+  ExternalFile('../specs/Spec.Lib.fst'),
+  ExternalFile('../specs/Spec.Hash.Helpers.fst'),
+  ExternalFile('../code/lib/kremlin/FStar.Endianness.fst'),
 ]
 
 no_extraction_files = [File(x) for x in [
@@ -883,7 +896,7 @@ def process_files_in(env, directories):
     for file in fstis:
       process_fstar_file(env, file, fstar_includes)
     for file in external_files:
-      process_fstar_file(env, File(file), fstar_includes)
+      process_fstar_file(env, File(file.obj_name()), fstar_includes)
     for file in vafs:
       process_vale_file(env, file, fstar_includes)
     for target in manual_dependencies:
@@ -1080,13 +1093,9 @@ if not is_help:
     check_z3_version(fstar_z3)
 
   # HACK: copy external files
-  for x in ['CanonCommSwaps.fst', 'CanonCommMonoid.fst', 'CanonCommSemiring.fst']:
-    source = f'{fstar_path}/examples/tactics/{x}'
-    target = f'obj/external/{x}'
-    shutil.copy(source, target)
-  for x in ['C.Loops.fst', 'Spec.Loops.fst']:
-    source = f'{kremlin_path}/kremlib/{x}'
-    target = f'obj/external/{x}'
+  for f in external_files:
+    source = f.filename
+    target = f.obj_name()
     shutil.copy(source, target)
 
   print('Processing source files')

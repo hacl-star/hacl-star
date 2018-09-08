@@ -104,26 +104,6 @@ let hi64 = Opaque_s.make_opaque hi64_def
 val lemma_lo64_properties (_:unit) :
   Lemma (forall (q0 q1:quad32) . (q0.lo0 == q1.lo0 /\ q0.lo1 == q1.lo1) <==> (lo64 q0 == lo64 q1))
 
-let insert_nat64_opaque = Opaque_s.make_opaque insert_nat64
-
-val lemma_insert_nat64_properties (q:quad32) (n:nat64) : 
-  Lemma ( (let q' = insert_nat64_opaque q n 0 in
-            q'.hi2 == q.hi2 /\
-            q'.hi3 == q.hi3) /\
-           (let q' = insert_nat64_opaque q n 1 in
-            q'.lo0 == q.lo0 /\
-            q'.lo1 == q.lo1))
-  [SMTPat (insert_nat64_opaque q n)]            
-         
-let lo64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 0)
-let hi64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 1)
-
-let lo64 = Opaque_s.make_opaque lo64_def
-let hi64 = Opaque_s.make_opaque hi64_def
-
-val lemma_lo64_properties (_:unit) :
-  Lemma (forall (q0 q1:quad32) . (q0.lo0 == q1.lo0 /\ q0.lo1 == q1.lo1) <==> (lo64 q0 == lo64 q1))
-
 val lemma_hi64_properties (_:unit) :
   Lemma (forall (q0 q1:quad32) . (q0.hi2 == q1.hi2 /\ q0.hi3 == q1.hi3) <==> (hi64 q0 == hi64 q1))
 
