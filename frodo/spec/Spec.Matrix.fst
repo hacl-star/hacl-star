@@ -31,7 +31,6 @@ val index_lt_s:
 let index_lt_s n1 n2 i j =
   assert (j * n1 + i <= (n2 - 1) * n1 + n1 - 1)
 
-// TODO: this proof is fragile; improve
 private
 val index_neq:
     #n1:size_nat
@@ -40,19 +39,18 @@ val index_neq:
   -> j:nat{j < n2}
   -> i':nat{i' < n1}
   -> j':nat{j' < n2}
-  -> Lemma (((i', j') <> (i, j) ==> i' * n2 + j' <> i * n2 + j) /\ i' * n2 + j' < n1 * n2)
+  -> Lemma (((i', j') <> (i, j) ==> (i' * n2 + j' <> i * n2 + j)) /\ i' * n2 + j' < n1 * n2)
 let index_neq #n1 #n2 i j i' j' =
-  admit(); // Fragile proof
-  index_lt n1 n2 i j;
   index_lt n1 n2 i' j';
-  if i' = i then
-    assert ((i', j') <> (i, j) ==> j' <> j)
+  if i = i' then ()
   else
+    if j = j' then ()
+    else
     begin
-    let open FStar.Math.Lemmas in
-    lemma_eucl_div_bound j i n2;
-    lemma_eucl_div_bound j' i' n2
+    assert_spinoff (j + n2 * i < n2 * (i + 1));
+    assert_spinoff (j' + n2 * i' < n2 * (i' + 1))
     end
+
 
 /// Matrices as flat sequences
 
