@@ -77,9 +77,6 @@ let frodo_mul_add_sa_plus_e_inner seed_a sp_matrix ep_matrix bp_matrix a_matrix 
   assert_norm (v params_nbar * v params_n % 2 = 0);
   clear_matrix ep_matrix
 
-//TODO: remove once _aseem_monotonic_buffers it's merged
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
 inline_for_extraction noextract
 val frodo_mul_add_sa_plus_e_main:
     seed_a:lbytes bytes_seed_a
@@ -265,9 +262,6 @@ let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix c2 =
   clear_matrix v_matrix;
   pop_frame()
 
-//TODO: remove once _aseem_monotonic_buffers it's merged
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
 inline_for_extraction noextract
 val crypto_kem_enc_ct_inner:
     seed_a:lbytes bytes_seed_a
@@ -384,7 +378,6 @@ let crypto_kem_enc_0 coins pk g =
   update_sub pk_coins crypto_publickeybytes bytes_mu coins;
   let h2 = ST.get () in
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_publickeybytes + v bytes_mu) (as_seq h2 pk_coins) 0 (v crypto_publickeybytes)) (as_seq h0 pk);
-
   cshake_frodo (crypto_publickeybytes +! bytes_mu) pk_coins (u16 3) (size 3 *! crypto_bytes) g;
   pop_frame()
 

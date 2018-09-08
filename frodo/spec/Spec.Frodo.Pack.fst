@@ -68,6 +68,7 @@ let frodo_pack #n1 #n2 a d =
   (fun i res ->
     (forall (j:nat{j < i}).
       let a8 = Seq.sub #uint16 a (8 * j) 8 in
+      d * j + d <= d * (n1 * n2 / 8) /\
       Seq.equal (Seq.sub res (d * j) d) (frodo_pack8 a8 d)))
   (fun i res ->
     assert_spinoff (d * i + d <= d * (n1 * n2 / 8));

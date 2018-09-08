@@ -18,7 +18,7 @@ open Spec.Frodo.Sample
 module Seq = Lib.Sequence
 module Matrix = Spec.Matrix
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 let crypto_publicmatrixbytes: size_nat =
   params_logq * params_n * params_nbar / 8
@@ -91,16 +91,17 @@ val frodo_mul_add_as_plus_e_pack:
   -> seed_e:lbytes crypto_bytes
   -> tuple2 (lbytes crypto_publicmatrixbytes) (lbytes (2 * params_n * params_nbar))
 let frodo_mul_add_as_plus_e_pack seed_a seed_e =
-  assert_spinoff (params_logq * (params_n * params_nbar / 8) =
-                  params_logq * params_n * params_nbar / 8);
-  assert_spinoff (params_logq * (params_n * params_nbar / 8) <= max_size_t /\ params_logq <= 16);
-  assert_spinoff (params_n * params_nbar <= max_size_t /\ params_nbar % 8 = 0);
+  assert (params_logq * (params_n * params_nbar / 8) =
+          params_logq * params_n * params_nbar / 8);
+  assert (params_n * params_nbar <= max_size_t /\ params_nbar % 8 = 0);
+  assert (forall (j:nat{j < params_n * params_nbar / 8}).
+      params_logq * j + params_logq <= params_logq * (params_n * params_nbar / 8) /\
+      0 <= params_logq * j);
   let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
   let s_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) in
   let s_bytes = matrix_to_lbytes s_matrix in
   let e_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) in
   let b_matrix = Matrix.add (Matrix.mul_s a_matrix s_matrix) e_matrix in
-  let params_logq:d:size_nat{d * (params_n * params_nbar / 8) <= max_size_t} = params_logq in
   let b = frodo_pack b_matrix params_logq in
   b, s_bytes
 
