@@ -1,4 +1,4 @@
-module Hacl.Impl.Gf128.NI
+module Hacl.Impl.Gf128.PreComp
 
 module ST = FStar.HyperStack.ST
 open FStar.HyperStack
@@ -9,204 +9,140 @@ open Lib.Utils
 open Lib.Vec128
 
 
-inline_for_extraction
-let cl_add (x:vec128) (y:vec128) : vec128 = vec128_xor x y
-inline_for_extraction
-let clmul_wide (x:vec128) (y:vec128) : vec128 * vec128 = 
-    let lo = ni_clmul x y (u8 0x00) in
-    let m1 = ni_clmul x y (u8 0x10) in
-    let m2 = ni_clmul x y (u8 0x01) in
-    let hi = ni_clmul x y (u8 0x11) in
-    let m1 = cl_add m1 m2 in
-    let m2 = vec128_shift_left m1 (size 64) in
-    let m1 = vec128_shift_right m1 (size 64) in
-    let lo = cl_add lo m2 in
-    let hi = cl_add hi m1 in
-    (hi,lo)
-
-inline_for_extraction
-let clmul_wide4 (x1:vec128) (x2:vec128) (x3:vec128) (x4:vec128) 
-		(y1:vec128) (y2:vec128) (y3:vec128) (y4:vec128): 
-		vec128 * vec128 = 
-    let lo1 = ni_clmul x1 y1 (u8 0x00) in
-    let lo2 = ni_clmul x2 y2 (u8 0x00) in
-    let lo3 = ni_clmul x3 y3 (u8 0x00) in
-    let lo4 = ni_clmul x4 y4 (u8 0x00) in
-    let lo = cl_add lo1 lo2 in
-    let lo = cl_add lo lo3 in
-    let lo = cl_add lo lo4 in
-    
-    let m1 = ni_clmul x1 y1 (u8 0x10) in
-    let m2 = ni_clmul x2 y2 (u8 0x10) in
-    let m3 = ni_clmul x3 y3 (u8 0x10) in
-    let m4 = ni_clmul x4 y4 (u8 0x10) in
-    let m = cl_add m1 m2 in
-    let m = cl_add m m3 in
-    let m = cl_add m m4 in
-
-    let m1 = ni_clmul x1 y1 (u8 0x01) in
-    let m2 = ni_clmul x2 y2 (u8 0x01) in
-    let m3 = ni_clmul x3 y3 (u8 0x01) in
-    let m4 = ni_clmul x4 y4 (u8 0x01) in
-    let m = cl_add m m1 in
-    let m = cl_add m m2 in
-    let m = cl_add m m3 in
-    let m = cl_add m m4 in
-
-    let hi1 = ni_clmul x1 y1 (u8 0x11) in
-    let hi2 = ni_clmul x2 y2 (u8 0x11) in
-    let hi3 = ni_clmul x3 y3 (u8 0x11) in
-    let hi4 = ni_clmul x4 y4 (u8 0x11) in
-    let hi = cl_add hi1 hi2 in
-    let hi = cl_add hi hi3 in
-    let hi = cl_add hi hi4 in
-
-    let m1 = vec128_shift_left m (size 64) in
-    let m2 = vec128_shift_right m (size 64) in
-    let lo = cl_add lo m1 in
-    let hi = cl_add hi m2 in
-    (hi,lo)
-
-inline_for_extraction
-let vec128_shift_left_bits (x:vec128) (y:size_t) : vec128 = 
-  if (y %. size 8 = size 0) then 
-      vec128_shift_left x y 
-  else if (y <. size 64) then 
-      let x1 = vec128_shift_right64 x (size 64 -. y) in
-      let x2 = vec128_shift_left64 x y in
-      let x3 = vec128_shift_left x1 (size 64) in
-      let x4 = vec128_or x3 x2 in
-      x4
-  else 
-      let x1 = vec128_shift_left64 x (y -. size 64) in
-      let x2 = vec128_shift_left x1 (size 64) in
-      x2
-
-inline_for_extraction
-let vec128_shift_right_bits (x:vec128) (y:size_t) : vec128 = 
-  if (y %. size 8 = size 0) then 
-      vec128_shift_right x y 
-  else if (y <. size 64) then 
-      let x1 = vec128_shift_left64 x (size 64 -. y) in
-      let x2 = vec128_shift_right64 x y in
-      let x3 = vec128_shift_right x1 (size 64) in
-      let x4 = vec128_or x3 x2 in
-      x4
-  else 
-      let x1 = vec128_shift_right64 x (y -. size 64) in
-      let x2 = vec128_shift_right x1 (size 64) in
-      x2
-
-inline_for_extraction
-let gf128_reduce (hi:vec128) (lo:vec128) : vec128 = 
-    (* LEFT SHIFT [hi:lo] by 1 *)
-    let lo1 = vec128_shift_right64 lo (size 63) in
-    let lo2 = vec128_shift_left lo1 (size 64) in
-    let lo3 = vec128_shift_left64 lo (size 1) in
-    let lo3 = vec128_xor lo3 lo2 in
-
-    let hi1 = vec128_shift_right64 hi (size 63) in
-    let hi1 = vec128_shift_left hi1 (size 64) in
-    let hi2 = vec128_shift_left64 hi (size 1) in
-    let hi2 = vec128_xor hi2 hi1 in
-
-    let lo1 = vec128_shift_right64 lo (size 63) in
-    let lo1 = vec128_shift_right lo1 (size 64) in
-    let hi2 = vec128_xor hi2 lo1 in
-    
-    let lo = lo3 in
-    let hi = hi2 in
-(*
-    let lo1 = vec128_shift_right_bits lo (size 127) in
-    let lo = vec128_shift_left_bits lo (size 1) in
-    let hi = vec128_shift_left_bits hi (size 1) in
-    let hi = vec128_xor hi lo1 in
-*)
-    (* LEFT SHIFT [x0:0] BY 63,62,57 and xor with [x1:x0] *)
-    let lo1 = vec128_shift_left64 lo (size 63) in
-    let lo2 = vec128_shift_left64 lo (size 62) in
-    let lo3 = vec128_shift_left64 lo (size 57) in
-    let lo1 = vec128_xor lo1 lo2 in
-    let lo1 = vec128_xor lo1 lo3 in
-    let lo2 = vec128_shift_right lo1 (size 64) in
-    let lo3 = vec128_shift_left lo1 (size 64) in
-    let lo =  vec128_xor lo lo3 in    
-    let lo' = lo2 in
-
-    (* RIGHT SHIFT [x1:x0] BY 1,2,7 and xor with [x1:x0] *)
-    let lo1 = vec128_shift_right64 lo (size 1) in
-    let lo2 = vec128_shift_right64 lo (size 2) in
-    let lo3 = vec128_shift_right64 lo (size 7) in
-    let lo1 = vec128_xor lo1 lo2 in
-    let lo1 = vec128_xor lo1 lo3 in
-    
-    let lo1 = vec128_xor lo1 lo' in
-    let lo = vec128_xor lo lo1 in
-
-    let lo = vec128_xor lo hi in
-    lo
+type felem = lbuffer uint64 2
+type felem4 = lbuffer uint64 8
+type precomp = lbuffer uint64 256
+type block = lbytes 16
+type block4 = lbytes 64
 
 
+[@ "c_inline" ]
+val prepare: pre:precomp -> r:felem -> Stack unit
+	  (requires (fun h -> live h pre /\ live h r))
+	  (ensures (fun h0 _ h1 -> modifies (loc_buffer pre) h0 h1))
+let prepare pre r = 
+    push_frame();
+    let sh = alloca (u64 0) 2ul in
+    sh.(size 0) <- r.(size 0);
+    sh.(size 1) <- r.(size 1);
+    let h0 = ST.get() in
+    loop_nospec #h0 (size 128) pre 
+      (fun i -> 
+	let s0 = sh.(size 0) in
+	let s1 = sh.(size 1) in
+	pre.(i *. size 2) <- s0;
+	pre.(size 1 +. i *. size 2) <- s1;
+	let m = Lib.Vec128.bit_mask64 s0 in
+        sh.(size 0) <- (s0 >>. u32 1) |. (s1 <<. u32 63);
+        sh.(size 1) <- (s1 >>. u32 1) ^. (m &. u64 0xE100000000000000));
+    pop_frame()
 
-let felem = lbuffer vec128 1
-let felem4 = lbuffer vec128 4
 
 inline_for_extraction
 val fadd: x:felem -> y:felem -> Stack unit
 	  (requires (fun h -> live h x /\ live h y))
 	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
 let fadd (x:felem) (y:felem) = 
-    x.(size 0) <- cl_add x.(size 0) y.(size 0)
-
+    x.(size 0) <- x.(size 0) ^. y.(size 0);
+    x.(size 1) <- x.(size 1) ^. y.(size 1)
 
 inline_for_extraction
-val fmul: x:felem -> y:felem -> Stack unit
+val fadd4: x:felem4 -> y:felem4 -> Stack unit
 	  (requires (fun h -> live h x /\ live h y))
 	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
-let fmul (x:felem) (y:felem) = 
-    let xe = x.(size 0) in
-    let ye = y.(size 0) in
-    let (hi,lo) = clmul_wide xe ye in
-    let lo = gf128_reduce hi lo in
-    x.(size 0) <- lo
+let fadd4 (x:felem4) (y:felem4) = 
+    fadd (sub x (size 0) (size 2)) (sub y (size 0) (size 2));
+    fadd (sub x (size 2) (size 2)) (sub y (size 2) (size 2));
+    fadd (sub x (size 4) (size 2)) (sub y (size 4) (size 2));
+    fadd (sub x (size 6) (size 2)) (sub y (size 6) (size 2))
 
+
+[@ "c_inline" ]
+val fmul: x:felem -> pre:precomp -> Stack unit
+	  (requires (fun h -> live h x /\ live h pre))
+	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 pre /\ modifies (loc_buffer x) h0 h1))
+let fmul (x:felem) (pre:precomp) = 
+    push_frame();
+    let tmp = alloca (u64 0) 2ul in
+    let h0 = ST.get() in
+    loop_nospec #h0 (size 64) tmp
+      (fun i -> 
+	let m = bit_mask64 (x.(size 1) >>. (size_to_uint32 (size 63 -. i))) in
+	tmp.(size 0) <- tmp.(size 0) ^. (m &. pre.(i *. size 2));
+	tmp.(size 1) <- tmp.(size 1) ^. (m &. pre.(size 1 +. i *. size 2)));
+    loop_nospec #h0 (size 64) tmp
+      (fun i -> 
+	let m = bit_mask64 (x.(size 0) >>. (size_to_uint32 (size 63 -. i))) in
+	tmp.(size 0) <- tmp.(size 0) ^. (m &. pre.(size 128 +. i *. size 2));
+	tmp.(size 1) <- tmp.(size 1) ^. (m &. pre.(size 129 +. i *. size 2)));
+    x.(size 0) <- tmp.(size 0);
+    x.(size 1) <- tmp.(size 1);
+    pop_frame()
 
 inline_for_extraction
-val fadd_mul4: acc:felem -> x:felem4 -> y:felem4 -> Stack unit
-	  (requires (fun h -> live h acc /\ live h x /\ live h y))
-	  (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
-let fadd_mul4 (acc:felem) (x:felem4) (y:felem4) = 
-    let x1 = x.(size 0) in
-    let x2 = x.(size 1) in
-    let x3 = x.(size 2) in
-    let x4 = x.(size 3) in
-    let y1 = y.(size 0) in
-    let y2 = y.(size 1) in
-    let y3 = y.(size 2) in
-    let y4 = y.(size 3) in
-    let acc0 = acc.(size 0) in
-    let x1 = cl_add x1 acc0 in
-    let (hi,lo) = clmul_wide4 x1 x2 x3 x4 y1 y2 y3 y4 in
-    let lo = gf128_reduce hi lo in
-    acc.(size 0) <- lo
+val fmul4: x:felem4 -> pre:precomp -> Stack unit
+	  (requires (fun h -> live h x /\ live h pre))
+	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 pre /\ modifies (loc_buffer x) h0 h1))
+let fmul4 (x:felem4) (pre:precomp) = 
+    fmul (sub x (size 0) (size 2)) pre;
+    fmul (sub x (size 2) (size 2)) pre;
+    fmul (sub x (size 4) (size 2)) pre;
+    fmul (sub x (size 6) (size 2)) pre
+
+
+[@ "c_inline" ]
+val fmul_reduce: x:felem -> y:felem -> Stack unit
+	  (requires (fun h -> live h x /\ live h y))
+	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
+let fmul_reduce (x:felem) (y:felem) = 
+    push_frame();
+    let tmp = alloca (u64 0) 2ul in
+    let sh = alloca (u64 0) 2ul in
+    sh.(size 0) <- y.(size 0);
+    sh.(size 1) <- y.(size 1);
+    let h0 = ST.get() in
+    loop_nospec #h0 (size 64) tmp
+      (fun i -> 
+	let s0 = sh.(size 0) in
+	let s1 = sh.(size 1) in
+	let m = bit_mask64 (x.(size 1) >>. (size_to_uint32 (size 63 -. i))) in
+	tmp.(size 0) <- tmp.(size 0) ^. (m &. s0);
+	tmp.(size 1) <- tmp.(size 1) ^. (m &. s1);
+	let s = bit_mask64 s0 in
+        sh.(size 0) <- (s0 >>. u32 1) |. (s1 <<. u32 63);
+        sh.(size 1) <- (s1 >>. u32 1) ^. (s &. u64 0xE100000000000000));
+    loop_nospec #h0 (size 64) tmp
+      (fun i -> 
+	let s0 = sh.(size 0) in
+	let s1 = sh.(size 1) in
+	let m = bit_mask64 (x.(size 0) >>. (size_to_uint32 (size 63 -. i))) in
+	tmp.(size 0) <- tmp.(size 0) ^. (m &. s0);
+	tmp.(size 1) <- tmp.(size 1) ^. (m &. s1);
+	let s = bit_mask64 s0 in
+        sh.(size 0) <- (s0 >>. u32 1) |. (s1 <<. u32 63);
+        sh.(size 1) <- (s1 >>. u32 1) ^. (s &. u64 0xE100000000000000));
+    x.(size 0) <- tmp.(size 0);
+    x.(size 1) <- tmp.(size 1);
+    pop_frame()
 
 inline_for_extraction
 val encode: x:felem -> y:lbytes 16 -> Stack unit
 	  (requires (fun h -> live h x /\ live h y))
 	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
 let encode x y = 
-    x.(size 0) <- vec128_load_be y
+   x.(size 1) <- load64_be (sub y (size 0) (size 8));
+   x.(size 0) <- load64_be (sub y (size 8) (size 8))
 
 inline_for_extraction
 val encode4: x:felem4 -> y:lbytes 64 -> Stack unit
 	  (requires (fun h -> live h x /\ live h y))
 	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
 let encode4 x y = 
-    x.(size 0) <- vec128_load_be (sub y (size 0) (size 16));
-    x.(size 1) <- vec128_load_be (sub y (size 16) (size 16));
-    x.(size 2) <- vec128_load_be (sub y (size 32) (size 16));
-    x.(size 3) <- vec128_load_be (sub y (size 48) (size 16))
-
+   encode (sub x (size 0) (size 2)) (sub y (size 0) (size 16));
+   encode (sub x (size 2) (size 2)) (sub y (size 16) (size 16));
+   encode (sub x (size 4) (size 2)) (sub y (size 32) (size 16));
+   encode (sub x (size 6) (size 2)) (sub y (size 48) (size 16))
+   
 inline_for_extraction
 val encode_last: x:felem -> y:bytes -> len:size_t{length y == size_v len} -> Stack unit
 	  (requires (fun h -> live h x /\ live h y))
@@ -223,90 +159,108 @@ val decode: x:lbytes 16 -> y:felem -> Stack unit
 	  (requires (fun h -> live h x /\ live h y))
 	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
 let decode x y = 
-    vec128_store_be x y.(size 0)
+   store64_be (sub x (size 0) (size 8)) y.(size 1);
+   store64_be (sub x (size 8) (size 8)) y.(size 0)
 
-
+    
 inline_for_extraction
-val update: acc:felem -> x:felem -> y:felem -> Stack unit
-	  (requires (fun h -> live h x /\ live h y /\ live h acc))
-	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ live h1 acc /\ modifies (loc_buffer acc) h0 h1))
-
-let update acc x y = 
+val update: acc:felem -> x:felem -> pre:precomp -> Stack unit
+	  (requires (fun h -> live h x /\ live h pre /\ live h acc))
+	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 pre /\ live h1 acc /\ modifies (loc_buffer acc) h0 h1))
+let update acc x pre = 
     fadd acc x;
-    fmul acc y
+    fmul acc pre 
 
-
-inline_for_extraction
-val poly: acc:felem -> text:bytes -> len:size_t{length text == size_v len} -> r:felem -> Stack unit
-	  (requires (fun h -> live h acc /\ live h text /\ live h r))
+[@ "c_inline" ]
+val poly: acc:felem -> text:bytes -> len:size_t{length text == size_v len} -> pre:precomp -> Stack unit
+	  (requires (fun h -> live h acc /\ live h text /\ live h pre))
 	  (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
-let poly acc text len r = 
+let poly acc text len pre = 
     push_frame ();
-    let elem = alloca vec128_zero 1ul in
+    let elem = alloca (u64 0) 2ul in
     let blocks = len /. size 16 in
     let h0 = ST.get() in
     loop_nospec #h0 blocks acc 
       (fun i -> encode elem (sub text (i *. size 16) (size 16)); 
-             update acc elem r
+             update acc elem pre
       );
     let rem = len %. size 16 in
     if (rem >. size 0) then (
        let last = sub text (blocks *. size 16) rem in
        encode_last elem last rem;
-       update acc elem r
+       update acc elem pre
     );
     pop_frame()
 
 
-inline_for_extraction
-val poly4: acc:felem -> text:bytes -> len:size_t{length text == size_v len} -> r:felem -> Stack unit
-	  (requires (fun h -> live h acc /\ live h text /\ live h r))
+[@ "c_inline" ]
+val poly4: acc:felem -> text:bytes -> len:size_t{length text == size_v len} -> pre:precomp -> r4:felem4 -> Stack unit
+	  (requires (fun h -> live h acc /\ live h text /\ live h pre /\ live h r4))
 	  (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
-let poly4 acc text len r = 
+let poly4 acc text len pre r4 = 
     push_frame ();
-    let tmp = alloca vec128_zero 1ul in
-    let b4 = alloca vec128_zero 4ul in
-    let r4 = alloca vec128_zero 4ul in
-    let r_4 = sub r4 (size 0) (size 1) in
-    let r_3 = sub r4 (size 1) (size 1) in
-    let r_2 = sub r4 (size 2) (size 1) in
-    r4.(size 0) <- r.(size 0);
-    r4.(size 1) <- r.(size 0);
-    r4.(size 2) <- r.(size 0);
-    r4.(size 3) <- r.(size 0);
-    fmul r_2 r;
-    fmul r_3 r_2;
-    fmul r_4 r_3;
-
+    let tmp = alloca (u64 0) 8ul in
+    let acc4 = alloca (u64 0) 8ul in
     let blocks = len /. size 64 in
     let h0 = ST.get() in
     loop_nospec #h0 blocks acc 
-      (fun i -> encode4 b4 (sub text (i *. size 64) (size 64)); 
-             fadd_mul4 acc b4 r4);
+      (fun i -> encode4 tmp (sub text (i *. size 64) (size 64)); 
+	     fmul4 acc4 pre;
+             fadd4 acc4 tmp);
+    fmul_reduce (sub acc4 (size 0) (size 2)) (sub r4 (size 0) (size 2));
+    fmul_reduce (sub acc4 (size 2) (size 2)) (sub r4 (size 2) (size 2));
+    fmul_reduce (sub acc4 (size 4) (size 2)) (sub r4 (size 4) (size 2));
+    fmul_reduce (sub acc4 (size 6) (size 2)) (sub r4 (size 6) (size 2));
+    acc.(size 0) <- acc4.(size 0);
+    acc.(size 1) <- acc4.(size 1);
+    fadd acc (sub acc4 (size 2) (size 2));
+    fadd acc (sub acc4 (size 4) (size 2));
+    fadd acc (sub acc4 (size 6) (size 2));
     let rem = len %. size 64 in
-    let blocks16 = rem /. size 16 in
-    let h0 = ST.get() in
-    loop_nospec #h0 blocks16 acc 
-      (fun i -> encode tmp (sub text ((i *. size 16) +. (blocks *. size 64)) (size 16));
-	     update acc tmp r);
-    let rem = rem %. size 16 in
-    if (rem >. size 0) then (
-       let last = sub text ((blocks16 *. size 16) +. (blocks *. size 64)) rem in
-       encode_last tmp last rem;
-       update acc tmp r
-    );
+    let last = sub text (blocks *. size 64) rem in 
+    poly acc last rem pre;
     pop_frame()
 
-inline_for_extraction
 val ghash: tag:lbytes 16 -> text:bytes -> len:size_t{length text == size_v len} -> key:lbytes 16 -> Stack unit
 	  (requires (fun h -> live h tag /\ live h text /\ live h key))
 	  (ensures (fun h0 _ h1 -> modifies (loc_buffer tag) h0 h1))
 
 let ghash tag text len key = 
   push_frame();
-  let r = alloca vec128_zero 1ul in
-  let acc = alloca vec128_zero 1ul in
+  let acc = alloca (u64 0) 2ul in
+  let r4 = alloca (u64 0) 8ul in
+  let r = sub r4 (size 6) (size 2) in
+  let r_2 = sub r4 (size 4) (size 2) in
+  let r_3 = sub r4 (size 2) (size 2) in
+  let r_4 = sub r4 (size 0) (size 2) in
+  let pre = alloca (u64 0) 256ul in
   encode r key;
-  poly4 acc text len r;
+  r_3.(size 0) <- r.(size 0);
+  r_3.(size 1) <- r.(size 1);
+  r_2.(size 0) <- r.(size 0);
+  r_2.(size 1) <- r.(size 1);
+  fmul_reduce r_2 r;
+  fmul_reduce r_3 r_2;
+  r_4.(size 0) <- r_2.(size 0);
+  r_4.(size 1) <- r_2.(size 1);
+  fmul_reduce r_4 r_2;
+  prepare pre r_4;
+  poly4 acc text len pre r4;
+  decode tag acc;
+  pop_frame()
+
+
+val ghash1: tag:lbytes 16 -> text:bytes -> len:size_t{length text == size_v len} -> key:lbytes 16 -> Stack unit
+	  (requires (fun h -> live h tag /\ live h text /\ live h key))
+	  (ensures (fun h0 _ h1 -> modifies (loc_buffer tag) h0 h1))
+
+let ghash1 tag text len key = 
+  push_frame();
+  let r = alloca (u64 0) 2ul in
+  let acc = alloca (u64 0) 2ul in
+  let pre = alloca (u64 0) 256ul in
+  encode r key;
+  prepare pre r;
+  poly acc text len pre;
   decode tag acc;
   pop_frame()

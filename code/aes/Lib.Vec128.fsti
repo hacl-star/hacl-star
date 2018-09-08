@@ -64,4 +64,4 @@ noextract
 val vec128_zero: vec128
 
 
-
+noextract val bit_mask64: uint64 -> uint64

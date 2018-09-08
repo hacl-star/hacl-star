@@ -11,15 +11,6 @@ typedef uint64_t* elem_t;
 typedef unsigned __int128 uint128_t;
 
 
-static inline uint64_t mask(const elem_t e, int i) {
-  if (i < 64) {
-    return - ((e[0] >> i) & 1);
-  }
-  else {
-    return - ((e[1] >> (i-64)) & 1);;
-  }
-}
-
 static void prepare(precomp_t pre, const elem_t r) {
   uint64_t sh[2] = {0};
   sh[0] = r[0];

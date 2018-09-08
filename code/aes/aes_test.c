@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <time.h>
 
 typedef uint64_t cycles;
@@ -30,7 +31,8 @@ static __inline__ cycles cpucycles_end(void)
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
-extern void Hacl_Impl_Aes_NI_aes128_encrypt(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* n, uint32_t c);
+extern void Hacl_AesCTRNI_aes128_ctr_encrypt(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* n, uint32_t c);
+extern void Hacl_AesCTR_aes128_ctr_encrypt(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* n, uint32_t c);
 
 #define ROUNDS 10240
 #define SIZE   16384
@@ -54,42 +56,84 @@ int main() {
     0xEB,0x2E,0x1E,0xFC,0x46,0xDA,0x57,0xC8,
     0xFC,0xE6,0x30,0xDF,0x91,0x41,0xBE,0x28};
   uint8_t comp[32] = {0};
-  Hacl_Impl_Aes_NI_aes128_encrypt(comp,in,in_len,k,n,1);
-  printf("computed:");
+  bool ok = true;
+  
+  Hacl_AesCTRNI_aes128_ctr_encrypt(comp,in,in_len,k,n,1);
+  printf("AES-NI computed:");
   for (int i = 0; i < 32; i++)
     printf("%02x",comp[i]);
   printf("\n");
-  printf("expected:");
+  printf("AES_NI expected:");
   for (int i = 0; i < 32; i++)
     printf("%02x",exp[i]);
   printf("\n");
+  ok = true;
+  for (int i = 0; i < 32; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+
+  Hacl_AesCTR_aes128_ctr_encrypt(comp,in,in_len,k,n,1);
+  printf("AES-BitSlice computed:");
+  for (int i = 0; i < 32; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("AES-BitSlice expected:");
+  for (int i = 0; i < 32; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 32; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
   uint8_t key[16];
   uint8_t nonce[12];
+  cycles a,b;
+  clock_t t1,t2;
+  uint64_t count = ROUNDS * SIZE;
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   memset(nonce,'N',12);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Impl_Aes_NI_aes128_encrypt(plain,plain,SIZE,key,nonce,1);
+    Hacl_AesCTRNI_aes128_ctr_encrypt(plain,plain,SIZE,key,nonce,1);
   }
 
-  cycles a,b;
-  clock_t t1,t2;
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Impl_Aes_NI_aes128_encrypt(plain,plain,SIZE,key,nonce,1);
+    Hacl_AesCTRNI_aes128_ctr_encrypt(plain,plain,SIZE,key,nonce,1);
   }
   b = cpucycles_end();
   t2 = clock();
-  double diff = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  clock_t tdiff1 = t2 - t1;
+  cycles cdiff1 = b - a;
 
-  uint64_t count = ROUNDS * SIZE;
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)(b-a),(double)(b-a)/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)(t2-t1),(double)(t2-t1)/count);
-  printf("bw %8.2f MB/s\n",(double)count/(diff * 1000000.0));
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_AesCTR_aes128_ctr_encrypt(plain,plain,SIZE,key,nonce,1);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_AesCTR_aes128_ctr_encrypt(plain,plain,SIZE,key,nonce,1);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  clock_t tdiff2 = t2 - t1;
+  cycles cdiff2 = b - a;
+
+  printf("AES-NI PERF:\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
+  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
+  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));
+
+  printf("AES-BitSlice PERF:\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff2,(double)cdiff2/count);
+  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff2,(double)tdiff2/count);
+  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff2 / CLOCKS_PER_SEC) * 1000000.0));
+
   
 }

@@ -65,4 +65,5 @@ typedef __m128i Lib_Vec128_vec128;
 #define Lib_Vec128_vec128_zero  \
   (_mm_set1_epi16((uint16_t)0))
 
+#define Lib_Vec128_bit_mask64(x) -((x) & 1)
 #endif

@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <time.h>
 
 typedef uint64_t cycles;
@@ -31,6 +32,7 @@ static __inline__ cycles cpucycles_end(void)
 }
 
 extern void Hacl_Gf128_ghash(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
+extern void Hacl_Gf128_PreComp_ghash(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 
 #define ROUNDS 1024
 #define SIZE   163840
@@ -57,7 +59,10 @@ int main() {
     0xcc,0x9a,0xe9,0x17,0x57,0x29,0xa6,0x49,
     0x93,0x6e,0x89,0x0b,0xd9,0x71,0xa8,0xbf};
   uint8_t comp[16] = {0};
-  Hacl_Gf128_ghash(comp,in,92,key);
+  bool ok = true;
+
+  Hacl_Gf128_PreComp_ghash(comp,in,92,key);
+  printf("GF128 (with PreComutation) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
     printf("%02x",comp[i]);
@@ -66,19 +71,57 @@ int main() {
   for (int i = 0; i < 16; i++)
     printf("%02x",exp[i]);
   printf("\n");
+  ok = true;
+  for (int i = 0; i < 16; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+
+  Hacl_Gf128_ghash(comp,in,92,key);
+  printf("GF128 NI Result:\n");
+  printf("computed:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 16; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+
 
   uint8_t plain[SIZE];
-  memset(plain,'P',SIZE);
-  memset(key,'K',16);
-
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Gf128_ghash(plain,plain,SIZE,key);
-  }
-
   uint64_t res = 0;
   uint8_t tag[16];
   cycles a,b;
   clock_t t1,t2;
+  uint64_t count = ROUNDS * SIZE;
+
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Gf128_PreComp_ghash(plain,plain,SIZE,key);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Gf128_PreComp_ghash(tag,plain,SIZE,key);
+    res ^= tag[0] ^ tag[15];
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  clock_t tdiff1 = t2 - t1;
+  cycles cdiff1 = b - a;
+
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Gf128_ghash(plain,plain,SIZE,key);
+  }
+
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
@@ -87,11 +130,17 @@ int main() {
   }
   b = cpucycles_end();
   t2 = clock();
-  double diff = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  clock_t tdiff2 = t2 - t1;
+  cycles cdiff2 = b - a;
 
-  uint64_t count = ROUNDS * SIZE;
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)(b-a),(double)(b-a)/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)(t2-t1),(double)(t2-t1)/count);
-  printf("bw %8.2f MB/s\n",(double)count/(diff * 1000000.0));
-  
+  printf("GF128-PRECOMP PERF:\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
+  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
+  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));
+
+  printf("GF128-NI PERF:\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff2,(double)cdiff2/count);
+  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff2,(double)tdiff2/count);
+  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff2 / CLOCKS_PER_SEC) * 1000000.0));
+
 }

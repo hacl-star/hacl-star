@@ -33,6 +33,19 @@ let store64_le b u =
     C.Endianness.store64_le b (Lib.RawIntTypes.u64_to_UInt64 u)
 
 inline_for_extraction 
+val load64_be: b:lbytes 8 -> ST uint64 
+               (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> h0 == h1))
+let load64_be b = 
+    let u = C.Endianness.load64_be b in
+    Lib.RawIntTypes.u64_from_UInt64 u
+
+inline_for_extraction 
+val store64_be: b:lbytes 8 -> u:uint64 -> ST unit
+               (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> live h1 b /\ modifies (loc_buffer b) h0 h1))
+let store64_be b u = 
+    C.Endianness.store64_be b (Lib.RawIntTypes.u64_to_UInt64 u)
+
+inline_for_extraction 
 val store32_be: b:lbytes 4 -> u:uint32 -> ST unit
                (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> live h1 b /\ modifies (loc_buffer b) h0 h1))
 let store32_be b u = 
