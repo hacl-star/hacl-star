@@ -11,23 +11,26 @@ typedef __m128i* state_t;
 typedef __m128i key1_t;
 typedef __m128i* keyex_t;
 
-
 static inline void aes_enc(state_t st, key1_t k) {
+#pragma unroll
   for (int j = 0; j < INTERLEAVE; j++) 
     st[j] = _mm_aesenc_si128(st[j],k);
 }
 
 static inline void aes_enc_last(state_t st, key1_t k) {
+#pragma unroll
   for (int j = 0; j < INTERLEAVE; j++)
     st[j] = _mm_aesenclast_si128(st[j],k);
 }
 
 static void rounds(state_t st, keyex_t key) {
+#pragma unroll
   for (int i = 0; i < 9; i++) 
       aes_enc(st,key[i]);
 }
 
 inline static  void addRoundKey(state_t st, key1_t k) {
+#pragma unroll
   for (int j = 0; j < INTERLEAVE; j++)
     st[j] = _mm_xor_si128(st[j], k); 
 }
@@ -74,6 +77,7 @@ static void key_expansion(state_t out, uint8_t* key) {
 }
 
 static inline void aes128_block(state_t out,state_t kex, __m128i nvec, uint32_t c) {
+#pragma unroll
   for (int i = 0; i < INTERLEAVE; i++)
     out[i] = _mm_insert_epi32(nvec, __builtin_bswap32(c + i), 3);
   block_cipher(out,kex);

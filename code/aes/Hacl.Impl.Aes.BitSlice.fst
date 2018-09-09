@@ -377,33 +377,33 @@ let shift_rows_state st =
       (fun i -> st.(i) <- let rowi = st.(i) in shift_row rowi)
 
 
-inline_for_extraction 
-let mix_column (col:uint64) (rot:uint64) = 
-    let col01 = col ^. (((col &. u64 0xeeeeeeeeeeeeeeee) >>. u32 1) 
-                |. ((col &. u64 0x1111111111111111) <<. u32 3)) in
-    let col0123 = col01 ^. (((col01 &. u64 0xcccccccccccccccc ) >>. u32  2) 
-		  |. ((col01 &. u64 0x3333333333333333) <<. u32  2)) in
-    (col ^. col0123 ^. rot, col01)
-
-
 val mix_columns_state: st:state -> ST unit
 			     (requires (fun h -> live h st))
 			     (ensures (fun h0 _ h1 -> live h1 st /\ modifies (loc_buffer st) h0 h1))
 let mix_columns_state st = 
     push_frame () ;
-    let rot_prev = alloca (u64 0) 1ul in
+    let col = alloca (u64 0) 8ul in
     let h0 = ST.get() in
     loop_nospec #h0 (size 8) st 
       (fun i -> 
-	 let col = st.(i) in
-	 let rot = rot_prev.(size 0) in
-	 let (col',rot') = mix_column col rot in
-	 st.(i) <- col';
-	 rot_prev.(size 0) <- rot');
-    st.(size 0) <- st.(size 0) ^. rot_prev.(size 0);
-    st.(size 1) <- st.(size 1) ^. rot_prev.(size 0);
-    st.(size 3) <- st.(size 3) ^. rot_prev.(size 0);
-    st.(size 4) <- st.(size 4) ^. rot_prev.(size 0);
+	 let coli = st.(i) in
+	 col.(i) <- coli ^. (((coli &. u64 0xeeeeeeeeeeeeeeee) >>. u32 1) 
+                |. ((coli &. u64 0x1111111111111111) <<. u32 3)));
+    let col0 = col.(size 0) in
+    let ncol0 = col0 ^. (((col0 &. u64 0xcccccccccccccccc ) >>. u32  2)
+		  |. ((col0 &. u64 0x3333333333333333) <<. u32  2)) in
+    st.(size 0) <- st.(size 0) ^. ncol0;
+    loop_nospec #h0 (size 7) st 
+      (fun i -> 
+         let prev = col.(i) in
+         let next = col.(i +. size 1) in
+         let ncoli = next ^. (((next &. u64 0xcccccccccccccccc ) >>. u32  2)
+		  |. ((next &. u64 0x3333333333333333) <<. u32  2)) in
+	 st.(i +. size 1) <- st.(i +. size 1) ^. ncoli ^. prev);
+    st.(size 0) <- st.(size 0) ^. col.(size 7);
+    st.(size 1) <- st.(size 1) ^. col.(size 7);
+    st.(size 3) <- st.(size 3) ^. col.(size 7);
+    st.(size 4) <- st.(size 4) ^. col.(size 7);
     pop_frame()
 
 

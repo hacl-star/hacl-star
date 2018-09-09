@@ -277,6 +277,7 @@ static void subBytes(transpose_t st) {
 }
 
 static  void shiftRows(transpose_t st){
+  //#pragma unroll
   for (int i = 0; i < 8; i++) {
     uint64_t curr = st[i];
     curr = (curr & 0x1111111111111111) |
@@ -292,50 +293,81 @@ static  void shiftRows(transpose_t st){
 
 static  void mixColumns(transpose_t st) {
   uint64_t rot_prev = 0;
-  for (int i = 0; i < 8; i++) {
+  /*  for (int i = 0; i < 8; i++) {
     uint64_t col = st[i];
     uint64_t col01 = col ^ (((col & 0xeeeeeeeeeeeeeeee) >> 1) | ((col & 0x1111111111111111) << 3));
     uint64_t col0123 = col01 ^ (((col01 & 0xcccccccccccccccc ) >> 2) | ((col01 & 0x3333333333333333) << 2));
     st[i] ^= col0123 ^ rot_prev;
     rot_prev = col01;
+    }*/
+  uint64_t col[8] = {0};
+  //#pragma unroll
+  for (int i = 0; i < 8; i++) {
+    col[i] = st[i] ^ (((st[i] & 0xeeeeeeeeeeeeeeee) >> 1) | ((st[i] & 0x1111111111111111) << 3));
   }
-  st[0] ^= rot_prev;
-  st[1] ^= rot_prev;
-  st[3] ^= rot_prev;
-  st[4] ^= rot_prev;
+
+  uint64_t ncol = col[0] ^ (((col[0] & 0xcccccccccccccccc ) >> 2) | ((col[0] & 0x3333333333333333) << 2));
+  st[0] = st[0] ^ ncol;
+  //#pragma unroll
+  for (int i = 1; i < 8; i++) {
+    uint64_t coli = col[i] ^ (((col[i] & 0xcccccccccccccccc ) >> 2) | ((col[i] & 0x3333333333333333) << 2));
+    st[i] = st[i] ^ coli ^ col[i-1];
+  }
+
+  st[0] ^= col[7];
+  st[1] ^= col[7];
+  st[3] ^= col[7];
+  st[4] ^= col[7];
 }
 
 static  void addRoundKey(transpose_t st, transpose_t k) {
-  for (int i = 0; i < 8; i++)
-    st[i] ^= k[i];
+  //  for (int i = 0; i < 8; i++)
+  // st[i] ^= k[i];
+  st[0] ^= k[0];
+  st[1] ^= k[1];
+  st[2] ^= k[2];
+  st[3] ^= k[3];
+  st[4] ^= k[4];
+  st[5] ^= k[5];
+  st[6] ^= k[6];
+  st[7] ^= k[7];
 }
 
-static  void aes_enc(transpose_t st, transpose_t k) {
-  subBytes(st);
-  shiftRows(st);
-  mixColumns(st);
-  addRoundKey(st,k);
+inline static  void aes_enc(transpose_t st, transpose_t k) {
+  subBytes(st);      // 10-12 cy
+  shiftRows(st);     // 4 cy
+  mixColumns(st);    // 8-10 cy
+  addRoundKey(st,k); // 3 cy
 }
 
-static  void aes_enc_last(transpose_t st, transpose_t k) {
+inline static  void aes_enc_last(transpose_t st, transpose_t k) {
   subBytes(st);
   shiftRows(st);
   addRoundKey(st,k);
 }
 
 static  void rounds(transpose_t st, uint64_t* key) {
-  for (int i = 0; i < 9; i++)
-    aes_enc(st,key+(8*i));
+  //  for (int i = 0; i < 9; i++) 
+  //  aes_enc(st,key+(i << 3));
+  aes_enc(st,key);
+  aes_enc(st,key+8);
+  aes_enc(st,key+16);
+  aes_enc(st,key+24);
+  aes_enc(st,key+32);
+  aes_enc(st,key+40);
+  aes_enc(st,key+48);
+  aes_enc(st,key+56);
+  aes_enc(st,key+64); 
 }
 
 static void block_cipher(uint8_t* out, uint64_t* st, uint64_t* key) {
   uint64_t* k0 = key;
   uint64_t* k = key + 8;
   uint64_t* kn = key + (8 * 10);
-  addRoundKey(st,k0);
-  rounds(st,k);
-  aes_enc_last(st,kn);
-  from_transpose(out,st);
+  addRoundKey(st,k0);     // 2-3 cy
+  rounds(st,k);           // 20 cy
+  aes_enc_last(st,kn);    // 3 cy
+  from_transpose(out,st); // 5 cy
 }
 
 const uint8_t rcon[11] = {

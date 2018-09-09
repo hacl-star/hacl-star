@@ -49,7 +49,7 @@ specific-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(AES_FILES)))
 ci: bignum-ci specific-ci
 all-ci: ci
 
-KREMLIN_ARGS=-warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native'
+KREMLIN_ARGS=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' 
 
 
 aes-bitslice-c/out.krml: $(AES_BS_FILES)
