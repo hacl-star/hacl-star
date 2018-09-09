@@ -282,6 +282,10 @@ noeq type merkle_tree =
 
 type mt_p = B.pointer merkle_tree
 
+val offset_of: i:uint32_t -> Tot uint32_t
+let offset_of i =
+  if i % 2ul = 0ul then i else i - 1ul
+
 /// Construction
 
 val create_mt_: 
@@ -369,25 +373,26 @@ val construct_rhs:
   lv:uint32_t{lv < 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
-  j:uint32_t ->
+  i:uint32_t -> j:uint32_t ->
   acc:hash ->
   actd:bool ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let rec construct_rhs lv hs rhs j acc actd =
+let rec construct_rhs lv hs rhs i j acc actd =
   admit ();
+  let ofs = offset_of i in
   let copy = Cpy?.copy hcpy in
   if j = 0ul then ()
   else 
     (if j % 2ul = 0ul 
-    then (RV.assign_copy hcpy rhs lv (V.index (V.index hs lv) (j - 1ul));
-	 construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc actd)
+    then (RV.assign_copy hcpy rhs lv (V.index (V.index hs lv) (j - 1ul - ofs));
+	 construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc actd)
     else (if actd
     	 then (RV.assign_copy hcpy rhs lv acc;
-	      hash_2 (V.index (V.index hs lv) (j - 1ul)) acc acc)
-	 else (copy (V.index (V.index hs lv) (j - 1ul)) acc);
-	 construct_rhs (lv + 1ul) hs rhs (j / 2ul) acc true))
+	      hash_2 (V.index (V.index hs lv) (j - 1ul - ofs)) acc acc)
+	 else (copy (V.index (V.index hs lv) (j - 1ul - ofs)) acc);
+	 construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc true))
 
 // Construct a Merkle path for a given index `k`, hashes `hs`, 
 // and rightmost hashes `rhs`.
@@ -397,25 +402,27 @@ val mt_get_path_:
   lv:uint32_t{lv < 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
-  j:uint32_t -> k:uint32_t{j = 0ul || k <= j} ->
+  i:uint32_t -> j:uint32_t -> 
+  k:uint32_t{j = 0ul || k <= j} ->
   path:B.pointer (V.vector hash) ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let rec mt_get_path_ lv hs rhs j k path =
+let rec mt_get_path_ lv hs rhs i j k path =
   admit ();
+  let ofs = offset_of i in
   if j = 0ul then ()
   else
     (if k % 2ul = 1ul
     then B.upd path 0ul (V.insert (B.index path 0ul)
-				  (V.index (V.index hs lv) (k - 1ul)))
+				  (V.index (V.index hs lv) (k - 1ul - ofs)))
     else
       (if k = j then ()
       else if k + 1ul = j
       then B.upd path 0ul (V.insert (B.index path 0ul) (V.index rhs lv))
       else B.upd path 0ul (V.insert (B.index path 0ul)
-  	 			    (V.index (V.index hs lv) (k + 1ul))));
-    mt_get_path_ (lv + 1ul) hs rhs (j / 2ul) (k / 2ul) path)
+  	 			    (V.index (V.index hs lv) (k + 1ul - ofs))));
+    mt_get_path_ (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) (k / 2ul) path)
 
 val mt_get_path:
   mt:mt_p -> 
@@ -430,27 +437,47 @@ let mt_get_path mt idx ih path root =
   admit ();
   let copy = Cpy?.copy hcpy in
   let mtv = B.index mt 0ul in
+  let ofs = offset_of (MT?.i mtv) in
   if not (MT?.rhs_ok mtv) then
-    (copy (V.index (V.index (MT?.hs mtv) 0ul) (MT?.j mtv - 1ul)) root;
-    construct_rhs 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv) root false;
+    (copy (V.index (V.index (MT?.hs mtv) 0ul) (MT?.j mtv - 1ul - ofs)) root;
+    construct_rhs 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.i mtv) (MT?.j mtv) root false;
     B.upd mt 0ul (MT (MT?.i mtv) (MT?.j mtv) (MT?.hs mtv) true (MT?.rhs mtv)))
   else ();
-  mt_get_path_ 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.j mtv - 1) idx path;
-  copy (V.index (V.index (MT?.hs mtv) 0ul) idx) ih;
+  mt_get_path_ 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.i mtv) (MT?.j mtv - 1) idx path;
+  copy (V.index (V.index (MT?.hs mtv) 0ul) (idx - ofs)) ih;
   MT?.j mtv
 
 /// Flushing
 
-// TODO: need to think about flushing after deciding a proper 
-//       data structure for `MT?.hs`.
-// NOTE: flush "until" `idx`
+val mt_flush_to_:
+  lv:uint32_t{lv < 32ul} ->
+  hs:hash_vv{V.size_of hs = 32ul} ->
+  i:uint32_t ->
+  HST.ST unit
+	 (requires (fun h0 -> true))
+	 (ensures (fun h0 _ h1 -> true))
+let rec mt_flush_to_ lv hs i =
+  admit ();
+  if i = 0ul then ()
+  else (let ofs = offset_of i in
+       let hvec = V.index hs lv in
+       RV.assign hs lv (RV.flush hvec ofs);
+       mt_flush_to_ (lv + 1ul) hs (i / 2ul))
+
 val mt_flush_to:
   mt:mt_p ->
   idx:uint32_t ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let mt_flush_to mt idx = ()
+let rec mt_flush_to mt idx =
+  admit ();
+  let mtv = B.index mt 0ul in
+  mt_flush_to_ 0ul (MT?.hs mtv) (idx - MT?.i mtv);
+  B.upd mt 0ul (MT idx (MT?.j mtv)
+		   (MT?.hs mtv)
+		   (MT?.rhs_ok mtv)
+		   (MT?.rhs mtv))
 
 val mt_flush:
   mt:mt_p ->
