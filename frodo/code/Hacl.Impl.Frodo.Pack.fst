@@ -91,8 +91,7 @@ val frodo_pack:
   -> d:size_t{v d * (v n1 * v n2 / 8) <= max_size_t /\ v d <= 16}
   -> res:lbytes (d *! (n1 *! n2 /. size 8))
   -> Stack unit
-    (requires fun h -> live h a /\ live h res /\ disjoint a res /\
-      0 < v d /\ 0 < v n1 * v n2 / 8)
+    (requires fun h -> live h a /\ live h res /\ disjoint a res)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer res) h0 h1 /\
       as_seq h1 res == S.frodo_pack (as_matrix h0 a) (v d))

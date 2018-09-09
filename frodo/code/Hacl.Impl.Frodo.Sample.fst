@@ -117,9 +117,6 @@ let gen_inv h0 h1 h2 n1 n2 r res i j =
   (forall (i0:size_nat{v i < i0 /\ i0 < v n1}) (j:size_nat{j < v n2}). get h2 res i0 j == get h0 res i0 j) /\
   as_seq h0 r == as_seq h2 r
 
-//TODO: remove once _aseem_monotonic_buffers it's merged
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
 inline_for_extraction noextract private
 val frodo_sample_matrix_fc:
     h0:HS.mem

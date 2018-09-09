@@ -110,9 +110,6 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   clear_matrix_se s_matrix e_matrix;
   pop_frame()
 
-//TODO: remove once _aseem_monotonic_buffers it's merged
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
 inline_for_extraction noextract
 val crypto_kem_keypair_:
     coins:lbytes (size 2 *! crypto_bytes +! bytes_seed_a)

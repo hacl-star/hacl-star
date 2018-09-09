@@ -50,9 +50,6 @@ let frodo_sub_mul_c_minus_bs_inner s_matrix bp_matrix c_matrix mu_decode =
   frodo_key_decode params_extracted_bits m_matrix mu_decode;
   pop_frame()
 
-//TODO: remove once _aseem_monotonic_buffers it's merged
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
 val frodo_sub_mul_c_minus_bs:
     sk:lbytes crypto_secretkeybytes
   -> bp_matrix:matrix_t params_nbar params_n
