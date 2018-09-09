@@ -120,7 +120,7 @@ val createL_global:
   -> init:list a{List.Tot.length init <= max_size_t}
   -> ST (b:lbuffer a (normalize_term (List.Tot.length init)){
     frameOf b == HyperStack.root /\ recallable b})
-    (requires fun h0 -> B.gcmalloc_of_list_pre #a init)
+    (requires fun h0 -> B.gcmalloc_of_list_pre #a HyperStack.root init)
     (ensures  fun h0 b h1 ->
       B.alloc_post_mem_common b h0 h1 (Seq.of_list init))
 let createL_global #a init =
