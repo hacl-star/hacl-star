@@ -20,17 +20,12 @@ module HS = FStar.HyperStack
 module Lemmas = Spec.Frodo.Lemmas
 module S = Spec.Frodo.Sample
 module B = LowStar.Buffer
+module IB = LowStar.ImmutableBuffer
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '*'"
 
-val gcmalloc_of_list_pre_eq: #a:Type -> l1:list a -> l2:list a -> Lemma
-  (requires gcmalloc_of_list_pre l1 /\ l1 == l2)
-  (ensures  gcmalloc_of_list_pre l2)
-let gcmalloc_of_list_pre_eq #a l1 l2 = ()
-
-let cdf_table: b:lbuffer uint16 (v cdf_table_len) { LowStar.Buffer.recallable b } =
-  gcmalloc_of_list_pre_eq (norm [delta_only [`%cdf_list]] cdf_list) cdf_list;
-  LowStar.Buffer.gcmalloc_of_list HyperStack.root cdf_list
+// TODO: expose ImmutableBuffer types and operations in Lib.PQ.Buffer
+let cdf_table = IB.igcmalloc_of_list HyperStack.root cdf_list
 
 inline_for_extraction noextract
 val frodo_sample_f:
@@ -41,10 +36,8 @@ val frodo_sample_f:
      (ensures  fun h0 r h1 ->
        modifies loc_none h0 h1 /\ uint_v r == S.frodo_sample_f t (v i))
 let frodo_sample_f t i =
-  recall cdf_table;
-  let ti = cdf_table.(i) in
-  let h = ST.get () in
-  assume (as_seq h cdf_table == S.cdf_table);
+  IB.recall_contents cdf_table (Seq.seq_of_list cdf_list);
+  let ti = IB.index cdf_table (Lib.RawIntTypes.size_to_UInt32 i) in
   S.lemma_frodo_sample0 (v i);
   S.lemma_frodo_sample1 t ti;
   to_u16 (to_u32 (ti -. t)) >>. u32 15
