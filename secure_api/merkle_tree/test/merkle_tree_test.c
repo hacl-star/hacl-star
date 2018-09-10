@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdint.h>
 #include <sys/time.h>
 #include "merkle_tree_test.h"
@@ -18,8 +19,12 @@ int timer_tick() {
 	  time_cur_sec * 1000000 - time_cur_usec);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 
+  uint32_t num_elts = 1;
+  if (argc > 1)
+    num_elts = atoi(argv[1]);
+  
   kremlinit_globals();
   hash_cfg(EverCrypt_AutoConfig_Vale);
 
@@ -32,7 +37,6 @@ int main() {
   printf("A Merkle tree has been created!\n");
 
   // Insertion
-  uint32_t num_elts = 9;
   for (uint32_t i = 0; i < num_elts; i++) {
     uint8_t *hash = hash_r_init();
     insert(mt, hash);
@@ -54,18 +58,18 @@ int main() {
     path.sz = 0; // This is a bit arbitrary
   }
 
-  int flush_to = 5;
-  mt_flush_to(mt, flush_to);
-  printf("Flushed until: %d\n", flush_to);
+  /* int flush_to = 5; */
+  /* mt_flush_to(mt, flush_to); */
+  /* printf("Flushed until: %d\n", flush_to); */
 
-  for (uint32_t k = flush_to; k <= num_elts; k++) {
-    int j = mt_get_path(mt, k, khash, &path, root);
+  /* for (uint32_t k = flush_to; k <= num_elts; k++) { */
+  /*   int j = mt_get_path(mt, k, khash, &path, root); */
 
-    bool verified = mt_verify(k, j, khash, path, root);
-    printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
+  /*   bool verified = mt_verify(k, j, khash, path, root); */
+  /*   printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified); */
 
-    path.sz = 0; // This is a bit arbitrary
-  }
+  /*   path.sz = 0; */
+  /* } */
 
   printf("All merkle paths are verified: %d\n", timer_tick());
 
