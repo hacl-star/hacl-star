@@ -335,13 +335,6 @@ let matrix_eq #n1 #n2 m a b =
 
 #set-options "--max_fuel 0"
 
-assume val lemma_uint_to_bytes_le: //TODO: prove in Lib.Bytesequence
-    #t:m_inttype
-  -> u:uint_t t
-  -> Lemma
-    (forall (i:nat{i < numbytes t}).
-      index (uint_to_bytes_le #t u) i == u8 (uint_v u / pow2 (8 * i) % pow2 8))
-
 val matrix_to_lbytes_fc:
     #n1:size_nat
   -> #n2:size_nat{2 * n1 * n2 <= max_size_t}
@@ -431,7 +424,7 @@ let matrix_to_lbytes #n1 #n2 m =
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res i0 k)
   (fun i res ->
-    lemma_uint_to_bytes_le m.[i];
+    index_uint_to_bytes_le m.[i];
     let res1 = update_sub res (2 * i) 2 (uint_to_bytes_le m.[i]) in
     eq_intro (Seq.sub res1 0 (2 * i)) (Seq.sub res 0 (2 * i));
     lemma_matrix_to_lbytes #n1 #n2 m res res1 i;

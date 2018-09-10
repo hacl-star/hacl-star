@@ -78,8 +78,9 @@ let rec nat_to_bytes_be_ len n =
 let nat_to_bytes_be = nat_to_bytes_be_
 
 val nat_to_bytes_le_:
-  len:size_nat -> n:nat{n < pow2 (8 * len)} ->
-  Tot (b:intseq U8 len {n == nat_from_intseq_le #U8 #len b}) (decreases (len))
+    len:size_nat
+  -> n:nat{n < pow2 (8 * len)}
+  -> Tot (b:intseq U8 len {n == nat_from_intseq_le b}) (decreases len)
 let rec nat_to_bytes_le_ len n =
   if len = 0 then create #(uint_t U8) len (nat_to_uint 0)
   else
@@ -100,8 +101,29 @@ let rec nat_to_bytes_le_ len n =
 
 let nat_to_bytes_le = nat_to_bytes_le_
 
+val index_nat_to_bytes_le:
+    len:size_nat
+  -> n:nat{n < pow2 (8 * len)}
+  -> i:nat{i < len}
+  -> Lemma (index (nat_to_bytes_le len n) i == u8 (n / pow2 (8 * i) % pow2 8))
+let rec index_nat_to_bytes_le len n i =
+  if i = 0 then ()
+  else
+    begin
+    index_nat_to_bytes_le (len - 1) (n / 256) (i - 1);
+    assert (index (nat_to_bytes_le (len - 1) (n / 256)) (i - 1) ==
+            u8 ((n / 256) / pow2 (8 * (i - 1)) % pow2 8));
+    assert_norm (pow2 8 == 256);
+    Math.Lemmas.division_multiplication_lemma n (pow2 8) (pow2 (8 * (i - 1)));
+    Math.Lemmas.pow2_plus 8 (8 * (i - 1));
+    assert (n / pow2 8 / pow2 (8 * (i - 1)) == n / (pow2 8 * pow2 (8 * i - 8)))
+    end
+
 let uint_to_bytes_le #t n =
   nat_to_bytes_le (numbytes t) (uint_to_nat n)
+
+let index_uint_to_bytes_le #t u =
+  Classical.forall_intro (index_nat_to_bytes_le (numbytes t) (uint_to_nat u))
 
 let uint_to_bytes_be #t n =
   nat_to_bytes_be (numbytes t) (uint_to_nat n)

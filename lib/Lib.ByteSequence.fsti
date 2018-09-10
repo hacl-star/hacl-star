@@ -32,6 +32,10 @@ val nat_to_bytes_le: len:size_nat -> n:nat{n < pow2 (8 `op_Multiply` len)} ->  T
 
 val uint_to_bytes_le: #t:m_inttype -> u:uint_t t -> lbytes (numbytes t)
 
+val index_uint_to_bytes_le: #t:m_inttype -> u:uint_t t
+  -> Lemma
+    (forall (i:nat{i < numbytes t}). index (uint_to_bytes_le u) i ==
+                              u8 (uint_v u / pow2 (op_Multiply 8 i) % pow2 8))
 val uint_to_bytes_be: #t:m_inttype -> u:uint_t t -> lbytes (numbytes t)
 
 val uint_from_bytes_le: #t:m_inttype -> lbytes (numbytes t) -> u:uint_t t

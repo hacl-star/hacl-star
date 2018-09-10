@@ -541,7 +541,8 @@ let matrix_to_lbytes #n1 #n2 m res =
     B.live h1 m /\ B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
     (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). M.matrix_to_lbytes_fc (as_matrix h0 m) (B.as_seq h1 res) i0 k))
   (fun i ->
-    M.lemma_uint_to_bytes_le (Seq.index #uint16 #(v n1 * v n2) (B.as_seq h0 m) (v i));
+    Lib.ByteSequence.index_uint_to_bytes_le
+      (Seq.index #uint16 #(v n1 * v n2) (B.as_seq h0 m) (v i));
     let tmp = sub res (size 2 *! i) (size 2) in
     let h0 = ST.get () in
     uint_to_bytes_le tmp m.(i);
