@@ -157,7 +157,6 @@ function refresh_hints() {
 }
 
 function exec_build() {
-    cd hacl-star
 
     export_home FSTAR "$(pwd)/../"
     result_file="../result.txt"
@@ -194,8 +193,6 @@ function exec_build() {
         echo "Build succeeded"
         echo Success >$result_file
     fi
-
-    cd ..
 }
 
 # Some environment variables we want
@@ -203,4 +200,7 @@ export OCAMLRUNPARAM=b
 export OTHERFLAGS="--print_z3_statistics --use_hints --query_stats"
 export MAKEFLAGS="$MAKEFLAGS -Otarget"
 
+export_home FSTAR "$(pwd)/FStar"
+cd hacl-star
 exec_build
+cd ..
