@@ -14,7 +14,7 @@ EverCrypt_AutoConfig_cfg_tags Prefer = EverCrypt_AutoConfig_Prefer;
 
 // We store our choices in global variables to improve processor branch
 // prediction and prefetching.
-impl sha256_impl = Vale;
+impl sha256_impl = Hacl;
 impl sha384_impl = Hacl;
 impl sha512_impl = Hacl;
 impl x25519_impl = Hacl;
@@ -81,8 +81,8 @@ void EverCrypt_AutoConfig_init(EverCrypt_AutoConfig_cfg x0) {
   // SHA256: best = Vale (unconditionally), fallback = Hacl (always works)
   if (prefer_hacl) {
     sha256_impl = Hacl;
-  } else if (EverCrypt_StaticConfig_vale && prefer_vale) {
-    sha256_impl = Vale;
+//  } else if (EverCrypt_StaticConfig_vale && prefer_vale) {
+//    sha256_impl = Vale;
   } else {
     sha256_impl = Hacl;
   }
