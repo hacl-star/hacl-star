@@ -87,6 +87,7 @@ val lemma_bignum_to_128:
   h0:limb{v h0 < pow2 44} -> h1:limb{v h1 < pow2 44} -> h2:limb{v h2 < pow2 42} ->
   Lemma (((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 + ((v h1 * pow2 44) % pow2 64) + v h0
     = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128)
+#push-options "--z3rlimit 250"
 let lemma_bignum_to_128 h0 h1 h2 =
   lemma_bignum_to_128_ h0 h1 h2;
   let z = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128 in
@@ -97,6 +98,7 @@ let lemma_bignum_to_128 h0 h1 h2 =
   assert_norm((pow2 44 - 1) + pow2 44 * (pow2 44 - 1) + (pow2 40 - 1) * pow2 88 < pow2 128);
   lemma_aux (v h0) (v h1) (v h2 % pow2 40);
   Math.Lemmas.modulo_lemma (v h0 + pow2 44 * v h1 + pow2 88 * (v h2 % pow2 40)) (pow2 128)
+#pop-options
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
