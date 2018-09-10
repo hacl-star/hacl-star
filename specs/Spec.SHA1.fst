@@ -9,7 +9,8 @@ module E = FStar.Kremlin.Endianness
 
 (* Section 5.3.1 *)
 
-let h0 : hash_w SHA1 = Seq.seq_of_list [
+inline_for_extraction
+let init_as_list = [
   0x67452301ul;
   0xefcdab89ul;
   0x98badcfeul;
@@ -17,27 +18,31 @@ let h0 : hash_w SHA1 = Seq.seq_of_list [
   0xc3d2e1f0ul;
 ]
 
+let h0 : hash_w SHA1 = Seq.seq_of_list init_as_list
+
 let init = h0
 
 (* Section 2.2.2: rotate left *)
 
+inline_for_extraction
 let rotl (n_:U32.t{0 < U32.v n_ /\ U32.v n_ < 32}) (x:U32.t): Tot U32.t =
   U32.((x <<^ n_) |^ (x >>^ (32ul -^ n_)))
 
 (* Section 6.1.2 Step 1: message schedule *)
 
-let rec w (mi: Seq.lseq (word SHA1) size_block_w) (t: nat {t <= 79}) : Tot (word SHA1) =
-  if t <= 15
-  then Seq.index mi t
-  else rotl 1ul (w mi (t - 3) `U32.logxor` w mi (t - 8) `U32.logxor` w mi (t - 14) `U32.logxor` w mi (t - 16))
+let rec w (mi: Seq.lseq (word SHA1) size_block_w) (t: U32.t {U32.v t <= 79}) : Tot (word SHA1) (decreases (U32.v t)) =
+  if U32.lt t 16ul
+  then Seq.index mi (U32.v t)
+  else rotl 1ul (w mi (t `U32.sub` 3ul) `U32.logxor` w mi (t `U32.sub` 8ul) `U32.logxor` w mi (t `U32.sub` 14ul) `U32.logxor` w mi (t `U32.sub` 16ul))
 
 (* Section 4.1.1: logical functions *)
 
-let f (t: nat {t <= 79}) (x y z: word SHA1) : Tot (word SHA1) =
-  if t <= 19
+inline_for_extraction
+let f (t: U32.t {U32.v t <= 79}) (x y z: word SHA1) : Tot (word SHA1) =
+  if U32.lt t 20ul
   then
     (x `U32.logand` y) `U32.logxor` (U32.lognot x `U32.logand` z)
-  else if 40 <= t && t <= 59
+  else if U32.lt 39ul t && U32.lt t 60ul
   then
     (x `U32.logand` y) `U32.logxor` (x `U32.logand` z) `U32.logxor` (y `U32.logand` z)
   else
@@ -63,12 +68,13 @@ let step2 (h: hash_w SHA1) : Tot working_state = {
 
 (* Section 4.2.1 *)
 
-let k (t: nat { t <= 79 } ) : Tot (word SHA1) =
-  if t <= 19
+inline_for_extraction
+let k (t: U32.t { U32.v t <= 79 } ) : Tot (word SHA1) =
+  if U32.lt t 20ul
   then 0x5a827999ul
-  else if t <= 39
+  else if U32.lt t 40ul
   then 0x6ed9eba1ul
-  else if t <= 59
+  else if U32.lt t  60ul
   then 0x8f1bbcdcul
   else 0xca62c1d6ul
 
@@ -76,10 +82,10 @@ let k (t: nat { t <= 79 } ) : Tot (word SHA1) =
 
 let word_block = Seq.lseq (word SHA1) size_block_w
 
-let step3_body
+let step3_body'
   (mi: word_block)
   (st: working_state)
-  (t: nat {t < 80})
+  (t: U32.t {U32.v t < 80})
 : Tot working_state
 = let _T = rotl 5ul st.a `U32.add_mod` f t st.b st.c st.d `U32.add_mod` st.e `U32.add_mod` k t `U32.add_mod` w mi t in
   let e = st.d in
@@ -88,6 +94,13 @@ let step3_body
   let b = st.a in
   let a = _T in
   {a = a; b = b; c = c; d = d; e = e; }
+
+let step3_body
+  (mi: word_block)
+  (st: working_state)
+  (t: nat {t < 80})
+: Tot working_state
+= step3_body' mi st (U32.uint_to_t t)
 
 let step3
   (mi: word_block)
