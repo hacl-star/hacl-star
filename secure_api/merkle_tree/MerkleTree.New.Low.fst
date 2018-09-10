@@ -282,49 +282,82 @@ noeq type merkle_tree =
 
 type mt_p = B.pointer merkle_tree
 
+val mt_not_full: HS.mem -> mt_p -> GTot bool
+let mt_not_full h mt =
+  MT?.j (B.get h mt 0) < U32.uint_to_t (UInt.max_int U32.n)
+
+/// (Memory) Safety
+
 val offset_of: i:uint32_t -> Tot uint32_t
 let offset_of i =
   if i % 2ul = 0ul then i else i - 1ul
 
-/// Construction
+val mt_safe_elts: 
+  h:HS.mem -> lv:uint32_t{lv <= 32ul} ->
+  hs:hash_vv{V.size_of hs = 32ul} -> 
+  i:uint32_t -> j:uint32_t{j >= i} ->
+  GTot Type0 (decreases (32 - U32.v lv))
+let rec mt_safe_elts h lv hs i j =
+  if lv = 32ul then true
+  else (V.size_of (V.get h hs lv) >= j - i /\
+       mt_safe_elts h (lv + 1ul) hs (i / 2ul) (j / 2ul))
 
-val create_mt_: 
-  hs:hash_vv{V.size_of hs = 32ul} ->
-  depth:uint32_t{depth <= 32ul} ->
-  HST.ST unit
-	 (requires (fun h0 -> 
-	   V.live h0 hs /\
-	   HST.is_eternal_region (V.frameOf hs)))
-	 (ensures (fun h0 mt h1 -> true))
-	 (decreases (U32.v depth))
-let rec create_mt_ hs depth =
-  if depth = 0ul then ()
-  else (let dr = RV.new_region_ (V.frameOf hs) in
-       let hv = RV.create_reserve hreg 1ul dr in
-       V.assign hs (depth - 1ul) hv;
-       create_mt_ hs (depth - 1ul))
+val mt_safe_elts_preserved:
+  lv:uint32_t{lv <= 32ul} ->
+  hs:hash_vv{V.size_of hs = 32ul} -> 
+  i:uint32_t -> j:uint32_t{j >= i} ->
+  p:loc -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (mt_safe_elts h0 lv hs i j /\
+		  loc_disjoint p (RV.loc_rvector hs) /\
+		  modifies p h0 h1))
+	(ensures (mt_safe_elts h1 lv hs i j))
+	[SMTPat (mt_safe_elts h0 lv hs i j);
+	SMTPat (loc_disjoint p (RV.loc_rvector hs));
+	SMTPat (modifies p h0 h1)]
+let mt_safe_elts_preserved lv hs i j p h0 h1 =
+  admit ()
+
+val mt_safe: HS.mem -> mt_p -> GTot Type0
+let mt_safe h mt =
+  B.live h mt /\ B.freeable mt /\
+  (let mtv = B.get h mt 0 in
+  // Liveness & Accessibility
+  RV.rv_inv h (MT?.hs mtv) /\
+  RV.rv_inv h (MT?.rhs mtv) /\
+  mt_safe_elts h 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv) /\
+  // Regionality
+  HH.extends (V.frameOf (MT?.hs mtv)) (B.frameOf mt) /\
+  HH.extends (V.frameOf (MT?.rhs mtv)) (B.frameOf mt) /\
+  HH.disjoint (V.frameOf (MT?.hs mtv)) (V.frameOf (MT?.rhs mtv)))
+
+val mt_loc: mt_p -> GTot loc
+let mt_loc mt = 
+  B.loc_all_regions_from false (B.frameOf mt)
+
+/// Construction
 
 val create_mt: init:hash ->
   HST.ST mt_p
 	 (requires (fun _ -> true))
-	 (ensures (fun h0 mt h1 -> true))
+	 (ensures (fun h0 mt h1 ->
+	   modifies (mt_loc mt) h0 h1 /\
+	   mt_safe h1 mt))
 let create_mt init =
   admit ();
-  let mt_region = RV.new_region_ HH.root in
-  let hs = RV.create_rid bhreg 32ul mt_region in
-  create_mt_ hs 32ul;
-  V.assign hs 0ul (RV.insert_copy hcpy (V.index hs 0ul) init);
-  let rhs = RV.create hreg 32ul in
+  let hs_region = RV.new_region_ HH.root in
+  let hs = RV.create_rid bhreg 32ul hs_region in
+  RV.assign hs 0ul (RV.insert_copy hcpy (V.index hs 0ul) init);
+  let rhs_region = RV.new_region_ HH.root in
+  let rhs = RV.create_rid hreg 32ul rhs_region in
   B.malloc HH.root (MT 0ul 1ul hs false rhs) 1ul
 
 /// Destruction (free)
 
 val free_mt: mt:mt_p ->
   HST.ST unit
-	 (requires (fun h0 -> B.live h0 mt))
-	 (ensures (fun h0 _ h1 -> true))
+	 (requires (fun h0 -> mt_safe h0 mt))
+	 (ensures (fun h0 _ h1 -> modifies (mt_loc mt) h0 h1))
 let free_mt mt =
-  admit ();
   let mtv = B.index mt 0ul in
   RV.free (MT?.hs mtv);
   RV.free (MT?.rhs mtv);
@@ -332,31 +365,44 @@ let free_mt mt =
 
 /// Insertion
 
-val insert_:
+private val insert_:
   lv:uint32_t{lv < 32ul} ->
-  j:uint32_t ->
+  i:Ghost.erased uint32_t ->
+  j:uint32_t{Ghost.reveal i <= j && j < U32.uint_to_t (UInt.max_int U32.n)} ->
   hs:hash_vv{V.size_of hs = 32ul} ->
   acc:hash ->
   HST.ST unit
-	 (requires (fun h0 -> true))
-	 (ensures (fun h0 _ h1 -> true))
-let rec insert_ lv j hs acc =
+	 (requires (fun h0 ->
+	   RV.rv_inv h0 hs /\ B.live h0 acc /\
+	   HH.disjoint (V.frameOf hs) (B.frameOf acc)))
+	 (ensures (fun h0 _ h1 ->
+	   modifies (RV.loc_rvector hs) h0 h1 /\
+	   RV.rv_inv h1 hs /\
+	   mt_safe_elts h1 lv hs (Ghost.reveal i) (j + 1ul)))
+private let rec insert_ lv i j hs acc =
   admit ();
   RV.assign hs lv (RV.insert_copy hcpy (V.index hs lv) acc);
   if j % 2ul = 1ul
   then (hash_2 (V.back (V.index hs lv)) acc acc;
-       insert_ (lv + 1ul) (j / 2ul) hs acc)
+       insert_ (lv + 1ul)
+	       (Ghost.hide (Ghost.reveal i / 2ul)) (j / 2ul) 
+	       hs acc)
 
 // Caution: current impl. manipulates the content in `v`.
 val insert:
   mt:mt_p -> v:hash ->
   HST.ST unit
-	 (requires (fun h0 -> true))
-	 (ensures (fun h0 _ h1 -> true))
+	 (requires (fun h0 ->
+	   mt_not_full h0 mt /\
+	   mt_safe h0 mt /\
+	   B.live h0 v /\
+	   HH.disjoint (B.frameOf mt) (B.frameOf v)))
+	 (ensures (fun h0 _ h1 ->
+	   modifies (mt_loc mt) h0 h1 /\
+	   mt_safe h1 mt))
 let rec insert mt v =
-  admit ();
   let mtv = B.index mt 0ul in
-  insert_ 0ul (MT?.j mtv) (MT?.hs mtv) v;
+  insert_ 0ul (Ghost.hide (MT?.i mtv)) (MT?.j mtv) (MT?.hs mtv) v;
   B.upd mt 0ul 
     (MT (MT?.i mtv)
 	(MT?.j mtv + 1ul)
@@ -373,12 +419,20 @@ val construct_rhs:
   lv:uint32_t{lv < 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
-  i:uint32_t -> j:uint32_t ->
+  i:uint32_t -> j:uint32_t{i <= j} ->
   acc:hash ->
   actd:bool ->
   HST.ST unit
-	 (requires (fun h0 -> true))
-	 (ensures (fun h0 _ h1 -> true))
+	 (requires (fun h0 ->
+	   RV.rv_inv h0 hs /\ RV.rv_inv h0 rhs /\
+	   HH.disjoint (V.frameOf hs) (V.frameOf rhs) /\
+	   B.live h0 acc /\
+	   HH.disjoint (B.frameOf acc) (V.frameOf hs) /\
+	   HH.disjoint (B.frameOf acc) (V.frameOf rhs) /\
+	   mt_safe_elts h0 lv hs i j))
+	 (ensures (fun h0 _ h1 ->
+	   modifies (RV.loc_rvector rhs) h0 h1 /\
+	   RV.rv_inv h1 rhs))
 let rec construct_rhs lv hs rhs i j acc actd =
   admit ();
   let ofs = offset_of i in
@@ -402,11 +456,14 @@ val mt_get_path_:
   lv:uint32_t{lv < 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
-  i:uint32_t -> j:uint32_t -> 
+  i:uint32_t -> j:uint32_t{i <= j} -> 
   k:uint32_t{j = 0ul || k <= j} ->
   path:B.pointer (V.vector hash) ->
   HST.ST unit
-	 (requires (fun h0 -> true))
+	 (requires (fun h0 ->
+	   RV.rv_inv h0 hs /\ RV.rv_inv h0 rhs /\
+	   HH.disjoint (V.frameOf hs) (V.frameOf rhs) /\
+	   mt_safe_elts h0 lv hs i j))
 	 (ensures (fun h0 _ h1 -> true))
 let rec mt_get_path_ lv hs rhs i j k path =
   admit ();
@@ -437,15 +494,19 @@ let mt_get_path mt idx ih path root =
   admit ();
   let copy = Cpy?.copy hcpy in
   let mtv = B.index mt 0ul in
+  let i = MT?.i mtv in
   let ofs = offset_of (MT?.i mtv) in
+  let j = MT?.j mtv in
+  let hs = MT?.hs mtv in
+  let rhs = MT?.rhs mtv in
   if not (MT?.rhs_ok mtv) then
-    (copy (V.index (V.index (MT?.hs mtv) 0ul) (MT?.j mtv - 1ul - ofs)) root;
-    construct_rhs 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.i mtv) (MT?.j mtv) root false;
-    B.upd mt 0ul (MT (MT?.i mtv) (MT?.j mtv) (MT?.hs mtv) true (MT?.rhs mtv)))
+    (copy (V.index (V.index hs 0ul) (j - 1ul - ofs)) root;
+    construct_rhs 0ul hs rhs i j root false;
+    B.upd mt 0ul (MT i j hs true rhs))
   else ();
-  mt_get_path_ 0ul (MT?.hs mtv) (MT?.rhs mtv) (MT?.i mtv) (MT?.j mtv - 1) idx path;
-  copy (V.index (V.index (MT?.hs mtv) 0ul) (idx - ofs)) ih;
-  MT?.j mtv
+  mt_get_path_ 0ul hs rhs i (j - 1) idx path;
+  copy (V.index (V.index hs 0ul) (idx - ofs)) ih;
+  j
 
 /// Flushing
 
