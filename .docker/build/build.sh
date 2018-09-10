@@ -158,7 +158,6 @@ function refresh_hints() {
 
 function exec_build() {
 
-    export_home FSTAR "$(pwd)/../"
     result_file="../result.txt"
     local status_file="../status.txt"
     echo -n false >$status_file
