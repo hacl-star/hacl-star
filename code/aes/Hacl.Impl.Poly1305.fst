@@ -101,7 +101,7 @@ let poly1305_init #s ctx key =
   let sk = get_s ctx in 
   set_zero acc;
   poly1305_encode_r r kr;
-  smul20_felem r_20 r;
+  smul_top_felem r_20 r;
   let (sl,sh) = load64x2_le ks in
   load_felem sk sl sh;
   admit()
@@ -113,10 +113,10 @@ val poly1305_update: #s:field_spec -> ctx:poly1305_ctx s -> text:bytes -> len:si
 
 let poly1305_update #s ctx text len = 
   push_frame();
-  let acc = sub ctx (size 0) (size 3) in
-  let r = sub ctx (size 3) (size 3) in
-  let r_20 = sub ctx (size 6) (size 3) in
-  let e = create_felem s in
+  let acc = get_acc ctx in
+  let r = get_r ctx in
+  let r_20 = get_r_20 ctx in
+  let e = create (limb_zero s) (size (nlimb s)) in
   let blocks = len /. size 16 in
   let h0 = ST.get() in
   admit();
@@ -142,6 +142,8 @@ let poly1305_finish #s ctx tag =
   let sk = get_s ctx in
   carry_felem acc;
   carry_top_felem acc;
+//  carry_felem acc;
+//  carry_top_felem acc;
   add_felem acc sk;
   carry_felem acc;
   let (lo,hi) = store_felem acc in

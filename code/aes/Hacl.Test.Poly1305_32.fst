@@ -1,4 +1,4 @@
-module Hacl.Test.Poly1305_64
+module Hacl.Test.Poly1305_32
 open FStar.HyperStack.All
 
 #set-options "--lax"
@@ -31,8 +31,8 @@ let main () =
     0xc2uy; 0x2buy; 0x8buy; 0xafuy; 0x0cuy; 0x01uy; 0x27uy; 0xa9uy
   ] in
   let comp0 = alloca 0uy 16ul in
-  Hacl.Poly1305_64.poly1305_mac comp0 input0 (size 34) key0;
-  TestLib.compare_and_print (C.String.of_literal "Poly1305 (64-bit) Tag 0") tag0 comp0 16ul;
+  Hacl.Poly1305_32.poly1305_mac comp0 input0 (size 34) key0;
+  TestLib.compare_and_print (C.String.of_literal "Poly1305 (32-bit) Tag 0") tag0 comp0 16ul;
 
   pop_frame();
   C.EXIT_SUCCESS

@@ -160,7 +160,7 @@ aesgcm-perf: aesgcm-ni.exe
 	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_Impl_AesGCM.c $(KREMLIN_HOME)/kremlib/c/testlib.o aesgcm_test.c -o aesgcm-perf.exe
 	./aesgcm-perf.exe
 
-POLY1305_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+POLY1305_64_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	Lib.Utils.fst \
 	Hacl.Impl.Poly1305.Field64.fst \
@@ -171,8 +171,8 @@ POLY1305_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 
 
 KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 
-poly64-c/out.krml: $(POLY1305_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c $(POLY1305_FILES) -skip-translation 
+poly64-c/out.krml: $(POLY1305_64_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c $(POLY1305_64_FILES) -skip-translation 
 
 poly64-c/Hacl_Poly1305_64.c: poly64-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c  $^ -skip-compilation \
@@ -184,11 +184,34 @@ poly1305_64.exe: poly64-c/Hacl_Poly1305_64.c poly64-c/out.krml
 	  -bundle 'Hacl.Test.Poly1305_64=*' -library Hacl.Poly1305_64 -library Lib.Vec128 \
 	  $^ -o $@
 
-poly1305-test: poly1305_64.exe
-	./poly1305_64.exe
+POLY1305_32_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	Lib.Utils.fst \
+	Hacl.Impl.Poly1305.Field32.fst \
+	Hacl.Impl.Poly1305.Fields.fst \
+	Hacl.Impl.Poly1305.fst \
+	Hacl.Poly1305_32.fst \
+	Hacl.Test.Poly1305_32.fst 
 
-poly1305-perf: poly1305_64.exe
-	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . poly64-c/Hacl_Poly1305_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o poly1305_test.c -o poly1305-perf.exe 
+poly32-c/out.krml: $(POLY1305_32_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly32-c $(POLY1305_32_FILES) -skip-translation 
+
+poly32-c/Hacl_Poly1305_32.c: poly32-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly32-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Poly1305_32=*'
+
+poly1305_32.exe: poly32-c/Hacl_Poly1305_32.c poly32-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly32-c \
+	  -no-prefix 'Hacl.Test.Poly1305_32' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
+	  -bundle 'Hacl.Test.Poly1305_32=*' -library Hacl.Poly1305_32 -library Lib.Vec128 \
+	  $^ -o $@
+
+poly1305-test: poly1305_64.exe poly1305_32.exe
+	./poly1305_64.exe
+	./poly1305_32.exe
+
+poly1305-perf: poly1305_64.exe poly1305_32.exe
+	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . poly64-c/Hacl_Poly1305_64.c poly32-c/Hacl_Poly1305_32.c $(KREMLIN_HOME)/kremlib/c/testlib.o poly1305_test.c -o poly1305-perf.exe 
 	./poly1305-perf.exe
 
 
