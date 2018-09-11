@@ -125,7 +125,7 @@ $(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.che
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-$(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/Spec.Matrix.fst.checked: | .depend
+$(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/Spec.Matrix.fst.checked $(CACHE_DIR)/Spec.Keccak.fst.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
