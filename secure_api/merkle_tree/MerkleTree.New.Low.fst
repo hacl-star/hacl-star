@@ -412,6 +412,15 @@ let rec insert mt v =
 
 /// Getting the Merkle root and path
 
+// b:uint8_p{B.len b = U32.mul 32ul hash_size}
+type path = B.pointer (V.vector hash)
+
+val path_safe: HS.mem -> path -> GTot Type0
+let path_safe h p =
+  B.live h p /\ B.freeable p /\
+  V.live h (B.get h p 0) /\
+  HH.extends (V.frameOf (B.get h p 0)) (B.frameOf p)
+
 // Construct the rightmost hashes for a given (incomplete) Merkle tree.
 // This function calculates the Merkle root as well, which is the final
 // accumulator value.
@@ -438,9 +447,10 @@ let rec construct_rhs lv hs rhs i j acc actd =
   let ofs = offset_of i in
   let copy = Cpy?.copy hcpy in
   if j = 0ul then ()
-  else 
+  else
     (if j % 2ul = 0ul 
-    then (RV.assign_copy hcpy rhs lv (V.index (V.index hs lv) (j - 1ul - ofs));
+    then (if i <> j 
+	 then RV.assign_copy hcpy rhs lv (V.index (V.index hs lv) (j - 1ul - ofs));
 	 construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc actd)
     else (if actd
     	 then (RV.assign_copy hcpy rhs lv acc;
@@ -458,39 +468,39 @@ val mt_get_path_:
   rhs:hash_vec{V.size_of rhs = 32ul} ->
   i:uint32_t -> j:uint32_t{i <= j} -> 
   k:uint32_t{j = 0ul || k <= j} ->
-  path:B.pointer (V.vector hash) ->
+  p:path ->
   HST.ST unit
 	 (requires (fun h0 ->
 	   RV.rv_inv h0 hs /\ RV.rv_inv h0 rhs /\
 	   HH.disjoint (V.frameOf hs) (V.frameOf rhs) /\
 	   mt_safe_elts h0 lv hs i j))
 	 (ensures (fun h0 _ h1 -> true))
-let rec mt_get_path_ lv hs rhs i j k path =
+let rec mt_get_path_ lv hs rhs i j k p =
   admit ();
   let ofs = offset_of i in
   if j = 0ul then ()
   else
     (if k % 2ul = 1ul
-    then B.upd path 0ul (V.insert (B.index path 0ul)
+    then B.upd p 0ul (V.insert (B.index p 0ul)
 				  (V.index (V.index hs lv) (k - 1ul - ofs)))
     else
       (if k = j then ()
       else if k + 1ul = j
-      then B.upd path 0ul (V.insert (B.index path 0ul) (V.index rhs lv))
-      else B.upd path 0ul (V.insert (B.index path 0ul)
+      then B.upd p 0ul (V.insert (B.index p 0ul) (V.index rhs lv))
+      else B.upd p 0ul (V.insert (B.index p 0ul)
   	 			    (V.index (V.index hs lv) (k + 1ul - ofs))));
-    mt_get_path_ (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) (k / 2ul) path)
+    mt_get_path_ (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) (k / 2ul) p)
 
 val mt_get_path:
   mt:mt_p -> 
   idx:uint32_t -> // {MT?.i mt <= idx && idx < MT?.j mt}
   ih:hash ->
-  path:B.pointer (V.vector hash) ->
+  p:path ->
   root:hash ->
   HST.ST uint32_t
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let mt_get_path mt idx ih path root =
+let mt_get_path mt idx ih p root =
   admit ();
   let copy = Cpy?.copy hcpy in
   let mtv = B.index mt 0ul in
@@ -504,7 +514,7 @@ let mt_get_path mt idx ih path root =
     construct_rhs 0ul hs rhs i j root false;
     B.upd mt 0ul (MT i j hs true rhs))
   else ();
-  mt_get_path_ 0ul hs rhs i (j - 1) idx path;
+  mt_get_path_ 0ul hs rhs i (j - 1) idx p;
   copy (V.index (V.index hs 0ul) (idx - ofs)) ih;
   j
 
@@ -555,22 +565,25 @@ let mt_flush mt =
 val mt_verify_:
   k:uint32_t ->
   j:uint32_t{j = 0ul || k <= j} ->
-  path:V.vector hash ->
-  ppos:uint32_t{ppos < V.size_of path} ->
+  p:path ->
+  ppos:uint32_t ->
   acc:hash ->
   HST.ST unit
-	 (requires (fun h0 -> true))
+	 (requires (fun h0 ->
+	   path_safe h0 p /\
+	   ppos < V.size_of (B.get h0 p 0)))
 	 (ensures (fun h0 _ h1 -> true))
-let rec mt_verify_ k j path ppos acc =
+let rec mt_verify_ k j p ppos acc =
   admit ();
   if j <= 1ul then ()
-  else (if k % 2ul = 0ul
+  else (let phash = V.index (B.index p 0ul) ppos in
+       if k % 2ul = 0ul
        then (if k + 1ul = j 
-	    then mt_verify_ (k / 2ul) ((j + 1ul) / 2ul) path ppos acc
-	    else (hash_2 acc (V.index path ppos) acc;
-		 mt_verify_ (k / 2ul) ((j + 1ul) / 2ul) path (ppos + 1ul) acc))
-       else (hash_2 (V.index path ppos) acc acc;
-	    mt_verify_ (k / 2ul) ((j + 1ul) / 2ul) path (ppos + 1ul) acc))
+	    then mt_verify_ (k / 2ul) ((j + 1ul) / 2ul) p ppos acc
+	    else (hash_2 acc phash acc;
+		 mt_verify_ (k / 2ul) ((j + 1ul) / 2ul) p (ppos + 1ul) acc))
+       else (hash_2 phash acc acc;
+	    mt_verify_ (k / 2ul) ((j + 1ul) / 2ul) p (ppos + 1ul) acc))
 
 val buf_eq:
   #a:eqtype -> b1:B.buffer a -> b2:B.buffer a ->
@@ -591,13 +604,13 @@ val mt_verify:
   k:uint32_t ->
   j:uint32_t{k < j} ->
   ih:hash ->
-  path:V.vector hash{V.size_of path > 0ul} ->
+  p:path ->
   root:hash ->
   HST.ST bool
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-let mt_verify k j ih path root =
+let mt_verify k j ih p root =
   admit ();
-  mt_verify_ k j path 0ul ih;
+  mt_verify_ k j p 0ul ih;
   buf_eq ih root hash_size
 

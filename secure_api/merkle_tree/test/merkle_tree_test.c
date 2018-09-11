@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
   }
 
   printf("All values are inserted: %d\n", timer_tick());
-  
+
   // Getting the Merkle path and verify it
   uint8_t *khash = hash_r_init();
   uint8_t *root = hash_r_init();
@@ -52,8 +52,8 @@ int main(int argc, char *argv[]) {
   for (uint32_t k = 0; k <= num_elts; k++) {
     int j = mt_get_path(mt, k, khash, &path, root);
 
-    bool verified = mt_verify(k, j, khash, path, root);
-    printf("Verification with k(%d), j(%d): %d\n", k, j, verified);
+    bool verified = mt_verify(k, j, khash, &path, root);
+    // printf("Verification with k(%d), j(%d): %d\n", k, j, verified);
 
     path.sz = 0; // This is a bit arbitrary
   }
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
   /* for (uint32_t k = flush_to; k <= num_elts; k++) { */
   /*   int j = mt_get_path(mt, k, khash, &path, root); */
 
-  /*   bool verified = mt_verify(k, j, khash, path, root); */
+  /*   bool verified = mt_verify(k, j, khash, &path, root); */
   /*   printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified); */
 
   /*   path.sz = 0; */
