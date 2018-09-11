@@ -46,7 +46,7 @@ let poly1305_encode_r #s f b =
     let hi = hi &. mask1 in
     load_felem f lo hi
   
-
+inline_for_extraction
 type poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s `op_Multiply` 4)
 
 (*
