@@ -39,47 +39,48 @@ int main(int argc, char *argv[]) {
   // Insertion
   for (uint32_t i = 0; i < num_elts; i++) {
     uint8_t *hash = hash_r_init();
-    insert(mt, hash);
+    mt_insert(mt, hash);
   }
 
-  printf("All values are inserted: %d\n", timer_tick());
+  // printf("All values are inserted: %d\n", timer_tick());
+  printf("All values are inserted!\n");
 
   // Getting the Merkle path and verify it
-  uint8_t *khash = hash_r_init();
   uint8_t *root = hash_r_init();
   hash_vec path = hash_vec_r_init();
 
   for (uint32_t k = 0; k <= num_elts; k++) {
-    int j = mt_get_path(mt, k, khash, &path, root);
+    int j = mt_get_path(mt, k, &path, root);
 
-    bool verified = mt_verify(k, j, khash, &path, root);
-    // printf("Verification with k(%d), j(%d): %d\n", k, j, verified);
+    bool verified = mt_verify(k, j, &path, root);
+    printf("Verification with k(%d), j(%d): %d\n", k, j, verified);
 
     path.sz = 0; // This is a bit arbitrary
   }
 
-  /* int flush_to = 5; */
-  /* mt_flush_to(mt, flush_to); */
-  /* printf("Flushed until: %d\n", flush_to); */
+  int flush_to = num_elts / 2;
+  mt_flush_to(mt, flush_to);
+  printf("Leaves flushed until: %d\n", flush_to);
 
-  /* for (uint32_t k = flush_to; k <= num_elts; k++) { */
-  /*   int j = mt_get_path(mt, k, khash, &path, root); */
+  for (uint32_t k = flush_to; k <= num_elts; k++) {
+    int j = mt_get_path(mt, k, &path, root);
 
-  /*   bool verified = mt_verify(k, j, khash, &path, root); */
-  /*   printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified); */
+    bool verified = mt_verify(k, j, &path, root);
+    printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
 
-  /*   path.sz = 0; */
-  /* } */
+    path.sz = 0;
+  }
 
-  printf("All merkle paths are verified: %d\n", timer_tick());
+  // printf("All merkle paths are verified: %d\n", timer_tick());
+  printf("All merkle paths are verified!\n");
 
   // Free
   free_mt(mt);
   free(path.vs);
-  hash_r_free(khash);
   hash_r_free(root);
 
-  printf("The Merkle tree is freed: %d\n", timer_tick());
+  // printf("The Merkle tree is freed: %d\n", timer_tick());
+  printf("The Merkle tree is freed\n");
   
   return 0;
 }
