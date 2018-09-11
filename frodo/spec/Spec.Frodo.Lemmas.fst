@@ -5,47 +5,76 @@ open FStar.Math.Lemmas
 
 open Lib.IntTypes
 
+friend Lib.IntTypes
+
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-val modulo_pow2_u16:
-  a:uint16 -> b:size_nat{b < 16} -> Lemma
-  (uint_v a % pow2 b == uint_v (a &. ((u16 1 <<. u32 b) -. u16 1)))
+// The lemma [lognot_plus_one] below can be proved from this other lemma, but it looks
+// hard to prove. Instead, we use [assert_norm] to exhaustively prove it from all values
+// [0 < e < 12], which suffices for our purposes.
+//
+// [val lognot_plus_one': #n:nat -> a:uint_t n{0 < a} -> Lemma (lognot a + 1 = pow2 n - a)]
+//
+val lognot_plus_one:
+    e:uint16{0 < uint_v e /\ uint_v e < 12}
+  -> Lemma (lognot e +. u16 1 == u16 (modulus U16 - uint_v e))
+let lognot_plus_one e =
+  // lognot_plus_one' #16 (uint_v e)
+  assert_norm ((lognot (u16 1) +. u16 1 == u16 (modulus U16 - uint_v (u16 1))));
+  assert_norm ((lognot (u16 2) +. u16 1 == u16 (modulus U16 - uint_v (u16 2))));
+  assert_norm ((lognot (u16 3) +. u16 1 == u16 (modulus U16 - uint_v (u16 3))));
+  assert_norm ((lognot (u16 4) +. u16 1 == u16 (modulus U16 - uint_v (u16 4))));
+  assert_norm ((lognot (u16 5) +. u16 1 == u16 (modulus U16 - uint_v (u16 5))));
+  assert_norm ((lognot (u16 6) +. u16 1 == u16 (modulus U16 - uint_v (u16 6))));
+  assert_norm ((lognot (u16 7) +. u16 1 == u16 (modulus U16 - uint_v (u16 7))));
+  assert_norm ((lognot (u16 8) +. u16 1 == u16 (modulus U16 - uint_v (u16 8))));
+  assert_norm ((lognot (u16 9) +. u16 1 == u16 (modulus U16 - uint_v (u16 9))));
+  assert_norm ((lognot (u16 10) +. u16 1 == u16 (modulus U16 - uint_v (u16 10))));
+  assert_norm ((lognot (u16 11) +. u16 1 == u16 (modulus U16 - uint_v (u16 11))));
+  assert_norm ((lognot (u16 12) +. u16 1 == u16 (modulus U16 - uint_v (u16 12))))
+
+let lemma_frodo_sample2 sign e =
+  let open FStar.Math.Lib in
+  if uint_v sign = 0 then
+    begin
+    assert_norm (powx (-1) 0 = 1);
+    uintv_extensionality sign (u16 0);
+    UInt.logxor_commutative #16 (uint_v e) 0;
+    UInt.logxor_lemma_1 #16 (uint_v e);
+    assert_norm (lognot (u16 0) +. u16 1 = u16 0)
+    end
+  else
+    begin
+    assert_norm (powx (-1) 1 = -1);
+    uintv_extensionality sign (u16 1);
+    UInt.logxor_commutative #16 (uint_v e) (UInt.ones 16);
+    UInt.logxor_lemma_2 #16 (uint_v e);
+    assert_norm (lognot (u16 1) +. u16 1 = u16 (maxint U16));
+    if uint_v e = 0 then
+      assert_norm (lognot (u16 0) +. u16 1 = u16 ((-1) * 0 % modulus U16))
+    else
+      lognot_plus_one e
+    end
+
 let modulo_pow2_u16 a b =
   uintv_extensionality (nat_to_uint 1) (u16 1);
   mod_mask_lemma #U16 a (u32 b)
 
-val modulo_pow2_u32:
-  a:uint32 -> b:size_nat{b < 32} -> Lemma
-  (uint_v a % pow2 b == uint_v (a &. ((u32 1 <<. u32 b) -. u32 1)))
 let modulo_pow2_u32 a b =
   uintv_extensionality (nat_to_uint 1) (u32 1);
   mod_mask_lemma #U32 a (u32 b)
 
-val modulo_pow2_u64:
-  a:uint64 -> b:size_nat{b < 64} -> Lemma
-  (uint_v a % pow2 b == uint_v (a &. ((u64 1 <<. u32 b) -. u64 1)))
 let modulo_pow2_u64 a b =
   uintv_extensionality (nat_to_uint 1) (u64 1);
   mod_mask_lemma #U64 a (u32 b)
 
-val lemma_mul_acc_comm:
-  a:size_nat -> b:size_nat -> c:size_nat -> Lemma
-  (a * b * c = c * a * b)
 let lemma_mul_acc_comm a b c = ()
 
-val lemma_matrix_index_repeati1:
-  n1:size_nat -> n2:size_nat ->
-  i:size_nat{i < n1} -> j:size_nat{j < n2} ->
-  Lemma (2 * (i * n2 + j) + 2 <= 2 * n1 * n2)
 let lemma_matrix_index_repeati1 n1 n2 i j =
   assert (2 * (i * n2 + j) + 2 <= 2 * ((n1 - 1) * n2 + n2 - 1) + 2);
   assert (2 * (n1 * n2 - 1) + 2 = 2 * n1 * n2 - 2 + 2);
   assert (2 * (i * n2 + j) + 2 <= 2 * n1 * n2)
 
-val lemma_matrix_index_repeati2:
-  n1:size_nat -> n2:size_nat ->
-  i:size_nat{i < n1} -> j:size_nat{j < n2} ->
-  Lemma (2 * (n1 * j + i) + 2 <= 2 * n1 * n2)
 let lemma_matrix_index_repeati2 n1 n2 i j =
   assert (2 * (n1 * j + i) + 2 <= 2 * (n1 * (n2 - 1) + n1 - 1) + 2);
   assert (2 * (n1 * n2 - 1) + 2 = 2 * n1 * n2 - 2 + 2);
@@ -53,16 +82,6 @@ let lemma_matrix_index_repeati2 n1 n2 i j =
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
 
-val lemma_matrix_index_repeati:
-    n1:size_nat
-  -> n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
-  -> d:size_nat{d * n1 <= max_size_t /\ d * n1 * n2 / 8 <= max_size_t}
-  -> i:size_nat{i < n1}
-  -> j:size_nat{j < n2 / 8}
-  -> Lemma (i * (n2 / 8) <= max_size_t /\
-           i * (n2 / 8) + j <= max_size_t /\
-           (i * (n2 / 8) + j) * d <= max_size_t /\
-           (i * (n2 / 8) + j) * d + d <= d * n1 * n2 / 8)
 let lemma_matrix_index_repeati n1 n2 d i j =
   assert (i * n2 / 8 + j <= (n1 - 1) * n2 / 8 + n2 / 8 - 1);
   assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 - 1);
