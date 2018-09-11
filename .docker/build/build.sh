@@ -108,7 +108,7 @@ function fetch_vale() {
 
 function fetch_and_make_vale() {
     fetch_vale
-    python3.6 $(which scons) -C valebin -j $threads
+    pushd valebin && ./run_scons.sh -j $threads && popd
 }
 
 function refresh_hacl_hints() {
