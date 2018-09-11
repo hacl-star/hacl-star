@@ -156,8 +156,10 @@ let sbox : (b:B.buffer FStar.UInt8.t{B.recallable b /\ B.length b == 256}) =
 
 
 // ENCRYPTION 
-let op_Array_Access a b = B.index a b
-let op_Array_Assignment a b c = B.upd a b c
+inline_for_extraction
+let op_Array_Access #t #u #v a b = B.index #t #u #v a b
+inline_for_extraction
+let op_Array_Assignment #t #u #v a b c = B.upd #t #u #v a b c
 
 let access_sbox i = sbox.(uint8_to_uint32 i)
 let access_inv_sbox i = inv_sbox.(uint8_to_uint32 i)
