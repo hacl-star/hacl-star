@@ -81,14 +81,14 @@ let bget #a #n h (b:lbuffer a n) i = Seq.index #_ #n (B.as_seq h b) i
 inline_for_extraction
 val create:
     #a:Type0
-  -> #len:size_nat{len > 0}
+  -> #len:size_nat
   -> clen:size_t{v clen == len}
   -> init:a
   -> StackInline (lbuffer a len)
-    (requires fun h0 -> True)
-    (ensures  fun h0 r h1 ->
-      B.alloc_post_common (HS.get_tip h0) len r h0 h1 /\
-      B.as_seq h1 r == Seq.create len init)
+    (requires fun h0 -> len > 0)
+    (ensures  fun h0 b h1 ->
+      B.alloc_post_mem_common b h0 h1 (Seq.create len init) /\
+      frameOf b = HS.get_tip h0)
 let create #a #len clen init =
   B.alloca init (normalize_term (size_to_UInt32 clen))
 
@@ -96,13 +96,11 @@ inline_for_extraction noextract
 val createL:
     #a:Type0
   -> init:list a{List.Tot.length init <= max_size_t}
-  -> StackInline (lbuffer a (List.Tot.length init))
-    (requires fun h0 -> B.alloc_of_list_pre #a init)
-    (ensures fun h0 r h1 ->
-      let len = FStar.List.Tot.length init in
-      B.alloc_post_common (HS.get_tip h0) len r h0 h1 /\
-      B.as_seq h1 r == Seq.of_list init /\
-      B.alloc_of_list_post #a len r)
+  -> StackInline (lbuffer a (normalize_term (List.Tot.length init)))
+    (requires fun h0 -> B.alloca_of_list_pre #a init)
+    (ensures fun h0 b h1 ->
+      alloc_post_mem_common b h0 h1 (Seq.of_list init) /\
+      frameOf b = HS.get_tip h0)
 let createL #a init =
   B.alloca_of_list init
 
@@ -120,15 +118,11 @@ inline_for_extraction noextract
 val createL_global:
     #a:Type0
   -> init:list a{List.Tot.length init <= max_size_t}
-  -> ST (lbuffer a (List.Tot.length init))
-    (requires fun h0 -> B.alloc_of_list_pre #a init)
+  -> ST (b:lbuffer a (normalize_term (List.Tot.length init)){
+    frameOf b == HyperStack.root /\ recallable b})
+    (requires fun h0 -> B.gcmalloc_of_list_pre #a HyperStack.root init)
     (ensures  fun h0 b h1 ->
-      let len = FStar.List.Tot.length init in
-      B.recallable b /\
-      B.alloc_post_static HyperStack.root len b /\
-      B.alloc_of_list_post len b /\
-      B.alloc_post_common HyperStack.root len b h0 h1 /\
-      B.as_seq h1 b == Seq.of_list init)
+      B.alloc_post_mem_common b h0 h1 (Seq.of_list init))
 let createL_global #a init =
   B.gcmalloc_of_list HyperStack.root init
 
@@ -247,4 +241,4 @@ assume val print_compare_display:
   -> lbuffer uint8 (size_v len)
   -> Stack unit
     (requires fun h -> True)
-    (ensures fun h0 _ h1 -> True)
+    (ensures fun h0 _ h1 -> h0 == h1)

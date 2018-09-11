@@ -26,7 +26,7 @@ module S = Spec.Frodo.KEM.Encaps
 module M = Spec.Matrix
 module LSeq = Lib.Sequence
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq -Spec'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val frodo_mul_add_sa_plus_e:
     seed_a:lbytes bytes_seed_a
@@ -77,9 +77,6 @@ let frodo_mul_add_sa_plus_e_inner seed_a sp_matrix ep_matrix bp_matrix a_matrix 
   assert_norm (v params_nbar * v params_n % 2 = 0);
   clear_matrix ep_matrix
 
-//TODO: remove once _aseem_monotonic_buffers it's merged
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
 inline_for_extraction noextract
 val frodo_mul_add_sa_plus_e_main:
     seed_a:lbytes bytes_seed_a
@@ -96,7 +93,6 @@ let frodo_mul_add_sa_plus_e_main seed_a seed_e sp_matrix bp_matrix =
   push_frame();
   let a_matrix = matrix_create params_n params_n in
   let ep_matrix = matrix_create params_nbar params_n in
-
   frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 5) ep_matrix;
   frodo_mul_add_sa_plus_e_inner seed_a sp_matrix ep_matrix bp_matrix a_matrix;
   pop_frame()
@@ -203,13 +199,18 @@ val crypto_kem_enc_ct_pack_c1:
     (requires fun h ->
       live h seed_a /\ live h seed_e /\ live h sp_matrix /\ live h c1 /\
       disjoint seed_a c1 /\ disjoint seed_e c1 /\ disjoint sp_matrix c1)
-    (ensures fun h0 _ h1 -> modifies (loc_buffer c1) h0 h1 /\
-      as_seq h1 c1 == S.crypto_kem_enc_ct_pack_c1 (as_seq h0 seed_a) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
+    (ensures fun h0 _ h1 ->
+      modifies (loc_buffer c1) h0 h1 /\
+      as_seq h1 c1 ==
+      S.crypto_kem_enc_ct_pack_c1 (as_seq h0 seed_a) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
 let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix c1 =
+  assert (v params_logq * (v params_nbar * v params_n / 8) =
+          v params_logq * v params_nbar * v params_n / 8);
+  assert (v params_logq * v params_n * v params_nbar / 8 <= max_size_t);
+  assert (v params_n % 8 = 0);
   push_frame();
   let bp_matrix = matrix_create params_nbar params_n in
   frodo_mul_add_sa_plus_e_main seed_a seed_e sp_matrix bp_matrix;
-  assert (v params_n % 8 = 0);
   frodo_pack bp_matrix params_logq c1;
   pop_frame()
 
@@ -231,8 +232,10 @@ val crypto_kem_enc_ct_pack_c2_inner:
       disjoint seed_e c2 /\ disjoint coins c2 /\ disjoint b c2 /\ disjoint sp_matrix c2 /\
       disjoint c2 v_matrix /\ disjoint seed_e v_matrix /\ disjoint coins v_matrix /\
       disjoint b v_matrix /\ disjoint sp_matrix v_matrix)
-    (ensures fun h0 _ h1 -> modifies (loc_union (loc_buffer c2) (loc_buffer v_matrix)) h0 h1 /\
-      as_matrix h1 v_matrix == S.frodo_mul_add_sb_plus_e_plus_mu (as_seq h0 b) (as_seq h0 seed_e) (as_seq h0 coins) (as_matrix h0 sp_matrix) /\
+    (ensures fun h0 _ h1 ->
+      modifies (loc_union (loc_buffer c2) (loc_buffer v_matrix)) h0 h1 /\
+      as_matrix h1 v_matrix ==
+      S.frodo_mul_add_sb_plus_e_plus_mu (as_seq h0 b) (as_seq h0 seed_e) (as_seq h0 coins) (as_matrix h0 sp_matrix) /\
       as_seq h1 c2 == Spec.Frodo.Pack.frodo_pack (as_matrix h1 v_matrix) (v params_logq))
 let crypto_kem_enc_ct_pack_c2_inner seed_e coins b sp_matrix c2 v_matrix =
   let n1 = params_nbar in
@@ -264,9 +267,6 @@ let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix c2 =
   crypto_kem_enc_ct_pack_c2_inner seed_e coins b sp_matrix c2 v_matrix;
   clear_matrix v_matrix;
   pop_frame()
-
-//TODO: remove once _aseem_monotonic_buffers it's merged
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val crypto_kem_enc_ct_inner:
@@ -384,7 +384,6 @@ let crypto_kem_enc_0 coins pk g =
   update_sub pk_coins crypto_publickeybytes bytes_mu coins;
   let h2 = ST.get () in
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_publickeybytes + v bytes_mu) (as_seq h2 pk_coins) 0 (v crypto_publickeybytes)) (as_seq h0 pk);
-
   cshake_frodo (crypto_publickeybytes +! bytes_mu) pk_coins (u16 3) (size 3 *! crypto_bytes) g;
   pop_frame()
 
@@ -429,7 +428,6 @@ let crypto_kem_enc_ coins ct ss pk =
   push_frame();
   let bytes_mu = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
   let g:lbytes (size 3 *! crypto_bytes) = create (size 3 *! crypto_bytes) (u8 0) in
-
   crypto_kem_enc_0 coins pk g;
   crypto_kem_enc_1 g coins ct ss pk;
   pop_frame()
@@ -441,16 +439,19 @@ val crypto_kem_enc:
   -> pk:lbytes crypto_publickeybytes
   -> Stack uint32
     (requires fun h ->
+      disjoint state ct /\ disjoint state ss /\ disjoint state pk /\
       live h ct /\ live h ss /\ live h pk /\
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer ct) (loc_buffer ss)) h0 h1 /\
-      (let ct_s, ss_s = S.crypto_kem_enc (as_seq h0 pk) in
+      modifies (loc_union (loc_buffer state) (loc_union (loc_buffer ct) (loc_buffer ss))) h0 h1 /\
+      (let ct_s, ss_s = S.crypto_kem_enc (as_seq h0 state) (as_seq h0 pk) in
       as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
 let crypto_kem_enc ct ss pk =
+  LowStar.Buffer.recall state;
   push_frame();
   let bytes_mu = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
   let coins = create (params_nbar *! params_nbar *! params_extracted_bits /. size 8) (u8 0) in
+  LowStar.Buffer.recall state;
   randombytes_ bytes_mu coins;
   crypto_kem_enc_ coins ct ss pk;
   pop_frame();

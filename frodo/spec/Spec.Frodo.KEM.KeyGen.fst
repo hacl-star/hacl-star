@@ -18,7 +18,7 @@ open Spec.Frodo.Sample
 module Seq = Lib.Sequence
 module Matrix = Spec.Matrix
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 let crypto_publicmatrixbytes: size_nat =
   params_logq * params_n * params_nbar / 8
@@ -91,7 +91,12 @@ val frodo_mul_add_as_plus_e_pack:
   -> seed_e:lbytes crypto_bytes
   -> tuple2 (lbytes crypto_publicmatrixbytes) (lbytes (2 * params_n * params_nbar))
 let frodo_mul_add_as_plus_e_pack seed_a seed_e =
-  assert_spinoff (params_logq * params_n <= max_size_t /\ params_logq <= 16);
+  assert (params_logq * (params_n * params_nbar / 8) =
+          params_logq * params_n * params_nbar / 8);
+  assert (params_n * params_nbar <= max_size_t /\ params_nbar % 8 = 0);
+  assert (forall (j:nat{j < params_n * params_nbar / 8}).
+      params_logq * j + params_logq <= params_logq * (params_n * params_nbar / 8) /\
+      0 <= params_logq * j);
   let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
   let s_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) in
   let s_bytes = matrix_to_lbytes s_matrix in
@@ -114,7 +119,8 @@ let crypto_kem_keypair_ coins =
   let sk = update_sk s pk s_bytes in
   pk, sk
 
-val crypto_kem_keypair: unit -> tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes)
-let crypto_kem_keypair () =
-  let coins = Spec.Frodo.Random.randombytes_ (2 * crypto_bytes + bytes_seed_a) in
+val crypto_kem_keypair: state:Spec.Frodo.Random.state_t
+  -> tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes)
+let crypto_kem_keypair state =
+  let coins, _ = Spec.Frodo.Random.randombytes_ state (2 * crypto_bytes + bytes_seed_a) in
   crypto_kem_keypair_ coins

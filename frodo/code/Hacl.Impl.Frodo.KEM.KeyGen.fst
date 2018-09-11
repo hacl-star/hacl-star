@@ -110,9 +110,6 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   clear_matrix_se s_matrix e_matrix;
   pop_frame()
 
-//TODO: remove once _aseem_monotonic_buffers it's merged
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
 inline_for_extraction noextract
 val crypto_kem_keypair_:
     coins:lbytes (size 2 *! crypto_bytes +! bytes_seed_a)
@@ -157,12 +154,15 @@ val crypto_kem_keypair:
     pk:lbytes crypto_publickeybytes
   -> sk:lbytes crypto_secretkeybytes
   -> Stack uint32
-    (requires fun h -> live h pk /\ live h sk /\ disjoint pk sk)
+    (requires fun h ->
+      disjoint state pk /\ disjoint state sk /\
+      live h pk /\ live h sk /\ disjoint pk sk)
     (ensures  fun h0 r h1 ->
-      modifies (loc_union (loc_buffer pk) (loc_buffer sk)) h0 h1 /\
-      (let pk_s, sk_s = S.crypto_kem_keypair () in
+      modifies (loc_union (loc_buffer state) (loc_union (loc_buffer pk) (loc_buffer sk))) h0 h1 /\
+      (let pk_s, sk_s = S.crypto_kem_keypair (as_seq h0 state) in
       as_seq h1 pk == pk_s /\ as_seq h1 sk == sk_s))
 let crypto_kem_keypair pk sk =
+  LowStar.Buffer.recall state;
   push_frame();
   let coins = create (size 2 *! crypto_bytes +! bytes_seed_a) (u8 0) in
   randombytes_ (size 2 *! crypto_bytes +! bytes_seed_a) coins;

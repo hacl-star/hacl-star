@@ -133,9 +133,14 @@ val crypto_kem_enc_ct_pack_c1:
   -> sp_matrix:matrix params_nbar params_n
   -> lbytes (params_logq * params_nbar * params_n / 8)
 let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix =
+  assert (params_logq * (params_nbar * params_n / 8) =
+          params_logq * params_nbar * params_n / 8);
+  assert (params_nbar * params_n <= max_size_t /\ params_n % 8 = 0);
+  assert (forall (j:nat{j < params_nbar * params_n / 8}).
+      params_logq * j + params_logq <= params_logq * (params_nbar * params_n / 8) /\
+      0 <= params_logq * j);
   let bp_matrix = frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix in
-  let c1 = frodo_pack bp_matrix params_logq in
-  c1
+  frodo_pack bp_matrix params_logq
 
 val crypto_kem_enc_ct_pack_c2:
     seed_e:lbytes crypto_bytes
@@ -144,9 +149,14 @@ val crypto_kem_enc_ct_pack_c2:
   -> sp_matrix:matrix params_nbar params_n
   -> lbytes (params_logq * params_nbar * params_nbar / 8)
 let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix =
+  assert (params_logq * (params_nbar * params_nbar/ 8) =
+          params_logq * params_nbar * params_nbar/ 8);
+  assert (params_nbar * params_nbar<= max_size_t /\ params_nbar% 8 = 0);
+  assert (forall (j:nat{j < params_nbar * params_nbar/ 8}).
+      params_logq * j + params_logq <= params_logq * (params_nbar * params_nbar/ 8) /\
+      0 <= params_logq * j);
   let v_matrix = frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix in
-  let c2 = frodo_pack v_matrix params_logq in
-  c2
+  frodo_pack v_matrix params_logq
 
 val crypto_kem_enc_ct_inner:
     seed_a:lbytes bytes_seed_a
@@ -159,8 +169,7 @@ val crypto_kem_enc_ct_inner:
 let crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d =
   let c1 = crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix in
   let c2 = crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix in
-  let ct = update_ct c1 c2 d in
-  ct
+  update_ct c1 c2 d
 
 val crypto_kem_enc_ct:
     pk:lbytes crypto_publickeybytes
@@ -172,10 +181,8 @@ let crypto_kem_enc_ct pk g coins =
   let b = Seq.sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) in
   let seed_e = Seq.sub g 0 crypto_bytes in
   let d = Seq.sub g (2 * crypto_bytes) crypto_bytes in
-
   let sp_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 4) in
-  let ct = crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d in
-  ct
+  crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d
 
 val crypto_kem_enc_0:
     coins:lbytes bytes_mu
@@ -185,8 +192,7 @@ let crypto_kem_enc_0 coins pk =
   let pk_coins = Seq.create (crypto_publickeybytes + bytes_mu) (u8 0) in
   let pk_coins = update_sub pk_coins 0 crypto_publickeybytes pk in
   let pk_coins = update_sub pk_coins crypto_publickeybytes bytes_mu coins in
-  let g = frodo_prf_spec (crypto_publickeybytes + bytes_mu) pk_coins (u16 3) (3 * crypto_bytes) in
-  g
+  frodo_prf_spec (crypto_publickeybytes + bytes_mu) pk_coins (u16 3) (3 * crypto_bytes)
 
 val crypto_kem_enc_1:
     g:lbytes (3 * crypto_bytes)
@@ -206,13 +212,13 @@ val crypto_kem_enc_:
   -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
 let crypto_kem_enc_ coins pk =
   let g = crypto_kem_enc_0 coins pk in
-  let ct, ss = crypto_kem_enc_1 g coins pk in
-  ct, ss
+  crypto_kem_enc_1 g coins pk
 
 val crypto_kem_enc:
-    pk:lbytes crypto_publickeybytes
+    state: Spec.Frodo.Random.state_t
+  -> pk:lbytes crypto_publickeybytes
   -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
-let crypto_kem_enc pk =
+let crypto_kem_enc state pk =
   let bytes_mu = params_nbar * params_nbar * params_extracted_bits / 8 in
-  let coins = Spec.Frodo.Random.randombytes_ bytes_mu in
+  let coins, _ = Spec.Frodo.Random.randombytes_ state bytes_mu in
   crypto_kem_enc_ coins pk
