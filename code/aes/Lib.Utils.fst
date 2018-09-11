@@ -6,9 +6,9 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open LowStar.Buffer
 
-type lbuffer a len = b:buffer a{length b == len}
-type bytes = buffer FStar.UInt8.t
-type lbytes l = b:bytes {length b == l} 
+unfold type lbuffer a len = b:buffer a{length b == len}
+unfold type bytes = buffer FStar.UInt8.t
+unfold type lbytes l = b:bytes {length b == l} 
 
 inline_for_extraction 
 val blit: #a:Type -> src:buffer a -> start1:size_t -> dst:buffer a -> start2:size_t -> len:size_t -> ST unit
@@ -20,17 +20,30 @@ inline_for_extraction
 let htobe32 (u:uint32) = Lib.RawIntTypes.u32_from_UInt32 (C.Endianness.htobe32 (Lib.RawIntTypes.u32_to_UInt32 u))
 
 inline_for_extraction 
-val load64_le: b:lbytes 8 -> ST uint64 
+val load64_le: b:bytes{length b == 8} -> ST uint64 
                (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> h0 == h1))
 let load64_le b = 
     let u = C.Endianness.load64_le b in
     Lib.RawIntTypes.u64_from_UInt64 u
 
 inline_for_extraction 
-val store64_le: b:lbytes 8 -> u:uint64 -> ST unit
+val store64_le: b:bytes{length b == 8} -> u:uint64 -> ST unit
                (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> live h1 b /\ modifies (loc_buffer b) h0 h1))
 let store64_le b u = 
     C.Endianness.store64_le b (Lib.RawIntTypes.u64_to_UInt64 u)
+
+inline_for_extraction 
+val load128_le: b:bytes{length b == 16} -> ST uint128
+               (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> h0 == h1))
+let load128_le b = 
+    let u = C.Endianness.load128_le b in
+    Lib.RawIntTypes.u128_from_UInt128 u
+
+inline_for_extraction 
+val store128_le: b:bytes{length b == 16} -> u:uint128 -> ST unit
+               (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> live h1 b /\ modifies (loc_buffer b) h0 h1))
+let store128_le b u = 
+    C.Endianness.store128_le b (Lib.RawIntTypes.u128_to_UInt128 u)
 
 inline_for_extraction 
 val load64_be: b:lbytes 8 -> ST uint64 
@@ -60,8 +73,8 @@ let gcreateL #a l =
 
 
 inline_for_extraction
-val sub: #a:Type -> b:buffer a -> i:size_t -> j:size_t -> ST (buffer a) 
-         (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> h0 == h1))
+val sub: #a:Type -> b:buffer a -> i:size_t -> j:size_t -> ST (b:buffer a{length b == size_v j}) 
+         (requires (fun h -> live h b)) (ensures (fun h0 s h1 -> h0 == h1 /\ s == Lib.RawIntTypes.(gsub b (size_to_UInt32 i) (size_to_UInt32 j))))
 let sub #a b i j = Lib.RawIntTypes.(sub b (size_to_UInt32 i) (size_to_UInt32 j))
 
 inline_for_extraction 
@@ -81,3 +94,36 @@ inline_for_extraction
 let op_Array_Assignment #a #b #c buf i v = upd #a #b #c buf (Lib.RawIntTypes.size_to_UInt32 i) v
 inline_for_extraction
 let op_Array_Access #a #b #c buf i  = index #a #b #c buf (Lib.RawIntTypes.size_to_UInt32 i)
+
+inline_for_extraction
+let op_String_Assignment #a buf i v = FStar.Seq.upd #a buf (Lib.RawIntTypes.uint_to_nat #SIZE i) v
+inline_for_extraction
+let op_String_Access #a buf i = FStar.Seq.index #a buf (Lib.RawIntTypes.uint_to_nat #SIZE i) 
+
+inline_for_extraction
+let create z i = alloca z (Lib.RawIntTypes.size_to_UInt32 i)
+
+val size_v_size: n:size_nat -> Lemma 
+                (requires True)
+		(ensures (size_v (size n) == n))
+		[SMTPat [size_v (size n)]]
+let size_v_size n = ()
+
+inline_for_extraction
+val load64x2_le: b:lbytes 16 -> Stack (uint64 * uint64)
+                   (requires (fun h -> live h b))
+		   (ensures (fun h0 _ h1 -> h0 == h1))
+let load64x2_le b = 
+    let lo = load64_le (sub b (size 0) (size 8)) in
+    let hi = load64_le (sub b (size 8) (size 8)) in
+    (lo,hi)
+
+inline_for_extraction
+val store64x2_le: b:lbytes 16 -> lo:uint64 -> hi:uint64 -> Stack unit
+                   (requires (fun h -> live h b))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer b) h0 h1))
+let store64x2_le b lo hi = 
+    store64_le (sub b (size 0) (size 8)) lo;
+    store64_le (sub b (size 8) (size 8)) hi
+
+

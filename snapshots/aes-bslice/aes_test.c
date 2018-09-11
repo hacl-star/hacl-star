@@ -32,8 +32,8 @@ static __inline__ cycles cpucycles_end(void)
 
 extern void aes128_encrypt(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_t* n, uint32_t c);
 
-#define ROUNDS 1024
-#define SIZE   16384
+#define ROUNDS 16384
+#define SIZE   8192
 
 int main() {
   int in_len = 32;

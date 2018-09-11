@@ -147,6 +147,29 @@ let from_transpose out (inp:state) =
   store64_le (sub out (size 48) (size 8)) t6;
   store64_le (sub out (size 56) (size 8)) t7
 
+val from_transpose_state: st:state -> ST unit 
+			        (requires (fun h -> live h st))
+				(ensures (fun h0 _ h1 -> live h1 st /\ modifies (loc_buffer st) h0 h1))
+let from_transpose_state st = 
+  let i0 = st.(size 0) in
+  let i1 = st.(size 1) in
+  let i2 = st.(size 2) in
+  let i3 = st.(size 3) in
+  let i4 = st.(size 4) in
+  let i5 = st.(size 5) in
+  let i6 = st.(size 6) in
+  let i7 = st.(size 7) in  
+  let (t0,t1,t2,t3,t4,t5,t6,t7) = 
+    transpose_state i0 i1 i2 i3 i4 i5 i6 i7 in
+  st.(size 0) <- t0;
+  st.(size 1) <- t1;
+  st.(size 2) <- t2;
+  st.(size 3) <- t3;
+  st.(size 4) <- t4;
+  st.(size 5) <- t5;
+  st.(size 6) <- t6;
+  st.(size 7) <- t7
+
 
 val from_transpose_block: out:block -> inp:state -> ST unit 
 			        (requires (fun h -> live h out /\ live h inp))
@@ -582,12 +605,14 @@ val aes128_update4: out:lbytes 64 -> inp:lbytes 64 -> keyx:keyex -> nvec:key1 ->
 let aes128_update4 out inp keyx nvec ctr =
   push_frame();
   let st = alloca (u64 0) 8ul in
-  let kb = alloca 0uy 64ul in
   aes128_block st keyx nvec ctr;
-  from_transpose kb st;
+  from_transpose_state st;
   let h0 = ST.get() in
-  loop_nospec #h0 (size 64) out
-     (fun j -> out.(j) <- FStar.UInt8.(inp.(j) ^^ kb.(j)));
+  loop_nospec #h0 (size 8) out
+     (fun j -> 
+       let ob = sub out (j *. size 8) (size 8) in
+       let ib = sub inp (j *. size 8) (size 8) in
+       store64_le ob ((load64_le ib) ^. st.(j)));
   pop_frame()
 
 
