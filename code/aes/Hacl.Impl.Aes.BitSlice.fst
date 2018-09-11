@@ -25,7 +25,7 @@ type key1 =  lbuffer uint64 8
 type keyr =  lbuffer uint64 72
 type keyex = lbuffer uint64 88
 
-inline_for_extraction 
+inline_for_extraction
 let transpose64 (x:uint64) : Tot uint64 = 
      (x &. u64 0x8040201008040201)    |.
     ((x &. u64 0x4020100804020100) >>. u32 7) |.
@@ -612,7 +612,8 @@ let aes128_update4 out inp keyx nvec ctr =
      (fun j -> 
        let ob = sub out (j *. size 8) (size 8) in
        let ib = sub inp (j *. size 8) (size 8) in
-       store64_le ob ((load64_le ib) ^. st.(j)));
+       let u = load64_le ib in
+       store64_le ob (u ^. st.(j)));
   pop_frame()
 
 

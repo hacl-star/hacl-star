@@ -54,14 +54,21 @@ let aes_keygen_assist ok ik rcon =
 
 
 inline_for_extraction
-val add_round_key: st:state -> key:key1 -> ST unit
+val xor_state: st:state -> key:state -> ST unit
 			     (requires (fun h -> live h st /\ live h key))
 			     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc_buffer st) h0 h1))
-let add_round_key st key = 
+let xor_state st key = 
     st.(size 0) <- vec128_xor st.(size 0) key.(size 0);
     st.(size 1) <- vec128_xor st.(size 1) key.(size 0);
     st.(size 2) <- vec128_xor st.(size 2) key.(size 0);
     st.(size 3) <- vec128_xor st.(size 3) key.(size 0)
+
+inline_for_extraction
+val add_round_key: st:state -> key:key1 -> ST unit
+			     (requires (fun h -> live h st /\ live h key))
+			     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc_buffer st) h0 h1))
+let add_round_key st key = xor_state st key
+
 
 val enc_rounds: st:state -> key:keyr -> n:size_t -> ST unit
 	     (requires (fun h -> live h st /\ live h key))
@@ -69,7 +76,7 @@ val enc_rounds: st:state -> key:keyr -> n:size_t -> ST unit
 let enc_rounds st key n = 
     let h0 = ST.get() in
     loop_nospec #h0 n st 
-      (fun i -> aes_enc st (sub key i (size 1)))
+      (fun i -> let sub_key = sub key i (size 1) in aes_enc st sub_key)
 
 
 inline_for_extraction
@@ -89,7 +96,8 @@ val key_expansion_step: next:key1 -> prev:key1 -> ST unit
 			     (requires (fun h -> live h prev /\ live h next))
 			     (ensures (fun h0 _ h1 -> live h1 prev /\ live h1 next /\ modifies (loc_buffer next) h0 h1))
 let key_expansion_step next prev = 
-    next.(size 0) <- vec128_shuffle32 next.(size 0) (vec128_shuffle32_spec (u8 3) (u8 3) (u8 3) (u8 3));
+    let n0 = next.(size 0) in
+    next.(size 0) <- vec128_shuffle32 n0 (vec128_shuffle32_spec (u8 3) (u8 3) (u8 3) (u8 3));
     let key = prev.(size 0) in
     let key = vec128_xor key (vec128_shift_left key (size 32)) in
     let key = vec128_xor key (vec128_shift_left key (size 32)) in
@@ -312,10 +320,14 @@ let aes_update4 out inp keyx nvec ctr rounds =
   push_frame();
   let st = alloca vec128_zero 4ul in
   aes_block st keyx nvec ctr rounds;
-  st.(size 0) <- vec128_xor st.(size 0) (vec128_load_le (sub inp (size 0) (size 16)));
-  st.(size 1) <- vec128_xor st.(size 1) (vec128_load_le (sub inp (size 16) (size 16)));
-  st.(size 2) <- vec128_xor st.(size 2) (vec128_load_le (sub inp (size 32) (size 16)));
-  st.(size 3) <- vec128_xor st.(size 3) (vec128_load_le (sub inp (size 48) (size 16)));
+  let st0 = st.(size 0) in
+  let st1 = st.(size 1) in
+  let st2 = st.(size 2) in
+  let st3 = st.(size 3) in
+  st.(size 0) <- vec128_xor st0 (vec128_load_le (sub inp (size 0) (size 16)));
+  st.(size 1) <- vec128_xor st1 (vec128_load_le (sub inp (size 16) (size 16)));
+  st.(size 2) <- vec128_xor st2 (vec128_load_le (sub inp (size 32) (size 16)));
+  st.(size 3) <- vec128_xor st3 (vec128_load_le (sub inp (size 48) (size 16)));
   vec128_store_le (sub out (size 0) (size 16)) st.(size 0);
   vec128_store_le (sub out (size 16) (size 16)) st.(size 1);
   vec128_store_le (sub out (size 32) (size 16)) st.(size 2);
