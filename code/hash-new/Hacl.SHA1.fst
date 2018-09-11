@@ -32,52 +32,6 @@ let init s =
   IB.recall_contents h0 (Seq.seq_of_list Spec.init_as_list);
   B.blit h0 0ul s 0ul 5ul
 
-let working_state_of_seq (s: hash_w SHA1) : GTot Spec.working_state =
-  {
-    Spec.a = Seq.index s 0;
-    Spec.b = Seq.index s 1;
-    Spec.c = Seq.index s 2;
-    Spec.d = Seq.index s 3;
-    Spec.e = Seq.index s 4;
-  }
-
-let seq_of_working_state (s: Spec.working_state) : GTot (hash_w SHA1) =
-  (Seq.seq_of_list [
-    s.Spec.a;
-    s.Spec.b;
-    s.Spec.c;
-    s.Spec.d;
-    s.Spec.e;
-  ])
-
-let seq_of_working_state_of_seq (s: hash_w SHA1) : Lemma
-  (seq_of_working_state (working_state_of_seq s) `Seq.equal` s)
-  [SMTPat (seq_of_working_state (working_state_of_seq s))]
-= ()
-
-let working_state_of_seq_of_working_state (s: Spec.working_state) : Lemma
-  (working_state_of_seq (seq_of_working_state s) == s)
-  [SMTPat (working_state_of_seq (seq_of_working_state s))]
-= ()
-
-// NOTE: working_state_of_buffer MUST NOT be directly defined in terms
-// of working_state_of_seq. If it is, then step3_body below will not
-// typecheck
-
-let working_state_of_buffer (h: HS.mem) (s: state SHA1) : GTot Spec.working_state =
-  let s = B.as_seq h s in {
-    Spec.a = Seq.index s 0;
-    Spec.b = Seq.index s 1;
-    Spec.c = Seq.index s 2;
-    Spec.d = Seq.index s 3;
-    Spec.e = Seq.index s 4;
-  }
-
-let working_state_of_buffer_eq (h: HS.mem) (s: state SHA1) : Lemma
-  (working_state_of_buffer h s == working_state_of_seq (B.as_seq h s))
-  [SMTPat (working_state_of_buffer h s)]
-= ()
-
 inline_for_extraction
 let w_t = (b: B.lbuffer (word SHA1) 80)
 
@@ -170,6 +124,47 @@ let w (m: block_t) (b: w_t) : HST.Stack unit
 = let h = Ghost.hide (HST.get ()) in
   C.Loops.for 0ul 80ul (w_loop_inv h m b) (fun i -> w_body h m b i)
 
+(*
+let equal5 (#t: Type) (s1 s2: Seq.seq t) : GTot Type0 =
+  Seq.length s1 == 5 /\
+  Seq.length s2 == 5 /\
+  Seq.index s1 0 == Seq.index s2 0 /\
+  Seq.index s1 1 == Seq.index s2 1 /\
+  Seq.index s1 2 == Seq.index s2 2 /\
+  Seq.index s1 3 == Seq.index s2 3 /\
+  Seq.index s1 4 == Seq.index s2 4
+
+let equal5_spec (#t: Type) (s1 s2: Seq.seq t) : Lemma
+  (requires (Seq.length s1 == 5 /\ Seq.length s2 == 5))
+  (ensures (equal5 s1 s2 <==> s1 == s2))
+  [SMTPat (equal5 s1 s2)]
+= assert (equal5 s1 s2 <==> Seq.equal s1 s2)
+
+let seq_index_upd (#a:Type) (s: Seq.seq a) (n:nat{n < Seq.length s}) (v:a) (i:nat{i < Seq.length s}) : Lemma
+  (requires True)
+  (ensures (Seq.index (Seq.upd s n v) i == (if i = n then v else Seq.index s i)))
+  [SMTPat (Seq.index (Seq.upd s n v) i)]
+= ()
+*)
+
+inline_for_extraction
+let upd5
+  (#t: Type)
+  (b: B.buffer t { B.length b == 5 } )
+  (x0 x1 x2 x3 x4: t)
+: HST.Stack unit
+  (requires (fun h -> B.live h b))
+  (ensures (fun h _ h' ->
+    B.modifies (B.loc_buffer b) h h' /\
+    B.live h' b /\
+    B.as_seq h' b `Seq.equal` Seq.seq_of_list [x0; x1; x2; x3; x4]
+  ))
+= B.upd b 0ul x0;
+  B.upd b 1ul x1;
+  B.upd b 2ul x2;
+  B.upd b 3ul x3;
+  B.upd b 4ul x4
+
 inline_for_extraction
 let step3_body
   (mi: Ghost.erased Spec.word_block)
@@ -184,7 +179,7 @@ let step3_body
   ))
   (ensures (fun h _ h' ->
     B.modifies (B.loc_buffer b) h h' /\
-    working_state_of_buffer h' b == Spec.step3_body' (Ghost.reveal mi) (working_state_of_buffer h b) t
+    B.as_seq h' b == Spec.step3_body' (Ghost.reveal mi) (B.as_seq h b) t
   ))
 = let _a = B.index b 0ul in
   let _b = B.index b 1ul in
@@ -193,11 +188,7 @@ let step3_body
   let _e = B.index b 4ul in
   let wmit = B.index w t in
   let _T = Spec.rotl 5ul _a `U32.add_mod` Spec.f t _b _c _d `U32.add_mod` _e `U32.add_mod` Spec.k t `U32.add_mod` wmit in
-  B.upd b 4ul _d;
-  B.upd b 3ul _c;
-  B.upd b 2ul (Spec.rotl 30ul _b);
-  B.upd b 1ul _a;
-  B.upd b 0ul _T
+  upd5 b _T _a (Spec.rotl 30ul _b) _c _d
 
 inline_for_extraction
 let zero_out
@@ -210,20 +201,73 @@ let zero_out
   C.Loops.for 0ul len (fun h _ -> B.live h b /\ B.modifies (B.loc_buffer b) h0 h) (fun i -> B.upd b i 0ul)
 
 let spec_step3_body (mi: Spec.word_block) (st: Ghost.erased (hash_w SHA1)) (t: nat {t < 80}) : Tot (Ghost.erased (hash_w SHA1)) =
-  Ghost.elift1 (fun h -> seq_of_working_state (Spec.step3_body mi (working_state_of_seq h) t)) st
+  Ghost.elift1 (fun h -> Spec.step3_body mi h t) st
 
 let spec_step3_body_spec (mi: Spec.word_block) (st: Ghost.erased (hash_w SHA1)) (t: nat { t < 80 } ) : Lemma
-  (working_state_of_seq (Ghost.reveal (spec_step3_body mi st t)) == Spec.step3_body mi (working_state_of_seq (Ghost.reveal st)) t)
-  [SMTPat (working_state_of_seq (Ghost.reveal (spec_step3_body mi st t)))]
+  (Ghost.reveal (spec_step3_body mi st t) == Spec.step3_body mi (Ghost.reveal st) t)
+  [SMTPat (Ghost.reveal (spec_step3_body mi st t))]
 = ()
 
 let repeat_range_spec_step3_body (mi: Spec.word_block) (st: Ghost.erased (hash_w SHA1)) (i j: nat) : Lemma
-  (requires (i <= j /\ j < 80))
-  (ensures (working_state_of_seq (Ghost.reveal (Spec.Loops.repeat_range i j (spec_step3_body mi) st)) ==
-  Spec.Loops.repeat_range i j (Spec.step3_body mi) (working_state_of_seq (Ghost.reveal st))
+  (requires (i <= j /\ j <= 80))
+  (ensures (Ghost.reveal (Spec.Loops.repeat_range i j (spec_step3_body mi) st) ==
+  Spec.Loops.repeat_range i j (Spec.step3_body mi) (Ghost.reveal st)
   ))
 = admit ()
 
+inline_for_extraction
+let repeat_range_body_spec
+  (a: Type0)
+  (l: U32.t)
+  (min: U32.t)
+  (max: U32.t { U32.v min <= U32.v max } )
+: Tot Type
+= Ghost.erased
+  (f:((s: Seq.seq a{Seq.length s = UInt32.v l}) ->
+    i:nat{i < UInt32.v max} ->
+    Tot ((s: Seq.seq a{Seq.length s = UInt32.v l}))))
+
+inline_for_extraction
+let repeat_range_body_impl
+  (#a:Type0)
+  (l: UInt32.t)
+  (min:UInt32.t)
+  (max:UInt32.t{UInt32.v min <= UInt32.v max})
+  (f: repeat_range_body_spec a l min max)
+  (b: B.buffer a{B.length b = UInt32.v l})
+  (inv: (HS.mem -> GTot Type0))
+: Tot Type
+= fc:(i:UInt32.t{UInt32.v i < UInt32.v max} ->
+    HST.Stack unit
+      (requires (fun h -> inv h /\ B.live h b))
+      (ensures (fun h0 _ h1 ->
+        B.live h0 b /\ B.live h1 b /\ B.modifies (B.loc_buffer b) h0 h1 /\ inv h1 /\ (
+        let b0 = B.as_seq h0 b in
+        let b1 = B.as_seq h1 b in
+        b1 == (Ghost.reveal f) (b0) (UInt32.v i)))))
+
+inline_for_extraction
+val repeat_range:
+  #a:Type0 ->
+  l: UInt32.t ->
+  min:UInt32.t ->
+  min_: nat { UInt32.v min == min_ } ->
+  max:UInt32.t{UInt32.v min <= UInt32.v max} ->
+  max_ : nat { UInt32.v max == max_ } ->
+  f: (repeat_range_body_spec a l min max) ->
+  b: B.buffer a{B.length b = UInt32.v l} ->
+  inv: (HS.mem -> GTot Type0) ->
+  fc: repeat_range_body_impl l min max f b inv ->
+  HST.Stack unit
+    (requires (fun h -> inv h /\ B.live h b ))
+    (ensures (fun h_1 r h_2 ->
+      B.modifies (B.loc_buffer b) h_1 h_2 /\ B.live h_1 b /\ B.live h_2 b /\
+      B.as_seq h_2 b ==  (Spec.Loops.repeat_range min_ max_ (Ghost.reveal f) ( (B.as_seq h_1 b)))
+    ))
+
+let repeat_range #a l min min_ max max_ = magic ()  // C.Loops.repeat_range #a l min max
+
+(*
 inline_for_extraction
 let impl_step3_body
   (mi: Ghost.erased Spec.word_block)
@@ -241,10 +285,10 @@ let impl_step3_body
     B.as_seq h' b == Ghost.reveal (spec_step3_body (Ghost.reveal mi) (Ghost.hide (B.as_seq h b)) (U32.v t))
   ))
 = step3_body mi w b t
+*)
 
-#set-options "--z3rlimit 16"
+#set-options "--z3rlimit 32"
 
-(*
 inline_for_extraction
 let step3
   (m: block_t)
@@ -258,26 +302,24 @@ let step3
   (ensures (fun h0 _ h1 ->
     B.modifies (B.loc_buffer h) h0 h1 /\
     B.live h1 h /\
-    working_state_of_buffer h1 h == Spec.step3 (E.seq_uint32_of_be size_block_w (B.as_seq h0 m)) (B.as_seq h0 h)
+    B.as_seq h1 h == Spec.step3 (E.seq_uint32_of_be size_block_w (B.as_seq h0 m)) (B.as_seq h0 h)
   ))
 = let h0 = HST.get () in
   HST.push_frame ();
   let _w = B.alloca 0ul 80ul in
   w m _w;
   let mi = Ghost.hide (E.seq_uint32_of_be size_block_w (B.as_seq h0 m)) in
-  let h1 = HST.get () in
   let inv (h' : HS.mem) : GTot Type0 =
-    B.modifies (B.loc_buffer h) h1 h'
+    w_inv (Ghost.reveal mi) _w h'
   in
-  let fc (i: U32.t { U32.v i < 80 } ) : HST.Stack unit
-    (requires (fun h2 -> inv h2 /\ B.live h2 h))
-    (ensures (fun h2 _ h3 -> B.live h2 h /\ B.live h3 h /\ B.modifies (B.loc_buffer h) h2 h3 /\ inv h3 /\ B.as_seq h3 h == Ghost.reveal (spec_step3_body (Ghost.reveal mi) (Ghost.hide (B.as_seq h2 h)) (U32.v i))
-    ))
-  = admit ()
-  in
-  let _ = C.Loops.repeat_range 5ul 0ul 80ul (spec_step3_body (Ghost.reveal mi)) h inv  fc in
-  admit ();
-  repeat_range_spec_step3_body (Ghost.reveal mi) (Ghost.hide (B.as_seq h1 h)) 0 80;
+  let h1 = HST.get () in
+  let f : repeat_range_body_spec U32.t 5ul 0ul 80ul = Ghost.hide (Spec.step3_body (Ghost.reveal mi)) in
+  let fc : repeat_range_body_impl 5ul 0ul 80ul f h inv = magic () in
+  repeat_range 5ul 0ul 0 80ul 80 f h inv  fc;
+  let h2 = HST.get () in
+  assert (B.as_seq h2 h == Spec.Loops.repeat_range 0 80 (Ghost.reveal f) (B.as_seq h1 h));
+  assert (Ghost.reveal f == Spec.step3_body (Ghost.reveal mi));
+  assume (Spec.Loops.repeat_range 0 80 (Ghost.reveal f) (B.as_seq h1 h) == Spec.Loops.repeat_range 0 80 (Spec.step3_body (Ghost.reveal mi)) (B.as_seq h1 h));
   zero_out _w 80ul;
   HST.pop_frame ();
   ()

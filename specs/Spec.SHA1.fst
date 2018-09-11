@@ -48,24 +48,6 @@ let f (t: U32.t {U32.v t <= 79}) (x y z: word SHA1) : Tot (word SHA1) =
   else
     x `U32.logxor` y `U32.logxor` z
 
-(* Section 6.1.2 Step 2 *)
-
-type working_state = {
-  a: word SHA1;
-  b: word SHA1;
-  c: word SHA1;
-  d: word SHA1;
-  e: word SHA1;
-}
-
-let step2 (h: hash_w SHA1) : Tot working_state = {
-  a = Seq.index h 0;
-  b = Seq.index h 1;
-  c = Seq.index h 2;
-  d = Seq.index h 3;
-  e = Seq.index h 4;
-}
-
 (* Section 4.2.1 *)
 
 inline_for_extraction
@@ -84,29 +66,40 @@ let word_block = Seq.lseq (word SHA1) size_block_w
 
 let step3_body'
   (mi: word_block)
-  (st: working_state)
+  (st: hash_w SHA1)
   (t: U32.t {U32.v t < 80})
-: Tot working_state
-= let _T = rotl 5ul st.a `U32.add_mod` f t st.b st.c st.d `U32.add_mod` st.e `U32.add_mod` k t `U32.add_mod` w mi t in
-  let e = st.d in
-  let d = st.c in
-  let c = rotl 30ul st.b in
-  let b = st.a in
+: Tot (hash_w SHA1)
+= let sta = Seq.index st 0 in
+  let stb = Seq.index st 1 in
+  let stc = Seq.index st 2 in
+  let std = Seq.index st 3 in
+  let ste = Seq.index st 4 in
+  let _T = rotl 5ul sta `U32.add_mod` f t stb stc std `U32.add_mod` ste `U32.add_mod` k t `U32.add_mod` w mi t in
+  let e = std in
+  let d = stc in
+  let c = rotl 30ul stb in
+  let b = sta in
   let a = _T in
-  {a = a; b = b; c = c; d = d; e = e; }
+  Seq.seq_of_list [
+    a;
+    b;
+    c;
+    d;
+    e;
+  ]
 
 let step3_body
   (mi: word_block)
-  (st: working_state)
+  (st: hash_w SHA1)
   (t: nat {t < 80})
-: Tot working_state
+: Tot (hash_w SHA1)
 = step3_body' mi st (U32.uint_to_t t)
 
 let step3
   (mi: word_block)
   (h: hash_w SHA1)
-: Tot working_state
-= Spec.Loops.repeat_range 0 80 (step3_body mi) (step2 h)
+: Tot (hash_w SHA1)
+= Spec.Loops.repeat_range 0 80 (step3_body mi) h
 
 (* Section 6.1.2 Step 4 *)
 
@@ -115,12 +108,17 @@ let step4
   (h: hash_w SHA1)
 : Tot (hash_w SHA1) =
   let st = step3 mi h in
+  let sta = Seq.index st 0 in
+  let stb = Seq.index st 1 in
+  let stc = Seq.index st 2 in
+  let std = Seq.index st 3 in
+  let ste = Seq.index st 4 in
   Seq.seq_of_list [
-    st.a `U32.add_mod` Seq.index h 0;
-    st.b `U32.add_mod` Seq.index h 1;
-    st.c `U32.add_mod` Seq.index h 2;
-    st.d `U32.add_mod` Seq.index h 3;
-    st.e `U32.add_mod` Seq.index h 4;
+    sta `U32.add_mod` Seq.index h 0;
+    stb `U32.add_mod` Seq.index h 1;
+    stc `U32.add_mod` Seq.index h 2;
+    std `U32.add_mod` Seq.index h 3;
+    ste `U32.add_mod` Seq.index h 4;
   ]
 
 (* Section 3.1 al. 2: words and bytes, big-endian *)
