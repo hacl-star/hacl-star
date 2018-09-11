@@ -1,4 +1,4 @@
-module Spec.Keccak.Test
+module Spec.SHA3.Test
 
 #reset-options "--z3rlimit 100 --max_fuel 0"
 
@@ -23,10 +23,10 @@ let test_sha3 msg_len msg expected224 expected256 expected384 expected512 =
   let expected384:lbytes 48 = createL expected384 in
   let expected512:lbytes 64 = createL expected512 in
 
-  let test224 = Spec.Keccak.sha3_224 msg_len msg in
-  let test256 = Spec.Keccak.sha3_256 msg_len msg in
-  let test384 = Spec.Keccak.sha3_384 msg_len msg in
-  let test512 = Spec.Keccak.sha3_512 msg_len msg in
+  let test224 = Spec.SHA3.sha3_224 msg_len msg in
+  let test256 = Spec.SHA3.sha3_256 msg_len msg in
+  let test384 = Spec.SHA3.sha3_384 msg_len msg in
+  let test512 = Spec.SHA3.sha3_512 msg_len msg in
 
   let r224 = print_and_compare 28 expected224 test224 in
   let r256 = print_and_compare 32 expected256 test256 in
@@ -38,14 +38,14 @@ let test_shake128 msg_len msg out_len expected =
   let msg:lbytes msg_len = createL msg in
   let expected:lbytes out_len = createL expected in
 
-  let test = Spec.Keccak.shake128 msg_len msg out_len in
+  let test = Spec.SHA3.shake128 msg_len msg out_len in
   print_and_compare out_len expected test
 
 let test_shake256 msg_len msg out_len expected =
   let msg:lbytes msg_len = createL msg in
   let expected:lbytes out_len = createL expected in
 
-  let test = Spec.Keccak.shake256 msg_len msg out_len in
+  let test = Spec.SHA3.shake256 msg_len msg out_len in
   print_and_compare out_len expected test
 
 //
@@ -281,5 +281,5 @@ let test () =
   let res_shake256 = res_shake256_1 && res_shake256_2 && res_shake256_3 && res_shake256_4 in
 
   let result = res_sha3 && res_shake128 in
-  if result then IO.print_string "\n\nKeccak : Success!\n"
-  else IO.print_string "\n\nKeccak: Failure :(\n"
+  if result then IO.print_string "\n\nSHA3 : Success!\n"
+  else IO.print_string "\n\nSHA3: Failure :(\n"

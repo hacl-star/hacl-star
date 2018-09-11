@@ -155,12 +155,12 @@ sha2.exe: $(LIBS_FILES) Spec.SHA2.fst tests/Spec.SHA2.Test.fst
 	$(OCAMLOPT) -I sha2-ml $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
 	./sha2.exe
 
-keccak.exe: $(LIBS_FILES) Spec.Keccak.fst tests/Spec.Keccak.Test.fst
-	mkdir -p keccak-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Keccak --extract_module Spec.Keccak.Test --odir keccak-ml $^
-	@echo 'let _ = test()' >> keccak-ml/Spec_Keccak_Test.ml
-	$(OCAMLOPT) -I keccak-ml $(addprefix keccak-ml/, $(LIBS_ML)) keccak-ml/Spec_Keccak.ml keccak-ml/Spec_Keccak_Test.ml -o keccak.exe
-	./keccak.exe
+sha3.exe: $(LIBS_FILES) Spec.SHA3.Constants.fst Spec.SHA3.fst tests/Spec.SHA3.Test.fst
+	mkdir -p sha3-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA3.Constants --extract_module Spec.SHA3 --extract_module Spec.SHA3.Test --odir sha3-ml $^
+	@echo 'let _ = test()' >> sha3-ml/Spec_SHA3_Test.ml
+	$(OCAMLOPT) -I sha3-ml $(addprefix sha3-ml/, $(LIBS_ML)) sha3-ml/Spec_SHA3_Constants.ml sha3-ml/Spec_SHA3.ml sha3-ml/Spec_SHA3_Test.ml -o sha3.exe
+	./sha3.exe
 
 blake2s.exe: $(LIBS_FILES) Spec.Blake2s.fst tests/Spec.Blake2s.Test.fst
 	mkdir -p blake2s-ml
@@ -226,13 +226,6 @@ rsapss.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.f
 	@echo 'let _ = test()' >> rsapss-ml/Spec_RSAPSS_Test.ml
 	$(OCAMLOPT) -I rsapss-ml $(addprefix rsapss-ml/, $(LIBS_ML)) rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
 	./rsapss.exe
-
-frodo.exe: $(LIBS_FILES) Spec.Keccak.fst Spec.Frodo.Matrix.LL.fst Spec.Frodo.fst tests/Spec.Frodo.Test.fst
-	mkdir -p frodo-ml
-	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Keccak --extract_module Spec.Frodo.Matrix.LL --extract_module Spec.Frodo --extract_module Spec.Frodo.Test --odir frodo-ml $^
-	@echo 'let _ = test()' >> frodo-ml/Spec_Frodo_Test.ml
-	$(OCAMLOPT) -I frodo-ml $(addprefix frodo-ml/, $(LIBS_ML)) frodo-ml/Spec_Keccak.ml frodo-ml/Spec_Frodo_Matrix_LL.ml frodo-ml/Spec_Frodo.ml frodo-ml/Spec_Frodo_Test.ml -o frodo.exe
-	./frodo.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml

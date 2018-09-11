@@ -12,9 +12,19 @@ open Lib.IntTypes
 open Lib.PQ.Buffer
 open Lib.Endianness
 
+open Spec.SHA3.Constants
+
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
+module IB = LowStar.ImmutableBuffer
+module S = Spec.SHA3
+
+let keccak_rotc = IB.igcmalloc_of_list HyperStack.root rotc_list
+
+let keccak_piln = IB.igcmalloc_of_list HyperStack.root piln_list
+
+let keccak_rndc = IB.igcmalloc_of_list HyperStack.root rndc_list
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -54,36 +64,6 @@ let writeLane s x y v = s.(x +! size 5 *! y) <- v
 [@"c_inline"]
 let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) : uint64 =
   (a <<. b) |. (a >>. (u32 64 -. b))
-
-let keccak_rotc: b:lbuffer uint32 24 { LowStar.Buffer.recallable b } =
-  [@ inline_let]
-  let rotc_list: list uint32 =
-    [u32 1; u32 3; u32 6; u32 10; u32 15; u32 21; u32 28; u32 36;
-     u32 45; u32 55; u32 2; u32 14; u32 27; u32 41; u32 56; u32 8;
-     u32 25; u32 43; u32 62; u32 18; u32 39; u32 61; u32 20; u32 44] in
-  assert_norm (List.Tot.length rotc_list == 24);
-  createL_global rotc_list
-
-let keccak_piln: b:lbuffer size_t 24 { LowStar.Buffer.recallable b } =
-  [@ inline_let]
-  let piln_list: list size_t =
-    [size 10; size 7; size 11; size 17; size 18; size 3; size 5; size 16;
-     size 8; size 21; size 24; size 4; size 15; size 23; size 19; size 13;
-     size 12; size 2; size 20; size 14; size 22; size 9; size 6; size 1] in
-  assert_norm (List.Tot.length piln_list == 24);
-  createL_global piln_list
-
-let keccak_rndc: b:lbuffer uint64 24 { LowStar.Buffer.recallable b } =
-  [@ inline_let]
-  let rndc_list: list uint64 =
-    [u64 0x0000000000000001; u64 0x0000000000008082; u64 0x800000000000808a; u64 0x8000000080008000;
-     u64 0x000000000000808b; u64 0x0000000080000001; u64 0x8000000080008081; u64 0x8000000000008009;
-     u64 0x000000000000008a; u64 0x0000000000000088; u64 0x0000000080008009; u64 0x000000008000000a;
-     u64 0x000000008000808b; u64 0x800000000000008b; u64 0x8000000000008089; u64 0x8000000000008003;
-     u64 0x8000000000008002; u64 0x8000000000000080; u64 0x000000000000800a; u64 0x800000008000000a;
-     u64 0x8000000080008081; u64 0x8000000000008080; u64 0x0000000080000001; u64 0x8000000080008008] in
-  assert_norm (List.Tot.length rndc_list == 24);
-  createL_global rndc_list
 
 inline_for_extraction noextract
 val state_theta:
@@ -134,14 +114,14 @@ let state_pi_rho s =
     live h1 current /\ live h1 s /\
     modifies (loc_union (loc_buffer current) (loc_buffer s)) h0 h1)
   (fun i ->
+    IB.recall_contents keccak_rotc (Seq.seq_of_list rotc_list);
+    IB.recall_contents keccak_piln (Seq.seq_of_list piln_list);
+    lemma_piln_list (v i);
+    S.lemma_keccak_rotc (v i);
     let current0:uint64 = current.(size 0) in
-    recall keccak_rotc;
-    recall keccak_piln;
-    let r = keccak_rotc.(i) in
-    let _Y = keccak_piln.(i) in
-    assume (v _Y < 25);
+    let r = IB.index keccak_rotc (Lib.RawIntTypes.size_to_UInt32 i) in
+    let _Y = IB.index keccak_piln (Lib.RawIntTypes.size_to_UInt32 i) in
     let temp = s.(_Y) in
-    assume (0 < uint_v r /\ uint_v r < 64);
     s.(_Y) <- rotl current0 r;
     current.(size 0) <- temp
   );
@@ -165,7 +145,8 @@ let state_chi s =
     (fun x ->
       writeLane s x y
 	(readLane temp x y ^.
-	((lognot (readLane temp ((x +. size 1) %. size 5) y)) &. readLane temp ((x +. size 2) %. size 5) y))
+	((lognot (readLane temp ((x +. size 1) %. size 5) y)) &.
+	  readLane temp ((x +. size 2) %. size 5) y))
     )
   );
   pop_frame ()
@@ -178,8 +159,8 @@ val state_iota:
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
 let state_iota s round =
-  recall keccak_rndc;
-  writeLane s (size 0) (size 0) (readLane s (size 0) (size 0) ^. keccak_rndc.(round))
+  IB.recall_contents keccak_rndc (Seq.seq_of_list rndc_list);
+  writeLane s (size 0) (size 0) (readLane s (size 0) (size 0) ^. (IB.index keccak_rndc (Lib.RawIntTypes.size_to_UInt32 round)))
 
 val state_permute1:
      s:state
@@ -297,7 +278,7 @@ let absorb s rateInBytes inputByteLen input delimitedSuffix =
   let h0 = ST.get () in
   loop_nospec #h0 n s
   (fun i ->
-    assume (v i * v rateInBytes + v rateInBytes <= v inputByteLen);
+    S.lemma_rateInBytes (v inputByteLen) (v rateInBytes) (v i);
     loadState rateInBytes (sub #_ #(v inputByteLen) #(v rateInBytes) input (i *! rateInBytes) rateInBytes) s;
     state_permute s
   );
@@ -323,7 +304,7 @@ let squeeze s rateInBytes outputByteLen output =
     live h1 s /\ live h1 output /\
     modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1)
   (fun i ->
-    assume (v i * v rateInBytes + v rateInBytes <= v outputByteLen);
+    S.lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
     storeState rateInBytes s (sub output (i *! rateInBytes) rateInBytes);
     state_permute s
   );

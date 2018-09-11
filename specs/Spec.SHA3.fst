@@ -1,12 +1,37 @@
-module Spec.Keccak
+module Spec.SHA3
 
 open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open FStar.Mul
+open Spec.SHA3.Constants
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+let keccak_rotc:lseq uint32 24 =
+  assert_norm (List.Tot.length rotc_list == 24);
+  createL rotc_list
+
+let keccak_piln: lseq size_nat 24 =
+  let piln_list = List.Tot.map size_v piln_list in
+  assert_norm (List.Tot.length piln_list == 24);
+  createL piln_list
+
+let keccak_rndc: lseq uint64 24 =
+  assert_norm (List.Tot.length rndc_list == 24);
+  createL rndc_list
+
+val lemma_keccak_rotc:
+     i:size_nat{i < length keccak_rotc}
+  -> Lemma (0 < uint_v keccak_rotc.[i] && uint_v keccak_rotc.[i] < 64)
+let lemma_keccak_rotc i = lemma_rotc_list i
+
+val lemma_keccak_piln:
+     i:size_nat{i < length keccak_piln}
+  -> Lemma (keccak_piln.[i] < 25)
+let lemma_keccak_piln i = admit();
+  lemma_piln_list i
 
 type state = lseq uint64 25
 type index = n:size_nat{n < 5}
@@ -19,33 +44,6 @@ let writeLane (s:state ) (x:index) (y:index) (v:uint64) : state =
 
 let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) : uint64 =
   (a <<. b) |. (a >>. (u32 64 -. b))
-
-let keccak_rotc: lseq uint32 24 =
-  let rotc_list: list uint32 =
-    [u32 1; u32 3; u32 6; u32 10; u32 15; u32 21; u32 28; u32 36;
-     u32 45; u32 55; u32 2; u32 14; u32 27; u32 41; u32 56; u32 8;
-     u32 25; u32 43; u32 62; u32 18; u32 39; u32 61; u32 20; u32 44] in
-  assert_norm (List.Tot.length rotc_list == 24);
-  createL rotc_list
-
-let keccak_piln: lseq size_nat 24 =
-  let piln_list: list size_nat = List.Tot.map size_v
-    [size 10; size 7; size 11; size 17; size 18; size 3; size 5; size 16;
-     size 8; size 21; size 24; size 4; size 15; size 23; size 19; size 13;
-     size 12; size 2; size 20; size 14; size 22; size 9; size 6; size 1] in
-  assert_norm (List.Tot.length piln_list == 24);
-  createL piln_list
-
-let keccak_rndc: lseq uint64 24 =
-  let rndc_list: list uint64 =
-    [u64 0x0000000000000001; u64 0x0000000000008082; u64 0x800000000000808a; u64 0x8000000080008000;
-     u64 0x000000000000808b; u64 0x0000000080000001; u64 0x8000000080008081; u64 0x8000000000008009;
-     u64 0x000000000000008a; u64 0x0000000000000088; u64 0x0000000080008009; u64 0x000000008000000a;
-     u64 0x000000008000808b; u64 0x800000000000008b; u64 0x8000000000008089; u64 0x8000000000008003;
-     u64 0x8000000000008002; u64 0x8000000000000080; u64 0x000000000000800a; u64 0x800000008000000a;
-     u64 0x8000000080008081; u64 0x8000000000008080; u64 0x0000000080000001; u64 0x8000000080008008] in
-  assert_norm (List.Tot.length rndc_list == 24);
-  createL rndc_list
 
 let state_theta (s:state) : state  =
   let _C = create 5 (u64 0) in
@@ -71,9 +69,9 @@ let state_pi_rho (s_theta:state) : state  =
     repeati 24 (fun i (current, s) ->
       let r = keccak_rotc.[i] in
       let _Y = keccak_piln.[i] in
-      assume (_Y < 25);
+      lemma_keccak_piln i;
+      lemma_keccak_rotc i;
       let temp = s.[_Y] in
-      assume (0 < uint_v r /\ uint_v r < 64);
       let s = s.[_Y] <- rotl current r in
       let current = temp in
       current, s
@@ -86,7 +84,8 @@ let state_chi (s_pi_rho:state) : state  =
     repeati 5 (fun x s ->
       writeLane s x y
 	(readLane temp x y ^.
-	((lognot (readLane temp ((x + 1) % 5) y)) &. readLane temp ((x + 2) % 5) y))
+	((lognot (readLane temp ((x + 1) % 5) y)) &.
+	  readLane temp ((x + 2) % 5) y))
     ) s
   ) s_pi_rho
 
@@ -145,6 +144,19 @@ let absorb_next (s:state)
   let s = state_permute s in
   s
 
+val lemma_rateInBytes:
+     inputByteLen:size_nat
+  -> rateInBytes:size_nat{rateInBytes > 0}
+  -> i:size_nat{i < inputByteLen / rateInBytes}
+  -> Lemma (i * rateInBytes + rateInBytes <= inputByteLen)
+let lemma_rateInBytes inputByteLen rateInBytes i =
+  let n = inputByteLen / rateInBytes in
+  assert (i * rateInBytes + rateInBytes <= (n - 1) * rateInBytes + rateInBytes);
+  assert ((n - 1) * rateInBytes + rateInBytes == n * rateInBytes - rateInBytes + rateInBytes);
+  assert ((n - 1) * rateInBytes + rateInBytes == n * rateInBytes);
+  assert (inputByteLen == inputByteLen / rateInBytes * rateInBytes + inputByteLen % rateInBytes);
+  assert (n * rateInBytes <= inputByteLen)
+
 let absorb (s:state)
            (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
 	   (inputByteLen:size_nat)
@@ -154,7 +166,7 @@ let absorb (s:state)
   let rem = inputByteLen % rateInBytes in
   let s : state =
     repeati n (fun i s ->
-      assume (i * rateInBytes + rateInBytes <= inputByteLen);
+      lemma_rateInBytes inputByteLen rateInBytes i;
       let s = loadState rateInBytes (sub input (i * rateInBytes) rateInBytes) s in
       state_permute s
     ) s in
@@ -174,8 +186,8 @@ let squeeze (s:state)
   let remOut = outputByteLen % rateInBytes in
   let s, output =
     repeati outBlocks (fun i (s, o) ->
+      lemma_rateInBytes outputByteLen rateInBytes i;
       let block = storeState rateInBytes s in
-      assume (i * rateInBytes + rateInBytes <= outputByteLen);
       let o = update_sub o (i * rateInBytes) rateInBytes block in
       let s = state_permute s in
       s, o
