@@ -14,8 +14,7 @@ val poly1305_encode_block: #s:field_spec -> f:felem s -> b:lbytes 16 -> Stack un
                    (requires (fun h -> live h b /\ live h f ))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
 let poly1305_encode_block #s f b = 
-    let (lo,hi) = load64x2_le b in
-    load_felem f lo hi;
+    load_felem_le f b;
     set_bit128 f 
 
 inline_for_extraction
@@ -142,8 +141,7 @@ let poly1305_finish #s ctx tag =
   let sk = get_s ctx in
   carry_felem acc;
   carry_top_felem acc;
-//  carry_felem acc;
-//  carry_top_felem acc;
+  subtract_p acc;
   add_felem acc sk;
   carry_felem acc;
   let (lo,hi) = store_felem acc in

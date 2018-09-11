@@ -37,6 +37,10 @@ chacha20_test.exe: chacha20.c chacha20_test.c
 	$(CC) $(CCOPTS) chacha20.c chacha20_test.c -o chacha20_test.exe
 	./chacha20_test.exe
 
+chacha20_old_test.exe: chacha20_old.c chacha20_test.c
+	$(CC) $(CCOPTS) chacha20_old.c chacha20_test.c -o chacha20_old_test.exe
+	./chacha20_old_test.exe
+
 aes_test.exe: aes.c aes_test.c
 	$(CC) $(CCOPTS) aes.c aes_test.c -o aes_test.exe
 	./aes_test.exe

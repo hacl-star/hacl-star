@@ -20,6 +20,18 @@ inline_for_extraction
 let htobe32 (u:uint32) = Lib.RawIntTypes.u32_from_UInt32 (C.Endianness.htobe32 (Lib.RawIntTypes.u32_to_UInt32 u))
 
 inline_for_extraction 
+val load32_le: b:bytes{length b == 4} -> ST uint32
+               (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> h0 == h1))
+let load32_le b = 
+    let u = C.Endianness.load32_le b in
+    Lib.RawIntTypes.u32_from_UInt32 u
+
+inline_for_extraction 
+val store32_le: b:bytes{length b == 4} -> u:uint32 -> ST unit
+               (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> live h1 b /\ modifies (loc_buffer b) h0 h1))
+let store32_le b u = 
+    C.Endianness.store32_le b (Lib.RawIntTypes.u32_to_UInt32 u)
+inline_for_extraction 
 val load64_le: b:bytes{length b == 8} -> ST uint64 
                (requires (fun h -> live h b)) (ensures (fun h0 _ h1 -> h0 == h1))
 let load64_le b = 
@@ -127,3 +139,42 @@ let store64x2_le b lo hi =
     store64_le (sub b (size 8) (size 8)) hi
 
 
+let uint64_eq_mask (a:uint64) (b:uint64) : uint64
+  = let x = a ^. b in
+    let minus_x = (lognot x) +. (u64 1) in
+    let x_or_minus_x = x |. minus_x in
+    let xnx = x_or_minus_x >>. (u32 63) in
+    let c = xnx -. (u64 1) in
+    c
+
+let uint64_gte_mask (a:uint64) (b:uint64) : uint64
+  = let x = a in
+    let y = b in
+    let x_xor_y = logxor x y in
+    let x_sub_y = x -. y in
+    let x_sub_y_xor_y = x_sub_y ^. y in
+    let q = logor x_xor_y x_sub_y_xor_y in
+    let x_xor_q = logxor x q in
+    let x_xor_q_ = shift_right x_xor_q (u32 63) in
+    let c = sub_mod x_xor_q_ (u64 1) in
+    c
+
+let uint32_eq_mask (a:uint32) (b:uint32) : uint32
+  = let x = a ^. b in
+    let minus_x = (lognot x) +. (u32 1) in
+    let x_or_minus_x = x |. minus_x in
+    let xnx = x_or_minus_x >>. (u32 31) in
+    let c = xnx -. (u32 1) in
+    c
+
+let uint32_gte_mask (a:uint32) (b:uint32) : uint32
+  = let x = a in
+    let y = b in
+    let x_xor_y = logxor x y in
+    let x_sub_y = x -. y in
+    let x_sub_y_xor_y = x_sub_y ^. y in
+    let q = logor x_xor_y x_sub_y_xor_y in
+    let x_xor_q = logxor x q in
+    let x_xor_q_ = shift_right x_xor_q (u32 31) in
+    let c = sub_mod x_xor_q_ (u32 1) in
+    c

@@ -170,7 +170,7 @@ POLY1305_64_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.Test.Poly1305_64.fst 
 
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
 poly64-c/out.krml: $(POLY1305_64_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c $(POLY1305_64_FILES) -skip-translation 
 

@@ -56,6 +56,14 @@ let load_felem f lo hi =
     f.(size 2) <- hi >>. u32 24
 
 inline_for_extraction
+val load_felem_le: f:felem -> b:lbytes 16 -> Stack unit
+                   (requires (fun h -> live h f /\ live h b))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+let load_felem_le f b =
+    let (lo,hi) = load64x2_le b in
+    load_felem f lo hi
+
+inline_for_extraction
 val store_felem: f:felem -> Stack (uint64 * uint64)
                    (requires (fun h -> live h f))
 		   (ensures (fun h0 _ h1 -> h0 == h1))
@@ -112,7 +120,7 @@ let smul_top_felem f1 f2 =
 
 #reset-options "--z3rlimit 20"
 
-[@ "c_inline"]
+[@ CInline]
 val add_felem: f1:felem  -> f2:felem  -> Stack unit
                    (requires (fun h -> live h f1 /\ live h f2 /\ 
 		    (let s1 = as_seq h f1 in
@@ -124,6 +132,7 @@ val add_felem: f1:felem  -> f2:felem  -> Stack unit
 				         as_nat h1 f1 ==
 					 as_nat h0 f1 +
 					 as_nat h0 f2))		
+[@ CInline]
 let add_felem f1 f2 = 
   let f10 = f1.(size 0) in
   let f11 = f1.(size 1) in
@@ -135,12 +144,13 @@ let add_felem f1 f2 =
   f1.(size 1) <- f11 +. f21;
   f1.(size 2) <- f12 +. f22
 
-[@ "c_inline"]
+[@ CInline]
 val smul_felem: out:felem_wide -> u1:uint64 -> f2:felem -> Stack unit
                    (requires (fun h -> live h out /\ live h f2))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1 /\
 				         wide_as_nat h1 out ==
 				         uint_v u1 `op_Multiply` as_nat h0 f2))
+[@ CInline]
 let smul_felem out u1 f2 = 
   let f20 = f2.(size 0) in
   let f21 = f2.(size 1) in
@@ -149,7 +159,7 @@ let smul_felem out u1 f2 =
   out.(size 1) <- mul_wide u1 f21;
   out.(size 2) <- mul_wide u1 f22
 
-[@ "c_inline"]
+[@ CInline]
 val smul_add_felem: out:felem_wide -> u1:uint64 -> f2:felem -> Stack unit
                    (requires (fun h -> live h out /\ live h f2 /\
 			       (let s1 = as_seq h out in
@@ -162,7 +172,7 @@ val smul_add_felem: out:felem_wide -> u1:uint64 -> f2:felem -> Stack unit
 				         wide_as_nat h0 out +
 				         uint_v u1 `op_Multiply` as_nat h0 f2))		
 
-#reset-options "--z3rlimit 50"
+[@ CInline]
 let smul_add_felem out u1 f2 = 
   let f20 = f2.(size 0) in
   let f21 = f2.(size 1) in
@@ -174,9 +184,11 @@ let smul_add_felem out u1 f2 =
   out.(size 1) <- o1 +. mul_wide u1 f21;
   out.(size 2) <- o2 +. mul_wide u1 f22
 
+[@ CInline]
 val mul_felem: out:felem_wide -> f1:felem -> f2:felem -> f2_20:felem  -> Stack unit
                    (requires (fun h -> live h out /\ live h f1 /\ live h f2 /\ live h f2_20))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
+[@ CInline]
 let mul_felem out f1 f2 f2_20 = 
   push_frame();
   let tmp = create (u64 0) (size 3) in
@@ -217,9 +229,11 @@ let carry42_wide l cin =
     let l = l +. to_u128 cin in
     (to_u64 l &. mask42, to_u64 (l >>. u32 42))
 
+[@ CInline]
 val carry_wide_felem: out:felem -> inp:felem_wide -> Stack unit
                    (requires (fun h -> live h out /\ live h inp))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
+[@ CInline]
 let carry_wide_felem out inp =
   let i0 = inp.(size 0) in
   let i1 = inp.(size 1) in
@@ -231,9 +245,11 @@ let carry_wide_felem out inp =
   out.(size 1) <- tmp1;
   out.(size 2) <- tmp2  
 
+[@ CInline]
 val carry_felem: f:felem -> Stack unit
                    (requires (fun h -> live h f))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+[@ CInline]
 let carry_felem f =
   let f0 = f.(size 0) in
   let f1 = f.(size 1) in
@@ -245,9 +261,11 @@ let carry_felem f =
   f.(size 1) <- tmp1;
   f.(size 2) <- tmp2  
 
+[@ CInline]
 val carry_top_felem: f:felem -> Stack unit
                    (requires (fun h -> live h f))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+[@ CInline]
 let carry_top_felem f =
   let f0 = f.(size 0) in
   let f1 = f.(size 1) in
@@ -259,9 +277,11 @@ let carry_top_felem f =
   f.(size 1) <- tmp1;
   f.(size 2) <- tmp2  
 
+[@ CInline]
 val fadd_mul_felem: acc:felem -> f1:felem -> f2:felem -> f2_20:felem -> Stack unit
                    (requires (fun h -> live h acc /\ live h f1 /\ live h f2 /\ live h f2_20))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
+[@ CInline]
 let fadd_mul_felem acc f1 f2 f2_20 =
   push_frame();
   let tmp = create (to_u128 (u64 0)) (size 3) in
@@ -271,3 +291,21 @@ let fadd_mul_felem acc f1 f2 f2_20 =
   carry_wide_felem acc tmp;
   pop_frame()
 
+
+inline_for_extraction
+val subtract_p: f:felem -> Stack unit
+                   (requires (fun h -> live h f))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+let subtract_p f =
+  let f0 = f.(size 0) in
+  let f1 = f.(size 1) in
+  let f2 = f.(size 2) in
+  let mask = uint64_eq_mask f2 (u64 0x3ffffffffff) in
+  let mask = mask &. uint64_eq_mask f1 (u64 0xfffffffffff) in
+  let mask = mask &. uint64_gte_mask f0 (u64 0xffffffffffb) in
+  let p0 = mask &. u64 0xffffffffffb in
+  let p1 = mask &. u64 0xfffffffffff in
+  let p2 = mask &. u64 0x3ffffffffff in
+  f.(size 0) <- f0 -. p0;
+  f.(size 1) <- f1 -. p1;
+  f.(size 2) <- f2 -. p2

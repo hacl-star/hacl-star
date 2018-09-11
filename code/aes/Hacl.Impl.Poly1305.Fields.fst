@@ -94,6 +94,15 @@ let load_felem (#s:field_spec) (f:felem s) (lo:uint64) (hi:uint64) =
   | M64 -> F64.load_felem f lo hi
 
 inline_for_extraction
+val load_felem_le: #s:field_spec -> f:felem s -> b:lbytes 16 -> Stack unit
+                   (requires (fun h -> live h f /\ live h b))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+let load_felem_le (#s:field_spec) (f:felem s) (b:lbytes 16) =
+  match s with
+  | M32 -> F32.load_felem_le f b
+  | M64 -> F64.load_felem_le f b
+
+inline_for_extraction
 val store_felem: #s:field_spec -> f:felem s -> Stack (lo:uint64 * hi:uint64)
                    (requires (fun h -> live h f))
 		   (ensures (fun h0 _ h1 -> h0 == h1))
@@ -157,4 +166,13 @@ let add_felem #s f1 f2=
   match s with
   | M32 -> F32.add_felem f1 f2 
   | M64 -> F64.add_felem f1 f2 
+
+inline_for_extraction
+val subtract_p: #s:field_spec -> f:felem s -> Stack unit
+                   (requires (fun h -> live h f))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+let subtract_p #s f=
+  match s with
+  | M32 -> F32.subtract_p f
+  | M64 -> F64.subtract_p f
 
