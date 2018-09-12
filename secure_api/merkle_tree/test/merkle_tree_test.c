@@ -31,14 +31,14 @@ int main(int argc, char *argv[]) {
   timer_start();
 
   // Creation
-  uint8_t *ih = hash_r_init();
+  uint8_t *ih = init_hash();
   mt_p mt = create_mt(ih);
 
   printf("A Merkle tree has been created!\n");
 
   // Insertion
   for (uint32_t i = 0; i < num_elts; i++) {
-    uint8_t *hash = hash_r_init();
+    uint8_t *hash = init_hash();
     mt_insert(mt, hash);
   }
 
@@ -46,16 +46,16 @@ int main(int argc, char *argv[]) {
   printf("All values are inserted!\n");
 
   // Getting the Merkle path and verify it
-  uint8_t *root = hash_r_init();
-  hash_vec path = hash_vec_r_init();
+  uint8_t *root = init_hash();
+  hash_vec *path = init_path();
 
   for (uint32_t k = 0; k <= num_elts; k++) {
-    int j = mt_get_path(mt, k, &path, root);
+    int j = mt_get_path(mt, k, path, root);
 
-    bool verified = mt_verify(k, j, &path, root);
+    bool verified = mt_verify(k, j, path, root);
     printf("Verification with k(%d), j(%d): %d\n", k, j, verified);
 
-    path.sz = 0; // This is a bit arbitrary
+    clear_path(path);
   }
 
   int flush_to = num_elts / 2;
@@ -63,12 +63,25 @@ int main(int argc, char *argv[]) {
   printf("Leaves flushed until: %d\n", flush_to);
 
   for (uint32_t k = flush_to; k <= num_elts; k++) {
-    int j = mt_get_path(mt, k, &path, root);
+    int j = mt_get_path(mt, k, path, root);
 
-    bool verified = mt_verify(k, j, &path, root);
+    bool verified = mt_verify(k, j, path, root);
     printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
 
-    path.sz = 0;
+    clear_path(path);
+  }
+
+  flush_to = num_elts;
+  mt_flush_to(mt, flush_to);
+  printf("Leaves flushed until: %d\n", flush_to);
+
+  for (uint32_t k = flush_to; k <= num_elts; k++) {
+    int j = mt_get_path(mt, k, path, root);
+
+    bool verified = mt_verify(k, j, path, root);
+    printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
+
+    clear_path(path);
   }
 
   // printf("All merkle paths are verified: %d\n", timer_tick());
@@ -76,7 +89,8 @@ int main(int argc, char *argv[]) {
 
   // Free
   free_mt(mt);
-  free(path.vs);
+  hash_vec_r_free(*path);
+  free(path);
   hash_r_free(root);
 
   // printf("The Merkle tree is freed: %d\n", timer_tick());
