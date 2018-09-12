@@ -47,7 +47,9 @@ val readLane:
   -> y:index
   -> Stack uint64
     (requires fun h -> live h s)
-    (ensures  fun h0 r h1 -> modifies loc_none h0 h1)
+    (ensures  fun h0 r h1 ->
+      modifies loc_none h0 h1 /\
+      r == S.readLane (as_seq h0 s) (v x) (v y))
 let readLane s x y = s.(x +! size 5 *! y)
 
 inline_for_extraction noextract
@@ -58,24 +60,34 @@ val writeLane:
   -> v:uint64
   -> Stack unit
     (requires fun h -> live h s)
-    (ensures  fun h0 r h1 -> modifies (loc_buffer s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.writeLane (as_seq h0 s) (size_v x) (size_v y) v)
 let writeLane s x y v = s.(x +! size 5 *! y) <- v
 
+val rotl:
+     a:uint64
+  -> b:uint32{0 < uint_v b /\ uint_v b < 64}
+  -> r:uint64 //{r == S.rotl a b}
 [@"c_inline"]
-let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) : uint64 =
-  (a <<. b) |. (a >>. (u32 64 -. b))
+let rotl a b = (a <<. b) |. (a >>. (u32 64 -. b))
 
 inline_for_extraction noextract
 val state_theta:
      s:state
   -> Stack unit
     (requires fun h -> live h s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1)
+      //as_seq h1 s == S.state_theta (as_seq h0 s))
 let state_theta s =
   push_frame();
   let _C:lbuffer uint64 5 = create (size 5) (u64 0) in
   let h0 = ST.get () in
-  loop_nospec #h0 (size 5) _C
+  Lib.Loops.for (size 0) (size 5)
+  (fun h1 i ->
+    live h0 _C /\ live h1 _C /\
+    modifies (loc_buffer _C) h0 h1)
   (fun x ->
     _C.(x) <-
       readLane s x (size 0) ^.
@@ -88,7 +100,7 @@ let state_theta s =
   let h0 = ST.get () in
   loop_nospec #h0 (size 5) s
   (fun x ->
-    let _D = _C.((x +. size 4) %. size 5) ^. (rotl _C.((x +. size 1) %. size 5) (u32 1)) in
+    let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (u32 1) in
     let h1 = ST.get () in
     loop_nospec #h1 (size 5) s
     (fun y ->

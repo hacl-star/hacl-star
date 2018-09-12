@@ -39,53 +39,101 @@ type index = n:size_nat{n < 5}
 let readLane (s:state) (x:index) (y:index) : uint64 =
   s.[x + 5 * y]
 
-let writeLane (s:state ) (x:index) (y:index) (v:uint64) : state =
-  s.[x + 5 * y] <- v
+val writeLane:
+     s:state
+  -> x:index
+  -> y:index
+  -> v:uint64
+  -> r:state{readLane r x y == v /\ (forall i j. (i, j) <> (x, y) ==> readLane r i j == readLane s i j)}
+let writeLane s x y v = s.[x + 5 * y] <- v
 
 let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) : uint64 =
   (a <<. b) |. (a >>. (u32 64 -. b))
 
-let state_theta (s:state) : state  =
+let state_theta_inner_C (s:state) (i:nat{i < 5}) =
+  readLane s i 0 ^.
+  readLane s i 1 ^.
+  readLane s i 2 ^.
+  readLane s i 3 ^.
+  readLane s i 4
+
+let state_theta0 (s:state) : lseq uint64 5 =
   let _C = create 5 (u64 0) in
   let _C =
-    repeati 5 (fun x _C ->
-      _C.[x] <-
-	readLane s x 0 ^.
-	readLane s x 1 ^.
-	readLane s x 2 ^.
-	readLane s x 3 ^.
-	readLane s x 4
+    repeati_inductive 5
+    (fun x _C ->
+      forall (i:size_nat{i < x}). _C.[i] == state_theta_inner_C s i)
+    (fun x _C ->
+      _C.[x] <- state_theta_inner_C s x
     ) _C in
-  repeati 5 (fun x s ->
-    let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (u32 1)) in
-    repeati 5 (fun y s ->
-      writeLane s x y (readLane s x y ^. _D)
-    ) s
-  ) s
+  _C
 
-let state_pi_rho (s_theta:state) : state  =
+let state_theta1 (s':state) (_C:lseq uint64 5) : state =
+  repeati_inductive 5
+  (fun x s ->
+    forall (i:size_nat{i < x}) (j:size_nat{j < 5}).
+      let _D = _C.[(i + 4) % 5] ^. (rotl _C.[(i + 1) % 5] (u32 1)) in
+      readLane s i j == readLane s' i j ^. _D)
+  (fun x s ->
+    let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (u32 1)) in
+    repeati_inductive 5
+    (fun y s0 ->
+      (forall (i:size_nat{i < x}) (j:size_nat{j < 5}). readLane s0 i j == readLane s i j) /\
+      (forall (j:size_nat{j < y}). readLane s0 x j == readLane s' x j ^. _D))
+    (fun y s0 ->
+      writeLane s0 x y (readLane s' x y ^. _D)
+    ) s
+  ) s'
+
+let state_theta (s:state) : state =
+  let _C = state_theta0 s in
+  state_theta1 s _C
+
+val state_pi_rho_inner:
+     current:uint64
+  -> s:state
+  -> i:size_nat{i < 24}
+  -> tuple2 uint64 state
+let state_pi_rho_inner current s i =
+  lemma_keccak_piln i;
+  lemma_keccak_rotc i;
+  let r = keccak_rotc.[i] in
+  let _Y = keccak_piln.[i] in
+  let s1 = s.[_Y] <- rotl current r in
+  let current = s.[_Y] in
+  current, s1
+
+let state_pi_rho (s_theta:state) : state =
   let current : uint64 = readLane s_theta 1 0 in
   let _, s_pi_rho =
-    repeati 24 (fun i (current, s) ->
-      let r = keccak_rotc.[i] in
-      let _Y = keccak_piln.[i] in
-      lemma_keccak_piln i;
-      lemma_keccak_rotc i;
-      let temp = s.[_Y] in
-      let s = s.[_Y] <- rotl current r in
-      let current = temp in
-      current, s
+    repeati_inductive 24
+    (fun i (current, s) -> True)
+    (fun i (current, s) ->
+      state_pi_rho_inner current s i
     ) (current, s_theta) in
   s_pi_rho
 
+val state_chi_inner:
+     s:state
+  -> x:index
+  -> y:index
+  -> uint64
+let state_chi_inner s x y =
+  readLane s x y ^.
+  ((lognot (readLane s ((x + 1) % 5) y)) &.
+    readLane s ((x + 2) % 5) y)
+
 let state_chi (s_pi_rho:state) : state  =
-  let temp = s_pi_rho in
-  repeati 5 (fun y s ->
-    repeati 5 (fun x s ->
-      writeLane s x y
-	(readLane temp x y ^.
-	((lognot (readLane temp ((x + 1) % 5) y)) &.
-	  readLane temp ((x + 2) % 5) y))
+  repeati_inductive 5
+  (fun y s ->
+    forall (j:size_nat{j < y}) (i:size_nat{i < 5}). readLane s i j == state_chi_inner s_pi_rho i j)
+  (fun y s ->
+    repeati_inductive 5
+    (fun x s0 ->
+      (forall (j:size_nat{j < y}) (i:size_nat{i < 5}). readLane s i j == readLane s0 i j) /\
+      (forall (i:size_nat{i < x}). readLane s0 i y == state_chi_inner s_pi_rho i y))
+    (fun x s0 ->
+      writeLane s0 x y (state_chi_inner s_pi_rho x y)
     ) s
   ) s_pi_rho
 
