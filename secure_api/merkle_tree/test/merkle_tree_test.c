@@ -24,7 +24,8 @@ int main(int argc, char *argv[]) {
   uint32_t num_elts = 1;
   if (argc > 1)
     num_elts = atoi(argv[1]);
-  
+
+  // Should call below two functions in the beginning of `main`.
   kremlinit_globals();
   hash_cfg(EverCrypt_AutoConfig_Vale);
 
@@ -33,6 +34,7 @@ int main(int argc, char *argv[]) {
   // Creation
   uint8_t *ih = init_hash();
   mt_p mt = create_mt(ih);
+  free_hash(ih);
 
   printf("A Merkle tree has been created!\n");
 
@@ -40,6 +42,7 @@ int main(int argc, char *argv[]) {
   for (uint32_t i = 0; i < num_elts; i++) {
     uint8_t *hash = init_hash();
     mt_insert(mt, hash);
+    free_hash(hash);
   }
 
   // printf("All values are inserted: %d\n", timer_tick());
@@ -89,9 +92,8 @@ int main(int argc, char *argv[]) {
 
   // Free
   free_mt(mt);
-  hash_vec_r_free(*path);
-  free(path);
-  hash_r_free(root);
+  free_path(path);
+  free_hash(root);
 
   // printf("The Merkle tree is freed: %d\n", timer_tick());
   printf("The Merkle tree is freed\n");

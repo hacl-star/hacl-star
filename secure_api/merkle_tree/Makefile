@@ -112,6 +112,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'LowStar.*' \
+	-bundle 'EverCrypt.*' \
 	-library 'EverCrypt,EverCrypt.*' \
 	-drop 'Spec,Lib,C.*,C.Loops.*' \
 	-I $(HACL_HOME)/specs \

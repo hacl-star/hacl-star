@@ -1,7 +1,6 @@
 module MerkleTree.New.Low
 
 open EverCrypt
-// open EverCrypt.Hash
 open EverCrypt.Helpers
 open EverCrypt.AutoConfig
 
@@ -55,11 +54,11 @@ val hash_region_of:
 let hash_region_of v =
   B.frameOf v
 
-val hash_cv: unit -> Tot hash
-let hash_cv _ = B.null
+private val hash_cv: unit -> Tot hash
+private let hash_cv _ = B.null
 
-val hash_repr: Type0
-let hash_repr = S.seq uint8_t
+private val hash_repr: Type0
+private let hash_repr = S.seq uint8_t
 
 val hash_r_repr:
   h:HS.mem -> v:hash -> GTot hash_repr
@@ -94,7 +93,7 @@ val hash_irepr: Ghost.erased hash_repr
 let hash_irepr =
   Ghost.hide (S.create (U32.v hash_size) 0uy)
 
-val hash_r_init:
+private val hash_r_init:
   r:erid ->
   HST.ST hash
     (requires (fun h0 -> true))
@@ -105,7 +104,7 @@ val hash_r_init:
       hash_r_inv h1 v /\
       hash_region_of v = r /\
       hash_r_repr h1 v == Ghost.reveal hash_irepr))
-let hash_r_init r =
+private let hash_r_init r =
   B.malloc r 0uy hash_size
 
 val hash_r_free:
@@ -133,8 +132,8 @@ let hash_copy src dst =
 // `hash_cv ()` is is also a trick to extract the C code using KreMLin.
 // If we just define and use `hash_cv` as a constant, then gcc complains with
 // the error "initializer element is not a compile-time constant".
-val hreg: regional hash
-let hreg =
+private val hreg: regional hash
+private let hreg =
   Rgl hash_region_of
       (hash_cv ())
       hash_repr
@@ -146,8 +145,8 @@ let hreg =
       hash_r_init
       hash_r_free
 
-val hcpy: copyable hash hreg
-let hcpy = Cpy hash_copy
+private val hcpy: copyable hash hreg
+private let hcpy = Cpy hash_copy
 
 type hash_vec = RV.rvector hreg
 
@@ -157,11 +156,11 @@ val hash_vec_region_of:
   v:hash_vec -> GTot HH.rid
 let hash_vec_region_of v = V.frameOf v
 
-val hash_vec_cv: hash_vec
-let hash_vec_cv = V.create_empty hash
+private val hash_vec_cv: hash_vec
+private let hash_vec_cv = V.create_empty hash
 
-val hash_vec_repr: Type0
-let hash_vec_repr = S.seq (S.seq uint8_t)
+private val hash_vec_repr: Type0
+private let hash_vec_repr = S.seq (S.seq uint8_t)
 
 val hash_vec_r_repr:
   h:HS.mem -> v:hash_vec -> GTot hash_vec_repr
@@ -195,7 +194,7 @@ val hash_vec_irepr: Ghost.erased hash_vec_repr
 let hash_vec_irepr =
   Ghost.hide (S.create 1 (Ghost.reveal hash_irepr))
 
-val hash_vec_r_init: 
+private val hash_vec_r_init: 
   r:erid ->
   HST.ST (v:hash_vec)
     (requires (fun h0 -> true))
@@ -206,7 +205,7 @@ val hash_vec_r_init:
       hash_vec_r_inv h1 v /\
       hash_vec_region_of v = r /\
       hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr))
-let hash_vec_r_init r =
+private let hash_vec_r_init r =
   admit ();
   let nrid = new_region_ r in
   let r_init = Rgl?.r_init hreg in
@@ -222,8 +221,8 @@ val hash_vec_r_free:
 let hash_vec_r_free v =
   RV.free v
 
-val bhreg: regional hash_vec
-let bhreg =
+private val bhreg: regional hash_vec
+private let bhreg =
   Rgl hash_vec_region_of
       hash_vec_cv
       hash_vec_repr
@@ -242,6 +241,7 @@ type hash_vv = RV.rvector bhreg
 /// Utility for hashes
 
 let init_hash = hash_r_init
+let free_hash = hash_r_free
 
 val hash_2: 
   src1:hash -> src2:hash -> dst:hash ->
@@ -301,7 +301,8 @@ val mt_safe_elts:
   GTot Type0 (decreases (32 - U32.v lv))
 let rec mt_safe_elts h lv hs i j =
   if lv = 32ul then true
-  else (V.size_of (V.get h hs lv) >= j - i /\
+  else (let ofs = offset_of i in
+       V.size_of (V.get h hs lv) >= j - ofs /\
        mt_safe_elts h (lv + 1ul) hs (i / 2ul) (j / 2ul))
 
 val mt_safe_elts_preserved:
@@ -419,7 +420,7 @@ type path = B.pointer (V.vector hash)
 val path_safe: HS.mem -> path -> GTot Type0
 let path_safe h p =
   B.live h p /\ B.freeable p /\
-  V.live h (B.get h p 0) /\
+  V.live h (B.get h p 0) /\ V.freeable (B.get h p 0) /\
   HH.extends (V.frameOf (B.get h p 0)) (B.frameOf p)
 
 val init_path: 
@@ -439,6 +440,16 @@ val clear_path:
       path_safe h1 p /\ V.size_of (B.get h1 p 0) = 0ul))
 let clear_path p =
   B.upd p 0ul (V.clear (B.index p 0ul))
+
+val free_path:
+  p:path ->
+  HST.ST unit
+    (requires (fun h0 -> path_safe h0 p))
+    (ensures (fun h0 _ h1 ->
+      modifies (B.loc_all_regions_from false (B.frameOf p)) h0 h1))
+let free_path p =
+  V.free (B.index p 0ul);
+  B.free p
 
 // Construct the rightmost hashes for a given (incomplete) Merkle tree.
 // This function calculates the Merkle root as well, which is the final

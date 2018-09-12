@@ -1,24 +1,37 @@
 #include "stdint.h"
 
-extern hash_p;
+extern hash_vec;
 extern merkle_tree;
 
+typedef uint8_t *hash;
 typedef merkle_tree *mt_p;
+typedef hash_vec *path;
+
+/// Utilities
+
+hash init_hash();
+void free_hash(hash h);
+
+path init_path();
+void free_path(path p);
+void clear_path(path p);
 
 /// Construction and destruction (free)
-mt_p create_mt(hash_p init);
+mt_p create_mt(hash init);
 void free_mt(mt_p mt);
 
 /* Insertion
  * @param[in] v NOTE that the content of v will be changed to an arbitrary
- *              value after calling it.
+ *              value after calling it. Also note that the tree does not
+ *              manage the hash pointer for `v`, so it should be manually
+ *              freed.
  */
-void mt_insert(mt_p mt, hash_p v);
+void mt_insert(mt_p mt, hash v);
 
 /** Getting the Merkle root
  * @param[out] root The merkle root returned as a hash pointer
  */
-void mt_get_root(mt_p mt, hash_p root);
+void mt_get_root(mt_p mt, hash root);
 
 /** Getting the Merkle path
  * @param idx The index of the target hash
@@ -28,7 +41,7 @@ void mt_get_root(mt_p mt, hash_p root);
  *                  not the actual hash values.
  * @return The number of elements in the tree
  */
-uint32_t mt_get_path(mt_p mt, uint32_t idx, hash_p root, hash_p *path);
+uint32_t mt_get_path(mt_p mt, uint32_t idx, hash root, hash *path);
 
 void mt_flush(mt_p mt);
 void mt_flush_to(mt_p mt, uint32_t idx);
@@ -37,4 +50,4 @@ void mt_flush_to(mt_p mt, uint32_t idx);
  * @param k The index of the target hash
  * @param j The maximum index + 1 of the tree when the path is generated
  */
-bool mt_verify(uint32_t k, uint32_t j, hash_p *path, hash_p root);
+bool mt_verify(uint32_t k, uint32_t j, hash *path, hash root);
