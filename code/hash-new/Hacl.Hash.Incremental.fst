@@ -93,6 +93,7 @@ let len_add32 (a: hash_alg)
 noextract
 let mk_update_last a s prev_len input input_len =
   ST.push_frame ();
+  let h0 = ST.get () in
 
   (* Get a series of complete blocks. *)
   let blocks_n = U32.(input_len /^ size_block_ul a) in
@@ -106,6 +107,9 @@ let mk_update_last a s prev_len input input_len =
   let rest = B.sub input blocks_len rest_len in
 
   find_update_multi a s blocks blocks_n;
+
+  let h1 = ST.get () in
+  assert (B.as_seq h1 s = update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks));
 
   (* Compute the total number of bytes fed. *)
   let total_input_len: len_t a = len_add32 a prev_len input_len in

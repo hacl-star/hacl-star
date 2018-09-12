@@ -37,7 +37,8 @@ let size_len_ul (a: hash_alg): n:U32.t { U32.v n = size_len_8 a } =
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
 
-(* Padding, not specialized, to be inlined in a specialized caller instead. *)
+
+(** Padding, not specialized, to be inlined in a specialized caller instead. *)
 
 inline_for_extraction
 let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer U8.t ->
@@ -58,9 +59,10 @@ val pad: a:hash_alg -> pad_st a
 val pad_len: a:hash_alg -> len:len_t a ->
   x:U32.t { U32.v x = pad_length a (len_v a len) }
 
-let hash_st (a: hash_alg) = b:B.buffer U8.t { B.length b = size_hash a }
 
-(* Finish, not specialized, to be inlined in a specialized caller instead. *)
+(** Finish, not specialized, to be inlined in a specialized caller instead. *)
+
+let hash_st (a: hash_alg) = b:B.buffer U8.t { B.length b = size_hash a }
 
 inline_for_extraction
 let finish_st (a: hash_alg) = s:state a -> dst:hash_st a -> ST.Stack unit
@@ -70,7 +72,7 @@ let finish_st (a: hash_alg) = s:state a -> dst:hash_st a -> ST.Stack unit
     B.live h dst))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
-    Seq.equal (B.as_seq h1 dst) (Spec.finish a (B.as_seq h0 s))))
+    Seq.equal (B.as_seq h1 dst) (Spec.Hash.Common.finish a (B.as_seq h0 s))))
 
 noextract
 val finish: a:hash_alg -> finish_st a

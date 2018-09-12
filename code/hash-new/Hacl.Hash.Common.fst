@@ -11,7 +11,6 @@ module Tactics = FStar.Tactics
 module Helpers = Spec.Hash.Helpers
 module Endianness = FStar.Kremlin.Endianness
 module Math = FStar.Math.Lemmas
-module Spec = Spec.SHA2
 module Helpers = Spec.Hash.Helpers
 
 module M = LowStar.Modifies
@@ -211,7 +210,7 @@ let pad a len dst =
   (**)   S.equal s (S.append s1 (S.append s2 s3)) /\
   (**)   True)
 
-let pad_len a len =
+let pad_len (a: hash_alg) (len: len_t a) =
   U32.(1ul +^ pad0_len a len +^ size_len_ul a)
 
 #set-options "--max_ifuel 1"
