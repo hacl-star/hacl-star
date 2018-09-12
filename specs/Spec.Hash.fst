@@ -24,24 +24,6 @@ let update a: update_t a =
   | SHA1 ->
       Spec.SHA1.update
 
-let pad a: pad_t a =
-  match a with
-  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
-      Spec.SHA2.pad a
-  | MD5 ->
-      Spec.MD5.pad
-  | SHA1 ->
-      Spec.SHA1.pad
-
-let finish a: finish_t a =
-  match a with
-  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
-      Spec.SHA2.finish a
-  | MD5 ->
-      Spec.MD5.finish
-  | SHA1 ->
-      Spec.SHA1.finish
-
 (* A helper that deals with the modulo proof obligation to make things go smoothly. *)
 let split_block (a: hash_alg)
   (blocks: bytes_blocks a)

@@ -4,6 +4,7 @@ module S = FStar.Seq
 
 open Spec.Hash
 open Spec.Hash.Helpers
+open Spec.Hash.Common
 
 (* Compress full blocks, then pad the partial block and compress the last block *)
 let update_last (a:hash_alg)
@@ -13,8 +14,8 @@ let update_last (a:hash_alg)
   Tot (hash_w a)
 =
   let total_len = prevlen + S.length input in
-  let blocks = pad a total_len in
-  update_multi a hash S.(input @| blocks)
+  let padding = pad a total_len in
+  update_multi a hash S.(input @| padding)
 
 let hash_incremental (a:hash_alg) (input:bytes{S.length input < (max_input8 a)}):
   Tot (hash:bytes{S.length hash = (size_hash a)})

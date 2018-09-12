@@ -11,6 +11,8 @@ module ST = FStar.HyperStack.ST
 module Tactics = FStar.Tactics
 module Lemmas = FStar.Math.Lemmas
 
+module Common = Spec.Hash.Common
+
 open Hacl.Hash.Common
 open Hacl.Hash.Lemmas
 open Spec.Hash
@@ -109,6 +111,7 @@ let mk_update_last a s prev_len input input_len =
   find_update_multi a s blocks blocks_n;
 
   let h1 = ST.get () in
+  assert (B.as_seq h0 input = S.append (B.as_seq h1 blocks) (B.as_seq h1 rest));
   assert (B.as_seq h1 s = update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks));
 
   (* Compute the total number of bytes fed. *)
@@ -135,10 +138,23 @@ let mk_update_last a s prev_len input input_len =
   B.blit rest 0ul tmp_rest 0ul rest_len;
   Hacl.Hash.Common.pad a total_input_len tmp_pad;
 
+  let h2 = ST.get () in
+  assert (B.as_seq h2 tmp = S.append (B.as_seq h2 tmp_rest) (B.as_seq h2 tmp_pad));
+  assert (B.as_seq h2 tmp_rest = B.as_seq h1 rest);
+  assert (B.as_seq h2 tmp_pad = Common.pad a (len_v a total_input_len));
+
   (* Update multi those last few blocks *)
   find_update_multi a s tmp U32.(tmp_len /^ size_block_ul a);
 
-  ST.pop_frame ();
+  let h3 = ST.get () in
+  assert (B.as_seq h3 s =
+    update_multi a (update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
+      (S.append (B.as_seq h1 rest) (Common.pad a (len_v a total_input_len))));
+  assert (
+    let s1 = B.as_seq h1 blocks in
+    let s2 = B.as_seq h2 rest in
+    let s3 = Common.pad a (len_v a total_input_len) in
+    S.equal (S.append s1 (S.append s2 s3)) (S.append (S.append s1 s2) s3));
 
-  admit ()
+  ST.pop_frame ()
 

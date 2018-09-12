@@ -1,6 +1,7 @@
 module Spec.Hash.Nist
 
 open Spec.Hash.Helpers
+open Spec.Hash.Common
 open Spec.Hash
 
 module S = FStar.Seq
