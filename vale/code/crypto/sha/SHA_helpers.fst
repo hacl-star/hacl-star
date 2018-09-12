@@ -2,6 +2,7 @@ module SHA_helpers
 
 open Opaque_s
 open Spec.SHA2
+open Spec.Hash
 open X64.CryptoInstructions_s
 open Types_s
 open Words_s

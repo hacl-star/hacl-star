@@ -283,9 +283,11 @@ external_files = [
   ExternalFile(f'{kremlin_path}/kremlib/C.Loops.fst'),
   ExternalFile(f'{kremlin_path}/kremlib/Spec.Loops.fst'),
   ExternalFile(f'{kremlin_path}/kremlib/FStar.Kremlin.Endianness.fst'),
+  ExternalFile('../specs/Spec.Hash.Common.fst'),
   ExternalFile('../specs/Spec.SHA2.fst'),
   ExternalFile('../specs/Spec.SHA2.Constants.fst'),
   ExternalFile('../specs/Spec.Lib.fst'),
+  ExternalFile('../specs/Spec.Hash.fst'),
   ExternalFile('../specs/Spec.Hash.Helpers.fst'),
   ExternalFile('../code/lib/kremlin/FStar.Endianness.fst'),
 ]

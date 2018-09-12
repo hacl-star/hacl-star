@@ -4,6 +4,7 @@ open Opaque_s
 open Types_s
 open Words_s
 open Words.Four_s
+open Spec.Hash.Helpers
 open Spec.SHA2
 
 let sha256_rnds2_spec_update (a b c d e f g h wk : word SHA2_256) =
