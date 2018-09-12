@@ -9,29 +9,23 @@ open Spec.SHA3.Constants
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let keccak_rotc:lseq uint32 24 =
+let keccak_rotc:lseq rotc_t 24 =
   assert_norm (List.Tot.length rotc_list == 24);
   createL rotc_list
 
-let keccak_piln: lseq size_nat 24 =
-  let piln_list = List.Tot.map size_v piln_list in
+let pilns_t = x:size_nat{x < 25}
+
+let sizes_v (x:piln_t) : pilns_t =
+  size_v x
+
+let keccak_piln: lseq pilns_t 24 =
+  let piln_list = List.Tot.map sizes_v piln_list in
   assert_norm (List.Tot.length piln_list == 24);
   createL piln_list
 
 let keccak_rndc: lseq uint64 24 =
   assert_norm (List.Tot.length rndc_list == 24);
   createL rndc_list
-
-val lemma_keccak_rotc:
-     i:size_nat{i < length keccak_rotc}
-  -> Lemma (0 < uint_v keccak_rotc.[i] && uint_v keccak_rotc.[i] < 64)
-let lemma_keccak_rotc i = lemma_rotc_list i
-
-val lemma_keccak_piln:
-     i:size_nat{i < length keccak_piln}
-  -> Lemma (keccak_piln.[i] < 25)
-let lemma_keccak_piln i = admit();
-  lemma_piln_list i
 
 type state = lseq uint64 25
 type index = n:size_nat{n < 5}
@@ -95,8 +89,6 @@ val state_pi_rho_inner:
   -> i:size_nat{i < 24}
   -> tuple2 uint64 state
 let state_pi_rho_inner current s i =
-  lemma_keccak_piln i;
-  lemma_keccak_rotc i;
   let r = keccak_rotc.[i] in
   let _Y = keccak_piln.[i] in
   let s1 = s.[_Y] <- rotl current r in
@@ -148,8 +140,9 @@ let state_permute1 (s:state) (round:size_nat{round < 24}) : state =
   s_iota
 
 let state_permute (s:state) : state =
-  repeati 24 (fun i s ->
-    state_permute1 s i
+  repeati 24
+  (fun i s0 ->
+    state_permute1 s0 i
   ) s
 
 let loadState (rateInBytes:size_nat{rateInBytes <= 200})

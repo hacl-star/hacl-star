@@ -128,8 +128,6 @@ let state_pi_rho s =
   (fun i ->
     IB.recall_contents keccak_rotc (Seq.seq_of_list rotc_list);
     IB.recall_contents keccak_piln (Seq.seq_of_list piln_list);
-    lemma_piln_list (v i);
-    S.lemma_keccak_rotc (v i);
     let current0:uint64 = current.(size 0) in
     let r = IB.index keccak_rotc (Lib.RawIntTypes.size_to_UInt32 i) in
     let _Y = IB.index keccak_piln (Lib.RawIntTypes.size_to_UInt32 i) in
