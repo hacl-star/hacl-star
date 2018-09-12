@@ -19,7 +19,7 @@ let blocks_t (a: hash_alg) =
 
 // Generic stateful type for update, for any hash_alg.
 inline_for_extraction
-let update_t (a:hash_alg) =
+let update_st (a:hash_alg) =
   s:state a ->
   block:B.buffer U8.t { B.length block = size_block a } ->
   ST.Stack unit
@@ -32,7 +32,7 @@ let update_t (a:hash_alg) =
 // Note: we cannot take more than 4GB of data because we are currently
 // constrained by the size of buffers...
 inline_for_extraction
-let update_multi_t (a: hash_alg) =
+let update_multi_st (a: hash_alg) =
   s:state a ->
   blocks:blocks_t a ->
   n:U32.t { B.length blocks = size_block a * U32.v n } ->
@@ -45,9 +45,9 @@ let update_multi_t (a: hash_alg) =
         (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks))))
 
 noextract
-val mk_update_multi: a:hash_alg -> update:update_t a -> update_multi_t a
+val mk_update_multi: a:hash_alg -> update:update_st a -> update_multi_st a
 
-val update_multi_sha2_224: update_multi_t SHA2_224
-val update_multi_sha2_256: update_multi_t SHA2_256
-val update_multi_sha2_384: update_multi_t SHA2_384
-val update_multi_sha2_512: update_multi_t SHA2_512
+val update_multi_sha2_224: update_multi_st SHA2_224
+val update_multi_sha2_256: update_multi_st SHA2_256
+val update_multi_sha2_384: update_multi_st SHA2_384
+val update_multi_sha2_512: update_multi_st SHA2_512

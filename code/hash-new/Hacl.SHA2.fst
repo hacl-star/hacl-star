@@ -378,21 +378,21 @@ let update_384: update_t SHA2_384 =
 let update_512: update_t SHA2_512 =
   Tactics.(synth_by_tactic (specialize (update SHA2_512) [`%update; `%shuffle; `%shuffle_core; `%ws]))
 
-let pad_224: pad_t SHA2_224 =
+let pad_224: pad_st SHA2_224 =
   Tactics.(synth_by_tactic (specialize (Common.pad SHA2_224) [`%Common.pad]))
-let pad_256: Common.pad_t SHA2_256 =
+let pad_256: pad_st SHA2_256 =
   Tactics.(synth_by_tactic (specialize (Common.pad SHA2_256) [`%Common.pad]))
-let pad_384: Common.pad_t SHA2_384 =
+let pad_384: pad_st SHA2_384 =
   Tactics.(synth_by_tactic (specialize (Common.pad SHA2_384) [`%Common.pad]))
-let pad_512: Common.pad_t SHA2_512 =
+let pad_512: pad_st SHA2_512 =
   Tactics.(synth_by_tactic (specialize (Common.pad SHA2_512) [`%Common.pad]))
 
-let finish_224: finish_t SHA2_224 =
+let finish_224: finish_st SHA2_224 =
   Tactics.(synth_by_tactic (specialize (Common.finish SHA2_224) [`%Common.finish]))
-let finish_256: Common.finish_t SHA2_256 =
+let finish_256: finish_st SHA2_256 =
   Tactics.(synth_by_tactic (specialize (Common.finish SHA2_256) [`%Common.finish]))
-let finish_384: Common.finish_t SHA2_384 =
+let finish_384: finish_st SHA2_384 =
   Tactics.(synth_by_tactic (specialize (Common.finish SHA2_384) [`%Common.finish]))
-let finish_512: Common.finish_t SHA2_512 =
+let finish_512: finish_st SHA2_512 =
   Tactics.(synth_by_tactic (specialize (Common.finish SHA2_512) [`%Common.finish]))
 

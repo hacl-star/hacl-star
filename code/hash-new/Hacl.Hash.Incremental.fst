@@ -19,7 +19,7 @@ open Spec.Hash.Incremental
 open FStar.Mul
 
 inline_for_extraction
-let update_last_t (a: hash_alg) =
+let update_last_st (a: hash_alg) =
   s:state a ->
   prev_len:len_t a { len_v a prev_len % size_block a = 0 } ->
   input:B.buffer U8.t { B.length input + len_v a prev_len < max_input8 a } ->
@@ -33,7 +33,7 @@ let update_last_t (a: hash_alg) =
         (update_last a (B.as_seq h0 s) (len_v a prev_len) (B.as_seq h0 input))))
 
 inline_for_extraction
-let find_update_multi (a: hash_alg): Hacl.Hash.update_multi_t a =
+let find_update_multi (a: hash_alg): Hacl.Hash.update_multi_st a =
   match a with
   | SHA2_224 -> Hacl.Hash.update_multi_sha2_224
   | SHA2_256 -> Hacl.Hash.update_multi_sha2_256
@@ -42,7 +42,7 @@ let find_update_multi (a: hash_alg): Hacl.Hash.update_multi_t a =
   | _ -> admit ()
 
 noextract
-val mk_update_last: a:hash_alg -> update_last_t a
+val mk_update_last: a:hash_alg -> update_last_st a
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
