@@ -1,44 +1,44 @@
 [
-  "V·uá\u0006ëX¿ÚY\u001a_©€<Ë",
+  "Iê\tœoI÷Iƒ≠Ék}Ì~\u001f",
   [
     [
-      "Hacl.MD5.alloca",
+      "Hacl.SHA1.alloca",
       1,
       2,
       1,
       [
         "@query", "assumption_FStar.Seq.Base.seq__uu___haseq",
         "assumption_FStar.UInt32.t__uu___haseq",
-        "constructor_distinct_Spec.Hash.Helpers.MD5",
-        "equality_tok_Spec.Hash.Helpers.MD5@tok",
-        "equation_Spec.Hash.Helpers.word",
-        "function_token_typing_FStar.UInt32.t"
+        "constructor_distinct_Spec.Hash.Helpers.SHA1",
+        "equality_tok_Spec.Hash.Helpers.SHA1@tok",
+        "equation_Spec.Hash.Helpers.word", "typing_Spec.Hash.Helpers.word",
+        "typing_tok_Spec.Hash.Helpers.SHA1@tok"
       ],
       0,
-      "7d736fd417489db3d9c6e9809a750be9"
+      "f4d7d4a2a2bbff48142b4261f430743c"
     ],
     [
-      "Hacl.MD5.update",
+      "Hacl.SHA1.update",
       1,
       2,
       1,
       [
         "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "constructor_distinct_Spec.Hash.Helpers.MD5",
-        "equality_tok_Spec.Hash.Helpers.MD5@tok",
+        "equality_tok_Spec.Hash.Helpers.SHA1@tok",
         "equation_Hacl.Hash.Common.state", "equation_Hacl.Hash.Common.word",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_Spec.Hash.Helpers.word",
-        "function_token_typing_FStar.UInt32.t",
         "function_token_typing_FStar.UInt8.t",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "refinement_interpretation_Hacl.Hash.Common_Tm_refine_4be16adba4cc0c2c2e52c699ab00f6f6",
-        "refinement_interpretation_Hacl.MD5_Tm_refine_1f888fc4447028fe77575a277a397480",
-        "typing_LowStar.Buffer.trivial_preorder"
+        "refinement_interpretation_Hacl.SHA1_Tm_refine_10a894bf1ad89f39d1cfa6aa3cdba6c1",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Spec.Hash.Helpers.word",
+        "typing_tok_Spec.Hash.Helpers.SHA1@tok"
       ],
       0,
-      "fd394b244e53b4f1f91681d5883d543f"
+      "215c71fe1b9fcb87345f8f68888c2468"
     ]
   ]
 ]
