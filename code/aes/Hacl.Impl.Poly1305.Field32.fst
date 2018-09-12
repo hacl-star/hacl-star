@@ -146,7 +146,8 @@ let smul_top_felem f1 f2 =
 
 #reset-options "--z3rlimit 50"
 
-[@ CInline]
+//[@ CInline]
+inline_for_extraction
 val add_felem: f1:felem  -> f2:felem  -> Stack unit
                    (requires (fun h -> live h f1 /\ live h f2 /\ 
 		    (let s1 = as_seq h f1 in
@@ -179,7 +180,8 @@ let add_felem f1 f2 =
   f1.(size 3) <- f13 +. f23;
   f1.(size 4) <- f14 +. f24
 
-[@ CInline]
+//[@ CInline]
+inline_for_extraction
 val smul_felem: out:felem_wide -> u1:uint32 -> f2:felem -> Stack unit
                    (requires (fun h -> live h out /\ live h f2))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1 /\
@@ -199,7 +201,8 @@ let smul_felem out u1 f2 =
   out.(size 4) <- to_u64 u1 *. to_u64 f24
 
 
-[@ CInline]
+//[@ CInline]
+inline_for_extraction
 val smul_add_felem: out:felem_wide -> u1:uint32 -> f2:felem -> Stack unit
                    (requires (fun h -> live h out /\ live h f2))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1 /\
@@ -274,7 +277,8 @@ let carry26_wide l cin =
     let l = l +. to_u64 cin in
     (to_u32 l &. mask26, to_u32 (l >>. u32 26))
 
-[@ CInline]
+//[@ CInline]
+inline_for_extraction
 val carry_wide_felem: out:felem -> inp:felem_wide -> Stack unit
                    (requires (fun h -> live h out /\ live h inp))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
@@ -299,7 +303,8 @@ let carry_wide_felem out inp =
   out.(size 3) <- tmp3; 
   out.(size 4) <- tmp4  
 
-[@ CInline]
+//[@ CInline]
+inline_for_extraction
 val carry_felem: f:felem -> Stack unit
                    (requires (fun h -> live h f))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
@@ -321,7 +326,8 @@ let carry_felem f =
   f.(size 3) <- tmp3; 
   f.(size 4) <- tmp4  
 
-[@ CInline]
+//[@ CInline]
+inline_for_extraction
 val carry_top_felem: f:felem -> Stack unit
                    (requires (fun h -> live h f))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
