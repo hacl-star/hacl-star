@@ -9,6 +9,7 @@ module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module E = FStar.Kremlin.Endianness
 module CE = C.Endianness
+module Common = Hacl.Hash.Common
 
 friend Spec.MD5
 
@@ -377,3 +378,6 @@ let update'
 let _ : squash (Spec.Hash.update MD5 == Spec.update) = ()
 
 let update abcd x = update' abcd x
+
+let pad: pad_st MD5 =
+  FStar.Tactics.(synth_by_tactic (specialize (Common.pad MD5) [`%Common.pad]))

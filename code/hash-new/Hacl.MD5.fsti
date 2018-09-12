@@ -25,3 +25,5 @@ val init (s: state MD5) : HST.Stack unit
     Seq.equal (B.as_seq h1 s) Spec.init))
 
 val update: update_st MD5
+
+val pad: pad_st MD5

@@ -9,6 +9,7 @@ module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module E = FStar.Kremlin.Endianness
 module CE = C.Endianness
+module Common = Hacl.Hash.Common
 
 friend Spec.SHA1
 
@@ -360,3 +361,6 @@ let step4
 
 let update h l =
   step4 l h
+
+let pad: pad_st SHA1 =
+  FStar.Tactics.(synth_by_tactic (specialize (Common.pad SHA1) [`%Common.pad]))

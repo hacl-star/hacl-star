@@ -155,3 +155,10 @@ let update_last_sha2_512: update_last_st SHA2_512 =
   Tactics.(synth_by_tactic
     (specialize (mk_update_last SHA2_512 Hacl.Hash.update_multi_sha2_512 Hacl.SHA2.pad_512) [`%mk_update_last]))
 
+let update_last_sha1: update_last_st SHA1 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_update_last SHA1 Hacl.Hash.update_multi_sha1 Hacl.SHA1.pad) [`%mk_update_last]))
+
+let update_last_md5: update_last_st MD5 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_update_last MD5 Hacl.Hash.update_multi_md5 Hacl.MD5.pad) [`%mk_update_last]))
