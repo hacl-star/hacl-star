@@ -275,7 +275,7 @@ let hash_2 src1 src2 dst =
 //        calculate some merkle parhs that need the rightmost hashes
 //        as a part of them.
 noeq type merkle_tree = 
-| MT: i:uint32_t -> j:uint32_t{j > i} ->
+| MT: i:uint32_t -> j:uint32_t{j >= i} ->
       hs:hash_vv{V.size_of hs = 32ul} ->
       rhs_ok:bool ->
       rhs:hash_vec{V.size_of hs = 32ul} ->
@@ -345,7 +345,8 @@ let mt_loc mt =
 
 /// Construction
 
-// Note that ...
+// NOTE: the public function is `create_mt` defined below, which
+// builds a tree with an initial hash.
 private val create_empty_mt: r:erid ->
   HST.ST mt_p
 	 (requires (fun _ -> true))
@@ -355,13 +356,20 @@ private val create_empty_mt: r:erid ->
 	   mt_safe h1 mt /\
 	   mt_not_full h1 mt))
 private let create_empty_mt r =
-  admit ();
   let hs_region = RV.new_region_ r in
   let hs = RV.create_rid bhreg 32ul hs_region in
-  // RV.assign hs 0ul (RV.insert_copy hcpy (V.index hs 0ul) init);
+  let h0 = HST.get () in
+  assume (mt_safe_elts h0 0ul hs 0ul 0ul);
   let rhs_region = RV.new_region_ r in
   let rhs = RV.create_rid hreg 32ul rhs_region in
-  B.malloc HH.root (MT 0ul 0ul hs false rhs) 1ul
+  let h1 = HST.get () in
+  mt_safe_elts_preserved
+    0ul hs 0ul 0ul (V.loc_vector rhs) h0 h1;
+  let mt = B.malloc r (MT 0ul 0ul hs false rhs) 1ul in
+  let h2 = HST.get () in
+  mt_safe_elts_preserved
+    0ul hs 0ul 0ul (B.loc_buffer mt) h1 h2;
+  mt
 
 /// Destruction (free)
 
