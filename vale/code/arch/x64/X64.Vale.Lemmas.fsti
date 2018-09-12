@@ -34,14 +34,15 @@ let eval_ins (c:code) (s0:state) : Ghost ((sM:state) * (f0:fuel))
   ) =
   let f0 = 0 in
   let (Some sM) = TS.taint_eval_code c f0 (state_to_S s0) in
-  (state_of_S sM, f0)
+  same_domain_eval_ins c f0 (state_to_S s0) s0;
+  (state_of_S s0 sM, f0)
 
 let eval_ocmp (s:state) (c:ocmp) : GTot bool = snd (TS.taint_eval_ocmp (state_to_S s) c)
 
 let valid_ocmp (c:ocmp) (s:state) : GTot bool =
-  S.valid_ocmp c.TS.o (state_to_S s).TS.state
+  BS.valid_ocmp c.TS.o (state_to_S s).TS.state
 
-let ensure_valid_ocmp (c:ocmp) (s:state) : GTot state = state_of_S (fst (TS.taint_eval_ocmp (state_to_S s) c))
+let ensure_valid_ocmp (c:ocmp) (s:state) : GTot state = state_of_S s (fst (TS.taint_eval_ocmp (state_to_S s) c))
 
 val lemma_cmp_eq : s:state -> o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> t:taint -> Lemma
   (ensures eval_ocmp s (TS.TaintedOCmp (BS.OEq o1 o2) t) <==> eval_operand o1 s == eval_operand o2 s)
@@ -176,4 +177,5 @@ val lemma_whileMerge_total (c:code) (s0:state) (f0:fuel) (sM:state) (fM:fuel) (s
   (ensures (fun fN ->
     eval_while_inv c s0 fN sN
   ))
+
 

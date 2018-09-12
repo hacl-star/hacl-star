@@ -5,19 +5,11 @@ open X64.Machine_s
 open X64.Memory_s
 open X64.Semantics_s
 
-val equiv_eval_operand (o:operand) (s:state) : Lemma
-  (requires valid_operand o s)
-  (ensures eval_operand o s == S.eval_operand o s.state)
-
 let equiv_eval_operand o s = match o with
   | OConst _ | OReg _ -> ()
   | OMem m ->
     let addr = eval_maddr m s in
     equiv_load_mem addr s
-
-val equiv_eval_mov128_op (o:mov128_op) (s:state) : Lemma
-  (requires valid_mov128_op o s)
-  (ensures eval_mov128_op o s == S.eval_mov128_op o s.state)
 
 let equiv_eval_mov128_op o s = match o with
   | Mov128Xmm _ -> ()

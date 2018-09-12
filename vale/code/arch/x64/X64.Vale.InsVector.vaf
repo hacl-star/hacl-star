@@ -302,8 +302,8 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Xmm(dst), Mov128Me
         dst == buffer128_read(b, index, mem);
         valid_taint_buf128(b, mem, memTaint, t);
 {
-    lemma_valid_mem128(b, #nat(index), mem);
-    lemma_load_mem128(b, #nat(index), mem);
+    low_lemma_valid_mem128(#buffer128_s(b), #nat(index), #mem_s(mem));
+    low_lemma_load_mem128(#buffer128_s(b), #nat(index), #mem_s(mem));
     lemma_valid_taint128(#buffer128_s(b), #memTaint_t(memTaint), #mem_s(mem), #nat(index), t);
 }
 
@@ -327,8 +327,8 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(d
         valid_taint_buf128(b, mem, memTaint, t);
         mem == old(buffer128_write(b, index, src, mem));
 {
-    lemma_valid_mem128(b, #nat(index), old(mem));
-    lemma_store_mem128(b, #nat(index), old(src), old(mem));
+    low_lemma_valid_mem128(#buffer128_s(b), #nat(index), old(#mem_s(mem)));
+    low_lemma_store_mem128(#buffer128_s(b), #nat(index), old(src), old(#mem_s(mem)));
     lemma_valid_taint128(#buffer128_s(b), old(#memTaint_t(memTaint)), old(#mem_s(mem)), #nat(index), t);
     same_memTaint128(#buffer128_s(b), old(#mem_s(mem)), #mem_s(mem), old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }

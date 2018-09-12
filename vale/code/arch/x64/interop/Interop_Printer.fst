@@ -416,7 +416,7 @@ let translate_lowstar target (func:func_ty) =
   "open Vale_" ^ name ^ "\n\n" ^
   "// TODO: Complete with your pre- and post-conditions\n" ^
   "let pre_cond (h:HS.mem) " ^ (print_args_list args) ^ "= " ^ (liveness "h" args) ^ separator1 ^ (disjoint args) ^ (print_lengths args) ^ "\n\n" ^
-  "let post_cond (h:HS.mem) (h:HS.mem) " ^ (print_args_list args) ^ "= " 
+  "let post_cond (h:HS.mem) (h':HS.mem) " ^ (print_args_list args) ^ "= " 
     ^ (liveness "h" args) ^ " /\\ " ^ (liveness "h'" args) ^ separator0 ^ (print_lengths args) ^ "\n\n" ^
   "val " ^ name ^ ": " ^ (print_low_args args) ^
   "\n\t(requires (fun h -> pre_cond h " ^ (print_args_names args) ^ "))\n\t" ^

@@ -320,16 +320,19 @@ verify_options = [
 #  ('code/arch/x64/X64.Vale.Decls.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
 
   # Special treatment for sensitive modules
-  ('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
+#  ('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
 
   # Disable verification by adding 'filename': None
   ('code/crypto/aes/x64/Low.GCMencrypt.fst', None), # TODO: timeout in gcm_core
+  ('code/arch/x64/interop/*.fst', None),
   ('code/arch/x64/interop/*_win.fst', None),
-  ('code/arch/x64/interop/*_win.fsti', None),
+  #TODO: Update taint analysis
+  ('code/arch/x64/X64.Leakage*', None),
+  ('specs/hardware/X64.Leakage_s.fst', None),
 
   # Interop stubs
-  ('code/arch/x64/interop/Memcpy.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
-  ('code/arch/x64/interop/Quad32_xor.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
+#  ('code/arch/x64/interop/Memcpy.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
+#  ('code/arch/x64/interop/Quad32_xor.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
 #  ('code/arch/x64/interop/AESEncryptBlock_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
 #  ('code/arch/x64/interop/AESEncryptBE_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
 #  ('code/arch/x64/interop/Gcm_load_xor_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),

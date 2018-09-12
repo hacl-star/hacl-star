@@ -102,12 +102,15 @@ let get_heap_val32_def (ptr:int) (mem:heap) : nat32 =
     mem.[ptr+3]
 let get_heap_val32 = make_opaque get_heap_val32_def
 
+let get_heap_val128_def (ptr:int) (mem:heap) : quad32 = Mkfour
+  (get_heap_val32 ptr mem)
+  (get_heap_val32 (ptr+4) mem)
+  (get_heap_val32 (ptr+8) mem)
+  (get_heap_val32 (ptr+12) mem)
+let get_heap_val128 = make_opaque get_heap_val128_def
+
 unfold let eval_mem (ptr:int) (s:state) : nat64 = get_heap_val64 ptr s.mem
-unfold let eval_mem128 (ptr:int) (s:state) : quad32 = Mkfour
-  (get_heap_val32 ptr s.mem)
-  (get_heap_val32 (ptr+4) s.mem)
-  (get_heap_val32 (ptr+8) s.mem)
-  (get_heap_val32 (ptr+12) s.mem)
+unfold let eval_mem128 (ptr:int) (s:state) : quad32 = get_heap_val128 ptr s.mem
 
 [@va_qattr]
 let eval_maddr (m:maddr) (s:state) : int =
@@ -183,12 +186,6 @@ let update_heap128 (ptr:int) (v:quad32) (mem:heap) =
   let mem = update_heap32 (ptr+12) v.hi3 mem in
   mem
 
-let update_mem (ptr:int) (v:nat64) (s:state) : state =
-  { s with mem = update_heap64 ptr v s.mem }
-
-let update_mem128 (ptr:int) (v:quad32) (s:state) : state =
-  { s with mem = update_heap128 ptr v s.mem }
-
 let valid_addr (ptr:int) (mem:heap) : bool =
   Map.contains mem ptr
 
@@ -219,6 +216,16 @@ let valid_addr128 (ptr:int) (mem:heap) =
   valid_addr (ptr+13) mem &&
   valid_addr (ptr+14) mem &&
   valid_addr (ptr+15) mem
+
+let update_mem (ptr:int) (v:nat64) (s:state) : state =
+  if valid_addr64 ptr s.mem then
+  { s with mem = update_heap64 ptr v s.mem }
+  else s
+  
+let update_mem128 (ptr:int) (v:quad32) (s:state) : state =
+  if valid_addr128 ptr s.mem then
+  { s with mem = update_heap128 ptr v s.mem }
+  else s
 
 let valid_maddr (m:maddr) (s:state) : bool =
   let ptr = eval_maddr m s in

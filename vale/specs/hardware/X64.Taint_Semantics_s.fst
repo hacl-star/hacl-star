@@ -4,8 +4,7 @@ open FStar.BaseTypes
 open FStar.List.Tot.Base
 
 open X64.Machine_s
-open X64.Memory_s
-open X64.Semantics_s
+open X64.Bytes_Semantics_s
 module S = X64.Bytes_Semantics_s
 
 // syntax for map accesses, m.[key] and m.[key] <- value
@@ -207,7 +206,7 @@ and taint_eval_while c fuel s0 =
     let s_opt = taint_eval_code body (fuel - 1) s0 in
     match s_opt with
     | None -> None
-    | Some s1 -> if not (s1.state).X64.Memory_s.state.S.ok then Some s1
+    | Some s1 -> if not s1.state.ok then Some s1
       else taint_eval_while c (fuel - 1) s1
 
 (* Used to split the analysis between instructions added for xmm, and other insns *)
