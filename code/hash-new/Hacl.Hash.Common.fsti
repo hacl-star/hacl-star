@@ -47,7 +47,7 @@ let pad_t (a: hash_alg) = len:len_t a -> dst:B.buffer U8.t ->
       B.length dst = pad_length a (len_v a len)))
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer dst) h0 h1) /\
-      B.as_seq h1 dst == Spec.pad a (len_v a len)))
+      Seq.equal (B.as_seq h1 dst) (Spec.pad a (len_v a len))))
 
 let hash_t (a: hash_alg) = b:B.buffer U8.t { B.length b = size_hash a }
 
@@ -59,4 +59,4 @@ let finish_t (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
     B.live h dst))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst == Spec.finish a (B.as_seq h0 s)))
+    Seq.equal (B.as_seq h1 dst) (Spec.finish a (B.as_seq h0 s))))

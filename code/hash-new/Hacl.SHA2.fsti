@@ -42,7 +42,7 @@ let alloca_t (a: sha2_alg) = unit -> ST.StackInline (state a)
   (ensures (fun h0 s h1 ->
     M.(modifies M.loc_none h0 h1) /\
     B.live h1 s /\
-    B.as_seq h1 s = Spec.init a))
+    Seq.equal (B.as_seq h1 s) (Spec.init a)))
 
 val alloca_224: alloca_t SHA2_224
 val alloca_256: alloca_t SHA2_256
@@ -72,7 +72,7 @@ let update_t (a:sha2_alg) =
       B.live h s /\ B.live h block /\ B.disjoint s block))
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer s) h0 h1) /\
-      B.as_seq h1 s == Spec.update a (B.as_seq h0 s) (B.as_seq h0 block)))
+      Seq.equal (B.as_seq h1 s) (Spec.update a (B.as_seq h0 s) (B.as_seq h0 block))))
 
 val update_224: update_t SHA2_224
 val update_256: update_t SHA2_256
