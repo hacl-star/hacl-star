@@ -6,6 +6,8 @@ open Spec.Hash
 open Spec.Hash.Helpers
 open Spec.Hash.Common
 
+#set-options "--max_fuel 0 --max_ifuel 0"
+
 (* Compress full blocks, then pad the partial block and compress the last block *)
 let update_last (a:hash_alg)
   (hash:hash_w a)
