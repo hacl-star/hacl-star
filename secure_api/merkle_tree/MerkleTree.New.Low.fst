@@ -239,7 +239,9 @@ type hash_vv = RV.rvector bhreg
 
 /// The Merkle tree implementation begins here.
 
-/// Compression of two hashes
+/// Utility for hashes
+
+let init_hash = hash_r_init
 
 val hash_2: 
   src1:hash -> src2:hash -> dst:hash ->
@@ -420,6 +422,24 @@ let path_safe h p =
   V.live h (B.get h p 0) /\
   HH.extends (V.frameOf (B.get h p 0)) (B.frameOf p)
 
+val init_path: 
+  r:erid ->
+  HST.ST path
+    (requires (fun h0 -> true))
+    (ensures (fun h0 p h1 -> path_safe h1 p))
+let init_path r =
+  let nrid = new_region_ r in
+  B.malloc r (hash_vec_r_init nrid) 1ul
+
+val clear_path:
+  p:path ->
+  HST.ST unit
+    (requires (fun h0 -> path_safe h0 p))
+    (ensures (fun h0 _ h1 -> 
+      path_safe h1 p /\ V.size_of (B.get h1 p 0) = 0ul))
+let clear_path p =
+  B.upd p 0ul (V.clear (B.index p 0ul))
+
 // Construct the rightmost hashes for a given (incomplete) Merkle tree.
 // This function calculates the Merkle root as well, which is the final
 // accumulator value.
@@ -448,9 +468,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
   if j = 0ul then ()
   else
     (if j % 2ul = 0ul 
-    then (if i <> j 
-	 then RV.assign_copy hcpy rhs lv (V.index (V.index hs lv) (j - 1ul - ofs));
-	 construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc actd)
+    then construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc actd
     else (if actd
     	 then (RV.assign_copy hcpy rhs lv acc;
 	      hash_2 (V.index (V.index hs lv) (j - 1ul - ofs)) acc acc)
@@ -484,13 +502,14 @@ private val mt_get_path_:
   i:uint32_t -> j:uint32_t{i <= j} -> 
   k:uint32_t{j = 0ul || k <= j} ->
   p:path ->
+  actd:bool ->
   HST.ST unit
 	 (requires (fun h0 ->
 	   RV.rv_inv h0 hs /\ RV.rv_inv h0 rhs /\
 	   HH.disjoint (V.frameOf hs) (V.frameOf rhs) /\
 	   mt_safe_elts h0 lv hs i j))
 	 (ensures (fun h0 _ h1 -> true))
-private let rec mt_get_path_ lv hs rhs i j k p =
+private let rec mt_get_path_ lv hs rhs i j k p actd =
   admit ();
   let ofs = offset_of i in
   if j = 0ul then ()
@@ -501,9 +520,10 @@ private let rec mt_get_path_ lv hs rhs i j k p =
     else
       (if k = j then ()
       else if k + 1ul = j
-      then B.upd p 0ul (V.insert pv (V.index rhs lv))
+      then (if actd then B.upd p 0ul (V.insert pv (V.index rhs lv)))
       else B.upd p 0ul (V.insert pv (V.index (V.index hs lv) (k + 1ul - ofs))));
-    mt_get_path_ (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) (k / 2ul) p)
+    mt_get_path_ (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) (k / 2ul) p
+		 (if j % 2 = 0ul then actd else true))
 
 val mt_get_path:
   mt:mt_p -> 
@@ -529,7 +549,7 @@ let mt_get_path mt idx p root =
   else ();
   let ih = V.index (V.index hs 0ul) (idx - ofs) in
   B.upd p 0ul (RV.insert_copy hcpy (B.index p 0ul) ih);
-  mt_get_path_ 0ul hs rhs i (j - 1) idx p;
+  mt_get_path_ 0ul hs rhs i j idx p false;
   j
 
 /// Flushing
