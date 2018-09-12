@@ -76,7 +76,7 @@ let recall_static_fp () =
 #set-options "--max_fuel 1"
 
 noextract
-val alloca: a:sha2_alg -> alloca_t a
+val alloca: a:sha2_alg -> alloca_st a
 noextract
 let alloca a () =
   [@ inline_let ]
@@ -89,19 +89,19 @@ let alloca a () =
 
 #set-options "--max_fuel 0"
 
-let alloca_224: alloca_t SHA2_224 =
+let alloca_224: alloca_st SHA2_224 =
   Tactics.(synth_by_tactic (specialize (alloca SHA2_224) [`%alloca]))
-let alloca_256: alloca_t SHA2_256 =
+let alloca_256: alloca_st SHA2_256 =
   Tactics.(synth_by_tactic (specialize (alloca SHA2_256) [`%alloca]))
-let alloca_384: alloca_t SHA2_384 =
+let alloca_384: alloca_st SHA2_384 =
   Tactics.(synth_by_tactic (specialize (alloca SHA2_384) [`%alloca]))
-let alloca_512: alloca_t SHA2_512 =
+let alloca_512: alloca_st SHA2_512 =
   Tactics.(synth_by_tactic (specialize (alloca SHA2_512) [`%alloca]))
 
 (** Init *)
 
 noextract
-val init: a:sha2_alg -> init_t a
+val init: a:sha2_alg -> init_st a
 noextract
 let init a s =
   match a with
@@ -118,13 +118,13 @@ let init a s =
       IB.recall_contents h512 (S.seq_of_list Constants.h512_l);
       B.blit h512 0ul s 0ul 8ul
 
-let init_224: init_t SHA2_224 =
+let init_224: init_st SHA2_224 =
   Tactics.(synth_by_tactic (specialize (init SHA2_224) [`%init]))
-let init_256: init_t SHA2_256 =
+let init_256: init_st SHA2_256 =
   Tactics.(synth_by_tactic (specialize (init SHA2_256) [`%init]))
-let init_384: init_t SHA2_384 =
+let init_384: init_st SHA2_384 =
   Tactics.(synth_by_tactic (specialize (init SHA2_384) [`%init]))
-let init_512: init_t SHA2_512 =
+let init_512: init_st SHA2_512 =
   Tactics.(synth_by_tactic (specialize (init SHA2_512) [`%init]))
 
 
@@ -353,7 +353,7 @@ let zero (a: sha2_alg): word a =
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 noextract
-val update: a:sha2_alg -> update_t a
+val update: a:sha2_alg -> update_st a
 noextract
 let update a hash block =
   (**) ST.push_frame ();
@@ -369,30 +369,30 @@ let update a hash block =
   C.Loops.in_place_map2 hash hash1 8ul (add a);
   (**) ST.pop_frame ()
 
-let update_224: update_t SHA2_224 =
+let update_224: update_st SHA2_224 =
   Tactics.(synth_by_tactic (specialize (update SHA2_224) [`%update; `%shuffle; `%shuffle_core; `%ws]))
-let update_256: update_t SHA2_256 =
+let update_256: update_st SHA2_256 =
   Tactics.(synth_by_tactic (specialize (update SHA2_256) [`%update; `%shuffle; `%shuffle_core; `%ws]))
-let update_384: update_t SHA2_384 =
+let update_384: update_st SHA2_384 =
   Tactics.(synth_by_tactic (specialize (update SHA2_384) [`%update; `%shuffle; `%shuffle_core; `%ws]))
-let update_512: update_t SHA2_512 =
+let update_512: update_st SHA2_512 =
   Tactics.(synth_by_tactic (specialize (update SHA2_512) [`%update; `%shuffle; `%shuffle_core; `%ws]))
 
-let pad_224: pad_t SHA2_224 =
+let pad_224: pad_st SHA2_224 =
   Tactics.(synth_by_tactic (specialize (Common.pad SHA2_224) [`%Common.pad]))
-let pad_256: Common.pad_t SHA2_256 =
+let pad_256: pad_st SHA2_256 =
   Tactics.(synth_by_tactic (specialize (Common.pad SHA2_256) [`%Common.pad]))
-let pad_384: Common.pad_t SHA2_384 =
+let pad_384: pad_st SHA2_384 =
   Tactics.(synth_by_tactic (specialize (Common.pad SHA2_384) [`%Common.pad]))
-let pad_512: Common.pad_t SHA2_512 =
+let pad_512: pad_st SHA2_512 =
   Tactics.(synth_by_tactic (specialize (Common.pad SHA2_512) [`%Common.pad]))
 
-let finish_224: finish_t SHA2_224 =
+let finish_224: finish_st SHA2_224 =
   Tactics.(synth_by_tactic (specialize (Common.finish SHA2_224) [`%Common.finish]))
-let finish_256: Common.finish_t SHA2_256 =
+let finish_256: finish_st SHA2_256 =
   Tactics.(synth_by_tactic (specialize (Common.finish SHA2_256) [`%Common.finish]))
-let finish_384: Common.finish_t SHA2_384 =
+let finish_384: finish_st SHA2_384 =
   Tactics.(synth_by_tactic (specialize (Common.finish SHA2_384) [`%Common.finish]))
-let finish_512: Common.finish_t SHA2_512 =
+let finish_512: finish_st SHA2_512 =
   Tactics.(synth_by_tactic (specialize (Common.finish SHA2_512) [`%Common.finish]))
 

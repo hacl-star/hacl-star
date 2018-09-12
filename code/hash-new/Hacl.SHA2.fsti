@@ -36,7 +36,7 @@ val recall_static_fp: unit -> ST.Stack unit
   * up to EverCrypt.Hash to perform multiplexing. *)
 
 inline_for_extraction
-let alloca_t (a: sha2_alg) = unit -> ST.StackInline (state a)
+let alloca_st (a: sha2_alg) = unit -> ST.StackInline (state a)
   (requires (fun h ->
     HS.is_stack_region (HS.get_tip h)))
   (ensures (fun h0 s h1 ->
@@ -44,13 +44,13 @@ let alloca_t (a: sha2_alg) = unit -> ST.StackInline (state a)
     B.live h1 s /\
     Seq.equal (B.as_seq h1 s) (Spec.init a)))
 
-val alloca_224: alloca_t SHA2_224
-val alloca_256: alloca_t SHA2_256
-val alloca_384: alloca_t SHA2_384
-val alloca_512: alloca_t SHA2_512
+val alloca_224: alloca_st SHA2_224
+val alloca_256: alloca_st SHA2_256
+val alloca_384: alloca_st SHA2_384
+val alloca_512: alloca_st SHA2_512
 
 inline_for_extraction
-let init_t (a:sha2_alg) = s:state a -> ST.Stack unit
+let init_st (a:sha2_alg) = s:state a -> ST.Stack unit
   (requires (fun h ->
     M.loc_disjoint (B.loc_addr_of_buffer s) (static_fp ()) /\
     B.live h s))
@@ -58,13 +58,13 @@ let init_t (a:sha2_alg) = s:state a -> ST.Stack unit
     M.(modifies (loc_buffer s) h0 h1) /\
     Seq.equal (B.as_seq h1 s) (Spec.init a)))
 
-val init_224: init_t SHA2_224
-val init_256: init_t SHA2_256
-val init_384: init_t SHA2_384
-val init_512: init_t SHA2_512
+val init_224: init_st SHA2_224
+val init_256: init_st SHA2_256
+val init_384: init_st SHA2_384
+val init_512: init_st SHA2_512
 
 inline_for_extraction
-let update_t (a:sha2_alg) =
+let update_st (a:sha2_alg) =
   s:state a ->
   block:B.buffer U8.t { B.length block = size_block a } ->
   ST.Stack unit
@@ -74,17 +74,17 @@ let update_t (a:sha2_alg) =
       M.(modifies (loc_buffer s) h0 h1) /\
       Seq.equal (B.as_seq h1 s) (Spec.update a (B.as_seq h0 s) (B.as_seq h0 block))))
 
-val update_224: update_t SHA2_224
-val update_256: update_t SHA2_256
-val update_384: update_t SHA2_384
-val update_512: update_t SHA2_512
+val update_224: update_st SHA2_224
+val update_256: update_st SHA2_256
+val update_384: update_st SHA2_384
+val update_512: update_st SHA2_512
 
-val pad_224: pad_t SHA2_224
-val pad_256: pad_t SHA2_256
-val pad_384: pad_t SHA2_384
-val pad_512: pad_t SHA2_512
+val pad_224: pad_st SHA2_224
+val pad_256: pad_st SHA2_256
+val pad_384: pad_st SHA2_384
+val pad_512: pad_st SHA2_512
 
-val finish_224: finish_t SHA2_224
-val finish_256: finish_t SHA2_256
-val finish_384: finish_t SHA2_384
-val finish_512: finish_t SHA2_512
+val finish_224: finish_st SHA2_224
+val finish_256: finish_st SHA2_256
+val finish_384: finish_st SHA2_384
+val finish_512: finish_st SHA2_512

@@ -7,7 +7,7 @@ old-%:
 
 # 0. Paths and includes
 
-ROOTS=$(HACL_HOME)/code/hash-new/Hacl.Hash.fst
+ROOTS=$(HACL_HOME)/code/hash-new/Hacl.Hash.fst $(HACL_HOME)/code/hash-new/Hacl.Hash.Incremental.fst
 
 ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 

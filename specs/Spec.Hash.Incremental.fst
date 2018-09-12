@@ -6,7 +6,12 @@ open Spec.Hash
 open Spec.Hash.Helpers
 
 (* Compress full blocks, then pad the partial block and compress the last block *)
-let update_last (a:hash_alg) (hash:hash_w a) (prevlen:nat{prevlen % (size_block a) = 0}) (input:bytes{(S.length input) + prevlen < (max_input8 a)}): Tot (hash_w a) =
+let update_last (a:hash_alg)
+  (hash:hash_w a)
+  (prevlen:nat{prevlen % size_block a = 0})
+  (input:bytes{S.length input + prevlen < max_input8 a}):
+  Tot (hash_w a)
+=
   let total_len = prevlen + S.length input in
   let blocks = pad a total_len in
   update_multi a hash S.(input @| blocks)
