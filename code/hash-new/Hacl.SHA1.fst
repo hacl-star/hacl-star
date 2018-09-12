@@ -310,3 +310,40 @@ let step3
   ()
 
 #reset-options
+
+inline_for_extraction
+let step4
+  (m: block_t)
+  (h: state SHA1)
+: HST.Stack unit
+  (requires (fun h0 ->
+    B.live h0 m /\
+    B.live h0 h /\
+    B.disjoint m h
+  ))
+  (ensures (fun h0 _ h1 ->
+    B.modifies (B.loc_buffer h) h0 h1 /\
+    B.live h1 h /\
+    B.as_seq h1 h == Spec.step4 (E.seq_uint32_of_be size_block_w (B.as_seq h0 m)) (B.as_seq h0 h)
+  ))
+= let ha = B.index h 0ul in
+  let hb = B.index h 1ul in
+  let hc = B.index h 2ul in
+  let hd = B.index h 3ul in
+  let he = B.index h 4ul in
+  step3 m h;
+  let sta = B.index h 0ul in
+  let stb = B.index h 1ul in
+  let stc = B.index h 2ul in
+  let std = B.index h 3ul in
+  let ste = B.index h 4ul in
+  upd5
+    h
+    (sta `U32.add_mod` ha)
+    (stb `U32.add_mod` hb)
+    (stc `U32.add_mod` hc)
+    (std `U32.add_mod` hd)
+    (ste `U32.add_mod` he)
+
+let update h l =
+  step4 l h
