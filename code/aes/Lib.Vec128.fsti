@@ -63,5 +63,9 @@ val vec128_insert32: vec128 -> uint32 -> uint8 -> vec128
 noextract
 val vec128_zero: vec128
 
+noextract
+val vec128_interleave_low64: vec128 -> vec128 -> vec128
+noextract
+val vec128_interleave_high64: vec128 -> vec128 -> vec128
 
 noextract val bit_mask64: uint64 -> uint64

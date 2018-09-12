@@ -59,25 +59,6 @@ let load_felem f lo hi =
     f.(size 3) <- (to_u32 (hi >>. u32 14)) &. mask26;
     f.(size 4) <- to_u32 (hi >>. u32 40)
 
-inline_for_extraction
-val load_felem_le: f:felem -> b:lbytes 16 -> Stack unit
-                   (requires (fun h -> live h f /\ live h b))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
-let load_felem_le f b =
-    let (lo,hi) = load64x2_le b in
-    load_felem f lo hi
-(*
-    let h0 = load32_le (sub b (size 0) (size 4)) in
-    let h1 = load32_le (sub b (size 3) (size 4)) in
-    let h2 = load32_le (sub b (size 6) (size 4)) in
-    let h3 = load32_le (sub b (size 9) (size 4)) in
-    let h4 = load32_le (sub b (size 12) (size 4)) in
-    f.(size 0) <- h0 &. mask26;
-    f.(size 1) <- (h1 >>. u32 2) &. mask26;
-    f.(size 2) <- (h2 >>. u32 4) &. mask26;
-    f.(size 3) <- (h3 >>. u32 6) &. mask26;
-    f.(size 4) <- (h4 >>. u32 8) &. mask26
-*)
 
 inline_for_extraction
 val store_felem: f:felem -> Stack (uint64 * uint64)
@@ -88,21 +69,13 @@ let store_felem f =
     let f1 = ((to_u64 f.(size 2)) >>. u32 12) |. ((to_u64 f.(size 3)) <<. u32 14) |. ((to_u64 f.(size 4)) <<. u32 40) in
     (f0,f1)
 
+
 inline_for_extraction
 val set_bit: f:felem -> i:size_t{size_v i < 130} -> Stack unit
                    (requires (fun h -> live h f))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
 let set_bit f i = 
-  if (i <. size 26) then
-    f.(size 0) <- f.(size 0) |. (u32 1 <<. size_to_uint32 i)
-  else if (i <. size 52) then
-    f.(size 1) <- f.(size 1) |. (u32 1 <<. size_to_uint32 (i -. size 26))
-  else if (i <. size 78) then
-    f.(size 2) <- f.(size 2) |. (u32 1 <<. size_to_uint32 (i -. size 52))
-  else if (i <. size 104) then
-    f.(size 3) <- f.(size 3) |. (u32 1 <<. size_to_uint32 (i -. size 78))
-  else   
-    f.(size 4) <- f.(size 4) |. (u32 1 <<. size_to_uint32 (i -. size 104))
+  f.(i /. size 26) <- f.(i /. size 26) |. (u32 1 <<. size_to_uint32 (i %. size 26))
 
 inline_for_extraction
 val set_bit128: f:felem -> Stack unit
@@ -134,10 +107,10 @@ let copy_felem f1 f2 =
     f1.(size 4) <- f2.(size 4)
 
 inline_for_extraction
-val smul_top_felem: f1:felem -> f2:felem -> Stack unit
+val precompute_shift_reduce: f1:felem -> f2:felem -> Stack unit
                    (requires (fun h -> live h f1 /\ live h f2))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f1) h0 h1))
-let smul_top_felem f1 f2 = 
+let precompute_shift_reduce f1 f2 = 
     f1.(size 0) <- f2.(size 0) *. u32 5;
     f1.(size 1) <- f2.(size 1) *. u32 5;
     f1.(size 2) <- f2.(size 2) *. u32 5;
@@ -383,3 +356,45 @@ let subtract_p f =
   f.(size 2) <- f2 -. p2;
   f.(size 3) <- f3 -. p3;
   f.(size 4) <- f4 -. p4
+
+
+inline_for_extraction
+val reduce_felem: f:felem -> Stack unit
+                   (requires (fun h -> live h f))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+let reduce_felem f =
+    carry_felem f;
+    carry_top_felem f;
+    subtract_p f
+
+
+
+inline_for_extraction
+val load_felem_le: f:felem -> b:lbytes 16 -> Stack unit
+                   (requires (fun h -> live h f /\ live h b))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+let load_felem_le f b =
+    let (lo,hi) = load64x2_le b in
+    load_felem f lo hi
+(*
+    let h0 = load32_le (sub b (size 0) (size 4)) in
+    let h1 = load32_le (sub b (size 3) (size 4)) in
+    let h2 = load32_le (sub b (size 6) (size 4)) in
+    let h3 = load32_le (sub b (size 9) (size 4)) in
+    let h4 = load32_le (sub b (size 12) (size 4)) in
+    f.(size 0) <- h0 &. mask26;
+    f.(size 1) <- (h1 >>. u32 2) &. mask26;
+    f.(size 2) <- (h2 >>. u32 4) &. mask26;
+    f.(size 3) <- (h3 >>. u32 6) &. mask26;
+    f.(size 4) <- (h4 >>. u32 8) &. mask26
+*)
+
+inline_for_extraction
+val store_felem_le: b:lbytes 16 -> f:felem -> Stack unit
+                   (requires (fun h -> live h f /\ live h b))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer b) h0 h1))
+let store_felem_le b f = 
+    carry_felem f;
+    let (f0,f1) = store_felem f in
+    store64x2_le b f0 f1
+

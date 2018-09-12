@@ -67,33 +67,6 @@ let create_felem s =
 
 
 inline_for_extraction
-val carry_felem: #s:field_spec -> f:felem s -> Stack unit
-                   (requires (fun h -> live h f))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
-let carry_felem #s f =
-  match s with
-  | M32 -> F32.carry_felem f
-  | M64 -> F64.carry_felem f
-
-inline_for_extraction
-val carry_top_felem: #s:field_spec -> f:felem s -> Stack unit
-                   (requires (fun h -> live h f))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
-let carry_top_felem #s f =
-  match s with
-  | M32 -> F32.carry_top_felem f
-  | M64 -> F64.carry_top_felem f
-
-inline_for_extraction
-val load_felem: #s:field_spec -> f:felem s -> lo:uint64 -> hi:uint64 -> Stack unit
-                   (requires (fun h -> live h f))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
-let load_felem (#s:field_spec) (f:felem s) (lo:uint64) (hi:uint64) = 
-  match s with
-  | M32 -> F32.load_felem f lo hi
-  | M64 -> F64.load_felem f lo hi
-
-inline_for_extraction
 val load_felem_le: #s:field_spec -> f:felem s -> b:lbytes 16 -> Stack unit
                    (requires (fun h -> live h f /\ live h b))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
@@ -103,13 +76,13 @@ let load_felem_le (#s:field_spec) (f:felem s) (b:lbytes 16) =
   | M64 -> F64.load_felem_le f b
 
 inline_for_extraction
-val store_felem: #s:field_spec -> f:felem s -> Stack (lo:uint64 * hi:uint64)
-                   (requires (fun h -> live h f))
-		   (ensures (fun h0 _ h1 -> h0 == h1))
-let store_felem (#s:field_spec) (f:felem s) =
+val store_felem_le: #s:field_spec -> b:lbytes 16 -> f:felem s -> Stack unit
+                   (requires (fun h -> live h f /\ live h b))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer b) h0 h1))
+let store_felem_le #s b f = 
   match s with
-  | M32 -> F32.store_felem f
-  | M64 -> F64.store_felem f 
+  | M32 -> F32.store_felem_le b f 
+  | M64 -> F64.store_felem_le b f 
 
 inline_for_extraction
 val set_bit: #s:field_spec -> f:felem s -> i:size_t{size_v i < 130} -> Stack unit
@@ -139,24 +112,34 @@ let set_zero (#s:field_spec) (f:felem s) =
   | M32 -> F32.set_zero f
   | M64 -> F64.set_zero f
 
+
 inline_for_extraction
-val smul_top_felem: #s:field_spec -> f1:felem s -> f2:felem s-> Stack unit
+val reduce_felem: #s:field_spec -> f:felem s -> Stack unit
+                   (requires (fun h -> live h f))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+let reduce_felem #s f =
+  match s with
+  | M32 -> F32.reduce_felem f
+  | M64 -> F64.reduce_felem f
+
+inline_for_extraction
+val precompute_shift_reduce: #s:field_spec -> f1:felem s -> f2:felem s-> Stack unit
                    (requires (fun h -> live h f1 /\ live h f2))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f1) h0 h1))
-let smul_top_felem #s f1 f2 = 
+let precompute_shift_reduce #s f1 f2 = 
   match s with
-  | M32 -> F32.smul_top_felem f1 f2
-  | M64 -> F64.smul_top_felem f1 f2
+  | M32 -> F32.precompute_shift_reduce f1 f2
+  | M64 -> F64.precompute_shift_reduce f1 f2
 
 
 inline_for_extraction
-val fadd_mul_felem: #s:field_spec -> acc:felem s -> f1:felem s -> f2:felem s -> f2_20:felem s -> Stack unit
-                   (requires (fun h -> live h acc /\ live h f1 /\ live h f2 /\ live h f2_20))
+val fadd_mul_felem: #s:field_spec -> acc:felem s -> f1:felem s -> f2:felem s -> precomp:felem s -> Stack unit
+                   (requires (fun h -> live h acc /\ live h f1 /\ live h f2 /\ live h precomp))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
-let fadd_mul_felem #s acc f1 f2 f2_20 =
+let fadd_mul_felem #s acc f1 f2 precomp =
   match s with
-  | M32 -> F32.fadd_mul_felem acc f1 f2 f2_20
-  | M64 -> F64.fadd_mul_felem acc f1 f2 f2_20
+  | M32 -> F32.fadd_mul_felem acc f1 f2 precomp
+  | M64 -> F64.fadd_mul_felem acc f1 f2 precomp
 
 inline_for_extraction
 val add_felem: #s:field_spec -> f1:felem s -> f2:felem s -> Stack unit
@@ -166,13 +149,4 @@ let add_felem #s f1 f2=
   match s with
   | M32 -> F32.add_felem f1 f2 
   | M64 -> F64.add_felem f1 f2 
-
-inline_for_extraction
-val subtract_p: #s:field_spec -> f:felem s -> Stack unit
-                   (requires (fun h -> live h f))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
-let subtract_p #s f=
-  match s with
-  | M32 -> F32.subtract_p f
-  | M64 -> F64.subtract_p f
 
