@@ -17,23 +17,8 @@ val alloca: unit -> HST.StackInline (state SHA1)
     B.live h1 s /\
     B.as_seq h1 s = Spec.init))
 
-val static_fp: unit -> GTot B.loc
-
-let loc_in (l: B.loc) (h: HS.mem) =
-  B.(loc_not_unused_in h `loc_includes` l)
-
-(* A useful lemma for clients, to be called at any time before performing an
-   allocation, hence giving them "for free" that their allocation is disjoint from
-   our top-level arrays. *)
-val recall_static_fp: unit -> HST.Stack unit
-  (requires (fun _ -> True))
-  (ensures (fun h0 _ h1 ->
-    B.(modifies loc_none h0 h1) /\
-    static_fp () `loc_in` h1))
-
 val init (s: state SHA1) : HST.Stack unit
   (requires (fun h ->
-    B.loc_disjoint (B.loc_addr_of_buffer s) (static_fp ()) /\
     B.live h s))
   (ensures (fun h0 _ h1 ->
     B.(modifies (loc_buffer s) h0 h1) /\

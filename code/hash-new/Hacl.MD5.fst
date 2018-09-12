@@ -13,33 +13,26 @@ module CE = C.Endianness
 friend Spec.MD5
 
 (** Top-level constant arrays for the MD5 algorithm. *)
-let h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
+let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 let _t = IB.igcmalloc_of_list HS.root Spec.t_as_list
-
-(* We believe it'll be hard to get, "for free", within this module:
-     readonly h224 /\ writable client_state ==> disjoint h224 client_state
-   so, instead, we require the client to do a little bit of reasoning to show
-   that their buffers are disjoint from our top-level readonly state. *)
 
 let alloca () =
   B.alloca_of_list Spec.init_as_list
-
-(* The total footprint of our morally readonly data. *)
-let static_fp () =
-  B.loc_union (B.loc_addr_of_buffer h0) (B.loc_addr_of_buffer _t)
-  
-let recall_static_fp () =
-  B.recall h0;
-  B.recall _t
-
-let init s =
-  IB.recall_contents h0 (Seq.seq_of_list Spec.init_as_list);
-  B.blit h0 0ul s 0ul 4ul
 
 (* We read values from constant buffers through accessors to isolate
    all recall/liveness issues away. Thus, clients will not need to
    know that their output buffers be disjoint from our constant
    immutable buffers. *)
+
+inline_for_extraction
+let h0 (i: U32.t { U32.v i < 4 } ) : HST.Stack U32.t
+  (requires (fun _ -> True))
+  (ensures (fun h res h' ->
+    B.modifies B.loc_none h h' /\
+    res == Seq.index Spec.init (U32.v i)
+  ))
+= IB.recall_contents _h0 Spec.init;
+  B.index _h0 i
 
 inline_for_extraction
 let t (i: U32.t { U32.v i < 64 } ) : HST.Stack U32.t
@@ -50,6 +43,24 @@ let t (i: U32.t { U32.v i < 64 } ) : HST.Stack U32.t
   ))
 = IB.recall_contents _t Spec.t;
   B.index _t i
+
+let seq_index_upd (#t: Type) (s: Seq.seq t) (i: nat) (v: t) (j: nat) : Lemma
+  (requires (i < Seq.length s /\ j < Seq.length s))
+  (ensures (Seq.index (Seq.upd s i v) j == (if j = i then v else Seq.index s j)))
+  [SMTPat (Seq.index (Seq.upd s i v) j)]
+= ()
+
+let init s =
+  let h = HST.get () in
+  let inv (h' : HS.mem) (i: nat) : GTot Type0 =
+    B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 4 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.init 0 i
+  in
+  C.Loops.for 0ul 4ul inv (fun i ->
+    B.upd s i (h0 i);
+    let h' = HST.get () in
+    Seq.snoc_slice_index (B.as_seq h' s) 0 (U32.v i);
+    Seq.snoc_slice_index (Spec.init) 0 (U32.v i)
+  )
 
 inline_for_extraction
 let abcd_t = (b: B.buffer U32.t { B.length b == 4 } )
