@@ -309,13 +309,13 @@ val mt_safe_elts_preserved:
   hs:hash_vv{V.size_of hs = 32ul} -> 
   i:uint32_t -> j:uint32_t{j >= i} ->
   p:loc -> h0:HS.mem -> h1:HS.mem ->
-  Lemma (requires (RV.rv_inv h0 hs /\
+  Lemma (requires (V.live h0 hs /\
 		  mt_safe_elts h0 lv hs i j /\
 		  loc_disjoint p (RV.loc_rvector hs) /\
 		  modifies p h0 h1))
 	(ensures (mt_safe_elts h1 lv hs i j))
 	(decreases (32 - U32.v lv))
-	[SMTPat (RV.rv_inv h0 hs);
+	[SMTPat (V.live h0 hs);
 	SMTPat (mt_safe_elts h0 lv hs i j);
 	SMTPat (loc_disjoint p (RV.loc_rvector hs));
 	SMTPat (modifies p h0 h1)]
@@ -345,20 +345,23 @@ let mt_loc mt =
 
 /// Construction
 
-val create_mt: init:hash ->
+// Note that ...
+private val create_empty_mt: r:erid ->
   HST.ST mt_p
 	 (requires (fun _ -> true))
 	 (ensures (fun h0 mt h1 ->
 	   modifies (mt_loc mt) h0 h1 /\
-	   mt_safe h1 mt))
-let create_mt init =
+	   B.frameOf mt = r /\
+	   mt_safe h1 mt /\
+	   mt_not_full h1 mt))
+private let create_empty_mt r =
   admit ();
-  let hs_region = RV.new_region_ HH.root in
+  let hs_region = RV.new_region_ r in
   let hs = RV.create_rid bhreg 32ul hs_region in
-  RV.assign hs 0ul (RV.insert_copy hcpy (V.index hs 0ul) init);
-  let rhs_region = RV.new_region_ HH.root in
+  // RV.assign hs 0ul (RV.insert_copy hcpy (V.index hs 0ul) init);
+  let rhs_region = RV.new_region_ r in
   let rhs = RV.create_rid hreg 32ul rhs_region in
-  B.malloc HH.root (MT 0ul 1ul hs false rhs) 1ul
+  B.malloc HH.root (MT 0ul 0ul hs false rhs) 1ul
 
 /// Destruction (free)
 
@@ -418,6 +421,20 @@ let mt_insert mt v =
 	(MT?.hs mtv)
 	false // `rhs` is always deprecated right after an insertion.
 	(MT?.rhs mtv))
+
+val create_mt: r:erid -> init:hash ->
+  HST.ST mt_p
+	 (requires (fun h0 -> 
+	   B.live h0 init /\
+	   HH.disjoint r (B.frameOf init)))
+	 (ensures (fun h0 mt h1 ->
+	   modifies (mt_loc mt) h0 h1 /\
+	   mt_safe h1 mt))
+let create_mt r init =
+  let mt = create_empty_mt r in
+  let hh1 = HST.get () in
+  mt_insert mt init;
+  mt
 
 /// Getting the Merkle root and path
 
