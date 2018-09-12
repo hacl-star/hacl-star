@@ -149,6 +149,21 @@ inline_for_extraction val alloc_nospec: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Ty
     (ensures (fun h0 r h1 -> preserves_live h0 h1 /\
 		          modifies1 write h0 h1))
 
+inline_for_extraction val alloc_nospec2: #h0:mem -> #a:Type0 -> #b:Type0 -> #w0:Type0 -> #w1:Type0 -> #len:size_nat -> #wlen0:size_nat -> #wlen1:size_nat -> clen:size_t{v clen == len} -> init:a ->
+  write0:lbuffer w0 wlen0 -> write1:lbuffer w1 wlen1 ->
+  impl:(buf:lbuffer a len -> Stack b
+    (requires (fun h -> creates1 #a #len buf h0 h /\
+		     preserves_live h0 h /\
+		     modifies1 buf h0 h /\
+		     live h0 write0 /\ live h0 write1 /\
+           disjoint write0 write1 /\
+           disjoint write1 write0))
+    (ensures (fun h r h' -> preserves_live h h' /\ modifies3 buf write0 write1 h h'))) ->
+  Stack b
+    (requires (fun h -> h == h0 /\ live h write0 /\ live h write1 /\ disjoint write0 write1 /\ disjoint write1 write0))
+    (ensures (fun h0 _ h1 -> preserves_live h0 h1 /\
+		          modifies2 write0 write1 h0 h1))
+
 (* (\** This function will allocate one buffer, write it and write in 2 other buffers, *)
 (*     the value of the first 'write' buffer is functionnally caracterized while the *)
 (*     functionnal behavior of the second 'write2' buffer is discarded *)
