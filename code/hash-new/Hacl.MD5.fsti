@@ -24,4 +24,4 @@ val init (s: state MD5) : HST.Stack unit
     B.(modifies (loc_buffer s) h0 h1) /\
     Seq.equal (B.as_seq h1 s) Spec.init))
 
-val update: update_t MD5
+val update: update_st MD5

@@ -63,17 +63,6 @@ val init_256: init_st SHA2_256
 val init_384: init_st SHA2_384
 val init_512: init_st SHA2_512
 
-inline_for_extraction
-let update_st (a:sha2_alg) =
-  s:state a ->
-  block:B.buffer U8.t { B.length block = size_block a } ->
-  ST.Stack unit
-    (requires (fun h ->
-      B.live h s /\ B.live h block /\ B.disjoint s block))
-    (ensures (fun h0 _ h1 ->
-      M.(modifies (loc_buffer s) h0 h1) /\
-      Seq.equal (B.as_seq h1 s) (Spec.update a (B.as_seq h0 s) (B.as_seq h0 block))))
-
 val update_224: update_st SHA2_224
 val update_256: update_st SHA2_256
 val update_384: update_st SHA2_384
