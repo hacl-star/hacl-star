@@ -1,8 +1,5 @@
 module Hacl.SHA1
 
-include Hacl.Hash.Common
-open Spec.Hash.Helpers
-
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module HS = FStar.HyperStack

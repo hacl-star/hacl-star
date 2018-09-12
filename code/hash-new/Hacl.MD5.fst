@@ -1,8 +1,5 @@
 module Hacl.MD5
 
-include Hacl.Hash.Common
-open Spec.Hash.Helpers
-
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module HS = FStar.HyperStack
@@ -17,7 +14,7 @@ friend Spec.MD5
 
 (** Top-level constant arrays for the MD5 algorithm. *)
 let h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
-let t = IB.igcmalloc_of_list HS.root Spec.t_as_list
+let _t = IB.igcmalloc_of_list HS.root Spec.t_as_list
 
 (* We believe it'll be hard to get, "for free", within this module:
      readonly h224 /\ writable client_state ==> disjoint h224 client_state
@@ -29,15 +26,30 @@ let alloca () =
 
 (* The total footprint of our morally readonly data. *)
 let static_fp () =
-  B.loc_union (B.loc_addr_of_buffer h0) (B.loc_addr_of_buffer t)
+  B.loc_union (B.loc_addr_of_buffer h0) (B.loc_addr_of_buffer _t)
   
 let recall_static_fp () =
   B.recall h0;
-  B.recall t
+  B.recall _t
 
 let init s =
   IB.recall_contents h0 (Seq.seq_of_list Spec.init_as_list);
   B.blit h0 0ul s 0ul 4ul
+
+(* We read values from constant buffers through accessors to isolate
+   all recall/liveness issues away. Thus, clients will not need to
+   know that their output buffers be disjoint from our constant
+   immutable buffers. *)
+
+inline_for_extraction
+let t (i: U32.t { U32.v i < 64 } ) : HST.Stack U32.t
+  (requires (fun _ -> True))
+  (ensures (fun h res h' ->
+    B.modifies B.loc_none h h' /\
+    res == Seq.index Spec.t (U32.v i)
+  ))
+= IB.recall_contents _t Spec.t;
+  B.index _t i
 
 inline_for_extraction
 let abcd_t = (b: B.buffer U32.t { B.length b == 4 } )
@@ -70,7 +82,6 @@ val round_op_gen
   (requires (fun h ->
     B.live h abcd /\
     B.live h x /\
-    B.loc_disjoint (B.loc_union (B.loc_buffer x) (B.loc_buffer abcd)) (static_fp ()) /\
     B.disjoint abcd x
   ))
   (ensures (fun h _ h' ->
@@ -84,7 +95,6 @@ val round_op_gen
 
 let round_op_gen f abcd x a b c d k s i =
   let h = HST.get () in
-  IB.recall_contents t Spec.t;
   assert_norm (64 / 4 == 16);
   assert_norm (64 % 4 == 0);
   let sx = Ghost.hide (E.seq_uint32_of_be 16 (B.as_seq h x)) in
@@ -94,8 +104,7 @@ let round_op_gen f abcd x a b c d k s i =
   let vd = B.index abcd d in
   let xk = CE.index_32_be x k in
   assert (xk == Seq.index (Ghost.reveal sx) (U32.v k));
-  let ti = B.index t (i `U32.sub` 1ul) in
-  assert (ti == Seq.index Spec.t (U32.v i - 1));
+  let ti = t (i `U32.sub` 1ul) in
   let v = (vb `U32.add_mod` ((va `U32.add_mod` f vb vc vd `U32.add_mod` xk `U32.add_mod` ti) <<< s)) in
   B.upd abcd a v;
   let h' = HST.get () in
@@ -119,7 +128,6 @@ let round1
   (requires (fun h ->
     B.live h abcd /\
     B.live h x /\
-    B.loc_disjoint (B.loc_union (B.loc_buffer x) (B.loc_buffer abcd)) (static_fp ()) /\
     B.disjoint abcd x
   ))
   (ensures (fun h _ h' ->
@@ -162,7 +170,6 @@ let round2
   (requires (fun h ->
     B.live h abcd /\
     B.live h x /\
-    B.loc_disjoint (B.loc_union (B.loc_buffer x) (B.loc_buffer abcd)) (static_fp ()) /\
     B.disjoint abcd x
   ))
   (ensures (fun h _ h' ->
@@ -205,7 +212,6 @@ let round3
   (requires (fun h ->
     B.live h abcd /\
     B.live h x /\
-    B.loc_disjoint (B.loc_union (B.loc_buffer x) (B.loc_buffer abcd)) (static_fp ()) /\
     B.disjoint abcd x
   ))
   (ensures (fun h _ h' ->
@@ -248,7 +254,6 @@ let round4
   (requires (fun h ->
     B.live h abcd /\
     B.live h x /\
-    B.loc_disjoint (B.loc_union (B.loc_buffer x) (B.loc_buffer abcd)) (static_fp ()) /\
     B.disjoint abcd x
   ))
   (ensures (fun h _ h' ->
@@ -288,7 +293,6 @@ let rounds
   (requires (fun h ->
     B.live h abcd /\
     B.live h x /\
-    B.loc_disjoint (B.loc_union (B.loc_buffer x) (B.loc_buffer abcd)) (static_fp ()) /\
     B.disjoint abcd x
   ))
   (ensures (fun h _ h' ->
@@ -329,7 +333,6 @@ let update'
   (x: x_t)
 : HST.Stack unit
     (requires (fun h ->
-      B.loc_disjoint (B.loc_union (B.loc_buffer abcd) (B.loc_buffer x)) (static_fp ()) /\
       B.live h abcd /\ B.live h x /\ B.disjoint abcd x))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer abcd) h0 h1) /\
@@ -356,5 +359,10 @@ let update'
     (d `U32.add_mod` dd)
 
 #reset-options
+
+(* NOTE: do not remove this, and do not move this into the definition
+   of `update` below: within `update` the context will be too crowded
+   for F* to complete a proof of equality between two functions *)
+let _ : squash (Spec.Hash.update MD5 == Spec.update) = ()
 
 let update abcd x = update' abcd x

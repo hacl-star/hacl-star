@@ -38,6 +38,18 @@ let size_len_ul (a: hash_alg): n:U32.t { U32.v n = size_len_8 a } =
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
 
+// Generic stateful type for update, for any hash_alg.
+inline_for_extraction
+let update_t (a:hash_alg) =
+  s:state a ->
+  block:B.buffer U8.t { B.length block = size_block a } ->
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h s /\ B.live h block /\ B.disjoint s block))
+    (ensures (fun h0 _ h1 ->
+      B.(modifies (loc_buffer s) h0 h1) /\
+      B.as_seq h1 s == Spec.Hash.update a (B.as_seq h0 s) (B.as_seq h0 block)))
+
 inline_for_extraction
 let pad_t (a: hash_alg) = len:len_t a -> dst:B.buffer U8.t ->
   ST.Stack unit

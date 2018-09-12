@@ -16,7 +16,7 @@ open Hacl.Hash.Lemmas
 open Spec.Hash
 open FStar.Mul
 
-#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 128"
 
 noextract
 let mk_update_multi a update s blocks n_blocks =
@@ -71,3 +71,11 @@ let update_multi_sha2_384: update_multi_t SHA2_384 =
 let update_multi_sha2_512: update_multi_t SHA2_512 =
   Tactics.(synth_by_tactic
     (specialize (mk_update_multi SHA2_512 Hacl.SHA2.update_512) [`%mk_update_multi]))
+
+let update_multi_sha1: update_multi_t SHA1 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_update_multi SHA1 Hacl.SHA1.update) [`%mk_update_multi]))
+
+let update_multi_md5: update_multi_t MD5 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_update_multi MD5 Hacl.MD5.update) [`%mk_update_multi]))

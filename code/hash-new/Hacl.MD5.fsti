@@ -1,7 +1,7 @@
 module Hacl.MD5
 
-include Hacl.Hash.Common
 open Spec.Hash.Helpers
+include Hacl.Hash.Common // must come last, for update_t
 
 module U8 = FStar.UInt8
 module B = LowStar.Buffer
@@ -39,14 +39,4 @@ val init (s: state MD5) : HST.Stack unit
     B.(modifies (loc_buffer s) h0 h1) /\
     Seq.equal (B.as_seq h1 s) Spec.init))
 
-val update
-  (s:state MD5)
-  (block:B.buffer U8.t { B.length block = size_block MD5 })
-: HST.Stack unit
-    (requires (fun h ->
-      B.loc_disjoint (B.loc_union (B.loc_buffer s) (B.loc_buffer block)) (static_fp ()) /\
-      B.live h s /\ B.live h block /\ B.disjoint s block))
-    (ensures (fun h0 _ h1 ->
-      B.(modifies (loc_buffer s) h0 h1) /\
-      B.live h1 s /\
-      B.as_seq h1 s == Spec.update (B.as_seq h0 s) (B.as_seq h0 block)))
+val update: update_t MD5
