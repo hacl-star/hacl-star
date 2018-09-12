@@ -12,6 +12,8 @@ open Spec.Hash.Helpers
 open FStar.Mul
 
 include Hacl.SHA2
+include Hacl.SHA1
+include Hacl.MD5
 
 inline_for_extraction
 let blocks_t (a: hash_alg) =
