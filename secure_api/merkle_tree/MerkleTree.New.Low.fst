@@ -192,7 +192,7 @@ let hash_vec_r_sep v p h0 h1 =
 
 val hash_vec_irepr: Ghost.erased hash_vec_repr
 let hash_vec_irepr =
-  Ghost.hide (S.create 1 (Ghost.reveal hash_irepr))
+  Ghost.hide S.empty
 
 private val hash_vec_r_init: 
   r:erid ->
@@ -206,7 +206,6 @@ private val hash_vec_r_init:
       hash_vec_region_of v = r /\
       hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr))
 private let hash_vec_r_init r =
-  admit ();
   let nrid = new_region_ r in
   let r_init = Rgl?.r_init hreg in
   let ia = r_init nrid in

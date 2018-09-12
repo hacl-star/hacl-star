@@ -172,7 +172,7 @@ let vector_r_sep #a #rg v p h0 h1 =
 val vector_irepr:
   #a:Type -> rg:regional a -> Ghost.erased (vector_repr rg)
 let vector_irepr #a rg =
-  Ghost.hide (S.create 1 (Ghost.reveal (Rgl?.irepr rg)))
+  Ghost.hide S.empty
 
 val vector_r_init: 
   #a:Type -> #rg:regional a -> r:erid ->
@@ -189,9 +189,7 @@ let vector_r_init #a #rg r =
   let nrid = new_region_ r in
   let r_init = Rgl?.r_init rg in
   let ia = r_init nrid in
-  let init = V.create_reserve 1ul ia r in
-  admit ();
-  init
+  V.create_reserve 1ul ia r
 
 val vector_r_free:
   #a:Type -> #rg:regional a -> v:rvector rg ->
