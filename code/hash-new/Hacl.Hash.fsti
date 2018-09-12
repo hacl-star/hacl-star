@@ -12,6 +12,8 @@ open Spec.Hash.Helpers
 open FStar.Mul
 
 include Hacl.SHA2
+include Hacl.SHA1
+include Hacl.MD5
 
 inline_for_extraction
 let blocks_t (a: hash_alg) =
@@ -51,3 +53,5 @@ val update_multi_sha2_224: update_multi_st SHA2_224
 val update_multi_sha2_256: update_multi_st SHA2_256
 val update_multi_sha2_384: update_multi_st SHA2_384
 val update_multi_sha2_512: update_multi_st SHA2_512
+// val update_multi_sha1: update_multi_st SHA1
+// val update_multi_md5: update_multi_st MD5
