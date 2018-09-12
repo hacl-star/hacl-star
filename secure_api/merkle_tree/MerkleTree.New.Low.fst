@@ -309,15 +309,22 @@ val mt_safe_elts_preserved:
   hs:hash_vv{V.size_of hs = 32ul} -> 
   i:uint32_t -> j:uint32_t{j >= i} ->
   p:loc -> h0:HS.mem -> h1:HS.mem ->
-  Lemma (requires (mt_safe_elts h0 lv hs i j /\
+  Lemma (requires (RV.rv_inv h0 hs /\
+		  mt_safe_elts h0 lv hs i j /\
 		  loc_disjoint p (RV.loc_rvector hs) /\
 		  modifies p h0 h1))
 	(ensures (mt_safe_elts h1 lv hs i j))
-	[SMTPat (mt_safe_elts h0 lv hs i j);
+	(decreases (32 - U32.v lv))
+	[SMTPat (RV.rv_inv h0 hs);
+	SMTPat (mt_safe_elts h0 lv hs i j);
 	SMTPat (loc_disjoint p (RV.loc_rvector hs));
 	SMTPat (modifies p h0 h1)]
-let mt_safe_elts_preserved lv hs i j p h0 h1 =
-  admit ()
+let rec mt_safe_elts_preserved lv hs i j p h0 h1 =
+  if lv = 32ul then ()
+  else (assert (loc_includes (RV.loc_rvector hs)
+    			     (V.loc_vector_within hs lv (lv + 1ul)));
+       V.get_preserved hs lv p h0 h1;
+       mt_safe_elts_preserved (lv + 1ul) hs (i / 2ul) (j / 2ul) p h0 h1)
 
 val mt_safe: HS.mem -> mt_p -> GTot Type0
 let mt_safe h mt =
