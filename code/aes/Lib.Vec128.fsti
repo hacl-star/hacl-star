@@ -26,6 +26,10 @@ val vec128_xor: vec128 -> vec128 -> vec128
 noextract
 val vec128_or: vec128 -> vec128 -> vec128
 noextract
+val vec128_and: vec128 -> vec128 -> vec128
+noextract
+val vec128_lognot: vec128 -> vec128
+noextract
 val vec128_shift_left: vec128 -> size_t -> vec128
 noextract
 val vec128_shift_right: vec128 -> size_t -> vec128
@@ -37,6 +41,9 @@ noextract
 val vec128_shuffle32: vec128 -> uint8 -> vec128
 noextract
 val vec128_shuffle32_spec: uint8 -> uint8 -> uint8 -> uint8 -> uint8
+
+noextract
+val vec128_load64: lo:uint64 -> hi:uint64 -> vec128
 
 noextract
 val vec128_load_le: b:lbytes 16 -> ST vec128
@@ -65,7 +72,19 @@ val vec128_zero: vec128
 
 noextract
 val vec128_interleave_low64: vec128 -> vec128 -> vec128
+
 noextract
 val vec128_interleave_high64: vec128 -> vec128 -> vec128
+
+noextract
+val vec128_smul64: vec128 -> uint64 -> vec128
+
+noextract
+val vec128_mul64: vec128 -> vec128 -> vec128
+
+noextract
+val vec128_add64: vec128 -> vec128 -> vec128
+noextract
+val vec128_sub64: vec128 -> vec128 -> vec128
 
 noextract val bit_mask64: uint64 -> uint64

@@ -28,6 +28,12 @@ typedef __m128i Lib_Vec128_vec128;
 #define Lib_Vec128_vec128_or(x0, x1) \
   (_mm_or_si128(x0, x1))
 
+#define Lib_Vec128_vec128_and(x0, x1) \
+  (_mm_and_si128(x0, x1))
+
+#define Lib_Vec128_vec128_lognot(x0) \
+  (_mm_xor_si128(x0, _mm_set1_epi32(-1)))
+
 #define Lib_Vec128_vec128_shift_left(x0, x1) \
   (_mm_slli_si128(x0, (x1)/8))
 
@@ -66,4 +72,26 @@ typedef __m128i Lib_Vec128_vec128;
   (_mm_set1_epi16((uint16_t)0))
 
 #define Lib_Vec128_bit_mask64(x) -((x) & 1)
+
+#define Lib_Vec128_vec128_add64(x0, x1) \
+  (_mm_add_epi64(x0, x1))
+
+#define Lib_Vec128_vec128_sub64(x0, x1)		\
+  (_mm_sub_epi64(x0, x1))
+
+#define Lib_Vec128_vec128_mul64(x0, x1) \
+  (_mm_mul_epu32(x0, x1))
+
+#define Lib_Vec128_vec128_smul64(x0, x1) \
+  (_mm_mul_epu32(x0, _mm_set1_epi64x(x1)))
+
+#define Lib_Vec128_vec128_load64(x1, x2) \
+  (_mm_set_epi64x(x1, x2)) // hi lo
+
+#define Lib_Vec128_vec128_interleave_low64(x1, x2) \
+  (_mm_unpacklo_epi64(x1, x2)) 
+
+#define Lib_Vec128_vec128_interleave_high64(x1, x2) \
+  (_mm_unpackhi_epi64(x1, x2)) 
+
 #endif

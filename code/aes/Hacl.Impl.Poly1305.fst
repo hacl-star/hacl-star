@@ -126,12 +126,12 @@ let poly1305_update #s ctx text len =
     (fun i ->
        let b = sub text (i *. size 16) (size 16) in
        poly1305_encode_block e b;
-       fadd_mul_felem acc e r precomp);
+       fadd_mul acc e r precomp);
   let rem = len %. size 16 in
   if (rem >. size 0) then (
      let b = sub text (blocks *. size 16) (size 16) in
      poly1305_encode_last e b rem;
-     fadd_mul_felem acc e r precomp);
+     fadd_mul acc e r precomp);
   pop_frame()
 
 inline_for_extraction
@@ -143,7 +143,7 @@ let poly1305_finish #s ctx tag =
   let acc = get_acc ctx in
   let sk = get_s ctx in
   reduce_felem acc;
-  add_felem acc sk;
+  fadd acc acc sk;
   store_felem_le tag acc;
   admit()
 

@@ -121,8 +121,8 @@ let precompute_shift_reduce f1 f2 =
 
 //[@ CInline]
 inline_for_extraction
-val add_felem: f1:felem  -> f2:felem  -> Stack unit
-                   (requires (fun h -> live h f1 /\ live h f2 /\ 
+val fadd: out:felem -> f1:felem  -> f2:felem  -> Stack unit
+                   (requires (fun h -> live h f1 /\ live h f2 /\ live h out /\
 		    (let s1 = as_seq h f1 in
 		     let s2 = as_seq h f2 in
 		     uint_v s1.[size 0] + uint_v s2.[size 0] <= maxint U32 /\ 
@@ -132,11 +132,11 @@ val add_felem: f1:felem  -> f2:felem  -> Stack unit
 		     uint_v s1.[size 4] + uint_v s2.[size 4] <= maxint U32 
 		     )))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f1) h0 h1 /\
-				         as_nat h1 f1 ==
+				         as_nat h1 out ==
 					 as_nat h0 f1 +
 					 as_nat h0 f2))		
 [@ CInline]
-let add_felem f1 f2 = 
+let fadd out f1 f2 = 
   let f10 = f1.(size 0) in
   let f11 = f1.(size 1) in
   let f12 = f1.(size 2) in
@@ -147,11 +147,11 @@ let add_felem f1 f2 =
   let f22 = f2.(size 2) in
   let f23 = f2.(size 3) in
   let f24 = f2.(size 4) in
-  f1.(size 0) <- f10 +. f20;
-  f1.(size 1) <- f11 +. f21;
-  f1.(size 2) <- f12 +. f22;
-  f1.(size 3) <- f13 +. f23;
-  f1.(size 4) <- f14 +. f24
+  out.(size 0) <- f10 +. f20;
+  out.(size 1) <- f11 +. f21;
+  out.(size 2) <- f12 +. f22;
+  out.(size 3) <- f13 +. f23;
+  out.(size 4) <- f14 +. f24
 
 //[@ CInline]
 inline_for_extraction
@@ -200,6 +200,7 @@ let smul_add_felem out u1 f2 =
   out.(size 2) <- o2 +. to_u64 u1 *. to_u64 f22;
   out.(size 3) <- o3 +. to_u64 u1 *. to_u64 f23;
   out.(size 4) <- o4 +. to_u64 u1 *. to_u64 f24
+
 
 [@ CInline]
 val mul_felem: out:felem_wide -> f1:felem -> f2:felem -> f2_20:felem  -> Stack unit
@@ -252,11 +253,11 @@ let carry26_wide l cin =
 
 //[@ CInline]
 inline_for_extraction
-val carry_wide_felem: out:felem -> inp:felem_wide -> Stack unit
+val carry_wide: out:felem -> inp:felem_wide -> Stack uint32
                    (requires (fun h -> live h out /\ live h inp))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
 [@ CInline]
-let carry_wide_felem out inp =
+let carry_wide out inp =
   let i0 = inp.(size 0) in
   let i1 = inp.(size 1) in
   let i2 = inp.(size 2) in
@@ -267,14 +268,38 @@ let carry_wide_felem out inp =
   let tmp2,carry = carry26_wide i2 carry in
   let tmp3,carry = carry26_wide i3 carry in
   let tmp4,carry = carry26_wide i4 carry in
-//  let tmp0,carry = carry26 tmp0 (carry *. u32 5) in
-//  let tmp1 = tmp1 +. carry in
-  let tmp0 = tmp0 +. (carry *. u32 5) in
   out.(size 0) <- tmp0;
   out.(size 1) <- tmp1;
   out.(size 2) <- tmp2;
   out.(size 3) <- tmp3; 
-  out.(size 4) <- tmp4  
+  out.(size 4) <- tmp4;
+  carry
+
+//[@ CInline]
+inline_for_extraction
+val carry0: out:felem -> carry:uint32 -> Stack unit
+                   (requires (fun h -> live h out))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
+[@ CInline]
+let carry0 out carry =
+  let i0 = out.(size 0) in
+  let tmp0 = i0 +. carry in
+  out.(size 0) <- tmp0
+
+//[@ CInline]
+inline_for_extraction
+val carry01: out:felem -> carry:uint32 -> Stack unit
+                   (requires (fun h -> live h out))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
+[@ CInline]
+let carry01 out carry =
+  let i0 = out.(size 0) in
+  let i1 = out.(size 1) in
+  let tmp0,carry = carry26 i0 carry in
+  let tmp1 = i1 +. carry in
+  out.(size 0) <- tmp0;
+  out.(size 1) <- tmp1
+
 
 //[@ CInline]
 inline_for_extraction
@@ -319,16 +344,30 @@ let carry_top_felem f =
   f.(size 4) <- tmp4  
 
 inline_for_extraction
-val fadd_mul_felem: acc:felem -> f1:felem -> f2:felem -> f2_20:felem -> Stack unit
-                   (requires (fun h -> live h acc /\ live h f1 /\ live h f2 /\ live h f2_20))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
-let fadd_mul_felem acc f1 f2 f2_20 =
+val fmul: out:felem -> f1:felem -> f2:felem -> f2_20:felem -> Stack unit
+                   (requires (fun h -> live h out /\ live h f1 /\ live h f2 /\ live h f2_20))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
+let fmul out f1 f2 f2_20 =
   push_frame();
   let tmp = create (u64 0) (size 5) in
   admit();
-  add_felem acc f1;
-  mul_felem tmp acc f2 f2_20;
-  carry_wide_felem acc tmp;
+  mul_felem tmp f1 f2 f2_20;
+  let carry = carry_wide out tmp in
+  carry01 out carry;
+  pop_frame()
+
+inline_for_extraction
+val fadd_mul: out:felem -> f1:felem -> f2:felem -> f2_20:felem -> Stack unit
+                   (requires (fun h -> live h out /\ live h f1 /\ live h f2 /\ live h f2_20))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
+let fadd_mul out f1 f2 f2_20 =
+  push_frame();
+  let tmp = create (u64 0) (size 5) in
+  admit();
+  fadd out out f1;
+  mul_felem tmp out f2 f2_20;
+  let carry = carry_wide out tmp in
+  carry01 out carry;
   pop_frame()
 
 inline_for_extraction
