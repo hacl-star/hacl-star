@@ -23,6 +23,62 @@ val same_domain_eval_ins (c:TS.tainted_code{Ins? c}) (f:nat) (s0:TS.traceState) 
      same_domain sv (Some?.v s1))
   )
 
+val eq_modulo_heap: h1:BS.heap -> h2:BS.heap -> prop0
+
+val eq_modulo_heap_idem: h:BS.heap -> 
+  Lemma (eq_modulo_heap h h)
+  [SMTPat (eq_modulo_heap h h)]
+
+val eq_modulo_heap_sym: h1:BS.heap -> h2:BS.heap -> Lemma
+  (eq_modulo_heap h1 h2 <==> eq_modulo_heap h2 h1)
+  [SMTPat (eq_modulo_heap h1 h2)]
+
+val eq_modulo_heap_trans: h1:BS.heap -> h2:BS.heap -> h3:BS.heap -> Lemma
+  (requires eq_modulo_heap h1 h2 /\ eq_modulo_heap h2 h3)
+  (ensures eq_modulo_heap h1 h3)
+  [SMTPat (eq_modulo_heap h1 h2); SMTPat (eq_modulo_heap h2 h3)]
+
+val eq_modulo_heap_valid: ptr:int -> h1:BS.heap -> h2:BS.heap -> Lemma
+  (requires eq_modulo_heap h1 h2)
+  (ensures BS.valid_addr64 ptr h1 <==> BS.valid_addr64 ptr h2)
+  [SMTPat (BS.valid_addr64 ptr h1); SMTPat (eq_modulo_heap h1 h2)]
+
+val eq_modulo_heap_load: ptr:int -> h1:BS.heap -> h2:BS.heap -> Lemma
+  (requires eq_modulo_heap h1 h2 /\ BS.valid_addr64 ptr h1)
+  (ensures BS.get_heap_val64 ptr h1 == BS.get_heap_val64 ptr h2)
+  [SMTPat (BS.get_heap_val64 ptr h1); SMTPat (eq_modulo_heap h1 h2)]
+
+val eq_modulo_heap_store: ptr:int -> v:nat64 -> h1:BS.heap -> h2:BS.heap -> Lemma
+  (requires eq_modulo_heap h1 h2 /\ BS.valid_addr64 ptr h1)
+  (ensures eq_modulo_heap (BS.update_heap64 ptr v h1) (BS.update_heap64 ptr v h2))
+  [SMTPat (BS.update_heap64 ptr v h1); SMTPat (eq_modulo_heap h1 h2)]
+
+val eq_modulo_heap_valid128: ptr:int -> h1:BS.heap -> h2:BS.heap -> Lemma
+  (requires eq_modulo_heap h1 h2)
+  (ensures BS.valid_addr128 ptr h1 <==> BS.valid_addr128 ptr h2)
+  [SMTPat (BS.valid_addr128 ptr h1); SMTPat (eq_modulo_heap h1 h2)]
+
+val eq_modulo_heap_load128: ptr:int -> h1:BS.heap -> h2:BS.heap -> Lemma
+  (requires eq_modulo_heap h1 h2 /\ BS.valid_addr128 ptr h1)
+  (ensures BS.get_heap_val128 ptr h1 == BS.get_heap_val128 ptr h2)
+  [SMTPat (BS.get_heap_val128 ptr h1); SMTPat (eq_modulo_heap h1 h2)]
+
+val eq_modulo_heap_store128: ptr:int -> v:quad32 -> h1:BS.heap -> h2:BS.heap -> Lemma
+  (requires eq_modulo_heap h1 h2 /\ BS.valid_addr128 ptr h1)
+  (ensures eq_modulo_heap (BS.update_heap128 ptr v h1) (BS.update_heap128 ptr v h2))
+  [SMTPat (BS.update_heap128 ptr v h1); SMTPat (eq_modulo_heap h1 h2)]
+
+let state_eq_BS (s1 s2:BS.state) =
+  s1.BS.ok == s2.BS.ok /\
+  s1.BS.flags == s2.BS.flags /\
+  s1.BS.regs == s2.BS.regs /\
+  s1.BS.xmms == s2.BS.xmms /\
+  eq_modulo_heap s1.BS.mem s2.BS.mem
+
+let state_eq_S (s1 s2:TS.traceState) =
+  s1.TS.memTaint == s2.TS.memTaint /\
+  state_eq_BS s1.TS.state s2.TS.state
+
 val state_to_S : s:state -> GTot (s':TS.traceState{same_domain s s'})
 val state_of_S : sv:state -> (s:TS.traceState{same_domain sv s}) -> GTot state
 
@@ -95,7 +151,7 @@ val lemma_of_to : s:state -> Lemma
   [SMTPat (state_of_S s (state_to_S s))]
 
 val lemma_to_of : sv:state -> (s:TS.traceState{same_domain sv s}) -> Lemma
-  (ensures state_to_S (state_of_S sv s) == {s with TS.trace = []})
+  (ensures state_eq_S (state_to_S (state_of_S sv s)) s)
   [SMTPat (state_to_S (state_of_S sv s))]
 
 unfold let op_String_Access (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y

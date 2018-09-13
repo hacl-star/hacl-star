@@ -19,6 +19,54 @@ let same_domain_eval_ins c f s0 sv = match c with
       X64.Bytes_Semantics.eval_ins_domains ins s0;
       ME.lemma_same_domains sv.mem s0.TS.state.BS.mem s1.TS.state.BS.mem
 
+let eq_modulo_heap h1 h2 =
+  Set.equal (Map.domain h1) (Map.domain h2) /\
+  (forall (x:int). Map.contains h1 x /\ Map.contains h2 x ==> (Map.sel h1 x == Map.sel h2 x) )
+
+let eq_modulo_heap_idem h = ()
+
+let eq_modulo_heap_sym h1 h2 = ()
+
+let eq_modulo_heap_trans h1 h2 h3 = ()
+
+let eq_modulo_heap_valid ptr h1 h2 = ()
+
+let eq_modulo_heap_load ptr h1 h2 = Opaque_s.reveal_opaque BS.get_heap_val64_def
+  
+let eq_modulo_heap_store ptr v h1 h2 = Opaque_s.reveal_opaque BS.update_heap64_def
+
+let eq_modulo_heap_valid128 ptr h1 h2 = ()
+
+let eq_modulo_heap_load128 ptr h1 h2 =
+  Opaque_s.reveal_opaque BS.get_heap_val128_def;
+  Opaque_s.reveal_opaque BS.get_heap_val32_def
+
+open Words_s
+
+let eq_modulo_heap_store32 (ptr:int) (v:nat32) (h1 h2:BS.heap) : Lemma
+  (requires eq_modulo_heap h1 h2 /\ 
+    BS.valid_addr ptr h1 /\ BS.valid_addr (ptr+1) h1 /\ 
+    BS.valid_addr (ptr+2) h1 /\ BS.valid_addr (ptr+3) h1)
+  (ensures (
+    let h1' = BS.update_heap32 ptr v h1 in 
+    let h2' = BS.update_heap32 ptr v h2 in
+    eq_modulo_heap h1' h2' /\
+    Set.equal (Map.domain h1) (Map.domain h1') /\
+    Set.equal (Map.domain h2) (Map.domain h2'))) =
+  Opaque_s.reveal_opaque BS.update_heap32_def
+  
+let eq_modulo_heap_store128 ptr v h1 h2 =
+  eq_modulo_heap_store32 ptr v.lo0 h1 h2;
+  let h1' = BS.update_heap32 ptr v.lo0 h1 in
+  let h2' = BS.update_heap32 ptr v.lo0 h2 in
+  eq_modulo_heap_store32 (ptr+4) v.lo1 h1' h2';
+  let h1' = BS.update_heap32 (ptr+4) v.lo1 h1' in
+  let h2' = BS.update_heap32 (ptr+4) v.lo1 h2' in
+  eq_modulo_heap_store32 (ptr+8) v.hi2 h1' h2';  
+  let h1' = BS.update_heap32 (ptr+8) v.hi2 h1' in
+  let h2' = BS.update_heap32 (ptr+8) v.hi2 h2' in
+  eq_modulo_heap_store32 (ptr+12) v.hi3 h1' h2'
+
 let state_to_S (s:state) : GTot TS.traceState =
   {
   TS.state = {
