@@ -174,6 +174,7 @@ let smul_add_felem out u1 f2 =
   out.(size 1) <- o1 +. mul_wide u1 f21;
   out.(size 2) <- o2 +. mul_wide u1 f22
 
+//inline_for_extraction
 [@ CInline]
 val mul_felem: out:felem_wide -> f1:felem -> f2:felem -> f2_20:felem  -> Stack unit
                    (requires (fun h -> live h out /\ live h f1 /\ live h f2 /\ live h f2_20))

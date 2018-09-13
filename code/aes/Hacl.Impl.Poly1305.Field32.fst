@@ -119,8 +119,8 @@ let precompute_shift_reduce f1 f2 =
 
 #reset-options "--z3rlimit 50"
 
-//[@ CInline]
-inline_for_extraction
+//inline_for_extraction
+[@ CInline]
 val fadd: out:felem -> f1:felem  -> f2:felem  -> Stack unit
                    (requires (fun h -> live h f1 /\ live h f2 /\ live h out /\
 		    (let s1 = as_seq h f1 in
@@ -201,7 +201,7 @@ let smul_add_felem out u1 f2 =
   out.(size 3) <- o3 +. to_u64 u1 *. to_u64 f23;
   out.(size 4) <- o4 +. to_u64 u1 *. to_u64 f24
 
-
+//inline_for_extraction
 [@ CInline]
 val mul_felem: out:felem_wide -> f1:felem -> f2:felem -> f2_20:felem  -> Stack unit
                    (requires (fun h -> live h out /\ live h f1 /\ live h f2 /\ live h f2_20))
@@ -343,10 +343,12 @@ let carry_top_felem f =
   f.(size 1) <- tmp1;
   f.(size 4) <- tmp4  
 
+//[@ CInline]
 inline_for_extraction
 val fmul: out:felem -> f1:felem -> f2:felem -> f2_20:felem -> Stack unit
                    (requires (fun h -> live h out /\ live h f1 /\ live h f2 /\ live h f2_20))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
+[@ CInline]
 let fmul out f1 f2 f2_20 =
   push_frame();
   let tmp = create (u64 0) (size 5) in
