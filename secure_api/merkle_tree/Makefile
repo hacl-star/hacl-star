@@ -112,7 +112,6 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'LowStar.*' \
-	-bundle 'EverCrypt.*' \
 	-library 'EverCrypt,EverCrypt.*' \
 	-drop 'Spec,Lib,C.*,C.Loops.*' \
 	-I $(HACL_HOME)/specs \
@@ -123,6 +122,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$^
 # -bundle 'Hacl.Impl.*' \
 # -I $(HACL_HOME)/providers/evercrypt/config/default
+# -bundle 'EverCrypt.*' \
 
 # The Makefile is manually staged because GNU Make does not understand
 # dependencies between the Makefiles we include, i.e. it won't first generate
