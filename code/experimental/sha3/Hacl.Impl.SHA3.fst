@@ -83,7 +83,9 @@ val state_theta_inner_C:
   -> i:index
   -> _C:lbuffer uint64 5
   -> Stack unit
-    (requires fun h -> live h s /\ live h _C /\ as_state h0 s == as_state h s /\
+    (requires fun h ->
+      live h s /\ live h _C /\ disjoint _C s /\
+      as_state h0 s == as_state h s /\
       loop_inv h0 h 5 5 _C (S.state_theta_inner_C (as_state h0 s)) (v i))
     (ensures  fun _ _ h -> live h s /\
       loop_inv h0 h 5 5 _C (S.state_theta_inner_C (as_state h0 s)) (v i + 1))
@@ -100,78 +102,23 @@ let state_theta_inner_C #h0 s x _C =
   lemma_repeati_sp #h0 5 (S.state_theta_inner_C (as_state h0 s)) (as_seq5 h0 _C) (v x) (as_seq5 h1 _C)
 
 inline_for_extraction noextract
-val state_theta_inner_s_inner:
+val state_theta0:
      #h0:mem
-  -> s0:state
-  -> _C:lbuffer uint64 5
-  -> _D:uint64
-  -> x:index
-  -> y:index
   -> s:state
+  -> _C:lbuffer uint64 5
   -> Stack unit
     (requires fun h ->
-      live h s0 /\ live h _C /\ live h s /\
-      as_seq5 h0 _C == as_seq5 h _C /\
-      as_state h0 s0 == as_state h s0 /\
-      loop_inv h0 h 25 5 s (fun y s1 -> S.writeLane s1 (v x) y (S.readLane (as_seq_sp h0 s0) (v x) y ^. _D)) (v y))
-    (ensures  fun _ _ h ->
-      loop_inv h0 h 25 5 s (fun y s1 -> S.writeLane s1 (v x) y (S.readLane (as_seq_sp h0 s0) (v x) y ^. _D)) (v y + 1))
-let state_theta_inner_s_inner #h0 s0 _C _D x y s =
-  let h1 = ST.get () in
-  writeLane s x y (readLane s0 x y ^. _D);
-  let h2 = ST.get () in
-  assert (as_state h2 s == S.writeLane (as_state h1 s) (v x) (v y) (S.readLane (as_seq_sp h0 s0) (v x) (v y) ^. _D));
-  lemma_repeati_sp #h0 5 (fun y s1 -> S.writeLane s1 (v x) y (S.readLane (as_seq_sp h0 s0) (v x) y ^. _D)) (as_state h0 s) (v y) (as_state h1 s)
-
-(*
-val state_theta_inner_s:
-     #h0:mem
-  -> s0:state
-  -> _C:lbuffer uint64 5
-  -> _D:uint64
-  -> x:index
-  -> s:state
-  -> Stack unit
-    (requires fun h -> live h s0 /\ live h _C /\
-      as_seq5 h0 _C == as_seq5 h _C /\
-      as_state h0 s0 == as_state h s0 /\
+      h0 == h /\ live h s /\ live h _C /\
+      disjoint _C s /\
       as_state h0 s == as_state h s)
-    (ensures  fun _ _ h -> loop_inv h0 h 25 5 s (fun y s1 -> S.writeLane s1 (v x) y (S.readLane (as_seq_sp h0 s0) (v x) y ^. _D)) 5)
-let state_theta_inner_s #h0 s0 _C _D x s =
-  let h1 = ST.get () in
-  let inv h0 h =
-    live h s0 /\ live h _C /\ live h s /\
-    as_seq5 h0 _C == as_seq5 h _C /\
-    as_state h0 s0 == as_state h s0 in
-  assert (loop_inv h0 h1 25 5 s (fun y s1 -> S.writeLane s1 (v x) y (S.readLane (as_seq_sp h0 s0) (v x) y ^. _D)) 0); admit()
-  loop #h1 (size 5) s inv (fun y s1 -> S.writeLane s1 (v x) y (S.readLane (as_seq_sp h0 s0) (v x) y ^. _D))
-  (fun y ->
-    state_theta_inner_s_inner #h0 s0 _C _D x y s
-  )
-*)
-
-val state_theta_inner_s:
-     #h0:mem
-  -> s0:state
-  -> _C:lbuffer uint64 5
-  -> x:index
-  -> s:state
-  -> Stack unit
-    (requires fun h -> live h s0 /\ live h _C /\
-      as_seq5 h0 _C == as_seq5 h _C /\
-      as_state h0 s0 == as_state h s0 /\
-      loop_inv h0 h 25 5 s (S.state_theta_inner_s (as_state h0 s0) (as_seq h0 _C)) (v x))
-    (ensures  fun _ _ h -> loop_inv h0 h 25 5 s (S.state_theta_inner_s (as_state h0 s0) (as_seq h0 _C)) (v x + 1))
-let state_theta_inner_s #h0 s0 _C x s =
-  let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (u32 1) in
-  let h1 = ST.get () in
-  let inv h0 h =
-    live h s0 /\ live h _C /\ live h s /\
-    as_seq5 h0 _C == as_seq5 h _C /\
-    as_state h0 s0 == as_state h s0 in
-  loop #h1 (size 5) s inv (fun y s1 -> S.writeLane s1 (v x) y (S.readLane (as_seq_sp h0 s0) (v x) y ^. _D))
-  (fun y ->
-    state_theta_inner_s_inner #h0 s0 _C _D x y s
+    (ensures  fun _ _ h1 ->
+      modifies (loc_buffer _C) h0 h1 /\
+      as_seq_sp h1 _C == S.state_theta0 (as_seq_sp h0 s) (as_seq_sp h0 _C))
+let state_theta0 #h0 s _C =
+  let inv h h1 = live h1 s /\ live h1 _C /\ disjoint s _C /\ as_state h0 s == as_state h1 s in
+  loop #h0 (size 5) _C inv (S.state_theta_inner_C (as_state h0 s))
+  (fun x ->
+    state_theta_inner_C #h0 s x _C
   )
 
 inline_for_extraction noextract
@@ -186,11 +133,7 @@ let state_theta s =
   push_frame();
   let _C:lbuffer uint64 5 = create (size 5) (u64 0) in
   let h0 = ST.get () in
-  let inv h0 h1 = live h1 s /\ live h1 _C /\ as_seq h0 s == as_seq h1 s in
-  loop #h0 (size 5) _C inv (S.state_theta_inner_C (as_state h0 s))
-  (fun x ->
-    state_theta_inner_C #h0 s x _C
-  );
+  state_theta0 #h0 s _C;
   let h0 = ST.get () in
   loop_nospec #h0 (size 5) s
   (fun x ->

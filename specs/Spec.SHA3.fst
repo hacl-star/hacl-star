@@ -44,6 +44,9 @@ let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) : uint64 =
 let state_theta_inner_C (s:state) (i:size_nat{i < 5}) (_C:lseq uint64 5) : lseq uint64 5 =
   _C.[i] <- readLane s i 0 ^. readLane s i 1 ^. readLane s i 2 ^. readLane s i 3 ^. readLane s i 4
 
+let state_theta0 (s:state) (_C:lseq uint64 5) =
+  repeati_sp #5 5 (state_theta_inner_C s) _C
+
 let state_theta_inner_s (s':state) (_C:lseq uint64 5) (x:index) (s:state) : state =
   let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (u32 1)) in
   repeati_sp #5 5
@@ -51,17 +54,13 @@ let state_theta_inner_s (s':state) (_C:lseq uint64 5) (x:index) (s:state) : stat
     writeLane s0 x y (readLane s' x y ^. _D)
   ) s
 
+let state_theta1 (s:state) (_C:lseq uint64 5): state =
+  repeati_sp #5 5 (state_theta_inner_s s _C) s
+
 let state_theta (s:state) : state =
   let _C = create 5 (u64 0) in
-  let _C =
-    repeati_sp #5 5
-    (fun i _C ->
-      state_theta_inner_C s i _C)
-    _C in
-  repeati_sp #5 5
-  (fun x s ->
-    state_theta_inner_s s _C x s
-  ) s
+  let _C = state_theta0 s _C in
+  state_theta1 s _C
 
 let state_pi_rho_inner (current:uint64) (s:state) (i:size_nat{i < 24}) : tuple2 uint64 state =
   let r = keccak_rotc.[i] in
@@ -154,6 +153,8 @@ let absorb_next (s:state)
   let s = loadState rateInBytes nextBlock s in
   let s = state_permute s in
   s
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 val lemma_rateInBytes:
      inputByteLen:size_nat
