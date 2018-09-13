@@ -126,9 +126,8 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -bundle 'Spec.*' \
 	  -bundle 'Hacl.Spec.*' \
 	  -bundle 'Hacl.Spe.*' \
-	  -bundle 'AEAD.*' \
 	  -bundle 'LowStar.*' \
-	  -library 'AEAD.*,Hacl.*' \
+	  -library 'Hacl.*' \
 	  -no-prefix 'EverCrypt.Vale' \
 	  -tmpdir $(GENERATED_DIR) $^ -warn-error @9
 
