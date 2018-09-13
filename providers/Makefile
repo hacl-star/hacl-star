@@ -122,13 +122,16 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -bundle 'FStar.*' \
+	  -bundle 'C,C.*' \
 	  -bundle 'Hacl.*' \
-	  -bundle 'Spec.*' \
-	  -bundle 'Hacl.Spec.*' \
-	  -bundle 'Hacl.Spe.*' \
-	  -bundle 'AEAD.*' \
+	  -bundle 'EverCrypt.Spec.*' \
+	  -drop 'Spec.*' \
+	  -drop 'Hacl.Spec.*' \
+	  -drop 'Hacl.Spe.*' \
+	  -drop 'EverCrypt.Spec' \
+	  -drop Seq.Create \
 	  -bundle 'LowStar.*' \
-	  -library 'AEAD.*,Hacl.*' \
+	  -library 'Hacl.*' \
 	  -no-prefix 'EverCrypt.Vale' \
 	  -tmpdir $(GENERATED_DIR) $^ -warn-error @9
 
