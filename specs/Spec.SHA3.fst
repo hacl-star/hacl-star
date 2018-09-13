@@ -26,7 +26,10 @@ let keccak_rndc: lseq uint64 24 =
   assert_norm (List.Tot.length rndc_list == 24);
   createL rndc_list
 
+unfold
 type state = lseq uint64 25
+
+unfold
 type index = n:size_nat{n < 5}
 
 let readLane (s:state) (x:index) (y:index) : uint64 =

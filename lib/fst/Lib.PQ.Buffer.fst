@@ -20,6 +20,8 @@ unfold let v = size_v
 
 type lbuffer (a:Type0) (len:size_nat) = b:B.buffer a {B.length b == len}
 
+assume val as_seq_sp: #a:Type0 -> #len:size_nat -> h:mem -> b:lbuffer a len -> (r:Seq.lseq a len{r == B.as_seq h b})
+
 val gsub:
     #a:Type0
   -> #len:size_nat
@@ -209,12 +211,12 @@ val loop_inv:
   -> len:size_nat
   -> n:size_nat
   -> buf:lbuffer a len
-  -> spec:(mem -> GTot (i:size_nat{i < n} -> Seq.lseq a len -> Seq.lseq a len))
+  -> spec:(i:size_nat{i < n} -> Seq.lseq a len -> Seq.lseq a len)
   -> i:nat{i <= n}
   -> Type0
 let loop_inv #a h0 h1 len n buf spec i =
   modifies (loc_buffer buf) h0 h1 /\
-  as_seq h1 buf == Seq.repeati_sp #n i (spec h0) (as_seq h0 buf)
+  as_seq h1 buf == Seq.repeati_sp #n i spec (as_seq h0 buf)
 
 inline_for_extraction
 val loop:
@@ -224,7 +226,7 @@ val loop:
   -> n:size_t
   -> buf:lbuffer a len
   -> inv:(h0:mem -> h1:mem -> Type0)
-  -> spec:(mem -> GTot (i:size_nat{i < v n} -> Seq.lseq a len -> Seq.lseq a len))
+  -> spec:(i:size_nat{i < v n} -> Seq.lseq a len -> Seq.lseq a len)
   -> impl:
       (i:size_t{v i < v n} -> Stack unit
         (requires fun h -> inv h0 h /\ loop_inv #a h0 h len (v n) buf spec (v i))
@@ -245,13 +247,13 @@ val lemma_repeati_sp:
      #h0:HyperStack.mem
   -> #a:Type
   -> n:size_nat
-  -> spec:(h:HyperStack.mem -> GTot (i:size_nat{i < n} -> a -> a))
+  -> spec:(i:size_nat{i < n} -> a -> a)
   -> res0:a
   -> i:size_nat{i < n}
   -> resi:a
   -> Lemma
-    (requires resi == Seq.repeati_sp #n i (spec h0) res0)
-    (ensures  Seq.repeati_sp #n (i + 1) (spec h0) res0 == (spec h0) i resi)
+    (requires resi == Seq.repeati_sp #n i spec res0)
+    (ensures  Seq.repeati_sp #n (i + 1) spec res0 == spec i resi)
 let lemma_repeati_sp #h0 #a n spec res0 i resi = ()
 
 inline_for_extraction
@@ -267,7 +269,7 @@ let lbytes_eq #len a b =
   push_frame();
   let res:lbuffer bool 1 = create (size 1) true in
   let h0 = ST.get () in
-  loop #h0 len res (fun _ _ -> True) (fun h0 -> Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b))
+  loop #h0 len res (fun _ _ -> True) (Seq.lbytes_eq_inner #(v len) (as_seq_sp h0 a) (as_seq_sp h0 b))
   (fun i ->
     let ai = a.(i) in
     let bi = b.(i) in
