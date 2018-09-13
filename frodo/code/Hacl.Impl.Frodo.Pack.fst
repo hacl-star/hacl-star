@@ -127,7 +127,7 @@ let frodo_pack #n1 #n2 a d res =
     Seq.eq_elim (Seq.sub res0 (v d * j) (v d)) (S.frodo_pack8 a8 (v d))
   in
   Classical.forall_intro f;
-  S.bar (v n1 * v n2 / 8) (v d) (as_seq h1 res) (S.frodo_pack a0 (v d))
+  S.equal_slices (v n1 * v n2 / 8) (v d) (as_seq h1 res) (S.frodo_pack a0 (v d))
 
 
 /// Unpack
