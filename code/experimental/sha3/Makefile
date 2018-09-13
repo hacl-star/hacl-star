@@ -54,8 +54,8 @@ ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 	$(FSTAR_INCLUDES) \
 	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
-#ROOTS = Hacl.Test.SHA3.fst
-ROOTS = Hacl.Test.CSHAKE.fst
+ROOTS = Hacl.Test.SHA3.fst
+#ROOTS = Hacl.Test.CSHAKE.fst
 
 .PRECIOUS: %.krml
 
@@ -140,7 +140,7 @@ $(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-no-prefix 'Hacl.Test.CSHAKE' \
+	-no-prefix 'Hacl.Test.SHA3' \
 	-no-prefix 'Hacl.Impl.SHA3' \
 	-no-prefix 'Hacl.SHA3' \
 	-bundle 'Lib.*' \

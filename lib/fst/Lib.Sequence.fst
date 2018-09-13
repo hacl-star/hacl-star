@@ -132,6 +132,22 @@ let repeati #a n = repeat_range #a 0 n
 val repeat: #a:Type -> n:size_nat -> (a -> Tot a) -> a -> a
 let repeat #a n f x = repeat_range 0 n (fun i -> f) x
 
+val repeati_:
+     #n:size_nat
+  -> #a:Type
+  -> i:size_nat{i <= n}
+  -> f:(s:size_nat{s < n} -> a -> Tot a)
+  -> a
+  -> Tot a
+let rec repeati_ #n #a i f x =
+  if i = 0 then x
+  else
+    let ai = repeati_ #n #a (i - 1) f x in
+    f (i - 1) ai
+
+val repeati_sp: #n:size_nat -> #a:Type -> i:size_nat{i <= n} -> (i:size_nat{i < n}  -> a -> Tot a) -> a -> a
+let repeati_sp #n #a i = repeati_ #n #a i
+
 unfold
 type repeatable (#a:Type) (#n:size_nat) (pred:(i:size_nat{i <= n} -> a -> Tot Type)) =
   i:size_nat{i < n} -> x:a -> Pure a (requires (pred i x)) (ensures (fun r -> pred (i+1) r))
@@ -157,40 +173,28 @@ val repeati_inductive:
 let repeati_inductive #a =
   repeat_range_inductive #a 0
 
-val fold_land_:
-    #n:size_nat
-  -> f:(j:size_nat{j < n} -> GTot bool)
-  -> i:size_nat{i <= n}
-  -> GTot bool
-let rec fold_land_ #n f i =
-  if i = 0 then true
-  else f (i - 1) && fold_land_ #n f (i - 1)
-
-#set-options "--max_fuel 1"
-
-val lbytes_eq_fc:
+val lbytes_eq_inner:
     #len:size_nat
   -> a:lseq uint8 len
   -> b:lseq uint8 len
-  -> i:size_nat{i <= len}
-  -> GTot bool
-let lbytes_eq_fc #len a b i =
+  -> i:size_nat{i < len}
+  -> res0:lseq bool 1
+  -> lseq bool 1
+let lbytes_eq_inner #len a b i res =
   let open Lib.RawIntTypes in
-  let f i = uint_to_nat a.[i] = uint_to_nat b.[i] in
-  fold_land_ #len f i
+  let open FStar.UInt8 in
+  res.[0] <- res.[0] && (u8_to_UInt8 a.[i] =^ u8_to_UInt8 b.[i])
 
 val lbytes_eq:
     #len:size_nat
   -> a:lseq uint8 len
   -> b:lseq uint8 len
-  -> res:bool{res == lbytes_eq_fc #len a b len}
+  -> res:bool
 let lbytes_eq #len a b =
   let open Lib.RawIntTypes in
-  repeati_inductive len
-  (fun i res -> res == lbytes_eq_fc #len a b i)
-  (fun i res ->
-    res && (uint_to_nat a.[i] = uint_to_nat b.[i])
-  ) true
+  let res = create 1 true in
+  let res = repeati_sp #len len (lbytes_eq_inner #len a b) res in
+  res.[0]
 
 val fold_left_range_: #a:Type -> #b:Type -> #len:size_nat
   -> min:size_nat

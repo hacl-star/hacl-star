@@ -176,7 +176,7 @@ val loop_nospec_inv:
   -> i:nat
   -> Type0
 let loop_nospec_inv #a h0 h1 len n buf i =
-  B.live h0 buf /\ B.live h1 buf /\ modifies (loc_buffer buf) h0 h1
+  modifies (loc_buffer buf) h0 h1
 
 inline_for_extraction
 val loop_nospec:
@@ -202,11 +202,57 @@ let loop_nospec #h0 #a #len n buf impl =
   Lib.Loops.for (size 0) n inv f'
 
 inline_for_extraction noextract
-val eq_u8: a:uint8 -> b:uint8 -> Tot bool
-let eq_u8 a b =
-  let open FStar.UInt8 in
-  let open Lib.RawIntTypes in
-  u8_to_UInt8 a =^ u8_to_UInt8 b
+val loop_inv:
+    #a:Type
+  -> h0:mem
+  -> h1:mem
+  -> len:size_nat
+  -> n:size_nat
+  -> buf:lbuffer a len
+  -> spec:(mem -> GTot (i:size_nat{i < n} -> Seq.lseq a len -> Seq.lseq a len))
+  -> i:nat{i <= n}
+  -> Type0
+let loop_inv #a h0 h1 len n buf spec i =
+  modifies (loc_buffer buf) h0 h1 /\
+  as_seq h1 buf == Seq.repeati_sp #n i (spec h0) (as_seq h0 buf)
+
+inline_for_extraction
+val loop:
+     #h0:mem
+  -> #a:Type0
+  -> #len:size_nat
+  -> n:size_t
+  -> buf:lbuffer a len
+  -> inv:(h0:mem -> h1:mem -> Type0)
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> Seq.lseq a len -> Seq.lseq a len))
+  -> impl:
+      (i:size_t{v i < v n} -> Stack unit
+        (requires fun h -> inv h0 h /\ loop_inv #a h0 h len (v n) buf spec (v i))
+        (ensures  fun _ r h1 -> inv h0 h1 /\ loop_inv #a h0 h1 len (v n) buf spec (v i + 1)))
+  -> Stack unit
+    (requires fun h -> h0 == h /\ live h buf /\ inv h0 h)
+    (ensures  fun _ _ h1 -> loop_inv #a h0 h1 len (v n) buf spec (v n))
+let loop #h0 #a #len n buf inv' spec impl =
+  let inv h1 j =
+    inv' h0 h1 /\ loop_inv #a h0 h1 len (v n) buf spec j in
+  let f' (j:size_t{v j < v n}): Stack unit
+      (requires fun h -> inv h (v j))
+      (ensures  fun _ _ h2 -> inv h2 (v j + 1)) =
+      impl j in
+  Lib.Loops.for (size 0) n inv f'
+
+val lemma_repeati_sp:
+     #h0:HyperStack.mem
+  -> #a:Type
+  -> n:size_nat
+  -> spec:(h:HyperStack.mem -> GTot (i:size_nat{i < n} -> a -> a))
+  -> res0:a
+  -> i:size_nat{i < n}
+  -> resi:a
+  -> Lemma
+    (requires resi == Seq.repeati_sp #n i (spec h0) res0)
+    (ensures  Seq.repeati_sp #n (i + 1) (spec h0) res0 == (spec h0) i resi)
+let lemma_repeati_sp #h0 #a n spec res0 i resi = ()
 
 inline_for_extraction
 val lbytes_eq:
@@ -221,14 +267,12 @@ let lbytes_eq #len a b =
   push_frame();
   let res:lbuffer bool 1 = create (size 1) true in
   let h0 = ST.get () in
-  Lib.Loops.for (size 0) len
-  (fun h1 i ->
-    B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
-    B.get h1 res 0 == Seq.lbytes_eq_fc #(v len) (as_seq h0 a) (as_seq h0 b) i)
+  loop #h0 len res (fun _ _ -> True) (fun h0 -> Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b))
   (fun i ->
-    let a1 = res.(size 0) in
-    let a2 = eq_u8 a.(i) b.(i) in
-    res.(size 0) <- a1 && a2
+    let ai = a.(i) in
+    let bi = b.(i) in
+    let res0 = res.(size 0) in
+    res.(size 0) <- res0 && FStar.UInt8.(u8_to_UInt8 ai =^ u8_to_UInt8 bi)
   );
   let res = res.(size 0) in
   pop_frame();

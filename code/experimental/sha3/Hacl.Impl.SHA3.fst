@@ -72,6 +72,57 @@ val rotl:
 [@"c_inline"]
 let rotl a b = (a <<. b) |. (a >>. (u32 64 -. b))
 
+let as_state (h:mem) (s:state) : GTot S.state = as_seq h s
+
+let as_seq5 (h:mem) (s:lbuffer uint64 5) : GTot (Seq.lseq uint64 5) = as_seq h s
+
+inline_for_extraction noextract
+val state_theta_inner_C:
+    #h0:mem
+  -> s:state
+  -> i:index
+  -> _C:lbuffer uint64 5
+  -> Stack unit
+    (requires fun h -> live h s /\ live h _C /\ as_state h0 s == as_state h s /\
+      loop_inv h0 h 5 5 _C (fun h0 -> S.state_theta_inner_C (as_state h0 s)) (v i))
+    (ensures  fun _ _ h -> live h s /\
+      loop_inv h0 h 5 5 _C (fun h0 -> S.state_theta_inner_C (as_state h0 s)) (v i + 1))
+let state_theta_inner_C #h0 s x _C =
+  let h1 = ST.get () in
+  _C.(x) <-
+    readLane s x (size 0) ^.
+    readLane s x (size 1) ^.
+    readLane s x (size 2) ^.
+    readLane s x (size 3) ^.
+    readLane s x (size 4);
+  let h2 = ST.get () in
+  assert (as_seq h2 _C == S.state_theta_inner_C (as_state h0 s) (v x) (as_seq5 h1 _C));
+  lemma_repeati_sp #h0 5 (fun h -> S.state_theta_inner_C (as_state h0 s)) (as_seq5 h0 _C) (v x) (as_seq5 h1 _C)
+
+(*
+val state_theta_inner_s:
+     #h0:mem
+  -> s0:state
+  -> _C:lbuffer uint64 5
+  -> x:index
+  -> s:state
+  -> Stack unit
+    (requires fun h -> live h s0 /\ live h _C /\ as_seq5 h0 _C == as_seq5 h _C /\
+      loop_inv h0 h 25 5 s (fun h0 -> S.state_theta_inner_s (as_state h0 s0) (as_seq h0 _C)) (v x))
+    (ensures  fun _ _ h -> loop_inv h0 h 25 5 s (fun h0 -> S.state_theta_inner_s (as_state h0 s0) (as_seq h0 _C)) (v x + 1))
+let state_theta_inner_s #h0 s0 _C x s =
+  let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (u32 1) in
+  let h1 = ST.get () in
+  let spec : (h0:mem -> GTot ((y:size_nat{y < 5}) -> Lib.Sequence.lseq uint64 5 -> Lib.Sequence.lseq uint64 5)) =
+    fun h0 -> (fun y s1 -> S.writeLane s1 (v x) y (S.readLane (as_seq h0 s0) (v x) y ^. _D)) in
+  loop #h1 (size 5) s (fun h0 h1 -> True) spec
+
+  //loop_nospec #h1 (size 5) s
+  (fun y ->
+      writeLane s x y (readLane s0 x y ^. _D)
+  )
+*)
+
 inline_for_extraction noextract
 val state_theta:
      s:state
@@ -84,19 +135,11 @@ let state_theta s =
   push_frame();
   let _C:lbuffer uint64 5 = create (size 5) (u64 0) in
   let h0 = ST.get () in
-  Lib.Loops.for (size 0) (size 5)
-  (fun h1 i ->
-    live h0 _C /\ live h1 _C /\
-    modifies (loc_buffer _C) h0 h1)
+  let inv h0 h1 = live h1 s /\ live h1 _C /\ as_seq h0 s == as_seq h1 s in
+  loop #h0 (size 5) _C inv (fun h0 -> S.state_theta_inner_C (as_state h0 s))
   (fun x ->
-    _C.(x) <-
-      readLane s x (size 0) ^.
-      readLane s x (size 1) ^.
-      readLane s x (size 2) ^.
-      readLane s x (size 3) ^.
-      readLane s x (size 4)
+    state_theta_inner_C #h0 s x _C
   );
-
   let h0 = ST.get () in
   loop_nospec #h0 (size 5) s
   (fun x ->
