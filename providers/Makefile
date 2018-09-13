@@ -122,7 +122,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -bundle 'FStar.*' \
-	  -bundle 'C=C,C.*' \
+	  -bundle 'C,C.*' \
 	  -bundle 'Hacl.*' \
 	  -bundle 'EverCrypt.Spec.*' \
 	  -drop 'Spec.*' \
