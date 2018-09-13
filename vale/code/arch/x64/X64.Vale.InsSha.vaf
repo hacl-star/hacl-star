@@ -1,5 +1,15 @@
 include "X64.Vale.InsBasic.vaf"
 include "X64.Vale.InsVector.vaf"
+include{:fstar}{:open} "Words_s"
+include{:fstar}{:open} "Types_s"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "Spec.SHA2"
+include{:fstar}{:open} "SHA_helpers"
+include{:fstar}{:open} "Spec.Hash.Common"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
 
 module X64.Vale.InsSha
 
