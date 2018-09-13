@@ -15,22 +15,20 @@ module Seq = Lib.Sequence
 
 // This lemma is used in Hacl.Impl.Frodo.Pack to prove functional correctness of pack
 val equal_slices:
-    n:size_nat
+    #a:Type
+  -> n:size_nat
   -> d:size_nat{d * n <= max_size_t}
-  -> b1:lbytes (d * n)
-  -> b2:lbytes (d * n)
-  -> Lemma
-    (requires
-      forall (j:nat{j < n}).
-        d * j + d <= d * n /\
-        FStar.Seq.equal
-          (FStar.Seq.slice b1 (d * j) (d * j + d))
-          (FStar.Seq.slice b2 (d * j) (d * j + d)))
-    (ensures Seq.equal b1 b2)
-let equal_slices n d b1 b2 =
+  -> b1:lseq a (d * n)
+  -> b2:lseq a (d * n)
+  -> (j:nat{j < n} -> Lemma
+      (d * j + d <= d * n /\
+       Seq.equal (Seq.sub b1 (d * j) d) (Seq.sub b2 (d * j) d)))
+  -> Lemma (Seq.equal b1 b2)
+let equal_slices #a n d b1 b2 f =
   let open FStar.Seq in
   let f (i:nat{i < d * n}) : Lemma (index b1 i == index b2 i) =
     let j = i / d in
+    let _ = f j in
     assert (
       d * j + d <= d * n /\
       equal (slice b1 (d * j) (d * j + d)) (slice b2 (d * j) (d * j + d)));
@@ -38,7 +36,8 @@ let equal_slices n d b1 b2 =
       index (slice b1 (d * j) (d * j + d)) (i % d) ==
       index (slice b2 (d * j) (d * j + d)) (i % d))
   in
-  Classical.forall_intro f
+  Classical.forall_intro_with_pat (fun i -> index b1 i) f;
+  Seq.eq_intro b1 b2
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar +FStar.Pervasives -Spec +Spec.Frodo +Spec.Frodo.Params'"
 
@@ -136,10 +135,12 @@ val frodo_unpack:
   -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
   -> d:size_nat{d * (n1 * n2 / 8) <= max_size_t /\ d <= 16}
   -> b:lbytes (d * (n1 * n2 / 8))
-  -> res:matrix n1 n2{
-    forall (j:nat{j < n1 * n2 / 8}).
+  -> Pure (matrix n1 n2)
+    (requires True)
+    (ensures fun res ->
+      forall (j:nat{j < n1 * n2 / 8}).
       let b = Seq.sub #uint8 b (d * j) d in
-      Seq.equal (Seq.sub res (8 * j) 8) (frodo_unpack8 d b)}
+      Seq.equal (Seq.sub res (8 * j) 8) (frodo_unpack8 d b))
 let frodo_unpack #n1 #n2 d b =
   repeati_inductive (n1 * n2 / 8) 
     (fun i res ->
