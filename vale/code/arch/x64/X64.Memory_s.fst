@@ -134,7 +134,7 @@ let get_hs h m =
 
 let get_hs_heap h = I.down_up_identity h.hs h.addrs h.ptrs
 
-let get_heap_hs m h = admit()
+let get_heap_hs m h = I.up_down_identity h.hs h.addrs h.ptrs m
 
 let buffer_addr #t b h =
   let addrs = h.addrs in

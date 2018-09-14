@@ -42,3 +42,7 @@ val same_domain_update128 (ptr:int) (v:quad32) (mem:heap) : Lemma
 val eval_ins_domains (ins:TS.tainted_ins) (s0:TS.traceState) : Lemma
   (let s1 = TS.taint_eval_ins ins s0 in
   Set.equal (Map.domain s0.TS.state.mem) (Map.domain s1.TS.state.mem))
+
+val eval_ins_same_unspecified (ins:TS.tainted_ins) (s0:TS.traceState) : Lemma
+  (let Some s1 = TS.taint_eval_code (Ins ins) 0 s0 in
+   forall x. not (Map.contains s1.TS.state.mem x) ==> s1.TS.state.mem.[x] == s0.TS.state.mem.[x])

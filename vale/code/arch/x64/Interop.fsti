@@ -121,3 +121,12 @@ val down_up_identity:
     let heap = down_mem mem addrs ptrs in 
     let new_mem = up_mem heap addrs ptrs mem in
     mem == new_mem)
+
+val up_down_identity:
+  (mem:HS.mem) ->
+  (addrs:addr_map) ->
+  (ptrs:list b8{list_disjoint_or_eq ptrs /\ list_live mem ptrs}) ->
+  (heap:heap{Set.equal (addrs_set ptrs addrs) (Map.domain heap)}) -> 
+  Lemma
+    (requires (forall x. not (Map.contains heap x) ==> Map.sel heap x == Map.sel (down_mem mem addrs ptrs) x))
+    (ensures (down_mem (up_mem heap addrs ptrs mem) addrs ptrs == heap))

@@ -2,7 +2,6 @@ module X64.Vale.Lemmas
 open X64.Machine_s
 open X64.Vale.State
 open X64.Vale.StateLemmas
-module S = X64.Semantics_s
 module BS = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
@@ -11,10 +10,10 @@ unfold let codes = TS.tainted_codes
 unfold let ocmp = TS.tainted_ocmp
 unfold let fuel = nat
 
-let cf (flags:int) : bool = S.cf (int_to_nat64 flags)
-let overflow (flags:int) : bool = S.overflow (int_to_nat64 flags)
-let update_cf (flags:int) (new_cf:bool) = S.update_cf (int_to_nat64 flags) new_cf
-let update_of (flags:int) (new_of:bool) = S.update_of (int_to_nat64 flags) new_of
+let cf (flags:int) : bool = BS.cf (int_to_nat64 flags)
+let overflow (flags:int) : bool = BS.overflow (int_to_nat64 flags)
+let update_cf (flags:int) (new_cf:bool) = BS.update_cf (int_to_nat64 flags) new_cf
+let update_of (flags:int) (new_of:bool) = BS.update_of (int_to_nat64 flags) new_of
 
 let state_eq_S (s1 s2:TS.traceState) =
   s1 == {s2 with TS.trace = s1.TS.trace}
@@ -35,6 +34,7 @@ let eval_ins (c:code) (s0:state) : Ghost ((sM:state) * (f0:fuel))
   let f0 = 0 in
   let (Some sM) = TS.taint_eval_code c f0 (state_to_S s0) in
   same_domain_eval_ins c f0 (state_to_S s0) s0;
+  lemma_to_of_eval_code c s0;
   (state_of_S s0 sM, f0)
 
 let eval_ocmp (s:state) (c:ocmp) : GTot bool = snd (TS.taint_eval_ocmp (state_to_S s) c)
@@ -177,5 +177,3 @@ val lemma_whileMerge_total (c:code) (s0:state) (f0:fuel) (sM:state) (fM:fuel) (s
   (ensures (fun fN ->
     eval_while_inv c s0 fN sN
   ))
-
-

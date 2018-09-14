@@ -3,7 +3,6 @@ module X64.Print_s
 // Trusted code for producing assembly code
 
 open X64.Machine_s
-open X64.Semantics_s
 open X64.Bytes_Semantics_s
 open X64.Taint_Semantics_s
 open FStar.IO

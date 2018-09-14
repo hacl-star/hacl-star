@@ -92,13 +92,20 @@ let lemma_of_to s =
   assert (state_eq s (state_of_S s (state_to_S s)));
   ()
 
-let lemma_to_of sv s =
-  let s' = state_of_S sv s in
+let lemma_to_of_eval_code c s0 =
+  let s0' = state_to_S s0 in
+  let Ins ins = c in
+  let Some sM = TS.taint_eval_code c 0 s0' in
+  same_domain_eval_ins c 0 s0' s0;
+  let s' = state_of_S s0 sM in
   let s'' = state_to_S s' in
-  let { BS.ok = ok; BS.regs = regs; BS.xmms = xmms; BS.flags = flags; BS.mem = heap} = s.TS.state in
+  let { BS.ok = ok; BS.regs = regs; BS.xmms = xmms; BS.flags = flags; BS.mem = heap} = sM.TS.state in
   let { BS.ok = ok''; BS.regs = regs''; BS.xmms = xmms''; BS.flags = flags''; BS.mem = heap''} = s''.TS.state in
   assert (feq regs regs'');
   assert (feq xmms xmms'');
+  X64.Bytes_Semantics.eval_ins_same_unspecified ins s0';
+  X64.Bytes_Semantics.eval_ins_domains ins s0';
+  ME.get_heap_hs heap s0.mem;
   ()
 
 val lemma_valid_taint64: (b:X64.Memory.buffer64) ->

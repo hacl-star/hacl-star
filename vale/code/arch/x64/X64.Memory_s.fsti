@@ -85,8 +85,9 @@ val get_hs: (h:mem) -> (m:S.heap{same_domain h m}) -> GTot (h':mem)
 val get_hs_heap: (h:mem) -> Lemma (get_hs h (get_heap h) == h)
   [SMTPat (get_hs h (get_heap h))]
 
-val get_heap_hs: (m:S.heap) -> (h:mem{same_domain h m}) -> Lemma (get_heap (get_hs h m) == m)
-  [SMTPat (get_heap (get_hs h m))]
+val get_heap_hs: (m:S.heap) -> (h:mem{same_domain h m}) -> Lemma
+  (requires (forall x. not (Map.contains m x) ==> Map.sel m x == Map.sel (get_heap h) x))
+  (ensures get_heap (get_hs h m) == m)
 
 val buffer_addr : #t:typ -> b:buffer t -> h:mem -> GTot int
 

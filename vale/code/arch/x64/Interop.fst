@@ -344,3 +344,34 @@ let rec down_up_identity_aux
 let down_up_identity mem addrs ptrs =
   let heap = down_mem mem addrs ptrs in
   down_up_identity_aux heap addrs ptrs ptrs [] mem
+
+let correct_down_p_same_sel (b:b8) (mem:HS.mem) (addrs:addr_map) (heap1 heap2:heap) (x:int) : Lemma
+  (requires (x >= addrs b /\ x < addrs b + B.length b 
+    /\ correct_down_p mem addrs heap1 b /\ correct_down_p mem addrs heap2 b))
+  (ensures Map.sel heap1 x == Map.sel heap2 x) = 
+    let i = x - addrs b in
+    assert (heap1.[x] == heap1.[addrs b + i]);
+    assert (heap2.[x] == heap2.[addrs b + i])
+
+let rec up_down_identity_aux
+  (ptrs:list b8{list_disjoint_or_eq ptrs})
+  (addrs:addr_map)
+  (mem:HS.mem)
+  (init_heap:heap{correct_down mem addrs ptrs init_heap})
+  : Lemma 
+      (let heap = down_mem mem addrs ptrs in 
+      forall x. Map.contains heap x ==> Map.sel heap x == Map.sel init_heap x) =
+    let heap = down_mem mem addrs ptrs in
+    let aux (x:int) : Lemma 
+      (requires Map.contains heap x)
+      (ensures Map.sel heap x == Map.sel init_heap x) =
+      Classical.forall_intro 
+        (Classical.move_requires (fun b -> correct_down_p_same_sel b mem addrs heap init_heap x))
+    in Classical.forall_intro (Classical.move_requires aux)
+
+let up_down_identity mem addrs ptrs heap = 
+  let initial_heap = down_mem mem addrs ptrs in
+  let new_heap = down_mem (up_mem heap addrs ptrs mem) addrs ptrs in
+  same_unspecified_down mem (up_mem heap addrs ptrs mem) addrs ptrs;
+  up_down_identity_aux ptrs addrs (up_mem heap addrs ptrs mem) heap;
+  assert (Map.equal heap new_heap)
