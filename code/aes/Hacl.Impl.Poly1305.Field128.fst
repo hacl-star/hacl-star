@@ -342,8 +342,8 @@ let load_precompute_r p r0 r1 =
     push_frame();
     let r = sub p (size 0) (size 5) in
     let r5 = sub p (size 5) (size 5) in
-    let r2 = sub p (size 0) (size 5) in
-    let r2_5 = sub p (size 5) (size 5) in
+    let r2 = sub p (size 10) (size 5) in
+    let r2_5 = sub p (size 15) (size 5) in
     let r_vec = vec128_load64s r1 r0 in
     load_felem r r_vec r_vec;
     precompute_shift_reduce r5 r;
