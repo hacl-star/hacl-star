@@ -206,15 +206,15 @@ let loop_nospec #h0 #a #len n buf impl =
 inline_for_extraction noextract
 val loop_inv:
     #a:Type
+  -> #len:size_nat
   -> h0:mem
   -> h1:mem
-  -> len:size_nat
   -> n:size_nat
   -> buf:lbuffer a len
   -> spec:(i:size_nat{i < n} -> Seq.lseq a len -> Seq.lseq a len)
   -> i:nat{i <= n}
   -> Type0
-let loop_inv #a h0 h1 len n buf spec i =
+let loop_inv #a #len h0 h1 n buf spec i =
   modifies (loc_buffer buf) h0 h1 /\
   as_seq h1 buf == Seq.repeati_sp #n i spec (as_seq h0 buf)
 
@@ -229,14 +229,14 @@ val loop:
   -> spec:(i:size_nat{i < v n} -> Seq.lseq a len -> Seq.lseq a len)
   -> impl:
       (i:size_t{v i < v n} -> Stack unit
-        (requires fun h -> inv h0 h /\ loop_inv #a h0 h len (v n) buf spec (v i))
-        (ensures  fun _ r h1 -> inv h0 h1 /\ loop_inv #a h0 h1 len (v n) buf spec (v i + 1)))
+        (requires fun h -> inv h0 h /\ loop_inv #a #len h0 h (v n) buf spec (v i))
+        (ensures  fun _ r h1 -> inv h0 h1 /\ loop_inv #a #len h0 h1 (v n) buf spec (v i + 1)))
   -> Stack unit
     (requires fun h -> h0 == h /\ live h buf /\ inv h0 h)
-    (ensures  fun _ _ h1 -> loop_inv #a h0 h1 len (v n) buf spec (v n))
+    (ensures  fun _ _ h1 -> loop_inv #a #len h0 h1 (v n) buf spec (v n))
 let loop #h0 #a #len n buf inv' spec impl =
   let inv h1 j =
-    inv' h0 h1 /\ loop_inv #a h0 h1 len (v n) buf spec j in
+    inv' h0 h1 /\ loop_inv #a #len h0 h1 (v n) buf spec j in
   let f' (j:size_t{v j < v n}): Stack unit
       (requires fun h -> inv h (v j))
       (ensures  fun _ _ h2 -> inv h2 (v j + 1)) =

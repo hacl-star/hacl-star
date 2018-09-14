@@ -84,9 +84,9 @@ val state_theta_inner_C:
     (requires fun h ->
       live h s /\ live h _C /\ disjoint _C s /\
       as_state h0 s == as_state h s /\
-      loop_inv h0 h 5 5 _C (S.state_theta_inner_C (as_state h0 s)) (v i))
+      loop_inv h0 h 5 _C (S.state_theta_inner_C (as_state h0 s)) (v i))
     (ensures  fun _ _ h -> live h s /\
-      loop_inv h0 h 5 5 _C (S.state_theta_inner_C (as_state h0 s)) (v i + 1))
+      loop_inv h0 h 5 _C (S.state_theta_inner_C (as_state h0 s)) (v i + 1))
 let state_theta_inner_C #h0 s x _C =
   let h1 = ST.get () in
   _C.(x) <-
@@ -130,9 +130,9 @@ val state_theta_inner_s_inner:
   -> Stack unit
     (requires fun h -> live h s0 /\ live h s /\ disjoint s0 s /\
       as_seq h0 s0 == as_seq h s0 /\
-      loop_inv h0 h 25 5 s (S.state_theta_inner_s_inner (as_seq h0 s0) (v x) _D) (v y))
+      loop_inv h0 h 5 s (S.state_theta_inner_s_inner (as_seq h0 s0) (v x) _D) (v y))
     (requires fun _ _ h -> as_seq h0 s0 == as_seq h s0 /\
-      loop_inv h0 h 25 5 s (S.state_theta_inner_s_inner (as_seq h0 s0) (v x) _D) (v y + 1))
+      loop_inv h0 h 5 s (S.state_theta_inner_s_inner (as_seq h0 s0) (v x) _D) (v y + 1))
 let state_theta_inner_s_inner #h0 s0 x _D y s =
   let h1 = ST.get () in
   writeLane s x y (readLane s0 x y ^. _D);
@@ -153,8 +153,8 @@ val state_theta_inner_s:
       disjoint _C s /\ disjoint s0 s /\
       as_seq h0 s0 == as_seq h s0 /\
       as_seq h0 _C == as_seq h _C /\
-      loop_inv h0 h 25 5 s (S.state_theta_inner_s (as_seq h0 s0) (as_seq h0 _C)) (v x))
-    (ensures  fun _ _ h -> loop_inv h0 h 25 5 s (S.state_theta_inner_s (as_seq h0 s0) (as_seq h0 _C)) (v x + 1))
+      loop_inv h0 h 5 s (S.state_theta_inner_s (as_seq h0 s0) (as_seq h0 _C)) (v x))
+    (ensures  fun _ _ h -> loop_inv h0 h 5 s (S.state_theta_inner_s (as_seq h0 s0) (as_seq h0 _C)) (v x + 1))
 let state_theta_inner_s #h0 s0 _C x s =
   let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (u32 1) in
   let inv h0 h = live h s0 /\ live h s /\ disjoint s0 s /\ as_seq h0 s0 == as_seq h s0 in
@@ -202,8 +202,6 @@ let state_theta1 s _C =
   (fun x ->
     state_theta_inner_s #h0 s0 _C x s
   );
-  let h1 = ST.get () in
-  assert (as_seq h1 s == LSeq.repeati_sp #5 5 (S.state_theta_inner_s (as_seq_sp h0 s0) (as_seq_sp h0 _C)) (as_seq h0 s0));
   pop_frame ()
 
 inline_for_extraction noextract
@@ -284,11 +282,11 @@ val state_chi_inner:
     (requires fun h ->
       live h s_pi_rho /\ live h s /\ disjoint s_pi_rho s /\
       as_seq h0 s_pi_rho == as_seq h s_pi_rho /\
-      loop_inv h0 h 25 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x))
+      loop_inv h0 h 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x))
     (ensures  fun h _ h1 ->
       modifies (loc_buffer s) h h1 /\
       as_seq h1 s == S.state_chi_inner (as_seq h s_pi_rho) (v y) (v x) (as_seq h s) /\
-      loop_inv h0 h1 25 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x + 1))
+      loop_inv h0 h1 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x + 1))
 let state_chi_inner #h0 s_pi_rho y x s =
   let h1 = ST.get () in
   writeLane s x y
@@ -308,11 +306,11 @@ val state_chi_inner1:
     (requires fun h ->
       live h s_pi_rho /\ live h s /\ disjoint s_pi_rho s /\
       as_seq h0 s_pi_rho == as_seq h s_pi_rho /\
-      loop_inv h0 h 25 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y))
+      loop_inv h0 h 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y))
     (ensures  fun h _ h1 ->
       modifies (loc_buffer s) h h1 /\
       as_seq h1 s == S.state_chi_inner1 (as_seq h s_pi_rho) (v y) (as_seq h s) /\
-      loop_inv h0 h1 25 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y + 1))
+      loop_inv h0 h1 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y + 1))
 let state_chi_inner1 #h0 s_pi_rho y s =
   let h1 = ST.get () in
   let inv h0 h1 = live h1 s_pi_rho /\ live h1 s /\ disjoint s_pi_rho s in
@@ -362,11 +360,11 @@ val state_permute1:
   -> s:state
   -> Stack unit
     (requires fun h1 -> live h1 s /\
-      loop_inv h0 h1 25 24 s S.state_permute1 (v round))
+      loop_inv h0 h1 24 s S.state_permute1 (v round))
     (ensures  fun h _ h1 ->
       modifies (loc_buffer s) h h1 /\
       as_seq h1 s == S.state_permute1 (v round) (as_seq h s) /\
-      loop_inv h0 h1 25 24 s S.state_permute1 (v round + 1))
+      loop_inv h0 h1 24 s S.state_permute1 (v round + 1))
 let state_permute1 #h0 round s =
   let h1 = ST.get () in
   state_theta s;
