@@ -220,18 +220,23 @@ let state_theta s =
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+inline_for_extraction noextract
 val state_pi_rho_inner:
-     i:size_t{v i < 24}
+    #h0:mem
+  -> i:size_t{v i < 24}
   -> current:lbuffer uint64 1
   -> s:state
   -> Stack unit
     (requires fun h ->
-      live h s /\ live h current /\ disjoint current s)
-    (ensures  fun h0 _ h1 ->
+      live h s /\ live h current /\ disjoint current s /\
+      loop2_inv h0 h 24 current s S.state_pi_rho_inner (v i))
+    (ensures  fun h _ h1 ->
+      loop2_inv h0 h1 24 current s S.state_pi_rho_inner (v i + 1) /\
       modifies (loc_union (loc_buffer current) (loc_buffer s)) h0 h1 /\
-      (let current_sp, s_sp = S.state_pi_rho_inner (v i) (as_seq h0 current, as_seq h0 s) in
+      (let current_sp, s_sp = S.state_pi_rho_inner (v i) (as_seq h current, as_seq h s) in
       as_seq h1 current == current_sp /\ as_seq h1 s == s_sp))
-let state_pi_rho_inner i current s =
+let state_pi_rho_inner #h0 i current s =
+  let h = ST.get () in
   IB.recall_contents keccak_rotc (Seq.seq_of_list rotc_list);
   IB.recall_contents keccak_piln (Seq.seq_of_list piln_list);
   let r = IB.index keccak_rotc (Lib.RawIntTypes.size_to_UInt32 i) in
@@ -241,24 +246,26 @@ let state_pi_rho_inner i current s =
   let temp = s.(_Y) in
   let current0:uint64 = current.(size 0) in
   s.(_Y) <- rotl current0 r;
-  current.(size 0) <- temp
+  current.(size 0) <- temp;
+  let h1 = ST.get () in
+  lemma_repeati_sp #h0 24 S.state_pi_rho_inner (as_seq h0 current, as_seq h0 s) (v i) (as_seq h current, as_seq h s)
 
 inline_for_extraction noextract
 val state_pi_rho:
      s:state
   -> Stack unit
     (requires fun h -> live h s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.state_pi_rho (as_seq h0 s))
 let state_pi_rho s =
   push_frame();
   let current:lbuffer uint64 1 = create (size 1) (readLane s (size 1) (size 0)) in
   let h0 = ST.get () in
-  Lib.Loops.for (size 0) (size 24)
-  (fun h1 t ->
-    live h1 current /\ live h1 s /\
-    modifies (loc_union (loc_buffer current) (loc_buffer s)) h0 h1)
+  let inv h0 h1 = live h1 s /\ live h1 current /\ disjoint current s in
+  loop2 #h0 (size 24) current s inv S.state_pi_rho_inner
   (fun i ->
-    state_pi_rho_inner i current s
+    state_pi_rho_inner #h0 i current s
   );
   pop_frame()
 
