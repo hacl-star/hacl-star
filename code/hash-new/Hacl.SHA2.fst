@@ -41,35 +41,30 @@ let h256 = IB.igcmalloc_of_list HS.root Constants.h256_l
 let h384 = IB.igcmalloc_of_list HS.root Constants.h384_l
 let h512 = IB.igcmalloc_of_list HS.root Constants.h512_l
 
+noextract
+let h (a: sha2_alg): S.lseq (word a) 8 =
+  match a with
+  | SHA2_224 -> Constants.h224
+  | SHA2_256 -> Constants.h256
+  | SHA2_384 -> Constants.h384
+  | SHA2_512 -> Constants.h512
+
+noextract
+let index_h (a: sha2_alg) (i: U32.t): ST.Stack (word a)
+  (requires (fun _ -> U32.v i < 8))
+  (ensures (fun h0 r h1 ->
+    B.(modifies loc_none h0 h1) /\
+    r = S.index (h a) (U32.v i)))
+=
+    match a with
+    | SHA2_224 -> B.recall h224; IB.recall_contents h224 Constants.h224; h224.(i)
+    | SHA2_256 -> B.recall h256; IB.recall_contents h256 Constants.h256; h256.(i)
+    | SHA2_384 -> B.recall h384; IB.recall_contents h384 Constants.h384; h384.(i)
+    | SHA2_512 -> B.recall h512; IB.recall_contents h512 Constants.h512; h512.(i)
+
 let k224_256 = IB.igcmalloc_of_list HS.root Constants.k224_256_l
 let k384_512 = IB.igcmalloc_of_list HS.root Constants.k384_512_l
 
-(* We believe it'll be hard to get, "for free", within this module:
-     readonly h224 /\ writable client_state ==> disjoint h224 client_state
-   so, instead, we require the client to do a little bit of reasoning to show
-   that their buffers are disjoint from our top-level readonly state. *)
-
-(* The total footprint of our morally readonly data. *)
-let static_fp () =
-  M.loc_union
-    (M.loc_union (M.loc_addr_of_buffer k224_256) (M.loc_addr_of_buffer k384_512))
-    (M.loc_union
-      (M.loc_union (M.loc_addr_of_buffer h224) (M.loc_addr_of_buffer h256))
-      (M.loc_union (M.loc_addr_of_buffer h384) (M.loc_addr_of_buffer h512)))
-
-let recall_static_fp () =
-  B.recall h224;
-  B.recall h256;
-  B.recall h384;
-  B.recall h512;
-  B.recall k224_256;
-  B.recall k384_512
-
-(* This succeeds: *)
-(* let test (): ST.St unit =
-  recall_static_fp ();
-  let b = B.malloc HS.root 0ul 1ul in
-  assert M.(loc_disjoint (loc_addr_of_buffer b) (static_fp ())) *)
 
 (** Alloca *)
 
@@ -104,28 +99,34 @@ noextract
 val init: a:sha2_alg -> init_st a
 noextract
 let init a s =
-  match a with
-  | SHA2_224 ->
-      IB.recall_contents h224 (S.seq_of_list Constants.h224_l);
-      B.blit h224 0ul s 0ul 8ul
-  | SHA2_256 ->
-      IB.recall_contents h256 (S.seq_of_list Constants.h256_l);
-      B.blit h256 0ul s 0ul 8ul
-  | SHA2_384 ->
-      IB.recall_contents h384 (S.seq_of_list Constants.h384_l);
-      B.blit h384 0ul s 0ul 8ul
-  | SHA2_512 ->
-      IB.recall_contents h512 (S.seq_of_list Constants.h512_l);
-      B.blit h512 0ul s 0ul 8ul
+  let h0 = ST.get () in
+  let inv h1 (i: nat): Type0 =
+    i <= 8 /\
+    M.(modifies (loc_buffer s) h0 h1) /\
+    S.equal (S.slice (B.as_seq h1 s) 0 i) (S.slice (h a) 0 i)
+  in
+  let f (i: U32.t { U32.(0 <= v i /\ v i < 8) }):
+    ST.Stack unit
+      (requires (fun h -> inv h (U32.v i)))
+      (ensures (fun h0 _ h1 -> U32.(inv h0 (v i) /\ inv h1 (v i + 1))))
+  =
+    s.(i) <- index_h a i;
+    let h2 = ST.get () in
+    assert (S.equal (S.slice (B.as_seq h2 s) 0 (U32.v i + 1))
+      (S.append
+        (S.slice (B.as_seq h2 s) 0 (U32.v i))
+        (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))))
+  in
+  C.Loops.for 0ul 8ul inv f
 
 let init_224: init_st SHA2_224 =
-  Tactics.(synth_by_tactic (specialize (init SHA2_224) [`%init]))
+  Tactics.(synth_by_tactic (specialize (init SHA2_224) [`%init; `%index_h]))
 let init_256: init_st SHA2_256 =
-  Tactics.(synth_by_tactic (specialize (init SHA2_256) [`%init]))
+  Tactics.(synth_by_tactic (specialize (init SHA2_256) [`%init; `%index_h]))
 let init_384: init_st SHA2_384 =
-  Tactics.(synth_by_tactic (specialize (init SHA2_384) [`%init]))
+  Tactics.(synth_by_tactic (specialize (init SHA2_384) [`%init; `%index_h]))
 let init_512: init_st SHA2_512 =
-  Tactics.(synth_by_tactic (specialize (init SHA2_512) [`%init]))
+  Tactics.(synth_by_tactic (specialize (init SHA2_512) [`%init; `%h]))
 
 
 (** Update *)

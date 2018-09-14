@@ -38,6 +38,39 @@ let size_len_ul (a: hash_alg): n:U32.t { U32.v n = size_len_8 a } =
   | SHA2_384 | SHA2_512 -> 16ul
 
 
+(** The type of init, alloca and update, share by all algorithms. Note that
+    since we manage to hide the static footprints, all algorithms do have a generic
+    signature. *)
+
+inline_for_extraction
+let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a)
+  (requires (fun h ->
+    HS.is_stack_region (HS.get_tip h)))
+  (ensures (fun h0 s h1 ->
+    M.(modifies M.loc_none h0 h1) /\
+    B.live h1 s /\
+    Seq.equal (B.as_seq h1 s) (Spec.Hash.init a)))
+
+inline_for_extraction
+let init_st (a: hash_alg) = s:state a -> ST.Stack unit
+  (requires (fun h ->
+    B.live h s))
+  (ensures (fun h0 _ h1 ->
+    M.(modifies (loc_buffer s) h0 h1) /\
+    Seq.equal (B.as_seq h1 s) (Spec.Hash.init a)))
+
+inline_for_extraction
+let update_st (a: hash_alg) =
+  s:state a ->
+  block:B.buffer U8.t { B.length block = size_block a } ->
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h s /\ B.live h block /\ B.disjoint s block))
+    (ensures (fun h0 _ h1 ->
+      M.(modifies (loc_buffer s) h0 h1) /\
+      Seq.equal (B.as_seq h1 s) (Spec.Hash.update a (B.as_seq h0 s) (B.as_seq h0 block))))
+
+
 (** Padding, not specialized, to be inlined in a specialized caller instead. *)
 
 inline_for_extraction
