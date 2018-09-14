@@ -197,6 +197,4 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   update_last s (u32_to_len a blocks_len) rest rest_len;
   finish s dst;
   ST.pop_frame ();
-  let h1 = ST.get () in
-  assume (B.(modifies (loc_buffer dst) h0 h1));
   Spec.Hash.Incremental.hash_is_hash_incremental a (B.as_seq h0 input)

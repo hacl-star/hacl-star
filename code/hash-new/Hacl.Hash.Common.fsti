@@ -48,6 +48,7 @@ let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a)
   (ensures (fun h0 s h1 ->
     M.(modifies M.loc_none h0 h1) /\
     B.live h1 s /\
+    B.frameOf s == HS.get_tip h0 /\
     Seq.equal (B.as_seq h1 s) (Spec.Hash.init a) /\
     LowStar.Monotonic.Buffer.alloc_post_mem_common s h0 h1 (Spec.Hash.init a)))
 
