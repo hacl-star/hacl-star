@@ -119,6 +119,7 @@ let state_theta0 #h0 s _C =
     state_theta_inner_C #h0 s x _C
   )
 
+inline_for_extraction noextract
 val state_theta_inner_s_inner:
      #h0:mem
   -> s0:state
@@ -139,6 +140,7 @@ let state_theta_inner_s_inner #h0 s0 x _D y s =
   assert (as_seq h2 s == S.writeLane (as_seq h1 s) (v x) (v y) (S.readLane (as_seq h0 s0) (v x) (v y) ^. _D));
   lemma_repeati_sp #h0 5 (S.state_theta_inner_s_inner (as_seq h0 s0) (v x) _D) (as_seq h0 s) (v y) (as_seq h1 s)
 
+inline_for_extraction noextract
 val state_theta_inner_s:
      #h0:mem
   -> s0:state
@@ -165,6 +167,7 @@ let state_theta_inner_s #h0 s0 _C x s =
   assert (as_seq h2 s == LSeq.repeati_sp #5 5 (S.state_theta_inner_s_inner (as_seq_sp h0 s0) (v x) _D) (as_seq h1 s));
   lemma_repeati_sp #h0 5 (S.state_theta_inner_s (as_seq h0 s0) (as_seq h0 _C)) (as_seq h0 s) (v x) (as_seq h1 s)
 
+inline_for_extraction noextract
 val copy_s:
      s0:state
   -> s1:state
@@ -175,6 +178,7 @@ val copy_s:
 let copy_s s0 s1 = admit();
   update_sub #uint64 #25 s0 (size 0) (size 25) s1
 
+inline_for_extraction noextract
 val state_theta1:
      s:state
   -> _C:lbuffer uint64 5
@@ -270,26 +274,72 @@ let state_pi_rho s =
   pop_frame()
 
 inline_for_extraction noextract
+val state_chi_inner:
+     #h0:mem
+  -> s_pi_rho:state
+  -> y:index
+  -> x:index
+  -> s:state
+  -> Stack unit
+    (requires fun h ->
+      live h s_pi_rho /\ live h s /\ disjoint s_pi_rho s /\
+      as_seq h0 s_pi_rho == as_seq h s_pi_rho /\
+      loop_inv h0 h 25 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x))
+    (ensures  fun h _ h1 ->
+      modifies (loc_buffer s) h h1 /\
+      as_seq h1 s == S.state_chi_inner (as_seq h s_pi_rho) (v y) (v x) (as_seq h s) /\
+      loop_inv h0 h1 25 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x + 1))
+let state_chi_inner #h0 s_pi_rho y x s =
+  let h1 = ST.get () in
+  writeLane s x y
+    (readLane s_pi_rho x y ^.
+     ((lognot (readLane s_pi_rho ((x +. size 1) %. size 5) y)) &.
+     readLane s_pi_rho ((x +. size 2) %. size 5) y));
+  let h2 = ST.get () in
+  lemma_repeati_sp #h0 5 (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (as_seq h0 s) (v x) (as_seq h1 s)
+
+inline_for_extraction noextract
+val state_chi_inner1:
+    #h0:mem
+  -> s_pi_rho:state
+  -> y:index
+  -> s:state
+  -> Stack unit
+    (requires fun h ->
+      live h s_pi_rho /\ live h s /\ disjoint s_pi_rho s /\
+      as_seq h0 s_pi_rho == as_seq h s_pi_rho /\
+      loop_inv h0 h 25 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y))
+    (ensures  fun h _ h1 ->
+      modifies (loc_buffer s) h h1 /\
+      as_seq h1 s == S.state_chi_inner1 (as_seq h s_pi_rho) (v y) (as_seq h s) /\
+      loop_inv h0 h1 25 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y + 1))
+let state_chi_inner1 #h0 s_pi_rho y s =
+  let h1 = ST.get () in
+  let inv h0 h1 = live h1 s_pi_rho /\ live h1 s /\ disjoint s_pi_rho s in
+  loop #h1 (size 5) s inv (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y))
+  (fun x ->
+    state_chi_inner #h1 s_pi_rho y x s
+  );
+  let h2 = ST.get () in
+  lemma_repeati_sp #h0 5 (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (as_seq h0 s) (v y) (as_seq h1 s)
+
+inline_for_extraction noextract
 val state_chi:
      s:state
   -> Stack unit
     (requires fun h -> live h s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.state_chi (as_seq h0 s))
 let state_chi s =
   push_frame ();
-  let temp:state = create (size 25) (u64 0) in
-  update_sub temp (size 0) (size 25) s;
+  let s_pi_rho:state = create (size 25) (u64 0) in
+  copy_s s_pi_rho s;
   let h0 = ST.get () in
-  loop_nospec #h0 (size 5) s
+  let inv h0 h1 = live h1 s_pi_rho /\ live h1 s /\ disjoint s_pi_rho s in
+  loop #h0 (size 5) s inv (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho))
   (fun y ->
-    let h1 = ST.get () in
-    loop_nospec #h1 (size 5) s
-    (fun x ->
-      writeLane s x y
-	(readLane temp x y ^.
-	((lognot (readLane temp ((x +. size 1) %. size 5) y)) &.
-	  readLane temp ((x +. size 2) %. size 5) y))
-    )
+    state_chi_inner1 #h0 s_pi_rho y s
   );
   pop_frame ()
 
@@ -299,35 +349,46 @@ val state_iota:
   -> round:size_t{v round < 24}
   -> Stack unit
     (requires fun h -> live h s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.state_iota (as_seq h0 s) (v round))
 let state_iota s round =
   IB.recall_contents keccak_rndc (Seq.seq_of_list rndc_list);
   writeLane s (size 0) (size 0) (readLane s (size 0) (size 0) ^. (IB.index keccak_rndc (Lib.RawIntTypes.size_to_UInt32 round)))
 
 val state_permute1:
-     s:state
+     #h0:mem
   -> round:size_t{v round < 24}
+  -> s:state
   -> Stack unit
-    (requires fun h -> live h s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
-let state_permute1 s round =
+    (requires fun h1 -> live h1 s /\
+      loop_inv h0 h1 25 24 s S.state_permute1 (v round))
+    (ensures  fun h _ h1 ->
+      modifies (loc_buffer s) h h1 /\
+      as_seq h1 s == S.state_permute1 (v round) (as_seq h s) /\
+      loop_inv h0 h1 25 24 s S.state_permute1 (v round + 1))
+let state_permute1 #h0 round s =
+  let h1 = ST.get () in
   state_theta s;
   state_pi_rho s;
   state_chi s;
-  state_iota s round
+  state_iota s round;
+  let h2 = ST.get () in
+  lemma_repeati_sp #h0 24 S.state_permute1 (as_seq h0 s) (v round) (as_seq h1 s)
 
 val state_permute:
      s:state
   -> Stack unit
     (requires fun h -> live h s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.state_permute (as_seq h0 s))
 let state_permute s =
   let h0 = ST.get () in
-  Lib.Loops.for (size 0) (size 24)
-  (fun h1 i ->
-    live h1 s /\ modifies (loc_buffer s) h0 h1)
+  let inv h0 h1 = live h1 s in
+  loop #h0 (size 24) s inv S.state_permute1
   (fun i ->
-    state_permute1 s i
+    state_permute1 #h0 i s
   )
 
 val loadState:
