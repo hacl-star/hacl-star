@@ -1380,39 +1380,43 @@ let low_lemma_load_mem64 b i h =
   lemma_load_mem64 b i h;
   equiv_load_mem_aux (buffer_addr b h + 8 `op_Multiply` i) h
 
-val valid_state_store_mem64_aux2: (i:int) -> (v:nat64) -> (h:mem) -> Lemma 
-  (requires valid_mem64 i h)
-  (ensures (
-    let heap = get_heap h in
-    let heap' = S.update_heap64 i v heap in
-    let h' = store_mem64 i v h in
-    bytes_valid_aux i h;
-    X64.Bytes_Semantics.same_domain_update i v heap;
-    get_hs h heap' == h'
-  ))
-
-let valid_state_store_mem64_aux2 i v h =
-  valid_state_store_mem64_aux i v h;
-  let heap = get_heap h in
-  let heap' = S.update_heap64 i v heap in
-  let h' = store_mem64 i v h in
-  assert (    heap' == I.down_mem h'.hs h'.addrs h'.ptrs );
-  I.down_up_identity h'.hs h'.addrs h'.ptrs;
-  assert (get_hs h' heap' == h');
-  admit()
-
-
 let same_domain_update64 b i v h =
   low_lemma_valid_mem64 b i h;
   X64.Bytes_Semantics.same_domain_update (buffer_addr b h + 8 `op_Multiply` i) v (get_heap h)
 
+open X64.BufferViewStore
+
+let low_lemma_store_mem64_aux 
+  (b:buffer64)
+  (heap:S.heap)
+  (i:nat{i < buffer_length b})
+  (v:nat64)
+  (h:mem{buffer_readable h b})
+  : Lemma
+    (let heap' = S.update_heap64 (buffer_addr b h + 8 `op_Multiply` i) v heap in
+     let h' = store_mem64 (buffer_addr b h + 8 `op_Multiply` i) v h in
+     h'.hs == B.g_upd_seq b (I.get_seq_heap heap' h.addrs b) h.hs) =
+   let ptr = buffer_addr b h + 8 `op_Multiply` i in
+   let heap' = S.update_heap64 ptr v heap in
+   let h' = store_mem64 ptr v h in
+   length_t_eq (TBase TUInt64) b;
+   store_buffer_write (TBase TUInt64) ptr v h h.ptrs;
+   let b' = get_addr_ptr (TBase TUInt64) ptr h h.ptrs in
+   assert (I.disjoint_or_eq b b');
+   length_t_eq (TBase TUInt64) b';
+   bv_upd_update_heap64 b heap i v h.addrs h.ptrs h.hs
+
 let low_lemma_store_mem64 b i v h =
   lemma_valid_mem64 b i h;
   lemma_store_mem64 b i v h;
-  valid_state_store_mem64_aux2 (buffer_addr b h + 8 `op_Multiply` i) v h
-  // let heap' = S.update_heap64 (buffer_addr b h + 8 `op_Multiply` i) v (get_heap h) in
-  // let h' = store_mem64 (buffer_addr b h + 8 `op_Multiply` i) v h in
-  // assume (get_hs h heap' == store_mem64 (buffer_addr b h + 8 `op_Multiply` i) v h)
+  valid_state_store_mem64_aux (buffer_addr b h + 8 `op_Multiply` i) v h;
+  let heap = get_heap h in
+  let heap' = S.update_heap64 (buffer_addr b h + 8 `op_Multiply` i) v heap in
+  let h' = store_mem64 (buffer_addr b h + 8 `op_Multiply` i) v h in
+  low_lemma_store_mem64_aux b heap i v h;
+  length_t_eq (TBase TUInt64) b;
+  X64.Bytes_Semantics.frame_update_heap (buffer_addr b h + 8 `op_Multiply` i) v heap;
+  I.update_buffer_up_mem h.ptrs h.addrs h.hs b heap heap'  
 
 let low_lemma_valid_mem128 b i h =
   lemma_valid_mem128 b i h;
@@ -1427,7 +1431,37 @@ let same_domain_update128 b i v h =
   low_lemma_valid_mem128 b i h;
   X64.Bytes_Semantics.same_domain_update128 (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h)
 
-let low_lemma_store_mem128 b i v h = admit()
+let low_lemma_store_mem128_aux 
+  (b:buffer128)
+  (heap:S.heap)
+  (i:nat{i < buffer_length b})
+  (v:quad32)
+  (h:mem{buffer_readable h b})
+  : Lemma
+    (let heap' = S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap in
+     let h' = store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h in
+     h'.hs == B.g_upd_seq b (I.get_seq_heap heap' h.addrs b) h.hs) =
+   let ptr = buffer_addr b h + 16 `op_Multiply` i in
+   let heap' = S.update_heap128 ptr v heap in
+   let h' = store_mem128 ptr v h in
+   length_t_eq (TBase TUInt128) b;
+   store_buffer_write (TBase TUInt128) ptr v h h.ptrs;
+   let b' = get_addr_ptr (TBase TUInt128) ptr h h.ptrs in
+   assert (I.disjoint_or_eq b b');
+   length_t_eq (TBase TUInt128) b';
+   bv_upd_update_heap128 b heap i v h.addrs h.ptrs h.hs
+
+let low_lemma_store_mem128 b i v h =
+  lemma_valid_mem128 b i h;
+  lemma_store_mem128 b i v h;
+  valid_state_store_mem128_aux (buffer_addr b h + 16 `op_Multiply` i) v h;
+  let heap = get_heap h in
+  let heap' = S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap in
+  let h' = store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h in
+  low_lemma_store_mem128_aux b heap i v h;  
+  length_t_eq (TBase TUInt128) b;
+  X64.Bytes_Semantics.frame_update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap;
+  I.update_buffer_up_mem h.ptrs h.addrs h.hs b heap heap'
 
 let valid128_64 ptr h =
   let b = get_addr_ptr (TBase TUInt128) ptr h h.ptrs in
