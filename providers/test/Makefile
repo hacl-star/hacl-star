@@ -19,8 +19,8 @@ UNAME = $(shell uname)
 
 ifeq ($(OS),Windows_NT)
   ifeq ($(shell uname -o),Cygwin)
-    EVERCRYPT_HOME_RUN := $(shell cygpath -m ${EVERCRYPT_HOME})
-    MLCRYPTO_HOME_RUN := $(shell cygpath -m ${MLCRYPTO_HOME})
+    EVERCRYPT_HOME_RUN := $(shell cygpath -u $(shell cygpath -m ${EVERCRYPT_HOME}))
+    MLCRYPTO_HOME_RUN := $(shell cygpath -u $(shell cygpath -m ${MLCRYPTO_HOME}))
   else
     EVERCRYPT_HOME_RUN := $(EVERCRYPT_HOME)
     MLCRYPTO_HOME_RUN := $(MLCRYPTO_HOME)
