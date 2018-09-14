@@ -796,30 +796,31 @@ let mt_flush mt =
 
 private val mt_verify_:
   k:uint32_t ->
-  j:uint32_t{j = 0ul || k <= j} ->
+  j:uint32_t{k <= j} ->
   p:path ->
   ppos:uint32_t ->
   acc:hash ->
+  actd:bool ->
   HST.ST unit
 	 (requires (fun h0 ->
 	   path_safe h0 p /\ Rgl?.r_inv hreg h0 acc /\
 	   HH.disjoint (B.frameOf p) (B.frameOf acc) /\
 	   (let psz = V.size_of (B.get h0 p 0) in
-	   ppos <= psz /\ U32.v j <= pow2 (U32.v (psz - ppos)))))
+	   ppos <= psz /\ U32.v j < pow2 (U32.v (psz - ppos)))))
 	 (ensures (fun h0 _ h1 ->
 	   modifies (B.loc_all_regions_from false (B.frameOf acc)) h0 h1 /\
 	   Rgl?.r_inv hreg h1 acc))
-private let rec mt_verify_ k j p ppos acc =
-  admit ();
-  if j <= 1ul then ()
-  else (let phash = V.index (B.index p 0ul) ppos in
+private let rec mt_verify_ k j p ppos acc actd =
+  if j = 0ul then ()
+  else (let nactd = actd || (j % 2ul = 1ul) in
+       let phash = V.index (B.index p 0ul) ppos in
        if k % 2ul = 0ul
-       then (if k + 1ul = j 
-	    then mt_verify_ (k / 2ul) ((j + 1ul) / 2ul) p ppos acc
+       then (if j = k || (j = k + 1ul && not actd)
+	    then mt_verify_ (k / 2ul) (j / 2ul) p ppos acc nactd
 	    else (hash_2 acc phash acc;
-		 mt_verify_ (k / 2ul) ((j + 1ul) / 2ul) p (ppos + 1ul) acc))
+		 mt_verify_ (k / 2ul) (j / 2ul) p (ppos + 1ul) acc nactd))
        else (hash_2 phash acc acc;
-	    mt_verify_ (k / 2ul) ((j + 1ul) / 2ul) p (ppos + 1ul) acc))
+	    mt_verify_ (k / 2ul) (j / 2ul) p (ppos + 1ul) acc nactd))
 
 private val buf_eq:
   #a:eqtype -> b1:B.buffer a -> b2:B.buffer a ->
@@ -863,6 +864,6 @@ let mt_verify k j p rt =
   copy (V.index (B.index p 0ul) 0ul) ih;
   let hh1 = HST.get () in
   path_safe_preserved p (B.loc_all_regions_from false (B.frameOf rt)) hh0 hh1;
-  mt_verify_ k j p 1ul ih;
+  mt_verify_ k j p 1ul ih false;
   buf_eq ih rt hash_size
 
