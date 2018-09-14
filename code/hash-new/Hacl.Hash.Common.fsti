@@ -95,10 +95,10 @@ val pad_len: a:hash_alg -> len:len_t a ->
 
 (** Finish, not specialized, to be inlined in a specialized caller instead. *)
 
-let hash_st (a: hash_alg) = b:B.buffer U8.t { B.length b = size_hash a }
+let hash_t (a: hash_alg) = b:B.buffer U8.t { B.length b = size_hash a }
 
 inline_for_extraction
-let finish_st (a: hash_alg) = s:state a -> dst:hash_st a -> ST.Stack unit
+let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
   (requires (fun h ->
     B.disjoint s dst /\
     B.live h s /\
@@ -109,3 +109,20 @@ let finish_st (a: hash_alg) = s:state a -> dst:hash_st a -> ST.Stack unit
 
 noextract
 val finish: a:hash_alg -> finish_st a
+
+
+(** The whole hash algorithm *)
+
+let hash_st (a: hash_alg) =
+  input:B.buffer U8.t ->
+  input_len:U32.t { B.length input = U32.v input_len } ->
+  dst:hash_t a ->
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h input /\
+      B.live h dst /\
+      B.disjoint input dst /\
+      B.length input < max_input8 a))
+    (ensures (fun h0 _ h1 ->
+      B.(modifies (loc_buffer dst) h0 h1) /\
+      Seq.equal (B.as_seq h1 dst) (Spec.Hash.Nist.hash a (B.as_seq h0 input))))

@@ -156,3 +156,39 @@ let update_last_sha2_512: update_last_st SHA2_512 =
   Tactics.(synth_by_tactic
     (specialize (mk_update_last SHA2_512 Hacl.Hash.update_multi_sha2_512 Hacl.SHA2.pad_512) [`%mk_update_last]))
 
+
+noextract
+val mk_hash: a:hash_alg ->
+  alloca:alloca_st a ->
+  update_multi:Hacl.Hash.update_multi_st a ->
+  update_last:update_last_st a ->
+  finish:finish_st a ->
+  hash_st a
+
+#set-options "--max_ifuel 1"
+
+let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
+  match a with
+  | SHA2_384 | SHA2_512 ->
+      FStar.Int.Cast.Full.(uint64_to_uint128 (uint32_to_uint64 l))
+  | _ ->
+      FStar.Int.Cast.Full.(uint32_to_uint64 l)
+
+#set-options "--max_ifuel 0"
+
+noextract
+let mk_hash a alloca update_multi update_last finish input input_len dst =
+  ST.push_frame ();
+  let s = alloca () in
+  assume (B.disjoint s input);
+  assume (B.disjoint s dst);
+  let blocks_n = U32.(input_len /^ size_block_ul a) in
+  let blocks_len = U32.(blocks_n *^ size_block_ul a) in
+  let blocks = B.sub input 0ul blocks_len in
+  let rest_len = U32.(input_len -^ blocks_len) in
+  let rest = B.sub input blocks_len rest_len in
+  update_multi s blocks blocks_n;
+  update_last s (u32_to_len a blocks_len) rest rest_len;
+  finish s dst;
+  ST.pop_frame ();
+  admit ()
