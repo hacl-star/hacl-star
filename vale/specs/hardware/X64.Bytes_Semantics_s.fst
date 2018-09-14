@@ -109,38 +109,6 @@ let get_heap_val128_def (ptr:int) (mem:heap) : quad32 = Mkfour
   (get_heap_val32 (ptr+12) mem)
 let get_heap_val128 = make_opaque get_heap_val128_def
 
-
-let valid_addr (ptr:int) (mem:heap) : bool =
-  Map.contains mem ptr
-
-let valid_addr64 (ptr:int) (mem:heap) =
-  valid_addr ptr mem &&
-  valid_addr (ptr+1) mem &&
-  valid_addr (ptr+2) mem &&
-  valid_addr (ptr+3) mem &&
-  valid_addr (ptr+4) mem &&
-  valid_addr (ptr+5) mem &&
-  valid_addr (ptr+6) mem &&
-  valid_addr (ptr+7) mem
-
-let valid_addr128 (ptr:int) (mem:heap) =
-  valid_addr ptr mem &&
-  valid_addr (ptr+1) mem &&
-  valid_addr (ptr+2) mem &&
-  valid_addr (ptr+3) mem &&
-  valid_addr (ptr+4) mem &&
-  valid_addr (ptr+5) mem &&
-  valid_addr (ptr+6) mem &&
-  valid_addr (ptr+7) mem &&
-  valid_addr (ptr+8) mem &&
-  valid_addr (ptr+9) mem &&
-  valid_addr (ptr+10) mem &&
-  valid_addr (ptr+11) mem &&
-  valid_addr (ptr+12) mem &&
-  valid_addr (ptr+13) mem &&
-  valid_addr (ptr+14) mem &&
-  valid_addr (ptr+15) mem
-
 unfold let eval_mem (ptr:int) (s:state) : nat64 = get_heap_val64 ptr s.mem
 unfold let eval_mem128 (ptr:int) (s:state) : quad32 = get_heap_val128 ptr s.mem
 
@@ -217,6 +185,37 @@ let update_heap128 (ptr:int) (v:quad32) (mem:heap) =
   let mem = update_heap32 (ptr+8) v.hi2 mem in
   let mem = update_heap32 (ptr+12) v.hi3 mem in
   mem
+
+let valid_addr (ptr:int) (mem:heap) : bool =
+  Map.contains mem ptr
+
+let valid_addr64 (ptr:int) (mem:heap) =
+  valid_addr ptr mem &&
+  valid_addr (ptr+1) mem &&
+  valid_addr (ptr+2) mem &&
+  valid_addr (ptr+3) mem &&
+  valid_addr (ptr+4) mem &&
+  valid_addr (ptr+5) mem &&
+  valid_addr (ptr+6) mem &&
+  valid_addr (ptr+7) mem
+
+let valid_addr128 (ptr:int) (mem:heap) =
+  valid_addr ptr mem &&
+  valid_addr (ptr+1) mem &&
+  valid_addr (ptr+2) mem &&
+  valid_addr (ptr+3) mem &&
+  valid_addr (ptr+4) mem &&
+  valid_addr (ptr+5) mem &&
+  valid_addr (ptr+6) mem &&
+  valid_addr (ptr+7) mem &&
+  valid_addr (ptr+8) mem &&
+  valid_addr (ptr+9) mem &&
+  valid_addr (ptr+10) mem &&
+  valid_addr (ptr+11) mem &&
+  valid_addr (ptr+12) mem &&
+  valid_addr (ptr+13) mem &&
+  valid_addr (ptr+14) mem &&
+  valid_addr (ptr+15) mem
 
 let update_mem (ptr:int) (v:nat64) (s:state) : state =
   if valid_addr64 ptr s.mem then

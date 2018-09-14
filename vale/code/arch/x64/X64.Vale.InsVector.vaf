@@ -333,10 +333,6 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(d
     same_memTaint128(#buffer128_s(b), old(#mem_s(mem)), #mem_s(mem), old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
-#verbatim
-#set-options "--z3rlimit 50"
-#endverbatim
-
 procedure {:quick exportOnly} PushXmm(
         src:xmm,
     out tmp:reg_opr64,
@@ -447,7 +443,7 @@ procedure {:quick} XmmEqual()
 {
     Pcmpeqd(x1, x2);
     Pextrq(tmp, x1, 0);
-    let tmp1:nat64 := tmp;
+    let tmp1 := tmp;
     lemma_equality_check_helper(x1);
     if (tmp == 0xFFFFFFFFFFFFFFFF) {
         //assert old(x1.lo0 == x2.lo0 /\ x1.lo1 == x2.lo1);
@@ -456,9 +452,9 @@ procedure {:quick} XmmEqual()
         //assert old(x1.lo0 != x2.lo0) \/ (x1.lo1 != x2.lo1);
         Mov64(result, 1);
     }
-    let result1:nat64 := result;
+    let result1 := result;
     Pextrq(tmp, x1, 1);
-    let tmp2:nat64 := tmp;
+    let tmp2 := tmp;
     if (tmp == 0xFFFFFFFFFFFFFFFF) {
         //assert old(x1.hi2 == x2.hi2 /\ x1.hi3 == x2.hi3);
         Mov64(tmp, 0);
@@ -472,7 +468,7 @@ procedure {:quick} XmmEqual()
 //    assert result1 == (if tmp1 = 0xFFFFFFFFFFFFFFFF then 0 else 1);
 //    assert tmp == (if tmp2 = 0xFFFFFFFFFFFFFFFF then 0 else 1);
 //    assert result == tmp + result1;
-    lemma_equality_check_helper_2(old(x1), old(x2), x1, #nat1(tmp1), #nat1(result1), #nat1(tmp2), #nat1(tmp), #nat1(result));
+    lemma_equality_check_helper_2(old(x1), old(x2), x1, tmp1, result1, tmp2, tmp, result);
 }
 
 /*  REVIEW: This version goes through with --ONE, but fails without it for reasons that are unclear

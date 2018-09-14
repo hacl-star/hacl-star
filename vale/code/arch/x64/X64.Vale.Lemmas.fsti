@@ -16,6 +16,9 @@ let overflow (flags:int) : bool = S.overflow (int_to_nat64 flags)
 let update_cf (flags:int) (new_cf:bool) = S.update_cf (int_to_nat64 flags) new_cf
 let update_of (flags:int) (new_of:bool) = S.update_of (int_to_nat64 flags) new_of
 
+let state_eq_S (s1 s2:TS.traceState) =
+  s1 == {s2 with TS.trace = s1.TS.trace}
+
 let state_eq_opt (s1 s2:option TS.traceState) =
   match (s1, s2) with
   | (Some s1, Some s2) -> state_eq_S s1 s2
