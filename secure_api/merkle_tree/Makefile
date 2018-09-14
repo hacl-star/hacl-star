@@ -35,9 +35,6 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/code/lib \
   $(HACL_HOME)/providers/evercrypt \
   $(KREMLIN_HOME)/kremlib
-#$(HACL_HOME)/providers/evercrypt/fst
-#$(HACL_HOME)/providers/evercrypt/config/default
-#$(KREMLIN_HOME)/kremlib/compat
 
 FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -73,7 +70,7 @@ ROOTS = MerkleTree.New.Low.fst
 
 include .depend
 
-# Admit SMT queries for modules in FStar, LowStar, C, and Spec namespaces
+# Admit SMT queries for some modules
 $(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
@@ -83,6 +80,10 @@ $(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/
 	touch $@
 
 $(CACHE_DIR)/MerkleTree.New.Low.fst.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/Low.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
@@ -111,7 +112,8 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'MerkleTree.New.Low' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
-	-bundle 'LowStar.*' \
+	-bundle 'Low.*' \
+	-bundle 'EverCrypt.*' \
 	-library 'EverCrypt,EverCrypt.*' \
 	-drop 'Spec,Lib,C.*,C.Loops.*' \
 	-I $(HACL_HOME)/specs \
@@ -120,9 +122,6 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-tmpdir $(GENERATED_DIR) \
 	-warn-error +9 \
 	$^
-# -bundle 'Hacl.Impl.*' \
-# -I $(HACL_HOME)/providers/evercrypt/config/default
-# -bundle 'EverCrypt.*' \
 
 # The Makefile is manually staged because GNU Make does not understand
 # dependencies between the Makefiles we include, i.e. it won't first generate
@@ -144,7 +143,7 @@ include $(GENERATED_DIR)/Makefile.include
 # KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
 # files for them in $(GENERATED_DIR). However, we are only interested in the header,
 # and drop these (mostly empty) C files.
-ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c C.c, $(ALL_C_FILES))
+ALL_OUR_FILES 	    = $(filter-out FStar_* LowStar.c Lib.c C.c, $(ALL_C_FILES))
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \

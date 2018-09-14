@@ -9,9 +9,8 @@ open FStar.Integers
 open FStar.Mul
 open LowStar.Modifies
 open LowStar.BufferOps
-open LowStar.Vector
-open LowStar.RVector
-// open LowStar.RVector.Instances
+open Low.Vector
+open Low.RVector
 
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
@@ -19,10 +18,9 @@ module MHS = FStar.Monotonic.HyperStack
 module HH = FStar.Monotonic.HyperHeap
 
 module B = LowStar.Buffer
-module V = LowStar.Vector
+module V = Low.Vector
+module RV = Low.RVector
 module S = FStar.Seq
-module RV = LowStar.RVector
-// module RVI = LowStar.RVector.Instances
 
 module U32 = FStar.UInt32
 module U8 = FStar.UInt8
@@ -206,7 +204,7 @@ private val hash_vec_r_init:
       hash_vec_region_of v = r /\
       hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr))
 private let hash_vec_r_init r =
-  let nrid = new_region_ r in
+  let nrid = RV.new_region_ r in
   let r_init = Rgl?.r_init hreg in
   let ia = r_init nrid in
   V.create_reserve 1ul ia r
@@ -495,16 +493,30 @@ let create_mt r init =
 
 /// Construction and Destruction of paths
 
-type path = B.pointer (V.vector hash)
+type path = B.pointer (RV.rvector hreg)
 
 val path_safe: HS.mem -> path -> GTot Type0
 let path_safe h p =
   B.live h p /\ B.freeable p /\
-  V.live h (B.get h p 0) /\ V.freeable (B.get h p 0) /\
+  RV.rv_inv h (B.get h p 0) /\
   HH.extends (V.frameOf (B.get h p 0)) (B.frameOf p)
 
 val path_loc: path -> GTot loc
 let path_loc p = B.loc_all_regions_from false (B.frameOf p)
+
+val path_safe_preserved:
+  p:path -> dl:loc -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (path_safe h0 p /\
+		  loc_disjoint dl (path_loc p) /\
+		  modifies dl h0 h1))
+	(ensures (path_safe h1 p))
+	[SMTPat (path_safe h0 p);
+	SMTPat (loc_disjoint dl (path_loc p));
+	SMTPat (modifies dl h0 h1)]
+let path_safe_preserved p dl h0 h1 =
+  assert (loc_includes (path_loc p) (loc_rvector (B.get h0 p 0)));
+  assert (loc_includes (path_loc p) (loc_buffer p));
+  rv_inv_preserved (B.get h0 p 0) dl h0 h1
 
 val init_path: 
   r:erid ->
@@ -512,7 +524,7 @@ val init_path:
     (requires (fun h0 -> true))
     (ensures (fun h0 p h1 -> path_safe h1 p))
 let init_path r =
-  let nrid = new_region_ r in
+  let nrid = RV.new_region_ r in
   B.malloc r (hash_vec_r_init nrid) 1ul
 
 val clear_path:
@@ -527,7 +539,10 @@ let clear_path p =
 val free_path:
   p:path ->
   HST.ST unit
-    (requires (fun h0 -> path_safe h0 p))
+    (requires (fun h0 -> 
+      B.live h0 p /\ B.freeable p /\
+      V.live h0 (B.get h0 p 0) /\ V.freeable (B.get h0 p 0) /\
+      HH.extends (V.frameOf (B.get h0 p 0)) (B.frameOf p)))
     (ensures (fun h0 _ h1 -> modifies (path_loc p) h0 h1))
 let free_path p =
   V.free (B.index p 0ul);
@@ -829,17 +844,25 @@ val mt_verify:
   HST.ST bool
 	 (requires (fun h0 ->
 	   path_safe h0 p /\ Rgl?.r_inv hreg h0 rt /\
+	   HST.is_eternal_region (B.frameOf rt) /\
 	   HH.disjoint (B.frameOf p) (B.frameOf rt) /\
 	   (let psz = V.size_of (B.get h0 p 0) in
 	   1ul <= psz /\ U32.v j <= pow2 (U32.v psz - 1))))
 	 (ensures (fun h0 _ h1 ->
+	   // `rt` is not modified in this function, but we use a trick 
+	   // to allocate an auxiliary buffer in the extended region of `rt`.
 	   modifies (B.loc_all_regions_from false (B.frameOf rt)) h0 h1 /\
-	   Rgl?.r_inv hreg h1 rt))
+	   Rgl?.r_inv hreg h1 rt /\
+	   S.equal (Rgl?.r_repr hreg h0 rt)
+		   (Rgl?.r_repr hreg h1 rt)))
 let mt_verify k j p rt =
-  admit ();
-  let ih = hash_r_init HH.root in
+  let hh0 = HST.get () in
+  let nrid = RV.new_region_ (B.frameOf rt) in
+  let ih = hash_r_init nrid in
   let copy = Cpy?.copy hcpy in
   copy (V.index (B.index p 0ul) 0ul) ih;
+  let hh1 = HST.get () in
+  path_safe_preserved p (B.loc_all_regions_from false (B.frameOf rt)) hh0 hh1;
   mt_verify_ k j p 1ul ih;
   buf_eq ih rt hash_size
 
