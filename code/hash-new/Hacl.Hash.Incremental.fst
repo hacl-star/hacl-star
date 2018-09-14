@@ -112,7 +112,8 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   pad_length_bound a total_input_len;
   assert (U32.v tmp_len <= 2 * size_block a);
 
-  let tmp = B.alloca 0uy tmp_len in
+  let tmp_twoblocks = B.alloca 0uy U32.(2ul *^ size_block_ul a) in
+  let tmp = B.sub tmp_twoblocks 0ul tmp_len in
   let tmp_rest = B.sub tmp 0ul rest_len in
   let tmp_pad = B.sub tmp rest_len pad_len in
   B.blit rest 0ul tmp_rest 0ul rest_len;
