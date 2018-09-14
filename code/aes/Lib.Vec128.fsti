@@ -43,7 +43,10 @@ noextract
 val vec128_shuffle32_spec: uint8 -> uint8 -> uint8 -> uint8 -> uint8
 
 noextract
-val vec128_load64: lo:uint64 -> hi:uint64 -> vec128
+val vec128_load64: u:uint64 -> vec128
+
+noextract
+val vec128_load64s: hi:uint64 -> lo:uint64 -> vec128
 
 noextract
 val vec128_load_le: b:lbytes 16 -> ST vec128

@@ -33,10 +33,10 @@ let poly1305_encode_last #s f b len =
     pop_frame()
 
 inline_for_extraction
-val poly1305_encode_r: #s:field_spec -> f:felem s -> b:lbytes 16 -> Stack unit
-                   (requires (fun h -> live h b /\ live h f ))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
-let poly1305_encode_r #s f b = 
+val poly1305_encode_r: #s:field_spec -> p:precomp_r s -> b:lbytes 16 -> Stack unit
+                   (requires (fun h -> live h b /\ live h p ))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer p) h0 h1))
+let poly1305_encode_r #s p b = 
     push_frame();
     let tmp = create 0uy (size 16) in
     let (lo,hi) = load64x2_le b in
@@ -44,8 +44,7 @@ let poly1305_encode_r #s f b =
     let mask1 = u64 0x0ffffffc0ffffffc in
     let lo = lo &. mask0 in
     let hi = hi &. mask1 in
-    store64x2_le tmp lo hi;
-    load_felem_le f tmp;
+    load_precompute_r p lo hi;
     admit();
     pop_frame()
   
@@ -64,21 +63,12 @@ let get_acc #s (ctx:poly1305_ctx s) = sub ctx (size 0) (size (nlimb s))
 
 (*
 inline_for_extraction
-val get_r: #s:field_spec -> ctx:poly1305_ctx s -> Stack (felem s)
+val get_precomp_r: #s:field_spec -> ctx:poly1305_ctx s -> Stack (precomp_r s)
                    (requires (fun h -> live h ctx))
 		   (ensures (fun h0 r h1 -> h0 == h1 /\ live h1 r))
 *)
 inline_for_extraction
-let get_r #s (ctx:poly1305_ctx s) = sub ctx (size (nlimb s)) (size (nlimb s))
-
-(*
-inline_for_extraction
-val get_precomp: #s:field_spec -> ctx:poly1305_ctx s -> Stack (felem s)
-                   (requires (fun h -> live h ctx))
-		   (ensures (fun h0 r h1 -> h0 == h1 /\ live h1 r))
-*)
-inline_for_extraction
-let get_precomp #s (ctx:poly1305_ctx s) = sub ctx (size (nlimb s) *. size 2) (size (nlimb s))
+let get_precomp_r #s (ctx:poly1305_ctx s) = sub ctx (size (nlimb s)) (size (precomplen s))
 
 (*
 inline_for_extraction
@@ -87,7 +77,7 @@ val get_s: #s:field_spec -> ctx:poly1305_ctx s -> Stack (felem s)
 		   (ensures (fun h0 r h1 -> h0 == h1 /\ live h1 r))
 *)
 inline_for_extraction
-let get_s #s (ctx:poly1305_ctx s) = sub ctx (size (nlimb s) *. size 3) (size (nlimb s))
+let get_s #s (ctx:poly1305_ctx s) = sub ctx (size (nlimb s) +. size (precomplen s)) (size (nlimb s))
 
 
 inline_for_extraction
@@ -99,12 +89,10 @@ let poly1305_init #s ctx key =
   let ks = sub key (size 16) (size 16) in
   
   let acc = get_acc ctx in
-  let r = get_r ctx in
-  let precomp = get_precomp ctx in
+  let precomp_r = get_precomp_r ctx in
   let sk = get_s ctx in 
   set_zero acc;
-  poly1305_encode_r r kr;
-  precompute_shift_reduce precomp r;
+  poly1305_encode_r precomp_r kr;
   load_felem_le sk ks;
   admit()
 
@@ -116,8 +104,7 @@ val poly1305_update: #s:field_spec -> ctx:poly1305_ctx s -> text:bytes -> len:si
 let poly1305_update #s ctx text len = 
   push_frame();
   let acc = get_acc ctx in
-  let r = get_r ctx in
-  let precomp = get_precomp ctx in
+  let pre = get_precomp_r ctx in
   let e = create (limb_zero s) (size (nlimb s)) in
   let blocks = len /. size 16 in
   let h0 = ST.get() in
@@ -126,12 +113,12 @@ let poly1305_update #s ctx text len =
     (fun i ->
        let b = sub text (i *. size 16) (size 16) in
        poly1305_encode_block e b;
-       fadd_mul acc e r precomp);
+       fadd_mul_r acc e pre);
   let rem = len %. size 16 in
   if (rem >. size 0) then (
      let b = sub text (blocks *. size 16) (size 16) in
      poly1305_encode_last e b rem;
-     fadd_mul acc e r precomp);
+     fadd_mul_r acc e pre);
   pop_frame()
 
 inline_for_extraction
@@ -154,7 +141,7 @@ val poly1305_mac: #s:field_spec -> tag:lbytes 16 -> text:bytes -> len:size_t{siz
  		     (ensures (fun h0 _ h1 -> modifies (loc_buffer tag) h0 h1))
 let poly1305_mac #s tag text len key = 
   push_frame();
-  let ctx : lbuffer (limb s) (nlimb s `op_Multiply` 4) = create (limb_zero s) (size (nlimb s) *. size 4) in
+  let ctx = create (limb_zero s) (size (nlimb s) *. size 4) in
   poly1305_init ctx key;
   poly1305_update ctx text len;
   poly1305_finish ctx tag;

@@ -31,10 +31,11 @@ static __inline__ cycles cpucycles_end(void)
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
+//extern void Hacl_Poly1305_128_poly1305_mac(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 extern void Hacl_Poly1305_64_poly1305_mac(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 extern void Hacl_Poly1305_32_poly1305_mac(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 
-#define ROUNDS 10240
+#define ROUNDS 102400
 #define SIZE   16384
 
 int main() {
@@ -105,6 +106,22 @@ int main() {
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
 
+/*
+  Hacl_Poly1305_128_poly1305_mac(comp,in,in_len,key);
+  printf("Poly1305 (128-bit) Result:\n");
+  printf("computed:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 16; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+*/
 
   Hacl_Poly1305_64_poly1305_mac(comp,in2,in_len2,key2);
   printf("Poly1305 (64-bit) Result:\n");
@@ -135,6 +152,22 @@ int main() {
   for (int i = 0; i < 16; i++)
     ok = ok & (exp2[i] == comp[i]);
   if (ok) printf("Success!\n");
+
+/*  Hacl_Poly1305_128_poly1305_mac(comp,in2,in_len2,key2);
+  printf("Poly1305 (128-bit) Result:\n");
+  printf("computed:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",exp2[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 16; i++)
+    ok = ok & (exp2[i] == comp[i]);
+  if (ok) printf("Success!\n");
+*/
 
   uint8_t plain[SIZE];
   uint64_t res = 0;
@@ -177,6 +210,25 @@ int main() {
   clock_t tdiff2 = t2 - t1;
   cycles cdiff2 = b - a;
 
+/*
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Poly1305_128_poly1305_mac(plain,plain,SIZE,key);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Poly1305_128_poly1305_mac(tag,plain,SIZE,key);
+    res ^= tag[0] ^ tag[15];
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  clock_t tdiff3 = t2 - t1;
+  cycles cdiff3 = b - a;
+*/
+
   printf("Poly1305 (64-bit) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
@@ -186,4 +238,10 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff2,(double)cdiff2/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff2,(double)tdiff2/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff2 / CLOCKS_PER_SEC) * 1000000.0));
+/*
+  printf("Poly1305 (128-bit) PERF:\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff3,(double)cdiff3/count);
+  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff3,(double)tdiff3/count);
+  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff3 / CLOCKS_PER_SEC) * 1000000.0));
+*/
 }
