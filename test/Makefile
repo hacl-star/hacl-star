@@ -396,13 +396,6 @@ test-vale-asm:
 	$(MAKE) -C ../secure_api/vale/asm/
 
 #
-# Tests for LowCProvider
-#
-
-test-provider-lowc:
-	$(MAKE) -C ../secure_api/LowCProvider
-
-#
 # Tests for applications
 #
 
