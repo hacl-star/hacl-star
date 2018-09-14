@@ -47,12 +47,12 @@ let state_theta_inner_C (s:state) (i:size_nat{i < 5}) (_C:lseq uint64 5) : lseq 
 let state_theta0 (s:state) (_C:lseq uint64 5) =
   repeati_sp #5 5 (state_theta_inner_C s) _C
 
+let state_theta_inner_s_inner (s':state) (x:index) (_D:uint64) (y:index) (s0:state) : state =
+  writeLane s0 x y (readLane s' x y ^. _D)
+
 let state_theta_inner_s (s':state) (_C:lseq uint64 5) (x:index) (s:state) : state =
   let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (u32 1)) in
-  repeati_sp #5 5
-  (fun y s0 ->
-    writeLane s0 x y (readLane s' x y ^. _D)
-  ) s
+  repeati_sp #5 5 (state_theta_inner_s_inner s' x _D) s
 
 let state_theta1 (s:state) (_C:lseq uint64 5): state =
   repeati_sp #5 5 (state_theta_inner_s s _C) s
@@ -62,7 +62,7 @@ let state_theta (s:state) : state =
   let _C = state_theta0 s _C in
   state_theta1 s _C
 
-let state_pi_rho_inner (current:uint64) (s:state) (i:size_nat{i < 24}) : tuple2 uint64 state =
+let state_pi_rho_inner (i:size_nat{i < 24}) (current, s) : tuple2 uint64 state =
   let r = keccak_rotc.[i] in
   let _Y = keccak_piln.[i] in
   let s1 = s.[_Y] <- rotl current r in
@@ -71,35 +71,25 @@ let state_pi_rho_inner (current:uint64) (s:state) (i:size_nat{i < 24}) : tuple2 
 
 let state_pi_rho (s_theta:state) : state =
   let current : uint64 = readLane s_theta 1 0 in
-  let _, s_pi_rho =
-    repeati_sp #24 24
-    (fun i (current, s) ->
-      state_pi_rho_inner current s i
-    ) (current, s_theta) in
+  let _, s_pi_rho = repeati_sp #24 24 state_pi_rho_inner (current, s_theta) in
   s_pi_rho
 
-let state_chi_inner (s_pi_rho:state) (s:state) (x:index) (y:index) : state =
+let state_chi_inner (s_pi_rho:state) (y:index) (x:index) (s:state) : state =
   writeLane s x y
     (readLane s_pi_rho x y ^.
      ((lognot (readLane s_pi_rho ((x + 1) % 5) y)) &.
       readLane s_pi_rho ((x + 2) % 5) y))
 
-let state_chi_inner1 (s_pi_rho:state) (s:state) (y:index) : state =
-  repeati_sp #5 5
-  (fun x s0 ->
-    state_chi_inner s_pi_rho s0 x y
-  ) s
+let state_chi_inner1 (s_pi_rho:state) (y:index) (s:state) : state =
+  repeati_sp #5 5 (state_chi_inner s_pi_rho y) s
 
 let state_chi (s_pi_rho:state) : state  =
-  repeati_sp #5 5
-  (fun y s ->
-    state_chi_inner1 s_pi_rho s y
-  ) s_pi_rho
+  repeati_sp #5 5 (state_chi_inner1 s_pi_rho) s_pi_rho
 
 let state_iota (s:state) (round:size_nat{round < 24}) : state =
   writeLane s 0 0 (readLane s 0 0 ^. keccak_rndc.[round])
 
-let state_permute1 (s:state) (round:size_nat{round < 24}) : state =
+let state_permute1 (round:size_nat{round < 24}) (s:state) : state =
   let s_theta = state_theta s in
   let s_pi_rho = state_pi_rho s_theta in
   let s_chi = state_chi s_pi_rho in
@@ -107,30 +97,26 @@ let state_permute1 (s:state) (round:size_nat{round < 24}) : state =
   s_iota
 
 let state_permute (s:state) : state =
-  repeati_sp #24 24
-  (fun i s0 ->
-    state_permute1 s0 i
-  ) s
+  repeati_sp #24 24 state_permute1 s
+
+let loadState_inner (block:lbytes 200) (j:size_nat{j < 25}) (s:state) : state =
+  let nj = uint_from_bytes_le #U64 (sub block (j * 8) 8) in
+  s.[j] <- s.[j] ^. nj
 
 let loadState (rateInBytes:size_nat{rateInBytes <= 200})
 	      (input:lbytes rateInBytes)
 	      (s:state) : state =
   let block = create 200 (u8 0) in
   let block = update_sub block 0 rateInBytes input in
-  repeati_sp #25 25
-  (fun j s ->
-    let nj = uint_from_bytes_le #U64 (sub block (j * 8) 8) in
-    s.[j] <- s.[j] ^. nj
-  ) s
+  repeati_sp #25 25 (loadState_inner block) s
+
+let storeState_inner (s:state) (j:size_nat{j < 25}) (block:lbytes 200) : lbytes 200 =
+  update_sub block (j * 8) 8 (uint_to_bytes_le #U64 s.[j])
 
 let storeState (rateInBytes:size_nat{rateInBytes <= 200})
 	       (s:state) : lbytes rateInBytes =
   let block = create 200 (u8 0) in
-  let block =
-  repeati_sp #25 25
-  (fun j block ->
-      update_sub block (j * 8) 8 (uint_to_bytes_le #U64 s.[j])
-    ) block in
+  let block = repeati_sp #25 25 (storeState_inner s) block in
   sub block 0 rateInBytes
 
 let absorb_last (s:state)
@@ -169,11 +155,11 @@ let lemma_rateInBytes inputByteLen rateInBytes i =
   assert (inputByteLen == inputByteLen / rateInBytes * rateInBytes + inputByteLen % rateInBytes);
   assert (n * rateInBytes <= inputByteLen)
 
-let absorb_inner (s:state)
-                 (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
+let absorb_inner (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                  (inputByteLen:size_nat)
                  (input:lbytes inputByteLen)
-                 (i:size_nat{i < inputByteLen / rateInBytes}) : state =
+                 (i:size_nat{i < inputByteLen / rateInBytes})
+		 (s:state): state =
   lemma_rateInBytes inputByteLen rateInBytes i;
   let s = loadState rateInBytes (sub input (i * rateInBytes) rateInBytes) s in
   state_permute s
@@ -185,23 +171,17 @@ let absorb (s:state)
 	   (delimitedSuffix:uint8) : state =
   let n = inputByteLen / rateInBytes in
   let rem = inputByteLen % rateInBytes in
-  let s : state =
-    repeati_sp #n n
-    (fun i s ->
-      absorb_inner s rateInBytes inputByteLen input i
-    ) s in
+  let s = repeati_sp #n n (absorb_inner rateInBytes inputByteLen input) s in
   let s = absorb_last s rateInBytes inputByteLen input delimitedSuffix in
   let s =
     if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) && (rem = rateInBytes - 1))
     then state_permute s else s in
-  let s = absorb_next s rateInBytes in
-  s
+  absorb_next s rateInBytes
 
-let squeeze_inner (s:state)
-                  (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
+let squeeze_inner (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                   (outputByteLen:size_nat)
-                  (o:lbytes outputByteLen)
-                  (i:size_nat{i < outputByteLen / rateInBytes}) : tuple2 state (lbytes outputByteLen) =
+                  (i:size_nat{i < outputByteLen / rateInBytes})
+		  (s, o) : tuple2 state (lbytes outputByteLen) =
   lemma_rateInBytes outputByteLen rateInBytes i;
   let block = storeState rateInBytes s in
   let o = update_sub o (i * rateInBytes) rateInBytes block in
@@ -215,11 +195,8 @@ let squeeze (s:state)
   let output = create outputByteLen (u8 0) in
   let outBlocks = outputByteLen / rateInBytes in
   let remOut = outputByteLen % rateInBytes in
-  let s, output =
-    repeati_sp #outBlocks outBlocks
-    (fun i (s, o) ->
-      squeeze_inner s rateInBytes outputByteLen o i
-    ) (s, output) in
+  let s, output = repeati_sp #outBlocks outBlocks
+    (squeeze_inner rateInBytes outputByteLen) (s, output) in
   let outBlock = storeState remOut s in
   update_sub output (outputByteLen - remOut) remOut outBlock
 

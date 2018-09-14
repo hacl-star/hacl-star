@@ -121,29 +121,104 @@ let state_theta0 #h0 s _C =
     state_theta_inner_C #h0 s x _C
   )
 
+
+val state_theta_inner_s_inner:
+     #h0:mem
+  -> s0:state
+  -> x:index
+  -> _D:uint64
+  -> y:index
+  -> s:state
+  -> Stack unit
+    (requires fun h -> live h s0 /\ live h s /\ disjoint s0 s /\
+      as_seq h0 s0 == as_seq h s0 /\
+      loop_inv h0 h 25 5 s (S.state_theta_inner_s_inner (as_seq h0 s0) (v x) _D) (v y))
+    (requires fun _ _ h -> as_seq h0 s0 == as_seq h s0 /\
+      loop_inv h0 h 25 5 s (S.state_theta_inner_s_inner (as_seq h0 s0) (v x) _D) (v y + 1))
+let state_theta_inner_s_inner #h0 s0 x _D y s =
+  let h1 = ST.get () in
+  writeLane s x y (readLane s0 x y ^. _D);
+  let h2 = ST.get () in
+  assert (as_seq h2 s == S.writeLane (as_seq h1 s) (v x) (v y) (S.readLane (as_seq h0 s0) (v x) (v y) ^. _D));
+  lemma_repeati_sp #h0 5 (S.state_theta_inner_s_inner (as_seq h0 s0) (v x) _D) (as_seq h0 s) (v y) (as_seq h1 s)
+
+val state_theta_inner_s:
+     #h0:mem
+  -> s0:state
+  -> _C:lbuffer uint64 5
+  -> x:index
+  -> s:state
+  -> Stack unit
+    (requires fun h ->
+      live h s0 /\ live h s /\ live h _C /\
+      disjoint _C s /\ disjoint s0 s /\
+      as_seq h0 s0 == as_seq h s0 /\
+      as_seq h0 _C == as_seq h _C /\
+      loop_inv h0 h 25 5 s (S.state_theta_inner_s (as_seq h0 s0) (as_seq h0 _C)) (v x))
+    (ensures  fun _ _ h -> loop_inv h0 h 25 5 s (S.state_theta_inner_s (as_seq h0 s0) (as_seq h0 _C)) (v x + 1))
+let state_theta_inner_s #h0 s0 _C x s =
+  let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (u32 1) in
+  let inv h0 h = live h s0 /\ live h s /\ disjoint s0 s /\ as_seq h0 s0 == as_seq h s0 in
+  let h1 = ST.get () in
+  loop #h1 (size 5) s inv (S.state_theta_inner_s_inner (as_seq_sp h0 s0) (v x) _D)
+  (fun y ->
+    state_theta_inner_s_inner #h1 s0 x _D y s
+  );
+  let h2 = ST.get () in
+  assert (as_seq h2 s == Lib.Sequence.repeati_sp #5 5 (S.state_theta_inner_s_inner (as_seq_sp h0 s0) (v x) _D) (as_seq h1 s));
+  lemma_repeati_sp #h0 5 (S.state_theta_inner_s (as_seq h0 s0) (as_seq h0 _C)) (as_seq h0 s) (v x) (as_seq h1 s)
+
+val copy_s:
+     s0:state
+  -> s1:state
+  -> Stack unit
+    (requires fun h -> live h s0 /\ live h s1 /\ disjoint s0 s1)
+    (ensures  fun h0 _ h1 -> modifies (loc_buffer s0) h0 h1 /\
+      as_seq h1 s0 == as_seq h0 s1)
+let copy_s s0 s1 = admit();
+  update_sub #uint64 #25 s0 (size 0) (size 25) s1
+
+val state_theta1:
+     s:state
+  -> _C:lbuffer uint64 5
+  -> Stack unit
+    (requires fun h ->
+      live h s /\ live h _C /\ disjoint _C s)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.state_theta1 (as_seq h0 s) (as_seq h0 _C))
+let state_theta1 s _C =
+  push_frame ();
+  let s0 = create (size 25) (u64 0) in
+  copy_s s0 s;
+  let inv h0 h =
+    live h s0 /\ live h s /\ live h _C /\
+    disjoint _C s /\ disjoint s0 s /\
+    as_seq h0 s0 == as_seq h s0 /\
+    as_seq h0 _C == as_seq h _C in
+  let h0 = ST.get () in
+  loop #h0 (size 5) s inv (S.state_theta_inner_s (as_seq_sp h0 s0) (as_seq_sp h0 _C))
+  (fun x ->
+    state_theta_inner_s #h0 s0 _C x s
+  );
+  let h1 = ST.get () in
+  assert (as_seq h1 s == Lib.Sequence.repeati_sp #5 5 (S.state_theta_inner_s (as_seq_sp h0 s0) (as_seq_sp h0 _C)) (as_seq h0 s0));
+  pop_frame ()
+
 inline_for_extraction noextract
 val state_theta:
      s:state
   -> Stack unit
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer s) h0 h1)
-      //as_seq h1 s == S.state_theta (as_seq h0 s))
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.state_theta (as_state h0 s))
 let state_theta s =
   push_frame();
   let _C:lbuffer uint64 5 = create (size 5) (u64 0) in
   let h0 = ST.get () in
   state_theta0 #h0 s _C;
-  let h0 = ST.get () in
-  loop_nospec #h0 (size 5) s
-  (fun x ->
-    let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (u32 1) in
-    let h1 = ST.get () in
-    loop_nospec #h1 (size 5) s
-    (fun y ->
-      writeLane s x y (readLane s x y ^. _D)
-    )
-  );
+  state_theta1 s _C;
   pop_frame()
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
