@@ -389,26 +389,68 @@ let state_permute s =
     state_permute1 #h0 i s
   )
 
+val loadState_inner:
+     #h0:mem
+  -> block:lbytes 200
+  -> j:size_t{v j < 25}
+  -> s:state
+  -> Stack unit
+    (requires fun h ->
+      live h block /\ live h s /\ disjoint block s /\
+      as_seq h0 block == as_seq h block /\
+      loop_inv h0 h 25 s (S.loadState_inner (as_seq_sp h0 block)) (v j))
+    (ensures  fun h _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.loadState_inner (as_seq h block) (v j) (as_seq h s) /\
+      loop_inv h0 h1 25 s (S.loadState_inner (as_seq_sp h0 block)) (v j + 1))
+let loadState_inner #h0 block j s =
+  let h1 = ST.get () in
+  s.(j) <- s.(j) ^. uint_from_bytes_le #U64 (sub #_ #200 #8 block (j *! size 8) (size 8));
+  let h2 = ST.get () in
+  lemma_repeati_sp #h0 25 (S.loadState_inner (as_seq_sp h0 block)) (as_seq h0 s) (v j) (as_seq h1 s)
+
 val loadState:
      rateInBytes:size_t{v rateInBytes <= 200}
   -> input:lbytes (v rateInBytes)
   -> s:state
   -> Stack unit
-    (requires fun h -> live h input /\ live h s /\ disjoint input s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+    (requires fun h ->
+      live h input /\ live h s /\ disjoint input s)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.loadState (v rateInBytes) (as_seq h0 input) (as_seq h0 s))
 let loadState rateInBytes input s =
   push_frame();
   let block:lbytes 200 = create (size 200) (u8 0) in
   update_sub block (size 0) rateInBytes input;
   let h0 = ST.get () in
-  Lib.Loops.for (size 0) (size 25)
-  (fun h1 j ->
-    live h1 block /\ live h1 s /\
-    modifies (loc_buffer s) h0 h1)
-  (fun j ->
-    s.(j) <- s.(j) ^. uint_from_bytes_le #U64 (sub #_ #200 #8 block (j *! size 8) (size 8))
+  let inv h0 h1 =
+    live h1 block /\ live h1 s /\ disjoint block s /\
+    as_seq h0 block == as_seq h1 block in
+  loop #h0 (size 25) s inv (S.loadState_inner (as_seq_sp h0 block))
+  (fun i ->
+    loadState_inner #h0 block i s
   );
-  pop_frame()
+  pop_frame ()
+
+val storeState_inner:
+     s:state
+  -> j:size_t{v j < 25}
+  -> block:lbytes 200
+  -> Stack unit
+    (requires fun h -> live h s /\ live h block /\ disjoint s block)
+    (ensures  fun h _ h1 ->
+      modifies (loc_buffer block) h h1 /\
+      as_seq h1 block == S.storeState_inner (as_seq h s) (v j) (as_seq h block))
+let storeState_inner s j block =
+  let tmp = sub block (j *! size 8) (size 8) in
+  let h1 = ST.get () in
+  uint_to_bytes_le tmp s.(j);
+  let h2 = ST.get () in
+  assert (v j * 8 < 200);
+  modifies_buffer_elim (sub #uint8 #200 #(v j * 8) block (size 0) (j *! size 8)) (loc_buffer tmp) h1 h2;
+  modifies_buffer_elim (sub #uint8 #200 #(200 - v j * 8 - 8) block (j *! size 8 +! size 8) (size 200 -! j *! size 8 -! size 8)) (loc_buffer tmp) h1 h2;
+  S.lemma_update_store (as_seq h1 s) (v j) (as_seq h1 block) (as_seq h2 block)
 
 val storeState:
      rateInBytes:size_t{v rateInBytes <= 200}
@@ -423,7 +465,7 @@ let storeState rateInBytes s res =
   let h0 = ST.get () in
   loop_nospec #h0 (size 25) block
   (fun j ->
-    uint_to_bytes_le (sub block (j *! size 8) (size 8)) s.(j)
+    storeState_inner s j block
   );
   update_sub res (size 0) rateInBytes (sub block (size 0) rateInBytes);
   pop_frame()

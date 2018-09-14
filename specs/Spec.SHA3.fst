@@ -111,8 +111,34 @@ let loadState (rateInBytes:size_nat{rateInBytes <= 200})
   let block = update_sub block 0 rateInBytes input in
   repeati_sp #25 25 (loadState_inner block) s
 
-let storeState_inner (s:state) (j:size_nat{j < 25}) (block:lbytes 200) : lbytes 200 =
-  update_sub block (j * 8) 8 (uint_to_bytes_le #U64 s.[j])
+let storeState_inner (s:state) (j:size_nat{j < 25}) (block:lbytes 200) :
+  res:lbytes 200{
+    sub res 0 (j * 8) == sub block 0 (j * 8) /\
+    sub res (j * 8) 8 == uint_to_bytes_le #U64 s.[j] /\
+    sub res (j * 8 + 8) (200 - j * 8 - 8) == sub block (j * 8 + 8) (200 - j * 8 - 8)} =
+  let res = update_sub block (j * 8) 8 (uint_to_bytes_le #U64 s.[j]) in
+  eq_intro (sub res 0 (j * 8)) (sub block 0 (j * 8));
+  eq_intro (sub res (j * 8) 8) (uint_to_bytes_le #U64 s.[j]);
+  eq_intro (sub res (j * 8 + 8) (200 - j * 8 - 8)) (sub block (j * 8 + 8) (200 - j * 8 - 8));
+  res
+
+val lemma_update_store:
+     s:state
+  -> j:size_nat{j < 25}
+  -> block:lbytes 200
+  -> res:lbytes 200
+  -> Lemma
+    (requires
+      sub res 0 (j * 8) == sub block 0 (j * 8) /\
+      sub res (j * 8) 8 == uint_to_bytes_le #U64 s.[j] /\
+      sub res (j * 8 + 8) (200 - j * 8 - 8) == sub block (j * 8 + 8) (200 - j * 8 - 8))
+    (ensures res == storeState_inner s j block)
+let lemma_update_store s j block res =
+  let res1 = storeState_inner s j block in
+  FStar.Seq.Properties.lemma_split (sub res 0 (j * 8 + 8)) (j * 8);
+  FStar.Seq.Properties.lemma_split (sub res1 0 (j * 8 + 8)) (j * 8);
+  FStar.Seq.Properties.lemma_split res (j * 8 + 8);
+  FStar.Seq.Properties.lemma_split res1 (j * 8 + 8)
 
 let storeState (rateInBytes:size_nat{rateInBytes <= 200})
 	       (s:state) : lbytes rateInBytes =
