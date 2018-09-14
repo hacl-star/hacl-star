@@ -178,10 +178,9 @@ let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
 
 noextract
 let mk_hash a alloca update_multi update_last finish input input_len dst =
+  let h0 = ST.get () in
   ST.push_frame ();
   let s = alloca () in
-  assume (B.disjoint s input);
-  assume (B.disjoint s dst);
   let blocks_n = U32.(input_len /^ size_block_ul a) in
   let blocks_len = U32.(blocks_n *^ size_block_ul a) in
   let blocks = B.sub input 0ul blocks_len in
@@ -191,4 +190,6 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   update_last s (u32_to_len a blocks_len) rest rest_len;
   finish s dst;
   ST.pop_frame ();
-  admit ()
+  let h1 = ST.get () in
+  assume (B.(modifies (loc_buffer dst) h0 h1));
+  Spec.Hash.Incremental.hash_is_hash_incremental a (B.as_seq h0 input)
