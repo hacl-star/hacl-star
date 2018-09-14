@@ -19,6 +19,7 @@ module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module S = Spec.SHA3
+module LSeq = Lib.Sequence
 
 let keccak_rotc = IB.igcmalloc_of_list HyperStack.root rotc_list
 
@@ -65,16 +66,13 @@ val writeLane:
       as_seq h1 s == S.writeLane (as_seq h0 s) (size_v x) (size_v y) v)
 let writeLane s x y v = s.(x +! size 5 *! y) <- v
 
-val rotl:
-     a:uint64
-  -> b:uint32{0 < uint_v b /\ uint_v b < 64}
-  -> r:uint64 //{r == S.rotl a b}
 [@"c_inline"]
-let rotl a b = (a <<. b) |. (a >>. (u32 64 -. b))
+let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) =
+  (a <<. b) |. (a >>. (u32 64 -. b))
 
 let as_state (h:mem) (s:state) : S.state = as_seq_sp h s
 
-let as_seq5 (h:mem) (s:lbuffer uint64 5) : Seq.lseq uint64 5 = as_seq_sp h s
+let as_seq5 (h:mem) (s:lbuffer uint64 5) : LSeq.lseq uint64 5 = as_seq_sp h s
 
 inline_for_extraction noextract
 val state_theta_inner_C:
@@ -121,7 +119,6 @@ let state_theta0 #h0 s _C =
     state_theta_inner_C #h0 s x _C
   )
 
-
 val state_theta_inner_s_inner:
      #h0:mem
   -> s0:state
@@ -165,7 +162,7 @@ let state_theta_inner_s #h0 s0 _C x s =
     state_theta_inner_s_inner #h1 s0 x _D y s
   );
   let h2 = ST.get () in
-  assert (as_seq h2 s == Lib.Sequence.repeati_sp #5 5 (S.state_theta_inner_s_inner (as_seq_sp h0 s0) (v x) _D) (as_seq h1 s));
+  assert (as_seq h2 s == LSeq.repeati_sp #5 5 (S.state_theta_inner_s_inner (as_seq_sp h0 s0) (v x) _D) (as_seq h1 s));
   lemma_repeati_sp #h0 5 (S.state_theta_inner_s (as_seq h0 s0) (as_seq h0 _C)) (as_seq h0 s) (v x) (as_seq h1 s)
 
 val copy_s:
@@ -202,7 +199,7 @@ let state_theta1 s _C =
     state_theta_inner_s #h0 s0 _C x s
   );
   let h1 = ST.get () in
-  assert (as_seq h1 s == Lib.Sequence.repeati_sp #5 5 (S.state_theta_inner_s (as_seq_sp h0 s0) (as_seq_sp h0 _C)) (as_seq h0 s0));
+  assert (as_seq h1 s == LSeq.repeati_sp #5 5 (S.state_theta_inner_s (as_seq_sp h0 s0) (as_seq_sp h0 _C)) (as_seq h0 s0));
   pop_frame ()
 
 inline_for_extraction noextract
@@ -223,6 +220,29 @@ let state_theta s =
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+val state_pi_rho_inner:
+     i:size_t{v i < 24}
+  -> current:lbuffer uint64 1
+  -> s:state
+  -> Stack unit
+    (requires fun h ->
+      live h s /\ live h current /\ disjoint current s)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_union (loc_buffer current) (loc_buffer s)) h0 h1 /\
+      (let current_sp, s_sp = S.state_pi_rho_inner (v i) (as_seq h0 current, as_seq h0 s) in
+      as_seq h1 current == current_sp /\ as_seq h1 s == s_sp))
+let state_pi_rho_inner i current s =
+  IB.recall_contents keccak_rotc (Seq.seq_of_list rotc_list);
+  IB.recall_contents keccak_piln (Seq.seq_of_list piln_list);
+  let r = IB.index keccak_rotc (Lib.RawIntTypes.size_to_UInt32 i) in
+  assert (r == LSeq.index S.keccak_rotc (v i));
+  let _Y = IB.index keccak_piln (Lib.RawIntTypes.size_to_UInt32 i) in
+  assume (v _Y == LSeq.index S.keccak_piln (v i));
+  let temp = s.(_Y) in
+  let current0:uint64 = current.(size 0) in
+  s.(_Y) <- rotl current0 r;
+  current.(size 0) <- temp
+
 inline_for_extraction noextract
 val state_pi_rho:
      s:state
@@ -238,14 +258,7 @@ let state_pi_rho s =
     live h1 current /\ live h1 s /\
     modifies (loc_union (loc_buffer current) (loc_buffer s)) h0 h1)
   (fun i ->
-    IB.recall_contents keccak_rotc (Seq.seq_of_list rotc_list);
-    IB.recall_contents keccak_piln (Seq.seq_of_list piln_list);
-    let current0:uint64 = current.(size 0) in
-    let r = IB.index keccak_rotc (Lib.RawIntTypes.size_to_UInt32 i) in
-    let _Y = IB.index keccak_piln (Lib.RawIntTypes.size_to_UInt32 i) in
-    let temp = s.(_Y) in
-    s.(_Y) <- rotl current0 r;
-    current.(size 0) <- temp
+    state_pi_rho_inner i current s
   );
   pop_frame()
 

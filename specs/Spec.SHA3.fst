@@ -62,15 +62,16 @@ let state_theta (s:state) : state =
   let _C = state_theta0 s _C in
   state_theta1 s _C
 
-let state_pi_rho_inner (i:size_nat{i < 24}) (current, s) : tuple2 uint64 state =
+let state_pi_rho_inner (i:size_nat{i < 24}) (current, s) : tuple2 (lseq uint64 1) state =
   let r = keccak_rotc.[i] in
   let _Y = keccak_piln.[i] in
-  let s1 = s.[_Y] <- rotl current r in
-  let current = s.[_Y] in
-  current, s1
+  let temp = s.[_Y] in
+  let s = s.[_Y] <- rotl current.[0] r in
+  let current = current.[0] <- temp in
+  current, s
 
 let state_pi_rho (s_theta:state) : state =
-  let current : uint64 = readLane s_theta 1 0 in
+  let current : lseq uint64 1 = create 1 (readLane s_theta 1 0) in
   let _, s_pi_rho = repeati_sp #24 24 state_pi_rho_inner (current, s_theta) in
   s_pi_rho
 
