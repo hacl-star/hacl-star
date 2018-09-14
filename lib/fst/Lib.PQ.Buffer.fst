@@ -243,6 +243,57 @@ let loop #h0 #a #len n buf inv' spec impl =
       impl j in
   Lib.Loops.for (size 0) n inv f'
 
+inline_for_extraction noextract
+val loop2_inv:
+    #a0:Type
+  -> #len0:size_nat
+  -> #a1:Type
+  -> #len1:size_nat
+  -> h0:mem
+  -> h1:mem
+  -> n:size_nat
+  -> buf0:lbuffer a0 len0
+  -> buf1:lbuffer a1 len1
+  -> spec:(i:size_nat{i < n}
+        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)
+        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1))
+  -> i:nat{i <= n}
+  -> Type0
+let loop2_inv #a0 #len0 #a1 #len1 h0 h1 n buf0 buf1 spec i =
+  modifies (loc_union (loc_buffer buf0) (loc_buffer buf1)) h0 h1 /\
+  (let s1, s2 = Seq.repeati_sp #n i spec (as_seq h0 buf0, as_seq h0 buf1) in
+  as_seq h1 buf0 == s1 /\ as_seq h1 buf1 == s2)
+
+inline_for_extraction
+val loop2:
+     #h0:mem
+  -> #a0:Type0
+  -> #len0:size_nat
+  -> #a1:Type0
+  -> #len1:size_nat
+  -> n:size_t
+  -> buf0:lbuffer a0 len0
+  -> buf1:lbuffer a1 len1
+  -> inv:(h0:mem -> h1:mem -> Type0)
+  -> spec:(i:size_nat{i < v n}
+        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)
+        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1))
+  -> impl:
+      (i:size_t{v i < v n} -> Stack unit
+        (requires fun h -> inv h0 h /\ loop2_inv #a0 #len0 #a1 #len1 h0 h (v n) buf0 buf1 spec (v i))
+        (ensures  fun _ r h1 -> inv h0 h1 /\ loop2_inv #a0 #len0 #a1 #len1 h0 h1 (v n) buf0 buf1 spec (v i + 1)))
+  -> Stack unit
+    (requires fun h -> h0 == h /\ live h buf0 /\ live h buf1 /\ inv h0 h)
+    (ensures  fun _ _ h1 -> loop2_inv #a0 #len0 #a1 #len1 h0 h1 (v n) buf0 buf1 spec (v n))
+let loop2 #h0 #a0 #len0 #a1 #len1 n buf0 buf1 inv' spec impl =
+  let inv h1 j =
+    inv' h0 h1 /\ loop2_inv #a0 #len0 #a1 #len1 h0 h1 (v n) buf0 buf1 spec j in
+  let f' (j:size_t{v j < v n}): Stack unit
+      (requires fun h -> inv h (v j))
+      (ensures  fun _ _ h2 -> inv h2 (v j + 1)) =
+      impl j in
+  Lib.Loops.for (size 0) n inv f'
+
 val lemma_repeati_sp:
      #h0:HyperStack.mem
   -> #a:Type
