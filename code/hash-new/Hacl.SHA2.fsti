@@ -15,48 +15,14 @@ open Spec.Hash.Helpers
 
 include Hacl.Hash.Common
 
-(** This module uses top-level arrays behind an abstract footprint *)
-
-val static_fp: unit -> GTot M.loc
-
-let loc_in (l: M.loc) (h: HS.mem) =
-  M.(loc_not_unused_in h `loc_includes` l)
-
-(* A useful lemma for clients, to be called at any time before performing an
-   allocation, hence giving them "for free" that their allocation is disjoint from
-   our top-level arrays. *)
-val recall_static_fp: unit -> ST.Stack unit
-  (requires (fun _ -> True))
-  (ensures (fun h0 _ h1 ->
-    M.(modifies loc_none h0 h1) /\
-    static_fp () `loc_in` h1))
-
 
 (** A series of functions; we only expose the monomorphic variants, and leave it
   * up to EverCrypt.Hash to perform multiplexing. *)
-
-inline_for_extraction
-let alloca_st (a: sha2_alg) = unit -> ST.StackInline (state a)
-  (requires (fun h ->
-    HS.is_stack_region (HS.get_tip h)))
-  (ensures (fun h0 s h1 ->
-    M.(modifies M.loc_none h0 h1) /\
-    B.live h1 s /\
-    Seq.equal (B.as_seq h1 s) (Spec.init a)))
 
 val alloca_224: alloca_st SHA2_224
 val alloca_256: alloca_st SHA2_256
 val alloca_384: alloca_st SHA2_384
 val alloca_512: alloca_st SHA2_512
-
-inline_for_extraction
-let init_st (a:sha2_alg) = s:state a -> ST.Stack unit
-  (requires (fun h ->
-    M.loc_disjoint (B.loc_addr_of_buffer s) (static_fp ()) /\
-    B.live h s))
-  (ensures (fun h0 _ h1 ->
-    M.(modifies (loc_buffer s) h0 h1) /\
-    Seq.equal (B.as_seq h1 s) (Spec.init a)))
 
 val init_224: init_st SHA2_224
 val init_256: init_st SHA2_256

@@ -112,7 +112,8 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   pad_length_bound a total_input_len;
   assert (U32.v tmp_len <= 2 * size_block a);
 
-  let tmp = B.alloca 0uy tmp_len in
+  let tmp_twoblocks = B.alloca 0uy U32.(2ul *^ size_block_ul a) in
+  let tmp = B.sub tmp_twoblocks 0ul tmp_len in
   let tmp_rest = B.sub tmp 0ul rest_len in
   let tmp_pad = B.sub tmp rest_len pad_len in
   B.blit rest 0ul tmp_rest 0ul rest_len;
@@ -162,3 +163,40 @@ let update_last_sha1: update_last_st SHA1 =
 let update_last_md5: update_last_st MD5 =
   Tactics.(synth_by_tactic
     (specialize (mk_update_last MD5 Hacl.Hash.update_multi_md5 Hacl.MD5.pad) [`%mk_update_last]))
+
+noextract
+val mk_hash: a:hash_alg ->
+  alloca:alloca_st a ->
+  update_multi:Hacl.Hash.update_multi_st a ->
+  update_last:update_last_st a ->
+  finish:finish_st a ->
+  hash_st a
+
+#set-options "--max_ifuel 1"
+
+let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
+  match a with
+  | SHA2_384 | SHA2_512 ->
+      FStar.Int.Cast.Full.(uint64_to_uint128 (uint32_to_uint64 l))
+  | _ ->
+      FStar.Int.Cast.Full.(uint32_to_uint64 l)
+
+#set-options "--max_ifuel 0"
+
+noextract
+let mk_hash a alloca update_multi update_last finish input input_len dst =
+  let h0 = ST.get () in
+  ST.push_frame ();
+  let s = alloca () in
+  let blocks_n = U32.(input_len /^ size_block_ul a) in
+  let blocks_len = U32.(blocks_n *^ size_block_ul a) in
+  let blocks = B.sub input 0ul blocks_len in
+  let rest_len = U32.(input_len -^ blocks_len) in
+  let rest = B.sub input blocks_len rest_len in
+  update_multi s blocks blocks_n;
+  update_last s (u32_to_len a blocks_len) rest rest_len;
+  finish s dst;
+  ST.pop_frame ();
+  let h1 = ST.get () in
+  assume (B.(modifies (loc_buffer dst) h0 h1));
+  Spec.Hash.Incremental.hash_is_hash_incremental a (B.as_seq h0 input)
