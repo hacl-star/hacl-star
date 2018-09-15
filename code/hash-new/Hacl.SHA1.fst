@@ -364,3 +364,6 @@ let update h l =
 
 let pad: pad_st SHA1 =
   FStar.Tactics.(synth_by_tactic (specialize (Common.pad SHA1) [`%Common.pad]))
+
+let finish: finish_st SHA1 =
+  FStar.Tactics.(synth_by_tactic (specialize (Common.finish SHA1) [`%Common.finish]))

@@ -381,3 +381,6 @@ let update abcd x = update' abcd x
 
 let pad: pad_st MD5 =
   FStar.Tactics.(synth_by_tactic (specialize (Common.pad MD5) [`%Common.pad]))
+
+let finish: finish_st MD5 =
+  FStar.Tactics.(synth_by_tactic (specialize (Common.finish MD5) [`%Common.finish]))

@@ -16,3 +16,5 @@ val init: init_st SHA1
 val update: update_st SHA1
 
 val pad: pad_st SHA1
+
+val finish: finish_st SHA1

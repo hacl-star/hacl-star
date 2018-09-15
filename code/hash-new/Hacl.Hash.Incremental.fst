@@ -225,3 +225,15 @@ let hash_sha2_512: hash_st SHA2_512 =
       Hacl.SHA2.alloca_512 Hacl.Hash.update_multi_sha2_512 update_last_sha2_512 Hacl.SHA2.finish_512)
       [`%mk_hash]))
 
+let hash_sha1: hash_st SHA1 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_hash SHA1
+      Hacl.SHA1.alloca Hacl.Hash.update_multi_sha1 update_last_sha1 Hacl.SHA1.finish)
+      [`%mk_hash]))
+
+let hash_md5: hash_st MD5 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_hash MD5
+      Hacl.MD5.alloca Hacl.Hash.update_multi_md5 update_last_md5 Hacl.MD5.finish)
+      [`%mk_hash]))
+

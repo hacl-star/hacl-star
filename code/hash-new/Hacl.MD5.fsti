@@ -16,3 +16,5 @@ val init: init_st MD5
 val update: update_st MD5
 
 val pad: pad_st MD5
+
+val finish: finish_st MD5
