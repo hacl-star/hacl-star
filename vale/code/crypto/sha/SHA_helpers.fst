@@ -83,7 +83,7 @@ let make_ordered_hash_def (abcd efgh:quad32) :
 
 unfold let make_ordered_hash = make_opaque make_ordered_hash_def
 
-let shuffle_core_properties (a:hash_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}) :
+let shuffle_core_properties (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}) :
     Lemma(let h = shuffle_core_opaque a block hash t in
           let a0 = hash.[0] in
           let b0 = hash.[1] in
@@ -421,7 +421,7 @@ let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
   assert (add_mod a (add_mod b (add_mod d c)) == add_mod a (add_mod b (add_mod c d)));
   ()
 
-let ws_computed (a:hash_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
+let ws_computed (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
   if t < size_block_w then ws_opaque a b t
   else
     let t16 = ws_opaque a b (t - 16) in
@@ -609,11 +609,11 @@ let translate_hash_update (h0 h1 h0' h1' a0 a1:quad32) : Lemma
          
 unfold let shuffle_opaque = make_opaque shuffle
   
-let update_block (a:hash_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
+let update_block (a:sha2_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
   let hash_1 = shuffle_opaque a hash block in
   Spec.Loops.seq_map2 (fun x y -> word_add_mod a x y) hash hash_1
 
-let lemma_update_block_equiv (a:hash_alg) (hash:hash_w a) (block:bytes{length block = size_block a}) :
+let lemma_update_block_equiv (a:sha2_alg) (hash:hash_w a) (block:bytes{length block = size_block a}) :
   Lemma (update_block a hash (words_from_be a size_block_w block) == update a hash block)
   =
   reveal_opaque shuffle;
