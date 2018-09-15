@@ -39,3 +39,8 @@ val update_last_sha2_384: update_last_st SHA2_384
 val update_last_sha2_512: update_last_st SHA2_512
 // val update_last_sha1: update_last_st SHA1
 // val update_last_md5: update_last_st MD5
+
+val hash_sha2_224: hash_st SHA2_224
+val hash_sha2_256: hash_st SHA2_256
+val hash_sha2_384: hash_st SHA2_384
+val hash_sha2_512: hash_st SHA2_512

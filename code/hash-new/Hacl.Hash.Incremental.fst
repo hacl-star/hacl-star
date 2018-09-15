@@ -52,6 +52,7 @@ let pad_length_bound (a: hash_alg) (len: len_t a): Lemma
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 150"
 
 (* Avoiding an ill-formed pattern error... *)
+inline_for_extraction
 let len_add32 (a: hash_alg)
   (prev_len: len_t a)
   (input_len: U32.t { U32.v input_len + len_v a prev_len < max_input8 a }):
@@ -167,6 +168,7 @@ val mk_hash: a:hash_alg ->
 
 #set-options "--max_ifuel 1"
 
+inline_for_extraction
 let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
   match a with
   | SHA2_384 | SHA2_512 ->
@@ -193,3 +195,28 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   let h1 = ST.get () in
   assume (B.(modifies (loc_buffer dst) h0 h1));
   Spec.Hash.Incremental.hash_is_hash_incremental a (B.as_seq h0 input)
+
+let hash_sha2_224: hash_st SHA2_224 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_hash SHA2_224
+      Hacl.SHA2.alloca_224 Hacl.Hash.update_multi_sha2_224 update_last_sha2_224 Hacl.SHA2.finish_224)
+      [`%mk_hash]))
+
+let hash_sha2_256: hash_st SHA2_256 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_hash SHA2_256
+      Hacl.SHA2.alloca_256 Hacl.Hash.update_multi_sha2_256 update_last_sha2_256 Hacl.SHA2.finish_256)
+      [`%mk_hash]))
+
+let hash_sha2_384: hash_st SHA2_384 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_hash SHA2_384
+      Hacl.SHA2.alloca_384 Hacl.Hash.update_multi_sha2_384 update_last_sha2_384 Hacl.SHA2.finish_384)
+      [`%mk_hash]))
+
+let hash_sha2_512: hash_st SHA2_512 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_hash SHA2_512
+      Hacl.SHA2.alloca_512 Hacl.Hash.update_multi_sha2_512 update_last_sha2_512 Hacl.SHA2.finish_512)
+      [`%mk_hash]))
+
