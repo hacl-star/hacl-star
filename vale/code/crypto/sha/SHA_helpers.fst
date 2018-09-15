@@ -3,6 +3,7 @@ module SHA_helpers
 open Opaque_s
 open Spec.SHA2
 open Spec.Hash
+open Spec.Hash.Helpers
 open X64.CryptoInstructions_s
 open Types_s
 open Words_s
@@ -707,6 +708,13 @@ let lemma_update_multi_quads_short (s:seq quad32) (hash_orig:hash_w SHA2_256) : 
   (ensures  update_multi_quads s hash_orig == hash_orig)
   =
   ()
+
+let update_multi_one (h:hash_w SHA2_256) (b:bytes{length b = size_block SHA2_256}) : Lemma
+  (ensures (update_multi SHA2_256 h b == update SHA2_256 h b)) =
+  let block, rem = Seq.split b (size_block SHA2_256) in
+  assert (Seq.length rem == 0);
+  update_multi_zero SHA2_256 (update SHA2_256 h b)
+
 #pop-options
 
 (*+ TODO +*)
@@ -717,6 +725,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (ensures  quads_to_block qs == words_from_be SHA2_256 size_block_w input2)
   =
   admit()
+
 
 let rec lemma_update_multi_equiv_vale (hash hash':hash_w SHA2_256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
@@ -830,7 +839,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash_w SHA2_256) (quads:seq qu
     //   update_block SHA2_256 h_bytes1 (words_from_be SHA2_256 16 input2)
     lemma_update_block_equiv SHA2_256 h_bytes1 input2;
     //   update SHA2_256 h_bytes1 input2
-    update_multi_one SHA2_256 h_bytes1 input2;
+    update_multi_one h_bytes1 input2;
     //   update_multi SHA2_256 h_bytes1 input2
     // }
     //
