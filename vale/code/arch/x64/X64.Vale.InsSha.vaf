@@ -19,6 +19,7 @@ open Types_s
 open Arch.Types
 open Spec.Hash.Common
 open Spec.SHA2
+open Spec.Hash.Helpers
 open SHA_helpers
 open X64.Machine_s
 open X64.Vale.State
@@ -40,6 +41,7 @@ open X64.Vale.StateLemmas
 open X64.Vale.Decls
 open X64.CryptoInstructions_s
 open Spec.Hash.Common
+open Spec.Hash.Helpers
 open Spec.SHA2
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s

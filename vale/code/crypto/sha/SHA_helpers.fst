@@ -709,7 +709,7 @@ let lemma_update_multi_quads_short (s:seq quad32) (hash_orig:hash_w SHA2_256) : 
   =
   ()
 
-let update_multi_one (h:hash_w SHA2_256) (b:bytes{length b = size_block SHA2_256}) : Lemma
+let update_multi_one (h:hash_w SHA2_256) (b:bytes_blocks SHA2_256 {length b = size_block SHA2_256}) : Lemma
   (ensures (update_multi SHA2_256 h b == update SHA2_256 h b)) =
   let block, rem = Seq.split b (size_block SHA2_256) in
   assert (Seq.length rem == 0);

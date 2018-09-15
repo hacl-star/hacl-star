@@ -888,6 +888,9 @@ def process_files_in(env, directories):
     include_fstar_file(env, file)
   for file in fstis:
     include_fstar_file(env, file)
+  for file in external_files:
+    file_node = File(file.obj_name())
+    fsti_map[file_module_name(file_node)] = file_node
   for file in vafs:
     include_vale_file(env, file)
   # Process and verify files:
