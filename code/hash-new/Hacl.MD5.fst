@@ -350,7 +350,7 @@ let update'
       B.(modifies (loc_buffer abcd) h0 h1) /\
       B.live h1 abcd /\
       B.as_seq h1 abcd == Spec.update (B.as_seq h0 abcd) (B.as_seq h0 x)))
-= 
+=
   assert_norm (U32.v ia == Spec.ia);
   assert_norm (U32.v ib == Spec.ib);
   assert_norm (U32.v ic == Spec.ic);
@@ -375,6 +375,7 @@ let update'
 (* NOTE: do not remove this, and do not move this into the definition
    of `update` below: within `update` the context will be too crowded
    for F* to complete a proof of equality between two functions *)
+noextract
 let _ : squash (Spec.Hash.update MD5 == Spec.update) = ()
 
 let update abcd x = update' abcd x

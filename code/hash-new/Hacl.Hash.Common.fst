@@ -210,6 +210,7 @@ let pad a len dst =
   (**)   S.equal s (S.append s1 (S.append s2 s3)) /\
   (**)   True)
 
+inline_for_extraction
 let pad_len (a: hash_alg) (len: len_t a) =
   U32.(1ul +^ pad0_len a len +^ size_len_ul a)
 

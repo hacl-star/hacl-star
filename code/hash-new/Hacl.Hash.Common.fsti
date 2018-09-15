@@ -90,6 +90,7 @@ val pad: a:hash_alg -> pad_st a
 
 (* So that the caller can compute which length to allocate for padding. *)
 
+inline_for_extraction
 val pad_len: a:hash_alg -> len:len_t a ->
   x:U32.t { U32.v x = pad_length a (len_v a len) }
 

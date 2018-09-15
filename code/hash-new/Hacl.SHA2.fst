@@ -49,7 +49,7 @@ let h (a: sha2_alg): S.lseq (word a) 8 =
   | SHA2_384 -> Constants.h384
   | SHA2_512 -> Constants.h512
 
-noextract
+noextract inline_for_extraction
 let index_h (a: sha2_alg) (i: U32.t): ST.Stack (word a)
   (requires (fun _ -> U32.v i < 8))
   (ensures (fun h0 r h1 ->
