@@ -157,6 +157,13 @@ let update_last_sha2_512: update_last_st SHA2_512 =
   Tactics.(synth_by_tactic
     (specialize (mk_update_last SHA2_512 Hacl.Hash.update_multi_sha2_512 Hacl.SHA2.pad_512) [`%mk_update_last]))
 
+let update_last_sha1: update_last_st SHA1 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_update_last SHA1 Hacl.Hash.update_multi_sha1 Hacl.SHA1.pad) [`%mk_update_last]))
+
+let update_last_md5: update_last_st MD5 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_update_last MD5 Hacl.Hash.update_multi_md5 Hacl.MD5.pad) [`%mk_update_last]))
 
 noextract
 val mk_hash: a:hash_alg ->
@@ -192,8 +199,6 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   update_last s (u32_to_len a blocks_len) rest rest_len;
   finish s dst;
   ST.pop_frame ();
-  let h1 = ST.get () in
-  assume (B.(modifies (loc_buffer dst) h0 h1));
   Spec.Hash.Incremental.hash_is_hash_incremental a (B.as_seq h0 input)
 
 let hash_sha2_224: hash_st SHA2_224 =

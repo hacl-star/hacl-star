@@ -1,8 +1,5 @@
 module Hacl.SHA1
 
-include Hacl.Hash.Common
-open Spec.Hash.Helpers
-
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module HS = FStar.HyperStack
@@ -12,25 +9,42 @@ module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module E = FStar.Kremlin.Endianness
 module CE = C.Endianness
+module Common = Hacl.Hash.Common
 
 friend Spec.SHA1
 
 (** Top-level constant arrays for the MD5 algorithm. *)
-let h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
-
+let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 
 let alloca () =
   B.alloca_of_list Spec.init_as_list
 
-let static_fp () =
-  B.loc_addr_of_buffer h0
+(* We read values from constant buffers through accessors to isolate
+   all recall/liveness issues away. Thus, clients will not need to
+   know that their output buffers be disjoint from our constant
+   immutable buffers. *)
 
-let recall_static_fp () =
-  B.recall h0
+inline_for_extraction
+let h0 (i: U32.t { U32.v i < 5 } ) : HST.Stack U32.t
+  (requires (fun _ -> True))
+  (ensures (fun h res h' ->
+    B.modifies B.loc_none h h' /\
+    res == Seq.index Spec.init (U32.v i)
+  ))
+= IB.recall_contents _h0 Spec.init;
+  B.index _h0 i
 
 let init s =
-  IB.recall_contents h0 (Seq.seq_of_list Spec.init_as_list);
-  B.blit h0 0ul s 0ul 5ul
+  let h = HST.get () in
+  let inv (h' : HS.mem) (i: nat) : GTot Type0 =
+    B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 5 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.init 0 i
+  in
+  C.Loops.for 0ul 5ul inv (fun i ->
+    B.upd s i (h0 i);
+    let h' = HST.get () in
+    Seq.snoc_slice_index (B.as_seq h' s) 0 (U32.v i);
+    Seq.snoc_slice_index (Spec.init) 0 (U32.v i)
+  )
 
 inline_for_extraction
 let w_t = (b: B.lbuffer (word SHA1) 80)
@@ -347,3 +361,6 @@ let step4
 
 let update h l =
   step4 l h
+
+let pad: pad_st SHA1 =
+  FStar.Tactics.(synth_by_tactic (specialize (Common.pad SHA1) [`%Common.pad]))

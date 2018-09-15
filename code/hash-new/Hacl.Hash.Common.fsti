@@ -37,7 +37,6 @@ let size_len_ul (a: hash_alg): n:U32.t { U32.v n = size_len_8 a } =
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
 
-
 (** The type of init, alloca and update, share by all algorithms. Note that
     since we manage to hide the static footprints, all algorithms do have a generic
     signature. *)
@@ -49,6 +48,7 @@ let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a)
   (ensures (fun h0 s h1 ->
     M.(modifies M.loc_none h0 h1) /\
     B.live h1 s /\
+    B.frameOf s == HS.get_tip h0 /\
     Seq.equal (B.as_seq h1 s) (Spec.Hash.init a) /\
     LowStar.Monotonic.Buffer.alloc_post_mem_common s h0 h1 (Spec.Hash.init a)))
 
