@@ -282,6 +282,20 @@ let fmul_r acc f1 p =
   carry_wide_felem acc tmp;
   pop_frame()
 
+inline_for_extraction
+val fadd_mul_r: acc:felem -> f1:felem -> p:precomp_r -> Stack unit
+                   (requires (fun h -> live h acc /\ live h f1 /\ live h p))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
+let fadd_mul_r acc f1 p =
+  push_frame();
+  let r = sub p (size 0) (size 5) in
+  let r5 = sub p (size 5) (size 5) in
+  let tmp = create_felem () in
+  admit();
+  fadd acc acc f1;
+  mul_felem tmp acc r r5;
+  carry_wide_felem acc tmp;
+  pop_frame()
 
 inline_for_extraction
 val fmul_rn: acc:felem -> f1:felem -> p:precomp_r -> Stack unit
@@ -319,8 +333,8 @@ let load_precompute_r p r0 r1 =
     push_frame();
     let r = sub p (size 0) (size 5) in
     let r5 = sub p (size 5) (size 5) in
-    let r4 = sub p (size 0) (size 5) in
-    let r4_5 = sub p (size 5) (size 5) in
+    let r4 = sub p (size 10) (size 5) in
+    let r4_5 = sub p (size 15) (size 5) in
     let r_vec = vec256_load64s r1 r0 r1 r0 in
     load_felem r r_vec r_vec;
     precompute_shift_reduce r5 r;
@@ -473,14 +487,13 @@ let store_felem_le b f =
     let lo = vec256_interleave_low64 f0 f1 in
     let hi = vec256_interleave_high64 f0 f1 in
     let r0 = vec256_interleave_low128 lo hi in
-    let r1 = vec256_interleave_high128 lo hi in
     let tmp = create 0uy (size 32) in
     vec256_store_le tmp r0;
     blit tmp (size 0) b (size 0) (size 16);
     pop_frame()
     
 inline_for_extraction
-val store_felems_le: b:lbytes 16 -> f:felem -> Stack unit
+val store_felems_le: b:lbytes 64 -> f:felem -> Stack unit
                    (requires (fun h -> live h f /\ live h b))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer b) h0 h1))
 let store_felems_le b f = 

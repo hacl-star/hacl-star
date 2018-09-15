@@ -333,7 +333,8 @@ val fmul_rn_normalize: out:felem -> p:precomp_r -> Stack unit
                    (requires (fun h -> live h out /\ live h p))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
 [@ CInline]
-let fmul_rn_normalize out p = ()
+let fmul_rn_normalize out p = 
+    fmul_r out out p
 
 inline_for_extraction
 val subtract_p: f:felem -> Stack unit

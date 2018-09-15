@@ -178,3 +178,22 @@ let uint32_gte_mask (a:uint32) (b:uint32) : uint32
     let x_xor_q_ = shift_right x_xor_q (u32 31) in
     let c = sub_mod x_xor_q_ (u32 1) in
     c
+
+inline_for_extraction
+val uint32s_from_bytes_le: out:buffer uint32 -> b:bytes -> len:size_t{size_v len == length out} -> Stack unit
+                   (requires (fun h -> live h b /\ live h out))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
+let uint32s_from_bytes_le out b len = 
+    let h0 = ST.get () in
+    loop_nospec #h0 len out 
+      (fun i -> out.(i) <- load32_le (sub b (i *. size 4) (size 4)))
+
+inline_for_extraction
+val uint32s_to_bytes_le: out:bytes -> b:buffer uint32 -> len:size_t{size_v len == length b} -> Stack unit
+                   (requires (fun h -> live h b /\ live h out))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
+let uint32s_to_bytes_le out b len = 
+    let h0 = ST.get () in
+    loop_nospec #h0 len out 
+      (fun i -> store32_le (sub out (i *. size 4) (size 4)) b.(i))
+      

@@ -281,6 +281,21 @@ let fmul_r acc f1 p =
   carry_wide_felem acc tmp;
   pop_frame()
 
+inline_for_extraction
+val fadd_mul_r: acc:felem -> f1:felem -> p:precomp_r -> Stack unit
+                   (requires (fun h -> live h acc /\ live h f1 /\ live h p))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
+let fadd_mul_r acc f1 p =
+  push_frame();
+  let r = sub p (size 0) (size 5) in
+  let r5 = sub p (size 5) (size 5) in
+  let tmp = create_felem () in
+  admit();
+  fadd acc acc f1;
+  mul_felem tmp acc r r5;
+  carry_wide_felem acc tmp;
+  pop_frame()
+
 
 inline_for_extraction
 val fmul_rn: acc:felem -> f1:felem -> p:precomp_r -> Stack unit
@@ -423,7 +438,7 @@ val load_felem_le: f:felem -> b:lbytes 16 -> Stack unit
                    (requires (fun h -> live h f /\ live h b))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
 let load_felem_le f b = 
-    let b = vec128_load_le (sub b (size 0) (size 16)) in
+    let b = vec128_load_le b in
     load_felem f b b
 
 

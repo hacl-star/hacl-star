@@ -61,25 +61,17 @@ let blocklen (s:field_spec) : size_nat =
   | M256 -> 64
 
 unfold
-let nelem (s:field_spec) : size_nat =
-  match s with
-  | M32 -> 1
-  | M64 -> 1
-  | M128 -> 2
-  | M256 -> 4
-
-unfold
 let precomplen (s:field_spec) : size_nat =
   match s with
-  | M32 -> 10
-  | M64 -> 6
-  | M128 -> 20
-  | M256 -> 20
+  | M32 -> 2
+  | M64 -> 2
+  | M128 -> 4
+  | M256 -> 6
 
 
 type felem (s:field_spec) = lbuffer (limb s) (nlimb s)
 type felem_wide (s:field_spec) = lbuffer (wide s) (nlimb s)
-type precomp_r (s:field_spec) = lbuffer (limb s) (precomplen s)
+type precomp_r (s:field_spec) = lbuffer (limb s) ((nlimb s) `op_Multiply` (precomplen s))
 noextract 
 val as_nat: #s:field_spec -> h:mem -> e:felem s-> GTot nat 
 let as_nat #s h (e:felem s) = 
@@ -193,60 +185,51 @@ let reduce_felem #s f =
   | M256 -> F256.reduce_felem f
   
 inline_for_extraction
-val load_precompute_r: #s:field_spec -> p:precomp_r s -> r0:uint64 -> r1:uint64 -> Stack unit
-                   (requires (fun h -> live h p))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer p) h0 h1))
-let load_precompute_r #s p r0 r1 = 
+val precompute_shift_reduce: #s:field_spec -> f1:precomp_r s -> f2:felem s-> Stack unit
+                   (requires (fun h -> live h f1 /\ live h f2))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f1) h0 h1))
+let precompute_shift_reduce #s f1 f2 = 
   match s with
-  | M32 -> F32.load_precompute_r p r0 r1
-  | M64 -> F64.load_precompute_r p r0 r1
-  | M128 -> F128.load_precompute_r p r0 r1
-  | M256 -> F256.load_precompute_r p r0 r1
+  | M32 -> F32.precompute_shift_reduce f1 f2
+  | M64 -> F64.precompute_shift_reduce f1 f2
+  | M128 -> F128.precompute_shift_reduce f1 f2
+  | M256 -> F256.precompute_shift_reduce f1 f2
 
 
 inline_for_extraction
-val fmul_r: #s:field_spec -> out:felem s -> f1:felem s -> precomp:precomp_r s -> Stack unit
+val fmul: #s:field_spec -> out:felem s -> f1:felem s -> precomp:felem s -> Stack unit
                    (requires (fun h -> live h out /\ live h f1 /\ live h precomp))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
-let fmul_r #s out f1 precomp =
+let fmul #s out f1 precomp =
   match s with
-  | M32 -> F32.fmul_r out f1 precomp
-  | M64 -> F64.fmul_r out f1 precomp
-  | M128 -> F128.fmul_r out f1 precomp
-  | M256 -> F256.fmul_r out f1 precomp
+  | M32 -> F32.fmul out f1 precomp
+  | M64 -> F64.fmul out f1 precomp
+  | M128 -> F128.fmul out f1 precomp
+  | M256 -> F256.fmul out f1 precomp
+
 
 inline_for_extraction
-val fadd_mul_r: #s:field_spec -> out:felem s -> f1:felem s -> precomp:precomp_r s -> Stack unit
-                   (requires (fun h -> live h out /\ live h f1 /\ live h precomp))
+val fadd_mul: #s:field_spec -> out:felem s -> f1:felem s -> f2:felem s -> precomp:felem s -> Stack unit
+                   (requires (fun h -> live h out /\ live h f1 /\ live h f2 /\ live h precomp))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
-let fadd_mul_r #s out f1 precomp =
+let fadd_mul #s out f1 f2 precomp =
   match s with
-  | M32 -> F32.fadd_mul_r out f1 precomp
-  | M64 -> F64.fadd_mul_r out f1 precomp
-  | M128 -> F128.fadd_mul_r out f1 precomp
-  | M256 -> F256.fadd_mul_r out f1 precomp
+  | M32 -> F32.fadd_mul out f1 f2 precomp
+  | M64 -> F64.fadd_mul out f1 f2 precomp
+  | M128 -> F128.fadd_mul out f1 f2 precomp
+  | M256 -> F256.fadd_mul out f1 f2 precomp
+
 
 inline_for_extraction
-val fmul_rn: #s:field_spec -> out:felem s -> f1:felem s -> precomp:precomp_r s -> Stack unit
-                   (requires (fun h -> live h out /\ live h f1 /\ live h precomp))
+val fmul_add: #s:field_spec -> out:felem s -> f1:felem s -> f2:felem s -> precomp:felem s -> Stack unit
+                   (requires (fun h -> live h out /\ live h f1 /\ live h f2 /\ live h precomp))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
-let fmul_rn #s out f1 precomp =
+let fmul_add #s out f1 f2 precomp =
   match s with
-  | M32 -> F32.fmul_rn out f1 precomp
-  | M64 -> F64.fmul_rn out f1 precomp
-  | M128 -> F128.fmul_rn out f1 precomp
-  | M256 -> F256.fmul_rn out f1 precomp
-
-inline_for_extraction
-val fmul_rn_normalize: #s:field_spec -> out:felem s -> precomp:precomp_r s -> Stack unit
-                   (requires (fun h -> live h out /\ live h precomp))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
-let fmul_rn_normalize #s out precomp =
-  match s with
-  | M32 -> F32.fmul_rn_normalize out precomp
-  | M64 -> F64.fmul_rn_normalize out precomp
-  | M128 -> F128.fmul_rn_normalize out precomp
-  | M256 -> F256.fmul_rn_normalize out precomp
+  | M32 -> F32.fmul_add out f1 f2 precomp
+  | M64 -> F64.fmul_add out f1 f2 precomp
+  | M128 -> F128.fmul_add out f1 f2 precomp
+  | M256 -> F256.fmul_add out f1 f2 precomp
 
 inline_for_extraction
 val fadd: #s:field_spec -> out:felem s -> f1:felem s -> f2:felem s -> Stack unit
