@@ -438,7 +438,8 @@ private let rec insert_ lv i j hs acc =
   let ihv = RV.insert_copy hcpy (V.index hs lv) acc in
   RV.assign hs lv ihv;
   if j % 2ul = 1ul
-  then (hash_2 (V.back (V.index hs lv)) acc acc;
+  then (let lvhs = V.index hs lv in
+       hash_2 (V.index lvhs (V.size_of lvhs - 2ul)) acc acc;
        insert_ (lv + 1ul)
 	       (Ghost.hide (Ghost.reveal i / 2ul)) (j / 2ul) 
 	       hs acc)
