@@ -199,8 +199,6 @@ let state_theta s =
   state_theta1 s _C;
   pop_frame()
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
 inline_for_extraction noextract
 val state_pi_rho_inner:
     #h0:mem
@@ -212,10 +210,7 @@ val state_pi_rho_inner:
       live h s /\ live h current /\ disjoint current s /\
       loop2_inv h0 h 24 current s S.state_pi_rho_inner (v i))
     (ensures  fun h _ h1 ->
-      loop2_inv h0 h1 24 current s S.state_pi_rho_inner (v i + 1) /\
-      modifies (loc_union (loc_buffer current) (loc_buffer s)) h0 h1 /\
-      (let current_sp, s_sp = S.state_pi_rho_inner (v i) (as_seq h current, as_seq h s) in
-      as_seq h1 current == current_sp /\ as_seq h1 s == s_sp))
+      loop2_inv h0 h1 24 current s S.state_pi_rho_inner (v i + 1))
 let state_pi_rho_inner #h0 i current s =
   let h = ST.get () in
   IB.recall_contents keccak_rotc (Seq.seq_of_list rotc_list);
@@ -263,8 +258,6 @@ val state_chi_inner:
       as_seq h0 s_pi_rho == as_seq h s_pi_rho /\
       loop_inv h0 h 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x))
     (ensures  fun h _ h1 ->
-      modifies (loc_buffer s) h h1 /\
-      as_seq h1 s == S.state_chi_inner (as_seq h s_pi_rho) (v y) (v x) (as_seq h s) /\
       loop_inv h0 h1 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x + 1))
 let state_chi_inner #h0 s_pi_rho y x s =
   let h1 = ST.get () in
@@ -287,8 +280,6 @@ val state_chi_inner1:
       as_seq h0 s_pi_rho == as_seq h s_pi_rho /\
       loop_inv h0 h 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y))
     (ensures  fun h _ h1 ->
-      modifies (loc_buffer s) h h1 /\
-      as_seq h1 s == S.state_chi_inner1 (as_seq h s_pi_rho) (v y) (as_seq h s) /\
       loop_inv h0 h1 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y + 1))
 let state_chi_inner1 #h0 s_pi_rho y s =
   let h1 = ST.get () in
@@ -346,7 +337,8 @@ val state_iota:
       as_seq h1 s == S.state_iota (as_seq h0 s) (v round))
 let state_iota s round =
   IB.recall_contents keccak_rndc (Seq.seq_of_list rndc_list);
-  writeLane s (size 0) (size 0) (readLane s (size 0) (size 0) ^. (IB.index keccak_rndc (Lib.RawIntTypes.size_to_UInt32 round)))
+  writeLane s (size 0) (size 0) (readLane s (size 0) (size 0) ^.
+    (IB.index keccak_rndc (Lib.RawIntTypes.size_to_UInt32 round)))
 
 val state_permute1:
      #h0:mem
@@ -356,8 +348,6 @@ val state_permute1:
     (requires fun h1 -> live h1 s /\
       loop_inv h0 h1 24 s S.state_permute1 (v round))
     (ensures  fun h _ h1 ->
-      modifies (loc_buffer s) h h1 /\
-      as_seq h1 s == S.state_permute1 (v round) (as_seq h s) /\
       loop_inv h0 h1 24 s S.state_permute1 (v round + 1))
 let state_permute1 #h0 round s =
   let h1 = ST.get () in
@@ -395,8 +385,6 @@ val loadState_inner:
       as_seq h0 block == as_seq h block /\
       loop_inv h0 h 25 s (S.loadState_inner (as_seq_sp h0 block)) (v j))
     (ensures  fun h _ h1 ->
-      modifies (loc_buffer s) h0 h1 /\
-      as_seq h1 s == S.loadState_inner (as_seq h block) (v j) (as_seq h s) /\
       loop_inv h0 h1 25 s (S.loadState_inner (as_seq_sp h0 block)) (v j + 1))
 let loadState_inner #h0 block j s =
   let h1 = ST.get () in
@@ -440,8 +428,6 @@ val storeState_inner:
       as_seq h0 s == as_seq h s /\
       loop_inv h0 h 25 block (S.storeState_inner (as_seq h0 s)) (v j))
     (ensures  fun h _ h1 ->
-      modifies (loc_buffer block) h h1 /\
-      as_seq h1 block == S.storeState_inner (as_seq h s) (v j) (as_seq h block) /\
       loop_inv h0 h1 25 block (S.storeState_inner (as_seq h0 s)) (v j + 1))
 let storeState_inner #h0 s j block =
   let h1 = ST.get () in
@@ -476,8 +462,6 @@ let storeState rateInBytes s res =
   update_sub res (size 0) rateInBytes (sub block (size 0) rateInBytes);
   pop_frame()
 
-#reset-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 150"
-
 inline_for_extraction noextract
 val absorb_last:
      s:state
@@ -508,8 +492,6 @@ let absorb_last s rateInBytes inputByteLen input delimitedSuffix =
   let h3 = ST.get () in
   assert (as_seq h3 s == S.loadState (v rateInBytes) (as_seq h2 lastBlock) (as_seq h2 s));
   pop_frame ()
-
-#set-options "--z3rlimit 50 --max_fuel 0"
 
 inline_for_extraction noextract
 val absorb_next:
@@ -543,9 +525,6 @@ val absorb_inner:
       loop_inv h0 h (v inputByteLen / v rateInBytes) s
 	(S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (v i))
     (ensures  fun h _ h1 ->
-      modifies (loc_buffer s) h h1 /\
-      as_seq h1 s ==
-      S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h input) (v i) (as_seq h s) /\
       loop_inv h0 h1 (v inputByteLen / v rateInBytes) s
 	(S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (v i + 1))
 let absorb_inner #h0 rateInBytes inputByteLen input i s =
@@ -597,12 +576,11 @@ val squeeze_inner:
   -> Stack unit
     (requires fun h ->
       live h s /\ live h output /\ disjoint s output /\
-      loop2_inv h0 h (v outputByteLen / v rateInBytes) s output (S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i))
+      loop2_inv h0 h (v outputByteLen / v rateInBytes) s output
+        (S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i))
     (ensures  fun h _ h1 ->
-      modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1 /\
-      (let s_sp, o_sp = S.squeeze_inner (v rateInBytes) (v outputByteLen) (v i) (as_seq h s, as_seq h output) in
-      as_seq h1 s == s_sp /\ as_seq h1 output == o_sp) /\
-      loop2_inv h0 h1 (v outputByteLen / v rateInBytes) s output (S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i + 1))
+      loop2_inv h0 h1 (v outputByteLen / v rateInBytes) s output
+        (S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i + 1))
 let squeeze_inner #h0 rateInBytes outputByteLen i s output =
   S.lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
   let h1 = ST.get () in
@@ -627,7 +605,8 @@ val squeeze_rem:
     (requires fun h -> live h s /\ live h output /\ disjoint s output)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer output) h0 h1 /\
-      as_seq h1 output == S.squeeze_rem (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq h0 output))
+      as_seq h1 output ==
+      S.squeeze_rem (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq h0 output))
 let squeeze_rem s rateInBytes outputByteLen output =
   let remOut = outputByteLen %. rateInBytes in
   let h1 = ST.get () in
@@ -646,7 +625,8 @@ val squeeze:
     (requires fun h -> live h s /\ live h output /\ disjoint s output)
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1 /\
-      as_seq h1 output == S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq h0 output))
+      as_seq h1 output ==
+      S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq h0 output))
 let squeeze s rateInBytes outputByteLen output =
   let outBlocks = outputByteLen /. rateInBytes in
   let h0 = ST.get () in
@@ -656,8 +636,6 @@ let squeeze s rateInBytes outputByteLen output =
     squeeze_inner #h0 rateInBytes outputByteLen i s output
   );
   squeeze_rem s rateInBytes outputByteLen output
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 val keccak:
      rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}
