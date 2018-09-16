@@ -156,16 +156,14 @@ let absorb_last (s:state)
   let last: lseq uint8 rem = sub input (inputByteLen - rem) rem in
   let lastBlock = update_sub lastBlock 0 rem last in
   let lastBlock = lastBlock.[rem] <- delimitedSuffix in
-  let s = loadState rateInBytes lastBlock s in
-  s
+  loadState rateInBytes lastBlock s
 
 let absorb_next (s:state)
                 (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}) : state =
   let nextBlock = create rateInBytes (u8 0) in
   let nextBlock = nextBlock.[rateInBytes - 1] <- u8 0x80 in
   let s = loadState rateInBytes nextBlock s in
-  let s = state_permute s in
-  s
+  state_permute s
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 

@@ -434,23 +434,30 @@ let loadState rateInBytes input s =
   pop_frame ()
 
 val storeState_inner:
-     s:state
+     #h0:mem
+  -> s:state
   -> j:size_t{v j < 25}
   -> block:lbytes 200
   -> Stack unit
-    (requires fun h -> live h s /\ live h block /\ disjoint s block)
+    (requires fun h ->
+      live h s /\ live h block /\ disjoint s block /\
+      as_seq h0 s == as_seq h s /\
+      loop_inv h0 h 25 block (S.storeState_inner (as_seq h0 s)) (v j))
     (ensures  fun h _ h1 ->
       modifies (loc_buffer block) h h1 /\
-      as_seq h1 block == S.storeState_inner (as_seq h s) (v j) (as_seq h block))
-let storeState_inner s j block =
-  let tmp = sub block (j *! size 8) (size 8) in
+      as_seq h1 block == S.storeState_inner (as_seq h s) (v j) (as_seq h block) /\
+      loop_inv h0 h1 25 block (S.storeState_inner (as_seq h0 s)) (v j + 1))
+let storeState_inner #h0 s j block =
   let h1 = ST.get () in
+  let tmp = sub block (j *! size 8) (size 8) in
   uint_to_bytes_le tmp s.(j);
   let h2 = ST.get () in
   assert (v j * 8 < 200);
   modifies_buffer_elim (sub #uint8 #200 #(v j * 8) block (size 0) (j *! size 8)) (loc_buffer tmp) h1 h2;
   modifies_buffer_elim (sub #uint8 #200 #(200 - v j * 8 - 8) block (j *! size 8 +! size 8) (size 200 -! j *! size 8 -! size 8)) (loc_buffer tmp) h1 h2;
-  S.lemma_update_store (as_seq h1 s) (v j) (as_seq h1 block) (as_seq h2 block)
+  S.lemma_update_store (as_seq h1 s) (v j) (as_seq h1 block) (as_seq h2 block);
+  assert (as_seq h2 block == S.storeState_inner (as_seq h1 s) (v j) (as_seq h1 block));
+  lemma_repeati_sp #h0 25 (S.storeState_inner (as_seq h0 s)) (as_seq h0 block) (v j) (as_seq h1 block)
 
 val storeState:
      rateInBytes:size_t{v rateInBytes <= 200}
@@ -458,14 +465,17 @@ val storeState:
   -> res:lbytes (v rateInBytes)
   -> Stack unit
     (requires fun h -> live h s /\ live h res /\ disjoint s res)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer res) h0 h1 /\
+      as_seq h1 res == S.storeState (v rateInBytes) (as_seq h0 s))
 let storeState rateInBytes s res =
   push_frame();
   let block:lbytes 200 = create (size 200) (u8 0) in
   let h0 = ST.get () in
-  loop_nospec #h0 (size 25) block
+  let inv h0 h = live h s /\ live h block /\ disjoint s block in
+  loop #h0 (size 25) block inv (S.storeState_inner (as_seq_sp h0 s))
   (fun j ->
-    storeState_inner s j block
+    storeState_inner #h0 s j block
   );
   update_sub res (size 0) rateInBytes (sub block (size 0) rateInBytes);
   pop_frame()
@@ -479,15 +489,26 @@ val absorb_last:
   -> delimitedSuffix:uint8
   -> Stack unit
     (requires fun h -> live h s /\ live h input /\ disjoint s input)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s ==
+      S.absorb_last (as_seq h0 s) (v rateInBytes) (v inputByteLen) (as_seq h0 input) delimitedSuffix)
 let absorb_last s rateInBytes inputByteLen input delimitedSuffix =
   push_frame ();
   let lastBlock = create rateInBytes (u8 0) in
   let rem = inputByteLen %. rateInBytes in
+  assert (v rem == v inputByteLen % v rateInBytes);
   let last = sub input (inputByteLen -. rem) rem in
-  update_sub lastBlock (size 0) rem last;
+  let h0 = ST.get () in
+  update_sub #uint8 #(v rateInBytes) lastBlock (size 0) rem last;
+  let h1 = ST.get () in
+  assert (as_seq h1 lastBlock == LSeq.update_sub #uint8 #(v rateInBytes) (as_seq h0 lastBlock) 0 (v rem) (as_seq h0 last));
   lastBlock.(rem) <- delimitedSuffix;
+  let h2 = ST.get () in
+  assert (as_seq h2 lastBlock == LSeq.upd #uint8 #(v rateInBytes) (as_seq h1 lastBlock) (v rem) delimitedSuffix);
   loadState rateInBytes lastBlock s;
+  let h3 = ST.get () in
+  assert (as_seq h3 s == S.loadState (v rateInBytes) (as_seq h2 lastBlock) (as_seq h2 s));
   pop_frame ()
 
 inline_for_extraction noextract
@@ -496,7 +517,9 @@ val absorb_next:
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> Stack unit
     (requires fun h -> live h s)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes))
 let absorb_next s rateInBytes =
   push_frame ();
   let nextBlock = create rateInBytes (u8 0) in
@@ -504,6 +527,35 @@ let absorb_next s rateInBytes =
   loadState rateInBytes nextBlock s;
   state_permute s;
   pop_frame ()
+
+inline_for_extraction noextract
+val absorb_inner:
+     #h0:mem
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> inputByteLen:size_t
+  -> input:lbytes (v inputByteLen)
+  -> i:size_t{v i < v inputByteLen / v rateInBytes}
+  -> s:state
+  -> Stack unit
+    (requires fun h ->
+      live h s /\ live h input /\ disjoint s input /\
+      as_seq h0 input == as_seq h input /\
+      loop_inv h0 h (v inputByteLen / v rateInBytes) s
+	(S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (v i))
+    (ensures  fun h _ h1 ->
+      modifies (loc_buffer s) h h1 /\
+      as_seq h1 s ==
+      S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h input) (v i) (as_seq h s) /\
+      loop_inv h0 h1 (v inputByteLen / v rateInBytes) s
+	(S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (v i + 1))
+let absorb_inner #h0 rateInBytes inputByteLen input i s =
+  let h1 = ST.get () in
+  S.lemma_rateInBytes (v inputByteLen) (v rateInBytes) (v i);
+  loadState rateInBytes (sub #_ #(v inputByteLen) #(v rateInBytes) input (i *! rateInBytes) rateInBytes) s;
+  state_permute s;
+  let h2 = ST.get () in
+  lemma_repeati_sp #h0 (v inputByteLen / v rateInBytes)
+    (S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (as_seq h0 s) (v i) (as_seq h1 s)
 
 val absorb:
      s:state
@@ -513,17 +565,21 @@ val absorb:
   -> delimitedSuffix:uint8
   -> Stack unit
     (requires fun h -> live h s /\ live h input /\ disjoint s input)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s ==
+      S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen) (as_seq h0 input) delimitedSuffix)
 let absorb s rateInBytes inputByteLen input delimitedSuffix =
   let open Lib.RawIntTypes in
   let n = inputByteLen /. rateInBytes in
   let rem = inputByteLen %. rateInBytes in
   let h0 = ST.get () in
-  loop_nospec #h0 n s
+  let inv h0 h =
+    live h s /\ live h input /\ disjoint s input /\
+    as_seq h0 input == as_seq h input in
+  loop #h0 n s inv (S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq_sp h0 input))
   (fun i ->
-    S.lemma_rateInBytes (v inputByteLen) (v rateInBytes) (v i);
-    loadState rateInBytes (sub #_ #(v inputByteLen) #(v rateInBytes) input (i *! rateInBytes) rateInBytes) s;
-    state_permute s
+    absorb_inner #h0 rateInBytes inputByteLen input i s
   );
   absorb_last s rateInBytes inputByteLen input delimitedSuffix;
   (if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) && (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. size 1)))
