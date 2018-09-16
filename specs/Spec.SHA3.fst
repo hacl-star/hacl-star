@@ -1,10 +1,10 @@
 module Spec.SHA3
 
 open Lib.IntTypes
-open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open FStar.Mul
+
 open Spec.SHA3.Constants
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
@@ -47,15 +47,15 @@ let state_theta_inner_C (s:state) (i:size_nat{i < 5}) (_C:lseq uint64 5) : lseq 
 let state_theta0 (s:state) (_C:lseq uint64 5) =
   repeati_sp #5 5 (state_theta_inner_C s) _C
 
-let state_theta_inner_s_inner (s':state) (x:index) (_D:uint64) (y:index) (s0:state) : state =
-  writeLane s0 x y (readLane s' x y ^. _D)
+let state_theta_inner_s_inner (x:index) (_D:uint64) (y:index) (s:state) : state =
+  writeLane s x y (readLane s x y ^. _D)
 
-let state_theta_inner_s (s':state) (_C:lseq uint64 5) (x:index) (s:state) : state =
+let state_theta_inner_s (_C:lseq uint64 5) (x:index) (s:state) : state =
   let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (u32 1)) in
-  repeati_sp #5 5 (state_theta_inner_s_inner s' x _D) s
+  repeati_sp #5 5 (state_theta_inner_s_inner x _D) s
 
 let state_theta1 (s:state) (_C:lseq uint64 5): state =
-  repeati_sp #5 5 (state_theta_inner_s s _C) s
+  repeati_sp #5 5 (state_theta_inner_s _C) s
 
 let state_theta (s:state) : state =
   let _C = create 5 (u64 0) in
@@ -197,6 +197,7 @@ let absorb (s:state)
 	   (inputByteLen:size_nat)
 	   (input:lbytes inputByteLen)
 	   (delimitedSuffix:uint8) : state =
+  let open Lib.RawIntTypes in
   let n = inputByteLen / rateInBytes in
   let rem = inputByteLen % rateInBytes in
   let s = repeati_sp #n n (absorb_inner rateInBytes inputByteLen input) s in
