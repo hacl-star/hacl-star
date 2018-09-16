@@ -16,6 +16,7 @@ open Hacl.Impl.SHA3
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
+module S = Spec.SHA3
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -27,7 +28,10 @@ val shake128_hacl:
   -> Stack unit
      (requires fun h ->
        live h input /\ live h output /\ disjoint input output)
-     (ensures  fun h0 _ h1 -> modifies (loc_buffer output) h0 h1)
+     (ensures  fun h0 _ h1 ->
+       modifies (loc_buffer output) h0 h1 /\
+       as_seq h1 output ==
+       S.shake128 (v inputByteLen) (as_seq h0 input) (v outputByteLen) (as_seq h0 output))
 let shake128_hacl inputByteLen input outputByteLen output =
   keccak (size 1344) (size 256) inputByteLen input (u8 0x1F) outputByteLen output
 
@@ -39,7 +43,10 @@ val shake256_hacl:
   -> Stack unit
      (requires fun h ->
        live h input /\ live h output /\ disjoint input output)
-     (ensures  fun h0 _ h1 -> modifies (loc_buffer output) h0 h1)
+     (ensures  fun h0 _ h1 ->
+       modifies (loc_buffer output) h0 h1 /\
+       as_seq h1 output ==
+       S.shake256 (v inputByteLen) (as_seq h0 input) (v outputByteLen) (as_seq h0 output))
 let shake256_hacl inputByteLen input outputByteLen output =
   keccak (size 1088) (size 512) inputByteLen input (u8 0x1F) outputByteLen output
 
@@ -50,7 +57,10 @@ val sha3_224:
   -> Stack unit
      (requires fun h ->
        live h input /\ live h output /\ disjoint input output)
-     (ensures  fun h0 _ h1 -> modifies (loc_buffer output) h0 h1)
+     (ensures  fun h0 _ h1 ->
+       modifies (loc_buffer output) h0 h1 /\
+       as_seq h1 output ==
+       S.sha3_224 (v inputByteLen) (as_seq h0 input) (as_seq h0 output))
 let sha3_224 inputByteLen input output =
   keccak (size 1152) (size 448) inputByteLen input (u8 0x06) (size 28) output
 
@@ -61,7 +71,10 @@ val sha3_256:
   -> Stack unit
      (requires fun h ->
        live h input /\ live h output /\ disjoint input output)
-     (ensures  fun h0 _ h1 -> modifies (loc_buffer output) h0 h1)
+     (ensures  fun h0 _ h1 ->
+       modifies (loc_buffer output) h0 h1 /\
+       as_seq h1 output ==
+       S.sha3_256 (v inputByteLen) (as_seq h0 input) (as_seq h0 output))
 let sha3_256 inputByteLen input output =
   keccak (size 1088) (size 512) inputByteLen input (u8 0x06) (size 32) output
 
@@ -72,7 +85,10 @@ val sha3_384:
   -> Stack unit
      (requires fun h ->
        live h input /\ live h output /\ disjoint input output)
-     (ensures  fun h0 _ h1 -> modifies (loc_buffer output) h0 h1)
+     (ensures  fun h0 _ h1 ->
+       modifies (loc_buffer output) h0 h1 /\
+       as_seq h1 output ==
+       S.sha3_384 (v inputByteLen) (as_seq h0 input) (as_seq h0 output))
 let sha3_384 inputByteLen input output =
   keccak (size 832) (size 768) inputByteLen input (u8 0x06) (size 48) output
 
@@ -83,7 +99,10 @@ val sha3_512:
   -> Stack unit
      (requires fun h ->
        live h input /\ live h output /\ disjoint input output)
-     (ensures  fun h0 _ h1 -> modifies (loc_buffer output) h0 h1)
+     (ensures  fun h0 _ h1 ->
+       modifies (loc_buffer output) h0 h1 /\
+       as_seq h1 output ==
+       S.sha3_512 (v inputByteLen) (as_seq h0 input) (as_seq h0 output))
 let sha3_512 inputByteLen input output =
   keccak (size 576) (size 1024) inputByteLen input (u8 0x06) (size 64) output
 
