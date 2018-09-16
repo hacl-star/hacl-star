@@ -383,6 +383,7 @@ let state_permute s =
     state_permute1 #h0 i s
   )
 
+inline_for_extraction noextract
 val loadState_inner:
      #h0:mem
   -> block:lbytes 200
@@ -427,6 +428,7 @@ let loadState rateInBytes input s =
   );
   pop_frame ()
 
+inline_for_extraction noextract
 val storeState_inner:
      #h0:mem
   -> s:state
