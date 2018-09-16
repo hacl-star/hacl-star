@@ -146,11 +146,14 @@ let storeState (rateInBytes:size_nat{rateInBytes <= 200})
   let block = repeati_sp #25 25 (storeState_inner s) block in
   sub block 0 rateInBytes
 
-let absorb_last (s:state)
-                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
-                (inputByteLen:size_nat)
-                (input:lbytes inputByteLen)
-                (delimitedSuffix:uint8) : state =
+val absorb_last:
+     s:state
+  -> rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}
+  -> inputByteLen:size_nat
+  -> input:lbytes inputByteLen
+  -> delimitedSuffix:uint8
+  -> state
+let absorb_last s rateInBytes inputByteLen input delimitedSuffix =
   let lastBlock = create rateInBytes (u8 0) in
   let rem = inputByteLen % rateInBytes in
   let last: lseq uint8 rem = sub input (inputByteLen - rem) rem in
@@ -203,54 +206,129 @@ let absorb (s:state)
     then state_permute s else s in
   absorb_next s rateInBytes
 
-let squeeze_inner (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
-                  (outputByteLen:size_nat)
-                  (i:size_nat{i < outputByteLen / rateInBytes})
-		  (s, o) : tuple2 state (lbytes outputByteLen) =
+val squeeze_inner:
+     rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}
+  -> outputByteLen:size_nat
+  -> i:size_nat{i < outputByteLen / rateInBytes}
+  -> so:tuple2 state (lbytes outputByteLen)
+  -> Pure (tuple2 state (lbytes outputByteLen))
+    (requires True)
+    (ensures fun (s1, o1) ->
+      let s, o = so in
+      lemma_rateInBytes outputByteLen rateInBytes i;
+      sub o1 0 (i * rateInBytes) == sub o 0 (i * rateInBytes) /\
+      sub o1 (i * rateInBytes) rateInBytes == storeState rateInBytes s /\
+      sub o1 (i * rateInBytes + rateInBytes) (outputByteLen - i * rateInBytes - rateInBytes) ==
+      sub o (i * rateInBytes + rateInBytes) (outputByteLen - i * rateInBytes - rateInBytes))
+let squeeze_inner rateInBytes outputByteLen i (s, o) =
   lemma_rateInBytes outputByteLen rateInBytes i;
   let block = storeState rateInBytes s in
-  let o = update_sub o (i * rateInBytes) rateInBytes block in
+  let res = update_sub o (i * rateInBytes) rateInBytes block in
+  eq_intro (sub res 0 (i * rateInBytes)) (sub o 0 (i * rateInBytes));
+  eq_intro (sub res (i * rateInBytes) rateInBytes) (storeState rateInBytes s);
+  eq_intro (sub res (i * rateInBytes + rateInBytes) (outputByteLen - i * rateInBytes - rateInBytes))
+    (sub o (i * rateInBytes + rateInBytes) (outputByteLen - i * rateInBytes - rateInBytes));
   let s = state_permute s in
-  s, o
+  s, res
+
+val lemma_update_squeeze:
+     rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}
+  -> outputByteLen:size_nat
+  -> i:size_nat{i < outputByteLen / rateInBytes}
+  -> s:state
+  -> o:lbytes outputByteLen
+  -> o1:lbytes outputByteLen
+  -> Lemma
+    (requires
+      (lemma_rateInBytes outputByteLen rateInBytes i;
+      sub o1 0 (i * rateInBytes) == sub o 0 (i * rateInBytes) /\
+      sub o1 (i * rateInBytes) rateInBytes == storeState rateInBytes s /\
+      sub o1 (i * rateInBytes + rateInBytes) (outputByteLen - i * rateInBytes - rateInBytes) ==
+      sub o (i * rateInBytes + rateInBytes) (outputByteLen - i * rateInBytes - rateInBytes)))
+    (ensures o1 == snd (squeeze_inner rateInBytes outputByteLen i (s, o)))
+let lemma_update_squeeze rateInBytes outputByteLen i s o o1 =
+  lemma_rateInBytes outputByteLen rateInBytes i;
+  let res1 = snd (squeeze_inner rateInBytes outputByteLen i (s, o)) in
+  FStar.Seq.Properties.lemma_split (sub o1 0 (i * rateInBytes + rateInBytes)) (i * rateInBytes);
+  FStar.Seq.Properties.lemma_split (sub res1 0 (i * rateInBytes + rateInBytes)) (i * rateInBytes);
+  FStar.Seq.Properties.lemma_split o1 (i * rateInBytes + rateInBytes);
+  FStar.Seq.Properties.lemma_split res1 (i * rateInBytes + rateInBytes)
+
+val squeeze_rem:
+     s:state
+  -> rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}
+  -> outputByteLen:size_nat
+  -> output:lbytes outputByteLen
+  -> res:lbytes outputByteLen
+    {let remOut = outputByteLen % rateInBytes in
+    sub res 0 (outputByteLen - remOut) == sub output 0 (outputByteLen - remOut) /\
+    sub res (outputByteLen - remOut) remOut == storeState remOut s}
+let squeeze_rem s rateInBytes outputByteLen output =
+  let remOut = outputByteLen % rateInBytes in
+  let outBlock = storeState remOut s in
+  let res = update_sub output (outputByteLen - remOut) remOut outBlock in
+  eq_intro (sub res 0 (outputByteLen - remOut)) (sub output 0 (outputByteLen - remOut));
+  res
+
+val lemma_update_squeeze_rem:
+     s:state
+  -> rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}
+  -> outputByteLen:size_nat
+  -> output:lbytes outputByteLen
+  -> res:lbytes outputByteLen
+  -> Lemma
+    (requires
+      (let remOut = outputByteLen % rateInBytes in
+      sub res 0 (outputByteLen - remOut) == sub output 0 (outputByteLen - remOut) /\
+      sub res (outputByteLen - remOut) remOut == storeState remOut s))
+    (ensures res == squeeze_rem s rateInBytes outputByteLen output)
+let lemma_update_squeeze_rem s rateInBytes outputByteLen output res =
+  let res1 = squeeze_rem s rateInBytes outputByteLen output in
+  let remOut = outputByteLen % rateInBytes in
+  FStar.Seq.Properties.lemma_split res (outputByteLen - remOut);
+  FStar.Seq.Properties.lemma_split res1 (outputByteLen - remOut)
 
 let squeeze (s:state)
 	    (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
 	    (outputByteLen:size_nat)
+	    (output:lbytes outputByteLen)
 	    : lbytes outputByteLen =
-  let output = create outputByteLen (u8 0) in
   let outBlocks = outputByteLen / rateInBytes in
-  let remOut = outputByteLen % rateInBytes in
   let s, output = repeati_sp #outBlocks outBlocks
     (squeeze_inner rateInBytes outputByteLen) (s, output) in
-  let outBlock = storeState remOut s in
-  update_sub output (outputByteLen - remOut) remOut outBlock
+  squeeze_rem s rateInBytes outputByteLen output
 
-let keccak (rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600})
-	   (capacity:size_nat{capacity + rate == 1600})
-	   (inputByteLen:size_nat)
-	   (input:lbytes inputByteLen)
-	   (delimitedSuffix:uint8)
-	   (outputByteLen:size_nat)
-	   : lbytes outputByteLen =
+val keccak:
+     rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
+  -> capacity:size_nat{capacity + rate == 1600}
+  -> inputByteLen:size_nat
+  -> input:lbytes inputByteLen
+  -> delimitedSuffix:uint8
+  -> outputByteLen:size_nat
+  -> output:lbytes outputByteLen
+  -> lbytes outputByteLen
+let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen output =
   let rateInBytes : size_nat = rate / 8 in
   let s : state = create 25 (u64 0) in
   let s = absorb s rateInBytes inputByteLen input delimitedSuffix in
-  squeeze s rateInBytes outputByteLen
+  squeeze s rateInBytes outputByteLen output
 
-let shake128 (inputByteLen:size_nat) (input:lbytes inputByteLen) (outputByteLen:size_nat) : lbytes outputByteLen =
-  keccak 1344 256 inputByteLen input (u8 0x1F) outputByteLen
+let shake128 (inputByteLen:size_nat) (input:lbytes inputByteLen)
+             (outputByteLen:size_nat) (output:lbytes outputByteLen) : lbytes outputByteLen =
+  keccak 1344 256 inputByteLen input (u8 0x1F) outputByteLen output
 
-let shake256 (inputByteLen:size_nat) (input:lbytes inputByteLen) (outputByteLen:size_nat) : lbytes outputByteLen =
-  keccak 1088 512 inputByteLen input (u8 0x1F) outputByteLen
+let shake256 (inputByteLen:size_nat) (input:lbytes inputByteLen)
+             (outputByteLen:size_nat) (output:lbytes outputByteLen) : lbytes outputByteLen =
+  keccak 1088 512 inputByteLen input (u8 0x1F) outputByteLen output
 
-let sha3_224 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 28 =
-  keccak 1152 448 inputByteLen input (u8 0x06) 28
+let sha3_224 (inputByteLen:size_nat) (input:lbytes inputByteLen) (output:lbytes 28) : lbytes 28 =
+  keccak 1152 448 inputByteLen input (u8 0x06) 28 output
 
-let sha3_256 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 32 =
-  keccak 1088 512 inputByteLen input (u8 0x06) 32
+let sha3_256 (inputByteLen:size_nat) (input:lbytes inputByteLen) (output:lbytes 32) : lbytes 32 =
+  keccak 1088 512 inputByteLen input (u8 0x06) 32 output
 
-let sha3_384 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 48 =
-  keccak 832 768 inputByteLen input (u8 0x06) 48
+let sha3_384 (inputByteLen:size_nat) (input:lbytes inputByteLen) (output:lbytes 48) : lbytes 48 =
+  keccak 832 768 inputByteLen input (u8 0x06) 48 output
 
-let sha3_512 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 64 =
-  keccak 576 1024 inputByteLen input (u8 0x06) 64
+let sha3_512 (inputByteLen:size_nat) (input:lbytes inputByteLen) (output:lbytes 64) : lbytes 64 =
+  keccak 576 1024 inputByteLen input (u8 0x06) 64 output

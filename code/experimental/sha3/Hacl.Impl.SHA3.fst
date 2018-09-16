@@ -480,6 +480,8 @@ let storeState rateInBytes s res =
   update_sub res (size 0) rateInBytes (sub block (size 0) rateInBytes);
   pop_frame()
 
+#reset-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 150"
+
 inline_for_extraction noextract
 val absorb_last:
      s:state
@@ -510,6 +512,8 @@ let absorb_last s rateInBytes inputByteLen input delimitedSuffix =
   let h3 = ST.get () in
   assert (as_seq h3 s == S.loadState (v rateInBytes) (as_seq h2 lastBlock) (as_seq h2 s));
   pop_frame ()
+
+#set-options "--z3rlimit 50 --max_fuel 0"
 
 inline_for_extraction noextract
 val absorb_next:
@@ -586,6 +590,57 @@ let absorb s rateInBytes inputByteLen input delimitedSuffix =
   then state_permute s);
   absorb_next s rateInBytes
 
+inline_for_extraction noextract
+val squeeze_inner:
+     #h0:mem
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> outputByteLen:size_t
+  -> i:size_t{v i < v outputByteLen / v rateInBytes}
+  -> s:state
+  -> output:lbytes (v outputByteLen)
+  -> Stack unit
+    (requires fun h ->
+      live h s /\ live h output /\ disjoint s output /\
+      loop2_inv h0 h (v outputByteLen / v rateInBytes) s output (S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i))
+    (ensures  fun h _ h1 ->
+      modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1 /\
+      (let s_sp, o_sp = S.squeeze_inner (v rateInBytes) (v outputByteLen) (v i) (as_seq h s, as_seq h output) in
+      as_seq h1 s == s_sp /\ as_seq h1 output == o_sp) /\
+      loop2_inv h0 h1 (v outputByteLen / v rateInBytes) s output (S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i + 1))
+let squeeze_inner #h0 rateInBytes outputByteLen i s output =
+  S.lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
+  let h1 = ST.get () in
+  let tmp = sub output (i *! rateInBytes) rateInBytes in
+  storeState rateInBytes s tmp;
+  let h2 = ST.get () in
+  modifies_buffer_elim (sub #uint8 #(v outputByteLen) #(v i * v rateInBytes) output (size 0) (i *! rateInBytes)) (loc_buffer tmp) h1 h2;
+  modifies_buffer_elim (sub #uint8 #(v outputByteLen) #(v outputByteLen - v i * v rateInBytes - v rateInBytes)
+    output (i *! rateInBytes +! rateInBytes) (outputByteLen -! i *! rateInBytes -! rateInBytes)) (loc_buffer tmp) h1 h2;
+  S.lemma_update_squeeze (v rateInBytes) (v outputByteLen) (v i) (as_seq h1 s) (as_seq h1 output) (as_seq h2 output);
+  state_permute s;
+  lemma_repeati_sp #h0 (v outputByteLen / v rateInBytes) (S.squeeze_inner (v rateInBytes) (v outputByteLen))
+    (as_seq h0 s, as_seq h0 output) (v i) (as_seq h1 s, as_seq h1 output)
+
+inline_for_extraction noextract
+val squeeze_rem:
+     s:state
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> outputByteLen:size_t
+  -> output:lbytes (v outputByteLen)
+  -> Stack unit
+    (requires fun h -> live h s /\ live h output /\ disjoint s output)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer output) h0 h1 /\
+      as_seq h1 output == S.squeeze_rem (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq h0 output))
+let squeeze_rem s rateInBytes outputByteLen output =
+  let remOut = outputByteLen %. rateInBytes in
+  let h1 = ST.get () in
+  let tmp = sub output (outputByteLen -. remOut) remOut in
+  storeState remOut s tmp;
+  let h2 = ST.get () in
+  modifies_buffer_elim (sub #uint8 #(v outputByteLen) #(v outputByteLen - v remOut) output (size 0) (outputByteLen -! remOut)) (loc_buffer tmp) h1 h2;
+  S.lemma_update_squeeze_rem (as_seq h1 s) (v rateInBytes) (v outputByteLen) (as_seq h1 output) (as_seq h2 output)
+
 val squeeze:
      s:state
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
@@ -593,24 +648,23 @@ val squeeze:
   -> output:lbytes (v outputByteLen)
   -> Stack unit
     (requires fun h -> live h s /\ live h output /\ disjoint s output)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1 /\
+      as_seq h1 output == S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq h0 output))
 let squeeze s rateInBytes outputByteLen output =
   let outBlocks = outputByteLen /. rateInBytes in
-  let remOut = outputByteLen %. rateInBytes in
   let h0 = ST.get () in
-  Lib.Loops.for (size 0) outBlocks
-  (fun h1 i ->
-    live h1 s /\ live h1 output /\
-    modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1)
+  let inv h0 h = live h s /\ live h output /\ disjoint s output in
+  loop2 #h0 outBlocks s output inv (S.squeeze_inner (v rateInBytes) (v outputByteLen))
   (fun i ->
-    S.lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
-    storeState rateInBytes s (sub output (i *! rateInBytes) rateInBytes);
-    state_permute s
+    squeeze_inner #h0 rateInBytes outputByteLen i s output
   );
-  storeState remOut s (sub output (outputByteLen -. remOut) remOut)
+  squeeze_rem s rateInBytes outputByteLen output
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 val keccak:
-     rate:size_t{v rate % 8 = 0 /\ v rate / 8 > 0 /\ v rate <= 1600}
+     rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}
   -> capacity:size_t{v capacity + v rate == 1600}
   -> inputByteLen:size_t
   -> input:lbytes (v inputByteLen)
@@ -619,7 +673,10 @@ val keccak:
   -> output:lbytes (v outputByteLen)
   -> Stack unit
     (requires fun h -> live h input /\ live h output /\ disjoint input output)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer output) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer output) h0 h1 /\
+      as_seq h1 output ==
+      S.keccak (v rate) (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen) (as_seq h0 output))
 let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen output =
   push_frame();
   let rateInBytes = rate /. size 8 in
