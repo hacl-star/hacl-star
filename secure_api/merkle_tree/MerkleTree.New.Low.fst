@@ -756,17 +756,18 @@ let mt_get_path mt idx p root =
 private val mt_flush_to_:
   lv:uint32_t{lv < 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} ->
-  i:uint32_t ->
+  pi:uint32_t ->
+  i:uint32_t{i >= pi} ->
   HST.ST unit
 	 (requires (fun h0 -> true))
 	 (ensures (fun h0 _ h1 -> true))
-private let rec mt_flush_to_ lv hs i =
+private let rec mt_flush_to_ lv hs pi i =
   admit ();
   if i = 0ul then ()
-  else (let ofs = offset_of i in
+  else (let ofs = offset_of i - offset_of pi in
        let hvec = V.index hs lv in
        RV.assign hs lv (RV.flush hvec ofs);
-       mt_flush_to_ (lv + 1ul) hs (i / 2ul))
+       mt_flush_to_ (lv + 1ul) hs (pi / 2ul) (i / 2ul))
 
 val mt_flush_to:
   mt:mt_p ->
@@ -777,7 +778,7 @@ val mt_flush_to:
 let rec mt_flush_to mt idx =
   admit ();
   let mtv = B.index mt 0ul in
-  mt_flush_to_ 0ul (MT?.hs mtv) (idx - MT?.i mtv);
+  mt_flush_to_ 0ul (MT?.hs mtv) (MT?.i mtv) idx;
   B.upd mt 0ul (MT idx (MT?.j mtv)
 		   (MT?.hs mtv)
 		   (MT?.rhs_ok mtv)

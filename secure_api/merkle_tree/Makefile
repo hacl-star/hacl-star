@@ -178,6 +178,10 @@ $(OUT_DIR):
 $(OUT_DIR)/libmerkletree.a: $(ALL_OBJS) | $(OUT_DIR)
 	$(AR) rcs $(OUT_DIR)/libmerkletree.a $^
 
+.PHONY: lib
+lib: $(ALL_OBJS) | $(OUT_DIR)
+	$(AR) rcs $(OUT_DIR)/libmerkletree.a $^
+
 .PRECIOUS: %.o
 
 endif # COMPILE
