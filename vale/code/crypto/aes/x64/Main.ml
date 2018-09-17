@@ -1,5 +1,6 @@
 let _ =
   CmdLineParser.parse_cmdline [
+      ("sha_update",           (fun win -> X64_SHA.va_code_sha_update_bytes_stdcall win));
       ("aes128_key_expansion", (fun win -> X64_AES.va_code_KeyExpansionStdcall win AES_s.AES_128));
       ("aes256_key_expansion", (fun win -> X64_AES.va_code_KeyExpansionStdcall win AES_s.AES_256));
       ("gcm128_encrypt",       (fun win -> X64_GCMencrypt.va_code_gcm_encrypt_stdcall win AES_s.AES_128));
