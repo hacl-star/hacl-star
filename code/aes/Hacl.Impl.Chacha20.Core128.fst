@@ -26,7 +26,7 @@ let load_state st b =
     let h0 = ST.get() in
     loop_nospec #h0 (size 16) st 
       (fun i -> st.(i) <- vec128_load_le (sub b (size 16 *. i) (size 16)));
-    let st2200 = vec128_interleave
+    let st2200 = vec128_interleave_low64
     
 
 inline_for_extraction

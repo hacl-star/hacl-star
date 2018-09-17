@@ -94,7 +94,7 @@ let aes_enc (#m:m_spec) (st:state m) (key:key1 m) =
 inline_for_extraction
 let aes_enc_last (#m:m_spec) (st:state m) (key:key1 m) = 
   match m with
-  | MAES -> Hacl.Impl.Aes.CoreNI.aes_enc st key
+  | MAES -> Hacl.Impl.Aes.CoreNI.aes_enc_last st key
 
 inline_for_extraction
 let aes_keygen_assist (#m:m_spec) (n:key1 m) (p:key1 m) (rcon:uint8) =
@@ -110,6 +110,8 @@ inline_for_extraction
 let key_expansion_step2 (#m:m_spec) (n:key1 m) (p:key1 m) =
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.key_expansion_step n p
+
+
 
 
 

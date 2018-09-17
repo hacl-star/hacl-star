@@ -38,12 +38,10 @@ val add_round_key: #m:m_spec -> st:state m -> key:key1 m -> ST unit
 			     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc_buffer st) h0 h1))
 let add_round_key #m st key = xor_state_key1 st key
 
-//[@ CInline ]
 inline_for_extraction
 val enc_rounds: #m:m_spec -> st:state m -> key:keyr m -> n:size_t -> ST unit
 	     (requires (fun h -> live h st /\ live h key))
 	     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc_buffer st) h0 h1))
-[@ CInline ]
 let enc_rounds #m st key n = 
     let h0 = ST.get() in
     loop_nospec #h0 n st 
