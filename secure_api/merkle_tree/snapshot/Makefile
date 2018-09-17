@@ -1,19 +1,20 @@
 
-all: libmerkletree.a
+all: libmerkletree.a merkle_tree_test
 
-CFLAGS+=-I kremlin/include -I kremlin/kremlib -I evercrypt/include 
+CFLAGS+=-I kremlin/include -I kremlin/kremlib -I kremlin/kremlib/extracted -I evercrypt/include 
 
 THIS_SOURCE=$(wildcard *.c)
 EVERCRYPT_SRC=$(wildcard evercrypt/extracted/*.c)
-KREMLIB_SRC=$(wildcard kremlin/kremlib/extracted/*.c)
-ALL_OBJS=$(patsubst %.c,%.o,$(THIS_SOURCE) $(EVERCRYPT_SRC) $(KREMLIB_SRC))
-NOT_NEEDED=kremlin/kremlib/extracted/FStar_UInt128.o
+KREMLIB_SRC=$(wildcard kremlin/kremlib/extracted/*.c) $(wildcard kremlin/*.c)
+HACL_SRC=$(wildcard hacl/*.c)
+ALL_OBJS=$(patsubst %.c,%.o,$(THIS_SOURCE) $(EVERCRYPT_SRC) $(KREMLIB_SRC) $(HACL_SRC))
+NOT_NEEDED=kremlin/kremlib/extracted/FStar_UInt128.o kremlin/fstar_uint128_msvc.o merkle_tree_test.o
 
 libmerkletree.a: $(filter-out $(NOT_NEEDED),$(ALL_OBJS))
 	$(AR) rcs $@ $^
 
-merkle_tree_test: merkle_tree_test.o
-	$(CC) $(CFLAGS) -static -L . -lmerkletree -o $@ $<
+merkle_tree_test: merkle_tree_test.o libmerkletree.a
+	$(CC) $(CFLAGS) -o $@ $< -static -L . -lmerkletree
 
 clean:
 	rm -f $(ALL_OBJS)
