@@ -108,10 +108,10 @@ let expand_secret #a prk label hv = expand_label prk label hv (tagLength a)
 open FStar.HyperStack.All
 open LowStar.Buffer
 
-//18-03-05 TODO drop hkdf_ prefix? conflicts with spec name 
+//18-03-05 TODO drop hkdf_ prefix? conflicts with spec name
 
 val hkdf_extract :
-  a       : alg -> 
+  a       : alg ->
   prk     : uint8_pl (tagLength a) ->
   salt    : uint8_p { disjoint salt prk /\ HMAC.keysized a (length salt)} ->
   saltlen : uint8_l salt ->

@@ -33,7 +33,7 @@ verify:
 
 .PHONY: clean
 clean:
-	rm -rf .depend.extract out/* vale/asm/*.o LowCProvider/*.{cm*,o,a}
+	rm -rf .depend.extract out/* vale/asm/*.o
 
 SHELL=/bin/bash
 

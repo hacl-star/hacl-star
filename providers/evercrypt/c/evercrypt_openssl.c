@@ -238,19 +238,19 @@ void* EverCrypt_OpenSSL_ecdh_load_curve(EverCrypt_OpenSSL_ec_curve g)
   EC_KEY *k = NULL;
   switch (g) {
     case EverCrypt_OpenSSL_ECC_P256:
-      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_X9_62_prime256v1));
+      k = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
       break;
     case EverCrypt_OpenSSL_ECC_P384:
-      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_secp384r1));
+      k = EC_KEY_new_by_curve_name(NID_secp384r1);
       break;
     case EverCrypt_OpenSSL_ECC_P521:
-      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_secp521r1));
+      k = EC_KEY_new_by_curve_name(NID_secp521r1);
       break;
     case EverCrypt_OpenSSL_ECC_X25519:
-      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_X25519));
+      k = EC_KEY_new_by_curve_name(NID_X25519);
       break;
     case EverCrypt_OpenSSL_ECC_X448:
-      k = EC_KEY_new_by_curve_name(OBJ_txt2nid(SN_X448));
+      k = EC_KEY_new_by_curve_name(NID_X448);
       break;
   }
   return (void*)k;
@@ -261,6 +261,15 @@ void EverCrypt_OpenSSL_ecdh_free_curve(void* st)
   EC_KEY_free((EC_KEY*)st);
 }
 
+void dump(const unsigned char buffer[], size_t len)
+{
+  size_t i;
+  for(i=0; i<len; i++) {
+    printf("%02x",buffer[i] & 0xFF);
+    if (i % 32 == 31 || i == len-1) printf("\n");
+  }
+}
+
 void EverCrypt_OpenSSL_ecdh_keygen(void* st, uint8_t *outx, uint8_t *outy)
 {
   EC_KEY *k = (EC_KEY*)st;
@@ -268,11 +277,14 @@ void EverCrypt_OpenSSL_ecdh_keygen(void* st, uint8_t *outx, uint8_t *outy)
   
   const EC_GROUP *g = EC_KEY_get0_group(k);
   const EC_POINT *p = EC_KEY_get0_public_key(k);
+  size_t len = (EC_GROUP_get_degree(g) + 7) / 8;
+  
   BIGNUM *x = BN_new(), *y = BN_new();
   EC_POINT_get_affine_coordinates_GFp(g, p, x, y, NULL);
+
+  BN_bn2binpad(x, outx, len);
+  BN_bn2binpad(y, outy, len);
   
-  BN_bn2bin(x, outx);
-  BN_bn2bin(y, outy);
   BN_free(y);
   BN_free(x);
 }
@@ -282,18 +294,20 @@ uint32_t EverCrypt_OpenSSL_ecdh_compute(void* st,
 {
   EC_KEY *k = (EC_KEY*)st;
   const EC_GROUP *g = EC_KEY_get0_group(k);
-  EC_POINT *pp = EC_POINT_new(g);
-  
-  size_t field_size = EC_GROUP_get_degree(g);
-  size_t len = (field_size + 7) / 8;
+  EC_POINT *p = EC_POINT_new(g);
+  size_t len = (EC_GROUP_get_degree(g) + 7) / 8;
   
   BIGNUM *px = BN_bin2bn(inx, len, NULL);
   BIGNUM *py = BN_bin2bn(iny, len, NULL);
-  EC_POINT_set_affine_coordinates_GFp(g, pp, px, py, NULL);
   
-  uint32_t olen = ECDH_compute_key((uint8_t *)out, len, pp, k, NULL);
-  EC_POINT_free(pp);
-  return olen;
+  EC_POINT_set_affine_coordinates_GFp(g, p, px, py, NULL);
+  int olen = ECDH_compute_key((uint8_t *)out, len, p, k, NULL);
+
+  BN_free(px);
+  BN_free(py);
+  EC_POINT_free(p);
+  
+  return olen < 0 ? 0 : olen;
 }
 
 /*

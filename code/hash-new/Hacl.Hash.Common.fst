@@ -11,7 +11,6 @@ module Tactics = FStar.Tactics
 module Helpers = Spec.Hash.Helpers
 module Endianness = FStar.Kremlin.Endianness
 module Math = FStar.Math.Lemmas
-module Spec = Spec.SHA2
 module Helpers = Spec.Hash.Helpers
 
 module M = LowStar.Modifies
@@ -23,6 +22,7 @@ module ST = FStar.HyperStack.ST
 
 open LowStar.BufferOps
 open Hacl.Hash.Lemmas
+open Spec.Hash.Helpers
 
 
 (** Padding *)
@@ -186,8 +186,6 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer U8.t):
   end
 
 noextract
-val pad: a:hash_alg -> pad_t a
-noextract
 let pad a len dst =
   (* i) Append a single 1 bit. *)
   let dst1 = B.sub dst 0ul 1ul in
@@ -212,9 +210,13 @@ let pad a len dst =
   (**)   S.equal s (S.append s1 (S.append s2 s3)) /\
   (**)   True)
 
+inline_for_extraction
+let pad_len (a: hash_alg) (len: len_t a) =
+  U32.(1ul +^ pad0_len a len +^ size_len_ul a)
+
 #set-options "--max_ifuel 1"
 inline_for_extraction
-let size_hash_final_w (a: hash_alg): n:U32.t { U32.v n = size_hash_final_w a } =
+let size_hash_final_w_ul (a: hash_alg): n:U32.t { U32.v n = size_hash_final_w a } =
   match a with
   | MD5 -> 4ul
   | SHA1 -> 5ul
@@ -226,9 +228,6 @@ let size_hash_final_w (a: hash_alg): n:U32.t { U32.v n = size_hash_final_w a } =
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
-
-noextract
-val finish: a:hash_alg -> finish_t a
 noextract
 let finish a s dst =
   let open FStar.Mul in
@@ -236,13 +235,13 @@ let finish a s dst =
   let inv (h: HS.mem) (i: nat) =
     let hash_w = B.as_seq h s in
     let hash = B.as_seq h dst in
-    i <= Helpers.size_hash_final_w a /\
+    i <= size_hash_final_w a /\
     B.live h dst /\ B.live h s /\
     M.(modifies (loc_buffer dst) h0 h) /\
     S.equal (S.slice hash 0 (i * Helpers.size_word a))
       (words_to_be a (S.slice hash_w 0 i))
   in
-  let f (i: U32.t { U32.(0 <= v i /\ v i < Helpers.size_hash_final_w a) }): ST.Stack unit
+  let f (i: U32.t { U32.(0 <= v i /\ v i < size_hash_final_w a) }): ST.Stack unit
     (requires (fun h -> inv h (U32.v i)))
     (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 (U32.v i + 1)))
   =
@@ -252,16 +251,16 @@ let finish a s dst =
         let dsti = B.sub dst U32.(4ul *^ i) 4ul in
         C.Endianness.store32_be dsti s.(i);
         let h2 = ST.get () in
-        be_of_seq_uint32_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
-        be_of_seq_uint32_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
+        Endianness.be_of_seq_uint32_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
+        Endianness.be_of_seq_uint32_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
           (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
     | SHA2_384 | SHA2_512 ->
         let dst0 = B.sub dst 0ul U32.(8ul *^ i) in
         let dsti = B.sub dst U32.(8ul *^ i) 8ul in
         C.Endianness.store64_be dsti s.(i);
         let h2 = ST.get () in
-        be_of_seq_uint64_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
-        be_of_seq_uint64_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
+        Endianness.be_of_seq_uint64_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
+        Endianness.be_of_seq_uint64_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
           (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
   in
-  C.Loops.for 0ul (size_hash_final_w a) inv f
+  C.Loops.for 0ul (size_hash_final_w_ul a) inv f
