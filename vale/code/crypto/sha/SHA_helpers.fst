@@ -735,6 +735,19 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
             input2 == seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
   (ensures  quads_to_block qs == words_from_be SHA2_256 size_block_w input2)
   =
+  // calc {
+  //   quads_to_block (reverse_bytes_quad32_seq quads)
+  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (reverse_bytes_quad32_seq quads))
+//reveal_reverse_bytes_quad32 quads;
+  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (four_reverse (four_map reverse_bytes_nat32 q)))
+  reveal_opaque reverse_bytes_nat32_def;
+  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (four_reverse (four_map (fun n -> be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))) q)))
+
+  //   words_from_be SHA2_256 16 (seq_nat8_to_seq_U8 (seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE b)))
+  reveal_opaque le_seq_quad32_to_bytes_def;
+  //   words_from_be SHA2_256 16 (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
+  //   words_from_be SHA2_256 size__w (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
+  // }
   admit()
 
 
