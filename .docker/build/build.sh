@@ -108,7 +108,7 @@ function fetch_vale() {
 
 function fetch_and_make_vale() {
     fetch_vale
-    python3.6 $(which scons) -C valebin -j $threads
+    pushd valebin && ./run_scons.sh -j $threads && popd
 }
 
 function refresh_hacl_hints() {
@@ -157,9 +157,7 @@ function refresh_hints() {
 }
 
 function exec_build() {
-    cd hacl-star
 
-    export_home FSTAR "$(pwd)/../"
     result_file="../result.txt"
     local status_file="../status.txt"
     echo -n false >$status_file
@@ -194,8 +192,6 @@ function exec_build() {
         echo "Build succeeded"
         echo Success >$result_file
     fi
-
-    cd ..
 }
 
 # Some environment variables we want
@@ -203,4 +199,7 @@ export OCAMLRUNPARAM=b
 export OTHERFLAGS="--print_z3_statistics --use_hints --query_stats"
 export MAKEFLAGS="$MAKEFLAGS -Otarget"
 
+export_home FSTAR "$(pwd)/FStar"
+cd hacl-star
 exec_build
+cd ..

@@ -47,9 +47,10 @@ void coverage(void)
   printf("\nSHA384('') = \n");
   quic_crypto_hash(TLS_hash_SHA384, hash, input, 0);
   dump(hash, 48);
-  printf("\nSHA512('') = \n");
-  quic_crypto_hash(TLS_hash_SHA512, hash, input, 0);
-  dump(hash, 64);
+
+//  printf("\nSHA512('') = \n");
+//  quic_crypto_hash(TLS_hash_SHA512, hash, input, 0);
+//  dump(hash, 64);
 
   unsigned char *key = (unsigned char *)"Jefe";
   unsigned char *data = (unsigned char *)"what do ya want for nothing?";
@@ -64,10 +65,10 @@ void coverage(void)
   dump(hash, 48);
   assert(memcmp(hash, "\xaf\x45\xd2\xe3\x76\x48\x40\x31\x61\x7f\x78\xd2\xb5\x8a\x6b\x1b\x9c\x7e\xf4\x64\xf5\xa0\x1b\x47\xe4\x2e\xc3\x73\x63\x22\x44\x5e\x8e\x22\x40\xca\x5e\x69\xe2\xc7\x8b\x32\x39\xec\xfa\xb2\x16\x49", 48) == 0);
 
-  printf("\nHMAC-SHA512('Jefe', 'what do ya want for nothing?') = \n");
-  quic_crypto_hmac(TLS_hash_SHA512, hash, key, 4, data, 28);
-  dump(hash, 64);
-  assert(memcmp(hash, "\x16\x4b\x7a\x7b\xfc\xf8\x19\xe2\xe3\x95\xfb\xe7\x3b\x56\xe0\xa3\x87\xbd\x64\x22\x2e\x83\x1f\xd6\x10\x27\x0c\xd7\xea\x25\x05\x54\x97\x58\xbf\x75\xc0\x5a\x99\x4a\x6d\x03\x4f\x65\xf8\xf0\xe6\xfd\xca\xea\xb1\xa3\x4d\x4a\x6b\x4b\x63\x6e\x07\x0a\x38\xbc\xe7\x37", 64) == 0);
+//  printf("\nHMAC-SHA512('Jefe', 'what do ya want for nothing?') = \n");
+//  quic_crypto_hmac(TLS_hash_SHA512, hash, key, 4, data, 28);
+//  dump(hash, 64);
+//  assert(memcmp(hash, "\x16\x4b\x7a\x7b\xfc\xf8\x19\xe2\xe3\x95\xfb\xe7\x3b\x56\xe0\xa3\x87\xbd\x64\x22\x2e\x83\x1f\xd6\x10\x27\x0c\xd7\xea\x25\x05\x54\x97\x58\xbf\x75\xc0\x5a\x99\x4a\x6d\x03\x4f\x65\xf8\xf0\xe6\xfd\xca\xea\xb1\xa3\x4d\x4a\x6b\x4b\x63\x6e\x07\x0a\x38\xbc\xe7\x37", 64) == 0);
 
   unsigned char *salt = (unsigned char *)"\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c";
   unsigned char *ikm = (unsigned char *)"\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b";
@@ -373,15 +374,15 @@ struct testcombination {
 
     { TLS_hash_SHA256, TLS_aead_AES_128_GCM, cipher_sha256_aes128 },
     { TLS_hash_SHA384, TLS_aead_AES_128_GCM, cipher_sha384_aes128 },
-    { TLS_hash_SHA512, TLS_aead_AES_128_GCM, cipher_sha512_aes128 },
+//    { TLS_hash_SHA512, TLS_aead_AES_128_GCM, cipher_sha512_aes128 },
 
     { TLS_hash_SHA256, TLS_aead_AES_256_GCM, cipher_sha256_aes256 },
     { TLS_hash_SHA384, TLS_aead_AES_256_GCM, cipher_sha384_aes256 },
-    { TLS_hash_SHA512, TLS_aead_AES_256_GCM, cipher_sha512_aes256 },
+//    { TLS_hash_SHA512, TLS_aead_AES_256_GCM, cipher_sha512_aes256 },
 
     { TLS_hash_SHA256, TLS_aead_CHACHA20_POLY1305, cipher_sha256_chachapoly },
     { TLS_hash_SHA384, TLS_aead_CHACHA20_POLY1305, cipher_sha384_chachapoly },
-    { TLS_hash_SHA512, TLS_aead_CHACHA20_POLY1305, cipher_sha512_chachapoly },
+//    { TLS_hash_SHA512, TLS_aead_CHACHA20_POLY1305, cipher_sha512_chachapoly },
 
     { 0, 0, NULL }
 };

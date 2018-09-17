@@ -326,7 +326,7 @@ let gcc : printer =
     | _ :: tail -> ins_name name tail
   in
   let op_order dst src = src, dst in
-  let align() = ".align" in
+  let align() = ".balign" in
   let header() = ".text\n" in
   let footer() = "\n" in
   let proc_name (name:string) = ".global " ^ name ^ "\n" ^ name ^ ":\n" in

@@ -8,12 +8,15 @@ module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module Tactics = FStar.Tactics
 
+module MD5 = Hacl.MD5
+module SHA1 = Hacl.SHA1
+
 open Hacl.Hash.Common
 open Hacl.Hash.Lemmas
 open Spec.Hash
 open FStar.Mul
 
-#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 128"
 
 noextract
 let mk_update_multi a update s blocks n_blocks =
@@ -53,18 +56,26 @@ let mk_update_multi a update s blocks n_blocks =
   assert (B.length blocks = U32.v n_blocks * size_block a);
   C.Loops.for 0ul n_blocks inv f
 
-let update_multi_sha2_224: update_multi_t SHA2_224 =
+let update_multi_sha2_224: update_multi_st SHA2_224 =
   Tactics.(synth_by_tactic
     (specialize (mk_update_multi SHA2_224 Hacl.SHA2.update_224) [`%mk_update_multi]))
 
-let update_multi_sha2_256: update_multi_t SHA2_256 =
+let update_multi_sha2_256: update_multi_st SHA2_256 =
   Tactics.(synth_by_tactic
     (specialize (mk_update_multi SHA2_256 Hacl.SHA2.update_256) [`%mk_update_multi]))
 
-let update_multi_sha2_384: update_multi_t SHA2_384 =
+let update_multi_sha2_384: update_multi_st SHA2_384 =
   Tactics.(synth_by_tactic
     (specialize (mk_update_multi SHA2_384 Hacl.SHA2.update_384) [`%mk_update_multi]))
 
-let update_multi_sha2_512: update_multi_t SHA2_512 =
+let update_multi_sha2_512: update_multi_st SHA2_512 =
   Tactics.(synth_by_tactic
     (specialize (mk_update_multi SHA2_512 Hacl.SHA2.update_512) [`%mk_update_multi]))
+
+let update_multi_sha1: update_multi_st SHA1 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_update_multi SHA1 Hacl.SHA1.update) [`%mk_update_multi]))
+
+let update_multi_md5: update_multi_st MD5 =
+  Tactics.(synth_by_tactic
+    (specialize (mk_update_multi MD5 Hacl.MD5.update) [`%mk_update_multi]))

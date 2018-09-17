@@ -269,13 +269,15 @@ let rec lemma_has_counter (#a:alg) (b:bytes {Seq.length b % blockLength a = 0}):
 
 #set-options "--max_fuel 0"
 let init #a s =
-  assert_norm(acc0 #(Ghost.reveal a) == hash0 #(Ghost.reveal a) (Seq.empty #UInt8.t));
+  assert_norm(acc0 #(Ghost.reveal a) == hash0 #(Ghost.reveal a) Seq.empty);
+  // 18-09-12 the assert below triggers an fstar Failure
+  // assert_norm(let a = Ghost.reveal a in acc0 == hash0 (Seq.empty #UInt8.t));
   match !*s with
   | SHA256_Hacl p -> Hacl.SHA2_256.init (T.new_to_old_st p)
   | SHA384_Hacl p -> Hacl.SHA2_384.init (T.new_to_old_st p)
   | SHA256_Vale p -> ValeGlue.sha256_init p; admit ()
 
-#set-options "--z3rlimit 20 --print_implicits"
+#set-options "--z3rlimit 20"
 let update #ea prior s data =
   let h0 = ST.get() in
   ( let a = Ghost.reveal ea in 

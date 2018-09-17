@@ -1,5 +1,5 @@
 [
-  "‘î¥×L‘:Z|\nô ûÓŒ»",
+  "Ø†\u0015æFÖn\u0000Px\u0005\u0011¢9\u0000â",
   [
     [
       "Hacl.Hash.Common.word",
@@ -17,7 +17,7 @@
         "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
       ],
       0,
-      "2bbccef35d89919b6f618313736dd928"
+      "998db7d25872fab8b21e50cf09a55df8"
     ],
     [
       "Hacl.Hash.Common.state",
@@ -26,7 +26,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "d6b9df562aa567ca0c46f0b1ce41aca4"
+      "2eddab12a933a6835974b056cdc018ac"
     ],
     [
       "Hacl.Hash.Common.size_word_ul",
@@ -49,7 +49,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "2f2deaf2120e666ec41146f4a4a762ee"
+      "aa2015f9bec0eb362c09ad43eb3d032a"
     ],
     [
       "Hacl.Hash.Common.size_block_ul",
@@ -83,7 +83,7 @@
         "typing_Spec.Hash.Helpers.size_word"
       ],
       0,
-      "1011f728c50f4fb434f157d2bfff068f"
+      "15e3930fb85e750c3e7b7d38ce474d73"
     ],
     [
       "Hacl.Hash.Common.size_len_ul",
@@ -106,10 +106,31 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "1d7477b8e3fc6954140af05158b5404a"
+      "0d04ba2a212aafb4727c85f1c9f52c39"
     ],
     [
-      "Hacl.Hash.Common.pad_t",
+      "Hacl.Hash.Common.update_st",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Hash.Common.state", "equation_Hacl.Hash.Common.word",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_Spec.Hash.Helpers.word",
+        "function_token_typing_FStar.UInt8.t",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "refinement_interpretation_Hacl.Hash.Common_Tm_refine_0b6fefc31a2e526fc00f9d977f3fc036",
+        "refinement_interpretation_Hacl.Hash.Common_Tm_refine_4be16adba4cc0c2c2e52c699ab00f6f6",
+        "typing_Hacl.Hash.Common.word",
+        "typing_LowStar.Buffer.trivial_preorder"
+      ],
+      0,
+      "fe0fe70d43832000f5d75e6595d7f252"
+    ],
+    [
+      "Hacl.Hash.Common.pad_st",
       1,
       2,
       1,
@@ -123,7 +144,27 @@
         "refinement_interpretation_Hacl.Hash.Common_Tm_refine_2b3144e5c163d000319dbaf0f9b02112"
       ],
       0,
-      "b52b11f7671917baa2f2b8563f9b83c1"
+      "287fa58744f1e3ff04920f24ece12e8d"
+    ],
+    [
+      "Hacl.Hash.Common.pad_len",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_Spec.Hash.Helpers.size_block",
+        "equation_Spec.Hash.Helpers.size_block_w",
+        "equation_Spec.Hash.Helpers.size_word",
+        "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg",
+        "function_token_typing_FStar.UInt32.n",
+        "haseqHacl.Hash.Common_Tm_refine_63a19a96db33e4e342e9b0d908f3a9f9",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "54df734cf4f677a42ca5ac76a2f72f44"
     ],
     [
       "Hacl.Hash.Common.hash_t",
@@ -132,10 +173,10 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "f8367beca6e4198e90f99ecc68ea13d2"
+      "ebd40eb2f7d56e75fc8bf6440da7cfd5"
     ],
     [
-      "Hacl.Hash.Common.finish_t",
+      "Hacl.Hash.Common.finish_st",
       1,
       2,
       1,
@@ -151,7 +192,28 @@
         "typing_Spec.Hash.Helpers.word"
       ],
       0,
-      "9c3a49410e294c67229db1f26f6c7f17"
+      "b37c5d03ee4d41695a8bd7d30fb7f9e1"
+    ],
+    [
+      "Hacl.Hash.Common.hash_st",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int",
+        "equation_FStar.Monotonic.HyperStack.mem", "equation_FStar.UInt32.n",
+        "equation_LowStar.Buffer.buffer",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt8.t",
+        "haseqFStar.Kremlin.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "refinement_interpretation_Hacl.Hash.Common_Tm_refine_6bf56c10be8986ea50d548649859dda3",
+        "typing_LowStar.Buffer.trivial_preorder"
+      ],
+      0,
+      "c4c8ffe9290496b3f7b90b5dddac000f"
     ]
   ]
 ]
