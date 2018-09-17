@@ -339,7 +339,8 @@ verify_options = [
 #  ('code/arch/x64/X64.Vale.Decls.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
 
   # Special treatment for sensitive modules
-  ('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
+  #('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
+  ('code/arch/x64/X64.Leakage_Ins.fst', None),
 
   # Disable verification by adding 'filename': None
   ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None), # TODO: Timeout dealing with SHA instructions
