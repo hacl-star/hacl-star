@@ -24,7 +24,18 @@ let to_uint32 (n:nat32) : UInt32.t = uint_to_t n
 unfold let ws_opaque = make_opaque ws
 unfold let shuffle_core_opaque = make_opaque shuffle_core
 unfold let update_multi_opaque = make_opaque update_multi
-  
+
+// Work around some limitations in Vale's support for dependent types
+unfold let block256 = block_w SHA2_256
+unfold let hash256 = hash_w SHA2_256
+//unfold let bytes_blocks256 = bytes_blocks SHA2_256
+unfold let repeat_range_vale (max:nat { max < size_k_w SHA2_256}) (block:block256) (hash:hash256) =
+  Spec.Loops.repeat_range 0 max (shuffle_core_opaque SHA2_256 block) hash
+unfold let lemma_repeat_range_0_vale (block:block256) (hash:hash256) = 
+  Spec.Loops.repeat_range_base 0 (shuffle_core_opaque SHA2_256 block) hash
+unfold let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 = 
+  if length blocks % 64 = 0 then let b:bytes_blocks SHA2_256 = blocks in update_multi_opaque SHA2_256 hash b else hash
+
 let make_hash_def (abef cdgh:quad32) :
     (hash:hash_w SHA2_256 {
          length hash == 8 /\
@@ -560,7 +571,7 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : 
 
 open GCM_helpers
 (* Abbreviations and lemmas for the code itself *)
-let k_reqs (k_seq:seq quad32) : Type0 =
+let k_reqs (k_seq:seq quad32) : Prop_s.prop0 =
   length k_seq == 64 / 4 /\
   (forall i . {:pattern (index_work_around_quad32 k_seq i)} 0 <= i /\ i < (64/4) ==> 
     (k_seq.[i]).lo0 == vv (k0 SHA2_256).[4 `op_Multiply` i] /\
@@ -609,15 +620,15 @@ let translate_hash_update (h0 h1 h0' h1' a0 a1:quad32) : Lemma
          
 unfold let shuffle_opaque = make_opaque shuffle
   
-let update_block (a:sha2_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
-  let hash_1 = shuffle_opaque a hash block in
-  Spec.Loops.seq_map2 (fun x y -> word_add_mod a x y) hash hash_1
+let update_block (hash:hash256) (block:block256): Tot (hash256) =
+  let hash_1 = shuffle_opaque SHA2_256 hash block in
+  Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) hash hash_1
 
-let lemma_update_block_equiv (a:sha2_alg) (hash:hash_w a) (block:bytes{length block = size_block a}) :
-  Lemma (update_block a hash (words_from_be a size_block_w block) == update a hash block)
+let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = size_block SHA2_256}) :
+  Lemma (update_block hash (words_from_be SHA2_256 size_block_w block) == update SHA2_256 hash block)
   =
   reveal_opaque shuffle;
-  assert (equal (update_block a hash (words_from_be a size_block_w block)) (update a hash block));
+  assert (equal (update_block hash (words_from_be SHA2_256 size_block_w block)) (update SHA2_256 hash block));
   ()
 
 let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) : Lemma
@@ -627,7 +638,7 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) :
              src1' == add_wrap_quad32 src1 h0 /\
              src2' == add_wrap_quad32 src2 h1))
   (ensures (let hash_orig = make_hash h0 h1 in
-            make_hash src1' src2' == update_block SHA2_256 hash_orig block))
+            make_hash src1' src2' == update_block hash_orig block))
   =
   let hash_orig = make_hash h0 h1 in
   let hash_1 = shuffle_opaque SHA2_256 hash_orig block in
@@ -641,18 +652,18 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) :
   assert (make_hash src1 src2 == shuffle SHA2_256 hash_orig block); 
   assert (make_hash src1 src2 == shuffle_opaque SHA2_256 hash_orig block);
   translate_hash_update src1 src2 src1' src2' h0 h1;
-  assert (equal (make_hash src1' src2') (update_block SHA2_256 hash_orig block));
+  assert (equal (make_hash src1' src2') (update_block hash_orig block));
   ()
 
 
-let rec update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) : Tot (hash_w SHA2_256) (decreases (length s))
+let rec update_multi_quads (s:seq quad32) (hash_orig:hash256) : Tot (hash256) (decreases (length s))
   =
   if length s < 4 then
     hash_orig
   else
     let prefix, qs = split s (length s - 4) in
     let h_prefix = update_multi_quads prefix hash_orig in
-    let hash = update_block SHA2_256 h_prefix (quads_to_block qs) in
+    let hash = update_block h_prefix (quads_to_block qs) in
     hash
 
 let seq_U8_to_seq_nat8 (b:seq UInt8.t) : (b':seq nat8) =
@@ -698,7 +709,7 @@ let lemma_update_multi_quads_unfold (s:seq quad32) (hash_orig:hash_w SHA2_256) :
   (requires length s >= 4)
   (ensures  (let prefix, qs = split s (length s - 4) in
              let h_prefix = update_multi_quads prefix hash_orig in
-             let hash = update_block SHA2_256 h_prefix (quads_to_block qs) in
+             let hash = update_block h_prefix (quads_to_block qs) in
              update_multi_quads s hash_orig == hash))
   =
   ()
@@ -766,7 +777,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash_w SHA2_256) (quads:seq qu
     // Unfold update_multi_quads one level, so we can start matching parts up    
     let prefix, qs = split r_quads (length r_quads - 4) in
     let h_prefix = update_multi_quads prefix hash in
-    let h_final = update_block SHA2_256 h_prefix (quads_to_block qs) in
+    let h_final = update_block h_prefix (quads_to_block qs) in
     lemma_update_multi_quads_unfold r_quads hash;
     // hash' == update_multi_quads r_quads hash == h_final
 
@@ -837,7 +848,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash_w SHA2_256) (quads:seq qu
     lemma_endian_relation (slice quads (length quads - 4) (length quads)) qs 
                           input2;  // ==> quads_to_block qs == words_from_be SHA2_256 size_block_w input2
     //   update_block SHA2_256 h_bytes1 (words_from_be SHA2_256 16 input2)
-    lemma_update_block_equiv SHA2_256 h_bytes1 input2;
+    lemma_update_block_equiv h_bytes1 input2;
     //   update SHA2_256 h_bytes1 input2
     update_multi_one h_bytes1 input2;
     //   update_multi SHA2_256 h_bytes1 input2
@@ -862,7 +873,7 @@ let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) (bou
               let block_quads_BE = reverse_bytes_quad32_seq block_quads_LE in
               let input_LE = slice s 0 (bound+4) in
               let input_BE = reverse_bytes_quad32_seq input_LE in
-              let h = update_block SHA2_256 h_prefix (quads_to_block block_quads_BE) in
+              let h = update_block h_prefix (quads_to_block block_quads_BE) in
               h == update_multi_quads input_BE hash_orig))
   =
   let prefix_LE = slice s 0 bound in
@@ -872,7 +883,7 @@ let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) (bou
   let block_quads_BE = reverse_bytes_quad32_seq block_quads_LE in
   let input_LE = slice s 0 (bound+4) in
   let input_BE = reverse_bytes_quad32_seq input_LE in
-  let h = update_block SHA2_256 h_prefix (quads_to_block block_quads_BE) in
+  let h = update_block h_prefix (quads_to_block block_quads_BE) in
   lemma_slice_commutes_reverse_bytes_quad32_seq s bound;
   lemma_slice_commutes_reverse_bytes_quad32_seq s (bound + 4);
   assert (prefix_BE == slice (reverse_bytes_quad32_seq s) 0 bound);

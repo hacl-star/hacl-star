@@ -54,8 +54,8 @@ friend X64.Memory
 //#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --initial_ifuel 2 --z3rlimit 60"
 #endverbatim
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src), list(), list()), Public))}{:quick exportOnly} 
-          SHA256_rnds2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w(SHA2_256), ghost hash_orig:hash_w(SHA2_256))
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src), list(), list()), Public))}{:quick exportOnly}{:typecheck false} 
+          SHA256_rnds2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block256, ghost hash_orig:hash256)
   reads xmm0;
   requires 
     t + 1 < size_k_w(SHA2_256);
@@ -68,8 +68,8 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src), list(),
     lemma_sha256_rnds2(old(src), old(dst), old(xmm0), t, block, hash_orig);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src), list(), list()), Public))}{:quick exportOnly} 
-          SHA256_msg1(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w(SHA2_256))
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src), list(), list()), Public))}{:quick exportOnly}{:typecheck false} 
+          SHA256_msg1(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block256)
   requires 
     16 <= t < size_k_w(SHA2_256);
     dst == ws_quad32(t-16, block);
@@ -81,8 +81,8 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src), list(), 
 }
 
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg2(dst, src), list(), list()), Public))}{:quick exportOnly} 
-          SHA256_msg2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w(SHA2_256))
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg2(dst, src), list(), list()), Public))}{:quick exportOnly}{:typecheck false} 
+          SHA256_msg2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block256)
   requires 
     16 <= t < size_k_w(SHA2_256) - 3;
     let step1 := ws_partial(t, block) in
