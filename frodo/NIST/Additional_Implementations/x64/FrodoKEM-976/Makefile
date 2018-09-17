@@ -127,7 +127,7 @@ KATS-fstar:
 ifeq "$(GENERATION_A)" "CSHAKE128"
 	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-cSHAKE -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem_cshake.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_fstar $(ARM_SETTING)
 else
-	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-AES -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem_cshake.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_fstar $(ARM_SETTING)
+	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-AES -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_fstar $(ARM_SETTING)
 endif
 
 check: tests
