@@ -371,6 +371,20 @@ val mt_loc: mt_p -> GTot loc
 let mt_loc mt = 
   B.loc_all_regions_from false (B.frameOf mt)
 
+val mt_safe_preserved:
+  mt:mt_p -> p:loc -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (mt_safe h0 mt /\
+		  loc_disjoint p (mt_loc mt) /\
+		  modifies p h0 h1))
+	(ensures (B.get h0 mt 0 == B.get h1 mt 0 /\
+		 mt_safe h1 mt))
+let mt_safe_preserved mt p h0 h1 =
+  admit ()
+  // let mtv = B.get h0 mt 0 in
+  // RV.rv_inv_preserved (MT?.hs mtv) p h0 h1;
+  // RV.rv_inv_preserved (MT?.rhs mtv) p h0 h1;
+  // mt_safe_elts_preserved 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv) p h0 h1
+
 /// Construction
 
 // NOTE: the public function is `create_mt` defined below, which
@@ -493,57 +507,74 @@ let create_mt r init =
 
 /// Construction and Destruction of paths
 
-type path = B.pointer (RV.rvector hreg)
+type path = B.pointer (V.vector hash)
 
-val path_safe: HS.mem -> path -> GTot Type0
-let path_safe h p =
+val path_safe: 
+  HS.mem -> mtr:HH.rid -> path -> GTot Type0
+let path_safe h mtr p =
   B.live h p /\ B.freeable p /\
-  RV.rv_inv h (B.get h p 0) /\
-  HH.extends (V.frameOf (B.get h p 0)) (B.frameOf p)
+  V.live h (B.get h p 0) /\ V.freeable (B.get h p 0) /\
+  HST.is_eternal_region (V.frameOf (B.get h p 0)) /\
+  V.forall_all h (B.get h p 0)
+    (fun hp -> Rgl?.r_inv hreg h hp /\
+	       HH.includes mtr (B.frameOf hp)) /\
+  HH.extends (V.frameOf (B.get h p 0)) (B.frameOf p) /\
+  HH.disjoint mtr (B.frameOf p)
 
 val path_loc: path -> GTot loc
-let path_loc p = B.loc_all_regions_from false (B.frameOf p)
+let path_loc p =
+  B.loc_all_regions_from false (B.frameOf p)
 
 val path_safe_preserved:
-  p:path -> dl:loc -> h0:HS.mem -> h1:HS.mem ->
-  Lemma (requires (path_safe h0 p /\
+  mtr:HH.rid -> p:path -> 
+  dl:loc -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (path_safe h0 mtr p /\
 		  loc_disjoint dl (path_loc p) /\
+		  loc_disjoint dl (B.loc_all_regions_from false mtr) /\
 		  modifies dl h0 h1))
-	(ensures (path_safe h1 p))
-	[SMTPat (path_safe h0 p);
-	SMTPat (loc_disjoint dl (path_loc p));
-	SMTPat (modifies dl h0 h1)]
-let path_safe_preserved p dl h0 h1 =
-  assert (loc_includes (path_loc p) (loc_rvector (B.get h0 p 0)));
-  assert (loc_includes (path_loc p) (loc_buffer p));
-  rv_inv_preserved (B.get h0 p 0) dl h0 h1
+	(ensures (path_safe h1 mtr p))
+let path_safe_preserved mtr p dl h0 h1 =
+  admit ()
+
+val path_safe_init_preserved:
+  mtr:HH.rid -> p:path -> 
+  dl:loc -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (path_safe h0 mtr p /\
+		  V.size_of (B.get h0 p 0) = 0ul /\
+		  B.loc_disjoint dl
+		    (B.loc_all_regions_from false (B.frameOf p))))
+	(ensures (path_safe h1 mtr p))
+let path_safe_init_preserved mtr p dl h0 h1 =
+  admit ()
 
 val init_path: 
-  r:erid ->
+  mtr:HH.rid -> r:erid ->
   HST.ST path
-    (requires (fun h0 -> true))
-    (ensures (fun h0 p h1 -> path_safe h1 p))
-let init_path r =
+    (requires (fun h0 -> HH.disjoint mtr r))
+    (ensures (fun h0 p h1 -> path_safe h1 mtr p))
+let init_path mtr r =
   let nrid = RV.new_region_ r in
   B.malloc r (hash_vec_r_init nrid) 1ul
 
 val clear_path:
-  p:path ->
+  mtr:HH.rid -> p:path ->
   HST.ST unit
-    (requires (fun h0 -> path_safe h0 p))
+    (requires (fun h0 -> path_safe h0 mtr p))
     (ensures (fun h0 _ h1 -> 
-      path_safe h1 p /\ V.size_of (B.get h1 p 0) = 0ul))
-let clear_path p =
+      path_safe h1 mtr p /\ 
+      V.size_of (B.get h1 p 0) = 0ul))
+let clear_path mtr p =
   p *= V.clear !*p
 
 val free_path:
   p:path ->
   HST.ST unit
-    (requires (fun h0 -> 
+    (requires (fun h0 ->
       B.live h0 p /\ B.freeable p /\
       V.live h0 (B.get h0 p 0) /\ V.freeable (B.get h0 p 0) /\
       HH.extends (V.frameOf (B.get h0 p 0)) (B.frameOf p)))
-    (ensures (fun h0 _ h1 -> modifies (path_loc p) h0 h1))
+    (ensures (fun h0 _ h1 -> 
+      modifies (path_loc p) h0 h1))
 let free_path p =
   V.free !*p;
   B.free p
@@ -649,7 +680,12 @@ val mt_get_root:
 	   modifies (loc_union
 		      (mt_loc mt)
 		      (B.loc_all_regions_from false (B.frameOf rt))) h0 h1 /\
-	   mt_safe h1 mt /\ Rgl?.r_inv hreg h1 rt))
+	   mt_safe h1 mt /\
+	   MT?.i (B.get h1 mt 0) = MT?.i (B.get h0 mt 0) /\
+	   MT?.j (B.get h1 mt 0) = MT?.j (B.get h0 mt 0) /\
+	   MT?.hs (B.get h1 mt 0) == MT?.hs (B.get h0 mt 0) /\
+	   MT?.rhs (B.get h1 mt 0) == MT?.rhs (B.get h0 mt 0) /\
+	   Rgl?.r_inv hreg h1 rt))
 let mt_get_root mt rt =
   let hh0 = HST.get () in
   let mtv = !*mt in
@@ -657,6 +693,8 @@ let mt_get_root mt rt =
   let j = MT?.j mtv in
   let hs = MT?.hs mtv in
   let rhs = MT?.rhs mtv in
+  // let rhs_ok = MT?.rhs_ok mtv in
+  // if not rhs_ok then
   construct_rhs 0ul hs rhs i j rt false;
   let hh1 = HST.get () in
   assert (RV.rv_inv hh1 rhs);
@@ -671,7 +709,7 @@ let mt_get_root mt rt =
     (loc_union
       (RV.loc_rvector rhs)
       (B.loc_all_regions_from false (B.frameOf rt)))
-  hh0 hh1;
+    hh0 hh1;
   mt *= MT i j hs true rhs;
   let hh2 = HST.get () in
   Rgl?.r_sep hreg rt (B.loc_buffer mt) hh1 hh2;
@@ -680,43 +718,92 @@ let mt_get_root mt rt =
   mt_safe_elts_preserved 0ul hs i j
     (B.loc_buffer mt) hh1 hh2
 
+inline_for_extraction val path_insert:
+  mtr:HH.rid -> p:path -> hp:hash ->
+  HST.ST unit
+    (requires (fun h0 -> 
+      path_safe h0 mtr p /\
+      not (V.is_full (B.get h0 p 0)) /\
+      Rgl?.r_inv hreg h0 hp /\
+      HH.includes mtr (B.frameOf hp)))
+    (ensures (fun h0 _ h1 -> 
+      modifies (path_loc p) h0 h1 /\
+      path_safe h1 mtr p /\
+      V.size_of (B.get h1 p 0) = V.size_of (B.get h0 p 0) + 1ul))
+inline_for_extraction let path_insert mtr p hp =
+  let pv = B.index p 0ul in
+  let ipv = V.insert pv hp in
+  p *= ipv;
+  let hh1 = HST.get () in
+  assume (V.forall_all hh1 (B.get hh1 p 0)
+	   (fun hp -> Rgl?.r_inv hreg hh1 hp /\
+		      HH.includes mtr (B.frameOf hp)))
+
 // Construct a Merkle path for a given index `k`, hashes `hs`, 
 // and rightmost hashes `rhs`.
 // Caution: current impl. copies "pointers" in the Merkle tree 
 //          to the output path.
 private val mt_get_path_:
-  lv:uint32_t{lv < 32ul} ->
+  lv:uint32_t{lv <= 32ul} ->
+  mtr:HH.rid ->
   hs:hash_vv{V.size_of hs = 32ul} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
-  i:uint32_t -> j:uint32_t{i <= j} -> 
+  i:uint32_t -> j:uint32_t{i <= j} ->
   k:uint32_t{i <= k && k <= j} ->
   p:path ->
   actd:bool ->
   HST.ST unit
 	 (requires (fun h0 ->
+	   U32.v j < pow2 (32 - U32.v lv) /\
+	   HH.includes mtr (V.frameOf hs) /\
+	   HH.includes mtr (V.frameOf rhs) /\
 	   RV.rv_inv h0 hs /\ RV.rv_inv h0 rhs /\
-	   HH.disjoint (V.frameOf hs) (V.frameOf rhs) /\
+	   // HH.disjoint (V.frameOf hs) (V.frameOf rhs) /\
 	   mt_safe_elts h0 lv hs i j /\
-	   path_safe h0 p))
+	   path_safe h0 mtr p /\
+	   V.size_of (B.get h0 p 0) <= lv + 1ul))
 	 (ensures (fun h0 _ h1 ->
 	   modifies (path_loc p) h0 h1 /\
-	   path_safe h1 p))
-private let rec mt_get_path_ lv hs rhs i j k p actd =
-  admit ();
+	   path_safe h1 mtr p))
+	 (decreases (32 - U32.v lv))
+private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
+  let hh0 = HST.get () in
   let ofs = offset_of i in
   if j = 0ul then ()
   else
     (let pv = !*p in
     if k % 2ul = 1ul
-    then B.upd p 0ul (V.insert pv (V.index (V.index hs lv) (k - 1ul - ofs)))
+    then (assert (HH.includes mtr (V.frameOf (V.get hh0 hs lv)));
+	 assert (RV.rv_inv hh0 (V.get hh0 hs lv));
+	 assert (HH.extends 
+		  (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k - 1ul - ofs)))
+		  (V.frameOf (V.get hh0 hs lv)));
+	 assert (HH.includes mtr
+		  (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k - 1ul - ofs))));
+	 path_insert mtr p (V.index (V.index hs lv) (k - 1ul - ofs)))
     else
       (if k = j then ()
       else if k + 1ul = j
-      then (if actd then p *= (V.insert pv (V.index rhs lv)))
-      else p *= (V.insert pv (V.index (V.index hs lv) (k + 1ul - ofs))));
-    mt_get_path_ (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) (k / 2ul) p
-		 (if j % 2 = 0ul then actd else true))
+      then (if actd 
+	   then (assert (HH.includes mtr (B.frameOf (V.get hh0 rhs lv)));
+		path_insert mtr p (V.index rhs lv)))
+      else (assert (HH.includes mtr (V.frameOf (V.get hh0 hs lv)));
+	   assert (RV.rv_inv hh0 (V.get hh0 hs lv));
+	   assert (HH.extends 
+		    (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k + 1ul - ofs)))
+		    (V.frameOf (V.get hh0 hs lv)));
+	   assert (HH.includes mtr
+		    (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k + 1ul - ofs))));
+	   path_insert mtr p (V.index (V.index hs lv) (k + 1ul - ofs))));
+    let hh1 = HST.get () in
+    RV.rv_inv_preserved hs (path_loc p) hh0 hh1;
+    RV.rv_inv_preserved rhs (path_loc p) hh0 hh1;
+    mt_safe_elts_preserved lv hs i j (path_loc p) hh0 hh1;
+    mt_get_path_ (lv + 1ul) mtr hs rhs (i / 2ul) (j / 2ul) (k / 2ul) p
+    		 (if j % 2ul = 0ul then actd else true))
 
+// TODO: it always calls `mt_get_root` that always (re)constructs `rhs`.
+// When `rhs_ok = true`, it suffices to return the root stored in the tree.
 val mt_get_path:
   mt:mt_p -> 
   idx:uint32_t ->
@@ -725,29 +812,53 @@ val mt_get_path:
   HST.ST uint32_t
 	 (requires (fun h0 ->
 	   MT?.i (B.get h0 mt 0) <= idx /\ idx < MT?.j (B.get h0 mt 0) /\
-	   mt_safe h0 mt /\ path_safe h0 p /\
-	   Rgl?.r_inv hreg h0 root))
+	   mt_safe h0 mt /\ 
+	   path_safe h0 (B.frameOf mt) p /\
+	   V.size_of (B.get h0 p 0) = 0ul /\
+	   Rgl?.r_inv hreg h0 root /\
+	   HH.disjoint (B.frameOf root) (B.frameOf mt) /\
+	   HH.disjoint (B.frameOf root) (B.frameOf p)))
 	 (ensures (fun h0 _ h1 ->
-	   modifies (loc_union (mt_loc mt) (path_loc p)) h0 h1 /\
+	   modifies (loc_union
+		      (mt_loc mt)
+		      (loc_union
+			(path_loc p)
+			(B.loc_all_regions_from false (B.frameOf root))))
+	   h0 h1 /\
 	   mt_safe h1 mt /\
-	   path_safe h1 p))
+	   path_safe h1 (B.frameOf mt) p))
+#reset-options "--z3rlimit 200 --max_fuel 1"
 let mt_get_path mt idx p root =
-  admit ();
   let copy = Cpy?.copy hcpy in
+  let hh0 = HST.get () in
+  mt_get_root mt root;
+  let hh1 = HST.get () in
+  path_safe_init_preserved (B.frameOf mt) p
+    (B.loc_union (mt_loc mt)
+      (B.loc_all_regions_from false (B.frameOf root)))
+    hh0 hh1;
   let mtv = !*mt in
   let i = MT?.i mtv in
   let ofs = offset_of (MT?.i mtv) in
   let j = MT?.j mtv in
   let hs = MT?.hs mtv in
   let rhs = MT?.rhs mtv in
-  if not (MT?.rhs_ok mtv) then
-    (copy (V.index (V.index hs 0ul) (j - 1ul - ofs)) root;
-    construct_rhs 0ul hs rhs i j root false;
-    mt *= (MT i j hs true rhs))
-  else ();
   let ih = V.index (V.index hs 0ul) (idx - ofs) in
-  p *= (RV.insert_copy hcpy (B.index p 0ul) ih);
-  mt_get_path_ 0ul hs rhs i j idx p false;
+  assert (Rgl?.r_inv hreg hh1 ih);
+  assert (RV.rv_inv hh1 (V.get hh1 hs 0ul));
+  assert (HH.extends 
+  	   (B.frameOf (V.get hh1 (V.get hh1 hs 0ul) (idx - ofs)))
+  	   (V.frameOf (V.get hh1 hs 0ul)));
+  assert (HH.includes (B.frameOf mt)
+  	   (B.frameOf (V.get hh1 (V.get hh1 hs 0ul) (idx - ofs))));
+  path_insert (B.frameOf mt) p ih;
+
+  let hh2 = HST.get () in
+  mt_safe_preserved mt (path_loc p) hh1 hh2;
+  mt_get_path_ 0ul (B.frameOf mt) hs rhs i j idx p false;
+
+  let hh3 = HST.get () in
+  mt_safe_preserved mt (path_loc p) hh2 hh3;
   j
 
 /// Flushing
@@ -812,30 +923,31 @@ let mt_flush mt =
 private val mt_verify_:
   k:uint32_t ->
   j:uint32_t{k <= j} ->
-  p:path ->
+  mtr:HH.rid -> p:path ->
   ppos:uint32_t ->
   acc:hash ->
   actd:bool ->
   HST.ST unit
 	 (requires (fun h0 ->
-	   path_safe h0 p /\ Rgl?.r_inv hreg h0 acc /\
+	   path_safe h0 mtr p /\ Rgl?.r_inv hreg h0 acc /\
 	   HH.disjoint (B.frameOf p) (B.frameOf acc) /\
+	   HH.disjoint mtr (B.frameOf acc) /\
 	   (let psz = V.size_of (B.get h0 p 0) in
 	   ppos <= psz /\ U32.v j < pow2 (U32.v (psz - ppos)))))
 	 (ensures (fun h0 _ h1 ->
 	   modifies (B.loc_all_regions_from false (B.frameOf acc)) h0 h1 /\
 	   Rgl?.r_inv hreg h1 acc))
-private let rec mt_verify_ k j p ppos acc actd =
+private let rec mt_verify_ k j mtr p ppos acc actd =
   if j = 0ul then ()
   else (let nactd = actd || (j % 2ul = 1ul) in
        let phash = V.index !*p ppos in
        if k % 2ul = 0ul
        then (if j = k || (j = k + 1ul && not actd)
-	    then mt_verify_ (k / 2ul) (j / 2ul) p ppos acc nactd
+	    then mt_verify_ (k / 2ul) (j / 2ul) mtr p ppos acc nactd
 	    else (hash_2 acc phash acc;
-		 mt_verify_ (k / 2ul) (j / 2ul) p (ppos + 1ul) acc nactd))
+		 mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd))
        else (hash_2 phash acc acc;
-	    mt_verify_ (k / 2ul) (j / 2ul) p (ppos + 1ul) acc nactd))
+	    mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd))
 
 private val buf_eq:
   #a:eqtype -> b1:B.buffer a -> b2:B.buffer a ->
@@ -855,13 +967,14 @@ private let rec buf_eq #a b1 b2 len =
 val mt_verify:
   k:uint32_t ->
   j:uint32_t{k < j} ->
-  p:path ->
+  mtr:HH.rid -> p:path ->
   rt:hash ->
   HST.ST bool
 	 (requires (fun h0 ->
-	   path_safe h0 p /\ Rgl?.r_inv hreg h0 rt /\
+	   path_safe h0 mtr p /\ Rgl?.r_inv hreg h0 rt /\
 	   HST.is_eternal_region (B.frameOf rt) /\
 	   HH.disjoint (B.frameOf p) (B.frameOf rt) /\
+	   HH.disjoint mtr (B.frameOf rt) /\
 	   (let psz = V.size_of (B.get h0 p 0) in
 	   1ul <= psz /\ U32.v j < pow2 (U32.v psz - 1))))
 	 (ensures (fun h0 _ h1 ->
@@ -871,14 +984,15 @@ val mt_verify:
 	   Rgl?.r_inv hreg h1 rt /\
 	   S.equal (Rgl?.r_repr hreg h0 rt)
 		   (Rgl?.r_repr hreg h1 rt)))
-let mt_verify k j p rt =
+let mt_verify k j mtr p rt =
   let hh0 = HST.get () in
   let nrid = RV.new_region_ (B.frameOf rt) in
   let ih = hash_r_init nrid in
   let copy = Cpy?.copy hcpy in
   copy (V.index !*p 0ul) ih;
   let hh1 = HST.get () in
-  path_safe_preserved p (B.loc_all_regions_from false (B.frameOf rt)) hh0 hh1;
-  mt_verify_ k j p 1ul ih false;
+  path_safe_preserved 
+    mtr p (B.loc_all_regions_from false (B.frameOf rt)) hh0 hh1;
+  mt_verify_ k j mtr p 1ul ih false;
   buf_eq ih rt hash_size
 
