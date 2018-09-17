@@ -200,7 +200,7 @@ EVERCRYPT_SOURCES = \
 ifeq ($(CONFIG),noopenssl)
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_bcrypt.c
 else 
-ifneq ($(CONFIG),hacl-only)
+ifneq ($(CONFIG),hacl-vale)
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_openssl.c
 endif
 endif
