@@ -346,6 +346,8 @@ let fmul_rn_normalize out p =
     out.(size 2) <- Lib.Vec128.vec128_add64 out.(size 2) (Lib.Vec128.vec128_shift_right out.(size 2) (size 64));
     out.(size 3) <- Lib.Vec128.vec128_add64 out.(size 3) (Lib.Vec128.vec128_shift_right out.(size 3) (size 64));
     out.(size 4) <- Lib.Vec128.vec128_add64 out.(size 4) (Lib.Vec128.vec128_shift_right out.(size 4) (size 64));
+    carry_felem out;	 
+    carry_top_felem out;	 
     pop_frame()
 
 
@@ -369,13 +371,16 @@ let load_precompute_r p r0 r1 =
     pop_frame()
 
 let vec128_eq_mask (a:vec128) (b:vec128) : vec128
-  = let x = vec128_xor a b in
+  = vec128_eq64 a b
+(*  
+  let x = vec128_xor a b in
     let one = vec128_load64 (u64 1) in
     let minus_x = vec128_add64 (vec128_lognot x) one in
     let x_or_minus_x = vec128_or x minus_x in
     let xnx = vec128_shift_right64 x_or_minus_x (size 63) in
     let c = vec128_sub64 xnx one in
     c
+*)
 
 let vec128_gte_mask (a:vec128) (b:vec128) : vec128
   = let x = a in

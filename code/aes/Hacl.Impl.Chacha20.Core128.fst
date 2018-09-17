@@ -1,4 +1,4 @@
-module Hacl.Impl.Chacha20.Core32
+module Hacl.Impl.Chacha20.Core128
 
 module ST = FStar.HyperStack.ST
 open FStar.HyperStack
@@ -6,8 +6,9 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open LowStar.Buffer
 open Lib.Utils
+open Lib.Vec128
 
-let state = lbuffer uint32 16
+let state = lbuffer vec128 16
 let index = (i:size_t{size_v i < 16})
 let rot32 = (i:uint32{uint_v i > 0 /\ uint_v i < 32})
 
@@ -15,29 +16,28 @@ inline_for_extraction
 val create_state: unit -> StackInline state
 		  (requires (fun h -> True))
    		  (ensures (fun h0 r h1 -> live h1 r))
-let create_state () = create (u32 0) (size 16)
+let create_state () = create vec128_zero (size 16)
 
 inline_for_extraction
 val load_state: st:state -> b:lbytes 64 -> ST unit
 		  (requires (fun h -> live h st /\ live h b))
    		  (ensures (fun h0 _ h1 -> modifies (loc_buffer st) h0 h1))
 let load_state st b =
-    uint32s_from_bytes_le st (b <: bytes) (size 16) 
+    let h0 = ST.get() in
+    loop_nospec #h0 (size 16) st 
+      (fun i -> st.(i) <- vec128_load_le (sub b (size 16 *. i) (size 16)));
+    let st2200 = vec128_interleave
+    
 
 inline_for_extraction
 val set_counter: st:state -> c:size_t -> ST unit
 		  (requires (fun h -> live h st))
    		  (ensures (fun h0 _ h1 -> modifies (loc_buffer st) h0 h1))
 let set_counter st c =
-    st.(size 12) <- size_to_uint32 c
-
-inline_for_extraction
-val incr_counter: st:state -> ST unit
-		  (requires (fun h -> live h st))
-   		  (ensures (fun h0 _ h1 -> modifies (loc_buffer st) h0 h1))
-let incr_counter st =
-    let c = st.(size 12) in
-    st.(size 12) <- c +. u32 1
+    let vff = vec128_load32s (u32 0xffffffff) (u32 0xffffffff) (u32 0xffffffff) (u32 0) in
+    let st3 = vec128_and st.(size 3) vff in
+    let vc = vec128_load32s (u32 0) (u32 0) (u32 0) (size_to_uint32 c) in
+    st.(size 3) <- vec128_or st3 vc
 
 inline_for_extraction
 val copy_state: st:state -> ost:state -> ST unit
@@ -114,3 +114,5 @@ let double_round st =
   quarter_round st (size 1) (size 6) (size 11) (size 12);
   quarter_round st (size 2) (size 7) (size 8) (size 13);
   quarter_round st (size 3) (size 4) (size 9) (size 14)
+
+

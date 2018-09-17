@@ -357,56 +357,52 @@ val fmul_rn_normalize: out:felem -> p:precomp_r -> Stack unit
 let fmul_rn_normalize out p = 
     push_frame();
     let r = sub p (size 0) (size 5) in
-    let r2 = sub p (size 10) (size 5) in
-    let r2_5 = sub p (size 15) (size 5) in
-    let v1212 =  Lib.Vec256.vec256_interleave_low64 r2.(size 0) r.(size 0) in
-    let v0012 = Lib.Vec256.vec256_shift_right r2.(size 0) (size 128) in
-    r2.(size 0) <- Lib.Vec256.vec256_mul64 v1212 v0012;
-
-    let v1212 =  Lib.Vec256.vec256_interleave_low64 r2.(size 1) r.(size 1) in
-    let v0012 = Lib.Vec256.vec256_shift_right r2.(size 1) (size 128) in
-    r2.(size 1) <- Lib.Vec256.vec256_mul64 v1212 v0012;
-
-    let v1212 =  Lib.Vec256.vec256_interleave_low64 r2.(size 2) r.(size 2) in
-    let v0012 = Lib.Vec256.vec256_shift_right r2.(size 2) (size 128) in
-    r2.(size 2) <- Lib.Vec256.vec256_mul64 v1212 v0012;
-
-    let v1212 =  Lib.Vec256.vec256_interleave_low64 r2.(size 3) r.(size 3) in
-    let v0012 = Lib.Vec256.vec256_shift_right r2.(size 3) (size 128) in
-    r2.(size 3) <- Lib.Vec256.vec256_mul64 v1212 v0012;
-
-    let v1212 =  Lib.Vec256.vec256_interleave_low64 r2.(size 4) r.(size 4) in
-    let v0012 = Lib.Vec256.vec256_shift_right r2.(size 4) (size 128) in
-    r2.(size 4) <- Lib.Vec256.vec256_mul64 v1212 v0012;
-    precompute_shift_reduce r2_5 r2;
+    let r_5 = sub p (size 5) (size 5) in
+    let r4 = sub p (size 10) (size 5) in
+    let r4_5 = sub p (size 15) (size 5) in
+    let r2 = create_felem () in
+    let r3 = create_felem () in
     let tmp = create_felem () in
-    mul_felem tmp out r2 r2_5;
+    mul_felem tmp r r r_5;
+    carry_wide_felem r2 tmp;
+    mul_felem tmp r2 r r_5;
+    carry_wide_felem r3 tmp;
+    let h0 = ST.get() in
+    loop_nospec #h0 (size 5) r2 
+      (fun i -> 
+         let v1212 = Lib.Vec256.vec256_interleave_low64 r2.(i) r.(i) in
+         let v3434 = Lib.Vec256.vec256_interleave_low64 r4.(i) r3.(i) in
+	 let v1234 = Lib.Vec256.vec256_interleave_low128 v3434 v1212 in
+	 r2.(i) <- v1234);
+
+    let r1234 = r2 in
+    let r1234_5 = r3 in
+    precompute_shift_reduce r1234_5 r1234;
+    mul_felem tmp out r1234 r1234_5;
     carry_wide_felem out tmp;
-    
-    let v0 = Lib.Vec256.vec256_add64 out.(size 0) (Lib.Vec256.vec256_shift_right out.(size 0) (size 128)) in    
-    out.(size 0) <- Lib.Vec256.vec256_add64 v0 (Lib.Vec256.vec256_shift_right v0 (size 64));
 
-    let v0 = Lib.Vec256.vec256_add64 out.(size 1) (Lib.Vec256.vec256_shift_right out.(size 1) (size 128)) in    
-    out.(size 1) <- Lib.Vec256.vec256_add64 v0 (Lib.Vec256.vec256_shift_right v0 (size 64));
-
-    let v0 = Lib.Vec256.vec256_add64 out.(size 2) (Lib.Vec256.vec256_shift_right out.(size 2) (size 128)) in    
-    out.(size 2) <- Lib.Vec256.vec256_add64 v0 (Lib.Vec256.vec256_shift_right v0 (size 64));
-
-    let v0 = Lib.Vec256.vec256_add64 out.(size 3) (Lib.Vec256.vec256_shift_right out.(size 3) (size 128)) in    
-    out.(size 3) <- Lib.Vec256.vec256_add64 v0 (Lib.Vec256.vec256_shift_right v0 (size 64));
-
-    let v0 = Lib.Vec256.vec256_add64 out.(size 4) (Lib.Vec256.vec256_shift_right out.(size 4) (size 128)) in    
-    out.(size 4) <- Lib.Vec256.vec256_add64 v0 (Lib.Vec256.vec256_shift_right v0 (size 64));
+    loop_nospec #h0 (size 5) out
+      (fun i -> 
+         let v0 = 
+	   Lib.Vec256.vec256_add64 out.(i) (Lib.Vec256.vec256_interleave_high128 out.(i) out.(i)) in    
+	 let v1 = 
+	   Lib.Vec256.vec256_add64 v0 (Lib.Vec256.vec256_shift_right v0 (size 64)) in
+	 out.(i) <- v1);
+    carry_felem out;	 
+    carry_top_felem out;	 
     pop_frame()
 
-let vec256_eq_mask (a:vec256) (b:vec256) : vec256
-  = let x = vec256_xor a b in
+let vec256_eq_mask (a:vec256) (b:vec256) : vec256 
+  = Lib.Vec256.vec256_eq64 a b
+  
+(*  let x = vec256_xor a b in
     let one = vec256_load64 (u64 1) in
     let minus_x = vec256_add64 (vec256_lognot x) one in
     let x_or_minus_x = vec256_or x minus_x in
     let xnx = vec256_shift_right64 x_or_minus_x (size 63) in
     let c = vec256_sub64 xnx one in
     c
+*)
 
 let vec256_gte_mask (a:vec256) (b:vec256) : vec256
   = let x = a in

@@ -22,7 +22,11 @@ noextract
 val ni_clmul: vec128 -> vec128 -> uint8 -> vec128
 
 noextract
+val vec128_eq64: vec128 -> vec128 -> vec128
+
+noextract
 val vec128_xor: vec128 -> vec128 -> vec128
+
 noextract
 val vec128_or: vec128 -> vec128 -> vec128
 noextract

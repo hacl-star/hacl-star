@@ -20,10 +20,11 @@ typedef __m128i Lib_Vec128_vec128;
   (_mm_clmulepi64_si128(x0, x1, x2))
 
 
-
-
 #define Lib_Vec128_vec128_xor(x0, x1) \
   (_mm_xor_si128(x0, x1))
+
+#define Lib_Vec128_vec128_eq64(x0, x1) \
+  (_mm_cmpeq_epi64(x0, x1))
 
 #define Lib_Vec128_vec128_or(x0, x1) \
   (_mm_or_si128(x0, x1))

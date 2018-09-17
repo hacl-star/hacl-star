@@ -9,6 +9,8 @@
 typedef __m256i Lib_Vec256_vec256;
 
 
+#define Lib_Vec256_vec256_eq64(x0, x1) \
+  (_mm256_cmpeq_epi64(x0, x1))
 
 #define Lib_Vec256_vec256_xor(x0, x1) \
   (_mm256_xor_si256(x0, x1))
@@ -53,8 +55,6 @@ typedef __m256i Lib_Vec256_vec256;
 #define Lib_Vec256_vec256_zero  \
   (_mm256_set1_epi16((uint16_t)0))
 
-#define Lib_Vec256_bit_mask64(x) -((x) & 1)
-
 #define Lib_Vec256_vec256_add64(x0, x1) \
   (_mm256_add_epi64(x0, x1))
 
@@ -84,5 +84,8 @@ typedef __m256i Lib_Vec256_vec256;
 
 #define Lib_Vec256_vec256_interleave_high128(x1, x2) \
   (_mm256_permute2x128_si256(x1, x2, 0x31)) 
+
+#define Lib_Vec256_bit_mask64(x) -((x) & 1)
+
 
 #endif

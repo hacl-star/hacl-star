@@ -8,6 +8,9 @@ AES_BS_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 
 AES_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	Hacl.Impl.Aes.CoreNI.fst \
+	Hacl.Impl.Aes.Core.fst \
+	Hacl.Impl.Aes.Generic.fst \
 	Hacl.Impl.Aes.NI.fst \
 	Hacl.Test.AesCTR.NI.fst \
 	Hacl.AesCTRNI.fst
@@ -73,6 +76,7 @@ aes-ni-c/out.krml: $(AES_NI_FILES)
 aes-ni-c/Hacl_AesCTRNI.c: aes-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-ni-c  $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.AesCTRNI=*'
+
 aes-ni.exe: aes-ni-c/Hacl_AesCTRNI.c aes-ni-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-ni-c \
 	  -no-prefix 'Hacl.Test.AesCTR.NI' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
@@ -259,7 +263,7 @@ poly1305-test: poly1305_64.exe poly1305_32.exe poly1305_128.exe  poly1305_256.ex
 	./poly1305_128.exe
 	./poly1305_256.exe
 
-poly1305-perf: poly1305_64.exe poly1305_32.exe #poly1305_256.exe
+poly1305-perf: poly1305_64.exe poly1305_32.exe poly1305_128.exe poly1305_256.exe
 	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . poly64-c/Hacl_Poly1305_64.c poly32-c/Hacl_Poly1305_32.c poly128-c/Hacl_Poly1305_128.c  poly256-c/Hacl_Poly1305_256.c $(KREMLIN_HOME)/kremlib/c/testlib.o poly1305_test.c -o poly1305-perf.exe 
 	./poly1305-perf.exe
 
@@ -272,8 +276,6 @@ CHACHA20_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.Impl.Chacha20.Core32.fst \
 	Hacl.Impl.Chacha20.fst \
 	Hacl.Chacha20.fst 
-
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' 
 
 chacha20-c/out.krml: $(CHACHA20_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-c $(CHACHA20_FILES) -skip-translation 

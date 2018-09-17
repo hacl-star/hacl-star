@@ -75,7 +75,8 @@ let chacha20_update out ctx ctr text len =
 	   chacha20_core k ctx; 
 	   let ib = sub text (size 64 *. i) (size 64) in
 	   let ob = sub out (size 64 *. i) (size 64) in
-	   xor_block ob k ib);
+	   xor_block ob k ib
+	   );
   let rem = len %. size 64 in
   if (rem >. size 0) then (
     let tmp = create 0uy (size 64) in
