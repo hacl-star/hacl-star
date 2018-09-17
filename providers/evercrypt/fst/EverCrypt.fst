@@ -9,6 +9,7 @@ module Vale = EverCrypt.Vale
 module ValeGlue = EverCrypt.ValeGlue
 
 module SC = EverCrypt.StaticConfig
+friend EverCrypt.StaticConfig
 module AC = EverCrypt.AutoConfig
 module U32 = FStar.UInt32
 module HS = FStar.HyperStack

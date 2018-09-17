@@ -138,6 +138,7 @@ module T = LowStar.ToFStarBuffer
 
 module AC = EverCrypt.AutoConfig
 module SC = EverCrypt.StaticConfig
+friend EverCrypt.StaticConfig
 module Vale = EverCrypt.Vale
 module Hacl = EverCrypt.Hacl
 module ValeGlue = EverCrypt.ValeGlue
