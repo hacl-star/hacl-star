@@ -136,11 +136,11 @@ val frodo_gen_matrix_cshake_4x:
   -> Stack unit
     (requires fun h -> live h seed /\ live h res /\ disjoint seed res)
     (ensures  fun h0 _ h1 ->
-      live h1 res /\ modifies (loc_buffer res) h0 h1)
-      // TODO: Verify this
-      // as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
+      modifies (loc_buffer res) h0 h1 /\
+      as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 [@"c_inline"]
 let frodo_gen_matrix_cshake_4x n seed_len seed res =
+  let h = ST.get() in
   push_frame ();
   let r: lbuffer uint8 (8 * v n) = create (size 8 *! n) (u8 0) in  
   let r0 = sub r (size 0 *! n) (size 2 *! n) in
@@ -182,8 +182,12 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
          mset res (size 4 *! i +! size 3) j (uint_from_bytes_le resij3)
        )
     );
-  pop_frame ()
+  pop_frame ();
+  // TODO: Verify this
+  let h' = ST.get() in
+  assume (as_matrix h' res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h seed))
 
+/// AES128
 
 inline_for_extraction noextract
 val frodo_gen_matrix_aes_inner:
