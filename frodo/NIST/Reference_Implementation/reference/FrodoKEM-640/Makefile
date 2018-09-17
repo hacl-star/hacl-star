@@ -102,7 +102,11 @@ tests: lib640 tests/ds_benchmark.h
 	$(CC) $(CFLAGS) -L./frodo tests/test_KEM640.c -lfrodo $(LDFLAGS) -o frodo/test_KEM $(ARM_SETTING)
 
 tests-fstar: lib640 tests/ds_benchmark.h
+ifeq "$(GENERATION_A)" "CSHAKE128"
 	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.640-cSHAKE -L$(KREMLIN_HOME)/kremlib/out tests/test_KEM640.c -lfrodo -lkremlib $(LDFLAGS) -o frodo/test_KEM_fstar $(ARM_SETTING)
+else
+	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.640-AES -L$(KREMLIN_HOME)/kremlib/out tests/test_KEM640.c -lfrodo -lkremlib $(LDFLAGS) -o frodo/test_KEM_fstar $(ARM_SETTING)
+endif
 
 lib640_for_KATs: $(KEM_FRODO640_OBJS) $(AES_OBJS) $(SHAKE_OBJS)
 	$(AR) frodo/libfrodo_for_testing.a $^
@@ -115,12 +119,12 @@ else
 	$(CC) $(CFLAGS) -L./frodo tests/PQCtestKAT_kem.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo/PQCtestKAT_kem $(ARM_SETTING)
 endif
 
-KATS-fstar: 
+KATS-fstar:
 	mkdir -p frodo
 ifeq "$(GENERATION_A)" "CSHAKE128"
 	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.640-cSHAKE -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem_cshake.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_cshake_fstar $(ARM_SETTING)
 else
-	@echo Unimplmeneted: FrodoKEM-AES in F*
+	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.640-AES -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_fstar $(ARM_SETTING)
 endif
 
 

@@ -6,10 +6,18 @@ VARIANT      ?= 640-cSHAKE
 
 ifeq ($(VARIANT),640-cSHAKE)
   KEM_DIR = FrodoKEM-640
+  GENERATION_A = CSHAKE128
+else ifeq ($(VARIANT),640-AES)
+  KEM_DIR = FrodoKEM-640
+  GENERATION_A = AES128
 else ifeq ($(VARIANT),976-cSHAKE)
   KEM_DIR = FrodoKEM-976
+  GENERATION_A = CSHAKE128
+else ifeq ($(VARIANT),976-AES)
+  KEM_DIR = FrodoKEM-976
+  GENERATION_A = AES128
 else
-  $(error ERROR: VARIANT must be either 640-cSHAKE or 976-cSHAKE)
+  $(error ERROR: VARIANT must be one of {640,976}-{cSHAKE,AES})
 endif
 
 ifeq ($(TARGET),x64)
@@ -62,15 +70,15 @@ stage2-test: $(OUT_DIR)/test.exe
 stage2-lib: $(OUT_DIR)/libfrodo_for_testing.a $(OUT_DIR)/libfrodo.a
 
 KATs: $(OUT_DIR)/libfrodo_for_testing.a
-	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 KATS-fstar
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=$(GENERATION_A) KATS-fstar
 	(cd $(LWEKE_HOME); frodo/PQCtestKAT_kem_cshake_fstar)
 
 benchmark: $(OUT_DIR)/libfrodo.a
-	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 tests-fstar
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=$(GENERATION_A) tests-fstar
 	(cd $(LWEKE_HOME); frodo/test_KEM_fstar)
 
 $(LWEKE_HOME)/%.o:
-	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 $*.o
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=$(GENERATION_A) $*.o
 
 # 1. Generation of .krml files
 # - generate the F* dependency graph via `fstar --dep full`
