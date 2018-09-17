@@ -128,98 +128,6 @@ let frodo_gen_matrix_cshake n seed_len seed res =
   let h1 = ST.get () in
   Spec.Matrix.extensionality (as_matrix h1 res) (S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 
-assume
-val aes128_key_expansion_sbox: key:buffer uint8 -> expanded_key:buffer uint8 -> sbox:buffer uint8 -> ST unit
-  (requires fun h0 -> True)
-  (ensures  fun h0 _ h1 -> modifies loc_none h0 h1)
-
-assume
-val aes128_encrypt_one_block:
-  cipher:buffer uint8 -> plain:buffer uint8 -> w:buffer uint8 -> sbox:buffer uint8 -> ST unit
-  (requires fun h0 -> True)
-  (ensures  fun h0 _ h1 -> modifies (loc_buffer cipher) h0 h1)
-
-
-[@CAbstractStruct]
-noeq type aes128_key_s =
-  | AES128_VALE: w:buffer uint8 -> sbox:buffer uint8 -> aes128_key_s
-
-let aes128_key = B.pointer aes128_key_s
-
-val aes128_create:
-    key:buffer uint8
-  -> ST aes128_key
-    (requires fun h0 -> True)
-    (ensures  fun h0 _ h1 -> modifies loc_none h0 h1)
-let aes128_create k =
-  let w    = B.malloc HS.root (u8 0) 176ul in
-  let sbox = B.malloc HS.root (u8 0) 256ul in
-  aes128_key_expansion_sbox k w sbox;
-  B.malloc HS.root (AES128_VALE w sbox) 1ul
-
-val aes128_compute:
-    key:aes128_key
-  -> plain:buffer uint8
-  -> cipher:buffer uint8
-  -> ST unit
-    (requires fun h0 -> B.live h0 key)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer cipher) h0 h1)
-let aes128_compute key plain cipher =
-  let k = !*key in
-  let AES128_VALE w sbox = k in
-  aes128_encrypt_one_block cipher plain w sbox
-
-val aes128_free:
-    key:aes128_key
-  -> ST unit
-    (requires fun h0 -> live h0 key)
-    (ensures  fun h0 _ h1 -> True)
-let aes128_free key =
-  let k = !*key in
-  let AES128_VALE w sbox = k in
-  B.free w;
-  B.free sbox;
-  B.free key
-
-val frodo_gen_matrix_aes:
-    n:size_t{0 < v n /\ v n * v n <= max_size_t}
-  -> seed_len:size_t{v seed_len > 0}
-  -> seed:lbytes seed_len
-  -> a:matrix_t n n
-  -> Stack unit
-    (requires fun h -> live h seed /\ live h a /\ disjoint seed a)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer a) h0 h1)
-let frodo_gen_matrix_aes n seed_len seed a =
-  push_frame();
-  let key = aes128_create seed in
-  let b:lbytes (size 16) = create #uint8 (size 16) (u8 0) in
-  let c:lbytes (size 16) = create #uint8 (size 16) (u8 0) in
-  let h0 = ST.get() in
-  Lib.Loops.for (size 0) n
-    (fun h1 i -> modifies (loc_union (loc_buffer b) (loc_buffer a)) h0 h1)
-    (fun i ->
-      let h1 = ST.get() in
-      Lib.Loops.for (size 0) (n /. size 8)
-        (fun h2 j -> modifies (loc_union (loc_buffer b) (loc_buffer a)) h1 h2)
-        (fun j ->
-          let j = j *! size 8 in
-          uint_to_bytes_le (sub b (size 0) (size 2)) (to_u16 (size_to_uint32 i));
-          uint_to_bytes_le (sub b (size 2) (size 2)) (to_u16 (size_to_uint32 j));
-          aes128_compute key b c;
-          a.[i, j +! size 0] <- uint_from_bytes_le (sub c (size 0)  (size 2));
-          a.[i, j +! size 1] <- uint_from_bytes_le (sub c (size 2)  (size 2));
-          a.[i, j +! size 2] <- uint_from_bytes_le (sub c (size 4)  (size 2));
-          a.[i, j +! size 3] <- uint_from_bytes_le (sub c (size 6)  (size 2));
-          a.[i, j +! size 4] <- uint_from_bytes_le (sub c (size 8)  (size 2));
-          a.[i, j +! size 5] <- uint_from_bytes_le (sub c (size 10) (size 2));
-          a.[i, j +! size 6] <- uint_from_bytes_le (sub c (size 12) (size 2));
-          a.[i, j +! size 7] <- uint_from_bytes_le (sub c (size 14) (size 2))
-        )
-    );
-  aes128_free key;
-  pop_frame()
-
-
 val frodo_gen_matrix_cshake_4x:
     n:size_t{0 < v n /\ 2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
@@ -275,3 +183,57 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
        )
     );
   pop_frame ()
+
+
+inline_for_extraction noextract
+val frodo_gen_matrix_aes_inner:
+    n:size_t{v n * v n <= max_size_t}
+  -> i:size_t{v i < v n}
+  -> j:size_t{v j < v n - 7}
+  -> c:lbytes (size 16)
+  -> a:matrix_t n n
+  -> Stack unit
+    (requires fun h -> live h a /\ live h c)
+    (ensures  fun h0 _ h1 -> modifies (loc_buffer a) h0 h1)
+let frodo_gen_matrix_aes_inner n i j c a =
+  a.[i, j +! size 0] <- uint_from_bytes_le (sub c (size 0)  (size 2));
+  a.[i, j +! size 1] <- uint_from_bytes_le (sub c (size 2)  (size 2));
+  a.[i, j +! size 2] <- uint_from_bytes_le (sub c (size 4)  (size 2));
+  a.[i, j +! size 3] <- uint_from_bytes_le (sub c (size 6)  (size 2));
+  a.[i, j +! size 4] <- uint_from_bytes_le (sub c (size 8)  (size 2));
+  a.[i, j +! size 5] <- uint_from_bytes_le (sub c (size 10) (size 2));
+  a.[i, j +! size 6] <- uint_from_bytes_le (sub c (size 12) (size 2));
+  a.[i, j +! size 7] <- uint_from_bytes_le (sub c (size 14) (size 2))
+
+val frodo_gen_matrix_aes:
+    n:size_t{v n * v n <= max_size_t}
+  -> seed_len:size_t{v seed_len == 16}
+  -> seed:lbytes seed_len
+  -> a:matrix_t n n
+  -> Stack unit
+    (requires fun h -> live h seed /\ live h a /\ disjoint seed a)
+    (ensures  fun h0 _ h1 -> modifies (loc_buffer a) h0 h1)
+let frodo_gen_matrix_aes n seed_len seed a =
+  push_frame();
+  let key = B.alloca (u8 0) 176ul in
+  Hacl.AES128.aes128_key_expansion seed key;
+  let b:lbytes (size 16) = create #uint8 (size 16) (u8 0) in
+  let c:lbytes (size 16) = create #uint8 (size 16) (u8 0) in
+  let h0 = ST.get() in
+  Lib.Loops.for (size 0) n
+    (fun h1 i ->
+      modifies (loc_union (loc_union (loc_buffer b) (loc_buffer c)) (loc_buffer a)) h0 h1)
+    (fun i ->
+      let h1 = ST.get() in
+      Lib.Loops.for (size 0) (n /. size 8)
+        (fun h2 j ->
+           modifies (loc_union (loc_union (loc_buffer b) (loc_buffer c)) (loc_buffer a)) h1 h2)
+        (fun j ->
+          let j = j *! size 8 in
+          uint_to_bytes_le (sub b (size 0) (size 2)) (to_u16 (size_to_uint32 i));
+          uint_to_bytes_le (sub b (size 2) (size 2)) (to_u16 (size_to_uint32 j));
+          Hacl.AES128.aes128_encrypt_block c b key;
+          frodo_gen_matrix_aes_inner n i j c a
+        )
+    );
+  pop_frame()
