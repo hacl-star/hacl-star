@@ -184,6 +184,22 @@ lib: $(ALL_OBJS) | $(OUT_DIR)
 
 .PRECIOUS: %.o
 
+# This snapshot assumes EverCrypt is built via `CONFIG=hacl-only make` $(HACL_HOME)/providers
+.PHONY: snapshot2
+snapshot2: $(ALL_SOURCES)
+	mkdir -p snapshot
+	mkdir -p snapshot/kremlin
+	cp -R $(KREMLIN_HOME)/include snapshot/kremlin/include
+	mkdir -p snapshot/kremlin/kremlib/extracted
+	cp -R $(KREMLIB)/extracted/*.{c,h} snapshot/kremlin/kremlib/extracted
+	mkdir -p snapshot/evercrypt/include
+	cp -R $(HACL_HOME)/providers/include/*.h snapshot/evercrypt/include
+	mkdir -p snapshot/evercrypt/extracted
+	for i in evercrypt_autoconfig.c evercrypt_bytes.c; do cp $(HACL_HOME)/providers/evercrypt/c/$$i snapshot/evercrypt/extracted; done
+	cp $(HACL_HOME)/providers/generated/*.{c,h} snapshot/evercrypt/extracted
+	cp -R $(GENERATED_DIR)/*.h snapshot
+	for i in $(ALL_SOURCES); do cp $$i snapshot; done
+
 endif # COMPILE
 
 # 5. Clean targets that do not re-trigger anything except perhaps the generation
@@ -204,3 +220,8 @@ clean-c:
 distclean: clean
 	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)
 
+.PHONY: snapshot
+snapshot:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) stage1
+	STAGE=2 $(MAKE) snapshot2
