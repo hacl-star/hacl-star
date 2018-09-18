@@ -486,7 +486,7 @@ let aead_free pk =
   else if SC.bcrypt && AEAD_BCRYPT? k then
     BCrypt.aead_free (AEAD_BCRYPT?.st k)
   else
-    failwith !$"ERROR: inconsistent configuration" (aead_free);
+    failwith !$"ERROR: inconsistent configuration (aead_free)";
   B.free pk
 
 /// DH
@@ -514,7 +514,7 @@ let dh_free_group st =
   if SC.openssl && DH_OPENSSL? s then
     OpenSSL.dh_free_group (DH_OPENSSL?.st s)
   else
-    failwith !$"ERROR: inconsistent configuration" (dh_free_group);
+    failwith !$"ERROR: inconsistent configuration (dh_free_group)";
   B.free st
 
 let dh_keygen st public =
@@ -562,7 +562,7 @@ let ecdh_free_curve st =
   if SC.openssl && ECDH_OPENSSL? s then
     OpenSSL.ecdh_free_curve (ECDH_OPENSSL?.st s)
   else
-    failwith !$"ERROR: inconsistent configuration" (ecdh_free_curve);
+    failwith !$"ERROR: inconsistent configuration (ecdh_free_curve)";
   B.free st
 
 let ecdh_keygen st outx outy =
