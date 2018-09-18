@@ -126,7 +126,7 @@ let init_256: init_st SHA2_256 =
 let init_384: init_st SHA2_384 =
   Tactics.(synth_by_tactic (specialize (init SHA2_384) [`%init; `%index_h]))
 let init_512: init_st SHA2_512 =
-  Tactics.(synth_by_tactic (specialize (init SHA2_512) [`%init; `%h]))
+  Tactics.(synth_by_tactic (specialize (init SHA2_512) [`%init; `%index_h]))
 
 
 (** Update *)
