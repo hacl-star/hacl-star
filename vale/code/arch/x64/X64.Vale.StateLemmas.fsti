@@ -34,12 +34,6 @@ val lemma_to_flags : s:state -> Lemma
   (ensures s.flags == flags' (state_to_S s).TS.state)
   [SMTPat s.flags]
 
-(*
-val lemma_to_mem : s:state -> Lemma
-  (ensures s.mem === mem' (state_to_S s).TS.state)
-  [SMTPat s.mem]
-*)
-
 val lemma_to_reg : s:state -> r:reg -> Lemma
   (ensures s.regs r == regs' (state_to_S s).TS.state r)
   [SMTPat (s.regs r)]
@@ -55,27 +49,6 @@ val lemma_to_trace : s:state -> Lemma
 val lemma_to_memTaint : s:state -> Lemma
   (ensures s.memTaint === memTaint' (state_to_S s))
   [SMTPat s.memTaint]
-
-(*
-// No SMTPats for lemmas_of to avoid pattern loops
-val lemma_of_ok : s:TS.traceState -> Lemma
-  (ensures (state_of_S s).ok == ok' s.TS.state)
-
-val lemma_of_flags : s:TS.traceState -> Lemma
-  (ensures (state_of_S s).flags == flags' s.TS.state)
-
-val lemma_of_mem : s:TS.traceState -> Lemma
-  (ensures (state_of_S s).mem === mem' s.TS.state)
-  
-val lemma_of_regs : s:TS.traceState -> Lemma
-  (ensures (state_of_S s).regs == regs' s.TS.state)
-
-val lemma_of_xmms : s:TS.traceState -> Lemma
-  (ensures (state_of_S s).xmms == xmms' s.TS.state)
-
-val lemma_of_memTaint : s:TS.traceState -> Lemma
-  (ensures (state_of_S s).memTaint === memTaint' s)
-*)
 
 val lemma_to_eval_operand : s:state -> o:operand -> Lemma
   (requires valid_operand o s)

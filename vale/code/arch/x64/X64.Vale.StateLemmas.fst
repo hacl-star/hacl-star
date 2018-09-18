@@ -45,21 +45,11 @@ let state_of_S (sv:state) (s:TS.traceState{same_domain sv s}) : GTot state =
 
 let lemma_to_ok s = ()
 let lemma_to_flags s = ()
-let lemma_to_mem s = ()
 
 let lemma_to_reg s r = ()
 let lemma_to_xmm s x = ()
 let lemma_to_trace s = ()
 let lemma_to_memTaint s = ()
-
-(*
-let lemma_of_ok s = ()
-let lemma_of_flags s = ()
-let lemma_of_mem s = ()
-let lemma_of_regs s = assert (feq (regs' s.TS.state) (state_of_S s).regs)
-let lemma_of_xmms s = assert (feq (xmms' s.TS.state) (state_of_S s).xmms)
-let lemma_of_memTaint s = ()
-*)
 
 let state_to_HS (s:state) : GTot ME.state =
   {

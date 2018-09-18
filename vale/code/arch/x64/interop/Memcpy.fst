@@ -1,6 +1,5 @@
 module Memcpy
 
-
 open LowStar.Buffer
 module B = LowStar.Buffer
 module BV = LowStar.BufferView
@@ -28,6 +27,7 @@ friend SecretByte
 friend X64.Memory_s
 friend X64.Memory
 friend X64.Vale.Decls
+friend X64.Vale.StateLemmas
 #set-options "--z3rlimit 60"
 
 open Vale_memcpy
@@ -56,9 +56,8 @@ let create_initial_trusted_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 d
     | Rsi -> addr_src
     | _ -> init_regs r end)
   in let xmms = init_xmms in
-  let (s_b:BS.state) = {BS.ok = true; BS.regs = regs; BS.xmms = xmms; BS.flags = 0;
+  let (s0:BS.state) = {BS.ok = true; BS.regs = regs; BS.xmms = xmms; BS.flags = 0;
        BS.mem = Interop.down_mem h0 addrs buffers} in
-  let s0:X64.Memory_s.state = {ME.state = s_b; ME.mem = mem} in
   {TS.state = s0; TS.trace = []; TS.memTaint = create_valid_memtaint mem buffers taint_func}
 
 val lemma_ghost_memcpy: is_win:bool -> dst:s8 -> src:s8 ->  stack_b:b8 -> (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) ->
@@ -67,7 +66,7 @@ val lemma_ghost_memcpy: is_win:bool -> dst:s8 -> src:s8 ->  stack_b:b8 -> (h0:HS
     (ensures (fun (s1, f1, h1) ->
       (let s0 = create_initial_trusted_state is_win dst src stack_b h0 in
       Some s1 == TS.taint_eval_code (va_code_memcpy is_win) f1 s0 /\
-      Interop.correct_down h1 addrs [stack_b;dst;src] s1.TS.state.ME.state.BS.mem /\
+      Interop.correct_down h1 addrs [stack_b;dst;src] s1.TS.state.BS.mem /\
       post_cond h0 h1 dst src  /\
       calling_conventions is_win s0 s1)
     ))
@@ -102,19 +101,12 @@ let create_initial_vale_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst 
       memTaint = create_valid_memtaint mem buffers taint_func}
 
 let create_lemma is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) : Lemma
-  (state_of_S (create_initial_trusted_state is_win dst src stack_b h0) == create_initial_vale_state is_win dst src stack_b h0) =
+  (create_initial_trusted_state is_win dst src stack_b h0 == state_to_S (create_initial_vale_state is_win dst src stack_b h0)) =
     let s_init = create_initial_trusted_state is_win dst src stack_b h0 in
-    let s0 = state_of_S s_init in
-    let s1 = create_initial_vale_state is_win dst src stack_b h0 in
-    assert (FunctionalExtensionality.feq s1.regs (regs' s_init.TS.state));
-    assert (FunctionalExtensionality.feq s1.xmms (xmms' s_init.TS.state));
-    lemma_of_ok s_init;
-    lemma_of_regs s_init;
-    lemma_of_flags s_init;
-    lemma_of_xmms s_init;
-    lemma_of_mem s_init;
-    lemma_of_memTaint s_init;
-    ()
+    let s0 = create_initial_vale_state is_win dst src stack_b h0 in
+    let s1 = state_to_S s0 in
+    assert (FunctionalExtensionality.feq (regs' s1.TS.state) (regs' s_init.TS.state));
+    assert (FunctionalExtensionality.feq (xmms' s1.TS.state) (xmms' s_init.TS.state))
 
 let implies_pre (is_win:bool) (h0:HS.mem) (dst:s8) (src:s8)  (stack_b:b8) : Lemma
   (requires pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src])
@@ -146,7 +138,7 @@ let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel)
   let src_b = BV.mk_buffer_view src Views.view64 in
   let t = TBase TUInt64 in
   assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) src)) (BV.as_seq va_sM.mem.hs src_b));  
-  assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) dst)) (BV.as_seq va_sM.mem.hs dst_b));    
+  assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) dst)) (BV.as_seq va_sM.mem.hs dst_b));      
   ()
 
 let lemma_ghost_memcpy is_win dst src stack_b h0 =
@@ -155,10 +147,14 @@ let lemma_ghost_memcpy is_win dst src stack_b h0 =
   length_t_eq (TBase TUInt64) src;
   implies_pre is_win h0 dst src stack_b;
   let s0 = create_initial_trusted_state is_win dst src stack_b h0 in
+  let s0' = create_initial_vale_state is_win dst src stack_b h0 in
   create_lemma is_win dst src stack_b h0;
-  let s_v, f_v = va_lemma_memcpy (va_code_memcpy is_win) (state_of_S s0) is_win stack_b dst src  in
-  implies_post is_win (state_of_S s0) s_v f_v dst src stack_b;
-  Some?.v (TS.taint_eval_code (va_code_memcpy is_win) f_v s0), f_v, s_v.mem.hs
+  let s_v, f_v = va_lemma_memcpy (va_code_memcpy is_win) s0' is_win stack_b dst src in
+  implies_post is_win s0' s_v f_v dst src stack_b;
+  let s1 = Some?.v (TS.taint_eval_code (va_code_memcpy is_win) f_v s0) in
+  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);
+  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);
+  s1, f_v, s_v.mem.hs
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
