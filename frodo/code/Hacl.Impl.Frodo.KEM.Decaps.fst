@@ -27,7 +27,7 @@ module S = Spec.Frodo.KEM.Decaps
 module M = Spec.Matrix
 module LSeq = Lib.Sequence
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val frodo_sub_mul_c_minus_bs_inner:
