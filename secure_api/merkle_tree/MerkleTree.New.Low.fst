@@ -379,11 +379,13 @@ val mt_safe_preserved:
 	(ensures (B.get h0 mt 0 == B.get h1 mt 0 /\
 		 mt_safe h1 mt))
 let mt_safe_preserved mt p h0 h1 =
-  admit ()
-  // let mtv = B.get h0 mt 0 in
-  // RV.rv_inv_preserved (MT?.hs mtv) p h0 h1;
-  // RV.rv_inv_preserved (MT?.rhs mtv) p h0 h1;
-  // mt_safe_elts_preserved 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv) p h0 h1
+  assert (loc_includes (mt_loc mt) (B.loc_buffer mt));
+  let mtv = B.get h0 mt 0 in
+  assert (loc_includes (mt_loc mt) (RV.loc_rvector (MT?.hs mtv)));
+  assert (loc_includes (mt_loc mt) (RV.loc_rvector (MT?.rhs mtv)));
+  RV.rv_inv_preserved (MT?.hs mtv) p h0 h1;
+  RV.rv_inv_preserved (MT?.rhs mtv) p h0 h1;
+  mt_safe_elts_preserved 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv) p h0 h1
 
 /// Construction
 
@@ -525,6 +527,32 @@ val path_loc: path -> GTot loc
 let path_loc p =
   B.loc_all_regions_from false (B.frameOf p)
 
+private val path_safe_preserved_:
+  mtr:HH.rid -> hvec:V.vector hash -> dl:loc ->
+  i:uint32_t -> j:uint32_t{i <= j && j <= V.size_of hvec} ->
+  h:HS.mem -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (V.forall_ h hvec i j
+		    (fun hp -> 
+		      Rgl?.r_inv hreg h0 hp /\
+		      HH.includes mtr (B.frameOf hp)) /\
+		  loc_disjoint dl (B.loc_all_regions_from false mtr) /\
+		  loc_disjoint dl
+		    (B.loc_all_regions_from false (V.frameOf hvec)) /\
+		  modifies dl h0 h1))
+	(ensures (V.forall_ h hvec i j
+		    (fun hp -> 
+		      Rgl?.r_inv hreg h1 hp /\
+		      HH.includes mtr (B.frameOf hp))))
+	(decreases (U32.v j))
+private let rec path_safe_preserved_ mtr hvec dl i j h h0 h1 =
+  if i = j then ()
+  else (assert (loc_includes
+	         (B.loc_all_regions_from false mtr)
+		 (B.loc_all_regions_from false
+		   (B.frameOf (V.get h hvec (j - 1ul)))));
+       Rgl?.r_sep hreg (V.get h hvec (j - 1ul)) dl h0 h1;
+       path_safe_preserved_ mtr hvec dl i (j - 1ul) h h0 h1)
+
 val path_safe_preserved:
   mtr:HH.rid -> p:path -> 
   dl:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -534,18 +562,25 @@ val path_safe_preserved:
 		  modifies dl h0 h1))
 	(ensures (path_safe h1 mtr p))
 let path_safe_preserved mtr p dl h0 h1 =
-  admit ()
+  assert (loc_includes (path_loc p) (B.loc_buffer p));
+  assert (loc_includes (path_loc p) (V.loc_vector (B.get h0 p 0)));
+  assert (loc_includes (path_loc p)
+	   (B.loc_all_regions_from false (V.frameOf (B.get h0 p 0))));
+  path_safe_preserved_
+    mtr (B.get h0 p 0) dl 0ul (V.size_of (B.get h0 p 0))
+    h0 h0 h1
 
 val path_safe_init_preserved:
   mtr:HH.rid -> p:path -> 
   dl:loc -> h0:HS.mem -> h1:HS.mem ->
   Lemma (requires (path_safe h0 mtr p /\
 		  V.size_of (B.get h0 p 0) = 0ul /\
-		  B.loc_disjoint dl
-		    (B.loc_all_regions_from false (B.frameOf p))))
+		  B.loc_disjoint dl (path_loc p) /\
+		  modifies dl h0 h1))
 	(ensures (path_safe h1 mtr p))
 let path_safe_init_preserved mtr p dl h0 h1 =
-  admit ()
+  assert (loc_includes (path_loc p) (B.loc_buffer p));
+  assert (loc_includes (path_loc p) (V.loc_vector (B.get h0 p 0)))
 
 val init_path: 
   mtr:HH.rid -> r:erid ->
@@ -731,6 +766,7 @@ inline_for_extraction val path_insert:
       path_safe h1 mtr p /\
       V.size_of (B.get h1 p 0) = V.size_of (B.get h0 p 0) + 1ul))
 inline_for_extraction let path_insert mtr p hp =
+  let hh0 = HST.get () in
   let pv = B.index p 0ul in
   let ipv = V.insert pv hp in
   p *= ipv;
