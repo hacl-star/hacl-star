@@ -336,7 +336,7 @@ let rec down_up_identity_aux
   | a::q ->
       let s = get_seq_heap heap addrs a in
       let m' = B.g_upd_seq a s m in
-      B.upd_sel_buffer a m;
+      B.lemma_g_upd_with_same_seq a m;
       assert (Seq.equal s (B.as_seq m a));
       (* The previous assertion and lemma ensure that m == m' *)
       B.g_upd_seq_as_seq a s m;
@@ -431,7 +431,7 @@ let rec update_buffer_up_mem_aux
      let m' = B.g_upd_seq a s mem in
      if StrongExcludedMiddle.strong_excluded_middle (a == b) then (
        if StrongExcludedMiddle.strong_excluded_middle (List.memP b accu) then (
-         B.upd_sel_buffer a mem;       
+         B.lemma_g_upd_with_same_seq a mem;       
          update_buffer_up_mem_aux ptrs addrs m' b heap1 heap2 q (a::accu)
        ) else (
          g_upd_tot_correct_down_invariant ptrs addrs heap1 heap2 b mem;
@@ -441,7 +441,7 @@ let rec update_buffer_up_mem_aux
      ) else (
        assert (B.disjoint a b);
        get_seq_heap_as_seq heap1 heap2 addrs mem a;
-       B.upd_sel_buffer a mem;       
+       B.lemma_g_upd_with_same_seq a mem;       
        update_buffer_up_mem_aux ptrs addrs m' b heap1 heap2 q (a::accu)
      )
 

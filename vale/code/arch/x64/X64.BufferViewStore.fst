@@ -122,7 +122,7 @@ let get128_aux (ptr:int) (heap:heap) (v:quad32) : Lemma
        (UInt8.v (Seq.index s 14))
        (UInt8.v (Seq.index s 15))
 
-#set-options "--z3refresh"
+#set-options "--z3refresh --z3rlimit 60"
 
 let bv_upd_update_heap128 b heap i v addrs ptrs h =
   let bv = BV.mk_buffer_view b view128 in
