@@ -217,6 +217,7 @@ val frodo_gen_matrix_aes:
   -> Stack unit
     (requires fun h -> live h seed /\ live h a /\ disjoint seed a)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer a) h0 h1)
+[@"c_inline"]
 let frodo_gen_matrix_aes n seed_len seed a =
   push_frame();
   let key = B.alloca (u8 0) 176ul in
