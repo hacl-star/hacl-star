@@ -10,106 +10,152 @@ open Lib.Vec128
 
 type m_spec =
   | MAES
+  | M32
 
-inline_for_extraction
+unfold
 let stelem (m:m_spec) =
   match m with
   | MAES -> vec128
+  | M32 -> uint64
 
-inline_for_extraction
+unfold
 let stlen (m:m_spec) =
   match m with
   | MAES -> 4
+  | M32 -> 8
 
-inline_for_extraction
+unfold
 let klen (m:m_spec) =
   match m with
   | MAES -> 1
+  | M32 -> 8
 
-inline_for_extraction
+unfold
 let nlen (m:m_spec) =
   match m with
   | MAES -> 1
+  | M32 -> 8
 
-inline_for_extraction
+
+unfold
 let state (m:m_spec) = lbuffer (stelem m) (stlen m)
 
-inline_for_extraction
+unfold
 let key1 (m:m_spec) = lbuffer (stelem m) (klen m)
 
-inline_for_extraction
+unfold
 let nonce (m:m_spec) = lbuffer (stelem m) (nlen m)
 
+
+unfold
+let ctxlen (m:m_spec) =  nlen m + (15 `op_Multiply` klen m)
+
+unfold
+type aes_ctx (m:m_spec) = lbuffer (stelem m) (ctxlen m) 
+
 inline_for_extraction
-let elem_zero (m:m_spec) =
+let get_nonce (#m:m_spec) (ctx:aes_ctx m) = sub ctx (size 0) (size (nlen m))
+inline_for_extraction
+let get_kex (#m:m_spec) (ctx:aes_ctx m) = sub ctx (size (nlen m)) (size 15 
+*. size (klen m))
+
+inline_for_extraction
+val create_ctx: m:m_spec -> StackInline (aes_ctx m)
+                   (requires (fun h -> True))
+		   (ensures (fun h0 f h1 -> live h1 f))
+let create_ctx (m:m_spec) = 
   match m with
+  | M32 -> create #uint64 (u64 0) (size (ctxlen m))
+  | MAES -> create #vec128 vec128_zero (size (ctxlen m))
+
+
+unfold
+let elem_zero (m:m_spec) : stelem m =
+  match m with
+  | M32 -> u64 0
   | MAES -> vec128_zero
 
 inline_for_extraction
 let load_key1 (#m:m_spec) (k:key1 m) (b:lbytes 16) = 
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.load_key1 k b
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.load_key1 k b
 
 inline_for_extraction
 let load_nonce (#m:m_spec) (n:nonce m) (b:lbytes 12) = 
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.load_nonce n b
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.load_nonce n b
 
 inline_for_extraction
 let load_state (#m:m_spec) (st:state m) (n:nonce m) (counter:size_t) = 
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.load_state st n counter
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.load_state st n counter
 
 inline_for_extraction
 let store_block0 (#m:m_spec) (out:lbytes 16) (st:state m) =
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.store_block0 out st
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.store_block0 out st
 
 
 inline_for_extraction
+val create_state: #m:m_spec -> StackInline (state m)
+                   (requires (fun h -> True))
+		   (ensures (fun h0 f h1 -> live h1 f))
 let create_state (#m:m_spec) = 
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.create_state()
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.create_state()
 
 inline_for_extraction
 let copy_state (#m:m_spec) (st:state m) (ost:state m) = 
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.copy_state st ost
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.copy_state st ost
 
 inline_for_extraction
 let xor_state_key1 (#m:m_spec) (st:state m) (key:key1 m) = 
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.xor_state_key1 st key
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.xor_state_key1 st key
 
 inline_for_extraction
 let xor_block (#m:m_spec) (out:lbytes 64)  (st:state m) (b:lbytes 64) = 
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.xor_block out st b
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.xor_block out st b
 
 inline_for_extraction
 let aes_enc (#m:m_spec) (st:state m) (key:key1 m) = 
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.aes_enc st key
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.aes_enc st key
 
 inline_for_extraction
 let aes_enc_last (#m:m_spec) (st:state m) (key:key1 m) = 
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.aes_enc_last st key
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.aes_enc_last st key
 
 inline_for_extraction
 let aes_keygen_assist (#m:m_spec) (n:key1 m) (p:key1 m) (rcon:uint8) =
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.aes_keygen_assist n p rcon
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.aes_keygen_assist n p rcon
 
 inline_for_extraction
 let key_expansion_step (#m:m_spec) (n:key1 m) (p:key1 m) =
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.key_expansion_step n p
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.key_expansion_step n p
 
 inline_for_extraction
 let key_expansion_step2 (#m:m_spec) (n:key1 m) (p:key1 m) =
   match m with
   | MAES -> Hacl.Impl.Aes.CoreNI.key_expansion_step n p
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.key_expansion_step n p
 
 
 

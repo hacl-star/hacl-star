@@ -1,4 +1,4 @@
-module Hacl.Impl.Aes.BitSlice
+module Hacl.Impl.Aes.BitSlice.Old
 
 module ST = FStar.HyperStack.ST
 open FStar.HyperStack
