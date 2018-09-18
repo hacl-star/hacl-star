@@ -2,6 +2,7 @@ include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../thirdPartyPorts/Intel/aes/x64/X64.AESCTR.vaf"
+include "../../../lib/util/x64/X64.Stack.vaf"
 include "X64.AES.vaf"
 include "X64.GF128_Mul.vaf"
 include "X64.GCTR.vaf"
@@ -67,6 +68,7 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open X64.GF128_Mul
 open X64.AESCTR
+open X64.Stack
 #endverbatim
 
 #reset-options "--z3rlimit 30"
@@ -795,161 +797,6 @@ procedure {:quick} gcm_core(
     //be_bytes_to_quad32_to_bytes(iv_BE);
 }
 
-#reset-options "--z3rlimit 30"
-procedure {:quick} callee_save_registers(inline win:bool, ghost stack_b:buffer64)
-    requires
-        valid_stack_slots(mem, rsp, stack_b, if win then 28 else 8, memTaint);
-        valid_taint_buf64(stack_b, mem, memTaint, Public);
-    reads rbx; rbp; rdi; rsi; r12; r13; r14; r15; 
-          xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15; memTaint;
-    modifies mem; rsp; rax;
-    ensures
-        modifies_buffer(stack_b, old(mem), mem);
-        forall i :: (if win then 28 else 8) <= i < buffer_length(stack_b) ==> buffer64_read(stack_b, i, mem) == old(buffer64_read(stack_b, i, mem));
-        valid_stack_slots(mem, rsp + (if win then 224 else 64), stack_b, if win then 28 else 8, memTaint);
-        valid_taint_buf64(stack_b, mem, memTaint, Public);
-
-        rbx == buffer64_read(stack_b, 0, mem);
-        rbp == buffer64_read(stack_b, 1, mem);
-        rdi == buffer64_read(stack_b, 2, mem);
-        rsi == buffer64_read(stack_b, 3, mem);
-        r12 == buffer64_read(stack_b, 4, mem);
-        r13 == buffer64_read(stack_b, 5, mem);
-        r14 == buffer64_read(stack_b, 6, mem);
-        r15 == buffer64_read(stack_b, 7, mem);
-
-        win ==> lo64(xmm15) == buffer64_read(stack_b, 27, mem);
-        win ==> hi64(xmm15) == buffer64_read(stack_b, 26, mem);
-        win ==> lo64(xmm14) == buffer64_read(stack_b, 25, mem);
-        win ==> hi64(xmm14) == buffer64_read(stack_b, 24, mem);
-        win ==> lo64(xmm13) == buffer64_read(stack_b, 23, mem);
-        win ==> hi64(xmm13) == buffer64_read(stack_b, 22, mem);
-        win ==> lo64(xmm12) == buffer64_read(stack_b, 21, mem);
-        win ==> hi64(xmm12) == buffer64_read(stack_b, 20, mem);
-        win ==> lo64(xmm11) == buffer64_read(stack_b, 19, mem);
-        win ==> hi64(xmm11) == buffer64_read(stack_b, 18, mem);
-        win ==> lo64(xmm10) == buffer64_read(stack_b, 17, mem);
-        win ==> hi64(xmm10) == buffer64_read(stack_b, 16, mem);
-        win ==> lo64(xmm9)  == buffer64_read(stack_b, 15, mem);
-        win ==> hi64(xmm9)  == buffer64_read(stack_b, 14, mem);
-        win ==> lo64(xmm8)  == buffer64_read(stack_b, 13, mem);
-        win ==> hi64(xmm8)  == buffer64_read(stack_b, 12, mem);
-        win ==> lo64(xmm7)  == buffer64_read(stack_b, 11, mem);
-        win ==> hi64(xmm7)  == buffer64_read(stack_b, 10, mem);
-        win ==> lo64(xmm6)  == buffer64_read(stack_b, 9, mem);
-        win ==> hi64(xmm6)  == buffer64_read(stack_b, 8, mem);
-{
-    inline if (win) {
-        PushXmm(xmm15, rax, stack_b, 27);
-        PushXmm(xmm14, rax, stack_b, 25);
-        PushXmm(xmm13, rax, stack_b, 23);
-        PushXmm(xmm12, rax, stack_b, 21);
-        PushXmm(xmm11, rax, stack_b, 19);
-        PushXmm(xmm10, rax, stack_b, 17);
-        PushXmm(xmm9,  rax, stack_b, 15);
-        PushXmm(xmm8,  rax, stack_b, 13);
-        PushXmm(xmm7,  rax, stack_b, 11);
-        PushXmm(xmm6,  rax, stack_b,  9);
-    }
-    Push(r15, stack_b, 7);
-    Push(r14, stack_b, 6);
-    Push(r13, stack_b, 5);
-    Push(r12, stack_b, 4);
-    Push(rsi, stack_b, 3);
-    Push(rdi, stack_b, 2);
-    Push(rbp, stack_b, 1);
-    Push(rbx, stack_b, 0);
-}
-
-procedure {:quick} callee_restore_registers(
-        inline win:bool,
-        ghost stack_b:buffer64,
-        ghost old_xmm6:quad32,
-        ghost old_xmm7:quad32,
-        ghost old_xmm8:quad32,
-        ghost old_xmm9:quad32,
-        ghost old_xmm10:quad32,
-        ghost old_xmm11:quad32,
-        ghost old_xmm12:quad32,
-        ghost old_xmm13:quad32,
-        ghost old_xmm14:quad32,
-        ghost old_xmm15:quad32
-        )
-    requires
-        valid_stack_slots(mem, rsp + (if win then 224 else 64), stack_b, if win then 28 else 8, memTaint);
-        valid_taint_buf64(stack_b, mem, memTaint, Public);
-
-        win ==> lo64(old_xmm15) == buffer64_read(stack_b, 27, mem);
-        win ==> hi64(old_xmm15) == buffer64_read(stack_b, 26, mem);
-        win ==> lo64(old_xmm14) == buffer64_read(stack_b, 25, mem);
-        win ==> hi64(old_xmm14) == buffer64_read(stack_b, 24, mem);
-        win ==> lo64(old_xmm13) == buffer64_read(stack_b, 23, mem);
-        win ==> hi64(old_xmm13) == buffer64_read(stack_b, 22, mem);
-        win ==> lo64(old_xmm12) == buffer64_read(stack_b, 21, mem);
-        win ==> hi64(old_xmm12) == buffer64_read(stack_b, 20, mem);
-        win ==> lo64(old_xmm11) == buffer64_read(stack_b, 19, mem);
-        win ==> hi64(old_xmm11) == buffer64_read(stack_b, 18, mem);
-        win ==> lo64(old_xmm10) == buffer64_read(stack_b, 17, mem);
-        win ==> hi64(old_xmm10) == buffer64_read(stack_b, 16, mem);
-        win ==> lo64(old_xmm9)  == buffer64_read(stack_b, 15, mem);
-        win ==> hi64(old_xmm9)  == buffer64_read(stack_b, 14, mem);
-        win ==> lo64(old_xmm8)  == buffer64_read(stack_b, 13, mem);
-        win ==> hi64(old_xmm8)  == buffer64_read(stack_b, 12, mem);
-        win ==> lo64(old_xmm7)  == buffer64_read(stack_b, 11, mem);
-        win ==> hi64(old_xmm7)  == buffer64_read(stack_b, 10, mem);
-        win ==> lo64(old_xmm6)  == buffer64_read(stack_b, 9, mem);
-        win ==> hi64(old_xmm6)  == buffer64_read(stack_b, 8, mem);
-    reads mem; memTaint;
-    modifies
-        rax; rbx; rbp; rdi; rsi; r12; r13; r14; r15;
-        xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        rsp;
-    ensures
-        rbx == buffer64_read(stack_b, 0, mem);
-        rbp == buffer64_read(stack_b, 1, mem);
-        rdi == buffer64_read(stack_b, 2, mem);
-        rsi == buffer64_read(stack_b, 3, mem);
-        r12 == buffer64_read(stack_b, 4, mem);
-        r13 == buffer64_read(stack_b, 5, mem);
-        r14 == buffer64_read(stack_b, 6, mem);
-        r15 == buffer64_read(stack_b, 7, mem);
-
-        win ==> xmm6  == old_xmm6;
-        win ==> xmm7  == old_xmm7;
-        win ==> xmm8  == old_xmm8;
-        win ==> xmm9  == old_xmm9;
-        win ==> xmm10 == old_xmm10;
-        win ==> xmm11 == old_xmm11;
-        win ==> xmm12 == old_xmm12;
-        win ==> xmm13 == old_xmm13;
-        win ==> xmm14 == old_xmm14;
-        win ==> xmm15 == old_xmm15;
-
-        valid_stack_slots(mem, rsp, stack_b, if win then 28 else 8, memTaint);
-        valid_taint_buf64(stack_b, mem, memTaint, Public);
-{
-    Pop(rbx, stack_b, 0);
-    Pop(rbp, stack_b, 1);
-    Pop(rdi, stack_b, 2);
-    Pop(rsi, stack_b, 3);
-    Pop(r12, stack_b, 4);
-    Pop(r13, stack_b, 5);
-    Pop(r14, stack_b, 6);
-    Pop(r15, stack_b, 7);
-
-    inline if (win) {
-        PopXmm(xmm6,  rax, stack_b,  8, old_xmm6);
-        PopXmm(xmm7,  rax, stack_b, 10, old_xmm7);
-        PopXmm(xmm8,  rax, stack_b, 12, old_xmm8);
-        PopXmm(xmm9,  rax, stack_b, 14, old_xmm9);
-        PopXmm(xmm10, rax, stack_b, 16, old_xmm10);
-        PopXmm(xmm11, rax, stack_b, 18, old_xmm11);
-        PopXmm(xmm12, rax, stack_b, 20, old_xmm12);
-        PopXmm(xmm13, rax, stack_b, 22, old_xmm13);
-        PopXmm(xmm14, rax, stack_b, 24, old_xmm14);
-        PopXmm(xmm15, rax, stack_b, 26, old_xmm15);
-    }
-}
 
 #reset-options "--z3rlimit 30"
 procedure {:quick} gcm_encrypt_stdcall_inner(

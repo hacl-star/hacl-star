@@ -13,14 +13,14 @@ open EverCrypt.Hash
 
 open FStar.Seq
 
-noextract let extract a salt ikm = EverCrypt.HMAC.hmac a salt ikm
+let extract a salt ikm = EverCrypt.HMAC.hmac a salt ikm
 
 // [a, prk, info] are fixed.
 // [required] is the number of bytes to be extracted
 // [count] is the number of extracted blocks so far
 // [last] is empty for count=0 then set to the prior tag for chaining.
-noextract let rec expand0 :
-  a: Hash.e_alg ->
+let rec expand0 :
+  a: Hash.alg ->
   prk: bytes ->
   info: bytes ->
   required: nat ->
@@ -43,7 +43,7 @@ noextract let rec expand0 :
   else tag @| expand0 a prk info (required - tagLength a) count tag
 
 noextract let expand:
-  a: Hash.e_alg ->
+  a: Hash.alg ->
   prk: bytes ->
   info: bytes ->
   required: nat {
@@ -108,11 +108,10 @@ let expand_secret #a prk label hv = expand_label prk label hv (tagLength a)
 open FStar.HyperStack.All
 open LowStar.Buffer
 
-//18-03-05 TODO drop hkdf_ prefix!
+//18-03-05 TODO drop hkdf_ prefix? conflicts with spec name
 
 val hkdf_extract :
-  a       : alg -> (
-  let a = Ghost.hide a in
+  a       : alg ->
   prk     : uint8_pl (tagLength a) ->
   salt    : uint8_p { disjoint salt prk /\ HMAC.keysized a (length salt)} ->
   saltlen : uint8_l salt ->
@@ -123,11 +122,10 @@ val hkdf_extract :
   (ensures  (fun h0 r h1 ->
     live h1 prk /\ LowStar.Modifies.(modifies (loc_buffer prk) h0 h1) /\
     length ikm + blockLength a <= maxLength a /\
-    as_seq h1 prk == HMAC.hmac a (as_seq h0 salt) (as_seq h0 ikm))))
+    as_seq h1 prk == HMAC.hmac a (as_seq h0 salt) (as_seq h0 ikm)))
 
 val hkdf_expand :
-  a       : alg -> (
-  let a = Ghost.hide a in
+  a       : alg ->
   okm     : uint8_p ->
   prk     : uint8_p -> prklen  : uint8_l prk ->
   info    : uint8_p -> infolen : uint8_l info ->
@@ -141,7 +139,7 @@ val hkdf_expand :
   (ensures  (fun h0 r h1 ->
     live h1 okm /\ LowStar.Modifies.(modifies (loc_buffer okm) h0 h1) /\
     tagLength a + pow2 32 + blockLength a <= maxLength a /\ // required for v len below
-    as_seq h1 okm = expand a (as_seq h0 prk) (as_seq h0 info) (v len) )))
+    as_seq h1 okm = expand a (as_seq h0 prk) (as_seq h0 info) (v len) ))
 
 
 /// HIGH-LEVEL WRAPPERS (TBC)

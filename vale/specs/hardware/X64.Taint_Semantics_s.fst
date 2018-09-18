@@ -213,11 +213,12 @@ and taint_eval_while c fuel s0 =
 let is_xmm_ins (ins:tainted_ins) =
   let i, _, _ = ins.ops in
   match i with
-    | S.Paddd _ _ | S.Pxor _ _ | S.Pslld _ _ | S.Psrld _ _ | S.Psrldq _ _ | S.Shufpd _ _ _ | S.Pshufb _ _
+    | S.Paddd _ _ | S.Pxor _ _ | S.Pslld _ _ | S.Psrld _ _ | S.Psrldq _ _ | S.Palignr _ _ _ | S.Shufpd _ _ _ | S.Pshufb _ _ 
     | S.Pshufd _ _ _ | S.Pcmpeqd _ _ | S.Pextrq _ _ _ | S.Pinsrd _ _ _ | S.Pinsrq _ _ _
     | S.VPSLLDQ _ _ _ | S.MOVDQU _ _
     | S.Pclmulqdq _ _ _ | S.AESNI_enc _ _ | S.AESNI_enc_last _ _
     | S.AESNI_dec _ _ | S.AESNI_dec_last _ _ | S.AESNI_imc _ _
-    | S.AESNI_keygen_assist _ _ _ -> true
+    | S.AESNI_keygen_assist _ _ _ 
+    | S.SHA256_rnds2 _ _ | S.SHA256_msg1 _ _ | S.SHA256_msg2 _ _ -> true
     | _ -> false
 

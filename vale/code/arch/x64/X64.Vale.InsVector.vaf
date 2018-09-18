@@ -79,11 +79,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Paddd(dst, src), list(), list()
           Paddd(inout dst:xmm, src:xmm)
     modifies efl;
     ensures
-        dst == old(Mkfour(
-            add_wrap32(dst.lo0, src.lo0),
-            add_wrap32(dst.lo1, src.lo1),
-            add_wrap32(dst.hi2, src.hi2),
-            add_wrap32(dst.hi3, src.hi3)));
+        dst == old(add_wrap_quad32(dst, src));
 {
 }
 
@@ -120,6 +116,23 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Psrldq(dst, amt), list(), list(
 {
 }
 
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, 4), list(), list()), Public))}{:quick exportOnly}
+          Palignr4(inout dst:xmm, src:xmm)
+    modifies efl;
+    ensures
+        dst == old(Mkfour(src.lo1, src.hi2, src.hi3, dst.lo0));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, 8), list(), list()), Public))}{:quick exportOnly}
+          Palignr8(inout dst:xmm, src:xmm)
+    modifies efl;
+    ensures
+        dst == old(Mkfour(src.hi2, src.hi3, dst.lo0, dst.lo1));
+{
+}
+
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.Shufpd(dst, src, permutation), list(), list()), Public))}{:quick exportOnly}
           Shufpd(inout dst:xmm, src:xmm, inline permutation:imm8)
     requires permutation < 4;
@@ -132,7 +145,6 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Shufpd(dst, src, permutation), 
                     (if permutation = 0 || permutation = 1 then src.lo1 else src.hi3)));
 {
 }
-
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src), list(), list()), Public))}{:quick exportOnly}
           Pshufb(inout dst:xmm, src:xmm)

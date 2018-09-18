@@ -1,0 +1,45 @@
+[
+  "\u007fø\u000b®∫x–^lç\u0019Ã«®∂°",
+  [
+    [
+      "Hacl.Hash.blocks_t",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "constructor_distinct_Spec.Hash.Helpers.MD5",
+        "constructor_distinct_Spec.Hash.Helpers.SHA1",
+        "equation_Spec.Hash.Helpers.size_block",
+        "equation_Spec.Hash.Helpers.size_block_w",
+        "equation_Spec.Hash.Helpers.size_hash_w",
+        "equation_Spec.Hash.Helpers.size_word",
+        "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "b6ca31a78981ad4b1cee5abab6603ff3"
+    ],
+    [
+      "Hacl.Hash.update_multi_st",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "equation_Hacl.Hash.Common.state", "equation_Hacl.Hash.Common.word",
+        "equation_Hacl.Hash.blocks_t", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_Spec.Hash.Helpers.word",
+        "function_token_typing_FStar.UInt8.t",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "refinement_interpretation_Hacl.Hash.Common_Tm_refine_4be16adba4cc0c2c2e52c699ab00f6f6",
+        "refinement_interpretation_Hacl.Hash_Tm_refine_48b4b499d0e50993758f09e378e3ce1a",
+        "typing_Hacl.Hash.Common.word",
+        "typing_LowStar.Buffer.trivial_preorder"
+      ],
+      0,
+      "c896a8e5e850d55ebb11566eb5851978"
+    ]
+  ]
+]

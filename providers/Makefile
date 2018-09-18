@@ -122,20 +122,23 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -bundle 'FStar.*' \
+	  -bundle 'C,C.*' \
 	  -bundle 'Hacl.*' \
-	  -bundle 'Spec.*' \
-	  -bundle 'Hacl.Spec.*' \
-	  -bundle 'Hacl.Spe.*' \
-	  -bundle 'AEAD.*' \
+	  -bundle 'EverCrypt.Spec.*' \
+	  -drop 'Spec.*' \
+	  -drop 'Hacl.Spec.*' \
+	  -drop 'Hacl.Spe.*' \
+	  -drop 'EverCrypt.Spec' \
+	  -drop Seq.Create \
 	  -bundle 'LowStar.*' \
-	  -library 'AEAD.*,Hacl.*' \
+	  -library 'Hacl.*' \
 	  -no-prefix 'EverCrypt.Vale' \
 	  -tmpdir $(GENERATED_DIR) $^ -warn-error @9
 
 $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
-	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.HKDF+EverCrypt.HMAC=* \
+	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=* \
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \
@@ -143,7 +146,7 @@ $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
 	  -add-include '<kremlin/internal/compat.h>' \
 	  -tmpdir $(INCLUDE_DIR) $^
 	rm -rf $(INCLUDE_DIR)/Makefile.include $(INCLUDE_DIR)/*.c
-	mv $(INCLUDE_DIR)/EverCrypt_EverCrypt_Bytes_EverCrypt_HKDF_EverCrypt_HMAC.h $@
+	mv $(INCLUDE_DIR)/EverCrypt_EverCrypt_Bytes_EverCrypt_AutoConfig_EverCrypt_HKDF_EverCrypt_HMAC_EverCrypt_Hash.h $@
 
 
 

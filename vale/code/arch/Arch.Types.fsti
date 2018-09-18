@@ -43,6 +43,13 @@ let quad32_shl32 (q:quad32) : quad32 =
   let Mkfour v0 v1 v2 v3 = q in
   Mkfour 0 v0 v1 v2
 
+let add_wrap_quad32 (q0 q1:quad32) : quad32 =
+  let open Words_s in
+  Mkfour (add_wrap q0.lo0 q1.lo0)
+         (add_wrap q0.lo1 q1.lo1)
+         (add_wrap q0.hi2 q1.hi2)
+         (add_wrap q0.hi3 q1.hi3) 
+
 val lemma_BitwiseXorCommutative (x y:nat32) : Lemma (x *^ y == y *^ x)
 val lemma_BitwiseXorWithZero (n:nat32) : Lemma (n *^ 0 == n)
 val lemma_BitwiseXorCancel (n:nat32) : Lemma (n *^ n == 0)
@@ -169,7 +176,19 @@ val be_bytes_to_quad32_to_bytes (q:quad32) :
   Lemma (be_bytes_to_quad32 (be_quad32_to_bytes q) == q)
   [SMTPat (be_bytes_to_quad32 (be_quad32_to_bytes q))]
 
+let reverse_bytes_quad32_seq (s:seq quad32) : seq quad32 =
+  seq_map reverse_bytes_quad32 s
+
+val lemma_reverse_reverse_bytes_quad32_seq (s:seq quad32) :
+  Lemma (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s) == s)
+  [SMTPat (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s))]
+
 open FStar.Mul
+
+val lemma_le_seq_quad32_to_bytes_length (s:seq quad32) : 
+  Lemma(length (le_seq_quad32_to_bytes s) == (length s) * 16)
+  
+
 val slice_commutes_seq_four_to_seq_LE (#a:Type) (s:seq (four a)) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
   Lemma(slice (seq_four_to_seq_LE s) (n * 4) (n' * 4) ==
         seq_four_to_seq_LE (slice s n n'))
@@ -181,6 +200,13 @@ val slice_commutes_le_seq_quad32_to_bytes (s:seq quad32) (n:nat{n <= length s}) 
 val slice_commutes_le_seq_quad32_to_bytes0 (s:seq quad32) (n:nat{n <= length s}) :
   Lemma(slice (le_seq_quad32_to_bytes s) 0 (n * 16) ==
         le_seq_quad32_to_bytes (slice s 0 n))
+
+(*
+val slice_commutes_le_bytes_to_seq_quad32 (s:seq nat8 { length s % 16 == 0 }) (n:nat{n * 16 <= length s}) :
+  Lemma(length (le_bytes_to_seq_quad32 s) == length s / 16 /\
+        slice (le_bytes_to_seq_quad32 s) 0 n ==
+        le_bytes_to_seq_quad32 (slice s 0 (n*16)))
+*)
 
 val append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))

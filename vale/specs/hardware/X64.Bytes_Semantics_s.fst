@@ -6,6 +6,7 @@ open Words_s
 open Words.Two_s
 open Words.Four_s
 open Types_s
+open X64.CryptoInstructions_s
 open FStar.Seq.Base
 
 type uint64:eqtype = UInt64.t
@@ -36,6 +37,7 @@ type ins:eqtype =
   | Pslld      : dst:xmm -> amt:int -> ins
   | Psrld      : dst:xmm -> amt:int -> ins
   | Psrldq     : dst:xmm -> amt:int -> ins
+  | Palignr    : dst:xmm -> src:xmm -> amount:imm8 -> ins
   | Shufpd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
   | Pshufb     : dst:xmm -> src:xmm -> ins
   | Pshufd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
@@ -52,6 +54,10 @@ type ins:eqtype =
   | AESNI_dec_last      : dst:xmm -> src:xmm -> ins
   | AESNI_imc           : dst:xmm -> src:xmm -> ins
   | AESNI_keygen_assist : dst:xmm -> src:xmm -> imm8 -> ins
+  | SHA256_rnds2 : dst:xmm -> src:xmm -> ins
+  | SHA256_msg1  : dst:xmm -> src:xmm -> ins
+  | SHA256_msg2  : dst:xmm -> src:xmm -> ins
+  
 
 type ocmp:eqtype =
   | OEq: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
@@ -542,6 +548,17 @@ let eval_ins (ins:ins) : st unit =
     let dst_q = le_bytes_to_quad32 (append zero_pad remaining_bytes) in
     update_xmm_preserve_flags dst dst_q
 
+  | Palignr dst src amount ->
+    // We only spec a restricted version sufficient for a handful of standard patterns
+    check_imm (amount = 4 || amount = 8);;
+    let src_q = eval_xmm src s in
+    let dst_q = eval_xmm dst s in
+    if amount = 4 then
+      update_xmm dst ins (Mkfour src_q.lo1 src_q.hi2 src_q.hi3 dst_q.lo0)
+    else if amount = 8 then
+      update_xmm dst ins (Mkfour src_q.hi2 src_q.hi3 dst_q.lo0 dst_q.lo1)
+    else fail
+
   | Shufpd dst src permutation ->
     check_imm (0 <= permutation && permutation < 4);;
     let src_q = eval_xmm src s in
@@ -667,6 +684,22 @@ let eval_ins (ins:ins) : st unit =
                                (ixor (AES_s.rot_word_LE (AES_s.sub_word src_q.lo1)) imm)
                                (AES_s.sub_word src_q.hi3)
                                (ixor (AES_s.rot_word_LE (AES_s.sub_word src_q.hi3)) imm))
+
+  | SHA256_rnds2 dst src ->
+    let src1_q = eval_xmm dst s in
+    let src2_q = eval_xmm src s in
+    let wk_q  = eval_xmm 0 s in    
+    update_xmm_preserve_flags dst (sha256_rnds2_spec src1_q src2_q wk_q)
+
+  | SHA256_msg1 dst src ->
+    let src1 = eval_xmm dst s in
+    let src2 = eval_xmm src s in
+    update_xmm_preserve_flags dst (sha256_msg1_spec src1 src2)
+
+  | SHA256_msg2 dst src ->
+    let src1 = eval_xmm dst s in
+    let src2 = eval_xmm src s in
+    update_xmm_preserve_flags dst (sha256_msg2_spec src1 src2)
 
 
 (*
