@@ -16,7 +16,7 @@ libmerkletree.a: $(filter-out $(NOT_NEEDED),$(ALL_OBJS))
 	$(AR) rcs $@ $^
 
 merkle_tree_test: merkle_tree_test.o libmerkletree.a
-	$(CC) $(CFLAGS) -o $@ $< -static -L . -lmerkletree
+	$(CC) $(CFLAGS) -o $@ $< -L . -lmerkletree
 
 clean:
 	rm -f $(ALL_OBJS)
