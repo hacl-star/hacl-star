@@ -1393,9 +1393,10 @@ let low_lemma_store_mem64_aux
   (v:nat64)
   (h:mem{buffer_readable h b})
   : Lemma
-    (let heap' = S.update_heap64 (buffer_addr b h + 8 `op_Multiply` i) v heap in
+    (requires I.correct_down_p h.hs h.addrs heap b)
+    (ensures (let heap' = S.update_heap64 (buffer_addr b h + 8 `op_Multiply` i) v heap in
      let h' = store_mem64 (buffer_addr b h + 8 `op_Multiply` i) v h in
-     h'.hs == B.g_upd_seq b (I.get_seq_heap heap' h.addrs b) h.hs) =
+     h'.hs == B.g_upd_seq b (I.get_seq_heap heap' h.addrs b) h.hs)) =
    let ptr = buffer_addr b h + 8 `op_Multiply` i in
    let heap' = S.update_heap64 ptr v heap in
    let h' = store_mem64 ptr v h in
@@ -1438,9 +1439,10 @@ let low_lemma_store_mem128_aux
   (v:quad32)
   (h:mem{buffer_readable h b})
   : Lemma
-    (let heap' = S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap in
+    (requires I.correct_down_p h.hs h.addrs heap b)
+    (ensures (let heap' = S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap in
      let h' = store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h in
-     h'.hs == B.g_upd_seq b (I.get_seq_heap heap' h.addrs b) h.hs) =
+     h'.hs == B.g_upd_seq b (I.get_seq_heap heap' h.addrs b) h.hs)) =
    let ptr = buffer_addr b h + 16 `op_Multiply` i in
    let heap' = S.update_heap128 ptr v heap in
    let h' = store_mem128 ptr v h in

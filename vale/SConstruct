@@ -358,10 +358,10 @@ verify_options = [
   ('.fst', BuildOptions(fstar_default_args + ' --use_two_phase_tc false')),
   ('.fsti', BuildOptions(fstar_default_args + ' --use_two_phase_tc false')),
 
-  # Needed to significantly speed up verification of interop files (and use the checked Memory_s.fst with expose_interfaces)
   ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
   ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
 
+  ('code/arch/x64/X64.BufferViewStore.fst', BuildOptions(fstar_default_args_nosmtencoding + ' --smtencoding.elim_box true')),
   ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding)),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding)),
