@@ -10,6 +10,7 @@ open FStar.Mul
 open LowStar.Modifies
 open LowStar.BufferOps
 open Low.Vector
+open Low.Regional
 open Low.RVector
 
 module HS = FStar.HyperStack
