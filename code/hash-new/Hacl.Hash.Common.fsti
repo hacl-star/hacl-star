@@ -117,6 +117,7 @@ val finish: a:hash_alg -> finish_st a
 
 (** The whole hash algorithm *)
 
+inline_for_extraction
 let hash_st (a: hash_alg) =
   input:B.buffer U8.t ->
   input_len:U32.t { B.length input = U32.v input_len } ->
