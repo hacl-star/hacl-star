@@ -12,6 +12,7 @@ module CE = C.Endianness
 module Common = Hacl.Hash.Common
 
 friend Spec.MD5
+friend Hacl.Hash.Common
 
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
