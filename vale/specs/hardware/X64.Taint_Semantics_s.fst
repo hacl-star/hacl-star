@@ -4,8 +4,7 @@ open FStar.BaseTypes
 open FStar.List.Tot.Base
 
 open X64.Machine_s
-open X64.Memory_s
-open X64.Semantics_s
+open X64.Bytes_Semantics_s
 module S = X64.Bytes_Semantics_s
 
 // syntax for map accesses, m.[key] and m.[key] <- value
@@ -207,18 +206,19 @@ and taint_eval_while c fuel s0 =
     let s_opt = taint_eval_code body (fuel - 1) s0 in
     match s_opt with
     | None -> None
-    | Some s1 -> if not (s1.state).X64.Memory_s.state.S.ok then Some s1
+    | Some s1 -> if not s1.state.ok then Some s1
       else taint_eval_while c (fuel - 1) s1
 
 (* Used to split the analysis between instructions added for xmm, and other insns *)
 let is_xmm_ins (ins:tainted_ins) =
   let i, _, _ = ins.ops in
   match i with
-    | S.Paddd _ _ | S.Pxor _ _ | S.Pslld _ _ | S.Psrld _ _ | S.Psrldq _ _ | S.Shufpd _ _ _ | S.Pshufb _ _
+    | S.Paddd _ _ | S.Pxor _ _ | S.Pslld _ _ | S.Psrld _ _ | S.Psrldq _ _ | S.Palignr _ _ _ | S.Shufpd _ _ _ | S.Pshufb _ _ 
     | S.Pshufd _ _ _ | S.Pcmpeqd _ _ | S.Pextrq _ _ _ | S.Pinsrd _ _ _ | S.Pinsrq _ _ _
     | S.VPSLLDQ _ _ _ | S.MOVDQU _ _
     | S.Pclmulqdq _ _ _ | S.AESNI_enc _ _ | S.AESNI_enc_last _ _
     | S.AESNI_dec _ _ | S.AESNI_dec_last _ _ | S.AESNI_imc _ _
-    | S.AESNI_keygen_assist _ _ _ -> true
+    | S.AESNI_keygen_assist _ _ _ 
+    | S.SHA256_rnds2 _ _ | S.SHA256_msg1 _ _ | S.SHA256_msg2 _ _ -> true
     | _ -> false
 

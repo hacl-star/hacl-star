@@ -22,8 +22,8 @@ assume val win:bool
 
 // Callee-saved registers that must be saved through an execution
 let calling_conventions (w:bool) (s0:TS.traceState) (s1:TS.traceState) =
-  let s0 = s0.TS.state.ME.state in
-  let s1 = s1.TS.state.ME.state in
+  let s0 = s0.TS.state in
+  let s1 = s1.TS.state in
   // Ensures that the execution didn't crash
   s1.BS.ok /\
   // Ensures that the callee_saved registers are correct

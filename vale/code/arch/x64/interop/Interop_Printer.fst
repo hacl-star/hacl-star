@@ -290,9 +290,8 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "let create_initial_trusted_state is_win " ^ (print_args_names args) ^ "stack_b " ^
   "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ stack_precond "h0" ^ "}) : GTot TS.traceState =\n" ^
   create_state target args stack_needed slots (slots+additional) ^
-  "  let (s_b:BS.state) = {BS.ok = true; BS.regs = regs; BS.xmms = xmms; BS.flags = 0;
+  "  let (s0:BS.state) = {BS.ok = true; BS.regs = regs; BS.xmms = xmms; BS.flags = 0;
        BS.mem = Interop.down_mem h0 addrs buffers} in\n" ^
-  "  let s0:X64.Memory_s.state = {ME.state = s_b; ME.mem = mem} in\n" ^
   "  {TS.state = s0; TS.trace = []; TS.memTaint = create_valid_memtaint mem buffers taint_func}\n\n" ^
   "val lemma_ghost_" ^ name ^ ": is_win:bool -> " ^ (print_low_args_and args) ^ 
   (if stack_needed then " stack_b:b8 -> " else "") ^
@@ -304,7 +303,7 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "    (ensures (fun (s1, f1, h1) ->\n" ^
   "      (let s0 = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
   "      Some s1 == TS.taint_eval_code (va_code_" ^ name ^ " is_win) f1 s0 /\\\n" ^
-  "      Interop.correct_down h1 addrs " ^ (namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::args))  ^ " s1.TS.state.ME.state.BS.mem /\\\n" ^
+  "      Interop.correct_down h1 addrs " ^ (namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::args))  ^ " s1.TS.state.BS.mem /\\\n" ^
   "      post_cond h0 h1 " ^ (print_args_names args) ^ " /\\\n" ^
   "      calling_conventions is_win s0 s1)\n" ^
   "    ))\n\n" ^
@@ -317,20 +316,13 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
       memTaint = create_valid_memtaint mem buffers taint_func}\n\n" ^
   "let create_lemma is_win " ^ (print_args_names args) ^ "stack_b (h0:HS.mem{pre_cond h0 " ^
     (print_args_names args) ^ stack_precond "h0" ^ "}) : Lemma\n" ^
-    "  (state_of_S (create_initial_trusted_state is_win " ^ print_args_names args ^ 
-    "stack_b h0) == create_initial_vale_state is_win " ^ print_args_names args ^ "stack_b h0) =\n" ^
+    "  (create_initial_trusted_state is_win " ^ print_args_names args ^ 
+    "stack_b h0 == state_to_S (create_initial_vale_state is_win " ^ print_args_names args ^ "stack_b h0)) =\n" ^
   "    let s_init = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
-  "    let s0 = state_of_S s_init in\n" ^
-  "    let s1 = create_initial_vale_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
-  "    assert (FunctionalExtensionality.feq s1.regs (regs' s_init.TS.state));\n" ^
-  "    assert (FunctionalExtensionality.feq s1.xmms (xmms' s_init.TS.state));\n" ^
-  "    lemma_of_ok s_init;\n" ^
-  "    lemma_of_regs s_init;\n" ^
-  "    lemma_of_flags s_init;\n" ^
-  "    lemma_of_xmms s_init;\n" ^
-  "    lemma_of_mem s_init;\n" ^
-  "    lemma_of_memTaint s_init;\n" ^  
-  "    ()\n\n" ^
+  "    let s0 = create_initial_vale_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
+  "    let s1 = state_to_S s0 in\n" ^
+  "    assert (FunctionalExtensionality.feq (regs' s1.TS.state) (regs' s_init.TS.state));\n" ^
+  "    assert (FunctionalExtensionality.feq (xmms' s1.TS.state) (xmms' s_init.TS.state))\n\n" ^
   "// TODO: Prove these two lemmas if they are not proven automatically\n" ^
   "let implies_pre (is_win:bool) (h0:HS.mem) " ^ (print_args_list args) ^ 
   (if stack_needed then " (stack_b:b8) " else "") ^
@@ -360,12 +352,16 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^
   "  implies_pre is_win h0 " ^ (print_args_names args) ^ "stack_b;\n" ^
   "  let s0 = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
+  "  let s0' = create_initial_vale_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
   "  create_lemma is_win " ^ print_args_names args ^ "stack_b h0;\n" ^
-  "  let s_v, f_v = va_lemma_" ^ name ^ " (va_code_" ^ name ^ " is_win) (state_of_S s0) is_win" ^
+  "  let s_v, f_v = va_lemma_" ^ name ^ " (va_code_" ^ name ^ " is_win) s0' is_win" ^
   (if stack_needed then " stack_b " else " ") ^
-  print_args_names_reveal args ^ " in\n" ^
-  "  implies_post is_win (state_of_S s0) s_v f_v " ^ print_args_names args ^ "stack_b;\n" ^
-  "  Some?.v (TS.taint_eval_code (va_code_" ^ name ^ " is_win) f_v s0), f_v, s_v.mem.hs\n\n"
+  print_args_names_reveal args ^ "in\n" ^
+  "  implies_post is_win s0' s_v f_v " ^ print_args_names args ^ "stack_b;\n" ^
+  "  let s1 = Some?.v (TS.taint_eval_code (va_code_" ^ name ^ " is_win) f_v s0) in\n" ^
+  "  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);\n" ^
+  "  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);\n" ^
+  "  s1, f_v, s_v.mem.hs\n\n"
 
 let translate_lowstar target (func:func_ty) =
   let name, args, Stk slots = func in
@@ -416,13 +412,13 @@ let translate_lowstar target (func:func_ty) =
   "open Vale_" ^ name ^ "\n\n" ^
   "// TODO: Complete with your pre- and post-conditions\n" ^
   "let pre_cond (h:HS.mem) " ^ (print_args_list args) ^ "= " ^ (liveness "h" args) ^ separator1 ^ (disjoint args) ^ (print_lengths args) ^ "\n\n" ^
-  "let post_cond (h:HS.mem) (h:HS.mem) " ^ (print_args_list args) ^ "= " 
+  "let post_cond (h:HS.mem) (h':HS.mem) " ^ (print_args_list args) ^ "= " 
     ^ (liveness "h" args) ^ " /\\ " ^ (liveness "h'" args) ^ separator0 ^ (print_lengths args) ^ "\n\n" ^
   "val " ^ name ^ ": " ^ (print_low_args args) ^
   "\n\t(requires (fun h -> pre_cond h " ^ (print_args_names args) ^ "))\n\t" ^
   "(ensures (fun h0 _ h1 -> post_cond h0 h1 " ^ (print_args_names args) ^ "))\n\n" ^    
   "module " ^ name ^
-  "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Words_s\nopen Types_s\nopen X64.Machine_s\nopen X64.Memory_s\nopen X64.Vale.State\nopen X64.Vale.Decls\nopen BufferViewHelpers\nopen Interop_assumptions\nopen X64.Vale.StateLemmas\nopen X64.Vale.Lemmas\nmodule TS = X64.Taint_Semantics_s\nmodule ME = X64.Memory_s\nmodule BS = X64.Bytes_Semantics_s\n\nfriend SecretByte\nfriend X64.Memory_s\nfriend X64.Memory\nfriend X64.Vale.Decls\n#set-options \"--z3rlimit 60\"\n\n" ^
+  "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Words_s\nopen Types_s\nopen X64.Machine_s\nopen X64.Memory_s\nopen X64.Vale.State\nopen X64.Vale.Decls\nopen BufferViewHelpers\nopen Interop_assumptions\nopen X64.Vale.StateLemmas\nopen X64.Vale.Lemmas\nmodule TS = X64.Taint_Semantics_s\nmodule ME = X64.Memory_s\nmodule BS = X64.Bytes_Semantics_s\n\nfriend SecretByte\nfriend X64.Memory_s\nfriend X64.Memory\nfriend X64.Vale.Decls\nfriend X64.Vale.StateLemmas\n#set-options \"--z3rlimit 60\"\n\n" ^
   "open Vale_" ^ name ^ "\n\n" ^
 
   "#set-options \"--initial_fuel " ^ fuel_value ^ " --max_fuel " ^ fuel_value ^ " --initial_ifuel 2 --max_ifuel 2\"\n" ^
