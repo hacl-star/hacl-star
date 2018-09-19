@@ -546,8 +546,6 @@ private val path_safe_preserved_:
 		      Rgl?.r_inv hreg h0 hp /\
 		      HH.includes mtr (B.frameOf hp)) /\
 		  loc_disjoint dl (B.loc_all_regions_from false mtr) /\
-		  loc_disjoint dl
-		    (B.loc_all_regions_from false (V.frameOf hvec)) /\
 		  modifies dl h0 h1))
 	(ensures (V.forall_ h hvec i j
 		    (fun hp -> 
@@ -574,8 +572,6 @@ val path_safe_preserved:
 let path_safe_preserved mtr p dl h0 h1 =
   assert (loc_includes (path_loc p) (B.loc_buffer p));
   assert (loc_includes (path_loc p) (V.loc_vector (B.get h0 p 0)));
-  assert (loc_includes (path_loc p)
-	   (B.loc_all_regions_from false (V.frameOf (B.get h0 p 0))));
   path_safe_preserved_
     mtr (B.get h0 p 0) dl 0ul (V.size_of (B.get h0 p 0))
     h0 h0 h1
@@ -652,7 +648,7 @@ private val construct_rhs:
 	   RV.rv_inv h1 rhs /\
 	   Rgl?.r_inv hreg h1 acc))
 	 (decreases (U32.v j))
-#reset-options "--z3rlimit 200 --max_fuel 1"
+#reset-options "--z3rlimit 300 --max_fuel 1"
 private let rec construct_rhs lv hs rhs i j acc actd =
   let ofs = offset_of i in
   let copy = Cpy?.copy hcpy in
@@ -679,6 +675,13 @@ private let rec construct_rhs lv hs rhs i j acc actd =
 	      	(B.loc_all_regions_from false (V.frameOf rhs))
 	      	hh0 hh1;
 	      mt_safe_elts_head hh1 lv hs i j;
+	      assert (RV.rv_inv hh1 (V.get hh1 hs lv));
+	      assert (RV.elems_reg hh1 (V.get hh1 hs lv));
+	      assert (HH.extends
+		       (B.frameOf (V.get hh1 (V.get hh1 hs lv) (j - 1ul - ofs)))
+		       (V.frameOf (V.get hh1 hs lv)));
+	      assert (HH.extends (V.frameOf (V.get hh1 hs lv))
+				 (V.frameOf hs));
 	      hash_2 (V.index (V.index hs lv) (j - 1ul - ofs)) acc acc;
 	      let hh2 = HST.get () in
 	      mt_safe_elts_preserved lv hs i j
@@ -779,29 +782,16 @@ inline_for_extraction val path_insert:
 inline_for_extraction let path_insert mtr p hp =
   let hh0 = HST.get () in
   let pv = B.index p 0ul in
-  assert (V.forall_all hh0 (B.get hh0 p 0)
-	   (fun hp -> Rgl?.r_inv hreg hh0 hp /\
-		      HH.includes mtr (B.frameOf hp)));
   let ipv = V.insert pv hp in
   let hh1 = HST.get () in
-  assert (S.equal (V.as_seq hh1 ipv)
-		  (S.snoc (V.as_seq hh0 pv) hp));
-  assert (V.forall_ hh1 ipv 0ul (V.size_of pv)
-	   (fun hp -> Rgl?.r_inv hreg hh0 hp /\
-		      HH.includes mtr (B.frameOf hp)));
-  assert (Rgl?.r_inv hreg hh1 (V.get hh1 ipv (V.size_of ipv - 1ul)));
-  assert (HH.includes mtr (B.frameOf (V.get hh1 ipv (V.size_of ipv - 1ul))));
-  assume (V.forall_ hh1 ipv 0ul (V.size_of pv)
-	   (fun hp -> Rgl?.r_inv hreg hh1 hp /\
-		      HH.includes mtr (B.frameOf hp)));
-  assert (V.forall_all hh1 ipv
-	   (fun hp -> Rgl?.r_inv hreg hh1 hp /\
-		      HH.includes mtr (B.frameOf hp)));
+  path_safe_preserved_
+    mtr ipv (B.loc_all_regions_from false (V.frameOf ipv))
+    0ul (V.size_of pv) hh1 hh0 hh1;
   p *= ipv;
   let hh2 = HST.get () in
-  assume (V.forall_all hh2 (B.get hh2 p 0)
-	   (fun hp -> Rgl?.r_inv hreg hh2 hp /\
-		      HH.includes mtr (B.frameOf hp)))
+  path_safe_preserved_
+    mtr (B.get hh2 p 0) (B.loc_region_only false (B.frameOf p))
+    0ul (V.size_of (B.get hh2 p 0)) hh2 hh1 hh2
 
 // Construct a Merkle path for a given index `k`, hashes `hs`, 
 // and rightmost hashes `rhs`.
