@@ -76,6 +76,7 @@ noeq type regional a =
 
     // Construction
     irepr: Ghost.erased repr ->
+    r_init_p: (a -> GTot Type0) ->
     r_init: (r:erid ->
       HST.ST a
 	(requires (fun h0 -> true))
@@ -83,7 +84,7 @@ noeq type regional a =
 	  Set.subset (Map.domain (HS.get_hmap h0))
 	  	     (Map.domain (HS.get_hmap h1)) /\
 	  modifies loc_none h0 h1 /\ 
-	  r_inv h1 v /\ region_of v = r /\
+	  r_init_p v /\ r_inv h1 v /\ region_of v = r /\
 	  r_repr h1 v == Ghost.reveal irepr))) ->
 
     // Destruction
@@ -675,7 +676,8 @@ private val create_:
       	      (S.create (U32.v cidx) (Ghost.reveal (Rgl?.irepr rg))) /\
       // the loop invariant for this function
       V.forall_ h1 rv 0ul cidx
-	(fun r -> MHS.fresh_region (Rgl?.region_of rg r) h0 h1) /\
+	(fun r -> MHS.fresh_region (Rgl?.region_of rg r) h0 h1 /\
+		  Rgl?.r_init_p rg r) /\
       Set.subset (Map.domain (MHS.get_hmap h0))
 		 (Map.domain (MHS.get_hmap h1))))
     (decreases (U32.v cidx))
@@ -716,6 +718,7 @@ val create_rid:
       rv_inv h1 rv /\
       V.frameOf rv = rid /\
       V.size_of rv = len /\
+      V.forall_all h1 rv (fun r -> Rgl?.r_init_p rg r) /\
       S.equal (as_seq h1 rv) 
 	      (S.create (U32.v len) (Ghost.reveal (Rgl?.irepr rg)))))
 let create_rid #a rg len rid =
@@ -747,6 +750,7 @@ val create:
       rv_inv h1 rv /\
       MHS.fresh_region (V.frameOf rv) h0 h1 /\
       V.size_of rv = len /\
+      V.forall_all h1 rv (fun r -> Rgl?.r_init_p rg r) /\
       S.equal (as_seq h1 rv)
       	      (S.create (U32.v len) (Ghost.reveal (Rgl?.irepr rg)))))
 let create #a rg len =
