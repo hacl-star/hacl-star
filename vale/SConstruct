@@ -1120,6 +1120,8 @@ if not is_help:
     # Build AES-GCM
     aesgcm_asm = extract_assembly_code(env, 'aesgcm', File('code/crypto/aes/x64/Main.ml'),
       File('code/crypto/aes/x64/X64.GCMdecrypt.vaf'), File('code/lib/util/CmdLineParser.ml'))
+    sha_asm = extract_assembly_code(env, 'sha256', File('code/crypto/sha/ShaMain.ml'),
+      File('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf'), File('code/lib/util/CmdLineParser.ml'))
     if env['TARGET_ARCH'] == 'amd64':
       aesgcmasm_obj = env.Object('obj/aesgcmasm_openssl', aesgcm_asm[0])
       aesgcmtest_src = File('code/crypto/aes/x64/TestAesGcm.cpp')
