@@ -43,11 +43,11 @@
         "equation_FStar.Monotonic.HyperStack.mreference",
         "equation_FStar.Monotonic.HyperStack.sel",
         "equation_FStar.Monotonic.HyperStack.unused_in",
-        "equation_FStar.Set.eqtype", "equation_FStar.Set.subset",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Hacl.Constants.h8",
-        "equation_Hacl.Constants.uint8_p", "equation_Hacl.Types.h64",
-        "equation_Prims.eq2", "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_FStar.Set.subset", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Constants.h8", "equation_Hacl.Constants.uint8_p",
+        "equation_Hacl.Types.h64", "equation_Prims.eq2",
+        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
         "equation_Prims.squash",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
         "fuel_guarded_inversion_Prims.equals",
@@ -81,17 +81,14 @@
         "lemma_FStar.Monotonic.Heap.lemma_contains_implies_used",
         "lemma_FStar.Monotonic.Heap.lemma_distinct_addrs_unused",
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_empty",
-        "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_union",
-        "lemma_FStar.Set.subset_mem",
+        "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
+        "lemma_FStar.Set.mem_union", "lemma_FStar.Set.subset_mem",
         "lemma_FStar.TSet.lemma_mem_tset_of_set",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Negation",
         "proj_equation_FStar.Buffer.MkBuffer_content",
-        "proj_equation_FStar.Buffer.MkBuffer_max_length",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_FStar.Buffer.MkBuffer_content",
-        "projection_inverse_FStar.Buffer.MkBuffer_max_length",
         "refinement_interpretation_FStar.HyperStack.ST_Tm_refine_003cbb363565c5358e7ed8a8d7dba6d4",
         "refinement_interpretation_FStar.Monotonic.HyperStack_Tm_refine_9a74d818566e70513bc032cc3b65a144",
         "refinement_interpretation_FStar.StrongExcludedMiddle_Tm_refine_94f72bfda5e23ac3960136c8bc3f958c",
@@ -126,7 +123,7 @@
         "typing_FStar.UInt32.v", "unit_typing"
       ],
       0,
-      "7f0c0c43a04fdba87570c330fcbd2d7f"
+      "5f60364ba0bf8d9b8d575c38ef469173"
     ],
     [
       "Hacl.Chacha20Poly1305.lemma_aead_encrypt_poly_2",
@@ -174,7 +171,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.clen"
       ],
       0,
-      "9d07621f41f11446d934b2603786b3ae"
+      "d167be561739a5c882a7147e7944699e"
     ],
     [
       "Hacl.Chacha20Poly1305.lemma_aead_encrypt_poly_2",
@@ -262,7 +259,7 @@
         "typing_Spec.Poly1305.encode_bytes"
       ],
       0,
-      "95500cac4c9acfefb0b2f6e51b2ce2ad"
+      "192dda92f0a6553f0d92643225fcaa1c"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_encrypt_poly",
@@ -302,7 +299,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "909d0e94c4aef3397d1cecfb45561247"
+      "049b0ab9e75261b93630a54019c3d54b"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_encrypt_poly",
@@ -465,7 +462,7 @@
         "unit_typing"
       ],
       0,
-      "c40b4296bdf6445960d7e8c9c4ff888c"
+      "4a7f287e7ac20ce5a12e84ca892de9f4"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_encrypt_poly",
@@ -627,7 +624,7 @@
         "typing_Hacl.Bignum.Parameters.w", "unit_typing"
       ],
       0,
-      "6c4887ad3d1b26e158033ab2ec15b8ba"
+      "875e5b45e5c9042ec4ff1ef9b785c88e"
     ],
     [
       "Hacl.Chacha20Poly1305.lemma_aead_encrypt",
@@ -642,7 +639,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e0090fafed7f2300874d40d50351b8c4"
+      "442c52f3d57aa5ddc2fc6bd44d431bed"
     ],
     [
       "Hacl.Chacha20Poly1305.encode_length",
@@ -681,7 +678,7 @@
         "typing_Hacl.Bignum.Parameters.v"
       ],
       0,
-      "ffcbacfa0d577f86dab13708852eed6e"
+      "4d539ad6ae34e4b4bab1300187c12182"
     ],
     [
       "Hacl.Chacha20Poly1305.encode_length",
@@ -778,7 +775,7 @@
         "typing_FStar.UInt64.v", "typing_Hacl.Cast.uint32_to_sint64"
       ],
       0,
-      "85a90be6a0814d0e55c41b0afcf9a1d9"
+      "59a00a2af540b2bef0520c6cd13f4699"
     ],
     [
       "Hacl.Chacha20Poly1305.encode_length",
@@ -874,7 +871,7 @@
         "typing_FStar.UInt64.v", "typing_Hacl.Cast.uint32_to_sint64"
       ],
       0,
-      "c4d84ed02118207d113bf13845ee8eb9"
+      "0eae71c6d36547909e2b8ce2fc6268bf"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_encrypt_",
@@ -963,7 +960,7 @@
         "typing_Hacl.Bignum.Parameters.v"
       ],
       0,
-      "052ed4edf45a58b33becfa6cc034b68f"
+      "ad5f39493785d00ef14f05e4b4b6ea11"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_encrypt_",
@@ -1136,7 +1133,7 @@
         "typing_Hacl.Bignum.Parameters.v", "unit_typing"
       ],
       0,
-      "fa7c57dd7644309c6caf39ac33c112c0"
+      "fedd5915b385397acfbd8eaf9e92f028"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_encrypt_",
@@ -1302,7 +1299,7 @@
         "typing_Hacl.Bignum.Parameters.v", "unit_typing"
       ],
       0,
-      "e1ca37ef4633df43afca158cffb76789"
+      "2fa9069761a9cfe1611c934d2e98863f"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_encrypt",
@@ -1346,7 +1343,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "9a53c4f8b94401a5693ebf717578f6f0"
+      "993236d8d57ca4696f61a41f2d56ead0"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_encrypt",
@@ -1400,7 +1397,7 @@
         "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "fc1e1f53586961615ecee3087f795135"
+      "c89fdb0565045403d813c58c6cd196ca"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_encrypt",
@@ -1450,7 +1447,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "aa16bea5ac55d35fdf902c61490c2d2e"
+      "95b2df1befef94aa9b9375a7ec8ebcbc"
     ],
     [
       "Hacl.Chacha20Poly1305.lemma_aead_decrypt",
@@ -1459,7 +1456,7 @@
       1,
       [ "@query" ],
       0,
-      "a412aed0ea3fa6cc07457cb24c754db5"
+      "978ffcfe2d4915ac17764829eb12e68a"
     ],
     [
       "Hacl.Chacha20Poly1305.lemma_aead_decrypt_len",
@@ -1471,7 +1468,7 @@
         "haseqHacl.Chacha20Poly1305_Tm_refine_1ec852aff28ab568526a8c54c3e853ec"
       ],
       0,
-      "cf4fec00cf5bf531ed15699a87f023af"
+      "e81b034ed33b7bd7bf92f49a1b6412ae"
     ],
     [
       "Hacl.Chacha20Poly1305.lemma_aead_decrypt_len",
@@ -1502,7 +1499,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "2d29d95ddcb526b140af179f1fe73657"
+      "75b349f0e7b29ac8cdd4f7b98e2390b3"
     ],
     [
       "Hacl.Chacha20Poly1305.lemma_aead_decrypt_len",
@@ -1532,7 +1529,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "515b8da4cf954aae633ba88c9764ab09"
+      "c6e032889247944ba9c42dd10c0697dd"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_decrypt",
@@ -1583,7 +1580,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "27b400c9a5df434c47352b969395ab46"
+      "2a2295ba01cc0c309e52c5bd08c3cd1d"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_decrypt",
@@ -1762,7 +1759,7 @@
         "typing_Hacl.Bignum.Parameters.v", "typing_Prims.pow2", "unit_typing"
       ],
       0,
-      "24809c16fe23c9d1ef2584eab214c53f"
+      "7a904d7ed0d5066ddbaf3c94c58ae20e"
     ],
     [
       "Hacl.Chacha20Poly1305.aead_decrypt",
@@ -1945,7 +1942,7 @@
         "typing_Hacl.Bignum.Parameters.v", "typing_Prims.pow2", "unit_typing"
       ],
       0,
-      "87a84aeea8154dc688fed06aae774da6"
+      "945503235182c60748232b95751192a8"
     ]
   ]
 ]
