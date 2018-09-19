@@ -91,6 +91,9 @@ val hash_irepr: Ghost.erased hash_repr
 let hash_irepr =
   Ghost.hide (S.create (U32.v hash_size) 0uy)
 
+val hash_r_init_p: v:hash -> GTot Type0
+let hash_r_init_p v = True
+
 private val hash_r_init:
   r:erid ->
   HST.ST hash
@@ -99,6 +102,7 @@ private val hash_r_init:
       Set.subset (Map.domain (MHS.get_hmap h0))
                  (Map.domain (MHS.get_hmap h1)) /\
       modifies loc_none h0 h1 /\
+      hash_r_init_p v /\
       hash_r_inv h1 v /\
       hash_region_of v = r /\
       hash_r_repr h1 v == Ghost.reveal hash_irepr))
@@ -140,6 +144,7 @@ private let hreg =
       hash_r_inv_reg
       hash_r_sep
       hash_irepr
+      hash_r_init_p
       hash_r_init
       hash_r_free
 
@@ -192,6 +197,10 @@ val hash_vec_irepr: Ghost.erased hash_vec_repr
 let hash_vec_irepr =
   Ghost.hide S.empty
 
+val hash_vec_r_init_p: v:hash_vec -> GTot Type0
+let hash_vec_r_init_p v =
+  V.size_of v = 0ul
+
 private val hash_vec_r_init: 
   r:erid ->
   HST.ST (v:hash_vec)
@@ -200,6 +209,7 @@ private val hash_vec_r_init:
       Set.subset (Map.domain (MHS.get_hmap h0))
                  (Map.domain (MHS.get_hmap h1)) /\
       modifies loc_none h0 h1 /\
+      hash_vec_r_init_p v /\
       hash_vec_r_inv h1 v /\
       hash_vec_region_of v = r /\
       hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr))
@@ -228,6 +238,7 @@ private let bhreg =
       hash_vec_r_inv_reg
       hash_vec_r_sep
       hash_vec_irepr
+      hash_vec_r_init_p
       hash_vec_r_init
       hash_vec_r_free
 
@@ -404,8 +415,6 @@ private let create_empty_mt r =
   let hs_region = RV.new_region_ r in
   let hs = RV.create_rid bhreg 32ul hs_region in
   let h0 = HST.get () in
-  assume (V.forall_ h0 hs 0ul (V.size_of hs)
-	   (fun hv -> V.size_of hv = 0ul));
   mt_safe_elts_init h0 0ul hs;
   let rhs_region = RV.new_region_ r in
   let rhs = RV.create_rid hreg 32ul rhs_region in
@@ -760,6 +769,7 @@ inline_for_extraction val path_insert:
       path_safe h0 mtr p /\
       not (V.is_full (B.get h0 p 0)) /\
       Rgl?.r_inv hreg h0 hp /\
+      HH.disjoint mtr (B.frameOf p) /\
       HH.includes mtr (B.frameOf hp)))
     (ensures (fun h0 _ h1 -> 
       modifies (path_loc p) h0 h1 /\
@@ -768,11 +778,28 @@ inline_for_extraction val path_insert:
 inline_for_extraction let path_insert mtr p hp =
   let hh0 = HST.get () in
   let pv = B.index p 0ul in
+  assert (V.forall_all hh0 (B.get hh0 p 0)
+	   (fun hp -> Rgl?.r_inv hreg hh0 hp /\
+		      HH.includes mtr (B.frameOf hp)));
   let ipv = V.insert pv hp in
-  p *= ipv;
   let hh1 = HST.get () in
-  assume (V.forall_all hh1 (B.get hh1 p 0)
+  assert (S.equal (V.as_seq hh1 ipv)
+		  (S.snoc (V.as_seq hh0 pv) hp));
+  assert (V.forall_ hh1 ipv 0ul (V.size_of pv)
+	   (fun hp -> Rgl?.r_inv hreg hh0 hp /\
+		      HH.includes mtr (B.frameOf hp)));
+  assert (Rgl?.r_inv hreg hh1 (V.get hh1 ipv (V.size_of ipv - 1ul)));
+  assert (HH.includes mtr (B.frameOf (V.get hh1 ipv (V.size_of ipv - 1ul))));
+  assume (V.forall_ hh1 ipv 0ul (V.size_of pv)
 	   (fun hp -> Rgl?.r_inv hreg hh1 hp /\
+		      HH.includes mtr (B.frameOf hp)));
+  assert (V.forall_all hh1 ipv
+	   (fun hp -> Rgl?.r_inv hreg hh1 hp /\
+		      HH.includes mtr (B.frameOf hp)));
+  p *= ipv;
+  let hh2 = HST.get () in
+  assume (V.forall_all hh2 (B.get hh2 p 0)
+	   (fun hp -> Rgl?.r_inv hreg hh2 hp /\
 		      HH.includes mtr (B.frameOf hp)))
 
 // Construct a Merkle path for a given index `k`, hashes `hs`, 
