@@ -760,11 +760,12 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash_w SHA2_256) (quads:seq qu
                   hash' == update_multi_quads r_quads hash)        
         (ensures 
            length blocks % 64 == 0 /\
-           hash' == update_multi SHA2_256 hash blocks)
+           hash' == update_multi_opaque_vale hash blocks)
         (decreases (length quads)) 
   =
   let open FStar.Mul in
   assert (length blocks % 64 == 0);
+  reveal_opaque update_multi;
   if length quads = 0 then begin
     lemma_le_seq_quad32_to_bytes_length quads;
     //assert (length nat8s == 0);

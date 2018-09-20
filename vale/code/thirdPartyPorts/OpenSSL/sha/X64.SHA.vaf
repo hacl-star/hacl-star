@@ -714,7 +714,6 @@ procedure {:quick} sha_update_bytes(
     assert hash_out == update_multi_quads(input_BE, hash_in);
     lemma_update_multi_equiv_vale(hash_in, hash_out, input_LE, input_BE, le_seq_quad32_to_bytes(input_LE),
                                   seq_nat8_to_seq_U8(le_seq_quad32_to_bytes(input_LE)));
-    reveal update_multi;
 }
 
 #reset-options "--z3rlimit 40"
