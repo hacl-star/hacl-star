@@ -303,7 +303,7 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "    (ensures (fun (s1, f1, h1) ->\n" ^
   "      (let s0 = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
   "      Some s1 == TS.taint_eval_code (va_code_" ^ name ^ " is_win) f1 s0 /\\\n" ^
-  "      Interop.correct_down h1 addrs " ^ (namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::args))  ^ " s1.TS.state.BS.mem /\\\n" ^
+  "      Interop.correct_down h1 addrs " ^ (namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::buffer_args))  ^ " s1.TS.state.BS.mem /\\\n" ^
   "      post_cond h0 h1 " ^ (print_args_names args) ^ " /\\\n" ^
   "      calling_conventions is_win s0 s1)\n" ^
   "    ))\n\n" ^
