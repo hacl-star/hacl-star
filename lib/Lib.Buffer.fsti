@@ -4,7 +4,9 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open Lib.IntTypes
 
+
 module LSeq = Lib.Sequence
+
 
 
 unfold let v = size_v
@@ -26,11 +28,11 @@ inline_for_extraction val as_lseq: #a:Type0 -> #len:size_nat -> b:lbuffer a len 
 
 let creates1 (#a:Type0) (#len:size_nat) (b:lbuffer a (len)) (h0:mem) (h1:mem) : GTot Type =
  (live h1 b /\
-  (forall (a':Type0) (len':size_nat) (b':lbuffer a' (len')). {:pattern (live h0 b')} live h0 b' ==> (live h1 b' /\ disjoint b b'  /\ disjoint b' b)))
+  (forall (a':Type0) (len':size_nat) (b':lbuffer a' (len')). (* {:pattern (live h0 b')} *) live h0 b' ==> (live h1 b' /\ disjoint b b'  /\ disjoint b' b)))
 
 let creates2 (#a0:Type0) (#a1:Type0) (#len0:size_nat) (#len1:size_nat) (b0:lbuffer a0 len0) (b1:lbuffer a1 len1) (h0:mem) (h1:mem) : GTot Type =
  (live h1 b0 /\ live h1 b1 /\ disjoint b0 b1 /\
-  (forall (a':Type0) (len':size_nat) (b':lbuffer a' (len')). {:pattern (live h0 b')} live h0 b' ==> (live h1 b' /\ disjoint b0 b' /\ disjoint b' b0 /\ disjoint b' b1 /\ disjoint b1 b')))
+  (forall (a':Type0) (len':size_nat) (b':lbuffer a' (len')). (* {:pattern (live h0 b')} *) live h0 b' ==> (live h1 b' /\ disjoint b0 b' /\ disjoint b' b0 /\ disjoint b' b1 /\ disjoint b1 b')))
 
 let rec creates (l:list bufitem) (h0:mem) (h1:mem) : GTot Type =
   match l with
@@ -71,6 +73,8 @@ inline_for_extraction val upd: #a:Type0 -> #len:size_nat -> b:lbuffer a (len) ->
 inline_for_extraction let op_Array_Assignment #a #len = upd #a #len
 inline_for_extraction let op_Array_Access #a #len = index #a #len
 
+
+let x: size_nat = 1 + 1 //vsize_key_sig_public + vsize_key_sig_private
 
 inline_for_extraction val create: #a:Type0 -> #len:size_nat -> clen:size_t{v clen == len} -> init:a ->
   StackInline (lbuffer a len)
