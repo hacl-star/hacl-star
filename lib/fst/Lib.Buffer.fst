@@ -12,12 +12,12 @@ module LSeq = Lib.Sequence
 module Buf = LowStar.Buffer
 module U32 = FStar.UInt32
 
-//type buffer (a:Type0) = Buf.buffer a 
+//type buffer (a:Type0) = Buf.buffer a
 let length (#a:Type0) (b:buffer a) = Buf.length b
 let gsub #a #len #olen b start n = admit() //; Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
 let disjoint #a1 #a2 #len1 #len2 b1 b2 : GTot Type0 = admit()
-let live #a #len h b : GTot Type0 = admit()
+let live #a h b : GTot Type0 = admit()
 let preserves_live h0 h1 = True
 let as_seq #a #len b m = admit()
 let as_lseq #a #len b m = admit()
@@ -65,6 +65,19 @@ let alloc_with #h0 #a #b #w #len #wlen clen init_spec init write spec impl =
   r
 
 let alloc_nospec #h0 #a #b #w #len #wlen clen init write impl =
+  push_frame();
+  let buf = create clen init in
+  let r = impl buf in
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      upd #a #len buf j init in
+  Lib.Loops.for (size 0) clen inv f';
+  pop_frame();
+  r
+
+let alloc_nospec2 #h0 #a #b #w0 #w1 #len #wlen0 #wlen1 clen init write0 write1 impl =
   push_frame();
   let buf = create clen init in
   let r = impl buf in
