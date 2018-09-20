@@ -1,10 +1,3 @@
-#include <inttypes.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <wmmintrin.h>
-#include <smmintrin.h>
-#include "endianness.h"
 
 #define INTERLEAVE 4
 typedef __m128i* state_t;

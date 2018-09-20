@@ -110,22 +110,29 @@ aes-perf: aes-bitslice.exe aes-ni.exe
 	./aes-perf.exe
 
 
-GF128_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+GF128_OLD_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	Hacl.Impl.Gf128.NI.fst \
 	Hacl.Gf128.fst \
 	Hacl.Test.Gf128NI.fst 
 
+GF128_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	Hacl.Impl.Gf128.FieldNI.fst \
+	Hacl.Impl.Gf128.Generic.fst \
+	Hacl.Gf128.NI.fst \
+	Hacl.Test.Gf128.NI.fst 
+
 gf128-ni-c/out.krml: $(GF128_NI_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-ni-c $(GF128_NI_FILES) -skip-translation
 
-gf128-ni-c/Hacl_Gf128.c: gf128-ni-c/out.krml
+gf128-ni-c/Hacl_Gf128_NI.c: gf128-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Gf128=*'
-gf128-ni.exe: gf128-ni-c/Hacl_Gf128.c gf128-ni-c/out.krml
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Gf128.NI=*'
+gf128-ni.exe: gf128-ni-c/Hacl_Gf128_NI.c gf128-ni-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-ni-c \
-	  -no-prefix 'Hacl.Test.Gf128NI' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
-	  -bundle 'Hacl.Test.Gf128NI=*' -library Hacl.Gf128 -library Lib.Vec128 \
+	  -no-prefix 'Hacl.Test.Gf128.NI' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
+	  -bundle 'Hacl.Test.Gf128.NI=*' -library Hacl.Gf128 -library Lib.Vec128 \
 	  $^ -o $@
 
 
@@ -153,7 +160,7 @@ gf128-test: gf128-ni.exe gf128-pre.exe
 	./gf128-pre.exe
 
 gf128-perf: gf128-ni.exe gf128-pre.exe
-	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128.c  gf128-pre-c/Hacl_Gf128_PreComp.c $(KREMLIN_HOME)/kremlib/c/testlib.o gf128_test.c -o gf128-perf.exe
+	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128_NI.c  gf128-pre-c/Hacl_Gf128_PreComp.c $(KREMLIN_HOME)/kremlib/c/testlib.o gf128_test.c -o gf128-perf.exe
 	./gf128-perf.exe
 
 

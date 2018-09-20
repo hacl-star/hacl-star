@@ -8,72 +8,17 @@ open LowStar.Buffer
 open Lib.Utils
 open Lib.Vec128
 
-type m_spec =
-  | MAES
-  | M32
-
-unfold
-let stelem (m:m_spec) =
+inline_for_extraction
+let create_state (#m:m_spec) = 
   match m with
-  | MAES -> vec128
-  | M32 -> uint64
-
-unfold
-let stlen (m:m_spec) =
-  match m with
-  | MAES -> 4
-  | M32 -> 8
-
-unfold
-let klen (m:m_spec) =
-  match m with
-  | MAES -> 1
-  | M32 -> 8
-
-unfold
-let nlen (m:m_spec) =
-  match m with
-  | MAES -> 1
-  | M32 -> 8
-
-
-unfold
-let state (m:m_spec) = lbuffer (stelem m) (stlen m)
-
-unfold
-let key1 (m:m_spec) = lbuffer (stelem m) (klen m)
-
-unfold
-let nonce (m:m_spec) = lbuffer (stelem m) (nlen m)
-
-
-unfold
-let ctxlen (m:m_spec) =  nlen m + (15 `op_Multiply` klen m)
-
-unfold
-type aes_ctx (m:m_spec) = lbuffer (stelem m) (ctxlen m) 
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.create_state() 
+  | MAES -> Hacl.Impl.Aes.CoreNI.create_state() 
 
 inline_for_extraction
-let get_nonce (#m:m_spec) (ctx:aes_ctx m) = sub ctx (size 0) (size (nlen m))
-inline_for_extraction
-let get_kex (#m:m_spec) (ctx:aes_ctx m) = sub ctx (size (nlen m)) (size 15 
-*. size (klen m))
-
-inline_for_extraction
-val create_ctx: m:m_spec -> StackInline (aes_ctx m)
-                   (requires (fun h -> True))
-		   (ensures (fun h0 f h1 -> live h1 f))
-let create_ctx (m:m_spec) = 
+let copy_state (#m:m_spec) (st:state m) (ost:state m) = 
   match m with
-  | M32 -> create #uint64 (u64 0) (size (ctxlen m))
-  | MAES -> create #vec128 vec128_zero (size (ctxlen m))
-
-
-unfold
-let elem_zero (m:m_spec) : stelem m =
-  match m with
-  | M32 -> u64 0
-  | MAES -> vec128_zero
+  | MAES -> Hacl.Impl.Aes.CoreNI.copy_state st ost
+  | M32 -> Hacl.Impl.Aes.CoreBitSlice.copy_state st ost
 
 inline_for_extraction
 let load_key1 (#m:m_spec) (k:key1 m) (b:lbytes 16) = 
@@ -99,21 +44,6 @@ let store_block0 (#m:m_spec) (out:lbytes 16) (st:state m) =
   | MAES -> Hacl.Impl.Aes.CoreNI.store_block0 out st
   | M32 -> Hacl.Impl.Aes.CoreBitSlice.store_block0 out st
 
-
-inline_for_extraction
-val create_state: #m:m_spec -> StackInline (state m)
-                   (requires (fun h -> True))
-		   (ensures (fun h0 f h1 -> live h1 f))
-let create_state (#m:m_spec) = 
-  match m with
-  | MAES -> Hacl.Impl.Aes.CoreNI.create_state()
-  | M32 -> Hacl.Impl.Aes.CoreBitSlice.create_state()
-
-inline_for_extraction
-let copy_state (#m:m_spec) (st:state m) (ost:state m) = 
-  match m with
-  | MAES -> Hacl.Impl.Aes.CoreNI.copy_state st ost
-  | M32 -> Hacl.Impl.Aes.CoreBitSlice.copy_state st ost
 
 inline_for_extraction
 let xor_state_key1 (#m:m_spec) (st:state m) (key:key1 m) = 

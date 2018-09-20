@@ -150,6 +150,9 @@ let gf128_reduce (hi:vec128) (lo:vec128) : vec128 =
 
 let felem = lbuffer vec128 1
 let felem4 = lbuffer vec128 4
+type precomp = lbuffer vec128 4
+type block = lbytes 16
+type block4 = lbytes 64
 
 inline_for_extraction
 val fadd: x:felem -> y:felem -> Stack unit
@@ -170,6 +173,7 @@ let fmul (x:felem) (y:felem) =
     let lo = gf128_reduce hi lo in
     x.(size 0) <- lo
 
+  
 
 inline_for_extraction
 val fadd_mul4: acc:felem -> x:felem4 -> y:felem4 -> Stack unit

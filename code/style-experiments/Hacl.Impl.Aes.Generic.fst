@@ -21,6 +21,26 @@ type keyr (m:m_spec) =  lbuffer (stelem m) (9 `op_Multiply` klen m)
 unfold
 type keyex (m:m_spec) = lbuffer (stelem m) (15 `op_Multiply` klen m) // Saving space for AES-256
 
+unfold
+let ctxlen (m:m_spec) =  nlen m + (15 `op_Multiply` klen m)
+
+unfold
+type aes_ctx (m:m_spec) = lbuffer (stelem m) (ctxlen m) 
+
+inline_for_extraction
+let get_nonce (#m:m_spec) (ctx:aes_ctx m) = sub ctx (size 0) (size (nlen m))
+inline_for_extraction
+let get_kex (#m:m_spec) (ctx:aes_ctx m) = sub ctx (size (nlen m)) (size 15 
+*. size (klen m))
+
+inline_for_extraction
+val create_ctx: m:m_spec -> StackInline (aes_ctx m)
+                   (requires (fun h -> True))
+		   (ensures (fun h0 f h1 -> live h1 f))
+let create_ctx (m:m_spec) = create (elem_zero m) (size (ctxlen m))
+
+
+
 inline_for_extraction
 val add_round_key: #m:m_spec -> st:state m -> key:key1 m -> ST unit
 			     (requires (fun h -> live h st /\ live h key))
@@ -193,6 +213,16 @@ let aes128_init #m ctx key nonce =
   key_expansion128 #m kex key ; 
   load_nonce #m n nonce
 
+
+inline_for_extraction
+val aes128_set_nonce: #m:m_spec -> ctx:aes_ctx m -> nonce:lbytes 12 -> ST unit
+			     (requires (fun h -> live h ctx /\ live h nonce))
+			     (ensures (fun h0 b h1 -> modifies (loc_buffer ctx) h0 h1))
+let aes128_set_nonce #m ctx nonce = 
+  let n = get_nonce ctx in
+  load_nonce #m n nonce
+
+  
 inline_for_extraction
 val aes256_init: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbytes 12 -> ST unit
 			     (requires (fun h -> live h ctx /\ live h nonce /\ live h key))

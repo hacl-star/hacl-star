@@ -11,6 +11,53 @@ let felem = lbuffer uint32 5
 let felem_wide = lbuffer uint64 5
 let precomp_r = lbuffer uint32 10
 
+inline_for_extraction
+let max26 = pow2 26 - 1
+//let _ : (x:unit{pow2 32 == 64 `op_Multiply` pow2 26}) = 
+//      assert_norm (pow2 32 == 64 `op_Multiply` pow2 26)
+
+
+
+let felem_fits (h:mem) (f:felem) (m:nat) = 
+    let s = as_seq h f in
+    let s0 =  uint_v (s.[size 0]) in
+    let s1 =  uint_v (s.[size 1]) in
+    let s2 =  uint_v (s.[size 2]) in
+    let s3 =  uint_v (s.[size 3]) in
+    let s4 =  uint_v (s.[size 4]) in
+    let ( * ) = op_Multiply in
+    s0 < m * pow2 26 /\
+    s1 < m * pow2 26 /\
+    s2 < m * pow2 26 /\
+    s3 < m * pow2 26 /\
+    s4 < m * pow2 26 
+
+let felem_wide_fits (h:mem) (f:felem_wide) (m:nat) = 
+    let s = as_seq h f in
+    let s0 =  uint_v (s.[size 0]) in
+    let s1 =  uint_v (s.[size 1]) in
+    let s2 =  uint_v (s.[size 2]) in
+    let s3 =  uint_v (s.[size 3]) in
+    let s4 =  uint_v (s.[size 4]) in
+    let ( * ) = op_Multiply in
+    s0 < m * pow2 26 /\
+    s1 < m * pow2 26 /\
+    s2 < m * pow2 26 /\
+    s3 < m * pow2 26 /\
+    s4 < m * pow2 26 
+
+val lemma_felem_fits_larger: h:mem -> f:felem -> m:nat -> n:nat -> Lemma
+		       (requires (felem_fits h f m /\ m <= n))
+		       (ensures (felem_fits h f n))
+		       [SMTPat (felem_fits h f m); SMTPat (m <= n)]
+let lemma_felem_fits_larger h f m n = ()		       
+
+val lemma_wide_fits_larger: h:mem -> f:felem_wide -> m:nat -> n:nat -> Lemma
+		       (requires (felem_wide_fits h f m /\ m <= n))
+		       (ensures (felem_wide_fits h f n))
+		       [SMTPat (felem_wide_fits h f m); SMTPat (m <= n)]
+let lemma_wide_fits_larger h f m n = ()		       
+
 noextract 
 val as_nat: h:mem -> e:felem -> GTot nat 
 let as_nat h e = 
@@ -83,7 +130,7 @@ let set_bit128 f =
 inline_for_extraction
 val set_zero: f:felem -> Stack unit
                    (requires (fun h -> live h f))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1 /\ as_nat h1 f == 0))
 let set_zero f = 
     f.(size 0) <- u32 0;
     f.(size 1) <- u32 0;
@@ -91,16 +138,22 @@ let set_zero f =
     f.(size 3) <- u32 0;
     f.(size 4) <- u32 0
 
+#reset-options "--z3rlimit 50"
 inline_for_extraction
 val copy_felem: f1:felem -> f2:felem -> Stack unit
                    (requires (fun h -> live h f1 /\ live h f2))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f1) h0 h1))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f1) h0 h1 /\ as_nat h1 f1 == as_nat h0 f2))
 let copy_felem f1 f2 = 
-    f1.(size 0) <- f2.(size 0);
-    f1.(size 1) <- f2.(size 1);
-    f1.(size 2) <- f2.(size 2);
-    f1.(size 3) <- f2.(size 3);
-    f1.(size 4) <- f2.(size 4)
+    let f20 = f2.(size 0) in
+    let f21 = f2.(size 1) in
+    let f22 = f2.(size 2) in
+    let f23 = f2.(size 3) in
+    let f24 = f2.(size 4) in
+    f1.(size 0) <- f20;
+    f1.(size 1) <- f21;
+    f1.(size 2) <- f22;
+    f1.(size 3) <- f23;
+    f1.(size 4) <- f24
 
 
 inline_for_extraction
@@ -118,27 +171,21 @@ let load_precompute_r p r0 r1 =
     r5.(size 4) <- r.(size 4) *. u32 5
 
 
+#reset-options "--z3rlimit 100 --max_fuel 1"
 
-#reset-options "--z3rlimit 50"
 
 //inline_for_extraction
 [@ CInline]
-val fadd: out:felem -> f1:felem  -> f2:felem  -> Stack unit
+val fadd_: #m1:nat -> #m2:nat -> out:felem -> f1:felem  -> f2:felem  -> Stack unit
                    (requires (fun h -> live h f1 /\ live h f2 /\ live h out /\
-		    (let s1 = as_seq h f1 in
-		     let s2 = as_seq h f2 in
-		     uint_v s1.[size 0] + uint_v s2.[size 0] <= maxint U32 /\ 
-		     uint_v s1.[size 1] + uint_v s2.[size 1] <= maxint U32 /\ 
-		     uint_v s1.[size 2] + uint_v s2.[size 2] <= maxint U32 /\
-		     uint_v s1.[size 3] + uint_v s2.[size 3] <= maxint U32 /\
-		     uint_v s1.[size 4] + uint_v s2.[size 4] <= maxint U32 
-		     )))
-		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f1) h0 h1 /\
+				    felem_fits h f1 m1 /\ felem_fits h f2 m2 /\
+				    m1 + m2 <= 64))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1 /\
 				         as_nat h1 out ==
 					 as_nat h0 f1 +
 					 as_nat h0 f2))		
 [@ CInline]
-let fadd out f1 f2 = 
+let fadd_ #m1 #m2 out f1 f2 = 
   let f10 = f1.(size 0) in
   let f11 = f1.(size 1) in
   let f12 = f1.(size 2) in
@@ -149,37 +196,65 @@ let fadd out f1 f2 =
   let f22 = f2.(size 2) in
   let f23 = f2.(size 3) in
   let f24 = f2.(size 4) in
-  out.(size 0) <- f10 +. f20;
-  out.(size 1) <- f11 +. f21;
-  out.(size 2) <- f12 +. f22;
-  out.(size 3) <- f13 +. f23;
-  out.(size 4) <- f14 +. f24
+  out.(size 0) <- f10 +! f20;
+  out.(size 1) <- f11 +! f21;
+  out.(size 2) <- f12 +! f22;
+  out.(size 3) <- f13 +! f23;
+  out.(size 4) <- f14 +! f24
+
+
+//inline_for_extraction
+[@ CInline]
+val fadd: out:felem -> f1:felem  -> f2:felem  -> Stack unit
+                   (requires (fun h -> live h f1 /\ live h f2 /\ live h out /\
+				    felem_fits h f1 32 /\ felem_fits h f2 32))
+		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1 /\
+				         as_nat h1 out ==
+					 as_nat h0 f1 +
+					 as_nat h0 f2))		
+[@ CInline]
+let fadd out f1 f2 = fadd_ #32 #32 out f1 f2
+
+inline_for_extraction
+val mul_wide32: x:uint32 -> y:uint32 -> z:uint64{uint_v z == uint_v x `op_Multiply` uint_v y}
+let mul_wide32 x y = to_u64 x *! to_u64 y
+
 
 //[@ CInline]
 inline_for_extraction
-val smul_felem: out:felem_wide -> u1:uint32 -> f2:felem -> Stack unit
-                   (requires (fun h -> live h out /\ live h f2))
+val smul_felem: #m:nat -> out:felem_wide -> u1:uint32 -> f2:felem -> Stack unit
+                   (requires (fun h -> live h out /\ live h f2 
+				    /\ felem_fits h f2 m
+				    ))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1 /\
+					 felem_wide_fits h1 out (uint_v u1 `op_Multiply` m) /\
 				         wide_as_nat h1 out ==
 				         uint_v u1 `op_Multiply` as_nat h0 f2))
+#reset-options "--z3rlimit 300"
+
 [@ CInline]
-let smul_felem out u1 f2 = 
+let smul_felem #m out u1 f2 = 
   let f20 = f2.(size 0) in
   let f21 = f2.(size 1) in
   let f22 = f2.(size 2) in
   let f23 = f2.(size 3) in
   let f24 = f2.(size 4) in
-  out.(size 0) <- to_u64 u1 *. to_u64 f20;
-  out.(size 1) <- to_u64 u1 *. to_u64 f21;
-  out.(size 2) <- to_u64 u1 *. to_u64 f22;
-  out.(size 3) <- to_u64 u1 *. to_u64 f23;
-  out.(size 4) <- to_u64 u1 *. to_u64 f24
-
+  let o0 = mul_wide32 u1 f20 in
+  let o1 = mul_wide32 u1 f21 in
+  let o2 = mul_wide32 u1 f22 in
+  let o3 = mul_wide32 u1 f23 in
+  let o4 = mul_wide32 u1 f24 in
+  out.(size 0) <- o0;
+  out.(size 1) <- o1;
+  out.(size 2) <- o2;
+  out.(size 3) <- o3;
+  out.(size 4) <- o4
 
 //[@ CInline]
 inline_for_extraction
-val smul_add_felem: out:felem_wide -> u1:uint32 -> f2:felem -> Stack unit
-                   (requires (fun h -> live h out /\ live h f2))
+val smul_add_felem: #m1:nat -> #m2:nat -> #m3:nat -> out:felem_wide -> u1:uint32 -> f2:felem -> Stack unit
+                   (requires (fun h -> live h out /\ live h f2 /\ felem_wide_fits h out m1 /\
+				    uint_v u1 < m2 `op_Multiply` pow2 26 /\ felem_fits h f2 m3))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1 /\
 				         wide_as_nat h1 out ==
 				         wide_as_nat h0 out +
@@ -197,11 +272,11 @@ let smul_add_felem out u1 f2 =
   let o2 = out.(size 2) in
   let o3 = out.(size 3) in
   let o4 = out.(size 4) in
-  out.(size 0) <- o0 +. to_u64 u1 *. to_u64 f20;
-  out.(size 1) <- o1 +. to_u64 u1 *. to_u64 f21;
-  out.(size 2) <- o2 +. to_u64 u1 *. to_u64 f22;
-  out.(size 3) <- o3 +. to_u64 u1 *. to_u64 f23;
-  out.(size 4) <- o4 +. to_u64 u1 *. to_u64 f24
+  out.(size 0) <- o0 +! mul_wide32 u1 f20;
+  out.(size 1) <- o1 +! mul_wide32 u1 f21;
+  out.(size 2) <- o2 +! mul_wide32 u1 f22;
+  out.(size 3) <- o3 +! mul_wide32 u1 f23;
+  out.(size 4) <- o4 +! mul_wide32 u1 f24
 
 //inline_for_extraction
 [@ CInline]

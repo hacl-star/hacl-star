@@ -31,11 +31,11 @@ static __inline__ cycles cpucycles_end(void)
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
-extern void Hacl_Gf128_ghash(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
+extern void Hacl_Gf128_NI_ghash(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 extern void Hacl_Gf128_PreComp_ghash(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 
-#define ROUNDS 1024
-#define SIZE   163840
+#define ROUNDS 10240
+#define SIZE   16384
 
 int main() {
   int in_len = 92;
@@ -76,7 +76,7 @@ int main() {
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
 
-  Hacl_Gf128_ghash(comp,in,92,key);
+  Hacl_Gf128_NI_ghash(comp,in,92,key);
   printf("GF128 NI Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -119,13 +119,13 @@ int main() {
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Gf128_ghash(plain,plain,SIZE,key);
+    Hacl_Gf128_NI_ghash(plain,plain,SIZE,key);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Gf128_ghash(tag,plain,SIZE,key);
+    Hacl_Gf128_NI_ghash(tag,plain,SIZE,key);
     res ^= tag[0] ^ tag[15];
   }
   b = cpucycles_end();

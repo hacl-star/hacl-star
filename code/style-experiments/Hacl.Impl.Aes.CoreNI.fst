@@ -12,6 +12,10 @@ type state = lbuffer vec128 4
 type key1 =  lbuffer vec128 1
 type nonce =  lbuffer vec128 1
 
+inline_for_extraction
+val create_state: unit -> StackInline state
+                   (requires (fun h -> True))
+		   (ensures (fun h0 f h1 -> live h1 f))
 let create_state () = create vec128_zero (size 4)
 
 
