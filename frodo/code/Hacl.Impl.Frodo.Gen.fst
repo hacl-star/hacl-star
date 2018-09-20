@@ -189,26 +189,6 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
 
 /// AES128
 
-inline_for_extraction noextract
-val frodo_gen_matrix_aes_inner:
-    n:size_t{v n * v n <= max_size_t}
-  -> i:size_t{v i < v n}
-  -> j:size_t{v j < v n - 7}
-  -> c:lbytes (size 16)
-  -> a:matrix_t n n
-  -> Stack unit
-    (requires fun h -> live h a /\ live h c)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer a) h0 h1)
-let frodo_gen_matrix_aes_inner n i j c a =
-  a.[i, j +! size 0] <- uint_from_bytes_le (sub c (size 0)  (size 2));
-  a.[i, j +! size 1] <- uint_from_bytes_le (sub c (size 2)  (size 2));
-  a.[i, j +! size 2] <- uint_from_bytes_le (sub c (size 4)  (size 2));
-  a.[i, j +! size 3] <- uint_from_bytes_le (sub c (size 6)  (size 2));
-  a.[i, j +! size 4] <- uint_from_bytes_le (sub c (size 8)  (size 2));
-  a.[i, j +! size 5] <- uint_from_bytes_le (sub c (size 10) (size 2));
-  a.[i, j +! size 6] <- uint_from_bytes_le (sub c (size 12) (size 2));
-  a.[i, j +! size 7] <- uint_from_bytes_le (sub c (size 14) (size 2))
-
 val frodo_gen_matrix_aes:
     n:size_t{v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len == 16}
@@ -222,23 +202,33 @@ let frodo_gen_matrix_aes n seed_len seed a =
   push_frame();
   let key = B.alloca (u8 0) 176ul in
   Hacl.AES128.aes128_key_expansion seed key;
-  let b:lbytes (size 16) = create #uint8 (size 16) (u8 0) in
-  let c:lbytes (size 16) = create #uint8 (size 16) (u8 0) in
+
   let h0 = ST.get() in
   Lib.Loops.for (size 0) n
-    (fun h1 i ->
-      modifies (loc_union (loc_union (loc_buffer b) (loc_buffer c)) (loc_buffer a)) h0 h1)
+    (fun h1 i -> modifies (loc_buffer a) h0 h1)
     (fun i ->
       let h1 = ST.get() in
       Lib.Loops.for (size 0) (n /. size 8)
-        (fun h2 j ->
-           modifies (loc_union (loc_union (loc_buffer b) (loc_buffer c)) (loc_buffer a)) h1 h2)
+        (fun h2 j -> modifies (loc_buffer a) h1 h2)
         (fun j ->
           let j = j *! size 8 in
-          uint_to_bytes_le (sub b (size 0) (size 2)) (to_u16 (size_to_uint32 i));
-          uint_to_bytes_le (sub b (size 2) (size 2)) (to_u16 (size_to_uint32 j));
-          Hacl.AES128.aes128_encrypt_block c b key;
-          frodo_gen_matrix_aes_inner n i j c a
+          a.[i, j] <- to_u16 (size_to_uint32 i);
+          a.[i, j +! size 1] <- to_u16 (size_to_uint32 j)
+        )
+    );
+
+  let h0 = ST.get() in
+  Lib.Loops.for (size 0) n
+    (fun h1 i -> modifies (loc_buffer a) h0 h1)
+    (fun i ->
+      let h1 = ST.get() in
+      Lib.Loops.for (size 0) (n /. size 8)
+        (fun h2 j -> modifies (loc_buffer a) h1 h2)
+        (fun j ->
+          let j = j *! size 8 in
+          assert_spinoff (v i * v n + v j + 8 <= (v n - 1) * v n + v n);
+          let b = sub a (i *! n +! j) (size 8) in
+          Hacl.AES128.aes128_encrypt_block b b key
         )
     );
   pop_frame()

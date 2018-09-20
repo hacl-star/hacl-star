@@ -19,8 +19,8 @@ val aes128_key_expansion:
   (ensures  fun h0 _ h1 -> modifies (loc_buffer expanded_key) h0 h1)
 
 val aes128_encrypt_block:
-    cipher:lbuffer uint8 16
-  -> plain:lbuffer uint8 16
+    cipher:lbuffer uint16 8
+  -> plain:lbuffer uint16 8
   -> expanded_key:lbuffer uint8 176
   -> Stack unit
   (requires fun h0 -> B.live h0 cipher /\ B.live h0 plain /\ B.live h0 expanded_key)
