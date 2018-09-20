@@ -93,9 +93,9 @@ let reverse_quad32 = ("reverse_bytes_quad32_buffer_win", [("b", TBuffer TUInt128
 *)
 
 let sha_update_bytes = ("sha_update_bytes_stdcall",  [("ctx_b", TBuffer TUInt128, Sec);
-  ("in_b", TBuffer TUInt128, Sec); ("num", TBase TUInt64, Sec); ("k_b", TBuffer TUInt128, Sec)], Stk (Prims.parse_int "0"))
+  ("in_b", TBuffer TUInt128, Sec); ("num_val", TBase TUInt64, Sec); ("k_b", TBuffer TUInt128, Sec)], Stk (Prims.parse_int "0"))
 
-let name = memcpy 
+let name = sha_update_bytes 
 
 let _ = print_string (translate_vale X86 name)
 let _ = print_newline()
