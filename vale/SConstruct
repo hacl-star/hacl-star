@@ -888,9 +888,18 @@ def process_files_in(env, directories):
     for target in manual_dependencies:
       Depends(target, manual_dependencies[target])
 
+def add_from_os_env(env, name):
+  if name in env:
+    env.Append(name = os.environ[name])
+
 def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_file):
   # OCaml depends on many libraries and executables; we have to assume they are in the user's PATH:
-  ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH'], 'OCAMLPATH' : fstar_path + '/bin'})
+  ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH']})
+  add_from_os_env(ocaml_env, 'OCAMLPATH')
+  add_from_os_env(ocaml_env, 'OCAMLLIB')
+  add_from_os_env(ocaml_env, 'OCAML_TOPLEVEL_PATH')
+  add_from_os_env(ocaml_env, 'CAML_LD_LIBRARY_PATH')
+  ocaml_env.PrependENVPath('OCAMLPATH', fstar_path + '/bin')
   main_ml = ml_out_file(main_file, '.ml')
   main_cmx = ml_out_file(main_file, '.cmx')
   main_exe = ml_out_file(main_file, '.exe')
