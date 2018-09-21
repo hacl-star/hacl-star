@@ -6,7 +6,7 @@ KREMLIN_HOME ?= ../../../../../../kremlin
 USE_OPENSSL ?= FALSE
 GENERATION_A ?= CSHAKE128
 
-CC=gcc-8
+CC?=gcc
 ifeq "$(CC)" "gcc"
     COMPILER=gcc
 else ifeq "$(CC)" "clang"
@@ -48,7 +48,7 @@ AR=ar rcs
 RANLIB=ranlib
 LN=ln -s
 
-CFLAGS= -O3 -flto -ffat-lto-objects -std=gnu11 -Wall -Wextra -DLINUX -D$(ARCHITECTURE) -D$(USE_OPT_LEVEL) -D$(USE_GENERATION_A) -D$(USING_OPENSSL)
+CFLAGS= -O3 -std=gnu11 -Wall -Wextra -DLINUX -D$(ARCHITECTURE) -D$(USE_OPT_LEVEL) -D$(USE_GENERATION_A) -D$(USING_OPENSSL)
 ifeq "$(CC)" "gcc"
 CFLAGS+= -march=native
 endif
@@ -59,14 +59,6 @@ CFLAGS+= -I$(OPENSSL_INCLUDE_DIR)
 LDFLAGS=-lm -L$(OPENSSL_LIB_DIR) -lssl -lcrypto
 endif
 
-INCLUDE_DIRS = \
-  $(KREMLIN_HOME)/include \
-  $(KREMLIN_HOME)/kremlib \
-  $(LWEKE_HOME)/sha3-hacl \
-  $(HACL_HOME)/lib
-
-CFLAGS+= $(addprefix -I ,$(INCLUDE_DIRS)) \
-	-Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
 
 .PHONY: all check clean prettyprint
 
@@ -96,8 +88,8 @@ AES_HEADERS := $(addprefix aes/, aes.h)
 $(AES_OBJS): $(AES_HEADERS)
 
 # SHAKE
-SHAKE_OBJS := $(addprefix objs/sha3/, fips202.o) sha3-hacl/Hacl_SHA3.o
-SHAKE_HEADERS := $(addprefix sha3/, fips202.h) sha3-hacl/Hacl_SHA3.h
+SHAKE_OBJS := $(addprefix objs/sha3/, fips202.o)
+SHAKE_HEADERS := $(addprefix sha3/, fips202.h)
 $(SHAKE_OBJS): $(SHAKE_HEADERS)
 
 lib640: $(KEM_FRODO640_OBJS) $(RAND_OBJS) $(AES_OBJS) $(SHAKE_OBJS)
@@ -107,7 +99,7 @@ lib640: $(KEM_FRODO640_OBJS) $(RAND_OBJS) $(AES_OBJS) $(SHAKE_OBJS)
 	$(RANLIB) frodo/libfrodo.a
 
 tests: lib640 tests/ds_benchmark.h
-	$(CC) $(CFLAGS) -L$(KREMLIN_HOME)/kremlib/out -L./frodo tests/test_KEM640.c -lfrodo -lkremlib $(LDFLAGS) -o frodo/test_KEM $(ARM_SETTING)
+	$(CC) $(CFLAGS) -L./frodo tests/test_KEM640.c -lfrodo $(LDFLAGS) -o frodo/test_KEM $(ARM_SETTING)
 
 tests-fstar: lib640 tests/ds_benchmark.h
 ifeq "$(GENERATION_A)" "CSHAKE128"
