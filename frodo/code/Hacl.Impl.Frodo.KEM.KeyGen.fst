@@ -26,7 +26,7 @@ module S = Spec.Frodo.KEM.KeyGen
 module M = Spec.Matrix
 module LSeq = Lib.Sequence
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val frodo_mul_add_as_plus_e:
     seed_a:lbytes bytes_seed_a
@@ -76,7 +76,7 @@ val clear_matrix_se:
     s:matrix_t params_n params_nbar
   -> e:matrix_t params_n params_nbar
   -> Stack unit
-    (requires fun h -> live h s /\ live h e /\ disjoint s e)
+    (requires fun h -> live h s /\ live h e)
     (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer s) (loc_buffer e)) h0 h1)
 let clear_matrix_se s e =
   assert_norm (v params_n * v params_nbar % 2 = 0);

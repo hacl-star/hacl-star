@@ -29,7 +29,7 @@ let cdf_table = IB.igcmalloc_of_list HyperStack.root cdf_list
 
 inline_for_extraction noextract
 val frodo_sample_f:
-     t:uint16{uint_v t < pow2 15}
+    t:uint16{uint_v t < pow2 15}
   -> i:size_t{v i < v cdf_table_len}
   -> Stack uint16
      (requires fun h -> True)
@@ -44,13 +44,12 @@ let frodo_sample_f t i =
 
 inline_for_extraction noextract
 val frodo_sample_res:
-     sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
+    sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
   -> sample:uint16{uint_v sample < v cdf_table_len}
   -> res:uint16{res == S.frodo_sample_res sign (uint_v sample)}
 let frodo_sample_res sign sample =
-  let res = ((lognot sign +. u16 1) ^. sample) +. sign in
-  S.lemma_frodo_sample2 sign sample;
-  res
+  Spec.Frodo.Lemmas.lemma_frodo_sample2 sign sample;
+  ((lognot sign +. u16 1) ^. sample) +. sign
 
 #set-options "--max_fuel 1"
 
@@ -66,7 +65,6 @@ let frodo_sample r =
   mod_mask_lemma r (u32 1);
   uintv_extensionality (mod_mask (u32 1)) (u16 1);
   assert (uint_v sign == 0 \/ uint_v sign == 1);
-
   let sample = create #uint16 #1 (size 1) (u16 0) in
   let h = ST.get () in
   assert (Lib.Sequence.index #_ #1 (as_seq h sample) 0 == u16 0);

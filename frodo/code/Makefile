@@ -6,15 +6,37 @@ VARIANT      ?= 640-cSHAKE
 
 ifeq ($(VARIANT),640-cSHAKE)
   KEM_DIR = FrodoKEM-640
+  GENERATION_A = CSHAKE128
+else ifeq ($(VARIANT),640-AES)
+  KEM_DIR = FrodoKEM-640
+  GENERATION_A = AES128
+  ifeq ($(TARGET),)
+    $(error ERROR: We only support TARGET=x64 for AES variants)
+  endif
 else ifeq ($(VARIANT),976-cSHAKE)
   KEM_DIR = FrodoKEM-976
+  GENERATION_A = CSHAKE128
+else ifeq ($(VARIANT),976-AES)
+  KEM_DIR = FrodoKEM-976
+  GENERATION_A = AES128
+  ifeq ($(TARGET),)
+    $(error ERROR: We only support TARGET=x64 for AES variants)
+  endif
 else
-  $(error ERROR: VARIANT must be either 640-cSHAKE or 976-cSHAKE)
+  $(error ERROR: VARIANT must be one of {640,976}-{cSHAKE,AES})
 endif
 
+UNAME = $(shell uname)
+ifeq ($(UNAME),Darwin)
+  ARCH	= -Darwin
+else ifeq ($(UNAME),Linux)
+  ARCH	= -Linux
+endif
+
+# AES object files from NIST needed by PRNG for KATs
 ifeq ($(TARGET),x64)
   LWEKE_HOME = ../NIST/Additional_Implementations/x64/$(KEM_DIR)
-  OBJS       = $(addprefix $(LWEKE_HOME)/objs/,aes/aes_ni.o sha3/fips202.o sha3/fips202x4.o sha3/keccak4x/KeccakP-1600-times4-SIMD256.o)
+  OBJS       = $(addprefix $(LWEKE_HOME)/objs/,aes/aes_ni.o sha3/fips202.o sha3/fips202x4.o sha3/keccak4x/KeccakP-1600-times4-SIMD256.o) include/x64/aes$(ARCH).o
   KECCAK     = x64/Hacl_Keccak.c
 else ifeq ($(TARGET),)
   LWEKE_HOME ?= ../NIST/Reference_Implementation/reference/$(KEM_DIR)
@@ -62,15 +84,15 @@ stage2-test: $(OUT_DIR)/test.exe
 stage2-lib: $(OUT_DIR)/libfrodo_for_testing.a $(OUT_DIR)/libfrodo.a
 
 KATs: $(OUT_DIR)/libfrodo_for_testing.a
-	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 KATS-fstar
-	(cd $(LWEKE_HOME); frodo/PQCtestKAT_kem_cshake_fstar)
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=$(GENERATION_A) KATS-fstar
+	(cd $(LWEKE_HOME); frodo/PQCtestKAT_kem_fstar)
 
 benchmark: $(OUT_DIR)/libfrodo.a
-	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 tests-fstar
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=$(GENERATION_A) tests-fstar
 	(cd $(LWEKE_HOME); frodo/test_KEM_fstar)
 
 $(LWEKE_HOME)/%.o:
-	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=CSHAKE128 $*.o
+	make -C $(LWEKE_HOME) USE_OPENSSL=FALSE GENERATION_A=$(GENERATION_A) $*.o
 
 # 1. Generation of .krml files
 # - generate the F* dependency graph via `fstar --dep full`
@@ -126,7 +148,7 @@ $(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.che
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-$(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/Spec.Matrix.fst.checked: | .depend
+$(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/Spec.Matrix.fst.checked $(CACHE_DIR)/Spec.Keccak.fst.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
@@ -218,7 +240,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Keccak=Hacl.Impl.SHA3,Hacl.Keccak' \
-	-library 'C,FStar' \
+	-library 'Hacl.AES128,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
 	-add-include '"c/Lib_PQ_Print.h"' \
 	-tmpdir $(GENERATED_DIR) \
@@ -244,18 +266,20 @@ include $(GENERATED_DIR)/Makefile.include
 # KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
 # files for them in $(GENERATED_DIR). However, we are only interested in the header,
 # and drop these (mostly empty) C files.
-ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
+ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c Hacl_Keccak.c Hacl_AES128.c C.c, $(ALL_C_FILES))
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
   include/rng.c \
   include/random.c \
+  include/$(KECCAK) \
+  include/x64/Hacl_AES128.c \
   include/clearwords.c \
   $(HACL_HOME)/lib/c/Lib_PQ_Print.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
-        $(LWEKE_HOME)/objs/aes/aes.o \
+	$(LWEKE_HOME)/objs/aes/aes.o \
 	$(OBJS)
 
 INCLUDE_DIRS = \

@@ -9,7 +9,7 @@ open Lib.ByteSequence
 module Seq = Lib.Sequence
 module Lemmas = Spec.Frodo.Lemmas
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FStar.Pervasives Prims FStar.Math.Lemmas Lib.Sequence Spec.Matrix'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 /// Auxiliary lemmas
 
@@ -31,6 +31,9 @@ val index_lt_s:
 let index_lt_s n1 n2 i j =
   assert (j * n1 + i <= (n2 - 1) * n1 + n1 - 1)
 
+#set-options "--max_ifuel 1"
+
+// Strange this seems to require ifuel=1 from the command-line but not in interactive mode
 private
 val index_neq:
     #n1:size_nat
@@ -51,6 +54,7 @@ let index_neq #n1 #n2 i j i' j' =
     assert_spinoff (j' + n2 * i' < n2 * (i' + 1))
     end
 
+#set-options "--max_ifuel 0"
 
 /// Matrices as flat sequences
 

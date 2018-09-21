@@ -114,7 +114,7 @@ val frodo_gen_matrix_cshake:
   -> Stack unit
     (requires fun h -> live h seed /\ live h res /\ disjoint seed res)
     (ensures  fun h0 _ h1 ->
-      live h1 res /\ modifies (loc_buffer res) h0 h1 /\
+      modifies (loc_buffer res) h0 h1 /\
       as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 [@"c_inline"]
 let frodo_gen_matrix_cshake n seed_len seed res =
@@ -136,11 +136,11 @@ val frodo_gen_matrix_cshake_4x:
   -> Stack unit
     (requires fun h -> live h seed /\ live h res /\ disjoint seed res)
     (ensures  fun h0 _ h1 ->
-      live h1 res /\ modifies (loc_buffer res) h0 h1)
-      // TODO: Verify this
-      // as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
+      modifies (loc_buffer res) h0 h1 /\
+      as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 [@"c_inline"]
 let frodo_gen_matrix_cshake_4x n seed_len seed res =
+  let h = ST.get() in
   push_frame ();
   let r: lbuffer uint8 (8 * v n) = create (size 8 *! n) (u8 0) in  
   let r0 = sub r (size 0 *! n) (size 2 *! n) in
@@ -182,4 +182,53 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
          mset res (size 4 *! i +! size 3) j (uint_from_bytes_le resij3)
        )
     );
-  pop_frame ()
+  pop_frame ();
+  // TODO: Verify this
+  let h' = ST.get() in
+  assume (as_matrix h' res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h seed))
+
+/// AES128
+
+val frodo_gen_matrix_aes:
+    n:size_t{v n * v n <= max_size_t}
+  -> seed_len:size_t{v seed_len == 16}
+  -> seed:lbytes seed_len
+  -> a:matrix_t n n
+  -> Stack unit
+    (requires fun h -> live h seed /\ live h a /\ disjoint seed a)
+    (ensures  fun h0 _ h1 -> modifies (loc_buffer a) h0 h1)
+[@"c_inline"]
+let frodo_gen_matrix_aes n seed_len seed a =
+  push_frame();
+  let key = B.alloca (u8 0) 176ul in
+  Hacl.AES128.aes128_key_expansion seed key;
+
+  let h0 = ST.get() in
+  Lib.Loops.for (size 0) n
+    (fun h1 i -> modifies (loc_buffer a) h0 h1)
+    (fun i ->
+      let h1 = ST.get() in
+      Lib.Loops.for (size 0) (n /. size 8)
+        (fun h2 j -> modifies (loc_buffer a) h1 h2)
+        (fun j ->
+          let j = j *! size 8 in
+          a.[i, j] <- to_u16 (size_to_uint32 i);
+          a.[i, j +! size 1] <- to_u16 (size_to_uint32 j)
+        )
+    );
+
+  let h0 = ST.get() in
+  Lib.Loops.for (size 0) n
+    (fun h1 i -> modifies (loc_buffer a) h0 h1)
+    (fun i ->
+      let h1 = ST.get() in
+      Lib.Loops.for (size 0) (n /. size 8)
+        (fun h2 j -> modifies (loc_buffer a) h1 h2)
+        (fun j ->
+          let j = j *! size 8 in
+          assert_spinoff (v i * v n + v j + 8 <= (v n - 1) * v n + v n);
+          let b = sub a (i *! n +! j) (size 8) in
+          Hacl.AES128.aes128_encrypt_block b b key
+        )
+    );
+  pop_frame()

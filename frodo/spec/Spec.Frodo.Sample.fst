@@ -26,7 +26,7 @@ val lemma_frodo_sample0:
 let lemma_frodo_sample0 i = lemma_cdf_list i
 
 val lemma_frodo_sample1:
-    a:uint16{uint_v a < pow2 15}
+   a:uint16{uint_v a < pow2 15}
  -> b:uint16{uint_v b < pow2 15}
  -> Lemma
      (let c0 = if Lib.RawIntTypes.(uint_to_nat a > uint_to_nat b) then 1 else 0 in
@@ -60,9 +60,9 @@ let rec frodo_sample_fc t i =
   else frodo_sample_f t (i - 1) + frodo_sample_fc t (i - 1)
 
 val frodo_sample_res:
-     sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
+    sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
   -> e:nat{e < cdf_table_len}
-  -> res:uint16
+  -> uint16
 let frodo_sample_res r0 e =
   let open Lib.RawIntTypes in
   let open FStar.Math.Lib in
@@ -71,12 +71,6 @@ let frodo_sample_res r0 e =
   assert_norm (powx (-1) 0 == 1);
   assert (-cdf_table_len < e /\ e < cdf_table_len);
   u16 (e % modulus U16)
-
-val lemma_frodo_sample2:
-    sign:uint16{uint_v sign == 0 \/ uint_v sign == 1}
-  -> e:uint16{uint_v e < cdf_table_len}
-  -> Lemma (((lognot sign +. u16 1) ^. e) +. sign == frodo_sample_res sign (uint_v e))
-let lemma_frodo_sample2 sign e = admit()
 
 #set-options "--max_fuel 1"
 

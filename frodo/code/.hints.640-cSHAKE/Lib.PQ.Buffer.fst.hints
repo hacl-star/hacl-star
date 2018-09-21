@@ -1,5 +1,5 @@
 [
-  "¢\u0010\u0017≈ÛãÅ•é¨óˆÓh£\u0019",
+  ";O\thﬁ\u000bcrΩ\u001eG—\u0000Ì⁄ì",
   [
     [
       "Lib.PQ.Buffer.gsub",
@@ -9,13 +9,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "FStar.UInt32_pretyping_041e3a67a2d2b51fd702f1f88cfc3b44",
-        "equation_FStar.Seq.Properties.compatible_sub_preorder",
+        "equation_FStar.UInt32.n_minus_one",
         "equation_Lib.PQ.Buffer.lbuffer", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.gsub",
         "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.compatible_sub",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.l_True",
         "equation_Prims.logical", "equation_Prims.nat",
+        "function_token_typing_FStar.UInt32.n_minus_one",
+        "function_token_typing_LowStar.Buffer.trivial_preorder",
         "interpretation_LowStar.Buffer_Tm_abs_d359dc64ac5a79b32b9828a25bf0bd72",
         "lemma_LowStar.Monotonic.Buffer.len_gsub",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
@@ -25,11 +25,10 @@
         "refinement_interpretation_Lib.RawIntTypes_Tm_refine_07b2c6395c4e496ede3d35fd17d7cf86",
         "true_interp", "typing_Lib.IntTypes.size_v",
         "typing_Lib.RawIntTypes.size_to_UInt32",
-        "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.len"
+        "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "0fce9ce333173dfd48e8021772971714"
+      "2a6472d06aef434b7d16355da9ccd3fa"
     ],
     [
       "Lib.PQ.Buffer.sub",
@@ -37,17 +36,25 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.PQ.Buffer.lbuffer",
-        "equation_Prims.nat", "primitive_Prims.op_Addition",
-        "projection_inverse_BoxInt_proj_0",
+        "@MaxIFuel_assumption", "@query",
+        "FStar.UInt32_pretyping_041e3a67a2d2b51fd702f1f88cfc3b44",
+        "equation_FStar.UInt32.n_minus_one",
+        "equation_Lib.PQ.Buffer.lbuffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.l_True",
+        "equation_Prims.logical", "equation_Prims.nat",
+        "function_token_typing_FStar.UInt32.n_minus_one",
+        "function_token_typing_LowStar.Buffer.trivial_preorder",
+        "interpretation_LowStar.Buffer_Tm_abs_d359dc64ac5a79b32b9828a25bf0bd72",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_3785ff6c422e153c6f8e37efe5f2ffb1",
         "refinement_interpretation_Lib.PQ.Buffer_Tm_refine_76f2397611eba56b0ba3ad077a900cd9",
         "refinement_interpretation_Lib.PQ.Buffer_Tm_refine_b2ac8a8adc0e80bb464fff308d4ad5b2",
         "refinement_interpretation_Lib.RawIntTypes_Tm_refine_07b2c6395c4e496ede3d35fd17d7cf86",
-        "typing_Lib.IntTypes.size_v", "typing_Lib.RawIntTypes.size_to_UInt32"
+        "true_interp", "typing_Lib.IntTypes.size_v",
+        "typing_Lib.RawIntTypes.size_to_UInt32"
       ],
       0,
-      "55d1f90ce727e25968c491516433f76b"
+      "8817025e75ab5d610576b907e125a20e"
     ],
     [
       "Lib.PQ.Buffer.sub",
@@ -58,13 +65,13 @@
         "@MaxIFuel_assumption", "@query",
         "FStar.UInt32_pretyping_041e3a67a2d2b51fd702f1f88cfc3b44",
         "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.Seq.Properties.compatible_sub_preorder",
+        "equation_FStar.UInt32.n_minus_one",
         "equation_Lib.PQ.Buffer.lbuffer", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.gsub",
         "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.compatible_sub",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.l_True",
         "equation_Prims.logical", "equation_Prims.nat",
+        "function_token_typing_FStar.UInt32.n_minus_one",
+        "function_token_typing_LowStar.Buffer.trivial_preorder",
         "interpretation_LowStar.Buffer_Tm_abs_d359dc64ac5a79b32b9828a25bf0bd72",
         "lemma_LowStar.Monotonic.Buffer.len_gsub",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
@@ -75,11 +82,10 @@
         "refinement_interpretation_Lib.RawIntTypes_Tm_refine_07b2c6395c4e496ede3d35fd17d7cf86",
         "true_interp", "typing_Lib.IntTypes.size_v",
         "typing_Lib.RawIntTypes.size_to_UInt32",
-        "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.len"
+        "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "8bc376c5da568e77922d80ba7721c26f"
+      "d23b06f232c74d71ae4c4e4b0e80e54d"
     ],
     [
       "Lib.PQ.Buffer.index",
@@ -97,7 +103,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "dc4454c82293f3a16d8505642e247188"
+      "fd54d51573a9d54768228526992d79ed"
     ],
     [
       "Lib.PQ.Buffer.index",
@@ -122,7 +128,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "005c5e06a92e7f83020b57d671c5636a"
+      "ffba8f8409c7d16baaa59b544a370d2e"
     ],
     [
       "Lib.PQ.Buffer.upd",
@@ -140,7 +146,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "df89f69889e3cb01fdfe5c2b31fcd758"
+      "56a6d504a748b9caf03d9ab3ac469e50"
     ],
     [
       "Lib.PQ.Buffer.upd",
@@ -169,7 +175,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "d885dfa4275708fd2ce741255860a31e"
+      "b5e47c046776714afff713d582fff41e"
     ],
     [
       "Lib.PQ.Buffer.bget",
@@ -186,7 +192,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "07e7f54151992eae05f210aee5817049"
+      "48c396045e67dc30494ae3550f84fae5"
     ],
     [
       "Lib.PQ.Buffer.create",
@@ -209,7 +215,7 @@
         "typing_Lib.IntTypes.size_v", "typing_Lib.RawIntTypes.size_to_UInt32"
       ],
       0,
-      "97ab690f7e46ece53b316386fa9feaf3"
+      "3b65eb40e0d29734c79c44ed53111390"
     ],
     [
       "Lib.PQ.Buffer.createL",
@@ -221,7 +227,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_56609cb097df748006aafa90a98ed73d"
       ],
       0,
-      "5e1f2e4af4839d0da8ce40627efd0ae8"
+      "6771361959da7671c10e5e0adcce3f5d"
     ],
     [
       "Lib.PQ.Buffer.createL",
@@ -233,7 +239,7 @@
         "equation_Lib.Sequence.of_list"
       ],
       0,
-      "0a3b299a31f84f775e6aeb9bb2f8a99d"
+      "e47437e3f111af1dbbae2f2f8c4cd239"
     ],
     [
       "Lib.PQ.Buffer.createL_global",
@@ -245,7 +251,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_56609cb097df748006aafa90a98ed73d"
       ],
       0,
-      "6e8e01e8f887c00c015c92b30cfa89b3"
+      "cba97b3775f6240358dce2e84223faf7"
     ],
     [
       "Lib.PQ.Buffer.createL_global",
@@ -280,7 +286,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "5bba484c9aeecd6ebbf20ba6340bf2cb"
+      "c5cf8170b46fd4d1a9392183d18b9689"
     ],
     [
       "Lib.PQ.Buffer.copy",
@@ -324,7 +330,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "1a39bcbd2a892300a5f7e310a5a9dbcb"
+      "8c00bfafb4488ce9f4eccf0ba75272ee"
     ],
     [
       "Lib.PQ.Buffer.update_sub",
@@ -344,7 +350,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "b5dc3e6fdba96b773acfb276a2791564"
+      "2b0df0c3764722abeaf6f3d443c3c7c9"
     ],
     [
       "Lib.PQ.Buffer.update_sub",
@@ -423,7 +429,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "b28e81f0018b0b5fad99b4f794e2ae84"
+      "5c0bead3399c3a5e98d0d27accd1244b"
     ],
     [
       "Lib.PQ.Buffer.loop_nospec",
@@ -442,7 +448,7 @@
         "typing_Lib.IntTypes.size_v"
       ],
       0,
-      "37b7b45bd49fadbed30d1558ca399b6e"
+      "e8518a6297e3e5fd290c342bb592ae68"
     ],
     [
       "Lib.PQ.Buffer.loop_nospec",
@@ -461,7 +467,7 @@
         "typing_Lib.IntTypes.size_v"
       ],
       0,
-      "79c394d05b937047ad76e1365aba909d"
+      "a4744b6aadacfe2957828d8cae857214"
     ],
     [
       "Lib.PQ.Buffer.loop_nospec",
@@ -492,7 +498,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "d97763273ffaee752c5f0cfd184683a3"
+      "ed82fa6fd0f30a81342791b8add52b94"
     ],
     [
       "Lib.PQ.Buffer.lbytes_eq",
@@ -511,7 +517,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "bd3022096599791f37fa1518adba4607"
+      "d93c59ef035b5d89f1dd3aa9615679b2"
     ],
     [
       "Lib.PQ.Buffer.lbytes_eq",
@@ -686,7 +692,7 @@
         "typing_tok_Lib.IntTypes.SIZE@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f6eac486ea63b11670f0a66bb01fd297"
+      "f321ea31cf7c2ae09bf43ca281bc46f0"
     ]
   ]
 ]
