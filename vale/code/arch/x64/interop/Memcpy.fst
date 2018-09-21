@@ -33,7 +33,7 @@ friend X64.Vale.StateLemmas
 open Vale_memcpy
 
 #set-options "--initial_fuel 5 --max_fuel 5 --initial_ifuel 2 --max_ifuel 2"
-let create_initial_trusted_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) : GTot TS.traceState =
+  let create_initial_trusted_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) : GTot TS.traceState =
   let taint_func (x:b8) : GTot taint =
     if StrongExcludedMiddle.strong_excluded_middle (x == dst) then Secret else
     if StrongExcludedMiddle.strong_excluded_middle (x == src) then Secret else
