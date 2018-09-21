@@ -8,6 +8,7 @@ open FStar.HyperStack.ST
 open EverCrypt.Helpers
 
 module AC = EverCrypt.AutoConfig
+module SC = EverCrypt.StaticConfig
 module H = EverCrypt.Hash
 
 open Test.Vectors
@@ -450,6 +451,12 @@ let main (): St C.exit_code =
   let open C.String in
   push_frame ();
 
+  print !$"\n  HASHING TESTS\n";
+  Test.Hash.main ();
+
+  print !$"\n  FINITE-FIELD DIFFIE-HELLMAN\n";
+  test_dh ();
+
   print !$"===========Hacl===========\n";
   AC.(init (Prefer Hacl));
   test_hash hash_vectors_low;
@@ -461,25 +468,28 @@ let main (): St C.exit_code =
   Test.Hash.main ();
   Test.Bytes.main ();
 
-  print !$"===========Vale===========\n";
-  AC.(init (Prefer Vale));
-  test_aead aead_vectors_low;
-  test_hash hash_vectors_low;
-  test_cipher block_cipher_vectors_low;
-  Test.Hash.main ();
+  if EverCrypt.StaticConfig.vale then begin
+    print !$"===========Vale===========\n";
+    AC.(init (Prefer Vale));
+    test_aead aead_vectors_low;
+    test_hash hash_vectors_low;
+    test_cipher block_cipher_vectors_low;
+    Test.Hash.main ()
+  end;
 
-  print !$"==========OpenSSL=========\n";
-  AC.(init (Prefer OpenSSL));
-  test_aead aead_vectors_low;
-  test_cipher block_cipher_vectors_low;
+  if EverCrypt.StaticConfig.openssl then begin
+    print !$"==========OpenSSL=========\n";
+    AC.(init (Prefer OpenSSL));
+    test_aead aead_vectors_low;
+    test_cipher block_cipher_vectors_low
+  end;
 
-  print !$"==========BCrypt==========\n";
-  AC.(init (Prefer BCrypt));
-  test_aead aead_vectors_low;
-  test_cipher block_cipher_vectors_low;
-
-  print !$"\n  HASHING TESTS\n";
-  Test.Hash.main ();
+  if EverCrypt.StaticConfig.bcrypt then begin
+    print !$"==========BCrypt==========\n";
+    AC.(init (Prefer BCrypt));
+    test_aead aead_vectors_low;
+    test_cipher block_cipher_vectors_low
+  end;
 
   // AR: 09/07: commenting it, random_init calls fails to verify, also see comment on test_rng above
   // print !$"\n  PSEUDO-RANDOM GENERATOR\n";
@@ -493,9 +503,6 @@ let main (): St C.exit_code =
   //   print !$"Failed to seed the PRNG!\n";
   //   C.portable_exit 3l
   //  end;
-
-  print !$"\n  FINITE-FIELD DIFFIE-HELLMAN\n";
-  test_dh ();
   
   pop_frame ();
   C.EXIT_SUCCESS

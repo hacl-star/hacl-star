@@ -55,4 +55,4 @@ $(OUTPUT_DIR)/%.krml:
 
 $(OUTPUT_DIR)/Makefile.include: $(ALL_KRML_FILES)
 	$(KRML) -tmpdir $(OUTPUT_DIR) -skip-compilation -bundle Spec.* $^ \
-	  -warn-error +9
+	  -warn-error @4

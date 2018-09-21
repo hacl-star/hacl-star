@@ -13,11 +13,13 @@ open Spec.Hash.Helpers
 
 (** We need to reveal the definition of the internal state for clients to use it *)
 
+inline_for_extraction
 let word (a: hash_alg) =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> U32.t
   | SHA2_384 | SHA2_512 -> U64.t
 
+inline_for_extraction
 type state (a: hash_alg) =
   b:B.buffer (word a) { B.length b = size_hash_w a }
 
@@ -115,6 +117,7 @@ val finish: a:hash_alg -> finish_st a
 
 (** The whole hash algorithm *)
 
+inline_for_extraction
 let hash_st (a: hash_alg) =
   input:B.buffer U8.t ->
   input_len:U32.t { B.length input = U32.v input_len } ->
