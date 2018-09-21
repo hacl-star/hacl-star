@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.PQ.Buffer
 
 module B = LowStar.Buffer
-module S = Spec.Frodo.Keccak
+module S = Spec.SHA3
 
 val cshake128_frodo:
     input_len:size_t

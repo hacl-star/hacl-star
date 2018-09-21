@@ -6,7 +6,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 open Spec.Matrix
-open Spec.Frodo.Keccak
+open Spec.SHA3
 
 module Matrix = Spec.Matrix
 module Seq = Lib.Sequence

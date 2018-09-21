@@ -20,7 +20,7 @@ unfold let bytes_seed_a = size 16
 
 unfold let params_nbar = size 8
 
-unfold let frodo_prf_spec = Spec.Frodo.Keccak.cshake256_frodo
+unfold let frodo_prf_spec = Spec.SHA3.cshake256_frodo
 
 unfold let frodo_gen_matrix = Spec.Frodo.Gen.frodo_gen_matrix_cshake
 

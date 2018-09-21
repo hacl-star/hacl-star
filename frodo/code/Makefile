@@ -233,13 +233,13 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'Hacl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
 	-no-prefix 'Hacl.Frodo.Clear' \
-	-no-prefix 'Hacl.Keccak' \
+	-no-prefix 'Hacl.SHA3' \
 	-no-prefix 'Hacl.Impl.SHA3' \
 	-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Frodo.*' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
-	-bundle 'Hacl.Keccak=Hacl.Impl.SHA3,Hacl.Keccak' \
+	-bundle 'Hacl.SHA3=Hacl.Impl.SHA3,Hacl.SHA3' \
 	-library 'Hacl.AES128,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
 	-add-include '"c/Lib_PQ_Print.h"' \

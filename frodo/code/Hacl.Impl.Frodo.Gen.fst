@@ -44,7 +44,7 @@ let gen_inv h0 h1 h2 n seed_len seed r res i j =
   (forall (j0:size_nat{j0 < j}). get h2 res (v i) j0 == S.frodo_gen_matrix_cshake_fc (v n) (v seed_len) (as_seq h0 seed) (v i) j0) /\
   (forall (j0:size_nat{j <= j0 /\ j0 < v n}). get h2 res (v i) j0 == get h0 res (v i) j0) /\
   (forall (i0:size_nat{v i < i0 /\ i0 < v n}) (j:size_nat{j < v n}). get h2 res i0 j == get h0 res i0 j) /\
-  as_seq h1 r == Spec.Frodo.Keccak.cshake128_frodo (v seed_len) (as_seq h0 seed) (u16 (256 + v i)) (2 * v n) /\
+  as_seq h1 r == Spec.SHA3.cshake128_frodo (v seed_len) (as_seq h0 seed) (u16 (256 + v i)) (2 * v n) /\
   as_seq h1 r == as_seq h2 r
 
 inline_for_extraction noextract private
