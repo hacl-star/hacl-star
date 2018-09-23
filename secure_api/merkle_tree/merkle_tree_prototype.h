@@ -21,11 +21,10 @@ mt_p create_mt(hash init);
 void free_mt(mt_p mt);
 
 /* Insertion
- * @param[in] v NOTE that the content of v will be changed to an arbitrary
- *              value after calling it. Also note that the tree does not
- *              manage the hash pointer for `v`, so it should be manually
- *              freed.
- */
+* @param[in] v The tree does not take ownership of the hash, it makes a copy of
+*              its content. Note that the content of the hash will be 
+*              overwritten with an arbitrary value by the call.
+*/
 void mt_insert(mt_p mt, hash v);
 
 /** Getting the Merkle root
@@ -37,7 +36,7 @@ void mt_get_root(mt_p mt, hash root);
  * @param idx The index of the target hash
  * @param[out] root The Merkle root
  * @param[out] path A resulting Merkle path that contains the leaf hash.
- *                  NOTE that the path contains pointers to hashes in the tree,
+ *                  Note that the path contains pointers to hashes in the tree,
  *                  not the actual hash values.
  * @return The number of elements in the tree
  */
