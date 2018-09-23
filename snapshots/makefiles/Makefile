@@ -7,7 +7,7 @@ HACL_HOME ?= ../..
 #
 
 # For Generic 64-bit
-ifneq($(OS),Windows_NT)
+ifneq ($(OS),Windows_NT)
   CCOPTS = -Ofast -m64 -fwrapv -fomit-frame-pointer -funroll-loops -march=native -mtune=native
 endif
 
