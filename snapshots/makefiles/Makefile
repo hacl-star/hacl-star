@@ -7,8 +7,9 @@ HACL_HOME ?= ../..
 #
 
 # For Generic 64-bit
-ifneq ($(OS),Windows_NT)
-  CCOPTS = -Ofast -m64 -fwrapv -fomit-frame-pointer -funroll-loops -march=native -mtune=native
+CCOPTS = -O3 -m64 -fwrapv -fomit-frame-pointer -funroll-loops -march=native -mtune=native
+ifeq ($(OS),Windows_NT)
+  CCOPTS += -fno-asynchronous-unwind-tables
 endif
 
 # For Generic 32-bit
