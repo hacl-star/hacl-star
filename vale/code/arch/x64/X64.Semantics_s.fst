@@ -7,6 +7,7 @@ open Words.Two_s
 open Words.Four_s
 open Types_s
 open FStar.Seq.Base
+open X64.CryptoInstructions_s
 module S = X64.Bytes_Semantics_s
 
 type uint64 = UInt64.t
@@ -373,6 +374,17 @@ let eval_ins (ins:ins) : GTot (st unit) =
     let remaining_bytes = slice src_bytes abs_amt (length src_bytes) in
     let dst_q = le_bytes_to_quad32 (append zero_pad remaining_bytes) in
     update_xmm_preserve_flags dst dst_q
+    
+  | S.Palignr dst src amount ->
+    // We only spec a restricted version sufficient for a handful of standard patterns
+    check_imm (amount = 4 || amount = 8);;
+    let src_q = eval_xmm src s in
+    let dst_q = eval_xmm dst s in
+    if amount = 4 then
+      update_xmm dst ins (Mkfour src_q.lo1 src_q.hi2 src_q.hi3 dst_q.lo0)
+    else if amount = 8 then
+      update_xmm dst ins (Mkfour src_q.hi2 src_q.hi3 dst_q.lo0 dst_q.lo1)
+    else fail
 
   | S.Shufpd dst src permutation ->
     check_imm (0 <= permutation && permutation < 4);;
@@ -500,7 +512,22 @@ let eval_ins (ins:ins) : GTot (st unit) =
                                (AES_s.sub_word src_q.hi3)
                                (ixor (AES_s.rot_word_LE (AES_s.sub_word src_q.hi3)) imm))
 
+  | S.SHA256_rnds2 dst src ->
+    let src1_q = eval_xmm dst s in
+    let src2_q = eval_xmm src s in
+    let wk_q  = eval_xmm 0 s in    
+    update_xmm_preserve_flags dst (sha256_rnds2_spec src1_q src2_q wk_q)
 
+  | S.SHA256_msg1 dst src ->
+    let src1 = eval_xmm dst s in
+    let src2 = eval_xmm src s in
+    update_xmm_preserve_flags dst (sha256_msg1_spec src1 src2)
+
+  | S.SHA256_msg2 dst src ->
+    let src1 = eval_xmm dst s in
+    let src2 = eval_xmm src s in
+    update_xmm_preserve_flags dst (sha256_msg2_spec src1 src2)
+    
 (*
  * These functions return an option state
  * None case arises when the while loop runs out of fuel

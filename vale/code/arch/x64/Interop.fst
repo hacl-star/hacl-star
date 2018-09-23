@@ -1,11 +1,5 @@
 module Interop
 
-(** Attempt to define down and up functions, to express relation between
-    Low*'s and Vale's memory models.
-    Currently only supports buffers of UInt8
-*)
-
-
 module List = FStar.List.Tot.Base
 module HS = FStar.Monotonic.HyperStack
 module HH = FStar.Monotonic.HyperHeap
@@ -18,63 +12,16 @@ open X64.Machine_s
 open X64.Bytes_Semantics_s
 open X64.Bytes_Semantics
 
+friend SecretByte
+
 #reset-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
-
-let op_String_Access = Map.sel
-let op_String_Assignment = Map.upd
-
-let sub l i = l - i
-
-inline_for_extraction
-let b8 = B.buffer UInt8.t
-let s8 = B.buffer S8.t
-
-let rec loc_locs_disjoint_rec (l:s8) (ls:list s8) : Type0 =
-  match ls with
-  | [] -> True
-  | h::t -> M.loc_disjoint (M.loc_buffer l) (M.loc_buffer h) /\ loc_locs_disjoint_rec l t
-
-let rec locs_disjoint_rec (ls:list s8) : Type0 =
-  match ls with
-  | [] -> True
-  | h::t -> loc_locs_disjoint_rec h t /\ locs_disjoint_rec t
-
-unfold
-let bufs_disjoint (ls:list s8) : Type0 =
-  norm [iota; zeta; delta; delta_only [`%loc_locs_disjoint_rec;
-                                       `%locs_disjoint_rec]] (locs_disjoint_rec ls)
-
-unfold
-let buf_disjoint_from (b:s8) (ls:list s8) : Type0 =
-  norm [iota; zeta; delta; delta_only [`%loc_locs_disjoint_rec;
-                                       `%locs_disjoint_rec]] (loc_locs_disjoint_rec b ls)
-
-unfold
-let disjoint (#a:Type0) (ptr1 ptr2:B.buffer a) = M.loc_disjoint (M.loc_buffer ptr1) (M.loc_buffer ptr2)
-
-unfold
-let disjoint_or_eq ptr1 ptr2 = disjoint ptr1 ptr2 \/ ptr1 == ptr2
-
-let list_disjoint_or_eq (#a:Type0) (ptrs:list (B.buffer a)) =
-  forall p1 p2. List.memP p1 ptrs /\ List.memP p2 ptrs ==> disjoint_or_eq p1 p2
-
-let disjoint_addr addr1 length1 addr2 length2 =
-  (* The first buffer is completely before the second, or the opposite *)
-  addr1 + length1 < addr2 || addr2 + length2 < addr1
-
-type addr_map = (m:(b8 -> nat64){
-  (forall (buf1 buf2:b8). disjoint buf1 buf2 ==> 
-    disjoint_addr (m buf1) (B.length buf1) (m buf2) (B.length buf2)) /\
-  (forall (b:b8). m b + B.length b < pow2_64)})
-
-unfold
-let list_live (#a:Type0) mem (ptrs:list (B.buffer a)) = forall p . List.memP p ptrs ==> B.live mem p
 
 (* Additional hypotheses, which should be added to the corresponding libraries at some point *)
 
 (* If two refs have the same address, and are in the heap, they are equal *)
 assume val ref_extensionality (#a:Type0) (#rel:Preorder.preorder a) (h:Heap.heap) (r1 r2:Heap.mref a rel) : Lemma 
   (Heap.contains h r1 /\ Heap.contains h r2 /\ Heap.addr_of r1 = Heap.addr_of r2 ==> r1 == r2)
+
 
 (* Write a buffer in the vale memory *)
 
@@ -168,12 +115,6 @@ let rec monotone_domain_write_vale_mem
      monotone_domain_write_vale_mem contents length addr (i+1) heap
     end
 
-let correct_down_p (mem:HS.mem) (addrs:addr_map) (heap:heap) (p:b8) =
-  let length = B.length p in
-  let contents = B.as_seq mem p in
-  let addr = addrs p in
-  (forall i.  0 <= i /\ i < length ==> heap.[addr + i] == UInt8.v (FStar.Seq.index contents i))
-
 #set-options "--z3rlimit 40"
 
 let correct_down_p_cancel mem (addrs:addr_map) heap (p:b8) : Lemma
@@ -218,9 +159,7 @@ let correct_down_p_frame mem (addrs:addr_map) (heap:heap) (p:b8) : Lemma
   in
   Classical.forall_intro aux
 
-val addrs_set: (ptrs:list b8) -> (addrs:addr_map) -> GTot (s:Set.set int{
-  forall x. not (Set.mem x s) <==> 
-    (forall (b:b8{List.memP b ptrs}). x < addrs b \/ x >= addrs b + B.length b)})
+
 
 private let add_buffer_domain (b:b8) (addrs:addr_map) (accu:Set.set int) : GTot (s:Set.set int{
   forall x. Set.mem x s <==> (Set.mem x accu \/ (x >= addrs b /\ x < addrs b + B.length b))}) =
@@ -259,30 +198,16 @@ private let rec addrs_set_aux (ptrs:list b8)
 
 let addrs_set ptrs addrs = addrs_set_aux ptrs ptrs [] addrs Set.empty
 
-val addrs_set_lemma: (ptrs1:list b8) -> (ptrs2:list b8) ->
-  (addrs:addr_map) -> Lemma
-  (requires forall b. List.memP b ptrs1 <==> List.memP b ptrs2)
-  (ensures addrs_set ptrs1 addrs == addrs_set ptrs2 addrs)
-
 let addrs_set_lemma ptrs1 ptrs2 addrs =
   let s1 = addrs_set_aux ptrs1 ptrs1 [] addrs Set.empty in
   let s2 = addrs_set_aux ptrs2 ptrs2 [] addrs Set.empty in
   assert (Set.equal s1 s2)
-
-val addrs_set_concat: (ptrs:list b8) -> (a:b8) ->
-  (addrs:addr_map) -> Lemma
-  (addrs_set (a::ptrs) addrs == Set.union (addrs_set ptrs addrs) (addrs_set [a] addrs))
 
 let addrs_set_concat ptrs a addrs = 
   let s1 = addrs_set ptrs addrs in
   let s2 = addrs_set [a] addrs in
   assert (Set.equal (addrs_set (a::ptrs) addrs) (Set.union s1 s2));
   ()
-
-val addrs_set_mem: (ptrs:list b8) -> (a:b8) ->
-  (addrs:addr_map) -> (i:int) -> Lemma
-  (requires List.memP a ptrs /\ i >= addrs a /\ i < addrs a + B.length a)
-  (ensures Set.mem i (addrs_set ptrs addrs))
 
 let addrs_set_mem ptrs a addrs i = ()
 
@@ -306,13 +231,6 @@ let domain_write_buffer (a:b8) (heap:heap) (mem:HS.mem) (addrs:addr_map) : Lemma
    domain2_write_vale_mem contents length addr 0 heap;
    monotone_domain_write_vale_mem contents length addr 0 heap;
    ()
-
-let correct_down mem (addrs:addr_map) (ptrs: list b8) heap =
-  Set.equal (addrs_set ptrs addrs) (Map.domain heap) /\ 
-  (forall p. List.memP p ptrs ==> correct_down_p mem addrs heap p)
-
-(* Takes a Low* Hyperstack and a list of buffers and create a vale memory + keep track of the vale addresses *)
-val down_mem: (mem:HS.mem) -> (addrs: addr_map) -> (ptrs:list b8{list_disjoint_or_eq ptrs}) -> GTot (heap :heap {correct_down mem addrs ptrs heap})
 
 let rec down_mem_aux (ptrs:list b8{list_disjoint_or_eq ptrs})
   (addrs:addr_map)
@@ -371,19 +289,6 @@ let rec frame_down_mem_aux (ptrs:list b8{list_disjoint_or_eq ptrs})
     frame_write_vale_mem contents length addr 0 h;
     ()
 
-val same_unspecified_down: 
-  (mem1: HS.mem) -> 
-  (mem2: HS.mem) -> 
-  (addrs:addr_map) ->
-  (ptrs:list b8{list_disjoint_or_eq ptrs}) ->
-  Lemma (
-    let heap1 = down_mem mem1 addrs ptrs in
-    let heap2 = down_mem mem2 addrs ptrs in
-    forall i. (forall (b:b8{List.memP b ptrs}). 
-      let base = addrs b in
-      i < base \/ i >= base + B.length b) ==>
-      heap1.[i] == heap2.[i])
-
 let same_unspecified_down mem1 mem2 addrs ptrs =
   let heap = Map.const 0 in
   let heap = Map.restrict Set.empty heap in
@@ -392,3 +297,153 @@ let same_unspecified_down mem1 mem2 addrs ptrs =
   frame_down_mem_aux ptrs addrs mem1 ptrs [] heap;
   frame_down_mem_aux ptrs addrs mem2 ptrs [] heap;
   ()
+
+let get_seq_heap_as_seq (heap1 heap2:heap) (addrs:addr_map) (mem:HS.mem) (b:b8) : Lemma
+  (requires correct_down_p mem addrs heap1 b /\
+    (forall x. x >= addrs b /\ x < addrs b + B.length b ==> heap1.[x] == heap2.[x]))
+  (ensures B.as_seq mem b == get_seq_heap heap2 addrs b) =
+  assert (Seq.equal (B.as_seq mem b) (get_seq_heap heap2 addrs b))
+
+let rec up_mem_aux (heap:heap)
+               (addrs:addr_map)
+               (ptrs:list b8{list_disjoint_or_eq ptrs})
+               (ps:list b8)
+               (accu:list b8{forall p. List.memP p ptrs <==> List.memP p ps \/ List.memP p accu}) 
+               (m:HS.mem{list_live m ptrs /\ 
+                 Set.equal (addrs_set ptrs addrs) (Map.domain heap) /\ 
+                 (forall p. List.memP p accu ==> correct_down_p m addrs heap p)})
+  : GTot (m':HS.mem{correct_down m' addrs ptrs heap /\ list_live m' ptrs}) =
+    match ps with
+    | [] -> m
+    | a::q ->
+      let s = get_seq_heap heap addrs a in
+      B.g_upd_seq_as_seq a s m;
+      let m' = B.g_upd_seq a s m in
+      up_mem_aux heap addrs ptrs q (a::accu) m'
+
+let up_mem heap addrs ptrs mem = up_mem_aux heap addrs ptrs ptrs [] mem
+
+let rec down_up_identity_aux
+    (heap:heap)
+    (addrs:addr_map)
+    (ptrs:list b8{list_disjoint_or_eq ptrs})
+    (ps:list b8)
+    (accu:list b8{forall p. List.memP p ptrs <==> List.memP p ps \/ List.memP p accu})    
+    (m:HS.mem{list_live m ptrs /\ correct_down m addrs ptrs heap})
+  : Lemma (m == up_mem_aux heap addrs ptrs ps accu m) =
+  match ps with
+  | [] -> ()
+  | a::q ->
+      let s = get_seq_heap heap addrs a in
+      let m' = B.g_upd_seq a s m in
+      B.lemma_g_upd_with_same_seq a m;
+      assert (Seq.equal s (B.as_seq m a));
+      (* The previous assertion and lemma ensure that m == m' *)
+      B.g_upd_seq_as_seq a s m;
+      down_up_identity_aux heap addrs ptrs q (a::accu) m'
+
+let down_up_identity mem addrs ptrs =
+  let heap = down_mem mem addrs ptrs in
+  down_up_identity_aux heap addrs ptrs ptrs [] mem
+
+let correct_down_p_same_sel (b:b8) (mem:HS.mem) (addrs:addr_map) (heap1 heap2:heap) (x:int) : Lemma
+  (requires (x >= addrs b /\ x < addrs b + B.length b 
+    /\ correct_down_p mem addrs heap1 b /\ correct_down_p mem addrs heap2 b))
+  (ensures Map.sel heap1 x == Map.sel heap2 x) = 
+    let i = x - addrs b in
+    assert (heap1.[x] == heap1.[addrs b + i]);
+    assert (heap2.[x] == heap2.[addrs b + i])
+
+let rec up_down_identity_aux
+  (ptrs:list b8{list_disjoint_or_eq ptrs})
+  (addrs:addr_map)
+  (mem:HS.mem)
+  (init_heap:heap{correct_down mem addrs ptrs init_heap})
+  : Lemma 
+      (let heap = down_mem mem addrs ptrs in 
+      forall x. Map.contains heap x ==> Map.sel heap x == Map.sel init_heap x) =
+    let heap = down_mem mem addrs ptrs in
+    let aux (x:int) : Lemma 
+      (requires Map.contains heap x)
+      (ensures Map.sel heap x == Map.sel init_heap x) =
+      Classical.forall_intro 
+        (Classical.move_requires (fun b -> correct_down_p_same_sel b mem addrs heap init_heap x))
+    in Classical.forall_intro (Classical.move_requires aux)
+
+let up_down_identity mem addrs ptrs heap = 
+  let initial_heap = down_mem mem addrs ptrs in
+  let new_heap = down_mem (up_mem heap addrs ptrs mem) addrs ptrs in
+  same_unspecified_down mem (up_mem heap addrs ptrs mem) addrs ptrs;
+  up_down_identity_aux ptrs addrs (up_mem heap addrs ptrs mem) heap;
+  assert (Map.equal heap new_heap)
+
+#set-options "--max_fuel 1 --max_ifuel 1"
+
+let g_upd_tot_correct_down_invariant
+  (ptrs:list b8{list_disjoint_or_eq ptrs})
+  (addrs:addr_map)
+  (heap1:heap)
+  (heap2:heap)
+  (b:b8{List.memP b ptrs})
+  (mem:HS.mem{list_live mem ptrs})
+  : Lemma
+  (requires forall p. (p =!= b /\ List.memP p ptrs) ==> correct_down_p mem addrs heap1 p)
+  (ensures (
+    let m' = B.g_upd_seq b (get_seq_heap heap2 addrs b) mem in
+    forall p. (p =!= b /\ List.memP p ptrs) ==> correct_down_p m' addrs heap1 p)
+  ) = 
+    B.g_upd_seq_as_seq b (get_seq_heap heap2 addrs b) mem
+
+let g_upd_tot_correct_down
+  (mem:HS.mem)
+  (addrs:addr_map)
+  (heap:heap)
+  (b:b8{B.live mem b}) :
+  Lemma (correct_down_p (B.g_upd_seq b (get_seq_heap heap addrs b) mem) addrs heap b) =
+  B.g_upd_seq_as_seq b (get_seq_heap heap addrs b) mem
+
+#set-options "--z3refresh"
+
+let rec update_buffer_up_mem_aux
+  (ptrs:list b8{list_disjoint_or_eq ptrs})
+  (addrs:addr_map)
+  (mem:HS.mem{list_live mem ptrs})
+  (b:b8{List.memP b ptrs})
+  (heap1:heap{Set.equal (Map.domain heap1) (addrs_set ptrs addrs)})
+  (heap2:heap{Set.equal (Map.domain heap1) (Map.domain heap2)})
+  (ps:list b8)
+  (accu:list b8{forall p. List.memP p ptrs <==> List.memP p ps \/ List.memP p accu}) : Lemma
+  (requires (forall x. x < addrs b \/ x >= addrs b + B.length b ==> heap1.[x] == heap2.[x]) /\
+    (List.memP b accu ==> B.as_seq mem b == get_seq_heap heap2 addrs b) /\  
+    (forall p. List.memP p accu ==> correct_down_p mem addrs heap2 p) /\
+    (forall p. (p =!= b /\ List.memP p ptrs) ==> correct_down_p mem addrs heap1 p)    )
+  (ensures 
+  (List.memP b accu ==> up_mem_aux heap2 addrs ptrs ps accu mem == mem) /\
+  (~(List.memP b accu) ==> up_mem_aux heap2 addrs ptrs ps accu mem ==
+    B.g_upd_seq b (get_seq_heap heap2 addrs b) mem))
+  (decreases ps)
+  
+  = match ps with
+   | [] -> ()
+   | a::q ->
+     let s = get_seq_heap heap2 addrs a in       
+     B.g_upd_seq_as_seq a s mem;         
+     let m' = B.g_upd_seq a s mem in
+     if StrongExcludedMiddle.strong_excluded_middle (a == b) then (
+       if StrongExcludedMiddle.strong_excluded_middle (List.memP b accu) then (
+         B.lemma_g_upd_with_same_seq a mem;       
+         update_buffer_up_mem_aux ptrs addrs m' b heap1 heap2 q (a::accu)
+       ) else (
+         g_upd_tot_correct_down_invariant ptrs addrs heap1 heap2 b mem;
+         g_upd_tot_correct_down mem addrs heap2 b;
+         update_buffer_up_mem_aux ptrs addrs m' b heap1 heap2 q (a::accu)
+       )
+     ) else (
+       assert (B.disjoint a b);
+       get_seq_heap_as_seq heap1 heap2 addrs mem a;
+       B.lemma_g_upd_with_same_seq a mem;       
+       update_buffer_up_mem_aux ptrs addrs m' b heap1 heap2 q (a::accu)
+     )
+
+let update_buffer_up_mem ptrs addrs mem b heap1 heap2 =
+  update_buffer_up_mem_aux ptrs addrs mem b heap1 heap2 ptrs []

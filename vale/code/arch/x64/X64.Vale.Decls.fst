@@ -4,7 +4,6 @@ open X64.Vale
 open X64.Vale.State
 open X64.Vale.StateLemmas
 open FStar.UInt
-module S = X64.Semantics_s
 module P = X64.Print_s
 module BS = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s

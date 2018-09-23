@@ -3,7 +3,6 @@ module X64.Print_s
 // Trusted code for producing assembly code
 
 open X64.Machine_s
-open X64.Semantics_s
 open X64.Bytes_Semantics_s
 open X64.Taint_Semantics_s
 open FStar.IO
@@ -199,6 +198,7 @@ let print_ins (ins:tainted_ins) (p:printer) =
   | Pslld dst amt          -> "  pslld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
   | Psrld dst amt          -> "  psrld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
   | Psrldq dst amt         -> "  psrldq "     ^ print_pair (print_xmm dst p) (print_imm8 amt p)
+  | Palignr dst src amount -> "  palignr "    ^ print_pair (print_xmms dst src) (print_imm8 amount p)
   | Shufpd dst src perm    -> "  shufpd "     ^ print_pair (print_xmms dst src) (print_imm8 perm p)
   | Pshufb dst src         -> "  pshufb "     ^ print_xmms dst src
   | Pshufd dst src count   -> "  pshufd "     ^ print_pair (print_xmms dst src) (print_imm8 count p)
@@ -215,6 +215,10 @@ let print_ins (ins:tainted_ins) (p:printer) =
   | AESNI_dec_last dst src -> "  aesdeclast " ^ print_xmms dst src
   | AESNI_imc dst src      -> "  aesimc "     ^ print_xmms dst src
   | AESNI_keygen_assist dst src imm -> "  aeskeygenassist " ^ print_pair (print_xmms dst src) (print_imm8 imm p)
+  | SHA256_rnds2 dst src   -> "  sha256_rnds2 " ^ print_xmms dst src
+  | SHA256_msg1 dst src    -> "  sha256_msg1 " ^ print_xmms dst src
+  | SHA256_msg2 dst src    -> "  sha256_msg2 " ^ print_xmms dst src
+    
 
 let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
   let print_ops (o1:operand) (o2:operand) : string =
@@ -321,7 +325,7 @@ let gcc : printer =
     | _ :: tail -> ins_name name tail
   in
   let op_order dst src = src, dst in
-  let align() = ".align" in
+  let align() = ".balign" in
   let header() = ".text\n" in
   let footer() = "\n" in
   let proc_name (name:string) = ".global " ^ name ^ "\n" ^ name ^ ":\n" in

@@ -68,11 +68,26 @@ val frame_valid (s1:state') : Lemma
 
 type state = (s:state'{valid_state s})
 
-val get_heap: (h:mem) -> GTot (m:S.heap{forall s.
-  s.state.S.mem == m /\ s.mem == h ==> valid_state s})
+val same_domain: (h:mem) -> (m:S.heap) -> prop0
+
+val lemma_same_domains: (h:mem) -> (m1:S.heap) -> (m2:S.heap) -> Lemma
+  (requires same_domain h m1 /\ Set.equal (Map.domain m1) (Map.domain m2))
+  (ensures same_domain h m2)
+
+val get_heap: (h:mem) -> GTot (m:S.heap{same_domain h m /\ (forall s.
+  s.state.S.mem == m /\ s.mem == h ==> valid_state s)})
 
 val same_heap: (s1:state) -> (s2:state) -> Lemma (
   s1.mem == s2.mem ==> s1.state.S.mem == s2.state.S.mem)
+
+val get_hs: (h:mem) -> (m:S.heap{same_domain h m}) -> GTot (h':mem)
+
+val get_hs_heap: (h:mem) -> Lemma (get_hs h (get_heap h) == h)
+  [SMTPat (get_hs h (get_heap h))]
+
+val get_heap_hs: (m:S.heap) -> (h:mem{same_domain h m}) -> Lemma
+  (requires (forall x. not (Map.contains m x) ==> Map.sel m x == Map.sel (get_heap h) x))
+  (ensures get_heap (get_hs h m) == m)
 
 val buffer_addr : #t:typ -> b:buffer t -> h:mem -> GTot int
 
@@ -337,26 +352,106 @@ val equiv_load_mem128: ptr:int -> s:state -> Lemma
   (requires valid_mem128 ptr s.mem)
   (ensures load_mem128 ptr s.mem == S.eval_mem128 ptr s.state)
 
+val low_lemma_valid_mem64: b:buffer64 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures
+    S.valid_addr64 (buffer_addr b h + 8 `op_Multiply` i) (get_heap h)
+  )
+
+val low_lemma_load_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures
+    S.get_heap_val64 (buffer_addr b h + 8 `op_Multiply` i) (get_heap h) == buffer_read b i h
+  )
+
+val same_domain_update64: b:buffer64 -> i:nat -> v:nat64 -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures same_domain h (S.update_heap64 (buffer_addr b h + 8 `op_Multiply` i) v (get_heap h)))
+
+val low_lemma_store_mem64 : b:buffer64 -> i:nat-> v:nat64 -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures (
+    same_domain_update64 b i v h;
+    get_hs h (S.update_heap64 (buffer_addr b h + 8 `op_Multiply` i) v (get_heap h)) == buffer_write b i v h)
+  )
+
+val low_lemma_valid_mem128: b:buffer128 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures
+    S.valid_addr128 (buffer_addr b h + 16 `op_Multiply` i) (get_heap h)
+  )
+
+val low_lemma_load_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures
+    S.get_heap_val128 (buffer_addr b h + 16 `op_Multiply` i) (get_heap h) == buffer_read b i h
+  )
+
+val same_domain_update128: b:buffer128 -> i:nat -> v:quad32 -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures same_domain h (S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h)))
+
+val low_lemma_store_mem128 : b:buffer128 -> i:nat-> v:quad32 -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures (
+    same_domain_update128 b i v h;
+    get_hs h (S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h)) == buffer_write b i v h)
+  )
+
 open Types_s
 open Words_s
 
-val valid128_64 (ptr:int) (s:state) : Lemma
-  (requires valid_mem128 ptr s.mem)
-  (ensures valid_mem64 ptr s.mem /\ valid_mem64 (ptr+8) s.mem)
+val valid128_64 (ptr:int) (h:mem) : Lemma
+  (requires valid_mem128 ptr h)
+  (ensures valid_mem64 ptr h /\ valid_mem64 (ptr+8) h)
 
-val load128_64 (ptr:int) (s:state) : Lemma
-  (requires valid_mem128 ptr s.mem)
+val load128_64 (ptr:int) (h:mem) : Lemma
+  (requires valid_mem128 ptr h)
   (ensures
-    (let v = load_mem128 ptr s.mem in
-     let v_lo = load_mem64 ptr s.mem in
-     let v_hi = load_mem64 (ptr+8) s.mem in
+    (let v = load_mem128 ptr h in
+     let v_lo = load_mem64 ptr h in
+     let v_hi = load_mem64 (ptr+8) h in
      v.lo0 + 0x100000000 `op_Multiply` v.lo1 == v_lo /\
      v.hi2 + 0x100000000 `op_Multiply` v.hi3 == v_hi))
 
-val store128_64 (ptr:int) (v:quad32) (s:state) : Lemma
+val store128_64_valid (ptr:int) (v:quad32) (s:state) : Lemma
+  (forall i. valid_mem64 i s.mem <==> valid_mem64 i (store_mem128 ptr v s.mem))
+
+val store128_64_frame (ptr:int) (v:quad32) (s:state) : Lemma
   (requires valid_mem128 ptr s.mem)
-  (ensures store_mem128 ptr v s.mem == store_mem64 ptr (v.lo0 + 0x100000000 `op_Multiply` v.lo1)
-    (store_mem64 (ptr+8) (v.hi2 + 0x100000000 `op_Multiply` v.hi3) s.mem))
+  (ensures (forall i. i <> ptr /\ i <> ptr + 8 /\ valid_mem64 i s.mem ==>
+    load_mem64 i s.mem == load_mem64 i (store_mem128 ptr v s.mem)))
+
+val store128_64_load (ptr:int) (v:quad32) (s:state) : Lemma
+  (requires valid_mem128 ptr s.mem)
+  (ensures (
+    let h = store_mem128 ptr v s.mem in
+    load_mem64 ptr h = v.lo0 + 0x100000000 `op_Multiply` v.lo1 /\
+    load_mem64 (ptr+8) h = v.hi2 + 0x100000000 `op_Multiply` v.hi3))
 
 //Memtaint related functions
 
@@ -412,4 +507,3 @@ val modifies_valid_taint128 (b:buffer128) (p:loc) (h h':mem) (memTaint:memtaint)
   )
   (ensures valid_taint_buf128 b h memTaint t <==> valid_taint_buf128 b h' memTaint t)
   [SMTPat (modifies p h h'); SMTPat (valid_taint_buf128 b h' memTaint t)]
-

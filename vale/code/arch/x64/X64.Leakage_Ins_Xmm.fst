@@ -79,6 +79,15 @@ let check_if_shufpd_leakage_free ins ts =
   let ts' = set_xmm_taint ts dst taint in
   true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
 
+val check_if_palignr_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.Palignr? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
+
+let check_if_palignr_leakage_free ins ts =
+  let S.Palignr dst src _, _, _ = ins.ops in
+  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
+  let ts' = set_xmm_taint ts dst taint in
+  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
+
 val check_if_pshufb_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.Pshufb? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
 
@@ -255,6 +264,38 @@ let check_if_aesni_keygen_leakage_free ins ts =
   let ts' = set_xmm_taint ts dst taint in
   true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
 
+val check_if_sha256_rnds2_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.SHA256_rnds2? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
+
+#push-options "--max_fuel 0 --max_ifuel 0"
+open X64.CryptoInstructions_s
+open Opaque_s
+let check_if_sha256_rnds2_leakage_free ins ts =
+  let S.SHA256_rnds2 dst src, _, _ = ins.ops in
+  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
+  let ts' = set_xmm_taint ts dst taint in
+  reveal_opaque sha256_rnds2_spec_def;
+  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
+#pop-options
+
+val check_if_sha256_msg1_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.SHA256_msg1? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
+     
+let check_if_sha256_msg1_leakage_free ins ts =
+  let S.SHA256_msg1 dst src, _, _ = ins.ops in
+  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
+  let ts' = set_xmm_taint ts dst taint in
+  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
+
+val check_if_sha256_msg2_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.SHA256_msg2? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
+     
+let check_if_sha256_msg2_leakage_free ins ts =
+  let S.SHA256_msg2 dst src, _, _ = ins.ops in
+  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
+  let ts' = set_xmm_taint ts dst taint in
+  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
+
 val check_if_movdqu_leakage_free: (ins:tainted_ins{let i, _, _ = ins.ops in S.MOVDQU? i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
 
@@ -300,8 +341,8 @@ let load64_128_eq ptr1 ptr2 s1 s2 =
   let v_hi2 = load_mem64 (ptr2+8) s2.state.mem in
   let v1 = load_mem128 ptr1 s1.state.mem in
   let v2 = load_mem128 ptr2 s2.state.mem in
-  load128_64 ptr1 s1.state;
-  load128_64 ptr2 s2.state;
+  load128_64 ptr1 s1.state.mem;
+  load128_64 ptr2 s2.state.mem;
   nat32_64_inj v1.lo0 v1.lo1 v_lo1;
   nat32_64_inj v1.hi2 v1.hi3 v_hi1
 
@@ -327,34 +368,25 @@ let lemma_if_movdqu_leakage_free_aux ins ts s1 s2 fuel =
       let v1_2 = v1.hi2 + 0x100000000 `op_Multiply` v1.hi3 in
       let v2_1 = v2.lo0 + 0x100000000 `op_Multiply` v2.lo1 in
       let v2_2 = v2.hi2 + 0x100000000 `op_Multiply` v2.hi3 in
-      store128_64 ptr1 v1 s1.state;
-      store128_64 ptr2 v2 s2.state;
-      valid128_64 ptr1 s1.state;
-      valid128_64 ptr2 s2.state;
-      let mem1 = store_mem64 (ptr1+8) v1_2 s1.state.mem in
-      let mem2 = store_mem64 (ptr2+8) v2_2 s2.state.mem in
-      lemma_store_load_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_store_load_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_valid_store_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_valid_store_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_frame_store_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_frame_store_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_store_load_mem64 ptr1 v1_1 mem1;
-      lemma_store_load_mem64 ptr2 v2_1 mem2;
-      lemma_valid_store_mem64 ptr1 v1_1 mem1;
-      lemma_valid_store_mem64 ptr2 v2_1 mem2;
-      lemma_frame_store_mem64 ptr1 v1_1 mem1;
-      lemma_frame_store_mem64 ptr2 v2_1 mem2
+      store128_64_valid ptr1 v1 s1.state;
+      store128_64_valid ptr2 v2 s2.state;
+      store128_64_frame ptr1 v1 s1.state;
+      store128_64_frame ptr2 v2 s2.state;
+      store128_64_load ptr1 v1 s1.state;
+      store128_64_load ptr2 v2 s2.state;
+      valid128_64 ptr1 s1.state.mem;
+      valid128_64 ptr2 s2.state.mem
    end
- | Mov128Mem m -> begin
+ | Mov128Mem m ->
+  begin
     let ptr1 = eval_maddr m s1.state in
     let ptr2 = eval_maddr m s2.state in
     if not (valid_mem128 ptr1 s1.state.mem) || not (valid_mem128 ptr2 s2.state.mem) then ()
     else (
-    valid128_64 ptr1 s1.state;
-    valid128_64 ptr2 s2.state;
-    load128_64 ptr1 s1.state;
-    load128_64 ptr2 s2.state;
+    valid128_64 ptr1 s1.state.mem;
+    valid128_64 ptr2 s2.state.mem;
+    load128_64 ptr1 s1.state.mem;
+    load128_64 ptr2 s2.state.mem;
     load64_128_eq ptr1 ptr2 s1 s2;
     match dst with
     | Mov128Xmm _ -> ()
@@ -370,24 +402,14 @@ let lemma_if_movdqu_leakage_free_aux ins ts s1 s2 fuel =
       let ptr2 = eval_maddr m s2.state in
       if not (valid_mem128 ptr1 s1.state.mem) || not (valid_mem128 ptr2 s2.state.mem) then ()
       else (
-      store128_64 ptr1 v1 s1.state;
-      store128_64 ptr2 v2 s2.state;
-      valid128_64 ptr1 s1.state;
-      valid128_64 ptr2 s2.state;
-      let mem1 = store_mem64 (ptr1+8) v1_2 s1.state.mem in
-      let mem2 = store_mem64 (ptr2+8) v2_2 s2.state.mem in
-      lemma_store_load_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_store_load_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_valid_store_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_valid_store_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_frame_store_mem64 (ptr1+8) v1_2 s1.state.mem;
-      lemma_frame_store_mem64 (ptr2+8) v2_2 s2.state.mem;
-      lemma_store_load_mem64 ptr1 v1_1 mem1;
-      lemma_store_load_mem64 ptr2 v2_1 mem2;
-      lemma_valid_store_mem64 ptr1 v1_1 mem1;
-      lemma_valid_store_mem64 ptr2 v2_1 mem2;
-      lemma_frame_store_mem64 ptr1 v1_1 mem1;
-      lemma_frame_store_mem64 ptr2 v2_1 mem2
+      store128_64_valid ptr1 v1 s1.state;
+      store128_64_valid ptr2 v2 s2.state;
+      store128_64_frame ptr1 v1 s1.state;
+      store128_64_frame ptr2 v2 s2.state;
+      store128_64_load ptr1 v1 s1.state;
+      store128_64_load ptr2 v2 s2.state;      
+      valid128_64 ptr1 s1.state.mem;
+      valid128_64 ptr2 s2.state.mem
       )
     end
     )
@@ -405,6 +427,7 @@ let check_if_xmm_ins_consumes_fixed_time ins ts =
     | S.Pslld dst amt -> check_if_pslld_leakage_free ins ts
     | S.Psrld dst amt -> check_if_psrld_leakage_free ins ts
     | S.Psrldq _ _ -> check_if_psrldq_leakage_free ins ts
+    | S.Palignr _ _ _ -> check_if_palignr_leakage_free ins ts
     | S.Shufpd _ _ _ -> check_if_shufpd_leakage_free ins ts
     | S.Pshufb dst src -> check_if_pshufb_leakage_free ins ts
     | S.Pshufd dst src permutation -> check_if_pshufd_leakage_free ins ts
@@ -421,4 +444,7 @@ let check_if_xmm_ins_consumes_fixed_time ins ts =
     | S.AESNI_dec_last dst src -> check_if_aesni_dec_last_leakage_free ins ts
     | S.AESNI_imc dst src -> check_if_aesni_imc_leakage_free ins ts
     | S.AESNI_keygen_assist dst src imm -> check_if_aesni_keygen_leakage_free ins ts
+    | S.SHA256_rnds2 _ _ -> check_if_sha256_rnds2_leakage_free ins ts
+    | S.SHA256_msg1 _ _ -> check_if_sha256_msg1_leakage_free ins ts
+    | S.SHA256_msg2 _ _ -> check_if_sha256_msg2_leakage_free ins ts
 

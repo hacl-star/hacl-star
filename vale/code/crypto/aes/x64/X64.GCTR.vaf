@@ -2,6 +2,7 @@ include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "X64.AES.vaf"
+include "../../../thirdPartyPorts/Intel/aes/x64/X64.AESCTRplain.vaf"
 include{:fstar}{:open} "Opaque_s"
 include{:fstar}{:open} "Words_s"
 include{:fstar}{:open} "Types_s"
@@ -46,6 +47,7 @@ open X64.Vale.InsVector
 open X64.Vale.InsAes
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
+open X64.AESCTRplain
 #endverbatim
 
 #reset-options "--z3rlimit 30"
@@ -199,7 +201,118 @@ procedure {:quick} gctr_register(
 
 procedure {:quick} gctr_core(
     inline alg:algorithm,
-    ghost icb_BE:quad32,
+    ghost in_b:buffer128,
+    ghost out_b:buffer128,
+    ghost block_offset:nat,
+    ghost old_iv:quad32,
+    ghost key:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128
+    )
+    lets in_ptr @= rax; out_ptr @= rbx; len @= rcx; icb @= xmm7; mask @= xmm8;
+
+    reads
+        r8; in_ptr; out_ptr; len; mask; memTaint;
+
+    modifies
+        rdx; r9; r10; r12; xmm0; xmm1; xmm2; xmm4; icb; mem; efl;
+
+    requires
+        // GCTR reqs
+        buffers_disjoint128(in_b, out_b);
+        buffers_disjoint128(keys_b, out_b);
+        validSrcAddrsOffset128(mem,  in_ptr,  in_b, block_offset, len, memTaint, Secret);
+        validDstAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
+        in_ptr  + 16 * len < pow2_64;
+        out_ptr + 16 * len < pow2_64;
+        buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        // GCTR
+        block_offset > 0 ==> gctr_partial(alg, block_offset, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
+        icb == inc32(old_iv, block_offset);
+
+        // AES reqs
+        alg = AES_128 || alg = AES_256;
+        is_aes_key_LE(alg, key);
+        length(round_keys) == nr(alg) + 1;
+        round_keys == key_to_round_keys_LE(alg, key);
+        r8 == buffer_addr(keys_b, mem);
+        validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
+        buffer128_as_seq(mem, keys_b) == round_keys;
+    ensures
+        modifies_buffer128(out_b, old(mem), mem);
+        validSrcAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
+        gctr_partial(alg, block_offset + len, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
+
+        icb == inc32(old(icb), old(len));
+        r9 == in_ptr + 16 * len;
+        r10 == out_ptr + 16 * len;
+{
+    Mov64(rdx, 0);
+    Mov64(r9, in_ptr);
+    Mov64(r10, out_ptr);
+
+    init_ctr();
+
+    while (rdx != len)
+        invariant
+            //////////////////// Basic indexing //////////////////////
+            0 <= rdx <= len;
+            r9 == in_ptr + 16 * rdx;
+            r10 == out_ptr + 16 * rdx;
+            icb == inc32(old_iv, block_offset + rdx);
+
+            //////////////////// From requires //////////////////////
+            // GCTR reqs
+            buffers_disjoint128(in_b, out_b);
+            buffers_disjoint128(keys_b, out_b);
+            validSrcAddrsOffset128(mem,  in_ptr,  in_b, block_offset, len, memTaint, Secret);
+            validDstAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
+            in_ptr  + 16 * len < pow2_64;
+            out_ptr + 16 * len < pow2_64;
+
+            // AES reqs
+            alg = AES_128 || alg = AES_256;
+            is_aes_key_LE(alg, key);
+            length(round_keys) == nr(alg) + 1;
+            round_keys == key_to_round_keys_LE(alg, key);
+            r8 == buffer_addr(keys_b, mem);
+            validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
+            buffer128_as_seq(mem, keys_b) == round_keys;
+
+            //////////////////// GCTR invariants //////////////////////
+            mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+            xmm4 == Mkfour(1, 0, 0, 0);
+
+            //////////////////// Postcondition goals //////////////////////
+            modifies_buffer128(out_b, old(mem), mem);
+            validSrcAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
+            gctr_partial(alg, block_offset + rdx, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
+        decreases
+            len - rdx;
+    {
+        Mov128(xmm0, icb);
+        Pshufb(xmm0, mask);
+        AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
+        reveal aes_encrypt_LE_def;
+
+        Load128_buffer(xmm2, r9, 0, Secret, in_b, block_offset + rdx);
+        Pxor(xmm2, xmm0);
+        Store128_buffer(r10, xmm2, 0, Secret, out_b, block_offset + rdx);
+
+        Add64(rdx, 1);
+        Add64(r9, 16);
+        Add64(r10, 16);
+        Inc32(icb, xmm4);
+    }
+
+//    // Call a helpful lemma
+//    gctr_partial_completed(alg, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
+}
+
+procedure {:quick} gctr_core_opt(
+    inline alg:algorithm,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
     ghost key:seq(nat32),
@@ -209,14 +322,15 @@ procedure {:quick} gctr_core(
     lets in_ptr @= rax; out_ptr @= rbx; len @= rcx; icb @= xmm7;
 
     reads
-        r8; in_ptr; out_ptr; len; memTaint;
+        r8; memTaint;
 
     modifies
-        rdx; r9; r10; r12; xmm0; xmm1; xmm2; xmm4; icb; mem; efl;
+        in_ptr; out_ptr; len; rdx; rdi; r9; r10; r12; mem; efl;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; xmm8; xmm9; xmm10;
+        xmm12; xmm13; xmm14; xmm15;
 
     requires
         // GCTR reqs
-        icb == icb_BE;
         buffers_disjoint128(in_b, out_b);
         buffers_disjoint128(keys_b, out_b);
         validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
@@ -235,80 +349,37 @@ procedure {:quick} gctr_core(
         buffer128_as_seq(mem, keys_b) == round_keys;
     ensures
         modifies_buffer128(out_b, old(mem), mem);
-        validSrcAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
-        //buffer128_as_seq(mem, out_b) == gctr_encrypt_recursive(icb_BE, buffer128_as_seq(old(mem), in_b), alg, key, 0);
-        gctr_partial(alg, len, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
+        validSrcAddrs128(mem, old(out_ptr), out_b, old(len), memTaint, Secret);
+        gctr_partial(alg, old(len), buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old(icb));
 
-        icb == inc32(old(icb_BE), len);
-        r9 == in_ptr + 16 * len;
-        r10 == out_ptr + 16 * len;
+        icb == old(inc32(icb, len));
+        r9 == old(in_ptr + 16 * len);
+        r10 == old(out_ptr + 16 * len);
 {
-    Mov64(rdx, 0);
-    Mov64(r9, in_ptr);
-    Mov64(r10, out_ptr);
+    InitPshufbMask(xmm8, r12);
 
-    init_ctr();
-    InitPshufbMask(xmm1, r12);
+    // len == # of blocks, so we need to figure out how many sets of four blocks we have
+    Mov64(rdx, len);
+    Shr64(rdx, 2);
+    And64(len, 3);
+    lemma_poly_bits64();
+    //assert rdx == old(len) / 4;
+    //assert len == old(len) % 4;
+    ghost var num_quad_blocks := rdx;
+    assert old(len) == 4 * num_quad_blocks + len;
 
-    while (rdx != len)
-        invariant
-            //////////////////// Basic indexing //////////////////////
-            0 <= rdx <= len;
-            r9 == in_ptr + 16 * rdx;
-            r10 == out_ptr + 16 * rdx;
-            icb == inc32(icb_BE, rdx);
-
-            //////////////////// From requires //////////////////////
-            // GCTR reqs
-            buffers_disjoint128(in_b, out_b);
-            buffers_disjoint128(keys_b, out_b);
-            validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
-            validDstAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
-            in_ptr  + 16 * len < pow2_64;
-            out_ptr + 16 * len < pow2_64;
-
-            // AES reqs
-            alg = AES_128 || alg = AES_256;
-            is_aes_key_LE(alg, key);
-            length(round_keys) == nr(alg) + 1;
-            round_keys == key_to_round_keys_LE(alg, key);
-            r8 == buffer_addr(keys_b, mem);
-            validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
-            buffer128_as_seq(mem, keys_b) == round_keys;
-
-            //////////////////// GCTR invariants //////////////////////
-            xmm1 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-            xmm4 == Mkfour(1, 0, 0, 0);
-
-            //////////////////// Postcondition goals //////////////////////
-            modifies_buffer128(out_b, old(mem), mem);
-            validSrcAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
-            gctr_partial(alg, rdx, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
-//            forall j :: 0 <= j < rdx ==>
-//                        buffer128_read(out_b, j, mem) ==
-//                        quad32_xor(index_workaround(buffer128_as_seq(mem, in_b), j), aes_encrypt_LE(alg, key, inc32(icb_BE, j)));
-
-        decreases
-            len - rdx;
-    {
-        Mov128(xmm0, icb);
-        Pshufb(xmm0, xmm1);
-        AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-        reveal aes_encrypt_LE_def;
-
-        Load128_buffer(xmm2, r9, 0, Secret, in_b, rdx);
-        Pxor(xmm2, xmm0);
-        Store128_buffer(r10, xmm2, 0, Secret, out_b, rdx);
-
-        Add64(rdx, 1);
-        Add64(r9, 16);
-        Add64(r10, 16);
-        Inc32(icb, xmm4);
+    if (rdx > 0) {
+        // TODO: Align registers to avoid all of this pointer copying
+        Mov64(r9, in_ptr);
+        Mov64(r10, out_ptr);
+        aes_counter_loop(alg, in_b, out_b, key, round_keys, keys_b);
+        Mov64(in_ptr, r9);
+        Mov64(out_ptr, r10);
     }
 
-//    // Call a helpful lemma
-//    gctr_partial_completed(alg, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
+    gctr_core(alg, in_b, out_b, 4*num_quad_blocks, old(icb), key, round_keys, keys_b);
 }
+
 
 #reset-options "--z3rlimit 20"
 procedure {:quick} gctr_bytes_extra_work(
@@ -769,7 +840,6 @@ procedure {:quick} gctr_bytes_no_extra(
 #reset-options "--z3rlimit 20"
 procedure {:quick} gctr_bytes(
     inline alg:algorithm,
-    ghost icb_BE:quad32,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
     ghost key:seq(nat32),
@@ -779,14 +849,16 @@ procedure {:quick} gctr_bytes(
     lets in_ptr @= rax; out_ptr @= rbx; num_bytes @= rcx; icb @= xmm7;
 
     reads
-        r8; in_ptr; out_ptr; memTaint;
+        r8; memTaint;
 
     modifies
-        rdx; num_bytes; r9; r10; r11; r12; xmm0; xmm1; xmm2; xmm4; icb; mem; efl;
+        rax; rbx; num_bytes; rdx; rdi; r9; r10; r11; r12; 
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; xmm8; xmm9; xmm10;
+        xmm12; xmm13; xmm14; xmm15;
+        mem; efl;
 
     requires
         // GCTR reqs
-        icb == icb_BE;
         buffers_disjoint128(in_b, out_b);
         buffers_disjoint128(keys_b, out_b);
         validSrcAddrs128(mem, in_ptr, in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
@@ -807,16 +879,11 @@ procedure {:quick} gctr_bytes(
         buffer128_as_seq(mem, keys_b) == round_keys;
     ensures
         modifies_buffer128(out_b, old(mem), mem);
-        validSrcAddrs128(mem, old(out_ptr), out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
+        validSrcAddrs128(mem, old(out_ptr), out_b, old(bytes_to_quad_size(num_bytes)), memTaint, Secret);
         let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,  in_b)), old(num_bytes));
         let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(num_bytes));
-        cipher == gctr_encrypt_LE(icb_BE, make_gctr_plain_LE(plain), alg, key);
-        //icb == inc32(icb_BE, num_blocks);
+        cipher == gctr_encrypt_LE(old(icb), make_gctr_plain_LE(plain), alg, key);
 {
-
-//    assert length(le_seq_quad32_to_bytes(buffer128_as_seq(mem,  in_b)))  == 16*bytes_to_quad_size(num_bytes);
-//    assert length(le_seq_quad32_to_bytes(buffer128_as_seq(mem,  out_b))) == 16*bytes_to_quad_size(num_bytes);
-//    assert num_bytes <= 16*bytes_to_quad_size(num_bytes);
     lemma_poly_bits64();
     Mov64(r11, num_bytes);
     And64(r11, 15);
@@ -825,12 +892,12 @@ procedure {:quick} gctr_bytes(
     ghost var num_blocks := old(num_bytes) / 16;
     assert rcx == num_blocks;
 
-    gctr_core(alg, icb_BE, in_b, out_b, key, round_keys, keys_b);
-    assert icb == inc32(icb_BE, num_blocks);
+    gctr_core_opt(alg, in_b, out_b, key, round_keys, keys_b);
+    assert icb == inc32(old(icb), num_blocks);
 
     if (r11 == 0) {
-        gctr_bytes_no_extra(alg, icb_BE, in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
+        gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
     } else {
-        gctr_bytes_extra(alg, icb_BE, in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
+        gctr_bytes_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
     }
 }

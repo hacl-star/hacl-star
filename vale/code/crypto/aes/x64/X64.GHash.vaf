@@ -501,7 +501,7 @@ procedure {:quick exportOnly} ghash_incremental_bytes_no_extra(
  *     Note that a switch statement will likely be much more efficient than a 16-way if/else,
  *     but Vale currently doesn't support switch statements
  */
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 40"
 procedure {:quick} compute_pad_to_128_bits()
     lets io @= xmm2; num_bytes @= rax; tmp @= rcx; mask @= rdx;
 

@@ -461,7 +461,7 @@ let nat32_xor_bytewise_3 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   nat32_xor_bytewise_3_helper2 x x' t t';
   ()
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 50 --smtencoding.nl_arith_repr boxwrap --smtencoding.l_arith_repr boxwrap"
 let nat32_xor_bytewise_4 (k k' x x' m:nat32) (s s' t t':four nat8) : Lemma
   (requires
     k == four_to_nat 8 s /\

@@ -1,8 +1,17 @@
 module X64.Semantics_Equiv
 
 module S = X64.Bytes_Semantics_s
+open X64.Machine_s
 open X64.Memory_s
 open X64.Semantics_s
+
+val equiv_eval_operand (o:operand) (s:state) : Lemma
+  (requires valid_operand o s)
+  (ensures eval_operand o s == S.eval_operand o s.state)
+
+val equiv_eval_mov128_op (o:mov128_op) (s:state) : Lemma
+  (requires valid_mov128_op o s)
+  (ensures eval_mov128_op o s == S.eval_mov128_op o s.state)
 
 val equiv_eval_ins (s:state) (ins:S.ins) : Lemma (
    let s_hi = run (eval_ins ins) s in
