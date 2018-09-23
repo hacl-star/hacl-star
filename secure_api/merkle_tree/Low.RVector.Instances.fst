@@ -3,6 +3,7 @@ module Low.RVector.Instances
 open FStar.All
 open FStar.Integers
 open LowStar.Buffer
+open Low.Regional
 open Low.RVector
 
 module HH = FStar.Monotonic.HyperHeap
@@ -21,8 +22,8 @@ val buffer_region_of:
 let buffer_region_of #a v =
   B.frameOf v
 
-val buffer_cv: a:Type -> Tot (B.buffer a)
-let buffer_cv _ = B.null
+val buffer_dummy: a:Type -> Tot (B.buffer a)
+let buffer_dummy _ = B.null
 
 val buffer_repr: a:Type0 -> Type0
 let buffer_repr a = S.seq a
@@ -115,7 +116,7 @@ val buffer_regional:
   regional (B.buffer a)
 let buffer_regional #a ia len =
   Rgl (buffer_region_of #a)
-      (buffer_cv a)
+      (buffer_dummy a)
       (buffer_repr a)
       (buffer_r_repr #a)
       (buffer_r_inv #a len)
@@ -138,9 +139,9 @@ val vector_region_of:
   #a:Type -> #rg:regional a -> v:rvector rg -> GTot HH.rid
 let vector_region_of #a #rg v = V.frameOf v
 
-val vector_cv:
+val vector_dummy:
   #a:Type -> rg:regional a -> Tot (rvector rg)
-let vector_cv #a rg = V.create_empty a
+let vector_dummy #a rg = V.create_empty a
 
 val vector_repr: #a:Type0 -> rg:regional a -> Tot Type0
 let vector_repr #a rg = S.seq (Rgl?.repr rg)
@@ -217,7 +218,7 @@ val vector_regional:
   #a:Type -> rg:regional a -> regional (rvector rg)
 let vector_regional #a rg =
   Rgl (vector_region_of #a #rg)
-      (vector_cv #a rg)
+      (vector_dummy #a rg)
       (vector_repr #a rg)
       (vector_r_repr #a #rg)
       (vector_r_inv #a #rg)

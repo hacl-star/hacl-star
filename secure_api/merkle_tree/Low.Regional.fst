@@ -18,11 +18,12 @@ type erid = rid:HH.rid{HST.is_eternal_region rid}
 // type `a` are within the `region_of` the value.
 noeq type regional a =
 | Rgl:
+    // The target type should have a region where it belongs.
     region_of: (a -> GTot HH.rid) ->
 
-    // A non-stateful chosen value of type `a`.
-    // Note that the value doesn't need to satisfy the stateful invariant.
-    cv: a ->
+    // A stateless value of type `a`.
+    // It does not have to satisfy the invariant `r_inv` described below.
+    dummy: a ->
 
     // A representation type of `a` and a corresponding conversion function
     repr: Type0 ->
@@ -42,25 +43,33 @@ noeq type regional a =
     r_sep:
       (v:a -> p:loc -> h:HS.mem -> h':HS.mem ->
       Lemma (requires (r_inv h v /\
-		      loc_disjoint 
-			(loc_all_regions_from false (region_of v)) p /\
+		      loc_disjoint (loc_all_regions_from false (region_of v)) p /\
 		      modifies p h h'))
 	    (ensures (r_inv h' v /\ r_repr h v == r_repr h' v))) ->
 
-    // Construction
+    /// Initialization (allocation)
+    // A representation value for the initial value of type `a`
     irepr: Ghost.erased repr ->
+
+    // A property that should hold for all initial values of type `a`.
     r_init_p: (a -> GTot Type0) ->
+
+    // An initialization operation. We might have a multiple ways of
+    // initializing a given target type `a`; then multiple typeclass instances
+    // should be defined, and each of them can be used properly.
     r_init: (r:erid ->
       HST.ST a
-	(requires (fun h0 -> true))
+	(requires (fun h0 -> True))
 	(ensures (fun h0 v h1 ->
 	  Set.subset (Map.domain (HS.get_hmap h0))
 	  	     (Map.domain (HS.get_hmap h1)) /\
 	  modifies loc_none h0 h1 /\ 
-	  r_init_p v /\ r_inv h1 v /\ region_of v = r /\
+	  r_init_p v /\ r_inv h1 v /\ region_of v == r /\
 	  r_repr h1 v == Ghost.reveal irepr))) ->
 
-    // Destruction
+    // Destruction: note that it allows to `modify` all the regions, including
+    // its subregions. It is fair when we want to `free` a vector and its 
+    // elements as well, assuming the elements belong to subregions.
     r_free: (v:a ->
       HST.ST unit
 	(requires (fun h0 -> r_inv h0 v))

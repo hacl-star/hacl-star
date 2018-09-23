@@ -14,8 +14,7 @@ module S = FStar.Seq
 type uint32_t = UInt32.t
 
 val max_uint32: uint32_t
-let max_uint32 = 4294967295ul // 2^32 - 1
-// UInt32.uint_to_t (UInt.max_int UInt32.n)
+let max_uint32 = UInt32.uint_to_t (UInt.max_int UInt32.n)
 
 module U32 = FStar.UInt32
 
@@ -234,6 +233,15 @@ val index:
 let index #a vec i =
   B.index (Vec?.vs vec) i
 
+val front:
+  #a:Type -> vec:vector a{size_of vec > 0ul} ->
+  HST.ST a
+    (requires (fun h0 -> live h0 vec))
+    (ensures (fun h0 v h1 -> 
+      h0 == h1 /\ S.index (as_seq h1 vec) 0 == v))
+let front #a vec =
+  B.index (Vec?.vs vec) 0ul
+
 val back:
   #a:Type -> vec:vector a{size_of vec > 0ul} ->
   HST.ST a
@@ -272,6 +280,7 @@ val assign:
     (ensures (fun h0 _ h1 ->
       hmap_dom_eq h0 h1 /\
       modifies (loc_vector_within #a vec i (i + 1ul)) h0 h1 /\
+      get h1 vec i == v /\
       S.equal (as_seq h1 vec) (S.upd (as_seq h0 vec) (U32.v i) v)))
 #reset-options "--z3rlimit 10"
 let assign #a vec i v =
@@ -310,8 +319,9 @@ val insert:
       modifies (loc_union (loc_addr_of_vector vec) 
       			  (loc_vector nvec)) h0 h1 /\
       size_of nvec = size_of vec + 1ul /\
+      get h1 nvec (size_of vec) == v /\
       S.equal (as_seq h1 nvec) (S.snoc (as_seq h0 vec) v)))
-#reset-options "--z3rlimit 10"
+#reset-options "--z3rlimit 20"
 let insert #a vec v =
   let sz = Vec?.sz vec in
   let cap = Vec?.cap vec in
@@ -443,14 +453,6 @@ val forall2_all:
 let forall2_all #a h vec p =
   forall2 h vec 0ul (size_of vec) p
 
-// val as_seq_p: 
-//   h:HS.mem -> #a:Type -> p:(a -> GTot Type0) -> 
-//   vec:vector a{forall_all h vec p} ->
-//   GTot (s:S.seq (e:a{p e}){S.length s = U32.v (Vec?.sz vec)})
-// let as_seq_p h #a p vec =
-//   assert (forall (i:uint32_t{i < size_of vec}). p (get h vec i));
-//   B.as_seq h (B.gsub (Vec?.vs vec) 0ul (Vec?.sz vec))
-
 (*! Facts *)
 
 val forall_seq_ok:
@@ -534,4 +536,22 @@ val forall2_extend:
 		    (fun a -> p a (get h vec j) /\ p (get h vec j) a)))
 	(ensures (forall2 h vec i (j + 1ul) p))
 let forall2_extend #a h vec i j p = ()
+
+val forall2_forall_left:
+  #a:Type -> h:HS.mem -> vec:vector a ->
+  i:uint32_t -> j:uint32_t{i <= j && j <= size_of vec} ->
+  k:uint32_t{i <= k && k < j} ->
+  p:(a -> a -> Tot Type0) ->
+  Lemma (requires (forall2 h vec i j p))
+	(ensures (forall_ h vec i k (p (get h vec k))))
+let forall2_forall_left #a h vec i j k p = ()
+
+val forall2_forall_right:
+  #a:Type -> h:HS.mem -> vec:vector a ->
+  i:uint32_t -> j:uint32_t{i <= j && j <= size_of vec} ->
+  k:uint32_t{i <= k && k < j} ->
+  p:(a -> a -> Tot Type0) ->
+  Lemma (requires (forall2 h vec i j p))
+	(ensures (forall_ h vec (k + 1ul) j (p (get h vec k))))
+let forall2_forall_right #a h vec i j k p = ()
 

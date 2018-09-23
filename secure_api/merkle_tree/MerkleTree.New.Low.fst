@@ -38,8 +38,8 @@ val hash_cfg: EverCrypt.AutoConfig.impl -> HST.St unit
 let hash_cfg i = 
   EverCrypt.AutoConfig.init (EverCrypt.AutoConfig.Prefer i)
 
-// We cannot use `LowStar.RVector.Instances`, where we have some general
-// instantiations of `regional`, e.g., if `rg:regional a` then
+// We cannot use `Low.RVector.Instances`, where we have some general
+// typeclass instances of `regional`, e.g., if `rg:regional a` then
 // `regional (rvector rg)`. In FStar we can use this, but KreMLin currently
 // cannot deal with this and gives a number of errors.
 // So we temporarily instantiate some `regional`s manually below, which is
@@ -53,8 +53,8 @@ val hash_region_of:
 let hash_region_of v =
   B.frameOf v
 
-private val hash_cv: unit -> Tot hash
-private let hash_cv _ = B.null
+private val hash_dummy: unit -> Tot hash
+private let hash_dummy _ = B.null
 
 private val hash_repr: Type0
 private let hash_repr = S.seq uint8_t
@@ -132,13 +132,13 @@ val hash_copy:
 let hash_copy src dst =
   B.blit src 0ul dst 0ul hash_size
 
-// `hash_cv ()` is is also a trick to extract the C code using KreMLin.
-// If we just define and use `hash_cv` as a constant, then gcc complains with
+// `hash_dummy ()` is is also a trick to extract the C code using KreMLin.
+// If we just define and use `hash_dummy` as a constant, then gcc complains with
 // the error "initializer element is not a compile-time constant".
 private val hreg: regional hash
 private let hreg =
   Rgl hash_region_of
-      (hash_cv ())
+      (hash_dummy ())
       hash_repr
       hash_r_repr
       hash_r_inv
@@ -160,8 +160,8 @@ val hash_vec_region_of:
   v:hash_vec -> GTot HH.rid
 let hash_vec_region_of v = V.frameOf v
 
-private val hash_vec_cv: hash_vec
-private let hash_vec_cv = V.create_empty hash
+private val hash_vec_dummy: hash_vec
+private let hash_vec_dummy = V.create_empty hash
 
 private val hash_vec_repr: Type0
 private let hash_vec_repr = S.seq (S.seq uint8_t)
@@ -232,7 +232,7 @@ let hash_vec_r_free v =
 private val bhreg: regional hash_vec
 private let bhreg =
   Rgl hash_vec_region_of
-      hash_vec_cv
+      hash_vec_dummy
       hash_vec_repr
       hash_vec_r_repr
       hash_vec_r_inv
@@ -279,6 +279,10 @@ let hash_2 src1 src2 dst =
 
 /// Low-level Merkle tree data structure
 
+// NOTE: because of a lack of 64-bit LowStar.Buffer support, currently
+// we cannot change below to some other types.
+type index_t = uint32_t
+
 // A Merkle tree `MT i j hs rhs_ok rhs` stores all necessary hashes to generate
 // a Merkle path for each element from the index `i` to `j-1`.
 // - Parameters
@@ -288,7 +292,7 @@ let hash_2 src1 src2 dst =
 //        calculate some merkle parhs that need the rightmost hashes
 //        as a part of them.
 noeq type merkle_tree = 
-| MT: i:uint32_t -> j:uint32_t{j >= i} ->
+| MT: i:index_t -> j:index_t{j >= i} ->
       hs:hash_vv{V.size_of hs = 32ul} ->
       rhs_ok:bool ->
       rhs:hash_vec{V.size_of rhs = 32ul} ->
@@ -302,14 +306,14 @@ let mt_not_full h mt =
 
 /// (Memory) Safety
 
-val offset_of: i:uint32_t -> Tot uint32_t
+val offset_of: i:index_t -> Tot index_t
 let offset_of i =
   if i % 2ul = 0ul then i else i - 1ul
 
 val mt_safe_elts: 
   h:HS.mem -> lv:uint32_t{lv <= 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} -> 
-  i:uint32_t -> j:uint32_t{j >= i} ->
+  i:index_t -> j:index_t{j >= i} ->
   GTot Type0 (decreases (32 - U32.v lv))
 let rec mt_safe_elts h lv hs i j =
   if lv = 32ul then true
@@ -317,10 +321,19 @@ let rec mt_safe_elts h lv hs i j =
        V.size_of (V.get h hs lv) == j - ofs /\
        mt_safe_elts h (lv + 1ul) hs (i / 2ul) (j / 2ul))
 
+val mt_safe_elts_constr:
+  h:HS.mem -> lv:uint32_t{lv < 32ul} ->
+  hs:hash_vv{V.size_of hs = 32ul} -> 
+  i:index_t -> j:index_t{j >= i} ->
+  Lemma (requires (V.size_of (V.get h hs lv) == j - offset_of i /\
+		  mt_safe_elts h (lv + 1ul) hs (i / 2ul) (j / 2ul)))
+	(ensures (mt_safe_elts h lv hs i j))
+let mt_safe_elts_constr h lv hs i j = ()
+
 val mt_safe_elts_head:
   h:HS.mem -> lv:uint32_t{lv < 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} -> 
-  i:uint32_t -> j:uint32_t{j >= i} ->
+  i:index_t -> j:index_t{j >= i} ->
   Lemma (requires (mt_safe_elts h lv hs i j))
 	(ensures (V.size_of (V.get h hs lv) == j - offset_of i))
 let mt_safe_elts_head h lv hs i j = ()
@@ -328,7 +341,7 @@ let mt_safe_elts_head h lv hs i j = ()
 val mt_safe_elts_rec:
   h:HS.mem -> lv:uint32_t{lv < 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} -> 
-  i:uint32_t -> j:uint32_t{j >= i} ->
+  i:index_t -> j:index_t{j >= i} ->
   Lemma (requires (mt_safe_elts h lv hs i j))
 	(ensures (mt_safe_elts h (lv + 1ul) hs (i / 2ul) (j / 2ul)))
 let mt_safe_elts_rec h lv hs i j = ()
@@ -347,21 +360,18 @@ let rec mt_safe_elts_init h lv hs =
 val mt_safe_elts_preserved:
   lv:uint32_t{lv <= 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} -> 
-  i:uint32_t -> j:uint32_t{j >= i} ->
+  i:index_t -> j:index_t{j >= i} ->
   p:loc -> h0:HS.mem -> h1:HS.mem ->
   Lemma (requires (V.live h0 hs /\
 		  mt_safe_elts h0 lv hs i j /\
-		  loc_disjoint p (RV.loc_rvector hs) /\
+		  // loc_disjoint p (RV.loc_rvector hs) /\
+		  loc_disjoint p (V.loc_vector_within hs lv (V.size_of hs)) /\
 		  modifies p h0 h1))
 	(ensures (mt_safe_elts h1 lv hs i j))
 	(decreases (32 - U32.v lv))
-	[SMTPat (V.live h0 hs);
-	SMTPat (mt_safe_elts h0 lv hs i j);
-	SMTPat (loc_disjoint p (RV.loc_rvector hs));
-	SMTPat (modifies p h0 h1)]
 let rec mt_safe_elts_preserved lv hs i j p h0 h1 =
   if lv = 32ul then ()
-  else (assert (loc_includes (RV.loc_rvector hs)
+  else (assert (loc_includes (V.loc_vector_within hs lv (V.size_of hs))
     			     (V.loc_vector_within hs lv (lv + 1ul)));
        V.get_preserved hs lv p h0 h1;
        mt_safe_elts_preserved (lv + 1ul) hs (i / 2ul) (j / 2ul) p h0 h1)
@@ -395,6 +405,7 @@ let mt_safe_preserved mt p h0 h1 =
   let mtv = B.get h0 mt 0 in
   assert (loc_includes (mt_loc mt) (RV.loc_rvector (MT?.hs mtv)));
   assert (loc_includes (mt_loc mt) (RV.loc_rvector (MT?.rhs mtv)));
+  assert (loc_includes (mt_loc mt) (V.loc_vector (MT?.hs mtv)));
   RV.rv_inv_preserved (MT?.hs mtv) p h0 h1;
   RV.rv_inv_preserved (MT?.rhs mtv) p h0 h1;
   mt_safe_elts_preserved 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv) p h0 h1
@@ -420,12 +431,12 @@ private let create_empty_mt r =
   let rhs_region = RV.new_region_ r in
   let rhs = RV.create_rid hreg 32ul rhs_region in
   let h1 = HST.get () in
+  RV.rv_inv_preserved hs (V.loc_vector rhs) h0 h1;
   mt_safe_elts_preserved
     0ul hs 0ul 0ul (V.loc_vector rhs) h0 h1;
   let mt = B.malloc r (MT 0ul 0ul hs false rhs) 1ul in
   let h2 = HST.get () in
-  mt_safe_elts_preserved
-    0ul hs 0ul 0ul (B.loc_buffer mt) h1 h2;
+  mt_safe_elts_preserved 0ul hs 0ul 0ul loc_none h1 h2;
   mt
 
 /// Destruction (free)
@@ -442,10 +453,34 @@ let free_mt mt =
 
 /// Insertion
 
+private val insert_index_helper_even:
+  lv:uint32_t{lv < 32ul} ->
+  j:index_t{U32.v j < pow2 (32 - U32.v lv) - 1} ->
+  Lemma (requires (j % 2ul <> 1ul))
+	(ensures (j / 2ul == (j + 1ul) / 2ul))
+private let insert_index_helper_even lv j = ()
+
+private val insert_index_helper_odd:
+  lv:uint32_t{lv < 32ul} ->
+  j:index_t{U32.v j < pow2 (32 - U32.v lv) - 1} ->
+  Lemma (requires (j % 2ul = 1ul))
+	(ensures (U32.v (j / 2ul) < pow2 (32 - U32.v (lv + 1ul)) - 1))
+private let insert_index_helper_odd lv j = ()
+
+// val loc_union_assoc_test:
+//   l1:loc -> l2:loc -> l3:loc ->
+//   Lemma (loc_union (loc_union l1 l2) l3 ==
+// 	loc_union l1 (loc_union l2 l3))
+// let loc_union_assoc_test l1 l2 l3 = ()
+
+// TODO: too slow; separate `mt_safe_elts` conditions by a lemma.
 private val insert_:
   lv:uint32_t{lv < 32ul} ->
-  i:Ghost.erased uint32_t ->
-  j:uint32_t{Ghost.reveal i <= j && j < U32.uint_to_t (UInt.max_int U32.n)} ->
+  i:Ghost.erased index_t ->
+  j:index_t{
+    Ghost.reveal i <= j &&
+    U32.v j < pow2 (32 - U32.v lv) - 1 &&
+    j < U32.uint_to_t (UInt.max_int U32.n)} ->
   hs:hash_vv{V.size_of hs = 32ul} ->
   acc:hash ->
   HST.ST unit
@@ -456,19 +491,181 @@ private val insert_:
 	   mt_safe_elts h0 lv hs (Ghost.reveal i) j))
 	 (ensures (fun h0 _ h1 ->
 	   // Need more fine-grained one for below.
-	   modifies (RV.loc_rvector hs) h0 h1 /\
+	   modifies (loc_union
+		      (loc_union
+			(RV.rv_loc_elems h0 hs lv (V.size_of hs))
+			(V.loc_vector_within hs lv (V.size_of hs)))
+		      (B.loc_all_regions_from false (B.frameOf acc))) h0 h1 /\
 	   RV.rv_inv h1 hs /\
+	   Rgl?.r_inv hreg h1 acc /\
 	   mt_safe_elts h1 lv hs (Ghost.reveal i) (j + 1ul)))
+#reset-options "--z3rlimit 120"
+
 private let rec insert_ lv i j hs acc =
-  admit ();
+  let hh0 = HST.get () in
+  mt_safe_elts_rec hh0 lv hs (Ghost.reveal i) j;
   let ihv = RV.insert_copy hcpy (V.index hs lv) acc in
+  let hh1 = HST.get () in
+
+  assert (modifies (RV.rs_loc_elem bhreg (V.as_seq hh0 hs) (U32.v lv)) hh0 hh1);
+
+  Rgl?.r_sep hreg acc (RV.loc_rvector (V.get hh0 hs lv)) hh0 hh1;
+  assert (V.size_of ihv == j + 1ul - offset_of (Ghost.reveal i));
+  
+  RV.rs_loc_elems_elem_disj
+    bhreg (V.as_seq hh0 hs) (V.frameOf hs) 
+    0 (U32.v (V.size_of hs)) 0 (U32.v lv) (U32.v lv);
+  RV.rs_loc_elems_parent_disj
+    bhreg (V.as_seq hh0 hs) (V.frameOf hs)
+    0 (U32.v lv);
+  RV.rv_elems_inv_preserved
+    hs 0ul lv (RV.loc_rvector (V.get hh0 hs lv))
+    hh0 hh1;
+  assert (RV.rv_elems_inv hh1 hs 0ul lv);
+  RV.rs_loc_elems_elem_disj
+    bhreg (V.as_seq hh0 hs) (V.frameOf hs) 
+    0 (U32.v (V.size_of hs))
+    (U32.v lv + 1) (U32.v (V.size_of hs))
+    (U32.v lv);
+  RV.rs_loc_elems_parent_disj
+    bhreg (V.as_seq hh0 hs) (V.frameOf hs)
+    (U32.v lv + 1) (U32.v (V.size_of hs));
+  RV.rv_elems_inv_preserved
+    hs (lv + 1ul) (V.size_of hs) (RV.loc_rvector (V.get hh0 hs lv))
+    hh0 hh1;
+  assert (RV.rv_elems_inv hh1 hs (lv + 1ul) (V.size_of hs));
+
+  // assert (rv_itself_inv hh1 hs);
+  // assert (elems_reg hh1 hs);
+
+  V.forall2_forall_left hh0 hs 0ul (V.size_of hs) lv
+    (fun b1 b2 -> HH.disjoint (Rgl?.region_of bhreg b1)
+			      (Rgl?.region_of bhreg b2));
+  // assert (V.forall_ hh1 hs 0ul lv
+  // 	   (fun b -> HH.disjoint (Rgl?.region_of bhreg b)
+  // 				 (Rgl?.region_of bhreg ihv)));
+  V.forall2_forall_right hh0 hs 0ul (V.size_of hs) lv
+    (fun b1 b2 -> HH.disjoint (Rgl?.region_of bhreg b1)
+			      (Rgl?.region_of bhreg b2));
+  // assert (V.forall_ hh1 hs (lv + 1ul) (V.size_of hs)
+  //     	   (fun b -> HH.disjoint (Rgl?.region_of bhreg b)
+  //     				 (Rgl?.region_of bhreg ihv)));
+
+  RV.rv_loc_elems_preserved
+    hs (lv + 1ul) (V.size_of hs)
+    (RV.loc_rvector (V.get hh0 hs lv)) hh0 hh1;
+  mt_safe_elts_preserved
+    (lv + 1ul) hs (Ghost.reveal i / 2ul) (j / 2ul)
+    (RV.loc_rvector (V.get hh0 hs lv)) hh0 hh1;
+
   RV.assign hs lv ihv;
+  let hh2 = HST.get () in
+  assert (modifies (V.loc_vector_within hs lv (lv + 1ul)) hh1 hh2);
+  assert (modifies (loc_union
+		     (RV.rs_loc_elem bhreg (V.as_seq hh0 hs) (U32.v lv))
+		     (V.loc_vector_within hs lv (lv + 1ul))) hh0 hh2);
+
+  Rgl?.r_sep hreg acc (RV.loc_rvector hs) hh1 hh2;
+  assert (V.size_of (V.get hh2 hs lv) ==
+  	 j + 1ul - offset_of (Ghost.reveal i));
+  RV.rv_loc_elems_preserved
+    hs (lv + 1ul) (V.size_of hs)
+    (V.loc_vector_within hs lv (lv + 1ul)) hh1 hh2;
+  mt_safe_elts_preserved
+    (lv + 1ul) hs (Ghost.reveal i / 2ul) (j / 2ul)
+    (V.loc_vector_within hs lv (lv + 1ul)) hh1 hh2;
+
   if j % 2ul = 1ul
-  then (let lvhs = V.index hs lv in
-       hash_2 (V.index lvhs (V.size_of lvhs - 2ul)) acc acc;
-       insert_ (lv + 1ul)
-	       (Ghost.hide (Ghost.reveal i / 2ul)) (j / 2ul) 
-	       hs acc)
+  then (insert_index_helper_odd lv j;
+       let lvhs = V.index hs lv in
+       assert (RV.rv_inv hh2 lvhs);
+       assert (RV.rv_elems_inv hh2 lvhs 0ul (V.size_of lvhs));
+       if V.size_of lvhs >= 2ul
+       then (assert (Rgl?.r_inv hreg hh2 (V.get hh2 lvhs (V.size_of lvhs - 2ul)));
+	    assert (Rgl?.r_inv hreg hh2 acc);
+	    hash_2 (V.index lvhs (V.size_of lvhs - 2ul)) acc acc;
+	    let hh3 = HST.get () in
+	    assert (modifies (B.loc_all_regions_from false (B.frameOf acc)) hh2 hh3);
+	    assert (modifies
+		     (loc_union
+		       (loc_union
+			 (RV.rs_loc_elem bhreg (V.as_seq hh0 hs) (U32.v lv))
+			 (V.loc_vector_within hs lv (lv + 1ul)))
+		       (B.loc_all_regions_from false (B.frameOf acc)))
+		     hh0 hh3);
+	    RV.rv_inv_preserved
+	      hs (B.loc_region_only false (B.frameOf acc)) hh2 hh3;
+	    RV.rv_loc_elems_preserved
+	      hs (lv + 1ul) (V.size_of hs)
+	      (B.loc_region_only false (B.frameOf acc)) hh2 hh3;
+	    mt_safe_elts_preserved
+	      (lv + 1ul) hs (Ghost.reveal i / 2ul) (j / 2ul)
+	      (B.loc_region_only false (B.frameOf acc)) hh2 hh3;
+	    assert (RV.rv_inv hh3 hs);
+	    assert (Rgl?.r_inv hreg hh3 acc);
+	    V.get_preserved hs lv
+	      (B.loc_region_only false (B.frameOf acc)) hh2 hh3;
+       	    insert_ (lv + 1ul)
+       	    	    (Ghost.hide (Ghost.reveal i / 2ul)) (j / 2ul) 
+       	    	    hs acc;
+	    let hh4 = HST.get () in
+	    assert (loc_disjoint
+	    	     (V.loc_vector_within hs lv (lv + 1ul))
+	    	     (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
+	    assert (loc_includes
+	    	     (V.loc_vector hs)
+	    	     (V.loc_vector_within hs lv (lv + 1ul)));
+	    RV.rv_loc_elems_included hh3 hs (lv + 1ul) (V.size_of hs);
+	    assert (loc_disjoint
+		     (V.loc_vector_within hs lv (lv + 1ul))
+		     (RV.rv_loc_elems hh3 hs (lv + 1ul) (V.size_of hs)));
+	    assert (loc_disjoint
+		     (V.loc_vector_within hs lv (lv + 1ul))
+		     (B.loc_all_regions_from false (B.frameOf acc)));
+	    V.get_preserved hs lv
+	      (loc_union
+		(loc_union
+		  (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))
+		  (RV.rv_loc_elems hh3 hs (lv + 1ul) (V.size_of hs)))
+		(B.loc_all_regions_from false (B.frameOf acc)))
+	      hh3 hh4))
+  else (insert_index_helper_even lv j;
+       assert (mt_safe_elts hh2 (lv + 1ul) hs
+       	        (Ghost.reveal i / 2ul) ((j + 1ul) / 2ul));
+       mt_safe_elts_constr hh2 lv hs (Ghost.reveal i) (j + 1ul));
+
+  let hh5 = HST.get () in
+  assume (V.loc_vector_within hs lv (V.size_of hs) ==
+	 loc_union (V.loc_vector_within hs lv (lv + 1ul))
+		   (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
+  rs_loc_elems_rec_inverse
+    bhreg (V.as_seq hh0 hs) (U32.v lv) (U32.v (V.size_of hs));
+  assert (modifies
+	   (loc_union
+	     (loc_union
+	       (loc_union
+		 (RV.rs_loc_elem bhreg (V.as_seq hh0 hs) (U32.v lv))
+		 (V.loc_vector_within hs lv (lv + 1ul)))
+	       (B.loc_all_regions_from false (B.frameOf acc)))
+	     (loc_union
+	       (loc_union
+		 (RV.rv_loc_elems hh0 hs (lv + 1ul) (V.size_of hs))
+		 (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
+	       (B.loc_all_regions_from false (B.frameOf acc))))
+	   hh0 hh5);
+  assert (RV.rv_inv hh5 hs);
+  assert (Rgl?.r_inv hreg hh5 acc);
+  assert (mt_safe_elts hh5 lv hs (Ghost.reveal i) (j + 1ul));
+  // assert (modifies (loc_union
+  // 		      (loc_union
+  // 			(V.loc_vector_within hs lv (V.size_of hs))
+  // 			(loc_union
+  // 			  (RV.rs_loc_elem bhreg (V.as_seq hh0 hs) (U32.v lv))
+  // 			  (RV.rv_loc_elems hh0 hs (lv + 1) (V.size_of hs))))
+  // 		      (B.loc_all_regions_from false (B.frameOf acc)))
+  // 	 hh0 hh5);
+  admit ()
+
 
 // Caution: current impl. manipulates the content in `v`.
 val mt_insert:
@@ -480,7 +677,9 @@ val mt_insert:
 	   Rgl?.r_inv hreg h0 v /\
 	   HH.disjoint (B.frameOf mt) (B.frameOf v)))
 	 (ensures (fun h0 _ h1 ->
-	   modifies (mt_loc mt) h0 h1 /\
+	   modifies (loc_union
+		      (mt_loc mt)
+		      (B.loc_all_regions_from false (B.frameOf v))) h0 h1 /\
 	   mt_safe h1 mt))
 #reset-options "--z3rlimit 40 --max_fuel 0"
 let mt_insert mt v =
@@ -539,7 +738,7 @@ let path_loc p =
 
 private val path_safe_preserved_:
   mtr:HH.rid -> hvec:V.vector hash -> dl:loc ->
-  i:uint32_t -> j:uint32_t{i <= j && j <= V.size_of hvec} ->
+  i:index_t -> j:index_t{i <= j && j <= V.size_of hvec} ->
   h:HS.mem -> h0:HS.mem -> h1:HS.mem ->
   Lemma (requires (V.forall_ h hvec i j
 		    (fun hp -> 
@@ -629,8 +828,8 @@ private val construct_rhs:
   lv:uint32_t{lv <= 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
-  i:uint32_t ->
-  j:uint32_t{i <= j && U32.v j < pow2 (32 - U32.v lv)} ->
+  i:index_t ->
+  j:index_t{i <= j && U32.v j < pow2 (32 - U32.v lv)} ->
   acc:hash ->
   actd:bool ->
   HST.ST unit
@@ -802,8 +1001,8 @@ private val mt_get_path_:
   mtr:HH.rid ->
   hs:hash_vv{V.size_of hs = 32ul} ->
   rhs:hash_vec{V.size_of rhs = 32ul} ->
-  i:uint32_t -> j:uint32_t{i <= j} ->
-  k:uint32_t{i <= k && k <= j} ->
+  i:index_t -> j:index_t{i <= j} ->
+  k:index_t{i <= k && k <= j} ->
   p:path ->
   actd:bool ->
   HST.ST unit
@@ -860,10 +1059,10 @@ private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
 // When `rhs_ok = true`, it suffices to return the root stored in the tree.
 val mt_get_path:
   mt:mt_p -> 
-  idx:uint32_t ->
+  idx:index_t ->
   p:path ->
   root:hash ->
-  HST.ST uint32_t
+  HST.ST index_t
 	 (requires (fun h0 ->
 	   MT?.i (B.get h0 mt 0) <= idx /\ idx < MT?.j (B.get h0 mt 0) /\
 	   mt_safe h0 mt /\ 
@@ -920,9 +1119,9 @@ let mt_get_path mt idx p root =
 private val mt_flush_to_:
   lv:uint32_t{lv < 32ul} ->
   hs:hash_vv{V.size_of hs = 32ul} ->
-  pi:uint32_t ->
-  i:uint32_t{i >= pi} ->
-  j:Ghost.erased uint32_t{Ghost.reveal j > i} ->
+  pi:index_t ->
+  i:index_t{i >= pi} ->
+  j:Ghost.erased index_t{Ghost.reveal j > i} ->
   HST.ST unit
 	 (requires (fun h0 ->
 	   RV.rv_inv h0 hs /\
@@ -943,7 +1142,7 @@ private let rec mt_flush_to_ lv hs pi i j =
 
 val mt_flush_to:
   mt:mt_p ->
-  idx:uint32_t ->
+  idx:index_t ->
   HST.ST unit
 	 (requires (fun h0 -> 
 	   mt_safe h0 mt /\ idx >= MT?.i (B.get h0 mt 0) /\
@@ -975,8 +1174,8 @@ let mt_flush mt =
 /// Client-side verification
 
 private val mt_verify_:
-  k:uint32_t ->
-  j:uint32_t{k <= j} ->
+  k:index_t ->
+  j:index_t{k <= j} ->
   mtr:HH.rid -> p:path ->
   ppos:uint32_t ->
   acc:hash ->
@@ -1019,8 +1218,8 @@ private let rec buf_eq #a b1 b2 len =
        a1 = a2 && teq)
 
 val mt_verify:
-  k:uint32_t ->
-  j:uint32_t{k < j} ->
+  k:index_t ->
+  j:index_t{k < j} ->
   mtr:HH.rid -> p:path ->
   rt:hash ->
   HST.ST bool
