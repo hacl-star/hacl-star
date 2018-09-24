@@ -153,11 +153,105 @@ let mt_get_root mt =
 		    hash_init false in
   root
 
-// TODOs:
-// path_insert
-// mt_get_path
-// mt_flush_to
-// mt_flush
-// mt_verify
+val path_insert: p:path -> hp:hash -> GTot path
+let path_insert p hp = S.snoc p hp
+
+// Construct a Merkle path for a given index `k`, hashes `hs`, 
+// and rightmost hashes `rhs`.
+val mt_get_path_:
+  lv:nat{lv <= 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  rhs:hash_seq{S.length rhs = 32} ->
+  i:nat -> j:nat{i <= j} ->
+  k:nat{i <= k && k <= j} ->
+  p:path ->
+  actd:bool ->
+  GTot path (decreases (32 - lv))
+let rec mt_get_path_ lv hs rhs i j k p actd =
+  admit ();
+  let ofs = offset_of i in
+  if j = 0 then p
+  else
+    (let np = 
+      (if k % 2 = 1
+      then path_insert p (S.index (S.index hs lv) (k - 1 - ofs))
+      else (if k = j then p
+	   else if k + 1 = j
+	   then (if actd
+		then path_insert p (S.index rhs lv)
+		else p)
+	   else path_insert p (S.index (S.index hs lv) (k + 1 - ofs)))) in
+    mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np
+    		 (if j % 2 = 0 then actd else true))
+
+val mt_get_path: mt:wf_mt -> idx:nat -> GTot (path * hash)
+let mt_get_path mt idx =
+  admit ();
+  let (rhs, root) =
+    construct_rhs 0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
+		  hash_init false in
+  let ofs = offset_of (MT?.i mt) in
+  let ip = path_insert S.empty (S.index (S.index (MT?.hs mt) 0) (idx - ofs)) in
+  (mt_get_path_ 0 (MT?.hs mt) rhs (MT?.i mt) (MT?.j mt) idx ip false,
+  root)
+
+val mt_flush_to_:
+  lv:nat{lv < 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  pi:nat ->
+  i:nat{i >= pi} ->
+  j:nat{j > i} ->
+  GTot hash_ss
+let rec mt_flush_to_ lv hs pi i j =
+  admit ();
+  if i = 0 then hs
+  else (let ofs = offset_of i - offset_of pi in
+       let hvec = S.index hs lv in
+       let flushed = S.slice hvec ofs (S.length hvec) in
+       let nhs = S.upd hs lv flushed in
+       mt_flush_to_ (lv + 1) nhs (pi / 2) (i / 2) (j / 2))
+
+val mt_flush_to: 
+  mt:wf_mt -> idx:nat -> GTot wf_mt
+let mt_flush_to mt idx =
+  admit ();
+  let fhs = mt_flush_to_ 0 (MT?.hs mt) (MT?.i mt) idx (MT?.j mt) in
+  MT idx (MT?.j mt) fhs (MT?.rhs_ok mt) (MT?.rhs mt)
+
+val mt_flush: mt:wf_mt{MT?.j mt > MT?.i mt} -> GTot wf_mt
+let mt_flush mt = 
+  mt_flush_to mt (MT?.j mt - 1)
+
+val mt_verify_:
+  k:nat ->
+  j:nat{k <= j} ->
+  p:path ->
+  ppos:nat ->
+  acc:hash ->
+  actd:bool ->
+  GTot hash
+let rec mt_verify_ k j p ppos acc actd =
+  admit ();
+  if j = 0 then acc
+  else (let nactd = actd || (j % 2 = 1) in
+       let phash = S.index p ppos in
+       if k % 2 = 0
+       then (if j = k || (j = k + 1 && not actd)
+	    then mt_verify_ (k / 2) (j / 2) p ppos acc nactd
+	    else (let nacc = hash_2 acc phash in
+		 mt_verify_ (k / 2) (j / 2) p (ppos + 1) nacc nactd))
+       else (let nacc = hash_2 phash acc in
+	    mt_verify_ (k / 2) (j / 2) p (ppos + 1) nacc nactd))
+
+val mt_verify:
+  k:nat ->
+  j:nat{k < j} ->
+  p:path ->
+  rt:hash ->
+  GTot bool
+let mt_verify k j p rt =
+  admit ();
+  let crt = mt_verify_ k j p 1 (S.index p 0) false in
+  crt = rt
 
 
