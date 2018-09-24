@@ -2,6 +2,8 @@ module Frodo.Params
 
 open Lib.IntTypes
 
+#reset-options "--max_fuel 0 --max_ifuel 0"
+
 unfold let params_n = size 976
 
 unfold let params_logq = size 16

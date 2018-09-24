@@ -2,6 +2,8 @@ module Frodo.Params
 
 open Lib.IntTypes
 
+#reset-options "--max_fuel 0 --max_ifuel 0"
+
 unfold let params_n = size 64
 
 unfold let params_logq = size 15
@@ -20,7 +22,7 @@ unfold let bytes_seed_a = size 16
 
 unfold let params_nbar = size 8
 
-unfold let frodo_prf_spec = Spec.Frodo.Keccak.cshake128_frodo
+unfold let frodo_prf_spec = Spec.SHA3.cshake128_frodo
 
 unfold let frodo_gen_matrix = Spec.Frodo.Gen.frodo_gen_matrix_cshake
 
