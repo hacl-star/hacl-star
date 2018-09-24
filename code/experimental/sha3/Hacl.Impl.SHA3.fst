@@ -70,10 +70,6 @@ let writeLane s x y v = s.(x +! size 5 *! y) <- v
 let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) =
   (a <<. b) |. (a >>. (u32 64 -. b))
 
-let as_state (h:mem) (s:state) : S.state = as_seq_sp h s
-
-let as_seq5 (h:mem) (s:lbuffer uint64 5) : LSeq.lseq uint64 5 = as_seq_sp h s
-
 inline_for_extraction noextract
 val state_theta_inner_C:
     #h0:mem
@@ -83,10 +79,10 @@ val state_theta_inner_C:
   -> Stack unit
     (requires fun h ->
       live h s /\ live h _C /\ disjoint _C s /\
-      as_state h0 s == as_state h s /\
-      loop_inv h0 h 5 _C (S.state_theta_inner_C (as_state h0 s)) (v i))
+      as_seq h0 s == as_seq h s /\
+      loop_inv h0 h 5 _C (fun h0 -> S.state_theta_inner_C (as_seq h0 s)) (v i))
     (ensures  fun _ _ h -> live h s /\
-      loop_inv h0 h 5 _C (S.state_theta_inner_C (as_state h0 s)) (v i + 1))
+      loop_inv h0 h 5 _C (fun h0 -> S.state_theta_inner_C (as_seq h0 s)) (v i + 1))
 let state_theta_inner_C #h0 s x _C =
   let h1 = ST.get () in
   _C.(x) <-
@@ -96,8 +92,8 @@ let state_theta_inner_C #h0 s x _C =
     readLane s x (size 3) ^.
     readLane s x (size 4);
   let h2 = ST.get () in
-  assert (as_seq h2 _C == S.state_theta_inner_C (as_state h0 s) (v x) (as_seq5 h1 _C));
-  lemma_repeati_sp #h0 5 (S.state_theta_inner_C (as_state h0 s)) (as_seq5 h0 _C) (v x) (as_seq5 h1 _C)
+  assert (as_seq h2 _C == S.state_theta_inner_C (as_seq h0 s) (v x) (as_seq h1 _C));
+  lemma_repeati_sp #h0 5 (fun h0 -> S.state_theta_inner_C (as_seq h0 s)) (as_seq h0 _C) (v x) (as_seq h1 _C)
 
 inline_for_extraction noextract
 val state_theta0:
@@ -108,13 +104,13 @@ val state_theta0:
     (requires fun h ->
       h0 == h /\ live h s /\ live h _C /\
       disjoint _C s /\
-      as_state h0 s == as_state h s)
+      as_seq h0 s == as_seq h s)
     (ensures  fun _ _ h1 ->
       modifies (loc_buffer _C) h0 h1 /\
-      as_seq_sp h1 _C == S.state_theta0 (as_seq_sp h0 s) (as_seq_sp h0 _C))
+      as_seq h1 _C == S.state_theta0 (as_seq h0 s) (as_seq h0 _C))
 let state_theta0 #h0 s _C =
-  let inv h h1 = live h1 s /\ live h1 _C /\ disjoint s _C /\ as_state h0 s == as_state h1 s in
-  loop #h0 (size 5) _C inv (S.state_theta_inner_C (as_state h0 s))
+  let inv h h1 = live h1 s /\ live h1 _C /\ disjoint s _C /\ as_seq h0 s == as_seq h1 s in
+  loop #h0 (size 5) _C inv (fun h0 -> S.state_theta_inner_C (as_seq h0 s))
   (fun x ->
     state_theta_inner_C #h0 s x _C
   )
@@ -128,14 +124,14 @@ val state_theta_inner_s_inner:
   -> s:state
   -> Stack unit
     (requires fun h -> live h s /\
-      loop_inv h0 h 5 s (S.state_theta_inner_s_inner (v x) _D) (v y))
+      loop_inv h0 h 5 s (fun h0 -> S.state_theta_inner_s_inner (v x) _D) (v y))
     (requires fun _ _ h ->
-      loop_inv h0 h 5 s (S.state_theta_inner_s_inner (v x) _D) (v y + 1))
+      loop_inv h0 h 5 s (fun h0 -> S.state_theta_inner_s_inner (v x) _D) (v y + 1))
 let state_theta_inner_s_inner #h0 x _D y s =
   let h1 = ST.get () in
   writeLane s x y (readLane s x y ^. _D);
   let h2 = ST.get () in
-  lemma_repeati_sp #h0 5 (S.state_theta_inner_s_inner (v x) _D) (as_seq h0 s) (v y) (as_seq h1 s)
+  lemma_repeati_sp #h0 5 (fun h0 -> S.state_theta_inner_s_inner (v x) _D) (as_seq h0 s) (v y) (as_seq h1 s)
 
 inline_for_extraction noextract
 val state_theta_inner_s:
@@ -147,19 +143,19 @@ val state_theta_inner_s:
     (requires fun h ->
       live h s /\ live h _C /\ disjoint _C s /\
       as_seq h0 _C == as_seq h _C /\
-      loop_inv h0 h 5 s (S.state_theta_inner_s (as_seq h0 _C)) (v x))
-    (ensures  fun _ _ h -> loop_inv h0 h 5 s (S.state_theta_inner_s (as_seq h0 _C)) (v x + 1))
+      loop_inv h0 h 5 s (fun h0 -> S.state_theta_inner_s (as_seq h0 _C)) (v x))
+    (ensures  fun _ _ h -> loop_inv h0 h 5 s (fun h0 -> S.state_theta_inner_s (as_seq h0 _C)) (v x + 1))
 let state_theta_inner_s #h0 _C x s =
   let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (u32 1) in
   let inv h0 h = live h s in
   let h1 = ST.get () in
-  loop #h1 (size 5) s inv (S.state_theta_inner_s_inner (v x) _D)
+  loop #h1 (size 5) s inv (fun h0 -> S.state_theta_inner_s_inner (v x) _D)
   (fun y ->
     state_theta_inner_s_inner #h1 x _D y s
   );
   let h2 = ST.get () in
   assert (as_seq h2 s == LSeq.repeati_sp #5 5 (S.state_theta_inner_s_inner (v x) _D) (as_seq h1 s));
-  lemma_repeati_sp #h0 5 (S.state_theta_inner_s (as_seq h0 _C)) (as_seq h0 s) (v x) (as_seq h1 s)
+  lemma_repeati_sp #h0 5 (fun h0 -> S.state_theta_inner_s (as_seq h0 _C)) (as_seq h0 s) (v x) (as_seq h1 s)
 
 inline_for_extraction noextract
 val state_theta1:
@@ -172,16 +168,14 @@ val state_theta1:
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s == S.state_theta1 (as_seq h0 s) (as_seq h0 _C))
 let state_theta1 s _C =
-  push_frame ();
   let inv h0 h =
     live h s /\ live h _C /\ disjoint _C s /\
     as_seq h0 _C == as_seq h _C in
   let h0 = ST.get () in
-  loop #h0 (size 5) s inv (S.state_theta_inner_s (as_seq_sp h0 _C))
+  loop #h0 (size 5) s inv (fun h0 -> S.state_theta_inner_s (as_seq h0 _C))
   (fun x ->
     state_theta_inner_s #h0 _C x s
-  );
-  pop_frame ()
+  )
 
 inline_for_extraction noextract
 val state_theta:
@@ -190,7 +184,7 @@ val state_theta:
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
-      as_seq h1 s == S.state_theta (as_state h0 s))
+      as_seq h1 s == S.state_theta (as_seq h0 s))
 let state_theta s =
   push_frame();
   let _C:lbuffer uint64 5 = create (size 5) (u64 0) in
@@ -198,6 +192,8 @@ let state_theta s =
   state_theta0 #h0 s _C;
   state_theta1 s _C;
   pop_frame()
+
+#reset-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 50"
 
 inline_for_extraction noextract
 val state_pi_rho_inner:
@@ -208,15 +204,15 @@ val state_pi_rho_inner:
   -> Stack unit
     (requires fun h ->
       live h s /\ live h current /\ disjoint current s /\
-      loop2_inv h0 h 24 current s S.state_pi_rho_inner (v i))
+      loop2_inv h0 h 24 current s (fun h0 -> S.state_pi_rho_inner) (v i))
     (ensures  fun h _ h1 ->
-      loop2_inv h0 h1 24 current s S.state_pi_rho_inner (v i + 1))
+      loop2_inv h0 h1 24 current s (fun h0 -> S.state_pi_rho_inner) (v i + 1))
 let state_pi_rho_inner #h0 i current s =
   let h = ST.get () in
   IB.recall_contents keccak_rotc (Seq.seq_of_list rotc_list);
   IB.recall_contents keccak_piln (Seq.seq_of_list piln_list);
   let r = IB.index keccak_rotc (Lib.RawIntTypes.size_to_UInt32 i) in
-  assert (r == LSeq.index S.keccak_rotc (v i));
+  //assert (r == LSeq.index S.keccak_rotc (v i));
   let _Y = IB.index keccak_piln (Lib.RawIntTypes.size_to_UInt32 i) in
   assume (v _Y == LSeq.index S.keccak_piln (v i));
   let temp = s.(_Y) in
@@ -224,7 +220,9 @@ let state_pi_rho_inner #h0 i current s =
   s.(_Y) <- rotl current0 r;
   current.(size 0) <- temp;
   let h1 = ST.get () in
-  lemma_repeati_sp #h0 24 S.state_pi_rho_inner (as_seq h0 current, as_seq h0 s) (v i) (as_seq h current, as_seq h s)
+  lemma_repeati_sp #h0 24 (fun h0 -> S.state_pi_rho_inner) (as_seq h0 current, as_seq h0 s) (v i) (as_seq h current, as_seq h s)
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 inline_for_extraction noextract
 val state_pi_rho:
@@ -239,7 +237,7 @@ let state_pi_rho s =
   let current:lbuffer uint64 1 = create (size 1) (readLane s (size 1) (size 0)) in
   let h0 = ST.get () in
   let inv h0 h1 = live h1 s /\ live h1 current /\ disjoint current s in
-  loop2 #h0 (size 24) current s inv S.state_pi_rho_inner
+  loop2 #h0 (size 24) current s inv (fun h0 -> S.state_pi_rho_inner)
   (fun i ->
     state_pi_rho_inner #h0 i current s
   );
@@ -256,9 +254,9 @@ val state_chi_inner:
     (requires fun h ->
       live h s_pi_rho /\ live h s /\ disjoint s_pi_rho s /\
       as_seq h0 s_pi_rho == as_seq h s_pi_rho /\
-      loop_inv h0 h 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x))
+      loop_inv h0 h 5 s (fun h0 -> S.state_chi_inner (as_seq h0 s_pi_rho) (v y)) (v x))
     (ensures  fun h _ h1 ->
-      loop_inv h0 h1 5 s (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (v x + 1))
+      loop_inv h0 h1 5 s (fun h0 -> S.state_chi_inner (as_seq h0 s_pi_rho) (v y)) (v x + 1))
 let state_chi_inner #h0 s_pi_rho y x s =
   let h1 = ST.get () in
   writeLane s x y
@@ -266,7 +264,7 @@ let state_chi_inner #h0 s_pi_rho y x s =
      ((lognot (readLane s_pi_rho ((x +. size 1) %. size 5) y)) &.
      readLane s_pi_rho ((x +. size 2) %. size 5) y));
   let h2 = ST.get () in
-  lemma_repeati_sp #h0 5 (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y)) (as_seq h0 s) (v x) (as_seq h1 s)
+  lemma_repeati_sp #h0 5 (fun h0 -> S.state_chi_inner (as_seq h0 s_pi_rho) (v y)) (as_seq h0 s) (v x) (as_seq h1 s)
 
 inline_for_extraction noextract
 val state_chi_inner1:
@@ -278,18 +276,18 @@ val state_chi_inner1:
     (requires fun h ->
       live h s_pi_rho /\ live h s /\ disjoint s_pi_rho s /\
       as_seq h0 s_pi_rho == as_seq h s_pi_rho /\
-      loop_inv h0 h 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y))
+      loop_inv h0 h 5 s (fun h0 -> S.state_chi_inner1 (as_seq h0 s_pi_rho)) (v y))
     (ensures  fun h _ h1 ->
-      loop_inv h0 h1 5 s (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (v y + 1))
+      loop_inv h0 h1 5 s (fun h0 -> S.state_chi_inner1 (as_seq h0 s_pi_rho)) (v y + 1))
 let state_chi_inner1 #h0 s_pi_rho y s =
   let h1 = ST.get () in
   let inv h0 h1 = live h1 s_pi_rho /\ live h1 s /\ disjoint s_pi_rho s in
-  loop #h1 (size 5) s inv (S.state_chi_inner (as_seq_sp h0 s_pi_rho) (v y))
+  loop #h1 (size 5) s inv (fun h0 -> S.state_chi_inner (as_seq h0 s_pi_rho) (v y))
   (fun x ->
     state_chi_inner #h1 s_pi_rho y x s
   );
   let h2 = ST.get () in
-  lemma_repeati_sp #h0 5 (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho)) (as_seq h0 s) (v y) (as_seq h1 s)
+  lemma_repeati_sp #h0 5 (fun h0 -> S.state_chi_inner1 (as_seq h0 s_pi_rho)) (as_seq h0 s) (v y) (as_seq h1 s)
 
 inline_for_extraction noextract
 val copy_s:
@@ -320,7 +318,7 @@ let state_chi s =
   copy_s s_pi_rho s;
   let h0 = ST.get () in
   let inv h0 h1 = live h1 s_pi_rho /\ live h1 s /\ disjoint s_pi_rho s in
-  loop #h0 (size 5) s inv (S.state_chi_inner1 (as_seq_sp h0 s_pi_rho))
+  loop #h0 (size 5) s inv (fun h0 -> S.state_chi_inner1 (as_seq h0 s_pi_rho))
   (fun y ->
     state_chi_inner1 #h0 s_pi_rho y s
   );
@@ -345,10 +343,10 @@ val state_permute1:
   -> round:size_t{v round < 24}
   -> s:state
   -> Stack unit
-    (requires fun h1 -> live h1 s /\
-      loop_inv h0 h1 24 s S.state_permute1 (v round))
-    (ensures  fun h _ h1 ->
-      loop_inv h0 h1 24 s S.state_permute1 (v round + 1))
+    (requires fun h1 -> live h1 s /\ modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == LSeq.repeati_sp #24 (v round) S.state_permute1 (as_seq h0 s))
+    (ensures  fun _ _ h1 ->  modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s == LSeq.repeati_sp #24 (v round + 1) S.state_permute1 (as_seq h0 s))
 let state_permute1 #h0 round s =
   let h1 = ST.get () in
   state_theta s;
@@ -356,7 +354,7 @@ let state_permute1 #h0 round s =
   state_chi s;
   state_iota s round;
   let h2 = ST.get () in
-  lemma_repeati_sp #h0 24 S.state_permute1 (as_seq h0 s) (v round) (as_seq h1 s)
+  lemma_repeati_sp #h0 24 (fun h0 -> S.state_permute1) (as_seq h0 s) (v round) (as_seq h1 s)
 
 val state_permute:
      s:state
@@ -368,7 +366,7 @@ val state_permute:
 let state_permute s =
   let h0 = ST.get () in
   let inv h0 h1 = live h1 s in
-  loop #h0 (size 24) s inv S.state_permute1
+  loop #h0 (size 24) s inv (fun h0 -> S.state_permute1)
   (fun i ->
     state_permute1 #h0 i s
   )
@@ -383,14 +381,14 @@ val loadState_inner:
     (requires fun h ->
       live h block /\ live h s /\ disjoint block s /\
       as_seq h0 block == as_seq h block /\
-      loop_inv h0 h 25 s (S.loadState_inner (as_seq_sp h0 block)) (v j))
+      loop_inv h0 h 25 s (fun h0 -> S.loadState_inner (as_seq h0 block)) (v j))
     (ensures  fun h _ h1 ->
-      loop_inv h0 h1 25 s (S.loadState_inner (as_seq_sp h0 block)) (v j + 1))
+      loop_inv h0 h1 25 s (fun h0 -> S.loadState_inner (as_seq h0 block)) (v j + 1))
 let loadState_inner #h0 block j s =
   let h1 = ST.get () in
   s.(j) <- s.(j) ^. uint_from_bytes_le #U64 (sub #_ #200 #8 block (j *! size 8) (size 8));
   let h2 = ST.get () in
-  lemma_repeati_sp #h0 25 (S.loadState_inner (as_seq_sp h0 block)) (as_seq h0 s) (v j) (as_seq h1 s)
+  lemma_repeati_sp #h0 25 (fun h0 -> S.loadState_inner (as_seq h0 block)) (as_seq h0 s) (v j) (as_seq h1 s)
 
 val loadState:
      rateInBytes:size_t{v rateInBytes <= 200}
@@ -410,7 +408,7 @@ let loadState rateInBytes input s =
   let inv h0 h1 =
     live h1 block /\ live h1 s /\ disjoint block s /\
     as_seq h0 block == as_seq h1 block in
-  loop #h0 (size 25) s inv (S.loadState_inner (as_seq_sp h0 block))
+  loop #h0 (size 25) s inv (fun h0 -> S.loadState_inner (as_seq h0 block))
   (fun i ->
     loadState_inner #h0 block i s
   );
@@ -426,9 +424,9 @@ val storeState_inner:
     (requires fun h ->
       live h s /\ live h block /\ disjoint s block /\
       as_seq h0 s == as_seq h s /\
-      loop_inv h0 h 25 block (S.storeState_inner (as_seq h0 s)) (v j))
+      loop_inv h0 h 25 block (fun h0 -> S.storeState_inner (as_seq h0 s)) (v j))
     (ensures  fun h _ h1 ->
-      loop_inv h0 h1 25 block (S.storeState_inner (as_seq h0 s)) (v j + 1))
+      loop_inv h0 h1 25 block (fun h0 -> S.storeState_inner (as_seq h0 s)) (v j + 1))
 let storeState_inner #h0 s j block =
   let h1 = ST.get () in
   let tmp = sub block (j *! size 8) (size 8) in
@@ -439,7 +437,7 @@ let storeState_inner #h0 s j block =
   modifies_buffer_elim (sub #uint8 #200 #(200 - v j * 8 - 8) block (j *! size 8 +! size 8) (size 200 -! j *! size 8 -! size 8)) (loc_buffer tmp) h1 h2;
   S.lemma_update_store (as_seq h1 s) (v j) (as_seq h1 block) (as_seq h2 block);
   assert (as_seq h2 block == S.storeState_inner (as_seq h1 s) (v j) (as_seq h1 block));
-  lemma_repeati_sp #h0 25 (S.storeState_inner (as_seq h0 s)) (as_seq h0 block) (v j) (as_seq h1 block)
+  lemma_repeati_sp #h0 25 (fun h0 -> S.storeState_inner (as_seq h0 s)) (as_seq h0 block) (v j) (as_seq h1 block)
 
 val storeState:
      rateInBytes:size_t{v rateInBytes <= 200}
@@ -455,7 +453,7 @@ let storeState rateInBytes s res =
   let block:lbytes 200 = create (size 200) (u8 0) in
   let h0 = ST.get () in
   let inv h0 h = live h s /\ live h block /\ disjoint s block in
-  loop #h0 (size 25) block inv (S.storeState_inner (as_seq_sp h0 s))
+  loop #h0 (size 25) block inv (fun h0 -> S.storeState_inner (as_seq h0 s))
   (fun j ->
     storeState_inner #h0 s j block
   );
@@ -522,11 +520,15 @@ val absorb_inner:
     (requires fun h ->
       live h s /\ live h input /\ disjoint s input /\
       as_seq h0 input == as_seq h input /\
-      loop_inv h0 h (v inputByteLen / v rateInBytes) s
-	(S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (v i))
+      modifies (loc_buffer s) h0 h /\
+      as_seq h s ==
+      LSeq.repeati_sp #(v inputByteLen / v rateInBytes) (v i)
+	(S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (as_seq h0 s))
     (ensures  fun h _ h1 ->
-      loop_inv h0 h1 (v inputByteLen / v rateInBytes) s
-	(S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (v i + 1))
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s ==
+      LSeq.repeati_sp #(v inputByteLen / v rateInBytes) (v i + 1)
+	(S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (as_seq h0 s))
 let absorb_inner #h0 rateInBytes inputByteLen input i s =
   let h1 = ST.get () in
   S.lemma_rateInBytes (v inputByteLen) (v rateInBytes) (v i);
@@ -534,7 +536,7 @@ let absorb_inner #h0 rateInBytes inputByteLen input i s =
   state_permute s;
   let h2 = ST.get () in
   lemma_repeati_sp #h0 (v inputByteLen / v rateInBytes)
-    (S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (as_seq h0 s) (v i) (as_seq h1 s)
+    (fun h0 -> S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input)) (as_seq h0 s) (v i) (as_seq h1 s)
 
 val absorb:
      s:state
@@ -556,7 +558,7 @@ let absorb s rateInBytes inputByteLen input delimitedSuffix =
   let inv h0 h =
     live h s /\ live h input /\ disjoint s input /\
     as_seq h0 input == as_seq h input in
-  loop #h0 n s inv (S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq_sp h0 input))
+  loop #h0 n s inv (fun h0 -> S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input))
   (fun i ->
     absorb_inner #h0 rateInBytes inputByteLen input i s
   );
@@ -577,10 +579,10 @@ val squeeze_inner:
     (requires fun h ->
       live h s /\ live h output /\ disjoint s output /\
       loop2_inv h0 h (v outputByteLen / v rateInBytes) s output
-        (S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i))
+        (fun h0 -> S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i))
     (ensures  fun h _ h1 ->
       loop2_inv h0 h1 (v outputByteLen / v rateInBytes) s output
-        (S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i + 1))
+        (fun h0 -> S.squeeze_inner (v rateInBytes) (v outputByteLen)) (v i + 1))
 let squeeze_inner #h0 rateInBytes outputByteLen i s output =
   S.lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
   let h1 = ST.get () in
@@ -592,7 +594,7 @@ let squeeze_inner #h0 rateInBytes outputByteLen i s output =
     output (i *! rateInBytes +! rateInBytes) (outputByteLen -! i *! rateInBytes -! rateInBytes)) (loc_buffer tmp) h1 h2;
   S.lemma_update_squeeze (v rateInBytes) (v outputByteLen) (v i) (as_seq h1 s) (as_seq h1 output) (as_seq h2 output);
   state_permute s;
-  lemma_repeati_sp #h0 (v outputByteLen / v rateInBytes) (S.squeeze_inner (v rateInBytes) (v outputByteLen))
+  lemma_repeati_sp #h0 (v outputByteLen / v rateInBytes) (fun h0 -> S.squeeze_inner (v rateInBytes) (v outputByteLen))
     (as_seq h0 s, as_seq h0 output) (v i) (as_seq h1 s, as_seq h1 output)
 
 inline_for_extraction noextract
@@ -631,7 +633,7 @@ let squeeze s rateInBytes outputByteLen output =
   let outBlocks = outputByteLen /. rateInBytes in
   let h0 = ST.get () in
   let inv h0 h = live h s /\ live h output /\ disjoint s output in
-  loop2 #h0 outBlocks s output inv (S.squeeze_inner (v rateInBytes) (v outputByteLen))
+  loop2 #h0 outBlocks s output inv (fun h0 -> S.squeeze_inner (v rateInBytes) (v outputByteLen))
   (fun i ->
     squeeze_inner #h0 rateInBytes outputByteLen i s output
   );

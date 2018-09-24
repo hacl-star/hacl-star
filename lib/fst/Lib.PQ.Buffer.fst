@@ -20,8 +20,6 @@ unfold let v = size_v
 
 type lbuffer (a:Type0) (len:size_nat) = b:B.buffer a {B.length b == len}
 
-assume val as_seq_sp: #a:Type0 -> #len:size_nat -> h:mem -> b:lbuffer a len -> (r:Seq.lseq a len{r == B.as_seq h b})
-
 val gsub:
     #a:Type0
   -> #len:size_nat
@@ -211,12 +209,12 @@ val loop_inv:
   -> h1:mem
   -> n:size_nat
   -> buf:lbuffer a len
-  -> spec:(i:size_nat{i < n} -> Seq.lseq a len -> Seq.lseq a len)
+  -> spec:(h:mem -> GTot (i:size_nat{i < n} -> Seq.lseq a len -> Seq.lseq a len))
   -> i:nat{i <= n}
   -> Type0
 let loop_inv #a #len h0 h1 n buf spec i =
   modifies (loc_buffer buf) h0 h1 /\
-  as_seq h1 buf == Seq.repeati_sp #n i spec (as_seq h0 buf)
+  as_seq h1 buf == Seq.repeati_sp #n i (spec h0) (as_seq h0 buf)
 
 inline_for_extraction
 val loop:
@@ -226,7 +224,7 @@ val loop:
   -> n:size_t
   -> buf:lbuffer a len
   -> inv:(h0:mem -> h1:mem -> Type0)
-  -> spec:(i:size_nat{i < v n} -> Seq.lseq a len -> Seq.lseq a len)
+  -> spec:(h0:mem -> GTot (i:size_nat{i < v n} -> Seq.lseq a len -> Seq.lseq a len))
   -> impl:
       (i:size_t{v i < v n} -> Stack unit
         (requires fun h -> inv h0 h /\ loop_inv #a #len h0 h (v n) buf spec (v i))
@@ -254,14 +252,14 @@ val loop2_inv:
   -> n:size_nat
   -> buf0:lbuffer a0 len0
   -> buf1:lbuffer a1 len1
-  -> spec:(i:size_nat{i < n}
+  -> spec:(h0:mem -> GTot (i:size_nat{i < n}
         -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)
-        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1))
+        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)))
   -> i:nat{i <= n}
   -> Type0
 let loop2_inv #a0 #len0 #a1 #len1 h0 h1 n buf0 buf1 spec i =
   modifies (loc_union (loc_buffer buf0) (loc_buffer buf1)) h0 h1 /\
-  (let s1, s2 = Seq.repeati_sp #n i spec (as_seq h0 buf0, as_seq h0 buf1) in
+  (let s1, s2 = Seq.repeati_sp #n i (spec h0) (as_seq h0 buf0, as_seq h0 buf1) in
   as_seq h1 buf0 == s1 /\ as_seq h1 buf1 == s2)
 
 inline_for_extraction
@@ -275,9 +273,9 @@ val loop2:
   -> buf0:lbuffer a0 len0
   -> buf1:lbuffer a1 len1
   -> inv:(h0:mem -> h1:mem -> Type0)
-  -> spec:(i:size_nat{i < v n}
+  -> spec:(h0:mem -> GTot (i:size_nat{i < v n}
         -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)
-        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1))
+        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)))
   -> impl:
       (i:size_t{v i < v n} -> Stack unit
         (requires fun h -> inv h0 h /\ loop2_inv #a0 #len0 #a1 #len1 h0 h (v n) buf0 buf1 spec (v i))
@@ -298,13 +296,13 @@ val lemma_repeati_sp:
      #h0:HyperStack.mem
   -> #a:Type
   -> n:size_nat
-  -> spec:(i:size_nat{i < n} -> a -> a)
+  -> spec:(h0:mem -> GTot (i:size_nat{i < n} -> a -> a))
   -> res0:a
   -> i:size_nat{i < n}
   -> resi:a
   -> Lemma
-    (requires resi == Seq.repeati_sp #n i spec res0)
-    (ensures  Seq.repeati_sp #n (i + 1) spec res0 == spec i resi)
+    (requires resi == Seq.repeati_sp #n i (spec h0) res0)
+    (ensures  Seq.repeati_sp #n (i + 1) (spec h0) res0 == (spec h0) i resi)
 let lemma_repeati_sp #h0 #a n spec res0 i resi = ()
 
 inline_for_extraction
@@ -320,7 +318,7 @@ let lbytes_eq #len a b =
   push_frame();
   let res:lbuffer bool 1 = create (size 1) true in
   let h0 = ST.get () in
-  loop #h0 len res (fun _ _ -> True) (Seq.lbytes_eq_inner #(v len) (as_seq_sp h0 a) (as_seq_sp h0 b))
+  loop #h0 len res (fun _ _ -> True) (fun h0 -> Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b))
   (fun i ->
     let ai = a.(i) in
     let bi = b.(i) in
