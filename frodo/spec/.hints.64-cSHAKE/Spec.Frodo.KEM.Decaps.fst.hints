@@ -51,7 +51,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "b9841a1458d6c0eef6882b0867f1d458"
+      "5817836645d92e636133131c23d9fef9"
     ],
     [
       "Spec.Frodo.KEM.Decaps.frodo_sub_mul_c_minus_bs_inner",
@@ -103,7 +103,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "fb4297a56cf9edd726b75181083f3356"
+      "2a5c127cab0d7419f587845927e22de8"
     ],
     [
       "Spec.Frodo.KEM.Decaps.frodo_sub_mul_c_minus_bs_inner",
@@ -150,7 +150,7 @@
         "typing_Spec.Frodo.KEM.crypto_publickeybytes"
       ],
       0,
-      "6640c3deb352d6879ebdcf8645cb41d7"
+      "484ed00d0d7817cfddd65d16d8df676b"
     ],
     [
       "Spec.Frodo.KEM.Decaps.frodo_sub_mul_c_minus_bs",
@@ -208,7 +208,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "24697009b49a781b3b1e1842843b9b8e"
+      "079a18d6fb93f370909fed8efd338fb6"
     ],
     [
       "Spec.Frodo.KEM.Decaps.frodo_sub_mul_c_minus_bs",
@@ -260,7 +260,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "9ca07bec7e3b1dcc28b129eecd86e4d4"
+      "acd87f84d5f2e12365cf4653a7221643"
     ],
     [
       "Spec.Frodo.KEM.Decaps.frodo_sub_mul_c_minus_bs",
@@ -320,7 +320,7 @@
         "typing_FStar.Seq.Base.length", "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "2c288ba36f437e90ee2bfaa4e846ff87"
+      "c472b50116f2fb62740f0b74c79f066d"
     ],
     [
       "Spec.Frodo.KEM.Decaps.get_dec_ss",
@@ -331,10 +331,12 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Frodo.Params.crypto_bytes",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
+        "equation_Frodo.Params.crypto_bytes",
         "equation_Frodo.Params.params_logq",
         "equation_Frodo.Params.params_n",
-        "equation_Frodo.Params.params_nbar", "equation_Prims.nat",
+        "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.uint_t", "equation_Prims.nat",
         "equation_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "equation_Spec.Frodo.Params.crypto_bytes",
         "equation_Spec.Frodo.Params.params_logq",
@@ -363,6 +365,8 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_6bcf8fe35e74c53b001adec76bfe526d",
         "refinement_interpretation_Lib.Sequence_Tm_refine_9fb20bddb03739771b600ef3c8142523",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_b2ce2dcf39175fa0e07ef961052c276e",
+        "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_c0dbf099e8721f0b994770c37db50dc1",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_7bbf4118a5df3f37546da637d5c0ed88",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_c8a3fba89dac713f03248a02febd4657",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265",
@@ -370,7 +374,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "f3ffb90dd62f6f7bf096a7c99cd0a4e1"
+      "24638abe19f47ecc9555faecc365cf94"
     ],
     [
       "Spec.Frodo.KEM.Decaps.get_bpp_cp_matrices",
@@ -383,46 +387,38 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_FStar.UInt32.n", "equation_Frodo.Params.crypto_bytes",
         "equation_Frodo.Params.params_extracted_bits",
-        "equation_Frodo.Params.params_logq",
         "equation_Frodo.Params.params_n",
         "equation_Frodo.Params.params_nbar", "equation_Prims.nat",
-        "equation_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "equation_Spec.Frodo.Params.crypto_bytes",
         "equation_Spec.Frodo.Params.params_extracted_bits",
-        "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_n",
         "equation_Spec.Frodo.Params.params_nbar",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_Frodo.Params.crypto_bytes",
         "function_token_typing_Frodo.Params.params_extracted_bits",
-        "function_token_typing_Frodo.Params.params_logq",
         "function_token_typing_Frodo.Params.params_n",
         "function_token_typing_Frodo.Params.params_nbar",
-        "function_token_typing_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "function_token_typing_Spec.Frodo.Params.crypto_bytes",
         "function_token_typing_Spec.Frodo.Params.params_extracted_bits",
-        "function_token_typing_Spec.Frodo.Params.params_logq",
         "function_token_typing_Spec.Frodo.Params.params_n",
         "function_token_typing_Spec.Frodo.Params.params_nbar",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Frodo.Params_Tm_refine_321166b4c5153e283ddf50c874777e9d",
         "refinement_interpretation_Frodo.Params_Tm_refine_6abd0a3dd46e8ff5703a5febaab1ae96",
         "refinement_interpretation_Frodo.Params_Tm_refine_6be5f04ba74f3a5faebdbf54d10fa207",
         "refinement_interpretation_Frodo.Params_Tm_refine_938ae4458cbe5e752505b8f36707dacb",
-        "refinement_interpretation_Frodo.Params_Tm_refine_fd88e6c53a75fb32bd6a18c866e3219a",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_7bbf4118a5df3f37546da637d5c0ed88",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_b17f1ad818f4f89d2d2801c2df223822",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_c8a3fba89dac713f03248a02febd4657",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_f3018dc41e2c93504dba66e99cc34d08",
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "62ca800849fa9f4ad5010887ac82e376"
+      "2240fcedd87f5bee6d1b6352c0868297"
     ],
     [
       "Spec.Frodo.KEM.Decaps.get_bpp_cp_matrices",
@@ -435,46 +431,38 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_FStar.UInt32.n", "equation_Frodo.Params.crypto_bytes",
         "equation_Frodo.Params.params_extracted_bits",
-        "equation_Frodo.Params.params_logq",
         "equation_Frodo.Params.params_n",
         "equation_Frodo.Params.params_nbar", "equation_Prims.nat",
-        "equation_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "equation_Spec.Frodo.Params.crypto_bytes",
         "equation_Spec.Frodo.Params.params_extracted_bits",
-        "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_n",
         "equation_Spec.Frodo.Params.params_nbar",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_Frodo.Params.crypto_bytes",
         "function_token_typing_Frodo.Params.params_extracted_bits",
-        "function_token_typing_Frodo.Params.params_logq",
         "function_token_typing_Frodo.Params.params_n",
         "function_token_typing_Frodo.Params.params_nbar",
-        "function_token_typing_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "function_token_typing_Spec.Frodo.Params.crypto_bytes",
         "function_token_typing_Spec.Frodo.Params.params_extracted_bits",
-        "function_token_typing_Spec.Frodo.Params.params_logq",
         "function_token_typing_Spec.Frodo.Params.params_n",
         "function_token_typing_Spec.Frodo.Params.params_nbar",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Frodo.Params_Tm_refine_321166b4c5153e283ddf50c874777e9d",
         "refinement_interpretation_Frodo.Params_Tm_refine_6abd0a3dd46e8ff5703a5febaab1ae96",
         "refinement_interpretation_Frodo.Params_Tm_refine_6be5f04ba74f3a5faebdbf54d10fa207",
         "refinement_interpretation_Frodo.Params_Tm_refine_938ae4458cbe5e752505b8f36707dacb",
-        "refinement_interpretation_Frodo.Params_Tm_refine_fd88e6c53a75fb32bd6a18c866e3219a",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_7bbf4118a5df3f37546da637d5c0ed88",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_b17f1ad818f4f89d2d2801c2df223822",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_c8a3fba89dac713f03248a02febd4657",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_f3018dc41e2c93504dba66e99cc34d08",
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "366ad4ecc212013975d2da7ae4fb7981"
+      "b491217f0140983c07b85a549cc73917"
     ],
     [
       "Spec.Frodo.KEM.Decaps.get_bpp_cp_matrices",
@@ -534,7 +522,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "5026f61fbbc4e283f482eed5f8311254"
+      "c4b78bb92929ddc1ae857e6f63b5697f"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_ss_cond",
@@ -586,7 +574,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "aeaaba1df5042ea80a394e9e242654c5"
+      "3302f3658d53af69ea53e1e395267b13"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_ss_cond",
@@ -638,7 +626,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "8a077434af905e6e6f832f1cbf89c645"
+      "283468f4a9c09226c017b2bebf827249"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_ss_cond",
@@ -668,7 +656,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "3d55ad9d2d543a94a9ea40859d67a0e1"
+      "0e2f2f64e0de10820129914953c13021"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_ss_inner",
@@ -726,7 +714,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "ca80a6fb85f06e7af291599c2704aa78"
+      "27c0c643d2f802982e77996ef55b907c"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_ss_inner",
@@ -741,23 +729,19 @@
         "equation_Frodo.Params.params_extracted_bits",
         "equation_Frodo.Params.params_logq",
         "equation_Frodo.Params.params_n",
-        "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.uint16",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Prims.nat",
+        "equation_Frodo.Params.params_nbar", "equation_Prims.nat",
         "equation_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "equation_Spec.Frodo.Params.crypto_bytes",
         "equation_Spec.Frodo.Params.params_extracted_bits",
         "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_n",
         "equation_Spec.Frodo.Params.params_nbar",
-        "equation_Spec.Matrix.elem", "equation_Spec.Matrix.matrix",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_Frodo.Params.crypto_bytes",
         "function_token_typing_Frodo.Params.params_extracted_bits",
         "function_token_typing_Frodo.Params.params_logq",
         "function_token_typing_Frodo.Params.params_n",
         "function_token_typing_Frodo.Params.params_nbar",
-        "function_token_typing_Lib.IntTypes.uint16",
         "function_token_typing_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "function_token_typing_Spec.Frodo.Params.crypto_bytes",
         "function_token_typing_Spec.Frodo.Params.params_extracted_bits",
@@ -773,18 +757,15 @@
         "refinement_interpretation_Frodo.Params_Tm_refine_938ae4458cbe5e752505b8f36707dacb",
         "refinement_interpretation_Frodo.Params_Tm_refine_fd88e6c53a75fb32bd6a18c866e3219a",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_7bbf4118a5df3f37546da637d5c0ed88",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_b17f1ad818f4f89d2d2801c2df223822",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_c8a3fba89dac713f03248a02febd4657",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_f3018dc41e2c93504dba66e99cc34d08",
-        "typing_FStar.Seq.Base.length"
+        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_f3018dc41e2c93504dba66e99cc34d08"
       ],
       0,
-      "999be7eed5f41a126d8d2d3330239ccd"
+      "5318f7d2f1d99d84d27c16f85cee1c2b"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_ss_inner",
@@ -804,7 +785,6 @@
         "equation_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "equation_Spec.Frodo.KEM.crypto_publickeybytes",
         "equation_Spec.Frodo.KEM.crypto_secretkeybytes",
-        "equation_Spec.Frodo.Params.bytes_seed_a",
         "equation_Spec.Frodo.Params.crypto_bytes",
         "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_n",
@@ -838,10 +818,12 @@
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_c8a3fba89dac713f03248a02febd4657",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_f3018dc41e2c93504dba66e99cc34d08",
-        "typing_FStar.Seq.Base.length", "typing_Spec.Frodo.Params.params_n"
+        "typing_FStar.Seq.Base.length",
+        "typing_Spec.Frodo.KEM.crypto_publickeybytes",
+        "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "a15ff820bd5caaf0882642784cec6280"
+      "95b4d3a29d11344b274dbf577b5084dc"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_g",
@@ -877,7 +859,7 @@
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265"
       ],
       0,
-      "fe78887da821ddd780a6f52477f62762"
+      "43b78bcff57f9174ac1184bb2c47cfb5"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_g",
@@ -908,7 +890,7 @@
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265"
       ],
       0,
-      "8a052619b0b203b45467237b11419a25"
+      "25c11eded11fdacd3d4212fca3aa45ac"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_g",
@@ -945,6 +927,7 @@
         "function_token_typing_Frodo.Params.params_n",
         "function_token_typing_Frodo.Params.params_nbar",
         "function_token_typing_Spec.Frodo.KEM.crypto_publickeybytes",
+        "function_token_typing_Spec.Frodo.KEM.crypto_secretkeybytes",
         "function_token_typing_Spec.Frodo.Params.crypto_bytes",
         "function_token_typing_Spec.Frodo.Params.params_extracted_bits",
         "function_token_typing_Spec.Frodo.Params.params_logq",
@@ -965,6 +948,9 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_9fb20bddb03739771b600ef3c8142523",
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_0a745b33b948823597ab730256f2c414",
+        "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_a2702cd371a85377c7493923d2e53ace",
+        "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_ea42dc11abd266c8186ca9c7b34f82ef",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_7bbf4118a5df3f37546da637d5c0ed88",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_b17f1ad818f4f89d2d2801c2df223822",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_c8a3fba89dac713f03248a02febd4657",
@@ -975,7 +961,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "594dd0c1222131b72cc5df26302de3ec"
+      "0064641ead4245d66f7481c0d6f65aa0"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_ss",
@@ -990,23 +976,19 @@
         "equation_Frodo.Params.params_extracted_bits",
         "equation_Frodo.Params.params_logq",
         "equation_Frodo.Params.params_n",
-        "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.uint16",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Prims.nat",
+        "equation_Frodo.Params.params_nbar", "equation_Prims.nat",
         "equation_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "equation_Spec.Frodo.Params.crypto_bytes",
         "equation_Spec.Frodo.Params.params_extracted_bits",
         "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_n",
         "equation_Spec.Frodo.Params.params_nbar",
-        "equation_Spec.Matrix.elem", "equation_Spec.Matrix.matrix",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_Frodo.Params.crypto_bytes",
         "function_token_typing_Frodo.Params.params_extracted_bits",
         "function_token_typing_Frodo.Params.params_logq",
         "function_token_typing_Frodo.Params.params_n",
         "function_token_typing_Frodo.Params.params_nbar",
-        "function_token_typing_Lib.IntTypes.uint16",
         "function_token_typing_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "function_token_typing_Spec.Frodo.Params.crypto_bytes",
         "function_token_typing_Spec.Frodo.Params.params_extracted_bits",
@@ -1022,18 +1004,15 @@
         "refinement_interpretation_Frodo.Params_Tm_refine_938ae4458cbe5e752505b8f36707dacb",
         "refinement_interpretation_Frodo.Params_Tm_refine_fd88e6c53a75fb32bd6a18c866e3219a",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_5eb152f90cf73d3207564ff832524421",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_7bbf4118a5df3f37546da637d5c0ed88",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_b17f1ad818f4f89d2d2801c2df223822",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_c8a3fba89dac713f03248a02febd4657",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_f3018dc41e2c93504dba66e99cc34d08",
-        "typing_FStar.Seq.Base.length"
+        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_f3018dc41e2c93504dba66e99cc34d08"
       ],
       0,
-      "88b320efd0edd2fbebd73ae2dcf65047"
+      "a2c191c35e8d46c21223c858c2ba4746"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_ss",
@@ -1091,7 +1070,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "2f4414ef79725c4a27feb277adc63368"
+      "d222daf72ee5c5996685b9b38daf3462"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec_ss",
@@ -1117,7 +1096,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "b9d428becf1b5345b60fce6a2eb04985"
+      "63e3a6d751861b3d3b5d731c0a13b455"
     ],
     [
       "Spec.Frodo.KEM.Decaps.get_bp_c_matrices",
@@ -1146,7 +1125,7 @@
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265"
       ],
       0,
-      "230101c0f6d4cef78f6d07a288b7c632"
+      "83b6a7acc26bf8d03e7e7c1b211fb7b3"
     ],
     [
       "Spec.Frodo.KEM.Decaps.get_bp_c_matrices",
@@ -1187,15 +1166,12 @@
         "refinement_interpretation_Frodo.Params_Tm_refine_938ae4458cbe5e752505b8f36707dacb",
         "refinement_interpretation_Frodo.Params_Tm_refine_fd88e6c53a75fb32bd6a18c866e3219a",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_db702344b78722c7fa18b616b9ec739a",
-        "refinement_interpretation_Lib.Sequence_Tm_refine_9fb20bddb03739771b600ef3c8142523",
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_0e257b83311e82f347a0f6f9218cd175",
         "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_12448bb8f4077232b3a3fa47ce8f8526",
         "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_213bfc179bd13acaeb07170ef3a475b0",
         "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_7b8e353bec6d751b7b35f30e9a7049bc",
-        "refinement_interpretation_Spec.Frodo.KEM.Decaps_Tm_refine_fe4e949323e0ae9cdb074655bf0a2e29",
-        "refinement_interpretation_Spec.Frodo.Pack_Tm_refine_230de2b281ac1038a6e27acb22ee1a78",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_7bbf4118a5df3f37546da637d5c0ed88",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_c8a3fba89dac713f03248a02febd4657",
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265",
@@ -1203,7 +1179,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "6d76ae3474fac584514b8da0cee0e708"
+      "1913b6107e7631690c9a19a685fd9455"
     ],
     [
       "Spec.Frodo.KEM.Decaps.crypto_kem_dec",
@@ -1240,7 +1216,7 @@
         "refinement_interpretation_Spec.Frodo.Params_Tm_refine_ddf16d608069086c15302099752be265"
       ],
       0,
-      "03acc4c1be8350fec25a29ec2e6099e7"
+      "dd14d7cf35d182624b7900831157739f"
     ]
   ]
 ]
