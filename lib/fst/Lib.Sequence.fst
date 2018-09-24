@@ -222,15 +222,24 @@ val fold_left: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot b) -> lseq 
 let fold_left #a #b #len f = fold_left_range #a #b #len 0 len (fun i -> f)
 
 val map: #a:Type -> #b:Type -> #len:size_nat -> (a -> Tot b) -> lseq a len -> lseq b len
-let map #a #b #len f x =
-  admit()
+let map #a #b #len f s =
+  Seq.seq_of_list (List.Tot.map f (Seq.seq_to_list s))
 
 val for_all: #a:Type -> #len:size_nat -> (a -> Tot bool) -> lseq a len -> bool
 let for_all #a #len f x = Seq.for_all f x
 
+private inline_for_extraction noextract
+val map2_list: #a:Type -> #b:Type -> #c:Type
+  -> f:(a -> b -> c) -> l1:list a -> l2:list b{List.Tot.length l1 == List.Tot.length l2}
+  -> l:list c{List.Tot.length l == List.Tot.length l1}
+let rec map2_list #a #b #c f l1 l2 =
+  match l1, l2 with
+  | [], [] -> []
+  | x::l1', y::l2' -> f x y :: map2_list f l1' l2'
+
 val map2: #a:Type -> #b:Type -> #c:Type -> #len:size_nat -> (a -> b -> Tot c) -> lseq a len -> lseq b len -> lseq c len
-let map2 #a #b #c #len f x y =
-  admit()
+let map2 #a #b #c #len f s1 s2 =
+  Seq.seq_of_list (map2_list f (Seq.seq_to_list s1) (Seq.seq_to_list s2))
 
 val for_all2: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> bool
 let rec for_all2 #a #b #len f x y =
