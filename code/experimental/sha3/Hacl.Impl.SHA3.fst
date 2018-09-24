@@ -193,6 +193,18 @@ let state_theta s =
   state_theta1 s _C;
   pop_frame()
 
+#reset-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 50"
+
+private
+val index_map: #a:Type -> #b:Type -> f:(a -> b) -> l:list a -> i:nat{i < List.Tot.length l} ->
+  Lemma (List.Tot.index (List.Tot.map f l) i == f (List.Tot.index l i))
+let rec index_map #a #b f l i =
+  if i = 0 then ()
+  else
+    match l with
+    | [] -> ()
+    | _ :: l' -> index_map f l' (i - 1)
+
 #reset-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 50"
 
 inline_for_extraction noextract
@@ -214,7 +226,8 @@ let state_pi_rho_inner #h0 i current s =
   let r = IB.index keccak_rotc (Lib.RawIntTypes.size_to_UInt32 i) in
   //assert (r == LSeq.index S.keccak_rotc (v i));
   let _Y = IB.index keccak_piln (Lib.RawIntTypes.size_to_UInt32 i) in
-  assume (v _Y == LSeq.index S.keccak_piln (v i));
+  index_map S.sizes_v piln_list (v i);
+  // assert (v _Y == LSeq.index #_ #24 S.keccak_piln (v i));
   let temp = s.(_Y) in
   let current0:uint64 = current.(size 0) in
   s.(_Y) <- rotl current0 r;
