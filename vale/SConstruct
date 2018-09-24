@@ -1129,7 +1129,7 @@ if not is_help:
     # Build AES-GCM
     aesgcm_asm = extract_assembly_code(env, 'aesgcm', File('code/crypto/aes/x64/Main.ml'),
       File('code/crypto/aes/x64/X64.GCMdecrypt.vaf'), File('code/lib/util/CmdLineParser.ml'))
-    sha_asm = extract_assembly_code(env, 'sha256', File('code/crypto/sha/ShaMain.ml'),
+    sha256_asm = extract_assembly_code(env, 'sha256', File('code/crypto/sha/ShaMain.ml'),
       File('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf'), File('code/lib/util/CmdLineParser.ml'))
     if env['TARGET_ARCH'] == 'amd64':
       aesgcmasm_obj = env.Object('obj/aesgcmasm_openssl', aesgcm_asm[0])
@@ -1137,6 +1137,11 @@ if not is_help:
       aesgcmtest_cpp = to_obj_dir(aesgcmtest_src)
       CopyFile(aesgcmtest_cpp, aesgcmtest_src)
       aesgcmtest_exe = env.Program(source = [aesgcmasm_obj, aesgcmtest_cpp], target = 'obj/TestAesGcm.exe')
+      sha256asm_obj = env.Object('obj/sha256asm_openssl', sha256_asm[0])
+      sha256test_src = File('code/crypto/sha/TestSha.cpp')
+      sha256test_cpp = to_obj_dir(sha256test_src)
+      CopyFile(sha256test_cpp, sha256test_src)
+      sha256test_exe = env.Program(source = [sha256asm_obj, sha256test_cpp], target = 'obj/TestSha.exe')
 
   if dump_args:
     print_dump_args()
