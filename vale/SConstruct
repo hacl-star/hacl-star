@@ -410,7 +410,7 @@ if not verify:
 
 # Find Z3 for F*
 found_z3 = False
-if verify and not is_help:
+if not is_help:
   fstar_z3 = GetOption('fstar_z3')
   if fstar_z3 == '':
     fstar_z3 = File('tools/Z3/z3.exe').path if sys.platform == 'win32' else 'tools/Z3/z3'
@@ -734,7 +734,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
     ' --print_bound_var_types --ugly ' + dump_module_flag)
   env.Command(dumptargetfile, sourcefile,
-    f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path}' +
+    f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
     f' {fstar_includes} {" ".join(fstar_user_args)}' +
     f' {dump_flags} 1>{dumptargetfile} 2>&1')
   Depends(dumptargetfile, targetfile)
@@ -756,13 +756,12 @@ def extract_fstar_file(options, sourcefile, fstar_includes):
 def process_fstar_file(env, file, fstar_includes):
   options = get_build_options(file)
   if options != None:
-    if verify:
-      target = File(f'{to_obj_dir(file)}.verified')
-      verify_fstar_file(options, target, file, fstar_includes)
-      if fstar_extract:
-        if file_extension(file) == '.fst':
-          if not (ml_out_file(file, '.ml') in no_extraction_files):
-            extract_fstar_file(options, file, fstar_includes)
+    target = File(f'{to_obj_dir(file)}.verified')
+    verify_fstar_file(options, target, file, fstar_includes)
+    if fstar_extract:
+      if file_extension(file) == '.fst':
+        if not (ml_out_file(file, '.ml') in no_extraction_files):
+          extract_fstar_file(options, file, fstar_includes)
 
 def vale_dependency_scan(env, file):
   contents = file.get_text_contents()
@@ -831,17 +830,16 @@ def process_vale_file(env, file, fstar_includes):
     fsts = translate_vale_file(options, file)
     fst = fsts[0]
     fsti = fsts[1]
-    if verify:
-      fst_options = get_build_options(fst)
-      fsti_options = get_build_options(fsti)
-      target = file_drop_extension(to_obj_dir(file))
-      target_fst = f'{target}.fst.verified'
-      target_fsti = f'{target}.fsti.verified'
-      Depends(f'{target_fst}.tmp', target_fsti)
-      verify_fstar_file(fst_options, target_fst, fst, fstar_includes)
-      verify_fstar_file(fsti_options, target_fsti, fsti, fstar_includes)
-      if fstar_extract:
-        extract_fstar_file(fst_options, fst, fstar_includes)
+    fst_options = get_build_options(fst)
+    fsti_options = get_build_options(fsti)
+    target = file_drop_extension(to_obj_dir(file))
+    target_fst = f'{target}.fst.verified'
+    target_fsti = f'{target}.fsti.verified'
+    Depends(f'{target_fst}.tmp', target_fsti)
+    verify_fstar_file(fst_options, target_fst, fst, fstar_includes)
+    verify_fstar_file(fsti_options, target_fsti, fsti, fstar_includes)
+    if fstar_extract:
+      extract_fstar_file(fst_options, fst, fstar_includes)
 
 def compute_module_types(env, source_vaf):
   source_base = file_drop_extension(to_obj_dir(File(source_vaf)))
@@ -1071,7 +1069,7 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
           dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
             ' --print_bound_var_types --ugly ' + dump_module_flag)
           env.Command(dumptargetfile, t,
-            f'{fstar_exe} {t} {fstar_z3_path}' +
+            f'{fstar_exe} {t} {fstar_z3_path} {fstar_no_verify}' +
             f' {dump_flags} 1>{dumptargetfile} 2>&1')
         if not (dumptargetfile in dump_deps):
           dump_deps[dumptargetfile] = set()
@@ -1108,7 +1106,7 @@ if not is_help:
   # Check F* and Z3 versions
   if not fstar_my_version:
     check_fstar_version()
-  if verify and not z3_my_version:
+  if not z3_my_version:
     if not found_z3:
       print_error_exit('Could not find z3 executable.  Either put z3 in your path, or put it in the directory tools/Z3/, or use the --FSTARZ3=<z3-executable> option.')
     check_z3_version(fstar_z3)
