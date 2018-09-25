@@ -434,6 +434,16 @@ vale_exe = File(f'{vale_path}/bin/vale.exe')
 import_fstar_types_exe = File(f'{vale_path}/bin/importFStarTypes.exe')
 fstar_exe = File(f'{fstar_path}/bin/fstar.exe')
 
+def add_from_os_env(env, name):
+  if name in os.environ:
+    env['ENV'][name] = os.environ[name]
+
+ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH']})
+add_from_os_env(ocaml_env, 'OCAMLPATH')
+add_from_os_env(ocaml_env, 'OCAMLLIB')
+add_from_os_env(ocaml_env, 'OCAML_TOPLEVEL_PATH')
+add_from_os_env(ocaml_env, 'CAML_LD_LIBRARY_PATH')
+
 ##################################################################################################
 #
 #   Global variables
@@ -912,17 +922,8 @@ def process_files_in(env, directories):
     for target in manual_dependencies:
       Depends(target, manual_dependencies[target])
 
-def add_from_os_env(env, name):
-  if name in os.environ:
-    env['ENV'][name] = os.environ[name]
-
 def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_file):
   # OCaml depends on many libraries and executables; we have to assume they are in the user's PATH:
-  ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH']})
-  add_from_os_env(ocaml_env, 'OCAMLPATH')
-  add_from_os_env(ocaml_env, 'OCAMLLIB')
-  add_from_os_env(ocaml_env, 'OCAML_TOPLEVEL_PATH')
-  add_from_os_env(ocaml_env, 'CAML_LD_LIBRARY_PATH')
   ocaml_env.PrependENVPath('OCAMLPATH', fstar_path + '/bin')
   main_ml = ml_out_file(main_file, '.ml')
   main_cmx = ml_out_file(main_file, '.cmx')
@@ -972,7 +973,7 @@ def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_fi
   output_target_base = 'obj/' + output_base_name
   def generate_asm(suffix, assembler, platform):
     target = output_target_base + suffix
-    return env.Command(target, main_exe, f'{main_exe} {assembler} {platform} > {target}')
+    return ocaml_env.Command(target, main_exe, f'{main_exe} {assembler} {platform} > {target}')
   masm_win = generate_asm('.asm', 'MASM', 'Win')
   gcc_win = generate_asm('-gcc.S', 'GCC', 'Win')
   gcc_linux = generate_asm('-linux.S', 'GCC', 'Linux')
