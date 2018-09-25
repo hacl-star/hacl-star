@@ -4,6 +4,7 @@ include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.Vale.InsBasic
 
@@ -15,6 +16,7 @@ open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.QuickCode
 unfold let memory = X64.Memory.mem // avoid conflict with "var{...} mem" vs. "mem" from X64.Memory
+open X64.CPU_Features_s
 #endverbatim
 
 #verbatim
@@ -22,6 +24,7 @@ open X64.Vale
 open X64.Vale.StateLemmas
 open X64.Vale.InsLemmas
 open X64.Taint_Semantics
+open X64.CPU_Features_s
 module S = X64.Bytes_Semantics_s
 
 friend X64.Vale.StateLemmas
@@ -75,6 +78,15 @@ procedure{:quick exportOnly}{:typecheck false} AssertQuickType(ghost p:Type0) re
         p;
 {
     u := tuple();
+}
+
+procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick exportOnly} Cpuid_AES()
+    requires rax = 1;
+    modifies rax; rbx; rcx; rdx;
+    ensures  (iand64(rcx, 0x2000000) = 1) = aesni_enabled;
+             (iand64(rcx, 0x2) = 1) = pclmulqdq_enabled;
+{
+    cpuid_features();
 }
 
 procedure{:instruction mk_taint_ins2(S.Mov64, dst, src, list(dst), list(src))}{:fast_instruction}{:quick exportOnly} Mov64(inout dst: dst_opr64, src: opr64)

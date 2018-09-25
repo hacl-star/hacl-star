@@ -9,6 +9,7 @@ open Types_s
 open FStar.Seq.Base
 open X64.CryptoInstructions_s
 module S = X64.Bytes_Semantics_s
+open X64.CPU_Features_s
 
 type uint64 = UInt64.t
 
@@ -248,6 +249,12 @@ let update_cf_of (new_cf new_of:bool) : GTot (st unit) =
 let eval_ins (ins:ins) : GTot (st unit) =
   s <-- get;
   match ins with
+  | S.Cpuid ->
+    update_reg Rax (cpuid Rax (eval_reg Rax s) (eval_reg Rcx s));; 
+    update_reg Rbx (cpuid Rbx (eval_reg Rax s) (eval_reg Rcx s));;
+    update_reg Rcx (cpuid Rcx (eval_reg Rax s) (eval_reg Rcx s));;
+    update_reg Rdx (cpuid Rdx (eval_reg Rax s) (eval_reg Rcx s))
+    
   | S.Mov64 dst src ->
     check (valid_operand src);;
     update_operand_preserve_flags dst (eval_operand src s)

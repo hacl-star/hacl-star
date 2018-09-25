@@ -2,6 +2,7 @@ module X64.Bytes_Semantics_s
 
 open Opaque_s
 open X64.Machine_s
+open X64.CPU_Features_s
 open Words_s
 open Words.Two_s
 open Words.Four_s
@@ -16,6 +17,7 @@ let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
 
 type ins:eqtype =
+  | Cpuid      : ins
   | Mov64      : dst:operand -> src:operand -> ins
   | Add64      : dst:operand -> src:operand -> ins
   | AddLea64   : dst:operand -> src1:operand -> src2:operand -> ins
@@ -315,7 +317,7 @@ let update_of (flags:nat64) (new_of:bool) : (new_flags:nat64{overflow new_flags 
       flags - 2048
     else
       flags
-
+  
 let is_full_byte_reversal_mask (q:quad32) : bool =
   q.lo0 = 0x0C0D0E0F &&
   q.lo1 = 0x08090A0B &&
@@ -422,6 +424,12 @@ let update_cf_of (new_cf new_of:bool) :st unit =
 let eval_ins (ins:ins) : st unit =
   s <-- get;
   match ins with
+  | Cpuid ->
+    update_reg Rax (cpuid Rax (eval_reg Rax s) (eval_reg Rcx s));; 
+    update_reg Rbx (cpuid Rbx (eval_reg Rax s) (eval_reg Rcx s));;
+    update_reg Rcx (cpuid Rcx (eval_reg Rax s) (eval_reg Rcx s));;
+    update_reg Rdx (cpuid Rdx (eval_reg Rax s) (eval_reg Rcx s))
+
   | Mov64 dst src ->
     check (valid_operand src);;
     update_operand_preserve_flags dst (eval_operand src s)

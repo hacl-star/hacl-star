@@ -168,6 +168,7 @@ let print_ins (ins:tainted_ins) (p:printer) =
   in
   let ins, _, _ = ins.ops in
   match ins with
+  | Cpuid -> "  cpuid"
   | Mov64 dst src -> p.ins_name "  mov" [dst; src] ^ print_ops dst src
   | Add64 dst src -> p.ins_name "  add" [dst; src] ^ print_ops dst src
   | AddLea64 dst src1 src2 -> let name = p.ins_name "  lea" [dst; src1; src2] in
