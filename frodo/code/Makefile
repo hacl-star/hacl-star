@@ -274,6 +274,7 @@ ALL_SOURCES = \
   include/rng.c \
   include/random.c \
   include/$(KECCAK) \
+  include/x64/Hacl_AesNI.c \
   include/x64/Hacl_AES128.c \
   include/clearwords.c \
   $(HACL_HOME)/lib/c/Lib_PQ_Print.c
