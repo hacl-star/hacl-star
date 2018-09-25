@@ -1121,9 +1121,10 @@ if not is_help:
 
   print('Processing source files')
   process_files_in(env, verify_paths)
-  compute_fstar_deps(env, verify_paths, compute_include_paths(src_include_paths, obj_include_paths, 'obj/dummies'))
-  for x in vaf_dump_deps:
-    compute_module_types(env, x)
+  if not is_single_vaf:
+    compute_fstar_deps(env, verify_paths, compute_include_paths(src_include_paths, obj_include_paths, 'obj/dummies'))
+    for x in vaf_dump_deps:
+      compute_module_types(env, x)
 
   if fstar_extract:
     # Build AES-GCM
