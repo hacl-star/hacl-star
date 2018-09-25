@@ -394,6 +394,7 @@ let equiv_eval_sha256_msg2 (s:state) (ins:S.ins{S.SHA256_msg2? ins}) : Lemma (
   ()
 
 let equiv_eval_ins s ins = match ins with
+  | S.Cpuid -> equiv_eval_cpuid s ins
   | S.Mov64 _ _ -> equiv_eval_mov s ins
   | S.Add64 _ _ -> equiv_eval_add s ins
   | S.AddLea64 _ _ _-> equiv_eval_addlea s ins
