@@ -93,6 +93,7 @@ let zero_quad32_buffer = ("zero_quad32_buffer_win", [("b", TBuffer TUInt128, Sec
 let reverse_quad32 = ("reverse_bytes_quad32_buffer_win", [("b", TBuffer TUInt128, Sec)], Stk (Prims.parse_int "0"))
 *)
 
+(*
 let sha_update_bytes =
    ("sha_update_bytes_stdcall",  
   [("ctx_b", TBuffer TUInt128, Sec);  ("in_b", TBuffer TUInt128, Sec); 
@@ -100,8 +101,17 @@ let sha_update_bytes =
   SaveRegsStk true,
   AddStk (Prims.parse_int "0"),
   Modifies ["ctx_b"])
+*)
 
-let name = sha_update_bytes 
+let gctr_bytes =
+  ("gctr_bytes_stdcall",
+  [("in_b", TBuffer TUInt128, Sec); ("out_b", TBuffer TUInt128, Sec);
+   ("keys_b", TBuffer TUInt128, Sec); ("num_val", TBase TUInt64, Sec)],
+  SaveRegsStk true,
+  AddStk (Prims.parse_int "0"),
+  Modifies ["out_b"])
+
+let name = gctr_bytes 
 
 let _ = print_string (translate_vale X86 name)
 let _ = print_newline()

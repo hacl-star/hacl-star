@@ -344,7 +344,6 @@ verify_options = [
 #  ('code/arch/x64/X64.Vale.Decls.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
 
   # Special treatment for sensitive modules
-#  ('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
 
   # Disable verification by adding 'filename': None
   ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None), # TODO: Timeout dealing with SHA instructions
@@ -352,8 +351,12 @@ verify_options = [
   ('code/arch/x64/interop/*.fst', None),
   ('code/arch/x64/interop/*_win.fst', None),
   #TODO: Update taint analysis
-  ('code/arch/x64/X64.Leakage*', None),
-  ('specs/hardware/X64.Leakage_s.fst', None),
+  ('code/arch/x64/X64.Leakage_Helpers.fst', None), 
+  ('code/arch/x64/X64.Leakage_Ins_Xmm.fsti', None),
+  ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None),
+  ('code/arch/x64/X64.Leakage_Ins.fsti', None),
+  ('code/arch/x64/X64.Leakage_Ins.fst', None),
+  ('code/arch/x64/X64.Leakage.fst', None),
 
   # Interop stubs
 #  ('code/arch/x64/interop/Memcpy.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
