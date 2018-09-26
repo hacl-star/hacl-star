@@ -17,6 +17,12 @@ let equiv_eval_mov128_op o s = match o with
     let addr = eval_maddr m s in
     equiv_load_mem128 addr s
 
+let equiv_eval_cpuid  (s:state) (ins:S.ins{S.Cpuid? ins}) : Lemma (
+  let s_hi = run (eval_ins ins) s in
+  let s_bytes = S.run (S.eval_ins ins) s.state in
+  s_hi.state.S.ok ==> s_hi.state == s_bytes) =
+  ()
+
 let equiv_eval_mov (s:state) (ins:S.ins{S.Mov64? ins}) : Lemma (
   let s_hi = run (eval_ins ins) s in
   let s_bytes = S.run (S.eval_ins ins) s.state in

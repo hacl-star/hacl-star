@@ -15,6 +15,7 @@ include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.GF128_Mul
 
@@ -37,6 +38,7 @@ open X64.Vale.InsVector
 open X64.Vale.InsAes
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
+open X64.CPU_Features_s
 #endverbatim
 
 procedure{:quick} ShiftLeft128_1(ghost a:poly)
