@@ -4,8 +4,8 @@ module X64.Vale.Xmms
 open Prop_s
 open X64.Machine_s
 unfold let quad32 = Types_s.quad32
-
-type t = xmm -> quad32
+module F = FStar.FunctionalExtensionality
+type t = F.restricted_t xmm (fun _ -> quad32)
 
 val equal (xmms1:t) (xmms2:t) : prop0
 

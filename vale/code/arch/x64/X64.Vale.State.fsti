@@ -5,6 +5,7 @@ open Prop_s
 open X64.Machine_s
 open X64.Vale
 open X64.Memory
+module F = FStar.FunctionalExtensionality
 
 noeq type state = {
   ok: bool;
@@ -63,11 +64,11 @@ let eval_operand (o:operand) (s:state) : GTot nat64 =
 
 [@va_qattr]
 let update_reg (r:reg) (v:nat64) (s:state) : state =
-  { s with regs = fun r' -> if r = r' then v else s.regs r' }
+  { s with regs = F.on_dom reg (fun r' -> if r = r' then v else s.regs r') }
 
 [@va_qattr]
 let update_xmm (x:xmm) (v:Types_s.quad32) (s:state) : state =
-  { s with xmms = fun x' -> if x = x' then v else s.xmms x' }
+  { s with xmms = F.on_dom xmm (fun x' -> if x = x' then v else s.xmms x') }
 
 [@va_qattr]
 let update_mem (ptr:int) (v:nat64) (s:state) : GTot state = { s with mem = store_mem64 ptr v s.mem }

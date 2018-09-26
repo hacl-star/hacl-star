@@ -7,6 +7,7 @@ module TS = X64.Taint_Semantics_s
 open X64.Semantics_Equiv
 
 friend X64.Memory
+module F = FStar.FunctionalExtensionality
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
@@ -23,8 +24,8 @@ let state_to_S (s:state) : GTot TS.traceState =
   {
   TS.state = {
     BS.ok = s.ok;
-    BS.regs = (fun r -> s.regs r);
-    BS.xmms = (fun x -> s.xmms x);
+    BS.regs = F.on_dom reg (fun r -> s.regs r);
+    BS.xmms = F.on_dom xmm (fun x -> s.xmms x);
     BS.flags = int_to_nat64 s.flags;
     BS.mem = ME.get_heap s.mem
   };
@@ -36,8 +37,8 @@ let state_of_S (sv:state) (s:TS.traceState{same_domain sv s}) : GTot state =
   let { BS.ok = ok; BS.regs = regs; BS.xmms = xmms; BS.flags = flags; BS.mem = mem} = s.TS.state in
   {
     ok = ok;
-    regs = (fun r -> regs r);
-    xmms = (fun x -> xmms x);
+    regs = F.on_dom reg (fun r -> regs r);
+    xmms = F.on_dom xmm (fun x -> xmms x);
     flags = flags;
     mem = ME.get_hs sv.mem mem;
     memTaint = s.TS.memTaint;
@@ -55,8 +56,8 @@ let state_to_HS (s:state) : GTot ME.state =
   {
   ME.state = {
     BS.ok = s.ok;
-    BS.regs = (fun r -> s.regs r);
-    BS.xmms = (fun x -> s.xmms x);
+    BS.regs = F.on_dom reg (fun r -> s.regs r);
+    BS.xmms = F.on_dom xmm (fun x -> s.xmms x);
     BS.flags = int_to_nat64 s.flags;
     BS.mem = ME.get_heap s.mem
   };
