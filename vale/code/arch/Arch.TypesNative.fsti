@@ -134,98 +134,28 @@ val lemma_quad32_xor_commutes (x y:quad32) :Lemma
 val lemma_quad32_xor_commutes_forall (_:unit) : Lemma
   (forall (x y:quad32) . {:pattern (quad32_xor x y)} quad32_xor x y = quad32_xor y x)
 
-let lemma_iand_pow2 (n:pos) (x:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
+val lemma_iand_pow2 (n:pos) (x:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
   (pow2 i < pow2 n /\ (iand x (pow2 i) == 0 \/ iand x (pow2 i) == pow2 i))
-  =
-  let open FStar.UInt in  
-  FStar.Math.Lemmas.pow2_lt_compat n i;
-  assert (pow2 i < pow2 n);
-  let result = iand x (pow2 i) in
 
-  if nth #n x (n - i - 1) then ( 
-    let helper (j:nat{j < n}) : Lemma (nth #n result j = nth #n (pow2 i) j)
-        =                                   
-        pow2_nth_lemma #n i j;
-        lemma_iand_nth_i n x (pow2 i) j;
-        assert (nth #n result j = (nth #n x j && nth #n (pow2 i) j));
-        //admit();
-        ()
-    in    
-    FStar.Classical.forall_intro helper;  
-    nth_lemma #n result (pow2 i);
-    assert(iand x (pow2 i) == pow2 i);
-    ()
-  ) else (
-    let helper (j:nat{j < n}) : Lemma (nth #n result j = false)
-        =                                   
-        pow2_nth_lemma #n i j;
-        lemma_iand_nth_i n x (pow2 i) j;
-        assert (nth #n result j = (nth #n x j && nth #n (pow2 i) j));
-        //admit();
-        ()
-    in    
-    FStar.Classical.forall_intro helper;    
-    nth_lemma #n (zero n) result;
-    assert(iand x (pow2 i) == 0);
-    ()
-  );
-  ()
-
-let lemma_ishr_pow2_diff (n:pos) (i:nat{i < n}) (j:nat{i <= j /\ j < n}) : Lemma
+val lemma_ishr_pow2_diff (n:pos) (i:nat{i < n}) (j:nat{i <= j /\ j < n}) : Lemma
   (pow2 j < pow2 n /\ ishr #(pow2 n) (pow2 j) (j - i) == pow2 i)
-  =
-  FStar.Math.Lemmas.pow2_lt_compat n i;
-  FStar.Math.Lemmas.pow2_lt_compat n j;
-  let open FStar.UInt in
-  let result = ishr #(pow2 n) (pow2 j) (j - i) in
-  let helper (k:nat{k < n}) : Lemma (nth #n result k == nth #n (pow2 i) k) =
-    admit()
-  in
-  FStar.Classical.forall_intro helper;
-  nth_lemma #n result (pow2 i);
-  ()
-  
-let lemma_iand_maybe_pow2 (n:pos) (x y:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
+
+let not (b:bool) : bool = if b then false else true
+
+val lemma_iand_maybe_pow2 (n:pos) (x y:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
   (requires (x == 0 \/ x == pow2 i) /\ (y == 0 \/ y == pow2 i))
-  (ensures ~(iand x y == 0) <==> ~(x == 0) /\ ~(y == 0))
-  =
-  admit()
+  (ensures not (iand x y = 0) <==> not (x = 0) /\ not (y = 0))
   
-let lemma_iand_pow2_64 (x:nat64) (i:nat{i < 64}) : Lemma
+val lemma_iand_pow2_64 (x:nat64) (i:nat{i < 64}) : Lemma
   (pow2 i < pow2 64 /\ (iand x (pow2 i) == 0 \/ iand x (pow2 i) == pow2 i))
-  =
-  lemma_iand_pow2 64 x i
-  
-let lemma_ishr_pow2_diff64 (i:nat{i < 64}) (j:nat) : Lemma
+
+val lemma_ishr_pow2_diff64 (i:nat{i < 64}) (j:nat) : Lemma
   (requires i <= j /\ j < 64)
   (ensures pow2 j < pow2 64 /\ ishr #(pow2 64) (pow2 j) (j - i) == pow2 i)
-  =
-  lemma_ishr_pow2_diff 64 i j
 
-let lemma_ishr_zero64 (i:nat{i < 64}) : Lemma
+val lemma_ishr_zero64 (i:nat{i < 64}) : Lemma
   (ishr #(pow2 64) 0 i == 0)
-  =
-  admit()
   
-let lemma_iand_maybe_pow2_64 (x y:nat64) (i:nat{i < 64}) : Lemma
+val lemma_iand_maybe_pow2_64 (x y:nat64) (i:nat{i < 64}) : Lemma
   (requires (x == 0 \/ x == pow2 i) /\ (y == 0 \/ y == pow2 i))
-  (ensures ~(iand x y == 0) <==> ~(x == 0) /\ ~(y == 0))
-  =
-  lemma_iand_maybe_pow2 64 x y i
-
-
-
-
-(*
-let lemma_iand_pow2 (n:pos) (x y:natN (pow2_norm n)) (i:nat{i < n}) (j:nat{j < n}) : Lemma
-  (requires (x == 0 || x == pow2 i) 
-  (pow2 i < pow2 n /\ pow2 j < pow2 n /\ 
-   (iand (pow2 i) (pow2 j) == 0 <==> 
-
-
-
-
-
-let lemma_iand_2x_pow2_64 (i:nat{i < 64}) (j:nat{j < 64}) : Lemma
-  (pow2 i < pow2 64 /\ pow2 j < pow2 64 /\
-*)   
+  (ensures not (iand x y = 0) <==> not (x = 0) /\ not (y = 0))
