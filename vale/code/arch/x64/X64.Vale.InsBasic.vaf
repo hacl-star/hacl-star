@@ -83,8 +83,8 @@ procedure{:quick exportOnly}{:typecheck false} AssertQuickType(ghost p:Type0) re
 procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick exportOnly} Cpuid_AES()
     requires rax = 1;
     modifies rax; rbx; rcx; rdx;
-    ensures  (iand64(rcx, 0x2000000) = 1) = aesni_enabled;
-             (iand64(rcx, 0x2) = 1) = pclmulqdq_enabled;
+    ensures  (iand64(rcx, 0x2000000) > 0) = aesni_enabled;
+             (iand64(rcx, 0x2) > 0) = pclmulqdq_enabled;
 {
     cpuid_features();
 }
@@ -93,7 +93,7 @@ procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick export
     requires rax = 7;
              rcx = 0;
     modifies rax; rbx; rcx; rdx;
-    ensures  (iand64(rbx, 0x20000000) = 1) = sha_enabled;
+    ensures  (iand64(rbx, 0x20000000) > 0) = sha_enabled;
 {
     cpuid_features();
 }
