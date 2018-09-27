@@ -8,6 +8,7 @@ open Words.Four_s
 open Types_s
 open X64.CryptoInstructions_s
 open FStar.Seq.Base
+module F = FStar.FunctionalExtensionality
 
 type uint64:eqtype = UInt64.t
 
@@ -72,8 +73,8 @@ type codes:eqtype = list code
 
 noeq type state = {
   ok: bool;
-  regs: reg -> nat64;
-  xmms: xmm -> quad32;
+  regs: Vale.Regs.t;
+  xmms: Vale.Xmms.t;
   flags: nat64;
   mem: heap;
 }
@@ -147,10 +148,10 @@ let eval_ocmp (s:state) (c:ocmp) :bool =
   | OGt o1 o2 -> eval_operand o1 s > eval_operand o2 s
 
 let update_reg' (r:reg) (v:nat64) (s:state) : state =
-  { s with regs = fun r' -> if r' = r then v else s.regs r' }
+  { s with regs = F.on_dom reg (fun r' -> if r' = r then v else s.regs r') }
 
 let update_xmm' (x:xmm) (v:quad32) (s:state) : state =
-  { s with xmms = fun x' -> if x' = x then v else s.xmms x' }
+  { s with xmms = F.on_dom xmm (fun x' -> if x' = x then v else s.xmms x') }
 
 val mod_8: (n:nat{n < pow2_64}) -> nat8
 let mod_8 n = n % 0x100

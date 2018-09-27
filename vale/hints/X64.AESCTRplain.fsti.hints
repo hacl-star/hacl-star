@@ -1,0 +1,140 @@
+[
+  "‘í∫\u0003Û\u0019‰\"°!b∏[NÊﬂ",
+  [
+    [
+      "X64.AESCTRplain.va_lemma_aes_ctr_loop_body",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Types_s.quad32", "equation_Words_s.nat32",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "fuel_guarded_inversion_Words_s.four",
+        "fuel_guarded_inversion_X64.Vale.State.state", "int_inversion",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.AESCTRplain_Tm_refine_0cae6fdabc3c04eec354ba7ac3d58fd5"
+      ],
+      0,
+      "2fdec1621884516034634c6c47b6a6ce"
+    ],
+    [
+      "X64.AESCTRplain.va_wp_aes_ctr_loop_body",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+      ],
+      0,
+      "42b8b1b68b00f01aa252e151750fb28d"
+    ],
+    [
+      "X64.AESCTRplain.va_wpProof_aes_ctr_loop_body",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "268858bd71a76026ff4b5506f3385dac"
+    ],
+    [
+      "X64.AESCTRplain.va_lemma_aes_counter_loop_body",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "109619a71d111e1024260119a50e3047"
+    ],
+    [
+      "X64.AESCTRplain.va_wp_aes_counter_loop_body",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "eb4ddc3bf33cca5598f39324432e0c4b"
+    ],
+    [
+      "X64.AESCTRplain.va_wpProof_aes_counter_loop_body",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "2f7ed0ec6c634fa663fa6c910ac42e33"
+    ],
+    [
+      "X64.AESCTRplain.va_lemma_aes_counter_loop_while",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "828ae2a78f2e77f2a9c0989d45d8c1d0"
+    ],
+    [
+      "X64.AESCTRplain.va_wp_aes_counter_loop_while",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "4f001e950bc9f23df9cd31d4ef8364b0"
+    ],
+    [
+      "X64.AESCTRplain.va_wpProof_aes_counter_loop_while",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "b99974f272f55f7c1c96fe5315191449"
+    ],
+    [
+      "X64.AESCTRplain.va_lemma_aes_counter_loop",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Words_s.nat32",
+        "refinement_interpretation_X64.AESCTRplain_Tm_refine_4cf89e76cb11fb4649c6e9d28fc0427e"
+      ],
+      0,
+      "3f7111eba88d7b0a38501d510ba1051e"
+    ],
+    [
+      "X64.AESCTRplain.va_wp_aes_counter_loop",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "37bd348a115b05b4c6a3313799b5f5b3"
+    ],
+    [
+      "X64.AESCTRplain.va_wpProof_aes_counter_loop",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "ffb8a6c45a88f0aabeebc8e101939ae9"
+    ]
+  ]
+]
