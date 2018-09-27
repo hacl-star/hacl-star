@@ -224,14 +224,26 @@ let create a =
         if SC.vale && i = AC.Vale then
           let b = B.malloc HS.root 0ul ValeGlue.sha256_size_state in
           SHA256_Vale b
-        else
+        else if SC.hacl && i = AC.Hacl then
           let b = B.malloc HS.root 0ul Hacl.SHA2_256.size_state in
           SHA256_Hacl b
+	else
+	 begin
+	  failwith !$"not implemented";
+	  admit()
+	 end
     | SHA384 ->
+      if SC.hacl && i = AC.Hacl then
         let b = B.malloc HS.root 0UL Hacl.SHA2_384.size_state in
         SHA384_Hacl b
+      else
+       begin
+        failwith !$"not implemented";
+	admit()
+       end
     | _ ->
-        failwith !$"not implemented"
+      failwith !$"not implemented";
+      admit()
   in
   B.malloc HS.root s 1ul
 
@@ -274,9 +286,13 @@ let init #a s =
   // 18-09-12 the assert below triggers an fstar Failure
   // assert_norm(let a = Ghost.reveal a in acc0 == hash0 (Seq.empty #UInt8.t));
   match !*s with
-  | SHA256_Hacl p -> Hacl.SHA2_256.init (T.new_to_old_st p)
-  | SHA384_Hacl p -> Hacl.SHA2_384.init (T.new_to_old_st p)
-  | SHA256_Vale p -> ValeGlue.sha256_init p; admit ()
+  | SHA256_Hacl p ->
+    if SC.hacl then Hacl.SHA2_256.init (T.new_to_old_st p)
+    else failwith !$"inconsistent configuration"
+  | SHA384_Hacl p ->
+    if SC.hacl then Hacl.SHA2_384.init (T.new_to_old_st p)
+  | SHA256_Vale p ->
+    if SC.vale then ValeGlue.sha256_init p; admit ()
 
 #set-options "--z3rlimit 20"
 let update #ea prior s data =
@@ -295,18 +311,24 @@ let update #ea prior s data =
 
   match !*s with
   | SHA256_Hacl p ->
+    if SC.hacl then
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
       Hacl.SHA2_256.update p data
+    else failwith !$"inconsistent configuration"
 
   | SHA384_Hacl p ->
+    if SC.hacl then
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
       Hacl.SHA2_384.update p data
+    else failwith !$"inconsistent configuration"
 
   | SHA256_Vale p ->
-      ValeGlue.sha256_update p data;
-      admit ()
+    if SC.vale then
+      ValeGlue.sha256_update p data
+    else failwith !$"inconsistent configuration";
+    admit()
 
 #set-options "--z3rlimit 300"
 let update_multi #ea prior s data len =
@@ -324,6 +346,7 @@ let update_multi #ea prior s data len =
 
   match !*s with
   | SHA256_Hacl p ->
+    if SC.hacl then
       let n = len / blockLen SHA256 in
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
@@ -341,8 +364,10 @@ let update_multi #ea prior s data len =
           r1.hash = Spec.SHA2_256.update_multi r0.hash fresh ==>
           r1 == hash2 r0 fresh));
       ()
+    else failwith !$"inconsistent configuration"
 
   | SHA384_Hacl p ->
+    if SC.hacl then
       let n = len / blockLen SHA384 in
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
@@ -360,11 +385,14 @@ let update_multi #ea prior s data len =
           r1.hash = Spec.SHA2_384.update_multi r0.hash fresh ==>
           r1 == hash2 r0 fresh));
       ()
+    else failwith !$"inconsistent configuration"
 
   | SHA256_Vale p ->
+    if SC.vale then
       let n = len / blockLen SHA256 in
       ValeGlue.sha256_update_multi p data n;
       admit ()
+    else failwith !$"inconsistent configuration"
 
 //18-07-07 For SHA384 I was expecting a conversion from 32 to 64 bits
 
@@ -386,6 +414,8 @@ let update_last #ea prior s data totlen =
     assert(M.(loc_disjoint (footprint #a s h0) (loc_buffer data))));
   match !*s with
   | SHA256_Hacl p ->
+    if SC.hacl then
+     begin
       let len = totlen % blockLen SHA256 in
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
@@ -399,33 +429,50 @@ let update_last #ea prior s data totlen =
         assert(Seq.length fresh % blockLength a = 0);
         let b = Seq.append prior fresh in
         assume(repr #a s h1 == hash0 b) // Hacl.Spec misses at least the updated counter
-        )
+      )
+     end
+    else failwith !$"inconsistent configuration"
+    
   | SHA384_Hacl p ->
+    if SC.hacl then
+     begin
       let len = totlen % blockLen SHA384 in
       let p = T.new_to_old_st p in
       let data = T.new_to_old_st data in
       admit();//18-07-12 unclear what's missing here
       Hacl.SHA2_384.update_last p data len;
       admit()
+     end
+    else failwith !$"inconsistent configuration"
 
   | SHA256_Vale p ->
+    if SC.vale then
+     begin
       let len = totlen % blockLen SHA256 in
       ValeGlue.sha256_update_last p data len;
       admit()
+     end
+    else failwith !$"inconsistent configuration"
 
 let finish #ea s dst =
   match !*s with
   | SHA256_Hacl p ->
+    if SC.hacl then
       let p = T.new_to_old_st p in
       let dst = T.new_to_old_st dst in
       Hacl.SHA2_256.finish p dst
+    else failwith !$"inconsistent configuration"
   | SHA384_Hacl p ->
+    if SC.hacl then
       let p = T.new_to_old_st p in
       let dst = T.new_to_old_st dst in
       Hacl.SHA2_384.finish p dst
+    else failwith !$"inconsistent configuration"
   | SHA256_Vale p ->
-      ValeGlue.sha256_finish p dst;
-      admit ()
+    if SC.vale then
+      ValeGlue.sha256_finish p dst
+    else failwith !$"inconsistent configuration";
+    admit ()
 
 let free #ea s =
   (match !* s with
@@ -437,21 +484,33 @@ let free #ea s =
 let hash a dst input len =
   match a with
   | SHA256 ->
-      let i = AC.sha256_impl () in
-      if SC.vale && i = AC.Vale then begin
-        ValeGlue.sha256_hash dst input len;
-        admit ()
-      end else begin
-        let input = T.new_to_old_st input in
-        let dst = T.new_to_old_st dst in
-        Hacl.SHA2_256.hash dst input len;
-        admit() //18-07-07 TODO align the specs
-      end
+    let i = AC.sha256_impl () in
+    if SC.vale && i = AC.Vale then
+     begin
+      ValeGlue.sha256_hash dst input len;
+      admit ()
+     end
+    else if SC.hacl && i = AC.Hacl then
+     begin
+      let input = T.new_to_old_st input in
+      let dst = T.new_to_old_st dst in
+      Hacl.SHA2_256.hash dst input len;
+      admit() //18-07-07 TODO align the specs
+     end
+    else
+     begin
+      failwith !$"no implementation";
+      admit()
+     end
   | SHA384 ->
+    if SC.hacl then
+     begin
       let input = T.new_to_old_st input in
       let dst = T.new_to_old_st dst in
       Hacl.SHA2_384.hash dst input len;
       admit() //18-07-07 TODO align the specs
+     end
+    else failwith !$"no implementation"
   | _ ->
-      admit ();
-      failwith !$"not implemented"
+    failwith !$"not implemented";
+    admit()
