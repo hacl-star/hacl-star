@@ -91,6 +91,7 @@ let get128_aux (ptr:int) (heap:heap) (v:quad32) (k:nat{k < 16}) : Lemma
 #set-options "--z3refresh --max_fuel 1 --initial_fuel 1 --z3rlimit 60"
 
 let bv_upd_update_heap64 b heap i v addrs ptrs h =
+admit();
   let bv = BV.mk_buffer_view b view64 in
   BV.as_buffer_mk_buffer_view b view64;
   BV.get_view_mk_buffer_view b view64;
@@ -126,6 +127,7 @@ let bv_upd_update_heap64 b heap i v addrs ptrs h =
 #set-options "--z3refresh"
 
 let bv_upd_update_heap128 b heap i v addrs ptrs h =
+  admit();
   let bv = BV.mk_buffer_view b view128 in
   BV.as_buffer_mk_buffer_view b view128;
   BV.get_view_mk_buffer_view b view128;
