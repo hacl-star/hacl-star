@@ -106,6 +106,15 @@ void coverage(void)
   printf("\nAES-128-GCM encrypt test:\n");
   quic_crypto_encrypt(k, cipher, 0, salt, 13, data, 28);
   dump(cipher, 28+16);
+  quic_crypto_decrypt(k, hash, 0, salt, 13, cipher, 28+16);
+  if(memcmp(hash, data, 28) != 0)
+  {
+    printf("Roundtrip decryption failed.\n");
+    exit(1);
+  }
+  assert(quic_crypto_decrypt(k, hash, 1, salt, 13, cipher, 28+16) < 0);
+  assert(quic_crypto_decrypt(k, hash, 0, salt, 12, cipher, 28+16) < 0);
+  assert(quic_crypto_decrypt(k, hash, 0, salt, 13, cipher+1, 27+16) < 0);
 
   unsigned char *expected_pnmask = (unsigned char *)"\x16\x53\x7a\x9a";
   unsigned char pnmask[4];

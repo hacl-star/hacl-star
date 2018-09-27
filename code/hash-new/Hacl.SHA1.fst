@@ -288,7 +288,7 @@ let repeat_range #a min max f inv interp fc =
   Spec.Loops.repeat_range_base (UInt32.v min) (Ghost.reveal f) (interp h0);
   C.Loops.for min max inv' f'
 
-#set-options "--z3rlimit 32"
+#set-options "--z3rlimit 32 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction
 let step3
