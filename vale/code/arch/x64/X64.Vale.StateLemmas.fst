@@ -64,7 +64,9 @@ let state_to_HS (s:state) : GTot ME.state =
   ME.mem = s.mem;
   }
 
+#set-options "--max_ifuel 2 --initial_ifuel 2"
 let lemma_to_eval_operand s o = equiv_eval_operand o (state_to_HS s)
+#reset-options "--initial_fuel 2 --max_fuel 2"
 
 let lemma_to_eval_xmm s x = ()
 
