@@ -14,6 +14,7 @@ include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "AES_helpers"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.AES128
 
@@ -34,6 +35,7 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open Arch.Types
 open AES_helpers
+open X64.CPU_Features_s
 #endverbatim
 
 #reset-options "--z3rlimit 20"
@@ -55,6 +57,7 @@ procedure{:quick} KeyExpansionRound(
     requires/ensures
         validDstAddrs128(mem, rdx, dst, 11, memTaint, Secret);
     requires
+        aesni_enabled;
         0 <= round < 10;
         rcon == aes_rcon(round);
         is_aes_key_LE(AES_128, key);
@@ -91,6 +94,7 @@ procedure{:quick exportOnly}{:recursive}{:decrease n} KeyExpansionRoundUnrolledR
     requires/ensures
         validDstAddrs128(mem, rdx, dst, 11, memTaint, Secret);
     requires
+        aesni_enabled;
         0 <= n <= 10;
         is_aes_key_LE(AES_128, key);
         key == quad32_to_seq(xmm1);
@@ -123,6 +127,7 @@ procedure{:quick} KeyExpansion128Stdcall(
         key_expansion_ptr := if win then rdx else rsi;
         key := quad32_to_seq(buffer128_read(input_key_b, 0, mem));
     requires/ensures
+        aesni_enabled;
         buffers_disjoint128(input_key_b, output_key_expansion_b);
         validSrcAddrs128(mem, key_ptr, input_key_b, 1, memTaint, Secret);
         validDstAddrs128(mem, key_expansion_ptr, output_key_expansion_b, 11, memTaint, Secret);
@@ -167,6 +172,7 @@ procedure{:quick} AES128EncryptRound(
     modifies
         xmm0; xmm2; efl;
     requires
+        aesni_enabled;
         1 <= n < 10 <= length(round_keys);
         xmm0 == rounds(init, round_keys, #nat(n - 1));
         r8 == buffer_addr(keys_buffer, mem);
@@ -191,6 +197,7 @@ procedure{:quick} AES128EncryptBlock(
     modifies
         xmm0; xmm2; efl;
     requires
+        aesni_enabled;
         is_aes_key_LE(AES_128, key);
         length(round_keys) == 11;
         round_keys == key_to_round_keys_LE(AES_128, key);
@@ -241,6 +248,7 @@ procedure{:quick} AES128EncryptBlockStdcall(
         input_ptr := if win then rdx else rsi;
         expanded_key_ptr := if win then r8 else rdx;
     requires
+        aesni_enabled;
         is_aes_key_LE(AES_128, key);
         buffer128_read(input_buffer, 0, mem) == input;
         expanded_key_ptr == buffer_addr(keys_buffer, mem);
