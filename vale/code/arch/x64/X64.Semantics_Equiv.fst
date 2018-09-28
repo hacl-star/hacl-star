@@ -126,6 +126,7 @@ let equiv_eval_mul (s:state) (ins:S.ins{S.Mul64? ins}) : Lemma (
     ()
   end
 
+#push-options "--z3rlimit 30"
 let equiv_eval_mulx (s:state) (ins:S.ins{S.Mulx64? ins}) : Lemma (
   let s_hi = run (eval_ins ins) s in
   let s_bytes = S.run (S.eval_ins ins) s.state in
@@ -142,6 +143,7 @@ let equiv_eval_mulx (s:state) (ins:S.ins{S.Mulx64? ins}) : Lemma (
     equiv_eval_operand src s;
     ()
   end
+#pop-options
 
 let equiv_eval_imul (s:state) (ins:S.ins{S.IMul64? ins}) : Lemma (
   let s_hi = run (eval_ins ins) s in
