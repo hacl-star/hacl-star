@@ -165,20 +165,8 @@ let update_sub #a #len dst start n src =
     (B.as_seq h1 dst)
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 
-inline_for_extraction noextract private
-val loop_nospec_inv:
-    #a:Type
-  -> h0:mem
-  -> h1:mem
-  -> len:size_nat
-  -> n:size_nat
-  -> buf:lbuffer a len
-  -> i:nat
-  -> Type0
-let loop_nospec_inv #a h0 h1 len n buf i =
-  modifies (loc_buffer buf) h0 h1
-
-inline_for_extraction
+(** Loop combinator with just memory safety specification *)
+inline_for_extraction noextract
 val loop_nospec:
     #h0:mem
   -> #a:Type0
@@ -187,122 +175,68 @@ val loop_nospec:
   -> buf:lbuffer a len
   -> impl:
       (i:size_t{v i < v n} -> Stack unit
-        (requires fun h -> loop_nospec_inv #a h0 h len (v n) buf (v i))
-        (ensures  fun _ r h1 -> loop_nospec_inv #a h0 h1 len (v n) buf (v i + 1)))
+        (requires fun h -> modifies (loc_buffer buf) h0 h)
+        (ensures  fun _ _ h1 -> modifies (loc_buffer buf) h0 h1))
   -> Stack unit
     (requires fun h -> h0 == h /\ B.live h0 buf)
-    (ensures  fun _ _ h1 -> B.live h1 buf /\ modifies (loc_buffer buf) h0 h1)
+    (ensures  fun _ _ h1 -> modifies (loc_buffer buf) h0 h1)
 let loop_nospec #h0 #a #len n buf impl =
-  let inv h1 j =
-    loop_nospec_inv #a h0 h1 len (v n) buf j in
-  let f' (j:size_t{0 <= v j /\ v j < v n}): Stack unit
-      (requires fun h -> inv h (v j))
-      (ensures  fun _ _ h2 -> inv h2 (v j + 1)) =
-      impl j in
-  Lib.Loops.for (size 0) n inv f'
+  let inv h1 j = modifies (loc_buffer buf) h0 h1 in
+  Lib.Loops.for (size 0) n inv impl
 
-inline_for_extraction noextract
+
+(**
+* A generalized loop combinator paremetrized by its state (e.g. an accumulator)
+* 
+* Arguments:
+* - [h0] the heap when entering the loop. We can't factor it out because the type
+*   of some arguments depends on it.
+* - [a_spec] the type for the specification state (may depend on the loop index)
+* - [a_impl] the Low* type of the state (e.g a tuple of buffers)
+* - [refl] a ghost function that reflects a concrete state as [a_spec]
+* - [footprint] locations modified by the loop (may depend on the loop index)
+* - [spec] a specification of how the body of the loop modifies the state
+* - [acc] Low* state
+* - [impl] the body of the loop as a Stack function
+*)
+unfold
 val loop_inv:
-    #a:Type
-  -> #len:size_nat
-  -> h0:mem
-  -> h1:mem
-  -> n:size_nat
-  -> buf:lbuffer a len
-  -> spec:(h:mem -> GTot (i:size_nat{i < n} -> Seq.lseq a len -> Seq.lseq a len))
-  -> i:nat{i <= n}
-  -> Type0
-let loop_inv #a #len h0 h1 n buf spec i =
-  modifies (loc_buffer buf) h0 h1 /\
-  as_seq h1 buf == Seq.repeati_sp #n i (spec h0) (as_seq h0 buf)
-
-inline_for_extraction
-val loop:
-    #h0:mem
-  -> #a:Type0
-  -> #len:size_nat
+    h0:mem
   -> n:size_t
-  -> buf:lbuffer a len
-  -> inv:(h0:mem -> h1:mem -> Type0)
-  -> spec:(h0:mem -> GTot (i:size_nat{i < v n} -> Seq.lseq a len -> Seq.lseq a len))
-  -> impl:
-      (i:size_t{v i < v n} -> Stack unit
-        (requires fun h -> inv h0 h /\ loop_inv h0 h (v n) buf spec (v i))
-        (ensures  fun _ r h1 -> inv h0 h1 /\ loop_inv h0 h1 (v n) buf spec (v i + 1)))
-  -> Stack unit
-    (requires fun h -> h0 == h /\ live h buf /\ inv h0 h)
-    (ensures  fun _ _ h1 -> loop_inv h0 h1 (v n) buf spec (v n))
-let loop #h0 #a #len n buf inv' spec impl =
-  let inv h1 j = inv' h0 h1 /\ loop_inv h0 h1 (v n) buf spec j in
-  let f' (j:size_t{v j < v n}): Stack unit
-      (requires fun h -> inv h (v j))
-      (ensures  fun _ _ h2 -> inv h2 (v j + 1)) =
-      impl j in
-  Lib.Loops.for (size 0) n inv f'
+  -> a_spec:(i:size_nat{i <= v n} -> Type)
+  -> a_impl:Type
+  -> refl:(mem -> i:size_nat{i <= v n} -> a_impl -> GTot (a_spec i))
+  -> footprint:(i:size_nat{i <= v n} -> GTot loc)
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1)))
+  -> acc:a_impl
+  -> i:size_nat{i <= v n}
+  -> h:mem 
+  -> Type0
+let loop_inv h0 n a_spec a_impl refl footprint spec acc i h =
+  modifies (footprint i) h0 h /\
+  refl h i acc == Seq.repeat i a_spec (spec h0) (refl h0 0 acc)
 
 inline_for_extraction noextract
-val loop2_inv:
-    #a0:Type
-  -> #len0:size_nat
-  -> #a1:Type
-  -> #len1:size_nat
-  -> h0:mem
-  -> h1:mem
-  -> n:size_nat
-  -> buf0:lbuffer a0 len0
-  -> buf1:lbuffer a1 len1
-  -> spec:(h0:mem -> GTot (i:size_nat{i < n}
-        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)
-        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)))
-  -> i:nat{i <= n}
-  -> Type0
-let loop2_inv #a0 #len0 #a1 #len1 h0 h1 n buf0 buf1 spec i =
-  modifies (loc_union (loc_buffer buf0) (loc_buffer buf1)) h0 h1 /\
-  (let s1, s2 = Seq.repeati_sp #n i (spec h0) (as_seq h0 buf0, as_seq h0 buf1) in
-  as_seq h1 buf0 == s1 /\ as_seq h1 buf1 == s2)
-
-inline_for_extraction
-val loop2:
-    #h0:mem
-  -> #a0:Type0
-  -> #len0:size_nat
-  -> #a1:Type0
-  -> #len1:size_nat
+val loop:
+    h0:mem
   -> n:size_t
-  -> buf0:lbuffer a0 len0
-  -> buf1:lbuffer a1 len1
-  -> inv:(h0:mem -> h1:mem -> Type0)
-  -> spec:(h0:mem -> GTot (i:size_nat{i < v n}
-        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)
-        -> tuple2 (Seq.lseq a0 len0) (Seq.lseq a1 len1)))
-  -> impl:
-      (i:size_t{v i < v n} -> Stack unit
-        (requires fun h -> inv h0 h /\ loop2_inv #a0 #len0 #a1 #len1 h0 h (v n) buf0 buf1 spec (v i))
-        (ensures  fun _ r h1 -> inv h0 h1 /\ loop2_inv #a0 #len0 #a1 #len1 h0 h1 (v n) buf0 buf1 spec (v i + 1)))
+  -> a_spec:(i:size_nat{i <= v n} -> Type)
+  -> a_impl:Type
+  -> refl:(mem -> i:size_nat{i <= v n} -> a_impl -> GTot (a_spec i))
+  -> footprint:(i:size_nat{i <= v n} -> GTot loc)
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1)))
+  -> acc:a_impl
+  -> impl:(i:size_t{v i < v n} -> Stack unit
+     (requires loop_inv h0 n a_spec a_impl refl footprint spec acc (v i))
+     (ensures  fun _ _ -> loop_inv h0 n a_spec a_impl refl footprint spec acc (v i + 1)))
   -> Stack unit
-    (requires fun h -> h0 == h /\ live h buf0 /\ live h buf1 /\ inv h0 h)
-    (ensures  fun _ _ h1 -> loop2_inv #a0 #len0 #a1 #len1 h0 h1 (v n) buf0 buf1 spec (v n))
-let loop2 #h0 #a0 #len0 #a1 #len1 n buf0 buf1 inv' spec impl =
-  let inv h1 j = inv' h0 h1 /\ loop2_inv h0 h1 (v n) buf0 buf1 spec j in
-  let f' (j:size_t{v j < v n}): Stack unit
-      (requires fun h -> inv h (v j))
-      (ensures  fun _ _ h2 -> inv h2 (v j + 1)) =
-      impl j in
-  Lib.Loops.for (size 0) n inv f'
+    (requires fun h -> h0 == h)
+    (ensures  fun _ _ -> loop_inv h0 n a_spec a_impl refl footprint spec acc (v n))
+let loop h0 n a_spec a_impl refl footprint spec acc impl =
+  let inv h i = loop_inv h0 n a_spec a_impl refl footprint spec acc i h in
+  Lib.Loops.for (size 0) n inv impl
 
-val lemma_repeati_sp:
-    #h0:HyperStack.mem
-  -> #a:Type
-  -> n:size_nat
-  -> spec:(h0:mem -> GTot (i:size_nat{i < n} -> a -> a))
-  -> res0:a
-  -> i:size_nat{i < n}
-  -> resi:a
-  -> Lemma
-    (requires resi == Seq.repeati_sp #n i (spec h0) res0)
-    (ensures  Seq.repeati_sp #n (i + 1) (spec h0) res0 == (spec h0) i resi)
-let lemma_repeati_sp #h0 #a n spec res0 i resi = ()
-
+(** Compares two byte buffers of equal length returning a bool *)
 inline_for_extraction
 val lbytes_eq:
     #len:size_t
@@ -315,22 +249,27 @@ val lbytes_eq:
       r == Seq.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b))
 let lbytes_eq #len a b =
   push_frame();
-  let res:lbuffer bool 1 = create (size 1) true in
+  let res = create (size 1) true in
+  let refl h _ b = bget h b 0 in
+  let spec h0 = Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b) in
   let h0 = ST.get () in
-  loop #h0 len res (fun _ _ -> True)
-  (fun h0 -> Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b))
-  (fun i ->
-    let ai = a.(i) in
-    let bi = b.(i) in
-    let res0 = res.(size 0) in
-    res.(size 0) <- res0 && FStar.UInt8.(u8_to_UInt8 ai =^ u8_to_UInt8 bi)
-  );
+  loop h0 len (fun _ -> bool) (lbuffer bool 1) refl 
+    (fun i -> loc_buffer res) spec res
+    (fun i ->
+      Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
+      let ai = a.(i) in
+      let bi = b.(i) in
+      let res0 = res.(size 0) in
+      res.(size 0) <- res0 && FStar.UInt8.(u8_to_UInt8 ai =^ u8_to_UInt8 bi)
+    );
   let res = res.(size 0) in
   pop_frame();
   res
 
-// TODO: move to a different module
-assume val print_compare_display:
+
+// TODO: used in tests; move to a different module
+assume 
+val print_compare_display:
     len:size_t
   -> lbuffer uint8 (size_v len)
   -> lbuffer uint8 (size_v len)

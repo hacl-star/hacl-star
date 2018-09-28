@@ -113,8 +113,116 @@ let op_String_Assignment #a #len = upd #a #len
 
 /// Iteration
 
-// 2018.07.13 SZ: TODO
-// Unsure why these functions are in Lib.Sequence; nothing to do with sequences
+(** 
+* fold_left-like loop combinator: 
+* [ repeat_left lo hi a f acc == f (hi - 1) .. ... (f (lo + 1) (f lo acc)) ]
+*
+* e.g. [ repeat_left 0 3 (fun _ -> list int) Cons [] == [2;1;0] ]
+*
+* It satisfies
+* [ repeat_left lo hi (fun _ -> a) f acc == fold_left (flip f) acc [lo..hi-1] ]
+*
+* A simpler variant with a non-dependent accumuator used to be called [repeat_range]
+*)
+val repeat_left:
+    lo:size_nat
+  -> hi:size_nat{lo <= hi}
+  -> a:(i:size_nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:size_nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
+  -> acc:a lo
+  -> Tot (a hi) (decreases (hi - lo))
+let rec repeat_left lo hi a f acc =
+  if lo = hi then acc
+  else repeat_left (lo + 1) hi a f (f lo acc) 
+
+(** 
+* fold_right-like loop combinator:
+* [ repeat_right lo hi a f acc == f (hi - 1) .. ... (f (lo + 1) (f lo acc)) ]
+*
+* e.g. [ repeat_right 0 3 (fun _ -> list int) Cons [] == [2;1;0] ]
+*
+* It satisfies
+* [ repeat_right lo hi (fun _ -> a) f acc == fold_right f acc [hi-1..lo] ]
+*)
+val repeat_right:
+    lo:size_nat
+  -> hi:size_nat{lo <= hi}
+  -> a:(i:size_nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:size_nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
+  -> acc:a lo
+  -> Tot (a hi) (decreases (hi - lo))
+let rec repeat_right lo hi a f acc =
+  if lo = hi then acc
+  else f (hi - 1) (repeat_right lo (hi - 1) a f acc)
+
+(** Splitting a repetition *)
+val repeat_right_plus:
+    lo:size_nat
+  -> mi:size_nat{lo <= mi}
+  -> hi:size_nat{mi <= hi}
+  -> a:(i:size_nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:size_nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
+  -> acc:a lo
+  -> Lemma (ensures 
+      repeat_right lo hi a f acc == 
+      repeat_right mi hi a f (repeat_right lo mi a f acc))
+    (decreases hi)
+let rec repeat_right_plus lo mi hi a f acc =
+  if hi = mi then ()
+  else repeat_right_plus lo mi (hi - 1) a f acc
+
+(**
+* [repeat_left] and [repeat_right] are equivalent.
+* 
+* This follows from the third duality theorem
+* [ fold_right f acc xs = fold_left (flip f) acc (reverse xs) ]
+*)
+val repeat_left_right:
+    lo:size_nat
+  -> hi:size_nat{lo <= hi}
+  -> a:(i:size_nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:size_nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
+  -> acc:a lo
+  -> Lemma (ensures repeat_right lo hi a f acc == repeat_left lo hi a f acc)
+    (decreases (hi - lo))
+let rec repeat_left_right lo hi a f acc = 
+  if lo = hi then ()
+  else
+    begin
+    repeat_right_plus lo (lo + 1) hi a f acc;
+    repeat_left_right (lo + 1) hi a f (f lo acc)
+    end
+
+(** 
+* Repetition starting from 0
+*
+* Defined as [repeat_right] for convenience, but [repeat_left] may be more 
+* efficient when extracted to OCaml.
+*)
+val repeat:
+    n:size_nat 
+  -> a:(i:size_nat{i <= n} -> Type)
+  -> f:(i:size_nat{i < n} -> a i -> a (i + 1))
+  -> acc0:a 0
+  -> a n
+let repeat n a f acc0 =
+  repeat_right 0 n a f acc0
+
+(** Unfolding one iteration *)
+val unfold_repeat:
+    n:size_nat
+  -> a:(i:size_nat{i <= n} -> Type)
+  -> f:(i:size_nat{i < n} -> a i -> a (i + 1))
+  -> acc0:a 0
+  -> i:size_nat{i < n}
+  -> Lemma (repeat (i + 1) a f acc0 == f i (repeat i a f acc0))
+let unfold_repeat n a f acc0 i = ()
+(* // Proof when using [repeat_left]:
+  repeat_left_right 0 (i + 1) a f acc0;
+  repeat_left_right 0 i a f acc0
+*)
+
+/// Old combinators; all subsumed by [repeat_left]
 
 val repeat_range: #a:Type
   -> min:size_nat
@@ -122,35 +230,15 @@ val repeat_range: #a:Type
   -> (s:size_nat{s >= min /\ s < max} -> a -> Tot a)
   -> a
   -> Tot a (decreases (max - min))
-let rec repeat_range #a min max f x =
-  if min = max then x
-  else repeat_range #a (min + 1) max f (f min x)
+let repeat_range #a min max f x =
+  repeat_left min max (fun _ -> a) f x
 
-val repeati: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> Tot a) -> a -> a
+val repeati: #a:Type -> n:size_nat -> (i:size_nat{i < n} -> a -> Tot a) -> a -> a
 let repeati #a n = repeat_range #a 0 n
-
-val repeat: #a:Type -> n:size_nat -> (a -> Tot a) -> a -> a
-let repeat #a n f x = repeat_range 0 n (fun i -> f) x
-
-val repeati_:
-     #n:size_nat
-  -> #a:Type
-  -> i:size_nat{i <= n}
-  -> f:(s:size_nat{s < n} -> a -> Tot a)
-  -> a
-  -> Tot a
-let rec repeati_ #n #a i f x =
-  if i = 0 then x
-  else
-    let ai = repeati_ #n #a (i - 1) f x in
-    f (i - 1) ai
-
-val repeati_sp: #n:size_nat -> #a:Type -> i:size_nat{i <= n} -> (i:size_nat{i < n}  -> a -> Tot a) -> a -> a
-let repeati_sp #n #a i = repeati_ #n #a i
 
 unfold
 type repeatable (#a:Type) (#n:size_nat) (pred:(i:size_nat{i <= n} -> a -> Tot Type)) =
-  i:size_nat{i < n} -> x:a -> Pure a (requires (pred i x)) (ensures (fun r -> pred (i+1) r))
+  i:size_nat{i < n} -> x:a{pred i x} -> y:a{pred (i+1) y}
 
 val repeat_range_inductive: #a:Type
   -> min:size_nat
@@ -160,8 +248,7 @@ val repeat_range_inductive: #a:Type
   -> x0:a{pred min x0}
   -> Tot (res:a{pred max res}) (decreases (max - min))
 let rec repeat_range_inductive #a min max pred f x =
-  if min = max then x
-  else repeat_range_inductive #a (min + 1) max pred f (f min x)
+  repeat_left min max (fun i -> x:a{pred i x}) f x
 
 val repeati_inductive:
    #a:Type
@@ -178,23 +265,23 @@ val lbytes_eq_inner:
   -> a:lseq uint8 len
   -> b:lseq uint8 len
   -> i:size_nat{i < len}
-  -> res0:lseq bool 1
-  -> lseq bool 1
-let lbytes_eq_inner #len a b i res =
+  -> r:bool
+  -> bool
+let lbytes_eq_inner #len a b i r =
   let open Lib.RawIntTypes in
   let open FStar.UInt8 in
-  res.[0] <- res.[0] && (u8_to_UInt8 a.[i] =^ u8_to_UInt8 b.[i])
+  r && (u8_to_UInt8 a.[i] =^ u8_to_UInt8 b.[i])
 
+// REMARK: for some reason, I have to mark this as [unfold] 
+// or use [assert_norm] to unfold it in the proof of [lbytes_eq] in Lib.PQ.Buffer.
+unfold
 val lbytes_eq:
     #len:size_nat
   -> a:lseq uint8 len
   -> b:lseq uint8 len
   -> res:bool
 let lbytes_eq #len a b =
-  let open Lib.RawIntTypes in
-  let res = create 1 true in
-  let res = repeati_sp #len len (lbytes_eq_inner #len a b) res in
-  res.[0]
+  repeat len (fun _ -> bool) (lbytes_eq_inner a b) true
 
 val fold_left_range_: #a:Type -> #b:Type -> #len:size_nat
   -> min:size_nat
@@ -204,12 +291,11 @@ val fold_left_range_: #a:Type -> #b:Type -> #len:size_nat
   -> b
   -> Tot b (decreases (max - min))
 let rec fold_left_range_ #a #b #len min max f l x =
-  admit()
-(*
-  match l with
-  | [] -> x
-  | h::t -> fold_left_range_ #a #b #(len - 1) (min + 1) max f t (f min h x)
-*)
+  if len = 0 then x
+  else
+    let h = Seq.head l in
+    let t = Seq.tail l in
+    fold_left_range_ #a #b #(len - 1) (min + 1) max f t (f min h x)
 
 val fold_left_range: #a:Type -> #b:Type -> #len:size_nat -> min:size_nat -> max:size_nat{min <= max /\ max <= len} -> (i:size_nat{i >= min /\ i < max} -> a -> b -> Tot b) -> lseq a len -> b -> b
 let fold_left_range #a #b #len min max f l x =
