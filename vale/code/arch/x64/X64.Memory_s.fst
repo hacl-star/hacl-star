@@ -121,7 +121,7 @@ let valid_state s = s.state.S.mem == I.down_mem s.mem.hs s.mem.addrs s.mem.ptrs
 
 let frame_valid s = ()
 
-let same_domain h m = Set.equal (I.addrs_set h.ptrs h.addrs) (Map.domain m)
+let same_domain h m = Set.equal (I.addrs_set h.ptrs h.addrs) (Map.domain m) /\ True  // TODO: /\ True is a temporary workaround for a temporary F*/OCaml extraction issue
 
 let lemma_same_domains h m1 m2 = ()
 
