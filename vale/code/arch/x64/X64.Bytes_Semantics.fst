@@ -334,7 +334,7 @@ let update_operand128_flags_same_unspecified o v s = match o with
   | _ -> ()
 
 val eval_ins_bs_same_unspecified (ins:ins) (s0:state) : Lemma
-  (let Some s1 = eval_code (Ins ins) 0 s0 in
+  (let s1 = run (eval_ins ins) s0 in
    forall x. not (Map.contains s1.mem x) ==> s1.mem.[x] == s0.mem.[x])
 
 let eval_ins_bs_same_unspecified ins s0 = ()

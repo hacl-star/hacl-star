@@ -253,13 +253,15 @@ fstar_default_args_nosmtencoding = ('--max_fuel 1 --max_ifuel 1'
   + ' --z3cliopt smt.arith.nl=false --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3'
   + ' --hint_info'
   + (' --use_hints --use_hint_hashes' if use_hints else '')
-  + (' --record_hints --cache_off' if record_hints else ' --cache_checked_modules')
+  + (' --cache_off' if record_hints else ' --cache_checked_modules')
   + ' --cache_dir obj/cache_checked'
   + ' --use_extracted_interfaces true'
   )
 fstar_default_args = (fstar_default_args_nosmtencoding
   + ' --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped'
   )
+
+fstar_record_hints = ' --record_hints' if record_hints else ''
 
 vale_scons_args = '-disableVerify -omitUnverified' if is_single_vaf else ''
 vale_includes = f'-include {File("code/lib/util/operator.vaf")}'
@@ -737,7 +739,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
     Depends(temptargetfiles, hintfile)
   env.Command(temptargetfiles, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
-    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile}' +
+    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile} {fstar_record_hints}' +
     f' 1> {temptargetfile} 2> {stderrfile}')
   CopyFile(targetfile, temptargetfile)
   dump_module_flag = '--dump_module ' + file_module_name(sourcefile)
@@ -759,7 +761,7 @@ def extract_fstar_file(options, sourcefile, fstar_includes):
   verifier_flags = options.verifier_flags.replace('--use_extracted_interfaces true', '')
   return env.Command(mlfile, sourcefile,
     f'{fstar_exe} {sourcefile} {verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
-    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile}' +
+    f' {fstar_includes} {" ".join(fstar_user_args)}' +
     f' --odir obj/ml_out --codegen OCaml --admit_smt_queries true --extract_module {module_name}')
 
 # Process a .fst or .fsti file
