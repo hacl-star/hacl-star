@@ -23,7 +23,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "cd86657b58f4fcc1d3b9fc7f8732edfd"
+      "5797e6f528b0f6777f0551f00259e699"
     ],
     [
       "GHash.lemma_ghash_incremental_def_0",
@@ -41,7 +41,7 @@
         "function_token_typing_Words_s.pow2_1", "primitive_Prims.op_Equality"
       ],
       0,
-      "57bf75a2ca3cb608e83cfbbe94bc868e"
+      "315684b001272ad3711380311a43f564"
     ],
     [
       "GHash.ghash_incremental_to_ghash",
@@ -96,7 +96,7 @@
         "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "44a6d05cb1812ebba70f5540e09dbff8"
+      "52d5496d074ae12a802bc341ea435878"
     ],
     [
       "GHash.lemma_hash_append",
@@ -143,7 +143,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "bcc802f00d58cd25fa95912d4e70f13b"
+      "54fef0ead9ef35595e019da0636d4a76"
     ],
     [
       "GHash.lemma_hash_append2",
@@ -222,11 +222,12 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_Prims.HasEq_int", "equation_FStar.Seq.Base.op_At_Bar",
         "equation_FStar.Seq.Properties.split",
-        "equation_GCM_helpers.bytes_to_quad_size", "equation_Prims.eqtype",
+        "equation_GCM_helpers.bytes_to_quad_size",
+        "equation_GCTR_s.pad_to_128_bits", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Types_s.le_seq_quad32_to_bytes",
         "equation_Types_s.quad32", "equation_Words_s.nat32",
-        "equation_Words_s.nat8", "equation_Words_s.pow2_1",
-        "fuel_guarded_inversion_Words_s.four",
+        "equation_Words_s.nat8", "equation_Words_s.natN",
+        "equation_Words_s.pow2_1", "fuel_guarded_inversion_Words_s.four",
         "function_token_typing_Types_s.quad32",
         "function_token_typing_Words_s.nat8",
         "function_token_typing_Words_s.pow2_1", "int_inversion",
@@ -241,15 +242,16 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_ea07e0a751efa2045cd38c3cb14362c9",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.Seq.Base.length",
+        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length",
         "typing_Types_s.le_seq_quad32_to_bytes"
       ],
       0,
-      "d3a29b8f71aba8558ed448c60222d89f"
+      "6446fb64608de6633bc364bb917d3b0d"
     ],
     [
       "GHash.lemma_ghash_registers",
@@ -293,7 +295,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.create",
-        "unit_typing"
+        "typing_FStar.Seq.Base.index", "unit_typing"
       ],
       0,
       "0f6efdc37cd80a4a3b36c77659c6b84b"
@@ -320,7 +322,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "5e6202c204bee6f9d3e5042019c54a41"
+      "0fe8a8d9f87d5c4d6b708c7d32884fb0"
     ],
     [
       "GHash.ghash_incremental_to_ghash",
@@ -335,7 +337,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "314ebd0e89a6ff7ec276fb018bfaa45d"
+      "cf087e5c1e2cbdf548f72cb7a43b95f3"
     ],
     [
       "GHash.lemma_hash_append3",
@@ -374,7 +376,7 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "886d0cb82108f319a0bfeb29a2c7a15a"
+      "fdf95a438dce166b02df175d73a53ccf"
     ],
     [
       "GHash.lemma_ghash_registers",
