@@ -32,7 +32,7 @@
         "typing_Math.Poly2.Defs_s.valid"
       ],
       0,
-      "00013a07e2d4e0f2fc1e482f348b67ff"
+      "706be61b0a5a2cb6594ad5503ee010d8"
     ],
     [
       "Math.Poly2.Defs.lemma_pointwise_equal",
@@ -47,7 +47,7 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "0f79a38447b638e8033363ffa226830c"
+      "274ef7f21c94e07b5c14e376da012c9d"
     ],
     [
       "Math.Poly2.Defs.lemma_add_zero",
@@ -329,7 +329,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "a13014e0025acc28612d9b2d567a42f4"
+      "0600e5b789ae998f44030c585dde2b30"
     ],
     [
       "Math.Poly2.Defs.lemma_sum_shift",
@@ -341,8 +341,9 @@
         "@fuel_correspondence_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
         "@fuel_irrelevance_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
         "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_0",
-        "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_1",
+        "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_1", "bool_typing",
         "equality_tok_Prims.LexTop@tok",
         "equation_with_fuel_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
         "int_inversion", "int_typing",
@@ -382,7 +383,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "4e2de426febf04d3619dbd874a09277a"
+      "1724522daaf99af7542f08c31755ac52"
     ],
     [
       "Math.Poly2.Defs.lemma_sum_invert",
@@ -484,7 +485,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "805c3112a4cb24c65b1b13744c0c3f2a"
+      "08ae24d53cee6888696bfb108bf1cb23"
     ],
     [
       "Math.Poly2.Defs.lemma_sum_swap_mul_associate",
@@ -515,7 +516,7 @@
         "typing_Math.Poly2.Defs_s.sum_of_bools"
       ],
       0,
-      "95d5d9759c16a71b110e6a465e120595"
+      "13a154baa8455a8de018c382b96b454b"
     ],
     [
       "Math.Poly2.Defs.lemma_sum_pointwise_equal",
@@ -537,7 +538,7 @@
         "projection_inverse_BoxInt_proj_0", "well-founded-ordering-on-nat"
       ],
       0,
-      "4b7a916fe48300f48aa3b29b3ee455e9"
+      "1aef50e54248430ec170a4097ede632c"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_element",
@@ -570,7 +571,7 @@
         "typing_Math.Poly2.Defs_s.valid"
       ],
       0,
-      "7321172db76a922d691846eb162a8c33"
+      "a3a933ac8264dc3f7b4b31b89ab48e57"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_zero",
@@ -610,7 +611,7 @@
         "typing_Math.Poly2.Defs_s.valid"
       ],
       0,
-      "04e4b6732ec08926b27b09d31ffbd33d"
+      "036e2b89a69487b9e56321ff9b6478a7"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_one",
@@ -636,6 +637,7 @@
         "lemma_FStar.Seq.Base.lemma_index_create",
         "lemma_Math.Poly2.Defs.lemma_mul_element",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_disEquality",
@@ -651,7 +653,7 @@
         "typing_Math.Poly2.Defs_s.valid"
       ],
       0,
-      "672eab3d1d968b1bcf767ca29d2921d5"
+      "e6eb7bd67bc1ae596ceb8af9f034c86a"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_commute",
@@ -672,7 +674,7 @@
         "typing_Math.Poly2.Defs_s.poly_index"
       ],
       0,
-      "92ac7f4c6cd73d12596fbaec9ac461a7"
+      "57c8f78f8f533cd0476c6c584db1c3bb"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_associate",
@@ -680,8 +682,10 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
+        "@fuel_irrelevance_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
         "bool_typing", "equation_Math.Poly2.Defs.poly_equal",
         "equation_Math.Poly2.Defs_s.mul_element",
@@ -689,8 +693,10 @@
         "equation_Math.Poly2.Defs_s.poly",
         "equation_Math.Poly2.Defs_s.poly_index",
         "equation_Math.Poly2.Defs_s.valid", "equation_Prims.nat",
+        "equation_with_fuel_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
         "int_inversion", "int_typing",
         "lemma_Math.Poly2.Defs.lemma_mul_element",
+        "partial_app_typing_c18f41d7210034719b60a404e521d925",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
@@ -699,6 +705,7 @@
         "refinement_interpretation_Math.Poly2.Defs_s_Tm_refine_104477900203e15c5f983d817bbd12d4",
         "refinement_interpretation_Math.Poly2.Defs_s_Tm_refine_e545a789272c9b4b030ed575ce094c42",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "token_correspondence_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
         "typing_Math.Poly2.Defs_s.mul",
         "typing_Math.Poly2.Defs_s.mul_element",
         "typing_Math.Poly2.Defs_s.mul_element_fun",
@@ -706,7 +713,7 @@
         "typing_Math.Poly2.Defs_s.valid"
       ],
       0,
-      "9db1ccd2826e6f773c070c35bf656a8e"
+      "6297f741da1e3193c1afe996f928a051"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_distribute",
@@ -741,7 +748,7 @@
         "typing_Math.Poly2.Defs_s.valid"
       ],
       0,
-      "39dd4c76cf34b5ba49a2827260d640ac"
+      "4ad8d7027009f38c0bbb425f9a326b73"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_distribute_left",
@@ -791,8 +798,7 @@
         "lemma_Math.Poly2.Defs.lemma_mul_element",
         "lemma_Math.Poly2.Defs.lemma_sum_empty",
         "partial_app_typing_a576962273fd7c1387f1e534bd1ec2aa",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
-        "primitive_Prims.op_Equality",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_disEquality",
@@ -805,8 +811,7 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "token_correspondence_Math.Poly2.Defs_s.mul_element_fun",
         "token_correspondence_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
-        "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.create",
-        "typing_FStar.Seq.Base.index", "typing_FStar.Seq.Base.length",
+        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length",
         "typing_Math.Poly2.Defs_s.monomial",
         "typing_Math.Poly2.Defs_s.mul_element",
         "typing_Math.Poly2.Defs_s.poly_index",
@@ -815,7 +820,7 @@
         "typing_Math.Poly2.Defs_s.valid"
       ],
       0,
-      "dfa99cc8ebc0189960f152780e0e47a7"
+      "b05f570cf9277a22ab27cdd03f3eab8d"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_degree",
@@ -863,7 +868,7 @@
         "typing_Math.Poly2.Defs_s.valid", "unit_inversion", "unit_typing"
       ],
       0,
-      "a06065af192bc860d39c998698951b0a"
+      "6c37268048c5fec68e23781adde1c6a7"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_reverse",
@@ -871,9 +876,8 @@
       1,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
-        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
         "assumption_Prims.HasEq_int", "bool_inversion", "bool_typing",
         "equation_FStar.Math.Lib.max", "equation_Math.Poly2.Defs.poly_equal",
@@ -883,9 +887,8 @@
         "equation_Math.Poly2.Defs_s.poly",
         "equation_Math.Poly2.Defs_s.poly_index",
         "equation_Math.Poly2.Defs_s.valid", "equation_Prims.min",
-        "equation_Prims.nat",
-        "equation_with_fuel_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
-        "function_token_typing_Prims.bool", "int_inversion", "int_typing",
+        "equation_Prims.nat", "function_token_typing_Prims.bool",
+        "int_inversion", "int_typing",
         "lemma_Math.Poly2.Defs.lemma_mul_element",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
@@ -899,15 +902,12 @@
         "refinement_interpretation_Math.Poly2.Defs_s_Tm_refine_e545a789272c9b4b030ed575ce094c42",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "typing_FStar.Math.Lib.max", "typing_FStar.Seq.Base.length",
-        "typing_Math.Poly2.Defs_Tm_abs_08d6e45501d3e58173a54565df3db448",
         "typing_Math.Poly2.Defs_s.mul",
         "typing_Math.Poly2.Defs_s.poly_index",
-        "typing_Math.Poly2.Defs_s.reverse",
-        "typing_Math.Poly2.Defs_s.sum_of_bools",
-        "typing_Math.Poly2.Defs_s.valid"
+        "typing_Math.Poly2.Defs_s.reverse", "typing_Math.Poly2.Defs_s.valid"
       ],
       0,
-      "1df0317eb1fad7366e2771c9fb0e4703"
+      "5ffb0f3d02c60c24300faea04be8519f"
     ],
     [
       "Math.Poly2.Defs.lemma_div_mod",
@@ -941,6 +941,7 @@
         "equation_with_fuel_Math.Poly2.Defs_s.sum_of_bools.fuel_instrumented",
         "function_token_typing_Prims.bool", "int_inversion", "int_typing",
         "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_index_app2",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_Math.Poly2.Defs.lemma_mul_element",
         "lemma_Math.Poly2.Defs.lemma_poly_equal_elim",
@@ -957,6 +958,7 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_FStar.Math.Lib_Tm_refine_1e8fd9ae838e0242317cb255d5558507",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_af0e4e2eeb194a2d6c276cb06764ff4f",
         "refinement_interpretation_Math.Poly2.Defs_s_Tm_refine_104477900203e15c5f983d817bbd12d4",
         "refinement_interpretation_Math.Poly2.Defs_s_Tm_refine_7fcffde0ff4f4e4eb4fa7122bc9c215e",
         "refinement_interpretation_Math.Poly2.Defs_s_Tm_refine_9495dd44cc1ab95035ceb015369d909f",
@@ -1025,11 +1027,10 @@
         "refinement_interpretation_Math.Poly2.Defs_s_Tm_refine_9495dd44cc1ab95035ceb015369d909f",
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.Math.Lib.max", "typing_FStar.Seq.Base.append",
-        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.index",
-        "typing_FStar.Seq.Base.length", "typing_Math.Poly2.Defs_s.add",
-        "typing_Math.Poly2.Defs_s.degree", "typing_Math.Poly2.Defs_s.div",
-        "typing_Math.Poly2.Defs_s.monomial",
+        "typing_FStar.Math.Lib.max", "typing_FStar.Seq.Base.create",
+        "typing_FStar.Seq.Base.index", "typing_FStar.Seq.Base.length",
+        "typing_Math.Poly2.Defs_s.add", "typing_Math.Poly2.Defs_s.degree",
+        "typing_Math.Poly2.Defs_s.div", "typing_Math.Poly2.Defs_s.monomial",
         "typing_Math.Poly2.Defs_s.poly_index",
         "typing_Math.Poly2.Defs_s.valid", "unit_typing",
         "well-founded-ordering-on-nat"
@@ -1096,7 +1097,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "dbee176d3d158e11e82e2c1bea1941cf"
+      "c76857b46f01e4743e096de882cf202c"
     ],
     [
       "Math.Poly2.Defs.op_Plus_Dot",
@@ -1105,7 +1106,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_bool" ],
       0,
-      "a1a11f5176b07e83293b56019c8d439f"
+      "7ebe31abcadbc442d6459dc34c3b97b8"
     ],
     [
       "Math.Poly2.Defs.lemma_add_zero",
@@ -1161,7 +1162,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_bool" ],
       0,
-      "d2f65e48b846963951546b73f182623e"
+      "8e0303a7727b0caa3fbd6f4928515420"
     ],
     [
       "Math.Poly2.Defs.lemma_sum_invert_rec",
@@ -1170,7 +1171,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_bool" ],
       0,
-      "cb41f4e8bfc5eb9a9edbd290f164b138"
+      "de6994869d3bd1e18981bb0372fecd2d"
     ],
     [
       "Math.Poly2.Defs.lemma_mul_zero",

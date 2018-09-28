@@ -253,7 +253,7 @@ fstar_default_args_nosmtencoding = ('--max_fuel 1 --max_ifuel 1'
   + ' --z3cliopt smt.arith.nl=false --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3'
   + ' --hint_info'
   + (' --use_hints --use_hint_hashes' if use_hints else '')
-  + (' --record_hints' if record_hints else ' --cache_checked_modules')
+  + (' --record_hints --cache_off' if record_hints else ' --cache_checked_modules')
   + ' --cache_dir obj/cache_checked'
   + ' --use_extracted_interfaces true'
   )
