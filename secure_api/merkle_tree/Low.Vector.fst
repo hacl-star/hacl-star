@@ -339,7 +339,7 @@ let insert #a vec v =
 
 val flush:
   #a:Type -> vec:vector a -> ia:a ->
-  i:uint32_t{i < size_of vec} ->
+  i:uint32_t{i <= size_of vec} ->
   HST.ST (vector a)
     (requires (fun h0 ->
       live h0 vec /\ freeable vec /\
@@ -355,11 +355,12 @@ val flush:
 	      (S.slice (as_seq h0 vec) (U32.v i) (U32.v (size_of vec)))))
 let flush #a vec ia i =
   let fsz = Vec?.sz vec - i in
+  let asz = if Vec?.sz vec = i then 1ul else fsz in
   let vs = Vec?.vs vec in
-  let fvs = B.malloc (B.frameOf vs) ia fsz in
+  let fvs = B.malloc (B.frameOf vs) ia asz in
   B.blit vs i fvs 0ul fsz;
   B.free vs;
-  Vec fsz fsz fvs
+  Vec fsz asz fvs
 
 /// Iteration
 

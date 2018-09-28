@@ -985,10 +985,12 @@ let rec free_elems #a #rg rv idx =
 
 val flush:
   #a:Type0 -> #rg:regional a ->
-  rv:rvector rg -> i:uint32_t{i < V.size_of rv} ->
+  rv:rvector rg -> i:uint32_t{i <= V.size_of rv} ->
   HST.ST (rvector rg)
     (requires (fun h0 -> rv_inv h0 rv))
     (ensures (fun h0 frv h1 ->
+      V.size_of frv = V.size_of rv - i /\
+      V.frameOf rv = V.frameOf frv /\
       modifies (loc_rvector rv) h0 h1 /\
       rv_inv h1 frv /\
       S.equal (as_seq h1 frv)
