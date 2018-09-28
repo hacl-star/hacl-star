@@ -744,7 +744,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
     ' --print_bound_var_types --ugly ' + dump_module_flag)
   env.Command(dumptargetfile, sourcefile,
-    f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
+    f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
     f' {fstar_includes} {" ".join(fstar_user_args)}' +
     f' {dump_flags} 1>{dumptargetfile} 2>&1')
   Depends(dumptargetfile, targetfile)
