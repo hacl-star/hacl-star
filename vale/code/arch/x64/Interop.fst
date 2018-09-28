@@ -402,8 +402,7 @@ let g_upd_tot_correct_down
   Lemma (correct_down_p (B.g_upd_seq b (get_seq_heap heap addrs b) mem) addrs heap b) =
   B.g_upd_seq_as_seq b (get_seq_heap heap addrs b) mem
 
-#set-options "--z3refresh"
-
+#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1 --initial_fuel 1 --initial_ifuel 1"
 let rec update_buffer_up_mem_aux
   (ptrs:list b8{list_disjoint_or_eq ptrs})
   (addrs:addr_map)

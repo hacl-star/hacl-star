@@ -23,7 +23,7 @@
         "typing_Words.Seq_s_Tm_abs_4b6491508e007fe9e104a73a8e9a08fa"
       ],
       0,
-      "6fed58a51a56cf6c28e537d305e54cf1"
+      "179044ebe430554da076c5b0aad25210"
     ],
     [
       "Words.Seq.seq_to_seq_four_to_seq_LE",
@@ -33,6 +33,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "FStar.Seq.Base_interpretation_Tm_arrow_015e5d64a12964940b96ac2bc090f517",
+        "FStar.Seq.Base_interpretation_Tm_arrow_bdcbfedb2f96eeeeff6f38aed48c66a0",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Words.Seq_s_interpretation_Tm_arrow_bc04648dfcdbc32442de0d4da50c7e00",
         "Words.Seq_s_interpretation_Tm_arrow_e3ddcc5b46969079ca9d1f0e35ec1c77",
@@ -40,6 +41,7 @@
         "equation_Words.Seq_s.seq_four_to_seq_LE",
         "equation_Words.Seq_s.seq_to_seq_four_LE", "equation_Words_s.pow2_1",
         "fuel_guarded_inversion_Words_s.four",
+        "function_token_typing_FStar.Seq.Base.index",
         "function_token_typing_Words_s.pow2_1", "int_inversion",
         "int_typing",
         "interpretation_Words.Seq_s_Tm_abs_26f048d51991e365b290dc350cc79e4b",
@@ -188,12 +190,12 @@
         "assumption_Prims.HasEq_int", "equation_Prims.nat",
         "equation_Words_s.nat32", "equation_Words_s.natN",
         "equation_Words_s.pow2_1", "function_token_typing_Words_s.pow2_1",
-        "int_inversion", "projection_inverse_BoxInt_proj_0",
+        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "012df8c272c2ece81f17275105b1dccd"
+      "72871056bef505d5f8d4da02c236f99c"
     ],
     [
       "Words.Seq.four_to_nat_to_four_8",
@@ -204,7 +206,6 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_Prims.nat", "equation_Words.Four_s.four_to_nat",
         "equation_Words.Four_s.nat_to_four", "equation_Words_s.natN",
         "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
@@ -214,13 +215,11 @@
         "projection_inverse_Words_s.Mkfour_lo0",
         "projection_inverse_Words_s.Mkfour_lo1",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "refinement_interpretation_Words.Seq_Tm_refine_0bc78dbdaa24822f400a2796d57ad8d3",
         "refinement_interpretation_Words_s_Tm_refine_1bc5c4f392722fe6a26189e86f17c270",
         "typing_Words_s.int_to_natN"
       ],
       0,
-      "aa9d2c31d5d8a44b27363794d84a63b8"
+      "b472f9950920b75b44d56c7172dc604b"
     ],
     [
       "Words.Seq.nat_to_four_to_nat",
@@ -275,7 +274,7 @@
         "typing_Words.Seq_s.seq_to_four_LE"
       ],
       0,
-      "9bc9bb3d2152ec13a2261b69ac5ef9b7"
+      "fc4c6d467e220013a64740513e8cbcd6"
     ],
     [
       "Words.Seq.seq_to_four_to_seq_LE",
@@ -432,8 +431,8 @@
         "equation_Words.Seq_s.seq_four_to_seq_LE",
         "equation_Words.Seq_s.seq_nat32_to_seq_nat8_LE",
         "equation_Words.Seq_s.seq_nat8_to_seq_nat32_LE",
-        "equation_Words_s.nat32", "equation_Words_s.nat8",
-        "equation_Words_s.pow2_1",
+        "equation_Words.Seq_s.seq_to_seq_four_LE", "equation_Words_s.nat32",
+        "equation_Words_s.nat8", "equation_Words_s.pow2_1",
         "function_token_typing_FStar.Seq.Base.index",
         "function_token_typing_Words_s.nat32",
         "function_token_typing_Words_s.nat8",
@@ -489,7 +488,7 @@
         "typing_Words.Seq_s_Tm_abs_4b6491508e007fe9e104a73a8e9a08fa"
       ],
       0,
-      "6d609298abfe238e5562a40eecc96cc0"
+      "f5c76aff0462b554a85bbf36461572fc"
     ],
     [
       "Words.Seq.seq_four_to_seq_LE_injective_specific",
