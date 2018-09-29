@@ -86,11 +86,10 @@ let state_theta0 s _C =
   [@ inline_let]
   let spec h0 = S.state_theta_inner_C (as_seq h0 s) in
   let h0 = ST.get () in
-  loop h0 (size 5) a_spec a_impl 
-    (fun h i (b:lbuffer uint64 5) -> as_seq h b)
+  loop h0 (size 5) a_spec a_impl _C
+    (fun h i -> as_seq h _C)
     (fun i -> loc_buffer _C)
     spec
-    _C
     (fun x ->      
       LSeq.unfold_repeat 5 a_spec (spec h0) (as_seq h0 _C) (v x);
       _C.(x) <-
@@ -114,12 +113,12 @@ val state_theta_inner_s:
 let state_theta_inner_s _C x s =
   let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (u32 1) in
   let a_spec i = S.state in 
-  let refl h i (s:state) : GTot S.state = as_seq h s in
+  let refl h i : GTot S.state = as_seq h s in
   let footprint i = loc_buffer s in
   [@ inline_let]
   let spec h0 = S.state_theta_inner_s_inner (v x) _D in
   let h0 = ST.get () in
-  loop h0 (size 5) a_spec state refl footprint spec s
+  loop h0 (size 5) a_spec state s refl footprint spec
     (fun y -> 
       LSeq.unfold_repeat 5 a_spec (spec h0) (as_seq h0 s) (v y);
       writeLane s x y (readLane s x y ^. _D)
@@ -136,12 +135,12 @@ val state_theta1:
       as_seq h1 s == S.state_theta1 (as_seq h0 s) (as_seq h0 _C))
 let state_theta1 s _C =
   let a_spec i = S.state in
-  let refl h i (s:state) : GTot S.state = as_seq h s in
+  let refl h i : GTot S.state = as_seq h s in
   let footprint i = loc_buffer s in
   [@ inline_let]
   let spec h0 = S.state_theta_inner_s (as_seq h0 _C) in
   let h0 = ST.get () in
-  loop h0 (size 5) a_spec state refl footprint spec s
+  loop h0 (size 5) a_spec state s refl footprint spec
   (fun x ->
     LSeq.unfold_repeat 5 a_spec (spec h0) (as_seq h0 s) (v x);
     state_theta_inner_s _C x s
@@ -215,14 +214,14 @@ let state_pi_rho s =
   let current:lbuffer uint64 1 = create (size 1) (readLane s (size 1) (size 0)) in
   let a_spec i = tuple2 uint64 S.state in
   let a_impl = tuple2 (lbuffer uint64 1) state in
-  let refl h i (cs:tuple2 (lbuffer uint64 1) state) : GTot (tuple2 uint64 S.state) = 
-    let current, (s:state) = cs in get h current 0, as_seq h s in
+  let refl h i : GTot (tuple2 uint64 S.state) = 
+    get h current 0, as_seq h s in
   let footprint i = loc_union (loc_buffer s) (loc_buffer current) in
   let spec h0 = S.state_pi_rho_inner in
   let h0 = ST.get () in
-  loop h0 (size 24) a_spec a_impl refl footprint spec (current, s)
+  loop h0 (size 24) a_spec a_impl (current, s) refl footprint spec
   (fun i ->
-    LSeq.unfold_repeat 24 a_spec (spec h0) (refl h0 0 (current, s)) (v i);
+    LSeq.unfold_repeat 24 a_spec (spec h0) (refl h0 0) (v i);
     state_pi_rho_inner i current s
   );
   pop_frame()
@@ -257,14 +256,14 @@ val state_chi_inner1:
 let state_chi_inner1 s_pi_rho y s =
   let a_spec i = S.state in
   let a_impl = state in
-  let refl h i (s:state) : GTot S.state = as_seq h s in
+  let refl h i : GTot S.state = as_seq h s in
   let footprint i = loc_buffer s in
   [@ inline_let]
   let spec h0 = S.state_chi_inner (as_seq h0 s_pi_rho) (v y) in
   let h0 = ST.get () in
-  loop h0 (size 5) a_spec a_impl refl footprint spec s
+  loop h0 (size 5) a_spec a_impl s refl footprint spec
   (fun x ->
-    LSeq.unfold_repeat 5 a_spec (spec h0) (refl h0 0 s) (v x);
+    LSeq.unfold_repeat 5 a_spec (spec h0) (refl h0 0) (v x);
     state_chi_inner s_pi_rho y x s
   )
 
@@ -282,14 +281,14 @@ let state_chi s =
   copy s_pi_rho (size 25) s;
   let a_spec i = S.state in
   let a_impl = state in
-  let refl h i (s:state) : GTot S.state = as_seq h s in
+  let refl h i : GTot S.state = as_seq h s in
   let footprint i = loc_buffer s in
   [@ inline_let]
   let spec h0 = S.state_chi_inner1 (as_seq h0 s_pi_rho) in
   let h0 = ST.get () in
-  loop h0 (size 5) a_spec a_impl refl footprint spec s
+  loop h0 (size 5) a_spec a_impl s refl footprint spec
   (fun y ->
-    LSeq.unfold_repeat 5 a_spec (spec h0) (refl h0 0 s) (v y);
+    LSeq.unfold_repeat 5 a_spec (spec h0) (refl h0 0) (v y);
     state_chi_inner1 s_pi_rho y s
   );
   pop_frame()
@@ -318,14 +317,14 @@ val state_permute:
 let state_permute s =
   let a_spec i = S.state in
   let a_impl = state in
-  let refl h i (s:state) : GTot S.state = as_seq h s in
+  let refl h i : GTot S.state = as_seq h s in
   let footprint i = loc_buffer s in
   [@ inline_let]
   let spec h0 = S.state_permute1 in
   let h0 = ST.get () in
-  loop h0 (size 24) a_spec a_impl refl footprint spec s
+  loop h0 (size 24) a_spec a_impl s refl footprint spec
   (fun round ->
-    LSeq.unfold_repeat 24 a_spec (spec h0) (refl h0 0 s) (v round);
+    LSeq.unfold_repeat 24 a_spec (spec h0) (refl h0 0) (v round);
     state_theta s;
     state_pi_rho s;
     state_chi s;
@@ -348,14 +347,14 @@ let loadState rateInBytes input s =
   update_sub block (size 0) rateInBytes input;
   let a_spec i = S.state in
   let a_impl = state in
-  let refl h i (s:state) : GTot S.state = as_seq h s in
+  let refl h i : GTot S.state = as_seq h s in
   let footprint i = loc_buffer s in
   [@ inline_let]
   let spec h0 = S.loadState_inner (as_seq h0 block) in
   let h0 = ST.get () in
-  loop h0 (size 25) a_spec a_impl refl footprint spec s
+  loop h0 (size 25) a_spec a_impl s refl footprint spec
   (fun j ->
-    LSeq.unfold_repeat 25 a_spec (spec h0) (refl h0 0 s) (v j);
+    LSeq.unfold_repeat 25 a_spec (spec h0) (refl h0 0) (v j);
     s.(j) <- s.(j) ^. uint_from_bytes_le #U64 (sub #_ #200 #8 block (j *! size 8) (size 8))
   );
   pop_frame ()
@@ -397,20 +396,19 @@ let storeState rateInBytes s res =
   let block:lbytes 200 = create (size 200) (u8 0) in
   let a_spec (i:size_nat{i <= 25}) = LB.lbytes 200 in
   let a_impl = lbytes 200 in
-  let refl h i (block:lbytes 200) : GTot (a_spec i) = as_seq h block in
+  let refl h i : GTot (a_spec i) = as_seq h block in
   let footprint i = loc_buffer block in
   [@ inline_let]
   let spec h0 = S.storeState_inner (as_seq h0 s) in
   let h0 = ST.get () in
-  loop h0 (size 25) a_spec a_impl refl footprint spec block
+  loop h0 (size 25) a_spec a_impl block refl footprint spec
   (fun j ->
-    LSeq.unfold_repeat 25 a_spec (spec h0) (refl h0 0 block) (v j);
+    LSeq.unfold_repeat 25 a_spec (spec h0) (refl h0 0) (v j);
     storeState_inner s j block
   );
   update_sub res (size 0) rateInBytes (sub block (size 0) rateInBytes);
   pop_frame()
   
-
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
@@ -509,14 +507,14 @@ let absorb s rateInBytes inputByteLen input delimitedSuffix =
   let rem = inputByteLen %. rateInBytes in
   let a_spec (i:size_nat{i <= v inputByteLen / v rateInBytes}) = S.state in
   let a_impl = state in
-  let refl h i (s:state) : GTot (a_spec i) = as_seq h s in
+  let refl h i : GTot (a_spec i) = as_seq h s in
   let footprint i = loc_buffer s in
   [@ inline_let]
   let spec h0 = S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input) in
   let h0 = ST.get () in
-  loop h0 n a_spec a_impl refl footprint spec s
+  loop h0 n a_spec a_impl s refl footprint spec
   (fun i ->
-    LSeq.unfold_repeat (v n) a_spec (spec h0) (refl h0 0 s) (v i);
+    LSeq.unfold_repeat (v n) a_spec (spec h0) (refl h0 0) (v i);
     absorb_inner rateInBytes inputByteLen input i s
   );
   absorb_last s rateInBytes inputByteLen input delimitedSuffix;
@@ -592,7 +590,8 @@ val squeeze:
       S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
 let squeeze s rateInBytes outputByteLen output =
   let h0 = ST.get() in
-  assert_norm (norm [delta] S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) ==
+  assert_norm (norm [delta]
+    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) ==
     S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen));
   let outBlocks = outputByteLen /. rateInBytes in
   let remOut = outputByteLen %. rateInBytes in
@@ -600,20 +599,19 @@ let squeeze s rateInBytes outputByteLen output =
   let a_spec (i:size_nat{i <= v outputByteLen / v rateInBytes}) =
     tuple2 S.state (LB.lbytes (i * v rateInBytes)) in
   let a_impl = tuple2 state (lbytes (v outputByteLen)) in
-  let refl h (i:size_nat{i <= v outBlocks}) (so:tuple2 state (lbytes (v outputByteLen))) :
+  let refl h (i:size_nat{i <= v outBlocks}) :
     GTot (tuple2 S.state (LB.lbytes (i * v rateInBytes))) =
     assert (i * v rateInBytes <= v outputByteLen);
-    let s, output = so in
     as_seq h s, 
     as_seq h (gsub #_ #_ #(i * v rateInBytes) output (size 0) (size i *! rateInBytes))
   in
   let footprint i = loc_union (loc_buffer s) (loc_buffer output) in
-  let spec h0: i:size_nat{i < v outBlocks} -> so:a_spec i -> a_spec (i + 1) = 
+  let spec h0: i:size_nat{i < v outBlocks} -> a_spec i -> a_spec (i + 1) = 
     S.squeeze_inner (v rateInBytes) (v outputByteLen) in
   let h0 = ST.get () in
-  loop h0 outBlocks a_spec a_impl refl footprint spec (s, output)
+  loop h0 outBlocks a_spec a_impl (s, output) refl footprint spec
   (fun i ->
-    LSeq.unfold_repeat (v outBlocks) a_spec (spec h0) (refl h0 0 (s, output)) (v i);    
+    LSeq.unfold_repeat (v outBlocks) a_spec (spec h0) (refl h0 0) (v i);    
     squeeze_inner rateInBytes outputByteLen i s output
   ); 
   storeState remOut s tmp;
@@ -621,7 +619,7 @@ let squeeze s rateInBytes outputByteLen output =
   Seq.lemma_split (as_seq h1 output) (v outputByteLen - v remOut);
   Seq.lemma_eq_intro (LSeq.create 0 (u8 0))
     (as_seq h0 (gsub #_ #_ #0 output (size 0) (size 0)))
-  
+
 val keccak:
     rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}
   -> capacity:size_t{v capacity + v rate == 1600}
