@@ -12,7 +12,6 @@ open Lib.IntTypes
 open Lib.PQ.Buffer
 open Lib.Endianness
 
-open Hacl.Keccak
 open Hacl.Impl.Matrix
 
 module ST = FStar.HyperStack.ST
@@ -100,7 +99,7 @@ let frodo_gen_matrix_cshake_inner h0 n seed_len seed res r i =
   let h0 = ST.get () in
   let ctr = size_to_uint32 (size 256 +. i) in
   uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. i))) (u16 (256 + v i));
-  Hacl.Keccak.cshake128_frodo seed_len seed (to_u16 ctr) (size 2 *! n) r;
+  Hacl.SHA3.cshake128_frodo seed_len seed (to_u16 ctr) (size 2 *! n) r;
   let h1 = ST.get () in
   Lib.Loops.for (size 0) n
     (fun h2 j -> gen_inv h0 h1 h2 n seed_len seed r res i j)
@@ -162,7 +161,7 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
      let ctr1 = size_to_uint32 (size 256 +. size 4 *! i +. size 1) in
      let ctr2 = size_to_uint32 (size 256 +. size 4 *! i +. size 2) in
      let ctr3 = size_to_uint32 (size 256 +. size 4 *! i +. size 3) in     
-     cshake128_frodo_4x seed_len seed 
+     Hacl.Keccak.cshake128_frodo_4x seed_len seed 
        (to_u16 ctr0) (to_u16 ctr1) (to_u16 ctr2) (to_u16 ctr3)
        (size 2 *! n) r0 r1 r2 r3;
      let h1' = ST.get() in
