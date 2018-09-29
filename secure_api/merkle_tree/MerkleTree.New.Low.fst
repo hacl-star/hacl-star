@@ -879,6 +879,15 @@ let free_path p =
 
 /// Getting the Merkle root and path
 
+private val hs_rv_inv_hash_r_inv:
+  h:HS.mem -> hs:hash_vv ->
+  lv:uint32_t -> i:uint32_t ->
+  Lemma (requires (RV.rv_inv h hs /\
+		  lv < V.size_of hs /\ 
+		  i < V.size_of (V.get h hs lv)))
+	(ensures (Rgl?.r_inv hreg h (V.get h (V.get h hs lv) i)))
+private let hs_rv_inv_hash_r_inv h hs lv i = ()
+
 // Construct the rightmost hashes for a given (incomplete) Merkle tree.
 // This function calculates the Merkle root as well, which is the final
 // accumulator value.
@@ -905,7 +914,7 @@ private val construct_rhs:
 	   RV.rv_inv h1 rhs /\
 	   Rgl?.r_inv hreg h1 acc))
 	 (decreases (U32.v j))
-#reset-options "--z3rlimit 500 --max_fuel 1"
+#reset-options "--z3rlimit 100 --max_fuel 1"
 private let rec construct_rhs lv hs rhs i j acc actd =
   let ofs = offset_of i in
   let copy = Cpy?.copy hcpy in
@@ -932,13 +941,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
 	      	(B.loc_all_regions_from false (V.frameOf rhs))
 	      	hh0 hh1;
 	      mt_safe_elts_head hh1 lv hs i j;
-	      assert (RV.rv_inv hh1 (V.get hh1 hs lv));
-	      assert (RV.elems_reg hh1 (V.get hh1 hs lv));
-	      assert (HH.extends
-		       (B.frameOf (V.get hh1 (V.get hh1 hs lv) (j - 1ul - ofs)))
-		       (V.frameOf (V.get hh1 hs lv)));
-	      assert (HH.extends (V.frameOf (V.get hh1 hs lv))
-				 (V.frameOf hs));
+	      hs_rv_inv_hash_r_inv hh1 hs lv (j - 1ul - ofs);
 	      hash_2 (V.index (V.index hs lv) (j - 1ul - ofs)) acc acc;
 	      let hh2 = HST.get () in
 	      mt_safe_elts_preserved lv hs i j
@@ -952,13 +955,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
 		hh1 hh2)
 	 else (let hh1 = HST.get () in
 	      mt_safe_elts_head hh1 lv hs i j;
-	      assert (RV.rv_inv hh1 (V.get hh1 hs lv));
-	      assert (RV.elems_reg hh1 (V.get hh1 hs lv));
-	      assert (HH.extends
-		       (B.frameOf (V.get hh1 (V.get hh1 hs lv) (j - 1ul - ofs)))
-		       (V.frameOf (V.get hh1 hs lv)));
-	      assert (HH.extends (V.frameOf (V.get hh1 hs lv))
-				 (V.frameOf hs));
+	      hs_rv_inv_hash_r_inv hh1 hs lv (j - 1ul - ofs);
 	      copy (V.index (V.index hs lv) (j - 1ul - ofs)) acc;
 	      let hh2 = HST.get () in
 	      mt_safe_elts_preserved lv hs i j

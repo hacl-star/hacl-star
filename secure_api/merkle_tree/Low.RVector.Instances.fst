@@ -133,7 +133,7 @@ val buffer_copyable:
 let buffer_copyable #a ia len =
   Cpy (buffer_copy len)
 
-/// If `a` is regional, then `rvector a` is also regional
+/// If `a` is regional, then `vector a` is also regional
 
 val vector_region_of: 
   #a:Type -> #rg:regional a -> v:rvector rg -> GTot HH.rid
