@@ -198,7 +198,6 @@ let loop_nospec #h0 #a #len n buf impl =
 * - [spec] a specification of how the body of the loop modifies the state
 * - [impl] the body of the loop as a Stack function
 *)
-//unfold
 val loop_inv:
     h0:mem
   -> n:size_t

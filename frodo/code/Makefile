@@ -36,8 +36,8 @@ endif
 # AES object files from NIST needed by PRNG for KATs
 ifeq ($(TARGET),x64)
   LWEKE_HOME = ../NIST/Additional_Implementations/x64/$(KEM_DIR)
-  OBJS       = $(addprefix $(LWEKE_HOME)/objs/,aes/aes_ni.o sha3/fips202.o sha3/fips202x4.o sha3/keccak4x/KeccakP-1600-times4-SIMD256.o) include/x64/aes$(ARCH).o
-  KECCAK     = x64/Hacl_Keccak.c
+  OBJS       = $(addprefix $(LWEKE_HOME)/objs/,aes/aes_ni.o sha3/fips202.o sha3/fips202x4.o sha3/keccak4x/KeccakP-1600-times4-SIMD256.o) include/x64/aes$(ARCH).o include/x64/Hacl_AesNI.o include/x64/Hacl_AES128.o
+KECCAK     = x64/Hacl_Keccak.c
 else ifeq ($(TARGET),)
   LWEKE_HOME ?= ../NIST/Reference_Implementation/reference/$(KEM_DIR)
   OBJS       = $(LWEKE_HOME)/objs/aes/aes_c.o $(LWEKE_HOME)/objs/sha3/fips202.o
@@ -274,8 +274,6 @@ ALL_SOURCES = \
   include/rng.c \
   include/random.c \
   include/$(KECCAK) \
-  include/x64/Hacl_AesNI.c \
-  include/x64/Hacl_AES128.c \
   include/clearwords.c \
   $(HACL_HOME)/lib/c/Lib_PQ_Print.c
 

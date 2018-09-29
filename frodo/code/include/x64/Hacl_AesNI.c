@@ -5,6 +5,7 @@
  */
 
 #include "Hacl_AesNI.h"
+#include "vec128.h"
 
 void Hacl_AesNI_aes128_key_expansion(uint8_t *key, uint8_t *keyex)
 {
