@@ -189,32 +189,31 @@ let loop_nospec #h0 #a #len n buf impl =
 * A generalized loop combinator paremetrized by its state (e.g. an accumulator)
 * 
 * Arguments:
-* - [h0] the heap when entering the loop. We can't factor it out because the type
-*   of some arguments depends on it.
+* - [h0] the heap when entering the loop. I couldn't factor it out because the specification of the body dedpends on it
 * - [a_spec] the type for the specification state (may depend on the loop index)
 * - [a_impl] the Low* type of the state (e.g a tuple of buffers)
-* - [refl] a ghost function that reflects a concrete state as [a_spec]
+* - [acc] Low* state
+* - [refl] a ghost function that reflects the Low* state in an iteration as [a_spec]
 * - [footprint] locations modified by the loop (may depend on the loop index)
 * - [spec] a specification of how the body of the loop modifies the state
-* - [acc] Low* state
 * - [impl] the body of the loop as a Stack function
 *)
-unfold
+//unfold
 val loop_inv:
     h0:mem
   -> n:size_t
   -> a_spec:(i:size_nat{i <= v n} -> Type)
   -> a_impl:Type
-  -> refl:(mem -> i:size_nat{i <= v n} -> a_impl -> GTot (a_spec i))
+  -> acc:a_impl
+  -> refl:(mem -> i:size_nat{i <= v n} -> GTot (a_spec i))
   -> footprint:(i:size_nat{i <= v n} -> GTot loc)
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1)))
-  -> acc:a_impl
   -> i:size_nat{i <= v n}
   -> h:mem 
   -> Type0
-let loop_inv h0 n a_spec a_impl refl footprint spec acc i h =
+let loop_inv h0 n a_spec a_impl acc refl footprint spec i h =
   modifies (footprint i) h0 h /\
-  refl h i acc == Seq.repeat i a_spec (spec h0) (refl h0 0 acc)
+  refl h i == Seq.repeat i a_spec (spec h0) (refl h0 0)
 
 inline_for_extraction noextract
 val loop:
@@ -222,18 +221,18 @@ val loop:
   -> n:size_t
   -> a_spec:(i:size_nat{i <= v n} -> Type)
   -> a_impl:Type
-  -> refl:(mem -> i:size_nat{i <= v n} -> a_impl -> GTot (a_spec i))
+  -> acc:a_impl
+  -> refl:(mem -> i:size_nat{i <= v n} -> GTot (a_spec i))
   -> footprint:(i:size_nat{i <= v n} -> GTot loc)
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1)))
-  -> acc:a_impl
   -> impl:(i:size_t{v i < v n} -> Stack unit
-     (requires loop_inv h0 n a_spec a_impl refl footprint spec acc (v i))
-     (ensures  fun _ _ -> loop_inv h0 n a_spec a_impl refl footprint spec acc (v i + 1)))
+     (requires loop_inv h0 n a_spec a_impl acc refl footprint spec (v i))
+     (ensures  fun _ _ -> loop_inv h0 n a_spec a_impl acc refl footprint spec (v i + 1)))
   -> Stack unit
     (requires fun h -> h0 == h)
-    (ensures  fun _ _ -> loop_inv h0 n a_spec a_impl refl footprint spec acc (v n))
-let loop h0 n a_spec a_impl refl footprint spec acc impl =
-  let inv h i = loop_inv h0 n a_spec a_impl refl footprint spec acc i h in
+    (ensures  fun _ _ -> loop_inv h0 n a_spec a_impl acc refl footprint spec (v n))
+let loop h0 n a_spec a_impl acc refl footprint spec impl =
+  let inv h i = loop_inv h0 n a_spec a_impl acc refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
 
 (** Compares two byte buffers of equal length returning a bool *)
@@ -250,11 +249,13 @@ val lbytes_eq:
 let lbytes_eq #len a b =
   push_frame();
   let res = create (size 1) true in
-  let refl h _ b = bget h b 0 in
+  [@ inline_let]
+  let refl h _ = get h res 0 in
+  [@ inline_let]
   let spec h0 = Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b) in
   let h0 = ST.get () in
-  loop h0 len (fun _ -> bool) (lbuffer bool 1) refl 
-    (fun i -> loc_buffer res) spec res
+  loop h0 len (fun _ -> bool) (lbuffer bool 1) res refl 
+    (fun i -> loc_buffer res) spec
     (fun i ->
       Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
       let ai = a.(i) in
@@ -264,8 +265,10 @@ let lbytes_eq #len a b =
     );
   let res = res.(size 0) in
   pop_frame();
+  // REMARK: for some reason [lbytes_eq] isn't unfolded
+  assert_norm (Seq.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b) ==
+               Seq.repeat (v len) (fun _ -> bool) (spec h0) true);
   res
-
 
 // TODO: used in tests; move to a different module
 assume 

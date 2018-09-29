@@ -272,9 +272,6 @@ let lbytes_eq_inner #len a b i r =
   let open FStar.UInt8 in
   r && (u8_to_UInt8 a.[i] =^ u8_to_UInt8 b.[i])
 
-// REMARK: for some reason, I have to mark this as [unfold] 
-// or use [assert_norm] to unfold it in the proof of [lbytes_eq] in Lib.PQ.Buffer.
-unfold
 val lbytes_eq:
     #len:size_nat
   -> a:lseq uint8 len
