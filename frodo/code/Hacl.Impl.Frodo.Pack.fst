@@ -201,9 +201,9 @@ let frodo_unpack n1 n2 d b res =
   let inv h (i:nat{i <= v n1 * v n2 / 8}) =
     modifies (loc_buffer res) h0 h /\
     (forall (j:nat{j < i}).
-      let b = Seq.sub #uint8 #(v d * (v n1 * v n2 / 8)) (as_seq h0 b) (v d * j) (v d) in
-      Seq.equal
-        (as_seq h (gsub #_ #_ #8 res (size 8 *! size j) (size 8)))
+      let b = Seq.sub #_ #(v d * (v n1 * v n2 / 8)) (as_seq h0 b) (v d * j) (v d) in
+      Seq.equal #uint16 #8
+        (as_seq h (gsub #uint16 #(v n1 * v n2) #8 res (size 8 *! size j) (size 8)))
         (S.frodo_unpack8 (v d) b))
   in
   let f (i:size_t{v i < v n1 * v n2 / 8}) : Stack unit

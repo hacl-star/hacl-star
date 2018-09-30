@@ -431,19 +431,12 @@ let absorb_last s rateInBytes inputByteLen input delimitedSuffix =
   let last = sub input (inputByteLen -. rem) rem in
   let h0 = ST.get () in
   update_sub #uint8 #(v rateInBytes) lastBlock (size 0) rem last;
-  assert (v rem < v rateInBytes);
   lastBlock.(rem) <- delimitedSuffix;
   loadState rateInBytes lastBlock s;
   pop_frame();
-  // TODO: this seems unnecessary
   let h1 = ST.get () in
   assert (as_seq h1 s == 
-    (let lastBlock = LSeq.create (v rateInBytes) (u8 0) in
-     let rem = v inputByteLen % v rateInBytes in
-     let last: LSeq.lseq uint8 rem = LSeq.sub #_ #(v inputByteLen) (as_seq h0 input) (v inputByteLen - rem) rem in
-     let lastBlock = LSeq.update_sub lastBlock 0 rem last in
-     let lastBlock = Lib.Sequence.(lastBlock.[rem] <- delimitedSuffix) in
-     S.loadState (v rateInBytes) lastBlock (as_seq h0 s)))
+    norm [delta] S.absorb_last (as_seq h0 s) (v rateInBytes) (v inputByteLen) (as_seq h0 input) delimitedSuffix)
 
 inline_for_extraction noextract
 val absorb_next:
