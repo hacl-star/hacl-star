@@ -1,4 +1,4 @@
-module Lib.PQ.Buffer
+module Lib.Buffer
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -187,7 +187,7 @@ let loop_nospec #h0 #a #len n buf impl =
 
 (**
 * A generalized loop combinator paremetrized by its state (e.g. an accumulator)
-* 
+*
 * Arguments:
 * - [h0] the heap when entering the loop. I couldn't factor it out because the specification of the body dedpends on it
 * - [a_spec] the type for the specification state (may depend on the loop index)
@@ -208,7 +208,7 @@ val loop_inv:
   -> footprint:(i:size_nat{i <= v n} -> GTot loc)
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1)))
   -> i:size_nat{i <= v n}
-  -> h:mem 
+  -> h:mem
   -> Type0
 let loop_inv h0 n a_spec a_impl acc refl footprint spec i h =
   modifies (footprint i) h0 h /\
@@ -253,7 +253,7 @@ let lbytes_eq #len a b =
   [@ inline_let]
   let spec h0 = Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b) in
   let h0 = ST.get () in
-  loop h0 len (fun _ -> bool) (lbuffer bool 1) res refl 
+  loop h0 len (fun _ -> bool) (lbuffer bool 1) res refl
     (fun i -> loc_buffer res) spec
     (fun i ->
       Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
@@ -270,7 +270,7 @@ let lbytes_eq #len a b =
   res
 
 // TODO: used in tests; move to a different module
-assume 
+assume
 val print_compare_display:
     len:size_t
   -> lbuffer uint8 (size_v len)
