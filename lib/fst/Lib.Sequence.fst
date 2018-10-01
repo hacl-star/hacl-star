@@ -3,6 +3,10 @@ module Lib.Sequence
 open FStar.Mul
 open Lib.IntTypes
 
+
+#set-options "--z3rlimit 15"
+
+
 /// Definition of sequences
 
 val seq: a:Type0 -> t:Type0
@@ -226,7 +230,8 @@ let unfold_repeat n a f acc0 i = ()
 
 /// Old combinators; all subsumed by [repeat_left]
 
-val repeat_range: #a:Type
+val repeat_range:
+  #a:Type
   -> min:size_nat
   -> max:size_nat{min <= max}
   -> (s:size_nat{s >= min /\ s < max} -> a -> Tot a)
@@ -234,6 +239,15 @@ val repeat_range: #a:Type
   -> Tot a (decreases (max - min))
 let repeat_range #a min max f x =
   repeat_left min max (fun _ -> a) f x
+
+val repeath:
+  #a:Type
+  -> max:size_nat
+  -> (a -> Tot a)
+  -> a
+  -> Tot a (decreases max)
+let repeath #a n f x = repeat_range 0 n (fun _ -> f) x
+
 
 val repeati: #a:Type -> n:size_nat -> (i:size_nat{i < n} -> a -> Tot a) -> a -> a
 let repeati #a n = repeat_range #a 0 n
