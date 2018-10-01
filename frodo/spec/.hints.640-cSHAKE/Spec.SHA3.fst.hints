@@ -17,7 +17,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "09a3853029e79ac3e06a6378b0d1b368"
+      "76496afbf4c23b57a3a6fc48262ac4da"
     ],
     [
       "Spec.SHA3.sizes_v",
@@ -30,7 +30,7 @@
         "refinement_interpretation_Spec.SHA3.Constants_Tm_refine_8991bf8b7f3a45b8c55cd33e7b6eb4d0"
       ],
       0,
-      "13ec2dfff99a1366e87a47c2c3de89a5"
+      "3ec4c183d34beb1b6ba036680d72b50c"
     ],
     [
       "Spec.SHA3.keccak_piln",
@@ -46,7 +46,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "5c9d673e89f844cd5744e4f89528ddec"
+      "34f7379a3446a6d2422c5bfd7d6944df"
     ],
     [
       "Spec.SHA3.keccak_rndc",
@@ -62,7 +62,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "9e76d89bb5112acb4830b777093a60f3"
+      "5a6000b4d5d47f8d81fe9e4dffc1031b"
     ],
     [
       "Spec.SHA3.state",
@@ -80,7 +80,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "04d861d3d64d2e43e7eb5f1d8ebe36bf"
+      "b74d278af68f352d1242d4fbc6028bf8"
     ],
     [
       "Spec.SHA3.readLane",
@@ -101,7 +101,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_93a44d88e9f7f5d9e415fa66070b1cfc"
       ],
       0,
-      "46256e594f9a04871dbf2ab23f573b62"
+      "1ff48155385e739b767f7d5795917bfd"
     ],
     [
       "Spec.SHA3.writeLane",
@@ -122,7 +122,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_93a44d88e9f7f5d9e415fa66070b1cfc"
       ],
       0,
-      "43ee2107d46506eda1b36867495df07e"
+      "bd1eb29239367c930e5fcef133d8893e"
     ],
     [
       "Spec.SHA3.rotl",
@@ -137,9 +137,10 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equation_Lib.IntTypes.machineint", "equation_Lib.IntTypes.uint32",
-        "equation_Lib.IntTypes.uint_v", "equation_Prims.nat",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v",
+        "equation_Prims.nat", "lemma_Lib.IntTypes.pow2_values",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_733eca0dea657618ec34a4c717fb8719",
         "refinement_interpretation_Spec.SHA3_Tm_refine_5dbbec16465785173f8fbe815526bc6f",
         "refinement_interpretation_Spec.SHA3_Tm_refine_b3510d7d13faa553992ce637f439d123",
@@ -147,7 +148,7 @@
         "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "76d94362b67daecef2300c42d8df67c7"
+      "272e7b9e02414883eef6988e91cc870c"
     ],
     [
       "Spec.SHA3.state_theta_inner_C",
@@ -164,7 +165,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "f4aa6a7e3d9cd00ff491535fea8d2afa"
+      "ddc6cbe4fa98a9a616ad9e70cc72d375"
     ],
     [
       "Spec.SHA3.state_theta_inner_C",
@@ -182,7 +183,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "b1afc3b4c60c331d914ded41ed5ff225"
+      "a0ed001d211271ff92853a6ac4b49ae0"
     ],
     [
       "Spec.SHA3.state_theta0",
@@ -199,7 +200,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "dd327fc7ecf9333b7b45b6eda4d706a8"
+      "b4e06494f4124f9d4468edfde4de3c58"
     ],
     [
       "Spec.SHA3.state_theta0",
@@ -214,7 +215,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "bf891417694dd96c839998eb949f3828"
+      "dc6cb7389d5e4928698443bc90b9936b"
     ],
     [
       "Spec.SHA3.state_theta_inner_s_inner",
@@ -227,7 +228,7 @@
         "equation_Lib.IntTypes.machineint"
       ],
       0,
-      "0242ea2860a9412b0cb7b09c4264173b"
+      "6c55eae485cc51ae00b4ea5626045752"
     ],
     [
       "Spec.SHA3.state_theta_inner_s",
@@ -244,7 +245,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "c693e2ac76cc9a03135be218d24f7edd"
+      "ba9c7ccc1594b487ae11c009dff5ab96"
     ],
     [
       "Spec.SHA3.state_theta_inner_s",
@@ -262,7 +263,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "e410445b2977e22497f293be7380222a"
+      "1458c481968e73bf85c53737ed130f74"
     ],
     [
       "Spec.SHA3.state_theta1",
@@ -279,7 +280,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "6b6269a461fb409138ab1ce04f50be69"
+      "20623c81f5e6252e44852cecbb28a095"
     ],
     [
       "Spec.SHA3.state_theta1",
@@ -294,7 +295,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "20fd3b9b9d125388b6501b4c1cc4c62a"
+      "0dd09f5435495e0f6eb36e05c3880a79"
     ],
     [
       "Spec.SHA3.state_theta",
@@ -315,7 +316,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "680077f7bea36de68880d10923c20835"
+      "d18b540fd8ce988db629625fe68a9270"
     ],
     [
       "Spec.SHA3.state_pi_rho_inner",
@@ -339,7 +340,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "4c79b346c41aa6412bd3dbab39e8952b"
+      "c7ba083a15d89137b95ddcfed046db40"
     ],
     [
       "Spec.SHA3.state_pi_rho_inner",
@@ -359,7 +360,7 @@
         "refinement_interpretation_Spec.SHA3.Constants_Tm_refine_51794dd58436a8f72bf4995ec08e43ca"
       ],
       0,
-      "929288be7b14b0cd82e4433867b21b54"
+      "e88d2d82776d838c3a762b487a9d2c7c"
     ],
     [
       "Spec.SHA3.state_pi_rho",
@@ -374,7 +375,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "4bfafac831e9acf4915452121a00db7c"
+      "cdd4f84f2cd5ba5e0a59bbd0be551732"
     ],
     [
       "Spec.SHA3.state_chi_inner",
@@ -392,7 +393,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "7497c85a22df460c95650ce6529e61ce"
+      "8dd7a309abfe83d20bf7b06af5003773"
     ],
     [
       "Spec.SHA3.state_chi_inner1",
@@ -407,7 +408,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "0283af0a441151309e617dc6f20545ea"
+      "e23c2fef80b4d49a489227e2dac24599"
     ],
     [
       "Spec.SHA3.state_chi",
@@ -422,7 +423,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "0c209100afc4a610120fa8e1a53bfb2c"
+      "5b88d5ff513d35e2b22583888bea9d15"
     ],
     [
       "Spec.SHA3.state_iota",
@@ -440,7 +441,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "fb388dabf01159931745250b48a58852"
+      "3e9c3890ffa995047131311116d0e0f6"
     ],
     [
       "Spec.SHA3.state_permute",
@@ -455,7 +456,7 @@
         "refinement_interpretation_Lib.Sequence_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "493694753e312669a15b2a994c5d54b5"
+      "acb291c6abbf0fca08872edf84dd3b49"
     ],
     [
       "Spec.SHA3.loadState_inner",
@@ -473,7 +474,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "8a837687accc5d7c260b712d1c409900"
+      "83cdd2cab6f9bb41770a7b07323d3039"
     ],
     [
       "Spec.SHA3.loadState_inner",
@@ -500,7 +501,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_48836f4de1214ecad50786fd0bf12f00"
       ],
       0,
-      "121c363d01e1232078d9a09651c4cc40"
+      "3182480fab8a4ed7a3d62bbc9992dffc"
     ],
     [
       "Spec.SHA3.loadState",
@@ -523,7 +524,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_3cb01fc20737a46470f6467adaf79606"
       ],
       0,
-      "975f16004ba9606279327d74fcff4d41"
+      "c4339e7ff4db12d9941cda1e2f4bb073"
     ],
     [
       "Spec.SHA3.storeState_inner",
@@ -541,7 +542,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "c5c8d480176a5d14128389e9e5a3c0cf"
+      "070f504d4d851af232b18448f53f1c64"
     ],
     [
       "Spec.SHA3.storeState_inner",
@@ -581,7 +582,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_fc8cf7e2569471d62f8c7e06faaa196e"
       ],
       0,
-      "c0210085140b8a38cc41e13a0c599b03"
+      "3bd82feb50432cfc85b4893327c9789a"
     ],
     [
       "Spec.SHA3.storeState",
@@ -604,7 +605,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_1525955c18d6cccf6fcd769bad1e1e24"
       ],
       0,
-      "1dc5bf4e46ca177d3d1e6c310f2cc44e"
+      "e6a69e89278d03ae5007ac4f5cf55b53"
     ],
     [
       "Spec.SHA3.absorb_last",
@@ -625,7 +626,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_9f7a55429d542167f8413f57f5646f31"
       ],
       0,
-      "e33d608ef8bc3a386e77de2a3d48b1bb"
+      "14a23660a25eed6e672af899b051f863"
     ],
     [
       "Spec.SHA3.absorb_next",
@@ -644,7 +645,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_9f7a55429d542167f8413f57f5646f31"
       ],
       0,
-      "6425f92f61fc62dbe247c7393be8c3be"
+      "9ff3f58388d03618553f4f696aff2fa1"
     ],
     [
       "Spec.SHA3.absorb_inner",
@@ -653,7 +654,7 @@
       0,
       [ "@query" ],
       0,
-      "163e3d514b2d1bcc21159a5866d134af"
+      "42a0d79356e8b15f64fefe27bf89ac1e"
     ],
     [
       "Spec.SHA3.absorb_inner",
@@ -679,7 +680,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_fffae317d46d7f3e4a22b0d9d6fb2c0d"
       ],
       0,
-      "3ce755b06c222b405ab80f41804cbef5"
+      "a97be7ece33272f62a59344cacb46ada"
     ],
     [
       "Spec.SHA3.absorb",
@@ -702,7 +703,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_9f7a55429d542167f8413f57f5646f31"
       ],
       0,
-      "16ef3fccf4e88d19dd9bb726f65c5829"
+      "149f5a493976d90b856963eece023fca"
     ],
     [
       "Spec.SHA3.squeeze_inner",
@@ -732,7 +733,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_fffae317d46d7f3e4a22b0d9d6fb2c0d"
       ],
       0,
-      "4123f99ca4cfc09d42f3c5e0eb8763ff"
+      "71f4e5df16a3c2d5e74d50ff89bfe287"
     ],
     [
       "Spec.SHA3.squeeze_inner",
@@ -754,7 +755,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_fffae317d46d7f3e4a22b0d9d6fb2c0d"
       ],
       0,
-      "5760f03d37ee231744e9affc9c3b19f6"
+      "05c39f6c74ace2b9f17ce7504c00539a"
     ],
     [
       "Spec.SHA3.squeeze_inner",
@@ -786,7 +787,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "23de13dd131416b4211efab11664f727"
+      "b7d5582fde3a57f7b01d5bd414f86c7a"
     ],
     [
       "Spec.SHA3.squeeze",
@@ -813,7 +814,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_86a8d49df481c8761de840fda0be312c"
       ],
       0,
-      "71a262a0e49179a8edbab0b1ee30d547"
+      "f653614dd4d0f3355bd1468bac8b0e0d"
     ],
     [
       "Spec.SHA3.lemma_update_squeeze",
@@ -847,7 +848,7 @@
         "typing_Spec.SHA3.storeState"
       ],
       0,
-      "41c6b501eccf45f6a64b8279e22f6910"
+      "210fcab8d3f86394ed6f0106a147cee1"
     ],
     [
       "Spec.SHA3.lemma_update_squeeze",
@@ -874,7 +875,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_fffae317d46d7f3e4a22b0d9d6fb2c0d"
       ],
       0,
-      "baa9ad6387d82eb20f4b45014e153bca"
+      "d412de9887147621915a93e00bfcd5ab"
     ],
     [
       "Spec.SHA3.lemma_update_squeeze",
@@ -927,7 +928,7 @@
         "typing_Spec.SHA3.storeState"
       ],
       0,
-      "2ceeb94e616c372755abaec0f37c6cd2"
+      "54d44243c75a2b3cc0d56950165aaaef"
     ],
     [
       "Spec.SHA3.keccak",
@@ -948,7 +949,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_3e6173b55401d01670911567d8c211ba"
       ],
       0,
-      "bc2a79d2b5c8e2a3fb16b2a22df3c667"
+      "42cd7408cee7c7006025897777c269c0"
     ],
     [
       "Spec.SHA3.shake128",
@@ -966,7 +967,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "ea95d022eb0a76f00c45b0b1c2fdbfc4"
+      "33e166c7049fefc66e3d4d588cd5a8cc"
     ],
     [
       "Spec.SHA3.shake256",
@@ -984,7 +985,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "660ecf8b9a3023b1a28d7513f8318cba"
+      "58bb3b82ed33755244677ad78176052f"
     ],
     [
       "Spec.SHA3.sha3_224",
@@ -1002,7 +1003,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "c07c357827b2288fef83c57b9fcfe33b"
+      "c054f79faaa278216fac6af74873b213"
     ],
     [
       "Spec.SHA3.sha3_256",
@@ -1020,7 +1021,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "1409afc3961de015886c51578d2b6672"
+      "5699cf8c8e830de8b1e4c21e32102883"
     ],
     [
       "Spec.SHA3.sha3_384",
@@ -1038,7 +1039,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "ebd5b81b2f2018c3366030380c290a52"
+      "2fe5c86f6f87fc0ff29fec33f9a38338"
     ],
     [
       "Spec.SHA3.sha3_512",
@@ -1056,7 +1057,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "b01b933c716dbae8611874e9b3fb5af3"
+      "78dbf2f22272bf8e82c224f20741eb7b"
     ],
     [
       "Spec.SHA3.cshake128_frodo",
@@ -1095,7 +1096,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_f1d7b376fc9b0247c2bf914421d70113"
       ],
       0,
-      "ae0ed43af7b36c59f95174d6203f51e8"
+      "13014857632aca696c9df47991582a59"
     ],
     [
       "Spec.SHA3.cshake256_frodo",
@@ -1134,7 +1135,7 @@
         "refinement_interpretation_Spec.SHA3_Tm_refine_f1d7b376fc9b0247c2bf914421d70113"
       ],
       0,
-      "87894dcc0b95b49cc2da9c481e44778d"
+      "dbcbad9f2fec2711c12874273f05be45"
     ]
   ]
 ]
