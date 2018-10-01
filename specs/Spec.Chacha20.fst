@@ -53,7 +53,7 @@ let double_round : shuffle =
   column_round @ diagonal_round (* 2 rounds *)
 
 let rounds : shuffle =
-  repeat 10 double_round (* 20 rounds *)
+  repeath 10 double_round (* 20 rounds *)
 
 let chacha20_core (s:state) : Tot state =
   let k = rounds s in
