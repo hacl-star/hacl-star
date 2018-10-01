@@ -16,6 +16,9 @@ module HS = FStar.HyperStack
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 
+#set-options "--z3rlimit 15"
+
+
 unfold let v = size_v
 
 type lbuffer (a:Type0) (len:size_nat) = b:B.buffer a {B.length b == len}
