@@ -272,6 +272,42 @@ let lbytes_eq #len a b =
                Seq.repeat (v len) (fun _ -> bool) (spec h0) true);
   res
 
+inline_for_extraction
+val alloc:
+  #h0:mem
+  -> #a:Type0
+  -> #b:Type0
+  -> #w:Type0
+  -> #len:size_nat
+  -> #wlen:size_nat
+  -> clen:size_t{v clen == len}
+  -> init:a
+  -> write:lbuffer w wlen
+  -> spec:(h:mem -> GTot(r:b -> Seq.lseq w wlen -> Type))
+  -> impl:(buf:lbuffer a len ->
+    Stack b
+      (requires (fun h -> modifies (loc_buffer buf) h0 h /\ live h0 write))
+      (ensures (fun h r h' -> modifies (loc_union (loc_buffer buf) (loc_buffer write)) h h' /\
+			                  spec h0 r (as_seq h' write)))) ->
+  Stack b
+    (requires (fun h -> h == h0 /\ live h write))
+    (ensures (fun h0 r h1 -> modifies (loc_buffer write) h0 h1 /\
+		                    spec h0 r (as_seq h1 write)))
+
+let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
+  admit();
+  push_frame();
+  let buf = B.alloca init (normalize_term (size_to_UInt32 clen)) in
+  let r = impl buf in
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      upd #a #len buf j init in
+  Lib.Loops.for (size 0) clen inv f';
+  pop_frame();
+  r
+
 // TODO: used in tests; move to a different module
 assume
 val print_compare_display:
