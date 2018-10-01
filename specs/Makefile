@@ -119,6 +119,7 @@ kyber.exe: $(LIBS_FILES) Spec.Kyber.fst
 	@echo 'let _ = test()' >> kyber-ml/Spec_Kyber.ml
 	$(OCAMLOPT) -I kyber-ml kyber-ml/Lib_IntTypes.ml kyber-ml/Lib_Sequence.ml kyber-ml/Spec_Kyber.ml -o kyber.exe
 	./kyber.exe
+
 # Under CI
 hmac.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
 	mkdir -p hmac-ml
@@ -134,6 +135,14 @@ hkdf.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst 
 	@echo 'let _ = test()' >> hkdf-ml/Spec_HKDF_Test.ml
 	$(OCAMLOPT) -I hkdf-ml hkdf-ml/Lib_IntTypes.ml hkdf-ml/Lib_RawIntTypes.ml hkdf-ml/Lib_Sequence.ml hkdf-ml/Lib_ByteSequence.ml hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Hash.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
 	./hkdf.exe
+
+# Under CI
+sha3.exe: $(LIBS_FILES) Spec.SHA3.Constants.fst Spec.SHA3.fst tests/Spec.SHA3.Test.fst
+	mkdir -p sha3-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA3.Constants --extract_module Spec.SHA3 --extract_module Spec.SHA3.Test --odir sha3-ml $^
+	@echo 'let _ = test()' >> sha3-ml/Spec_SHA3_Test.ml
+	$(OCAMLOPT) -I sha3-ml $(addprefix sha3-ml/, $(LIBS_ML)) sha3-ml/Spec_SHA3_Constants.ml sha3-ml/Spec_SHA3.ml sha3-ml/Spec_SHA3_Test.ml -o sha3.exe
+	./sha3.exe
 
 # NOT Under CI
 argon2i.exe: $(LIBS_FILES) Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
@@ -190,56 +199,6 @@ sha2.exe: $(LIBS_FILES) Spec.SHA2.fst tests/Spec.SHA2.Test.fst
 	@echo 'let _ = test()' >> sha2-ml/Spec_SHA2_Test.ml
 	$(OCAMLOPT) -I sha2-ml $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
 	./sha2.exe
-
-sha3.exe: $(LIBS_FILES) Spec.SHA3.Constants.fst Spec.SHA3.fst tests/Spec.SHA3.Test.fst
-	mkdir -p sha3-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA3.Constants --extract_module Spec.SHA3 --extract_module Spec.SHA3.Test --odir sha3-ml $^
-	@echo 'let _ = test()' >> sha3-ml/Spec_SHA3_Test.ml
-	$(OCAMLOPT) -I sha3-ml $(addprefix sha3-ml/, $(LIBS_ML)) sha3-ml/Spec_SHA3_Constants.ml sha3-ml/Spec_SHA3.ml sha3-ml/Spec_SHA3_Test.ml -o sha3.exe
-	./sha3.exe
-
-blake2s.exe: $(LIBS_FILES) Spec.Blake2s.fst tests/Spec.Blake2s.Test.fst
-	mkdir -p blake2s-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Blake2s --extract_module Spec.Blake2s.Test --odir blake2s-ml $^
-	@echo 'let _ = test()' >> blake2s-ml/Spec_Blake2s_Test.ml
-	$(OCAMLOPT) -I blake2s-ml blake2s-ml/Lib_IntTypes.ml blake2s-ml/Lib_RawIntTypes.ml blake2s-ml/Lib_Sequence.ml blake2s-ml/Lib_ByteSequence.ml blake2s-ml/Spec_Blake2s.ml blake2s-ml/Spec_Blake2s_Test.ml -o blake2s.exe
-	./blake2s.exe
-
-blake2generic.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Blake2.Generic.fst tests/Spec.Blake2.Generic.Test.fst
-	mkdir -p blake2generic-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2.Generic --extract_module Spec.Blake2.Generic.Test --odir blake2generic-ml $^
-	@echo 'let _ = test()' >> blake2generic-ml/Spec_Blake2_Generic_Test.ml
-	$(OCAMLOPT) -I blake2generic-ml blake2generic-ml/Lib_IntTypes.ml blake2generic-ml/Lib_RawIntTypes.ml blake2generic-ml/Lib_Sequence.ml blake2generic-ml/Lib_Stateful.ml blake2generic-ml/Spec_Blake2_Generic.ml blake2generic-ml/Spec_Blake2_Generic_Test.ml -o blake2generic.exe
-	./blake2generic.exe
-
-blake2b.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Blake2b.fst tests/Spec.Blake2b.Test.fst
-	mkdir -p blake2b-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2b --extract_module Spec.Blake2b.Test --odir blake2b-ml $^
-	@echo 'let _ = test()' >> blake2b-ml/Spec_Blake2b_Test.ml
-	$(OCAMLOPT) -I blake2b-ml blake2b-ml/Lib_IntTypes.ml blake2b-ml/Lib_RawIntTypes.ml blake2b-ml/Lib_Sequence.ml blake2b-ml/Lib_Stateful.ml blake2b-ml/Spec_Blake2b.ml blake2b-ml/Spec_Blake2b_Test.ml -o blake2b.exe
-	./blake2b.exe
-
-argon2i.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
-	mkdir -p argon2i-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.Blake2b --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
-	@echo 'let _ = test()' >> argon2i-ml/Spec_Argon2i_Test.ml
-	$(OCAMLOPT) -I argon2i-ml argon2i-ml/Lib_IntTypes.ml argon2i-ml/Lib_RawIntTypes.ml argon2i-ml/Lib_Sequence.ml argon2i-ml/Lib_Stateful.ml argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
-	./argon2i.exe
-
-
-hmac.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
-	mkdir -p hmac-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
-	@echo 'let _ = test()' >> hmac-ml/Spec_HMAC_Test.ml
-	$(OCAMLOPT) -I hmac-ml hmac-ml/Lib_IntTypes.ml hmac-ml/Lib_RawIntTypes.ml hmac-ml/Lib_Sequence.ml hmac-ml/Lib_Stateful.ml hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Hash.ml hmac-ml/Spec_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
-	./hmac.exe
-
-hkdf.exe: $(LIBS_FILES) ../lib/fst/Spec.Lib.Stateful.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst tests/Spec.HKDF.Test.fst
-	mkdir -p hkdf-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.Sequence --extract_module Spec.Lib.Stateful --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HKDF --extract_module Spec.HKDF.Test --odir hkdf-ml $^
-	@echo 'let _ = test()' >> hkdf-ml/Spec_HKDF_Test.ml
-	$(OCAMLOPT) -I hkdf-ml hkdf-ml/Lib_IntTypes.ml hkdf-ml/Lib_RawIntTypes.ml hkdf-ml/Lib_Sequence.ml hkdf-ml/Lib_Stateful.ml hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Hash.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
-	./hkdf.exe
 
 # NOT Under CI
 pbkdf2.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.PBKDF2.fst tests/Spec.PBKDF2.Test.fst
