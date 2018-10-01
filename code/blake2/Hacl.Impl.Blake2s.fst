@@ -6,13 +6,12 @@ open FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Buffer.Lemmas
 open Lib.ByteBuffer
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module Spec = Spec.Blake2s
-module Lemmas = Hacl.Impl.Lemmas
+// module Lemmas = Hacl.Impl.Lemmas
 
 ///
 /// Helper functions
@@ -22,19 +21,6 @@ module Lemmas = Hacl.Impl.Lemmas
 inline_for_extraction let v = size_v
 inline_for_extraction let index (x:size_nat) = size x
 noextract let op_String_Access #a #len m b = as_lseq #a #len b m
-
-(* Functions to add to the libraries *)
-inline_for_extraction
-val update_sub: #a:Type0 -> #len:size_nat -> #xlen:size_nat -> i:lbuffer a len -> start:size_t -> n:size_t{v start + v n <= len /\ v n == xlen} -> x:lbuffer a xlen ->
-  Stack unit
-    (requires (fun h -> live h i /\ live h x))
-    (ensures  (fun h0 _ h1 -> preserves_live h0 h1 /\ modifies1 i h0 h1
-                         /\ h1.[i] == LSeq.update_sub #a #len h0.[i] (v start) (v n) h0.[x]))
-
-inline_for_extraction
-let update_sub #a #len #olen i start n x =
-  let buf = sub i start n in
-  copy buf n x
 
 ///
 /// Blake2s

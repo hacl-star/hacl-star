@@ -12,7 +12,7 @@ type lbytes (len:size_nat) = lseq uint8 len
 
 let empty: lbytes 0 = create 0 (u8 0)
 
-///
+
 val to_lbytes: b:bytes -> lbytes (length b)
 
 val to_bytes: #len:size_nat -> b:lbytes len -> o:bytes{length o == len}

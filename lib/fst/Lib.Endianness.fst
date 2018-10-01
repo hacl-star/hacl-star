@@ -48,3 +48,56 @@ let uint_to_bytes_be #t o i =
   | U32 -> C.store32_be o (u32_to_UInt32 i)
   | U64 -> C.store64_be o (u64_to_UInt64 i)
   | U128 -> C.store128_be o (u128_to_UInt128 i)
+
+inline_for_extraction
+let uints_from_bytes_le #t #len o clen i =
+  let h0 = ST.get() in
+  let inv (h1:mem) (j:nat) =  True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      let b_i = sub #uint8 #(len `op_Multiply` numbytes t) #len i (mul_mod #SIZE j (size (numbytes t))) (size (numbytes t)) in
+      let u_i = uint_from_bytes_le b_i in
+      o.(j) <- u_i in
+  Lib.Loops.for (size 0) clen inv f'
+
+
+inline_for_extraction
+let uints_from_bytes_be #t #len o clen i =
+  let h0 = ST.get() in
+  let inv (h1:mem) (j:nat) =  True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+      (requires (fun h -> inv h (v j)))
+      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      let b_i = sub #uint8 #(len `op_Multiply` numbytes t) #len i (mul_mod #SIZE j (size (numbytes t))) (size (numbytes t)) in
+      let u_i = uint_from_bytes_be b_i in
+      o.(j) <- u_i in
+  Lib.Loops.for (size 0) clen inv f'
+
+
+
+inline_for_extraction
+let uints_to_bytes_le #t #len o clen i =
+  let h0 = ST.get () in
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+    (requires (fun h -> inv h (v j)))
+    (ensures  (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      let u_i = index i j in
+      let b_i = sub o (mul_mod #SIZE j (size (numbytes t))) (size (numbytes t)) in
+      uint_to_bytes_le b_i u_i in
+  Lib.Loops.for (size 0) clen inv f'
+
+
+inline_for_extraction
+let uints_to_bytes_be #t #len o clen i =
+  let h0 = ST.get () in
+  let inv (h1:mem) (j:nat) = True in
+  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+    (requires (fun h -> inv h (v j)))
+    (ensures  (fun h1 _ h2 -> inv h2 (v j + 1))) =
+      let u_i = index i j in
+      let b_i = sub o (mul_mod #SIZE j (size (numbytes t))) (size (numbytes t)) in
+      uint_to_bytes_be b_i u_i in
+  Lib.Loops.for (size 0) clen inv f'
+
