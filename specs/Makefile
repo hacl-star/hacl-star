@@ -47,8 +47,8 @@ all: test
 
 test: test-unified-target test-individual-target
 
-test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe Keccak.exe SHA2.exe Blake2s.exe Blake2b.exe
-test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe
+test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2s.exe Blake2b.exe
+test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe sha3.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
