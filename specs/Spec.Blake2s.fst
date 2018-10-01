@@ -1,7 +1,6 @@
 module Spec.Blake2s
 
 open FStar.Mul
-open FStar.All
 open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence

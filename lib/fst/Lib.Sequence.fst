@@ -1,5 +1,6 @@
 module Lib.Sequence
 
+open FStar.Mul
 open Lib.IntTypes
 
 /// Definition of sequences
@@ -113,8 +114,8 @@ let op_String_Assignment #a #len = upd #a #len
 
 /// Iteration
 
-(** 
-* fold_left-like loop combinator: 
+(**
+* fold_left-like loop combinator:
 * [ repeat_left lo hi a f acc == f (hi - 1) .. ... (f (lo + 1) (f lo acc)) ]
 *
 * e.g. [ repeat_left 0 3 (fun _ -> list int) Cons [] == [2;1;0] ]
@@ -133,9 +134,9 @@ val repeat_left:
   -> Tot (a hi) (decreases (hi - lo))
 let rec repeat_left lo hi a f acc =
   if lo = hi then acc
-  else repeat_left (lo + 1) hi a f (f lo acc) 
+  else repeat_left (lo + 1) hi a f (f lo acc)
 
-(** 
+(**
 * fold_right-like loop combinator:
 * [ repeat_right lo hi a f acc == f (hi - 1) .. ... (f (lo + 1) (f lo acc)) ]
 *
@@ -163,8 +164,8 @@ val repeat_right_plus:
   -> a:(i:size_nat{lo <= i /\ i <= hi} -> Type)
   -> f:(i:size_nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
   -> acc:a lo
-  -> Lemma (ensures 
-      repeat_right lo hi a f acc == 
+  -> Lemma (ensures
+      repeat_right lo hi a f acc ==
       repeat_right mi hi a f (repeat_right lo mi a f acc))
     (decreases hi)
 let rec repeat_right_plus lo mi hi a f acc =
@@ -173,7 +174,7 @@ let rec repeat_right_plus lo mi hi a f acc =
 
 (**
 * [repeat_left] and [repeat_right] are equivalent.
-* 
+*
 * This follows from the third duality theorem
 * [ fold_right f acc xs = fold_left (flip f) acc (reverse xs) ]
 *)
@@ -185,7 +186,7 @@ val repeat_left_right:
   -> acc:a lo
   -> Lemma (ensures repeat_right lo hi a f acc == repeat_left lo hi a f acc)
     (decreases (hi - lo))
-let rec repeat_left_right lo hi a f acc = 
+let rec repeat_left_right lo hi a f acc =
   if lo = hi then ()
   else
     begin
@@ -193,14 +194,15 @@ let rec repeat_left_right lo hi a f acc =
     repeat_left_right (lo + 1) hi a f (f lo acc)
     end
 
-(** 
+(**
 * Repetition starting from 0
 *
-* Defined as [repeat_right] for convenience, but [repeat_left] may be more 
+* Defined as [repeat_right] for convenience, but [repeat_left] may be more
 * efficient when extracted to OCaml.
 *)
+
 val repeat:
-    n:size_nat 
+    n:size_nat
   -> a:(i:size_nat{i <= n} -> Type)
   -> f:(i:size_nat{i < n} -> a i -> a (i + 1))
   -> acc0:a 0
@@ -337,3 +339,37 @@ val concat:#a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 <= maxint SIZ
 let concat #a #len1 #len2 s1 s2 = Seq.append s1 s2
 
 let (@|) #a #len1 #len2 s1 s2 = concat #a #len1 #len2 s1 s2
+
+val map_blocks: #a:Type0 ->
+		blocksize:size_nat{blocksize > 0} ->
+		nblocks:size_nat{nblocks * blocksize <= maxint SIZE} ->
+		f:(i:size_nat{i + 1 <= nblocks} -> lseq a blocksize -> lseq a blocksize) ->
+		inp: lseq a (nblocks * blocksize) ->
+		out:  lseq a (nblocks * blocksize)
+
+let map_blocks #a bs nb f inp =
+  let len = nb * bs in
+  let out = inp in
+  let out = repeati #(lseq a len) nb
+	    (fun i out ->
+	         update_slice #a out (i * bs) ((i+1) * bs)
+			      (f i (slice #a inp (i * bs) ((i+1) * bs))))
+	    out in
+  out
+
+val reduce_blocks: #a:Type0 -> #b:Type0 ->
+		blocksize:size_nat{blocksize > 0} ->
+		nblocks:size_nat{nblocks * blocksize <= maxint SIZE} ->
+		f:(i:size_nat{i + 1 <= nblocks} -> lseq a blocksize -> b -> b) ->
+		inp: lseq a (nblocks * blocksize) ->
+		init: b ->
+		out:  b
+
+let reduce_blocks #a #b bs nb f inp init =
+  let len = nb * bs in
+  let acc = init in
+  let acc = repeati #b nb
+	    (fun i acc ->
+	       f i (slice #a inp (i * bs) ((i+1) * bs)) acc)
+	    acc in
+  acc
