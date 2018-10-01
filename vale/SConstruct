@@ -740,6 +740,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   env.Command(temptargetfiles, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
     f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile} {fstar_record_hints}' +
+    f' --debug {file_module_name(File(sourcefile))} --debug_level print_normalized_terms' +
     f' 1> {temptargetfile} 2> {stderrfile}')
   CopyFile(targetfile, temptargetfile)
   dump_module_flag = '--dump_module ' + file_module_name(sourcefile)
@@ -829,7 +830,7 @@ def translate_vale_file(options, source_vaf):
   types_include = ''
   types_include = f'-include {target}.types.vaf'
   env.Command(targets, source_vaf,
-    f'{mono} {vale_exe} -fstarText -typecheck {types_include} {opt_vale_includes}' +
+    f'{mono} {vale_exe} -fstarText -quickMods -typecheck {types_include} {opt_vale_includes}' +
     f' -in {source_vaf} -out {target_fst} -outi {target_fsti}' +
     f' {vale_scons_args} {" ".join(vale_user_args)}')
   return targets
