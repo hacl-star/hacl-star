@@ -7,7 +7,7 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.RawIntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 
 module B = LowStar.Buffer
 module ByteSeq = Lib.ByteSequence
