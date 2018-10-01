@@ -6,7 +6,6 @@ open FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteBuffer
 
 module S = Spec.Blake2s
 module I = Hacl.Impl.Blake2s

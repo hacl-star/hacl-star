@@ -7,7 +7,6 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Buffer
-open Lib.ByteBuffer
 
 //
 // Test 1
