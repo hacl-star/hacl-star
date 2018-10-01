@@ -20,6 +20,7 @@ include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.GCTR
 
@@ -48,6 +49,7 @@ open X64.Vale.InsAes
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open X64.AESCTRplain
+open X64.CPU_Features_s
 #endverbatim
 
 #reset-options "--z3rlimit 30"
@@ -172,6 +174,7 @@ procedure {:quick} gctr_register(
 
     requires
         // AES reqs
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
@@ -233,6 +236,7 @@ procedure {:quick} gctr_core(
         icb == inc32(old_iv, block_offset);
 
         // AES reqs
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
@@ -273,6 +277,7 @@ procedure {:quick} gctr_core(
             out_ptr + 16 * len < pow2_64;
 
             // AES reqs
+            aesni_enabled;
             alg = AES_128 || alg = AES_256;
             is_aes_key_LE(alg, key);
             length(round_keys) == nr(alg) + 1;
@@ -340,6 +345,7 @@ procedure {:quick} gctr_core_opt(
         buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
 
         // AES reqs
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
@@ -412,6 +418,7 @@ procedure {:quick} gctr_bytes_extra_work(
         buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ 256 * buffer_length(in_b) < pow2_32 /\ 4096 * num_bytes < pow2_32;
 
         // AES reqs
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
@@ -489,6 +496,7 @@ procedure {:quick} gctr_bytes_extra(
         buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ 256 * buffer_length(in_b) < pow2_32 /\ 4096 * num_bytes < pow2_32;
 
         // AES reqs
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
@@ -574,6 +582,7 @@ procedure {:quick} gctr_bytes_extra_stdcall(
         4096 * num_bytes < pow2_32;
         256 * bytes_to_quad_size(num_bytes) < pow2_32;
 
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         buffer_length(keys_b) == nr(alg) + 1;
@@ -680,6 +689,7 @@ procedure {:quick} gctr_bytes_extra_buffer_win(
         4096 * num_bytes < pow2_32;
         256 * bytes_to_quad_size(num_bytes) < pow2_32;
 
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         buffer_length(keys_b) == nr(alg) + 1;
@@ -870,6 +880,7 @@ procedure {:quick} gctr_bytes(
         0 < num_bytes;
 
         // AES reqs
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;

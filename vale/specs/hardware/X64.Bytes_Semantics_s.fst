@@ -2,6 +2,7 @@ module X64.Bytes_Semantics_s
 
 open Opaque_s
 open X64.Machine_s
+open X64.CPU_Features_s
 open Words_s
 open Words.Two_s
 open Words.Four_s
@@ -17,6 +18,7 @@ let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
 
 type ins:eqtype =
+  | Cpuid      : ins
   | Mov64      : dst:operand -> src:operand -> ins
   | Add64      : dst:operand -> src:operand -> ins
   | AddLea64   : dst:operand -> src1:operand -> src2:operand -> ins
@@ -316,7 +318,7 @@ let update_of (flags:nat64) (new_of:bool) : (new_flags:nat64{overflow new_flags 
       flags - 2048
     else
       flags
-
+  
 let is_full_byte_reversal_mask (q:quad32) : bool =
   q.lo0 = 0x0C0D0E0F &&
   q.lo1 = 0x08090A0B &&
@@ -423,6 +425,12 @@ let update_cf_of (new_cf new_of:bool) :st unit =
 let eval_ins (ins:ins) : st unit =
   s <-- get;
   match ins with
+  | Cpuid ->
+    update_reg Rax (cpuid Rax (eval_reg Rax s) (eval_reg Rcx s));; 
+    update_reg Rbx (cpuid Rbx (eval_reg Rax s) (eval_reg Rcx s));;
+    update_reg Rcx (cpuid Rcx (eval_reg Rax s) (eval_reg Rcx s));;
+    update_reg Rdx (cpuid Rdx (eval_reg Rax s) (eval_reg Rcx s))
+
   | Mov64 dst src ->
     check (valid_operand src);;
     update_operand_preserve_flags dst (eval_operand src s)
@@ -629,7 +637,7 @@ let eval_ins (ins:ins) : st unit =
     update_xmm_preserve_flags dst (insert_nat64 dst_q (eval_operand src s) (index % 2))
 
   | VPSLLDQ dst src count ->
-    check (fun s -> count = 4);;  // We only spec the one very special case we need
+    check_imm (count = 4);;  // We only spec the one very special case we need
     let src_q = eval_xmm src s in
     let shifted_xmm = Mkfour 0 src_q.lo0 src_q.lo1 src_q.hi2 in
     update_xmm_preserve_flags dst shifted_xmm
@@ -639,6 +647,7 @@ let eval_ins (ins:ins) : st unit =
     update_mov128_op_preserve_flags dst (eval_mov128_op src s)
 
   | Pclmulqdq dst src imm ->
+    check_imm pclmulqdq_enabled;;
     (
       let Mkfour a0 a1 a2 a3 = eval_xmm dst s in
       let Mkfour b0 b1 b2 b3 = eval_xmm src s in
@@ -656,30 +665,36 @@ let eval_ins (ins:ins) : st unit =
     )
 
   | AESNI_enc dst src ->
+    check_imm aesni_enabled;;
     let dst_q = eval_xmm dst s in
     let src_q = eval_xmm src s in
     update_xmm dst ins (quad32_xor (AES_s.mix_columns_LE (AES_s.sub_bytes (AES_s.shift_rows_LE dst_q))) src_q)
 
   | AESNI_enc_last dst src ->
+    check_imm aesni_enabled;;
     let dst_q = eval_xmm dst s in
     let src_q = eval_xmm src s in
     update_xmm dst ins (quad32_xor (AES_s.sub_bytes (AES_s.shift_rows_LE dst_q)) src_q)
 
   | AESNI_dec dst src ->
+    check_imm aesni_enabled;;
     let dst_q = eval_xmm dst s in
     let src_q = eval_xmm src s in
     update_xmm dst ins (quad32_xor (AES_s.inv_mix_columns_LE (AES_s.inv_sub_bytes (AES_s.inv_shift_rows_LE dst_q))) src_q)
 
   | AESNI_dec_last dst src ->
+    check_imm aesni_enabled;;
     let dst_q = eval_xmm dst s in
     let src_q = eval_xmm src s in
     update_xmm dst ins (quad32_xor (AES_s.inv_sub_bytes (AES_s.inv_shift_rows_LE dst_q)) src_q)
 
   | AESNI_imc dst src ->
+    check_imm aesni_enabled;;
     let src_q = eval_xmm src s in
     update_xmm dst ins (AES_s.inv_mix_columns_LE src_q)
 
   | AESNI_keygen_assist dst src imm ->
+    check_imm aesni_enabled;;
     let src_q = eval_xmm src s in
     update_xmm dst ins (Mkfour (AES_s.sub_word src_q.lo1)
                                (ixor (AES_s.rot_word_LE (AES_s.sub_word src_q.lo1)) imm)
@@ -687,17 +702,20 @@ let eval_ins (ins:ins) : st unit =
                                (ixor (AES_s.rot_word_LE (AES_s.sub_word src_q.hi3)) imm))
 
   | SHA256_rnds2 dst src ->
+    check_imm sha_enabled;;
     let src1_q = eval_xmm dst s in
     let src2_q = eval_xmm src s in
     let wk_q  = eval_xmm 0 s in    
     update_xmm_preserve_flags dst (sha256_rnds2_spec src1_q src2_q wk_q)
 
   | SHA256_msg1 dst src ->
+    check_imm sha_enabled;;
     let src1 = eval_xmm dst s in
     let src2 = eval_xmm src s in
     update_xmm_preserve_flags dst (sha256_msg1_spec src1 src2)
 
   | SHA256_msg2 dst src ->
+    check_imm sha_enabled;;
     let src1 = eval_xmm dst s in
     let src2 = eval_xmm src s in
     update_xmm_preserve_flags dst (sha256_msg2_spec src1 src2)
