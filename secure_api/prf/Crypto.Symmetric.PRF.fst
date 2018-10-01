@@ -158,7 +158,7 @@ noeq type state (i:id) =
 
 // boring...
 val itable: i:id {prf i} -> s:state i
-  -> Tot (r:HS.ref (Seq.seq (entry s.mac_rgn i)) {HS.frameOf r == s.rgn})
+  -> Tot (r:ST.ref (Seq.seq (entry s.mac_rgn i)) {HS.frameOf r == s.rgn})
 let itable i s = s.table
 
 val mktable: i:id {prf i} -> rgn:region -> mac_rgn:region{mac_rgn `HS.extends` rgn}
@@ -344,7 +344,13 @@ let prf_mac i t k_0 x =
   else
     begin
     cut (~(CMA.authId macId));
-    // Changed from rcreate to create to avoid leak
+    //Changed from rcreate to create to avoid leak
+    (*
+     * AR: adding this is_stack_region assume (06/20, NYC hackathon)
+     *     the function's precondition doesn'say this
+     *     need some invariants fixing regarding regions
+     *)
+    assume (HS.is_stack_region (HS.get_tip h0));
     let keyBuffer = Buffer.create (*t.mac_rgn*) 0uy (CMA.keylen i) in
     let h1 = ST.get() in
     Crypto.Indexing.aeadAlg_cipherAlg i;
@@ -354,7 +360,7 @@ let prf_mac i t k_0 x =
     let h2 = ST.get() in
     Buffer.lemma_reveal_modifies_1 keyBuffer h1 h2;
     //assert (Buffer.modifies_1 keyBuffer h1 h2);
-    let r:CMA.erid = t.mac_rgn in
+    let r:ST.erid = t.mac_rgn in
     //let i:CMA.id = macId in
     //let ak:CMA.akey t.mac_rgn (fst i) = k_0 in
     //let k:k:lbuffer (UInt32.v (CMA.keylen (fst i))){Buffer.frameOf k == r} = keyBuffer in
@@ -436,7 +442,7 @@ let extends (#rgn:region) (#i:id) (s0:Seq.seq (entry rgn i))
 	     Seq.equal (Seq.slice s1 0 (Seq.length s0)) s0
 
 // modifies a table (at most at x) and a buffer.
-let modifies_x_buffer_1 #i (t:state i) x b h0 h1 =
+let modifies_x_buffer_1 (#i:id) (t:state i) (x:domain_blk i) (b:buffer) (h0 h1:mem) :Type0 =
   Buffer.live h1 b /\
   (if prf i then
     let r = itable i t in
@@ -455,7 +461,7 @@ private val prf_blk:
   i:id -> t:state i -> x:domain_blk i -> len:u32 {len <=^ blocklen i} ->
   output:lbuffer (v len) {Buffer.frameOf output <> t.rgn} -> ST unit
   (requires (fun h0 -> Buffer.live h0 output))
-  (ensures (fun h0 _ h1 -> modifies_x_buffer_1 t x output h0 h1))
+  (ensures (fun h0 _ h1 -> modifies_x_buffer_1 #i t x output h0 h1))
 
 #reset-options "--z3rlimit 100"
 
@@ -482,8 +488,7 @@ let prf_blk i t x len output =
     let h2 = ST.get() in
     Buffer.lemma_reveal_modifies_1 output h1 h2
     end
-  else
-    getBlock t x len output
+  else getBlock t x len output
 
 ////////////////////////////////////////////////////////////////////////////////
 //prf_dexor

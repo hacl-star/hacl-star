@@ -29,30 +29,9 @@ all: $(DIST_DIR)/krml-test.exe $(DIST_DIR)/LowC.cmxa # $(DIST_DIR)/LowC.cma
 ################################################################################
 
 ifneq (,$(EVEREST_WINDOWS))
-$(DIST_DIR)/uint128/FStar_UInt128.h:
-	mkdir -p $(dir $@)
-	$(KREMLIN_HOME)/krml -minimal -fnouint128 \
-	  $(FSTAR_HOME)/ulib/FStar.UInt128.fst \
-	  -add-early-include '"kremlin/fstar_ints.h"' \
-	  -add-early-include '<stdbool.h>' \
-	  -tmpdir $(DIST_DIR)/uint128 -skip-compilation \
-	  -bundle FStar.UInt128=* # -fnostruct-passing
-	touch $(subst .c,.h,$(@))
-
-KOPTS+=-add-early-include '"FStar_UInt128.h"'
-KOPTS+=-fnouint128 -drop FStar.UInt128 -falloca -ftail-calls
-CFLAGS+=-DKRML_NOUINT128 -DKRML_SEPARATE_UINT128 # -DKRML_NOSTRUCT_PASSING
-
-$(DIST_DIR)/copied/kremstr.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-else
-$(DIST_DIR)/uint128/FStar_UInt128.h:
-	mkdir -p $(dir $@)
-	touch $@
-	touch $(subst .h,.c,$(@))
+KOPTS+=-falloca -ftail-calls
+CFLAGS+=# -DKRML_NOSTRUCT_PASSING
 endif
-
-# Convenience target for debugging.
-uint128: $(DIST_DIR)/uint128/FStar_UInt128.h
 
 ################################################################################
 # Main configurations                                    		       #
@@ -80,7 +59,10 @@ quicprovider-test: $(DIST_DIR)/quicprovider-test.exe.test
 ################################################################################
 
 # Extraction runs F* in --lax mode
+ifeq (,$(VERIFY))
 FSTAR += --lax
+LAX = .lax
+endif
 
 # The entry points
 FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst \
@@ -95,35 +77,31 @@ EXTRACT='* -FStar -CryptoTypes'
 
 include .depend.$(IMPL_CHOICE)
 
+verification: $(addprefix $(CACHE_DIR)/,$(notdir $(addsuffix .checked,$(ALL_FST_FILES))))
+	echo $^
+
 # Now we get parallel lax-checking, which is nice.
 # cwinter: The order-only dependency makes sure that F* will not run until
 # .depend.* is re-generated. Otherwise it can happen that this rule is executed
 # in parallel with the .depend rule, where this rule uses the old .depend file.
-%.checked.lax: | .depend.$(IMPL_CHOICE) $(CACHE_DIR) $(OUTPUT_DIR)
+%.checked$(LAX): | .depend.$(IMPL_CHOICE) $(CACHE_DIR) $(OUTPUT_DIR)
 	$(FSTAR) $<
 	touch $@
-
-# F* doesn't recursively create directories for --odir
-$(OUTPUT_DIR):
-	mkdir -p $@
-
-$(CACHE_DIR):
-	mkdir -p $@
 
 # Filling out the right invocations to generate a .krml
 $(OUTPUT_DIR)/%.krml: | $(OUTPUT_DIR)
 	$(FSTAR) \
-          $(subst $(CACHE_DIR)/,,$(subst .checked.lax,,$<)) \
+          $(subst $(CACHE_DIR)/,,$(subst .checked$(LAX),,$<)) \
 	  --codegen Kremlin \
-	  --extract_module $(basename $(notdir $(subst .checked.lax,,$<)))
+	  --extract_module $(basename $(notdir $(subst .checked$(LAX),,$<)))
 
 # ... and a .ml file. Note: it's hard to put these in two separate
 # sub-directories because they share the --odir option of F*.
 $(OUTPUT_DIR)/%.ml: | $(OUTPUT_DIR)
 	$(FSTAR) \
-	  $(subst $(CACHE_DIR)/,,$(subst .checked.lax,,$<)) \
+	  $(subst $(CACHE_DIR)/,,$(subst .checked$(LAX),,$<)) \
 	  --codegen OCaml \
-	  --extract_module $(basename $(notdir $(subst .checked.lax,,$<)))
+	  --extract_module $(basename $(notdir $(subst .checked$(LAX),,$<)))
 
 
 ################################################################################
@@ -135,11 +113,9 @@ CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable 
 
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
-$(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
-	$(KREMLIN_HOME)/krml $(KOPTS) -drop FStar.UInt128,FStar.Int.Cast.Full -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
-	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include \
-	  '"kremlin/c_string.h"' -add-include '"kremlin/prims_int.h"' \
-	  -add-include '"kremlin/prims_string.h"' \
+$(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(ALL_KRML_FILES)
+	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
+	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremlin/internal/compat.h"' \
 	  $(EXTRA)
 
 # Manually override the default argument for bundles, so as to provide a +
@@ -150,7 +126,7 @@ $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.c \
   $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h: BUNDLE=Crypto_HKDF+Crypto_HMAC
 
 # This is without the indexing id.
-$(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"kremlin/testlib.h"' -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
+$(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
 
 
 ################################################################################
@@ -191,14 +167,13 @@ $(DIST_DIR)/copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
 
 # Note: this does not yet use the standalone C file because the test still
 # bypasses Crypto.AEAD.Main
-$(DIST_DIR)/krml-test.exe: $(DIST_DIR)/uint128/FStar_UInt128.c $(ALL_KRML_FILES) $($(IMPL_CHOICE)_EXTRA) $(DIST_DIR)/copied/testlib.c
+$(DIST_DIR)/krml-test.exe: $(ALL_KRML_FILES) $($(IMPL_CHOICE)_EXTRA)
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
-	    Crypto.AEAD.Main=Crypto.* -add-include '"kremlin/c_string.h"' -add-include \
-	  '"kremlin/testlib.h"' -add-include '"kremlib.h"' -tmpdir $(OUTPUT_DIR) \
-	  -add-include '"kremlin/prims_int.h"' \
+	    Crypto.AEAD.Main=Crypto.* -tmpdir $(OUTPUT_DIR) \
+	    -add-include '"kremlin/internal/compat.h"' \
 	  $^ -o $@ \
-	  -I $(DIST_DIR)/uint128 -drop HaclProvider,LowCProvider,CryptoTypes
+	  -drop HaclProvider,LowCProvider,CryptoTypes
 
 ################################################################################
 # 4. The LowC provider library                                   	       #
@@ -211,27 +186,18 @@ ifeq (,$(wildcard $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa))
 endif
 
 ifeq (,$(wildcard $(CURVE_DIR)/Hacl_Curve25519.c))
-  ifneq (,$(EVEREST_WINDOWS))
-    $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
-      $(CURVE_DIR)/Hacl_Curve25519.c -- please run `EVEREST_WINDOWS=1 make -C $(CURVE_DIR)/.. extract-c`)
-  else
-    $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
-      $(CURVE_DIR)/Hacl_Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
-  endif
+  $(error The Curve25519 directory is $(CURVE_DIR) and I cannot find \
+    $(CURVE_DIR)/Hacl_Curve25519.c -- please run `make -C $(CURVE_DIR)/.. extract-c`)
 endif
 
 POLY_DIR=$(HACL_HOME)/code/poly1305/poly-c
 CHACHA_DIR=$(HACL_HOME)/code/salsa-family/chacha-c
 CHACHAPOLY_DIR=$(HACL_HOME)/code/api/aead-c
+POLICIES_DIR=$(HACL_HOME)/code/api/policies-c
 
 ifeq (,$(wildcard $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c))
-  ifneq (,$(KRML_NOUINT128))
-    $(error The Chacha20Poly1305 directory is $(CHACHAPOLY_DIR) and I cannot find \
-      $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c -- please run `KOPTS="-fnouint128 -drop FStar.UInt128,FStar.Int.Cast.Full -add-early-include '\"FStar_UInt128.h\"'" make -C $(CHACHAPOLY_DIR)/.. extract-c`)
-  else
-    $(error The Chacha20Poly1305 directory is $(CHACHAPOLY_DIR) and I cannot find \
-      $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c -- please run `make -C $(CHACHAPOLY_DIR)/.. extract-c`)
-  endif
+  $(error The Chacha20Poly1305 directory is $(CHACHAPOLY_DIR) and I cannot find \
+    $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.c -- please run `make -C $(CHACHAPOLY_DIR)/.. extract-c`)
 endif
 
 # Since we're building an actual C file, we need the standalone AEAD file, along
@@ -240,22 +206,7 @@ endif
 HEADERS=$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h \
 	  $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.h \
 	  $(CURVE_DIR)/Hacl_Curve25519.h \
-	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.h \
-	  $(DIST_DIR)/uint128/FStar_UInt128.h
-
-# Technically these dependency edges are only real for the KRML_NOUINT128 case.
-$(DIST_DIR)/uint128/FStar_UInt128.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(DIST_DIR)/uint128/FStar_UInt128.c: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CURVE_DIR)/Hacl_Curve25519.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CHACHA_DIR)/Hacl_Chacha20.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(POLY_DIR)/AEAD_Poly1305_64.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CHACHAPOLY_DIR)/Hacl_Policies.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(VALE_DIR)/sha256_main_i.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(VALE_DIR)/Vale_Hash_SHA2_256.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o: $(DIST_DIR)/uint128/FStar_UInt128.h
-$(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o: $(DIST_DIR)/uint128/FStar_UInt128.h
+	  $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.h
 
 # Note: we don't use gcc -MM because this would need to happen after KreMLin
 # extraction, and then every run of this Makefile would start by extracting the
@@ -271,11 +222,10 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib -g -I $(FSTAR_HOME)/uli
 # Then, we need to generate some .o ourselves, using ocamlopt to get all the
 # right include paths...
 %.o: %.c
-	$(OCAMLOPT) -c $< -I $(DIST_DIR) -I $(KREMLIN_HOME)/include -I $(MLCRYPTO_HOME) \
+	$(OCAMLOPT) -c $< -I $(dir $@) -I $(DIST_DIR) -I $(KREMLIN_HOME)/include -I $(MLCRYPTO_HOME) \
 	  -I $(TLS_FFI_DIR) -ccopt "-o $@" -I $(CHACHA_DIR) -I $(POLY_DIR) \
 	  -I $(CURVE_DIR) -I $(CRYPTO_DIR) -I $(CHACHAPOLY_DIR) \
-	  $(addprefix -ccopt ,$(CCOPTS)) \
-	  -I $(DIST_DIR)/uint128
+	  $(addprefix -ccopt ,$(CCOPTS))
 
 # Gross approximation: the cmx's we build are most likely extracted F* code and,
 # as such, require a working fstarlib.
@@ -302,7 +252,6 @@ LowCProvider/LowCProvider.cmo: $(MLCRYPTO_HOME)/CryptoTypes.cmo
 LowCProvider/Tests.cmo: LowCProvider/LowCProvider.cmo
 
 ARCHIVE_FILES= $(VALE_OBJ) \
-    $(DIST_DIR)/uint128/FStar_UInt128.o \
     LowCProvider/LowCProvider.cmx \
     LowCProvider/HaclProvider.cmx \
     LowCProvider/lowc_stub.o \
@@ -310,7 +259,7 @@ ARCHIVE_FILES= $(VALE_OBJ) \
     $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
     $(CHACHA_DIR)/Hacl_Chacha20.o \
     $(POLY_DIR)/AEAD_Poly1305_64.o \
-    $(CHACHAPOLY_DIR)/Hacl_Policies.o \
+    $(POLICIES_DIR)/Hacl_Policies.o \
     $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o \
     $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.o $(CURVE_DIR)/Hacl_Curve25519.o \
     $($(IMPL_CHOICE)_EXTRA)
@@ -328,13 +277,18 @@ $(DIST_DIR)/LowC.cma: $(ARCHIVE_FILES)
 # 5. The LowC provider tests                                     	       #
 ################################################################################
 
+LIBKREMLIB = $(KREMLIN_HOME)/kremlib/out/libkremlib.a
+
+$(LIBKREMLIB):
+	$(error Please run make -C $(KREMLIN_HOME)/kremlib to generate libkremlib.a)
+
 # Note: clients of MLCrypto are generally assumed to use CoreCrypto.cmxa but
 # here since we just need the type definitions we optimize the linking and just
 # pass CryptoTypes.cmx
-$(DIST_DIR)/LowCTests.exe: $(DIST_DIR)/copied/kremstr.o \
+$(DIST_DIR)/LowCTests.exe:  \
 	  $(MLCRYPTO_HOME)/CryptoTypes.cmx $(DIST_DIR)/LowC.cmxa LowCProvider/Tests.cmx
 	$(OCAMLOPT) -I $(OUTPUT_DIR) -I LowCProvider \
-	  -ccopt -L$(DIST_DIR) -linkpkg $^ -o $@
+	  -ccopt -L$(DIST_DIR) -cclib $(LIBKREMLIB) -linkpkg $^ -o $@
 
 ################################################################################
 # 6. The QuicProvider tests                                      	       #
@@ -352,12 +306,12 @@ $(DIST_DIR)/libquicprovider.$(SO): $(VALE_OBJ) \
   $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
   $(CHACHA_DIR)/Hacl_Chacha20.o \
   $(POLY_DIR)/AEAD_Poly1305_64.o \
-  $(CHACHAPOLY_DIR)/Hacl_Policies.o \
+  $(POLICIES_DIR)/Hacl_Policies.o \
   $(CHACHAPOLY_DIR)/Hacl_Chacha20Poly1305.o \
-  $(DIST_DIR)/copied/kremstr.o \
-  $(DIST_DIR)/uint128/FStar_UInt128.o
+  $(LIBKREMLIB)
 	$(CC) $^ -o $@ $(QUICPROVIDER_SO_LDOPTS) -shared
 
-$(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO)
-	$(CC) $< -o $@ -L$(DIST_DIR) -lquicprovider
+$(DIST_DIR)/quicprovider-test.exe: $(QUICPROVIDER_DIR)/test.o $(DIST_DIR)/libquicprovider.$(SO) \
+  $(LIBKREMLIB)
+	$(CC) $< -o $@ -L$(DIST_DIR) -lquicprovider $(LIBKREMLIB)
 

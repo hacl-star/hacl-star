@@ -33,7 +33,7 @@ static __inline__ cycles cpucycles_end(void)
 extern void ghash(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 
 #define ROUNDS 1024
-#define SIZE   8192
+#define SIZE   163840
 
 int main() {
   int in_len = 92;
@@ -57,7 +57,7 @@ int main() {
     0xcc,0x9a,0xe9,0x17,0x57,0x29,0xa6,0x49,
     0x93,0x6e,0x89,0x0b,0xd9,0x71,0xa8,0xbf};
   uint8_t comp[16] = {0};
-  ghash(comp,in,in_len,key);
+  ghash(comp,in,92,key);
   printf("computed:");
   for (int i = 0; i < 16; i++)
     printf("%02x",comp[i]);

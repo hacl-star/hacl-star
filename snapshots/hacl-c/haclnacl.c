@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -102,6 +102,10 @@ int crypto_auth(uint8_t *output, const uint8_t *input, uint64_t input_len, const
   Hacl_HMAC_SHA2_256_hmac_core(output, (uint8_t *)key, (uint8_t *)input, input_len);
   return 0;
 }
+
+// JP: the owner of this file should include the proper header
+// ("kremlib/generated/FStar_UInt8.h")
+extern uint8_t FStar_UInt8_eq_mask(uint8_t x0, uint8_t x1);
 
 int crypto_auth_verify(const uint8_t *tag, const uint8_t *input, uint64_t input_len, const uint8_t *key){
   uint8_t recomputed_tag[32], tmp = 0xff;
@@ -253,12 +257,12 @@ int crypto_sign(uint8_t *signed_msg, uint64_t *signed_len, const uint8_t *msg, u
 int crypto_sign_open(uint8_t *unsigned_msg, uint64_t *unsigned_msg_len, const uint8_t *msg, uint64_t msg_len, const uint8_t *pk){
   uint32_t res;
   res = Hacl_Ed25519_verify((uint8_t *)pk, (uint8_t *)msg+64, msg_len - 64, (uint8_t *)msg);
-  if (res == true){
+  if (res){
     memmove(unsigned_msg, msg+64, sizeof(uint8_t) * (msg_len-64));
     *unsigned_msg_len = msg_len - 64;
-    return true;
+    return 0;
   } else {
-    return false;
+    return -1;
   }
 }
 

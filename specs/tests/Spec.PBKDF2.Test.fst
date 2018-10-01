@@ -7,7 +7,6 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Spec.Lib.Stateful
 
 module Hash = Spec.Hash
 module HMAC = Spec.HMAC

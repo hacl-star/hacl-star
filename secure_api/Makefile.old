@@ -21,7 +21,7 @@ else
 endif
 
 
-KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_api/uf1cma $(HACL_HOME)/secure_api/vale $(HACL_HOME)/secure_api/vale/asm $(HACL_HOME)/secure_api/prf $(HACL_HOME)/secure_api/hkdf $(HACL_HOME)/secure_api/utils $(HACL_HOME)/secure_api/indexing $(HACL_HOME)/code/experimental/aesgcm $(HACL_HOME)/code/bignum $(HACL_HOME)/code/poly1305 $(HACL_HOME)/code/salsa-family $(HACL_HOME)/code/hash $(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/specs $(KREMLIN_HOME)/kremlib $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_api/uf1cma $(HACL_HOME)/secure_api/vale $(HACL_HOME)/secure_api/vale/asm $(HACL_HOME)/secure_api/prf $(HACL_HOME)/secure_api/hkdf $(HACL_HOME)/secure_api/utils $(HACL_HOME)/secure_api/indexing $(HACL_HOME)/code/experimental/aesgcm $(HACL_HOME)/code/bignum $(HACL_HOME)/code/poly1305 $(HACL_HOME)/code/salsa-family $(HACL_HOME)/code/hash $(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/specs $(KREMLIN_HOME)/kremlib/compat $(KREMLIN_HOME)/test)
 
 # 2017.08.15 SZ: Made these warnings non-fatal
 # - Warning 4 (dropping toplevel definition)
@@ -32,7 +32,7 @@ KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_a
 # marked as `inline_for_extraction`, so always inlined.
 KRML_ARGS=$(FPIC) -warn-error +4+9 -ccopt -Wno-unused-value \
   -ccopt -maes -ccopt -Ofast -ccopt -funroll-loops -ccopt -fomit-frame-pointer \
-  $(KREMLIN_HOME)/test/../kremlib/testlib.c \
+  $(KREMLIN_HOME)/test/../kremlib/c/testlib.c \
   vale/asm/vale.a -add-include '"kremstr.h"' \
   -add-include '"testlib.h"' -bundle Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* $(KOPTS)
 
@@ -76,10 +76,10 @@ test-perf-hacl.exe: krml-test-hacl.exe test/test_perf.c
 	$(CC) -Ofast -m64 -march=native -mtune=native -funroll-loops -fomit-frame-pointer \
 	 -o test-perf-hacl.exe \
 	$(filter-out tmp-hacl/KrmlTest.c, $(wildcard tmp-hacl/*.c)) \
-	$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/testlib.c \
+	$(KREMLIN_HOME)/kremlib/kremlib.c $(KREMLIN_HOME)/kremlib/c/testlib.c \
 	test/test_perf.c test/test_hacks.c \
 	-I tmp-hacl  \
-	-I $(KREMLIN_HOME)/kremlib \
+	-I $(KREMLIN_HOME)/kremlib/compat \
 	-I $(KREMLIN_HOME)/test \
 	-I $(OPENSSL_HOME)/include \
 	-L $(OPENSSL_HOME) -lcrypto $(CFLAGS)
@@ -109,11 +109,11 @@ OTHERFLAGS+= \
 --include $(HACL_HOME)/secure_api/vale \
 --include $(HACL_HOME)/secure_api/uf1cma \
 --include $(HACL_HOME)/secure_api/utils \
---include $(HACL_HOME)/secure_api/indexing \
+--include $(HACL_HOME)/secure_api/concrete_specializations/verification \
 --include $(HACL_HOME)/secure_api/ideal_flags \
 --include $(HACL_HOME)/secure_api \
 --include $(HACL_HOME)/specs \
---include $(KREMLIN_HOME)/kremlib
+--include $(KREMLIN_HOME)/kremlib/compat
 
 # TODO integrate GF128 with specs and code
 # TODO recheck why we dropped TestMonotonic and AES256GCM
@@ -148,7 +148,7 @@ VERIFY= \
   aead/Crypto.AEAD.Encrypt.Ideal.Invariant \
   aead/Crypto.AEAD.Encrypt \
   aead/Crypto.AEAD \
-  aead/Crypto.Plain
+  Crypto.Plain
 
 EXTRA= \
   Crypto.Symmetric.Poly1305 \

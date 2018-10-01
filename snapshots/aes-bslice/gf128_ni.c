@@ -8,6 +8,7 @@
 #include <wmmintrin.h>
 #include <emmintrin.h>
 #include <smmintrin.h>
+#include "vec128.h"
 
 #define inline __attribute((always_inline))
 typedef uint8_t* block_t;
@@ -15,63 +16,70 @@ typedef uint64_t* precomp_t;
 typedef __m128i* elem_t;
 
 static inline void fadd(elem_t e1, const elem_t e2) {
-  *e1 = _mm_xor_si128(*e1, *e2);
+  *e1 = Lib_Vec128_vec128_xor(*e1, *e2);
 }
 
+
+
 static inline void fmul(elem_t e1, elem_t e2) {
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
+  __m128i lo, hi, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
+
+  lo = Lib_Vec128_ni_clmul(*e1, *e2, 0x00);
+  tmp0 = Lib_Vec128_ni_clmul(*e1, *e2, 0x10);
+  tmp1 = Lib_Vec128_ni_clmul(*e1, *e2, 0x01);
+  hi = Lib_Vec128_ni_clmul(*e1, *e2, 0x11);
+
+  tmp0 = Lib_Vec128_vec128_xor(tmp0, tmp1);
+  tmp1 = Lib_Vec128_vec128_shift_right(tmp0, 64);
+  tmp0 = Lib_Vec128_vec128_shift_left(tmp0, 64);
+  lo = Lib_Vec128_vec128_xor(lo, tmp0);
+  hi = Lib_Vec128_vec128_xor(hi, tmp1);
+
   
-  tmp3 = _mm_clmulepi64_si128(*e1, *e2, 0x00);
-  tmp4 = _mm_clmulepi64_si128(*e1, *e2, 0x10);
-  tmp5 = _mm_clmulepi64_si128(*e1, *e2, 0x01);
-  tmp6 = _mm_clmulepi64_si128(*e1, *e2, 0x11);
+  tmp7 = Lib_Vec128_vec128_shift_right64(lo, 63);
+  tmp9 = Lib_Vec128_vec128_shift_left(tmp7, 64);
+  tmp3 = Lib_Vec128_vec128_shift_left64(lo, 1);
+  tmp3 = Lib_Vec128_vec128_xor(tmp3, tmp9);
 
-  tmp4 = _mm_xor_si128(tmp4, tmp5);
-  tmp5 = _mm_slli_si128(tmp4, 8);
-  tmp4 = _mm_srli_si128(tmp4, 8);
-  tmp3 = _mm_xor_si128(tmp3, tmp5);
-  tmp6 = _mm_xor_si128(tmp6, tmp4);
+  tmp8 = Lib_Vec128_vec128_shift_right64(hi, 63);
+  tmp8 = Lib_Vec128_vec128_shift_left(tmp8, 64);
+  tmp6 = Lib_Vec128_vec128_shift_left64(hi, 1);
+  tmp6 = Lib_Vec128_vec128_xor(tmp6, tmp8);
+  
+  tmp7 = Lib_Vec128_vec128_shift_right64(lo, 63); // we can save this shift
+  tmp7 = Lib_Vec128_vec128_shift_right(tmp7, 64);
+  tmp6 = Lib_Vec128_vec128_xor(tmp6, tmp7);
 
-  tmp7 = _mm_srli_epi32(tmp3, 31);
-  tmp8 = _mm_srli_epi32(tmp6, 31);
-  tmp3 = _mm_slli_epi32(tmp3, 1);
-  tmp6 = _mm_slli_epi32(tmp6, 1);
 
-  tmp9 = _mm_srli_si128(tmp7, 12);
-  tmp8 = _mm_slli_si128(tmp8, 4);
-  tmp7 = _mm_slli_si128(tmp7, 4);
-  tmp3 = _mm_or_si128(tmp3, tmp7);
-  tmp6 = _mm_or_si128(tmp6, tmp8);
-  tmp6 = _mm_or_si128(tmp6, tmp9);
+  /* LEFT SHIFT [x0:0] BY 63,62,57 and xor with [x1:x0] */
+  tmp7 = Lib_Vec128_vec128_shift_left64(tmp3, 63);
+  tmp8 = Lib_Vec128_vec128_shift_left64(tmp3, 62);
+  tmp9 = Lib_Vec128_vec128_shift_left64(tmp3, 57);
+  tmp7 = Lib_Vec128_vec128_xor(tmp7, tmp8);
+  tmp7 = Lib_Vec128_vec128_xor(tmp7, tmp9);
+  tmp8 = Lib_Vec128_vec128_shift_right(tmp7, 64);
+  tmp7 = Lib_Vec128_vec128_shift_left(tmp7, 64);
+  tmp3 = Lib_Vec128_vec128_xor(tmp3, tmp7);
 
-  tmp7 = _mm_slli_epi32(tmp3, 31);
-  tmp8 = _mm_slli_epi32(tmp3, 30);
-  tmp9 = _mm_slli_epi32(tmp3, 25);
+  /* RIGHT SHIFT [x1:x0] BY 1,2,7 and xor with [x1:x0] */
+  tmp2 = Lib_Vec128_vec128_shift_right64(tmp3, 1);
+  tmp4 = Lib_Vec128_vec128_shift_right64(tmp3, 2);
+  tmp5 = Lib_Vec128_vec128_shift_right64(tmp3, 7);
+  tmp2 = Lib_Vec128_vec128_xor(tmp2, tmp4);
+  tmp2 = Lib_Vec128_vec128_xor(tmp2, tmp5);
+  
+  tmp2 = Lib_Vec128_vec128_xor(tmp2, tmp8);
+  tmp3 = Lib_Vec128_vec128_xor(tmp3, tmp2);
 
-  tmp7 = _mm_xor_si128(tmp7, tmp8);
-  tmp7 = _mm_xor_si128(tmp7, tmp9);
-  tmp8 = _mm_srli_si128(tmp7, 4);
-  tmp7 = _mm_slli_si128(tmp7, 12);
-  tmp3 = _mm_xor_si128(tmp3, tmp7);
-
-  tmp2 = _mm_srli_epi32(tmp3, 1);
-  tmp4 = _mm_srli_epi32(tmp3, 2);
-  tmp5 = _mm_srli_epi32(tmp3, 7);
-  tmp2 = _mm_xor_si128(tmp2, tmp4);
-  tmp2 = _mm_xor_si128(tmp2, tmp5);
-  tmp2 = _mm_xor_si128(tmp2, tmp8);
-  tmp3 = _mm_xor_si128(tmp3, tmp2);
-  tmp6 = _mm_xor_si128(tmp6, tmp3);
-
+  /* XOR [x1:x0] with [x3:x2] */
+  tmp6 = Lib_Vec128_vec128_xor(tmp6, tmp3);
   *e1 = tmp6;
+
 }
 
 
 static inline void encode(elem_t e, const block_t b) {
-  __m128i BSWAP_MASK = _mm_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-14, 15);
-  __m128i inp = _mm_loadu_si128((__m128i*)b);
-  *e = _mm_shuffle_epi8(inp, BSWAP_MASK);
+  *e = Lib_Vec128_vec128_load_be(b);
 }
 
 static inline void encode_last(elem_t e, const block_t b, int blen) {
@@ -81,39 +89,30 @@ static inline void encode_last(elem_t e, const block_t b, int blen) {
 }
 
 static inline void decode(block_t b, const elem_t e) {
-  __m128i BSWAP_MASK = _mm_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-14, 15);
-  __m128i out = _mm_shuffle_epi8(*e, BSWAP_MASK);
-  _mm_storeu_si128((__m128i*)b, out);
+  Lib_Vec128_vec128_store_be(b,*e);
 }
 
-static inline void update(elem_t acc, const block_t b, const elem_t r) {
-  __m128i tmp;
-  encode(&tmp,b);
-  fadd(acc,&tmp);
-  fmul(acc,r);
-}
-
-static inline void update_last(elem_t acc, const block_t b, int blen, const elem_t r) {
-  __m128i tmp;
-  encode_last(&tmp,b,blen);
-  fadd(acc,&tmp);
+static inline void update(elem_t acc, elem_t b, const elem_t r) {
+  fadd(acc,b);
   fmul(acc,r);
 }
 
 static inline void poly(elem_t acc, uint8_t* text, int tlen, const elem_t r) {
   int blocks = tlen / 16;
+  __m128i elem = Lib_Vec128_vec128_zero;
   for (int i = 0; i < blocks; i++) {
-    update(acc,text + 16*i, r);
+    encode(&elem,text + 16*i);
+    update(acc,&elem, r);
   }
   if (tlen % 16 > 0) {
-    update_last(acc,text + 16*blocks, tlen % 16, r);
+    encode_last(&elem,text + 16*blocks,tlen % 16);
+    update(acc,&elem, r);
   }
 }
 
 void ghash(uint8_t* tag, uint8_t* text, int tlen, uint8_t* key) {
-  __m128i r = {0};
-  __m128i acc = {0};
+  __m128i r = Lib_Vec128_vec128_zero;
+  __m128i acc = Lib_Vec128_vec128_zero;
   encode(&r,key);
   poly(&acc,text,tlen,&r);
   decode(tag,&acc);

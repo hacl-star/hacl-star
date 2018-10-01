@@ -353,7 +353,7 @@ let refines (#rgn:region) (#i:id)
 (*+ aead_liveness:
 	The aead_state and its regions etc. are live **)
 let aead_liveness (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) : Type0 =
-  HS.(h.h `Map.contains` st.prf.mac_rgn) /\        //contains the mac region
+  HS.(get_hmap h `Map.contains` st.prf.mac_rgn) /\        //contains the mac region
   (safeMac i ==> h `HS.contains` (st_ilog st)) /\  //contains the aead log
   (prf i ==> h `HS.contains` (itable i st.prf))   //contains the prf table
 
@@ -388,8 +388,8 @@ let enc_dec_liveness (#i:id) (#rw:rw) (st:aead_state i rw)
     Buffer.live h aad /\
     Buffer.live h cipher /\
     Plain.live h plain /\
-    st.log_region `is_in` h.h /\
-    st.prf.mac_rgn `is_in` h.h
+    st.log_region `is_in` (HS.get_hmap h) /\
+    st.prf.mac_rgn `is_in` (HS.get_hmap h)
 
 let ak_live (#i:CMA.id) (r:rid) (ak:CMA.state i) (h:mem) = 
     let open CMA in 
@@ -562,8 +562,8 @@ let frame_inv_modifies_1 (#i:id) (#rw:rw) (#a:Type) (b:FStar.Buffer.buffer a)
 let frame_inv_modifies_tip (#i:id) (#rw:rw) (st:aead_state i rw) (h:mem) (h1:mem)
    : Lemma (requires (let open HS in 
 		      inv st h /\ 
-		      is_stack_region h.tip /\
-		      modifies_one h.tip h h1))
+		      is_stack_region (HS.get_tip h) /\
+		      modifies_one (HS.get_tip h) h h1))
 	   (ensures  (inv st h1))
    = if safeMac i
      then frame_refines i st.prf.mac_rgn (HS.sel h (PRF.itable i st.prf)) (HS.sel h (st_ilog st)) h h1;
@@ -847,13 +847,13 @@ let rec counterblocks_slice #i rgn x len from_pos to_pos plain cipher =
 	let ih1 = counterblocks_slice rgn y len from_pos' to_pos plain cipher in
   	let ih2 = counterblocks_slice rgn y (to_pos - from_pos) l (to_pos - from_pos) (Plain.slice plain from_pos to_pos) (Seq.slice cipher from_pos to_pos) in
 	  //slice-slice-1
-	  assert (Seq.equal (as_bytes #i #(to_pos - from_pos') (Plain.slice plain from_pos' to_pos))
-			    (as_bytes #i #(to_pos - from_pos') (Plain.slice (Plain.slice plain from_pos to_pos) l (to_pos - from_pos))));
+	  assert (Seq.equal (as_bytes (Plain.slice plain from_pos' to_pos))
+			    (as_bytes (Plain.slice (Plain.slice plain from_pos to_pos) l (to_pos - from_pos))));
 	  assert (Seq.equal (Seq.slice cipher from_pos' to_pos)
 			    (Seq.slice (Seq.slice cipher from_pos to_pos) l (to_pos - from_pos)));
 	  //slice-slice-2
-          assert (Seq.equal (as_bytes #i #l (Plain.slice (Plain.slice plain from_pos to_pos) 0 l))
-			    (as_bytes #i #l (Plain.slice plain from_pos from_pos')));
+          assert (Seq.equal (as_bytes (Plain.slice (Plain.slice plain from_pos to_pos) 0 l))
+			    (as_bytes (Plain.slice plain from_pos from_pos')));
           assert (Seq.equal (Seq.slice (Seq.slice cipher from_pos to_pos) 0 l)
 			    (Seq.slice cipher from_pos from_pos'))
 
@@ -1153,7 +1153,7 @@ val lemma_mac_log_framing
   (mac_st_2:CMA.state (i, nonce_2){CMA.(mac_st_2.region) = CMA.(mac_st_1.region)}) : Lemma
   (requires (nonce_1 <> nonce_2                                        /\
              HS.contains h0 (CMA.(ilog mac_st_2.log))                 /\
-	     HS.(h1.h `Map.contains` CMA.(mac_st_2.region))          /\
+	     HS.(get_hmap h1 `Map.contains` CMA.(mac_st_2.region))    /\
              HS.modifies_ref (CMA.(mac_st_1.region)) (Set.singleton (HS.as_addr (CMA.(ilog mac_st_1.log)))) h0 h1))
   (ensures  (HS.sel h0 (CMA.(ilog mac_st_2.log)) = HS.sel h1 (CMA.(ilog mac_st_2.log))))
 #set-options "--initial_ifuel 1 --max_ifuel 1"

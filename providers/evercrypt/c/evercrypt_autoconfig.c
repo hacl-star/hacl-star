@@ -18,8 +18,11 @@ impl sha256_impl = Vale;
 impl sha384_impl = Hacl;
 impl sha512_impl = Hacl;
 impl x25519_impl = Hacl;
-impl aes128_gcm_impl = OpenSSL;
-impl aes256_gcm_impl = OpenSSL;
+impl aes128_impl = Hacl;
+impl aes256_impl = Hacl;
+impl chacha20_impl = Hacl;
+impl aes128_gcm_impl = Vale;
+impl aes256_gcm_impl = Vale;
 impl chacha20_poly1305_impl = Hacl;
 
 // https://en.wikipedia.org/wiki/CPUID
@@ -89,17 +92,35 @@ void EverCrypt_AutoConfig_init(EverCrypt_AutoConfig_cfg x0) {
     aes128_gcm_impl = BCrypt;
   } else if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
     aes128_gcm_impl = OpenSSL;
+  } else if (EverCrypt_StaticConfig_bcrypt) {
+    aes128_gcm_impl = BCrypt;
+  } else if (EverCrypt_StaticConfig_openssl) {
+    aes128_gcm_impl = OpenSSL;
   } else {
-    aes128_gcm_impl = EverCrypt_StaticConfig_bcrypt ? BCrypt : OpenSSL;
+    //assert (EverCrypt_StaticConfig_vale);
+    aes128_gcm_impl = Vale;
   }
 
-  // AES256-GCM: OpenSSL or BCrypt
-  if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
-    aes256_gcm_impl = OpenSSL;
+  // AES256-GCM: best = Vale (IF AES-NI), fallback = OpenSSL or BCrypt
+  if (has_aesni && EverCrypt_StaticConfig_vale && prefer_vale) {
+    aes256_gcm_impl = Vale;
   } else if (EverCrypt_StaticConfig_bcrypt && prefer_bcrypt) {
     aes256_gcm_impl = BCrypt;
+  } else if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
+    aes256_gcm_impl = OpenSSL;
+  } else if (EverCrypt_StaticConfig_bcrypt) {
+    aes128_gcm_impl = BCrypt;
+  } else if (EverCrypt_StaticConfig_openssl) {
+    aes128_gcm_impl = OpenSSL;
   } else {
-    aes256_gcm_impl = EverCrypt_StaticConfig_bcrypt ? BCrypt : OpenSSL;
+    //assert (EverCrypt_StaticConfig_vale);
+    aes128_gcm_impl = Vale;
+  }
+
+  if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
+    chacha20_poly1305_impl = OpenSSL;
+  } else {
+    chacha20_poly1305_impl = Hacl;
   }
 }
 
@@ -121,6 +142,18 @@ impl EverCrypt_AutoConfig_x25519_impl() {
 
 impl EverCrypt_AutoConfig_aes128_gcm_impl() {
   return aes128_gcm_impl;
+}
+
+impl EverCrypt_AutoConfig_aes128_impl() {
+  return aes128_impl;
+}
+
+impl EverCrypt_AutoConfig_aes256_impl() {
+  return aes256_impl;
+}
+
+impl EverCrypt_AutoConfig_chacha20_impl() {
+  return chacha20_impl;
 }
 
 impl EverCrypt_AutoConfig_aes256_gcm_impl() {

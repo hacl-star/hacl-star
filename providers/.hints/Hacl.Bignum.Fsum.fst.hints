@@ -16,7 +16,7 @@
         "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882"
       ],
       0,
-      "cbc727f230dcd8c7e6dd21e54ef9c5bd"
+      "b7981e280cccb4fef9a580b3ad62996c"
     ],
     [
       "Hacl.Bignum.Fsum.fsum_",
@@ -42,7 +42,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "62e5b9b9daa604b114eadc37aec6ca1f"
+      "ec5859045664e539c34ddf461a4e370d"
     ],
     [
       "Hacl.Bignum.Fsum.fsum_",
@@ -51,7 +51,9 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "equation_FStar.Buffer.as_seq",
-        "equation_FStar.Buffer.buffer", "equation_Hacl.Bignum.Constants.len",
+        "equation_FStar.Buffer.buffer",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_Hacl.Bignum.Constants.len",
         "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Fsum.red_c", "equation_Hacl.Bignum.Limb.t",
         "equation_Hacl.Bignum.Parameters.clen",
@@ -60,16 +62,15 @@
         "equation_Hacl.Bignum.Parameters.limb",
         "equation_Hacl.Spec.Bignum.Fsum.fsum_spec",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
-        "fuel_guarded_inversion_FStar.Monotonic.HyperStack.mem",
         "function_token_typing_Hacl.Bignum.Parameters.clen",
         "refinement_interpretation_FStar.UInt32_Tm_refine_6c25b42778726de94cd4dac42edb4860",
-        "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_72d3c6e71283179f002e1558013c4184",
-        "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_d75f0a2f48588e75c2f201ba8af18229",
+        "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_84236c489173a447473e4b8d0799c2df",
+        "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_a418791cf2731d891e2b4f4d28ccfa2c",
         "refinement_interpretation_Hacl.Bignum.Fsum_Tm_refine_ea0cdb077ae78da455b9677f874da9dd",
         "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882"
       ],
       0,
-      "daa3fbb3f96a9d2b8add072d019441ac"
+      "65f6296914b7d67ceec6cb113d93e300"
     ]
   ]
 ]

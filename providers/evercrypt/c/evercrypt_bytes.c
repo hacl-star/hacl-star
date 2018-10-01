@@ -1,4 +1,3 @@
-#include "kremlin/fstar_bytes.h"
 #include "kremlib.h"
 #include "EverCrypt_Bytes.h"
 #include "EverCrypt.h"

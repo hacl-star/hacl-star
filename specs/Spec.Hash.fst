@@ -13,11 +13,11 @@ private let parameters a = match a with
 
 let state a = Spec.SHA2.state (parameters a)
 
-let size_block a = Spec.SHA2.size_block (parameters a)
+(* let size_block a = Spec.SHA2.size_block (parameters a) *)
 
-let size_hash a = Spec.SHA2.size_hash (parameters a)
+(* let size_hash a = Spec.SHA2.size_hash (parameters a) *)
 
-let max_input a = Spec.SHA2.max_input (parameters a)
+(* let max_input a = Spec.SHA2.max_input (parameters a) *)
 
 
 let get_st_n #a (st:state a) = Spec.SHA2.get_st_n #(parameters a) st

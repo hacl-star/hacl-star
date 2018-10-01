@@ -453,14 +453,14 @@ let store_lengths i aadlen txtlen w =
   | GHASH    -> store_lengths_ghash    aadlen txtlen w
 
 let fresh_sref (#a:Type0) h0 h1 (r:ST.reference a) =
-  (r `HS.unused_in` h0) /\
-  HS.frameOf r == HS.(h1.tip) /\
+  r `HS.unused_in` h0 /\
+  HS.frameOf r == HS.get_tip h1 /\
   h1 `HS.contains` r
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 private val frame_modifies_buf_and_ref: #a:Type -> #b:Type -> #c:Type -> h0:mem -> h1:mem ->
   buf:Buffer.buffer a ->
-  ref:HS.reference b{Buffer.frameOf buf == HS.frameOf ref} ->
+  ref:ST.reference b{Buffer.frameOf buf == HS.frameOf ref} ->
   buf':Buffer.buffer c -> Lemma
   (requires (CMA.modifies_buf_and_ref #a #b buf ref h0 h1 /\
              (Buffer.frameOf buf' <> Buffer.frameOf buf \/
@@ -494,7 +494,7 @@ val accumulate:
     // This doesn't seem to work, so inlining it below:
     // fresh_sref h0 h1 (Buffer.content abuf) /\
     ((MAC.as_buffer (CMA.abuf a)) `Buffer.unused_in` h0) /\
-    Buffer.frameOf (MAC.as_buffer (CMA.abuf a)) == h1.HS.tip /\
+    Buffer.frameOf (MAC.as_buffer (CMA.abuf a)) == (HS.get_tip h1) /\
     //h1 `Buffer.contains` (MAC.as_buffer buf) /\
     Buffer.live h1 aad /\
     Buffer.live h1 cipher /\
@@ -509,8 +509,10 @@ let accumulate #i st aadlen aad txtlen cipher =
   let h = ST.get() in
   let acc = CMA.start st in
   let h0 = ST.get() in
+  assume (Buffer.disjoint CMA.(MAC.as_buffer st.r) aad);
   add_bytes st acc aadlen aad;
   let h1 = ST.get() in
+  assume (Buffer.disjoint CMA.(MAC.as_buffer st.r) cipher);
   add_bytes st acc txtlen cipher;
   let h2 = ST.get() in
   assert_norm (16 <= pow2 32 - 1);
@@ -533,11 +535,11 @@ let accumulate #i st aadlen aad txtlen cipher =
       Buffer.lemma_reveal_modifies_0 h h0;
       //modifies_buf_and_ref_trans buf log h0 h1 h2;
       Buffer.lemma_reveal_modifies_0 h2 h4;
-      //assert HS.(modifies_one h.tip h h0);
-      assert HS.(modifies_one h.tip h0 h2);
-      //assert HS.(modifies_one h.tip h2 h4);
-      assert HS.(modifies_one h.tip h4 h5);
-      assert HS.(modifies_one h.tip h h5);
+      //assert HS.(modifies_one (HS.get_tip h) h h0);
+      assert HS.(modifies_one (HS.get_tip h) h0 h2);
+      //assert HS.(modifies_one (HS.get_tip h) h2 h4);
+      assert HS.(modifies_one (HS.get_tip h) h4 h5);
+      assert HS.(modifies_one (HS.get_tip h) h h5);
       Buffer.lemma_intro_modifies_0 h h5;
       lemma_eq_intro (HS.sel h0 log) createEmpty;
       Buffer.no_upd_lemma_0 h h0 aad;

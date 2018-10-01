@@ -43,3 +43,25 @@ val chacha20_poly1305_decrypt: key:uint8_p -> iv:uint8_p ->
   cipher: uint8_p -> tag:uint8_p ->
   Stack uint32_t chacha20_poly1305_decrypt_pre chacha20_poly1305_decrypt_post
 
+type alg =
+  | AES128_GCM
+  | AES256_GCM
+  | CHACHA20_POLY1305
+
+val aead_create: alg:alg -> key:uint8_p ->
+  St Dyn.dyn
+
+val aead_encrypt: key:Dyn.dyn -> iv:uint8_p ->
+  ad:uint8_p -> adlen:uint32_t ->
+  plain:uint8_p -> len:uint32_t ->
+  cipher: uint8_p -> tag:uint8_p ->
+  St unit
+
+val aead_decrypt: key:Dyn.dyn -> iv:uint8_p ->
+  ad:uint8_p -> adlen:uint32_t ->
+  plain:uint8_p -> len:uint32_t ->
+  cipher: uint8_p -> tag:uint8_p ->
+  St uint32_t
+
+val aead_free: key:Dyn.dyn ->
+  St unit

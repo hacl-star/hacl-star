@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2016-2017 INRIA and Microsoft Corporation
+ * Copyright (c) 2016-2018 INRIA and Microsoft Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,32 @@
 
 
 #include "AEAD_Poly1305_64.h"
+
+extern uint64_t FStar_UInt64_eq_mask(uint64_t x0, uint64_t x1);
+
+extern uint64_t FStar_UInt64_gte_mask(uint64_t x0, uint64_t x1);
+
+extern FStar_UInt128_uint128
+FStar_UInt128_add(FStar_UInt128_uint128 x0, FStar_UInt128_uint128 x1);
+
+extern FStar_UInt128_uint128
+FStar_UInt128_add_mod(FStar_UInt128_uint128 x0, FStar_UInt128_uint128 x1);
+
+extern FStar_UInt128_uint128
+FStar_UInt128_logand(FStar_UInt128_uint128 x0, FStar_UInt128_uint128 x1);
+
+extern FStar_UInt128_uint128
+FStar_UInt128_logor(FStar_UInt128_uint128 x0, FStar_UInt128_uint128 x1);
+
+extern FStar_UInt128_uint128 FStar_UInt128_shift_left(FStar_UInt128_uint128 x0, uint32_t x1);
+
+extern FStar_UInt128_uint128 FStar_UInt128_shift_right(FStar_UInt128_uint128 x0, uint32_t x1);
+
+extern FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t x0);
+
+extern uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 x0);
+
+extern FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x0, uint64_t x1);
 
 inline static void Hacl_Bignum_Modulo_reduce(uint64_t *b)
 {
@@ -167,6 +193,10 @@ Hacl_Bignum_AddAndMultiply_add_and_multiply(uint64_t *acc, uint64_t *block, uint
   }
   Hacl_Bignum_Fmul_fmul(acc, acc, r);
 }
+
+extern FStar_UInt128_uint128 load128_le(uint8_t *x0);
+
+extern void store128_le(uint8_t *x0, FStar_UInt128_uint128 x1);
 
 inline static void
 Hacl_Impl_Poly1305_64_poly1305_update(
@@ -349,7 +379,9 @@ AEAD_Poly1305_64_pad_last(
   uint8_t b[16U];
   if (!(len1 == (uint32_t)0U))
   {
-    memset(b, 0U, (uint32_t)16U * sizeof b[0U]);
+    uint8_t init = (uint8_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+      b[i] = init;
     memcpy(b, input, len1 * sizeof input[0U]);
     uint8_t *b0 = b;
     Hacl_Impl_Poly1305_64_poly1305_update(st, b0);

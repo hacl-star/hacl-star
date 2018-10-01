@@ -9,10 +9,13 @@ VALE_UTIL_FILES=DafnyLib.h
 import:
 	@if [ x"$(VALE_HOME)" = x ]; then echo "VALE_HOME not defined"; exit 1; fi
 	cp $(VALE_HOME)/obj/aes-gcc.S aes-x86_64.S
+	cp $(VALE_HOME)/obj/aesgcm-gcc.S aesgcm-x86_64.S
 	cp $(VALE_HOME)/obj/sha256-gcc.S sha256-x86_64.S
 	cp $(VALE_HOME)/obj/aes-macos.S aes-x86_64-Darwin.S
+	cp $(VALE_HOME)/obj/aesgcm-macos.S aesgcm-x86_64-Darwin.S
 	cp $(VALE_HOME)/obj/sha256-macos.S sha256-x86_64-Darwin.S
 	cp $(VALE_HOME)/obj/aes-linux.S aes-x86_64-Linux.S
+	cp $(VALE_HOME)/obj/aesgcm-linux.S aesgcm-x86_64-Linux.S
 	cp $(VALE_HOME)/obj/sha256-linux.S sha256-x86_64-Linux.S
 	$(SED) -i 's/.section .text/.text/' *.S
 	for f in $(VALE_OBJ_FILES); do cp $(VALE_HOME)/obj/crypto/hashing/$$f .; done
@@ -21,6 +24,6 @@ import:
 clean:
 	rm -f *.a *.o *~
 
-benchmark: benchmark-aesgcm.c aesgcm-gcc.S
-	$(CC) -O3 aesgcm-gcc.S $< -o $@
+benchmark-Darwin: benchmark-aesgcm.c aesgcm-x86_64-Darwin.S
+	$(CC) -O3 aesgcm-x86_64-Darwin.S $< -o $@
 	nice -n -20 ./$@

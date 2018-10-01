@@ -17,12 +17,10 @@ function export_home() {
 
 function hacl_test() {
     fetch_and_make_kremlin &&
-	make -j $threads ci -k
-        #fetch_and_make_mlcrypto &&
-        #fetch_mitls &&
-        #fetch_and_make_vale &&
-        #export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
-        #env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads ci -k
+        fetch_and_make_mlcrypto &&
+        fetch_mitls &&
+        export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
+        make -j $threads ci -k
 }
 
 function hacl_test_and_hints() {
@@ -92,26 +90,6 @@ function fetch_mitls() {
     export_home MITLS "$(pwd)/mitls-fstar"
 }
 
-function fetch_vale() {
-    # NOTE: the name of the directory where Vale is downloaded MUST NOT be vale, because the latter already exists
-    # so let's call it valebin
-    if [ ! -d valebin ]; then
-        git clone https://github.com/project-everest/vale valebin
-    fi
-    cd valebin
-    git fetch origin
-    local ref=$(if [ -f ../.vale_version ]; then cat ../.vale_version | tr -d '\r\n'; else echo origin/master; fi)
-    echo Switching to Vale $ref
-    git reset --hard $ref
-    cd ..
-    export_home VALE "$(pwd)/valebin"
-}
-
-function fetch_and_make_vale() {
-    fetch_vale
-    pushd valebin && ./run_scons.sh -j $threads && popd
-}
-
 function refresh_hacl_hints() {
     refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
 }
@@ -158,7 +136,9 @@ function refresh_hints() {
 }
 
 function exec_build() {
+    cd hacl-star
 
+    export_home FSTAR "$(pwd)/../"
     result_file="../result.txt"
     local status_file="../status.txt"
     echo -n false >$status_file
@@ -174,8 +154,7 @@ function exec_build() {
 
     if [[ $target == "hacl-ci" ]]; then
         echo target - >hacl-ci
-        hacl_test &&
-        echo -n true >$status_file
+        hacl_test && echo -n true >$status_file
     elif [[ $target == "hacl-nightly" ]]; then
         echo target - >hacl-nightly
         export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
@@ -193,6 +172,8 @@ function exec_build() {
         echo "Build succeeded"
         echo Success >$result_file
     fi
+
+    cd ..
 }
 
 # Some environment variables we want
@@ -200,7 +181,4 @@ export OCAMLRUNPARAM=b
 export OTHERFLAGS="--print_z3_statistics --use_hints --query_stats"
 export MAKEFLAGS="$MAKEFLAGS -Otarget"
 
-export_home FSTAR "$(pwd)/FStar"
-cd hacl-star
 exec_build
-cd ..
