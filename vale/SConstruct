@@ -166,6 +166,8 @@ AddOptYesNo('FSTAR-EXTRACT', dest = 'fstar_extract', default = False,
   help = "Extract .ml files from F* files")
 AddOptYesNo('MIN-TEST', dest = 'min_test', default = False,
   help = "Only run on a minimal set of test files")
+AddOptYesNo('PROFILE', dest = 'profile', default = False,
+  help = "Turn on profile options to measure verification performance (note: --NO-USE-HINTS is recommended when profiling)")
 
 is_help = GetOption('help')
 vale_path = Dir(GetOption('vale_path')).abspath
@@ -186,6 +188,7 @@ dump_args = GetOption('dump_args')
 single_vaf = GetOption('single_vaf')
 is_single_vaf = not (single_vaf is None)
 min_test = GetOption('min_test')
+profile = GetOption('profile')
 
 ##################################################################################################
 #
@@ -740,7 +743,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   env.Command(temptargetfiles, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
     f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile} {fstar_record_hints}' +
-    f' --debug {file_module_name(File(sourcefile))} --debug_level print_normalized_terms' +
+    (f' --debug {file_module_name(File(sourcefile))} --debug_level print_normalized_terms' if profile else '') +
     f' 1> {temptargetfile} 2> {stderrfile}')
   CopyFile(targetfile, temptargetfile)
   dump_module_flag = '--dump_module ' + file_module_name(sourcefile)
