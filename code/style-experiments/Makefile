@@ -10,11 +10,13 @@ AES_BS_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.AesCTR.fst
 
 
-AES_BS_OLD_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+AES_ONLY_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	Hacl.Impl.Aes.BitSlice.Old.fst \
-	Hacl.Test.AesCTR.BitSlice.Old.fst \
-	Hacl.AesCTR.Old.fst
+	Hacl.Impl.Aes.CoreNI.fst \
+	Hacl.Impl.Aes.Core.fst \
+	Hacl.Impl.Aes.Generic.fst \
+	Hacl.Impl.Aes.NI.fst \
+	Hacl.AesNI.fst 
 
 
 AES_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
@@ -72,6 +74,15 @@ aes-bitslice-c/out.krml: $(AES_BS_FILES)
 aes-bitslice-c/Hacl_AesCTR.c: aes-bitslice-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-bitslice-c $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.AesCTR=*'
+
+
+aes-only-c/out.krml: $(AES_ONLY_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-only-c $(AES_ONLY_FILES) -skip-translation
+
+aes-only-c/Hacl_AesNI.c: aes-only-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-only-c $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.AesNI=*'
+
 
 aes-bitslice-old-c/out.krml: $(AES_BS_OLD_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-bitslice-old-c $(AES_BS_OLD_FILES) -skip-translation

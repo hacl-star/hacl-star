@@ -30,14 +30,13 @@ val poly1305_encode_last: #s:field_spec -> f:felem s -> b:bytes ->
 			len:size_t{size_v len == length b /\ length b < 16} -> Stack unit
                    (requires (fun h -> live h b /\ live h f ))
 		   (ensures (fun h0 _ h1 -> modifies (loc_buffer f) h0 h1))
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 200"
 let poly1305_encode_last #s f b len = 
     push_frame();
     let tmp = create 0uy (size 16) in
     blit b (size 0) tmp (size 0) len;
     load_felem_le f tmp;
     set_bit f (len *. size 8);
-    admit();
     pop_frame()
 
 inline_for_extraction
@@ -183,3 +182,4 @@ let poly1305_mac #s tag text len key =
   poly1305_update ctx text len;
   poly1305_finish ctx tag;
   pop_frame()
+
