@@ -245,7 +245,8 @@ let create_state target args stack slots stkstart saveRegs =
   "    fun r -> begin match r with\n" ^
     (if stack then "    | Rsp -> addr_stack\n" else "") ^
     (print_low_calling_args Linux target args stkstart) ^  
-  "  in let xmms = init_xmms in\n"
+  "  in let regs = FunctionalExtensionality.on reg regs\n" ^
+  "  in let xmms = FunctionalExtensionality.on xmm init_xmms in\n"
 
 let print_vale_bufferty = function
   | TUInt8 -> "buffer8"
@@ -329,7 +330,6 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "    let s_init = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
   "    let s0 = create_initial_vale_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
   "    let s1 = state_to_S s0 in\n" ^
-  "    assert (state_eq_S s1 (state_to_S s_v));\n" ^
   "    assert (FunctionalExtensionality.feq (regs' s1.TS.state) (regs' s_init.TS.state));\n" ^
   "    assert (FunctionalExtensionality.feq (xmms' s1.TS.state) (xmms' s_init.TS.state))\n\n" ^
   "// TODO: Prove these two lemmas if they are not proven automatically\n" ^
@@ -368,6 +368,7 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   print_args_names_reveal args ^ "in\n" ^
   "  implies_post is_win s0' s_v f_v " ^ print_args_names args ^ "stack_b;\n" ^
   "  let s1 = Some?.v (TS.taint_eval_code (va_code_" ^ name ^ " is_win) f_v s0) in\n" ^
+  "  assert (state_eq_S s1 (state_to_S s_v));\n" ^  
   "  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);\n" ^
   "  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);\n" ^
   "  s1, f_v, s_v.mem.hs\n\n"
