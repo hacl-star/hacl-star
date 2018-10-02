@@ -669,6 +669,22 @@ def report_verification_failures():
           print()
           time.sleep(1)
           os.rename(filename, error_filename)
+        if filename.endswith('.dump') and os.path.isfile(filename):
+          stderr_filename = filename[:-len('.dump')] + '.stderr'
+          report_filename = stderr_filename if os.path.isfile(stderr_filename) else filename
+          print()
+          print(f'##### {red}Verification error{uncolor}')
+          print('Printing contents of ' + report_filename + ' #####')
+          with open (report_filename, 'r') as myfile:
+            lines = myfile.read().splitlines()
+            valeErrors = [line for line in lines if ("*****" in line)]
+            for line in lines:
+              if 'error was reported' in line or '(Error)' in line or ' failed' in line:
+                line = f'{red}{line}{uncolor}'
+              print(line)
+          print()
+          time.sleep(1)
+         
 
 ##################################################################################################
 #
@@ -755,7 +771,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   env.Command(dumptargetfile, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
     f' {fstar_includes} {" ".join(fstar_user_args)}' +
-    f' {dump_flags} 1>{dumptargetfile} 2>&1')
+    f' {dump_flags} 1>{dumptargetfile} 2>{dumptargetfile}.stderr')
   Depends(dumptargetfile, targetfile)
 
 def extract_fstar_file(options, sourcefile, fstar_includes):
@@ -767,9 +783,9 @@ def extract_fstar_file(options, sourcefile, fstar_includes):
   Depends(mlfile, to_obj_dir(base_name + '.fst.verified'))
   verifier_flags = options.verifier_flags.replace('--use_extracted_interfaces true', '')
   return env.Command(mlfile, sourcefile,
-    f'{fstar_exe} {sourcefile} {verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
+    f'{fstar_exe} {sourcefile} {verifier_flags} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
     f' {fstar_includes} {" ".join(fstar_user_args)}' +
-    f' --odir obj/ml_out --codegen OCaml --admit_smt_queries true --extract_module {module_name}')
+    f' --odir obj/ml_out --codegen OCaml --extract_module {module_name}')
 
 # Process a .fst or .fsti file
 def process_fstar_file(env, file, fstar_includes):
@@ -1079,8 +1095,8 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
           dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
             ' --print_bound_var_types --ugly ' + dump_module_flag)
           env.Command(dumptargetfile, t,
-            f'{fstar_exe} {t} {fstar_z3_path} {fstar_no_verify}' +
-            f' {dump_flags} 1>{dumptargetfile} 2>&1')
+            f'{fstar_exe} {t} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
+            f' {dump_flags} 1>{dumptargetfile} 2> {dumptargetfile}.stderr')
         if not (dumptargetfile in dump_deps):
           dump_deps[dumptargetfile] = set()
         for s in sources:
