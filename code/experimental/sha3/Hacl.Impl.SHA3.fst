@@ -86,16 +86,14 @@ let state_theta0 s _C =
   loop1 #uint64 #5 h0 (size 5) _C
     spec
     (fun x ->      
-  //    LSeq.unfold_repeati #(LSeq.lseq uint64 5) 5 (spec h0) (as_seq h0 _C) (v x);
+      LSeq.unfold_repeati #(LSeq.lseq uint64 5) 5 (spec h0) (as_seq h0 _C) (v x);
       _C.(x) <-
         readLane s x (size 0) ^.
         readLane s x (size 1) ^.
         readLane s x (size 2) ^.
         readLane s x (size 3) ^.
-        readLane s x (size 4) ;
-	admit()
-    );
-    admit()
+        readLane s x (size 4) 
+    )
 
 
 
