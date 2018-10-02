@@ -256,7 +256,6 @@ let lbytes_eq #len a b =
   loop h0 len (fun _ -> bool) (lbuffer bool 1) res refl 
     (fun i -> loc_buffer res) spec
     (fun i ->
-      Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
       let ai = a.(i) in
       let bi = b.(i) in
       let res0 = res.(size 0) in
@@ -265,8 +264,9 @@ let lbytes_eq #len a b =
   let res = res.(size 0) in
   pop_frame();
   // REMARK: for some reason [lbytes_eq] isn't unfolded
-  assert_norm (Seq.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b) ==
-               Seq.repeat (v len) (fun _ -> bool) (spec h0) true);
+  assert_norm ( 
+    Seq.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b) ==
+    Seq.repeat (v len) (fun _ -> bool) (spec h0) true);
   res
 
 // TODO: used in tests; move to a different module
