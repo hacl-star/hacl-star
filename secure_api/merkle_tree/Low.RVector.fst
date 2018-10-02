@@ -684,8 +684,7 @@ let rec create_ #a #rg rv cidx =
   let hh0 = HST.get () in
   if cidx = 0ul then ()
   else (let nrid = new_region_ (V.frameOf rv) in
-       let r_init = Rgl?.r_init rg in
-       let v = r_init nrid in
+       let v = Rgl?.r_init rg nrid in
 
        let hh1 = HST.get () in
        V.assign rv (cidx - 1ul) v;
@@ -821,8 +820,7 @@ let insert_copy #a #rg cp rv v =
   let hh0 = HST.get () in
   rv_elems_inv_live_region hh0 rv 0ul (V.size_of rv);
   let nrid = new_region_ (V.frameOf rv) in
-  let r_init = Rgl?.r_init rg in
-  let nv = r_init nrid in
+  let nv = Rgl?.r_init rg nrid in
 
   let hh1 = HST.get () in
   Rgl?.r_sep rg v loc_none hh0 hh1;
@@ -970,8 +968,7 @@ val free_elems:
       modifies (rv_loc_elems h0 rv 0ul (idx + 1ul)) h0 h1))
 let rec free_elems #a #rg rv idx =
   let hh0 = HST.get () in
-  let r_free = Rgl?.r_free rg in
-  r_free (V.index rv idx);
+  Rgl?.r_free rg (V.index rv idx);
 
   let hh1 = HST.get () in
   rs_loc_elems_elem_disj
