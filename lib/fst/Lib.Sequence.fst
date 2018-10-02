@@ -214,19 +214,6 @@ val repeat:
 let repeat n a f acc0 =
   repeat_right 0 n a f acc0
 
-(**
-* Repetition with a fixed accumulator type
-*)
-
-unfold val repeati:
-    #a: Type 
-  -> n:size_nat
-  -> f:(i:size_nat{i < n} -> a -> a)
-  -> acc0:a 
-  -> a 
-unfold let repeati #a n f acc0 =
-  repeat n (fun i -> a) f acc0
-
 (** Unfolding one iteration *)
 val unfold_repeat:
     n:size_nat
@@ -241,6 +228,21 @@ let unfold_repeat n a f acc0 i = ()
   repeat_left_right 0 i a f acc0
 *)
 
+(**
+* Repetition with a fixed accumulator type
+*)
+
+let fixed_a (a:Type) (i:size_nat) = a
+
+val repeati:
+    #a: Type 
+  -> n:size_nat
+  -> f:(i:size_nat{i < n} -> a -> a)
+  -> acc0:a 
+  -> a 
+let repeati #a n f acc0 =
+  repeat n (fixed_a a) f acc0
+
 (** Unfolding one iteration *)
 val unfold_repeati:
     #a : Type
@@ -250,7 +252,8 @@ val unfold_repeati:
   -> i:size_nat{i < n}
   -> Lemma (repeati #a (i + 1) f acc0 == f i (repeati #a i f acc0))
 let unfold_repeati #a n f acc0 i = 
-  admit()
+  unfold_repeat n (fixed_a a) f acc0 i 
+
 (* // Proof when using [repeat_left]:
   repeat_left_right 0 (i + 1) a f acc0;
   repeat_left_right 0 i a f acc0
