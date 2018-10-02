@@ -216,8 +216,7 @@ private val hash_vec_r_init:
       hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr))
 private let hash_vec_r_init r =
   let nrid = RV.new_region_ r in
-  let r_init = Rgl?.r_init hreg in
-  let ia = r_init nrid in
+  let ia = Rgl?.r_init hreg nrid in
   V.create_reserve 1ul ia r
 
 val hash_vec_r_free:
