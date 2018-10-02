@@ -45,17 +45,17 @@ let state_theta_inner_C (s:state) (i:size_nat{i < 5}) (_C:lseq uint64 5) : lseq 
   _C.[i] <- readLane s i 0 ^. readLane s i 1 ^. readLane s i 2 ^. readLane s i 3 ^. readLane s i 4
 
 let state_theta0 (s:state) (_C:lseq uint64 5) =
-  repeat 5 (fun i -> lseq uint64 5) (state_theta_inner_C s) _C
+  repeati 5 (state_theta_inner_C s) _C
 
 let state_theta_inner_s_inner (x:index) (_D:uint64) (y:index) (s:state) : state =
   writeLane s x y (readLane s x y ^. _D)
 
 let state_theta_inner_s (_C:lseq uint64 5) (x:index) (s:state) : state =
   let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (u32 1)) in
-  repeat 5 (fun i -> state) (state_theta_inner_s_inner x _D) s
+  repeati 5 (state_theta_inner_s_inner x _D) s
 
 let state_theta1 (s:state) (_C:lseq uint64 5): state =
-  repeat 5 (fun i -> state) (state_theta_inner_s _C) s
+  repeati 5 (state_theta_inner_s _C) s
 
 let state_theta (s:state) : state =
   let _C = create 5 (u64 0) in
@@ -72,8 +72,7 @@ let state_pi_rho_inner (i:size_nat{i < 24}) (current, s) : tuple2 uint64 state =
 
 let state_pi_rho (s_theta:state) : state =
   let current = readLane s_theta 1 0 in
-  let _, s_pi_rho = repeat 24 (fun i -> tuple2 uint64 state) 
-    state_pi_rho_inner (current, s_theta) in
+  let _, s_pi_rho = repeati 24 state_pi_rho_inner (current, s_theta) in
   s_pi_rho
 
 let state_chi_inner (s_pi_rho:state) (y:index) (x:index) (s:state) : state =
@@ -83,10 +82,10 @@ let state_chi_inner (s_pi_rho:state) (y:index) (x:index) (s:state) : state =
       readLane s_pi_rho ((x + 2) % 5) y))
 
 let state_chi_inner1 (s_pi_rho:state) (y:index) (s:state) : state =
-  repeat 5 (fun i -> state) (state_chi_inner s_pi_rho y) s
+  repeati 5 (state_chi_inner s_pi_rho y) s
 
 let state_chi (s_pi_rho:state) : state  =
-  repeat 5 (fun i -> state) (state_chi_inner1 s_pi_rho) s_pi_rho
+  repeati 5 (state_chi_inner1 s_pi_rho) s_pi_rho
 
 let state_iota (s:state) (round:size_nat{round < 24}) : state =
   writeLane s 0 0 (readLane s 0 0 ^. keccak_rndc.[round])
@@ -99,7 +98,7 @@ let state_permute1 (round:size_nat{round < 24}) (s:state) : state =
   s_iota
 
 let state_permute (s:state) : state =
-  repeat 24 (fun i -> state) state_permute1 s
+  repeati 24 state_permute1 s
 
 let loadState_inner (block:lbytes 200) (j:size_nat{j < 25}) (s:state) : state =
   let nj = uint_from_bytes_le #U64 (sub block (j * 8) 8) in
@@ -110,7 +109,7 @@ let loadState (rateInBytes:size_nat{rateInBytes <= 200})
 	      (s:state) : state =
   let block = create 200 (u8 0) in
   let block = update_sub block 0 rateInBytes input in
-  repeat 25 (fun i -> state) (loadState_inner block) s
+  repeati 25 (loadState_inner block) s
 
 let storeState_inner (s:state) (j:size_nat{j < 25}) (block:lbytes 200) :
   res:lbytes 200{
@@ -126,7 +125,7 @@ let storeState_inner (s:state) (j:size_nat{j < 25}) (block:lbytes 200) :
 let storeState (rateInBytes:size_nat{rateInBytes <= 200})
 	       (s:state) : lbytes rateInBytes =
   let block = create 200 (u8 0) in
-  let block = repeat 25 (fun i -> lbytes 200) (storeState_inner s) block in
+  let block = repeati 25 (storeState_inner s) block in
   sub block 0 rateInBytes
 
 val absorb_last:
@@ -167,7 +166,7 @@ let absorb (s:state)
   let open Lib.RawIntTypes in
   let n = inputByteLen / rateInBytes in
   let rem = inputByteLen % rateInBytes in
-  let s = repeat n (fun i -> state) (absorb_inner rateInBytes inputByteLen input) s in
+  let s = repeati n (absorb_inner rateInBytes inputByteLen input) s in
   let s = absorb_last s rateInBytes inputByteLen input delimitedSuffix in
   let s =
     if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) && (rem = rateInBytes - 1))

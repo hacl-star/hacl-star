@@ -9,7 +9,7 @@ open LowStar.Buffer
 open LowStar.BufferOps
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 open Lib.Endianness
 
 open Spec.SHA3.Constants
@@ -81,24 +81,23 @@ val state_theta0:
       modifies (loc_buffer _C) h0 h1 /\
       as_seq h1 _C == S.state_theta0 (as_seq h0 s) (as_seq h0 _C))
 let state_theta0 s _C =
-  let a_spec i = LSeq.lseq uint64 5 in 
-  let a_impl = lbuffer uint64 5 in
-  [@ inline_let]
   let spec h0 = S.state_theta_inner_C (as_seq h0 s) in
   let h0 = ST.get () in
-  loop h0 (size 5) a_spec a_impl _C
-    (fun h i -> as_seq h _C)
-    (fun i -> loc_buffer _C)
+  loop1 #uint64 #5 h0 (size 5) _C
     spec
     (fun x ->      
-      LSeq.unfold_repeat 5 a_spec (spec h0) (as_seq h0 _C) (v x);
+  //    LSeq.unfold_repeati #(LSeq.lseq uint64 5) 5 (spec h0) (as_seq h0 _C) (v x);
       _C.(x) <-
         readLane s x (size 0) ^.
         readLane s x (size 1) ^.
         readLane s x (size 2) ^.
         readLane s x (size 3) ^.
-        readLane s x (size 4)    
-    )
+        readLane s x (size 4) ;
+	admit()
+    );
+    admit()
+
+
 
 inline_for_extraction noextract
 val state_theta_inner_s:

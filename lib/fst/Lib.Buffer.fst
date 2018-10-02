@@ -237,6 +237,41 @@ let loop h0 n a_spec a_impl acc refl footprint spec impl =
   let inv h i = loop_inv h0 n a_spec a_impl acc refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
 
+unfold
+val loop1_inv:
+    h0:mem
+  -> n:size_t
+  -> b: Type
+  -> blen: size_nat
+  -> acc:lbuffer b blen
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> Seq.lseq b blen -> Seq.lseq b blen))
+  -> i:size_nat{i <= v n}
+  -> h:mem
+  -> Type0
+unfold
+let loop1_inv h0 n b blen acc spec i h =
+  modifies (loc_buffer acc) h0 h /\
+  as_seq h acc == Seq.repeati i (spec h0) (as_seq h0 acc)
+
+
+inline_for_extraction noextract
+val loop1:
+    #b:Type
+  -> #blen:size_nat
+  -> h0:mem
+  -> n:size_t
+  -> acc:lbuffer b blen
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> Seq.lseq b blen -> Seq.lseq b blen))
+  -> impl:(i:size_t{v i < v n} -> Stack unit
+     (requires loop1_inv h0 n b blen acc spec (v i))
+     (ensures  fun _ _ h1 -> loop1_inv h0 n b blen acc spec (v i + 1) h1))
+  -> Stack unit
+    (requires fun h -> h0 == h)
+    (ensures  fun _ _ h1 -> loop1_inv h0 n b blen acc spec (v n) h1)
+let loop1 #b #blen h0 n acc spec impl =
+  let inv h i = loop1_inv h0 n b blen acc spec i h in
+  Lib.Loops.for (size 0) n inv impl
+
 (** Compares two byte buffers of equal length returning a bool *)
 inline_for_extraction
 val lbytes_eq:
