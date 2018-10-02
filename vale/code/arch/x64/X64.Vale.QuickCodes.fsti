@@ -392,7 +392,10 @@ unfold let normal_steps : list string =
     `%Mkstate?.memTaint;
     `%QProc?.wp;
     `%QProc?.mods;
-    `%FStar.FunctionalExtensionality.on_dom
+    `%OConst?;
+    `%OReg?;
+    `%OMem?;
+    `%FStar.FunctionalExtensionality.on_dom;
   ]
 
 unfold let normal (x:Type0) : Type0 = norm [iota; zeta; simplify; primops; delta_attr [`%va_qattr]; delta_only normal_steps] x
