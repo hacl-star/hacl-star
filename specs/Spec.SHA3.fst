@@ -235,11 +235,11 @@ let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen =
   squeeze s rateInBytes outputByteLen
 
 let shake128 (inputByteLen:size_nat) (input:lbytes inputByteLen)
-             (outputByteLen:size_nat) (output:lbytes outputByteLen) : lbytes outputByteLen =
+             (outputByteLen:size_nat) : lbytes outputByteLen =
   keccak 1344 256 inputByteLen input (u8 0x1F) outputByteLen
 
 let shake256 (inputByteLen:size_nat) (input:lbytes inputByteLen)
-             (outputByteLen:size_nat) (output:lbytes outputByteLen) : lbytes outputByteLen =
+             (outputByteLen:size_nat) : lbytes outputByteLen =
   keccak 1088 512 inputByteLen input (u8 0x1F) outputByteLen
 
 let sha3_224 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 28 =
