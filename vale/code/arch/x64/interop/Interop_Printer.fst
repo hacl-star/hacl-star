@@ -496,7 +496,7 @@ let print_ty_number = function
 let rec print_valid_taints = function
   | [] -> ""
   | (a, TBuffer ty, t)::q -> "        valid_taint_buf" ^ (print_ty_number ty) ^ "(" ^ a ^ ", mem, memTaint, "^ taint_of_label t ^");\n" ^ print_valid_taints q
-  | a::q -> print_buff_readable q
+  | a::q -> print_valid_taints q
 
 let print_vale_arg_value = function
   | (_, TGhost _, _) -> "error" // Should not happen
