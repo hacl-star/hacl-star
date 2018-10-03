@@ -1,8 +1,7 @@
 open Interop_Printer
 
-(*
-let memcpy = ("memcpy", [("dst", TBuffer TUInt64, Sec); ("src", TBuffer TUInt64, Sec)], Stk (Prims.parse_int "0"))
-*)
+
+
 
 (* let poly = ("poly", [("ctx", TBuffer TUInt64); ("inp", TBuffer TUInt64); ("len", TBase TUInt64)]) *)
 
@@ -103,6 +102,8 @@ let sha_update_bytes =
   Modifies ["ctx_b"])
 *)
 
+let memcpy = ("memcpy", [("dst", TBuffer TUInt64, Sec); ("src", TBuffer TUInt64, Sec)], SaveRegsStk false, AddStk (Prims.parse_int "0"), Modifies ["dst"], Return Unit)
+
 let gctr_bytes128 =
   ("gctr_bytes_stdcall128",
   [("in_b", TBuffer TUInt128, Sec); ("out_b", TBuffer TUInt128, Sec);
@@ -111,9 +112,12 @@ let gctr_bytes128 =
    ("iv_b", TBuffer TUInt128, Sec)],
   SaveRegsStk true,
   AddStk (Prims.parse_int "0"),
-  Modifies ["out_b"])
+  Modifies ["out_b"],
+  Return Unit)
 
-let name = gctr_bytes128 
+let check_aesni = ("check_aesni_stdcall", [], SaveRegsStk false, AddStk (Prims.parse_int "0"), Modifies [], Return Int64)
+
+let name = check_aesni 
 
 let _ = print_string (translate_vale X86 name)
 let _ = print_newline()

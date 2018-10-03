@@ -20,8 +20,13 @@ type save_regs = | SaveRegsStk of bool
 
 type modified = | Modifies of list string
 
+type ret_type = | Unit
+                | Int64
+
+type ret = | Return of ret_type
+
 type arg = string * ty * label
-type func_ty = string * list arg * save_regs * stack_slots * modified
+type func_ty = string * list arg * save_regs * stack_slots * modified * ret
 
 type os = | Windows | Linux
 type target = | X86
@@ -54,9 +59,9 @@ let print_low_ty ty t = match ty with
   | TBuffer ty -> if t = Pub then "b8" else "s8"
   | TBase ty -> print_low_nat_ty ty
 
-let rec print_low_args = function
-  | [] -> "Stack unit"
-  | (a, ty, t)::q -> a ^ ":" ^ print_low_ty ty t ^ " -> " ^ print_low_args q
+let rec print_low_args return = function
+  | [] -> if return then "Stack UInt64.t" else "Stack unit"
+  | (a, ty, t)::q -> a ^ ":" ^ print_low_ty ty t ^ " -> " ^ print_low_args return q
 
 let rec print_low_args_and = function
   | [] -> ""
@@ -278,14 +283,9 @@ let rec print_modifies (args:list string) = match args with
   | a::q -> "M.loc_union (M.loc_buffer " ^ a ^ ") ( "  ^ print_modifies q ^ ")"
 
 let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_stack:int) (slots:int) (additional:int) =
-  let name, args, SaveRegsStk save, AddStk slots, Modifies modified = func in
-  // let additional = (if os = Windows then 5 else 0) in
+  let name, args, SaveRegsStk save, AddStk slots, Modifies modified, Return ty = func in
+  let return = Int64? ty in
   let buffer_args = List.Tot.Base.filter is_buffer args in
-    // let nbr_stack_args = List.Tot.Base.length real_args - 
-  //   List.Tot.Base.length (calling_registers os target) in
-  // let length_stack = (slots + additional + nbr_stack_args) `op_Multiply` 8 in
-  // let stack_needed = length_stack > 0 in
-  // let fuel_value = string_of_int (List.Tot.Base.length buffer_args + 3) in
   let stack_length = if save then
     "(if is_win then " ^ string_of_int (224 + length_stack) ^ " else " ^ string_of_int (64 + length_stack) ^ ")" else string_of_int (length_stack) in
   let implies_precond = if stack_needed then "B.length stack_b == " ^ stack_length ^
@@ -306,13 +306,21 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
     "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ 
     stack_precond "h0" ^
     "}) ->\n" ^
-  "  Ghost (TS.traceState * nat * HS.mem)\n" ^
+  (if return then "  Ghost (TS.traceState * nat * HS.mem * nat64)\n"
+  else "  Ghost (TS.traceState * nat * HS.mem)\n") ^
   "    (requires True)\n" ^ 
-  "    (ensures (fun (s1, f1, h1) ->\n" ^
+  (if return then
+  "    (ensures (fun (s1, f1, h1, ret_val) ->\n"
+  else
+  "    (ensures (fun (s1, f1, h1) ->\n") ^
   "      (let s0 = create_initial_trusted_state is_win " ^ print_args_names args ^ "stack_b h0 in\n" ^
   "      Some s1 == TS.taint_eval_code (va_code_" ^ name ^ " is_win) f1 s0 /\\\n" ^
   "      Interop.correct_down h1 addrs " ^ (namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::buffer_args))  ^ " s1.TS.state.BS.mem /\\\n" ^
-  "      post_cond h0 h1 " ^ (print_args_names args) ^ " /\\\n" ^
+  (if return then
+  "      post_cond h0 h1 (UInt64.uint_to_t ret_val)" ^ (print_args_names args) ^ " /\\\n" ^
+  "      ret_val == s1.TS.state.BS.regs Rax /\\\n"
+  else
+  "      post_cond h0 h1 " ^ (print_args_names args) ^ " /\\\n") ^
   "      calling_conventions is_win s0 s1 /\\\n" ^
   "      M.modifies (" ^ print_modifies ("stack_b" :: modified) ^ ") h0 h1)\n" ^
   "    ))\n\n" ^
@@ -353,7 +361,10 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "    va_post (va_code_" ^ name ^ " is_win) va_s0 va_sM va_fM is_win" ^
   (if stack_needed then " stack_b " else " ") ^
   (print_args_names_reveal args) ^ ")\n" ^
-  "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs " ^ (print_args_names args) ^ ") =\n" ^
+  (if return then
+  "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs (UInt64.uint_to_t (va_sM.regs Rax))" ^ (print_args_names args) ^ ") =\n"
+  else
+  "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs " ^ (print_args_names args) ^ ") =\n") ^
   print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^ 
   "  ()\n\n" ^
   "let lemma_ghost_" ^ name ^ " is_win " ^ (print_args_names args) ^
@@ -371,10 +382,14 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "  assert (state_eq_S s1 (state_to_S s_v));\n" ^  
   "  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);\n" ^
   "  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);\n" ^
-  "  s1, f_v, s_v.mem.hs\n\n"
+  (if return then
+  "  s1, f_v, s_v.mem.hs, s_v.regs Rax\n\n"
+  else
+  "  s1, f_v, s_v.mem.hs\n\n")
 
 let translate_lowstar target (func:func_ty) =
-  let name, args, SaveRegsStk saveRegs, AddStk slots, Modifies modified = func in
+  let name, args, SaveRegsStk saveRegs, AddStk slots, Modifies modified, Return ty = func in
+  let return = Int64? ty in
   let additional = 5 in
   let buffer_args = List.Tot.Base.filter is_buffer args in
   let real_args = List.Tot.Base.filter not_ghost args in
@@ -423,14 +438,23 @@ let translate_lowstar target (func:func_ty) =
   "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Types_s\n\n" ^
   "// TODO: Complete with your pre- and post-conditions\n" ^
   "let pre_cond (h:HS.mem) " ^ (print_args_list args) ^ "= " ^ (liveness "h" args) ^ separator1 ^ (disjoint args) ^ (print_lengths args) ^ "\n\n" ^
-  "let post_cond (h:HS.mem) (h':HS.mem) " ^ (print_args_list args) ^ "= " 
+  (if return then
+  "let post_cond (h:HS.mem) (h':HS.mem) (ret_val:UInt64.t) " ^ (print_args_list args) ^ "= "
+  else
+  "let post_cond (h:HS.mem) (h':HS.mem) " ^ (print_args_list args) ^ "= ") 
     ^ (liveness "h" args) ^ " /\\ " ^ (liveness "h'" args) ^ separator0 ^ (print_lengths args) ^ "\n\n" ^
-  "let full_post_cond (h:HS.mem) (h':HS.mem) " ^ (print_args_list args) ^ " =\n" ^
+  (if return then
+  "let full_post_cond (h:HS.mem) (h':HS.mem) (ret_val:UInt64.v) " ^ (print_args_list args) ^ " =\n"
+  else
+  "let full_post_cond (h:HS.mem) (h':HS.mem) " ^ (print_args_list args) ^ " =\n") ^
   "  post_cond h h' " ^ (print_args_names args) ^ " /\\\n" ^
   "  M.modifies (" ^ (print_modifies modified) ^ ") h h'\n\n" ^
-  "val " ^ name ^ ": " ^ (print_low_args args) ^
+  "val " ^ name ^ ": " ^ (print_low_args return args) ^
   "\n\t(requires (fun h -> pre_cond h " ^ (print_args_names args) ^ "))\n\t" ^
-  "(ensures (fun h0 _ h1 -> full_post_cond h0 h1 " ^ (print_args_names args) ^ "))\n\n" ^    
+  (if return then
+  "(ensures (fun h0 ret_val h1 -> full_post_cond h0 h1 ret_val" ^ (print_args_names args) ^ "))\n\n"
+  else
+  "(ensures (fun h0 _ h1 -> full_post_cond h0 h1 " ^ (print_args_names args) ^ "))\n\n") ^ 
   "module " ^ name ^
   "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Words_s\nopen Types_s\nopen X64.Machine_s\nopen X64.Memory_s\nopen X64.Vale.State\nopen X64.Vale.Decls\nopen BufferViewHelpers\nopen Interop_assumptions\nopen X64.Vale.StateLemmas\nopen X64.Vale.Lemmas\nmodule TS = X64.Taint_Semantics_s\nmodule ME = X64.Memory_s\nmodule BS = X64.Bytes_Semantics_s\n\nfriend SecretByte\nfriend X64.Memory_s\nfriend X64.Memory\nfriend X64.Vale.Decls\nfriend X64.Vale.StateLemmas\n#set-options \"--z3rlimit 60\"\n\n" ^
   "open Vale_" ^ name ^ "\n\n" ^
@@ -442,18 +466,29 @@ let translate_lowstar target (func:func_ty) =
   "let " ^ name ^ " " ^ (print_args_names args) ^ " =\n" ^
   (if stack_needed then "  push_frame();\n" ^
     "  let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t " ^ string_length_stack ^ ") in\n"  else "") ^
-  " if win then\n" ^
+  (if return then "  let x = (" else "  ") ^
+  "if win then\n" ^
   "  st_put\n" ^
   "    (fun h -> pre_cond h " ^ (print_args_names args) ^ win_stack_precond "h" ^ ")\n" ^
+  (if return then (
+  "    (fun h -> let _, _, h1, x =
+        lemma_ghost_" ^ name ^ " true " ^ (print_args_names args) ^ "stack_b h\n" ^
+  "    in x, h1)\n")     
+  else (
   "    (fun h -> let _, _, h1 =
       lemma_ghost_" ^ name ^ " true " ^ (print_args_names args) ^ "stack_b h\n" ^
-  "    in h1)\n" ^
+  "    in (), h1)\n")) ^
   "  else st_put\n" ^
   "    (fun h -> pre_cond h " ^ (print_args_names args) ^ lin_stack_precond "h" ^ ")\n" ^  
+  (if return then (
+  "    (fun h -> let _, _, h1, x =
+        lemma_ghost_" ^ name ^ " false " ^ (print_args_names args) ^ "stack_b h\n" ^
+  "    in x, h1))\n")   
+  else (
   "    (fun h -> let _, _, h1 =
       lemma_ghost_" ^ name ^ " false " ^ (print_args_names args) ^ "stack_b h\n" ^
-  "    in h1);\n" ^
-  "  pop_frame()\n"
+  "    in (), h1);\n")) ^
+  (if return then "  in pop_frame();\n  UInt64.uint_to_t x\n" else "  pop_frame()\n")
   
 let print_vale_arg = function
   | (a, ty, _) -> "ghost " ^ a ^ ":" ^ print_vale_full_ty ty
@@ -553,7 +588,7 @@ let rec print_vale_modifies (args:list string) = match args with
   | a::q -> "loc_union(loc_buffer(" ^ a ^ "), " ^ print_vale_modifies q ^ ")"
 
 let translate_vale target (func:func_ty) =
-  let name, args, SaveRegsStk save, AddStk slots, Modifies modified = func in
+  let name, args, SaveRegsStk save, AddStk slots, Modifies modified, Return _ = func in
   let real_args = List.Tot.Base.filter not_ghost args in
   let stack_before_args = slots + 5 in // Account for shadow space on windows
   let nbr_stack_args = stack_before_args + List.Tot.Base.length real_args - 
