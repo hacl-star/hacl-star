@@ -99,7 +99,7 @@ let step3
   (mi: word_block)
   (h: hash_w SHA1)
 : Tot (hash_w SHA1)
-= Spec.Compat.Loops.repeat_range 0 80 (step3_body mi) h
+= Spec.Loops.repeat_range 0 80 (step3_body mi) h
 
 (* Section 6.1.2 Step 4 *)
 

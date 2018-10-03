@@ -199,7 +199,7 @@ let shuffle_core (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < s
 
 (* Full shuffling function *)
 let shuffle (a:sha2_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
-  Spec.Compat.Loops.repeat_range 0 (size_k_w a) (shuffle_core a block) hash
+  Spec.Loops.repeat_range 0 (size_k_w a) (shuffle_core a block) hash
 
 let init = h0
 
@@ -207,7 +207,7 @@ let init = h0
 let update (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block a}): Tot (hash_w a) =
   let block_w = words_from_be a size_block_w block in
   let hash_1 = shuffle a hash block_w in
-  Spec.Compat.Loops.seq_map2 (word_add_mod a) hash hash_1
+  Spec.Loops.seq_map2 (word_add_mod a) hash hash_1
 
 
 #set-options "--max_fuel 0 --max_ifuel 0"

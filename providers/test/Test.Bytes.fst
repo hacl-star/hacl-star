@@ -72,7 +72,7 @@ let rec test_aead (b:Lowstarize.lbuffer aead_vector) : St bool =
   let b = B.alloca true 1ul in
   B.recall vecs;
   let h0 = HyperStack.ST.get() in
-  C.Compat.Loops.for 0ul len (fun h i -> B.live h vecs /\ B.live h b /\ B.modifies (B.loc_buffer b) h0 h)
+  C.Loops.for 0ul len (fun h i -> B.live h vecs /\ B.live h b /\ B.modifies (B.loc_buffer b) h0 h)
   (fun i ->
     let v = vecs.(i) in
     match v with

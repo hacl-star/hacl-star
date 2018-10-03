@@ -58,7 +58,7 @@ let rounds : shuffle =
 
 let chacha20_core (s:state) : Tot state =
     let s' = rounds s in
-    Spec.Compat.Loops.seq_map2 (fun x y -> x +%^ y) s' s
+    Spec.Loops.seq_map2 (fun x y -> x +%^ y) s' s
 
 (* state initialization *)
 let c0 = 0x61707865ul

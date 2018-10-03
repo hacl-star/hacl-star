@@ -6,7 +6,7 @@ open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
 
-open Spec.Compat.Loops
+open Spec.Loops
 open Spec.Lib
 
 module U8 = FStar.UInt8

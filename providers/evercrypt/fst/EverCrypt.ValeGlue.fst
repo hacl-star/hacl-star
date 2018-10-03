@@ -2,7 +2,7 @@
 module EverCrypt.ValeGlue
 
 open C.Failure
-open C.Compat.Endianness
+open C.Endianness
 open C.String
 
 module U32 = FStar.UInt32
@@ -25,7 +25,7 @@ let sha256_update state data =
 
 let sha256_update_multi state data n =
   admit();
-  C.Compat.Loops.for 0ul n (fun _ _ -> True) (fun i ->
+  C.Loops.for 0ul n (fun _ _ -> True) (fun i ->
     let b = LowStar.Buffer.offset data U32.(i *^ 64ul) in
     Vale.Hash.SHA2_256.update state b)
 
@@ -37,7 +37,7 @@ let sha256_finish state hash =
   Vale.Hash.SHA2_256.finish state hash;
   // Reverse byte-order in little-endian hosts
   admit();
-  C.Compat.Loops.for 0ul 8ul (fun _ _ -> True) (fun i ->
+  C.Loops.for 0ul 8ul (fun _ _ -> True) (fun i ->
     let out = LowStar.Buffer.sub hash U32.(i *^ 4ul) 4ul in
     let out = LowStar.ToFStarBuffer.new_to_old_st out in
     store32_le out (htole32 (load32_be out)))

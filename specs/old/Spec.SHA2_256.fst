@@ -8,7 +8,7 @@ open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
 
-open Spec.Compat.Loops
+open Spec.Loops
 open Spec.Lib
 
 module Word = FStar.UInt32
@@ -144,7 +144,7 @@ let shuffle_core (block:block_w) (hash:hash_w) (t:counter{t < size_k_w}) : Tot h
 
 
 let shuffle (hash:hash_w) (block:block_w) : Tot hash_w =
-  Spec.Compat.Loops.repeat_range_spec 0 size_ws_w (shuffle_core block) hash
+  Spec.Loops.repeat_range_spec 0 size_ws_w (shuffle_core block) hash
 
 
 let update (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =

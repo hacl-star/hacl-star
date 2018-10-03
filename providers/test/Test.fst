@@ -106,7 +106,7 @@ let test_one_hash vec =
       push_frame();
       let total_input = B.alloca 0uy total_input_len in
       let h0 = get () in
-      C.Compat.Loops.for 0ul repeat
+      C.Loops.for 0ul repeat
       (fun h i -> B.live h total_input /\ B.modifies (B.loc_buffer total_input) h0 h)
       (fun i ->
         assert (v input_len * v i + v input_len <= v input_len * (v repeat - 1) + v input_len);
