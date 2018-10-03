@@ -30,9 +30,9 @@ unfold let block256 = block_w SHA2_256
 unfold let hash256 = hash_w SHA2_256
 //unfold let bytes_blocks256 = bytes_blocks SHA2_256
 unfold let repeat_range_vale (max:nat { max < size_k_w SHA2_256}) (block:block256) (hash:hash256) =
-  Spec.Loops.repeat_range 0 max (shuffle_core_opaque SHA2_256 block) hash
+  Spec.Compat.Loops.repeat_range 0 max (shuffle_core_opaque SHA2_256 block) hash
 unfold let lemma_repeat_range_0_vale (block:block256) (hash:hash256) = 
-  Spec.Loops.repeat_range_base 0 (shuffle_core_opaque SHA2_256 block) hash
+  Spec.Compat.Loops.repeat_range_base 0 (shuffle_core_opaque SHA2_256 block) hash
 unfold let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 = 
   if length blocks % 64 = 0 then let b:bytes_blocks SHA2_256 = blocks in update_multi_opaque SHA2_256 hash b else hash
 
@@ -349,14 +349,14 @@ let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w SHA2_2
   (requires t + 1 < size_k_w SHA2_256 /\
             xmm0.lo0 == add_wrap (vv (k0 SHA2_256).[t]  ) (vv (ws_opaque SHA2_256 block t)) /\
             xmm0.lo1 == add_wrap (vv (k0 SHA2_256).[t+1]) (vv (ws_opaque SHA2_256 block (t+1))) /\ 
-            make_hash abef cdgh == Spec.Loops.repeat_range_spec 0 t (shuffle_core_opaque SHA2_256 block) hash_in
+            make_hash abef cdgh == Spec.Compat.Loops.repeat_range_spec 0 t (shuffle_core_opaque SHA2_256 block) hash_in
             )
   (ensures make_hash (sha256_rnds2_spec cdgh abef xmm0) abef ==
-           Spec.Loops.repeat_range_spec 0 (t+2) (shuffle_core_opaque SHA2_256 block) hash_in)
+           Spec.Compat.Loops.repeat_range_spec 0 (t+2) (shuffle_core_opaque SHA2_256 block) hash_in)
   =
   lemma_sha256_rnds2_two_steps abef cdgh xmm0 t block;
-  Spec.Loops.lemma_repeat_range_spec 0 (t + 1) (shuffle_core_opaque SHA2_256 block) hash_in;
-  Spec.Loops.lemma_repeat_range_spec 0 (t + 2) (shuffle_core_opaque SHA2_256 block) hash_in;
+  Spec.Compat.Loops.lemma_repeat_range_spec 0 (t + 1) (shuffle_core_opaque SHA2_256 block) hash_in;
+  Spec.Compat.Loops.lemma_repeat_range_spec 0 (t + 2) (shuffle_core_opaque SHA2_256 block) hash_in;
   ()
 
 (* Proof work for the SHA256_msg* instructions *)
@@ -607,13 +607,13 @@ let translate_hash_update (h0 h1 h0' h1' a0 a1:quad32) : Lemma
          let h = make_hash h0 h1 in
          let a = make_hash a0 a1 in
          let h' = make_hash h0' h1' in
-         let mapped = Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) h a in
+         let mapped = Spec.Compat.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) h a in
          mapped == h'))
   =
   let h = make_hash h0 h1 in
   let a = make_hash a0 a1 in
   let h' = make_hash h0' h1' in
-  let mapped = Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) h a in
+  let mapped = Spec.Compat.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) h a in
   FStar.Classical.forall_intro_2 lemma_add_wrap_is_add_mod;
   assert (equal mapped h');
   ()
@@ -622,7 +622,7 @@ unfold let shuffle_opaque = make_opaque shuffle
   
 let update_block (hash:hash256) (block:block256): Tot (hash256) =
   let hash_1 = shuffle_opaque SHA2_256 hash block in
-  Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) hash hash_1
+  Spec.Compat.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) hash hash_1
 
 let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = size_block SHA2_256}) :
   Lemma (update_block hash (words_from_be SHA2_256 size_block_w block) == update SHA2_256 hash block)
@@ -634,7 +634,7 @@ let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = size_blo
 let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) : Lemma
   (requires (let hash_orig = make_hash h0 h1 in
              make_hash src1 src2 == 
-             Spec.Loops.repeat_range_spec 0 64 (shuffle_core_opaque SHA2_256 block) hash_orig /\
+             Spec.Compat.Loops.repeat_range_spec 0 64 (shuffle_core_opaque SHA2_256 block) hash_orig /\
              src1' == add_wrap_quad32 src1 h0 /\
              src2' == add_wrap_quad32 src2 h1))
   (ensures (let hash_orig = make_hash h0 h1 in
@@ -647,8 +647,8 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) :
   let h = make_hash src1 src2 in
   assert (shuffle_core_opaque == shuffle_core);
   assert (shuffle_core_opaque SHA2_256 block == shuffle_core SHA2_256 block);
-  assert (Spec.Loops.repeat_range_spec 0 64 (shuffle_core_opaque SHA2_256 block) hash_orig ==
-          Spec.Loops.repeat_range_spec 0 64 (shuffle_core SHA2_256 block) hash_orig);
+  assert (Spec.Compat.Loops.repeat_range_spec 0 64 (shuffle_core_opaque SHA2_256 block) hash_orig ==
+          Spec.Compat.Loops.repeat_range_spec 0 64 (shuffle_core SHA2_256 block) hash_orig);
   assert (make_hash src1 src2 == shuffle SHA2_256 hash_orig block); 
   assert (make_hash src1 src2 == shuffle_opaque SHA2_256 hash_orig block);
   translate_hash_update src1 src2 src1' src2' h0 h1;
@@ -917,16 +917,16 @@ let le_bytes_to_hash (b:seq nat8) : hash_w SHA2_256 =
      init 8 f)
   else (
      let open Words.Seq_s in
-     Spec.Loops.seq_map to_uint32 (seq_nat8_to_seq_nat32_LE b)
+     Spec.Compat.Loops.seq_map to_uint32 (seq_nat8_to_seq_nat32_LE b)
   )
 
 let lemma_le_bytes_to_hash_quads_part1 (s:seq quad32) : Lemma
   (requires length s == 2)
   (ensures  le_bytes_to_hash (le_seq_quad32_to_bytes s) ==
-            Spec.Loops.seq_map to_uint32 (Words.Seq_s.seq_four_to_seq_LE s))
+            Spec.Compat.Loops.seq_map to_uint32 (Words.Seq_s.seq_four_to_seq_LE s))
   =
   let rhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in  
-  assert (rhs == Spec.Loops.seq_map to_uint32 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (le_seq_quad32_to_bytes s)));
+  assert (rhs == Spec.Compat.Loops.seq_map to_uint32 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (le_seq_quad32_to_bytes s)));
   reveal_opaque le_seq_quad32_to_bytes_def;
   Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_LE (Words.Seq_s.seq_four_to_seq_LE s);
   ()
@@ -948,7 +948,7 @@ let lemma_le_bytes_to_hash_quads (s:seq quad32) : Lemma
   =
   let rhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in  
   lemma_le_bytes_to_hash_quads_part1 s;
-  assert (rhs == Spec.Loops.seq_map to_uint32 (Words.Seq_s.seq_four_to_seq_LE s));
+  assert (rhs == Spec.Compat.Loops.seq_map to_uint32 (Words.Seq_s.seq_four_to_seq_LE s));
   ()
 #pop-options
 

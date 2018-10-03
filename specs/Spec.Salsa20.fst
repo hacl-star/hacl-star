@@ -52,11 +52,11 @@ let double_round: shuffle =
   column_round @ row_round (* 2 rounds *)
 
 let rounds : shuffle =
-    Spec.Loops.repeat_spec 10 double_round (* 20 rounds *)
+    Spec.Compat.Loops.repeat_spec 10 double_round (* 20 rounds *)
 
 let salsa20_core (s:state) : Tot state =
     let s' = rounds s in
-    Spec.Loops.seq_map2 (fun x y -> x +%^ y) s' s
+    Spec.Compat.Loops.seq_map2 (fun x y -> x +%^ y) s' s
 
 (* state initialization *)
 

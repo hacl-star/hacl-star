@@ -8,7 +8,7 @@ module Spec = Spec.MD5
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module E = FStar.Kremlin.Endianness
-module CE = C.Endianness
+module CE = C.Compat.Endianness
 module Common = Hacl.Hash.Common
 
 friend Spec.MD5
@@ -57,7 +57,7 @@ let init s =
   let inv (h' : HS.mem) (i: nat) : GTot Type0 =
     B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 4 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.init 0 i
   in
-  C.Loops.for 0ul 4ul inv (fun i ->
+  C.Compat.Loops.for 0ul 4ul inv (fun i ->
     B.upd s i (h0 i);
     let h' = HST.get () in
     Seq.snoc_slice_index (B.as_seq h' s) 0 (U32.v i);

@@ -6,7 +6,7 @@ open FStar.HyperStack
 open FStar.ST
 open FStar.Buffer
 
-open C.Loops
+open C.Compat.Loops
 
 open Hacl.Hash.Lib.LoadStore
 
@@ -68,7 +68,7 @@ inline_for_extraction let pos_state_hash0 = pos_key_w +^ size_key_w
 
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
-let xor_bytes_inplace a b len = C.Loops.in_place_map2 a b len (fun x y -> H8.logxor x y)
+let xor_bytes_inplace a b len = C.Compat.Loops.in_place_map2 a b len (fun x y -> H8.logxor x y)
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"

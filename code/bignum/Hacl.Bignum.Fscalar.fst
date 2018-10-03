@@ -28,4 +28,4 @@ val fscalar:
       /\ as_seq h1 output == fscalar_spec (as_seq h0 input) s))
 [@"substitute"]
 let fscalar output b s =
-  C.Loops.map output b clen (fun x -> Hacl.Bignum.Wide.mul_wide x s)
+  C.Compat.Loops.map output b clen (fun x -> Hacl.Bignum.Wide.mul_wide x s)

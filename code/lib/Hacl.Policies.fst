@@ -93,7 +93,7 @@ let rec cmp_bytes_ b1 b2 len tmp =
     else
       lemma_not_equal_last (as_seq h0 b1) (as_seq h0 b2) 0 (U32.v i + 1)
   in
-  C.Loops.for 0ul len inv f;
+  C.Compat.Loops.for 0ul len inv f;
   tmp.(0ul)
 
 

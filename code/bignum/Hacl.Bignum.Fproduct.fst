@@ -30,7 +30,7 @@ val copy_from_wide_:
       /\ as_seq h1 output == copy_from_wide_spec (as_seq h0 input) ))
 [@"c_inline"]
 let copy_from_wide_ output input  =
-  C.Loops.map output input clen (fun x -> wide_to_limb x)
+  C.Compat.Loops.map output input clen (fun x -> wide_to_limb x)
 
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_fuel 0"
@@ -71,7 +71,7 @@ let shift_ output =
     assert(Hacl.Bignum.Limb.v (get h' output (v ctr)) = Hacl.Bignum.Limb.v (get h0 output (v ctr-1)));
     assert(forall (j:nat). (j <= len - 1 /\ j > len - 1 - (v i+1)) ==> Hacl.Bignum.Limb.v (get h' output (j)) = Hacl.Bignum.Limb.v (get h0 output (j-1)))
   in
-  C.Loops.for 0ul (clen -^ 1ul) inv f';
+  C.Compat.Loops.for 0ul (clen -^ 1ul) inv f';
   let h = ST.get() in
   assert(forall (i:nat). (i <= len - 1 /\ i > 0) ==> Hacl.Bignum.Limb.v (get h output (i)) == Hacl.Bignum.Limb.v (get h0 output (i-1)));
   lemma_variable_change h h0 output
@@ -110,7 +110,7 @@ val sum_scalar_multiplication_:
       /\ (as_seq h1 output) == sum_scalar_multiplication_spec (as_seq h0 output) (as_seq h0 input) s))
 [@"c_inline"]
 let sum_scalar_multiplication_ output input s =
-  C.Loops.in_place_map2 output input clen (fun x y -> Hacl.Bignum.Wide.(x +%^ (y *^ s)))
+  C.Compat.Loops.in_place_map2 output input clen (fun x y -> Hacl.Bignum.Wide.(x +%^ (y *^ s)))
 
 
 #reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
@@ -170,7 +170,7 @@ let carry_wide_ tmp =
     lemma_carry_wide_spec_ 0 (UInt32.v i + 1) (as_seq h0 tmp)
   in
   lemma_carry_wide_spec_0 (as_seq h0 tmp);
-  C.Loops.for 0ul FStar.UInt32.(clen -^ 1ul) inv f'
+  C.Compat.Loops.for 0ul FStar.UInt32.(clen -^ 1ul) inv f'
 
 
 #reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
@@ -222,7 +222,7 @@ let carry_limb_ tmp =
     lemma_carry_limb_spec_ 0 (UInt32.v i + 1) (as_seq h0 tmp)
   in
   lemma_carry_limb_spec_0 (as_seq h0 tmp);
-  C.Loops.for 0ul FStar.UInt32.(clen -^ 1ul) inv f'
+  C.Compat.Loops.for 0ul FStar.UInt32.(clen -^ 1ul) inv f'
 
 
 #set-options "--z3rlimit 20"

@@ -30,13 +30,13 @@ type idx = n:nat{n < 4}
 type shuffle = state -> Tot state
 
 (* unfold  *)let op_Plus_Percent_Hat (x:vec) (y:vec) : Tot vec =
-       Spec.Loops.seq_map2 U32.op_Plus_Percent_Hat x y
+       Spec.Compat.Loops.seq_map2 U32.op_Plus_Percent_Hat x y
 
 (* unfold *) let op_Hat_Hat (x:vec) (y:vec) : Tot vec =
-       Spec.Loops.seq_map2 U32.op_Hat_Hat x y
+       Spec.Compat.Loops.seq_map2 U32.op_Hat_Hat x y
 
 (* unfold *) let op_Less_Less_Less (x:vec) (n:UInt32.t{0 < v n /\ v n < 32}) : Tot vec =
-       Spec.Loops.seq_map (fun x -> x <<< n) x
+       Spec.Compat.Loops.seq_map (fun x -> x <<< n) x
 
 let shuffle_right (x:vec) (n:idx) : Tot vec =
         let z:nat = n in
@@ -99,7 +99,7 @@ let rounds (st:state) : Tot state =
 
 let chacha20_core (s:state) : Tot state =
     let s' = rounds s in
-    Spec.Loops.seq_map2 op_Plus_Percent_Hat s' s
+    Spec.Compat.Loops.seq_map2 op_Plus_Percent_Hat s' s
 
 (* state initialization *)
 unfold let constants = [0x61707865ul; 0x3320646eul; 0x79622d32ul; 0x6b206574ul]

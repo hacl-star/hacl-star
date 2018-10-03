@@ -453,7 +453,7 @@ let counter_enxor #i t x len remaining_len plain cipher h_init =
 
     PRF.prf_enxor i t y l cipher_hd plain_hd
   in
-  C.Loops.for 0ul n (fun _ _ -> True) body
+  C.Compat.Loops.for 0ul n (fun _ _ -> True) body
     
   // let completed_len = len -^ remaining_len in
   // let h0 = get () in
@@ -822,7 +822,7 @@ let counter_dexor i t x len remaining_len plain cipher p =
     
     prf_dexor i t y l cipher_hd plain_hd
   in
-  C.Loops.for 0ul n (fun _ _ -> True) body
+  C.Compat.Loops.for 0ul n (fun _ _ -> True) body
 
   // let completed_len = len -^ remaining_len in
   // let h0 = get () in

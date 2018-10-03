@@ -25,10 +25,10 @@ inline_for_extraction
 let xor8 (x y: uint8_t): uint8_t = x ^^ y
 
 let xor (x: uint8_t) (v: bseq): GTot (lbseq (length v)) =
-  Spec.Loops.seq_map (xor8 x) v
+  Spec.Compat.Loops.seq_map (xor8 x) v
 
 let rec xor_lemma (x: uint8_t) (v: bseq) : Lemma (requires True)
-  (ensures (xor x v == Spec.Loops.seq_map2 xor8 (create (length v) x) v))
+  (ensures (xor x v == Spec.Compat.Loops.seq_map2 xor8 (create (length v) x) v))
   (decreases (length v)) =
   let l = length v in
   if l = 0 then () else (
@@ -38,22 +38,22 @@ let rec xor_lemma (x: uint8_t) (v: bseq) : Lemma (requires True)
     xor_lemma x (tail v))
 (*
     assert(// by induction
-      xor (tail v) y == Spec.Loops.seq_map2 xor8 (tail v) ys');
+      xor (tail v) y == Spec.Compat.Loops.seq_map2 xor8 (tail v) ys');
     assert(// by definition
-      Spec.Loops.seq_map (fun x -> xor8 x y) v ==
+      Spec.Compat.Loops.seq_map (fun x -> xor8 x y) v ==
       cons
         (xor8 (head v) y)
-        (Spec.Loops.seq_map (fun x -> xor8 x y) (tail v)));
+        (Spec.Compat.Loops.seq_map (fun x -> xor8 x y) (tail v)));
     assert(// by definition
       xor v y ==
       cons
         (xor8 (head v) y)
         (xor (tail v) y));
     assert(// by definition
-      Spec.Loops.seq_map2 xor8 v ys ==
+      Spec.Compat.Loops.seq_map2 xor8 v ys ==
       cons
         (xor8 (head v) (head ys))
-        (Spec.Loops.seq_map2 xor8 (tail v) (tail ys)));
+        (Spec.Compat.Loops.seq_map2 xor8 (tail v) (tail ys)));
 *)
 
 let hmac a key data =
@@ -305,11 +305,11 @@ val xor_bytes_inplace:
   (requires fun h0 -> disjoint a b /\ live h0 a /\ live h0 b)
   (ensures fun h0 _ h1 ->
     modifies (loc_buffer a) h0 h1 /\
-    as_seq h1 a == Spec.Loops.seq_map2 xor8 (as_seq h0 a) (as_seq h0 b))
+    as_seq h1 a == Spec.Compat.Loops.seq_map2 xor8 (as_seq h0 a) (as_seq h0 b))
 let xor_bytes_inplace a b len =
   let a = LowStar.ToFStarBuffer.new_to_old_st a in
   let b = LowStar.ToFStarBuffer.new_to_old_st b in
-  C.Loops.in_place_map2 a b len xor8
+  C.Compat.Loops.in_place_map2 a b len xor8
 
 // TODO small improvements: part1 and part2 could return their tags in
 // mac, so that we can reuse the pad.

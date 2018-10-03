@@ -89,13 +89,13 @@ let double_round' (st:state3) : Tot state3 =
   VecUnits (double_round (st.v1)) (double_round (st.v2)) (double_round (st.v3))
 
 let rounds (st:state3) : Tot state3 = 
-    C.Loops.repeat_spec 10 double_round' st (* 20 rounds *)
+    C.Compat.Loops.repeat_spec 10 double_round' st (* 20 rounds *)
 
 (* let rounds : shuffle =  *)
 (*     iter 10 double_round (\* 20 rounds *\) *)
 
 let sum_states (s:state) (s':state) : Tot state =
-  C.Loops.seq_map2 op_Plus_Percent_Hat s' s
+  C.Compat.Loops.seq_map2 op_Plus_Percent_Hat s' s
 
 let sum_states' (st:state3) (st':state3) : Tot state3 =
   VecUnits (sum_states st.v1 st'.v1) (sum_states st.v2 st'.v2) (sum_states st.v3 st'.v3)

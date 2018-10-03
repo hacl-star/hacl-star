@@ -210,7 +210,7 @@ let lemma_encode_final b = ()
 let rec add_bytes #i st acc len txt =
   push_frame();
   let bound = len /^ 16ul in
-  C.Loops.for 0ul bound (fun _ _ -> True)
+  C.Compat.Loops.for 0ul bound (fun _ _ -> True)
   (fun i ->
     let w = Buffer.sub txt (16ul *^ i) 16ul in
     CMA.update st acc w

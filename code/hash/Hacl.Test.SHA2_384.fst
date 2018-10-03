@@ -396,7 +396,7 @@ let test_6_loop state plaintext =
     =
     Hash.update state plaintext
   in
-  C.Loops.for 0ul 8388607ul inv f'
+  C.Compat.Loops.for 0ul 8388607ul inv f'
 
 
 val test_6: unit -> ST unit

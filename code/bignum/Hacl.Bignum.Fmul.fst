@@ -88,7 +88,7 @@ let mul_shift_reduce_ output input input2 =
     in
   lemma_mul_shift_reduce_spec_def_0
     (as_seq h0 output) (as_seq h0 input) (as_seq h0 input) (as_seq h0 input2);
-  C.Loops.for 0ul U32.(clen -^ 1ul) inv f';
+  C.Compat.Loops.for 0ul U32.(clen -^ 1ul) inv f';
   let i = U32.(clen -^ 1ul) in
   let h0' = ST.get() in
   lemma_mul_shift_reduce_spec_def

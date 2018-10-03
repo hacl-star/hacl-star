@@ -6,7 +6,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.Buffer
 open Spec.Chacha20
-open C.Loops
+open C.Compat.Loops
 open Hacl.Spec.Endianness
 open Hacl.UInt32x4N
 

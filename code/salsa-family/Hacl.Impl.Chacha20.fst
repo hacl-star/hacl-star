@@ -13,7 +13,7 @@ open Hacl.UInt32
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Chacha20
-open C.Loops
+open C.Compat.Loops
 open Hacl.Lib.LoadStore32
 
 module Spec = Spec.Chacha20
@@ -290,7 +290,7 @@ let rounds st =
     (requires (fun h -> inv h (UInt32.v i)))
     (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
   = double_round st;
-    Spec.Loops.lemma_repeat (UInt32.v i + 1) Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st))
+    Spec.Compat.Loops.lemma_repeat (UInt32.v i + 1) Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st))
   in
   lemma_repeat_0 0 Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st));
   for 0ul 10ul inv f'
@@ -743,7 +743,7 @@ let chacha20_counter_mode_blocks output plain num_blocks log st ctr =
   lemma_chacha20_counter_mode_def_0 (Seq.slice (as_seq h0 plain) 0 0) (Ghost.reveal log).k (Ghost.reveal log).n ctr;
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 0) Seq.empty;
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
-  C.Loops.for 0ul num_blocks inv f';
+  C.Compat.Loops.for 0ul num_blocks inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (64 * UInt32.v num_blocks)) (as_seq h output);
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 (64 * UInt32.v num_blocks)) (as_seq h plain)

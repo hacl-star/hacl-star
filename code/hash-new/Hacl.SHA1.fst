@@ -8,7 +8,7 @@ module Spec = Spec.SHA1
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module E = FStar.Kremlin.Endianness
-module CE = C.Endianness
+module CE = C.Compat.Endianness
 module Common = Hacl.Hash.Common
 
 friend Spec.SHA1
@@ -40,7 +40,7 @@ let init s =
   let inv (h' : HS.mem) (i: nat) : GTot Type0 =
     B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 5 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.init 0 i
   in
-  C.Loops.for 0ul 5ul inv (fun i ->
+  C.Compat.Loops.for 0ul 5ul inv (fun i ->
     B.upd s i (h0 i);
     let h' = HST.get () in
     Seq.snoc_slice_index (B.as_seq h' s) 0 (U32.v i);
@@ -137,7 +137,7 @@ let w (m: block_t) (b: w_t) : HST.Stack unit
   (requires (fun h -> B.live h m /\ B.live h b /\ B.disjoint m b))
   (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ w_inv (E.seq_uint32_of_be size_block_w (B.as_seq h m)) b h'))
 = let h = Ghost.hide (HST.get ()) in
-  C.Loops.for 0ul 80ul (w_loop_inv h m b) (fun i -> w_body h m b i)
+  C.Compat.Loops.for 0ul 80ul (w_loop_inv h m b) (fun i -> w_body h m b i)
 
 (*
 let equal5 (#t: Type) (s1 s2: Seq.seq t) : GTot Type0 =
@@ -213,7 +213,7 @@ let zero_out
   (requires (fun h -> B.live h b))
   (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ B.live h' b))
 = let h0 = HST.get () in
-  C.Loops.for 0ul len (fun h _ -> B.live h b /\ B.modifies (B.loc_buffer b) h0 h) (fun i -> B.upd b i 0ul)
+  C.Compat.Loops.for 0ul len (fun h _ -> B.live h b /\ B.modifies (B.loc_buffer b) h0 h) (fun i -> B.upd b i 0ul)
 
 let spec_step3_body (mi: Spec.word_block) (st: Ghost.erased (hash_w SHA1)) (t: nat {t < 80}) : Tot (Ghost.erased (hash_w SHA1)) =
   Ghost.elift1 (fun h -> Spec.step3_body mi h t) st
@@ -268,7 +268,7 @@ val repeat_range:
     (requires (fun h -> inv h))
     (ensures (fun h_1 _ h_2 ->
       inv h_1 /\ inv h_2 /\
-      interp h_2 == Spec.Loops.repeat_range (U32.v min) (U32.v max) (Ghost.reveal f) (interp h_1)
+      interp h_2 == Spec.Compat.Loops.repeat_range (U32.v min) (U32.v max) (Ghost.reveal f) (interp h_1)
     ))
 
 let repeat_range #a min max f inv interp fc =
@@ -276,17 +276,17 @@ let repeat_range #a min max f inv interp fc =
   let inv' (h1: HS.mem) (i: nat): Type0 =
     inv h1 /\
     i <= UInt32.v max /\ UInt32.v min <= i /\
-    interp h1 == Spec.Loops.repeat_range (UInt32.v min) i (Ghost.reveal f) (interp h0)
+    interp h1 == Spec.Compat.Loops.repeat_range (UInt32.v min) i (Ghost.reveal f) (interp h0)
   in
   let f' (i:UInt32.t{ U32.( 0 <= v i /\ v i < v max ) }): HST.Stack unit
     (requires (fun h -> inv' h (UInt32.v i)))
     (ensures (fun h_1 _ h_2 -> U32.(inv' h_2 (v i + 1))))
   =
     fc i;
-    Spec.Loops.repeat_range_induction (UInt32.v min) (UInt32.v i + 1) (Ghost.reveal f) (interp h0)
+    Spec.Compat.Loops.repeat_range_induction (UInt32.v min) (UInt32.v i + 1) (Ghost.reveal f) (interp h0)
   in
-  Spec.Loops.repeat_range_base (UInt32.v min) (Ghost.reveal f) (interp h0);
-  C.Loops.for min max inv' f'
+  Spec.Compat.Loops.repeat_range_base (UInt32.v min) (Ghost.reveal f) (interp h0);
+  C.Compat.Loops.for min max inv' f'
 
 #set-options "--z3rlimit 32"
 

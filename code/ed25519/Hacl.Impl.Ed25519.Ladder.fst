@@ -84,7 +84,7 @@ let point_mul_ b k =
   let nq   = Buffer.sub b  0ul 20ul in
   let nqpq = Buffer.sub b 20ul 20ul in
   lemma_montgomery_ladder_def_0 (as_point h0 nq) (as_point h0 nqpq) (reveal_sbytes (as_seq h0 k));
-  C.Loops.for 0ul 256ul inv f'
+  C.Compat.Loops.for 0ul 256ul inv f'
 
 let elemB = b:buffer Hacl.UInt64.t{length b = 5}
 

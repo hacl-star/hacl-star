@@ -7,7 +7,7 @@ open FStar.HyperStack.All
 open FStar.HyperStack.ST
 open FStar.Buffer
 
-open C.Loops
+open C.Compat.Loops
 
 open Hacl.Spec.Endianness
 open Hacl.Cast
@@ -65,7 +65,7 @@ private let u64_to_h64 = Hacl.Cast.uint64_to_sint64
 
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
-let xor_bytes_inplace a b len = C.Loops.in_place_map2 a b len (fun x y -> H8.logxor x y)
+let xor_bytes_inplace a b len = C.Compat.Loops.in_place_map2 a b len (fun x y -> H8.logxor x y)
 
 
 #reset-options "--max_fuel 0  --z3rlimit 20"

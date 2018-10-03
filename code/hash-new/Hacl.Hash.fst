@@ -54,7 +54,7 @@ let mk_update_multi a update s blocks n_blocks =
       S.equal s2 (update_multi a s1 block))
   in
   assert (B.length blocks = U32.v n_blocks * size_block a);
-  C.Loops.for 0ul n_blocks inv f
+  C.Compat.Loops.for 0ul n_blocks inv f
 
 let update_multi_sha2_224: update_multi_st SHA2_224 =
   Tactics.(synth_by_tactic
