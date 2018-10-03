@@ -17,6 +17,12 @@ let equiv_eval_mov128_op o s = match o with
     let addr = eval_maddr m s in
     equiv_load_mem128 addr s
 
+let equiv_eval_cpuid  (s:state) (ins:S.ins{S.Cpuid? ins}) : Lemma (
+  let s_hi = run (eval_ins ins) s in
+  let s_bytes = S.run (S.eval_ins ins) s.state in
+  s_hi.state.S.ok ==> s_hi.state == s_bytes) =
+  ()
+
 let equiv_eval_mov (s:state) (ins:S.ins{S.Mov64? ins}) : Lemma (
   let s_hi = run (eval_ins ins) s in
   let s_bytes = S.run (S.eval_ins ins) s.state in
@@ -120,6 +126,7 @@ let equiv_eval_mul (s:state) (ins:S.ins{S.Mul64? ins}) : Lemma (
     ()
   end
 
+#push-options "--z3rlimit 30"
 let equiv_eval_mulx (s:state) (ins:S.ins{S.Mulx64? ins}) : Lemma (
   let s_hi = run (eval_ins ins) s in
   let s_bytes = S.run (S.eval_ins ins) s.state in
@@ -136,6 +143,7 @@ let equiv_eval_mulx (s:state) (ins:S.ins{S.Mulx64? ins}) : Lemma (
     equiv_eval_operand src s;
     ()
   end
+#pop-options
 
 let equiv_eval_imul (s:state) (ins:S.ins{S.IMul64? ins}) : Lemma (
   let s_hi = run (eval_ins ins) s in
@@ -394,6 +402,7 @@ let equiv_eval_sha256_msg2 (s:state) (ins:S.ins{S.SHA256_msg2? ins}) : Lemma (
   ()
 
 let equiv_eval_ins s ins = match ins with
+  | S.Cpuid -> equiv_eval_cpuid s ins
   | S.Mov64 _ _ -> equiv_eval_mov s ins
   | S.Add64 _ _ -> equiv_eval_add s ins
   | S.AddLea64 _ _ _-> equiv_eval_addlea s ins

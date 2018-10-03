@@ -9,7 +9,6 @@ open LowStar.ModifiesPat
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 open Interop
-open Words_s
 open Types_s
 open SHA_helpers
 
@@ -41,8 +40,8 @@ let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s
   hash_out == update_multi_opaque_vale hash_in input_LE
  )
 
-let full_post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8) = 
-  post_cond h h' ctx_b in_b num_val k_b /\
+let full_post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8)  =
+  post_cond h h' ctx_b in_b num_val k_b  /\
   M.modifies (M.loc_buffer ctx_b) h h'
 
 val sha_update_bytes_stdcall: ctx_b:s8 -> in_b:s8 -> num_val:nat64 -> k_b:s8 -> Stack unit

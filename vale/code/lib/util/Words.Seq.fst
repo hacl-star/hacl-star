@@ -32,7 +32,7 @@ let seq_four_to_seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) :
 
 unfold let pow2_24 = 16777216 //normalize_term (pow2 24)
 
-#reset-options "--z3rlimit 30 --using_facts_from 'Prims Words_s'"
+#reset-options "--z3rlimit 200 --using_facts_from 'Prims Words_s'"
 let lemma_fundamental_div_mod_4 (x:nat32) :
   Lemma (x = x % pow2_8 + pow2_8 * ((x / pow2_8) % pow2_8) + pow2_16 * ((x / pow2_16) % pow2_8) + pow2_24 * ((x / pow2_24) % pow2_8))
   =

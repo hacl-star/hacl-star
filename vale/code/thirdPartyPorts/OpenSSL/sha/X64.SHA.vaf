@@ -19,6 +19,7 @@ include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "Spec.Loops"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.SHA
 
@@ -45,6 +46,7 @@ open Spec.Hash.Helpers
 open GCM_helpers
 open Spec.Loops
 open X64.Stack
+open X64.CPU_Features_s
 #endverbatim
 
 #reset-options "--z3rlimit 20"
@@ -112,6 +114,7 @@ procedure {:quick} loop_rounds_0_15(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
+        sha_enabled;
         validSrcAddrsOffset128(mem, inp,   in_b, offset, 4, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40 < pow2_64;
@@ -228,6 +231,7 @@ procedure {:quick} loop_rounds_16_51_body(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
         efl;
     requires
+        sha_enabled;
         validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
         4 <= i /\ i < 13;
@@ -305,6 +309,7 @@ procedure {:recursive} loop_rounds_16_51_recursive(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
         efl;
     requires
+        sha_enabled;
         validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
         4 <= i /\ i < 13;
@@ -349,6 +354,7 @@ procedure {:quick exportOnly} loop_rounds_16_51(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
         efl;
     requires
+        sha_enabled;
         validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
         k_reqs(buffer128_as_seq(mem, k_b));
@@ -388,6 +394,7 @@ procedure {:quick} loop_rounds_52_64(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
         efl;
     requires
+        sha_enabled;
         validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
         num > 0;
@@ -467,6 +474,7 @@ procedure {:quick} loop_rounds(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
+        sha_enabled;
         validSrcAddrsOffset128(mem, inp,   in_b, offset, 4, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40 < pow2_64;
@@ -523,6 +531,7 @@ procedure {:quick} loop(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
+        sha_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40*num < pow2_64;
@@ -543,6 +552,8 @@ procedure {:quick} loop(
     ghost var count:nat := 0;
     while (num > 0) 
         invariant
+            sha_enabled;
+
             validSrcAddrs128(mem, old(inp),   in_b,  4*old(num), memTaint, Secret);
             validSrcAddrs128(mem,      tbl,    k_b,          16, memTaint, Secret);
 
@@ -626,6 +637,7 @@ procedure {:quick} sha_update(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
         mem; efl;
     requires
+        sha_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
@@ -671,6 +683,7 @@ procedure {:quick} sha_update_bytes(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
         mem; efl;
     requires
+        sha_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
@@ -731,6 +744,7 @@ procedure {:quick}{:exportSpecs} sha_update_bytes_stdcall(
            num         := if win then r8  else rdx;
           k_ptr        := if win then r9  else rcx;
     requires
+        sha_enabled;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(in_b))) \/ ctx_b == in_b;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(k_b))) \/ ctx_b == k_b;
         locs_disjoint(list(loc_buffer(in_b), loc_buffer(k_b))) \/ in_b == k_b;
