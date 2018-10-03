@@ -49,7 +49,7 @@ let pad_length_bound (a: hash_alg) (len: len_t a): Lemma
 =
   ()
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 150"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 (* Avoiding an ill-formed pattern error... *)
 inline_for_extraction
