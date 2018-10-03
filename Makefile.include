@@ -55,7 +55,7 @@ KREMTEST=$(KREMLIN_HOME)/test
 # Default Kremlin arguments
 KREMLIN_ARGS?=
 KREMLIN_ARGS+=$(KOPTS)
-KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB)/compat -I $(KREMLIB) -I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/old -I .
+KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB)/compat -I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/old -I .
 
 ifneq (,$(EVEREST_WINDOWS))
 KREMLIN_ARGS+=-falloca -ftail-calls

@@ -26,7 +26,7 @@ all-hints: hints
 
 all: $(addsuffix -verify, $(ALL))
 
-KREMLIN_ARGS=-drop Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.Types
+KREMLIN_ARGS+=-drop Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.Types
 
 lib-c/Hacl_Policies.c: Hacl.Policies.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation $^ -tmpdir lib-c \
