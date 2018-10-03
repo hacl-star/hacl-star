@@ -117,7 +117,7 @@ let init a s =
         (S.slice (B.as_seq h2 s) 0 (U32.v i))
         (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))))
   in
-  C.Compat.Loops.for 0ul 8ul inv f
+  C.Loops.for 0ul 8ul inv f
 
 let init_224: init_st SHA2_224 =
   Tactics.(synth_by_tactic (specialize (init SHA2_224) [`%init; `%index_h]))
@@ -166,8 +166,8 @@ let index_be (a: sha2_alg) (b: B.buffer U8.t) (i: U32.t):
        r = S.index (words_from_be a (B.length b / size_word a) (B.as_seq h0 b)) (U32.v i)))
 =
   match a with
-  | SHA2_224 | SHA2_256 -> C.Compat.Endianness.index_32_be b i
-  | SHA2_384 | SHA2_512 -> C.Compat.Endianness.index_64_be b i
+  | SHA2_224 | SHA2_256 -> C.Endianness.index_32_be b i
+  | SHA2_384 | SHA2_512 -> C.Endianness.index_64_be b i
 
 #set-options "--max_fuel 1 --z3rlimit 100"
 
@@ -218,7 +218,7 @@ let ws a b ws =
       (**) let h2 = ST.get () in
       (**) init_next (B.as_seq h2 ws) (Spec.ws a (block_words_be a h0 b)) (U32.v i)
   in
-  C.Compat.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f
+  C.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f
 
 #set-options "--max_fuel 0 --z3rlimit 20"
 
@@ -325,7 +325,7 @@ let shuffle a block hash ws =
     M.(modifies (loc_buffer hash) h0 h1) /\
     i <= Spec.size_k_w a /\
     B.as_seq h1 hash ==
-      Spec.Compat.Loops.repeat_range 0 i (Spec.shuffle_core a block) (B.as_seq h0 hash)
+      Spec.Loops.repeat_range 0 i (Spec.shuffle_core a block) (B.as_seq h0 hash)
   in
   let f (i: U32.t { U32.(0 <= v i /\ v i < Spec.size_k_w a)}):
     ST.Stack unit
@@ -339,10 +339,10 @@ let shuffle a block hash ws =
     (**) let block = G.reveal block in
     (**) let block = block_words_be a h0 block in
     (**) let hash = B.as_seq h0 hash in
-    (**) Spec.Compat.Loops.repeat_range_induction 0 (U32.v i + 1) (Spec.shuffle_core a block) hash
+    (**) Spec.Loops.repeat_range_induction 0 (U32.v i + 1) (Spec.shuffle_core a block) hash
   in
-  (**) Spec.Compat.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
-  C.Compat.Loops.for 0ul (size_k_w a) inv f
+  (**) Spec.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
+  C.Loops.for 0ul (size_k_w a) inv f
 
 
 inline_for_extraction
@@ -367,7 +367,7 @@ let update a hash block =
   (**) assert (S.equal (B.as_seq h1 hash1) (B.as_seq h0 hash));
   (**) assert (S.equal (B.as_seq h1 hash) (B.as_seq h0 hash));
   shuffle a (G.hide block) hash1 computed_ws;
-  C.Compat.Loops.in_place_map2 hash hash1 8ul (add a);
+  C.Loops.in_place_map2 hash hash1 8ul (add a);
   (**) ST.pop_frame ()
 
 let update_224: update_st SHA2_224 =

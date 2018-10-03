@@ -42,11 +42,11 @@ inline_for_extraction
 let store_len a len b =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
-      C.Compat.Endianness.store64_be b len;
+      C.Endianness.store64_be b len;
       let h = ST.get () in
       Endianness.n_to_be_be_to_n 8ul (B.as_seq h b)
   | SHA2_384 | SHA2_512 ->
-      C.Compat.Endianness.store128_be b len;
+      C.Endianness.store128_be b len;
       let h = ST.get () in
       Endianness.n_to_be_be_to_n 16ul (B.as_seq h b)
 
@@ -150,7 +150,7 @@ let pad_2 (a: hash_alg) (len: len_t a) (dst: B.buffer U8.t):
     (**) let h' = ST.get () in
     (**) create_next (B.as_seq h' dst) 0uy (U32.v i)
   in
-  C.Compat.Loops.for 0ul (pad0_len a len) inv f
+  C.Loops.for 0ul (pad0_len a len) inv f
 
 inline_for_extraction
 let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer U8.t):
@@ -249,7 +249,7 @@ let finish a s dst =
     | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
         let dst0 = B.sub dst 0ul U32.(4ul *^ i) in
         let dsti = B.sub dst U32.(4ul *^ i) 4ul in
-        C.Compat.Endianness.store32_be dsti s.(i);
+        C.Endianness.store32_be dsti s.(i);
         let h2 = ST.get () in
         Endianness.be_of_seq_uint32_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
         Endianness.be_of_seq_uint32_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
@@ -257,10 +257,10 @@ let finish a s dst =
     | SHA2_384 | SHA2_512 ->
         let dst0 = B.sub dst 0ul U32.(8ul *^ i) in
         let dsti = B.sub dst U32.(8ul *^ i) 8ul in
-        C.Compat.Endianness.store64_be dsti s.(i);
+        C.Endianness.store64_be dsti s.(i);
         let h2 = ST.get () in
         Endianness.be_of_seq_uint64_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
         Endianness.be_of_seq_uint64_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
           (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
   in
-  C.Compat.Loops.for 0ul (size_hash_final_w_ul a) inv f
+  C.Loops.for 0ul (size_hash_final_w_ul a) inv f
