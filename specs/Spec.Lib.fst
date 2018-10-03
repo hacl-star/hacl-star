@@ -33,10 +33,10 @@ let op_String_Assignment = Seq.upd
 // Can't fix this one because this file is used with both compat and non-compat
 // kremlib... sigh
 unfold inline_for_extraction
-let iter n f x = Spec.Compat.Loops.repeat_spec n f x
+let iter n f x = Spec.Loops.repeat_spec n f x
 
 unfold inline_for_extraction
-let map2 f s1 s2 = Spec.Compat.Loops.seq_map2 f s1 s2
+let map2 f s1 s2 = Spec.Loops.seq_map2 f s1 s2
 
 let singleton x = Seq.create 1 x
 
