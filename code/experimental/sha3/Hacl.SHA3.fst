@@ -8,7 +8,7 @@ open FStar.Mul
 open LowStar.Buffer
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 open Lib.Endianness
 
 open Hacl.Impl.SHA3
