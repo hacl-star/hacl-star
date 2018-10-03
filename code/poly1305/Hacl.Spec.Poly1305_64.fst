@@ -87,7 +87,7 @@ val lemma_bignum_to_128:
   h0:limb{v h0 < pow2 44} -> h1:limb{v h1 < pow2 44} -> h2:limb{v h2 < pow2 42} ->
   Lemma (((v h2 * (pow2 24)) % pow2 64 + v h1 / pow2 20) * pow2 64 + ((v h1 * pow2 44) % pow2 64) + v h0
     = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128)
-#push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1 --using_facts_from '* -Hacl.Spec.* -Spec.* -FStar.Seq.*'"
+#push-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1 --using_facts_from '* -Hacl.Spec.* -Spec.* -FStar.Seq.*'"
 let lemma_bignum_to_128 h0 h1 h2 =
   lemma_bignum_to_128_ h0 h1 h2;
   let z = (v h0 + pow2 44 * v h1 + pow2 88 * v h2) % pow2 128 in
