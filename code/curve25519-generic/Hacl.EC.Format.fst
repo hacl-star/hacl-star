@@ -61,7 +61,7 @@ let point_inf () =
   p
 
 
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100"
 

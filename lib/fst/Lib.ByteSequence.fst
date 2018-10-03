@@ -5,6 +5,8 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.RawIntTypes
 
+friend Lib.Sequence
+
 let to_lbytes (s:bytes) = s
 let to_bytes #len (s:lbytes len) = s
 

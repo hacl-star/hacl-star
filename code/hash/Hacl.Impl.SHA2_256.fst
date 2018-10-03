@@ -10,7 +10,7 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Buffer
 
-open C.Loops
+open C.Compat.Loops
 
 open Hacl.Spec.Endianness
 open Hacl.Cast
@@ -431,9 +431,9 @@ let shuffle hash block ws k =
       (ensures (fun h_1 _ h_2 -> inv h_2 (UInt32.v t + 1)))
     =
     shuffle_core hash block ws k t;
-    (**) C.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (reveal_h32s (as_seq h0 block))) (reveal_h32s (as_seq h0 hash))
+    (**) C.Compat.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (reveal_h32s (as_seq h0 block))) (reveal_h32s (as_seq h0 hash))
   in
-  (**) C.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core (reveal_h32s (as_seq h0 block))) (reveal_h32s (as_seq h0 hash));
+  (**) C.Compat.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core (reveal_h32s (as_seq h0 block))) (reveal_h32s (as_seq h0 hash));
   for 0ul size_ws_w inv f'
 
 
@@ -455,7 +455,7 @@ private val sum_hash:
 
 [@"substitute"]
 let sum_hash hash_0 hash_1 =
-  C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H32.(x +%^ y))
+  C.Compat.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H32.(x +%^ y))
 
 
 #set-options "--max_fuel 0 --z3rlimit 20"
@@ -603,7 +603,7 @@ let update_core hash_w data data_w ws_w k_w =
   (**) assert(let x = reveal_h32s (as_seq h0 hash_w) in
          let y = Spec.shuffle (reveal_h32s (as_seq h0 hash_w)) (Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data))) in
          let z = reveal_h32s (as_seq h5 hash_w) in
-         let z' = Spec.Loops.seq_map2 (fun x y -> FStar.UInt32.(x +%^ y)) x y in
+         let z' = Spec.Compat.Loops.seq_map2 (fun x y -> FStar.UInt32.(x +%^ y)) x y in
          z == z');
   (**) no_upd_lemma_1 h4 h5 hash_w data;
   (**) no_upd_lemma_1 h4 h5 hash_w data_w;
@@ -895,7 +895,7 @@ val set_pad_part2:
 
 [@"substitute"]
 let set_pad_part2 buf2 encodedlen =
-  Hacl.Endianness.hstore64_be buf2 encodedlen;
+  Hacl.Compat.Endianness.hstore64_be buf2 encodedlen;
   (**) let h = ST.get () in
   (**) Lemmas.lemma_eq_endianness h buf2 encodedlen
 

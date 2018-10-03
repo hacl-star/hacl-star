@@ -9,6 +9,10 @@ open Lib.Sequence
 open Lib.Buffer
 open Lib.ByteSequence
 
+friend Lib.Buffer
+friend Lib.IntTypes
+friend Lib.RawIntTypes
+
 module LSeq = Lib.Sequence
 
 module Buf = LowStar.Buffer

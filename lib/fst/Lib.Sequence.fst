@@ -181,10 +181,10 @@ let for_all2 = for_all2_
 let as_list #a #len l = l
 
 
-let rec concat #a #len1 #len2 s1 s2 =
+let rec concat #a s1 s2 =
   match s1 with
   | [] -> s2
-  | h :: t -> h :: (concat #a #(len1 - 1) #len2 t s2)
+  | h :: t -> h :: (concat #a t s2)
 
 let map_blocks #a bs nb f inp =
   let len = nb * bs in

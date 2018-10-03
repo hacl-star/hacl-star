@@ -171,7 +171,7 @@ let fsquare_times_ input tmp count =
   fsquare_times_one (as_seq h0 input);
   fsquare_5413_is_fine (as_seq h0 input);
   fsquare_ tmp input;
-  C.Loops.for 1ul count inv (fun i ->
+  C.Compat.Loops.for 1ul count inv (fun i ->
     let h1 = ST.get() in
     relax (as_seq h1 input);
     fsquare_5413_is_fine (as_seq h1 input);

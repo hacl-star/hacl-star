@@ -8,7 +8,7 @@ open FStar.Buffer
 open FStar.Endianness
 open Hacl.UInt64
 open Hacl.Spec.Endianness
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 
 
 #reset-options "--max_fuel 0 --z3rlimit 100"

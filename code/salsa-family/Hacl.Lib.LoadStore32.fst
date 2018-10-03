@@ -10,7 +10,7 @@ open FStar.HyperStack.ST
 open FStar.Buffer
 open Hacl.UInt32
 open Hacl.Spec.Endianness
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 
 module U32 = FStar.UInt32
 module H32 =  Hacl.UInt32
@@ -61,7 +61,7 @@ let rec uint32s_from_le_bytes output input len =
   in
   Spec.Lib.lemma_uint32s_from_le_def_0 0 (reveal_sbytes (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.createEmpty;
-  C.Loops.for 0ul len inv f';
+  C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (UInt32.v len)) (as_seq h output);
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (4 * UInt32.v len)) (as_seq h0 input)
@@ -118,7 +118,7 @@ let rec uint32s_to_le_bytes output input len =
   in
   Spec.Lib.lemma_uint32s_to_le_def_0 0 (reveal_h32s (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.createEmpty;
-  C.Loops.for 0ul len inv f';
+  C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (4 * UInt32.v len)) (as_seq h output);
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (UInt32.v len)) (as_seq h0 input)

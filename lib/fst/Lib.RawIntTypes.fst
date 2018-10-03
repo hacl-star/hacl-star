@@ -1,6 +1,7 @@
 module Lib.RawIntTypes
 
 open Lib.IntTypes
+friend Lib.IntTypes
 
 (* This module offers direct access to the internals of IntTypes.
    Typechecking it requires full access to IntTypes.fst (not just IntTypes.fsti)

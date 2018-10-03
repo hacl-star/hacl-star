@@ -10,7 +10,7 @@ open FStar.Endianness
 
 open Hacl.Bignum.Parameters
 open Hacl.Spec.Bignum.Bigint
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 open Hacl.UInt64
 
 

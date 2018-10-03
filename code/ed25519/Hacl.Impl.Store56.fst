@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 
 open FStar.Buffer
 open Hacl.UInt64
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 open Hacl.Spec.BignumQ.Eval
 open Hacl.Spec.Endianness
 

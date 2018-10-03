@@ -11,7 +11,7 @@ open FStar.Seq
 open FStar.Buffer
 open FStar.HyperStack
 
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 
 open Hacl.Cast
 open Hacl.Bignum.Parameters

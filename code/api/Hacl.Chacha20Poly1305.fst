@@ -10,7 +10,7 @@ open Hacl.Policies
 open Hacl.Cast
 open Hacl.Spec.Endianness
 open FStar.Endianness
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 
 open Spec.Chacha20Poly1305
 

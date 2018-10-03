@@ -7,7 +7,7 @@ open FStar.HyperStack.All
 open FStar.HyperStack.ST
 open FStar.Buffer
 
-open C.Loops
+open C.Compat.Loops
 
 open Hacl.Spec.Endianness
 open Hacl.Cast
@@ -437,9 +437,9 @@ let shuffle hash block ws k =
       (ensures (fun h_1 _ h_2 -> inv h_2 (UInt32.v t + 1)))
     =
     shuffle_core hash block ws k t;
-    (**) C.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash))
+    (**) C.Compat.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash))
   in
-  (**) C.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash));
+  (**) C.Compat.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash));
   for 0ul size_ws_w inv f'
 
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 20"
@@ -454,15 +454,15 @@ private val sum_hash:
               /\ (let new_seq_hash_0 = reveal_h64s (as_seq h1 hash_0) in
               let seq_hash_0 = reveal_h64s (as_seq h0 hash_0) in
               let seq_hash_1 = reveal_h64s (as_seq h0 hash_1) in
-              let res        = Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) seq_hash_0 seq_hash_1 in
+              let res        = Spec.Compat.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) seq_hash_0 seq_hash_1 in
               new_seq_hash_0 == res)))
 
 [@"substitute"]
 let sum_hash hash_0 hash_1 =
   (**) let h0 = ST.get() in
-  C.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H64.(x +%^ y));
+  C.Compat.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H64.(x +%^ y));
   (**) let h1 = ST.get() in
-  (**) Seq.lemma_eq_intro (Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) (reveal_h64s (as_seq h0 hash_0))
+  (**) Seq.lemma_eq_intro (Spec.Compat.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) (reveal_h64s (as_seq h0 hash_0))
                           (reveal_h64s (as_seq  h0 hash_1))) (reveal_h64s (as_seq h1 hash_0))
 
 
@@ -607,7 +607,7 @@ let update_core hash_w data data_w ws_w k_w =
   (**) assert(let x = reveal_h64s (as_seq h0 hash_w) in
          let y = Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) (Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data))) in
          let z = reveal_h64s (as_seq h5 hash_w) in
-         let z' = Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) x y in
+         let z' = Spec.Compat.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) x y in
          z == z');
 
   (* Pop the frame *)
@@ -901,7 +901,7 @@ val set_pad_part2:
 
 [@"substitute"]
 let set_pad_part2 buf2 encodedlen =
-  Hacl.Endianness.hstore128_be buf2 encodedlen;
+  Hacl.Compat.Endianness.hstore128_be buf2 encodedlen;
   (**) let h = ST.get () in
   (**) Lemmas.lemma_eq_endianness h buf2 encodedlen
 

@@ -48,7 +48,7 @@ let alloc_point () =
 
 open FStar.Endianness
 open Hacl.Spec.Endianness
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 
 val load64_le_spec: b:uint8_s{Seq.length b = 8} -> GTot (z:limb{v z = hlittle_endian b})
 let load64_le_spec b =

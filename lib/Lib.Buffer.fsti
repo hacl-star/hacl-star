@@ -11,6 +11,7 @@ unfold let v = size_v
 
 
 inline_for_extraction val buffer: a:Type0 -> Type0
+
 inline_for_extraction val length: #a:Type0 -> buffer a -> GTot size_nat
 inline_for_extraction let lbuffer (a:Type0) (len:size_nat) = b:buffer a{length b == len}
 
@@ -174,6 +175,7 @@ inline_for_extraction val alloc_nospec: #h0:mem -> #a:Type0 -> #b:Type0 -> #w:Ty
 
 (* Various Allocation Patterns *)
 
+inline_for_extraction
 val map: #a:Type -> #len:size_nat -> clen:size_t{v clen == len} -> f:(a -> Tot a) -> b:lbuffer a (len) ->
   Stack unit
     (requires (fun h0 -> live h0 b))

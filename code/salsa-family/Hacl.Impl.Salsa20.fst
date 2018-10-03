@@ -12,9 +12,9 @@ open FStar.Buffer
 open Hacl.Cast
 open Hacl.UInt32
 open Hacl.Spec.Endianness
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 open Spec.Salsa20
-open C.Loops
+open C.Compat.Loops
 open Hacl.Lib.LoadStore32
 open Hacl.Lib.Create
 
@@ -199,7 +199,7 @@ let rounds st =
     (requires (fun h -> inv h (UInt32.v i)))
     (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
   = double_round st;
-    Spec.Loops.lemma_repeat (UInt32.v i + 1) Spec.Salsa20.double_round (reveal_h32s (as_seq h0 st))
+    Spec.Compat.Loops.lemma_repeat (UInt32.v i + 1) Spec.Salsa20.double_round (reveal_h32s (as_seq h0 st))
   in
   lemma_repeat_0 0 Spec.Salsa20.double_round (reveal_h32s (as_seq h0 st));
   for 0ul 10ul inv f'
@@ -735,7 +735,7 @@ let rec salsa20_counter_mode_blocks output plain len log st ctr =
   lemma_salsa20_counter_mode_def_0 (Seq.slice (as_seq h0 plain) 0 0) (Ghost.reveal log).k (Ghost.reveal log).n ctr;
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 0) Seq.createEmpty;
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.createEmpty;
-  C.Loops.for 0ul len inv f';
+  C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (64 * UInt32.v len)) (as_seq h output);
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 plain) 0 (64 * UInt32.v len)) (as_seq h plain)

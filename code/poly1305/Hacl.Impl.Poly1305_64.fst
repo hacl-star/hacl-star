@@ -14,7 +14,7 @@ open FStar.Endianness
 open FStar.Buffer
 
 open Hacl.Spec.Endianness
-open Hacl.Endianness
+open Hacl.Compat.Endianness
 
 open Hacl.Cast
 open Hacl.Bignum.Parameters

@@ -12,7 +12,10 @@ module LSeq = Lib.Sequence
 module Buf = LowStar.Buffer
 module U32 = FStar.UInt32
 
+inline_for_extraction
 type buffer (a:Type0) = Buf.buffer a 
+
+inline_for_extraction
 let length (#a:Type0) (b:buffer a) = Buf.length b
 let gsub #a #len #olen b start n = admit() //; Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
@@ -30,14 +33,22 @@ let disjoint_list = admit()
 let disjoint_lists = admit()
 let disjoints = admit()
 
+inline_for_extraction
 let sub #a #len #olen b start n = let b: lbuffer a len = b in Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
+inline_for_extraction
 let slice #a #len #olen b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 (n -. start))
+inline_for_extraction
 let index #a #len b i = Buf.index b (size_to_UInt32 i)
+inline_for_extraction
 let upd #a #len b i v = Buf.upd b (size_to_UInt32 i) v
 
+inline_for_extraction
 let create #a #len clen init = Buf.alloca init (size_to_UInt32 clen)
+inline_for_extraction
 let createL #a init = Buf.alloca_of_list init
+inline_for_extraction
 let createG #a init = Buf.gcmalloc_of_list FStar.HyperStack.root init
+inline_for_extraction
 let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
   push_frame();
   let buf = create clen init in
@@ -57,6 +68,7 @@ let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
   (* pop_frame(); *)
   (* r *)
 
+inline_for_extraction
 let alloc_with #h0 #a #b #w #len #wlen clen init_spec init write spec impl =
   push_frame();
   let buf = init () in
@@ -64,6 +76,7 @@ let alloc_with #h0 #a #b #w #len #wlen clen init_spec init write spec impl =
   pop_frame();
   r
 
+inline_for_extraction
 let alloc_nospec #h0 #a #b #w #len #wlen clen init write impl =
   push_frame();
   let buf = create clen init in
@@ -77,6 +90,7 @@ let alloc_nospec #h0 #a #b #w #len #wlen clen init write impl =
   pop_frame();
   r
 
+inline_for_extraction
 let map #a #len clen f b =
   let h0 = ST.get() in
   let inv (h1:mem) (j:nat) = True in
@@ -88,6 +102,7 @@ let map #a #len clen f b =
   Lib.Loops.for (size 0) clen inv f'
 
 
+inline_for_extraction
 let map2 #a1 #a2 #len clen f b1 b2 =
   let h0 = ST.get() in
   let inv (h1:mem) (j:nat) = True in
@@ -99,6 +114,7 @@ let map2 #a1 #a2 #len clen f b1 b2 =
       b1.(j) <- f i1 i2 in
   Lib.Loops.for (size 0) clen inv f'
 
+inline_for_extraction
 let copy #a #len o clen i =
   let h0 = ST.get() in
   let inv (h1:mem) (j:nat) =
@@ -114,6 +130,7 @@ let copy #a #len o clen i =
   Lib.Loops.for (size 0) clen inv f'
 
 
+inline_for_extraction
 let iter_range #a #len start fin spec impl input =
   let h0 = ST.get() in
   let inv (h1:mem) (j:nat) = True in
@@ -123,8 +140,10 @@ let iter_range #a #len start fin spec impl input =
       impl j input in
   Lib.Loops.for start fin inv f'
 
+inline_for_extraction
 let iteri #a #len n spec impl input = iter_range #a #len (size 0) n spec impl input
 
+inline_for_extraction
 let iter #a #len #clen n spec impl input =
   let h0 = ST.get() in
   let inv (h1:mem) (j:nat) = True in
