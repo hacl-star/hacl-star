@@ -12,7 +12,7 @@ open Hacl.Cast
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Chacha20_vec256
-open C.Loops
+open C.Compat.Loops
 open Vec256
 
 module Spec = Spec.Chacha20_vec256

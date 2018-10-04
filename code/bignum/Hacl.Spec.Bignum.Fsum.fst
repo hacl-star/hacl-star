@@ -28,7 +28,7 @@ val fsum_spec:
   Tot (s'':seqelem{(forall (i:nat). {:pattern (v (Seq.index s'' i))}
                               i < len ==> v (Seq.index s'' i) = v (Seq.index s i) + v (Seq.index s' i))})
 let fsum_spec a b =
-  Spec.Loops.seq_map2 (fun x y -> x +%^ y) a b
+  Spec.Compat.Loops.seq_map2 (fun x y -> x +%^ y) a b
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 50"
 

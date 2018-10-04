@@ -11,7 +11,7 @@ open Hacl.Cast
 open Hacl.UInt32
 open Hacl.Spec.Endianness
 open Hacl.Endianness
-open C.Loops
+open C.Compat.Loops
 open FStar.Seq
 
 module U32 = FStar.UInt32

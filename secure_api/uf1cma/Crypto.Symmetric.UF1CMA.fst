@@ -385,7 +385,7 @@ val start: #i:id -> st:state i -> StackInline (accBuffer i)
     Buffer.frameOf (MAC.as_buffer a.a) == (HS.get_tip h1) /\
     ((MAC.as_buffer (abuf a)) `Buffer.unused_in` h0) /\
     (mac_log ==>
-      HS.sel h1 (alog a) = Seq.createEmpty /\
+      HS.sel h1 (alog a) = Seq.empty /\
       ((alog a) `HS.unused_in` h0)) /\
     acc_inv st a h1 /\
     modifies_0 h0 h1))
@@ -398,10 +398,10 @@ let start #i st =
   let h1 = ST.get () in
   lemma_reveal_modifies_0 h0 h1;
   if mac_log then
-    let log = salloc #text #(Heap.trivial_preorder text) Seq.createEmpty in
+    let log = salloc #text #(Heap.trivial_preorder text) Seq.empty in
     let h2 = ST.get () in
     // Needed to prove disjointness of st.r and log
-    assert (HS.sel h2 (Buffer.content (MAC.as_buffer st.r)) =!= Seq.createEmpty);
+    assert (HS.sel h2 (Buffer.content (MAC.as_buffer st.r)) =!= Seq.empty);
     lemma_intro_modifies_0 h0 h2;
     MAC.frame_sel_elem h1 h2 a;
     MAC.poly_empty #i (HS.sel h2 log) (MAC.sel_elem h2 st.r);
@@ -452,7 +452,7 @@ noextract val read_word: len:u32 -> b:PL.wordB{length b == UInt32.v len} -> ST w
   (ensures (fun h0 r h1 -> h0 == h1 /\ live h1 b /\ r == (sel_word h1 b)))
 let read_word len b =
   let h = ST.get() in
-  let s0 = Seq.createEmpty #UInt8.t in
+  let s0 = Seq.empty #UInt8.t in
   Seq.lemma_eq_intro s0 (Seq.slice (sel_word h b) 0 0);
   _read_word len b s0 0ul
 

@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 
 open FStar.Mul
 open Hacl.Cast
-open C.Loops
+open C.Compat.Loops
 open Spec.Chacha20_vec256
 open FStar.Seq
 

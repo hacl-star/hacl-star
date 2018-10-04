@@ -42,7 +42,7 @@ val xor_bytes_inplace: output:bytes -> in1:bytes{disjoint in1 output} ->
     /\ modifies_1 output h0 h1 ))
 let xor_bytes_inplace output in1 len =
   let h0 = ST.get() in
-  C.Loops.for 0ul len (fun h1 i -> live h1 output /\ live h1 in1 /\ modifies_1 output h0 h1)
+  C.Compat.Loops.for 0ul len (fun h1 i -> live h1 output /\ live h1 in1 /\ modifies_1 output h0 h1)
   (fun i -> let ibyte = index in1 i in
          let obyte = index output i in
          let obyte' = UInt8.logxor ibyte obyte in
@@ -175,6 +175,6 @@ val memset: b:bytes -> z:u8 -> len:u32 -> STL unit
     Seq.equal (as_seq h1 b) (Seq.create (v len) z)))
 let memset b z len =
   let h0 = ST.get() in
-  C.Loops.for 0ul len (fun h1 i -> live h1 b /\ modifies_1 b h0 h1 /\ i <= Buffer.length b /\
+  C.Compat.Loops.for 0ul len (fun h1 i -> live h1 b /\ modifies_1 b h0 h1 /\ i <= Buffer.length b /\
     (forall (j:nat{j < i}).{:pattern Seq.index (as_seq h1 b) j} Seq.index (as_seq h1 b) j == z))
   (fun i -> b.(i) <- z)

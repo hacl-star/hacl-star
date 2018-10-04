@@ -14,7 +14,7 @@ open FStar.UInt32
 open Crypto.Symmetric.Bytes
 open Crypto.Indexing
 
-open C.Loops
+open C.Compat.Loops
 
 (* Definition of aliases for modules *)
 module U8 = FStar.UInt8
@@ -46,7 +46,7 @@ private let uint64_p = Buffer.buffer uint64_t
 
 //#reset-options "--max_fuel 0 --z3rlimit 10"
 let xor_bytes_inplace a b len =
-  C.Loops.in_place_map2 a b len (fun x y -> U8.logxor x y)
+  C.Compat.Loops.in_place_map2 a b len (fun x y -> U8.logxor x y)
 
 type alg =
   | SHA256
