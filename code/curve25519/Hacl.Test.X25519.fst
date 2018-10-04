@@ -54,7 +54,7 @@ let main () =
   Hacl.EC.crypto_scalarmult result scalar2 input2;
   TestLib.compare_and_print (C.String.of_literal "Curve25519") expected2 result keysize;
   let t1 = C.clock () in
-  C.Loops.for 0ul 1000ul (fun _ _ -> True) (fun _ ->
+  C.Compat.Loops.for 0ul 1000ul (fun _ _ -> True) (fun _ ->
     Hacl.EC.crypto_scalarmult result scalar2 input2
   );
   let t2 = C.clock () in

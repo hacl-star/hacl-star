@@ -28,4 +28,4 @@ val fdifference_:
       /\ as_seq h1 a == fdifference_spec (as_seq h0 a) (as_seq h0 b)))
 [@"substitute"]
 let fdifference_ a b =
-  C.Loops.in_place_map2 a b clen (fun x y -> y -%^ x)
+  C.Compat.Loops.in_place_map2 a b clen (fun x y -> y -%^ x)

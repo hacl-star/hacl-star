@@ -23,7 +23,7 @@ module H128 = Hacl.UInt128
 
 #set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 5"
 
-open C
+open C.Compat.Endianness
 
 // Byte-level functions
 unfold inline_for_extraction let htole16 x = htole16 x

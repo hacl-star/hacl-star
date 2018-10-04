@@ -13,7 +13,7 @@ open Hacl.Cast
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 open Spec.Chacha20_vec
-open C.Loops
+open C.Compat.Loops
 
 module Spec = Spec.Chacha20
 module U32 = FStar.UInt32

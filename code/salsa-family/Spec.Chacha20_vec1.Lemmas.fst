@@ -1299,7 +1299,7 @@ let lemma_chacha_rounds_vec s sv =
 
 
 val lemma_chacha_core_std: s:state -> s':state -> Lemma
-  (let s'' = Spec.Loops.seq_map2 FStar.UInt32.op_Plus_Percent_Hat s' s in
+  (let s'' = Spec.Compat.Loops.seq_map2 FStar.UInt32.op_Plus_Percent_Hat s' s in
   let s0 = index s 0 in   let s1 = index s 1 in
   let s2 = index s 2 in   let s3 = index s 3 in
   let s4 = index s 4 in   let s5 = index s 5 in
@@ -1345,7 +1345,7 @@ val lemma_chacha_core_std: s:state -> s':state -> Lemma
 let lemma_chacha_core_std s s' = ()
 
 val lemma_chacha_core_vec: s:vec_state -> s':vec_state -> Lemma
-  (let s'' = Spec.Loops.seq_map2 V.op_Plus_Percent_Hat s' s in
+  (let s'' = Spec.Compat.Loops.seq_map2 V.op_Plus_Percent_Hat s' s in
   let s0 = index (index s 0) 0 in   let s1 = index (index s 0) 1 in
   let s2 = index (index s 0) 2 in   let s3 = index (index s 0) 3 in
   let s4 = index (index s 1) 0 in   let s5 = index (index s 1) 1 in
