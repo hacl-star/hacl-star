@@ -9,6 +9,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 
 module B = LowStar.Buffer
+module IB = LowStar.ImmutableBuffer
 module U32 = FStar.UInt32
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
@@ -26,6 +27,7 @@ let buffer (a:Type0) = B.buffer a
 val length: #a:Type0 -> b:buffer a -> GTot (r:size_nat{r == B.length b})
 
 let lbuffer (a:Type0) (len:size_nat) = b:buffer a {length b == len}
+let libuffer (a:Type0) (len:size_nat) = b:IB.ibuffer a{IB.length b == len}
 let lbytes len = lbuffer uint8 len
 
 val gsub:
@@ -78,6 +80,9 @@ inline_for_extraction let op_Array_Access #a #len = index #a #len
 
 unfold
 let bget #a #n h (b:lbuffer a n) i = Seq.index #_ #n (B.as_seq h b) i
+
+unfold
+let ibget #a #n h (b:libuffer a n) i = Seq.index #_ #n (IB.as_seq h b) i
 
 inline_for_extraction
 val create:
@@ -133,6 +138,18 @@ val copy:
       B.live h1 o /\ B.live h1 i /\ modifies (loc_buffer o) h0 h1 /\
       B.as_seq h1 o == B.as_seq h0 i)
 
+val icopy:
+    #a:Type
+  -> #len:size_nat
+  -> o:lbuffer a len
+  -> clen:size_t{v clen == len}
+  -> i:libuffer a len
+  -> Stack unit
+    (requires fun h0 -> B.live h0 o /\ B.live h0 i /\ B.disjoint i o)
+    (ensures  fun h0 _ h1 ->
+      B.live h1 o /\ B.live h1 i /\ modifies (loc_buffer o) h0 h1 /\
+      B.as_seq h1 o == B.as_seq h0 i)
+
 inline_for_extraction
 val update_sub:
     #a:Type
@@ -141,6 +158,19 @@ val update_sub:
   -> start:size_t
   -> n:size_t{v start + v n <= len}
   -> src:lbuffer a (size_v n)
+  -> Stack unit
+    (requires fun h -> B.live h dst /\ B.live h src /\ B.disjoint dst src)
+    (ensures  fun h0 _ h1 -> B.live h1 dst /\ modifies (loc_buffer dst) h0 h1 /\
+      B.as_seq h1 dst == Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
+
+inline_for_extraction
+val update_isub:
+    #a:Type
+  -> #len:size_nat
+  -> dst:lbuffer a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= len}
+  -> src:libuffer a (size_v n)
   -> Stack unit
     (requires fun h -> B.live h dst /\ B.live h src /\ B.disjoint dst src)
     (ensures  fun h0 _ h1 -> B.live h1 dst /\ modifies (loc_buffer dst) h0 h1 /\

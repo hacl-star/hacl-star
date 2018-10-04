@@ -50,5 +50,5 @@ test-blake2s.exe: blake2s-c/Hacl_Blake2s.c blake2s-c/Hacl_Test_Blake2s.c $(BASE_
 #
 
 clean:
-	rm -rf *~ *.exe *.exe.dSYM
+	rm -rf *~ *.exe *.exe.dSYM *.checked.lax
 	rm -rf blake2s-c
