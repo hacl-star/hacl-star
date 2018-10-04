@@ -284,7 +284,7 @@ procedure{:quick exportOnly} Gf128ModulusRev(inout dst:xmm)
     PinsrdImm(dst, 0xe100_0000, 3, r12);
 }
 
-procedure{:quick} ReduceMulRev128(ghost a:poly, ghost b:poly)
+procedure{:quick}{:public} ReduceMulRev128(ghost a:poly, ghost b:poly)
     modifies
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;

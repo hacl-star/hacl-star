@@ -25,7 +25,7 @@ open X64.Vale.QuickCodes
 
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} callee_save_registers(inline win:bool, ghost stack_b:buffer64)
+procedure {:quick}{:public} callee_save_registers(inline win:bool, ghost stack_b:buffer64)
     requires
         valid_stack_slots(mem, rsp, stack_b, if win then 28 else 8, memTaint);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
@@ -90,7 +90,7 @@ procedure {:quick} callee_save_registers(inline win:bool, ghost stack_b:buffer64
     Push(rbx, stack_b, 0);
 }
 
-procedure {:quick} callee_restore_registers(
+procedure {:quick}{:public} callee_restore_registers(
         inline win:bool,
         ghost stack_b:buffer64,
         ghost old_xmm6:quad32,

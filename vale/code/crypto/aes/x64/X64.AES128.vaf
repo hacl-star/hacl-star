@@ -113,7 +113,7 @@ procedure{:quick exportOnly}{:recursive}{:decrease n} KeyExpansionRoundUnrolledR
     }
 }
 
-procedure{:quick} KeyExpansion128Stdcall(
+procedure{:quick}{:public} KeyExpansion128Stdcall(
     inline win:bool,
     ghost input_key_b:buffer128,
     ghost output_key_expansion_b:buffer128)
@@ -186,7 +186,7 @@ procedure{:quick} AES128EncryptRound(
     AESNI_enc(xmm0, xmm2);
 }
 
-procedure{:quick} AES128EncryptBlock(
+procedure{:quick}{:public} AES128EncryptBlock(
     ghost input:quad32,
     ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
@@ -230,7 +230,7 @@ procedure{:quick} AES128EncryptBlock(
     Pxor(xmm2, xmm2);
 }
 
-procedure{:quick} AES128EncryptBlockStdcall(
+procedure{:quick}{:public} AES128EncryptBlockStdcall(
     inline win:bool,
     ghost input:quad32,
     ghost key:seq(nat32),

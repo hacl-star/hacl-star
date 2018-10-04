@@ -73,14 +73,14 @@ operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem;
 operand_type opr64:nat64 @ va_operand := dst_opr64 | const;
 
 // add {:typecheck false} attr because Type0 is not defined. (TODO: get rid of this)
-procedure{:quick exportOnly}{:typecheck false} AssertQuickType(ghost p:Type0) returns(ghost u:squash(p))
+procedure{:quick exportOnly}{:typecheck false}{:public} AssertQuickType(ghost p:Type0) returns(ghost u:squash(p))
     requires
         p;
 {
     u := tuple();
 }
 
-procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick exportOnly} Cpuid_AES()
+procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick exportOnly}{:public} Cpuid_AES()
     requires rax = 1;
     modifies rax; rbx; rcx; rdx;
     ensures  (iand64(rcx, 0x2000000) > 0) = aesni_enabled;
@@ -89,7 +89,7 @@ procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick export
     cpuid_features();
 }
 
-procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick exportOnly} Cpuid_Sha()
+procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick exportOnly}{:public} Cpuid_Sha()
     requires rax = 7;
              rcx = 0;
     modifies rax; rbx; rcx; rdx;
@@ -99,13 +99,13 @@ procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick export
 }
 
 
-procedure{:instruction mk_taint_ins2(S.Mov64, dst, src, list(dst), list(src))}{:fast_instruction}{:quick exportOnly} Mov64(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.Mov64, dst, src, list(dst), list(src))}{:fast_instruction}{:quick exportOnly}{:public} Mov64(inout dst: dst_opr64, src: opr64)
     ensures
         dst == old(src);
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Add64, dst, src, list(dst), list(dst, src))}{:quick exportOnly} Add64(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.Add64, dst, src, list(dst), list(dst, src))}{:quick exportOnly}{:public} Add64(inout dst: dst_opr64, src: opr64)
     modifies
         efl;
     requires
@@ -115,7 +115,7 @@ procedure{:instruction mk_taint_ins2(S.Add64, dst, src, list(dst), list(dst, src
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Add64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Add64Wrap(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.Add64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly}{:public} Add64Wrap(inout dst: dst_opr64, src: opr64)
     modifies
         efl;
     ensures
@@ -134,7 +134,7 @@ procedure{:instruction mk_taint_ins2(S.Add64, dst, src, list(dst), list(dst, src
 {
 }
 
-procedure{:instruction mk_taint_ins3(S.AddLea64, dst, src1, src2, list(dst), list(dst, src1, src2))}{:quick exportOnly} AddLea64(out dst: dst_opr64, src1: opr64, src2: opr64)
+procedure{:instruction mk_taint_ins3(S.AddLea64, dst, src1, src2, list(dst), list(dst, src1, src2))}{:quick exportOnly}{:public} AddLea64(out dst: dst_opr64, src1: opr64, src2: opr64)
     requires
         max_one_mem(@src1, @src2);
         src1 + src2 < pow2_64;
@@ -143,7 +143,7 @@ procedure{:instruction mk_taint_ins3(S.AddLea64, dst, src1, src2, list(dst), lis
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.AddCarry64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Adc64Wrap(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.AddCarry64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly}{:public} Adc64Wrap(inout dst: dst_opr64, src: opr64)
     modifies
         efl;
     ensures
@@ -170,7 +170,7 @@ procedure{:instruction mk_taint_ins2(S.Adox64, dst, src, list(dst), list(dst, sr
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Sub64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Sub64(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.Sub64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly}{:public} Sub64(inout dst: dst_opr64, src: opr64)
     requires
         0 <= dst - src;
     modifies
@@ -180,7 +180,7 @@ procedure{:instruction mk_taint_ins2(S.Sub64, dst, src, list(dst), list(dst, src
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Sub64, dst, src, list(dst), list(dst, src))}{:quick exportOnly} Sub64Wrap(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.Sub64, dst, src, list(dst), list(dst, src))}{:quick exportOnly}{:public} Sub64Wrap(inout dst: dst_opr64, src: opr64)
     modifies
         efl;
     ensures
@@ -197,7 +197,7 @@ let lemma_fundamental_div_mod (a b:nat64) :
 
 ghost procedure lemma_fundamental_div_mod(ghost a:nat64, ghost b:nat64) extern;
 
-procedure{:instruction mk_taint_ins1(S.Mul64, src, list(TReg(Rax), TReg(Rdx)), list(TReg(Rax), src))}{:fast_instruction}{:quick exportOnly} Mul64Wrap(src: opr64)
+procedure{:instruction mk_taint_ins1(S.Mul64, src, list(TReg(Rax), TReg(Rdx)), list(TReg(Rax), src))}{:fast_instruction}{:quick exportOnly}{:public} Mul64Wrap(src: opr64)
     modifies
         efl;
         rax;
@@ -221,7 +221,7 @@ procedure{:instruction mk_taint_ins3(S.Mulx64, dst_hi, dst_lo, src, list(dst_hi,
 ghost procedure lemma_mul_nat(ghost x:nat, ghost y:nat) extern;
 ghost procedure lemma_mul_in_bounds(ghost a:nat64, ghost b:nat64) extern;
 
-procedure{:instruction mk_taint_ins2(S.IMul64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} IMul64(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.IMul64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly}{:public} IMul64(inout dst: dst_opr64, src: opr64)
     requires
         dst * src < pow2_64;
     modifies
@@ -244,7 +244,7 @@ procedure{:instruction mk_taint_ins2(S.Xor64, dst, src, list(dst), list(dst, src
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.And64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} And64(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.And64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly}{:public} And64(inout dst: dst_opr64, src: opr64)
     modifies
         efl;
     ensures
@@ -252,7 +252,7 @@ procedure{:instruction mk_taint_ins2(S.And64, dst, src, list(dst), list(dst, src
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Shl64, dst, amt, list(dst), list(dst, amt))}{:quick exportOnly} Shl64(inout dst: dst_opr64, amt: shift_amt64)
+procedure{:instruction mk_taint_ins2(S.Shl64, dst, amt, list(dst), list(dst, amt))}{:quick exportOnly}{:public} Shl64(inout dst: dst_opr64, amt: shift_amt64)
     modifies
         efl;
 //    requires
@@ -262,7 +262,7 @@ procedure{:instruction mk_taint_ins2(S.Shl64, dst, amt, list(dst), list(dst, amt
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Shr64, dst, amt, list(dst), list(dst, amt))}{:fast_instruction}{:quick exportOnly} Shr64(inout dst: dst_opr64, amt: shift_amt64)
+procedure{:instruction mk_taint_ins2(S.Shr64, dst, amt, list(dst), list(dst, amt))}{:fast_instruction}{:quick exportOnly}{:public} Shr64(inout dst: dst_opr64, amt: shift_amt64)
     modifies
         efl;
     ensures

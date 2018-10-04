@@ -46,7 +46,7 @@ friend X64.Memory
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 20"
 #endverbatim
 
-procedure{:quick exportOnly}
+procedure{:quick exportOnly}{:public}
     {:instruction Ins(TS.TaintedIns(tuple(S.Pclmulqdq(dst, src, (if dstHi then 1 else 0) + (if srcHi then 16 else 0)), list(), list()), Public))}
     Pclmulqdq(inout dst:xmm, src:xmm, inline dstHi:bool, inline srcHi:bool)
     requires pclmulqdq_enabled;
@@ -58,7 +58,7 @@ procedure{:quick exportOnly}
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc(dst, src), list(), list()), Public))}{:quick exportOnly}
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc(dst, src), list(), list()), Public))}{:quick exportOnly}{:public}
     AESNI_enc(inout dst:xmm, src:xmm)
     requires aesni_enabled;
     modifies efl;
@@ -67,7 +67,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc(dst, src), list(), li
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc_last(dst, src), list(), list()), Public))}{:quick exportOnly}
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc_last(dst, src), list(), list()), Public))}{:quick exportOnly}{:public}
     AESNI_enc_last(inout dst:xmm, src:xmm)
     requires aesni_enabled;
     modifies efl;
@@ -103,7 +103,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_imc(dst, src), list(), li
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_keygen_assist(dst, src, imm), list(), list()), Public))}{:quick exportOnly}
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_keygen_assist(dst, src, imm), list(), list()), Public))}{:quick exportOnly}{:public}
     AESNI_keygen_assist(inout dst:xmm, src:xmm, inline imm:imm8)
     requires aesni_enabled;
     modifies efl;

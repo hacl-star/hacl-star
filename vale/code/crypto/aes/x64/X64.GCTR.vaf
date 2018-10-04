@@ -69,7 +69,7 @@ procedure {:quick} init_ctr()
     lemma_quad32_xor();
 }
 
-procedure {:quick exportOnly} Inc32(inout dst:xmm, one:xmm)
+procedure {:quick exportOnly}{:public} Inc32(inout dst:xmm, one:xmm)
     requires
         one == Mkfour(1, 0, 0, 0);
     modifies
@@ -161,7 +161,7 @@ procedure {:quick} inc32_buffer_win(ghost stack_b:buffer64, ghost iv_b:buffer128
 
 
 // GCTR encrypt one block
-procedure {:quick} gctr_register(
+procedure {:quick}{:public} gctr_register(
     inline alg:algorithm,
     ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
@@ -388,7 +388,7 @@ procedure {:quick} gctr_core_opt(
 
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} gctr_bytes_extra_work(
+procedure {:quick}{:public} gctr_bytes_extra_work(
     inline alg:algorithm,
     ghost icb_BE:quad32,
     ghost in_b:buffer128,
@@ -466,7 +466,7 @@ procedure {:quick} gctr_bytes_extra_work(
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} gctr_bytes_extra(
+procedure {:quick}{:public} gctr_bytes_extra(
     inline alg:algorithm,
     ghost icb_BE:quad32,
     ghost in_b:buffer128,
@@ -787,7 +787,7 @@ procedure {:quick} gctr_bytes_extra_buffer_win(
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} gctr_bytes_no_extra(
+procedure {:quick}{:public} gctr_bytes_no_extra(
     inline alg:algorithm,
     ghost icb_BE:quad32,
     ghost in_b:buffer128,
