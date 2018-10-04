@@ -13,15 +13,6 @@ module I = Hacl.Impl.Blake2s
 
 type state = I.state
 
-
-val mkstate: unit ->
-  Stack state
-    (requires (fun h -> True))
-    (ensures  (fun h0 _ h1 -> True))
-
-let mkstate () = I.blake2s_mkstate ()
-
-
 val init:
     #vkk:size_t
   -> st:state

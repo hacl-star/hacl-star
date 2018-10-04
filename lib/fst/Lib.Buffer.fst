@@ -50,6 +50,12 @@ let copy #a #len o clen i =
   let h1 = ST.get () in
   assert (Seq.slice #a #len (B.as_seq h1 o) 0 len == Seq.slice #a #len (B.as_seq h0 i) 0 len)
 
+let icopy #a #len o clen i =
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit i (size_to_UInt32 (size 0)) o (size_to_UInt32 (size 0)) (size_to_UInt32 clen);
+  let h1 = ST.get () in
+  assert (Seq.slice #a #len (B.as_seq h1 o) 0 len == Seq.slice #a #len (B.as_seq h0 i) 0 len)
+
 let update_sub #a #len dst start n src =
   let h0 = ST.get () in
   LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
@@ -58,6 +64,15 @@ let update_sub #a #len dst start n src =
   Seq.eq_intro
     (B.as_seq h1 dst)
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
+
+let update_isub #a #len dst start n src =
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
+  let h1 = ST.get () in
+  assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == ibget h0 src k);
+  Seq.eq_intro
+    (B.as_seq h1 dst)
+    (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (IB.as_seq h0 src))
 
 let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
