@@ -9,7 +9,7 @@ open FStar.Seq
 open FStar.UInt64
 
 open Spec.Compat.Loops
-open Spec.Lib
+open Spec.Compat.Lib
 
 module Word = FStar.UInt64
 
@@ -49,8 +49,8 @@ type blocks_w = m:seq block_w
 type counter = nat
 
 (* Define word based operators *)
-let words_to_be = Spec.Lib.uint64s_to_be
-let words_from_be = Spec.Lib.uint64s_from_be
+let words_to_be = Spec.Compat.Lib.uint64s_to_be
+let words_from_be = Spec.Compat.Lib.uint64s_from_be
 let word_logxor = Word.logxor
 let word_logand = Word.logand
 let word_logor = Word.logor

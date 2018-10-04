@@ -30,12 +30,12 @@ val uint32s_from_be_bytes:
     (ensures  (fun h0 _ h1 -> live h1 output /\ live h0 input /\ modifies_1 output h0 h1 /\
       (let o = reveal_h32s (as_seq h1 output) in
        let i = reveal_sbytes (as_seq h0 input) in
-       o == Spec.Lib.uint32s_from_be (U32.v len) i)))
+       o == Spec.Compat.Lib.uint32s_from_be (U32.v len) i)))
 let uint32s_from_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ modifies_1 output h0 h1 /\ 0 <= i /\ i <= UInt32.v len
-    /\ Seq.slice (reveal_h32s (as_seq h1 output)) 0 i == Spec.Lib.uint32s_from_be i (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (4 * i)))
+    /\ Seq.slice (reveal_h32s (as_seq h1 output)) 0 i == Spec.Compat.Lib.uint32s_from_be i (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (4 * i)))
   in
   let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < v len ) }): Stack unit
     (requires (fun h -> inv h (UInt32.v i)))
@@ -46,7 +46,7 @@ let uint32s_from_be_bytes output input len =
     let inputi = hload32_be (Buffer.sub input (4ul*^i) (4ul)) in
     output.(i) <- inputi;
     let h' = ST.get() in
-    Spec.Lib.lemma_uint32s_from_be_def_1 (UInt32.v i + 1) (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (4 * v i + 4)));
+    Spec.Compat.Lib.lemma_uint32s_from_be_def_1 (UInt32.v i + 1) (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (4 * v i + 4)));
     Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (4 * v i + 4))
                        (Seq.append (Seq.slice (as_seq h0 input) 0 (4 * v i)) (as_seq h (Buffer.sub input (4ul *^ i) (4ul))));
     Seq.lemma_eq_intro (as_seq h0 (Buffer.sub input (4ul*^i) (4ul)))
@@ -58,9 +58,9 @@ let uint32s_from_be_bytes output input len =
     Seq.lemma_eq_intro (Seq.slice (as_seq h' output) 0 (v i+1))
                        (Seq.snoc (Seq.slice (as_seq h output) 0 (v i)) inputi);
     Seq.lemma_eq_intro (reveal_h32s (Seq.slice (as_seq h' output) 0 (v i + 1)))
-                       (Spec.Lib.uint32s_from_be (v i + 1) (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (4 * (v i + 1)))))
+                       (Spec.Compat.Lib.uint32s_from_be (v i + 1) (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (4 * (v i + 1)))))
   in
-  Spec.Lib.lemma_uint32s_from_be_def_0 0 (reveal_sbytes (Seq.slice (as_seq h0 input) 0 0));
+  Spec.Compat.Lib.lemma_uint32s_from_be_def_0 0 (reveal_sbytes (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
   C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
@@ -79,12 +79,12 @@ val uint32s_to_be_bytes:
     (ensures  (fun h0 _ h1 -> live h1 output /\ live h0 input /\ modifies_1 output h0 h1 /\
       (let o = reveal_sbytes (as_seq h1 output) in
        let i = reveal_h32s (as_seq h0 input) in
-       o == Spec.Lib.uint32s_to_be (U32.v len) i)))
+       o == Spec.Compat.Lib.uint32s_to_be (U32.v len) i)))
 let uint32s_to_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ modifies_1 output h0 h1 /\ 0 <= i /\ i <= UInt32.v len
-    /\ reveal_sbytes (Seq.slice (as_seq h1 output) 0 (4 * i)) == Spec.Lib.uint32s_to_be i (reveal_h32s (Seq.slice (as_seq h0 input) 0 (i)))
+    /\ reveal_sbytes (Seq.slice (as_seq h1 output) 0 (4 * i)) == Spec.Compat.Lib.uint32s_to_be i (reveal_h32s (Seq.slice (as_seq h0 input) 0 (i)))
   in
   let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < v len ) }): Stack unit
     (requires (fun h -> inv h (UInt32.v i)))
@@ -109,15 +109,15 @@ let uint32s_to_be_bytes output input len =
     Seq.lemma_eq_intro (Seq.slice (as_seq h' output) 0 (4 * v i + 4))
                        (Seq.append (Seq.slice (Seq.slice (as_seq h' output) 0 (4 * v i + 4)) 0 (4 * v i))
                                    (Seq.slice (Seq.slice (as_seq h' output) 0 (4 * v i + 4)) (4 * v i) (4 * v i + 4)));
-    Spec.Lib.lemma_uint32s_to_be_def_1 (UInt32.v i + 1) (reveal_h32s (Seq.slice (as_seq h0 input) 0 (v i + 1)));
+    Spec.Compat.Lib.lemma_uint32s_to_be_def_1 (UInt32.v i + 1) (reveal_h32s (Seq.slice (as_seq h0 input) 0 (v i + 1)));
     Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (v i))
                        (Seq.slice (Seq.slice (as_seq h0 input) 0 (v i + 1)) 0 (v i));
     FStar.Endianness.lemma_big_endian_inj (Seq.slice (reveal_sbytes (as_seq h' output)) (4 * v i) (4 * v i + 4))
-                                             (Spec.Lib.uint32_to_be (h32_to_u32 hd));
+                                             (Spec.Compat.Lib.uint32_to_be (h32_to_u32 hd));
     Seq.lemma_eq_intro (reveal_sbytes (Seq.slice (as_seq h' output) 0 (4 * v i + 4)))
-                       (Spec.Lib.uint32s_to_be (v i + 1) (reveal_h32s (Seq.slice (as_seq h0 input) 0 (v i + 1))))
+                       (Spec.Compat.Lib.uint32s_to_be (v i + 1) (reveal_h32s (Seq.slice (as_seq h0 input) 0 (v i + 1))))
   in
-  Spec.Lib.lemma_uint32s_to_be_def_0 0 (reveal_h32s (Seq.slice (as_seq h0 input) 0 0));
+  Spec.Compat.Lib.lemma_uint32s_to_be_def_0 0 (reveal_h32s (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
   C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
@@ -136,12 +136,12 @@ val uint64s_from_be_bytes:
     (ensures  (fun h0 _ h1 -> live h1 output /\ live h0 input /\ modifies_1 output h0 h1 /\
       (let o = reveal_h64s (as_seq h1 output) in
        let i = reveal_sbytes (as_seq h0 input) in
-       o == Spec.Lib.uint64s_from_be (U32.v len) i)))
+       o == Spec.Compat.Lib.uint64s_from_be (U32.v len) i)))
 let uint64s_from_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ modifies_1 output h0 h1 /\ 0 <= i /\ i <= UInt32.v len
-    /\ Seq.slice (reveal_h64s (as_seq h1 output)) 0 i == Spec.Lib.uint64s_from_be i (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (8 * i)))
+    /\ Seq.slice (reveal_h64s (as_seq h1 output)) 0 i == Spec.Compat.Lib.uint64s_from_be i (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (8 * i)))
   in
   let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < v len ) }): Stack unit
     (requires (fun h -> inv h (UInt32.v i)))
@@ -152,7 +152,7 @@ let uint64s_from_be_bytes output input len =
     let inputi = hload64_be (Buffer.sub input (8ul*^i) (8ul)) in
     output.(i) <- inputi;
     let h' = ST.get() in
-    Spec.Lib.lemma_uint64s_from_be_def_1 (UInt32.v i + 1) (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (8 * v i + 8)));
+    Spec.Compat.Lib.lemma_uint64s_from_be_def_1 (UInt32.v i + 1) (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (8 * v i + 8)));
     Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (8 * v i + 8))
                        (Seq.append (Seq.slice (as_seq h0 input) 0 (8 * v i)) (as_seq h (Buffer.sub input (8ul *^ i) (8ul))));
     Seq.lemma_eq_intro (as_seq h0 (Buffer.sub input (8ul*^i) (8ul)))
@@ -164,9 +164,9 @@ let uint64s_from_be_bytes output input len =
     Seq.lemma_eq_intro (Seq.slice (as_seq h' output) 0 (v i+1))
                        (Seq.snoc (Seq.slice (as_seq h output) 0 (v i)) inputi);
     Seq.lemma_eq_intro (reveal_h64s (Seq.slice (as_seq h' output) 0 (v i + 1)))
-                       (Spec.Lib.uint64s_from_be (v i + 1) (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (8 * (v i + 1)))))
+                       (Spec.Compat.Lib.uint64s_from_be (v i + 1) (reveal_sbytes (Seq.slice (as_seq h0 input) 0 (8 * (v i + 1)))))
   in
-  Spec.Lib.lemma_uint64s_from_be_def_0 0 (reveal_sbytes (Seq.slice (as_seq h0 input) 0 0));
+  Spec.Compat.Lib.lemma_uint64s_from_be_def_0 0 (reveal_sbytes (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
   C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
@@ -184,12 +184,12 @@ val uint64s_to_be_bytes:
     (ensures  (fun h0 _ h1 -> live h1 output /\ live h0 input /\ modifies_1 output h0 h1 /\
       (let o = reveal_sbytes (as_seq h1 output) in
        let i = reveal_h64s (as_seq h0 input) in
-       o == Spec.Lib.uint64s_to_be (U32.v len) i)))
+       o == Spec.Compat.Lib.uint64s_to_be (U32.v len) i)))
 let uint64s_to_be_bytes output input len =
   let h0 = ST.get() in
   let inv (h1: mem) (i: nat): Type0 =
     live h1 output /\ modifies_1 output h0 h1 /\ 0 <= i /\ i <= UInt32.v len
-    /\ reveal_sbytes (Seq.slice (as_seq h1 output) 0 (8 * i)) == Spec.Lib.uint64s_to_be i (reveal_h64s (Seq.slice (as_seq h0 input) 0 (i)))
+    /\ reveal_sbytes (Seq.slice (as_seq h1 output) 0 (8 * i)) == Spec.Compat.Lib.uint64s_to_be i (reveal_h64s (Seq.slice (as_seq h0 input) 0 (i)))
   in
   let f' (i:UInt32.t{ FStar.UInt32.( 0 <= v i /\ v i < v len ) }): Stack unit
     (requires (fun h -> inv h (UInt32.v i)))
@@ -214,15 +214,15 @@ let uint64s_to_be_bytes output input len =
     Seq.lemma_eq_intro (Seq.slice (as_seq h' output) 0 (8 * v i + 8))
                        (Seq.append (Seq.slice (Seq.slice (as_seq h' output) 0 (8 * v i + 8)) 0 (8 * v i))
                                    (Seq.slice (Seq.slice (as_seq h' output) 0 (8 * v i + 8)) (8 * v i) (8 * v i + 8)));
-    Spec.Lib.lemma_uint64s_to_be_def_1 (UInt32.v i + 1) (reveal_h64s (Seq.slice (as_seq h0 input) 0 (v i + 1)));
+    Spec.Compat.Lib.lemma_uint64s_to_be_def_1 (UInt32.v i + 1) (reveal_h64s (Seq.slice (as_seq h0 input) 0 (v i + 1)));
     Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (v i))
                        (Seq.slice (Seq.slice (as_seq h0 input) 0 (v i + 1)) 0 (v i));
     FStar.Endianness.lemma_big_endian_inj (Seq.slice (reveal_sbytes (as_seq h' output)) (8 * v i) (8 * v i + 8))
-                                             (Spec.Lib.uint64_to_be (h64_to_u64 hd));
+                                             (Spec.Compat.Lib.uint64_to_be (h64_to_u64 hd));
     Seq.lemma_eq_intro (reveal_sbytes (Seq.slice (as_seq h' output) 0 (8 * v i + 8)))
-                       (Spec.Lib.uint64s_to_be (v i + 1) (reveal_h64s (Seq.slice (as_seq h0 input) 0 (v i + 1))))
+                       (Spec.Compat.Lib.uint64s_to_be (v i + 1) (reveal_h64s (Seq.slice (as_seq h0 input) 0 (v i + 1))))
   in
-  Spec.Lib.lemma_uint64s_to_be_def_0 0 (reveal_h64s (Seq.slice (as_seq h0 input) 0 0));
+  Spec.Compat.Lib.lemma_uint64s_to_be_def_0 0 (reveal_h64s (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
   C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in

@@ -9,7 +9,7 @@ open FStar.Seq
 open FStar.UInt32
 
 open Spec.Compat.Loops
-open Spec.Lib
+open Spec.Compat.Lib
 
 module Word = FStar.UInt32
 
@@ -45,8 +45,8 @@ type blocks_w = m:seq block_w
 type counter = nat
 
 (* Define word based operators *)
-let words_to_be = Spec.Lib.uint32s_to_be
-let words_from_be = Spec.Lib.uint32s_from_be
+let words_to_be = Spec.Compat.Lib.uint32s_to_be
+let words_from_be = Spec.Compat.Lib.uint32s_from_be
 let word_logxor = Word.logxor
 let word_logand = Word.logand
 let word_logor = Word.logor
@@ -150,7 +150,7 @@ let shuffle (hash:hash_w) (block:block_w) : Tot hash_w =
 let update (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
   let b = words_from_be size_block_w block in
   let hash_1 = shuffle hash b in
-  Spec.Lib.map2 (fun x y -> x +%^ y) hash hash_1
+  Spec.Compat.Lib.map2 (fun x y -> x +%^ y) hash hash_1
 
 
 let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}) : Tot hash_w (decreases (Seq.length blocks)) =

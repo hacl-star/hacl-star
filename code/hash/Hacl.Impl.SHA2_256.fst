@@ -449,7 +449,7 @@ private val sum_hash:
               /\ (let new_seq_hash_0 = as_seq h1 hash_0 in
               let seq_hash_0 = as_seq h0 hash_0 in
               let seq_hash_1 = as_seq h0 hash_1 in
-              new_seq_hash_0 == Spec.Lib.map2 (fun x y -> H32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
+              new_seq_hash_0 == Spec.Compat.Lib.map2 (fun x y -> H32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
 
 #set-options "--max_fuel 0  --z3rlimit 20"
 
@@ -533,7 +533,7 @@ private val update_core:
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 data /\ live h0 data_w /\ live h0 ws_w /\ live h0 k_w
                   /\ reveal_h32s (as_seq h0 k_w) == Spec.k
-                  /\ (reveal_h32s (as_seq h0 data_w) = Spec.Lib.uint32s_from_be (v size_block_w) (reveal_sbytes (as_seq h0 data)))
+                  /\ (reveal_h32s (as_seq h0 data_w) = Spec.Compat.Lib.uint32s_from_be (v size_block_w) (reveal_sbytes (as_seq h0 data)))
                   /\ (let w = reveal_h32s (as_seq h0 ws_w) in
                   let b = reveal_h32s (as_seq h0 data_w) in
                   (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i))))
@@ -698,7 +698,7 @@ let update state data =
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_whash_w size_whash_w);
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_count_w size_count_w);
   (**) no_upd_lemma_1 h2 h3 data_w data;
-  (**) assert(reveal_h32s (as_seq h3 data_w) == Spec.Lib.uint32s_from_be (U32.v size_block_w) (reveal_sbytes (as_seq h3 data)));
+  (**) assert(reveal_h32s (as_seq h3 data_w) == Spec.Compat.Lib.uint32s_from_be (U32.v size_block_w) (reveal_sbytes (as_seq h3 data)));
 
   (* Retreive values from the state *)
   let hash_w = Buffer.sub state pos_whash_w size_whash_w in
