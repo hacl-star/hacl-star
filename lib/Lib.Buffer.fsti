@@ -144,6 +144,7 @@ val copy:
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       as_seq h1 o == as_seq h0 i)
 
+inline_for_extraction
 val icopy:
     #a:Type
   -> #len:size_nat
