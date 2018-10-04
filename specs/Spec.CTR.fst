@@ -13,7 +13,7 @@ type cipher =
 	    key_len:size_nat ->
 	    counter_max:size_nat ->
 	    block_len:(x:size_nat{x>0}) ->
-	    init:(lbytes key_len -> n_len:size_nat -> lbytes n_len -> state) ->
+	    init:(lbytes key_len -> n_len:size_nat{n_len <= block_len} -> lbytes n_len -> state) ->
 	    set_counter:(state -> c:size_nat{c <= counter_max} -> state) ->
 	    key_block: (state -> lbytes block_len) ->
 	    cipher

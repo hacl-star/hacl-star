@@ -217,7 +217,7 @@ let (^~.) x y = logand #U8 (lognot #U8 (x ^. y)) (u8 1)
   output *)
 
 
-type block = lseq uint8 16
+type block = lbytes 16
 
 let subBytes (state:block) : block =
   map sbox state
@@ -303,10 +303,10 @@ let round (key:block) (state:block) =
   let state = addRoundKey key state in
   state
 
-let rounds (key:lseq uint8 (9 * 16)) (state:block) =
+let rounds (key:lbytes (9 * 16)) (state:block) =
   repeati 9 (fun i -> round (sub key (16*i) 16)) state
 
-let block_cipher (key:lseq uint8 (11 * 16)) (input:block) =
+let block_cipher (key:lbytes (11 * 16)) (input:block) =
   let state = input in
   let k0 = slice key 0 16 in
   let k = sub key 16 (9 * 16) in
@@ -318,7 +318,7 @@ let block_cipher (key:lseq uint8 (11 * 16)) (input:block) =
   let state = addRoundKey kn state in
   state
 
-type word = lseq uint8 4
+type word = lbytes 4
 let rotate_word (w:word) : word =
   createL [w.[1];w.[2];w.[3];w.[0]]
 
@@ -333,26 +333,26 @@ let rec rcon_spec i =
   else two `fmul` rcon_spec (i - 1)
 *)
 
-let rcon_l = [u8 0x8d; u8 0x01; u8 0x02; u8 0x04; u8 0x08; u8 0x10; u8 0x20; u8 0x40; u8 0x80; u8 0x1b; u8 0x36]
+let rcon_l : list uint8 = [u8 0x8d; u8 0x01; u8 0x02; u8 0x04; u8 0x08; u8 0x10; u8 0x20; u8 0x40; u8 0x80; u8 0x1b; u8 0x36]
 
-let rcon : lseq uint8 11 =
+let rcon : lbytes 11 =
   assert_norm (List.Tot.length rcon_l = 11);
   createL #uint8 rcon_l
 
-let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 48}) : word =
+let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 44}) : word =
   let k = w1 in
   let k =
-    if (i % 4 = 0) then
+    if (i % 4 = 0) then (
        let k = rotate_word k in
        let k = sub_word k in
        let rcon_i = rcon.[i / 4] in
        let k = k.[0] <- logxor #U8 rcon_i k.[0] in
-       k
+       k)
     else k in
   let k = map2 (logxor #U8) w0 k in
   k
 
-let key_expansion (key:block) : (lseq uint8 (11 * 16)) =
+let key_expansion (key:block) : (lbytes (11 * 16)) =
   let key_ex = create (11 * 16) (u8 0) in
   let key_ex = repeati 16 (fun i s -> s.[i] <- key.[i]) key_ex in
   let key_ex = repeat_range 4 44
@@ -365,7 +365,7 @@ let key_expansion (key:block) : (lseq uint8 (11 * 16)) =
   key_ex
 
 
-let aes128_block (k:block) (n:lseq uint8 12) (c:size_nat) : block =
+let aes128_block (k:block) (n:lbytes 12) (c:size_nat) : block =
   let ctrby = nat_to_bytes_be 4 c in
   let input = create 16 (u8 0) in
   let input = repeati 12 (fun i b -> b.[i] <- n.[i]) input in
@@ -380,34 +380,30 @@ let aes128_encrypt_block (k:block) (m:block) : block =
   output
 
 noeq type aes_state = {
-  key_ex: lseq uint8 (11 `op_Multiply` 16);
-  block:  lseq uint8 16;
-  ctr:    size_nat;
+  key_ex: lbytes (11 `op_Multiply` 16);
+  block:  lbytes 16;
 }
 
-let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lseq uint8 n_len) : aes_state =
+let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : aes_state =
   let input = create 16 (u8 0) in
   let input = repeati n_len (fun i b -> b.[i] <- n.[i]) input in
   let key_ex = key_expansion k in
-  let ctr = if n_len = 12 then 0 else 1 in
   {key_ex = key_ex;
-   block  = input;
-   ctr    = ctr}
-
+   block  = input}
+   
 let aes_set_counter (st:aes_state) (c:size_nat) : Tot aes_state =
-  let bint = nat_from_bytes_be st.block in
-  let ctr = c - st.ctr in
-  let input = nat_to_bytes_be 16 (bint + ctr) in
-  {st with block = input}
+  let cby = nat_to_bytes_be 4 c in
+  let nblock = update_sub st.block 12 4 cby in
+  {st with block = nblock}
 
 let aes_key_block (st:aes_state) : Tot block =
   block_cipher st.key_ex st.block
 
-let aes_key_block0 (k:block) (n_len:size_nat{n_len <= 16}) (n:lseq uint8 n_len) : Tot block =
+let aes_key_block0 (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot block =
   let st = aes_init k n_len n in
   aes_key_block st
 
-let aes_key_block1 (k:block) (n_len:size_nat{n_len <= 16}) (n:lseq uint8 n_len) : Tot block =
+let aes_key_block1 (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot block =
   let st = aes_init k n_len n in
   let st = aes_set_counter st 1 in
   aes_key_block st
@@ -417,3 +413,4 @@ let aes128_cipher =
 
 let aes128_encrypt_bytes key n_len nonce counter n m =
   Spec.CTR.counter_mode aes128_cipher key n_len nonce counter n m
+
