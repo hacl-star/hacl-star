@@ -43,7 +43,7 @@ val text_to_PS_text: t:text -> Tot (t':PS_.text{
     i < Seq.length t ==> Seq.index t i == Seq.index t' i)})
   (decreases (Seq.length t))
 let rec text_to_PS_text t =
-  if Seq.length t = 0 then Seq.createEmpty
+  if Seq.length t = 0 then Seq.empty
   else
     Seq.cons (Seq.head t) (text_to_PS_text (Seq.tail t))
 
@@ -502,7 +502,7 @@ let finish #i s a t =
     let h' = ST.get () in
     assume (Buffer.disjoint a' t);
     assume (Buffer.disjoint a' s);
-    PL.poly1305_finish_ (Ghost.hide Seq.createEmpty) st t dummy_m 0uL s;
+    PL.poly1305_finish_ (Ghost.hide Seq.empty) st t dummy_m 0uL s;
     let h'' = ST.get() in
     lemma_modifies_3_2_finish h h' h'' a t;
     pop_frame();

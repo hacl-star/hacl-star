@@ -63,7 +63,7 @@ noextract private val encode_bytes: txt:Seq.seq UInt8.t ->
 let rec encode_bytes txt =
   let l = Seq.length txt in
   if l = 0 then
-    Seq.createEmpty
+    Seq.empty
   else if l < 16 then
     Seq.create 1 (pad_0 txt (16 - l))
   else
@@ -541,7 +541,7 @@ let accumulate #i st aadlen aad txtlen cipher =
       assert HS.(modifies_one (HS.get_tip h) h4 h5);
       assert HS.(modifies_one (HS.get_tip h) h h5);
       Buffer.lemma_intro_modifies_0 h h5;
-      lemma_eq_intro (HS.sel h0 log) createEmpty;
+      lemma_eq_intro (HS.sel h0 log) empty;
       Buffer.no_upd_lemma_0 h h0 aad;
       frame_modifies_buf_and_ref h0 h1 buf log aad;
       frame_modifies_buf_and_ref h1 h2 buf log aad;
@@ -549,7 +549,7 @@ let accumulate #i st aadlen aad txtlen cipher =
       frame_modifies_buf_and_ref h0 h1 buf log cipher;
       frame_modifies_buf_and_ref h1 h2 buf log cipher;
       append_empty_r (encode_bytes abytes);
-      lemma_eq_intro (HS.sel h1 log) (append (encode_bytes abytes) createEmpty);
+      lemma_eq_intro (HS.sel h1 log) (append (encode_bytes abytes) empty);
       lemma_eq_intro (HS.sel h1 log) (encode_bytes abytes);
       lemma_eq_intro (HS.sel h2 log) (encode_bytes cbytes @| encode_bytes abytes)
     end
