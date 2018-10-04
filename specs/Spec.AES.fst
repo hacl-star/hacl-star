@@ -30,8 +30,8 @@ let from_elem x = x
 let zero = u8 0
 (* let fadd (a:uint8) (b:uint8) : uint8 = a ^. b *)
 let fmul (a:uint8) (b:uint8) : uint8 =
-  let (p,a,b) =
-    repeat 7 (fun (p,a,b) ->
+  let (p,a,b): (uint8 & uint8 & uint8) =
+    repeati #(uint8 & uint8 & uint8) 7 (fun _ (p,a,b) ->
 	      let b0 = eq_mask #U8 (b &. u8 1) (u8 1) in
 	      let p = p ^. (b0 &. a) in
   	      let carry_mask = gte_mask #U8 a (u8 0x80) in
@@ -333,7 +333,7 @@ let rec rcon_spec i =
   else two `fmul` rcon_spec (i - 1)
 *)
 
-let rcon_l = [u8 0x8d; u8 0x01; u8 0x02; u8 0x04; u8 0x08; u8 0x10; u8 0x20; u8 0x40; u8 0x80; u8 0x1b; u8 0x36]
+let rcon_l :list uint8 = [u8 0x8d; u8 0x01; u8 0x02; u8 0x04; u8 0x08; u8 0x10; u8 0x20; u8 0x40; u8 0x80; u8 0x1b; u8 0x36]
 
 let rcon : lseq uint8 11 =
   assert_norm (List.Tot.length rcon_l = 11);
@@ -345,7 +345,8 @@ let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 48}) : word =
     if (i % 4 = 0) then
        let k = rotate_word k in
        let k = sub_word k in
-       let rcon_i = rcon.[i / 4] in
+       assert(47 / 4 <= 11);
+       let rcon_i = rcon.[i / 4] in // BB. Incorrect. i / 4 <= 11 not < 11
        let k = k.[0] <- logxor #U8 rcon_i k.[0] in
        k
     else k in
