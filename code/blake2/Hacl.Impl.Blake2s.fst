@@ -229,7 +229,7 @@ val blake2_compress :
 
 let blake2_compress s m offset flag =
   let h0 = ST.get () in
-  alloc #h0 (size 16) (u32 0) s
+  alloc h0 (size 16) (u32 0) s
   (fun h0 ->
     let s0 = h0.[s] in
     let m0 = h0.[m] in
@@ -253,7 +253,7 @@ val blake2s_update_block:
 
 let blake2s_update_block hash dd_prev d =
   let h0 = ST.get () in
-  alloc #h0 (size 16) (u32 0) hash
+  alloc h0 (size 16) (u32 0) hash
   (fun h0 ->
     let d0 = h0.[d] in
     let s0 = h0.[hash] in
@@ -299,7 +299,7 @@ val blake2s_init:
 let blake2s_init #vkk hash k kk nn =
   IB.recall_contents const_iv (FStar.Seq.seq_of_list Spec.list_iv);
   let h0 = ST.get () in
-  alloc #h0 (size Spec.size_block) (u8 0) hash
+  alloc h0 (size Spec.size_block) (u8 0) hash
   (fun h -> (fun _ sv -> sv == Spec.Blake2s.blake2s_init (v kk) h0.[k] (v nn)))
   (fun key_block ->
     admit();
@@ -369,7 +369,7 @@ let blake2s_update_last #vlen hash ll last len fk =
   let ll_plus_block_bytes64 = ll64 +. (u64 Spec.size_block) in
   assume(ll_plus_block_bytes64 == u64 (size_v ll + Spec.size_block));
   (**) let h0 = ST.get () in
-  alloc #h0 (size Spec.size_block) (u8 0) hash
+  alloc h0 (size Spec.size_block) (u8 0) hash
   (fun h ->
     let hash0 = h0.[hash] in
     let last0 = h0.[last] in
@@ -379,7 +379,7 @@ let blake2s_update_last #vlen hash ll last len fk =
     admit();
     update_sub last_block (size 0) len last;
     (**) let h1 = ST.get () in
-    alloc #h1 (size Spec.size_block_w) (u32 0) hash
+    alloc h1 (size Spec.size_block_w) (u32 0) hash
     (fun h ->
       let hash1 = h1.[hash] in
       let last_block1 = h1.[last_block] in
@@ -405,7 +405,7 @@ val blake2s_update_last_empty:
 
 let blake2s_update_last_empty hash =
   let h0 = ST.get () in
-  alloc #h0 (size Spec.size_block) (u8 0) hash
+  alloc h0 (size Spec.size_block) (u8 0) hash
   (fun h0 ->
     let hash0 = h0.[hash] in
     (fun _ r ->
@@ -429,7 +429,7 @@ val blake2s_finish:
 
 let blake2s_finish #vnn output hash nn =
   (**) let h0 = ST.get () in
-  alloc #h0 (size 32) (u8 0) output
+  alloc h0 (size 32) (u8 0) output
   (fun h ->
     (fun _ r -> r == Spec.Blake2s.blake2s_finish h0.[hash] (v nn))
   )
@@ -459,7 +459,7 @@ val blake2s:
 
 let blake2s #vll #vkk #vnn output d ll k kk nn =
   let h0 = ST.get () in
-  alloc #h0 (size 8) (u32 0) output
+  alloc h0 (size 8) (u32 0) output
   (fun h -> (fun _ r -> r == Spec.Blake2s.blake2s (v ll) h0.[d] (v kk) h0.[k] (v nn)))
   (fun hash ->
     let fk = if kk =. (size 0) then false else true in
