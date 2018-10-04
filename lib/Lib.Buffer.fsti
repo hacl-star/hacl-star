@@ -153,7 +153,7 @@ val icopy:
   -> Stack unit
     (requires fun h0 -> B.live h0 o /\ B.live h0 i /\ B.disjoint i o)
     (ensures  fun h0 _ h1 ->
-      B.live h1 o /\ B.live h1 i /\ modifies (loc_buffer o) h0 h1 /\
+      B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       B.as_seq h1 o == B.as_seq h0 i)
 
 inline_for_extraction
@@ -179,7 +179,7 @@ val update_isub:
   -> src:libuffer a (size_v n)
   -> Stack unit
     (requires fun h -> B.live h dst /\ B.live h src /\ B.disjoint dst src)
-    (ensures  fun h0 _ h1 -> B.live h1 dst /\ modifies (loc_buffer dst) h0 h1 /\
+    (ensures  fun h0 _ h1 -> B.live h1 dst /\ B.modifies (B.loc_buffer dst) h0 h1 /\
       B.as_seq h1 dst == Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 
 (** Loop combinator with just memory safety specification *)
