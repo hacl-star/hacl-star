@@ -53,7 +53,7 @@ let double_round: shuffle =
   column_round @ row_round (* 2 rounds *)
 
 let rounds : shuffle =
-  repeat 10 double_round (* 20 rounds *)
+  repeati 10 (fun i -> double_round) (* 20 rounds *)
 
 let salsa20_core (s:state) : Tot state =
   let s' = rounds s in
