@@ -13,6 +13,8 @@ open Low.Vector
 open Low.Regional
 open Low.RVector
 
+open MerkleTree.New.High
+
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
 module MHS = FStar.Monotonic.HyperStack
@@ -28,6 +30,8 @@ module U8 = FStar.UInt8
 
 module EHS = EverCrypt.Hash
 module EHL = EverCrypt.Helpers
+
+module High = MerkleTree.New.High
 
 val hash_size: uint32_t
 let hash_size = EHS.tagLen EHS.SHA256
@@ -259,10 +263,17 @@ val hash_2:
 	   Rgl?.r_inv hreg h0 src2 /\
 	   Rgl?.r_inv hreg h0 dst))
 	 (ensures (fun h0 _ h1 ->
+	   // memory safety
 	   modifies (B.loc_region_only false (B.frameOf dst)) h0 h1 /\
-	   Rgl?.r_inv hreg h1 dst))
+	   Rgl?.r_inv hreg h1 dst /\
+	   // correctness
+	   S.equal (Rgl?.r_repr hreg h1 dst)
+		   (High.hash_2
+		     (Rgl?.r_repr hreg h0 src1)
+		     (Rgl?.r_repr hreg h0 src2))))
+#reset-options "--z3rlimit 40"
 let hash_2 src1 src2 dst =
-  admit ();
+  let hh0 = HST.get () in
   HST.push_frame ();
   // let cb = B.malloc HH.root 0uy (EHS.blockLen EHS.SHA256) in
   // EHS.blockLen EHS.SHA256 = 64ul
@@ -271,10 +282,36 @@ let hash_2 src1 src2 dst =
   B.blit src2 0ul cb 32ul hash_size;
   let st = EHS.create EHS.SHA256 in
   EHS.init st;
+  let hh1 = HST.get () in
+  assert (S.equal (S.append 
+  		    (Rgl?.r_repr hreg hh0 src1)
+  		    (Rgl?.r_repr hreg hh0 src2))
+  		  (B.as_seq hh1 cb));
   EHS.update (Ghost.hide S.empty) st cb;
+  let hh2 = HST.get () in
+  assert (EHS.hashing st hh2 (S.append S.empty (B.as_seq hh1 cb)));
+  assert (S.equal (S.append S.empty (B.as_seq hh1 cb))
+  		  (B.as_seq hh1 cb));
   EHS.finish st dst;
+  let hh3 = HST.get () in
+  assert (S.equal (B.as_seq hh3 dst)
+  		  (EHS.extract (EHS.repr st hh2)));
+  assert (S.equal (B.as_seq hh3 dst)
+  		  (EHS.extract 
+  		    (EHS.hash0 #(Ghost.hide EHS.SHA256) (B.as_seq hh1 cb))));
+  assert (S.equal (B.as_seq hh3 dst)
+		  (High.hash_2
+		    (Rgl?.r_repr hreg hh0 src1)
+		    (Rgl?.r_repr hreg hh0 src2)));
   EHS.free st;
-  HST.pop_frame ()
+  HST.pop_frame ();
+  let hh4 = HST.get () in
+  assert (S.equal (B.as_seq hh4 dst)
+		  (High.hash_2
+		    (Rgl?.r_repr hreg hh0 src1)
+		    (Rgl?.r_repr hreg hh0 src2)));
+  // TODO: need to deal with `st` and stack-allocated `cb`
+  assume (modifies (B.loc_region_only false (B.frameOf dst)) hh0 hh4)
 
 /// Low-level Merkle tree data structure
 
@@ -1461,7 +1498,7 @@ val mt_verify:
 let mt_verify k j mtr p rt =
   let hh0 = HST.get () in
   let nrid = RV.new_region_ (B.frameOf rt) in
-  let ih = hash_r_init nrid in
+  let ih = Rgl?.r_init hreg nrid in
   let copy = Cpy?.copy hcpy in
   copy (V.index !*p 0ul) ih;
   let hh1 = HST.get () in
