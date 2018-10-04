@@ -345,7 +345,8 @@ let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 44}) : word =
     if (i % 4 = 0) then (
        let k = rotate_word k in
        let k = sub_word k in
-       let rcon_i = rcon.[i / 4] in
+       assert(47 / 4 <= 11);
+       let rcon_i = rcon.[i / 4] in // BB. Incorrect. i / 4 <= 11 not < 11
        let k = k.[0] <- logxor #U8 rcon_i k.[0] in
        k)
     else k in

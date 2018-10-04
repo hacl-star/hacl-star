@@ -3,7 +3,7 @@ module Lib.Buffer
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-open LowStar.Buffer
+//open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.RawIntTypes
@@ -21,8 +21,8 @@ module ByteSeq = Lib.ByteSequence
 friend Lib.Sequence
 
 let length #a b = B.length b
-let gsub #a #len #olen b start n =
-  B.gsub b (size_to_UInt32 start) (size_to_UInt32 n)
+
+let as_seq #a #len h b = B.as_seq h b
 
 let sub #a #len #olen b start n =
   B.sub b (size_to_UInt32 start) (size_to_UInt32 n)
@@ -75,50 +75,45 @@ let update_isub #a #len dst start n src =
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (IB.as_seq h0 src))
 
 let loop_nospec #h0 #a #len n buf impl =
-  let inv h1 j = modifies (loc_buffer buf) h0 h1 in
+  let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
-
-let loop_inv h0 n a_spec a_impl acc refl footprint spec i h =
-  modifies (footprint i) h0 h /\
-  refl h i == Seq.repeat i a_spec (spec h0) (refl h0 0)
 
 let loop h0 n a_spec a_impl acc refl footprint spec impl =
   let inv h i = loop_inv h0 n a_spec a_impl acc refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
 
-let loop1_inv h0 n b blen acc spec i h =
-  modifies (loc_buffer acc) h0 h /\
-  as_seq h acc == Seq.repeati i (spec h0) (as_seq h0 acc)
-
 let loop1 #b #blen h0 n acc spec impl =
   let inv h i = loop1_inv h0 n b blen acc spec i h in
   Lib.Loops.for (size 0) n inv impl
 
-let lbytes_eq #len a b =
+#set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
+
+let lbytes_eq #len a b = admit(); //FIXME
   push_frame();
   let res = create #bool #1 (size 1) true in
   [@ inline_let]
-  let refl h _ = get h res 0 in
+  let refl h _ = B.get h res 0 in
   [@ inline_let]
   let spec h0 = Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b) in
   let h0 = ST.get () in
   loop h0 len (fun _ -> bool) (lbuffer bool 1) res refl
-    (fun i -> loc_buffer res) spec
+    (fun i -> B.loc_buffer res) spec
     (fun i ->
-      Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
-      let ai = index a i in
-      let bi = index b i in
-      let res0 = index res (size 0) in
-      upd res (size 0) (res0 && FStar.UInt8.(u8_to_UInt8 ai =^ u8_to_UInt8 bi))
+      //Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
+      let ai = a.(i) in
+      let bi = b.(i) in
+      let res0 = res.(size 0) in
+      res.(size 0) <- res0 && FStar.UInt8.(u8_to_UInt8 ai =^ u8_to_UInt8 bi)
     );
-  let res = index #bool #1 res (size 0) in
+  let res = res.(size 0) in
   pop_frame();
   // REMARK: for some reason [lbytes_eq] isn't unfolded
-  assert_norm (Seq.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b) ==
-               Seq.repeat (v len) (fun _ -> bool) (spec h0) true);
+  assert_norm (
+    Seq.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b) ==
+    Seq.repeat (v len) (fun _ -> bool) (spec h0) true);
   res
 
-let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
+let alloc #a #b #w #len #wlen h0 clen init write spec impl =
   admit();
   push_frame();
   let buf = B.alloca init (normalize_term (size_to_UInt32 clen)) in
