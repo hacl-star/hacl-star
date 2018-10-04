@@ -19,10 +19,14 @@ module ByteSeq = Lib.ByteSequence
 #set-options "--z3rlimit 15"
 
 inline_for_extraction noextract
-unfold let v = size_v
+let v = size_v
 
-unfold let lbuffer (a:Type0) (len:size_nat) = b:B.buffer a {B.length b == len}
-unfold let lbytes len = lbuffer uint8 len
+let buffer (a:Type0) = B.buffer a
+
+val length: #a:Type0 -> b:buffer a -> GTot (r:size_nat{r == B.length b})
+
+let lbuffer (a:Type0) (len:size_nat) = b:buffer a {length b == len}
+let lbytes len = lbuffer uint8 len
 
 val gsub:
     #a:Type0
@@ -68,8 +72,9 @@ val upd:
       modifies (loc_buffer b) h0 h1 /\ B.live h1 b /\
       B.as_seq h1 b == Seq.upd #a #len (B.as_seq h0 b) (v i) x)
 
-inline_for_extraction unfold let op_Array_Assignment #a #len = upd #a #len
-inline_for_extraction unfold let op_Array_Access #a #len = index #a #len
+inline_for_extraction let op_Array_Assignment #a #len = upd #a #len
+
+inline_for_extraction let op_Array_Access #a #len = index #a #len
 
 unfold
 let bget #a #n h (b:lbuffer a n) i = Seq.index #_ #n (B.as_seq h b) i

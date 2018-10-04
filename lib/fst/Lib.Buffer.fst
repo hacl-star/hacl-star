@@ -20,6 +20,7 @@ module ByteSeq = Lib.ByteSequence
 
 friend Lib.Sequence
 
+let length #a b = B.length b
 let gsub #a #len #olen b start n =
   B.gsub b (size_to_UInt32 start) (size_to_UInt32 n)
 
