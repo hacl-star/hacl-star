@@ -7,7 +7,7 @@ open FStar.HyperStack.All
 open FStar.HyperStack.ST
 open FStar.Buffer
 
-open C.Loops
+open C.Compat.Loops
 
 open Hacl.Spec.Endianness
 open Hacl.Cast

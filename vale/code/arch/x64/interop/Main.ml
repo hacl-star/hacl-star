@@ -1,8 +1,7 @@
 open Interop_Printer
 
-(*
-let memcpy = ("memcpy", [("dst", TBuffer TUInt64, Sec); ("src", TBuffer TUInt64, Sec)], Stk (Prims.parse_int "0"))
-*)
+
+
 
 (* let poly = ("poly", [("ctx", TBuffer TUInt64); ("inp", TBuffer TUInt64); ("len", TBase TUInt64)]) *)
 
@@ -93,6 +92,7 @@ let zero_quad32_buffer = ("zero_quad32_buffer_win", [("b", TBuffer TUInt128, Sec
 let reverse_quad32 = ("reverse_bytes_quad32_buffer_win", [("b", TBuffer TUInt128, Sec)], Stk (Prims.parse_int "0"))
 *)
 
+(*
 let sha_update_bytes =
    ("sha_update_bytes_stdcall",  
   [("ctx_b", TBuffer TUInt128, Sec);  ("in_b", TBuffer TUInt128, Sec); 
@@ -100,8 +100,26 @@ let sha_update_bytes =
   SaveRegsStk true,
   AddStk (Prims.parse_int "0"),
   Modifies ["ctx_b"])
+*)
 
-let name = sha_update_bytes 
+let memcpy = ("memcpy", [("dst", TBuffer TUInt64, Sec); ("src", TBuffer TUInt64, Sec)], SaveRegsStk false, AddStk (Prims.parse_int "0"), Modifies ["dst"], Return Unit)
+
+let gctr_bytes128 =
+  ("gctr_bytes_stdcall128",
+  [("in_b", TBuffer TUInt128, Sec); ("out_b", TBuffer TUInt128, Sec);
+   ("key", TGhost "seq nat32", Sec); ("round_keys", TGhost "seq quad32", Sec);
+   ("keys_b", TBuffer TUInt128, Sec); ("num_val", TBase TUInt64, Sec);
+   ("iv_b", TBuffer TUInt128, Sec)],
+  SaveRegsStk true,
+  AddStk (Prims.parse_int "0"),
+  Modifies ["out_b"],
+  Return Unit)
+
+let check_aesni = ("check_aesni_stdcall", [], SaveRegsStk false, AddStk (Prims.parse_int "0"), Modifies [], Return Int64)
+
+let check_sha = ("check_sha_stdcall", [], SaveRegsStk false, AddStk (Prims.parse_int "0"), Modifies [], Return Int64)
+
+let name = check_sha
 
 let _ = print_string (translate_vale X86 name)
 let _ = print_newline()

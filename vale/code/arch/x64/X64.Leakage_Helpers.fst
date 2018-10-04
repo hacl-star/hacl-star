@@ -1,9 +1,8 @@
 module X64.Leakage_Helpers
-open X64.Semantics_s
+open X64.Bytes_Semantics_s
 open X64.Machine_s
 open X64.Taint_Semantics_s
 open X64.Leakage_s
-
 
 let merge_taint t1 t2 =
   if Secret? t1 || Secret? t2 then

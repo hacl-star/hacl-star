@@ -47,7 +47,7 @@ endif
 # Kremlin
 #
 
-KREMLIB=$(KREMLIN_HOME)/kremlib/compat
+KREMLIB=$(KREMLIN_HOME)/kremlib
 KREMLIN=$(KREMLIN_HOME)/krml
 KREMTEST=$(KREMLIN_HOME)/test
 
@@ -55,7 +55,7 @@ KREMTEST=$(KREMLIN_HOME)/test
 # Default Kremlin arguments
 KREMLIN_ARGS?=
 KREMLIN_ARGS+=$(KOPTS)
-KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/old -I .
+KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB)/compat -I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/old -I .
 
 ifneq (,$(EVEREST_WINDOWS))
 KREMLIN_ARGS+=-fparentheses -falloca -ftail-calls
@@ -81,7 +81,7 @@ endif
 
 FSTAR_LIB=$(FSTAR_HOME)/ulib
 HINTS_ENABLED?=--use_hints
-FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/old
+FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB)/compat --include $(KREMLIB) --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/old
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
 

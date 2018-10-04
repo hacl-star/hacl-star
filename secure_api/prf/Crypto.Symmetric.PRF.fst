@@ -174,7 +174,7 @@ val gen: rgn:region -> i:id -> ST (state i)
     s.rgn == rgn /\
     (prf i ==>
             ((itable i s) `HS.unused_in` h0)
-	  /\ HS.sel h1 (itable i s) == Seq.createEmpty #(entry s.mac_rgn i))))
+	  /\ HS.sel h1 (itable i s) == Seq.empty #(entry s.mac_rgn i))))
 let gen rgn i =
   (* match cipherAlg_of_id i with *)
   (* | CHACHA20 -> *)
@@ -187,7 +187,7 @@ let gen rgn i =
   (*   Block.init #i key keystate; *)
   (*   let table: table_t rgn mac_rgn i = *)
   (*     if prf i then  *)
-  (*       mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i))) *)
+  (*       mktable i rgn mac_rgn (ralloc rgn (Seq.empty #(entry mac_rgn i))) *)
   (*     else () *)
   (*     in *)
   (*   pop_frame(); *)
@@ -209,7 +209,7 @@ let gen rgn i =
     Block.init #i key keystate;
     let table: table_t rgn mac_rgn i =
       if prf i then
-        mktable i rgn mac_rgn (ralloc rgn (Seq.createEmpty #(entry mac_rgn i)))
+        mktable i rgn mac_rgn (ralloc rgn (Seq.empty #(entry mac_rgn i)))
       else ()
       in
     Buffer.rfree key;

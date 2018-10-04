@@ -5,10 +5,9 @@ module HS = FStar.HyperStack
 open Interop
 open X64.Machine_s
 module TS = X64.Taint_Semantics_s
-module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 
-assume val st_put (p:HS.mem -> Type0) (f:(h0:HS.mem{p h0}) -> GTot HS.mem) : Stack unit (fun h0 -> p h0) (fun h0 _ h1 -> f h0 == h1)
+assume val st_put (#a:Type) (p:HS.mem -> Type0) (f:(h0:HS.mem{p h0}) -> GTot (a*HS.mem)) : Stack a (fun h0 -> p h0) (fun h0 x h1 -> f h0 == (x,h1))
 
 //The map from buffers to addresses in the heap, that remains abstract
 assume val addrs: addr_map

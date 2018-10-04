@@ -28,4 +28,4 @@ val fsum_:
       /\ as_seq h1 a == fsum_spec (as_seq h0 a) (as_seq h0 b)))
 [@"substitute"]
 let fsum_ a b =
-  C.Loops.in_place_map2 a b clen (fun x y -> x +%^ y)
+  C.Compat.Loops.in_place_map2 a b clen (fun x y -> x +%^ y)

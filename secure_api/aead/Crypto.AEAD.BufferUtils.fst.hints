@@ -36,7 +36,7 @@
         "typing_FStar.Set.complement", "typing_FStar.Set.mem"
       ],
       0,
-      "bbcc68d239f6bdf20d6eae934b4e6ff5"
+      "dd68c1e95a7f1d5f3a588057c9fb4e59"
     ],
     [
       "Crypto.AEAD.BufferUtils.prf_mac_modifies",
@@ -48,7 +48,7 @@
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "8ec006cb26bee1ab55f91d7d9e2f357c"
+      "76eb909eb882d59c837b86a09cdd3fe4"
     ],
     [
       "Crypto.AEAD.BufferUtils.intro_prf_mac_modifies",
@@ -65,7 +65,7 @@
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "41c03f1ece90695a2994c9698fd8bd8e"
+      "4983735a5d5319ba2c08d581b945b9f1"
     ],
     [
       "Crypto.AEAD.BufferUtils.reveal_prf_mac_modifies",
@@ -82,7 +82,7 @@
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "124a63a8d20ef78bb96183401c1a9506"
+      "ec6e3ec2b22ab320934db7befa716c8c"
     ],
     [
       "Crypto.AEAD.BufferUtils.decrypt_modifies",
@@ -94,7 +94,7 @@
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "e6237580bfbf742aed7b05f1375b8689"
+      "901afd9fe97b6b328afc7710a23995f6"
     ],
     [
       "Crypto.AEAD.BufferUtils.chain_mods_enc",
@@ -233,7 +233,7 @@
         "unit_typing"
       ],
       0,
-      "fb6ea833b604ed5c0b253205f419818c"
+      "53d300b6241fa2b53c4ecfadaf5ea968"
     ],
     [
       "Crypto.AEAD.BufferUtils.chain_mods_enc",
@@ -382,7 +382,7 @@
         "unit_typing"
       ],
       0,
-      "0838053e7f51771dc7df58863c443c45"
+      "e3b288618e4cc014d5d251f247c60459"
     ],
     [
       "Crypto.AEAD.BufferUtils.chain_modification",
@@ -512,7 +512,7 @@
         "typing_FStar.StrongExcludedMiddle.strong_excluded_middle"
       ],
       0,
-      "3bb06598e1c5f4fe3c0be80addf762ab"
+      "e50b1d8a02f34269c507687f620557a8"
     ],
     [
       "Crypto.AEAD.BufferUtils.chain_modification",
@@ -536,10 +536,10 @@
         "equation_FStar.Buffer.equal", "equation_FStar.Buffer.frameOf",
         "equation_FStar.Buffer.live", "equation_FStar.Buffer.lseq",
         "equation_FStar.Buffer.max_length",
-        "equation_FStar.Buffer.modifies_buf_0",
         "equation_FStar.Buffer.modifies_buf_1", "equation_FStar.Buffer.sel",
         "equation_FStar.Buffer.unused_in",
         "equation_FStar.Heap.trivial_preorder",
+        "equation_FStar.Heap.trivial_rel",
         "equation_FStar.HyperStack.ST.is_eternal_region",
         "equation_FStar.HyperStack.ST.mreference",
         "equation_FStar.HyperStack.ST.reference",
@@ -594,8 +594,6 @@
         "lemma_FStar.Monotonic.Heap.lemma_contains_implies_used",
         "lemma_FStar.Monotonic.Heap.lemma_in_dom_emp",
         "lemma_FStar.Monotonic.HyperHeap.lemma_disjoint_includes",
-        "lemma_FStar.Monotonic.HyperHeap.lemma_extends_includes",
-        "lemma_FStar.Monotonic.HyperHeap.lemma_extends_parent",
         "lemma_FStar.Monotonic.HyperHeap.lemma_includes_anti_symmetric",
         "lemma_FStar.Monotonic.HyperHeap.lemma_includes_refl",
         "lemma_FStar.Monotonic.HyperStack.lemma_map_invariant",
@@ -619,6 +617,7 @@
         "refinement_interpretation_FStar.Monotonic.HyperHeap_Tm_refine_f0496eb03f3fb51b5e4ca0d53ea58c01",
         "refinement_interpretation_FStar.Monotonic.HyperStack_Tm_refine_9a74d818566e70513bc032cc3b65a144",
         "refinement_interpretation_FStar.StrongExcludedMiddle_Tm_refine_94f72bfda5e23ac3960136c8bc3f958c",
+        "refinement_kinding_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "typing_FStar.Buffer.__proj__MkBuffer__item__content",
         "typing_FStar.Buffer.as_ref", "typing_FStar.Buffer.content",
         "typing_FStar.Buffer.frameOf", "typing_FStar.Buffer.lseq",
@@ -649,7 +648,7 @@
         "typing_FStar.StrongExcludedMiddle.strong_excluded_middle"
       ],
       0,
-      "eb3b1bd5e569effebc2141788dd633ae"
+      "4ed1b2272904a05d5f0bf141860cede8"
     ]
   ]
 ]

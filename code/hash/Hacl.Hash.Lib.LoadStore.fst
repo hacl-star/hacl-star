@@ -62,7 +62,7 @@ let uint32s_from_be_bytes output input len =
   in
   Spec.Lib.lemma_uint32s_from_be_def_0 0 (reveal_sbytes (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
-  C.Loops.for 0ul len inv f';
+  C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (UInt32.v len)) (as_seq h output);
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (4 * UInt32.v len)) (as_seq h0 input)
@@ -119,7 +119,7 @@ let uint32s_to_be_bytes output input len =
   in
   Spec.Lib.lemma_uint32s_to_be_def_0 0 (reveal_h32s (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
-  C.Loops.for 0ul len inv f';
+  C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (4 * UInt32.v len)) (as_seq h output);
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (UInt32.v len)) (as_seq h0 input)
@@ -168,7 +168,7 @@ let uint64s_from_be_bytes output input len =
   in
   Spec.Lib.lemma_uint64s_from_be_def_0 0 (reveal_sbytes (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
-  C.Loops.for 0ul len inv f';
+  C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (UInt32.v len)) (as_seq h output);
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (8 * UInt32.v len)) (as_seq h0 input)
@@ -224,7 +224,7 @@ let uint64s_to_be_bytes output input len =
   in
   Spec.Lib.lemma_uint64s_to_be_def_0 0 (reveal_h64s (Seq.slice (as_seq h0 input) 0 0));
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 output) 0 0) Seq.empty;
-  C.Loops.for 0ul len inv f';
+  C.Compat.Loops.for 0ul len inv f';
   let h = ST.get() in
   Seq.lemma_eq_intro (Seq.slice (as_seq h output) 0 (8 * UInt32.v len)) (as_seq h output);
   Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (UInt32.v len)) (as_seq h0 input)

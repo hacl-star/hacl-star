@@ -166,6 +166,8 @@ AddOptYesNo('FSTAR-EXTRACT', dest = 'fstar_extract', default = False,
   help = "Extract .ml files from F* files")
 AddOptYesNo('MIN-TEST', dest = 'min_test', default = False,
   help = "Only run on a minimal set of test files")
+AddOptYesNo('PROFILE', dest = 'profile', default = False,
+  help = "Turn on profile options to measure verification performance (note: --NO-USE-HINTS is recommended when profiling)")
 
 is_help = GetOption('help')
 vale_path = Dir(GetOption('vale_path')).abspath
@@ -186,6 +188,7 @@ dump_args = GetOption('dump_args')
 single_vaf = GetOption('single_vaf')
 is_single_vaf = not (single_vaf is None)
 min_test = GetOption('min_test')
+profile = GetOption('profile')
 
 ##################################################################################################
 #
@@ -341,7 +344,6 @@ verify_options = [
 #  ('code/arch/x64/X64.Vale.Decls.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
 
   # Special treatment for sensitive modules
-#  ('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
 
   # Disable verification by adding 'filename': None
   ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None), # TODO: Timeout dealing with SHA instructions
@@ -349,8 +351,12 @@ verify_options = [
   ('code/arch/x64/interop/*.fst', None),
   ('code/arch/x64/interop/*_win.fst', None),
   #TODO: Update taint analysis
-  ('code/arch/x64/X64.Leakage*', None),
-  ('specs/hardware/X64.Leakage_s.fst', None),
+  ('code/arch/x64/X64.Leakage_Helpers.fst', None), 
+  ('code/arch/x64/X64.Leakage_Ins_Xmm.fsti', None),
+  ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None),
+  ('code/arch/x64/X64.Leakage_Ins.fsti', None),
+  ('code/arch/x64/X64.Leakage_Ins.fst', None),
+  ('code/arch/x64/X64.Leakage.fst', None),
 
   # Interop stubs
 #  ('code/arch/x64/interop/Memcpy.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
@@ -663,6 +669,22 @@ def report_verification_failures():
           print()
           time.sleep(1)
           os.rename(filename, error_filename)
+        if filename.endswith('.dump') and os.path.isfile(filename):
+          stderr_filename = filename[:-len('.dump')] + '.stderr'
+          report_filename = stderr_filename if os.path.isfile(stderr_filename) else filename
+          print()
+          print(f'##### {red}Verification error{uncolor}')
+          print('Printing contents of ' + report_filename + ' #####')
+          with open (report_filename, 'r') as myfile:
+            lines = myfile.read().splitlines()
+            valeErrors = [line for line in lines if ("*****" in line)]
+            for line in lines:
+              if 'error was reported' in line or '(Error)' in line or ' failed' in line:
+                line = f'{red}{line}{uncolor}'
+              print(line)
+          print()
+          time.sleep(1)
+         
 
 ##################################################################################################
 #
@@ -740,6 +762,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   env.Command(temptargetfiles, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
     f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile} {fstar_record_hints}' +
+    (f' --debug {file_module_name(File(sourcefile))} --debug_level print_normalized_terms' if profile else '') +
     f' 1> {temptargetfile} 2> {stderrfile}')
   CopyFile(targetfile, temptargetfile)
   dump_module_flag = '--dump_module ' + file_module_name(sourcefile)
@@ -748,7 +771,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   env.Command(dumptargetfile, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
     f' {fstar_includes} {" ".join(fstar_user_args)}' +
-    f' {dump_flags} 1>{dumptargetfile} 2>&1')
+    f' {dump_flags} 1>{dumptargetfile} 2>{dumptargetfile}.stderr')
   Depends(dumptargetfile, targetfile)
 
 def extract_fstar_file(options, sourcefile, fstar_includes):
@@ -760,9 +783,9 @@ def extract_fstar_file(options, sourcefile, fstar_includes):
   Depends(mlfile, to_obj_dir(base_name + '.fst.verified'))
   verifier_flags = options.verifier_flags.replace('--use_extracted_interfaces true', '')
   return env.Command(mlfile, sourcefile,
-    f'{fstar_exe} {sourcefile} {verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
+    f'{fstar_exe} {sourcefile} {verifier_flags} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
     f' {fstar_includes} {" ".join(fstar_user_args)}' +
-    f' --odir obj/ml_out --codegen OCaml --admit_smt_queries true --extract_module {module_name}')
+    f' --odir obj/ml_out --codegen OCaml --extract_module {module_name}')
 
 # Process a .fst or .fsti file
 def process_fstar_file(env, file, fstar_includes):
@@ -829,7 +852,7 @@ def translate_vale_file(options, source_vaf):
   types_include = ''
   types_include = f'-include {target}.types.vaf'
   env.Command(targets, source_vaf,
-    f'{mono} {vale_exe} -fstarText -typecheck {types_include} {opt_vale_includes}' +
+    f'{mono} {vale_exe} -fstarText -quickMods -typecheck {types_include} {opt_vale_includes}' +
     f' -in {source_vaf} -out {target_fst} -outi {target_fsti}' +
     f' {vale_scons_args} {" ".join(vale_user_args)}')
   return targets
@@ -1072,8 +1095,8 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
           dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
             ' --print_bound_var_types --ugly ' + dump_module_flag)
           env.Command(dumptargetfile, t,
-            f'{fstar_exe} {t} {fstar_z3_path} {fstar_no_verify}' +
-            f' {dump_flags} 1>{dumptargetfile} 2>&1')
+            f'{fstar_exe} {t} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
+            f' {dump_flags} 1>{dumptargetfile} 2> {dumptargetfile}.stderr')
         if not (dumptargetfile in dump_deps):
           dump_deps[dumptargetfile] = set()
         for s in sources:

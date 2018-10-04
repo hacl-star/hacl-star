@@ -32,8 +32,9 @@ friend X64.Vale.StateLemmas
 
 open Vale_memcpy
 
+
 #set-options "--initial_fuel 5 --max_fuel 5 --initial_ifuel 2 --max_ifuel 2"
-  let create_initial_trusted_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) : GTot TS.traceState =
+let create_initial_trusted_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) : GTot TS.traceState =
   let taint_func (x:b8) : GTot taint =
     if StrongExcludedMiddle.strong_excluded_middle (x == dst) then Secret else
     if StrongExcludedMiddle.strong_excluded_middle (x == src) then Secret else
@@ -55,7 +56,8 @@ open Vale_memcpy
     | Rdi -> addr_dst
     | Rsi -> addr_src
     | _ -> init_regs r end)
-  in let xmms = init_xmms in
+  in let regs = FunctionalExtensionality.on reg regs
+  in let xmms = FunctionalExtensionality.on xmm init_xmms in
   let (s0:BS.state) = {BS.ok = true; BS.regs = regs; BS.xmms = xmms; BS.flags = 0;
        BS.mem = Interop.down_mem h0 addrs buffers} in
   {TS.state = s0; TS.trace = []; TS.memTaint = create_valid_memtaint mem buffers taint_func}
@@ -68,7 +70,8 @@ val lemma_ghost_memcpy: is_win:bool -> dst:s8 -> src:s8 ->  stack_b:b8 -> (h0:HS
       Some s1 == TS.taint_eval_code (va_code_memcpy is_win) f1 s0 /\
       Interop.correct_down h1 addrs [stack_b;dst;src] s1.TS.state.BS.mem /\
       post_cond h0 h1 dst src  /\
-      calling_conventions is_win s0 s1)
+      calling_conventions is_win s0 s1 /\
+      M.modifies (M.loc_union (M.loc_buffer stack_b) ( M.loc_buffer dst)) h0 h1)
     ))
 
 // ===============================================================================================
@@ -96,7 +99,8 @@ let create_initial_vale_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst 
     | Rdi -> addr_dst
     | Rsi -> addr_src
     | _ -> init_regs r end)
-  in let xmms = init_xmms in
+  in let regs = FunctionalExtensionality.on reg regs
+  in let xmms = FunctionalExtensionality.on xmm init_xmms in
   {ok = true; regs = regs; xmms = xmms; flags = 0; mem = mem;
       memTaint = create_valid_memtaint mem buffers taint_func}
 
@@ -108,6 +112,7 @@ let create_lemma is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.leng
     assert (FunctionalExtensionality.feq (regs' s1.TS.state) (regs' s_init.TS.state));
     assert (FunctionalExtensionality.feq (xmms' s1.TS.state) (xmms' s_init.TS.state))
 
+// TODO: Prove these two lemmas if they are not proven automatically
 let implies_pre (is_win:bool) (h0:HS.mem) (dst:s8) (src:s8)  (stack_b:b8) : Lemma
   (requires pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src])
   (ensures (
@@ -138,7 +143,7 @@ let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel)
   let src_b = BV.mk_buffer_view src Views.view64 in
   let t = TBase TUInt64 in
   assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) src)) (BV.as_seq va_sM.mem.hs src_b));  
-  assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) dst)) (BV.as_seq va_sM.mem.hs dst_b));      
+  assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) dst)) (BV.as_seq va_sM.mem.hs dst_b));     
   ()
 
 let lemma_ghost_memcpy is_win dst src stack_b h0 =
@@ -152,6 +157,7 @@ let lemma_ghost_memcpy is_win dst src stack_b h0 =
   let s_v, f_v = va_lemma_memcpy (va_code_memcpy is_win) s0' is_win stack_b dst src in
   implies_post is_win s0' s_v f_v dst src stack_b;
   let s1 = Some?.v (TS.taint_eval_code (va_code_memcpy is_win) f_v s0) in
+  assert (state_eq_S s1 (state_to_S s_v));
   assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);
   assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);
   s1, f_v, s_v.mem.hs
@@ -161,10 +167,15 @@ let lemma_ghost_memcpy is_win dst src stack_b h0 =
 let memcpy dst src  =
   push_frame();
   let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 24) in
+ if win then
   st_put
     (fun h -> pre_cond h dst src /\ B.length stack_b == 24 /\ live h stack_b /\ buf_disjoint_from stack_b [dst;src])
-  (fun h -> let _, _, h1 =
-    if win then lemma_ghost_memcpy true dst src stack_b h
-    else lemma_ghost_memcpy false dst src stack_b h
-  in h1);
+    (fun h -> let _, _, h1 =
+      lemma_ghost_memcpy true dst src stack_b h
+    in (), h1)
+  else st_put
+    (fun h -> pre_cond h dst src /\ B.length stack_b == 24 /\ live h stack_b /\ buf_disjoint_from stack_b [dst;src])
+    (fun h -> let _, _, h1 =
+      lemma_ghost_memcpy false dst src stack_b h
+    in (), h1);
   pop_frame()
