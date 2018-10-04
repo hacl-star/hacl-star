@@ -31,7 +31,7 @@ let zero = u8 0
 (* let fadd (a:uint8) (b:uint8) : uint8 = a ^. b *)
 let fmul (a:uint8) (b:uint8) : uint8 =
   let (p,a,b) =
-    repeat 7 (fun (p,a,b) ->
+    repeati 7 (fun i (p,a,b) ->
 	      let b0 = eq_mask #U8 (b &. u8 1) (u8 1) in
 	      let p = p ^. (b0 &. a) in
   	      let carry_mask = gte_mask #U8 a (u8 0x80) in
