@@ -92,8 +92,8 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   update_multi s blocks blocks_n;
 
   let h1 = ST.get () in
-  assert (B.as_seq h0 input = S.append (B.as_seq h1 blocks) (B.as_seq h1 rest));
-  assert (B.as_seq h1 s = Spec.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks));
+  assert (S.equal (B.as_seq h0 input) (S.append (B.as_seq h1 blocks) (B.as_seq h1 rest)));
+  assert (S.equal (B.as_seq h1 s) (Spec.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks)));
 
   (* Compute the total number of bytes fed. *)
   let total_input_len: len_t a = len_add32 a prev_len input_len in
@@ -121,17 +121,17 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   pad total_input_len tmp_pad;
 
   let h2 = ST.get () in
-  assert (B.as_seq h2 tmp = S.append (B.as_seq h2 tmp_rest) (B.as_seq h2 tmp_pad));
-  assert (B.as_seq h2 tmp_rest = B.as_seq h1 rest);
-  assert (B.as_seq h2 tmp_pad = Common.pad a (len_v a total_input_len));
+  assert (S.equal (B.as_seq h2 tmp) (S.append (B.as_seq h2 tmp_rest) (B.as_seq h2 tmp_pad)));
+  assert (S.equal (B.as_seq h2 tmp_rest) (B.as_seq h1 rest));
+  assert (S.equal (B.as_seq h2 tmp_pad) (Common.pad a (len_v a total_input_len)));
 
   (* Update multi those last few blocks *)
   update_multi s tmp U32.(tmp_len /^ size_block_ul a);
 
   let h3 = ST.get () in
-  assert (B.as_seq h3 s =
-    Spec.update_multi a (Spec.update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
-      (S.append (B.as_seq h1 rest) (Common.pad a (len_v a total_input_len))));
+  assert (S.equal (B.as_seq h3 s)
+    (Spec.update_multi a (Spec.update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
+      (S.append (B.as_seq h1 rest) (Common.pad a (len_v a total_input_len)))));
   assert (
     let s1 = B.as_seq h1 blocks in
     let s2 = B.as_seq h2 rest in
