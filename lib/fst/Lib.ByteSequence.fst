@@ -5,6 +5,8 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.RawIntTypes
 
+friend Lib.Sequence
+
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
 
 let to_lbytes (s:bytes) = s
