@@ -288,12 +288,12 @@ val lbytes_eq:
 
 inline_for_extraction
 val alloc:
-  #h0:mem
-  -> #a:Type0
+    #a:Type0
   -> #b:Type0
   -> #w:Type0
   -> #len:size_nat
   -> #wlen:size_nat
+  -> h0:mem
   -> clen:size_t{v clen == len}
   -> init:a
   -> write:lbuffer w wlen

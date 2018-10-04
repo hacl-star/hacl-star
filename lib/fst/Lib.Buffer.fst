@@ -113,7 +113,7 @@ let lbytes_eq #len a b = admit(); //FIXME
     Seq.repeat (v len) (fun _ -> bool) (spec h0) true);
   res
 
-let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
+let alloc #a #b #w #len #wlen h0 clen init write spec impl =
   admit();
   push_frame();
   let buf = B.alloca init (normalize_term (size_to_UInt32 clen)) in
