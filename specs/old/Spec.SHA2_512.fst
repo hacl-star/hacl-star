@@ -8,8 +8,8 @@ open FStar.Mul
 open FStar.Seq
 open FStar.UInt64
 
-open Spec.Loops
-open Spec.Lib
+open Spec.Compat.Loops
+open Spec.Compat.Lib
 
 module Word = FStar.UInt64
 
@@ -49,8 +49,8 @@ type blocks_w = m:seq block_w
 type counter = nat
 
 (* Define word based operators *)
-let words_to_be = Spec.Lib.uint64s_to_be
-let words_from_be = Spec.Lib.uint64s_from_be
+let words_to_be = Spec.Compat.Lib.uint64s_to_be
+let words_from_be = Spec.Compat.Lib.uint64s_from_be
 let word_logxor = Word.logxor
 let word_logand = Word.logand
 let word_logor = Word.logor
@@ -158,13 +158,13 @@ let shuffle_core (block:block_w) (hash:hash_w) (t:counter{t < size_k_w}) : Tot h
 
 
 let shuffle (hash:hash_w) (block:block_w) : Tot hash_w =
-  Spec.Loops.repeat_range_spec 0 size_ws_w (shuffle_core block) hash
+  Spec.Compat.Loops.repeat_range_spec 0 size_ws_w (shuffle_core block) hash
 
 
 let update (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
   let b = words_from_be size_block_w block in
   let hash_1 = shuffle hash b in
-  Spec.Loops.seq_map2 (fun x y -> x +%^ y) hash hash_1
+  Spec.Compat.Loops.seq_map2 (fun x y -> x +%^ y) hash hash_1
 
 
 let rec update_multi (hash:hash_w) (blocks:bytes{length blocks % size_block = 0}) : Tot hash_w (decreases (Seq.length blocks)) =
