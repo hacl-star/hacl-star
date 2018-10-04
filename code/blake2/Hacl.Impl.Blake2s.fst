@@ -240,7 +240,7 @@ let blake2_compress s m offset flag =
     blake2_compress2 wv m;
     blake2_compress3 wv s)
 
-inline_for_extraction
+
 val blake2s_update_block:
     hash:state
   -> dd_prev:size_t{(size_v dd_prev + 1) * Spec.size_block <= max_size_t}
@@ -265,12 +265,6 @@ let blake2s_update_block hash dd_prev d =
     blake2_compress hash block offset64 false
   )
 
-val blake2s_mkstate: unit ->
-  StackInline state
-    (requires (fun h -> True))
-    (ensures  (fun h0 hash h1 -> LB.live h1 hash))
-
-let blake2s_mkstate () = create (size Spec.size_hash_w) (u32 0)
 
 val blake2s_init_hash:
     hash:state
@@ -446,7 +440,6 @@ let blake2s_finish #vnn output hash nn =
     copy output nn final)
 
 
-inline_for_extraction noextract
 val blake2s:
     #vll: size_t
   -> #vkk: size_t
