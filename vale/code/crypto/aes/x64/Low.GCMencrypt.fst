@@ -612,7 +612,7 @@ let gcm128_one_pass_blocks
     inc32_buffer iv_b;
     ()
   in *)
-  C.Compat.Loops.for64 0UL num_blocks inv
+  C.Loops.for64 0UL num_blocks inv
     (fun (i:U64.t{ U64.v 0UL <= U64.v i /\ U64.v i < U64.v num_blocks }) ->
       // Compute the encryption of the counter value
       aes128_encrypt_block_BE_buffer iv_b enc_ctr_b key keys_b;
