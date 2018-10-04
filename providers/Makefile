@@ -6,7 +6,11 @@ OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
 
 # The noopenssl config no means: enable bcrypt + disable openssl
 ifeq (,$(EVEREST_WINDOWS))
+ifeq (,$(KAIZALA))
 CONFIG		?= default
+else
+CONFIG		= kaizala
+endif
 else
 CONFIG		= noopenssl
 endif

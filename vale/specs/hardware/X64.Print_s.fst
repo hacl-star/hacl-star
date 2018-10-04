@@ -168,6 +168,7 @@ let print_ins (ins:tainted_ins) (p:printer) =
   in
   let ins, _, _ = ins.ops in
   match ins with
+  | Cpuid -> "  cpuid"
   | Mov64 dst src -> p.ins_name "  mov" [dst; src] ^ print_ops dst src
   | Add64 dst src -> p.ins_name "  add" [dst; src] ^ print_ops dst src
   | AddLea64 dst src1 src2 -> let name = p.ins_name "  lea" [dst; src1; src2] in
@@ -215,9 +216,9 @@ let print_ins (ins:tainted_ins) (p:printer) =
   | AESNI_dec_last dst src -> "  aesdeclast " ^ print_xmms dst src
   | AESNI_imc dst src      -> "  aesimc "     ^ print_xmms dst src
   | AESNI_keygen_assist dst src imm -> "  aeskeygenassist " ^ print_pair (print_xmms dst src) (print_imm8 imm p)
-  | SHA256_rnds2 dst src   -> "  sha256_rnds2 " ^ print_xmms dst src
-  | SHA256_msg1 dst src    -> "  sha256_msg1 " ^ print_xmms dst src
-  | SHA256_msg2 dst src    -> "  sha256_msg2 " ^ print_xmms dst src
+  | SHA256_rnds2 dst src   -> "  sha256rnds2 " ^ print_xmms dst src
+  | SHA256_msg1 dst src    -> "  sha256msg1 "  ^ print_xmms dst src
+  | SHA256_msg2 dst src    -> "  sha256msg2 "  ^ print_xmms dst src
     
 
 let print_cmp (c:ocmp) (counter:int) (p:printer) : string =

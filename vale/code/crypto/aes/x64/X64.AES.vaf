@@ -17,6 +17,7 @@ include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "AES256_helpers"
 include{:fstar}{:open} "Opaque_s"
 include{:fstar}{:open} "GCTR"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.AES
 
@@ -41,6 +42,7 @@ open Opaque_s
 open X64.AES128
 open X64.AES256
 open GCTR
+open X64.CPU_Features_s
 #endverbatim
 
 #reset-options "--z3rlimit 20"
@@ -66,6 +68,7 @@ procedure{:quick} KeyExpansionStdcall(
             if alg = AES_128 then quad32_to_seq(buffer128_read(input_key_b, 0, mem))
             else make_AES256_key(buffer128_read(input_key_b, 0, mem), buffer128_read(input_key_b, 1, mem));
     requires/ensures
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         buffers_disjoint128(input_key_b, output_key_expansion_b);
         validSrcAddrs128(mem, key_ptr, input_key_b, if alg = AES_128 then 1 else 2, memTaint, Secret);
@@ -98,6 +101,7 @@ procedure{:quick} AESEncryptBlock(
     modifies
         xmm0; xmm2; efl;
     requires
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
@@ -137,6 +141,7 @@ procedure{:quick} AESEncryptBlockStdcall(
         input_ptr := if win then rdx else rsi;
         expanded_key_ptr := if win then r8 else rdx;
     requires
+        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         buffer128_read(input_buffer, 0, mem) == input;
@@ -179,6 +184,7 @@ procedure{:quick} AESEncryptBlockStdcall_BE(
         input_ptr := if win then rdx else rsi;
         expanded_key_ptr := if win then r8 else rdx;
     requires
+        aesni_enabled;
         locs_disjoint(list(loc_buffer(input_buffer), loc_buffer(keys_buffer)));
         locs_disjoint(list(loc_buffer(output_buffer), loc_buffer(keys_buffer)));
         buffers_disjoint128(output_buffer, input_buffer) \/ output_buffer == input_buffer;

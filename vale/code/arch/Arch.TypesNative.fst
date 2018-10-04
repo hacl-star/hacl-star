@@ -121,3 +121,128 @@ let lemma_quad32_xor_commutes_forall () : Lemma
   (forall (x y:quad32) . {:pattern (quad32_xor x y)} quad32_xor x y = quad32_xor y x)
   =
   FStar.Classical.forall_intro_2 lemma_quad32_xor_commutes
+
+let lemma_iand_pow2 (n:pos) (x:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
+  (pow2 i < pow2 n /\ (iand x (pow2 i) == 0 \/ iand x (pow2 i) == pow2 i))
+  =
+  let open FStar.UInt in  
+  FStar.Math.Lemmas.pow2_lt_compat n i;
+  assert (pow2 i < pow2 n);
+  let result = iand x (pow2 i) in
+
+  if nth #n x (n - i - 1) then ( 
+    let helper (j:nat{j < n}) : Lemma (nth #n result j = nth #n (pow2 i) j)
+        =                                   
+        pow2_nth_lemma #n i j;
+        lemma_iand_nth_i n x (pow2 i) j;
+        assert (nth #n result j = (nth #n x j && nth #n (pow2 i) j));
+        ()
+    in    
+    FStar.Classical.forall_intro helper;  
+    nth_lemma #n result (pow2 i);
+    assert(iand x (pow2 i) == pow2 i);
+    ()
+  ) else (
+    let helper (j:nat{j < n}) : Lemma (nth #n result j = false)
+        =                                   
+        pow2_nth_lemma #n i j;
+        lemma_iand_nth_i n x (pow2 i) j;
+        assert (nth #n result j = (nth #n x j && nth #n (pow2 i) j));
+        ()
+    in    
+    FStar.Classical.forall_intro helper;    
+    nth_lemma #n (zero n) result;
+    assert(iand x (pow2 i) == 0);
+    ()
+  );
+  ()
+
+let lemma_ishr_pow2_diff (n:pos) (i:nat{i < n}) (j:nat{i <= j /\ j < n}) : Lemma
+  (pow2 j < pow2 n /\ ishr #(pow2 n) (pow2 j) (j - i) == pow2 i)
+  =
+  FStar.Math.Lemmas.pow2_lt_compat n i;
+  FStar.Math.Lemmas.pow2_lt_compat n j;
+  let open FStar.UInt in
+  let result = ishr #(pow2 n) (pow2 j) (j - i) in
+  let helper (k:nat{k < n}) : Lemma (nth #n result k == nth #n (pow2 i) k) =
+    reveal_ishr_all n;
+    pow2_nth_lemma #n j k;
+    pow2_nth_lemma #n i k;
+    if k < (j - i) then (
+      shift_right_lemma_1 #n (pow2 j) (j - i) k;
+      ()
+    ) else (
+      shift_right_lemma_2 #n (pow2 j) (j - i) k;
+      assert (nth #n result k = nth #n (pow2 j) (k - (j - i)));
+      ()
+    )
+    ;  
+    ()
+  in
+  FStar.Classical.forall_intro helper;
+  nth_lemma #n result (pow2 i);
+  ()
+
+let lemma_iand_maybe_pow2 (n:pos) (x y:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
+  (requires (x == 0 \/ x == pow2 i) /\ (y == 0 \/ y == pow2 i))
+  (ensures not (iand x y = 0) <==> not (x = 0) /\ not (y = 0))
+  =
+  let open FStar.UInt in
+  reveal_iand_all n;
+  let result = iand x y in
+  (* Prove ==> *)
+  if not (iand x y = 0) then (
+    if x = 0 then (
+      assert (x = zero n);
+      logand_commutative #n x y;
+      logand_lemma_1 #n y;
+      assert (iand x y = 0)
+    ) else ()
+    ;
+    assert (not (x = 0));
+    if y = 0 then (
+      assert (y = zero n);
+      logand_commutative #n x y;
+      logand_lemma_1 #n x;
+      assert (iand x y = 0)
+    ) else ()
+    ;
+    assert (not (y = 0));
+    ()
+  ) else ()
+  ;
+  (* Prove <== *)
+  if not (x = 0) && not (y = 0) then (
+    assert (x = pow2 i /\ y = pow2 i);
+    logand_self #n (pow2 i);
+    assert (result = pow2 i)
+  ) else ()
+  ;
+  ()
+  
+let lemma_iand_pow2_64 (x:nat64) (i:nat{i < 64}) : Lemma
+  (pow2 i < pow2 64 /\ (iand x (pow2 i) == 0 \/ iand x (pow2 i) == pow2 i))
+  =
+  lemma_iand_pow2 64 x i
+  
+let lemma_ishr_pow2_diff64 (i:nat{i < 64}) (j:nat) : Lemma
+  (requires i <= j /\ j < 64)
+  (ensures pow2 j < pow2 64 /\ ishr #(pow2 64) (pow2 j) (j - i) == pow2 i)
+  =
+  lemma_ishr_pow2_diff 64 i j
+
+let lemma_ishr_zero64 (i:nat{i < 64}) : Lemma
+  (ishr #(pow2 64) 0 i == 0)
+  =
+  reveal_ishr_all 64;
+  FStar.UInt.shift_right_value_lemma #64 0 i;
+  assert (ishr #(pow2 64) 0 i = 0 / (pow2 i));
+  FStar.Math.Lemmas.small_division_lemma_1 0 (pow2 i); // Prove that 0 / pow2 i == 0
+  ()
+  
+let lemma_iand_maybe_pow2_64 (x y:nat64) (i:nat{i < 64}) : Lemma
+  (requires (x == 0 \/ x == pow2 i) /\ (y == 0 \/ y == pow2 i))
+  (ensures not (iand x y = 0) <==> not (x = 0) /\ not (y = 0))
+  =
+  lemma_iand_maybe_pow2 64 x y i
+

@@ -22,6 +22,7 @@ include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.GHash
 
@@ -52,6 +53,7 @@ open X64.Vale.InsVector
 open X64.Vale.InsAes
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
+open X64.CPU_Features_s
 #endverbatim
 
 #verbatim{:interface}
@@ -89,6 +91,7 @@ procedure{:quick} ReduceMul128_LE(ghost a:poly, ghost b:poly)
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;
     requires
+        pclmulqdq_enabled;
         degree(a) <= 127;
         degree(b) <= 127;
         xmm1 == reverse_bytes_quad32(gf128_to_quad32(a));
@@ -104,7 +107,9 @@ procedure{:quick} ReduceMul128_LE(ghost a:poly, ghost b:poly)
 
 procedure {:quick} compute_ghash_incremental_register()
     lets input @= xmm2; io @= xmm1; mask @= xmm8; h @= xmm11;
-    requires mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+    requires 
+        pclmulqdq_enabled;
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     reads
         h; mask;
     modifies
@@ -137,6 +142,7 @@ procedure {:quick} ghash_incremental_one_block_buffer(
         valid_taint_buf128(hash_b, mem, memTaint, Secret);
         valid_taint_buf128(input_b, mem, memTaint, Secret);
     requires
+        pclmulqdq_enabled;
         locs_disjoint(list(loc_buffer(h_b), loc_buffer(hash_b), loc_buffer(input_b)));
         rdi == buffer_addr(h_b, mem);
         rsi == buffer_addr(hash_b, mem);
@@ -212,6 +218,7 @@ procedure {:quick} ghash_incremental_one_block_buffer_win(
         valid_taint_buf128(hash_b, mem, memTaint, Secret);
         valid_taint_buf128(input_b, mem, memTaint, Secret);
     requires
+        pclmulqdq_enabled;
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(h_b), loc_buffer(hash_b), loc_buffer(input_b)));
         buffer_readable(mem, stack_b);
         buffer_length(stack_b) >= 9;
@@ -317,6 +324,7 @@ procedure {:quick} compute_ghash_incremental(
 
     requires
         // GHash reqs
+        pclmulqdq_enabled;
         len > 0 ==> validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
         len > 0 ==> in_ptr  + 16 * len < pow2_64;
         len > 0 ==> buffer_length(in_b) == len;
@@ -338,6 +346,7 @@ procedure {:quick} compute_ghash_incremental(
 
                 //////////////////// From requires //////////////////////
                 // GHash reqs
+                pclmulqdq_enabled;
                 validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
                 in_ptr  + 16 * len < pow2_64;
                 len > 0;
@@ -383,6 +392,7 @@ procedure {:quick} compute_ghash_incremental_partial(
 
     requires
         // GHash reqs
+        pclmulqdq_enabled;
         len > 0 ==> validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
         len > 0 ==> in_ptr  + 16 * len < pow2_64;
         len > 0 ==> buffer_length(in_b) >= len;
@@ -406,6 +416,7 @@ procedure {:quick} compute_ghash_incremental_partial(
 
                 //////////////////// From requires //////////////////////
                 // GHash reqs
+                pclmulqdq_enabled;
                 validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
                 in_ptr  + 16 * len < pow2_64;
                 len > 0;
@@ -585,6 +596,7 @@ procedure {:quick} ghash_incremental_bytes_extra(
         orig_num_bytes > 0 ==> validSrcAddrs128(mem, orig_in_ptr, in_b, bytes_to_quad_size(orig_num_bytes), memTaint, Secret);
     requires
         // GHash reqs
+        pclmulqdq_enabled;
         orig_num_bytes > 0 ==> orig_in_ptr  + 16 * bytes_to_quad_size(orig_num_bytes) < pow2_64;
         buffer_length(in_b) == bytes_to_quad_size(orig_num_bytes);
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -636,6 +648,7 @@ procedure {:quick} ghash_incremental_extra_stdcall(
         valid_taint_buf128(hash_b, mem, memTaint, Secret);
         valid_taint_buf128(h_b, mem, memTaint, Secret);
     requires
+        pclmulqdq_enabled;
         locs_disjoint(list(loc_buffer(in_b), loc_buffer(hash_b), loc_buffer(h_b)));
         rdi == buffer_addr(in_b, mem);
         rsi == buffer_addr(hash_b, mem);
@@ -732,6 +745,7 @@ procedure {:quick} ghash_incremental_extra_stdcall_win(
         valid_taint_buf128(hash_b, mem, memTaint, Secret);
         valid_taint_buf128(h_b, mem, memTaint, Secret);
     requires
+        pclmulqdq_enabled;
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(in_b), loc_buffer(hash_b), loc_buffer(h_b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, in_b);
@@ -865,6 +879,7 @@ procedure {:quick} ghash_incremental_bytes(
         num_bytes > 0 ==> validSrcAddrs128(mem, old(in_ptr), in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
     requires
         // GHash reqs
+        pclmulqdq_enabled;
         num_bytes > 0 ==> in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
         num_bytes > 0 ==> buffer_length(in_b) == bytes_to_quad_size(num_bytes);
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -910,6 +925,7 @@ procedure {:quick} ghash_incremental_bytes_stdcall(ghost h_b:buffer128, ghost ha
         valid_taint_buf128(h_b, mem, memTaint, Secret);
         valid_taint_buf128(hash_b, mem, memTaint, Secret);
     requires
+        pclmulqdq_enabled;
         locs_disjoint(list(loc_buffer(h_b), loc_buffer(hash_b), loc_buffer(input_b)));
         num_bytes > 0 ==> rdx  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
         num_bytes > 0 ==> buffer_length(input_b) == bytes_to_quad_size(num_bytes);
@@ -970,6 +986,7 @@ procedure{:quick}{:exportSpecs} ghash_incremental_bytes_stdcall_win(
         valid_taint_buf128(h_b, mem, memTaint, Secret);
         valid_taint_buf128(hash_b, mem, memTaint, Secret);
     requires
+        pclmulqdq_enabled;
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(h_b), loc_buffer(hash_b), loc_buffer(input_b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, h_b);
@@ -1073,6 +1090,7 @@ procedure {:quick} ghash_core(
         xmm2; xmm3; xmm4; xmm5; xmm6;
     requires
         // GHash reqs
+        pclmulqdq_enabled;
         len > 0 ==> validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
         len > 0 ==> in_ptr  + 16 * len < pow2_64;
         len > 0 ==> buffer_length(in_b) == len;

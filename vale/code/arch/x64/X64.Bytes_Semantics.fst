@@ -208,7 +208,7 @@ let correct_update_get128 ptr v mem =
   frame_update_heap32 (ptr+12) v.hi3 mem3;
   correct_update_get32 (ptr+12) v.hi3 mem3
 
-#reset-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
+#reset-options "--z3rlimit 10 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 
 let same_domain_update128 ptr v mem =
   let memf = update_heap128 ptr v mem in
@@ -242,7 +242,7 @@ val update_operand128_flags_same_domains (o:mov128_op) (v:quad32) (s:state) : Le
   Set.equal (Map.domain s.mem) (Map.domain s1.mem))
   [SMTPat (update_mov128_op_preserve_flags' o v s)]
 
-
+#set-options "--z3rlimit 20"
 let update_operand128_flags_same_domains o v s = match o with
   | Mov128Mem m ->
       let ptr = eval_maddr m s in
@@ -334,7 +334,7 @@ let update_operand128_flags_same_unspecified o v s = match o with
   | _ -> ()
 
 val eval_ins_bs_same_unspecified (ins:ins) (s0:state) : Lemma
-  (let Some s1 = eval_code (Ins ins) 0 s0 in
+  (let s1 = run (eval_ins ins) s0 in
    forall x. not (Map.contains s1.mem x) ==> s1.mem.[x] == s0.mem.[x])
 
 let eval_ins_bs_same_unspecified ins s0 = ()

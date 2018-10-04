@@ -8,11 +8,10 @@
       0,
       [
         "@query", "equation_FStar.FunctionalExtensionality.feq",
-        "equation_Types_s.quad32", "equation_X64.Machine_s.xmm",
-        "equation_X64.Vale.Xmms.equal"
+        "equation_X64.Machine_s.xmm", "equation_X64.Vale.Xmms.equal"
       ],
       0,
-      "286ea27b6fa3f6aa2365ad8e34e4af5c"
+      "592ca6da3673b3a365b42aa19306ed9e"
     ],
     [
       "X64.Vale.Xmms.lemma_equal_elim",
@@ -21,13 +20,16 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "assumption_FStar.FunctionalExtensionality.Extensionality",
-        "equation_FStar.FunctionalExtensionality.efun",
+        "equation_FStar.FunctionalExtensionality.is_restricted",
+        "equation_FStar.FunctionalExtensionality.restricted_t",
         "equation_Prims.eqtype", "equation_Types_s.quad32",
         "equation_X64.Machine_s.xmm", "equation_X64.Vale.Xmms.equal",
-        "equation_X64.Vale.Xmms.t", "function_token_typing_Types_s.quad32",
+        "equation_X64.Vale.Xmms.t",
         "function_token_typing_X64.Machine_s.xmm",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "lemma_FStar.FunctionalExtensionality.extensionality",
+        "refinement_interpretation_FStar.FunctionalExtensionality_Tm_refine_2b7181aa5e69259183420adaa263965b",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.FunctionalExtensionality_Tm_abs_33c425e9d5a70900b1deadec7d52bee0"
       ],
       0,
       "e3a14370de07cbf49f9076151347a055"

@@ -1,7 +1,9 @@
+#include <openssl/bn.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/dh.h>
 #include <openssl/ec.h>
+#include <openssl/ecdh.h>
 #include <inttypes.h>
 
 #include "kremlin/internal/target.h"
@@ -138,19 +140,28 @@ uint32_t EverCrypt_OpenSSL_aes256_gcm_decrypt(uint8_t *key, uint8_t *iv, uint8_t
 void EverCrypt_OpenSSL_chacha20_poly1305_encrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,
                                                  uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)
 {
+#ifdef OPENSSL_IS_BORINGSSL
+  handleErrors();
+#else
   EVP_CIPHER_CTX *ctx = openssl_create(EVP_chacha20_poly1305(), key);
   if(NULL == ctx || 1 != openssl_aead(ctx, 1, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag))
     handleErrors();
   openssl_free(ctx);
+#endif
 }
 
 uint32_t EverCrypt_OpenSSL_chacha20_poly1305_decrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,
                                                      uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)
 {
+#ifdef OPENSSL_IS_BORINGSSL
+  handleErrors();
+  return 0;
+#else
   EVP_CIPHER_CTX *ctx = openssl_create(EVP_chacha20_poly1305(), key);
   int ret = openssl_aead(ctx, 0, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag);
   openssl_free(ctx);
   return ret;
+#endif
 }
 
 void* EverCrypt_OpenSSL_aead_create(uint8_t alg, uint8_t *key)
@@ -160,8 +171,10 @@ void* EverCrypt_OpenSSL_aead_create(uint8_t alg, uint8_t *key)
   
   if(alg == 0) a = EVP_aes_128_gcm();
   else if(alg == 1) a = EVP_aes_256_gcm();
+#ifndef OPENSSL_IS_BORINGSSL
   else if(alg == 2) a = EVP_chacha20_poly1305();
-  else handleErrors();
+#endif
+  else{ handleErrors(); return NULL; }
 
   ctx = openssl_create(a, key);
   if(ctx == NULL) handleErrors();
@@ -249,9 +262,15 @@ void* EverCrypt_OpenSSL_ecdh_load_curve(EverCrypt_OpenSSL_ec_curve g)
     case EverCrypt_OpenSSL_ECC_X25519:
       k = EC_KEY_new_by_curve_name(NID_X25519);
       break;
+#ifdef OPENSSL_IS_BORINGSSL
+    case EverCrypt_OpenSSL_ECC_X448:
+      handleErrors();
+      break;
+#else
     case EverCrypt_OpenSSL_ECC_X448:
       k = EC_KEY_new_by_curve_name(NID_X448);
       break;
+#endif
   }
   return (void*)k;
 }
@@ -282,9 +301,14 @@ void EverCrypt_OpenSSL_ecdh_keygen(void* st, uint8_t *outx, uint8_t *outy)
   BIGNUM *x = BN_new(), *y = BN_new();
   EC_POINT_get_affine_coordinates_GFp(g, p, x, y, NULL);
 
+#ifdef OPENSSL_IS_BORINGSSL
+  BN_bn2bin_padded(outx, len, x);
+  BN_bn2bin_padded(outy, len, y);
+#else
   BN_bn2binpad(x, outx, len);
   BN_bn2binpad(y, outy, len);
-  
+#endif
+
   BN_free(y);
   BN_free(x);
 }

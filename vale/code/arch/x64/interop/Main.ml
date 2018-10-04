@@ -1,7 +1,8 @@
 open Interop_Printer
 
-
+(*
 let memcpy = ("memcpy", [("dst", TBuffer TUInt64, Sec); ("src", TBuffer TUInt64, Sec)], Stk (Prims.parse_int "0"))
+*)
 
 (* let poly = ("poly", [("ctx", TBuffer TUInt64); ("inp", TBuffer TUInt64); ("len", TBase TUInt64)]) *)
 
@@ -56,10 +57,10 @@ let ghash_one_block = ("ghash_incremental_one_block_buffer_win", [
 let inc32 = ("inc32_buffer_win", [("iv_b", TBuffer TUInt128, Sec)], Stk (Prims.parse_int "0"))
 *)
 
- 
+ (*
 let quad32_xor = ("quad32_xor_buffer", [("src1", TBuffer TUInt128, Sec);
   ("src2", TBuffer TUInt128, Sec); ("dst", TBuffer TUInt128, Sec)], Stk (Prims.parse_int "0"))
-
+*)
 
 (*
 let gcm_make_length = ("gcm_make_length_quad_buffer_win", [
@@ -92,8 +93,13 @@ let zero_quad32_buffer = ("zero_quad32_buffer_win", [("b", TBuffer TUInt128, Sec
 let reverse_quad32 = ("reverse_bytes_quad32_buffer_win", [("b", TBuffer TUInt128, Sec)], Stk (Prims.parse_int "0"))
 *)
 
-let sha_update_bytes = ("sha_update_bytes_stdcall",  [("ctx_b", TBuffer TUInt128, Sec);
-  ("in_b", TBuffer TUInt128, Sec); ("num_val", TBase TUInt64, Sec); ("k_b", TBuffer TUInt128, Sec)], Stk (Prims.parse_int "0"))
+let sha_update_bytes =
+   ("sha_update_bytes_stdcall",  
+  [("ctx_b", TBuffer TUInt128, Sec);  ("in_b", TBuffer TUInt128, Sec); 
+    ("num_val", TBase TUInt64, Sec); ("k_b", TBuffer TUInt128, Sec)], 
+  SaveRegsStk true,
+  AddStk (Prims.parse_int "0"),
+  Modifies ["ctx_b"])
 
 let name = sha_update_bytes 
 

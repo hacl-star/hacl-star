@@ -9,6 +9,7 @@ open Types_s
 open FStar.Seq.Base
 open X64.CryptoInstructions_s
 module S = X64.Bytes_Semantics_s
+open X64.CPU_Features_s
 
 type uint64 = UInt64.t
 
@@ -248,6 +249,12 @@ let update_cf_of (new_cf new_of:bool) : GTot (st unit) =
 let eval_ins (ins:ins) : GTot (st unit) =
   s <-- get;
   match ins with
+  | S.Cpuid ->
+    update_reg Rax (cpuid Rax (eval_reg Rax s) (eval_reg Rcx s));; 
+    update_reg Rbx (cpuid Rbx (eval_reg Rax s) (eval_reg Rcx s));;
+    update_reg Rcx (cpuid Rcx (eval_reg Rax s) (eval_reg Rcx s));;
+    update_reg Rdx (cpuid Rdx (eval_reg Rax s) (eval_reg Rcx s))
+    
   | S.Mov64 dst src ->
     check (valid_operand src);;
     update_operand_preserve_flags dst (eval_operand src s)
@@ -465,6 +472,7 @@ let eval_ins (ins:ins) : GTot (st unit) =
     update_mov128_op_preserve_flags dst (eval_mov128_op src s)
 
   | S.Pclmulqdq dst src imm ->
+    check_imm pclmulqdq_enabled;;
     (
       let Mkfour a0 a1 a2 a3 = eval_xmm dst s in
       let Mkfour b0 b1 b2 b3 = eval_xmm src s in
@@ -482,30 +490,36 @@ let eval_ins (ins:ins) : GTot (st unit) =
     )
 
   | S.AESNI_enc dst src ->
+    check_imm aesni_enabled;;
     let dst_q = eval_xmm dst s in
     let src_q = eval_xmm src s in
     update_xmm dst ins (quad32_xor (AES_s.mix_columns_LE (AES_s.sub_bytes (AES_s.shift_rows_LE dst_q))) src_q)
 
   | S.AESNI_enc_last dst src ->
+    check_imm aesni_enabled;;
     let dst_q = eval_xmm dst s in
     let src_q = eval_xmm src s in
     update_xmm dst ins (quad32_xor (AES_s.sub_bytes (AES_s.shift_rows_LE dst_q)) src_q)
 
   | S.AESNI_dec dst src ->
+    check_imm aesni_enabled;;
     let dst_q = eval_xmm dst s in
     let src_q = eval_xmm src s in
     update_xmm dst ins (quad32_xor (AES_s.inv_mix_columns_LE (AES_s.inv_sub_bytes (AES_s.inv_shift_rows_LE dst_q))) src_q)
 
   | S.AESNI_dec_last dst src ->
+    check_imm aesni_enabled;;
     let dst_q = eval_xmm dst s in
     let src_q = eval_xmm src s in
     update_xmm dst ins (quad32_xor (AES_s.inv_sub_bytes (AES_s.inv_shift_rows_LE dst_q)) src_q)
 
   | S.AESNI_imc dst src ->
+    check_imm aesni_enabled;;
     let src_q = eval_xmm src s in
     update_xmm dst ins (AES_s.inv_mix_columns_LE src_q)
 
   | S.AESNI_keygen_assist dst src imm ->
+    check_imm aesni_enabled;;
     let src_q = eval_xmm src s in
     update_xmm dst ins (Mkfour (AES_s.sub_word src_q.lo1)
                                (ixor (AES_s.rot_word_LE (AES_s.sub_word src_q.lo1)) imm)
@@ -513,17 +527,20 @@ let eval_ins (ins:ins) : GTot (st unit) =
                                (ixor (AES_s.rot_word_LE (AES_s.sub_word src_q.hi3)) imm))
 
   | S.SHA256_rnds2 dst src ->
+    check_imm sha_enabled;;
     let src1_q = eval_xmm dst s in
     let src2_q = eval_xmm src s in
     let wk_q  = eval_xmm 0 s in    
     update_xmm_preserve_flags dst (sha256_rnds2_spec src1_q src2_q wk_q)
 
   | S.SHA256_msg1 dst src ->
+    check_imm sha_enabled;;
     let src1 = eval_xmm dst s in
     let src2 = eval_xmm src s in
     update_xmm_preserve_flags dst (sha256_msg1_spec src1 src2)
 
   | S.SHA256_msg2 dst src ->
+    check_imm sha_enabled;;
     let src1 = eval_xmm dst s in
     let src2 = eval_xmm src s in
     update_xmm_preserve_flags dst (sha256_msg2_spec src1 src2)

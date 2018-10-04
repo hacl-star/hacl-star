@@ -22,6 +22,7 @@ include{:fstar}{:open} "GCM_helpers"
 include{:fstar}{:open} "GCTR_s"
 include{:fstar}{:open} "GCTR"
 include{:fstar}{:open} "Arch.TypesNative"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.AESCTRplain
 
@@ -50,6 +51,7 @@ open GCTR_s
 open GCTR
 open Arch.TypesNative
 open X64.AESCTR
+open X64.CPU_Features_s
 #endverbatim
 
 

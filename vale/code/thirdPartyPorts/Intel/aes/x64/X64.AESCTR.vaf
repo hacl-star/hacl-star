@@ -23,6 +23,7 @@ include{:fstar}{:open} "GCTR_s"
 include{:fstar}{:open} "GCTR"
 include{:fstar}{:open} "Arch.TypesNative"
 include{:fstar}{:open} "GHash"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.AESCTR
 
@@ -53,8 +54,7 @@ open GCTR
 open Arch.TypesNative
 open X64.GHash
 open GHash
-//open Arch.Types
-//open AES256_helpers
+open X64.CPU_Features_s
 #endverbatim
 
 #verbatim{:interface}
@@ -62,6 +62,7 @@ let aes_reqs
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
   (key_ptr:nat64) (mem:memory) (memTaint:memtaint) : prop0
   =
+  aesni_enabled /\
   (alg = AES_128 || alg = AES_256) /\
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
@@ -101,6 +102,7 @@ procedure {:quick exportOnly} aes_round_4way(
         ctr1; ctr2; ctr3; ctr4;
         efl;
     requires
+        aesni_enabled;
         1 <= n < nr(alg) <= length(round_keys);
         ctr1 == rounds_opaque(init1, round_keys, n - 1);
         ctr2 == rounds_opaque(init2, round_keys, n - 1);
@@ -143,6 +145,7 @@ procedure {:quick} aes_2rounds_4way(
         ctr1; ctr2; ctr3; ctr4;
         efl;
     requires
+        aesni_enabled;
         1 <= n < nr(alg) - 1 && nr(alg) <= length(round_keys);
         ctr1 == rounds_opaque(init1, round_keys, n - 1);
         ctr2 == rounds_opaque(init2, round_keys, n - 1);
@@ -178,6 +181,7 @@ procedure {:quick} aes_3rounds_4way(
         ctr1; ctr2; ctr3; ctr4;
         efl;
     requires
+        aesni_enabled;
         1 <= n < nr(alg) - 2 && nr(alg) <= length(round_keys);
         ctr1 == rounds_opaque(init1, round_keys, n - 1);
         ctr2 == rounds_opaque(init2, round_keys, n - 1);
@@ -215,6 +219,7 @@ procedure {:quick} aes_4rounds_4way(
         ctr1; ctr2; ctr3; ctr4;
         efl;
     requires
+        aesni_enabled;
         1 <= n < nr(alg) - 3 && nr(alg) <= length(round_keys);
         ctr1 == rounds_opaque(init1, round_keys, n - 1);
         ctr2 == rounds_opaque(init2, round_keys, n - 1);
@@ -359,6 +364,7 @@ procedure {:quick} aes_ctr_ghash(
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
         mask @= xmm8; hash @= xmm1; h @= xmm11; 
     requires
+        pclmulqdq_enabled;
         0 <= count < old_num_quad_blocks;
         validDstAddrs128(mem, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memTaint, Secret);
         
@@ -400,7 +406,7 @@ procedure {:quick} aes_ctr_ghash(
 
 }
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 500"
 // Intel's LOOP_4
 procedure{:quick} aes_ctr_loop_body(
     inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
@@ -457,6 +463,7 @@ procedure{:quick} aes_ctr_loop_body(
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
         // GCM reqs
+        pclmulqdq_enabled;
         iv == reverse_bytes_quad32(icb_BE);
         iv_lower64 == lo64(iv);
 
@@ -465,8 +472,9 @@ procedure{:quick} aes_ctr_loop_body(
         hash == ghash_incremental0(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*count));
 
     reads key_ptr; iv_lower64; mask; mask64; four; memTaint; h;
-    modifies const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
-             tmp_xmm; hash; plain_ptr; num_quad_blocks; out_ptr; r12; efl; mem;
+    modifies
+        const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
+        tmp_xmm; hash; plain_ptr; num_quad_blocks; out_ptr; r12; efl; mem;
     ensures
         // Framing
         modifies_buffer128(out_b, old(mem), mem);
@@ -583,16 +591,18 @@ procedure {:quick} aes_counter_loop(
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128
     )
-    lets plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
-         const2_1 @= xmm9; const4_3 @= xmm10; iv @= xmm7; mask64 @= xmm0; four @= xmm15;
-         rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
-         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
-         mask @= xmm8; hash @= xmm1; h @= xmm11;
+    lets
+        plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
+        const2_1 @= xmm9; const4_3 @= xmm10; iv @= xmm7; mask64 @= xmm0; four @= xmm15;
+        rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
+        ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
+        mask @= xmm8; hash @= xmm1; h @= xmm11;
     
     reads mask; key_ptr; memTaint; h;
-    modifies mask64; four; iv; const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
-             rax; plain_ptr; num_quad_blocks; out_ptr; iv_lower64; r12; hash;
-             efl; mem;
+    modifies
+        mask64; four; iv; const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
+        rax; plain_ptr; num_quad_blocks; out_ptr; iv_lower64; r12; hash;
+        efl; mem;
 
     requires
         // There's at least one block of four left to do
@@ -612,6 +622,7 @@ procedure {:quick} aes_counter_loop(
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
         // GCM reqs
+        pclmulqdq_enabled;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
     ensures
@@ -711,6 +722,7 @@ procedure {:quick} aes_counter_loop(
             aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
             // GCM reqs
+            pclmulqdq_enabled;
             old_iv == reverse_bytes_quad32(icb_BE);
             iv_lower64 == lo64(old_iv);
 

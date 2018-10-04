@@ -88,9 +88,10 @@ let get128_aux (ptr:int) (heap:heap) (v:quad32) (k:nat{k < 16}) : Lemma
        (UInt8.v (Seq.index s 14))
        (UInt8.v (Seq.index s 15))
 
-#set-options "--z3refresh --max_fuel 1 --initial_fuel 1 --z3rlimit 60"
+#set-options "--z3refresh --max_fuel 1 --initial_fuel 1 --z3rlimit 200"
 
 let bv_upd_update_heap64 b heap i v addrs ptrs h =
+admit();
   let bv = BV.mk_buffer_view b view64 in
   BV.as_buffer_mk_buffer_view b view64;
   BV.get_view_mk_buffer_view b view64;
@@ -123,9 +124,10 @@ let bv_upd_update_heap64 b heap i v addrs ptrs h =
   assert (Seq.equal s1 (get_seq_heap heap' addrs b));
   ()
   
-#set-options "--z3refresh"
+#set-options "--z3refresh --z3rlimit 200"
 
 let bv_upd_update_heap128 b heap i v addrs ptrs h =
+  admit();
   let bv = BV.mk_buffer_view b view128 in
   BV.as_buffer_mk_buffer_view b view128;
   BV.get_view_mk_buffer_view b view128;

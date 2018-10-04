@@ -15,6 +15,7 @@ include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
+include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.GF128_Mul
 
@@ -37,6 +38,7 @@ open X64.Vale.InsVector
 open X64.Vale.InsAes
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
+open X64.CPU_Features_s
 #endverbatim
 
 procedure{:quick} ShiftLeft128_1(ghost a:poly)
@@ -116,6 +118,7 @@ procedure{:quick} ClmulRev64(ghost a:poly, ghost b:poly, inline dstHi:bool, inli
         efl;
         xmm1; xmm2;
     requires
+        pclmulqdq_enabled;
         degree(a) <= 63;
         degree(b) <= 63;
         reverse(a, 63) == of_double32(if dstHi then quad32_double_hi(xmm1) else quad32_double_lo(xmm1));
@@ -177,6 +180,7 @@ procedure{:quick} Clmul128(ghost ab:poly, ghost cd:poly) returns(ghost lo:poly, 
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5;
     requires
+        pclmulqdq_enabled;
         degree(ab) <= 127;
         degree(cd) <= 127;
         xmm1 == to_quad32(ab);
@@ -246,6 +250,7 @@ procedure{:quick} ClmulRev128(ghost ab:poly, ghost cd:poly) returns(ghost lo:pol
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5;
     requires
+        pclmulqdq_enabled;
         degree(ab) <= 127;
         degree(cd) <= 127;
         xmm1 == to_quad32(reverse(ab, 127));
@@ -284,6 +289,7 @@ procedure{:quick} ReduceMulRev128(ghost a:poly, ghost b:poly)
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;
     requires
+        pclmulqdq_enabled;
         degree(a) <= 127;
         degree(b) <= 127;
         xmm1 == to_quad32(reverse(a, 127));

@@ -1,5 +1,5 @@
 [
-  "ƒ™PN±\u0019†tJB\u0015qà¥›U",
+  "\"Hñx\u001egäøÆÍ‰ƒ€\u0013\u0013Õ",
   [
     [
       "X64.Bytes_Semantics.same_mem_get_heap_val",
@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "406e69e5249f900bc848e77ea23da784"
+      "4e1858b15abb8afa53496f265b0e153c"
     ],
     [
       "X64.Bytes_Semantics.frame_update_heap",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "33eed970a6eaf23088a3a5ad59707f61"
+      "3efa354e9ac3d966c281676936010f2a"
     ],
     [
       "X64.Bytes_Semantics.same_domain_update",
@@ -26,7 +26,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "bf2af3baa93e5951dd3ea7d0bca349ee"
+      "12e62e7001db19e3e2b2fd84da4d8c70"
     ],
     [
       "X64.Bytes_Semantics.same_mem_get_heap_val32",
@@ -35,7 +35,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "b28a3ffebe7c5487613036a54fc1ebd1"
+      "bcc9456f95a03390870682c0c9e714ec"
     ],
     [
       "X64.Bytes_Semantics.frame_update_heap128",
@@ -44,7 +44,7 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "3ffd0e52493d6e6427bcdcfa8ab75ef8"
+      "256d5e1a9f1eeecb16c89cbbc0dbb57a"
     ],
     [
       "X64.Bytes_Semantics.same_domain_update128",
@@ -53,7 +53,40 @@
       0,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "305c33b24c8139ef68ee9b26bd2ace65"
+      "aba59f3d1b2376dccb89b3c5e1c7e1e9"
+    ],
+    [
+      "X64.Bytes_Semantics.eval_ins_domains",
+      1,
+      1,
+      0,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "9ed8a95d40007d49eba043a279cb6310"
+    ],
+    [
+      "X64.Bytes_Semantics.eval_ins_same_unspecified",
+      1,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Taint_Semantics_s.taint_eval_code.fuel_instrumented",
+        "@query",
+        "X64.Taint_Semantics_s_pretyping_e5512f1f3d006584f1f8889e0827cf63",
+        "assumption_Prims.HasEq_int",
+        "constructor_distinct_FStar.Pervasives.Native.Some",
+        "constructor_distinct_X64.Machine_s.Ins",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "equation_with_fuel_X64.Taint_Semantics_s.taint_eval_code.fuel_instrumented",
+        "projection_inverse_FStar.Pervasives.Native.Some_a",
+        "projection_inverse_FStar.Pervasives.Native.Some_v",
+        "projection_inverse_X64.Machine_s.Ins_ins",
+        "projection_inverse_X64.Machine_s.Ins_t_ins",
+        "projection_inverse_X64.Machine_s.Ins_t_ocmp"
+      ],
+      0,
+      "e04a773b667f5aa6d9f3519a861ecd53"
     ]
   ]
 ]

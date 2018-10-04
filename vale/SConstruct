@@ -166,6 +166,8 @@ AddOptYesNo('FSTAR-EXTRACT', dest = 'fstar_extract', default = False,
   help = "Extract .ml files from F* files")
 AddOptYesNo('MIN-TEST', dest = 'min_test', default = False,
   help = "Only run on a minimal set of test files")
+AddOptYesNo('PROFILE', dest = 'profile', default = False,
+  help = "Turn on profile options to measure verification performance (note: --NO-USE-HINTS is recommended when profiling)")
 
 is_help = GetOption('help')
 vale_path = Dir(GetOption('vale_path')).abspath
@@ -186,6 +188,7 @@ dump_args = GetOption('dump_args')
 single_vaf = GetOption('single_vaf')
 is_single_vaf = not (single_vaf is None)
 min_test = GetOption('min_test')
+profile = GetOption('profile')
 
 ##################################################################################################
 #
@@ -253,13 +256,15 @@ fstar_default_args_nosmtencoding = ('--max_fuel 1 --max_ifuel 1'
   + ' --z3cliopt smt.arith.nl=false --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3'
   + ' --hint_info'
   + (' --use_hints --use_hint_hashes' if use_hints else '')
-  + (' --record_hints' if record_hints else ' --cache_checked_modules')
+  + (' --cache_off' if record_hints else ' --cache_checked_modules')
   + ' --cache_dir obj/cache_checked'
   + ' --use_extracted_interfaces true'
   )
 fstar_default_args = (fstar_default_args_nosmtencoding
   + ' --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped'
   )
+
+fstar_record_hints = ' --record_hints' if record_hints else ''
 
 vale_scons_args = '-disableVerify -omitUnverified' if is_single_vaf else ''
 vale_includes = f'-include {File("code/lib/util/operator.vaf")}'
@@ -410,7 +415,7 @@ if not verify:
 
 # Find Z3 for F*
 found_z3 = False
-if verify and not is_help:
+if not is_help:
   fstar_z3 = GetOption('fstar_z3')
   if fstar_z3 == '':
     fstar_z3 = File('tools/Z3/z3.exe').path if sys.platform == 'win32' else 'tools/Z3/z3'
@@ -433,6 +438,16 @@ else:
 vale_exe = File(f'{vale_path}/bin/vale.exe')
 import_fstar_types_exe = File(f'{vale_path}/bin/importFStarTypes.exe')
 fstar_exe = File(f'{fstar_path}/bin/fstar.exe')
+
+def add_from_os_env(env, name):
+  if name in os.environ:
+    env['ENV'][name] = os.environ[name]
+
+ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH']})
+add_from_os_env(ocaml_env, 'OCAMLPATH')
+add_from_os_env(ocaml_env, 'OCAMLLIB')
+add_from_os_env(ocaml_env, 'OCAML_TOPLEVEL_PATH')
+add_from_os_env(ocaml_env, 'CAML_LD_LIBRARY_PATH')
 
 ##################################################################################################
 #
@@ -727,14 +742,15 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
     Depends(temptargetfiles, hintfile)
   env.Command(temptargetfiles, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
-    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile}' +
+    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile} {fstar_record_hints}' +
+    (f' --debug {file_module_name(File(sourcefile))} --debug_level print_normalized_terms' if profile else '') +
     f' 1> {temptargetfile} 2> {stderrfile}')
   CopyFile(targetfile, temptargetfile)
   dump_module_flag = '--dump_module ' + file_module_name(sourcefile)
   dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
     ' --print_bound_var_types --ugly ' + dump_module_flag)
   env.Command(dumptargetfile, sourcefile,
-    f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path}' +
+    f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
     f' {fstar_includes} {" ".join(fstar_user_args)}' +
     f' {dump_flags} 1>{dumptargetfile} 2>&1')
   Depends(dumptargetfile, targetfile)
@@ -749,20 +765,19 @@ def extract_fstar_file(options, sourcefile, fstar_includes):
   verifier_flags = options.verifier_flags.replace('--use_extracted_interfaces true', '')
   return env.Command(mlfile, sourcefile,
     f'{fstar_exe} {sourcefile} {verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
-    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile}' +
+    f' {fstar_includes} {" ".join(fstar_user_args)}' +
     f' --odir obj/ml_out --codegen OCaml --admit_smt_queries true --extract_module {module_name}')
 
 # Process a .fst or .fsti file
 def process_fstar_file(env, file, fstar_includes):
   options = get_build_options(file)
   if options != None:
-    if verify:
-      target = File(f'{to_obj_dir(file)}.verified')
-      verify_fstar_file(options, target, file, fstar_includes)
-      if fstar_extract:
-        if file_extension(file) == '.fst':
-          if not (ml_out_file(file, '.ml') in no_extraction_files):
-            extract_fstar_file(options, file, fstar_includes)
+    target = File(f'{to_obj_dir(file)}.verified')
+    verify_fstar_file(options, target, file, fstar_includes)
+    if fstar_extract:
+      if file_extension(file) == '.fst':
+        if not (ml_out_file(file, '.ml') in no_extraction_files):
+          extract_fstar_file(options, file, fstar_includes)
 
 def vale_dependency_scan(env, file):
   contents = file.get_text_contents()
@@ -818,7 +833,7 @@ def translate_vale_file(options, source_vaf):
   types_include = ''
   types_include = f'-include {target}.types.vaf'
   env.Command(targets, source_vaf,
-    f'{mono} {vale_exe} -fstarText -typecheck {types_include} {opt_vale_includes}' +
+    f'{mono} {vale_exe} -fstarText -quickMods -typecheck {types_include} {opt_vale_includes}' +
     f' -in {source_vaf} -out {target_fst} -outi {target_fsti}' +
     f' {vale_scons_args} {" ".join(vale_user_args)}')
   return targets
@@ -831,17 +846,16 @@ def process_vale_file(env, file, fstar_includes):
     fsts = translate_vale_file(options, file)
     fst = fsts[0]
     fsti = fsts[1]
-    if verify:
-      fst_options = get_build_options(fst)
-      fsti_options = get_build_options(fsti)
-      target = file_drop_extension(to_obj_dir(file))
-      target_fst = f'{target}.fst.verified'
-      target_fsti = f'{target}.fsti.verified'
-      Depends(f'{target_fst}.tmp', target_fsti)
-      verify_fstar_file(fst_options, target_fst, fst, fstar_includes)
-      verify_fstar_file(fsti_options, target_fsti, fsti, fstar_includes)
-      if fstar_extract:
-        extract_fstar_file(fst_options, fst, fstar_includes)
+    fst_options = get_build_options(fst)
+    fsti_options = get_build_options(fsti)
+    target = file_drop_extension(to_obj_dir(file))
+    target_fst = f'{target}.fst.verified'
+    target_fsti = f'{target}.fsti.verified'
+    Depends(f'{target_fst}.tmp', target_fsti)
+    verify_fstar_file(fst_options, target_fst, fst, fstar_includes)
+    verify_fstar_file(fsti_options, target_fsti, fsti, fstar_includes)
+    if fstar_extract:
+      extract_fstar_file(fst_options, fst, fstar_includes)
 
 def compute_module_types(env, source_vaf):
   source_base = file_drop_extension(to_obj_dir(File(source_vaf)))
@@ -914,17 +928,8 @@ def process_files_in(env, directories):
     for target in manual_dependencies:
       Depends(target, manual_dependencies[target])
 
-def add_from_os_env(env, name):
-  if name in os.environ:
-    env['ENV'][name] = os.environ[name]
-
 def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_file):
   # OCaml depends on many libraries and executables; we have to assume they are in the user's PATH:
-  ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH']})
-  add_from_os_env(ocaml_env, 'OCAMLPATH')
-  add_from_os_env(ocaml_env, 'OCAMLLIB')
-  add_from_os_env(ocaml_env, 'OCAML_TOPLEVEL_PATH')
-  add_from_os_env(ocaml_env, 'CAML_LD_LIBRARY_PATH')
   ocaml_env.PrependENVPath('OCAMLPATH', fstar_path + '/bin')
   main_ml = ml_out_file(main_file, '.ml')
   main_cmx = ml_out_file(main_file, '.cmx')
@@ -974,7 +979,7 @@ def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_fi
   output_target_base = 'obj/' + output_base_name
   def generate_asm(suffix, assembler, platform):
     target = output_target_base + suffix
-    return env.Command(target, main_exe, f'{main_exe} {assembler} {platform} > {target}')
+    return ocaml_env.Command(target, main_exe, f'{main_exe} {assembler} {platform} > {target}')
   masm_win = generate_asm('.asm', 'MASM', 'Win')
   gcc_win = generate_asm('-gcc.S', 'GCC', 'Win')
   gcc_linux = generate_asm('-linux.S', 'GCC', 'Linux')
@@ -1071,7 +1076,7 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
           dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
             ' --print_bound_var_types --ugly ' + dump_module_flag)
           env.Command(dumptargetfile, t,
-            f'{fstar_exe} {t} {fstar_z3_path}' +
+            f'{fstar_exe} {t} {fstar_z3_path} {fstar_no_verify}' +
             f' {dump_flags} 1>{dumptargetfile} 2>&1')
         if not (dumptargetfile in dump_deps):
           dump_deps[dumptargetfile] = set()
@@ -1108,7 +1113,7 @@ if not is_help:
   # Check F* and Z3 versions
   if not fstar_my_version:
     check_fstar_version()
-  if verify and not z3_my_version:
+  if not z3_my_version:
     if not found_z3:
       print_error_exit('Could not find z3 executable.  Either put z3 in your path, or put it in the directory tools/Z3/, or use the --FSTARZ3=<z3-executable> option.')
     check_z3_version(fstar_z3)
@@ -1130,7 +1135,7 @@ if not is_help:
     # Build AES-GCM
     aesgcm_asm = extract_assembly_code(env, 'aesgcm', File('code/crypto/aes/x64/Main.ml'),
       File('code/crypto/aes/x64/X64.GCMdecrypt.vaf'), File('code/lib/util/CmdLineParser.ml'))
-    sha_asm = extract_assembly_code(env, 'sha256', File('code/crypto/sha/ShaMain.ml'),
+    sha256_asm = extract_assembly_code(env, 'sha256', File('code/crypto/sha/ShaMain.ml'),
       File('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf'), File('code/lib/util/CmdLineParser.ml'))
     if env['TARGET_ARCH'] == 'amd64':
       aesgcmasm_obj = env.Object('obj/aesgcmasm_openssl', aesgcm_asm[0])
@@ -1138,6 +1143,11 @@ if not is_help:
       aesgcmtest_cpp = to_obj_dir(aesgcmtest_src)
       CopyFile(aesgcmtest_cpp, aesgcmtest_src)
       aesgcmtest_exe = env.Program(source = [aesgcmasm_obj, aesgcmtest_cpp], target = 'obj/TestAesGcm.exe')
+      sha256asm_obj = env.Object('obj/sha256asm_openssl', sha256_asm[0])
+      sha256test_src = File('code/crypto/sha/TestSha.cpp')
+      sha256test_cpp = to_obj_dir(sha256test_src)
+      CopyFile(sha256test_cpp, sha256test_src)
+      sha256test_exe = env.Program(source = [sha256asm_obj, sha256test_cpp], target = 'obj/TestSha.exe')
 
   if dump_args:
     print_dump_args()
