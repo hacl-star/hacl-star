@@ -442,7 +442,7 @@ let shuffle hash block ws k =
     shuffle_core hash block ws k t;
     C.Compat.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash))
   in
-  C.Compat.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash));
+  C.Compat.Loops.lemma_repeat_range_0 0 (Spec.shuffle_core (reveal_h64s (as_seq h0 block))) (reveal_h64s (as_seq h0 hash));
   for 0ul size_ws_w inv f'
 
 
@@ -458,7 +458,7 @@ private val sum_hash:
               /\ (let new_seq_hash_0 = reveal_h64s (as_seq h1 hash_0) in
               let seq_hash_0 = reveal_h64s (as_seq h0 hash_0) in
               let seq_hash_1 = reveal_h64s (as_seq h0 hash_1) in
-              let res        = Spec.Compat.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) seq_hash_0 seq_hash_1 in
+              let res        = Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) seq_hash_0 seq_hash_1 in
               new_seq_hash_0 == res)))
 
 [@"substitute"]
@@ -466,7 +466,7 @@ let sum_hash hash_0 hash_1 =
   let h0 = ST.get() in
   C.Compat.Loops.in_place_map2 hash_0 hash_1 size_hash_w (fun x y -> H64.(x +%^ y));
   let h1 = ST.get() in
-  Seq.lemma_eq_intro (Spec.Compat.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) (reveal_h64s (as_seq h0 hash_0)) (reveal_h64s (as_seq  h0 hash_1))) (reveal_h64s (as_seq h1 hash_0))
+  Seq.lemma_eq_intro (Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) (reveal_h64s (as_seq h0 hash_0)) (reveal_h64s (as_seq  h0 hash_1))) (reveal_h64s (as_seq h1 hash_0))
 
 
 
@@ -542,7 +542,7 @@ private val update_core:
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 data /\ live h0 data_w /\ live h0 ws_w /\ live h0 k_w
                   /\ reveal_h64s (as_seq h0 k_w) == Spec.k
-                  /\ (reveal_h64s (as_seq h0 data_w) = Spec.Compat.Lib.uint64s_from_be (v size_block_w) (reveal_sbytes (as_seq h0 data)))
+                  /\ (reveal_h64s (as_seq h0 data_w) = Spec.Lib.uint64s_from_be (v size_block_w) (reveal_sbytes (as_seq h0 data)))
                   /\ (let w = reveal_h64s (as_seq h0 ws_w) in
                   let b = reveal_h64s (as_seq h0 data_w) in
                   (forall (i:nat). {:pattern (Seq.index w i)} i < 80 ==> Seq.index w i == Spec.ws b i))))
@@ -624,7 +624,7 @@ let update_core hash_w data data_w ws_w k_w =
   assert(let x = reveal_h64s (as_seq h0 hash_w) in
          let y = Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) (Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data))) in
          let z = reveal_h64s (as_seq h5 hash_w) in
-         let z' = Spec.Compat.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) x y in
+         let z' = Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) x y in
          z == z');
 
   lemma_modifies_0_1 hash_w h1 h4 h5;
@@ -720,7 +720,7 @@ let update state data =
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_whash_w size_whash_w);
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_count_w size_count_w);
   (**) no_upd_lemma_1 h2 h3 data_w data;
-  (**) assert(reveal_h64s (as_seq h3 data_w) == Spec.Compat.Lib.uint64s_from_be (U32.v size_block_w) (reveal_sbytes (as_seq h3 data)));
+  (**) assert(reveal_h64s (as_seq h3 data_w) == Spec.Lib.uint64s_from_be (U32.v size_block_w) (reveal_sbytes (as_seq h3 data)));
 
   (* Retreive values from the state *)
   let hash_w = Buffer.sub state pos_whash_w size_whash_w in
