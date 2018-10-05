@@ -101,8 +101,7 @@ let state_permute (s:state) : state =
   repeati 24 state_permute1 s
 
 let loadState_inner (block:lbytes 200) (j:size_nat{j < 25}) (s:state) : state =
-  let nj = uint_from_bytes_le #U64 (sub block (j * 8) 8) in
-  s.[j] <- s.[j] ^. nj
+  s.[j] <- s.[j] ^. uint_from_bytes_le #U64 (sub block (j * 8) 8)
 
 let loadState (rateInBytes:size_nat{rateInBytes <= 200})
 	      (input:lbytes rateInBytes)
@@ -111,19 +110,10 @@ let loadState (rateInBytes:size_nat{rateInBytes <= 200})
   let block = update_sub block 0 rateInBytes input in
   repeati 25 (loadState_inner block) s
 
-let storeState_inner (s:state) (j:size_nat{j < 25}) (block:lbytes 200) :
-  res:lbytes 200{
-    sub res 0 (j * 8) == sub block 0 (j * 8) /\
-    sub res (j * 8) 8 == uint_to_bytes_le #U64 s.[j] /\
-    sub res (j * 8 + 8) (200 - j * 8 - 8) == sub block (j * 8 + 8) (200 - j * 8 - 8)} =
-  let res = update_sub block (j * 8) 8 (uint_to_bytes_le #U64 s.[j]) in
-  eq_intro (sub res 0 (j * 8)) (sub block 0 (j * 8));
-  eq_intro (sub res (j * 8) 8) (uint_to_bytes_le #U64 s.[j]);
-  eq_intro (sub res (j * 8 + 8) (200 - j * 8 - 8)) (sub block (j * 8 + 8) (200 - j * 8 - 8));
-  res
+let storeState_inner (s:state) (j:size_nat{j < 25}) (block:lbytes 200) : lbytes 200 =
+  update_sub block (j * 8) 8 (uint_to_bytes_le #U64 s.[j])
 
-let storeState (rateInBytes:size_nat{rateInBytes <= 200})
-	       (s:state) : lbytes rateInBytes =
+let storeState (rateInBytes:size_nat{rateInBytes <= 200}) (s:state) : lbytes rateInBytes =
   let block = create 200 (u8 0) in
   let block = repeati 25 (storeState_inner s) block in
   sub block 0 rateInBytes
@@ -143,8 +133,7 @@ let absorb_last s rateInBytes inputByteLen input delimitedSuffix =
   let lastBlock = lastBlock.[rem] <- delimitedSuffix in
   loadState rateInBytes lastBlock s
 
-let absorb_next (s:state)
-                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}) : state =
+let absorb_next (s:state) (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}) : state =
   let nextBlock = create rateInBytes (u8 0) in
   let nextBlock = nextBlock.[rateInBytes - 1] <- u8 0x80 in
   let s = loadState rateInBytes nextBlock s in
@@ -169,7 +158,8 @@ let absorb (s:state)
   let s = repeati n (absorb_inner rateInBytes inputByteLen input) s in
   let s = absorb_last s rateInBytes inputByteLen input delimitedSuffix in
   let s =
-    if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) && (rem = rateInBytes - 1))
+    if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) &&
+       (rem = rateInBytes - 1))
     then state_permute s else s in
   absorb_next s rateInBytes
 
@@ -194,30 +184,15 @@ let squeeze (s:state)
 	    (outputByteLen:size_nat)
 	    : lbytes outputByteLen =
   let outBlocks = outputByteLen / rateInBytes in
-  let s, output = 
-    repeat outBlocks 
-      (fun (i:size_nat{i <= outputByteLen / rateInBytes}) -> 
+  let s, output =
+    repeat outBlocks
+      (fun (i:size_nat{i <= outputByteLen / rateInBytes}) ->
         tuple2 state (lbytes (i * rateInBytes)))
-      (squeeze_inner rateInBytes outputByteLen) 
+      (squeeze_inner rateInBytes outputByteLen)
       (s, create 0 (u8 0)) in
   let remOut = outputByteLen % rateInBytes in
   let block = storeState remOut s in
   output @| block
-
-val lemma_update_squeeze:
-    rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
-  -> outputByteLen:size_nat
-  -> i:size_nat{i < outputByteLen / rateInBytes}
-  -> s:state
-  -> o:lbytes (i * rateInBytes)
-  -> o1:lbytes ((i + 1) * rateInBytes)
-  -> Lemma
-    (requires
-      sub o1 0 (i * rateInBytes) == sub o 0 (i * rateInBytes) /\
-      sub o1 (i * rateInBytes) rateInBytes == storeState rateInBytes s)
-    (ensures o1 == snd (squeeze_inner rateInBytes outputByteLen i (s, o)))
-let lemma_update_squeeze rateInBytes outputByteLen i s o o1 =
-  Seq.lemma_split (sub o1 0 (i * rateInBytes + rateInBytes)) (i * rateInBytes)
 
 val keccak:
     rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
@@ -261,7 +236,7 @@ val cshake128_frodo:
   -> lbytes output_len
 let cshake128_frodo input_len input cstm output_len =
   let s = Seq.create 25 (u64 0) in
-  let s = s.[0] <- (u64 0x10010001a801) |. (shift_left (to_u64 cstm) (u32 48)) in
+  let s = s.[0] <- u64 0x10010001a801 |. shift_left (to_u64 cstm) (u32 48) in
   let s = state_permute s in
   let s = absorb s 168 input_len input (u8 0x04) in
   squeeze s 168 output_len
@@ -274,7 +249,7 @@ val cshake256_frodo:
   -> lbytes output_len
 let cshake256_frodo input_len input cstm output_len =
   let s = Seq.create 25 (u64 0) in
-  let s = s.[0] <- (u64 0x100100018801) |. (shift_left (to_u64 cstm) (u32 48)) in
+  let s = s.[0] <- u64 0x100100018801 |. shift_left (to_u64 cstm) (u32 48) in
   let s = state_permute s in
   let s = absorb s 136 input_len input (u8 0x04) in
   squeeze s 136 output_len

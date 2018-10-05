@@ -375,7 +375,7 @@ let storeState rateInBytes s res =
     LSeq.unfold_repeati 25 (spec h0) (as_seq h0 block) (v j);
     storeState_inner s j block
   );
-  update_sub res (size 0) rateInBytes (sub block (size 0) rateInBytes);
+  copy res rateInBytes (sub block (size 0) rateInBytes);
   pop_frame()
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
@@ -483,7 +483,8 @@ let absorb s rateInBytes inputByteLen input delimitedSuffix =
     absorb_inner rateInBytes inputByteLen input i s
   );
   absorb_last s rateInBytes inputByteLen input delimitedSuffix;
-  (if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) && (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. size 1)))
+  (if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) &&
+      (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. size 1)))
   then state_permute s);
   absorb_next s rateInBytes;
   let h1 = ST.get () in
