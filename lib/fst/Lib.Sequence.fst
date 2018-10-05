@@ -42,6 +42,13 @@ let update_sub #a #len s start n x =
   Seq.lemma_eq_intro (Seq.slice o start (start + n)) x;
   o
 
+let lemma_update_sub #a #len dst start n src res =
+  let res1 = update_sub dst start n src in
+  FStar.Seq.Properties.lemma_split (sub res 0 (start + n)) start;
+  FStar.Seq.Properties.lemma_split (sub res1 0 (start + n)) start;
+  FStar.Seq.Properties.lemma_split res (start + n);
+  FStar.Seq.Properties.lemma_split res1 (start + n)
+
 let update_slice #a #len i start fin upd =
   update_sub #a #len i start (fin-start) upd
 
