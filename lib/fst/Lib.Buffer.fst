@@ -7,6 +7,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 
 module B = LowStar.Buffer
+module IB = LowStar.ImmutableBuffer
 module U32 = FStar.UInt32
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
@@ -23,8 +24,14 @@ let length #a b = B.length b
 let sub #a #len #olen b start n =
   B.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
+let isub #a #len #olen b start n =
+  IB.isub b (size_to_UInt32 start) (size_to_UInt32 n)
+
 let index #a #len b i =
   B.index b (size_to_UInt32 i)
+
+let iindex #a #len b i =
+  IB.index b (size_to_UInt32 i)
 
 let upd #a #len b i v =
   B.upd b (size_to_UInt32 i) v

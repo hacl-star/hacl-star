@@ -38,6 +38,7 @@ let gsub
  =
   B.gsub b (size_to_UInt32 start) (size_to_UInt32 n)
 
+
 inline_for_extraction
 val sub:
     #a:Type0
@@ -53,6 +54,20 @@ val sub:
       B.as_seq h1 r == Seq.sub #a #len (B.as_seq h0 b) (v start) (v n))
 
 inline_for_extraction
+val isub:
+    #a:Type0
+  -> #len:size_nat
+  -> #olen:size_nat
+  -> b:libuffer a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= len /\ v n == olen}
+  -> Stack (libuffer a olen)
+    (requires fun h0 -> IB.live h0 b)
+    (ensures  fun h0 r h1 ->
+      h0 == h1 /\ r == IB.igsub b (size_to_UInt32 start) (size_to_UInt32 n) /\
+      IB.as_seq h1 r == Seq.sub #a #len (IB.as_seq h0 b) (v start) (v n))
+
+inline_for_extraction
 val index:
     #a:Type0
   -> #len:size_nat
@@ -62,6 +77,17 @@ val index:
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 r h1 -> h0 == h1 /\
       r == Seq.index #a #len (B.as_seq h1 b) (v i))
+
+inline_for_extraction
+val iindex:
+    #a:Type0
+  -> #len:size_nat
+  -> b:libuffer a len
+  -> i:size_t{v i < len}
+  -> Stack a
+    (requires fun h0 -> B.live h0 b)
+    (ensures  fun h0 r h1 -> h0 == h1 /\
+      r == Seq.index #a #len (IB.as_seq h1 b) (v i))
 
 inline_for_extraction
 val upd:
