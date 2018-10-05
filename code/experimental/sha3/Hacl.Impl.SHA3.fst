@@ -343,16 +343,16 @@ val storeState_inner:
       modifies (loc_buffer block) h0 h1 /\
       as_seq h1 block == S.storeState_inner (as_seq h0 s) (v j) (as_seq h0 block))
 let storeState_inner s j block =
-  let h1 = ST.get () in
-  let tmp = sub block (j *! size 8) (size 8) in
-  uint_to_bytes_le tmp s.(j);
-  let h2 = ST.get () in
-  modifies_buffer_elim
-    (sub #_ #_ #(v j * 8) block (size 0) (j *! size 8)) (loc_buffer tmp) h1 h2;
-  modifies_buffer_elim
-    (sub #_ #_ #(200 - v j * 8 - 8) block (j *! size 8 +! size 8) (size 200 -! j *! size 8 -! size 8)) (loc_buffer tmp) h1 h2;
-  Seq.lemma_eq_intro (as_seq h2 block)
-    (S.storeState_inner (as_seq h1 s) (v j) (as_seq h1 block))
+  let sj = s.(j) in
+  [@ inline_let]
+  let spec h0 = Lib.ByteSequence.uint_to_bytes_le sj in
+  let impl (b:lbuffer uint8 (v (size 8))) : Stack unit
+    (requires fun h -> live h b)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer b) h0 h1 /\
+      as_seq h1 b == spec h0)
+    = uint_to_bytes_le #U64 b sj in
+  update_sub_f block (j *! size 8) (size 8) spec impl
 
 val storeState:
     rateInBytes:size_t{v rateInBytes <= 200}

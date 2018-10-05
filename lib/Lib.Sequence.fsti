@@ -97,6 +97,23 @@ val update_sub:
     (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < len)}).
       {:pattern (index o k)} index o k == index i k)}
 
+val lemma_update_sub:
+    #a:Type
+  -> #len:size_nat
+  -> dst:lseq a len
+  -> start:size_nat
+  -> n:size_nat{start + n <= len}
+  -> src:lseq a n
+  -> res:lseq a len
+  -> Lemma
+    (requires
+      sub res 0 start == sub dst 0 start /\
+      sub res start n == src /\
+      sub res (start + n) (len - start - n) ==
+      sub dst (start + n) (len - start - n))
+    (ensures
+      res == update_sub dst start n src)
+
 val update_slice:
     #a:Type
   -> #len:size_nat

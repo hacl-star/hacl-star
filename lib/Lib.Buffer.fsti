@@ -183,6 +183,24 @@ val update_isub:
     (ensures  fun h0 _ h1 -> B.live h1 dst /\ B.modifies (B.loc_buffer dst) h0 h1 /\
       B.as_seq h1 dst == Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 
+inline_for_extraction
+val update_sub_f:
+    #a:Type
+  -> #len:size_nat
+  -> buf:lbuffer a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= len}
+  -> spec:(mem -> GTot (Seq.lseq a (v n)))
+  -> f:(b:lbuffer a (v n) -> Stack unit
+        (requires fun h -> B.live h b)
+        (ensures  fun h0 _ h1 ->
+	  B.modifies (B.loc_buffer b) h0 h1 /\
+	  as_seq h1 b == spec h0))
+  -> Stack unit
+    (requires fun h -> B.live h buf)
+    (ensures  fun h0 _ h1 -> B.modifies (B.loc_buffer buf) h0 h1 /\
+      as_seq h1 buf == Seq.update_sub #a #len (as_seq h0 buf) (v start) (v n) (spec h0))
+
 (** Loop combinator with just memory safety specification *)
 inline_for_extraction noextract
 val loop_nospec:
@@ -274,6 +292,7 @@ val loop1:
     (requires fun h -> h0 == h)
     (ensures  fun _ _ -> loop1_inv h0 n b blen acc spec (v n))
 
+inline_for_extraction noextract
 let loop2_inv
     (#b0:Type)
     (#blen0:size_nat)

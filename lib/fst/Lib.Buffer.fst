@@ -3,8 +3,6 @@ module Lib.Buffer
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-//open LowStar.Buffer
-
 open Lib.IntTypes
 open Lib.RawIntTypes
 
@@ -73,6 +71,15 @@ let update_isub #a #len dst start n src =
   Seq.eq_intro
     (B.as_seq h1 dst)
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (IB.as_seq h0 src))
+
+let update_sub_f #a #len buf start n spec f =
+  let h0 = ST.get () in
+  let tmp = sub buf start n in
+  f tmp;
+  let h1 = ST.get () in
+  B.modifies_buffer_elim (sub #_ #len #(v start) buf (size 0) start) (B.loc_buffer tmp) h0 h1;
+  B.modifies_buffer_elim (sub #_ #len #(len - v start - v n) buf (start +! n) (size len -. start -. n)) (B.loc_buffer tmp) h0 h1;
+  Sequence.lemma_update_sub #a #len (as_seq h0 buf) (v start) (v n) (spec h0) (as_seq h1 buf)
 
 let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
