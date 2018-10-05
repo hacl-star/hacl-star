@@ -56,7 +56,9 @@ val sub:
   -> n:size_t{v start + v n <= len /\ v n == olen}
   -> Stack (lbuffer a olen)
     (requires fun h0 -> B.live h0 b)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == gsub #a #len #olen b start n)
+    (ensures  fun h0 r h1 ->
+      h0 == h1 /\ r == B.gsub b (size_to_UInt32 start) (size_to_UInt32 n) /\
+      as_seq h1 r == Seq.sub #a #len (as_seq h0 b) (v start) (v n))
 
 inline_for_extraction
 val index:
