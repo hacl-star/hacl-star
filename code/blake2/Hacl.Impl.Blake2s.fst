@@ -99,11 +99,11 @@ let blake2_round1 wv m i =
   IB.recall_contents const_sigma (FStar.Seq.seq_of_list Spec.list_sigma);
   let start_idx = (i %. (size 10)) *. (size 16) in
   let s = IB.isub #sigma_elt const_sigma (Lib.RawIntTypes.size_to_UInt32 start_idx) (16ul) in
-  admit();
   blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(IB.index s (0ul))) (m.(IB.index s (1ul)));
   blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(IB.index s (2ul))) (m.(IB.index s (3ul)));
   blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(IB.index s (4ul))) (m.(IB.index s (5ul)));
-  blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(IB.index s (6ul))) (m.(IB.index s (7ul)))
+  blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(IB.index s (6ul))) (m.(IB.index s (7ul)));
+  admit()
 
 
 val blake2_round2 : wv:working_vector -> m:message_block_w -> i:size_t ->
@@ -118,11 +118,11 @@ let blake2_round2 wv m i =
   IB.recall_contents const_sigma (FStar.Seq.seq_of_list Spec.list_sigma);
   let start_idx = (i %. (size 10)) *. (size 16) in
   let s = IB.isub #sigma_elt const_sigma (Lib.RawIntTypes.size_to_UInt32 start_idx) (16ul) in
-  admit();
   blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(IB.index s (8ul))) (m.(IB.index s (9ul)));
   blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(IB.index s (10ul))) (m.(IB.index s (11ul)));
   blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(IB.index s (12ul))) (m.(IB.index s (13ul)));
-  blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(IB.index s (14ul))) (m.(IB.index s (15ul)))
+  blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(IB.index s (14ul))) (m.(IB.index s (15ul)));
+  admit()
 
 
 val blake2_round : wv:working_vector -> m:message_block_w -> i:size_t ->
@@ -178,11 +178,13 @@ val blake2_compress2 :
 
 [@ Substitute ]
 let blake2_compress2 wv m =
+  let spec h = Spec.blake2_round h.[m] in
   let h0 = ST.get () in
-  admit();
   loop1 #uint32 #Spec.size_block_w h0 (size Spec.rounds_in_f) wv
-    (fun h -> Spec.blake2_round h0.[m])
-    (fun i -> blake2_round wv m i)
+    (fun h -> spec h)
+    (fun i ->
+       Seq.unfold_repeati (Spec.rounds_in_f) (spec h0) (as_seq h0 wv) (v i);
+       blake2_round wv m i)
 
 
 val blake2_compress3_inner :
@@ -211,11 +213,13 @@ val blake2_compress3 :
 
 [@ Substitute ]
 let blake2_compress3 wv s =
-  admit();
+  let spec h = Spec.blake2_compress3_inner h.[wv] in
   let h0 = ST.get () in
   loop1 h0 (size 8) s
-    (fun h -> Spec.blake2_compress3_inner h.[wv])
-    (fun i -> blake2_compress3_inner wv i s)
+    (fun h -> spec h)
+    (fun i ->
+      Seq.unfold_repeati 8 (spec h0) (as_seq h0 s) (v i);
+      blake2_compress3_inner wv i s)
 
 
 val blake2_compress :
@@ -325,9 +329,9 @@ val blake2s_update_multi_iteration:
                          /\ h1.[hash] == Spec.blake2s_update_multi_iteration (v dd_prev) (v dd) h0.[d] (v i) h0.[hash]))
 
 [@ Substitute ]
-let blake2s_update_multi_iteration st dd_prev dd d i =
+let blake2s_update_multi_iteration hash dd_prev dd d i =
   let block = sub d (i *. size Spec.size_block) (size Spec.size_block) in
-  blake2s_update_block st (dd_prev +. i) block;
+  blake2s_update_block hash (dd_prev +. i) block;
   admit()
 
 
@@ -343,11 +347,13 @@ val blake2s_update_multi:
                           /\ h1.[hash] == Spec.blake2s_update_multi (v dd_prev) (v dd) h0.[d] h0.[hash]))
 
 let blake2s_update_multi hash dd_prev dd d =
-  admit();
+  let spec h = Spec.Blake2s.blake2s_update_multi_iteration (v dd_prev) (v dd) h.[d] in
   let h0 = ST.get () in
   loop1 h0 dd hash
-    (fun h -> Spec.Blake2s.blake2s_update_multi_iteration (v dd_prev) (v dd) h.[d])
-    (fun i -> blake2s_update_multi_iteration hash dd_prev dd d i)
+    (fun h -> spec h)
+    (fun i ->
+      Seq.unfold_repeati (v dd) (spec h0) (as_seq h0 hash) (v i);
+      blake2s_update_multi_iteration hash dd_prev dd d i)
 
 
 val blake2s_update_last:
