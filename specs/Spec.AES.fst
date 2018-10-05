@@ -345,8 +345,7 @@ let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 44}) : word =
     if (i % 4 = 0) then (
        let k = rotate_word k in
        let k = sub_word k in
-       assert(47 / 4 <= 11);
-       let rcon_i = rcon.[i / 4] in // BB. Incorrect. i / 4 <= 11 not < 11
+       let rcon_i = rcon.[i / 4] in
        let k = k.[0] <- logxor #U8 rcon_i k.[0] in
        k)
     else k in
@@ -391,7 +390,7 @@ let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : aes_stat
   let key_ex = key_expansion k in
   {key_ex = key_ex;
    block  = input}
-   
+
 let aes_set_counter (st:aes_state) (c:size_nat) : Tot aes_state =
   let cby = nat_to_bytes_be 4 c in
   let nblock = update_sub st.block 12 4 cby in
@@ -414,4 +413,3 @@ let aes128_cipher =
 
 let aes128_encrypt_bytes key n_len nonce counter n m =
   Spec.CTR.counter_mode aes128_cipher key n_len nonce counter n m
-
