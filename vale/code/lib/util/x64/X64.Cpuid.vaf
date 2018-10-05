@@ -31,7 +31,7 @@ open X64.CPU_Features_s
 open Util.Meta
 #endverbatim
 
-procedure {:quick} check_aesni_support()
+procedure{:public}{:quick} check_aesni_support()
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures rax != 0 ==> aesni_enabled && pclmulqdq_enabled;
             rbx == old(rbx);
@@ -62,7 +62,7 @@ procedure {:quick} check_aesni_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure {:quick} check_sha_support()
+procedure{:public}{:quick} check_sha_support()
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures rax != 0 ==> sha_enabled;
             rbx == old(rbx);

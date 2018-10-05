@@ -848,7 +848,7 @@ procedure {:quick}{:public} gctr_bytes_no_extra(
 
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} gctr_bytes(
+procedure {:quick}{:public} gctr_bytes(
     inline alg:algorithm,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
