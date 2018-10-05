@@ -20,8 +20,6 @@ friend Lib.Sequence
 
 let length #a b = B.length b
 
-let as_seq #a #len h b = B.as_seq h b
-
 let sub #a #len #olen b start n =
   B.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
@@ -79,7 +77,7 @@ let update_sub_f #a #len buf start n spec f =
   let h1 = ST.get () in
   B.modifies_buffer_elim (sub #_ #len #(v start) buf (size 0) start) (B.loc_buffer tmp) h0 h1;
   B.modifies_buffer_elim (sub #_ #len #(len - v start - v n) buf (start +! n) (size len -. start -. n)) (B.loc_buffer tmp) h0 h1;
-  Sequence.lemma_update_sub #a #len (as_seq h0 buf) (v start) (v n) (spec h0) (as_seq h1 buf)
+  Sequence.lemma_update_sub #a #len (B.as_seq h0 buf) (v start) (v n) (spec h0) (B.as_seq h1 buf)
 
 let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
@@ -105,7 +103,7 @@ let lbytes_eq #len a b =
   [@ inline_let]
   let refl h _ = B.get h res 0 in
   [@ inline_let]
-  let spec h0 = Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b) in
+  let spec h0 = Seq.lbytes_eq_inner #(v len) (B.as_seq h0 a) (B.as_seq h0 b) in
   let h0 = ST.get () in
   loop h0 len (Seq.lbytes_eq_state (v len)) (lbuffer bool 1) res refl
     (fun i -> B.loc_buffer res) spec

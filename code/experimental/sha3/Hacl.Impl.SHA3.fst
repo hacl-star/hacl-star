@@ -30,11 +30,11 @@ let keccak_rndc = IB.igcmalloc_of_list HyperStack.root rndc_list
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-inline_for_extraction noextract
-let lbytes len = lbuffer uint8 len
+//inline_for_extraction noextract
+//let lbytes len = lbuffer uint8 len
 
-inline_for_extraction noextract
-let v = size_v
+//inline_for_extraction noextract
+//let v = size_v
 
 inline_for_extraction noextract
 let state = lbuffer uint64 25
@@ -526,19 +526,19 @@ val squeeze_inner:
       lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
       modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1 /\
  //       (loc_buffer (gsub #_ #_ #(v rateInBytes) output (i *! rateInBytes) rateInBytes))) h0 h1 /\
-      (let o = as_seq #_ #(v i * v rateInBytes) h0 (gsub #_ #_ #(v i * v rateInBytes) output (size 0) (i *! rateInBytes)) in
+      (let o = as_seq h0 (gsub #_ #_ #(v i * v rateInBytes) output (size 0) (i *! rateInBytes)) in
        let s', output' =
          S.squeeze_inner (v rateInBytes) (v outputByteLen) (v i) (as_seq h0 s, o) in
        as_seq h1 s == s' /\
-       as_seq #_ #((v i + 1) * v rateInBytes) h1 (gsub #_ #_ #((v i + 1) * v rateInBytes) output (size 0) ((i +! size 1) *! rateInBytes)) == output'))
+       as_seq h1 (gsub #_ #_ #((v i + 1) * v rateInBytes) output (size 0) ((i +! size 1) *! rateInBytes)) == output'))
 let squeeze_inner rateInBytes outputByteLen i s output =
   lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
   let h0 = ST.get () in
   storeState rateInBytes s (sub output (i *! rateInBytes) rateInBytes);
   let h1 = ST.get () in
   state_permute s;
-  let o = as_seq #_ #(v i * v rateInBytes) h0 (gsub #_ #_ #(v i * v rateInBytes) output (size 0) (i *! rateInBytes)) in
-  let o' = as_seq #_ #((v i + 1) * v rateInBytes) h1 (gsub #_ #_  #((v i + 1) * v rateInBytes) output (size 0) ((i +! size 1) *! rateInBytes)) in
+  let o = as_seq h0 (gsub #_ #_ #(v i * v rateInBytes) output (size 0) (i *! rateInBytes)) in
+  let o' = as_seq h1 (gsub #_ #_  #((v i + 1) * v rateInBytes) output (size 0) ((i +! size 1) *! rateInBytes)) in
   lemma_update_squeeze (v rateInBytes) (v outputByteLen) (v i) (as_seq h1 s) o o'
 
 #set-options "--max_ifuel 1"
@@ -569,7 +569,7 @@ let squeeze s rateInBytes outputByteLen output = admit(); //TODO: add loop2
     GTot (tuple2 S.state (LB.lbytes (i * v rateInBytes))) =
     assert (i * v rateInBytes <= v outputByteLen);
     as_seq h s,
-    as_seq #_ #(i * v rateInBytes) h (gsub #_ #_ #(i * v rateInBytes) output (size 0) (size i *! rateInBytes))
+    as_seq h (gsub #_ #_ #(i * v rateInBytes) output (size 0) (size i *! rateInBytes))
   in
   let footprint i = loc_union (loc_buffer s) (loc_buffer output) in
   let spec h0: i:size_nat{i < v outBlocks} -> a_spec i -> a_spec (i + 1) =
@@ -584,7 +584,7 @@ let squeeze s rateInBytes outputByteLen output = admit(); //TODO: add loop2
   let h1 = ST.get() in
   Seq.lemma_split (as_seq h1 output) (v outputByteLen - v remOut);
   Seq.lemma_eq_intro (LSeq.create 0 (u8 0))
-    (as_seq #_ #0 h0 (gsub #_ #_ #0 output (size 0) (size 0)))
+    (as_seq h0 (gsub #_ #_ #0 output (size 0) (size 0)))
 
 val keccak:
     rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}

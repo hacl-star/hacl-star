@@ -28,21 +28,13 @@ let lbuffer (a:Type0) (len:size_nat) = b:buffer a {length b == len}
 let libuffer (a:Type0) (len:size_nat) = b:IB.ibuffer a{IB.length b == len}
 let lbytes len = lbuffer uint8 len
 
-inline_for_extraction
-val as_seq:
-    #a:Type0
-  -> #len:size_nat
-  -> h:mem
-  -> b:lbuffer a len
-  -> GTot (s:Seq.seq a{s == B.as_seq h b}) //Seq.length s == len
-
 let gsub
     (#a:Type0)
     (#len:size_nat)
     (#olen:size_nat)
     (b:lbuffer a len)
     (start:size_t)
-    (n:size_t{v start + v n <= len /\ v n == olen}) //: GTot (lbuffer a olen)
+    (n:size_t{v start + v n <= len /\ v n == olen})
  =
   B.gsub b (size_to_UInt32 start) (size_to_UInt32 n)
 
@@ -58,7 +50,7 @@ val sub:
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 r h1 ->
       h0 == h1 /\ r == B.gsub b (size_to_UInt32 start) (size_to_UInt32 n) /\
-      as_seq h1 r == Seq.sub #a #len (as_seq h0 b) (v start) (v n))
+      B.as_seq h1 r == Seq.sub #a #len (B.as_seq h0 b) (v start) (v n))
 
 inline_for_extraction
 val index:
@@ -68,7 +60,8 @@ val index:
   -> i:size_t{v i < len}
   -> Stack a
     (requires fun h0 -> B.live h0 b)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == Seq.index #a #len (as_seq h1 b) (v i))
+    (ensures  fun h0 r h1 -> h0 == h1 /\
+      r == Seq.index #a #len (B.as_seq h1 b) (v i))
 
 inline_for_extraction
 val upd:
@@ -81,13 +74,15 @@ val upd:
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer b) h0 h1 /\ B.live h1 b /\
-      as_seq h1 b == Seq.upd #a #len (as_seq h0 b) (v i) x)
+      B.as_seq h1 b == Seq.upd #a #len (B.as_seq h0 b) (v i) x)
 
-inline_for_extraction let op_Array_Assignment #a #len = upd #a #len
+inline_for_extraction
+let op_Array_Assignment #a #len = upd #a #len
 
-inline_for_extraction let op_Array_Access #a #len = index #a #len
+inline_for_extraction
+let op_Array_Access #a #len = index #a #len
 
-let bget (#a:Type0) (#len:size_nat) h (b:lbuffer a len) i = Seq.index #a #len (as_seq h b) i
+let bget (#a:Type0) (#len:size_nat) h (b:lbuffer a len) i = Seq.index #a #len (B.as_seq h b) i
 
 unfold
 let ibget #a #n h (b:libuffer a n) i = Seq.index #_ #n (IB.as_seq h b) i
@@ -144,7 +139,7 @@ val copy:
     (requires fun h0 -> B.live h0 o /\ B.live h0 i /\ B.disjoint i o)
     (ensures  fun h0 _ h1 ->
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
-      as_seq h1 o == as_seq h0 i)
+      B.as_seq h1 o == B.as_seq h0 i)
 
 inline_for_extraction
 val icopy:
@@ -170,7 +165,7 @@ val update_sub:
   -> Stack unit
     (requires fun h -> B.live h dst /\ B.live h src /\ B.disjoint dst src)
     (ensures  fun h0 _ h1 -> B.live h1 dst /\ B.modifies (B.loc_buffer dst) h0 h1 /\
-      as_seq h1 dst == Seq.update_sub #a #len (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
+      B.as_seq h1 dst == Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 
 inline_for_extraction
 val update_isub:
@@ -197,11 +192,11 @@ val update_sub_f:
         (requires fun h -> B.live h b)
         (ensures  fun h0 _ h1 ->
 	  B.modifies (B.loc_buffer b) h0 h1 /\
-	  as_seq h1 b == spec h0))
+	  B.as_seq h1 b == spec h0))
   -> Stack unit
     (requires fun h -> B.live h buf)
     (ensures  fun h0 _ h1 -> B.modifies (B.loc_buffer buf) h0 h1 /\
-      as_seq h1 buf == Seq.update_sub #a #len (as_seq h0 buf) (v start) (v n) (spec h0))
+      B.as_seq h1 buf == Seq.update_sub #a #len (B.as_seq h0 buf) (v start) (v n) (spec h0))
 
 (** Loop combinator with just memory safety specification *)
 inline_for_extraction noextract
@@ -277,7 +272,7 @@ let loop1_inv
     (h:mem) : Type0
  =
   B.modifies (B.loc_buffer acc) h0 h /\
-  as_seq h acc == Seq.repeati i (spec h0) (as_seq h0 acc)
+  B.as_seq h acc == Seq.repeati i (spec h0) (B.as_seq h0 acc)
 
 inline_for_extraction noextract
 val loop1:
@@ -311,8 +306,8 @@ let loop2_inv
     (h:mem) : Type0
  =
   B.modifies (B.loc_union (B.loc_buffer acc0) (B.loc_buffer acc1)) h0 h /\
-  (let s0, s1 = Seq.repeati i (spec h0) (as_seq h0 acc0, as_seq h0 acc1) in
-  as_seq h acc0 == s0 /\ as_seq h acc1 == s1)
+  (let s0, s1 = Seq.repeati i (spec h0) (B.as_seq h0 acc0, B.as_seq h0 acc1) in
+  B.as_seq h acc0 == s0 /\ B.as_seq h acc1 == s1)
 
 inline_for_extraction noextract
 val loop2:
@@ -344,7 +339,7 @@ val lbytes_eq:
     (requires fun h -> B.live h a /\ B.live h b)
     (ensures  fun h0 r h1 ->
       B.modifies B.loc_none h0 h1 /\
-      r == Seq.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b))
+      r == Seq.lbytes_eq #(v len) (B.as_seq h0 a) (B.as_seq h0 b))
 
 inline_for_extraction
 val alloc:
@@ -362,11 +357,11 @@ val alloc:
     Stack b
       (requires (fun h -> B.modifies (B.loc_buffer buf) h0 h /\ B.live h0 write))
       (ensures (fun h r h' -> B.modifies (B.loc_union (B.loc_buffer buf) (B.loc_buffer write)) h h' /\
-			                  spec h0 r (as_seq h' write)))) ->
+			                  spec h0 r (B.as_seq h' write)))) ->
   Stack b
     (requires (fun h -> h == h0 /\ B.live h write))
     (ensures (fun h0 r h1 -> B.modifies (B.loc_buffer write) h0 h1 /\
-		                    spec h0 r (as_seq h1 write)))
+		                    spec h0 r (B.as_seq h1 write)))
 
 // TODO: used in tests; move to a different module
 val print_compare_display:
