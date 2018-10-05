@@ -86,6 +86,10 @@ let loop1 #b #blen h0 n acc spec impl =
   let inv h i = loop1_inv h0 n b blen acc spec i h in
   Lib.Loops.for (size 0) n inv impl
 
+let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
+  let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
+  Lib.Loops.for (size 0) n inv impl
+
 #set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
 
 let lbytes_eq #len a b = admit(); //FIXME

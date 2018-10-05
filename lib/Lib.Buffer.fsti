@@ -274,6 +274,45 @@ val loop1:
     (requires fun h -> h0 == h)
     (ensures  fun _ _ -> loop1_inv h0 n b blen acc spec (v n))
 
+let loop2_inv
+    (#b0:Type)
+    (#blen0:size_nat)
+    (#b1:Type)
+    (#blen1:size_nat)
+    (h0:mem)
+    (n:size_t)
+    (acc0:lbuffer b0 blen0)
+    (acc1:lbuffer b1 blen1)
+    (spec:(mem -> GTot (i:size_nat{i < v n}
+               -> tuple2 (Seq.lseq b0 blen0) (Seq.lseq b1 blen1)
+               -> tuple2 (Seq.lseq b0 blen0) (Seq.lseq b1 blen1))))
+    (i:size_nat{i <= v n})
+    (h:mem) : Type0
+ =
+  B.modifies (B.loc_union (B.loc_buffer acc0) (B.loc_buffer acc1)) h0 h /\
+  (let s0, s1 = Seq.repeati i (spec h0) (as_seq h0 acc0, as_seq h0 acc1) in
+  as_seq h acc0 == s0 /\ as_seq h acc1 == s1)
+
+inline_for_extraction noextract
+val loop2:
+     #b0:Type
+  -> #blen0:size_nat
+  -> #b1:Type
+  -> #blen1:size_nat
+  -> h0:mem
+  -> n:size_t
+  -> acc0:lbuffer b0 blen0
+  -> acc1:lbuffer b1 blen1
+  -> spec:(mem -> GTot (i:size_nat{i < v n}
+               -> tuple2 (Seq.lseq b0 blen0) (Seq.lseq b1 blen1)
+               -> tuple2 (Seq.lseq b0 blen0) (Seq.lseq b1 blen1)))
+  -> impl:(i:size_t{v i < v n} -> Stack unit
+    (requires loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec (v i))
+    (ensures  fun _ _  -> loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec (v i + 1)))
+  -> Stack unit
+    (requires fun h -> h0 == h)
+    (ensures  fun _ _  -> loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec (v n))
+
 (** Compares two byte buffers of equal length returning a bool *)
 inline_for_extraction
 val lbytes_eq:
