@@ -119,7 +119,7 @@ let check_aesni = ("check_aesni_stdcall", [], SaveRegsStk false, AddStk (Prims.p
 
 let check_sha = ("check_sha_stdcall", [], SaveRegsStk false, AddStk (Prims.parse_int "0"), Modifies [], Return Int64)
 
-let name = check_sha
+let name = memcpy 
 
 let _ = print_string (translate_vale X86 name)
 let _ = print_newline()

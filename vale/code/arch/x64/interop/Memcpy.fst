@@ -33,13 +33,20 @@ friend X64.Vale.StateLemmas
 open Vale_memcpy
 
 
-#set-options "--initial_fuel 5 --max_fuel 5 --initial_ifuel 2 --max_ifuel 2"
+#set-options "--initial_fuel 5 --max_fuel 5 --initial_ifuel 0 --max_ifuel 0"
+let create_buffer_list (dst:s8) (src:s8) (stack_b:b8)  : (l:list b8{
+    l == [stack_b;dst;src] /\
+  (forall x. {:pattern List.memP x l} List.memP x l <==> (x == dst \/ x == src \/ x == stack_b))}) =
+  [stack_b;dst;src]
+
+#set-options "--max_fuel 0 --max_ifuel 0"
+
 let create_initial_trusted_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) : GTot TS.traceState =
   let taint_func (x:b8) : GTot taint =
     if StrongExcludedMiddle.strong_excluded_middle (x == dst) then Secret else
     if StrongExcludedMiddle.strong_excluded_middle (x == src) then Secret else
     Public in
-  let buffers = stack_b::dst::src::[] in
+  let buffers = create_buffer_list dst src stack_b in
   let (mem:mem) = {addrs = addrs; ptrs = buffers; hs = h0} in
   let addr_dst = addrs dst in
   let addr_src = addrs src in
@@ -82,7 +89,7 @@ let create_initial_vale_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst 
     if StrongExcludedMiddle.strong_excluded_middle (x == dst) then Secret else
     if StrongExcludedMiddle.strong_excluded_middle (x == src) then Secret else
     Public in
-  let buffers = stack_b::dst::src::[] in
+  let buffers = create_buffer_list dst src stack_b in
   let (mem:mem) = {addrs = addrs; ptrs = buffers; hs = h0} in
   let addr_dst = addrs dst in
   let addr_src = addrs src in
@@ -143,8 +150,10 @@ let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel)
   let src_b = BV.mk_buffer_view src Views.view64 in
   let t = TBase TUInt64 in
   assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) src)) (BV.as_seq va_sM.mem.hs src_b));  
-  assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) dst)) (BV.as_seq va_sM.mem.hs dst_b));     
+  assert (Seq.equal (seq_nat64_to_seq_U64 (buffer_as_seq #t (va_get_mem va_sM) dst)) (BV.as_seq va_sM.mem.hs dst_b));  
   ()
+
+#set-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 let lemma_ghost_memcpy is_win dst src stack_b h0 =
   length_t_eq (TBase TUInt64) stack_b;
@@ -160,6 +169,7 @@ let lemma_ghost_memcpy is_win dst src stack_b h0 =
   assert (state_eq_S s1 (state_to_S s_v));
   assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);
   assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);
+  assert (M.modifies (M.loc_union (M.loc_buffer stack_b) ( M.loc_buffer dst)) h0 s_v.mem.hs);
   s1, f_v, s_v.mem.hs
 
 #set-options "--max_fuel 0 --max_ifuel 0"
@@ -167,7 +177,7 @@ let lemma_ghost_memcpy is_win dst src stack_b h0 =
 let memcpy dst src  =
   push_frame();
   let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 24) in
- if win then
+  if win then
   st_put
     (fun h -> pre_cond h dst src /\ B.length stack_b == 24 /\ live h stack_b /\ buf_disjoint_from stack_b [dst;src])
     (fun h -> let _, _, h1 =
@@ -179,3 +189,4 @@ let memcpy dst src  =
       lemma_ghost_memcpy false dst src stack_b h
     in (), h1);
   pop_frame()
+

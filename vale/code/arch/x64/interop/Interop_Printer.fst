@@ -238,7 +238,7 @@ let create_taint_fun (args:list arg) =
 let create_state target args stack slots stkstart saveRegs =
   let stack_length = if saveRegs then "(if is_win then " ^ (string_of_int (224 + slots `op_Multiply` 8)) ^ " else " ^ (string_of_int (64 + slots `op_Multiply` 8)) ^ ")" else string_of_int (slots `op_Multiply` 8) in
   create_taint_fun args ^
-  "  let buffers = " ^ (if stack then "stack_b::" else "") ^ print_buffers_list args ^ " in\n" ^
+  "  let buffers = create_buffer_list " ^ print_args_names (List.Tot.filter is_buffer args) ^ (if stack then "stack_b" else "") ^ " in\n" ^
   "  let (mem:mem) = {addrs = addrs; ptrs = buffers; hs = h0} in\n" ^
   generate_low_addrs args ^
   (if stack then "  let addr_stack:nat64 = addrs stack_b + " ^ stack_length ^ " in\n" else "") ^
@@ -282,6 +282,10 @@ let rec print_modifies (args:list string) = match args with
   | [a] -> "M.loc_buffer " ^ a
   | a::q -> "M.loc_union (M.loc_buffer " ^ a ^ ") ( "  ^ print_modifies q ^ ")"
 
+let rec print_eq_args = function
+  | [] -> "x == stack_b"
+  | (a, _, _)::q -> "x == " ^ a ^ " \/ " ^ print_eq_args q
+
 let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_stack:int) (slots:int) (additional:int) =
   let name, args, SaveRegsStk save, AddStk slots, Modifies modified, Return ty = func in
   let return = Int64? ty in
@@ -295,6 +299,11 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
     "/\ B.length stack_b == " ^ stack_length ^
     " /\ live " ^ memname ^ " stack_b /\ buf_disjoint_from stack_b " ^ (namelist_of_args (buffer_args))
   else "" in
+  "let create_buffer_list " ^ (print_args_list buffer_args) ^ (if stack_needed then "(stack_b:b8) " else "") ^ " : (l:list b8{
+    l == " ^ namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::buffer_args) ^ " /\\\n" ^ 
+  "  (forall x. {:pattern List.memP x l} List.memP x l <==> (" ^ print_eq_args buffer_args ^ "))}) =\n  " ^
+  namelist_of_args (("stack_b", TBuffer TUInt64, Pub)::buffer_args) ^ "\n\n" ^
+  "#set-options \"--max_fuel 0 --max_ifuel 0\"\n\n" ^  
   "let create_initial_trusted_state is_win " ^ (print_args_names args) ^ "stack_b " ^
   "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ stack_precond "h0" ^ "}) : GTot TS.traceState =\n" ^
   create_state target args stack_needed slots (slots+additional) save ^
@@ -367,6 +376,7 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs " ^ (print_args_names args) ^ ") =\n") ^
   print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^ 
   "  ()\n\n" ^
+  "#set-options \"--max_fuel 0 --initial_ifuel 1 --max_ifuel 1\"\n\n" ^
   "let lemma_ghost_" ^ name ^ " is_win " ^ (print_args_names args) ^
   (if stack_needed then "stack_b " else "") ^ "h0 =\n" ^
   print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^
@@ -382,6 +392,7 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "  assert (state_eq_S s1 (state_to_S s_v));\n" ^  
   "  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);\n" ^
   "  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);\n" ^
+  "  assert (M.modifies (" ^ print_modifies ("stack_b" :: modified) ^ ") h0 s_v.mem.hs);\n" ^
   (if return then
   "  s1, f_v, s_v.mem.hs, s_v.regs Rax\n\n"
   else
@@ -461,8 +472,7 @@ let translate_lowstar target (func:func_ty) =
   "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Words_s\nopen Types_s\nopen X64.Machine_s\nopen X64.Memory_s\nopen X64.Vale.State\nopen X64.Vale.Decls\nopen BufferViewHelpers\nopen Interop_assumptions\nopen X64.Vale.StateLemmas\nopen X64.Vale.Lemmas\nmodule TS = X64.Taint_Semantics_s\nmodule ME = X64.Memory_s\nmodule BS = X64.Bytes_Semantics_s\n\nfriend SecretByte\nfriend X64.Memory_s\nfriend X64.Memory\nfriend X64.Vale.Decls\nfriend X64.Vale.StateLemmas\n#set-options \"--z3rlimit 60\"\n\n" ^
   "open Vale_" ^ name ^ "\n\n" ^
 
-  "#set-options \"--initial_fuel " ^ fuel_value ^ " --max_fuel " ^ fuel_value ^ " --initial_ifuel 2 --max_ifuel 2\"\n" ^
-  
+  "#set-options \"--initial_fuel " ^ fuel_value ^ " --max_fuel " ^ fuel_value ^ " --initial_ifuel 0 --max_ifuel 0\"\n" ^
   translate_core_lowstar target func stack_needed length_stack slots additional ^
   "#set-options \"--max_fuel 0 --max_ifuel 0\"\n\n" ^
   "let " ^ name ^ " " ^ (print_args_names args) ^ " =\n" ^
