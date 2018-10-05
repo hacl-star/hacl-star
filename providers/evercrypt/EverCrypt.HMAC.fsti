@@ -32,6 +32,7 @@ open EverCrypt.Helpers
    we tolerate overlaps between tag and data.
    (we used to require [disjoint data tag])
 *)
+inline_for_extraction
 val compute:
   a: ha ->
   tag: uint8_pl (tagLength a) ->
