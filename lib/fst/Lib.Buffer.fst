@@ -99,7 +99,7 @@ let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
 
 #set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
 
-let lbytes_eq #len a b = admit(); //FIXME
+let lbytes_eq #len a b =
   push_frame();
   let res = create #bool #1 (size 1) true in
   [@ inline_let]
@@ -107,7 +107,7 @@ let lbytes_eq #len a b = admit(); //FIXME
   [@ inline_let]
   let spec h0 = Seq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b) in
   let h0 = ST.get () in
-  loop h0 len (fun _ -> bool) (lbuffer bool 1) res refl
+  loop h0 len (Seq.lbytes_eq_state (v len)) (lbuffer bool 1) res refl
     (fun i -> B.loc_buffer res) spec
     (fun i ->
       //Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
@@ -118,10 +118,6 @@ let lbytes_eq #len a b = admit(); //FIXME
     );
   let res = res.(size 0) in
   pop_frame();
-  // REMARK: for some reason [lbytes_eq] isn't unfolded
-  assert_norm (
-    Seq.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b) ==
-    Seq.repeat (v len) (fun _ -> bool) (spec h0) true);
   res
 
 let alloc #a #b #w #len #wlen h0 clen init write spec impl =

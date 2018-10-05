@@ -105,8 +105,11 @@ let lbytes_eq_inner #len a b i r =
   let open FStar.UInt8 in
   r && (u8_to_UInt8 a.[i] =^ u8_to_UInt8 b.[i])
 
+val lbytes_eq_state: len:size_nat -> i:size_nat{i <= len} -> Type0
+let lbytes_eq_state len i = bool
+
 let lbytes_eq #len a b =
-  repeat len (fun _ -> bool) (lbytes_eq_inner a b) true
+  repeat len (lbytes_eq_state len) (lbytes_eq_inner a b) true
 
 let rec fold_left_range_ #a #b #len min max f l x =
   if len = 0 then x
