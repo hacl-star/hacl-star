@@ -108,7 +108,16 @@ let op_Array_Assignment #a #len = upd #a #len
 inline_for_extraction
 let op_Array_Access #a #len = index #a #len
 
-let bget (#a:Type0) (#len:size_nat) h (b:lbuffer a len) i = Seq.index #a #len (B.as_seq h b) i
+//We don't have access to Lib.Sequence.fst
+//to get the fact `Lib.Sequence.index == FStar.Seq.index`
+inline_for_extraction
+val bget:
+    #a:Type0
+  -> #len:size_nat
+  -> h:mem
+  -> b:lbuffer a len
+  -> i:size_nat{i < len}
+  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (B.as_seq h b) i})
 
 unfold
 let ibget #a #n h (b:libuffer a n) i = Seq.index #_ #n (IB.as_seq h b) i
