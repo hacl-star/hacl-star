@@ -6,7 +6,22 @@ open FStar.Mul
 open FStar.Tactics
 open CanonCommSemiring
 
+unfold let pow2_192 = 0x1000000000000000000000000000000000000000000000000
+let _ = assert_norm (pow2 192 = pow2_192)
+unfold let pow2_256 = 0x10000000000000000000000000000000000000000000000000000000000000000
+let _ = assert_norm (pow2 256 = pow2_256)
+unfold let pow2_320 = 0x100000000000000000000000000000000000000000000000000000000000000000000000000000000
+let _ = assert_norm (pow2 320 = pow2_320)
+unfold let pow2_384 = 0x1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+let _ = assert_norm (pow2 384 = pow2_384)
+unfold let pow2_448 = 0x10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+let _ = assert_norm (pow2 448 = pow2_448)
+
 let int_canon = fun _ -> canon_semiring int_cr
+
+//let my_bool_to_nat (b:bool) : nat = if b then 1 else 0
+
+//unfold let assert_by_tactic = assert_by_tactic
 
 let simple_helper (a0 b0 b1 a0b0_lo a0b0_hi a0b1_lo a0b1_hi sum:nat64) (overflow:bool) : Lemma
   (requires pow2_64 * a0b0_hi + a0b0_lo == a0 * b0 /\

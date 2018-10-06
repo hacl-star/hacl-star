@@ -1,6 +1,7 @@
-include "../../../arch/x64/X64.Vale.InsBasic.vaf"
-include "../../../arch/x64/X64.Vale.InsMem.vaf"
-
+include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
+include "../../../../arch/x64/X64.Vale.InsMem.vaf"
+include{:fstar}{:open} "FastMul_helpers"
+//include{:fstar}{:open} "Prop_s"
 module X64.FastMul
 
 #reset-options "--z3rlimit 30"
@@ -17,33 +18,17 @@ open X64.Vale.InsMem
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open FastMul_helpers
-
 open FStar.Tactics
-open CanonCommSemiring
+
+//open FStar.Tactics
+//open CanonCommSemiring
 #endverbatim
 
-#verbatim{:interface}
-unfold let pow2_192 = 0x1000000000000000000000000000000000000000000000000
-let _ = assert_norm (pow2 192 = pow2_192)
-unfold let pow2_256 = 0x10000000000000000000000000000000000000000000000000000000000000000
-let _ = assert_norm (pow2 256 = pow2_256)
-unfold let pow2_320 = 0x100000000000000000000000000000000000000000000000000000000000000000000000000000000
-let _ = assert_norm (pow2 320 = pow2_320)
-unfold let pow2_384 = 0x1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-let _ = assert_norm (pow2 384 = pow2_384)
-unfold let pow2_448 = 0x10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-let _ = assert_norm (pow2 448 = pow2_448)
-
-let int_canon = fun _ -> canon_semiring int_cr
-
-let my_bool_to_nat (b:bool) : nat = if b then 1 else 0
-
-#endverbatim
+//ghost procedure assert_by_tactic(ghost e:int, ghost t:int) extern;
 
 #reset-options "--z3rlimit 30"
-/*
 
-procedure{:quick exportOnly} fast_multiply(
+procedure{:quick exportOnly}{:typecheck false} fast_multiply(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
     ghost inB_b:buffer64)
@@ -65,7 +50,7 @@ procedure{:quick exportOnly} fast_multiply(
         a := a0 + pow2_64 * a1 + pow2_128 * a2 + pow2_192 * a3;
         b := b0 + pow2_64 * b1 + pow2_128 * b2 + pow2_192 * b3;
     reads
-        dst_ptr; inA_ptr; inB_ptr;
+        dst_ptr; inA_ptr; inB_ptr; memTaint;
 
     modifies
         rax; rdx; r8; r9; r10; r11; r12; r13; r14;
@@ -75,25 +60,25 @@ procedure{:quick exportOnly} fast_multiply(
         buffers_disjoint(dst_b, inA_b);
         buffers_disjoint(dst_b, inB_b);
 
-        validDstAddrs64(mem, dst_ptr, dst_b, 8);
-        validSrcAddrs64(mem, inA_ptr, inA_b, 4);
-        validSrcAddrs64(mem, inB_ptr, inB_b, 4);
+        validDstAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inB_ptr, inB_b, 4, memTaint, Secret);
 
     ensures
-        let d0 := buffer64_read(dst_b, 0, mem);
-        let d1 := buffer64_read(dst_b, 1, mem);
-        let d2 := buffer64_read(dst_b, 2, mem);
-        let d3 := buffer64_read(dst_b, 3, mem);
-        let d4 := buffer64_read(dst_b, 4, mem);
-        let d5 := buffer64_read(dst_b, 5, mem);
-        let d6 := buffer64_read(dst_b, 6, mem);
-        let d7 := buffer64_read(dst_b, 7, mem);
-
-        let d := d0 + pow2_64 * d1 + pow2_128 * d2 + pow2_192 * d3 +
-                 pow2_256 * d4 + pow2_320 * d5 + pow2_384 * d6 + pow2_448 * d7;
-//        d == a * b;
-        validSrcAddrs64(mem, dst_ptr, dst_b, 8);
-        modifies_buffer(dst_b, old(mem), mem);
+//        let d0 := buffer64_read(dst_b, 0, mem);
+//        let d1 := buffer64_read(dst_b, 1, mem);
+//        let d2 := buffer64_read(dst_b, 2, mem);
+//        let d3 := buffer64_read(dst_b, 3, mem);
+//        let d4 := buffer64_read(dst_b, 4, mem);
+//        let d5 := buffer64_read(dst_b, 5, mem);
+//        let d6 := buffer64_read(dst_b, 6, mem);
+//        let d7 := buffer64_read(dst_b, 7, mem);
+//
+//        let d := d0 + pow2_64 * d1 + pow2_128 * d2 + pow2_192 * d3 +
+//                 pow2_256 * d4 + pow2_320 * d5 + pow2_384 * d6 + pow2_448 * d7;
+////        d == a * b;
+//        validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
+//        modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
 
@@ -104,11 +89,11 @@ procedure{:quick exportOnly} fast_multiply(
 //    "mulx 24(B), %%r14, %%rdx; " /* A[0]*B[3] */    "adox %%r13, %%r14 ;"                                                       "movq $0, %%rax ;"
 //    /*******************************************/   "adox %%rdx, %%rax ;"
 
-    Load64_buffer(rdx, inA_ptr,  0, inA_b, 0);     /* A[0] */
+    Load64_buffer(rdx, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
     // TODO: It would be really nice to not need the call to lemma_load_mem64, but it's the only connection between eval_operand and buffer64_read
     lemma_load_mem64(inB_b, 0, mem);
     /* The Xo64 clears the flags used for carry bits; NOTE: Original code uses xorl with r10d, maybe produces smaller code? */
-    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0));  /* A[0]*B[0] */ Xor64(r10, r10);         Store64_buffer(dst_ptr,  r8, 0, dst_b, 0);
+    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0, Secret));  /* A[0]*B[0] */ Xor64(r10, r10);         Store64_buffer(dst_ptr,  r8, 0, Secret, dst_b, 0);
 
     assert overflow(efl) == false;
     ghost var old_efl := efl;
@@ -118,7 +103,7 @@ procedure{:quick exportOnly} fast_multiply(
 //    assert d0 == a0 * b0 % pow2_64;     // Passes
 //    assert not(overflow(efl));            // Passes
     lemma_load_mem64(inB_b, 1, mem);
-    Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1));  /* A[0]*B[1] */ ghost var a0b1_lo := r10; Adox64Wrap(r10,  r9);    Store64_buffer(dst_ptr, r10, 8, dst_b, 1);
+    Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1, Secret));  /* A[0]*B[1] */ ghost var a0b1_lo := r10; Adox64Wrap(r10,  r9);    Store64_buffer(dst_ptr, r10, 8, Secret, dst_b, 1);
 //    ghost var carry := a0b1_lo + r9 + 0 >= pow2_64;
 //    assert efl == update_of(old_efl, carry);
 //    assert overflow(efl) == carry;
@@ -126,10 +111,7 @@ procedure{:quick exportOnly} fast_multiply(
     ghost var d0 := buffer64_read(dst_b, 0, mem);
     ghost var d1 := buffer64_read(dst_b, 1, mem);
 
-
-    ghost var carry := if overflow(efl) then 1 else 0;          // BUG: With this version, the tactic fails to unify, perhaps due to the if-else
-    //ghost var carry := my_bool_to_nat(overflow(efl));         // BUG: With this version, we get: (Error 230) Variable "__fname__mem#303637" not found
-
+    ghost var carry := if overflow(efl) then 1 else 0;          
 
     //assume overflow(efl);
     //ghost var carry := 1;
@@ -142,14 +124,18 @@ procedure{:quick exportOnly} fast_multiply(
 //    simple_helper(a0, b0, b1, d0, a0b0_hi, a0b1_lo, r11, r10, overflow(efl));
 //    assert a0b0b1 == a0 * (b0 + pow2_64 * b1); // FAILS:
 
-//    assert_by_tactic(a0b0b1 == a0 * (b0 + pow2_64 * b1), int_canon); // FAILS:
-    // user tactic failed: apply_lemma: Cannot instantiate lemma CanonCommSemiring.semiring_reflect CanonCommSemiring.const_last
+    assert_by_tactic(a0b0b1 == a0 * (b0 + pow2_64 * b1), int_canon); // FAILS:
+
+
+
+
+
 
 /*
     lemma_load_mem64(inB_b, 2, mem);
-    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2));  /* A[0]*B[2] */ Adox64Wrap(r12, r11);
+    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2, Secret));  /* A[0]*B[2] */ Adox64Wrap(r12, r11);
     lemma_load_mem64(inB_b, 3, mem);
-    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3));  /* A[0]*B[3] */ Adox64Wrap(r14, r13);    Mov64(rax, 0);
+    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3, Secret));  /* A[0]*B[3] */ Adox64Wrap(r14, r13);    Mov64(rax, 0);
     /*******************************************/                  Adox64Wrap(rax, rdx);
 
     ghost var d0 := buffer64_read(dst_b, 0, mem);
@@ -170,11 +156,11 @@ procedure{:quick exportOnly} fast_multiply(
 //    "mulx 24(B), %%r14, %%rdx; " /* A[1]*B[3] */    "adox %%r13, %%r14 ;"    "adcx %%rax, %%r14 ;"                              "movq $0, %%rax ;"
 //    /*******************************************/   "adox %%rdx, %%rax ;"    "adcx  %%r8, %%rax ;"
 
-    Load64_buffer(rdx, inA_ptr,  8, inA_b, 1);     /* A[1] */
-    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0));  /* A[1]*B[0] */ Xor64(r10, r10);       Adcx64Wrap(r8, Mem(dst_ptr,  8, dst_b, 1));   Store64_buffer(dst_ptr, r8,  8, dst_b, 1);  // REVIEW: Why not combine the Adcx with the Store?
-    Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1));  /* A[1]*B[1] */ Adox64Wrap(r10,  r9);  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 16, dst_b, 2);
-    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2));  /* A[1]*B[2] */ Adox64Wrap(r12, r11);  Adcx64Wrap(r12, r14);                         Mov64( r8, 0);
-    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3));  /* A[1]*B[3] */ Adox64Wrap(r14, r13);  Adcx64Wrap(r14, rax);                         Mov64(rax, 0);
+    Load64_buffer(rdx, inA_ptr,  8, Secret, inA_b, 1);     /* A[1] */
+    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0, Secret));  /* A[1]*B[0] */ Xor64(r10, r10);       Adcx64Wrap(r8, Mem(dst_ptr,  8, dst_b, 1, Secret));   Store64_buffer(dst_ptr, r8,  8, Secret, dst_b, 1);  // REVIEW: Why not combine the Adcx with the Store?
+    Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1, Secret));  /* A[1]*B[1] */ Adox64Wrap(r10,  r9);  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2);
+    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2, Secret));  /* A[1]*B[2] */ Adox64Wrap(r12, r11);  Adcx64Wrap(r12, r14);                         Mov64( r8, 0);
+    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3, Secret));  /* A[1]*B[3] */ Adox64Wrap(r14, r13);  Adcx64Wrap(r14, rax);                         Mov64(rax, 0);
     /*******************************************/                  Adox64Wrap(rax, rdx);  Adcx64Wrap(rax, r8);
 
 //
@@ -186,11 +172,11 @@ procedure{:quick exportOnly} fast_multiply(
 //    "mulx 24(B), %%r14, %%rdx; " /* A[2]*B[3] */    "adox %%r13, %%r14 ;"    "adcx %%rax, %%r14 ;"                              "movq $0, %%rax ;"
 //    /*******************************************/   "adox %%rdx, %%rax ;"    "adcx  %%r8, %%rax ;"
 
-    Load64_buffer(rdx, inA_ptr, 16, inA_b, 2);     /* A[2] */
-    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0));  /* A[2]*B[0] */ Xor64(r10, r10);       Adcx64Wrap(r8, Mem(dst_ptr, 16, dst_b, 2));   Store64_buffer(dst_ptr,  r8, 16, dst_b, 2);
-    Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1));  /* A[2]*B[1] */ Adox64Wrap(r10,  r9);  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 24, dst_b, 3);
-    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2));  /* A[2]*B[2] */ Adox64Wrap(r12, r11);  Adcx64Wrap(r12, r14);                         Mov64( r8, 0);
-    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3));  /* A[2]*B[3] */ Adox64Wrap(r14, r13);  Adcx64Wrap(r14, rax);                         Mov64(rax, 0);
+    Load64_buffer(rdx, inA_ptr, 16, Secret, inA_b, 2);     /* A[2] */
+    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0, Secret));  /* A[2]*B[0] */ Xor64(r10, r10);       Adcx64Wrap(r8, Mem(dst_ptr, 16, dst_b, 2, Secret));   Store64_buffer(dst_ptr,  r8, 16, Secret, dst_b, 2);
+    Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1, Secret));  /* A[2]*B[1] */ Adox64Wrap(r10,  r9);  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 24, Secret, dst_b, 3);
+    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2, Secret));  /* A[2]*B[2] */ Adox64Wrap(r12, r11);  Adcx64Wrap(r12, r14);                         Mov64( r8, 0);
+    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3, Secret));  /* A[2]*B[3] */ Adox64Wrap(r14, r13);  Adcx64Wrap(r14, rax);                         Mov64(rax, 0);
     /*******************************************/                  Adox64Wrap(rax, rdx);  Adcx64Wrap(rax, r8);
 
 //
@@ -201,16 +187,17 @@ procedure{:quick exportOnly} fast_multiply(
 //    "mulx 24(B), %%r14, %%rdx; " /* A[3]*B[3] */    "adox %%r13, %%r14 ;"    "adcx %%rax, %%r14 ;"    "movq %%r14, 48(dst) ;"    "movq $0, %%rax ;"
 //    /*******************************************/   "adox %%rdx, %%rax ;"    "adcx  %%r8, %%rax ;"    "movq %%rax, 56(dst) ;"
 
-    Load64_buffer(rdx, inA_ptr, 24, inA_b, 3);     /* A[3] */
-    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0));  /* A[3]*B[0] */ Xor64(r10, r10);       Adcx64Wrap(r8, Mem(dst_ptr, 24, dst_b, 2));   Store64_buffer(dst_ptr,  r8, 24, dst_b, 3);
-    Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1));  /* A[3]*B[1] */ Adox64Wrap(r10,  r9);  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 32, dst_b, 4);
+    Load64_buffer(rdx, inA_ptr, 24, Secret, inA_b, 3);     /* A[3] */
+    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0, Secret));  /* A[3]*B[0] */ Xor64(r10, r10);       Adcx64Wrap(r8, Mem(dst_ptr, 24, dst_b, 2, Secret));   Store64_buffer(dst_ptr,  r8, 24, Secret, dst_b, 3);
+    Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1, Secret));  /* A[3]*B[1] */ Adox64Wrap(r10,  r9);  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 32, Secret, dst_b, 4);
 
-    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2));  /* A[3]*B[2] */ Adox64Wrap(r12, r11);  Adcx64Wrap(r12, r14);                         Store64_buffer(dst_ptr, r12, 40, dst_b, 5);   Mov64( r8, 0);
-    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3));  /* A[3]*B[3] */ Adox64Wrap(r14, r13);  Adcx64Wrap(r14, rax);                         Store64_buffer(dst_ptr, r14, 48, dst_b, 6);   Mov64(rax, 0);
-    /*******************************************/                  Adox64Wrap(rax, rdx);  Adcx64Wrap(rax, r8);                          Store64_buffer(dst_ptr, rax, 56, dst_b, 7);
+    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2, Secret));  /* A[3]*B[2] */ Adox64Wrap(r12, r11);  Adcx64Wrap(r12, r14);                         Store64_buffer(dst_ptr, r12, 40, Secret, dst_b, 5);   Mov64( r8, 0);
+    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3, Secret));  /* A[3]*B[3] */ Adox64Wrap(r14, r13);  Adcx64Wrap(r14, rax);                         Store64_buffer(dst_ptr, r14, 48, Secret, dst_b, 6);   Mov64(rax, 0);
+    /*******************************************/                  Adox64Wrap(rax, rdx);  Adcx64Wrap(rax, r8);                          Store64_buffer(dst_ptr, rax, 56, Secret, dst_b, 7);
 */
 }
 
+/*
 // fast_mul_stdcall(dst, inA, inB)
 procedure{:quick} fast_mul_stdcall(
     inline win:bool,
