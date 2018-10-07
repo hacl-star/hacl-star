@@ -112,7 +112,10 @@ function fetch_and_make_vale() {
 }
 
 function refresh_hacl_hints() {
-    refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
+    # We should not generate hints when building on Windows
+    if [[ "$OS" != "Windows_NT" ]]; then
+        refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
+    fi
 }
 
 # Note: this performs an _approximate_ refresh of the hints, in the sense that

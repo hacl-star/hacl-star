@@ -16,7 +16,7 @@ open Hacl.UInt32
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 
-open Spec.Compat.Loops
+open Spec.Loops
 
 module U32 = FStar.UInt32
 module H8  = Hacl.UInt8

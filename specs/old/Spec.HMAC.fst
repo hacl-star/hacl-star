@@ -6,8 +6,8 @@ open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
 
-open Spec.Compat.Loops
-open Spec.Compat.Lib
+open Spec.Loops
+open Spec.Lib
 
 module U8 = FStar.UInt8
 
@@ -17,7 +17,7 @@ module Hash = Spec.SHA2
 #set-options "--max_fuel 0 --z3rlimit 10"
 
 val xor_bytes: (b0:bytes) -> (b1:bytes{length b0 = length b1}) -> Tot bytes
-let xor_bytes b0 b1 = Spec.Compat.Lib.map2 (fun x y -> U8.logxor x y) b0 b1
+let xor_bytes b0 b1 = Spec.Lib.map2 (fun x y -> U8.logxor x y) b0 b1
 
 
 #reset-options "--max_fuel 0 --z3rlimit 25"

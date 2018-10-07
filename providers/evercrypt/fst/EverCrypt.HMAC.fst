@@ -76,7 +76,9 @@ module ST = FStar.HyperStack.ST
 
 // we rely on the output being zero-initialized for the correctness of padding
 
-[@"substitute"]
+#set-options "--max_fuel 0"
+
+inline_for_extraction
 val wrap_key:
   a: ha ->
   output: uint8_pl (blockLength a) ->
@@ -92,8 +94,9 @@ val wrap_key:
       modifies (loc_buffer output) h0 h1 /\
       as_seq h1 output = wrap a (as_seq h0 key) )
 
+inline_for_extraction
 let wrap_key a output key len =
-  [@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
+  //[@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
   let i = if len <= blockLen a then len else tagLen a in
   let nkey = sub output 0ul i in
   let h0 = ST.get () in
@@ -110,6 +113,7 @@ let wrap_key a output key len =
 // we pre-allocate the variable-type, variable length hash state,
 // to avoid both verification and extraction problems.
 
+inline_for_extraction
 val part1:
   a: alg -> 
   acc: state a ->
@@ -139,7 +143,7 @@ val part1:
 #reset-options "--max_fuel 0 --z3rlimit 1000" // without hints
 
 // we use auxiliary functions only for clarity and proof modularity
-[@"substitute"]
+inline_for_extraction
 let part1 a (acc: state a) key data len =
   assert_norm(pow2 32 + blockLength a <= maxLength a);
   let ll = len % blockLen a in
@@ -204,7 +208,7 @@ let part1 a (acc: state a) key data len =
     assert(extract acc3 == spec a (key1 @| data1)))
 
 // the two parts have the same stucture; let's keep their proofs in sync.
-[@"substitute"]
+inline_for_extraction
 val part2:
   a: alg -> 
   acc: state a ->
@@ -228,7 +232,7 @@ val part2:
         Seq.length payload <= maxLength a /\
         as_seq h1 mac = spec a payload))
 
-[@"substitute"]
+inline_for_extraction
 let part2 a acc mac opad tag =
   let totLen = blockLen a + tagLen a in
   assert_norm(v totLen <= maxLength a);
@@ -265,6 +269,7 @@ let part2 a acc mac opad tag =
     assert(extract acc2 = spec a (v1 @| tag1)))
 
 // similar spec as hmac with keylen = blockLen a
+inline_for_extraction
 val hmac_core:
   a: alg -> 
   acc: state a ->
@@ -296,7 +301,7 @@ val hmac_core:
       Seq.length (k2 @| v1) <= maxLength a /\
       as_seq h1 tag == spec a (k2 @| v1))))
 
-[@"substitute"]
+inline_for_extraction
 val xor_bytes_inplace:
   a: uint8_p ->
   b: uint8_p ->
@@ -306,16 +311,15 @@ val xor_bytes_inplace:
   (ensures fun h0 _ h1 ->
     modifies (loc_buffer a) h0 h1 /\
     as_seq h1 a == Spec.Loops.seq_map2 xor8 (as_seq h0 a) (as_seq h0 b))
+inline_for_extraction
 let xor_bytes_inplace a b len =
-  let a = LowStar.ToFStarBuffer.new_to_old_st a in
-  let b = LowStar.ToFStarBuffer.new_to_old_st b in
   C.Loops.in_place_map2 a b len xor8
 
 // TODO small improvements: part1 and part2 could return their tags in
 // mac, so that we can reuse the pad.
 
 
-[@"substitute"]
+inline_for_extraction
 let hmac_core a acc tag key data len =
   let h00 = ST.get() in
   push_frame ();
@@ -384,6 +388,7 @@ let hmac_core a acc tag key data len =
     frame_invariant (loc_region_only false (HyperStack.get_tip h1)) acc h2 h3
   )
 
+inline_for_extraction
 let compute a mac key keylen data datalen =
   let h00 = ST.get() in
   push_frame ();

@@ -22,7 +22,7 @@ val fscalar_spec:
               w (Seq.index s' i) = v (Seq.index input i) * v s)
        })
 let fscalar_spec input s =
-  Spec.Compat.Loops.seq_map (fun x -> Hacl.Bignum.Wide.mul_wide x s) input
+  Spec.Loops.seq_map (fun x -> Hacl.Bignum.Wide.mul_wide x s) input
 
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 400"
