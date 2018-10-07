@@ -374,7 +374,7 @@ val sum_states:
     (ensures  (fun h0 _ h1 -> live h1 st' /\ live h1 st /\ modifies_1 st' h0 h1 /\ live h0 st /\
       live h0 st' /\
       (let st1' = as_state h1 st' in let st0' = as_state h0 st' in let st0 = as_state h0 st in
-       st1' == Spec.Compat.Loops.seq_map2 Spec.op_Plus_Percent_Hat st0' st0)))
+       st1' == Spec.Loops.seq_map2 Spec.op_Plus_Percent_Hat st0' st0)))
 [@ CInline]
 let sum_states st' st =
   let h0 = ST.get() in
@@ -392,7 +392,7 @@ let sum_states st' st =
   st'.(3ul) <- s3' +%^ s3;
   let h1 = ST.get() in
   Seq.lemma_eq_intro (as_state h1 st') (let st0' = as_state h0 st' in let st0 = as_state h0 st in
-                                      Spec.Compat.Loops.seq_map2 Spec.op_Plus_Percent_Hat st0' st0)
+                                      Spec.Loops.seq_map2 Spec.op_Plus_Percent_Hat st0' st0)
 
 
 [@ CInline]
@@ -449,7 +449,7 @@ let chacha20_core log k st =
   let h2 = ST.get() in
   sum_states k st;
   let h3 = ST.get() in
-  Seq.lemma_eq_intro (as_state h3 k) (Spec.Compat.Loops.seq_map2 Spec.op_Plus_Percent_Hat (as_state h2 k) (as_state h2 st))
+  Seq.lemma_eq_intro (as_state h3 k) (Spec.Loops.seq_map2 Spec.op_Plus_Percent_Hat (as_state h2 k) (as_state h2 st))
 
 
 #reset-options "--max_fuel 0 --z3rlimit 10"
@@ -1021,7 +1021,7 @@ val xor_block:
       let stbytes = FStar.Seq.(Spec.Lib.uint32s_to_le 16 (
                                vec_as_seq (Seq.index st 0) @| vec_as_seq (Seq.index st 1) @|
                                vec_as_seq (Seq.index st 2) @| vec_as_seq (Seq.index st 3))) in
-      output == Spec.Compat.Loops.seq_map2 UInt8.logxor plain stbytes) ))
+      output == Spec.Loops.seq_map2 UInt8.logxor plain stbytes) ))
 let xor_block output plain st =
   let h0 = ST.get() in
   let p0 = vec_load_le (Buffer.sub plain 0ul 16ul) in
@@ -1041,7 +1041,7 @@ let xor_block output plain st =
          let p = FStar.Seq.(vec_as_seq p0 @| vec_as_seq p1 @| vec_as_seq p2 @| vec_as_seq p3) in
          (forall (i:nat). i < 16 ==> Seq.index s i == FStar.UInt32.(Seq.index p i ^^ Seq.index k i)));
   Seq.lemma_eq_intro (let k = FStar.Seq.(vec_as_seq k0 @| vec_as_seq k1 @| vec_as_seq k2 @| vec_as_seq k3) in let p = FStar.Seq.(vec_as_seq p0 @| vec_as_seq p1 @| vec_as_seq p2 @| vec_as_seq p3) in
-    Spec.Compat.Loops.seq_map2 FStar.UInt32.logxor p k)
+    Spec.Loops.seq_map2 FStar.UInt32.logxor p k)
                      FStar.Seq.(vec_as_seq o0 @| vec_as_seq o1 @| vec_as_seq o2 @| vec_as_seq o3);
   lemma_uint32s_fragments2 h0 plain (vec_as_seq p0) (vec_as_seq p1) (vec_as_seq p2) (vec_as_seq p3);
   assert (FStar.Seq.(vec_as_seq p0 @| vec_as_seq p1 @| vec_as_seq p2 @| vec_as_seq p3) ==
@@ -1055,7 +1055,7 @@ let xor_block output plain st =
                                          let stbytes = FStar.Seq.(Spec.Lib.uint32s_to_le 16 (
                                          vec_as_seq (Seq.index st 0) @| vec_as_seq (Seq.index st 1) @|
                                         vec_as_seq (Seq.index st 2) @| vec_as_seq (Seq.index st 3))) in
-                                         Spec.Compat.Loops.seq_map2 UInt8.logxor plain stbytes)
+                                         Spec.Loops.seq_map2 UInt8.logxor plain stbytes)
 
 
 #reset-options "--max_fuel 0 --z3rlimit 200"

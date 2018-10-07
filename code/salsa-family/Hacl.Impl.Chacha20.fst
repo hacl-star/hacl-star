@@ -290,7 +290,7 @@ let rounds st =
     (requires (fun h -> inv h (UInt32.v i)))
     (ensures (fun h_1 _ h_2 -> FStar.UInt32.(inv h_2 (v i + 1))))
   = double_round st;
-    Spec.Compat.Loops.lemma_repeat (UInt32.v i + 1) Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st))
+    Spec.Loops.lemma_repeat (UInt32.v i + 1) Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st))
   in
   lemma_repeat_0 0 Spec.Chacha20.double_round (reveal_h32s (as_seq h0 st));
   for 0ul 10ul inv f'

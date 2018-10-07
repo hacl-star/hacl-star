@@ -423,7 +423,7 @@ let shuffle hash block ws k =
   let inv (h1: HS.mem) (i: nat) : Type0 =
     live h1 hash /\ modifies_1 hash h0 h1 /\ i <= v size_ws_w
     /\ (let seq_block = reveal_h32s (as_seq h0 block) in
-    reveal_h32s (as_seq h1 hash) == repeat_range_spec 0 i (Spec.shuffle_core seq_block) (reveal_h32s (as_seq h0 hash)))
+    reveal_h32s (as_seq h1 hash) == Spec.Loops.repeat_range_spec 0 i (Spec.shuffle_core seq_block) (reveal_h32s (as_seq h0 hash)))
   in
   let f' (t:uint32_t {v t < v size_ws_w}) :
     Stack unit
@@ -431,9 +431,9 @@ let shuffle hash block ws k =
       (ensures (fun h_1 _ h_2 -> inv h_2 (UInt32.v t + 1)))
     =
     shuffle_core hash block ws k t;
-    (**) C.Compat.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (reveal_h32s (as_seq h0 block))) (reveal_h32s (as_seq h0 hash))
+    (**) Spec.Loops.lemma_repeat_range_spec 0 (UInt32.v t + 1) (Spec.shuffle_core (reveal_h32s (as_seq h0 block))) (reveal_h32s (as_seq h0 hash))
   in
-  (**) C.Compat.Loops.lemma_repeat_range_0 0 0 (Spec.shuffle_core (reveal_h32s (as_seq h0 block))) (reveal_h32s (as_seq h0 hash));
+  (**) Spec.Loops.lemma_repeat_range_0 0 (Spec.shuffle_core (reveal_h32s (as_seq h0 block))) (reveal_h32s (as_seq h0 hash));
   for 0ul size_ws_w inv f'
 
 
@@ -449,7 +449,7 @@ private val sum_hash:
               /\ (let new_seq_hash_0 = as_seq h1 hash_0 in
               let seq_hash_0 = as_seq h0 hash_0 in
               let seq_hash_1 = as_seq h0 hash_1 in
-              new_seq_hash_0 == Spec.Compat.Lib.map2 (fun x y -> H32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
+              new_seq_hash_0 == Spec.Lib.map2 (fun x y -> H32.(x +%^ y)) seq_hash_0 seq_hash_1 )))
 
 #set-options "--max_fuel 0  --z3rlimit 20"
 
@@ -533,7 +533,7 @@ private val update_core:
   Stack unit
         (requires (fun h0 -> live h0 hash_w /\ live h0 data /\ live h0 data_w /\ live h0 ws_w /\ live h0 k_w
                   /\ reveal_h32s (as_seq h0 k_w) == Spec.k
-                  /\ (reveal_h32s (as_seq h0 data_w) = Spec.Compat.Lib.uint32s_from_be (v size_block_w) (reveal_sbytes (as_seq h0 data)))
+                  /\ (reveal_h32s (as_seq h0 data_w) = Spec.Lib.uint32s_from_be (v size_block_w) (reveal_sbytes (as_seq h0 data)))
                   /\ (let w = reveal_h32s (as_seq h0 ws_w) in
                   let b = reveal_h32s (as_seq h0 data_w) in
                   (forall (i:nat). {:pattern (Seq.index w i)} i < 64 ==> Seq.index w i == Spec.ws b i))))
@@ -603,7 +603,7 @@ let update_core hash_w data data_w ws_w k_w =
   (**) assert(let x = reveal_h32s (as_seq h0 hash_w) in
          let y = Spec.shuffle (reveal_h32s (as_seq h0 hash_w)) (Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data))) in
          let z = reveal_h32s (as_seq h5 hash_w) in
-         let z' = Spec.Compat.Loops.seq_map2 (fun x y -> FStar.UInt32.(x +%^ y)) x y in
+         let z' = Spec.Loops.seq_map2 (fun x y -> FStar.UInt32.(x +%^ y)) x y in
          z == z');
   (**) no_upd_lemma_1 h4 h5 hash_w data;
   (**) no_upd_lemma_1 h4 h5 hash_w data_w;
@@ -698,7 +698,7 @@ let update state data =
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_whash_w size_whash_w);
   (**) no_upd_lemma_1 h2 h3 data_w (Buffer.sub state pos_count_w size_count_w);
   (**) no_upd_lemma_1 h2 h3 data_w data;
-  (**) assert(reveal_h32s (as_seq h3 data_w) == Spec.Compat.Lib.uint32s_from_be (U32.v size_block_w) (reveal_sbytes (as_seq h3 data)));
+  (**) assert(reveal_h32s (as_seq h3 data_w) == Spec.Lib.uint32s_from_be (U32.v size_block_w) (reveal_sbytes (as_seq h3 data)));
 
   (* Retreive values from the state *)
   let hash_w = Buffer.sub state pos_whash_w size_whash_w in

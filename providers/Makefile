@@ -69,7 +69,10 @@ test:
 # every HACL* algorithm should have an interfaces directory that allows us to
 # cut the dependency graph
 
-FSTAR_INCLUDES = $(KREMLIN_HOME)/kremlib/compat evercrypt evercrypt/fst \
+FSTAR_INCLUDES = \
+  $(KREMLIN_HOME)/kremlib/compat \
+  $(KREMLIN_HOME)/kremlib \
+  evercrypt evercrypt/fst \
   evercrypt/config/$(CONFIG) \
   $(HACL_CODE)/lib/kremlin \
   $(HACL_CODE)/experimental/aesgcm \

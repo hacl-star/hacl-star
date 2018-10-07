@@ -24,7 +24,7 @@ let copy_from_wide_pre (s:seqelem_wide) : GTot Type0 =
 val copy_from_wide_spec_: s:seqelem_wide{copy_from_wide_pre s} ->
   Tot (s':seqelem{(forall (j:nat). j < len ==> v (Seq.index s' j) = w (Seq.index s j))})
 let copy_from_wide_spec_ s =
-  Spec.Compat.Loops.seq_map (fun x -> wide_to_limb x) s
+  Spec.Loops.seq_map (fun x -> wide_to_limb x) s
 
 #reset-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 50"
 
@@ -84,7 +84,7 @@ val sum_scalar_multiplication_spec:
     (forall (j:nat). {:pattern (w (Seq.index s' j))} j < len ==>
       w (Seq.index s' j) = w (Seq.index sw j) + (v (Seq.index s j) * v scalar))})
 let sum_scalar_multiplication_spec sw s scalar =
-  Spec.Compat.Loops.seq_map2 (fun x y -> Hacl.Bignum.Wide.(x +%^ (y *^ scalar))) sw s
+  Spec.Loops.seq_map2 (fun x y -> Hacl.Bignum.Wide.(x +%^ (y *^ scalar))) sw s
 
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
@@ -255,7 +255,7 @@ val carry_wide_spec_: s:seqelem_wide -> i:nat{i < len /\ carry_wide_pre s i} ->
     (* /\ (i < len-1 ==> w (Seq.index s' (len-1)) < w (Seq.index s (len-1)) + pow2 (2*word_size - limb_size)) *)})
   (decreases (len - 1 - i))
 let rec carry_wide_spec_ s i k =
-  (* Spec.Compat.Loops.repeat_range_spec 0 (len-1) carry_wide_step' s *)
+  (* Spec.Loops.repeat_range_spec 0 (len-1) carry_wide_step' s *)
   if i = k then s
   else (
     let s'' = carry_wide_step' s i in
