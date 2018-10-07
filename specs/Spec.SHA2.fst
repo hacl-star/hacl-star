@@ -7,18 +7,14 @@ open Lib.ByteSequence
 
 #set-options "--z3rlimit  25"
 
-(* Aliasing for operators *)
-let op_String_Access #a #len = index #a #len
-let op_String_Assignment #a #len = upd #a #len
-
 (* Definition: Hash algorithm parameters *)
 noeq type parameters =
   | MkParameters:
     wt:       inttype{wt = U32 \/ wt = U64} ->
 	 opTable:  lseq (rotval wt) 12 ->
 	 kSize:    size_nat{kSize > 16} ->
-	 kTable:   intseq wt kSize ->
-	 h0:       intseq wt 8 ->
+	 kTable:   lseq (uint_t wt) kSize ->
+	 h0:       lseq (uint_t wt) 8 ->
 	 size_hash: nat {0 < size_hash /\ size_hash <= 8 * numbytes wt} ->
 	 parameters
 
@@ -40,9 +36,9 @@ let size_hash p :size_nat = p.size_hash
 let max_input p : n:nat = (maxint (lenType p) + 1) / 8
 
 (* Definition: Types for block and hash as sequences of words *)
-type block_w p = b:intseq p.wt 16
-type hash_w p = b:intseq p.wt size_hash_w
-type ws_w p = b:intseq p.wt p.kSize
+type block_w p = lseq (uint_t p.wt) 16
+type hash_w p = lseq (uint_t p.wt) size_hash_w
+type ws_w p = lseq (uint_t p.wt) p.kSize
 
 (* Definition of permutation functions *)
 let _Ch p (x:uint_t p.wt) (y:uint_t p.wt) (z:uint_t p.wt) = ((x &. y) ^. ((~. x) &. z))
@@ -181,8 +177,8 @@ let pad
 let len_block_nat (p:parameters) = l:size_nat{l < size_block p}
 noeq type state (p:parameters) =
   {
-    hash:intseq p.wt size_hash_w;
-    blocks:intseq U8 (2 * size_block p);
+    hash:lseq (uint_t p.wt) size_hash_w;
+    blocks:lbytes (2 * size_block p);
     len_block:len_block_nat p;
     n:size_nat;
   }
@@ -240,10 +236,10 @@ let update' (p:parameters) (len:size_nat) (input:lbytes len) (st:state p{let n =
     let rem2 = sub input l1 l2 in
     let n : size_nat = l2 / size_block p in
     let r : size_nat = l2 % size_block p in
-    let blocks = sub #uint8 #l2 rem2 0 (n * (size_block p)) in
+    let blocks = sub #uint8 rem2 0 (n * (size_block p)) in
     let st = update_multi p n blocks st in
     // Handle the remainder of the input
-    let rem3 = sub #uint8 #l2 rem2 (n * (size_block p)) r in
+    let rem3 = sub #uint8 rem2 (n * (size_block p)) r in
     let pblock = update_sub st.blocks 0 r rem3 in
     {st with blocks = pblock; len_block = r}
   end
@@ -355,10 +351,10 @@ let parameters224 : parameters =
   assert_norm(List.Tot.length const_224_256_k = 64);
   MkParameters
     U32
-    (createL const_224_256_ops)
+    (of_list const_224_256_ops)
     64
-    (createL const_224_256_k)
-    (createL const_224_h0)
+    (of_list const_224_256_k)
+    (of_list const_224_h0)
     28
 
 let parameters256 : parameters =
@@ -367,10 +363,10 @@ let parameters256 : parameters =
   assert_norm(List.Tot.length const_224_256_k = 64);
   MkParameters
     U32
-    (createL const_224_256_ops)
+    (of_list const_224_256_ops)
     64
-    (createL const_224_256_k)
-    (createL const_256_h0)
+    (of_list const_224_256_k)
+    (of_list const_256_h0)
     32
 
 let parameters384 : parameters =
@@ -379,10 +375,10 @@ let parameters384 : parameters =
   assert_norm(List.Tot.length const_384_512_k = 80);
   MkParameters
     U64
-    (createL const_384_512_ops)
+    (of_list const_384_512_ops)
     80
-    (createL const_384_512_k)
-    (createL const_384_h0)
+    (of_list const_384_512_k)
+    (of_list const_384_h0)
     48
 
 let parameters512 : parameters =
@@ -391,10 +387,10 @@ let parameters512 : parameters =
   assert_norm(List.Tot.length const_384_512_k = 80);
   MkParameters
     U64
-    (createL const_384_512_ops)
+    (of_list const_384_512_ops)
     80
-    (createL const_384_512_k)
-    (createL const_512_h0)
+    (of_list const_384_512_k)
+    (of_list const_512_h0)
     64
 
 ///

@@ -7,38 +7,41 @@ open Lib.IntTypes
 
 /// Definition of sequences
 
-let seq (a:Type0) = s:Seq.seq a{Seq.length s <= max_size_t}
+(* This is the type of unbounded sequences. 
+   Use this only when dealing with, say, user input whose length is unbounded *)
+   
+let seq (a:Type0) = s:Seq.seq a
 
-let lseq (a:Type0) (len:size_nat) = s:seq a{Seq.length s == len}
+(* This is the type of bounded sequences. 
+   Use this as much as possible. 
+   It adds additional length checks that you'd have to prove in the implementation otherwise *)
 
-let intseq (t:m_inttype) (len:size_nat) = lseq (uint_t t) len
+let lseq (a:Type0) (len:size_nat) = s:seq a{len > 0 /\ Seq.length s == len}
 
-val length: #a:Type0 -> seq a -> size_nat
+let length (#a:Type0) (s:seq a) : nat = Seq.length s
 
-val to_lseq: #a:Type0 -> s:seq a -> l:lseq a (Seq.length s){l == s}
-val to_seq: #a:Type0 -> #len:size_nat -> s:lseq a len -> o:seq a {o == s /\ Seq.length o == len}
+let to_lseq (#a:Type0) (s:seq a{length s > 0 /\ length s <= max_size_t}) : l:lseq a (length s){l == s} = s
 
-val index: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len} -> a
+val index: #a:Type -> s:seq a -> n:nat{length s > 0 /\ n < length s} -> a
 
 abstract
-type equal (#a:Type) (#len:size_nat) (s1:lseq a len) (s2:lseq a len) =
- forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
+type equal (#a:Type) (s1:seq a) (s2:seq a) =
+ length s1 == length s2 /\
+ (forall (i:nat{i < length s1}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i)
 
 val eq_intro:
     #a:Type
-  -> #len:size_nat
-  -> s1:lseq a len
-  -> s2:lseq a len
+  -> s1:seq a
+  -> s2:seq a
   -> Lemma
-    (requires (forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i))
+    (requires (length s1 == length s2 /\ (forall (i:nat{i < length s1}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i)))
     (ensures  (equal s1 s2))
   [SMTPat (equal s1 s2)]
 
 val eq_elim:
     #a:Type
-  -> #len:size_nat
-  -> s1:lseq a len
-  -> s2:lseq a len
+  -> s1:seq a 
+  -> s2:seq a 
   -> Lemma
     (requires equal s1 s2)
     (ensures  s1 == s2)
@@ -46,90 +49,95 @@ val eq_elim:
 
 val upd:
     #a:Type
-  -> #len:size_nat
-  -> s:lseq a len
-  -> n:size_nat{n < len /\ len > 0}
+  -> s:seq a
+  -> n:nat{n < length s}
   -> x:a
-  -> o:lseq a len{index o n == x /\ (forall (i:size_nat).
-    {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)}
-
-///
-/// Allocation functions for sequences
-///
-
-val create:
-    #a:Type
-  -> len:size_nat
-  -> init:a
-  -> s:lseq a len{forall (i:size_nat).
-    {:pattern (index s i)} i < len ==> index s i == init}
-
-/// TODO: rename this to of_list. Used in Lib.Buffer
-val createL:#a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (List.Tot.length l)
-
-val of_list:#a:Type -> l:list a{List.Tot.length l <= maxint U32} -> seq a
+  -> o:seq a{length o == length s /\ index o n == x /\ (forall (i:nat).
+    {:pattern (index s i)} (i < length s /\ i <> n) ==> index o i == index s i)}
 
 val sub:
     #a:Type
-  -> #len:size_nat
-  -> s1:lseq a len
-  -> start:size_nat
-  -> n:size_nat{start + n <= len}
-  -> s2:lseq a n{forall (k:size_nat{k < n}).
-    {:pattern (index s2 k)} index s2 k == index s1 (start + k)}
+  -> s1:seq a
+  -> start:nat
+  -> n:nat{start + n <= length s1}
+  -> s2:seq a{length s2 == n /\ 
+	     (forall (k:nat{k < n}). {:pattern (index s2 k)} index s2 k == index s1 (start + k))}
 
-val slice:
-    #a:Type
-  -> #len:size_nat
-  -> i:lseq a len
-  -> start:size_nat
-  -> fin:size_nat{start <= fin /\ fin <= len}
-  -> lseq a (fin - start)
+let slice (#a:Type) (s1:seq a) (start:nat) (fin:nat{start <= fin /\ fin <= length s1}) = sub #a s1 start (fin - start)
 
 val update_sub:
     #a:Type
-  -> #len:size_nat
-  -> i:lseq a len
-  -> start:size_nat
-  -> n:size_nat{start + n <= len}
-  -> x:lseq a n
-  -> o:lseq a len{sub o start n == x /\
-    (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < len)}).
+  -> i:seq a
+  -> start:nat
+  -> n:nat{start + n <= length i}
+  -> x:seq a{length x == n}
+  -> o:seq a{length o == length i /\ sub o start n == x /\
+    (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < length i)}).
       {:pattern (index o k)} index o k == index i k)}
 
 val lemma_update_sub:
     #a:Type
-  -> #len:size_nat
-  -> dst:lseq a len
-  -> start:size_nat
-  -> n:size_nat{start + n <= len}
-  -> src:lseq a n
-  -> res:lseq a len
+  -> dst:seq a
+  -> start:nat
+  -> n:nat{start + n <= length dst}
+  -> src:seq a
+  -> res:seq a
   -> Lemma
     (requires
+      length res == length dst /\
+      length src == n /\
       sub res 0 start == sub dst 0 start /\
       sub res start n == src /\
-      sub res (start + n) (len - start - n) ==
-      sub dst (start + n) (len - start - n))
+      sub res (start + n) (length dst - start - n) ==
+      sub dst (start + n) (length dst - start - n))
     (ensures
       res == update_sub dst start n src)
 
-val update_slice:
+let update_slice (#a:Type) (i:seq a) (start:nat) (fin:nat{start <= fin /\ fin <= length i}) 
+                 (upd:seq a{length upd == fin - start}) = update_sub #a i start (fin - start) upd
+
+
+///
+/// Allocation functions for bounded sequences
+///
+
+val seq_create:
     #a:Type
-  -> #len:size_nat
-  -> i:lseq a len
-  -> start:size_nat
-  -> fin:size_nat{start <= fin /\ fin <= len}
-  -> upd:lseq a (fin - start)
-  -> lseq a len
+  -> len:nat
+  -> init:a
+  -> s:seq a{length s == len /\ (forall (i:nat).
+    {:pattern (index s i)} i < len ==> index s i == init)}
+
+val create:
+    #a:Type
+  -> len:size_nat{len > 0}
+  -> init:a
+  -> s:lseq a len{(forall (i:nat).
+    {:pattern (index s i)} i < len ==> index s i == init)}
+
+val to_list:
+    #a:Type 
+  -> s:seq a 
+  -> l:list a{List.Tot.length l = length s}
+
+val of_list:
+    #a:Type 
+  -> l:list a
+  -> s:seq a{length s == List.Tot.length l}
+
+val concat:#a:Type -> s1:seq a -> s2:seq a -> r:seq a{length r == length s1 + length s2}
+let (@|) #a s1 s2 = concat #a s1 s2
 
 unfold
-let op_String_Access #a #len = index #a #len
+let op_String_Access #a = index #a 
 
 unfold
-let op_String_Assignment #a #len = upd #a #len
+let op_String_Assignment #a = upd #a
 
-/// Iteration
+
+
+
+/// Iteration Patterns (may be good to move this to a different module)
 
 (**
 * fold_left-like loop combinator:
@@ -143,10 +151,10 @@ let op_String_Assignment #a #len = upd #a #len
 * A simpler variant with a non-dependent accumuator used to be called [repeat_range]
 *)
 val repeat_left:
-    lo:size_nat
-  -> hi:size_nat{lo <= hi}
-  -> a:(i:size_nat{lo <= i /\ i <= hi} -> Type)
-  -> f:(i:size_nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
+    lo:nat
+  -> hi:nat{lo <= hi}
+  -> a:(i:nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
   -> acc:a lo
   -> Tot (a hi) (decreases (hi - lo))
 
@@ -160,20 +168,20 @@ val repeat_left:
 * [ repeat_right lo hi (fun _ -> a) f acc == fold_right f acc [hi-1..lo] ]
 *)
 val repeat_right:
-    lo:size_nat
-  -> hi:size_nat{lo <= hi}
-  -> a:(i:size_nat{lo <= i /\ i <= hi} -> Type)
-  -> f:(i:size_nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
+    lo:nat
+  -> hi:nat{lo <= hi}
+  -> a:(i:nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
   -> acc:a lo
   -> Tot (a hi) (decreases (hi - lo))
 
 (** Splitting a repetition *)
 val repeat_right_plus:
-    lo:size_nat
-  -> mi:size_nat{lo <= mi}
-  -> hi:size_nat{mi <= hi}
-  -> a:(i:size_nat{lo <= i /\ i <= hi} -> Type)
-  -> f:(i:size_nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
+    lo:nat
+  -> mi:nat{lo <= mi}
+  -> hi:nat{mi <= hi}
+  -> a:(i:nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
   -> acc:a lo
   -> Lemma (ensures
       repeat_right lo hi a f acc ==
@@ -187,10 +195,10 @@ val repeat_right_plus:
 * [ fold_right f acc xs = fold_left (flip f) acc (reverse xs) ]
 *)
 val repeat_left_right:
-    lo:size_nat
-  -> hi:size_nat{lo <= hi}
-  -> a:(i:size_nat{lo <= i /\ i <= hi} -> Type)
-  -> f:(i:size_nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
+    lo:nat
+  -> hi:nat{lo <= hi}
+  -> a:(i:nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
   -> acc:a lo
   -> Lemma (ensures repeat_right lo hi a f acc == repeat_left lo hi a f acc)
     (decreases (hi - lo))
@@ -202,21 +210,21 @@ val repeat_left_right:
 * efficient when extracted to OCaml.
 *)
 
-val repeat:
-    n:size_nat
-  -> a:(i:size_nat{i <= n} -> Type)
-  -> f:(i:size_nat{i < n} -> a i -> a (i + 1))
+val repeat_gen:
+    n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1))
   -> acc0:a 0
   -> a n
 
 (** Unfolding one iteration *)
-val unfold_repeat:
-    n:size_nat
-  -> a:(i:size_nat{i <= n} -> Type)
-  -> f:(i:size_nat{i < n} -> a i -> a (i + 1))
+val unfold_repeat_gen:
+    n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1))
   -> acc0:a 0
-  -> i:size_nat{i < n}
-  -> Lemma (repeat (i + 1) a f acc0 == f i (repeat i a f acc0))
+  -> i:nat{i < n}
+  -> Lemma (repeat_gen (i + 1) a f acc0 == f i (repeat_gen i a f acc0))
 
 (**
 * Repetition with a fixed accumulator type
@@ -224,122 +232,89 @@ val unfold_repeat:
 
 val repeati:
     #a:Type
-  -> n:size_nat
-  -> f:(i:size_nat{i < n} -> a -> a)
+  -> n:nat
+  -> f:(i:nat{i < n} -> a -> a)
   -> acc0:a
   -> a
 
 (** Unfolding one iteration *)
 val unfold_repeati:
     #a:Type
-  -> n:size_nat
-  -> f:(i:size_nat{i < n} -> a -> a)
+  -> n:nat
+  -> f:(i:nat{i < n} -> a -> a)
   -> acc0:a
-  -> i:size_nat{i < n}
+  -> i:nat{i < n}
   -> Lemma (repeati #a (i + 1) f acc0 == f i (repeati #a i f acc0))
 
-/// Old combinators; all subsumed by [repeat_left]
+val repeat:
+    #a:Type
+  -> n:nat
+  -> f:(a -> a)
+  -> acc0:a
+  -> a
 
 val repeat_range:
   #a:Type
-  -> min:size_nat
-  -> max:size_nat{min <= max}
-  -> (s:size_nat{s >= min /\ s < max} -> a -> Tot a)
+  -> min:nat
+  -> max:nat{min <= max}
+  -> (s:nat{s >= min /\ s < max} -> a -> Tot a)
   -> a
   -> Tot a (decreases (max - min))
 
-val repeath:
-    #a:Type
-  -> max:size_nat
-  -> (a -> Tot a)
-  -> a
-  -> Tot a (decreases max)
-
 unfold
-type repeatable (#a:Type) (#n:size_nat) (pred:(i:size_nat{i <= n} -> a -> Tot Type)) =
-  i:size_nat{i < n} -> x:a{pred i x} -> y:a{pred (i+1) y}
+type repeatable (#a:Type) (#n:nat) (pred:(i:nat{i <= n} -> a -> Tot Type)) =
+  i:nat{i < n} -> x:a{pred i x} -> y:a{pred (i+1) y}
 
 val repeat_range_inductive:
     #a:Type
-  -> min:size_nat
-  -> max:size_nat{min <= max}
-  -> pred:(i:size_nat{i <= max} -> a -> Type)
+  -> min:nat
+  -> max:nat{min <= max}
+  -> pred:(i:nat{i <= max} -> a -> Type)
   -> f:repeatable #a #max pred
   -> x0:a{pred min x0}
   -> Tot (res:a{pred max res}) (decreases (max - min))
 
 val repeati_inductive:
    #a:Type
- -> n:size_nat
- -> pred:(i:size_nat{i <= n} -> a -> Type)
+ -> n:nat
+ -> pred:(i:nat{i <= n} -> a -> Type)
  -> f:repeatable #a #n pred
  -> x0:a{pred 0 x0}
  -> res:a{pred n res}
 
-val lbytes_eq_inner:
-    #len:size_nat
-  -> a:lseq uint8 len
-  -> b:lseq uint8 len
-  -> i:size_nat{i < len}
-  -> r:bool
+val map:#a:Type -> #b:Type -> (a -> Tot b) -> s1:seq a -> s2:seq b{length s2 == length s1}
+
+val map2:#a:Type -> #b:Type -> #c:Type 
+  -> f:(a -> b -> Tot c) 
+  -> s1:seq a 
+  -> s2:seq b{length s1 == length s2} 
+  -> s3:seq c{length s3 == length s2}
+
+val for_all:#a:Type -> (a -> Tot bool) -> seq a -> bool
+
+val for_all2:#a:Type -> #b:Type 
+  -> (a -> b -> Tot bool) 
+  -> s1:seq a 
+  -> s2:seq b{length s1 == length s2}
   -> bool
 
 val lbytes_eq:#len:size_nat -> lseq uint8 len -> lseq uint8 len -> bool
 
-val fold_left_range_:
-    #a:Type
-  -> #b:Type
-  -> #len:size_nat
-  -> min:size_nat
-  -> max:size_nat{min <= max /\ len = max - min}
-  -> (i:size_nat{i >= min /\ i < max} -> a -> b -> Tot b)
-  -> lseq a len
-  -> b
-  -> Tot b (decreases (max - min))
-
-val fold_left_range:
-    #a:Type
-  -> #b:Type
-  -> #len:size_nat
-  -> min:size_nat
-  -> max:size_nat{min <= max /\ max <= len}
-  -> (i:size_nat{i >= min /\ i < max} -> a -> b -> Tot b)
-  -> lseq a len
-  -> b
-  -> b
-
-val fold_lefti:#a:Type -> #b:Type -> #len:size_nat -> (i:size_nat{i < len} -> a -> b -> Tot b) -> lseq a len -> b -> b
-
-val fold_left:#a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot b) -> lseq a len -> b -> b
-
-val map:#a:Type -> #b:Type -> #len:size_nat -> (a -> Tot b) -> lseq a len -> lseq b len
-
-val for_all:#a:Type -> #len:size_nat -> (a -> Tot bool) -> lseq a len -> bool
-
-val map2:#a:Type -> #b:Type -> #c:Type -> #len:size_nat -> (a -> b -> Tot c) -> lseq a len -> lseq b len -> lseq c len
-
-val for_all2:#a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> bool
-
-val as_list:#a:Type -> #len:size_nat -> lseq a len -> l:list a{List.Tot.length l = len}
-
-val concat:#a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 <= maxint SIZE} -> lseq a len1 -> lseq a len2 -> lseq a (len1 + len2)
-
-let (@|) #a #len1 #len2 s1 s2 = concat #a #len1 #len2 s1 s2
-
 val map_blocks:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
-  -> nblocks:size_nat{nblocks * blocksize <= maxint SIZE}
-  -> f:(i:size_nat{i + 1 <= nblocks} -> lseq a blocksize -> lseq a blocksize)
-  -> inp:lseq a (nblocks * blocksize)
-  -> out:lseq a (nblocks * blocksize)
+  -> inp:seq a 
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
+  -> g:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> lseq a len -> lseq a len)
+  -> out:seq a {length out == length inp}
+  
 
-val reduce_blocks:
+val repeat_blocks:
     #a:Type0
   -> #b:Type0
   -> blocksize:size_nat{blocksize > 0}
-  -> nblocks:size_nat{nblocks * blocksize <= maxint SIZE}
-  -> f:(i:size_nat{i + 1 <= nblocks} -> lseq a blocksize -> b -> b)
-  -> inp:lseq a (nblocks * blocksize)
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> b -> b)
+  -> l:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> lseq a len -> b -> b)
   -> init:b
   -> out:b

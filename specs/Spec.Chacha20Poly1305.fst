@@ -22,7 +22,7 @@ let poly1305_padded (len:size_nat) (text:lbytes len) (tmp:lbytes Poly.blocksize)
   let r = len % Poly.blocksize in
   let blocks = sub text 0 (n * Poly.blocksize) in
   let rem = sub text (n * Poly.blocksize) r in
-  let st = Poly.update_blocks n blocks st in
+  let st = Poly.poly blocks st in
   let tmp = update_sub tmp 0 r rem in
   let st = Poly1305.update1 Poly1305.blocksize tmp st in
   st
@@ -48,7 +48,7 @@ let aead_encrypt k n len m len_aad aad =
   let key0 = Spec.Chacha20.chacha20_key_block0 k n in
   let poly_k = sub key0 0 32 in
   let res = create (len + Poly.blocksize) (u8 0) in
-  let cipher = Spec.Chacha20.chacha20_encrypt_bytes k n 1 len m in
+  let cipher = Spec.Chacha20.chacha20_encrypt_bytes k n 1 m in
   let mac = poly1305_do poly_k len cipher len_aad aad in
   let res = update_sub res 0 len cipher in
   let res = update_sub res len Poly.blocksize mac in
@@ -62,7 +62,7 @@ let aead_decrypt k n len c tag len_aad aad =
   let xmac = poly1305_do poly_k len c len_aad aad in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) xmac tag in
   if result then
-    let plain = Spec.Chacha20.chacha20_encrypt_bytes k n 1 len c in
+    let plain = Spec.Chacha20.chacha20_encrypt_bytes k n 1 c in
     Some plain
   else None
 

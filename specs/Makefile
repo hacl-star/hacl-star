@@ -12,11 +12,7 @@ FSTAR_INCLUDES+= \
 
 SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Poly1305.fst \
-		Spec.AES.fst \
-		Spec.AESGCM.fst \
 		Spec.Chacha20.fst \
-		Spec.Chacha20Poly1305.fst \
-		Spec.CTR.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.Curve25519.fst \
 		Spec.Curve448.fst \
@@ -26,6 +22,8 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Chacha20_vec.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
+		Spec.AES.fst \
+		Spec.AESGCM.fst \
 		Spec.HMAC.fst \
 		Spec.HKDF.fst \
 		Spec.ECIES.fst \

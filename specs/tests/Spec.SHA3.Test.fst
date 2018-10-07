@@ -10,18 +10,18 @@ open Lib.ByteSequence
 
 let print_and_compare (len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) =
   IO.print_string "\n\nResult:   ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test_result);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
   IO.print_string "\nExpected: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test_expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
   for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result
 
 
 let test_sha3 msg_len msg expected224 expected256 expected384 expected512 =
-  let msg:lbytes msg_len = createL msg in
-  let expected224:lbytes 28 = createL expected224 in
-  let expected256:lbytes 32 = createL expected256 in
-  let expected384:lbytes 48 = createL expected384 in
-  let expected512:lbytes 64 = createL expected512 in
+  let msg:lbytes msg_len = of_list msg in
+  let expected224:lbytes 28 = of_list expected224 in
+  let expected256:lbytes 32 = of_list expected256 in
+  let expected384:lbytes 48 = of_list expected384 in
+  let expected512:lbytes 64 = of_list expected512 in
 
   let test224 = Spec.SHA3.sha3_224 msg_len msg in
   let test256 = Spec.SHA3.sha3_256 msg_len msg in
@@ -35,16 +35,16 @@ let test_sha3 msg_len msg expected224 expected256 expected384 expected512 =
   r224 && r256 && r384 && r512
 
 let test_shake128 msg_len msg out_len expected =
-  let msg:lbytes msg_len = createL msg in
-  let expected:lbytes out_len = createL expected in
+  let msg:lbytes msg_len = of_list msg in
+  let expected:lbytes out_len = of_list expected in
 
   let test = create out_len (u8 0) in
   let test = Spec.SHA3.shake128 msg_len msg out_len test in
   print_and_compare out_len expected test
 
 let test_shake256 msg_len msg out_len expected =
-  let msg:lbytes msg_len = createL msg in
-  let expected:lbytes out_len = createL expected in
+  let msg:lbytes msg_len = of_list msg in
+  let expected:lbytes out_len = of_list expected in
 
   let test = create out_len (u8 0) in
   let test = Spec.SHA3.shake256 msg_len msg out_len test in

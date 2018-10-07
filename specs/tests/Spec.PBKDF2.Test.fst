@@ -94,15 +94,15 @@ val test_c: expected:lbytes 20 -> counter:size_t -> FStar.All.ML unit
 let test_c expected counter =
   let p_len: size_t = 8 in
   let s_len: size_t = 4 in
-  let test_pwd : lbytes 8 = createL test1_pwd in
-  let test_salt : lbytes 4 = createL test1_salt in
-  let test_expected : lbytes 20 = createL expected in
+  let test_pwd : lbytes 8 = of_list test1_pwd in
+  let test_salt : lbytes 4 = of_list test1_salt in
+  let test_expected : lbytes 20 = of_list expected in
   let output : lbytes 20 = PBKDF2.pbkdf2 Hash.SHA2_256 p_len test_pwd s_len test_salt counter dkLen in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
   IO.print_string   "Expected key:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected);
   IO.print_string "\nComputed key:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list output);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list output);
   if result then   IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n"
 
@@ -110,15 +110,15 @@ val test_c2: expected:lbytes 50 -> counter:size_t -> FStar.All.ML unit
 let test_c2 expected counter =
   let p_len: size_t = 8 in
   let s_len: size_t = 4 in
-  let test_pwd : lbytes 8 = createL test1_pwd in
-  let test_salt : lbytes 4 = createL test1_salt in
-  let test_expected : lbytes 50 = createL expected in
+  let test_pwd : lbytes 8 = of_list test1_pwd in
+  let test_salt : lbytes 4 = of_list test1_salt in
+  let test_expected : lbytes 50 = of_list expected in
   let output : lbytes 50 = PBKDF2.pbkdf2 Hash.SHA2_256 p_len test_pwd s_len test_salt counter dkLen2 in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output test_expected in
   IO.print_string   "Expected key:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test_expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
   IO.print_string "\nComputed key:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list output);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list output);
   if result then   IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n"
 

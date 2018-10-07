@@ -17,10 +17,10 @@ inline_for_extraction let rounds_in_f : size_nat = 10
 
 
 (* Definition of base types *)
-type working_vector = intseq U32 size_block_w
-type message_block_w = intseq U32 size_block_w
-type message_block = intseq U8 size_block
-type hash_state = intseq U32 size_hash_w
+type working_vector = lseq uint32 size_block_w
+type message_block_w = lseq uint32 size_block_w
+type message_block = lseq uint32 size_block
+type hash_state = lseq uint32 size_hash_w
 type idx = n:size_nat{n < 16}
 type counter = uint64
 type last_block_flag = bool
@@ -37,9 +37,9 @@ inline_for_extraction let list_iv : list uint32 =
    u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19]
 
 inline_for_extraction let size_const_iv : size_nat = 8
-let const_iv : intseq U32 size_const_iv =
+let const_iv : lseq uint32 size_const_iv =
   assert_norm (List.Tot.length list_iv = size_const_iv);
-  createL list_iv
+  of_list list_iv
 
 inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
   size  0; size  1; size  2; size  3; size  4; size  5; size  6; size  7;
@@ -67,7 +67,7 @@ inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
 inline_for_extraction let size_const_sigma : size_nat = 160
 let const_sigma:lseq (n:size_t{size_v n < 16}) size_const_sigma =
   assert_norm (List.Tot.length list_sigma = size_const_sigma);
-  createL list_sigma
+  of_list list_sigma
 
 
 (* Functions *)
@@ -160,7 +160,7 @@ let blake2_compress s m offset flag =
 
 val blake2s_update_block: dd_prev:size_nat -> d:message_block -> hash_state -> Tot hash_state
 let blake2s_update_block dd_prev d s =
-  let to_compress : intseq U32 16 = uints_from_bytes_le d in
+  let to_compress : lseq uint32 16 = uints_from_bytes_le d in
   let offset = u64 ((dd_prev + 1) * size_block) in
   blake2_compress s to_compress offset false
 
@@ -200,7 +200,7 @@ let blake2s_update_multi dd_prev dd d s =
 val blake2s_update_last_block : ll:size_nat -> last_block:lbytes size_block -> flag_key:bool -> hash_state -> Tot hash_state
 
 let blake2s_update_last_block ll last_block fk s =
-  let last_block : intseq U32 16 = uints_from_bytes_le last_block in
+  let last_block : lseq uint32 16 = uints_from_bytes_le last_block in
   if not fk then
     blake2_compress s last_block (u64 ll) true
   else

@@ -7,7 +7,6 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
-open FStar.All
 
 let version_number : uint8 = assert_norm (0x13 < maxint (U8));u8 0x13
 let argon_type = 1
@@ -21,7 +20,7 @@ val h : a_len:size_nat{0 < a_len /\ a_len <=max_size_t - 2 *$line_size}
   -> Tot (lbytes nn)
 let h a_len a nn =
   let null_list = [] in
-  let null_key : lbytes 0 = assert_norm (List.Tot.length null_list = 0); createL #uint8 null_list in
+  let null_key : lbytes 0 = assert_norm (List.Tot.length null_list = 0); of_list #uint8 null_list in
   Spec.Blake2b.blake2b a_len a 0 null_key nn
 
 (** Concats the parameters for Argon2i and hashes them to provide the initial buffer *)

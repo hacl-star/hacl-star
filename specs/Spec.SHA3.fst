@@ -11,7 +11,7 @@ open Spec.SHA3.Constants
 
 let keccak_rotc:lseq rotc_t 24 =
   assert_norm (List.Tot.length rotc_list == 24);
-  createL rotc_list
+  of_list rotc_list
 
 let pilns_t = x:size_nat{x < 25}
 
@@ -20,11 +20,11 @@ let sizes_v (x:piln_t) : pilns_t = size_v x
 let keccak_piln: lseq pilns_t 24 =
   let piln_list = List.Tot.map sizes_v piln_list in
   assert_norm (List.Tot.length piln_list == 24);
-  createL piln_list
+  of_list piln_list
 
 let keccak_rndc: lseq uint64 24 =
   assert_norm (List.Tot.length rndc_list == 24);
-  createL rndc_list
+  of_list rndc_list
 
 unfold
 type state = lseq uint64 25
@@ -75,7 +75,7 @@ let state_pi_rho_s i = tuple2 uint64 state
 
 let state_pi_rho (s_theta:state) : state =
   let current = readLane s_theta 1 0 in
-  let _, s_pi_rho = repeat 24 state_pi_rho_s
+  let _, s_pi_rho = repeat_gen 24 state_pi_rho_s
     state_pi_rho_inner (current, s_theta) in
   s_pi_rho
 
@@ -189,7 +189,7 @@ let squeeze (s:state)
 	    : lbytes outputByteLen =
   let outBlocks = outputByteLen / rateInBytes in
   let s, output =
-    repeat outBlocks
+    repeat_gen outBlocks
       (fun (i:size_nat{i <= outputByteLen / rateInBytes}) ->
         tuple2 state (lbytes (i * rateInBytes)))
       (squeeze_inner rateInBytes outputByteLen)

@@ -10,7 +10,8 @@ open Spec.Curve25519.Lemmas
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 (* Field types and parameters *)
-let prime = pow2 255 - 19
+let prime = pow2 255 - 19 
+  
 unfold type elem = nat_mod prime
 let to_elem x = x `modulo` prime
 let from_elem (x:elem) = nat_mod_v x

@@ -24,7 +24,7 @@ let init_list = List.Tot.map u64
    0x3C6EF372FE94F82B; 0xA54FF53A5F1D36F1;
    0x510E527FADE682D1; 0x9B05688C2B3E6C1F;
    0x1F83D9ABFB41BD6B; 0x5BE0CD19137E2179]
-let init_vector : intseq U64 8 = assert_norm (List.Tot.length init_list = 8) ; createL init_list
+let init_vector : lseq uint64 8 = assert_norm (List.Tot.length init_list = 8) ; of_list init_list
 let sigma_list : list (n:nat{n<16}) =
   [0;  1;  2;  3;  4;  5;  6;  7;  8;  9; 10; 11; 12; 13; 14; 15;
    14; 10;  4;  8;  9; 15; 13;  6;  1; 12;  0;  2; 11;  7;  5;  3;
@@ -36,11 +36,11 @@ let sigma_list : list (n:nat{n<16}) =
    13; 11;  7; 14; 12;  1;  3;  9;  5;  0; 15;  4;  8;  6;  2; 10;
    6; 15; 14;  9; 11;  3;  0;  8; 12;  2; 13;  7;  1;  4; 10;  5;
    10;  2;  8;  4;  7;  6;  1;  5; 15; 11;  9; 14;  3; 12; 13;  0]
-let sigma:lseq (n:nat{n < 16}) 160 = assert_norm (List.Tot.length sigma_list = 160) ; createL sigma_list
+let sigma:lseq (n:nat{n < 16}) 160 = assert_norm (List.Tot.length sigma_list = 160) ; of_list sigma_list
 
-type working_vector = intseq U64 16
-type message_block = intseq U64 16
-type hash_state = intseq U64 8
+type working_vector = lseq uint64 16
+type message_block = lseq uint64 16
+type hash_state = lseq uint64 8
 type idx = n:size_nat{n < 16}
 type counter = uint64
 type last_block_flag = bool
@@ -104,14 +104,14 @@ let blake2b_internal dd d ll kk nn =
   let h = if dd > 1 then
     repeati (dd -1)
       (fun i h ->
-	let to_compress : intseq U64 16 =
+	let to_compress : lseq uint64 16 =
 	  uints_from_bytes_le (sub d (i*bytes_in_block) bytes_in_block)
 	in
 	blake2_compress h to_compress (u128 ((i+1)*block_bytes)) false
       ) h else h
   in
   let offset : size_nat = (dd-1)*block_bytes in
-  let last_block : intseq U64 16 = uints_from_bytes_le (sub d offset bytes_in_block) in
+  let last_block : lseq uint64 16 = uints_from_bytes_le (sub d offset bytes_in_block) in
   let h = if kk = 0 then
     blake2_compress h last_block (u128  ll) true
     else

@@ -29,32 +29,23 @@ let decode (e:elem) : Tot block = nat_to_bytes_be blocksize (from_felem e)
 let update (r:elem ) (len:size_nat{len <= blocksize}) (w:lbytes len) (acc:elem) : Tot elem =
     (encode len w `fadd` acc) `fmul` r
 
-val poly: len:size_nat -> text:lbytes len -> r:elem ->  Tot (a:elem)  (decreases len)
-let poly len text r =
-  let blocks = len / blocksize in
-  let rem = len % blocksize in
-  let init  : elem = zero in
-  let acc   : elem =
-    repeati blocks
-      (fun i acc  ->
-	let b = slice text (i * blocksize) ((i+1)*blocksize) in
-	update r blocksize b acc)
-      init in
-  let acc = if rem = 0 then acc else
-    update r rem (slice text (len-rem) len) acc in
-  acc
+let poly (text:seq uint8) (r:elem) =
+  repeat_blocks #uint8 #elem blocksize text
+    (fun i b -> update r blocksize b)
+    (fun i -> update r)
+  zero
+
 let finish (a:elem) (s:tag) : Tot tag = decode (a `fadd` (encode blocksize s))
 
-let gmul (len:size_nat) (text:lbytes len) (h:lbytes blocksize) : Tot tag  =
+let gmul (text:bytes) (h:lbytes blocksize) : Tot tag  =
     let r = encode blocksize h in
-    decode (poly len text r)
+    decode (poly text r)
 
 val gmac:
-  len:size_nat ->
-  text:lbytes len ->
+  text:bytes ->
   h:lbytes blocksize ->
   k:key ->
   Tot tag
-let gmac len text h k =
+let gmac text h k =
   let r = encode blocksize h in
-  finish (poly len text r) k
+  finish (poly text r) k
