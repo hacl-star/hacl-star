@@ -152,7 +152,7 @@ procedure{:instruction mk_taint_ins2(S.AddCarry64, dst, src, list(dst), list(dst
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Adcx64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Adcx64Wrap(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.Adcx64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly}{:public} Adcx64Wrap(inout dst: dst_opr64, src: opr64)
     modifies
         efl;
     ensures
@@ -161,7 +161,7 @@ procedure{:instruction mk_taint_ins2(S.Adcx64, dst, src, list(dst), list(dst, sr
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Adox64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Adox64Wrap(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.Adox64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly}{:public} Adox64Wrap(inout dst: dst_opr64, src: opr64)
     modifies
         efl;
     ensures
@@ -208,7 +208,7 @@ procedure{:instruction mk_taint_ins1(S.Mul64, src, list(TReg(Rax), TReg(Rdx)), l
     lemma_fundamental_div_mod(old(rax), old(src));
 }
 
-procedure{:instruction mk_taint_ins3(S.Mulx64, dst_hi, dst_lo, src, list(dst_hi, dst_lo), list(TReg(Rdx), src))}{:fast_instruction}{:quick exportOnly} Mulx64(out dst_hi: dst_opr64, out dst_lo: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins3(S.Mulx64, dst_hi, dst_lo, src, list(dst_hi, dst_lo), list(TReg(Rdx), src))}{:fast_instruction}{:quick exportOnly}{:public} Mulx64(out dst_hi: dst_opr64, out dst_lo: dst_opr64, src: opr64)
     requires @dst_hi != @dst_lo;
     reads
         rdx;
@@ -233,7 +233,7 @@ procedure{:instruction mk_taint_ins2(S.IMul64, dst, src, list(dst), list(dst, sr
     lemma_mul_in_bounds(old(dst), old(src));
 }
 
-procedure{:instruction mk_taint_ins2(S.Xor64, dst, src, list(dst), list(dst, src))}{:quick exportOnly} Xor64(inout dst: dst_opr64, src: opr64)
+procedure{:instruction mk_taint_ins2(S.Xor64, dst, src, list(dst), list(dst, src))}{:quick exportOnly}{:public} Xor64(inout dst: dst_opr64, src: opr64)
     modifies
         efl;
     ensures
