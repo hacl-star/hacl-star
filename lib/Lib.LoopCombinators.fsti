@@ -143,4 +143,3 @@ val repeati_inductive:
  -> f:repeatable #a #n pred
  -> x0:a{pred 0 x0}
  -> res:a{pred n res}
-

@@ -9,6 +9,7 @@ open Lib.RawIntTypes
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module U32 = FStar.UInt32
+
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 
@@ -18,6 +19,7 @@ module ByteSeq = Lib.ByteSequence
 #set-options "--z3rlimit 15"
 
 friend Lib.Sequence
+friend Lib.LoopCombinators
 
 let length #a b = B.length b
 
@@ -43,10 +45,10 @@ let upd #a #len b i v =
   B.upd b (size_to_UInt32 i) v
 
 let bget #a #len h b i =
-  Seq.index #a #len (B.as_seq h b) i
+  Seq.index #a (B.as_seq h b) i
 
 let ibget #a #len h b i =
-  Seq.index #a #len (IB.as_seq h b) i
+  Seq.index #a (IB.as_seq h b) i
 
 let create #a #len clen init =
   B.alloca init (normalize_term (size_to_UInt32 clen))
