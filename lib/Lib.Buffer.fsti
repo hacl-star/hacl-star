@@ -8,6 +8,8 @@ open Lib.RawIntTypes
 
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
+module LMB = LowStar.Monotonic.Buffer
+
 module U32 = FStar.UInt32
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
@@ -37,6 +39,67 @@ let ilbuffer (a:Type0) (len:size_nat) = b:IB.ibuffer a{IB.length b == len}
 
 (** Alias for mutable buffer of bytes *)
 let lbytes len = lbuffer uint8 len
+
+(** Liveness of buffers *)
+let live (#a:Type0) (#rrel #rel:LMB.srel a) (h:HS.mem) (b:LMB.mbuffer a rrel rel) = B.live #a #rrel #rel h b
+
+(** Generalized modification clause for Buffer locations *)
+let modifies
+  (s: B.loc)
+  (h1 h2: HS.mem)
+: GTot Type0 = B.modifies s h1 h2
+
+(** Disjointness clause for Buffers *)
+unfold
+let disjoint
+  (#a1 #a2:Type0)
+  (#rrel1 #rel1:LMB.srel a1)
+  (#rrel2 #rel2:LMB.srel a2)
+  (b1:LMB.mbuffer a1 rrel1 rel1)
+  (b2:LMB.mbuffer a2 rrel2 rel2)
+: GTot Type0 =
+  B.loc_disjoint (B.loc_buffer b1) (B.loc_buffer b2)
+
+(** Modification clause for one Buffer *)
+unfold
+let modifies1
+  (#a:Type0)
+  (#len:size_nat)
+  (b: lbuffer a len)
+  (h1 h2: HS.mem)
+: GTot Type0 = B.modifies (B.loc_buffer b) h1 h2
+
+(** Modification clause for two Buffers *)
+unfold
+let modifies2
+  (#a0:Type0)
+  (#a1:Type0)
+  (#len0:size_nat)
+  (#len1:size_nat)
+  (b0: lbuffer a0 len0)
+  (b1: lbuffer a1 len1)
+  (h1 h2: HS.mem)
+: GTot Type0 = B.modifies (B.loc_union (B.loc_buffer b0) (B.loc_buffer b1)) h1 h2
+
+(** Modification clause for two Buffers *)
+unfold
+let modifies3
+  (#a0:Type0)
+  (#a1:Type0)
+  (#a2:Type0)
+  (#len0:size_nat)
+  (#len1:size_nat)
+  (#len2:size_nat)
+  (b0: lbuffer a0 len0)
+  (b1: lbuffer a1 len1)
+  (b2: lbuffer a1 len1)
+  (h1 h2: HS.mem)
+: GTot Type0 = B.modifies (B.loc_union (B.loc_buffer b0) (B.loc_union (B.loc_buffer b1) (B.loc_buffer b2))) h1 h2
+
+(** Ghost reveal a Buffer as its Pure Sequence *)
+let as_seq (#a:Type0) (#rrel #rel:LMB.srel a) (h:HS.mem) (b:LMB.mbuffer a rrel rel)
+  : GTot (Seq.seq a)
+= B.as_seq #a #rrel #rel h b
 
 (** Ghost view of a subset of a mutable Buffer *)
 let gsub
