@@ -262,6 +262,17 @@ val createL_global:
     (ensures  fun h0 b h1 ->
       B.alloc_post_mem_common b h0 h1 (Seq.of_list init))
 
+(** Allocate a top-level fixed-length immutable Buffer and initialize it to value [init] *)
+inline_for_extraction noextract unfold
+val icreateL_global:
+    #a:Type0
+  -> init:list a{List.Tot.length init <= max_size_t} ->
+  ST (b:ilbuffer a (normalize_term (List.Tot.length init)){
+      IB.frameOf b == HyperStack.root /\ IB.recallable b})
+    (requires fun h0 -> IB.gcmalloc_of_list_pre #a HyperStack.root init)
+    (ensures  fun h0 b h1 ->
+      IB.alloc_post_mem_common b h0 h1 (Seq.of_list init))
+
 (** Copy a mutable Buffer in another mutable Buffer *)
 inline_for_extraction
 val copy:
