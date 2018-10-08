@@ -125,9 +125,29 @@ let op_Array_Assignment #a #len = upd #a #len
 inline_for_extraction
 let op_Array_Access #a #len = index #a #len
 
-(** Access to the pure sequence-based value associated to an index of a Buffer  *)
-let bget (#a:Type0) (#len:size_nat) h (b:lbuffer a len) i = Seq.index #a #len (B.as_seq h b) i
-let ibget (#a:Type0) (#len:size_nat) h (b:ilbuffer a len) i = Seq.index #a #len (IB.as_seq h b) i
+(** Access to the pure sequence-based value associated to an index of a mutable Buffer  *)
+(* We don't have access to Lib.Sequence.fst
+   to get the fact `Lib.Sequence.index == FStar.Seq.index` *)
+inline_for_extraction
+val bget:
+    #a:Type0
+  -> #len:size_nat
+  -> h:mem
+  -> b:lbuffer a len
+  -> i:size_nat{i < len}
+  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (B.as_seq h b) i})
+
+(** Access to the pure sequence-based value associated to an index of an immutable Buffer  *)
+(* We don't have access to Lib.Sequence.fst
+   to get the fact `Lib.Sequence.index == FStar.Seq.index` *)
+inline_for_extraction
+val ibget:
+    #a:Type0
+  -> #len:size_nat
+  -> h:mem
+  -> b:ilbuffer a len
+  -> i:size_nat{i < len}
+  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (IB.as_seq h b) i})
 
 (** Allocate a fixed-length mutable Buffer and initialize it to value [init] *)
 inline_for_extraction

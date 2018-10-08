@@ -70,9 +70,13 @@ let state_pi_rho_inner (i:size_nat{i < 24}) (current, s) : tuple2 uint64 state =
   let current = temp in
   current, s
 
+val state_pi_rho_s: i:size_nat{i <= 24} -> Type0
+let state_pi_rho_s i = tuple2 uint64 state
+
 let state_pi_rho (s_theta:state) : state =
   let current = readLane s_theta 1 0 in
-  let _, s_pi_rho = repeati 24 state_pi_rho_inner (current, s_theta) in
+  let _, s_pi_rho = repeat 24 state_pi_rho_s
+    state_pi_rho_inner (current, s_theta) in
   s_pi_rho
 
 let state_chi_inner (s_pi_rho:state) (y:index) (x:index) (s:state) : state =

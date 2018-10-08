@@ -38,6 +38,12 @@ let iindex #a #len b i =
 let upd #a #len b i v =
   B.upd b (size_to_UInt32 i) v
 
+let bget #a #len h b i =
+  Seq.index #a #len (B.as_seq h b) i
+
+let ibget #a #len h b i =
+  Seq.index #a #len (IB.as_seq h b) i
+
 let create #a #len clen init =
   B.alloca init (normalize_term (size_to_UInt32 clen))
 
