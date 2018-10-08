@@ -16,7 +16,7 @@ module HS = FStar.HyperStack
 
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
-
+module Loop = Lib.LoopCombinators
 
 #set-options "--z3rlimit 15"
 
@@ -139,7 +139,7 @@ val sub:
 let igsub
     (#a:Type0)
     (#len:size_nat)
-    (b:libuffer a len)
+    (b:ilbuffer a len)
     (start:size_t)
     (n:size_t{v start + v n <= len})
  =
@@ -149,7 +149,7 @@ val as_seq_igsub:
     #a:Type0
   -> #len:size_nat
   -> h:HS.mem
-  -> b:libuffer a len
+  -> b:ilbuffer a len
   -> start:size_t
   -> n:size_t{v start + v n <= len}
   -> Lemma
@@ -180,7 +180,7 @@ val index:
   Stack a
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == Seq.index #a #len (B.as_seq h1 b) (v i))
+      r == Seq.index #a (B.as_seq h1 b) (v i))
 
 (** Access a specific value in an immutable Buffer *)
 inline_for_extraction
@@ -192,7 +192,7 @@ val iindex:
   Stack a
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == Seq.index #a #len (IB.as_seq h1 b) (v i))
+      r == Seq.index #a (IB.as_seq h1 b) (v i))
 
 (** Update a specific value in a mutable Buffer *)
 inline_for_extraction
@@ -230,7 +230,7 @@ val bget:
   -> h:mem
   -> b:lbuffer a len
   -> i:size_nat{i < len}
-  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (B.as_seq h b) i})
+  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a (B.as_seq h b) i})
 
 (** Access to the pure sequence-based value associated to an index of an immutable Buffer  *)
 (* We don't have access to Lib.Sequence.fst
@@ -242,7 +242,7 @@ val ibget:
   -> h:mem
   -> b:ilbuffer a len
   -> i:size_nat{i < len}
-  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (IB.as_seq h b) i})
+  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a (IB.as_seq h b) i})
 
 (** Allocate a fixed-length mutable Buffer and initialize it to value [init] *)
 inline_for_extraction
@@ -409,7 +409,7 @@ let loop_inv
     (h:mem) : Type0
   =
   B.modifies (footprint i) h0 h /\
-  refl h i == Seq.repeat i a_spec (spec h0) (refl h0 0)
+  refl h i == Loop.repeat_gen i a_spec (spec h0) (refl h0 0)
 
 inline_for_extraction noextract
 val loop:
@@ -441,7 +441,7 @@ let loop1_inv
     (h:mem) : Type0
  =
   B.modifies (B.loc_buffer write) h0 h /\
-  B.as_seq h write == Seq.repeati i (spec h0) (B.as_seq h0 write)
+  B.as_seq h write == Loop.repeati i (spec h0) (B.as_seq h0 write)
 
 (** Loop which modifies a single buffer [write] *)
 inline_for_extraction noextract
@@ -477,7 +477,7 @@ let loop2_inv
     (h:mem) : Type0
  =
   B.modifies (B.loc_union (B.loc_buffer write0) (B.loc_buffer write1)) h0 h /\
-  (let s0, s1 = Seq.repeati i (spec h0) (B.as_seq h0 write0, B.as_seq h0 write1) in
+  (let s0, s1 = Loop.repeati i (spec h0) (B.as_seq h0 write0, B.as_seq h0 write1) in
   B.as_seq h write0 == s0 /\ B.as_seq h write1 == s1)
 
 (** Loop which modifies two buffers [write0] and [write1] *)

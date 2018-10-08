@@ -39,8 +39,9 @@ let readLane (s:state) (x:index) (y:index) : uint64 =
 let writeLane (s:state) (x:index) (y:index) (v:uint64) : state =
   s.[x + 5 * y] <- v
 
-let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) : uint64 =
-  (a <<. b) |. (a >>. (u32 64 -. b))
+
+let rotl (a:uint64) (b:size_t{0 < uint_v b /\ uint_v b < 64}) : uint64 =
+  (a <<. b) |. (a >>. (size 64 -. b))
 
 let state_theta_inner_C (s:state) (i:size_nat{i < 5}) (_C:lseq uint64 5) : lseq uint64 5 =
   _C.[i] <- readLane s i 0 ^. readLane s i 1 ^. readLane s i 2 ^. readLane s i 3 ^. readLane s i 4
@@ -52,7 +53,7 @@ let state_theta_inner_s_inner (x:index) (_D:uint64) (y:index) (s:state) : state 
   writeLane s x y (readLane s x y ^. _D)
 
 let state_theta_inner_s (_C:lseq uint64 5) (x:index) (s:state) : state =
-  let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (u32 1)) in
+  let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (size 1)) in
   repeati 5 (state_theta_inner_s_inner x _D) s
 
 let state_theta1 (s:state) (_C:lseq uint64 5): state =
@@ -241,7 +242,7 @@ val cshake128_frodo:
   -> lbytes output_len
 let cshake128_frodo input_len input cstm output_len =
   let s = Seq.create 25 (u64 0) in
-  let s = s.[0] <- u64 0x10010001a801 |. shift_left (to_u64 cstm) (u32 48) in
+  let s = s.[0] <- u64 0x10010001a801 |. shift_left (to_u64 cstm) (size 48) in
   let s = state_permute s in
   let s = absorb s 168 input_len input (u8 0x04) in
   squeeze s 168 output_len
@@ -254,7 +255,7 @@ val cshake256_frodo:
   -> lbytes output_len
 let cshake256_frodo input_len input cstm output_len =
   let s = Seq.create 25 (u64 0) in
-  let s = s.[0] <- u64 0x100100018801 |. shift_left (to_u64 cstm) (u32 48) in
+  let s = s.[0] <- u64 0x100100018801 |. shift_left (to_u64 cstm) (size 48) in
   let s = state_permute s in
   let s = absorb s 136 input_len input (u8 0x04) in
   squeeze s 136 output_len
