@@ -21,6 +21,8 @@ friend Lib.Sequence
 
 let length #a b = B.length b
 
+let ilength #a b = IB.length b
+
 let sub #a #len #olen b start n =
   B.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
