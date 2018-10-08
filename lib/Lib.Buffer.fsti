@@ -31,13 +31,23 @@ let lbytes len = lbuffer uint8 len
 let gsub
     (#a:Type0)
     (#len:size_nat)
-    (#olen:size_nat)
     (b:lbuffer a len)
     (start:size_t)
-    (n:size_t{v start + v n <= len /\ v n == olen})
+    (n:size_t{v start + v n <= len})
  =
   B.gsub b (size_to_UInt32 start) (size_to_UInt32 n)
 
+val as_seq_gsub:
+    #a:Type0
+  -> #len:size_nat
+  -> h:HS.mem
+  -> b:lbuffer a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= len}
+  -> Lemma
+    (B.as_seq h (gsub #a #len b start n) ==
+     Seq.sub #a #len (B.as_seq h b) (v start) (v n))
+    [SMTPat (Seq.sub #a #len (B.as_seq h b) (v start) (v n))]
 
 inline_for_extraction
 val sub:
@@ -49,9 +59,28 @@ val sub:
   -> n:size_t{v start + v n <= len /\ v n == olen}
   -> Stack (lbuffer a olen)
     (requires fun h0 -> B.live h0 b)
-    (ensures  fun h0 r h1 ->
-      h0 == h1 /\ r == B.gsub b (size_to_UInt32 start) (size_to_UInt32 n) /\
-      B.as_seq h1 r == Seq.sub #a #len (B.as_seq h0 b) (v start) (v n))
+    (ensures  fun h0 r h1 -> h0 == h1 /\ r == gsub b start n)
+
+let igsub
+    (#a:Type0)
+    (#len:size_nat)
+    (b:libuffer a len)
+    (start:size_t)
+    (n:size_t{v start + v n <= len})
+ =
+  IB.igsub b (size_to_UInt32 start) (size_to_UInt32 n)
+
+val as_seq_igsub:
+    #a:Type0
+  -> #len:size_nat
+  -> h:HS.mem
+  -> b:libuffer a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= len}
+  -> Lemma
+    (B.as_seq h (igsub #a #len b start n) ==
+     Seq.sub #a #len (B.as_seq h b) (v start) (v n))
+    [SMTPat (Seq.sub #a #len (B.as_seq h b) (v start) (v n))]
 
 inline_for_extraction
 val isub:
@@ -63,9 +92,7 @@ val isub:
   -> n:size_t{v start + v n <= len /\ v n == olen}
   -> Stack (libuffer a olen)
     (requires fun h0 -> IB.live h0 b)
-    (ensures  fun h0 r h1 ->
-      h0 == h1 /\ r == IB.igsub b (size_to_UInt32 start) (size_to_UInt32 n) /\
-      IB.as_seq h1 r == Seq.sub #a #len (IB.as_seq h0 b) (v start) (v n))
+    (ensures  fun h0 r h1 -> h0 == h1 /\ r == igsub b start n)
 
 inline_for_extraction
 val index:
