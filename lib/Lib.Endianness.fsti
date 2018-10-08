@@ -108,7 +108,7 @@ val uints_to_bytes_be:
 			      (BS.uints_to_bytes_be #t #len (as_seq h0 i) )))
 
 inline_for_extraction
-let uint32s_to_bytes_le #_ #len = uints_to_bytes_le #U32 #len
+let uint32s_to_bytes_le #len = uints_to_bytes_le #U32 #len
 
 inline_for_extraction
-let uint32s_from_bytes_le #_ #len = uints_from_bytes_le #U32 #len
+let uint32s_from_bytes_le #len = uints_from_bytes_le #U32 #len
