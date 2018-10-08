@@ -61,6 +61,14 @@ let recall #a #len b = B.recall b
 let createL_global #a init =
   B.gcmalloc_of_list HyperStack.root init
 
+let icreateL_global #a init =
+  let b = B.mgcmalloc_of_list root init in
+  B.witness_p b (cpred (Seq.seq_of_list init));
+  b
+
+let recall_contents #a #len b s =
+  B.recall_p b (cpred s)
+
 let copy #a #len o clen i =
   let h0 = ST.get () in
   LowStar.BufferOps.blit i (size_to_UInt32 (size 0)) o (size_to_UInt32 (size 0)) (size_to_UInt32 clen);

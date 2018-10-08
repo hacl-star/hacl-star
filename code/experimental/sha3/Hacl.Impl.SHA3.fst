@@ -20,21 +20,16 @@ module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module LSeq = Lib.Sequence
 module LB = Lib.ByteSequence
+module Loop = Lib.LoopCombinators
 module S = Spec.SHA3
 
-let keccak_rotc = IB.igcmalloc_of_list HyperStack.root rotc_list
+let keccak_rotc = icreateL_global rotc_list
 
-let keccak_piln = IB.igcmalloc_of_list HyperStack.root piln_list
+let keccak_piln = icreateL_global piln_list
 
-let keccak_rndc = IB.igcmalloc_of_list HyperStack.root rndc_list
+let keccak_rndc = icreateL_global rndc_list
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
-
-//inline_for_extraction noextract
-//let lbytes len = lbuffer uint8 len
-
-//inline_for_extraction noextract
-//let v = size_v
 
 inline_for_extraction noextract
 let state = lbuffer uint64 25
@@ -68,8 +63,8 @@ val writeLane:
 let writeLane s x y v = s.(x +! size 5 *! y) <- v
 
 [@"c_inline"]
-let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) =
-  (a <<. b) |. (a >>. (u32 64 -. b))
+let rotl (a:uint64) (b:size_t{0 < uint_v b /\ uint_v b < 64}) =
+  rotate_left a b
 
 inline_for_extraction noextract
 val state_theta0:
@@ -86,7 +81,7 @@ let state_theta0 s _C =
   let h0 = ST.get () in
   loop1 h0 (size 5) _C spec
   (fun x ->
-    LSeq.unfold_repeati 5 (spec h0) (as_seq h0 _C) (v x);
+    Loop.unfold_repeati 5 (spec h0) (as_seq h0 _C) (v x);
     _C.(x) <-
       readLane s x (size 0) ^.
       readLane s x (size 1) ^.
@@ -106,13 +101,13 @@ val state_theta_inner_s:
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s == S.state_theta_inner_s (as_seq h0 _C) (v x) (as_seq h0 s))
 let state_theta_inner_s _C x s =
-  let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (u32 1) in
+  let _D = _C.((x +. size 4) %. size 5) ^. rotl _C.((x +. size 1) %. size 5) (size 1) in
   [@ inline_let]
   let spec h0 = S.state_theta_inner_s_inner (v x) _D in
   let h0 = ST.get () in
   loop1 h0 (size 5) s spec
   (fun y ->
-    LSeq.unfold_repeati 5 (spec h0) (as_seq h0 s) (v y);
+    Loop.unfold_repeati 5 (spec h0) (as_seq h0 s) (v y);
     writeLane s x y (readLane s x y ^. _D)
   )
 
@@ -131,7 +126,7 @@ let state_theta1 s _C =
   let h0 = ST.get () in
   loop1 h0 (size 5) s spec
   (fun x ->
-    LSeq.unfold_repeati 5 (spec h0) (as_seq h0 s) (v x);
+    Loop.unfold_repeati 5 (spec h0) (as_seq h0 s) (v x);
     state_theta_inner_s _C x s
   )
 
@@ -162,7 +157,7 @@ let rec index_map #a #b f l i =
     | [] -> ()
     | _ :: l' -> index_map f l' (i - 1)
 
-#reset-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 50"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 inline_for_extraction noextract
 val state_pi_rho_inner:
@@ -173,22 +168,20 @@ val state_pi_rho_inner:
     (requires fun h -> live h s /\ live h current /\ disjoint current s)
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc_buffer s) (loc_buffer current)) h0 h1 /\
-      (let c', s' = S.state_pi_rho_inner (v i) (get h0 current 0, as_seq h0 s) in
-      get h1 current 0 == c' /\
+      (let c', s' = S.state_pi_rho_inner (v i) (bget h0 current 0, as_seq h0 s) in
+      bget h1 current 0 == c' /\
       as_seq h1 s == s'))
 let state_pi_rho_inner i current s =
-  let h = ST.get () in
-  IB.recall_contents keccak_rotc (Seq.seq_of_list rotc_list);
-  IB.recall_contents keccak_piln (Seq.seq_of_list piln_list);
-  let r  = IB.index keccak_rotc (Lib.RawIntTypes.size_to_UInt32 i) in
-  let _Y = IB.index keccak_piln (Lib.RawIntTypes.size_to_UInt32 i) in
+  assert_norm (List.Tot.length rotc_list <= max_size_t);
+  assert_norm (List.Tot.length piln_list <= max_size_t);
+  recall_contents keccak_rotc (LSeq.seq_of_list rotc_list);
+  recall_contents keccak_piln (LSeq.seq_of_list piln_list);
   index_map S.sizes_v piln_list (v i);
-  let temp = s.(_Y) in
-  let current0 = current.(size 0) in
-  s.(_Y) <- rotl current0 r;
+  let _Y = iindex keccak_piln i in
+  let r = iindex keccak_rotc i in
+  let temp = s.(_Y) in  
+  s.(_Y) <- rotl current.(size 0) r;
   current.(size 0) <- temp
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 inline_for_extraction noextract
 val state_pi_rho:
@@ -197,22 +190,21 @@ val state_pi_rho:
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
-      as_seq h1 s == S.state_pi_rho (as_seq h0 s))
+      as_seq h1 s == S.state_pi_rho (as_seq h0 s)) 
 let state_pi_rho s =
   push_frame();
   let h0 = ST.get () in
   let current:lbuffer uint64 1 = create (size 1) (readLane s (size 1) (size 0)) in
   let h1 = ST.get () in
   assert (bget h1 current 0 == S.readLane (as_seq h0 s) 1 0);
-  let a_impl = tuple2 (lbuffer uint64 1) state in
-  let refl h i : GTot (tuple2 uint64 S.state) =
-    get h current 0, as_seq h s in
+  let a_impl = (lbuffer uint64 1) & state in
+  let refl h i : GTot (uint64 & S.state) = get h current 0, as_seq h s in
   let footprint i = loc_union (loc_buffer current) (loc_buffer s) in
   let spec h0 = S.state_pi_rho_inner in
   let h0 = ST.get () in
   loop h0 (size 24) S.state_pi_rho_s a_impl (current, s) refl footprint spec
   (fun i ->
-    LSeq.unfold_repeat 24 S.state_pi_rho_s (spec h0) (refl h0 0) (v i);
+    Loop.unfold_repeat_gen 24 S.state_pi_rho_s (spec h0) (refl h0 0) (v i);
     state_pi_rho_inner i current s
   );
   pop_frame()
@@ -250,7 +242,7 @@ let state_chi_inner1 s_pi_rho y s =
   let h0 = ST.get () in
   loop1 h0 (size 5) s spec
   (fun x ->
-    LSeq.unfold_repeati 5 (spec h0) (as_seq h0 s) (v x);
+    Loop.unfold_repeati 5 (spec h0) (as_seq h0 s) (v x);
     state_chi_inner s_pi_rho y x s
   )
 
@@ -271,7 +263,7 @@ let state_chi s =
   let h0 = ST.get () in
   loop1 h0 (size 5) s spec
   (fun y ->
-    LSeq.unfold_repeati 5 (spec h0) (as_seq h0 s) (v y);
+    Loop.unfold_repeati 5 (spec h0) (as_seq h0 s) (v y);
     state_chi_inner1 s_pi_rho y s
   );
   pop_frame()
@@ -286,9 +278,10 @@ val state_iota:
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s == S.state_iota (as_seq h0 s) (v round))
 let state_iota s round =
-  IB.recall_contents keccak_rndc (Seq.seq_of_list rndc_list);
+  assert_norm (List.Tot.length rndc_list <= max_size_t);
+  recall_contents keccak_rndc (LSeq.seq_of_list rndc_list);
   writeLane s (size 0) (size 0) (readLane s (size 0) (size 0) ^.
-    (IB.index keccak_rndc (Lib.RawIntTypes.size_to_UInt32 round)))
+    (iindex keccak_rndc round))
 
 val state_permute:
     s:state
@@ -303,7 +296,7 @@ let state_permute s =
   let h0 = ST.get () in
   loop1 h0 (size 24) s spec
   (fun round ->
-    LSeq.unfold_repeati 24 (spec h0) (as_seq h0 s) (v round);
+    Loop.unfold_repeati 24 (spec h0) (as_seq h0 s) (v round);
     state_theta s;
     state_pi_rho s;
     state_chi s;
@@ -315,8 +308,7 @@ val loadState:
   -> input:lbytes (v rateInBytes)
   -> s:state
   -> Stack unit
-    (requires fun h ->
-      live h input /\ live h s /\ disjoint input s)
+    (requires fun h -> live h input /\ live h s /\ disjoint input s)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s == S.loadState (v rateInBytes) (as_seq h0 input) (as_seq h0 s))
@@ -329,7 +321,7 @@ let loadState rateInBytes input s =
   let h0 = ST.get () in
   loop1 h0 (size 25) s spec
   (fun j ->
-    LSeq.unfold_repeati 25 (spec h0) (as_seq h0 s) (v j);
+    Loop.unfold_repeati 25 (spec h0) (as_seq h0 s) (v j);
     s.(j) <- s.(j) ^. uint_from_bytes_le #U64 (sub #_ #200 #8 block (j *! size 8) (size 8))
   );
   pop_frame ()
@@ -374,47 +366,13 @@ let storeState rateInBytes s res =
   let h0 = ST.get () in
   loop1 h0 (size 25) block spec
   (fun j ->
-    LSeq.unfold_repeati 25 (spec h0) (as_seq h0 block) (v j);
+    Loop.unfold_repeati 25 (spec h0) (as_seq h0 block) (v j);
     storeState_inner s j block
   );
   copy res rateInBytes (sub block (size 0) rateInBytes);
   pop_frame()
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
-
-inline_for_extraction noextract
-val absorb_last:
-    s:state
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
-  -> inputByteLen:size_t
-  -> input:lbytes (v inputByteLen)
-  -> delimitedSuffix:uint8
-  -> Stack unit
-    (requires fun h -> live h s /\ live h input /\ disjoint s input)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer s) h0 h1 /\
-      as_seq h1 s ==
-      S.absorb_last (as_seq h0 s) (v rateInBytes) (v inputByteLen) (as_seq h0 input) delimitedSuffix)
-let absorb_last s rateInBytes inputByteLen input delimitedSuffix =
-  push_frame ();
-  let lastBlock = create rateInBytes (u8 0) in
-  let rem = inputByteLen %. rateInBytes in
-  let last = sub input (inputByteLen -. rem) rem in
-  let h0 = ST.get () in
-  update_sub #uint8 #(v rateInBytes) lastBlock (size 0) rem last;
-  assert (v rem < v rateInBytes);
-  lastBlock.(rem) <- delimitedSuffix;
-  loadState rateInBytes lastBlock s;
-  pop_frame();
-  // TODO: this seems unnecessary
-  let h1 = ST.get () in
-  assert (as_seq h1 s ==
-    (let lastBlock = LSeq.create (v rateInBytes) (u8 0) in
-     let rem = v inputByteLen % v rateInBytes in
-     let last: LSeq.lseq uint8 rem = LSeq.sub #_ #(v inputByteLen) (as_seq h0 input) (v inputByteLen - rem) rem in
-     let lastBlock = LSeq.update_sub lastBlock 0 rem last in
-     let lastBlock = Lib.Sequence.(lastBlock.[rem] <- delimitedSuffix) in
-     S.loadState (v rateInBytes) lastBlock (as_seq h0 s)))
 
 inline_for_extraction noextract
 val absorb_next:
@@ -432,6 +390,34 @@ let absorb_next s rateInBytes =
   loadState rateInBytes nextBlock s;
   state_permute s;
   pop_frame ()
+
+inline_for_extraction noextract
+val absorb_last:
+    delimitedSuffix:byte_t
+  -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
+  -> rem:size_t{v rem < v rateInBytes}  
+  -> input:lbytes (v rem)
+  -> s:state
+  -> Stack unit
+    (requires fun h -> live h s /\ live h input /\ disjoint s input)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer s) h0 h1 /\
+      as_seq h1 s ==
+      S.absorb_last delimitedSuffix (v rateInBytes) (v rem) 
+        (as_seq h0 input) (as_seq h0 s))
+let absorb_last delimitedSuffix rateInBytes rem input s =
+  let open Lib.RawIntTypes in
+  push_frame ();
+  let lastBlock = create rateInBytes (u8 0) in
+  let h0 = ST.get () in
+  update_sub #uint8 #(v rateInBytes) lastBlock (size 0) rem input;
+  lastBlock.(rem) <- byte_to_uint8 delimitedSuffix;
+  loadState rateInBytes lastBlock s;
+  if not ((delimitedSuffix &. byte 0x80) =. byte 0) && 
+     (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. size 1))
+  then state_permute s;
+  absorb_next s rateInBytes;
+  pop_frame()
 
 private
 val lemma_rateInBytes:
@@ -452,12 +438,18 @@ val absorb_inner:
     (requires fun h0 -> live h0 s /\ live h0 input /\ disjoint s input)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
-      as_seq h1 s ==
-      S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input) (v i) (as_seq h0 s))
+      as_seq h1 s == S.absorb_inner (v rateInBytes) (v inputByteLen) 
+        (as_seq h0 input) (v i) (as_seq h0 s))
 let absorb_inner rateInBytes inputByteLen input i s =
   lemma_rateInBytes (v inputByteLen) (v rateInBytes) (v i);
-  loadState rateInBytes
-    (sub #_ #(v inputByteLen) #(v rateInBytes) input (i *! rateInBytes) rateInBytes) s;
+  let block = sub input (i *. rateInBytes) rateInBytes in
+  // SZ: repeat_blocks is defined in terms of LSeq.seq_sub but sub is specified
+  // in terms of LSeq.sub, so we need to prove extensional equality explicitly.
+  let h = ST.get () in
+  LSeq.eq_intro
+    (LSeq.sub #_ #(v inputByteLen) (as_seq h input) (v (i *. rateInBytes)) (v rateInBytes))
+    (LSeq.seq_sub (as_seq h input) (v (i *. rateInBytes)) (v rateInBytes));
+  loadState rateInBytes block s;
   state_permute s
 
 val absorb:
@@ -465,40 +457,33 @@ val absorb:
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> inputByteLen:size_t
   -> input:lbytes (v inputByteLen)
-  -> delimitedSuffix:uint8
+  -> delimitedSuffix:byte_t
   -> Stack unit
     (requires fun h0 -> live h0 s /\ live h0 input /\ disjoint s input)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s ==
-      S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen) (as_seq h0 input) delimitedSuffix)
+      S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen) 
+        (as_seq h0 input) delimitedSuffix)
 let absorb s rateInBytes inputByteLen input delimitedSuffix =
-  let open Lib.RawIntTypes in
-  let n = inputByteLen /. rateInBytes in
+  let nb = inputByteLen /. rateInBytes in
   let rem = inputByteLen %. rateInBytes in
   [@ inline_let]
   let spec h0 = S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input) in
   let h0 = ST.get () in
-  loop1 h0 n s spec
-  (fun i ->
-    LSeq.unfold_repeati (v n) (spec h0) (as_seq h0 s) (v i);
-    absorb_inner rateInBytes inputByteLen input i s
-  );
-  absorb_last s rateInBytes inputByteLen input delimitedSuffix;
-  (if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) &&
-      (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. size 1)))
-  then state_permute s);
-  absorb_next s rateInBytes;
-  let h1 = ST.get () in
-  // TODO: Figure out why S.absorb doesn't unfold
-  let foo (p:Type0)
-    (pp:squash (norm [delta_only ["Spec.SHA3.absorb"]] p)) : squash p = pp
-  in
-  foo (
-    as_seq h1 s ==
-    S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen) (as_seq h0 input) delimitedSuffix) ()
+  loop1 h0 nb s spec (fun i -> 
+    Loop.unfold_repeati (v nb) (spec h0) (as_seq h0 s) (v i);
+    absorb_inner rateInBytes inputByteLen input i s);
+  let last = sub input (nb *. rateInBytes) rem in
+  // SZ: repeat_blocks is defined in terms of LSeq.seq_sub but sub is specified
+  // in terms of LSeq.sub, so we need to prove extensional equality explicitly.
+  let h = ST.get () in
+  LSeq.eq_intro
+    (LSeq.sub #_ #(v inputByteLen) (as_seq h input) (v (nb *. rateInBytes)) (v rem))
+    (LSeq.seq_sub (as_seq h input) (v (nb *. rateInBytes)) (v rem));
+  absorb_last delimitedSuffix rateInBytes rem last s
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '*'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
 
 val lemma_update_squeeze:
     rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
@@ -513,13 +498,18 @@ val lemma_update_squeeze:
       LSeq.sub o1 (i * rateInBytes) rateInBytes == S.storeState rateInBytes s)
     (ensures o1 == snd (S.squeeze_inner rateInBytes outputByteLen i (s, o)))
 let lemma_update_squeeze rateInBytes outputByteLen i s o o1 =
-  Seq.lemma_split (LSeq.sub o1 0 (i * rateInBytes + rateInBytes)) (i * rateInBytes)
+  Seq.lemma_split (LSeq.sub o1 0 (i * rateInBytes + rateInBytes)) (i * rateInBytes);
+  // SZ: applying the above lemma is useless without knowing that 
+  // LSeq.append is FStar.Seq.append and that LSeq.sub s o1 ... == Seq.slice ...
+  // We can either prove a similar lemma written in terms of LSeq.sub and
+  // LSeq.append in LSeq, or make some definitions transparent
+  admit()
 
 inline_for_extraction noextract
 val squeeze_inner:
-    rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
+    rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
-  -> i:size_t{v i < v outputByteLen / v rateInBytes}
+  -> i:size_t{v i < v (outputByteLen /. rateInBytes)}
   -> s:state
   -> output:lbytes (v outputByteLen)
   -> Stack unit
@@ -527,20 +517,19 @@ val squeeze_inner:
     (ensures  fun h0 _ h1 ->
       lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
       modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1 /\
- //       (loc_buffer (gsub #_ #_ #(v rateInBytes) output (i *! rateInBytes) rateInBytes))) h0 h1 /\
-      (let o = as_seq h0 (gsub #_ #_ #(v i * v rateInBytes) output (size 0) (i *! rateInBytes)) in
+      (let o = as_seq h0 (gsub output (size 0) (i *! rateInBytes)) in
        let s', output' =
          S.squeeze_inner (v rateInBytes) (v outputByteLen) (v i) (as_seq h0 s, o) in
        as_seq h1 s == s' /\
-       as_seq h1 (gsub #_ #_ #((v i + 1) * v rateInBytes) output (size 0) ((i +! size 1) *! rateInBytes)) == output'))
+       as_seq h1 (gsub output (size 0) ((i +! size 1) *! rateInBytes)) == output'))
 let squeeze_inner rateInBytes outputByteLen i s output =
   lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
   let h0 = ST.get () in
   storeState rateInBytes s (sub output (i *! rateInBytes) rateInBytes);
   let h1 = ST.get () in
   state_permute s;
-  let o = as_seq h0 (gsub #_ #_ #(v i * v rateInBytes) output (size 0) (i *! rateInBytes)) in
-  let o' = as_seq h1 (gsub #_ #_  #((v i + 1) * v rateInBytes) output (size 0) ((i +! size 1) *! rateInBytes)) in
+  let o = as_seq h0 (gsub output (size 0) (i *! rateInBytes)) in
+  let o' = as_seq h1 (gsub  output (size 0) ((i +! size 1) *! rateInBytes)) in
   lemma_update_squeeze (v rateInBytes) (v outputByteLen) (v i) (as_seq h1 s) o o'
 
 #set-options "--max_ifuel 1"
@@ -565,13 +554,13 @@ let squeeze s rateInBytes outputByteLen output = admit(); //TODO: add loop2
   let remOut = outputByteLen %. rateInBytes in
   let tmp = sub output (outputByteLen -. remOut) remOut in
   let a_spec (i:size_nat{i <= v outputByteLen / v rateInBytes}) =
-    tuple2 S.state (LB.lbytes (i * v rateInBytes)) in
-  let a_impl = tuple2 state (lbytes (v outputByteLen)) in
+    S.state & (LB.lbytes (i * v rateInBytes)) in
+  let a_impl = state & (lbytes (v outputByteLen)) in
   let refl h (i:size_nat{i <= v outBlocks}) :
-    GTot (tuple2 S.state (LB.lbytes (i * v rateInBytes))) =
+    GTot (S.state & (LB.lbytes (i * v rateInBytes))) =
     assert (i * v rateInBytes <= v outputByteLen);
     as_seq h s,
-    as_seq h (gsub #_ #_ #(i * v rateInBytes) output (size 0) (size i *! rateInBytes))
+    as_seq h (gsub output (size 0) (size i *! rateInBytes))
   in
   let footprint i = loc_union (loc_buffer s) (loc_buffer output) in
   let spec h0: i:size_nat{i < v outBlocks} -> a_spec i -> a_spec (i + 1) =
@@ -579,21 +568,23 @@ let squeeze s rateInBytes outputByteLen output = admit(); //TODO: add loop2
   let h0 = ST.get () in
   loop h0 outBlocks a_spec a_impl (s, output) refl footprint spec
   (fun i ->
-    LSeq.unfold_repeat (v outBlocks) a_spec (spec h0) (refl h0 0) (v i);
+    Loop.unfold_repeat_gen (v outBlocks) a_spec (spec h0) (refl h0 0) (v i);
     squeeze_inner rateInBytes outputByteLen i s output
   );
   storeState remOut s tmp;
   let h1 = ST.get() in
   Seq.lemma_split (as_seq h1 output) (v outputByteLen - v remOut);
   Seq.lemma_eq_intro (LSeq.create 0 (u8 0))
-    (as_seq h0 (gsub #_ #_ #0 output (size 0) (size 0)))
+    (as_seq h0 (gsub output (size 0) (size 0)))
+
+#set-options "--max_ifuel 0"
 
 val keccak:
     rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}
   -> capacity:size_t{v capacity + v rate == 1600}
   -> inputByteLen:size_t
   -> input:lbytes (v inputByteLen)
-  -> delimitedSuffix:uint8
+  -> delimitedSuffix:byte_t
   -> outputByteLen:size_t
   -> output:lbytes (v outputByteLen)
   -> Stack unit

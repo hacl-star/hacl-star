@@ -50,6 +50,9 @@ let seq_create #a len init = Seq.create #a len init
 
 let seq_of_list #a l = Seq.seq_of_list #a l
 
+let seq_of_list_index #a l i =
+  Seq.lemma_seq_of_list_index #a l i
+
 let seq_map #a #b f s =
   Seq.seq_of_list (List.Tot.map f (Seq.seq_to_list s))
 
@@ -77,6 +80,9 @@ let create #a len init = seq_create #a len init
 let to_list #a s = Seq.Properties.seq_to_list s
 
 let of_list #a l = seq_of_list #a l
+
+let of_list_index #a l i =
+  Seq.lemma_seq_of_list_index #a l i  
 
 let upd #a #len s n x = seq_upd #a s n x
 
@@ -135,14 +141,12 @@ let repeat_blocks #a #b bs inp f g init =
   let len = length inp in
   let nb = len / bs in
   let rem = len % bs in
-  let blocks : s:seq a{length s == nb * bs } = seq_sub inp 0 (nb * bs) in
-  let acc : b = init in
   let acc =
-    repeati #b nb
+    repeati nb
     (fun i acc ->
        assert ((i+1) * bs <= nb * bs);
-       let block : lseq a bs = seq_sub inp (i * bs) bs in
+       let block = seq_sub inp (i * bs) bs in
        f i block acc)
-    acc in
-  let last : lseq a rem = seq_sub #a inp (nb * bs) rem in
+    init in
+  let last = seq_sub inp (nb * bs) rem in
   g nb rem last acc

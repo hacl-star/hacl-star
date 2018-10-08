@@ -116,6 +116,13 @@ val seq_of_list:
   -> l:list a
   -> s:seq a{length s == List.Tot.length l}
 
+val seq_of_list_index:
+    #a:Type
+  -> l:list a
+  -> i:nat{i < List.Tot.length l}
+  -> Lemma (index (seq_of_list l) i == List.Tot.index l i)
+    [SMTPat (index (seq_of_list l) i)]
+
 (** Map function for Sequences *)
 val seq_map:#a:Type -> #b:Type -> (a -> Tot b) -> s1:seq a -> s2:seq b{length s2 == length s1}
 
@@ -167,6 +174,13 @@ val of_list:
     #a:Type
   -> l:list a{List.Tot.length l <= max_size_t}
   -> s:lseq a (List.Tot.length l)
+
+val of_list_index:
+    #a:Type
+  -> l:list a{List.Tot.length l <= max_size_t}
+  -> i:nat{i < List.Tot.length l}
+  -> Lemma (index (of_list l) i == List.Tot.index l i)
+    [SMTPat (index (of_list l) i)]
 
 (* Alias for creation from a list *)
 let createL #a l = of_list #a l

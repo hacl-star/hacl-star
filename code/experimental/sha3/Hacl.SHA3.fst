@@ -31,9 +31,9 @@ val shake128_hacl:
      (ensures  fun h0 _ h1 ->
        modifies (loc_buffer output) h0 h1 /\
        as_seq h1 output ==
-       S.shake128 (v inputByteLen) (as_seq h0 input) (v outputByteLen) (as_seq h0 output))
+       S.shake128 (v inputByteLen) (as_seq h0 input) (v outputByteLen))
 let shake128_hacl inputByteLen input outputByteLen output =
-  keccak (size 1344) (size 256) inputByteLen input (u8 0x1F) outputByteLen output
+  keccak (size 1344) (size 256) inputByteLen input (byte 0x1F) outputByteLen output
 
 val shake256_hacl:
     inputByteLen:size_t
@@ -46,9 +46,9 @@ val shake256_hacl:
      (ensures  fun h0 _ h1 ->
        modifies (loc_buffer output) h0 h1 /\
        as_seq h1 output ==
-       S.shake256 (v inputByteLen) (as_seq h0 input) (v outputByteLen) (as_seq h0 output))
+       S.shake256 (v inputByteLen) (as_seq h0 input) (v outputByteLen))
 let shake256_hacl inputByteLen input outputByteLen output =
-  keccak (size 1088) (size 512) inputByteLen input (u8 0x1F) outputByteLen output
+  keccak (size 1088) (size 512) inputByteLen input (byte 0x1F) outputByteLen output
 
 val sha3_224:
     inputByteLen:size_t
@@ -62,7 +62,7 @@ val sha3_224:
        as_seq h1 output ==
        S.sha3_224 (v inputByteLen) (as_seq h0 input))
 let sha3_224 inputByteLen input output =
-  keccak (size 1152) (size 448) inputByteLen input (u8 0x06) (size 28) output
+  keccak (size 1152) (size 448) inputByteLen input (byte 0x06) (size 28) output
 
 val sha3_256:
     inputByteLen:size_t
@@ -76,7 +76,7 @@ val sha3_256:
        as_seq h1 output ==
        S.sha3_256 (v inputByteLen) (as_seq h0 input))
 let sha3_256 inputByteLen input output =
-  keccak (size 1088) (size 512) inputByteLen input (u8 0x06) (size 32) output
+  keccak (size 1088) (size 512) inputByteLen input (byte 0x06) (size 32) output
 
 val sha3_384:
     inputByteLen:size_t
@@ -90,7 +90,7 @@ val sha3_384:
        as_seq h1 output ==
        S.sha3_384 (v inputByteLen) (as_seq h0 input))
 let sha3_384 inputByteLen input output =
-  keccak (size 832) (size 768) inputByteLen input (u8 0x06) (size 48) output
+  keccak (size 832) (size 768) inputByteLen input (byte 0x06) (size 48) output
 
 val sha3_512:
     inputByteLen:size_t
@@ -104,7 +104,7 @@ val sha3_512:
        as_seq h1 output ==
        S.sha3_512 (v inputByteLen) (as_seq h0 input))
 let sha3_512 inputByteLen input output =
-  keccak (size 576) (size 1024) inputByteLen input (u8 0x06) (size 64) output
+  keccak (size 576) (size 1024) inputByteLen input (byte 0x06) (size 64) output
 
 (* cSHAKE for Frodo *)
 val cshake128_frodo:
@@ -122,9 +122,9 @@ val cshake128_frodo:
 let cshake128_frodo input_len input cstm output_len output =
   push_frame ();
   let s = create (size 25) (u64 0) in
-  s.(size 0) <- u64 0x10010001a801 |. (to_u64 cstm <<. u32 48);
+  s.(size 0) <- u64 0x10010001a801 |. (to_u64 cstm <<. size 48);
   state_permute s;
-  absorb s (size 168) input_len input (u8 0x04);
+  absorb s (size 168) input_len input (byte 0x04);
   squeeze s (size 168) output_len output;
   pop_frame ()
 
@@ -143,8 +143,8 @@ val cshake256_frodo:
 let cshake256_frodo input_len input cstm output_len output =
   push_frame ();
   let s = create (size 25) (u64 0) in
-  s.(size 0) <- u64 0x100100018801 |. (to_u64 cstm <<. u32 48);
+  s.(size 0) <- u64 0x100100018801 |. (to_u64 cstm <<. size 48);
   state_permute s;
-  absorb s (size 136) input_len input (u8 0x04);
+  absorb s (size 136) input_len input (byte 0x04);
   squeeze s (size 136) output_len output;
   pop_frame ()

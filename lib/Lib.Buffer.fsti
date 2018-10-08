@@ -35,7 +35,7 @@ val ilength: #a:Type0 -> b:ibuffer a -> GTot (r:size_nat{r == IB.length b})
 
 (** Definition of fixed length mutable and immutable Buffers *)
 let lbuffer (a:Type0) (len:size_nat) = b:buffer a {length b == len}
-let ilbuffer (a:Type0) (len:size_nat) = b:IB.ibuffer a{IB.length b == len}
+let ilbuffer (a:Type0) (len:size_nat) = b:IB.libuffer a len
 
 (** Alias for mutable buffer of bytes *)
 let lbytes len = lbuffer uint8 len
@@ -269,8 +269,7 @@ val createL:
       B.frameOf b = HS.get_tip h0)
 
 (** Recall the value of a top-level Buffer *)
-(* BB. Do we use this for mutable top-level buffers ? or should it be an ilbuffer *)
-inline_for_extraction
+inline_for_extraction noextract
 val recall:
   #a:Type
   -> #len:size_nat
@@ -283,12 +282,34 @@ val recall:
 inline_for_extraction noextract
 val createL_global:
     #a:Type0
-  -> init:list a{List.Tot.length init <= max_size_t} ->
+  -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
   ST (b:lbuffer a (normalize_term (List.Tot.length init)){
       B.frameOf b == HyperStack.root /\ B.recallable b})
     (requires fun h0 -> B.gcmalloc_of_list_pre #a HyperStack.root init)
-    (ensures  fun h0 b h1 ->
-      B.alloc_post_mem_common b h0 h1 (Seq.of_list init))
+    (ensures  fun h0 b h1 -> B.alloc_post_mem_common b h0 h1 (Seq.of_list init))
+
+private
+let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> Seq.equal s s1
+
+inline_for_extraction noextract
+val icreateL_global:
+    #a:Type0
+  -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
+  ST (b:ilbuffer a (normalize_term (List.Tot.length init)){
+      B.frameOf b == HyperStack.root /\ B.recallable b /\
+      B.witnessed b (cpred (Seq.seq_of_list init))})
+    (requires fun h0 -> B.gcmalloc_of_list_pre #a HyperStack.root init)
+    (ensures  fun h0 b h1 -> B.alloc_post_mem_common b h0 h1 (Seq.of_list init))
+
+inline_for_extraction noextract
+val recall_contents:
+    #a:Type0
+  -> #len:size_nat{len <= max_size_t}
+  -> b:ilbuffer a len
+  -> s:Seq.lseq a len
+  -> ST unit
+    (requires fun h0 -> (B.recallable b \/ live h0 b) /\ B.witnessed b (cpred s))
+    (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b /\ as_seq h0 b == s)
 
 (** Copy a mutable Buffer in another mutable Buffer *)
 inline_for_extraction
