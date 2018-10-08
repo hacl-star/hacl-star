@@ -39,8 +39,8 @@ let readLane (s:state) (x:index) (y:index) : uint64 =
 let writeLane (s:state) (x:index) (y:index) (v:uint64) : state =
   s.[x + 5 * y] <- v
 
-let rotl (a:uint64) (b:uint32{0 < uint_v b /\ uint_v b < 64}) : uint64 =
-  (a <<. b) |. (a >>. (u32 64 -. b))
+let rotl (a:uint64) (b:size_t{0 < uint_v b /\ uint_v b < 64}) : uint64 =
+  rotate_left a b
 
 let state_theta_inner_C (s:state) (i:size_nat{i < 5}) (_C:lseq uint64 5) : lseq uint64 5 =
   _C.[i] <- readLane s i 0 ^. readLane s i 1 ^. readLane s i 2 ^. readLane s i 3 ^. readLane s i 4
@@ -52,7 +52,7 @@ let state_theta_inner_s_inner (x:index) (_D:uint64) (y:index) (s:state) : state 
   writeLane s x y (readLane s x y ^. _D)
 
 let state_theta_inner_s (_C:lseq uint64 5) (x:index) (s:state) : state =
-  let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (u32 1)) in
+  let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (size 1)) in
   repeati 5 (state_theta_inner_s_inner x _D) s
 
 let state_theta1 (s:state) (_C:lseq uint64 5): state =
@@ -123,50 +123,44 @@ let storeState (rateInBytes:size_nat{rateInBytes <= 200}) (s:state) : lbytes rat
   let block = repeati 25 (storeState_inner s) block in
   sub block 0 rateInBytes
 
-val absorb_last:
-    s:state
-  -> rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}
-  -> inputByteLen:size_nat
-  -> input:lbytes inputByteLen
-  -> delimitedSuffix:uint8
-  -> state
-let absorb_last s rateInBytes inputByteLen input delimitedSuffix =
-  let lastBlock = create rateInBytes (u8 0) in
-  let rem = inputByteLen % rateInBytes in
-  let last: lseq uint8 rem = sub input (inputByteLen - rem) rem in
-  let lastBlock = update_sub lastBlock 0 rem last in
-  let lastBlock = lastBlock.[rem] <- delimitedSuffix in
-  loadState rateInBytes lastBlock s
-
 let absorb_next (s:state) (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200}) : state =
   let nextBlock = create rateInBytes (u8 0) in
   let nextBlock = nextBlock.[rateInBytes - 1] <- u8 0x80 in
   let s = loadState rateInBytes nextBlock s in
   state_permute s
 
-let absorb_inner (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
-                 (inputByteLen:size_nat)
-                 (input:lbytes inputByteLen)
-                 (i:size_nat{i < inputByteLen / rateInBytes})
+val absorb_last:
+    delimitedSuffix:byte_t
+  -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
+  -> rem:size_nat{rem < rateInBytes}
+  -> input:lbytes rem
+  -> s:state
+  -> state
+let absorb_last delimitedSuffix rateInBytes rem input s =
+  let lastBlock = create rateInBytes (u8 0) in
+  let lastBlock = update_sub lastBlock 0 rem input in
+  let lastBlock = lastBlock.[rem] <- byte_to_uint8 delimitedSuffix in
+  let s = loadState rateInBytes lastBlock s in
+  let s =
+    if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
+       (rem = rateInBytes - 1)
+    then state_permute s else s in
+  absorb_next s rateInBytes
+
+let absorb_inner (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+                 (block:lbytes rateInBytes)
 		 (s:state): state =
-  let s = loadState rateInBytes (sub input (i * rateInBytes) rateInBytes) s in
+  let s = loadState rateInBytes block s in
   state_permute s
 
 let absorb (s:state)
-           (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
+           (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
 	   (inputByteLen:size_nat)
 	   (input:lbytes inputByteLen)
-	   (delimitedSuffix:uint8) : state =
-  let open Lib.RawIntTypes in
-  let n = inputByteLen / rateInBytes in
-  let rem = inputByteLen % rateInBytes in
-  let s = repeati n (absorb_inner rateInBytes inputByteLen input) s in
-  let s = absorb_last s rateInBytes inputByteLen input delimitedSuffix in
-  let s =
-    if (not (u8_to_UInt8 (delimitedSuffix &. u8 0x80) = 0uy) &&
-       (rem = rateInBytes - 1))
-    then state_permute s else s in
-  absorb_next s rateInBytes
+	   (delimitedSuffix:byte_t) : state =
+  repeat_blocks rateInBytes input
+  (fun i -> absorb_inner rateInBytes)
+  (fun i -> absorb_last delimitedSuffix rateInBytes) s
 
 val squeeze_inner:
     rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
@@ -204,7 +198,7 @@ val keccak:
   -> capacity:size_nat{capacity + rate == 1600}
   -> inputByteLen:size_nat
   -> input:lbytes inputByteLen
-  -> delimitedSuffix:uint8
+  -> delimitedSuffix:byte_t
   -> outputByteLen:size_nat
   -> lbytes outputByteLen
 let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen =
@@ -215,23 +209,23 @@ let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen =
 
 let shake128 (inputByteLen:size_nat) (input:lbytes inputByteLen)
              (outputByteLen:size_nat) (output:lbytes outputByteLen) : lbytes outputByteLen =
-  keccak 1344 256 inputByteLen input (u8 0x1F) outputByteLen
+  keccak 1344 256 inputByteLen input (byte 0x1F) outputByteLen
 
 let shake256 (inputByteLen:size_nat) (input:lbytes inputByteLen)
              (outputByteLen:size_nat) (output:lbytes outputByteLen) : lbytes outputByteLen =
-  keccak 1088 512 inputByteLen input (u8 0x1F) outputByteLen
+  keccak 1088 512 inputByteLen input (byte 0x1F) outputByteLen
 
 let sha3_224 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 28 =
-  keccak 1152 448 inputByteLen input (u8 0x06) 28
+  keccak 1152 448 inputByteLen input (byte 0x06) 28
 
 let sha3_256 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 32 =
-  keccak 1088 512 inputByteLen input (u8 0x06) 32
+  keccak 1088 512 inputByteLen input (byte 0x06) 32
 
 let sha3_384 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 48 =
-  keccak 832 768 inputByteLen input (u8 0x06) 48
+  keccak 832 768 inputByteLen input (byte 0x06) 48
 
 let sha3_512 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 64 =
-  keccak 576 1024 inputByteLen input (u8 0x06) 64
+  keccak 576 1024 inputByteLen input (byte 0x06) 64
 
 val cshake128_frodo:
     input_len:size_nat
@@ -241,9 +235,9 @@ val cshake128_frodo:
   -> lbytes output_len
 let cshake128_frodo input_len input cstm output_len =
   let s = Seq.create 25 (u64 0) in
-  let s = s.[0] <- u64 0x10010001a801 |. shift_left (to_u64 cstm) (u32 48) in
+  let s = s.[0] <- u64 0x10010001a801 |. shift_left (to_u64 cstm) (size 48) in
   let s = state_permute s in
-  let s = absorb s 168 input_len input (u8 0x04) in
+  let s = absorb s 168 input_len input (byte 0x04) in
   squeeze s 168 output_len
 
 val cshake256_frodo:
@@ -254,7 +248,7 @@ val cshake256_frodo:
   -> lbytes output_len
 let cshake256_frodo input_len input cstm output_len =
   let s = Seq.create 25 (u64 0) in
-  let s = s.[0] <- u64 0x100100018801 |. shift_left (to_u64 cstm) (u32 48) in
+  let s = s.[0] <- u64 0x100100018801 |. shift_left (to_u64 cstm) (size 48) in
   let s = state_permute s in
-  let s = absorb s 136 input_len input (u8 0x04) in
+  let s = absorb s 136 input_len input (byte 0x04) in
   squeeze s 136 output_len

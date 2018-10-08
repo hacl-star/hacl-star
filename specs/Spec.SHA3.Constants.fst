@@ -4,12 +4,12 @@ open Lib.IntTypes
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let rotc_t = x:uint32{0 < uint_v x && uint_v x < 64}
+let rotc_t = x:size_t{0 < uint_v x && uint_v x < 64}
 
 unfold let rotc_list: list rotc_t =
-  [u32 1; u32 3; u32 6; u32 10; u32 15; u32 21; u32 28; u32 36;
-   u32 45; u32 55; u32 2; u32 14; u32 27; u32 41; u32 56; u32 8;
-   u32 25; u32 43; u32 62; u32 18; u32 39; u32 61; u32 20; u32 44]
+  [size 1; size 3; size 6; size 10; size 15; size 21; size 28; size 36;
+   size 45; size 55; size 2; size 14; size 27; size 41; size 56; size 8;
+   size 25; size 43; size 62; size 18; size 39; size 61; size 20; size 44]
 
 let piln_t = x:size_t{size_v x < 25}
 
