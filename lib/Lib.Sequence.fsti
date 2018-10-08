@@ -49,6 +49,7 @@ val seq_upd:
   -> x:a
   -> o:seq a{length o == length s /\ index o n == x /\ (forall (i:nat).
     {:pattern (index s i)} (i < length s /\ i <> n) ==> index o i == index s i)}
+    
 val seq_sub:
     #a:Type
   -> s1:seq a
@@ -165,7 +166,7 @@ val sub:
   -> s2:lseq a n{
 	     (forall (k:nat{k < n}). {:pattern (index s2 k)} index s2 k == index s1 (start + k))}
 
-let slice (#a:Type) (#len:size_nat) (s1:lseq a len) (start:nat) (fin:nat{start < fin /\ fin <= len}) = sub #a s1 start (fin - start)
+let slice (#a:Type) (#len:size_nat) (s1:lseq a len) (start:nat) (fin:nat{start <= fin /\ fin <= len}) = sub #a s1 start (fin - start)
 
 val update_sub:
     #a:Type
