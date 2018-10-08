@@ -32,48 +32,37 @@ inline_for_extraction let r2 = size 12
 inline_for_extraction let r3 = size 8
 inline_for_extraction let r4 = size 7
 
-type list_iv_t = l:list uint32{ List.Tot.length l <= max_size_t}
-inline_for_extraction let list_iv : list_iv_t =
-  [@inline_let]
-  let l =
+inline_for_extraction let list_iv : list uint32 =
   [u32 0x6A09E667; u32 0xBB67AE85; u32 0x3C6EF372; u32 0xA54FF53A;
-   u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19] in
-  assert_norm(List.Tot.length l <= max_size_t);
-  l
+   u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19]
 
 inline_for_extraction let size_const_iv : size_nat = 8
 let const_iv : lseq uint32 size_const_iv =
   assert_norm (List.Tot.length list_iv = size_const_iv);
   of_list list_iv
 
-type list_sigma_elt_t = n:size_t{size_v n < 16}
-type list_sigma_t = l:list list_sigma_elt_t{List.Tot.length l <= max_size_t}
-inline_for_extraction let list_sigma: list_sigma_t =
-  [@inline_let]
-  let l = [
-    size  0; size  1; size  2; size  3; size  4; size  5; size  6; size  7;
-    size  8; size  9; size 10; size 11; size 12; size 13; size 14; size 15;
-    size 14; size 10; size  4; size  8; size  9; size 15; size 13; size  6;
-    size  1; size 12; size  0; size  2; size 11; size  7; size  5; size  3;
-    size 11; size  8; size 12; size  0; size  5; size  2; size 15; size 13;
-    size 10; size 14; size  3; size  6; size  7; size  1; size  9; size  4;
-    size  7; size  9; size  3; size  1; size 13; size 12; size 11; size 14;
-    size  2; size  6; size  5; size 10; size  4; size  0; size 15; size  8;
-    size  9; size  0; size  5; size  7; size  2; size  4; size 10; size 15;
-    size 14; size  1; size 11; size 12; size  6; size  8; size  3; size 13;
-    size  2; size 12; size  6; size 10; size  0; size 11; size  8; size  3;
-    size  4; size 13; size  7; size  5; size 15; size 14; size  1; size  9;
-    size 12; size  5; size  1; size 15; size 14; size 13; size  4; size 10;
-    size  0; size  7; size  6; size  3; size  9; size  2; size  8; size 11;
-    size 13; size 11; size  7; size 14; size 12; size  1; size  3; size  9;
-    size  5; size  0; size 15; size  4; size  8; size  6; size  2; size 10;
-    size  6; size 15; size 14; size  9; size 11; size  3; size  0; size  8;
-    size 12; size  2; size 13; size  7; size  1; size  4; size 10; size  5;
-    size 10; size  2; size  8; size  4; size  7; size  6; size  1; size  5;
-    size 15; size 11; size  9; size 14; size  3; size 12; size 13; size  0]
-  in
-  assert_norm(List.Tot.length l <= max_size_t);
-  l
+inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
+  size  0; size  1; size  2; size  3; size  4; size  5; size  6; size  7;
+  size  8; size  9; size 10; size 11; size 12; size 13; size 14; size 15;
+  size 14; size 10; size  4; size  8; size  9; size 15; size 13; size  6;
+  size  1; size 12; size  0; size  2; size 11; size  7; size  5; size  3;
+  size 11; size  8; size 12; size  0; size  5; size  2; size 15; size 13;
+  size 10; size 14; size  3; size  6; size  7; size  1; size  9; size  4;
+  size  7; size  9; size  3; size  1; size 13; size 12; size 11; size 14;
+  size  2; size  6; size  5; size 10; size  4; size  0; size 15; size  8;
+  size  9; size  0; size  5; size  7; size  2; size  4; size 10; size 15;
+  size 14; size  1; size 11; size 12; size  6; size  8; size  3; size 13;
+  size  2; size 12; size  6; size 10; size  0; size 11; size  8; size  3;
+  size  4; size 13; size  7; size  5; size 15; size 14; size  1; size  9;
+  size 12; size  5; size  1; size 15; size 14; size 13; size  4; size 10;
+  size  0; size  7; size  6; size  3; size  9; size  2; size  8; size 11;
+  size 13; size 11; size  7; size 14; size 12; size  1; size  3; size  9;
+  size  5; size  0; size 15; size  4; size  8; size  6; size  2; size 10;
+  size  6; size 15; size 14; size  9; size 11; size  3; size  0; size  8;
+  size 12; size  2; size 13; size  7; size  1; size  4; size 10; size  5;
+  size 10; size  2; size  8; size  4; size  7; size  6; size  1; size  5;
+  size 15; size 11; size  9; size 14; size  3; size 12; size 13; size  0
+]
 
 inline_for_extraction let size_const_sigma : size_nat = 160
 let const_sigma:lseq (n:size_t{size_v n < 16}) size_const_sigma =
@@ -198,40 +187,17 @@ let blake2s_init kk k nn =
     blake2s_update_block 0 key_block s end
 
 
-val blake2s_update_multi_iteration : dd_prev:size_nat -> dd:size_nat{(dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) ->  i:size_nat{i + 1 <= dd} -> s:hash_state -> Tot hash_state
-let blake2s_update_multi_iteration dd_prev dd d i s =
-  let block = (sub d (i * size_block) size_block) in
-  blake2s_update_block (dd_prev + i) block s
+val blake2s_update_last : prev:nat{prev < pow2 64} ->
+			  len:size_nat{len < size_block} -> 
+			  last_block:lbytes len -> 
+			  hash_state -> 
+			  Tot hash_state
 
-
-val blake2s_update_multi : dd_prev:size_nat -> dd:size_nat{(dd + dd_prev) * size_block <= max_size_t} -> d:lbytes (dd * size_block) -> hash_state -> Tot hash_state
-let blake2s_update_multi dd_prev dd d s =
-  repeati dd (blake2s_update_multi_iteration dd_prev dd d) s
-
-
-val blake2s_update_last_block : ll:size_nat -> last_block:lbytes size_block -> flag_key:bool -> hash_state -> Tot hash_state
-
-let blake2s_update_last_block ll last_block fk s =
-  let last_block : lseq uint32 16 = uints_from_bytes_le last_block in
-  if not fk then
-    blake2_compress s last_block (u64 ll) true
-  else
-    blake2_compress s last_block (u64 (ll + size_block)) true
-
-
-val blake2s_update_last : ll:size_nat -> len:size_nat{len <= size_block} -> last:lbytes len -> flag_key:bool -> hash_state -> Tot hash_state
-
-let blake2s_update_last ll len last fk s =
+let blake2s_update_last prev len last s =
   let last_block = create size_block (u8 0) in
   let last_block = update_sub last_block 0 len last in
-  blake2s_update_last_block ll last_block fk s
-
-
-val blake2s_update_last_empty: hash_state -> Tot hash_state
-let blake2s_update_last_empty st =
-  let data = create size_block (u8 0) in
-  blake2s_update_last 0 size_block data false st
-
+  let last_uint32s = uints_from_bytes_le last_block in
+  blake2_compress s last_uint32s (u64 prev) true
 
 val blake2s_finish : s:hash_state -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot (lbytes nn)
 let blake2s_finish s nn =
@@ -248,16 +214,10 @@ val blake2s:
   Tot (lbytes nn)
 
 let blake2s ll d kk k nn =
-  let fk = if kk = 0 then false else true in
-  let rem = ll % size_block in
-  let nblocks = ll / size_block in
-  let blocks = sub d 0 (nblocks * size_block) in
-  let last = sub d (nblocks * size_block) rem in
+  let klen = if kk = 0 then 0 else 1 in
   let s = blake2s_init kk k nn in
-  let s =
-    if ll = 0 && kk = 0 then blake2s_update_last_empty s
-    else begin
-      let nprev = if kk = 0 then 0 else 1 in
-      let s = blake2s_update_multi nprev nblocks blocks s in
-      blake2s_update_last ll rem last fk s end in
+  let s = repeat_blocks size_block d 
+    (fun i -> blake2s_update_block (klen + i))
+    (fun i -> blake2s_update_last  (klen * size_block + ll)) 
+    s in
   blake2s_finish s nn

@@ -7,12 +7,13 @@ open FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.Endianness
+open Lib.LoopCombinators
 
 module ST = FStar.HyperStack.ST
 module Seq = Lib.Sequence
+module Loops = Lib.LoopCombinators
 module Spec = Spec.Blake2s
 
-module LB = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 
 ///
@@ -147,7 +148,7 @@ let blake2_compress1 wv s m offset flag =
   assume(disjoint wv const_iv);
   update_isub wv (size 8) (size 8) const_iv;
   let low_offset = to_u32 #U64 offset in
-  let high_offset = to_u32 #U64 (offset >>. u32 32) in
+  let high_offset = to_u32 #U64 (offset >>. size 32) in
   // BB. Note that using the ^. operator here would break extraction !
   let wv_12 = logxor #U32 wv.(size 12) low_offset in
   let wv_13 = logxor #U32 wv.(size 13) high_offset in
@@ -173,7 +174,7 @@ let blake2_compress2 wv m =
   loop1 #uint32 #Spec.size_block_w h0 (size Spec.rounds_in_f) wv
     (fun h -> spec h)
     (fun i ->
-       Seq.unfold_repeati (Spec.rounds_in_f) (spec h0) (as_seq h0 wv) (v i);
+       Loops.unfold_repeati (Spec.rounds_in_f) (spec h0) (as_seq h0 wv) (v i);
        blake2_round wv m i)
 
 
@@ -208,7 +209,7 @@ let blake2_compress3 wv s =
   loop1 h0 (size 8) s
     (fun h -> spec h)
     (fun i ->
-      Seq.unfold_repeati 8 (spec h0) (as_seq h0 s) (v i);
+      Loops.unfold_repeati 8 (spec h0) (as_seq h0 s) (v i);
       blake2_compress3_inner wv i s)
 
 
@@ -271,7 +272,7 @@ val blake2s_init_hash:
 
 let blake2s_init_hash hash kk nn =
   let s0 = hash.(size 0) in
-  let kk_shift_8 = shift_left #U32 (size_to_uint32 kk) (u32 8) in
+  let kk_shift_8 = shift_left #U32 (size_to_uint32 kk) (size 8) in
   let s0' = s0 ^. (u32 0x01010000) ^. kk_shift_8 ^. size_to_uint32 nn in
   hash.(size 0) <- s0'
 
@@ -342,7 +343,7 @@ let blake2s_update_multi hash dd_prev dd d =
   loop1 h0 dd hash
     (fun h -> spec h)
     (fun i ->
-      Seq.unfold_repeati (v dd) (spec h0) (as_seq h0 hash) (v i);
+      Loops.unfold_repeati (v dd) (spec h0) (as_seq h0 hash) (v i);
       blake2s_update_multi_iteration hash dd_prev dd d i)
 
 
@@ -382,7 +383,7 @@ let blake2s_update_last #vlen hash ll last len fk =
       (fun _ r -> r == Spec.Blake2s.blake2s_update_last_block (v ll) last_block1 fk hash1)
     )
     (fun last_block_w ->
-      uint32s_from_bytes_le last_block_w (size 16) last_block;
+      uint32s_from_bytes_le #16 last_block_w (size 16) last_block;
       if not fk then
         blake2_compress hash last_block_w ll64 true
       else

@@ -291,6 +291,7 @@ val createL_global:
 private
 let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> Seq.equal s s1
 
+(** Allocate a top-level fixed-length immutable Buffer and initialize it to value [init] *)
 inline_for_extraction noextract
 val icreateL_global:
     #a:Type0

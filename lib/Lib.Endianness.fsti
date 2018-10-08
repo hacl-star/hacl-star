@@ -16,8 +16,8 @@ open FStar.Mul
 inline_for_extraction
 val uint_from_bytes_le:
     #t:inttype{~(SIZE? t)}
-  -> i:lbuffer uint8 (numbytes t)
-  -> Stack (uint_t t)
+  -> i:lbuffer uint8 (numbytes t) ->
+  Stack (uint_t t)
     (requires fun h0 -> live h0 i)
     (ensures  fun h0 o h1 ->
       h0 == h1 /\ live h1 i /\
@@ -26,8 +26,8 @@ val uint_from_bytes_le:
 inline_for_extraction
 val uint_from_bytes_be:
     #t:inttype{~(SIZE? t)}
-  -> i:lbuffer uint8 (numbytes t)
-  -> Stack (uint_t t)
+  -> i:lbuffer uint8 (numbytes t) ->
+  Stack (uint_t t)
     (requires fun h0 -> live h0 i)
     (ensures  fun h0 o h1 ->
       h0 == h1 /\ live h1 i /\
@@ -37,8 +37,8 @@ inline_for_extraction
 val uint_to_bytes_le:
     #t:inttype{~(SIZE? t)}
   -> o:lbuffer uint8 (numbytes t)
-  -> i:uint_t t
-  -> Stack unit
+  -> i:uint_t t ->
+  Stack unit
     (requires fun h0 -> live h0 o)
     (ensures  fun h0 _ h1 ->
       live h1 o /\ modifies (loc_buffer o) h0 h1 /\
@@ -48,8 +48,8 @@ inline_for_extraction
 val uint_to_bytes_be:
     #t:inttype{~(SIZE? t)}
   -> o:lbuffer uint8 (numbytes t)
-  -> i:uint_t t
-  -> Stack unit
+  -> i:uint_t t ->
+  Stack unit
     (requires fun h0 -> live h0 o)
     (ensures  fun h0 _ h1 ->
       live h1 o /\ modifies (loc_buffer o) h0 h1 /\
@@ -107,9 +107,7 @@ val uints_to_bytes_be:
 			      (BS.uints_to_bytes_be #t #len (as_seq h0 i) )))
 
 inline_for_extraction
-let uint32s_to_bytes_le (#len:size_nat{len * 32 <= max_size_t}) =
-  uints_to_bytes_le #U32 #len
+let uint32s_to_bytes_le #len = uints_to_bytes_le #U32 #len
 
 inline_for_extraction
-let uint32s_from_bytes_le (#len:size_nat{len * 32 <= max_size_t}) = 
-  uints_from_bytes_le #U32 #len
+let uint32s_from_bytes_le #len = uints_from_bytes_le #U32 #len
