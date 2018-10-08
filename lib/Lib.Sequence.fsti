@@ -125,6 +125,8 @@ val of_list:
   -> l:list a
   -> s:seq a{length s == List.Tot.length l}
 
+let createL #a l = of_list #a l
+
 val concat:#a:Type -> s1:seq a -> s2:seq a -> r:seq a{length r == length s1 + length s2}
 let (@|) #a s1 s2 = concat #a s1 s2
 

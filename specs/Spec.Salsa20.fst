@@ -27,7 +27,7 @@ type shuffle = state -> Tot state
 let op_At f g = fun x -> g (f x)
 
 
-let line (a:idx) (b:idx) (d:idx) (s:rotval U32) (m:state) =
+let line (a:idx) (b:idx) (d:idx) (s:rotval U32) (m:state) : state =
   let m = m.[a] <- (m.[a] ^. ((m.[b] +. m.[d]) <<<. s)) in
   m
 
@@ -91,8 +91,28 @@ let salsa20_key_block (st:state) : Tot block =
   let st' = salsa20_core st in
   uints_to_bytes_le st'
 
-let salsa20_cipher =
-  Spec.CTR.Cipher state keylen max_size_t blocklen salsa20_init salsa20_set_counter salsa20_key_block
+let salsa20_encrypt_block (st0:state) (ctr0:counter) (incr:counter{ctr0 + incr <= max_size_t}) (b:block) : Tot block =
+  let st = salsa20_set_counter st0 (ctr0 + incr) in
+  let kb = salsa20_key_block st in
+  map2 (^.) b kb
 
-let salsa20_encrypt_bytes key nonce counter m =
-  Spec.CTR.counter_mode salsa20_cipher key nonce counter m
+let salsa20_encrypt_last (st0:state) (ctr0:counter) 
+			  (incr:counter{ctr0 + incr <= max_size_t}) 
+			  (len:size_nat{len < blocklen})
+			  (b:lbytes len) : lbytes len =
+  let plain = create blocklen (u8 0) in
+  let plain = update_sub plain 0 (length b) b in
+  let cipher = salsa20_encrypt_block st0 ctr0 incr plain in
+  sub cipher 0 (length b)
+
+val salsa20_encrypt_bytes:
+  key -> nonce -> c:counter 
+-> msg:bytes{length msg / blocklen + c <= max_size_t} 
+-> cipher:bytes{length cipher == length msg}
+
+let salsa20_encrypt_bytes key nonce ctr0 msg =
+  let cipher = msg in
+  let st0 = salsa20_init key 8 nonce in
+  map_blocks blocklen cipher
+    (salsa20_encrypt_block st0 ctr0) 
+    (salsa20_encrypt_last st0 ctr0)

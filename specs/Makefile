@@ -17,13 +17,13 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Curve25519.fst \
 		Spec.Curve448.fst \
 		Spec.Salsa20.fst \
-		Spec.SHA2.fst \
 		Spec.Ed25519.fst \
 		Spec.Chacha20_vec.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
 		Spec.AES.fst \
 		Spec.AESGCM.fst \
+		Spec.SHA2.fst \
 		Spec.HMAC.fst \
 		Spec.HKDF.fst \
 		Spec.ECIES.fst \

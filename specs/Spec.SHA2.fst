@@ -138,7 +138,7 @@ let pad_single
   let plen : size_nat = nr * size_block p in
   // Create the padding and copy the partial block inside
   let padding : lbytes plen = create plen (u8 0) in
-  let padding = repeati len (fun i s -> s.[i] <- last.[i]) padding in
+  let padding = repeati #(lbytes plen) len (fun i s -> s.[i] <- last.[i]) padding in
   // Write the 0x80 byte and the zeros in the padding
   let padding = padding.[len] <- u8 0x80 in
   // Encode and write the total length in bits at the end of the padding
@@ -200,7 +200,7 @@ let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p{(st.n 
 let update_multi (p:parameters) (n:size_nat{n * size_block p <= max_size_t}) (blocks:lbytes (n * size_block p)) (st:state p{st.n + n <= max_size_t}) : Tot (st1:state p)(* {st1.n = st.n + n})*) =
   let bl = size_block p in
   let h =
-    repeati n (fun i h ->
+    repeati #(hash_w p) n (fun i h ->
       let block = sub blocks (i * bl) bl in
       let bw = uints_from_bytes_be block in
       compress p bw h
@@ -436,3 +436,4 @@ let hash224 = hash' parameters224
 let hash256 = hash' parameters256
 let hash384 = hash' parameters384
 let hash512 = hash' parameters512
+
