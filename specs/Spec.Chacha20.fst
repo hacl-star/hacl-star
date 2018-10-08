@@ -33,10 +33,10 @@ let line (a:idx) (b:idx) (d:idx) (s:rotval U32) (m:state) : Tot state =
   let m = m.[d] <- ((m.[d] ^. m.[a]) <<<. s) in m
 
 let quarter_round a b c d : shuffle =
-  line a b d (u32 16) @
-  line c d b (u32 12) @
-  line a b d (u32 8)  @
-  line c d b (u32 7)
+  line a b d (size 16) @
+  line c d b (size 12) @
+  line a b d (size 8)  @
+  line c d b (size 7)
 
 let column_round : shuffle =
   quarter_round 0 4 8  12 @

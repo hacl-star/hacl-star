@@ -10,4 +10,6 @@ val ( +% ) : #m:pos -> nat_mod m -> nat_mod m -> nat_mod m
 val ( -% ) : #m:pos -> nat_mod m -> nat_mod m -> nat_mod m
 val ( *% ) : #m:pos -> nat_mod m -> nat_mod m -> nat_mod m
 val ( **% ) : #m:pos -> nat_mod m -> pos -> nat_mod m
+val ( =% ) : #m:pos -> nat_mod m -> nat_mod m -> bool
+val ( <>% ) : #m:pos -> nat_mod m -> nat_mod m -> bool
 

@@ -54,7 +54,7 @@ let ghash text_len text aad_len aad tag_k k =
 
 val gcm:
     k:key
-  -> n_len:size_nat
+  -> n_len:size_nat{n_len < 16}
   -> n:lbytes n_len
   -> m_len:size_nat
   -> m:lbytes m_len
@@ -63,7 +63,7 @@ val gcm:
   Tot Spec.GF128.tag
 
 let gcm k n_len n m_len m aad_len aad =
-  let tag_key = AES.aes128_encrypt_bytes k n_len n 1 blocksize (create blocksize (u8 0)) in
+  let tag_key = AES.aes128_encrypt_bytes k n_len n 1 (create blocksize (u8 0)) in
   let mac = ghash m_len m aad_len aad tag_key k in
   mac
 
@@ -78,6 +78,7 @@ val aead_encrypt:
   -> aad:lbytes aad_len ->
   Tot (lbytes (len + blocksize))
 
+#reset-options "--z3rlimit 50"
 let aead_encrypt k n_len n len m aad_len aad =
   let iv_len = if n_len = 12 then 12 else blocksize in
   let iv: lbytes iv_len = if n_len = 12 then n else (
@@ -91,7 +92,7 @@ let aead_encrypt k n_len n len m aad_len aad =
     let gmul_input = update_slice gmul_input (n_len + n_padding) (n_len + n_padding + 8) n_len_bytes  in
     ghash_ gmul_input (create blocksize (u8 0)) k
   ) in
-  let c = AES.aes128_encrypt_bytes k iv_len iv 2 len m in
+  let c = AES.aes128_encrypt_bytes k iv_len iv 2 m in
   let mac = gcm k iv_len iv len c aad_len aad in
   let result = create (len + blocksize) (u8 0) in
   let result = update_slice result 0 len c in
@@ -127,5 +128,5 @@ let aead_decrypt k n_len n clen c aad_len aad =
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed_mac associated_mac in
   let zeros = create (clen - blocksize) (u8 0) in
   if result then
-    AES.aes128_encrypt_bytes k iv_len iv 2 (clen - blocksize) encrypted_plaintext
+    AES.aes128_encrypt_bytes k iv_len iv 2 encrypted_plaintext
   else zeros

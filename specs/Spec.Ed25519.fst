@@ -23,11 +23,11 @@ let modp_inv (x:elem) : Tot elem =
 
 let d : elem = to_elem 37095705934669439343138083508754565189542113879843219016388785533085940283555
 
-let q: nat =
+let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
-let sha512_modq (len:size_nat) (s:lbytes len) : nat =
+let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
   (nat_from_bytes_le (hash512 len s) % q)
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
@@ -65,7 +65,7 @@ let point_double (p:ext_point) : Tot ext_point =
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 let ith_bit (len:size_nat) (k:lbytes len) (i:size_nat{i < 8 * len}) =
-  let q = i / 8 in let r = u32 (i % 8) in
+  let q = i / 8 in let r = size (i % 8) in
   (k.[q] >>. r) &. u8 1
 
 let rec montgomery_ladder_ (x:ext_point) (xp1:ext_point) (len:size_nat{8 * len <= max_size_t}) (k:lbytes len) (ctr:size_nat{ ctr <= 8 * len})
@@ -90,14 +90,15 @@ noeq type record = { s:(s':lseq bool 3)}
 let recover_x (y:nat) (sign:bool) : Tot (option elem) =
   if y >= prime then None
   else (
-    let x2 = to_elem ((y * y) - 1) *% (modp_inv ((d *% (to_elem (y * y))) +% one)) in
-    if x2 = zero then (
+    let y2 = to_elem (y * y) in
+    let x2 = (y2 -% one) *% (modp_inv ((d *% y2) +% one)) in
+    if x2 =% zero then (
       if sign then None
       else Some zero
     ) else (
       let x = x2 **% ((prime + 3) / 8) in
-      let x = if ((x *% x) -% x2) <> zero then x *% modp_sqrt_m1 else x in
-      if ((x *% x) -% x2) <> zero then None
+      let x = if ((x *% x) -% x2) <>% zero then x *% modp_sqrt_m1 else x in
+      if ((x *% x) -% x2) <>% zero then None
       else (
         let x = if (nat_mod_v x % 2 = 1) <> sign then to_elem (prime - nat_mod_v x) else x in
         Some x)))
@@ -123,7 +124,7 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   | Some x -> Some (x, to_elem y, one, x *% to_elem y)
   | _ -> None
 
-let secret_expand (secret:lbytes 32) =
+let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
   let h = hash512 32 secret in
   let h_low : lbytes 32 = slice h 0 32 in
   let h_high : lbytes 32 = slice h 32 64 in
@@ -137,7 +138,7 @@ let secret_to_public (secret:lbytes 32) =
   let a, dummy = secret_expand secret in
   point_compress (point_mul 32 a g)
 
-#reset-options "--max_fuel 0 --z3rlimit 25"
+#reset-options "--max_fuel 0 --z3rlimit 50"
 
 let sign (secret:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes len) =
   let a, prefix = secret_expand secret in
@@ -160,8 +161,8 @@ let sign (secret:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes le
 let point_equal (p:ext_point) (q:ext_point) =
   let px, py, pz, pt = p in
   let qx, qy, qz, qt = q in
-  if ((px *% qz) <> (qx *% pz)) then false
-  else if ((py *% qz) <> (qy *% pz)) then false
+  if ((px *% qz) <>% (qx *% pz)) then false
+  else if ((py *% qz) <>% (qy *% pz)) then false
   else true
 
 let verify (public:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes len) (signature:lbytes 64) =

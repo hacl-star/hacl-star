@@ -19,7 +19,7 @@ inline_for_extraction let rounds_in_f : size_nat = 10
 (* Definition of base types *)
 type working_vector = lseq uint32 size_block_w
 type message_block_w = lseq uint32 size_block_w
-type message_block = lseq uint32 size_block
+type message_block = lseq uint8 size_block
 type hash_state = lseq uint32 size_hash_w
 type idx = n:size_nat{n < 16}
 type counter = uint64
@@ -27,10 +27,10 @@ type last_block_flag = bool
 
 
 (* Constants *)
-inline_for_extraction let r1 = u32 16
-inline_for_extraction let r2 = u32 12
-inline_for_extraction let r3 = u32 8
-inline_for_extraction let r4 = u32 7
+inline_for_extraction let r1 = size 16
+inline_for_extraction let r2 = size 12
+inline_for_extraction let r3 = size 8
+inline_for_extraction let r4 = size 7
 
 inline_for_extraction let list_iv : list uint32 =
   [u32 0x6A09E667; u32 0xBB67AE85; u32 0x3C6EF372; u32 0xA54FF53A;
@@ -123,7 +123,7 @@ let blake2_compress1 wv s m offset flag =
   let wv = update_sub wv 0 8 s in
   let wv = update_sub wv 8 8 const_iv in
   let low_offset = to_u32 #U64 offset in
-  let high_offset = to_u32 #U64 (offset >>. u32 32) in
+  let high_offset = to_u32 #U64 (offset >>. size 32) in
   let wv_12 = wv.[12] ^. low_offset in
   let wv_13 = wv.[13] ^. high_offset in
   let wv_14 = wv.[14] ^. (u32 0xFFFFFFFF) in
@@ -160,7 +160,8 @@ let blake2_compress s m offset flag =
 
 val blake2s_update_block: dd_prev:size_nat -> d:message_block -> hash_state -> Tot hash_state
 let blake2s_update_block dd_prev d s =
-  let to_compress : lseq uint32 16 = uints_from_bytes_le d in
+  assert (length d == 16 * 4);
+  let to_compress : lseq uint32 16 = uints_from_bytes_le #U32 #16 d in
   let offset = u64 ((dd_prev + 1) * size_block) in
   blake2_compress s to_compress offset false
 
@@ -172,7 +173,7 @@ let blake2s_init_iv iv = const_iv
 val blake2s_init_hash: hash_state -> kk:size_nat{kk<=32} -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state
 let blake2s_init_hash s kk nn =
   let s0 = s.[0] in
-  let s0' = s0 ^. (u32 0x01010000) ^. ((u32 kk) <<. (u32 8)) ^. (u32 nn) in
+  let s0' = s0 ^. (u32 0x01010000) ^. ((u32 kk) <<. (size 8)) ^. (u32 nn) in
   s.[0] <- s0'
 
 val blake2s_init: kk:size_nat{kk <= 32} -> k:lbytes kk -> nn:size_nat{1 <= nn /\ nn <= 32} -> Tot hash_state

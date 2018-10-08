@@ -32,10 +32,10 @@ let line (a:idx) (b:idx) (d:idx) (s:rotval U32) (m:state) : state =
   m
 
 let quarter_round a b c d : shuffle =
-  line b a d (u32 7) @
-  line c b a (u32 9) @
-  line d c b (u32 13) @
-  line a d c (u32 18)
+  line b a d (size 7) @
+  line c b a (size 9) @
+  line d c b (size 13) @
+  line a d c (size 18)
 
 let column_round : shuffle =
   quarter_round 0 4 8 12 @

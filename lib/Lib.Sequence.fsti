@@ -117,16 +117,16 @@ val seq_for_all2:#a:Type -> #b:Type
    Use this as much as possible. 
    It adds additional length checks that you'd have to prove in the implementation otherwise *)
 
-let lseq (a:Type0) (len:size_nat) = s:seq a{len > 0 /\ Seq.length s == len}
+let lseq (a:Type0) (len:size_nat) = s:seq a{(* len > 0 /\*) Seq.length s == len}
 
 val create:
     #a:Type
-  -> len:size_nat{len > 0}
+  -> len:size_nat
   -> init:a
   -> s:lseq a len{(forall (i:nat).
     {:pattern (index s i)} i < len ==> index s i == init)}
 
-let to_lseq (#a:Type0) (s:seq a{length s > 0 /\ length s <= max_size_t}) : l:lseq a (length s){l == s} = s
+let to_lseq (#a:Type0) (s:seq a{length s <= max_size_t}) : l:lseq a (length s){l == s} = s
 
 val to_list:
     #a:Type 
@@ -135,7 +135,7 @@ val to_list:
 
 val of_list:
     #a:Type 
-  -> l:list a{List.Tot.length l > 0 /\ List.Tot.length l <= max_size_t}
+  -> l:list a{List.Tot.length l <= max_size_t}
   -> s:lseq a (List.Tot.length l)
 
 let createL #a l = of_list #a l
@@ -161,7 +161,7 @@ val sub:
   -> #len:size_nat
   -> s1:lseq a len
   -> start:size_nat
-  -> n:size_nat{n > 0 /\ start + n <= len}
+  -> n:size_nat{start + n <= len}
   -> s2:lseq a n{
 	     (forall (k:nat{k < n}). {:pattern (index s2 k)} index s2 k == index s1 (start + k))}
 
@@ -172,7 +172,7 @@ val update_sub:
   -> #len:size_nat
   -> i:lseq a len
   -> start:size_nat
-  -> n:size_nat{n > 0 /\ start + n <= len}
+  -> n:size_nat{start + n <= len}
   -> x:lseq a n
   -> o:lseq a len{sub o start n == x /\
     (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < length i)}).
@@ -183,7 +183,7 @@ val lemma_update_sub:
   -> #len:size_nat
   -> dst:lseq a len
   -> start:size_nat
-  -> n:size_nat{n > 0 /\ start + n <= len}
+  -> n:size_nat{start + n <= len}
   -> src:lseq a n
   -> res:lseq a len
   -> Lemma
@@ -227,7 +227,7 @@ val map_blocks:
   -> blocksize:size_nat{blocksize > 0}
   -> inp:seq a 
   -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
-  -> g:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> lseq a len -> lseq a len)
+  -> g:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len)
   -> out:seq a {length out == length inp}
   
 
@@ -237,6 +237,6 @@ val repeat_blocks:
   -> blocksize:size_nat{blocksize > 0}
   -> inp:seq a
   -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> b -> b)
-  -> l:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> lseq a len -> b -> b)
+  -> l:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> b -> b)
   -> init:b
   -> out:b
