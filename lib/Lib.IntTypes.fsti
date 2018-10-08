@@ -27,12 +27,12 @@ let bits (n:inttype) =
 
 let is_public (n:inttype) =
   match n with
-  | U8 
+  | U8
   | U16
   | U32
   | U64
   | U128 -> False
-  | SIZE 
+  | SIZE
   | BYTE -> True
 
 
@@ -47,7 +47,7 @@ let numbytes (n:inttype) =
   | U128 -> 16
   | SIZE -> 4
   | BYTE -> 1
-  
+
 val pow2_values: n:nat ->  Lemma (
     pow2 0 == 1 /\
     pow2 1 == 2 /\
@@ -64,7 +64,7 @@ val pow2_values: n:nat ->  Lemma (
 
 inline_for_extraction
 unfold let modulus (t:inttype) = pow2 (bits t)
-  
+
 
 inline_for_extraction
 unfold let maxint (t:inttype) =
@@ -156,8 +156,8 @@ inline_for_extraction
 val nat_to_uint: #t:inttype -> (n:nat{n <= maxint t}) -> u:uint_t t{uint_v u == n}
 
 inline_for_extraction
-val cast: #t:inttype{~ (is_public t)} 
-	  -> t':inttype{~ (is_public t)} 
+val cast: #t:inttype{~ (is_public t)}
+	  -> t':inttype{~ (is_public t)}
 	  -> u1:uint_t t -> u2:uint_t t'{uint_v u2 == uint_v u1 % modulus t'}
 
 
