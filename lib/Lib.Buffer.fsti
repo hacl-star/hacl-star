@@ -188,6 +188,10 @@ let op_Array_Assignment #a #len = upd #a #len
 inline_for_extraction
 let op_Array_Access #a #len = index #a #len
 
+(** Operator definition to access a Buffer as a Sequence *)
+inline_for_extraction
+let op_String_Access #a #r0 #r1 m b = B.as_seq #a #r0 #r1 m b
+
 (** Access to the pure sequence-based value associated to an index of a mutable Buffer  *)
 (* We don't have access to Lib.Sequence.fst
    to get the fact `Lib.Sequence.index == FStar.Seq.index` *)
