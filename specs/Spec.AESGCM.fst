@@ -5,6 +5,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+open Lib.LoopCombinators
 
 module AES = Spec.AES
 module GF = Spec.GF128

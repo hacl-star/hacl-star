@@ -6,6 +6,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+open Lib.NatMod
 
 (* Field types and parameters *)
 let prime : pos =  
@@ -39,8 +40,8 @@ let set_acc (st:state) (acc:elem) =
 let update1 (len:size_nat{len <= blocksize}) (b:lbytes len) (st:state) : state =
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
-  let n = to_elem (pow2 (8 * len)) +. to_elem (nat_from_bytes_le b) in
-  let acc = (n +. st.acc) *. st.r in
+  let n = to_elem (pow2 (8 * len)) +% to_elem (nat_from_bytes_le b) in
+  let acc = (n +% st.acc) *% st.r in
   set_acc st acc
 
 let poly (text:bytes) (st:state) : state =

@@ -4,8 +4,8 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open FStar.All
 open Lib.RawIntTypes
+open Lib.LoopCombinators
 
 (* Constants *)
 
@@ -89,7 +89,7 @@ let blake2_compress h m offset f =
       v
     ) v
   in
-  let h = repeati 8
+  let h = repeati #hash_state 8
     (fun i h ->
       h.[i] <- h.[i] ^. v.[i] ^. v.[i+8]
     ) h

@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
-
+open Lib.LoopCombinators
 
 #set-options "--max_fuel 0 --z3rlimit 100"
 

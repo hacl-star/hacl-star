@@ -4,6 +4,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open FStar.Mul
+open Lib.LoopCombinators
 
 open Spec.SHA3.Constants
 

@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.RawIntTypes
-
+open Lib.LoopCombinators
 friend Lib.Sequence
 
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
@@ -12,13 +12,13 @@ friend Lib.Sequence
 private
 let decr (x:size_nat{x > 0}) : size_nat = x - 1
 
-val nat_from_intseq_be_:#t:m_inttype -> b:seq (uint_t t) -> Tot (n:nat{n < pow2 (length b * bits t)})  (decreases (length b))
+val nat_from_intseq_be_:#t:inttype -> b:seq (uint_t t) -> Tot (n:nat{n < pow2 (length b * bits t)})  (decreases (length b))
 let rec nat_from_intseq_be_ #t b =
   let len = length b in
   if len = 0 then 0
   else
     let l = uint_to_nat #t (index b (len - 1)) in
-    let pre = sub b 0 (decr len) in //prefix #(uint_t t) #len b (decr len)
+    let pre = seq_sub b 0 (decr len) in //prefix #(uint_t t) #len b (decr len)
     let shift = pow2 (bits t) in
     let n': n:nat{n < pow2 ((len-1) * bits t)} = nat_from_intseq_be_ #t pre in
     assert (l <= shift - 1);
@@ -32,13 +32,13 @@ let rec nat_from_intseq_be_ #t b =
 
 let nat_from_intseq_be = nat_from_intseq_be_
 
-val nat_from_intseq_le_:#t:m_inttype -> b:seq (uint_t t) -> Tot (n:nat{n < pow2 (length b * bits t)}) (decreases (length b))
+val nat_from_intseq_le_:#t:inttype -> b:seq (uint_t t) -> Tot (n:nat{n < pow2 (length b * bits t)}) (decreases (length b))
 let rec nat_from_intseq_le_ #t b = 
   let len = length b in
   if len = 0 then 0
   else
     let shift = pow2 (bits t) in
-    let tt = sub b 1 (decr len) in
+    let tt = seq_sub b 1 (decr len) in
     let n' : n:nat{n < pow2 ((len-1) * bits t)} = nat_from_intseq_le_ #t tt in
     let l = uint_to_nat #t (index b 0) in
     assert (l <= shift - 1);
@@ -69,9 +69,9 @@ let rec nat_to_bytes_be_ len n =
     let b  = concat b' (create 1 byte) in
 //    Lib.Sequence.Lemmas.concat_subs b' (create 1 byte);
     assert (index (create 1 byte) 0 == byte);
-    assert (b' == sub b 0 len');
-    assert (create 1 byte == sub b (decr len) 1);
-    assert (index (sub b (decr len) 1) 0 == index b (decr len));
+    assert (b' == seq_sub b 0 len');
+    assert (create 1 byte == seq_sub b (decr len) 1);
+    assert (index (seq_sub b (decr len) 1) 0 == index b (decr len));
     assert (byte == index b (decr len));
     b)
 
@@ -93,9 +93,9 @@ let rec nat_to_bytes_le_ len n =
     let b = concat (create 1 byte) b' in
 //    Lib.Sequence.Lemmas.concat_subs (create 1 byte) b';
     assert (index (create 1 byte) 0 == byte);
-    assert (b' == sub b 1 len);
-    assert (create 1 byte == sub b 0 1);
-    assert (index (sub b 0 1) 0 == index b 0);
+    assert (b' == seq_sub b 1 len);
+    assert (create 1 byte == seq_sub b 0 1);
+    assert (index (seq_sub b 0 1) 0 == index b 0);
     assert (byte == index b 0);
     b
 

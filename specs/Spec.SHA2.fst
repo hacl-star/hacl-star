@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-
+open Lib.LoopCombinators
 #set-options "--z3rlimit  25"
 
 (* Definition: Hash algorithm parameters *)

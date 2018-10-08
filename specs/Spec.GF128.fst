@@ -5,6 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Spec.GaloisField
+open Lib.LoopCombinators
 
 (* Field types and parameters *)
 

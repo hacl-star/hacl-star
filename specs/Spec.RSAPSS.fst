@@ -6,6 +6,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
 open FStar.Math.Lemmas
+open Lib.LoopCombinators
 
 module Hash = Spec.SHA2
 

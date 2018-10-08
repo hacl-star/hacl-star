@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-
+open Lib.LoopCombinators
 
 (* Algorithm parameters *)
 inline_for_extraction let size_hash_w : size_nat = 8

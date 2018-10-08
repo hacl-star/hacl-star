@@ -5,6 +5,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open FStar.Mul
+open Lib.LoopCombinators
 
 let q = 7681
 let n = 256
@@ -55,20 +56,20 @@ let poly_mul (p1:poly) (p2:poly) : poly =
 let poly_scalar_mul (x:field) (p:poly) : poly = map (fun y -> x ** y) p
 
 let poly_shift_reduce (p:poly) : poly =
-    let np = repeati 255 (fun i np -> np.[i+1] <- np.[i]) p in
+    let np = repeati #poly 255 (fun i np -> np.[i+1] <- np.[i]) p in
     np.[0] <- zero -- p.[255]
 
 let poly_mul_textbook_old (p1:poly) (p2:poly) : poly =
   let zero_poly : poly = create 256 zero in
-  let sum,_ = repeati 256 (fun i (sum,np1) ->
+  let sum,_ = repeati #(poly & poly) 256 (fun i (sum,np1) ->
 		 (poly_add sum (poly_scalar_mul p2.[255-i] np1)),
 		 (poly_shift_reduce np1)) (zero_poly,p1) in
   sum
 
 let poly_mul_textbook (p1:poly) (p2:poly) : poly =
   let sum = create 512 zero in
-  let sum = repeati 256 (fun i sum ->
-		 repeati 256 (fun j sum ->
+  let sum = repeati #(lseq field 512) 256 (fun i sum ->
+		 repeati #(lseq field 512) 256 (fun j sum ->
 			 sum.[i+j] <- sum.[i+j] ++ (p1.[i] ** p2.[j])) sum) sum in
   let high = sub sum 256 256 in
   let low = sub sum 0 256 in

@@ -7,6 +7,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
+open Lib.LoopCombinators
 
 let version_number : uint8 = assert_norm (0x13 < maxint (U8));u8 0x13
 let argon_type = 1

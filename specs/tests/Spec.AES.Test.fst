@@ -4,6 +4,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Spec.AES
+open Lib.LoopCombinators
 
 let test_key = List.Tot.map u8 [
   0x2b; 0x7e; 0x15; 0x16; 0x28; 0xae; 0xd2; 0xa6;
