@@ -1,4 +1,8 @@
-all: verify extract test
+all:
+	$(MAKE) .depend
+	$(MAKE) all_
+
+all_: verify extract test
 
 # Old targets, backwards-compat:
 .PHONY: old-%
@@ -7,18 +11,17 @@ old-%:
 
 # 0. Paths and includes
 
-HACL_HOME ?= ..
-
 HASH_DIR=$(HACL_HOME)/code/hash-new
 
 ROOTS=$(addprefix $(HASH_DIR)/Hacl.Hash.,MD5.fst SHA1.fst SHA2.fst)
 
 ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 
+.PHONY: .depend
 .depend:
 	@$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
-include .depend
+-include .depend
 
 include Makefile.common
 
