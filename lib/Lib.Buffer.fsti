@@ -81,7 +81,7 @@ let modifies2
   (h1 h2: HS.mem)
 : GTot Type0 = B.modifies (B.loc_union (B.loc_buffer b0) (B.loc_buffer b1)) h1 h2
 
-(** Modification clause for two Buffers *)
+(** Modification clause for three Buffers *)
 unfold
 let modifies3
   (#a0:Type0)
