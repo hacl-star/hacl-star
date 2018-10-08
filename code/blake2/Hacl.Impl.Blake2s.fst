@@ -43,12 +43,11 @@ let const_iv = IB.igcmalloc_of_list HyperStack.root Spec.list_iv
 let const_sigma = IB.igcmalloc_of_list HyperStack.root Spec.list_sigma
 
 
-
 (* Define algorithm functions *)
 val g1: wv:working_vector -> a:idx -> b:idx -> r:rotval U32 ->
   Stack unit
-    (requires (fun h -> LB.live h wv))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer wv) h0 h1
+    (requires (fun h -> live h wv))
+    (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.g1 h0.[wv] (v a) (v b) r))
 
 let g1 wv a b r =
@@ -59,8 +58,8 @@ let g1 wv a b r =
 
 val g2: wv:working_vector -> a:idx -> b:idx -> x:uint32 ->
   Stack unit
-    (requires (fun h -> LB.live h wv))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer wv) h0 h1
+    (requires (fun h -> live h wv))
+    (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.g2 h0.[wv] (v a) (v b) x))
 
 let g2 wv a b x =
@@ -71,8 +70,8 @@ let g2 wv a b x =
 
 val blake2_mixing : wv:working_vector -> a:idx -> b:idx -> c:idx -> d:idx -> x:uint32 -> y:uint32 ->
   Stack unit
-    (requires (fun h -> LB.live h wv))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer wv) h0 h1
+    (requires (fun h -> live h wv))
+    (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_mixing h0.[wv] (v a) (v b) (v c) (v d) x y))
 
 let blake2_mixing wv a b c d x y =
@@ -89,9 +88,9 @@ let blake2_mixing wv a b c d x y =
 
 val blake2_round1 : wv:working_vector -> m:message_block_w -> i:size_t ->
   Stack unit
-    (requires (fun h -> LB.live h wv /\ LB.live h m
-                  /\ LB.disjoint wv m /\ LB.disjoint m wv))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer wv) h0 h1
+    (requires (fun h -> live h wv /\ live h m
+                  /\ disjoint wv m /\ disjoint m wv))
+    (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.Blake2s.blake2_round1 h0.[wv] h0.[m] (v i)))
 
 [@ Substitute ]
@@ -108,9 +107,9 @@ let blake2_round1 wv m i =
 
 val blake2_round2 : wv:working_vector -> m:message_block_w -> i:size_t ->
   Stack unit
-    (requires (fun h -> LB.live h wv /\ LB.live h m
-                   /\ LB.disjoint wv m /\ LB.disjoint m wv))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer wv) h0 h1
+    (requires (fun h -> live h wv /\ live h m
+                   /\ disjoint wv m /\ disjoint m wv))
+    (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_round2 h0.[wv] h0.[m] (v i)))
 
 [@ Substitute ]
@@ -127,9 +126,9 @@ let blake2_round2 wv m i =
 
 val blake2_round : wv:working_vector -> m:message_block_w -> i:size_t ->
   Stack unit
-    (requires (fun h -> LB.live h wv /\ LB.live h m
-                   /\ LB.disjoint wv m /\ LB.disjoint m wv))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer wv) h0 h1
+    (requires (fun h -> live h wv /\ live h m
+                   /\ disjoint wv m /\ disjoint m wv))
+    (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_round h0.[m] (v i) h0.[wv]))
 
 let blake2_round wv m i =
@@ -144,17 +143,17 @@ val blake2_compress1:
   -> offset:uint64
   -> flag:Spec.last_block_flag ->
   Stack unit
-    (requires (fun h -> LB.live h s /\ LB.live h m /\ LB.live h wv
-                     /\ LB.disjoint wv s /\ LB.disjoint wv m
-                     /\ LB.disjoint s wv /\ LB.disjoint m wv))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer wv) h0 h1
+    (requires (fun h -> live h s /\ live h m /\ live h wv
+                     /\ disjoint wv s /\ disjoint wv m
+                     /\ disjoint s wv /\ disjoint m wv))
+    (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.Blake2s.blake2_compress1 h0.[wv] h0.[s] h0.[m] offset flag))
 
 [@ Substitute ]
 let blake2_compress1 wv s m offset flag =
   IB.recall_contents const_iv (FStar.Seq.seq_of_list Spec.list_iv);
   update_sub wv (size 0) (size 8) s;
-  assume(LB.disjoint wv const_iv);
+  assume(disjoint wv const_iv);
   update_isub wv (size 8) (size 8) const_iv;
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. u32 32) in
@@ -171,9 +170,9 @@ let blake2_compress1 wv s m offset flag =
 val blake2_compress2 :
   wv:working_vector -> m:message_block_w ->
   Stack unit
-    (requires (fun h -> LB.live h wv /\ LB.live h m
-                   /\ LB.disjoint wv m /\ LB.disjoint m wv))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer wv) h0 h1
+    (requires (fun h -> live h wv /\ live h m
+                   /\ disjoint wv m /\ disjoint m wv))
+    (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_compress2 h0.[wv] h0.[m]))
 
 [@ Substitute ]
@@ -190,9 +189,9 @@ let blake2_compress2 wv m =
 val blake2_compress3_inner :
   wv:working_vector -> i:size_t{size_v i < 8} -> s:state ->
   Stack unit
-    (requires (fun h -> LB.live h s /\ LB.live h wv
-                   /\ LB.disjoint s wv /\ LB.disjoint wv s))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer s) h0 h1
+    (requires (fun h -> live h s /\ live h wv
+                   /\ disjoint s wv /\ disjoint wv s))
+    (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress3_inner h0.[wv] (v i) h0.[s]))
 
 [@ Substitute ]
@@ -206,9 +205,9 @@ let blake2_compress3_inner wv i s =
 val blake2_compress3 :
   wv:working_vector -> s:state ->
   Stack unit
-    (requires (fun h -> LB.live h s /\ LB.live h wv
-                     /\ LB.disjoint wv s /\ LB.disjoint s wv))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer s) h0 h1
+    (requires (fun h -> live h s /\ live h wv
+                     /\ disjoint wv s /\ disjoint s wv))
+    (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress3 h0.[wv] h0.[s]))
 
 [@ Substitute ]
@@ -226,9 +225,9 @@ val blake2_compress :
   s:state -> m:message_block_w ->
   offset:uint64 -> f:Spec.last_block_flag ->
   Stack unit
-    (requires (fun h -> LB.live h s /\ LB.live h m
-                     /\ LB.disjoint s m /\ LB.disjoint m s))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer s) h0 h1
+    (requires (fun h -> live h s /\ live h m
+                     /\ disjoint s m /\ disjoint m s))
+    (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress h0.[s] h0.[m] offset f))
 
 let blake2_compress s m offset flag =
@@ -250,9 +249,9 @@ val blake2s_update_block:
   -> dd_prev:size_t{(size_v dd_prev + 1) * Spec.size_block <= max_size_t}
   -> d:message_block ->
   Stack unit
-    (requires (fun h -> LB.live h hash /\ LB.live h d
-                   /\ LB.disjoint hash d /\ LB.disjoint d hash))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer hash) h0 h1
+    (requires (fun h -> live h hash /\ live h d
+                   /\ disjoint hash d /\ disjoint d hash))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[hash] == Spec.blake2s_update_block (v dd_prev) h0.[d] h0.[hash]))
 
 let blake2s_update_block hash dd_prev d =
@@ -275,8 +274,8 @@ val blake2s_init_hash:
   -> kk:size_t{v kk <= 32}
   -> nn:size_t{1 <= v nn /\ v nn <= 32} ->
   Stack unit
-     (requires (fun h -> LB.live h hash))
-     (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer hash) h0 h1
+     (requires (fun h -> live h hash))
+     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                           /\ h1.[hash] == Spec.Blake2s.blake2s_init_hash h0.[hash] (v kk) (v nn)))
 
 let blake2s_init_hash hash kk nn =
@@ -293,10 +292,10 @@ val blake2s_init:
   -> kk:size_t{v kk <= 32 /\ kk == vkk}
   -> nn:size_t{1 <= v nn /\ v nn <= 32} ->
   Stack unit
-    (requires (fun h -> LB.live h hash
-                   /\ LB.live h k
-                   /\ LB.disjoint hash k /\ LB.disjoint k hash))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer hash) h0 h1
+    (requires (fun h -> live h hash
+                   /\ live h k
+                   /\ disjoint hash k /\ disjoint k hash))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[hash] == Spec.Blake2s.blake2s_init (v kk) h0.[k] (v nn)))
 
 [@ Substitute ]
@@ -323,9 +322,9 @@ val blake2s_update_multi_iteration:
   -> d:lbuffer uint8 (v dd * Spec.size_block)
   -> i:size_t{v i + 1 <= v dd} ->
   Stack unit
-    (requires (fun h -> LB.live h hash
-                   /\ LB.live h d /\ LB.disjoint hash d /\ LB.disjoint d hash))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer hash) h0 h1
+    (requires (fun h -> live h hash
+                   /\ live h d /\ disjoint hash d /\ disjoint d hash))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[hash] == Spec.blake2s_update_multi_iteration (v dd_prev) (v dd) h0.[d] (v i) h0.[hash]))
 
 [@ Substitute ]
@@ -341,9 +340,9 @@ val blake2s_update_multi:
   -> dd: size_t{(v dd + v dd_prev) * Spec.size_block <= max_size_t}
   -> d: lbuffer uint8 (size_v dd * Spec.size_block) ->
    Stack unit
-     (requires (fun h -> LB.live h hash
-                    /\ LB.live h d /\ LB.disjoint hash d /\ LB.disjoint d hash))
-     (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer hash) h0 h1
+     (requires (fun h -> live h hash
+                    /\ live h d /\ disjoint hash d /\ disjoint d hash))
+     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                           /\ h1.[hash] == Spec.blake2s_update_multi (v dd_prev) (v dd) h0.[d] h0.[hash]))
 
 let blake2s_update_multi hash dd_prev dd d =
@@ -364,9 +363,9 @@ val blake2s_update_last:
   -> len: size_t{v len <= Spec.size_block /\ len == vlen}
   -> flag_key: bool ->
   Stack unit
-    (requires (fun h -> LB.live h hash
-                   /\ LB.live h last /\ LB.disjoint hash last /\ LB.disjoint last hash))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer hash) h0 h1
+    (requires (fun h -> live h hash
+                   /\ live h last /\ disjoint hash last /\ disjoint last hash))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[hash] == Spec.Blake2s.blake2s_update_last (v ll) (v len) h0.[last] flag_key h0.[hash]))
 
 
@@ -404,8 +403,8 @@ let blake2s_update_last #vlen hash ll last len fk =
 val blake2s_update_last_empty:
   hash: state ->
   Stack unit
-    (requires (fun h -> LB.live h hash))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer hash) h0 h1
+    (requires (fun h -> live h hash))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ (let data = Seq.create Spec.size_block (u8 0) in
                            h1.[hash] == Spec.Blake2s.blake2s_update_last (Spec.size_block) (Spec.size_block) data false h0.[hash])))
 
@@ -428,9 +427,9 @@ val blake2s_finish:
   -> hash: state
   -> nn: size_t{1 <= v nn /\ v nn <= 32 /\ nn == vnn} ->
   Stack unit
-    (requires (fun h -> LB.live h hash
-                   /\ LB.live h output /\ LB.disjoint output hash /\ LB.disjoint hash output))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer output) h0 h1
+    (requires (fun h -> live h hash
+                   /\ live h output /\ disjoint output hash /\ disjoint hash output))
+    (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
                          /\ h1.[output] == Spec.Blake2s.blake2s_finish h0.[hash] (v nn)))
 
 let blake2s_finish #vnn output hash nn =
@@ -457,10 +456,10 @@ val blake2s:
   -> kk: size_t{v kk <= 32 /\ kk == vkk}
   -> nn:size_t{1 <= v nn /\ v nn <= 32 /\ nn == vnn} ->
   Stack unit
-    (requires (fun h -> LB.live h output /\ LB.live h d /\ LB.live h k
-                   /\ LB.disjoint output d /\ LB.disjoint d output
-                   /\ LB.disjoint output k /\ LB.disjoint k output))
-    (ensures  (fun h0 _ h1 -> LB.modifies (LB.loc_buffer output) h0 h1
+    (requires (fun h -> live h output /\ live h d /\ live h k
+                   /\ disjoint output d /\ disjoint d output
+                   /\ disjoint output k /\ disjoint k output))
+    (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
                          /\ h1.[output] == Spec.Blake2s.blake2s (v ll) h0.[d] (v kk) h0.[k] (v nn)))
 
 let blake2s #vll #vkk #vnn output d ll k kk nn =
