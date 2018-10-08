@@ -141,29 +141,6 @@ let w (m: block_t) (b: w_t) : HST.Stack unit
 = let h = Ghost.hide (HST.get ()) in
   C.Loops.for 0ul 80ul (w_loop_inv h m b) (fun i -> w_body h m b i)
 
-(*
-let equal5 (#t: Type) (s1 s2: Seq.seq t) : GTot Type0 =
-  Seq.length s1 == 5 /\
-  Seq.length s2 == 5 /\
-  Seq.index s1 0 == Seq.index s2 0 /\
-  Seq.index s1 1 == Seq.index s2 1 /\
-  Seq.index s1 2 == Seq.index s2 2 /\
-  Seq.index s1 3 == Seq.index s2 3 /\
-  Seq.index s1 4 == Seq.index s2 4
-
-let equal5_spec (#t: Type) (s1 s2: Seq.seq t) : Lemma
-  (requires (Seq.length s1 == 5 /\ Seq.length s2 == 5))
-  (ensures (equal5 s1 s2 <==> s1 == s2))
-  [SMTPat (equal5 s1 s2)]
-= assert (equal5 s1 s2 <==> Seq.equal s1 s2)
-
-let seq_index_upd (#a:Type) (s: Seq.seq a) (n:nat{n < Seq.length s}) (v:a) (i:nat{i < Seq.length s}) : Lemma
-  (requires True)
-  (ensures (Seq.index (Seq.upd s n v) i == (if i = n then v else Seq.index s i)))
-  [SMTPat (Seq.index (Seq.upd s n v) i)]
-= ()
-*)
-
 inline_for_extraction
 let upd5
   (#t: Type)
@@ -231,71 +208,6 @@ let spec_step3_body_spec (mi: Spec.word_block) (st: Ghost.erased (hash_w SHA1)) 
   [SMTPat (Ghost.reveal (spec_step3_body mi st t))]
 = ()
 
-inline_for_extraction
-let repeat_range_body_spec
-  (a: Type0)
-  (max: nat)
-: Tot Type
-= (a -> i:nat{i < max} -> Tot a)
-
-inline_for_extraction
-let repeat_range_body_interp
-  (a: Type0)
-  (inv: (HS.mem -> GTot Type0))
-: Tot Type
-= (h: HS.mem { inv h } ) ->
-  GTot a
-
-inline_for_extraction
-let repeat_range_body_impl
-  (#a:Type0)
-  (min:UInt32.t)
-  (max:UInt32.t{UInt32.v min <= UInt32.v max})
-  (f: Ghost.erased (repeat_range_body_spec a (U32.v max)))
-  (inv: (HS.mem -> GTot Type0))
-  (interp: repeat_range_body_interp a inv)
-: Tot Type
-= (i:UInt32.t{UInt32.v min <= UInt32.v i /\ UInt32.v i < UInt32.v max}) ->
-  HST.Stack unit
-  (requires (fun h -> inv h))
-  (ensures (fun h0 _ h1 ->
-    inv h0 /\ inv h1 /\
-    interp h1 == (Ghost.reveal f) (interp h0) (UInt32.v i)
-  ))
-
-inline_for_extraction
-val repeat_range:
-  #a:Type0 ->
-  min:UInt32.t ->
-  max:UInt32.t{UInt32.v min <= UInt32.v max} ->
-  f: (Ghost.erased (repeat_range_body_spec a (U32.v max))) ->
-  inv: (HS.mem -> GTot Type0) ->
-  interp: repeat_range_body_interp a inv ->
-  fc: repeat_range_body_impl min max f inv interp ->
-  HST.Stack unit
-    (requires (fun h -> inv h))
-    (ensures (fun h_1 _ h_2 ->
-      inv h_1 /\ inv h_2 /\
-      interp h_2 == Spec.Loops.repeat_range (U32.v min) (U32.v max) (Ghost.reveal f) (interp h_1)
-    ))
-
-let repeat_range #a min max f inv interp fc =
-  let h0 = HST.get() in
-  let inv' (h1: HS.mem) (i: nat): Type0 =
-    inv h1 /\
-    i <= UInt32.v max /\ UInt32.v min <= i /\
-    interp h1 == Spec.Loops.repeat_range (UInt32.v min) i (Ghost.reveal f) (interp h0)
-  in
-  let f' (i:UInt32.t{ U32.( 0 <= v i /\ v i < v max ) }): HST.Stack unit
-    (requires (fun h -> inv' h (UInt32.v i)))
-    (ensures (fun h_1 _ h_2 -> U32.(inv' h_2 (v i + 1))))
-  =
-    fc i;
-    Spec.Loops.repeat_range_induction (UInt32.v min) (UInt32.v i + 1) (Ghost.reveal f) (interp h0)
-  in
-  Spec.Loops.repeat_range_base (UInt32.v min) (Ghost.reveal f) (interp h0);
-  C.Loops.for min max inv' f'
-
 #set-options "--z3rlimit 32 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction
@@ -319,7 +231,7 @@ let step3
   w m _w;
   let mi = Ghost.hide (E.seq_uint32_of_be size_block_w (B.as_seq h0 m)) in
   let h1 = HST.get () in
-  let f : Ghost.erased (repeat_range_body_spec (hash_w SHA1) 80) = Ghost.hide (Spec.step3_body (Ghost.reveal mi)) in
+  let f : Ghost.erased (C.Loops.repeat_range_body_spec (hash_w SHA1) 80) = Ghost.hide (Spec.step3_body (Ghost.reveal mi)) in
   let inv (h' : HS.mem) : GTot Type0 =
     B.modifies (B.loc_buffer h) h1 h' /\
     B.live h' h
@@ -327,7 +239,7 @@ let step3
   let interp (h' : HS.mem { inv h' } ) : GTot (hash_w SHA1) =
     B.as_seq h' h
   in
-  repeat_range 0ul 80ul f inv interp (fun i -> step3_body mi _w h i);
+  C.Loops.repeat_range 0ul 80ul f inv interp (fun i -> step3_body mi _w h i);
   zero_out _w 80ul;
   HST.pop_frame ();
   ()
