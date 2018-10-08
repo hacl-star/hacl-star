@@ -32,37 +32,48 @@ inline_for_extraction let r2 = size 12
 inline_for_extraction let r3 = size 8
 inline_for_extraction let r4 = size 7
 
-inline_for_extraction let list_iv : list uint32 =
+type list_iv_t = l:list uint32{ List.Tot.length l <= max_size_t}
+inline_for_extraction let list_iv : list_iv_t =
+  [@inline_let]
+  let l =
   [u32 0x6A09E667; u32 0xBB67AE85; u32 0x3C6EF372; u32 0xA54FF53A;
-   u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19]
+   u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19] in
+  assert_norm(List.Tot.length l <= max_size_t);
+  l
 
 inline_for_extraction let size_const_iv : size_nat = 8
 let const_iv : lseq uint32 size_const_iv =
   assert_norm (List.Tot.length list_iv = size_const_iv);
   of_list list_iv
 
-inline_for_extraction let list_sigma: list (n:size_t{size_v n < 16}) = [
-  size  0; size  1; size  2; size  3; size  4; size  5; size  6; size  7;
-  size  8; size  9; size 10; size 11; size 12; size 13; size 14; size 15;
-  size 14; size 10; size  4; size  8; size  9; size 15; size 13; size  6;
-  size  1; size 12; size  0; size  2; size 11; size  7; size  5; size  3;
-  size 11; size  8; size 12; size  0; size  5; size  2; size 15; size 13;
-  size 10; size 14; size  3; size  6; size  7; size  1; size  9; size  4;
-  size  7; size  9; size  3; size  1; size 13; size 12; size 11; size 14;
-  size  2; size  6; size  5; size 10; size  4; size  0; size 15; size  8;
-  size  9; size  0; size  5; size  7; size  2; size  4; size 10; size 15;
-  size 14; size  1; size 11; size 12; size  6; size  8; size  3; size 13;
-  size  2; size 12; size  6; size 10; size  0; size 11; size  8; size  3;
-  size  4; size 13; size  7; size  5; size 15; size 14; size  1; size  9;
-  size 12; size  5; size  1; size 15; size 14; size 13; size  4; size 10;
-  size  0; size  7; size  6; size  3; size  9; size  2; size  8; size 11;
-  size 13; size 11; size  7; size 14; size 12; size  1; size  3; size  9;
-  size  5; size  0; size 15; size  4; size  8; size  6; size  2; size 10;
-  size  6; size 15; size 14; size  9; size 11; size  3; size  0; size  8;
-  size 12; size  2; size 13; size  7; size  1; size  4; size 10; size  5;
-  size 10; size  2; size  8; size  4; size  7; size  6; size  1; size  5;
-  size 15; size 11; size  9; size 14; size  3; size 12; size 13; size  0
-]
+type list_sigma_elt_t = n:size_t{size_v n < 16}
+type list_sigma_t = l:list list_sigma_elt_t{List.Tot.length l <= max_size_t}
+inline_for_extraction let list_sigma: list_sigma_t =
+  [@inline_let]
+  let l = [
+    size  0; size  1; size  2; size  3; size  4; size  5; size  6; size  7;
+    size  8; size  9; size 10; size 11; size 12; size 13; size 14; size 15;
+    size 14; size 10; size  4; size  8; size  9; size 15; size 13; size  6;
+    size  1; size 12; size  0; size  2; size 11; size  7; size  5; size  3;
+    size 11; size  8; size 12; size  0; size  5; size  2; size 15; size 13;
+    size 10; size 14; size  3; size  6; size  7; size  1; size  9; size  4;
+    size  7; size  9; size  3; size  1; size 13; size 12; size 11; size 14;
+    size  2; size  6; size  5; size 10; size  4; size  0; size 15; size  8;
+    size  9; size  0; size  5; size  7; size  2; size  4; size 10; size 15;
+    size 14; size  1; size 11; size 12; size  6; size  8; size  3; size 13;
+    size  2; size 12; size  6; size 10; size  0; size 11; size  8; size  3;
+    size  4; size 13; size  7; size  5; size 15; size 14; size  1; size  9;
+    size 12; size  5; size  1; size 15; size 14; size 13; size  4; size 10;
+    size  0; size  7; size  6; size  3; size  9; size  2; size  8; size 11;
+    size 13; size 11; size  7; size 14; size 12; size  1; size  3; size  9;
+    size  5; size  0; size 15; size  4; size  8; size  6; size  2; size 10;
+    size  6; size 15; size 14; size  9; size 11; size  3; size  0; size  8;
+    size 12; size  2; size 13; size  7; size  1; size  4; size 10; size  5;
+    size 10; size  2; size  8; size  4; size  7; size  6; size  1; size  5;
+    size 15; size 11; size  9; size 14; size  3; size 12; size 13; size  0]
+  in
+  assert_norm(List.Tot.length l <= max_size_t);
+  l
 
 inline_for_extraction let size_const_sigma : size_nat = 160
 let const_sigma:lseq (n:size_t{size_v n < 16}) size_const_sigma =
