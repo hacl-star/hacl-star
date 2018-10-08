@@ -231,21 +231,21 @@ let test () =
 
   IO.print_string "\nTEST 1\n";
   let test1_sk_len :size_t = List.Tot.length test1_sk in
-  let test1_sk :lbytes test1_sk_len = createL test1_sk in
+  let test1_sk :lbytes test1_sk_len = of_list test1_sk in
   let test1_pk_len :size_t = List.Tot.length test1_pk in
-  let test1_pk :lbytes test1_pk_len = createL test1_pk in
+  let test1_pk :lbytes test1_pk_len = of_list test1_pk in
   let test1_msg_len :size_t = List.Tot.length test1_msg in
-  let test1_msg :lbytes test1_msg_len = createL test1_msg in
+  let test1_msg :lbytes test1_msg_len = of_list test1_msg in
   let test1_expected_sig_len :size_t = List.Tot.length test1_expected_sig in
-  let test1_expected_sig :lbytes test1_expected_sig_len = createL test1_expected_sig in
+  let test1_expected_sig :lbytes test1_expected_sig_len = of_list test1_expected_sig in
 
   let test1_sig : lbytes 64 = Spec.Ed25519.sign test1_sk test1_msg_len test1_msg in
   let test1_verify : bool = Spec.Ed25519.verify test1_pk test1_msg_len test1_msg test1_sig in
 
   IO.print_string "\nExpected Ed25519 signature: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected_sig);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected_sig);
   IO.print_string "\nComputed Ed25519 signature: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_sig);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_sig);
 
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected_sig test1_sig in
   let result1' = test1_verify in

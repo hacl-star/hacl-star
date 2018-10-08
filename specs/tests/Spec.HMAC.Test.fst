@@ -411,13 +411,13 @@ let test () =
 
   IO.print_string "\nTEST 1\n";
   let test1_key_len : size_nat = 20 in
-  let test1_key : lbytes test1_key_len = createL test1_key in
+  let test1_key : lbytes test1_key_len = of_list test1_key in
   let test1_data_len : size_nat = 8 in
-  let test1_data : lbytes test1_data_len = createL test1_data in
-  let test1_expected224 = createL test1_expected224 in
-  let test1_expected256 = createL test1_expected256 in
-  let test1_expected384 = createL test1_expected384 in
-  let test1_expected512 = createL test1_expected512 in
+  let test1_data : lbytes test1_data_len = of_list test1_data in
+  let test1_expected224 = of_list test1_expected224 in
+  let test1_expected256 = of_list test1_expected256 in
+  let test1_expected384 = of_list test1_expected384 in
+  let test1_expected512 = of_list test1_expected512 in
   let test1_result224 = HMAC.hmac Hash.SHA2_224 test1_key_len test1_key test1_data_len test1_data in
   let test1_result256 = HMAC.hmac Hash.SHA2_256 test1_key_len test1_key test1_data_len test1_data in
   let test1_result384 = HMAC.hmac Hash.SHA2_384 test1_key_len test1_key test1_data_len test1_data in
@@ -437,41 +437,41 @@ let test () =
   let result1 = result1_224 && result1_256 && result1_384 && result1_512 in
   let result1' = result1_224' && result1_256' && result1_384' && result1_512' in
   IO.print_string "\nExpected HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected224);
   IO.print_string "\nComputed HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_result224);
   IO.print_string "\nExpected HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected256);
   IO.print_string "\nComputed HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_result256);
   IO.print_string "\nExpected HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected384);
   IO.print_string "\nComputed HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_result384);
   IO.print_string "\nExpected HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected512);
   IO.print_string "\nComputed HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_result512);
 
   if result1 then IO.print_string "\nHMAC SHA2 Test1 ontime: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test1 ontime: Failure :(\n";
 
   IO.print_string "\nExpected HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected224);
   IO.print_string "\nComputed HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result224');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_result224');
   IO.print_string "\nExpected HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected256);
   IO.print_string "\nComputed HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result256');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_result256');
   IO.print_string "\nExpected HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected384);
   IO.print_string "\nComputed HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result384');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_result384');
   IO.print_string "\nExpected HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected512);
   IO.print_string "\nComputed HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_result512');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_result512');
 
   if result1' then IO.print_string "\nHMAC SHA2 Test1 incremental: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test1 incremental: Failure :(\n";
@@ -479,13 +479,13 @@ let test () =
 
   IO.print_string "\nTEST 2\n";
   let test2_key_len : size_nat = List.Tot.length test2_key in
-  let test2_key : lbytes test2_key_len = createL test2_key in
+  let test2_key : lbytes test2_key_len = of_list test2_key in
   let test2_data_len : size_nat = List.Tot.length test2_data in
-  let test2_data : lbytes test2_data_len = createL test2_data in
-  let test2_expected224 = createL test2_expected224 in
-  let test2_expected256 = createL test2_expected256 in
-  let test2_expected384 = createL test2_expected384 in
-  let test2_expected512 = createL test2_expected512 in
+  let test2_data : lbytes test2_data_len = of_list test2_data in
+  let test2_expected224 = of_list test2_expected224 in
+  let test2_expected256 = of_list test2_expected256 in
+  let test2_expected384 = of_list test2_expected384 in
+  let test2_expected512 = of_list test2_expected512 in
   let test2_result224 = HMAC.hmac Hash.SHA2_224 test2_key_len test2_key test2_data_len test2_data in
   let test2_result256 = HMAC.hmac Hash.SHA2_256 test2_key_len test2_key test2_data_len test2_data in
   let test2_result384 = HMAC.hmac Hash.SHA2_384 test2_key_len test2_key test2_data_len test2_data in
@@ -506,41 +506,41 @@ let test () =
   let result2' = result2_224' && result2_256' && result2_384' && result2_512' in
 
   IO.print_string "\nExpected HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected224);
   IO.print_string "\nComputed HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_result224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_result224);
   IO.print_string "\nExpected HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected256);
   IO.print_string "\nComputed HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_result256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_result256);
   IO.print_string "\nExpected HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected384);
   IO.print_string "\nComputed HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_result384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_result384);
   IO.print_string "\nExpected HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected512);
   IO.print_string "\nComputed HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_result512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_result512);
 
   if result2 then IO.print_string "\nHMAC SHA2 Test2 ontime: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test2 ontime: Failure :(\n";
 
   IO.print_string "\nExpected HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected224);
   IO.print_string "\nComputed HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_result224');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_result224');
   IO.print_string "\nExpected HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected256);
   IO.print_string "\nComputed HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_result256');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_result256');
   IO.print_string "\nExpected HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected384);
   IO.print_string "\nComputed HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_result384');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_result384');
   IO.print_string "\nExpected HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected512);
   IO.print_string "\nComputed HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_result512');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_result512');
 
   if result2' then IO.print_string "\nHMAC SHA2 Test2 incremental: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test2 incremental: Failure :(\n";
@@ -548,13 +548,13 @@ let test () =
 
   IO.print_string "\nTEST 3\n";
   let test3_key_len : size_nat = List.Tot.length test3_key in
-  let test3_key : lbytes test3_key_len = createL test3_key in
+  let test3_key : lbytes test3_key_len = of_list test3_key in
   let test3_data_len : size_nat = List.Tot.length test3_data in
-  let test3_data : lbytes test3_data_len = createL test3_data in
-  let test3_expected224 = createL test3_expected224 in
-  let test3_expected256 = createL test3_expected256 in
-  let test3_expected384 = createL test3_expected384 in
-  let test3_expected512 = createL test3_expected512 in
+  let test3_data : lbytes test3_data_len = of_list test3_data in
+  let test3_expected224 = of_list test3_expected224 in
+  let test3_expected256 = of_list test3_expected256 in
+  let test3_expected384 = of_list test3_expected384 in
+  let test3_expected512 = of_list test3_expected512 in
   let test3_result224 = HMAC.hmac Hash.SHA2_224 test3_key_len test3_key test3_data_len test3_data in
   let test3_result256 = HMAC.hmac Hash.SHA2_256 test3_key_len test3_key test3_data_len test3_data in
   let test3_result384 = HMAC.hmac Hash.SHA2_384 test3_key_len test3_key test3_data_len test3_data in
@@ -575,41 +575,41 @@ let test () =
   let result3' = result3_224' && result3_256' && result3_384' && result3_512' in
 
   IO.print_string "\nExpected HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected224);
   IO.print_string "\nComputed HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_result224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_result224);
   IO.print_string "\nExpected HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected256);
   IO.print_string "\nComputed HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_result256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_result256);
   IO.print_string "\nExpected HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected384);
   IO.print_string "\nComputed HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_result384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_result384);
   IO.print_string "\nExpected HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected512);
   IO.print_string "\nComputed HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_result512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_result512);
 
   if result3 then IO.print_string "\nHMAC SHA2 Test3 ontime: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test3 ontime: Failure :(\n";
 
   IO.print_string "\nExpected HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected224);
   IO.print_string "\nComputed HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_result224');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_result224');
   IO.print_string "\nExpected HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected256);
   IO.print_string "\nComputed HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_result256');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_result256');
   IO.print_string "\nExpected HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected384);
   IO.print_string "\nComputed HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_result384');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_result384');
   IO.print_string "\nExpected HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected512);
   IO.print_string "\nComputed HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_result512');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_result512');
 
   if result3' then IO.print_string "\nHMAC SHA2 Test3 incremental: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test3 incremental: Failure :(\n";
@@ -617,13 +617,13 @@ let test () =
 
   IO.print_string "\nTEST 4\n";
   let test4_key_len : size_nat = List.Tot.length test4_key in
-  let test4_key : lbytes test4_key_len = createL test4_key in
+  let test4_key : lbytes test4_key_len = of_list test4_key in
   let test4_data_len : size_nat = List.Tot.length test4_data in
-  let test4_data : lbytes test4_data_len = createL test4_data in
-  let test4_expected224 = createL test4_expected224 in
-  let test4_expected256 = createL test4_expected256 in
-  let test4_expected384 = createL test4_expected384 in
-  let test4_expected512 = createL test4_expected512 in
+  let test4_data : lbytes test4_data_len = of_list test4_data in
+  let test4_expected224 = of_list test4_expected224 in
+  let test4_expected256 = of_list test4_expected256 in
+  let test4_expected384 = of_list test4_expected384 in
+  let test4_expected512 = of_list test4_expected512 in
   let test4_result224 = HMAC.hmac Hash.SHA2_224 test4_key_len test4_key test4_data_len test4_data in
   let test4_result256 = HMAC.hmac Hash.SHA2_256 test4_key_len test4_key test4_data_len test4_data in
   let test4_result384 = HMAC.hmac Hash.SHA2_384 test4_key_len test4_key test4_data_len test4_data in
@@ -644,41 +644,41 @@ let test () =
   let result4' = result4_224' && result4_256' && result4_384' && result4_512' in
 
   IO.print_string "\nExpected HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_expected224);
   IO.print_string "\nComputed HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_result224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_result224);
   IO.print_string "\nExpected HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_expected256);
   IO.print_string "\nComputed HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_result256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_result256);
   IO.print_string "\nExpected HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_expected384);
   IO.print_string "\nComputed HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_result384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_result384);
   IO.print_string "\nExpected HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_expected512);
   IO.print_string "\nComputed HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_result512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_result512);
 
   if result4 then IO.print_string "\nHMAC SHA2 Test4 ontime: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test4 ontime: Failure :(\n";
 
   IO.print_string "\nExpected HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_expected224);
   IO.print_string "\nComputed HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_result224');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_result224');
   IO.print_string "\nExpected HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_expected256);
   IO.print_string "\nComputed HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_result256');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_result256');
   IO.print_string "\nExpected HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_expected384);
   IO.print_string "\nComputed HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_result384');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_result384');
   IO.print_string "\nExpected HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_expected512);
   IO.print_string "\nComputed HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test4_result512');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_result512');
 
   if result4' then IO.print_string "\nHMAC SHA2 Test4 incremental: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test4 incremental: Failure :(\n";
@@ -686,13 +686,13 @@ let test () =
 
   IO.print_string "\nTEST 5\n";
   let test5_key_len : size_nat = List.Tot.length test5_key in
-  let test5_key : lbytes test5_key_len = createL test5_key in
+  let test5_key : lbytes test5_key_len = of_list test5_key in
   let test5_data_len : size_nat = List.Tot.length test5_data in
-  let test5_data : lbytes test5_data_len = createL test5_data in
-  let test5_expected224 : lbytes 16 = createL test5_expected224 in
-  let test5_expected256 : lbytes 16 = createL test5_expected256 in
-  let test5_expected384 : lbytes 16 = createL test5_expected384 in
-  let test5_expected512 : lbytes 16 = createL test5_expected512 in
+  let test5_data : lbytes test5_data_len = of_list test5_data in
+  let test5_expected224 : lbytes 16 = of_list test5_expected224 in
+  let test5_expected256 : lbytes 16 = of_list test5_expected256 in
+  let test5_expected384 : lbytes 16 = of_list test5_expected384 in
+  let test5_expected512 : lbytes 16 = of_list test5_expected512 in
   let test5_result224b = HMAC.hmac Hash.SHA2_224 test5_key_len test5_key test5_data_len test5_data in
   let test5_result256b = HMAC.hmac Hash.SHA2_256 test5_key_len test5_key test5_data_len test5_data in
   let test5_result384b = HMAC.hmac Hash.SHA2_384 test5_key_len test5_key test5_data_len test5_data in
@@ -721,41 +721,41 @@ let test () =
   let result5' = result5_224' && result5_256' && result5_384' && result5_512' in
 
   IO.print_string "\nExpected HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_expected224);
   IO.print_string "\nComputed HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_result224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_result224);
   IO.print_string "\nExpected HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_expected256);
   IO.print_string "\nComputed HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_result256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_result256);
   IO.print_string "\nExpected HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_expected384);
   IO.print_string "\nComputed HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_result384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_result384);
   IO.print_string "\nExpected HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_expected512);
   IO.print_string "\nComputed HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_result512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_result512);
 
   if result5 then IO.print_string "\nHMAC SHA2 Test5 ontime: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test5 ontime: Failure :(\n";
 
   IO.print_string "\nExpected HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_expected224);
   IO.print_string "\nComputed HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_result224');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_result224');
   IO.print_string "\nExpected HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_expected256);
   IO.print_string "\nComputed HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_result256');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_result256');
   IO.print_string "\nExpected HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_expected384);
   IO.print_string "\nComputed HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_result384');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_result384');
   IO.print_string "\nExpected HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_expected512);
   IO.print_string "\nComputed HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test5_result512');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_result512');
 
   if result5' then IO.print_string "\nHMAC SHA2 Test5 incremental: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test5 incremental: Failure :(\n";
@@ -763,13 +763,13 @@ let test () =
 
   IO.print_string "\nTEST 6\n";
   let test6_key_len : size_nat = List.Tot.length test6_key in
-  let test6_key : lbytes test6_key_len = createL test6_key in
+  let test6_key : lbytes test6_key_len = of_list test6_key in
   let test6_data_len : size_nat = List.Tot.length test6_data in
-  let test6_data : lbytes test6_data_len = createL test6_data in
-  let test6_expected224 = createL test6_expected224 in
-  let test6_expected256 = createL test6_expected256 in
-  let test6_expected384 = createL test6_expected384 in
-  let test6_expected512 = createL test6_expected512 in
+  let test6_data : lbytes test6_data_len = of_list test6_data in
+  let test6_expected224 = of_list test6_expected224 in
+  let test6_expected256 = of_list test6_expected256 in
+  let test6_expected384 = of_list test6_expected384 in
+  let test6_expected512 = of_list test6_expected512 in
   let test6_result224 = HMAC.hmac Hash.SHA2_224 test6_key_len test6_key test6_data_len test6_data in
   let test6_result256 = HMAC.hmac Hash.SHA2_256 test6_key_len test6_key test6_data_len test6_data in
   let test6_result384 = HMAC.hmac Hash.SHA2_384 test6_key_len test6_key test6_data_len test6_data in
@@ -790,41 +790,41 @@ let test () =
   let result6' = result6_224' && result6_256' && result6_384' && result6_512' in
 
   IO.print_string "\nExpected HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_expected224);
   IO.print_string "\nComputed HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_result224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_result224);
   IO.print_string "\nExpected HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_expected256);
   IO.print_string "\nComputed HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_result256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_result256);
   IO.print_string "\nExpected HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_expected384);
   IO.print_string "\nComputed HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_result384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_result384);
   IO.print_string "\nExpected HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_expected512);
   IO.print_string "\nComputed HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_result512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_result512);
 
   if result6 then IO.print_string "\nHMAC SHA2 Test6 ontime: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test6 ontime: Failure :(\n";
 
   IO.print_string "\nExpected HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_expected224);
   IO.print_string "\nComputed HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_result224');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_result224');
   IO.print_string "\nExpected HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_expected256);
   IO.print_string "\nComputed HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_result256');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_result256');
   IO.print_string "\nExpected HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_expected384);
   IO.print_string "\nComputed HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_result384');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_result384');
   IO.print_string "\nExpected HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_expected512);
   IO.print_string "\nComputed HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test6_result512');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test6_result512');
 
   if result6' then IO.print_string "\nHMAC SHA2 Test6 incremental: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test6 incremental: Failure :(\n";
@@ -832,13 +832,13 @@ let test () =
 
   IO.print_string "\nTEST 7\n";
   let test7_key_len : size_nat = List.Tot.length test7_key in
-  let test7_key : lbytes test7_key_len = createL test7_key in
+  let test7_key : lbytes test7_key_len = of_list test7_key in
   let test7_data_len : size_nat = List.Tot.length test7_data in
-  let test7_data : lbytes test7_data_len = createL test7_data in
-  let test7_expected224 = createL test7_expected224 in
-  let test7_expected256 = createL test7_expected256 in
-  let test7_expected384 = createL test7_expected384 in
-  let test7_expected512 = createL test7_expected512 in
+  let test7_data : lbytes test7_data_len = of_list test7_data in
+  let test7_expected224 = of_list test7_expected224 in
+  let test7_expected256 = of_list test7_expected256 in
+  let test7_expected384 = of_list test7_expected384 in
+  let test7_expected512 = of_list test7_expected512 in
   let test7_result224 = HMAC.hmac Hash.SHA2_224 test7_key_len test7_key test7_data_len test7_data in
   let test7_result256 = HMAC.hmac Hash.SHA2_256 test7_key_len test7_key test7_data_len test7_data in
   let test7_result384 = HMAC.hmac Hash.SHA2_384 test7_key_len test7_key test7_data_len test7_data in
@@ -859,41 +859,41 @@ let test () =
   let result7' = result7_224' && result7_256' && result7_384' && result7_512' in
 
   IO.print_string "\nExpected HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_expected224);
   IO.print_string "\nComputed HMAC SHA2 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_result224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_result224);
   IO.print_string "\nExpected HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_expected256);
   IO.print_string "\nComputed HMAC SHA2 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_result256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_result256);
   IO.print_string "\nExpected HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_expected384);
   IO.print_string "\nComputed HMAC SHA2 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_result384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_result384);
   IO.print_string "\nExpected HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_expected512);
   IO.print_string "\nComputed HMAC SHA2 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_result512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_result512);
 
   if result7 then IO.print_string "\nHMAC SHA2 Test7 ontime: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test7 ontime: Failure :(\n";
 
   IO.print_string "\nExpected HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_expected224);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_expected224);
   IO.print_string "\nComputed HMAC SHA2 Incremental 224: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_result224');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_result224');
   IO.print_string "\nExpected HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_expected256);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_expected256);
   IO.print_string "\nComputed HMAC SHA2 Incremental 256: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_result256');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_result256');
   IO.print_string "\nExpected HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_expected384);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_expected384);
   IO.print_string "\nComputed HMAC SHA2 Incremental 384: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_result384');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_result384');
   IO.print_string "\nExpected HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_expected512);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_expected512);
   IO.print_string "\nComputed HMAC SHA2 Incremental 512: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test7_result512');
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test7_result512');
 
   if result7' then IO.print_string "\nHMAC SHA2 Test7 incremental: Success!\n"
   else IO.print_string "\nHMAC SHA2 Test7 incremental: Failure :(\n";

@@ -198,19 +198,21 @@ val state_pi_rho:
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s == S.state_pi_rho (as_seq h0 s))
-let state_pi_rho s = admit(); //TODO: add loop2
+let state_pi_rho s =
   push_frame();
+  let h0 = ST.get () in
   let current:lbuffer uint64 1 = create (size 1) (readLane s (size 1) (size 0)) in
-  let a_spec i = tuple2 uint64 S.state in
+  let h1 = ST.get () in
+  assert (bget h1 current 0 == S.readLane (as_seq h0 s) 1 0);
   let a_impl = tuple2 (lbuffer uint64 1) state in
   let refl h i : GTot (tuple2 uint64 S.state) =
     get h current 0, as_seq h s in
-  let footprint i = loc_union (loc_buffer s) (loc_buffer current) in
+  let footprint i = loc_union (loc_buffer current) (loc_buffer s) in
   let spec h0 = S.state_pi_rho_inner in
   let h0 = ST.get () in
-  loop h0 (size 24) a_spec a_impl (current, s) refl footprint spec
+  loop h0 (size 24) S.state_pi_rho_s a_impl (current, s) refl footprint spec
   (fun i ->
-    LSeq.unfold_repeat 24 a_spec (spec h0) (refl h0 0) (v i);
+    LSeq.unfold_repeat 24 S.state_pi_rho_s (spec h0) (refl h0 0) (v i);
     state_pi_rho_inner i current s
   );
   pop_frame()

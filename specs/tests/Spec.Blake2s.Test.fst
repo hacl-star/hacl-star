@@ -17,7 +17,7 @@ let test1_plaintext_list  = List.Tot.map u8_from_UInt8 [
 ]
 let test1_plaintext : lbytes 3 =
   assert_norm (List.Tot.length test1_plaintext_list = 3);
-  createL test1_plaintext_list
+  of_list test1_plaintext_list
 
 let test1_expected_list = List.Tot.map u8_from_UInt8 [
   0x50uy; 0x8Cuy; 0x5Euy; 0x8Cuy; 0x32uy; 0x7Cuy; 0x14uy; 0xE2uy;
@@ -27,14 +27,14 @@ let test1_expected_list = List.Tot.map u8_from_UInt8 [
 ]
 let test1_expected : lbytes 32 =
   assert_norm (List.Tot.length test1_expected_list = 32);
-  createL test1_expected_list
+  of_list test1_expected_list
 
 
 
 let test2_plaintext_list = List.Tot.map u8_from_UInt8 [ 0x00uy ]
 let test2_plaintext : lbytes 1 =
   assert_norm (List.Tot.length test2_plaintext_list = 1);
-  createL test2_plaintext_list
+  of_list test2_plaintext_list
 
 let test2_key_list = List.Tot.map u8_from_UInt8 [
   0x00uy; 0x01uy; 0x02uy; 0x03uy; 0x04uy; 0x05uy; 0x06uy; 0x07uy;
@@ -44,7 +44,7 @@ let test2_key_list = List.Tot.map u8_from_UInt8 [
 
 let test2_key : lbytes 32 =
   assert_norm (List.Tot.length test2_key_list = 32);
-  createL test2_key_list
+  of_list test2_key_list
 
 let test2_expected_list = List.Tot.map u8_from_UInt8 [
   0x40uy; 0xd1uy; 0x5fuy; 0xeeuy; 0x7cuy; 0x32uy; 0x88uy; 0x30uy;
@@ -54,7 +54,7 @@ let test2_expected_list = List.Tot.map u8_from_UInt8 [
 
 let test2_expected : lbytes 32 =
   assert_norm (List.Tot.length test2_expected_list = 32);
-  createL test2_expected_list
+  of_list test2_expected_list
 
 
 
@@ -95,7 +95,7 @@ let test3_plaintext_list = List.Tot.map u8_from_UInt8 [
 
 let test3_plaintext : lbytes (List.Tot.length test3_plaintext_list) =
   assert_norm (List.Tot.length test3_plaintext_list = 255);
-  createL test3_plaintext_list
+  of_list test3_plaintext_list
 
 let test3_key_list = List.Tot.map u8_from_UInt8 [
   0x00uy; 0x01uy; 0x02uy; 0x03uy; 0x04uy; 0x05uy; 0x06uy; 0x07uy;
@@ -105,7 +105,7 @@ let test3_key_list = List.Tot.map u8_from_UInt8 [
 
 let test3_key : lbytes 32 =
   assert_norm (List.Tot.length test3_key_list = 32);
-  createL test3_key_list
+  of_list test3_key_list
 
 let test3_expected_list = List.Tot.map u8_from_UInt8 [
   0x3fuy; 0xb7uy; 0x35uy; 0x06uy; 0x1auy; 0xbcuy; 0x51uy; 0x9duy;
@@ -115,7 +115,7 @@ let test3_expected_list = List.Tot.map u8_from_UInt8 [
 
 let test3_expected : lbytes 32 =
   assert_norm (List.Tot.length test3_expected_list = 32);
-  createL test3_expected_list
+  of_list test3_expected_list
 
 
 
@@ -156,7 +156,7 @@ let test4_plaintext_list = List.Tot.map u8_from_UInt8 [
 
 let test4_plaintext : lbytes (List.Tot.length test4_plaintext_list) =
   assert_norm (List.Tot.length test4_plaintext_list = 251);
-  createL test4_plaintext_list
+  of_list test4_plaintext_list
 
 let test4_key_list = List.Tot.map u8_from_UInt8 [
   0x00uy; 0x01uy; 0x02uy; 0x03uy; 0x04uy; 0x05uy; 0x06uy; 0x07uy;
@@ -166,7 +166,7 @@ let test4_key_list = List.Tot.map u8_from_UInt8 [
 
 let test4_key : lbytes 32 =
   assert_norm (List.Tot.length test4_key_list = 32);
-  createL test4_key_list
+  of_list test4_key_list
 
 let test4_expected_list = List.Tot.map u8_from_UInt8 [
   0xd1uy; 0x2buy; 0xf3uy; 0x73uy; 0x2euy; 0xf4uy; 0xafuy; 0x5cuy;
@@ -177,7 +177,7 @@ let test4_expected_list = List.Tot.map u8_from_UInt8 [
 
 let test4_expected : lbytes 32 =
   assert_norm (List.Tot.length test4_expected_list = 32);
-  createL test4_expected_list
+  of_list test4_expected_list
 
 //
 // Main
@@ -188,15 +188,15 @@ let test () =
   IO.print_string "\n\nTEST 1";
   let test1_plaintext_len : size_nat = 32 in
   let test1_result : lbytes 32 =
-    Spec.Blake2s.blake2s 3 test1_plaintext 0 (createL []) 32
+    Spec.Blake2s.blake2s 3 test1_plaintext 0 (of_list []) 32
   in
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
 
   IO.print_string "\n1. Result  : ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list test1_result);
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_result);
 
   IO.print_string "\n1. Expected: ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list test1_expected);
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_expected);
 
   //
   // TEST 2
@@ -209,10 +209,10 @@ let test () =
   let result2 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected test2_result in
 
   IO.print_string "\n2. Result  : ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list test2_result);
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test2_result);
 
   IO.print_string "\n2. Expected: ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list test2_expected);
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test2_expected);
 
   //
   // TEST 3
@@ -225,10 +225,10 @@ let test () =
   let result3 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected test3_result in
 
   IO.print_string "\n3. Result  : ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list test3_result);
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test3_result);
 
   IO.print_string "\n3. Expected: ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list test3_expected);
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test3_expected);
 
   //
   // TEST 4
@@ -241,10 +241,10 @@ let test () =
   let result4 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected test4_result in
 
   IO.print_string "\n4. Result  : ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list test4_result);
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test4_result);
 
   IO.print_string "\n4. Expected: ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list test4_expected);
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test4_expected);
 
 
   //

@@ -31,14 +31,14 @@ let test () =
   assert_norm(List.Tot.length msg      = 34);
   assert_norm(List.Tot.length k        = 32);
   assert_norm(List.Tot.length expected = 16);
-  let msg      : lseq uint8 34  = createL #uint8 msg in
-  let k        : lseq uint8 keysize  = createL #uint8 k   in
-  let expected : lseq uint8 blocksize = createL #uint8 expected in
-  let mac      : lseq uint8 blocksize = poly1305 34 msg k in
+  let msg      : lseq uint8 34  = of_list #uint8 msg in
+  let k        : lseq uint8 keysize  = of_list #uint8 k   in
+  let expected : lseq uint8 blocksize = of_list #uint8 expected in
+  let mac      : lseq uint8 blocksize = poly1305 msg k in
   let result : bool = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac expected in
   IO.print_string   "Expected MAC:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected);
   IO.print_string "\nComputed MAC:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list mac);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list mac);
   if result then   IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n"

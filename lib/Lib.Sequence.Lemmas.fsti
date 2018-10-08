@@ -11,8 +11,8 @@ val create_index: #a:Type -> len:size_nat -> init:a -> i:size_nat{i < len} -> Le
 
 val createL_index: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> i:size_nat{i < List.Tot.length l} -> Lemma
 		  (requires True)
-		  (ensures (index (createL l) i) == List.Tot.index l i)
-		  [SMTPat (index (createL l) i)]
+		  (ensures (index (of_list l) i) == List.Tot.index l i)
+		  [SMTPat (index (of_list l) i)]
 
 val upd_index: #a:Type -> #len:size_nat -> s:lseq a len -> i:size_nat{i < len /\ len > 0} -> x:a -> j:size_nat{j < len} -> Lemma
 		  (requires True)

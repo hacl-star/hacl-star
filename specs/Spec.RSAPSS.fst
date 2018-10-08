@@ -6,6 +6,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
 open FStar.Math.Lemmas
+open Lib.LoopCombinators
 
 module Hash = Spec.SHA2
 
@@ -49,14 +50,14 @@ let mgf_sha256 #mgfseedLen mgfseed maskLen =
     (fun i acc ->
       let counter = nat_to_bytes_be 4 i in
       let mgfseed_counter = update_slice mgfseed_counter mgfseedLen (mgfseedLen + 4) counter in
-      let mHash = hash_sha256 mgfseed_counter in
+      let mHash = hash_sha256 #4 mgfseed_counter in
       update_slice acc (hLen * i) (hLen * i + hLen) mHash
     ) acc in
   slice acc 0 maskLen
 
 (* Bignum convert functions *)
 val os2ip: #bLen:size_nat -> b:lbytes bLen -> Tot (res:nat{res < pow2 (8 * bLen)})
-let os2ip #bLen b = nat_from_intseq_be #U8 #bLen b
+let os2ip #bLen b = nat_from_intseq_be #U8 b
 
 val i2osp: #bLen:size_nat -> n:nat{n < pow2 (8 * bLen)} -> Tot (lbytes bLen)
 let i2osp #bLen n = nat_to_bytes_be bLen n
@@ -149,7 +150,7 @@ let pss_verify #msgLen sLen msg emBits em =
       let maskedDB = slice em 0 dbLen in
       let m1Hash = slice em dbLen (dbLen + hLen) in
 
-      let dbMask = mgf_sha256 m1Hash dbLen in
+      let dbMask = mgf_sha256 #hLen m1Hash dbLen in
       let db = xor_bytes maskedDB dbMask in
       let db =
 	if msBits > 0
@@ -163,7 +164,7 @@ let pss_verify #msgLen sLen msg emBits em =
       let pad = slice db 0 padLen in
       let salt = slice db padLen (padLen + sLen) in
 
-      if not (eq_bytes pad pad2) then false
+      if not (eq_bytes #padLen pad pad2) then false
       else begin
 	let m1Len:size_nat = 8 + hLen + sLen in
 	let m1 = create m1Len (u8 0) in
