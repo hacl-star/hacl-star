@@ -1,4 +1,4 @@
-module Hacl.Hash.Common
+module Hacl.Hash.PadFinish
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
@@ -7,7 +7,6 @@ module U128 = FStar.UInt128
 
 module Cast = FStar.Int.Cast.Full
 module Constants = Spec.SHA2.Constants
-module Tactics = FStar.Tactics
 module Helpers = Spec.Hash.Helpers
 module Endianness = FStar.Kremlin.Endianness
 module Math = FStar.Math.Lemmas
@@ -21,9 +20,9 @@ module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open LowStar.BufferOps
+open Hacl.Hash.Definitions
 open Hacl.Hash.Lemmas
 open Spec.Hash.Helpers
-
 
 (** Padding *)
 
@@ -185,7 +184,7 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer U8.t):
       store_len a U128.(shift_left len 3ul) dst
   end
 
-noextract
+noextract inline_for_extraction
 let pad a len dst =
   (* i) Append a single 1 bit. *)
   let dst1 = B.sub dst 0ul 1ul in
@@ -228,7 +227,7 @@ let size_hash_final_w_ul (a: hash_alg): n:U32.t { U32.v n = size_hash_final_w a 
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
-noextract
+noextract inline_for_extraction
 let finish a s dst =
   let open FStar.Mul in
   let h0 = ST.get () in
@@ -264,3 +263,4 @@ let finish a s dst =
           (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
   in
   C.Loops.for 0ul (size_hash_final_w_ul a) inv f
+

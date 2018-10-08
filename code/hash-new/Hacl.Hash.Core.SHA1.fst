@@ -1,4 +1,4 @@
-module Hacl.SHA1
+module Hacl.Hash.Core.SHA1
 
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
@@ -9,10 +9,12 @@ module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module E = FStar.Kremlin.Endianness
 module CE = C.Endianness
-module Common = Hacl.Hash.Common
+
+open Hacl.Hash.Definitions
+open Spec.Hash.Helpers
 
 friend Spec.SHA1
-friend Hacl.Hash.Common
+friend Hacl.Hash.PadFinish
 
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
@@ -178,7 +180,13 @@ let upd5
   B.upd b 1ul x1;
   B.upd b 2ul x2;
   B.upd b 3ul x3;
-  B.upd b 4ul x4
+  B.upd b 4ul x4;
+  // JP: why define this helper instead of letting callers call intro_of_list?
+  let h = FStar.HyperStack.ST.get () in
+  [@inline_let]
+  let l = [ x0; x1; x2; x3; x4 ] in
+  assert_norm (List.length l = 5);
+  Seq.intro_of_list (B.as_seq h b) l
 
 inline_for_extraction
 let step3_body
@@ -363,8 +371,6 @@ let step4
 let update h l =
   step4 l h
 
-let pad: pad_st SHA1 =
-  FStar.Tactics.(synth_by_tactic (specialize (Common.pad SHA1) [`%Common.pad]))
+let pad: pad_st SHA1 = Hacl.Hash.PadFinish.pad SHA1
 
-let finish: finish_st SHA1 =
-  FStar.Tactics.(synth_by_tactic (specialize (Common.finish SHA1) [`%Common.finish]))
+let finish: finish_st SHA1 = Hacl.Hash.PadFinish.finish SHA1

@@ -1,24 +1,23 @@
-module Hacl.Hash.Incremental
+module Hacl.Hash.MD
+
+(** The Merkle-Damgård construction. *)
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module U128 = FStar.UInt128
+module Lemmas = FStar.Math.Lemmas
 module B = LowStar.Buffer
 module S = FStar.Seq
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
-module Tactics = FStar.Tactics
-module Lemmas = FStar.Math.Lemmas
 
-module Common = Spec.Hash.Common
-module Spec = Spec.Hash
-
-open Hacl.Hash.Common
+open Hacl.Hash.Definitions
 open Hacl.Hash.Lemmas
 open Spec.Hash.Helpers
-open Spec.Hash.Incremental
 open FStar.Mul
+
+(** Auxiliary helpers *)
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -67,13 +66,51 @@ let len_add32 (a: hash_alg)
       assert_norm (pow2 125 < pow2 128);
       U128.(prev_len +^ uint64_to_uint128 (uint32_to_uint64 input_len))
 
-noextract
-val mk_update_last: a:hash_alg ->
-  Hacl.Hash.update_multi_st a ->
-  Hacl.Hash.Common.pad_st a ->
-  update_last_st a
+#push-options "--max_fuel 1 --z3rlimit 128 --using_facts_from '* -FStar.UInt8 -FStar.UInt16 -FStar.UInt32 -FStar.UInt64 -FStar.UInt128'"
 
-noextract
+(** Iterated compression function. *)
+noextract inline_for_extraction
+let mk_update_multi a update s blocks n_blocks =
+  let h0 = ST.get () in
+  let inv (h: HS.mem) (i: nat) =
+    let i_block = size_block a * i in
+    i <= U32.v n_blocks /\
+    B.live h s /\ B.live h blocks /\
+    B.(modifies (loc_buffer s) h0 h) /\
+    S.equal (B.as_seq h s)
+      (Spec.Hash.update_multi a (B.as_seq h0 s) (S.slice (B.as_seq h0 blocks) 0 i_block))
+  in
+  let f (i:U32.t { U32.(0 <= v i /\ v i < v n_blocks)}): ST.Stack unit
+    (requires (fun h -> inv h (U32.v i)))
+    (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 (U32.v i + 1)))
+  =
+    let h1 = ST.get () in
+    let sz = size_block_ul a in
+    let blocks0 = B.sub blocks 0ul U32.(sz *^ i) in
+    let block = B.sub blocks U32.(sz *^ i) sz in
+    update s block;
+    let h2 = ST.get () in
+    assert (
+      let s0 = B.as_seq h0 s in
+      let s1 = B.as_seq h1 s in
+      let s2 = B.as_seq h2 s in
+      let blocks = B.as_seq h0 blocks in
+      let block = B.as_seq h0 block in
+      let blocks0 = B.as_seq h0 blocks0 in
+      let i = U32.v i in
+      let n_blocks = U32.v n_blocks in
+      size_block a * (i + 1) <= S.length blocks /\
+      (size_block a * (i + 1) - size_block a * i) % size_block a = 0 /\
+      S.equal block (S.slice blocks (size_block a * i) (size_block a * (i + 1))) /\
+      S.equal s2 (Spec.Hash.update_multi a s1 block))
+  in
+  assert (B.length blocks = U32.v n_blocks * size_block a);
+  C.Loops.for 0ul n_blocks inv f
+
+#push-options "--max_fuel 0 --z3rlimit 200"
+
+(** An arbitrary number of bytes, then padding. *)
+noextract inline_for_extraction
 let mk_update_last a update_multi pad s prev_len input input_len =
   ST.push_frame ();
   let h0 = ST.get () in
@@ -93,13 +130,13 @@ let mk_update_last a update_multi pad s prev_len input input_len =
 
   let h1 = ST.get () in
   assert (S.equal (B.as_seq h0 input) (S.append (B.as_seq h1 blocks) (B.as_seq h1 rest)));
-  assert (S.equal (B.as_seq h1 s) (Spec.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks)));
+  assert (S.equal (B.as_seq h1 s) (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks)));
 
   (* Compute the total number of bytes fed. *)
   let total_input_len: len_t a = len_add32 a prev_len input_len in
 
   (* Blit the remaining data and the padding together *)
-  let pad_len = pad_len a total_input_len in
+  let pad_len = Hacl.Hash.PadFinish.pad_len a total_input_len in
   let tmp_len = U32.( rest_len +^ pad_len ) in
   assert (len_v a total_input_len = len_v a prev_len + U32.v blocks_len + U32.v rest_len);
   Lemmas.modulo_distributivity (len_v a prev_len) (U32.v blocks_len) (size_block a);
@@ -123,57 +160,25 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   let h2 = ST.get () in
   assert (S.equal (B.as_seq h2 tmp) (S.append (B.as_seq h2 tmp_rest) (B.as_seq h2 tmp_pad)));
   assert (S.equal (B.as_seq h2 tmp_rest) (B.as_seq h1 rest));
-  assert (S.equal (B.as_seq h2 tmp_pad) (Common.pad a (len_v a total_input_len)));
+  assert (S.equal (B.as_seq h2 tmp_pad) (Spec.Hash.Common.pad a (len_v a total_input_len)));
 
   (* Update multi those last few blocks *)
   update_multi s tmp U32.(tmp_len /^ size_block_ul a);
 
   let h3 = ST.get () in
   assert (S.equal (B.as_seq h3 s)
-    (Spec.update_multi a (Spec.update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
-      (S.append (B.as_seq h1 rest) (Common.pad a (len_v a total_input_len)))));
+    (Spec.Hash.update_multi a (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
+      (S.append (B.as_seq h1 rest) (Spec.Hash.Common.pad a (len_v a total_input_len)))));
   assert (
     let s1 = B.as_seq h1 blocks in
     let s2 = B.as_seq h2 rest in
-    let s3 = Common.pad a (len_v a total_input_len) in
+    let s3 = Spec.Hash.Common.pad a (len_v a total_input_len) in
     S.equal (S.append s1 (S.append s2 s3)) (S.append (S.append s1 s2) s3));
 
   ST.pop_frame ()
 
 
-let update_last_sha2_224: update_last_st SHA2_224 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_update_last SHA2_224 Hacl.Hash.update_multi_sha2_224 Hacl.SHA2.pad_224) [`%mk_update_last]))
-
-let update_last_sha2_256: update_last_st SHA2_256 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_update_last SHA2_256 Hacl.Hash.update_multi_sha2_256 Hacl.SHA2.pad_256) [`%mk_update_last]))
-
-let update_last_sha2_384: update_last_st SHA2_384 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_update_last SHA2_384 Hacl.Hash.update_multi_sha2_384 Hacl.SHA2.pad_384) [`%mk_update_last]))
-
-let update_last_sha2_512: update_last_st SHA2_512 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_update_last SHA2_512 Hacl.Hash.update_multi_sha2_512 Hacl.SHA2.pad_512) [`%mk_update_last]))
-
-let update_last_sha1: update_last_st SHA1 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_update_last SHA1 Hacl.Hash.update_multi_sha1 Hacl.SHA1.pad) [`%mk_update_last]))
-
-let update_last_md5: update_last_st MD5 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_update_last MD5 Hacl.Hash.update_multi_md5 Hacl.MD5.pad) [`%mk_update_last]))
-
-noextract
-val mk_hash: a:hash_alg ->
-  alloca:alloca_st a ->
-  update_multi:Hacl.Hash.update_multi_st a ->
-  update_last:update_last_st a ->
-  finish:finish_st a ->
-  hash_st a
-
-#set-options "--max_ifuel 1"
+#push-options "--max_ifuel 1"
 
 inline_for_extraction
 let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
@@ -183,9 +188,11 @@ let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
   | _ ->
       FStar.Int.Cast.Full.(uint32_to_uint64 l)
 
-#set-options "--max_ifuel 0"
+#pop-options
 
-noextract
+
+(** Complete hash. *)
+noextract inline_for_extraction
 let mk_hash a alloca update_multi update_last finish input input_len dst =
   let h0 = ST.get () in
   ST.push_frame ();
@@ -200,40 +207,3 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   finish s dst;
   ST.pop_frame ();
   Spec.Hash.Incremental.hash_is_hash_incremental a (B.as_seq h0 input)
-
-let hash_sha2_224: hash_st SHA2_224 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_hash SHA2_224
-      Hacl.SHA2.alloca_224 Hacl.Hash.update_multi_sha2_224 update_last_sha2_224 Hacl.SHA2.finish_224)
-      [`%mk_hash]))
-
-let hash_sha2_256: hash_st SHA2_256 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_hash SHA2_256
-      Hacl.SHA2.alloca_256 Hacl.Hash.update_multi_sha2_256 update_last_sha2_256 Hacl.SHA2.finish_256)
-      [`%mk_hash]))
-
-let hash_sha2_384: hash_st SHA2_384 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_hash SHA2_384
-      Hacl.SHA2.alloca_384 Hacl.Hash.update_multi_sha2_384 update_last_sha2_384 Hacl.SHA2.finish_384)
-      [`%mk_hash]))
-
-let hash_sha2_512: hash_st SHA2_512 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_hash SHA2_512
-      Hacl.SHA2.alloca_512 Hacl.Hash.update_multi_sha2_512 update_last_sha2_512 Hacl.SHA2.finish_512)
-      [`%mk_hash]))
-
-let hash_sha1: hash_st SHA1 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_hash SHA1
-      Hacl.SHA1.alloca Hacl.Hash.update_multi_sha1 update_last_sha1 Hacl.SHA1.finish)
-      [`%mk_hash]))
-
-let hash_md5: hash_st MD5 =
-  Tactics.(synth_by_tactic
-    (specialize (mk_hash MD5
-      Hacl.MD5.alloca Hacl.Hash.update_multi_md5 update_last_md5 Hacl.MD5.finish)
-      [`%mk_hash]))
-

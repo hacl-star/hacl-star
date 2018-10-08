@@ -1,14 +1,12 @@
-module Hacl.SHA2
+module Hacl.Hash.Core.SHA2
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module U128 = FStar.UInt128
 
-module Common = Hacl.Hash.Common
 module Cast = FStar.Int.Cast.Full
 module Constants = Spec.SHA2.Constants
-module Tactics = FStar.Tactics
 module Helpers = Spec.Hash.Helpers
 module Endianness = FStar.Kremlin.Endianness
 module Math = FStar.Math.Lemmas
@@ -24,10 +22,10 @@ module ST = FStar.HyperStack.ST
 open Spec.Hash.Helpers
 open LowStar.BufferOps
 open Hacl.Hash.Lemmas
-open Hacl.Hash.Common
+open Hacl.Hash.Definitions
 
 friend Spec.SHA2
-friend Hacl.Hash.Common
+friend Hacl.Hash.PadFinish
 
 
 module IB = LowStar.ImmutableBuffer
@@ -70,9 +68,9 @@ let k384_512 = IB.igcmalloc_of_list HS.root Constants.k384_512_l
 
 #set-options "--max_fuel 1"
 
-noextract
+noextract inline_for_extraction
 val alloca: a:sha2_alg -> alloca_st a
-noextract
+noextract inline_for_extraction
 let alloca a () =
   [@ inline_let ]
   let l: list (word a) = Spec.(match a with
@@ -84,20 +82,16 @@ let alloca a () =
 
 #set-options "--max_fuel 0"
 
-let alloca_224: alloca_st SHA2_224 =
-  Tactics.(synth_by_tactic (specialize (alloca SHA2_224) [`%alloca]))
-let alloca_256: alloca_st SHA2_256 =
-  Tactics.(synth_by_tactic (specialize (alloca SHA2_256) [`%alloca]))
-let alloca_384: alloca_st SHA2_384 =
-  Tactics.(synth_by_tactic (specialize (alloca SHA2_384) [`%alloca]))
-let alloca_512: alloca_st SHA2_512 =
-  Tactics.(synth_by_tactic (specialize (alloca SHA2_512) [`%alloca]))
+let alloca_224: alloca_st SHA2_224 = alloca SHA2_224
+let alloca_256: alloca_st SHA2_256 = alloca SHA2_256
+let alloca_384: alloca_st SHA2_384 = alloca SHA2_384
+let alloca_512: alloca_st SHA2_512 = alloca SHA2_512
 
 (** Init *)
 
-noextract
+noextract inline_for_extraction
 val init: a:sha2_alg -> init_st a
-noextract
+noextract inline_for_extraction
 let init a s =
   let h0 = ST.get () in
   let inv h1 (i: nat): Type0 =
@@ -119,14 +113,10 @@ let init a s =
   in
   C.Loops.for 0ul 8ul inv f
 
-let init_224: init_st SHA2_224 =
-  Tactics.(synth_by_tactic (specialize (init SHA2_224) [`%init; `%index_h]))
-let init_256: init_st SHA2_256 =
-  Tactics.(synth_by_tactic (specialize (init SHA2_256) [`%init; `%index_h]))
-let init_384: init_st SHA2_384 =
-  Tactics.(synth_by_tactic (specialize (init SHA2_384) [`%init; `%index_h]))
-let init_512: init_st SHA2_512 =
-  Tactics.(synth_by_tactic (specialize (init SHA2_512) [`%init; `%index_h]))
+let init_224: init_st SHA2_224 = init SHA2_224
+let init_256: init_st SHA2_256 = init SHA2_256
+let init_384: init_st SHA2_384 = init SHA2_384
+let init_512: init_st SHA2_512 = init SHA2_512
 
 
 (** Update *)
@@ -353,9 +343,9 @@ let zero (a: sha2_alg): word a =
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
-noextract
+noextract inline_for_extraction
 val update: a:sha2_alg -> update_st a
-noextract
+noextract inline_for_extraction
 let update a hash block =
   (**) ST.push_frame ();
   (**) let h0 = ST.get () in
@@ -370,30 +360,17 @@ let update a hash block =
   C.Loops.in_place_map2 hash hash1 8ul (add a);
   (**) ST.pop_frame ()
 
-let update_224: update_st SHA2_224 =
-  Tactics.(synth_by_tactic (specialize (update SHA2_224) [`%update; `%shuffle; `%shuffle_core; `%ws]))
-let update_256: update_st SHA2_256 =
-  Tactics.(synth_by_tactic (specialize (update SHA2_256) [`%update; `%shuffle; `%shuffle_core; `%ws]))
-let update_384: update_st SHA2_384 =
-  Tactics.(synth_by_tactic (specialize (update SHA2_384) [`%update; `%shuffle; `%shuffle_core; `%ws]))
-let update_512: update_st SHA2_512 =
-  Tactics.(synth_by_tactic (specialize (update SHA2_512) [`%update; `%shuffle; `%shuffle_core; `%ws]))
+let update_224: update_st SHA2_224 = update SHA2_224
+let update_256: update_st SHA2_256 = update SHA2_256
+let update_384: update_st SHA2_384 = update SHA2_384
+let update_512: update_st SHA2_512 = update SHA2_512
 
-let pad_224: pad_st SHA2_224 =
-  Tactics.(synth_by_tactic (specialize (Common.pad SHA2_224) [`%Common.pad]))
-let pad_256: pad_st SHA2_256 =
-  Tactics.(synth_by_tactic (specialize (Common.pad SHA2_256) [`%Common.pad]))
-let pad_384: pad_st SHA2_384 =
-  Tactics.(synth_by_tactic (specialize (Common.pad SHA2_384) [`%Common.pad]))
-let pad_512: pad_st SHA2_512 =
-  Tactics.(synth_by_tactic (specialize (Common.pad SHA2_512) [`%Common.pad]))
+let pad_224: pad_st SHA2_224 = Hacl.Hash.PadFinish.pad SHA2_224
+let pad_256: pad_st SHA2_256 = Hacl.Hash.PadFinish.pad SHA2_256
+let pad_384: pad_st SHA2_384 = Hacl.Hash.PadFinish.pad SHA2_384
+let pad_512: pad_st SHA2_512 = Hacl.Hash.PadFinish.pad SHA2_512
 
-let finish_224: finish_st SHA2_224 =
-  Tactics.(synth_by_tactic (specialize (Common.finish SHA2_224) [`%Common.finish]))
-let finish_256: finish_st SHA2_256 =
-  Tactics.(synth_by_tactic (specialize (Common.finish SHA2_256) [`%Common.finish]))
-let finish_384: finish_st SHA2_384 =
-  Tactics.(synth_by_tactic (specialize (Common.finish SHA2_384) [`%Common.finish]))
-let finish_512: finish_st SHA2_512 =
-  Tactics.(synth_by_tactic (specialize (Common.finish SHA2_512) [`%Common.finish]))
-
+let finish_224: finish_st SHA2_224 = Hacl.Hash.PadFinish.finish SHA2_224
+let finish_256: finish_st SHA2_256 = Hacl.Hash.PadFinish.finish SHA2_256
+let finish_384: finish_st SHA2_384 = Hacl.Hash.PadFinish.finish SHA2_384
+let finish_512: finish_st SHA2_512 = Hacl.Hash.PadFinish.finish SHA2_512

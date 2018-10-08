@@ -1,4 +1,4 @@
-module Hacl.MD5
+module Hacl.Hash.Core.MD5
 
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
@@ -9,10 +9,12 @@ module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module E = FStar.Kremlin.Endianness
 module CE = C.Endianness
-module Common = Hacl.Hash.Common
+
+open Hacl.Hash.Definitions
+open Spec.Hash.Helpers
 
 friend Spec.MD5
-friend Hacl.Hash.Common
+friend Hacl.Hash.PadFinish
 
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
@@ -381,8 +383,6 @@ let _ : squash (Spec.Hash.update MD5 == Spec.update) = ()
 
 let update abcd x = update' abcd x
 
-let pad: pad_st MD5 =
-  FStar.Tactics.(synth_by_tactic (specialize (Common.pad MD5) [`%Common.pad]))
+let pad: pad_st MD5 = Hacl.Hash.PadFinish.pad MD5
 
-let finish: finish_st MD5 =
-  FStar.Tactics.(synth_by_tactic (specialize (Common.finish MD5) [`%Common.finish]))
+let finish: finish_st MD5 = Hacl.Hash.PadFinish.finish MD5
