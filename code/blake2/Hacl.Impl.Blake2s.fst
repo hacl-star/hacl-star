@@ -16,15 +16,6 @@ module LB = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 
 ///
-/// Helper functions
-///
-
-(* Operators *)
-inline_for_extraction let v = size_v
-inline_for_extraction let index (x:size_nat) = size x
-noextract let op_String_Access #a #r0 #r1 m b = LB.as_seq #a #r0 #r1 m b
-
-///
 /// Blake2s
 ///
 
