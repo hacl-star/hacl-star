@@ -263,7 +263,7 @@ val createL_global:
       B.alloc_post_mem_common b h0 h1 (Seq.of_list init))
 
 (** Allocate a top-level fixed-length immutable Buffer and initialize it to value [init] *)
-inline_for_extraction noextract unfold
+inline_for_extraction noextract
 val icreateL_global:
     #a:Type0
   -> init:list a{List.Tot.length init <= max_size_t} ->
