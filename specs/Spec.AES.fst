@@ -36,9 +36,9 @@ let fmul (a:uint8) (b:uint8) : uint8 =
 	      let b0 = eq_mask #U8 (b &. u8 1) (u8 1) in
 	      let p = p ^. (b0 &. a) in
   	      let carry_mask = gte_mask #U8 a (u8 0x80) in
-	      let a = a <<. u32 1 in
+	      let a = a <<. size 1 in
 	      let a = a ^. (carry_mask &. u8 0x1b) in
-	      let b = b >>. u32 1 in
+	      let b = b >>. size 1 in
 	      (p,a,b)) (u8 0,a,b) in
  let b0 = eq_mask #U8 (b &. u8 1) (u8 1) in
  let p = p ^. (b0 &. a) in
@@ -65,7 +65,7 @@ let finv (a: uint8) =
 
 let sbox input =
   let s = finv input in
-  let r: uint8 = logxor #U8 s ((s <<<. u32 1) ^. (s <<<. u32 2) ^. (s <<<. u32 3) ^. (s <<<. u32 4) ^. (u8 99)) in
+  let r: uint8 = logxor #U8 s ((s <<<. size 1) ^. (s <<<. size 2) ^. (s <<<. size 3) ^. (s <<<. size 4) ^. (u8 99)) in
     r
 
 
@@ -118,8 +118,8 @@ let mixColumn (c:size_nat{c < 4}) (state:block) : block =
 *)
 
 let xtime (x:uint8) : uint8 =
-  let x1 : uint8 = shift_left #U8 x (u32 1) in
-  let x7 : uint8 = shift_right #U8 x (u32 7) in
+  let x1 : uint8 = shift_left #U8 x (size 1) in
+  let x7 : uint8 = shift_right #U8 x (size 7) in
   let x71 : uint8 = logand #U8 x7 (u8 1) in
   let x711b : uint8 = mul_mod #U8 x71 (u8 0x1b) in
   logxor #U8 x1 x711b
@@ -260,8 +260,31 @@ let aes_key_block1 (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : To
   let st = aes_set_counter st 1 in
   aes_key_block st
 
-let aes128_cipher =
-  Spec.CTR.Cipher aes_state 16 max_size_t 16 aes_init aes_set_counter aes_key_block
 
-let aes128_encrypt_bytes key n_len nonce counter n m =
-  Spec.CTR.counter_mode aes128_cipher key n_len nonce counter n m
+
+let aes_encrypt_block (st0:aes_state) (ctr0:size_nat) (incr:size_nat{ctr0 + incr <= max_size_t}) (b:block) : Tot block =
+  let st = aes_set_counter st0 (ctr0 + incr) in
+  let kb = aes_key_block st in
+  map2 (^.) b kb
+
+let aes_encrypt_last (st0:aes_state) (ctr0:size_nat) 
+  		     (incr:size_nat{ctr0 + incr <= max_size_t}) 
+		     (len:size_nat{len < 16})
+		     (b:lbytes len) : lbytes len =
+  let plain = create 16 (u8 0) in
+  let plain = update_sub plain 0 (length b) b in
+  let cipher = aes_encrypt_block st0 ctr0 incr plain in
+  sub cipher 0 (length b)
+
+val aes128_encrypt_bytes:
+  key:block -> n_len:size_nat{n_len <= 16} -> 
+  nonce:lbytes n_len -> c:size_nat ->
+  msg:bytes{length msg / 16 + c <= max_size_t}
+-> cipher:bytes{length cipher == length msg}
+
+let aes128_encrypt_bytes key n_len nonce ctr0 msg =
+  let cipher = msg in
+  let st0 = aes_init key n_len nonce in
+  map_blocks 16 cipher
+    (aes_encrypt_block st0 ctr0) 
+    (aes_encrypt_last st0 ctr0)

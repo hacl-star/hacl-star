@@ -148,7 +148,5 @@ let repeat_blocks #a #b bs inp f g init =
        let block : lseq a bs = seq_sub inp (i * bs) bs in
        f i block acc)
     acc in
-  if rem > 0 then
-    let last : lseq a rem = seq_sub #a inp (nb * bs) rem in
-    g nb rem last acc
-  else acc
+  let last : lseq a rem = seq_sub #a inp (nb * bs) rem in
+  g nb rem last acc

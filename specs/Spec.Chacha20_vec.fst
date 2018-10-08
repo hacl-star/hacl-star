@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
-
+open Lib.LoopCombinators
 (* This should go elsewhere! *)
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
@@ -60,10 +60,10 @@ let line a b d s m =
   m
 
 let round (st:state) : Tot state =
-  let st = line 0 1 3 (u32 16) st in
-  let st = line 2 3 1 (u32 12) st in
-  let st = line 0 1 3 (u32 8)  st in
-  let st = line 2 3 1 (u32 7)  st in
+  let st = line 0 1 3 (size 16) st in
+  let st = line 2 3 1 (size 12) st in
+  let st = line 0 1 3 (size 8)  st in
+  let st = line 2 3 1 (size 7)  st in
   st
 
 let shuffle_rows_0123 (st:state) : Tot state =
@@ -137,9 +137,30 @@ let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
     let st = chacha20_set_counter st c in
     chacha20_key_block st
 
-let chacha20_cipher =
-  Spec.CTR.Cipher state keylen max_size_t blocklen chacha20_init chacha20_set_counter chacha20_key_block
+let chacha20_encrypt_block (st0:state) (ctr0:counter) (incr:counter{ctr0 + incr <= max_size_t}) (b:block) : Tot block =
+  let st = chacha20_set_counter st0 (ctr0 + incr) in
+  let kb = chacha20_key_block st in
+  map2 (^.) b kb
 
-let chacha20_encrypt_bytes key nonce counter len m =
-  Spec.CTR.counter_mode chacha20_cipher key nonce counter len m
+let chacha20_encrypt_last (st0:state) (ctr0:counter) 
+			  (incr:counter{ctr0 + incr <= max_size_t}) 
+			  (len:size_nat{len < blocklen})
+			  (b:lbytes len) : lbytes len =
+  let plain = create blocklen (u8 0) in
+  let plain = update_sub plain 0 (length b) b in
+  let cipher = chacha20_encrypt_block st0 ctr0 incr plain in
+  sub cipher 0 (length b)
+
+val chacha20_encrypt_bytes:
+  key -> nonce -> c:counter 
+-> msg:bytes{length msg / blocklen + c <= max_size_t} 
+-> cipher:bytes{length cipher == length msg}
+
+let chacha20_encrypt_bytes key nonce ctr0 msg =
+  let cipher = msg in
+  let st0 = chacha20_init key 12 nonce in
+  map_blocks blocklen cipher
+    (chacha20_encrypt_block st0 ctr0) 
+    (chacha20_encrypt_last st0 ctr0)
+
 

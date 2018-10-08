@@ -271,8 +271,8 @@ let hash (p:parameters) (len:size_nat{len < max_input p /\ (size_block p * numbe
 /// Parameters for all instances of SHA2
 ///
 
-let rotval32 (n:nat{n > 0 /\ n < 32}) : rotval U32 = u32 n
-let rotval64 (n:nat{n > 0 /\ n < 64}) : rotval U64 = u32 n
+let rotval32 (n:nat{n > 0 /\ n < 32}) : rotval U32 = size n
+let rotval64 (n:nat{n > 0 /\ n < 64}) : rotval U64 = size n
 
 let const_224_256_ops = List.Tot.map rotval32 [
     2; 13; 22;

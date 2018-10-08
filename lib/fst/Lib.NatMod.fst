@@ -14,4 +14,5 @@ let rec ( **% ) (#m:pos) (e:nat_mod m) (n:pos) : Tot (nat_mod m) (decreases n) =
   else
     if n % 2 = 0 then (e *% e) **% (n / 2)
     else e *% ((e *% e) **% ((n-1)/2))
-
+let ( =% ) (#m:pos) n1 n2 = n1 = n2
+let ( <>% ) (#m:pos) n1 n2 = n1 <> n2
