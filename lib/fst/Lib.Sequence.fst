@@ -17,8 +17,6 @@ let seq_concat #a s1 s2 =
   let r = (Seq.append s1 s2 <: seq a) in
   assert (length r == length s1 + length s2);
   r
-(** Operator for concatenation of two Sequences*)
-let (@|) #a s1 s2 = seq_concat #a s1 s2
 
 (** Equality of two Sequences *)
 abstract

@@ -24,20 +24,28 @@ let length (#a:Type0) (s:seq a) : nat = Seq.length s
 
 (** Definition of a fixed-length Sequence *)
 let lseq (a:Type0) (len:size_nat) = s:seq a{Seq.length s == len}
+let to_seq (#a:Type0) (#len:size_nat) (l:lseq a len) : seq a = l
+let to_lseq (#a:Type0) (s:seq a{length s <= max_size_t}) : l:lseq a (length s){l == s} = s 
+
+(* If you want to prove your code with an abstract lseq use the following: *)
+// val lseq: a:Type0 -> len:size_nat -> Type0
+// val to_seq: #a:Type0 -> #len:size_nat -> lseq a len -> s:seq a{length s == len}
+// val to_lseq: #a:Type0 -> s:seq a{length s <= max_size_t} -> lseq a (length s)
+
 
 val index:
     #a:Type
   -> #len:size_nat
   -> s:lseq a len
   -> i:size_nat{i < len}
-  -> a
+  -> r:a{r == Seq.index (to_seq s) i}
 
 (** Creation of a fixed-length Sequence from an initial value *)
 val create:
     #a:Type
   -> len:size_nat
   -> init:a
-  -> s:lseq a len{(forall (i:nat).
+  -> s:lseq a len{to_seq s == Seq.create len init /\ (forall (i:nat).
     {:pattern (index s i)} i < len ==> index s i == init)}
 
 (** Concatenate sequences: use with care, may make implementation hard to verify *)
@@ -47,24 +55,24 @@ val concat:
   -> #len1:size_nat{len0 + len1 <= max_size_t}
   -> s0:lseq a len0
   -> s1:lseq a len1
-  -> s2:lseq a (len0 + len1)
+  -> s2:lseq a (len0 + len1){to_seq s2 == Seq.append (to_seq s0) (to_seq s1)}
 
-
-(** Conversion from Sequence to fixed-length Sequence *)
-let to_lseq (#a:Type0) (s:seq a{length s <= max_size_t}) : l:lseq a (length s){l == s} = s
+(** Operator for concatenation of two Sequences*)
+inline_for_extraction
+let (@|) #a #l1 #l2 s1 s2 = concat #a #l1 #l2 s1 s2
 
 (** Conversion of a Sequence to a list *)
 val to_list:
     #a:Type
   -> #len:size_nat
   -> s:lseq a len
-  -> l:list a{List.Tot.length l = len}
+  -> l:list a{List.Tot.length l = len /\ l == Seq.seq_to_list (to_seq s)}
 
 (** Creation of a fixed-length Sequence from a list of values *)
 val of_list:
     #a:Type
   -> l:list a{List.Tot.length l <= max_size_t}
-  -> s:lseq a (List.Tot.length l)
+  -> s:lseq a (List.Tot.length l){to_seq s == Seq.seq_of_list l}
 
 val of_list_index:
     #a:Type
@@ -83,8 +91,8 @@ val upd:
   -> s:lseq a len
   -> n:size_nat{n < len}
   -> x:a
-  -> o:lseq a len{index o n == x /\ (forall (i:size_nat).
-    {:pattern (index s i)} (i < length s /\ i <> n) ==> index o i == index s i)}
+  -> o:lseq a len{to_seq o == Seq.upd (to_seq s) n x /\ index o n == x /\ (forall (i:size_nat).
+    {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)}
 
 (** Operator for accessing an element of a fixed-length Sequence *)
 unfold
@@ -101,7 +109,7 @@ val sub:
   -> s1:lseq a len
   -> start:size_nat
   -> n:size_nat{start + n <= len}
-  -> s2:lseq a n{
+  -> s2:lseq a n{to_seq s2 == Seq.slice (to_seq s1) start (start + n) /\
 	     (forall (k:nat{k < n}). {:pattern (index s2 k)} index s2 k == index s1 (start + k))}
 
 (** Selecting a subset of a fixed-length Sequence *)
@@ -123,7 +131,7 @@ val update_sub:
   -> n:size_nat{start + n <= len}
   -> x:lseq a n
   -> o:lseq a len{sub o start n == x /\
-    (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < length i)}).
+    (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < len)}).
       {:pattern (index o k)} index o k == index i k)}
 
 (** Lemma regarding updating a sub-Sequence with another Sequence *)
@@ -139,8 +147,8 @@ val lemma_update_sub:
     (requires
       sub res 0 start == sub dst 0 start /\
       sub res start n == src /\
-      sub res (start + n) (length dst - start - n) ==
-      sub dst (start + n) (length dst - start - n))
+      sub res (start + n) (len - start - n) ==
+      sub dst (start + n) (len - start - n))
     (ensures
       res == update_sub dst start n src)
 
@@ -150,13 +158,16 @@ let update_slice
     (#len:size_nat)
     (i:lseq a len)
     (start:size_nat)
-	 (fin:size_nat{start <= fin /\ fin <= len})
+    (fin:size_nat{start <= fin /\ fin <= len})
     (upd:lseq a (fin - start))
   =
   update_sub #a i start (fin - start) upd
 
 (** Map function for fixed-length Sequences *)
-val map:#a:Type -> #b:Type -> #len:size_nat -> (a -> Tot b) -> s1:lseq a len -> s2:lseq b len
+val map:#a:Type -> #b:Type -> #len:size_nat 
+  -> (a -> Tot b) 
+  -> s1:lseq a len 
+  -> s2:lseq b len
 
 (** Map2 function for fixed-length Sequences *)
 val map2:#a:Type -> #b:Type -> #c:Type -> #len:size_nat

@@ -147,22 +147,33 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
     then state_permute s else s in
   absorb_next s rateInBytes
 
+#set-options "--z3rlimit 50"
+(*
 let absorb_inner (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                  (inputByteLen:size_nat)
                  (input:lbytes inputByteLen)
                  (i:size_nat{i < inputByteLen / rateInBytes})
 		 (s:state) : state =
   let nb = inputByteLen / rateInBytes in
+  assert ((i+1) <= nb);
   assert ((i+1) * rateInBytes <= nb * rateInBytes);
-  let block = seq_sub input (i * rateInBytes) rateInBytes in
+  let block = sub input (i * rateInBytes) rateInBytes in
   let s = loadState rateInBytes block s in
-  state_permute s
+  state_permute s 
+*)
+
+let absorb_inner (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+                 (block:lbytes rateInBytes)
+		 (s:state) : state =
+  let s = loadState rateInBytes block s in
+  state_permute s 
 
 let absorb (s:state)
            (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
-	   (inputByteLen:size_nat)
-	   (input:lbytes inputByteLen)
+	   (inputByteLen:nat)
+	   (input:bytes)
 	   (delimitedSuffix:byte_t) : state =
+(*
   // SZ: Inlining the definition of repeat_blocks. 
   // We need to either make the definition transparent, or provide a 
   // combinator in Lib.Buffer that corresponds to it.
@@ -170,13 +181,12 @@ let absorb (s:state)
   let nb =  inputByteLen / rateInBytes in
   let rem = inputByteLen % rateInBytes in
   let acc = repeati nb (absorb_inner rateInBytes inputByteLen input) s in
-  let last = seq_sub input (nb * rateInBytes) rem in
+  let last = sub input (nb * rateInBytes) rem in
   absorb_last delimitedSuffix rateInBytes rem last acc
-(*
+  *)
   repeat_blocks rateInBytes input
   (fun i -> absorb_inner rateInBytes)
   (fun i -> absorb_last delimitedSuffix rateInBytes) s
-*)
 
 val squeeze_inner:
     rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
@@ -244,8 +254,8 @@ let sha3_512 (inputByteLen:size_nat) (input:lbytes inputByteLen) : lbytes 64 =
   keccak 576 1024 inputByteLen input (byte 0x06) 64
 
 val cshake128_frodo:
-    input_len:size_nat
-  -> input:lbytes input_len
+    input_len:nat
+  -> input:bytes
   -> cstm:uint16
   -> output_len:size_nat
   -> lbytes output_len
@@ -257,8 +267,8 @@ let cshake128_frodo input_len input cstm output_len =
   squeeze s 168 output_len
 
 val cshake256_frodo:
-    input_len: size_nat
-  -> input: lbytes input_len
+    input_len: nat
+  -> input: bytes
   -> cstm: uint16
   -> output_len: size_nat
   -> lbytes output_len
