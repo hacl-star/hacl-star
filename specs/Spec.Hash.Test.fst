@@ -1,7 +1,6 @@
 module Spec.Hash.Test
 
 open FStar.Seq
-module Hash = Spec.SHA2
 
 
 //
@@ -50,7 +49,9 @@ let test1_expected512 = [
 // Test 2
 //
 
-let test2_plaintext = []
+// This empty list must have its type annotated, otherwise
+// length preconditions on test vectors cannot be normalized
+let test2_plaintext : list UInt8.t = []
 
 let test2_expected224 = [
   0xd1uy; 0x4auy; 0x02uy; 0x8cuy; 0x2auy; 0x3auy; 0x2buy; 0xc9uy;
@@ -234,13 +235,13 @@ open Spec.Hash.Helpers
 
 type vec =
   | Vec: a:hash_alg ->
-      plain:list UInt8.t { List.Tot.length plain < max_input8 a } ->
-      hash:list UInt8.t { List.Tot.length hash = size_hash a } ->
+      plain:list UInt8.t { norm [delta; iota; zeta; primops] (List.Tot.length plain < max_input8 a) == true } ->
+      hash:list UInt8.t { norm [delta; iota; zeta; primops] (List.Tot.length hash = size_hash a) == true } ->
       vec
 
-#set-options "--admit_smt_queries true"
 let test_vectors: list vec = [
   Vec SHA2_224 test1_plaintext test1_expected224;
+
   Vec SHA2_224 test2_plaintext test2_expected224;
   Vec SHA2_224 test3_plaintext test3_expected224;
   Vec SHA2_224 test4_plaintext test4_expected224;
@@ -260,7 +261,6 @@ let test_vectors: list vec = [
   Vec SHA2_512 test3_plaintext test3_expected512;
   Vec SHA2_512 test4_plaintext test4_expected512
 ]
-#reset-options
 
 let test_one (v: vec) =
   let Vec a plain tag = v in
