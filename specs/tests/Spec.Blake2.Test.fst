@@ -179,6 +179,39 @@ let test4_expected : lbytes 32 =
   assert_norm (List.Tot.length test4_expected_list = 32);
   of_list test4_expected_list
 
+
+
+
+
+
+
+//
+// Test 5 BLAKE 2B
+//
+
+let test5_plaintext_list  = List.Tot.map u8_from_UInt8 [
+  0x61uy; 0x62uy; 0x63uy
+]
+let test5_plaintext : lbytes 3 =
+  assert_norm (List.Tot.length test5_plaintext_list = 3);
+  of_list test5_plaintext_list
+
+let test5_expected_list = List.Tot.map u8_from_UInt8 [
+  0xBAuy; 0x80uy; 0xA5uy; 0x3Fuy; 0x98uy; 0x1Cuy; 0x4Duy; 0x0Duy; 0x6Auy; 0x27uy; 0x97uy; 0xB6uy; 0x9Fuy; 0x12uy; 0xF6uy; 0xE9uy;
+  0x4Cuy; 0x21uy; 0x2Fuy; 0x14uy; 0x68uy; 0x5Auy; 0xC4uy; 0xB7uy; 0x4Buy; 0x12uy; 0xBBuy; 0x6Fuy; 0xDBuy; 0xFFuy; 0xA2uy; 0xD1uy;
+  0x7Duy; 0x87uy; 0xC5uy; 0x39uy; 0x2Auy; 0xABuy; 0x79uy; 0x2Duy; 0xC2uy; 0x52uy; 0xD5uy; 0xDEuy; 0x45uy; 0x33uy; 0xCCuy; 0x95uy;
+  0x18uy; 0xD3uy; 0x8Auy; 0xA8uy; 0xDBuy; 0xF1uy; 0x92uy; 0x5Auy; 0xB9uy; 0x23uy; 0x86uy; 0xEDuy; 0xD4uy; 0x00uy; 0x99uy; 0x23uy
+]
+let test5_expected : lbytes 64 =
+  assert_norm (List.Tot.length test5_expected_list = 64);
+  of_list test5_expected_list
+
+//
+// Main
+//
+
+
+
 //
 // Main
 //
@@ -246,11 +279,26 @@ let test () =
   IO.print_string "\n4. Expected: ";
   List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test4_expected);
 
+  //
+  // TEST 5
+  //
+  IO.print_string "\n\nTEST 5";
+
+  let test5_result : lbytes 64 =
+    Spec.Blake2.blake2b (List.Tot.length test5_plaintext_list) test5_plaintext 0 (of_list []) 64
+  in
+  let result5 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test5_expected test5_result in
+
+  IO.print_string "\n5. Result  : ";
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test5_result);
+
+  IO.print_string "\n5. Expected: ";
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test5_expected);
 
   //
   // RESULT
   //
-  if result1 && result2 && result3 && result4 then IO.print_string "\n\nSuccess !\n"
+  if result1 && result2 && result3 && result4 && result5 then IO.print_string "\n\nSuccess !\n"
   else IO.print_string "\n\nFailed !\n";
 
   ()
