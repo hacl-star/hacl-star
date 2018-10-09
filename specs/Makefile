@@ -29,7 +29,7 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.ECIES.fst \
 		Spec.HSalsa20.fst
 
-LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst 
+LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst
 LIBS_FILES= $(addprefix ../lib/fst/, $(LIBS))
 LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml
 LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=))
@@ -45,7 +45,7 @@ all: test
 
 test: test-unified-target test-individual-target
 
-test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2s.exe Blake2b.exe
+test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2s.exe Blake2.exe
 test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe sha3.exe
 
 clean:
