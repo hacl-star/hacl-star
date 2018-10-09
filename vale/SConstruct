@@ -359,6 +359,7 @@ verify_options = [
   ('code/arch/x64/X64.Leakage.fst', None),
 
   # Interop stubs
+  ('code/arch/x64/interop/Sha_update_bytes_stdcall.fsti', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', ''))),
 #  ('code/arch/x64/interop/Memcpy.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
 #  ('code/arch/x64/interop/Quad32_xor.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
 #  ('code/arch/x64/interop/AESEncryptBlock_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
