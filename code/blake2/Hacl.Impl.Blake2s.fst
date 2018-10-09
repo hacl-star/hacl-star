@@ -89,7 +89,7 @@ val blake2_round1 : wv:working_vector -> m:message_block_w -> i:size_t ->
 
 [@ Substitute ]
 let blake2_round1 wv m i =
-  recall_contents const_sigma (Seq.seq_of_list Spec.list_sigma);
+  recall_contents const_sigma (Seq.of_list Spec.list_sigma);
   let start_idx = (i %. (size 10)) *. (size 16) in
   let s = isub #sigma_elt #160 #16 const_sigma start_idx (size 16) in
   blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(iindex s (size 0))) (m.(iindex s (size 1)));
@@ -108,7 +108,7 @@ val blake2_round2 : wv:working_vector -> m:message_block_w -> i:size_t ->
 
 [@ Substitute ]
 let blake2_round2 wv m i =
-  recall_contents const_sigma (Seq.seq_of_list Spec.list_sigma);
+  recall_contents const_sigma (Seq.of_list Spec.list_sigma);
   let start_idx = (i %. (size 10)) *. (size 16) in
   let s = isub #sigma_elt #160 #16 const_sigma start_idx (size 16) in
   blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(iindex s (size 8))) (m.(iindex s (size 9)));
@@ -145,7 +145,7 @@ val blake2_compress1:
 
 [@ Substitute ]
 let blake2_compress1 wv s m offset flag =
-  recall_contents const_iv (Seq.seq_of_list Spec.list_iv);
+  recall_contents const_iv (Seq.of_list Spec.list_iv);
   update_sub wv (size 0) (size 8) s;
   assume(disjoint wv const_iv);
   update_isub wv (size 8) (size 8) const_iv;
@@ -294,7 +294,7 @@ val blake2s_init:
 
 [@ Substitute ]
 let blake2s_init #vkk hash k kk nn =
-  recall_contents const_iv (Seq.seq_of_list Spec.list_iv);
+  recall_contents const_iv (Seq.of_list Spec.list_iv);
   let h0 = ST.get () in
   alloc h0 (size Spec.size_block) (u8 0) hash
   (fun h -> (fun _ sv -> sv == Spec.Blake2s.blake2s_init (v kk) h0.[k] (v nn)))
