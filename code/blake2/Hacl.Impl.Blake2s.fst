@@ -30,9 +30,11 @@ type iv_t = lbuffer uint32 Spec.size_hash_w
 type sigma_elt = n:size_t{size_v n < 16}
 type sigma_t = lbuffer sigma_elt 160
 
+inline_for_extraction
+let const_iv = icreateL_global Spec.list_iv
 
-let const_iv = IB.igcmalloc_of_list HyperStack.root Spec.list_iv
-let const_sigma = IB.igcmalloc_of_list HyperStack.root Spec.list_sigma
+inline_for_extraction
+let const_sigma = icreateL_global Spec.list_sigma
 
 
 (* Define algorithm functions *)
@@ -76,7 +78,7 @@ let blake2_mixing wv a b c d x y =
   g2 wv c d (u32 0);
   g1 wv b c Spec.r4
 
-#reset-options "--max_fuel 0 --z3rlimit 150"
+#reset-options "--z3rlimit 150"
 
 val blake2_round1 : wv:working_vector -> m:message_block_w -> i:size_t ->
   Stack unit
@@ -87,13 +89,13 @@ val blake2_round1 : wv:working_vector -> m:message_block_w -> i:size_t ->
 
 [@ Substitute ]
 let blake2_round1 wv m i =
-  IB.recall_contents const_sigma (FStar.Seq.seq_of_list Spec.list_sigma);
+  recall_contents const_sigma (Seq.seq_of_list Spec.list_sigma);
   let start_idx = (i %. (size 10)) *. (size 16) in
-  let s = IB.isub #sigma_elt const_sigma (Lib.RawIntTypes.size_to_UInt32 start_idx) (16ul) in
-  blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(IB.index s (0ul))) (m.(IB.index s (1ul)));
-  blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(IB.index s (2ul))) (m.(IB.index s (3ul)));
-  blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(IB.index s (4ul))) (m.(IB.index s (5ul)));
-  blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(IB.index s (6ul))) (m.(IB.index s (7ul)));
+  let s = isub #sigma_elt #160 #16 const_sigma start_idx (size 16) in
+  blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(iindex s (size 0))) (m.(iindex s (size 1)));
+  blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(iindex s (size 2))) (m.(iindex s (size 3)));
+  blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(iindex s (size 4))) (m.(iindex s (size 5)));
+  blake2_mixing wv (size 3) (size 7) (size 11) (size 15) (m.(iindex s (size 6))) (m.(iindex s (size 7)));
   admit()
 
 
@@ -106,13 +108,13 @@ val blake2_round2 : wv:working_vector -> m:message_block_w -> i:size_t ->
 
 [@ Substitute ]
 let blake2_round2 wv m i =
-  IB.recall_contents const_sigma (FStar.Seq.seq_of_list Spec.list_sigma);
+  recall_contents const_sigma (Seq.seq_of_list Spec.list_sigma);
   let start_idx = (i %. (size 10)) *. (size 16) in
-  let s = IB.isub #sigma_elt const_sigma (Lib.RawIntTypes.size_to_UInt32 start_idx) (16ul) in
-  blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(IB.index s (8ul))) (m.(IB.index s (9ul)));
-  blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(IB.index s (10ul))) (m.(IB.index s (11ul)));
-  blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(IB.index s (12ul))) (m.(IB.index s (13ul)));
-  blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(IB.index s (14ul))) (m.(IB.index s (15ul)));
+  let s = isub #sigma_elt #160 #16 const_sigma start_idx (size 16) in
+  blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(iindex s (size 8))) (m.(iindex s (size 9)));
+  blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(iindex s (size 10))) (m.(iindex s (size 11)));
+  blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(iindex s (size 12))) (m.(iindex s (size 13)));
+  blake2_mixing wv (size 3) (size 4) (size  9) (size 14) (m.(iindex s (size 14))) (m.(iindex s (size 15)));
   admit()
 
 
@@ -143,7 +145,7 @@ val blake2_compress1:
 
 [@ Substitute ]
 let blake2_compress1 wv s m offset flag =
-  IB.recall_contents const_iv (FStar.Seq.seq_of_list Spec.list_iv);
+  recall_contents const_iv (Seq.seq_of_list Spec.list_iv);
   update_sub wv (size 0) (size 8) s;
   assume(disjoint wv const_iv);
   update_isub wv (size 8) (size 8) const_iv;
@@ -292,7 +294,7 @@ val blake2s_init:
 
 [@ Substitute ]
 let blake2s_init #vkk hash k kk nn =
-  IB.recall_contents const_iv (FStar.Seq.seq_of_list Spec.list_iv);
+  recall_contents const_iv (Seq.seq_of_list Spec.list_iv);
   let h0 = ST.get () in
   alloc h0 (size Spec.size_block) (u8 0) hash
   (fun h -> (fun _ sv -> sv == Spec.Blake2s.blake2s_init (v kk) h0.[k] (v nn)))
