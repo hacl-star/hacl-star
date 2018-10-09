@@ -221,7 +221,7 @@ let test () =
   IO.print_string "\n\nTEST 1";
   let test1_plaintext_len : size_nat = 32 in
   let test1_result : lbytes 32 =
-    Spec.Blake2.blake2s 3 test1_plaintext 0 (of_list []) 32
+    Spec.Blake2.blake2s test1_plaintext 0 (of_list []) 32
   in
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
 
@@ -237,7 +237,7 @@ let test () =
   IO.print_string "\n\nTEST 2";
 
   let test2_result : lbytes 32 =
-    Spec.Blake2.blake2s 1 test2_plaintext 32 test2_key  32
+    Spec.Blake2.blake2s test2_plaintext 32 test2_key  32
   in
   let result2 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected test2_result in
 
@@ -253,7 +253,7 @@ let test () =
   IO.print_string "\n\nTEST 3";
 
   let test3_result : lbytes 32 =
-    Spec.Blake2.blake2s (List.Tot.length test3_plaintext_list) test3_plaintext 32 test3_key  32
+    Spec.Blake2.blake2s test3_plaintext 32 test3_key  32
   in
   let result3 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected test3_result in
 
@@ -269,7 +269,7 @@ let test () =
   IO.print_string "\n\nTEST 4";
 
   let test4_result : lbytes 32 =
-    Spec.Blake2.blake2s (List.Tot.length test4_plaintext_list) test4_plaintext 32 test4_key  32
+    Spec.Blake2.blake2s test4_plaintext 32 test4_key  32
   in
   let result4 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected test4_result in
 
@@ -285,7 +285,7 @@ let test () =
   IO.print_string "\n\nTEST 5";
 
   let test5_result : lbytes 64 =
-    Spec.Blake2.blake2b (List.Tot.length test5_plaintext_list) test5_plaintext 0 (of_list []) 64
+    Spec.Blake2.blake2b test5_plaintext 0 (of_list []) 64
   in
   let result5 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test5_expected test5_result in
 
