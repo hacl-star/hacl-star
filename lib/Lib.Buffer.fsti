@@ -35,7 +35,7 @@ val ilength: #a:Type0 -> b:ibuffer a -> GTot (r:size_nat{r == IB.length b})
 
 (** Definition of fixed length mutable and immutable Buffers *)
 let lbuffer (a:Type0) (len:size_nat) = b:buffer a {length b == len}
-let ilbuffer (a:Type0) (len:size_nat) = b:IB.libuffer a len
+let ilbuffer (a:Type0) (len:size_nat) = b:IB.ibuffer a {IB.length b == len}
 
 (** Alias for mutable buffer of bytes *)
 let lbytes len = lbuffer uint8 len
