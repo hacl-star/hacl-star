@@ -180,7 +180,7 @@ val index:
   Stack a
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == Seq.index #a (B.as_seq h1 b) (v i))
+      r == Seq.index #a #len (B.as_seq h1 b) (v i))
 
 (** Access a specific value in an immutable Buffer *)
 inline_for_extraction
@@ -192,7 +192,7 @@ val iindex:
   Stack a
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == Seq.index #a (IB.as_seq h1 b) (v i))
+      r == Seq.index #a #len (IB.as_seq h1 b) (v i))
 
 (** Update a specific value in a mutable Buffer *)
 inline_for_extraction
@@ -230,7 +230,7 @@ val bget:
   -> h:mem
   -> b:lbuffer a len
   -> i:size_nat{i < len}
-  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a (B.as_seq h b) i})
+  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (B.as_seq h b) i})
 
 (** Access to the pure sequence-based value associated to an index of an immutable Buffer  *)
 (* We don't have access to Lib.Sequence.fst
@@ -242,7 +242,7 @@ val ibget:
   -> h:mem
   -> b:ilbuffer a len
   -> i:size_nat{i < len}
-  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a (IB.as_seq h b) i})
+  -> GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (IB.as_seq h b) i})
 
 (** Allocate a fixed-length mutable Buffer and initialize it to value [init] *)
 inline_for_extraction
