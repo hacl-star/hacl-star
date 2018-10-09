@@ -18,7 +18,7 @@ let rec nat_from_intseq_be_ #t b =
   let len = length b in
   if len = 0 then 0
   else
-    let l = uint_to_nat #t (index b (len - 1)) in
+    let l = uint_to_nat #t (seq_index b (len - 1)) in
     let pre = seq_sub b 0 (len - 1) in //prefix #(uint_t t) #len b (decr len)
     let shift = pow2 (bits t) in
     let n': n:nat{n < pow2 ((len-1) * bits t)} = nat_from_intseq_be_ #t pre in
@@ -41,7 +41,7 @@ let rec nat_from_intseq_le_ #t b =
     let shift = pow2 (bits t) in
     let tt = seq_sub b 1 (len - 1) in
     let n' : n:nat{n < pow2 ((len-1) * bits t)} = nat_from_intseq_le_ #t tt in
-    let l = uint_to_nat #t (index b 0) in
+    let l = uint_to_nat #t (seq_index b 0) in
     assert (l <= shift - 1);
     assert (l + shift * n' <= shift * (n' + 1) - 1);
     assert (n' + 1 <= pow2 ((len -1) * bits t));
@@ -66,16 +66,16 @@ let rec nat_to_bytes_be_ len n =
     Math.Lemmas.pow2_plus 8 (8 * len');
     assert (n' < pow2 (8 * len'));
     let b' = nat_to_bytes_be_ len' n' in
-    let b  = concat b' (create 1 byte) in
+    let b  = seq_concat b' (create 1 byte) in
     //let b  : lbytes len = snoc #uint8 #len' b' byte in
     //Lib.Sequence.Lemmas.concat_subs b' (create 1 byte);
     assume (seq_sub b 0 len' == b');
     assume (seq_sub b len' 1 == create 1 byte);
-    assert (index (create 1 byte) 0 == byte);
+    assert (seq_index (create 1 byte) 0 == byte);
     assert (b' == seq_sub b 0 len');
     assert (create 1 byte == seq_sub b len' 1);
-    assert (index (seq_sub b len' 1) 0 == index b len');
-    assert (byte == index b len');
+    assert (seq_index (seq_sub b len' 1) 0 == seq_index b len');
+    assert (byte == seq_index b len');
     b)
 
 let nat_to_bytes_be = nat_to_bytes_be_
@@ -93,16 +93,16 @@ let rec nat_to_bytes_le_ len n =
     Math.Lemmas.pow2_plus 8 (8 * len');
     assert(n' < pow2 (8 * len'));
     let b' = nat_to_bytes_le_ len' n' in
-    let b = concat (create 1 byte) b' in
+    let b = seq_concat (create 1 byte) b' in
     //let b  : lbytes len = snoc #uint8 #len' b' byte in
     //Lib.Sequence.Lemmas.concat_subs b' (create 1 byte);
     assume (seq_sub b 0 1 == create 1 byte);
     assume (seq_sub b 1 len' == b');
-    assert (index (create 1 byte) 0 == byte);
+    assert (seq_index (create 1 byte) 0 == byte);
     assert (b' == seq_sub b 1 len');
     assert (create 1 byte == seq_sub b 0 1);
-    assert (index (seq_sub b 0 1) 0 == index b 0);
-    assert (byte == index b 0);
+    assert (seq_index (seq_sub b 0 1) 0 == seq_index b 0);
+    assert (byte == seq_index b 0);
     b
 
 let nat_to_bytes_le = nat_to_bytes_le_
@@ -111,13 +111,13 @@ val index_nat_to_bytes_le:
     len:size_nat
   -> n:nat{n < pow2 (8 * len)}
   -> i:nat{i < len}
-  -> Lemma (index (nat_to_bytes_le len n) i == u8 (n / pow2 (8 * i) % pow2 8))
+  -> Lemma (seq_index (nat_to_bytes_le len n) i == u8 (n / pow2 (8 * i) % pow2 8))
 let rec index_nat_to_bytes_le len n i =
   if i = 0 then ()
   else
     begin
     index_nat_to_bytes_le (len - 1) (n / 256) (i - 1);
-    assert (index (nat_to_bytes_le (len - 1) (n / 256)) (i - 1) ==
+    assert (seq_index (nat_to_bytes_le (len - 1) (n / 256)) (i - 1) ==
             u8 ((n / 256) / pow2 (8 * (i - 1)) % pow2 8));
     assert_norm (pow2 8 == 256);
     Math.Lemmas.division_multiplication_lemma n (pow2 8) (pow2 (8 * (i - 1)));
