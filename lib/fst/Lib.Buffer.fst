@@ -45,10 +45,10 @@ let upd #a #len b i v =
   B.upd b (size_to_UInt32 i) v
 
 let bget #a #len h b i =
-  Seq.index #a (B.as_seq h b) i
+  FStar.Seq.index #a (B.as_seq h b) i
 
 let ibget #a #len h b i =
-  Seq.index #a (IB.as_seq h b) i
+  FStar.Seq.index #a (IB.as_seq h b) i
 
 let create #a #len clen init =
   B.alloca init (normalize_term (size_to_UInt32 clen))

@@ -289,7 +289,7 @@ val createL_global:
     (ensures  fun h0 b h1 -> B.alloc_post_mem_common b h0 h1 (Seq.of_list init))
 
 private
-let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> Seq.equal s s1
+let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> FStar.Seq.equal s s1
 
 (** Allocate a top-level fixed-length immutable Buffer and initialize it to value [init] *)
 inline_for_extraction noextract
@@ -298,7 +298,7 @@ val icreateL_global:
   -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
   ST (b:ilbuffer a (normalize_term (List.Tot.length init)){
       B.frameOf b == HyperStack.root /\ B.recallable b /\
-      B.witnessed b (cpred (Seq.seq_of_list init))})
+      B.witnessed b (cpred (Seq.of_list init))})
     (requires fun h0 -> B.gcmalloc_of_list_pre #a HyperStack.root init)
     (ensures  fun h0 b h1 -> B.alloc_post_mem_common b h0 h1 (Seq.of_list init))
 
