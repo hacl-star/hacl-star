@@ -117,7 +117,7 @@ let test() : FStar.All.ML unit =
   let counter = test_counter in
   let plain = of_list test_plaintext in
   let expected = of_list test_ciphertext in
-  let cip = aes128_encrypt_bytes key 12 nonce counter 16 plain in
+  let cip = aes128_encrypt_bytes key 12 nonce counter plain in
 //  let cip = aes128_block key nonce counter in
 //  let cip = map2 (logxor #U8) cip plain in
   IO.print_string "aes_cip computed:\n";
@@ -131,7 +131,7 @@ let test() : FStar.All.ML unit =
   let counter = test_counter1 in
   let plain = of_list test_plaintext1 in
   let expected = of_list test_ciphertext1 in
-  let cip = aes128_encrypt_bytes key 12 nonce counter 16 plain in
+  let cip = aes128_encrypt_bytes key 12 nonce counter plain in
 //  let cip = aes128_block key nonce counter in
 //  let cip = map2 (logxor #U8) cip plain in
   IO.print_string "aes_cip computed:\n";
@@ -145,7 +145,7 @@ let test() : FStar.All.ML unit =
   let counter = test_counter2 in
   let plain = of_list test_plaintext2 in
   let expected = of_list test_ciphertext2 in
-  let cip = aes128_encrypt_bytes key 12 nonce counter 32 plain in
+  let cip = aes128_encrypt_bytes key 12 nonce counter plain in
 //  let cip = aes128_block key nonce counter in
 //  let cip = map2 (logxor #U8) cip plain in
   IO.print_string "aes_cip computed:\n";

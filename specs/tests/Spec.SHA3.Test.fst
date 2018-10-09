@@ -39,7 +39,7 @@ let test_shake128 msg_len msg out_len expected =
   let expected:lbytes out_len = of_list expected in
 
   let test = create out_len (u8 0) in
-  let test = Spec.SHA3.shake128 msg_len msg out_len test in
+  let test = Spec.SHA3.shake128 msg_len msg out_len in
   print_and_compare out_len expected test
 
 let test_shake256 msg_len msg out_len expected =
@@ -47,7 +47,7 @@ let test_shake256 msg_len msg out_len expected =
   let expected:lbytes out_len = of_list expected in
 
   let test = create out_len (u8 0) in
-  let test = Spec.SHA3.shake256 msg_len msg out_len test in
+  let test = Spec.SHA3.shake256 msg_len msg out_len in
   print_and_compare out_len expected test
 
 //
