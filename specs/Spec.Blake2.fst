@@ -452,3 +452,9 @@ let blake2 a ll d kk k nn =
       blake2_update_last a ll rem last fk s end in
   blake2_finish a s nn
 
+
+inline_for_extraction
+let blake2s ll d kk k n = blake2 Blake2S ll d kk k n
+
+inline_for_extraction
+let blake2b ll d kk k n = blake2 Blake2B ll d kk k n
