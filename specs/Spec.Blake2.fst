@@ -7,7 +7,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
 
-#set-options "--z3rlimit 25 --max_fuel 0"
+#set-options "--z3rlimit 25"
 
 type alg =
   | Blake2S
@@ -68,13 +68,13 @@ let limb_to_word (a:alg) (x:limb_t a) : word_t a =
 
 
 inline_for_extraction
-let rTable_list_S : l:list (rotval U32){List.Tot.length l = 4} =
+let rTable_list_S : l:list (rotval U32){List.Tot.length l == 4} =
   [
     size 16; size 12; size 8; size 7
   ]
 
 inline_for_extraction
-let rTable_list_B: l:list (rotval U64){List.Tot.length l = 4} =
+let rTable_list_B: l:list (rotval U64){List.Tot.length l == 4} =
   [
     size 32; size 24; size 16; size 63
   ]
@@ -86,15 +86,15 @@ let rTable (a:alg) : lseq (rotval (wt a)) 4 =
   | Blake2B -> of_list rTable_list_B
 
 
-inline_for_extraction let list_iv_S: l:list uint32{List.Tot.length l = 8} =
+inline_for_extraction let list_iv_S: l:list uint32{List.Tot.length l == 8} =
   [@inline_let]
   let l =
   [u32 0x6A09E667; u32 0xBB67AE85; u32 0x3C6EF372; u32 0xA54FF53A;
    u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19] in
-  assert_norm(List.Tot.length l = 8);
+  assert_norm(List.Tot.length l == 8);
   l
 
-inline_for_extraction let list_iv_B: l:list uint64{List.Tot.length l = 8}  =
+inline_for_extraction let list_iv_B: l:list uint64{List.Tot.length l == 8}  =
   [@inline_let]
   let l = [
     u64 0x6A09E667F3BCC908; u64 0xBB67AE8584CAA73B;
@@ -102,7 +102,7 @@ inline_for_extraction let list_iv_B: l:list uint64{List.Tot.length l = 8}  =
     u64 0x510E527FADE682D1; u64 0x9B05688C2B3E6C1F;
     u64 0x1F83D9ABFB41BD6B; u64 0x5BE0CD19137E2179]
   in
-  assert_norm(List.Tot.length l = 8);
+  assert_norm(List.Tot.length l == 8);
   l
 
 inline_for_extraction
@@ -112,7 +112,7 @@ let ivTable (a:alg) : lseq (word_t a) 8 =
   | Blake2B -> of_list list_iv_B
 
 type sigma_elt_t = n:size_t{size_v n < 16}
-type list_sigma_t = l:list sigma_elt_t{List.Tot.length l = 160}
+type list_sigma_t = l:list sigma_elt_t{List.Tot.length l == 160}
 
 inline_for_extraction let list_sigma: list_sigma_t =
   [@inline_let]
@@ -138,11 +138,11 @@ inline_for_extraction let list_sigma: list_sigma_t =
     size 10; size  2; size  8; size  4; size  7; size  6; size  1; size  5;
     size 15; size 11; size  9; size 14; size  3; size 12; size 13; size  0]
   in
-  assert_norm(List.Tot.length l = 160);
+  assert_norm(List.Tot.length l == 160);
   l
 
 let const_sigma:lseq sigma_elt_t size_const_sigma =
-  assert_norm (List.Tot.length list_sigma = size_const_sigma);
+  assert_norm (List.Tot.length list_sigma == size_const_sigma);
   of_list list_sigma
 
 
@@ -309,19 +309,15 @@ let blake2_compress a s m offset flag =
 
 val blake2_update_block:
     a:alg
-  -> dd_prev:size_nat{(dd_prev + 1) * (size_block a) <= max_size_t}
+  -> prev:size_nat
   -> d:message_block_s a
   -> s:hash_state_s a ->
   Tot (hash_state_s a)
 
-let blake2_update_block a dd_prev d s =
+let blake2_update_block a prev d s =
   let to_compress : lseq (word_t a) 16 = uints_from_bytes_le #(wt a) #16 d in
-  let offset = to_limb a ((dd_prev + 1) * (size_block a)) in
+  let offset = to_limb a prev in
   blake2_compress a s to_compress offset false
-
-
-val blake2_init_iv: a:alg -> Tot (hash_state_s a)
-let blake2_init_iv a = (ivTable a)
 
 
 val blake2_init_hash:
@@ -345,76 +341,27 @@ val blake2_init:
   Tot (hash_state_s a)
 
 let blake2_init a kk k nn =
-  let s = blake2_init_iv a in
-  let s = blake2_init_hash a s kk nn in
+  let s = blake2_init_hash a (ivTable a) kk nn in
   if kk = 0 then s
   else begin
     let key_block = create (size_block a) (u8 0) in
     let key_block = update_sub key_block 0 kk k in
-    blake2_update_block a 0 key_block s end
-
-
-val blake2_update_multi_iteration:
-  a:alg
-  -> dd_prev:size_nat
-  -> dd:size_nat{(dd + dd_prev) * (size_block a) <= max_size_t}
-  -> d:lbytes (dd * (size_block a))
-  -> i:size_nat{i + 1 <= dd}
-  -> s:hash_state_s a ->
-  Tot (hash_state_s a)
-
-let blake2_update_multi_iteration a dd_prev dd d i s =
-  let block = (sub d (i * (size_block a)) (size_block a)) in
-  blake2_update_block a (dd_prev + i) block s
-
-
-val blake2_update_multi:
-    a:alg
-  -> dd_prev:size_nat
-  -> dd:size_nat{(dd + dd_prev) * (size_block a) <= max_size_t}
-  -> d:lbytes (dd * (size_block a))
-  -> s:hash_state_s a ->
-  Tot (hash_state_s a)
-
-let blake2_update_multi a dd_prev dd d s =
-  repeati dd (blake2_update_multi_iteration a dd_prev dd d) s
-
-
-val blake2_update_last_block:
-    a:alg
-  -> ll:size_nat{ll + (size_block a) <= max_size_t}
-  -> last_block:lbytes (size_block a)
-  -> flag_key:bool
-  -> s:hash_state_s a ->
-  Tot (hash_state_s a)
-
-let blake2_update_last_block a ll last_block fk s =
-  let last_block : lseq (word_t a) 16 = uints_from_bytes_le #(wt a) last_block in
-  if not fk then
-    blake2_compress a s last_block (to_limb a ll) true
-  else
-    blake2_compress a s last_block (to_limb a (ll + (size_block a))) true
+    blake2_update_block a (size_block a) key_block s end
 
 
 val blake2_update_last:
     a:alg
-  -> ll:size_nat{ll + (size_block a) <= max_size_t}
+  -> prev:size_nat //{ll + (size_block a) <= max_size_t}
   -> len:size_nat{len <= (size_block a)}
   -> last:lbytes len
-  -> flag_key:bool
   -> s:hash_state_s a ->
   Tot (hash_state_s a)
 
-let blake2_update_last a ll len last fk s =
+let blake2_update_last a prev len last s =
   let last_block = create (size_block a) (u8 0) in
   let last_block = update_sub last_block 0 len last in
-  blake2_update_last_block a ll last_block fk s
-
-
-val blake2_update_last_empty: a:alg -> s:hash_state_s a -> Tot (hash_state_s a)
-let blake2_update_last_empty a st =
-  let data = create (size_block a) (u8 0) in
-  blake2_update_last a 0 (size_block a) data false st
+  let last_uint32s = uints_from_bytes_le last_block in
+  blake2_compress a s last_uint32s (to_limb a prev) true
 
 
 val blake2_finish:
@@ -427,7 +374,6 @@ let blake2_finish a s nn =
   let full = uints_to_bytes_le s in
   sub full 0 nn
 
-
 val blake2:
     a:alg
   -> ll:size_nat{ll + 2 * (size_block a) <= max_size_t} // This could be relaxed
@@ -438,18 +384,12 @@ val blake2:
   Tot (lbytes nn)
 
 let blake2 a ll d kk k nn =
-  let fk = if kk = 0 then false else true in
-  let rem = ll % (size_block a) in
-  let nblocks = ll / (size_block a) in
-  let blocks = sub d 0 (nblocks * (size_block a)) in
-  let last = sub d (nblocks * (size_block a)) rem in
+  let klen = if kk = 0 then 0 else 1 in
   let s = blake2_init a kk k nn in
-  let s =
-    if ll = 0 && kk = 0 then blake2_update_last_empty a s
-    else begin
-      let nprev = if kk = 0 then 0 else 1 in
-      let s = blake2_update_multi a nprev nblocks blocks s in
-      blake2_update_last a ll rem last fk s end in
+  let s = repeat_blocks (size_block a) d
+    (fun i -> blake2_update_block a ((klen + i + 1) * (size_block a)))
+    (fun i -> blake2_update_last  a (klen * (size_block a) + ll))
+    s in
   blake2_finish a s nn
 
 
