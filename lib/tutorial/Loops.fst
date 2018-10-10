@@ -86,11 +86,16 @@ open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Sequence
+open Lib.LoopCombinators
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
 module Seq = Lib.Sequence
+
+unfold let op_String_Access #a #len = Seq.op_String_Access #a #len
+noextract unfold let repeat = repeat_gen
+unfold let unfold_repeat = unfold_repeat_gen
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
 
@@ -165,7 +170,7 @@ let reverse n a =
       //  (repeat (v i + 1) (reverse_state n) (spec h0) (Seq.create n (u8 0))))
       //
       // We thus apply a lemma to unfold ``repeat``
-      unfold_repeat n (reverse_state n) (spec h0) (Seq.create n (u8 0)) (v i)
+      unfold_repeat_gen n (reverse_state n) (spec h0) (Seq.create n (u8 0)) (v i)
     );
   copy a (size n) b;
   pop_frame()
@@ -211,25 +216,25 @@ let reverse_inplace n a =
 
 ///  Tail-recursive Fibonnacci
 
-val fib_state: n:size_nat -> i:size_nat{i <= n} -> Type0
+val fib_state: n:nat -> i:nat{i <= n} -> Type0
 let fib_state n i = nat & nat
 
 noextract
-val fib_inner: n:size_nat -> i:size_nat{i < n} -> fib_state n i -> fib_state n (i + 1)
+val fib_inner: n:nat -> i:nat{i < n} -> fib_state n i -> fib_state n (i + 1)
 let fib_inner n i (a, b) = b, a + b
 
 noextract
-val fib_spec: size_nat -> nat
+val fib_spec: nat -> nat
 let fib_spec n = fst (repeat n (fib_state n) (fib_inner n) (0, 1))
 
 // We use ``nat`` rather than a machine integer type to keep things simple
 val fib: n:size_nat -> Stack nat
   (requires fun _ -> True)
-  (ensures  fun h0 res h1 -> B.modifies B.loc_none h0 h1 /\ res == fib_spec n)
+  (ensures  fun h0 res h1 -> modifies B.loc_none h0 h1 /\ res == fib_spec n)
 let fib n =
   push_frame();
-  let a = create #nat #1 (size 1) 0 in
-  let b = create #nat #1 (size 1) 1 in
+  let a = create (size 1) 0 in
+  let b = create (size 1) 1 in
   let h0 = ST.get () in
   loop h0 (size n) (fib_state n) (lbuffer nat 1 & lbuffer nat 1) (a, b)
   (fun h _ -> bget h a 0, bget h b 0)
