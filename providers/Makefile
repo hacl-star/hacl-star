@@ -1,29 +1,4 @@
-FSTAR_HOME	?= ../../FStar
-KREMLIN_HOME	?= ../../kremlin
-HACL_HOME	?= ..
-MLCRYPTO_HOME	?= ../../MLCrypto
-OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
-
-# The noopenssl config no means: enable bcrypt + disable openssl
-ifeq (,$(EVEREST_WINDOWS))
-ifeq (,$(KAIZALA))
-CONFIG		?= default
-else
-CONFIG		= kaizala
-endif
-else
-CONFIG		= noopenssl
-endif
-
-CACHE_DIR	= .cache
-OUTPUT_DIR	= .output
-HINT_DIR	= .hints
-GENERATED_DIR	= generated
-OUT_DIR		= out
-INCLUDE_DIR	= include
-
-HACL_CODE	= $(HACL_HOME)/code
-HACL_SPEC	= $(HACL_HOME)/specs
+include Makefile.common
 
 # 0. The usual pseudo auto-configuration
 
@@ -63,28 +38,6 @@ test:
 # - generate the F* dependency graph via `fstar --dep full`
 # - verify every F* file in parallel to generate .checked files
 # - extract each .checked file into a .krml file in parallel
-
-# TODO: some of these directories have no interfaces, meaning that we end up
-# with way too much HACL* code in our verification dependency graph; ideally,
-# every HACL* algorithm should have an interfaces directory that allows us to
-# cut the dependency graph
-
-FSTAR_INCLUDES = \
-  $(KREMLIN_HOME)/kremlib/compat \
-  $(KREMLIN_HOME)/kremlib \
-  evercrypt evercrypt/fst \
-  evercrypt/config/$(CONFIG) \
-  $(HACL_CODE)/lib/kremlin \
-  $(HACL_CODE)/experimental/aesgcm \
-  $(HACL_CODE)/curve25519/interfaces \
-  $(HACL_CODE)/hash/interfaces \
-  $(HACL_CODE)/api/interfaces \
-  $(HACL_CODE)/api \
-  $(HACL_CODE)/salsa-family \
-  $(HACL_CODE)/poly1305 \
-  $(HACL_CODE)/bignum \
-  $(HACL_SPEC) \
-  $(HACL_HOME)/specs/old # REMOVE ASAP
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
@@ -183,7 +136,6 @@ VALE_ASM 	= $(addprefix $(VALE_DIR)/,\
 # - aead-c: kremlin seems to generate an extra argument, JK had a hack to sed
 #   the code in place
 HACL_SOURCES	= \
-  $(addprefix $(HACL_CODE)/hash/sha2-c/Hacl_SHA2_,256.c 384.c 512.c) \
   $(HACL_CODE)/curve25519/x25519-c/Hacl_Curve25519.c \
   $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
   $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \

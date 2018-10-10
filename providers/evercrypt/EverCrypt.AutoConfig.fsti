@@ -5,6 +5,18 @@ open FStar.HyperStack.ST
 
 module M = LowStar.Modifies
 
+(** New multiplexing support, via a set of flags *)
+
+inline_for_extraction
+let getter a = unit -> Stack a
+  (requires (fun _ -> true))
+  (ensures (fun h0 _ h1 -> M.(modifies loc_none h0 h1)))
+
+val has_shaext: getter bool
+val has_aesni: getter bool
+
+(** Old multiplexing support, to be phased out. *)
+
 /// Multiplexing support
 type impl = | Hacl | Vale | OpenSSL | BCrypt
 
@@ -12,10 +24,6 @@ type cfg =
 | Default
 | Prefer: preferred:impl -> cfg
 
-inline_for_extraction
-let getter a = unit -> Stack a
-  (requires (fun _ -> true))
-  (ensures (fun h0 _ h1 -> M.(modifies loc_none h0 h1)))
 val sha256_impl: getter impl
 val sha384_impl: getter impl
 val sha512_impl: getter impl

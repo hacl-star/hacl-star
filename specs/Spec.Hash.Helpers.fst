@@ -93,6 +93,7 @@ let size_block a =
   size_word a * size_block_w
 
 (* Number of words for intermediate hash, i.e. the working state. *)
+inline_for_extraction
 let size_hash_w a =
   match a with
   | MD5 -> 4
@@ -148,6 +149,10 @@ let words_from_be: a:hash_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(si
 (* Input data. *)
 type bytes =
   m:Seq.seq UInt8.t
+
+(* Input data, multiple of a block length. *)
+let bytes_block a =
+  l:bytes { Seq.length l = size_block a }
 
 (* Input data, multiple of a block length. *)
 let bytes_blocks a =
