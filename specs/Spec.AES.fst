@@ -29,21 +29,25 @@ let elem = uint8
 let to_elem x = x
 let from_elem x = x
 let zero = u8 0
+
+type word = lbytes 4
+type block = lbytes 16
+
 (* let fadd (a:uint8) (b:uint8) : uint8 = a ^. b *)
+
 let fmul (a:uint8) (b:uint8) : uint8 =
   let (p,a,b) =
     repeati 7 (fun i (p,a,b) ->
-	      let b0 = eq_mask #U8 (b &. u8 1) (u8 1) in
-	      let p = p ^. (b0 &. a) in
-  	      let carry_mask = gte_mask #U8 a (u8 0x80) in
-	      let a = a <<. size 1 in
-	      let a = a ^. (carry_mask &. u8 0x1b) in
-	      let b = b >>. size 1 in
-	      (p,a,b)) (u8 0,a,b) in
- let b0 = eq_mask #U8 (b &. u8 1) (u8 1) in
- let p = p ^. (b0 &. a) in
- p
-
+	   let b0 = eq_mask #U8 (b &. u8 1) (u8 1) in
+	   let p = p ^. (b0 &. a) in
+  	   let carry_mask = gte_mask #U8 a (u8 0x80) in
+	   let a = a <<. size 1 in
+	   let a = a ^. (carry_mask &. u8 0x1b) in
+	   let b = b >>. size 1 in
+	   (p,a,b)) (u8 0,a,b) in
+  let b0 = eq_mask #U8 (b &. u8 1) (u8 1) in
+  let p = p ^. (b0 &. a) in
+  p
 
 let finv (a: uint8) =
   let a2 = fmul a a in
@@ -62,14 +66,10 @@ let finv (a: uint8) =
   a254
 
 (* Specification of the Rijndael S-Box : *)
-
 let sbox input =
   let s = finv input in
   let r: uint8 = logxor #U8 s ((s <<<. size 1) ^. (s <<<. size 2) ^. (s <<<. size 3) ^. (s <<<. size 4) ^. (u8 99)) in
-    r
-
-
-type block = lbytes 16
+  r
 
 let subBytes (state:block) : block =
   map sbox state
@@ -137,7 +137,6 @@ let mixColumn (c:size_nat{c < 4}) (state:block) : block =
   let state = state.[i0+3] <- logxor #U8 s3 (tmp ^. (xtime (logxor #U8 s3 s0))) in
   state
 
-
 let mixColumns (state:block) : block =
   let state = mixColumn 0 state in
   let state = mixColumn 1 state in
@@ -170,7 +169,6 @@ let block_cipher (key:lbytes (11 * 16)) (input:block) =
   let state = addRoundKey kn state in
   state
 
-type word = lbytes 4
 let rotate_word (w:word) : word =
   of_list [w.[1];w.[2];w.[3];w.[0]]
 
@@ -185,7 +183,11 @@ let rec rcon_spec i =
   else two `fmul` rcon_spec (i - 1)
 *)
 
-let rcon_l : list uint8 = [u8 0x8d; u8 0x01; u8 0x02; u8 0x04; u8 0x08; u8 0x10; u8 0x20; u8 0x40; u8 0x80; u8 0x1b; u8 0x36]
+let rcon_l : list uint8 = [
+  u8 0x8d; u8 0x01; u8 0x02; u8 0x04;
+  u8 0x08; u8 0x10; u8 0x20; u8 0x40;
+  u8 0x80; u8 0x1b; u8 0x36
+]
 
 let rcon : lbytes 11 =
   assert_norm (List.Tot.length rcon_l = 11);
@@ -195,11 +197,11 @@ let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 44}) : word =
   let k = w1 in
   let k =
     if (i % 4 = 0) then (
-       let k = rotate_word k in
-       let k = sub_word k in
-       let rcon_i = rcon.[i / 4] in
-       let k = k.[0] <- logxor #U8 rcon_i k.[0] in
-       k)
+      let k = rotate_word k in
+      let k = sub_word k in
+      let rcon_i = rcon.[i / 4] in
+      let k = k.[0] <- logxor #U8 rcon_i k.[0] in
+      k)
     else k in
   let k = map2 (logxor #U8) w0 k in
   k
@@ -207,21 +209,20 @@ let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 44}) : word =
 let key_expansion (key:block) : (lbytes (11 * 16)) =
   let key_ex = create (11 * 16) (u8 0) in
   let key_ex = repeati #(lbytes (11 * 16)) 16 (fun i s -> s.[i] <- key.[i]) key_ex in
-  let key_ex = repeat_range #(lbytes (11 * 16)) 4 44
-		       (fun i k -> update_slice k (i*4) ((i*4) + 4)
-			(key_expansion_word
-			  (sub k ((i-4) * 4) 4)
-			  (sub k ((i-1) * 4) 4)
-			  i))
-		       key_ex in
+  let key_ex =
+    repeat_range #(lbytes (11 * 16)) 4 44
+	 (fun i k -> update_slice k (i*4) ((i*4) + 4)
+			    (key_expansion_word
+			    (sub k ((i-4) * 4) 4)
+			    (sub k ((i-1) * 4) 4)
+			    i)) key_ex in
   key_ex
-
 
 let aes128_block (k:block) (n:lbytes 12) (c:size_nat) : block =
   let ctrby = nat_to_bytes_be 4 c in
   let input = create 16 (u8 0) in
   let input = repeati #(lbytes 16) 12 (fun i b -> b.[i] <- n.[i]) input in
-  let input = repeati #(lbytes 16) 4 (fun i b -> b.[12+i] <- ctrby.[i]) input in
+  let input = repeati #(lbytes 16) 4 (fun i b -> b.[12+i] <- (Seq.index ctrby i)) input in
   let key_ex = key_expansion k in
   let output = block_cipher key_ex input in
   output
@@ -232,7 +233,7 @@ let aes128_encrypt_block (k:block) (m:block) : block =
   output
 
 noeq type aes_state = {
-  key_ex: lbytes (11 `op_Multiply` 16);
+  key_ex: lbytes (11 * 16);
   block:  lbytes 16;
 }
 
@@ -240,51 +241,53 @@ let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : aes_stat
   let input = create 16 (u8 0) in
   let input = repeati #(lbytes 16) n_len (fun i b -> b.[i] <- n.[i]) input in
   let key_ex = key_expansion k in
-  {key_ex = key_ex;
-   block  = input}
+  { key_ex = key_ex; block = input}
 
-let aes_set_counter (st:aes_state) (c:size_nat) : Tot aes_state =
+let aes_set_counter (st:aes_state) (c:size_nat) : aes_state =
   let cby = nat_to_bytes_be 4 c in
   let nblock = update_sub st.block 12 4 cby in
   {st with block = nblock}
 
-let aes_key_block (st:aes_state) : Tot block =
+let aes_key_block (st:aes_state) : block =
   block_cipher st.key_ex st.block
 
-let aes_key_block0 (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot block =
+let aes_key_block0 (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : block =
   let st = aes_init k n_len n in
   aes_key_block st
 
-let aes_key_block1 (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot block =
+let aes_key_block1 (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : block =
   let st = aes_init k n_len n in
   let st = aes_set_counter st 1 in
   aes_key_block st
 
-
-
-let aes_encrypt_block (st0:aes_state) (ctr0:size_nat) (incr:size_nat{ctr0 + incr <= max_size_t}) (b:block) : Tot block =
+let aes_encrypt_block (st0:aes_state) (ctr0:size_nat) (incr:size_nat{ctr0 + incr <= max_size_t}) (b:block) : block =
   let st = aes_set_counter st0 (ctr0 + incr) in
   let kb = aes_key_block st in
   map2 (^.) b kb
 
-let aes_encrypt_last (st0:aes_state) (ctr0:size_nat) 
-  		     (incr:size_nat{ctr0 + incr <= max_size_t}) 
-		     (len:size_nat{len < 16})
-		     (b:lbytes len) : lbytes len =
+let aes_encrypt_last
+  (st0:aes_state)
+  (ctr0:size_nat)
+  (incr:size_nat{ctr0 + incr <= max_size_t})
+  (len:size_nat{len < 16})
+  (b:lbytes len): lbytes len =
   let plain = create 16 (u8 0) in
   let plain = update_sub plain 0 (length b) b in
   let cipher = aes_encrypt_block st0 ctr0 incr plain in
   sub cipher 0 (length b)
 
+
 val aes128_encrypt_bytes:
-  key:block -> n_len:size_nat{n_len <= 16} -> 
-  nonce:lbytes n_len -> c:size_nat ->
-  msg:bytes{length msg / 16 + c <= max_size_t}
--> cipher:bytes{length cipher == length msg}
+    key:block
+  -> n_len:size_nat{n_len <= 16}
+  -> nonce:lbytes n_len
+  -> c:size_nat
+  -> msg:bytes{length msg / 16 + c <= max_size_t}
+  -> cipher:bytes{length cipher == length msg}
 
 let aes128_encrypt_bytes key n_len nonce ctr0 msg =
   let cipher = msg in
   let st0 = aes_init key n_len nonce in
   map_blocks 16 cipher
-    (aes_encrypt_block st0 ctr0) 
+    (aes_encrypt_block st0 ctr0)
     (aes_encrypt_last st0 ctr0)
