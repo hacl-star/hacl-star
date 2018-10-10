@@ -143,8 +143,6 @@ let chain_modification #a acc cond prf_region mac_region plain h_init h0 h1 h2 h
 
     let _ :squash (HS.poppable h4) =
       if FStar.StrongExcludedMiddle.strong_excluded_middle (h3 == h4) then ()
-      else begin
-        assert (dexor_modifies cond prf_region plain h3 h4)
-      end
+      else assert (dexor_modifies cond prf_region plain h3 h4)
     in
     assert (HS.modifies_ref mac_region Set.empty h_init (HS.pop h4))
