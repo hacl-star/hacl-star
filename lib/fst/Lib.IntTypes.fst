@@ -1,5 +1,11 @@
 module Lib.IntTypes
 
+open FStar.IFC
+open FStar.Integers
+open FStar.ConstantTime.Integers
+
+module CT = FStar.ConstantTime.Integers
+
 (* Declared in .fsti : intsize, bits, maxint *)
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
@@ -15,80 +21,79 @@ let pow2_values n =
     assert_norm (pow2 64 = 0x10000000000000000);
     assert_norm (pow2 128 = 0x100000000000000000000000000000000)
 
-let uint_t (t:inttype) : Type0 =
-  match t with
-  | U8 -> UInt8.t
-  | U16 -> UInt16.t
-  | U32 -> UInt32.t
-  | U64 -> UInt64.t
-  | U128 -> UInt128.t
-  | SIZE -> UInt32.t
-  | BYTE -> UInt8.t
+unfold let secret (w:fixed_width{w <> W128}) = 
+  CT.t (Secret hacl_label (Unsigned w))
 
+unfold let public sw = CT.t (Public sw)
+
+let uint_t t = 
+  match t with
+  | U8   -> secret W8
+  | U16  -> secret W16
+  | U32  -> secret W32
+  | U64  -> secret W64
+  | U128 -> public (Unsigned W128) // We don't have constant-time operations on UInt128
+  | SIZE -> public (Unsigned W32)
+  | BYTE -> public (Unsigned W8)
 
 inline_for_extraction
-let uint_to_nat_ #t (x:uint_t t) : (n:nat{n <= maxint t}) =
+let uint_to_nat_ (#t:inttype) (x:uint_t t) =
   match t with
-  | U8 -> UInt8.v x
-  | U16 -> UInt16.v x
-  | U32 -> UInt32.v x
-  | U64 -> UInt64.v x
-  | U128 -> UInt128.v x
-  | SIZE -> UInt32.v x
-  | BYTE -> UInt8.v x
+  | U8   -> v (CT.i (x <: secret W8))
+  | U16  -> v (CT.i (x <: secret W16))
+  | U32  -> v (CT.i (x <: secret W32))
+  | U64  -> v (CT.i (x <: secret W64))
+  | U128 -> v (x <: int_t (Unsigned W128))
+  | SIZE -> v (x <: int_t (Unsigned W32))
+  | BYTE -> v (x <: int_t (Unsigned W8))
 
-let uint_v #t u : nat = uint_to_nat_ u
+let uint_v #t u = uint_to_nat_ u
 
 let uintv_extensionality #t a b =
   match t with
-  | U8   -> UInt8.v_inj a b
-  | U16  -> UInt16.v_inj a b
-  | U32  -> UInt32.v_inj a b
-  | U64  -> UInt64.v_inj a b
+  | U8   -> UInt8.v_inj (m (a <: secret W8)) (m (b <: secret W8))
+  | U16  -> UInt16.v_inj (m (a <: secret W16)) (m (b <: secret W16))
+  | U32  -> UInt32.v_inj (m (a <: secret W32)) (m (b <: secret W32))
+  | U64  -> UInt64.v_inj (m (a <: secret W64)) (m (b <: secret W64))
   | U128 -> UInt128.v_inj a b
   | SIZE -> UInt32.v_inj a b
   | BYTE -> UInt8.v_inj a b
 
-
 (* Declared in .fsti: uint8, uint16, uint32, uint64, uint128 *)
 
-let u8 x : uint8  = UInt8.uint_to_t x
+let u8 x = 
+  reveal_hide #hacl_lattice #hacl_label #(Unsigned W8) x;
+  hide x
 
-let u16 x : uint16 = UInt16.uint_to_t x
+let u16 x =
+  reveal_hide #hacl_lattice #hacl_label #(Unsigned W16) x;
+  hide x
 
-let u16_us x = x
+let u32 x =
+  reveal_hide #hacl_lattice #hacl_label #(Unsigned W32) x;
+  hide x
 
-let u32 x : uint32 = UInt32.uint_to_t x
+let u64 x =
+  reveal_hide #hacl_lattice #hacl_label #(Unsigned W64) x;
+  hide x
 
-let u32_ul x = x
-
-let u64 x : uint64 = UInt64.uint_to_t x
-
-let u64_uL x = x
-
-let u128 x : uint128 = UInt128.uint_to_t x
-
-inline_for_extraction
-let size_ x : uint_t SIZE = UInt32.uint_to_t x
-
-inline_for_extraction
-let byte_ x : uint_t BYTE = UInt8.uint_to_t x
+let u128 x = UInt128.uint_to_t x
 
 inline_for_extraction
-let size x = size_ x
+let size x : uint_t SIZE = UInt32.uint_to_t x
 
 inline_for_extraction
 let size_v x = UInt32.v x
 
 inline_for_extraction
-let byte x = byte_ x
+let byte x = UInt8.uint_to_t x
 
 inline_for_extraction
 let byte_v x = UInt8.v x
 
-let size_to_uint32 x = x <: UInt32.t
-
-let byte_to_uint8 x = x <: UInt8.t
+let size_to_uint32 x = hide (size_v x)
+  
+let byte_to_uint8 x = hide (byte_v x)
 
 let nat_to_uint #t x : uint_t t =
   match t with
@@ -97,10 +102,10 @@ let nat_to_uint #t x : uint_t t =
   | U32 -> u32 x
   | U64 -> u64 x
   | U128 -> u128 x
-  | SIZE -> size_ x
-  | BYTE -> byte_ x
+  | SIZE -> size x
+  | BYTE -> byte x
 
-#reset-options "--z3rlimit 1000 --max_fuel 0"
+#set-options "--z3rlimit 1000 --max_fuel 0"
 #set-options "--lax" // TODO: remove this
 let cast #t t' u  =
   match t, t' with
@@ -140,57 +145,58 @@ let cast #t t' u  =
   | U128, SIZE -> FStar.Int.Cast.uint64_to_uint32 (FStar.UInt128.uint128_to_uint64 u)
   | U128, U64 -> FStar.UInt128.uint128_to_uint64 u
   | U128, U128 -> u
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
-#reset-options "--z3rlimit 100"
-
-let add_mod #t a b =
+let add_mod #t a b = 
   match t with
-  | U8  -> (UInt8.add_mod a b)
-  | U16 -> (UInt16.add_mod a b)
-  | U32 -> (UInt32.add_mod a b)
-  | U64 -> (UInt64.add_mod a b)
-  | U128 -> (UInt128.add_mod a b)
-  | SIZE -> (UInt32.add_mod a b)
-  | BYTE -> (UInt8.add_mod a b)
+  | U8  -> addition_mod (a <: uint_t U8)  b
+  | U16 -> addition_mod (a <: uint_t U16) b
+  | U32 -> addition_mod (a <: uint_t U32) b
+  | U64 -> addition_mod (a <: uint_t U64) b
+  | U128 -> UInt128.add_mod a b
+  | SIZE -> UInt32.add_mod a b
+  | BYTE -> UInt8.add_mod a b
 
 let add #t a b =
   match t with
-  | U8 -> (UInt8.add a b)
-  | U16 -> (UInt16.add a b)
-  | U32 -> (UInt32.add a b)
-  | U64 -> (UInt64.add a b)
-  | U128 -> (UInt128.add a b)
-  | SIZE -> (UInt32.add a b)
-  | BYTE -> (UInt8.add a b)
+  | U8   -> addition (a <: uint_t U8)  b
+  | U16  -> addition (a <: uint_t U16) b
+  | U32  -> addition (a <: uint_t U32) b
+  | U64  -> addition (a <: uint_t U64) b
+  | U128 -> UInt128.add a b
+  | SIZE -> UInt32.add a b
+  | BYTE -> UInt8.add a b
 
 let incr #t a =
   match t with
-  | U8 -> (UInt8.add a 0x1uy)
-  | U16 -> (UInt16.add a 0x1us)
-  | U32 -> (UInt32.add a 0x1ul)
-  | U64 -> (UInt64.add a 0x1uL)
-  | U128 -> (UInt128.add a (UInt128.uint_to_t 1))
-  | SIZE -> (UInt32.add a 0x1ul)
-  | BYTE -> (UInt8.add a 0x1uy)
-
+  | U8   -> addition (a <: uint_t U8)  (u8 1)  
+  | U16  -> addition (a <: uint_t U16) (u16 1)
+  | U32  -> addition (a <: uint_t U32) (u32 1)
+  | U64  -> addition (a <: uint_t U64) (u64 1)
+  | U128 -> UInt128.add a (u128 1)
+  | SIZE -> UInt32.add a (size 1)
+  | BYTE -> UInt8.add a (byte 1)
 
 let mul_mod #t a b =
   match t with
-  | U8 -> (UInt8.mul_mod a b)
-  | U16 -> (UInt16.mul_mod a b)
-  | U32 -> (UInt32.mul_mod a b)
-  | U64 -> (UInt64.mul_mod a b)
-  | SIZE -> (UInt32.mul_mod a b)
-  | BYTE -> (UInt8.mul_mod a b)
+  | U8   -> multiplication_mod (a <: uint_t U8)  b
+  | U16  -> multiplication_mod (a <: uint_t U16) b
+  | U32  -> multiplication_mod (a <: uint_t U32) b
+  | U64  -> multiplication_mod (a <: uint_t U64) b
+  | SIZE -> UInt32.mul_mod a b
+  | BYTE -> UInt8.mul_mod a b
+
+// SZ: Stopped here
+#set-options "--lax"
 
 let mul #t a b =
   match t with
-  | U8 -> (UInt8.mul a b)
-  | U16 -> (UInt16.mul a b)
-  | U32 -> (UInt32.mul a b)
-  | U64 -> (UInt64.mul a b)
-  | SIZE -> (UInt32.mul a b)
-  | BYTE -> (UInt8.mul a b)
+  | U8 -> UInt8.mul a b
+  | U16 -> UInt16.mul a b
+  | U32 -> UInt32.mul a b
+  | U64 -> UInt64.mul a b
+  | SIZE -> UInt32.mul a b
+  | BYTE -> UInt8.mul a b
 
 let mul_wide a b = UInt128.mul_wide a b
 
@@ -301,8 +307,8 @@ let eq_mask #t a b =
   | U32 -> if FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a =^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a =^ b) then (size_ (maxint U32)) else (size_ 0)
-  | BYTE -> if FStar.UInt8.(a =^ b) then (byte_ (maxint U8)) else (byte_ 0)
+  | SIZE -> if FStar.UInt32.(a =^ b) then (size (maxint U32)) else (size 0)
+  | BYTE -> if FStar.UInt8.(a =^ b) then (byte (maxint U8)) else (byte 0)
 
 let neq_mask #t a b =
   match t with
@@ -311,8 +317,8 @@ let neq_mask #t a b =
   | U32 -> if not FStar.UInt32.(a =^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if not FStar.UInt64.(a =^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if not FStar.UInt128.(a =^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if not FStar.UInt32.(a =^ b) then (size_ (maxint U32)) else (size_ 0)
-  | BYTE -> if not FStar.UInt8.(a =^ b) then (byte_ (maxint U8)) else (byte_ 0)
+  | SIZE -> if not FStar.UInt32.(a =^ b) then (size (maxint U32)) else (size 0)
+  | BYTE -> if not FStar.UInt8.(a =^ b) then (byte (maxint U8)) else (byte 0)
 
 let gt_mask #t a b =
   match t with
@@ -321,8 +327,8 @@ let gt_mask #t a b =
   | U32 -> if FStar.UInt32.(a >^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a >^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a >^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a >^ b) then (size_ (maxint U32)) else (size_ 0)
-  | BYTE -> if FStar.UInt8.(a >^ b) then (byte_ (maxint U8)) else (byte_ 0)
+  | SIZE -> if FStar.UInt32.(a >^ b) then (size (maxint U32)) else (size 0)
+  | BYTE -> if FStar.UInt8.(a >^ b) then (byte (maxint U8)) else (byte 0)
 
 let gte_mask #t a b =
   match t with
@@ -331,8 +337,8 @@ let gte_mask #t a b =
   | U32 -> if FStar.UInt32.(a >=^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a >=^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a >=^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a >=^ b) then (size_ (maxint U32)) else (size_ 0)
-  | BYTE -> if FStar.UInt8.(a >=^ b) then (byte_ (maxint U8)) else (byte_ 0)
+  | SIZE -> if FStar.UInt32.(a >=^ b) then (size (maxint U32)) else (size 0)
+  | BYTE -> if FStar.UInt8.(a >=^ b) then (byte (maxint U8)) else (byte 0)
 
 let lt_mask #t a b =
   match t with
@@ -341,8 +347,8 @@ let lt_mask #t a b =
   | U32 -> if FStar.UInt32.(a <^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a <^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a <^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a <^ b) then (size_ (maxint U32)) else (size_ 0)
-  | BYTE -> if FStar.UInt8.(a <^ b) then (byte_ (maxint U8)) else (byte_ 0)
+  | SIZE -> if FStar.UInt32.(a <^ b) then (size (maxint U32)) else (size 0)
+  | BYTE -> if FStar.UInt8.(a <^ b) then (byte (maxint U8)) else (byte 0)
 
 let lte_mask #t a b =
   match t with
@@ -351,8 +357,8 @@ let lte_mask #t a b =
   | U32 -> if FStar.UInt32.(a <=^ b) then (u32 (maxint U32)) else (u32 0)
   | U64 -> if FStar.UInt64.(a <=^ b) then (u64 (maxint U64)) else (u64 0)
   | U128 -> if FStar.UInt128.(a <=^ b) then (u128 (maxint U128)) else (u128 0)
-  | SIZE -> if FStar.UInt32.(a <=^ b) then (size_ (maxint U32)) else (size_ 0)
-  | BYTE -> if FStar.UInt8.(a <=^ b) then (byte_ (maxint U8)) else (byte_ 0)
+  | SIZE -> if FStar.UInt32.(a <=^ b) then (size (maxint U32)) else (size 0)
+  | BYTE -> if FStar.UInt8.(a <=^ b) then (byte (maxint U8)) else (byte 0)
 
 let eq_mask_lemma #t a b d = admit()
 let neq_mask_lemma #t a b d = admit()
