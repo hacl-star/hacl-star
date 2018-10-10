@@ -8,140 +8,19 @@ open LowStar.Buffer
 open Lib.Utils
 open Lib.Vec128
 
-
-type felem = lbuffer uint64 2
-type felem4 = lbuffer uint64 8
-type precomp = lbuffer uint64 256
-type block = lbytes 16
-type block4 = lbytes 64
-
-
-[@ "c_inline" ]
-val prepare: pre:precomp -> r:felem -> Stack unit
-	  (requires (fun h -> live h pre /\ live h r))
-	  (ensures (fun h0 _ h1 -> modifies (loc_buffer pre) h0 h1))
-let prepare pre r = 
-    push_frame();
-    let sh = alloca (u64 0) 2ul in
-    sh.(size 0) <- r.(size 0);
-    sh.(size 1) <- r.(size 1);
-    let h0 = ST.get() in
-    loop_nospec #h0 (size 128) pre 
-      (fun i -> 
-	let s0 = sh.(size 0) in
-	let s1 = sh.(size 1) in
-	pre.(i *. size 2) <- s0;
-	pre.(size 1 +. i *. size 2) <- s1;
-	let m = Lib.Vec128.bit_mask64 s0 in
-        sh.(size 0) <- (s0 >>. u32 1) |. (s1 <<. u32 63);
-        sh.(size 1) <- (s1 >>. u32 1) ^. (m &. u64 0xE100000000000000));
-    pop_frame()
-
-
-inline_for_extraction
-val fadd: x:felem -> y:felem -> Stack unit
-	  (requires (fun h -> live h x /\ live h y))
-	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
-let fadd (x:felem) (y:felem) = 
-    x.(size 0) <- x.(size 0) ^. y.(size 0);
-    x.(size 1) <- x.(size 1) ^. y.(size 1)
-
-inline_for_extraction
-val fadd4: x:felem4 -> y:felem4 -> Stack unit
-	  (requires (fun h -> live h x /\ live h y))
-	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
-let fadd4 (x:felem4) (y:felem4) = 
-    fadd (sub x (size 0) (size 2)) (sub y (size 0) (size 2));
-    fadd (sub x (size 2) (size 2)) (sub y (size 2) (size 2));
-    fadd (sub x (size 4) (size 2)) (sub y (size 4) (size 2));
-    fadd (sub x (size 6) (size 2)) (sub y (size 6) (size 2))
-
-
-[@ "c_inline" ]
-val fmul: x:felem -> pre:precomp -> Stack unit
-	  (requires (fun h -> live h x /\ live h pre))
-	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 pre /\ modifies (loc_buffer x) h0 h1))
-let fmul (x:felem) (pre:precomp) = 
-    push_frame();
-    let tmp = alloca (u64 0) 2ul in
-    let h0 = ST.get() in
-    loop_nospec #h0 (size 64) tmp
-      (fun i -> 
-	let m = bit_mask64 (x.(size 1) >>. (size_to_uint32 (size 63 -. i))) in
-	tmp.(size 0) <- tmp.(size 0) ^. (m &. pre.(i *. size 2));
-	tmp.(size 1) <- tmp.(size 1) ^. (m &. pre.(size 1 +. i *. size 2)));
-    loop_nospec #h0 (size 64) tmp
-      (fun i -> 
-	let m = bit_mask64 (x.(size 0) >>. (size_to_uint32 (size 63 -. i))) in
-	tmp.(size 0) <- tmp.(size 0) ^. (m &. pre.(size 128 +. i *. size 2));
-	tmp.(size 1) <- tmp.(size 1) ^. (m &. pre.(size 129 +. i *. size 2)));
-    x.(size 0) <- tmp.(size 0);
-    x.(size 1) <- tmp.(size 1);
-    pop_frame()
-
-inline_for_extraction
-val fmul4: x:felem4 -> pre:precomp -> Stack unit
-	  (requires (fun h -> live h x /\ live h pre))
-	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 pre /\ modifies (loc_buffer x) h0 h1))
-let fmul4 (x:felem4) (pre:precomp) = 
-    fmul (sub x (size 0) (size 2)) pre;
-    fmul (sub x (size 2) (size 2)) pre;
-    fmul (sub x (size 4) (size 2)) pre;
-    fmul (sub x (size 6) (size 2)) pre
-
-
-[@ "c_inline" ]
-val fmul_reduce: x:felem -> y:felem -> Stack unit
-	  (requires (fun h -> live h x /\ live h y))
-	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
-let fmul_reduce (x:felem) (y:felem) = 
-    push_frame();
-    let tmp = alloca (u64 0) 2ul in
-    let sh = alloca (u64 0) 2ul in
-    sh.(size 0) <- y.(size 0);
-    sh.(size 1) <- y.(size 1);
-    let h0 = ST.get() in
-    loop_nospec #h0 (size 64) tmp
-      (fun i -> 
-	let s0 = sh.(size 0) in
-	let s1 = sh.(size 1) in
-	let m = bit_mask64 (x.(size 1) >>. (size_to_uint32 (size 63 -. i))) in
-	tmp.(size 0) <- tmp.(size 0) ^. (m &. s0);
-	tmp.(size 1) <- tmp.(size 1) ^. (m &. s1);
-	let s = bit_mask64 s0 in
-        sh.(size 0) <- (s0 >>. u32 1) |. (s1 <<. u32 63);
-        sh.(size 1) <- (s1 >>. u32 1) ^. (s &. u64 0xE100000000000000));
-    loop_nospec #h0 (size 64) tmp
-      (fun i -> 
-	let s0 = sh.(size 0) in
-	let s1 = sh.(size 1) in
-	let m = bit_mask64 (x.(size 0) >>. (size_to_uint32 (size 63 -. i))) in
-	tmp.(size 0) <- tmp.(size 0) ^. (m &. s0);
-	tmp.(size 1) <- tmp.(size 1) ^. (m &. s1);
-	let s = bit_mask64 s0 in
-        sh.(size 0) <- (s0 >>. u32 1) |. (s1 <<. u32 63);
-        sh.(size 1) <- (s1 >>. u32 1) ^. (s &. u64 0xE100000000000000));
-    x.(size 0) <- tmp.(size 0);
-    x.(size 1) <- tmp.(size 1);
-    pop_frame()
+open Hacl.Impl.Gf128.FieldPreComp
 
 inline_for_extraction
 val encode: x:felem -> y:lbytes 16 -> Stack unit
 	  (requires (fun h -> live h x /\ live h y))
 	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
-let encode x y = 
-   x.(size 1) <- load64_be (sub y (size 0) (size 8));
-   x.(size 0) <- load64_be (sub y (size 8) (size 8))
+let encode x y = load_felem x y
 
 inline_for_extraction
 val encode4: x:felem4 -> y:lbytes 64 -> Stack unit
 	  (requires (fun h -> live h x /\ live h y))
 	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
-let encode4 x y = 
-   encode (sub x (size 0) (size 2)) (sub y (size 0) (size 16));
-   encode (sub x (size 2) (size 2)) (sub y (size 16) (size 16));
-   encode (sub x (size 4) (size 2)) (sub y (size 32) (size 16));
-   encode (sub x (size 6) (size 2)) (sub y (size 48) (size 16))
+let encode4 x y = load_felem4 x y
    
 inline_for_extraction
 val encode_last: x:felem -> y:bytes -> len:size_t{length y == size_v len} -> Stack unit
@@ -158,9 +37,7 @@ inline_for_extraction
 val decode: x:lbytes 16 -> y:felem -> Stack unit
 	  (requires (fun h -> live h x /\ live h y))
 	  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc_buffer x) h0 h1))
-let decode x y = 
-   store64_be (sub x (size 0) (size 8)) y.(size 1);
-   store64_be (sub x (size 8) (size 8)) y.(size 0)
+let decode x y = store_felem x y
 
     
 inline_for_extraction
@@ -227,6 +104,7 @@ val ghash: tag:lbytes 16 -> text:bytes -> len:size_t{length text == size_v len} 
 
 let ghash tag text len key = 
   push_frame();
+  let ctx = create_ctx() in
   let acc = alloca (u64 0) 2ul in
   let r4 = alloca (u64 0) 8ul in
   let r = sub r4 (size 6) (size 2) in

@@ -18,6 +18,14 @@ let keyex = keyex MAES
 let aes_ctx = aes_ctx MAES
 
 [@ CInline ]
+val create_ctx: unit -> StackInline aes_ctx
+                   (requires (fun h -> True))
+		   (ensures (fun h0 f h1 -> live h1 f))
+[@ CInline ]
+let create_ctx () = //Hacl.Impl.Aes.Core.create_ctx MAES
+  create_ctx MAES
+
+[@ CInline ]
 val enc_rounds: st:state -> key:keyr -> n:size_t -> ST unit
 	     (requires (fun h -> live h st /\ live h key))
 	     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc_buffer st) h0 h1))
@@ -40,6 +48,13 @@ val key_expansion256: keyx:keyex -> key:lbytes 32 -> ST unit
 [@ CInline ]
 let key_expansion256 keyx key = key_expansion256 #MAES keyx key
     
+
+[@ CInline ]
+val aes128_set_nonce: ctx:aes_ctx -> nonce:lbytes 12 -> ST unit
+			     (requires (fun h -> live h ctx /\ live h nonce))
+			     (ensures (fun h0 b h1 -> modifies (loc_buffer ctx) h0 h1))
+[@ CInline ]
+let aes128_set_nonce ctx nonce = aes128_set_nonce #MAES ctx nonce
 
 [@ CInline ]
 val aes128_init: ctx:aes_ctx -> key:skey -> nonce:lbytes 12 -> ST unit
@@ -82,10 +97,10 @@ let aes_ctr out inp len ctx counter rounds = aes_ctr #MAES out inp len ctx count
 let aes128_ctr_encrypt out inp in_len k n c = aes128_ctr_encrypt #MAES out inp in_len k n c
 
 [@ CInline ]
-let aes128_ctr_decrypt out inp in_len k n c = aes128_ctr_decrypt #MAES out inp in_len k n c
+let aes128_ctr_decrypt out inp in_len k n c = aes128_ctr_encrypt out inp in_len k n c
 
 [@ CInline ]
 let aes256_ctr_encrypt out inp in_len k n c = aes256_ctr_encrypt #MAES out inp in_len k n c
 
 [@ CInline ]
-let aes256_ctr_decrypt out inp in_len k n c = aes256_ctr_decrypt #MAES out inp in_len k n c
+let aes256_ctr_decrypt out inp in_len k n c = aes256_ctr_encrypt out inp in_len k n c

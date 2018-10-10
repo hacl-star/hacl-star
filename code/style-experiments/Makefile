@@ -10,11 +10,13 @@ AES_BS_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.AesCTR.fst
 
 
-AES_BS_OLD_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+AES_ONLY_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	Hacl.Impl.Aes.BitSlice.Old.fst \
-	Hacl.Test.AesCTR.BitSlice.Old.fst \
-	Hacl.AesCTR.Old.fst
+	Hacl.Impl.Aes.CoreNI.fst \
+	Hacl.Impl.Aes.Core.fst \
+	Hacl.Impl.Aes.Generic.fst \
+	Hacl.Impl.Aes.NI.fst \
+	Hacl.AesNI.fst 
 
 
 AES_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
@@ -73,6 +75,15 @@ aes-bitslice-c/Hacl_AesCTR.c: aes-bitslice-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-bitslice-c $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.AesCTR=*'
 
+
+aes-only-c/out.krml: $(AES_ONLY_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-only-c $(AES_ONLY_FILES) -skip-translation
+
+aes-only-c/Hacl_AesNI.c: aes-only-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-only-c $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.AesNI=*'
+
+
 aes-bitslice-old-c/out.krml: $(AES_BS_OLD_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-bitslice-old-c $(AES_BS_OLD_FILES) -skip-translation
 
@@ -110,22 +121,29 @@ aes-perf: aes-bitslice.exe aes-ni.exe
 	./aes-perf.exe
 
 
-GF128_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+GF128_OLD_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	Hacl.Impl.Gf128.NI.fst \
 	Hacl.Gf128.fst \
 	Hacl.Test.Gf128NI.fst 
 
+GF128_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	Hacl.Impl.Gf128.FieldNI.fst \
+	Hacl.Impl.Gf128.Generic.fst \
+	Hacl.Gf128.NI.fst \
+	Hacl.Test.Gf128.NI.fst 
+
 gf128-ni-c/out.krml: $(GF128_NI_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-ni-c $(GF128_NI_FILES) -skip-translation
 
-gf128-ni-c/Hacl_Gf128.c: gf128-ni-c/out.krml
+gf128-ni-c/Hacl_Gf128_NI.c: gf128-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Gf128=*'
-gf128-ni.exe: gf128-ni-c/Hacl_Gf128.c gf128-ni-c/out.krml
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Gf128.NI=*'
+gf128-ni.exe: gf128-ni-c/Hacl_Gf128_NI.c gf128-ni-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-ni-c \
-	  -no-prefix 'Hacl.Test.Gf128NI' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
-	  -bundle 'Hacl.Test.Gf128NI=*' -library Hacl.Gf128 -library Lib.Vec128 \
+	  -no-prefix 'Hacl.Test.Gf128.NI' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
+	  -bundle 'Hacl.Test.Gf128.NI=*' -library Hacl.Gf128 -library Lib.Vec128 \
 	  $^ -o $@
 
 
@@ -153,7 +171,7 @@ gf128-test: gf128-ni.exe gf128-pre.exe
 	./gf128-pre.exe
 
 gf128-perf: gf128-ni.exe gf128-pre.exe
-	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128.c  gf128-pre-c/Hacl_Gf128_PreComp.c $(KREMLIN_HOME)/kremlib/c/testlib.o gf128_test.c -o gf128-perf.exe
+	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128_NI.c  gf128-pre-c/Hacl_Gf128_PreComp.c $(KREMLIN_HOME)/kremlib/c/testlib.o gf128_test.c -o gf128-perf.exe
 	./gf128-perf.exe
 
 

@@ -15,6 +15,10 @@ type nonce =  lbuffer uint64 8
 type block = lbytes 16
 type block4 = lbytes 64
 
+inline_for_extraction
+val create_state: unit -> StackInline state
+                   (requires (fun h -> True))
+		   (ensures (fun h0 f h1 -> live h1 f))
 let create_state() = create (u64 0) (size 8)
 
 inline_for_extraction
@@ -98,7 +102,7 @@ let load_key1 (out:state) (k:block) =
       out.(i) <- u)
 
 
-val load_nonce: out:nonce -> nonce:block -> ST unit 
+val load_nonce: out:nonce -> nonce:lbytes 12 -> ST unit 
 			        (requires (fun h -> live h out /\ live h nonce))
 				(ensures (fun h0 _ h1 -> live h1 out /\ live h1 nonce /\ modifies (loc_buffer out) h0 h1))
 let load_nonce (out:state) (n:lbytes 12) = 
