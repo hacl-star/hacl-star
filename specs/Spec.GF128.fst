@@ -27,20 +27,36 @@ let encode (len:size_nat{len <= blocksize}) (w:lbytes len) : Tot elem =
 
 let decode (e:elem) : Tot block = nat_to_bytes_be blocksize (from_felem e)
 
-let update (r:elem ) (len:size_nat{len <= blocksize}) (w:lbytes len) (acc:elem) : Tot elem =
-    (encode len w `fadd` acc) `fmul` r
+noeq type state = {
+    r:elem;
+    acc:elem
+  }
+  
+let init (h:lbytes blocksize) : state = 
+  {r =  encode blocksize h;
+   acc = zero}
 
-let poly (text:seq uint8) (r:elem) =
-  repeat_blocks #uint8 #elem blocksize text
-    (fun i b -> update r blocksize b)
-    (fun i -> update r)
-  zero
+let set_acc (st:state) (acc:elem) =
+  {st with acc = acc}
 
-let finish (a:elem) (s:tag) : Tot tag = decode (a `fadd` (encode blocksize s))
+let update (len:size_nat{len <= blocksize}) (w:lbytes len) (st:state) : state =
+    let acc = (encode len w `fadd` st.acc) `fmul` st.r in
+    set_acc st acc
+
+
+let poly (text:seq uint8) (st:state) : state =
+  repeat_blocks #uint8 #state blocksize text
+    (fun i b st -> update blocksize b st)
+    (fun i rem b st -> if rem = 0 then st else update rem b st)
+  st
+
+let finish (st:state) (s:tag) : Tot tag = 
+  decode (st.acc `fadd` (encode blocksize s))
 
 let gmul (text:bytes) (h:lbytes blocksize) : Tot tag  =
-    let r = encode blocksize h in
-    decode (poly text r)
+    let st = init h in
+    let st = poly text st in
+    decode st.acc
 
 val gmac:
   text:bytes ->
@@ -48,5 +64,6 @@ val gmac:
   k:key ->
   Tot tag
 let gmac text h k =
-  let r = encode blocksize h in
-  finish (poly text r) k
+  let st = init h in
+  let st = poly text st in
+  finish st k

@@ -57,16 +57,14 @@ val concat:
   -> s1:lseq a len1
   -> s2:lseq a (len0 + len1){to_seq s2 == Seq.append (to_seq s0) (to_seq s1)}
 
-(** Operator for concatenation of two Sequences*)
 inline_for_extraction
-let (@|) #a #l1 #l2 s1 s2 = concat #a #l1 #l2 s1 s2
+let ( @| ) #a #len0 #len1 s0 s1 = concat #a #len0 #len1 s0 s1
 
 (** Conversion of a Sequence to a list *)
 val to_list:
     #a:Type
-  -> #len:size_nat
-  -> s:lseq a len
-  -> l:list a{List.Tot.length l = len /\ l == Seq.seq_to_list (to_seq s)}
+  -> s:seq a
+  -> l:list a{List.Tot.length l = length s /\ l == Seq.seq_to_list s}
 
 (** Creation of a fixed-length Sequence from a list of values *)
 val of_list:

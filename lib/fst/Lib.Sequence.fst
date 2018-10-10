@@ -193,7 +193,7 @@ let create #a len init = Seq.create #a len init
 
 let concat #a #len0 #len1 s0 s1 = seq_concat s0 s1
 
-let to_list #a #len s = Seq.Properties.seq_to_list s
+let to_list #a s = Seq.Properties.seq_to_list s
 
 let of_list #a l = seq_of_list #a l
 
