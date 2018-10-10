@@ -19,7 +19,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
 # on that assumption
 ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
   Spec.Salsa20.fst Spec.Chacha20Poly1305.fst $(wildcard Spec.*.Test.fst) \
-  Spec.Ed25519.fst Spec.SHA1.fst Spec.MD5.fst
+  Spec.Ed25519.fst
 
 # TODO: decide what to do with the following (excluded) specs:
 #  Spec.HMAC.SHA2_256.fst Spec.HMAC.SHA2_384.fst Spec.HMAC.SHA2_512.fst
