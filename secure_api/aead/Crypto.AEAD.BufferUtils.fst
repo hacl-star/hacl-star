@@ -140,5 +140,11 @@ val chain_modification: #a:Type ->
 let chain_modification #a acc cond prf_region mac_region plain h_init h0 h1 h2 h3 h4 =
     Buffer.lemma_reveal_modifies_1 acc h2 h3;
     FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 plain h3) h4;
-    assume (HS.poppable h4);
+
+    let _ :squash (HS.poppable h4) =
+      if FStar.StrongExcludedMiddle.strong_excluded_middle (h3 == h4) then ()
+      else begin
+        assert (dexor_modifies cond prf_region plain h3 h4)
+      end
+    in
     assert (HS.modifies_ref mac_region Set.empty h_init (HS.pop h4))
