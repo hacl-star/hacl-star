@@ -6,16 +6,13 @@
       1,
       2,
       1,
-      [
-        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
-        "equation_FStar.UInt.zero"
-      ],
+      [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "8e3857863da03fafc0fe133ee8887aed"
+      "aeb98264c77423518b79c21958b30689"
     ],
     [
-      "Hacl.UInt8.lt_mask",
-      1,
+      "Hacl.UInt8.gt_mask",
+      2,
       2,
       1,
       [
@@ -23,11 +20,41 @@
         "equation_FStar.UInt.zero"
       ],
       0,
-      "18ad6489931e3621858d9d43f5b2f2ca"
+      "04f71fbd8726aa639586d679b90cebff"
+    ],
+    [
+      "Hacl.UInt8.lt_mask",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "446cbca6fe00f57756324b82f8a17567"
+    ],
+    [
+      "Hacl.UInt8.lt_mask",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero"
+      ],
+      0,
+      "1649b3e9c4a60a9fd8a4d68ac8bcb115"
     ],
     [
       "Hacl.UInt8.lte_mask",
       1,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "d14f818741a19137d6f7174dacaf7475"
+    ],
+    [
+      "Hacl.UInt8.lte_mask",
+      2,
       2,
       1,
       [
@@ -38,7 +65,7 @@
         "typing_Hacl.UInt8.gt_mask"
       ],
       0,
-      "8e691c10e92d8f2bd5abc5031559bac3"
+      "a40e9fd1a62ab7c7e9d5263db19739aa"
     ]
   ]
 ]

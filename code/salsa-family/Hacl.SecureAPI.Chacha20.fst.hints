@@ -8,7 +8,25 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "e74c22d36627fdcb3b657e440c16d056"
+      "2e61e41b00d1b9448dfb5f5a9a652903"
+    ],
+    [
+      "Hacl.SecureAPI.Chacha20.setup",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "404c8194c8cd16cac4fcf28c93ad3b59"
+    ],
+    [
+      "Hacl.SecureAPI.Chacha20.setup",
+      3,
+      0,
+      1,
+      [ "@query" ],
+      0,
+      "606ad461acf79dbbe6f37ed9be851eb9"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_core",
@@ -35,11 +53,29 @@
         "refinement_interpretation_Hacl.SecureAPI.Chacha20_Tm_refine_e0f4be5bd72b4187a1ad66a3d3f712e3"
       ],
       0,
-      "23f3be6cfc4cf452c3fc332a7b4177a9"
+      "428900fd02787c60962bf62457e82783"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_stream",
       1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "42a7234bcce27f346a1bc1e48f83ec3e"
+    ],
+    [
+      "Hacl.SecureAPI.Chacha20.chacha20_stream",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "96c07d942927e745af8cbacb37bc7956"
+    ],
+    [
+      "Hacl.SecureAPI.Chacha20.chacha20_stream",
+      3,
       0,
       1,
       [
@@ -134,7 +170,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "8817378ad834e0a47e4050aec48ca0a1"
+      "dab3911741db96d6b0c70d8c7a60aaff"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_stream_finish",
@@ -146,7 +182,7 @@
         "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
       ],
       0,
-      "0655504009ad0d3200542d4b15770a0e"
+      "fbf867ff6ee8f89196c134022d5f8163"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_stream_finish",
@@ -221,7 +257,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip", "typing_FStar.UInt32.v"
       ],
       0,
-      "90666aac58e97c00018965be35ac19eb"
+      "6110a0eacce868876c8c3210292c124e"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_stream_finish",
@@ -321,7 +357,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "ebb154e93699320012aa8294c8c157d7"
+      "e1d8c5b61b195fe91ec438c24ee120cc"
     ]
   ]
 ]

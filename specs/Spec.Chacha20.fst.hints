@@ -11,7 +11,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "45ffe4ddac81273b3a901c7db40810c3"
+      "ccb708f42a56db1b9283c530b7044ed3"
     ],
     [
       "Spec.Chacha20.block",
@@ -23,7 +23,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "497cbfe2bc2ca59cf5378123eb3983b5"
+      "de22be35c8cb05387314f02854e25f6e"
     ],
     [
       "Spec.Chacha20.nonce",
@@ -35,7 +35,16 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "6c5e684f54f5b1164fbe5705fe462b38"
+      "925f208f3bf0a63193d1c555c46d3755"
+    ],
+    [
+      "Spec.Chacha20.state",
+      1,
+      0,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "1750e0b223557591ae8b6d8d41e4608c"
     ],
     [
       "Spec.Chacha20.line",
@@ -59,7 +68,7 @@
         "token_correspondence_Spec.Lib.op_String_Assignment"
       ],
       0,
-      "90bc85539e1aae406ad241baebc3e303"
+      "54ef0316d35975261813ece2d9e1a6fe"
     ],
     [
       "Spec.Chacha20.chacha20_core",
@@ -75,7 +84,7 @@
         "refinement_interpretation_Spec.Chacha20_Tm_refine_aca10fb50cc7162d8b55c168416f714b"
       ],
       0,
-      "34fa3b667b6676017c50f0fd6dfdb111"
+      "778bfd6068e7575fbe5abee60d70c786"
     ],
     [
       "Spec.Chacha20.setup",
@@ -110,7 +119,7 @@
         "typing_Spec.Lib.uint32s_from_le"
       ],
       0,
-      "53a2b3bf6b61a4ba433b2ed1f249387d"
+      "e0da9b286ebad9fe5cf3bafeacf02ca6"
     ],
     [
       "Spec.Chacha20.chacha20_block",
@@ -119,7 +128,7 @@
       1,
       [ "@query" ],
       0,
-      "02b583e9ac7b221d99db09a70f0e5302"
+      "44f898d8806752532286bcda10d13390"
     ],
     [
       "Spec.Chacha20.chacha20_ctx",
@@ -132,7 +141,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ecaf704c08d566efe0bcac937dd01dd1"
+      "135cd8f9db70eb5feab656dc4323ca14"
     ],
     [
       "Spec.Chacha20.chacha20_encrypt_bytes",
@@ -141,7 +150,7 @@
       1,
       [ "@query" ],
       0,
-      "3cdb192798c4d7134ed1cf346a3a7f98"
+      "8eda9deb2e915a5d34a00fd05df7a8df"
     ],
     [
       "Spec.Chacha20.test",
@@ -180,7 +189,7 @@
         "typing_FStar.List.Tot.Base.length"
       ],
       0,
-      "b14048970d7adbc4586e31d1012cdd7d"
+      "7f74ab628c2e4f48705b91689e6b2191"
     ]
   ]
 ]

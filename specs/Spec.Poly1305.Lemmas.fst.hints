@@ -8,7 +8,16 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "d045913d5822831531e1702b2dff652e"
+      "3c10203f443771c124690c33ebf13b79"
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_prime_value",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "ca6e1be9e2d96e242e4c287433492615"
     ],
     [
       "Spec.Poly1305.Lemmas.lemma_encode_bound",
@@ -27,7 +36,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "4e25519dbb0a7e72113bc153c423a930"
+      "f7eb1b8ac2fadb7c30eeb6440da5703a"
     ],
     [
       "Spec.Poly1305.Lemmas.lemma_encode_bound",
@@ -49,20 +58,38 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "3f2e0fd22f4813721e1a60f070a76bba"
+      "8491f356663eef69d4052769ccb7b490"
     ],
     [
       "Spec.Poly1305.Lemmas.lemma_encode_r",
       1,
       2,
       1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "0b0a01155471ec7311675077d2a3e9ce"
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_r",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int" ],
+      0,
+      "15b1e4131fb1384238db09806c0e033a"
+    ],
+    [
+      "Spec.Poly1305.Lemmas.lemma_encode_r",
+      3,
+      2,
+      1,
       [
-        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
+        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Spec.Poly1305.Lemmas_Tm_refine_aca10fb50cc7162d8b55c168416f714b"
       ],
       0,
-      "e40374cdd46c0329dc01b7e1b4faa264"
+      "c38e357320c4fe6e5a6fdb5921a24eee"
     ]
   ]
 ]
