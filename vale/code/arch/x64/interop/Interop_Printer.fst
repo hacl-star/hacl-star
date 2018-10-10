@@ -610,7 +610,7 @@ let translate_vale target (func:func_ty) =
   "module Vale_" ^ name ^
   "\n#verbatim{:interface}{:implementation}\n" ^ 
   "\nopen X64.Machine_s\nopen X64.Memory\nopen X64.Vale.State\nopen X64.Vale.Decls\n#set-options \"--z3rlimit 20\"\n#endverbatim\n\n" ^
-  "procedure {:quick}{:exportSpecs} " ^ name ^ "(inline win:bool," ^ print_vale_args args ^")\n" ^
+  "procedure {:quick}{:exportSpecs}{:public} " ^ name ^ "(inline win:bool," ^ print_vale_args args ^")\n" ^
   "    requires\n" ^
   // By default, buffer arguments are disjoint or equal
   print_vale_disjoint_or_eq (List.Tot.Base.tl args) ^
