@@ -14,31 +14,23 @@ module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 module Spec = Spec.Blake2s
 
-module IB = LowStar.ImmutableBuffer
 
-///
-/// Blake2s
-///
 
 (* Define algorithm parameters *)
 type working_vector = lbuffer uint32 Spec.size_block_w
 type message_block_w = lbuffer uint32 Spec.size_block_w
 type message_block = lbuffer uint8 Spec.size_block
 type state = lbuffer uint32 Spec.size_hash_w
-type idx = n:size_t{size_v n < 16}
-type iv_t = lbuffer uint32 Spec.size_hash_w
-type sigma_elt = n:size_t{size_v n < 16}
-type sigma_t = lbuffer sigma_elt 160
+type index_t = n:size_t{size_v n < 16}
 
-inline_for_extraction
+
+(* Constants *)
 let const_iv = icreateL_global Spec.list_iv
-
-inline_for_extraction
 let const_sigma = icreateL_global Spec.list_sigma
 
 
 (* Define algorithm functions *)
-val g1: wv:working_vector -> a:idx -> b:idx -> r:rotval U32 ->
+val g1: wv:working_vector -> a:index_t -> b:index_t -> r:rotval U32 ->
   Stack unit
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
@@ -50,7 +42,7 @@ let g1 wv a b r =
   wv.(a) <- (wv_a ^. wv_b) >>>. r
 
 
-val g2: wv:working_vector -> a:idx -> b:idx -> x:uint32 ->
+val g2: wv:working_vector -> a:index_t -> b:index_t -> x:uint32 ->
   Stack unit
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
@@ -62,7 +54,7 @@ let g2 wv a b x =
   wv.(a) <- add_mod #U32 (wv_a +. wv_b) x
 
 
-val blake2_mixing : wv:working_vector -> a:idx -> b:idx -> c:idx -> d:idx -> x:uint32 -> y:uint32 ->
+val blake2_mixing : wv:working_vector -> a:index_t -> b:index_t -> c:index_t -> d:index_t -> x:uint32 -> y:uint32 ->
   Stack unit
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
@@ -91,7 +83,7 @@ val blake2_round1 : wv:working_vector -> m:message_block_w -> i:size_t ->
 let blake2_round1 wv m i =
   recall_contents const_sigma (Seq.of_list Spec.list_sigma);
   let start_idx = (i %. (size 10)) *. (size 16) in
-  let s = isub #sigma_elt #160 #16 const_sigma start_idx (size 16) in
+  let s = isub #Spec.sigma_elt_t #160 #16 const_sigma start_idx (size 16) in
   blake2_mixing wv (size 0) (size 4) (size  8) (size 12) (m.(iindex s (size 0))) (m.(iindex s (size 1)));
   blake2_mixing wv (size 1) (size 5) (size  9) (size 13) (m.(iindex s (size 2))) (m.(iindex s (size 3)));
   blake2_mixing wv (size 2) (size 6) (size 10) (size 14) (m.(iindex s (size 4))) (m.(iindex s (size 5)));
@@ -110,7 +102,7 @@ val blake2_round2 : wv:working_vector -> m:message_block_w -> i:size_t ->
 let blake2_round2 wv m i =
   recall_contents const_sigma (Seq.of_list Spec.list_sigma);
   let start_idx = (i %. (size 10)) *. (size 16) in
-  let s = isub #sigma_elt #160 #16 const_sigma start_idx (size 16) in
+  let s = isub #Spec.sigma_elt_t #160 #16 const_sigma start_idx (size 16) in
   blake2_mixing wv (size 0) (size 5) (size 10) (size 15) (m.(iindex s (size 8))) (m.(iindex s (size 9)));
   blake2_mixing wv (size 1) (size 6) (size 11) (size 12) (m.(iindex s (size 10))) (m.(iindex s (size 11)));
   blake2_mixing wv (size 2) (size 7) (size  8) (size 13) (m.(iindex s (size 12))) (m.(iindex s (size 13)));
