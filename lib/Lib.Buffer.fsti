@@ -50,7 +50,6 @@ let modifies
 : GTot Type0 = B.modifies s h1 h2
 
 (** Disjointness clause for Buffers *)
-unfold
 let disjoint
   (#a1 #a2:Type0)
   (#rrel1 #rel1:LMB.srel a1)
@@ -61,7 +60,9 @@ let disjoint
   B.loc_disjoint (B.loc_buffer b1) (B.loc_buffer b2)
 
 (** Modification clause for one Buffer *)
-unfold
+let modifies0 (h1 h2: HS.mem) : GTot Type0 = B.modifies (B.loc_none) h1 h2
+
+(** Modification clause for one Buffer *)
 let modifies1
   (#a:Type0)
   (#len:size_nat)
@@ -70,7 +71,6 @@ let modifies1
 : GTot Type0 = B.modifies (B.loc_buffer b) h1 h2
 
 (** Modification clause for two Buffers *)
-unfold
 let modifies2
   (#a0:Type0)
   (#a1:Type0)
@@ -82,7 +82,6 @@ let modifies2
 : GTot Type0 = B.modifies (B.loc_union (B.loc_buffer b0) (B.loc_buffer b1)) h1 h2
 
 (** Modification clause for three Buffers *)
-unfold
 let modifies3
   (#a0:Type0)
   (#a1:Type0)
@@ -136,6 +135,7 @@ val sub:
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 r h1 -> h0 == h1 /\ r == gsub b start n)
 
+(** Ghost view of a subset of an immutable Buffer *)
 let igsub
     (#a:Type0)
     (#len:size_nat)
