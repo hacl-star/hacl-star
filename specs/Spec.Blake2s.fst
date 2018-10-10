@@ -46,8 +46,8 @@ let const_iv : lseq uint32 size_const_iv =
   assert_norm (List.Tot.length list_iv = size_const_iv);
   of_list list_iv
 
-type list_sigma_elt_t = n:size_t{size_v n < 16}
-type list_sigma_t = l:list list_sigma_elt_t{List.Tot.length l <= max_size_t}
+type sigma_elt_t = n:size_t{size_v n < 16}
+type list_sigma_t = l:list sigma_elt_t{List.Tot.length l <= max_size_t}
 inline_for_extraction let list_sigma: list_sigma_t =
   [@inline_let]
   let l = [
