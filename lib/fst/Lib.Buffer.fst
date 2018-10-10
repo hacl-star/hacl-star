@@ -2,191 +2,163 @@ module Lib.Buffer
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
-module ST = FStar.HyperStack.ST
+
 open Lib.IntTypes
 open Lib.RawIntTypes
-open Lib.Sequence
 
-module LSeq = Lib.Sequence
-
-module Buf = LowStar.Buffer
+module B = LowStar.Buffer
+module IB = LowStar.ImmutableBuffer
 module U32 = FStar.UInt32
 
-//type buffer (a:Type0) = Buf.buffer a
-let length (#a:Type0) (b:buffer a) = Buf.length b
-let gsub #a #len #olen b start n = admit() //; Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
+module ST = FStar.HyperStack.ST
+module HS = FStar.HyperStack
 
-let disjoint #a1 #a2 #len1 #len2 b1 b2 : GTot Type0 = admit()
-let live #a h b : GTot Type0 = admit()
-let preserves_live h0 h1 = True
-let as_seq #a #len b m = admit()
-let as_lseq #a #len b m = admit()
-let modifies1 #a #len b h0 h1 = admit()
-let modifies2 = admit()
-let modifies3 = admit()
-let modifies = admit()
-let live_list = admit()
-let disjoint_list = admit()
-let disjoint_lists = admit()
-let disjoints = admit()
+module Seq = Lib.Sequence
+module ByteSeq = Lib.ByteSequence
 
-let sub #a #len #olen b start n = let b: lbuffer a len = b in Buf.sub b (size_to_UInt32 start) (size_to_UInt32 n)
-let slice #a #len #olen b start n = Buf.sub b (size_to_UInt32 start) (size_to_UInt32 (n -. start))
-let index #a #len b i = Buf.index b (size_to_UInt32 i)
-let upd #a #len b i v = Buf.upd b (size_to_UInt32 i) v
+#set-options "--z3rlimit 15"
 
-let create #a #len clen init = Buf.alloca init (size_to_UInt32 clen)
-let createL #a init = Buf.alloca_of_list init
-let createG #a init = Buf.gcmalloc_of_list FStar.HyperStack.root init
-let alloc #h0 #a #b #w #len #wlen clen init write spec impl =
-  push_frame();
-  let buf = create clen init in
-  let r = impl buf in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      upd #a #len buf j init in
-  Lib.Loops.for (size 0) clen inv f';
-  pop_frame();
-  r
-  // Unprotected alloc
-  (* push_frame(); *)
-  (* let buf = create clen init in *)
-  (* let r = impl buf in *)
-  (* pop_frame(); *)
-  (* r *)
+friend Lib.Sequence
+friend Lib.LoopCombinators
 
-let alloc_with #h0 #a #b #w #len #wlen clen init_spec init write spec impl =
-  push_frame();
-  let buf = init () in
-  let r = impl buf in
-  pop_frame();
-  r
+let length #a b = B.length b
 
-let alloc_nospec #h0 #a #b #w #len #wlen clen init write impl =
-  push_frame();
-  let buf = create clen init in
-  let r = impl buf in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      upd #a #len buf j init in
-  Lib.Loops.for (size 0) clen inv f';
-  pop_frame();
-  r
+let ilength #a b = IB.length b
 
-let alloc_nospec2 #h0 #a #b #w0 #w1 #len #wlen0 #wlen1 clen init write0 write1 impl =
-  push_frame();
-  let buf = create clen init in
-  let r = impl buf in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      upd #a #len buf j init in
-  Lib.Loops.for (size 0) clen inv f';
-  pop_frame();
-  r
+let as_seq_gsub #a #len h b start n = ()
 
-let map #a #len clen f b =
-  let h0 = ST.get() in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      let b_i = b.(j) in
-      b.(j) <- f b_i in
-  Lib.Loops.for (size 0) clen inv f'
+let sub #a #len #olen b start n =
+  B.sub b (size_to_UInt32 start) (size_to_UInt32 n)
 
+let as_seq_igsub #a #len h b start n = ()
 
-let map2 #a1 #a2 #len clen f b1 b2 =
-  let h0 = ST.get() in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      let i1 = b1.(j) in
-      let i2 = b2.(j) in
-      b1.(j) <- f i1 i2 in
-  Lib.Loops.for (size 0) clen inv f'
+let isub #a #len #olen b start n =
+  IB.isub b (size_to_UInt32 start) (size_to_UInt32 n)
+
+let index #a #len b i =
+  B.index b (size_to_UInt32 i)
+
+let iindex #a #len b i =
+  IB.index b (size_to_UInt32 i)
+
+let upd #a #len b i v =
+  B.upd b (size_to_UInt32 i) v
+
+let bget #a #len h b i =
+  FStar.Seq.index #a (B.as_seq h b) i
+
+let ibget #a #len h b i =
+  FStar.Seq.index #a (IB.as_seq h b) i
+
+let create #a #len clen init =
+  B.alloca init (normalize_term (size_to_UInt32 clen))
+
+let createL #a init =
+  B.alloca_of_list init
+
+let recall #a #len b = B.recall b
+
+let createL_global #a init =
+  B.gcmalloc_of_list HyperStack.root init
+
+let icreateL_global #a init =
+  let b = B.mgcmalloc_of_list root init in
+  B.witness_p b (cpred (Seq.seq_of_list init));
+  b
+
+let recall_contents #a #len b s =
+  B.recall_p b (cpred s)
 
 let copy #a #len o clen i =
-  let h0 = ST.get() in
-  let inv (h1:mem) (j:nat) =
-    preserves_live h0 h1 /\
-    modifies1 o h0 h1 /\
-    LSeq.slice (as_lseq #a #len o h1) 0 j ==
-    LSeq.slice (as_lseq #a #len i h0) 0 j in
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit i (size_to_UInt32 (size 0)) o (size_to_UInt32 (size 0)) (size_to_UInt32 clen);
+  let h1 = ST.get () in
+  assert (Seq.slice #a #len (B.as_seq h1 o) 0 len == Seq.slice #a #len (B.as_seq h0 i) 0 len)
+
+let icopy #a #len o clen i =
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit i (size_to_UInt32 (size 0)) o (size_to_UInt32 (size 0)) (size_to_UInt32 clen);
+  let h1 = ST.get () in
+  assert (Seq.slice #a #len (B.as_seq h1 o) 0 len == Seq.slice #a #len (B.as_seq h0 i) 0 len)
+
+let update_sub #a #len dst start n src =
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
+  let h1 = ST.get () in
+  assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
+  Seq.eq_intro
+    (B.as_seq h1 dst)
+    (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
+
+let update_isub #a #len dst start n src =
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
+  let h1 = ST.get () in
+  assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == ibget h0 src k);
+  Seq.eq_intro
+    (B.as_seq h1 dst)
+    (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (IB.as_seq h0 src))
+
+let update_sub_f #a #len buf start n spec f =
+  let h0 = ST.get () in
+  let tmp = sub buf start n in
+  f tmp;
+  let h1 = ST.get () in
+  B.modifies_buffer_elim (sub #_ #len #(v start) buf (size 0) start) (B.loc_buffer tmp) h0 h1;
+  B.modifies_buffer_elim (sub #_ #len #(len - v start - v n) buf (start +! n) (size len -. start -. n)) (B.loc_buffer tmp) h0 h1;
+  Sequence.lemma_update_sub #a #len (B.as_seq h0 buf) (v start) (v n) (spec h0) (B.as_seq h1 buf)
+
+let loop_nospec #h0 #a #len n buf impl =
+  let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
+  Lib.Loops.for (size 0) n inv impl
+
+let loop h0 n a_spec a_impl acc refl footprint spec impl =
+  let inv h i = loop_inv h0 n a_spec a_impl acc refl footprint spec i h in
+  Lib.Loops.for (size 0) n inv impl
+
+let loop1 #b #blen h0 n acc spec impl =
+  let inv h i = loop1_inv h0 n b blen acc spec i h in
+  Lib.Loops.for (size 0) n inv impl
+
+let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
+  let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
+  Lib.Loops.for (size 0) n inv impl
+
+#set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
+
+let lbytes_eq #len a b =
+  push_frame();
+  let res = create #bool #1 (size 1) true in
+  [@ inline_let]
+  let refl h _ = B.get h res 0 in
+  [@ inline_let]
+  let spec h0 = Seq.lbytes_eq_inner #(v len) (B.as_seq h0 a) (B.as_seq h0 b) in
+  let h0 = ST.get () in
+  loop h0 len (Seq.lbytes_eq_state (v len)) (lbuffer bool 1) res refl
+    (fun i -> B.loc_buffer res) spec
+    (fun i ->
+      //Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
+      let ai = a.(i) in
+      let bi = b.(i) in
+      let res0 = res.(size 0) in
+      res.(size 0) <- res0 && FStar.UInt8.(u8_to_UInt8 ai =^ u8_to_UInt8 bi)
+    );
+  let res = res.(size 0) in
+  pop_frame();
+  res
+
+let alloc #a #b #w #len #wlen h0 clen init write spec impl =
+  admit();
+  push_frame();
+  let buf = B.alloca init (normalize_term (size_to_UInt32 clen)) in
+  let r = impl buf in
+  let inv (h1:mem) (j:nat) = True in
   let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      let src_i = i.(j) in
-      o.(j) <- src_i in
-  Lib.Loops.for (size 0) clen inv f'
+      upd #a #len buf j init in
+  Lib.Loops.for (size 0) clen inv f';
+  pop_frame();
+  r
 
-
-let iter_range #a #len start fin spec impl input =
-  let h0 = ST.get() in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{v start <= v j /\ v j <= v fin}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      impl j input in
-  Lib.Loops.for start fin inv f'
-
-let iteri #a #len n spec impl input = iter_range #a #len (size 0) n spec impl input
-
-let iter #a #len #clen n spec impl input =
-  let h0 = ST.get() in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      impl input in
-  Lib.Loops.for (size 0) n inv f'
-
-inline_for_extraction let loop #h0 #a #len n buf spec impl =
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      impl j in
-  Lib.Loops.for (size 0) n inv f'
-
-inline_for_extraction let loop_set #a #len buf start n init =
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      upd buf j init in
-  Lib.Loops.for start n inv f'
-
-inline_for_extraction let loop_nospec #h0 #a #len n buf impl =
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      impl j in
-  Lib.Loops.for (size 0) n inv f'
-
-
-inline_for_extraction let map_blocks #h0 #a #bs #nb blocksize nblocks buf f_spec f =
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= nb}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      let bufi = sub #a #(nb*bs) #bs buf (j *. blocksize) blocksize in
-      f j in
-  Lib.Loops.for (size 0) nblocks inv f'
-
-
-inline_for_extraction let reduce_blocks #h0 #a #r #bs #nb #rlen blocksize nblocks rbuf f_spec f buf =
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= nb}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      let bufi = sub buf (j *. blocksize) blocksize in
-      f j bufi in
-  Lib.Loops.for (size 0) nblocks inv f'
+let print_compare_display len a b = admit()

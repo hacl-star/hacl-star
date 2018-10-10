@@ -2,222 +2,267 @@ module Lib.Sequence
 
 open FStar.Mul
 open Lib.IntTypes
-//open Lib.RawIntTypes
+open Lib.LoopCombinators
 
-#reset-options "--z3rlimit 300"
+#set-options "--z3rlimit 15"
 
-let decr (x:size_nat{x > 0}) : size_nat = x - 1
-let incr (x:size_nat{x < max_size_t}) : size_nat = x + 1
+(** Access to an element of a Sequence *)
+val seq_index: #a:Type -> s:seq a -> n:nat{length s > 0 /\ n < length s} -> a
+let seq_index #a s n = Seq.index s n
 
-let seq (a:Type0) =  s:list a {List.Tot.length s <= max_size_t}
-let length (#a:Type0) (l:seq a) = List.Tot.length l
+(** Concatenation of two Sequences *)
+val seq_concat:#a:Type -> s1:seq a -> s2:seq a -> r:seq a{length r == length s1 + length s2}
 
-let to_lseq #a (s:seq a) = s
-let to_seq #a #len (s:lseq a len) = s
+let seq_concat #a s1 s2 =
+  let r = (Seq.append s1 s2 <: seq a) in
+  assert (length r == length s1 + length s2);
+  r
 
-val create_: #a:Type -> len:size_nat -> init:a -> Tot (lseq a len) (decreases (len))
-let rec create_ #a len x =
-  if len = 0 then []
-  else
-    let t = create_ #a (decr len) x in
-    x :: t
+(** Equality of two Sequences *)
+abstract
+type equal (#a:Type) (s1:seq a) (s2:seq a) =
+ length s1 == length s2 /\
+ (forall (i:nat{i < length s1}).{:pattern (seq_index s1 i); (seq_index s2 i)} seq_index s1 i == seq_index s2 i)
 
-val index_: #a:Type -> #len:size_nat{len > 0} -> lseq a len -> n:size_nat{n < len} -> Tot a (decreases (n))
-let rec index_ #a #len l i =
-  match i, l with
-  | 0, h::t -> h
-  | n, h::t -> index_ #a #(decr len) t (decr i)
+(** Lemma on equality of two Sequences *)
+val eq_intro:
+    #a:Type
+  -> s1:seq a
+  -> s2:seq a
+  -> Lemma
+    (requires (length s1 == length s2 /\ (forall (i:nat{i < length s1}).{:pattern (seq_index s1 i); (seq_index s2 i)} seq_index s1 i == seq_index s2 i)))
+    (ensures  (equal s1 s2))
+  [SMTPat (equal s1 s2)]
+let eq_intro #a s1 s2 =
+  assert (forall (i:nat{i < length s1}).{:pattern (Seq.index s1 i); (Seq.index s2 i)}
+    seq_index s1 i == seq_index s2 i);
+  Seq.lemma_eq_intro #a s1 s2
 
-let index #a #len s n = index_ #a #len s n
+(** Lemma on equality of two Sequences *)
+val eq_elim:
+    #a:Type
+  -> s1:seq a
+  -> s2:seq a
+  -> Lemma
+    (requires equal s1 s2)
+    (ensures  s1 == s2)
+  [SMTPat (equal s1 s2)]
+let eq_elim #a s1 s2 =
+  assert (length s1 == length s2);
+  assert (forall (i:nat{i < length s1}).{:pattern (Seq.index s1 i); (Seq.index s2 i)}
+    seq_index s1 i == seq_index s2 i);
+  Seq.lemma_eq_elim #a s1 s2
 
-val upd_: #a:Type -> #len:size_nat -> lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a -> Tot (o:lseq a len{index o n == x}) (decreases (n))
-let rec upd_ #a #len l i x =
-  match i,l with
-  | 0, h::t -> x::t
-  | n, h::t -> h::upd_ #a #(decr len) t (decr i) x
+(* The following functions on unbounded sequences should not be needed in normal crypto specs.
+   Maybe we should leave them in the .fst and not expose them here. *)
 
-let upd #a #len s n x = upd_ #a #len s n x
+(** Updating an element of un unbounded Sequence *)
+val seq_upd:
+    #a:Type
+  -> s:seq a
+  -> n:nat{n < length s}
+  -> x:a
+  -> o:seq a{length o == length s /\ seq_index o n == x /\ (forall (i:nat).
+    {:pattern (seq_index s i)} (i < length s /\ i <> n) ==> seq_index o i == seq_index s i)}
+let seq_upd #a s n x = Seq.upd #a s n x
 
-let create = create_
+(** Selecting a subset of an unbounded Sequence *)
+val seq_sub:
+    #a:Type
+  -> s1:seq a
+  -> start:nat
+  -> n:nat{start + n <= length s1}
+  -> s2:seq a{length s2 == n /\
+	     (forall (k:nat{k < n}). {:pattern (seq_index s2 k)} seq_index s2 k == seq_index s1 (start + k))}
+let seq_sub #a s start n =
+  let r = Seq.slice #a s start (start + n) in
+  assert (length r == n);
+  r
 
-let createL #a l = l
+(** Updating a subset of an unbounded Sequence with another Sequence *)
+val seq_update_sub:
+    #a:Type
+  -> i:seq a
+  -> start:nat
+  -> n:nat{start + n <= length i}
+  -> x:seq a{length x == n}
+  -> o:seq a{length o == length i /\ seq_sub o start n == x /\
+    (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < length i)}).
+      {:pattern (seq_index o k)} seq_index o k == seq_index i k)}
+let seq_update_sub #a s start n x =
+  let o =
+    Seq.append
+      (Seq.append (Seq.slice s 0 start) x)
+      (Seq.slice s (start + n) (length s)) in
+  Seq.lemma_eq_intro (Seq.slice o start (start + n)) x;
+  o
 
-val prefix_: #a:Type -> #len:size_nat -> lseq a len -> n:size_nat{n <= len} -> Tot (lseq a n) (decreases (n))
-let rec prefix_ #a #len l n =
-  match n,l with
-  | 0, _ -> []
-  | n', h::t -> h::prefix_ #a #(decr len) t (decr n)
+(** Lemma on update of a sub-Sequence *)
+val lemma_seq_update_sub:
+    #a:Type
+  -> dst:seq a
+  -> start:nat
+  -> n:nat{start + n <= length dst}
+  -> src:seq a
+  -> res:seq a
+  -> Lemma
+    (requires
+      length res == length dst /\
+      length src == n /\
+      seq_sub res 0 start == seq_sub dst 0 start /\
+      seq_sub res start n == src /\
+      seq_sub res (start + n) (length dst - start - n) ==
+      seq_sub dst (start + n) (length dst - start - n))
+    (ensures
+      res == seq_update_sub dst start n src)
+let lemma_seq_update_sub #a dst start n src res =
+  let res1 = seq_update_sub dst start n src in
+  FStar.Seq.Properties.lemma_split (seq_sub res 0 (start + n)) start;
+  FStar.Seq.Properties.lemma_split (seq_sub res1 0 (start + n)) start;
+  FStar.Seq.Properties.lemma_split res (start + n);
+  FStar.Seq.Properties.lemma_split res1 (start + n)
 
-let prefix #a #len = prefix_ #a #len
+(** Creation of a Sequence from an initial value *)
+val seq_create:
+    #a:Type
+  -> len:nat
+  -> init:a
+  -> s:seq a{length s == len /\ (forall (i:nat).
+    {:pattern (seq_index s i)} i < len ==> seq_index s i == init)}
+let seq_create #a len init = Seq.create #a len init
 
-val suffix: #a:Type -> #len:size_nat -> lseq a len -> n:size_nat{n <= len} -> Tot (lseq a (len - n)) (decreases (n))
-let rec suffix #a #len l n =
-  match n,l with
-  | 0, _ ->   l
-  | _, h::t -> suffix #a #(decr len) t (decr n)
+(** Creation of a Sequence from a list of values *)
+val seq_of_list:
+    #a:Type
+  -> l:list a
+  -> s:seq a{length s == List.Tot.length l}
+let seq_of_list #a l = Seq.seq_of_list #a l
 
-let sub #a #len l s n =
-  let suf = suffix #a #len l s in
-  prefix #a #(len - s) suf n
-
-val last: #a:Type -> #len:size_nat{len > 0} -> x:lseq a len -> a
-let last #a #len x = index #a #len x (decr len)
-
-val snoc: #a:Type -> #len:size_nat{len < maxint U32} -> i:lseq a len -> x:a -> Tot (o:lseq a (incr len){i == prefix #a #(incr len) o len /\ last o == x}) (decreases (len))
-let rec snoc #a #len i x =
-  match i with
-  | [] -> [x]
-  | h::t -> h::snoc #a #(decr len) t x
-
-val update_prefix: #a:Type -> #len:size_nat -> lseq a len -> n:size_nat{n <= len} -> x:lseq a n -> Tot (o:lseq a len{sub o 0 n == x}) (decreases (len))
-let rec update_prefix #a #len l n l' =
-  match n,l,l' with
-  | 0, _, _ -> l
-  | _, h::t, h'::t' -> h':: update_prefix #a #(decr len) t (decr n) t'
-
-val update_sub_: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> Tot (o:lseq a len{sub o start n == x}) (decreases (len))
-let rec update_sub_ #a #len l s n l' =
-  match s,l with
-  | 0, l -> update_prefix #a #len l n l'
-  | _, h::t -> h:: update_sub_ #a #(decr len) t (decr s) n l'
-
-let update_sub = update_sub_
-
-val repeat_range_: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (s:size_nat{s >= min /\ s < max} -> a -> Tot a) -> a -> Tot (a) (decreases (max - min))
-let rec repeat_range_ #a min max f x =
-  if min = max then x
-  else repeat_range_ #a (incr min) max f (f min x)
-
-val repeat_range_ghost_: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (s:size_nat{s >= min /\ s < max} -> a -> GTot a) -> a -> GTot (a) (decreases (max - min))
-let rec repeat_range_ghost_ #a min max f x =
-  if min = max then x
-  else repeat_range_ghost_ #a (incr min) max f (f min x)
-
-val repeat_range_all_ml_: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (s:size_nat{s >= min /\ s < max} -> a -> FStar.All.ML a) -> a -> FStar.All.ML a
-let rec repeat_range_all_ml_ #a min max f x =
-  if min = max then x
-  else repeat_range_all_ml_ #a (incr min) max f (f min x)
-
-let repeat_range = repeat_range_
-let repeat_range_ghost = repeat_range_ghost_
-let repeat_range_all_ml = repeat_range_all_ml_
-let repeati #a = repeat_range #a 0
-let repeati_ghost #a = repeat_range_ghost #a 0
-let repeati_all_ml #a = repeat_range_all_ml #a 0
-let repeat #a n f x = repeat_range 0 n (fun i -> f) x
-
-
-val fold_left_range_: #a:Type -> #b:Type -> #len:size_nat -> min:size_nat ->
-  max:size_nat{min <= max /\ len = max - min} ->
-  (i:size_nat{i >= min /\ i < max} -> a -> b -> Tot b) ->
-  lseq a len -> b -> Tot b (decreases (max - min))
-let rec fold_left_range_ #a #b #len min max f l x =
-  match l with
-  | [] -> x
-  | h::t -> fold_left_range_ #a #b #(len - 1) (min + 1) max f t (f min h x)
-
-let fold_left_range #a #b #len min max f l x =
-  fold_left_range_ #a #b #(max - min) min max f (slice #a #len l min max) x
-
-let fold_lefti #a #b #len = fold_left_range #a #b #len 0 len
-
-let fold_left #a #b #len f = fold_left_range #a #b #len 0 len (fun i -> f)
-
-(*
-let fold_left_slices #a #b #len #slice_len f l b =
-  let n = lin / slice_len in
-  repeati #a n (fun i -> let sl = sub #a #len
-*)
-val map_: #a:Type -> #b:Type -> #len:size_nat -> (a -> Tot b) -> lseq a len -> Tot (lseq b len) (decreases (len))
-let rec map_ #a #b #len f x =
-  match x with
-  | [] -> []
-  | h :: t ->
-	 let t' : lseq a (decr len) = t in
-	 f h :: map_ #a #b #(decr len) f t'
-let map = map_
-
-
-val for_all_: #a:Type -> #len:size_nat -> (a -> Tot bool) -> lseq a len -> Tot bool (decreases (len))
-let rec for_all_ #a #len f x =
-  match x with
-  | [] -> true
-  | h :: t ->
-	 let t' : lseq a (decr len) = t in
-	 f h && for_all_ #a #(decr len) f t'
-
-let for_all = for_all_
-
-val ghost_map_: #a:Type -> #b:Type -> #len:size_nat -> (a -> GTot b) -> lseq a len -> GTot (lseq b len) (decreases (len))
-let rec ghost_map_ #a #b #len f x = match x with
-  | [] -> []
-  | h :: t ->
-	 let t' : lseq a (decr len) = t in
-	 f h :: ghost_map_ #a #b #(decr len) f t'
-
-let ghost_map = ghost_map_
-
-val map2_: #a:Type -> #b:Type -> #c:Type -> #len:size_nat -> (a -> b -> Tot c) -> lseq a len -> lseq b len -> Tot (lseq c len) (decreases (len))
-let rec map2_ #a #b #c #len f x y = match x,y with
-  | [],[] -> []
-  | h1 :: t1, h2 :: t2 ->
-	 let t1' : lseq a (decr len) = t1 in
-	 let t2' : lseq b (decr len) = t2 in
-	 f h1 h2 :: map2_ #a #b #c #(decr len) f t1' t2'
-
-let map2 = map2_
-
-val for_all2_: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> Tot (bool) (decreases (len))
-let rec for_all2_ #a #b #len f x y = match x,y with
-  | [],[] -> true
-  | h1 :: t1, h2 :: t2 ->
-	 let t1' : lseq a (decr len) = t1 in
-	 let t2' : lseq b (decr len) = t2 in
-	 f h1 h2 && for_all2_ #a #b #(decr len) f t1' t2'
-
-let for_all2 = for_all2_
+val seq_of_list_index:
+    #a:Type
+  -> l:list a
+  -> i:nat{i < List.Tot.length l}
+  -> Lemma (seq_index (seq_of_list l) i == List.Tot.index l i)
+    [SMTPat (seq_index (seq_of_list l) i)]
+let seq_of_list_index #a l i =
+  Seq.lemma_seq_of_list_index #a l i
 
 
-let as_list #a #len l = l
+(** Map function for Sequences *)
+val seq_map:#a:Type -> #b:Type -> (a -> Tot b) -> s1:seq a -> s2:seq b{length s2 == length s1}
+let seq_map #a #b f s =
+  Seq.seq_of_list (List.Tot.map f (Seq.seq_to_list s))
+
+private inline_for_extraction noextract
+val map2_list: #a:Type -> #b:Type -> #c:Type
+  -> f:(a -> b -> c) -> l1:list a -> l2:list b{List.Tot.length l1 == List.Tot.length l2}
+  -> l:list c{List.Tot.length l == List.Tot.length l1}
+let rec map2_list #a #b #c f l1 l2 =
+  match l1, l2 with
+  | [], [] -> []
+  | x::l1', y::l2' -> f x y :: map2_list f l1' l2'
 
 
-let rec concat #a #len1 #len2 s1 s2 =
-  match s1 with
-  | [] -> s2
-  | h :: t -> h :: (concat #a #(len1 - 1) #len2 t s2)
+(** Map2 function for Sequences *)
+val seq_map2:#a:Type -> #b:Type -> #c:Type
+  -> f:(a -> b -> Tot c)
+  -> s1:seq a
+  -> s2:seq b{length s1 == length s2}
+  -> s3:seq c{length s3 == length s2}
+let seq_map2 #a #b #c f s1 s2 =
+  Seq.seq_of_list (map2_list f (Seq.seq_to_list s1) (Seq.seq_to_list s2))
 
-let map_blocks #a bs nb f inp =
-  let len = nb * bs in
-  let out = inp in
-  let out = repeati #(lseq a len) nb
-	    (fun i out ->
-	         update_slice #a out (i * bs) ((i+1) * bs)
-			      (f i (slice #a inp (i * bs) ((i+1) * bs))))
-	    out in
-  out
+(** Forall function for Sequences *)
+val seq_for_all:#a:Type -> (a -> Tot bool) -> seq a -> bool
+let seq_for_all #a f x = Seq.for_all f x
 
-let reduce_blocks #a #b bs nb f inp init =
-  let len = nb * bs in
-  let acc = init in
-  let acc = repeati #b nb
-	    (fun i acc ->
-	       f i (slice #a inp (i * bs) ((i+1) * bs)) acc)
-	    acc in
-  acc
+(** Forall2 function for Sequences *)
+val seq_for_all2:#a:Type -> #b:Type
+  -> (a -> b -> Tot bool)
+  -> s1:seq a
+  -> s2:seq b{length s1 == length s2}
+  -> bool
+let seq_for_all2 #a #b f x y =
+  let r = seq_map2 (fun xi yi -> f xi yi) x y in
+  seq_for_all (fun bi -> bi = true) r
 
 
-(*
-#reset-options "--z3rlimit 400 --max_fuel 0"
+let index #a #len s n = seq_index s n
 
-let reduce_blocks #a #b bs inp f g init =
+let create #a len init = Seq.create #a len init
+
+let concat #a #len0 #len1 s0 s1 = seq_concat s0 s1
+
+let to_list #a #len s = Seq.Properties.seq_to_list s
+
+let of_list #a l = seq_of_list #a l
+
+let of_list_index #a l i =
+  Seq.lemma_seq_of_list_index #a l i  
+
+let upd #a #len s n x = seq_upd #a s n x
+
+let sub #a #len s start n =
+  to_lseq (seq_sub #a s start n)
+
+let update_sub #a #len i start n x =
+    to_lseq (seq_update_sub #a i start n x)
+
+let lemma_update_sub #a #len dst start n src res =
+    lemma_seq_update_sub #a dst start n src res
+
+let map #a #b #len f s = seq_map #a #b f s
+
+let map2 #a #b #c #len f s1 s2 = seq_map2 #a #b #c f s1 s2
+
+let for_all #a #len f x = seq_for_all #a f x
+
+let for_all2 #a #b #len f x y = seq_for_all2 #a #b f x y
+
+val lbytes_eq_inner:
+    #len:size_nat
+  -> a:lseq uint8 len
+  -> b:lseq uint8 len
+  -> i:size_nat{i < len}
+  -> r:bool
+  -> bool
+let lbytes_eq_inner #len a b i r =
+  let open Lib.RawIntTypes in
+  let open FStar.UInt8 in
+  r && (u8_to_UInt8 (index a i) =^ u8_to_UInt8 (index b i))
+
+val lbytes_eq_state: len:size_nat -> i:size_nat{i <= len} -> Type0
+let lbytes_eq_state len i = bool
+
+let lbytes_eq #len a b =
+  repeat_gen len (lbytes_eq_state len) (lbytes_eq_inner a b) true
+
+let map_blocks #a bs inp f g =
   let len = length inp in
-  let blocks = len / bs in
+  let nb = len / bs in
   let rem = len % bs in
-  let acc = repeati #b blocks
-	       (fun i acc -> f i (slice (to_lseq inp) (i * bs) ((i+1) * bs)) acc)
-	    init in
-  let acc = g blocks rem (sub (to_lseq inp) (blocks * bs) rem) acc in
-  acc
+  let out = inp in
+  let out =
+    repeati #(s:seq a{length s == len}) nb
+    (fun i out ->
+      assert ((i+1) * bs <= nb * bs);
+      seq_update_sub #a out (i * bs) bs
+	   (f i (seq_sub inp (i * bs) bs))
+    ) out in
+  if rem > 0 then
+    seq_update_sub out (nb * bs) rem (g nb rem (seq_sub inp (nb * bs) rem))
+  else out
 
-
-*)
+let repeat_blocks #a #b bs inp f g init =
+  let len = length inp in
+  let nb = len / bs in
+  let rem = len % bs in
+  let acc =
+    repeati nb
+    (fun i acc ->
+       assert ((i+1) * bs <= nb * bs);
+       let block = seq_sub inp (i * bs) bs in
+       f i block acc)
+    init in
+  let last = seq_sub inp (nb * bs) rem in
+  g nb rem last acc

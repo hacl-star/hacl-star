@@ -1,0 +1,169 @@
+[
+  "U·å«\u007f=fÆ±Öüa=ôõÎ",
+  [
+    [
+      "Lib.RawIntTypes.u8_from_UInt8",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_ff71f07ca2c716a62af68d13a2bc4c23"
+      ],
+      0,
+      "974d0f76979a7a8056a5de5e7cd8c3d6"
+    ],
+    [
+      "Lib.RawIntTypes.u16_from_UInt16",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_c974a8c1833b75ea818c2ab964487280"
+      ],
+      0,
+      "e978c1bd146adf12280372799c4e055e"
+    ],
+    [
+      "Lib.RawIntTypes.u32_from_UInt32",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_db707a327296a75a288aa91c1018c0e8"
+      ],
+      0,
+      "7bfa63a1339c3d608787e5b81aaf5191"
+    ],
+    [
+      "Lib.RawIntTypes.u64_from_UInt64",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_b66b7a06a50c8273f32d0581cb8a7d60"
+      ],
+      0,
+      "bbf963419de0518179fe9bea89e07ee6"
+    ],
+    [
+      "Lib.RawIntTypes.u128_from_UInt128",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_FStar.UInt32.n", "function_token_typing_FStar.UInt32.n",
+        "haseqLib.RawIntTypes_Tm_refine_5bf69fdc2cf03a19821d2d56221d12ed",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "32a863cb03665bb8b32bc9a936ffc8bd"
+    ],
+    [
+      "Lib.RawIntTypes.size_from_UInt32",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_db707a327296a75a288aa91c1018c0e8"
+      ],
+      0,
+      "a17c2cc6fcb1e1dcab67fb157b97f538"
+    ],
+    [
+      "Lib.RawIntTypes.u8_to_UInt8",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_ff71f07ca2c716a62af68d13a2bc4c23"
+      ],
+      0,
+      "93cb7e0bdea7c2184af0e06c89510fa7"
+    ],
+    [
+      "Lib.RawIntTypes.u16_to_UInt16",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_c974a8c1833b75ea818c2ab964487280"
+      ],
+      0,
+      "39204bba5f253d71aa7730f0b290832b"
+    ],
+    [
+      "Lib.RawIntTypes.u32_to_UInt32",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_db707a327296a75a288aa91c1018c0e8"
+      ],
+      0,
+      "e50a308e0026f1439d2cf89d5482dd85"
+    ],
+    [
+      "Lib.RawIntTypes.u64_to_UInt64",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_b66b7a06a50c8273f32d0581cb8a7d60"
+      ],
+      0,
+      "8ea946aa2ad45c3d5d92c49a65429506"
+    ],
+    [
+      "Lib.RawIntTypes.u128_to_UInt128",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_FStar.UInt32.n", "function_token_typing_FStar.UInt32.n",
+        "haseqLib.RawIntTypes_Tm_refine_5bf69fdc2cf03a19821d2d56221d12ed",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "fec20271397704c3ef4b2e8854b084ea"
+    ],
+    [
+      "Lib.RawIntTypes.size_to_UInt32",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqLib.RawIntTypes_Tm_refine_db707a327296a75a288aa91c1018c0e8"
+      ],
+      0,
+      "0f92320709ee5c3b53c29efe52010336"
+    ],
+    [
+      "Lib.RawIntTypes.uint_to_nat",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "fcb0ea7a93f17f0e8b674d1755eb0313"
+    ]
+  ]
+]

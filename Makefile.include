@@ -2,23 +2,16 @@ UNAME := $(shell uname)
 .DEFAULT_GOAL=all
 
 ifndef HACL_HOME
-	HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-	HACL_HOME:=$(HACL_HOME:/=)
-else
-	HACL_HOME:=$(abspath $(HACL_HOME))
-	HACL_HOME:=$(HACL_HOME:/=)
+  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+  HACL_HOME:=$(HACL_HOME:/=)
 endif
 
 ifndef FSTAR_HOME
-  FSTAR_HOME:=$(abspath $(HACL_HOME)/dependencies/FStar)
-else
-  FSTAR_HOME:=$(abspath $(FSTAR_HOME))
+  FSTAR_HOME:=$(HACL_HOME)/../FStar
 endif
 
 ifndef KREMLIN_HOME
-  KREMLIN_HOME:=$(abspath $(HACL_HOME)/dependencies/kremlin)
-else
-  KREMLIN_HOME:=$(abspath $(KREMLIN_HOME))
+  KREMLIN_HOME:=$(HACL_HOME)/../kremlin
 endif
 
 export HACL_HOME
@@ -60,6 +53,14 @@ else ifdef USE_CL
   KREMLIN_ARGS+=-cc msvc $(VERBOSE)
 else
   KREMLIN_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
+endif
+
+# BB. Check if this is necessary
+# Release mode (includes testlib if not release)
+ifdef HACL_RELEASE
+  KREMLIN_TESTLIB=
+else
+  KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
 endif
 
 # License header
@@ -133,11 +134,43 @@ GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
 %.fsti-verify: %.fsti
 	$(FSTAR) $<
 
+%.fst-in:
+	@echo --hint_info \
+	$(HINTS_ENABLED) \
+	$(OTHERFLAGS) \
+	$(FSTAR_INCLUDES)
+
+%.fsti-in:
+	@echo --hint_info \
+	$(HINTS_ENABLED) \
+	$(OTHERFLAGS) \
+	$(FSTAR_INCLUDES)
+
 %.fst.hints: %.fst
 	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
 
 %.fsti.hints: %.fsti
 	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
+
+# Custom verification targets for re-located hint files
+%.fst-reloc-verify: %.fst
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $<
+%.fsti-reloc-verify: %.fsti
+	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $<
+%.fst.reloc.hints: %.fst
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
+%.fsti.reloc.hints: %.fsti
+	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
+
+# Directories
+%.dir-verify: %
+	$(MAKE) -C $^ verify
+
+%.dir-extract-c: %
+	$(MAKE) -C $^ extract-c
+
+%.dir-hints: %
+	$(MAKE) -C $^ hints
 
 # Colors
 NORMAL="\\033[0;39m"

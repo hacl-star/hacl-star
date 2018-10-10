@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-
+open Lib.LoopCombinators
 #reset-options "--z3rlimit 250 --max_fuel 0"
 
 module Hash = Spec.Hash

@@ -1,129 +1,210 @@
 module Lib.Sequence
 
+open FStar.Mul
 open Lib.IntTypes
+#set-options "--z3rlimit 15"
+
+/// Unbounded sequences, derived from FStar.Seq
+
+(* This is the type of unbounded sequences.
+   Use this only when dealing with, say, user input whose length is unbounded.
+   As far as possible use the API for bounded sequences defined later in this file.*)
+
+(** Definition of a Sequence *)
+let seq (a:Type0) = s:Seq.seq a
+
+(** Length of a Sequence *)
+let length (#a:Type0) (s:seq a) : nat = Seq.length s
+
+/// Bounded Sequences
+
+(* This is the type of bounded sequences.
+   Use this as much as possible.
+   It adds additional length checks that you'd have to prove in the implementation otherwise *)
+
+(** Definition of a fixed-length Sequence *)
+let lseq (a:Type0) (len:size_nat) = s:seq a{Seq.length s == len}
+let to_seq (#a:Type0) (#len:size_nat) (l:lseq a len) : seq a = l
+let to_lseq (#a:Type0) (s:seq a{length s <= max_size_t}) : l:lseq a (length s){l == s} = s 
+
+(* If you want to prove your code with an abstract lseq use the following: *)
+// val lseq: a:Type0 -> len:size_nat -> Type0
+// val to_seq: #a:Type0 -> #len:size_nat -> lseq a len -> s:seq a{length s == len}
+// val to_lseq: #a:Type0 -> s:seq a{length s <= max_size_t} -> lseq a (length s)
 
 
-///
-/// Definition of sequences
-///
+val index:
+    #a:Type
+  -> #len:size_nat
+  -> s:lseq a len
+  -> i:size_nat{i < len}
+  -> r:a{r == Seq.index (to_seq s) i}
 
-val seq: a:Type0 -> t:Type0
+(** Creation of a fixed-length Sequence from an initial value *)
+val create:
+    #a:Type
+  -> len:size_nat
+  -> init:a
+  -> s:lseq a len{to_seq s == Seq.create len init /\ (forall (i:nat).
+    {:pattern (index s i)} i < len ==> index s i == init)}
 
-val length: #a:Type0 -> seq a -> size_nat
+(** Concatenate sequences: use with care, may make implementation hard to verify *)
+val concat:
+    #a:Type
+  -> #len0:size_nat
+  -> #len1:size_nat{len0 + len1 <= max_size_t}
+  -> s0:lseq a len0
+  -> s1:lseq a len1
+  -> s2:lseq a (len0 + len1){to_seq s2 == Seq.append (to_seq s0) (to_seq s1)}
 
-//val lseq: a:Type0 -> len:size_nat -> Type0
+(** Operator for concatenation of two Sequences*)
+inline_for_extraction
+let (@|) #a #l1 #l2 s1 s2 = concat #a #l1 #l2 s1 s2
 
-let lseq (a:Type0) (len:size_nat) = s:seq a{length s == len}
+(** Conversion of a Sequence to a list *)
+val to_list:
+    #a:Type
+  -> #len:size_nat
+  -> s:lseq a len
+  -> l:list a{List.Tot.length l = len /\ l == Seq.seq_to_list (to_seq s)}
 
-type intseq (t:m_inttype) (len:size_nat) = lseq (uint_t t) len
+(** Creation of a fixed-length Sequence from a list of values *)
+val of_list:
+    #a:Type
+  -> l:list a{List.Tot.length l <= max_size_t}
+  -> s:lseq a (List.Tot.length l){to_seq s == Seq.seq_of_list l}
 
-///
-/// Conversions operations
-///
+val of_list_index:
+    #a:Type
+  -> l:list a{List.Tot.length l <= max_size_t}
+  -> i:nat{i < List.Tot.length l}
+  -> Lemma (index (of_list l) i == List.Tot.index l i)
+    [SMTPat (index (of_list l) i)]
 
-val to_lseq: #a:Type0 -> s:seq a -> l:lseq a (length s){l == s}
+(* Alias for creation from a list *)
+let createL #a l = of_list #a l
 
-val to_seq: #a:Type0 -> #len:size_nat -> s:lseq a len -> o:seq a {o == s /\ length o == len}
+(** Updating an element of a fixed-length Sequence *)
+val upd:
+    #a:Type
+  -> #len:size_nat
+  -> s:lseq a len
+  -> n:size_nat{n < len}
+  -> x:a
+  -> o:lseq a len{to_seq o == Seq.upd (to_seq s) n x /\ index o n == x /\ (forall (i:size_nat).
+    {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)}
 
-
-///
-/// Operations on sequences
-///
-
-val index: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len} -> a
-
-val upd: #a:Type -> #len:size_nat -> s:lseq a len -> n:size_nat{n < len /\ len > 0} -> x:a -> Pure (lseq a len)
-    (requires True)
-    (ensures (fun o -> index o n == x /\
-      (forall (i:size_nat). {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)))
-
-///
-/// Allocation functions for sequences
-///
-
-val create: #a:Type -> len:size_nat -> init:a -> s:lseq a len{
-    forall (i:size_nat). {:pattern (index s i)} i < len ==> index s i == init}
-
-val createL: #a:Type -> l:list a{List.Tot.length l <= maxint U32} -> lseq a (List.Tot.length l)
-
-//val copy: #a:Type -> #len:size_nat -> lseq a len -> lseq a len
-
-val sub: #a:Type -> #len:size_nat -> lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> lseq a n
-
-let slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat)
-	  (fin:size_nat{start <= fin /\ fin <= len}) =
-	  sub #a #len i start (fin - start)
-
-val update_sub: #a:Type -> #len:size_nat -> i:lseq a len -> start:size_nat -> n:size_nat{start + n <= len} -> x:lseq a n -> o:lseq a len{sub o start n == x}
-
-let update_slice (#a:Type) (#len:size_nat) (i:lseq a len) (start:size_nat) (fin:size_nat{start <= fin /\ fin <= len}) (upd:lseq a (fin - start)) =
-		 update_sub #a #len i start (fin-start) upd
-
-
+(** Operator for accessing an element of a fixed-length Sequence *)
+unfold
 let op_String_Access #a #len = index #a #len
+
+(** Operator for updating an element of a fixed-length Sequence *)
+unfold
 let op_String_Assignment #a #len = upd #a #len
 
+(** Selecting a subset of a fixed-length Sequence *)
+val sub:
+    #a:Type
+  -> #len:size_nat
+  -> s1:lseq a len
+  -> start:size_nat
+  -> n:size_nat{start + n <= len}
+  -> s2:lseq a n{to_seq s2 == Seq.slice (to_seq s1) start (start + n) /\
+	     (forall (k:nat{k < n}). {:pattern (index s2 k)} index s2 k == index s1 (start + k))}
 
-val repeat_range: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> Tot a) -> a -> Tot (a)
+(** Selecting a subset of a fixed-length Sequence *)
+let slice
+    (#a:Type)
+    (#len:size_nat)
+    (s1:lseq a len)
+    (start:nat)
+    (fin:nat{start <= fin /\ fin <= len})
+  =
+  sub #a s1 start (fin - start)
 
-(* BB: I think, this might not be necessary *)
-val repeat_range_ghost: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> GTot a) -> a -> GTot (a)
-val repeat_range_all_ml: #a:Type -> min:size_nat -> max:size_nat{min <= max} -> (i:size_nat{i >= min /\ i < max}  -> a -> FStar.All.ML a) -> a -> FStar.All.ML (a)
+(** Updating a sub-Sequence from another fixed-length Sequence *)
+val update_sub:
+    #a:Type
+  -> #len:size_nat
+  -> i:lseq a len
+  -> start:size_nat
+  -> n:size_nat{start + n <= len}
+  -> x:lseq a n
+  -> o:lseq a len{sub o start n == x /\
+    (forall (k:nat{(0 <= k /\ k < start) \/ (start + n <= k /\ k < len)}).
+      {:pattern (index o k)} index o k == index i k)}
 
-val repeati: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> Tot a) -> a -> Tot (a)
+(** Lemma regarding updating a sub-Sequence with another Sequence *)
+val lemma_update_sub:
+    #a:Type
+  -> #len:size_nat
+  -> dst:lseq a len
+  -> start:size_nat
+  -> n:size_nat{start + n <= len}
+  -> src:lseq a n
+  -> res:lseq a len
+  -> Lemma
+    (requires
+      sub res 0 start == sub dst 0 start /\
+      sub res start n == src /\
+      sub res (start + n) (len - start - n) ==
+      sub dst (start + n) (len - start - n))
+    (ensures
+      res == update_sub dst start n src)
 
-(* BB: I think, this might not be necessary *)
-val repeati_ghost: #a:Type -> n:size_nat -> (i:size_nat{i < n}  -> a -> GTot a) -> a -> GTot a
+(** Updating a sub-Sequence from another fixed-length Sequence *)
+let update_slice
+    (#a:Type)
+    (#len:size_nat)
+    (i:lseq a len)
+    (start:size_nat)
+    (fin:size_nat{start <= fin /\ fin <= len})
+    (upd:lseq a (fin - start))
+  =
+  update_sub #a i start (fin - start) upd
 
-val repeat: #a:Type -> n:size_nat -> (a -> Tot a) -> a -> Tot (a)
+(** Map function for fixed-length Sequences *)
+val map:#a:Type -> #b:Type -> #len:size_nat 
+  -> (a -> Tot b) 
+  -> s1:lseq a len 
+  -> s2:lseq b len
 
+(** Map2 function for fixed-length Sequences *)
+val map2:#a:Type -> #b:Type -> #c:Type -> #len:size_nat
+  -> f:(a -> b -> Tot c)
+  -> s1:lseq a len
+  -> s2:lseq b len
+  -> s3:lseq c len
 
-val fold_left_range: #a:Type -> #b:Type -> #len:size_nat -> min:size_nat -> max:size_nat{min <= max /\ max <= len} -> (i:size_nat{i >= min /\ i < max} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b)
+(** Forall function for fixed-length Sequences *)
+val for_all:#a:Type -> #len:size_nat -> (a -> Tot bool) -> lseq a len -> bool
 
-val fold_lefti: #a:Type -> #b:Type -> #len:size_nat -> (i:size_nat{i < len} -> a -> b -> Tot b) -> lseq a len -> b -> Tot (b)
+(** Forall2 function for fixed-length Sequences *)
+val for_all2:#a:Type -> #b:Type -> #len:size_nat
+  -> (a -> b -> Tot bool)
+  -> s1:lseq a len
+  -> s2:lseq b len
+  -> bool
 
-val fold_left: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot b) -> lseq a len -> b -> Tot (b)
+(** Secure comparison of Byte Sequences *)
+(* BB. TODO: The following function should move to ByteSequence *)
+val lbytes_eq:#len:size_nat -> lseq uint8 len -> lseq uint8 len -> bool
 
-val map: #a:Type -> #b:Type -> #len:size_nat -> (a -> Tot b) -> lseq a len -> lseq b len
+(* The following functions allow us to bridge between unbounded and bounded sequences *)
+val map_blocks:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
+  -> g:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len)
+  -> out:seq a {length out == length inp}
 
-//val mapi: #a:Type -> #b:Type -> #len:size_nat -> (i:size_nat{i < len} -> a -> Tot b) -> lseq a len -> lseq b len
-
-val for_all: #a:Type -> #len:size_nat -> (a -> Tot bool) -> lseq a len -> bool
-
-
-val ghost_map: #a:Type -> #b:Type -> #len:size_nat -> (a -> GTot b) -> lseq a len -> GTot (lseq b len)
-
-val map2: #a:Type -> #b:Type -> #c:Type -> #len:size_nat -> (a -> b -> Tot c) -> lseq a len -> lseq b len -> lseq c len
-
-val for_all2: #a:Type -> #b:Type -> #len:size_nat -> (a -> b -> Tot bool) -> lseq a len -> lseq b len -> bool
-
-///
-///
-/// Unsafe functions
-/// !!! The following function is primarily meant for testing, do not rely on it in code. !!!
-///
-
-val as_list: #a:Type -> #len:size_nat -> lseq a len -> l:list a{List.Tot.length l = len}
-
-
-///
-/// Experimental functions
-///
-
-val concat: #a:Type -> #len1:size_nat -> #len2:size_nat{len1 + len2 <= maxint SIZE} -> lseq a len1 -> lseq a len2 -> lseq a (len1 + len2)
-let (@|) #a #len1 #len2 s1 s2 = concat #a #len1 #len2 s1 s2
-
-open FStar.Mul
-val map_blocks: #a:Type0 ->
-		blocksize:size_nat{blocksize > 0} ->
-		nblocks:size_nat{nblocks * blocksize <= maxint SIZE} ->
-		f:(i:size_nat{i + 1 <= nblocks} -> lseq a blocksize -> lseq a blocksize) ->
-		inp: lseq a (nblocks * blocksize) ->
-		out:  lseq a (nblocks * blocksize)
-val reduce_blocks: #a:Type0 -> #b:Type0 ->
-		blocksize:size_nat{blocksize > 0} ->
-		nblocks:size_nat{nblocks * blocksize <= maxint SIZE} ->
-		f:(i:size_nat{i + 1 <= nblocks} -> lseq a blocksize -> b -> b) ->
-		inp: lseq a (nblocks * blocksize) ->
-		init: b ->
-		out:  b
+val repeat_blocks:
+    #a:Type0
+  -> #b:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> b -> b)
+  -> l:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> b -> b)
+  -> init:b
+  -> out:b

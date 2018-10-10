@@ -5,6 +5,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+open Lib.LoopCombinators
 
 #set-options "--max_fuel 0 --z3rlimit 100"
 
@@ -32,10 +33,10 @@ let line (a:idx) (b:idx) (d:idx) (s:rotval U32) (m:state) : Tot state =
   let m = m.[d] <- ((m.[d] ^. m.[a]) <<<. s) in m
 
 let quarter_round a b c d : shuffle =
-  line a b d (u32 16) @
-  line c d b (u32 12) @
-  line a b d (u32 8)  @
-  line c d b (u32 7)
+  line a b d (size 16) @
+  line c d b (size 12) @
+  line a b d (size 8)  @
+  line c d b (size 7)
 
 let column_round : shuffle =
   quarter_round 0 4 8  12 @
@@ -74,8 +75,8 @@ let setup (k:key) (n:nonce) (st:state) : Tot state =
   let st = st.[1] <- u32 c1 in
   let st = st.[2] <- u32 c2 in
   let st = st.[3] <- u32 c3 in
-  let st = update_sub st 4 8 (uints_from_bytes_le k) in
-  let st = update_sub st 13 3 (uints_from_bytes_le n) in
+  let st = update_sub st 4 8 (uints_from_bytes_le #U32 #8 k) in
+  let st = update_sub st 13 3 (uints_from_bytes_le #U32 #3 n) in
   st
 
 let chacha20_init (k:key) (n:nonce) : Tot state =
@@ -99,24 +100,23 @@ let chacha20_encrypt_block (st0:state) (ctr0:counter) (incr:counter{ctr0 + incr 
   let kb = chacha20_key_block st in
   map2 (^.) b kb
 
-let chacha20_encrypt_last (st0:state) (ctr0:counter) (incr:counter{ctr0 + incr <= max_size_t}) (len:size_nat{len < blocklen}) (b:lbytes len) : lbytes len  =
+let chacha20_encrypt_last (st0:state) (ctr0:counter) 
+			  (incr:counter{ctr0 + incr <= max_size_t}) 
+			  (len:size_nat{len < blocklen})
+			  (b:lbytes len) : lbytes len =
   let plain = create blocklen (u8 0) in
-  let plain = update_slice plain 0 len b in
+  let plain = update_sub plain 0 (length b) b in
   let cipher = chacha20_encrypt_block st0 ctr0 incr plain in
-  slice cipher 0 len
+  sub cipher 0 (length b)
 
 val chacha20_encrypt_bytes:
-  key -> nonce -> c:counter -> len:size_nat{c + len <= maxint SIZE} ->
-  msg:lseq uint8 len -> cipher:lseq uint8 len
-let chacha20_encrypt_bytes key nonce counter len msg =
+  key -> nonce -> c:counter 
+-> msg:bytes{length msg / blocklen + c <= max_size_t} 
+-> cipher:bytes{length cipher == length msg}
+
+let chacha20_encrypt_bytes key nonce ctr0 msg =
   let cipher = msg in
   let st0 = chacha20_init key nonce in
-  let nblocks = len / blocklen in
-  let rem = len % blocklen in
-  let bs = map_blocks #uint8 blocklen nblocks
-	   (chacha20_encrypt_block st0 counter)
-	   (sub cipher 0 (nblocks * blocklen)) in
-  let cipher = update_sub cipher 0 (nblocks * blocklen) bs in
-  let l = chacha20_encrypt_last st0 counter nblocks rem
-	   (sub cipher (nblocks * blocklen) rem) in
-  update_sub cipher (nblocks * blocklen) rem l
+  map_blocks blocklen cipher
+    (chacha20_encrypt_block st0 ctr0) 
+    (chacha20_encrypt_last st0 ctr0)

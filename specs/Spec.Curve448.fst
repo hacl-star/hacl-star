@@ -68,7 +68,7 @@ let add_and_double qx nq nqp1 =
 
 let ith_bit (k:scalar) (i:nat{i < 448}) : uint8 =
   let (&.) = logand #U8 in
-  let q = i / 8 in let r = u32 (i % 8) in
+  let q = i / 8 in let r = size (i % 8) in
   (k.[q] >>. r) &. u8 1
 
 let rec montgomery_ladder_ (init:elem) x xp1 (k:scalar) (ctr:nat{ctr<=448})
