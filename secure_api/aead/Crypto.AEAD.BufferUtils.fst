@@ -136,7 +136,7 @@ val chain_modification: #a:Type ->
 	      (h3 == h4 \/ dexor_modifies cond prf_region plain h3 h4)) //maybe dexor
 	    (ensures (HS.poppable h4 /\
 		      decrypt_modifies prf_region mac_region plain h_init (HS.pop h4)))
-#reset-options "--z3rlimit 1000"
+#reset-options "--z3rlimit 2000"
 let chain_modification #a acc cond prf_region mac_region plain h_init h0 h1 h2 h3 h4 =
     Buffer.lemma_reveal_modifies_1 acc h2 h3;
     FStar.Classical.move_requires (Buffer.lemma_reveal_modifies_1 plain h3) h4;
