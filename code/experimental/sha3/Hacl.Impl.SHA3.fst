@@ -172,10 +172,9 @@ val state_pi_rho_inner:
       bget h1 current 0 == c' /\
       as_seq h1 s == s'))
 let state_pi_rho_inner i current s =
-  assert_norm (List.Tot.length rotc_list <= max_size_t);
   assert_norm (List.Tot.length piln_list <= max_size_t);
-  recall_contents keccak_rotc (LSeq.seq_of_list rotc_list);
-  recall_contents keccak_piln (LSeq.seq_of_list piln_list);
+  recall_contents keccak_rotc S.keccak_rotc;
+  recall_contents keccak_piln (LSeq.of_list piln_list);
   index_map S.sizes_v piln_list (v i);
   let _Y = iindex keccak_piln i in
   let r = iindex keccak_rotc i in
@@ -278,8 +277,7 @@ val state_iota:
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s == S.state_iota (as_seq h0 s) (v round))
 let state_iota s round =
-  assert_norm (List.Tot.length rndc_list <= max_size_t);
-  recall_contents keccak_rndc (LSeq.seq_of_list rndc_list);
+  recall_contents keccak_rndc S.keccak_rndc;
   writeLane s (size 0) (size 0) (readLane s (size 0) (size 0) ^.
     (iindex keccak_rndc round))
 

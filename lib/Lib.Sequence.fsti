@@ -2,6 +2,7 @@ module Lib.Sequence
 
 open FStar.Mul
 open Lib.IntTypes
+
 #set-options "--z3rlimit 15"
 
 /// Unbounded sequences, derived from FStar.Seq
@@ -11,7 +12,7 @@ open Lib.IntTypes
    As far as possible use the API for bounded sequences defined later in this file.*)
 
 (** Definition of a Sequence *)
-let seq (a:Type0) = s:Seq.seq a
+let seq (a:Type0) = Seq.seq a
 
 (** Length of a Sequence *)
 let length (#a:Type0) (s:seq a) : nat = Seq.length s
@@ -31,7 +32,6 @@ let to_lseq (#a:Type0) (s:seq a{length s <= max_size_t}) : l:lseq a (length s){l
 // val lseq: a:Type0 -> len:size_nat -> Type0
 // val to_seq: #a:Type0 -> #len:size_nat -> lseq a len -> s:seq a{length s == len}
 // val to_lseq: #a:Type0 -> s:seq a{length s <= max_size_t} -> lseq a (length s)
-
 
 val index:
     #a:Type
