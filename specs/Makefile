@@ -24,6 +24,8 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.AES.fst \
 		Spec.AESGCM.fst \
 		Spec.SHA2.fst \
+		Spec.SHA2.Constants.fst \
+		Spec.SHA2.New.fst \
 		Spec.HMAC.fst \
 		Spec.HKDF.fst \
 		Spec.ECIES.fst \
@@ -46,7 +48,7 @@ all: test
 test: test-unified-target test-individual-target
 
 test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2s.exe Blake2.exe
-test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe sha3.exe
+test-individual-target: Salsa20.exe Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe sha3.exe sha2-new.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
@@ -125,6 +127,13 @@ hmac.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMA
 	@echo 'let _ = test()' >> hmac-ml/Spec_HMAC_Test.ml
 	$(OCAMLOPT) -I hmac-ml $(OCAML_INCLUDES) $(addprefix hmac-ml/, $(LIBS_ML)) hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Hash.ml hmac-ml/Spec_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
 	./hmac.exe
+
+sha2-new.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.SHA2.New.fst tests/Spec.SHA2.New.Test.fst
+	mkdir -p sha2-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.SHA2.New --extract_module Spec.SHA2.New.Test --odir sha2-ml $^
+	@echo 'let _ = test()' >> sha2-ml/Spec_SHA2_New_Test.ml
+	$(OCAMLOPT) -I sha2-ml $(OCAML_INCLUDES) $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2_Constants.ml sha2-ml/Spec_SHA2_New.ml sha2-ml/Spec_SHA2_New_Test.ml -o sha2-new.exe
+	./sha2-new.exe
 
 # Under CI
 hkdf.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst tests/Spec.HKDF.Test.fst

@@ -203,6 +203,6 @@ val repeat_blocks:
   -> blocksize:size_nat{blocksize > 0}
   -> inp:seq a
   -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> b -> b)
-  -> l:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> b -> b)
+  -> l:(i:nat{i == length inp / blocksize} -> len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b)
   -> init:b
   -> out:b
