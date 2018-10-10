@@ -26,7 +26,7 @@
         "typing_Crypto.Symmetric.AES.v", "typing_FStar.UInt32.v"
       ],
       0,
-      "1906eeb9650635bab2a9d6ef265becb6"
+      "57270210e83ea8208283b9d8885fba57"
     ],
     [
       "Crypto.AEAD.EnxorDexor.separation",
@@ -43,7 +43,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "bcb1fad0c4bd8a59b4459a9463550461"
+      "4786ff06d1d2c7bfe581c85c3d94a424"
     ],
     [
       "Crypto.AEAD.EnxorDexor.liveness",
@@ -70,7 +70,7 @@
         "typing_Crypto.Symmetric.AES.v", "typing_FStar.UInt32.v"
       ],
       0,
-      "aa3074f1e9b14a7e0d04df5f3f0f2d52"
+      "0f3ba78802097ff6f139e01ae1ae61c1"
     ],
     [
       "Crypto.AEAD.EnxorDexor.liveness",
@@ -87,7 +87,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "9d5b967458828dc8f0018095072b43a6"
+      "b716e716cdf3e86eb60b3a22760fdc83"
     ],
     [
       "Crypto.AEAD.EnxorDexor.iteration_lengths_ok",
@@ -121,33 +121,16 @@
         "typing_Crypto.Symmetric.PRF.ctr_0", "typing_FStar.UInt32.v"
       ],
       0,
-      "e0e32dcc1faed42bf891e9a0ea15cabb"
+      "f5075eb504f6a04aff62cd99d6f96a8c"
     ],
     [
       "Crypto.AEAD.EnxorDexor.modifies_table_above_x_and_buffer",
       1,
+      2,
+      1,
+      [ "@query", "equation_Flag.prf", "projection_inverse_BoxBool_proj_0" ],
       0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_Crypto.Symmetric.PRF.region",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "fuel_guarded_inversion_Crypto.Symmetric.PRF.domain",
-        "fuel_guarded_inversion_Crypto.Symmetric.PRF.state",
-        "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "kinding_Crypto.Symmetric.PRF.entry@tok",
-        "primitive_Prims.op_LessThanOrEqual",
-        "proj_equation_Crypto.Symmetric.PRF.State_mac_rgn",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Crypto.Symmetric.PRF_Tm_refine_27649fbd4f13690e6d12e3d57e5e0511",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_Crypto.Symmetric.PRF.__proj__State__item__mac_rgn",
-        "typing_FStar.Seq.Base.length"
-      ],
-      0,
-      "f0d50786209ef71f096eb83420fdfa72"
+      "0e6ba027ec0614ec77d58acbe7aae0aa"
     ],
     [
       "Crypto.AEAD.EnxorDexor.weaken_modifies",
@@ -231,7 +214,7 @@
         "typing_FStar.Set.union", "typing_FStar.UInt32.v"
       ],
       0,
-      "43b649cffb0658cf4a4936a859cb2d06"
+      "66865a124097c435dfa273e50d8f2d6c"
     ],
     [
       "Crypto.AEAD.EnxorDexor.refl_modifies_table_above_x_and_buffer",
@@ -323,7 +306,7 @@
         "typing_FStar.Set.union", "typing_Flag.prf"
       ],
       0,
-      "ff6984ef13734ce311e5bd8bae1a935d"
+      "d4ee30264454d99df651f1ef6841e537"
     ],
     [
       "Crypto.AEAD.EnxorDexor.refl_modifies_table_above_x_and_buffer",
@@ -389,7 +372,7 @@
         "typing_FStar.Set.complement", "typing_FStar.Set.singleton"
       ],
       0,
-      "4b9011e01e3ee03a666d747710127aec"
+      "9e64b263ebd642fe6e543a3bd7e0bdc7"
     ],
     [
       "Crypto.AEAD.EnxorDexor.trans_modifies_table_above_x_and_buffer",
@@ -517,7 +500,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "27bb0fc6db3f8d842aba224657edd431"
+      "8267dd3e3fe71c798f948763ae2364aa"
     ],
     [
       "Crypto.AEAD.EnxorDexor.trans_modifies_table_above_x_and_buffer",
@@ -547,7 +530,7 @@
         "typing_FStar.Buffer.frameOf"
       ],
       0,
-      "3bfc599bdb1ce2d98d92d0e950e03c8d"
+      "a67db367a62902024db6442ce11765ad"
     ],
     [
       "Crypto.AEAD.EnxorDexor.x_buffer_1_modifies_table_above_x_and_buffer",
@@ -589,7 +572,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "5bcdc2b28cb0e31a720b41847a256b4b"
+      "266ba1bb151a716cb8241a2802696cee"
     ],
     [
       "Crypto.AEAD.EnxorDexor.prf_enxor_leaves_none_strictly_above_x",
@@ -638,7 +621,7 @@
         "typing_Hacl.Bignum.Parameters.clen"
       ],
       0,
-      "08078c5f0990060f85f25d0940e08665"
+      "f3d64ce3755d745670eb33b0823f3352"
     ],
     [
       "Crypto.AEAD.EnxorDexor.prf_enxor_leaves_none_strictly_above_x",
@@ -740,7 +723,7 @@
         "typing_Hacl.Bignum.Parameters.v"
       ],
       0,
-      "0bcd15b0857468d2f763422e6e2e837f"
+      "eab62b83febaae449d7f174de7204376"
     ],
     [
       "Crypto.AEAD.EnxorDexor.prf_enxor_leaves_none_strictly_above_x",
@@ -758,7 +741,7 @@
         "typing_FStar.UInt32.lte"
       ],
       0,
-      "bea38738d3095a5161157960537dd6a7"
+      "a073b59e73dc7e59cfd8e9f0f84a9f46"
     ],
     [
       "Crypto.AEAD.EnxorDexor.frame_counterblocks_snoc",
@@ -772,7 +755,7 @@
         "refinement_interpretation_Crypto.AEAD.Invariant_Tm_refine_382dc0bac6b5ab79032637ee87d8f146"
       ],
       0,
-      "1bd0c6480f3e8d2402c5ba93d2c114a6"
+      "799c9d53137c2ebb24a956825314de50"
     ],
     [
       "Crypto.AEAD.EnxorDexor.frame_counterblocks_snoc",
@@ -1003,7 +986,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits", "unit_typing"
       ],
       0,
-      "d4738575bd34fad0496efa79e64988bb"
+      "2f77ae6160ebac9cb3db8a0ca8f562f2"
     ],
     [
       "Crypto.AEAD.EnxorDexor.frame_counterblocks_snoc",
@@ -1017,7 +1000,7 @@
         "refinement_interpretation_Crypto.AEAD.Invariant_Tm_refine_382dc0bac6b5ab79032637ee87d8f146"
       ],
       0,
-      "31f4cb71e615c93f447d328ba4ebf0c1"
+      "68f5ccca75c4a0c4998423f6d733a09c"
     ],
     [
       "Crypto.AEAD.EnxorDexor.invert_contains_plain_and_cipher_block",
@@ -1117,7 +1100,7 @@
         "typing_FStar.UInt32.v", "typing_Flag.safeId"
       ],
       0,
-      "005b7d1bfa9542c31820baa02d0fd55a"
+      "500ffe6e70617b1b717b5e3091d53171"
     ],
     [
       "Crypto.AEAD.EnxorDexor.invert_contains_plain_and_cipher_block",
@@ -1131,7 +1114,7 @@
         "refinement_interpretation_Crypto.Symmetric.PRF_Tm_refine_daa0a58d606a758d0b18c214c63f0a31"
       ],
       0,
-      "6016d32169db839775f211da537b58b1"
+      "fe0470b5b5cbb322e17339e5d728763d"
     ],
     [
       "Crypto.AEAD.EnxorDexor.extending_counter_blocks",
@@ -1227,7 +1210,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits"
       ],
       0,
-      "17c370b5e96fb4773eadd3768686f2b4"
+      "8b0fb7d7ac35082735c3af08c7714f35"
     ],
     [
       "Crypto.AEAD.EnxorDexor.extending_counter_blocks",
@@ -1405,7 +1388,7 @@
         "typing_FStar.UInt32.lte", "typing_FStar.UInt32.v", "typing_Flag.prf"
       ],
       0,
-      "9e2e41c0217402a661920831ddddb2a6"
+      "86d501923abd7540ae0e9b8b17586bd6"
     ],
     [
       "Crypto.AEAD.EnxorDexor.extending_counter_blocks",
@@ -1419,7 +1402,7 @@
         "primitive_Prims.op_AmpAmp", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "61b9ca4eec104eea6bf4fd0954ffdeb6"
+      "8513ae2a9ec9ee5787c2888a5531995a"
     ],
     [
       "Crypto.AEAD.EnxorDexor.enxor_invariant",
@@ -1491,7 +1474,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v"
       ],
       0,
-      "4cb4d1f204d8a8a155fc0bd54ca46660"
+      "c26ea7cf0dd19c35c4f0121cbe9bc4d8"
     ],
     [
       "Crypto.AEAD.EnxorDexor.enxor_invariant",
@@ -1503,7 +1486,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "750c3fb877a90510b20b5ee7b2ec3a27"
+      "f86fbb9eed07eaa86230ca1fdb2516aa"
     ],
     [
       "Crypto.AEAD.EnxorDexor.counter_enxor",
@@ -1520,7 +1503,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "6a1e2ef8703c1ce1847cd9893d79f13d"
+      "09d8f74d3b3ccd94586db97aa1d13b3a"
     ],
     [
       "Crypto.AEAD.EnxorDexor.counter_enxor",
@@ -1536,7 +1519,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "a0075e292819318dcad1e72c087831ab"
+      "0dc5a27c5a7fc8cb64129d3128176195"
     ],
     [
       "Crypto.AEAD.EnxorDexor.enxor",
@@ -1577,7 +1560,7 @@
         "typing_FStar.UInt32.v", "typing_tok_Crypto.Indexing.Writer@tok"
       ],
       0,
-      "1ca3ba15d859eceb5ff7922df8be0b5e"
+      "00e4faddaab8194746fa689c1009efb1"
     ],
     [
       "Crypto.AEAD.EnxorDexor.enxor",
@@ -1927,7 +1910,7 @@
         "typing_tok_Crypto.Indexing.Writer@tok"
       ],
       0,
-      "563e40ab58954cdc76c3a578d8283587"
+      "2fc71ce913b608c293dea3794df3076f"
     ],
     [
       "Crypto.AEAD.EnxorDexor.enxor",
@@ -2141,7 +2124,7 @@
         "typing_tok_Crypto.Indexing.Writer@tok"
       ],
       0,
-      "3f63f4e879dc167ad0f7cb38af10bbb7"
+      "c566b69eb2eafd7fbb150c62bc56c615"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_modifies",
@@ -2167,7 +2150,7 @@
         "typing_Crypto.Symmetric.AES.v", "typing_FStar.UInt32.v"
       ],
       0,
-      "01169f9ccde6a66c7b720a38105acfdf"
+      "693efb9dcd7e29c02f075480d95f3913"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_modifies",
@@ -2184,7 +2167,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "44b5abb74fcd34743a8a0864a98c5d11"
+      "eed186f462f6b41a055c90a87c8df966"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_of_prf_dexor_modifies",
@@ -2222,7 +2205,7 @@
         "typing_Crypto.Symmetric.AES.v", "typing_FStar.UInt32.v"
       ],
       0,
-      "1660f40f9ec3134f49625e0ca70fda08"
+      "0bb5a4bd10fe04a4e501d8f886385d0c"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_of_prf_dexor_modifies",
@@ -2241,7 +2224,7 @@
         "refinement_interpretation_Crypto.Symmetric.PRF_Tm_refine_74cf3240570ab002adb9144c91d00f3b"
       ],
       0,
-      "a9ad60e4f97798d9756e6511c28079d7"
+      "0a6d7cff8925f0b6a6df3fbbdfdbf1b5"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_modifies_refl",
@@ -2302,7 +2285,7 @@
         "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "ad3637efba9f2c925987028775867a5e"
+      "2fcf9d4d2c1acb94edae77b093ef358c"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_modifies_refl",
@@ -2335,7 +2318,7 @@
         "typing_Crypto.Plain.as_buffer", "typing_FStar.UInt32.v"
       ],
       0,
-      "bf7118881ed18e23dae19c236b5f4dd2"
+      "faea96f67990ebd47362231a5429ffce"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_modifies_trans",
@@ -2397,7 +2380,7 @@
         "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "efa609d7d50e6fec04e61ec40b8615e1"
+      "51abfe346d17138051ae83a946eb4396"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_modifies_trans",
@@ -2430,7 +2413,7 @@
         "typing_Crypto.Plain.as_buffer", "typing_FStar.UInt32.v"
       ],
       0,
-      "e8b765bbd926b7cbc09a9dc5526f9f14"
+      "c24191623f9e1cef2451cf17eae3cb40"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_modifies_widen",
@@ -2493,7 +2476,7 @@
         "typing_FStar.Buffer.sub", "typing_FStar.UInt32.v", "typing_Flag.prf"
       ],
       0,
-      "6d9fbebff732e8a582fe91ba654f12af"
+      "8aa42cb722b1dee99727900914159747"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_modifies_widen",
@@ -2543,7 +2526,7 @@
         "typing_FStar.Buffer.sub", "typing_FStar.UInt32.v"
       ],
       0,
-      "535128a0106707c084c21e8d772207a5"
+      "ed6f76a6339e5c1a48c41e508e7355ee"
     ],
     [
       "Crypto.AEAD.EnxorDexor.decrypted_up_to",
@@ -2568,7 +2551,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "a5674a6c2d5f3960db58ed6a68231bac"
+      "1b96f0644df5c113db5a5a959b509f20"
     ],
     [
       "Crypto.AEAD.EnxorDexor.decrypted_up_to",
@@ -2580,7 +2563,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "9cd73f1ef655f78939b6fb20a2469f00"
+      "fbb4e876c9974a4361554bea2a5464fb"
     ],
     [
       "Crypto.AEAD.EnxorDexor.decrypted_up_to_end",
@@ -2620,7 +2603,7 @@
         "typing_FStar.UInt32.v", "typing_Flag.safeId"
       ],
       0,
-      "b250ebd4623df3526b3c97b33b7577fe"
+      "06899ae8a4ea3add7268a8fdc2792ee2"
     ],
     [
       "Crypto.AEAD.EnxorDexor.decrypted_up_to_end",
@@ -2644,7 +2627,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "79c8bdffe3515ddaa32aad1cc7f84df3"
+      "a15b24a2af042a59a0228876ceee7f73"
     ],
     [
       "Crypto.AEAD.EnxorDexor.prf_contains_all_otp_blocks_st",
@@ -2683,7 +2666,7 @@
         "typing_Flag.prf", "typing_Flag.safeHS"
       ],
       0,
-      "9e2f6f3105cc25964612d0a916fcc4fb"
+      "62846813bf06c6f82fed5f100acc40fa"
     ],
     [
       "Crypto.AEAD.EnxorDexor.frame_prf_contains_all_otp_blocks_st",
@@ -2808,7 +2791,7 @@
         "typing_Flag.prf", "typing_Flag.safeId", "unit_inversion"
       ],
       0,
-      "ed710eac301e8b7ab797a5fb96cbe7d9"
+      "b02f217f3abf36726446bb2c5cdee37a"
     ],
     [
       "Crypto.AEAD.EnxorDexor.frame_prf_contains_all_otp_blocks_st",
@@ -2892,7 +2875,7 @@
         "typing_FStar.UInt32.lte", "typing_FStar.UInt32.v", "unit_inversion"
       ],
       0,
-      "8ba343002f19e3bf0f646bc95461b817"
+      "104efe6c8bf81e7fa14c5d55f1aadfed"
     ],
     [
       "Crypto.AEAD.EnxorDexor.invert_prf_contains_all_otp_blocks_st",
@@ -3024,7 +3007,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits", "unit_typing"
       ],
       0,
-      "ac3f276403017bca1c5e19daec1027b0"
+      "ad0dd851b78e146adc58df07f2a70df1"
     ],
     [
       "Crypto.AEAD.EnxorDexor.invert_prf_contains_all_otp_blocks_st",
@@ -3132,7 +3115,7 @@
         "unit_typing"
       ],
       0,
-      "6b5d3a85d0356361ef6339cf7e87da0f"
+      "7c67f1c328d00b66e603da85e1e4c8ff"
     ],
     [
       "Crypto.AEAD.EnxorDexor.invert_prf_contains_all_otp_blocks_st",
@@ -3148,7 +3131,7 @@
         "typing_FStar.UInt32.lte"
       ],
       0,
-      "1a5206324359dd61d7d5325e8a0aa5ec"
+      "534f6fcbd80451e5e9a4b81f2b2adeb3"
     ],
     [
       "Crypto.AEAD.EnxorDexor.extend_decrypted_up_to",
@@ -3214,7 +3197,7 @@
         "unit_typing"
       ],
       0,
-      "7e368fa7218725fa6e93bd87609fd059"
+      "f373716e8c076bc10de417f53166c0c2"
     ],
     [
       "Crypto.AEAD.EnxorDexor.extend_decrypted_up_to",
@@ -3403,7 +3386,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__bits"
       ],
       0,
-      "2b9b2c2f38aac47076ce5e35234d4e07"
+      "d3097bfa72ea42571f4a426df3093422"
     ],
     [
       "Crypto.AEAD.EnxorDexor.extend_decrypted_up_to",
@@ -3475,7 +3458,7 @@
         "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "c885192fbbff70c35c6cf614406f6616"
+      "09b351dd81233d7c6f7f8873f1d5a887"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_requires",
@@ -3529,7 +3512,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v"
       ],
       0,
-      "c8188d5bfa4e405bb23f9fb1f56a903f"
+      "9302aeca91413d8344683d1269de189a"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_requires",
@@ -3556,7 +3539,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "3c5b23c3bd16e4698960bf32bc2a980e"
+      "69af6edc7e20d6b8ae3e089ca2f9924b"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_ensures",
@@ -3603,7 +3586,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "bee34151864bf007df0d614022f3123a"
+      "f90f93032c3e0e16c790fc3982c48031"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor_ensures",
@@ -3615,7 +3598,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "bd7b06aa637fc1b479ebd6762e7eb554"
+      "dfeb65c6492e3da86ef8120c83f139d3"
     ],
     [
       "Crypto.AEAD.EnxorDexor.counter_dexor",
@@ -3642,7 +3625,7 @@
         "typing_Crypto.Symmetric.AES.v", "typing_FStar.UInt32.v"
       ],
       0,
-      "87a11896a861041d2167353b847a1e50"
+      "4fd5c34bf9ef031d3cc10f0339ff97e7"
     ],
     [
       "Crypto.AEAD.EnxorDexor.counter_dexor",
@@ -3882,7 +3865,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "58b45752fbee8a9c063c16f01c4b0bdc"
+      "0763b20fc148f9fb6dcee8363b7b3ca8"
     ],
     [
       "Crypto.AEAD.EnxorDexor.decrypt_ok",
@@ -3928,7 +3911,7 @@
         "typing_Flag.mac1", "typing_Flag.safeHS"
       ],
       0,
-      "25f9f2bac041dafae78c5f2d3cf72d4a"
+      "2bf7850f0d0146727c0696afbaa07a54"
     ],
     [
       "Crypto.AEAD.EnxorDexor.decrypt_ok",
@@ -3958,7 +3941,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "45fe63afaf89d98565285ddcd3042084"
+      "45ee60bb7352c46609e7cf907ab499c0"
     ],
     [
       "Crypto.AEAD.EnxorDexor.found_entry",
@@ -4001,7 +3984,7 @@
         "typing_Flag.mac1", "typing_Flag.safeHS"
       ],
       0,
-      "5573ff00357a3a46be6c837413c5a785"
+      "1d467324076090e9e7415ab8c6900070"
     ],
     [
       "Crypto.AEAD.EnxorDexor.found_entry",
@@ -4013,7 +3996,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "3bf898fa60128f0486139ba6398ea8e4"
+      "48229566a4aaf4fda6da6c906e367b12"
     ],
     [
       "Crypto.AEAD.EnxorDexor.find_fresh_iv_none",
@@ -4138,7 +4121,7 @@
         "typing_tok_Crypto.Indexing.Reader@tok", "unit_typing"
       ],
       0,
-      "3998599bc9ed521f5cb2f4d8b8059b3d"
+      "f2ae8d2296dec38b567be2ee056a8419"
     ],
     [
       "Crypto.AEAD.EnxorDexor.find_fresh_iv_none",
@@ -4155,7 +4138,7 @@
         "refinement_interpretation_Crypto.AEAD.EnxorDexor_Tm_refine_4ab841bf125c283402d5bec4cbc31601"
       ],
       0,
-      "91d16cea0d2a2c9b78ee2a23b823d7fc"
+      "120a9708e277283735924a41da413f0f"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor",
@@ -4263,7 +4246,7 @@
         "typing_Hacl.Bignum.Parameters.v", "unit_typing"
       ],
       0,
-      "2e0421d81ef0179c13776cb0b33d1541"
+      "2732966674a8d00b8d30824bf6cb8d54"
     ],
     [
       "Crypto.AEAD.EnxorDexor.intro_separation",
@@ -4344,7 +4327,7 @@
         "typing_tok_Crypto.Indexing.Reader@tok"
       ],
       0,
-      "080e3ec7656026a64bc0d2f7aa21d9e4"
+      "470342a9d9485252e0d29e89de313523"
     ],
     [
       "Crypto.AEAD.EnxorDexor.intro_separation",
@@ -4422,7 +4405,7 @@
         "typing_tok_Crypto.Indexing.Reader@tok"
       ],
       0,
-      "7164fb941e760a5da2a2330df29580fb"
+      "2009907ac7861e9d4c7950fd7e3c3e75"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor",
@@ -4699,7 +4682,7 @@
         "unit_typing"
       ],
       0,
-      "666d73522dc1591ff4ab10a54940065e"
+      "b5ae077b1952a7f82d491440295a6524"
     ],
     [
       "Crypto.AEAD.EnxorDexor.dexor",
@@ -4813,7 +4796,7 @@
         "unit_inversion"
       ],
       0,
-      "1facfc8762339d1c49dc38e187c3590d"
+      "a4c04eed122ba42c2552737c904d798a"
     ]
   ]
 ]
