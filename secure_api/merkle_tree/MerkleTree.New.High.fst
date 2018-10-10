@@ -62,6 +62,26 @@ let rec mt_wf_elts lv hs i j =
        S.length (S.index hs lv) == j - ofs /\
        mt_wf_elts (lv + 1) hs (i / 2) (j / 2))
 
+val mt_wf_elts_equal:
+  lv:nat{lv <= 32} ->
+  hs1:hash_ss{S.length hs1 = 32} ->
+  hs2:hash_ss{S.length hs2 = 32} ->
+  i:nat -> j:nat{j >= i} ->
+  Lemma (requires (mt_wf_elts lv hs1 i j /\
+		  S.equal (S.slice hs1 lv 32) (S.slice hs2 lv 32)))
+	(ensures (mt_wf_elts lv hs2 i j))
+	(decreases (32 - lv))
+let rec mt_wf_elts_equal lv hs1 hs2 i j =
+  if lv = 32 then ()
+  else (S.slice_slice hs1 lv 32 1 (32 - lv);
+       S.slice_slice hs2 lv 32 1 (32 - lv);
+       assert (S.equal (S.slice hs1 (lv + 1) 32)
+		       (S.slice hs2 (lv + 1) 32));
+       S.lemma_index_slice hs1 lv 32 0; 
+       S.lemma_index_slice hs2 lv 32 0;
+       assert (S.index hs1 lv == S.index hs2 lv);
+       mt_wf_elts_equal (lv + 1) hs1 hs2 (i / 2) (j / 2))
+
 val mt_wf: merkle_tree -> GTot Type0
 let mt_wf mt =
   mt_wf_elts 0 (MT?.hs mt) (MT?.i mt) (MT?.j mt)
@@ -72,46 +92,40 @@ type wf_mt = mt:merkle_tree{mt_wf mt}
 
 // NOTE: the public function is `create_mt` defined below, which
 // builds a tree with an initial hash.
-private val create_empty_mt: unit -> GTot wf_mt
-private let create_empty_mt _ =
-  admit ();
+val create_empty_mt: unit -> GTot merkle_tree
+let create_empty_mt _ =
   MT 0 0 (S.create 32 S.empty) false (S.create 32 hash_init)
 
 /// Insertion
 
-private val insert_:
+val insert_:
   lv:nat{lv < 32} ->
-  i:Ghost.erased nat ->
-  j:nat{Ghost.reveal i <= j} ->
-  hs:hash_ss{
-    S.length hs = 32 /\ 
-    mt_wf_elts lv hs (Ghost.reveal i) j} ->
+  i:nat ->
+  j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
+  hs:hash_ss{S.length hs = 32 /\ mt_wf_elts lv hs i j} ->
   acc:hash ->
-  GTot (ihs:hash_ss{
-    S.length ihs = 32 /\
-    mt_wf_elts lv ihs (Ghost.reveal i) (j + 1)})
-  (decreases j)
-private let rec insert_ lv i j hs acc =
-  admit ();
+  GTot (ihs:hash_ss{S.length ihs = 32})
+       (decreases j)
+let rec insert_ lv i j hs acc =
   let ihs = S.upd hs lv (S.snoc (S.index hs lv) acc) in
   if j % 2 = 1 && S.length (S.index hs lv) > 0 
   then (let nacc = hash_2 (S.last (S.index hs lv)) acc in
-       insert_ (lv + 1) 
-	       (Ghost.hide (Ghost.reveal i / 2)) (j / 2)
-	       ihs nacc)
+       mt_wf_elts_equal (lv + 1) hs ihs (i / 2) (j / 2);
+       insert_ (lv + 1) (i / 2) (j / 2) ihs nacc)
   else ihs
 
 val mt_insert:
-  mt:wf_mt{mt_not_full mt} -> v:hash -> GTot wf_mt
+  mt:wf_mt{mt_not_full mt} -> v:hash -> GTot merkle_tree
 let mt_insert mt v =
   MT (MT?.i mt)
      (MT?.j mt + 1)
-     (insert_ 0 (Ghost.hide (MT?.i mt)) (MT?.j mt) (MT?.hs mt) v)
+     (insert_ 0 (MT?.i mt) (MT?.j mt) (MT?.hs mt) v)
      false
      (MT?.rhs mt)
 
-val create_mt: init:hash -> GTot wf_mt
+val create_mt: init:hash -> GTot merkle_tree
 let create_mt init =
+  admit ();
   mt_insert (create_empty_mt ()) init
 
 /// Getting the Merkle root and path
