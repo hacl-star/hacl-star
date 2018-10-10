@@ -1,5 +1,7 @@
 module Lib.IntTypes
 
+open FStar.Integers
+open FStar.ConstantTime.Integers
 open FStar.Math.Lemmas
 
 ///
@@ -70,9 +72,21 @@ inline_for_extraction
 unfold let maxint (t:inttype) =
   modulus t - 1
 
+unfold let secret (w:fixed_width{w <> W128}) = 
+  ConstantTime.Integers.t (Secret hacl_label (Unsigned w))
 
-inline_for_extraction
-val uint_t: t:inttype -> Type0
+unfold let public sw = ConstantTime.Integers.t (Public sw)
+
+inline_for_extraction unfold
+let uint_t (t:inttype) = 
+  match t with
+  | U8   -> secret W8
+  | U16  -> secret W16
+  | U32  -> secret W32
+  | U64  -> secret W64
+  | U128 -> public (Unsigned W128) // We don't have constant-time operations on UInt128
+  | SIZE -> public (Unsigned W32)
+  | BYTE -> public (Unsigned W8)
 
 inline_for_extraction
 val uint_v: #t:inttype -> u:uint_t t -> GTot (n:nat{n <= maxint t})
@@ -205,9 +219,9 @@ val mul: #t:inttype{t <> U128} -> a:uint_t t -> b:uint_t t -> Pure (uint_t t)
   (ensures (fun c -> uint_v c == uint_v a `op_Multiply` uint_v b))
 
 inline_for_extraction
-val mul_wide: a:uint64 -> b:uint64 -> Pure (uint128)
-  (requires (True))
-  (ensures (fun c -> uint_v #U128 c == uint_v #U64 a `op_Multiply` uint_v #U64 b))
+val mul_wide: a:uint64 -> b:uint64 -> Pure uint128
+  (requires True)
+  (ensures fun c -> (uint_v #U128 c <: nat) == uint_v #U64 a `op_Multiply` uint_v #U64 b)
 
 (* KB: I would prefer the post-condition to say:
        uint_v c = (pow2 (bits t) + uint_v a - uint_v b) % pow2 (bits t)
@@ -323,46 +337,46 @@ val mod_mask_lemma: #t:inttype -> a:uint_t t -> m:shiftval t -> Lemma
 ///
 
 inline_for_extraction
-let (+!) #t = add #t
+let (+!) #t a = add #t a
 
 inline_for_extraction
-let (+.) #t = add_mod #t
+let (+.) #t a = add_mod #t a
 
 inline_for_extraction
-let ( *! ) #t = mul #t
+let ( *! ) #t a = mul #t a
 
 inline_for_extraction
-let ( *. ) #t = mul_mod #t
+let ( *. ) #t a = mul_mod #t a
 
 inline_for_extraction
-let ( -! ) #t = sub #t
+let ( -! ) #t a = sub #t a
 
 inline_for_extraction
-let ( -. ) #t = sub_mod #t
+let ( -. ) #t a = sub_mod #t a
 
 inline_for_extraction
-let ( >>. ) #t = shift_right #t
+let ( >>. ) #t a = shift_right #t a
 
 inline_for_extraction
-let ( <<. ) #t = shift_left #t
+let ( <<. ) #t a = shift_left #t a
 
 inline_for_extraction
-let ( >>>. ) #t = rotate_right #t
+let ( >>>. ) #t a = rotate_right #t a
 
 inline_for_extraction
-let ( <<<. ) #t = rotate_left #t
+let ( <<<. ) #t a b = rotate_left #t a b
 
 inline_for_extraction
-let ( ^. ) #t = logxor #t
+let ( ^. ) #t a b = logxor #t a b
 
 inline_for_extraction
-let ( |. ) #t = logor #t
+let ( |. ) #t a b = logor #t a b
 
 inline_for_extraction
-let ( &. ) #t = logand #t
+let ( &. ) #t a = logand #t a
 
 inline_for_extraction
-let ( ~. ) #t = lognot #t
+let ( ~. ) #t a = lognot #t a
 
 ///
 /// Operations reserved to public integers

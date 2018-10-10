@@ -21,21 +21,6 @@ let pow2_values n =
     assert_norm (pow2 64 = 0x10000000000000000);
     assert_norm (pow2 128 = 0x100000000000000000000000000000000)
 
-unfold let secret (w:fixed_width{w <> W128}) = 
-  CT.t (Secret hacl_label (Unsigned w))
-
-unfold let public sw = CT.t (Public sw)
-
-let uint_t t = 
-  match t with
-  | U8   -> secret W8
-  | U16  -> secret W16
-  | U32  -> secret W32
-  | U64  -> secret W64
-  | U128 -> public (Unsigned W128) // We don't have constant-time operations on UInt128
-  | SIZE -> public (Unsigned W32)
-  | BYTE -> public (Unsigned W8)
-
 inline_for_extraction
 let uint_to_nat_ (#t:inttype) (x:uint_t t) =
   match t with
@@ -145,46 +130,46 @@ let cast #t t' u  =
   | U128, SIZE -> FStar.Int.Cast.uint64_to_uint32 (FStar.UInt128.uint128_to_uint64 u)
   | U128, U64 -> FStar.UInt128.uint128_to_uint64 u
   | U128, U128 -> u
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 20 --max_fuel 1 --max_ifuel 8"
 
-let add_mod #t a b = 
+let add_mod #t a b =
   match t with
-  | U8  -> addition_mod (a <: uint_t U8)  b
-  | U16 -> addition_mod (a <: uint_t U16) b
-  | U32 -> addition_mod (a <: uint_t U32) b
-  | U64 -> addition_mod (a <: uint_t U64) b
+  | U8  -> (a <: uint_t U8)    +% b
+  | U16 -> (a <: uint_t U16)   +% b
+  | U32 -> (a <: uint_t U32)   +% b
+  | U64 -> (a <: uint_t U64)   +% b
   | U128 -> UInt128.add_mod a b
-  | SIZE -> UInt32.add_mod a b
-  | BYTE -> UInt8.add_mod a b
+  | SIZE -> (a <: uint_t SIZE) +% b
+  | BYTE -> (a <: uint_t BYTE) +% b
 
 let add #t a b =
   match t with
-  | U8   -> addition (a <: uint_t U8)  b
-  | U16  -> addition (a <: uint_t U16) b
-  | U32  -> addition (a <: uint_t U32) b
-  | U64  -> addition (a <: uint_t U64) b
-  | U128 -> UInt128.add a b
-  | SIZE -> UInt32.add a b
-  | BYTE -> UInt8.add a b
+  | U8   -> (a <: uint_t U8)   +! b
+  | U16  -> (a <: uint_t U16)  +! b
+  | U32  -> (a <: uint_t U32)  +! b
+  | U64  -> (a <: uint_t U64)  +! b
+  | U128 -> (a <: uint_t U128) +! b
+  | SIZE -> (a <: uint_t SIZE) +! b
+  | BYTE -> (a <: uint_t BYTE) +! b
 
 let incr #t a =
   match t with
-  | U8   -> addition (a <: uint_t U8)  (u8 1)  
-  | U16  -> addition (a <: uint_t U16) (u16 1)
-  | U32  -> addition (a <: uint_t U32) (u32 1)
-  | U64  -> addition (a <: uint_t U64) (u64 1)
-  | U128 -> UInt128.add a (u128 1)
-  | SIZE -> UInt32.add a (size 1)
-  | BYTE -> UInt8.add a (byte 1)
+  | U8   -> (a <: uint_t U8)   +! (u8 1)  
+  | U16  -> (a <: uint_t U16)  +! (u16 1)
+  | U32  -> (a <: uint_t U32)  +! (u32 1)
+  | U64  -> (a <: uint_t U64)  +! (u64 1)
+  | U128 -> (a <: uint_t U128) +! (u128 1)
+  | SIZE -> (a <: uint_t SIZE) +! (size 1)
+  | BYTE -> (a <: uint_t BYTE) +! (byte 1)
 
 let mul_mod #t a b =
   match t with
-  | U8   -> multiplication_mod (a <: uint_t U8)  b
-  | U16  -> multiplication_mod (a <: uint_t U16) b
-  | U32  -> multiplication_mod (a <: uint_t U32) b
-  | U64  -> multiplication_mod (a <: uint_t U64) b
-  | SIZE -> UInt32.mul_mod a b
-  | BYTE -> UInt8.mul_mod a b
+  | U8  -> (a <: uint_t U8)    *% b
+  | U16 -> (a <: uint_t U16)   *% b
+  | U32 -> (a <: uint_t U32)   *% b
+  | U64 -> (a <: uint_t U64)   *% b
+  | SIZE -> (a <: uint_t SIZE) *% b
+  | BYTE -> (a <: uint_t BYTE) *% b
 
 // SZ: Stopped here
 #set-options "--lax"

@@ -7,17 +7,20 @@ open Lib.IntTypes
    Use only if you need to, because using this module will load more F* dependencies.
    More importantly, using the u*_to_UInt* functions BREAKS secret independence.  *)
 
-let u8_from_UInt8 x = x
+let u8_from_UInt8 x = u8 (UInt8.v x)
 
-let u16_from_UInt16 x = x
+let u16_from_UInt16 x = u16 (UInt16.v x)
 
-let u32_from_UInt32 x = x
+let u32_from_UInt32 x = u32 (UInt32.v x)
 
-let u64_from_UInt64 x = x
+let u64_from_UInt64 x = u64 (UInt64.v x)
 
-let u128_from_UInt128 x = x
+let u128_from_UInt128 x = u128 (UInt128.v x)
 
-let size_from_UInt32 x =  x
+let size_from_UInt32 x = size (UInt32.v x)
+
+// TODO: the rest will need explicit declassification
+#set-options "--lax"
 
 let u8_to_UInt8 x = x
 
@@ -40,4 +43,3 @@ let uint_to_nat #t (x:uint_t t) =
   | U128 -> UInt128.v x
   | SIZE -> UInt32.v x
   | BYTE -> UInt8.v x
-
