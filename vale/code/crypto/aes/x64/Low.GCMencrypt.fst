@@ -27,6 +27,7 @@ open GHash
 open X64.Memory_s
 open BufferViewHelpers
 open FStar.Seq
+open X64.CPU_Features_s
 
 // Not sure how to define this after we open FStar.Mul
 noextract
@@ -125,7 +126,8 @@ let aes128_encrypt_block_buffer
     // AES reqs
     B.length keys_b == (nr AES_128 + 1) * 16 /\
     B.length keys_b % 16 == 0 /\  // REVIEW: Should be derivable from line above :(
-    keys_match key keys_b h
+    keys_match key keys_b h /\
+    aesni_enabled
   )
   (ensures fun h () h' ->
     B.live h' input_b /\ B.live h' output_b /\ B.live h' keys_b /\
@@ -135,7 +137,7 @@ let aes128_encrypt_block_buffer
      output_q == aes_encrypt_LE AES_128 (Ghost.reveal key) input_q)
   )
   =
-  AESEncryptBlock_win.aes128_encrypt_block_win output_b input_b key keys_b
+  AESEncryptBlockStdcall.aes_EncryptBlockStdcall output_b input_b key keys_b
 
 let aes128_encrypt_block_BE_buffer
              (input_b output_b:B.buffer U8.t)

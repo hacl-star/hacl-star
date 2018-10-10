@@ -16,12 +16,16 @@ open Interop_Printer
   ],
     Stk (Prims.parse_int "18"))
 *)
-(*
-let aes_encrypt_block = ("aes128_encrypt_block_win", [
+
+let aes_encrypt_block = ("AESEncryptBlockStdcall", [
   ("output_b", TBuffer TUInt128, Sec); ("input_b", TBuffer TUInt128, Sec);
   ("key", TGhost "aes_key_LE AES_128", Pub); ("keys_b", TBuffer TUInt128, Sec)
-  ], Stk (Prims.parse_int "0"))
-*)
+  ], 
+  SaveRegsStk true,
+  AddStk (Prims.parse_int "0"), 
+  Modifies ["output_b"],
+  Return Unit)
+
 
 (*
 let ghash = ("ghash_incremental_bytes_stdcall_win", [
@@ -119,7 +123,7 @@ let check_aesni = ("check_aesni_stdcall", [], SaveRegsStk false, AddStk (Prims.p
 
 let check_sha = ("check_sha_stdcall", [], SaveRegsStk false, AddStk (Prims.parse_int "0"), Modifies [], Return Int64)
 
-let name = memcpy 
+let name = aes_encrypt_block 
 
 let _ = print_string (translate_vale X86 name)
 let _ = print_newline()
