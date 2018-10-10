@@ -9,10 +9,10 @@ open Spec.Hash.Helpers
 
 inline_for_extraction
 let init_as_list : list U32.t = [
-  0x01234567ul;
-  0x89abcdeful;
-  0xfedcba98ul;
-  0x76543210ul;
+  0x67452301ul;
+  0xefcdab89ul;
+  0x98badcfeul;
+  0x10325476ul;
 ]
 
 let init = Seq.seq_of_list init_as_list
@@ -263,7 +263,7 @@ let overwrite (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot abcd_t =
   abcd
 
 let update abcd x =
-  let x = E.seq_uint32_of_be 16 x in
+  let x = words_from_be MD5 16 x in
   let aa = Seq.index abcd ia in
   let bb = Seq.index abcd ib in
   let cc = Seq.index abcd ic in

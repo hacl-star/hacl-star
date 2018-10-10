@@ -22,7 +22,11 @@ let pad (a:hash_alg)
   let total_len_bits = total_len * 8 in
   // Saves the need for high fuel + makes hint replayable.
   max_input_size_len a;
-  let encodedlen = E.n_to_be (size_len_ul_8 a) (total_len * 8) in
+  let encodedlen =
+    match a with
+    | MD5 -> E.n_to_le (size_len_ul_8 a) (total_len * 8)
+    | _ -> E.n_to_be (size_len_ul_8 a) (total_len * 8)
+  in
   S.(firstbyte @| zeros @| encodedlen)
 
 
