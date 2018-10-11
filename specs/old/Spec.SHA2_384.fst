@@ -182,16 +182,26 @@ let update_multi_one (h:hash_w) (b:bytes{Seq.length b = size_block}) : Lemma
   assert (Seq.length rem == 0);
   update_multi_empty (update h b) rem
 
+val append_preserves_multiples:
+  blocks1:bytes ->
+  blocks2:bytes ->
+  Lemma
+    (requires (length blocks1 % size_block = 0 /\ length blocks2 % size_block = 0))
+    (ensures (length (blocks1 @| blocks2) % size_block = 0))
+let append_preserves_multiples _ _ = ()
+
 val update_multi_append:
   hash:hash_w ->
   blocks1:bytes{length blocks1 % size_block = 0} ->
   blocks2:bytes{length blocks2 % size_block = 0} ->
   Lemma
     (requires True)
-    (ensures (update_multi (update_multi hash blocks1) blocks2 ==
+    (ensures ((length (blocks1 @| blocks2) % size_block = 0) /\ // needed to prove the other conjunct well-formed
+              update_multi (update_multi hash blocks1) blocks2 ==
               update_multi hash (blocks1 @| blocks2)))
     (decreases (length blocks1))
 let rec update_multi_append hash blocks1 blocks2 =
+  append_preserves_multiples blocks1 blocks2;
   if Seq.length blocks1 = 0 then
     begin
     update_multi_empty hash blocks1;
