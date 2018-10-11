@@ -196,9 +196,13 @@ let state_pi_rho s =
   let current:lbuffer uint64 1 = create (size 1) (readLane s (size 1) (size 0)) in
   let h1 = ST.get () in
   assert (bget h1 current 0 == S.readLane (as_seq h0 s) 1 0);
+  [@ inline_let]  
   let a_impl = (lbuffer uint64 1) & state in
+  [@ inline_let]  
   let refl h i : GTot (uint64 & S.state) = get h current 0, as_seq h s in
+  [@ inline_let]  
   let footprint i = loc_union (loc_buffer current) (loc_buffer s) in
+  [@ inline_let]  
   let spec h0 = S.state_pi_rho_inner in
   let h0 = ST.get () in
   loop h0 (size 24) S.state_pi_rho_s a_impl (current, s) refl footprint spec
@@ -533,16 +537,21 @@ let squeeze s rateInBytes outputByteLen output = admit(); //TODO: add loop2
   let outBlocks = outputByteLen /. rateInBytes in
   let remOut = outputByteLen %. rateInBytes in
   let tmp = sub output (outputByteLen -. remOut) remOut in
+  [@ inline_let]  
   let a_spec (i:size_nat{i <= v outputByteLen / v rateInBytes}) =
     S.state & (LB.lbytes (i * v rateInBytes)) in
+  [@ inline_let]    
   let a_impl = state & (lbytes (v outputByteLen)) in
+  [@ inline_let]  
   let refl h (i:size_nat{i <= v outBlocks}) :
     GTot (S.state & (LB.lbytes (i * v rateInBytes))) =
     assert (i * v rateInBytes <= v outputByteLen);
     as_seq h s,
     as_seq h (gsub output (size 0) (size i *! rateInBytes))
   in
+  [@ inline_let]  
   let footprint i = loc_union (loc_buffer s) (loc_buffer output) in
+  [@ inline_let]  
   let spec h0: i:size_nat{i < v outBlocks} -> a_spec i -> a_spec (i + 1) =
     S.squeeze_inner (v rateInBytes) (v outputByteLen) in
   let h0 = ST.get () in
