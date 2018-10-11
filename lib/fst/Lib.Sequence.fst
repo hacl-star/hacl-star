@@ -103,16 +103,25 @@ let map_blocks #a bs inp f g =
     seq_update_sub out (nb * bs) rem (g nb rem (seq_sub inp (nb * bs) rem))
   else out
 
+val repeat_blocks_f:
+    #a:Type0
+  -> #b:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> b -> b)
+  -> nb:nat{nb == length inp / blocksize}
+  -> i:nat{i < nb}
+  -> acc:b
+  -> b
+let repeat_blocks_f #a #b bs inp f nb i acc =
+  assert ((i+1) * bs <= nb * bs);
+  let block = seq_sub inp (i * bs) bs in
+  f i block acc
+
 let repeat_blocks #a #b bs inp f g init =
   let len = length inp in
   let nb = len / bs in
   let rem = len % bs in
-  let acc =
-    repeati nb
-    (fun i acc ->
-       assert ((i+1) * bs <= nb * bs);
-       let block = seq_sub inp (i * bs) bs in
-       f i block acc)
-    init in
+  let acc = repeati nb (repeat_blocks_f bs inp f nb) init in
   let last = seq_sub inp (nb * bs) rem in
   g nb rem last acc

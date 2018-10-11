@@ -543,6 +543,48 @@ val alloc:
     (ensures (fun h0 r h1 -> B.modifies (B.loc_buffer write) h0 h1 /\
 		                    spec h0 r (B.as_seq h1 write)))
 
+inline_for_extraction noextract
+val loop_blocks:
+    #a:Type0
+  -> #b:Type0
+  -> #blen:size_nat
+  -> blocksize:size_t{v blocksize > 0}
+  -> inpLen:size_t
+  -> inp:lbuffer a (v inpLen)
+  -> spec_f:(i:nat{i < v inpLen / v blocksize}
+              -> Seq.lseq a (v blocksize)
+              -> Seq.lseq b blen
+              -> Seq.lseq b blen)
+  -> spec_l:(i:nat{i == v inpLen / v blocksize}
+              -> len:size_nat{len == v inpLen % v blocksize}
+              -> s:Seq.lseq a len
+              -> Seq.lseq b blen
+              -> Seq.lseq b blen)
+  -> f:(i:size_t{v i < v inpLen / v blocksize}
+       -> inp:lbuffer a (v blocksize)
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            B.live h inp /\ B.live h w /\ B.disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            B.modifies (B.loc_buffer w) h0 h1 /\
+            as_seq h1 w == spec_f (v i) (as_seq h0 inp) (as_seq h0 w)))
+  -> l:(i:size_t{v i == v inpLen / v blocksize}
+       -> len:size_t{v len == v inpLen % v blocksize}
+       -> inp:lbuffer a (v len)
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            B.live h inp /\ B.live h w /\ B.disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            B.modifies (B.loc_buffer w) h0 h1 /\
+            as_seq h1 w == spec_l (v i) (v len) (as_seq h0 inp) (as_seq h0 w)))
+  -> write:lbuffer b blen
+  -> Stack unit
+    (requires fun h -> B.live h inp /\ B.live h write /\ B.disjoint inp write)
+    (ensures  fun h0 _ h1 ->
+      B.modifies (B.loc_buffer write) h0 h1 /\
+      as_seq h1 write ==
+      Seq.repeat_blocks #a #(Seq.lseq b blen) (v blocksize) (B.as_seq h0 inp) spec_f spec_l (as_seq h0 write))
+
 (** Print and compare two buffers securely *)
 (* BB. TODO: used in tests; move to Lib.Print *)
 val print_compare_display:
