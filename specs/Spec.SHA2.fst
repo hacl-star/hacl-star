@@ -13,8 +13,8 @@ noeq type parameters =
     wt:       inttype{wt = U32 \/ wt = U64} ->
 	 opTable:  lseq (rotval wt) 12 ->
 	 kSize:    size_nat{kSize > 16} ->
-	 kTable:   lseq (uint_t wt) kSize ->
-	 h0:       lseq (uint_t wt) 8 ->
+	 kTable:   lseq (uint_t wt SEC) kSize ->
+	 h0:       lseq (uint_t wt SEC) 8 ->
 	 size_hash: nat {0 < size_hash /\ size_hash <= 8 * numbytes wt} ->
 	 parameters
 
@@ -36,17 +36,17 @@ let size_hash p :size_nat = p.size_hash
 let max_input p : n:nat = (maxint (lenType p) + 1) / 8
 
 (* Definition: Types for block and hash as sequences of words *)
-type block_w p = lseq (uint_t p.wt) 16
-type hash_w p = lseq (uint_t p.wt) size_hash_w
-type ws_w p = lseq (uint_t p.wt) p.kSize
+type block_w p = lseq (uint_t p.wt SEC) 16
+type hash_w p = lseq (uint_t p.wt SEC) size_hash_w
+type ws_w p = lseq (uint_t p.wt SEC) p.kSize
 
 (* Definition of permutation functions *)
-let _Ch p (x:uint_t p.wt) (y:uint_t p.wt) (z:uint_t p.wt) = ((x &. y) ^. ((~. x) &. z))
-let _Maj p (x:uint_t p.wt) (y:uint_t p.wt) (z:uint_t p.wt) = (x &. y) ^. ((x &. z) ^. (y &. z))
-let _Sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[0]) ^. ((x >>>. p.opTable.[1]) ^. (x >>>. p.opTable.[2]))
-let _Sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[3]) ^. ((x >>>. p.opTable.[4]) ^. (x >>>. p.opTable.[5]))
-let _sigma0 p (x:uint_t p.wt) = (x >>>. p.opTable.[6]) ^. ((x >>>. p.opTable.[7]) ^. (x >>. p.opTable.[8]))
-let _sigma1 p (x:uint_t p.wt) = (x >>>. p.opTable.[9]) ^. ((x >>>. p.opTable.[10]) ^. (x >>. p.opTable.[11]))
+let _Ch p (x:uint_t p.wt SEC) (y:uint_t p.wt SEC) (z:uint_t p.wt SEC) : uint_t p.wt SEC = ((x &. y) ^. ((~. x) &. z))
+let _Maj p (x:uint_t p.wt SEC) (y:uint_t p.wt SEC) (z:uint_t p.wt SEC) = (x &. y) ^. ((x &. z) ^. (y &. z))
+let _Sigma0 p (x:uint_t p.wt SEC) = (x >>>. p.opTable.[0]) ^. ((x >>>. p.opTable.[1]) ^. (x >>>. p.opTable.[2]))
+let _Sigma1 p (x:uint_t p.wt SEC) = (x >>>. p.opTable.[3]) ^. ((x >>>. p.opTable.[4]) ^. (x >>>. p.opTable.[5]))
+let _sigma0 p (x:uint_t p.wt SEC) = (x >>>. p.opTable.[6]) ^. ((x >>>. p.opTable.[7]) ^. (x >>. p.opTable.[8]))
+let _sigma1 p (x:uint_t p.wt SEC) = (x >>>. p.opTable.[9]) ^. ((x >>>. p.opTable.[10]) ^. (x >>. p.opTable.[11]))
 
 (* Definition of the scheduling function (part 1) *)
 let step_ws0 (p:parameters) (b:block_w p) (i:size_nat{i < 16}) (s:ws_w p) : Tot (ws_w p) =
@@ -70,7 +70,7 @@ let loop_ws1 p s = repeati (p.kSize - 16) (fun i -> step_ws1 p (i + 16)) s
 
 (* Definition of the core scheduling function *)
 let ws (p:parameters) (b:block_w p) : Tot (ws_w p) =
-  let s = create p.kSize (nat_to_uint #p.wt 0) in
+  let s = create p.kSize (nat_to_uint #p.wt #SEC 0) in
   let s = loop_ws0 p b s in
   let s = loop_ws1 p s in
   s
@@ -144,7 +144,7 @@ let pad_single
   // Encode and write the total length in bits at the end of the padding
   let tlen = n * size_block p + len in
   let tlenbits = tlen * 8 in
-  let x = nat_to_uint #(lenType p) tlenbits in
+  let x = nat_to_uint #(lenType p) #SEC tlenbits in
   let encodedlen = uint_to_bytes_be x in
   let padding = update_slice padding (plen - numbytes (lenType p)) plen encodedlen in
   padding
@@ -177,7 +177,7 @@ let pad
 let len_block_nat (p:parameters) = l:size_nat{l < size_block p}
 noeq type state (p:parameters) =
   {
-    hash:lseq (uint_t p.wt) size_hash_w;
+    hash:lseq (uint_t p.wt SEC) size_hash_w;
     blocks:lbytes (2 * size_block p);
     len_block:len_block_nat p;
     n:size_nat;
@@ -189,7 +189,7 @@ let get_st_len_block #p (st:state p) = st.len_block
 
 (* Definition of the initialization function for convenience *)
 let init (p:parameters) : Tot (state p) =
-  {hash = p.h0; blocks = create (2 * size_block p) (nat_to_uint 0); len_block = 0; n = 0}
+  {hash = p.h0; blocks = create (2 * size_block p) (u8 0); len_block = 0; n = 0}
 
 (* Definition of the single block update function *)
 let update_block (p:parameters) (block:lbytes (size_block p)) (st:state p{(st.n + 1) * (size_block p) <= max_input p /\ st.n + 1 <= max_size_t}) : Tot (st1:state p)(*{st1.n = st.n + 1 /\ st1.len_block = st.len_block})*) =

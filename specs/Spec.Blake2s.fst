@@ -172,7 +172,7 @@ let blake2_compress s m offset flag =
 val blake2s_update_block: dd_prev:size_nat -> d:message_block -> hash_state -> Tot hash_state
 let blake2s_update_block dd_prev d s =
   assert (length d == 16 * 4);
-  let to_compress : lseq uint32 16 = uints_from_bytes_le #U32 #16 d in
+  let to_compress : lseq uint32 16 = uints_from_bytes_le #U32 #SEC d in
   let offset = u64 ((dd_prev + 1) * size_block) in
   blake2_compress s to_compress offset false
 

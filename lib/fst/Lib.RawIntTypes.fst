@@ -31,13 +31,11 @@ let u128_to_UInt128 x = x
 
 let size_to_UInt32 x =  x
 
-let uint_to_nat #t (x:uint_t t) =
+let uint_to_nat #t #l (x:uint_t t l) =
   match t with
   | U8 -> UInt8.v x
   | U16 -> UInt16.v x
   | U32 -> UInt32.v x
   | U64 -> UInt64.v x
   | U128 -> UInt128.v x
-  | SIZE -> UInt32.v x
-  | BYTE -> UInt8.v x
 

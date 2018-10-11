@@ -14,7 +14,7 @@ type alg =
   | Blake2B
 
 inline_for_extraction
-let wt (a:alg) =
+unfold let wt (a:alg) =
   match a with
   | Blake2S -> U32
   | Blake2B -> U64
@@ -44,8 +44,8 @@ let limb_inttype (a:alg) =
   | U32 -> U64
   | U64 -> U128
 
-type word_t (a:alg) = uint_t (wt a)
-type limb_t (a:alg) : Type0 = uint_t (limb_inttype a)
+type word_t (a:alg) = uint_t (wt a) SEC
+type limb_t (a:alg) : Type0 = uint_t (limb_inttype a) SEC
 
 let max_limb (a:alg) = maxint (limb_inttype a)
 
@@ -64,54 +64,60 @@ let to_limb (a:alg) (x:nat{x <= max_limb a}) : limb_t a =
 inline_for_extraction
 let limb_to_word (a:alg) (x:limb_t a) : word_t a =
   match (wt a) with
-  | U32 -> to_u32 #U64 x
-  | U64 -> to_u64 #U128 x
-
+  | U32 -> to_u32 x
+  | U64 -> to_u64 x
 
 
 inline_for_extraction
-let rTable_list_S : l:list (rotval U32){List.Tot.length l == 4} =
+unfold let rtable_t (a:alg) = lseq (rotval (wt a)) 4
+
+[@"opaque_to_smt"]
+inline_for_extraction
+let rTable_list_S : l:List.Tot.llist (rotval U32) 4 =
   [
     size 16; size 12; size 8; size 7
   ]
 
+[@"opaque_to_smt"]
 inline_for_extraction
-let rTable_list_B: l:list (rotval U64){List.Tot.length l == 4} =
+let rTable_list_B: l:List.Tot.llist (rotval U64) 4 =
   [
     size 32; size 24; size 16; size 63
   ]
 
 inline_for_extraction
-let rTable (a:alg) : lseq (rotval (wt a)) 4 =
+let rTable (a:alg) : rtable_t a = 
   match a with
-  | Blake2S -> of_list rTable_list_S
-  | Blake2B -> of_list rTable_list_B
+  | Blake2S -> (of_list rTable_list_S) 
+  | Blake2B -> (of_list rTable_list_B) 
 
 
-inline_for_extraction let list_iv_S: l:list uint32{List.Tot.length l == 8} =
+inline_for_extraction 
+let list_iv_S: l:List.Tot.llist size_t 8 = 
   [@inline_let]
   let l =
-  [u32 0x6A09E667; u32 0xBB67AE85; u32 0x3C6EF372; u32 0xA54FF53A;
-   u32 0x510E527F; u32 0x9B05688C; u32 0x1F83D9AB; u32 0x5BE0CD19] in
+  [0x6A09E667ul; 0xBB67AE85ul; 0x3C6EF372ul; 0xA54FF53Aul;
+   0x510E527Ful; 0x9B05688Cul; 0x1F83D9ABul; 0x5BE0CD19ul] in
   assert_norm(List.Tot.length l == 8);
   l
 
-inline_for_extraction let list_iv_B: l:list uint64{List.Tot.length l == 8}  =
+inline_for_extraction let list_iv_B: List.Tot.llist (uint_t U64 PUB) 8   =
   [@inline_let]
   let l = [
-    u64 0x6A09E667F3BCC908; u64 0xBB67AE8584CAA73B;
-    u64 0x3C6EF372FE94F82B; u64 0xA54FF53A5F1D36F1;
-    u64 0x510E527FADE682D1; u64 0x9B05688C2B3E6C1F;
-    u64 0x1F83D9ABFB41BD6B; u64 0x5BE0CD19137E2179]
+    0x6A09E667F3BCC908uL; 0xBB67AE8584CAA73BuL;
+    0x3C6EF372FE94F82BuL; 0xA54FF53A5F1D36F1uL;
+    0x510E527FADE682D1uL; 0x9B05688C2B3E6C1FuL;
+    0x1F83D9ABFB41BD6BuL; 0x5BE0CD19137E2179uL]
   in
   assert_norm(List.Tot.length l == 8);
   l
 
+
 inline_for_extraction
 let ivTable (a:alg) : lseq (word_t a) 8 =
   match a with
-  | Blake2S -> of_list list_iv_S
-  | Blake2B -> of_list list_iv_B
+  | Blake2S -> map secret (of_list list_iv_S)
+  | Blake2B -> map secret (of_list list_iv_B)
 
 type sigma_elt_t = n:size_t{size_v n < 16}
 type list_sigma_t = l:list sigma_elt_t{List.Tot.length l == 160}
@@ -186,14 +192,15 @@ val blake2_mixing:
   Tot (working_vector_s a)
 
 let blake2_mixing al wv a b c d x y =
+  let rt = rTable al in
   let wv = g2 al wv a b x in
-  let wv = g1 al wv d a (rTable al).[0] in
+  let wv = g1 al wv d a rt.[0] in
   let wv = g2 al wv c d (to_word al 0) in
-  let wv = g1 al wv b c (rTable al).[1] in
+  let wv = g1 al wv b c rt.[1] in
   let wv = g2 al wv a b y in
-  let wv = g1 al wv d a (rTable al).[2] in
+  let wv = g1 al wv d a rt.[2] in
   let wv = g2 al wv c d (to_word al 0) in
-  let wv = g1 al wv b c (rTable al).[3] in
+  let wv = g1 al wv b c rt.[3] in
   wv
 
 
@@ -320,7 +327,7 @@ val blake2_update_block:
   Tot (hash_state_s a)
 
 let blake2_update_block a prev d s =
-  let to_compress : lseq (word_t a) 16 = uints_from_bytes_le #(wt a) #16 d in
+  let to_compress : lseq (word_t a) 16 = uints_from_bytes_le #(wt a) #SEC d in
   let offset = to_limb a prev in
   blake2_compress a s to_compress offset false
 

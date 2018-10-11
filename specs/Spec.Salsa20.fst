@@ -67,8 +67,8 @@ let constant3 = 0x6b206574
 
 
 let setup (k:key) (n:nonce) (st:state) : Tot state =
-  let ks = uints_from_bytes_le #U32 #8 k in
-  let ns = uints_from_bytes_le #U32 #2 n in
+  let ks = uints_from_bytes_le #U32 #SEC #8 k in
+  let ns = uints_from_bytes_le #U32 #SEC #2 n in
   let st = st.[0] <- u32 constant0 in
   let st = update_sub st 1 4 (slice ks 0 4) in
   let st = st.[5] <- u32 constant1 in

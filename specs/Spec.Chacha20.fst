@@ -75,8 +75,8 @@ let setup (k:key) (n:nonce) (st:state) : Tot state =
   let st = st.[1] <- u32 c1 in
   let st = st.[2] <- u32 c2 in
   let st = st.[3] <- u32 c3 in
-  let st = update_sub st 4 8 (uints_from_bytes_le #U32 #8 k) in
-  let st = update_sub st 13 3 (uints_from_bytes_le #U32 #3 n) in
+  let st = update_sub st 4 8 (uints_from_bytes_le #U32 #SEC #8 k) in
+  let st = update_sub st 13 3 (uints_from_bytes_le #U32 #SEC #3 n) in
   st
 
 let chacha20_init (k:key) (n:nonce) : Tot state =

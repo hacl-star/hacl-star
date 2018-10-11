@@ -10,10 +10,10 @@ open Lib.LoopCombinators
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1"
 
 val nat_from_intseq_be_:
-    #t:inttype
-  -> b:seq (uint_t t)
+    #t:inttype -> #l:secrecy_level
+  -> b:seq (uint_t t l)
   -> Tot (n:nat{n < pow2 (length b * bits t)}) (decreases (length b))
-let rec nat_from_intseq_be_ #t b =
+let rec nat_from_intseq_be_ #t #l b =
   let len = length b in
   if len = 0 then 0
   else
@@ -27,17 +27,17 @@ let rec nat_from_intseq_be_ #t b =
 let nat_from_intseq_be = nat_from_intseq_be_
 
 val nat_from_intseq_le_:
-    #t:inttype
-  -> b:seq (uint_t t)
+    #t:inttype -> #l:secrecy_level
+  -> b:seq (uint_t t l)
   -> Tot (n:nat{n < pow2 (length b * bits t)}) (decreases (length b))
-let rec nat_from_intseq_le_ #t b =
+let rec nat_from_intseq_le_ #t #l b =
   let len = length b in
   if len = 0 then 0
   else
     let shift = pow2 (bits t) in
     let tt = Seq.slice b 1 len in
-    let n' = nat_from_intseq_le_ #t tt in
-    let l = uint_to_nat #t (Seq.index b 0) in
+    let n' = nat_from_intseq_le_ #t #l tt in
+    let l = uint_to_nat #t #l (Seq.index b 0) in
     Math.Lemmas.pow2_plus (bits t) ( len * bits t - bits t);
     l + shift * n'
 
@@ -50,7 +50,7 @@ val nat_to_bytes_be_:
   -> n:nat{ n < pow2 (8 * len)}
   -> Tot (b:bytes {length b == len /\ n == nat_from_intseq_be #U8 b}) (decreases len)
 let rec nat_to_bytes_be_ len n =
-  if len = 0 then create #(uint_t U8) len (nat_to_uint 0)
+  if len = 0 then create len (u8 0)
   else
     let len' = len - 1 in
     let byte = u8 (n % 256) in
@@ -68,7 +68,7 @@ val nat_to_bytes_le_:
   -> n:nat{n < pow2 (8 * len)}
   -> Tot (b:bytes {length b == len /\ n == nat_from_intseq_le b}) (decreases len)
 let rec nat_to_bytes_le_ len n =
-  if len = 0 then create #(uint_t U8) len (nat_to_uint 0)
+  if len = 0 then create len (u8 0)
   else
     let len' = len - 1 in
     let byte = u8 (n % 256) in
@@ -99,39 +99,39 @@ let rec index_nat_to_bytes_le len n i =
     assert (n / pow2 8 / pow2 (8 * (i - 1)) == n / (pow2 8 * pow2 (8 * i - 8)))
     end
 
-let uint_to_bytes_le #t n =
+let uint_to_bytes_le #t #l n =
   nat_to_bytes_le (numbytes t) (uint_to_nat n)
 
-let index_uint_to_bytes_le #t u =
+let index_uint_to_bytes_le #t #l u =
   Classical.forall_intro (index_nat_to_bytes_le (numbytes t) (uint_to_nat u))
 
-let uint_to_bytes_be #t n =
+let uint_to_bytes_be #t #l n =
   nat_to_bytes_be (numbytes t) (uint_to_nat n)
 
-let uint_from_bytes_le #t b =
+let uint_from_bytes_le #t #l b =
   let n = nat_from_intseq_le #U8 b in
-  nat_to_uint #t n
+  nat_to_uint #t #l n
 
-let uint_from_bytes_be #t b =
+let uint_from_bytes_be #t #l b =
   let n = nat_from_intseq_be #U8 b in
-  nat_to_uint #t n
+  nat_to_uint #t #l n
 
-let uints_to_bytes_le #t #len l =
+let uints_to_bytes_le #t #l #len ul =
   let b = create (len * numbytes t) (u8 0) in
   repeati len
-    (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_le  l.[i])) b
+    (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_le  ul.[i])) b
 
-let uints_to_bytes_be #t #len l =
+let uints_to_bytes_be #t #l #len ul =
   let b = create (len * numbytes t) (u8 0) in
   repeati len
-    (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_be l.[i])) b
+    (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_be ul.[i])) b
 
-let uints_from_bytes_le #t #len b =
-  let l = create #(uint_t t) len (nat_to_uint 0) in
+let uints_from_bytes_le #t #l #len b =
+  let l = create #(uint_t t l) len (nat_to_uint 0) in
   repeati len
     (fun i l -> l.[i] <- uint_from_bytes_le (sub b (i * numbytes t) (numbytes t))) l
 
-let uints_from_bytes_be #t #len b =
-  let l = create #(uint_t t) len (nat_to_uint 0) in
+let uints_from_bytes_be #t #l #len b =
+  let l = create #(uint_t t l) len (nat_to_uint 0) in
   repeati len
     (fun i l -> l.[i] <- uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))) l
