@@ -35,4 +35,4 @@ let pad (a:hash_alg)
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
 let finish (a:hash_alg) (hashw:hash_w a): Tot (hash:bytes{S.length hash = (size_hash a)}) =
   let hash_final_w = S.slice hashw 0 (size_hash_final_w a) in
-  words_to_be a hash_final_w
+  bytes_of_words a hash_final_w

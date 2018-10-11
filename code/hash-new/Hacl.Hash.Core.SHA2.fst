@@ -132,7 +132,7 @@ inline_for_extraction
 let ws_w (a: sha2_alg) = b:B.buffer (word a) { B.length b = Spec.size_k_w a }
 
 let block_words_be (a: sha2_alg) (h: HS.mem) (b: block_b a) =
-  words_from_be a size_block_w (B.as_seq h b)
+  words_of_bytes a size_block_w (B.as_seq h b)
 
 inline_for_extraction
 val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
@@ -153,7 +153,7 @@ let index_be (a: sha2_alg) (b: B.buffer U8.t) (i: U32.t):
       U32.v i < B.length b / size_word a))
     (ensures (fun h0 r h1 ->
        M.(modifies loc_none h0 h1) /\
-       r = S.index (words_from_be a (B.length b / size_word a) (B.as_seq h0 b)) (U32.v i)))
+       r = S.index (words_of_bytes a (B.length b / size_word a) (B.as_seq h0 b)) (U32.v i)))
 =
   match a with
   | SHA2_224 | SHA2_256 -> C.Endianness.index_32_be b i

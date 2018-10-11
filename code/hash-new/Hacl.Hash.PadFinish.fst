@@ -246,7 +246,7 @@ let finish a s dst =
     B.live h dst /\ B.live h s /\
     M.(modifies (loc_buffer dst) h0 h) /\
     S.equal (S.slice hash 0 (i * Helpers.size_word a))
-      (words_to_be a (S.slice hash_w 0 i))
+      (bytes_of_words a (S.slice hash_w 0 i))
   in
   let f (i: U32.t { U32.(0 <= v i /\ v i < size_hash_final_w a) }): ST.Stack unit
     (requires (fun h -> inv h (U32.v i)))

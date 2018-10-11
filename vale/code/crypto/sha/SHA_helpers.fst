@@ -625,10 +625,10 @@ let update_block (hash:hash256) (block:block256): Tot (hash256) =
   Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) hash hash_1
 
 let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = size_block SHA2_256}) :
-  Lemma (update_block hash (words_from_be SHA2_256 size_block_w block) == update SHA2_256 hash block)
+  Lemma (update_block hash (words_of_bytes SHA2_256 size_block_w block) == update SHA2_256 hash block)
   =
   reveal_opaque shuffle;
-  assert (equal (update_block hash (words_from_be SHA2_256 size_block_w block)) (update SHA2_256 hash block));
+  assert (equal (update_block hash (words_of_bytes SHA2_256 size_block_w block)) (update SHA2_256 hash block));
   ()
 
 let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w SHA2_256) : Lemma
@@ -733,7 +733,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
             qs == reverse_bytes_quad32_seq quads /\
             input2 == seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
-  (ensures  quads_to_block qs == words_from_be SHA2_256 size_block_w input2)
+  (ensures  quads_to_block qs == words_of_bytes SHA2_256 size_block_w input2)
   =
   // calc {
   //   quads_to_block (reverse_bytes_quad32_seq quads)
@@ -743,10 +743,10 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   reveal_opaque reverse_bytes_nat32_def;
   //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (four_reverse (four_map (fun n -> be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))) q)))
 
-  //   words_from_be SHA2_256 16 (seq_nat8_to_seq_U8 (seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE b)))
+  //   words_of_bytes SHA2_256 16 (seq_nat8_to_seq_U8 (seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE b)))
   reveal_opaque le_seq_quad32_to_bytes_def;
-  //   words_from_be SHA2_256 16 (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
-  //   words_from_be SHA2_256 size__w (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
+  //   words_of_bytes SHA2_256 16 (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
+  //   words_of_bytes SHA2_256 size__w (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
   // }
   admit()
 
@@ -860,8 +860,8 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash_w SHA2_256) (quads:seq qu
     //   update_block SHA2_256 h_bytes1 (quads_to_block qs)
     //
     lemma_endian_relation (slice quads (length quads - 4) (length quads)) qs 
-                          input2;  // ==> quads_to_block qs == words_from_be SHA2_256 size_block_w input2
-    //   update_block SHA2_256 h_bytes1 (words_from_be SHA2_256 16 input2)
+                          input2;  // ==> quads_to_block qs == words_of_bytes SHA2_256 size_block_w input2
+    //   update_block SHA2_256 h_bytes1 (words_of_bytes SHA2_256 16 input2)
     lemma_update_block_equiv h_bytes1 input2;
     //   update SHA2_256 h_bytes1 input2
     update_multi_one h_bytes1 input2;

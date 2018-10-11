@@ -263,7 +263,7 @@ let overwrite (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot abcd_t =
   abcd
 
 let update abcd x =
-  let x = words_from_be MD5 16 x in
+  let x = words_of_bytes MD5 16 x in
   let aa = Seq.index abcd ia in
   let bb = Seq.index abcd ib in
   let cc = Seq.index abcd ic in
