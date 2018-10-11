@@ -1,4 +1,4 @@
-module Lib.Endianness
+module Lib.ByteBuffer
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
