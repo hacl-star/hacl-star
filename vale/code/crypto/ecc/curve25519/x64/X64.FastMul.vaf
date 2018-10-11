@@ -28,7 +28,7 @@ open FStar.Tactics
 
 #reset-options "--z3rlimit 100"
 
-procedure{:quick }{:typecheck false} fast_multiply(
+procedure{:quick exportOnly}{:typecheck false} fast_multiply(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
     ghost inB_b:buffer64)
