@@ -30,10 +30,97 @@ let rotl (n_:U32.t{0 < U32.v n_ /\ U32.v n_ < 32}) (x:U32.t): Tot U32.t =
 
 (* Section 6.1.2 Step 1: message schedule *)
 
-let rec w (mi: Seq.lseq (word SHA1) size_block_w) (t: U32.t {U32.v t <= 79}) : Tot (word SHA1) (decreases (U32.v t)) =
-  if U32.lt t 16ul
-  then Seq.index mi (U32.v t)
-  else rotl 1ul (w mi (t `U32.sub` 3ul) `U32.logxor` w mi (t `U32.sub` 8ul) `U32.logxor` w mi (t `U32.sub` 14ul) `U32.logxor` w mi (t `U32.sub` 16ul))
+let rec w' (mi: Seq.lseq (word SHA1) size_block_w) (t: nat {t <= 79}) : GTot (word SHA1) (decreases (t)) =
+  if t < 16
+  then Seq.index mi (t)
+  else rotl 1ul (w' mi (t - 3) `U32.logxor` w' mi (t - 8) `U32.logxor` w' mi (t - 14) `U32.logxor` w' mi (t - 16))
+
+let w (mi: Seq.lseq (word SHA1) size_block_w) (t: U32.t {U32.v t <= 79}) : GTot (word SHA1) = w' mi (U32.v t)
+
+let compute_w_post
+  (mi: Seq.lseq (word SHA1) size_block_w)
+  (n: nat)
+  (res: Seq.lseq (word SHA1) n)
+: GTot Type0
+= (n <= 80 /\ (
+    forall (i: nat) . i < n ==> Seq.index res i == w' mi i
+  ))
+
+let compute_w_post_intro
+  (mi: Seq.lseq (word SHA1) size_block_w)
+  (n: nat)
+  (res: Seq.lseq (word SHA1) n)
+  (u: squash (n <= 80))
+  (f: (i: nat) -> Lemma
+      (requires (i < n))
+      (ensures (i < n /\ Seq.index res i == w' mi i)))
+: Lemma
+  (compute_w_post mi n res)
+= Classical.forall_intro (Classical.move_requires f)
+
+inline_for_extraction
+noextract
+let compute_w_n'
+  (mi: Seq.lseq (word SHA1) size_block_w)
+  (n: nat { n <= 79 } )
+  (w: ((i: nat {i < n}) -> Tot (y: word SHA1 {y == w' mi i})))
+: Tot (y: word SHA1 {y == w' mi n})
+= let r =
+      if n < 16
+      then Seq.index mi n
+      else rotl 1ul (w (n - 3) `U32.logxor` w (n - 8) `U32.logxor` w (n - 14) `U32.logxor` w (n - 16))
+  in
+  r
+
+inline_for_extraction
+noextract
+let compute_w_n
+  (mi: Seq.lseq (word SHA1) size_block_w)
+  (n: nat { n <= 79 } )
+  (accu: Seq.lseq (word SHA1) n)
+: Pure (word SHA1)
+  (requires (compute_w_post mi n accu))
+  (ensures (fun y -> n <= 79 /\ y == w' mi n))
+= [@inline_let]
+  let w (i: nat {i < n}) : Tot (y: word SHA1 {y == w' mi i}) = Seq.index accu i in
+  compute_w_n' mi n w
+
+inline_for_extraction
+noextract
+let compute_w_next
+  (mi: Seq.lseq (word SHA1) size_block_w)
+  (n: nat { n <= 79 } )
+  (accu: Seq.lseq (word SHA1) n)
+: Pure (Seq.lseq (word SHA1) (n + 1))
+  (requires (compute_w_post mi n accu))
+  (ensures (fun accu' -> compute_w_post mi (n + 1) accu'))
+= let wn = compute_w_n mi n accu in
+  let accu' = Seq.snoc accu wn in
+  assert (n + 1 <= 80);
+  let g
+    (i: nat)
+  : Lemma
+    (requires (i < n + 1))
+    (ensures (i < n + 1 /\ Seq.index accu' i == w' mi i))
+  = if i = n
+    then ()
+    else ()
+  in
+  compute_w_post_intro mi (n + 1) accu' () g;
+  accu'
+
+let rec compute_w
+  (mi: Seq.lseq (word SHA1) size_block_w)
+  (n: nat)
+  (accu: Seq.lseq (word SHA1) n)
+: Pure (Seq.lseq (word SHA1) 80)
+  (requires (compute_w_post mi n accu))
+  (ensures (fun res -> compute_w_post mi 80 res))
+  (decreases (80 - n))
+= assert (n <= 80); // this assert is necessary for Z3 to prove that n <= 79 in the else branch
+  if n = 80
+  then accu
+  else compute_w mi (n + 1) (compute_w_next mi n accu)
 
 (* Section 4.1.1: logical functions *)
 
@@ -68,13 +155,14 @@ let step3_body'
   (mi: word_block)
   (st: hash_w SHA1)
   (t: U32.t {U32.v t < 80})
+  (wt: word SHA1 { wt == w mi t } )
 : Tot (hash_w SHA1)
 = let sta = Seq.index st 0 in
   let stb = Seq.index st 1 in
   let stc = Seq.index st 2 in
   let std = Seq.index st 3 in
   let ste = Seq.index st 4 in
-  let _T = rotl 5ul sta `U32.add_mod` f t stb stc std `U32.add_mod` ste `U32.add_mod` k t `U32.add_mod` w mi t in
+  let _T = rotl 5ul sta `U32.add_mod` f t stb stc std `U32.add_mod` ste `U32.add_mod` k t `U32.add_mod` wt in
   let e = std in
   let d = stc in
   let c = rotl 30ul stb in
@@ -90,16 +178,18 @@ let step3_body'
 
 let step3_body
   (mi: word_block)
+  (w: (t: nat { t < 80 }) -> Tot (wt: word SHA1 { wt == w' mi t } ))
   (st: hash_w SHA1)
   (t: nat {t < 80})
 : Tot (hash_w SHA1)
-= step3_body' mi st (U32.uint_to_t t)
+= step3_body' mi st (U32.uint_to_t t) (w t)
 
 let step3
   (mi: word_block)
   (h: hash_w SHA1)
 : Tot (hash_w SHA1)
-= Spec.Loops.repeat_range 0 80 (step3_body mi) h
+= let cwt = compute_w mi 0 Seq.empty in
+  Spec.Loops.repeat_range 0 80 (step3_body mi (fun i -> Seq.index cwt i)) h
 
 (* Section 6.1.2 Step 4 *)
 
