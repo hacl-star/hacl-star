@@ -521,18 +521,6 @@ val loop2:
     (requires fun h -> h0 == h)
     (ensures  fun _ _  -> loop2_inv #b0 #blen0 #b1 #blen1 h0 n write0 write1 spec (v n))
 
-(** Compares two byte buffers of equal length returning a bool *)
-inline_for_extraction
-val lbytes_eq:
-    #len:size_t
-  -> a:lbuffer uint8 (v len)
-  -> b:lbuffer uint8 (v len) ->
-  Stack bool
-    (requires fun h -> B.live h a /\ B.live h b)
-    (ensures  fun h0 r h1 ->
-      B.modifies B.loc_none h0 h1 /\
-      r == Seq.lbytes_eq #(v len) (B.as_seq h0 a) (B.as_seq h0 b))
-
 (** Allocates a mutable Buffer, perform computations [impl] and securely delete the allocated buffer *)
 inline_for_extraction
 val alloc:
