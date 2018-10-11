@@ -25,7 +25,7 @@ let keccak_piln: lseq pilns_t 24 =
 
 let keccak_rndc: lseq uint64 24 =
   assert_norm (List.Tot.length rndc_list == 24);
-  of_list rndc_list
+  map secret (of_list rndc_list)
 
 unfold
 type state = lseq uint64 25
