@@ -100,7 +100,7 @@ $(OUTPUT_DIR)/FStar_%.krml $(OUTPUT_DIR)/LowStar_%.krml $(OUTPUT_DIR)/C%.krml: |
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-$(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml $(OUTPUT_DIR)/Lib_IntTypes.krml $(OUTPUT_DIR)/Lib_Endianness.krml: | .depend
+$(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml $(OUTPUT_DIR)/Lib_IntTypes.krml $(OUTPUT_DIR)/Lib_ByteBuffer.krml: | .depend
 	$(FSTARR) --codegen Kremlin --lax \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
@@ -129,7 +129,7 @@ $(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
 	  --expose_interfaces \
 	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	  $(HACL_HOME)/lib/fst/Lib.Endianness.fst \
+	  $(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
 	  $(HACL_HOME)/lib/c/Lib.Loops.fst \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \

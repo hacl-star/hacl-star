@@ -10,7 +10,7 @@ open LowStar.BufferOps
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Endianness
+open Lib.ByteBuffer
 
 open Spec.SHA3.Constants
 
@@ -178,7 +178,7 @@ let state_pi_rho_inner i current s =
   index_map S.sizes_v piln_list (v i);
   let _Y = iindex keccak_piln i in
   let r = iindex keccak_rotc i in
-  let temp = s.(_Y) in  
+  let temp = s.(_Y) in
   s.(_Y) <- rotl current.(size 0) r;
   current.(size 0) <- temp
 
@@ -189,7 +189,7 @@ val state_pi_rho:
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
-      as_seq h1 s == S.state_pi_rho (as_seq h0 s)) 
+      as_seq h1 s == S.state_pi_rho (as_seq h0 s))
 let state_pi_rho s =
   push_frame();
   let h0 = ST.get () in
@@ -393,7 +393,7 @@ inline_for_extraction noextract
 val absorb_last:
     delimitedSuffix:byte_t
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
-  -> rem:size_t{v rem < v rateInBytes}  
+  -> rem:size_t{v rem < v rateInBytes}
   -> input:lbytes (v rem)
   -> s:state
   -> Stack unit
@@ -401,7 +401,7 @@ val absorb_last:
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s ==
-      S.absorb_last delimitedSuffix (v rateInBytes) (v rem) 
+      S.absorb_last delimitedSuffix (v rateInBytes) (v rem)
         (as_seq h0 input) (as_seq h0 s))
 let absorb_last delimitedSuffix rateInBytes rem input s =
   let open Lib.RawIntTypes in
@@ -411,7 +411,7 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
   update_sub #uint8 #(v rateInBytes) lastBlock (size 0) rem input;
   lastBlock.(rem) <- byte_to_uint8 delimitedSuffix;
   loadState rateInBytes lastBlock s;
-  if not ((delimitedSuffix &. byte 0x80) =. byte 0) && 
+  if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
      (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. size 1))
   then state_permute s;
   absorb_next s rateInBytes;
@@ -428,25 +428,15 @@ let lemma_rateInBytes _ _ _ = ()
 inline_for_extraction noextract
 val absorb_inner:
     rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
-  -> inputByteLen:size_t
-  -> input:lbytes (v inputByteLen)
-  -> i:size_t{v i < v inputByteLen / v rateInBytes}
+  -> block:lbytes (v rateInBytes)
   -> s:state
   -> Stack unit
-    (requires fun h0 -> live h0 s /\ live h0 input /\ disjoint s input)
+    (requires fun h0 -> live h0 s /\ live h0 block /\ disjoint s block)
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
-      as_seq h1 s == S.absorb_inner (v rateInBytes) (v inputByteLen) 
-        (as_seq h0 input) (v i) (as_seq h0 s))
-let absorb_inner rateInBytes inputByteLen input i s =
-  lemma_rateInBytes (v inputByteLen) (v rateInBytes) (v i);
-  let block = sub input (i *. rateInBytes) rateInBytes in
-  // SZ: repeat_blocks is defined in terms of LSeq.seq_sub but sub is specified
-  // in terms of LSeq.sub, so we need to prove extensional equality explicitly.
-  let h = ST.get () in
-  LSeq.eq_intro
-    (LSeq.sub #_ #(v inputByteLen) (as_seq h input) (v (i *. rateInBytes)) (v rateInBytes))
-    (LSeq.seq_sub (as_seq h input) (v (i *. rateInBytes)) (v rateInBytes));
+      as_seq h1 s ==
+      S.absorb_inner (v rateInBytes) (as_seq h0 block) (as_seq h0 s))
+let absorb_inner rateInBytes block s =
   loadState rateInBytes block s;
   state_permute s
 
@@ -461,25 +451,17 @@ val absorb:
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s ==
-      S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen) 
+      S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen)
         (as_seq h0 input) delimitedSuffix)
 let absorb s rateInBytes inputByteLen input delimitedSuffix =
-  let nb = inputByteLen /. rateInBytes in
-  let rem = inputByteLen %. rateInBytes in
   [@ inline_let]
-  let spec h0 = S.absorb_inner (v rateInBytes) (v inputByteLen) (as_seq h0 input) in
-  let h0 = ST.get () in
-  loop1 h0 nb s spec (fun i -> 
-    Loop.unfold_repeati (v nb) (spec h0) (as_seq h0 s) (v i);
-    absorb_inner rateInBytes inputByteLen input i s);
-  let last = sub input (nb *. rateInBytes) rem in
-  // SZ: repeat_blocks is defined in terms of LSeq.seq_sub but sub is specified
-  // in terms of LSeq.sub, so we need to prove extensional equality explicitly.
-  let h = ST.get () in
-  LSeq.eq_intro
-    (LSeq.sub #_ #(v inputByteLen) (as_seq h input) (v (nb *. rateInBytes)) (v rem))
-    (LSeq.seq_sub (as_seq h input) (v (nb *. rateInBytes)) (v rem));
-  absorb_last delimitedSuffix rateInBytes rem last s
+  let spec_f = (fun i -> S.absorb_inner (v rateInBytes)) in
+  [@ inline_let]
+  let spec_l = (fun i -> S.absorb_last delimitedSuffix (v rateInBytes)) in
+  loop_blocks rateInBytes inputByteLen input
+  spec_f spec_l
+  (fun i -> absorb_inner rateInBytes)
+  (fun i -> absorb_last delimitedSuffix rateInBytes) s
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
 
@@ -497,7 +479,7 @@ val lemma_update_squeeze:
     (ensures o1 == snd (S.squeeze_inner rateInBytes outputByteLen i (s, o)))
 let lemma_update_squeeze rateInBytes outputByteLen i s o o1 =
   Seq.lemma_split (LSeq.sub o1 0 (i * rateInBytes + rateInBytes)) (i * rateInBytes);
-  // SZ: applying the above lemma is useless without knowing that 
+  // SZ: applying the above lemma is useless without knowing that
   // LSeq.append is FStar.Seq.append and that LSeq.sub s o1 ... == Seq.slice ...
   // We can either prove a similar lemma written in terms of LSeq.sub and
   // LSeq.append in LSeq, or make some definitions transparent
