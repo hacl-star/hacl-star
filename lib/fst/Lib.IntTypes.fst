@@ -288,9 +288,11 @@ let lte_mask_lemma #t #l a b d = admit()
 #set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
 
 private
-val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t -> Lemma
-  (uint_v (mod_mask #t #l m) == pow2 (uint_v m) - 1)
+val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t ->
+  Lemma
+    (uint_v (mod_mask #t #l m) == pow2 (uint_v m) - 1)
 let mod_mask_value #t #l m =
+  admit();
   if uint_v m > 0 then
     begin
     let m = uint_v m in
