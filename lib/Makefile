@@ -19,7 +19,6 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
 
 FILES = $(addprefix fst/, \
 	Lib.IntTypes.fst \
-	Lib.RawIntTypes.fst \
 	Lib.Sequence.fst \
 	Lib.ByteSequence.fst \
 	Lib.Buffer.fst \
