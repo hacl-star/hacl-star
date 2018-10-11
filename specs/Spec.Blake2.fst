@@ -31,8 +31,6 @@ inline_for_extraction let size_hash_w : size_nat = 8
 inline_for_extraction let size_block_w : size_nat = 16
 inline_for_extraction let size_word (a:alg) : size_nat = numbytes (wt a)
 inline_for_extraction let size_block (a:alg) : size_nat = size_block_w * (size_word a)
-inline_for_extraction let max_size_hash : size_nat = 32
-
 inline_for_extraction let size_const_iv : size_nat = 8
 inline_for_extraction let size_const_sigma : size_nat = 160
 
@@ -67,18 +65,14 @@ let limb_to_word (a:alg) (x:limb_t a) : word_t a =
   | U32 -> to_u32 x
   | U64 -> to_u64 x
 
-
-inline_for_extraction
 unfold let rtable_t (a:alg) = lseq (rotval (wt a)) 4
 
-[@"opaque_to_smt"]
 inline_for_extraction
 let rTable_list_S : l:List.Tot.llist (rotval U32) 4 =
   [
     size 16; size 12; size 8; size 7
   ]
 
-[@"opaque_to_smt"]
 inline_for_extraction
 let rTable_list_B: l:List.Tot.llist (rotval U64) 4 =
   [
@@ -86,32 +80,30 @@ let rTable_list_B: l:List.Tot.llist (rotval U64) 4 =
   ]
 
 inline_for_extraction
-let rTable (a:alg) : rtable_t a = 
+let rTable (a:alg) : rtable_t a =
   match a with
-  | Blake2S -> (of_list rTable_list_S) 
-  | Blake2B -> (of_list rTable_list_B) 
+  | Blake2S -> (of_list rTable_list_S)
+  | Blake2B -> (of_list rTable_list_B)
 
-
-inline_for_extraction 
-let list_iv_S: l:List.Tot.llist size_t 8 = 
+inline_for_extraction
+let list_iv_S: l:List.Tot.llist size_t 8 =
   [@inline_let]
-  let l =
-  [0x6A09E667ul; 0xBB67AE85ul; 0x3C6EF372ul; 0xA54FF53Aul;
-   0x510E527Ful; 0x9B05688Cul; 0x1F83D9ABul; 0x5BE0CD19ul] in
+  let l = [
+    0x6A09E667ul; 0xBB67AE85ul; 0x3C6EF372ul; 0xA54FF53Aul;
+    0x510E527Ful; 0x9B05688Cul; 0x1F83D9ABul; 0x5BE0CD19ul] in
   assert_norm(List.Tot.length l == 8);
   l
 
-inline_for_extraction let list_iv_B: List.Tot.llist (uint_t U64 PUB) 8   =
+inline_for_extraction
+let list_iv_B: List.Tot.llist (uint_t U64 PUB) 8 =
   [@inline_let]
   let l = [
     0x6A09E667F3BCC908uL; 0xBB67AE8584CAA73BuL;
     0x3C6EF372FE94F82BuL; 0xA54FF53A5F1D36F1uL;
     0x510E527FADE682D1uL; 0x9B05688C2B3E6C1FuL;
-    0x1F83D9ABFB41BD6BuL; 0x5BE0CD19137E2179uL]
-  in
+    0x1F83D9ABFB41BD6BuL; 0x5BE0CD19137E2179uL] in
   assert_norm(List.Tot.length l == 8);
   l
-
 
 inline_for_extraction
 let ivTable (a:alg) : lseq (word_t a) 8 =
@@ -119,11 +111,12 @@ let ivTable (a:alg) : lseq (word_t a) 8 =
   | Blake2S -> map secret (of_list list_iv_S)
   | Blake2B -> map secret (of_list list_iv_B)
 
+
 type sigma_elt_t = n:size_t{size_v n < 16}
 type list_sigma_t = l:list sigma_elt_t{List.Tot.length l == 160}
 
-#reset-options "--lax"
-inline_for_extraction let list_sigma: list_sigma_t =
+inline_for_extraction
+let list_sigma: list_sigma_t =
   [@inline_let]
   let l = [
     size  0; size  1; size  2; size  3; size  4; size  5; size  6; size  7;
@@ -150,46 +143,36 @@ inline_for_extraction let list_sigma: list_sigma_t =
   assert_norm(List.Tot.length l == 160);
   l
 
-#reset-options
-
 let const_sigma:lseq sigma_elt_t size_const_sigma =
   assert_norm (List.Tot.length list_sigma == size_const_sigma);
   of_list list_sigma
 
 
-inline_for_extraction
-let const_FF (a:alg) : word_t a =
-  match (wt a) with
-  | U32 -> u32 0xFFFFFFFF
-  | U64 -> u64 0xFFFFFFFFFFFFFFFF
-
-
 (* Algorithms types *)
-type working_vector_s (a:alg) = lseq (word_t a) size_block_w
-type message_block_ws (a:alg) = lseq (word_t a) size_block_w
-type message_block_s (a:alg) = lseq uint8 (size_block a)
-type hash_state_s (a:alg) = lseq (word_t a) size_hash_w
+type vector_ws (a:alg) = lseq (word_t a) size_block_w
+type block_ws (a:alg) = lseq (word_t a) size_block_w
+type block_s (a:alg) = lseq uint8 (size_block a)
+type hash_s (a:alg) = lseq (word_t a) size_hash_w
 type idx_t = n:size_nat{n < 16}
-type last_block_flag = bool
-
 
 (* Functions *)
-let g1 (a:alg) (wv:working_vector_s a) (i:idx_t) (j:idx_t) (r:rotval (wt a)) : Tot (working_vector_s a) =
+let g1 (a:alg) (wv:vector_ws a) (i:idx_t) (j:idx_t) (r:rotval (wt a)) : Tot (vector_ws a) =
   wv.[i] <- (wv.[i] ^. wv.[j]) >>>. r
 
-let g2 (a:alg) (wv:working_vector_s a) (i:idx_t) (j:idx_t) (x:word_t a) : Tot (working_vector_s a) =
+let g2 (a:alg) (wv:vector_ws a) (i:idx_t) (j:idx_t) (x:word_t a) : Tot (vector_ws a) =
   wv.[i] <- (wv.[i] +. wv.[j] +. x)
 
+
 val blake2_mixing:
-  a:alg
-  -> ws:working_vector_s a
+    a:alg
+  -> ws:vector_ws a
   -> idx_t
   -> idx_t
   -> idx_t
   -> idx_t
   -> word_t a
   -> word_t a ->
-  Tot (working_vector_s a)
+  Tot (vector_ws a)
 
 let blake2_mixing al wv a b c d x y =
   let rt = rTable al in
@@ -206,10 +189,10 @@ let blake2_mixing al wv a b c d x y =
 
 val blake2_round1:
     a:alg
-  -> wv:working_vector_s a
-  -> m:message_block_ws a
+  -> wv:vector_ws a
+  -> m:block_ws a
   -> i:size_nat ->
-  Tot (working_vector_s a)
+  Tot (vector_ws a)
 
 let blake2_round1 a wv m i =
   let s = sub const_sigma ((i % 10) * 16) 16 in
@@ -222,10 +205,10 @@ let blake2_round1 a wv m i =
 
 val blake2_round2:
     a:alg
-  -> wv:working_vector_s a
-  -> m:message_block_ws a
+  -> wv:vector_ws a
+  -> m:block_ws a
   -> i:size_nat ->
-  Tot (working_vector_s a)
+  Tot (vector_ws a)
 
 let blake2_round2 a wv m i =
   let s = sub const_sigma ((i % 10) * 16) 16 in
@@ -238,10 +221,10 @@ let blake2_round2 a wv m i =
 
 val blake2_round:
     a:alg
-  -> m:message_block_ws a
+  -> m:block_ws a
   -> i:size_nat
-  -> wv:working_vector_s a ->
-  Tot (working_vector_s a)
+  -> wv:vector_ws a ->
+  Tot (vector_ws a)
 
 let blake2_round a m i wv =
   let wv = blake2_round1 a wv m i in
@@ -250,13 +233,13 @@ let blake2_round a m i wv =
 
 
 val blake2_compress1:
-  a:alg
-  -> wv:working_vector_s a
-  -> s:hash_state_s a
-  -> m:message_block_ws a
+    a:alg
+  -> wv:vector_ws a
+  -> s:hash_s a
+  -> m:block_ws a
   -> offset:limb_t a
-  -> flag:last_block_flag ->
-  Tot (working_vector_s a)
+  -> flag:bool ->
+  Tot (vector_ws a)
 
 let blake2_compress1 a wv s m offset flag =
   let wv = update_sub wv 0 8 s in
@@ -265,7 +248,7 @@ let blake2_compress1 a wv s m offset flag =
   let high_offset = limb_to_word a (shift_right #(limb_inttype a) offset (size (bits (wt a)))) in
   let wv_12 = wv.[12] ^. low_offset in
   let wv_13 = wv.[13] ^. high_offset in
-  let wv_14 = wv.[14] ^. (const_FF a) in
+  let wv_14 = wv.[14] ^. (ones (wt a) SEC) in
   let wv = wv.[12] <- wv_12 in
   let wv = wv.[13] <- wv_13 in
   let wv = if flag then wv.[14] <- wv_14 else wv in
@@ -274,19 +257,19 @@ let blake2_compress1 a wv s m offset flag =
 
 val blake2_compress2:
     a:alg
-  -> wv:working_vector_s a
-  -> m:message_block_ws a ->
-  Tot (working_vector_s a)
+  -> wv:vector_ws a
+  -> m:block_ws a ->
+  Tot (vector_ws a)
 
 let blake2_compress2 a wv m = repeati (rounds a) (blake2_round a m) wv
 
 
 val blake2_compress3_inner:
-  a:alg
-  -> ws:working_vector_s a
+    a:alg
+  -> ws:vector_ws a
   -> i:size_nat{i < 8}
-  -> s:hash_state_s a ->
-  Tot (hash_state_s a)
+  -> s:hash_s a ->
+  Tot (hash_s a)
 
 let blake2_compress3_inner a wv i s =
   let i_plus_8 = i + 8 in
@@ -296,21 +279,21 @@ let blake2_compress3_inner a wv i s =
 
 
 val blake2_compress3:
-  a:alg
-  -> ws:working_vector_s a
-  -> s:hash_state_s a ->
-  Tot (hash_state_s a)
+    a:alg
+  -> ws:vector_ws a
+  -> s:hash_s a ->
+  Tot (hash_s a)
 
 let blake2_compress3 a wv s = repeati 8 (blake2_compress3_inner a wv) s
 
 
 val blake2_compress:
     a:alg
-  -> s:hash_state_s a
-  -> m:message_block_ws a
+  -> s:hash_s a
+  -> m:block_ws a
   -> offset:limb_t a
-  -> last_block_flag ->
-  Tot (hash_state_s a)
+  -> flag:bool ->
+  Tot (hash_s a)
 
 let blake2_compress a s m offset flag =
   let wv = create 16 (to_word a 0) in
@@ -319,12 +302,13 @@ let blake2_compress a s m offset flag =
   let s = blake2_compress3 a wv s in
   s
 
+
 val blake2_update_block:
     a:alg
   -> prev:nat{prev <= max_limb a}
-  -> d:message_block_s a
-  -> s:hash_state_s a ->
-  Tot (hash_state_s a)
+  -> d:block_s a
+  -> s:hash_s a ->
+  Tot (hash_s a)
 
 let blake2_update_block a prev d s =
   let to_compress : lseq (word_t a) 16 = uints_from_bytes_le #(wt a) #SEC d in
@@ -334,10 +318,10 @@ let blake2_update_block a prev d s =
 
 val blake2_init_hash:
     a:alg
-  -> s:hash_state_s a
+  -> s:hash_s a
   -> kk:size_nat{kk <= 32}
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
-  Tot (hash_state_s a)
+  Tot (hash_s a)
 
 let blake2_init_hash a s kk nn =
   let s0 = s.[0] in
@@ -350,7 +334,7 @@ val blake2_init:
   -> kk:size_nat{kk <= 32}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
-  Tot (hash_state_s a)
+  Tot (hash_s a)
 
 let blake2_init a kk k nn =
   let s = blake2_init_hash a (ivTable a) kk nn in
@@ -366,8 +350,8 @@ val blake2_update_last:
   -> prev:nat{prev <= max_limb a}
   -> len:size_nat{len <= (size_block a)}
   -> last:lbytes len
-  -> s:hash_state_s a ->
-  Tot (hash_state_s a)
+  -> s:hash_s a ->
+  Tot (hash_s a)
 
 let blake2_update_last a prev len last s =
   let last_block = create (size_block a) (u8 0) in
@@ -378,13 +362,14 @@ let blake2_update_last a prev len last s =
 
 val blake2_finish:
     a:alg
-  -> s:hash_state_s a
+  -> s:hash_s a
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
   Tot (lbytes nn)
 
 let blake2_finish a s nn =
   let full = uints_to_bytes_le s in
   sub full 0 nn
+
 
 val blake2:
     a:alg
