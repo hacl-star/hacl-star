@@ -103,7 +103,7 @@ val round_op_gen
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\ // better to add this here also to ease chaining
-    B.as_seq h' abcd == Spec.round_op_gen f (B.as_seq h abcd) (E.seq_uint32_of_be 16 (B.as_seq h x)) (U32.v a) (U32.v b) (U32.v c) (U32.v d) (U32.v k) s (U32.v i)
+    B.as_seq h' abcd == Spec.round_op_gen f (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x)) (U32.v a) (U32.v b) (U32.v c) (U32.v d) (U32.v k) s (U32.v i)
   ))
 
 #reset-options "--z3rlimit 16" // --using_facts_from '* -FStar.Int8 -FStar.Int16 -FStar.Int32 -FStar.Int64 -FStar.Int128 -FStar.UInt16 -FStar.UInt64 -FStar.UInt128'"
@@ -112,12 +112,12 @@ let round_op_gen f abcd x a b c d k s i =
   let h = HST.get () in
   assert_norm (64 / 4 == 16);
   assert_norm (64 % 4 == 0);
-  let sx = Ghost.hide (E.seq_uint32_of_be 16 (B.as_seq h x)) in
+  let sx = Ghost.hide (E.seq_uint32_of_le 16 (B.as_seq h x)) in
   let va = B.index abcd a in
   let vb = B.index abcd b in
   let vc = B.index abcd c in
   let vd = B.index abcd d in
-  let xk = CE.index_32_be x k in
+  let xk = CE.index_32_le x k in
   assert (xk == Seq.index (Ghost.reveal sx) (U32.v k));
   let ti = t (i `U32.sub` 1ul) in
   let v = (vb `U32.add_mod` ((va `U32.add_mod` f vb vc vd `U32.add_mod` xk `U32.add_mod` ti) <<< s)) in
@@ -149,7 +149,7 @@ let round1
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.round1 (B.as_seq h abcd) (E.seq_uint32_of_be 16 (B.as_seq h x))
+    B.as_seq h' abcd == Spec.round1 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
   let _ = round1_op abcd x ia ib ic id  0ul  7ul  1ul in
@@ -191,7 +191,7 @@ let round2
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.round2 (B.as_seq h abcd) (E.seq_uint32_of_be 16 (B.as_seq h x))
+    B.as_seq h' abcd == Spec.round2 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
   let _ = round2_op abcd x ia ib ic id 1ul 5ul 17ul in
@@ -233,7 +233,7 @@ let round3
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.round3 (B.as_seq h abcd) (E.seq_uint32_of_be 16 (B.as_seq h x))
+    B.as_seq h' abcd == Spec.round3 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
   let _ = round3_op abcd x ia ib ic id 5ul 4ul 33ul in
@@ -275,7 +275,7 @@ let round4
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.round4 (B.as_seq h abcd) (E.seq_uint32_of_be 16 (B.as_seq h x))
+    B.as_seq h' abcd == Spec.round4 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
   let _ = round4_op abcd x ia ib ic id 0ul 6ul 49ul in
@@ -314,7 +314,7 @@ let rounds
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.rounds (B.as_seq h abcd) (E.seq_uint32_of_be 16 (B.as_seq h x))
+    B.as_seq h' abcd == Spec.rounds (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
   round1 abcd x;
