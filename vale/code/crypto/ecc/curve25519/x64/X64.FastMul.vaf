@@ -26,9 +26,9 @@ open FStar.Tactics
 
 //ghost procedure assert_by_tactic(ghost e:int, ghost t:int) extern;
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 100"
 
-procedure{:quick exportOnly}{:typecheck false} fast_multiply(
+procedure{:quick }{:typecheck false} fast_multiply(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
     ghost inB_b:buffer64)
@@ -126,11 +126,11 @@ procedure{:quick exportOnly}{:typecheck false} fast_multiply(
 //               d1, r12, r14,
 //               overflow0, overflow1, overflow2);
 //    assert a0 * b == a0b;   // PASSES 
-    assert_by_tactic(a0b == a0 * b, int_canon);   // PASSES 
+//    assert_by_tactic(a0b == a0 * b, int_canon);   // PASSES 
 //    assert rax == add_wrap64(rdx, carry);
 //    assert overflow(efl) == rdx + carry >= pow2_64;
 //    assert rax + pow2_64 * carry_new == rdx + carry;
-/*
+
 //
 //    "movq  8(A), %%rdx; " /* A[1] */
 //    "mulx   (B),  %%r8,  %%r9; " /* A[1]*B[0] */    "xorl %%r10d, %%r10d ;"  "adcx 8(dst),  %%r8 ;"    "movq  %%r8,  8(dst) ;"
@@ -171,13 +171,13 @@ procedure{:quick exportOnly}{:typecheck false} fast_multiply(
 //    /*******************************************/   "adox %%rdx, %%rax ;"    "adcx  %%r8, %%rax ;"    "movq %%rax, 56(dst) ;"
 
     Load64_buffer(rdx, inA_ptr, 24, Secret, inA_b, 3);     /* A[3] */
-    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0, Secret));  /* A[3]*B[0] */ Xor64(r10, r10);       Adcx64Wrap(r8, Mem(dst_ptr, 24, dst_b, 2, Secret));   Store64_buffer(dst_ptr,  r8, 24, Secret, dst_b, 3);
+    Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0, Secret));  /* A[3]*B[0] */ Xor64(r10, r10);       Adcx64Wrap(r8, Mem(dst_ptr, 24, dst_b, 3, Secret));   Store64_buffer(dst_ptr,  r8, 24, Secret, dst_b, 3);
     Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1, Secret));  /* A[3]*B[1] */ Adox64Wrap(r10,  r9);  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 32, Secret, dst_b, 4);
 
     Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2, Secret));  /* A[3]*B[2] */ Adox64Wrap(r12, r11);  Adcx64Wrap(r12, r14);                         Store64_buffer(dst_ptr, r12, 40, Secret, dst_b, 5);   Mov64( r8, 0);
     Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3, Secret));  /* A[3]*B[3] */ Adox64Wrap(r14, r13);  Adcx64Wrap(r14, rax);                         Store64_buffer(dst_ptr, r14, 48, Secret, dst_b, 6);   Mov64(rax, 0);
     /*******************************************/                  Adox64Wrap(rax, rdx);  Adcx64Wrap(rax, r8);                          Store64_buffer(dst_ptr, rax, 56, Secret, dst_b, 7);
-*/
+
 }
 
 /*
