@@ -176,20 +176,34 @@ let step3_body'
     e;
   ]
 
+[@unifier_hint_injective]
+inline_for_extraction
+let step3_body_w_t
+  (mi: word_block)
+: Tot Type
+= (t: nat { t < 80 }) -> Tot (wt: word SHA1 { wt == w' mi t } )
+
 let step3_body
   (mi: word_block)
-  (w: (t: nat { t < 80 }) -> Tot (wt: word SHA1 { wt == w' mi t } ))
+  (w: step3_body_w_t mi)
   (st: hash_w SHA1)
   (t: nat {t < 80})
 : Tot (hash_w SHA1)
 = step3_body' mi st (U32.uint_to_t t) (w t)
+
+inline_for_extraction
+let index_compute_w
+  (mi: word_block)
+  (cwt: Seq.lseq (word SHA1) 80 { compute_w_post mi 80 cwt } )
+: Tot (step3_body_w_t mi)
+= fun (t: nat {t < 80}) -> (Seq.index cwt t <: (wt: word SHA1 { wt == w' mi t }))
 
 let step3
   (mi: word_block)
   (h: hash_w SHA1)
 : Tot (hash_w SHA1)
 = let cwt = compute_w mi 0 Seq.empty in
-  Spec.Loops.repeat_range 0 80 (step3_body mi (fun i -> Seq.index cwt i)) h
+  Spec.Loops.repeat_range 0 80 (step3_body mi (index_compute_w mi cwt)) h
 
 (* Section 6.1.2 Step 4 *)
 
