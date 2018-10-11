@@ -59,24 +59,6 @@ let for_all2 #a #b #len f x y =
   let r = map2 (fun xi yi -> f xi yi) x y in
   Seq.for_all (fun bi -> bi = true) r
 
-val lbytes_eq_inner:
-    #len:size_nat
-  -> a:lseq uint8 len
-  -> b:lseq uint8 len
-  -> i:size_nat{i < len}
-  -> r:bool
-  -> bool
-let lbytes_eq_inner #len a b i r =
-  let open Lib.RawIntTypes in
-  let open FStar.UInt8 in
-  r && (u8_to_UInt8 (index a i) =^ u8_to_UInt8 (index b i))
-
-val lbytes_eq_state: len:size_nat -> i:size_nat{i <= len} -> Type0
-let lbytes_eq_state len i = bool
-
-let lbytes_eq #len a b =
-  repeat_gen len (lbytes_eq_state len) (lbytes_eq_inner a b) true
-
 (** Selecting a subset of an unbounded Sequence *)
 val seq_sub:
     #a:Type

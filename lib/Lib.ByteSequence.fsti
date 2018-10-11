@@ -14,6 +14,7 @@ type lbytes (len:size_nat) = lseq uint8 len
 
 let to_lbytes (b:bytes{length b > 0 /\ length b < max_size_t}) : lbytes (length b) = to_lseq #uint8 b
 
+val lbytes_eq:#len:size_nat -> lseq uint8 len -> lseq uint8 len -> bool
 
 /// Conversions between natural numbers and sequences
 ///

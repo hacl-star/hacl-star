@@ -184,10 +184,6 @@ val for_all2:#a:Type -> #b:Type -> #len:size_nat
   -> s2:lseq b len
   -> bool
 
-(** Secure comparison of Byte Sequences *)
-(* BB. TODO: The following function should move to ByteSequence *)
-val lbytes_eq:#len:size_nat -> lseq uint8 len -> lseq uint8 len -> bool
-
 (* The following functions allow us to bridge between unbounded and bounded sequences *)
 val map_blocks:
     #a:Type0
