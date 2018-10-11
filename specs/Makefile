@@ -27,7 +27,9 @@ ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
 
 ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 
-all: $(ALL_CHECKED_FILES)
+all: verify test
+
+verify: $(ALL_CHECKED_FILES)
 
 # Always generate the dependency file
 .depend:
@@ -73,3 +75,5 @@ $(OUTPUT_DIR)/%_AutoTest.exe: $(ALL_CMX_FILES) $(OUTPUT_DIR)/%_AutoTest.ml
 clean:
 	rm -rf $(OUTPUT_DIR)
 	rm -rf *.checked
+
+.PHONY: all verify test clean
