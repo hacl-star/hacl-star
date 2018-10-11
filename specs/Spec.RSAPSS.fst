@@ -7,6 +7,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
+open Lib.NatMod
 
 module Hash = Spec.SHA2
 
@@ -84,32 +85,17 @@ val i2osp:
   -> lbytes len
 let i2osp #len n = nat_to_bytes_be len n
 
-(* Bignum library *)
-type elem n = x:nat{x < n}
-
-val mod_exp_: n:nat -> a:elem n -> b:nat -> acc:elem n -> Tot (elem n) (decreases b)
-let rec mod_exp_ n a b acc =
-  if b = 0
-  then acc
-  else begin
-    let a2 = a * a % n in
-    let acc2 = if b % 2 = 0 then acc else a * acc % n in
-    mod_exp_ n a2 (b / 2) acc2 end
-
-val mod_exp: n:nat{n > 1} -> a:elem n -> b:nat -> elem n
-let mod_exp n a b = mod_exp_ n a b 1
-
 (* RSA *)
 type modBits = modBits:size_nat{1 < modBits}
 
 noeq type rsa_pubkey (modBits:modBits) =
   | Mk_rsa_pubkey: n:nat{1 < n /\ pow2 (modBits - 1) <= n /\ n < pow2 modBits}
-                -> e:elem n{1 < e}
+                -> e:nat_mod n{1 < nat_mod_v e}
                 -> rsa_pubkey modBits
 
 noeq type rsa_privkey (modBits:modBits) =
   | Mk_rsa_privkey: pkey:rsa_pubkey modBits
-                 -> d:elem (Mk_rsa_pubkey?.n pkey){1 < d}
+                 -> d:nat_mod (Mk_rsa_pubkey?.n pkey){1 < nat_mod_v d}
                  -> rsa_privkey modBits
 
 val db_zero:
@@ -205,6 +191,7 @@ let pss_verify #msgLen sLen msg emBits em =
     end
   end
 
+
 val rsapss_sign:
      #sLen:size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < max_input_len_sha256}
   -> #msgLen:size_nat{msgLen < max_input_len_sha256}
@@ -228,7 +215,8 @@ let rsapss_sign #sLen #msgLen modBits skey salt msg =
   let em = pss_encode salt msg emBits in
   let m = os2ip #emLen em in
   assume (m < n);
-  let s = mod_exp n m d in
+  let m = modulo m n in
+  let s = m **% d in
   i2osp #nLen s
 
 val rsapss_verify:
@@ -250,7 +238,8 @@ let rsapss_verify #msgLen modBits pkey sLen msg sgnt =
 
   let s = os2ip #nLen sgnt in
   if s < n then begin
-    let m = mod_exp n s e in
+    let s = modulo s n in
+    let m = s **% e in
     if m < pow2 (emLen * 8) then
       let em = i2osp #emLen m in
       pss_verify #msgLen sLen msg emBits em
