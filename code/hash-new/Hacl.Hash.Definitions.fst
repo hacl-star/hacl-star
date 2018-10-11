@@ -1,4 +1,4 @@
-module Hacl.Hash.Common
+module Hacl.Hash.Definitions
 
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
@@ -9,9 +9,12 @@ module ST = FStar.HyperStack.ST
 module M = LowStar.Modifies
 module B = LowStar.Buffer
 module Spec = Spec.Hash.Common
-open Spec.Hash.Helpers
 
-(** We need to reveal the definition of the internal state for clients to use it *)
+open Spec.Hash.Helpers
+open FStar.Mul
+
+(** The low-level types that our clients need to be aware of, in order to
+    successfully call this module. *)
 
 inline_for_extraction
 let word (a: hash_alg) =
@@ -39,9 +42,14 @@ let size_len_ul (a: hash_alg): n:U32.t { U32.v n = size_len_8 a } =
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
 
-(** The type of init, alloca and update, share by all algorithms. Note that
-    since we manage to hide the static footprints, all algorithms do have a generic
-    signature. *)
+inline_for_extraction
+let blocks_t (a: hash_alg) =
+  b:B.buffer U8.t { B.length b % size_block a = 0 }
+
+let hash_t (a: hash_alg) = b:B.buffer U8.t { B.length b = size_hash a }
+
+
+(** The types of all stateful operations for a hash algorithm. *)
 
 inline_for_extraction
 let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a)
@@ -73,9 +81,6 @@ let update_st (a: hash_alg) =
       M.(modifies (loc_buffer s) h0 h1) /\
       Seq.equal (B.as_seq h1 s) (Spec.Hash.update a (B.as_seq h0 s) (B.as_seq h0 block))))
 
-
-(** Padding, not specialized, to be inlined in a specialized caller instead. *)
-
 inline_for_extraction
 let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer U8.t ->
   ST.Stack unit
@@ -87,19 +92,34 @@ let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer U8.t ->
       M.(modifies (loc_buffer dst) h0 h1) /\
       Seq.equal (B.as_seq h1 dst) (Spec.pad a (len_v a len))))
 
-noextract
-val pad: a:hash_alg -> pad_st a
-
-(* So that the caller can compute which length to allocate for padding. *)
+// Note: we cannot take more than 4GB of data because we are currently
+// constrained by the size of buffers...
+inline_for_extraction
+let update_multi_st (a: hash_alg) =
+  s:state a ->
+  blocks:blocks_t a ->
+  n:U32.t { B.length blocks = size_block a * U32.v n } ->
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h s /\ B.live h blocks /\ B.disjoint s blocks))
+    (ensures (fun h0 _ h1 ->
+      B.(modifies (loc_buffer s) h0 h1) /\
+      Seq.equal (B.as_seq h1 s)
+        (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks))))
 
 inline_for_extraction
-val pad_len: a:hash_alg -> len:len_t a ->
-  x:U32.t { U32.v x = pad_length a (len_v a len) }
-
-
-(** Finish, not specialized, to be inlined in a specialized caller instead. *)
-
-let hash_t (a: hash_alg) = b:B.buffer U8.t { B.length b = size_hash a }
+let update_last_st (a: hash_alg) =
+  s:state a ->
+  prev_len:len_t a { len_v a prev_len % size_block a = 0 } ->
+  input:B.buffer U8.t { B.length input + len_v a prev_len < max_input8 a } ->
+  input_len:U32.t { B.length input = U32.v input_len } ->
+  ST.Stack unit
+    (requires (fun h ->
+      B.live h s /\ B.live h input /\ B.disjoint s input))
+    (ensures (fun h0 _ h1 ->
+      B.(modifies (loc_buffer s) h0 h1) /\
+      Seq.equal (B.as_seq h1 s)
+        (Spec.Hash.Incremental.update_last a (B.as_seq h0 s) (len_v a prev_len) (B.as_seq h0 input))))
 
 inline_for_extraction
 let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
@@ -110,12 +130,6 @@ let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
     Seq.equal (B.as_seq h1 dst) (Spec.Hash.Common.finish a (B.as_seq h0 s))))
-
-noextract
-val finish: a:hash_alg -> finish_st a
-
-
-(** The whole hash algorithm *)
 
 inline_for_extraction
 let hash_st (a: hash_alg) =
@@ -131,3 +145,4 @@ let hash_st (a: hash_alg) =
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1) /\
       Seq.equal (B.as_seq h1 dst) (Spec.Hash.Nist.hash a (B.as_seq h0 input))))
+

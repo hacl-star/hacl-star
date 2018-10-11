@@ -1,19 +1,7 @@
-module Hacl.SHA2
-
-module U8 = FStar.UInt8
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
-module S = FStar.Seq
-module B = LowStar.Buffer
-module HS = FStar.HyperStack
-module ST = FStar.HyperStack.ST
-module M = LowStar.Modifies
-
-module Spec = Spec.SHA2
+module Hacl.Hash.Core.SHA2
 
 open Spec.Hash.Helpers
-
-include Hacl.Hash.Common
+open Hacl.Hash.Definitions
 
 
 (** A series of functions; we only expose the monomorphic variants, and leave it

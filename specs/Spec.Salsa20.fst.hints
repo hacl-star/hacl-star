@@ -11,7 +11,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "97d4f114e4a81fc2c086fadc414f2c5a"
+      "f82e64da39cca59977cabf0ea75ed05a"
     ],
     [
       "Spec.Salsa20.block",
@@ -23,7 +23,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "27f735496e106f18e9327288a4d06f46"
+      "00c02fee1c05ac1f34dae318d115183f"
     ],
     [
       "Spec.Salsa20.nonce",
@@ -35,7 +35,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "2535af9c483c2642f68a220e9a1757f7"
+      "4ba989c77c0e30b8e4de8007edef5cdd"
     ],
     [
       "Spec.Salsa20.line",
@@ -56,7 +56,7 @@
         "refinement_interpretation_Spec.Salsa20_Tm_refine_aca10fb50cc7162d8b55c168416f714b"
       ],
       0,
-      "87c3b5081bd7b048312068a453de8f60"
+      "1d8b4546fcd06c99ca72b0cdc7a1eb49"
     ],
     [
       "Spec.Salsa20.salsa20_core",
@@ -72,7 +72,7 @@
         "refinement_interpretation_Spec.Salsa20_Tm_refine_aca10fb50cc7162d8b55c168416f714b"
       ],
       0,
-      "d9274d842d44333a7e9bcd2b33560624"
+      "81c164a1236549e6f77ebc8147aae639"
     ],
     [
       "Spec.Salsa20.setup",
@@ -82,15 +82,17 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
         "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_Prims.int",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Spec.Salsa20_Tm_refine_54c03c78d7539eae7ee3b6a012705328",
         "refinement_interpretation_Spec.Salsa20_Tm_refine_a38ba213f7d10ad82997d9720a14fea1"
       ],
       0,
-      "0a2fc36cf0cf01cac3b0a49b7dc31458"
+      "65a89fb1b4618154bb39ea30d105b7bb"
     ],
     [
       "Spec.Salsa20.salsa20_block",
@@ -99,7 +101,7 @@
       1,
       [ "@query" ],
       0,
-      "7c8dd2cba29015104bad75202ff849a4"
+      "3f22abdb5631ab540574cec9b0705cdf"
     ],
     [
       "Spec.Salsa20.salsa20_ctx",
@@ -112,7 +114,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ab2cedfefd049ed7318b39f28fecba6e"
+      "1c4994665985018547bbdb6607905326"
     ],
     [
       "Spec.Salsa20.salsa20_encrypt_bytes",
@@ -121,7 +123,7 @@
       1,
       [ "@query" ],
       0,
-      "64f368e90e1b10824dc6bc3695afcab6"
+      "e3b2e31ef70cce6ea4b4711ce97b1572"
     ],
     [
       "Spec.Salsa20.test_quarter_round",
@@ -158,7 +160,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "3448858d43a21aef213fb879c63d30c0"
+      "767735b165b1c0c5dc2d7b9e41a26ec7"
     ],
     [
       "Spec.Salsa20.test_row_round",
@@ -198,7 +200,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "072a593fada5f6c049b9e27eb2b92c54"
+      "2bf01649a9003f85d3a1890a84f91ad0"
     ],
     [
       "Spec.Salsa20.test_column_round",
@@ -238,7 +240,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "fd8d384a7a0664dc7ab061b1f5649191"
+      "b10a9767ceea6cdda0fd12a618076d88"
     ],
     [
       "Spec.Salsa20.test_column_round2",
@@ -252,7 +254,7 @@
         "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "ef7aaa05bbbdc927d6e7e80cb65b4240"
+      "9557271e83f4565a9c533b6e5ae4239b"
     ],
     [
       "Spec.Salsa20.test_salsa20_core",
@@ -263,16 +265,17 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_FStar.Seq.Base.seq__uu___haseq",
-        "assumption_FStar.UInt32.t__uu___haseq",
-        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "assumption_FStar.UInt32.t__uu___haseq", "equation_FStar.UInt32.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_FStar.UInt32.n",
         "function_token_typing_FStar.UInt32.t",
+        "function_token_typing_Prims.int",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "haseqSpec.Salsa20_Tm_refine_3074964b5d8d3a92c5e95cf66d069e80",
-        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0"
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "3cd1e9a84200f78588290828b2cdce8d"
+      "c9b34c3980f0c085242c5624d63e2ded"
     ]
   ]
 ]

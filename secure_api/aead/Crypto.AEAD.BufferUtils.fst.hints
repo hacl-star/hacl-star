@@ -1,5 +1,5 @@
 [
-  "Ê/\nÃû2„çÒ\u0007%FÒÇ\u001a˝",
+  "ë\u0007\u000e¢\"\u0007R5å0ıÜg‘Œz",
   [
     [
       "Crypto.AEAD.BufferUtils.weaken_modifies",
@@ -36,65 +36,71 @@
         "typing_FStar.Set.complement", "typing_FStar.Set.mem"
       ],
       0,
-      "f59ef57374c10ddc67fe62511b1e1fb5"
+      "84c2c1fb04a34bbc9227a4a37ab1051f"
     ],
     [
       "Crypto.AEAD.BufferUtils.prf_mac_modifies",
       1,
-      0,
-      0,
+      2,
+      1,
       [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "7e2656342e69d4701b7acb10b392f423"
+      "3f8059a21841ee368c8b90728b3db60a"
     ],
     [
       "Crypto.AEAD.BufferUtils.intro_prf_mac_modifies",
       1,
-      0,
-      0,
+      2,
+      1,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int",
         "equation_Crypto.AEAD.BufferUtils.prf_mac_modifies",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e05e8adb6bd52a54538375d71b47a95b"
+      "90413b44c8d74e9892eca92ee8087d02"
     ],
     [
       "Crypto.AEAD.BufferUtils.reveal_prf_mac_modifies",
       1,
-      0,
-      0,
+      2,
+      1,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int",
         "equation_Crypto.AEAD.BufferUtils.prf_mac_modifies",
-        "equation_FStar.UInt32.n", "equation_Prims.nat",
-        "function_token_typing_FStar.UInt32.n",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "4a7b5d8ce7e03ead03094549f98cd03b"
+      "a3c4a76c6ce2d80a1df3ff916a6a581d"
     ],
     [
       "Crypto.AEAD.BufferUtils.decrypt_modifies",
       1,
-      0,
-      0,
+      2,
+      1,
       [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e618d90fe53397cdf408f86a0b85ed81"
+      "030be2c9794aaa70b51d38cc6d22324b"
     ],
     [
       "Crypto.AEAD.BufferUtils.chain_mods_enc",
@@ -233,7 +239,7 @@
         "unit_typing"
       ],
       0,
-      "84d93a05a1b3a61c83a5ce0a2fa70eda"
+      "f1098f30b0f00099fa3eaaf1cb207237"
     ],
     [
       "Crypto.AEAD.BufferUtils.chain_mods_enc",
@@ -382,7 +388,7 @@
         "unit_typing"
       ],
       0,
-      "260cdb26fae668b85110d9eeaf71d621"
+      "9e398d8f04cd6fe7b8e46610a2d7737f"
     ],
     [
       "Crypto.AEAD.BufferUtils.chain_modification",
@@ -512,20 +518,19 @@
         "typing_FStar.StrongExcludedMiddle.strong_excluded_middle"
       ],
       0,
-      "dd77c55ebb1368f441ebbe1e00d90613"
+      "77429c5ca4d7cae9f544f6f5af800b63"
     ],
     [
       "Crypto.AEAD.BufferUtils.chain_modification",
       2,
-      4,
       2,
+      1,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
-        "assumption_FStar.Monotonic.HyperHeap.Mod_set_def",
-        "assumption_Prims.HasEq_int", "b2t_def", "bool_inversion",
-        "bool_typing", "eq2-interp",
+        "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
+        "bool_inversion", "bool_typing", "eq2-interp",
         "equation_Crypto.AEAD.BufferUtils.accumulate_modifies_nothing",
         "equation_Crypto.AEAD.BufferUtils.buffer",
         "equation_Crypto.AEAD.BufferUtils.decrypt_modifies",
@@ -569,13 +574,15 @@
         "equation_FStar.Monotonic.HyperStack.sel",
         "equation_FStar.Monotonic.HyperStack.unused_in",
         "equation_FStar.Set.subset", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "fuel_guarded_inversion_FStar.Buffer._buffer",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "fuel_guarded_inversion_FStar.Buffer._buffer",
         "function_token_typing_FStar.Monotonic.Heap.emp",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_FStar.Monotonic.HyperHeap.rid",
         "function_token_typing_FStar.Monotonic.HyperHeap.root",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Prims.int",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "int_inversion", "l_and-interp",
         "lemma_FStar.Buffer.lemma_fresh_poppable",
@@ -593,6 +600,8 @@
         "lemma_FStar.Map.lemma_equal_intro",
         "lemma_FStar.Monotonic.Heap.lemma_contains_implies_used",
         "lemma_FStar.Monotonic.Heap.lemma_in_dom_emp",
+        "lemma_FStar.Monotonic.HyperHeap.lemma_extends_includes",
+        "lemma_FStar.Monotonic.HyperHeap.lemma_extends_parent",
         "lemma_FStar.Monotonic.HyperHeap.lemma_includes_anti_symmetric",
         "lemma_FStar.Monotonic.HyperHeap.lemma_includes_refl",
         "lemma_FStar.Monotonic.HyperHeap.root_is_root",
@@ -611,13 +620,18 @@
         "proj_equation_FStar.Buffer.MkBuffer_max_length",
         "proj_equation_FStar.Monotonic.HyperStack.MkRef_frame",
         "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_FStar.Buffer.MkBuffer_content",
+        "projection_inverse_FStar.Buffer.MkBuffer_max_length",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
         "refinement_interpretation_FStar.HyperStack.ST_Tm_refine_003cbb363565c5358e7ed8a8d7dba6d4",
+        "refinement_interpretation_FStar.Monotonic.Heap_Tm_refine_d707d33e41362c0dea8c68f8ad6796cf",
         "refinement_interpretation_FStar.Monotonic.HyperHeap_Tm_refine_f0496eb03f3fb51b5e4ca0d53ea58c01",
         "refinement_interpretation_FStar.Monotonic.HyperStack_Tm_refine_9a74d818566e70513bc032cc3b65a144",
         "refinement_interpretation_FStar.StrongExcludedMiddle_Tm_refine_94f72bfda5e23ac3960136c8bc3f958c",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_kinding_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "typing_FStar.Buffer.__proj__MkBuffer__item__content",
         "typing_FStar.Buffer.as_ref", "typing_FStar.Buffer.content",
         "typing_FStar.Buffer.frameOf", "typing_FStar.Buffer.lseq",
@@ -641,14 +655,14 @@
         "typing_FStar.Monotonic.HyperStack.is_stack_region",
         "typing_FStar.Monotonic.HyperStack.live_region",
         "typing_FStar.Monotonic.HyperStack.remove_elt",
-        "typing_FStar.Monotonic.HyperStack.unused_in",
         "typing_FStar.Set.complement", "typing_FStar.Set.empty",
-        "typing_FStar.Set.mem", "typing_FStar.Set.singleton",
-        "typing_FStar.Set.union",
-        "typing_FStar.StrongExcludedMiddle.strong_excluded_middle"
+        "typing_FStar.Set.intersect", "typing_FStar.Set.mem",
+        "typing_FStar.Set.singleton", "typing_FStar.Set.union",
+        "typing_FStar.StrongExcludedMiddle.strong_excluded_middle",
+        "unit_inversion"
       ],
       0,
-      "eb3b1bd5e569effebc2141788dd633ae"
+      "da25817d31ee2945f748d0ca7d25b339"
     ]
   ]
 ]
