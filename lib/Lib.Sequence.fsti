@@ -26,7 +26,7 @@ let length (#a:Type0) (s:seq a) : nat = Seq.length s
 (** Definition of a fixed-length Sequence *)
 let lseq (a:Type0) (len:size_nat) = s:seq a{Seq.length s == len}
 let to_seq (#a:Type0) (#len:size_nat) (l:lseq a len) : seq a = l
-let to_lseq (#a:Type0) (s:seq a{length s <= max_size_t}) : l:lseq a (length s){l == s} = s 
+let to_lseq (#a:Type0) (s:seq a{length s <= max_size_t}) : l:lseq a (length s){l == s} = s
 
 (* If you want to prove your code with an abstract lseq use the following: *)
 // val lseq: a:Type0 -> len:size_nat -> Type0
@@ -162,9 +162,9 @@ let update_slice
   update_sub #a i start (fin - start) upd
 
 (** Map function for fixed-length Sequences *)
-val map:#a:Type -> #b:Type -> #len:size_nat 
-  -> (a -> Tot b) 
-  -> s1:lseq a len 
+val map:#a:Type -> #b:Type -> #len:size_nat
+  -> (a -> Tot b)
+  -> s1:lseq a len
   -> s2:lseq b len
 
 (** Map2 function for fixed-length Sequences *)
