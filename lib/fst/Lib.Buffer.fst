@@ -137,8 +137,10 @@ let alloc #a #b #w #len #wlen h0 clen init write spec impl =
   pop_frame();
   r
 
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
-val loop_blocks_f:
+val loopi_blocks_f:
     #a:Type0
   -> #b:Type0
   -> #blen:size_nat
@@ -165,23 +167,32 @@ val loop_blocks_f:
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer w) h0 h1 /\
       as_seq h1 w ==
-      Sequence.repeat_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
-let loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
+      Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
+let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
   let block = sub #_ #(v inpLen) inp (i *. bs) bs in
   f i block w
 
-let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
+let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let nb = inpLen /. bs in
   let rem = inpLen %. bs in
   [@ inline_let]
-  let spec_fh h0 = Seq.repeat_blocks_f (v bs) (as_seq h0 inp) spec_f (v nb) in
+  let spec_fh h0 = Seq.repeati_blocks_f (v bs) (as_seq h0 inp) spec_f (v nb) in
   let h0 = ST.get () in
   loop1 #b #blen h0 nb w spec_fh
   (fun i ->
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
-    loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
+    loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l nb rem last w
+
+let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
+  let h0 = ST.get () in
+  loopi_blocks bs inpLen inp
+    (fun (i:nat{i < Seq.length (as_seq h0 inp) / v bs}) -> spec_f)
+    (fun (i:nat{i == Seq.length (as_seq h0 inp) / v bs}) -> spec_l)
+    (fun i -> f)
+    (fun i -> l)
+    w
 
 let print_compare_display len a b = admit()

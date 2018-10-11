@@ -544,7 +544,7 @@ val alloc:
 		                    spec h0 r (B.as_seq h1 write)))
 
 inline_for_extraction noextract
-val loop_blocks:
+val loopi_blocks:
     #a:Type0
   -> #b:Type0
   -> #blen:size_nat
@@ -583,7 +583,45 @@ val loop_blocks:
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer write) h0 h1 /\
       as_seq h1 write ==
-      Seq.repeat_blocks #a #(Seq.lseq b blen) (v blocksize) (B.as_seq h0 inp) spec_f spec_l (as_seq h0 write))
+      Seq.repeati_blocks #a #(Seq.lseq b blen) (v blocksize) (B.as_seq h0 inp) spec_f spec_l (as_seq h0 write))
+
+inline_for_extraction noextract
+val loop_blocks:
+    #a:Type0
+  -> #b:Type0
+  -> #blen:size_nat
+  -> blocksize:size_t{v blocksize > 0}
+  -> inpLen:size_t
+  -> inp:lbuffer a (v inpLen)
+  -> spec_f:(Seq.lseq a (v blocksize)
+              -> Seq.lseq b blen
+              -> Seq.lseq b blen)
+  -> spec_l:(len:size_nat{len == v inpLen % v blocksize}
+              -> s:Seq.lseq a len
+              -> Seq.lseq b blen
+              -> Seq.lseq b blen)
+  -> f:(inp:lbuffer a (v blocksize)
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            B.live h inp /\ B.live h w /\ B.disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            B.modifies (B.loc_buffer w) h0 h1 /\
+            as_seq h1 w == spec_f (as_seq h0 inp) (as_seq h0 w)))
+  -> l:(len:size_t{v len == v inpLen % v blocksize}
+       -> inp:lbuffer a (v len)
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            B.live h inp /\ B.live h w /\ B.disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            B.modifies (B.loc_buffer w) h0 h1 /\
+            as_seq h1 w == spec_l (v len) (as_seq h0 inp) (as_seq h0 w)))
+  -> write:lbuffer b blen
+  -> Stack unit
+    (requires fun h -> B.live h inp /\ B.live h write /\ B.disjoint inp write)
+    (ensures  fun h0 _ h1 ->
+      B.modifies (B.loc_buffer write) h0 h1 /\
+      as_seq h1 write ==
+      Seq.repeat_blocks #a #(Seq.lseq b blen) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
 
 (** Print and compare two buffers securely *)
 (* BB. TODO: used in tests; move to Lib.Print *)

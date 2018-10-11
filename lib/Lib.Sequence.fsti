@@ -193,7 +193,7 @@ val map_blocks:
   -> g:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len)
   -> out:seq a {length out == length inp}
 
-val repeat_blocks:
+val repeati_blocks:
     #a:Type0
   -> #b:Type0
   -> blocksize:size_nat{blocksize > 0}
@@ -202,3 +202,18 @@ val repeat_blocks:
   -> l:(i:nat{i == length inp / blocksize} -> len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b)
   -> init:b
   -> out:b
+
+unfold
+let repeat_blocks
+    (#a:Type0)
+    (#b:Type0)
+    (blocksize:size_nat{blocksize > 0})
+    (inp:seq a)
+    (f:(lseq a blocksize -> b -> b))
+    (l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b))
+    (init:b) : b
+  =
+  repeati_blocks #a #b blocksize inp
+  (fun (i:nat{i < length inp / blocksize}) -> f)
+  (fun (i:nat{i == length inp / blocksize}) -> l)
+  init

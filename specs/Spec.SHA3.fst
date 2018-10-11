@@ -153,14 +153,15 @@ let absorb_inner (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   let s = loadState rateInBytes block s in
   state_permute s
 
+unfold
 let absorb (s:state)
            (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
 	   (inputByteLen:nat)
 	   (input:bytes{length input == inputByteLen})
 	   (delimitedSuffix:byte_t) : state =
   repeat_blocks rateInBytes input
-  (fun i -> absorb_inner rateInBytes)
-  (fun i -> absorb_last delimitedSuffix rateInBytes) s
+  (absorb_inner rateInBytes)
+  (absorb_last delimitedSuffix rateInBytes) s
 
 val squeeze_inner:
     rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}

@@ -46,8 +46,8 @@ let update (len:size_nat{len <= blocksize}) (w:lbytes len) (st:state) : state =
 
 let poly (text:seq uint8) (st:state) : state =
   repeat_blocks #uint8 #state blocksize text
-    (fun i b st -> update blocksize b st)
-    (fun i rem b st -> if rem = 0 then st else update rem b st)
+    (fun b st -> update blocksize b st)
+    (fun rem b st -> if rem = 0 then st else update rem b st)
   st
 
 let finish (st:state) (s:tag) : Tot tag = 
