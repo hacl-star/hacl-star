@@ -4,7 +4,7 @@ open X64.Machine_s
 open X64.Memory
 open X64.Vale.State
 open X64.Vale.Decls
-open X64.AES
+open X64.AESstdcall
 open AES_s
 
 val va_code_AESEncryptBlockStdcall: bool -> va_code

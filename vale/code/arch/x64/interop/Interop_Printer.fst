@@ -417,6 +417,8 @@ let translate_lowstar target (func:func_ty) =
   let win_stack_precond memname = if stack_needed then
     "/\ B.length stack_b == " ^ (if saveRegs then string_of_int (224 + length_stack) else string_of_int length_stack) ^
     " /\ live " ^ memname ^ " stack_b /\ buf_disjoint_from stack_b " ^ (namelist_of_args (buffer_args)) else "" in    
+  let stack_precond memname = " /\ B.length stack_b == " ^ string_length_stack ^
+    " /\ live " ^ memname ^ " stack_b /\ buf_disjoint_from stack_b " ^ (namelist_of_args (buffer_args)) in    
   let separator0 = if (List.Tot.Base.length buffer_args = 0) then "" else " /\\ " in
   let separator1 = if (List.Tot.Base.length buffer_args <= 1) then "" else " /\\ " in  
   "module Vale_" ^ name ^
@@ -475,9 +477,18 @@ let translate_lowstar target (func:func_ty) =
   "#set-options \"--initial_fuel " ^ fuel_value ^ " --max_fuel " ^ fuel_value ^ " --initial_ifuel 0 --max_ifuel 0\"\n" ^
   translate_core_lowstar target func stack_needed length_stack slots additional ^
   "#set-options \"--max_fuel 0 --max_ifuel 0\"\n\n" ^
-  "let " ^ name ^ " " ^ (print_args_names args) ^ " =\n" ^
-  (if stack_needed then "  push_frame();\n" ^
-    "  let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t " ^ string_length_stack ^ ") in\n"  else "") ^
+  "irreducible\n" ^
+  "let " ^ name ^ "_aux " ^ (print_args_list args) ^ "(stack_b:b8) : Stack " ^ (if return then "UInt64.t" else "unit") ^ "\n" ^
+  "  (fun h -> pre_cond h " ^ (print_args_names args) ^ stack_precond "h" ^ ")\n" ^
+  (if return then
+  "  (fun h0 ret_val h1 ->\n" ^
+  "    post_cond h0 h1 ret_val" ^ (print_args_names args) ^ " /\\\n" ^
+  "    M.modifies (" ^ print_modifies ("stack_b" :: modified) ^ ") h0 h1) =\n"
+  else
+  "  (fun h0 _ h1 ->\n" ^
+  "    post_cond h0 h1 " ^ (print_args_names args) ^ " /\\\n" ^
+  "    M.modifies (" ^ print_modifies ("stack_b" :: modified) ^ ") h0 h1) =\n"
+  ) ^
   (if return then "  let x = (" else "  ") ^
   "if win then\n" ^
   "  st_put\n" ^
@@ -499,7 +510,12 @@ let translate_lowstar target (func:func_ty) =
   else (
   "    (fun h -> let _, _, h1 =
       lemma_ghost_" ^ name ^ " false " ^ (print_args_names args) ^ "stack_b h\n" ^
-  "    in (), h1);\n")) ^
+  "    in (), h1)\n")) ^
+  "\n" ^
+  "let " ^ name ^ " " ^ (print_args_names args) ^ " =\n" ^
+  (if stack_needed then "  push_frame();\n" ^
+    "  let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t " ^ string_length_stack ^ ") in\n"  else "") ^
+  "  " ^ name ^ "_aux " ^ (print_args_names args) ^ "stack_b;\n" ^
   (if return then "  in pop_frame();\n  UInt64.uint_to_t x\n" else "  pop_frame()\n")
   
 let print_vale_arg = function
@@ -554,7 +570,7 @@ let print_vale_calling_stack is_win sstart (args:list arg) =
   let rec aux (i:nat) (args:list arg) : Tot string (decreases %[args])  =
   match args with
   | [] -> ""
-  | a::q -> "        " ^ is_win ^ " " ^ "buffer_read(stack_b, " ^ (string_of_int (sstart + i)) ^ ", mem) == " ^  print_vale_arg_value a ^ ";\n" ^ aux (i+1) q
+  | a::q -> "        " ^ is_win ^ " " ^ "buffer64_read(stack_b, " ^ (string_of_int (sstart + i)) ^ ", mem) == " ^  print_vale_arg_value a ^ ";\n" ^ aux (i+1) q
   in aux 0 args
 
 let print_calling_args_aux is_win os target sstart (args:list arg) =
