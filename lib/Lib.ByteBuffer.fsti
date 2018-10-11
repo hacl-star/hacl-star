@@ -8,7 +8,6 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Buffer
 
-module Seq = Lib.Sequence
 module B = LowStar.Buffer
 module BS = Lib.ByteSequence
 
@@ -24,7 +23,7 @@ val lbytes_eq:
     (requires fun h -> B.live h a /\ B.live h b)
     (ensures  fun h0 r h1 ->
       B.modifies B.loc_none h0 h1 /\
-      r == Seq.lbytes_eq #(v len) (B.as_seq h0 a) (B.as_seq h0 b))
+      r == BS.lbytes_eq #(v len) (B.as_seq h0 a) (B.as_seq h0 b))
 
 inline_for_extraction
 val uint_from_bytes_le:
