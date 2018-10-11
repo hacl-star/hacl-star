@@ -62,9 +62,7 @@ let createL_global #a init =
   B.gcmalloc_of_list HyperStack.root init
 
 let icreateL_global #a init =
-  let b = B.mgcmalloc_of_list root init in
-  B.witness_p b (cpred (Seq.seq_of_list init));
-  b
+  IB.igcmalloc_of_list #a root init
 
 let recall_contents #a #len b s =
   B.recall_p b (cpred s)
@@ -86,7 +84,7 @@ let update_sub #a #len dst start n src =
   LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
   let h1 = ST.get () in
   assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-  Seq.eq_intro
+  FStar.Seq.lemma_eq_intro
     (B.as_seq h1 dst)
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
 
@@ -95,7 +93,7 @@ let update_isub #a #len dst start n src =
   LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
   let h1 = ST.get () in
   assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == ibget h0 src k);
-  Seq.eq_intro
+  FStar.Seq.lemma_eq_intro
     (B.as_seq h1 dst)
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (IB.as_seq h0 src))
 
