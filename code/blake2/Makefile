@@ -20,7 +20,7 @@ BASE_OBJ = ../../lib/c/Lib_Print.o
 
 #$(KREMLIN_HOME)/kremlib/testlib.o $(KREMLIN_HOME)/kremlib/kremlib.o $(KREMLIN_HOME)/kremlib/kremstr.o
 
-HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.Endianness.fst ../../lib/Lib.Print.fsti
+HACL_LIBS = ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.ByteBuffer.fst ../../lib/Lib.Print.fsti
 
 
 blake2s-c/out.krml: $(HACL_LIBS) Hacl.Impl.Blake2s.fst Hacl.Blake2s.fst Hacl.Test.Blake2s.fst
