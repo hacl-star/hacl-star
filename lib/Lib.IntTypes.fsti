@@ -78,7 +78,6 @@ let pub_int_v #t (x:pub_int_t t) : (n:nat{n <= maxint t}) =
   | U64 -> UInt64.v x
   | U128 -> UInt128.v x
 
-
 (* SECRET Machine Integers *)
 
 type secrecy_level =
@@ -143,7 +142,6 @@ unfold type byte_t = uint_t U8 PUB
 inline_for_extraction
 val secret: #t:inttype -> u:uint_t t PUB -> v:uint_t t SEC{uint_v v == uint_v u}
 
-
 inline_for_extraction
 val u8: (n:nat{n <= maxint U8}) -> u:uint8{uint_v #U8 u == n}
 
@@ -185,7 +183,6 @@ val byte_to_uint8: s:byte_t -> u:uint8{u == u8 (byte_v s)}
 
 inline_for_extraction
 val nat_to_uint: #t:inttype -> #l:secrecy_level -> (n:nat{n <= maxint t}) -> u:uint_t t l{uint_v u == n}
-
 
 inline_for_extraction
 val cast: #t:inttype -> #l:secrecy_level
@@ -364,7 +361,6 @@ val lt_mask:  #t:inttype -> #l:secrecy_level
   -> b:uint_t t l
   -> c:uint_t t l
 
-
 inline_for_extraction
 val gt_mask:  #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
@@ -436,7 +432,6 @@ let ( ~. ) #t #l = lognot #t #l
 ///
 /// Operations reserved to public integers
 ///
-
 
 inline_for_extraction
 val div: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> Pure (uint_t t PUB)

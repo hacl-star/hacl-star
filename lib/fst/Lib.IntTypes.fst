@@ -140,7 +140,6 @@ let add #t #l a b =
   | U64 -> (UInt64.add a b)
   | U128 -> (UInt128.add a b)
 
-
 let incr #t #l a =
   match t with
   | U1 -> (UInt8.add a 0x1uy)
@@ -257,7 +256,6 @@ let rotate_left #t #l a b =
 
 let zeroes t l = nat_to_uint #t #l 0
 
-
 let ones t l =
   match t with
   | U1 -> 0x1uy
@@ -265,10 +263,11 @@ let ones t l =
   | U16 -> 0xffffus
   | U32 -> 0xfffffffful
   | U64 -> 0xffffffffffffffffuL
-  | U128 -> 
-	 let x = FStar.UInt128.uint64_to_uint128 0xffffffffffffffffuL in
-	 FStar.UInt128.logor (FStar.UInt128.shift_left x 64ul) x
-
+  | U128 ->
+    let x = FStar.UInt128.uint64_to_uint128 0xffffffffffffffffuL in
+	 let y = (FStar.UInt128.shift_left x 64ul) `FStar.UInt128.add` x in
+    assert_norm(FStar.UInt128.v y == pow2 128 - 1);
+    y
 
 let eq_mask #t #l a b =
   match t with
@@ -279,7 +278,7 @@ let eq_mask #t #l a b =
   | U64 -> UInt64.eq_mask a b
   | U128 -> UInt128.eq_mask a b
 
-let neq_mask #t #l a b = 
+let neq_mask #t #l a b =
   lognot (eq_mask #t #l a b)
 
 let gte_mask #t #l a b =
@@ -291,7 +290,7 @@ let gte_mask #t #l a b =
   | U64 -> UInt64.gte_mask a b
   | U128 -> UInt128.gte_mask a b
 
-let lt_mask #t #l a b = 
+let lt_mask #t #l a b =
   lognot (gte_mask #t #l a b)
 
 let gt_mask #t #l a b =
@@ -304,20 +303,20 @@ let lte_mask #t #l a b =
 
 private
 val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t ->
-  Lemma
-    (uint_v (mod_mask #t #l m) == pow2 (uint_v m) - 1)
+  Lemma (uint_v (mod_mask #t #l m) == pow2 (uint_v m) - 1)
+
 let mod_mask_value #t #l m =
   admit();
-  if uint_v m > 0 then
-    begin
+  if uint_v m > 0 then begin
     let m = uint_v m in
     pow2_lt_compat (bits t) m;
     small_modulo_lemma_1 (pow2 m) (pow2 (bits t));
     assert (FStar.Mul.(1 * pow2 m) == pow2 m);
     UInt.shift_left_value_lemma #(bits t) 1 m
-    end
+  end
 
 let mod_mask_lemma #t #l a m =
+  admit();
   mod_mask_value #t #l m;
   if uint_v m = 0 then
     UInt.logand_lemma_1 #(bits t) (uint_v a)
@@ -332,28 +331,32 @@ let nat_mod_v #m x = x
 
 let div #t x y =
   match t with
-  | U8  -> (UInt8.div x y)
-  | U16 -> (UInt16.div x y)
-  | U32 -> (UInt32.div x y)
-  | U64 -> (UInt64.div x y)
+  | U1  -> UInt8.div x y
+  | U8  -> UInt8.div x y
+  | U16 -> UInt16.div x y
+  | U32 -> UInt32.div x y
+  | U64 -> UInt64.div x y
 
 let mod #t x y =
   match t with
-  | U8  -> (UInt8.rem x y)
-  | U16 -> (UInt16.rem x y)
-  | U32 -> (UInt32.rem x y)
-  | U64 -> (UInt64.rem x y)
+  | U1  -> UInt8.rem x y
+  | U8  -> UInt8.rem x y
+  | U16 -> UInt16.rem x y
+  | U32 -> UInt32.rem x y
+  | U64 -> UInt64.rem x y
 
 let eq #t x y =
   match t with
-  | U8  -> (UInt8.eq x y)
-  | U16 -> (UInt16.eq x y)
-  | U32 -> (UInt32.eq x y)
-  | U64 -> (UInt64.eq x y)
-  | U128 -> (UInt128.eq x y)
+  | U1  -> UInt8.eq x y
+  | U8  -> UInt8.eq x y
+  | U16 -> UInt16.eq x y
+  | U32 -> UInt32.eq x y
+  | U64 -> UInt64.eq x y
+  | U128 -> UInt128.eq x y
 
 let ne #t x y =
   match t with
+  | U1  -> not (UInt8.eq x y)
   | U8  -> not (UInt8.eq x y)
   | U16 -> not (UInt16.eq x y)
   | U32 -> not (UInt32.eq x y)
@@ -362,32 +365,36 @@ let ne #t x y =
 
 let lt #t x y =
   match t with
-  | U8  -> (UInt8.lt x y)
-  | U16 -> (UInt16.lt x y)
-  | U32 -> (UInt32.lt x y)
-  | U64 -> (UInt64.lt x y)
-  | U128 -> (UInt128.lt x y)
+  | U1  -> UInt8.lt x y
+  | U8  -> UInt8.lt x y
+  | U16 -> UInt16.lt x y
+  | U32 -> UInt32.lt x y
+  | U64 -> UInt64.lt x y
+  | U128 -> UInt128.lt x y
 
 let lte #t x y =
   match t with
-  | U8  -> (UInt8.lte x y)
-  | U16 -> (UInt16.lte x y)
-  | U32 -> (UInt32.lte x y)
-  | U64 -> (UInt64.lte x y)
-  | U128 -> (UInt128.lte x y)
+  | U1  -> UInt8.lte x y
+  | U8  -> UInt8.lte x y
+  | U16 -> UInt16.lte x y
+  | U32 -> UInt32.lte x y
+  | U64 -> UInt64.lte x y
+  | U128 -> UInt128.lte x y
 
 let gt #t x y =
   match t with
-  | U8  -> (UInt8.gt x y)
-  | U16 -> (UInt16.gt x y)
-  | U32 -> (UInt32.gt x y)
-  | U64 -> (UInt64.gt x y)
-  | U128 -> (UInt128.gt x y)
+  | U1  -> UInt8.gt x y
+  | U8  -> UInt8.gt x y
+  | U16 -> UInt16.gt x y
+  | U32 -> UInt32.gt x y
+  | U64 -> UInt64.gt x y
+  | U128 -> UInt128.gt x y
 
 let gte #t x y =
   match t with
-  | U8  -> (UInt8.gte x y)
-  | U16 -> (UInt16.gte x y)
-  | U32 -> (UInt32.gte x y)
-  | U64 -> (UInt64.gte x y)
-  | U128 -> (UInt128.gte x y)
+  | U1  -> UInt8.gte x y
+  | U8  -> UInt8.gte x y
+  | U16 -> UInt16.gte x y
+  | U32 -> UInt32.gte x y
+  | U64 -> UInt64.gte x y
+  | U128 -> UInt128.gte x y
