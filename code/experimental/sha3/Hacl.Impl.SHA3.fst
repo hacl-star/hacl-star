@@ -197,6 +197,7 @@ let state_pi_rho s =
      (fun current ->
          let h1 = ST.get () in
          assert (bget h1 current 0 == S.readLane (as_seq h0 s) 1 0);
+         [@ inline_let]
          let refl h i : GTot (uint64 & S.state) = get h current 0, as_seq h s in
          [@ inline_let]
          let footprint i = loc_union (loc_buffer current) (loc_buffer s) in
