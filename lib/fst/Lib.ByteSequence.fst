@@ -49,6 +49,7 @@ val nat_from_intseq_le_:
     #t:inttype -> #l:secrecy_level
   -> b:seq (uint_t t l)
   -> Tot (n:nat{n < pow2 (length b * bits t)}) (decreases (length b))
+
 let rec nat_from_intseq_le_ #t #l b =
   let len = length b in
   if len = 0 then 0
@@ -58,7 +59,8 @@ let rec nat_from_intseq_le_ #t #l b =
     let n' = nat_from_intseq_le_ #t #l tt in
     let l = uint_to_nat #t #l (Seq.index b 0) in
     Math.Lemmas.pow2_plus (bits t) ( len * bits t - bits t);
-    l + shift * n'
+    let n = l + shift * n' in
+    n
 
 let nat_from_intseq_le = nat_from_intseq_le_
 let nat_from_bytes_be = nat_from_intseq_be #U8

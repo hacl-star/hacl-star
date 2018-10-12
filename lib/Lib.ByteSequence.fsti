@@ -39,9 +39,9 @@ val index_uint_to_bytes_le: #t:inttype -> #l:secrecy_level -> u:uint_t t l
                               u8 (uint_v u / pow2 (op_Multiply 8 i) % pow2 8))
 val uint_to_bytes_be: #t:inttype -> #l:secrecy_level -> u:uint_t t l -> lbytes (numbytes t)
 
-val uint_from_bytes_le: #t:inttype -> #l:secrecy_level -> lbytes (numbytes t) -> u:uint_t t l
+val uint_from_bytes_le: #t:inttype{~(t == U1)} -> #l:secrecy_level -> b:lbytes (numbytes t) -> u:uint_t t l
 
-val uint_from_bytes_be: #t:inttype -> #l:secrecy_level -> lbytes (numbytes t) -> u:uint_t t l
+val uint_from_bytes_be: #t:inttype{~(t == U1)} -> #l:secrecy_level -> b:lbytes (numbytes t) -> u:uint_t t l
 
 val uints_to_bytes_le: #t:inttype -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> s:lseq (uint_t t l) len -> b:lbytes (len * numbytes t)
@@ -49,7 +49,7 @@ val uints_to_bytes_be: #t:inttype -> #l:secrecy_level -> #len:size_nat{len * num
   -> s:lseq (uint_t t l) len -> b:lbytes (len * numbytes t)
 
 
-val uints_from_bytes_le: #t:inttype -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
+val uints_from_bytes_le: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> b:lbytes (len * numbytes t) -> s:lseq (uint_t t l) len
-val uints_from_bytes_be: #t:inttype -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
+val uints_from_bytes_be: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> b:lbytes (len * numbytes t) -> s:lseq (uint_t t l) len

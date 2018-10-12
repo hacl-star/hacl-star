@@ -7,20 +7,20 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.RawIntTypes
 
+friend Lib.Sequence
+friend Lib.LoopCombinators
+
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module U32 = FStar.UInt32
-
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
-
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 
-#set-options "--z3rlimit 15"
 
-friend Lib.Sequence
-friend Lib.LoopCombinators
+#set-options "--z3rlimit 100"
+
 
 let length #a b = B.length b
 
@@ -136,8 +136,6 @@ let alloc #a #b #w #len #wlen h0 clen init write spec impl =
   Lib.Loops.for (size 0) clen inv f';
   pop_frame();
   r
-
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val loopi_blocks_f:
