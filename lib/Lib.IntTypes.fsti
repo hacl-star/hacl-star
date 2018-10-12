@@ -7,8 +7,7 @@ open FStar.Math.Lemmas
 ///
 
 type inttype =
-// | U1
-   | U8 | U16 | U32 | U64 | U128
+ | U1 | U8 | U16 | U32 | U64 | U128
 
 ///
 /// Operations on the underlying machine integer base types
@@ -18,7 +17,7 @@ inline_for_extraction
 unfold
 let bits (n:inttype) =
   match n with
-//  | U1 -> 1
+  | U1 -> 1
   | U8 -> 8
   | U16 -> 16
   | U32 -> 32
@@ -29,7 +28,7 @@ inline_for_extraction
 unfold
 let numbytes (n:inttype) =
   match n with
-//  | U1 -> 1
+  | U1 -> 1
   | U8 -> 1
   | U16 -> 2
   | U32 -> 4
@@ -50,7 +49,6 @@ val pow2_values: n:nat ->  Lemma (
     )
     [SMTPat (pow2 n)]
 
-
 inline_for_extraction
 unfold let modulus (t:inttype) = pow2 (bits t)
 
@@ -58,10 +56,12 @@ inline_for_extraction
 unfold let maxint (t:inttype) =
   modulus t - 1
 
+(* PUBLIC Machine Integers *)
+
 inline_for_extraction
 unfold let pub_int_t (t:inttype) =
   match t with
-//  | U1 -> u:UInt8.t{UInt8.v u < 2}
+  | U1 -> u:UInt8.t{UInt8.v u < 2}
   | U8 -> UInt8.t
   | U16 -> UInt16.t
   | U32 -> UInt32.t
@@ -69,29 +69,32 @@ unfold let pub_int_t (t:inttype) =
   | U128 -> UInt128.t
 
 inline_for_extraction
-val sec_int_t: t:inttype -> Type0
-
-type secrecy_level =
-  | SEC
-  | PUB
-
-inline_for_extraction
-let uint_t (t:inttype) (l:secrecy_level) =
-  match l with
-  | PUB -> pub_int_t t
-  | SEC -> sec_int_t t
-
-inline_for_extraction
 let pub_int_v #t (x:pub_int_t t) : (n:nat{n <= maxint t}) =
   match t with
-//  | U1 -> (UInt8.v x % 2)
+  | U1 -> UInt8.v x
   | U8 -> UInt8.v x
   | U16 -> UInt16.v x
   | U32 -> UInt32.v x
   | U64 -> UInt64.v x
   | U128 -> UInt128.v x
 
+
+(* SECRET Machine Integers *)
+
+type secrecy_level =
+  | SEC
+  | PUB
+
+val sec_int_t: t:inttype -> Type0
 val sec_int_v: #t:inttype -> u:sec_int_t t -> n:nat{n <= maxint t}
+
+(* GENERIC (unsigned) Machine Integers *)
+
+inline_for_extraction
+let uint_t (t:inttype) (l:secrecy_level) =
+  match l with
+  | PUB -> pub_int_t t
+  | SEC -> sec_int_t t
 
 unfold
 let uint_v #t #l (u:uint_t t l) : n:nat{n <= maxint t} =
@@ -107,7 +110,6 @@ val uintv_extensionality:
  -> Lemma
   (requires uint_v a == uint_v b)
   (ensures  a == b)
-
 
 ///
 /// Definition of machine integers
@@ -333,12 +335,10 @@ val rotate_left: #t:inttype -> #l:secrecy_level
 ///
 
 inline_for_extraction
-let zeroes (t:inttype) (l:secrecy_level) =
-  nat_to_uint #t #l 0
+val zeroes: t:inttype -> l:secrecy_level -> v:uint_t t l{uint_v v = 0}
 
 inline_for_extraction
-let ones (t:inttype) (l:secrecy_level) =
-    nat_to_uint #t #l (pow2 (bits t) - 1)
+val ones: t:inttype -> l:secrecy_level -> v:uint_t t l{uint_v v = maxint t}
 
 inline_for_extraction
 val eq_mask: #t:inttype -> #l:secrecy_level
@@ -348,12 +348,6 @@ val eq_mask: #t:inttype -> #l:secrecy_level
 
 inline_for_extraction
 val neq_mask: #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l
-  -> b:uint_t t l
-  -> uint_t t l
-
-inline_for_extraction
-val gt_mask:  #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:uint_t t l
   -> uint_t t l
@@ -370,49 +364,18 @@ val lt_mask:  #t:inttype -> #l:secrecy_level
   -> b:uint_t t l
   -> c:uint_t t l
 
+
+inline_for_extraction
+val gt_mask:  #t:inttype -> #l:secrecy_level
+  -> a:uint_t t l
+  -> b:uint_t t l
+  -> uint_t t l
+
 inline_for_extraction
 val lte_mask:  #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:uint_t t l
   -> uint_t t l
-
-val eq_mask_lemma: #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l -> b:uint_t t l -> d:uint_t t l ->
-  Lemma
-    (requires (True))
-    (ensures  ((eq_mask #t a b) `logand` d == (if uint_v a = uint_v b then d else nat_to_uint 0)))
-    [SMTPat (eq_mask #t a b `logand` d)]
-
-val neq_mask_lemma: #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l -> b:uint_t t l -> d:uint_t t l ->
-  Lemma
-    (requires (True))
-    (ensures  ((neq_mask #t a b) `logand` d == (if uint_v a <> uint_v b then d else nat_to_uint 0)))
-    [SMTPat (neq_mask #t a b `logand` d)]
-
-val gt_mask_lemma: #t:inttype -> #l:secrecy_level  -> a:uint_t t l -> b:uint_t t l -> d:uint_t t l ->
-  Lemma
-    (requires (True))
-    (ensures  ((gt_mask #t a b) `logand` d == (if uint_v a > uint_v b then d else nat_to_uint 0)))
-    [SMTPat (gt_mask #t a b `logand` d)]
-
-val gte_mask_lemma: #t:inttype -> #l:secrecy_level  -> a:uint_t t l -> b:uint_t t l -> d:uint_t t l ->
-  Lemma
-    (requires (True))
-    (ensures  ((gte_mask #t a b) `logand` d == (if uint_v a >= uint_v b then d else nat_to_uint 0)))
-    [SMTPat (gte_mask #t a b `logand` d)]
-
-val lt_mask_lemma: #t:inttype -> #l:secrecy_level  -> a:uint_t t l -> b:uint_t t l -> d:uint_t t l ->
-  Lemma
-    (requires (True))
-    (ensures  ((lt_mask #t a b) `logand` d == (if uint_v a  < uint_v b then d else nat_to_uint 0)))
-    [SMTPat (lt_mask #t a b `logand` d)]
-
-val lte_mask_lemma: #t:inttype -> #l:secrecy_level  -> a:uint_t t l -> b:uint_t t l -> d:uint_t t l ->
-  Lemma
-    (requires (True))
-    (ensures  ((lte_mask #t a b) `logand` d == (if uint_v a  <= uint_v b then d else nat_to_uint 0)))
-    [SMTPat (lte_mask #t a b `logand` d)]
 
 inline_for_extraction
 let mod_mask (#t:inttype) (#l:secrecy_level) (m:shiftval t) : uint_t t l =
