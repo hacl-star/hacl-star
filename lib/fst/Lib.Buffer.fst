@@ -80,6 +80,23 @@ let icopy #a #len o clen i =
   let h1 = ST.get () in
   assert (Seq.slice #a #len (B.as_seq h1 o) 0 len == Seq.slice #a #len (B.as_seq h0 i) 0 len)
 
+(**
+* WARNING: don't rely on the extracted implementation for secure erasure,
+* C compilers may remove optimize it away.
+*)
+let memset #a #blen b init len =
+  let h0 = ST.get() in
+  let inv (h:mem) (i:nat{i <= v len}) : Type0 =
+    modifies1 b h0 h
+    /\ FStar.Seq.equal (Seq.seq_sub (as_seq h b) 0 i) (Seq.create i init)
+  in
+  Lib.Loops.for (size 0) len inv
+     (fun i ->
+       b.(i) <- init;
+       let h = ST.get() in
+       FStar.Seq.lemma_split (Seq.seq_sub (as_seq h b) 0 (v i + 1)) (v i)
+     )
+
 let update_sub #a #len dst start n src =
   let h0 = ST.get () in
   LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
@@ -98,7 +115,7 @@ let update_isub #a #len dst start n src =
     (B.as_seq h1 dst)
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (IB.as_seq h0 src))
 
-let update_sub_f #a #len buf start n spec f =
+let update_sub_f #a #len h0 buf start n spec f =
   let h0 = ST.get () in
   let tmp = sub buf start n in
   f tmp;
@@ -122,23 +139,6 @@ let loop1 #b #blen h0 n acc spec impl =
 let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
   let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
   Lib.Loops.for (size 0) n inv impl
-
-(** 
-* WARNING: don't rely on the extracted implementation for secure erasure,
-* C compilers may remove optimize it away.
-*)
-let memset #a #blen b init len =
-  let h0 = ST.get() in  
-  let inv (h:mem) (i:nat{i <= v len}) : Type0 = 
-    modifies1 b h0 h
-    /\ FStar.Seq.equal (Seq.seq_sub (as_seq h b) 0 i) (Seq.create i init)
-  in  
-  Lib.Loops.for (size 0) len inv
-     (fun i -> 
-       b.(i) <- init;
-       let h = ST.get() in 
-       FStar.Seq.lemma_split (Seq.seq_sub (as_seq h b) 0 (v i + 1)) (v i)
-     )
 
 let salloc1 #a #res h len x footprint spec spec_inv impl =
   let h0 = ST.get() in
@@ -179,13 +179,14 @@ val loopi_blocks_f:
             B.as_seq h1 w == spec_f (v i) (B.as_seq h0 inp) (B.as_seq h0 w)))
   -> nb:size_t{v nb == v inpLen / v blocksize}
   -> i:size_t{v i < v nb}
-  -> w:lbuffer b blen
-  -> Stack unit
+  -> w:lbuffer b blen ->
+  Stack unit
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer w) h0 h1 /\
       as_seq h1 w ==
       Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
+
 let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
   let block = sub #_ #(v inpLen) inp (i *. bs) bs in

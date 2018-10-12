@@ -97,10 +97,17 @@ let modifies3
 (** Ghost reveal a Buffer as its Pure Sequence *)
 let as_seq
   (#a:Type0)
-  (#rrel #rel:LMB.srel a)
+  (#len:size_nat)
   (h:HS.mem)
-  (b:LMB.mbuffer a rrel rel):
-  GTot (Seq.seq a) = B.as_seq #a #rrel #rel h b
+  (b:lbuffer a len):
+  GTot (Seq.lseq a len) = B.as_seq h b
+
+let ias_seq
+  (#a:Type0)
+  (#len:size_nat)
+  (h:HS.mem)
+  (b:ilbuffer a len):
+  GTot (Seq.lseq a len) = IB.as_seq h b
 
 (** Ghost view of a subset of a mutable Buffer *)
 let gsub
@@ -119,9 +126,9 @@ val as_seq_gsub:
   -> start:size_t
   -> n:size_t{v start + v n <= len} ->
   Lemma
-   (B.as_seq h (gsub #a #len b start n) ==
-    Seq.sub #a #len (B.as_seq h b) (v start) (v n))
-  [SMTPat (Seq.sub #a #len (B.as_seq h b) (v start) (v n))]
+   (as_seq h (gsub #a #len b start n) ==
+    Seq.sub #a #len (as_seq h b) (v start) (v n))
+  [SMTPat (Seq.sub #a #len (as_seq h b) (v start) (v n))]
 
 (** Subset of a mutable Buffer *)
 inline_for_extraction
@@ -153,9 +160,9 @@ val as_seq_igsub:
   -> start:size_t
   -> n:size_t{v start + v n <= len} ->
   Lemma
-    (B.as_seq h (igsub #a #len b start n) ==
-     Seq.sub #a #len (B.as_seq h b) (v start) (v n))
-  [SMTPat (Seq.sub #a #len (B.as_seq h b) (v start) (v n))]
+    (ias_seq h (igsub #a #len b start n) ==
+     Seq.sub #a #len (ias_seq h b) (v start) (v n))
+  [SMTPat (Seq.sub #a #len (ias_seq h b) (v start) (v n))]
 
 (** Subset of an immutable Buffer *)
 inline_for_extraction
@@ -180,7 +187,7 @@ val index:
   Stack a
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == Seq.index #a #len (B.as_seq h1 b) (v i))
+      r == Seq.index #a #len (as_seq h1 b) (v i))
 
 (** Access a specific value in an immutable Buffer *)
 inline_for_extraction
@@ -192,7 +199,7 @@ val iindex:
   Stack a
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == Seq.index #a #len (IB.as_seq h1 b) (v i))
+      r == Seq.index #a #len (ias_seq h1 b) (v i))
 
 (** Update a specific value in a mutable Buffer *)
 inline_for_extraction
@@ -206,7 +213,7 @@ val upd:
     (requires fun h0 -> B.live h0 b)
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer b) h0 h1 /\ B.live h1 b /\
-      B.as_seq h1 b == Seq.upd #a #len (B.as_seq h0 b) (v i) x)
+      as_seq h1 b == Seq.upd #a #len (as_seq h0 b) (v i) x)
 
 (** Operator definition to update a mutable Buffer *)
 inline_for_extraction
@@ -230,7 +237,7 @@ val bget:
   -> h:mem
   -> b:lbuffer a len
   -> i:size_nat{i < len} ->
-  GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (B.as_seq h b) i})
+  GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (as_seq h b) i})
 
 (** Access to the pure sequence-based value associated to an index of an immutable Buffer  *)
 (* We don't have access to Lib.Sequence.fst
@@ -242,7 +249,7 @@ val ibget:
   -> h:mem
   -> b:ilbuffer a len
   -> i:size_nat{i < len} ->
-  GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (IB.as_seq h b) i})
+  GTot (r:a{r == B.get h b i /\ r == Seq.index #a #len (ias_seq h b) i})
 
 (** Allocate a fixed-length mutable Buffer and initialize it to value [init] *)
 inline_for_extraction
@@ -311,7 +318,7 @@ val recall_contents:
   -> s:Seq.lseq a len
   -> ST unit
     (requires fun h0 -> (B.recallable b \/ live h0 b) /\ B.witnessed b (cpred s))
-    (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b /\ as_seq h0 b == s)
+    (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b /\ ias_seq h0 b == s)
 
 (** Copy a mutable Buffer in another mutable Buffer *)
 inline_for_extraction
@@ -325,7 +332,7 @@ val copy:
     (requires fun h0 -> B.live h0 o /\ B.live h0 i /\ B.disjoint i o)
     (ensures  fun h0 _ h1 ->
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
-      B.as_seq h1 o == B.as_seq h0 i)
+      as_seq h1 o == as_seq h0 i)
 
 (** Copy an immutable Buffer in a mutable Buffer *)
 inline_for_extraction
@@ -339,7 +346,20 @@ val icopy:
     (requires fun h0 -> B.live h0 o /\ B.live h0 i /\ B.disjoint i o)
     (ensures  fun h0 _ h1 ->
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
-      B.as_seq h1 o == B.as_seq h0 i)
+      as_seq h1 o == ias_seq h0 i)
+
+(** Set all elements of a mutable buffer to a specific value *)
+inline_for_extraction
+val memset:
+    #a:Type
+  -> #blen:size_nat 
+  -> b:lbuffer a blen
+  -> w:a
+  -> len:size_t{v len <= blen}
+  -> Stack unit
+    (requires fun h0 -> live h0 b)
+    (ensures  fun h0 _ h1 -> 
+      modifies1 b h0 h1 /\ as_seq h1 (gsub b 0ul len) == Seq.create (v len) w)
 
 (** Copy a mutable Buffer in a part of another mutable Buffer *)
 inline_for_extraction
@@ -353,7 +373,7 @@ val update_sub:
   Stack unit
     (requires fun h -> B.live h dst /\ B.live h src /\ B.disjoint dst src)
     (ensures  fun h0 _ h1 -> B.live h1 dst /\ B.modifies (B.loc_buffer dst) h0 h1 /\
-      B.as_seq h1 dst == Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
+      as_seq h1 dst == Seq.update_sub #a #len (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
 
 (** Copy an immutable Buffer in a part of a mutable Buffer *)
 inline_for_extraction
@@ -367,26 +387,27 @@ val update_isub:
   Stack unit
     (requires fun h -> B.live h dst /\ B.live h src /\ B.disjoint dst src)
     (ensures  fun h0 _ h1 -> B.live h1 dst /\ B.modifies (B.loc_buffer dst) h0 h1 /\
-      B.as_seq h1 dst == Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (B.as_seq h0 src))
+      as_seq h1 dst == Seq.update_sub #a #len (as_seq h0 dst) (v start) (v n) (ias_seq h0 src))
 
 (** Update a part of a mutable Buffer in-place with the application of a function F on another Buffer *)
 inline_for_extraction
 val update_sub_f:
-    #a:Type
+     #a:Type
   -> #len:size_nat
+  -> h0:mem
   -> buf:lbuffer a len
   -> start:size_t
   -> n:size_t{v start + v n <= len}
   -> spec:(mem -> GTot (Seq.lseq a (v n)))
   -> f:(b:lbuffer a (v n) -> Stack unit
-      (requires fun h -> B.live h b)
+      (requires fun h -> h0 == h /\ B.live h b)
       (ensures  fun h0 _ h1 ->
-             B.modifies (B.loc_buffer b) h0 h1 /\
-             B.as_seq h1 b == spec h0)) ->
+	     B.modifies (B.loc_buffer b) h0 h1 /\
+	     as_seq h1 b == spec h0)) ->
   Stack unit
-    (requires fun h -> B.live h buf)
+    (requires fun h -> h0 == h /\ B.live h buf)
     (ensures  fun h0 _ h1 -> B.modifies (B.loc_buffer buf) h0 h1 /\
-      B.as_seq h1 buf == Seq.update_sub #a #len (B.as_seq h0 buf) (v start) (v n) (spec h0))
+      as_seq h1 buf == Seq.update_sub #a #len (as_seq h0 buf) (v start) (v n) (spec h0))
 
 (** Loop combinator with just memory safety specification *)
 inline_for_extraction noextract
@@ -457,7 +478,7 @@ let loop1_inv
     Type0
 =
   B.modifies (B.loc_buffer write) h0 h /\
-  B.as_seq h write == Loop.repeati i (spec h0) (B.as_seq h0 write)
+  as_seq h write == Loop.repeati i (spec h0) (as_seq h0 write)
 
 (** Loop which modifies a single buffer [write] *)
 inline_for_extraction noextract
@@ -493,8 +514,8 @@ let loop2_inv
   Type0
 =
   B.modifies (B.loc_union (B.loc_buffer write0) (B.loc_buffer write1)) h0 h /\
-  (let s0, s1 = Loop.repeati i (spec h0) (B.as_seq h0 write0, B.as_seq h0 write1) in
-   B.as_seq h write0 == s0 /\ B.as_seq h write1 == s1)
+  (let s0, s1 = Loop.repeati i (spec h0) (as_seq h0 write0, as_seq h0 write1) in
+   as_seq h write0 == s0 /\ as_seq h write1 == s1)
 
 (** Loop which modifies two buffers [write0] and [write1] *)
 inline_for_extraction noextract
@@ -516,17 +537,6 @@ val loop2:
   Stack unit
     (requires fun h -> h0 == h)
     (ensures  fun _ _  -> loop2_inv #b0 #blen0 #b1 #blen1 h0 n write0 write1 spec (v n))
-
-val memset:
-    #a:Type
-  -> #blen:size_nat 
-  -> b:lbuffer a blen
-  -> w:a
-  -> len:size_t{v len <= blen}
-  -> Stack unit
-    (requires fun h0 -> live h0 b)
-    (ensures  fun h0 _ h1 -> 
-      modifies1 b h0 h1 /\ as_seq h1 (gsub b 0ul len) == Seq.create (v len) w)
 
 (**
 * Allocates a mutable buffer [b] in the stack, calls [impl b] and ovewrites the contents
@@ -613,7 +623,7 @@ val loopi_blocks:
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer write) h0 h1 /\
       as_seq h1 write ==
-      Seq.repeati_blocks #a #(Seq.lseq b blen) (v blocksize) (B.as_seq h0 inp) spec_f spec_l (as_seq h0 write))
+      Seq.repeati_blocks #a #(Seq.lseq b blen) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
 
 inline_for_extraction noextract
 val loop_blocks:

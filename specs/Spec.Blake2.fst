@@ -37,7 +37,7 @@ inline_for_extraction let size_const_sigma : size_nat = 160
 
 (* Definition of base types *)
 inline_for_extraction
-let limb_inttype (a:alg) =
+unfold let limb_inttype (a:alg) =
   match (wt a) with
   | U32 -> U64
   | U64 -> U128
@@ -45,6 +45,7 @@ let limb_inttype (a:alg) =
 type word_t (a:alg) = uint_t (wt a) SEC
 type limb_t (a:alg) : Type0 = uint_t (limb_inttype a) SEC
 
+inline_for_extraction
 let max_limb (a:alg) = maxint (limb_inttype a)
 
 inline_for_extraction
@@ -390,7 +391,6 @@ let blake2 a d kk k nn =
   blake2_finish a s nn
 
 
-inline_for_extraction
 val blake2s:
     d:bytes
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d < pow2 64 else length d + 64 < pow2 64)}
@@ -401,7 +401,6 @@ val blake2s:
 let blake2s d kk k n = blake2 Blake2S d kk k n
 
 
-inline_for_extraction
 val blake2b:
     d:bytes
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d < pow2 128 else length d + 128  < pow2 128)}
@@ -409,5 +408,4 @@ val blake2b:
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
   Tot (lbytes nn)
 
-inline_for_extraction
 let blake2b d kk k n = blake2 Blake2B d kk k n
