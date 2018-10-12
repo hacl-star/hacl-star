@@ -123,9 +123,24 @@ let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
   let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
   Lib.Loops.for (size 0) n inv impl
 
-let memset #a #blen b w len = admit()
+(** 
+* WARNING: don't rely on the extracted implementation for secure erasure,
+* C compilers may remove optimize it away.
+*)
+let memset #a #blen b init len =
+  let h0 = ST.get() in  
+  let inv (h:mem) (i:nat{i <= v len}) : Type0 = 
+    modifies1 b h0 h
+    /\ FStar.Seq.equal (Seq.seq_sub (as_seq h b) 0 i) (Seq.create i init)
+  in  
+  Lib.Loops.for (size 0) len inv
+     (fun i -> 
+       b.(i) <- init;
+       let h = ST.get() in 
+       FStar.Seq.lemma_split (Seq.seq_sub (as_seq h b) 0 (v i + 1)) (v i)
+     )
 
-let salloc1 #a #res #a_spec h len x footprint refl spec spec_inv impl =
+let salloc1 #a #res h len x footprint spec spec_inv impl =
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in

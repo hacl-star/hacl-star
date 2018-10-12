@@ -532,31 +532,30 @@ val memset:
 * Allocates a mutable buffer [b] in the stack, calls [impl b] and ovewrites the contents
 * of [b] before returning.
 *
-* [spec] is the functional post-condition of [impl]. We could parameterize it
-* by a [mem} and thus thunk it and avoid [Ghost.erased]. However, this [mem] argument is
-* determined by [h] so this is unnecessary (we could also thunk it with a [unit] argument).
-*
+* `spec` is the functional post-condition of `impl`, it only takes the final memory
+* because the initial memory is determined by `h`
+
 * [spec_inv] is used to propagate the post-condition of [impl] to the final memory
 * after popping the stack frame
 *)
+inline_for_extraction noextract
 val salloc1:
     #a:Type
   -> #res:Type
-  -> #a_spec:Type
   -> h:mem
   -> len:size_t{0 < v len}
   -> x:a
   -> footprint:Ghost.erased B.loc
-  -> refl:(mem -> GTot a_spec)
-  -> spec:Ghost.erased (a_spec -> (a_spec & res))
+  -> spec: (res -> mem -> GTot Type0)
   -> spec_inv:(h1:mem -> h2:mem -> h3:mem -> r:res -> Lemma
       (requires
         modifies0 h h1 /\
-        modifies (B.loc_union (B.loc_all_regions_from false (get_tip h1))
-                              (Ghost.reveal footprint)) h1 h2 /\
+        modifies (B.loc_union (B.loc_all_regions_from false (get_tip h1)) 
+                            (Ghost.reveal footprint)) h1 h2 /\
         modifies (B.loc_region_only false (get_tip h1)) h2 h3 /\
-        ~(live_region h (get_tip h1)))
-      (ensures  refl h2 == refl h3))
+        ~(live_region h (get_tip h1)) /\
+        spec r h2)
+      (ensures  spec r h3))
   -> impl:(b:lbuffer a (v len) -> Stack res
       (requires fun h0 ->
         modifies0 h h0 /\ ~(live_region h (get_tip h0)) /\
@@ -564,12 +563,15 @@ val salloc1:
       (ensures  fun h0 r h1 ->
         modifies (B.loc_union (B.loc_all_regions_from false (get_tip h0))
                               (Ghost.reveal footprint)) h0 h1 /\
-        (refl h1, r) == (Ghost.reveal spec) (refl h)))
+        spec r h1))
   -> Stack res
     (requires fun h0 -> h0 == h)
-    (ensures  fun h0 r h1 ->
-      modifies (Ghost.reveal footprint) h0 h1 /\
-      (refl h1, r) == (Ghost.reveal spec) (refl h0))
+    (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
+
+inline_for_extraction noextract
+let salloc1_trivial h len x footprint spec impl =
+  let trivial (#res:Type) (h1 h2 h3:mem) (r:res) = () in
+  salloc1 h len x footprint spec trivial impl
 
 inline_for_extraction noextract
 val loopi_blocks:
