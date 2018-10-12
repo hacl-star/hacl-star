@@ -98,7 +98,7 @@ let update_isub #a #len dst start n src =
     (B.as_seq h1 dst)
     (Seq.update_sub #a #len (B.as_seq h0 dst) (v start) (v n) (IB.as_seq h0 src))
 
-let update_sub_f #a #len buf start n spec f =
+let update_sub_f #a #len h0 buf start n spec f =
   let h0 = ST.get () in
   let tmp = sub buf start n in
   f tmp;
