@@ -111,8 +111,8 @@ let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
 
-let loop h0 n a_spec a_impl acc refl footprint spec impl =
-  let inv h i = loop_inv h0 n a_spec a_impl acc refl footprint spec i h in
+let loop h0 n a_spec refl footprint spec impl =
+  let inv h i = loop_inv h0 n a_spec refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
 
 let loop1 #b #blen h0 n acc spec impl =
@@ -123,18 +123,23 @@ let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
   let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
   Lib.Loops.for (size 0) n inv impl
 
-let alloc #a #b #w #len #wlen h0 clen init write spec impl =
-  admit();
+let memset #a #blen b w len = admit()
+
+let salloc1 #a #res #a_spec h len x footprint refl spec spec_inv impl =
+  let h0 = ST.get() in
   push_frame();
-  let buf = B.alloca init (normalize_term (size_to_UInt32 clen)) in
-  let r = impl buf in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
-      (requires (fun h -> inv h (v j)))
-      (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
-      upd #a #len buf j init in
-  Lib.Loops.for (size 0) clen inv f';
+  let h1 = ST.get() in
+  B.fresh_frame_modifies h0 h1;
+  let b = B.alloca x len in
+  let h2 = ST.get() in
+  let r = impl b in
+  let h3 = ST.get() in
+  memset #a #(v len) b x len;
+  let h4 = ST.get() in
   pop_frame();
+  let h5 = ST.get() in
+  B.popped_modifies h4 h5;
+  spec_inv h2 h3 h5 r;
   r
 
 inline_for_extraction noextract
@@ -192,5 +197,3 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
     (fun i -> f)
     (fun i -> l)
     w
-
-let print_compare_display len a b = admit()

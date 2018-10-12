@@ -50,17 +50,15 @@ module Loops
 ///    h0:mem
 /// -> n:size_t
 /// -> a_spec:(i:size_nat{i <= v n} -> Type)
-/// -> a_impl:Type
-/// -> acc:a_impl
 /// -> refl:(mem -> i:size_nat{i <= v n} -> GTot (a_spec i))
 /// -> footprint:(i:size_nat{i <= v n} -> GTot loc)
 /// -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1)))
 /// -> impl:(i:size_t{v i < v n} -> Stack unit
-///    (requires loop_inv h0 n a_spec a_impl acc refl footprint spec (v i))
-///    (ensures  fun _ _ -> loop_inv h0 n a_spec a_impl acc refl footprint spec (v i + 1)))
+///    (requires loop_inv h0 n a_spec refl footprint spec (v i))
+///    (ensures  fun _ _ -> loop_inv h0 n a_spec refl footprint spec (v i + 1)))
 /// -> Stack unit
 ///   (requires fun h -> h0 == h)
-///   (ensures  fun _ _ -> loop_inv h0 n a_spec a_impl acc refl footprint spec (v n))
+///   (ensures  fun _ _ -> loop_inv h0 n a_spec refl footprint spec (v n))
 /// ```
 ///
 /// One quirk of ``loop`` is that it takes the heap upon entering the
@@ -68,9 +66,9 @@ module Loops
 /// defining
 ///
 /// ```
-/// let loop' n a_spec a_impl acc refl footprint spec impl =
+/// let loop' n a_spec  refl footprint spec impl =
 ///   let h0 = ST.get() in
-///   loop h0 n a_spec a_impl acc refl footprint spec (impl h0)
+///   loop h0 n a_spec refl footprint spec (impl h0)
 /// ```
 ///
 /// However, this does not quite work for ``impl`` functions that
@@ -142,11 +140,11 @@ let reverse n a =
   push_frame();
   // We use a local buffer as the Low* state
   let b = create (size n) (u8 0) in
+  let h0 = ST.get() in
   // We annotate this so that Kremlin doesn't try to extract it
   [@ inline_let]
   let spec h0 = reverse_inner n (as_seq h0 a) in
-  let h0 = ST.get() in
-  loop h0 (size n) (reverse_state n) (lbuffer uint8 n) b
+  loop h0 (size n) (reverse_state n)
     /// We recover the spec accumulator by viewing the buffer as a sequence
     (fun h i -> as_seq h b)
     (fun i -> B.loc_buffer b)
@@ -202,7 +200,7 @@ val reverse_inplace: n:size_nat{0 < n} -> a:lbuffer uint8 n -> Stack unit
 let reverse_inplace n a =
   push_frame();
   let h0 = ST.get() in
-  loop h0 (size n /. size 2) (reverse_inplace_state n) (lbuffer uint8 n) a
+  loop h0 (size n /. size 2) (reverse_inplace_state n)
     (fun h i -> as_seq h a)
     (fun i -> B.loc_buffer a)
     (fun h0 -> reverse_inplace_inner n)
@@ -233,10 +231,10 @@ val fib: n:size_nat -> Stack nat
   (ensures  fun h0 res h1 -> modifies B.loc_none h0 h1 /\ res == fib_spec n)
 let fib n =
   push_frame();
-  let a = create (size 1) 0 in
-  let b = create (size 1) 1 in
+  let a:lbuffer nat 1 = create (size 1) 0 in
+  let b:lbuffer nat 1 = create (size 1) 1 in
   let h0 = ST.get () in
-  loop h0 (size n) (fib_state n) (lbuffer nat 1 & lbuffer nat 1) (a, b)
+  loop h0 (size n) (fib_state n)
   (fun h _ -> bget h a 0, bget h b 0)
   (fun _ -> B.loc_union (B.loc_buffer a) (B.loc_buffer b))
   (fun _ -> fib_inner n)
