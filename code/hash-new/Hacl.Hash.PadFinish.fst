@@ -34,13 +34,19 @@ val store_len: a:hash_alg -> len:len_t a -> b:B.buffer U8.t ->
       B.live h b /\
       B.length b = Helpers.size_len_8 a))
     (ensures (fun h0 _ h1 ->
-      M.(modifies (loc_buffer b) h0 h1) /\
-      B.as_seq h1 b == Endianness.n_to_be (size_len_ul a) (len_v a len)))
+      M.(modifies (loc_buffer b) h0 h1) /\ (
+      match a with
+      | MD5 -> B.as_seq h1 b == Endianness.n_to_le (size_len_ul a) (len_v a len)
+      | _ -> B.as_seq h1 b == Endianness.n_to_be (size_len_ul a) (len_v a len))))
 
 inline_for_extraction
 let store_len a len b =
   match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
+  | MD5 ->
+      C.Endianness.store64_le b len;
+      let h = ST.get () in
+      Endianness.n_to_le_le_to_n 8ul (B.as_seq h b)
+  | SHA1 | SHA2_224 | SHA2_256 ->
       C.Endianness.store64_be b len;
       let h = ST.get () in
       Endianness.n_to_be_be_to_n 8ul (B.as_seq h b)
@@ -161,7 +167,9 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer U8.t):
       max_input_size_len a;
       B.(modifies (loc_buffer dst) h0 h1) /\
       S.equal (B.as_seq h1 dst)
-        (Endianness.n_to_be (size_len_ul_8 a) FStar.Mul.(len_v a len * 8))))
+        (match a with
+        | MD5 -> Endianness.n_to_le (size_len_ul_8 a) FStar.Mul.(len_v a len * 8)
+        | _ -> Endianness.n_to_be (size_len_ul_8 a) FStar.Mul.(len_v a len * 8))))
 =
   begin match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
@@ -238,14 +246,22 @@ let finish a s dst =
     B.live h dst /\ B.live h s /\
     M.(modifies (loc_buffer dst) h0 h) /\
     S.equal (S.slice hash 0 (i * Helpers.size_word a))
-      (words_to_be a (S.slice hash_w 0 i))
+      (bytes_of_words a (S.slice hash_w 0 i))
   in
   let f (i: U32.t { U32.(0 <= v i /\ v i < size_hash_final_w a) }): ST.Stack unit
     (requires (fun h -> inv h (U32.v i)))
     (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 (U32.v i + 1)))
   =
     match a with
-    | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
+    | MD5 ->
+        let dst0 = B.sub dst 0ul U32.(4ul *^ i) in
+        let dsti = B.sub dst U32.(4ul *^ i) 4ul in
+        C.Endianness.store32_le dsti s.(i);
+        let h2 = ST.get () in
+        Endianness.le_of_seq_uint32_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
+        Endianness.le_of_seq_uint32_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
+          (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
+    | SHA1 | SHA2_224 | SHA2_256 ->
         let dst0 = B.sub dst 0ul U32.(4ul *^ i) in
         let dsti = B.sub dst U32.(4ul *^ i) 4ul in
         C.Endianness.store32_be dsti s.(i);

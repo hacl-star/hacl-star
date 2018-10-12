@@ -205,7 +205,7 @@ let init = h0
 
 (* Compression function *)
 let update (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block a}): Tot (hash_w a) =
-  let block_w = words_from_be a size_block_w block in
+  let block_w = words_of_bytes a size_block_w block in
   let hash_1 = shuffle a hash block_w in
   Spec.Loops.seq_map2 (word_add_mod a) hash hash_1
 

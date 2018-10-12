@@ -134,12 +134,14 @@ let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % size_block a =
 module E = FStar.Kremlin.Endianness
 
 (* Define word based operators *)
-let words_to_be: a:hash_alg -> Tot (s:Seq.seq (word a) -> Tot (Spec.Lib.lbytes FStar.Mul.(size_word a * Seq.length s))) = function
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> E.be_of_seq_uint32
+let bytes_of_words: a:hash_alg -> Tot (s:Seq.seq (word a) -> Tot (Spec.Lib.lbytes FStar.Mul.(size_word a * Seq.length s))) = function
+  | MD5 -> E.le_of_seq_uint32
+  | SHA1 | SHA2_224 | SHA2_256 -> E.be_of_seq_uint32
   | SHA2_384 | SHA2_512 -> E.be_of_seq_uint64
 
-let words_from_be: a:hash_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(size_word a * len) -> Tot (s:Seq.seq (word a){Seq.length s = len})) = function
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> E.seq_uint32_of_be
+let words_of_bytes: a:hash_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(size_word a * len) -> Tot (s:Seq.seq (word a){Seq.length s = len})) = function
+  | MD5 -> E.seq_uint32_of_le
+  | SHA1 | SHA2_224 | SHA2_256 -> E.seq_uint32_of_be
   | SHA2_384 | SHA2_512 -> E.seq_uint64_of_be
 
 

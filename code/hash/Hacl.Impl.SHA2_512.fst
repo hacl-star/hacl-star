@@ -566,7 +566,7 @@ let update_core hash_w data data_w ws_w k_w =
   (* Push a new frame *)
   (**) push_frame();
   (**) let h1 = ST.get() in
-  (**) assert(let b = Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
+  (**) assert(let b = Spec.words_of_bytes Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
               reveal_h64s (as_seq h0 data_w) == b);
 
   (* Allocate space for converting the data block *)
@@ -587,7 +587,7 @@ let update_core hash_w data data_w ws_w k_w =
   assert (modifies_1 hash_0 h3 h4);
   lemma_modifies_1_trans hash_0 h2 h3 h4;
   assert (modifies_1 hash_0 h2 h4);
-  (**) assert(let b = Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
+  (**) assert(let b = Spec.words_of_bytes Spec.size_block_w (reveal_sbytes (as_seq h0 data)) in
               let ha = Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) b in
               as_seq h4 hash_w == as_seq h0 hash_w /\
               reveal_h64s (as_seq h4 hash_0) == ha);
@@ -603,9 +603,9 @@ let update_core hash_w data data_w ws_w k_w =
   (**) assert(let x = reveal_h64s (as_seq h4 hash_w) in
           let y = reveal_h64s (as_seq h4 hash_0) in
           x == reveal_h64s (as_seq h0 hash_w) /\
-          y == Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) (Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data))));
+          y == Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) (Spec.words_of_bytes Spec.size_block_w (reveal_sbytes (as_seq h0 data))));
   (**) assert(let x = reveal_h64s (as_seq h0 hash_w) in
-         let y = Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) (Spec.words_from_be Spec.size_block_w (reveal_sbytes (as_seq h0 data))) in
+         let y = Spec.shuffle (reveal_h64s (as_seq h0 hash_w)) (Spec.words_of_bytes Spec.size_block_w (reveal_sbytes (as_seq h0 data))) in
          let z = reveal_h64s (as_seq h5 hash_w) in
          let z' = Spec.Loops.seq_map2 (fun x y -> FStar.UInt64.(x +%^ y)) x y in
          z == z');
@@ -1144,7 +1144,7 @@ val finish_core:
         (ensures  (fun h0 _ h1 -> live h0 hash_w /\ live h0 hash /\ live h1 hash /\ modifies_1 hash h0 h1
                   /\ (let seq_hash_w = reveal_h64s (as_seq h0 hash_w) in
                   let seq_hash = reveal_sbytes (as_seq h1 hash) in
-                  seq_hash = Spec.words_to_be (U32.v size_hash_w) seq_hash_w)))
+                  seq_hash = Spec.bytes_of_words (U32.v size_hash_w) seq_hash_w)))
 
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 50"
 

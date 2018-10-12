@@ -735,7 +735,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "d45d8652d7df804434fdbf288f803596"
+      "11a4d05c0d9bee076c520a0d9f4ee022"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.mul_shift_reduce_spec_",
@@ -791,7 +791,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "41957b2d9ea04236d11f9f98ea830271"
+      "f5286331f002167b38539ba2aa0c0947"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_mul_shift_reduce_spec_def",
@@ -830,7 +830,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "46e99d163fce74245e37dbfc5078d243"
+      "449b2a9d06b2ce60d785f5e9ee7807f9"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_mul_shift_reduce_spec_def",
@@ -853,7 +853,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "789556d7af29696b78a9b70ccf6b5754"
+      "b0b27bc2bbe3b56146c954e6f1e0710d"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_mul_shift_reduce_spec_def",
@@ -875,7 +875,7 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "9df32a03d1cb49a79e7d600690b52711"
+      "06895f4dd7b47037760e3f427ad394aa"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_mul_shift_reduce_spec_def_0",
@@ -888,7 +888,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "5ce270971a51c2e3c47215aec6f68aa9"
+      "335352694f97d179d661b667de05691b"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_mul_shift_reduce_spec_def_0",
@@ -906,7 +906,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "63493cd90395fa0543442e8c74b2bbaa"
+      "4d08a9f785d871abd64b39e417e8e187"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_mul_shift_reduce_spec_def_0",
@@ -923,7 +923,7 @@
         "int_typing", "primitive_Prims.op_Equality"
       ],
       0,
-      "24c33221f31a95f6aaf76662a01a6e0e"
+      "a300a1a653620070b17c3de6fcd81820"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_seval_wide_null",
@@ -937,7 +937,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "4809538b2b2e36001e979348dc987c00"
+      "974aaf12dd6e7b223204022af84e9e1a"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_seval_wide_null",
@@ -981,7 +981,51 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "06b00defcd6878dd5ae5d5d77d3307c7"
+      "8bff869d35082d2bb234d68124bd5c13"
+    ],
+    [
+      "Hacl.Spec.Bignum.Fmul.lemma_seval_wide_null",
+      3,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Hacl.Spec.Bignum.Bigint.seval_wide_.fuel_instrumented",
+        "@fuel_irrelevance_Hacl.Spec.Bignum.Bigint.seval_wide_.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_09f17e42dfd48b0cea3514f94a71ce4b_0",
+        "binder_x_eb16176cf17239971c67267513c17e34_1",
+        "equality_tok_Prims.LexTop@tok", "equation_FStar.UInt.min_int",
+        "equation_Hacl.Bignum.Constants.len",
+        "equation_Hacl.Bignum.Constants.wide",
+        "equation_Hacl.Bignum.Parameters.len",
+        "equation_Hacl.Bignum.Parameters.seqelem_wide",
+        "equation_Hacl.Bignum.Parameters.wide",
+        "equation_Hacl.Bignum.Parameters.wide_zero",
+        "equation_Hacl.Bignum.Wide.v", "equation_Hacl.UInt128.t",
+        "equation_Prims.nat",
+        "equation_with_fuel_Hacl.Spec.Bignum.Bigint.seval_wide_.fuel_instrumented",
+        "function_token_typing_Hacl.Bignum.Parameters.wide_zero",
+        "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_index_create",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_FStar.UInt_Tm_refine_8ae4abcfc6bc8d4903b7e1f40e070ec2",
+        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_c291cb7141ed0bb97057cbdf3c706fc4",
+        "refinement_interpretation_Hacl.Spec.Bignum.Fmul_Tm_refine_0359b95eefb76a291d80dbf4684e9487",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_FStar.Seq.Base.length", "typing_FStar.UInt128.t",
+        "typing_Hacl.Bignum.Parameters.wide_zero",
+        "typing_Hacl.Spec.Bignum.Bigint.seval_wide_",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "2fd1d0553be167abe6d46b2cf2d6269c"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.mul_shift_reduce_spec",
@@ -1018,7 +1062,7 @@
         "typing_Hacl.Bignum.Parameters.wide_zero"
       ],
       0,
-      "926e3d7fda70c91047ecd75f1b69c30b"
+      "ab9206ece772e76fae255f7c46fec8e8"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.mul_shift_reduce_spec",
@@ -1054,7 +1098,7 @@
         "typing_Hacl.Bignum.Parameters.wide_zero"
       ],
       0,
-      "5b77d8468f1f507cd68c9a89e7ae7b01"
+      "d0ba306c17a5aa37605cb8051ae3cd93"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.mul_shift_reduce_spec",
@@ -1090,7 +1134,7 @@
         "typing_Hacl.Bignum.Parameters.wide_zero"
       ],
       0,
-      "2d1b7e3390c88a703f3156f3255965a0"
+      "bc346fa49f3ed4fbac11157c25cc51d3"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.fmul_pre",
@@ -1115,7 +1159,7 @@
         "typing_Hacl.Bignum.Parameters.wide_zero"
       ],
       0,
-      "b084a4d4189b8a4d2dd18b9b561de105"
+      "635bd5430849ee75f39be243d15f8825"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.fmul_spec",
@@ -1133,7 +1177,7 @@
         "refinement_interpretation_Hacl.Spec.Bignum.Field_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
       ],
       0,
-      "7a71c3a9f801d07b39113e5a9ad9f2ba"
+      "dec1c712eba1700194410074df57faa1"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.fmul_spec",
@@ -1179,7 +1223,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "7148dcc9b326e76372e50c2932910dd6"
+      "7b296c8e9a8f4448813018b4e8011403"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_whole_slice",
@@ -1194,7 +1238,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "6a4d944f6cf103ca7e95fe5fc913f7c5"
+      "397b9902951f845dd19257d73c3eeaa3"
     ],
     [
       "Hacl.Spec.Bignum.Fmul.lemma_whole_slice",
@@ -1210,7 +1254,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "ca6993b6a1d5668eb2bd0b585154af8c"
+      "f8ee26189cff61e98e71ff564c3272e7"
     ]
   ]
 ]

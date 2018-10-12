@@ -48,8 +48,8 @@ type blocks_w = m:seq block_w
 type counter = nat
 
 (* Define word based operators *)
-let words_to_be = Spec.Lib.uint64s_to_be
-let words_from_be = Spec.Lib.uint64s_from_be
+let bytes_of_words = Spec.Lib.uint64s_to_be
+let words_of_bytes = Spec.Lib.uint64s_from_be
 let word_logxor = Word.logxor
 let word_logand = Word.logand
 let word_logor = Word.logor
@@ -158,7 +158,7 @@ let shuffle (hash:hash_w) (block:block_w) : Tot hash_w =
 
 
 let update (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
-  let b = words_from_be size_block_w block in
+  let b = words_of_bytes size_block_w block in
   let hash_1 = shuffle hash b in
   Spec.Loops.seq_map2 (fun x y -> x +%^ y) hash hash_1
 
@@ -182,16 +182,26 @@ let update_multi_one (h:hash_w) (b:bytes{Seq.length b = size_block}) : Lemma
   assert (Seq.length rem == 0);
   update_multi_empty (update h b) rem
 
+val append_preserves_multiples:
+  blocks1:bytes ->
+  blocks2:bytes ->
+  Lemma
+    (requires (length blocks1 % size_block = 0 /\ length blocks2 % size_block = 0))
+    (ensures (length (blocks1 @| blocks2) % size_block = 0))
+let append_preserves_multiples _ _ = ()
+
 val update_multi_append:
   hash:hash_w ->
   blocks1:bytes{length blocks1 % size_block = 0} ->
   blocks2:bytes{length blocks2 % size_block = 0} ->
   Lemma
     (requires True)
-    (ensures (update_multi (update_multi hash blocks1) blocks2 ==
+    (ensures ((length (blocks1 @| blocks2) % size_block = 0) /\ // needed to prove the other conjunct well-formed
+              update_multi (update_multi hash blocks1) blocks2 ==
               update_multi hash (blocks1 @| blocks2)))
     (decreases (length blocks1))
 let rec update_multi_append hash blocks1 blocks2 =
+  append_preserves_multiples blocks1 blocks2;
   if Seq.length blocks1 = 0 then
     begin
     update_multi_empty hash blocks1;
@@ -249,7 +259,7 @@ let update_last (hash:hash_w) (prevlen:nat{prevlen % size_block = 0}) (input:byt
 
 let finish (hashw:hash_w) : Tot (hash:bytes{length hash = size_hash}) =
   let sliced_hash = Seq.slice hashw 0 size_hash_final_w in
-  words_to_be size_hash_final_w sliced_hash
+  bytes_of_words size_hash_final_w sliced_hash
 
 
 let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{length hash = size_hash}) =
