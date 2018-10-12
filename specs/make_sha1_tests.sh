@@ -7,6 +7,9 @@
 #
 # NOTE: the first test of SHA1ShortMsg file is wrong, since it asserts Len = 0 but a Msg of length 1, so I fixed it here.
 
+# On OS X, we need to explicitly use GNU sed
+SED=$(if which gsed 2>/dev/null ; then echo gsed ; else echo sed ; fi)
+
 {
   cat <<EOF
 #  CAVS 11.0
@@ -297,14 +300,14 @@ MD = b22b87ea30f4050913f8f0241fc2ae2c319f52e7
 EOF
 } |
 tr -d '\r' |
-sed 's!#.*$!!g' |
+$SED 's!#.*$!!g' |
 grep -v '^\[' |
 grep -v '^Len ' |
 tr -d '\n' |
-sed 's!Msg = \([a-f0-9]*\)!(LET PLAIN TY = [\1] IN !g' |
-sed 's!MD = \([a-f0-9]*\)!LET CIPHER TY = [\1] IN VEC ALG PLAIN CIPHER);\n!g' |
-sed 's!\([a-f0-9][a-f0-9]\)!0x\1uy;!g' |
+$SED 's!Msg = \([a-f0-9]*\)!(LET PLAIN TY = [\1] IN !g' |
+$SED 's!MD = \([a-f0-9]*\)!LET CIPHER TY = [\1] IN VEC ALG PLAIN CIPHER);\n!g' |
+$SED 's!\([a-f0-9][a-f0-9]\)!0x\1uy;!g' |
 tr 'A-Z' 'a-z' |
-sed 's!ty!: list FStar.UInt8.t!g' |
-sed 's!vec!Vec!g' |
-sed "s!alg!SHA1!g"
+$SED 's!ty!: list FStar.UInt8.t!g' |
+$SED 's!vec!Vec!g' |
+$SED "s!alg!SHA1!g"

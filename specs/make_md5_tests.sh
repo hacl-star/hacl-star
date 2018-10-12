@@ -2,8 +2,11 @@
 
 # From: RFC 1321, section A.5 (https://www.ietf.org/rfc/rfc1321.txt)
 
+# On OS X, we need to explicitly use GNU sed
+SED=$(if which gsed 2>/dev/null ; then echo gsed ; else echo sed ; fi)
+
 make_byte_sequence () {
-  sed 's!\([0-9a-f][0-9a-f]\)!0x\1uy; !g'
+  $SED 's!\([0-9a-f][0-9a-f]\)!0x\1uy; !g'
 }
 
 { cat <<EOF
@@ -17,7 +20,7 @@ MD5 ("12345678901234567890123456789012345678901234567890123456789012345678901234
 EOF
 } |
 tr -d '\r\n' |
-sed 's!MD5 *("\([^"]*\)") *= *\([0-9a-f]*\)!\1\n\2\n!g' |
+$SED 's!MD5 *("\([^"]*\)") *= *\([0-9a-f]*\)!\1\n\2\n!g' |
 while read plain
 do
   echo -n "(let plain : list FStar.UInt8.t = ["
