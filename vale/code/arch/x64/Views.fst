@@ -14,7 +14,7 @@ let inverses16 (u:unit) =
     assert (Seq.equal x (put16 (get16 x)))
   in Classical.forall_intro aux
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 40"
 
 let inverses32 (u:unit) =
   reveal_opaque get32_def;
