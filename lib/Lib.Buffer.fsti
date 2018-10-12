@@ -341,6 +341,18 @@ val icopy:
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       B.as_seq h1 o == B.as_seq h0 i)
 
+(** Set all elements of a mutable Buffer to a specific value [memset] *)
+inline_for_extraction
+val set:
+    #a: Type
+  -> #vlen:size_nat
+  -> b: lbuffer a vlen
+  -> len:size_t{v len == vlen}
+  -> x: a ->
+  Stack unit
+    (requires (fun h -> B.live h b))
+    (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ B.live h' b))
+
 (** Copy a mutable Buffer in a part of another mutable Buffer *)
 inline_for_extraction
 val update_sub:

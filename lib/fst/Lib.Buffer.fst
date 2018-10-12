@@ -80,6 +80,10 @@ let icopy #a #len o clen i =
   let h1 = ST.get () in
   assert (Seq.slice #a #len (B.as_seq h1 o) 0 len == Seq.slice #a #len (B.as_seq h0 i) 0 len)
 
+let set #a #vlen b len x =
+  let h0 = ST.get () in
+  C.Loops.for 0ul len (fun h _ -> B.live h b /\ B.modifies (B.loc_buffer b) h0 h) (fun i -> B.upd b i x)
+
 let update_sub #a #len dst start n src =
   let h0 = ST.get () in
   LowStar.BufferOps.blit src 0ul dst (size_to_UInt32 start) (size_to_UInt32 n);
@@ -159,13 +163,14 @@ val loopi_blocks_f:
             B.as_seq h1 w == spec_f (v i) (B.as_seq h0 inp) (B.as_seq h0 w)))
   -> nb:size_t{v nb == v inpLen / v blocksize}
   -> i:size_t{v i < v nb}
-  -> w:lbuffer b blen
-  -> Stack unit
+  -> w:lbuffer b blen ->
+  Stack unit
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer w) h0 h1 /\
       as_seq h1 w ==
       Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
+
 let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
   let block = sub #_ #(v inpLen) inp (i *. bs) bs in
