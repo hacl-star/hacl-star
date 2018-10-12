@@ -2,6 +2,7 @@ module Lib.Buffer
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
+open FStar.Mul
 
 open Lib.IntTypes
 open Lib.RawIntTypes
@@ -122,29 +123,6 @@ let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
   let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
   Lib.Loops.for (size 0) n inv impl
 
-#set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
-
-let lbytes_eq #len a b =
-  push_frame();
-  let res = create #bool #1 (size 1) true in
-  [@ inline_let]
-  let refl h _ = B.get h res 0 in
-  [@ inline_let]
-  let spec h0 = Seq.lbytes_eq_inner #(v len) (B.as_seq h0 a) (B.as_seq h0 b) in
-  let h0 = ST.get () in
-  loop h0 len (Seq.lbytes_eq_state (v len)) (lbuffer bool 1) res refl
-    (fun i -> B.loc_buffer res) spec
-    (fun i ->
-      //Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
-      let ai = a.(i) in
-      let bi = b.(i) in
-      let res0 = res.(size 0) in
-      res.(size 0) <- res0 && FStar.UInt8.(u8_to_UInt8 ai =^ u8_to_UInt8 bi)
-    );
-  let res = res.(size 0) in
-  pop_frame();
-  res
-
 let alloc #a #b #w #len #wlen h0 clen init write spec impl =
   admit();
   push_frame();
@@ -158,5 +136,63 @@ let alloc #a #b #w #len #wlen h0 clen init write spec impl =
   Lib.Loops.for (size 0) clen inv f';
   pop_frame();
   r
+
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+inline_for_extraction noextract
+val loopi_blocks_f:
+    #a:Type0
+  -> #b:Type0
+  -> #blen:size_nat
+  -> blocksize:size_t{v blocksize > 0}
+  -> inpLen:size_t
+  -> inp:lbuffer a (v inpLen)
+  -> spec_f:(i:nat{i < v inpLen / v blocksize}
+              -> Seq.lseq a (v blocksize)
+              -> Seq.lseq b blen
+              -> Seq.lseq b blen)
+  -> f:(i:size_t{v i < v inpLen / v blocksize}
+       -> inp:lbuffer a (v blocksize)
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            B.live h inp /\ B.live h w /\ B.disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            B.modifies (B.loc_buffer w) h0 h1 /\
+            B.as_seq h1 w == spec_f (v i) (B.as_seq h0 inp) (B.as_seq h0 w)))
+  -> nb:size_t{v nb == v inpLen / v blocksize}
+  -> i:size_t{v i < v nb}
+  -> w:lbuffer b blen
+  -> Stack unit
+    (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
+    (ensures  fun h0 _ h1 ->
+      B.modifies (B.loc_buffer w) h0 h1 /\
+      as_seq h1 w ==
+      Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
+let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
+  assert ((v i + 1) * v bs <= v nb * v bs);
+  let block = sub #_ #(v inpLen) inp (i *. bs) bs in
+  f i block w
+
+let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
+  let nb = inpLen /. bs in
+  let rem = inpLen %. bs in
+  [@ inline_let]
+  let spec_fh h0 = Seq.repeati_blocks_f (v bs) (as_seq h0 inp) spec_f (v nb) in
+  let h0 = ST.get () in
+  loop1 #b #blen h0 nb w spec_fh
+  (fun i ->
+    Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
+    loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
+  let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
+  l nb rem last w
+
+let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
+  let h0 = ST.get () in
+  loopi_blocks bs inpLen inp
+    (fun (i:nat{i < Seq.length (as_seq h0 inp) / v bs}) -> spec_f)
+    (fun (i:nat{i == Seq.length (as_seq h0 inp) / v bs}) -> spec_l)
+    (fun i -> f)
+    (fun i -> l)
+    w
 
 let print_compare_display len a b = admit()

@@ -383,7 +383,7 @@ let blake2 a d kk k nn =
   let klen = if kk = 0 then 0 else 1 in
   let ll = length d in
   let s = blake2_init a kk k nn in
-  let s = repeat_blocks (size_block a) d
+  let s = repeati_blocks (size_block a) d
     (fun i -> blake2_update_block a ((klen + i + 1) * (size_block a)))
     (fun i -> blake2_update_last  a (klen * (size_block a) + ll))
     s in

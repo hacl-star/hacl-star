@@ -14,7 +14,32 @@ module B = LowStar.Buffer
 module ByteSeq = Lib.ByteSequence
 
 friend Lib.IntTypes
+friend Lib.ByteSequence
 friend Lib.Buffer
+
+
+#set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
+
+let lbytes_eq #len a b =
+  push_frame();
+  let res = create #bool #1 (size 1) true in
+  [@ inline_let]
+  let refl h _ = B.get h res 0 in
+  [@ inline_let]
+  let spec h0 = ByteSeq.lbytes_eq_inner #(v len) (B.as_seq h0 a) (B.as_seq h0 b) in
+  let h0 = ST.get () in
+  loop h0 len (ByteSeq.lbytes_eq_state (v len)) (lbuffer bool 1) res refl
+    (fun i -> B.loc_buffer res) spec
+    (fun i ->
+      //Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
+      let ai = a.(i) in
+      let bi = b.(i) in
+      let res0 = res.(size 0) in
+      res.(size 0) <- res0 && FStar.UInt8.(u8_to_UInt8 ai =^ u8_to_UInt8 bi)
+    );
+  let res = res.(size 0) in
+  pop_frame();
+  res
 
 // TODO: Fix this
 #set-options "--admit_smt_queries true"

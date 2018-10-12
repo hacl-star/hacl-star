@@ -20,7 +20,9 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
 FILES = $(addprefix fst/, \
 	Lib.IntTypes.fst \
 	Lib.Sequence.fst \
-	Lib.Buffer.fst)
+	Lib.ByteSequence.fst \
+	Lib.Buffer.fst \
+	Lib.ByteBuffer.fst)
 
 FIXME = $(addprefix fst/, \
 	Lib.RawIntTypes.fst \

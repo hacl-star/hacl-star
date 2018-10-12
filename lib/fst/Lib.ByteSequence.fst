@@ -9,6 +9,25 @@ open Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1"
 
+val lbytes_eq_inner:
+    #len:size_nat
+  -> a:lseq uint8 len
+  -> b:lseq uint8 len
+  -> i:size_nat{i < len}
+  -> r:bool
+  -> bool
+let lbytes_eq_inner #len a b i r =
+  let open Lib.RawIntTypes in
+  let open FStar.UInt8 in
+  r && (u8_to_UInt8 (index a i) =^ u8_to_UInt8 (index b i))
+
+val lbytes_eq_state: len:size_nat -> i:size_nat{i <= len} -> Type0
+let lbytes_eq_state len i = bool
+
+let lbytes_eq #len a b =
+  repeat_gen len (lbytes_eq_state len) (lbytes_eq_inner a b) true
+
+
 val nat_from_intseq_be_:
     #t:inttype -> #l:secrecy_level
   -> b:seq (uint_t t l)

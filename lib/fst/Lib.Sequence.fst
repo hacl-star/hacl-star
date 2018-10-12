@@ -59,24 +59,6 @@ let for_all2 #a #b #len f x y =
   let r = map2 (fun xi yi -> f xi yi) x y in
   Seq.for_all (fun bi -> bi = true) r
 
-val lbytes_eq_inner:
-    #len:size_nat
-  -> a:lseq uint8 len
-  -> b:lseq uint8 len
-  -> i:size_nat{i < len}
-  -> r:bool
-  -> bool
-let lbytes_eq_inner #len a b i r =
-  let open Lib.RawIntTypes in
-  let open FStar.UInt8 in
-  r && (u8_to_UInt8 (index a i) =^ u8_to_UInt8 (index b i))
-
-val lbytes_eq_state: len:size_nat -> i:size_nat{i <= len} -> Type0
-let lbytes_eq_state len i = bool
-
-let lbytes_eq #len a b =
-  repeat_gen len (lbytes_eq_state len) (lbytes_eq_inner a b) true
-
 (** Selecting a subset of an unbounded Sequence *)
 val seq_sub:
     #a:Type
@@ -121,16 +103,25 @@ let map_blocks #a bs inp f g =
     seq_update_sub out (nb * bs) rem (g nb rem (seq_sub inp (nb * bs) rem))
   else out
 
-let repeat_blocks #a #b bs inp f g init =
+val repeati_blocks_f:
+    #a:Type0
+  -> #b:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> b -> b)
+  -> nb:nat{nb == length inp / blocksize}
+  -> i:nat{i < nb}
+  -> acc:b
+  -> b
+let repeati_blocks_f #a #b bs inp f nb i acc =
+  assert ((i+1) * bs <= nb * bs);
+  let block = seq_sub inp (i * bs) bs in
+  f i block acc
+
+let repeati_blocks #a #b bs inp f g init =
   let len = length inp in
   let nb = len / bs in
   let rem = len % bs in
-  let acc =
-    repeati nb
-    (fun i acc ->
-       assert ((i+1) * bs <= nb * bs);
-       let block = seq_sub inp (i * bs) bs in
-       f i block acc)
-    init in
+  let acc = repeati nb (repeati_blocks_f bs inp f nb) init in
   let last = seq_sub inp (nb * bs) rem in
   g nb rem last acc

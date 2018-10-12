@@ -67,10 +67,10 @@ let test () =
   in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected output in
   IO.print_string "\nResult   ARGON2i: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (to_list output);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list output);
 
   IO.print_string "\nExpected ARGON2i: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (to_list expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected);
 
   if result then IO.print_string "\nARGON2i Test1 : Success!\n"
   else IO.print_string "\nARGON2i Test1: Failure :(\n"

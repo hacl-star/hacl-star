@@ -9,7 +9,7 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Endianness
+open Lib.ByteBuffer
 
 open Hacl.Impl.SHA3
 
