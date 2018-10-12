@@ -29,7 +29,7 @@ module Loops
 ///  if lo = hi then acc
 ///  else f (hi - 1) (repeat_right lo (hi - 1) a f acc)
 /// ```
-/// 
+///
 /// - ``loop`` is a wrapper around ``Lib.Loops.for`` that abstracts
 /// over the Low* state used by the body. It takes as input a pure
 /// function operating over an arbitrary index-dependent state (as in
@@ -43,7 +43,7 @@ module Loops
 /// footprint of a loop can grow iteratively -- consider for example
 /// a loop that modifies an increasingly longer sub-buffer of an input
 /// buffer.
-/// 
+///
 ///
 /// ```
 /// val loop:
@@ -86,6 +86,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.LoopCombinators
 open Lib.Buffer
+open Lib.Print
 
 module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
@@ -114,7 +115,7 @@ let reverse_state n i = lseq uint8 n
 /// Again, the foolproof method is to give a top-level definition
 /// shared between the specification and implementation code.
 noextract
-val reverse_inner: n:size_nat -> s:lseq uint8 n -> i:size_nat{i < n} 
+val reverse_inner: n:size_nat -> s:lseq uint8 n -> i:size_nat{i < n}
   -> reverse_state n i -> reverse_state n (i + 1)
 let reverse_inner n s i t = t.[i] <- s.[n - i - 1]
 
@@ -133,9 +134,9 @@ let reverse_spec n s =
 /// non-Low*. A telltale sign is Kremlin trying to extract
 /// definitions in ``Lib.Sequence``.
 val reverse: n:size_nat{0 < n} -> a:lbuffer uint8 n -> Stack unit
-  (requires fun h0 -> B.live h0 a)
-  (ensures  fun h0 _ h1 -> 
-    B.modifies (B.loc_buffer a) h0 h1 /\ as_seq h1 a == reverse_spec n (as_seq h0 a))
+  (requires fun h0 -> live h0 a)
+  (ensures  fun h0 _ h1 ->
+    modifies1 a h0 h1 /\ as_seq h1 a == reverse_spec n (as_seq h0 a))
 let reverse n a =
   push_frame();
   // We use a local buffer as the Low* state
@@ -164,7 +165,7 @@ let reverse n a =
       // equation of ``repeat`, using 1 unit of fuel, but its definition is hidden
       // behind ``Lib.Sequence.fsti``.
       //
-      // assert (as_seq h2 b ==        
+      // assert (as_seq h2 b ==
       //  (repeat (v i + 1) (reverse_state n) (spec h0) (Seq.create n (u8 0))))
       //
       // We thus apply a lemma to unfold ``repeat``
@@ -180,9 +181,9 @@ val reverse_inplace_state: n:size_nat -> i:size_nat{i <= n / 2} -> Type0
 let reverse_inplace_state n i = lseq uint8 n
 
 noextract
-val reverse_inplace_inner: n:size_nat -> i:size_nat{i < n / 2} 
+val reverse_inplace_inner: n:size_nat -> i:size_nat{i < n / 2}
   -> reverse_state n i -> reverse_state n (i + 1)
-let reverse_inplace_inner n i s = 
+let reverse_inplace_inner n i s =
   let tmp = s.[i] in
   let s = s.[i] <- s.[n - i - 1] in
   s.[n - i - 1] <- tmp
@@ -193,9 +194,9 @@ let reverse_inplace_spec n s =
   repeat (n / 2) (reverse_inplace_state n) (reverse_inplace_inner n) s
 
 val reverse_inplace: n:size_nat{0 < n} -> a:lbuffer uint8 n -> Stack unit
-  (requires fun h0 -> B.live h0 a)
-  (ensures  fun h0 _ h1 -> 
-    B.modifies (B.loc_buffer a) h0 h1 /\ as_seq h1 a == 
+  (requires fun h0 -> live h0 a)
+  (ensures  fun h0 _ h1 ->
+    modifies1 a h0 h1 /\ as_seq h1 a ==
     reverse_inplace_spec n (as_seq h0 a))
 let reverse_inplace n a =
   push_frame();
@@ -228,7 +229,7 @@ let fib_spec n = fst (repeat n (fib_state n) (fib_inner n) (0, 1))
 // We use ``nat`` rather than a machine integer type to keep things simple
 val fib: n:size_nat -> Stack nat
   (requires fun _ -> True)
-  (ensures  fun h0 res h1 -> modifies B.loc_none h0 h1 /\ res == fib_spec n)
+  (ensures  fun h0 res h1 -> modifies0 h0 h1 /\ res == fib_spec n)
 let fib n =
   push_frame();
   let a:lbuffer nat 1 = create (size 1) 0 in
@@ -241,12 +242,48 @@ let fib n =
   (fun i ->
     unfold_repeat n (fib_state n) (fib_inner n) (0,1) (size_v i);
     let a_ = a.(size 0) in
-    a.(size 0) <- b.(size 0); 
-    b.(size 0) <- a_ + b.(size 0) 
+    a.(size 0) <- b.(size 0);
+    b.(size 0) <- a_ + b.(size 0)
   );
   let res = a.(size 0) in
   pop_frame();
   res
+
+/// Secure alloc combinator
+
+/// Use ``salloc1`` for computations that use temporary stack-allocated state, instead
+/// of pushing a new stack frame and an explicit ``create``.
+///
+/// ``salloc1 h len init footprint spec spec_inv impl`` allocates a buffer ``b`` of
+/// length ``len``, initializes it to ``init``, and then runs ``impl b``.
+///
+/// Before returning, it overwrites the buffer ``b`` in the stack. Although this has no
+/// observable effect, it is necessary to scrub the final contents of ``b`` when they
+/// are secret-dependent. Currently, this is done using a naive implementation of
+/// ``memset`` that may be optimized away by C compilers. We will replace it with a
+/// more robust hand-written implementation in C or extract it as ``memset_s``,
+/// which is guaranteed not to be optimized away during compilation.
+///
+/// ``spec_inv`` is a lemma used to propagate the post-condition of ``impl`` to
+/// the final memory. The ``salloc1_trivial`` variant doesn't take this argument and
+/// attempts to prove this automatically; it works in most cases.
+
+val set_true_spec: a:lbuffer bool 1 -> mem -> bool -> mem -> GTot Type0
+let set_true_spec a h0 r h1 = B.get h1 a 0 == true /\ r == B.get h0 a 0
+
+(** Sets a.(0) to true, returning the previous value *)
+val set_true: a:lbuffer bool 1 -> Stack bool
+  (requires fun h -> live h a)
+  (ensures  fun h0 _ h1 -> modifies1 a h0 h1)
+let set_true a =
+  let h = ST.get() in
+  let footprint = Ghost.hide (B.loc_buffer a) in
+  salloc1_trivial h 1ul true footprint (set_true_spec a h)
+    (fun b ->
+      let open LowStar.BufferOps in
+      b.(0ul) <- a.(0ul);
+      a.(0ul) <- true;
+      b.(0ul))
 
 /// Tests
 
@@ -256,31 +293,31 @@ let b0: b:lbuffer uint8 3{B.recallable b} =
   assert_norm (List.Tot.length l <= max_size_t);
   createL_global l
 
-let b1: b:lbuffer uint8 3{B.recallable b} = 
+let b1: b:lbuffer uint8 3{B.recallable b} =
   [@inline_let]
   let l = [u8 1; u8 2; u8 3] in
   assert_norm (List.Tot.length l <= max_size_t);
   createL_global l
-  
-let b2: b:lbuffer uint8 3{B.recallable b} = 
+
+let b2: b:lbuffer uint8 3{B.recallable b} =
   [@inline_let]
   let l = [u8 3; u8 2; u8 1] in
   assert_norm (List.Tot.length l <= max_size_t);
   createL_global l
 
-let a0: b:lbuffer uint8 4{B.recallable b} = 
+let a0: b:lbuffer uint8 4{B.recallable b} =
   [@inline_let]
   let l = [u8 1; u8 2; u8 3; u8 4] in
   assert_norm (List.Tot.length l <= max_size_t);
   createL_global l
 
-let a1: b:lbuffer uint8 4{B.recallable b} = 
+let a1: b:lbuffer uint8 4{B.recallable b} =
   [@inline_let]
   let l = [u8 1; u8 2; u8 3; u8 4] in
   assert_norm (List.Tot.length l <= max_size_t);
   createL_global l
 
-let a2: b:lbuffer uint8 4{B.recallable b} = 
+let a2: b:lbuffer uint8 4{B.recallable b} =
   [@inline_let]
   let l = [u8 4; u8 3; u8 2; u8 1] in
   assert_norm (List.Tot.length l <= max_size_t);
@@ -289,19 +326,25 @@ let a2: b:lbuffer uint8 4{B.recallable b} =
 val main: unit -> St int
 let main () =
   recall b0;
-  reverse_inplace 3 b0;  
+  reverse_inplace 3 b0;
   print_compare_display (size 3) b0 b2;
   recall b0;
   reverse 3 b0;
   print_compare_display (size 3) b0 b1;
   recall a0;
-  reverse_inplace 4 a0; 
+  reverse_inplace 4 a0;
   print_compare_display (size 4) a0 a2;
   recall a0;
   reverse 4 a0;
   print_compare_display (size 4) a0 a1;
   let open TestLib in
-  let n = fib 10 in 
+  let n = fib 10 in
   assume (UInt.fits (fib_spec 10) 32);
   TestLib.checku32 (UInt32.uint_to_t n) 55ul;
+  push_frame();
+  let a = create #_ #1 1ul false in
+  let b = set_true a in
+  TestLib.check (a.(size 0));
+  TestLib.check (not b);
+  pop_frame();
   0
