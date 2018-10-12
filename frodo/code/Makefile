@@ -242,7 +242,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Hacl.SHA3=Hacl.Impl.SHA3,Hacl.SHA3' \
 	-library 'Hacl.AES128,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
-	-add-include '"c/Lib_PQ_Print.h"' \
+	-add-include '"c/Lib_Print.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -275,7 +275,7 @@ ALL_SOURCES = \
   include/random.c \
   include/$(KECCAK) \
   include/clearwords.c \
-  $(HACL_HOME)/lib/c/Lib_PQ_Print.c
+  $(HACL_HOME)/lib/c/Lib_Print.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
 	$(LWEKE_HOME)/objs/aes/aes.o \
@@ -360,7 +360,7 @@ CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
 
 BASE_OBJ = \
-  ../../lib/c/Lib_PQ_Print.o \
+  ../../lib/c/Lib_Print.o \
   include/Hacl_Keccak.o \
   include/rng.o \
   include/clearwords.o \
@@ -403,7 +403,7 @@ $(OUT_DIR)/Hacl_Frodo_KEM.c $(OUT_DIR)/Hacl_Test_Frodo.c: $(OUT_DIR)/out.krml
 	-bundle 'C=C.Endianness' \
 	-library 'Hacl.Keccak,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
-	-add-include '"c/Lib_PQ_Print.h"' \
+	-add-include '"c/Lib_Print.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 

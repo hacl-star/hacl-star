@@ -149,7 +149,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Hacl.SHA3=Hacl.Impl.*,Hacl.SHA3' \
 	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
-	-add-include '"c/Lib_PQ_Print.h"' \
+	-add-include '"c/Lib_Print.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -178,7 +178,7 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_PQ_Print.c
+  $(HACL_HOME)/lib/c/Lib_Print.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
