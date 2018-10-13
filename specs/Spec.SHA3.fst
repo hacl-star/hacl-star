@@ -23,9 +23,10 @@ let keccak_piln: lseq pilns_t 24 =
   assert_norm (List.Tot.length piln_list == 24);
   of_list piln_list
 
-let keccak_rndc: lseq uint64 24 =
+let keccak_rndc: lseq (uint_t U64 PUB) 24 =
   assert_norm (List.Tot.length rndc_list == 24);
-  map secret (of_list rndc_list)
+  of_list rndc_list
+  
 
 unfold
 type state = lseq uint64 25
@@ -93,7 +94,7 @@ let state_chi (s_pi_rho:state) : state  =
   repeati 5 (state_chi_inner1 s_pi_rho) s_pi_rho
 
 let state_iota (s:state) (round:size_nat{round < 24}) : state =
-  writeLane s 0 0 (readLane s 0 0 ^. keccak_rndc.[round])
+  writeLane s 0 0 (readLane s 0 0 ^. secret keccak_rndc.[round])
 
 let state_permute1 (round:size_nat{round < 24}) (s:state) : state =
   let s_theta = state_theta s in
