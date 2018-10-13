@@ -511,23 +511,28 @@ private val create_empty_mt: r:erid ->
 	   B.frameOf mt = r /\
 	   modifies (mt_loc mt) h0 h1 /\
 	   mt_safe h1 mt /\
-	   mt_not_full h1 mt))
+	   mt_not_full h1 mt /\
 	   // correctness
-	   // mt_lift h1 mt == High.create_empty_mt ()))
-#reset-options "--z3rlimit 20"
+	   mt_lift h1 mt == High.create_empty_mt ()))
+#reset-options "--z3rlimit 40"
 private let create_empty_mt r =
   let hs_region = RV.new_region_ r in
   let hs = RV.create_rid hvreg merkle_tree_size_lg hs_region in
   let h0 = HST.get () in
+  assert (RV.as_seq h0 hs == S.create 32 S.empty);
   mt_safe_elts_init h0 0ul hs;
   let rhs_region = RV.new_region_ r in
   let rhs = RV.create_rid hreg merkle_tree_size_lg rhs_region in
   let h1 = HST.get () in
+  assert (RV.as_seq h1 rhs == S.create 32 High.hash_init);
   RV.rv_inv_preserved hs (V.loc_vector rhs) h0 h1;
+  RV.as_seq_preserved hs (V.loc_vector rhs) h0 h1;
   mt_safe_elts_preserved
     0ul hs 0ul 0ul (V.loc_vector rhs) h0 h1;
   let mt = B.malloc r (MT 0ul 0ul hs false rhs) 1ul in
   let h2 = HST.get () in
+  RV.as_seq_preserved hs loc_none h1 h2;
+  RV.as_seq_preserved rhs loc_none h1 h2;
   mt_safe_elts_preserved 0ul hs 0ul 0ul loc_none h1 h2;
   mt
 
