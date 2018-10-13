@@ -203,17 +203,12 @@ val repeati_blocks:
   -> init:b
   -> out:b
 
-unfold
-let repeat_blocks
-    (#a:Type0)
-    (#b:Type0)
-    (blocksize:size_nat{blocksize > 0})
-    (inp:seq a)
-    (f:(lseq a blocksize -> b -> b))
-    (l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b))
-    (init:b) : b
-  =
-  repeati_blocks #a #b blocksize inp
-  (fun (i:nat{i < length inp / blocksize}) -> f)
-  (fun (i:nat{i == length inp / blocksize}) -> l)
-  init
+val repeat_blocks:
+    #a:Type0
+  -> #b:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a
+  -> f:(lseq a blocksize -> b -> b)
+  -> l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b)
+  -> init:b
+  -> out:b

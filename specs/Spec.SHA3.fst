@@ -26,7 +26,7 @@ let keccak_piln: lseq pilns_t 24 =
 let keccak_rndc: lseq (uint_t U64 PUB) 24 =
   assert_norm (List.Tot.length rndc_list == 24);
   of_list rndc_list
-  
+
 
 unfold
 type state = lseq uint64 25
@@ -154,7 +154,6 @@ let absorb_inner (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   let s = loadState rateInBytes block s in
   state_permute s
 
-unfold
 let absorb (s:state)
            (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
 	   (inputByteLen:nat)
@@ -204,7 +203,6 @@ let squeeze (s:state)
   let output = create outputByteLen (u8 0) in
   squeeze' s rateInBytes outputByteLen output
 
-unfold
 val keccak':
     rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
   -> capacity:size_nat{capacity + rate == 1600}

@@ -125,3 +125,9 @@ let repeati_blocks #a #b bs inp f g init =
   let acc = repeati nb (repeati_blocks_f bs inp f nb) init in
   let last = seq_sub inp (nb * bs) rem in
   g nb rem last acc
+
+let repeat_blocks #a #b bs inp f l init =
+  repeati_blocks bs inp
+  (fun (i:nat{i < length inp / bs}) -> f)
+  (fun (i:nat{i == length inp / bs}) -> l)
+  init

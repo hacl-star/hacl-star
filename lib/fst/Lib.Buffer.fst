@@ -205,7 +205,7 @@ let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l nb rem last w
 
-let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
+let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w = admit();
   let h0 = ST.get () in
   loopi_blocks bs inpLen inp
     (fun (i:nat{i < Seq.length (as_seq h0 inp) / v bs}) -> spec_f)
