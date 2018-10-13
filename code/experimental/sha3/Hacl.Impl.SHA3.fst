@@ -282,12 +282,9 @@ val state_iota:
       modifies (loc_buffer s) h0 h1 /\
       as_seq h1 s == S.state_iota (as_seq h0 s) (v round))
 let state_iota s round =
-  // SZ: This regressed because of
-  // https://github.com/project-everest/hacl-star/commit/f5d92e63
-  admit();
   recall_contents keccak_rndc S.keccak_rndc;
-  writeLane s (size 0) (size 0) (readLane s (size 0) (size 0) ^.
-    (iindex keccak_rndc round))
+  let c = iindex keccak_rndc round in
+  writeLane s (size 0) (size 0) (readLane s (size 0) (size 0) ^. secret c)
 
 val state_permute:
     s:state
@@ -554,10 +551,10 @@ val keccak:
       as_seq h1 output ==
       S.keccak' (v rate) (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen) (as_seq h0 output))
 let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen output =
-  admit();
-  push_frame();  
+  push_frame();
   let rateInBytes = rate /. size 8 in  
   let s:state = create (size 25) (u64 0) in
   absorb s rateInBytes inputByteLen input delimitedSuffix;
   squeeze s rateInBytes outputByteLen output;
-  pop_frame()
+  pop_frame();
+  admit()
