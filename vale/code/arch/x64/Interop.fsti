@@ -69,8 +69,8 @@ let correct_down_p (mem:HS.mem) (addrs:addr_map) (heap:heap) (p:s8) =
   (forall i.  0 <= i /\ i < length ==> heap.[addr + i] == SecretByte.v (FStar.Seq.index contents i))
 
 val addrs_set: (ptrs:list s8) -> (addrs:addr_map) -> GTot (s:Set.set int{
-  forall x. not (Set.mem x s) <==> 
-    (forall (b:s8{List.memP b ptrs}). x < addrs b \/ x >= addrs b + B.length b)})
+  forall x.{:pattern (Set.mem x s)} not (Set.mem x s) <==> 
+    (forall (b:s8{List.memP b ptrs}).{:pattern (addrs b)} x < addrs b \/ x >= addrs b + B.length b)})
     
 val addrs_set_lemma: (ptrs1:list s8) -> (ptrs2:list s8) ->
   (addrs:addr_map) -> Lemma
