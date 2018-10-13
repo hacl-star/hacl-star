@@ -18,14 +18,19 @@ type uint8_t = U8.t
 module EHS = EverCrypt.Hash
 module EHL = EverCrypt.Helpers
 
-val hash_size: uint32_t
-let hash_size = 32ul
+val hash_size: nat
+let hash_size = U32.v (EHS.tagLen EHS.SHA256)
 
-type hash = b:EHS.bytes{S.length b = U32.v hash_size}
-type hash_seq = S.seq hash
-type hash_ss = S.seq hash_seq
+val hash: Type0
+let hash = b:EHS.bytes{S.length b = hash_size}
 
-let hash_init: hash = S.create (U32.v hash_size) 0uy
+val hash_seq: Type0
+let hash_seq = S.seq hash
+
+val hash_ss: Type0
+let hash_ss = S.seq hash_seq
+
+let hash_init: hash = S.create hash_size 0uy
 
 val hash_2: src1:hash -> src2:hash -> GTot hash
 let hash_2 src1 src2 =
@@ -125,8 +130,9 @@ let mt_insert mt v =
 
 val create_mt: init:hash -> GTot merkle_tree
 let create_mt init =
-  admit ();
-  mt_insert (create_empty_mt ()) init
+  MT 0 1
+     (S.cons (S.cons init S.empty) (S.create 31 S.empty))
+     false (S.create 32 hash_init)
 
 /// Getting the Merkle root and path
 

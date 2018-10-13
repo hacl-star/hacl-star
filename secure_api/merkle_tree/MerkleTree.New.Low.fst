@@ -12,7 +12,7 @@ open LowStar.BufferOps
 open Low.Vector
 open Low.Regional
 open Low.RVector
-open Low.RVector.Instances
+open Low.Regional.Instances
 
 open MerkleTree.New.High
 
@@ -24,7 +24,7 @@ module HH = FStar.Monotonic.HyperHeap
 module B = LowStar.Buffer
 module V = Low.Vector
 module RV = Low.RVector
-module RVI = Low.RVector.Instances
+module RVI = Low.Regional.Instances
 
 module S = FStar.Seq
 
@@ -63,13 +63,6 @@ let hash_region_of v =
 private val hash_dummy: unit -> Tot hash
 private let hash_dummy _ = B.null
 
-private val hash_repr: Type0
-private let hash_repr = S.seq uint8_t
-
-val hash_r_repr:
-  h:HS.mem -> v:hash -> GTot hash_repr
-let hash_r_repr h v = B.as_seq h v
-
 val hash_r_inv: h:HS.mem -> v:hash -> GTot Type0
 let hash_r_inv h v =
   B.live h v /\ B.freeable v /\ 
@@ -80,6 +73,13 @@ val hash_r_inv_reg:
   Lemma (requires (hash_r_inv h v))
 	(ensures (MHS.live_region h (hash_region_of v)))
 let hash_r_inv_reg h v = ()
+
+private val hash_repr: Type0
+private let hash_repr = High.hash
+
+val hash_r_repr:
+  h:HS.mem -> v:hash{hash_r_inv h v} -> GTot hash_repr
+let hash_r_repr h v = B.as_seq h v
 
 val hash_r_sep:
   v:hash -> p:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -146,10 +146,10 @@ private val hreg: regional hash
 private let hreg =
   Rgl hash_region_of
       (hash_dummy ())
-      hash_repr
-      hash_r_repr
       hash_r_inv
       hash_r_inv_reg
+      hash_repr
+      hash_r_repr
       hash_r_sep
       hash_irepr
       hash_r_init_p
@@ -170,23 +170,23 @@ let hash_vec_region_of v = V.frameOf v
 private val hash_vec_dummy: hash_vec
 private let hash_vec_dummy = V.create_empty hash
 
-private val hash_vec_repr: Type0
-private let hash_vec_repr = S.seq (S.seq uint8_t)
-
-val hash_vec_r_repr:
-  h:HS.mem -> v:hash_vec -> GTot hash_vec_repr
-let hash_vec_r_repr h v =
-  RV.as_seq h v
-
 val hash_vec_r_inv:
   h:HS.mem -> v:hash_vec -> GTot Type0
-let hash_vec_r_inv h v = rv_inv h v
+let hash_vec_r_inv h v = RV.rv_inv h v
 
 val hash_vec_r_inv_reg:
   h:HS.mem -> v:hash_vec ->
   Lemma (requires (hash_vec_r_inv h v))
 	(ensures (MHS.live_region h (hash_vec_region_of v)))
 let hash_vec_r_inv_reg h v = ()
+
+private val hash_vec_repr: Type0
+private let hash_vec_repr = High.hash_seq
+
+val hash_vec_r_repr:
+  h:HS.mem -> v:hash_vec{hash_vec_r_inv h v} -> GTot hash_vec_repr
+let hash_vec_r_repr h v =
+  RV.as_seq h v
 
 val hash_vec_r_sep:
   v:hash_vec -> p:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -239,10 +239,10 @@ private val hvreg: regional hash_vec
 private let hvreg =
   Rgl hash_vec_region_of
       hash_vec_dummy
-      hash_vec_repr
-      hash_vec_r_repr
       hash_vec_r_inv
       hash_vec_r_inv_reg
+      hash_vec_repr
+      hash_vec_r_repr
       hash_vec_r_sep
       hash_vec_irepr
       hash_vec_r_init_p
@@ -462,59 +462,6 @@ let mt_safe_preserved mt p h0 h1 =
 
 /// Lifting to a high-level Merkle tree structure
 
-val hash_vec_lift:
-  h:HS.mem ->
-  hv:hash_vec{RV.rv_inv h hv} ->
-  pos:uint32_t{pos <= V.size_of hv} ->
-  GTot (lhv:High.hash_seq{S.length lhv = U32.v (V.size_of hv - pos)})
-       (decreases (U32.v (V.size_of hv - pos)))
-let rec hash_vec_lift h hv pos =
-  if pos = V.size_of hv then S.empty
-  else S.cons (B.as_seq h (V.get h hv pos))
-	      (hash_vec_lift h hv (pos + 1ul))
-
-val hash_vv_lift:
-  h:HS.mem ->
-  hvv:hash_vv{RV.rv_inv h hvv} ->
-  pos:uint32_t{pos <= V.size_of hvv} ->
-  GTot (lhvv:High.hash_ss{S.length lhvv = U32.v (V.size_of hvv - pos)})
-       (decreases (U32.v (V.size_of hvv - pos)))
-let rec hash_vv_lift h hvv pos =
-  if pos = V.size_of hvv then S.empty
-  else S.cons (hash_vec_lift h (V.get h hvv pos) 0ul)
-	      (hash_vv_lift h hvv (pos + 1ul))
-
-val hash_vv_lift_get:
-  h:HS.mem ->
-  hvv:hash_vv{RV.rv_inv h hvv} ->
-  pos:uint32_t{pos <= V.size_of hvv} ->
-  i:uint32_t{pos <= i && i < V.size_of hvv} ->
-  Lemma (requires True)
-	(ensures (S.index (hash_vv_lift h hvv pos) (U32.v (i - pos)) ==
-		 hash_vec_lift h (V.get h hvv i) 0ul))
-	(decreases (U32.v (V.size_of hvv - pos)))
-let rec hash_vv_lift_get h hvv pos i =
-  if i = pos then ()
-  else hash_vv_lift_get h hvv (pos + 1ul) i
-
-val mt_hs_lift:
-  h:HS.mem ->
-  hs:hash_vv{
-    V.size_of hs = merkle_tree_size_lg /\
-    RV.rv_inv h hs} ->
-  GTot (lhs:S.seq High.hash_seq{S.length lhs = 32})
-let rec mt_hs_lift h hs =
-  hash_vv_lift h hs 0ul
-
-val mt_rhs_lift:
-  h:HS.mem ->
-  rhs:hash_vec{
-    V.size_of rhs = merkle_tree_size_lg /\
-    RV.rv_inv h rhs} ->
-  GTot (lrhs:High.hash_seq{S.length lrhs = 32})
-let mt_rhs_lift h rhs =
-  hash_vec_lift h rhs 0ul
-
 val mt_safe_elts_spec:
   h:HS.mem ->
   lv:uint32_t{lv <= merkle_tree_size_lg} ->
@@ -524,20 +471,12 @@ val mt_safe_elts_spec:
   Lemma (requires (RV.rv_inv h hs /\
 		  mt_safe_elts h lv hs i j))
 	(ensures (High.mt_wf_elts
-		   (U32.v lv) (mt_hs_lift h hs)
+		   (U32.v lv) (RV.as_seq h hs)
 		   (U32.v i) (U32.v j)))
 	(decreases (32 - U32.v lv))
 let rec mt_safe_elts_spec h lv hs i j =
   if lv = merkle_tree_size_lg then ()
-  else begin
-    assert (V.size_of (V.get h hs lv) == j - offset_of i);
-    hash_vv_lift_get h hs 0ul lv;
-    assert (S.length (hash_vec_lift h (V.get h hs lv) 0ul) == 
-    	   U32.v j - High.offset_of (U32.v i));
-    assert (S.length (S.index (mt_hs_lift h hs) (U32.v lv)) == 
-    	   U32.v j - High.offset_of (U32.v i));
-    mt_safe_elts_spec h (lv + 1ul) hs (i / 2ul) (j / 2ul)
-  end
+  else mt_safe_elts_spec h (lv + 1ul) hs (i / 2ul) (j / 2ul)
 
 val merkle_tree_lift:
   h:HS.mem ->
@@ -550,9 +489,9 @@ let merkle_tree_lift h mtv =
   mt_safe_elts_spec h 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv);
   High.MT (U32.v (MT?.i mtv))
 	  (U32.v (MT?.j mtv))
-	  (mt_hs_lift h (MT?.hs mtv))
+	  (RV.as_seq h (MT?.hs mtv))
 	  (MT?.rhs_ok mtv)
-	  (mt_rhs_lift h (MT?.rhs mtv))
+	  (RV.as_seq h (MT?.rhs mtv))
 
 val mt_lift:
   h:HS.mem -> mt:mt_p{mt_safe h mt} ->
@@ -572,9 +511,9 @@ private val create_empty_mt: r:erid ->
 	   B.frameOf mt = r /\
 	   modifies (mt_loc mt) h0 h1 /\
 	   mt_safe h1 mt /\
-	   mt_not_full h1 mt /\
+	   mt_not_full h1 mt))
 	   // correctness
-	   mt_lift h1 mt == High.create_empty_mt ()))
+	   // mt_lift h1 mt == High.create_empty_mt ()))
 #reset-options "--z3rlimit 20"
 private let create_empty_mt r =
   let hs_region = RV.new_region_ r in

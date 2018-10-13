@@ -490,7 +490,9 @@ let rv_inv_preserved_int #a #rg rv i h0 h1 =
 val as_seq_seq:
   #a:Type0 -> rg:regional a -> 
   h:HS.mem -> rs:S.seq a ->
-  i:nat -> j:nat{i <= j && j <= S.length rs} ->
+  i:nat -> 
+  j:nat{i <= j /\ j <= S.length rs /\
+    rs_elems_inv rg h rs i j} ->
   GTot (s:S.seq (Rgl?.repr rg){S.length s = j - i})
        (decreases j)
 let rec as_seq_seq #a rg h rs i j =
@@ -501,7 +503,11 @@ let rec as_seq_seq #a rg h rs i j =
 val as_seq_sub:
   #a:Type0 -> #rg:regional a -> 
   h:HS.mem -> rv:rvector rg ->
-  i:uint32_t -> j:uint32_t{i <= j && j <= V.size_of rv} ->
+  i:uint32_t -> 
+  j:uint32_t{
+    i <= j /\
+    j <= V.size_of rv /\
+    rv_elems_inv h rv i j} ->
   GTot (s:S.seq (Rgl?.repr rg){S.length s = U32.v j - U32.v i})
        (decreases (U32.v j))
 let rec as_seq_sub #a #rg h rv i j =
@@ -509,14 +515,14 @@ let rec as_seq_sub #a #rg h rv i j =
 
 val as_seq:
   #a:Type0 -> #rg:regional a -> 
-  h:HS.mem -> rv:rvector rg ->
+  h:HS.mem -> rv:rvector rg{rv_inv h rv} ->
   GTot (s:S.seq (Rgl?.repr rg){S.length s = U32.v (V.size_of rv)})
 let rec as_seq #a #rg h rv =
   as_seq_sub h rv 0ul (V.size_of rv)
 
 val as_seq_sub_as_seq:
   #a:Type0 -> #rg:regional a -> 
-  h:HS.mem -> rv:rvector rg ->
+  h:HS.mem -> rv:rvector rg{rv_inv h rv} ->
   Lemma (S.equal (as_seq_sub h rv 0ul (V.size_of rv))
 		 (as_seq h rv))
 	[SMTPat (as_seq_sub h rv 0ul (V.size_of rv))]
@@ -525,7 +531,8 @@ let as_seq_sub_as_seq #a #rg h rv = ()
 val as_seq_seq_index:
   #a:Type0 -> rg:regional a -> 
   h:HS.mem -> rs:S.seq a ->
-  i:nat -> j:nat{i <= j && j <= S.length rs} ->
+  i:nat -> 
+  j:nat{i <= j /\ j <= S.length rs /\ rs_elems_inv rg h rs i j} ->
   k:nat{k < j - i} ->
   Lemma (requires true)
 	(ensures (S.index (as_seq_seq rg h rs i j) k ==
@@ -540,8 +547,10 @@ let rec as_seq_seq_index #a rg h rs i j k =
 val as_seq_seq_eq:
   #a:Type0 -> rg:regional a -> 
   h:HS.mem -> rs1:S.seq a -> rs2:S.seq a ->
-  i:nat -> j:nat{i <= j && j <= S.length rs1} ->
-  k:nat -> l:nat{k <= l && l <= S.length rs2} ->
+  i:nat -> 
+  j:nat{i <= j /\ j <= S.length rs1 /\ rs_elems_inv rg h rs1 i j} ->
+  k:nat -> 
+  l:nat{k <= l /\ l <= S.length rs2 /\ rs_elems_inv rg h rs2 k l} ->
   Lemma (requires (S.equal (S.slice rs1 i j) (S.slice rs2 k l)))
 	(ensures (S.equal (as_seq_seq rg h rs1 i j)
 			  (as_seq_seq rg h rs2 k l)))
@@ -563,10 +572,11 @@ let as_seq_seq_eq #a rg h rs1 rs2 i j k l =
 val as_seq_seq_slice:
   #a:Type0 -> rg:regional a -> 
   h:HS.mem -> rs:S.seq a ->
-  i:nat -> j:nat{i <= j && j <= S.length rs} ->
+  i:nat -> j:nat{i <= j /\ j <= S.length rs /\ rs_elems_inv rg h rs i j} ->
   k:nat -> l:nat{k <= l && l <= j - i} ->
   Lemma (S.equal (S.slice (as_seq_seq rg h rs i j) k l)
 		 (as_seq_seq rg h (S.slice rs (i + k) (i + l)) 0 (l - k)))
+#reset-options "--z3rlimit 10"
 let rec as_seq_seq_slice #a rg h rs i j k l =
   if k = l then ()
   else (as_seq_seq_slice rg h rs i j k (l - 1);
@@ -579,8 +589,12 @@ let rec as_seq_seq_slice #a rg h rs i j k l =
 val as_seq_seq_upd:
   #a:Type0 -> rg:regional a -> 
   h:HS.mem -> rs:S.seq a ->
-  i:nat -> j:nat{i <= j && j <= S.length rs} ->
-  k:nat{i <= k && k < j} -> v:a ->
+  i:nat ->
+  j:nat{
+    i <= j /\
+    j <= S.length rs /\
+    rs_elems_inv rg h rs i j} ->
+  k:nat{i <= k && k < j} -> v:a{Rgl?.r_inv rg h v} ->
   Lemma (S.equal (as_seq_seq rg h (S.upd rs k v) i j)
 		 (S.upd (as_seq_seq rg h rs i j) (k - i) 
 			(Rgl?.r_repr rg h v)))
@@ -598,11 +612,13 @@ val as_seq_seq_preserved:
   Lemma (requires (rs_elems_inv rg h0 rs i j /\
 		  loc_disjoint p (rs_loc_elems rg rs i j) /\
 		  modifies p h0 h1))
-  	(ensures (S.equal (as_seq_seq rg h0 rs i j)
-			  (as_seq_seq rg h1 rs i j)))
+  	(ensures (rs_elems_inv_preserved rg rs i j p h0 h1;
+		 S.equal (as_seq_seq rg h0 rs i j)
+			 (as_seq_seq rg h1 rs i j)))
 let rec as_seq_seq_preserved #a rg rs i j p h0 h1 =
   if i = j then ()
-  else (as_seq_seq_preserved rg rs i (j - 1) p h0 h1;
+  else (rs_elems_inv_preserved rg rs i (j - 1) p h0 h1;
+       as_seq_seq_preserved rg rs i (j - 1) p h0 h1;
        Rgl?.r_sep rg (S.index rs (j - 1)) p h0 h1)
 
 val as_seq_sub_preserved:
@@ -615,8 +631,9 @@ val as_seq_sub_preserved:
 		  loc_disjoint p (rv_loc_elems h0 rv i j) /\
 		  loc_disjoint p (V.loc_vector rv) /\
 		  modifies p h0 h1))
-  	(ensures (S.equal (as_seq_sub h0 rv i j)
-			  (as_seq_sub h1 rv i j)))
+  	(ensures (rv_elems_inv_preserved rv i j p h0 h1;
+		 S.equal (as_seq_sub h0 rv i j)
+			 (as_seq_sub h1 rv i j)))
 let as_seq_sub_preserved #a #rg rv i j p h0 h1 =
   as_seq_seq_preserved rg (V.as_seq h0 rv) (U32.v i) (U32.v j) p h0 h1
 
@@ -628,7 +645,8 @@ val as_seq_preserved_:
 		  loc_disjoint p (loc_vector rv) /\
 		  loc_disjoint p (rv_loc_elems h0 rv 0ul (V.size_of rv)) /\
 		  modifies p h0 h1))
-  	(ensures (S.equal (as_seq h0 rv) (as_seq h1 rv)))
+  	(ensures (rv_inv_preserved_ rv p h0 h1;
+		 S.equal (as_seq h0 rv) (as_seq h1 rv)))
 let as_seq_preserved_ #a #rg rv p h0 h1 =
   as_seq_sub_preserved rv 0ul (V.size_of rv) p h0 h1
 
@@ -640,7 +658,8 @@ val as_seq_preserved:
   Lemma (requires (rv_inv h0 rv /\
 		  loc_disjoint p (loc_rvector rv) /\
 		  modifies p h0 h1))
-  	(ensures (S.equal (as_seq h0 rv) (as_seq h1 rv)))
+  	(ensures (rv_inv_preserved rv p h0 h1;
+		 S.equal (as_seq h0 rv) (as_seq h1 rv)))
 	[SMTPat (rv_inv h0 rv);
 	SMTPat (loc_disjoint p (loc_rvector rv));
 	SMTPat (modifies p h0 h1)]
@@ -859,7 +878,10 @@ val assign:
       rv_inv h1 rv /\
       V.get h1 rv i == v /\
       S.equal (as_seq h1 rv)
-      	      (S.upd (as_seq h0 rv) (U32.v i) (Rgl?.r_repr rg h0 v))))
+	      (S.append
+		(as_seq_sub h0 rv 0ul i)
+		(S.cons (Rgl?.r_repr rg h0 v)
+		  (as_seq_sub h0 rv (i + 1ul) (V.size_of rv))))))
 let assign #a #rg rv i v =
   let hh0 = HST.get () in
   V.assign rv i v;
@@ -886,17 +908,14 @@ let assign #a #rg rv i v =
   as_seq_seq_preserved
     rg (V.as_seq hh1 rv)
     0 (U32.v (V.size_of rv))
-    (V.loc_vector rv) hh0 hh1;
-  as_seq_seq_upd
-    rg hh0 (V.as_seq hh0 rv) 0 (U32.v (V.size_of rv)) (U32.v i) v
+    (V.loc_vector rv) hh0 hh1
 
 private val r_sep_forall:
   #a:Type0 -> rg:regional a ->
   p:loc -> h0:HS.mem -> h1:HS.mem ->
-  v:a ->
-  Lemma (requires (Rgl?.r_inv rg h0 v /\
-		  loc_disjoint (loc_all_regions_from
-			         false (Rgl?.region_of rg v)) p /\
+  v:a{Rgl?.r_inv rg h0 v} ->
+  Lemma (requires (loc_disjoint (loc_all_regions_from
+				  false (Rgl?.region_of rg v)) p /\
 		  modifies p h0 h1))
 	(ensures (Rgl?.r_inv rg h1 v /\ 
 		 Rgl?.r_repr rg h0 v == Rgl?.r_repr rg h1 v))
@@ -931,30 +950,30 @@ let assign_copy #a #rg cp rv i v =
   forall_intro
     (move_requires
       (rs_loc_elem_disj
-	rg (V.as_seq hh0 rv) (V.frameOf rv)
-	0 (U32.v (V.size_of rv))
-	(U32.v i)));
+  	rg (V.as_seq hh0 rv) (V.frameOf rv)
+  	0 (U32.v (V.size_of rv))
+  	(U32.v i)));
   assert (forall (k:nat{k <> U32.v i && k < U32.v (V.size_of rv)}).
   	   loc_disjoint (rs_loc_elem rg (V.as_seq hh0 rv) k)
   			(rs_loc_elem rg (V.as_seq hh0 rv) (U32.v i)));
   forall_intro
     (move_requires
       (r_sep_forall
-	rg (rs_loc_elem rg (V.as_seq hh0 rv) (U32.v i))
-	hh0 hh1));
+  	rg (rs_loc_elem rg (V.as_seq hh0 rv) (U32.v i))
+  	hh0 hh1));
   assert (forall (k:nat{k <> U32.v i && k < U32.v (V.size_of rv)}).
   	   loc_disjoint (rs_loc_elem rg (V.as_seq hh0 rv) k)
   			(rs_loc_elem rg (V.as_seq hh0 rv) (U32.v i)) ==>
   	   Rgl?.r_repr rg hh1 (S.index (V.as_seq hh1 rv) k) ==
   	   Rgl?.r_repr rg hh0 (S.index (V.as_seq hh0 rv) k));
   assert (forall (k:nat{k <> U32.v i && k < U32.v (V.size_of rv)}).
-	   Rgl?.r_repr rg hh1 (S.index (V.as_seq hh1 rv) k) ==
-	   Rgl?.r_repr rg hh0 (S.index (V.as_seq hh0 rv) k));
+  	   Rgl?.r_repr rg hh1 (S.index (V.as_seq hh1 rv) k) ==
+  	   Rgl?.r_repr rg hh0 (S.index (V.as_seq hh0 rv) k));
   assert (forall (k:nat{k <> U32.v i && k < U32.v (V.size_of rv)}).
-	   S.index (as_seq_seq rg hh1 (V.as_seq hh1 rv)
-			       0 (U32.v (V.size_of rv))) k ==
-	   S.index (as_seq_seq rg hh0 (V.as_seq hh0 rv)
-			       0 (U32.v (V.size_of rv))) k)
+  	   S.index (as_seq_seq rg hh1 (V.as_seq hh1 rv)
+  			       0 (U32.v (V.size_of rv))) k ==
+  	   S.index (as_seq_seq rg hh0 (V.as_seq hh0 rv)
+  			       0 (U32.v (V.size_of rv))) k)
 
 val free_elems:
   #a:Type0 -> #rg:regional a -> rv:rvector rg -> 

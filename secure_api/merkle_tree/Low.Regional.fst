@@ -25,10 +25,6 @@ noeq type regional a =
     // It does not have to satisfy the invariant `r_inv` described below.
     dummy: a ->
 
-    // A representation type of `a` and a corresponding conversion function
-    repr: Type0 ->
-    r_repr: (HS.mem -> a -> GTot repr) ->
-
     // An invariant we want to maintain for each operation.
     // For example, it may include `live` and `freeable` properties
     // for related objects.
@@ -37,6 +33,10 @@ noeq type regional a =
       (h:HS.mem -> v:a ->
       Lemma (requires (r_inv h v))
 	    (ensures (MHS.live_region h (region_of v)))) ->
+
+    // A representation type of `a` and a corresponding conversion function
+    repr: Type0 ->
+    r_repr: (h:HS.mem -> v:a{r_inv h v} -> GTot repr) ->
 
     // A core separation lemma, saying that the invariant and represenation
     // are preserved when an orthogonal state transition happens.
