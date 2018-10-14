@@ -315,8 +315,8 @@ val recall_contents:
     #a:Type0
   -> #len:size_nat{len <= max_size_t}
   -> b:ilbuffer a len
-  -> s:Seq.lseq a len
-  -> ST unit
+  -> s:Seq.lseq a len ->
+  ST unit
     (requires fun h0 -> (B.recallable b \/ live h0 b) /\ B.witnessed b (cpred s))
     (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b /\ ias_seq h0 b == s)
 
@@ -355,8 +355,8 @@ val memset:
   -> #blen:size_nat
   -> b:lbuffer a blen
   -> w:a
-  -> len:size_t{v len <= blen}
-  -> Stack unit
+  -> len:size_t{v len <= blen} ->
+  Stack unit
     (requires fun h0 -> live h0 b)
     (ensures  fun h0 _ h1 ->
       modifies1 b h0 h1 /\ as_seq h1 (gsub b 0ul len) == Seq.create (v len) w)
@@ -573,8 +573,8 @@ val salloc1:
       (ensures  fun h0 r h1 ->
         modifies (B.loc_union (B.loc_all_regions_from false (get_tip h0))
                               (Ghost.reveal footprint)) h0 h1 /\
-        spec r h1))
-  -> Stack res
+        spec r h1)) ->
+  Stack res
     (requires fun h0 -> h0 == h)
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
 
@@ -617,8 +617,8 @@ val loopi_blocks:
           (ensures  fun h0 _ h1 ->
             B.modifies (B.loc_buffer w) h0 h1 /\
             as_seq h1 w == spec_l (v i) (v len) (as_seq h0 inp) (as_seq h0 w)))
-  -> write:lbuffer b blen
-  -> Stack unit
+  -> write:lbuffer b blen ->
+  Stack unit
     (requires fun h -> B.live h inp /\ B.live h write /\ B.disjoint inp write)
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer write) h0 h1 /\
@@ -655,8 +655,8 @@ val loop_blocks:
           (ensures  fun h0 _ h1 ->
             B.modifies (B.loc_buffer w) h0 h1 /\
             as_seq h1 w == spec_l (v len) (as_seq h0 inp) (as_seq h0 w)))
-  -> write:lbuffer b blen
-  -> Stack unit
+  -> write:lbuffer b blen ->
+  Stack unit
     (requires fun h -> B.live h inp /\ B.live h write /\ B.disjoint inp write)
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer write) h0 h1 /\
