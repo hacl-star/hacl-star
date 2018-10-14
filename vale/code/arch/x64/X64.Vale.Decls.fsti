@@ -88,6 +88,8 @@ unfold let va_cmp = o:va_operand{not (TMem? o)}
 unfold let va_register = reg
 unfold let va_operand_xmm = xmm
 
+[@va_qattr] unfold let va_expand_state (s:state) : state = state_eta s
+
 (* Abbreviations *)
 unfold let get_reg (o:va_reg_operand) : reg = OReg?.r (t_op_to_op o)
 //unfold let buffer_readable = M.buffer_readable

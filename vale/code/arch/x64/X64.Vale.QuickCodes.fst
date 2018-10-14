@@ -430,5 +430,15 @@ let wp_run_code #a c qc s0 update post =
   (sN, fN, gN)
 
 let wp_sound_norm = wp_sound_wrap
-let wp_sound_code_norm = wp_sound_code_wrap
+
+let assert_normal (p:Type) : Lemma
+  (requires normal p)
+  (ensures p)
+  =
+  ()
+
+let wp_sound_code_norm #a c qc s0 k =
+  assert_normal (wp_sound_code_pre qc s0 k);
+  wp_sound_code_wrap c qc s0 k
+
 let wp_run_norm = wp_run

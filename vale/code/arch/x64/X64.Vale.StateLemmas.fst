@@ -24,8 +24,8 @@ let state_to_S (s:state) : GTot TS.traceState =
   {
   TS.state = {
     BS.ok = s.ok;
-    BS.regs = F.on_dom reg (fun r -> s.regs r);
-    BS.xmms = F.on_dom xmm (fun x -> s.xmms x);
+    BS.regs = F.on_dom reg (fun r -> Regs.sel r s.regs);
+    BS.xmms = F.on_dom xmm (fun x -> Xmms.sel x s.xmms);
     BS.flags = int_to_nat64 s.flags;
     BS.mem = ME.get_heap s.mem
   };
@@ -33,12 +33,72 @@ let state_to_S (s:state) : GTot TS.traceState =
   TS.memTaint = s.memTaint;
   }
 
+[@"opaque_to_smt"]
+let regs_of_fun (m:reg -> nat64) : Pure Regs.t
+  (requires True)
+  (ensures fun m' ->
+    (forall (r:reg).{:pattern (m r) \/ (Regs.sel r m')} m r == Regs.sel r m')
+  )
+  =
+  let m0_3 = ((m Rax, m Rbx), (m Rcx, m Rdx)) in
+  let m4_7 = ((m Rsi, m Rdi), (m Rbp, m Rsp)) in
+  let m8_11 = ((m R8, m R9), (m R10, m R11)) in
+  let m12_15 = ((m R12, m R13), (m R14, m R15)) in
+  let m' = ((m0_3, m4_7), (m8_11, m12_15)) in
+  assert_norm (m Rax == Regs.sel Rax m');
+  assert_norm (m Rbx == Regs.sel Rbx m');
+  assert_norm (m Rcx == Regs.sel Rcx m');
+  assert_norm (m Rdx == Regs.sel Rdx m');
+  assert_norm (m Rsi == Regs.sel Rsi m');
+  assert_norm (m Rdi == Regs.sel Rdi m');
+  assert_norm (m Rbp == Regs.sel Rbp m');
+  assert_norm (m Rsp == Regs.sel Rsp m');
+  assert_norm (m R8  == Regs.sel R8  m');
+  assert_norm (m R9  == Regs.sel R9  m');
+  assert_norm (m R10 == Regs.sel R10 m');
+  assert_norm (m R11 == Regs.sel R11 m');
+  assert_norm (m R12 == Regs.sel R12 m');
+  assert_norm (m R13 == Regs.sel R13 m');
+  assert_norm (m R14 == Regs.sel R14 m');
+  assert_norm (m R15 == Regs.sel R15 m');
+  m'
+
+[@"opaque_to_smt"]
+let xmms_of_fun (m:xmm -> quad32) : Pure Xmms.t
+  (requires True)
+  (ensures fun m' ->
+    (forall (r:xmm).{:pattern (m r) \/ (Xmms.sel r m')} m r == Xmms.sel r m')
+  )
+  =
+  let m0_3 = ((m 0, m 1), (m 2, m 3)) in
+  let m4_7 = ((m 4, m 5), (m 6, m 7)) in
+  let m8_11 = ((m 8, m 9), (m 10, m 11)) in
+  let m12_15 = ((m 12, m 13), (m 14, m 15)) in
+  let m' = ((m0_3, m4_7), (m8_11, m12_15)) in
+  assert_norm (m  0 == Xmms.sel  0 m');
+  assert_norm (m  1 == Xmms.sel  1 m');
+  assert_norm (m  2 == Xmms.sel  2 m');
+  assert_norm (m  3 == Xmms.sel  3 m');
+  assert_norm (m  4 == Xmms.sel  4 m');
+  assert_norm (m  5 == Xmms.sel  5 m');
+  assert_norm (m  6 == Xmms.sel  6 m');
+  assert_norm (m  7 == Xmms.sel  7 m');
+  assert_norm (m  8 == Xmms.sel  8 m');
+  assert_norm (m  9 == Xmms.sel  9 m');
+  assert_norm (m 10 == Xmms.sel 10 m');
+  assert_norm (m 11 == Xmms.sel 11 m');
+  assert_norm (m 12 == Xmms.sel 12 m');
+  assert_norm (m 13 == Xmms.sel 13 m');
+  assert_norm (m 14 == Xmms.sel 14 m');
+  assert_norm (m 15 == Xmms.sel 15 m');
+  m'
+
 let state_of_S (sv:state) (s:TS.traceState{same_domain sv s}) : GTot state =
   let { BS.ok = ok; BS.regs = regs; BS.xmms = xmms; BS.flags = flags; BS.mem = mem} = s.TS.state in
   {
     ok = ok;
-    regs = F.on_dom reg (fun r -> regs r);
-    xmms = F.on_dom xmm (fun x -> xmms x);
+    regs = regs_of_fun regs;
+    xmms = xmms_of_fun xmms;
     flags = flags;
     mem = ME.get_hs sv.mem mem;
     memTaint = s.TS.memTaint;
@@ -56,8 +116,8 @@ let state_to_HS (s:state) : GTot ME.state =
   {
   ME.state = {
     BS.ok = s.ok;
-    BS.regs = F.on_dom reg (fun r -> s.regs r);
-    BS.xmms = F.on_dom xmm (fun x -> s.xmms x);
+    BS.regs = F.on_dom reg (fun r -> Regs.sel r s.regs);
+    BS.xmms = F.on_dom xmm (fun x -> Xmms.sel x s.xmms);
     BS.flags = int_to_nat64 s.flags;
     BS.mem = ME.get_heap s.mem
   };

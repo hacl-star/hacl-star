@@ -44,12 +44,12 @@ open X64.Taint_Semantics
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
-friend X64.Vale.StateLemmas
+friend X64.Vale.StateLemmas // TODO: this shouldn't be here
 friend X64.Vale.Decls
 friend X64.Memory
 #endverbatim
 
-#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 
 var{:state xmm(0)} xmm0:quad32;
 var{:state xmm(1)} xmm1:quad32;

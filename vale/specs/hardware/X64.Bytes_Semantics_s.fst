@@ -1,5 +1,6 @@
 module X64.Bytes_Semantics_s
 
+open Prop_s
 open Opaque_s
 open X64.Machine_s
 open X64.CPU_Features_s
@@ -72,11 +73,13 @@ type ocmp:eqtype =
 
 type code:eqtype = precode ins ocmp
 type codes:eqtype = list code
+type regs_t = F.restricted_t reg (fun _ -> nat64)
+type xmms_t = F.restricted_t xmm (fun _ -> quad32)
 
 noeq type state = {
   ok: bool;
-  regs: Vale.Regs.t;
-  xmms: Vale.Xmms.t;
+  regs: regs_t;
+  xmms: xmms_t;
   flags: nat64;
   mem: heap;
 }
