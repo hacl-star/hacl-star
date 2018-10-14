@@ -228,15 +228,19 @@ val blake2_compress :
     (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress Spec.Blake2S h0.[s] h0.[m] offset flag))
 
+(* let state_theta s = *)
+(*   let h0 = ST.get() in *)
+(*   let spec _ h1 = as_seq h1 s == S.state_theta (as_seq h0 s) in *)
+(*   salloc1_trivial h0 (size 5) (u64 0) (Ghost.hide (loc_buffer s))  spec *)
+(*     (fun _C -> state_theta0 s _C; state_theta1 s _C) *)
+
+
 let blake2_compress s m offset flag =
   let h0 = ST.get () in
-  alloc h0 (size 16) (u32 0) s
-  (fun h0 ->
-    let s0 = h0.[s] in
-    let m0 = h0.[m] in
-    (fun _ sv -> sv == Spec.blake2_compress Spec.Blake2S s0 m0 offset flag))
+  [@inline_let]
+  let spec _ h1 = h1.[s] == Spec.blake2_compress Spec.Blake2S h0.[s] h0.[m] offset flag in
+  salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer s)) spec
   (fun wv ->
-    admit();
     blake2_compress1 wv s m offset flag;
     blake2_compress2 wv m;
     blake2_compress3 wv s)
@@ -254,11 +258,8 @@ val blake2s_update_block:
 
 let blake2s_update_block hash prev d =
   let h0 = ST.get () in
-  alloc h0 (size 16) (u32 0) hash
-  (fun h0 ->
-    let d0 = h0.[d] in
-    let s0 = h0.[hash] in
-    (fun _ sv -> sv == Spec.blake2_update_block Spec.Blake2S (v prev) d0 s0))
+  salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
+  (fun _ h1 -> h1.[d] == Spec.blake2_update_block Spec.Blake2S (v prev) h0.[d] h0.[hash])
   (fun block_w ->
     admit();
     uints_from_bytes_le block_w (size Spec.size_block_w) d;
@@ -300,8 +301,8 @@ val blake2s_init:
 let blake2s_init #vkk hash k kk nn =
   recall_contents const_iv (Seq.of_list Spec.list_iv_S);
   let h0 = ST.get () in
-  alloc h0 (size_block Spec.Blake2S) (u8 0) hash
-  (fun h -> (fun _ sv -> sv == Spec.blake2_init Spec.Blake2S (v kk) h0.[k] (v nn)))
+  salloc1_trivial h0 (size_block Spec.Blake2S) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
+  (fun _ h1 -> h1.[hash] == Spec.blake2_init Spec.Blake2S (v kk) h0.[k] (v nn))
   (fun key_block ->
     admit();
     icopy hash (size Spec.size_hash_w) const_iv;
@@ -348,10 +349,8 @@ val blake2s_finish:
 
 let blake2s_finish #vnn output hash nn =
   let h0 = ST.get () in
-  alloc h0 (size 32) (u8 0) output
-  (fun h ->
-    (fun _ r -> r == Spec.Blake2.blake2_finish Spec.Blake2S h0.[hash] (v nn))
-  )
+  salloc1_trivial h0 (size 32) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer output))
+  (fun _ h1 -> h1.[output] == Spec.Blake2.blake2_finish Spec.Blake2S h0.[hash] (v nn))
   (fun full ->
     admit();
     uints_to_bytes_le full (size 8) hash;
@@ -378,8 +377,8 @@ val blake2s:
 
 let blake2s #vll #vkk #vnn output d ll k kk nn =
   let h0 = ST.get () in
-  alloc h0 (size 8) (u32 0) output
-  (fun h -> (fun _ r -> r == Spec.Blake2s.blake2s (v ll) h0.[d] (v kk) h0.[k] (v nn)))
+  salloc1_trivial h0 (size 8) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer output))
+  (fun _ h1 -> h1.[output] == Spec.Blake2s.blake2s (v ll) h0.[d] (v kk) h0.[k] (v nn))
   (fun hash ->
     let klen = if kk = 0ul then 0ul else 1ul in
     blake2s_init #vkk hash k kk nn;
