@@ -1,6 +1,7 @@
 // Optimized weakest precondition generation for 'quick' procedures
 
 module X64.Vale.QuickCodes
+open Prop_s
 open X64.Machine_s
 open X64.Memory
 open X64.Vale.State
@@ -278,7 +279,7 @@ val wp_sound_code (#a:Type0) (c:code) (qc:quickCode a c) (k:state -> a -> Type0)
 let rec regs_match (regs:list reg) (r0:Regs.t) (r1:Regs.t) : Type0 =
   match regs with
   | [] -> True
-  | r::regs -> r0 r == r1 r /\ regs_match regs r0 r1
+  | r::regs -> Regs.sel r r0 == Regs.sel r r1 /\ regs_match regs r0 r1
 
 [@va_qattr]
 let all_regs_match (r0:Regs.t) (r1:Regs.t) : Type0
@@ -290,7 +291,7 @@ let all_regs_match (r0:Regs.t) (r1:Regs.t) : Type0
 let rec xmms_match (xmms:list xmm) (r0:Xmms.t) (r1:Xmms.t) : Type0 =
   match xmms with
   | [] -> True
-  | r::xmms -> r0 r == r1 r /\ xmms_match xmms r0 r1
+  | r::xmms -> Xmms.sel r r0 == Xmms.sel r r1 /\ xmms_match xmms r0 r1
 
 [@va_qattr]
 let all_xmms_match (r0:Xmms.t) (r1:Xmms.t) : Type0
@@ -298,13 +299,19 @@ let all_xmms_match (r0:Xmms.t) (r1:Xmms.t) : Type0
   let xmms = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15] in
   xmms_match xmms r0 r1
 
+let assert_norm_match (p:prop0) : Lemma
+  (requires norm [iota; zeta; simplify; primops; delta_only [`%regs_match; `%all_regs_match; `%xmms_match; `%all_xmms_match]] p)
+  (ensures p)
+  =
+  ()
+
 [@va_qattr]
 let va_state_match (s0:state) (s1:state) : Pure Type0
   (requires True)
   (ensures fun b -> b ==> state_eq s0 s1)
   =
-  assert_norm (all_regs_match s0.regs s1.regs ==> Regs.equal s0.regs s1.regs);
-  assert_norm (all_xmms_match s0.xmms s1.xmms ==> Xmms.equal s0.xmms s1.xmms);
+  assert_norm_match (all_regs_match s0.regs s1.regs ==> Regs.equal s0.regs s1.regs);
+  assert_norm_match (all_xmms_match s0.xmms s1.xmms ==> Xmms.equal s0.xmms s1.xmms);
   s0.ok == s1.ok /\
   all_regs_match s0.regs s1.regs /\
   all_xmms_match s0.xmms s1.xmms /\
@@ -316,7 +323,7 @@ let va_state_match (s0:state) (s1:state) : Pure Type0
 unfold let wp_sound_pre (#a:Type0) (#cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (k:state -> state -> a -> Type0) : Type0 =
   forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (memTaint:memtaint).
     let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; memTaint = memTaint} in
-    s0 == s0' ==> wp cs qcs mods (k s0') s0'
+    s0 == s0' ==> wp cs qcs mods (k (state_eta s0')) (state_eta s0')
 
 unfold let wp_sound_post (#a:Type0) (#cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (k:state -> state -> a -> Type0) ((sN:state), (fN:fuel), (gN:a)) : Type0 =
   eval (Block cs) s0 fN sN /\
@@ -332,7 +339,7 @@ val wp_sound_wrap (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:
 unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:state) (k:state -> state -> a -> Type0) : Type0 =
   forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (memTaint:memtaint).
     let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; memTaint = memTaint} in
-    s0 == s0' ==> QProc?.wp qc s0' (k s0')
+    s0 == s0' ==> QProc?.wp qc (state_eta s0') (k (state_eta s0'))
 
 unfold let wp_sound_code_post (#a:Type0) (#c:code) (qc:quickCode a c) (s0:state) (k:state -> state -> a -> Type0) ((sN:state), (fN:fuel), (gN:a)) : Type0 =
   eval c s0 fN sN /\
@@ -351,7 +358,7 @@ val wp_sound_code_wrap (#a:Type0) (c:code) (qc:quickCode a c) (s0:state) (k:stat
 let wp_final_k (#a:Type0) (update:state -> state) (post:state -> state -> Type0) (k:state -> a -> Type0) (sN:state) (g:a) : Type0 =
   va_state_match sN (update sN) /\ post sN sN /\
     (forall (ok':bool) (regs':Regs.t) (xmms':Xmms.t) (flags':nat64) (mem':mem) (memTaint':memtaint).
-      let sN' = {ok = ok'; regs = regs'; xmms = xmms'; flags = flags'; mem = mem'; memTaint = memTaint'} in
+      let sN' = state_eta ({ok = ok'; regs = regs'; xmms = xmms'; flags = flags'; mem = mem'; memTaint = memTaint'}) in
       post sN sN' ==> k sN' g)
 
 // For efficiency, introduce shorter names (e.g. ok, mem) for components of initial state s0.
@@ -359,13 +366,13 @@ let wp_final_k (#a:Type0) (update:state -> state) (post:state -> state -> Type0)
 let wp_wrap (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (update:state -> state -> state) (post:state -> state -> Type0) (k:state -> a -> Type0) (s0:state) : Type0 =
   forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (memTaint:memtaint).
     let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; memTaint = memTaint} in
-    s0 == s0' ==> wp cs qcs mods (wp_final_k (update s0') post k) s0'
+    s0 == s0' ==> wp cs qcs mods (wp_final_k (update (state_eta s0')) post k) (state_eta s0')
 
 [@va_qattr]
 let wp_wrap_code (#a:Type0) (c:code) (qc:quickCode a c) (update:state -> state -> state) (post:state -> state -> Type0) (k:state -> a -> Type0) (s0:state) : Type0 =
   forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (memTaint:memtaint).
     let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; memTaint = memTaint} in
-    s0 == s0' ==> QProc?.wp qc s0' (wp_final_k (update s0') post k)
+    s0 == s0' ==> QProc?.wp qc (state_eta s0') (wp_final_k (update (state_eta s0')) post k)
 
 unfold let wp_GHOST (#a:Type0) (c:code) (s0:state) (update:state -> state -> state) (fk:(state -> a -> Type0) -> Type0) (p:state * fuel * a -> Type0) : Type0 =
   forall (k:state -> a -> Type0).

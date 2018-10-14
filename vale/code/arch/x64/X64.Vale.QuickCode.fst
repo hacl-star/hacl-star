@@ -1,4 +1,5 @@
 module X64.Vale.QuickCode
+open Prop_s
 open X64.Machine_s
 open X64.Vale.State
 open X64.Vale.Decls

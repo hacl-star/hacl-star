@@ -24,8 +24,8 @@ let state_to_S (s:state) : GTot TS.traceState =
   {
   TS.state = {
     BS.ok = s.ok;
-    BS.regs = F.on_dom reg (fun r -> s.regs r);
-    BS.xmms = F.on_dom xmm (fun x -> s.xmms x);
+    BS.regs = F.on_dom reg (fun r -> Regs.sel r s.regs);
+    BS.xmms = F.on_dom xmm (fun x -> Xmms.sel x s.xmms);
     BS.flags = int_to_nat64 s.flags;
     BS.mem = ME.get_heap s.mem
   };
@@ -37,8 +37,8 @@ let state_of_S (sv:state) (s:TS.traceState{same_domain sv s}) : GTot state =
   let { BS.ok = ok; BS.regs = regs; BS.xmms = xmms; BS.flags = flags; BS.mem = mem} = s.TS.state in
   {
     ok = ok;
-    regs = F.on_dom reg (fun r -> regs r);
-    xmms = F.on_dom xmm (fun x -> xmms x);
+    regs = Regs.of_fun regs;
+    xmms = Xmms.of_fun xmms;
     flags = flags;
     mem = ME.get_hs sv.mem mem;
     memTaint = s.TS.memTaint;
@@ -56,8 +56,8 @@ let state_to_HS (s:state) : GTot ME.state =
   {
   ME.state = {
     BS.ok = s.ok;
-    BS.regs = F.on_dom reg (fun r -> s.regs r);
-    BS.xmms = F.on_dom xmm (fun x -> s.xmms x);
+    BS.regs = F.on_dom reg (fun r -> Regs.sel r s.regs);
+    BS.xmms = F.on_dom xmm (fun x -> Xmms.sel x s.xmms);
     BS.flags = int_to_nat64 s.flags;
     BS.mem = ME.get_heap s.mem
   };

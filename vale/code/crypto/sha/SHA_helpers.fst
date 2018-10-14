@@ -1,5 +1,6 @@
 module SHA_helpers
 
+open Prop_s
 open Opaque_s
 open Spec.SHA2
 open Spec.Hash
@@ -571,7 +572,7 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : 
 
 open GCM_helpers
 (* Abbreviations and lemmas for the code itself *)
-let k_reqs (k_seq:seq quad32) : Prop_s.prop0 =
+let k_reqs (k_seq:seq quad32) : prop0 =
   length k_seq == 64 / 4 /\
   (forall i . {:pattern (index_work_around_quad32 k_seq i)} 0 <= i /\ i < (64/4) ==> 
     (k_seq.[i]).lo0 == vv (k0 SHA2_256).[4 `op_Multiply` i] /\
