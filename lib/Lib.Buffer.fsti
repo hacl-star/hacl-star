@@ -352,13 +352,13 @@ val icopy:
 inline_for_extraction
 val memset:
     #a:Type
-  -> #blen:size_nat 
+  -> #blen:size_nat
   -> b:lbuffer a blen
   -> w:a
   -> len:size_t{v len <= blen}
   -> Stack unit
     (requires fun h0 -> live h0 b)
-    (ensures  fun h0 _ h1 -> 
+    (ensures  fun h0 _ h1 ->
       modifies1 b h0 h1 /\ as_seq h1 (gsub b 0ul len) == Seq.create (v len) w)
 
 (** Copy a mutable Buffer in a part of another mutable Buffer *)
@@ -560,7 +560,7 @@ val salloc1:
   -> spec_inv:(h1:mem -> h2:mem -> h3:mem -> r:res -> Lemma
       (requires
         modifies0 h h1 /\
-        modifies (B.loc_union (B.loc_all_regions_from false (get_tip h1)) 
+        modifies (B.loc_union (B.loc_all_regions_from false (get_tip h1))
                             (Ghost.reveal footprint)) h1 h2 /\
         modifies (B.loc_region_only false (get_tip h1)) h2 h3 /\
         ~(live_region h (get_tip h1)) /\
