@@ -130,25 +130,33 @@ let frodo_unpack8 d b =
   let res = res.[7] <- to_u16 (templong >>. u32 (0 * d)) &. maskd in
   res
 
+val frodo_unpack_state:
+    #n1:size_nat
+  -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
+  -> i:size_nat{i <= n1 * n2 / 8} 
+  -> Type0 
+let frodo_unpack_state #n1 #n2 i = lseq uint16 (8 * i)
+
+val frodo_unpack_inner:
+    #n1:size_nat
+  -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
+  -> d:size_nat{d * (n1 * n2 / 8) <= max_size_t /\ d <= 16}
+  -> b:lbytes (d * (n1 * n2 / 8))
+  -> i:size_nat{i < n1 * n2 / 8}
+  -> frodo_unpack_state #n1 #n2 i
+  -> frodo_unpack_state #n1 #n2 (i + 1)
+let frodo_unpack_inner #n1 #n2 d b i s =
+  s @| frodo_unpack8 d (Seq.sub b (d * i) d)
+
 val frodo_unpack:
     #n1:size_nat
   -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
   -> d:size_nat{d * (n1 * n2 / 8) <= max_size_t /\ d <= 16}
   -> b:lbytes (d * (n1 * n2 / 8))
-  -> Pure (matrix n1 n2)
-    (requires True)
-    (ensures fun res ->
-      forall (j:nat{j < n1 * n2 / 8}).
-      let b = Seq.sub #uint8 b (d * j) d in
-      Seq.equal (Seq.sub res (8 * j) 8) (frodo_unpack8 d b))
+  -> matrix n1 n2
 let frodo_unpack #n1 #n2 d b =
-  repeati_inductive (n1 * n2 / 8) 
-    (fun i res ->
-      forall (j:nat{j < i}).
-      let b = Seq.sub #uint8 b (d * j) d in
-      Seq.equal (Seq.sub res (8 * j) 8) (frodo_unpack8 d b))
-    (fun i res ->
-      assert_spinoff (d * i + d <= d * (n1 * n2 / 8));
-      let b = Seq.sub #uint8 b (d * i) d in
-      update_sub res (8 * i) 8 (frodo_unpack8 d b))
-    (create n1 n2)
+  assert (8 * (n1 * (n2 / 8)) == n1 * n2);
+  repeat (n1 * n2 / 8) 
+    (frodo_unpack_state #n1 #n2)
+    (frodo_unpack_inner #n1 #n2 d b)
+    (Seq.create 0 (u16 0))

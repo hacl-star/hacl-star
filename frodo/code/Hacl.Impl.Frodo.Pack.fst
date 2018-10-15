@@ -194,35 +194,23 @@ val frodo_unpack:
       as_seq h1 res == S.frodo_unpack #(v n1) #(v n2) (v d) (as_seq h0 b))
 [@"c_inline"]
 let frodo_unpack n1 n2 d b res =
-  assert (8 * (v n1 * v n2 / 8) == 8 * (v n1 * (v n2 / 8)));
-  assert (8 * (v n1 * v n2 / 8) == (v n1 * v n2));
-  assert (forall (j:nat{j < v n1 * v n2 / 8}). v d * j + v d <= v d * (v n1 * v n2 / 8));
+  let a_spec = S.frodo_unpack_state #(v n1) #(v n2) in
+  let a_impl = lbuffer elem (v n1 * v n2) in
+  [@ inline_let]  
+  let refl h (i:size_nat{i <= v n1 * v n2 / 8}) =
+    Seq.sub #_ #(v n1 * v n2) (as_seq h res) 0 (i * 8) in
+  let footprint  (i:size_nat{i <= v n1 * v n2 / 8}) = 
+    loc_buffer (gsub #_ #_ #(i * 8) res (size 0) (size i *! size 8)) in
+  [@ inline_let]
+  let spec h0 = S.frodo_unpack_inner #(v n1) #(v n2) (v d) (as_seq h0 b) in
   let h0 = ST.get () in
-  let inv h (i:nat{i <= v n1 * v n2 / 8}) =
-    modifies (loc_buffer res) h0 h /\
-    (forall (j:nat{j < i}).
-      let b = Seq.sub #uint8 #(v d * (v n1 * v n2 / 8)) (as_seq h0 b) (v d * j) (v d) in
-      Seq.equal
-        (as_seq h (gsub #_ #_ #8 res (size 8 *! size j) (size 8)))
-        (S.frodo_unpack8 (v d) b))
-  in
-  let f (i:size_t{v i < v n1 * v n2 / 8}) : Stack unit
-    (requires fun h1 -> inv h1 (v i))
-    (ensures  fun _ _ h2 -> inv h2 (v i + 1)) =
+  assert (Seq.equal (refl h0 0) (Seq.create 0 (u16 0)));
+  loop h0 (n1 *! n2 /. size 8) a_spec a_impl res refl footprint spec
+    (fun i ->
+      Seq.unfold_repeat (v (n1 *! n2 /. size 8)) a_spec (spec h0) (refl h0 0) (v i);
       let b = sub b (d *! i) d in
-      frodo_unpack8' d b res i
-  in
-  assert (forall (j:nat{j < v n1 * v n2 / 8}). 0 <= v d * j /\ v d * j <= max_size_t);
-  Lib.Loops.for (size 0) (n1 *! n2 /. size 8) inv f;
-  let h1 = ST.get() in
-  let b0 = as_seq h0 b in
-  let res0 = S.frodo_unpack #(v n1) #(v n2) (v d) b0 in
-  let f (j:nat{j < v n1 * v n2 / 8}) : Lemma
-    (Seq.equal
-       (Seq.sub #_ #(v n1 * v n2) (as_seq h1 res) (8 * j) 8)
-       (Seq.sub res0 (8 * j) 8))
-  =
-    let b = Seq.sub #_ #(v d * (v n1 * v n2 / 8)) b0 (v d * j) (v d) in
-    Seq.eq_elim (Seq.sub res0 (8 * j) 8) (S.frodo_unpack8 (v d) b)
-  in
-  S.equal_slices (v n1 * v n2 / 8) 8 (as_seq h1 res) res0 f
+      let r = sub res (size 8 *! i) (size 8) in
+      frodo_unpack8 d b r;
+      let h1 = ST.get() in
+      FStar.Seq.lemma_split (refl h1 (v i + 1)) (v i * 8)
+    )
