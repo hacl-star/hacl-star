@@ -228,19 +228,13 @@ val blake2_compress :
     (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
                          /\ h1.[s] == Spec.blake2_compress Spec.Blake2S h0.[s] h0.[m] offset flag))
 
-(* let state_theta s = *)
-(*   let h0 = ST.get() in *)
-(*   let spec _ h1 = as_seq h1 s == S.state_theta (as_seq h0 s) in *)
-(*   salloc1_trivial h0 (size 5) (u64 0) (Ghost.hide (loc_buffer s))  spec *)
-(*     (fun _C -> state_theta0 s _C; state_theta1 s _C) *)
-
-
 let blake2_compress s m offset flag =
   let h0 = ST.get () in
   [@inline_let]
   let spec _ h1 = h1.[s] == Spec.blake2_compress Spec.Blake2S h0.[s] h0.[m] offset flag in
   salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer s)) spec
   (fun wv ->
+    admit();
     blake2_compress1 wv s m offset flag;
     blake2_compress2 wv m;
     blake2_compress3 wv s)
