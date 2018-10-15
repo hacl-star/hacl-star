@@ -64,16 +64,19 @@ val blake2_mixing : wv:working_vector -> a:index_t -> b:index_t -> c:index_t -> 
                          /\ h1.[wv] == Spec.blake2_mixing Spec.Blake2S h0.[wv] (v a) (v b) (v c) (v d) x y))
 
 let blake2_mixing wv a b c d x y =
-  recall_contents rTable_S (Seq.of_list Spec.rTable_list_S);
+  recall_contents rTable_S (Spec.rTable Spec.Blake2S);
+  let r0 = iindex rTable_S (size 0) in
+  let r1 = iindex rTable_S (size 1) in
+  let r2 = iindex rTable_S (size 2) in
+  let r3 = iindex rTable_S (size 3) in
   g2 wv a b x;
-  g1 wv d a (iindex rTable_S (size 0));
+  g1 wv d a r0;
   g2 wv c d (u32 0);
-  g1 wv b c (iindex rTable_S (size 1));
+  g1 wv b c r1;
   g2 wv a b y;
-  g1 wv d a (iindex rTable_S (size 2));
+  g1 wv d a r2;
   g2 wv c d (u32 0);
-  g1 wv b c (iindex rTable_S (size 3));
-  admit()
+  g1 wv b c r3
 
 #reset-options "--z3rlimit 150"
 
