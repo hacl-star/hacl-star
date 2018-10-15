@@ -27,7 +27,7 @@ let rec lemma_expand_append (key:aes_key_LE AES_128) (size1:nat) (size2:nat) =
   reveal_opaque expand_key_def;
   if size1 < size2 then lemma_expand_append key size1 (size2 - 1)
 
-#reset-options "--z3rlimit 80"
+#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 20 --using_facts_from '* -FStar.Seq.Properties'"
 // quad32 key expansion is equivalent to nat32 key expansion
 let rec lemma_expand_key_128 (key:seq nat32) (size:nat) =
   reveal_opaque expand_key_128_def;
