@@ -232,6 +232,7 @@ val loop_blocks_f:
       B.modifies (B.loc_buffer w) h0 h1 /\
       as_seq h1 w ==
       Sequence.repeat_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
+
 let loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
   let block = sub #_ #(v inpLen) inp (i *. bs) bs in
