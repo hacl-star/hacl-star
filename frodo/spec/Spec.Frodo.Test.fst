@@ -456,5 +456,5 @@ let test () : ML unit =
       test1_sk_expected
   in
   if result
-  then IO.print_string "\n\nFrodoKEM : Success!"
-  else IO.print_string "\n\nFrodoKEM: Failure :("
+  then IO.print_string "\n\nFrodoKEM : Success!\n"
+  else IO.print_string "\n\nFrodoKEM: Failure :(\n"
