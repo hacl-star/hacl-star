@@ -118,6 +118,9 @@ val uintv_extensionality:
 ///
 
 inline_for_extraction
+type uint1 = uint_t U1 SEC
+
+inline_for_extraction
 type uint8 = uint_t U8 SEC
 
 inline_for_extraction
@@ -133,10 +136,27 @@ inline_for_extraction
 type uint128 = uint_t U128 SEC
 
 inline_for_extraction
-unfold type size_t = uint_t U32 PUB
+unfold type bit_t = uint_t U1 PUB
 
 inline_for_extraction
 unfold type byte_t = uint_t U8 PUB
+
+inline_for_extraction
+unfold type size_t = uint_t U32 PUB
+
+inline_for_extraction
+unfold type pub_uint16 = uint_t U16 PUB
+
+inline_for_extraction
+unfold type pub_uint32 = uint_t U32 PUB
+
+inline_for_extraction
+unfold type pub_uint64 = uint_t U64 PUB
+
+inline_for_extraction
+unfold type pub_uint128 = uint_t U128 PUB
+
+
 
 ///
 /// Casts between natural numbers and machine integers
@@ -170,13 +190,13 @@ inline_for_extraction
 val size: n:size_nat -> u:size_t{uint_v u == n}
 
 inline_for_extraction
-val size_v: s:size_t -> n:size_nat{uint_v s == n}
+let size_v (s:size_t) : n:size_nat{uint_v s == n} = pub_int_v s
 
 inline_for_extraction
 val byte: n:nat{n < 256} -> u:byte_t{uint_v u == n}
 
 inline_for_extraction
-val byte_v: s:byte_t -> n:nat{uint_v s == n}
+let byte_v (s:byte_t) : n:size_nat{uint_v s == n} = pub_int_v (s <: pub_int_t U8)
 
 inline_for_extraction
 val size_to_uint32: s:size_t -> u:uint32{u == u32 (size_v s)}

@@ -58,13 +58,7 @@ inline_for_extraction
 let size x = size_ x
 
 inline_for_extraction
-let size_v x = UInt32.v x
-
-inline_for_extraction
 let byte x = byte_ x
-
-inline_for_extraction
-let byte_v x = UInt8.v x
 
 let size_to_uint32 x = x <: UInt32.t
 

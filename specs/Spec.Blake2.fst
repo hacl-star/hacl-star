@@ -43,6 +43,7 @@ unfold let limb_inttype (a:alg) =
   | U64 -> U128
 
 type word_t (a:alg) = uint_t (wt a) SEC
+type pub_word_t (a:alg) = uint_t (wt a) PUB
 type limb_t (a:alg) : Type0 = uint_t (limb_inttype a) SEC
 
 inline_for_extraction
@@ -68,12 +69,14 @@ let limb_to_word (a:alg) (x:limb_t a) : word_t a =
 
 unfold let rtable_t (a:alg) = lseq (rotval (wt a)) 4
 
+[@"opaque_to_smt"]
 inline_for_extraction
 let rTable_list_S : l:List.Tot.llist (rotval U32) 4 =
   [
     size 16; size 12; size 8; size 7
   ]
 
+[@"opaque_to_smt"]
 inline_for_extraction
 let rTable_list_B: l:List.Tot.llist (rotval U64) 4 =
   [
@@ -86,6 +89,7 @@ let rTable (a:alg) : rtable_t a =
   | Blake2S -> (of_list rTable_list_S)
   | Blake2B -> (of_list rTable_list_B)
 
+[@"opaque_to_smt"]
 inline_for_extraction
 let list_iv_S: l:List.Tot.llist size_t 8 =
   [@inline_let]
@@ -95,6 +99,7 @@ let list_iv_S: l:List.Tot.llist size_t 8 =
   assert_norm(List.Tot.length l == 8);
   l
 
+[@"opaque_to_smt"]
 inline_for_extraction
 let list_iv_B: List.Tot.llist (uint_t U64 PUB) 8 =
   [@inline_let]
@@ -107,15 +112,16 @@ let list_iv_B: List.Tot.llist (uint_t U64 PUB) 8 =
   l
 
 inline_for_extraction
-let ivTable (a:alg) : lseq (word_t a) 8 =
+let ivTable (a:alg) : lseq (pub_word_t a) 8 =
   match a with
-  | Blake2S -> map secret (of_list list_iv_S)
-  | Blake2B -> map secret (of_list list_iv_B)
+  | Blake2S -> of_list list_iv_S
+  | Blake2B -> of_list list_iv_B
 
 
 type sigma_elt_t = n:size_t{size_v n < 16}
 type list_sigma_t = l:list sigma_elt_t{List.Tot.length l == 160}
 
+[@"opaque_to_smt"]
 inline_for_extraction
 let list_sigma: list_sigma_t =
   [@inline_let]
@@ -163,7 +169,6 @@ let g1 (a:alg) (wv:vector_ws a) (i:idx_t) (j:idx_t) (r:rotval (wt a)) : Tot (vec
 let g2 (a:alg) (wv:vector_ws a) (i:idx_t) (j:idx_t) (x:word_t a) : Tot (vector_ws a) =
   wv.[i] <- (wv.[i] +. wv.[j] +. x)
 
-
 val blake2_mixing:
     a:alg
   -> ws:vector_ws a
@@ -187,7 +192,6 @@ let blake2_mixing al wv a b c d x y =
   let wv = g1 al wv b c rt.[3] in
   wv
 
-
 val blake2_round1:
     a:alg
   -> wv:vector_ws a
@@ -196,13 +200,35 @@ val blake2_round1:
   Tot (vector_ws a)
 
 let blake2_round1 a wv m i =
-  let s = sub const_sigma ((i % 10) * 16) 16 in
-  let wv = blake2_mixing a wv 0 4  8 12 (m.[size_v s.[ 0]]) (m.[size_v s.[ 1]]) in
-  let wv = blake2_mixing a wv 1 5  9 13 (m.[size_v s.[ 2]]) (m.[size_v s.[ 3]]) in
-  let wv = blake2_mixing a wv 2 6 10 14 (m.[size_v s.[ 4]]) (m.[size_v s.[ 5]]) in
-  let wv = blake2_mixing a wv 3 7 11 15 (m.[size_v s.[ 6]]) (m.[size_v s.[ 7]]) in
+  let start = ((i % 10) * 16) in
+  let s0 = size_v const_sigma.[start + 0] in
+  let s1 = size_v const_sigma.[start + 1] in
+  let s2 = size_v const_sigma.[start + 2] in
+  let s3 = size_v const_sigma.[start + 3] in
+  let s4 = size_v const_sigma.[start + 4] in
+  let s5 = size_v const_sigma.[start + 5] in
+  let s6 = size_v const_sigma.[start + 6] in
+  let s7 = size_v const_sigma.[start + 7] in
+  let wv = blake2_mixing a wv 0 4  8 12 (m.[s0]) (m.[s1]) in
+  let wv = blake2_mixing a wv 1 5  9 13 (m.[s2]) (m.[s3]) in
+  let wv = blake2_mixing a wv 2 6 10 14 (m.[s4]) (m.[s5]) in
+  let wv = blake2_mixing a wv 3 7 11 15 (m.[s6]) (m.[s7]) in
   wv
 
+(* val blake2_round2: *)
+(*     a:alg *)
+(*   -> wv:vector_ws a *)
+(*   -> m:block_ws a *)
+(*   -> i:size_nat -> *)
+(*   Tot (vector_ws a) *)
+
+(* let blake2_round2 a wv m i = *)
+(*   let s = sub const_sigma ((i % 10) * 16) 16 in *)
+(*   let wv = blake2_mixing a wv 0 5 10 15 (m.[size_v s.[ 8]]) (m.[size_v s.[ 9]]) in *)
+(*   let wv = blake2_mixing a wv 1 6 11 12 (m.[size_v s.[10]]) (m.[size_v s.[11]]) in *)
+(*   let wv = blake2_mixing a wv 2 7  8 13 (m.[size_v s.[12]]) (m.[size_v s.[13]]) in *)
+(*   let wv = blake2_mixing a wv 3 4  9 14 (m.[size_v s.[14]]) (m.[size_v s.[15]]) in *)
+(*   wv *)
 
 val blake2_round2:
     a:alg
@@ -212,11 +238,19 @@ val blake2_round2:
   Tot (vector_ws a)
 
 let blake2_round2 a wv m i =
-  let s = sub const_sigma ((i % 10) * 16) 16 in
-  let wv = blake2_mixing a wv 0 5 10 15 (m.[size_v s.[ 8]]) (m.[size_v s.[ 9]]) in
-  let wv = blake2_mixing a wv 1 6 11 12 (m.[size_v s.[10]]) (m.[size_v s.[11]]) in
-  let wv = blake2_mixing a wv 2 7  8 13 (m.[size_v s.[12]]) (m.[size_v s.[13]]) in
-  let wv = blake2_mixing a wv 3 4  9 14 (m.[size_v s.[14]]) (m.[size_v s.[15]]) in
+  let start = ((i % 10) * 16) in
+  let s8 = size_v const_sigma.[start + 8] in
+  let s9 = size_v const_sigma.[start + 9] in
+  let s10 = size_v const_sigma.[start + 10] in
+  let s11 = size_v const_sigma.[start + 11] in
+  let s12 = size_v const_sigma.[start + 12] in
+  let s13 = size_v const_sigma.[start + 13] in
+  let s14 = size_v const_sigma.[start + 14] in
+  let s15 = size_v const_sigma.[start + 15] in
+  let wv = blake2_mixing a wv 0 5 10 15 (m.[s8]) (m.[s9]) in
+  let wv = blake2_mixing a wv 1 6 11 12 (m.[s10]) (m.[s11]) in
+  let wv = blake2_mixing a wv 2 7  8 13 (m.[s12]) (m.[s13]) in
+  let wv = blake2_mixing a wv 3 4  9 14 (m.[s14]) (m.[s15]) in
   wv
 
 
@@ -243,8 +277,9 @@ val blake2_compress1:
   Tot (vector_ws a)
 
 let blake2_compress1 a wv s m offset flag =
+  let iv = map secret (ivTable a) in
   let wv = update_sub wv 0 8 s in
-  let wv = update_sub wv 8 8 (ivTable a) in
+  let wv = update_sub wv 8 8 iv in
   let low_offset = limb_to_word a offset in
   let high_offset = limb_to_word a (shift_right #(limb_inttype a) offset (size (bits (wt a)))) in
   let wv_12 = wv.[12] ^. low_offset in
@@ -319,16 +354,15 @@ let blake2_update_block a prev d s =
 
 val blake2_init_hash:
     a:alg
-  -> s:hash_s a
   -> kk:size_nat{kk <= 32}
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
   Tot (hash_s a)
 
-let blake2_init_hash a s kk nn =
+let blake2_init_hash a kk nn =
+  let s = map secret (ivTable a) in
   let s0 = s.[0] in
   let s0' = s0 ^. (to_word a 0x01010000) ^. ((to_word a kk) <<. (size 8)) ^. (to_word a nn) in
   s.[0] <- s0'
-
 
 val blake2_init:
     a:alg
@@ -338,7 +372,7 @@ val blake2_init:
   Tot (hash_s a)
 
 let blake2_init a kk k nn =
-  let s = blake2_init_hash a (ivTable a) kk nn in
+  let s = blake2_init_hash a kk nn in
   if kk = 0 then s
   else begin
     let key_block = create (size_block a) (u8 0) in

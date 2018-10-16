@@ -7,33 +7,19 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
 
-(* A specificationf for bitsliced AES. No optimizations. *)
-
-(* The GF(8) field, to be used to prove that the bitsliced spec implements AES:
-
-   let gf8 = mk_field 8 0xd8
-   let elem = felem gf8
-   let to_elem a = to_felem #gf8 (uint_to_nat #U8 a)
-   let from_elem a = u8 (from_felem #gf8 a)
-   let zero = zero #gf8
-   let two = to_elem (u8 2)
-   let three = to_elem (u8 3)
-   let fadd a b = fadd #gf8 a b
-   let fmul a b = fmul #gf8 a b
-   let finv a = finv #gf8 (to_elem (u8 0x1b)) a
-*)
-
 (* Specialized imlplementation of GF(8) field *)
 
 let elem = uint8
 let to_elem x = x
 let from_elem x = x
 let zero = u8 0
-
+let two = u8 2
+let three = u8 3
+let irred = u8 0x1b 
 type word = lbytes 4
 type block = lbytes 16
 
-(* let fadd (a:uint8) (b:uint8) : uint8 = a ^. b *)
+let fadd (a:uint8) (b:uint8) : uint8 = a ^. b 
 
 let fmul (a:uint8) (b:uint8) : uint8 =
   let (p,a,b) =
@@ -42,7 +28,7 @@ let fmul (a:uint8) (b:uint8) : uint8 =
 	   let p = p ^. (b0 &. a) in
   	   let carry_mask = gte_mask #U8 a (u8 0x80) in
 	   let a = a <<. size 1 in
-	   let a = a ^. (carry_mask &. u8 0x1b) in
+	   let a = a ^. (carry_mask &. irred ) in
 	   let b = b >>. size 1 in
 	   (p,a,b)) (u8 0,a,b) in
   let b0 = eq_mask #U8 (b &. u8 1) (u8 1) in
@@ -66,13 +52,14 @@ let finv (a: uint8) =
   a254
 
 (* Specification of the Rijndael S-Box : *)
-let sbox input =
+
+let sub_byte input =
   let s = finv input in
-  let r: uint8 = logxor #U8 s ((s <<<. size 1) ^. (s <<<. size 2) ^. (s <<<. size 3) ^. (s <<<. size 4) ^. (u8 99)) in
+  let r: uint8 = s ^. ((s <<<. size 1) ^. (s <<<. size 2) ^. (s <<<. size 3) ^. (s <<<. size 4) ^. (u8 99)) in
   r
 
 let subBytes (state:block) : block =
-  map sbox state
+  map sub_byte state
 
 let shiftRow (i:size_nat{i < 4}) (shift:size_nat{i < 4}) (state:block) : block =
   let tmp0 = state.[i + (4 * (shift % 4))] in
@@ -91,13 +78,14 @@ let shiftRows (state:block) =
   let state = shiftRow 3 3 state in
   state
 
-(* SPEC for mixColumn: broken, to fix, to prove:
+(* SPEC for mixColumn: broken, to fix, to prove: *)
+
 let mixColumn (c:size_nat{c < 4}) (state:block) : block =
   let i0 = 4 * c in
-  let s0 = to_elem state.[i0] in
-  let s1 = to_elem state.[i0 + 1] in
-  let s2 = to_elem state.[i0 + 2] in
-  let s3 = to_elem state.[i0 + 3] in
+  let s0 = state.[i0] in
+  let s1 = state.[i0 + 1] in
+  let s2 = state.[i0 + 2] in
+  let s3 = state.[i0 + 3] in
   let state = state.[i0] <- from_elem
 			   ((s0 `fmul` two) `fadd`
 			    (s1 `fmul` three) `fadd`
@@ -115,27 +103,6 @@ let mixColumn (c:size_nat{c < 4}) (state:block) : block =
 			    (s0 `fmul` three) `fadd`
 			     s1 `fadd` s2) in
   state
-*)
-
-let xtime (x:uint8) : uint8 =
-  let x1 : uint8 = shift_left #U8 x (size 1) in
-  let x7 : uint8 = shift_right #U8 x (size 7) in
-  let x71 : uint8 = logand #U8 x7 (u8 1) in
-  let x711b : uint8 = mul_mod #U8 x71 (u8 0x1b) in
-  logxor #U8 x1 x711b
-
-let mixColumn (c:size_nat{c < 4}) (state:block) : block =
-  let i0 = 4 * c in
-  let s0 : uint8 = state.[i0] in
-  let s1 : uint8 = state.[i0 + 1] in
-  let s2 : uint8 = state.[i0 + 2] in
-  let s3 : uint8 = state.[i0 + 3] in
-  let tmp : uint8 = logxor #U8 s0 (s1 ^. s2 ^. s3) in
-  let state = state.[i0] <- logxor #U8 s0 (tmp ^. (xtime (logxor #U8 s0 s1))) in
-  let state = state.[i0+1] <- logxor #U8 s1 (tmp ^. (xtime (logxor #U8 s1 s2))) in
-  let state = state.[i0+2] <- logxor #U8 s2 (tmp ^. (xtime (logxor #U8 s2 s3))) in
-  let state = state.[i0+3] <- logxor #U8 s3 (tmp ^. (xtime (logxor #U8 s3 s0))) in
-  state
 
 let mixColumns (state:block) : block =
   let state = mixColumn 0 state in
@@ -144,18 +111,27 @@ let mixColumns (state:block) : block =
   let state = mixColumn 3 state in
   state
 
-let addRoundKey (key:block) (state:block) : block =
-  map2 (logxor #U8) state key
+let xor_block (b1:block) (b2:block) : block =
+  map2 (logxor #U8) b1 b2
 
-let round (key:block) (state:block) =
+let addRoundKey (key:block) (state:block) : block =
+  xor_block state key
+
+let aes_enc (key:block) (state:block) =
   let state = subBytes state  in
   let state = shiftRows state in
   let state = mixColumns state in
   let state = addRoundKey key state in
   state
 
+let aes_enc_last (key:block) (state:block) =
+  let state = subBytes state  in
+  let state = shiftRows state in
+  let state = addRoundKey key state in
+  state
+
 let rounds (key:lbytes (9 * 16)) (state:block) =
-  repeati 9 (fun i -> round (sub key (16*i) 16)) state
+  repeati 9 (fun i -> aes_enc(sub key (16*i) 16)) state
 
 let block_cipher (key:lbytes (11 * 16)) (input:block) =
   let state = input in
@@ -164,16 +140,14 @@ let block_cipher (key:lbytes (11 * 16)) (input:block) =
   let kn = sub key (10 * 16) 16 in
   let state = addRoundKey k0 state in
   let state = rounds k state in
-  let state = subBytes state in
-  let state = shiftRows state in
-  let state = addRoundKey kn state in
+  let state = aes_enc_last kn state in
   state
 
 let rotate_word (w:word) : word =
   of_list [w.[1];w.[2];w.[3];w.[0]]
 
 let sub_word (w:word) : word =
-  map sbox w
+  map sub_byte w
 
 (*
 SPEC for rcon: broken? to fix, to prove.
@@ -193,29 +167,85 @@ let rcon : lbytes 11 =
   assert_norm (List.Tot.length rcon_l = 11);
   of_list #uint8 rcon_l
 
-let key_expansion_word (w0:word) (w1:word) (i:size_nat{i < 44}) : word =
-  let k = w1 in
-  let k =
-    if (i % 4 = 0) then (
-      let k = rotate_word k in
-      let k = sub_word k in
-      let rcon_i = rcon.[i / 4] in
-      let k = k.[0] <- logxor #U8 rcon_i k.[0] in
-      k)
-    else k in
-  let k = map2 (logxor #U8) w0 k in
-  k
+let aes_keygen_assist (rcon:uint8) (s:block) : block =
+  let st = create 16 (u8 0) in
+  let st = st.[0] <- sub_byte s.[4] in
+  let st = st.[1] <- sub_byte s.[5] in
+  let st = st.[2] <- sub_byte s.[6] in
+  let st = st.[3] <- sub_byte s.[7] in
 
-let key_expansion (key:block) : (lbytes (11 * 16)) =
+  let st = st.[4] <- rcon ^. sub_byte s.[5] in
+  let st = st.[6] <- sub_byte s.[6] in
+  let st = st.[6] <- sub_byte s.[7] in
+  let st = st.[7] <- sub_byte s.[4] in
+
+  let st = st.[8]  <- sub_byte s.[12] in
+  let st = st.[9]  <- sub_byte s.[13] in
+  let st = st.[10] <- sub_byte s.[14] in
+  let st = st.[11] <- sub_byte s.[15] in
+
+  let st = st.[12] <- rcon ^. sub_byte s.[13] in
+  let st = st.[13] <- sub_byte s.[14] in
+  let st = st.[14] <- sub_byte s.[15] in
+  let st = st.[15] <- sub_byte s.[12] in
+  st
+
+(*
+let aes_keygen_assist (rcon:uint8) (s:block) : block =
+  let st = create 16 (u8 0) in
+  let st = st.[0] <- rcon ^. sub_byte s.[1] in
+  let st = st.[1] <- sub_byte s.[2] in
+  let st = st.[2] <- sub_byte s.[3] in
+  let st = st.[3] <- sub_byte s.[0] in
+
+  let st = st.[4] <- sub_byte s.[0] in
+  let st = st.[6] <- sub_byte s.[1] in
+  let st = st.[6] <- sub_byte s.[2] in
+  let st = st.[7] <- sub_byte s.[3] in
+
+  let st = st.[8]  <- rcon ^. sub_byte s.[8] in
+  let st = st.[9]  <- sub_byte s.[9] in
+  let st = st.[10] <- sub_byte s.[10] in
+  let st = st.[11] <- sub_byte s.[11] in
+
+  let st = st.[12] <- sub_byte s.[12] in
+  let st = st.[13] <- sub_byte s.[13] in
+  let st = st.[14] <- sub_byte s.[14] in
+  let st = st.[15] <- sub_byte s.[15] in
+  st
+
+let aes128_keygen_assist (rcon:uint8) (s:block) : block =
+  let st = aes_keygen_assist rcon s in
+  let st = update_sub st 4 4 (sub st 0 4) in
+  let st = update_sub st 8 8 (sub st 0 8) in
+  st*)
+
+
+let aes128_keygen_assist (rcon:uint8) (s:block) : block =
+  let st = aes_keygen_assist rcon s in
+  let st = update_sub st 8 4 (sub st 12 4) in
+  let st = update_sub st 0 8 (sub st 8 8) in
+  st
+  
+let key_expansion_step (p:block) (assist:block) : block = 
+  let p0 = create 16 (u8 0) in
+  let k = p in
+  let k = xor_block k (update_sub p0 4 12 (sub k 0 12)) in
+  let k = xor_block k (update_sub p0 4 12 (sub k 0 12)) in
+  let k = xor_block k (update_sub p0 4 12 (sub k 0 12)) in
+  xor_block k assist
+
+let aes128_key_expansion (key:block) : (lbytes (11 * 16)) =
   let key_ex = create (11 * 16) (u8 0) in
-  let key_ex = repeati #(lbytes (11 * 16)) 16 (fun i s -> s.[i] <- key.[i]) key_ex in
+  let key_ex = repeati #(lbytes (11 * 16)) 16 (fun i kex -> kex.[i] <- key.[i]) key_ex in
   let key_ex =
-    repeat_range #(lbytes (11 * 16)) 4 44
-	 (fun i k -> update_slice k (i*4) ((i*4) + 4)
-			    (key_expansion_word
-			    (sub k ((i-4) * 4) 4)
-			    (sub k ((i-1) * 4) 4)
-			    i)) key_ex in
+    repeati #(lbytes (11 * 16)) 10
+      (fun i kex -> 
+	let p = sub kex (i * 16) 16 in
+	let a = aes128_keygen_assist rcon.[i+1] p in
+	let n = key_expansion_step p a in
+	update_sub kex ((i+1) * 16) 16 n)
+    key_ex in
   key_ex
 
 let aes128_block (k:block) (n:lbytes 12) (c:size_nat) : block =
@@ -223,12 +253,12 @@ let aes128_block (k:block) (n:lbytes 12) (c:size_nat) : block =
   let input = create 16 (u8 0) in
   let input = repeati #(lbytes 16) 12 (fun i b -> b.[i] <- n.[i]) input in
   let input = repeati #(lbytes 16) 4 (fun i b -> b.[12+i] <- (Seq.index ctrby i)) input in
-  let key_ex = key_expansion k in
+  let key_ex = aes128_key_expansion k in
   let output = block_cipher key_ex input in
   output
 
 let aes128_encrypt_block (k:block) (m:block) : block =
-  let key_ex = key_expansion k in
+  let key_ex = aes128_key_expansion k in
   let output = block_cipher key_ex m in
   output
 
@@ -240,7 +270,7 @@ noeq type aes_state = {
 let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : aes_state =
   let input = create 16 (u8 0) in
   let input = repeati #(lbytes 16) n_len (fun i b -> b.[i] <- n.[i]) input in
-  let key_ex = key_expansion k in
+  let key_ex = aes128_key_expansion k in
   { key_ex = key_ex; block = input}
 
 let aes_set_counter (st:aes_state) (c:size_nat) : aes_state =
