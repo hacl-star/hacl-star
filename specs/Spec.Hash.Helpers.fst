@@ -142,13 +142,15 @@ let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
 
 module E = FStar.Kremlin.Endianness
 
+let lbytes (l:nat) = b:seq UInt8.t {length b = l}
+
 (* Define word based operators *)
-let bytes_of_words: a:hash_alg -> Tot (s:Seq.seq (word a) -> Tot (Spec.Lib.lbytes FStar.Mul.(size_word a * Seq.length s))) = function
+let bytes_of_words: a:hash_alg -> Tot (s:Seq.seq (word a) -> Tot (lbytes FStar.Mul.(size_word a * Seq.length s))) = function
   | MD5 -> E.le_of_seq_uint32
   | SHA1 | SHA2_224 | SHA2_256 -> E.be_of_seq_uint32
   | SHA2_384 | SHA2_512 -> E.be_of_seq_uint64
 
-let words_of_bytes: a:hash_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(size_word a * len) -> Tot (s:Seq.seq (word a){Seq.length s = len})) = function
+let words_of_bytes: a:hash_alg -> Tot (len:nat -> b:lbytes FStar.Mul.(size_word a * len) -> Tot (s:Seq.seq (word a){Seq.length s = len})) = function
   | MD5 -> E.seq_uint32_of_le
   | SHA1 | SHA2_224 | SHA2_256 -> E.seq_uint32_of_be
   | SHA2_384 | SHA2_512 -> E.seq_uint64_of_be
