@@ -24,13 +24,16 @@ type state = lbuffer uint32 Spec.size_hash_w
 type index_t = n:size_t{size_v n < 16}
 
 inline_for_extraction let size_word : size_t = 4ul
-
 inline_for_extraction let size_block x : size_t = (size Spec.size_block_w) *. size_word
 
-(* Constants *)
-let const_iv : ilbuffer size_t  8 = icreateL_global Spec.list_iv_S
-let const_sigma : ilbuffer Spec.sigma_elt_t 160 = icreateL_global Spec.list_sigma
-let rTable_S : ilbuffer (rotval U32) 4 = icreateL_global Spec.rTable_list_S
+
+/// Constants
+
+let const_iv = icreateL_global Spec.list_iv_S
+let const_sigma = icreateL_global Spec.list_sigma
+let rTable_S = icreateL_global Spec.rTable_list_S
+
+/// Accessors for constants
 
 val get_iv:
   s:size_t{size_v s < 8} ->
@@ -39,10 +42,10 @@ val get_iv:
     (ensures  (fun h0 z h1 -> h0 == h1 /\ uint_v z == uint_v (Seq.index (Spec.ivTable Spec.Blake2S) (size_v s))))
 
 let get_iv s =
-  admit();
   recall_contents const_iv (Spec.ivTable Spec.Blake2S);
-  let r : size_t  = iindex const_iv s in
+  let r : size_t = iindex const_iv s in
   secret r
+
 
 val set_iv:
   hash:state ->
@@ -55,6 +58,7 @@ let set_iv hash =
   admit();
   icopy hash (size (Spec.size_hash_w)) const_iv
 
+
 val get_sigma:
   s:size_t{size_v s < 160} ->
   Stack Spec.sigma_elt_t
@@ -62,20 +66,23 @@ val get_sigma:
     (ensures  (fun h0 z h1 -> h0 == h1 /\ uint_v z == uint_v (Seq.index Spec.const_sigma (size_v s))))
 
 let get_sigma s =
-  admit();
   recall_contents const_sigma Spec.const_sigma;
-  let r : size_t  = iindex const_sigma s in
-  r
+  iindex const_sigma s
+
 
 val get_sigma_sub:
-  start:size_t{size_v start + 16 <= 160} ->
+  start:size_t{size_v start + 16 < 160} ->
   i:size_t{size_v i < 16} ->
   Stack Spec.sigma_elt_t
     (requires (fun h -> True))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ uint_v z == uint_v (Seq.index Spec.const_sigma (size_v start + size_v i))))
-    ///\ uint_v z == uint_v (Seq.index (Seq.sub Spec.const_sigma (size_v start) 16) (size_v i))))
 
-let get_sigma_sub start i = admit(); get_sigma (start +. i)
+let get_sigma_sub start i =
+  assert(v start + v i < 160);
+  let r : Spec.sigma_elt_t = get_sigma (start +. i) in
+  assume(size_v (start +. i) == size_v start + size_v i);
+  assert(v r == uint_v (Seq.index Spec.const_sigma (size_v (start +. i))));
+  r
 
 
 val get_r:
@@ -85,13 +92,12 @@ val get_r:
     (ensures  (fun h0 z h1 -> h0 == h1 /\ uint_v z == uint_v (Seq.index (Spec.rTable Spec.Blake2S) (size_v s))))
 
 let get_r s =
-  admit();
   recall_contents rTable_S (Spec.rTable Spec.Blake2S);
-  let r : size_t  = iindex rTable_S s in
-  r
+  iindex rTable_S s
 
 
-(* Define algorithm functions *)
+/// Define algorithm functions
+
 val g1: wv:working_vector -> a:index_t -> b:index_t -> r:rotval U32 ->
   Stack unit
     (requires (fun h -> live h wv))
