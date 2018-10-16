@@ -63,17 +63,19 @@ let finish #vnn output st nn = I.blake2s_finish #vnn output st nn
 
 
 val blake2s:
-    #vll: size_t
-  -> #vkk: size_t
-  -> #vnn: size_t
-  -> output: lbuffer uint8 (v vnn)
-  -> outlen:size_t{1 <= v outlen /\ v outlen <= 32}
-  -> input: lbuffer uint8 (v vll)
-  -> ilen: size_t{v ilen + 2 * S.size_block <= max_size_t /\ ilen == vll}
-  -> key: lbuffer uint8 (v vkk)
-  -> klen: size_t{v klen <= 32 /\ klen == vkk} ->
+    output: buffer uint8
+  -> d: buffer uint8
+  -> ll: size_t{length d == v ll}
+  -> k: buffer uint8
+  -> kk: size_t{length k == v kk /\ v kk <= 32 /\ (if v kk = 0 then v ll < pow2 64 else v ll + 64 < pow2 64)}
+  -> nn:size_t{1 <= v nn /\ v nn <= 32} ->
   Stack unit
-    (requires (fun h -> True))
-    (ensures  (fun h0 _ h1 -> True))
+    (requires (fun h -> LowStar.Buffer.live h output
+                   /\ LowStar.Buffer.live h d
+                   /\ LowStar.Buffer.live h k
+                   /\ LowStar.Buffer.disjoint output d
+                   /\ LowStar.Buffer.disjoint output k))
+    (ensures  (fun h0 _ h1 -> LowStar.Buffer.modifies (LowStar.Buffer.loc_buffer output) h0 h1
+                         /\ h1.[output] == Spec.Blake2.blake2s h0.[d] (v kk) h0.[k] (v nn)))
 
-let blake2s #vll #vkk #vnn output outlen input ilen key klen = I.blake2s #vll #vkk #vnn output input ilen key klen outlen
+let blake2s output d ll k kk nn = I.blake2s output d ll k kk nn
