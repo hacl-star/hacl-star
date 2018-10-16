@@ -55,7 +55,8 @@ val set_iv:
                          /\ h1.[hash] == Seq.map secret (Spec.ivTable Spec.Blake2S)))
 
 let set_iv hash =
-  admit();
+  recall_contents const_iv (Spec.ivTable Spec.Blake2S);
+  admit(); // BB. we need Lib.Buffer.map to apply `secret`
   icopy hash (size (Spec.size_hash_w)) const_iv
 
 
@@ -63,33 +64,36 @@ val get_sigma:
   s:size_t{size_v s < 160} ->
   Stack Spec.sigma_elt_t
     (requires (fun h -> True))
-    (ensures  (fun h0 z h1 -> h0 == h1 /\ uint_v z == uint_v (Seq.index Spec.const_sigma (size_v s))))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ v z == v (Seq.index Spec.const_sigma (size_v s))))
 
 let get_sigma s =
   recall_contents const_sigma Spec.const_sigma;
   iindex const_sigma s
 
 
+#set-options "--z3rlimit 15"
+
 val get_sigma_sub:
-  start:size_t{size_v start + 16 < 160} ->
-  i:size_t{size_v i < 16} ->
+  start:size_t ->
+  i:size_t{v i < 16 /\ v start + v i < 160} ->
   Stack Spec.sigma_elt_t
     (requires (fun h -> True))
-    (ensures  (fun h0 z h1 -> h0 == h1 /\ uint_v z == uint_v (Seq.index Spec.const_sigma (size_v start + size_v i))))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ v z == v (Seq.index Spec.const_sigma (v start + v i))))
 
 let get_sigma_sub start i =
   assert(v start + v i < 160);
-  let r : Spec.sigma_elt_t = get_sigma (start +. i) in
-  assume(size_v (start +. i) == size_v start + size_v i);
-  assert(v r == uint_v (Seq.index Spec.const_sigma (size_v (start +. i))));
-  r
+  assert(v (start +. i) < 160);
+  let x : size_t = start +. i in
+  get_sigma x
 
+
+#reset-options
 
 val get_r:
   s:size_t{size_v s < 4} ->
   Stack (rotval U32)
     (requires (fun h -> True))
-    (ensures  (fun h0 z h1 -> h0 == h1 /\ uint_v z == uint_v (Seq.index (Spec.rTable Spec.Blake2S) (size_v s))))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ v z == v (Seq.index (Spec.rTable Spec.Blake2S) (v s))))
 
 let get_r s =
   recall_contents rTable_S (Spec.rTable Spec.Blake2S);
