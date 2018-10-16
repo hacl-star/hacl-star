@@ -386,7 +386,7 @@ val mod_mask_lemma: #t:inttype -> #l:secrecy_level  -> a:uint_t t l -> m:shiftva
   Lemma
     (requires True)
     (ensures  uint_v (a `logand` (mod_mask #t m)) == uint_v a % pow2 (uint_v m))
-    [SMTPat (uint_v (a `logand` (mod_mask #t m)))]
+    [SMTPat (a `logand` (mod_mask #t m))]
 
 ///
 /// Operators available for all machine integers
