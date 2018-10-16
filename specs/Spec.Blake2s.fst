@@ -33,6 +33,8 @@ inline_for_extraction let r3 = size 8
 inline_for_extraction let r4 = size 7
 
 type list_iv_t = l:list uint32{ List.Tot.length l <= max_size_t}
+
+[@"opaque_to_smt"]
 inline_for_extraction let list_iv : list_iv_t =
   [@inline_let]
   let l =
@@ -48,6 +50,8 @@ let const_iv : lseq uint32 size_const_iv =
 
 type sigma_elt_t = n:size_t{size_v n < 16}
 type list_sigma_t = l:list sigma_elt_t{List.Tot.length l <= max_size_t}
+
+[@"opaque_to_smt"]
 inline_for_extraction let list_sigma: list_sigma_t =
   [@inline_let]
   let l = [
