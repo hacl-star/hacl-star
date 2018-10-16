@@ -252,6 +252,7 @@ val mget_s:
   -> j:size_nat{j < n2}
   -> elem
 let mget_s #n1 #n2 a i j =
+  assert ((n2 - 1) * n1 + n1 - 1 == n2 * n1 - 1);
   assert (j * n1 + i <= (n2 - 1) * n1 + n1 - 1);
   a.[j * n1 + i]
 

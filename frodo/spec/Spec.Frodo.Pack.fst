@@ -82,6 +82,9 @@ val update_sub:
 let update_sub #a #len i start n x =
   update_sub #a #len i start n x
 
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar +FStar.Pervasives -Spec +Spec.Frodo +Spec.Frodo.Params +Spec.Matrix'"
+
 val frodo_pack:
     #n1:size_nat
   -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
@@ -112,8 +115,6 @@ let frodo_pack #n1 #n2 a d =
 
 
 /// Unpack
-
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar +FStar.Pervasives -Spec +Spec.Frodo +Spec.Frodo.Params +Spec.Matrix'"
 
 val frodo_unpack8:
     d:size_nat{d <= 16}
