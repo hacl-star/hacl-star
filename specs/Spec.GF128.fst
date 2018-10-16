@@ -9,9 +9,55 @@ open Lib.LoopCombinators
 
 (* Field types and parameters *)
 
-let gf128 = mk_field 128 0xe1000000000000000000000000000000
-let elem = felem gf128
-let zero = zero #gf128
+//let gf128 = mk_field 128 0xe1
+//let elem = felem gf128
+//let zero = zero #gf128
+// let reverse (u:uint128) : uint128 = 
+//   repeati 64 
+//     (fun i u -> 
+//       let ui = u &. (u128 1 <<. size i) in
+//       let u128_i = u &. ((u128 1) <<. size (127 - i)) in
+//       (u &. (u128 0 <<. size i) &. ((u128 0) <<. size (127 - i))) |.
+//       (ui <<. size (127 - i - i)) |. (u128_i >>. size (127 - i - i))
+//     ) u
+//let irred = u128 0x87
+// let fmul (a:uint128) (b:uint128) : uint128 =
+//   let (p,a,b) =
+//     repeati 127 (fun i (p,a,b) ->
+// 	   let b0 = eq_mask #U128 (b &. u128 1) (u128 1) in
+// 	   let p = p ^. (b0 &. a) in
+//   	   let carry_mask = eq_mask #U128 (a >>. 127) (u128 1) in
+// 	   let a = a <<. size 1 in
+// 	   let a = a ^. (carry_mask &. irred) in
+// 	   let b = b >>. size 1 in
+// 	   (p,a,b)) (u128 0,a,b) in
+//   let b0 = eq_mask #U128 (b &. u128 1) (u128 1) in
+//   let p = p ^. (b0 &. a) in
+//   p
+
+
+  
+let elem = uint128
+let to_elem x = x
+let from_elem x = x
+let zero = u128 0
+let irred = u128 0xE1000000000000000000000000000000
+
+let fadd (a:uint128) (b:uint128) : uint128 = a ^. b 
+
+let fmul (a:uint128) (b:uint128) : uint128 =
+  let (p,a,b) =
+    repeati 127 (fun i (p,a,b) ->
+	   let b0 = eq_mask #U128 (b >>. 127) (u128 1) in
+	   let p = p ^. (b0 &. a) in
+  	   let carry_mask = eq_mask #U128 (a &. u128 1) (u128 1) in
+	   let a = a >>. size 1 in
+	   let a = a ^. (carry_mask &. irred) in
+	   let b = b <<. size 1 in
+	   (p,a,b)) (u128 0,a,b) in
+  let b0 = eq_mask #U128 (b >>. 127) (u128 1) in
+  let p = p ^. (b0 &. a) in
+  p
 
 (* GCM types and specs *)
 let blocksize : size_nat = 16
@@ -23,9 +69,9 @@ type key   = lbytes keysize
 let encode (len:size_nat{len <= blocksize}) (w:lbytes len) : Tot elem =
   let b = create blocksize (u8 0) in
   let b = update_slice b 0 len w  in
-  to_felem (nat_from_bytes_be b)
+  to_elem (uint_from_bytes_be #U128 b)
 
-let decode (e:elem) : Tot block = nat_to_bytes_be blocksize (from_felem e)
+let decode (e:elem) : Tot block = uint_to_bytes_be (from_elem e)
 
 noeq type state = {
     r:elem;
