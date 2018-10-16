@@ -59,7 +59,7 @@ ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 ROOTS = Spec.Frodo.Test.fst
 
 .depend:
-	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
+	$(FSTAR) --dep full --cmi $(ROOTS) --extract '* -Prims -FStar' > $@
 
 include .depend
 
