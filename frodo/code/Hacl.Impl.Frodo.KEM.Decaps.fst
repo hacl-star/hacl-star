@@ -9,7 +9,7 @@ open LowStar.Buffer
 open LowStar.BufferOps
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
@@ -146,7 +146,7 @@ val crypto_kem_dec_ss_cond:
       r == S.crypto_kem_dec_ss_cond (as_seq h0 d) (as_seq h0 dp) (as_matrix h0 bp_matrix)
 	(as_matrix h0 bpp_matrix) (as_matrix h0 c_matrix) (as_matrix h0 cp_matrix))
 let crypto_kem_dec_ss_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix =
-  let b1 = lbytes_eq d dp in
+  let b1 = Lib.ByteBuffer.lbytes_eq d dp in
   let b2 = matrix_eq params_logq bp_matrix bpp_matrix in
   let b3 = matrix_eq params_logq c_matrix cp_matrix in
   b1 && b2 && b3

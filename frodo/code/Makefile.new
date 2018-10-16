@@ -37,7 +37,7 @@ endif
 ifeq ($(TARGET),x64)
   LWEKE_HOME = ../NIST/Additional_Implementations/x64/$(KEM_DIR)
   OBJS       = $(addprefix $(LWEKE_HOME)/objs/,aes/aes_ni.o sha3/fips202.o sha3/fips202x4.o sha3/keccak4x/KeccakP-1600-times4-SIMD256.o) include/x64/aes$(ARCH).o include/x64/Hacl_AesNI.o include/x64/Hacl_AES128.o
-KECCAK     = x64/Hacl_Keccak.c
+  KECCAK     = x64/Hacl_Keccak.c
 else ifeq ($(TARGET),)
   LWEKE_HOME ?= ../NIST/Reference_Implementation/reference/$(KEM_DIR)
   OBJS       = $(LWEKE_HOME)/objs/aes/aes_c.o $(LWEKE_HOME)/objs/sha3/fips202.o
@@ -52,15 +52,14 @@ HINT_DIR      = .hints.$(VARIANT)
 GENERATED_DIR = frodo-c.$(VARIANT)
 OUT_DIR	      = frodo-c.$(VARIANT)
 
-# .checked files
-# .krml files
-# .hints
-# .c, .h, .d
-# .o, .a
+# Generated files:
+# .checked   CACHE_DIR
+# .krml      OUTPUT_DIR
+# .hints     HINT_DIR
+# .c, .h, .d GENERATED_DIR
+# .o, .a     OUT_DIR
 
-KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
-
-KREMLIN=$(KREMLIN_HOME)/krml
+.PHONY: all test lib stage1 stage2-test stage2-lib KATs benchmark clean clean-c distclean
 
 # Manual staging...
 all: lib
@@ -111,28 +110,13 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib/c \
   $(HACL_HOME)/code/experimental/sha3
 
-FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
-FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) \
-  --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
-
-FSTARR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
-  --cache_dir $(CACHE_DIR) \
-  --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
-
-%.fst-in:
-	@echo --cache_checked_modules --cache_dir $(CACHE_DIR) \
-	$(FSTAR_INCLUDES) \
-	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
-
-%.fsti-in:
-	@echo --cache_checked_modules --cache_dir $(CACHE_DIR) \
-	$(FSTAR_INCLUDES) \
-	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
-
 
 ROOTS = Hacl.Test.Frodo.fst
 
@@ -144,77 +128,25 @@ ROOTS = Hacl.Test.Frodo.fst
 include .depend
 
 # Admit SMT queries for modules in FStar, LowStar, C, and Spec namespaces
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked $(CACHE_DIR)/Spec.Frodo.%.checked: | .depend
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked $(CACHE_DIR)/Spec.%.checked: | .depend $(CACHE_DIR)/prims.fst.checked
 	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/Spec.Matrix.fst.checked $(CACHE_DIR)/Spec.Keccak.fst.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/Lib.RawIntTypes.fst.checked: $(CACHE_DIR)/Lib.IntTypes.fst.checked
-$(CACHE_DIR)/Lib.RawIntTypes.fst.checked: | .depend
-	$(FSTARR) $< \
-	  --expose_interfaces \
-	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
 $(CACHE_DIR)/%.checked: | .depend
-	$(FSTAR) $< \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
-# We mimick what Kremlin would do when it is driving F* and it is given all
-# .fst in the command-line: it would add `--expose_interfaces` and expose all
-# implementations.
-#
-# We need to additionally expose Lib.Loops and Lib.RawIntTypes for the
-# compilation to succeed and be as if Kremlin was given all files at the
-# same time. This means stale cache files, so we use --lax
-
-$(OUTPUT_DIR)/FStar_%.krml $(OUTPUT_DIR)/LowStar_%.krml $(OUTPUT_DIR)/C%.krml: | .depend
-	$(FSTARR) --codegen Kremlin --lax \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-$(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml $(OUTPUT_DIR)/Lib_IntTypes.krml $(OUTPUT_DIR)/Lib_ByteBuffer.krml: | .depend
-	$(FSTARR) --codegen Kremlin --lax \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-$(OUTPUT_DIR)/Lib_RawIntTypes.krml: $(OUTPUT_DIR)/Lib_IntTypes.krml
-$(OUTPUT_DIR)/Lib_RawIntTypes.krml: | .depend
-	$(FSTAR) --codegen Kremlin --lax \
-	  --expose_interfaces \
-	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-$(OUTPUT_DIR)/Lib_Loops.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
-	$(FSTAR) --codegen Kremlin --lax \
-	  --expose_interfaces \
-	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-$(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
-	$(FSTAR) --codegen Kremlin --lax \
-	  --expose_interfaces \
-	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	  $(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	  $(HACL_HOME)/lib/c/Lib.Loops.fst \
+$(OUTPUT_DIR)/%.krml: | .depend
+	$(FSTAR) --codegen Kremlin \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
 # 2. Generation of .c files
+
+KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
+
+KREMLIN=$(KREMLIN_HOME)/krml
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
@@ -256,8 +188,7 @@ ifeq ($(STAGE),2)
 # there.
 include $(GENERATED_DIR)/Makefile.include
 
-# 3. Collecting all of our source files, and generating corresponding object
-# files.
+# 3. Collecting all of our source files, and generating corresponding objects
 
 # This is auto-generated by KreMLin; since the Makefile is staged via the
 # inclusion of Makefile.include, the automated dependency analysis via $(CC) -MM
@@ -290,7 +221,7 @@ INCLUDE_DIRS = \
 
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
 
 # GNU Make manual section 4.14
 %.d: %.c
@@ -304,7 +235,7 @@ CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
 $(OUT_DIR):
 	mkdir -p $@
 
-# 4. Collecting all of the object files into a static library.
+# 4. Collecting all of the object files into static libraries and test executable
 
 $(OUT_DIR)/libfrodo_for_testing.a: $(filter-out $(OUT_DIR)/Hacl_Test_Frodo.o include/random.o, $(ALL_OBJS)) $(LWEKE_HOME)/tests/rng.o | $(OUT_DIR)
 	$(AR) rcs -S $(OUT_DIR)/libfrodo_for_testing.a $^
@@ -321,23 +252,29 @@ $(OUT_DIR)/test.exe: $(filter-out include/random.o, $(ALL_OBJS)) $(LWEKE_HOME)/t
 
 .PRECIOUS: %.o
 
-endif # COMPILE
+endif # STAGE=2
 
-# 5. Clean targets that do not re-trigger anything except perhaps the generation
-# of the .depend file.
+# 5. Targets for interactive mode
+
+%.fst-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
+
+# 6. Clean targets
 
 SHELL=/bin/bash
 
-.PHONY: clean
 clean:
 	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
 	rm -rf include/*.o include/*.d
 
-.PHONY: clean-c
 clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
 
-.PHONY: distclean
 distclean: clean
 	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)
 
@@ -357,7 +294,7 @@ INCLUDE_DIRS = \
 
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
 
 BASE_OBJ = \
   ../../lib/c/Lib_Print.o \

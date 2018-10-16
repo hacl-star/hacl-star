@@ -6,7 +6,8 @@ open FStar.Mul
 open LowStar.Buffer
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
+open Lib.Print
 
 open Hacl.Impl.Frodo.KEM
 open Hacl.Frodo.KEM

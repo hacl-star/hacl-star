@@ -7,8 +7,8 @@ open LowStar.BufferOps
 open LowStar.Buffer
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
-open Lib.Endianness
+open Lib.Buffer
+open Lib.ByteBuffer
 
 module B   = LowStar.Buffer
 module HS  = FStar.HyperStack

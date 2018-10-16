@@ -8,8 +8,8 @@ open FStar.Mul
 open LowStar.Buffer
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
-open Lib.Endianness
+open Lib.Buffer
+open Lib.ByteBuffer
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params

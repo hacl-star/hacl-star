@@ -5,11 +5,11 @@ open FStar.HyperStack.All
 open LowStar.Buffer
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 
 module S = Spec.Frodo.Random
 
-val state: b:buffer uint8{ recallable b }
+val state: b:lbuffer uint8 48{ recallable b }
 
 val randombytes_init_:
     entropy_input:lbuffer uint8 48
