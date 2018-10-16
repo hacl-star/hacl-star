@@ -104,6 +104,7 @@ let g2 wv a b x =
   let wv_b = wv.(b) in
   wv.(a) <- add_mod #U32 (wv_a +. wv_b) x
 
+
 val blake2_mixing : wv:working_vector -> a:index_t -> b:index_t -> c:index_t -> d:index_t -> x:uint32 -> y:uint32 ->
   Stack unit
     (requires (fun h -> live h wv))
@@ -124,12 +125,13 @@ let blake2_mixing wv a b c d x y =
   g2 wv c d (u32 0);
   g1 wv b c r3
 
+
 #set-options "--z3rlimit 50"
 
 val blake2_round1 : wv:working_vector -> m:message_block_w -> i:size_t{size_v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
-                  /\ disjoint wv m /\ disjoint m wv))
+                  /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_round1 Spec.Blake2S h0.[wv] h0.[m] (v i)))
 
@@ -155,7 +157,7 @@ let blake2_round1 wv m i =
 val blake2_round2 : wv:working_vector -> m:message_block_w -> i:size_t{size_v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
-                  /\ disjoint wv m /\ disjoint m wv))
+                  /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_round2 Spec.Blake2S h0.[wv] h0.[m] (v i)))
 
@@ -182,7 +184,7 @@ let blake2_round2 wv m i =
 val blake2_round : wv:working_vector -> m:message_block_w -> i:size_t{v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
-                   /\ disjoint wv m /\ disjoint m wv))
+                   /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_round Spec.Blake2S h0.[m] (v i) h0.[wv]))
 
@@ -199,16 +201,15 @@ val blake2_compress1:
   -> flag:bool ->
   Stack unit
     (requires (fun h -> live h s /\ live h m /\ live h wv
-                     /\ disjoint wv s /\ disjoint wv m
-                     /\ disjoint s wv /\ disjoint m wv))
+                     /\ disjoint wv s /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_compress1 Spec.Blake2S h0.[wv] h0.[s] h0.[m] offset flag))
 
 [@ Substitute ]
 let blake2_compress1 wv s m offset flag =
+  admit();
   recall_contents const_iv (Seq.of_list Spec.list_iv_S);
   update_sub wv (size 0) (size 8) s;
-  admit();
   update_isub wv (size 8) (size 8) const_iv;
   let low_offset = to_u32 #U64 offset in
   let high_offset = to_u32 #U64 (offset >>. size 32) in
@@ -220,28 +221,25 @@ let blake2_compress1 wv s m offset flag =
  (if flag then wv.(size 14) <- wv_14)
 
 
-#reset-options "--z3rlimit 15"
+#reset-options "--z3rlimit 150"
 
 val blake2_compress2 :
   wv:working_vector -> m:message_block_w ->
   Stack unit
-    (requires (fun h -> live h wv /\ live h m
-                   /\ disjoint wv m /\ disjoint m wv))
+    (requires (fun h -> live h wv /\ live h m /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_compress2 Spec.Blake2S h0.[wv] h0.[m]))
 
 [@ Substitute ]
 let blake2_compress2 wv m =
+  let h0 = ST.get () in
   [@inline_let]
   let spec h = Spec.blake2_round Spec.Blake2S h.[m] in
-  let h0 = ST.get () in
-  admit();
-  loop1 #uint32 #Spec.size_block_w h0 (size (Spec.rounds Spec.Blake2S)) wv
-    (fun h -> spec h)
+  loop1 h0 (size (Spec.rounds Spec.Blake2S)) wv spec
     (fun i ->
        Loops.unfold_repeati (Spec.rounds Spec.Blake2S) (spec h0) (as_seq h0 wv) (v i);
-       blake2_round wv m i)
-
+       blake2_round wv m i
+    )
 
 val blake2_compress3_inner :
   wv:working_vector -> i:size_t{size_v i < 8} -> s:state ->
@@ -272,7 +270,6 @@ let blake2_compress3 wv s =
   [@inline_let]
   let spec h = Spec.blake2_compress3_inner Spec.Blake2S h.[wv] in
   let h0 = ST.get () in
-  admit();
   loop1 h0 (size 8) s
     (fun h -> spec h)
     (fun i ->
@@ -297,7 +294,6 @@ let blake2_compress s m offset flag =
   let spec _ h1 = h1.[s] == Spec.blake2_compress Spec.Blake2S h0.[s] h0.[m] offset flag in
   salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer s)) spec
   (fun wv ->
-    admit();
     blake2_compress1 wv s m offset flag;
     blake2_compress2 wv m;
     blake2_compress3 wv s)
@@ -308,15 +304,16 @@ val blake2s_update_block:
   -> prev:size_t{size_v prev <= Spec.max_limb Spec.Blake2S}
   -> d:message_block ->
   Stack unit
-    (requires (fun h -> live h hash /\ live h d
-                   /\ disjoint hash d /\ disjoint d hash))
+    (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[hash] == Spec.blake2_update_block Spec.Blake2S (v prev) h0.[d] h0.[hash]))
 
 let blake2s_update_block hash prev d =
   let h0 = ST.get () in
+  [@inline_let]
+  let spec _ h1 = h1.[d] == Spec.blake2_update_block Spec.Blake2S (v prev) h0.[d] h0.[hash] in
   salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
-  (fun _ h1 -> h1.[d] == Spec.blake2_update_block Spec.Blake2S (v prev) h0.[d] h0.[hash])
+  spec
   (fun block_w ->
     admit();
     uints_from_bytes_le block_w (size Spec.size_block_w) d;
