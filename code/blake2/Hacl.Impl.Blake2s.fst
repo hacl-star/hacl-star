@@ -323,13 +323,12 @@ let blake2s_update_block hash prev d =
   let h0 = ST.get () in
   [@inline_let]
   let spec _ h1 = h1.[hash] == Spec.blake2_update_block Spec.Blake2S (v prev) h0.[d] h0.[hash] in
-  salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
-  spec
+  salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash)) spec
   (fun block_w ->
-    uints_from_bytes_le block_w (size Spec.size_block_w) d;
-    let offset = to_u64 prev in
-    blake2_compress hash block_w offset false
-  )
+     uints_from_bytes_le block_w (size Spec.size_block_w) d;
+     let offset = to_u64 prev in
+     assume(offset == (Spec.to_limb Spec.Blake2S (v prev)));
+     blake2_compress hash block_w offset false)
 
 
 val blake2s_init_hash:
