@@ -197,7 +197,7 @@ val iindex:
   -> b:ilbuffer a len
   -> i:size_t{v i < len} ->
   Stack a
-    (requires fun h0 -> B.live h0 b)
+    (requires fun h0 -> IB.live h0 b)
     (ensures  fun h0 r h1 -> h0 == h1 /\
       r == Seq.index #a #len (ias_seq h1 b) (v i))
 
