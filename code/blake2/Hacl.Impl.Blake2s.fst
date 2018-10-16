@@ -363,19 +363,16 @@ val blake2s_init:
 
 [@ Substitute ]
 let blake2s_init #vkk hash k kk nn =
-  recall_contents const_iv (Seq.of_list Spec.list_iv_S);
   let h0 = ST.get () in
-  salloc1_trivial h0 (size_block Spec.Blake2S) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
+  salloc1_trivial h0 (size 64) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
   (fun _ h1 -> h1.[hash] == Spec.blake2_init Spec.Blake2S (v kk) h0.[k] (v nn))
   (fun key_block ->
     blake2s_init_hash hash kk nn;
     if kk =. (size 0) then ()
     else begin
       update_sub key_block (size 0) kk k;
-      blake2s_update_block hash (size 0) key_block end
-  )
+      blake2s_update_block hash (size 0) key_block end)
 
-#reset-options
 
 val blake2s_update_last:
     #vlen: size_t
@@ -384,8 +381,7 @@ val blake2s_update_last:
   -> last: lbuffer uint8 (v vlen)
   -> len: size_t{v len <= Spec.size_block Spec.Blake2S /\ len == vlen} ->
   Stack unit
-    (requires (fun h -> live h hash
-                   /\ live h last /\ disjoint hash last /\ disjoint last hash))
+    (requires (fun h -> live h hash /\ live h last /\ disjoint hash last))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[hash] == Spec.Blake2.blake2_update_last Spec.Blake2S (v prev) (v len) h0.[last] h0.[hash]))
 
@@ -395,8 +391,11 @@ let blake2s_update_last #vlen hash prev last len =
   let last_block_w = create #uint32 16ul (u32 0) in
   update_sub last_block (size 0) len last;
   uints_from_bytes_le last_block_w (size 16) last_block;
-  blake2_compress hash last_block_w (to_u64 prev) true;
+  let offset = to_u64 prev in
+  assume(offset == (Spec.to_limb Spec.Blake2S (v prev)));
+  blake2_compress hash last_block_w offset true;
   pop_frame ()
+
 
 val blake2s_finish:
     #vnn: size_t
@@ -414,7 +413,6 @@ let blake2s_finish #vnn output hash nn =
   salloc1_trivial h0 (size 32) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer output))
   (fun _ h1 -> h1.[output] == Spec.Blake2.blake2_finish Spec.Blake2S h0.[hash] (v nn))
   (fun full ->
-    admit();
     uints_to_bytes_le full (size 8) hash;
     let final = sub full (size 0) nn in
     copy output nn final)
