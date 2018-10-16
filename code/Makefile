@@ -50,6 +50,7 @@ test:
 .PRECIOUS: %.krml
 
 $(OUTPUT_DIR)/%.krml:
+	echo "< is: $<"
 	$(FSTAR) --codegen Kremlin \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \

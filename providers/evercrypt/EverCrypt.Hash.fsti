@@ -241,6 +241,9 @@ val update_multi:
 // 18-03-03 the last block is *never* complete so there is room for the 1st byte of padding.
 // 18-10-10 using uint64 for the length as the is the only thing that TLS needs
 //   and also saves the need for a (painful) indexed type
+// 18-10-15 a crucial bit is that this function reveals that last @| padding is a multiple of the
+//   block size; indeed, any caller will want to know this in order to reason
+//   about that sequence concatenation
 val update_last:
   #a:e_alg -> (
   let a = Ghost.reveal a in
@@ -256,6 +259,7 @@ val update_last:
     M.(loc_disjoint (footprint s h0) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
+    (B.length last + Seq.length (Spec.Hash.Common.pad a (v total_len))) % size_block a = 0 /\
     repr s h1 ==
       compress_many (repr s h0)
         (Seq.append (B.as_seq h0 last) (Spec.Hash.Common.pad a (v total_len))) /\

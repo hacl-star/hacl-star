@@ -158,33 +158,65 @@ val update_last_256: Hacl.Hash.Definitions.update_last_st SHA2_256
 let update_last_256 s prev_len input input_len =
   Hacl.Hash.MD.mk_update_last SHA2_256 update_multi_256 Hacl.Hash.SHA2.pad_256 s prev_len input input_len
 
+// Splitting out these proof bits; the proof is highly unreliable when all six
+// cases are done together in a single match
+inline_for_extraction
+let update_last_st (#a:e_alg) =
+  let a = Ghost.reveal a in
+  p:Hacl.Hash.Definitions.state a ->
+  last:uint8_p { B.length last < size_block a } ->
+  total_len:uint64_t {
+    v total_len < max_input8 a /\
+    (v total_len - B.length last) % size_block a = 0 } ->
+  Stack unit
+  (requires fun h0 ->
+    B.live h0 p /\
+    B.live h0 last /\
+    M.(loc_disjoint (loc_buffer p) (loc_buffer last)))
+  (ensures fun h0 _ h1 ->
+    M.(modifies (loc_buffer p) h0 h1) /\
+    (B.length last + Seq.length (Spec.Hash.Common.pad a (v total_len))) % size_block a = 0 /\
+    B.as_seq h1 p ==
+      compress_many (B.as_seq h0 p)
+        (Seq.append (B.as_seq h0 last) (Spec.Hash.Common.pad a (v total_len))))
+
+inline_for_extraction
+val update_last_64 (a: e_alg{ G.reveal a <> SHA2_384 /\ G.reveal a <> SHA2_512 })
+  (update_last: Hacl.Hash.Definitions.update_last_st (G.reveal a)):
+  update_last_st #a
+inline_for_extraction
+let update_last_64 a update_last p last total_len =
+  let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul MD5) in
+  let prev_len = total_len - input_len in
+  update_last p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
+
 #push-options "--z3rlimit 1000"
+inline_for_extraction
+val update_last_128 (a: e_alg{ G.reveal a = SHA2_384 \/ G.reveal a = SHA2_512 })
+  (update_last: Hacl.Hash.Definitions.update_last_st (G.reveal a)):
+  update_last_st #a
+inline_for_extraction
+let update_last_128 a update_last p last total_len =
+  let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul SHA2_384) in
+  let prev_len = Int.Cast.Full.uint64_to_uint128 (total_len - input_len) in
+  update_last p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
+#pop-options
+
+#push-options "--z3rlimit 50"
 let update_last #a s last total_len =
   match !*s with
   | MD5_s p ->
-      let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul MD5) in
-      let prev_len = total_len - input_len in
-      Hacl.Hash.MD5.update_last p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
+      update_last_64 a Hacl.Hash.MD5.update_last p last total_len
   | SHA1_s p ->
-      let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul SHA1) in
-      let prev_len = total_len - input_len in
-      Hacl.Hash.SHA1.update_last p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
+      update_last_64 a Hacl.Hash.SHA1.update_last p last total_len
   | SHA2_224_s p ->
-      let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul SHA2_224) in
-      let prev_len = total_len - input_len in
-      Hacl.Hash.SHA2.update_last_224 p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
+      update_last_64 a Hacl.Hash.SHA2.update_last_224 p last total_len
   | SHA2_256_s p ->
-      let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul SHA2_256) in
-      let prev_len = total_len - input_len in
-      update_last_256 p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
+      update_last_64 a update_last_256 p last total_len
   | SHA2_384_s p ->
-      let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul SHA2_384) in
-      let prev_len = Int.Cast.Full.uint64_to_uint128 (total_len - input_len) in
-      Hacl.Hash.SHA2.update_last_384 p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
+      update_last_128 a Hacl.Hash.SHA2.update_last_384 p last total_len
   | SHA2_512_s p ->
-      let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul SHA2_512) in
-      let prev_len = Int.Cast.Full.uint64_to_uint128 (total_len - input_len) in
-      Hacl.Hash.SHA2.update_last_512 p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
+      update_last_128 a Hacl.Hash.SHA2.update_last_512 p last total_len
 #pop-options
 
 let finish #a s dst =

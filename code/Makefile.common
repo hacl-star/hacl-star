@@ -21,7 +21,7 @@ OUTPUT_DIR = extracted
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
-  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES)
+  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi
 
 %.fst-in:
 	@echo $(FSTAR_INCLUDES)

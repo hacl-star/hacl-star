@@ -62,6 +62,15 @@ let update_multi_zero (a: hash_alg) (h: hash_w a): Lemma
 
 #set-options "--z3rlimit 50"
 
+let update_multi_update (a: hash_alg) (h: hash_w a) (input: bytes_block a): Lemma
+  (ensures (S.equal (update_multi a h input) (update a h input)))
+  [ SMTPat (update a h input) ]
+=
+  ()
+
+/// Start of the central proof of the commutation of update_multi and append
+
+(** A small helper. *)
 let update_multi_block (a: hash_alg) (h: hash_w a) (input: bytes):
   Lemma
     (requires (

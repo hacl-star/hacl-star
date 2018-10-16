@@ -8,6 +8,8 @@ module S = FStar.Seq
 open EverCrypt.Helpers
 open FStar.Integers
 
+let _: squash (inversion alg) = allow_inversion alg
+
 noextract inline_for_extraction
 let spec = Spec.Hash.Nist.hash
 
@@ -80,33 +82,46 @@ val wrap_key:
       live h1 output /\ live h1 key /\ live h0 output /\ live h0 key /\
       as_seq h0 output == Seq.create (size_block a) 0uy /\
       modifies (loc_buffer output) h0 h1 /\
-      as_seq h1 output = wrap a (as_seq h0 key) )
+      as_seq h1 output == wrap a (as_seq h0 key) )
 
-inline_for_extraction
+unfold
 let block_len a = Hacl.Hash.Definitions.size_block_ul a
 
-inline_for_extraction
+unfold
 let tag_len a = Hacl.Hash.Definitions.size_hash_ul a
 
+inline_for_extraction
+let helper_smtpat (a: ha) (len: uint32_t{ v len < max_input8 a }):
+  x:uint32_t { x <= block_len a } =
+  if len <= block_len a then len else tag_len a
 
-// let key0 = if S.length key <= size_block a then key else spec a key in
-// let paddingLength = size_block a - S.length key0 in
-// S.append key0 (S.create paddingLength 0uy)
 inline_for_extraction
 let wrap_key a output key len =
   //[@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
-  let i = if len <= block_len a then len else tag_len a in
+  let i = helper_smtpat a len in
   let nkey = sub output 0ul i in
+  let zeroes = sub output i (block_len a - i) in
+  assert (loc_disjoint (loc_buffer nkey) (loc_buffer zeroes));
   let h0 = ST.get () in
-  if len <= block_len a then
-    blit key 0ul nkey 0ul len
-  else
+  assert (Seq.equal (as_seq h0 zeroes) (Seq.create (v (block_len a - i)) 0uy));
+  if len <= block_len a then begin
+    blit key 0ul nkey 0ul len;
+    let h1 = ST.get () in
+    assert (Seq.equal (as_seq h1 zeroes) (as_seq h0 zeroes));
+    assert (Seq.equal (as_seq h1 nkey) (as_seq h0 key));
+    assert (Seq.equal (as_seq h1 output) (S.append (as_seq h1 nkey) (as_seq h1 zeroes)));
+    Seq.lemma_eq_elim (as_seq h1 output) (S.append (as_seq h1 nkey) (as_seq h1 zeroes));
+    assert (as_seq h1 output == wrap a (as_seq h0 key))
+  end else begin
     Hash.hash a nkey key len;
-  let h1 = ST.get () in (
-    let pad = sub output i (block_len a - i) in
-    Seq.lemma_eq_intro (as_seq h0 pad) (Seq.create (size_block a - v i) 0uy);
-    Seq.lemma_split (as_seq h1 output) (v i)
-  )
+    let h1 = ST.get () in
+    assert (Seq.equal (as_seq h1 zeroes) (as_seq h0 zeroes));
+    assert (Seq.equal (as_seq h1 nkey) (spec a (as_seq h0 key)));
+    assert (Seq.equal (as_seq h1 output) (S.append (as_seq h1 nkey) (as_seq h1 zeroes)));
+    Seq.lemma_eq_elim (as_seq h1 output) (S.append (as_seq h1 nkey) (as_seq h1 zeroes));
+    assert (as_seq h1 output == wrap a (as_seq h0 key))
+  end
+
 
 // we pre-allocate the variable-type, variable length hash state,
 // to avoid both verification and extraction problems.
@@ -135,24 +150,32 @@ val part1:
       modifies (loc_union (footprint acc h0) (loc_buffer s2)) h0 h1 /\
       (
       let hash0 = Seq.slice (as_seq h1 s2) 0 (size_hash a) in
-      length data + size_block a <= max_input8 a /\ (*always true, required by spec below*)
+      length data + size_block a < max_input8 a /\ (*always true, required by spec below*)
       hash0 == spec a (Seq.append (as_seq h0 s2) (as_seq h0 data))))
 
-#reset-options "--max_fuel 0 --z3rlimit 1000" // without hints
+let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
+  compress_many (acc0 #a) b
+
+#push-options "--z3rlimit 100"
 
 // we use auxiliary functions only for clarity and proof modularity
 inline_for_extraction
 let part1 a (acc: state a) key data len =
-  assert_norm(pow2 32 + size_block a <= max_input8 a);
+  assert (size_block a <= 128);
+  assert_norm (pow2 61 <= pow2 125);
+  assert (pow2 61 <= max_input8 a);
+  assert_norm(pow2 32 + 128 <= pow2 61);
   let ll = len % block_len a in
+  assert ((v len - v ll) % size_block a = 0);
+  assert ((size_block a + v len - v ll) % size_block a = 0);
   let lb = len - ll in
   let blocks = sub data 0ul lb in
   let last = offset data lb in
   Hash.init #(Ghost.hide a) acc;
   let h0 = ST.get() in //assume(bounded_counter acc h0 1);
+  assert (repr acc h0 == acc0 #a);
   Hash.update
     #(Ghost.hide a)
-    (Ghost.hide Seq.empty)
     acc key;
   let h1 = ST.get() in
   assert(
@@ -161,15 +184,21 @@ let part1 a (acc: state a) key data len =
     repr acc h1 == hash0 k);
   Hash.update_multi
     #(Ghost.hide a)
-    (Ghost.hide (as_seq h0 key))
     acc blocks lb;
   let h2 = ST.get() in
-  assert_norm(size_block a + v len <= max_input8 a);
-  Hash.update_last 
+  assert_norm(size_block a + v len < max_input8 a);
+  assert (repr acc h2 == hash0 S.(as_seq h0 key @| as_seq h0 blocks));
+  Hash.update_last
     #(Ghost.hide a)
-    (Ghost.hide (Seq.append (as_seq h0 key) (as_seq h2 blocks)))
-    acc last (block_len a + len);
+    acc last (Int.Cast.Full.uint32_to_uint64 (block_len a + len));
   let h3 = ST.get() in
+  assert (v (Int.Cast.Full.uint32_to_uint64 (block_len a + len)) =
+    size_block a + v len);
+  assert (v (Int.Cast.Full.uint32_to_uint64 (block_len a + len)) = v (block_len a + len));
+  assert (S.equal (as_seq h0 last) (as_seq h2 last));
+  assert (repr acc h3 ==
+    compress_many (hash0 (S.append (as_seq h0 key) (as_seq h0 blocks)))
+      (S.append (as_seq h0 last) (Spec.Hash.Common.pad a (v (block_len a + len)))));
   // assert(LowStar.Buffer.live h3 key);
   let tag = sub key 0ul (tag_len a) in (* Salvage memory *)
   Hash.finish #(Ghost.hide a) acc tag;
@@ -180,30 +209,30 @@ let part1 a (acc: state a) key data len =
     let key1 = as_seq h1 key in
     let blocks1 = as_seq h1 blocks in
     let acc1 = repr acc h1 in
-    lemma_compress (acc0 #a) key1;
+    //lemma_compress (acc0 #a) key1;
     assert(acc1 == hash0 key1);
-    let v2 = key1 @| blocks1 in
+    let v2 = S.(key1 @| blocks1) in
     let acc2 = repr acc h2 in
     // assert (Seq.length key1 % p = 0);
     // assert (Seq.length blocks1 % p = 0);
     // assert (Seq.length v2 % p = 0);
-    lemma_hash2 (acc0 #a) key1 blocks1;
+    // lemma_hash2 (acc0 #a) key1 blocks1;
     assert(acc2 == hash0 #a v2);
     let data1 = as_seq h1 data in
     let last1 = as_seq h1 last in
-    let suffix1 = suffix a (p + v len) in
-    Seq.lemma_eq_intro data1 (blocks1 @| last1);
+    let suffix1 = Spec.Hash.Common.pad a (p + v len) in
+    Seq.lemma_eq_intro data1 S.(blocks1 @| last1);
     let acc3 = repr acc h3 in
     let ls = Seq.length suffix1 in
     assert((p + v len + ls) % p = 0);
     Math.Lemmas.lemma_mod_plus (v ll + ls) (1 + v len / p) p;
     assert((v ll + ls) % p = 0);
-    lemma_hash2 (acc0 #a) v2 (last1 @| suffix1);
-    assert(acc3 == hash0 #a (v2 @| (last1 @| suffix1)));
+    //lemma_hash2 (acc0 #a) v2 S.(last1 @| suffix1);
+    assert(acc3 == hash0 #a S.(v2 @| (last1 @| suffix1)));
     Seq.append_assoc v2 last1 suffix1;
     Seq.append_assoc key1 blocks1 last1;
-    assert(acc3 == hash0 #a ((key1 @| data1) @| suffix1));
-    assert(extract acc3 == spec a (key1 @| data1)))
+    assert(acc3 == hash0 #a S.((key1 @| data1) @| suffix1));
+    assert(extract acc3 == spec a S.(key1 @| data1)))
 
 // the two parts have the same stucture; let's keep their proofs in sync.
 inline_for_extraction
@@ -227,17 +256,22 @@ val part2:
       invariant acc h1 /\ footprint acc h1 == footprint acc h0 /\
       modifies (loc_union (footprint acc h0) (loc_buffer mac)) h0 h1 /\
       ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in
-        Seq.length payload <= max_input8 a /\
+        Seq.length payload < max_input8 a /\
         as_seq h1 mac = spec a payload))
 
+#set-options "--z3rlimit 200"
 inline_for_extraction
 let part2 a acc mac opad tag =
   let totLen = block_len a + tag_len a in
-  assert_norm(v totLen <= max_input8 a);
+  assert (size_block a <= 128);
+  assert_norm (pow2 61 <= pow2 125);
+  assert (pow2 61 <= max_input8 a);
+  assert_norm(pow2 32 + 128 <= pow2 61);
+  assert(v totLen < max_input8 a);
   let h0 = ST.get() in
   //assume(LowStar.Modifies.(loc_disjoint (footprint acc h0) (loc_buffer opad)));
   Hash.init #(Ghost.hide a) acc;
-  Hash.update #(Ghost.hide a) (Ghost.hide Seq.empty) acc opad;
+  Hash.update #(Ghost.hide a) acc opad;
   let h1 = ST.get() in
   // assert(
   //   footprint acc h1 == footprint acc h0 /\
@@ -247,7 +281,7 @@ let part2 a acc mac opad tag =
     let k = as_seq h0 opad in
     FStar.Seq.lemma_eq_intro (Seq.append (Seq.empty #UInt8.t) k) k;
     repr acc h1 == hash0 k);
-  Hash.update_last #(Ghost.hide a) (Ghost.hide (as_seq h1 opad)) acc tag totLen;
+  Hash.update_last #(Ghost.hide a) acc tag (Int.Cast.Full.uint32_to_uint64 totLen);
   let h2 = ST.get() in
   // assert(
   //   LowStar.Buffer.live h2 mac /\
@@ -256,15 +290,15 @@ let part2 a acc mac opad tag =
   (
     let v1 = as_seq h1 opad in
     let acc1 = repr acc h1 in
-    lemma_compress (acc0 #a) v1;
+    //lemma_compress (acc0 #a) v1;
     assert(acc1 == hash0 v1);
     let tag1 = as_seq h1 tag in
-    let suffix1 = suffix a (size_block a + size_hash a) in
+    let suffix1 = Spec.Hash.Common.pad a (size_block a + size_hash a) in
     let acc2 = repr acc h2 in
-    lemma_hash2 (acc0 #a) v1 (tag1 @| suffix1);
+    //lemma_hash2 (acc0 #a) v1 S.(tag1 @| suffix1);
     Seq.append_assoc v1 tag1 suffix1;
-    assert(acc2 == hash0 ((v1 @| tag1) @| suffix1));
-    assert(extract acc2 = spec a (v1 @| tag1)))
+    assert(acc2 == hash0 S.((v1 @| tag1) @| suffix1));
+    assert(extract acc2 = spec a S.(v1 @| tag1)))
 
 // similar spec as hmac with keylen = block_len a
 inline_for_extraction
@@ -294,10 +328,10 @@ val hmac_core:
     ( let k = as_seq h0 key in
       let k1 = xor 0x36uy k in
       let k2 = xor 0x5cuy k in
-      length data + size_block a <= max_input8 a /\ ( (*always true*)
-      let v1 = spec a (k1 @| as_seq h0 data) in
-      Seq.length (k2 @| v1) <= max_input8 a /\
-      as_seq h1 tag == spec a (k2 @| v1))))
+      length data + size_block a < max_input8 a /\ ( (*always true*)
+      let v1 = spec a S.(k1 @| as_seq h0 data) in
+      Seq.length S.(k2 @| v1) < max_input8 a /\
+      as_seq h1 tag == spec a S.(k2 @| v1))))
 
 inline_for_extraction
 val xor_bytes_inplace:
@@ -354,14 +388,14 @@ let hmac_core a acc tag key data len =
     let vdata = as_seq h0 data in
     let v1: lbytes (size_hash a) = as_seq h1 inner in
     assert_norm(size_block a + size_hash a <= max_input8 a);
-    assert(Seq.length (k2 @| v1) <= max_input8 a);
+    assert(Seq.length S.(k2 @| v1) < max_input8 a);
     let v2 = as_seq h2 tag in
     xor_lemma 0x36uy k;
     xor_lemma 0x5cuy k;
     // assert(k1 == as_seq h0 ipad);
     // assert(k2 == as_seq h1 opad);
-    assert(v1 == spec a (k1 @| vdata));
-    assert(v2 == spec a (k2 @| v1));
+    assert(v1 == spec a S.(k1 @| vdata));
+    assert(v2 == spec a S.(k2 @| v1));
 
     // TR: modifies clause now automatically proven thanks to
     // pattern provided in Hash.loc_includes_union_l_footprint
@@ -386,11 +420,13 @@ let hmac_core a acc tag key data len =
     frame_invariant (loc_region_only false (HyperStack.get_tip h1)) acc h2 h3
   )
 
-inline_for_extraction
 let compute a mac key keylen data datalen =
   let h00 = ST.get() in
   push_frame ();
-  assert_norm(pow2 32 + size_block a <= max_input8 a);
+  assert (size_block a <= 128);
+  assert_norm (pow2 32 + 128 < pow2 61);
+  assert_norm (pow2 61 < pow2 125);
+  assert(pow2 32 + size_block a < max_input8 a);
   assert(length data + size_block a <= max_input8 a);
   let keyblock = alloca 0x00uy (block_len a) in
   let acc = Hash.create a in
