@@ -169,6 +169,7 @@ inline_for_extraction
 let step3_body
   (mi: Ghost.erased Spec.word_block)
   (w: w_t)
+  (gw: Ghost.erased (Spec.step3_body_w_t (Ghost.reveal mi)))
   (b: state SHA1)
   (t: U32.t {U32.v t < 80})
 : HST.Stack unit
@@ -179,7 +180,7 @@ let step3_body
   ))
   (ensures (fun h _ h' ->
     B.modifies (B.loc_buffer b) h h' /\
-    B.as_seq h' b == Spec.step3_body' (Ghost.reveal mi) (B.as_seq h b) t
+    B.as_seq h' b == Spec.step3_body' (Ghost.reveal mi) (B.as_seq h b) t (Ghost.reveal gw (U32.v t))
   ))
 = let _a = B.index b 0ul in
   let _b = B.index b 1ul in
@@ -200,12 +201,21 @@ let zero_out
 = let h0 = HST.get () in
   C.Loops.for 0ul len (fun h _ -> B.live h b /\ B.modifies (B.loc_buffer b) h0 h) (fun i -> B.upd b i 0ul)
 
-let spec_step3_body (mi: Spec.word_block) (st: Ghost.erased (hash_w SHA1)) (t: nat {t < 80}) : Tot (Ghost.erased (hash_w SHA1)) =
-  Ghost.elift1 (fun h -> Spec.step3_body mi h t) st
+let spec_step3_body
+  (mi: Spec.word_block)
+  (gw: Ghost.erased (Spec.step3_body_w_t mi))
+  (st: Ghost.erased (hash_w SHA1))
+  (t: nat {t < 80})
+: Tot (Ghost.erased (hash_w SHA1))
+= Ghost.elift1 (fun h -> Spec.step3_body mi (Ghost.reveal gw) h t) st
 
-let spec_step3_body_spec (mi: Spec.word_block) (st: Ghost.erased (hash_w SHA1)) (t: nat { t < 80 } ) : Lemma
-  (Ghost.reveal (spec_step3_body mi st t) == Spec.step3_body mi (Ghost.reveal st) t)
-  [SMTPat (Ghost.reveal (spec_step3_body mi st t))]
+let spec_step3_body_spec
+  (mi: Spec.word_block)
+  (gw: Ghost.erased (Spec.step3_body_w_t mi))
+  (st: Ghost.erased (hash_w SHA1)) (t: nat { t < 80 } )
+: Lemma
+  (Ghost.reveal (spec_step3_body mi gw st t) == Spec.step3_body mi (Ghost.reveal gw) (Ghost.reveal st) t)
+  [SMTPat (Ghost.reveal (spec_step3_body mi gw st t))]
 = ()
 
 #set-options "--z3rlimit 32 --max_fuel 0 --max_ifuel 0"
@@ -231,7 +241,11 @@ let step3
   w m _w;
   let mi = Ghost.hide (E.seq_uint32_of_be size_block_w (B.as_seq h0 m)) in
   let h1 = HST.get () in
-  let f : Ghost.erased (C.Loops.repeat_range_body_spec (hash_w SHA1) 80) = Ghost.hide (Spec.step3_body (Ghost.reveal mi)) in
+  let cwt = Ghost.hide (Spec.compute_w (Ghost.reveal mi) 0 Seq.empty) in
+  let gw: Ghost.erased (Spec.step3_body_w_t (Ghost.reveal mi)) =
+    Ghost.elift1 (Spec.index_compute_w (Ghost.reveal mi)) cwt
+  in
+  let f : Ghost.erased (C.Loops.repeat_range_body_spec (hash_w SHA1) 80) = Ghost.hide (Spec.step3_body (Ghost.reveal mi) (Ghost.reveal gw)) in
   let inv (h' : HS.mem) : GTot Type0 =
     B.modifies (B.loc_buffer h) h1 h' /\
     B.live h' h
@@ -239,7 +253,7 @@ let step3
   let interp (h' : HS.mem { inv h' } ) : GTot (hash_w SHA1) =
     B.as_seq h' h
   in
-  C.Loops.repeat_range 0ul 80ul f inv interp (fun i -> step3_body mi _w h i);
+  C.Loops.repeat_range 0ul 80ul f inv interp (fun i -> step3_body mi _w gw h i);
   zero_out _w 80ul;
   HST.pop_frame ();
   ()

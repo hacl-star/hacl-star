@@ -514,7 +514,7 @@ procedure {:quick} loop_rounds(
     lemma_update_multi_quads(buffer128_as_seq(mem, in_b), hash_orig, offset);
 }
 
-
+#reset-options "--z3rlimit 40"
 procedure {:quick} loop(
         ghost in_b:buffer128,
         ghost k_b:buffer128

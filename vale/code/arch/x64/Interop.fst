@@ -370,6 +370,7 @@ let rec up_down_identity_aux
         (Classical.move_requires (fun b -> correct_down_p_same_sel b mem addrs heap init_heap x))
     in Classical.forall_intro (Classical.move_requires aux)
 
+#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1 --initial_fuel 1 --initial_ifuel 1"
 let up_down_identity mem addrs ptrs heap = 
   let initial_heap = down_mem mem addrs ptrs in
   let new_heap = down_mem (up_mem heap addrs ptrs mem) addrs ptrs in

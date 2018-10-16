@@ -49,8 +49,8 @@ type blocks_w = m:seq block_w
 type counter = nat
 
 (* Define word based operators *)
-let words_to_be = Spec.Lib.uint64s_to_be
-let words_from_be = Spec.Lib.uint64s_from_be
+let bytes_of_words = Spec.Lib.uint64s_to_be
+let words_of_bytes = Spec.Lib.uint64s_from_be
 let word_logxor = Word.logxor
 let word_logand = Word.logand
 let word_logor = Word.logor
@@ -162,7 +162,7 @@ let shuffle (hash:hash_w) (block:block_w) : Tot hash_w =
 
 
 let update (hash:hash_w) (block:bytes{length block = size_block}) : Tot hash_w =
-  let b = words_from_be size_block_w block in
+  let b = words_of_bytes size_block_w block in
   let hash_1 = shuffle hash b in
   Spec.Loops.seq_map2 (fun x y -> x +%^ y) hash hash_1
 
@@ -194,7 +194,7 @@ let update_last (hash:hash_w) (prevlen:nat{prevlen % size_block = 0}) (input:byt
   update_multi hash (input @| blocks)
 
 
-let finish (hashw:hash_w) : Tot (hash:bytes{length hash = size_hash}) = words_to_be size_hash_w hashw
+let finish (hashw:hash_w) : Tot (hash:bytes{length hash = size_hash}) = bytes_of_words size_hash_w hashw
 
 
 let hash (input:bytes{Seq.length input < max_input_len_8}) : Tot (hash:bytes{length hash = size_hash}) =

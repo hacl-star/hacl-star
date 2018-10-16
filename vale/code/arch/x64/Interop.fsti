@@ -55,9 +55,9 @@ let disjoint_addr addr1 length1 addr2 length2 =
   addr1 + length1 < addr2 || addr2 + length2 < addr1
 
 type addr_map = (m:(s8 -> nat64){
-  (forall (buf1 buf2:s8). disjoint buf1 buf2 ==> 
+  (forall (buf1 buf2:s8).{:pattern (m buf1); (m buf2)} disjoint buf1 buf2 ==> 
     disjoint_addr (m buf1) (B.length buf1) (m buf2) (B.length buf2)) /\
-  (forall (b:s8). m b + B.length b < pow2_64)})
+  (forall (b:s8).{:pattern (m b)} m b + B.length b < pow2_64)})
 
 unfold
 let list_live (#a:Type0) mem (ptrs:list (B.buffer a)) = forall p . List.memP p ptrs ==> B.live mem p
@@ -69,8 +69,8 @@ let correct_down_p (mem:HS.mem) (addrs:addr_map) (heap:heap) (p:s8) =
   (forall i.  0 <= i /\ i < length ==> heap.[addr + i] == SecretByte.v (FStar.Seq.index contents i))
 
 val addrs_set: (ptrs:list s8) -> (addrs:addr_map) -> GTot (s:Set.set int{
-  forall x. not (Set.mem x s) <==> 
-    (forall (b:s8{List.memP b ptrs}). x < addrs b \/ x >= addrs b + B.length b)})
+  forall x.{:pattern (Set.mem x s)} not (Set.mem x s) <==> 
+    (forall (b:s8{List.memP b ptrs}).{:pattern (addrs b)} x < addrs b \/ x >= addrs b + B.length b)})
     
 val addrs_set_lemma: (ptrs1:list s8) -> (ptrs2:list s8) ->
   (addrs:addr_map) -> Lemma

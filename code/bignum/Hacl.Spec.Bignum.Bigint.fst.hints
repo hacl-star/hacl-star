@@ -282,11 +282,34 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "21481b1bb8dcf81ccfa8070651b74f4b"
+      "85b0bd5b67b5ea44fe79e4d9d2267c60"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_eval_",
       2,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Hacl.Bignum.Constants.len",
+        "equation_Hacl.Bignum.Constants.limb",
+        "equation_Hacl.Bignum.Parameters.felem",
+        "equation_Hacl.Bignum.Parameters.len",
+        "equation_Hacl.Bignum.Parameters.limb", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "int_typing",
+        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882",
+        "refinement_interpretation_Hacl.Spec.Bignum.Bigint_Tm_refine_04d3395c881847f65dd2a6cf9d8a71b5",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "68d3d48c807b4f0702b7420522b858db"
+    ],
+    [
+      "Hacl.Spec.Bignum.Bigint.lemma_eval_",
+      3,
       1,
       2,
       [
@@ -295,7 +318,7 @@
         "@fuel_correspondence_Hacl.Spec.Bignum.Bigint.seval_.fuel_instrumented",
         "@fuel_irrelevance_Hacl.Spec.Bignum.Bigint.eval_.fuel_instrumented",
         "@fuel_irrelevance_Hacl.Spec.Bignum.Bigint.seval_.fuel_instrumented",
-        "@query", "assumption_Prims.HasEq_int",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_036dd81661f7ff95c075635a660c861d_1",
         "binder_x_0c8c560ea1f64597ac6752d770b1c7b5_0",
         "binder_x_eb16176cf17239971c67267513c17e34_2", "bool_inversion",
@@ -305,7 +328,7 @@
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.Set.eqtype", "equation_Hacl.Bignum.Constants.len",
+        "equation_Hacl.Bignum.Constants.len",
         "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Parameters.felem",
         "equation_Hacl.Bignum.Parameters.len",
@@ -330,7 +353,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "0b331e5d700c37b963009373ea81d816"
+      "63c1f4986a931f93399de2daaff23e3b"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_eval",
@@ -353,7 +376,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "6e056c2aef08cfaf356957984a63a992"
+      "3511368d668d2841868866cfe3a680e5"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_eval",
@@ -371,7 +394,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "648df0a442675026b41cbeef6bef1c0e"
+      "8cd97159cdd0c78135beacf00c53107f"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_eval_wide_",
@@ -395,11 +418,35 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "4dbce71adde2b67b98ee084f05fdd9ae"
+      "cdcbf000e6cd24b79761917cf834b9b8"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_eval_wide_",
       2,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Hacl.Bignum.Constants.len",
+        "equation_Hacl.Bignum.Constants.wide",
+        "equation_Hacl.Bignum.Parameters.felem_wide",
+        "equation_Hacl.Bignum.Parameters.len",
+        "equation_Hacl.Bignum.Parameters.wide", "equation_Hacl.UInt128.t",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "int_typing",
+        "refinement_interpretation_Hacl.Bignum.Parameters_Tm_refine_2cce8b21947d7cc0465fdc87c7a1f882",
+        "refinement_interpretation_Hacl.Spec.Bignum.Bigint_Tm_refine_04d3395c881847f65dd2a6cf9d8a71b5",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "06282d0f9d347a0c1d9d1250718ad294"
+    ],
+    [
+      "Hacl.Spec.Bignum.Bigint.lemma_eval_wide_",
+      3,
       1,
       2,
       [
@@ -408,7 +455,7 @@
         "@fuel_correspondence_Hacl.Spec.Bignum.Bigint.seval_wide_.fuel_instrumented",
         "@fuel_irrelevance_Hacl.Spec.Bignum.Bigint.eval_wide_.fuel_instrumented",
         "@fuel_irrelevance_Hacl.Spec.Bignum.Bigint.seval_wide_.fuel_instrumented",
-        "@query", "assumption_Prims.HasEq_int",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_0c8c560ea1f64597ac6752d770b1c7b5_0",
         "binder_x_4012a3845f3960404c794ded9d98d470_1",
         "binder_x_eb16176cf17239971c67267513c17e34_2", "bool_inversion",
@@ -418,7 +465,7 @@
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.Set.eqtype", "equation_Hacl.Bignum.Constants.len",
+        "equation_Hacl.Bignum.Constants.len",
         "equation_Hacl.Bignum.Constants.wide",
         "equation_Hacl.Bignum.Parameters.felem_wide",
         "equation_Hacl.Bignum.Parameters.len",
@@ -444,7 +491,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "0d8a2be297f513355ae74e37ff61c2a5"
+      "b2edbb160c1cfb06ae426a23483ba362"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_eval_wide",
@@ -468,7 +515,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "55b6d1d1a766f9f2c19fc89d20fb4345"
+      "3cafd0c5f999aad93122a4680a2c9b02"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_eval_wide",
@@ -486,7 +533,7 @@
         "equation_Hacl.UInt128.t", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d299b184582b11b10094c7a76874edd7"
+      "51a12b353ef017990e3f395bd240f6e7"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_seval_def",
@@ -508,7 +555,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "73a49ae8b6e7a2465e6a0166485021f2"
+      "6331358b93f1a39cf93629bb3a592b19"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_seval_def",
@@ -531,7 +578,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "e1619ea26bc4613b12bcb31e1d3b0d50"
+      "32d66ee29a61a3c3b79e73a2baf48eaa"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_seval_wide_def",
@@ -553,7 +600,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "2707d54efe94b2c9cfda315607704cbe"
+      "dd80d5f496f9b16e3c08e848887662ca"
     ],
     [
       "Hacl.Spec.Bignum.Bigint.lemma_seval_wide_def",
@@ -580,7 +627,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "9da30ff8ffa8e8c0e2428194703efd97"
+      "5b1de2d84d6f64543a103ba7bfc8d99c"
     ]
   ]
 ]
