@@ -384,7 +384,6 @@ val lemma_matrix_to_lbytes:
     (ensures
       (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res1 i0 k))
 let lemma_matrix_to_lbytes #n1 #n2 m res res1 i =
-  assert (Seq.sub #_ #(2 * n1 * n2) res1 0 (2 * i) == Seq.sub #_ #(2 * n1 * n2) res 0 (2 * i));
   assert (forall (i0:size_nat{i0 < 2 * i}). res1.[i0] == index (Seq.sub #_ #(2 * n1 * n2) res1 0 (2 * i)) i0);
   assert (forall (i0:size_nat{i0 < 2 * i}). res1.[i0] == res.[i0]);
   Classical.forall_intro_2 #(i0:size_nat{i0 < i}) #(fun i -> k:size_nat{k < 2})

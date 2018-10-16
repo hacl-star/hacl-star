@@ -198,8 +198,9 @@ val crypto_kem_enc_1:
     g:lbytes (3 * crypto_bytes)
   -> coins:lbytes bytes_mu
   -> pk:lbytes crypto_publickeybytes
-  -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
+  -> lbytes crypto_ciphertextbytes & lbytes crypto_bytes
 let crypto_kem_enc_1 g coins pk =
+  assert (crypto_bytes <= crypto_ciphertextbytes);
   let ct = crypto_kem_enc_ct pk g coins in
   let c12 = Seq.sub ct 0 (crypto_ciphertextbytes - crypto_bytes) in
   let kd = Seq.sub g crypto_bytes (crypto_bytes + crypto_bytes) in
@@ -209,7 +210,7 @@ let crypto_kem_enc_1 g coins pk =
 val crypto_kem_enc_:
     coins:lbytes bytes_mu
   -> pk:lbytes crypto_publickeybytes
-  -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
+  -> lbytes crypto_ciphertextbytes & lbytes crypto_bytes
 let crypto_kem_enc_ coins pk =
   let g = crypto_kem_enc_0 coins pk in
   crypto_kem_enc_1 g coins pk
@@ -217,7 +218,7 @@ let crypto_kem_enc_ coins pk =
 val crypto_kem_enc:
     state: Spec.Frodo.Random.state_t
   -> pk:lbytes crypto_publickeybytes
-  -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
+  -> lbytes crypto_ciphertextbytes & lbytes crypto_bytes
 let crypto_kem_enc state pk =
   let bytes_mu = params_nbar * params_nbar * params_extracted_bits / 8 in
   let coins, _ = Spec.Frodo.Random.randombytes_ state bytes_mu in
