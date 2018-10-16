@@ -205,11 +205,48 @@ let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l nb rem last w
 
+inline_for_extraction noextract
+val loop_blocks_f:
+    #a:Type0
+  -> #b:Type0
+  -> #blen:size_nat
+  -> blocksize:size_t{v blocksize > 0}
+  -> inpLen:size_t
+  -> inp:lbuffer a (v inpLen)
+  -> spec_f:(Seq.lseq a (v blocksize)
+              -> Seq.lseq b blen
+              -> Seq.lseq b blen)
+  -> f:(inp:lbuffer a (v blocksize)
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            B.live h inp /\ B.live h w /\ B.disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            B.modifies (B.loc_buffer w) h0 h1 /\
+            B.as_seq h1 w == spec_f (B.as_seq h0 inp) (B.as_seq h0 w)))
+  -> nb:size_t{v nb == v inpLen / v blocksize}
+  -> i:size_t{v i < v nb}
+  -> w:lbuffer b blen ->
+  Stack unit
+    (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
+    (ensures  fun h0 _ h1 ->
+      B.modifies (B.loc_buffer w) h0 h1 /\
+      as_seq h1 w ==
+      Sequence.repeat_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
+
+let loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
+  assert ((v i + 1) * v bs <= v nb * v bs);
+  let block = sub #_ #(v inpLen) inp (i *. bs) bs in
+  f block w
+
 let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
+  let nb = inpLen /. bs in
+  let rem = inpLen %. bs in
+  [@ inline_let]
+  let spec_fh h0 = Seq.repeat_blocks_f (v bs) (as_seq h0 inp) spec_f (v nb) in
   let h0 = ST.get () in
-  loopi_blocks bs inpLen inp
-    (fun (i:nat{i < Seq.length (as_seq h0 inp) / v bs}) -> spec_f)
-    (fun (i:nat{i == Seq.length (as_seq h0 inp) / v bs}) -> spec_l)
-    (fun i -> f)
-    (fun i -> l)
-    w
+  loop1 #b #blen h0 nb w spec_fh
+  (fun i ->
+    Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
+    loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
+  let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
+  l rem last w

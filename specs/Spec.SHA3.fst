@@ -26,7 +26,7 @@ let keccak_piln: lseq pilns_t 24 =
 let keccak_rndc: lseq (uint_t U64 PUB) 24 =
   assert_norm (List.Tot.length rndc_list == 24);
   of_list rndc_list
-  
+
 
 unfold
 type state = lseq uint64 25
@@ -154,7 +154,6 @@ let absorb_inner (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   let s = loadState rateInBytes block s in
   state_permute s
 
-unfold
 let absorb (s:state)
            (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
 	   (inputByteLen:nat)
@@ -168,57 +167,32 @@ val squeeze_inner:
     rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
   -> outputByteLen:size_nat
   -> i:size_nat{i < outputByteLen / rateInBytes}
-  -> so:tuple2 state (lbytes outputByteLen)
-  -> Tot (tuple2 state (lbytes outputByteLen))
+  -> so:(state & (lbytes (i * rateInBytes)))
+  -> Pure (state & (lbytes ((i + 1) * rateInBytes)))
+    (requires True)
+    (ensures fun (s', o') ->
+      let s, o = so in
+      s' == state_permute s /\
+      o' == o @| storeState rateInBytes s)
 let squeeze_inner rateInBytes outputByteLen i (s, o) =
   let block = storeState rateInBytes s in
-  let res = update_sub o (i * rateInBytes) rateInBytes block in
   let s = state_permute s in
-  s, res
-
-val squeeze_rem:
-     s:state
-  -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
-  -> outputByteLen:size_nat
-  -> output:lbytes outputByteLen
-  -> res:lbytes outputByteLen
-let squeeze_rem s rateInBytes outputByteLen output =
-  let rem = outputByteLen % rateInBytes in
-  let block = storeState rem s in
-  update_sub output (outputByteLen - rem) rem block
-
-let squeeze' (s:state)
-	    (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
-	    (outputByteLen:size_nat)
-	    (output:lbytes outputByteLen)
-	    : lbytes outputByteLen =
-  let outBlocks = outputByteLen / rateInBytes in
-  let s, output = repeati outBlocks
-    (squeeze_inner rateInBytes outputByteLen) (s, output) in
-  squeeze_rem s rateInBytes outputByteLen output
+  s, o @| block
 
 let squeeze (s:state)
 	    (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
 	    (outputByteLen:size_nat)
 	    : lbytes outputByteLen =
-  let output = create outputByteLen (u8 0) in
-  squeeze' s rateInBytes outputByteLen output
-
-unfold
-val keccak':
-    rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
-  -> capacity:size_nat{capacity + rate == 1600}
-  -> inputByteLen:nat
-  -> input:bytes{length input == inputByteLen}
-  -> delimitedSuffix:byte_t
-  -> outputByteLen:size_nat
-  -> output:lbytes outputByteLen
-  -> lbytes outputByteLen
-let keccak' rate capacity inputByteLen input delimitedSuffix outputByteLen output =
-  let rateInBytes = rate / 8 in
-  let s = create 25 (u64 0) in
-  let s = absorb s rateInBytes inputByteLen input delimitedSuffix in
-  squeeze' s rateInBytes outputByteLen output
+  let outBlocks = outputByteLen / rateInBytes in
+  let s, output =
+    repeat_gen outBlocks
+      (fun (i:size_nat{i <= outputByteLen / rateInBytes}) ->
+         state & (lbytes (i * rateInBytes)))
+      (squeeze_inner rateInBytes outputByteLen)
+      (s, create 0 (u8 0)) in
+  let remOut = outputByteLen % rateInBytes in
+  let block = storeState remOut s in
+  output @| block
 
 val keccak:
     rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
@@ -229,8 +203,10 @@ val keccak:
   -> outputByteLen:size_nat
   -> lbytes outputByteLen
 let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen =
-  let output = create outputByteLen (u8 0) in
-  keccak' rate capacity inputByteLen input delimitedSuffix outputByteLen output
+  let rateInBytes : size_nat = rate / 8 in
+  let s : state = create 25 (u64 0) in
+  let s = absorb s rateInBytes inputByteLen input delimitedSuffix in
+  squeeze s rateInBytes outputByteLen
 
 let shake128 (inputByteLen:nat) (input:bytes{length input == inputByteLen})
              (outputByteLen:size_nat) : lbytes outputByteLen =
