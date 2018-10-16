@@ -80,10 +80,6 @@ let icopy #a #len o clen i =
   let h1 = ST.get () in
   assert (Seq.slice #a #len (B.as_seq h1 o) 0 len == Seq.slice #a #len (B.as_seq h0 i) 0 len)
 
-(**
-* WARNING: don't rely on the extracted implementation for secure erasure,
-* C compilers may remove optimize it away.
-*)
 let memset #a #blen b init len =
   let h0 = ST.get() in
   let inv (h:mem) (i:nat{i <= v len}) : Type0 =

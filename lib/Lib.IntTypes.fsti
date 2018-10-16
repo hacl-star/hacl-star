@@ -209,8 +209,8 @@ val nat_to_uint: #t:inttype -> #l:secrecy_level -> (n:nat{n <= maxint t}) -> u:u
 
 inline_for_extraction
 val cast: #t:inttype -> #l:secrecy_level
-	  -> t':inttype -> l':secrecy_level {PUB? l \/ SEC? l'}
-	  -> u1:uint_t t l -> u2:uint_t t' l'{uint_v u2 == uint_v u1 % modulus t'}
+          -> t':inttype -> l':secrecy_level {PUB? l \/ SEC? l'}
+          -> u1:uint_t t l -> u2:uint_t t' l'{uint_v u2 == uint_v u1 % modulus t'}
 
 inline_for_extraction
 let to_u8 #t #l u : uint8 = cast #t #l U8 SEC u
@@ -233,9 +233,9 @@ let to_u128 #t #l u : uint128 = cast #t #l U128 SEC u
 
 inline_for_extraction
 val add_mod: #t:inttype -> #l:secrecy_level ->
-	     a:uint_t t l ->
-	     b:uint_t t l ->
-	     c:uint_t t l{uint_v c == (uint_v a + uint_v b) % modulus t}
+             a:uint_t t l ->
+             b:uint_t t l ->
+             c:uint_t t l{uint_v c == (uint_v a + uint_v b) % modulus t}
 
 inline_for_extraction
 val add: #t:inttype -> #l:secrecy_level

@@ -348,7 +348,12 @@ val icopy:
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       as_seq h1 o == ias_seq h0 i)
 
-(** Set all elements of a mutable buffer to a specific value *)
+(**
+* Set all elements of a mutable buffer to a specific value
+*
+* WARNING: don't rely on the extracted implementation for secure erasure,
+* C compilers may remove optimize it away.
+*)
 inline_for_extraction
 val memset:
     #a:Type
@@ -402,8 +407,8 @@ val update_sub_f:
   -> f:(b:lbuffer a (v n) -> Stack unit
       (requires fun h -> h0 == h /\ B.live h b)
       (ensures  fun h0 _ h1 ->
-	     B.modifies (B.loc_buffer b) h0 h1 /\
-	     as_seq h1 b == spec h0)) ->
+             B.modifies (B.loc_buffer b) h0 h1 /\
+             as_seq h1 b == spec h0)) ->
   Stack unit
     (requires fun h -> h0 == h /\ B.live h buf)
     (ensures  fun h0 _ h1 -> B.modifies (B.loc_buffer buf) h0 h1 /\
