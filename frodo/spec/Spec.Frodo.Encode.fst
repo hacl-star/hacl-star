@@ -12,6 +12,7 @@ open Spec.Frodo.Lemmas
 open Spec.Frodo.Params
 
 module Seq = Lib.Sequence
+module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -37,7 +38,7 @@ val ec:
   -> k:uint16{uint_v k < pow2 b}
   -> r:uint16{uint_v r < pow2 params_logq /\ uint_v r == uint_v k * pow2 (params_logq - b)}
 let ec b k =
-  let res = k <<. u32 (params_logq - b) in
+  let res = k <<. size (params_logq - b) in
   assert (uint_v res = uint_v k * pow2 (params_logq - b) % modulus U16);
   assert (uint_v k * pow2 (params_logq - b) < pow2 b * pow2 (params_logq - b));
   pow2_plus b (params_logq - b);
@@ -56,7 +57,7 @@ val dc:
   -> r:uint16{uint_v r < pow2 b /\
              uint_v r = (uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b) % pow2 b}
 let dc b c =
-  let res1 = (c +. (u16 1 <<. u32 (params_logq - b - 1))) >>. u32 (params_logq - b) in
+  let res1 = (c +. (u16 1 <<. size (params_logq - b - 1))) >>. size (params_logq - b) in
   //assert (uint_v res1 = (((uint_v c + pow2 (params_logq - b - 1) % modulus U16) % modulus U16) / pow2 (params_logq - b)) % modulus U16);
   lemma_mod_plus_distr_l (pow2 (params_logq - b - 1)) (uint_v c) (modulus U16);
   //assert (uint_v res1 = (((uint_v c + pow2 (params_logq - b - 1)) % modulus U16) / pow2 (params_logq - b)) % modulus U16);
@@ -64,9 +65,9 @@ let dc b c =
   //assert (uint_v res1 = (((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 (16 - params_logq + b)) % modulus U16);
   pow2_modulo_modulo_lemma_1 ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) (16 - params_logq + b) 16;
   //assert (uint_v res1 = ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) % pow2 (16 - params_logq + b));
-  let res = res1 &. ((u16 1 <<. u32 b) -. u16 1) in
+  let res = res1 &. ((u16 1 <<. size b) -. u16 1) in
   modulo_pow2_u16 res1 b;
-  assert (uint_v res1 % pow2 b = uint_v (res1 &. ((u16 1 <<. u32 b) -. u16 1)));
+  assert (uint_v res1 % pow2 b = uint_v (res1 &. ((u16 1 <<. size b) -. u16 1)));
   pow2_modulo_modulo_lemma_1 ((uint_v c + pow2 (params_logq - b - 1)) / pow2 (params_logq - b)) b (16 - params_logq + b);
   res
 
@@ -79,10 +80,10 @@ val ec1:
       pow2_lt_compat 16 b;
       res == ec b (u16 rk)}
 let ec1 b x k =
-  modulo_pow2_u64 (x >>. u32 (b * k)) b;
-  let rk = (x >>. u32 (b * k)) &. ((u64 1 <<. u32 b) -. u64 1) in
-  assert (uint_v rk == uint_v (x >>. u32 (b * k)) % pow2 b);
-  assert (uint_v (x >>. u32 (b * k)) == uint_v x / pow2 (b * k));
+  modulo_pow2_u64 (x >>. size (b * k)) b;
+  let rk = (x >>. size (b * k)) &. ((u64 1 <<. size b) -. u64 1) in
+  assert (uint_v rk == uint_v (x >>. size (b * k)) % pow2 b);
+  assert (uint_v (x >>. size (b * k)) == uint_v x / pow2 (b * k));
   assert (uint_v rk == uint_v x / pow2 (b * k) % pow2 b);
   pow2_lt_compat 16 b;
   uintv_extensionality (to_u16 rk) (u16 (uint_v x / pow2 (b * k) % pow2 b));
@@ -110,7 +111,7 @@ val frodo_key_encode1:
     {(forall (i0:size_nat{i0 < params_nbar /\ i0 <> i}) (k:size_nat{k < 8}). res0.(i0, k) == res.(i0, k)) /\
      (forall (k:size_nat{k < 8}). res.(i, k) == ec1 b x k)}
 let frodo_key_encode1 b a res0 x i =
-  repeati_inductive 8
+  Loops.repeati_inductive 8
     (fun k res ->
       (forall (i0:size_nat{i0 < params_nbar /\ i0 <> i}) (k:size_nat{k < 8}). res0.(i0, k) == res.(i0, k)) /\
       (forall (k1:size_nat{k1 < k}). res.(i, k1) == ec1 b x k1))
@@ -140,7 +141,7 @@ val frodo_key_encode:
 let frodo_key_encode b a =
   let res = create params_nbar params_nbar in
 
-  repeati_inductive params_nbar
+  Loops.repeati_inductive params_nbar
   (fun i res ->
     (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 8}).
      res.(i0, k) == frodo_key_encode_fc b a i0 k))
@@ -166,7 +167,7 @@ val decode_fc:
   -> GTot uint64
 let decode_fc b a i k =
   let f (k:size_nat{k < 8}) =
-    to_u64 (dc b a.(i, k)) <<. u32 (b * k) in
+    to_u64 (dc b a.(i, k)) <<. size (b * k) in
   fold_logor_ f k
 
 val frodo_key_decode1:
@@ -176,10 +177,10 @@ val frodo_key_decode1:
   -> res:uint64{res == decode_fc b a i 8}
 let frodo_key_decode1 b a i =
   assert_norm (64 <= pow2 32);
-  repeati_inductive 8
+  Loops.repeati_inductive 8
     (fun k templong -> templong == decode_fc b a i k)
     (fun k templong ->
-      templong |. to_u64 (dc b a.(i, k)) <<. u32 (b * k)
+      templong |. to_u64 (dc b a.(i, k)) <<. size (b * k)
     ) (u64 0)
 
 #set-options "--max_fuel 0"
@@ -193,7 +194,7 @@ val frodo_key_decode_fc:
 let frodo_key_decode_fc b a i k =
   u8 (uint_v (frodo_key_decode1 b a i) / pow2 (8 * k) % pow2 8)
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.Pervasives Spec.Frodo.Encode Lib.Sequence Lib.IntTypes Spec.Frodo.Params'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val frodo_key_decode2:
     b:size_nat{0 < b /\ b <= 8}
@@ -220,12 +221,9 @@ val frodo_key_decode:
 let frodo_key_decode b a =
   let resLen = params_nbar * params_nbar * b / 8 in
   let res = Seq.create resLen (u8 0) in
-  repeati_inductive params_nbar
+  Loops.repeati_inductive params_nbar
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (k:size_nat{k < b}).
     res.[i0 * b + k] == frodo_key_decode_fc b a i0 k)
-  (fun i res ->
-      // Don't remove. Not a useless let
-      let res = frodo_key_decode2 b a i res in
-      res
-  ) res
+  (fun i res -> frodo_key_decode2 b a i res) 
+  res

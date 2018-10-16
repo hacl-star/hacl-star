@@ -1,7 +1,7 @@
 FSTAR_HOME ?= ../../../FStar
 HACL_HOME  ?= ../..
 
-VARIANT    ?= 640-cSHAKE
+VARIANT    ?= 64-cSHAKE
 
 ifeq ($(VARIANT),64-cSHAKE)
   # Info banners break interactive mode
@@ -68,30 +68,15 @@ $(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-# We need this because F* can't take duplicate modules in the command line
-$(CACHE_DIR)/Lib.IntTypes.%.checked: | .depend
-	$(FSTAR) $< \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
-
 # We verify and cache Lib.IntTypes first; otherwise a parallel build may
 # verify Lib.IntTypes several times.
-$(CACHE_DIR)/%.checked: | .depend $(CACHE_DIR)/Lib.IntTypes.fst.checked
+$(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
-	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
-
-# We need this because F* can't take duplicate modules in the command line
-$(OUT_DIR)/Lib_IntTypes.ml: | .depend
-	$(FSTAR) --codegen OCaml \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
 $(OUT_DIR)/%.ml: | .depend
-	$(FSTAR) --codegen OCaml \
-	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(FSTAR) --codegen OCaml --cmi \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@

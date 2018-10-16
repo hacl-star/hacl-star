@@ -8,6 +8,7 @@ open Lib.ByteSequence
 
 module Seq = Lib.Sequence
 module Lemmas = Spec.Frodo.Lemmas
+module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
@@ -31,9 +32,7 @@ val index_lt_s:
 let index_lt_s n1 n2 i j =
   assert (j * n1 + i <= (n2 - 1) * n1 + n1 - 1)
 
-#set-options "--max_ifuel 1"
-
-// Strange this seems to require ifuel=1 from the command-line but not in interactive mode
+// This proof is fragile; we set the Z3 seed to a value known to succeed
 private
 val index_neq:
     #n1:size_nat
@@ -42,19 +41,23 @@ val index_neq:
   -> j:nat{j < n2}
   -> i':nat{i' < n1}
   -> j':nat{j' < n2}
-  -> Lemma (((i', j') <> (i, j) ==> (i' * n2 + j' <> i * n2 + j)) /\ i' * n2 + j' < n1 * n2)
+  -> Lemma (((i', j') <> (i, j) ==> (i' * n2 + j' <> i * n2 + j) /\ i' * n2 + j' < n1 * n2))
+#reset-options "--max_fuel 0 --max_ifuel 1 --z3seed 2"
 let index_neq #n1 #n2 i j i' j' =
   index_lt n1 n2 i' j';
-  if i = i' then ()
-  else
-    if j = j' then ()
-    else
+  if i' < i then
     begin
-    assert_spinoff (j + n2 * i < n2 * (i + 1));
-    assert_spinoff (j' + n2 * i' < n2 * (i' + 1))
+    assert (i' * n2 + j' < n2 * (i' + 1));
+    assert (i' * n2 + j' < n2 * i + j)
+    end
+  else if i = i' then ()
+  else
+    begin
+    assert (i * n2 + j < n2 * (i + 1));
+    assert (i * n2 + j < n2 * i' + j')
     end
 
-#set-options "--max_ifuel 0"
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 /// Matrices as flat sequences
 
@@ -108,11 +111,18 @@ val extensionality:
     (ensures  a == b)
 let extensionality #n1 #n2 a b =
   Classical.forall_intro_2 (index_lt n1 n2);
-  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). a.(i, j) == a.[i * n2 + j] /\ b.(i, j) == b.[i * n2 + j]);
-  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}). a.[i * n2 + j] == b.[i * n2 + j]);
-  assert (forall (k:size_nat{k < n1 * n2}). k == (k / n2) * n2 + k % n2 /\ k / n2 < n1 /\ k % n2 < n2);
-  assert (forall (k:size_nat{k < n1 * n2}). index a k == index b k);
-  Seq.eq_intro a b
+  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).
+    let n = index_lt n1 n2 i j in
+    a.(i, j) == a.[i * n2 + j] /\ b.(i, j) == b.[i * n2 + j]);   
+  assert (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).
+    a.[i * n2 + j] == b.[i * n2 + j]);
+  assert_spinoff (forall (k:size_nat{k < n1 * n2}).{:pattern index a k; index b k}
+    let i = k / n2 in
+    let j = k % n2 in
+    i < n1 /\ j < n2 /\ k = i * n2 + j /\ a.[i * n2 + j] == a.[k] /\ b.[i * n2 + j] == b.[k] /\
+    index a k == index b k);    
+  eq_intro a b;
+  eq_elim a b
 
 (*
 /// Example (of course it doesn't work with Lib.IntTypes)
@@ -136,19 +146,16 @@ val map2:
   -> c:matrix n1 n2{ forall i j. c.(i,j) == f a.(i,j) b.(i,j) }
 let map2 #n1 #n2 f a b =
   let c = create n1 n2 in
-  repeati_inductive n1
+  Loops.repeati_inductive n1
     (fun i c -> forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}). c.(i0,j) == f a.(i0,j) b.(i0,j))
     (fun i c ->
-      repeati_inductive n2
+      Loops.repeati_inductive n2
         (fun j c0 ->
           (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}). c0.(i0,j) == c.(i0,j)) /\
           (forall (j0:size_nat{j0 < j}). c0.(i,j0) == f a.(i,j0) b.(i,j0)))
         (fun j c' -> c'.(i,j) <- f a.(i,j) b.(i,j))
         c)
     c
-
-//TODO: revisit when the "friends" mechanism is in place
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0 --using_facts_from 'FStar.Pervasives Prims FStar.Math.Lemmas Lib.IntTypes Lib.Sequence Spec.Matrix'"
 
 val add:
     #n1:size_nat
@@ -180,6 +187,8 @@ let rec sum_ #n f i =
 
 let sum #n f = sum_ #n f n
 
+#set-options "--max_fuel 1"
+
 val sum_extensionality:
     n:size_nat
   -> f:(i:size_nat{i < n} -> GTot uint16)
@@ -205,7 +214,7 @@ val mul_inner:
 let mul_inner #n1 #n2 #n3 a b i k =
   let f l = a.(i, l) *. b.(l, k) in
   let res =
-    repeati_inductive n2
+    Loops.repeati_inductive n2
       (fun j res -> res == sum_ #n2 f j)
       (fun j res ->
         res +. a.(i, j) *. b.(j, k)
@@ -224,11 +233,10 @@ val mul:
   -> c:matrix n1 n3{ forall i k. c.(i, k) == sum #n2 (fun l -> a.(i, l) *. b.(l, k))}
 let mul #n1 #n2 #n3 a b =
   let c = create n1 n3 in
-
-  repeati_inductive n1
+  Loops.repeati_inductive n1
     (fun i c -> forall (i1:size_nat{i1 < i}) (k:size_nat{k < n3}). c.(i1, k) == sum #n2 (fun l -> a.(i1, l) *. b.(l, k)))
     (fun i c ->
-      repeati_inductive n3
+      Loops.repeati_inductive n3
         (fun k c0 -> (forall (k1:size_nat{k1 < k}). c0.(i, k1) == sum #n2 (fun l -> a.(i, l) *. b.(l, k1))) /\
                    (forall (i1:size_nat{i1 < n1 /\ i <> i1}) (k:size_nat{k < n3}). c0.(i1, k) == c.(i1, k)))
         (fun k c0 ->
@@ -261,7 +269,7 @@ val mul_inner_s:
 let mul_inner_s #n1 #n2 #n3 a b i k =
   let f l = a.(i, l) *. mget_s b l k in
   let res =
-    repeati_inductive n2
+    Loops.repeati_inductive n2
       (fun j res -> res == sum_ #n2 f j)
       (fun j res ->
         res +. a.(i, j) *. mget_s b j k
@@ -280,11 +288,10 @@ val mul_s:
   -> c:matrix n1 n3{ forall i k. c.(i, k) == sum #n2 (fun l -> a.(i, l) *. mget_s b l k)}
 let mul_s #n1 #n2 #n3 a b =
   let c = create n1 n3 in
-
-  repeati_inductive n1
+  Loops.repeati_inductive n1
     (fun i c -> forall (i1:size_nat{i1 < i}) (k:size_nat{k < n3}). c.(i1, k) == sum #n2 (fun l -> a.(i1, l) *. mget_s b l k))
     (fun i c ->
-      repeati_inductive n3
+      Loops.repeati_inductive n3
         (fun k c0 -> (forall (k1:size_nat{k1 < k}). c0.(i, k1) == sum #n2 (fun l -> a.(i, l) *. mget_s b l k1)) /\
                    (forall (i1:size_nat{i1 < n1 /\ i <> i1}) (k:size_nat{k < n3}). c0.(i1, k) == c.(i1, k)))
         (fun k c0 ->
@@ -330,7 +337,7 @@ val matrix_eq:
 let matrix_eq #n1 #n2 m a b =
   let open Lib.RawIntTypes in
   let res =
-    repeati_inductive (n1 * n2)
+    Loops.repeati_inductive (n1 * n2)
     (fun i res -> res == matrix_eq_fc #n1 #n2 m a b i)
     (fun i res ->
       res && eq_m m a.[i] b.[i]
@@ -424,7 +431,7 @@ val matrix_to_lbytes:
       matrix_to_lbytes_fc #n1 #n2 m res i k}
 let matrix_to_lbytes #n1 #n2 m =
   let res = Seq.create (2 * n1 * n2) (u8 0) in
-  repeati_inductive (n1 * n2)
+  Loops.repeati_inductive (n1 * n2)
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res i0 k)
   (fun i res ->
@@ -453,9 +460,7 @@ val matrix_from_lbytes:
       res.[i] == matrix_from_lbytes_fc n1 n2 b i}
 let matrix_from_lbytes n1 n2 b =
   let res = create n1 n2 in
-  repeati_inductive (n1 * n2)
-  (fun i res ->
-    forall (i0:size_nat{i0 < i}). res.[i0] == matrix_from_lbytes_fc n1 n2 b i0)
-  (fun i res ->
-    res.[i] <- uint_from_bytes_le (Seq.sub b (2 * i) 2)
-  ) res
+  Loops.repeati_inductive (n1 * n2)
+  (fun i res -> forall (i0:size_nat{i0 < i}). res.[i0] == matrix_from_lbytes_fc n1 n2 b i0)
+  (fun i res -> res.[i] <- uint_from_bytes_le (Seq.sub b (2 * i) 2)) 
+  res

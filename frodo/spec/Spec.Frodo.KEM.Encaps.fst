@@ -21,7 +21,7 @@ module Matrix = Spec.Matrix
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
 
 val update_ct:
-     c1:lbytes (params_logq * params_nbar * params_n / 8)
+    c1:lbytes (params_logq * params_nbar * params_n / 8)
   -> c2:lbytes (params_logq * params_nbar * params_nbar / 8)
   -> d:lbytes crypto_bytes
   -> res:lbytes crypto_ciphertextbytes
@@ -45,7 +45,7 @@ let update_ct c1 c2 d =
   ct
 
 val lemma_update_ct:
-     c1:lbytes (params_logq * params_nbar * params_n / 8)
+    c1:lbytes (params_logq * params_nbar * params_n / 8)
   -> c2:lbytes (params_logq * params_nbar * params_nbar / 8)
   -> d:lbytes crypto_bytes
   -> ct:lbytes crypto_ciphertextbytes
