@@ -41,7 +41,6 @@ blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
 
 
 test-blake2s.exe: blake2s-c/Hacl_Blake2s.c blake2s-c/Hacl_Test_Blake2s.c $(BASE_OBJ)
-	cp myvoid.h blake2s-c/
 	$(CC) $(CFLAGS) -I $(KREMLIN_HOME) -I $(KREMLIN_HOME)/kremlib/extracted -L $(KREMLIN_HOME)/kremlib/out -o $@ $^ -lkremlib
 
 
