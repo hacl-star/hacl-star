@@ -142,7 +142,7 @@ let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
 
 module E = FStar.Kremlin.Endianness
 
-let lbytes (l:nat) = b:seq UInt8.t {length b = l}
+let lbytes (l:nat) = b:Seq.seq UInt8.t {Seq.length b = l}
 
 (* Define word based operators *)
 let bytes_of_words: a:hash_alg -> Tot (s:Seq.seq (word a) -> Tot (lbytes FStar.Mul.(size_word a * Seq.length s))) = function

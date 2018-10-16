@@ -5,6 +5,7 @@ module EverCrypt.Hash
 open FStar.HyperStack.ST
 
 module B = LowStar.Buffer
+module IB = LowStar.ImmutableBuffer
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
@@ -111,9 +112,12 @@ inline_for_extraction noextract
 val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
 let update_multi_256 s blocks n =
   let has_shaext = AC.has_shaext () in
-  if SC.vale && has_shaext then
-    admit ()
-  else
+  if SC.vale && has_shaext then begin
+    let open Hacl.Hash.Core.SHA2.COnstants in
+    B.recall k224_256;
+    IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
+    Sha_update_bytes_stdcall.sha_update_bytes_stdcall s blocks n k224_256
+  end else
     Hacl.Hash.SHA2.update_multi_256 s blocks n
 
 // Need to unroll the definition of update_multi once to prove that it's update

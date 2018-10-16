@@ -27,11 +27,16 @@ INCLUDE_DIR	= include
 HACL_CODE	= $(HACL_HOME)/code
 HACL_SPEC	= $(HACL_HOME)/specs
 
-# TODO: some of these directories have no interfaces, meaning that we end up
-# with way too much HACL* code in our verification dependency graph; ideally,
-# every HACL* algorithm should have an interfaces directory that allows us to
-# cut the dependency graph
 
+# We include:
+# - both old and new kremlib (for the purposes of bringing old HACL* code in our
+#   dependency graph)
+# - the algorithms in code/ that we need
+# - everything needed for the fsti of Vale to be parsed
+# - the directories containing .checked files from vale, in the hope that we can
+#   reuse them
+# - the spec directory, last, to override the copy of the spec files that live
+#   in vale/obj/external
 FSTAR_INCLUDES = \
   $(KREMLIN_HOME)/kremlib/compat \
   $(KREMLIN_HOME)/kremlib \
@@ -47,6 +52,18 @@ FSTAR_INCLUDES = \
   $(HACL_CODE)/salsa-family \
   $(HACL_CODE)/poly1305 \
   $(HACL_CODE)/bignum \
+  $(HACL_HOME)/vale/code/arch/x64/interop/fsti \
+  $(HACL_HOME)/vale/code/arch/x64 \
+  $(HACL_HOME)/vale/specs/defs \
+  $(HACL_HOME)/vale/specs/hardware \
+  $(HACL_HOME)/vale/code/crypto/sha \
+  $(HACL_HOME)/vale/code/arch \
+  $(HACL_HOME)/vale/code/lib/collections \
+  $(HACL_HOME)/vale/code/lib/util \
+  $(HACL_HOME)/vale/code/crypto/aes \
+  $(HACL_HOME)/vale/specs/crypto \
+  $(HACL_HOME)/vale/obj/cache_checked \
+  $(HACL_HOME)/vale/obj/external \
   $(HACL_SPEC)
 
 %.fst-in %.fsti-in:

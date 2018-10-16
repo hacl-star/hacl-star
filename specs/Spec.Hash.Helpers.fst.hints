@@ -1,5 +1,5 @@
 [
-  "¿¥ÖI\u0013\tVÝë\u0010V\u0016ÕìÔw",
+  "Û£û\\]QÁ™¾˜U\u0007Æ\u001eêJ",
   [
     [
       "Spec.Hash.Helpers.max_input8",
@@ -17,7 +17,7 @@
         "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
       ],
       0,
-      "6a20828bd88b4c68dd98aaad46315c49"
+      "3001dcf88ab012c461f2fb1444a31b7a"
     ],
     [
       "Spec.Hash.Helpers.len_t",
@@ -35,7 +35,7 @@
         "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
       ],
       0,
-      "81b14bb7f111a299b0f549ad57af3ddd"
+      "53c035ac887d835479e6466a5ea2c4b0"
     ],
     [
       "Spec.Hash.Helpers.len_v",
@@ -64,7 +64,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "fbf2527155f5d076f970f88244380239"
+      "32a135ef40a22e57c99454a75ab34f7a"
     ],
     [
       "Spec.Hash.Helpers.size_len_8",
@@ -82,7 +82,7 @@
         "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
       ],
       0,
-      "8ef28e70469fd285a94445c612a1e5f9"
+      "167df305ffd2bdc17d8522f64a881d96"
     ],
     [
       "Spec.Hash.Helpers.size_len_ul_8",
@@ -108,7 +108,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "8918f936d6b741c5259215b7c8a1d262"
+      "a7b48be17dc65247ecef14d58eb8cceb"
     ],
     [
       "Spec.Hash.Helpers.size_len_ul_8",
@@ -120,7 +120,7 @@
         "haseqFStar.Kremlin.Endianness_Tm_refine_1ec852aff28ab568526a8c54c3e853ec"
       ],
       0,
-      "02f9af768772ab999f015b6d865a7d43"
+      "119706dc266b27458d2bd17e467772b3"
     ],
     [
       "Spec.Hash.Helpers.max_input_size_len",
@@ -160,7 +160,7 @@
         "typing_FStar.UInt.fits", "typing_Spec.Hash.Helpers.size_len_8"
       ],
       0,
-      "a54f728b56ca31af97645eceb6ea27b1"
+      "965cb87c6be715d47a828789e59accda"
     ],
     [
       "Spec.Hash.Helpers.word",
@@ -178,7 +178,7 @@
         "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
       ],
       0,
-      "b6a9f3a923a38535e228ff2ee60b040d"
+      "81722f7cd62317af13453d55e48309f1"
     ],
     [
       "Spec.Hash.Helpers.size_word",
@@ -196,7 +196,7 @@
         "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
       ],
       0,
-      "7a710b75fe7097cbff27ca9a41ca1a27"
+      "b8d2575ba2beada1b589109b4ea08904"
     ],
     [
       "Spec.Hash.Helpers.size_hash_final_w",
@@ -214,7 +214,7 @@
         "fuel_guarded_inversion_Spec.Hash.Helpers.hash_alg"
       ],
       0,
-      "55d2d2af24b118d87bb4648fad5606aa"
+      "70bb5a499c7a2ea5801fec768b4516da"
     ],
     [
       "Spec.Hash.Helpers.pad0_length",
@@ -235,7 +235,7 @@
         "typing_Spec.Hash.Helpers.size_block"
       ],
       0,
-      "b3f65168016a9a22fb30551d4fd65241"
+      "9758a53b5643cdf473fd594fd41210d3"
     ],
     [
       "Spec.Hash.Helpers.pad_length",
@@ -261,10 +261,58 @@
         "typing_Spec.Hash.Helpers.size_len_8"
       ],
       0,
-      "fa859fcf1c64613e8f8fdb53641b509f"
+      "24bf70ddc736d99082314f40c75b4226"
     ],
     [
-      "Spec.Hash.Helpers.words_to_be",
+      "Spec.Hash.Helpers.pad_invariant_block",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Tm_unit", "equation_FStar.UInt32.n",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.Hash.Helpers.pad0_length",
+        "equation_Spec.Hash.Helpers.pad_length",
+        "equation_Spec.Hash.Helpers.size_block",
+        "equation_Spec.Hash.Helpers.size_block_w",
+        "equation_Spec.Hash.Helpers.size_len_8",
+        "equation_Spec.Hash.Helpers.size_word",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Spec.Hash.Helpers_Tm_refine_31632aaf81ed895967118b76656940bf",
+        "refinement_interpretation_Spec.Hash.Helpers_Tm_refine_df86ba99d0a6c7465f63045fa94adf07",
+        "typing_Spec.Hash.Helpers.pad0_length",
+        "typing_Spec.Hash.Helpers.pad_length",
+        "typing_Spec.Hash.Helpers.size_len_8",
+        "typing_Spec.Hash.Helpers.size_word"
+      ],
+      0,
+      "48a88b975c2d94f5e95c778267e6a2e6"
+    ],
+    [
+      "Spec.Hash.Helpers.lbytes",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "aca2f0849905b3c9d70195128fedbaad"
+    ],
+    [
+      "Spec.Hash.Helpers.bytes_of_words",
       1,
       2,
       1,
@@ -294,10 +342,10 @@
         "typing_FStar.Seq.Base.length", "typing_Spec.Hash.Helpers.word"
       ],
       0,
-      "efcc80296dc0422419e5a0d3ec453a95"
+      "c2cb71bd707958ac02a8a813a709282a"
     ],
     [
-      "Spec.Hash.Helpers.words_to_be",
+      "Spec.Hash.Helpers.bytes_of_words",
       2,
       2,
       1,
@@ -310,10 +358,10 @@
         "typing_FStar.Seq.Base.length", "typing_Spec.Hash.Helpers.word"
       ],
       0,
-      "cd06f03e650735f6428457f6f1b9231a"
+      "70d67522bd3e977f22bfc3d3c313c0a4"
     ],
     [
-      "Spec.Hash.Helpers.words_from_be",
+      "Spec.Hash.Helpers.words_of_bytes",
       1,
       2,
       1,
@@ -345,10 +393,10 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "d8f3e88c95f2b7bf92a294fea58af7b3"
+      "5bfca02ac829fe711028327346036435"
     ],
     [
-      "Spec.Hash.Helpers.words_from_be",
+      "Spec.Hash.Helpers.words_of_bytes",
       2,
       2,
       1,
@@ -366,7 +414,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "f12b0c765949a45ada7747329c800c02"
+      "f572f12baa713e7b5720d11e43f3a585"
     ],
     [
       "Spec.Hash.Helpers.bytes_blocks",
@@ -382,7 +430,7 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "5947f769f67d6773d3fedc39324769f2"
+      "444fedda84c5ea842a2d5612929d4085"
     ],
     [
       "Spec.Hash.Helpers.pad_t",
@@ -398,7 +446,7 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "726fcc0be470d61ca0cd37f5e00ab97d"
+      "3735c9f58c9f5b32d24154ef361c14f0"
     ]
   ]
 ]
