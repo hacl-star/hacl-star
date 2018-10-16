@@ -44,6 +44,17 @@ let get_iv s =
   let r : size_t  = iindex const_iv s in
   secret r
 
+val set_iv:
+  hash:state ->
+  Stack unit
+    (requires (fun h -> live h hash))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
+                         /\ h1.[hash] == Seq.map secret (Spec.ivTable Spec.Blake2S)))
+
+let set_iv hash =
+  admit();
+  icopy hash (size (Spec.size_hash_w)) const_iv
+
 val get_sigma:
   s:size_t{size_v s < 160} ->
   Stack Spec.sigma_elt_t
@@ -332,6 +343,7 @@ val blake2s_init_hash:
                           /\ h1.[hash] == Spec.blake2_init_hash Spec.Blake2S (v kk) (v nn)))
 
 let blake2s_init_hash hash kk nn =
+  set_iv hash;
   let s0 = hash.(size 0) in
   let kk_shift_8 = shift_left #U32 (size_to_uint32 kk) (size 8) in
   let s0' = s0 ^. (u32 0x01010000) ^. kk_shift_8 ^. size_to_uint32 nn in
@@ -358,8 +370,6 @@ let blake2s_init #vkk hash k kk nn =
   salloc1_trivial h0 (size_block Spec.Blake2S) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
   (fun _ h1 -> h1.[hash] == Spec.blake2_init Spec.Blake2S (v kk) h0.[k] (v nn))
   (fun key_block ->
-    admit();
-    icopy hash (size Spec.size_hash_w) const_iv;
     blake2s_init_hash hash kk nn;
     if kk =. (size 0) then ()
     else begin
