@@ -364,7 +364,10 @@ val memset:
   Stack unit
     (requires fun h0 -> live h0 b)
     (ensures  fun h0 _ h1 ->
-      modifies1 b h0 h1 /\ as_seq h1 (gsub b 0ul len) == Seq.create (v len) w)
+      modifies1 b h0 h1 /\
+      as_seq #a #(v len) h1 (gsub b 0ul len) == Seq.create (v len) w /\
+      as_seq #a #(blen - v len) h1 (gsub b len (size blen -! len)) ==
+      as_seq #a #(blen - v len) h0 (gsub b len (size blen -! len)))
 
 (** Copy a mutable Buffer in a part of another mutable Buffer *)
 inline_for_extraction

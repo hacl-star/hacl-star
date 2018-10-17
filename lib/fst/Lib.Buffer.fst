@@ -81,17 +81,7 @@ let icopy #a #len o clen i =
   assert (Seq.slice #a #len (B.as_seq h1 o) 0 len == Seq.slice #a #len (B.as_seq h0 i) 0 len)
 
 let memset #a #blen b init len =
-  let h0 = ST.get() in
-  let inv (h:mem) (i:nat{i <= v len}) : Type0 =
-    modifies1 b h0 h
-    /\ FStar.Seq.equal (Seq.seq_sub (as_seq h b) 0 i) (Seq.create i init)
-  in
-  Lib.Loops.for (size 0) len inv
-     (fun i ->
-       b.(i) <- init;
-       let h = ST.get() in
-       FStar.Seq.lemma_split (Seq.seq_sub (as_seq h b) 0 (v i + 1)) (v i)
-     )
+  B.fill #a b init len
 
 let update_sub #a #len dst start n src =
   let h0 = ST.get () in
