@@ -12,11 +12,12 @@ open FStar.Seq
 open FStar.UInt32  // Interop with UInt-based SHA spec
 open Arch.Types
 
-unfold
-let (.[]) = FStar.Seq.index
+friend Spec.SHA2
+friend X64.CryptoInstructions_s
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
-  
+
+(*
 // Define these specific converters here, so that F* only reasons about 
 // the correctness of the conversion once, rather that at every call site
 let vv (u:UInt32.t) : nat32 = v u
@@ -36,6 +37,7 @@ unfold let lemma_repeat_range_0_vale (block:block256) (hash:hash256) =
   Spec.Loops.repeat_range_base 0 (shuffle_core_opaque SHA2_256 block) hash
 unfold let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 = 
   if length blocks % 64 = 0 then let b:bytes_blocks SHA2_256 = blocks in update_multi_opaque SHA2_256 hash b else hash
+*)
 
 let make_hash_def (abef cdgh:quad32) :
     (hash:hash_w SHA2_256 {
@@ -64,8 +66,6 @@ let make_hash_def (abef cdgh:quad32) :
     //assert_norm (index hash 2 == c);
     hash
 
-unfold let make_hash = make_opaque make_hash_def
-
 let make_ordered_hash_def (abcd efgh:quad32) :
   (hash:hash_w SHA2_256 {
          length hash == 8 /\
@@ -92,8 +92,6 @@ let make_ordered_hash_def (abcd efgh:quad32) :
     assert_norm (length hash == 8);
     elim_of_list l;
     hash  
-
-unfold let make_ordered_hash = make_opaque make_ordered_hash_def
 
 let shuffle_core_properties (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}) :
     Lemma(let h = shuffle_core_opaque a block hash t in
