@@ -111,6 +111,8 @@ val round_op_gen
     B.as_seq h' abcd == Spec.round_op_gen f (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x)) (U32.v a) (U32.v b) (U32.v c) (U32.v d) (U32.v k) s (U32.v i)
   ))
 
+unfold let reveal = norm_spec
+
 #push-options "--z3rlimit 10"
 let round_op_gen f abcd x a b c d k s i =
   let h = HST.get () in
@@ -128,8 +130,7 @@ let round_op_gen f abcd x a b c d k s i =
   B.upd abcd a v;
   
   let h' = HST.get () in
-  //reveal Spec.round_op_gen, also trigger sequence extensional equality rather than relying on z3
-  Spec.lemma_reveal_round_op_gen ();
+  reveal [delta_only [`%Spec.round_op_gen]] Spec.round_op_gen;
   assert (Seq.equal (B.as_seq h' abcd)
                     (Spec.round_op_gen f (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x)) (U32.v a) (U32.v b) (U32.v c) (U32.v d) (U32.v k) s (U32.v i)))
 #pop-options
@@ -182,7 +183,7 @@ let round1
   let _ = round1_op abcd x ib ic id ia 15ul 22ul 16ul in
 
   let h' = HST.get () in
-  Spec.lemma_reveal_round1 ();
+  reveal [delta_only [`%Spec.round1]] Spec.round1;
   assert (Seq.equal (B.as_seq h' abcd) (Spec.round1 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
@@ -228,7 +229,7 @@ let round2
   let _ = round2_op abcd x ib ic id ia 12ul 20ul 32ul in
 
   let h' = HST.get () in
-  Spec.lemma_reveal_round2 ();
+  reveal [delta_only [`%Spec.round2]] Spec.round2;
   assert (Seq.equal (B.as_seq h' abcd) (Spec.round2 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
@@ -274,7 +275,7 @@ let round3
   let _ = round3_op abcd x ib ic id ia 2ul 23ul 48ul in
 
   let h' = HST.get () in
-  Spec.lemma_reveal_round3 ();
+  reveal [delta_only [`%Spec.round3]] Spec.round3;
   assert (Seq.equal (B.as_seq h' abcd) (Spec.round3 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
@@ -320,7 +321,7 @@ let round4
   let _ = round4_op abcd x ib ic id ia 9ul 21ul 64ul in
 
   let h' = HST.get () in
-  Spec.lemma_reveal_round4 ();
+  reveal [delta_only [`%Spec.round4]] Spec.round4;
   assert (Seq.equal (B.as_seq h' abcd) (Spec.round4 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
@@ -348,7 +349,7 @@ let rounds
   round4 abcd x;
 
   let h' = HST.get () in
-  Spec.lemma_reveal_rounds ();
+  reveal [delta_only [`%Spec.rounds]] Spec.rounds;
   assert (Seq.equal (B.as_seq h' abcd) (Spec.rounds (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
@@ -371,7 +372,7 @@ let overwrite
   B.upd abcd id d';
 
   let h1 = HST.get () in
-  Spec.lemma_reveal_overwrite ();
+  reveal [delta_only [`%Spec.overwrite]] Spec.overwrite;
   assert (Seq.equal (B.as_seq h1 abcd) (Spec.overwrite (B.as_seq h0 abcd) a' b' c' d'))
 
 (* No longer required *)
@@ -411,7 +412,7 @@ let update'
     (d `U32.add_mod` dd);
 
   let h1 = HST.get () in
-  Spec.lemma_reveal_update ();
+  reveal [delta_only [`%Spec.update]] Spec.update;
   assert (Seq.equal (B.as_seq h1 abcd) (Spec.update (B.as_seq h0 abcd) (B.as_seq h0 x)))
 
 

@@ -132,34 +132,21 @@ let rotl (x:U32.t) (n_ : rotate_idx): Tot U32.t =
 
 let (<<<) = rotl
 
-open FStar.Tactics
-
 (*
  * General idea for the round, overwrite, and update functions:
- *   Define a private macro (calling it macro, since it is marked unfold) for the body of the function
+ *   Define a macro for the body of the function
  *   Define the function itself equal to the macro
- *   Both these are opaque to smt, so Z3 does not see their definitions
- *   Define a lemma that proves their equality, prove the lemma using normalization (controlled via tactics)
- *   And then, in the implementation file call these lemmas in the related functions
+ *   Make the function opaque to smt
+ *   And then, in the implementation file assert equivalence of these using the reveal tactic
  *
- * The pattern is pretty uniform, so we can also write some metaprogram to generate these automatically
  *)
 [@"opaque_to_smt"]
-unfold private let round_op_gen_macro (f: (U32.t -> U32.t -> U32.t -> Tot U32.t)) (abcd: abcd_t) (x: x_t) (a b c d: abcd_idx) (k: x_idx) (s: rotate_idx) (i: t_idx) : Tot abcd_t =
+let round_op_gen (f: (U32.t -> U32.t -> U32.t -> Tot U32.t)) (abcd: abcd_t) (x: x_t) (a b c d: abcd_idx) (k: x_idx) (s: rotate_idx) (i: t_idx) :Tot abcd_t =
   let va = Seq.index abcd a in
   let vb = Seq.index abcd b in
   let vc = Seq.index abcd c in
   let vd = Seq.index abcd d in
   Seq.upd abcd a (vb `U32.add_mod` ((va `U32.add_mod` f vb vc vd `U32.add_mod` Seq.index x k `U32.add_mod` Seq.index t (i - 1)) <<< s))
-
-[@"opaque_to_smt"]
-let round_op_gen = round_op_gen_macro
-
-let lemma_reveal_round_op_gen ()
-  :Lemma (forall f abcd x a b c d k s i.{:pattern (round_op_gen f abcd x a b c d k s i)} 
-                                   round_op_gen f abcd x a b c d k s i == round_op_gen_macro f abcd x a b c d k s i)
-   by (norm [delta_only [`%round_op_gen; `%round_op_gen_macro]])
-  = ()
 
 (* Round 1 *)
 
@@ -171,7 +158,7 @@ let ic : abcd_idx = 2
 let id : abcd_idx = 3
 
 [@"opaque_to_smt"]
-private unfold let round1_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
+let round1 (abcd:abcd_t) (x:x_t) :Tot abcd_t =
   let abcd = round1_op abcd x ia ib ic id  0  7ul  1 in
   let abcd = round1_op abcd x id ia ib ic  1 12ul  2 in
   let abcd = round1_op abcd x ic id ia ib  2 17ul  3 in
@@ -194,17 +181,10 @@ private unfold let round1_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
      
   abcd
 
-[@"opaque_to_smt"]
-let round1 = round1_macro
-
-let lemma_reveal_round1 () :Lemma (forall abcd x.{:pattern round1 abcd x} round1 abcd x == round1_macro abcd x)
-  by (norm [delta_only [`%round1; `%round1_macro]])
-  = ()
-
 let round2_op = round_op_gen g
 
 [@"opaque_to_smt"]
-unfold private let round2_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
+let round2 (abcd:abcd_t) (x:x_t) :Tot abcd_t =
   let abcd = round2_op abcd x ia ib ic id 1 5ul 17 in
   let abcd = round2_op abcd x id ia ib ic 6 9ul 18 in
   let abcd = round2_op abcd x ic id ia ib 11 14ul 19 in
@@ -227,17 +207,10 @@ unfold private let round2_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
 
   abcd
 
-[@"opaque_to_smt"]
-let round2 = round2_macro
-
-let lemma_reveal_round2 () :Lemma (forall abcd x.{:pattern (round2 abcd x)} round2 abcd x == round2_macro abcd x)
-  by (norm [delta_only [`%round2; `%round2_macro]])
-  = ()
-
 let round3_op = round_op_gen h
 
 [@"opaque_to_smt"]
-unfold private let round3_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
+let round3 (abcd:abcd_t) (x:x_t) :Tot abcd_t =
   let abcd = round3_op abcd x ia ib ic id 5 4ul 33 in
   let abcd = round3_op abcd x id ia ib ic 8 11ul 34 in
   let abcd = round3_op abcd x ic id ia ib 11 16ul 35 in
@@ -260,17 +233,10 @@ unfold private let round3_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
 
   abcd
 
-[@"opaque_to_smt"]
-let round3 = round3_macro
-
-let lemma_reveal_round3 () :Lemma (forall abcd x.{:pattern (round3 abcd x)} round3 abcd x == round3_macro abcd x)
-  by (norm [delta_only [`%round3; `%round3_macro]])
-  = ()
-
 let round4_op = round_op_gen i
 
 [@"opaque_to_smt"]
-unfold private let round4_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
+let round4 (abcd:abcd_t) (x:x_t) :Tot abcd_t =
   let abcd = round4_op abcd x ia ib ic id 0 6ul 49 in
   let abcd = round4_op abcd x id ia ib ic 7 10ul 50 in
   let abcd = round4_op abcd x ic id ia ib 14 15ul 51 in
@@ -293,17 +259,10 @@ unfold private let round4_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
 
   abcd
 
-[@"opaque_to_smt"]
-let round4 = round4_macro
-
-let lemma_reveal_round4 () :Lemma (forall abcd x.{:pattern (round4 abcd x)} round4 abcd x == round4_macro abcd x)
-  by (norm [delta_only [`%round4; `%round4_macro]])
-  = ()
-
 module E = FStar.Kremlin.Endianness
 
 [@"opaque_to_smt"]
-unfold private let rounds_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
+let rounds (abcd:abcd_t) (x:x_t) :Tot abcd_t =
   let abcd = round1 abcd x in
   let abcd = round2 abcd x in
   let abcd = round3 abcd x in
@@ -311,14 +270,7 @@ unfold private let rounds_macro (abcd:abcd_t) (x:x_t) :Tot abcd_t =
   abcd
 
 [@"opaque_to_smt"]
-let rounds = rounds_macro
-
-let lemma_reveal_rounds () :Lemma (forall abcd x.{:pattern (rounds abcd x)} rounds abcd x == rounds_macro abcd x)
-  by (norm [delta_only [`%rounds; `%rounds_macro]])
-  = ()
-
-[@"opaque_to_smt"]
-unfold private let overwrite_macro (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot abcd_t =
+let overwrite (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot abcd_t =
   let abcd : abcd_t = Seq.upd abcd ia a' in
   let abcd : abcd_t = Seq.upd abcd ib b' in
   let abcd : abcd_t = Seq.upd abcd ic c' in
@@ -326,15 +278,7 @@ unfold private let overwrite_macro (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot ab
   abcd
 
 [@"opaque_to_smt"]
-let overwrite = overwrite_macro
-
-let lemma_reveal_overwrite () :Lemma (forall abcd a' b' c' d'.{:pattern (overwrite abcd a' b' c' d')}
-                                                         overwrite abcd a' b' c' d' == overwrite_macro abcd a' b' c' d')
-  by (norm [delta_only [`%overwrite; `%overwrite_macro]])
-  = ()
-
-[@"opaque_to_smt"]
-unfold private let update_macro (abcd:abcd_t) x :Tot abcd_t =
+let update (abcd:abcd_t) x :Tot abcd_t =
   let x = words_of_bytes MD5 16 x in
   let aa = Seq.index abcd ia in
   let bb = Seq.index abcd ib in
@@ -347,13 +291,6 @@ unfold private let update_macro (abcd:abcd_t) x :Tot abcd_t =
     (Seq.index abcd ib `U32.add_mod` bb)
     (Seq.index abcd ic `U32.add_mod` cc)
     (Seq.index abcd id `U32.add_mod` dd)
-
-[@"opaque_to_smt"]
-let update = update_macro
-
-let lemma_reveal_update () :Lemma (forall abcd x.{:pattern (update abcd x)} update abcd x == update_macro abcd x)
-  by (norm [delta_only [`%update; `%update_macro]])
-  = ()
 
 (* Sections 3.1 and 3.2 *)
 
