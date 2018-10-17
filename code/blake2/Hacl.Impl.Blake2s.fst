@@ -473,13 +473,40 @@ let blake2s_finish #vnn output hash nn =
     copy output nn final)
 
 
+
+val blake2s_update:
+    #vll: size_nat
+  -> hash: state
+  -> d: lbuffer uint8 vll
+  -> ll: size_t{v ll == vll}
+  -> kk: size_t{v kk <= 32 /\ (if v kk = 0 then v ll < pow2 64 else v ll + 64 < pow2 64)} ->
+  Stack unit
+    (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
+                         /\ h1.[hash] == Spec.blake2_update Spec.Blake2S h0.[hash] h0.[d] (v kk)))
+                       (* /\ ( let klen = if v kk = 0 then 0 else 1 in *)
+                       (*     h1.[hash] == Seq.repeati_blocks (Spec.size_block Spec.Blake2S) h0.[d] *)
+                       (*     (fun i -> Spec.blake2_update_block Spec.Blake2S ((klen + i + 1) * (Spec.size_block Spec.Blake2S))) *)
+                       (*     (fun i -> Spec.blake2_update_last  Spec.Blake2S (klen * (Spec.size_block Spec.Blake2S) + (v ll))) *)
+                       (*     h0.[hash]))) *)
+
+let blake2s_update #vll hash d ll kk =
+  let klen = if kk = size 0 then size 0 else size 1 in
+  admit();
+  loopi_blocks (size_block Spec.Blake2S) ll d
+    (fun i -> Spec.blake2_update_block Spec.Blake2S (((v klen) + i + 1) * (Spec.size_block Spec.Blake2S)))
+    (fun i -> Spec.blake2_update_last Spec.Blake2S ((v klen) * (Spec.size_block Spec.Blake2S) + (v ll)))
+    (fun i block hash -> blake2s_update_block hash ((klen +. i +. 1) *. (size 64)) block)
+    (fun i rem last hash -> blake2s_update_last hash ll last rem) hash
+
+
 val blake2s:
     output: buffer uint8
   -> d: buffer uint8
   -> ll: size_t{length d == v ll}
   -> k: buffer uint8
   -> kk: size_t{length k == v kk /\ v kk <= 32 /\ (if v kk = 0 then v ll < pow2 64 else v ll + 64 < pow2 64)}
-  -> nn:size_t{1 <= v nn /\ v nn <= 32} ->
+  -> nn:size_t{v nn == length output /\ 1 <= v nn /\ v nn <= 32} ->
   Stack unit
     (requires (fun h -> LowStar.Buffer.live h output
                    /\ LowStar.Buffer.live h d
@@ -495,13 +522,5 @@ let blake2s output d ll k kk nn =
   (fun _ h1 -> h1.[output] == Spec.Blake2.blake2s h0.[d] (v kk) h0.[k] (v nn))
   (fun hash ->
     blake2s_init #kk hash k kk nn;
-    let klen = if kk = 0ul then 0ul else 1ul in
-    loopi_blocks (size 64) ll d
-      (fun i -> Spec.blake2_update_block Spec.Blake2S (((v klen) + i + 1) * (Spec.size_block Spec.Blake2S)))
-      (fun i -> Spec.blake2_update_last Spec.Blake2S ((v klen) * (Spec.size_block Spec.Blake2S) + (v ll)))
-      (fun i block hash -> blake2s_update_block hash ((klen +. i +. 1) *. (size 64)) block)
-      (fun i rem last hash -> blake2s_update_last hash ll last rem) hash;
-    admit();
-    blake2s_finish #nn output hash nn
-  );
-  admit()
+    blake2s_update #(v ll) hash d ll kk;
+    blake2s_finish #nn output hash nn)

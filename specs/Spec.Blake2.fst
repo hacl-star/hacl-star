@@ -380,6 +380,21 @@ let blake2_update_last a prev len last s =
   blake2_compress a s last_uint32s (to_limb a prev) true
 
 
+val blake2_update:
+    a:alg
+  -> s:hash_s a
+  -> d:bytes
+  -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)} ->
+  Tot (hash_s a)
+
+let blake2_update a s d kk =
+  let ll = length d in
+  let klen = if kk = 0 then 0 else 1 in
+  repeati_blocks (size_block a) d
+    (fun i -> blake2_update_block a ((klen + i + 1) * (size_block a)))
+    (fun i -> blake2_update_last  a (klen * (size_block a) + ll)) s
+
+
 val blake2_finish:
     a:alg
   -> s:hash_s a
@@ -400,13 +415,8 @@ val blake2:
   Tot (lbytes nn)
 
 let blake2 a d kk k nn =
-  let klen = if kk = 0 then 0 else 1 in
-  let ll = length d in
   let s = blake2_init a kk k nn in
-  let s = repeati_blocks (size_block a) d
-    (fun i -> blake2_update_block a ((klen + i + 1) * (size_block a)))
-    (fun i -> blake2_update_last  a (klen * (size_block a) + ll))
-    s in
+  let s = blake2_update a s d kk in
   blake2_finish a s nn
 
 
