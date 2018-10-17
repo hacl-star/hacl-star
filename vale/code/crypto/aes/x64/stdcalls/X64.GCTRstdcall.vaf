@@ -189,3 +189,249 @@ procedure {:quick}{:exportSpecs} gctr_bytes_stdcall128(
     callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8),
         old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
 }
+
+procedure {:quick}{:exportSpecs}{:public} inc32_stdcall(
+    inline win:bool,
+    ghost stack_b:buffer64,
+    ghost iv_b:buffer128)
+    requires
+        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(iv_b)));
+        buffer_readable(mem, stack_b);
+        buffer_readable(mem, iv_b);
+        valid_taint_buf64(stack_b, mem, memTaint, Public);
+        valid_taint_buf128(iv_b, mem, memTaint, Secret);
+        valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
+        win ==> rcx == buffer_addr(iv_b, mem);
+        !win ==> rdi == buffer_addr(iv_b, mem);
+
+        buffer_length(iv_b) == 1;
+    ensures
+        modifies_mem(loc_union(loc_buffer(stack_b), loc_buffer(iv_b)), old(mem), mem);
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        buffer128_read(iv_b, 0, mem) == inc32(buffer128_read(iv_b, 0, old(mem)), 1);
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; mem;
+{
+    inline if (win) {
+        Load128_buffer(xmm1, rcx, 0, Secret, iv_b, 0);
+        ZeroXmm(xmm2);
+        PinsrdImm(xmm2, 1, 0, rax);
+        Inc32(xmm1, xmm2);
+        Store128_buffer(rcx, xmm1, 0, Secret, iv_b, 0);    
+    } else {
+        Load128_buffer(xmm1, rdi, 0, Secret, iv_b, 0);
+        ZeroXmm(xmm2);
+        PinsrdImm(xmm2, 1, 0, rax);
+        Inc32(xmm1, xmm2);
+        Store128_buffer(rdi, xmm1, 0, Secret, iv_b, 0);
+
+    }
+}
+
+
+procedure {:quick}{:exportSpecs}{:public} gctr_bytes_extra_stdcall(
+    inline win:bool,
+    ghost stack_b:buffer64,
+    ghost plain_b:buffer128,
+    ghost num_bytes:nat64,
+    ghost iv_old:(quad32),
+    ghost iv_b:buffer128,
+    ghost key:seq(nat32),
+    ghost keys_b:buffer128,
+    ghost cipher_b:buffer128)
+    requires
+        locs_disjoint(list(loc_buffer(plain_b), loc_buffer(iv_b)));
+        locs_disjoint(list(loc_buffer(plain_b), loc_buffer(keys_b)));
+        locs_disjoint(list(loc_buffer(plain_b), loc_buffer(cipher_b)));
+        locs_disjoint(list(loc_buffer(iv_b), loc_buffer(keys_b)));
+        locs_disjoint(list(loc_buffer(iv_b), loc_buffer(cipher_b)));
+        locs_disjoint(list(loc_buffer(keys_b), loc_buffer(cipher_b)));
+        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(plain_b)));
+        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(iv_b)));
+        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(keys_b)));
+        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(cipher_b)));
+        buffer_readable(mem, stack_b);
+        buffer_readable(mem, plain_b);
+        buffer_readable(mem, iv_b);
+        buffer_readable(mem, keys_b);
+        buffer_readable(mem, cipher_b);
+        valid_taint_buf64(stack_b, mem, memTaint, Public);
+        valid_taint_buf128(plain_b, mem, memTaint, Secret);
+        valid_taint_buf128(iv_b, mem, memTaint, Secret);
+        valid_taint_buf128(keys_b, mem, memTaint, Secret);
+        valid_taint_buf128(cipher_b, mem, memTaint, Secret);
+        valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
+        win ==> rcx == buffer_addr(plain_b, mem);
+        win ==> rdx == num_bytes;
+        win ==> r8 == buffer_addr(iv_b, mem);
+        win ==> r9 == buffer_addr(keys_b, mem);
+        win ==> buffer64_read(stack_b, 5, mem) == buffer_addr(cipher_b, mem);
+        !win ==> rdi == buffer_addr(plain_b, mem);
+        !win ==> rsi == num_bytes;
+        !win ==> rdx == buffer_addr(iv_b, mem);
+        !win ==> rcx == buffer_addr(keys_b, mem);
+        !win ==> r8 == buffer_addr(cipher_b, mem);
+
+        buffer_length(stack_b) >= 6;
+        buffer_length(plain_b) == bytes_to_quad_size(num_bytes);
+        buffer_length(cipher_b) == buffer_length(plain_b);
+        buffer_length(iv_b) == 1;
+
+        buffer_addr(plain_b, mem)  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
+        buffer_addr(cipher_b, mem) + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
+
+        4096 * num_bytes < pow2_32;
+        256 * bytes_to_quad_size(num_bytes) < pow2_32;
+
+        aesni_enabled;
+        is_aes_key_LE(AES_128, key);
+        buffer_length(keys_b) == nr(AES_128) + 1;
+        buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(AES_128, key);
+
+        // Extra reqs
+        let num_blocks := num_bytes / 16;
+        num_bytes % 16 != 0;
+        0 < num_bytes < 16 * bytes_to_quad_size(num_bytes);
+        16 * (bytes_to_quad_size(num_bytes) -1) < num_bytes;
+        gctr_partial(AES_128, num_blocks, buffer128_as_seq(mem, plain_b), buffer128_as_seq(mem, cipher_b), key, iv_old);
+        buffer128_read(iv_b, 0, mem) == inc32(iv_old, num_blocks);
+
+    ensures
+        modifies_mem(loc_union(loc_buffer(stack_b), loc_buffer(cipher_b)), old(mem), mem);
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        let num_blocks := num_bytes / 16;
+        let plain := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, plain_b)), 0, num_bytes);
+        let cipher := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, cipher_b)), 0, num_bytes);
+        cipher == gctr_encrypt_LE(iv_old, make_gctr_plain_LE(plain), AES_128, key);
+
+        let cipher_blocks := slice_work_around(buffer128_as_seq(mem, cipher_b), num_blocks);
+        let old_cipher_blocks := slice_work_around(buffer128_as_seq(old(mem), cipher_b), num_blocks);
+        cipher_blocks == old_cipher_blocks;
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; mem;
+{
+    inline if (win) {
+        ghost var orig_in_ptr := rcx;
+        ghost var orig_out_ptr := buffer64_read(stack_b, 5, mem);
+        ghost var round_keys := buffer128_as_seq(mem, keys_b);
+
+        // Shuffle parameters around to avoid clobbering incoming arguments
+        Mov64(rax, r9);
+        Mov64(r11, r8);
+
+        // r9 should contain orig_in_ptr + num_bytes / 16 * 16
+        // r10 should contain orig_out_ptr + num_bytes / 16 * 16
+        Mov64(r9, rcx);
+        Load64_buffer(r10, rsp, 40, Public, stack_b, 5);
+
+        // rdx initially holds num_bytes
+        Shr64(rdx, 4);
+        lemma_poly_bits64();
+        IMul64(rdx, 16);
+        assert (rdx == num_bytes / 16 * 16);
+
+        Add64(r9, rdx);
+        Add64(r10, rdx);
+
+        // r8 must contain the address of keys_b
+        Mov64(r8, rax);
+
+
+        // Load iv into xmm7, after saving a copy
+        Mov128(xmm3, xmm7);
+        Load128_buffer(xmm7, r11, 0, Secret, iv_b, 0);
+
+        // Save r12, which gctr_bytes_extra clobbers
+        Mov64(r11, r12);
+
+        gctr_bytes_extra(AES_128, iv_old, plain_b, cipher_b, key, round_keys, keys_b, orig_in_ptr, orig_out_ptr, num_bytes);
+
+        // Restore r12
+        Mov64(r12, r11);
+
+        // Restore xmm7
+        Mov128(xmm7, xmm3);
+    } else {
+        // Save r12
+        Mov64(rax, r12);
+        ghost var orig_in_ptr := rdi;
+        ghost var orig_out_ptr := r8;
+
+        // r9 should contain rdi + num_bytes / 16 * 16
+        Shr64(rsi, 4);
+        lemma_poly_bits64();
+        IMul64(rsi, 16);
+        Add64(rdi, rsi);
+        Mov64(r9, rdi);
+        Add64(r8, rsi);
+        Mov64(r10, r8);
+        assert (rsi == num_bytes / 16 * 16);
+
+        // r8 must contain the address of keys_b
+        Mov64(r8, rcx);
+        ghost var round_keys := buffer128_as_seq(mem, keys_b);
+
+        // Store icb parameter
+        Load128_buffer(xmm7, rdx, 0, Secret, iv_b, 0);
+        gctr_bytes_extra(AES_128, iv_old, plain_b, cipher_b, key, round_keys, keys_b, orig_in_ptr, orig_out_ptr, num_bytes);
+
+        // Restore r12
+        Mov64(r12, rax);
+    }
+}

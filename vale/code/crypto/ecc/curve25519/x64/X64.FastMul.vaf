@@ -24,11 +24,13 @@ open FStar.Tactics
 //open CanonCommSemiring
 #endverbatim
 
-//ghost procedure assert_by_tactic(ghost e:int, ghost t:int) extern;
+type tactic:Type(0) extern;
+const int_canon:tactic extern;
+ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
 #reset-options "--z3rlimit 20"
 
-procedure{:quick }{:typecheck false} fast_multiply(
+procedure{:quick} fast_multiply(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
     ghost inB_b:buffer64)
@@ -105,7 +107,14 @@ procedure{:quick }{:typecheck false} fast_multiply(
     ghost var a0b0b1 := d0 + pow2_64 * d1 + pow2_128 * (r11 + carry);
 //    simple_helper(a0, b0, b1, d0, r9, a0b1_lo, r11, r10, overflow(efl));
 //    assert a0b0b1 == a0 * (b0 + pow2_64 * b1);   // PASSES in both modes using lemma above
+
+// These work:
+    assert_by_tactic(a0 * (b0 + pow2_64 * b1) == a0 * b0 + pow2_64 * (a0 * b1), int_canon);
+    assert a0b0b1 == a0 * (b0 + pow2_64 * b1);
+
+// Fails in quick mode:
     assert_by_tactic(a0b0b1 == a0 * (b0 + pow2_64 * b1), int_canon);   // PASSES in exportOnly mode, FAILS in quick mode
+
 
 /*
     lemma_load_mem64(inB_b, 2, mem);

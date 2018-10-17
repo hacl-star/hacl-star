@@ -1731,6 +1731,8 @@ let rec write_taint (t:taint) (length addr:nat) (i:nat{i <= length}) (accu:memta
     write_taint t length addr (i+1) new_accu
   )
 
+#set-options "--z3rlimit 128"
+
 let create_valid_memtaint mem ps ts =
   let memTaint = FStar.Map.const Public in
   assert (Set.equal (Map.domain memTaint) (Set.complement Set.empty));

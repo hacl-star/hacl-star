@@ -4,6 +4,7 @@ include "../../../arch/x64/X64.Vale.InsVector.vaf"
 //include "../../../arch/x64/X64.Vale.InsAes.vaf"
 include "X64.AES128.vaf"
 include "X64.AES256.vaf"
+include "../../../lib/util/x64/X64.Stack.vaf"
 include{:fstar}{:open} "Types_s"
 include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "AES_s"
@@ -43,6 +44,7 @@ open X64.AES128
 open X64.AES256
 open GCTR
 open X64.CPU_Features_s
+open X64.Stack
 #endverbatim
 
 #reset-options "--z3rlimit 20"
@@ -121,119 +123,6 @@ procedure{:quick}{:public} AESEncryptBlock(
         AES256EncryptBlock(input, key, round_keys, keys_buffer);
     }
 }
-
-procedure{:quick} AESEncryptBlockStdcall(
-    inline win:bool,
-    inline alg:algorithm,
-    ghost input:quad32,
-    ghost key:seq(nat32),
-    ghost input_buffer:buffer128,
-    ghost output_buffer:buffer128,
-    ghost keys_buffer:buffer128
-    )
-    reads
-        rcx; rdx; rsi; rdi; memTaint;
-    modifies
-        r8;
-        mem; xmm0; xmm2; efl;
-    lets
-        output_ptr := if win then rcx else rdi;
-        input_ptr := if win then rdx else rsi;
-        expanded_key_ptr := if win then r8 else rdx;
-    requires
-        aesni_enabled;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        buffer128_read(input_buffer, 0, mem) == input;
-        expanded_key_ptr == buffer_addr(keys_buffer, mem);
-        validSrcAddrs128(mem, input_ptr, input_buffer, 1, memTaint, Secret);
-        validSrcAddrs128(mem, output_ptr, output_buffer, 1, memTaint, Secret);
-        validSrcAddrs128(mem, expanded_key_ptr, keys_buffer, nr(alg) + 1, memTaint, Secret);
-        forall i:nat :: i < nr(alg) + 1 ==>
-            buffer128_read(keys_buffer, i, mem) == index(key_to_round_keys_LE(alg, key), i);
-    ensures
-        modifies_mem(loc_buffer(output_buffer), old(mem), mem);
-        validSrcAddrs128(mem, output_ptr, output_buffer, 1, memTaint, Secret);
-        buffer128_read(output_buffer, 0, mem) == aes_encrypt_LE(alg, key, input);
-{
-    inline if (alg = AES_128) {
-        assert {:quick_type} alg == AES_128;
-        AES128EncryptBlockStdcall(win, input, key, input_buffer, output_buffer, keys_buffer);
-    } else {
-        assert {:quick_type} alg == AES_256;
-        AES256EncryptBlockStdcall(win, input, key, input_buffer, output_buffer, keys_buffer);
-    }
-}
-
-procedure{:quick} AESEncryptBlockStdcall_BE(
-    inline win:bool,
-    inline alg:algorithm,
-    ghost input:quad32,
-    ghost key:seq(nat32),
-    ghost input_buffer:buffer128,
-    ghost output_buffer:buffer128,
-    ghost keys_buffer:buffer128
-    )
-    reads
-        rcx; rdx; rsi; rdi; memTaint;
-    modifies
-        r8; rax;
-        mem; xmm0; xmm2; efl;
-    lets
-        output_ptr := if win then rcx else rdi;
-        input_ptr := if win then rdx else rsi;
-        expanded_key_ptr := if win then r8 else rdx;
-    requires
-        aesni_enabled;
-        locs_disjoint(list(loc_buffer(input_buffer), loc_buffer(keys_buffer)));
-        locs_disjoint(list(loc_buffer(output_buffer), loc_buffer(keys_buffer)));
-        buffers_disjoint128(output_buffer, input_buffer) \/ output_buffer == input_buffer;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        buffer128_read(input_buffer, 0, mem) == input;
-        expanded_key_ptr == buffer_addr(keys_buffer, mem);
-        validSrcAddrs128(mem, input_ptr, input_buffer, 1, memTaint, Secret);
-        validSrcAddrs128(mem, output_ptr, output_buffer, 1, memTaint, Secret);
-        validSrcAddrs128(mem, expanded_key_ptr, keys_buffer, nr(alg) + 1, memTaint, Secret);
-        forall i:nat :: i < nr(alg) + 1 ==>
-            buffer128_read(keys_buffer, i, mem) == index(key_to_round_keys_LE(alg, key), i);
-    ensures
-        modifies_mem(loc_buffer(output_buffer), old(mem), mem);
-        validSrcAddrs128(mem, output_ptr, output_buffer, 1, memTaint, Secret);
-        buffer128_read(output_buffer, 0, mem) == aes_encrypt_BE(alg, key, input);
-{
-    // Reverse the input
-    InitPshufbMask(xmm2, rax);
-    inline if (win) {
-        Load128_buffer(xmm0, rdx, 0, Secret, input_buffer, 0);
-        Pshufb(xmm0, xmm2);
-    } else {
-        Load128_buffer(xmm0, rsi, 0, Secret, input_buffer, 0);
-        Pshufb(xmm0, xmm2);
-        Mov64(r8, rdx);
-    }
-
-    inline if (alg = AES_128) {
-        assert{:quick_type} is_aes_key_LE(AES_128, key);
-        AES128EncryptBlock(reverse_bytes_quad32(input), key, key_to_round_keys_LE(AES_128, key), keys_buffer);
-    } else {
-        assert{:quick_type} is_aes_key_LE(AES_256, key);
-        AES256EncryptBlock(reverse_bytes_quad32(input), key, key_to_round_keys_LE(AES_256, key), keys_buffer);
-    }
-
-    inline if (win)
-    {
-        Store128_buffer(rcx, xmm0, 0, Secret, output_buffer, 0);
-    }
-    else
-    {
-        Store128_buffer(rdi, xmm0, 0, Secret, output_buffer, 0);
-    }
-    reveal aes_encrypt_LE_def;
-}
-
-
-
 
 
 /*

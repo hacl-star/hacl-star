@@ -106,8 +106,8 @@ let create_initial_vale_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst 
     | Rdi -> addr_dst
     | Rsi -> addr_src
     | _ -> init_regs r end)
-  in let regs = FunctionalExtensionality.on reg regs
-  in let xmms = FunctionalExtensionality.on xmm init_xmms in
+  in let regs = X64.Vale.Regs.of_fun regs
+  in let xmms = X64.Vale.Xmms.of_fun init_xmms in
   {ok = true; regs = regs; xmms = xmms; flags = 0; mem = mem;
       memTaint = create_valid_memtaint mem buffers taint_func}
 
@@ -167,8 +167,8 @@ let lemma_ghost_memcpy is_win dst src stack_b h0 =
   implies_post is_win s0' s_v f_v dst src stack_b;
   let s1 = Some?.v (TS.taint_eval_code (va_code_memcpy is_win) f_v s0) in
   assert (state_eq_S s1 (state_to_S s_v));
-  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);
-  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);
+  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs (X64.Vale.Regs.to_fun s_v.regs));
+  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms (X64.Vale.Xmms.to_fun s_v.xmms));
   assert (M.modifies (M.loc_union (M.loc_buffer stack_b) ( M.loc_buffer dst)) h0 s_v.mem.hs);
   s1, f_v, s_v.mem.hs
 

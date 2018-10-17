@@ -35,12 +35,12 @@ val lemma_to_flags : s:state -> Lemma
   [SMTPat s.flags]
 
 val lemma_to_reg : s:state -> r:reg -> Lemma
-  (ensures s.regs r == regs' (state_to_S s).TS.state r)
-  [SMTPat (s.regs r)]
+  (ensures Regs.sel r s.regs == regs' (state_to_S s).TS.state r)
+  [SMTPat (Regs.sel r s.regs)]
 
 val lemma_to_xmm : s:state -> x:xmm -> Lemma
-  (ensures s.xmms x == xmms' (state_to_S s).TS.state x)
-  [SMTPat (s.xmms x)]
+  (ensures Xmms.sel x s.xmms == xmms' (state_to_S s).TS.state x)
+  [SMTPat (Xmms.sel x s.xmms)]
 
 val lemma_to_trace : s:state -> Lemma
   (ensures [] == trace' (state_to_S s))

@@ -1,5 +1,5 @@
 [
-  "∂‹‹1q\u0019Ûòfé\u001eNa†\t∂",
+  "¶@`KµÙè^È¿&ò\u0007ø¥5",
   [
     [
       "Spec.MD5.init",
@@ -45,7 +45,7 @@
         "typing_FStar.Seq.Properties.seq_of_list"
       ],
       0,
-      "54bab047415868baba004e4f1aa44d1e"
+      "6878ec84a7c700611b39cb9cea3c1e5f"
     ],
     [
       "Spec.MD5.rotl",
@@ -91,7 +91,7 @@
         "typing_FStar.Seq.Properties.seq_of_list", "typing_FStar.UInt32.v"
       ],
       0,
-      "edda8a88642260331564ce0b99cca06a"
+      "9eb5460d66db6324c6cbbd0271f24fba"
     ],
     [
       "Spec.MD5.round_op_gen",
@@ -118,7 +118,7 @@
         "refinement_interpretation_Spec.MD5_Tm_refine_fef6205e5051f619a8333726d8adfeb8"
       ],
       0,
-      "cf2e80a5eaf5b46ec2561848eae5121f"
+      "ad471ef340ad1e768dfd499c6c4087ef"
     ],
     [
       "Spec.MD5.overwrite",
@@ -143,30 +143,21 @@
         "refinement_interpretation_Spec.MD5_Tm_refine_fef6205e5051f619a8333726d8adfeb8"
       ],
       0,
-      "a5157c6dcf9861f803fbec34424baa6f"
+      "916d346c567a751cef5cc0c7c272a5ef"
     ],
     [
       "Spec.MD5.update",
       1,
-      2,
-      1,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0,
-      "2ad8519ad4d56e6980af6be330f0c1f1"
-    ],
-    [
-      "Spec.MD5.update",
-      2,
       2,
       1,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int",
         "constructor_distinct_Spec.Hash.Helpers.MD5",
         "equality_tok_Spec.Hash.Helpers.MD5@tok",
         "equation_FStar.Seq.Properties.lseq", "equation_FStar.UInt32.n",
-        "equation_Prims.nat", "equation_Spec.Hash.Helpers.bytes",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.Hash.Helpers.bytes",
         "equation_Spec.Hash.Helpers.hash_w",
         "equation_Spec.Hash.Helpers.size_block",
         "equation_Spec.Hash.Helpers.size_block_w",
@@ -175,18 +166,17 @@
         "equation_Spec.Hash.Helpers.word", "equation_Spec.MD5.abcd_t",
         "equation_Spec.MD5.ib", "equation_Spec.MD5.ic",
         "equation_Spec.MD5.id", "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_Prims.int",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "int_inversion", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Spec.Hash.Helpers_Tm_refine_75ea514f7047e5102708137986feec48",
-        "refinement_interpretation_Spec.MD5_Tm_refine_aca10fb50cc7162d8b55c168416f714b",
-        "refinement_interpretation_Spec.MD5_Tm_refine_fdcc04e8895c0bfea2c4dd2f21804df0",
-        "typing_Spec.Hash.Helpers.size_block",
-        "typing_tok_Spec.Hash.Helpers.MD5@tok"
+        "refinement_interpretation_Spec.MD5_Tm_refine_3a46000429494b2a0232d3aec5df797c",
+        "refinement_interpretation_Spec.MD5_Tm_refine_fdcc04e8895c0bfea2c4dd2f21804df0"
       ],
       0,
-      "ea27273566e2ad8851045cea2552bae7"
+      "eea3dcd8c440e05b8d39f503377d7d22"
     ]
   ]
 ]

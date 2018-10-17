@@ -22,7 +22,11 @@ let pad (a:hash_alg)
   let total_len_bits = total_len * 8 in
   // Saves the need for high fuel + makes hint replayable.
   max_input_size_len a;
-  let encodedlen = E.n_to_be (size_len_ul_8 a) (total_len * 8) in
+  let encodedlen =
+    match a with
+    | MD5 -> E.n_to_le (size_len_ul_8 a) (total_len * 8)
+    | _ -> E.n_to_be (size_len_ul_8 a) (total_len * 8)
+  in
   S.(firstbyte @| zeros @| encodedlen)
 
 
@@ -31,4 +35,4 @@ let pad (a:hash_alg)
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
 let finish (a:hash_alg) (hashw:hash_w a): Tot (hash:bytes{S.length hash = (size_hash a)}) =
   let hash_final_w = S.slice hashw 0 (size_hash_final_w a) in
-  words_to_be a hash_final_w
+  bytes_of_words a hash_final_w

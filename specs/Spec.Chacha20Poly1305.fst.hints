@@ -11,7 +11,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a40743ae86aa8c44b8ec34a54b39e0a2"
+      "9cae6a60f6335a81957ea8f2d4210bea"
     ],
     [
       "Spec.Chacha20Poly1305.nonce",
@@ -23,7 +23,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "544d36b2aa70064727d4c8b28382ee0d"
+      "2be3fef7932119e0d044cd592e46ee57"
     ],
     [
       "Spec.Chacha20Poly1305.pad_16",
@@ -35,7 +35,7 @@
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "912fde1332ad2e0666bb29353c62de13"
+      "0046d26cd06b303646fc98ee4af15fbe"
     ],
     [
       "Spec.Chacha20Poly1305.poly1305_aad",
@@ -70,7 +70,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "d55005b14d6b1baafab03bdca15b128d"
+      "d9d03eda2d93b554d0dc4332068297f0"
     ],
     [
       "Spec.Chacha20Poly1305.aead_chacha20_poly1305_encrypt",
@@ -82,7 +82,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "58317bf9649ea3cfa122d0b93658c13f"
+      "64c52d3d7008685449c5e6f209f87b53"
     ],
     [
       "Spec.Chacha20Poly1305.aead_chacha20_poly1305_encrypt",
@@ -94,7 +94,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "527167f950e34759246722e8bdddef49"
+      "e3cf6a3d9fffd1346f3394d50f4aa4a8"
     ],
     [
       "Spec.Chacha20Poly1305.aead_chacha20_poly1305_encrypt",
@@ -132,7 +132,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "b07deaf3ed9d51c32d7d9f321af983f0"
+      "4b450c4c671c347488eaca5f6e52fdbb"
     ],
     [
       "Spec.Chacha20Poly1305.aead_chacha20_poly1305_decrypt",
@@ -144,7 +144,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "77776e75d1460e7b2a8df282da16de1d"
+      "6ea164dc4fe1adb968f304bf7ac5a1cc"
     ],
     [
       "Spec.Chacha20Poly1305.aead_chacha20_poly1305_decrypt",
@@ -156,7 +156,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "feb60aa8e666ffed8f7141ebbd3e183b"
+      "e01863fd41d4abac7ec24fc4dd2cd2d0"
     ],
     [
       "Spec.Chacha20Poly1305.aead_chacha20_poly1305_decrypt",
@@ -168,18 +168,19 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_FStar.Seq.Base.seq__uu___haseq",
-        "assumption_FStar.UInt8.t__uu___haseq", "assumption_Prims.HasEq_int",
-        "b2t_def", "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "assumption_FStar.UInt8.t__uu___haseq", "b2t_def",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_Prims.nat", "equation_Spec.Chacha20.blocklen",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.Chacha20.blocklen",
         "equation_Spec.Chacha20.chacha20_ctx",
         "equation_Spec.Chacha20.keylen", "equation_Spec.Chacha20.noncelen",
         "equation_Spec.Chacha20Poly1305.bytes",
         "equation_Spec.Chacha20Poly1305.key",
         "equation_Spec.Chacha20Poly1305.keylen", "equation_Spec.Lib.lbytes",
         "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Prims.int",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "haseqSpec.Chacha20Poly1305_Tm_refine_3074964b5d8d3a92c5e95cf66d069e80",
         "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
@@ -193,12 +194,13 @@
         "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_counterbits",
         "projection_inverse_Spec.CTR.Mkblock_cipher_ctx_incr",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Chacha20Poly1305_Tm_refine_6f26e0f319127d2eaaacb2de398dad6c",
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "95f90529225ced099749bd9170ac01a8"
+      "a957bbda60381c0b0d368c43760135bd"
     ],
     [
       "Spec.Chacha20Poly1305.test",
@@ -229,7 +231,7 @@
         "typing_FStar.List.Tot.Base.length", "typing_Spec.Lib.lbytes"
       ],
       0,
-      "2280c4f9c05315d25c73fe677a294c0b"
+      "2f34e4e3398c5e16379f5b3118d6b189"
     ]
   ]
 ]

@@ -235,8 +235,10 @@ let create_taint_fun (args:list arg) =
   | _::q -> aux q
   in "  let taint_func (x:b8) : GTot taint =\n" ^ aux args ^ "in\n"
 
-let create_state target args stack slots stkstart saveRegs =
+let create_state trusted target args stack slots stkstart saveRegs =
   let stack_length = if saveRegs then "(if is_win then " ^ (string_of_int (224 + slots `op_Multiply` 8)) ^ " else " ^ (string_of_int (64 + slots `op_Multiply` 8)) ^ ")" else string_of_int (slots `op_Multiply` 8) in
+  let of_fun = if trusted then "FunctionalExtensionality.on reg" else "X64.Vale.Regs.of_fun" in
+  let of_fun = if trusted then "FunctionalExtensionality.on xmm" else "X64.Vale.Xmms.of_fun" in
   create_taint_fun args ^
   "  let buffers = create_buffer_list " ^ print_args_names (List.Tot.filter is_buffer args) ^ (if stack then "stack_b" else "") ^ " in\n" ^
   "  let (mem:mem) = {addrs = addrs; ptrs = buffers; hs = h0} in\n" ^
@@ -250,8 +252,8 @@ let create_state target args stack slots stkstart saveRegs =
   "    fun r -> begin match r with\n" ^
     (if stack then "    | Rsp -> addr_stack\n" else "") ^
     (print_low_calling_args Linux target args stkstart) ^  
-  "  in let regs = FunctionalExtensionality.on reg regs\n" ^
-  "  in let xmms = FunctionalExtensionality.on xmm init_xmms in\n"
+  "  in let regs = " ^ of_fun ^ " regs\n" ^
+  "  in let xmms = " ^ of_fun ^ " init_xmms in\n"
 
 let print_vale_bufferty = function
   | TUInt8 -> "buffer8"
@@ -306,7 +308,7 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "#set-options \"--max_fuel 0 --max_ifuel 0\"\n\n" ^  
   "let create_initial_trusted_state is_win " ^ (print_args_names args) ^ "stack_b " ^
   "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ stack_precond "h0" ^ "}) : GTot TS.traceState =\n" ^
-  create_state target args stack_needed slots (slots+additional) save ^
+  create_state true target args stack_needed slots (slots+additional) save ^
   "  let (s0:BS.state) = {BS.ok = true; BS.regs = regs; BS.xmms = xmms; BS.flags = 0;
        BS.mem = Interop.down_mem h0 addrs buffers} in\n" ^
   "  {TS.state = s0; TS.trace = []; TS.memTaint = create_valid_memtaint mem buffers taint_func}\n\n" ^
@@ -337,7 +339,7 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "//  Everything below this line is untrusted\n\n" ^
   "let create_initial_vale_state is_win " ^ (print_args_names args) ^ "stack_b " ^
   "(h0:HS.mem{pre_cond h0 " ^ (print_args_names args) ^ stack_precond "h0" ^ "}) : GTot va_state =\n" ^
-  create_state target args stack_needed slots (slots+additional) save ^
+  create_state false target args stack_needed slots (slots+additional) save ^
   "  {ok = true; regs = regs; xmms = xmms; flags = 0; mem = mem;
       memTaint = create_valid_memtaint mem buffers taint_func}\n\n" ^
   "let create_lemma is_win " ^ (print_args_names args) ^ "stack_b (h0:HS.mem{pre_cond h0 " ^
@@ -371,7 +373,7 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   (if stack_needed then " stack_b " else " ") ^
   (print_args_names_reveal args) ^ ")\n" ^
   (if return then
-  "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs (UInt64.uint_to_t (va_sM.regs Rax))" ^ (print_args_names args) ^ ") =\n"
+  "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs (UInt64.uint_to_t (eval_reg Rax va_sM))" ^ (print_args_names args) ^ ") =\n"
   else
   "  (ensures post_cond va_s0.mem.hs va_sM.mem.hs " ^ (print_args_names args) ^ ") =\n") ^
   print_length_t (if stack_needed then ("stack_b", TBuffer TUInt64, Pub)::args else args) ^ 
@@ -390,13 +392,13 @@ let translate_core_lowstar target (func:func_ty) (stack_needed:bool) (length_sta
   "  implies_post is_win s0' s_v f_v " ^ print_args_names args ^ "stack_b;\n" ^
   "  let s1 = Some?.v (TS.taint_eval_code (va_code_" ^ name ^ " is_win) f_v s0) in\n" ^
   "  assert (state_eq_S s1 (state_to_S s_v));\n" ^  
-  "  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);\n" ^
-  "  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);\n" ^
+  "  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs (X64.Vale.Regs.to_fun s_v.regs));\n" ^
+  "  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms (X64.Vale.Xmms.to_fun s_v.xmms));\n" ^
   "  assert (M.modifies (" ^ print_modifies ("stack_b" :: modified) ^ ") h0 s_v.mem.hs);\n" ^
   (if return then
-  "  s1, f_v, s_v.mem.hs, s_v.regs Rax\n\n"
+  "  (s1, f_v, s_v.mem.hs, eval_reg Rax s_v)\n\n"
   else
-  "  s1, f_v, s_v.mem.hs\n\n")
+  "  (s1, f_v, s_v.mem.hs)\n\n")
 
 let translate_lowstar target (func:func_ty) =
   let name, args, SaveRegsStk saveRegs, AddStk slots, Modifies modified, Return ty = func in
@@ -417,6 +419,8 @@ let translate_lowstar target (func:func_ty) =
   let win_stack_precond memname = if stack_needed then
     "/\ B.length stack_b == " ^ (if saveRegs then string_of_int (224 + length_stack) else string_of_int length_stack) ^
     " /\ live " ^ memname ^ " stack_b /\ buf_disjoint_from stack_b " ^ (namelist_of_args (buffer_args)) else "" in    
+  let stack_precond memname = " /\ B.length stack_b == " ^ string_length_stack ^
+    " /\ live " ^ memname ^ " stack_b /\ buf_disjoint_from stack_b " ^ (namelist_of_args (buffer_args)) in    
   let separator0 = if (List.Tot.Base.length buffer_args = 0) then "" else " /\\ " in
   let separator1 = if (List.Tot.Base.length buffer_args <= 1) then "" else " /\\ " in  
   "module Vale_" ^ name ^
@@ -475,9 +479,18 @@ let translate_lowstar target (func:func_ty) =
   "#set-options \"--initial_fuel " ^ fuel_value ^ " --max_fuel " ^ fuel_value ^ " --initial_ifuel 0 --max_ifuel 0\"\n" ^
   translate_core_lowstar target func stack_needed length_stack slots additional ^
   "#set-options \"--max_fuel 0 --max_ifuel 0\"\n\n" ^
-  "let " ^ name ^ " " ^ (print_args_names args) ^ " =\n" ^
-  (if stack_needed then "  push_frame();\n" ^
-    "  let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t " ^ string_length_stack ^ ") in\n"  else "") ^
+  "irreducible\n" ^
+  "let " ^ name ^ "_aux " ^ (print_args_list args) ^ "(stack_b:b8) : Stack " ^ (if return then "UInt64.t" else "unit") ^ "\n" ^
+  "  (fun h -> pre_cond h " ^ (print_args_names args) ^ stack_precond "h" ^ ")\n" ^
+  (if return then
+  "  (fun h0 ret_val h1 ->\n" ^
+  "    post_cond h0 h1 ret_val" ^ (print_args_names args) ^ " /\\\n" ^
+  "    M.modifies (" ^ print_modifies ("stack_b" :: modified) ^ ") h0 h1) =\n"
+  else
+  "  (fun h0 _ h1 ->\n" ^
+  "    post_cond h0 h1 " ^ (print_args_names args) ^ " /\\\n" ^
+  "    M.modifies (" ^ print_modifies ("stack_b" :: modified) ^ ") h0 h1) =\n"
+  ) ^
   (if return then "  let x = (" else "  ") ^
   "if win then\n" ^
   "  st_put\n" ^
@@ -499,7 +512,12 @@ let translate_lowstar target (func:func_ty) =
   else (
   "    (fun h -> let _, _, h1 =
       lemma_ghost_" ^ name ^ " false " ^ (print_args_names args) ^ "stack_b h\n" ^
-  "    in (), h1);\n")) ^
+  "    in (), h1)\n")) ^
+  "\n" ^
+  "let " ^ name ^ " " ^ (print_args_names args) ^ " =\n" ^
+  (if stack_needed then "  push_frame();\n" ^
+    "  let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t " ^ string_length_stack ^ ") in\n"  else "") ^
+  "  " ^ name ^ "_aux " ^ (print_args_names args) ^ "stack_b;\n" ^
   (if return then "  in pop_frame();\n  UInt64.uint_to_t x\n" else "  pop_frame()\n")
   
 let print_vale_arg = function
@@ -554,7 +572,7 @@ let print_vale_calling_stack is_win sstart (args:list arg) =
   let rec aux (i:nat) (args:list arg) : Tot string (decreases %[args])  =
   match args with
   | [] -> ""
-  | a::q -> "        " ^ is_win ^ " " ^ "buffer_read(stack_b, " ^ (string_of_int (sstart + i)) ^ ", mem) == " ^  print_vale_arg_value a ^ ";\n" ^ aux (i+1) q
+  | a::q -> "        " ^ is_win ^ " " ^ "buffer64_read(stack_b, " ^ (string_of_int (sstart + i)) ^ ", mem) == " ^  print_vale_arg_value a ^ ";\n" ^ aux (i+1) q
   in aux 0 args
 
 let print_calling_args_aux is_win os target sstart (args:list arg) =
@@ -610,7 +628,7 @@ let translate_vale target (func:func_ty) =
   "module Vale_" ^ name ^
   "\n#verbatim{:interface}{:implementation}\n" ^ 
   "\nopen X64.Machine_s\nopen X64.Memory\nopen X64.Vale.State\nopen X64.Vale.Decls\n#set-options \"--z3rlimit 20\"\n#endverbatim\n\n" ^
-  "procedure {:quick}{:exportSpecs} " ^ name ^ "(inline win:bool," ^ print_vale_args args ^")\n" ^
+  "procedure {:quick}{:exportSpecs}{:public} " ^ name ^ "(inline win:bool," ^ print_vale_args args ^")\n" ^
   "    requires\n" ^
   // By default, buffer arguments are disjoint or equal
   print_vale_disjoint_or_eq (List.Tot.Base.tl args) ^

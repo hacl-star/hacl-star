@@ -190,8 +190,8 @@ let lemma_ghost_sha_update_bytes_stdcall is_win ctx_b in_b num_val k_b stack_b h
   implies_post is_win s0' s_v f_v ctx_b in_b num_val k_b stack_b;
   let s1 = Some?.v (TS.taint_eval_code (va_code_sha_update_bytes_stdcall is_win) f_v s0) in
   assert (state_eq_S s1 (state_to_S s_v));
-  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);
-  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);
+  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs (X64.Vale.Regs.to_fun s_v.regs));
+  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms (X64.Vale.Xmms.to_fun s_v.xmms));
   s1, f_v, s_v.mem.hs
 
 #set-options "--max_fuel 0 --max_ifuel 0"
