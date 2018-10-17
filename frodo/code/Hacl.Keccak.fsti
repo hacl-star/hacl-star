@@ -5,7 +5,7 @@ open FStar.HyperStack.All
 open LowStar.Buffer
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 
 module B = LowStar.Buffer
 module S = Spec.SHA3

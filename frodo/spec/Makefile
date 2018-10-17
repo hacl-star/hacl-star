@@ -1,32 +1,29 @@
 FSTAR_HOME ?= ../../../FStar
 HACL_HOME  ?= ../..
 
-VARIANT    ?= 640-cSHAKE
+VARIANT    ?= 64-cSHAKE
 
 ifeq ($(VARIANT),64-cSHAKE)
-  # Info banners break interactive mode
-  #$(info ========= Building FrodoKEM-64-cSHAKE ==========)
+  TARGET = test
 else ifeq ($(VARIANT),640-cSHAKE)
-  #$(info ========= Building FrodoKEM-640-cSHAKE =========)
+  TARGET = verify
 else ifeq ($(VARIANT),976-cSHAKE)
-  #$(info ========= Building FrodoKEM-976-cSHAKE =========)
+  TARGET = verify
 else
   $(error ERROR: VARIANT must be one of 64-cSHAKE, 640-cSHAKE or 976-cSHAKE)
 endif
 
-CACHE_DIR  = .cache.$(VARIANT)
-HINT_DIR   = .hints.$(VARIANT)
-OUT_DIR	   = frodo-ml.$(VARIANT)
+CACHE_DIR = .cache.$(VARIANT)
+HINT_DIR  = .hints.$(VARIANT)
+OUT_DIR   = frodo-ml.$(VARIANT)
 
 include $(HACL_HOME)/Makefile.include
 
+.PHONY: all verify test clean distclean
+
 all:
 	rm -f .depend && $(MAKE) .depend
-ifeq ($(VARIANT),64-cSHAKE)
-	$(MAKE) test
-else
-	$(MAKE) verify
-endif
+	$(MAKE) $(TARGET)
 
 verify: $(addprefix $(CACHE_DIR)/,Spec.Frodo.KEM.KeyGen.fst.checked Spec.Frodo.KEM.Encaps.fst.checked Spec.Frodo.KEM.Decaps.fst.checked)
 	@echo SUCCESS!
@@ -42,19 +39,13 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/fst
 
-FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUT_DIR) \
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
-FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) \
-  --odir $(OUT_DIR) $(FSTAR_INCLUDES)
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
-
-%.fst-in:
-	@echo $(OTHERFLAGS) \
-	  --cache_checked_modules --cache_dir $(CACHE_DIR) \
-	  --odir $(OUT_DIR) $(FSTAR_INCLUDES) \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
 
 ROOTS = Spec.Frodo.Test.fst
 
@@ -63,40 +54,22 @@ ROOTS = Spec.Frodo.Test.fst
 
 include .depend
 
-# Admit SMT queries for modules in FStar namespace
+# Admit SMT queries for modules in FStar namespace and prims
 $(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-# We need this because F* can't take duplicate modules in the command line
-$(CACHE_DIR)/Lib.IntTypes.%.checked: | .depend
-	$(FSTAR) $< \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
-
-# We verify and cache Lib.IntTypes first; otherwise a parallel build may
-# verify Lib.IntTypes several times.
-$(CACHE_DIR)/%.checked: | .depend $(CACHE_DIR)/Lib.IntTypes.fst.checked
-	$(FSTAR) $< \
-	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
-
-# We need this because F* can't take duplicate modules in the command line
-$(OUT_DIR)/Lib_IntTypes.ml: | .depend
-	$(FSTAR) --codegen OCaml \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
+$(CACHE_DIR)/%.checked: | .depend
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
 $(OUT_DIR)/%.ml: | .depend
 	$(FSTAR) --codegen OCaml \
-	  --expose_interfaces $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-# 3. Compilation
+# 2. Compilation
 
 $(OUT_DIR):
 	mkdir -p $@
@@ -114,15 +87,22 @@ $(OUT_DIR)/test.exe: $(subst .ml,.cmx,$(ALL_ML_FILES)) | $(OUT_DIR)
 test: $(OUT_DIR)/test.exe
 	$(OUT_DIR)/test.exe
 
+# 3. Targets for interactive mode
+
+%.fst-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
 # 4. Clean targets
 
 SHELL=/bin/bash
 
-.PHONY: clean
 clean:
 	rm -rf $(OUT_DIR)
 
-.PHONY: distclean
 distclean: clean
 	rm -rf $(CACHE_DIR)

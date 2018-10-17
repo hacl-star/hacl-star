@@ -84,7 +84,10 @@ type secrecy_level =
   | SEC
   | PUB
 
+inline_for_extraction
 val sec_int_t: t:inttype -> Type0
+
+inline_for_extraction
 val sec_int_v: #t:inttype -> u:sec_int_t t -> n:nat{n <= maxint t}
 
 (* GENERIC (unsigned) Machine Integers *)
@@ -206,8 +209,8 @@ val nat_to_uint: #t:inttype -> #l:secrecy_level -> (n:nat{n <= maxint t}) -> u:u
 
 inline_for_extraction
 val cast: #t:inttype -> #l:secrecy_level
-	  -> t':inttype -> l':secrecy_level {PUB? l \/ SEC? l'}
-	  -> u1:uint_t t l -> u2:uint_t t' l'{uint_v u2 == uint_v u1 % modulus t'}
+          -> t':inttype -> l':secrecy_level {PUB? l \/ SEC? l'}
+          -> u1:uint_t t l -> u2:uint_t t' l'{uint_v u2 == uint_v u1 % modulus t'}
 
 inline_for_extraction
 let to_u8 #t #l u : uint8 = cast #t #l U8 SEC u
@@ -230,9 +233,9 @@ let to_u128 #t #l u : uint128 = cast #t #l U128 SEC u
 
 inline_for_extraction
 val add_mod: #t:inttype -> #l:secrecy_level ->
-	     a:uint_t t l ->
-	     b:uint_t t l ->
-	     c:uint_t t l{uint_v c == (uint_v a + uint_v b) % modulus t}
+             a:uint_t t l ->
+             b:uint_t t l ->
+             c:uint_t t l{uint_v c == (uint_v a + uint_v b) % modulus t}
 
 inline_for_extraction
 val add: #t:inttype -> #l:secrecy_level
@@ -323,17 +326,19 @@ type shiftval (t:inttype) = u:size_t{uint_v u < bits t}
 inline_for_extraction
 type rotval  (t:inttype) = u:size_t{uint_v u > 0 /\ uint_v u < bits t}
 
+(* SZ: the refinements on the result of the next two lemmas were commented out in _dev;
+I restored them *)
 inline_for_extraction
 val shift_right: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
-  -> c:uint_t t l//{uint_v #t c ==  uint_v #t a / pow2 (uint_v #U32 b)}
+  -> c:uint_t t l{uint_v #t c ==  uint_v #t a / pow2 (uint_v #U32 b)}
 
 inline_for_extraction
 val shift_left: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
-  -> c:uint_t t l//{uint_v #t c == (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % modulus t}
+  -> c:uint_t t l{uint_v #t c == (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % modulus t}
 
 inline_for_extraction
 val rotate_right: #t:inttype -> #l:secrecy_level
@@ -401,7 +406,7 @@ val mod_mask_lemma: #t:inttype -> #l:secrecy_level  -> a:uint_t t l -> m:shiftva
   Lemma
     (requires True)
     (ensures  uint_v (a `logand` (mod_mask #t m)) == uint_v a % pow2 (uint_v m))
-    [SMTPat (uint_v (a `logand` (mod_mask #t m)))]
+    [SMTPat (a `logand` (mod_mask #t m))]
 
 ///
 /// Operators available for all machine integers

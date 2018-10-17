@@ -12,6 +12,7 @@ module Lib.LoopCombinators
 *
 * A simpler variant with a non-dependent accumuator used to be called [repeat_range]
 *)
+inline_for_extraction
 val repeat_left:
     lo:nat
   -> hi:nat{lo <= hi}

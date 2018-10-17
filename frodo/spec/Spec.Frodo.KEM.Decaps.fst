@@ -64,7 +64,7 @@ val get_bpp_cp_matrices:
     g:lbytes (3 * crypto_bytes)
   -> mu_decode:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
   -> sk:lbytes crypto_secretkeybytes
-  -> tuple2 (matrix params_nbar params_n) (matrix params_nbar params_nbar)
+  -> matrix params_nbar params_n & matrix params_nbar params_nbar
 let get_bpp_cp_matrices g mu_decode sk =
   assert_norm (params_nbar * params_nbar <= max_size_t);
   let pk = Seq.sub sk crypto_bytes crypto_publickeybytes in
@@ -140,7 +140,7 @@ let crypto_kem_dec_ss mu_decode bp_matrix c_matrix sk ct =
 
 val get_bp_c_matrices:
     ct:lbytes crypto_ciphertextbytes
-  -> tuple2 (matrix params_nbar params_n) (matrix params_nbar params_nbar)
+  -> matrix params_nbar params_n & matrix params_nbar params_nbar
 let get_bp_c_matrices ct =
   let c1Len = params_logq * params_nbar * params_n / 8 in
   let c2Len = params_logq * params_nbar * params_nbar / 8 in

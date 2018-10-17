@@ -1,7 +1,7 @@
 module Hacl.Impl.Frodo.Params
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 
 include Frodo.Params
 

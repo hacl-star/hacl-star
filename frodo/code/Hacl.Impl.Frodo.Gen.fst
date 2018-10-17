@@ -9,8 +9,8 @@ open LowStar.Buffer
 open LowStar.BufferOps
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
-open Lib.Endianness
+open Lib.Buffer
+open Lib.ByteBuffer
 
 open Hacl.Impl.Matrix
 

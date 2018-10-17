@@ -10,6 +10,7 @@ open Spec.SHA3
 
 module Matrix = Spec.Matrix
 module Seq = Lib.Sequence
+module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -33,13 +34,13 @@ val frodo_gen_matrix_cshake:
      res.(i, j) == frodo_gen_matrix_cshake_fc n seedLen seed i j}
 let frodo_gen_matrix_cshake n seedLen seed =
   let res = Matrix.create n n in
-  let res = repeati_inductive n
+  let res = Loops.repeati_inductive n
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (j:size_nat{j < n}).
     res.(i0, j) == frodo_gen_matrix_cshake_fc n seedLen seed i0 j)
   (fun i res ->
     let res_i = cshake128_frodo seedLen seed (u16 (256 + i)) (2 * n) in
-    repeati_inductive n
+    Loops.repeati_inductive n
     (fun j res0 ->
       (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n}). res0.(i0, j) == res.(i0, j)) /\
       (forall (j0:size_nat{j0 < j}). res0.(i, j0) == frodo_gen_matrix_cshake_fc n seedLen seed i j0))
@@ -73,7 +74,7 @@ val frodo_gen_matrix_cshake_4x:
 let frodo_gen_matrix_cshake_4x n seedLen seed =
   let res = Matrix.create n n in
   let n4 = n / 4 in
-  let res = repeati_inductive n4
+  let res = Loops.repeati_inductive n4
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (j:size_nat{j < n}) (k:size_nat{k < 4}).
     res.(4 * i0 + k, j) == frodo_gen_matrix_cshake_fc n seedLen seed (4 * i0 + k) j)
@@ -86,7 +87,7 @@ let frodo_gen_matrix_cshake_4x n seedLen seed =
     let r1 = cshake128_frodo seedLen seed (u16 ctr1) (2 * n) in
     let r2 = cshake128_frodo seedLen seed (u16 ctr2) (2 * n) in
     let r3 = cshake128_frodo seedLen seed (u16 ctr3) (2 * n) in
-    let res1 = repeati_inductive n
+    let res1 = Loops.repeati_inductive n
     (fun j res0 ->
       (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n}) (k:size_nat{k < 4}). res0.(4 * i0 + k, j) == res.(4 * i0 + k, j)) /\
       (forall (j0:size_nat{j0 < j}) (k:size_nat{k < 4}). res0.(4 * i + k, j0) == frodo_gen_matrix_cshake_fc n seedLen seed (4 * i + k) j0))
