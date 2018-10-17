@@ -64,9 +64,8 @@ let test_frodo seed ss_expected pk_expected ct_expected sk_expected =
 val u8: n: nat{n < 0x100} -> uint8
 let u8 n = u8 n
 
-// The rest verifies for params_n = 64, but takes too long
+// The rest verifies for params_n = 64
 // It expectedly fails for FrodoKEM-{640,976}.
-//#set-options "--lax"
 
 let test1_ss_expected: b: lbytes crypto_bytes {recallable b} =
   [@ inline_let ]let l =
