@@ -1,4 +1,4 @@
-module Spec.SHA2.Exp
+module Spec.SHA2
 
 open FStar.Mul
 open Lib.IntTypes
@@ -58,7 +58,6 @@ let limb_to_word (a:alg) (x:limb_t a) : word_t a =
 inline_for_extraction let size_opTable: size_nat = 12
 
 [@"opaque_to_smt"]
-inline_for_extraction
 let opTable_list_224_256: l:List.Tot.llist (rotval U32) 12 =
   [@inline_let]
   let l = [
@@ -70,7 +69,6 @@ let opTable_list_224_256: l:List.Tot.llist (rotval U32) 12 =
   l
 
 [@"opaque_to_smt"]
-inline_for_extraction
 let opTable_list_384_512: l:List.Tot.llist (rotval U64) 12 =
   [@inline_let]
   let l = [
@@ -83,21 +81,18 @@ let opTable_list_384_512: l:List.Tot.llist (rotval U64) 12 =
 
 unfold let opTable_t (a:alg) = lseq (rotval (wt a)) size_opTable
 
-inline_for_extraction
 let opTable (a:alg) : opTable_t a =
   match a with
   | SHA2_224 | SHA2_256 -> (of_list opTable_list_224_256)
   | SHA2_384 | SHA2_512 -> (of_list opTable_list_384_512)
 
 
-inline_for_extraction
 let size_kTable (p:alg): size_nat =
   match p with
   | SHA2_224 | SHA2_256 -> 64
   | SHA2_384 | SHA2_512 -> 80
 
 [@"opaque_to_smt"]
-inline_for_extraction
 let kTable_list_224_256: l:List.Tot.llist uint32 64 =
   [@inline_let]
   let l = [
@@ -121,7 +116,6 @@ let kTable_list_224_256: l:List.Tot.llist uint32 64 =
   l
 
 [@"opaque_to_smt"]
-inline_for_extraction
 let kTable_list_384_512 : l:List.Tot.llist uint64 80 =
   [@inline_let]
   let l = [
@@ -150,7 +144,6 @@ let kTable_list_384_512 : l:List.Tot.llist uint64 80 =
 
 unfold let kTable_t (a:alg) = lseq (uint_t (wt a) SEC) (size_kTable a)
 
-inline_for_extraction
 let kTable (a:alg) : kTable_t a =
   match a with
   | SHA2_224 | SHA2_256 -> (of_list kTable_list_224_256)
@@ -160,7 +153,6 @@ let kTable (a:alg) : kTable_t a =
 inline_for_extraction let size_h0Table: size_nat = 8
 
 [@"opaque_to_smt"]
-inline_for_extraction
 let h0Table_list_224: l:List.Tot.llist uint32 size_h0Table =
   [@inline_let]
   let l = [
@@ -170,7 +162,6 @@ let h0Table_list_224: l:List.Tot.llist uint32 size_h0Table =
   l
 
 [@"opaque_to_smt"]
-inline_for_extraction
 let h0Table_list_256: l:List.Tot.llist uint32 size_h0Table =
   [@inline_let]
   let l = [
@@ -180,7 +171,6 @@ let h0Table_list_256: l:List.Tot.llist uint32 size_h0Table =
   l
 
 [@"opaque_to_smt"]
-inline_for_extraction
 let h0Table_list_384: l:List.Tot.llist uint64 size_h0Table =
   [@inline_let]
   let l = [
@@ -190,7 +180,6 @@ let h0Table_list_384: l:List.Tot.llist uint64 size_h0Table =
   l
 
 [@"opaque_to_smt"]
-inline_for_extraction
 let h0Table_list_512: l:List.Tot.llist uint64 size_h0Table =
   [@inline_let]
   let l = [
@@ -201,7 +190,6 @@ let h0Table_list_512: l:List.Tot.llist uint64 size_h0Table =
 
 unfold let h0Table_t (a:alg) = lseq (uint_t (wt a) SEC) size_h0Table
 
-inline_for_extraction
 let h0Table (a:alg) : h0Table_t a =
   match a with
   | SHA2_224 -> (of_list h0Table_list_224)
@@ -375,3 +363,9 @@ let hash (p:alg) (input:bytes{length input <= max_input p}) : lbytes (size_hash 
     (fun i -> update_block p)
     (fun i -> update_last p (i * (size_block p))) s in
   finish p s
+
+
+inline_for_extraction let hash224 input = hash SHA2_224 input
+inline_for_extraction let hash256 input = hash SHA2_256 input
+inline_for_extraction let hash384 input = hash SHA2_384 input
+inline_for_extraction let hash512 input = hash SHA2_512 input
