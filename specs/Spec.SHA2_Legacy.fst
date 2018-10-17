@@ -1,4 +1,4 @@
-module Spec.SHA2
+module Spec.SHA2_Legacy
 
 open FStar.Mul
 open Lib.IntTypes

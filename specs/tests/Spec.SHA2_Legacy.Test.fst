@@ -1,4 +1,4 @@
-module Spec.SHA2.Test
+module Spec.SHA2_Legacy.Test
 
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
 
@@ -244,14 +244,14 @@ let test () =
   let test1_expected256 : lbytes 32 = of_list test1_expected256 in
   let test1_expected384 : lbytes 48 = of_list test1_expected384 in
   let test1_expected512 : lbytes 64 = of_list test1_expected512 in
-  let test1_result224 : lbytes 28 = Spec.SHA2.hash Spec.SHA2.parameters224 test1_plaintext_len test1_plaintext in
-  let test1_result256 : lbytes 32 = Spec.SHA2.hash Spec.SHA2.parameters256 test1_plaintext_len test1_plaintext in
-  let test1_result384 : lbytes 48 = Spec.SHA2.hash Spec.SHA2.parameters384 test1_plaintext_len test1_plaintext in
-  let test1_result512 : lbytes 64 = Spec.SHA2.hash Spec.SHA2.parameters512 test1_plaintext_len test1_plaintext in
-  let test1_result224' : lbytes 28 = Spec.SHA2.hash' Spec.SHA2.parameters224 test1_plaintext_len test1_plaintext in
-  let test1_result256' : lbytes 32 = Spec.SHA2.hash' Spec.SHA2.parameters256 test1_plaintext_len test1_plaintext in
-  let test1_result384' : lbytes 48 = Spec.SHA2.hash' Spec.SHA2.parameters384 test1_plaintext_len test1_plaintext in
-  let test1_result512' : lbytes 64 = Spec.SHA2.hash' Spec.SHA2.parameters512 test1_plaintext_len test1_plaintext in
+  let test1_result224 : lbytes 28 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters224 test1_plaintext_len test1_plaintext in
+  let test1_result256 : lbytes 32 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters256 test1_plaintext_len test1_plaintext in
+  let test1_result384 : lbytes 48 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters384 test1_plaintext_len test1_plaintext in
+  let test1_result512 : lbytes 64 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters512 test1_plaintext_len test1_plaintext in
+  let test1_result224' : lbytes 28 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters224 test1_plaintext_len test1_plaintext in
+  let test1_result256' : lbytes 32 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters256 test1_plaintext_len test1_plaintext in
+  let test1_result384' : lbytes 48 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters384 test1_plaintext_len test1_plaintext in
+  let test1_result512' : lbytes 64 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters512 test1_plaintext_len test1_plaintext in
   let result1_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected224 test1_result224 in
   let result1_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected256 test1_result256 in
   let result1_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected384 test1_result384 in
@@ -310,14 +310,14 @@ let test () =
   let test2_expected256 : lbytes 32 = of_list test2_expected256 in
   let test2_expected384 : lbytes 48 = of_list test2_expected384 in
   let test2_expected512 : lbytes 64 = of_list test2_expected512 in
-  let test2_result224 : lbytes 28 = Spec.SHA2.hash Spec.SHA2.parameters224 test2_plaintext_len test2_plaintext in
-  let test2_result256 : lbytes 32 = Spec.SHA2.hash Spec.SHA2.parameters256 test2_plaintext_len test2_plaintext in
-  let test2_result384 : lbytes 48 = Spec.SHA2.hash Spec.SHA2.parameters384 test2_plaintext_len test2_plaintext in
-  let test2_result512 : lbytes 64 = Spec.SHA2.hash Spec.SHA2.parameters512 test2_plaintext_len test2_plaintext in
-  let test2_result224' : lbytes 28 = Spec.SHA2.hash' Spec.SHA2.parameters224 test2_plaintext_len test2_plaintext in
-  let test2_result256' : lbytes 32 = Spec.SHA2.hash' Spec.SHA2.parameters256 test2_plaintext_len test2_plaintext in
-  let test2_result384' : lbytes 48 = Spec.SHA2.hash' Spec.SHA2.parameters384 test2_plaintext_len test2_plaintext in
-  let test2_result512' : lbytes 64 = Spec.SHA2.hash' Spec.SHA2.parameters512 test2_plaintext_len test2_plaintext in
+  let test2_result224 : lbytes 28 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters224 test2_plaintext_len test2_plaintext in
+  let test2_result256 : lbytes 32 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters256 test2_plaintext_len test2_plaintext in
+  let test2_result384 : lbytes 48 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters384 test2_plaintext_len test2_plaintext in
+  let test2_result512 : lbytes 64 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters512 test2_plaintext_len test2_plaintext in
+  let test2_result224' : lbytes 28 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters224 test2_plaintext_len test2_plaintext in
+  let test2_result256' : lbytes 32 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters256 test2_plaintext_len test2_plaintext in
+  let test2_result384' : lbytes 48 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters384 test2_plaintext_len test2_plaintext in
+  let test2_result512' : lbytes 64 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters512 test2_plaintext_len test2_plaintext in
   let result2_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected224 test2_result224 in
   let result2_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected256 test2_result256 in
   let result2_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected384 test2_result384 in
@@ -376,14 +376,14 @@ let test () =
   let test3_expected256 : lbytes 32 = of_list test3_expected256 in
   let test3_expected384 : lbytes 48 = of_list test3_expected384 in
   let test3_expected512 : lbytes 64 = of_list test3_expected512 in
-  let test3_result224 : lbytes 28 = Spec.SHA2.hash Spec.SHA2.parameters224 test3_plaintext_len test3_plaintext in
-  let test3_result256 : lbytes 32 = Spec.SHA2.hash Spec.SHA2.parameters256 test3_plaintext_len test3_plaintext in
-  let test3_result384 : lbytes 48 = Spec.SHA2.hash Spec.SHA2.parameters384 test3_plaintext_len test3_plaintext in
-  let test3_result512 : lbytes 64 = Spec.SHA2.hash Spec.SHA2.parameters512 test3_plaintext_len test3_plaintext in
-  let test3_result224' : lbytes 28 = Spec.SHA2.hash' Spec.SHA2.parameters224 test3_plaintext_len test3_plaintext in
-  let test3_result256' : lbytes 32 = Spec.SHA2.hash' Spec.SHA2.parameters256 test3_plaintext_len test3_plaintext in
-  let test3_result384' : lbytes 48 = Spec.SHA2.hash' Spec.SHA2.parameters384 test3_plaintext_len test3_plaintext in
-  let test3_result512' : lbytes 64 = Spec.SHA2.hash' Spec.SHA2.parameters512 test3_plaintext_len test3_plaintext in
+  let test3_result224 : lbytes 28 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters224 test3_plaintext_len test3_plaintext in
+  let test3_result256 : lbytes 32 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters256 test3_plaintext_len test3_plaintext in
+  let test3_result384 : lbytes 48 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters384 test3_plaintext_len test3_plaintext in
+  let test3_result512 : lbytes 64 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters512 test3_plaintext_len test3_plaintext in
+  let test3_result224' : lbytes 28 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters224 test3_plaintext_len test3_plaintext in
+  let test3_result256' : lbytes 32 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters256 test3_plaintext_len test3_plaintext in
+  let test3_result384' : lbytes 48 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters384 test3_plaintext_len test3_plaintext in
+  let test3_result512' : lbytes 64 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters512 test3_plaintext_len test3_plaintext in
   let result3_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected224 test3_result224 in
   let result3_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected256 test3_result256 in
   let result3_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected384 test3_result384 in
@@ -442,14 +442,14 @@ let test () =
   let test4_expected256 : lbytes 32 = of_list test4_expected256 in
   let test4_expected384 : lbytes 48 = of_list test4_expected384 in
   let test4_expected512 : lbytes 64 = of_list test4_expected512 in
-  let test4_result224 : lbytes 28 = Spec.SHA2.hash Spec.SHA2.parameters224 test4_plaintext_len test4_plaintext in
-  let test4_result256 : lbytes 32 = Spec.SHA2.hash Spec.SHA2.parameters256 test4_plaintext_len test4_plaintext in
-  let test4_result384 : lbytes 48 = Spec.SHA2.hash Spec.SHA2.parameters384 test4_plaintext_len test4_plaintext in
-  let test4_result512 : lbytes 64 = Spec.SHA2.hash Spec.SHA2.parameters512 test4_plaintext_len test4_plaintext in
-  let test4_result224' : lbytes 28 = Spec.SHA2.hash' Spec.SHA2.parameters224 test4_plaintext_len test4_plaintext in
-  let test4_result256' : lbytes 32 = Spec.SHA2.hash' Spec.SHA2.parameters256 test4_plaintext_len test4_plaintext in
-  let test4_result384' : lbytes 48 = Spec.SHA2.hash' Spec.SHA2.parameters384 test4_plaintext_len test4_plaintext in
-  let test4_result512' : lbytes 64 = Spec.SHA2.hash' Spec.SHA2.parameters512 test4_plaintext_len test4_plaintext in
+  let test4_result224 : lbytes 28 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters224 test4_plaintext_len test4_plaintext in
+  let test4_result256 : lbytes 32 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters256 test4_plaintext_len test4_plaintext in
+  let test4_result384 : lbytes 48 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters384 test4_plaintext_len test4_plaintext in
+  let test4_result512 : lbytes 64 = Spec.SHA2_Legacy.hash Spec.SHA2_Legacy.parameters512 test4_plaintext_len test4_plaintext in
+  let test4_result224' : lbytes 28 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters224 test4_plaintext_len test4_plaintext in
+  let test4_result256' : lbytes 32 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters256 test4_plaintext_len test4_plaintext in
+  let test4_result384' : lbytes 48 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters384 test4_plaintext_len test4_plaintext in
+  let test4_result512' : lbytes 64 = Spec.SHA2_Legacy.hash' Spec.SHA2_Legacy.parameters512 test4_plaintext_len test4_plaintext in
   let result4_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected224 test4_result224 in
   let result4_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected256 test4_result256 in
   let result4_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected384 test4_result384 in
