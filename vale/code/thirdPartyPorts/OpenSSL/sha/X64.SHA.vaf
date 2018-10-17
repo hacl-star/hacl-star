@@ -13,7 +13,7 @@ include{:fstar}{:open} "SHA_helpers"
 include{:fstar}{:open} "Spec.Hash"
 include{:fstar}{:open} "Spec.Hash.Common"
 include{:fstar}{:open} "Spec.Hash.Helpers"
-include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "Workarounds"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
@@ -43,7 +43,7 @@ open Spec.SHA2
 open Spec.Hash
 open Spec.Hash.Common
 open Spec.Hash.Helpers
-open GCM_helpers
+open Workarounds
 open Spec.Loops
 open X64.Stack
 open X64.CPU_Features_s

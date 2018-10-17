@@ -570,7 +570,7 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : 
   lemma_ws_computed_is_ws_quad32 block t;
   ()
 
-open GCM_helpers
+open Workarounds
 (* Abbreviations and lemmas for the code itself *)
 let k_reqs (k_seq:seq quad32) : prop0 =
   length k_seq == 64 / 4 /\
