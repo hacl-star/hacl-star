@@ -9,7 +9,7 @@ open LowStar.Buffer
 open LowStar.BufferOps
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params

@@ -12,15 +12,15 @@ val lemma_frodo_sample2:
 
 val modulo_pow2_u16:
   a:uint16 -> b:size_nat{b < 16} -> Lemma
-  (uint_v a % pow2 b == uint_v (a &. ((u16 1 <<. u32 b) -. u16 1)))
+  (uint_v a % pow2 b == uint_v (a &. ((u16 1 <<. size b) -. u16 1)))
 
 val modulo_pow2_u32:
   a:uint32 -> b:size_nat{b < 32} -> Lemma
-  (uint_v a % pow2 b == uint_v (a &. ((u32 1 <<. u32 b) -. u32 1)))
+  (uint_v a % pow2 b == uint_v (a &. ((u32 1 <<. size b) -. u32 1)))
 
 val modulo_pow2_u64:
   a:uint64 -> b:size_nat{b < 64} -> Lemma
-  (uint_v a % pow2 b == uint_v (a &. ((u64 1 <<. u32 b) -. u64 1)))
+  (uint_v a % pow2 b == uint_v (a &. ((u64 1 <<. size b) -. u64 1)))
 
 val lemma_mul_acc_comm:
   a:size_nat -> b:size_nat -> c:size_nat -> Lemma

@@ -28,6 +28,16 @@ let of_list #a l = Seq.seq_of_list #a l
 let of_list_index #a l i =
   Seq.lemma_seq_of_list_index #a l i
 
+let eq_intro #a #len s1 s2 =
+  assert (forall (i:nat{i < len}).{:pattern (Seq.index s1 i); (Seq.index s2 i)}
+    index s1 i == index s2 i);
+  Seq.lemma_eq_intro #a (to_seq s1) (to_seq s2)
+
+let eq_elim #a #len s1 s2 =
+  assert (forall (i:nat{i < len}).{:pattern (Seq.index s1 i); (Seq.index s2 i)}
+    index s1 i == index s2 i);
+  Seq.lemma_eq_elim #a s1 s2
+
 let upd #a #len s n x = Seq.upd #a s n x
 
 let sub #a #len s start n = Seq.slice #a s start (start + n)

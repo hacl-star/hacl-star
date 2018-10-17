@@ -80,11 +80,11 @@ let lemma_matrix_index_repeati2 n1 n2 i j =
   assert (2 * (n1 * n2 - 1) + 2 = 2 * n1 * n2 - 2 + 2);
   assert (2 * (n1 * j + i) + 2 <= 2 * n1 * n2)
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.l_arith_repr boxwrap --smtencoding.nl_arith_repr wrapped"
 
 let lemma_matrix_index_repeati n1 n2 d i j =
   assert (i * n2 / 8 + j <= (n1 - 1) * n2 / 8 + n2 / 8 - 1);
-  assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 - 1);
+//  assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 - 1);
   lemma_mult_le_right d (i * n2 / 8 + j) (n1 * n2 / 8 - 1)
 
 

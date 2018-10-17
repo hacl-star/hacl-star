@@ -46,5 +46,5 @@ let repeat_range #a min max f x =
 let rec repeat_range_inductive #a min max pred f x =
   repeat_left min max (fun i -> x:a{pred i x}) f x
 
-let repeati_inductive #a =
-  repeat_range_inductive #a 0
+let repeati_inductive #a n pred f x0 =
+  repeat_range_inductive #a 0 n pred f x0

@@ -9,8 +9,8 @@ open LowStar.Buffer
 open LowStar.BufferOps
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
-open Lib.Endianness
+open Lib.Buffer
+open Lib.ByteBuffer
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
@@ -24,7 +24,7 @@ module IB = LowStar.ImmutableBuffer
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '*'"
 
-// TODO: expose ImmutableBuffer types and operations in Lib.PQ.Buffer
+// TODO: expose ImmutableBuffer types and operations in Lib.Buffer
 let cdf_table = IB.igcmalloc_of_list HyperStack.root cdf_list
 
 inline_for_extraction noextract

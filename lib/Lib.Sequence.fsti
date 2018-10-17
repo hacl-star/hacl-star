@@ -79,6 +79,20 @@ val of_list_index:
   -> Lemma (index (of_list l) i == List.Tot.index l i)
     [SMTPat (index (of_list l) i)]
 
+abstract
+type equal (#a:Type) (#len:size_nat) (s1:lseq a len) (s2:lseq a len) =
+  forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
+
+val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma 
+  (requires forall i. {:pattern index s1 i; index s2 i} index s1 i == index s2 i)
+  (ensures equal s1 s2)
+  [SMTPat (equal s1 s2)]
+
+val eq_elim: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
+  (requires equal s1 s2)
+  (ensures  s1 == s2)
+  [SMTPat (equal s1 s2)]
+
 (* Alias for creation from a list *)
 let createL #a l = of_list #a l
 

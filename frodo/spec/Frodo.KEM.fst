@@ -9,13 +9,13 @@ open Spec.Frodo.KEM
 
 val crypto_kem_keypair:
     state:Spec.Frodo.Random.state_t
-  -> tuple2 (lbytes crypto_publickeybytes) (lbytes crypto_secretkeybytes)
+  -> lbytes crypto_publickeybytes & lbytes crypto_secretkeybytes
 let crypto_kem_keypair state = Spec.Frodo.KEM.KeyGen.crypto_kem_keypair state
 
 val crypto_kem_enc:
     state:Spec.Frodo.Random.state_t
   -> pk:lbytes crypto_publickeybytes
-  -> tuple2 (lbytes crypto_ciphertextbytes) (lbytes crypto_bytes)
+  -> lbytes crypto_ciphertextbytes & lbytes crypto_bytes
 let crypto_kem_enc state pk = Spec.Frodo.KEM.Encaps.crypto_kem_enc state pk
 
 val crypto_kem_dec:

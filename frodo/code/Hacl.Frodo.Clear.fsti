@@ -6,7 +6,7 @@ open FStar.Mul
 open LowStar.Buffer
 
 open Lib.IntTypes
-open Lib.PQ.Buffer
+open Lib.Buffer
 
 // REMARK:
 // The C implementation clears one 32-bit word at a time, so we need [len] 
@@ -19,7 +19,7 @@ val clear_words_u16:
   -> Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer b) h0 h1 /\ 
-      as_seq h1 (gsub #_ #(length b) #(v nwords) b (size 0) nwords) == 
+      as_seq #_ #(v nwords) h1 (gsub #_ #(length b) b (size 0) nwords) == 
       Seq.create (v nwords) (u16 0))
 
 val clear_words_u8:
@@ -28,5 +28,5 @@ val clear_words_u8:
   -> Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer b) h0 h1 /\
-      as_seq h1 (gsub #_ #(length b) #(v nwords) b (size 0) nwords) == 
+      as_seq #_ #(v nwords) h1 (gsub #_ #(length b) b (size 0) nwords) == 
       Seq.create (v nwords) (u8 0))
