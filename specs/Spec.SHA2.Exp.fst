@@ -321,8 +321,8 @@ let number_blocks_padding (p:alg) (len:size_nat{len <= size_block p}) : size_nat
 (* Definition of the padding function for a single input block *)
 let pad
   (p:alg)
-  (prev:size_nat)
-  (len:size_nat{len <= size_block p /\ len + prev <= max_input p})
+  (prev:nat)
+  (len:nat{len <= size_block p /\ len + prev <= max_input p})
   (last:lbytes len) :
   Tot (block:lbytes (size_block p * number_blocks_padding p len)) =
 
@@ -349,8 +349,8 @@ let update_block (p:alg) (block:lbytes (size_block p)) (hash:hash_w p) : Tot (ha
 (* Definition of the function for the partial block compression *)
 let update_last
   (p:alg)
-  (prev:size_nat)
-  (len:size_nat{len <= size_block p /\ len + prev <= max_input p})
+  (prev:nat)
+  (len:nat{len <= size_block p /\ len + prev <= max_input p})
   (last:lbytes len)
   (hash:hash_w p):
   Tot (hash_w p) =
@@ -368,7 +368,7 @@ let finish p (hash:hash_w p) : lbytes (size_hash p) =
   truncate p hash
 
 (* Definition of the SHA2 ontime function *)
-let hash (p:alg) (input:bytes{length input <= max_input p /\ length input <= max_size_t}) : lbytes (size_hash p) =
+let hash (p:alg) (input:bytes{length input <= max_input p}) : lbytes (size_hash p) =
   let len = length input in
   let s = h0Table p in
   let s = repeati_blocks (size_block p) input
