@@ -215,21 +215,6 @@ let blake2_round1 a wv m i =
   let wv = blake2_mixing a wv 3 7 11 15 (m.[s6]) (m.[s7]) in
   wv
 
-(* val blake2_round2: *)
-(*     a:alg *)
-(*   -> wv:vector_ws a *)
-(*   -> m:block_ws a *)
-(*   -> i:size_nat -> *)
-(*   Tot (vector_ws a) *)
-
-(* let blake2_round2 a wv m i = *)
-(*   let s = sub const_sigma ((i % 10) * 16) 16 in *)
-(*   let wv = blake2_mixing a wv 0 5 10 15 (m.[size_v s.[ 8]]) (m.[size_v s.[ 9]]) in *)
-(*   let wv = blake2_mixing a wv 1 6 11 12 (m.[size_v s.[10]]) (m.[size_v s.[11]]) in *)
-(*   let wv = blake2_mixing a wv 2 7  8 13 (m.[size_v s.[12]]) (m.[size_v s.[13]]) in *)
-(*   let wv = blake2_mixing a wv 3 4  9 14 (m.[size_v s.[14]]) (m.[size_v s.[15]]) in *)
-(*   wv *)
-
 val blake2_round2:
     a:alg
   -> wv:vector_ws a
@@ -372,10 +357,10 @@ val blake2_init:
   Tot (hash_s a)
 
 let blake2_init a kk k nn =
+  let key_block = create (size_block a) (u8 0) in
   let s = blake2_init_hash a kk nn in
   if kk = 0 then s
   else begin
-    let key_block = create (size_block a) (u8 0) in
     let key_block = update_sub key_block 0 kk k in
     blake2_update_block a (size_block a) key_block s end
 
