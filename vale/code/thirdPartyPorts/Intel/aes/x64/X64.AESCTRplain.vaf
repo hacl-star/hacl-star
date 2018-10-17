@@ -18,7 +18,7 @@ include{:fstar}{:open} "X64.Vale.QuickCodes"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "AES_helpers"
 include{:fstar}{:open} "X64.Poly1305.Math"
-include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "Workarounds"
 include{:fstar}{:open} "GCTR_s"
 include{:fstar}{:open} "GCTR"
 include{:fstar}{:open} "Arch.TypesNative"
@@ -46,7 +46,7 @@ open X64.Vale.QuickCodes
 open Arch.Types
 open AES_helpers
 open X64.Poly1305.Math    // For lemma_poly_bits64()
-open GCM_helpers
+open Workarounds
 open GCTR_s
 open GCTR
 open Arch.TypesNative

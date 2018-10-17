@@ -14,6 +14,7 @@ include{:fstar}{:open} "GF128_s"
 include{:fstar}{:open} "GF128"
 include{:fstar}{:open} "GCTR_s"
 include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "Workarounds"
 include{:fstar}{:open} "Math.Poly2_s"
 include{:fstar}{:open} "X64.Poly1305.Math"
 include{:fstar}{:open} "X64.Machine_s"
@@ -40,6 +41,7 @@ open GF128_s
 open GF128
 open GCTR_s
 open GCM_helpers
+open Workarounds
 open Math.Poly2_s
 open X64.Poly1305.Math
 open X64.GF128_Mul
