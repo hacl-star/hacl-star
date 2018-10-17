@@ -84,7 +84,7 @@ let lemma_matrix_index_repeati2 n1 n2 i j =
 
 let lemma_matrix_index_repeati n1 n2 d i j =
   assert (i * n2 / 8 + j <= (n1 - 1) * n2 / 8 + n2 / 8 - 1);
-  assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 - 1);
+//  assert ((n1 - 1) * n2 / 8 + n2 / 8 - 1 = n1 * n2 / 8 - 1);
   lemma_mult_le_right d (i * n2 / 8 + j) (n1 * n2 / 8 - 1)
 
 
