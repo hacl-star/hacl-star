@@ -484,11 +484,6 @@ val blake2s_update:
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[hash] == Spec.blake2_update Spec.Blake2S h0.[hash] h0.[d] (v kk)))
-                       (* /\ ( let klen = if v kk = 0 then 0 else 1 in *)
-                       (*     h1.[hash] == Seq.repeati_blocks (Spec.size_block Spec.Blake2S) h0.[d] *)
-                       (*     (fun i -> Spec.blake2_update_block Spec.Blake2S ((klen + i + 1) * (Spec.size_block Spec.Blake2S))) *)
-                       (*     (fun i -> Spec.blake2_update_last  Spec.Blake2S (klen * (Spec.size_block Spec.Blake2S) + (v ll))) *)
-                       (*     h0.[hash]))) *)
 
 let blake2s_update #vll hash d ll kk =
   let klen = if kk = size 0 then size 0 else size 1 in
@@ -497,7 +492,7 @@ let blake2s_update #vll hash d ll kk =
     (fun i -> Spec.blake2_update_block Spec.Blake2S (((v klen) + i + 1) * (Spec.size_block Spec.Blake2S)))
     (fun i -> Spec.blake2_update_last Spec.Blake2S ((v klen) * (Spec.size_block Spec.Blake2S) + (v ll)))
     (fun i block hash -> blake2s_update_block hash ((klen +. i +. 1) *. (size 64)) block)
-    (fun i rem last hash -> blake2s_update_last hash ll last rem) hash
+    (fun i rem last hash -> blake2s_update_last hash (klen *. (size 64) +. ll) last rem) hash
 
 
 val blake2s:
