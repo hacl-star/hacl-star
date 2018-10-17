@@ -475,10 +475,10 @@ let blake2s_finish #vnn output hash nn =
 
 
 val blake2s_update:
-    #vll: size_nat
+    #vll: size_t
   -> hash: state
-  -> d: lbuffer uint8 vll
-  -> ll: size_t{v ll == vll}
+  -> d: lbuffer uint8 (v vll)
+  -> ll: size_t{v ll == v vll}
   -> kk: size_t{v kk <= 32 /\ (if v kk = 0 then v ll < pow2 64 else v ll + 64 < pow2 64)} ->
   Stack unit
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
@@ -517,5 +517,5 @@ let blake2s output d ll k kk nn =
   (fun _ h1 -> h1.[output] == Spec.Blake2.blake2s h0.[d] (v kk) h0.[k] (v nn))
   (fun hash ->
     blake2s_init #kk hash k kk nn;
-    blake2s_update #(v ll) hash d ll kk;
+    blake2s_update #ll hash d ll kk;
     blake2s_finish #nn output hash nn)
