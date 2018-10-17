@@ -363,9 +363,3 @@ let hash (p:alg) (input:bytes{length input <= max_input p}) : lbytes (size_hash 
     (fun i -> update_block p)
     (fun i -> update_last p (i * (size_block p))) s in
   finish p s
-
-
-inline_for_extraction let hash224 input = hash SHA2_224 input
-inline_for_extraction let hash256 input = hash SHA2_256 input
-inline_for_extraction let hash384 input = hash SHA2_384 input
-inline_for_extraction let hash512 input = hash SHA2_512 input
