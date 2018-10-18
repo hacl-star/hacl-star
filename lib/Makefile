@@ -26,24 +26,21 @@ FILES = $(addprefix fst/, \
 	Lib.ByteBuffer.fst)
 
 FIXME = $(addprefix fst/, \
-	Lib.RawIntTypes.fst \
 	Lib.IntVector.fst \
-	Lib.ByteSequence.fst \
-	Lib.Endianness.fst \
 	Lib.LoopCombinators.fst)
 
-%.fst-verify:
-	$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_INCLUDES) $^ --use_hints
+%.fst-v: %.fst
+	$(FSTAR) $(FSTAR_INCLUDES) --use_hints $<
 
-%.fsti-verify:
-	$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_INCLUDES) $^ --use_hints
+%.fsti-v: %.fsti
+	$(FSTAR) $(FSTAR_INCLUDES) --use_hints $<
 
-%.fst-hints:
-	$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_INCLUDES) $^ --record_hints
+%.fst-h: %.fst
+	$(FSTAR) $(FSTAR_INCLUDES) --record_hints $<
 
-%.fsti-hints:
-	$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_INCLUDES) $^ --record_hints
+%.fsti-h: %.fsti
+	$(FSTAR) $(FSTAR_INCLUDES) --record_hints $<
 
 
-verify: $(addsuffix -verify, $(FILES))
-hints: $(addsuffix -hints, $(FILES))
+verify: $(addsuffix -v, $(FILES))
+hints: $(addsuffix -h, $(FILES))
