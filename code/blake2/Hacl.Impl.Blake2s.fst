@@ -18,10 +18,10 @@ module Spec = Spec.Blake2
 #set-options "--z3rlimit 150"
 
 (* Define algorithm parameters *)
-type working_vector = lbuffer uint32 Spec.size_block_w
-type message_block_w = lbuffer uint32 Spec.size_block_w
-type message_block = lbuffer uint8 (Spec.size_block Spec.Blake2S)
-type state = lbuffer uint32 Spec.size_hash_w
+type vector_wp = lbuffer uint32 Spec.size_block_w
+type block_wp = lbuffer uint32 Spec.size_block_w
+type block_p = lbuffer uint8 (Spec.size_block Spec.Blake2S)
+type hash_wp = lbuffer uint32 Spec.size_hash_w
 type index_t = n:size_t{size_v n < 16}
 
 inline_for_extraction let size_word : size_t = 4ul
@@ -51,7 +51,7 @@ let get_iv s =
 
 
 val set_iv:
-  hash:state ->
+  hash:hash_wp ->
   Stack unit
     (requires (fun h -> live h hash))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
@@ -124,7 +124,7 @@ let get_r s =
 
 /// Define algorithm functions
 
-val g1: wv:working_vector -> a:index_t -> b:index_t -> r:rotval U32 ->
+val g1: wv:vector_wp -> a:index_t -> b:index_t -> r:rotval U32 ->
   Stack unit
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
@@ -136,7 +136,7 @@ let g1 wv a b r =
   wv.(a) <- (wv_a ^. wv_b) >>>. r
 
 
-val g2: wv:working_vector -> a:index_t -> b:index_t -> x:uint32 ->
+val g2: wv:vector_wp -> a:index_t -> b:index_t -> x:uint32 ->
   Stack unit
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
@@ -148,7 +148,7 @@ let g2 wv a b x =
   wv.(a) <- add_mod #U32 (wv_a +. wv_b) x
 
 
-val blake2_mixing : wv:working_vector -> a:index_t -> b:index_t -> c:index_t -> d:index_t -> x:uint32 -> y:uint32 ->
+val blake2_mixing : wv:vector_wp -> a:index_t -> b:index_t -> c:index_t -> d:index_t -> x:uint32 -> y:uint32 ->
   Stack unit
     (requires (fun h -> live h wv))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
@@ -171,7 +171,7 @@ let blake2_mixing wv a b c d x y =
 
 #set-options "--z3rlimit 50"
 
-val blake2_round1 : wv:working_vector -> m:message_block_w -> i:size_t{size_v i <= 9} ->
+val blake2_round1 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
                   /\ disjoint wv m))
@@ -197,7 +197,7 @@ let blake2_round1 wv m i =
   blake2_mixing wv (size 3) (size 7) (size 11) (size 15) m.(s6) m.(s7)
 
 
-val blake2_round2 : wv:working_vector -> m:message_block_w -> i:size_t{size_v i <= 9} ->
+val blake2_round2 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
                   /\ disjoint wv m))
@@ -223,7 +223,7 @@ let blake2_round2 wv m i =
   blake2_mixing wv (size 3) (size 4) (size  9) (size 14) m.(s14) m.(s15)
 
 
-val blake2_round : wv:working_vector -> m:message_block_w -> i:size_t{v i <= 9} ->
+val blake2_round : wv:vector_wp -> m:block_wp -> i:size_t{v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
                    /\ disjoint wv m))
@@ -238,9 +238,9 @@ let blake2_round wv m i =
 #reset-options "--z3rlimit 150"
 
 val blake2_compress1:
-    wv:working_vector
-  -> s:state
-  -> m:message_block_w
+    wv:vector_wp
+  -> s:hash_wp
+  -> m:block_wp
   -> offset:uint64
   -> flag:bool ->
   Stack unit
@@ -265,7 +265,7 @@ let blake2_compress1 wv s m offset flag =
 
 
 val blake2_compress2 :
-  wv:working_vector -> m:message_block_w ->
+  wv:vector_wp -> m:block_wp ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
@@ -283,7 +283,7 @@ let blake2_compress2 wv m =
 
 
 val blake2_compress3_inner :
-  wv:working_vector -> i:size_t{size_v i < 8} -> s:state ->
+  wv:vector_wp -> i:size_t{size_v i < 8} -> s:hash_wp ->
   Stack unit
     (requires (fun h -> live h s /\ live h wv
                    /\ disjoint s wv /\ disjoint wv s))
@@ -299,7 +299,7 @@ let blake2_compress3_inner wv i s =
 
 
 val blake2_compress3 :
-  wv:working_vector -> s:state ->
+  wv:vector_wp -> s:hash_wp ->
   Stack unit
     (requires (fun h -> live h s /\ live h wv
                      /\ disjoint wv s /\ disjoint s wv))
@@ -319,8 +319,8 @@ let blake2_compress3 wv s =
 
 
 val blake2_compress :
-    s:state
-  -> m:message_block_w
+    s:hash_wp
+  -> m:block_wp
   -> offset:uint64
   -> flag:bool ->
   Stack unit
@@ -341,9 +341,9 @@ let blake2_compress s m offset flag =
 
 
 val blake2s_update_block:
-    hash:state
+    hash:hash_wp
   -> prev:size_t{size_v prev <= Spec.max_limb Spec.Blake2S}
-  -> d:message_block ->
+  -> d:block_p ->
   Stack unit
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
@@ -362,7 +362,7 @@ let blake2s_update_block hash prev d =
 
 
 val blake2s_init_hash:
-    hash:state
+    hash:hash_wp
   -> kk:size_t{v kk <= 32}
   -> nn:size_t{1 <= v nn /\ v nn <= 32} ->
   Stack unit
@@ -381,7 +381,7 @@ let blake2s_init_hash hash kk nn =
 
 val blake2s_init_branching:
     #vkk:size_t
-  -> hash:state
+  -> hash:hash_wp
   -> key_block:lbuffer uint8 64
   -> k:lbuffer uint8 (v vkk)
   -> kk:size_t{v kk <= 32 /\ kk == vkk}
@@ -408,7 +408,7 @@ let blake2s_init_branching #vkk hash key_block k kk nn =
 
 val blake2s_init:
     #vkk:size_t
-  -> hash:state
+  -> hash:hash_wp
   -> k:lbuffer uint8 (v vkk)
   -> kk:size_t{v kk <= 32 /\ kk == vkk}
   -> nn:size_t{1 <= v nn /\ v nn <= 32} ->
@@ -431,7 +431,7 @@ let blake2s_init #vkk hash k kk nn =
 
 val blake2s_update_last:
     #vlen: size_t
-  -> hash: state
+  -> hash: hash_wp
   -> prev: size_t{v prev <= Spec.max_limb Spec.Blake2S}
   -> last: lbuffer uint8 (v vlen)
   -> len: size_t{v len <= Spec.size_block Spec.Blake2S /\ len == vlen} ->
@@ -455,7 +455,7 @@ let blake2s_update_last #vlen hash prev last len =
 val blake2s_finish:
     #vnn: size_t
   -> output: lbuffer uint8 (v vnn)
-  -> hash: state
+  -> hash: hash_wp
   -> nn: size_t{1 <= v nn /\ v nn <= 32 /\ nn == vnn} ->
   Stack unit
     (requires (fun h -> live h hash
@@ -476,7 +476,7 @@ let blake2s_finish #vnn output hash nn =
 
 val blake2s_update:
     #vll: size_t
-  -> hash: state
+  -> hash: hash_wp
   -> d: lbuffer uint8 (v vll)
   -> ll: size_t{v ll == v vll}
   -> kk: size_t{v kk <= 32 /\ (if v kk = 0 then v ll < pow2 64 else v ll + 64 < pow2 64)} ->

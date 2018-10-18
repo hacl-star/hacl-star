@@ -159,7 +159,7 @@ let const_sigma:lseq sigma_elt_t size_const_sigma =
 type vector_ws (a:alg) = lseq (word_t a) size_block_w
 type block_ws (a:alg) = lseq (word_t a) size_block_w
 type block_s (a:alg) = lseq uint8 (size_block a)
-type hash_s (a:alg) = lseq (word_t a) size_hash_w
+type hash_ws (a:alg) = lseq (word_t a) size_hash_w
 type idx_t = n:size_nat{n < 16}
 
 (* Functions *)
@@ -255,7 +255,7 @@ let blake2_round a m i wv =
 val blake2_compress1:
     a:alg
   -> wv:vector_ws a
-  -> s:hash_s a
+  -> s:hash_ws a
   -> m:block_ws a
   -> offset:limb_t a
   -> flag:bool ->
@@ -289,8 +289,8 @@ val blake2_compress3_inner:
     a:alg
   -> ws:vector_ws a
   -> i:size_nat{i < 8}
-  -> s:hash_s a ->
-  Tot (hash_s a)
+  -> s:hash_ws a ->
+  Tot (hash_ws a)
 
 let blake2_compress3_inner a wv i s =
   let i_plus_8 = i + 8 in
@@ -302,19 +302,19 @@ let blake2_compress3_inner a wv i s =
 val blake2_compress3:
     a:alg
   -> ws:vector_ws a
-  -> s:hash_s a ->
-  Tot (hash_s a)
+  -> s:hash_ws a ->
+  Tot (hash_ws a)
 
 let blake2_compress3 a wv s = repeati 8 (blake2_compress3_inner a wv) s
 
 
 val blake2_compress:
     a:alg
-  -> s:hash_s a
+  -> s:hash_ws a
   -> m:block_ws a
   -> offset:limb_t a
   -> flag:bool ->
-  Tot (hash_s a)
+  Tot (hash_ws a)
 
 let blake2_compress a s m offset flag =
   let wv = create 16 (to_word a 0) in
@@ -328,8 +328,8 @@ val blake2_update_block:
     a:alg
   -> prev:nat{prev <= max_limb a}
   -> d:block_s a
-  -> s:hash_s a ->
-  Tot (hash_s a)
+  -> s:hash_ws a ->
+  Tot (hash_ws a)
 
 let blake2_update_block a prev d s =
   let to_compress : lseq (word_t a) 16 = uints_from_bytes_le #(wt a) #SEC d in
@@ -341,7 +341,7 @@ val blake2_init_hash:
     a:alg
   -> kk:size_nat{kk <= 32}
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
-  Tot (hash_s a)
+  Tot (hash_ws a)
 
 let blake2_init_hash a kk nn =
   let s = map secret (ivTable a) in
@@ -354,7 +354,7 @@ val blake2_init:
   -> kk:size_nat{kk <= 32}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
-  Tot (hash_s a)
+  Tot (hash_ws a)
 
 let blake2_init a kk k nn =
   let key_block = create (size_block a) (u8 0) in
@@ -370,8 +370,8 @@ val blake2_update_last:
   -> prev:nat{prev <= max_limb a}
   -> len:size_nat{len <= (size_block a)}
   -> last:lbytes len
-  -> s:hash_s a ->
-  Tot (hash_s a)
+  -> s:hash_ws a ->
+  Tot (hash_ws a)
 
 let blake2_update_last a prev len last s =
   let last_block = create (size_block a) (u8 0) in
@@ -382,10 +382,10 @@ let blake2_update_last a prev len last s =
 
 val blake2_update:
     a:alg
-  -> s:hash_s a
+  -> s:hash_ws a
   -> d:bytes
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)} ->
-  Tot (hash_s a)
+  Tot (hash_ws a)
 
 let blake2_update a s d kk =
   let ll = length d in
@@ -397,7 +397,7 @@ let blake2_update a s d kk =
 
 val blake2_finish:
     a:alg
-  -> s:hash_s a
+  -> s:hash_ws a
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
   Tot (lbytes nn)
 
