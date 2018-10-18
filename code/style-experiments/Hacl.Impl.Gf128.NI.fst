@@ -276,10 +276,11 @@ let poly acc text len r =
     pop_frame()
 
 
-inline_for_extraction
+[@ CInline]
 val poly4: acc:felem -> text:bytes -> len:size_t{length text == size_v len} -> r4:felem4 -> Stack unit
 	  (requires (fun h -> live h acc /\ live h text /\ live h r4))
 	  (ensures (fun h0 _ h1 -> modifies (loc_buffer acc) h0 h1))
+[@ CInline]
 let poly4 acc text len r4 = 
     push_frame ();
     let tmp = alloca vec128_zero 1ul in
@@ -294,6 +295,7 @@ let poly4 acc text len r4 =
     poly acc last rem (sub r4 (size 3) (size 1));
     pop_frame()
 
+inline_for_extraction
 val gcm_alloc: unit -> StackInline (felem * felem4)
 	  (requires (fun h -> True))
 	  (ensures (fun h0 (x,y) h1 -> modifies (loc_union (loc_buffer x) (loc_buffer y)) h0 h1))
@@ -302,9 +304,11 @@ let gcm_alloc () =
   let r4 = alloca vec128_zero 4ul in
   (acc,r4)
 
+[@ CInline ]
 val gcm_init: acc:felem -> r4:felem4 -> key:lbytes 16 -> Stack unit
 	  (requires (fun h -> live h acc /\ live h r4 /\ live h key))
 	  (ensures (fun h0 _ h1 -> modifies (loc_union (loc_buffer acc) (loc_buffer r4)) h0 h1))
+[@ CInline ]
 let gcm_init acc r4 key = 
     let r_4 = sub r4 (size 0) (size 1) in
     let r_3 = sub r4 (size 1) (size 1) in
@@ -319,9 +323,11 @@ let gcm_init acc r4 key =
     fmul r_4 r_3
     
   
+[@ CInline ]
 val ghash: tag:lbytes 16 -> text:bytes -> len:size_t{length text == size_v len} -> key:lbytes 16 -> Stack unit
 	  (requires (fun h -> live h tag /\ live h text /\ live h key))
 	  (ensures (fun h0 _ h1 -> modifies (loc_buffer tag) h0 h1))
+[@ CInline ]
 let ghash tag text len key = 
   push_frame();
   let (acc,r4) = gcm_alloc () in

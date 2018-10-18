@@ -23,7 +23,7 @@ type hash_wp = lbuffer uint32 Spec.size_hash_w
 type index_t = n:size_t{size_v n < 16}
 
 inline_for_extraction let size_word : size_t = 4ul
-inline_for_extraction let size_block x : size_t = (size Spec.size_block_w) *. size_word
+inline_for_extraction let size_block x : n:size_t{v n > 0} = (size Spec.size_block_w) *. size_word
 
 
 /// Constants
@@ -500,7 +500,7 @@ let blake2s_finish #vnn output hash nn =
     copy output nn final)
 
 
-#reset-options
+#reset-options "--z3rlimit 50"
 
 val blake2s_update:
     #vll: size_t
@@ -514,12 +514,11 @@ val blake2s_update:
                          /\ h1.[hash] == Spec.blake2_update Spec.Blake2S h0.[hash] h0.[d] (v kk)))
 
 let blake2s_update #vll hash d ll kk =
-  let klen = if kk = size 0 then size 0 else size 1 in
-  admit();
+  let klen = if kk =. size 0 then size 0 else size 1 in
   loopi_blocks (size_block Spec.Blake2S) ll d
     (fun i -> Spec.blake2_update_block Spec.Blake2S (((v klen) + i + 1) * (Spec.size_block Spec.Blake2S)))
     (fun i -> Spec.blake2_update_last Spec.Blake2S ((v klen) * (Spec.size_block Spec.Blake2S) + (v ll)))
-    (fun i block hash -> blake2s_update_block hash ((klen +. i +. 1) *. (size 64)) block)
+    (fun i block hash -> blake2s_update_block hash ((klen +. i +. size 1) *. (size 64)) block)
     (fun i rem last hash -> blake2s_update_last hash (klen *. (size 64) +. ll) last rem) hash
 
 

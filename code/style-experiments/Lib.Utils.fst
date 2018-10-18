@@ -108,9 +108,9 @@ inline_for_extraction
 let op_Array_Access #a #b #c buf i  = index #a #b #c buf (Lib.RawIntTypes.size_to_UInt32 i)
 
 inline_for_extraction
-let op_String_Assignment #a buf i v = FStar.Seq.upd #a buf (Lib.RawIntTypes.uint_to_nat #SIZE i) v
+let op_String_Assignment #a buf i v = FStar.Seq.upd #a buf (Lib.RawIntTypes.uint_to_nat #U32 #SEC i) v
 inline_for_extraction
-let op_String_Access #a buf i = FStar.Seq.index #a buf (Lib.RawIntTypes.uint_to_nat #SIZE i) 
+let op_String_Access #a buf i = FStar.Seq.index #a buf (Lib.RawIntTypes.uint_to_nat #U32 #SEC i) 
 
 inline_for_extraction
 let create z i = alloca z (Lib.RawIntTypes.size_to_UInt32 i)

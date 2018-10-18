@@ -177,7 +177,12 @@ gf128-perf: gf128-ni.exe gf128-pre.exe
 
 AESGCM_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	Hacl.Impl.Aes.CoreNI.fst \
+	Hacl.Impl.Aes.Core.fst \
+	Hacl.Impl.Aes.Generic.fst \
 	Hacl.Impl.Aes.NI.fst \
+	Hacl.Impl.Gf128.FieldNI.fst \
+	Hacl.Impl.Gf128.Generic.fst \
 	Hacl.Impl.Gf128.NI.fst \
 	Hacl.Impl.AesGCM.fst \
 	Hacl.Test.AesGCM.fst 

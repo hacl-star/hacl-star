@@ -21,7 +21,7 @@ module Loop = Lib.LoopCombinators
 #set-options "--z3rlimit 15"
 
 inline_for_extraction noextract
-let v = size_v
+unfold let v = size_v
 
 (** Definition of a mutable Buffer *)
 let buffer (a:Type0) = B.buffer a
