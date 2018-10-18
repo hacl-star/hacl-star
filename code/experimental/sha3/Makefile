@@ -121,9 +121,11 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/lib
 
+# TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
+  -Wno-incompatible-pointer-types
 
 # GNU Make manual section 4.14
 %.d: %.c
