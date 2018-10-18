@@ -124,6 +124,7 @@ let point_mul_g_compress out s =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+inline_for_extraction
 [@ Substitute]
 val copy_bytes:
   output:hint8_p ->
