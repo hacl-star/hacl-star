@@ -11,17 +11,13 @@ open Words_s
 open FStar.Seq
 open FStar.UInt32  // Interop with UInt-based SHA spec
 open Arch.Types
+open SHA_defs
 
 unfold
 let (.[]) = FStar.Seq.index
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
   
-// Define these specific converters here, so that F* only reasons about 
-// the correctness of the conversion once, rather that at every call site
-let vv (u:UInt32.t) : nat32 = v u
-let to_uint32 (n:nat32) : UInt32.t = uint_to_t n
-
 unfold let ws_opaque = make_opaque ws
 unfold let shuffle_core_opaque = make_opaque shuffle_core
 unfold let update_multi_opaque = make_opaque update_multi
@@ -572,14 +568,6 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w SHA2_256) : 
 
 open Workarounds
 (* Abbreviations and lemmas for the code itself *)
-let k_reqs (k_seq:seq quad32) : prop0 =
-  length k_seq == 64 / 4 /\
-  (forall i . {:pattern (index_work_around_quad32 k_seq i)} 0 <= i /\ i < (64/4) ==> 
-    (k_seq.[i]).lo0 == vv (k0 SHA2_256).[4 `op_Multiply` i] /\
-    (k_seq.[i]).lo1 == vv (k0 SHA2_256).[4 `op_Multiply` i + 1] /\
-    (k_seq.[i]).hi2 == vv (k0 SHA2_256).[4 `op_Multiply` i + 2] /\
-    (k_seq.[i]).hi3 == vv (k0 SHA2_256).[4 `op_Multiply` i + 3])
-  
 let quads_to_block (qs:seq quad32) : block_w SHA2_256
   =
   let nat32_seq = Words.Seq_s.seq_four_to_seq_LE qs in
@@ -669,9 +657,6 @@ let rec update_multi_quads (s:seq quad32) (hash_orig:hash256) : Tot (hash256) (d
 
 let seq_U8_to_seq_nat8 (b:seq UInt8.t) : (b':seq nat8) =
   init (length b) (fun (i:nat { i < length b }) -> let x:nat8 = UInt8.v (index b i) in x)
-
-let seq_nat8_to_seq_U8 (b:seq nat8) : (b':seq UInt8.t) =
-  init (length b) (fun (i:nat { i < length b }) -> let x:UInt8.t = UInt8.uint_to_t (index b i) in x)
 
 let lemma_le_bytes_to_seq_quad32_empty (b:seq nat8) : Lemma 
   (requires b == empty) 
@@ -912,15 +897,6 @@ let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash_w SHA2_256) (bou
   )  
 #pop-options  
 
-let le_bytes_to_hash (b:seq nat8) : hash_w SHA2_256 =
-  if length b <> 32 then   
-     (let f (n:nat{n < 8}) : UInt32.t = to_uint32 0 in
-     init 8 f)
-  else (
-     let open Words.Seq_s in
-     Spec.Loops.seq_map to_uint32 (seq_nat8_to_seq_nat32_LE b)
-  )
-
 let lemma_le_bytes_to_hash_quads_part1 (s:seq quad32) : Lemma
   (requires length s == 2)
   (ensures  le_bytes_to_hash (le_seq_quad32_to_bytes s) ==
@@ -959,4 +935,11 @@ let lemma_hash_to_bytes (s:seq quad32) : Lemma
   =
   lemma_le_bytes_to_hash_quads s;
   assert (equal (make_ordered_hash s.[0] s.[1]) (le_bytes_to_hash (le_seq_quad32_to_bytes s)));
+  ()
+
+let lemma_update_multi_opaque_vale_is_update_multi (hash:hash256) (blocks:bytes) : Lemma
+  (requires length blocks % 64 = 0)
+  (ensures  update_multi_opaque_vale hash blocks == update_multi SHA2_256 hash blocks)
+  =
+  reveal_opaque update_multi;
   ()

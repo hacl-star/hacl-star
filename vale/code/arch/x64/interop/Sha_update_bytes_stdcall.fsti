@@ -10,7 +10,9 @@ open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 open Interop
 open Types_s
-open SHA_helpers
+open SHA_defs
+open Spec.Hash
+open Spec.Hash.Helpers
 
 let pre_cond (h:HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8) = 
   live h ctx_b /\ live h in_b /\ live h k_b /\
@@ -37,7 +39,7 @@ let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s
   let hash_in = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h ctx_b128)) in
   let hash_out = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h' ctx_b128)) in
   (Seq.length input_LE) % 64 = 0 /\
-  hash_out == update_multi_opaque_vale hash_in input_LE
+  hash_out == update_multi SHA2_256 hash_in input_LE
  )
 
 let full_post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8)  =
