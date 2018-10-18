@@ -152,6 +152,7 @@ CC = $(GCC)
 
 ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) verify -C lib
+	$(MAKE) verify -C code/blake2
 	$(MAKE) -C frodo
 	# $(MAKE) extract-specs
 	# $(MAKE) extract-all
