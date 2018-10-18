@@ -268,8 +268,7 @@ let blake2_compress1 wv s m offset flag =
   let high_offset = Spec.limb_to_word Spec.Blake2S (offset >>. size 32) in
   let wv_12 = logxor wv.(size 12) low_offset in
   let wv_13 = logxor wv.(size 13) high_offset in
-  let wv_14 = logxor wv.(size 14) (u32 0xFFFFFFFF) in
-  assume((ones (Spec.wt Spec.Blake2S) SEC) == u32 0xFFFFFFFF);
+  let wv_14 = logxor wv.(size 14) (ones (Spec.wt Spec.Blake2S) SEC) in
   wv.(size 12) <- wv_12;
   wv.(size 13) <- wv_13;
  (if flag then wv.(size 14) <- wv_14)
