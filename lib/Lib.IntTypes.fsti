@@ -110,8 +110,9 @@ val uintv_extensionality:
  -> a:uint_t t l
  -> b:uint_t t l
  -> Lemma
-  (requires uint_v a == uint_v b)
+  (requires uint_v #t #l a == uint_v #t #l b)
   (ensures  a == b)
+  [SMTPat (uint_v #t #l a == uint_v #t #l b)]
 
 ///
 /// Definition of machine integers
