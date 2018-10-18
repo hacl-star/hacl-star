@@ -150,11 +150,9 @@ providers:
 
 CC = $(GCC)
 
-# BB. We can't run extraction of the C code until everything gets ported
-#     to the new libraries.
 ci: .clean-banner .clean-git .clean-snapshots
+	$(MAKE) verify -C lib
 	$(MAKE) -C frodo
-	# $(MAKE) verify -C lib
 	# $(MAKE) extract-specs
 	# $(MAKE) extract-all
 	# $(MAKE) -C code clean-c
