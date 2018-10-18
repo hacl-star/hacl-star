@@ -1,6 +1,10 @@
 HACL_HOME?=../..
 include $(HACL_HOME)/Makefile.include
 
+
+verify: Hacl.Blake2s.fst-verify Hacl.Impl.Blake2s.fst-verify
+	$(MAKE) $<
+
 # Files for verification
 KREMLIN_ARGS =-verbose $(KREMLIN_TESTLIB) \
 	-drop FStar,Prims,LowStar,C,C.*,C.Loops.Spec.Loops,Spec.*,Lib.*,WasmSupport \
