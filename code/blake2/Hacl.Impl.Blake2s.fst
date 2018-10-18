@@ -15,8 +15,6 @@ module Loops = Lib.LoopCombinators
 module Spec = Spec.Blake2
 
 
-#set-options "--z3rlimit 150"
-
 (* Define algorithm parameters *)
 type vector_wp = lbuffer uint32 Spec.size_block_w
 type block_wp = lbuffer uint32 Spec.size_block_w
@@ -61,6 +59,9 @@ let set_iv hash =
   recall_contents const_iv (Spec.ivTable Spec.Blake2S);
   admit(); // BB. we need Lib.Buffer.map to apply `secret`
   icopy hash (size (Spec.size_hash_w)) const_iv
+
+
+#set-options "--z3rlimit 15"
 
 val set_iv_sub:
   b:lbuffer uint32 16 ->
@@ -175,7 +176,7 @@ let blake2_mixing wv a b c d x y =
   g1 wv b c r3
 
 
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 15"
 
 val blake2_round1 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
   Stack unit
@@ -203,6 +204,8 @@ let blake2_round1 wv m i =
   blake2_mixing wv (size 3) (size 7) (size 11) (size 15) m.(s6) m.(s7)
 
 
+#set-options "--z3rlimit 15"
+
 val blake2_round2 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
@@ -229,6 +232,8 @@ let blake2_round2 wv m i =
   blake2_mixing wv (size 3) (size 4) (size  9) (size 14) m.(s14) m.(s15)
 
 
+#reset-options
+
 val blake2_round : wv:vector_wp -> m:block_wp -> i:size_t{v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
@@ -241,7 +246,7 @@ let blake2_round wv m i =
   blake2_round2 wv m i
 
 
-#reset-options "--z3rlimit 150"
+#reset-options "--z3rlimit 15"
 
 val blake2_compress1:
     wv:vector_wp
@@ -270,6 +275,8 @@ let blake2_compress1 wv s m offset flag =
  (if flag then wv.(size 14) <- wv_14)
 
 
+#reset-options "--z3rlimit 25"
+
 val blake2_compress2 :
   wv:vector_wp -> m:block_wp ->
   Stack unit
@@ -288,6 +295,8 @@ let blake2_compress2 wv m =
     blake2_round wv m i)
 
 
+#reset-options "--z3rlimit 15"
+
 val blake2_compress3_inner :
   wv:vector_wp -> i:size_t{size_v i < 8} -> s:hash_wp ->
   Stack unit
@@ -303,6 +312,8 @@ let blake2_compress3_inner wv i s =
   let hi = logxor #U32 hi_xor_wvi wv.(i_plus_8) in
   s.(i) <- hi
 
+
+#reset-options "--z3rlimit 25"
 
 val blake2_compress3 :
   wv:vector_wp -> s:hash_wp ->
@@ -323,6 +334,8 @@ let blake2_compress3 wv s =
       Loops.unfold_repeati 8 (spec h0) (as_seq h0 s) (v i);
       blake2_compress3_inner wv i s)
 
+
+#reset-options "--z3rlimit 15"
 
 val blake2_compress :
     s:hash_wp
@@ -346,6 +359,8 @@ let blake2_compress s m offset flag =
     blake2_compress3 wv s)
 
 
+#reset-options "--z3rlimit 15"
+
 val blake2s_update_block:
     hash:hash_wp
   -> prev:size_t{size_v prev <= Spec.max_limb Spec.Blake2S}
@@ -367,6 +382,8 @@ let blake2s_update_block hash prev d =
      blake2_compress hash block_w offset false)
 
 
+#reset-options
+
 val blake2s_init_hash:
     hash:hash_wp
   -> kk:size_t{v kk <= 32}
@@ -383,7 +400,8 @@ let blake2s_init_hash hash kk nn =
   let s0' = s0 ^. (u32 0x01010000) ^. kk_shift_8 ^. size_to_uint32 nn in
   hash.(size 0) <- s0'
 
-#reset-options "--z3rlimit 150"
+
+#reset-options "--z3rlimit 15"
 
 val blake2s_init_branching:
     #vkk:size_t
@@ -412,6 +430,8 @@ let blake2s_init_branching #vkk hash key_block k kk nn =
   end
 
 
+#reset-options "--z3rlimit 15"
+
 val blake2s_init:
     #vkk:size_t
   -> hash:hash_wp
@@ -434,6 +454,8 @@ let blake2s_init #vkk hash k kk nn =
     blake2s_init_hash hash kk nn;
     blake2s_init_branching #vkk hash key_block k kk nn)
 
+
+#reset-options "--z3rlimit 15"
 
 val blake2s_update_last:
     #vlen: size_t
@@ -458,6 +480,8 @@ let blake2s_update_last #vlen hash prev last len =
   pop_frame ()
 
 
+#reset-options "--z3rlimit 15"
+
 val blake2s_finish:
     #vnn: size_t
   -> output: lbuffer uint8 (v vnn)
@@ -479,6 +503,7 @@ let blake2s_finish #vnn output hash nn =
     copy output nn final)
 
 
+#reset-options
 
 val blake2s_update:
     #vll: size_t
@@ -500,6 +525,8 @@ let blake2s_update #vll hash d ll kk =
     (fun i block hash -> blake2s_update_block hash ((klen +. i +. 1) *. (size 64)) block)
     (fun i rem last hash -> blake2s_update_last hash (klen *. (size 64) +. ll) last rem) hash
 
+
+#reset-options "--z3rlimit 25"
 
 val blake2s:
     output: buffer uint8
