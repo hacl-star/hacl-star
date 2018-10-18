@@ -69,15 +69,21 @@ val set_iv_sub:
     (ensures  (fun h0 _ h1 -> modifies1 b h0 h1
                       /\ (let b0: Seq.lseq uint32 16 = h0.[b] in
                          let b1: Seq.lseq uint32 16 = h1.[b] in
-                         let dest = Seq.sub #uint32 #16 b1 8 8 in
                          let src = Seq.map secret (Spec.ivTable Spec.Blake2S) in
                          b1 == Seq.update_sub #uint32 #16 b0 8 8 src)))
 [@ Substitute ]
 let set_iv_sub b =
-  admit();
-  let half = sub b (size 8) (size 8) in
-  set_iv half
+  let h0 = ST.get () in
+  let half0 = sub #uint32 #16 #8 b (size 0) (size 8) in
+  let half1 = sub #uint32 #16 #8 b (size 8) (size 8) in
+  let h1 = ST.get () in
+  set_iv half1;
+  let h2 = ST.get () in
+  Seq.eq_intro h2.[b] (Seq.concat #uint32 #8 #8 h2.[half0] h2.[half1]);
+  Seq.eq_intro h2.[b] (Seq.update_sub #uint32 #16 h0.[b] 8 8 (Seq.map secret (Spec.ivTable Spec.Blake2S)))
 
+
+#reset-options
 
 val get_sigma:
   s:size_t{size_v s < 160} ->
