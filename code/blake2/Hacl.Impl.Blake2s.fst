@@ -377,7 +377,7 @@ let blake2s_update_block hash prev d =
   (fun block_w ->
      uints_from_bytes_le block_w (size Spec.size_block_w) d;
      let offset = to_u64 prev in
-     assume(offset == (Spec.to_limb Spec.Blake2S (v prev)));
+     assume(offset == (Spec.nat_to_limb Spec.Blake2S (v prev)));
      blake2_compress hash block_w offset false)
 
 
@@ -474,7 +474,7 @@ let blake2s_update_last #vlen hash prev last len =
   update_sub last_block (size 0) len last;
   uints_from_bytes_le last_block_w (size 16) last_block;
   let offset = to_u64 prev in
-  assume(offset == (Spec.to_limb Spec.Blake2S (v prev)));
+  assume(offset == (Spec.nat_to_limb Spec.Blake2S (v prev)));
   blake2_compress hash last_block_w offset true;
   pop_frame ()
 
