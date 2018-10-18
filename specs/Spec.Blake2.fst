@@ -56,7 +56,7 @@ let nat_to_word (a:alg) (x:size_nat) : word_t a =
   | U64 -> u64 x
 
 inline_for_extraction
-let nat_to_limb (a:alg) (x:nat{x <= max_limb a}) : limb_t a =
+let nat_to_limb (a:alg) (x:nat{x <= max_limb a}) : xl:limb_t a{uint_v xl == x} =
   match (wt a) with
   | U32 -> u64 x
   | U64 -> u128 x
