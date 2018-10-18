@@ -104,6 +104,9 @@ val frodo_key_encode:
       as_matrix h1 res == S.frodo_key_encode (v b) (as_seq h0 a))
 [@"c_inline"]
 let frodo_key_encode b a res =
+  (* TODO: we don't need to call the memset function
+     since we know that the frodo_key_encode function
+     doesn't depend on the initial values of the res buffer *)
   memset res (u16 0) (params_nbar *! params_nbar);
   let h0 = ST.get () in
   LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 (v params_nbar * v params_nbar)) (as_seq h0 res);
@@ -178,6 +181,9 @@ val frodo_key_decode:
 [@"c_inline"]
 let frodo_key_decode b a res =
   let resLen = params_nbar *! params_nbar *! b /. size 8 in
+  (* TODO: we don't need to call the memset function
+     since we know that the frodo_key_decode function
+     doesn't depend on the initial values of the res buffer *)
   memset res (u8 0) resLen;
   let h0 = ST.get () in
   LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 (v resLen)) (as_seq h0 res);
