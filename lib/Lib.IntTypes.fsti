@@ -518,3 +518,11 @@ let (>.) #t = gt #t
 
 inline_for_extraction
 let (>=.) #t = gte #t
+
+
+inline_for_extraction
+let p_t (t:inttype) = 
+  match t with
+  | U32 -> UInt32.t
+  | _ -> UInt64.t
+

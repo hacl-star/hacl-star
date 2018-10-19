@@ -21,7 +21,7 @@ module Loop = Lib.LoopCombinators
 #set-options "--z3rlimit 15"
 
 inline_for_extraction noextract
-unfold let v = size_v
+let v = size_v
 
 (** Definition of a mutable Buffer *)
 let buffer (a:Type0) = B.buffer a
@@ -670,3 +670,6 @@ val loop_blocks:
       B.modifies (B.loc_buffer write) h0 h1 /\
       as_seq h1 write ==
       Seq.repeat_blocks #a #(Seq.lseq b blen) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
+ 
+
+
