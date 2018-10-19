@@ -395,10 +395,20 @@ let init256 = init SHA2_256
 let init384 = init SHA2_384
 let init512 = init SHA2_512
 
+let update_block224 block hash = update_block SHA2_224 block hash
+let update_block256 block hash = update_block SHA2_256 block hash
+let update_block384 block hash = update_block SHA2_384 block hash
+let update_block512 block hash = update_block SHA2_512 block hash
+
 let update224 input hash = update SHA2_224 input hash
 let update256 input hash = update SHA2_256 input hash
 let update384 input hash = update SHA2_384 input hash
 let update512 input hash = update SHA2_512 input hash
+
+let update_last224 prev len last hash = update_last SHA2_224 prev len last hash
+let update_last256 prev len last hash = update_last SHA2_256 prev len last hash
+let update_last384 prev len last hash = update_last SHA2_384 prev len last hash
+let update_last512 prev len last hash = update_last SHA2_512 prev len last hash
 
 let finish224 hash = finish SHA2_224 hash
 let finish256 hash = finish SHA2_256 hash
