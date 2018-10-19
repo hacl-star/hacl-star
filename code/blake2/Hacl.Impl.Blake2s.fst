@@ -22,7 +22,7 @@ type block_p = lbuffer uint8 (Spec.size_block Spec.Blake2S)
 type hash_wp = lbuffer uint32 Spec.size_hash_w
 type index_t = n:size_t{size_v n < 16}
 
-inline_for_extraction let size_word : size_t = 4ul
+inline_for_extraction let size_word : size_t = size 4
 inline_for_extraction let size_block x : n:size_t{v n > 0 /\ v n == Spec.size_block Spec.Blake2.Blake2S} = (size Spec.size_block_w) *. size_word
 
 
@@ -528,6 +528,37 @@ let prev2 (klen:size_t{v klen == 0 \/ v klen == 1})
 	  = to_u64 dlen +. to_u64 (klen *. size 64)
 
 
+val lemma_eq_spec_update_block:
+    (klen:size_nat{klen == 0 \/ klen == 1})
+  -> (dlen:size_nat{if klen = 0 then dlen < pow2 64 else dlen + 64 < pow2 64})
+  -> (i:size_nat{i < dlen/64})
+  -> (prev:uint64{uint_v prev = spec_prev1 klen dlen i})
+  -> block:Seq.lseq uint8 (Spec.size_block Spec.Blake2S)
+  -> hash:Seq.lseq uint32 8 ->
+  Lemma (ensures
+    (Spec.blake2_update_block Spec.Blake2S (spec_prev1 klen dlen i) block hash
+    == Spec.blake2_update_block Spec.Blake2S (uint_v prev) block hash))
+
+let lemma_eq_spec_update_block klen dlen i prev d0 hash0 = ()
+
+
+val lemma_eq_spec_update_last:
+    (klen:size_nat{klen == 0 \/ klen == 1})
+  -> (dlen:size_nat{if klen = 0 then dlen < pow2 64 else dlen + 64 < pow2 64})
+  -> (i:size_nat{i == dlen/64})
+  -> (prev:uint64{uint_v prev == spec_prev2 klen dlen i})
+  -> (llen: size_nat{llen > 0 /\ llen == dlen % 64})
+  -> last:Seq.lseq uint8 llen
+  -> hash:Seq.lseq uint32 8 ->
+  Lemma (ensures
+    (Spec.blake2_update_last Spec.Blake2S (spec_prev2 klen dlen i) llen last hash
+    == Spec.blake2_update_last Spec.Blake2S (uint_v prev) llen last hash))
+
+let lemma_eq_spec_update_last klen dlen i prev llen last hash = ()
+
+
+#reset-options "--z3rlimit 150 --max_fuel 1"
+
 inline_for_extraction
 val blake2s_update:
     #vll: size_t
@@ -541,15 +572,38 @@ val blake2s_update:
                          /\ h1.[hash] == Spec.blake2_update Spec.Blake2S h0.[hash] h0.[d] (v kk)))
 
 let blake2s_update #vll hash d ll kk =
+  let h0 = ST.get() in
   let klen = if kk =. size 0 then size 0 else size 1 in
-  loopi_blocks (size_block Spec.Blake2S) ll d
-    (fun i -> Spec.blake2_update_block Spec.Blake2S (spec_prev1 (v klen) (v ll) i))
-    (fun i -> Spec.blake2_update_last Spec.Blake2S (spec_prev2 (v klen) (v ll) i))
-    (fun i block hash -> blake2s_update_block hash (prev1 klen ll i) block)
-    (fun i rem last hash -> blake2s_update_last hash (prev2 klen ll i) last rem)
-  hash;
-  admit()
-
+  [@inline_let]
+  let spec_update_block (i:size_nat{i < (v ll) / (Spec.size_block Spec.Blake2S)}) =
+    Spec.blake2_update_block Spec.Blake2S ((v klen + i + 1) * (Spec.size_block Spec.Blake2S)) in
+  [@inline_let]
+  let spec_update_last (i:size_nat{i == (v ll) / Spec.size_block Spec.Blake2S}) =
+    Spec.blake2_update_last Spec.Blake2S (v klen * (Spec.size_block Spec.Blake2S) + v ll) in
+  [@inline_let]
+  let impl_update_block (i:size_t{v i < (v ll) / (Spec.size_block Spec.Blake2S)}) (block:block_p) (hash:hash_wp) =
+    blake2s_update_block hash (prev1 klen ll i) block in
+  [@inline_let]
+    let impl_update_last (i:size_t{v i == (v ll) / (Spec.size_block Spec.Blake2S)})
+      (len:size_t{v len <= Spec.size_block Spec.Blake2S /\ v len == (v ll % (Spec.size_block Spec.Blake2S))})
+      (last:lbuffer uint8 (v ll % (Spec.size_block Spec.Blake2S)))
+      (hash:hash_wp):
+      Stack unit
+        (requires (fun h -> live h last /\ live h hash /\ disjoint last hash))
+        (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
+          /\ h1.[hash] == Spec.Blake2.blake2_update_last Spec.Blake2S (spec_prev2 (v klen) (v ll) (v i)) (v len) h0.[last] h0.[hash])) =
+    blake2s_update_last #(ll %. size (Spec.size_block Spec.Blake2S)) hash (prev2 klen ll i) last len in
+  loopi_blocks (size_block Spec.Blake2S) ll d spec_update_block spec_update_last impl_update_block impl_update_last hash;
+  let h1 = ST.get () in
+  assert(
+    let ll = length d in
+    let klen = if kk = 0 then 0 else 1 in
+    let spec_update_block (i:nat{i < ll / (Spec.size_block Spec.Blake2S)}) =
+      Spec.blake2_update_block Spec.Blake2S ((klen + i + 1) * (Spec.size_block Spec.Blake2S)) in
+    let spec_update_last (i:nat) = Spec.blake2_update_last Spec.Blake2S (klen * (Spec.size_block Spec.Blake2S) + ll) in
+    let res = Seq.repeati_blocks (Spec.size_block Spec.Blake2S) h0.[d] spec_update_block spec_update_last h0.[hash] in
+    h1.[hash] == res
+  )
 
 #reset-options "--z3rlimit 25"
 

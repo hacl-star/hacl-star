@@ -396,9 +396,10 @@ val blake2_update:
 let blake2_update a s d kk =
   let ll = length d in
   let klen = if kk = 0 then 0 else 1 in
-  repeati_blocks (size_block a) d
-    (fun i -> blake2_update_block a ((klen + i + 1) * (size_block a)))
-    (fun i -> blake2_update_last  a (klen * (size_block a) + ll)) s
+  let spec_update_block (i:nat{i < ll / (size_block a)}) =
+    blake2_update_block a ((klen + i + 1) * (size_block a)) in
+  let spec_update_last (i:nat) = blake2_update_last a (klen * (size_block a) + ll) in
+  repeati_blocks (size_block a) d spec_update_block spec_update_last s
 
 
 val blake2_finish:
