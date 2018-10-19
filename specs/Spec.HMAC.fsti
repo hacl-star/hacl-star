@@ -26,8 +26,8 @@ val update_block:
 
 val update_last:
     a: H.algorithm
-  -> prev: size_nat
-  -> len: size_nat{len < Hash.size_block a /\ len + prev <= Hash.max_input a}
+  -> prev: nat
+  -> len: nat{len < H.size_block a /\ len + prev <= H.max_input a}
   -> last: lbytes len
   -> H.state a ->
   Tot (H.state a)
@@ -42,6 +42,6 @@ val hmac:
     a: H.algorithm
   -> klen: size_nat{klen < H.max_input a}
   -> key:lbytes klen
-  -> len:size_nat{klen + len <= H.max_input a}
+  -> len:size_nat{klen + len + H.size_block a <= H.max_input a}
   -> input:lbytes len ->
   Tot (lbytes (H.size_hash a))
