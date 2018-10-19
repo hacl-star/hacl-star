@@ -61,6 +61,7 @@ let index_neq #n1 #n2 i j i' j' =
 
 /// Matrices as flat sequences
 
+unfold
 type elem = uint16
 
 type matrix (n1:size_nat) (n2:size_nat{n1 * n2 <= max_size_t}) = Seq.lseq elem (n1 * n2)
