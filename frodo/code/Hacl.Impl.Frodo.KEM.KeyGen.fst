@@ -62,13 +62,13 @@ val frodo_mul_add_as_plus_e_pack_inner:
     (ensures fun h0 r h1 -> modifies (loc_buffer b) h0 h1 /\
       (let a_matrix = Spec.Frodo.Params.frodo_gen_matrix (v params_n) (v bytes_seed_a) (as_seq h0 seed_a) in
       let b_matrix = M.add (M.mul_s a_matrix (as_matrix h0 s_matrix)) (as_matrix h0 e_matrix) in
-      as_seq h1 b == Spec.Frodo.Pack.frodo_pack b_matrix (v params_logq)))
+      as_seq h1 b == Spec.Frodo.Pack.frodo_pack (v params_logq) b_matrix))
 let frodo_mul_add_as_plus_e_pack_inner seed_a s_matrix e_matrix b =
   push_frame();
   let b_matrix = matrix_create params_n params_nbar in
   frodo_mul_add_as_plus_e seed_a s_matrix e_matrix b_matrix;
   assert (v params_nbar % 8 = 0);
-  frodo_pack b_matrix params_logq b;
+  frodo_pack params_logq b_matrix b;
   pop_frame()
 
 inline_for_extraction noextract

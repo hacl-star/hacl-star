@@ -211,7 +211,7 @@ let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix c1 =
   push_frame();
   let bp_matrix = matrix_create params_nbar params_n in
   frodo_mul_add_sa_plus_e_main seed_a seed_e sp_matrix bp_matrix;
-  frodo_pack bp_matrix params_logq c1;
+  frodo_pack params_logq bp_matrix c1;
   pop_frame()
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq
@@ -236,14 +236,14 @@ val crypto_kem_enc_ct_pack_c2_inner:
       modifies (loc_union (loc_buffer c2) (loc_buffer v_matrix)) h0 h1 /\
       as_matrix h1 v_matrix ==
       S.frodo_mul_add_sb_plus_e_plus_mu (as_seq h0 b) (as_seq h0 seed_e) (as_seq h0 coins) (as_matrix h0 sp_matrix) /\
-      as_seq h1 c2 == Spec.Frodo.Pack.frodo_pack (as_matrix h1 v_matrix) (v params_logq))
+      as_seq h1 c2 == Spec.Frodo.Pack.frodo_pack (v params_logq) (as_matrix h1 v_matrix))
 let crypto_kem_enc_ct_pack_c2_inner seed_e coins b sp_matrix c2 v_matrix =
   let n1 = params_nbar in
   let n2 = params_nbar in
   let d = params_logq in
   assert_norm (v d * v n1 <= max_size_t /\ (v d * v n1) * v n2 <= max_size_t /\ v d <= 16);
   frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix;
-  frodo_pack v_matrix params_logq c2
+  frodo_pack params_logq v_matrix c2
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 

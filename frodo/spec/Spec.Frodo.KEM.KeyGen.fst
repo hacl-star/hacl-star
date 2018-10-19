@@ -102,7 +102,7 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e =
   let s_bytes = matrix_to_lbytes s_matrix in
   let e_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 2) in
   let b_matrix = Matrix.add (Matrix.mul_s a_matrix s_matrix) e_matrix in
-  let b = frodo_pack b_matrix params_logq in
+  let b = frodo_pack params_logq b_matrix in
   b, s_bytes
 
 val crypto_kem_keypair_:

@@ -140,7 +140,7 @@ let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix =
       params_logq * j + params_logq <= params_logq * (params_nbar * params_n / 8) /\
       0 <= params_logq * j);
   let bp_matrix = frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix in
-  frodo_pack bp_matrix params_logq
+  frodo_pack params_logq bp_matrix
 
 val crypto_kem_enc_ct_pack_c2:
     seed_e:lbytes crypto_bytes
@@ -156,7 +156,7 @@ let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix =
       params_logq * j + params_logq <= params_logq * (params_nbar * params_nbar/ 8) /\
       0 <= params_logq * j);
   let v_matrix = frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix in
-  frodo_pack v_matrix params_logq
+  frodo_pack params_logq v_matrix
 
 val crypto_kem_enc_ct_inner:
     seed_a:lbytes bytes_seed_a
