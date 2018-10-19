@@ -23,6 +23,8 @@ module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 
+open SHA_helpers
+
 friend SecretByte
 friend X64.Memory_s
 friend X64.Memory
@@ -175,6 +177,12 @@ let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel)
   assert (Seq.equal
     (BV.as_seq va_sM.mem.hs ctx_b128)
     (buffer_as_seq #t va_sM.mem ctx_b));   
+  let ctx_b128 = BV.mk_buffer_view ctx_b Views.view128 in
+  let in_b128 = BV.mk_buffer_view in_b Views.view128 in
+  let input_LE = seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (BV.as_seq h' in_b128)) in
+  let hash_in = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h ctx_b128)) in
+  let hash_out = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h' ctx_b128)) in
+  lemma_update_multi_opaque_vale_is_update_multi hash_in input_LE;  
   ()
 
 let lemma_ghost_sha_update_bytes_stdcall is_win ctx_b in_b num_val k_b stack_b h0 =
