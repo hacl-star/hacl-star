@@ -334,6 +334,9 @@ let update_block (p:alg) (block:lbytes (size_block p)) (hash:hash_w p) : Tot (ha
   let bw = uints_from_bytes_be block in
   compress p bw hash
 
+(* Definition of the init function *)
+let init (p:alg): Tot (hash_w p) = h0Table p
+
 (* Definition of the function for the partial block compression *)
 let update_last
   (p:alg)
@@ -351,6 +354,12 @@ let update_last
     let hash = update_block p block1 hash in
     update_block p block2 hash)
 
+(* Definition of the update function *)
+let update (p:alg) (input:bytes{length input <= max_input p}) (hash:hash_w p): Tot (hash_w p) =
+  repeati_blocks (size_block p) input
+    (fun i -> update_block p)
+    (fun i -> update_last p (i * (size_block p))) hash
+
 (* Definition of the finalization function *)
 let finish p (hash:hash_w p) : lbytes (size_hash p) =
   truncate p hash
@@ -358,8 +367,45 @@ let finish p (hash:hash_w p) : lbytes (size_hash p) =
 (* Definition of the SHA2 ontime function *)
 let hash (p:alg) (input:bytes{length input <= max_input p}) : lbytes (size_hash p) =
   let len = length input in
-  let s = h0Table p in
-  let s = repeati_blocks (size_block p) input
-    (fun i -> update_block p)
-    (fun i -> update_last p (i * (size_block p))) s in
+  let s = init p in
+  let s = update p input s in
   finish p s
+
+///
+/// Instances of SHA2
+///
+
+let size_block224 = size_block SHA2_224
+let size_block256 = size_block SHA2_256
+let size_block384 = size_block SHA2_384
+let size_block512 = size_block SHA2_512
+
+let size_hash224 = size_hash SHA2_224
+let size_hash256 = size_hash SHA2_256
+let size_hash384 = size_hash SHA2_384
+let size_hash512 = size_hash SHA2_512
+
+let max_input224 = max_input SHA2_224
+let max_input256 = max_input SHA2_256
+let max_input384 = max_input SHA2_384
+let max_input512 = max_input SHA2_512
+
+let init224 = init SHA2_224
+let init256 = init SHA2_256
+let init384 = init SHA2_384
+let init512 = init SHA2_512
+
+let update224 input hash = update SHA2_224 input hash
+let update256 input hash = update SHA2_256 input hash
+let update384 input hash = update SHA2_384 input hash
+let update512 input hash = update SHA2_512 input hash
+
+let finish224 hash = finish SHA2_224 hash
+let finish256 hash = finish SHA2_256 hash
+let finish384 hash = finish SHA2_384 hash
+let finish512 hash = finish SHA2_512 hash
+
+let hash224 input = hash SHA2_224 input
+let hash256 input = hash SHA2_256 input
+let hash384 input = hash SHA2_384 input
+let hash512 input = hash SHA2_512 input
