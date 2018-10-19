@@ -17,6 +17,7 @@ open GCTR
 open GCM_s
 open GCM_helpers
 open GHash
+open X64.CPU_Features_s
 
 let buffer_to_seq_quad32 (b:s8{ B.length b % 16 == 0 }) (h:HS.mem) : GTot (s:Seq.seq quad32 {Seq.length s == B.length b / 16} ) =
   let b128 = BV.mk_buffer_view b Views.view128 in
@@ -40,6 +41,8 @@ let keys_match (key:Ghost.erased (aes_key_LE AES_128)) (keys_b:s8 { B.length key
   BV.as_seq h keys128_b == round_keys
 
 let pre_cond (h:HS.mem) (plain_b:s8) (num_bytes:nat64) (iv_old:Ghost.erased (quad32)) (iv_b:s8) (key:Ghost.erased (aes_key_LE AES_128)) (keys_b:s8) (cipher_b:s8) = 
+  aesni_enabled /\
+
   live h plain_b /\ live h iv_b /\ live h keys_b /\ live h cipher_b /\ 
   disjoint plain_b iv_b /\ 
   disjoint plain_b keys_b /\ 
