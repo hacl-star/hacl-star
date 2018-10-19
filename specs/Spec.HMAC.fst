@@ -56,7 +56,7 @@ let finish (a:H.algorithm) (key:lbytes (H.size_block a)) (hash:H.state a) =
   hash2
 
 
-let hmac (a:H.algorithm) (klen:size_nat{klen < H.max_input a}) (key:lbytes klen) (len:size_nat{klen + len + H.size_block a <= H.max_input a}) (input:lbytes len) =
+let hmac (a:H.algorithm) (klen:size_nat{klen <= H.max_input a}) (key:lbytes klen) (len:size_nat{klen + len + H.size_block a <= H.max_input a}) (input:lbytes len) =
   let okey = wrap_key a klen key in
   let hash0 = init a okey in
   let hash1 = repeati_blocks (H.size_block a) input
