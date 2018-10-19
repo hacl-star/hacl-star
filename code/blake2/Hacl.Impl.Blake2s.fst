@@ -453,7 +453,7 @@ let blake2s_init #vkk hash k kk nn =
     blake2s_init_hash hash kk nn;
     blake2s_init_branching #vkk hash key_block k kk nn)
 
- 
+
 #reset-options "--z3rlimit 15"
 
 val blake2s_update_last:
@@ -503,28 +503,28 @@ let blake2s_finish #vnn output hash nn =
 
 #reset-options "--z3rlimit 50"
 noextract inline_for_extraction
-let spec_prev1 (klen:size_nat{klen == 0 \/ klen == 1}) 
-	      (dlen:size_nat{if klen = 0 then dlen < pow2 64 else dlen + 64 < pow2 64}) 
+let spec_prev1 (klen:size_nat{klen == 0 \/ klen == 1})
+	      (dlen:size_nat{if klen = 0 then dlen < pow2 64 else dlen + 64 < pow2 64})
 	      (i:size_nat{i < dlen/64}) : r:nat{r < pow2 64} = (klen + i + 1) * 64
 
 noextract inline_for_extraction
-let spec_prev2 (klen:size_nat{klen == 0 \/ klen == 1}) 
-	      (dlen:size_nat{if klen = 0 then dlen < pow2 64 else dlen + 64 < pow2 64}) 
+let spec_prev2 (klen:size_nat{klen == 0 \/ klen == 1})
+	      (dlen:size_nat{if klen = 0 then dlen < pow2 64 else dlen + 64 < pow2 64})
 	      (i:size_nat{i == dlen/64}) : r:nat{r < pow2 64} = (klen * 64) + dlen
 
 
 noextract inline_for_extraction
-let prev1 (klen:size_t{v klen == 0 \/ v klen == 1}) 
-          (dlen:size_t{if v klen = 0 then v dlen < pow2 64 else v dlen + 64 < pow2 64}) 
-	  (i:size_t{v i < v dlen/64}) : 
-	  (prev:uint64{uint_v prev = spec_prev1 (v klen) (v dlen) (v i)})  	  
+let prev1 (klen:size_t{v klen == 0 \/ v klen == 1})
+          (dlen:size_t{if v klen = 0 then v dlen < pow2 64 else v dlen + 64 < pow2 64})
+	  (i:size_t{v i < v dlen/64}) :
+	  (prev:uint64{uint_v prev = spec_prev1 (v klen) (v dlen) (v i)})
 	  = to_u64 (klen +. i +. size 1) *. u64 64
 
 noextract inline_for_extraction
-let prev2 (klen:size_t{v klen == 0 \/ v klen == 1}) 
-          (dlen:size_t{if v klen = 0 then v dlen < pow2 64 else v dlen + 64 < pow2 64}) 
-	  (i:size_t{v i == v dlen/64}) : 
-	  (prev:uint64{uint_v prev == spec_prev2 (v klen) (v dlen) (v i)})  	  
+let prev2 (klen:size_t{v klen == 0 \/ v klen == 1})
+          (dlen:size_t{if v klen = 0 then v dlen < pow2 64 else v dlen + 64 < pow2 64})
+	  (i:size_t{v i == v dlen/64}) :
+	  (prev:uint64{uint_v prev == spec_prev2 (v klen) (v dlen) (v i)})
 	  = to_u64 dlen +. to_u64 (klen *. size 64)
 
 
@@ -546,7 +546,7 @@ let blake2s_update #vll hash d ll kk =
     (fun i -> Spec.blake2_update_block Spec.Blake2S (spec_prev1 (v klen) (v ll) i))
     (fun i -> Spec.blake2_update_last Spec.Blake2S (spec_prev2 (v klen) (v ll) i))
     (fun i block hash -> blake2s_update_block hash (prev1 klen ll i) block)
-    (fun i rem last hash -> blake2s_update_last hash (prev2 klen ll i) last rem) 
+    (fun i rem last hash -> blake2s_update_last hash (prev2 klen ll i) last rem)
   hash;
   admit()
 
