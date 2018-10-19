@@ -14,19 +14,18 @@ let (.[]) = FStar.Seq.index
 #reset-options "--max_fuel 0 --max_ifuel 0"
   
 // Specialize these definitions (from Spec.SHA2.fst) for SHA256
-unfold let size_k_w = 64
+unfold let size_k_w_256 = 64
 val word:Type0
-unfold let size_hash_w =8
 (* Number of words for a block size *)
-let size_block_w = 16
+let size_block_w_256 = 16
 (* Define the size block in bytes *)
 let size_block =
   let open FStar.Mul in
-  4 (*size_word a*) * size_block_w
-let block_w  = m:seq word {length m = size_block_w}
+  4 (*size_word a*) * size_block_w_256
+let block_w  = m:seq word {length m = size_block_w_256}
 let counter = nat
-val k0 : (s:seq word {length s = size_k_w})
-unfold let hash256 = m:Seq.seq word {Seq.length m = size_hash_w}
+val k : (s:seq word {length s = size_k_w_256})
+unfold let hash256 = m:Seq.seq word {Seq.length m = 8}
 
 (* Input data. *)
 val byte:Type0
@@ -37,12 +36,12 @@ let bytes_blocks =
   l:bytes { Seq.length l % size_block = 0 }
 
 // Hide various SHA2 definitions
-val ws_opaque (b:block_w) (t:counter{t < size_k_w}): Tot (nat32)
-val shuffle_core_opaque (block:block_w) (hash:hash256) (t:counter{t < size_k_w}): Tot (hash256) 
-val update_multi_opaque (hash:hash256) (blocks:bytes_blocks):Tot (hash256) 
+val ws_opaque (b:block_w) (t:counter{t < size_k_w_256}):nat32
+val shuffle_core_opaque (block:block_w) (hash:hash256) (t:counter{t < size_k_w_256}):hash256
+val update_multi_opaque (hash:hash256) (blocks:bytes_blocks):hash256 
 
 // Hide some functions that operate on words & bytes
-val add_mod (x:word) (y:nat32) : nat32
+val add_mod32 (x:word) (y:nat32) : nat32
 val word_to_nat32 (x:word) : nat32
 val nat32_to_word (x:nat32) : word
 val byte_to_nat8 (b:byte) : nat8
@@ -51,22 +50,45 @@ val nat8_to_byte (b:nat8) : byte
 // Work around some limitations in Vale's support for dependent types
 
 //unfold let bytes_blocks256 = bytes_blocks SHA2_256
-unfold let repeat_range_vale (max:nat { max < size_k_w}) (block:block_w) (hash:hash256) =
+unfold let repeat_range_vale (max:nat { max < size_k_w_256}) (block:block_w) (hash:hash256) =
   Spec.Loops.repeat_range 0 max (shuffle_core_opaque block) hash
 unfold let lemma_repeat_range_0_vale (block:block_w) (hash:hash256) = 
   Spec.Loops.repeat_range_base 0 (shuffle_core_opaque block) hash
 unfold let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 = 
-  if length blocks % size_k_w = 0 then let b:bytes_blocks = blocks in update_multi_opaque hash b else hash
+  if length blocks % size_k_w_256 = 0 then let b:bytes_blocks = blocks in update_multi_opaque hash b else hash
 
 
-val make_hash (abef cdgh:quad32) : hash256
-val make_ordered_hash (abef cdgh:quad32): hash256
+val make_hash (abef cdgh:quad32) : 
+    (hash:hash256 {
+         length hash == 8 /\
+         hash.[0] == nat32_to_word abef.hi3 /\
+         hash.[1] == nat32_to_word abef.hi2 /\
+         hash.[2] == nat32_to_word cdgh.hi3 /\
+         hash.[3] == nat32_to_word cdgh.hi2 /\
+         hash.[4] == nat32_to_word abef.lo1 /\
+         hash.[5] == nat32_to_word abef.lo0 /\
+         hash.[6] == nat32_to_word cdgh.lo1 /\
+         hash.[7] == nat32_to_word cdgh.lo0    
+    } )
+
+val make_ordered_hash (abcd efgh:quad32): 
+  (hash:hash256 {
+         length hash == 8 /\
+         hash.[0] == nat32_to_word abcd.lo0 /\
+         hash.[1] == nat32_to_word abcd.lo1 /\
+         hash.[2] == nat32_to_word abcd.hi2 /\
+         hash.[3] == nat32_to_word abcd.hi3 /\
+         hash.[4] == nat32_to_word efgh.lo0 /\
+         hash.[5] == nat32_to_word efgh.lo1 /\
+         hash.[6] == nat32_to_word efgh.hi2 /\
+         hash.[7] == nat32_to_word efgh.hi3      
+   })
 
 // Top-level proof for the SHA256_rnds2 instruction
 val lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w) (hash_in:hash256) : Lemma
-  (requires t + 1 < size_k_w /\
-            xmm0.lo0 == add_mod k0.[t]   (ws_opaque block t) /\
-            xmm0.lo1 == add_mod k0.[t+1] (ws_opaque block (t+1)) /\ 
+  (requires t + 1 < size_k_w_256 /\
+            xmm0.lo0 == add_mod32 k.[t]   (ws_opaque block t) /\
+            xmm0.lo1 == add_mod32 k.[t+1] (ws_opaque block (t+1)) /\ 
             make_hash abef cdgh == Spec.Loops.repeat_range 0 t (shuffle_core_opaque block) hash_in
             )
   (ensures make_hash (sha256_rnds2_spec cdgh abef xmm0) abef ==
@@ -74,7 +96,7 @@ val lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w) (hash
 
 (* Proof work for the SHA256_msg* instructions *)
 let ws_quad32 (t:counter) (block:block_w) : quad32 =
-    if t < size_k_w - 3 then
+    if t < size_k_w_256 - 3 then
        Mkfour (ws_opaque block t)
               (ws_opaque block (t+1))
               (ws_opaque block (t+2))
@@ -87,7 +109,7 @@ unfold let ws_partial = make_opaque ws_partial_def
 
 // Top-level proof for the SHA256_msg1 instruction
 val lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w) : Lemma
-  (requires 16 <= t /\ t < size_k_w /\
+  (requires 16 <= t /\ t < size_k_w_256 /\
             dst == ws_quad32 (t-16) block /\
             src.lo0 == ws_opaque block (t-12))
   (ensures sha256_msg1_spec dst src == ws_partial t block)
@@ -95,7 +117,7 @@ val lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w) : Lemma
   
 // Top-level proof for the SHA256_msg2 instruction
 val lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w) : Lemma
-  (requires 16 <= t /\ t < size_k_w - 3 /\
+  (requires 16 <= t /\ t < size_k_w_256 - 3 /\
             (let step1 = ws_partial t block in
              let t_minus_7 = ws_quad32 (t-7) block in
              src1 == add_wrap_quad32 step1 t_minus_7 /\
@@ -108,12 +130,12 @@ open Workarounds
 
 (* Abbreviations and lemmas for the code itself *)
 let k_reqs (k_seq:seq quad32) : prop0 =
-  length k_seq == size_k_w / 4 /\
-  (forall i . {:pattern (index_work_around_quad32 k_seq i)} 0 <= i /\ i < (size_k_w/4) ==> 
-    (k_seq.[i]).lo0 == word_to_nat32 (k0.[4 `op_Multiply` i]) /\
-    (k_seq.[i]).lo1 == word_to_nat32 (k0.[4 `op_Multiply` i + 1]) /\
-    (k_seq.[i]).hi2 == word_to_nat32 (k0.[4 `op_Multiply` i + 2]) /\
-    (k_seq.[i]).hi3 == word_to_nat32 (k0.[4 `op_Multiply` i + 3]))
+  length k_seq == size_k_w_256 / 4 /\
+  (forall i . {:pattern (index_work_around_quad32 k_seq i)} 0 <= i /\ i < (size_k_w_256/4) ==> 
+    (k_seq.[i]).lo0 == word_to_nat32 (k.[4 `op_Multiply` i]) /\
+    (k_seq.[i]).lo1 == word_to_nat32 (k.[4 `op_Multiply` i + 1]) /\
+    (k_seq.[i]).hi2 == word_to_nat32 (k.[4 `op_Multiply` i + 2]) /\
+    (k_seq.[i]).hi3 == word_to_nat32 (k.[4 `op_Multiply` i + 3]))
   
 let quads_to_block (qs:seq quad32) : block_w
   =
@@ -121,22 +143,25 @@ let quads_to_block (qs:seq quad32) : block_w
   let f (n:nat{n < 16}) : word = nat32_to_word (if n < length nat32_seq then nat32_seq.[n] else 0) in
   init 16 f
 
+(*+ TODO +*)
 val lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
-  (ensures (let block = quads_to_block qs in
+  (ensures true)
+  (*
+  (let block = quads_to_block qs in
             forall i . {:pattern (index_work_around_quad32 qs i)} 0 <= i /\ i < 4 ==>
               (qs.[i]).lo0 == ws_opaque block (4 `op_Multiply` i + 0) /\
               (qs.[i]).lo1 == ws_opaque block (4 `op_Multiply` i + 1) /\
               (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\
               (qs.[i]).hi3 == ws_opaque block (4 `op_Multiply` i + 3) /\
               qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
-         
+    *)     
 val update_block (hash:hash256) (block:block_w): hash256
 
 val update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
   (requires (let hash_orig = make_hash h0 h1 in
              make_hash src1 src2 == 
-             Spec.Loops.repeat_range 0 size_k_w (shuffle_core_opaque block) hash_orig /\
+             Spec.Loops.repeat_range 0 size_k_w_256 (shuffle_core_opaque block) hash_orig /\
              src1' == add_wrap_quad32 src1 h0 /\
              src2' == add_wrap_quad32 src2 h1))
   (ensures (let hash_orig = make_hash h0 h1 in
@@ -164,7 +189,7 @@ val lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_qua
                   blocks == seq_nat8_to_seq_byte nat8s /\
                   hash' == update_multi_quads r_quads hash)        
         (ensures 
-           length blocks % size_k_w == 0 /\
+           length blocks % size_k_w_256 == 0 /\
            hash' == update_multi_opaque_vale hash blocks)
         (decreases (length quads)) 
 
