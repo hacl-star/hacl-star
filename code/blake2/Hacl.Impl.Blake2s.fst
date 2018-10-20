@@ -48,6 +48,9 @@ let get_iv s =
   secret r
 
 
+
+#set-options "--z3rlimit 50"
+[@ Substitute ]
 val set_iv:
   hash:hash_wp ->
   Stack unit
@@ -57,6 +60,7 @@ val set_iv:
 [@ Substitute ]
 let set_iv hash =
   recall_contents const_iv (Spec.ivTable Spec.Blake2S);
+  let h0 = ST.get() in
   admit(); // BB. we need Lib.Buffer.map to apply `secret`
   icopy hash (size (Spec.size_hash_w)) const_iv
 
@@ -419,10 +423,8 @@ val blake2s_init_branching:
 [@ Substitute ]
 let blake2s_init_branching #vkk hash key_block k kk nn =
   let h0 = ST.get () in
-  if kk =. (size 0) then
-    let h1 = ST.get () in
-    assume(modifies0 h0 h1 ==> modifies2 hash key_block h0 h1)
-  else begin
+  if kk <>. (size 0) then
+  begin
     update_sub key_block (size 0) kk k;
     let prev = Spec.word_to_limb Spec.Blake2S (secret (size_block Spec.Blake2S)) in
     blake2s_update_block hash prev key_block

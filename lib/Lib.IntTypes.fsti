@@ -509,6 +509,9 @@ inline_for_extraction
 let (=.) #t = eq #t
 
 inline_for_extraction
+let (<>.) #t = ne #t
+
+inline_for_extraction
 let (<.) #t = lt #t
 inline_for_extraction
 let (<=.) #t = lte #t
