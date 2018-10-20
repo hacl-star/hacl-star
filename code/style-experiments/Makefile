@@ -205,6 +205,10 @@ aesgcm-perf: aesgcm-ni.exe
 	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_Impl_AesGCM.c $(KREMLIN_HOME)/kremlib/c/testlib.o aesgcm_test.c -o aesgcm-perf.exe
 	./aesgcm-perf.exe
 
+aesgcm-test-only: 
+	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_Impl_AesGCM.c aesgcm-ni-c/Hacl_Test_AesGCM.c $(KREMLIN_HOME)/kremlib/c/testlib.o -o aesgcm-ni.exe
+	./aesgcm-ni.exe
+
 POLY1305_64_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	Lib.Utils.fst \

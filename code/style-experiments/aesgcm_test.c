@@ -8,30 +8,21 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include <vec128.h>
 
 typedef uint64_t cycles;
 
-static __inline__ cycles cpucycles_begin(void)
+static __inline__ cycles cpucycles(void)
 {
   uint64_t rax,rdx,aux;
   asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
   return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
 
-extern void Hacl_Impl_AesGCM_aes128_gcm_encrypt(uint8_t* out, uint8_t* in, int in_len, uint8_t* aad, int aad_len, uint8_t* k, uint8_t* n);
+extern void Hacl_Impl_AesGCM_aes128_gcm_init(Lib_Vec128_vec128* ctx, uint8_t* k, uint8_t* n);
+extern void Hacl_Impl_AesGCM_aes128_gcm_encrypt(Lib_Vec128_vec128* ctx, uint8_t* out, uint8_t* in, int in_len, uint8_t* aad, int aad_len);
+extern int Hacl_Impl_AesGCM_aes128_gcm_decrypt(Lib_Vec128_vec128* ctx, uint8_t* out, uint8_t* in, int in_len, uint8_t* aad, int aad_len);
 
 #define ROUNDS 10240
 #define SIZE   16384
@@ -73,8 +64,10 @@ int main() {
   };
   uint8_t comp[76] = {0};
   bool ok = true;
-  
-  Hacl_Impl_AesGCM_aes128_gcm_encrypt(comp,in,60,aad,20,k,n);
+
+  Lib_Vec128_vec128 ctx[22] = {0};
+  Hacl_Impl_AesGCM_aes128_gcm_init(ctx,k,n);
+  Hacl_Impl_AesGCM_aes128_gcm_encrypt(ctx,comp,in,60,aad,20);
   printf("AESGCM-NI computed:");
   for (int i = 0; i < 76; i++)
     printf("%02x",comp[i]);
@@ -86,7 +79,27 @@ int main() {
   ok = true;
   for (int i = 0; i < 76; i++)
     ok = ok & (exp[i] == comp[i]);
-  if (ok) printf("Success!\n");
+  if (ok) printf("Encrypt Success!\n");
+  else printf("Encrypt FAILURE!\n");
+
+  int res = Hacl_Impl_AesGCM_aes128_gcm_decrypt(ctx,comp,exp,76,aad,20);
+  if (res == 0) 
+    printf("AESGCM-NI Decrypt failed!");
+  else {
+    printf("AESGCM-NI Decrypt computed:");
+    for (int i = 0; i < 60; i++)
+      printf("%02x",comp[i]);
+    printf("\n");
+    printf("AESGCM_NI Decrypt expected:");
+    for (int i = 0; i < 60; i++)
+      printf("%02x",in[i]);
+    printf("\n");
+    ok = true;
+    for (int i = 0; i < 60; i++)
+      ok = ok & (in[i] == comp[i]);
+    if (ok) printf("Decrypt Success!\n");
+    else printf("Decrypt FAILURE!\n");
+  }
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE+16];
@@ -99,16 +112,17 @@ int main() {
   memset(key,'K',16);
   memset(nonce,'N',12);
 
+  Hacl_Impl_AesGCM_aes128_gcm_init(ctx,key,nonce);
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Impl_AesGCM_aes128_gcm_encrypt(plain,plain,SIZE,aad,20,key,nonce); 
- }
+    Hacl_Impl_AesGCM_aes128_gcm_encrypt(ctx,plain,plain,SIZE,aad,20);
+  }
 
   t1 = clock();
-  a = cpucycles_begin();
+  a = cpucycles();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Impl_AesGCM_aes128_gcm_encrypt(plain,plain,SIZE,aad,20,key,nonce); 
+    Hacl_Impl_AesGCM_aes128_gcm_encrypt(ctx,plain,plain,SIZE,aad,20);
   }
-  b = cpucycles_end();
+  b = cpucycles();
   t2 = clock();
   clock_t tdiff1 = t2 - t1;
   cycles cdiff1 = b - a;
@@ -117,12 +131,5 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));
-
-  /*
-  printf("AES-BitSlice PERF:\n");
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff2,(double)cdiff2/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff2,(double)tdiff2/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff2 / CLOCKS_PER_SEC) * 1000000.0));
-  */
   
 }
