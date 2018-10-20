@@ -354,8 +354,8 @@ let lemma_sha256_rnds2_two_steps (abef cdgh xmm0:quad32) (t:counter) (block:bloc
 // Top-level proof for the SHA256_rnds2 instruction
 let lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w) (hash_in:hash256) : Lemma
   (requires t + 1 < size_k_w_256 /\
-            xmm0.lo0 == add_mod32 k.[t]   (ws_opaque block t) /\
-            xmm0.lo1 == add_mod32 k.[t+1] (ws_opaque block (t+1)) /\ 
+            xmm0.lo0 == add_wrap (word_to_nat32 k.[t])   (ws_opaque block t) /\
+            xmm0.lo1 == add_wrap (word_to_nat32 k.[t+1]) (ws_opaque block (t+1)) /\ 
             make_hash abef cdgh == Spec.Loops.repeat_range 0 t (shuffle_core_opaque block) hash_in
             )
   (ensures make_hash (sha256_rnds2_spec cdgh abef xmm0) abef ==
@@ -569,7 +569,8 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w) : Lemma
 (* Abbreviations and lemmas for the code itself *)
 open Workarounds
 
-(*+ TODO +*)
+(*+ TODO: Why does this work in fsti but not here? +*)
+(*
 #push-options "--z3rlimit 20 --max_fuel 1"
 let lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
@@ -584,6 +585,7 @@ let lemma_quads_to_block (qs:seq quad32) : Lemma
   //reveal_opaque ws;
   admit()
 #pop-options
+*)
 
 let translate_hash_update (h0 h1 h0' h1' a0 a1:quad32) : Lemma
   (requires h0' == add_wrap_quad32 a0 h0 /\

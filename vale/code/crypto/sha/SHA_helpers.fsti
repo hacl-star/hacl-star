@@ -41,7 +41,6 @@ val shuffle_core_opaque (block:block_w) (hash:hash256) (t:counter{t < size_k_w_2
 val update_multi_opaque (hash:hash256) (blocks:bytes_blocks):hash256 
 
 // Hide some functions that operate on words & bytes
-val add_mod32 (x:word) (y:nat32) : nat32
 val word_to_nat32 (x:word) : nat32
 val nat32_to_word (x:nat32) : word
 val byte_to_nat8 (b:byte) : nat8
@@ -87,8 +86,8 @@ val make_ordered_hash (abcd efgh:quad32):
 // Top-level proof for the SHA256_rnds2 instruction
 val lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w) (hash_in:hash256) : Lemma
   (requires t + 1 < size_k_w_256 /\
-            xmm0.lo0 == add_mod32 k.[t]   (ws_opaque block t) /\
-            xmm0.lo1 == add_mod32 k.[t+1] (ws_opaque block (t+1)) /\ 
+            xmm0.lo0 == add_wrap (word_to_nat32 k.[t])   (ws_opaque block t) /\
+            xmm0.lo1 == add_wrap (word_to_nat32 k.[t+1]) (ws_opaque block (t+1)) /\ 
             make_hash abef cdgh == Spec.Loops.repeat_range 0 t (shuffle_core_opaque block) hash_in
             )
   (ensures make_hash (sha256_rnds2_spec cdgh abef xmm0) abef ==
@@ -143,11 +142,11 @@ let quads_to_block (qs:seq quad32) : block_w
   let f (n:nat{n < 16}) : word = nat32_to_word (if n < length nat32_seq then nat32_seq.[n] else 0) in
   init 16 f
 
-(*+ TODO +*)
+(*+ TODO: Why doesn't this work in the .fst? +*)
+(*
 val lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
-  (ensures true)
-  (*
+  (ensures
   (let block = quads_to_block qs in
             forall i . {:pattern (index_work_around_quad32 qs i)} 0 <= i /\ i < 4 ==>
               (qs.[i]).lo0 == ws_opaque block (4 `op_Multiply` i + 0) /\
@@ -155,7 +154,22 @@ val lemma_quads_to_block (qs:seq quad32) : Lemma
               (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\
               (qs.[i]).hi3 == ws_opaque block (4 `op_Multiply` i + 3) /\
               qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
-    *)     
+*)
+#push-options "--z3rlimit 20 --max_fuel 1"
+let lemma_quads_to_block (qs:seq quad32) : Lemma
+  (requires length qs == 4)
+  (ensures (let block = quads_to_block qs in
+            forall i . {:pattern (index_work_around_quad32 qs i)} 0 <= i /\ i < 4 ==>
+              (qs.[i]).lo0 == ws_opaque block (4 `op_Multiply` i + 0) /\
+              (qs.[i]).lo1 == ws_opaque block (4 `op_Multiply` i + 1) /\
+              (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\
+              (qs.[i]).hi3 == ws_opaque block (4 `op_Multiply` i + 3) /\
+              qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
+  =  
+  //reveal_opaque ws;
+  admit()
+#pop-options
+
 val update_block (hash:hash256) (block:block_w): hash256
 
 val update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
