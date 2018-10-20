@@ -694,9 +694,9 @@ let lemma_update_multi_quads_short (s:seq quad32) (hash_orig:hash256) : Lemma
   =
   ()
 
-let update_multi_one (h:hash256) (b:bytes_blocks SHA2_256 {length b = size_block SHA2_256}) : Lemma
+let update_multi_one (h:hash256) (b:bytes_blocks {length b = size_block}) : Lemma
   (ensures (update_multi SHA2_256 h b == update SHA2_256 h b)) =
-  let block, rem = Seq.split b (size_block SHA2_256) in
+  let block, rem = Seq.split b (size_block) in
   assert (Seq.length rem == 0);
   update_multi_zero SHA2_256 (update SHA2_256 h b)
 
@@ -706,7 +706,7 @@ let update_multi_one (h:hash256) (b:bytes_blocks SHA2_256 {length b = size_block
 let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
             qs == reverse_bytes_quad32_seq quads /\
-            input2 == seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
+            input2 == seq_nat8_to_seq_byte (le_seq_quad32_to_bytes quads))
   (ensures  quads_to_block qs == words_of_bytes SHA2_256 size_block_w input2)
   =
   // calc {
@@ -730,7 +730,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
   Lemma (requires length quads % 4 == 0 /\
                   r_quads == reverse_bytes_quad32_seq quads /\
                   nat8s == le_seq_quad32_to_bytes quads /\
-                  blocks == seq_nat8_to_seq_U8 nat8s /\
+                  blocks == seq_nat8_to_seq_byte nat8s /\
                   hash' == update_multi_quads r_quads hash)        
         (ensures 
            length blocks % 64 == 0 /\
@@ -777,16 +777,16 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     let r_prefix = reverse_bytes_quad32_seq prefix in
     lemma_update_multi_equiv_vale hash h_prefix r_prefix prefix 
                              (le_seq_quad32_to_bytes r_prefix) 
-                             (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix));
-    assert (h_prefix == update_multi SHA2_256 hash (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix)));    
+                             (seq_nat8_to_seq_byte (le_seq_quad32_to_bytes r_prefix));
+    assert (h_prefix == update_multi SHA2_256 hash (seq_nat8_to_seq_byte (le_seq_quad32_to_bytes r_prefix)));    
     // To show that h_prefix == h_bytes1, we need to show that:
     // seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix) == input1
     // calc {
     //   input1
     //   slice blocks 0 bytes_pivot
     //   slice ( (le_seq_quad32_to_bytes quads)) 0 bytes_pivot
-    assert (equal (slice (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads)) 0 bytes_pivot)
-                  (seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads) 0 bytes_pivot)));
+    assert (equal (slice (seq_nat8_to_seq_byte (le_seq_quad32_to_bytes quads)) 0 bytes_pivot)
+                  (seq_nat8_to_seq_byte (slice (le_seq_quad32_to_bytes quads) 0 bytes_pivot)));
     //   seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads) 0 bytes_pivot)
     slice_commutes_le_seq_quad32_to_bytes0 quads (bytes_pivot / 16);
     //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads 0 (bytes_pivot / 16)))
@@ -817,8 +817,8 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     //   input2
     //   slice blocks bytes_pivot (length blocks)
     //   slice (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads)) bytes_pivot (length blocks)
-    assert (equal (slice (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads)) bytes_pivot (length blocks))
-                  (seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads)  bytes_pivot (length blocks))));
+    assert (equal (slice (seq_nat8_to_seq_byte (le_seq_quad32_to_bytes quads)) bytes_pivot (length blocks))
+                  (seq_nat8_to_seq_byte (slice (le_seq_quad32_to_bytes quads)  bytes_pivot (length blocks))));
     //   seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads) bytes_pivot (length blocks))
     slice_commutes_le_seq_quad32_to_bytes quads (bytes_pivot/16) ((length blocks)/16);
     //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads bytes_pivot/16 (length blocks)/16)
@@ -885,22 +885,13 @@ let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) 
   )  
 #pop-options  
 
-let le_bytes_to_hash (b:seq nat8) : hash256 =
-  if length b <> 32 then   
-     (let f (n:nat{n < 8}) : UInt32.t = to_uint32 0 in
-     init 8 f)
-  else (
-     let open Words.Seq_s in
-     Spec.Loops.seq_map to_uint32 (seq_nat8_to_seq_nat32_LE b)
-  )
-
 let lemma_le_bytes_to_hash_quads_part1 (s:seq quad32) : Lemma
   (requires length s == 2)
   (ensures  le_bytes_to_hash (le_seq_quad32_to_bytes s) ==
-            Spec.Loops.seq_map to_uint32 (Words.Seq_s.seq_four_to_seq_LE s))
+            Spec.Loops.seq_map nat32_to_word (Words.Seq_s.seq_four_to_seq_LE s))
   =
-  let rhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in  
-  assert (rhs == Spec.Loops.seq_map to_uint32 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (le_seq_quad32_to_bytes s)));
+  let lhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in  
+  assert (lhs == Spec.Loops.seq_map nat32_to_word (Words.Seq_s.seq_nat8_to_seq_nat32_LE (le_seq_quad32_to_bytes s)));
   reveal_opaque le_seq_quad32_to_bytes_def;
   Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_LE (Words.Seq_s.seq_four_to_seq_LE s);
   ()
@@ -922,7 +913,7 @@ let lemma_le_bytes_to_hash_quads (s:seq quad32) : Lemma
   =
   let rhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in  
   lemma_le_bytes_to_hash_quads_part1 s;
-  assert (rhs == Spec.Loops.seq_map to_uint32 (Words.Seq_s.seq_four_to_seq_LE s));
+  assert (rhs == Spec.Loops.seq_map nat32_to_word (Words.Seq_s.seq_four_to_seq_LE s));
   ()
 #pop-options
 
