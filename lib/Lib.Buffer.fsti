@@ -672,4 +672,37 @@ val loop_blocks:
       Seq.repeat_blocks #a #(Seq.lseq b blen) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
  
 
+(** Map a total function on a buffer *)
+inline_for_extraction
+val mapT:
+    #a:Type
+  -> #b:Type
+  -> #len:size_nat
+  -> o:lbuffer b len
+  -> clen:size_t{v clen == len}
+  -> f:(a -> Tot b)
+  -> i:lbuffer a len ->
+  Stack unit
+    (requires fun h0 -> B.live h0 o /\ B.live h0 i)
+    (ensures  fun h0 _ h1 ->
+      B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
+      as_seq h1 o == Seq.map f (as_seq h0 i))
+
+(** Map a total function on an immutable buffer *)
+inline_for_extraction
+val imapT:
+    #a:Type
+  -> #b:Type
+  -> #len:size_nat
+  -> o:lbuffer b len
+  -> clen:size_t{v clen == len}
+  -> f:(a -> Tot b)
+  -> i:ilbuffer a len ->
+  Stack unit
+    (requires fun h0 -> B.live h0 o /\ B.live h0 i)
+    (ensures  fun h0 _ h1 ->
+      B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
+      as_seq h1 o == Seq.map f (ias_seq h0 i))
+
+
 

@@ -61,8 +61,7 @@ val set_iv:
 let set_iv hash =
   recall_contents const_iv (Spec.ivTable Spec.Blake2S);
   let h0 = ST.get() in
-  admit(); // BB. we need Lib.Buffer.map to apply `secret`
-  icopy hash (size (Spec.size_hash_w)) const_iv
+  imapT hash (size (Spec.size_hash_w)) secret const_iv
 
 
 #set-options "--z3rlimit 15"

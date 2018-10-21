@@ -236,3 +236,15 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
     loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l rem last w
+
+
+let mapT #a #b #len o clen f inp = 
+  let h0 = ST.get () in
+  loop_nospec #h0 clen o (fun i -> o.(i) <- f inp.(i));
+  admit()
+
+let imapT #a #b #len o clen f inp = 
+  let h0 = ST.get () in
+  loop_nospec #h0 clen o (fun i -> o.(i) <- f (iindex inp i));
+  admit()
+
