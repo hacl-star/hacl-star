@@ -398,8 +398,10 @@ val rv_loc_elems_preserved:
 	(decreases (U32.v j))
 let rec rv_loc_elems_preserved #a #rg rv i j p h0 h1 =
   if i = j then ()
-  else (V.get_preserved rv (j - 1ul) p h0 h1;
+  else (V.loc_vector_within_includes rv i j (j - 1ul) j;
+       V.get_preserved rv (j - 1ul) p h0 h1;
        assert (V.get h0 rv (j - 1ul) == V.get h1 rv (j - 1ul));
+       V.loc_vector_within_includes rv i j i (j - 1ul);
        rv_loc_elems_preserved rv i (j - 1ul) p h0 h1)
 
 val rs_elems_inv_preserved:
@@ -709,6 +711,7 @@ let rec create_ #a #rg rv cidx =
        V.assign rv (cidx - 1ul) v;
 
        let hh2 = HST.get () in
+       V.loc_vector_within_included rv (cidx - 1ul) cidx;
        Rgl?.r_sep
 	 rg (V.get hh2 rv (cidx - 1ul))
 	 (V.loc_vector_within rv (cidx - 1ul) cidx)
@@ -716,13 +719,15 @@ let rec create_ #a #rg rv cidx =
        create_ rv (cidx - 1ul);
 
        let hh3 = HST.get () in
+       V.loc_vector_within_included rv 0ul (cidx - 1ul);
        Rgl?.r_sep
 	 rg (V.get hh3 rv (cidx - 1ul))
 	 (V.loc_vector_within rv 0ul (cidx - 1ul))
 	 hh2 hh3;
        V.forall2_extend hh3 rv 0ul (cidx - 1ul)
        	 (fun r1 r2 -> HH.disjoint (Rgl?.region_of rg r1)
-       				   (Rgl?.region_of rg r2)))
+       				   (Rgl?.region_of rg r2));
+       V.loc_vector_within_union_rev rv 0ul cidx)
 
 val create_rid:
   #a:Type0 -> rg:regional a ->
@@ -740,6 +745,7 @@ val create_rid:
 let create_rid #a rg len rid =
   let vec = V.create_rid len (Rgl?.dummy rg) rid in
   create_ #a #rg vec len;
+  V.loc_vector_within_included vec 0ul len;
   vec
 
 val create_reserve:
