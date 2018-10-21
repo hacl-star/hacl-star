@@ -25,7 +25,7 @@ let size_block =
 let block_w  = m:seq word {length m = size_block_w_256}
 let counter = nat
 val k : (s:seq word {length s = size_k_w_256})
-unfold let hash256 = m:Seq.seq word {Seq.length m = 8}
+let hash256 = m:Seq.seq word {Seq.length m = 8}
 
 (* Input data. *)
 val byte:Type0
@@ -57,8 +57,9 @@ unfold let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 =
   if length blocks % size_k_w_256 = 0 then let b:bytes_blocks = blocks in update_multi_opaque hash b else hash
 
 
-val make_hash (abef cdgh:quad32) : 
-    (hash:hash256 {
+val make_hash (abef cdgh:quad32) : Pure (hash256)
+  (requires True)
+  (ensures fun hash ->
          length hash == 8 /\
          hash.[0] == nat32_to_word abef.hi3 /\
          hash.[1] == nat32_to_word abef.hi2 /\
@@ -68,10 +69,11 @@ val make_hash (abef cdgh:quad32) :
          hash.[5] == nat32_to_word abef.lo0 /\
          hash.[6] == nat32_to_word cdgh.lo1 /\
          hash.[7] == nat32_to_word cdgh.lo0    
-    } )
+  )
 
-val make_ordered_hash (abcd efgh:quad32): 
-  (hash:hash256 {
+val make_ordered_hash (abcd efgh:quad32): Pure (hash256) 
+  (requires True)
+  (ensures fun hash ->
          length hash == 8 /\
          hash.[0] == nat32_to_word abcd.lo0 /\
          hash.[1] == nat32_to_word abcd.lo1 /\
@@ -81,7 +83,7 @@ val make_ordered_hash (abcd efgh:quad32):
          hash.[5] == nat32_to_word efgh.lo1 /\
          hash.[6] == nat32_to_word efgh.hi2 /\
          hash.[7] == nat32_to_word efgh.hi3      
-   })
+  )
 
 // Top-level proof for the SHA256_rnds2 instruction
 val lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w) (hash_in:hash256) : Lemma
