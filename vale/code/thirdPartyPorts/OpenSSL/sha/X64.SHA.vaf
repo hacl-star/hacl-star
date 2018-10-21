@@ -781,7 +781,7 @@ procedure {:quick}{:exportSpecs} sha_update_bytes_stdcall(
 
         let input_LE := seq_nat8_to_seq_byte(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b))) in
         length(input_LE) % 64 == 0 /\
-        hash_out == update_multi_opaque_vale(hash_in, input_LE);
+        hash_out == update_multi_transparent(hash_in, #(SHA_helpers.bytes_blocks)(input_LE));
 
         // Framing
         modifies_mem(loc_union(loc_buffer(stack_b), loc_buffer(ctx_b)), old(mem), mem);
@@ -827,6 +827,9 @@ procedure {:quick}{:exportSpecs} sha_update_bytes_stdcall(
     sha_update_bytes(ctx_b, in_b, k_b);
     callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
                              old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+    ghost var hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
+    ghost var input_LE := seq_nat8_to_seq_byte(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)));
+    lemma_update_multi_opaque_vale_is_update_multi(hash_in, input_LE);
 }
 
 

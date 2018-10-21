@@ -39,6 +39,9 @@ unfold let update_multi_opaque_aux = make_opaque update_multi
 let update_multi_opaque (hash:hash256) (blocks:bytes_blocks):hash256 =
   update_multi_opaque_aux SHA2_256 hash blocks
 
+let update_multi_transparent (hash:hash256) (blocks:bytes_blocks) = 
+  update_multi SHA2_256 hash blocks
+
 let add_mod32 (x:word) (y:nat32) : nat32 = vv (add_mod x (to_uint32 y))
 let word_to_nat32 = vv
 let nat32_to_word = to_uint32
@@ -927,3 +930,9 @@ let lemma_hash_to_bytes (s:seq quad32) : Lemma
   assert (equal (make_ordered_hash s.[0] s.[1]) (le_bytes_to_hash (le_seq_quad32_to_bytes s)));
   ()
 
+let lemma_update_multi_opaque_vale_is_update_multi (hash:hash256) (blocks:bytes) : Lemma
+  (requires length blocks % 64 = 0)
+  (ensures  update_multi_opaque_vale hash blocks == update_multi_transparent hash blocks)
+  =
+  reveal_opaque update_multi;
+  ()

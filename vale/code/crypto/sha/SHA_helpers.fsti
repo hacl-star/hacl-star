@@ -39,6 +39,7 @@ let bytes_blocks =
 val ws_opaque (b:block_w) (t:counter{t < size_k_w_256}):nat32
 val shuffle_core_opaque (block:block_w) (hash:hash256) (t:counter{t < size_k_w_256}):hash256
 val update_multi_opaque (hash:hash256) (blocks:bytes_blocks):hash256 
+val update_multi_transparent (hash:hash256) (blocks:bytes_blocks):hash256
 
 // Hide some functions that operate on words & bytes
 val word_to_nat32 (x:word) : nat32
@@ -233,3 +234,7 @@ let le_bytes_to_hash (b:seq nat8) : hash256 =
 val lemma_hash_to_bytes (s:seq quad32) : Lemma
   (requires length s == 2)
   (ensures make_ordered_hash s.[0] s.[1] == le_bytes_to_hash (le_seq_quad32_to_bytes s))
+
+val lemma_update_multi_opaque_vale_is_update_multi (hash:hash256) (blocks:bytes) : Lemma
+  (requires length blocks % 64 = 0)
+  (ensures  update_multi_opaque_vale hash blocks == update_multi_transparent hash blocks)
