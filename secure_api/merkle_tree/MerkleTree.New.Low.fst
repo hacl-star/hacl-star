@@ -255,6 +255,21 @@ noextract private val hvvreg: regional hash_vv
 noextract private let hvvreg =
   vector_regional hvreg
 
+private val hash_vec_rv_inv_r_inv:
+  h:HS.mem -> hv:hash_vec -> i:uint32_t{i < V.size_of hv} ->
+  Lemma (requires (RV.rv_inv h hv))
+	(ensures (Rgl?.r_inv hreg h (V.get h hv i)))
+private let hash_vec_rv_inv_r_inv h hv i = ()  
+
+private val hash_vv_rv_inv_r_inv:
+  h:HS.mem -> hvv:hash_vv -> 
+  i:uint32_t -> j:uint32_t ->
+  Lemma (requires (RV.rv_inv h hvv /\
+		  i < V.size_of hvv /\ 
+		  j < V.size_of (V.get h hvv i)))
+	(ensures (Rgl?.r_inv hreg h (V.get h (V.get h hvv i) j)))
+private let hash_vv_rv_inv_r_inv h hvv lv i = ()
+
 /// The Merkle tree implementation begins here.
 
 /// Utility for hashes
@@ -410,7 +425,6 @@ val mt_safe_elts_preserved:
   p:loc -> h0:HS.mem -> h1:HS.mem ->
   Lemma (requires (V.live h0 hs /\
 		  mt_safe_elts h0 lv hs i j /\
-		  // loc_disjoint p (RV.loc_rvector hs) /\
 		  loc_disjoint p (V.loc_vector_within hs lv (V.size_of hs)) /\
 		  modifies p h0 h1))
 	(ensures (mt_safe_elts h1 lv hs i j))
@@ -421,9 +435,7 @@ val mt_safe_elts_preserved:
 	SMTPat (modifies p h0 h1)]
 let rec mt_safe_elts_preserved lv hs i j p h0 h1 =
   if lv = merkle_tree_size_lg then ()
-  else (assert (loc_includes (V.loc_vector_within hs lv (V.size_of hs))
-    			     (V.loc_vector_within hs lv (lv + 1ul)));
-       V.get_preserved hs lv p h0 h1;
+  else (V.get_preserved hs lv p h0 h1;
        mt_safe_elts_preserved (lv + 1ul) hs (i / 2ul) (j / 2ul) p h0 h1)
 
 val mt_safe: HS.mem -> mt_p -> GTot Type0
@@ -458,6 +470,7 @@ let mt_safe_preserved mt p h0 h1 =
   assert (loc_includes (mt_loc mt) (V.loc_vector (MT?.hs mtv)));
   RV.rv_inv_preserved (MT?.hs mtv) p h0 h1;
   RV.rv_inv_preserved (MT?.rhs mtv) p h0 h1;
+  V.loc_vector_within_included (MT?.hs mtv) 0ul (V.size_of (MT?.hs mtv));
   mt_safe_elts_preserved 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv) p h0 h1
 
 /// Lifting to a high-level Merkle tree structure
@@ -527,6 +540,7 @@ private let create_empty_mt r =
   assert (RV.as_seq h1 rhs == S.create 32 High.hash_init);
   RV.rv_inv_preserved hs (V.loc_vector rhs) h0 h1;
   RV.as_seq_preserved hs (V.loc_vector rhs) h0 h1;
+  V.loc_vector_within_included hs 0ul (V.size_of hs);
   mt_safe_elts_preserved
     0ul hs 0ul 0ul (V.loc_vector rhs) h0 h1;
   let mt = B.malloc r (MT 0ul 0ul hs false rhs) 1ul in
@@ -588,12 +602,6 @@ private val insert_modifies_rec_helper:
 	    (V.loc_vector_within hs lv (V.size_of hs)))
 	  aloc)
 private let insert_modifies_rec_helper lv hs aloc h =
-  // TODO: how to prove this?
-  // assume (V.loc_vector_within hs lv (V.size_of hs) ==
-  // 	 loc_union (V.loc_vector_within hs lv (lv + 1ul))
-  // 		   (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
-  // rs_loc_elems_rec_inverse
-  //   hvreg (V.as_seq hh0 hs) (U32.v lv) (U32.v (V.size_of hs));
   admit ()
 
 private val insert_:
@@ -612,6 +620,7 @@ private val insert_:
 	   HH.disjoint (V.frameOf hs) (B.frameOf acc) /\
 	   mt_safe_elts h0 lv hs (Ghost.reveal i) j))
 	 (ensures (fun h0 _ h1 ->
+	   // memory safety
 	   modifies (loc_union
 		      (loc_union
 			(RV.rv_loc_elems h0 hs lv (V.size_of hs))
@@ -620,7 +629,12 @@ private val insert_:
 	   RV.rv_inv h1 hs /\
 	   Rgl?.r_inv hreg h1 acc /\
 	   mt_safe_elts h1 lv hs (Ghost.reveal i) (j + 1ul)))
-#reset-options "--z3rlimit 300"
+	   // correctness
+	   // (mt_safe_elts_spec h0 lv hs (Ghost.reveal i) j;
+	   // High.insert_ (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
+	   //   (RV.as_seq h0 hs) (Rgl?.r_repr hreg h0 acc) ==
+	   // RV.as_seq h1 hs)))
+#reset-options "--z3rlimit 400"
 private let rec insert_ lv i j hs acc =
   let hh0 = HST.get () in
   mt_safe_elts_rec hh0 lv hs (Ghost.reveal i) j;
@@ -680,6 +694,10 @@ private let rec insert_ lv i j hs acc =
   // assert (rv_itself_inv hh1 hs);
   // assert (elems_reg hh1 hs);
 
+  // 1-5) Correctness
+  assert (S.equal (RV.as_seq hh1 ihv)
+		  (S.snoc (RV.as_seq hh0 (V.get hh0 hs lv)) (Rgl?.r_repr hreg hh0 acc)));
+
   /// 2) Assign the updated vector to `hs` at the level `lv`.
   RV.assign hs lv ihv;
   let hh2 = HST.get () in
@@ -702,14 +720,21 @@ private let rec insert_ lv i j hs acc =
     (lv + 1ul) hs (Ghost.reveal i / 2ul) (j / 2ul)
     (V.loc_vector_within hs lv (lv + 1ul)) hh1 hh2;
 
+  // 2-4) Correctness
+  RV.as_seq_sub_preserved hs 0ul lv (loc_rvector ihv) hh0 hh1;
+  RV.as_seq_sub_preserved hs (lv + 1ul) merkle_tree_size_lg (loc_rvector ihv) hh0 hh1;
+  assert (S.equal (RV.as_seq hh2 hs)
+		  (S.append
+		    (RV.as_seq_sub hh0 hs 0ul lv)
+		    (S.cons (RV.as_seq hh1 ihv)
+		      (RV.as_seq_sub hh0 hs (lv + 1ul) merkle_tree_size_lg))));
+
   let lvhs = V.index hs lv in
   if j % 2ul = 1ul && V.size_of lvhs >= 2ul
   then (insert_index_helper_odd lv j;
 
        /// 3) Update the accumulator `acc`.
-       assert (RV.rv_inv hh2 lvhs);
-       assert (RV.rv_elems_inv hh2 lvhs 0ul (V.size_of lvhs));
-       assert (Rgl?.r_inv hreg hh2 (V.get hh2 lvhs (V.size_of lvhs - 2ul)));
+       hash_vec_rv_inv_r_inv hh2 (V.get hh2 hs lv) (V.size_of (V.get hh2 hs lv) - 2ul);
        assert (Rgl?.r_inv hreg hh2 acc);
        hash_2 (V.index lvhs (V.size_of lvhs - 2ul)) acc acc;
        let hh3 = HST.get () in
@@ -740,6 +765,8 @@ private let rec insert_ lv i j hs acc =
 	 (lv + 1ul) hs (Ghost.reveal i / 2ul) (j / 2ul)
 	 (B.loc_region_only false (B.frameOf acc)) hh2 hh3; // tail preserved
 
+       // 3-4) Correctness
+       // TODO
 
        /// 4) Recursion
        insert_ (lv + 1ul)
@@ -797,7 +824,7 @@ private let rec insert_ lv i j hs acc =
 		 (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
 	       (B.loc_all_regions_from false (B.frameOf acc))))
 	   hh0 hh5);
-  insert_modifies_rec_helper 
+  insert_modifies_rec_helper
     lv hs (B.loc_all_regions_from false (B.frameOf acc)) hh0;
 
   // 5-2) For `mt_safe_elts`
@@ -972,14 +999,6 @@ let free_path p =
 
 /// Getting the Merkle root and path
 
-private val hs_rv_inv_hash_r_inv:
-  h:HS.mem -> hs:hash_vv ->
-  lv:uint32_t -> i:uint32_t ->
-  Lemma (requires (RV.rv_inv h hs /\
-		  lv < V.size_of hs /\ 
-		  i < V.size_of (V.get h hs lv)))
-	(ensures (Rgl?.r_inv hreg h (V.get h (V.get h hs lv) i)))
-private let hs_rv_inv_hash_r_inv h hs lv i = ()
 
 // Construct the rightmost hashes for a given (incomplete) Merkle tree.
 // This function calculates the Merkle root as well, which is the final
@@ -1034,7 +1053,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
 	      	(B.loc_all_regions_from false (V.frameOf rhs))
 	      	hh0 hh1;
 	      mt_safe_elts_head hh1 lv hs i j;
-	      hs_rv_inv_hash_r_inv hh1 hs lv (j - 1ul - ofs);
+	      hash_vv_rv_inv_r_inv hh1 hs lv (j - 1ul - ofs);
 	      hash_2 (V.index (V.index hs lv) (j - 1ul - ofs)) acc acc;
 	      let hh2 = HST.get () in
 	      mt_safe_elts_preserved lv hs i j
@@ -1048,7 +1067,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
 		hh1 hh2)
 	 else (let hh1 = HST.get () in
 	      mt_safe_elts_head hh1 lv hs i j;
-	      hs_rv_inv_hash_r_inv hh1 hs lv (j - 1ul - ofs);
+	      hash_vv_rv_inv_r_inv hh1 hs lv (j - 1ul - ofs);
 	      copy (V.index (V.index hs lv) (j - 1ul - ofs)) acc;
 	      let hh2 = HST.get () in
 	      mt_safe_elts_preserved lv hs i j
