@@ -49,7 +49,6 @@ let lemma_modifies_3 h0 h1 h2 h3 h4 h5 h6 a b c =
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 inline_for_extraction
-private
 val append_to_sig:
   signature:hint8_p{length signature = 64} ->
   a:hint8_p{length a = 32 /\ disjoint a signature} ->
@@ -155,6 +154,7 @@ let lemma_modifies_3_to_modifies_2 #a #a' #a'' h0 h1 h2 h3 h4 b b' b'' =
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 inline_for_extraction
+private
 val sign_:
   signature:hint8_p{length signature = 64} ->
   secret:hint8_p{length secret = 32} ->

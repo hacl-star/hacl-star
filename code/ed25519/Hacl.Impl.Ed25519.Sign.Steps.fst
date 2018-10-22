@@ -96,7 +96,6 @@ let point_mul_g result scalar =
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 [@ Substitute]
-private
 val point_mul_g_compress:
   out:hint8_p{length out = 32} ->
   s:hint8_p{length s = 32 /\ disjoint s out} ->

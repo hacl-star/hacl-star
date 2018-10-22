@@ -45,14 +45,15 @@ int main(void)
 {
     TIME before, after;
     unsigned char private_key[32];
-    unsigned char public_key[32];
+    unsigned char keys[96];
+    unsigned char *public_key = keys; /* (leading 32 bytes) */
 
     srand((unsigned)time(NULL));
 
     for (int i=0; i < 32; i++)
         private_key[i] = rand() % 128;
 
-    Hacl_Ed25519_secret_to_public(public_key, private_key);
+    Hacl_Ed25519_expand_keys( keys, private_key );
 
     printf( "len [b] | t_sig [s] |   sig/s | t_ver [s] |   ver/s\n" );
     printf( "---------------------------------------------------\n" );
@@ -68,7 +69,7 @@ int main(void)
 
         get_time(&before);
         for (unsigned i = its; i > 0; i--)
-            Hacl_Ed25519_sign(signature, private_key, msg, sz);
+            Hacl_Ed25519_sign_expanded(signature, keys, msg, sz);
         get_time(&after);
         double sign_time = time_diff_in_secs(&before, &after);
 
