@@ -28,8 +28,6 @@ ED25519_SPECIFIC= \
 	Hacl.Impl.Ed25519.Ladder.Step.fst \
 	Hacl.Impl.Ed25519.Ladder.fsti \
 	Hacl.Impl.Ed25519.Ladder.fst \
-	Hacl.Impl.Store51.fsti \
-	Hacl.Impl.Store51.fst \
 	Hacl.Impl.Ed25519.PointCompress.fst \
 	Hacl.Impl.Ed25519.G.fst \
 	Hacl.Impl.Ed25519.SecretExpand.fsti \
@@ -72,7 +70,6 @@ FSTS=   Hacl.Bignum25519.fst \
 	../hash/Hacl.SHA2_512.fst \
 	Hacl.Impl.Load56.fst \
 	Hacl.Impl.Load51.fst \
-	Hacl.Impl.Store51.fst \
 	Hacl.Impl.BignumQ.Mul.fst \
 	Hacl.Impl.SHA512.ModQ.fst \
 	Hacl.Impl.Sha512.fst \

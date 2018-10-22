@@ -210,7 +210,7 @@ let point_compress z p =
   (**) let h3 = ST.get() in
   (**) lemma_modifies_0_1' tmp h1 h2 h3;
   let b = x_mod_2 x in
-  Hacl.Impl.Store51.store_51 z out;
+  Hacl.EC.Format.fcontract_store z out;
   (**) let h4 = ST.get() in
   add_sign z b;
   let h5 = ST.get() in

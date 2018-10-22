@@ -356,7 +356,6 @@ let reduce out =
   fcontract_trim out
 
 
-private 
 val fcontract_store:
   output:buffer Hacl.UInt8.t{Buffer.length output = 32} ->
   input:felem ->
@@ -370,7 +369,7 @@ val fcontract_store:
       Hacl.Spec.EC.AddAndDouble.bounds (as_seq h0 input) p51 p51 p51 p51 p51)
      /\ Buffer.live h1 output
      /\ (as_seq h1 output) == Hacl.Spec.EC.Format.fcontract_store (as_seq h0 input)))
-private let fcontract_store output input =
+let fcontract_store output input =
   let t0 = input.(0ul) in
   let t1 = input.(1ul) in
   let t2 = input.(2ul) in
