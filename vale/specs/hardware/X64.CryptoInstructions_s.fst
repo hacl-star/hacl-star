@@ -7,6 +7,8 @@ open Words.Four_s
 open Spec.Hash.Helpers
 open Spec.SHA2
 
+friend Spec.SHA2
+
 let sha256_rnds2_spec_update (a b c d e f g h wk : word SHA2_256) =
   let open FStar.UInt32 in   // Interop with UInt-based SHA spec
   let a' = add_mod (_Ch SHA2_256 e f g) 

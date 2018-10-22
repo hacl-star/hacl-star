@@ -30,14 +30,15 @@ let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s
   length k_b % 16 == 0 /\
   length k_b >= 256 /\
   length ctx_b == 32 /\
+  length ctx_b % 16 == 0 /\  // Why do we need this redundant requirement to satisfy BV.mk_buffer_view?
   length in_b == 64 `op_Multiply` num_val /\
   (let ctx_b128 = BV.mk_buffer_view ctx_b Views.view128 in
   let in_b128 = BV.mk_buffer_view in_b Views.view128 in
-  let input_LE = seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (BV.as_seq h' in_b128)) in
+  let input_LE = seq_nat8_to_seq_byte (le_seq_quad32_to_bytes (BV.as_seq h' in_b128)) in
   let hash_in = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h ctx_b128)) in
   let hash_out = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h' ctx_b128)) in
   (Seq.length input_LE) % 64 = 0 /\
-  hash_out == update_multi_opaque_vale hash_in input_LE
+  hash_out == update_multi_transparent hash_in input_LE
  )
 
 let full_post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8)  =
