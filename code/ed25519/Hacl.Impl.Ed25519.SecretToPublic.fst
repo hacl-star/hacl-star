@@ -16,11 +16,10 @@ open Hacl.Impl.Ed25519.Ladder
 open Hacl.Impl.Ed25519.PointCompress
 open Hacl.Impl.Ed25519.G
 
+
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-
 inline_for_extraction
-[@ Substitute]
 private
 val point_mul_g:
   result:point ->
@@ -49,7 +48,6 @@ let point_mul_g result scalar =
 
 
 inline_for_extraction
-[@ Substitute]
 val secret_to_public_:
   out:hint8_p{length out = 32} ->
   secret:hint8_p{length secret = 32 /\ disjoint out secret} ->

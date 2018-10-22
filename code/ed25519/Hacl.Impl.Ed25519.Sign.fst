@@ -74,7 +74,6 @@ let append_to_sig signature a b =
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 inline_for_extraction
-[@ Substitute]
 private
 val sign__:
   signature:hint8_p{length signature = 64} ->
