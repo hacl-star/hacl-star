@@ -134,8 +134,9 @@ ed25519-c/out.krml: $(ED25519_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) $(FSTS) -skip-translation
 
 ed25519-c/Hacl_Ed25519.c: ed25519-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Ed25519=*'
+	 $(KREMLIN) $(KREMLIN_ARGS) \
+		-bundle 'Hacl.Ed25519=*' -minimal -add-include '"kremlib.h"' \
+		-skip-compilation $^ -o $@
 
 extract-c: ed25519-c/Hacl_Ed25519.c
 
