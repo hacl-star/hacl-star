@@ -147,13 +147,12 @@ private val construct_rhs:
   rhs:hash_seq{S.length rhs = 32} ->
   i:nat ->
   j:nat{
-    i <= j && j < pow2 (32 - lv) /\
+    i <= j /\ j < pow2 (32 - lv) /\
     mt_wf_elts lv hs i j} ->
   acc:hash ->
   actd:bool ->
   GTot (crhs:hash_seq{S.length crhs = 32} * hash) (decreases j)
 private let rec construct_rhs lv hs rhs i j acc actd =
-  admit ();
   let ofs = offset_of i in
   if j = 0 then (rhs, acc)
   else
@@ -182,13 +181,15 @@ val mt_get_path_:
   lv:nat{lv <= 32} ->
   hs:hash_ss{S.length hs = 32} ->
   rhs:hash_seq{S.length rhs = 32} ->
-  i:nat -> j:nat{i <= j} ->
+  i:nat -> 
+  j:nat{
+    i <= j /\ j < pow2 (32 - lv) /\
+    mt_wf_elts lv hs i j} ->
   k:nat{i <= k && k <= j} ->
   p:path ->
   actd:bool ->
   GTot path (decreases (32 - lv))
 let rec mt_get_path_ lv hs rhs i j k p actd =
-  admit ();
   let ofs = offset_of i in
   if j = 0 then p
   else
@@ -204,9 +205,11 @@ let rec mt_get_path_ lv hs rhs i j k p actd =
     mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np
     		 (if j % 2 = 0 then actd else true))
 
-val mt_get_path: mt:wf_mt -> idx:nat -> GTot (path * hash)
+val mt_get_path: 
+  mt:wf_mt -> 
+  idx:nat{MT?.i mt <= idx /\ idx < MT?.j mt} ->
+  GTot (path * hash)
 let mt_get_path mt idx =
-  admit ();
   let (rhs, root) =
     construct_rhs 0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
 		  hash_init false in
@@ -220,25 +223,31 @@ val mt_flush_to_:
   hs:hash_ss{S.length hs = 32} ->
   pi:nat ->
   i:nat{i >= pi} ->
-  j:nat{j > i} ->
-  GTot hash_ss
+  j:nat{
+    j >= i /\ j < pow2 (32 - lv) /\
+    mt_wf_elts lv hs pi j} ->
+  GTot (fhs:hash_ss{S.length fhs = 32}) (decreases i)
 let rec mt_flush_to_ lv hs pi i j =
-  admit ();
-  if i = 0 then hs
-  else (let ofs = offset_of i - offset_of pi in
+  let oi = offset_of i in
+  let opi = offset_of pi in
+  if oi = opi then hs
+  else (let ofs = oi - opi in
        let hvec = S.index hs lv in
        let flushed = S.slice hvec ofs (S.length hvec) in
        let nhs = S.upd hs lv flushed in
+       assume (mt_wf_elts (lv + 1) nhs (pi / 2) (j / 2));
+       assume (offset_of i - offset_of pi > offset_of (i / 2) - offset_of (pi / 2));
        mt_flush_to_ (lv + 1) nhs (pi / 2) (i / 2) (j / 2))
 
 val mt_flush_to: 
-  mt:wf_mt -> idx:nat -> GTot wf_mt
+  mt:wf_mt -> 
+  idx:nat{idx >= MT?.i mt /\ idx < MT?.j mt} ->
+  GTot merkle_tree
 let mt_flush_to mt idx =
-  admit ();
   let fhs = mt_flush_to_ 0 (MT?.hs mt) (MT?.i mt) idx (MT?.j mt) in
   MT idx (MT?.j mt) fhs (MT?.rhs_ok mt) (MT?.rhs mt)
 
-val mt_flush: mt:wf_mt{MT?.j mt > MT?.i mt} -> GTot wf_mt
+val mt_flush: mt:wf_mt{MT?.j mt > MT?.i mt} -> GTot merkle_tree
 let mt_flush mt = 
   mt_flush_to mt (MT?.j mt - 1)
 
@@ -246,12 +255,11 @@ val mt_verify_:
   k:nat ->
   j:nat{k <= j} ->
   p:path ->
-  ppos:nat ->
+  ppos:nat{ppos <= S.length p /\ j < pow2 (S.length p - ppos)} ->
   acc:hash ->
   actd:bool ->
   GTot hash
 let rec mt_verify_ k j p ppos acc actd =
-  admit ();
   if j = 0 then acc
   else (let nactd = actd || (j % 2 = 1) in
        let phash = S.index p ppos in
@@ -266,12 +274,10 @@ let rec mt_verify_ k j p ppos acc actd =
 val mt_verify:
   k:nat ->
   j:nat{k < j} ->
-  p:path ->
+  p:path{1 <= S.length p /\ j < pow2 (S.length p - 1)} ->
   rt:hash ->
   GTot bool
 let mt_verify k j p rt =
-  admit ();
   let crt = mt_verify_ k j p 1 (S.index p 0) false in
   crt = rt
-
 
