@@ -587,9 +587,32 @@ val salloc1:
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
 
 inline_for_extraction noextract
-let salloc1_trivial h len x footprint spec impl =
-  let trivial (#res:Type) (h1 h2 h3:mem) (r:res) = () in
-  salloc1 h len x footprint spec trivial impl
+val salloc1_trivial:
+    #a:Type
+  -> #res:Type
+  -> h:mem
+  -> len:size_t{0 < v len}
+  -> x:a
+  -> footprint:Ghost.erased B.loc
+  -> spec: (res -> mem -> GTot Type0)
+  -> impl:(b:lbuffer a (v len) -> Stack res
+      (requires fun h0 ->
+        modifies0 h h0 /\ ~(live_region h (get_tip h0)) /\
+        B.frameOf b == get_tip h0 /\ live h0 b /\ as_seq h0 b == Seq.create (v len) x)
+      (ensures  fun h0 r h1 ->
+        modifies (B.loc_union (B.loc_all_regions_from false (get_tip h0))
+                              (Ghost.reveal footprint)) h0 h1 /\
+        spec r h1)) ->
+  Stack res
+    (requires fun h0 -> h0 == h /\
+      (forall (h1 h2 h3:mem) (r:res).
+        (modifies0 h h1 /\
+         modifies (B.loc_union (B.loc_all_regions_from false (get_tip h1))
+                               (Ghost.reveal footprint)) h1 h2 /\
+         modifies (B.loc_region_only false (get_tip h1)) h2 h3 /\
+         ~(live_region h (get_tip h1)) /\
+         spec r h2) ==> spec r h3))
+    (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
 
 inline_for_extraction noextract
 val loopi_blocks:
