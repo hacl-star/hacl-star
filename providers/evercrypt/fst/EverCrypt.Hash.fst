@@ -107,16 +107,27 @@ let init #a s =
   | SHA2_384_s p -> Hacl.Hash.SHA2.init_384 p
   | SHA2_512_s p -> Hacl.Hash.SHA2.init_512 p
 
+friend SecretByte
+friend SHA_helpers
+
 // A new switch between HACL and Vale; can be used in place of Hacl.Hash.SHA2.update_256
 inline_for_extraction noextract
 val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
 let update_multi_256 s blocks n =
   let has_shaext = AC.has_shaext () in
   if SC.vale && has_shaext then begin
-    let open Hacl.Hash.Core.SHA2.COnstants in
+    let n = Int.Cast.Full.uint32_to_uint64 n in
+    let open Hacl.Hash.Core.SHA2.Constants in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
-    Sha_update_bytes_stdcall.sha_update_bytes_stdcall s blocks n k224_256
+    let h0 = ST.get () in
+    assume (M.loc_disjoint (M.loc_buffer k224_256) (M.loc_buffer s));
+    assume (M.loc_disjoint (M.loc_buffer k224_256) (M.loc_buffer blocks));
+    assume (
+      let k_b128 = LowStar.BufferView.mk_buffer_view k224_256 Views.view32_128 in
+      SHA_helpers.k_reqs (LowStar.BufferView.as_seq h0 k_b128));
+    Sha_update_bytes_stdcall.sha_update_bytes_stdcall s blocks n k224_256;
+    admit ()
   end else
     Hacl.Hash.SHA2.update_multi_256 s blocks n
 

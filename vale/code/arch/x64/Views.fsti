@@ -145,3 +145,31 @@ val inverses128 (u:unit) : Lemma (inverses get128 put128)
 
 let view128 = inverses128 (); View 16 get128 put128
 
+open FStar.Mul
+
+let nat32s_to_nat128 (v1 v2 v3 v4: nat32): nat128 =
+  v1 + v2 * 0x100000000 + v3 * 0x1000000000000 + v4 * 0x1000000000000000000000000
+
+module U32 = FStar.UInt32
+
+let get32_128_def (s: Seq.lseq U32.t 4) =
+  Mkfour
+    (U32.v (Seq.index s 0))
+    (U32.v (Seq.index s 1))
+    (U32.v (Seq.index s 2))
+    (U32.v (Seq.index s 3))
+
+let put32_128_def (a:quad32) : GTot (Seq.lseq U32.t 4) =
+  Seq.of_list [
+    UInt32.uint_to_t a.lo0;
+    UInt32.uint_to_t a.lo1;
+    UInt32.uint_to_t a.hi2;
+    UInt32.uint_to_t a.hi3
+  ]
+
+let get32_128 = make_opaque get32_128_def
+let put32_128 = make_opaque put32_128_def
+
+val inverses32_128 (u: unit): Lemma (inverses get32_128 put32_128)
+
+let view32_128 = inverses32_128 (); View 4 get32_128 put32_128
