@@ -405,7 +405,7 @@ val crypto_kem_enc_1:
       (let ct_s, ss_s = S.crypto_kem_enc_1 (as_seq h0 g) (as_seq h0 coins) (as_seq h0 pk) in
       as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
 let crypto_kem_enc_1 g coins ct ss pk =
-  assert_norm (2 * v crypto_bytes % 4 = 0);
+  assert_spinoff (2 * v crypto_bytes % 4 == 0);
   crypto_kem_enc_ct pk g coins ct;
   crypto_kem_enc_ss g ct ss;
   clear_words_u8 (size 2 *! crypto_bytes) (sub #_ #_ #(2 * v crypto_bytes) g (size 0) (size 2 *! crypto_bytes))
@@ -451,7 +451,7 @@ let crypto_kem_enc ct ss pk =
   push_frame();
   let bytes_mu = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
   let coins = create (params_nbar *! params_nbar *! params_extracted_bits /. size 8) (u8 0) in
-  LowStar.Buffer.recall state;
+  recall state;
   randombytes_ bytes_mu coins;
   crypto_kem_enc_ coins ct ss pk;
   pop_frame();

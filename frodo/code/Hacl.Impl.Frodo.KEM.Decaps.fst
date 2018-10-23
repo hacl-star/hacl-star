@@ -252,12 +252,13 @@ val crypto_kem_dec_ss:
 	(as_matrix h0 c_matrix) (as_seq h0 sk) (as_seq h0 ct))
 [@"c_inline"]
 let crypto_kem_dec_ss mu_decode bp_matrix c_matrix sk ct ss =
-  assert_norm (2 * v crypto_bytes % 4 = 0);
+  assert_spinoff (v (size 2 *! crypto_bytes) % 4 == 0);
+  assert_spinoff (v (size 2 *! crypto_bytes) <= v (size 3 *! crypto_bytes));
   push_frame();
   let g = create (size 3 *! crypto_bytes) (u8 0) in
   crypto_kem_dec_g mu_decode sk g;
   crypto_kem_dec_ss_inner mu_decode g bp_matrix c_matrix sk ct ss;
-  clear_words_u8 (size 2 *! crypto_bytes) (sub #_ #_ #(2 * v crypto_bytes) g (size 0) (size 2 *! crypto_bytes));
+  clear_words_u8 (size 2 *! crypto_bytes) g;
   pop_frame()
 
 inline_for_extraction noextract

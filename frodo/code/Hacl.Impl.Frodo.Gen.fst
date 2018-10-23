@@ -201,7 +201,7 @@ let frodo_gen_matrix_aes n seed_len seed a =
   push_frame();
   let key = B.alloca (u8 0) 176ul in
   Hacl.AES128.aes128_key_expansion seed key;
-
+  
   let h0 = ST.get() in
   Lib.Loops.for (size 0) n
     (fun h1 i -> modifies (loc_buffer a) h0 h1)
@@ -225,6 +225,8 @@ let frodo_gen_matrix_aes n seed_len seed a =
         (fun h2 j -> modifies (loc_buffer a) h1 h2)
         (fun j ->
           let j = j *! size 8 in
+          assert (v j + 8 <= v n);
+          assert (v i <= v n - 1);
           assert_spinoff (v i * v n + v j + 8 <= (v n - 1) * v n + v n);
           let b = sub a (i *! n +! j) (size 8) in
           Hacl.AES128.aes128_encrypt_block b b key
