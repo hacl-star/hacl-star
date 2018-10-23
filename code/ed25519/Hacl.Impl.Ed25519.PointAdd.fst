@@ -450,7 +450,7 @@ let point_add_ out p q tmp =
   no_upd_lemma_1 h3 h4 z3 y3;
   no_upd_lemma_1 h3 h4 z3 t3
 
-
+inline_for_extraction
 let point_add out p q =
   push_frame();
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) 30ul in

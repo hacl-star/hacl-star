@@ -55,8 +55,8 @@ int main(void)
 
     Hacl_Ed25519_expand_keys( keys, private_key );
 
-    printf( "len [b] | t_sig [s] |   sig/s | t_ver [s] |   ver/s\n" );
-    printf( "---------------------------------------------------\n" );
+    printf( "len [b] | t_sig [s] |    sig/s | t_ver [s] |    ver/s\n" );
+    printf( "-----------------------------------------------------\n" );
 
     for (int sz = 32; sz <= 65536; sz *= 2)
     {
@@ -82,7 +82,7 @@ int main(void)
         get_time(&after);
         double verify_time = time_diff_in_secs(&before, &after);
 
-        printf("% 7d | % 9.2f | %7.2f | % 9.2f | %7.2f\n", sz, sign_time, its/sign_time, verify_time, its/verify_time );
+        printf("% 7d | % 9.2f | %8.2f | % 9.2f | %8.2f\n", sz, sign_time, its/sign_time, verify_time, its/verify_time );
 
         free( msg );
    }
