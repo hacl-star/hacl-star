@@ -1,6 +1,10 @@
 HACL_HOME?=../..
 include $(HACL_HOME)/Makefile.include
 
+
+verify: Hacl.Blake2s.fst-verify Hacl.Impl.Blake2s.fst-verify
+	$(MAKE) $<
+
 # Files for verification
 KREMLIN_ARGS =-verbose $(KREMLIN_TESTLIB) \
 	-drop FStar,Prims,LowStar,C,C.*,C.Loops.Spec.Loops,Spec.*,Lib.*,WasmSupport \
@@ -41,7 +45,6 @@ blake2s-c/Hacl_Test_Blake2s.c: blake2s-c/out.krml
 
 
 test-blake2s.exe: blake2s-c/Hacl_Blake2s.c blake2s-c/Hacl_Test_Blake2s.c $(BASE_OBJ)
-	cp myvoid.h blake2s-c/
 	$(CC) $(CFLAGS) -I $(KREMLIN_HOME) -I $(KREMLIN_HOME)/kremlib/extracted -L $(KREMLIN_HOME)/kremlib/out -o $@ $^ -lkremlib
 
 

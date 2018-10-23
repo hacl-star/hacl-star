@@ -128,6 +128,13 @@ hmac.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMA
 	$(OCAMLOPT) -I hmac-ml $(OCAML_INCLUDES) $(addprefix hmac-ml/, $(LIBS_ML)) hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Hash.ml hmac-ml/Spec_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
 	./hmac.exe
 
+hmac_generic.exe: $(LIBS_FILES) Spec.Blake2.fst Spec.SHA2.fst Spec.Hash_Generic.fst Spec.HMAC_Generic.fst tests/Spec.HMAC_Generic.Test.fst
+	mkdir -p hmac-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2 --extract_module Spec.Blake2 --extract_module Spec.Hash_Generic --extract_module Spec.HMAC_Generic --extract_module Spec.HMAC_Generic.Test --odir hmac-ml $^
+	@echo 'let _ = test()' >> hmac-ml/Spec_HMAC_Generic_Test.ml
+	$(OCAMLOPT) -I hmac-ml $(OCAML_INCLUDES) $(addprefix hmac-ml/, $(LIBS_ML)) hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Blake2.ml hmac-ml/Spec_Hash_Generic.ml hmac-ml/Spec_HMAC_Generic.ml hmac-ml/Spec_HMAC_Generic_Test.ml -o hmac.exe
+	./hmac.exe
+
 sha2-new.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.SHA2.New.fst tests/Spec.SHA2.New.Test.fst
 	mkdir -p sha2-ml
 	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.SHA2.New --extract_module Spec.SHA2.New.Test --odir sha2-ml $^

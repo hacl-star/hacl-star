@@ -140,8 +140,9 @@ val state_theta:
       as_seq h1 s == S.state_theta (as_seq h0 s))
 let state_theta s =
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.state_theta (as_seq h0 s) in
-  salloc1_trivial h0 (size 5) (u64 0) (Ghost.hide (loc_buffer s))  spec
+  let spec _ h1 = as_seq h1 s == S.state_theta (as_seq h0 s) /\ live h1 s in
+  let footprint = Ghost.hide (loc_buffer s) in
+  salloc1_trivial h0 (size 5) (u64 0) (Ghost.hide (loc_buffer s)) spec
     (fun _C -> state_theta0 s _C; state_theta1 s _C)
 
 #reset-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 50"
@@ -192,7 +193,7 @@ val state_pi_rho:
 let state_pi_rho s =
   let x = readLane s (size 1) (size 0) in
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.state_pi_rho (as_seq h0 s) in
+  let spec _ h1 = as_seq h1 s == S.state_pi_rho (as_seq h0 s) /\ live h1 s in
   salloc1_trivial h0 (size 1) x (Ghost.hide (loc_buffer s)) spec
      (fun current ->
          let h1 = ST.get () in
@@ -258,7 +259,7 @@ val state_chi:
       as_seq h1 s == S.state_chi (as_seq h0 s))
 let state_chi s =
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.state_chi (as_seq h0 s) in
+  let spec _ h1 = as_seq h1 s == S.state_chi (as_seq h0 s) /\ live h1 s in
   salloc1_trivial h0 (size 25) (u64 0) (Ghost.hide (loc_buffer s)) spec
     (fun s_pi_rho ->
       copy s_pi_rho (size 25) s;
@@ -316,7 +317,8 @@ val loadState:
       as_seq h1 s == S.loadState (v rateInBytes) (as_seq h0 input) (as_seq h0 s))
 let loadState rateInBytes input s =
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.loadState (v rateInBytes) (as_seq h0 input) (as_seq h0 s) in
+  let spec _ h1 = as_seq h1 s ==
+    S.loadState (v rateInBytes) (as_seq h0 input) (as_seq h0 s) /\ live h1 s in
   salloc1_trivial h0 (size 200) (u8 0) (Ghost.hide (loc_buffer s)) spec
     (fun block ->
       update_sub block (size 0) rateInBytes input;
@@ -363,7 +365,7 @@ val storeState:
       as_seq h1 res == S.storeState (v rateInBytes) (as_seq h0 s))
 let storeState rateInBytes s res =
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 res == S.storeState (v rateInBytes) (as_seq h0 s) in
+  let spec _ h1 = as_seq h1 res == S.storeState (v rateInBytes) (as_seq h0 s) /\ live h1 res in
   salloc1_trivial h0 (size 200) (u8 0) (Ghost.hide (loc_buffer res)) spec
     (fun block ->
       [@ inline_let]
@@ -390,7 +392,7 @@ val absorb_next:
       as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes))
 let absorb_next s rateInBytes =
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes) in
+  let spec _ h1 = as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes) /\ live h1 s in
   salloc1_trivial h0 rateInBytes (u8 0) (Ghost.hide (loc_buffer s)) spec
     (fun nextBlock ->
       nextBlock.(rateInBytes -! size 1) <- u8 0x80;
@@ -416,7 +418,8 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
   let h0 = ST.get() in
   let spec _ h1 =
     as_seq h1 s ==
-    S.absorb_last delimitedSuffix (v rateInBytes) (v rem) (as_seq h0 input) (as_seq h0 s) in
+    S.absorb_last delimitedSuffix (v rateInBytes) (v rem) (as_seq h0 input) (as_seq h0 s) /\
+    live h1 s in
   salloc1_trivial h0 rateInBytes (u8 0) (Ghost.hide (loc_buffer s)) spec
     (fun lastBlock ->
       let open Lib.RawIntTypes in

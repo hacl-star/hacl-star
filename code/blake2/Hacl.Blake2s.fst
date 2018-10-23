@@ -7,73 +7,91 @@ open FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-module S = Spec.Blake2s
-module I = Hacl.Impl.Blake2s
+module Spec = Spec.Blake2
+module Impl = Hacl.Impl.Blake2s
 
 
-type state = I.state
+let hash_wp = lbuffer uint32 8
+let block_p = lbuffer uint8 64
 
-val init:
+
+val blake2s_init:
     #vkk:size_t
-  -> st:state
+  -> hash:hash_wp
   -> k:lbuffer uint8 (v vkk)
   -> kk:size_t{v kk <= 32 /\ kk == vkk}
   -> nn:size_t{1 <= v nn /\ v nn <= 32} ->
   Stack unit
-    (requires (fun h -> True))
-    (ensures  (fun h0 _ h1 -> True))
+    (requires (fun h -> LowStar.Buffer.live h hash
+                   /\ LowStar.Buffer.live h k
+                   /\ LowStar.Buffer.disjoint hash k
+                   /\ LowStar.Buffer.disjoint k hash))
+    (ensures  (fun h0 _ h1 -> LowStar.Buffer.modifies (LowStar.Buffer.loc_buffer hash) h0 h1
+                         /\ h1.[hash] == Spec.Blake2.blake2_init Spec.Blake2S (v kk) h0.[k] (v nn)))
 
-let init #vkk st k kk nn = I.blake2s_init #vkk st k kk nn
+let blake2s_init #vkk hash k kk nn = Impl.blake2s_init #vkk hash k kk nn
 
 
-val update_block:
-    s:state
-  -> n:size_t
-  -> d:lbuffer uint8 S.size_block ->
+val blake2s_update_block:
+    hash:hash_wp
+  -> prev:size_t{size_v prev <= Spec.max_limb Spec.Blake2S}
+  -> d:block_p ->
   Stack unit
-    (requires (fun h -> True))
-    (ensures  (fun h0 _ h1 -> True))
+    (requires (fun h -> LowStar.Buffer.live h hash
+                   /\ LowStar.Buffer.live h d
+                   /\ LowStar.Buffer.disjoint hash d))
+    (ensures  (fun h0 _ h1 -> LowStar.Buffer.modifies (LowStar.Buffer.loc_buffer hash) h0 h1
+                         /\ h1.[hash] == Spec.blake2_update_block Spec.Blake2S (v prev) h0.[d] h0.[hash]))
 
-let update_block s n block = I.blake2s_update_block s n block
+let blake2s_update_block hash prev d = Impl.blake2s_update_block hash prev d
 
 
-val update_last:
+val blake2s_update_last:
     #vlen: size_t
-  -> s: state
-  -> ll: size_t
-  -> len: size_t
-  -> last: lbuffer uint8 (v vlen) ->
+  -> hash: hash_wp
+  -> prev: size_t{v prev <= Spec.max_limb Spec.Blake2S}
+  -> last: lbuffer uint8 (v vlen)
+  -> len: size_t{v len <= Spec.size_block Spec.Blake2S /\ len == vlen} ->
   Stack unit
-    (requires (fun h -> True))
-    (ensures  (fun h0 _ h1 -> True))
+    (requires (fun h -> LowStar.Buffer.live h hash
+                   /\ LowStar.Buffer.live h last
+                   /\ LowStar.Buffer.disjoint hash last))
+    (ensures  (fun h0 _ h1 -> LowStar.Buffer.modifies (LowStar.Buffer.loc_buffer hash) h0 h1
+                         /\ h1.[hash] == Spec.Blake2.blake2_update_last Spec.Blake2S (v prev) (v len) h0.[last] h0.[hash]))
 
-let update_last #vlen s ll len last = I.blake2s_update_last #vlen s ll last len
+let blake2s_update_last #vlen hash prev last len = Impl.blake2s_update_last #vlen hash prev last len
 
 
-val finish:
+val blake2s_finish:
     #vnn: size_t
   -> output: lbuffer uint8 (v vnn)
-  -> st: state
-  -> nn: size_t{nn == vnn} ->
+  -> hash: hash_wp
+  -> nn: size_t{1 <= v nn /\ v nn <= 32 /\ nn == vnn} ->
   Stack unit
-    (requires (fun h -> True))
-    (ensures  (fun h0 _ h1 -> True))
+    (requires (fun h -> LowStar.Buffer.live h hash
+                   /\ LowStar.Buffer.live h output
+                   /\ LowStar.Buffer.disjoint output hash
+                   /\ LowStar.Buffer.disjoint hash output))
+    (ensures  (fun h0 _ h1 -> LowStar.Buffer.modifies (LowStar.Buffer.loc_buffer output) h0 h1
+                         /\ h1.[output] == Spec.Blake2.blake2_finish Spec.Blake2S h0.[hash] (v nn)))
 
-let finish #vnn output st nn = I.blake2s_finish #vnn output st nn
+let blake2s_finish #vnn output hash nn = Impl.blake2s_finish #vnn output hash nn
 
 
 val blake2s:
-    #vll: size_t
-  -> #vkk: size_t
-  -> #vnn: size_t
-  -> output: lbuffer uint8 (v vnn)
-  -> outlen:size_t{1 <= v outlen /\ v outlen <= 32}
-  -> input: lbuffer uint8 (v vll)
-  -> ilen: size_t{v ilen + 2 * S.size_block <= max_size_t /\ ilen == vll}
-  -> key: lbuffer uint8 (v vkk)
-  -> klen: size_t{v klen <= 32 /\ klen == vkk} ->
+    output: buffer uint8
+  -> d: buffer uint8
+  -> ll: size_t{length d == v ll}
+  -> k: buffer uint8
+  -> kk: size_t{length k == v kk /\ v kk <= 32 /\ (if v kk = 0 then v ll < pow2 64 else v ll + 64 < pow2 64)}
+  -> nn:size_t{v nn == length output /\ 1 <= v nn /\ v nn <= 32} ->
   Stack unit
-    (requires (fun h -> True))
-    (ensures  (fun h0 _ h1 -> True))
+    (requires (fun h -> LowStar.Buffer.live h output
+                   /\ LowStar.Buffer.live h d
+                   /\ LowStar.Buffer.live h k
+                   /\ LowStar.Buffer.disjoint output d
+                   /\ LowStar.Buffer.disjoint output k))
+    (ensures  (fun h0 _ h1 -> LowStar.Buffer.modifies (LowStar.Buffer.loc_buffer output) h0 h1
+                         /\ h1.[output] == Spec.Blake2.blake2s h0.[d] (v kk) h0.[k] (v nn)))
 
-let blake2s #vll #vkk #vnn output outlen input ilen key klen = I.blake2s #vll #vkk #vnn output input ilen key klen outlen
+let blake2s output d ll k kk nn = Impl.blake2s output d ll k kk nn

@@ -28,7 +28,7 @@ let q: n:nat{n < pow2 256} =
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
 let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
-  (nat_from_bytes_le (hash512 len s) % q)
+  (nat_from_bytes_le (hash512 s) % q)
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
@@ -125,7 +125,7 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   | _ -> None
 
 let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
-  let h = hash512 32 secret in
+  let h = hash512 secret in
   let h_low : lbytes 32 = slice h 0 32 in
   let h_high : lbytes 32 = slice h 32 64 in
   let h_low0 : uint8  = h_low.[0] in

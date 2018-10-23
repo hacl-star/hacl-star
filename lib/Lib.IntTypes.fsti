@@ -110,8 +110,9 @@ val uintv_extensionality:
  -> a:uint_t t l
  -> b:uint_t t l
  -> Lemma
-  (requires uint_v a == uint_v b)
+  (requires uint_v #t #l a == uint_v #t #l b)
   (ensures  a == b)
+  [SMTPat (uint_v #t #l a == uint_v #t #l b)]
 
 ///
 /// Definition of machine integers
@@ -508,6 +509,9 @@ inline_for_extraction
 let (=.) #t = eq #t
 
 inline_for_extraction
+let (<>.) #t = ne #t
+
+inline_for_extraction
 let (<.) #t = lt #t
 inline_for_extraction
 let (<=.) #t = lte #t
@@ -517,3 +521,11 @@ let (>.) #t = gt #t
 
 inline_for_extraction
 let (>=.) #t = gte #t
+
+
+inline_for_extraction
+let p_t (t:inttype) = 
+  match t with
+  | U32 -> UInt32.t
+  | _ -> UInt64.t
+

@@ -1,6 +1,6 @@
-FSTAR_HOME   ?= ../../../../FStar
-KREMLIN_HOME ?= ../../../../kremlin
-HACL_HOME    ?= ../../..
+FSTAR_HOME   ?= ../../../FStar
+KREMLIN_HOME ?= ../../../kremlin
+HACL_HOME    ?= ../..
 
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
@@ -73,7 +73,7 @@ KREMLIN=$(KREMLIN_HOME)/krml
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) -dast $(KREMLIN_TESTLIB) -skip-compilation \
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.SHA3' \
 	-no-prefix 'Hacl.Impl.SHA3' \
 	-no-prefix 'Hacl.SHA3' \
@@ -121,9 +121,11 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/lib
 
+# TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
+  -Wno-incompatible-pointer-types
 
 # GNU Make manual section 4.14
 %.d: %.c
