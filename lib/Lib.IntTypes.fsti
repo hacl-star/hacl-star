@@ -112,7 +112,8 @@ val uintv_extensionality:
  -> Lemma
   (requires uint_v #t #l a == uint_v #t #l b)
   (ensures  a == b)
-  [SMTPat (uint_v #t #l a == uint_v #t #l b)]
+// REMARK: We can't mark `uint_v` as `unfold` and keep this pattern
+// [SMTPat (uint_v #t #l a == uint_v #t #l b)]
 
 ///
 /// Definition of machine integers
