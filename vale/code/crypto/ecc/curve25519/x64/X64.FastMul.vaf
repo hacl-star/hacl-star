@@ -168,7 +168,6 @@ procedure{:quick} fast_multiply(
     ghost var a0a1b := d0 + pow2_64 * d1 + pow2_128 * d2 + pow2_192 * r12 + pow2_256 * r14 + pow2_320 * rax + pow2_384 * (carry_new + overflow_new);
     //assert a0a1b == (a0 + pow2_64 * a1) * b;  //
 
-/*
 //
 //
 //    "movq 16(A), %%rdx; " /* A[2] */
