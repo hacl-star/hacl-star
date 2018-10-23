@@ -44,6 +44,7 @@ noeq type merkle_tree =
 | MT: i:nat -> j:nat{j >= i && j < pow2 merkle_tree_size_lg} ->
       hs:S.seq hash_seq{S.length hs = 32} ->
       rhs_ok:bool -> rhs:hash_seq{S.length rhs = 32} ->
+      mroot:hash ->
       merkle_tree
 
 val mt_not_full: merkle_tree -> GTot bool
@@ -95,11 +96,21 @@ type wf_mt = mt:merkle_tree{mt_wf mt}
 
 /// Construction
 
+val mt_wf_elts_empty:
+  lv:nat{lv <= 32} ->
+  Lemma (requires True)
+	(ensures (mt_wf_elts lv (S.create 32 S.empty) 0 0))
+	(decreases (32 - lv))
+let rec mt_wf_elts_empty lv =
+  if lv = 32 then ()
+  else mt_wf_elts_empty (lv + 1)
+
 // NOTE: the public function is `create_mt` defined below, which
 // builds a tree with an initial hash.
-val create_empty_mt: unit -> GTot merkle_tree
+val create_empty_mt: unit -> GTot wf_mt
 let create_empty_mt _ =
-  MT 0 0 (S.create 32 S.empty) false (S.create 32 hash_init)
+  mt_wf_elts_empty 0;
+  MT 0 0 (S.create 32 S.empty) false (S.create 32 hash_init) hash_init
 
 /// Insertion
 
@@ -127,12 +138,11 @@ let mt_insert mt v =
      (insert_ 0 (MT?.i mt) (MT?.j mt) (MT?.hs mt) v)
      false
      (MT?.rhs mt)
+     (MT?.mroot mt)
 
 val create_mt: init:hash -> GTot merkle_tree
 let create_mt init =
-  MT 0 1
-     (S.cons (S.cons init S.empty) (S.create 31 S.empty))
-     false (S.create 32 hash_init)
+  mt_insert (create_empty_mt ()) init
 
 /// Getting the Merkle root and path
 
@@ -141,7 +151,7 @@ type path = S.seq hash
 // Construct the rightmost hashes for a given (incomplete) Merkle tree.
 // This function calculates the Merkle root as well, which is the final
 // accumulator value.
-private val construct_rhs:
+val construct_rhs:
   lv:nat{lv <= 32} ->
   hs:hash_ss{S.length hs = 32} ->
   rhs:hash_seq{S.length rhs = 32} ->
@@ -152,7 +162,7 @@ private val construct_rhs:
   acc:hash ->
   actd:bool ->
   GTot (crhs:hash_seq{S.length crhs = 32} * hash) (decreases j)
-private let rec construct_rhs lv hs rhs i j acc actd =
+let rec construct_rhs lv hs rhs i j acc actd =
   let ofs = offset_of i in
   if j = 0 then (rhs, acc)
   else
@@ -165,12 +175,14 @@ private let rec construct_rhs lv hs rhs i j acc actd =
 	 else (let nacc = S.index (S.index hs lv) (j - 1 - ofs) in
 	      construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) nacc true)))
 
-val mt_get_root: mt:wf_mt -> GTot hash
+val mt_get_root: 
+  mt:wf_mt -> 
+  GTot (rhs:hash_seq{S.length rhs = 32} * hash)
 let mt_get_root mt =
-  let (_, root) = construct_rhs
-		    0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
-		    hash_init false in
-  root
+  if MT?.rhs_ok mt then (MT?.rhs mt, MT?.mroot mt)
+  else construct_rhs
+         0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
+	 hash_init false
 
 val path_insert: p:path -> hp:hash -> GTot path
 let path_insert p hp = S.snoc p hp
@@ -210,9 +222,7 @@ val mt_get_path:
   idx:nat{MT?.i mt <= idx /\ idx < MT?.j mt} ->
   GTot (path * hash)
 let mt_get_path mt idx =
-  let (rhs, root) =
-    construct_rhs 0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
-		  hash_init false in
+  let (rhs, root) = mt_get_root mt in
   let ofs = offset_of (MT?.i mt) in
   let ip = path_insert S.empty (S.index (S.index (MT?.hs mt) 0) (idx - ofs)) in
   (mt_get_path_ 0 (MT?.hs mt) rhs (MT?.i mt) (MT?.j mt) idx ip false,
@@ -245,7 +255,7 @@ val mt_flush_to:
   GTot merkle_tree
 let mt_flush_to mt idx =
   let fhs = mt_flush_to_ 0 (MT?.hs mt) (MT?.i mt) idx (MT?.j mt) in
-  MT idx (MT?.j mt) fhs (MT?.rhs_ok mt) (MT?.rhs mt)
+  MT idx (MT?.j mt) fhs (MT?.rhs_ok mt) (MT?.rhs mt) (MT?.mroot mt)
 
 val mt_flush: mt:wf_mt{MT?.j mt > MT?.i mt} -> GTot merkle_tree
 let mt_flush mt = 

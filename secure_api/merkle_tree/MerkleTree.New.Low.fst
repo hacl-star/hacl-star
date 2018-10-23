@@ -270,6 +270,17 @@ private val hash_vv_rv_inv_r_inv:
 	(ensures (Rgl?.r_inv hreg h (V.get h (V.get h hvv i) j)))
 private let hash_vv_rv_inv_r_inv h hvv lv i = ()
 
+private val hash_vv_rv_inv_disjoint:
+  h:HS.mem -> hvv:hash_vv -> 
+  i:uint32_t -> j:uint32_t -> drid:HH.rid ->
+  Lemma (requires (RV.rv_inv h hvv /\
+		  i < V.size_of hvv /\ 
+		  j < V.size_of (V.get h hvv i) /\
+		  HH.disjoint (Rgl?.region_of hvvreg hvv) drid))
+	(ensures (HH.disjoint (Rgl?.region_of hreg (V.get h (V.get h hvv i) j)) drid))
+#reset-options "--z3rlimit 10"
+private let hash_vv_rv_inv_disjoint h hvv i j drid = ()
+
 /// The Merkle tree implementation begins here.
 
 /// Utility for hashes
@@ -352,11 +363,15 @@ inline_for_extraction let merkle_tree_size_lg = 32ul
 // `rhs`: a store for "rightmost" hashes, manipulated only when required to
 //        calculate some merkle parhs that need the rightmost hashes
 //        as a part of them.
+// `mroot`: during the construction of `rhs` we can also calculate the Merkle 
+//          root of the tree. If `rhs_ok` is true then it has the up-to-date
+//          root value.
 noeq type merkle_tree =
 | MT: i:index_t -> j:index_t{j >= i} ->
       hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
       rhs_ok:bool ->
       rhs:hash_vec{V.size_of rhs = merkle_tree_size_lg} ->
+      mroot:hash ->
       merkle_tree
 
 type mt_p = B.pointer merkle_tree
@@ -445,11 +460,15 @@ let mt_safe h mt =
   // Liveness & Accessibility
   RV.rv_inv h (MT?.hs mtv) /\
   RV.rv_inv h (MT?.rhs mtv) /\
+  Rgl?.r_inv hreg h (MT?.mroot mtv) /\
   mt_safe_elts h 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv) /\
   // Regionality
   HH.extends (V.frameOf (MT?.hs mtv)) (B.frameOf mt) /\
   HH.extends (V.frameOf (MT?.rhs mtv)) (B.frameOf mt) /\
-  HH.disjoint (V.frameOf (MT?.hs mtv)) (V.frameOf (MT?.rhs mtv)))
+  HH.extends (B.frameOf (MT?.mroot mtv)) (B.frameOf mt) /\
+  HH.disjoint (V.frameOf (MT?.hs mtv)) (V.frameOf (MT?.rhs mtv)) /\
+  HH.disjoint (V.frameOf (MT?.hs mtv)) (B.frameOf (MT?.mroot mtv)) /\
+  HH.disjoint (V.frameOf (MT?.rhs mtv)) (B.frameOf (MT?.mroot mtv)))
 
 val mt_loc: mt_p -> GTot loc
 let mt_loc mt = 
@@ -468,8 +487,11 @@ let mt_safe_preserved mt p h0 h1 =
   assert (loc_includes (mt_loc mt) (RV.loc_rvector (MT?.hs mtv)));
   assert (loc_includes (mt_loc mt) (RV.loc_rvector (MT?.rhs mtv)));
   assert (loc_includes (mt_loc mt) (V.loc_vector (MT?.hs mtv)));
+  assert (loc_includes (mt_loc mt)
+		       (B.loc_all_regions_from false (B.frameOf (MT?.mroot mtv))));
   RV.rv_inv_preserved (MT?.hs mtv) p h0 h1;
   RV.rv_inv_preserved (MT?.rhs mtv) p h0 h1;
+  Rgl?.r_sep hreg (MT?.mroot mtv) p h0 h1;
   V.loc_vector_within_included (MT?.hs mtv) 0ul (V.size_of (MT?.hs mtv));
   mt_safe_elts_preserved 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv) p h0 h1
 
@@ -496,6 +518,7 @@ val merkle_tree_lift:
   mtv:merkle_tree{
     RV.rv_inv h (MT?.hs mtv) /\
     RV.rv_inv h (MT?.rhs mtv) /\
+    Rgl?.r_inv hreg h (MT?.mroot mtv) /\
     mt_safe_elts h 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv)} ->
   GTot High.wf_mt
 let merkle_tree_lift h mtv =
@@ -505,6 +528,7 @@ let merkle_tree_lift h mtv =
 	  (RV.as_seq h (MT?.hs mtv))
 	  (MT?.rhs_ok mtv)
 	  (RV.as_seq h (MT?.rhs mtv))
+	  (Rgl?.r_repr hreg h (MT?.mroot mtv))
 
 val mt_lift:
   h:HS.mem -> mt:mt_p{mt_safe h mt} ->
@@ -527,7 +551,7 @@ private val create_empty_mt: r:erid ->
 	   mt_not_full h1 mt /\
 	   // correctness
 	   mt_lift h1 mt == High.create_empty_mt ()))
-#reset-options "--z3rlimit 40"
+#reset-options "--z3rlimit 100"
 private let create_empty_mt r =
   let hs_region = RV.new_region_ r in
   let hs = RV.create_rid hvreg merkle_tree_size_lg hs_region in
@@ -543,11 +567,18 @@ private let create_empty_mt r =
   V.loc_vector_within_included hs 0ul (V.size_of hs);
   mt_safe_elts_preserved
     0ul hs 0ul 0ul (V.loc_vector rhs) h0 h1;
-  let mt = B.malloc r (MT 0ul 0ul hs false rhs) 1ul in
+  let mroot_region = RV.new_region_ r in
+  let mroot = Rgl?.r_init hreg mroot_region in
   let h2 = HST.get () in
   RV.as_seq_preserved hs loc_none h1 h2;
   RV.as_seq_preserved rhs loc_none h1 h2;
   mt_safe_elts_preserved 0ul hs 0ul 0ul loc_none h1 h2;
+  let mt = B.malloc r (MT 0ul 0ul hs false rhs mroot) 1ul in
+  let h3 = HST.get () in
+  RV.as_seq_preserved hs loc_none h2 h3;
+  RV.as_seq_preserved rhs loc_none h2 h3;
+  Rgl?.r_sep hreg mroot loc_none h2 h3;
+  mt_safe_elts_preserved 0ul hs 0ul 0ul loc_none h2 h3;
   mt
 
 /// Destruction (free)
@@ -560,6 +591,7 @@ let free_mt mt =
   let mtv = !*mt in
   RV.free (MT?.hs mtv);
   RV.free (MT?.rhs mtv);
+  Rgl?.r_free hreg (MT?.mroot mtv);
   B.free mt
 
 /// Insertion
@@ -628,13 +660,14 @@ private val insert_:
 		      (B.loc_all_regions_from false (B.frameOf acc))) h0 h1 /\
 	   RV.rv_inv h1 hs /\
 	   Rgl?.r_inv hreg h1 acc /\
-	   mt_safe_elts h1 lv hs (Ghost.reveal i) (j + 1ul)))
+	   mt_safe_elts h1 lv hs (Ghost.reveal i) (j + 1ul) /\
 	   // correctness
-	   // (mt_safe_elts_spec h0 lv hs (Ghost.reveal i) j;
-	   // High.insert_ (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
-	   //   (RV.as_seq h0 hs) (Rgl?.r_repr hreg h0 acc) ==
-	   // RV.as_seq h1 hs)))
-#reset-options "--z3rlimit 400"
+	   (mt_safe_elts_spec h0 lv hs (Ghost.reveal i) j;
+	   RV.as_seq h1 hs ==
+	   High.insert_ (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
+	     (RV.as_seq h0 hs) (Rgl?.r_repr hreg h0 acc))))
+// #reset-options "--z3rlimit 400"
+#reset-options "--admit_smt_queries true"
 private let rec insert_ lv i j hs acc =
   let hh0 = HST.get () in
   mt_safe_elts_rec hh0 lv hs (Ghost.reveal i) j;
@@ -663,6 +696,7 @@ private let rec insert_ lv i j hs acc =
 
   // 1-3) For `mt_safe_elts`
   assert (V.size_of ihv == j + 1ul - offset_of (Ghost.reveal i)); // head updated
+  V.loc_vector_within_included hs (lv + 1ul) (V.size_of hs);
   mt_safe_elts_preserved
     (lv + 1ul) hs (Ghost.reveal i / 2ul) (j / 2ul)
     (RV.loc_rvector (V.get hh0 hs lv)) hh0 hh1; // tail not yet
@@ -716,6 +750,7 @@ private let rec insert_ lv i j hs acc =
 
   // 2-3) For `mt_safe_elts`
   assert (V.size_of (V.get hh2 hs lv) == j + 1ul - offset_of (Ghost.reveal i));
+  V.loc_vector_within_disjoint hs lv (lv + 1ul) (lv + 1ul) (V.size_of hs);
   mt_safe_elts_preserved
     (lv + 1ul) hs (Ghost.reveal i / 2ul) (j / 2ul)
     (V.loc_vector_within hs lv (lv + 1ul)) hh1 hh2;
@@ -844,10 +879,13 @@ val mt_insert:
 	   Rgl?.r_inv hreg h0 v /\
 	   HH.disjoint (B.frameOf mt) (B.frameOf v)))
 	 (ensures (fun h0 _ h1 ->
+	   // memory safety
 	   modifies (loc_union
 		      (mt_loc mt)
 		      (B.loc_all_regions_from false (B.frameOf v))) h0 h1 /\
-	   mt_safe h1 mt))
+	   mt_safe h1 mt /\
+	   // correctness
+	   mt_lift h1 mt == High.mt_insert (mt_lift h0 mt) (Rgl?.r_repr hreg h0 v)))
 #reset-options "--z3rlimit 40 --max_fuel 0"
 let mt_insert mt v =
   let hh0 = HST.get () in
@@ -856,8 +894,24 @@ let mt_insert mt v =
   insert_ 0ul (Ghost.hide (MT?.i mtv)) (MT?.j mtv) hs v;
   let hh1 = HST.get () in
   RV.rv_loc_elems_included hh0 (MT?.hs mtv) 0ul (V.size_of hs);
+  V.loc_vector_within_included hs 0ul (V.size_of hs);
   RV.rv_inv_preserved
     (MT?.rhs mtv)
+    (loc_union
+      (loc_union
+	(RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
+	(V.loc_vector_within hs 0ul (V.size_of hs)))
+      (B.loc_all_regions_from false (B.frameOf v)))
+    hh0 hh1;
+  RV.as_seq_preserved
+    (MT?.rhs mtv)
+    (loc_union
+      (loc_union
+	(RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
+	(V.loc_vector_within hs 0ul (V.size_of hs)))
+      (B.loc_all_regions_from false (B.frameOf v)))
+    hh0 hh1;
+  Rgl?.r_sep hreg (MT?.mroot mtv) 
     (loc_union
       (loc_union
 	(RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
@@ -868,12 +922,18 @@ let mt_insert mt v =
 	   (MT?.j mtv + 1ul)
 	   (MT?.hs mtv)
 	   false // `rhs` is always deprecated right after an insertion.
-	   (MT?.rhs mtv);
+	   (MT?.rhs mtv)
+	   (MT?.mroot mtv);
   let hh2 = HST.get () in
   RV.rv_inv_preserved
     (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.rv_inv_preserved
     (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
+  RV.as_seq_preserved
+    (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
+  RV.as_seq_preserved
+    (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
+  Rgl?.r_sep hreg (MT?.mroot mtv) (B.loc_buffer mt) hh1 hh2;
   mt_safe_elts_preserved
     0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv + 1ul) (B.loc_buffer mt)
     hh1 hh2
@@ -884,14 +944,19 @@ val create_mt: r:erid -> init:hash ->
 	   Rgl?.r_inv hreg h0 init /\
 	   HH.disjoint r (B.frameOf init)))
 	 (ensures (fun h0 mt h1 ->
+	   // memory safety
 	   modifies (loc_union 
 		      (mt_loc mt)
 		      (B.loc_all_regions_from false (B.frameOf init))) 
 		    h0 h1 /\
-	   mt_safe h1 mt))
+	   mt_safe h1 mt /\
+	   // correctness
+	   mt_lift h1 mt == High.create_mt (Rgl?.r_repr hreg h0 init)))
 let create_mt r init =
+  let hh0 = HST.get () in
   let mt = create_empty_mt r in
   mt_insert mt init;
+  let hh2 = HST.get () in
   mt
 
 /// Construction and Destruction of paths
@@ -999,7 +1064,6 @@ let free_path p =
 
 /// Getting the Merkle root and path
 
-
 // Construct the rightmost hashes for a given (incomplete) Merkle tree.
 // This function calculates the Merkle root as well, which is the final
 // accumulator value.
@@ -1020,13 +1084,23 @@ private val construct_rhs:
 	   HH.disjoint (B.frameOf acc) (V.frameOf rhs) /\
 	   mt_safe_elts h0 lv hs i j))
 	 (ensures (fun h0 _ h1 ->
+	   // memory safety
 	   modifies (loc_union
 		      (RV.loc_rvector rhs)
 		      (B.loc_all_regions_from false (B.frameOf acc))) h0 h1 /\
 	   RV.rv_inv h1 rhs /\
 	   Rgl?.r_inv hreg h1 acc))
+	   // correctness
+	   // (mt_safe_elts_spec h0 lv hs i j;
+	   // High.construct_rhs
+	   //   (U32.v lv)
+	   //   (Rgl?.r_repr hvvreg h0 hs)
+	   //   (Rgl?.r_repr hvreg h0 rhs)
+	   //   (U32.v i) (U32.v j)
+	   //   (Rgl?.r_repr hreg h0 acc) actd ==
+	   // (Rgl?.r_repr hvreg h1 rhs, Rgl?.r_repr hreg h1 acc))))
 	 (decreases (U32.v j))
-#reset-options "--z3rlimit 100 --max_fuel 1"
+#reset-options "--z3rlimit 150 --max_fuel 1"
 private let rec construct_rhs lv hs rhs i j acc actd =
   let ofs = offset_of i in
   let copy = Cpy?.copy hcpy in
@@ -1049,6 +1123,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
 	      RV.rv_inv_preserved
 	      	(V.index hs lv) (B.loc_all_regions_from false (V.frameOf rhs))
 	      	hh0 hh1;
+	      V.loc_vector_within_included hs lv (V.size_of hs);
 	      mt_safe_elts_preserved lv hs i j
 	      	(B.loc_all_regions_from false (V.frameOf rhs))
 	      	hh0 hh1;
@@ -1068,8 +1143,10 @@ private let rec construct_rhs lv hs rhs i j acc actd =
 	 else (let hh1 = HST.get () in
 	      mt_safe_elts_head hh1 lv hs i j;
 	      hash_vv_rv_inv_r_inv hh1 hs lv (j - 1ul - ofs);
+	      hash_vv_rv_inv_disjoint hh1 hs lv (j - 1ul - ofs) (B.frameOf acc);
 	      copy (V.index (V.index hs lv) (j - 1ul - ofs)) acc;
 	      let hh2 = HST.get () in
+	      V.loc_vector_within_included hs lv (V.size_of hs);
 	      mt_safe_elts_preserved lv hs i j
 		(B.loc_all_regions_from false (B.frameOf acc))
 		hh1 hh2;
@@ -1099,7 +1176,9 @@ val mt_get_root:
 	   MT?.j (B.get h1 mt 0) = MT?.j (B.get h0 mt 0) /\
 	   MT?.hs (B.get h1 mt 0) == MT?.hs (B.get h0 mt 0) /\
 	   MT?.rhs (B.get h1 mt 0) == MT?.rhs (B.get h0 mt 0) /\
+	   MT?.rhs_ok (B.get h1 mt 0) = true /\
 	   Rgl?.r_inv hreg h1 rt))
+#reset-options "--z3rlimit 150 --max_fuel 1"
 let mt_get_root mt rt =
   let hh0 = HST.get () in
   let mtv = !*mt in
@@ -1107,30 +1186,49 @@ let mt_get_root mt rt =
   let j = MT?.j mtv in
   let hs = MT?.hs mtv in
   let rhs = MT?.rhs mtv in
-  // let rhs_ok = MT?.rhs_ok mtv in
-  // if not rhs_ok then
-  construct_rhs 0ul hs rhs i j rt false;
-  let hh1 = HST.get () in
-  assert (RV.rv_inv hh1 rhs);
-  assert (Rgl?.r_inv hreg hh1 rt);
-  assert (B.live hh1 mt);
-  RV.rv_inv_preserved
-    hs (loc_union
-         (RV.loc_rvector rhs)
-	 (B.loc_all_regions_from false (B.frameOf rt)))
-    hh0 hh1;
-  mt_safe_elts_preserved 0ul hs i j
-    (loc_union
-      (RV.loc_rvector rhs)
-      (B.loc_all_regions_from false (B.frameOf rt)))
-    hh0 hh1;
-  mt *= MT i j hs true rhs;
-  let hh2 = HST.get () in
-  Rgl?.r_sep hreg rt (B.loc_buffer mt) hh1 hh2;
-  RV.rv_inv_preserved hs (B.loc_buffer mt) hh1 hh2;
-  RV.rv_inv_preserved rhs (B.loc_buffer mt) hh1 hh2;
-  mt_safe_elts_preserved 0ul hs i j
-    (B.loc_buffer mt) hh1 hh2
+  let mroot = MT?.mroot mtv in
+  if MT?.rhs_ok mtv
+  then begin
+    Cpy?.copy hcpy mroot rt;
+    let hh1 = HST.get () in
+    mt_safe_preserved mt (B.loc_all_regions_from false (Rgl?.region_of hreg rt)) hh0 hh1
+  end
+  else begin
+    construct_rhs 0ul hs rhs i j rt false;
+    let hh1 = HST.get () in
+    assert (RV.rv_inv hh1 rhs);
+    assert (Rgl?.r_inv hreg hh1 rt);
+    assert (B.live hh1 mt);
+    RV.rv_inv_preserved
+      hs (loc_union
+	   (RV.loc_rvector rhs)
+	   (B.loc_all_regions_from false (B.frameOf rt)))
+      hh0 hh1;
+    V.loc_vector_within_included hs 0ul (V.size_of hs);
+    mt_safe_elts_preserved 0ul hs i j
+      (loc_union
+	(RV.loc_rvector rhs)
+	(B.loc_all_regions_from false (B.frameOf rt)))
+      hh0 hh1;
+    Cpy?.copy hcpy rt mroot;
+    let hh2 = HST.get () in
+    RV.rv_inv_preserved
+      hs (B.loc_all_regions_from false (B.frameOf mroot))
+      hh1 hh2;
+    RV.rv_inv_preserved
+      rhs (B.loc_all_regions_from false (B.frameOf mroot))
+      hh1 hh2;
+    mt_safe_elts_preserved 0ul hs i j
+      (B.loc_all_regions_from false (B.frameOf mroot))
+      hh1 hh2;
+    mt *= MT i j hs true rhs mroot;
+    let hh3 = HST.get () in
+    Rgl?.r_sep hreg rt (B.loc_buffer mt) hh2 hh3;
+    RV.rv_inv_preserved hs (B.loc_buffer mt) hh2 hh3;
+    RV.rv_inv_preserved rhs (B.loc_buffer mt) hh2 hh3;
+    mt_safe_elts_preserved 0ul hs i j
+      (B.loc_buffer mt) hh2 hh3
+  end
 
 inline_for_extraction val path_insert:
   mtr:HH.rid -> p:path -> hp:hash ->
@@ -1178,7 +1276,6 @@ private val mt_get_path_:
 	   HH.includes mtr (V.frameOf hs) /\
 	   HH.includes mtr (V.frameOf rhs) /\
 	   RV.rv_inv h0 hs /\ RV.rv_inv h0 rhs /\
-	   // HH.disjoint (V.frameOf hs) (V.frameOf rhs) /\
 	   mt_safe_elts h0 lv hs i j /\
 	   path_safe h0 mtr p /\
 	   V.size_of (B.get h0 p 0) <= lv + 1ul))
@@ -1218,12 +1315,22 @@ private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
     let hh1 = HST.get () in
     RV.rv_inv_preserved hs (path_loc p) hh0 hh1;
     RV.rv_inv_preserved rhs (path_loc p) hh0 hh1;
+    V.loc_vector_within_included hs lv (V.size_of hs);
     mt_safe_elts_preserved lv hs i j (path_loc p) hh0 hh1;
     mt_get_path_ (lv + 1ul) mtr hs rhs (i / 2ul) (j / 2ul) (k / 2ul) p
     		 (if j % 2ul = 0ul then actd else true))
 
-// TODO: it always calls `mt_get_root` that always (re)constructs `rhs`.
-// When `rhs_ok = true`, it suffices to return the root stored in the tree.
+private val hash_vv_rv_inv_includes:
+  h:HS.mem -> hvv:hash_vv -> 
+  i:uint32_t -> j:uint32_t ->
+  Lemma (requires (RV.rv_inv h hvv /\
+		  i < V.size_of hvv /\ 
+		  j < V.size_of (V.get h hvv i)))
+	(ensures (HH.includes
+		   (Rgl?.region_of hvvreg hvv)
+		   (Rgl?.region_of hreg (V.get h (V.get h hvv i) j))))
+private let hash_vv_rv_inv_includes h hvv i j = ()
+
 val mt_get_path:
   mt:mt_p -> 
   idx:index_t ->
@@ -1264,13 +1371,14 @@ let mt_get_path mt idx p root =
   let hs = MT?.hs mtv in
   let rhs = MT?.rhs mtv in
   let ih = V.index (V.index hs 0ul) (idx - ofs) in
-  assert (Rgl?.r_inv hreg hh1 ih);
-  assert (RV.rv_inv hh1 (V.get hh1 hs 0ul));
-  assert (HH.extends 
-  	   (B.frameOf (V.get hh1 (V.get hh1 hs 0ul) (idx - ofs)))
-  	   (V.frameOf (V.get hh1 hs 0ul)));
-  assert (HH.includes (B.frameOf mt)
-  	   (B.frameOf (V.get hh1 (V.get hh1 hs 0ul) (idx - ofs))));
+  hash_vv_rv_inv_includes hh1 hs 0ul (idx - ofs);
+  // assert (Rgl?.r_inv hreg hh1 ih);
+  // assert (RV.rv_inv hh1 (V.get hh1 hs 0ul));
+  // assert (HH.extends 
+  // 	   (B.frameOf (V.get hh1 (V.get hh1 hs 0ul) (idx - ofs)))
+  // 	   (V.frameOf (V.get hh1 hs 0ul)));
+  // assert (HH.includes (B.frameOf mt)
+  // 	   (B.frameOf (V.get hh1 (V.get hh1 hs 0ul) (idx - ofs))));
   path_insert (B.frameOf mt) p ih;
 
   let hh2 = HST.get () in
@@ -1320,6 +1428,7 @@ private val mt_flush_to_:
 	   RV.rv_inv h1 hs /\
 	   mt_safe_elts h1 lv hs i (Ghost.reveal j)))
 #reset-options "--z3rlimit 300 --max_fuel 1"
+// #reset-options "--admit_smt_queries true"
 private let rec mt_flush_to_ lv hs pi i j =
   let hh0 = HST.get () in
   mt_safe_elts_rec hh0 lv hs pi (Ghost.reveal j);
@@ -1366,6 +1475,7 @@ private let rec mt_flush_to_ lv hs pi i j =
 
     // 1-3) For `mt_safe_elts`
     assert (V.size_of flushed == Ghost.reveal j - offset_of i); // head updated
+    V.loc_vector_within_included hs (lv + 1ul) (V.size_of hs);
     mt_safe_elts_preserved
       (lv + 1ul) hs (pi / 2ul) (Ghost.reveal j / 2ul)
       (RV.loc_rvector (V.get hh0 hs lv)) hh0 hh1; // tail not yet
@@ -1479,18 +1589,18 @@ let rec mt_flush_to mt idx =
   mt_flush_to_ 0ul hs (MT?.i mtv) idx (Ghost.hide (MT?.j mtv));
   let hh1 = HST.get () in
   RV.rv_loc_elems_included hh0 hs 0ul (V.size_of hs);
+  V.loc_vector_within_included hs 0ul (V.size_of hs);
   RV.rv_inv_preserved
     (MT?.rhs mtv)
     (loc_union
       (RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
       (V.loc_vector_within hs 0ul (V.size_of hs)))
     hh0 hh1;
-  mt *= MT idx (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv);
+  mt *= MT idx (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv);
   let hh2 = HST.get () in
   RV.rv_inv_preserved (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.rv_inv_preserved (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
-  mt_safe_elts_preserved 0ul (MT?.hs mtv) idx (MT?.j mtv)
-    (B.loc_buffer mt) hh1 hh2
+  mt_safe_elts_preserved 0ul hs idx (MT?.j mtv) (B.loc_buffer mt) hh1 hh2
 
 val mt_flush:
   mt:mt_p ->
