@@ -1,12 +1,10 @@
 module Hacl.Impl.Frodo.KEM.KeyGen
 
-open FStar.HyperStack.All
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
 open LowStar.Buffer
-open LowStar.BufferOps
 
 open Lib.IntTypes
 open Lib.Buffer
@@ -14,7 +12,6 @@ open Lib.Buffer
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
 open Hacl.Impl.Frodo.KEM
-open Hacl.Impl.Frodo.Encode
 open Hacl.Impl.Frodo.Pack
 open Hacl.Impl.Frodo.Sample
 open Hacl.Frodo.Random
@@ -110,6 +107,45 @@ let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
   clear_matrix_se s_matrix e_matrix;
   pop_frame()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+val lemma_update_pk:
+    seed_a:LSeq.lseq uint8 (v bytes_seed_a)
+  -> b:LSeq.lseq uint8 S.crypto_publicmatrixbytes
+  -> pk:LSeq.lseq uint8 (v crypto_publickeybytes)
+  -> Lemma
+    (requires
+      LSeq.sub pk 0 (v bytes_seed_a) == seed_a /\
+      LSeq.sub pk (v bytes_seed_a) S.crypto_publicmatrixbytes == b)
+    (ensures pk == S.update_pk seed_a b)
+let lemma_update_pk seed_a b pk =
+  let pk1 = S.update_pk seed_a b in
+  FStar.Seq.Properties.lemma_split pk (v bytes_seed_a);
+  FStar.Seq.Properties.lemma_split pk1 (v bytes_seed_a)
+
+val lemma_update_sk:
+    s:LSeq.lseq uint8 (v crypto_bytes)
+  -> pk:LSeq.lseq uint8 (v crypto_publickeybytes)
+  -> s_bytes:LSeq.lseq uint8 (2 * v params_n * v params_nbar)
+  -> sk:LSeq.lseq uint8 (v crypto_secretkeybytes)
+  -> Lemma
+    (requires
+      LSeq.sub sk 0 (v crypto_bytes) == s /\
+      LSeq.sub sk (v crypto_bytes) (v crypto_publickeybytes) == pk /\
+      LSeq.sub sk (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar) == s_bytes)
+    (ensures sk == S.update_sk s pk s_bytes)
+let lemma_update_sk s pk s_bytes sk =
+  let sk1 = S.update_sk s pk s_bytes in
+  FStar.Seq.Base.lemma_eq_intro (LSeq.sub sk1 0 (v crypto_bytes)) s;
+  FStar.Seq.Base.lemma_eq_intro (LSeq.sub sk1 (v crypto_bytes) (v crypto_publickeybytes)) pk;
+  FStar.Seq.Base.lemma_eq_intro (LSeq.sub sk1 (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar)) s_bytes;
+  FStar.Seq.Properties.lemma_split (LSeq.sub sk 0 (v crypto_bytes + v crypto_publickeybytes)) (v crypto_bytes);
+  FStar.Seq.Properties.lemma_split (LSeq.sub sk1 0 (v crypto_bytes + v crypto_publickeybytes)) (v crypto_bytes);
+  FStar.Seq.Properties.lemma_split sk (v crypto_bytes + v crypto_publickeybytes);
+  FStar.Seq.Properties.lemma_split sk1 (v crypto_bytes + v crypto_publickeybytes)
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
 inline_for_extraction noextract
 val crypto_kem_keypair_:
     coins:lbytes (size 2 *! crypto_bytes +! bytes_seed_a)
@@ -136,7 +172,7 @@ let crypto_kem_keypair_ coins pk sk =
   let s_bytes = sub sk (crypto_bytes +! crypto_publickeybytes) (size 2 *! params_n *! params_nbar) in
   frodo_mul_add_as_plus_e_pack seed_a seed_e b s_bytes;
   let h1 = ST.get () in
-  S.lemma_update_pk (as_seq h1 seed_a) (as_seq h1 b) (as_seq h1 pk);
+  lemma_update_pk (as_seq h1 seed_a) (as_seq h1 b) (as_seq h1 pk);
 
   assert (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h1 sk)
     (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar) == as_seq h1 s_bytes);
@@ -147,7 +183,7 @@ let crypto_kem_keypair_ coins pk sk =
   let h3 = ST.get () in
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h3 sk) 0 (v crypto_bytes)) (as_seq h1 s);
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_secretkeybytes) (as_seq h3 sk) (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar)) (as_seq h1 s_bytes);
-  S.lemma_update_sk (as_seq h1 s) (as_seq h1 pk) (as_seq h1 s_bytes) (as_seq h3 sk)
+  lemma_update_sk (as_seq h1 s) (as_seq h1 pk) (as_seq h1 s_bytes) (as_seq h3 sk)
 
 inline_for_extraction noextract
 val crypto_kem_keypair:

@@ -268,6 +268,39 @@ let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix c2 =
   clear_matrix v_matrix;
   pop_frame()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+val lemma_update_ct:
+    c1:LSeq.lseq uint8 (v params_logq * v params_nbar * v params_n / 8)
+  -> c2:LSeq.lseq uint8 (v params_logq * v params_nbar * v params_nbar / 8)
+  -> d:LSeq.lseq uint8 (v crypto_bytes)
+  -> ct:LSeq.lseq uint8 (v crypto_ciphertextbytes)
+  -> Lemma
+    (requires (
+      let c1Len = v params_logq * v params_nbar * v params_n / 8 in
+      let c2Len = v params_logq * v params_nbar * v params_nbar / 8 in
+      Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
+      LSeq.sub ct 0 c1Len == c1 /\
+      LSeq.sub ct c1Len c2Len == c2 /\
+      LSeq.sub ct (c1Len + c2Len) (v crypto_bytes) == d))
+    (ensures ct == S.update_ct c1 c2 d)
+let lemma_update_ct c1 c2 d ct =
+  let ct1 = S.update_ct c1 c2 d in
+  let c1Len = v params_logq * v params_nbar * v params_n / 8 in
+  let c2Len = v params_logq * v params_nbar * v params_nbar / 8 in
+  Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
+
+  FStar.Seq.Base.lemma_eq_intro (LSeq.sub ct1 0 c1Len) c1;
+  FStar.Seq.Base.lemma_eq_intro (LSeq.sub ct1 c1Len c2Len) c2;
+  FStar.Seq.Base.lemma_eq_intro (LSeq.sub ct1 (c1Len + c2Len) (v crypto_bytes)) d;
+
+  FStar.Seq.Properties.lemma_split (LSeq.sub ct 0 (c1Len + c2Len)) c1Len;
+  FStar.Seq.Properties.lemma_split (LSeq.sub ct1 0 (c1Len + c2Len)) c1Len;
+  FStar.Seq.Properties.lemma_split ct (c1Len + c2Len);
+  FStar.Seq.Properties.lemma_split ct1 (c1Len + c2Len)
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
 inline_for_extraction noextract
 val crypto_kem_enc_ct_inner:
     seed_a:lbytes bytes_seed_a
@@ -308,7 +341,7 @@ let crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d ct =
   let h3 = ST.get () in
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_ciphertextbytes) (as_seq h3 ct) (v c1Len) (v c2Len)) (as_seq h2 c2);
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_ciphertextbytes) (as_seq h3 ct) 0 (v c1Len)) (as_seq h1 c1);
-  S.lemma_update_ct (as_seq h3 c1) (as_seq h3 c2) (as_seq h0 d) (as_seq h3 ct)
+  lemma_update_ct (as_seq h3 c1) (as_seq h3 c2) (as_seq h0 d) (as_seq h3 ct)
 
 val crypto_kem_enc_ct:
     pk:lbytes crypto_publickeybytes
@@ -337,6 +370,24 @@ let crypto_kem_enc_ct pk g coins ct =
   clear_matrix sp_matrix;
   pop_frame()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+val lemma_update_ss_init:
+    c12:LSeq.lseq uint8 (v crypto_ciphertextbytes - v crypto_bytes)
+  -> kd:LSeq.lseq uint8 (2 * v crypto_bytes)
+  -> ss_init:LSeq.lseq uint8 (v crypto_ciphertextbytes + v crypto_bytes)
+  -> Lemma
+    (requires
+      LSeq.sub ss_init 0 (v crypto_ciphertextbytes - v crypto_bytes) == c12 /\
+      LSeq.sub ss_init (v crypto_ciphertextbytes - v crypto_bytes) (2 * v crypto_bytes) == kd)
+    (ensures ss_init == S.update_ss_init c12 kd)
+let lemma_update_ss_init c12 kd ss_init =
+  let ss_init1 = S.update_ss_init c12 kd in
+  FStar.Seq.Properties.lemma_split ss_init (v crypto_ciphertextbytes - v crypto_bytes);
+  FStar.Seq.Properties.lemma_split ss_init1 (v crypto_ciphertextbytes - v crypto_bytes)
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
 val crypto_kem_enc_ss:
     g:lbytes (size 3 *! crypto_bytes)
   -> ct:lbytes crypto_ciphertextbytes
@@ -361,6 +412,7 @@ let crypto_kem_enc_ss g ct ss =
   update_sub ss_init (crypto_ciphertextbytes -! crypto_bytes) (size 2 *! crypto_bytes) kd;
   let h2 = ST.get () in
   LSeq.eq_intro (LSeq.sub #_ #(v ss_init_len) (as_seq h2 ss_init) 0 (v crypto_ciphertextbytes - v crypto_bytes)) (as_seq h0 c12);
+  lemma_update_ss_init (as_seq h0 c12) (as_seq h0 kd) (as_seq h2 ss_init);
   //assert (as_seq h2 ss_init == S.update_ss_init (as_seq h0 c12) (as_seq h0 kd) (as_seq h0 ss_init));
   cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
   pop_frame()
