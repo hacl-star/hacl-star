@@ -5,8 +5,7 @@ open Words_s
 open Types_s
 open Opaque_s
 
-//module U8 = FStar.UInt8
-module U8 = SecretByte
+module U8 = FStar.UInt8
 
 let get8_def (s:Seq.lseq U8.t 1) = Seq.index s 0
 let put8_def (x:U8.t) : GTot (Seq.lseq U8.t 1) =

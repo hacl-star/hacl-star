@@ -13,7 +13,7 @@ open Types_s
 open SHA_helpers
 open X64.CPU_Features_s
 
-let pre_cond (h:HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8) = 
+let pre_cond (h:HS.mem) (ctx_b:b8) (in_b:b8) (num_val:nat64) (k_b:b8) = 
   live h ctx_b /\ live h in_b /\ live h k_b /\
   disjoint_or_eq ctx_b k_b /\ 
   disjoint_or_eq in_b k_b /\ 
@@ -26,7 +26,7 @@ let pre_cond (h:HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8) =
   (let k_b128 = BV.mk_buffer_view k_b Views.view128 in
   k_reqs (BV.as_seq h k_b128))
 
-let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8) = 
+let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:b8) (in_b:b8) (num_val:nat64) (k_b:b8) = 
   live h ctx_b /\ live h in_b /\ live h k_b /\
   live h' ctx_b /\ live h' in_b /\ live h' k_b /\
   length k_b % 16 == 0 /\
@@ -43,10 +43,10 @@ let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s
   hash_out == update_multi_transparent hash_in input_LE
  )
 
-let full_post_cond (h:HS.mem) (h':HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8)  =
+let full_post_cond (h:HS.mem) (h':HS.mem) (ctx_b:b8) (in_b:b8) (num_val:nat64) (k_b:b8)  =
   post_cond h h' ctx_b in_b num_val k_b  /\
   M.modifies (M.loc_buffer ctx_b) h h'
 
-val sha_update_bytes_stdcall: ctx_b:s8 -> in_b:s8 -> num_val:nat64 -> k_b:s8 -> Stack unit
+val sha_update_bytes_stdcall: ctx_b:b8 -> in_b:b8 -> num_val:nat64 -> k_b:b8 -> Stack unit
 	(requires (fun h -> pre_cond h ctx_b in_b num_val k_b ))
 	(ensures (fun h0 _ h1 -> full_post_cond h0 h1 ctx_b in_b num_val k_b ))

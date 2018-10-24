@@ -23,7 +23,6 @@ module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 
-friend SecretByte
 friend X64.Memory_s
 friend X64.Memory
 friend X64.Vale.Decls
@@ -34,7 +33,7 @@ friend LowStar.Monotonic.Buffer
 open Vale_sha_update_bytes_stdcall
 
 #set-options "--initial_fuel 6 --max_fuel 6 --initial_ifuel 0 --max_ifuel 0"
-let create_buffer_list (ctx_b:s8) (in_b:s8) (k_b:s8) (stack_b:b8)  : (l:list b8{
+let create_buffer_list (ctx_b:b8) (in_b:b8) (k_b:b8) (stack_b:b8)  : (l:list b8{
     l == [stack_b;ctx_b;in_b;k_b] /\
   (forall x. {:pattern List.memP x l} List.memP x l <==> (x == ctx_b \/ x == in_b \/ x == k_b \/ x == stack_b))}) =
   [stack_b;ctx_b;in_b;k_b]
@@ -75,7 +74,7 @@ let create_initial_trusted_state is_win ctx_b in_b num_val k_b stack_b (h0:HS.me
        BS.mem = Interop.down_mem h0 addrs buffers} in
   {TS.state = s0; TS.trace = []; TS.memTaint = create_valid_memtaint mem buffers taint_func}
 
-val lemma_ghost_sha_update_bytes_stdcall: is_win:bool -> ctx_b:s8 -> in_b:s8 -> num_val:nat64 -> k_b:s8 ->  stack_b:b8 -> (h0:HS.mem{pre_cond h0 ctx_b in_b num_val k_b /\ B.length stack_b == (if is_win then 264 else 104) /\ live h0 stack_b /\ buf_disjoint_from stack_b [ctx_b;in_b;k_b]}) ->
+val lemma_ghost_sha_update_bytes_stdcall: is_win:bool -> ctx_b:b8 -> in_b:b8 -> num_val:nat64 -> k_b:b8 ->  stack_b:b8 -> (h0:HS.mem{pre_cond h0 ctx_b in_b num_val k_b /\ B.length stack_b == (if is_win then 264 else 104) /\ live h0 stack_b /\ buf_disjoint_from stack_b [ctx_b;in_b;k_b]}) ->
   Ghost (TS.traceState * nat * HS.mem)
     (requires True)
     (ensures (fun (s1, f1, h1) ->
@@ -131,12 +130,12 @@ let create_lemma is_win ctx_b in_b num_val k_b stack_b (h0:HS.mem{pre_cond h0 ct
     assert (FunctionalExtensionality.feq (regs' s1.TS.state) (regs' s_init.TS.state));
     assert (FunctionalExtensionality.feq (xmms' s1.TS.state) (xmms' s_init.TS.state))
 
-let implies_pre_aux (b:s8) (n:nat64) : Lemma
+let implies_pre_aux (b:b8) (n:nat64) : Lemma
   (requires length b == 64 `op_Multiply` n)
   (ensures buffer_length #(X64.Memory.TBase X64.Memory.TUInt128) b == 4 `op_Multiply` n) = 
 length_t_eq (TBase TUInt128) b
 
-let implies_pre (is_win:bool) (h0:HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8)  (stack_b:b8) : Lemma
+let implies_pre (is_win:bool) (h0:HS.mem) (ctx_b:b8) (in_b:b8) (num_val:nat64) (k_b:b8)  (stack_b:b8) : Lemma
   (requires pre_cond h0 ctx_b in_b num_val k_b /\ B.length stack_b == (if is_win then 264 else 104) /\ live h0 stack_b /\ buf_disjoint_from stack_b [ctx_b;in_b;k_b])
   (ensures (
 B.length stack_b == (if is_win then 264 else 104) /\ live h0 stack_b /\ buf_disjoint_from stack_b [ctx_b;in_b;k_b] /\ (
@@ -162,7 +161,7 @@ B.length stack_b == (if is_win then 264 else 104) /\ live h0 stack_b /\ buf_disj
     (BV.as_seq h0 k_b128));  
   ()
 
-let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8)  (stack_b:b8) : Lemma
+let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel) (ctx_b:b8) (in_b:b8) (num_val:nat64) (k_b:b8)  (stack_b:b8) : Lemma
   (requires pre_cond va_s0.mem.hs ctx_b in_b num_val k_b /\ B.length stack_b == (if is_win then 264 else 104) /\ live va_s0.mem.hs stack_b /\ buf_disjoint_from stack_b [ctx_b;in_b;k_b]/\
     va_post (va_code_sha_update_bytes_stdcall is_win) va_s0 va_sM va_fM is_win stack_b ctx_b in_b num_val k_b )
   (ensures post_cond va_s0.mem.hs va_sM.mem.hs ctx_b in_b num_val k_b ) =
@@ -207,7 +206,7 @@ let lemma_ghost_sha_update_bytes_stdcall is_win ctx_b in_b num_val k_b stack_b h
 #set-options "--max_fuel 0 --max_ifuel 0"
 
 irreducible
-let sha_update_bytes_stdcall_aux (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8) (stack_b:b8) : Stack unit
+let sha_update_bytes_stdcall_aux (ctx_b:b8) (in_b:b8) (num_val:nat64) (k_b:b8) (stack_b:b8) : Stack unit
   (fun h -> pre_cond h ctx_b in_b num_val k_b  /\ B.length stack_b == (if win then 264 else 104) /\ live h stack_b /\ buf_disjoint_from stack_b [ctx_b;in_b;k_b])
   (fun h0 _ h1 ->
     post_cond h0 h1 ctx_b in_b num_val k_b  /\
@@ -224,8 +223,12 @@ let sha_update_bytes_stdcall_aux (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8) (
       lemma_ghost_sha_update_bytes_stdcall false ctx_b in_b num_val k_b stack_b h
     in (), h1)
 
-let sha_update_bytes_stdcall ctx_b in_b num_val k_b  =
+let sha_update_bytes_stdcall8 ctx_b in_b num_val k_b : ST unit
+  (requires (fun h -> pre_cond h ctx_b in_b num_val k_b))
+  (ensures (fun h0 _ h1 -> full_post_cond h0 h1 ctx_b in_b num_val k_b)) =
   push_frame();
   let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t (if win then 264 else 104)) in
   sha_update_bytes_stdcall_aux ctx_b in_b num_val k_b stack_b;
   pop_frame()
+
+let sha_update_bytes_stdcall ctx_b in_b num_val k_b = admit()

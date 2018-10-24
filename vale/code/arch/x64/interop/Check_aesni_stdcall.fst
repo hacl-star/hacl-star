@@ -23,7 +23,6 @@ module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 
-friend SecretByte
 friend X64.Memory_s
 friend X64.Memory
 friend X64.Vale.Decls
