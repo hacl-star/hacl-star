@@ -11,6 +11,7 @@ module HS = FStar.HyperStack
 open Interop
 open Types_s
 open SHA_helpers
+open X64.CPU_Features_s
 
 let pre_cond (h:HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8) = 
   live h ctx_b /\ live h in_b /\ live h k_b /\
@@ -21,6 +22,7 @@ let pre_cond (h:HS.mem) (ctx_b:s8) (in_b:s8) (num_val:nat64) (k_b:s8) =
   length ctx_b == 32 /\
   length in_b == 64 `op_Multiply` num_val /\
   disjoint ctx_b in_b /\
+  sha_enabled /\
   (let k_b128 = BV.mk_buffer_view k_b Views.view128 in
   k_reqs (BV.as_seq h k_b128))
 
