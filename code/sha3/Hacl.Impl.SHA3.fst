@@ -141,7 +141,6 @@ val state_theta:
 let state_theta s =
   let h0 = ST.get() in
   let spec _ h1 = as_seq h1 s == S.state_theta (as_seq h0 s) /\ live h1 s in
-  let footprint = Ghost.hide (loc_buffer s) in
   salloc1_trivial h0 (size 5) (u64 0) (Ghost.hide (loc_buffer s)) spec
     (fun _C -> state_theta0 s _C; state_theta1 s _C)
 
