@@ -14,6 +14,7 @@ include{:fstar}{:open} "AES_s"
 include{:fstar}{:open} "GCTR_s"
 include{:fstar}{:open} "GCTR"
 include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "Workarounds"
 include{:fstar}{:open} "X64.Poly1305.Math"
 include{:fstar}{:open} "Words.Two_s"
 include{:fstar}{:open} "X64.Machine_s"
@@ -38,6 +39,7 @@ open X64.AES
 open GCTR_s
 open GCTR
 open GCM_helpers
+open Workarounds
 open X64.Poly1305.Math
 open Words.Two_s
 open X64.Machine_s

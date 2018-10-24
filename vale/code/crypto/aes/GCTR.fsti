@@ -9,6 +9,7 @@ open FStar.Mul
 open FStar.Seq
 open AES_s
 open GCTR_s
+open Workarounds
 open GCM_helpers
 open FStar.Math.Lemmas
 open Collections.Seqs

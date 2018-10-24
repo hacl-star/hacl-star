@@ -8,6 +8,7 @@ open GHash_s
 open GF128_s
 open GCTR_s
 open GCM_helpers
+open Workarounds
 open Collections.Seqs_s
 open Collections.Seqs
 open FStar.Seq

@@ -237,8 +237,8 @@ let create_taint_fun (args:list arg) =
 
 let create_state trusted target args stack slots stkstart saveRegs =
   let stack_length = if saveRegs then "(if is_win then " ^ (string_of_int (224 + slots `op_Multiply` 8)) ^ " else " ^ (string_of_int (64 + slots `op_Multiply` 8)) ^ ")" else string_of_int (slots `op_Multiply` 8) in
-  let of_fun = if trusted then "FunctionalExtensionality.on reg" else "X64.Vale.Regs.of_fun" in
-  let of_fun = if trusted then "FunctionalExtensionality.on xmm" else "X64.Vale.Xmms.of_fun" in
+  let of_fun_reg = if trusted then "FunctionalExtensionality.on reg" else "X64.Vale.Regs.of_fun" in
+  let of_fun_xmm = if trusted then "FunctionalExtensionality.on xmm" else "X64.Vale.Xmms.of_fun" in
   create_taint_fun args ^
   "  let buffers = create_buffer_list " ^ print_args_names (List.Tot.filter is_buffer args) ^ (if stack then "stack_b" else "") ^ " in\n" ^
   "  let (mem:mem) = {addrs = addrs; ptrs = buffers; hs = h0} in\n" ^
@@ -252,8 +252,8 @@ let create_state trusted target args stack slots stkstart saveRegs =
   "    fun r -> begin match r with\n" ^
     (if stack then "    | Rsp -> addr_stack\n" else "") ^
     (print_low_calling_args Linux target args stkstart) ^  
-  "  in let regs = " ^ of_fun ^ " regs\n" ^
-  "  in let xmms = " ^ of_fun ^ " init_xmms in\n"
+  "  in let regs = " ^ of_fun_reg ^ " regs\n" ^
+  "  in let xmms = " ^ of_fun_xmm ^ " init_xmms in\n"
 
 let print_vale_bufferty = function
   | TUInt8 -> "buffer8"

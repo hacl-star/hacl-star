@@ -25,6 +25,7 @@ include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
 include{:fstar}{:open} "X64.CPU_Features_s"
+include{:fstar}{:open} "Workarounds"
 
 module X64.GHashstdcall
 
@@ -42,6 +43,7 @@ open GF128_s
 open GF128
 open GCTR_s
 open GCM_helpers
+open Workarounds
 open Math.Poly2_s
 open X64.Poly1305.Math
 open X64.GF128_Mul
