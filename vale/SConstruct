@@ -336,7 +336,6 @@ verify_options = [
   # Special treatment for sensitive modules
 
   # Disable verification by adding 'filename': None
-  ('code/crypto/aes/x64/Low.GCMencrypt.fst', None), # TODO: timeout in gcm_core
   #TODO: Update taint analysis
   ('code/arch/x64/X64.Leakage_Helpers.fst', None), 
   ('code/arch/x64/X64.Leakage_Ins_Xmm.fsti', None),
@@ -345,10 +344,6 @@ verify_options = [
   ('code/arch/x64/X64.Leakage_Ins.fst', None),
   ('code/arch/x64/X64.Leakage.fst', None),
   ('code/arch/x64/interop/Sha_update_bytes_stdcall.fst', None),
-  ('code/arch/x64/interop/GCTR_win.fst', None),
-  ('code/arch/x64/interop/GCTR_win.fsti', None),
-  ('code/arch/x64/interop/Gctr_extra_stdcall.fsti', None),
-  ('code/arch/x64/interop/Gctr_extra_stdcall.fst', None),
   ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
