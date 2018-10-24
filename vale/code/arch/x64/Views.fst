@@ -85,3 +85,22 @@ let inverses128 (u:unit) =
   in
   Classical.forall_intro aux1;
   Classical.forall_intro aux2
+
+
+let get32_128_aux1 (x: Seq.lseq U32.t 4): Lemma (put32_128 (get32_128 x) == x) =
+  reveal_opaque put32_128_def;
+  reveal_opaque get32_128_def;
+  let vg = get32_128 x in
+  let vp = put32_128 vg in
+  assert (Seq.equal x vp)
+
+let put32_128_aux1 (x: quad32): Lemma (get32_128 (put32_128 x) == x) =
+  reveal_opaque put32_128_def;
+  reveal_opaque get32_128_def;
+  ()
+  
+let inverses32_128 (u:unit) =
+  reveal_opaque get32_128_def;
+  reveal_opaque put32_128_def;
+  Classical.forall_intro get32_128_aux1;
+  Classical.forall_intro put32_128_aux1
