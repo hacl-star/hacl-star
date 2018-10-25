@@ -107,8 +107,19 @@ let init #a s =
   | SHA2_384_s p -> Hacl.Hash.SHA2.init_384 p
   | SHA2_512_s p -> Hacl.Hash.SHA2.init_512 p
 
-friend SecretByte
 friend SHA_helpers
+
+assume val such_a_bad_hack: #a:Type -> b:IB.ibuffer a ->
+  Stack (b': B.buffer a)
+    (requires (fun h ->
+      B.live h b))
+    (ensures (fun h0 b' h1 ->
+      forall h. {:pattern B.live h b } B.live h b ==> B.live h b' /\
+      B.length b = B.length b' /\
+      B.modifies B.loc_none h0 h1))
+
+[@ (CPrologue "#define EverCrypt_Hash_such_a_bad_hack(X) (X)") ]
+let _ = ()
 
 // A new switch between HACL and Vale; can be used in place of Hacl.Hash.SHA2.update_256
 inline_for_extraction noextract
@@ -120,13 +131,16 @@ let update_multi_256 s blocks n =
     let open Hacl.Hash.Core.SHA2.Constants in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
+    // Hack alert!
+    let k = such_a_bad_hack k224_256 in
     let h0 = ST.get () in
-    assume (M.loc_disjoint (M.loc_buffer k224_256) (M.loc_buffer s));
-    assume (M.loc_disjoint (M.loc_buffer k224_256) (M.loc_buffer blocks));
+    assume (X64.CPU_Features_s.sha_enabled);
+    assume (M.loc_disjoint (M.loc_buffer k) (M.loc_buffer s));
+    assume (M.loc_disjoint (M.loc_buffer k) (M.loc_buffer blocks));
     assume (
-      let k_b128 = LowStar.BufferView.mk_buffer_view k224_256 Views.view32_128 in
+      let k_b128 = LowStar.BufferView.mk_buffer_view k Views.view32_128 in
       SHA_helpers.k_reqs (LowStar.BufferView.as_seq h0 k_b128));
-    Sha_update_bytes_stdcall.sha_update_bytes_stdcall s blocks n k224_256;
+    Sha_update_bytes_stdcall.sha_update_bytes_stdcall s blocks n k;
     admit ()
   end else
     Hacl.Hash.SHA2.update_multi_256 s blocks n

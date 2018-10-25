@@ -54,13 +54,20 @@ ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
 
 include .depend
 
-# Admit SMT queries for modules in FStar namespace
-$(CACHE_DIR)/FStar.%.fst.checked: | .depend
-	$(FSTAR) --admit_smt_queries true $< && \
-	touch $@
+ADMIT=false
+
+# Admit ulib + Vale-related files, verified separately with different Z3
+# options.
+$(CACHE_DIR)/FStar.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/X64.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/Arch.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/Words.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/Vale.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/Collections.%.fst.checked: ADMIT=true
 
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
+	  --admit_smt_queries $(ADMIT) \
 	  --use_hints --record_hints \
 	  --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
@@ -76,11 +83,16 @@ ifneq (,$(EVEREST_WINDOWS))
 KOPTS		+=-falloca -ftail-calls
 endif
 
+VALE_BUNDLES=$(addprefix -bundle , 'X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
+  'Collections.*' 'SHA_helpers' Collections Types_s Words_s Views AES_s \
+  Workarounds 'Math.*')
+
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
+	  $(VALE_BUNDLES) \
 	  -bundle 'FStar.*' \
 	  -bundle 'C,C.*' \
 	  -bundle 'Hacl.*' \
