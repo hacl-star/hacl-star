@@ -136,7 +136,7 @@ procedure{:quick} fast_multiply_a0b(
 }
 
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 300"
 procedure{:quick} {:verify true} fast_multiply_a1b(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -178,23 +178,23 @@ procedure{:quick} {:verify true} fast_multiply_a1b(
         let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * rax; 
         a0b == a0 * b;
     ensures
-//        let d0 := buffer64_read(dst_b, 0, mem);
-//        let d1 := buffer64_read(dst_b, 1, mem);
-//        let d2 := buffer64_read(dst_b, 2, mem);
-//        let d3 := buffer64_read(dst_b, 3, mem);
-//        let d4 := buffer64_read(dst_b, 4, mem);
-//        let d5 := buffer64_read(dst_b, 5, mem);
-//        let d6 := buffer64_read(dst_b, 6, mem);
-//        let d7 := buffer64_read(dst_b, 7, mem);
-//
-//        let d := d0 + pow2_64 * d1 + pow2_128 * d2 + pow2_192 * d3 +
-//                 pow2_256 * d4 + pow2_320 * d5 + pow2_384 * d6 + pow2_448 * d7;
-////        d == a * b;
-//        validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
-//        modifies_buffer(dst_b, old(mem), mem);
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let carry_bit := if cf(efl) then 1 else 0;
+        pow2_two(a0, a1) * b == pow2_seven(d0, d1, d2, r12, r14, rax, carry_bit);
+
+        validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
 
+    ghost var a0b_0 := buffer64_read(dst_b, 0, mem);
+    ghost var a0b_1 := buffer64_read(dst_b, 1, mem);
+    ghost var a0b_2 := r12;
+    ghost var a0b_3 := r14;
+    ghost var a0b_4 := rax;
+    ghost var a0b := pow2_five(a0b_0, a0b_1, a0b_2, a0b_3, a0b_4);
 //
 //    "movq  8(A), %%rdx; " /* A[1] */
 //    "mulx   (B),  %%r8,  %%r9; " /* A[1]*B[0] */    "xorl %%r10d, %%r10d ;"  "adcx 8(dst),  %%r8 ;"    "movq  %%r8,  8(dst) ;"
@@ -208,39 +208,72 @@ procedure{:quick} {:verify true} fast_multiply_a1b(
     Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0, Secret));  /* A[1]*B[0] */ 
     assert pow2_64 * r9 + r8 == a1 * b0;
     lemma_load_mem64(dst_b, 1, mem);    
-    Xor64(r10, r10);  ghost var a1b0_lo := r8;      Adcx64Wrap(r8, Mem(dst_ptr,  8, dst_b, 1, Secret));   Store64_buffer(dst_ptr, r8,  8, Secret, dst_b, 1);  // REVIEW: Why not combine the Adcx with the Store?
+    Xor64(r10, r10);  ghost var a1b_0 := r8;      Adcx64Wrap(r8, Mem(dst_ptr,  8, dst_b, 1, Secret));   Store64_buffer(dst_ptr, r8,  8, Secret, dst_b, 1);  // REVIEW: Why not combine the Adcx with the Store?
     lemma_load_mem64(inB_b, 1, mem);    
     Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1, Secret));  /* A[1]*B[1] */ 
     assert pow2_64 * r11 + r10 == a1 * b1;
-    Adox64Wrap(r10,  r9);  ghost var a1b1_lo := r10;  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2); 
+    Adox64Wrap(r10,  r9);  ghost var a1b_1 := r10;  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2); 
     lemma_load_mem64(inB_b, 2, mem);    
-    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2, Secret));  /* A[1]*B[2] */ Adox64Wrap(r12, r11);  ghost var a1b2_lo := r12; Adcx64Wrap(r12, r14);                         Mov64( r8, 0); 
+    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2, Secret));  /* A[1]*B[2] */ Adox64Wrap(r12, r11);  ghost var a1b_2 := r12; Adcx64Wrap(r12, r14);                         Mov64( r8, 0); 
     lemma_load_mem64(inB_b, 3, mem);    
-    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3, Secret));  /* A[1]*B[3] */ lemma_overflow_is_zero(rdx, r14, a1, b3); Adox64Wrap(r14, r13);  ghost var a1b3_lo := r14; Adcx64Wrap(r14, rax);                         Mov64(rax, 0);
-    /*******************************************/                  Adox64Wrap(rax, rdx);  ghost var a1b_hi := rax;  ghost var overflow_bit := if overflow(efl) then 1 else 0;  Adcx64Wrap(rax, r8); 
+    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3, Secret));  /* A[1]*B[3] */ lemma_overflow_is_zero(rdx, r14, a1, b3); Adox64Wrap(r14, r13);  ghost var a1b_3 := r14; Adcx64Wrap(r14, rax);                         Mov64(rax, 0);
+    /*******************************************/                  Adox64Wrap(rax, rdx);  ghost var a1b_4 := rax;  ghost var overflow_bit := if overflow(efl) then 1 else 0;  Adcx64Wrap(rax, r8); 
 
-    ghost var a1b := a1b0_lo + pow2_64 * a1b1_lo + pow2_128 * a1b2_lo + pow2_192 * a1b3_lo + pow2_256 * a1b_hi + pow2_320 * overflow_bit;
-    assert_by_tactic(a1 * b == a1*b0 + pow2_64 * (a1*b1) + pow2_128 * (a1*b2) + pow2_192 * (a1*b3), int_canon);   // PASSES
-    assert a1 * b == a1b;  // PASSES
     assert overflow_bit == 0;
-    assert pow2_64 * (a1 * b) == pow2_64 * a1b;
-    //assert_by_tactic(pow2_64 * a1b == pow2_64 * a1b0_lo + pow2_128 * a1b1_lo + pow2_192 * a1b2_lo + pow2_256 * a1b3_lo + pow2_320 * a1b_hi + pow2_384 * overflow_bit, int_canon);
+
+    ghost var carry_bit := if cf(efl) then 1 else 0;
 
     ghost var d0 := buffer64_read(dst_b, 0, mem);
     ghost var d1 := buffer64_read(dst_b, 1, mem);
     ghost var d2 := buffer64_read(dst_b, 2, mem);
 
-    assert d0 == old(d0);
-    assert d1 == (old(buffer64_read(dst_b, 1, mem)) + a1b0_lo) % pow2_64;
+    ghost var a1b := pow2_five(a1b_0, a1b_1, a1b_2, a1b_3, a1b_4);
+    ghost var a0a1b := pow2_seven(d0, d1, d2, r12, r14, rax, carry_bit);
 
-    ghost var carry_bit := if cf(efl) then 1 else 0;
-    ghost var a0a1b := d0 + pow2_64 * d1 + pow2_128 * d2 + pow2_192 * r12 + pow2_256 * r14 + pow2_320 * rax + pow2_384 * (carry_bit + overflow_bit);
-    assert_by_tactic((a0 + pow2_64 * a1) * b == a0 * b + pow2_64 * (a1 * b), int_canon);                          // PASSES
-    assert_by_tactic(a0 * b + pow2_64 * (a1 * b) == 
-        old(d0) + pow2_64 * (a1b0_lo + old(buffer64_read(dst_b, 1, mem))) + pow2_128 * (a1b1_lo + old(r12)) + pow2_192 * (a1b2_lo + old(r14)) + pow2_256 * (a1b3_lo + old(rax)) + pow2_320 * a1b_hi + pow2_384 * overflow_bit, int_canon);
+    assert_by_tactic(a1 * b == pow2_four(a1*b0, a1*b1, a1*b2, a1*b3), int_canon);   // PASSES
+    assert a1b == a1 * b;  // PASSES
 
+    lemma_sum(a0, a1,
+              a0b, a0b_0, a0b_1, a0b_2, a0b_3, a0b_4,
+              a1b, a1b_0, a1b_1, a1b_2, a1b_3, a1b_4,
+              b, b0, b1, b2, b3,
+              d1, d2, r12, r14, rax,
+              carry_bit); 
+    assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the lemma
 
-    //assert a0a1b == (a0 + pow2_64 * a1) * b;  // FAILS
+/*
+    // calc {
+    //   pow2_two(a0, a1) * b  
+        assert_by_tactic(pow2_two(a0, a1) * b == pow2_two(mul_nats(a0, b), mul_nats(a1, b)), int_canon); // PASSES
+    //   pow2_two(a0 * b, a1 * b)
+    //     calc {
+    //       a0 * b
+                assert a0b == a0 * b;  // PASSES
+    //       a0b
+    //     }
+    //     calc {
+    //       a1 * b
+                assert_by_tactic(a1 * b == pow2_four(a1*b0, a1*b1, a1*b2, a1*b3), int_canon);   // PASSES
+                assert a1b == a1 * b;  // PASSES
+    //       a1b
+    //     }
+           assert pow2_two(mul_nats(a0, b), mul_nats(a1, b)) == pow2_two(a0b, a1b);  // PASSES
+    //   pow2_two(a0b, a1b)
+        lemma_partial_sum(a0b, a0b_0, a0b_1, a0b_2, a0b_3, a0b_4,
+                          a1b, a1b_0, a1b_1, a1b_2, a1b_3, a1b_4);  // PASSES
+        assert pow2_two(a0b, a1b) == pow2_six(a0b_0, a0b_1 + a1b_0, a0b_2 + a1b_1, a0b_3 + a1b_2, a0b_4 + a1b_3, a1b_4);  // PASSES
+    //   pow2_six a0b_0 (a0b_1 + a1b_0) (a0b_2 + a1b_1) (a0b_3 + a1b_2) (a0b_4 + a1b_3) a1b_4)
+        lemma_sum(a0b_0, a0b_1, a0b_2, a0b_3, a0b_4,
+                  a1b_0, a1b_1, a1b_2, a1b_3, a1b_4,
+                  d1, d2, r12, r14, rax); 
+        assert pow2_six(a0b_0, a0b_1 + a1b_0, a0b_2 + a1b_1, a0b_3 + a1b_2, a0b_4 + a1b_3, a1b_4) == 
+               pow2_seven(a0b_0, d1, d2, r12, r14, rax, carry_bit);
+        assert pow2_seven(a0b_0, d1, d2, r12, r14, rax, carry_bit) ==
+               a0a1b;
+    //   a0a1b
+    // }
+    //assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the calc
+*/
 }
 
 /*
