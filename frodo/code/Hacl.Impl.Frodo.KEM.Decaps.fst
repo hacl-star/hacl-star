@@ -70,10 +70,10 @@ let get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix =
   push_frame();
   Spec.Frodo.KEM.expand_crypto_publickeybytes ();
   Spec.Frodo.KEM.expand_crypto_secretkeybytes ();
-  let pk = sub #uint8 #_ #(v crypto_publickeybytes) sk crypto_bytes crypto_publickeybytes in
-  let seed_a = sub #uint8 #_ #(v bytes_seed_a) pk (size 0) bytes_seed_a in
-  let b = sub #uint8 #_ #(v ((params_logq *! params_n *! params_nbar) /. size 8)) pk bytes_seed_a (crypto_publickeybytes -! bytes_seed_a) in
-  let seed_ep = sub #uint8 #_ #(v crypto_bytes) g (size 0) crypto_bytes in
+  let pk: lbytes crypto_publickeybytes = sub sk crypto_bytes crypto_publickeybytes in
+  let seed_a = sub pk (size 0) bytes_seed_a in
+  let b = sub pk bytes_seed_a (crypto_publickeybytes -! bytes_seed_a) in
+  let seed_ep = sub g (size 0) crypto_bytes in
 
   let sp_matrix  = matrix_create params_nbar params_n in
   frodo_sample_matrix params_nbar params_n crypto_bytes seed_ep (u16 4) sp_matrix;
@@ -148,8 +148,8 @@ val crypto_kem_dec_kp_s:
 let crypto_kem_dec_kp_s mu_decode g bp_matrix c_matrix sk ct =
   push_frame ();
   Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
-  let dp = sub #uint8 #_ #(v crypto_bytes) g (crypto_bytes +! crypto_bytes) crypto_bytes in
-  let d = sub #uint8 #_ #(v crypto_bytes) ct (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes in
+  let dp = sub g (crypto_bytes +! crypto_bytes) crypto_bytes in
+  let d = sub ct (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes in
 
   let bpp_matrix = matrix_create params_nbar params_n in
   let cp_matrix  = matrix_create params_nbar params_nbar in
@@ -172,10 +172,10 @@ val crypto_kem_dec_ss0:
 let crypto_kem_dec_ss0 ct kp_s ss =
   push_frame();
   let c12 = sub ct (size 0) (crypto_ciphertextbytes -! crypto_bytes) in
-  let d = sub #uint8 #_ #(v crypto_bytes) ct (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes in
+  let d = sub ct (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes in
 
   let ss_init_len = crypto_ciphertextbytes +! crypto_bytes in
-  let ss_init:lbytes ss_init_len = create ss_init_len (u8 0) in
+  let ss_init = create ss_init_len (u8 0) in
   concat3 (crypto_ciphertextbytes -! crypto_bytes) c12 crypto_bytes kp_s crypto_bytes d ss_init;
   cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
   pop_frame()
@@ -200,8 +200,8 @@ val crypto_kem_dec_ss:
 	(as_seq h0 g) (as_seq h0 mu_decode) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
 let crypto_kem_dec_ss ct sk g mu_decode bp_matrix c_matrix ss =
   let b = crypto_kem_dec_kp_s mu_decode g bp_matrix c_matrix sk ct in
-  let kp = sub #uint8 #_ #(v crypto_bytes) g crypto_bytes crypto_bytes in
-  let s = sub #uint8 #_ #(v crypto_bytes) sk (size 0) crypto_bytes in
+  let kp = sub g crypto_bytes crypto_bytes in
+  let s = sub sk (size 0) crypto_bytes in
   let kp_s = if b then kp else s in
   crypto_kem_dec_ss0 ct kp_s ss
 
@@ -220,10 +220,10 @@ val crypto_kem_dec_0:
       as_seq h1 g == Spec.Frodo.Params.frodo_prf_spec (v crypto_publickeybytes + v bytes_mu)
 	pk_mu_decode (u16 3) (3 * v crypto_bytes)))
 let crypto_kem_dec_0 mu_decode sk g =
-  let pk_mu_decode_len = crypto_publickeybytes +! bytes_mu in
   push_frame();
+  let pk_mu_decode_len = crypto_publickeybytes +! bytes_mu in
   let pk_mu_decode = create pk_mu_decode_len (u8 0) in
-  let pk = sub #uint8 #_ #(v crypto_publickeybytes) sk crypto_bytes crypto_publickeybytes in
+  let pk = sub sk crypto_bytes crypto_publickeybytes in
   concat2 crypto_publickeybytes pk bytes_mu mu_decode pk_mu_decode;
   cshake_frodo pk_mu_decode_len pk_mu_decode (u16 3) (size 3 *! crypto_bytes) g;
   pop_frame()

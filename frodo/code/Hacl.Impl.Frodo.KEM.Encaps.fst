@@ -79,7 +79,7 @@ let frodo_mul_add_sb_plus_e b seed_e sp_matrix v_matrix =
 val frodo_mul_add_sb_plus_e_plus_mu:
     b:lbytes (params_logq *! params_n *! params_nbar /. size 8)
   -> seed_e:lbytes crypto_bytes
-  -> coins:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
+  -> coins:lbytes bytes_mu
   -> sp_matrix:matrix_t params_nbar params_n
   -> v_matrix:matrix_t params_nbar params_nbar
   -> Stack unit
@@ -123,7 +123,7 @@ let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix c1 =
 inline_for_extraction noextract
 val crypto_kem_enc_ct_pack_c2:
     seed_e:lbytes crypto_bytes
-  -> coins:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
+  -> coins:lbytes bytes_mu
   -> b:lbytes (params_logq *! params_n *! params_nbar /. size 8)
   -> sp_matrix:matrix_t params_nbar params_n
   -> c2:lbytes (params_logq *! params_nbar *! params_nbar /. size 8)
@@ -144,11 +144,11 @@ let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix c2 =
   pop_frame()
 
 inline_for_extraction noextract
-val crypto_kem_enc_ct_inner:
+val crypto_kem_enc_ct0:
     seed_a:lbytes bytes_seed_a
   -> seed_e:lbytes crypto_bytes
   -> b:lbytes (params_logq *! params_n *! params_nbar /. size 8)
-  -> coins:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
+  -> coins:lbytes bytes_mu
   -> sp_matrix:matrix_t params_nbar params_n
   -> d:lbytes crypto_bytes
   -> ct:lbytes crypto_ciphertextbytes
@@ -159,40 +159,38 @@ val crypto_kem_enc_ct_inner:
       disjoint coins ct /\ disjoint b ct /\ disjoint d ct /\
       disjoint seed_a ct /\ disjoint seed_e ct /\ disjoint sp_matrix ct)
     (ensures fun h0 _ h1 -> modifies (loc_buffer ct) h0 h1 /\
-      (let c1 = S.crypto_kem_enc_ct_pack_c1 (as_seq h0 seed_a) (as_seq h0 seed_e) (as_seq h0 sp_matrix) in
+     (let c1 = S.crypto_kem_enc_ct_pack_c1 (as_seq h0 seed_a) (as_seq h0 seed_e) (as_seq h0 sp_matrix) in
       let c2 = S.crypto_kem_enc_ct_pack_c2 (as_seq h0 seed_e) (as_seq h0 coins) (as_seq h0 b) (as_seq h0 sp_matrix) in
       Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
-      let ct_s = LSeq.concat (LSeq.concat c1 c2) (as_seq h0 d) in
-      as_seq h1 ct == ct_s))
-let crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d ct =
+      as_seq h1 ct == LSeq.concat (LSeq.concat c1 c2) (as_seq h0 d)))
+let crypto_kem_enc_ct0 seed_a seed_e b coins sp_matrix d ct =
   let h0 = ST.get () in
   Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
   let c1Len = params_logq *! params_nbar *! params_n /. size 8 in
   let c2Len = params_logq *! params_nbar *! params_nbar /. size 8 in
   let c12Len = c1Len +! c2Len in
 
-  let c1 = sub #_ #(v crypto_ciphertextbytes) #(v c1Len) ct (size 0) c1Len in
+  let c1 = sub ct (size 0) c1Len in
   crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix c1;
   let h1 = ST.get () in
-  assert (LSeq.sub #_ #(v crypto_ciphertextbytes) (as_seq h1 ct) 0 (v c1Len) == as_seq h1 c1);
+  assert (LSeq.sub (as_seq h1 ct) 0 (v c1Len) == as_seq h1 c1);
 
-  let c2 = sub #_ #(v crypto_ciphertextbytes) #(v c2Len) ct c1Len c2Len in
+  let c2 = sub ct c1Len c2Len in
   crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix c2;
   let h2 = ST.get () in
-  assert (LSeq.sub #_ #(v crypto_ciphertextbytes) (as_seq h2 ct) (v c1Len) (v c2Len) == as_seq h2 c2);
-  assert (LSeq.sub #_ #(v crypto_ciphertextbytes) (as_seq h2 ct) 0 (v c1Len) == as_seq h1 c1);
+  assert (LSeq.sub (as_seq h2 ct) (v c1Len) (v c2Len) == as_seq h2 c2);
+  assert (LSeq.sub (as_seq h2 ct) 0 (v c1Len) == as_seq h1 c1);
 
   update_sub ct c12Len crypto_bytes d;
   let h3 = ST.get () in
-  LSeq.eq_intro (LSeq.sub #_ #(v crypto_ciphertextbytes) (as_seq h3 ct) (v c1Len) (v c2Len)) (as_seq h2 c2);
-  LSeq.eq_intro (LSeq.sub #_ #(v crypto_ciphertextbytes) (as_seq h3 ct) 0 (v c1Len)) (as_seq h1 c1);
-
+  LSeq.eq_intro (LSeq.sub (as_seq h3 ct) (v c1Len) (v c2Len)) (as_seq h2 c2);
+  LSeq.eq_intro (LSeq.sub (as_seq h3 ct) 0 (v c1Len)) (as_seq h1 c1);
   LSeq.lemma_concat3 (v c1Len) (as_seq h3 c1) (v c2Len) (as_seq h3 c2) (v crypto_bytes) (as_seq h0 d) (as_seq h3 ct)
 
 val crypto_kem_enc_ct:
     pk:lbytes crypto_publickeybytes
   -> g:lbytes (size 3 *! crypto_bytes)
-  -> coins:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
+  -> coins:lbytes bytes_mu
   -> ct:lbytes crypto_ciphertextbytes
   -> Stack unit
     (requires fun h ->
@@ -204,15 +202,13 @@ val crypto_kem_enc_ct:
 let crypto_kem_enc_ct pk g coins ct =
   assert (v params_nbar * v params_n % 2 = 0);
   push_frame();
-  let seed_a = sub #uint8 #_ #(v bytes_seed_a) pk (size 0) bytes_seed_a in
-  let b = sub #uint8 #_ #(v (params_logq *! params_n *! params_nbar /. size 8)) pk bytes_seed_a (crypto_publickeybytes -! bytes_seed_a) in
-  let seed_e = sub #uint8 #_ #(v crypto_bytes) g (size 0) crypto_bytes in
-  let d = sub #uint8 #_ #(v crypto_bytes) g (size 2 *! crypto_bytes) crypto_bytes in
-
+  let seed_a = sub pk (size 0) bytes_seed_a in
+  let b = sub pk bytes_seed_a (crypto_publickeybytes -! bytes_seed_a) in
+  let seed_e = sub g (size 0) crypto_bytes in
+  let d = sub g (size 2 *! crypto_bytes) crypto_bytes in
   let sp_matrix = matrix_create params_nbar params_n in
   frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 4) sp_matrix;
-  crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d ct;
-
+  crypto_kem_enc_ct0 seed_a seed_e b coins sp_matrix d ct;
   clear_matrix sp_matrix;
   pop_frame()
 
@@ -230,15 +226,15 @@ val crypto_kem_enc_ss:
 let crypto_kem_enc_ss g ct ss =
   push_frame();
   let ss_init_len = crypto_ciphertextbytes +! crypto_bytes in
-  let ss_init:lbytes ss_init_len = create ss_init_len (u8 0) in
+  let ss_init = create ss_init_len (u8 0) in
   let c12 = sub ct (size 0) (crypto_ciphertextbytes -! crypto_bytes) in
-  let kd = sub #uint8 #_ #(2 * v crypto_bytes) g crypto_bytes (size 2 *! crypto_bytes) in
+  let kd = sub g crypto_bytes (size 2 *! crypto_bytes) in
   concat2 (crypto_ciphertextbytes -! crypto_bytes) c12 (size 2 *! crypto_bytes) kd ss_init;
   cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
   pop_frame()
 
 inline_for_extraction noextract
-val crypto_kem_enc_0:
+val crypto_kem_enc_g:
     coins:lbytes bytes_mu
   -> pk:lbytes crypto_publickeybytes
   -> g:lbytes (size 3 *! crypto_bytes)
@@ -248,18 +244,19 @@ val crypto_kem_enc_0:
       disjoint g coins /\ disjoint g pk)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer g) h0 h1 /\
       (let pk_coins = LSeq.concat (as_seq h0 pk) (as_seq h0 coins) in
-      as_seq h1 g == Spec.Frodo.Params.frodo_prf_spec (v crypto_publickeybytes + v bytes_mu) pk_coins (u16 3) (3 * v crypto_bytes)))
-let crypto_kem_enc_0 coins pk g =
+      as_seq h1 g ==
+      Spec.Frodo.Params.frodo_prf_spec (v crypto_publickeybytes + v bytes_mu) pk_coins (u16 3) (3 * v crypto_bytes)))
+let crypto_kem_enc_g coins pk g =
   push_frame();
-  let pk_coins:lbytes (crypto_publickeybytes +! bytes_mu) = create (crypto_publickeybytes +! bytes_mu) (u8 0) in
+  let pk_coins = create (crypto_publickeybytes +! bytes_mu) (u8 0) in
   concat2 crypto_publickeybytes pk bytes_mu coins pk_coins;
   cshake_frodo (crypto_publickeybytes +! bytes_mu) pk_coins (u16 3) (size 3 *! crypto_bytes) g;
   pop_frame()
 
 inline_for_extraction noextract
-val crypto_kem_enc_1:
+val crypto_kem_enc_ct_ss:
      g:lbytes (size 3 *! crypto_bytes)
-  -> coins:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
+  -> coins:lbytes bytes_mu
   -> ct:lbytes crypto_ciphertextbytes
   -> ss:lbytes crypto_bytes
   -> pk:lbytes crypto_publickeybytes
@@ -273,7 +270,7 @@ val crypto_kem_enc_1:
       modifies (loc_union (loc_union (loc_buffer ct) (loc_buffer ss)) (loc_buffer g)) h0 h1 /\
       as_seq h1 ct == S.crypto_kem_enc_ct (as_seq h0 pk) (as_seq h0 g) (as_seq h0 coins) /\
       as_seq h1 ss == S.crypto_kem_enc_ss (as_seq h0 g) (as_seq h1 ct))
-let crypto_kem_enc_1 g coins ct ss pk =
+let crypto_kem_enc_ct_ss g coins ct ss pk =
   assert_spinoff (2 * v crypto_bytes % 4 == 0);
   crypto_kem_enc_ct pk g coins ct;
   crypto_kem_enc_ss g ct ss;
@@ -290,14 +287,14 @@ val crypto_kem_enc_:
       live h ct /\ live h ss /\ live h pk /\ live h coins /\
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk /\
       disjoint coins ss /\ disjoint coins ct /\ disjoint coins pk)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer ct) (loc_buffer ss)) h0 h1 /\
-      (let ct_s, ss_s = S.crypto_kem_enc_ (as_seq h0 coins) (as_seq h0 pk) in
-      as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_union (loc_buffer ct) (loc_buffer ss)) h0 h1 /\
+      (as_seq h1 ct, as_seq h1 ss) == S.crypto_kem_enc_ (as_seq h0 coins) (as_seq h0 pk))
 let crypto_kem_enc_ coins ct ss pk =
   push_frame();
-  let g:lbytes (size 3 *! crypto_bytes) = create (size 3 *! crypto_bytes) (u8 0) in
-  crypto_kem_enc_0 coins pk g;
-  crypto_kem_enc_1 g coins ct ss pk;
+  let g = create (size 3 *! crypto_bytes) (u8 0) in
+  crypto_kem_enc_g coins pk g;
+  crypto_kem_enc_ct_ss g coins ct ss pk;
   pop_frame()
 
 inline_for_extraction noextract
@@ -312,13 +309,11 @@ val crypto_kem_enc:
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk)
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc_buffer state) (loc_union (loc_buffer ct) (loc_buffer ss))) h0 h1 /\
-      (let ct_s, ss_s = S.crypto_kem_enc (as_seq h0 state) (as_seq h0 pk) in
-      as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
+      (as_seq h1 ct, as_seq h1 ss) == S.crypto_kem_enc (as_seq h0 state) (as_seq h0 pk))
 let crypto_kem_enc ct ss pk =
   LowStar.Buffer.recall state;
   push_frame();
-  let bytes_mu = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
-  let coins = create (params_nbar *! params_nbar *! params_extracted_bits /. size 8) (u8 0) in
+  let coins = create bytes_mu (u8 0) in
   recall state;
   randombytes_ bytes_mu coins;
   crypto_kem_enc_ coins ct ss pk;

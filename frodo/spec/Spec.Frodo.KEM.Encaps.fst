@@ -44,7 +44,7 @@ let frodo_mul_add_sb_plus_e b seed_e sp_matrix =
 val frodo_mul_add_sb_plus_e_plus_mu:
     b:lbytes (params_logq * params_n * params_nbar / 8)
   -> seed_e:lbytes crypto_bytes
-  -> coins:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
+  -> coins:lbytes bytes_mu
   -> sp_matrix:matrix params_nbar params_n
   -> matrix params_nbar params_nbar
 let frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix =
@@ -64,7 +64,7 @@ let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix =
 
 val crypto_kem_enc_ct_pack_c2:
     seed_e:lbytes crypto_bytes
-  -> coins:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
+  -> coins:lbytes bytes_mu
   -> b:lbytes (params_logq * params_n * params_nbar / 8)
   -> sp_matrix:matrix params_nbar params_n
   -> lbytes (params_logq * params_nbar * params_nbar / 8)
@@ -75,7 +75,7 @@ let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix =
 val crypto_kem_enc_ct:
     pk:lbytes crypto_publickeybytes
   -> g:lbytes (3 * crypto_bytes)
-  -> coins:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
+  -> coins:lbytes bytes_mu
   -> lbytes crypto_ciphertextbytes
 let crypto_kem_enc_ct pk g coins =
   let seed_a = Seq.sub pk 0 bytes_seed_a in
