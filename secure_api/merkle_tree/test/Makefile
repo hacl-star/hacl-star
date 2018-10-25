@@ -30,5 +30,8 @@ all:
 	make -C ../
 	$(CC) $(CC_ARGS) $(IN_TEST_C) -o $(OUT_TEST) $(LD_ARGS)
 
+test-asan: all
+	clang -O1 -g -fsanitize=address -fno-omit-frame-pointer $(CC_ARGS) $(IN_TEST_C) -o $(OUT_TEST).asan $(LD_ARGS)
+
 clean:
 	rm -rf $(OUT_TEST)
