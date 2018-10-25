@@ -314,29 +314,29 @@ let hash_2 src1 src2 dst =
   B.blit src1 0ul cb 0ul hash_size;
   B.blit src2 0ul cb 32ul hash_size;
   let st = EHS.create EHS.SHA256 in
-  EHS.init st;
+  EHS.init #(Ghost.hide EHS.SHA256) st;
   let hh1 = HST.get () in
   assert (S.equal (S.append 
   		    (Rgl?.r_repr hreg hh0 src1)
   		    (Rgl?.r_repr hreg hh0 src2))
   		  (B.as_seq hh1 cb));
-  EHS.update (Ghost.hide S.empty) st cb;
+  EHS.update #(Ghost.hide EHS.SHA256) (Ghost.hide S.empty) st cb;
   let hh2 = HST.get () in
   assert (EHS.hashing st hh2 (S.append S.empty (B.as_seq hh1 cb)));
   assert (S.equal (S.append S.empty (B.as_seq hh1 cb))
   		  (B.as_seq hh1 cb));
-  EHS.finish st dst;
+  EHS.finish #(Ghost.hide EHS.SHA256) st dst;
   let hh3 = HST.get () in
   assert (S.equal (B.as_seq hh3 dst)
   		  (EHS.extract (EHS.repr st hh2)));
   assert (S.equal (B.as_seq hh3 dst)
   		  (EHS.extract 
-  		    (EHS.hash0 #(Ghost.hide EHS.SHA256) (B.as_seq hh1 cb))));
+  		    (EHS.hash0 #EHS.SHA256 (B.as_seq hh1 cb))));
   assert (S.equal (B.as_seq hh3 dst)
 		  (High.hash_2
 		    (Rgl?.r_repr hreg hh0 src1)
 		    (Rgl?.r_repr hreg hh0 src2)));
-  EHS.free st;
+  EHS.free #(Ghost.hide EHS.SHA256) st;
   HST.pop_frame ();
   let hh4 = HST.get () in
   assert (S.equal (B.as_seq hh4 dst)

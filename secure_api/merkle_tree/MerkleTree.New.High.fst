@@ -34,7 +34,7 @@ let hash_init: hash = S.create hash_size 0uy
 
 val hash_2: src1:hash -> src2:hash -> GTot hash
 let hash_2 src1 src2 =
-  EHS.extract (EHS.hash0 #(Ghost.hide EHS.SHA256) (S.append src1 src2))
+  EHS.extract (EHS.hash0 #EHS.SHA256 (S.append src1 src2))
 
 /// High-level Merkle tree data structure
 
