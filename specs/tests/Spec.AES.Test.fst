@@ -102,7 +102,7 @@ let test() : FStar.All.ML unit =
   FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (to_list #uint8 #256 inv);
   IO.print_string "\n";
   *)
-  let seqsbox = map (fun s -> sbox s) seqi in
+  let seqsbox = map (fun s -> sub_byte s) seqi in
   IO.print_string "sbox i:     \n";
   FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)); IO.print_string " ; ") (to_list #uint8 seqsbox);
   IO.print_string "\n";
