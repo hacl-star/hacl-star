@@ -77,7 +77,7 @@ let get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix =
 
   let sp_matrix  = matrix_create params_nbar params_n in
   frodo_sample_matrix params_nbar params_n crypto_bytes seed_ep (u16 4) sp_matrix;
-  frodo_mul_add_sa_plus_e_main seed_a seed_ep sp_matrix bpp_matrix;
+  frodo_mul_add_sa_plus_e seed_a seed_ep sp_matrix bpp_matrix;
 
   frodo_mul_add_sb_plus_e_plus_mu b seed_ep mu_decode sp_matrix cp_matrix;
   clear_matrix sp_matrix;

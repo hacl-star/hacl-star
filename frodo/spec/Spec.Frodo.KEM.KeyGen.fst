@@ -25,12 +25,7 @@ val frodo_mul_add_as_plus_e_pack:
   -> seed_e:lbytes crypto_bytes
   -> tuple2 (lbytes crypto_publicmatrixbytes) (lbytes (2 * params_n * params_nbar))
 let frodo_mul_add_as_plus_e_pack seed_a seed_e =
-  assert (params_logq * (params_n * params_nbar / 8) =
-          params_logq * params_n * params_nbar / 8);
-  assert (params_n * params_nbar <= max_size_t /\ params_nbar % 8 = 0);
-  assert (forall (j:nat{j < params_n * params_nbar / 8}).
-      params_logq * j + params_logq <= params_logq * (params_n * params_nbar / 8) /\
-      0 <= params_logq * j);
+  assert (2 * params_n * params_nbar <= max_size_t /\ params_nbar % 8 = 0);
   let a_matrix = frodo_gen_matrix params_n bytes_seed_a seed_a in
   let s_matrix = frodo_sample_matrix params_n params_nbar crypto_bytes seed_e (u16 1) in
   let s_bytes = matrix_to_lbytes s_matrix in

@@ -82,8 +82,8 @@ val crypto_kem_dec_kp_s:
   -> bool
 let crypto_kem_dec_kp_s mu_decode g bp_matrix c_matrix sk ct =
   expand_crypto_ciphertextbytes ();
-  let dp = Seq.sub #_ #(3 * crypto_bytes) g (crypto_bytes + crypto_bytes) crypto_bytes in
-  let d  = Seq.sub #_ #crypto_ciphertextbytes ct (crypto_ciphertextbytes - crypto_bytes) crypto_bytes in
+  let dp = Seq.sub g (crypto_bytes + crypto_bytes) crypto_bytes in
+  let d  = Seq.sub ct (crypto_ciphertextbytes - crypto_bytes) crypto_bytes in
   let bpp_matrix, cp_matrix = get_bpp_cp_matrices g mu_decode sk in
   crypto_kem_dec_kp_s_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix
 
@@ -107,8 +107,8 @@ val crypto_kem_dec_ss:
   -> lbytes crypto_bytes
 let crypto_kem_dec_ss ct sk g mu_decode bp_matrix c_matrix =
   let b = crypto_kem_dec_kp_s mu_decode g bp_matrix c_matrix sk ct in
-  let kp = Seq.sub #_ #(3 * crypto_bytes) g crypto_bytes crypto_bytes in
-  let s  = Seq.sub #_ #crypto_secretkeybytes sk 0 crypto_bytes in
+  let kp = Seq.sub g crypto_bytes crypto_bytes in
+  let s  = Seq.sub sk 0 crypto_bytes in
   let kp_s = if b then kp else s in
   crypto_kem_dec_ss0 ct kp_s
 

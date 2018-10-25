@@ -25,110 +25,33 @@ module LSeq = Lib.Sequence
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+inline_for_extraction noextract
 val frodo_mul_add_sa_plus_e:
-    seed_a:lbytes bytes_seed_a
-  -> sp_matrix:matrix_t params_nbar params_n
-  -> ep_matrix:matrix_t params_nbar params_n
-  -> bp_matrix:matrix_t params_nbar params_n
-  -> a_matrix:matrix_t params_n params_n
-  -> Stack unit
-    (requires fun h ->
-      live h a_matrix /\ live h seed_a /\ live h ep_matrix /\
-      live h bp_matrix /\ live h sp_matrix /\
-      disjoint seed_a a_matrix /\ disjoint a_matrix bp_matrix /\
-      disjoint sp_matrix bp_matrix /\ disjoint bp_matrix ep_matrix /\
-      disjoint sp_matrix a_matrix /\ disjoint ep_matrix a_matrix /\
-      disjoint sp_matrix ep_matrix)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer bp_matrix) (loc_buffer a_matrix)) h0 h1 /\
-      as_matrix h1 a_matrix == Spec.Frodo.Params.frodo_gen_matrix (v params_n) (v bytes_seed_a) (as_seq h0 seed_a) /\
-      as_matrix h1 bp_matrix == M.add (M.mul (as_matrix h0 sp_matrix) (as_matrix h1 a_matrix)) (as_matrix h0 ep_matrix))
-[@"c_inline"]
-let frodo_mul_add_sa_plus_e seed_a sp_matrix ep_matrix bp_matrix a_matrix =
-  assert_norm (0 < v params_n /\ 2 * v params_n <= max_size_t /\ 256 + v params_n < maxint U16 /\ v params_n * v params_n <= max_size_t);
-  frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
-  matrix_mul sp_matrix a_matrix bp_matrix;
-  matrix_add bp_matrix ep_matrix
-
-inline_for_extraction noextract
-val frodo_mul_add_sa_plus_e_inner:
-    seed_a:lbytes bytes_seed_a
-  -> sp_matrix:matrix_t params_nbar params_n
-  -> ep_matrix:matrix_t params_nbar params_n
-  -> bp_matrix:matrix_t params_nbar params_n
-  -> a_matrix:matrix_t params_n params_n
-  -> Stack unit
-    (requires fun h ->
-      live h a_matrix /\ live h seed_a /\ live h ep_matrix /\
-      live h bp_matrix /\ live h sp_matrix /\
-      disjoint seed_a a_matrix /\ disjoint a_matrix bp_matrix /\
-      disjoint sp_matrix bp_matrix /\ disjoint bp_matrix ep_matrix /\
-      disjoint sp_matrix a_matrix /\ disjoint ep_matrix a_matrix /\
-      disjoint sp_matrix ep_matrix)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer ep_matrix) (loc_union (loc_buffer bp_matrix) (loc_buffer a_matrix))) h0 h1 /\
-      as_matrix h1 a_matrix == Spec.Frodo.Params.frodo_gen_matrix (v params_n) (v bytes_seed_a) (as_seq h0 seed_a) /\
-      as_matrix h1 bp_matrix == M.add (M.mul (as_matrix h0 sp_matrix) (as_matrix h1 a_matrix)) (as_matrix h0 ep_matrix))
-let frodo_mul_add_sa_plus_e_inner seed_a sp_matrix ep_matrix bp_matrix a_matrix =
-  frodo_mul_add_sa_plus_e seed_a sp_matrix ep_matrix bp_matrix a_matrix;
-  assert_norm (v params_nbar * v params_n % 2 = 0);
-  clear_matrix ep_matrix
-
-inline_for_extraction noextract
-val frodo_mul_add_sa_plus_e_main:
     seed_a:lbytes bytes_seed_a
   -> seed_e:lbytes crypto_bytes
   -> sp_matrix:matrix_t params_nbar params_n
   -> bp_matrix:matrix_t params_nbar params_n
   -> Stack unit
     (requires fun h ->
-      live h seed_a /\ live h seed_e /\ live h bp_matrix /\ live h sp_matrix /\
-      disjoint bp_matrix sp_matrix /\ disjoint bp_matrix seed_a /\ disjoint bp_matrix seed_e)
+      live h seed_a /\ live h seed_e /\ live h sp_matrix /\ live h bp_matrix /\
+      disjoint bp_matrix seed_a /\ disjoint bp_matrix seed_e /\ disjoint bp_matrix sp_matrix)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer bp_matrix) h0 h1 /\
-      as_matrix h1 bp_matrix == S.frodo_mul_add_sa_plus_e (as_seq h0 seed_a) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
-let frodo_mul_add_sa_plus_e_main seed_a seed_e sp_matrix bp_matrix =
+      as_matrix h1 bp_matrix ==
+      S.frodo_mul_add_sa_plus_e (as_seq h0 seed_a) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
+let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix =
+  assert_norm (v params_n * v params_nbar % 2 = 0);
   push_frame();
   let a_matrix = matrix_create params_n params_n in
   let ep_matrix = matrix_create params_nbar params_n in
+  frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
   frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 5) ep_matrix;
-  frodo_mul_add_sa_plus_e_inner seed_a sp_matrix ep_matrix bp_matrix a_matrix;
+  matrix_mul sp_matrix a_matrix bp_matrix;
+  matrix_add bp_matrix ep_matrix;
+  clear_matrix ep_matrix;
   pop_frame()
 
+inline_for_extraction noextract
 val frodo_mul_add_sb_plus_e:
-    sp_matrix:matrix_t params_nbar params_n
-  -> epp_matrix:matrix_t params_nbar params_nbar
-  -> b_matrix:matrix_t params_n params_nbar
-  -> v_matrix:matrix_t params_nbar params_nbar
-  -> Stack unit
-    (requires fun h ->
-      live h sp_matrix /\ live h epp_matrix /\ live h b_matrix /\ live h v_matrix /\
-      disjoint v_matrix sp_matrix /\ disjoint b_matrix v_matrix /\ disjoint v_matrix epp_matrix)
-    (ensures fun h0 _ h1 -> modifies (loc_buffer v_matrix) h0 h1 /\
-      as_matrix h1 v_matrix == M.add (M.mul (as_matrix h0 sp_matrix) (as_matrix h0 b_matrix)) (as_matrix h0 epp_matrix))
-[@"c_inline"]
-let frodo_mul_add_sb_plus_e sp_matrix epp_matrix b_matrix v_matrix =
-  matrix_mul sp_matrix b_matrix v_matrix;
-  matrix_add v_matrix epp_matrix
-
-inline_for_extraction noextract
-val frodo_mul_add_sb_plus_e_inner:
-    sp_matrix:matrix_t params_nbar params_n
-  -> epp_matrix:matrix_t params_nbar params_nbar
-  -> b_matrix:matrix_t params_n params_nbar
-  -> v_matrix:matrix_t params_nbar params_nbar
-  -> Stack unit
-    (requires fun h ->
-      live h sp_matrix /\ live h epp_matrix /\ live h b_matrix /\ live h v_matrix /\
-      disjoint v_matrix sp_matrix /\ disjoint b_matrix v_matrix /\ disjoint v_matrix epp_matrix)
-    (ensures fun h0 _ h1 -> modifies (loc_union (loc_buffer v_matrix) (loc_buffer epp_matrix)) h0 h1 /\
-      as_matrix h1 v_matrix == M.add (M.mul (as_matrix h0 sp_matrix) (as_matrix h0 b_matrix)) (as_matrix h0 epp_matrix))
-let frodo_mul_add_sb_plus_e_inner sp_matrix epp_matrix b_matrix v_matrix =
-  frodo_mul_add_sb_plus_e sp_matrix epp_matrix b_matrix v_matrix;
-  assert_norm (v params_nbar * v params_nbar % 2 == 0);
-  clear_matrix epp_matrix
-
-inline_for_extraction noextract
-val frodo_mul_add_sb_plus_e_main:
     b:lbytes (params_logq *! params_n *! params_nbar /. size 8)
   -> seed_e:lbytes crypto_bytes
   -> sp_matrix:matrix_t params_nbar params_n
@@ -138,34 +61,19 @@ val frodo_mul_add_sb_plus_e_main:
       live h b /\ live h seed_e /\ live h v_matrix /\ live h sp_matrix /\
       disjoint v_matrix b /\ disjoint v_matrix seed_e /\ disjoint v_matrix sp_matrix)
     (ensures fun h0 _ h1 -> modifies (loc_buffer v_matrix) h0 h1 /\
-      as_matrix h1 v_matrix == S.frodo_mul_add_sb_plus_e (as_seq h0 b) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
-let frodo_mul_add_sb_plus_e_main b seed_e sp_matrix v_matrix =
+      as_matrix h1 v_matrix ==
+      S.frodo_mul_add_sb_plus_e (as_seq h0 b) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
+let frodo_mul_add_sb_plus_e b seed_e sp_matrix v_matrix =
+  assert_norm (v params_nbar * v params_nbar % 2 == 0);
   push_frame();
   let b_matrix   = matrix_create params_n params_nbar in
   let epp_matrix = matrix_create params_nbar params_nbar in
-
-  frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) epp_matrix;
   assert (v params_nbar % 8 = 0);
   frodo_unpack params_n params_nbar params_logq b b_matrix;
-
-  frodo_mul_add_sb_plus_e_inner sp_matrix epp_matrix b_matrix v_matrix;
-  pop_frame()
-
-inline_for_extraction noextract
-val frodo_mul_add_sb_plus_e_plus_mu_inner:
-    coins:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
-  -> v_matrix:matrix_t params_nbar params_nbar
-  -> Stack unit
-    (requires fun h ->
-      live h coins /\ live h v_matrix /\ disjoint v_matrix coins)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer v_matrix) h0 h1 /\
-      (let mu_encode = Spec.Frodo.Encode.frodo_key_encode (v params_extracted_bits) (as_seq h0 coins) in
-       as_matrix h1 v_matrix == M.add (as_matrix h0 v_matrix) mu_encode))
-let frodo_mul_add_sb_plus_e_plus_mu_inner coins v_matrix =
-  push_frame();
-  let mu_encode  = matrix_create params_nbar params_nbar in
-  frodo_key_encode params_extracted_bits coins mu_encode;
-  matrix_add v_matrix mu_encode;
+  frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) epp_matrix;
+  matrix_mul sp_matrix b_matrix v_matrix;
+  matrix_add v_matrix epp_matrix;
+  clear_matrix epp_matrix;
   pop_frame()
 
 val frodo_mul_add_sb_plus_e_plus_mu:
@@ -180,11 +88,16 @@ val frodo_mul_add_sb_plus_e_plus_mu:
       disjoint v_matrix b /\ disjoint v_matrix seed_e /\ disjoint v_matrix sp_matrix /\
       disjoint v_matrix coins)
     (ensures fun h0 _ h1 -> modifies (loc_buffer v_matrix) h0 h1 /\
-      as_matrix h1 v_matrix == S.frodo_mul_add_sb_plus_e_plus_mu (as_seq h0 b) (as_seq h0 seed_e) (as_seq h0 coins) (as_matrix h0 sp_matrix))
+      as_matrix h1 v_matrix ==
+      S.frodo_mul_add_sb_plus_e_plus_mu (as_seq h0 b) (as_seq h0 seed_e) (as_seq h0 coins) (as_matrix h0 sp_matrix))
 [@"c_inline"]
 let frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix =
-  frodo_mul_add_sb_plus_e_main b seed_e sp_matrix v_matrix;
-  frodo_mul_add_sb_plus_e_plus_mu_inner coins v_matrix
+  push_frame();
+  frodo_mul_add_sb_plus_e b seed_e sp_matrix v_matrix;
+  let mu_encode  = matrix_create params_nbar params_nbar in
+  frodo_key_encode params_extracted_bits coins mu_encode;
+  matrix_add v_matrix mu_encode;
+  pop_frame()
 
 inline_for_extraction noextract
 val crypto_kem_enc_ct_pack_c1:
@@ -201,48 +114,11 @@ val crypto_kem_enc_ct_pack_c1:
       as_seq h1 c1 ==
       S.crypto_kem_enc_ct_pack_c1 (as_seq h0 seed_a) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
 let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix c1 =
-  assert (v params_logq * (v params_nbar * v params_n / 8) =
-          v params_logq * v params_nbar * v params_n / 8);
-  assert (v params_logq * v params_n * v params_nbar / 8 <= max_size_t);
-  assert (v params_n % 8 = 0);
   push_frame();
   let bp_matrix = matrix_create params_nbar params_n in
-  frodo_mul_add_sa_plus_e_main seed_a seed_e sp_matrix bp_matrix;
+  frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix;
   frodo_pack params_logq bp_matrix c1;
   pop_frame()
-
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq
-  -Spec.Frodo.KEM.Encaps'"
-
-inline_for_extraction noextract
-val crypto_kem_enc_ct_pack_c2_inner:
-    seed_e:lbytes crypto_bytes
-  -> coins:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
-  -> b:lbytes (params_logq *! params_n *! params_nbar /. size 8)
-  -> sp_matrix:matrix_t params_nbar params_n
-  -> c2:lbytes (params_logq *! params_nbar *! params_nbar /. size 8)
-  -> v_matrix:matrix_t params_nbar params_nbar
-  -> Stack unit
-    (requires fun h ->
-      live h seed_e /\ live h coins /\ live h b /\
-      live h sp_matrix /\ live h c2 /\ live h v_matrix /\
-      disjoint seed_e c2 /\ disjoint coins c2 /\ disjoint b c2 /\ disjoint sp_matrix c2 /\
-      disjoint c2 v_matrix /\ disjoint seed_e v_matrix /\ disjoint coins v_matrix /\
-      disjoint b v_matrix /\ disjoint sp_matrix v_matrix)
-    (ensures fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer c2) (loc_buffer v_matrix)) h0 h1 /\
-      as_matrix h1 v_matrix ==
-      S.frodo_mul_add_sb_plus_e_plus_mu (as_seq h0 b) (as_seq h0 seed_e) (as_seq h0 coins) (as_matrix h0 sp_matrix) /\
-      as_seq h1 c2 == Spec.Frodo.Pack.frodo_pack (v params_logq) (as_matrix h1 v_matrix))
-let crypto_kem_enc_ct_pack_c2_inner seed_e coins b sp_matrix c2 v_matrix =
-  let n1 = params_nbar in
-  let n2 = params_nbar in
-  let d = params_logq in
-  assert_norm (v d * v n1 <= max_size_t /\ (v d * v n1) * v n2 <= max_size_t /\ v d <= 16);
-  frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix;
-  frodo_pack params_logq v_matrix c2
-
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val crypto_kem_enc_ct_pack_c2:
@@ -256,12 +132,14 @@ val crypto_kem_enc_ct_pack_c2:
       live h seed_e /\ live h coins /\ live h b /\ live h sp_matrix /\ live h c2 /\
       disjoint seed_e c2 /\ disjoint coins c2 /\ disjoint b c2 /\ disjoint sp_matrix c2)
     (ensures fun h0 _ h1 -> modifies (loc_buffer c2) h0 h1 /\
-      as_seq h1 c2 == S.crypto_kem_enc_ct_pack_c2 (as_seq h0 seed_e) (as_seq h0 coins) (as_seq h0 b) (as_matrix h0 sp_matrix))
+      as_seq h1 c2 ==
+      S.crypto_kem_enc_ct_pack_c2 (as_seq h0 seed_e) (as_seq h0 coins) (as_seq h0 b) (as_matrix h0 sp_matrix))
 let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix c2 =
   assert (v params_nbar * v params_nbar % 2 == 0);
   push_frame();
   let v_matrix = matrix_create params_nbar params_nbar in
-  crypto_kem_enc_ct_pack_c2_inner seed_e coins b sp_matrix c2 v_matrix;
+  frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix;
+  frodo_pack params_logq v_matrix c2;
   clear_matrix v_matrix;
   pop_frame()
 
