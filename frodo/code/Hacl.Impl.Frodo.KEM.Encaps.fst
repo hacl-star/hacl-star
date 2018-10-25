@@ -1,12 +1,10 @@
 module Hacl.Impl.Frodo.KEM.Encaps
 
-open FStar.HyperStack.All
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
 open LowStar.Buffer
-open LowStar.BufferOps
 
 open Lib.IntTypes
 open Lib.Buffer
@@ -21,7 +19,6 @@ open Hacl.Frodo.Random
 open Hacl.Frodo.Clear
 
 module ST = FStar.HyperStack.ST
-module Lemmas = Spec.Frodo.Lemmas
 module S = Spec.Frodo.KEM.Encaps
 module M = Spec.Matrix
 module LSeq = Lib.Sequence
@@ -283,9 +280,9 @@ val lemma_update_ct:
       LSeq.sub ct 0 c1Len == c1 /\
       LSeq.sub ct c1Len c2Len == c2 /\
       LSeq.sub ct (c1Len + c2Len) (v crypto_bytes) == d))
-    (ensures ct == S.update_ct c1 c2 d)
+    (ensures ct == LSeq.concat (LSeq.concat c1 c2) d)
 let lemma_update_ct c1 c2 d ct =
-  let ct1 = S.update_ct c1 c2 d in
+  let ct1 = LSeq.concat (LSeq.concat c1 c2) d in
   let c1Len = v params_logq * v params_nbar * v params_n / 8 in
   let c2Len = v params_logq * v params_nbar * v params_nbar / 8 in
   Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
@@ -317,8 +314,11 @@ val crypto_kem_enc_ct_inner:
       disjoint coins ct /\ disjoint b ct /\ disjoint d ct /\
       disjoint seed_a ct /\ disjoint seed_e ct /\ disjoint sp_matrix ct)
     (ensures fun h0 _ h1 -> modifies (loc_buffer ct) h0 h1 /\
-       as_seq h1 ct == S.crypto_kem_enc_ct_inner (as_seq h0 seed_a) (as_seq h0 seed_e) (as_seq h0 b)
-       (as_seq h0 coins) (as_matrix h0 sp_matrix) (as_seq h0 d))
+      (let c1 = S.crypto_kem_enc_ct_pack_c1 (as_seq h0 seed_a) (as_seq h0 seed_e) (as_seq h0 sp_matrix) in
+      let c2 = S.crypto_kem_enc_ct_pack_c2 (as_seq h0 seed_e) (as_seq h0 coins) (as_seq h0 b) (as_seq h0 sp_matrix) in
+      Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
+      let ct_s = LSeq.concat (LSeq.concat c1 c2) (as_seq h0 d) in
+      as_seq h1 ct == ct_s))
 let crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d ct =
   let h0 = ST.get () in
   Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
@@ -380,9 +380,9 @@ val lemma_update_ss_init:
     (requires
       LSeq.sub ss_init 0 (v crypto_ciphertextbytes - v crypto_bytes) == c12 /\
       LSeq.sub ss_init (v crypto_ciphertextbytes - v crypto_bytes) (2 * v crypto_bytes) == kd)
-    (ensures ss_init == S.update_ss_init c12 kd)
+    (ensures ss_init == LSeq.concat c12 kd)
 let lemma_update_ss_init c12 kd ss_init =
-  let ss_init1 = S.update_ss_init c12 kd in
+  let ss_init1 = LSeq.concat c12 kd in
   FStar.Seq.Properties.lemma_split ss_init (v crypto_ciphertextbytes - v crypto_bytes);
   FStar.Seq.Properties.lemma_split ss_init1 (v crypto_ciphertextbytes - v crypto_bytes)
 
@@ -397,9 +397,7 @@ val crypto_kem_enc_ss:
       live h g /\ live h ct /\ live h ss /\
       disjoint ct ss /\ disjoint g ct /\ disjoint g ss)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer ss) h0 h1 /\
-     (let c12 = LSeq.sub #_ #(v crypto_ciphertextbytes) (as_seq h0 ct) 0 (v crypto_ciphertextbytes - v crypto_bytes) in
-      let kd = LSeq.sub #_ #(3 * v crypto_bytes) (as_seq h0 g) (v crypto_bytes) (2 * v crypto_bytes) in
-      as_seq h1 ss == S.update_ss c12 kd))
+     as_seq h1 ss == S.crypto_kem_enc_ss (as_seq h0 g) (as_seq h0 ct))
 [@"c_inline"]
 let crypto_kem_enc_ss g ct ss =
   push_frame();
@@ -417,18 +415,38 @@ let crypto_kem_enc_ss g ct ss =
   cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
   pop_frame()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+val lemma_update_pk_coins:
+    pk:LSeq.lseq uint8 (v crypto_publickeybytes)
+  -> coins:LSeq.lseq uint8 (v params_nbar * v params_nbar * v params_extracted_bits / 8)
+  -> pk_coins:LSeq.lseq uint8 (v crypto_publickeybytes + v params_nbar * v params_nbar * v params_extracted_bits / 8)
+  -> Lemma
+    (requires
+      LSeq.sub pk_coins 0 (v crypto_publickeybytes) == pk /\
+      LSeq.sub pk_coins (v crypto_publickeybytes)
+	(v params_nbar * v params_nbar * v params_extracted_bits / 8) == coins)
+    (ensures pk_coins == LSeq.concat pk coins)
+let lemma_update_pk_coins pk coins pk_coins =
+  let pk_coins1 = LSeq.concat pk coins in
+  FStar.Seq.Properties.lemma_split pk_coins (v crypto_publickeybytes);
+  FStar.Seq.Properties.lemma_split pk_coins1 (v crypto_publickeybytes)
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
 inline_for_extraction noextract
 val crypto_kem_enc_0:
-    coins:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
+    coins:lbytes bytes_mu
   -> pk:lbytes crypto_publickeybytes
   -> g:lbytes (size 3 *! crypto_bytes)
   -> Stack unit
     (requires fun h ->
-      live h coins /\ live h pk /\ live h g)
+      live h coins /\ live h pk /\ live h g /\
+      disjoint g coins /\ disjoint g pk)
     (ensures  fun h0 _ h1 -> modifies (loc_buffer g) h0 h1 /\
-      as_seq h1 g == S.crypto_kem_enc_0 (as_seq h0 coins) (as_seq h0 pk))
+      (let pk_coins = LSeq.concat (as_seq h0 pk) (as_seq h0 coins) in
+      as_seq h1 g == Spec.Frodo.Params.frodo_prf_spec (v crypto_publickeybytes + v bytes_mu) pk_coins (u16 3) (3 * v crypto_bytes)))
 let crypto_kem_enc_0 coins pk g =
-  let bytes_mu = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
   push_frame();
   let pk_coins:lbytes (crypto_publickeybytes +! bytes_mu) = create (crypto_publickeybytes +! bytes_mu) (u8 0) in
   let h0 = ST.get () in
@@ -436,6 +454,7 @@ let crypto_kem_enc_0 coins pk g =
   update_sub pk_coins crypto_publickeybytes bytes_mu coins;
   let h2 = ST.get () in
   LSeq.eq_intro (LSeq.sub #_ #(v crypto_publickeybytes + v bytes_mu) (as_seq h2 pk_coins) 0 (v crypto_publickeybytes)) (as_seq h0 pk);
+  lemma_update_pk_coins (as_seq h0 pk) (as_seq h0 coins) (as_seq h2 pk_coins);
   cshake_frodo (crypto_publickeybytes +! bytes_mu) pk_coins (u16 3) (size 3 *! crypto_bytes) g;
   pop_frame()
 
@@ -454,8 +473,8 @@ val crypto_kem_enc_1:
       disjoint g ss /\ disjoint g coins /\ disjoint g pk)
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc_union (loc_buffer ct) (loc_buffer ss)) (loc_buffer g)) h0 h1 /\
-      (let ct_s, ss_s = S.crypto_kem_enc_1 (as_seq h0 g) (as_seq h0 coins) (as_seq h0 pk) in
-      as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
+      as_seq h1 ct == S.crypto_kem_enc_ct (as_seq h0 pk) (as_seq h0 g) (as_seq h0 coins) /\
+      as_seq h1 ss == S.crypto_kem_enc_ss (as_seq h0 g) (as_seq h1 ct))
 let crypto_kem_enc_1 g coins ct ss pk =
   assert_spinoff (2 * v crypto_bytes % 4 == 0);
   crypto_kem_enc_ct pk g coins ct;
@@ -464,7 +483,7 @@ let crypto_kem_enc_1 g coins ct ss pk =
 
 inline_for_extraction noextract
 val crypto_kem_enc_:
-    coins:lbytes (params_nbar *! params_nbar *! params_extracted_bits /. size 8)
+    coins:lbytes bytes_mu
   -> ct:lbytes crypto_ciphertextbytes
   -> ss:lbytes crypto_bytes
   -> pk:lbytes crypto_publickeybytes
@@ -478,9 +497,8 @@ val crypto_kem_enc_:
       as_seq h1 ct == ct_s /\ as_seq h1 ss == ss_s))
 let crypto_kem_enc_ coins ct ss pk =
   push_frame();
-  let bytes_mu = params_nbar *! params_nbar *! params_extracted_bits /. size 8 in
   let g:lbytes (size 3 *! crypto_bytes) = create (size 3 *! crypto_bytes) (u8 0) in
-  crypto_kem_enc_0 coins pk g;
+  crypto_kem_enc_0 coins pk g;  
   crypto_kem_enc_1 g coins ct ss pk;
   pop_frame()
 

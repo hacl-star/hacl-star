@@ -7,7 +7,6 @@ open Lib.ByteSequence
 open FStar.Mul
 
 open Spec.Matrix
-open Spec.Frodo.Lemmas
 open Spec.Frodo.Params
 open Spec.Frodo.KEM
 open Spec.Frodo.Pack
@@ -20,19 +19,6 @@ module Matrix = Spec.Matrix
 
 let crypto_publicmatrixbytes: size_nat =
   params_logq * params_n * params_nbar / 8
-
-val update_pk:
-    seed_a:lbytes bytes_seed_a
-  -> b:lbytes crypto_publicmatrixbytes
-  -> lbytes crypto_publickeybytes
-let update_pk seed_a b = seed_a @| b
-
-val update_sk:
-    s:lbytes crypto_bytes
-  -> pk:lbytes crypto_publickeybytes
-  -> s_bytes:lbytes (2 * params_n * params_nbar)
-  -> lbytes crypto_secretkeybytes
-let update_sk s pk s_bytes = s @| pk @| s_bytes
 
 val frodo_mul_add_as_plus_e_pack:
     seed_a:lbytes bytes_seed_a
@@ -63,8 +49,8 @@ let crypto_kem_keypair_ coins =
   let z = Seq.sub coins (2 * crypto_bytes) bytes_seed_a in
   let seed_a = frodo_prf_spec bytes_seed_a z (u16 0) bytes_seed_a in
   let b, s_bytes = frodo_mul_add_as_plus_e_pack seed_a seed_e in
-  let pk = update_pk seed_a b in
-  let sk = update_sk s pk s_bytes in
+  let pk = concat seed_a b in
+  let sk = concat (concat s pk) s_bytes in
   pk, sk
 
 val crypto_kem_keypair:

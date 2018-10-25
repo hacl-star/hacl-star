@@ -5,7 +5,6 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 open FStar.Mul
-open FStar.Math.Lemmas
 
 open Spec.Matrix
 open Spec.Frodo.Lemmas
@@ -19,27 +18,6 @@ module Seq = Lib.Sequence
 module Matrix = Spec.Matrix
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
-
-val update_ct:
-    c1:lbytes (params_logq * params_nbar * params_n / 8)
-  -> c2:lbytes (params_logq * params_nbar * params_nbar / 8)
-  -> d:lbytes crypto_bytes
-  -> lbytes crypto_ciphertextbytes
-let update_ct c1 c2 d = c1 @| c2 @| d
-
-val update_ss_init:
-    c12:lbytes (crypto_ciphertextbytes - crypto_bytes)
-  -> kd:lbytes (crypto_bytes + crypto_bytes)
-  -> lbytes (crypto_ciphertextbytes + crypto_bytes)
-let update_ss_init c12 kd = c12 @| kd
-
-val update_ss:
-    c12:lbytes (crypto_ciphertextbytes - crypto_bytes)
-  -> kd:lbytes (crypto_bytes + crypto_bytes)
-  -> lbytes crypto_bytes
-let update_ss c12 kd =
-  let ss_init = update_ss_init c12 kd in
-  frodo_prf_spec (crypto_ciphertextbytes + crypto_bytes) ss_init (u16 7) crypto_bytes
 
 val frodo_mul_add_sa_plus_e:
     seed_a:lbytes bytes_seed_a
@@ -107,19 +85,6 @@ let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix =
   let v_matrix = frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix in
   frodo_pack params_logq v_matrix
 
-val crypto_kem_enc_ct_inner:
-    seed_a:lbytes bytes_seed_a
-  -> seed_e:lbytes crypto_bytes
-  -> b:lbytes (params_logq * params_n * params_nbar / 8)
-  -> coins:lbytes (params_nbar * params_nbar * params_extracted_bits / 8)
-  -> sp_matrix:matrix params_nbar params_n
-  -> d:lbytes crypto_bytes
-  -> lbytes crypto_ciphertextbytes
-let crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d =
-  let c1 = crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix in
-  let c2 = crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix in
-  update_ct c1 c2 d
-
 val crypto_kem_enc_ct:
     pk:lbytes crypto_publickeybytes
   -> g:lbytes (3 * crypto_bytes)
@@ -131,38 +96,34 @@ let crypto_kem_enc_ct pk g coins =
   let seed_e = Seq.sub g 0 crypto_bytes in
   let d = Seq.sub g (2 * crypto_bytes) crypto_bytes in
   let sp_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 4) in
-  crypto_kem_enc_ct_inner seed_a seed_e b coins sp_matrix d
+  let c1 = crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix in
+  let c2 = crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix in
+  expand_crypto_ciphertextbytes ();
+  let ct = concat (concat c1 c2) d in
+  ct
 
-val crypto_kem_enc_0:
-    coins:lbytes bytes_mu
-  -> pk:lbytes crypto_publickeybytes
-  -> lbytes (3 * crypto_bytes)
-let crypto_kem_enc_0 coins pk =
-  let pk_coins = Seq.create (crypto_publickeybytes + bytes_mu) (u8 0) in
-  let pk_coins = update_sub pk_coins 0 crypto_publickeybytes pk in
-  let pk_coins = update_sub pk_coins crypto_publickeybytes bytes_mu coins in
-  frodo_prf_spec (crypto_publickeybytes + bytes_mu) pk_coins (u16 3) (3 * crypto_bytes)
-
-val crypto_kem_enc_1:
+val crypto_kem_enc_ss:
     g:lbytes (3 * crypto_bytes)
-  -> coins:lbytes bytes_mu
-  -> pk:lbytes crypto_publickeybytes
-  -> lbytes crypto_ciphertextbytes & lbytes crypto_bytes
-let crypto_kem_enc_1 g coins pk =
-  assert (crypto_bytes <= crypto_ciphertextbytes);
-  let ct = crypto_kem_enc_ct pk g coins in
+  -> ct:lbytes crypto_ciphertextbytes
+  -> lbytes crypto_bytes
+let crypto_kem_enc_ss g ct =
+  expand_crypto_ciphertextbytes ();
   let c12 = Seq.sub ct 0 (crypto_ciphertextbytes - crypto_bytes) in
   let kd = Seq.sub g crypto_bytes (crypto_bytes + crypto_bytes) in
-  let ss = update_ss c12 kd in
-  ct, ss
+  let ss_init = concat c12 kd in
+  frodo_prf_spec (crypto_ciphertextbytes + crypto_bytes) ss_init (u16 7) crypto_bytes
 
 val crypto_kem_enc_:
     coins:lbytes bytes_mu
   -> pk:lbytes crypto_publickeybytes
   -> lbytes crypto_ciphertextbytes & lbytes crypto_bytes
 let crypto_kem_enc_ coins pk =
-  let g = crypto_kem_enc_0 coins pk in
-  crypto_kem_enc_1 g coins pk
+  let pk_coins = concat pk coins in
+  let g = frodo_prf_spec (crypto_publickeybytes + bytes_mu) pk_coins (u16 3) (3 * crypto_bytes) in
+  assert (crypto_bytes <= crypto_ciphertextbytes);
+  let ct = crypto_kem_enc_ct pk g coins in
+  let ss = crypto_kem_enc_ss g ct in
+  ct, ss
 
 val crypto_kem_enc:
     state: Spec.Frodo.Random.state_t

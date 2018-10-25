@@ -18,7 +18,6 @@ open Hacl.Frodo.Random
 open Hacl.Frodo.Clear
 
 module ST = FStar.HyperStack.ST
-module Lemmas = Spec.Frodo.Lemmas
 module S = Spec.Frodo.KEM.KeyGen
 module M = Spec.Matrix
 module LSeq = Lib.Sequence
@@ -117,9 +116,9 @@ val lemma_update_pk:
     (requires
       LSeq.sub pk 0 (v bytes_seed_a) == seed_a /\
       LSeq.sub pk (v bytes_seed_a) S.crypto_publicmatrixbytes == b)
-    (ensures pk == S.update_pk seed_a b)
+    (ensures pk == LSeq.concat seed_a b)
 let lemma_update_pk seed_a b pk =
-  let pk1 = S.update_pk seed_a b in
+  let pk1 = LSeq.concat seed_a b in
   FStar.Seq.Properties.lemma_split pk (v bytes_seed_a);
   FStar.Seq.Properties.lemma_split pk1 (v bytes_seed_a)
 
@@ -133,9 +132,9 @@ val lemma_update_sk:
       LSeq.sub sk 0 (v crypto_bytes) == s /\
       LSeq.sub sk (v crypto_bytes) (v crypto_publickeybytes) == pk /\
       LSeq.sub sk (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar) == s_bytes)
-    (ensures sk == S.update_sk s pk s_bytes)
+    (ensures sk == LSeq.concat (LSeq.concat s pk) s_bytes)
 let lemma_update_sk s pk s_bytes sk =
-  let sk1 = S.update_sk s pk s_bytes in
+  let sk1 = LSeq.concat (LSeq.concat s pk) s_bytes in
   FStar.Seq.Base.lemma_eq_intro (LSeq.sub sk1 0 (v crypto_bytes)) s;
   FStar.Seq.Base.lemma_eq_intro (LSeq.sub sk1 (v crypto_bytes) (v crypto_publickeybytes)) pk;
   FStar.Seq.Base.lemma_eq_intro (LSeq.sub sk1 (v crypto_bytes + v crypto_publickeybytes) (2 * v params_n * v params_nbar)) s_bytes;
@@ -144,7 +143,7 @@ let lemma_update_sk s pk s_bytes sk =
   FStar.Seq.Properties.lemma_split sk (v crypto_bytes + v crypto_publickeybytes);
   FStar.Seq.Properties.lemma_split sk1 (v crypto_bytes + v crypto_publickeybytes)
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val crypto_kem_keypair_:
