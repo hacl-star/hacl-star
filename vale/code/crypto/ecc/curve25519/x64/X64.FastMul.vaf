@@ -204,20 +204,32 @@ procedure{:quick} {:verify true} fast_multiply_a1b(
 //    /*******************************************/   "adox %%rdx, %%rax ;"    "adcx  %%r8, %%rax ;"
 
     Load64_buffer(rdx, inA_ptr,  8, Secret, inA_b, 1);     /* A[1] */
+
     lemma_load_mem64(inB_b, 0, mem);    
     Mulx64( r9,  r8, Mem(inB_ptr,  0, inB_b, 0, Secret));  /* A[1]*B[0] */ 
-    assert pow2_64 * r9 + r8 == a1 * b0;
     lemma_load_mem64(dst_b, 1, mem);    
-    Xor64(r10, r10);  ghost var a1b_0 := r8;      Adcx64Wrap(r8, Mem(dst_ptr,  8, dst_b, 1, Secret));   Store64_buffer(dst_ptr, r8,  8, Secret, dst_b, 1);  // REVIEW: Why not combine the Adcx with the Store?
+    Xor64(r10, r10);  ghost var a1b_0 := r8;      
+    Adcx64Wrap(r8, Mem(dst_ptr,  8, dst_b, 1, Secret));   
+    Store64_buffer(dst_ptr, r8,  8, Secret, dst_b, 1);  // REVIEW: Why not combine the Adcx with the Store?
+
     lemma_load_mem64(inB_b, 1, mem);    
     Mulx64(r11, r10, Mem(inB_ptr,  8, inB_b, 1, Secret));  /* A[1]*B[1] */ 
-    assert pow2_64 * r11 + r10 == a1 * b1;
-    Adox64Wrap(r10,  r9);  ghost var a1b_1 := r10;  Adcx64Wrap(r10, r12);                         Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2); 
+    Adox64Wrap(r10,  r9);  ghost var a1b_1 := r10;  
+    Adcx64Wrap(r10, r12);                         
+    Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2); 
+
     lemma_load_mem64(inB_b, 2, mem);    
-    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2, Secret));  /* A[1]*B[2] */ Adox64Wrap(r12, r11);  ghost var a1b_2 := r12; Adcx64Wrap(r12, r14);                         Mov64( r8, 0); 
+    Mulx64(r13, r12, Mem(inB_ptr, 16, inB_b, 2, Secret));  /* A[1]*B[2] */ 
+    Adox64Wrap(r12, r11);  ghost var a1b_2 := r12; 
+    Adcx64Wrap(r12, r14); 
+    Mov64( r8, 0); 
+
     lemma_load_mem64(inB_b, 3, mem);    
-    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3, Secret));  /* A[1]*B[3] */ lemma_overflow_is_zero(rdx, r14, a1, b3); Adox64Wrap(r14, r13);  ghost var a1b_3 := r14; Adcx64Wrap(r14, rax);                         Mov64(rax, 0);
-    /*******************************************/                  Adox64Wrap(rax, rdx);  ghost var a1b_4 := rax;  ghost var overflow_bit := if overflow(efl) then 1 else 0;  Adcx64Wrap(rax, r8); 
+    Mulx64(rdx, r14, Mem(inB_ptr, 24, inB_b, 3, Secret));  /* A[1]*B[3] */ lemma_overflow_is_zero(rdx, r14, a1, b3); 
+    Adox64Wrap(r14, r13);  ghost var a1b_3 := r14; 
+    Adcx64Wrap(r14, rax);                         
+    Mov64(rax, 0);
+    /*******************************************/  Adox64Wrap(rax, rdx);  ghost var a1b_4 := rax;  ghost var overflow_bit := if overflow(efl) then 1 else 0;  Adcx64Wrap(rax, r8); 
 
     assert overflow_bit == 0;
 
@@ -240,40 +252,6 @@ procedure{:quick} {:verify true} fast_multiply_a1b(
               d1, d2, r12, r14, rax,
               carry_bit); 
     assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the lemma
-
-/*
-    // calc {
-    //   pow2_two(a0, a1) * b  
-        assert_by_tactic(pow2_two(a0, a1) * b == pow2_two(mul_nats(a0, b), mul_nats(a1, b)), int_canon); // PASSES
-    //   pow2_two(a0 * b, a1 * b)
-    //     calc {
-    //       a0 * b
-                assert a0b == a0 * b;  // PASSES
-    //       a0b
-    //     }
-    //     calc {
-    //       a1 * b
-                assert_by_tactic(a1 * b == pow2_four(a1*b0, a1*b1, a1*b2, a1*b3), int_canon);   // PASSES
-                assert a1b == a1 * b;  // PASSES
-    //       a1b
-    //     }
-           assert pow2_two(mul_nats(a0, b), mul_nats(a1, b)) == pow2_two(a0b, a1b);  // PASSES
-    //   pow2_two(a0b, a1b)
-        lemma_partial_sum(a0b, a0b_0, a0b_1, a0b_2, a0b_3, a0b_4,
-                          a1b, a1b_0, a1b_1, a1b_2, a1b_3, a1b_4);  // PASSES
-        assert pow2_two(a0b, a1b) == pow2_six(a0b_0, a0b_1 + a1b_0, a0b_2 + a1b_1, a0b_3 + a1b_2, a0b_4 + a1b_3, a1b_4);  // PASSES
-    //   pow2_six a0b_0 (a0b_1 + a1b_0) (a0b_2 + a1b_1) (a0b_3 + a1b_2) (a0b_4 + a1b_3) a1b_4)
-        lemma_sum(a0b_0, a0b_1, a0b_2, a0b_3, a0b_4,
-                  a1b_0, a1b_1, a1b_2, a1b_3, a1b_4,
-                  d1, d2, r12, r14, rax); 
-        assert pow2_six(a0b_0, a0b_1 + a1b_0, a0b_2 + a1b_1, a0b_3 + a1b_2, a0b_4 + a1b_3, a1b_4) == 
-               pow2_seven(a0b_0, d1, d2, r12, r14, rax, carry_bit);
-        assert pow2_seven(a0b_0, d1, d2, r12, r14, rax, carry_bit) ==
-               a0a1b;
-    //   a0a1b
-    // }
-    //assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the calc
-*/
 }
 
 /*
