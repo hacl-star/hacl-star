@@ -9,7 +9,6 @@ open BufferViewHelpers
 open Types_s
 
 friend LowStar.BufferView
-friend SecretByte
 
 #reset-options "--z3rlimit 10 --max_fuel 0 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 1"
 

@@ -23,7 +23,6 @@ module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 
-friend SecretByte
 friend X64.Memory_s
 friend X64.Memory
 friend X64.Vale.Decls
@@ -83,8 +82,8 @@ let create_initial_vale_state is_win stack_b (h0:HS.mem{pre_cond h0 /\ B.length 
     fun r -> begin match r with
     | Rsp -> addr_stack
     | _ -> init_regs r end)
-  in let regs = FunctionalExtensionality.on reg regs
-  in let xmms = FunctionalExtensionality.on xmm init_xmms in
+  in let regs = X64.Vale.Regs.of_fun regs
+  in let xmms = X64.Vale.Xmms.of_fun init_xmms in
   {ok = true; regs = regs; xmms = xmms; flags = 0; mem = mem;
       memTaint = create_valid_memtaint mem buffers taint_func}
 
@@ -111,7 +110,7 @@ B.length stack_b == 8 /\ live h0 stack_b /\ buf_disjoint_from stack_b [] /\ (
 let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel)  (stack_b:b8) : Lemma
   (requires pre_cond va_s0.mem.hs /\ B.length stack_b == 8 /\ live va_s0.mem.hs stack_b /\ buf_disjoint_from stack_b []/\
     va_post (va_code_check_sha_stdcall is_win) va_s0 va_sM va_fM is_win stack_b )
-  (ensures post_cond va_s0.mem.hs va_sM.mem.hs (UInt64.uint_to_t (va_sM.regs Rax))) =
+  (ensures post_cond va_s0.mem.hs va_sM.mem.hs (UInt64.uint_to_t (eval_reg Rax va_sM))) =
   length_t_eq (TBase TUInt64) stack_b;
   ()
 
@@ -127,9 +126,9 @@ let lemma_ghost_check_sha_stdcall is_win stack_b h0 =
   implies_post is_win s0' s_v f_v stack_b;
   let s1 = Some?.v (TS.taint_eval_code (va_code_check_sha_stdcall is_win) f_v s0) in
   assert (state_eq_S s1 (state_to_S s_v));
-  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs s_v.regs);
-  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms s_v.xmms);
-  s1, f_v, s_v.mem.hs, s_v.regs Rax
+  assert (FunctionalExtensionality.feq s1.TS.state.BS.regs (X64.Vale.Regs.to_fun s_v.regs));
+  assert (FunctionalExtensionality.feq s1.TS.state.BS.xmms (X64.Vale.Xmms.to_fun s_v.xmms));
+  (s1, f_v, s_v.mem.hs, eval_reg Rax s_v)
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 

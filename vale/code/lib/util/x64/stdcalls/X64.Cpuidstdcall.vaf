@@ -27,7 +27,7 @@ open X64.Cpuid
 #endverbatim
 
 
-procedure {:quick}{:exportSpecs} check_aesni_stdcall(inline win:bool,ghost stack_b:buffer64)
+procedure {:quick}{:exportSpecs}{:public} check_aesni_stdcall(inline win:bool,ghost stack_b:buffer64)
     requires
         buffer_readable(mem, stack_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
@@ -71,7 +71,7 @@ procedure {:quick}{:exportSpecs} check_aesni_stdcall(inline win:bool,ghost stack
 }
 
 
-procedure {:quick}{:exportSpecs} check_sha_stdcall(inline win:bool,ghost stack_b:buffer64)
+procedure {:quick}{:exportSpecs}{:public} check_sha_stdcall(inline win:bool,ghost stack_b:buffer64)
     requires
         buffer_readable(mem, stack_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);

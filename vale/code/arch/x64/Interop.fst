@@ -5,14 +5,11 @@ module HS = FStar.Monotonic.HyperStack
 module HH = FStar.Monotonic.HyperHeap
 module B = LowStar.Buffer
 module M = LowStar.Modifies
-module S8 = SecretByte
 
 open Opaque_s
 open X64.Machine_s
 open X64.Bytes_Semantics_s
 open X64.Bytes_Semantics
-
-friend SecretByte
 
 #reset-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 
@@ -376,6 +373,8 @@ let up_down_identity mem addrs ptrs heap =
   let new_heap = down_mem (up_mem heap addrs ptrs mem) addrs ptrs in
   same_unspecified_down mem (up_mem heap addrs ptrs mem) addrs ptrs;
   up_down_identity_aux ptrs addrs (up_mem heap addrs ptrs mem) heap;
+  assert (forall k. Map.contains heap k ==> Map.sel heap k == Map.sel new_heap k);
+  assert (forall k. (~ (Map.contains heap k)) ==> Map.sel heap k == Map.sel new_heap k);
   assert (Map.equal heap new_heap)
 
 #set-options "--max_fuel 1 --max_ifuel 1"

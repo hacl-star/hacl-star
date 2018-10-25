@@ -14,7 +14,7 @@ let inverses16 (u:unit) =
     assert (Seq.equal x (put16 (get16 x)))
   in Classical.forall_intro aux
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 40"
 
 let inverses32 (u:unit) =
   reveal_opaque get32_def;
@@ -91,38 +91,15 @@ let get32_128_aux1 (x: Seq.lseq U32.t 4): Lemma (put32_128 (get32_128 x) == x) =
   reveal_opaque get32_128_def;
   let vg = get32_128 x in
   let vp = put32_128 vg in
-  assert (Seq.index vp 0 = UInt32.uint_to_t vg.lo0);
-  assert (Seq.index vp 1 = UInt32.uint_to_t vg.lo1);
-  assert (Seq.index vp 2 = UInt32.uint_to_t vg.hi2);
-  assert (Seq.index vp 3 = UInt32.uint_to_t vg.hi3);
   assert (Seq.equal x vp)
 
 let put32_128_aux1 (x: quad32): Lemma (get32_128 (put32_128 x) == x) =
   reveal_opaque put32_128_def;
   reveal_opaque get32_128_def;
-  let vp = put32_128 x in
-  let vg = get32_128 vp in
-  assert (vg == Mkfour
-    (U32.v (Seq.index vp 0))
-    (U32.v (Seq.index vp 1))
-    (U32.v (Seq.index vp 2))
-    (U32.v (Seq.index vp 3)));
-  assert (Seq.index vp 0 == UInt32.uint_to_t x.lo0);
-  assert (Seq.index vp 1 == UInt32.uint_to_t x.lo1);
-  assert (Seq.index vp 2 == UInt32.uint_to_t x.hi2);
-  assert (Seq.index vp 3 == UInt32.uint_to_t x.hi3);
-  assert (vg == Mkfour
-    (U32.v (UInt32.uint_to_t x.lo0))
-    (U32.v (UInt32.uint_to_t x.lo1))
-    (U32.v (UInt32.uint_to_t x.hi2))
-    (U32.v (UInt32.uint_to_t x.hi3)));
-  assert (vg == Mkfour x.lo0 x.lo1 x.hi2 x.hi3);
-  assert (Mkfour x.lo0 x.lo1 x.hi2 x.hi3 == x);
-  assume (vg == x)
+  ()
 
 let inverses32_128 (u:unit) =
   reveal_opaque get32_128_def;
   reveal_opaque put32_128_def;
   Classical.forall_intro get32_128_aux1;
   Classical.forall_intro put32_128_aux1
-

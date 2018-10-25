@@ -17,7 +17,7 @@ open X64.Vale.QuickCodes
 #set-options "--z3rlimit 20"
 #endverbatim
 
-procedure {:quick}{:exportSpecs} memcpy(inline win:bool,ghost stack_b:buffer64, ghost dst:buffer64, ghost src:buffer64)
+procedure {:quick}{:exportSpecs}{:public} memcpy(inline win:bool,ghost stack_b:buffer64, ghost dst:buffer64, ghost src:buffer64)
     requires
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(dst), loc_buffer(src)));
         buffer_readable(mem, stack_b);

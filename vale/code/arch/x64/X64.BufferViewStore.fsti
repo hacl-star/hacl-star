@@ -11,12 +11,12 @@ open X64.Machine_s
 open X64.Bytes_Semantics_s
 
 val bv_upd_update_heap64:
-  (b:s8{B.length b % 8 == 0}) ->
+  (b:b8{B.length b % 8 == 0}) ->
   (heap:heap) ->
   (i:nat{i < B.length b / 8}) ->
   (v:nat64) ->
   (addrs:addr_map) ->
-  (ptrs:list s8) ->
+  (ptrs:list b8) ->
   (h:HS.mem{B.live h b}) ->
    Lemma
      (requires correct_down_p h addrs heap b)
@@ -28,12 +28,12 @@ val bv_upd_update_heap64:
      BV.upd h bv i (UInt64.uint_to_t v) == B.g_upd_seq b (get_seq_heap heap' addrs b) h))
 
 val bv_upd_update_heap128:
-  (b:s8{B.length b % 16 == 0}) ->
+  (b:b8{B.length b % 16 == 0}) ->
   (heap:heap) ->
   (i:nat{i < B.length b / 16}) ->
   (v:quad32) ->
   (addrs:addr_map) ->
-  (ptrs:list s8) ->
+  (ptrs:list b8) ->
   (h:HS.mem{B.live h b}) ->
    Lemma 
      (requires correct_down_p h addrs heap b)

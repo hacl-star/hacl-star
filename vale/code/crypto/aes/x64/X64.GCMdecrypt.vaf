@@ -7,7 +7,6 @@ include "X64.GF128_Mul.vaf"
 include "X64.GCTR.vaf"
 include "X64.GHash.vaf"
 include "X64.GCMencrypt.vaf"
-include "X64.Util.vaf"
 include{:fstar}{:open} "Opaque_s"
 include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Words_s"
@@ -32,7 +31,6 @@ include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
-include{:fstar}{:open} "X64.Util"
 include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.GCMdecrypt
@@ -73,7 +71,6 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open X64.GF128_Mul
 open X64.GCMencrypt
-open X64.Util
 open X64.Stack
 open X64.CPU_Features_s
 #endverbatim
