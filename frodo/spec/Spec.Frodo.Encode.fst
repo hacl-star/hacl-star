@@ -100,21 +100,11 @@ val frodo_key_encode2:
      b:size_nat{0 < b /\ b <= 8}
   -> a:lbytes (params_nbar * params_nbar * b / 8)
   -> i:size_nat{i < params_nbar}
-  -> x:uint64
   -> res:matrix params_nbar params_nbar
   -> matrix params_nbar params_nbar
-let frodo_key_encode2 b a i x res =
-  Loops.repeati 8 (frodo_key_encode0 b a x i) res
-
-val frodo_key_encode3:
-     b:size_nat{0 < b /\ b <= 8}
-  -> a:lbytes (params_nbar * params_nbar * b / 8)
-  -> i:size_nat{i < params_nbar}
-  -> res:matrix params_nbar params_nbar
-  -> matrix params_nbar params_nbar
-let frodo_key_encode3 b a i res =
+let frodo_key_encode2 b a i res =
   let x = frodo_key_encode1 b a i in
-  frodo_key_encode2 b a i x res
+  Loops.repeati 8 (frodo_key_encode0 b a x i) res
 
 val frodo_key_encode:
     b:size_nat{0 < b /\ b <= 8}
@@ -122,7 +112,7 @@ val frodo_key_encode:
   -> res:matrix params_nbar params_nbar
 let frodo_key_encode b a =
   let res = create params_nbar params_nbar in
-  Loops.repeati params_nbar (frodo_key_encode3 b a) res
+  Loops.repeati params_nbar (frodo_key_encode2 b a) res
 
 val frodo_key_decode0:
     b:size_nat{0 < b /\ b <= 8}
@@ -150,18 +140,10 @@ val frodo_key_decode2:
     b:size_nat{0 < b /\ b <= 8}
   -> a:matrix params_nbar params_nbar
   -> i:size_nat{i < params_nbar}
-  -> uint64
-let frodo_key_decode2 b a i =
-  Loops.repeat_gen 8 decode_templong_t (frodo_key_decode0 b a i) (u64 0)
-
-val frodo_key_decode3:
-    b:size_nat{0 < b /\ b <= 8}
-  -> a:matrix params_nbar params_nbar
-  -> i:size_nat{i < params_nbar}
   -> res:lbytes (params_nbar * params_nbar * b / 8)
   -> lbytes (params_nbar * params_nbar * b / 8)
-let frodo_key_decode3 b a i res =
-  let templong = frodo_key_decode2 b a i in
+let frodo_key_decode2 b a i res =
+  let templong = Loops.repeat_gen 8 decode_templong_t (frodo_key_decode0 b a i) (u64 0) in
   frodo_key_decode1 b i templong res
 
 val frodo_key_decode:
@@ -171,4 +153,4 @@ val frodo_key_decode:
 let frodo_key_decode b a =
   let resLen = params_nbar * params_nbar * b / 8 in
   let res = Seq.create resLen (u8 0) in
-  Loops.repeati params_nbar (frodo_key_decode3 b a) res
+  Loops.repeati params_nbar (frodo_key_decode2 b a) res

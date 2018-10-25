@@ -1,6 +1,5 @@
 module Hacl.Impl.Frodo.Encode
 
-open FStar.HyperStack.All
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
@@ -19,7 +18,7 @@ module ST = FStar.HyperStack.ST
 
 module LSeq = Lib.Sequence
 module S    = Spec.Frodo.Encode
-module FLemmas = Spec.Frodo.Lemmas
+module Lemmas = Spec.Frodo.Lemmas
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -47,7 +46,7 @@ val ec1:
   -> k:size_t{v k < 8}
   -> res:uint16{res == S.ec1 (v b) x (v k)}
 let ec1 b x k =
-  FLemmas.modulo_pow2_u64 (x >>. (b *! k)) (v b);
+  Lemmas.modulo_pow2_u64 (x >>. (b *! k)) (v b);
   let rk = (x >>. (b *! k)) &. ((u64 1 <<. b) -. u64 1) in
   ec b (to_u16 rk)
 
@@ -81,7 +80,8 @@ val frodo_key_encode2:
       B.live h a /\ B.live h res /\ B.disjoint a res)
     (ensures fun h0 _ h1 ->
       modifies (loc_buffer res) h0 h1 /\
-      as_matrix h1 res == S.frodo_key_encode2 (v b) (as_seq h0 a) (v i) x (as_matrix h0 res))
+      as_matrix h1 res ==
+      Lib.LoopCombinators.repeati 8 (S.frodo_key_encode0 (v b) (as_seq h0 a) x (v i)) (as_matrix h0 res))
 let frodo_key_encode2 b a i x res =
   [@ inline_let]
   let spec h0 = S.frodo_key_encode0 (v b) (as_seq h0 a) x (v i) in
@@ -111,7 +111,7 @@ let frodo_key_encode b a res =
   let h0 = ST.get () in
   LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 (v params_nbar * v params_nbar)) (as_seq h0 res);
   [@ inline_let]
-  let spec h0 = S.frodo_key_encode3 (v b) (as_seq h0 a) in
+  let spec h0 = S.frodo_key_encode2 (v b) (as_seq h0 a) in
   loop1 h0 params_nbar res spec
   (fun i ->
     Lib.LoopCombinators.unfold_repeati (v params_nbar) (spec h0) (as_seq h0 res) (v i);
@@ -147,7 +147,8 @@ val frodo_key_decode2:
     (requires fun h -> B.live h a)
     (ensures fun h0 r h1 ->
       modifies loc_none h0 h1 /\
-      r == S.frodo_key_decode2 (v b) (as_matrix h0 a) (v i))
+      r == Lib.LoopCombinators.repeat_gen 8 S.decode_templong_t
+           (S.frodo_key_decode0 (v b) (as_matrix h0 a) (v i)) (u64 0))
 let frodo_key_decode2 b a i =
   push_frame();
   let templong = create #uint64 #1 (size 1) (u64 0) in
@@ -188,7 +189,7 @@ let frodo_key_decode b a res =
   let h0 = ST.get () in
   LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 (v resLen)) (as_seq h0 res);
   [@ inline_let]
-  let spec h0 = S.frodo_key_decode3 (v b) (as_seq h0 a) in
+  let spec h0 = S.frodo_key_decode2 (v b) (as_seq h0 a) in
   loop1 h0 params_nbar res spec
   (fun i ->
     Lib.LoopCombinators.unfold_repeati (v params_nbar) (spec h0) (as_seq h0 res) (v i);
