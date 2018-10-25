@@ -19,7 +19,7 @@ merkle_tree_test: merkle_tree_test.o libmerkletree.a
 	$(CC) $(CFLAGS) -o $@ $< -L . -lmerkletree
 
 clean:
-	rm -f $(ALL_OBJS)
+	rm -f $(ALL_OBJS) $(NOT_NEEDED)
 	rm -f libmerkletree.a merkle_tree_test
 
 .c.o: $<
