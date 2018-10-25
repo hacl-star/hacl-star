@@ -83,7 +83,7 @@ abstract
 type equal (#a:Type) (#len:size_nat) (s1:lseq a len) (s2:lseq a len) =
   forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
 
-val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma 
+val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
   (requires forall i. {:pattern index s1 i; index s2 i} index s1 i == index s2 i)
   (ensures equal s1 s2)
   [SMTPat (equal s1 s2)]
@@ -163,6 +163,35 @@ val lemma_update_sub:
       sub dst (start + n) (len - start - n))
     (ensures
       res == update_sub dst start n src)
+
+val lemma_concat2:
+    #a:Type0
+  -> len0:size_nat
+  -> s0:lseq a len0
+  -> len1:size_nat{len0 + len1 < max_size_t}
+  -> s1:lseq a len1
+  -> s:lseq a (len0 + len1)
+  -> Lemma
+    (requires
+      sub s 0 len0 == s0 /\
+      sub s len0 len1 == s1)
+    (ensures s == concat s0 s1)
+
+val lemma_concat3:
+    #a:Type0
+  -> len0:size_nat
+  -> s0:lseq a len0
+  -> len1:size_nat{len0 + len1 < max_size_t}
+  -> s1:lseq a len1
+  -> len2:size_nat{len0 + len1 + len2 < max_size_t}
+  -> s2:lseq a len2
+  -> s:lseq a (len0 + len1 + len2)
+  -> Lemma
+    (requires
+      sub s 0 len0 == s0 /\
+      sub s len0 len1 == s1 /\
+      sub s (len0 + len1) len2 == s2)
+    (ensures s == concat (concat s0 s1) s2)
 
 (** Updating a sub-Sequence from another fixed-length Sequence *)
 let update_slice

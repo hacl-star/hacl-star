@@ -57,6 +57,17 @@ let lemma_update_sub #a #len dst start n src res =
   FStar.Seq.lemma_split res (start + n);
   FStar.Seq.lemma_split res1 (start + n)
 
+let lemma_concat2 #a len0 s0 len1 s1 s =
+  FStar.Seq.Properties.lemma_split s len0;
+  FStar.Seq.Properties.lemma_split (concat s0 s1) len0
+
+let lemma_concat3 #a len0 s0 len1 s1 len2 s2 s =
+  let s' = concat (concat s0 s1) s2 in
+  FStar.Seq.Properties.lemma_split (sub s 0 (len0 + len1)) len0;
+  FStar.Seq.Properties.lemma_split (sub s' 0 (len0 + len1)) len0;
+  FStar.Seq.Properties.lemma_split s (len0 + len1);
+  FStar.Seq.Properties.lemma_split s' (len0 + len1)
+
 let map #a #b #len f s =
   Seq.seq_of_list (List.Tot.map f (Seq.seq_to_list s))
 

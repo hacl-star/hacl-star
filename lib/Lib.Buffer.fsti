@@ -417,6 +417,38 @@ val update_sub_f:
     (ensures  fun h0 _ h1 -> B.modifies (B.loc_buffer buf) h0 h1 /\
       as_seq h1 buf == Seq.update_sub #a #len (as_seq h0 buf) (v start) (v n) (spec h0))
 
+inline_for_extraction
+val concat2:
+    #a:Type0
+  -> len0:size_t
+  -> s0:lbuffer a (v len0)
+  -> len1:size_t{v len0 + v len1 < max_size_t}
+  -> s1:lbuffer a (v len1)
+  -> s:lbuffer a (v len0 + v len1)
+  -> Stack unit
+    (requires fun h ->
+      B.live h s0 /\ B.live h s1 /\ B.live h s /\
+      B.disjoint s s0 /\ B.disjoint s s1)
+    (ensures fun h0 _ h1 -> B.modifies (B.loc_buffer s) h0 h1 /\
+      as_seq h1 s == Seq.concat (as_seq h0 s0) (as_seq h0 s1))
+
+inline_for_extraction
+val concat3:
+    #a:Type0
+  -> len0:size_t
+  -> s0:lbuffer a (v len0)
+  -> len1:size_t{v len0 + v len1 < max_size_t}
+  -> s1:lbuffer a (v len1)
+  -> len2:size_t{v len0 + v len1 + v len2 < max_size_t}
+  -> s2:lbuffer a (v len2)
+  -> s:lbuffer a (v len0 + v len1 + v len2)
+  -> Stack unit
+    (requires fun h ->
+      B.live h s0 /\ B.live h s1 /\ B.live h s2 /\ B.live h s /\
+      B.disjoint s s0 /\ B.disjoint s s1 /\ B.disjoint s s2)
+    (ensures fun h0 _ h1 -> B.modifies (B.loc_buffer s) h0 h1 /\
+      as_seq h1 s == Seq.concat (Seq.concat (as_seq h0 s0) (as_seq h0 s1)) (as_seq h0 s2))
+
 (** Loop combinator with just memory safety specification *)
 inline_for_extraction noextract
 val loop_nospec:
@@ -693,7 +725,7 @@ val loop_blocks:
       B.modifies (B.loc_buffer write) h0 h1 /\
       as_seq h1 write ==
       Seq.repeat_blocks #a #(Seq.lseq b blen) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
- 
+
 
 (** Map a total function on a buffer *)
 inline_for_extraction
@@ -726,6 +758,3 @@ val imapT:
     (ensures  fun h0 _ h1 ->
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       as_seq h1 o == Seq.map f (ias_seq h0 i))
-
-
-

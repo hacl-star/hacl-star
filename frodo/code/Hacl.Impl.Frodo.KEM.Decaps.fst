@@ -158,31 +158,6 @@ let crypto_kem_dec_kp_s mu_decode g bp_matrix c_matrix sk ct =
   pop_frame ();
   b
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
-val lemma_update_ss_init:
-    c12:LSeq.lseq uint8 (v crypto_ciphertextbytes - v crypto_bytes)
-  -> kp_s:LSeq.lseq uint8 (v crypto_bytes)
-  -> d:LSeq.lseq uint8 (v crypto_bytes)
-  -> ss_init:LSeq.lseq uint8 (v crypto_ciphertextbytes + v crypto_bytes)
-  -> Lemma
-    (requires
-      LSeq.sub ss_init 0 (v crypto_ciphertextbytes - v crypto_bytes) == c12 /\
-      LSeq.sub ss_init (v crypto_ciphertextbytes - v crypto_bytes) (v crypto_bytes) == kp_s /\
-      LSeq.sub ss_init (v crypto_ciphertextbytes) (v crypto_bytes) == d)
-    (ensures ss_init == LSeq.concat (LSeq.concat c12 kp_s) d)
-let lemma_update_ss_init c12 kp_s d ss_init =
-  let ss_init1 =  LSeq.concat (LSeq.concat c12 kp_s) d in
-  FStar.Seq.Base.lemma_eq_intro (LSeq.sub ss_init1 0 (v crypto_ciphertextbytes - v crypto_bytes)) c12;
-  FStar.Seq.Base.lemma_eq_intro (LSeq.sub ss_init1 (v crypto_ciphertextbytes - v crypto_bytes) (v crypto_bytes)) kp_s;
-  FStar.Seq.Base.lemma_eq_intro (LSeq.sub ss_init1 (v crypto_ciphertextbytes) (v crypto_bytes)) d;
-  FStar.Seq.Properties.lemma_split (LSeq.sub ss_init 0 (v crypto_ciphertextbytes)) (v crypto_ciphertextbytes - v crypto_bytes);
-  FStar.Seq.Properties.lemma_split (LSeq.sub ss_init1 0 (v crypto_ciphertextbytes)) (v crypto_ciphertextbytes - v crypto_bytes);
-  FStar.Seq.Properties.lemma_split ss_init (v crypto_ciphertextbytes);
-  FStar.Seq.Properties.lemma_split ss_init1 (v crypto_ciphertextbytes)
-
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
-
 inline_for_extraction noextract
 val crypto_kem_dec_ss0:
     ct:lbytes crypto_ciphertextbytes
@@ -201,16 +176,7 @@ let crypto_kem_dec_ss0 ct kp_s ss =
 
   let ss_init_len = crypto_ciphertextbytes +! crypto_bytes in
   let ss_init:lbytes ss_init_len = create ss_init_len (u8 0) in
-  let h0 = ST.get () in
-  update_sub ss_init (size 0) (crypto_ciphertextbytes -! crypto_bytes) c12;
-  update_sub ss_init (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes kp_s;
-  let h1 = ST.get () in
-  LSeq.eq_intro (LSeq.sub (as_seq h1 ss_init) 0 (v crypto_ciphertextbytes - v crypto_bytes)) (as_seq h0 c12);
-  update_sub ss_init crypto_ciphertextbytes crypto_bytes d;
-  let h2 = ST.get () in
-  LSeq.eq_intro (LSeq.sub (as_seq h2 ss_init) 0 (v crypto_ciphertextbytes - v crypto_bytes)) (as_seq h0 c12);
-  LSeq.eq_intro (LSeq.sub (as_seq h2 ss_init) (v crypto_ciphertextbytes - v crypto_bytes) (v crypto_bytes)) (as_seq h0 kp_s);
-  lemma_update_ss_init (as_seq h0 c12) (as_seq h0 kp_s) (as_seq h0 d) (as_seq h2 ss_init);
+  concat3 (crypto_ciphertextbytes -! crypto_bytes) c12 crypto_bytes kp_s crypto_bytes d ss_init;
   cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
   pop_frame()
 
@@ -258,12 +224,7 @@ let crypto_kem_dec_0 mu_decode sk g =
   push_frame();
   let pk_mu_decode = create pk_mu_decode_len (u8 0) in
   let pk = sub #uint8 #_ #(v crypto_publickeybytes) sk crypto_bytes crypto_publickeybytes in
-  let h0 = ST.get () in
-  update_sub pk_mu_decode (size 0) crypto_publickeybytes pk;
-  update_sub pk_mu_decode crypto_publickeybytes bytes_mu mu_decode;
-  let h1 = ST.get () in
-  LSeq.eq_intro (LSeq.sub #_ #(v crypto_publickeybytes + v bytes_mu) (as_seq h1 pk_mu_decode) 0 (v crypto_publickeybytes)) (as_seq h0 pk);
-  lemma_update_pk_coins (as_seq h0 pk) (as_seq h0 mu_decode) (as_seq h1 pk_mu_decode);
+  concat2 crypto_publickeybytes pk bytes_mu mu_decode pk_mu_decode;
   cshake_frodo pk_mu_decode_len pk_mu_decode (u16 3) (size 3 *! crypto_bytes) g;
   pop_frame()
 
