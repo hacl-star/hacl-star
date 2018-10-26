@@ -354,7 +354,7 @@
         "typing_Spec.SHA2.Constants.h224"
       ],
       0,
-      "642ae6795ad335bbca0c09154fcad6e8"
+      "2a9dd929e71db6f01e7ae7ef90260e31"
     ],
     [
       "Hacl.Hash.PadFinish.pad_3",
@@ -563,7 +563,7 @@
         "typing_tok_Spec.Hash.Helpers.MD5@tok"
       ],
       0,
-      "5a23e8ff1298f53d3e2ba1badd8bd901"
+      "14bc851f29f88486ea91c7844d09c655"
     ],
     [
       "Hacl.Hash.PadFinish.pad_len",
@@ -588,7 +588,7 @@
         "typing_Spec.Hash.Helpers.size_word"
       ],
       0,
-      "1243480f2b5a168c4f298b4355b6366e"
+      "85414e4284bf97bfda6b0e9052c3eaae"
     ],
     [
       "Hacl.Hash.PadFinish.pad_len",
@@ -642,7 +642,7 @@
         "typing_Spec.Hash.Helpers.size_word"
       ],
       0,
-      "73f72a02adbafd45505fccfadee80c97"
+      "00638f9f59350a2c4e60fd504f13eb8e"
     ],
     [
       "Hacl.Hash.PadFinish.size_hash_final_w_ul",
@@ -668,7 +668,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "4d928b58b555afce94d4a8bfc5882b03"
+      "946eb2de2d31a7655ac7b8f48f045a6a"
     ],
     [
       "Hacl.Hash.PadFinish.finish",
@@ -687,6 +687,7 @@
         "constructor_distinct_BoxInt",
         "constructor_distinct_Spec.Hash.Helpers.MD5",
         "constructor_distinct_Spec.Hash.Helpers.SHA1",
+        "constructor_distinct_Spec.Hash.Helpers.SHA2_512",
         "constructor_distinct_Tm_unit",
         "disc_equation_Spec.Hash.Helpers.MD5",
         "disc_equation_Spec.Hash.Helpers.SHA1",
@@ -745,15 +746,13 @@
         "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_eq_intro",
         "lemma_FStar.Seq.Base.lemma_eq_refl",
-        "lemma_FStar.Seq.Base.lemma_index_app1",
-        "lemma_FStar.Seq.Base.lemma_index_app2",
         "lemma_FStar.Seq.Base.lemma_index_slice",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.Seq.Properties.slice_is_empty",
         "lemma_FStar.Seq.Properties.slice_length",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
-        "lemma_FStar.UInt32.vu_inv",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Hacl.Hash.Lemmas.lemma_slice",
         "lemma_Hacl.Hash.Lemmas.lemma_slice_ijk",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
@@ -784,7 +783,6 @@
         "refinement_interpretation_FStar.Kremlin.Endianness_Tm_refine_e1ef919b7ab89ac4bd9d5da1e707c85c",
         "refinement_interpretation_FStar.List.Tot.Properties_Tm_refine_fbb3412f12fd58a91571022d7c9fa36d",
         "refinement_interpretation_FStar.Monotonic.HyperStack_Tm_refine_9a74d818566e70513bc032cc3b65a144",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_03127b5d59ee3055620018693b4264e8",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
@@ -830,6 +828,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_union",
         "typing_Spec.Hash.Common.finish",
+        "typing_Spec.Hash.Helpers.size_hash",
         "typing_Spec.Hash.Helpers.size_hash_final_w",
         "typing_Spec.Hash.Helpers.size_hash_w",
         "typing_Spec.Hash.Helpers.size_word",
@@ -839,7 +838,7 @@
         "unit_typing"
       ],
       0,
-      "fb0904303ceb32dd5f331a1629aef7e7"
+      "280f212fa55ae21a6acd46269f8fcfe1"
     ]
   ]
 ]
