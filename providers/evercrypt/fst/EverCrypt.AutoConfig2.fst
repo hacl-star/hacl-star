@@ -19,14 +19,17 @@ let eternal_pointer a = buf:B.buffer a { B.recallable buf /\ B.length buf = 1 }
 unfold
 let cached_flag (b: bool) = eternal_pointer (flag b)
 
-let cpu_has_shaext: cached_flag X64.CPU_Features_s.sha_enabled = B.gcmalloc HS.root false 1ul
-let cpu_has_aesni: cached_flag X64.CPU_Features_s.aesni_enabled = B.gcmalloc HS.root false 1ul
+let cpu_has_shaext: cached_flag X64.CPU_Features_s.sha_enabled =
+  B.gcmalloc_of_list HS.root [ false ]
+let cpu_has_aesni: cached_flag X64.CPU_Features_s.aesni_enabled =
+  B.gcmalloc_of_list HS.root [ false ]
 
-let user_wants_hacl: eternal_pointer bool = B.gcmalloc HS.root false 1ul
-let user_wants_vale: eternal_pointer bool = B.gcmalloc HS.root false 1ul
-let user_wants_openssl: eternal_pointer bool = B.gcmalloc HS.root false 1ul
-let user_wants_bcrypt: eternal_pointer bool = B.gcmalloc HS.root false 1ul
+let user_wants_hacl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ false ]
+let user_wants_vale: eternal_pointer bool = B.gcmalloc_of_list HS.root [ false ]
+let user_wants_openssl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ false ]
+let user_wants_bcrypt: eternal_pointer bool = B.gcmalloc_of_list HS.root [ false ]
 
+inline_for_extraction
 let mk_getter #b (f: cached_flag b): getter b = fun () ->
   B.recall f;
   B.index f 0ul
@@ -63,6 +66,7 @@ let init () =
     B.upd cpu_has_shaext 0ul true
   end
 
+inline_for_extraction
 let mk_disabler (f: eternal_pointer bool { B.loc_includes (fp ()) (B.loc_buffer f) }): disabler = fun () ->
   B.recall f;
   B.upd f 0ul false
@@ -72,4 +76,4 @@ let disable_aesni () = B.recall cpu_has_aesni; B.upd cpu_has_aesni 0ul false
 let disable_vale = mk_disabler user_wants_vale
 let disable_hacl = mk_disabler user_wants_hacl
 let disable_openssl = mk_disabler user_wants_openssl
-let disable_bcrytp = mk_disabler user_wants_bcrypt
+let disable_bcrypt = mk_disabler user_wants_bcrypt

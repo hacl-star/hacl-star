@@ -364,9 +364,10 @@ let hmac_core a acc tag key data len =
   //  assert (loc_in (footprint acc h01) h01);
   // TR: now works thanks to Hash.invariant_loc_in_footprint
   fresh_is_disjoint (loc_buffer ipad) (footprint acc h01)  h01 h02;
-  let opad = alloca 0x5cuy (block_len a) in
-  xor_bytes_inplace ipad key (block_len a);
-  xor_bytes_inplace opad key (block_len a);
+  let l = block_len a in
+  let opad = alloca 0x5cuy l in
+  xor_bytes_inplace ipad key l;
+  xor_bytes_inplace opad key l;
   let h0 = ST.get() in
   modifies_address_liveness_insensitive_unused_in h01 h0;
   // assert(loc_in (footprint acc h0) h0);

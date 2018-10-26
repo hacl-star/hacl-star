@@ -8,6 +8,11 @@ module M = LowStar.Modifies
 
 (** Old multiplexing support, to be phased out. *)
 
+inline_for_extraction
+let getter a = unit -> Stack a
+  (requires (fun _ -> true))
+  (ensures (fun h0 _ h1 -> M.(modifies loc_none h0 h1)))
+
 /// Multiplexing support
 type impl = | Hacl | Vale | OpenSSL | BCrypt
 

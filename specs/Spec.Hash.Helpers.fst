@@ -26,6 +26,7 @@ let sha2_alg = a:hash_alg { is_sha2 a }
 (** Maximum input data length. *)
 
 (* In bytes. *)
+inline_for_extraction noextract
 let max_input8: hash_alg -> Tot nat = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> pow2 61
@@ -93,7 +94,7 @@ let size_block a =
   size_word a * size_block_w
 
 (* Number of words for intermediate hash, i.e. the working state. *)
-inline_for_extraction
+inline_for_extraction noextract
 let size_hash_w a =
   match a with
   | MD5 -> 4

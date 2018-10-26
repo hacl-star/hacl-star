@@ -85,7 +85,7 @@ endif
 
 VALE_BUNDLES=$(addprefix -bundle , 'X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
   'Collections.*' 'SHA_helpers' Collections Types_s Words_s Views AES_s \
-  Workarounds 'Math.*')
+  Workarounds 'Math.*' Interop TypesNative_s)
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
@@ -93,6 +93,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  $(VALE_BUNDLES) \
+	  -bundle 'Prims' \
 	  -bundle 'FStar.*' \
 	  -bundle 'C,C.*' \
 	  -bundle 'Hacl.*' \

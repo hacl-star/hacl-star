@@ -4,7 +4,9 @@ open FStar.Integers
 open EverCrypt.Helpers
 open EverCrypt.Hash
 
+noextract
 unfold let bytes = Spec.Hash.Helpers.bytes
+noextract
 unfold let lbytes = EverCrypt.HMAC.lbytes
 
 /// FUNCTIONAL SPECIFICATION:
