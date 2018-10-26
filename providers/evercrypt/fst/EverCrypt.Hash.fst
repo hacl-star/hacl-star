@@ -9,7 +9,7 @@ module IB = LowStar.ImmutableBuffer
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-module AC = EverCrypt.AutoConfig
+module AC = EverCrypt.AutoConfig2
 module SC = EverCrypt.StaticConfig
 friend EverCrypt.StaticConfig
 
@@ -86,7 +86,6 @@ let frame_invariant #a l s h0 h1 =
 
 let create a =
   let h0 = ST.get () in
-  let i = AC.sha256_impl () in
   let s: state_s a =
     match a with
     | MD5 -> MD5_s (B.malloc HS.root 0ul 4ul)
@@ -134,7 +133,6 @@ let update_multi_256 s blocks n =
     // Hack alert!
     let k = such_a_bad_hack k224_256 in
     let h0 = ST.get () in
-    assume (X64.CPU_Features_s.sha_enabled);
     assume (M.loc_disjoint (M.loc_buffer k) (M.loc_buffer s));
     assume (M.loc_disjoint (M.loc_buffer k) (M.loc_buffer blocks));
     assume (
