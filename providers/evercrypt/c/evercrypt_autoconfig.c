@@ -49,15 +49,16 @@ bool detect_aesni() {
 
 #else // _MSC_VER
 
-#include <cpuid.h>
 bool detect_aesni() {
 // Same logic as above
 #if defined(__x86_64)
-  // https://github.com/gcc-mirror/gcc/blob/master/gcc/config/i386/cpuid.h
-  unsigned int eax, ebx, ecx, edx;
-  if (!__get_cpuid(1, &eax, &ebx, &ecx, &edx))
-    return false;
-  return (ecx & bit_AES) != 0;
+  static unsigned int c = 0;
+  asm("movl  $1, %%eax   \n\t"
+      "cpuid             \n\t"
+      : "=c" (c)
+      :
+      : "eax", "ebx", "edx");
+  return ( c &  0x02000000u) != 0;
 #else
   return false;
 #endif
