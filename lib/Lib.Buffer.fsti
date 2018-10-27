@@ -504,6 +504,7 @@ val loop1:
     (requires fun h -> h0 == h)
     (ensures  fun _ _ -> loop1_inv h0 n b blen write spec (v n))
 
+
 (** Invariant for Loop2: modifies two Buffers *)
 let loop2_inv
   (#b0:Type)
@@ -697,6 +698,20 @@ val loop_blocks:
 
 (** Map a total function on a buffer *)
 inline_for_extraction
+val fillT:
+    #a:Type
+  -> clen:size_t
+  -> o:lbuffer a (v clen)
+  -> spec_f:(i:size_nat{i < v clen} -> a)
+  -> f:(i:size_t{v i < v clen} -> r:a{r == spec_f (size_v i)})
+  -> Stack unit
+    (requires fun h0 -> B.live h0 o)
+    (ensures  fun h0 _ h1 ->
+      B.live h1 o /\ B.modifies (B.loc_buffer o) h0 h1 /\
+      as_seq h1 o == Seq.createi #a (v clen) spec_f)
+
+(** Map a total function on a buffer *)
+inline_for_extraction
 val mapT:
     #a:Type
   -> #b:Type
@@ -726,6 +741,26 @@ val imapT:
     (ensures  fun h0 _ h1 ->
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       as_seq h1 o == Seq.map f (ias_seq h0 i))
+
+
+(** Map a total function on a buffer *)
+inline_for_extraction
+val fill:
+    #a:Type
+  -> clen:size_t
+  -> o:lbuffer a (v clen)
+  -> spec:(mem -> GTot(i:size_nat{i < v clen} -> a))
+  -> impl:(i:size_t{v i < v clen} -> Stack unit
+          (requires fun h ->  B.live h o)
+          (ensures  fun h0 _ h1 ->
+            B.modifies (B.loc_buffer o) h0 h1 /\
+            as_seq h1 o == Seq.upd (as_seq h0 o) (v i) (spec h0 (v i))))
+  -> Stack unit
+    (requires fun h0 -> B.live h0 o)
+    (ensures  fun h0 _ h1 ->
+      B.live h1 o /\ B.modifies (B.loc_buffer o) h0 h1 /\
+      as_seq h1 o == Seq.createi #a (v clen) (spec h0))
+
 
 
 

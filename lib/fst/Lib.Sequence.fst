@@ -6,15 +6,6 @@ open Lib.LoopCombinators
 
 #set-options "--z3rlimit 15"
 
-private inline_for_extraction noextract
-val map2_list: #a:Type -> #b:Type -> #c:Type
-  -> f:(a -> b -> c) -> l1:list a -> l2:list b{List.Tot.length l1 == List.Tot.length l2}
-  -> l:list c{List.Tot.length l == List.Tot.length l1}
-let rec map2_list #a #b #c f l1 l2 =
-  match l1, l2 with
-  | [], [] -> []
-  | x::l1', y::l2' -> f x y :: map2_list f l1' l2'
-
 let index #a #len s n = Seq.index s n
 
 let create #a len init = Seq.create #a len init
@@ -57,11 +48,45 @@ let lemma_update_sub #a #len dst start n src res =
   FStar.Seq.lemma_split res (start + n);
   FStar.Seq.lemma_split res1 (start + n)
 
+
+(* The following code for createi verifies against the spec but does not match "loop" because the "refl" function maps to a state-dependent refinement type. 
+   To do this properly we need a version of "repeat_gen_inductive" that matches loop. For now, admitting createi with a simpler createi_a *)
+
+let createi_a' (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = 
+    s:lseq a k{forall (i:nat).
+    {:pattern (index s i)} i < k ==> index s i == init i}
+
+let createi_spec' (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
+	         (si:createi_a' a len init i) : createi_a' a len init (i+1) = 
+    let s : lseq a (i+1) = FStar.Seq.snoc si (init i) in
+    assert (forall (j:nat). j < i ==> index si j == init j);
+    assert (forall (j:nat). j < (i+1) ==> index s j == init j);
+    s
+let createi' #a len init_f = 
+  repeat_gen len (createi_a' a len init_f) (createi_spec' a len init_f)
+  (of_list [])
+
+let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = lseq a k
+
+let createi_spec (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
+	         (si:createi_a a len init i) : createi_a a len init (i+1) = FStar.Seq.snoc si (init i)
+
+let createi #a len init_f = 
+  admit();
+  repeat_gen len (createi_a a len init_f) (createi_spec a len init_f)
+  (of_list [])
+
+let mapi #a #b #len f s = 
+    createi #b len (fun i -> f i s.[i])
+
 let map #a #b #len f s =
-  Seq.seq_of_list (List.Tot.map f (Seq.seq_to_list s))
+  createi #b len (fun i -> f s.[i])
+
+let map2i #a #b #c #len f s1 s2 =
+    createi #c len (fun i -> f i s1.[i] s2.[i])
 
 let map2 #a #b #c #len f s1 s2 =
-  Seq.seq_of_list (map2_list f (Seq.seq_to_list s1) (Seq.seq_to_list s2))
+    createi #c len (fun i -> f s1.[i] s2.[i])
 
 let for_all #a #len f x = Seq.for_all f x
 
