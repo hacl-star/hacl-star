@@ -7,6 +7,7 @@ open Lib.ByteSequence
 
 open Spec.Matrix
 open Spec.SHA3
+open Spec.AES
 
 module Matrix = Spec.Matrix
 module Seq = Lib.Sequence
@@ -105,3 +106,31 @@ let frodo_gen_matrix_cshake_4x n seedLen seed =
   lemma_gen_matrix_4x n seedLen seed res;
   Spec.Matrix.extensionality res (frodo_gen_matrix_cshake n seedLen seed);
   res
+
+val frodo_gen_matrix_aes:
+    n:size_nat{n * n <= max_size_t /\ n < maxint U16}
+  -> seedLen:size_nat{seedLen == 16}
+  -> seed:lbytes seedLen
+  -> res:matrix n n
+let frodo_gen_matrix_aes n seedLen seed =
+  let res = Matrix.create n n in
+  let key = aes128_key_expansion seed in
+
+  let tmp = Seq.create 8 (u16 0) in
+  let n1 = n / 8 in
+
+  Loops.repeati n
+  (fun i res ->
+    Loops.repeati n1
+    (fun j res ->
+      let j = j * 8 in
+      let tmp = tmp.[0] <- u16 i in
+      let tmp = tmp.[1] <- u16 j in
+      //let res_i = aes128_encrypt_block seed (uints_to_bytes_le tmp) in
+      let res_i = block_cipher key (uints_to_bytes_le tmp) in
+      Loops.repeati 8
+      (fun k res ->
+        res.(i, j + k) <- uint_from_bytes_le (Seq.sub res_i (k * 2) 2)
+      ) res
+    ) res
+  ) res

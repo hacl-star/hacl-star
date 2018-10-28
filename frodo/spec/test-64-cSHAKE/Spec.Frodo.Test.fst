@@ -15,7 +15,7 @@ open Spec.Frodo.Params
 open FStar.All
 
 // Reducing e.g. v (size 64) to 64 requires access to Lib.IntTypes implementation,
-// hence why we befriend Lib.IntTypes although it might be possible to prove this 
+// hence why we befriend Lib.IntTypes although it might be possible to prove this
 // opaquely.
 friend Lib.IntTypes
 

@@ -2,7 +2,9 @@ module Frodo.Params
 
 open Lib.IntTypes
 
-unfold let params_n = size 640
+#reset-options "--max_fuel 0 --max_ifuel 0"
+
+unfold let params_n = size 64
 
 unfold let params_logq = size 15
 
@@ -12,7 +14,7 @@ unfold let crypto_bytes = size 16
 
 unfold let cdf_table_len = size 12
 
-unfold let cdf_list: list uint16 =
+unfold let cdf_list: list uint16 = 
   [u16 4727;  u16 13584; u16 20864; u16 26113; u16 29434; u16 31278;
    u16 32176; u16 32560; u16 32704; u16 32751; u16 32764; u16 32767]
 
@@ -41,3 +43,4 @@ let lemma_cdf_list i =
   assert_norm (uint_v (List.Tot.index cdf_list 9) < pow2 15);
   assert_norm (uint_v (List.Tot.index cdf_list 10) < pow2 15);
   assert_norm (uint_v (List.Tot.index cdf_list 11) < pow2 15)
+
