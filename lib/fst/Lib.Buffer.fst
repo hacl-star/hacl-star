@@ -150,6 +150,11 @@ let salloc_nospec #a #res h len x footprint impl =
   salloc1 #a #res h len x footprint spec spec_inv impl
 
 inline_for_extraction noextract
+let salloc1_trivial #a #res h len x footprint spec impl =
+  let trivial (#res:Type) (h1 h2 h3:mem) (r:res) = () in
+  salloc1 h len x footprint spec trivial impl
+
+inline_for_extraction noextract
 val loopi_blocks_f:
     #a:Type0
   -> #b:Type0
