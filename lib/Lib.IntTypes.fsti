@@ -98,7 +98,6 @@ let uint_t (t:inttype) (l:secrecy_level) =
   | PUB -> pub_int_t t
   | SEC -> sec_int_t t
 
-unfold
 let uint_v #t #l (u:uint_t t l) : n:nat{n <= maxint t} =
   match l with
   | PUB -> pub_int_v #t u
@@ -527,7 +526,7 @@ let (>=.) #t = gte #t
 
 
 inline_for_extraction
-let p_t (t:inttype) = 
+let p_t (t:inttype) =
   match t with
   | U32 -> UInt32.t
   | _ -> UInt64.t
