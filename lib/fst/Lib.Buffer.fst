@@ -259,43 +259,63 @@ let fillT #a clen o spec f =
     ()
     )
 
-let mapT #a #b #len out clen f inp = 
-  [@ inline_let]
-  let spec (h0:mem) = 
-    let i_seq = as_seq h0 inp in
-    (fun (i:size_nat{i < len}) (o_seq:Seq.lseq b len) -> 
-       let i_sub : Seq.lseq a i = Seq.sub i_seq 0 i in
-       let o_sub : Seq.lseq b i = Seq.map f i_sub in
-       let o_seq : Seq.lseq b len = Seq.update_sub o_seq 0 i o_sub in
-       o_seq) in
-  let h0 = ST.get () in
-  loop1 #b #len h0 clen out spec
+let fill #a h0 clen o spec impl = 
+  loop h0 clen 
+  (Seq.createi_a a (v clen) (spec h0)) 
+  (fun h i -> Seq.sub (as_seq h o) 0 i)
+  (fun i -> B.loc_buffer o)
+  (fun h -> Seq.createi_spec a (v clen) (spec h0))
   (fun i ->
-    Loop.unfold_repeati len (spec h0) (as_seq h0 out) (v i);
-    out.(i) <- f inp.(i);
-    admit());
-  admit()
+    Loop.unfold_repeat_gen (v clen) (Seq.createi_a a (v clen) (spec h0)) (Seq.createi_spec a (v clen) (spec h0)) (Seq.of_list []) (v i);
+    let h = ST.get () in
+    impl i;
+    let h' = ST.get () in
+    let sub_o = Seq.sub (as_seq h' o) 0 (v i+1) in
+    let (old,n) = FStar.Seq.un_snoc sub_o in 
+    ()
+    )
 
-
-let imapT #a #b #len o clen f inp = 
+let mapT #a #b clen out f inp = 
   let h0 = ST.get () in
-  loop_nospec #h0 clen o (fun i -> o.(i) <- f (iindex inp i));
-  admit()
-
-let fill #a clen o spec impl = 
-  [@ inline_let]
-  let spec (h0:mem) = 
-    let i_seq = as_seq h0 inp in
-    (fun (i:size_nat{i < len}) (o_seq:Seq.lseq b len) -> 
-       let i_sub : Seq.lseq a i = Seq.sub i_seq 0 i in
-       let o_sub : Seq.lseq b i = Seq.map f i_sub in
-       let o_seq : Seq.lseq b len = Seq.update_sub o_seq 0 i o_sub in
-       o_seq) in
+  fill #b h0 clen out 
+  (fun h -> 
+    let in_seq = as_seq h inp in
+    Seq.map_inner #a #b #(v clen) f in_seq)
+  (fun i -> let h = ST.get() in 
+	 assert (live h inp);
+	 assert (live h out);
+	 out.(i) <- f inp.(i))
+  
+let mapiT #a #b clen out spec_f f inp = 
   let h0 = ST.get () in
-  loop1 #b #len h0 clen out spec
-  (fun i ->
-    Loop.unfold_repeati len (spec h0) (as_seq h0 out) (v i);
-    out.(i) <- f inp.(i);
-    admit());
-  admit()
+  fill #b h0 clen out 
+  (fun h -> 
+    let in_seq = as_seq h inp in
+    Seq.mapi_inner #a #b #(v clen) spec_f in_seq)
+  (fun i -> let xi = inp.(i) in
+	 out.(i) <- f i xi)
+
+let imapT #a #b #len out clen f inp = 
+  let h0 = ST.get () in
+  fill #b h0 clen out 
+  (fun h -> 
+    let in_seq = ias_seq h inp in
+    Seq.map_inner #a #b #len f in_seq)
+  (fun i -> let h = ST.get() in 
+	 assert (live h inp);
+	 assert (live h out);
+	 out.(i) <- f (iindex inp i))
+
+
+let mapi #a #b h0 clen out inp spec impl = 
+  let h0 = ST.get () in
+  fill #b h0 clen out 
+  (fun h -> 
+    let in_seq = as_seq h inp in
+    Seq.mapi_inner #a #b #(v clen) spec in_seq)
+  (fun i -> impl i)
+
+let map_blocks
+  
+
   

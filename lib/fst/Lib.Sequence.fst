@@ -76,11 +76,19 @@ let createi #a len init_f =
   repeat_gen len (createi_a a len init_f) (createi_spec a len init_f)
   (of_list [])
 
+let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
+	       (f:(i:nat{i < len} -> a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
+		 f i s.[i]
+
 let mapi #a #b #len f s = 
-    createi #b len (fun i -> f i s.[i])
+    createi #b len (mapi_inner #a #b #len f s)
+
+let map_inner (#a:Type) (#b:Type) (#len:size_nat)
+	       (f:(a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
+		 f s.[i]
 
 let map #a #b #len f s =
-  createi #b len (fun i -> f s.[i])
+    createi #b len (map_inner #a #b #len f s)
 
 let map2i #a #b #c #len f s1 s2 =
     createi #c len (fun i -> f i s1.[i] s2.[i])
