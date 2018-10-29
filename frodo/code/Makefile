@@ -107,7 +107,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c \
-  $(HACL_HOME)/code/experimental/sha3
+  $(HACL_HOME)/code/sha3
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
@@ -221,7 +221,7 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(LWEKE_HOME)/sha3 \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/code/experimental/sha3
+  $(HACL_HOME)/code/sha3
 
 # TODO: remove the last line of warning supressions when --cmi is fixed
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops

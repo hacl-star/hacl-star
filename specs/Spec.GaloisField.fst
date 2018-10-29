@@ -1,105 +1,51 @@
 module Spec.GaloisField
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.LoopCombinators
+open Lib.ByteSequence
+(* We represent GF(2^n) by uint_t along  with some  irreducible polynomial also of type uint_t *)
+(* Consequently this module is specialized for GF(8/16/32/64/128) but can be generalized to other sizes if needed *)
 
-open FStar.Seq
-open FStar.BitVector
+noeq type field = 
+  | GF: t:inttype{t <> U1} -> irred: uint_t t SEC -> field
 
+let gf t irred = GF t irred 
+type felem (f:field) = uint_t f.t SEC
+let to_felem (#f:field) (n:nat{n <= maxint f.t}) : felem f = uint #f.t #SEC n 
+let from_felem (#f:field) (e:felem f) : n:nat{n <= maxint f.t} = uint_v #f.t #SEC e 
 
-(* We represent GF(2^n) with irreducible polynomial x^n + p(x), deg(p) <= n-1
-   by GF n bv where bv is the big-endian bitvector for p(x)   *)
-type polynomial (degree:nat) = bv_t (degree + 1)
-type field' = | GF: bits:pos -> irred: polynomial (bits - 1) -> field'
-let field = field'
+let zero (#f:field) : felem f = to_felem 0
+let one (#f:field) : felem f = to_felem 1
 
-let numbits (f:field) = f.bits
-let mk_field bits irred = GF bits (UInt.to_vec #bits irred)
+let load_felem_be (#f:field) (b:lbytes (numbytes f.t)) : felem f = uint_from_bytes_be #f.t #SEC b
+let store_felem_be (#f:field) (e:felem f): lbytes (numbytes f.t) = uint_to_bytes_be #f.t #SEC e
 
-type felem (f:field) = bv_t f.bits
+let reverse (#t:inttype) (a:uint_t t SEC) : uint_t t SEC = 
+  repeati (bits t) (fun i u ->
+    u |. (((a >>. size i) &. uint #t #SEC 1) <<. (size (bits t - 1 - i)))) (uint #t #SEC 0)
 
-let to_felem #f u = UInt.to_vec #f.bits u
-let from_felem #f (e:felem f) = UInt.from_vec #f.bits e
-let zero #f : felem f = zero_vec #f.bits
-let one #f : felem f = elem_vec #f.bits 0
+let load_felem_le (#f:field) (b:lbytes (numbytes f.t)) : felem f = reverse #f.t (load_felem_be #f b)
+let store_felem_le (#f:field) (e:felem f) : lbytes (numbytes f.t) = store_felem_be #f (reverse #f.t e)
 
-let fadd (#f:field) (a:felem f) (b:felem f) : felem f = logxor_vec #f.bits a b
+let fadd (#f:field) (a:felem f) (b:felem f) : felem f = a ^. b
 let op_Plus_At #f e1 e2 = fadd #f e1 e2
 
-(* Properties *)
-
-let add_comm (#f:field) (a:felem f) (b:felem f) = lemma_eq_intro (a +@ b) (b +@ a)
-
-let add_asso (#f:field) (a:felem f) (b:felem f) (c:felem f) = lemma_eq_intro (a +@ b +@ c) (a +@ (b +@ c))
-
-let add_zero (#f:field) (a:felem f) = lemma_eq_intro (a +@ zero) a
-
-let shift_reduce (#f:field) (a:felem f) =
-    if (index a (f.bits-1) = true) then
-       fadd (shift_right_vec a 1) f.irred
-    else (shift_right_vec a 1)
-
-let cond_fadd (#f:field) (a:felem f) (b:felem f) (c:felem f) (n:nat{n < f.bits}) =
-    if (index b n = true) then fadd c a else c
-
-val cond_fadd_lemma: #f:field -> a:felem f -> b:felem f -> c:felem f -> d:felem f -> n:nat{n < f.bits} -> Lemma
-  (requires True)
-  (ensures cond_fadd a b c n `fadd` d = c `fadd` cond_fadd a b d n)
-let cond_fadd_lemma #f a b c d n =
-    if (index b n = true) then begin
-       add_comm #f d a;
-       add_asso #f c a d
-    end else ()
-
-
-let rec fmul_loop (#f:field) (a:felem f) (b:felem f) (n:nat{n<=f.bits})
-    : Tot (felem f) (decreases (f.bits - n)) =
-    if n = f.bits then zero #f
-    else
-       let n_1 : nat = n + 1 in
-       let fmul_n_1 = fmul_loop (shift_reduce #f a)
-       	   	      		b n_1 in
-       cond_fadd a b fmul_n_1 n
-
-let fmul (#f:field) (a:felem f) (b:felem f) = fmul_loop a b 0
-
+let fmul (#f:field) (a:felem f) (b:felem f) : felem f =
+  let one = one #f in
+  let zero = zero #f in
+  let (p,a,b) =
+    repeati (bits f.t - 1) (fun i (p,a,b) ->
+	   let b0 = eq_mask #f.t (b &. one) one in
+	   let p = p ^. (b0 &. a) in
+  	   let carry_mask = eq_mask #f.t (a >>. size (bits f.t - 1)) one  in
+	   let a = a <<. size 1 in
+	   let a = a ^. (carry_mask &. f.irred) in
+	   let b = b >>. size 1 in
+	   (p,a,b)) (zero,a,b) in
+  let b0 = eq_mask #f.t (b &. one) one in
+  let p = p ^. (b0 &. a) in
+  p
 let op_Star_At #f e1 e2 = fmul #f e1 e2
-
-val degree_: #f:field -> a:felem f -> i:nat{i < f.bits} -> Tot nat (decreases i)
-let rec degree_ (#f:field) (a:felem f) (i:nat{i < f.bits}) =
-  if i = 0 then 0
-  else if index a (f.bits - i - 1) then i
-  else degree_ #f a (i-1)
-
-let degree #f a = degree_ #f a (f.bits - 1)
-
-val finv_: #f:field -> s:felem f -> r:felem f -> v:felem f -> u:felem f -> Tot (felem f) (decreases (degree r + degree s))
-let rec finv_ (#f:field) (s:felem f) (r:felem f) (v:felem f) (u:felem f) =
-  let dr = degree r in
-  let ds = degree s in
-  if dr = 0 then u else
-  if ds >= dr then
-    let s' : felem f = fadd s (shift_left_vec r (ds - dr)) in
-    let v' : felem f = fadd v (shift_left_vec u (ds - dr)) in
-    finv_ #f s' r  v' u
-  else
-    let r' = s in
-    let s' = r in
-    let v' = u in
-    let u' = v in
-    let s' = fadd s' (shift_left_vec r' (dr - ds)) in
-    let v' = fadd v' (shift_left_vec u' (dr - ds)) in
-    finv_ #f s' r' v' u'
-
-let finv (#f:field) (irr: felem f) (a:felem f) =
-  if from_felem #f a = 0 then zero else
-  let r = a in
-  let s = irr in
-  let dr = degree r in
-  let ds = f.bits in
-  let v = zero in
-  let u = to_felem #f 1 in
-  if dr = 0 then u else
-    let s' = fadd s (shift_left_vec r (ds - dr)) in
-    let v' = fadd v (shift_left_vec u (ds - dr)) in
-    finv_ #f s' r  v' u
 
 val fexp: #f:field -> a:felem f -> n:nat{n >= 1} -> Tot (felem f) (decreases n)
 let rec fexp #f a x =
@@ -109,3 +55,7 @@ let rec fexp #f a x =
   let r' = fmul #f r r in
   if (x % 2) = 0  then r'
   else fmul #f a r'
+let op_Star_Star_At #f e1 e2 = fexp #f e1 e2
+
+let finv (#f:field) (a:felem f) : felem f = 
+  fexp #f a (maxint f.t - 1)

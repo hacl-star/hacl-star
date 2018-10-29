@@ -42,11 +42,11 @@ let max_input_len_sha256 = pow2 61
 let hLen = 32
 
 val hash_sha256:
-     #len:size_nat{len < max_input_len_sha256}
+    #len:size_nat{len < max_input_len_sha256}
   -> msg:lbytes len
   -> lbytes hLen
 let hash_sha256 #len msg =
-  Hash.hash256 len msg
+  Hash.hash256 msg
 
 (* Mask Generation Function *)
 (* max_size_t = pow2 32 - 1 *)

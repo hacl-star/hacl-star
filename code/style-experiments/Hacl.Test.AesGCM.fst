@@ -28,7 +28,10 @@ let main () =
   0x58uy; 0xe2uy; 0xfcuy; 0xceuy; 0xfauy; 0x7euy; 0x30uy; 0x61uy; 0x36uy; 0x7fuy; 0x1duy; 0x57uy; 0xa4uy; 0xe7uy; 0x45uy; 0x5auy
   ] in
   let comp0 = alloca 0uy 16ul in
-  Hacl.Impl.AesGCM.aes128_gcm_encrypt comp0 input0 (size 0) cip0 (size 0) key0 iv0;
+
+  let ctx = alloca Lib.Vec128.vec128_zero 22ul in
+  Hacl.Impl.AesGCM.aes128_gcm_init ctx key0 iv0;
+  Hacl.Impl.AesGCM.aes128_gcm_encrypt ctx comp0 input0 (size 0) cip0 (size 0);
   TestLib.compare_and_print (C.String.of_literal "AES-GCM NI encryption 0") cip0 comp0 16ul;
 
   let key1 = alloca_of_list
@@ -51,7 +54,10 @@ let main () =
 
   ] in
   let comp1 = alloca 0uy 76ul in
-  Hacl.Impl.AesGCM.aes128_gcm_encrypt comp1 input1 (size 60) aad1 (size 20) key1 iv1;
+  let ctx = alloca Lib.Vec128.vec128_zero 22ul in
+  Hacl.Impl.AesGCM.aes128_gcm_init ctx key1 iv1;
+  Hacl.Impl.AesGCM.aes128_gcm_encrypt ctx comp1 input1 (size 60) aad1 (size 20);
+//  Hacl.Impl.AesGCM.aes128_gcm_encrypt comp1 input1 (size 60) aad1 (size 20) key1 iv1;
   TestLib.compare_and_print (C.String.of_literal "AES-GCM NI encryption 1") cip1 comp1 76ul;
 
   pop_frame();

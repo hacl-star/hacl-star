@@ -50,16 +50,22 @@ inline_for_extraction
 let max_limb (a:alg) = maxint (limb_inttype a)
 
 inline_for_extraction
-let to_word (a:alg) (x:size_nat) : word_t a =
+let nat_to_word (a:alg) (x:size_nat) : word_t a =
   match (wt a) with
   | U32 -> u32 x
   | U64 -> u64 x
 
 inline_for_extraction
-let to_limb (a:alg) (x:nat{x <= max_limb a}) : limb_t a =
+let nat_to_limb (a:alg) (x:nat{x <= max_limb a}) : xl:limb_t a{uint_v xl == x} =
   match (wt a) with
   | U32 -> u64 x
   | U64 -> u128 x
+
+inline_for_extraction
+let word_to_limb (a:alg) (x:word_t a{uint_v x <= max_limb a}) : xl:limb_t a{uint_v xl == uint_v x} =
+  match (wt a) with
+  | U32 -> to_u64 x
+  | U64 -> to_u128 x
 
 inline_for_extraction
 let limb_to_word (a:alg) (x:limb_t a) : word_t a =
@@ -184,11 +190,11 @@ let blake2_mixing al wv a b c d x y =
   let rt = rTable al in
   let wv = g2 al wv a b x in
   let wv = g1 al wv d a rt.[0] in
-  let wv = g2 al wv c d (to_word al 0) in
+  let wv = g2 al wv c d (nat_to_word al 0) in
   let wv = g1 al wv b c rt.[1] in
   let wv = g2 al wv a b y in
   let wv = g1 al wv d a rt.[2] in
-  let wv = g2 al wv c d (to_word al 0) in
+  let wv = g2 al wv c d (nat_to_word al 0) in
   let wv = g1 al wv b c rt.[3] in
   wv
 
@@ -317,7 +323,7 @@ val blake2_compress:
   Tot (hash_ws a)
 
 let blake2_compress a s m offset flag =
-  let wv = create 16 (to_word a 0) in
+  let wv = create 16 (nat_to_word a 0) in
   let wv = blake2_compress1 a wv s m offset flag in
   let wv = blake2_compress2 a wv m in
   let s = blake2_compress3 a wv s in
@@ -333,7 +339,7 @@ val blake2_update_block:
 
 let blake2_update_block a prev d s =
   let to_compress : lseq (word_t a) 16 = uints_from_bytes_le #(wt a) #SEC d in
-  let offset = to_limb a prev in
+  let offset = nat_to_limb a prev in
   blake2_compress a s to_compress offset false
 
 
@@ -346,7 +352,7 @@ val blake2_init_hash:
 let blake2_init_hash a kk nn =
   let s = map secret (ivTable a) in
   let s0 = s.[0] in
-  let s0' = s0 ^. (to_word a 0x01010000) ^. ((to_word a kk) <<. (size 8)) ^. (to_word a nn) in
+  let s0' = s0 ^. (nat_to_word a 0x01010000) ^. ((nat_to_word a kk) <<. (size 8)) ^. (nat_to_word a nn) in
   s.[0] <- s0'
 
 val blake2_init:
@@ -377,7 +383,7 @@ let blake2_update_last a prev len last s =
   let last_block = create (size_block a) (u8 0) in
   let last_block = update_sub last_block 0 len last in
   let last_uint32s = uints_from_bytes_le last_block in
-  blake2_compress a s last_uint32s (to_limb a prev) true
+  blake2_compress a s last_uint32s (nat_to_limb a prev) true
 
 
 val blake2_update:
@@ -387,12 +393,25 @@ val blake2_update:
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)} ->
   Tot (hash_ws a)
 
+let spec_update_block 
+    (a:alg) 
+    (init:nat) 
+    (i:nat{init + (i * size_block a) <= max_limb a}) =
+    blake2_update_block a (init + (i * size_block a))
+
+let spec_update_last 
+    (a:alg) 
+    (len:nat{len <= max_limb a})
+    (i:nat) =
+    blake2_update_last a len 
+    
 let blake2_update a s d kk =
   let ll = length d in
   let klen = if kk = 0 then 0 else 1 in
-  repeati_blocks (size_block a) d
-    (fun i -> blake2_update_block a ((klen + i + 1) * (size_block a)))
-    (fun i -> blake2_update_last  a (klen * (size_block a) + ll)) s
+  repeati_blocks (size_block a) d 
+    (spec_update_block a ((klen + 1) * size_block a))
+    (spec_update_last a (klen * (size_block a) + ll))
+    s
 
 
 val blake2_finish:

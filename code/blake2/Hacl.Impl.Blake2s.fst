@@ -22,8 +22,8 @@ type block_p = lbuffer uint8 (Spec.size_block Spec.Blake2S)
 type hash_wp = lbuffer uint32 Spec.size_hash_w
 type index_t = n:size_t{size_v n < 16}
 
-inline_for_extraction let size_word : size_t = 4ul
-inline_for_extraction let size_block x : size_t = (size Spec.size_block_w) *. size_word
+inline_for_extraction let size_word : size_t = size 4
+inline_for_extraction let size_block x : n:size_t{v n > 0 /\ v n == Spec.size_block Spec.Blake2.Blake2S} = (size Spec.size_block_w) *. size_word
 
 
 /// Constants
@@ -48,6 +48,9 @@ let get_iv s =
   secret r
 
 
+
+#set-options "--z3rlimit 50"
+[@ Substitute ]
 val set_iv:
   hash:hash_wp ->
   Stack unit
@@ -57,8 +60,8 @@ val set_iv:
 [@ Substitute ]
 let set_iv hash =
   recall_contents const_iv (Spec.ivTable Spec.Blake2S);
-  admit(); // BB. we need Lib.Buffer.map to apply `secret`
-  icopy hash (size (Spec.size_hash_w)) const_iv
+  let h0 = ST.get() in
+  imapT hash (size (Spec.size_hash_w)) secret const_iv
 
 
 #set-options "--z3rlimit 15"
@@ -108,11 +111,7 @@ val get_sigma_sub:
     (ensures  (fun h0 z h1 -> h0 == h1 /\ v z == v (Seq.index Spec.const_sigma (v start + v i))))
 
 [@ Substitute ]
-let get_sigma_sub start i =
-  assert(v start + v i < 160);
-  assert(v (start +. i) < 160);
-  let x : size_t = start +. i in
-  get_sigma x
+let get_sigma_sub start i = get_sigma (start +. i)
 
 
 #reset-options
@@ -188,8 +187,6 @@ val blake2_round1 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
 [@ Substitute ]
 let blake2_round1 wv m i =
   let start_idx = (i %. (size 10)) *. (size 16) in
-  assert(v start_idx == ((v i) % 10) * 16);
-  assert((v start_idx) + 16 <= 160);
   let s0 = get_sigma_sub start_idx (size 0) in
   let s1 = get_sigma_sub start_idx (size 1) in
   let s2 = get_sigma_sub start_idx (size 2) in
@@ -216,8 +213,6 @@ val blake2_round2 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
 [@ Substitute ]
 let blake2_round2 wv m i =
   let start_idx = (i %. (size 10)) *. (size 16) in
-  assert(v start_idx == ((v i) % 10) * 16);
-  assert((v start_idx) + 16 <= 160);
   let s8 = get_sigma_sub start_idx (size 8) in
   let s9 = get_sigma_sub start_idx (size 9) in
   let s10 = get_sigma_sub start_idx (size 10) in
@@ -268,8 +263,7 @@ let blake2_compress1 wv s m offset flag =
   let high_offset = Spec.limb_to_word Spec.Blake2S (offset >>. size 32) in
   let wv_12 = logxor wv.(size 12) low_offset in
   let wv_13 = logxor wv.(size 13) high_offset in
-  let wv_14 = logxor wv.(size 14) (u32 0xFFFFFFFF) in
-  assume((ones (Spec.wt Spec.Blake2S) SEC) == u32 0xFFFFFFFF);
+  let wv_14 = logxor wv.(size 14) (ones (Spec.wt Spec.Blake2S) SEC) in
   wv.(size 12) <- wv_12;
   wv.(size 13) <- wv_13;
  (if flag then wv.(size 14) <- wv_14)
@@ -278,7 +272,8 @@ let blake2_compress1 wv s m offset flag =
 #reset-options "--z3rlimit 25"
 
 val blake2_compress2 :
-  wv:vector_wp -> m:block_wp ->
+    wv:vector_wp
+  -> m:block_wp ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
@@ -298,7 +293,9 @@ let blake2_compress2 wv m =
 #reset-options "--z3rlimit 15"
 
 val blake2_compress3_inner :
-  wv:vector_wp -> i:size_t{size_v i < 8} -> s:hash_wp ->
+    wv:vector_wp
+  -> i:size_t{size_v i < 8}
+  -> s:hash_wp ->
   Stack unit
     (requires (fun h -> live h s /\ live h wv
                    /\ disjoint s wv /\ disjoint wv s))
@@ -316,7 +313,8 @@ let blake2_compress3_inner wv i s =
 #reset-options "--z3rlimit 25"
 
 val blake2_compress3 :
-  wv:vector_wp -> s:hash_wp ->
+    wv:vector_wp
+  -> s:hash_wp ->
   Stack unit
     (requires (fun h -> live h s /\ live h wv
                      /\ disjoint wv s /\ disjoint s wv))
@@ -363,22 +361,21 @@ let blake2_compress s m offset flag =
 
 val blake2s_update_block:
     hash:hash_wp
-  -> prev:size_t{size_v prev <= Spec.max_limb Spec.Blake2S}
+  -> prev:uint64
   -> d:block_p ->
   Stack unit
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                         /\ h1.[hash] == Spec.blake2_update_block Spec.Blake2S (v prev) h0.[d] h0.[hash]))
+                         /\ h1.[hash] == Spec.blake2_update_block Spec.Blake2S (uint_v prev) h0.[d] h0.[hash]))
 
 let blake2s_update_block hash prev d =
   let h0 = ST.get () in
   [@inline_let]
-  let spec _ h1 = h1.[hash] == Spec.blake2_update_block Spec.Blake2S (v prev) h0.[d] h0.[hash] in
+  let spec _ h1 = h1.[hash] == Spec.blake2_update_block Spec.Blake2S (uint_v prev) h0.[d] h0.[hash] in
   salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash)) spec
   (fun block_w ->
      uints_from_bytes_le block_w (size Spec.size_block_w) d;
-     let offset = to_u64 prev in
-     assume(offset == (Spec.to_limb Spec.Blake2S (v prev)));
+     let offset = prev in
      blake2_compress hash block_w offset false)
 
 
@@ -421,12 +418,11 @@ val blake2s_init_branching:
 [@ Substitute ]
 let blake2s_init_branching #vkk hash key_block k kk nn =
   let h0 = ST.get () in
-  if kk =. (size 0) then
-    let h1 = ST.get () in
-    assume(modifies0 h0 h1 ==> modifies2 hash key_block h0 h1)
-  else begin
+  if kk <>. (size 0) then
+  begin
     update_sub key_block (size 0) kk k;
-    blake2s_update_block hash (size_block Spec.Blake2S) key_block
+    let prev = Spec.word_to_limb Spec.Blake2S (secret (size_block Spec.Blake2S)) in
+    blake2s_update_block hash prev key_block
   end
 
 
@@ -449,7 +445,7 @@ val blake2s_init:
 let blake2s_init #vkk hash k kk nn =
   let h0 = ST.get () in
   salloc1_trivial h0 (size 64) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
-  (fun _ h1 -> h1.[hash] == Spec.blake2_init Spec.Blake2S (v kk) h0.[k] (v nn))
+  (fun _ h1 -> h1.[hash] == Spec.blake2_init Spec.Blake2S (size_v kk) h0.[k] (v nn))
   (fun key_block ->
     blake2s_init_hash hash kk nn;
     blake2s_init_branching #vkk hash key_block k kk nn)
@@ -460,13 +456,13 @@ let blake2s_init #vkk hash k kk nn =
 val blake2s_update_last:
     #vlen: size_t
   -> hash: hash_wp
-  -> prev: size_t{v prev <= Spec.max_limb Spec.Blake2S}
+  -> prev: uint64
   -> last: lbuffer uint8 (v vlen)
   -> len: size_t{v len <= Spec.size_block Spec.Blake2S /\ len == vlen} ->
   Stack unit
     (requires (fun h -> live h hash /\ live h last /\ disjoint hash last))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                         /\ h1.[hash] == Spec.Blake2.blake2_update_last Spec.Blake2S (v prev) (v len) h0.[last] h0.[hash]))
+                         /\ h1.[hash] == Spec.Blake2.blake2_update_last Spec.Blake2S (uint_v prev) (v len) h0.[last] h0.[hash]))
 
 let blake2s_update_last #vlen hash prev last len =
   push_frame ();
@@ -474,8 +470,7 @@ let blake2s_update_last #vlen hash prev last len =
   let last_block_w = create #uint32 16ul (u32 0) in
   update_sub last_block (size 0) len last;
   uints_from_bytes_le last_block_w (size 16) last_block;
-  let offset = to_u64 prev in
-  assume(offset == (Spec.to_limb Spec.Blake2S (v prev)));
+  let offset = prev in
   blake2_compress hash last_block_w offset true;
   pop_frame ()
 
@@ -503,8 +498,39 @@ let blake2s_finish #vnn output hash nn =
     copy output nn final)
 
 
-#reset-options
+#reset-options "--z3rlimit 50"
 
+noextract inline_for_extraction
+let spec_prev1 (klen:size_nat{klen == 0 \/ klen == 1})
+	      (dlen:size_nat{if klen = 0 then dlen < pow2 64 else dlen + 64 < pow2 64})
+	      (i:size_nat{i < dlen/64}) : r:nat{r < pow2 64} = (klen + i + 1) * 64
+
+noextract inline_for_extraction
+let spec_prev2 (klen:size_nat{klen == 0 \/ klen == 1})
+	      (dlen:size_nat{if klen = 0 then dlen < pow2 64 else dlen + 64 < pow2 64})
+	      (i:size_nat{i == dlen/64}) : r:nat{r < pow2 64} = (klen * 64) + dlen
+
+
+noextract inline_for_extraction
+let prev1 (klen:size_t{v klen == 0 \/ v klen == 1})
+          (dlen:size_t{if v klen = 0 then v dlen < pow2 64 else v dlen + 64 < pow2 64})
+	  (i:size_t{v i < v dlen/64}) :
+	  (prev:uint64{uint_v prev == spec_prev1 (v klen) (v dlen) (v i)})
+	  = let p = to_u64 (klen +. i +. size 1) *. u64 64 in
+	    assert (uint_v p == spec_prev1 (v klen) (v dlen) (v i));
+	    p
+
+noextract inline_for_extraction
+let prev2 (klen:size_t{v klen == 0 \/ v klen == 1})
+          (dlen:size_t{if v klen = 0 then v dlen < pow2 64 else v dlen + 64 < pow2 64})
+	  (i:size_t{v i == v dlen/64}) :
+	  (prev:uint64{uint_v prev == spec_prev2 (v klen) (v dlen) (v i)})
+	  = to_u64 dlen +. to_u64 (klen *. size 64)
+
+
+#reset-options "--z3rlimit 150"
+
+inline_for_extraction
 val blake2s_update:
     #vll: size_t
   -> hash: hash_wp
@@ -517,13 +543,14 @@ val blake2s_update:
                          /\ h1.[hash] == Spec.blake2_update Spec.Blake2S h0.[hash] h0.[d] (v kk)))
 
 let blake2s_update #vll hash d ll kk =
-  let klen = if kk = size 0 then size 0 else size 1 in
-  admit();
+  let h0 = ST.get() in
+  let klen = if kk =. size 0 then size 0 else size 1 in
   loopi_blocks (size_block Spec.Blake2S) ll d
-    (fun i -> Spec.blake2_update_block Spec.Blake2S (((v klen) + i + 1) * (Spec.size_block Spec.Blake2S)))
-    (fun i -> Spec.blake2_update_last Spec.Blake2S ((v klen) * (Spec.size_block Spec.Blake2S) + (v ll)))
-    (fun i block hash -> blake2s_update_block hash ((klen +. i +. 1) *. (size 64)) block)
-    (fun i rem last hash -> blake2s_update_last hash (klen *. (size 64) +. ll) last rem) hash
+    (Spec.spec_update_block Spec.Blake2S ((v klen + 1) * (Spec.size_block Spec.Blake2S)))
+    (Spec.spec_update_last Spec.Blake2S (v klen * (Spec.size_block Spec.Blake2S) + v ll))
+    (fun i block hash -> blake2s_update_block hash (prev1 klen ll i) block)
+    (fun i len last hash -> blake2s_update_last #(ll %. size (Spec.size_block Spec.Blake2S)) hash (prev2 klen ll i) last len)
+    hash
 
 
 #reset-options "--z3rlimit 25"
