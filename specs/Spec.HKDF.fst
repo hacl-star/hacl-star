@@ -47,41 +47,28 @@ val hkdf_round:
   -> prk: bytes{length prk <= Hash.max_input a}
   -> info: bytes{length info + Hash.size_hash a + 1 <= max_size_t (* BB. FIXME, this is required by create *)
               /\ length prk + length info + 1 + Hash.size_hash a + Hash.size_block a <= Hash.max_input a}
-  -> i:nat{1 <= i /\ i <= 255}
+  -> i:nat{1 < i /\ i <= 255}
   -> ti:lbytes (Hash.size_hash a) ->
   Tot (lbytes (Hash.size_hash a))
 
 let hkdf_round a prk info i ti =
   let ilen = length info in
-  let input =
-    if i = 1 then begin
-      let ilen = length info in
-      let input = create (ilen + 1) (u8 0) in
-      let input = update_sub input 0 ilen info in
-      input.[ilen] <- u8 1 end
-    else begin
-      let input = create (Hash.size_hash a + ilen + 1) (u8 0) in
-      let input = update_sub input 0 (Hash.size_hash a) ti in
-      let input = update_sub input (Hash.size_hash a) ilen info in
-      input.[(Hash.size_hash a) + ilen] <- u8 i end
-  in
+  let input = create (Hash.size_hash a + ilen + 1) (u8 0) in
+  let input = update_sub input 0 (Hash.size_hash a) ti in
+  let input = update_sub input (Hash.size_hash a) ilen info in
+  let input = input.[(Hash.size_hash a) + ilen] <- u8 i in
   HMAC.hmac a prk input
-
-
-(* val hkdf_expand: *)
-(*     a:Hash.algorithm *)
-(*   -> prk:bytes{length prk <= Hash.max_input a} *)
-(*   -> info: bytes{length info + Hash.size_hash a + 1 <= max_size_t (\* BB. FIXME, this is required by create *\) *)
-(*               /\ length prk + length info + 1 + Hash.size_hash a + Hash.size_block a <= Hash.max_input a} *)
-(*   -> len:size_nat{len <= 255 * Hash.size_hash a} -> *)
-(*   Tot (lbytes len) *)
 
 
 let hkdf_expand a prk info len =
   let n : size_nat = len / (Hash.size_hash a) + 1 in
-  let t = create #uint8 ((n + 1) * Hash.size_hash a) (u8 0) in
+  let t = create #uint8 (n * Hash.size_hash a) (u8 0) in
+  (* Compute T(0) *)
+  let t0 = hkdf_round0 a prk info in
+  let t = update_sub t 0 (Hash.size_hash a) t0 in
+  (* Compute T(1) ... T(N)*)
   let t =
-    repeat_range 1 (n + 1)
+    repeat_range 2 (n + 1)
       (fun i t ->
         let ti = sub t ((i - 2) * Hash.size_hash a) (Hash.size_hash a) in
         let r = hkdf_round a prk info i ti in

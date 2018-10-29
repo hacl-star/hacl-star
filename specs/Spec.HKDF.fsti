@@ -22,5 +22,5 @@ val hkdf_expand:
   -> prk:bytes{length prk <= Hash.max_input a}
   -> info: bytes{length info + Hash.size_hash a + 1 <= max_size_t (* BB. FIXME, this is required by create *)
               /\ length prk + length info + 1 + Hash.size_hash a + Hash.size_block a <= Hash.max_input a}
-  -> len:size_nat{len <= 255 * Hash.size_hash a} ->
+  -> len:size_nat{len < 255 * Hash.size_hash a} ->
   Tot (lbytes len)
