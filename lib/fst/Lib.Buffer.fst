@@ -143,6 +143,12 @@ let salloc1 #a #res h len x footprint spec spec_inv impl =
   spec_inv h2 h3 h5 r;
   r
 
+let salloc_nospec #a #res h len x footprint impl =
+  (* BB. `a` is a random type because it is unused, is there a better solution ? *)
+  let spec (z:res) (h0:mem) = a in
+  let spec_inv (#res:Type) (h1 h2 h3:mem) (r:res) = () in
+  salloc1 #a #res h len x footprint spec spec_inv impl
+
 inline_for_extraction noextract
 val loopi_blocks_f:
     #a:Type0
@@ -238,13 +244,12 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   l rem last w
 
 
-let mapT #a #b #len o clen f inp = 
+let mapT #a #b #len o clen f inp =
   let h0 = ST.get () in
   loop_nospec #h0 clen o (fun i -> o.(i) <- f inp.(i));
   admit()
 
-let imapT #a #b #len o clen f inp = 
+let imapT #a #b #len o clen f inp =
   let h0 = ST.get () in
   loop_nospec #h0 clen o (fun i -> o.(i) <- f (iindex inp i));
   admit()
-
