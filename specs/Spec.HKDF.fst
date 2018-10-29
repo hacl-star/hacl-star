@@ -76,3 +76,26 @@ let hkdf_expand a prk info len =
       ) t in
   let res = sub t 0 len in
   res
+
+
+let hkdf_build_label secret label context len =
+  let llen = length label in
+  let clen = length context in
+  let size_hkdf_label : size_nat = numbytes U16 + numbytes U8 + llen + numbytes U8 + clen in
+  let hkdf_label = create size_hkdf_label (u8 0) in
+  let hkdf_label = update_sub hkdf_label 0 (numbytes U16) (uint_to_bytes_be (u16 len)) in
+  let hkdf_label = update_sub hkdf_label (numbytes U16) (numbytes U8) (uint_to_bytes_be #U8 (u8 llen)) in
+  let hkdf_label = update_sub hkdf_label (numbytes U16 + numbytes U8) llen label in
+  let hkdf_label = update_sub hkdf_label (numbytes U16 + numbytes U8 + llen) (numbytes U8) (uint_to_bytes_be #U8 (u8 clen)) in
+  let hkdf_label = update_sub hkdf_label (numbytes U16 + numbytes U8 + llen + numbytes U8) clen context in
+  hkdf_label
+
+
+let hkdf_expand_label a secret label context len =
+  let hkdf_label = hkdf_build_label secret label context len in
+  hkdf_expand a secret hkdf_label len
+
+
+let hkdf_expand_derive_secret a secret label context =
+  let loghash = Hash.hash a context in
+  hkdf_expand_label a secret label loghash (Hash.size_hash a)
