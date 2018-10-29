@@ -144,3 +144,11 @@ val repeati_inductive:
  -> f:repeatable #a #n pred
  -> x0:a{pred 0 x0}
  -> res:a{pred n res}
+
+val repeati_inductive_repeat_gen:
+   #a:Type
+ -> n:nat
+ -> pred:(i:nat{i <= n} -> a -> Type)
+ -> f:repeatable #a #n pred
+ -> x0:a{pred 0 x0}
+ -> Lemma (repeati_inductive n pred f x0 == repeat_gen n (fun i -> x:a{pred i x}) f x0)
