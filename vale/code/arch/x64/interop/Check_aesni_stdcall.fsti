@@ -22,6 +22,7 @@ let full_post_cond (h:HS.mem) (h':HS.mem) (ret_val:UInt64.t) =
   post_cond h h' ret_val /\
   M.modifies (M.loc_none) h h'
 
+[@ (CCConv "stdcall") ]
 val check_aesni_stdcall (u:unit) : Stack UInt64.t
 	(requires (fun h -> pre_cond h ))
 	(ensures (fun h0 ret_val h1 -> full_post_cond h0 h1 ret_val))

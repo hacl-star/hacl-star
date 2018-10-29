@@ -343,7 +343,6 @@ verify_options = [
   ('code/arch/x64/X64.Leakage_Ins.fsti', None),
   ('code/arch/x64/X64.Leakage_Ins.fst', None),
   ('code/arch/x64/X64.Leakage.fst', None),
-  ('code/arch/x64/interop/Sha_update_bytes_stdcall.fst', None),
   ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,

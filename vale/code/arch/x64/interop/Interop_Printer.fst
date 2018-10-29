@@ -451,12 +451,13 @@ let translate_lowstar target (func:func_ty) =
   "module " ^ name ^
   "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Types_s\n\n" ^
   "// TODO: Complete with your pre- and post-conditions\n" ^
-  "let pre_cond (h:HS.mem) " ^ (print_args_list args) ^ "= " ^ (liveness "h" args) ^ separator1 ^ (disjoint args) ^ (print_lengths args) ^ "\n\n" ^
+  "unfold\n"^
+  "let pre_cond (h:HS.mem) " ^ (print_args_list args) ^ "= " ^ (liveness "h" args) ^ separator1 ^ (disjoint args) ^ (print_lengths args) ^ "\n\nunfold\n" ^
   (if return then
   "let post_cond (h:HS.mem) (h':HS.mem) (ret_val:UInt64.t) " ^ (print_args_list args) ^ "= "
   else
   "let post_cond (h:HS.mem) (h':HS.mem) " ^ (print_args_list args) ^ "= ") 
-    ^ (liveness "h" args) ^ " /\\ " ^ (liveness "h'" args) ^ separator0 ^ (print_lengths args) ^ "\n\n" ^
+    ^ (liveness "h" args) ^ " /\\ " ^ (liveness "h'" args) ^ separator0 ^ (print_lengths args) ^ "\n\nunfold\n" ^
   (if return then
   "let full_post_cond (h:HS.mem) (h':HS.mem) (ret_val:UInt64.t) " ^ (print_args_list args) ^ " =\n"
   else
@@ -466,6 +467,7 @@ let translate_lowstar target (func:func_ty) =
   else
   "  post_cond h h' " ^ (print_args_names args) ^ " /\\\n") ^
   "  M.modifies (" ^ (print_modifies modified) ^ ") h h'\n\n" ^
+  "[@ (CCConv \"stdcall\") ]\n" ^
   "val " ^ name ^ ": " ^ (print_low_args return args) ^
   "\n\t(requires (fun h -> pre_cond h " ^ (print_args_names args) ^ "))\n\t" ^
   (if return then
