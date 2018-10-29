@@ -16,6 +16,8 @@ unfold let pow2_384 = 0x10000000000000000000000000000000000000000000000000000000
 let _ = assert_norm (pow2 384 = pow2_384)
 unfold let pow2_448 = 0x10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 let _ = assert_norm (pow2 448 = pow2_448)
+unfold let pow2_512 = 0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+let _ = assert_norm (pow2 512 = pow2_512)
 
 let int_canon = fun _ -> canon_semiring int_cr //; dump "Final"
 
@@ -29,6 +31,9 @@ let pow2_four (c0 c1 c2 c3:nat) : nat = pow2_three c0 c1 c2 + pow2_192 * c3
 let pow2_five (c0 c1 c2 c3 c4:nat) : nat = pow2_four c0 c1 c2 c3 + pow2_256 * c4
 let pow2_six (c0 c1 c2 c3 c4 c5:nat) : nat = pow2_five c0 c1 c2 c3 c4 + pow2_320 * c5
 let pow2_seven (c0 c1 c2 c3 c4 c5 c6:nat) : nat = pow2_six c0 c1 c2 c3 c4 c5 + pow2_384 * c6
+let pow2_eight (c0 c1 c2 c3 c4 c5 c6 c7:nat) : nat = pow2_seven c0 c1 c2 c3 c4 c5 c6 + pow2_448 * c7
+let pow2_nine (c0 c1 c2 c3 c4 c5 c6 c7 c8:nat) : nat = pow2_eight c0 c1 c2 c3 c4 c5 c6 c7 + pow2_512 * c8
+
 
 let simple_helper2 (a0 b0 b1 a0b0_lo a0b0_hi a0b1_lo a0b1_hi sum:nat64) (overflow:bool) : Lemma
   (requires pow2_two a0b0_lo a0b0_hi = a0 * b0 /\
@@ -110,7 +115,9 @@ let lemma_mul_bound64 (x y:nat64) : Lemma (x * y < pow2_128 - 1 /\ x * y <= pow2
 
 let lemma_overflow_is_zero (dst_hi dst_lo x y:nat64) : Lemma
   (requires pow2_64 * dst_hi + dst_lo == x * y)
-  (ensures  dst_hi < pow2_64 - 1)
+  (ensures  dst_hi < pow2_64 - 1 /\
+            (dst_hi < pow2_64 - 2 \/ dst_lo <= 1)
+  )
   =
   let result = x * y in
   lemma_div_mod result pow2_64;
@@ -120,7 +127,33 @@ let lemma_overflow_is_zero (dst_hi dst_lo x y:nat64) : Lemma
   lemma_mul_bound64 x y;
   ()
 
+let lemma_prod_sum_bound (w x y z:nat64) : Lemma
+    (requires true)
+    (ensures w * x + y + z < pow2_128)
+    =
+    lemma_mul_bound64 w x;
+    ()
 
+type bit = b:nat { b <= 1 }
+
+let bool_bit (b:bool) : bit = if b then 1 else 0
+
+open Arch.Types
+let add_carry (x y:nat64) (c:bit) : nat64 & (c':nat{c = 0 || c = 1})
+  =
+  add_wrap64 (add_wrap64 x y) c,
+  (if x + y + c >= pow2_64 then 1 else 0)
+
+let lemma_no_carry (rdx r14 r13 rax:nat64) (o_old c_old:bit) : Lemma
+    (requires (rdx < pow2_64 - 2 \/ r14 <= 1) /\
+              r13 < pow2_64 - 1 /\
+              rax <= pow2_64 - 1
+    )
+    (ensures (let s0, o_new = add_carry r14 r13 o_old in
+              let s1, c_new = add_carry r14 rax c_old in
+              rdx < pow2_64 \/ c_new = 0 \/ o_new = 0))
+  =
+  ()
 
 let lemma_offset_sum (a_agg:nat) (a0 a1 a2 a3 a4:nat64)
                       (b_agg:nat) (b0 b1 b2 b3 b4:nat64) : Lemma
@@ -134,11 +167,6 @@ let lemma_offset_sum (a_agg:nat) (a0 a1 a2 a3 a4:nat64)
   assert_by_tactic (lhs == rhs) int_canon;
   ()
 
-open Arch.Types
-let add_carry (x y:nat64) (c:nat{c = 0 || c = 1}) : nat64 & (c':nat{c = 0 || c = 1})
-  =
-  add_wrap64 (add_wrap64 x y) c,
-  (if x + y + c >= pow2_64 then 1 else 0)
 
 #push-options "--z3rlimit 60"
 let lemma_partial_sum (
@@ -160,9 +188,29 @@ let lemma_partial_sum (
            pow2_seven a0 s1 s2 s3 s4 s5 c)
   =
   ()
+
+let lemma_partial_sum_a2b (
+      a0 a1 a2 a3 a4 a5
+      b0 b1 b2 b3 b4
+      s1 s2 s3 s4 s5:nat64) : Lemma
+  (requires(let s1', c1 = add_carry a2 b0 0 in
+            let s2', c2 = add_carry a3 b1 c1 in
+            let s3', c3 = add_carry a4 b2 c2 in
+            let s4', c4 = add_carry a5 b3 c3 in
+            let s5', c5 = add_carry 0 b4 c4 in
+            s1 == s1' /\
+            s2 == s2' /\
+            s3 == s3' /\
+            s4 == s4' /\
+            s5 == s5' /\
+            0 == c5))
+  (ensures pow2_seven a0 a1 (a2 + b0) (a3 + b1) (a4 + b2) (a5 + b3) b4 =          
+           pow2_seven a0 a1 s1 s2 s3 s4 s5)
+  =
+  ()
 #pop-options
 
-let lemma_sum
+let lemma_sum_a1b
       (a0 a1:nat64)
       (a0b:nat) (a0b_0 a0b_1 a0b_2 a0b_3 a0b_4:nat64)
       (a1b:nat) (a1b_0 a1b_1 a1b_2 a1b_3 a1b_4:nat64)
@@ -203,3 +251,47 @@ let lemma_sum
                     a1b_0 a1b_1 a1b_2 a1b_3 a1b_4
                     s1 s2 s3 s4 s5 c;
   ()
+
+#push-options "--z3rlimit 60"
+let lemma_sum_a2b
+      (a0 a1 a2:nat64)
+      (a0a1b:nat) (a0a1b_0 a0a1b_1 a0a1b_2 a0a1b_3 a0a1b_4 a0a1b_5:nat64)
+      (a2b:nat) (a2b_0 a2b_1 a2b_2 a2b_3 a2b_4:nat64)
+      (b:nat)   (b0 b1 b2 b3:nat64)
+      (s1 s2 s3 s4 s5:nat64) : Lemma
+  (requires a0a1b = pow2_six a0a1b_0 a0a1b_1 a0a1b_2 a0a1b_3 a0a1b_4 a0a1b_5  /\
+            a2b = pow2_five a2b_0 a2b_1 a2b_2 a2b_3 a2b_4 /\
+            b = pow2_four b0 b1 b2 b3 /\
+            a0a1b = mul_nats (pow2_two a0 a1) b /\
+            a2b = mul_nats a2 b /\
+           (let s1', c1 = add_carry a0a1b_2 a2b_0 0 in
+            let s2', c2 = add_carry a0a1b_3 a2b_1 c1 in
+            let s3', c3 = add_carry a0a1b_4 a2b_2 c2 in
+            let s4', c4 = add_carry a0a1b_5 a2b_3 c3 in
+            let s5', c5 = add_carry 0 a2b_4 c4 in
+            s1 == s1' /\
+            s2 == s2' /\
+            s3 == s3' /\
+            s4 == s4' /\
+            s5 == s5' /\
+            c5 == 0))
+  (ensures (pow2_three a0 a1 a2) * b ==
+           pow2_seven a0a1b_0 a0a1b_1 s1 s2 s3 s4 s5)
+  =
+  
+  assert_by_tactic (
+    (pow2_three a0 a1 a2) * b == 
+    mul_nats (pow2_two a0 a1) b + pow2_128 * (mul_nats a2 b)) int_canon;
+  assert (
+    mul_nats (pow2_two a0 a1) b + pow2_128 * (mul_nats a2 b) ==
+    a0a1b + pow2_128 * a2b);
+  assert_by_tactic (
+    a0a1b + pow2_128 * a2b ==
+    pow2_seven a0a1b_0 a0a1b_1 (a0a1b_2 + a2b_0) (a0a1b_3 + a2b_1) (a0a1b_4 + a2b_2) (a0a1b_5 + a2b_3) a2b_4) int_canon;
+  lemma_partial_sum_a2b
+        a0a1b_0 a0a1b_1 a0a1b_2 a0a1b_3 a0a1b_4 a0a1b_5
+        a2b_0 a2b_1 a2b_2 a2b_3 a2b_4
+        s1 s2 s3 s4 s5;
+  admit();
+  ()
+#pop-options
