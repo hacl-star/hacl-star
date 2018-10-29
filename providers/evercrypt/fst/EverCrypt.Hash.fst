@@ -117,9 +117,6 @@ assume val such_a_bad_hack: #a:Type -> b:IB.ibuffer a ->
       B.length b = B.length b' /\
       B.modifies B.loc_none h0 h1))
 
-[@ (CPrologue "#define EverCrypt_Hash_such_a_bad_hack(X) (X)") ]
-let _ = ()
-
 // A new switch between HACL and Vale; can be used in place of Hacl.Hash.SHA2.update_256
 inline_for_extraction noextract
 val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256

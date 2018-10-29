@@ -20,8 +20,11 @@ open FStar.Seq
 
 let extract a salt ikm = EverCrypt.HMAC.hmac a salt ikm
 
+noextract
 let tagLength = Spec.Hash.Helpers.size_hash
+noextract
 let blockLength = Spec.Hash.Helpers.size_block
+noextract
 let maxLength = Spec.Hash.Helpers.max_input8
 
 // [a, prk, info] are fixed.

@@ -86,9 +86,11 @@ let size_word: hash_alg -> Tot nat = function
   | SHA2_384 | SHA2_512 -> 8
 
 (* Number of words for a block size *)
+noextract
 let size_block_w = 16
 
 (* Define the size block in bytes *)
+noextract
 let size_block a =
   let open FStar.Mul in
   size_word a * size_block_w
@@ -115,6 +117,7 @@ let size_hash_final_w: hash_alg -> Tot nat = function
   | SHA2_512 -> 8
 
 (* Define the final hash length in bytes *)
+noextract
 let size_hash a =
   let open FStar.Mul in
   size_word a * size_hash_final_w a

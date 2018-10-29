@@ -19,12 +19,21 @@ else ifeq ($(OS),Windows_NT)
   SO		= dll
 endif
 
+VALE_FSTI_HACK	= $(HACL_HOME)/vale/code/arch/x64/interop/fsti
+
 # Manual staging...
-all:
+all: $(VALE_FSTI_HACK)
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
 	$(MAKE) -C quic_provider
+
+$(VALE_FSTI_HACK): $(VALE_OBJ_DIR)
+	mkdir -p $@
+	ln -s $@/../*.fsti $@/
+
+$(VALE_OBJ_DIR):
+	echo "Please run scons in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
 
 stage1: $(GENERATED_DIR)/Makefile.include $(INCLUDE_DIR)/EverCrypt.h
 
@@ -84,27 +93,37 @@ KOPTS		+=-falloca -ftail-calls
 endif
 
 VALE_BUNDLES=$(addprefix -bundle , 'X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
-  'Collections.*' 'SHA_helpers' Collections Types_s Words_s Views AES_s \
+  'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
   Workarounds 'Math.*' Interop TypesNative_s)
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
+	  -warn-error '-6' \
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  $(VALE_BUNDLES) \
 	  -bundle 'Prims' \
 	  -bundle 'FStar.*' \
 	  -bundle 'C,C.*' \
-	  -bundle 'Hacl.*' \
+	  -bundle 'Hacl.Hash.*' \
+	  -bundle 'Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Lib.LoadStore32' \
+	  -bundle 'Hacl.Standalone.Poly1305_64=Hacl.Impl.Poly1305_64,Hacl.Impl.Poly1305_64.State,Hacl.Bignum.*' \
+	  -bundle 'Hacl.Chacha20Poly1305=Hacl.Policies' \
 	  -bundle 'EverCrypt.Spec.*' \
-	  -drop 'Spec.*' \
-	  -drop 'Hacl.Spec.*' \
-	  -drop 'Hacl.Spe.*' \
-	  -drop 'EverCrypt.Spec' \
-	  -drop Seq.Create \
+	  -bundle 'Flag' \
+	  -bundle 'Spec.*' \
+	  -bundle 'Hacl.Spec.*,Hacl.Spe.*,Hacl.Impl.Xor.Lemmas,Seq.Create' \
+	  -bundle 'Hacl.Types' \
+	  -bundle 'Hacl.Constants' \
+	  -bundle 'Hacl.Endianness' \
+	  -bundle 'Hacl.Cast' \
+	  -bundle 'Hacl.UInt128.*' \
+	  -bundle 'Hacl.UInt64.*' \
+	  -bundle 'Hacl.UInt32.*' \
+	  -bundle 'Hacl.UInt16.*' \
+	  -bundle 'Hacl.UInt8.*' \
 	  -bundle 'LowStar.*' \
-	  -library 'Hacl.*' \
 	  -no-prefix 'EverCrypt.Vale' \
 	  -tmpdir $(GENERATED_DIR) $^ -warn-error @9
 
