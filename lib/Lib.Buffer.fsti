@@ -712,7 +712,7 @@ val loop_blocks:
       B.modifies (B.loc_buffer write) h0 h1 /\
       as_seq h1 write ==
       Seq.repeat_blocks #a #(Seq.lseq b blen) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
- 
+
 
 (** Map a total function on a buffer *)
 inline_for_extraction
@@ -745,6 +745,3 @@ val imapT:
     (ensures  fun h0 _ h1 ->
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       as_seq h1 o == Seq.map f (ias_seq h0 i))
-
-
-

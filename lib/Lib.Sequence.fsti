@@ -83,7 +83,7 @@ abstract
 type equal (#a:Type) (#len:size_nat) (s1:lseq a len) (s2:lseq a len) =
   forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
 
-val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma 
+val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
   (requires forall i. {:pattern index s1 i; index s2 i} index s1 i == index s2 i)
   (ensures equal s1 s2)
   [SMTPat (equal s1 s2)]
