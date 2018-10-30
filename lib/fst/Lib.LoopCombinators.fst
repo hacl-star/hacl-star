@@ -4,6 +4,10 @@ let rec repeat_left lo hi a f acc =
   if lo = hi then acc
   else repeat_left (lo + 1) hi a f (f lo acc)
 
+let rec repeat_left_all_ml lo hi a f acc =
+  if lo = hi then acc
+  else repeat_left_all_ml (lo + 1) hi a f (f lo acc)
+
 let rec repeat_right lo hi a f acc =
   if lo = hi then acc
   else f (hi - 1) (repeat_right lo (hi - 1) a f acc)
@@ -42,6 +46,9 @@ let repeat #a n f acc0 =
 
 let repeat_range #a min max f x =
   repeat_left min max (fun _ -> a) f x
+
+let repeat_range_all_ml #a min max f x =
+  repeat_left_all_ml min max (fun _ -> a) f x
 
 let rec repeat_range_inductive #a min max pred f x =
   repeat_left min max (fun i -> x:a{pred i x}) f x
