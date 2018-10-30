@@ -7,7 +7,7 @@ open FStar.Math.Lemmas
 ///
 
 type inttype =
- | U1 | U8 | U16 | U32 | U64 | U128
+  | U1 | U8 | U16 | U32 | U64 | U128
 
 ///
 /// Operations on the underlying machine integer base types
