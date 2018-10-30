@@ -11,8 +11,8 @@ open Lib.NatMod
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
 (* Field types and parameters *)
-let prime = pow2 255 - 19 
-  
+let prime = pow2 255 - 19
+
 unfold type elem = nat_mod prime
 let to_elem x = x `modulo` prime
 let from_elem (x:elem) = nat_mod_v x
@@ -30,7 +30,7 @@ let decodeScalar25519 (k:scalar) =
   let k :scalar = k.[31] <- ((k.[31] &. u8 127) |. u8 64) in k
 
 let decodePoint (u:serialized_point) =
-  to_elem (nat_from_bytes_le u % pow2 255) 
+  to_elem (nat_from_bytes_le u % pow2 255)
 
 let add_and_double qx nq nqp1 =
   let x_1 = qx in
