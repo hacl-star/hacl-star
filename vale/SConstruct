@@ -409,7 +409,7 @@ if not is_help:
         fstar_z3 = str(find_z3)
   else:
     found_z3 = True
-  fstar_z3_path = '--smt ' + os.path.abspath(fstar_z3) if dump_args else fstar_z3 
+  fstar_z3_path = '--smt ' + (os.path.abspath(fstar_z3) if dump_args else fstar_z3)
 else:
   fstar_z3_path = ''
 
