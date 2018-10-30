@@ -34,7 +34,7 @@ let pow2_seven (c0 c1 c2 c3 c4 c5 c6:nat) : nat = pow2_six c0 c1 c2 c3 c4 c5 + p
 let pow2_eight (c0 c1 c2 c3 c4 c5 c6 c7:nat) : nat = pow2_seven c0 c1 c2 c3 c4 c5 c6 + pow2_448 * c7
 let pow2_nine (c0 c1 c2 c3 c4 c5 c6 c7 c8:nat) : nat = pow2_eight c0 c1 c2 c3 c4 c5 c6 c7 + pow2_512 * c8
 
-
+(*
 let simple_helper2 (a0 b0 b1 a0b0_lo a0b0_hi a0b1_lo a0b1_hi sum:nat64) (overflow:bool) : Lemma
   (requires pow2_two a0b0_lo a0b0_hi = a0 * b0 /\
             pow2_two a0b1_lo a0b1_hi = a0 * b1 /\
@@ -50,7 +50,6 @@ let simple_helper2 (a0 b0 b1 a0b0_lo a0b0_hi a0b1_lo a0b1_hi sum:nat64) (overflo
   let rhs = pow2_three a0b0_lo sum (a0b1_hi + overflow_v) in
   assert_by_tactic (lhs == rhs) int_canon;
   ()
-
 
 let a0b_helper (a0 b0 b1 b2 b3 
                 a0b0_lo a0b0_hi 
@@ -81,7 +80,7 @@ let a0b_helper (a0 b0 b1 b2 b3
   assert_by_tactic (lhs == rhs)
     int_canon;
   ()
-
+*)
 open FStar.Math.Lemmas
 
 let lemma_mul_bounds_le (x b_x y b_y:nat) : Lemma 
@@ -106,14 +105,23 @@ let lemma_mul_pow2_bound (b:nat{b > 1}) (x y:natN (pow2 b)) :
   assert ( (pow2 b - 1) * (pow2 b -1) = pow2 (2*b) - 2*pow2(b) + 1);
   ()
 
-let lemma_mul_bound64 (x y:nat64) : Lemma (x * y < pow2_128 - 1 /\ x * y <= pow2_128 - 2*pow2_64 + 1)
+let lemma_mul_bound64 (x y:nat64) :
+  Lemma (x * y < pow2_128 - 1 /\ x * y <= pow2_128 - 2*pow2_64 + 1)
  = 
  assert_norm (pow2 64 == pow2_64);
  assert_norm (pow2 128 == pow2_128);
  lemma_mul_pow2_bound 64 x y;
  ()
 
-let lemma_overflow_is_zero (dst_hi dst_lo x y:nat64) : Lemma
+(* Intel manual mentions this fact *)
+let lemma_intel_prod_sum_bound (w x y z:nat64) : Lemma
+    (requires true)
+    (ensures w * x + y + z < pow2_128)
+    =
+    lemma_mul_bound64 w x;
+    ()
+
+let lemma_prod_bounds (dst_hi dst_lo x y:nat64) : Lemma
   (requires pow2_64 * dst_hi + dst_lo == x * y)
   (ensures  dst_hi < pow2_64 - 1 /\
             (dst_hi < pow2_64 - 2 \/ dst_lo <= 1)
@@ -127,12 +135,8 @@ let lemma_overflow_is_zero (dst_hi dst_lo x y:nat64) : Lemma
   lemma_mul_bound64 x y;
   ()
 
-let lemma_prod_sum_bound (w x y z:nat64) : Lemma
-    (requires true)
-    (ensures w * x + y + z < pow2_128)
-    =
-    lemma_mul_bound64 w x;
-    ()
+
+
 
 type bit = b:nat { b <= 1 }
 
@@ -144,14 +148,13 @@ let add_carry (x y:nat64) (c:bit) : nat64 & (c':nat{c = 0 || c = 1})
   add_wrap64 (add_wrap64 x y) c,
   (if x + y + c >= pow2_64 then 1 else 0)
 
-let lemma_no_carry (rdx r14 r13 rax:nat64) (o_old c_old:bit) : Lemma
-    (requires (rdx < pow2_64 - 2 \/ r14 <= 1) /\
-              r13 < pow2_64 - 1 /\
-              rax <= pow2_64 - 1
-    )
-    (ensures (let s0, o_new = add_carry r14 r13 o_old in
-              let s1, c_new = add_carry r14 rax c_old in
-              rdx < pow2_64 \/ c_new = 0 \/ o_new = 0))
+
+let lemma_overflow (dst_hi dst_lo addend:nat64) (old_overflow:bit) : Lemma
+  (requires dst_hi < pow2_64 - 1 /\
+            (dst_hi < pow2_64 - 2 \/ dst_lo <= 1) /\
+            addend < pow2_64 - 1 /\
+            (old_overflow = 0 \/ addend < pow2_64 - 2))
+  (ensures dst_hi < pow2_64 - 2 \/ dst_lo + addend + old_overflow < pow2_64)
   =
   ()
 
@@ -292,6 +295,5 @@ let lemma_sum_a2b
         a0a1b_0 a0a1b_1 a0a1b_2 a0a1b_3 a0a1b_4 a0a1b_5
         a2b_0 a2b_1 a2b_2 a2b_3 a2b_4
         s1 s2 s3 s4 s5;
-  admit();
   ()
 #pop-options
