@@ -32,6 +32,15 @@ let uintv_extensionality #t #l a b =
 
 let secret #t x = x
 
+let uint #t #l x =
+  match t with
+  | U1 -> UInt8.uint_to_t x
+  | U8 -> UInt8.uint_to_t x
+  | U16 -> UInt16.uint_to_t x
+  | U32 -> UInt32.uint_to_t x
+  | U64 -> UInt64.uint_to_t x
+  | U128 -> UInt128.uint_to_t x
+
 let u8 x : uint8  = UInt8.uint_to_t x
 
 let u16 x : uint16 = UInt16.uint_to_t x

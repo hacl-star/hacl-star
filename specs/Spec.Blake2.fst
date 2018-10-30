@@ -393,22 +393,22 @@ val blake2_update:
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)} ->
   Tot (hash_ws a)
 
-let spec_update_block 
-    (a:alg) 
-    (init:nat) 
+let spec_update_block
+    (a:alg)
+    (init:nat)
     (i:nat{init + (i * size_block a) <= max_limb a}) =
     blake2_update_block a (init + (i * size_block a))
 
-let spec_update_last 
-    (a:alg) 
+let spec_update_last
+    (a:alg)
     (len:nat{len <= max_limb a})
     (i:nat) =
-    blake2_update_last a len 
-    
+    blake2_update_last a len
+
 let blake2_update a s d kk =
   let ll = length d in
   let klen = if kk = 0 then 0 else 1 in
-  repeati_blocks (size_block a) d 
+  repeati_blocks (size_block a) d
     (spec_update_block a ((klen + 1) * size_block a))
     (spec_update_last a (klen * (size_block a) + ll))
     s

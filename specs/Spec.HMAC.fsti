@@ -9,8 +9,7 @@ module H = Spec.Hash
 
 val wrap_key:
     a: H.algorithm
-  -> len: size_nat{len < H.max_input a}
-  -> key: lbytes len ->
+  -> key:bytes{length key <= H.max_input a} ->
   Tot (lbytes (H.size_block a))
 
 val init:
@@ -40,8 +39,6 @@ val finish:
 
 val hmac:
     a: H.algorithm
-  -> klen: size_nat{klen <= H.max_input a}
-  -> key:lbytes klen
-  -> len:size_nat{klen + len + H.size_block a <= H.max_input a}
-  -> input:lbytes len ->
+  -> key:bytes{length key <= H.max_input a}
+  -> input:bytes{length key + length input + H.size_block a <= H.max_input a} ->
   Tot (lbytes (H.size_hash a))

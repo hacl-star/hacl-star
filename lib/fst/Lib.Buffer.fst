@@ -169,6 +169,13 @@ let salloc1_trivial #a #res h len x footprint spec impl =
   salloc1 h len x footprint spec trivial impl
 
 inline_for_extraction noextract
+let salloc_nospec #a #res h len x footprint impl =
+  (* BB. `a` is a random type because it is unused, is there a better solution ? *)
+  let spec (z:res) (h0:mem) = a in
+  let spec_inv (#res:Type) (h1 h2 h3:mem) (r:res) = () in
+  salloc1 #a #res h len x footprint spec spec_inv impl
+
+inline_for_extraction noextract
 val loopi_blocks_f:
     #a:Type0
   -> #b:Type0
