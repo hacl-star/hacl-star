@@ -590,7 +590,7 @@ procedure{:quick} fast_multiply(
 }
 
 // fast_mul_stdcall(dst, inA, inB)
-procedure{:quick} {:verify true} fast_mul_stdcall(
+procedure{:quick} fast_mul_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
