@@ -1646,16 +1646,16 @@ private let rec mt_verify_ k j mtr p ppos acc actd =
        (
          if j = k || (j = k + 1ul && not actd) then
            mt_verify_ (k / 2ul) (j / 2ul) mtr p ppos acc nactd
-       else
+         else
          (
            hash_2 acc phash acc;
-       mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd
+           mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd
          )
        )
        else
        (
          hash_2 phash acc acc;
-       mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd)
+         mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd)
        )
 
 private val buf_eq:
