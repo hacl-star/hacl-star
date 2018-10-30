@@ -595,8 +595,12 @@ def check_z3_version(fstar_z3):
 
 def print_dump_args():
   #print('Currently using the following F* args:')
+  options = fstar_default_args
+  if len(COMMAND_LINE_TARGETS) > 0:
+    options = get_build_options(File(COMMAND_LINE_TARGETS[0])).verifier_flags
+    #print("The options are: %s" % options.verifier_flags)
   fstar_includes = compute_includes(src_include_paths, obj_include_paths, 'obj', relative=False)
-  for option in [fstar_z3_path, fstar_no_verify, fstar_includes, fstar_user_args, fstar_default_args]:
+  for option in [fstar_z3_path, fstar_no_verify, fstar_includes, fstar_user_args, options]:
     if len(option) > 0:
       print(f'{option} ', end='')
   print()
