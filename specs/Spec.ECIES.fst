@@ -1,5 +1,6 @@
 module Spec.ECIES
 
+open FStar.Mul
 open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
@@ -39,74 +40,81 @@ inline_for_extraction let vsize_iv: size_nat = 12 (* AES_GCM with TLS length IV 
 (** Definition of a ECIES keys *)
 inline_for_extraction let vsize_key_symmetric: size_nat = 16
 inline_for_extraction let vsize_key_asymmetric: size_nat = 32
-type ecies_key_public_s = lbytes vsize_key_asymmetric
-type ecies_key_private_s = lbytes vsize_key_asymmetric
-type ecies_key_s = lbytes vsize_key_asymmetric
+type key_public_s = lbytes vsize_key_asymmetric
+type key_private_s = lbytes vsize_key_asymmetric
+type key_s = lbytes vsize_key_asymmetric
 
 
 (** Definition of a ECIES keypair *)
-type ecies_keypair_r = (ecies_key_public_s * option ecies_key_private_s)
+type keypair_r = (key_public_s & option key_private_s)
 
 
 (** Generation of an EC public private keypair for Curve25519 *)
-val ecies_secret_to_public: ecies_key_private_s -> Tot ecies_key_public_s
-let ecies_secret_to_public kpriv =
+val secret_to_public: key_private_s -> Tot key_public_s
+let secret_to_public kpriv =
   let basepoint_zeros = create vsize_key_asymmetric (u8 0) in
   let basepoint = upd basepoint_zeros (vsize_key_asymmetric - 1) (u8 0x09) in
   Spec.Curve25519.scalarmult kpriv basepoint
 
 
 (** Generation of an EC public private keypair for Curve25519 *)
-val ecies_generate: unit -> Tot ecies_keypair_r
-let ecies_generate () =
+val generate: unit -> Tot keypair_r
+let generate () =
   let basepoint_zeros = create vsize_key_asymmetric (u8 0) in
   let basepoint = upd basepoint_zeros (vsize_key_asymmetric - 1) (u8 0x09) in
   let kpriv = crypto_random vsize_key_asymmetric in
-  let kpub = ecies_secret_to_public kpriv in
+  let kpub = secret_to_public kpriv in
   kpub, Some kpriv
 
 
+
+#set-options "--z3rlimit 25"
+
 (** ECIES Encryption *)
 val encrypt:
-    #olen: size_nat
-  -> a: Hash.algorithm
-  -> receiver: ecies_key_public_s
-  -> sender: ecies_key_private_s
-  -> input: bytes ->
-  Tot (lbytes olen)
+    a: Hash.algorithm
+  -> receiver: key_public_s
+  -> sender: key_private_s
+  -> input: bytes{length input <= max_size_t /\ length input + Hash.size_block a <= max_size_t /\ length input + Spec.AES128_GCM.padlen (length input) <= max_size_t} ->
+  Tot (lbytes (length input + Spec.AES128_GCM.size_block))
 
-let encrypt #olen a receiver sender input =
+let encrypt a receiver sender input =
   let len = length input in
+  let olen = length input + Spec.AES128_GCM.size_block in
   let ek: lbytes vsize_key_asymmetric = Spec.Curve25519.scalarmult receiver sender in
-  let unsafe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
+  let unsafe : bool = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
   let kdf_iv_zeros = create vsize_key_asymmetric (u8 0) in
+  // assert(vsize_key_asymmetric <= pow2 32 * pow2 3);
+  assert_norm(pow2 32 * pow2 3 <= pow2 61 - 1);
+  assert_norm(pow2 32 * pow2 3 <= pow2 125 - 1);
+  // assert(vsize_key_asymmetric <= Hash.max_input a);
   let extracted = Spec.HKDF.hkdf_extract a kdf_iv_zeros ek in
-  let iv = Spec.HKDF.hkdf_expand a extracted const_ecies_label_iv vsize_iv in
-  let key = Spec.HKDF.hkdf_expand a extracted const_ecies_label_key vsize_key_symmetric in
-  let out = Spec.AESGCM.aead_encrypt key vsize_iv iv len input 0 empty in
-  let zeros = create (len + vsize_iv) (u8 0) in
+  let iv = Spec.HKDF.hkdf_expand a extracted const_label_iv vsize_iv in
+  let key = Spec.HKDF.hkdf_expand a extracted const_label_key vsize_key_symmetric in
+  let out = Spec.AES128_GCM.aead_encrypt key iv input empty in
+  let zeros = create olen (u8 0) in
   if unsafe then zeros else out
 
 
 (** ECIES Decryption *)
 val decrypt:
-    #olen: size_nat
-  -> a: Hash.algorithm
-  -> sender: ecies_key_public_s
-  -> receiver: ecies_key_private_s
-  -> input: bytes ->
-  Tot (lbytes olen)
+    a: Hash.algorithm
+  -> sender: key_public_s
+  -> receiver: key_private_s
+  -> input: bytes{Spec.AES128_GCM.size_block < length input /\ length input <= max_size_t} ->
+  Tot (lbytes (length input - Spec.AES128_GCM.size_block))
 
-let decrypt #olen a sender receiver input =
+let decrypt a sender receiver input =
   let len = length input in
+  let olen = length input - Spec.AES128_GCM.size_block in
   let ek: lbytes vsize_key_asymmetric = Spec.Curve25519.scalarmult receiver sender in
   let unsafe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
   let kdf_iv_zeros = create vsize_key_asymmetric (u8 0) in
   let extracted = Spec.HKDF.hkdf_extract a kdf_iv_zeros ek in
-  let iv = Spec.HKDF.hkdf_expand a extracted const_ecies_label_iv vsize_iv in
-  let key = Spec.HKDF.hkdf_expand a extracted const_ecies_label_key vsize_key_symmetric in
-  let out = Spec.AESGCM.aead_decrypt key 12 iv len input 0 empty in
-  let zeros = create (len + vsize_iv) (u8 0) in
+  let iv = Spec.HKDF.hkdf_expand a extracted const_label_iv vsize_iv in
+  let key = Spec.HKDF.hkdf_expand a extracted const_label_key vsize_key_symmetric in
+  let out = Spec.AES128_GCM.aead_decrypt key iv input empty in
+  let zeros = create olen (u8 0) in
   if unsafe then zeros else out
 
 
@@ -126,8 +134,8 @@ let decrypt #olen a sender receiver input =
 assume val encrypt_counter:
     #olen: size_nat
   -> i: size_nat
-  -> receiver: ecies_key_public_s
-  -> sender: ecies_key_private_s
+  -> receiver: key_public_s
+  -> sender: key_private_s
   -> len: size_nat
   -> plaintext: lbytes len ->
   Tot (lbytes olen)
@@ -136,8 +144,8 @@ assume val encrypt_counter:
 assume val decrypt_counter:
     #olen: size_nat
   -> i: size_nat
-  -> sender: ecies_key_public_s
-  -> receiver: ecies_key_private_s
+  -> sender: key_public_s
+  -> receiver: key_private_s
   -> len: size_nat
   -> ciphertext: lbytes len ->
   Tot (lbytes olen)
