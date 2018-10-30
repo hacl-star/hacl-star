@@ -6,17 +6,6 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 
-/// Lib.ByteSequence.fst:
-/// ======================
-
-/// I1. There is no definition of empty bytes
-///
-/// R1. Introduce the following definition to Lib.ByteSequence.fsti ?
-
-let lbytes_empty: lbytes 0 = create 0 (u8 0)
-
-
-
 
 /// Lib.Buffer.fst:
 /// ===============
