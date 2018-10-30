@@ -16,7 +16,9 @@ let size_block: size_nat = 16
 let size_iv: size_nat = 12
 
 (* Types *)
-type key_s = lbytes size_key
+type key = lbytes size_key
+type nonce = lbytes size_iv
+
 
 inline_for_extraction
 let padlen (x:size_nat) = ((size_block - x % size_block) % size_block)
@@ -45,8 +47,8 @@ let ghash text aad gf_key tag_key =
   tag
 
 val gcm:
-    k:key_s
-  -> n: bytes{length n <= size_iv}
+    k: key
+  -> n: nonce
   -> m: bytes{length m <= max_size_t /\ length m + padlen (length m) <= max_size_t}
   -> aad: bytes {length aad <= max_size_t /\ length aad + padlen (length aad) <= max_size_t} ->
   Tot Spec.GF128.tag
@@ -63,8 +65,8 @@ let gcm k n m aad =
 #reset-options "--z3rlimit 15"
 
 val aead_encrypt:
-    k: key_s
-  -> n: bytes{length n == size_iv}
+    k: key
+  -> n: nonce
   -> m: bytes{length m <= max_size_t /\ length m + size_block <= max_size_t /\ length m + padlen (length m) <= max_size_t}
   -> aad: bytes {length aad <= max_size_t /\ length aad + padlen (length aad) <= max_size_t} ->
   Tot (lbytes (length m + size_block))
@@ -82,8 +84,8 @@ let aead_encrypt k n m aad =
 
 
 val aead_decrypt:
-    k: key_s
-  -> n: bytes{length n == size_iv}
+    k: key
+  -> n: nonce
   -> c: bytes{size_block <= length c /\ length c <= max_size_t}
   -> aad: bytes{length aad <= max_size_t /\ length aad + padlen (length aad) <= max_size_t} ->
   Tot (lbytes (length c - size_block))
