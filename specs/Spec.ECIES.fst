@@ -14,10 +14,6 @@ module Hash = Spec.Hash
 (* BB. TODO: Relocate this function *)
 assume val crypto_random: len:size_nat -> Tot (lbytes len)
 
-(* BB. TODO: Relocate this constant *)
-let empty : lbytes 0 = create 0 (u8 0)
-
-
 
 (** Constants for ECIES labels *)
 let const_label_iv : lbytes 8 =
@@ -91,7 +87,7 @@ let encrypt a receiver sender input =
   let extracted = Spec.HKDF.hkdf_extract a kdf_iv_zeros ek in
   let iv = Spec.HKDF.hkdf_expand a extracted const_label_iv vsize_iv in
   let key = Spec.HKDF.hkdf_expand a extracted const_label_key vsize_key_symmetric in
-  let out = Spec.AES128_GCM.aead_encrypt key iv input empty in
+  let out = Spec.AES128_GCM.aead_encrypt key iv input lbytes_empty in
   let zeros = create olen (u8 0) in
   if unsafe then zeros else out
 
@@ -113,7 +109,7 @@ let decrypt a sender receiver input =
   let extracted = Spec.HKDF.hkdf_extract a kdf_iv_zeros ek in
   let iv = Spec.HKDF.hkdf_expand a extracted const_label_iv vsize_iv in
   let key = Spec.HKDF.hkdf_expand a extracted const_label_key vsize_key_symmetric in
-  let out = Spec.AES128_GCM.aead_decrypt key iv input empty in
+  let out = Spec.AES128_GCM.aead_decrypt key iv input lbytes_empty in
   let zeros = create olen (u8 0) in
   if unsafe then zeros else out
 
