@@ -409,7 +409,7 @@ if not is_help:
         fstar_z3 = str(find_z3)
   else:
     found_z3 = True
-  fstar_z3_path = '--smt ' + fstar_z3
+  fstar_z3_path = '--smt ' + os.path.abspath(fstar_z3) if dump_args else fstar_z3 
 else:
   fstar_z3_path = ''
 
@@ -510,9 +510,9 @@ def is_our_file(file):
 def compute_include_paths(src_include_paths, obj_include_paths, obj_prefix):
   return src_include_paths + [str(Dir('obj/external'))] + [str(Dir(f'{obj_prefix}/{x}')) for x in obj_include_paths]
 
-def compute_includes(src_include_paths, obj_include_paths, obj_prefix):
+def compute_includes(src_include_paths, obj_include_paths, obj_prefix, relative=True):
   fstar_include_paths = compute_include_paths(src_include_paths, obj_include_paths, obj_prefix)
-  return " ".join(["--include " + x for x in fstar_include_paths])
+  return " ".join(["--include " + (x if relative else os.path.abspath(x)) for x in fstar_include_paths])
 
 def CopyFile(target, source):
   Command(target, source, Copy(target, source))
@@ -594,8 +594,8 @@ def check_z3_version(fstar_z3):
       ' (We rarely change the Z3 version; we strongly recommend using the expected version of Z3.)')
 
 def print_dump_args():
-  print('Currently using the following F* args:')
-  fstar_includes = compute_includes(src_include_paths, obj_include_paths, 'obj')
+  #print('Currently using the following F* args:')
+  fstar_includes = compute_includes(src_include_paths, obj_include_paths, 'obj', relative=False)
   for option in [fstar_z3_path, fstar_no_verify, fstar_includes, fstar_user_args, fstar_default_args]:
     if len(option) > 0:
       print(f'{option} ', end='')
@@ -1019,9 +1019,11 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
   cmd = [str(x) for x in cmd]
   #print(" ".join(cmd))
   try:
-    print('F* dependency analysis starting')
+    if not dump_args:
+      print('F* dependency analysis starting')
     o = subprocess.check_output(cmd, stderr = subprocess.STDOUT).decode('ascii')
-    print('F* dependency analysis finished')
+    if not dump_args:
+      print('F* dependency analysis finished')
   except (subprocess.CalledProcessError) as e:
     print(f'F* dependency analysis: error: {e.output}')
     Exit(1)
@@ -1051,7 +1053,7 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
       targets = [str(File(x)).replace(dummies_name, obj_name) for x in targets]
       for source in sources:
         for target in targets:
-          if target.startswith('specs') and (source.startswith('obj') or source.startswith('code')):
+          if target.startswith('specs') and (source.startswith('obj') or source.startswith('code')) and not dump_args:
             print(f'{yellow}Warning: file {target} in specs directory depends on file {source} outside specs directory{uncolor}')
       sources_ver = [to_obj_dir(File(re.sub('\.fst$', '.fst.verified', re.sub('\.fsti$', '.fsti.verified', x)))) for x in sources if is_our_file(File(x))]
       targets_ver = [to_obj_dir(File(re.sub('\.fst$', '.fst.verified.tmp', re.sub('\.fsti$', '.fsti.verified.tmp', x)))) for x in targets if is_our_file(File(x))]
@@ -1118,7 +1120,8 @@ if not is_help:
     target = f.obj_name()
     shutil.copy(source, target)
 
-  print('Processing source files')
+  if not dump_args:
+    print('Processing source files')
   process_files_in(env, verify_paths)
   if not is_single_vaf:
     compute_fstar_deps(env, verify_paths, compute_include_paths(src_include_paths, obj_include_paths, 'obj/dummies'))
