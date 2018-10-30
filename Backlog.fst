@@ -2,7 +2,20 @@ module Backlog
 
 open FStar.Mul
 open Lib.IntTypes
+open Lib.Sequence
 open Lib.ByteSequence
+
+
+/// Spec.ByteSequence.fst:
+/// ======================
+///
+/// I1. There is no definition of empty bytes
+///
+/// R1. Introduce the following definition to Lib.ByteSequence.fsti ?
+
+let lbytes_empty: lbytes 0 = create 0 (u8 0)
+
+
 
 
 /// Spec.Random.fst:
