@@ -87,10 +87,6 @@ $(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-$(CACHE_DIR)/MerkleTree.New.Low.fst.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
 $(CACHE_DIR)/Low.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
