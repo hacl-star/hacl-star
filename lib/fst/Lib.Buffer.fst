@@ -269,6 +269,46 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l rem last w
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
+let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
+  [@inline_let]
+  let a_spec' (i:nat{i <= v n}) =
+    assert_spinoff (i * v len <= max_size_t);
+    a_spec i & Seq.lseq t (i * v len) in
+  [@inline_let]
+  let refl' h (i:nat{i <= v n}) : GTot (a_spec' i) =
+    refl h i, as_seq #_ #(i * v len) h (gsub output (size 0) (size i *! len))
+  in
+  let footprint' i = B.loc_union (footprint i) (B.loc_buffer output) in
+  [@inline_let]
+  let spec' h0 : GTot (i:nat{i < v n} -> a_spec' i -> a_spec' (i + 1)) =
+    let f = spec h0 in
+    fun i so ->
+      let s, o = so <: a_spec i & Seq.lseq t (i * v len) in
+      let s', block = f i s in
+      let o' : Seq.lseq t ((i + 1) * v len) = Seq.(o @| block) in
+      s', o'
+  in
+  let h0 = ST.get () in
+  loop h0 n a_spec' refl' footprint' spec'
+  (fun i ->
+    Loop.unfold_repeat_gen (v n) a_spec' (spec' h0) (refl' h0 0) (v i);
+    let block = B.sub output (i *! len) len in
+    impl i block;
+    let h = ST.get() in
+    B.loc_includes_union_l (footprint (v i + 1)) (B.loc_buffer output) (B.loc_buffer block);
+    B.loc_includes_union_l (footprint (v i + 1)) (B.loc_buffer output) (footprint (v i + 1));
+    assert ((v i + 1) * v len == v i * v len + v len);
+    FStar.Seq.lemma_split
+      (as_seq #_ #(v i * v len + v len) h (gsub output (size 0) (i *! len +! len)))
+      (v i * v len)
+  );
+  assert (Seq.equal
+    (as_seq #_ #0 h0 (gsub output (size 0) (size 0 *! len))) FStar.Seq.empty);
+  assert_norm (
+    Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) ==
+    norm [delta] Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0))
 
 let mapT #a #b #len o clen f inp =
   let h0 = ST.get () in

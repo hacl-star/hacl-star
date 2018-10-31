@@ -745,6 +745,39 @@ val loop_blocks:
       as_seq h1 write ==
       Seq.repeat_blocks #a #(Seq.lseq b blen) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
 
+open FStar.Mul
+
+(** Fills a buffer block by block using a function with an accumulator *)
+inline_for_extraction noextract
+val fill_blocks:
+    #t:Type0
+  -> h0:mem
+  -> len:size_t
+  -> n:size_t{v n * v len <= max_size_t}
+  -> output:lbuffer t (v n * v len)
+  -> a_spec:(i:size_nat{i <= v n} -> Type)
+  -> refl:(mem -> i:size_nat{i <= v n} -> GTot (a_spec i))
+  -> footprint:(i:size_nat{i <= v n} -> GTot
+      (l:B.loc{B.loc_disjoint l (B.loc_buffer output) /\
+               B.address_liveness_insensitive_locs `B.loc_includes` l}))
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq t (v len)))
+  -> impl:(i:size_t{v i < v n} -> block:lbuffer t (v len) -> Stack unit
+      (requires fun h1 ->
+        live h1 block /\
+        B.loc_buffer output `B.loc_includes` B.loc_buffer block /\
+        modifies (B.loc_union (footprint (v i)) (B.loc_buffer output)) h0 h1)
+      (ensures  fun h1 _ h2 ->
+        let s, b = spec h0 (v i) (refl h1 (v i)) in
+        footprint (v i + 1) `B.loc_includes` footprint (v i) /\
+        B.modifies (B.loc_union (footprint (v i + 1)) (B.loc_buffer block)) h1 h2 /\
+        refl h2 (v i + 1) == s /\ as_seq h2 block == b)) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h output)
+    (ensures  fun _ _ h1 ->
+      let s, o = Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) in
+      B.modifies (B.loc_union (footprint (v n)) (B.loc_buffer output)) h0 h1 /\
+      refl h1 (v n) == s /\
+      as_seq #_ #(v n * v len) h1 (gsub output (size 0) (n *! len)) == o)
 
 (** Map a total function on a buffer *)
 inline_for_extraction

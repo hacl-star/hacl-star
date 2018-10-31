@@ -169,3 +169,14 @@ let repeat_blocks #a #b bs inp f l init =
   let acc = repeati nb (repeat_blocks_f bs inp f nb) init in
   let last = seq_sub inp (nb * bs) rem in
   l rem last acc
+
+let generate_blocks #t len n a f acc0 =
+  let a' (i:nat{i <= n}) = a i & lseq t (i * len) in
+  let f' (i:nat{i < n}) (ao:a' i) = 
+    let acc, o = ao <: a i & lseq t (i * len) in
+    let acc', block = f i acc in
+    let o' : lseq t ((i + 1) * len) = o @| block in
+    acc', o'
+  in
+  let acc0' : a 0 & lseq t (0 * len) = acc0, Seq.empty in
+  repeat_gen n a' f' acc0'

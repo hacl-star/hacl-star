@@ -255,3 +255,13 @@ val repeat_blocks:
   -> l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b)
   -> init:b
   -> out:b
+
+(** Generates `n` blocks of length `len` by iteratively applying a function with an accumulator *)
+val generate_blocks:
+    #t:Type0
+  -> len:size_nat 
+  -> n:nat{n * len <= max_size_t}
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & lseq t len)
+  -> init:a 0
+  -> a n & lseq t (n * len)
