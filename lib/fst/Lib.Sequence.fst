@@ -48,6 +48,17 @@ let lemma_update_sub #a #len dst start n src res =
   FStar.Seq.lemma_split res (start + n);
   FStar.Seq.lemma_split res1 (start + n)
 
+let lemma_concat2 #a len0 s0 len1 s1 s =
+  FStar.Seq.Properties.lemma_split s len0;
+  FStar.Seq.Properties.lemma_split (concat s0 s1) len0
+
+let lemma_concat3 #a len0 s0 len1 s1 len2 s2 s =
+  let s' = concat (concat s0 s1) s2 in
+  FStar.Seq.Properties.lemma_split (sub s 0 (len0 + len1)) len0;
+  FStar.Seq.Properties.lemma_split (sub s' 0 (len0 + len1)) len0;
+  FStar.Seq.Properties.lemma_split s (len0 + len1);
+  FStar.Seq.Properties.lemma_split s' (len0 + len1)
+
 let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = lseq a k
 let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) (s:createi_a a len init k) =
   forall (i:nat). {:pattern (index s i)} i < k ==> index s i == init i
@@ -183,3 +194,14 @@ let repeat_blocks #a #b bs inp f l init =
   let acc = repeati nb (repeat_blocks_f bs inp f nb) init in
   let last = seq_sub inp (nb * bs) rem in
   l rem last acc
+
+let generate_blocks #t len n a f acc0 =
+  let a' (i:nat{i <= n}) = a i & lseq t (i * len) in
+  let f' (i:nat{i < n}) (ao:a' i) = 
+    let acc, o = ao <: a i & lseq t (i * len) in
+    let acc', block = f i acc in
+    let o' : lseq t ((i + 1) * len) = o @| block in
+    acc', o'
+  in
+  let acc0' : a 0 & lseq t (0 * len) = acc0, Seq.empty in
+  repeat_gen n a' f' acc0'

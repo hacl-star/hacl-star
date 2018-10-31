@@ -1,6 +1,5 @@
 module Lib.LoopCombinators
 
-
 (**
 * fold_left-like loop combinator:
 * [ repeat_left lo hi a f acc == f (hi - 1) .. ... (f (lo + 1) (f lo acc)) ]
@@ -162,6 +161,14 @@ val repeati_inductive:
  -> x0:a{pred 0 x0}
  -> res:a{pred n res}
 
+val repeati_inductive_repeat_gen:
+   #a:Type
+ -> n:nat
+ -> pred:(i:nat{i <= n} -> a -> Type)
+ -> f:repeatable #a #n pred
+ -> x0:a{pred 0 x0}
+ -> Lemma (repeati_inductive n pred f x0 == repeat_gen n (fun i -> x:a{pred i x}) f x0)
+
 type preserves_predicate (n:nat) 
      (a:(i:nat{i <= n} -> Type)) 
      (f:(i:nat{i < n} -> a i -> a (i + 1))) 
@@ -177,4 +184,3 @@ val repeat_gen_inductive:
  -> Pure (a n)
    (requires preserves_predicate n a f pred /\ pred 0 x0)
    (ensures fun res -> pred n res /\ res == repeat_gen n a f x0)
- 

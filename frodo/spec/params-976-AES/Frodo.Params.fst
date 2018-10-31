@@ -22,7 +22,7 @@ unfold let params_nbar = size 8
 
 unfold let frodo_prf_spec = Spec.SHA3.cshake256_frodo
 
-unfold let frodo_gen_matrix = Spec.Frodo.Gen.frodo_gen_matrix_cshake
+unfold let frodo_gen_matrix = Spec.Frodo.Gen.frodo_gen_matrix_aes
 
 val lemma_cdf_list:
   i:size_nat{i < List.Tot.length cdf_list}

@@ -1,29 +1,19 @@
 module Hacl.Impl.Frodo.KEM
 
-open FStar.HyperStack.All
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
 open LowStar.Buffer
-open LowStar.BufferOps
 
 open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
-open Hacl.Impl.Frodo.Encode
-open Hacl.Impl.Frodo.Pack
-open Hacl.Impl.Frodo.Sample
-open Hacl.Frodo.Random
 open Hacl.Frodo.Clear
 
-module ST = FStar.HyperStack.ST
-module Lemmas = Spec.Frodo.Lemmas
 module S = Spec.Frodo.KEM
-module M = Spec.Matrix
-module LSeq = Lib.Sequence
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 

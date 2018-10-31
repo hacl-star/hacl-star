@@ -5,12 +5,18 @@ VARIANT    ?= 64-cSHAKE
 
 ifeq ($(VARIANT),64-cSHAKE)
   TARGET = test
+else ifeq ($(VARIANT),64-AES)
+  TARGET = test
 else ifeq ($(VARIANT),640-cSHAKE)
   TARGET = verify
 else ifeq ($(VARIANT),976-cSHAKE)
   TARGET = verify
+else ifeq ($(VARIANT),640-AES)
+  TARGET = verify
+else ifeq ($(VARIANT),976-AES)
+  TARGET = verify
 else
-  $(error ERROR: VARIANT must be one of 64-cSHAKE, 640-cSHAKE or 976-cSHAKE)
+  $(error ERROR: VARIANT must be one of 64-cSHAKE, 640-cSHAKE, 976-cSHAKE, 64-AES, 640-AES, 976-AES)
 endif
 
 CACHE_DIR = .cache.$(VARIANT)
@@ -47,7 +53,15 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Spec.Frodo.Test.fst
+ifeq ($(VARIANT),64-cSHAKE)
+  ROOTS = test-$(VARIANT)/Spec.Frodo.Test.fst
+  FSTAR += --include test-$(VARIANT)
+else ifeq ($(VARIANT),64-AES)
+  ROOTS = test-$(VARIANT)/Spec.Frodo.Test.fst
+  FSTAR += --include test-$(VARIANT)
+else
+  ROOTS = Frodo.KEM.fst
+endif
 
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@

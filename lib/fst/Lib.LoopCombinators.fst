@@ -50,11 +50,24 @@ let repeat_range #a min max f x =
 let repeat_range_all_ml #a min max f x =
   repeat_left_all_ml min max (fun _ -> a) f x
 
-let rec repeat_range_inductive #a min max pred f x =
+let repeat_range_inductive #a min max pred f x =
   repeat_left min max (fun i -> x:a{pred i x}) f x
 
 let repeati_inductive #a n pred f x0 =
   repeat_range_inductive #a 0 n pred f x0
+
+let repeati_inductive_repeat_gen #a n pred f x0 =
+  let a' i = x:a{pred i x} in
+  let f' (i:nat{i < n}) (x:a' i) : y:a' (i + 1) = f i x in
+  repeat_left_right 0 n (fun i -> x:a{pred i x}) f x0;
+  assert_norm (repeati_inductive n pred f x0 == repeat_right 0 n (fun i -> a' i) f' x0);
+  assert (repeat_gen n (fun i -> x:a{pred i x}) f x0 == repeat_right 0 n a' f' x0);
+  let repeat_right_eta
+    (a:(i:nat{0 <= i /\ i <= n} -> Type))
+    (f:(i:nat{0 <= i /\ i < n} -> a i -> a (i + 1)))
+    (acc:a 0) :
+    Lemma (repeat_right 0 n a f acc == repeat_right 0 n (fun i -> a i) f acc) = () in
+  repeat_right_eta a' f' x0
 
 let repeat_gen_inductive n a pred f x0 = 
   let f' (i:nat{i < n}) 
