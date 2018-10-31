@@ -700,7 +700,7 @@ val create_:
       Set.subset (Map.domain (MHS.get_hmap h0))
 		 (Map.domain (MHS.get_hmap h1))))
     (decreases (U32.v cidx))
-#reset-options "--z3rlimit 10"
+#reset-options "--z3rlimit 20"
 let rec create_ #a #rg rv cidx =
   let hh0 = HST.get () in
   if cidx = 0ul then ()
@@ -798,7 +798,7 @@ val insert:
       V.get h1 irv (V.size_of rv) == v /\
       S.equal (as_seq h1 irv)
       	      (S.snoc (as_seq h0 rv) (Rgl?.r_repr rg h0 v))))
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40"
 let insert #a #rg rv v =
   let hh0 = HST.get () in
   let irv = V.insert rv v in
@@ -987,23 +987,23 @@ val free_elems:
   HST.ST unit
     (requires (fun h0 -> 
       V.live h0 rv /\
-      rv_elems_inv h0 rv 0ul (idx + 1ul) /\
-      rv_elems_reg h0 rv 0ul (idx + 1ul)))
+        rv_elems_inv h0 rv 0ul (idx + 1ul) /\
+        rv_elems_reg h0 rv 0ul (idx + 1ul)))
     (ensures (fun h0 _ h1 ->
-      modifies (rv_loc_elems h0 rv 0ul (idx + 1ul)) h0 h1))
+      idx < V.size_of rv ==> modifies (rv_loc_elems h0 rv 0ul (idx + 1ul)) h0 h1))
 let rec free_elems #a #rg rv idx =
   let hh0 = HST.get () in
-  Rgl?.r_free rg (V.index rv idx);
+    Rgl?.r_free rg (V.index rv idx);
 
-  let hh1 = HST.get () in
-  rs_loc_elems_elem_disj
-    rg (V.as_seq hh0 rv) (V.frameOf rv)
-    0 (U32.v idx + 1) 0 (U32.v idx) (U32.v idx);
-  rv_elems_inv_preserved 
-    rv 0ul idx (rs_loc_elem rg (V.as_seq hh0 rv) (U32.v idx)) hh0 hh1;
+    let hh1 = HST.get () in
+    rs_loc_elems_elem_disj
+      rg (V.as_seq hh0 rv) (V.frameOf rv)
+      0 (U32.v idx + 1) 0 (U32.v idx) (U32.v idx);
+    rv_elems_inv_preserved 
+      rv 0ul idx (rs_loc_elem rg (V.as_seq hh0 rv) (U32.v idx)) hh0 hh1;
 
-  if idx <> 0ul then
-    free_elems rv (idx - 1ul)
+    if idx <> 0ul then
+      free_elems rv (idx - 1ul)
 
 val flush:
   #a:Type0 -> #rg:regional a ->
@@ -1067,6 +1067,32 @@ let flush #a #rg rv i =
 		  (as_seq hh2 frv));
   frv
 
+
+val rv_elems_inv_cap:
+  #a:Type0 -> #rg:regional a ->
+  h:HS.mem -> rv:rvector rg ->
+  i:uint32_t -> j:uint32_t{i <= j && j <= V.capacity_of rv} ->
+  GTot Type0
+let rv_elems_inv_cap #a #rg h rv i j =
+  rs_elems_inv rg h (V.as_seq_capped h rv) (U32.v i) (U32.v j) 
+
+
+// cwinter: an attempt at freeing the reserved elements...
+let rec free_reserved_r (#a:Type0) (#rg:regional a) (v:rvector rg) (i:uint32_t{i < V.capacity_of v}): HST.ST unit
+  (requires (fun h -> live h v /\ rv_elems_inv_cap h v 0ul (V.capacity_of v)))
+  (ensures (fun _ _ h1 -> live h1 v))
+= Rgl?.r_free rg (V.index_capped v i);
+  if i + 1ul <> V.capacity_of v then
+    assert (i + 1ul < V.capacity_of v);
+    admit();
+    free_reserved_r #a #rg v (i + 1ul)
+
+let free_reserved (#a:Type0) (#rg:regional a) (v:rvector rg): HST.ST unit
+  (requires (fun h -> live h v /\ rv_elems_inv_cap h v 0ul (V.capacity_of v)))
+  (ensures (fun _ _ h1 -> live h1 v))
+= if (V.size_of v < V.capacity_of v) then
+     free_reserved_r v (V.size_of v)
+
 val free:
   #a:Type0 -> #rg:regional a -> rv:rvector rg -> 
   HST.ST unit
@@ -1076,6 +1102,7 @@ let free #a #rg rv =
   let hh0 = HST.get () in
   (if V.size_of rv = 0ul then () 
   else free_elems rv (V.size_of rv - 1ul));
+  admit(); free_reserved rv; 
   let hh1 = HST.get () in
   rv_loc_elems_included hh0 rv 0ul (V.size_of rv);
   V.free rv

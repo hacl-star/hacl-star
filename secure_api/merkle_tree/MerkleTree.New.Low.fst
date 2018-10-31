@@ -224,7 +224,7 @@ private val hash_vec_r_init:
 private let hash_vec_r_init r =
   let nrid = RV.new_region_ r in
   let ia = Rgl?.r_init hreg nrid in
-  V.create_reserve 1ul ia r
+  V.create_reserve 1ul ia r // cwinter: this is a memory leak; `ia' is never freed.
 
 val hash_vec_r_free:
   v:hash_vec ->
@@ -232,8 +232,10 @@ val hash_vec_r_free:
     (requires (fun h0 -> hash_vec_r_inv h0 v))
     (ensures (fun h0 _ h1 ->
       modifies (loc_all_regions_from false (hash_vec_region_of v)) h0 h1))
-let hash_vec_r_free v =
-  RV.free v
+let hash_vec_r_free v =  
+  // cwinter: this cleans up the contained elements, but only up to size_of v, which 
+  // can be smaller than capacity_of v, e.g. after the V.create_reserve above.
+  RV.free v 
 
 private val hvreg: regional hash_vec
 private let hvreg =
@@ -1633,7 +1635,7 @@ private val mt_verify_:
      HH.disjoint (B.frameOf p) (B.frameOf acc) /\
      HH.disjoint mtr (B.frameOf acc) /\
      (let psz = V.size_of (B.get h0 p 0) in
-     ppos <= psz /\ U32.v j < pow2 (U32.v (psz - ppos)))))
+     ppos <= psz /\ U32.v j <= pow2 (U32.v (psz - ppos)))))
    (ensures (fun h0 _ h1 ->
      modifies (B.loc_all_regions_from false (B.frameOf acc)) h0 h1 /\
      Rgl?.r_inv hreg h1 acc))
@@ -1673,10 +1675,35 @@ private let rec buf_eq #a b1 b2 len =
        let teq = buf_eq b1 b2 (len - 1ul) in
        a1 = a2 && teq)
 
+val mt_verify_precondition:
+  k:index_t ->
+  j:index_t{k < j} ->
+  mtr:HH.rid -> 
+  p:path ->
+  rt:hash ->
+  HST.ST bool
+    (requires (fun h0 ->
+      path_safe h0 mtr p /\ Rgl?.r_inv hreg h0 rt /\
+      HST.is_eternal_region (B.frameOf rt) /\
+      HH.disjoint (B.frameOf p) (B.frameOf rt) /\
+      HH.disjoint mtr (B.frameOf rt)))
+    (ensures (fun _ r h1 -> r ==> 
+      path_safe h1 mtr p /\ Rgl?.r_inv hreg h1 rt /\
+      HST.is_eternal_region (B.frameOf rt) /\
+      HH.disjoint (B.frameOf p) (B.frameOf rt) /\
+      HH.disjoint mtr (B.frameOf rt) /\
+      (let psz = V.size_of (B.get h1 p 0) in
+      1ul < psz /\ U32.v j <= pow2 (U32.v psz - 1))))
+let mt_verify_precondition k j mtr p rt =
+  // cwinter: add memory checks?
+  let psz = V.size_of !*p in
+  1ul < psz && U32.v j <= pow2 (U32.v psz - 1)
+
 val mt_verify:
   k:index_t ->
   j:index_t{k < j} ->
-  mtr:HH.rid -> p:path ->
+  mtr:HH.rid -> 
+  p:path ->
   rt:hash ->
   HST.ST bool
    (requires (fun h0 ->
@@ -1685,7 +1712,7 @@ val mt_verify:
      HH.disjoint (B.frameOf p) (B.frameOf rt) /\
      HH.disjoint mtr (B.frameOf rt) /\
      (let psz = V.size_of (B.get h0 p 0) in
-     1ul < psz /\ U32.v j < pow2 (U32.v psz - 1))))
+     1ul < psz /\ U32.v j <= pow2 (U32.v psz - 1))))
    (ensures (fun h0 _ h1 ->
      // `rt` is not modified in this function, but we use a trick
      // to allocate an auxiliary buffer in the extended region of `rt`.
