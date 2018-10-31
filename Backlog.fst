@@ -6,6 +6,16 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 
+/// Lib.IntTypes.fst:
+/// =================
+
+
+/// I1. There is a need of having generic types for word and limb.
+///
+/// R1. Experiment backport of functions from Spec.SHA2 to Lib.IntTypes
+///     replacing the index of the type by a uint_t instead of the "alg".
+
+
 
 /// Lib.Buffer.fst:
 /// ===============
