@@ -98,6 +98,15 @@ procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick export
     cpuid_features();
 }
 
+procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick exportOnly}{:public} Cpuid_Adx_Bmi2()
+    requires rax = 7;
+             rcx = 0;
+    modifies rax; rbx; rcx; rdx;
+    ensures  (iand64(rbx, 0x100) > 0) = bmi2_enabled;
+             (iand64(rbx, 0x80000) > 0) = adx_enabled;
+{
+    cpuid_features();
+}
 
 procedure{:instruction mk_taint_ins2(S.Mov64, dst, src, list(dst), list(src))}{:fast_instruction}{:quick exportOnly}{:public} Mov64(inout dst: dst_opr64, src: opr64)
     ensures
@@ -153,6 +162,7 @@ procedure{:instruction mk_taint_ins2(S.AddCarry64, dst, src, list(dst), list(dst
 }
 
 procedure{:instruction mk_taint_ins2(S.Adcx64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly}{:public} Adcx64Wrap(inout dst: dst_opr64, src: opr64)
+    requires adx_enabled;
     modifies
         efl;
     ensures
@@ -162,6 +172,7 @@ procedure{:instruction mk_taint_ins2(S.Adcx64, dst, src, list(dst), list(dst, sr
 }
 
 procedure{:instruction mk_taint_ins2(S.Adox64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly}{:public} Adox64Wrap(inout dst: dst_opr64, src: opr64)
+    requires adx_enabled;
     modifies
         efl;
     ensures
@@ -209,7 +220,7 @@ procedure{:instruction mk_taint_ins1(S.Mul64, src, list(TReg(Rax), TReg(Rdx)), l
 }
 
 procedure{:instruction mk_taint_ins3(S.Mulx64, dst_hi, dst_lo, src, list(dst_hi, dst_lo), list(TReg(Rdx), src))}{:fast_instruction}{:quick exportOnly}{:public} Mulx64(out dst_hi: dst_opr64, out dst_lo: dst_opr64, src: opr64)
-    requires @dst_hi != @dst_lo;
+    requires bmi2_enabled; @dst_hi != @dst_lo; 
     reads
         rdx;
     ensures

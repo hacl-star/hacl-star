@@ -1,6 +1,8 @@
 include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../../arch/x64/X64.Vale.InsMem.vaf"
 include{:fstar}{:open} "FastMul_helpers"
+include{:fstar}{:open} "X64.CPU_Features_s"
+
 //include{:fstar}{:open} "Prop_s"
 module X64.FastMul
 
@@ -19,6 +21,7 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open FastMul_helpers
 open FStar.Tactics
+open X64.CPU_Features_s
 
 //open FStar.Tactics
 //open CanonCommSemiring
@@ -59,6 +62,7 @@ procedure{:quick} fast_multiply_a0b(
         mem; efl;
 
     requires
+        adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
         buffers_disjoint(dst_b, inB_b);
 
@@ -169,6 +173,7 @@ procedure{:quick} fast_multiply_a1b(
         mem; efl;
 
     requires
+        adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
         buffers_disjoint(dst_b, inB_b);
 
@@ -293,6 +298,7 @@ procedure{:quick} fast_multiply_a2b(
         mem; efl;
 
     requires
+        adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
         buffers_disjoint(dst_b, inB_b);
 
@@ -392,7 +398,7 @@ procedure{:quick} fast_multiply_a2b(
 
 
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 400"
 procedure{:quick} fast_multiply_a3b(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -422,6 +428,7 @@ procedure{:quick} fast_multiply_a3b(
         mem; efl;
 
     requires
+        adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
         buffers_disjoint(dst_b, inB_b);
 
@@ -561,6 +568,7 @@ procedure{:quick} fast_multiply(
         mem; efl;
 
     requires
+        adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
         buffers_disjoint(dst_b, inB_b);
 
@@ -606,6 +614,7 @@ procedure{:quick} fast_mul_stdcall(
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
         rsp; efl; mem;
     requires
+        adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
         buffers_disjoint(dst_b, inB_b);
 

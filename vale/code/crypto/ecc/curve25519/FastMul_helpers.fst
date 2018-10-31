@@ -316,10 +316,8 @@ let lemma_sum_a2b
         a2b_0 a2b_1 a2b_2 a2b_3 a2b_4
         s1 s2 s3 s4 s5;
   ()
-#pop-options
 
 
-#push-options "--z3rlimit 60"
 let lemma_sum_a3b
       (a0 a1 a2 a3:nat64)
       (a0a1a2b:nat) (a0a1a2b_0 a0a1a2b_1 a0a1a2b_2 a0a1a2b_3 a0a1a2b_4 a0a1a2b_5 a0a1a2b_6:nat64)
@@ -360,3 +358,5 @@ let lemma_sum_a3b
         a3b_0 a3b_1 a3b_2 a3b_3 a3b_4
         s1 s2 s3 s4 s5;
   ()
+
+#pop-options
