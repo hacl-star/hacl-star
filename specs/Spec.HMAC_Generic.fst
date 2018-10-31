@@ -10,8 +10,9 @@ module H = Spec.Hash_Generic
 
 
 (* Key wrapping function *)
-let wrap_key (a:H.algorithm) (len:size_nat{len < H.max_input a}) (key:lbytes len) (hlen:nat{H.range_output a hlen}) =
+let wrap_key (a:H.algorithm) (key:bytes{length key <= H.max_input a}) (hlen:nat{H.range_output a hlen}) =
   let block = create (H.size_block a) (u8 0) in
+  let len = length key in
   if len <= H.size_block a then
     update_slice block 0 len key
   else begin
@@ -34,7 +35,10 @@ let init (a:H.algorithm) (okey:lbytes (H.size_block a)) (hlen:nat{H.range_output
 
 let update_block (a:H.algorithm) prev block chash = H.update_block a prev block chash
 
-let update_last (a:H.algorithm) prev len last hash = H.update_last a prev len last hash
+let update_last (a:H.algorithm) prev last hash =
+  (* BB: Remove the argument from Spec.Hash_ *)
+  let len = length last in
+  H.update_last a prev len last hash
 
 
 let finish (a:H.algorithm) (key:lbytes (H.size_block a)) (hash:H.state a) (hlen:nat{H.range_output a hlen}) =
@@ -56,10 +60,17 @@ let finish (a:H.algorithm) (key:lbytes (H.size_block a)) (hash:H.state a) (hlen:
   hash2
 
 
-let hmac (a:H.algorithm) (klen:size_nat{klen < H.max_input a}) (key:lbytes klen) (len:size_nat{klen + len + H.size_block a <= H.max_input a}) (input:lbytes len) (hlen:nat{H.range_output a hlen}) =
-  let okey = wrap_key a klen key hlen in
+let hmac
+  (a:H.algorithm)
+  (key: bytes{length key <= H.max_input a})
+  (input: bytes{length key + length input + H.size_block a <= H.max_input a})
+  (hlen: nat{H.range_output a hlen}) =
+
+  let klen = length key in
+  let ilen = length input in
+  let okey = wrap_key a key hlen in
   let hash0 = init a okey hlen in
   let hash1 = repeati_blocks (H.size_block a) input
     (fun i -> update_block a ((i + 1) * H.size_block a))
-    (fun i -> update_last a ((i + 1) * H.size_block a)) hash0 in
+    (fun i _ -> update_last a ((i + 1) * H.size_block a)) hash0 in
   finish a okey hash1 hlen
