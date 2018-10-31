@@ -1,6 +1,7 @@
 include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../../arch/x64/X64.Vale.InsMem.vaf"
 include{:fstar}{:open} "FastMul_helpers"
+include{:fstar}{:open} "FastMul_defs"
 include{:fstar}{:open} "X64.CPU_Features_s"
 
 //include{:fstar}{:open} "Prop_s"
@@ -8,7 +9,7 @@ module X64.FastMul
 
 #reset-options "--z3rlimit 30"
 
-#verbatim{:interface}{:implementation}
+#verbatim{:interface}
 open Types_s
 open Arch.Types
 open X64.Machine_s
@@ -19,12 +20,25 @@ open X64.Vale.InsBasic
 open X64.Vale.InsMem
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
-open FastMul_helpers
-open FStar.Tactics
+open FastMul_defs
 open X64.CPU_Features_s
+#endverbatim
 
-//open FStar.Tactics
-//open CanonCommSemiring
+#verbatim{:implementation}
+open Types_s
+open Arch.Types
+open X64.Machine_s
+open X64.Memory
+open X64.Vale.State
+open X64.Vale.Decls
+open X64.Vale.InsBasic
+open X64.Vale.InsMem
+open X64.Vale.QuickCode
+open X64.Vale.QuickCodes
+open FStar.Tactics
+open FastMul_defs
+open FastMul_helpers
+open X64.CPU_Features_s
 #endverbatim
 
 type tactic:Type(0) extern;
@@ -598,7 +612,7 @@ procedure{:quick} fast_multiply(
 }
 
 // fast_mul_stdcall(dst, inA, inB)
-procedure{:quick} fast_mul_stdcall(
+procedure{:quick}{:public} fast_mul_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
