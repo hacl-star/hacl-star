@@ -21,6 +21,15 @@ val repeat_left:
   -> acc:a lo
   -> Tot (a hi) (decreases (hi - lo))
 
+inline_for_extraction
+val repeat_left_all_ml:
+    lo:nat
+  -> hi:nat{lo <= hi}
+  -> a:(i:nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:nat{lo <= i /\ i < hi} -> a i -> FStar.All.ML (a (i + 1)))
+  -> acc:a lo
+  -> FStar.All.ML (a hi)
+
 (**
 * fold_right-like loop combinator:
 * [ repeat_right lo hi a f acc == f (hi - 1) .. ... (f (lo + 1) (f lo acc)) ]
@@ -123,6 +132,14 @@ val repeat_range:
   -> (s:nat{s >= min /\ s < max} -> a -> Tot a)
   -> a
   -> Tot a (decreases (max - min))
+
+val repeat_range_all_ml:
+  #a:Type
+  -> min:nat
+  -> max:nat{min <= max}
+  -> (s:nat{s >= min /\ s < max} -> a -> FStar.All.ML a)
+  -> a
+  -> FStar.All.ML a
 
 unfold
 type repeatable (#a:Type) (#n:nat) (pred:(i:nat{i <= n} -> a -> Tot Type)) =

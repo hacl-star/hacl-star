@@ -10,8 +10,9 @@ module H = Spec.Hash
 
 
 (* Key wrapping function *)
-let wrap_key (a:H.algorithm) (len:size_nat{len < H.max_input a}) (key:lbytes len) =
+let wrap_key (a:H.algorithm) (key:bytes{length key <= H.max_input a}) =
   let block = create (H.size_block a) (u8 0) in
+  let len = length key in
   if len <= H.size_block a then
     update_slice block 0 len key
   else begin
@@ -56,8 +57,14 @@ let finish (a:H.algorithm) (key:lbytes (H.size_block a)) (hash:H.state a) =
   hash2
 
 
-let hmac (a:H.algorithm) (klen:size_nat{klen <= H.max_input a}) (key:lbytes klen) (len:size_nat{klen + len + H.size_block a <= H.max_input a}) (input:lbytes len) =
-  let okey = wrap_key a klen key in
+let hmac
+  (a:H.algorithm)
+  (key:bytes{length key <= H.max_input a})
+  (input:bytes{length key + length input + H.size_block a <= H.max_input a}) =
+
+  let klen = length key in
+  let ilen = length input in
+  let okey = wrap_key a key in
   let hash0 = init a okey in
   let hash1 = repeati_blocks (H.size_block a) input
     (fun i -> update_block a)

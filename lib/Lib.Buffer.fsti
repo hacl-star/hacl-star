@@ -616,6 +616,25 @@ val salloc1_trivial:
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
 
 inline_for_extraction noextract
+val salloc_nospec:
+    #a:Type
+  -> #res:Type
+  -> h:mem
+  -> len:size_t{0 < v len}
+  -> x:a
+  -> footprint:Ghost.erased B.loc
+  -> impl:(b:lbuffer a (v len) -> Stack res
+      (requires fun h0 ->
+        modifies0 h h0 /\ ~(live_region h (get_tip h0)) /\
+        B.frameOf b == get_tip h0 /\ live h0 b /\ as_seq h0 b == Seq.create (v len) x)
+      (ensures  fun h0 r h1 ->
+        modifies (B.loc_union (B.loc_all_regions_from false (get_tip h0))
+                              (Ghost.reveal footprint)) h0 h1)) ->
+  Stack res
+    (requires fun h0 -> h0 == h)
+    (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1)
+
+inline_for_extraction noextract
 val loopi_blocks:
     #a:Type0
   -> #b:Type0
@@ -694,7 +713,7 @@ val loop_blocks:
       B.modifies (B.loc_buffer write) h0 h1 /\
       as_seq h1 write ==
       Seq.repeat_blocks #a #(Seq.lseq b blen) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
- 
+
 
 (** Map a total function on a buffer *)
 inline_for_extraction
@@ -741,26 +760,4 @@ val imapT:
     (ensures  fun h0 _ h1 ->
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       as_seq h1 o == Seq.map f (ias_seq h0 i))
-
-
-(** Map a total function on a buffer *)
-inline_for_extraction
-val fill:
-    #a:Type
-  -> clen:size_t
-  -> o:lbuffer a (v clen)
-  -> spec:(mem -> GTot(i:size_nat{i < v clen} -> a))
-  -> impl:(i:size_t{v i < v clen} -> Stack unit
-          (requires fun h ->  B.live h o)
-          (ensures  fun h0 _ h1 ->
-            B.modifies (B.loc_buffer o) h0 h1 /\
-            as_seq h1 o == Seq.upd (as_seq h0 o) (v i) (spec h0 (v i))))
-  -> Stack unit
-    (requires fun h0 -> B.live h0 o)
-    (ensures  fun h0 _ h1 ->
-      B.live h1 o /\ B.modifies (B.loc_buffer o) h0 h1 /\
-      as_seq h1 o == Seq.createi #a (v clen) (spec h0))
-
-
-
 

@@ -74,7 +74,7 @@ val aead_encrypt:
 let aead_encrypt k n_len n len m aad_len aad =
   let iv_len = 12 in
   let iv = create 12 (u8 0) in
-  let iv = update_sub iv 0 n_len n in 
+  let iv = update_sub iv 0 n_len n in
 
   let c = AES.aes128_encrypt_bytes k iv_len iv 2 m in
   let mac = gcm k iv_len iv len c aad_len aad in
@@ -97,7 +97,7 @@ val aead_decrypt:
 let aead_decrypt k n_len n clen c aad_len aad =
   let iv_len = 12 in
   let iv = create 12 (u8 0) in
-  let iv = update_sub iv 0 n_len n in 
+  let iv = update_sub iv 0 n_len n in
   let encrypted_plaintext = sub c 0 (clen - blocksize) in
   let associated_mac = sub c (clen - blocksize) blocksize in
   let computed_mac = gcm k iv_len iv (clen - blocksize) encrypted_plaintext aad_len aad in
