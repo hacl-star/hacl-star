@@ -61,3 +61,11 @@ let repeati_inductive_repeat_gen #a n pred f x0 =
     (acc:a 0) :
     Lemma (repeat_right 0 n a f acc == repeat_right 0 n (fun i -> a i) f acc) = () in
   repeat_right_eta a' f' x0
+
+let repeati_inductive' #a n pred f x0 =
+  let f'
+    (i:nat{i < n})
+    (x:a{pred i x /\ x == repeati i f x0})
+    : x':a{pred (i + 1) x' /\ x' == repeati (i + 1) f x0}
+    = f i x in
+  repeat_gen n (fun i -> x:a{pred i x /\ x == repeati i f x0}) f' x0

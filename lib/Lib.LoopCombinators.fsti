@@ -124,7 +124,6 @@ val repeat_range:
   -> a
   -> Tot a (decreases (max - min))
 
-unfold
 type repeatable (#a:Type) (#n:nat) (pred:(i:nat{i <= n} -> a -> Tot Type)) =
   i:nat{i < n} -> x:a{pred i x} -> y:a{pred (i+1) y}
 
@@ -152,3 +151,16 @@ val repeati_inductive_repeat_gen:
  -> f:repeatable #a #n pred
  -> x0:a{pred 0 x0}
  -> Lemma (repeati_inductive n pred f x0 == repeat_gen n (fun i -> x:a{pred i x}) f x0)
+
+type preserves (#a:Type) (#n:nat) (f:(i:nat{i < n} -> a -> a)) (pred:(i:nat{i <= n} -> a -> Tot Type)) =
+  forall (i:nat{i < n}) (x:a). pred i x ==> pred (i + 1) (f i x)
+
+val repeati_inductive':
+    #a:Type
+  -> n:nat
+  -> pred:(i:nat{i <= n} -> a -> Type0)
+  -> f:(i:nat{i < n} -> a -> a)
+  -> x0:a
+  -> Pure a
+    (requires preserves #a #n f pred /\ pred 0 x0)
+    (ensures fun res -> pred n res /\ res == repeati n f x0)
