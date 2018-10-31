@@ -114,6 +114,18 @@ let create_empty_mt _ =
 
 /// Insertion
 
+val hash_ss_insert:
+  lv:nat{lv < 32} ->
+  i:nat ->
+  j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
+  hs:hash_ss{S.length hs = 32 /\ mt_wf_elts lv hs i j} ->
+  v:hash ->
+  GTot (ihs:hash_ss{S.length ihs = 32 /\ mt_wf_elts (lv + 1) ihs (i / 2) (j / 2)})
+let hash_ss_insert lv i j hs v =
+  let ihs = S.upd hs lv (S.snoc (S.index hs lv) v) in
+  mt_wf_elts_equal (lv + 1) hs ihs (i / 2) (j / 2);
+  ihs
+
 val insert_:
   lv:nat{lv < 32} ->
   i:nat ->
@@ -123,12 +135,36 @@ val insert_:
   GTot (ihs:hash_ss{S.length ihs = 32})
        (decreases j)
 let rec insert_ lv i j hs acc =
-  let ihs = S.upd hs lv (S.snoc (S.index hs lv) acc) in
-  if j % 2 = 1 && S.length (S.index hs lv) > 0 
+  let ihs = hash_ss_insert lv i j hs acc in
+  if j % 2 = 1 // S.length (S.index hs lv) > 0 
   then (let nacc = hash_2 (S.last (S.index hs lv)) acc in
-       mt_wf_elts_equal (lv + 1) hs ihs (i / 2) (j / 2);
        insert_ (lv + 1) (i / 2) (j / 2) ihs nacc)
   else ihs
+
+val insert_base:
+  lv:nat -> i:nat -> j:nat -> hs:hash_ss -> acc:hash ->
+  Lemma (requires (
+	  lv < 32 /\ i <= j /\ j < pow2 (32 - lv) - 1 /\
+	  S.length hs = 32 /\ mt_wf_elts lv hs i j /\
+	  j % 2 <> 1))
+	(ensures (S.equal (insert_ lv i j hs acc)
+			  (hash_ss_insert lv i j hs acc)))
+let insert_base lv i j hs acc = ()
+
+val insert_rec:
+  lv:nat -> i:nat -> j:nat -> hs:hash_ss -> acc:hash ->
+  Lemma (requires (
+	  lv < 32 /\ i <= j /\ j < pow2 (32 - lv) - 1 /\
+	  S.length hs = 32 /\ mt_wf_elts lv hs i j /\
+	  j % 2 == 1))
+	(ensures (
+	  (mt_wf_elts_equal (lv + 1) hs
+	    (hash_ss_insert lv i j hs acc) (i / 2) (j / 2);
+	  S.equal (insert_ lv i j hs acc)
+		  (insert_ (lv + 1) (i / 2) (j / 2)
+			   (hash_ss_insert lv i j hs acc)
+			   (hash_2 (S.last (S.index hs lv)) acc)))))
+let insert_rec lv i j hs acc = ()
 
 val mt_insert:
   mt:wf_mt{mt_not_full mt} -> v:hash -> GTot merkle_tree
