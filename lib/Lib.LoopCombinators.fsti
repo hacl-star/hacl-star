@@ -144,3 +144,20 @@ val repeati_inductive:
  -> f:repeatable #a #n pred
  -> x0:a{pred 0 x0}
  -> res:a{pred n res}
+
+type preserves_predicate (n:nat) 
+     (a:(i:nat{i <= n} -> Type)) 
+     (f:(i:nat{i < n} -> a i -> a (i + 1))) 
+     (pred:(i:nat{i <= n} -> a i -> Tot Type))=
+  forall (i:nat{i < n}) (x:a i). pred i x ==> pred (i + 1) (f i x)
+
+val repeat_gen_inductive:
+   n:nat
+ -> a:(i:nat{i <= n} -> Type)
+ -> pred:(i:nat{i <= n} -> a i -> Type0)
+ -> f:(i:nat{i < n} -> a i -> a (i + 1))
+ -> x0:a 0
+ -> Pure (a n)
+   (requires preserves_predicate n a f pred /\ pred 0 x0)
+   (ensures fun res -> pred n res /\ res == repeat_gen n a f x0)
+ 

@@ -48,33 +48,25 @@ let lemma_update_sub #a #len dst start n src res =
   FStar.Seq.lemma_split res (start + n);
   FStar.Seq.lemma_split res1 (start + n)
 
-
-(* The following code for createi verifies against the spec but does not match "loop" because the "refl" function maps to a state-dependent refinement type. 
-   To do this properly we need a version of "repeat_gen_inductive" that matches loop. For now, admitting createi with a simpler createi_a *)
-
-let createi_a' (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = 
-    s:lseq a k{forall (i:nat).
-    {:pattern (index s i)} i < k ==> index s i == init i}
-
-let createi_spec' (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
-	         (si:createi_a' a len init i) : createi_a' a len init (i+1) = 
-    let s : lseq a (i+1) = FStar.Seq.snoc si (init i) in
-    assert (forall (j:nat). j < i ==> index si j == init j);
-    assert (forall (j:nat). j < (i+1) ==> index s j == init j);
-    s
-let createi' #a len init_f = 
-  repeat_gen len (createi_a' a len init_f) (createi_spec' a len init_f)
-  (of_list [])
-
 let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = lseq a k
-
-let createi_spec (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
-	         (si:createi_a a len init i) : createi_a a len init (i+1) = FStar.Seq.snoc si (init i)
-
+let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) (s:createi_a a len init k) =
+  forall (i:nat). {:pattern (index s i)} i < k ==> index s i == init i
+let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
+	         (si:createi_a a len init i) 
+		 : r:createi_a a len init (i+1){
+		   createi_pred a len init i si ==>
+		   createi_pred a len init (i+1) r
+		 } = 
+    let s : lseq a (i+1) = FStar.Seq.snoc si (init i) in
+    assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
+    assert (createi_pred a len init i si ==> (forall (j:nat). j < (i+1) ==> index s j == init j));
+    s
 let createi #a len init_f = 
-  admit();
-  repeat_gen len (createi_a a len init_f) (createi_spec a len init_f)
-  (of_list [])
+    repeat_gen_inductive len 
+      (createi_a a len init_f) 
+      (createi_pred a len init_f)
+      (createi_step a len init_f)
+      (of_list []) 
 
 let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
 	       (f:(i:nat{i < len} -> a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =

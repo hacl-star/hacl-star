@@ -249,9 +249,9 @@ let fillT #a clen o spec f =
   (Seq.createi_a a (v clen) spec) 
   (fun h i -> Seq.sub (as_seq h o) 0 i)
   (fun i -> B.loc_buffer o)
-  (fun h -> Seq.createi_spec a (v clen) spec)
+  (fun h -> Seq.createi_step a (v clen) spec)
   (fun i ->
-    Loop.unfold_repeat_gen (v clen) (Seq.createi_a a (v clen) spec) (Seq.createi_spec a (v clen) spec) (Seq.of_list []) (v i);
+    Loop.unfold_repeat_gen (v clen) (Seq.createi_a a (v clen) spec) (Seq.createi_step a (v clen) spec) (Seq.of_list []) (v i);
     o.(i) <- f i;
     let h' = ST.get () in
     let sub_o = Seq.sub (as_seq h' o) 0 (v i+1) in
@@ -264,9 +264,9 @@ let fill #a h0 clen o spec impl =
   (Seq.createi_a a (v clen) (spec h0)) 
   (fun h i -> Seq.sub (as_seq h o) 0 i)
   (fun i -> B.loc_buffer o)
-  (fun h -> Seq.createi_spec a (v clen) (spec h0))
+  (fun h -> Seq.createi_step a (v clen) (spec h0))
   (fun i ->
-    Loop.unfold_repeat_gen (v clen) (Seq.createi_a a (v clen) (spec h0)) (Seq.createi_spec a (v clen) (spec h0)) (Seq.of_list []) (v i);
+    Loop.unfold_repeat_gen (v clen) (Seq.createi_a a (v clen) (spec h0)) (Seq.createi_step a (v clen) (spec h0)) (Seq.of_list []) (v i);
     let h = ST.get () in
     impl i;
     let h' = ST.get () in
@@ -315,7 +315,6 @@ let mapi #a #b h0 clen out inp spec impl =
     Seq.mapi_inner #a #b #(v clen) spec in_seq)
   (fun i -> impl i)
 
-let map_blocks
   
 
   

@@ -73,11 +73,11 @@ Salsa20.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Salsa20.fst tests/Spec.Salsa20.Test
 	./Salsa20.exe
 
 # Under CI
-Chacha20Poly1305.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst tests/Spec.Chacha20Poly1305.Test.fst
+Chacha20Poly1305.exe: $(LIBS_FILES) Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst tests/Spec.Chacha20Poly1305.Test.fst
 	mkdir -p Chacha20Poly1305-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.CTR --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.Chacha20Poly1305.Test --odir Chacha20Poly1305-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.Chacha20Poly1305.Test --odir Chacha20Poly1305-ml $^
 	@echo 'let _ = test()' >> Chacha20Poly1305-ml/Spec_Chacha20Poly1305_Test.ml
-	$(OCAMLOPT) -I Chacha20Poly1305-ml $(addprefix Chacha20Poly1305-ml/, $(LIBS_ML)) Chacha20Poly1305-ml/Spec_CTR.ml Chacha20Poly1305-ml/Spec_Chacha20.ml Chacha20Poly1305-ml/Spec_Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305_Test.ml -o Chacha20Poly1305.exe
+	$(OCAMLOPT) -I Chacha20Poly1305-ml $(addprefix Chacha20Poly1305-ml/, $(LIBS_ML)) Chacha20Poly1305-ml/Spec_Chacha20.ml Chacha20Poly1305-ml/Spec_Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305_Test.ml -o Chacha20Poly1305.exe
 	./Chacha20Poly1305.exe
 
 # Under CI
@@ -97,19 +97,19 @@ gf128.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.GF128.fst tests/Spec.GF128.Te
 	./gf128.exe
 
 # Under CI
-aes.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst tests/Spec.AES.Test.fst
+aes.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst tests/Spec.AES.Test.fst
 	mkdir -p aes-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --extract_module Spec.AES.Test --odir aes-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.AES.Test --odir aes-ml $^
 	@echo 'let _ = test()' >> aes-ml/Spec_AES_Test.ml
-	$(OCAMLOPT) -I aes-ml $(OCAML_INCLUDES) $(addprefix aes-ml/, $(LIBS_ML)) aes-ml/Spec_GaloisField.ml aes-ml/Spec_CTR.ml aes-ml/Spec_AES.ml aes-ml/Spec_AES_Test.ml -o aes.exe
+	$(OCAMLOPT) -I aes-ml $(OCAML_INCLUDES) $(addprefix aes-ml/, $(LIBS_ML)) aes-ml/Spec_GaloisField.ml aes-ml/Spec_AES.ml aes-ml/Spec_AES_Test.ml -o aes.exe
 	./aes.exe
 
 # Under CI
-aesgcm.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.CTR.fst Spec.AES.fst Spec.GF128.fst Spec.AESGCM.fst tests/Spec.AESGCM.Test.fst
+aesgcm.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AESGCM.fst tests/Spec.AESGCM.Test.fst
 	mkdir -p aesgcm-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.CTR --extract_module Spec.AES --extract_module Spec.AESGCM  --extract_module Spec.AESGCM.Test --extract_module Spec.GF128 --odir aesgcm-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.AESGCM  --extract_module Spec.AESGCM.Test --extract_module Spec.GF128 --odir aesgcm-ml $^
 	@echo 'let _ = test()' >> aesgcm-ml/Spec_AESGCM_Test.ml
-	$(OCAMLOPT) -I aesgcm-ml $(OCAML_INCLUDES) $(addprefix aesgcm-ml/, $(LIBS_ML)) aesgcm-ml/Spec_GaloisField.ml aesgcm-ml/Spec_CTR.ml aesgcm-ml/Spec_AES.ml aesgcm-ml/Spec_GF128.ml aesgcm-ml/Spec_AESGCM.ml aesgcm-ml/Spec_AESGCM_Test.ml -o aesgcm.exe
+	$(OCAMLOPT) -I aesgcm-ml $(OCAML_INCLUDES) $(addprefix aesgcm-ml/, $(LIBS_ML)) aesgcm-ml/Spec_GaloisField.ml aesgcm-ml/Spec_AES.ml aesgcm-ml/Spec_GF128.ml aesgcm-ml/Spec_AESGCM.ml aesgcm-ml/Spec_AESGCM_Test.ml -o aesgcm.exe
 	./aesgcm.exe
 
 # Under CI
