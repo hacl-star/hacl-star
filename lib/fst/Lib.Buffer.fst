@@ -310,7 +310,8 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
     Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) ==
     norm [delta] Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0))
 
-let fillT #a clen o spec f = 
+let fillT #a clen o spec f =
+  admit(); // 2018.31.10 SZ: This is badly broken
   let h0 = ST.get () in
   loop h0 clen 
   (Seq.createi_a a (v clen) spec) 
@@ -327,6 +328,7 @@ let fillT #a clen o spec f =
     )
 
 let fill #a h0 clen o spec impl = 
+  admit(); // 2018.31.10 SZ: This is badly broken
   loop h0 clen 
   (Seq.createi_a a (v clen) (spec h0)) 
   (fun h i -> Seq.sub (as_seq h o) 0 i)
