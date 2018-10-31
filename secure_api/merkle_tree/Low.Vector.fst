@@ -37,6 +37,12 @@ val as_seq:
 let as_seq h #a vec =
   B.as_seq h (B.gsub (Vec?.vs vec) 0ul (Vec?.sz vec))
 
+val as_seq_capped: 
+  HS.mem -> #a:Type -> vec:vector a -> 
+  GTot (s:S.seq a{S.length s = U32.v (Vec?.cap vec)})
+let as_seq_capped h #a vec =
+  B.as_seq h (B.gsub (Vec?.vs vec) 0ul (Vec?.cap vec))
+
 /// Capacity
 
 unfold val size_of: #a:Type -> vec:vector a -> Tot uint32_t
@@ -305,7 +311,7 @@ val free:
   HST.ST unit
     (requires (fun h0 -> live h0 vec /\ freeable vec))
     (ensures (fun h0 _ h1 -> modifies (loc_addr_of_vector vec) h0 h1))
-let free #a vec =
+let free #a vec =  
   B.free (Vec?.vs vec)
 
 /// Element access
@@ -323,6 +329,15 @@ val index:
     (ensures (fun h0 v h1 -> 
       h0 == h1 /\ S.index (as_seq h1 vec) (U32.v i) == v))
 let index #a vec i =
+  B.index (Vec?.vs vec) i
+
+val index_capped:
+  #a:Type -> vec:vector a -> i:uint32_t -> 
+  HST.ST a
+    (requires (fun h0 -> live h0 vec /\ i < B.len vec.vs))
+    (ensures (fun h0 v h1 ->
+      h0 == h1 /\ S.index (as_seq_capped h1 vec) (U32.v i) == v))
+let index_capped #a vec i =
   B.index (Vec?.vs vec) i
 
 val front:
