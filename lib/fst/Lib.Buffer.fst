@@ -310,75 +310,60 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
     Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) ==
     norm [delta] Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0))
 
+#set-options "--max_fuel 1"
+
 let fillT #a clen o spec f =
-  admit(); // 2018.31.10 SZ: This is badly broken
+  let open Seq in
   let h0 = ST.get () in
-  loop h0 clen 
-  (Seq.createi_a a (v clen) spec) 
-  (fun h i -> Seq.sub (as_seq h o) 0 i)
-  (fun i -> B.loc_buffer o)
-  (fun h -> Seq.createi_step a (v clen) spec)
-  (fun i ->
-    Loop.unfold_repeat_gen (v clen) (Seq.createi_a a (v clen) spec) (Seq.createi_step a (v clen) spec) (Seq.of_list []) (v i);
-    o.(i) <- f i;
-    let h' = ST.get () in
-    let sub_o = Seq.sub (as_seq h' o) 0 (v i+1) in
-    let (old,n) = FStar.Seq.un_snoc sub_o in 
-    ()
+  let a_spec = createi_a a (v clen) spec in
+  let refl h i = sub (as_seq h o) 0 i in
+  let footprint i = B.loc_buffer o in
+  let spec h = createi_step a (v clen) spec in
+  loop h0 clen a_spec refl footprint spec
+    (fun i ->
+      Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (of_list #a []) (v i);
+      o.(i) <- f i;
+      let h' = ST.get () in
+      FStar.Seq.lemma_split (as_seq h' o) (v i)
     )
 
 let fill #a h0 clen o spec impl = 
-  admit(); // 2018.31.10 SZ: This is badly broken
-  loop h0 clen 
-  (Seq.createi_a a (v clen) (spec h0)) 
-  (fun h i -> Seq.sub (as_seq h o) 0 i)
-  (fun i -> B.loc_buffer o)
-  (fun h -> Seq.createi_step a (v clen) (spec h0))
+  let open Seq in
+  let h0 = ST.get() in
+  let a_spec = createi_a a (v clen) (spec h0) in
+  let refl h i = sub (as_seq h o) 0 i in
+  let footprint i = B.loc_buffer o in
+  let spec h = createi_step a (v clen) (spec h0) in
+  loop h0 clen a_spec refl footprint spec
   (fun i ->
-    Loop.unfold_repeat_gen (v clen) (Seq.createi_a a (v clen) (spec h0)) (Seq.createi_step a (v clen) (spec h0)) (Seq.of_list []) (v i);
-    let h = ST.get () in
+    Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (of_list #a []) (v i);
     impl i;
     let h' = ST.get () in
-    let sub_o = Seq.sub (as_seq h' o) 0 (v i+1) in
-    let (old,n) = FStar.Seq.un_snoc sub_o in 
-    ()
-    )
+    FStar.Seq.lemma_split (as_seq h' o) (v i)
+  )
+
+#set-options "--max_fuel 0"
 
 let mapT #a #b clen out f inp = 
   let h0 = ST.get () in
-  fill #b h0 clen out 
-  (fun h -> 
-    let in_seq = as_seq h inp in
-    Seq.map_inner #a #b #(v clen) f in_seq)
-  (fun i -> let h = ST.get() in 
-	 assert (live h inp);
-	 assert (live h out);
-	 out.(i) <- f inp.(i))
-  
+  fill h0 clen out
+    (fun h -> let in_seq = as_seq h inp in Seq.map_inner f in_seq)
+    (fun i -> let h = ST.get() in out.(i) <- f inp.(i))
+
 let mapiT #a #b clen out spec_f f inp = 
   let h0 = ST.get () in
-  fill #b h0 clen out 
-  (fun h -> 
-    let in_seq = as_seq h inp in
-    Seq.mapi_inner #a #b #(v clen) spec_f in_seq)
-  (fun i -> let xi = inp.(i) in
-	 out.(i) <- f i xi)
+  fill h0 clen out
+    (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner spec_f in_seq)
+    (fun i -> let xi = inp.(i) in out.(i) <- f i xi)
 
 let imapT #a #b #len out clen f inp = 
   let h0 = ST.get () in
-  fill #b h0 clen out 
-  (fun h -> 
-    let in_seq = ias_seq h inp in
-    Seq.map_inner #a #b #len f in_seq)
-  (fun i -> let h = ST.get() in 
-	 assert (live h inp);
-	 assert (live h out);
-	 out.(i) <- f (iindex inp i))
+  fill h0 clen out
+    (fun h -> let in_seq = ias_seq h inp in Seq.map_inner f in_seq)
+    (fun i -> let h = ST.get() in out.(i) <- f (iindex inp i))
 
 let mapi #a #b h0 clen out inp spec impl = 
   let h0 = ST.get () in
-  fill #b h0 clen out 
-  (fun h -> 
-    let in_seq = as_seq h inp in
-    Seq.mapi_inner #a #b #(v clen) spec in_seq)
-  (fun i -> impl i)
+  fill h0 clen out
+    (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner #a #b #(v clen) spec in_seq)
+    (fun i -> impl i)
