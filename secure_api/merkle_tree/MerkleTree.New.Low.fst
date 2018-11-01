@@ -849,6 +849,8 @@ private val insert_:
 		     (RV.as_seq h0 hs) (Rgl?.r_repr hreg h0 acc)))))
 	 (decreases (U32.v j))
 // #reset-options "--z3rlimit 800"
+// This proof works with the resource limit above, but it's a bit slow.
+// It will be admitted until the hint file is generated.
 #reset-options "--admit_smt_queries true"
 private let rec insert_ lv i j hs acc =
   let hh0 = HST.get () in
@@ -1039,8 +1041,7 @@ private let rec insert_ lv i j hs acc =
   assert (S.equal (RV.as_seq hh5 hs)
 		  (High.insert_ (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
 		    (RV.as_seq hh0 hs) (Rgl?.r_repr hreg hh0 acc))) // QED
-
-#reset-options
+#reset-options // reset "--admit_smt_queries true"
 
 // Caution: current impl. manipulates the content in `v`.
 val mt_insert:
