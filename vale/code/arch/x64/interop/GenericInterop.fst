@@ -180,10 +180,12 @@ let rec create_buffer_list (dom:list vale_type) (acc:list b8)
 let maybe_cons_buffer (a:vale_type) (x:vale_type_as_type a) (acc:list b8) : list b8 =
   if VT_Buffer? a then x::acc else acc
 
+let mem_roots_p (h0:HS.mem) (roots:list b8) =
+  Interop.list_disjoint_or_eq roots /\
+  Interop.list_live h0 roots
 
 let mem_roots (roots:list b8) =
-    h0:HS.mem{ Interop.list_disjoint_or_eq roots /\
-               Interop.list_live h0 roots }
+    h0:HS.mem{ mem_roots_p h0 roots }
 
 let rec initial_state_t
               (dom:list vale_type)
@@ -192,7 +194,8 @@ let rec initial_state_t
   : n_arrow dom Type =
     match dom with
     | [] ->
-      (mem_roots acc ->
+      (h0:HS.mem ->
+       stack:b8{mem_roots_p h0 (stack::acc)} ->
        GTot codom)
     | hd::tl ->
       fun (x:vale_type_as_type hd) ->
@@ -295,6 +298,12 @@ let update_taint_map (#a:vale_type)
         else taint y
     | _ -> taint
 
+let regs_with_stack (regs:registers) (stack_b:b8) : registers =
+    fun r ->
+      if r = Rsp then
+        addrs stack_b
+      else regs r
+
 // Splitting the construction of the initial state into two functions
 // one that creates the initial trusted state (i.e., part of our TCB)
 // and another that just creates the vale state, a view upon the trusted one
@@ -303,14 +312,16 @@ let create_initial_trusted_state_core
        (regs:registers)
        (xmms:xmms_t)
        (taint:taint_map)
-       (h0:mem_roots acc)
+       (h0:HS.mem)
+       (stack:b8{mem_roots_p h0 (stack::acc)})
   : GTot (TS.traceState & mem)
-  = let (mem:mem) = {
+  = let acc = stack::acc in
+    let (mem:mem) = {
       addrs = addrs;
       ptrs = acc;
       hs = h0
     } in
-    let regs = FunctionalExtensionality.on reg regs in
+    let regs = FunctionalExtensionality.on reg (regs_with_stack regs stack) in
     let xmms = FunctionalExtensionality.on xmm xmms in
     let (s0:BS.state) = {
       BS.ok = true;
@@ -326,7 +337,6 @@ let create_initial_trusted_state_core
     },
     mem
 
-
 let initial_vale_state_t (dom:list vale_type) (acc:list b8) =
   initial_state_t dom acc va_state
 
@@ -335,9 +345,10 @@ let create_initial_vale_state_core
        (regs:registers)
        (xmms:xmms_t)
        (taint:taint_map)
-       (h0:mem_roots acc)
+       (h0:HS.mem)
+       (stack:b8{mem_roots_p h0 (stack::acc)})
   : GTot va_state
-  = let t_state, mem = create_initial_trusted_state_core acc regs xmms taint h0 in
+  = let t_state, mem = create_initial_trusted_state_core acc regs xmms taint h0 stack in
     {ok = TS.(BS.(t_state.state.ok));
      regs = X64.Vale.Regs.of_fun TS.(BS.(t_state.state.regs));
      xmms =  X64.Vale.Xmms.of_fun TS.(BS.(t_state.state.xmms));
@@ -350,12 +361,13 @@ let core_create_lemma
        (regs:registers)
        (xmms:xmms_t)
        (taint:taint_map)
-       (h0:mem_roots acc)
+       (h0:HS.mem)
+       (stack:b8{mem_roots_p h0 (stack::acc)})
   : Lemma
-      (ensures (fst (create_initial_trusted_state_core acc regs xmms taint h0) ==
-                state_to_S (create_initial_vale_state_core acc regs xmms taint h0)))
-  = let s_init, _ = (create_initial_trusted_state_core acc regs xmms taint h0) in
-    let s0 = (create_initial_vale_state_core acc regs xmms taint h0) in
+      (ensures (fst (create_initial_trusted_state_core acc regs xmms taint h0 stack) ==
+                state_to_S (create_initial_vale_state_core acc regs xmms taint h0 stack)))
+  = let s_init, _ = create_initial_trusted_state_core acc regs xmms taint h0 stack in
+    let s0 = create_initial_vale_state_core acc regs xmms taint h0 stack in
     let s1 = state_to_S s0 in
     assert (FunctionalExtensionality.feq (regs' s1.TS.state) (regs' s_init.TS.state));
     assert (FunctionalExtensionality.feq (xmms' s1.TS.state) (xmms' s_init.TS.state))
@@ -365,15 +377,15 @@ let create_both_initial_states_core
        (regs:registers)
        (xmms:xmms_t)
        (taint:taint_map)
-       (h0:HS.mem{ Interop.list_disjoint_or_eq acc /\
-                   Interop.list_live h0 acc })
+       (h0:HS.mem)
+       (stack:b8{mem_roots_p h0 (stack::acc)})
     : GTot (t:TS.traceState &
             v:va_state{
               t == state_to_S v
             })
-    = let t, _ = create_initial_trusted_state_core acc regs xmms taint h0 in
-      let v = create_initial_vale_state_core acc regs xmms taint h0 in
-      core_create_lemma acc regs xmms taint h0;
+    = let t, _ = create_initial_trusted_state_core acc regs xmms taint h0 stack in
+      let v = create_initial_vale_state_core acc regs xmms taint h0 stack in
+      core_create_lemma acc regs xmms taint h0 stack;
       (|t, v|)
 
 //The type of an arity-generic function that produces a pair
@@ -395,7 +407,7 @@ let rec create_initial_state_aux
         (xmms:xmms_t)
         (acc:list b8)
         (taint:taint_map)
-        (f: (acc:list b8 -> registers -> xmms_t -> taint_map -> mem_roots acc -> GTot codom))
+        (f: (acc:list b8 -> registers -> xmms_t -> taint_map -> h:HS.mem -> stack:b8{mem_roots_p h (stack::acc)} -> GTot codom))
       : n_dep_arrow
         dom
         (initial_state_t dom acc codom) =
@@ -429,26 +441,19 @@ let rec create_initial_state_aux
 
 let init_taint : taint_map = fun r -> Public
 
-let init_regs (stack_b:b8) : registers =
-    fun r ->
-      if r = Rsp then
-        addrs stack_b
-      else init_regs r
-
 let create_both_initial_states
       (is_win:bool)
-      (stack_b:b8)
       (dom:list vale_type{List.length dom < max_arity is_win})
     : n_dep_arrow
          dom
-         (both_initial_states_t dom [stack_b])
+         (both_initial_states_t dom [])
     = create_initial_state_aux
           dom
           is_win
           0
-          (init_regs stack_b)
+          init_regs
           init_xmms
-          [stack_b]
+          []
           init_taint
           create_both_initial_states_core
 
@@ -524,15 +529,11 @@ let vale_sig (#dom:list vale_type)
 //    Interepreting a vale pre/post as a Low* function type
 //////////////////////////////////////////////////////////////////////////////////////////
 
-let mem_roots_p (h0:HS.mem) (roots:list b8) =
-  Interop.list_disjoint_or_eq roots /\
-  Interop.list_live h0 roots
-
 let elim_down_1 (hd:vale_type)
                 (acc:list b8)
                 (down:create_vale_initial_state_t [hd] acc)
                 (x:vale_type_as_type hd)
-    : mem_roots (maybe_cons_buffer hd x acc) -> GTot va_state =
+    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::maybe_cons_buffer hd x acc)} -> GTot va_state =
   let f : n_dep_arrow [] (elim_1 (initial_vale_state_t [hd] acc) x) = elim_dep_arrow_cons hd [] down x in
   let g : (elim_1 (initial_vale_state_t [hd] acc) x) = elim_dep_arrow_nil f in
   let h : (elim_1 (initial_state_t [hd] acc va_state) x) = g in
@@ -565,8 +566,8 @@ let rec as_lowstar_sig_tl (#dom:list vale_type{Cons? dom})
                        (v:va_state).
                             HS.fresh_frame h0 h0' /\
                             B.frameOf b == HS.get_tip h0' /\
-                            B.live h0' b /\ //some trouble here with b not being in acc
-                            v == elim_down_1 hd acc down x h0' ==>
+                            B.live h0' b /\
+                            v == elim_down_1 hd acc down x h0' b ==>
                             elim_nil (elim_1 pre x) v b)))
         (ensures (fun h0 _ h1 -> True))
 
@@ -589,5 +590,3 @@ let as_lowstar_sig  (#dom:list vale_type{Cons? dom /\ List.length dom < max_arit
       (create_vale_initial_state dom [])
       (pre va_b0 win)
       (post va_b0 win)
-
-////////////////////////////////////////////////////////////////////////////////
