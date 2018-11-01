@@ -632,6 +632,8 @@ inline_for_extraction private val hash_vv_insert_copy:
       V.size_of (V.get h1 hs lv) == j + 1ul - offset_of (Ghost.reveal i) /\
       V.size_of (V.get h1 hs lv) == V.size_of (V.get h0 hs lv) + 1ul /\
       mt_safe_elts h1 (lv + 1ul) hs (Ghost.reveal i / 2ul) (j / 2ul) /\
+      RV.rv_loc_elems h0 hs (lv + 1ul) (V.size_of hs) ==
+      RV.rv_loc_elems h1 hs (lv + 1ul) (V.size_of hs) /\
       // correctness
       (mt_safe_elts_spec h0 lv hs (Ghost.reveal i) j;
       S.equal (RV.as_seq h1 hs)
@@ -784,6 +786,14 @@ private val insert_modifies_rec_helper:
 private let insert_modifies_rec_helper lv hs aloc h =
   admit ()
 
+private val insert_modifies_union_loc_weakening:
+  l1:loc -> l2:loc -> l3:loc -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (modifies l1 h0 h1))
+	(ensures (modifies (loc_union (loc_union l1 l2) l3) h0 h1))
+private let insert_modifies_union_loc_weakening l1 l2 l3 h0 h1 =
+  B.loc_includes_union_l l1 l2 l1;
+  B.loc_includes_union_l (loc_union l1 l2) l3 (loc_union l1 l2)
+
 private val insert_snoc_last_helper:
   #a:Type -> s:S.seq a{S.length s > 0} -> v:a ->
   Lemma (S.index (S.snoc s v) (S.length s - 1) ==
@@ -846,7 +856,6 @@ private let rec insert_ lv i j hs acc =
   let hh2 = HST.get () in
 
   // Base conditions
-  mt_safe_elts_spec hh0 lv hs (Ghost.reveal i) j;
   V.loc_vector_within_included hs lv (lv + 1ul);
   V.loc_vector_within_included hs (lv + 1ul) (V.size_of hs);
   V.loc_vector_within_disjoint hs lv (lv + 1ul) (lv + 1ul) (V.size_of hs);
@@ -871,12 +880,12 @@ private let rec insert_ lv i j hs acc =
        // 3-1) For the `modifies` postcondition
        assert (modifies (B.loc_all_regions_from false (B.frameOf acc)) hh2 hh3);
        assert (modifies
-          (loc_union
-      (loc_union
-        (RV.rs_loc_elem hvreg (V.as_seq hh0 hs) (U32.v lv))
-        (V.loc_vector_within hs lv (lv + 1ul)))
-      (B.loc_all_regions_from false (B.frameOf acc)))
-    hh0 hh3);
+                (loc_union
+		  (loc_union
+		    (RV.rs_loc_elem hvreg (V.as_seq hh0 hs) (U32.v lv))
+		    (V.loc_vector_within hs lv (lv + 1ul)))
+		  (B.loc_all_regions_from false (B.frameOf acc)))
+		hh0 hh3);
 
        // 3-2) Preservation
        RV.rv_inv_preserved
@@ -914,6 +923,25 @@ private let rec insert_ lv i j hs acc =
        // 4-0) Memory safety brought from the postcondition of the recursion
        assert (RV.rv_inv hh4 hs);
        assert (Rgl?.r_inv hreg hh4 acc);
+       assert (modifies (loc_union
+			  (loc_union
+  			    (RV.rv_loc_elems hh0 hs (lv + 1ul) (V.size_of hs))
+  			    (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
+  			  (B.loc_all_regions_from false (B.frameOf acc)))
+			hh3 hh4);
+       assert (modifies
+  	        (loc_union
+  		  (loc_union
+  		    (loc_union
+  		      (RV.rs_loc_elem hvreg (V.as_seq hh0 hs) (U32.v lv))
+  		      (V.loc_vector_within hs lv (lv + 1ul)))
+  		    (B.loc_all_regions_from false (B.frameOf acc)))
+  		  (loc_union
+  		    (loc_union
+  		      (RV.rv_loc_elems hh0 hs (lv + 1ul) (V.size_of hs))
+  		      (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
+  		    (B.loc_all_regions_from false (B.frameOf acc))))
+  	      hh0 hh4);
 
        // 4-1) For `mt_safe_elts`
        rv_inv_rv_elems_reg hh3 hs (lv + 1ul) (V.size_of hs);
@@ -944,6 +972,7 @@ private let rec insert_ lv i j hs acc =
        assert (S.equal (RV.as_seq hh4 hs)
 		       (High.insert_ (U32.v lv + 1) (U32.v (Ghost.reveal i) / 2) (U32.v j / 2)
 			 (RV.as_seq hh3 hs) (Rgl?.r_repr hreg hh3 acc)));
+       mt_safe_elts_spec hh0 lv hs (Ghost.reveal i) j;
        High.insert_rec (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
        	 (RV.as_seq hh0 hs) (Rgl?.r_repr hreg hh0 acc);
        assert (S.equal (RV.as_seq hh4 hs)
@@ -954,7 +983,24 @@ private let rec insert_ lv i j hs acc =
        assert (mt_safe_elts hh2 (lv + 1ul) hs (Ghost.reveal i / 2ul) ((j + 1ul) / 2ul));
        mt_safe_elts_constr hh2 lv hs (Ghost.reveal i) (j + 1ul);
        assert (mt_safe_elts hh2 lv hs (Ghost.reveal i) (j + 1ul));
+       assert (modifies
+  	        (loc_union
+  		  (RV.rs_loc_elem hvreg (V.as_seq hh0 hs) (U32.v lv))
+  		  (V.loc_vector_within hs lv (lv + 1ul)))
+		hh0 hh2);
+       insert_modifies_union_loc_weakening
+  	 (loc_union
+  	   (RV.rs_loc_elem hvreg (V.as_seq hh0 hs) (U32.v lv))
+  	   (V.loc_vector_within hs lv (lv + 1ul)))
+	 (B.loc_all_regions_from false (B.frameOf acc))
+	 (loc_union
+  	   (loc_union
+  	     (RV.rv_loc_elems hh0 hs (lv + 1ul) (V.size_of hs))
+  	     (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
+  	   (B.loc_all_regions_from false (B.frameOf acc)))
+	 hh0 hh2;
        // correctness
+       mt_safe_elts_spec hh0 lv hs (Ghost.reveal i) j;
        High.insert_base (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
        	 (RV.as_seq hh0 hs) (Rgl?.r_repr hreg hh0 acc);
        assert (S.equal (RV.as_seq hh2 hs)
@@ -989,9 +1035,11 @@ private let rec insert_ lv i j hs acc =
   assert (Rgl?.r_inv hreg hh5 acc);
 
   // 5-4) Correctness
+  mt_safe_elts_spec hh0 lv hs (Ghost.reveal i) j;
   assert (S.equal (RV.as_seq hh5 hs)
 		  (High.insert_ (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
 		    (RV.as_seq hh0 hs) (Rgl?.r_repr hreg hh0 acc))) // QED
+
 #reset-options
 
 // Caution: current impl. manipulates the content in `v`.
@@ -1162,7 +1210,7 @@ val init_path:
     (ensures (fun h0 p h1 -> path_safe h1 mtr p))
 let init_path mtr r =
   let nrid = RV.new_region_ r in
-  B.malloc r (hash_vec_r_init nrid) 1ul
+  B.malloc r (V.create_reserve 1ul (Rgl?.dummy hreg) nrid) 1ul
 
 val clear_path:
   mtr:HH.rid -> p:path ->
@@ -1552,7 +1600,7 @@ private val mt_flush_to_:
         h0 h1 /\
      RV.rv_inv h1 hs /\
      mt_safe_elts h1 lv hs i (Ghost.reveal j)))
-#reset-options "--z3rlimit 300 --max_fuel 2"
+// #reset-options "--z3rlimit 300 --max_fuel 2"
 #reset-options "--admit_smt_queries true"
 private let rec mt_flush_to_ lv hs pi i j =
   let hh0 = HST.get () in
