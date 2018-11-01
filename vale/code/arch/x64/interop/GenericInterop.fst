@@ -515,6 +515,15 @@ let rec vale_sig_tl (#dom:list vale_type)
       x:vale_type_as_type hd ->
       vale_sig_tl #tl (elim_1 pre x) (elim_1 post x)
 
+let elim_vale_sig_cons (hd:vale_type)
+                       (tl:list vale_type)
+                       (pre:vale_pre_tl (hd::tl))
+                       (post:vale_post_tl (hd::tl))
+                       (v:vale_sig_tl pre post)
+    : x:vale_type_as_type hd
+    -> vale_sig_tl (elim_1 pre x) (elim_1 post x)
+    = v
+
 let vale_sig (#dom:list vale_type)
              (pre:vale_pre dom)
              (post:vale_post dom)
@@ -534,11 +543,12 @@ let elim_down_1 (hd:vale_type)
                 (down:create_vale_initial_state_t [hd] acc)
                 (x:vale_type_as_type hd)
     : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::maybe_cons_buffer hd x acc)} -> GTot va_state =
-  let f : n_dep_arrow [] (elim_1 (initial_vale_state_t [hd] acc) x) = elim_dep_arrow_cons hd [] down x in
-  let g : (elim_1 (initial_vale_state_t [hd] acc) x) = elim_dep_arrow_nil f in
-  let h : (elim_1 (initial_state_t [hd] acc va_state) x) = g in
-  let i : (initial_state_t [] (maybe_cons_buffer hd x acc) va_state) = h in
-  i
+    down x
+
+let elim_down_nil (acc:list b8)
+                  (down:create_vale_initial_state_t [] acc)
+    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc)} -> GTot va_state =
+    down
 
 let elim_down_cons (hd:vale_type)
                    (tl:list vale_type)
@@ -548,28 +558,43 @@ let elim_down_cons (hd:vale_type)
     : create_vale_initial_state_t tl (maybe_cons_buffer hd x acc) =
     elim_dep_arrow_cons hd tl down x
 
-let rec as_lowstar_sig_tl (#dom:list vale_type{Cons? dom})
+let rec as_lowstar_sig_tl (#dom:list vale_type)
                           (acc:list b8)
                           (down:create_vale_initial_state_t dom acc)
                           (pre: vale_pre_tl dom)
                           (post: vale_post_tl dom)
     : Type =
     match dom with
-    | [hd] ->
-      x:vale_type_as_type hd ->
+    | [] ->
+      unit ->
       Stack unit
         (requires (fun h0 ->
-                    let acc1 = maybe_cons_buffer hd x acc in
-                    mem_roots_p h0 acc1 /\
-                    (forall (h0':mem_roots acc1)
-                       (b:stack_buffer)
-                       (v:va_state).
-                            HS.fresh_frame h0 h0' /\
-                            B.frameOf b == HS.get_tip h0' /\
-                            B.live h0' b /\
-                            v == elim_down_1 hd acc down x h0' b ==>
-                            elim_nil (elim_1 pre x) v b)))
-        (ensures (fun h0 _ h1 -> True))
+                    mem_roots_p h0 acc /\
+                    (forall (push_h0:mem_roots acc)
+                       (alloc_push_h0:mem_roots acc)
+                       (b:stack_buffer).
+                            HS.fresh_frame h0 push_h0 /\
+                            M.modifies loc_none push_h0 alloc_push_h0 /\
+                            HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
+                            B.frameOf b == HS.get_tip alloc_push_h0 /\
+                            B.live alloc_push_h0 b ==>
+                            elim_nil pre (elim_down_nil acc down alloc_push_h0 b) b)))
+        (ensures (fun h0 _ h1 ->
+                       exists push_h0 alloc_push_h0 b final fuel.//  {:pattern
+                                 // (post push_h0 alloc_push_h0 b final fuel)}
+                            HS.fresh_frame h0 push_h0 /\
+                            M.modifies loc_none push_h0 alloc_push_h0 /\
+                            HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
+                            B.frameOf b == HS.get_tip alloc_push_h0 /\
+                            B.live alloc_push_h0 b /\
+                            elim_nil
+                              post
+                              (elim_down_nil acc down alloc_push_h0 b)
+                              b
+                              final
+                              fuel /\
+                            HS.poppable final.mem.hs /\
+                            h1 == HS.pop (final.mem.hs)))
 
     | hd::tl ->
       x:vale_type_as_type hd ->
@@ -580,7 +605,7 @@ let rec as_lowstar_sig_tl (#dom:list vale_type{Cons? dom})
         (elim_1 pre x)
         (elim_1 post x)
 
-let as_lowstar_sig  (#dom:list vale_type{Cons? dom /\ List.length dom < max_arity win})
+let as_lowstar_sig  (#dom:list vale_type{List.length dom < max_arity win})
                     (pre: vale_pre dom)
                     (post: vale_post dom) =
     va_b0:va_code ->
@@ -590,3 +615,72 @@ let as_lowstar_sig  (#dom:list vale_type{Cons? dom /\ List.length dom < max_arit
       (create_vale_initial_state dom [])
       (pre va_b0 win)
       (post va_b0 win)
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+let elim_vale_sig_nil  (pre:vale_pre_tl [])
+                       (post:vale_post_tl [])
+                       (v:vale_sig_tl pre post)
+    : va_s0:va_state ->
+      stack_b:stack_buffer ->
+      Ghost (va_state & va_fuel)
+            (requires (elim_nil pre va_s0 stack_b))
+            (ensures (fun (va_s1, f) -> elim_nil post va_s0 stack_b va_s1 f))
+    = v
+
+let rec wrap_tl
+         (dom:list vale_type)
+         (acc:list b8)
+         (down:create_vale_initial_state_t dom acc)
+         (pre:vale_pre_tl dom)
+         (post:vale_post_tl dom)
+         (v:vale_sig_tl pre post)
+    : as_lowstar_sig_tl acc down pre post
+    = match dom with
+      | [] ->
+        let f : as_lowstar_sig_tl #[] acc down pre post =
+          fun () ->
+            let h0 = get() in
+            push_frame();
+            let h1 = get () in
+            let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 24) in
+            let h2 = get () in
+            assert (HS.fresh_frame h0 h1);
+            assert (mem_roots_p h2 acc);
+            st_put (fun h0' -> h0' == h2) (fun h0' ->
+              let va_s0 = elim_down_nil acc down h0' stack_b in
+              assert (B.frameOf stack_b = HS.get_tip h0');
+              assert (B.live h0' stack_b);
+              assert (elim_nil pre (elim_down_nil acc down h0' stack_b) stack_b);
+              let va_s1, fuel = elim_vale_sig_nil pre post v va_s0 stack_b in
+              assert (elim_nil post va_s0 stack_b va_s1 fuel);
+              (), va_s1.mem.hs
+            ); //conveniently, st_put assumes that the shape of the stack did not change
+            pop_frame()
+        in
+        f <: as_lowstar_sig_tl #[] acc down pre post
+
+      | hd::tl ->
+        let f (x:vale_type_as_type hd)
+           : as_lowstar_sig_tl (maybe_cons_buffer hd x acc)
+                               (elim_down_cons hd tl acc down x)
+                               (elim_1 pre x)
+                               (elim_1 post x)
+           = wrap_tl tl
+                  (maybe_cons_buffer hd x acc)
+                  (elim_down_cons hd tl acc down x)
+                  (elim_1 pre x)
+                  (elim_1 post x)
+                  (elim_vale_sig_cons hd tl pre post v x)
+        in
+        f
+
+
+let wrap (dom:list vale_type{List.length dom < max_arity win})
+         (pre:vale_pre dom)
+         (post:vale_post dom)
+         (v:vale_sig pre post)
+  : as_lowstar_sig pre post =
+  fun (va_b0:va_code) ->
+     wrap_tl dom [] (create_vale_initial_state dom []) (pre va_b0 win) (post va_b0 win) (v va_b0 win)
