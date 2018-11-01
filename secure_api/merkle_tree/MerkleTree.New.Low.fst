@@ -224,7 +224,7 @@ private val hash_vec_r_init:
 private let hash_vec_r_init r =
   let nrid = RV.new_region_ r in
   let ia = Rgl?.dummy hreg in
-  V.create_reserve 1ul ia r // cwinter: this is a memory leak; `ia' is never freed.
+  V.create_reserve 1ul ia r
 
 val hash_vec_r_free:
   v:hash_vec ->
@@ -233,8 +233,6 @@ val hash_vec_r_free:
     (ensures (fun h0 _ h1 ->
       modifies (loc_all_regions_from false (hash_vec_region_of v)) h0 h1))
 let hash_vec_r_free v =  
-  // cwinter: this cleans up the contained elements, but only up to size_of v, which 
-  // can be smaller than capacity_of v, e.g. after the V.create_reserve above.
   RV.free v
 
 
@@ -1901,4 +1899,6 @@ let mt_verify k j mtr p rt =
   path_safe_preserved
     mtr p (B.loc_all_regions_from false (B.frameOf rt)) hh0 hh1;
   mt_verify_ k j mtr p 1ul ih false;
-  buf_eq ih rt hash_size
+  let r = buf_eq ih rt hash_size in
+  Rgl?.r_free hreg ih;
+  r
