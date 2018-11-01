@@ -10,7 +10,7 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
   $(KREMLIN_HOME)/kremlib
 
-CC_ARGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
+CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
 
 LD_ARGS += $(MERKLE_TREE_HOME)/libmerkletree.a
@@ -28,10 +28,10 @@ OUT_TEST = merkle_tree_test
 
 all:
 	make -C ../
-	$(CC) $(CC_ARGS) $(IN_TEST_C) -o $(OUT_TEST) $(LD_ARGS)
+	$(CC) $(CFLAGS) $(IN_TEST_C) -o $(OUT_TEST) $(LD_ARGS)
 
 test-asan: all
-	clang -O1 -g -fsanitize=address -fno-omit-frame-pointer $(CC_ARGS) $(IN_TEST_C) -o $(OUT_TEST).asan $(LD_ARGS)
+	clang -O1 -g -fsanitize=address -fno-omit-frame-pointer $(CFLAGS) $(IN_TEST_C) -o $(OUT_TEST).asan $(LD_ARGS)
 
 clean:
 	rm -rf $(OUT_TEST)
