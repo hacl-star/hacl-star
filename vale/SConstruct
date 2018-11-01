@@ -1,5 +1,6 @@
 # This file requires Python version >= 3.6
 # This file requires SCons version >= 3.00
+# See ./INSTALL.md for more information
 
 ##################################################################################################
 #
@@ -138,6 +139,8 @@ AddOptYesNo('FSTAR-MY-VERSION', dest = 'fstar_my_version', default = False,
   help = 'Use version of F* that does not necessarily match .tested_fstar_version')
 AddOptYesNo('Z3-MY-VERSION', dest = 'z3_my_version', default = False,
   help = 'Use version of Z3 that does not necessarily match .tested_z3_version')
+AddOptYesNo('VALE-MY-VERSION', dest = 'vale_my_version', default = False,
+  help = 'Use version of Vale that does not necessarily match .vale_version')
 AddOptYesNo('RECORD-HINTS', dest = 'record_hints', default = False,
   help = 'Record new F* .hints files into the hints directory')
 AddOptYesNo('USE-HINTS', dest = 'use_hints', default = True,
@@ -180,6 +183,7 @@ c_user_args = GetOption('c_user_args')
 openssl_path = GetOption('openssl_path')
 fstar_my_version = GetOption('fstar_my_version')
 z3_my_version = GetOption('z3_my_version')
+vale_my_version = GetOption('vale_my_version')
 fstar_extract = GetOption('fstar_extract')
 record_hints = GetOption('record_hints')
 use_hints = GetOption('use_hints')
@@ -592,7 +596,8 @@ def check_fstar_version():
       f' modify .tested_fstar_version, or use the --FSTAR-MY-VERSION option to override.' +
       f' (We try to update the F* version frequently; feel free to change .tested_fstar_version' +
       f' to a more recent F* version as long as the build still succeeds with the new version.' +
-      f' We try to maintain the invariant that the build succeeds with the F* version in .tested_fstar_version.)')
+      f' We try to maintain the invariant that the build succeeds with the F* version in .tested_fstar_version.)' +
+      f' See ./INSTALL.md for more information.')
 
 def check_z3_version(fstar_z3):
   import subprocess
@@ -614,9 +619,25 @@ def check_z3_version(fstar_z3):
     for line in lines:
       print_error('  ' + line)
     print_error_exit(
-      'Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested,' +
-      ' modify .tested_z3_version, or use the --Z3-MY-VERSION option to override.' +
-      ' (We rarely change the Z3 version; we strongly recommend using the expected version of Z3.)')
+      f'Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested,' +
+      f' modify .tested_z3_version, or use the --Z3-MY-VERSION option to override.' +
+      f' (We rarely change the Z3 version; we strongly recommend using the expected version of Z3.)' +
+      f' See ./INSTALL.md for more information.')
+
+def check_vale_version():
+  with open(".vale_version") as f:
+    version = f.read().splitlines()[0]
+  vale_version_file = f'{vale_path}/bin/.vale_version'
+  vale_version = '0.2.7 or older'
+  if os.path.isfile(vale_version_file):
+    with open(vale_version_file) as f:
+      vale_version = f.read().splitlines()[0]
+  if vale_version != version:
+    print_error(f'Expected Vale version {version}, but found Vale version {vale_version}')
+    print_error_exit(
+      f'Get version {version} from https://github.com/project-everest/vale/releases/download/v{version}/vale-release-{version}.zip,' +
+      f' modify .vale_version, or use the --VALE-MY-VERSION option to override.' +
+      f' See ./INSTALL.md for more information.')
 
 def print_dump_args():
   print('Currently using the following F* args:')
@@ -1129,13 +1150,15 @@ if not is_help:
   pathlib.Path('obj/external').mkdir(parents = True, exist_ok = True)
   pathlib.Path('obj/cache_checked').mkdir(parents = True, exist_ok = True)
 
-  # Check F* and Z3 versions
+  # Check F*, Z3, and Vale versions
   if not fstar_my_version:
     check_fstar_version()
   if not z3_my_version:
     if not found_z3:
       print_error_exit('Could not find z3 executable.  Either put z3 in your path, or put it in the directory tools/Z3/, or use the --FSTARZ3=<z3-executable> option.')
     check_z3_version(fstar_z3)
+  if not vale_my_version:
+    check_vale_version()
 
   # HACK: copy external files
   for f in external_files:
