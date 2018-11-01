@@ -348,7 +348,7 @@ let mapT #a #b clen out f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = as_seq h inp in Seq.map_inner f in_seq)
-    (fun i -> let h = ST.get() in out.(i) <- f inp.(i))
+    (fun i -> out.(i) <- f inp.(i))
 
 let mapiT #a #b clen out spec_f f inp = 
   let h0 = ST.get () in
@@ -360,8 +360,9 @@ let imapT #a #b #len out clen f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = ias_seq h inp in Seq.map_inner f in_seq)
-    (fun i -> let h = ST.get() in out.(i) <- f (iindex inp i))
+    (fun i -> out.(i) <- f (iindex inp i))
 
+// 2018.11.1 SZ: This function is unspecified in Lib.Buffer.fsti (and thus visible only to friends). Do we need this function? What's the spec?
 let mapi #a #b h0 clen out inp spec impl = 
   let h0 = ST.get () in
   fill h0 clen out
