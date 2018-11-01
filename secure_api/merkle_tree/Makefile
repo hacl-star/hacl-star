@@ -125,6 +125,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-I $(HACL_HOME)/providers/evercrypt \
 	-tmpdir $(GENERATED_DIR) \
 	-warn-error +9 \
+	-fparentheses \
 	$^
 
 # The Makefile is manually staged because GNU Make does not understand

@@ -706,7 +706,7 @@ let rec create_ #a #rg rv cidx =
   if cidx = 0ul then ()
   else (let nrid = new_region_ (V.frameOf rv) in
        let v = Rgl?.r_init rg nrid in
-
+  
        let hh1 = HST.get () in
        V.assign rv (cidx - 1ul) v;
 
@@ -1067,32 +1067,6 @@ let flush #a #rg rv i =
 		  (as_seq hh2 frv));
   frv
 
-
-val rv_elems_inv_cap:
-  #a:Type0 -> #rg:regional a ->
-  h:HS.mem -> rv:rvector rg ->
-  i:uint32_t -> j:uint32_t{i <= j && j <= V.capacity_of rv} ->
-  GTot Type0
-let rv_elems_inv_cap #a #rg h rv i j =
-  rs_elems_inv rg h (V.as_seq_capped h rv) (U32.v i) (U32.v j) 
-
-
-// cwinter: an attempt at freeing the reserved elements...
-let rec free_reserved_r (#a:Type0) (#rg:regional a) (v:rvector rg) (i:uint32_t{i < V.capacity_of v}): HST.ST unit
-  (requires (fun h -> live h v /\ rv_elems_inv_cap h v 0ul (V.capacity_of v)))
-  (ensures (fun _ _ h1 -> live h1 v))
-= Rgl?.r_free rg (V.index_capped v i);
-  if i + 1ul <> V.capacity_of v then
-    assert (i + 1ul < V.capacity_of v);
-    admit();
-    free_reserved_r #a #rg v (i + 1ul)
-
-let free_reserved (#a:Type0) (#rg:regional a) (v:rvector rg): HST.ST unit
-  (requires (fun h -> live h v /\ rv_elems_inv_cap h v 0ul (V.capacity_of v)))
-  (ensures (fun _ _ h1 -> live h1 v))
-= if (V.size_of v < V.capacity_of v) then
-     free_reserved_r v (V.size_of v)
-
 val free:
   #a:Type0 -> #rg:regional a -> rv:rvector rg -> 
   HST.ST unit
@@ -1102,7 +1076,6 @@ let free #a #rg rv =
   let hh0 = HST.get () in
   (if V.size_of rv = 0ul then () 
   else free_elems rv (V.size_of rv - 1ul));
-  admit(); free_reserved rv; 
   let hh1 = HST.get () in
   rv_loc_elems_included hh0 rv 0ul (V.size_of rv);
   V.free rv

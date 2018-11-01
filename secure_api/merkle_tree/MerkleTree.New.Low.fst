@@ -223,7 +223,7 @@ private val hash_vec_r_init:
       hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr))
 private let hash_vec_r_init r =
   let nrid = RV.new_region_ r in
-  let ia = Rgl?.r_init hreg nrid in
+  let ia = Rgl?.dummy hreg in
   V.create_reserve 1ul ia r // cwinter: this is a memory leak; `ia' is never freed.
 
 val hash_vec_r_free:
@@ -235,7 +235,8 @@ val hash_vec_r_free:
 let hash_vec_r_free v =  
   // cwinter: this cleans up the contained elements, but only up to size_of v, which 
   // can be smaller than capacity_of v, e.g. after the V.create_reserve above.
-  RV.free v 
+  RV.free v
+
 
 private val hvreg: regional hash_vec
 private let hvreg =
@@ -1210,7 +1211,7 @@ val init_path:
     (ensures (fun h0 p h1 -> path_safe h1 mtr p))
 let init_path mtr r =
   let nrid = RV.new_region_ r in
-  B.malloc r (V.create_reserve 1ul (Rgl?.dummy hreg) nrid) 1ul
+  B.malloc r (hash_vec_r_init nrid) 1ul
 
 val clear_path:
   mtr:HH.rid -> p:path ->
