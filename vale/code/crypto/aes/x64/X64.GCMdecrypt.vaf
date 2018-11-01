@@ -313,10 +313,9 @@ procedure {:quick} gcm_one_pass(
 //            assert buffer128_as_seq(old(mem), in_b) == buffer128_as_seq(mem, in_b);       // OBSERVE
         }
 
-        // REVIEW: Vale infers types that are semantically equal to the types below, but the slice_work_around postcondition doesn't seem to kick in unless the types are syntactically equal
-        let cipher:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), in_b)), old(num_bytes));
-        let cipher_padded_bytes:seq(nat8) := pad_to_128_bits(cipher);
-        let cipher_padded_quads:seq(quad32) := le_bytes_to_seq_quad32(cipher_padded_bytes);
+        let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), in_b)), old(num_bytes));
+        let cipher_padded_bytes := pad_to_128_bits(cipher);
+        let cipher_padded_quads := le_bytes_to_seq_quad32(cipher_padded_bytes);
         assert length(cipher_padded_quads) > 0 by {reveal le_bytes_to_seq_quad32_def;}
     }
 
