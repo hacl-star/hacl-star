@@ -813,7 +813,6 @@ val fill:
       B.modifies (B.loc_buffer o) h h' /\
       as_seq h' o == Seq.createi #a (v clen) (spec h0))
 
-
 (** Map a total function on a buffer *)
 inline_for_extraction
 val mapT:
@@ -829,7 +828,7 @@ val mapT:
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       as_seq h1 o == Seq.map f (as_seq h0 i))
 
-(** Map a total function on a buffer *)
+(** Map a total function (depending on the index) on a buffer *)
 inline_for_extraction
 val mapiT:
     #a:Type
@@ -844,7 +843,6 @@ val mapiT:
     (ensures  fun h0 _ h1 ->
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       as_seq h1 o == Seq.mapi spec_f (as_seq h0 i))
-      
 
 (** Map a total function on an immutable buffer *)
 inline_for_extraction
