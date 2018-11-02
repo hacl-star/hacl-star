@@ -80,14 +80,15 @@ forall src. List.Tot.Base.mem src s /\ Public? (sources_taint s ts ins.t) ==> Pu
 
 let lemma_taint_sources ins ts = ()
 
+#set-options "--z3rlimit 20"
+
 val lemma_public_op_are_same:
   (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState)
    -> Lemma (requires (operand_does_not_use_secrets op ts   /\
                       Public? (operand_taint op ts Public) /\
 		      publicValuesAreSame ts s1 s2         /\
 		      taint_match op Public s1.memTaint s1.state /\
-		      taint_match op Public s2.memTaint s2.state /\
-		      valid_operand op s1.state /\ valid_operand op s2.state))
+		      taint_match op Public s2.memTaint s2.state))
            (ensures eval_operand op s1.state == eval_operand op s2.state)
 let lemma_public_op_are_same ts op s1 s2 =
   match op with
@@ -98,14 +99,16 @@ let lemma_public_op_are_same ts op s1 s2 =
     let a2 = eval_maddr m s2.state in
     assert (a1 == a2);
     assert (forall a. (a >= a1 /\ a < a1 + 8) ==> s1.state.mem.[a] == s2.state.mem.[a]);
-    (*
-     * AR: my guess is somehow we need to reveal from Views?
-     *)
-    admit ()
+    Opaque_s.reveal_opaque get_heap_val64_def
 
-val lemma_public_op_are_same2: (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState) -> Lemma
-(requires operand_does_not_use_secrets op ts /\ Public? (operand_taint op ts Secret) /\ publicValuesAreSame ts s1 s2 /\ taint_match op Public s1.memTaint s1.state /\ taint_match op Public s2.memTaint s2.state /\ valid_operand op s1.state /\ valid_operand op s2.state)
-(ensures eval_operand op s1.state == eval_operand op s2.state)
+val lemma_public_op_are_same2: 
+  (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState) -> 
+  Lemma (requires operand_does_not_use_secrets op ts /\ 
+                  Public? (operand_taint op ts Secret) /\ 
+                  publicValuesAreSame ts s1 s2 /\ 
+                  taint_match op Public s1.memTaint s1.state /\ 
+                  taint_match op Public s2.memTaint s2.state)
+        (ensures eval_operand op s1.state == eval_operand op s2.state)
 
 let lemma_public_op_are_same2 ts op s1 s2 = ()
 
