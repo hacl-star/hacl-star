@@ -191,7 +191,7 @@ procedure{:quick} fast_sqr_part1(
 
 }
 
-procedure{:quick} {:verify true}fast_sqr_part2()
+procedure{:quick} fast_sqr_part2()
     modifies
         rax; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15;
         efl;
@@ -201,8 +201,8 @@ procedure{:quick} {:verify true}fast_sqr_part2()
         r14 == 0;
 
     ensures
-        pow2_seven(r8, r9, r10, r11, r12, r13, r14) ==
-        old(pow2_six(2*r8, 2*r9, 2*(r10 + rax), 2*(r11+rcx), 2*r12, 2*r13));
+//        pow2_seven(r8, r9, r10, r11, r12, r13, r14) ==
+//        old(pow2_six(2*r8, 2*r9, 2*(r10 + rax), 2*(r11+rcx), 2*r12, 2*r13));
 {
     xor_lemmas();
 
@@ -225,6 +225,11 @@ procedure{:quick} {:verify true}fast_sqr_part2()
                               Adcx64Wrap(r14, r14);
     assert !cf(efl);
     assert !overflow(efl);
+    
+    ghost var lhs:nat := pow2_seven(r8, r9, r10, r11, r12, r13, r14);
+    ghost var rhs:nat := old(pow2_six(2*r8, 2*r9, 2*(r10 + rax), 2*(r11+rcx), 2*r12, 2*r13));
+    //ghost var rhs:nat := pow2_six(old(2*r8), old(2*r9), old(2*(r10 + rax)), old(2*(r11+rcx)), old(2*r12), old(2*r13));
+    assert_by_tactic(lhs == rhs, int_canon);
 }
 
 procedure{:quick}fast_sqr_part3(
