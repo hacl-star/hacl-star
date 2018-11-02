@@ -8,6 +8,7 @@ open Lib.RawIntTypes
 
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
+module UB = LowStar.UninitializedBuffer
 module LMB = LowStar.Monotonic.Buffer
 
 module U32 = FStar.UInt32
@@ -23,19 +24,24 @@ module Loop = Lib.LoopCombinators
 inline_for_extraction noextract
 let v = size_v
 
-(** Definition of a mutable Buffer *)
+(** Mutable Buffer *)
 let buffer (a:Type0) = B.buffer a
 
-(** Definition of an immutable Buffer *)
+(** Immutable buffer *)
 let ibuffer (a:Type0) = IB.ibuffer a
+
+(** Uninitialized buffer *)
+let ubuffer (a:Type0) = UB.ubuffer a
 
 (** Length of buffers *)
 val length: #a:Type0 -> b:buffer a -> GTot (r:size_nat{r == B.length b})
 val ilength: #a:Type0 -> b:ibuffer a -> GTot (r:size_nat{r == IB.length b})
+val ulength: #a:Type0 -> b:ubuffer a -> GTot (r:size_nat{r == UB.length b})
 
-(** Definition of fixed length mutable and immutable Buffers *)
+(** Definition of fixed length mutable, immutable, and uninitialized buffers *)
 let lbuffer (a:Type0) (len:size_nat) = b:buffer a {length b == len}
 let ilbuffer (a:Type0) (len:size_nat) = b:IB.ibuffer a {IB.length b == len}
+let ulbuffer (a:Type0) (len:size_nat) = b:UB.ubuffer a{UB.length b == len}
 
 (** Alias for mutable buffer of bytes *)
 let lbytes len = lbuffer uint8 len
@@ -274,6 +280,23 @@ val createL:
     (ensures fun h0 b h1 ->
       B.alloc_post_mem_common b h0 h1 (Seq.of_list init) /\
       B.frameOf b = HS.get_tip h0)
+
+(** Allocate a buffer in the stack and initialize it with a stateful function with read effect *)
+inline_for_extraction
+val create_fill:
+    #a:Type
+  -> h0:mem 
+  -> clen:size_t{0 < v clen}
+  -> spec:(mem -> GTot (i:size_nat{i < v clen} -> a))
+  -> impl:(i:size_t{v i < v clen} -> Stack a
+           (requires fun h -> True)
+           (ensures  fun h x h1 -> x == spec h0 (v i) /\ modifies0 h h1))
+  -> StackInline (ulbuffer a (v clen))
+    (requires fun h -> h0 == h)
+    (ensures  fun h0 b h1 ->
+      let f = spec h0 in
+      B.alloc_post_mem_common b h0 h1 (Seq.createi (v clen) (fun i -> Some (f i))) /\
+      B.frameOf b == HS.get_tip h0)
 
 (** Recall the value of a top-level Buffer *)
 inline_for_extraction noextract
