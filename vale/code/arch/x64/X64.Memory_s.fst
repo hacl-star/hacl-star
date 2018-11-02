@@ -1683,12 +1683,23 @@ let valid_taint_buf128 b mem memTaint t = valid_taint_buf b mem memTaint t
 
 let lemma_valid_taint64 b memTaint mem i t =
   length_t_eq (TBase TUInt64) b;
-  ()
+  let ptr = buffer_addr b mem + 8 `op_Multiply` i in
+  let aux i' : Lemma
+    (requires i' >= ptr /\ i' < ptr + 8)
+    (ensures memTaint.[i'] == t) = 
+    assert (i' == mem.addrs b + (8 `op_Multiply` i + i' - ptr));
+    () in
+  Classical.forall_intro (Classical.move_requires aux)
 
 let lemma_valid_taint128 b memTaint mem i t =
   length_t_eq (TBase TUInt128) b;
-  assert (memTaint.[(buffer_addr b mem + (16 `op_Multiply` i + 8))] == t);
-  ()
+  let ptr = buffer_addr b mem + 16 `op_Multiply` i in
+  let aux i' : Lemma
+    (requires i' >= ptr /\ i' < ptr + 16)
+    (ensures memTaint.[i'] == t) = 
+    assert (i' == mem.addrs b + (16 `op_Multiply` i + i' - ptr));
+    () in
+  Classical.forall_intro (Classical.move_requires aux)
 
 let same_memTaint (t:typ) (b:buffer t) (mem0 mem1:mem) (memT0 memT1:memtaint) : Lemma
   (requires modifies (loc_buffer b) mem0 mem1 /\
@@ -1696,7 +1707,6 @@ let same_memTaint (t:typ) (b:buffer t) (mem0 mem1:mem) (memT0 memT1:memtaint) : 
   (ensures memT0 == memT1) =
   assert (Map.equal memT0 memT1);
   ()
-
 
 let same_memTaint64 b mem0 mem1 memtaint0 memtaint1 =
 same_memTaint (TBase TUInt64) b mem0 mem1 memtaint0 memtaint1

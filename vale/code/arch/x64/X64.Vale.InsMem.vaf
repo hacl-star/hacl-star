@@ -45,8 +45,7 @@ procedure{:operand} Mem_in(base:reg64, inline offset:int, ghost b:buffer64, ghos
         mem;
     extern;
 
-procedure{:instruction mk_taint_ins2(S.Mov64, dst, TMem(MReg(get_reg(src), offset), t),
-                                     list(dst), list(TMem(MReg(get_reg(src), offset), t)))}
+procedure{:instruction mk_taint_ins2(S.Mov64, dst, TMem(MReg(get_reg(src), offset), t))}
          {:fast_instruction}{:quick exportOnly}{:public}
     Load64_buffer(
     out dst: dst_opr64,
@@ -72,8 +71,7 @@ procedure{:instruction mk_taint_ins2(S.Mov64, dst, TMem(MReg(get_reg(src), offse
     lemma_valid_taint64(#buffer64_s(b), #memTaint_t(memTaint), #mem_s(mem), #nat(index), t);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Mov64(OMem(MReg(get_reg(dst), offset)), t_op_to_op(src)),
-                                         list(OMem(MReg(get_reg(dst), offset))), list(t_op_to_op(src))), t))}
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Mov64(OMem(MReg(get_reg(dst), offset)), t_op_to_op(src))), t))}
          {:fast_instruction}{:quick exportOnly}{:public}
     Store64_buffer(
         dst:reg_opr64,
@@ -100,7 +98,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Mov64(OMem(MReg(get_reg(dst), o
     same_memTaint64(#buffer64_s(b), old(#mem_s(mem)), #mem_s(mem), old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst)), list(t_op_to_op(dst)), list(OMem(MReg(Rsp, 0)))), Public))}
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst))), Public))}
          {:fast_instruction}{:quick exportOnly}{:public}
     Pop(
     out dst: dst_opr64,
@@ -122,7 +120,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst)), list(t_op
     lemma_valid_taint64(#buffer64_s(b), old(#memTaint_t(memTaint)), old(#mem_s(mem)), #nat(index), Public);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src)), list(), list(t_op_to_op(src))), Public))}
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src))), Public))}
          {:fast_instruction}{:quick exportOnly}{:public}
     Push(
         src: reg_opr64,

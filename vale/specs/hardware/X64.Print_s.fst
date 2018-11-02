@@ -166,7 +166,7 @@ let print_ins (ins:tainted_ins) (p:printer) =
     let first, second = p.op_order (print_xmm dst p) (print_xmm src p) in
       first ^ ", " ^ second
   in
-  let ins, _, _ = ins.ops in
+  let ins = ins.i in
   match ins with
   | Cpuid -> "  cpuid"
   | Mov64 dst src -> p.ins_name "  mov" [dst; src] ^ print_ops dst src

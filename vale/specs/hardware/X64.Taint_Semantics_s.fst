@@ -144,7 +144,7 @@ let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
       else if S.Push? i then begin
         let S.Push src = i in
         let new_rsp = ((eval_reg Rsp s) - 8) % pow2_64 in
-        let mt = ts.memTaint.[new_rsp] <- t in
+        let mt = update_n new_rsp 8 ts.memTaint t in
         mt
       end
       else update_taint_list ts.memTaint dsts t s
