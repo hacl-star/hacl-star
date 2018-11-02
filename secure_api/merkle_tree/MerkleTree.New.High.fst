@@ -246,13 +246,34 @@ val construct_rhs_odd:
 let construct_rhs_odd lv hs rhs i j acc actd = ()
 
 val mt_get_root: 
-  mt:wf_mt -> 
-  GTot (rhs:hash_seq{S.length rhs = 32} * hash)
-let mt_get_root mt =
-  if MT?.rhs_ok mt then (MT?.rhs mt, MT?.mroot mt)
-  else construct_rhs
-         0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
-	 hash_init false
+  mt:wf_mt -> drt:hash ->
+  GTot (merkle_tree * hash)
+let mt_get_root mt drt =
+  if MT?.rhs_ok mt then (mt, MT?.mroot mt)
+  else begin
+    let (nrhs, rt) = 
+        construct_rhs
+          0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
+	  drt false in
+    (MT (MT?.i mt) (MT?.j mt) (MT?.hs mt) true nrhs rt, rt)
+  end
+
+val mt_get_root_rhs_ok_true:
+  mt:wf_mt -> drt:hash ->
+  Lemma (requires (MT?.rhs_ok mt == true))
+        (ensures (mt_get_root mt drt == (mt, MT?.mroot mt)))
+let mt_get_root_rhs_ok_true mt drt = ()
+
+val mt_get_root_rhs_ok_false:
+  mt:wf_mt -> drt:hash ->
+  Lemma (requires (MT?.rhs_ok mt == false))
+        (ensures (mt_get_root mt drt ==
+                 (let (nrhs, rt) = 
+                   construct_rhs
+                     0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
+	             drt false in
+                   (MT (MT?.i mt) (MT?.j mt) (MT?.hs mt) true nrhs rt, rt))))
+let mt_get_root_rhs_ok_false mt drt = ()
 
 val path_insert: p:path -> hp:hash -> GTot path
 let path_insert p hp = S.snoc p hp
@@ -288,14 +309,15 @@ let rec mt_get_path_ lv hs rhs i j k p actd =
     		 (if j % 2 = 0 then actd else true))
 
 val mt_get_path: 
-  mt:wf_mt -> 
+  mt:wf_mt -> drt:hash ->
   idx:nat{MT?.i mt <= idx /\ idx < MT?.j mt} ->
   GTot (path * hash)
-let mt_get_path mt idx =
-  let (rhs, root) = mt_get_root mt in
-  let ofs = offset_of (MT?.i mt) in
-  let ip = path_insert S.empty (S.index (S.index (MT?.hs mt) 0) (idx - ofs)) in
-  (mt_get_path_ 0 (MT?.hs mt) rhs (MT?.i mt) (MT?.j mt) idx ip false,
+let mt_get_path mt drt idx =
+  let (umt, root) = mt_get_root mt drt in
+  let ofs = offset_of (MT?.i umt) in
+  let ip = path_insert S.empty (S.index (S.index (MT?.hs umt) 0) (idx - ofs)) in
+  (mt_get_path_ 0 (MT?.hs umt) (MT?.rhs umt)
+    (MT?.i umt) (MT?.j umt) idx ip false,
   root)
 
 val mt_flush_to_:
