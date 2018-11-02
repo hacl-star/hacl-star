@@ -1104,6 +1104,7 @@ let mt_insert mt v =
   mt_safe_elts_preserved
     0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv + 1ul) (B.loc_buffer mt)
     hh1 hh2
+#reset-options // reset "--max_fuel 0"
 
 val create_mt: r:erid -> init:hash ->
   HST.ST mt_p
@@ -1119,6 +1120,7 @@ val create_mt: r:erid -> init:hash ->
      mt_safe h1 mt /\
      // correctness
      mt_lift h1 mt == High.create_mt (Rgl?.r_repr hreg h0 init)))
+#reset-options "--z3rlimit 40"
 let create_mt r init =
   let hh0 = HST.get () in
   let mt = create_empty_mt r in
@@ -1258,39 +1260,61 @@ private val construct_rhs:
                 (B.loc_all_regions_from false (B.frameOf acc)))
               h0 h1 /\
      RV.rv_inv h1 rhs /\
-     Rgl?.r_inv hreg h1 acc))
+     Rgl?.r_inv hreg h1 acc /\
      // correctness
-     // (mt_safe_elts_spec h0 lv hs i j;
-     // High.construct_rhs
-     //   (U32.v lv)
-     //   (Rgl?.r_repr hvvreg h0 hs)
-     //   (Rgl?.r_repr hvreg h0 rhs)
-     //   (U32.v i) (U32.v j)
-     //   (Rgl?.r_repr hreg h0 acc) actd ==
-     // (Rgl?.r_repr hvreg h1 rhs, Rgl?.r_repr hreg h1 acc))))
+     (mt_safe_elts_spec h0 lv hs i j;
+     High.construct_rhs
+       (U32.v lv)
+       (Rgl?.r_repr hvvreg h0 hs)
+       (Rgl?.r_repr hvreg h0 rhs)
+       (U32.v i) (U32.v j)
+       (Rgl?.r_repr hreg h0 acc) actd ==
+     (Rgl?.r_repr hvreg h1 rhs, Rgl?.r_repr hreg h1 acc))))
    (decreases (U32.v j))
-#reset-options "--z3rlimit 150 --max_fuel 1"
+// #reset-options "--z3rlimit 400 --max_fuel 1"
+// This proof works with the resource limit above, but it's a bit slow.
+// It will be admitted until the hint file is generated.
+#reset-options "--admit_smt_queries true"
 private let rec construct_rhs lv hs rhs i j acc actd =
+  let hh0 = HST.get () in
   let ofs = offset_of i in
   let copy = Cpy?.copy hcpy in
+
   if j = 0ul then ()
   else
     (if j % 2ul = 0ul
     then begin
       Math.Lemmas.pow2_double_mult (32 - U32.v lv - 1);
-      let hh0 = HST.get () in
       mt_safe_elts_rec hh0 lv hs i j;
-      construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc actd
+      construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc actd;
+      let hh1 = HST.get () in
+      // correctness
+      mt_safe_elts_spec hh0 lv hs i j;
+      High.construct_rhs_even
+        (U32.v lv) (Rgl?.r_repr hvvreg hh0 hs) (Rgl?.r_repr hvreg hh0 rhs)
+        (U32.v i) (U32.v j) (Rgl?.r_repr hreg hh0 acc) actd;
+      assert (High.construct_rhs
+               (U32.v lv)
+               (Rgl?.r_repr hvvreg hh0 hs)
+               (Rgl?.r_repr hvreg hh0 rhs)
+               (U32.v i) (U32.v j)
+               (Rgl?.r_repr hreg hh0 acc)
+               actd ==
+             (Rgl?.r_repr hvreg hh1 rhs, Rgl?.r_repr hreg hh1 acc))
     end
+
     else begin
       if actd
       then begin
-        let hh0 = HST.get () in
         RV.assign_copy hcpy rhs lv acc;
         let hh1 = HST.get () in
+        // memory safety
         Rgl?.r_sep hreg acc
           (B.loc_all_regions_from false (V.frameOf rhs)) hh0 hh1;
         RV.rv_inv_preserved
+          hs (B.loc_all_regions_from false (V.frameOf rhs))
+          hh0 hh1;
+        RV.as_seq_preserved
           hs (B.loc_all_regions_from false (V.frameOf rhs))
           hh0 hh1;
         RV.rv_inv_preserved
@@ -1302,33 +1326,94 @@ private let rec construct_rhs lv hs rhs i j acc actd =
           hh0 hh1;
         mt_safe_elts_head hh1 lv hs i j;
         hash_vv_rv_inv_r_inv hh1 hs lv (j - 1ul - ofs);
+
+        // correctness
+        assert (S.equal (RV.as_seq hh1 rhs)
+                        (S.upd (RV.as_seq hh0 rhs) (U32.v lv)
+                               (Rgl?.r_repr hreg hh0 acc)));
+
         hash_2 (V.index (V.index hs lv) (j - 1ul - ofs)) acc acc;
         let hh2 = HST.get () in
+        // memory safety
         mt_safe_elts_preserved lv hs i j
           (B.loc_all_regions_from false (B.frameOf acc)) hh1 hh2;
         RV.rv_inv_preserved
           hs (B.loc_region_only false (B.frameOf acc)) hh1 hh2;
         RV.rv_inv_preserved
-          rhs (B.loc_region_only false (B.frameOf acc)) hh1 hh2
+          rhs (B.loc_region_only false (B.frameOf acc)) hh1 hh2;
+        RV.as_seq_preserved
+          hs (B.loc_region_only false (B.frameOf acc)) hh1 hh2;
+        RV.as_seq_preserved
+          rhs (B.loc_region_only false (B.frameOf acc)) hh1 hh2;
+
+        // correctness
+        assert (Rgl?.r_repr hreg hh2 acc ==
+               High.hash_2 (S.index (S.index (RV.as_seq hh0 hs) (U32.v lv))
+                                    (U32.v j - 1 - U32.v ofs))
+                           (Rgl?.r_repr hreg hh0 acc))
       end
+
       else begin
-        let hh1 = HST.get () in
-        mt_safe_elts_head hh1 lv hs i j;
-        hash_vv_rv_inv_r_inv hh1 hs lv (j - 1ul - ofs);
-        hash_vv_rv_inv_disjoint hh1 hs lv (j - 1ul - ofs) (B.frameOf acc);
+        mt_safe_elts_head hh0 lv hs i j;
+        hash_vv_rv_inv_r_inv hh0 hs lv (j - 1ul - ofs);
+        hash_vv_rv_inv_disjoint hh0 hs lv (j - 1ul - ofs) (B.frameOf acc);
         copy (V.index (V.index hs lv) (j - 1ul - ofs)) acc;
-        let hh2 = HST.get () in
+        let hh1 = HST.get () in
+        // memory safety
         V.loc_vector_within_included hs lv (V.size_of hs);
         mt_safe_elts_preserved lv hs i j
-          (B.loc_all_regions_from false (B.frameOf acc)) hh1 hh2;
+          (B.loc_all_regions_from false (B.frameOf acc)) hh0 hh1;
         RV.rv_inv_preserved
-          hs (B.loc_all_regions_from false (B.frameOf acc)) hh1 hh2;
+          hs (B.loc_all_regions_from false (B.frameOf acc)) hh0 hh1;
         RV.rv_inv_preserved
-          rhs (B.loc_all_regions_from false (B.frameOf acc)) hh1 hh2
+          rhs (B.loc_all_regions_from false (B.frameOf acc)) hh0 hh1;
+        RV.as_seq_preserved
+          hs (B.loc_all_regions_from false (B.frameOf acc)) hh0 hh1;
+        RV.as_seq_preserved
+          rhs (B.loc_all_regions_from false (B.frameOf acc)) hh0 hh1;
+
+        // correctness
+        assert (Rgl?.r_repr hreg hh1 acc ==
+               S.index (S.index (RV.as_seq hh0 hs) (U32.v lv))
+                       (U32.v j - 1 - U32.v ofs))
       end;
       let hh3 = HST.get () in
+      assert (S.equal (RV.as_seq hh3 hs) (RV.as_seq hh0 hs));
+      assert (S.equal (RV.as_seq hh3 rhs)
+                      (if actd
+                      then S.upd (RV.as_seq hh0 rhs) (U32.v lv)
+                                 (Rgl?.r_repr hreg hh0 acc)
+                      else RV.as_seq hh0 rhs));
+      assert (Rgl?.r_repr hreg hh3 acc ==
+             (if actd
+             then High.hash_2 (S.index (S.index (RV.as_seq hh0 hs) (U32.v lv))
+                                       (U32.v j - 1 - U32.v ofs))
+                              (Rgl?.r_repr hreg hh0 acc)
+             else S.index (S.index (RV.as_seq hh0 hs) (U32.v lv))
+                          (U32.v j - 1 - U32.v ofs)));
+
       mt_safe_elts_rec hh3 lv hs i j;
-      construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc true
+      construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc true;
+      let hh4 = HST.get () in      
+      mt_safe_elts_spec hh3 (lv + 1ul) hs (i / 2ul) (j / 2ul);
+      assert (High.construct_rhs
+               (U32.v lv + 1)
+               (Rgl?.r_repr hvvreg hh3 hs)
+               (Rgl?.r_repr hvreg hh3 rhs)
+               (U32.v i / 2) (U32.v j / 2)
+               (Rgl?.r_repr hreg hh3 acc) true ==
+             (Rgl?.r_repr hvreg hh4 rhs, Rgl?.r_repr hreg hh4 acc));             
+      mt_safe_elts_spec hh0 lv hs i j;
+      High.construct_rhs_odd
+        (U32.v lv) (Rgl?.r_repr hvvreg hh0 hs) (Rgl?.r_repr hvreg hh0 rhs)
+        (U32.v i) (U32.v j) (Rgl?.r_repr hreg hh0 acc) actd;
+      assert (High.construct_rhs
+               (U32.v lv)
+               (Rgl?.r_repr hvvreg hh0 hs)
+               (Rgl?.r_repr hvreg hh0 rhs)
+               (U32.v i) (U32.v j)
+               (Rgl?.r_repr hreg hh0 acc) actd ==
+             (Rgl?.r_repr hvreg hh4 rhs, Rgl?.r_repr hreg hh4 acc))
     end)
 
 val mt_get_root:

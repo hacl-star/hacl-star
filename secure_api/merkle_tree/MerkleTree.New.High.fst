@@ -204,12 +204,46 @@ let rec construct_rhs lv hs rhs i j acc actd =
   else
     (if j % 2 = 0
     then construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) acc actd
-    else (if actd
-    	 then (let nrhs = S.upd rhs lv acc in
-	      let nacc = hash_2 (S.index (S.index hs lv) (j - 1 - ofs)) acc in
-	      construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true)
-	 else (let nacc = S.index (S.index hs lv) (j - 1 - ofs) in
-	      construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) nacc true)))
+    else (let nrhs = if actd then S.upd rhs lv acc else rhs in
+         let nacc = if actd 
+                    then hash_2 (S.index (S.index hs lv) (j - 1 - ofs)) acc
+                    else S.index (S.index hs lv) (j - 1 - ofs) in
+         construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true))
+
+val construct_rhs_even:
+  lv:nat{lv <= 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  rhs:hash_seq{S.length rhs = 32} ->
+  i:nat ->
+  j:nat{
+    i <= j /\ j < pow2 (32 - lv) /\
+    mt_wf_elts lv hs i j} ->
+  acc:hash ->
+  actd:bool ->
+  Lemma (requires (j <> 0 /\ j % 2 = 0))
+        (ensures (construct_rhs lv hs rhs i j acc actd ==
+                 construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) acc actd))
+let construct_rhs_even lv hs rhs i j acc actd = ()
+
+val construct_rhs_odd:
+  lv:nat{lv <= 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  rhs:hash_seq{S.length rhs = 32} ->
+  i:nat ->
+  j:nat{
+    i <= j /\ j < pow2 (32 - lv) /\
+    mt_wf_elts lv hs i j} ->
+  acc:hash ->
+  actd:bool ->
+  Lemma (requires (j % 2 = 1))
+        (ensures (construct_rhs lv hs rhs i j acc actd ==
+                 (let ofs = offset_of i in
+                 let nrhs = if actd then S.upd rhs lv acc else rhs in
+                 let nacc = if actd 
+                            then hash_2 (S.index (S.index hs lv) (j - 1 - ofs)) acc
+                            else S.index (S.index hs lv) (j - 1 - ofs) in
+                 construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true)))
+let construct_rhs_odd lv hs rhs i j acc actd = ()
 
 val mt_get_root: 
   mt:wf_mt -> 
