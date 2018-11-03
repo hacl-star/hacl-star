@@ -107,6 +107,7 @@ let sha3_512 inputByteLen input output =
   keccak (size 576) (size 1024) inputByteLen input (byte 0x06) (size 64) output
 
 (* cSHAKE for Frodo *)
+inline_for_extraction noextract
 val cshake128_frodo:
     input_len:size_t
   -> input:lbuffer uint8 (v input_len)
@@ -128,6 +129,7 @@ let cshake128_frodo input_len input cstm output_len output =
   squeeze s (size 168) output_len output;
   pop_frame ()
 
+inline_for_extraction noextract
 val cshake256_frodo:
     input_len:size_t
   -> input:lbuffer uint8 (v input_len)

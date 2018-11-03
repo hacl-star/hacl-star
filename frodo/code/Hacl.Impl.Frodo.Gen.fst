@@ -91,6 +91,7 @@ let frodo_gen_matrix_cshake n seed_len seed res =
     frodo_gen_matrix_cshake1 n seed_len seed i res
   )
 
+inline_for_extraction noextract
 val frodo_gen_matrix_cshake_4x:
     n:size_t{0 < v n /\ 2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
@@ -101,7 +102,7 @@ val frodo_gen_matrix_cshake_4x:
     (ensures  fun h0 _ h1 ->
       modifies (loc_buffer res) h0 h1 /\
       as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
-[@"c_inline"]
+//[@"c_inline"]
 let frodo_gen_matrix_cshake_4x n seed_len seed res =
   let h = ST.get() in
   push_frame ();
