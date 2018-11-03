@@ -267,9 +267,9 @@ procedure{:quick} {:verify true} fast_sqr_part3(
         
         pow2_nine(d0, d1, d2, d3, d4, d5, d6, d7, bool_bit(cf(efl))) ==
         old(pow2_eight(mul_nats(a0,a0), r8, mul_nats(a1,a1) + r9, r10, mul_nats(a2,a2) + r11, r12, mul_nats(a3,a3) + r13, r14));
-//
-//        validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
-//        modifies_buffer(dst_b, old(mem), mem);
+
+        validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
 
@@ -286,23 +286,6 @@ procedure{:quick} {:verify true} fast_sqr_part3(
 //    "adcq %%rax, %%r13 ;"   "movq %%r13, 48(%0) ;"
 //    "adcq %%rcx, %%r14 ;"   "movq %%r14, 56(%0) ;"
 
-    // Experiment 1
-//
-//    Load64_buffer(rdx, inA_ptr,  0, Secret, inA_b, 0);   Mulx64(rcx, rax, rdx);  /* A[0]^2 */ ghost var a0a0_lo := rax;
-//    /********************/                               
-//    Add64Wrap(r8, rcx);                                  
-//
-//    //assert old(pow2_two(mul_nats(a0,a0), r8)) == pow2_three(rax, r8, bool_bit(cf(efl)));    // PASSES
-//
-//    Load64_buffer(rdx, inA_ptr,  8, Secret, inA_b, 1);   Mulx64(rcx, rax, rdx);  /* A[1]^2Secret,  */
-//    Adcx64Wrap( r9, rax);                                
-//
-//    //assert old(pow2_three(mul_nats(a0,a0), r8, mul_nats(a1,a1) + r9)) == pow2_four(a0a0_lo, r8, r9, rcx + bool_bit(cf(efl)));    // PASSES
-//
-//    Adcx64Wrap(r10, rcx);                                
-//    assert old(pow2_four(mul_nats(a0,a0), r8, mul_nats(a1,a1) + r9, r10)) == pow2_five(a0a0_lo, r8, r9, r10, bool_bit(cf(efl)));    // PASSES
-//
-
     Load64_buffer(rdx, inA_ptr,  0, Secret, inA_b, 0);   Mulx64(rcx, rax, rdx);  /* A[0]^2 */
     /********************/                               Store64_buffer(dst_ptr, rax,  0, Secret, dst_b, 0);
     Add64Wrap(r8, rcx);                                  Store64_buffer(dst_ptr,  r8,  8, Secret, dst_b, 1);
@@ -315,8 +298,6 @@ procedure{:quick} {:verify true} fast_sqr_part3(
     Load64_buffer(rdx, inA_ptr, 24, Secret, inA_b, 3);   Mulx64(rcx, rax, rdx);  /* A[3]^2Secret,  */       lemma_prod_bounds(rcx, rax, rdx, rdx);
     Adcx64Wrap(r13, rax);                                Store64_buffer(dst_ptr, r13, 48, Secret, dst_b, 6);
     Adcx64Wrap(r14, rcx);                                Store64_buffer(dst_ptr, r14, 56, Secret, dst_b, 7);
-
-
 }
 
 /*
