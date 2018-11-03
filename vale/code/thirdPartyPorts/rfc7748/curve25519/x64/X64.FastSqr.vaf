@@ -207,51 +207,6 @@ procedure{:quick} {:verify true} fast_sqr_part2()
 {
     xor_lemmas();
 
-//    "xorl %%r15d, %%r15d;"
-//    "adox %%rax, %%r10 ;"  "adcx  %%r8,  %%r8 ;"
-//    "adox %%rcx, %%r11 ;"  "adcx  %%r9,  %%r9 ;"
-//    "adox %%r15, %%r12 ;"  "adcx %%r10, %%r10 ;"
-//    "adox %%r15, %%r13 ;"  "adcx %%r11, %%r11 ;"
-//    "adox %%r15, %%r14 ;"  "adcx %%r12, %%r12 ;"
-//                           "adcx %%r13, %%r13 ;"
-//                           "adcx %%r14, %%r14 ;"
-
-    // Experiment 1
-//    Xor64(r15, r15);
-//    Adcx64Wrap(r8, r8);
-//    Adcx64Wrap(r9, r9);
-//    
-//    assert pow2_three(r8, r9, bool_bit(cf(efl))) == old(pow2_two(2*r8, 2*r9));  // PASSES
-//
-//    Adox64Wrap(r10, rax);
-//    Adcx64Wrap(r10, r10);
-//
-//    assert pow2_four(r8, r9, r10, 2*bool_bit(overflow(efl)) + bool_bit(cf(efl))) == old(pow2_three(2*r8, 2*r9, 2*(r10 + rax)));  // PASSES
-
-    // Experiment 2
-//    Xor64(r15, r15);
-//    Adox64Wrap(r10, rax);     Adcx64Wrap(r8, r8);
-//    Adox64Wrap(r11, rcx);     Adcx64Wrap(r9, r9);
-//    Adox64Wrap(r12, r15);     Adcx64Wrap(r10, r10);
-//    Adox64Wrap(r13, r15);     Adcx64Wrap(r11, r11);
-//    ghost var last_overflow := bool_bit(overflow(efl));
-//    Adox64Wrap(r14, r15);     
-//    assert r14 == last_overflow;        // PASSES
-//    
-//    Adcx64Wrap(r12, r12);
-//                              Adcx64Wrap(r13, r13);
-//    ghost var last_carry := bool_bit(cf(efl));
-//                              Adcx64Wrap(r14, r14);
-//    assert r14 == 2*last_overflow + last_carry; // PASSES
-
-    // Experiment 3
-//    Xor64(r15, r15);
-//    Adox64Wrap(r10, rax);     Adcx64Wrap(r8, r8);
-//    Adox64Wrap(r11, rcx);     Adcx64Wrap(r9, r9);
-//                              Adcx64Wrap(r10, r10);
-//                              Adcx64Wrap(r11, r11);
-//    assert pow2_five(r8, r9, r10, r11, 2*bool_bit(overflow(efl)) + bool_bit(cf(efl))) == old(pow2_four(2*r8, 2*r9, 2*(r10 + rax), 2*(r11+rcx)));  // PASSES
-
     Xor64(r15, r15);
     Adox64Wrap(r10, rax);     Adcx64Wrap(r8, r8);
     Adox64Wrap(r11, rcx);     Adcx64Wrap(r9, r9);
@@ -260,13 +215,6 @@ procedure{:quick} {:verify true} fast_sqr_part2()
     Adox64Wrap(r14, r15);     Adcx64Wrap(r12, r12);
                               Adcx64Wrap(r13, r13);
                               Adcx64Wrap(r14, r14);
-//    assert !cf(efl);
-//    assert !overflow(efl);
-//    
-//    ghost var lhs:nat := pow2_seven(r8, r9, r10, r11, r12, r13, 2*r14);
-//    ghost var rhs:nat := old(pow2_six(2*r8, 2*r9, 2*(r10 + rax), 2*(r11+rcx), 2*r12, 2*r13));
-//    assert lhs == rhs;
-    //assert_by_tactic(lhs == rhs, int_canon);
 }
 
 procedure{:quick}fast_sqr_part3(
