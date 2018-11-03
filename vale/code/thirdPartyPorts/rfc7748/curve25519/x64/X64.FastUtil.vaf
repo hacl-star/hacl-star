@@ -225,7 +225,7 @@ procedure{:quick} fast_add1(
         let d := pow2_five(d0, d1, d2, d3, rax);
         d == old(a + b);
 
-        validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
