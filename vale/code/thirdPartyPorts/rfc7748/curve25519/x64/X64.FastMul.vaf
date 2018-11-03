@@ -612,7 +612,7 @@ procedure{:quick} fast_multiply(
 }
 
 // fast_mul_stdcall(dst, inA, inB)
-procedure{:quick}{:public} fast_mul_stdcall(
+procedure{:quick}{:public} {:verify true} fast_mul_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -639,7 +639,7 @@ procedure{:quick}{:public} fast_mul_stdcall(
         validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 5, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 4, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -674,7 +674,6 @@ procedure{:quick}{:public} fast_mul_stdcall(
         modifies_buffer_2(dst_b, stack_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
 
-        rbx == old(rbx);
         rsi == old(rsi);
         r12 == old(r12);
         r13 == old(r13);
@@ -683,7 +682,6 @@ procedure{:quick}{:public} fast_mul_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rbx, stack_b, 4);
     Push(rsi, stack_b, 3);
     Push(r12, stack_b, 2);
     Push(r13, stack_b, 1);
@@ -704,5 +702,4 @@ procedure{:quick}{:public} fast_mul_stdcall(
     Pop(r13, stack_b, 1);
     Pop(r12, stack_b, 2);
     Pop(rsi, stack_b, 3);
-    Pop(rbx, stack_b, 4);
 }
