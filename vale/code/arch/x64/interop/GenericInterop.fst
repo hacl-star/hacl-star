@@ -684,3 +684,78 @@ let wrap (dom:list vale_type{List.length dom < max_arity win})
   : as_lowstar_sig pre post =
   fun (va_b0:va_code) ->
      wrap_tl dom [] (create_vale_initial_state dom []) (pre va_b0 win) (post va_b0 win) (v va_b0 win)
+
+////////////////////////////////////////////////////////////////////////////////
+//test
+////////////////////////////////////////////////////////////////////////////////
+open Vale_memcpy
+let lem_memcpy (va_b0:va_code)
+               (win:bool)
+               (dst:buffer64)
+               (src:buffer64)
+               (va_s0:va_state)
+               (stack_b:buffer64)
+  :  Ghost (va_state & va_fuel)
+           (requires va_pre va_b0 va_s0 win stack_b dst src )
+           (ensures (fun (va_sM, va_fM) -> va_post va_b0 va_s0 va_sM va_fM win stack_b dst src )) =
+   Vale_memcpy.va_lemma_memcpy va_b0 va_s0 win stack_b dst src
+
+unfold
+let dom : l:list vale_type{List.Tot.length l < max_arity win} =
+  let d = [VT_Buffer TUInt64; VT_Buffer TUInt64;] in
+  assert_norm (List.Tot.length d < max_arity win);
+  d
+
+let pre : vale_pre dom =
+  fun (va_b0:code)
+    (win:bool)
+    (dst:buffer64)
+    (src:buffer64)
+    (va_s0:va_state)
+    (stack_b:buffer64) -> va_pre va_b0 va_s0 win stack_b dst src
+
+let post : vale_post dom =
+  fun (va_b0:code)
+    (win:bool)
+    (dst:buffer64)
+    (src:buffer64)
+    (va_s0:va_state)
+    (stack_b:buffer64)
+    (va_sM:va_state)
+    (va_fM:fuel) -> va_post va_b0 va_s0 va_sM va_fM win stack_b dst src
+
+let memcpy_raw
+    : as_lowstar_sig pre post
+    = wrap [VT_Buffer TUInt64; VT_Buffer TUInt64;] pre post lem_memcpy
+
+unfold let norm (#a:Type) (x:a) : a = normalize_term x
+
+let force (#a:Type) (x:a) : norm a = x
+
+let elim_lowstar_sig (#dom:list vale_type{List.length dom < max_arity win})
+                     (#pre:vale_pre dom)
+                     (#post:vale_post dom)
+                     (f:as_lowstar_sig pre post)
+    : norm (as_lowstar_sig pre post)
+    = force f
+
+let pre_cond (h:HS.mem) (dst:b8) (src:b8) = live h dst /\ live h src /\ bufs_disjoint [dst;src] /\ length dst % 8 == 0 /\ length src % 8 == 0 /\ length dst == 16 /\ length src == 16
+
+let post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8) =
+  live h dst /\ live h src /\
+  live h' dst /\ live h' src /\
+  length dst % 8 == 0 /\ length src % 8 == 0 /\
+  (let dst_b = BV.mk_buffer_view dst Views.view64 in
+  let src_b = BV.mk_buffer_view src Views.view64 in
+  Seq.equal (BV.as_seq h' dst_b) (BV.as_seq h' src_b))
+
+let full_post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8)  =
+  post_cond h h' dst src  /\
+  M.modifies (M.loc_buffer dst) h h'
+
+val memcpy: dst:buffer64 -> src:buffer64 -> Stack unit
+        (requires (fun h -> pre_cond h dst src ))
+        (ensures (fun h0 _ h1 -> full_post_cond h0 h1 dst src ))
+let memcpy dst src =
+  assume false; //TODO
+  elim_lowstar_sig memcpy_raw (Vale_memcpy.va_code_memcpy win) dst src ()
