@@ -111,7 +111,10 @@ let lemma_prod_bounds (dst_hi dst_lo x y:nat64) : Lemma
   lemma_mul_bound64 x y;
   ()
 
-
+let lemma_double_bound (x:nat64) : 
+  Lemma (add_wrap x x < pow2_64 - 1)
+  =
+  ()
 
 
 type bit = b:nat { b <= 1 }
