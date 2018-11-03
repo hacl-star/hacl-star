@@ -51,6 +51,8 @@ let frodo_gen_matrix_cshake1 n seedLen seed i res =
     (forall (j0:size_nat{j0 < j}). res0.(i, j0) == frodo_gen_matrix_cshake_fc n seedLen seed i j0))
   (frodo_gen_matrix_cshake0 n i res_i) res
 
+let frodo_gen_matrix_cshake_s (n:size_nat{n * n <= max_size_t}) (i:size_nat{i <= n}) = matrix n n
+
 val frodo_gen_matrix_cshake:
     n:size_nat{2 * n <= max_size_t /\ 256 + n < maxint U16 /\ n * n <= max_size_t}
   -> seedLen:size_nat
@@ -60,10 +62,10 @@ val frodo_gen_matrix_cshake:
      res.(i, j) == frodo_gen_matrix_cshake_fc n seedLen seed i j}
 let frodo_gen_matrix_cshake n seedLen seed =
   let res = Matrix.create n n in
-  Loops.repeati_inductive' #(matrix n n) n
+  Loops.repeat_gen_inductive n (frodo_gen_matrix_cshake_s n)
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (j:size_nat{j < n}).
-    res.(i0, j) == frodo_gen_matrix_cshake_fc n seedLen seed i0 j)
+    mget #n #n res i0 j == frodo_gen_matrix_cshake_fc n seedLen seed i0 j)
   (frodo_gen_matrix_cshake1 n seedLen seed) res
 
 val lemma_gen_matrix_4x:

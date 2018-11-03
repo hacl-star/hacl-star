@@ -43,18 +43,17 @@ val frodo_gen_matrix_cshake1:
     n:size_t{2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
   -> seed:lbytes seed_len
+  -> r:lbytes (size 2 *! n)
   -> i:size_t{v i < v n}
   -> res:matrix_t n n
   -> Stack unit
     (requires fun h ->
-      live h seed /\ live h res /\ disjoint res seed)
+      live h seed /\ live h res /\ live h r /\
+      disjoint res seed /\ disjoint res r /\ disjoint r seed)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer res) h0 h1 /\
+      modifies (loc_union (loc_buffer res) (loc_buffer r)) h0 h1 /\
       as_matrix h1 res == S.frodo_gen_matrix_cshake1 (v n) (v seed_len) (as_seq h0 seed) (v i) (as_matrix h0 res))
-let frodo_gen_matrix_cshake1 n seed_len seed i res =
-  push_frame ();
-  //TODO (?): create this buffer in `frodo_gen_matrix_cshake`
-  let r = create #_ #(2 * v n) (size 2 *! n) (u8 0) in
+let frodo_gen_matrix_cshake1 n seed_len seed r i res =
   let ctr = size_to_uint32 (size 256 +. i) in
   uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. i))) (u16 (256 + v i));
   SHA3.cshake128_frodo seed_len seed (to_u16 ctr) (size 2 *! n) r;
@@ -65,8 +64,7 @@ let frodo_gen_matrix_cshake1 n seed_len seed i res =
   (fun j ->
     Lib.LoopCombinators.unfold_repeati (v n) (spec h0) (as_matrix h0 res) (v j);
     frodo_gen_matrix_cshake0 n i r j res
-  );
-  pop_frame ()
+  )
 
 val frodo_gen_matrix_cshake:
     n:size_t{0 < v n /\ 2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
@@ -80,16 +78,24 @@ val frodo_gen_matrix_cshake:
       as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 [@"c_inline"]
 let frodo_gen_matrix_cshake n seed_len seed res =
+  push_frame ();
+  let r = create #_ #(2 * v n) (size 2 *! n) (u8 0) in
   memset res (u16 0) (n *! n);
   let h0 = ST.get () in
   Lib.Sequence.eq_intro (Lib.Sequence.sub (as_seq h0 res) 0 (v n * v n)) (as_seq h0 res);
   [@ inline_let]
+  let refl h i = as_matrix h res in
+  [@ inline_let]
+  let footprint i = loc_union (loc_buffer res) (loc_buffer r) in
+  [@ inline_let]
   let spec h0 = S.frodo_gen_matrix_cshake1 (v n) (v seed_len) (as_seq h0 seed) in
-  loop1 h0 n res spec
+  let h0 = ST.get () in
+  loop h0 n (S.frodo_gen_matrix_cshake_s (v n)) refl footprint spec
   (fun i ->
-    Lib.LoopCombinators.unfold_repeati (v n) (spec h0) (as_matrix h0 res) (v i);
-    frodo_gen_matrix_cshake1 n seed_len seed i res
-  )
+    Lib.LoopCombinators.unfold_repeat_gen (v n) (S.frodo_gen_matrix_cshake_s (v n)) (spec h0) (refl h0 0) (v i);
+    frodo_gen_matrix_cshake1 n seed_len seed r i res
+  );
+  pop_frame ()
 
 inline_for_extraction noextract
 val frodo_gen_matrix_cshake_4x:
