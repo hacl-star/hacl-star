@@ -1,0 +1,251 @@
+include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
+include "../../../../arch/x64/X64.Vale.InsMem.vaf"
+include{:fstar}{:open} "FastMul_helpers"
+include{:fstar}{:open} "FastMul_defs"
+include{:fstar}{:open} "X64.CPU_Features_s"
+
+module X64.FastUtil
+
+#reset-options "--z3rlimit 30"
+
+#verbatim{:interface}
+open Types_s
+open Arch.Types
+open X64.Machine_s
+open X64.Memory
+open X64.Vale.State
+open X64.Vale.Decls
+open X64.Vale.InsBasic
+open X64.Vale.InsMem
+open X64.Vale.QuickCode
+open X64.Vale.QuickCodes
+open FastMul_defs
+open X64.CPU_Features_s
+#endverbatim
+
+#verbatim{:implementation}
+open Types_s
+open Arch.Types
+open X64.Machine_s
+open X64.Memory
+open X64.Vale.State
+open X64.Vale.Decls
+open X64.Vale.InsBasic
+open X64.Vale.InsMem
+open X64.Vale.QuickCode
+open X64.Vale.QuickCodes
+open FStar.Tactics
+open FastMul_defs
+open FastMul_helpers
+open X64.CPU_Features_s
+#endverbatim
+
+type tactic:Type(0) extern;
+const int_canon:tactic extern;
+ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
+
+#reset-options "--z3rlimit 300"
+
+procedure{:quick}{:verify true} fast_mul1(
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64)
+    lets
+        dst_ptr @= rdi;
+        inA_ptr @= rsi;
+        b @= rdx;
+
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
+
+        a := pow2_four(a0, a1, a2, a3);
+    reads
+        dst_ptr; inA_ptr; b; memTaint;
+
+    modifies
+        rax; r8; r9; r10; r11; r12; r13; r14;
+        mem; efl;
+
+    requires
+        adx_enabled && bmi2_enabled;
+        buffers_disjoint(dst_b, inA_b);
+
+        validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+
+    ensures
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+        let d4 := buffer64_read(dst_b, 4, mem);
+        let d := pow2_five(d0, d1, d2, d3, rax);
+        d == old(a * b);
+
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
+{
+    xor_lemmas();
+    
+    lemma_load_mem64(inA_b, 0, mem);    
+    Mulx64( r9,  r8, Mem(inA_ptr,  0, inA_b, 0, Secret));  /* A[0]*B */ lemma_prod_bounds(r9, r8, b, a0); ghost var old_r8 := r8;
+    Store64_buffer(dst_ptr, r8,  0, Secret, dst_b, 0);  
+    Xor64(r8, r8);
+    lemma_load_mem64(inA_b, 1, mem);    
+    Mulx64(r11, r10, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[1]*B */ lemma_prod_bounds(r11, r10, b, a1); 
+    Add64Wrap(r10, r9);
+    Store64_buffer(dst_ptr, r10,  8, Secret, dst_b, 1);  
+    lemma_load_mem64(inA_b, 2, mem);    
+    Mulx64(r13, r12, Mem(inA_ptr, 16, inA_b, 2, Secret));  /* A[2]*B */ lemma_prod_bounds(r13, r12, b, a2); 
+    Adcx64Wrap(r12, r11);
+    Store64_buffer(dst_ptr, r12, 16, Secret, dst_b, 2);  
+    lemma_load_mem64(inA_b, 3, mem);    
+    Mulx64(rax, r14, Mem(inA_ptr, 24, inA_b, 3, Secret));  /* A[3]*B */ lemma_prod_bounds(rax, r14, b, a3); 
+    Adcx64Wrap(r14, r13);
+    Store64_buffer(dst_ptr, r14, 24, Secret, dst_b, 3);  
+    Adcx64Wrap(rax, r8);
+    
+    ghost var carry_bit := bool_bit(cf(efl));
+    assert carry_bit == 0;      // PASSES
+    assert_by_tactic(a * b == pow2_four(b*a0, b*a1, b*a2, b*a3), int_canon);   // PASSES
+}
+
+procedure{:quick} fast_add1(
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64)
+    lets
+        dst_ptr @= rdi;
+        inA_ptr @= rsi;
+        b @= rax;
+
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
+
+        a := pow2_four(a0, a1, a2, a3);
+    reads
+        dst_ptr; inA_ptr; memTaint;
+
+    modifies
+        b; r8; r9; r10; r11; r12; r13; r14;
+        mem; efl;
+
+    requires
+        adx_enabled && bmi2_enabled;
+        buffers_disjoint(dst_b, inA_b);
+
+        validDstAddrs64(mem, dst_ptr, dst_b, 5, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+
+    ensures
+//        let d0 := buffer64_read(dst_b, 0, mem);
+//        let d1 := buffer64_read(dst_b, 1, mem);
+//        let d2 := buffer64_read(dst_b, 2, mem);
+//        let d3 := buffer64_read(dst_b, 3, mem);
+//        let d4 := buffer64_read(dst_b, 4, mem);
+//        let d := pow2_five(d0, d1, d2, d3, d4);
+//        d == old(a * b);
+//
+//        validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
+//        modifies_buffer(dst_b, old(mem), mem);
+{
+    lemma_load_mem64(inA_b, 0, mem);    
+    Add64Wrap(b, Mem(inA_ptr,  0, inA_b, 0, Secret));
+    Store64_buffer(dst_ptr, b,  0, Secret, dst_b, 0);  
+    lemma_load_mem64(inA_b, 1, mem);    
+    Adcx64Wrap(b, Mem(inA_ptr,  8, inA_b, 1, Secret));
+    Store64_buffer(dst_ptr, b,  8, Secret, dst_b, 1);  
+    lemma_load_mem64(inA_b, 2, mem);    
+    Adcx64Wrap(b, Mem(inA_ptr, 16, inA_b, 2, Secret));
+    Store64_buffer(dst_ptr, b, 16, Secret, dst_b, 2);  
+    lemma_load_mem64(inA_b, 3, mem);    
+    Adcx64Wrap(b, Mem(inA_ptr, 24, inA_b, 3, Secret));
+    Store64_buffer(dst_ptr, b, 24, Secret, dst_b, 3);  
+}
+
+/*
+#reset-options "--z3rlimit 20"
+
+procedure{:quick}{:public} fast_sqr_stdcall(
+    inline win:bool,
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64,
+    ghost stack_b:buffer64)
+    lets
+        dst_ptr @= rdi; inA_ptr @= rsi; 
+        dst_in := (if win then rcx else rdi);
+        inA_in := (if win then rdx else rsi);
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rsp; efl; mem;
+    requires
+        adx_enabled && bmi2_enabled;
+        buffers_disjoint(dst_b, inA_b);
+
+        buffers_disjoint(stack_b, dst_b);
+        buffers_disjoint(stack_b, inA_b);
+
+        validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
+        valid_stack_slots(mem, rsp, stack_b, 5, memTaint);
+    ensures
+        let a0 := old(buffer64_read(inA_b, 0, mem));
+        let a1 := old(buffer64_read(inA_b, 1, mem));
+        let a2 := old(buffer64_read(inA_b, 2, mem));
+        let a3 := old(buffer64_read(inA_b, 3, mem));
+
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+        let d4 := buffer64_read(dst_b, 4, mem);
+        let d5 := buffer64_read(dst_b, 5, mem);
+        let d6 := buffer64_read(dst_b, 6, mem);
+        let d7 := buffer64_read(dst_b, 7, mem);
+
+        let a := a0 + pow2_64 * a1 + pow2_128 * a2 + pow2_192 * a3;
+
+        let d := d0 + pow2_64 * d1 + pow2_128 * d2 + pow2_192 * d3 +
+                 pow2_256 * d4 + pow2_320 * d5 + pow2_384 * d6 + pow2_448 * d7;
+        d == a * a;
+
+        //////////////////////////////////////
+        //   Framing
+        //////////////////////////////////////
+
+        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
+
+        rbx == old(rbx);
+        rsi == old(rsi);
+        r12 == old(r12);
+        r13 == old(r13);
+        r14 == old(r14);
+
+        rsp == old(rsp);
+{
+    // Store callee-save registers
+    Push(r15, stack_b, 4);
+    Push(rsi, stack_b, 3);
+    Push(r12, stack_b, 2);
+    Push(r13, stack_b, 1);
+    Push(r14, stack_b, 0);
+
+    // Line up the rest of the arguments
+    inline if (win) {
+        Mov64(dst_ptr, rcx);
+        Mov64(inA_ptr, rdx);
+    } 
+
+    fast_sqr(dst_b, inA_b);
+
+    Pop(r14, stack_b, 0);
+    Pop(r13, stack_b, 1);
+    Pop(r12, stack_b, 2);
+    Pop(rsi, stack_b, 3);
+    Pop(r15, stack_b, 4);
+}
+*/
