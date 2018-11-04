@@ -13,6 +13,7 @@ include{:fstar}{:open} "SHA_helpers"
 include{:fstar}{:open} "Spec.Hash"
 include{:fstar}{:open} "Spec.Hash.Common"
 include{:fstar}{:open} "Spec.Hash.Helpers"
+include{:fstar}{:open} "SHA_defs"
 include{:fstar}{:open} "Workarounds"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Vale.State"
@@ -39,6 +40,7 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open Arch.Types
 open SHA_helpers
+open SHA_defs
 open Spec.SHA2
 open Spec.Hash
 open Spec.Hash.Common

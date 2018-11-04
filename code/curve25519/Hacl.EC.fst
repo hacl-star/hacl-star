@@ -120,7 +120,7 @@ let crypto_scalarmult_ mypublic secret basepoint q =
   crypto_scalarmult__ mypublic scalar basepoint q;
   pop_frame()
 
-
+inline_for_extraction
 val crypto_scalarmult:
   mypublic:uint8_p{length mypublic = 32} ->
   secret:uint8_p{length secret = 32} ->

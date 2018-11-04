@@ -40,7 +40,7 @@ let all_10_bellow_56 (t:Seq.seq Hacl.UInt64.t{Seq.length t = 10}) : GTot Type0 =
   /\ v t.[8] < 0x100000000000000
   /\ v t.[9] < 0x100000000000000)
 
-
+inline_for_extraction
 val barrett_reduction:
   z:qelemB ->
   t:buffer Hacl.UInt64.t{length t = 10} ->

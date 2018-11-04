@@ -81,7 +81,7 @@ all-ci: bignum-ci specific-ci
 
 
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
-KREMLIN_ARGS+=-I ../bignum -tmpdir x25519-c \
+KREMLIN_ARGS+=-tmpdir x25519-c -I ../bignum \
 	$(KREMLIN_TESTLIB)
 
 # Acknowledge the F* dependency graph
@@ -96,7 +96,7 @@ x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
 x25519-c/Hacl_Test_X25519.c: x25519-c/Hacl_Curve25519.c
 
 x25519-c/Hacl_Curve25519.c:  x25519-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -I ../bignum -tmpdir x25519-c \
+	$(KREMLIN) $(KREMLIN_ARGS) \
 	 	-bundle 'Hacl.Curve25519=*' \
 		-minimal -add-include '"kremlib.h"' \
 		-skip-compilation $^ -o $@

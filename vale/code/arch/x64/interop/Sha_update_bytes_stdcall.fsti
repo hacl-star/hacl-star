@@ -43,7 +43,11 @@ let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:uint32_p) (in_b:b8) (num_val:UInt64.
   let hash_in = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h ctx_b128)) in
   let hash_out = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h' ctx_b128)) in
   (Seq.length input_LE) % 64 = 0 /\
+<<<<<<< HEAD
   hash_out == update_multi_transparent hash_in input_LE
+=======
+  hash_out == update_multi SHA2_256 hash_in input_LE
+>>>>>>> fstar-master
  )
 
 let full_post_cond (h:HS.mem) (h':HS.mem) (ctx_b:uint32_p) (in_b:b8) (num_val:UInt64.t) (k_b:uint32_p)  =

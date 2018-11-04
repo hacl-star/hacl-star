@@ -11,12 +11,12 @@ open Words_s
 open FStar.Seq
 open FStar.UInt32  // Interop with UInt-based SHA spec
 open Arch.Types
+open SHA_defs
 
 friend Spec.SHA2
 friend X64.CryptoInstructions_s
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
-
 
 // Define these specific converters here, so that F* only reasons about 
 // the correctness of the conversion once, rather that at every call site

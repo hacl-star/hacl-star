@@ -29,11 +29,7 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
-
-// TODO: replace with cast
-let nat64_to_nat32 (n:nat64 { n < pow2_32 }) : nat32 = let m:nat = n in m
 #endverbatim
-function nat64_to_nat32(n:nat64):nat32 requires n < pow2_32; extern;
 
 #verbatim
 open Opaque_s
@@ -246,7 +242,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pinsrd(dst, t_op_to_op(src), in
         src < pow2_32;
         index < 4;
     ensures
-        dst == insert_nat32(old(dst), nat64_to_nat32(old(src)), #nat2(index));
+        dst == insert_nat32(old(dst), #nat32(old(src)), #nat2(index));
 {
 }
 

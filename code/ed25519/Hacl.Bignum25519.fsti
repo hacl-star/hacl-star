@@ -47,7 +47,7 @@ val lemma_red_5413_is_red_55: s:seqelem -> Lemma (requires (red_5413 s))
 (* Functional mapping to mathematical integers *)
 val seval: seqelem -> GTot Spec.Curve25519.elem
 
-
+inline_for_extraction
 val fsum:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -57,7 +57,7 @@ val fsum:
       /\ live h1 a /\ modifies_1 a h0 h1 /\ red_53 (as_seq h1 a)
       /\ seval (as_seq h1 a) == Spec.Curve25519.fadd (seval (as_seq h0 a)) (seval (as_seq h0 b))))
   
-
+inline_for_extraction
 val fdifference:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -67,7 +67,7 @@ val fdifference:
       /\ live h1 a /\ modifies_1 a h0 h1 /\ red_5413 (as_seq h1 a)
       /\ seval (as_seq h1 a) == Spec.Curve25519.fsub (seval (as_seq h0 b)) (seval (as_seq h0 a))))
 
-
+inline_for_extraction
 val reduce_513:
   a:felem -> 
   Stack unit
@@ -76,7 +76,7 @@ val reduce_513:
       /\ live h1 a /\ modifies_1 a h0 h1 /\ red_513 (as_seq h1 a)
       /\ seval (as_seq h1 a) == seval (as_seq h0 a)))
 
-
+inline_for_extraction
 val fdifference_reduced:
   a:felem ->
   b:felem{disjoint a b} ->
@@ -86,6 +86,7 @@ val fdifference_reduced:
       /\ live h1 a /\ modifies_1 a h0 h1 /\ red_513 (as_seq h1 a)
       /\ seval (as_seq h1 a) == Spec.Curve25519.fsub (seval (as_seq h0 b)) (seval (as_seq h0 a))))
 
+inline_for_extraction
 val fmul:
   out:felem ->
   a:felem ->
@@ -96,6 +97,7 @@ val fmul:
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
       seval (as_seq h1 out) == Spec.Curve25519.fmul (seval (as_seq h0 a)) (seval (as_seq h0 b))))
 
+inline_for_extraction
 val times_2:
   out:felem ->
   a:felem ->
@@ -105,7 +107,7 @@ val times_2:
       /\ live h1 out /\ modifies_1 out h0 h1 /\ red_53 (as_seq h1 out)
       /\ seval (as_seq h1 out) == Spec.Curve25519.fmul 2 (seval (as_seq h0 a))))
 
-
+inline_for_extraction
 val times_d:
   out:felem ->
   a:felem ->
@@ -115,7 +117,7 @@ val times_d:
       /\ live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out)
       /\ seval (as_seq h1 out) == Spec.Curve25519.fmul Spec.Ed25519.d (seval (as_seq h0 a))))
 
-
+inline_for_extraction
 val times_2d:
   out:felem ->
   a:felem ->
@@ -125,7 +127,7 @@ val times_2d:
       /\ live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out)
       /\ seval (as_seq h1 out) == Spec.Curve25519.(2 `fmul` Spec.Ed25519.d `fmul` (seval (as_seq h0 a)))))
 
-
+inline_for_extraction
 val fsquare:
   out:felem ->
   a:felem{disjoint a out} ->
@@ -135,7 +137,7 @@ val fsquare:
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
       seval (as_seq h1 out) == Spec.Curve25519.fmul (seval (as_seq h0 a)) (seval (as_seq h0 a))))
 
-
+inline_for_extraction
 val fsquare_times:
   out:felem ->
   a:felem{disjoint out a} ->
@@ -146,7 +148,7 @@ val fsquare_times:
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
       seval (as_seq h1 out) == Spec.Curve25519.op_Star_Star (seval (as_seq h0 a)) (pow2 (FStar.UInt32.v n))))
 
-
+inline_for_extraction
 val fsquare_times_inplace:
   out:felem ->
   n:FStar.UInt32.t{FStar.UInt32.v n > 0} ->
@@ -156,7 +158,7 @@ val fsquare_times_inplace:
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
       seval (as_seq h1 out) == Spec.Curve25519.((seval (as_seq h0 out)) ** (pow2 (FStar.UInt32.v n)))))
 
-
+inline_for_extraction
 val inverse:
   out:felem ->
   a:felem{disjoint a out} ->
@@ -166,7 +168,7 @@ val inverse:
       live h1 out /\ modifies_1 out h0 h1 /\ red_513 (as_seq h1 out) /\
       seval (as_seq h1 out) == Spec.Ed25519.modp_inv (seval (as_seq h0 a))))
 
-
+inline_for_extraction
 val reduce:
   out:felem ->
   Stack unit
@@ -181,6 +183,7 @@ val reduce:
                                + pow2 204 * v (Seq.index s 4) < Spec.Curve25519.prime))) /\
       seval (as_seq h1 out) == seval (as_seq h0 out)))
 
+inline_for_extraction
 val lemma_reveal_red_51: s:seqelem ->
   Lemma (requires (red_51 s))
         (ensures (let open Hacl.UInt64 in
@@ -188,6 +191,7 @@ val lemma_reveal_red_51: s:seqelem ->
          v (Seq.index s 2) < pow2 51 /\ v (Seq.index s 3) < pow2 51 /\
          v (Seq.index s 4) < pow2 51))
 
+inline_for_extraction
 val lemma_intro_red_51: s:seqelem ->
   Lemma (requires (let open Hacl.UInt64 in
          v (Seq.index s 0) < pow2 51 /\ v (Seq.index s 1) < pow2 51 /\
@@ -195,7 +199,7 @@ val lemma_intro_red_51: s:seqelem ->
          v (Seq.index s 4) < pow2 51))
         (ensures (red_51 s))
 
-
+inline_for_extraction
 val lemma_reveal_red_513: s:seqelem ->
   Lemma (requires (red_513 s))
         (ensures (let open Hacl.UInt64 in
@@ -203,6 +207,7 @@ val lemma_reveal_red_513: s:seqelem ->
          v (Seq.index s 2) < pow2 51 + pow2 13 /\ v (Seq.index s 3) < pow2 51 + pow2 13 /\
          v (Seq.index s 4) < pow2 51 + pow2 13))
 
+inline_for_extraction
 val lemma_intro_red_513: s:seqelem ->
   Lemma (requires (let open Hacl.UInt64 in
          v (Seq.index s 0) < pow2 51 + pow2 13 /\ v (Seq.index s 1) < pow2 51 + pow2 13 /\
@@ -210,6 +215,7 @@ val lemma_intro_red_513: s:seqelem ->
          v (Seq.index s 4) < pow2 51 + pow2 13))
         (ensures (red_513 s))
 
+inline_for_extraction
 val lemma_reveal_seval: s:seqelem ->
   Lemma (FStar.Mul.(Hacl.UInt64.((v (Seq.index s 0)
                                + pow2 51 * v (Seq.index s 1)
