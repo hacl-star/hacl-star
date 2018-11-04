@@ -354,9 +354,26 @@ let rec mt_flush_to_ lv hs pi i j =
        let hvec = S.index hs lv in
        let flushed = S.slice hvec ofs (S.length hvec) in
        let nhs = S.upd hs lv flushed in
-       assume (mt_wf_elts (lv + 1) nhs (pi / 2) (j / 2));
-       assume (offset_of i - offset_of pi > offset_of (i / 2) - offset_of (pi / 2));
+       mt_wf_elts_equal (lv + 1) hs nhs (pi / 2) (j / 2);
        mt_flush_to_ (lv + 1) nhs (pi / 2) (i / 2) (j / 2))
+
+val mt_flush_to_rec:
+  lv:nat{lv < 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  pi:nat ->
+  i:nat{i >= pi} ->
+  j:nat{
+    j >= i /\ j < pow2 (32 - lv) /\
+    mt_wf_elts lv hs pi j} ->
+  Lemma (requires (offset_of i <> offset_of pi))
+        (ensures (mt_flush_to_ lv hs pi i j ==
+                 (let ofs = offset_of i - offset_of pi in
+                 let hvec = S.index hs lv in
+                 let flushed = S.slice hvec ofs (S.length hvec) in
+                 let nhs = S.upd hs lv flushed in
+                 mt_wf_elts_equal (lv + 1) hs nhs (pi / 2) (j / 2);
+                 mt_flush_to_ (lv + 1) nhs (pi / 2) (i / 2) (j / 2))))
+let mt_flush_to_rec lv hs pi i j = ()                 
 
 val mt_flush_to: 
   mt:wf_mt -> 

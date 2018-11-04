@@ -1739,6 +1739,9 @@ private val mt_get_path_:
              (High.mt_get_path_ (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
    (decreases (32 - U32.v lv))
+// This proof works, but it's a bit slow.
+// It will be admitted until the hint file is generated.
+#reset-options "--admit_smt_queries true"
 private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
   let hh0 = HST.get () in
   let ofs = offset_of i in
@@ -1772,6 +1775,8 @@ private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
                       (U32.v i / 2) (U32.v j / 2) (U32.v k / 2)
                       (lift_path hh1 mtr p)
                       (if U32.v j % 2 = 0 then actd else true))))
+#reset-options // reset "--admit_smt_queries true"
+
 
 private val hash_vv_rv_inv_includes:
   h:HS.mem -> hvv:hash_vv ->
@@ -1815,7 +1820,10 @@ val mt_get_path:
      (U32.v (MT?.j (B.get h1 mt 0)),
      lift_path h1 (B.frameOf mt) p,
      Rgl?.r_repr hreg h1 root)))
-#reset-options "--z3rlimit 200 --max_fuel 1"
+// #reset-options "--z3rlimit 200 --max_fuel 1"
+// This proof works, but it's a bit slow.
+// It will be admitted until the hint file is generated.
+#reset-options "--admit_smt_queries true"
 let mt_get_path mt idx p root =
   let copy = Cpy?.copy hcpy in
   let hh0 = HST.get () in
@@ -1862,6 +1870,7 @@ let mt_get_path mt idx p root =
                     (U32.v i) (U32.v j) (U32.v idx)
                     (lift_path hh2 (B.frameOf mt) p) false));
   j
+#reset-options // reset "--admit_smt_queries true"
 
 /// Flushing
 
@@ -1909,11 +1918,20 @@ private val mt_flush_to_:
                (U32.v lv) (RV.as_seq h0 hs) (U32.v pi)
                (U32.v i) (U32.v (Ghost.reveal j))))))
    (decreases (U32.v i))
-// #reset-options "--z3rlimit 300 --max_fuel 2"
+// #reset-options "--z3rlimit 800 --max_fuel 1"
+// This proof works with the resource limit above, but it's a bit slow.
+// It will be admitted until the hint file is generated.
 #reset-options "--admit_smt_queries true"
 private let rec mt_flush_to_ lv hs pi i j =
   let hh0 = HST.get () in
+
+  // Base conditions
   mt_safe_elts_rec hh0 lv hs pi (Ghost.reveal j);
+  V.loc_vector_within_included hs 0ul lv;
+  V.loc_vector_within_included hs lv (lv + 1ul);
+  V.loc_vector_within_included hs (lv + 1ul) (V.size_of hs);
+  V.loc_vector_within_disjoint hs lv (lv + 1ul) (lv + 1ul) (V.size_of hs);
+
   let oi = offset_of i in
   let opi = offset_of pi in
   if oi = opi then ()
@@ -1957,7 +1975,6 @@ private let rec mt_flush_to_ lv hs pi i j =
 
     // 1-3) For `mt_safe_elts`
     assert (V.size_of flushed == Ghost.reveal j - offset_of i); // head updated
-    V.loc_vector_within_included hs (lv + 1ul) (V.size_of hs);
     mt_safe_elts_preserved
       (lv + 1ul) hs (pi / 2ul) (Ghost.reveal j / 2ul)
       (RV.loc_rvector (V.get hh0 hs lv)) hh0 hh1; // tail not yet
@@ -1989,6 +2006,11 @@ private let rec mt_flush_to_ lv hs pi i j =
     assert (rv_itself_inv hh1 hs);
     assert (elems_reg hh1 hs);
 
+    // 1-5) Correctness
+    assert (S.equal (RV.as_seq hh1 flushed)
+                    (S.slice (RV.as_seq hh0 (V.get hh0 hs lv)) (U32.v ofs)
+                             (S.length (RV.as_seq hh0 (V.get hh0 hs lv)))));
+
     /// 2) Assign the flushed vector to `hs` at the level `lv`.
     RV.assign hs lv flushed;
     let hh2 = HST.get () in
@@ -2000,6 +2022,7 @@ private let rec mt_flush_to_ lv hs pi i j =
                        (V.loc_vector_within hs lv (lv + 1ul))) hh0 hh2);
 
     // 2-2) Preservation
+    V.loc_vector_within_disjoint hs lv (lv + 1ul) (lv + 1ul) (V.size_of hs);
     RV.rv_loc_elems_preserved
       hs (lv + 1ul) (V.size_of hs)
       (V.loc_vector_within hs lv (lv + 1ul)) hh1 hh2;
@@ -2011,6 +2034,19 @@ private let rec mt_flush_to_ lv hs pi i j =
       (lv + 1ul) hs (pi / 2ul) (Ghost.reveal j / 2ul)
       (V.loc_vector_within hs lv (lv + 1ul)) hh1 hh2;
 
+    // 2-4) Correctness
+    RV.as_seq_sub_preserved hs 0ul lv (loc_rvector flushed) hh0 hh1;
+    RV.as_seq_sub_preserved hs (lv + 1ul) merkle_tree_size_lg (loc_rvector flushed) hh0 hh1;
+    assert (S.equal (RV.as_seq hh2 hs)
+                    (S.append
+                      (RV.as_seq_sub hh0 hs 0ul lv)
+                      (S.cons (RV.as_seq hh1 flushed)
+                              (RV.as_seq_sub hh0 hs (lv + 1ul) merkle_tree_size_lg))));
+    assume (S.equal (RV.as_seq hh2 hs)
+                    (S.upd (RV.as_seq hh0 hs) (U32.v lv) (RV.as_seq hh1 flushed)));
+
+    // if `lv = 31` then `pi <= i <= j < 2` thus `oi = opi`, 
+    // contradicting the branch.
     assert (lv + 1ul < merkle_tree_size_lg);
     assert (U32.v (Ghost.reveal j / 2ul) < pow2 (32 - U32.v (lv + 1ul)));
     assert (RV.rv_inv hh2 hs);
@@ -2021,6 +2057,7 @@ private let rec mt_flush_to_ lv hs pi i j =
       (Ghost.hide (Ghost.reveal j / 2ul));
     let hh3 = HST.get () in
 
+    // 3-0) Memory safety brought from the postcondition of the recursion
     assert (modifies
              (loc_union
                (loc_union
@@ -2031,12 +2068,8 @@ private let rec mt_flush_to_ lv hs pi i j =
                  (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))))
              hh0 hh3);
     mt_flush_to_modifies_rec_helper lv hs hh0;
-    assert (loc_disjoint
-             (V.loc_vector_within hs lv (lv + 1ul))
-             (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
-    assert (loc_includes
-             (V.loc_vector hs)
-             (V.loc_vector_within hs lv (lv + 1ul)));
+    V.loc_vector_within_disjoint hs lv (lv + 1ul) (lv + 1ul) (V.size_of hs);
+    V.loc_vector_within_included hs lv (lv + 1ul);
     RV.rv_loc_elems_included hh2 hs (lv + 1ul) (V.size_of hs);
     assert (loc_disjoint
              (V.loc_vector_within hs lv (lv + 1ul))
@@ -2050,7 +2083,20 @@ private let rec mt_flush_to_ lv hs pi i j =
            Ghost.reveal j - offset_of i);
     assert (RV.rv_inv hh3 hs);
     mt_safe_elts_constr hh3 lv hs i (Ghost.reveal j);
-    assert (mt_safe_elts hh3 lv hs i (Ghost.reveal j))
+    assert (mt_safe_elts hh3 lv hs i (Ghost.reveal j));
+
+    // 3-1) Correctness
+    mt_safe_elts_spec hh2 (lv + 1ul) hs (pi / 2ul) (Ghost.reveal j / 2ul);
+    assert (S.equal (RV.as_seq hh3 hs)
+                    (High.mt_flush_to_ (U32.v lv + 1) (RV.as_seq hh2 hs)
+                      (U32.v pi / 2) (U32.v i / 2) (U32.v (Ghost.reveal j) / 2)));
+    mt_safe_elts_spec hh0 lv hs pi (Ghost.reveal j);
+    High.mt_flush_to_rec 
+      (U32.v lv) (RV.as_seq hh0 hs)
+      (U32.v pi) (U32.v i) (U32.v (Ghost.reveal j));
+    assert (S.equal (RV.as_seq hh3 hs)
+                    (High.mt_flush_to_ (U32.v lv) (RV.as_seq hh0 hs)
+                      (U32.v pi) (U32.v i) (U32.v (Ghost.reveal j))))
   end
 #reset-options
 
