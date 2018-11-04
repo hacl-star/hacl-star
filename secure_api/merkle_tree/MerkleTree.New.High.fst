@@ -278,6 +278,29 @@ let mt_get_root_rhs_ok_false mt drt = ()
 val path_insert: p:path -> hp:hash -> GTot path
 let path_insert p hp = S.snoc p hp
 
+val mt_get_path_step:
+  lv:nat{lv <= 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  rhs:hash_seq{S.length rhs = 32} ->
+  i:nat ->
+  j:nat{
+    j <> 0 /\ i <= j /\ j < pow2 (32 - lv) /\
+    mt_wf_elts lv hs i j} ->
+  k:nat{i <= k && k <= j} ->
+  p:path ->
+  actd:bool ->
+  GTot path (decreases (32 - lv))
+let mt_get_path_step lv hs rhs i j k p actd =
+  let ofs = offset_of i in
+  if k % 2 = 1
+  then path_insert p (S.index (S.index hs lv) (k - 1 - ofs))
+  else (if k = j then p
+       else if k + 1 = j
+	    then (if actd
+		 then path_insert p (S.index rhs lv)
+		 else p)
+	    else path_insert p (S.index (S.index hs lv) (k + 1 - ofs)))
+
 // Construct a Merkle path for a given index `k`, hashes `hs`, 
 // and rightmost hashes `rhs`.
 val mt_get_path_:
@@ -296,28 +319,22 @@ let rec mt_get_path_ lv hs rhs i j k p actd =
   let ofs = offset_of i in
   if j = 0 then p
   else
-    (let np = 
-      (if k % 2 = 1
-      then path_insert p (S.index (S.index hs lv) (k - 1 - ofs))
-      else (if k = j then p
-	   else if k + 1 = j
-	   then (if actd
-		then path_insert p (S.index rhs lv)
-		else p)
-	   else path_insert p (S.index (S.index hs lv) (k + 1 - ofs)))) in
+    (let np = mt_get_path_step lv hs rhs i j k p actd in
     mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np
     		 (if j % 2 = 0 then actd else true))
 
 val mt_get_path: 
-  mt:wf_mt -> drt:hash ->
+  mt:wf_mt ->
   idx:nat{MT?.i mt <= idx /\ idx < MT?.j mt} ->
-  GTot (path * hash)
-let mt_get_path mt drt idx =
+  drt:hash ->
+  GTot (nat * path * hash)
+let mt_get_path mt idx drt =
   let (umt, root) = mt_get_root mt drt in
   let ofs = offset_of (MT?.i umt) in
-  let ip = path_insert S.empty (S.index (S.index (MT?.hs umt) 0) (idx - ofs)) in
-  (mt_get_path_ 0 (MT?.hs umt) (MT?.rhs umt)
-    (MT?.i umt) (MT?.j umt) idx ip false,
+  let np = path_insert S.empty (S.index (S.index (MT?.hs umt) 0) (idx - ofs)) in
+  (MT?.j umt,
+  mt_get_path_ 0 (MT?.hs umt) (MT?.rhs umt)
+    (MT?.i umt) (MT?.j umt) idx np false,
   root)
 
 val mt_flush_to_:
