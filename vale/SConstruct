@@ -926,7 +926,7 @@ def process_files_in(env, directories):
     for target in manual_dependencies:
       Depends(target, manual_dependencies[target])
 
-def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_file):
+def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_file, extra_vafs=[]):
   # OCaml depends on many libraries and executables; we have to assume they are in the user's PATH:
   ocaml_env.PrependENVPath('OCAMLPATH', fstar_path + '/bin')
   main_ml = ml_out_file(main_file, '.ml')
@@ -957,17 +957,20 @@ def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_fi
       f'ocamlfind ocamlopt -c -package fstarlib -package fstar-tactics-lib -o {x_cmx} {x_ml} -I obj/ml_out')
     cmxs.append(cmx[0])
     Depends(main_exe, cmx[0])
-  def collect_cmxs_in_order(x_ml):
-    if not (x_ml in done):
-      done.add(x_ml)
-      for y_ml in sorted(ml_out_deps[x_ml]): # sorting makes the order deterministic, so scons doesn't needlessly rebuild
-        # if x depends on y, y must appear first in ocaml link step
-        Depends(ml_out_file(x_ml, '.cmx'), ml_out_file(y_ml, '.cmx'))
-        collect_cmxs_in_order(y_ml)
-      Depends(x_ml, pointer_ml)
-      add_cmx(x_ml)
+  def collect_cmxs_in_order(x_mls):
+    for x_ml in x_mls:
+      if not (x_ml in done):
+        done.add(x_ml)
+        for y_ml in sorted(ml_out_deps[x_ml]): # sorting makes the order deterministic, so scons doesn't needlessly rebuild
+          # if x depends on y, y must appear first in ocaml link step
+          Depends(ml_out_file(x_ml, '.cmx'), ml_out_file(y_ml, '.cmx'))
+          collect_cmxs_in_order(y_ml)
+        Depends(x_ml, pointer_ml)
+        add_cmx(x_ml)
   add_cmx(pointer_ml)
-  collect_cmxs_in_order(alg_ml)
+  vafs = [alg_ml] + extra_vafs
+  print("Vafs are %s" % vafs)
+  collect_cmxs_in_order(vafs)
   add_cmx(cmdline_ml)
   add_cmx(main_ml)
   cmxs_string = " ".join([str(cmx) for cmx in cmxs])
@@ -1134,10 +1137,14 @@ if not is_help:
 
   if fstar_extract:
     # Build AES-GCM
-    aesgcm_asm = extract_assembly_code(env, 'aesgcm', File('code/crypto/aes/x64/Main.ml'),
-      File('code/crypto/aes/x64/X64.GCMdecrypt.vaf'), File('code/lib/util/CmdLineParser.ml'))
-    sha256_asm = extract_assembly_code(env, 'sha256', File('code/crypto/sha/ShaMain.ml'),
-      File('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf'), File('code/lib/util/CmdLineParser.ml'))
+#    aesgcm_asm = extract_assembly_code(env, 'aesgcm', File('code/crypto/aes/x64/Main.ml'),
+#      File('code/crypto/aes/x64/X64.GCMdecrypt.vaf'), File('code/lib/util/CmdLineParser.ml'))
+#    sha256_asm = extract_assembly_code(env, 'sha256', File('code/crypto/sha/ShaMain.ml'),
+#      File('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf'), File('code/lib/util/CmdLineParser.ml'))
+    curve25519_vafs = [File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastSqr.vaf'),\
+                       File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastUtil.vaf')]
+    curve25519_asm = extract_assembly_code(env, 'curve25519', File('code/crypto/ecc/curve25519/Main25519.ml'),
+      File('code/thirdPartyPorts/rfc7748/curve25519/x64.vaf'), File('code/lib/util/CmdLineParser.ml'), curve25519_vafs)
     if env['TARGET_ARCH'] == 'amd64':
       aesgcmasm_obj = env.Object('obj/aesgcmasm_openssl', aesgcm_asm[0])
       aesgcmtest_src = File('code/crypto/aes/x64/TestAesGcm.cpp')
