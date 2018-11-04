@@ -5,7 +5,6 @@ include{:fstar}{:open} "Types_s"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "Spec.SHA2"
 include{:fstar}{:open} "SHA_helpers"
-include{:fstar}{:open} "SHA_defs"
 include{:fstar}{:open} "Spec.Hash.Common"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Vale.State"
@@ -23,7 +22,6 @@ open Spec.Hash.Common
 open Spec.SHA2
 open Spec.Hash.Helpers
 open SHA_helpers
-open SHA_defs
 open X64.Machine_s
 open X64.Vale.State
 open X64.Vale.Decls

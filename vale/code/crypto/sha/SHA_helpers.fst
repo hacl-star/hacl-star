@@ -11,7 +11,6 @@ open Words_s
 open FStar.Seq
 open FStar.UInt32  // Interop with UInt-based SHA spec
 open Arch.Types
-open SHA_defs
 
 friend Spec.SHA2
 friend X64.CryptoInstructions_s

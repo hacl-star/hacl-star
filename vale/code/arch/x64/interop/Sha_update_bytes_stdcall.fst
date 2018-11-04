@@ -209,17 +209,7 @@ let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel)
     (buffer_as_seq #t va_s0.mem ctx_b));
   assert (Seq.equal
     (BV.as_seq va_sM.mem.hs ctx_b128)
-<<<<<<< HEAD
     (buffer_as_seq #t va_sM.mem ctx_b));     
-=======
-    (buffer_as_seq #t va_sM.mem ctx_b));   
-  let ctx_b128 = BV.mk_buffer_view ctx_b Views.view128 in
-  let in_b128 = BV.mk_buffer_view in_b Views.view128 in
-  let input_LE = seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (BV.as_seq h' in_b128)) in
-  let hash_in = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h ctx_b128)) in
-  let hash_out = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h' ctx_b128)) in
-  lemma_update_multi_opaque_vale_is_update_multi hash_in input_LE;  
->>>>>>> fstar-master
   ()
 
 #set-options "--max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
