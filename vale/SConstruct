@@ -1141,7 +1141,7 @@ if not is_help:
       [File('code/crypto/aes/x64/X64.GCMdecrypt.vaf')], File('code/lib/util/CmdLineParser.ml'))
     sha256_asm = extract_assembly_code(env, 'sha256', File('code/crypto/sha/ShaMain.ml'),
       [File('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf')], File('code/lib/util/CmdLineParser.ml'))
-    extract_assembly_code(env, 'curve25519', File('code/crypto/ecc/curve25519/Main25519.ml'), [
+    curve25519_asm = extract_assembly_code(env, 'curve25519', File('code/crypto/ecc/curve25519/Main25519.ml'), [
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastUtil.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastSqr.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastMul.vaf')],
@@ -1157,6 +1157,11 @@ if not is_help:
       sha256test_cpp = to_obj_dir(sha256test_src)
       CopyFile(sha256test_cpp, sha256test_src)
       sha256test_exe = env.Program(source = [sha256asm_obj, sha256test_cpp], target = 'obj/TestSha.exe')
+      curve25519asm_obj = env.Object('obj/curve25519asm_openssl', curve25519_asm[0])
+      curve25519test_src = File('code/crypto/ecc/curve25519/TestEcc.cpp')
+      curve25519test_cpp = to_obj_dir(curve25519test_src)
+      CopyFile(curve25519test_cpp, curve25519test_src)
+      curve25519test_exe = env.Program(source = [curve25519asm_obj, curve25519test_cpp], target = 'obj/TestEcc.exe')
 
   if dump_args:
     print_dump_args()
