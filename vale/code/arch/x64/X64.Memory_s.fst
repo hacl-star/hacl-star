@@ -9,8 +9,6 @@ module BV = LowStar.BufferView
 module S = X64.Bytes_Semantics_s
 module H = FStar.Heap
 
-friend SecretByte
-
 #reset-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 
 let b8 = B.buffer UInt8.t
@@ -1481,7 +1479,7 @@ let valid128_64 ptr h =
 open Views
 
 private
-let load128_64_aux (s:Seq.lseq SecretByte.t 16) : Lemma
+let load128_64_aux (s:Seq.lseq UInt8.t 16) : Lemma
   (let v = get128 s in
    let v_lo = get64 (Seq.slice s 0 8) in
    let v_hi = get64 (Seq.slice s 8 16) in

@@ -32,7 +32,7 @@ let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
 
 *)
 
-[@ Substitute]
+inline_for_extraction
 private
 val copy:
   a:buffer Hacl.UInt64.t{length a = 5} ->
@@ -41,7 +41,7 @@ val copy:
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h0 a == as_seq h1 b))
-[@ Substitute]
+
 let copy a b =
   let h = ST.get() in
   blit a 0ul b 0ul 5ul;
@@ -52,7 +52,7 @@ let copy a b =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ Substitute]
+inline_for_extraction
 private
 val point_add_step_1:
   p:point ->
@@ -96,7 +96,7 @@ val point_add_step_1:
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ Substitute]
+inline_for_extraction
 private
 let point_add_step_1 p q tmp =
   let tmp1 = sub tmp 0ul 5ul in
@@ -129,7 +129,7 @@ let point_add_step_1 p q tmp =
   fmul tmp4 tmp1 tmp2
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val point_add_step_2:
   p:point ->
@@ -181,7 +181,7 @@ val point_add_step_2:
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ Substitute]
+inline_for_extraction
 private
 let point_add_step_2 p q tmp =
   let tmp1 = sub tmp 0ul 5ul in
@@ -255,7 +255,7 @@ let point_add_step_2 p q tmp =
   ()
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val point_add_step_3:
   p:point ->
@@ -313,7 +313,7 @@ val point_add_step_3:
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-[@ Substitute]
+inline_for_extraction
 private
 let point_add_step_3 p q tmp =
   let tmp1 = sub tmp 0ul 5ul in
@@ -363,7 +363,7 @@ let point_add_step_3 p q tmp =
   ()
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val point_add_:
   out:point ->
@@ -405,7 +405,7 @@ val point_add_:
   ))
 
 #reset-options "--max_fuel 0 --z3rlimit 500"
-[@ Substitute]
+inline_for_extraction
 private
 let point_add_ out p q tmp =
   point_add_step_1 p q tmp;
@@ -450,7 +450,7 @@ let point_add_ out p q tmp =
   no_upd_lemma_1 h3 h4 z3 y3;
   no_upd_lemma_1 h3 h4 z3 t3
 
-
+inline_for_extraction
 let point_add out p q =
   push_frame();
   let tmp = create (Hacl.Cast.uint64_to_sint64 0uL) 30ul in

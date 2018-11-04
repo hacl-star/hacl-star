@@ -23,7 +23,6 @@ module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 
-friend SecretByte
 friend X64.Memory_s
 friend X64.Memory
 friend X64.Vale.Decls
@@ -34,7 +33,7 @@ open Vale_memcpy
 
 
 #set-options "--initial_fuel 5 --max_fuel 5 --initial_ifuel 0 --max_ifuel 0"
-let create_buffer_list (dst:s8) (src:s8) (stack_b:b8)  : (l:list b8{
+let create_buffer_list (dst:b8) (src:b8) (stack_b:b8)  : (l:list b8{
     l == [stack_b;dst;src] /\
   (forall x. {:pattern List.memP x l} List.memP x l <==> (x == dst \/ x == src \/ x == stack_b))}) =
   [stack_b;dst;src]
@@ -69,7 +68,7 @@ let create_initial_trusted_state is_win dst src stack_b (h0:HS.mem{pre_cond h0 d
        BS.mem = Interop.down_mem h0 addrs buffers} in
   {TS.state = s0; TS.trace = []; TS.memTaint = create_valid_memtaint mem buffers taint_func}
 
-val lemma_ghost_memcpy: is_win:bool -> dst:s8 -> src:s8 ->  stack_b:b8 -> (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) ->
+val lemma_ghost_memcpy: is_win:bool -> dst:b8 -> src:b8 ->  stack_b:b8 -> (h0:HS.mem{pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]}) ->
   Ghost (TS.traceState * nat * HS.mem)
     (requires True)
     (ensures (fun (s1, f1, h1) ->
@@ -120,7 +119,7 @@ let create_lemma is_win dst src stack_b (h0:HS.mem{pre_cond h0 dst src /\ B.leng
     assert (FunctionalExtensionality.feq (xmms' s1.TS.state) (xmms' s_init.TS.state))
 
 // TODO: Prove these two lemmas if they are not proven automatically
-let implies_pre (is_win:bool) (h0:HS.mem) (dst:s8) (src:s8)  (stack_b:b8) : Lemma
+let implies_pre (is_win:bool) (h0:HS.mem) (dst:b8) (src:b8)  (stack_b:b8) : Lemma
   (requires pre_cond h0 dst src /\ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src])
   (ensures (
 B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src] /\ (
@@ -139,7 +138,7 @@ B.length stack_b == 24 /\ live h0 stack_b /\ buf_disjoint_from stack_b [dst;src]
 let seq_nat64_to_seq_U64 (b:Seq.seq nat64) : (Seq.seq UInt64.t) =
 Seq.init (Seq.length b) (fun (i:nat { i < Seq.length b }) -> UInt64.uint_to_t (Seq.index b i))
 
-let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel) (dst:s8) (src:s8)  (stack_b:b8) : Lemma
+let implies_post (is_win:bool) (va_s0:va_state) (va_sM:va_state) (va_fM:va_fuel) (dst:b8) (src:b8)  (stack_b:b8) : Lemma
   (requires pre_cond va_s0.mem.hs dst src /\ B.length stack_b == 24 /\ live va_s0.mem.hs stack_b /\ buf_disjoint_from stack_b [dst;src]/\
     va_post (va_code_memcpy is_win) va_s0 va_sM va_fM is_win stack_b dst src )
   (ensures post_cond va_s0.mem.hs va_sM.mem.hs dst src ) =

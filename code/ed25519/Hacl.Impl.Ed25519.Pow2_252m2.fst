@@ -15,7 +15,7 @@ open Hacl.Bignum25519
 
 (* #reset-options "--max_fuel 0 --z3rlimit 10" *)
 
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* private *)
 (* val fmul: *)
 (*   output:felem -> *)
@@ -32,7 +32,7 @@ open Hacl.Bignum25519
 (*       (\* /\ Hacl.Spec.Bignum.Fmul.fmul_pre (as_seq h0 a) (as_seq h0 b) *\) *)
 (*       (\* /\ as_seq h1 output == Hacl.Spec.Bignum.fmul_tot (as_seq h0 a) (as_seq h0 b) *\) *)
 (*       )) *)
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* private let fmul output a b = *)
 (*   let h = ST.get() in *)
 (*   lemma_red_513_is_red_53 (as_seq h a); *)
@@ -42,7 +42,7 @@ open Hacl.Bignum25519
 
 (* #reset-options "--max_fuel 0 --z3rlimit 10" *)
 
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* inline_for_extraction private val fsquare_times: *)
 (*   output:felem -> *)
 (*   input:felem{disjoint output input} -> *)
@@ -55,14 +55,14 @@ open Hacl.Bignum25519
 (*       /\ red_513 (as_seq h1 output) *)
 (*       (\* /\ (as_seq h1 output) == Hacl.Spec.Bignum.Fsquare.fsquare_times_tot (as_seq h0 input) (FStar.UInt32.v count))) *\) *)
 (*       )) *)
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* inline_for_extraction private let fsquare_times output input count = *)
 (*   (\* let h = ST.get() in *\) *)
 (*   (\* lemma_513_is_5413 (as_seq h input); *\) *)
 (*   fsquare_times output input count *)
 
 
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* inline_for_extraction private val fsquare_times_inplace: *)
 (*   output:felem -> *)
 (*   count:FStar.UInt32.t{FStar.UInt32.v count > 0} -> *)
@@ -73,7 +73,7 @@ open Hacl.Bignum25519
 (*       /\ red_513 (as_seq h1 output) *)
 (*       (\* /\ (as_seq h1 output) == Hacl.Spec.Bignum.Fsquare.fsquare_times_tot (as_seq h0 output) (FStar.UInt32.v count) *\) *)
 (*     )) *)
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* inline_for_extraction private let fsquare_times_inplace output count = *)
 (*   (\* let h = ST.get() in *\) *)
 (*   (\* lemma_513_is_5413 (as_seq h output); *\) *)
@@ -110,7 +110,7 @@ open Hacl.Bignum25519
 (*   lemma_crecip_1_modifies' h0 h7 buf *)
 
 
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* private inline_for_extraction val crecip_1: *)
 (*   buf:buffer limb{length buf = 20} -> *)
 (*   z:felem{disjoint buf z} -> *)
@@ -128,7 +128,7 @@ open Hacl.Bignum25519
 (*     (\*    /\ ( (as_seq h1 t0, as_seq h1 b, as_seq h1 a)  == crecip_tot_1 (as_seq h0 z))) *\) *)
 (*   )) *)
 (* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100" *)
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* private inline_for_extraction let crecip_1 buf z = *)
 (*   let a  = Buffer.sub buf 0ul  5ul in *)
 (*   let t0 = Buffer.sub buf 5ul  5ul in *)
@@ -176,7 +176,7 @@ open Hacl.Bignum25519
 (*   lemma_crecip_1_modifies' h0 h8 buf *)
 
 
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* private inline_for_extraction val crecip_2: *)
 (*   buf:buffer limb{length buf = 20} -> *)
 (*   Stack unit *)
@@ -204,7 +204,7 @@ open Hacl.Bignum25519
 (*        ) *)
 (*   )) *)
 (* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 200" *)
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* private inline_for_extraction let crecip_2 buf = *)
 (*   assert_norm(pow2 32 = 0x100000000); *)
 (*   let a  = Buffer.sub buf 0ul  5ul in *)
@@ -264,7 +264,7 @@ open Hacl.Bignum25519
 (* private let lemma_crecip_3_modifies h0 h1 h2 h3 h4 h5 h6 h7 buf out = () *)
 
 
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* private inline_for_extraction val crecip_3: *)
 (*   out:felem -> *)
 (*   buf:buffer limb{length buf = 20 /\ disjoint out buf} -> *)
@@ -290,7 +290,7 @@ open Hacl.Bignum25519
 (*        (\* /\ as_seq h1 out  == crecip_tot_3 (as_seq h0 t0) (as_seq h0 b) (as_seq h0 a)) *\) *)
 (*   )) *)
 (* #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 100" *)
-(* [@"substitute"] *)
+(* inline_for_extraction *)
 (* private inline_for_extraction let crecip_3 out buf = *)
 (*   assert_norm(pow2 32 = 0x100000000); *)
 (*   let a  = Buffer.sub buf 0ul  5ul in *)
@@ -330,7 +330,7 @@ open Hacl.Bignum25519
 (*   (\* lemma_crecip_3_modifies h0 h1 h2 h3 h4 h5 h6 h7 buf out *\) *)
 
 
-(* (\* [@"c_inline"] *\) *)
+(* (\* inline_for_extraction *\) *)
 (* (\* val pow2_252m2: *\) *)
 (* (\*   out:felem -> *\) *)
 (* (\*   z:felem{disjoint out z} -> *\) *)
@@ -348,7 +348,7 @@ open Hacl.Bignum25519
 
 #reset-options "--max_fuel 0 --z3rlimit 50"
 
-[@"c_inline"]
+inline_for_extraction
 let pow2_252m2 out z =
   assert_norm(((pow2 255 - 19) + 3) / 8 = pow2 252 - 2);
   let h  = ST.get() in

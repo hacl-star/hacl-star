@@ -12,7 +12,7 @@ open Hacl.Impl.Ed25519.ExtPoint
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ Substitute]
+inline_for_extraction
 val make_g:
   g:point ->
   Stack unit

@@ -764,6 +764,7 @@ let barrett_reduction__2 t m tmp =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 val barrett_reduction__:
   z:qelemB ->
   t:buffer h64{length t = 10} ->
@@ -844,6 +845,7 @@ let lemma_modifies_0_2_ #a #a' #a'' h0 h1 h2 b b' b'' =
   lemma_reveal_modifies_2 b b' h1 h2;
   lemma_intro_modifies_3_2 b b' h0 h2
 
+inline_for_extraction
 val barrett_reduction_:
   z:qelemB ->
   t:buffer h64{length t = 10} ->

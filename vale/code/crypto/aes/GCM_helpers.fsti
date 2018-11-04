@@ -11,21 +11,10 @@ open AES_s
 open GCTR_s
 open FStar.Math.Lemmas
 open Collections.Seqs
+open Workarounds
 
 let bytes_to_quad_size (num_bytes:nat) =
   ((num_bytes + 15) / 16)
-
-val slice_work_around (#a:Type) (s:seq a) (i:int) : Pure (seq a)
-  (requires True)
-  (ensures fun s' -> 0 <= i && i <= length s ==> s' == slice s 0 i)
-
-val slice_workaround (#a:Type) (s:seq a) (i:int) (j:int) : Pure (seq a)
-  (requires True)
-  (ensures fun s' -> 0 <= i && i <= j && j <= length s ==> s' == slice s i j)
-
-val index_work_around_quad32 (s:seq quad32) (i:int) : Pure quad32
-  (requires True)
-  (ensures fun s' -> 0 <= i && i < length s ==> s' == index s i)
 
 val bytes_to_quad_size_no_extra_bytes (num_bytes:nat) : Lemma
   (requires num_bytes % 16 == 0)

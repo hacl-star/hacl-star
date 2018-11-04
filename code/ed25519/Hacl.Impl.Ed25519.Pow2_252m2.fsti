@@ -10,6 +10,7 @@ open FStar.Buffer
 
 open Hacl.Bignum25519
 
+inline_for_extraction
 val pow2_252m2:
   out:felem ->
   z:felem{disjoint out z} ->
