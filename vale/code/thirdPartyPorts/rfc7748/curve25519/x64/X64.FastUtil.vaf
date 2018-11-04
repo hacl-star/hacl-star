@@ -69,7 +69,7 @@ procedure{:quick} fast_mul1(
 
     requires
         adx_enabled && bmi2_enabled;
-        buffers_disjoint(dst_b, inA_b);
+        buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
         validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
@@ -128,7 +128,7 @@ procedure{:quick}{:public} fast_mul1_stdcall(
         rsp; efl; mem;
     requires
         adx_enabled && bmi2_enabled;
-        buffers_disjoint(dst_b, inA_b);
+        buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
         buffers_disjoint(stack_b, dst_b);
         buffers_disjoint(stack_b, inA_b);
@@ -212,7 +212,7 @@ procedure{:quick} fast_add1(
 
     requires
         adx_enabled && bmi2_enabled;
-        buffers_disjoint(dst_b, inA_b);
+        buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
         validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
@@ -272,7 +272,7 @@ procedure{:quick}{:public} fast_add1_stdcall(
         rsp; efl; mem;
     requires
         adx_enabled && bmi2_enabled;
-        buffers_disjoint(dst_b, inA_b);
+        buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
         buffers_disjoint(stack_b, dst_b);
         buffers_disjoint(stack_b, inA_b);
@@ -359,8 +359,8 @@ procedure{:quick} fast_add(
 
     requires
         adx_enabled && bmi2_enabled;
-        buffers_disjoint(dst_b, inA_b);
-        buffers_disjoint(dst_b, inB_b);
+        buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
+        buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
         validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
@@ -421,8 +421,8 @@ procedure{:quick}{:public} fast_add_stdcall(
         rsp; efl; mem;
     requires
         adx_enabled && bmi2_enabled;
-        buffers_disjoint(dst_b, inA_b);
-        buffers_disjoint(dst_b, inB_b);
+        buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
+        buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
         buffers_disjoint(stack_b, dst_b);
         buffers_disjoint(stack_b, inA_b);
