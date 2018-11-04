@@ -1895,12 +1895,20 @@ private val mt_flush_to_:
      RV.rv_inv h0 hs /\
      mt_safe_elts h0 lv hs pi (Ghost.reveal j)))
    (ensures (fun h0 _ h1 ->
+     // memory safety
      modifies (loc_union
                 (RV.rv_loc_elems h0 hs lv (V.size_of hs))
                 (V.loc_vector_within hs lv (V.size_of hs)))
               h0 h1 /\
      RV.rv_inv h1 hs /\
-     mt_safe_elts h1 lv hs i (Ghost.reveal j)))
+     mt_safe_elts h1 lv hs i (Ghost.reveal j) /\
+     // correctness
+     (mt_safe_elts_spec h0 lv hs pi (Ghost.reveal j);
+     S.equal (RV.as_seq h1 hs)
+             (High.mt_flush_to_
+               (U32.v lv) (RV.as_seq h0 hs) (U32.v pi)
+               (U32.v i) (U32.v (Ghost.reveal j))))))
+   (decreases (U32.v i))
 // #reset-options "--z3rlimit 300 --max_fuel 2"
 #reset-options "--admit_smt_queries true"
 private let rec mt_flush_to_ lv hs pi i j =
@@ -2054,8 +2062,11 @@ val mt_flush_to:
      mt_safe h0 mt /\ idx >= MT?.i (B.get h0 mt 0) /\
      idx < MT?.j (B.get h0 mt 0)))
    (ensures (fun h0 _ h1 ->
+     // memory safety
      modifies (mt_loc mt) h0 h1 /\
-     mt_safe h1 mt))
+     mt_safe h1 mt /\
+     // correctness
+     High.mt_flush_to (mt_lift h0 mt) (U32.v idx) == mt_lift h1 mt))
 #reset-options "--z3rlimit 80 --max_fuel 1"
 let rec mt_flush_to mt idx =
   let hh0 = HST.get () in
@@ -2071,10 +2082,25 @@ let rec mt_flush_to mt idx =
       (RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
       (V.loc_vector_within hs 0ul (V.size_of hs)))
     hh0 hh1;
+  RV.as_seq_preserved
+    (MT?.rhs mtv)
+    (loc_union
+      (RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
+      (V.loc_vector_within hs 0ul (V.size_of hs)))
+    hh0 hh1;
+  Rgl?.r_sep hreg (MT?.mroot mtv)
+    (loc_union
+      (RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
+      (V.loc_vector_within hs 0ul (V.size_of hs)))
+    hh0 hh1;
   mt *= MT idx (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv);
+
   let hh2 = HST.get () in
   RV.rv_inv_preserved (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.rv_inv_preserved (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
+  RV.as_seq_preserved (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
+  RV.as_seq_preserved (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
+  Rgl?.r_sep hreg (MT?.mroot mtv) (B.loc_buffer mt) hh1 hh2;
   mt_safe_elts_preserved 0ul hs idx (MT?.j mtv) (B.loc_buffer mt) hh1 hh2
 
 val mt_flush:
@@ -2084,12 +2110,14 @@ val mt_flush:
      mt_safe h0 mt /\
      MT?.j (B.get h0 mt 0) > MT?.i (B.get h0 mt 0)))
    (ensures (fun h0 _ h1 ->
+     // memory safety
      modifies (mt_loc mt) h0 h1 /\
-     mt_safe h1 mt))
+     mt_safe h1 mt /\
+     // correctness
+     High.mt_flush (mt_lift h0 mt) == mt_lift h1 mt))
 let mt_flush mt =
   let mtv = !*mt in
   mt_flush_to mt (MT?.j mtv - 1ul)
-
 
 /// Client-side verification
 
