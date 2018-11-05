@@ -278,6 +278,22 @@ let mt_get_root_rhs_ok_false mt drt = ()
 val path_insert: p:path -> hp:hash -> GTot path
 let path_insert p hp = S.snoc p hp
 
+val mt_path_length_step:
+  k:nat -> j:nat{k <= j} -> actd:bool -> GTot nat
+let mt_path_length_step k j actd =
+  if j = 0 then 0
+  else (if k % 2 = 0
+       then (if j = k || (j = k + 1 && not actd) then 0 else 1)
+       else 1)
+
+val mt_path_length:
+  k:nat -> j:nat{k <= j} -> actd:bool -> GTot nat
+let rec mt_path_length k j actd =
+  if j = 0 then 0
+  else (let nactd = actd || (j % 2 = 1) in
+       mt_path_length_step k j actd +
+       mt_path_length (k / 2) (j / 2) nactd)
+
 val mt_get_path_step:
   lv:nat{lv <= 32} ->
   hs:hash_ss{S.length hs = 32} ->
@@ -314,7 +330,8 @@ val mt_get_path_:
   k:nat{i <= k && k <= j} ->
   p:path ->
   actd:bool ->
-  GTot path (decreases (32 - lv))
+  GTot (np:path{S.length np = S.length p + mt_path_length k j actd})
+       (decreases (32 - lv))
 let rec mt_get_path_ lv hs rhs i j k p actd =
   let ofs = offset_of i in
   if j = 0 then p
@@ -327,7 +344,9 @@ val mt_get_path:
   mt:wf_mt ->
   idx:nat{MT?.i mt <= idx /\ idx < MT?.j mt} ->
   drt:hash ->
-  GTot (nat * path * hash)
+  GTot (nat * 
+       (np:path{S.length np = 1 + mt_path_length idx (MT?.j mt) false}) * 
+       hash)
 let mt_get_path mt idx drt =
   let (umt, root) = mt_get_root mt drt in
   let ofs = offset_of (MT?.i umt) in
@@ -391,26 +410,25 @@ val mt_verify_:
   k:nat ->
   j:nat{k <= j} ->
   p:path ->
-  ppos:nat{ppos <= S.length p /\ j < pow2 (S.length p - ppos)} ->
+  ppos:nat ->
   acc:hash ->
-  actd:bool ->
+  actd:bool{ppos + mt_path_length k j actd <= S.length p} ->
   GTot hash
 let rec mt_verify_ k j p ppos acc actd =
   if j = 0 then acc
   else (let nactd = actd || (j % 2 = 1) in
-       let phash = S.index p ppos in
        if k % 2 = 0
        then (if j = k || (j = k + 1 && not actd)
 	    then mt_verify_ (k / 2) (j / 2) p ppos acc nactd
-	    else (let nacc = hash_2 acc phash in
+	    else (let nacc = hash_2 acc (S.index p ppos) in
 		 mt_verify_ (k / 2) (j / 2) p (ppos + 1) nacc nactd))
-       else (let nacc = hash_2 phash acc in
+       else (let nacc = hash_2 (S.index p ppos) acc in
 	    mt_verify_ (k / 2) (j / 2) p (ppos + 1) nacc nactd))
 
 val mt_verify:
   k:nat ->
   j:nat{k < j} ->
-  p:path{1 <= S.length p /\ j < pow2 (S.length p - 1)} ->
+  p:path{S.length p = 1 + mt_path_length k j false} ->
   rt:hash ->
   GTot bool
 let mt_verify k j p rt =
