@@ -12,7 +12,21 @@ let rec has_mem_operand = function
 
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 80"
 
+let check_if_cpuid_consumes_fixed_time (ins:tainted_ins{S.Cpuid? ins.i}) (ts:taintState) :
+  (res:(bool*taintState){let b, ts' = res in b2t b ==>
+    isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'}) =
+  let taint = merge_taint (ts.regTaint Rax) (ts.regTaint Rbx) in
+  let taint = merge_taint (ts.regTaint Rcx) taint in
+  let taint = merge_taint (ts.regTaint Rdx) taint in
+  let ts = set_taint (OReg Rax) ts taint in
+  let ts = set_taint (OReg Rbx) ts taint in
+  let ts = set_taint (OReg Rcx) ts taint in
+  let ts = set_taint (OReg Rdx) ts taint in  
+  true, ts
+
 let check_if_ins_consumes_fixed_time ins ts =
+  if S.Cpuid? ins.i then check_if_cpuid_consumes_fixed_time ins ts
+  else (
   let i = ins.i in
   let dsts, srcs = extract_operands i in
   let ftSrcs = operands_do_not_use_secrets srcs ts in
@@ -77,6 +91,7 @@ let check_if_ins_consumes_fixed_time ins ts =
       | [] -> false, ts'  (* AR: this case was missing, Unhandled yet *)
   in
   b, ts'
+  )
 
 val lemma_public_flags_same: (ts:taintState) -> (ins:tainted_ins{S.Mul64? ins.i}) -> Lemma (forall s1 s2.
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
@@ -560,7 +575,147 @@ let lemma_mulx_same_public_aux (ts:taintState) (ins:tainted_ins{S.Mulx64? ins.i}
   :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
                     is_explicit_leakage_free_lhs (Ins ins) fuel ts ts' s1 s2))
          (ensures  (is_explicit_leakage_free_rhs (Ins ins) fuel ts ts' s1 s2)) =
-  admit() // TODO
+    let S.Mulx64 dst_hi dst_lo src, t = ins.i, ins.t in
+    let dsts, srcs = extract_operands ins.i in
+
+    let r1 = taint_eval_code (Ins ins) fuel s1 in
+    let r2 = taint_eval_code (Ins ins) fuel s2 in
+
+    let s1' = Some?.v r1 in
+    let s2' = Some?.v r2 in
+
+    let s1b = S.run (S.check (taint_match_list srcs t s1.memTaint)) s1.state in
+    let s2b = S.run (S.check (taint_match_list srcs t s2.memTaint)) s2.state in
+
+    let taint = sources_taint srcs ts ins.t in
+
+    let v1_hi = UInt.mul_div #64 (S.eval_reg Rdx s1.state) (S.eval_operand src s1.state) in
+    let v2_hi = UInt.mul_div #64 (S.eval_reg Rdx s2.state) (S.eval_operand src s2.state) in
+    let v1_lo = UInt.mul_mod #64 (S.eval_reg Rdx s1.state) (S.eval_operand src s1.state) in
+    let v2_lo = UInt.mul_mod #64 (S.eval_reg Rdx s2.state) (S.eval_operand src s2.state) in
+
+    let aux_value () : Lemma
+      (requires Public? taint)
+      (ensures v1_lo == v2_lo /\ v1_hi == v2_hi)
+      = Opaque_s.reveal_opaque S.get_heap_val64_def
+    in
+
+    match dst_lo with
+      | OConst _ -> ()
+      | OReg _ -> begin
+        match dst_hi with
+        | OConst _ | OReg _ -> if Secret? taint then () else aux_value()
+        | OMem m ->
+          let aux_reg() : Lemma (publicRegisterValuesAreSame ts' s1' s2') =
+            if Secret? taint then () else aux_value()
+          in let aux_mem (x:int) : Lemma
+            (requires Public? s1'.memTaint.[x] || Public? s2'.memTaint.[x])
+            (ensures s1'.state.S.mem.[x] == s2'.state.S.mem.[x]) =
+            let s1b = S.run (S.update_operand_preserve_flags dst_lo v1_lo) s1b in
+            let s2b = S.run (S.update_operand_preserve_flags dst_lo v2_lo) s2b in
+            let ptr1 = S.eval_maddr m s1b in
+            let ptr2 = S.eval_maddr m s2b in
+            let aux_ptr () : Lemma (ptr1 == ptr2) =
+              if Secret? taint then () else aux_value()
+            in aux_ptr();
+            if x < ptr1 || x >= ptr1 + 8 then (
+              // If we're outside the modified area, nothing changed, the property still holds
+              frame_update_heap_x ptr1 x v1_hi s1b.S.mem;
+              frame_update_heap_x ptr1 x v2_hi s2b.S.mem
+            ) else (
+              if Secret? taint then ()
+              else (
+                aux_value();
+                correct_update_get ptr1 v1_hi s1b.S.mem;
+                correct_update_get ptr1 v2_hi s2b.S.mem;
+                // If values are identical, the bytes also are identical
+                same_mem_get_heap_val ptr1 s1'.state.S.mem s2'.state.S.mem
+              )
+            )
+          
+          in Classical.forall_intro (Classical.move_requires aux_mem); aux_reg()
+      end
+      | OMem m1 -> begin
+        match dst_hi with
+        | OConst _ -> () // Cannot happen
+        | OReg r ->
+          let aux_reg() : Lemma (publicRegisterValuesAreSame ts' s1' s2') =
+            if Secret? taint then () else aux_value()
+          in let aux_mem (x:int) : Lemma
+            (requires Public? s1'.memTaint.[x] || Public? s2'.memTaint.[x])
+            (ensures s1'.state.S.mem.[x] == s2'.state.S.mem.[x]) =
+            let ptr1 = S.eval_maddr m1 s1b in
+            let ptr2 = S.eval_maddr m1 s2b in
+            assert (ptr1 == ptr2);
+            if x < ptr1 || x >= ptr1 + 8 then (
+              // If we're outside the modified area, nothing changed, the property still holds
+              frame_update_heap_x ptr1 x v1_lo s1b.S.mem;
+              frame_update_heap_x ptr1 x v2_lo s2b.S.mem
+            ) else (
+              if Secret? taint then ()
+              else (
+                aux_value();
+                correct_update_get ptr1 v1_lo s1b.S.mem;
+                correct_update_get ptr1 v2_lo s2b.S.mem;
+                // If values are identical, the bytes also are identical
+                same_mem_get_heap_val ptr1 s1'.state.S.mem s2'.state.S.mem
+              )
+            )
+          in Classical.forall_intro (Classical.move_requires aux_mem); aux_reg()
+        | OMem m2 -> 
+          let aux (x:int) : Lemma
+            (requires Public? s1'.memTaint.[x] || Public? s2'.memTaint.[x])
+            (ensures s1'.state.S.mem.[x] == s2'.state.S.mem.[x]) =
+            let ptr1_lo = S.eval_maddr m1 s1b in
+            let ptr2_lo = S.eval_maddr m2 s1b in
+            let s1_lo = S.run (S.update_operand_preserve_flags dst_lo v1_lo) s1b in
+            let s2_lo = S.run (S.update_operand_preserve_flags dst_lo v2_lo) s2b in
+            let ptr1_hi = S.eval_maddr m2 s1b in
+            let ptr2_hi = S.eval_maddr m2 s2b in
+            let aux_ptr () : Lemma (ptr1_hi == ptr2_hi) =
+              if Secret? taint then () else aux_value()
+            in aux_ptr();
+            if x < ptr1_lo || x >= ptr1_lo + 8 then (
+              // If we're outside the modified area, nothing changed
+              frame_update_heap_x ptr1_lo x v1_lo s1b.S.mem;
+              frame_update_heap_x ptr1_lo x v2_lo s2b.S.mem;
+              if x < ptr1_hi || x >= ptr1_hi + 8 then (
+                frame_update_heap_x ptr1_hi x v1_hi s1_lo.S.mem;
+                frame_update_heap_x ptr1_hi x v2_hi s2_lo.S.mem      
+              ) else (
+                if Secret? taint then ()
+                else (
+                  aux_value();
+                  correct_update_get ptr1_hi v1_hi s1_lo.S.mem;
+                  correct_update_get ptr1_hi v2_hi s2_lo.S.mem;
+                  // If values are identical, the bytes also are identical
+                  same_mem_get_heap_val ptr1_hi s1'.state.S.mem s2'.state.S.mem
+                )
+              )
+            ) else (
+              if x < ptr1_hi || x >= ptr1_hi + 8 then (
+                frame_update_heap_x ptr1_hi x v1_hi s1_lo.S.mem;
+                frame_update_heap_x ptr1_hi x v2_hi s2_lo.S.mem;
+                if Secret? taint then ()
+                else (
+                  aux_value();
+                  correct_update_get ptr1_lo v1_lo s1b.S.mem;
+                  correct_update_get ptr1_lo v2_lo s2b.S.mem;
+                  same_mem_get_heap_val ptr1_lo s1_lo.S.mem s2_lo.S.mem
+                )
+              ) else (
+                if Secret? taint then ()
+                else (
+                  aux_value();
+                  correct_update_get ptr1_hi v1_hi s1_lo.S.mem;
+                  correct_update_get ptr1_hi v2_hi s2_lo.S.mem;
+                  // If values are identical, the bytes also are identical
+                  same_mem_get_heap_val ptr1_hi s1'.state.S.mem s2'.state.S.mem                  
+                )
+              )
+            )
+          in Classical.forall_intro (Classical.move_requires aux)
+      end
 
 let lemma_mulx_same_public (ts:taintState) (ins:tainted_ins{S.Mulx64? ins.i}) (s1:traceState) (s2:traceState) 
   (fuel:nat)
@@ -568,103 +723,6 @@ let lemma_mulx_same_public (ts:taintState) (ins:tainted_ins{S.Mulx64? ins.i}) (s
   (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
   = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
     Classical.move_requires (lemma_mulx_same_public_aux ts ins s1 s2 fuel b) ts'
-
-(*val lemma_mulx_same_public: (ts:taintState) -> (ins:tainted_ins{let i, _, _ = ins.ops in S.Mulx64? i}) -> (s1:traceState) -> (s2:traceState) -> (fuel:nat) -> Lemma
-(let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-  (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
-
-let lemma_mulx_same_public ts ins s1 s2 fuel =
-  let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-  let i, dsts, srcs = ins.ops in
-  let r1 = taint_eval_ins ins s1 in
-  let r2 = taint_eval_ins ins s2 in
-  match dsts with
-    | [OMem m1; OMem m2] ->
-      let ptr1_hi = eval_maddr m1 s1.state in
-      let ptr2_hi = eval_maddr m1 s2.state in
-      let ptr1_lo = eval_maddr m2 s1.state in
-      let ptr2_lo = eval_maddr m2 s2.state in
-      begin match srcs with
-      | [src1; src2] ->
-      let v11 = eval_operand src1 s1.state in
-      let v12 = eval_operand src2 s1.state in
-      let v21 = eval_operand src1 s2.state in
-      let v22 = eval_operand src2 s2.state in
-      let v1_hi = FStar.UInt.mul_div #64 v11 v12 in
-      let v1_lo = FStar.UInt.mul_mod #64 v11 v12 in
-      let v2_hi = FStar.UInt.mul_div #64 v21 v22 in
-      let v2_lo = FStar.UInt.mul_mod #64 v21 v22 in
-      let s1' = update_operand_preserve_flags' (OMem m2) v1_lo s1.state in
-      let s2' = update_operand_preserve_flags' (OMem m2) v2_lo s2.state in
-      if not (valid_mem64 ptr1_hi s1'.mem) || not (valid_mem64 ptr2_hi s2'.mem)
-        || not (valid_mem64 ptr1_lo s1.state.mem) || not (valid_mem64 ptr2_lo s2.state.mem) then ()
-      else begin
-      lemma_store_load_mem64 ptr1_hi v1_hi s1'.mem;
-      lemma_store_load_mem64 ptr2_hi v2_hi s2'.mem;
-      lemma_valid_store_mem64 ptr1_hi v1_hi s1'.mem;
-      lemma_valid_store_mem64 ptr2_hi v2_hi s2'.mem;
-      lemma_frame_store_mem64 ptr1_hi v1_hi s1'.mem;
-      lemma_frame_store_mem64 ptr2_hi v2_hi s2'.mem;
-      lemma_store_load_mem64 ptr1_lo v1_lo s1.state.mem;
-      lemma_store_load_mem64 ptr2_lo v2_lo s2.state.mem;
-      lemma_valid_store_mem64 ptr1_lo v1_lo s1.state.mem;
-      lemma_valid_store_mem64 ptr2_lo v2_lo s2.state.mem;
-      lemma_frame_store_mem64 ptr1_lo v1_lo s1.state.mem;
-      lemma_frame_store_mem64 ptr2_lo v2_lo s2.state.mem;
-      assert (b2t b ==> publicValuesAreSame ts s1 s2 /\ r1.state.X64.Memory_s.state.S.ok /\ r2.state.X64.Memory_s.state.S.ok /\ Public? ins.t ==> v1_hi == v2_hi);
-      ()
-      end
-      end
-    | [OMem m1; o] ->
-      begin match srcs with
-      | [src1; src2] ->
-      let v11 = eval_operand src1 s1.state in
-      let v12 = eval_operand src2 s1.state in
-      let v21 = eval_operand src1 s2.state in
-      let v22 = eval_operand src2 s2.state in
-      let v1_hi = FStar.UInt.mul_div #64 v11 v12 in
-      let v1_lo = FStar.UInt.mul_mod #64 v11 v12 in
-      let v2_hi = FStar.UInt.mul_div #64 v21 v22 in
-      let v2_lo = FStar.UInt.mul_mod #64 v21 v22 in
-      let s1' = update_operand_preserve_flags' o v1_lo s1.state in
-      let s2' = update_operand_preserve_flags' o v2_lo s2.state in
-      let ptr1_hi = eval_maddr m1 s1' in
-      let ptr2_hi = eval_maddr m1 s2' in
-      if not (valid_mem64 ptr1_hi s1.state.mem) || not (valid_mem64 ptr2_hi s2.state.mem) then ()
-      else begin
-      lemma_store_load_mem64 ptr1_hi v1_hi s1'.mem;
-      lemma_store_load_mem64 ptr2_hi v2_hi s2'.mem;
-      lemma_valid_store_mem64 ptr1_hi v1_hi s1'.mem;
-      lemma_valid_store_mem64 ptr2_hi v2_hi s2'.mem;
-      lemma_frame_store_mem64 ptr1_hi v1_hi s1'.mem;
-      lemma_frame_store_mem64 ptr2_hi v2_hi s2'.mem
-      end
-      end
-    | [o; OMem m2] ->
-      begin match srcs with
-      | [src1; src2] ->
-      let v11 = eval_operand src1 s1.state in
-      let v12 = eval_operand src2 s1.state in
-      let v21 = eval_operand src1 s2.state in
-      let v22 = eval_operand src2 s2.state in
-      let v1_hi = FStar.UInt.mul_div #64 v11 v12 in
-      let v1_lo = FStar.UInt.mul_mod #64 v11 v12 in
-      let v2_hi = FStar.UInt.mul_div #64 v21 v22 in
-      let v2_lo = FStar.UInt.mul_mod #64 v21 v22 in
-      let ptr1_lo = eval_maddr m2 s1.state in
-      let ptr2_lo = eval_maddr m2 s2.state in
-      if not (valid_mem64 ptr1_lo s1.state.mem) || not (valid_mem64 ptr2_lo s2.state.mem) then ()
-      else begin
-      lemma_store_load_mem64 ptr1_lo v1_lo s1.state.mem;
-      lemma_store_load_mem64 ptr2_lo v2_lo s2.state.mem;
-      lemma_valid_store_mem64 ptr1_lo v1_lo s1.state.mem;
-      lemma_valid_store_mem64 ptr2_lo v2_lo s2.state.mem;
-      lemma_frame_store_mem64 ptr1_lo v1_lo s1.state.mem;
-      lemma_frame_store_mem64 ptr2_lo v2_lo s2.state.mem
-      end
-      end
-    | _ -> ()
-*)
 
 
 let lemma_imul_same_public_aux (ts:taintState) (ins:tainted_ins{S.IMul64? ins.i}) (s1:traceState) (s2:traceState)
@@ -1136,7 +1194,7 @@ val lemma_ins_same_public: (ts:taintState) -> (ins:tainted_ins{not (is_xmm_ins i
 
 let lemma_ins_same_public ts ins s1 s2 fuel =
   match ins.i with
-  | S.Cpuid -> admit() // TODO
+  | S.Cpuid -> ()
   | S.Mov64 _ _ -> lemma_mov_same_public ts ins s1 s2 fuel
   | S.Add64 _ _ -> lemma_add_same_public ts ins s1 s2 fuel
   | S.AddLea64 _ _ _ -> lemma_addlea_same_public ts ins s1 s2 fuel
