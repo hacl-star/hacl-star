@@ -218,6 +218,13 @@ let same_domain_update128 ptr v mem =
   assert (Set.equal (Map.domain mem) (Map.domain mem1));
   assert (Set.equal (Map.domain mem) (Map.domain memf))
 
+let same_mem_get_heap_val128 ptr mem1 mem2 =
+  Opaque_s.reveal_opaque get_heap_val128_def;
+  same_mem_get_heap_val32 ptr mem1 mem2;
+  same_mem_get_heap_val32 (ptr+4) mem1 mem2;
+  same_mem_get_heap_val32 (ptr+8) mem1 mem2;
+  same_mem_get_heap_val32 (ptr+12) mem1 mem2  
+
 (* All the following lemmas prove that the domain of the bytes memory map remains invariant
 through execution *)
 
@@ -271,10 +278,11 @@ let eval_ins_bs_domains ins s0 = ()
 
 let eval_ins_domains ins s0 =
   let t = ins.TS.t in
-  let i, dsts, srcs = ins.TS.ops in
+  let i = ins.TS.i in
+  let dsts, srcs = TS.extract_operands i in
   let s = 
     if MOVDQU? i then 
-      let MOVDQU dst src, _, _ = ins.TS.ops in
+      let MOVDQU dst src = ins.TS.i in
       run (check (TS.taint_match128 src t s0.TS.memTaint)) s0.TS.state
     else run (check (TS.taint_match_list srcs t s0.TS.memTaint)) s0.TS.state
   in
@@ -341,10 +349,11 @@ let eval_ins_bs_same_unspecified ins s0 = ()
 
 let eval_ins_same_unspecified ins s0 =
   let t = ins.TS.t in
-  let i, dsts, srcs = ins.TS.ops in
+  let i = ins.TS.i in
+  let dsts, srcs = TS.extract_operands i in
   let s = 
     if MOVDQU? i then 
-      let MOVDQU dst src, _, _ = ins.TS.ops in
+      let MOVDQU dst src = i in
       run (check (TS.taint_match128 src t s0.TS.memTaint)) s0.TS.state
     else run (check (TS.taint_match_list srcs t s0.TS.memTaint)) s0.TS.state
   in
