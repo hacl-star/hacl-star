@@ -4,10 +4,14 @@ open X64.Machine_s
 open X64.Memory_s
 open X64.Taint_Semantics_s
 open X64.Bytes_Semantics_s
+module F = FStar.FunctionalExtensionality
+
+type reg_taint = F.restricted_t reg (fun _ -> taint)
+type xmms_taint = F.restricted_t xmm (fun _ -> taint)
 
 noeq type taintState =
-  | TaintState: regTaint: (reg -> taint) -> flagsTaint: taint -> cfFlagsTaint: taint ->
-  xmmTaint: (xmm -> taint) -> taintState
+  | TaintState: regTaint: reg_taint -> flagsTaint: taint -> cfFlagsTaint: taint ->
+  xmmTaint: xmms_taint -> taintState
 
 let publicFlagValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
   ts.flagsTaint = Public ==> (s1.state.flags = s2.state.flags)

@@ -90,123 +90,6 @@ let frame_update_heap_x (ptr:int) (j:int) (v:nat64) (mem:S.heap) : Lemma
   (ensures (let new_mem = S.update_heap64 ptr v mem in
     mem.[j] == new_mem.[j])) = frame_update_heap ptr v mem
 
-let lemma_push_same_public_aux (ts:taintState) (ins:tainted_ins{S.Push? ins.i}) (s1:traceState) (s2:traceState)
-                               (fuel:nat) (b:bool) (ts':taintState)
-  :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
-                    is_explicit_leakage_free_lhs (Ins ins) fuel ts ts' s1 s2))
-         (ensures  (is_explicit_leakage_free_rhs (Ins ins) fuel ts ts' s1 s2))
-  = let S.Push src, t = ins.i, ins.t in
-    let dsts, srcs = extract_operands ins.i in
-
-    let r1 = taint_eval_code (Ins ins) fuel s1 in
-    let r2 = taint_eval_code (Ins ins) fuel s2 in
-
-    let s1' = Some?.v r1 in
-    let s2' = Some?.v r2 in
-
-    // We only need to help Z3 proving that public mem values are identical 
-    // after executing this instruction
-
-    let aux (x:int) : Lemma
-      (requires Public? s1'.memTaint.[x] || Public? s2'.memTaint.[x])
-      (ensures s1'.state.S.mem.[x] == s2'.state.S.mem.[x]) =
-        let ptr1 = ((S.eval_reg Rsp s1.state) - 8) % pow2_64 in
-        let ptr2 = ((S.eval_reg Rsp s2.state) - 8) % pow2_64 in
-        // Rsp is ensured to be Public if the taint analysis is successful
-        assert (ptr1 == ptr2);
-        let v1 = S.eval_operand src s1.state in
-        let v2 = S.eval_operand src s2.state in
-        // The instruction is executed after checking the taints of sources
-        let s1b = S.run (S.check (taint_match_list srcs t s1.memTaint)) s1.state in
-        let s2b = S.run (S.check (taint_match_list srcs t s2.memTaint)) s2.state in
-        if x < ptr1 || x >= ptr1 + 8 then (
-          // If we're outside the modified area, nothing changed, the property still holds
-          frame_update_heap_x ptr1 x v1 s1b.S.mem;
-          frame_update_heap_x ptr1 x v2 s2b.S.mem
-        ) else (
-          if Secret? t then ()
-          else (
-            Opaque_s.reveal_opaque S.get_heap_val64_def;
-            // If x is modified by Public values, values are identical            
-            assert (v1 == v2);
-            correct_update_get ptr1 v1 s1b.S.mem;
-            correct_update_get ptr1 v2 s2b.S.mem;
-            // If values are identical, the bytes also are identical
-            same_mem_get_heap_val ptr1 s1'.state.S.mem s2'.state.S.mem
-          )
-        )
-        
-    in Classical.forall_intro (Classical.move_requires aux)
-
-let lemma_push_same_public (ts:taintState) (ins:tainted_ins{S.Push? ins.i}) (s1:traceState) (s2:traceState)
-                           (fuel:nat)
-  :Lemma (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-          (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
-  = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-    Classical.move_requires (lemma_push_same_public_aux ts ins s1 s2 fuel b) ts'
-
-let lemma_pop_same_public_aux (ts:taintState) (ins:tainted_ins{S.Pop? ins.i}) (s1:traceState) (s2:traceState)
-                               (fuel:nat) (b:bool) (ts':taintState)
-  :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
-                    is_explicit_leakage_free_lhs (Ins ins) fuel ts ts' s1 s2))
-         (ensures  (is_explicit_leakage_free_rhs (Ins ins) fuel ts ts' s1 s2)) =
-    let S.Pop dst, t = ins.i, ins.t in
-    let dsts, srcs = extract_operands ins.i in
-
-    let r1 = taint_eval_code (Ins ins) fuel s1 in
-    let r2 = taint_eval_code (Ins ins) fuel s2 in
-
-    let s1' = Some?.v r1 in
-    let s2' = Some?.v r2 in
-
-    let op = OMem (MReg Rsp 0) in
-
-    let v1 = S.eval_operand op s1.state in
-    let v2 = S.eval_operand op s2.state in
-    let aux_value () : Lemma (v1 == v2) = Opaque_s.reveal_opaque S.get_heap_val64_def in
-    aux_value();
-
-    // We only need to help Z3 proving that public mem values are identical 
-    // after executing this instruction
-
-    let aux (x:int) : Lemma
-      (requires Public? s1'.memTaint.[x] || Public? s2'.memTaint.[x])
-      (ensures s1'.state.S.mem.[x] == s2'.state.S.mem.[x]) =
-        match dst with
-        | OConst _ | OReg _ -> ()
-        | OMem m -> begin
-        let ptr1 = S.eval_maddr m s1.state in
-        let ptr2 = S.eval_maddr m s2.state in
-        // Rsp is ensured to be Public if the taint analysis is successful
-        assert (ptr1 == ptr2);
-        // The instruction is executed after checking the taints of sources
-        let s1b = S.run (S.check (taint_match_list srcs t s1.memTaint)) s1.state in
-        let s2b = S.run (S.check (taint_match_list srcs t s2.memTaint)) s2.state in
-        if x < ptr1 || x >= ptr1 + 8 then (
-          // If we're outside the modified area, nothing changed, the property still holds
-          frame_update_heap_x ptr1 x v1 s1b.S.mem;
-          frame_update_heap_x ptr1 x v2 s2b.S.mem
-        ) else (
-          if Secret? t then ()
-          else (
-            correct_update_get ptr1 v1 s1b.S.mem;
-            correct_update_get ptr1 v2 s2b.S.mem;
-            // If values are identical, the bytes also are identical
-            same_mem_get_heap_val ptr1 s1'.state.S.mem s2'.state.S.mem
-          )
-        )
-        end
-        
-    in Classical.forall_intro (Classical.move_requires aux)
-
-
-let lemma_pop_same_public (ts:taintState) (ins:tainted_ins{S.Pop? ins.i}) (s1:traceState) (s2:traceState) 
-  (fuel:nat)
-  :Lemma (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-  (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
-  = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-    Classical.move_requires (lemma_pop_same_public_aux ts ins s1 s2 fuel b) ts'
-
 let lemma_mov_same_public_aux (ts:taintState) (ins:tainted_ins{S.Mov64? ins.i}) (s1:traceState) (s2:traceState)
                                (fuel:nat) (b:bool) (ts':taintState)
   :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
@@ -1128,6 +1011,124 @@ let lemma_shl_same_public (ts:taintState) (ins:tainted_ins{S.Shl64? ins.i}) (s1:
   = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
     Classical.move_requires (lemma_shl_same_public_aux ts ins s1 s2 fuel b) ts'
 
+
+let lemma_push_same_public_aux (ts:taintState) (ins:tainted_ins{S.Push? ins.i}) (s1:traceState) (s2:traceState)
+                               (fuel:nat) (b:bool) (ts':taintState)
+  :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
+                    is_explicit_leakage_free_lhs (Ins ins) fuel ts ts' s1 s2))
+         (ensures  (is_explicit_leakage_free_rhs (Ins ins) fuel ts ts' s1 s2))
+  = let S.Push src, t = ins.i, ins.t in
+    let dsts, srcs = extract_operands ins.i in
+
+    let r1 = taint_eval_code (Ins ins) fuel s1 in
+    let r2 = taint_eval_code (Ins ins) fuel s2 in
+
+    let s1' = Some?.v r1 in
+    let s2' = Some?.v r2 in
+
+    // We only need to help Z3 proving that public mem values are identical 
+    // after executing this instruction
+
+    let aux (x:int) : Lemma
+      (requires Public? s1'.memTaint.[x] || Public? s2'.memTaint.[x])
+      (ensures s1'.state.S.mem.[x] == s2'.state.S.mem.[x]) =
+        let ptr1 = ((S.eval_reg Rsp s1.state) - 8) % pow2_64 in
+        let ptr2 = ((S.eval_reg Rsp s2.state) - 8) % pow2_64 in
+        // Rsp is ensured to be Public if the taint analysis is successful
+        assert (ptr1 == ptr2);
+        let v1 = S.eval_operand src s1.state in
+        let v2 = S.eval_operand src s2.state in
+        // The instruction is executed after checking the taints of sources
+        let s1b = S.run (S.check (taint_match_list srcs t s1.memTaint)) s1.state in
+        let s2b = S.run (S.check (taint_match_list srcs t s2.memTaint)) s2.state in
+        if x < ptr1 || x >= ptr1 + 8 then (
+          // If we're outside the modified area, nothing changed, the property still holds
+          frame_update_heap_x ptr1 x v1 s1b.S.mem;
+          frame_update_heap_x ptr1 x v2 s2b.S.mem
+        ) else (
+          if Secret? t then ()
+          else (
+            Opaque_s.reveal_opaque S.get_heap_val64_def;
+            // If x is modified by Public values, values are identical            
+            assert (v1 == v2);
+            correct_update_get ptr1 v1 s1b.S.mem;
+            correct_update_get ptr1 v2 s2b.S.mem;
+            // If values are identical, the bytes also are identical
+            same_mem_get_heap_val ptr1 s1'.state.S.mem s2'.state.S.mem
+          )
+        )
+        
+    in Classical.forall_intro (Classical.move_requires aux)
+
+let lemma_push_same_public (ts:taintState) (ins:tainted_ins{S.Push? ins.i}) (s1:traceState) (s2:traceState)
+                           (fuel:nat)
+  :Lemma (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
+          (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
+  = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
+    Classical.move_requires (lemma_push_same_public_aux ts ins s1 s2 fuel b) ts'
+
+let lemma_pop_same_public_aux (ts:taintState) (ins:tainted_ins{S.Pop? ins.i}) (s1:traceState) (s2:traceState)
+                               (fuel:nat) (b:bool) (ts':taintState)
+  :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
+                    is_explicit_leakage_free_lhs (Ins ins) fuel ts ts' s1 s2))
+         (ensures  (is_explicit_leakage_free_rhs (Ins ins) fuel ts ts' s1 s2)) =
+    let S.Pop dst, t = ins.i, ins.t in
+    let dsts, srcs = extract_operands ins.i in
+
+    let r1 = taint_eval_code (Ins ins) fuel s1 in
+    let r2 = taint_eval_code (Ins ins) fuel s2 in
+
+    let s1' = Some?.v r1 in
+    let s2' = Some?.v r2 in
+
+    let op = OMem (MReg Rsp 0) in
+
+    let v1 = S.eval_operand op s1.state in
+    let v2 = S.eval_operand op s2.state in
+    let aux_value () : Lemma (v1 == v2) = Opaque_s.reveal_opaque S.get_heap_val64_def in
+    aux_value();
+
+    // We only need to help Z3 proving that public mem values are identical 
+    // after executing this instruction
+
+    let aux (x:int) : Lemma
+      (requires Public? s1'.memTaint.[x] || Public? s2'.memTaint.[x])
+      (ensures s1'.state.S.mem.[x] == s2'.state.S.mem.[x]) =
+        match dst with
+        | OConst _ | OReg _ -> ()
+        | OMem m -> begin
+        let ptr1 = S.eval_maddr m s1.state in
+        let ptr2 = S.eval_maddr m s2.state in
+        // Rsp is ensured to be Public if the taint analysis is successful
+        assert (ptr1 == ptr2);
+        // The instruction is executed after checking the taints of sources
+        let s1b = S.run (S.check (taint_match_list srcs t s1.memTaint)) s1.state in
+        let s2b = S.run (S.check (taint_match_list srcs t s2.memTaint)) s2.state in
+        if x < ptr1 || x >= ptr1 + 8 then (
+          // If we're outside the modified area, nothing changed, the property still holds
+          frame_update_heap_x ptr1 x v1 s1b.S.mem;
+          frame_update_heap_x ptr1 x v2 s2b.S.mem
+        ) else (
+          if Secret? t then ()
+          else (
+            correct_update_get ptr1 v1 s1b.S.mem;
+            correct_update_get ptr1 v2 s2b.S.mem;
+            // If values are identical, the bytes also are identical
+            same_mem_get_heap_val ptr1 s1'.state.S.mem s2'.state.S.mem
+          )
+        )
+        end
+        
+    in Classical.forall_intro (Classical.move_requires aux)
+
+
+let lemma_pop_same_public (ts:taintState) (ins:tainted_ins{S.Pop? ins.i}) (s1:traceState) (s2:traceState) 
+  (fuel:nat)
+  :Lemma (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
+  (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
+  = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
+    Classical.move_requires (lemma_pop_same_public_aux ts ins s1 s2 fuel b) ts'
+
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 20"
 val lemma_ins_same_public: (ts:taintState) -> (ins:tainted_ins{not (is_xmm_ins ins)}) -> (s1:traceState) -> (s2:traceState) -> (fuel:nat) -> Lemma
 (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
@@ -1147,8 +1148,8 @@ let lemma_ins_same_public ts ins s1 s2 fuel =
   | S.Xor64 _ _ -> lemma_xor_same_public ts ins s1 s2 fuel
   | S.AddCarry64 _ _ -> lemma_addcarry_same_public ts ins s1 s2 fuel
   | S.Adcx64 _ _ -> lemma_adcx_same_public ts ins s1 s2 fuel
-  | S.Shl64 _ _ -> lemma_shl_same_public ts ins s1 s2 fuel
   | S.Shr64 _ _ -> lemma_shr_same_public ts ins s1 s2 fuel
+  | S.Shl64 _ _ -> lemma_shl_same_public ts ins s1 s2 fuel
   | S.Push _ -> lemma_push_same_public ts ins s1 s2 fuel
   | S.Pop _ -> lemma_pop_same_public ts ins s1 s2 fuel
   | S.Adox64 _ _ -> () // TODO

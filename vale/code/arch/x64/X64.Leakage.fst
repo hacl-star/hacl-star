@@ -25,7 +25,7 @@ let combine_xmm_taints_monotone xmms1 xmms2: Lemma
   (forall r. Public? ((combine_xmm_taints xmms1 xmms2) r) ==> Public? (xmms1 r) /\ Public? (xmms2 r))
 = ()
 
-val eq_registers: (regs1: (reg -> taint)) -> (regs2: (reg -> taint)) -> (b:bool{b <==> (regs1 == regs2)})
+val eq_registers: (regs1: reg_taint) -> (regs2: reg_taint) -> (b:bool{b <==> (regs1 == regs2)})
 
 let eq_registers regs1 regs2 =
   let b = regs1 Rax = regs2 Rax &&
@@ -47,7 +47,7 @@ let eq_registers regs1 regs2 =
   assert (FStar.FunctionalExtensionality.feq regs1 regs2 <==> b);
   b
 
-val eq_xmms: (xmms1: (xmm -> taint)) -> (xmms2: (xmm -> taint)) -> (b:bool{b <==> (xmms1 == xmms2)})
+val eq_xmms: (xmms1: xmms_taint) -> (xmms2: xmms_taint) -> (b:bool{b <==> (xmms1 == xmms2)})
 
 let eq_xmms xmms1 xmms2 =
   let b = xmms1 0 = xmms2 0 &&

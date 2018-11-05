@@ -40,7 +40,7 @@ let lemma_operand_obs ts dst s1 s2 = match dst with
 let set_taint (dst:operand) ts taint : Tot taintState =
   match dst with
   | OConst _ -> ts  (* Shouldn't actually happen *)
-  | OReg r -> TaintState (fun x -> if x = r then taint else ts.regTaint x) ts.flagsTaint ts.cfFlagsTaint ts.xmmTaint
+  | OReg r -> TaintState (FunctionalExtensionality.on reg (fun x -> if x = r then taint else ts.regTaint x)) ts.flagsTaint ts.cfFlagsTaint ts.xmmTaint
   | OMem m -> ts (* Ensured by taint semantics *)
 
 let rec operands_do_not_use_secrets ops ts = match ops with
