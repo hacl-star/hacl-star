@@ -51,24 +51,12 @@ let lemma_to_xmm s x = ()
 let lemma_to_trace s = ()
 let lemma_to_memTaint s = ()
 
-let state_to_HS (s:state) : GTot ME.state =
-  {
-  ME.state = {
-    BS.ok = s.ok;
-    BS.regs = F.on_dom reg (fun r -> Regs.sel r s.regs);
-    BS.xmms = F.on_dom xmm (fun x -> Xmms.sel x s.xmms);
-    BS.flags = int_to_nat64 s.flags;
-    BS.mem = ME.get_heap s.mem
-  };
-  ME.mem = s.mem;
-  }
-
 #set-options "--max_ifuel 2 --initial_ifuel 2"
 let lemma_to_eval_operand s o = match o with
   | OConst _ | OReg _ -> ()
   | OMem m ->
     let addr = eval_maddr m s in
-    X64.Memory_s.equiv_load_mem addr (state_to_HS s)
+    X64.Memory_s.equiv_load_mem addr s.mem
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
@@ -80,7 +68,7 @@ let lemma_to_valid_operand s o = match o with
     let aux () : Lemma
     (requires valid_operand o s)
     (ensures BS.valid_operand o (state_to_S s).TS.state) =
-    ME.bytes_valid addr (state_to_HS s) in
+    ME.bytes_valid addr s.mem in
     Classical.move_requires aux ()
 
 let lemma_to_valid_taint s o t = ()
