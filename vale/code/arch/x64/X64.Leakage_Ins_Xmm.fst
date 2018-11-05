@@ -1,6 +1,5 @@
 module X64.Leakage_Ins_Xmm
 open X64.Machine_s
-open X64.Memory_s
 open X64.Taint_Semantics_s
 open X64.Bytes_Semantics_s
 open X64.Leakage_s
