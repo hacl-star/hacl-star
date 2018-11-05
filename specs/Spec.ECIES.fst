@@ -65,22 +65,26 @@ let const_label_key : lbytes 9 =
 
 /// Constants sizes
 
-inline_for_extraction let vsize_nonce: size_nat = 12 (* AES_GCM with TLS length IV *)
+inline_for_extraction let vsize_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
 inline_for_extraction let vsize_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + 8
-inline_for_extraction let vsize_key_asymmetric (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
+inline_for_extraction let vsize_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
 
 /// Types
 
-type key_public_s (cs:ciphersuite) = lbytes (vsize_key_asymmetric cs)
-type key_private_s (cs:ciphersuite) = lbytes (vsize_key_asymmetric cs)
+type key_public_s (cs:ciphersuite) = lbytes (vsize_key_dh cs)
+type key_private_s (cs:ciphersuite) = lbytes (vsize_key_dh cs)
 type key_s (cs:ciphersuite) = lbytes (vsize_key cs)
 
 
 /// Cryptographic Primitives
 
-val encap: cs:ciphersuite -> kpub:key_public_s cs -> Tot (option (key_s cs & key_public_s cs))
+val encap:
+    cs: ciphersuite
+  -> kpub: key_public_s cs ->
+  Tot (option (key_s cs & key_public_s cs))
+
 let encap cs kpub =
-  match crypto_random (vsize_key_asymmetric cs) with
+  match crypto_random (vsize_key_dh cs) with
   | None -> None
   | Some eph_kpriv ->
     let eph_kpub = DH.secret_to_public (curve_of_cs cs) eph_kpriv in
@@ -93,7 +97,12 @@ let encap cs kpub =
       Some (key, eph_kpub)
 
 
-val decap: cs:ciphersuite -> key_private_s cs -> eph_kpub:key_public_s cs -> Tot (option (key_s cs))
+val decap:
+    cs: ciphersuite
+  -> kpriv: key_private_s cs
+  -> eph_kpub: key_public_s cs ->
+  Tot (option (key_s cs))
+
 let decap cs kpriv eph_kpub =
   let kpub = DH.secret_to_public (curve_of_cs cs) kpriv in
   match DH.dh (curve_of_cs cs) kpriv eph_kpub with
