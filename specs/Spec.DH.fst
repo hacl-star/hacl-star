@@ -40,11 +40,15 @@ let scalarmult a k u =
   | DH_Curve448 -> Spec.Curve448.scalarmult k u
 
 
-val dh: a:algorithm -> k0:key a -> k1:key a -> Tot (key a)
+val dh: a:algorithm -> k0:key a -> k1:key a -> Tot (option (key a))
 let dh a k0 k1 =
-  match a with
-  | DH_Curve25519 -> scalarmult a k0 k1
-  | DH_Curve448 -> scalarmult a k0 k1
+  let secret =
+    match a with
+    | DH_Curve25519 -> scalarmult a k0 k1
+    | DH_Curve448 -> scalarmult a k0 k1
+  in
+  let result : bool = lbytes_eq (create (size_key a) (u8 0)) secret in
+  if result then Some secret else None
 
 
 val secret_to_public: a:algorithm -> key a -> Tot (key a)
