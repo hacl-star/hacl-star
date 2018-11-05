@@ -2,6 +2,7 @@ module X64.Vale.StateLemmas
 open X64.Machine_s
 open X64.Vale.State
 module BS = X64.Bytes_Semantics_s
+module MS = X64.Memory_Sems
 module ME = X64.Memory_s
 module TS = X64.Taint_Semantics_s
 
@@ -10,14 +11,14 @@ module F = FStar.FunctionalExtensionality
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
-let same_domain sv s = ME.same_domain sv.mem s.TS.state.BS.mem
+let same_domain sv s = MS.same_domain sv.mem s.TS.state.BS.mem
 
 let same_domain_eval_ins c f s0 sv = match c with
   | Ins ins -> 
       let obs = TS.ins_obs ins s0 in 
       let s1 = {TS.taint_eval_ins ins s0 with TS.trace = obs @ s0.TS.trace} in
       X64.Bytes_Semantics.eval_ins_domains ins s0;
-      ME.lemma_same_domains sv.mem s0.TS.state.BS.mem s1.TS.state.BS.mem
+      MS.lemma_same_domains sv.mem s0.TS.state.BS.mem s1.TS.state.BS.mem
 
 let state_to_S (s:state) : GTot TS.traceState =
   {
@@ -26,7 +27,7 @@ let state_to_S (s:state) : GTot TS.traceState =
     BS.regs = F.on_dom reg (fun r -> Regs.sel r s.regs);
     BS.xmms = F.on_dom xmm (fun x -> Xmms.sel x s.xmms);
     BS.flags = int_to_nat64 s.flags;
-    BS.mem = ME.get_heap s.mem
+    BS.mem = MS.get_heap s.mem
   };
   TS.trace = [];
   TS.memTaint = s.memTaint;
@@ -39,7 +40,7 @@ let state_of_S (sv:state) (s:TS.traceState{same_domain sv s}) : GTot state =
     regs = Regs.of_fun regs;
     xmms = Xmms.of_fun xmms;
     flags = flags;
-    mem = ME.get_hs sv.mem mem;
+    mem = MS.get_hs sv.mem mem;
     memTaint = s.TS.memTaint;
   }
 
@@ -56,7 +57,7 @@ let lemma_to_eval_operand s o = match o with
   | OConst _ | OReg _ -> ()
   | OMem m ->
     let addr = eval_maddr m s in
-    X64.Memory_s.equiv_load_mem addr s.mem
+    MS.equiv_load_mem addr s.mem
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
@@ -68,7 +69,7 @@ let lemma_to_valid_operand s o = match o with
     let aux () : Lemma
     (requires valid_operand o s)
     (ensures BS.valid_operand o (state_to_S s).TS.state) =
-    ME.bytes_valid addr s.mem in
+    MS.bytes_valid addr s.mem in
     Classical.move_requires aux ()
 
 let lemma_to_valid_taint s o t = ()
@@ -90,7 +91,7 @@ let lemma_to_of_eval_code c s0 =
   assert (feq xmms xmms'');
   X64.Bytes_Semantics.eval_ins_same_unspecified ins s0';
   X64.Bytes_Semantics.eval_ins_domains ins s0';
-  ME.get_heap_hs heap s0.mem;
+  MS.get_heap_hs heap s0.mem;
   ()
 
 val lemma_valid_taint64: (b:X64.Memory.buffer64) ->

@@ -3,7 +3,7 @@ module M = X64.Memory
 
 // This interface should hide all of Semantics_s.
 // (It should not refer to Semantics_s, directly or indirectly.)
-// It should not refer to Memory_s, StateLemmas, Lemmas, or Print_s,
+// It should not refer to StateLemmas, Lemmas, or Print_s,
 // because they refer to Semantics_s.
 // Memory, Regs and State are ok, because they do not refer to Semantics_s.
 
