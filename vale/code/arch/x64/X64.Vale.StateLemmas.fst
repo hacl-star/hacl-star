@@ -4,7 +4,6 @@ open X64.Vale.State
 module BS = X64.Bytes_Semantics_s
 module ME = X64.Memory_s
 module TS = X64.Taint_Semantics_s
-open X64.Semantics_Equiv
 
 friend X64.Memory
 module F = FStar.FunctionalExtensionality
@@ -65,7 +64,12 @@ let state_to_HS (s:state) : GTot ME.state =
   }
 
 #set-options "--max_ifuel 2 --initial_ifuel 2"
-let lemma_to_eval_operand s o = equiv_eval_operand o (state_to_HS s)
+let lemma_to_eval_operand s o = match o with
+  | OConst _ | OReg _ -> ()
+  | OMem m ->
+    let addr = eval_maddr m s in
+    X64.Memory_s.equiv_load_mem addr (state_to_HS s)
+
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
 let lemma_to_eval_xmm s x = ()

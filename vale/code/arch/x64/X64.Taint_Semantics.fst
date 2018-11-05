@@ -3,7 +3,7 @@ module X64.Taint_Semantics
 open X64.Taint_Semantics_s
 open X64.Vale.Decls
 open X64.Machine_s
-module S = X64.Semantics_s
+module S = X64.Bytes_Semantics_s
 module L = FStar.List.Tot
 
 let mk_taint_ins0 (i:S.ins { i == X64.Bytes_Semantics_s.Cpuid}) =
