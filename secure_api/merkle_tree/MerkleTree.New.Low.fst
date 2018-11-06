@@ -321,11 +321,11 @@ val hash_2:
 let hash_2 src1 src2 dst =
   let hh0 = HST.get () in
   HST.push_frame ();
-  // let cb = B.malloc HH.root 0uy (EHS.blockLen EHS.SHA256) in
-  // EHS.blockLen EHS.SHA256 = 64ul
+  // KreMLin can't extract `EHS.blockLen EHS.SHA256` (= 64ul)
   let cb = B.alloca 0uy 64ul in
   B.blit src1 0ul cb 0ul hash_size;
   B.blit src2 0ul cb 32ul hash_size;
+
   let st = EHS.create EHS.SHA256 in
   EHS.init #(Ghost.hide EHS.SHA256) st;
   let hh1 = HST.get () in
@@ -356,7 +356,7 @@ let hash_2 src1 src2 dst =
                   (High.hash_2
                     (Rgl?.r_repr hreg hh0 src1)
                     (Rgl?.r_repr hreg hh0 src2)));
-  // TODO: need to deal with `st` and stack-allocated `cb`
+  // TODO: need to deal with the region of `st` (= HH.root)
   assume (modifies (B.loc_region_only false (B.frameOf dst)) hh0 hh4)
 
 /// Low-level Merkle tree data structure
@@ -389,6 +389,7 @@ noeq type merkle_tree =
 
 type mt_p = B.pointer merkle_tree
 
+// The maximum number of elements in the tree is (2^32 - 1).
 val mt_not_full: HS.mem -> mt_p -> GTot bool
 let mt_not_full h mt =
   MT?.j (B.get h mt 0) < U32.uint_to_t (UInt.max_int U32.n)
@@ -399,6 +400,9 @@ val offset_of: i:index_t -> Tot index_t
 let offset_of i =
   if i % 2ul = 0ul then i else i - 1ul
 
+// `mt_safe_elts` says that it is safe to access an element from `i` to `j - 1`
+// at level `lv` in the Merkle tree, i.e., hs[lv][k] (i <= k < j) is a valid
+// element.
 val mt_safe_elts:
   h:HS.mem -> lv:uint32_t{lv <= merkle_tree_size_lg} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
@@ -466,6 +470,9 @@ let rec mt_safe_elts_preserved lv hs i j p h0 h1 =
   else (V.get_preserved hs lv p h0 h1;
        mt_safe_elts_preserved (lv + 1ul) hs (i / 2ul) (j / 2ul) p h0 h1)
 
+// `mt_safe` is the invariant of a Merkle tree through its lifetime.
+// It includes liveness, regionality, disjointness (to each data structure),
+// and valid element access (`mt_safe_elts`).
 val mt_safe: HS.mem -> mt_p -> GTot Type0
 let mt_safe h mt =
   B.live h mt /\ B.freeable mt /\
@@ -483,6 +490,8 @@ let mt_safe h mt =
   HH.disjoint (V.frameOf (MT?.hs mtv)) (B.frameOf (MT?.mroot mtv)) /\
   HH.disjoint (V.frameOf (MT?.rhs mtv)) (B.frameOf (MT?.mroot mtv)))
 
+// Since a Merkle tree satisfies regionality, it's ok to take all regions from
+// a tree pointer as a location of the tree.
 val mt_loc: mt_p -> GTot loc
 let mt_loc mt =
   B.loc_all_regions_from false (B.frameOf mt)
@@ -573,8 +582,8 @@ let mt_preserved mt p h0 h1 =
 
 /// Construction
 
-// NOTE: the public function is `create_mt` defined below, which
-// builds a tree with an initial hash.
+// Note that the public function for creation is `create_mt` defined below,
+// which builds a tree with an initial hash.
 private val create_empty_mt: r:erid ->
   HST.ST mt_p
    (requires (fun _ -> true))
@@ -622,6 +631,7 @@ val free_mt: mt:mt_p ->
   HST.ST unit
    (requires (fun h0 -> mt_safe h0 mt))
    (ensures (fun h0 _ h1 -> modifies (mt_loc mt) h0 h1))
+// #reset-options "--z3rlimit 100"
 // This proof works with the resource limit above, but it's a bit slow.
 // It will be admitted until the hint file is generated.
 #reset-options "--admit_smt_queries true"
@@ -635,6 +645,9 @@ let free_mt mt =
 
 /// Insertion
 
+// `hash_vv_insert_copy` inserts a hash element at a level `lv`, by copying
+// and pushing its content to `hs[lv]`. For detailed insertion procedure, see
+// `insert_` and `mt_insert`.
 #reset-options "--z3rlimit 40"
 inline_for_extraction private val hash_vv_insert_copy:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
@@ -830,7 +843,6 @@ private val insert_snoc_last_helper:
   Lemma (S.index (S.snoc s v) (S.length s - 1) == S.last s)
 private let insert_snoc_last_helper #a s v = ()
 
-// TODO: better to move to `Low.Rvector.fst`
 private val rv_inv_rv_elems_reg:
   #a:Type0 -> #rg:regional a ->
   h:HS.mem -> rv:rvector rg ->
@@ -839,6 +851,17 @@ private val rv_inv_rv_elems_reg:
         (ensures (RV.rv_elems_reg h rv i j))
 private let rv_inv_rv_elems_reg #a #rg h rv i j = ()
 
+// `insert_` recursively inserts proper hashes to each level `lv` by
+// accumulating a compressed hash. For example, if there are three leaf elements
+// in the tree, `insert_` will change `hs` as follow:
+// (`hij` is a compressed hash from `hi` to `hj`)
+//     
+//     BEFORE INSERTION        AFTER INSERTION
+// lv 
+// 0   h0  h1  h2       ====>  h0  h1  h2  h3
+// 1   h01                     h01 h23
+// 2                           h03
+//
 private val insert_:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   i:Ghost.erased index_t ->
@@ -1066,7 +1089,9 @@ private let rec insert_ lv i j hs acc =
                     (RV.as_seq hh0 hs) (Rgl?.r_repr hreg hh0 acc))) // QED
 #reset-options // reset "--admit_smt_queries true"
 
-// Caution: current impl. manipulates the content in `v`.
+// `mt_insert` inserts a hash to a Merkle tree. Note that this operation 
+// manipulates the content in `v`, since it uses `v` as an accumulator during
+// insertion.
 val mt_insert:
   mt:mt_p -> v:hash ->
   HST.ST unit
@@ -1137,6 +1162,8 @@ let mt_insert mt v =
     hh1 hh2
 #reset-options // reset "--max_fuel 0"
 
+// `create_mt` initiates a Merkle tree with a given initial hash `init`.
+// A valid Merkle tree should contain at least one element.
 val create_mt: r:erid -> init:hash ->
   HST.ST mt_p
    (requires (fun h0 ->
@@ -1161,8 +1188,13 @@ let create_mt r init =
 
 /// Construction and Destruction of paths
 
+// Since each element pointer in `path` is from the target Merkle tree and
+// each element has different location in `MT?.hs` (thus different region id),
+// we cannot use the regionality property for `path`s. Hence here we manually
+// define invariants and representation.
 type path = B.pointer (V.vector hash)
 
+// Memory safety of a path as an invariant
 val path_safe:
   HS.mem -> mtr:HH.rid -> path -> GTot Type0
 let path_safe h mtr p =
@@ -1188,6 +1220,7 @@ let rec lift_path_ h p =
   else (S.cons (Rgl?.r_repr hreg h (S.head p))
                (lift_path_ h (S.tail p)))
 
+// Representation of a path
 val lift_path:
   h:HS.mem -> mtr:HH.rid -> p:path{path_safe h mtr p} ->
   GTot (hp:High.path{S.length hp = U32.v (V.size_of (B.get h p 0))})
@@ -1247,17 +1280,6 @@ let path_safe_init_preserved mtr p dl h0 h1 =
   assert (loc_includes (path_loc p) (B.loc_buffer p));
   assert (loc_includes (path_loc p) (V.loc_vector (B.get h0 p 0)))
 
-// val path_preserved_:
-//   p:S.seq hash -> dl:loc -> h0:HS.mem -> h1:HS.mem ->
-//   Lemma (requires (V.forall_seq p 0 (S.length p)
-//                     (fun hp -> Rgl?.r_inv hreg h hp /\
-//                                HH.includes mtr (B.frameOf hp)) /\
-//                   loc_disjoint dl (B.loc_all_regions_from false mtr) /\
-//                   modifies dl h0 h1))
-//         (ensures (path_safe_preserved mtr p dl h0 h1;
-//                  S.equal (lift_path h0 mtr p) (lift_path h1 mtr p)))
-// let path_preserved mtr p dl h0 h1 =
-
 val path_preserved:
   mtr:HH.rid -> p:path ->
   dl:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -1268,7 +1290,7 @@ val path_preserved:
         (ensures (path_safe_preserved mtr p dl h0 h1;
                  S.equal (lift_path h0 mtr p) (lift_path h1 mtr p)))
 let path_preserved mtr p dl h0 h1 =
-  admit () // So trivial
+  admit () // TODO: should be easy
 
 val init_path:
   mtr:HH.rid -> r:erid ->
@@ -1311,7 +1333,7 @@ let free_path p =
 
 /// Getting the Merkle root and path
 
-// Construct the rightmost hashes for a given (incomplete) Merkle tree.
+// Construct "rightmost hashes" for a given (incomplete) Merkle tree.
 // This function calculates the Merkle root as well, which is the final
 // accumulator value.
 private val construct_rhs:
@@ -1496,6 +1518,10 @@ private let rec construct_rhs lv hs rhs i j acc actd =
     end)
 #reset-options // reset "--admit_smt_queries true"
 
+// `mt_get_root` returns the Merkle root. If it's already calculated with 
+// up-to-date hashes, the root is returned immediately. Otherwise it calls
+// `construct_rhs` to build rightmost hashes and to calculate the Merkle root
+// as well.
 val mt_get_root:
   mt:mt_p ->
   rt:hash ->
@@ -1657,6 +1683,12 @@ inline_for_extraction let path_insert mtr p hp =
     mtr (B.get hh2 p 0) (B.loc_region_only false (B.frameOf p))
     0ul (V.size_of (B.get hh2 p 0)) hh2 hh1 hh2
 
+// For given a target index `k`, the number of elements (in the tree) `j`,
+// and a boolean flag (to check the existence of rightmost hashes), we can 
+// calculate a required Merkle path length.
+// 
+// `mt_path_length` is a postcondition of `mt_get_path`, and a precondition
+// of `mt_verify`. For detailed description, see `mt_get_path` and `mt_verify`.
 private val mt_path_length_step:
   k:index_t -> 
   j:index_t{k <= j} ->
@@ -1667,6 +1699,21 @@ private let mt_path_length_step k j actd =
   else (if k % 2ul = 0ul
        then (if j = k || (j = k + 1ul && not actd) then 0ul else 1ul)
        else 1ul)
+
+private val mt_path_length:
+  lv:uint32_t{lv <= merkle_tree_size_lg} ->
+  k:index_t -> 
+  j:index_t{k <= j && U32.v j < pow2 (32 - U32.v lv)} ->
+  actd:bool ->
+  Tot (l:uint32_t{
+        U32.v l = High.mt_path_length (U32.v k) (U32.v j) actd &&
+        l <= 32ul - lv})
+      (decreases (U32.v j))
+private let rec mt_path_length lv k j actd =
+  if j = 0ul then 0ul
+  else (let nactd = actd || (j % 2ul = 1ul) in
+       mt_path_length_step k j actd +
+       mt_path_length (lv + 1ul) (k / 2ul) (j / 2ul) nactd)
 
 inline_for_extraction private val mt_get_path_step:
   lv:uint32_t{lv <= merkle_tree_size_lg} ->
@@ -1728,41 +1775,6 @@ inline_for_extraction private let mt_get_path_step lv mtr hs rhs i j k p actd =
          path_insert mtr p (V.index (V.index hs lv) (k + 1ul - ofs)))
   end
 
-private val mt_path_length:
-  lv:uint32_t{lv <= merkle_tree_size_lg} ->
-  k:index_t -> 
-  j:index_t{k <= j && U32.v j < pow2 (32 - U32.v lv)} ->
-  actd:bool ->
-  Tot (l:uint32_t{
-        U32.v l = High.mt_path_length (U32.v k) (U32.v j) actd &&
-        l <= 32ul - lv})
-      (decreases (U32.v j))
-private let rec mt_path_length lv k j actd =
-  if j = 0ul then 0ul
-  else (let nactd = actd || (j % 2ul = 1ul) in
-       mt_path_length_step k j actd +
-       mt_path_length (lv + 1ul) (k / 2ul) (j / 2ul) nactd)
-
-// private val mt_path_length_spec:
-//   h0:HS.mem -> h1:HS.mem ->
-//   lv:uint32_t{lv <= merkle_tree_size_lg} ->
-//   mtr:HH.rid ->
-//   k:index_t -> 
-//   j:index_t{k <= j && U32.v j < pow2 (32 - U32.v lv)} ->
-//   actd:bool ->
-//   p:path ->
-//   Lemma (requires (path_safe h0 mtr p /\ path_safe h1 mtr p /\
-//                   V.size_of (B.get h0 p 0) <= lv + 1ul /\
-//                   V.size_of (B.get h1 p 0) == 
-//                   V.size_of (B.get h0 p 0) + mt_path_length lv k j actd))
-//         (ensures (S.length (lift_path h1 mtr p) ==
-//                  S.length (lift_path h0 mtr p) +
-//                  High.mt_path_length (U32.v k) (U32.v j) actd))
-// private let mt_path_length_spec h0 h1 lv mtr k j actd p = ()
-
-// Construct a Merkle path for a given index `k`, hashes `hs`,
-// and rightmost hashes `rhs`.
-// Caution: it copies "pointers" in the Merkle tree to the output path.
 private val mt_get_path_:
   lv:uint32_t{lv <= merkle_tree_size_lg} ->
   mtr:HH.rid ->
@@ -1792,7 +1804,8 @@ private val mt_get_path_:
              (High.mt_get_path_ (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
    (decreases (32 - U32.v lv))
-// This proof works, but it's a bit slow.
+// #reset-options "--z3rlimit 150 --max_fuel 1"
+// This proof works with the resource limit above, but it's a bit slow.
 // It will be admitted until the hint file is generated.
 #reset-options "--admit_smt_queries true"
 private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
@@ -1841,6 +1854,9 @@ private val hash_vv_rv_inv_includes:
                    (Rgl?.region_of hreg (V.get h (V.get h hvv i) j))))
 private let hash_vv_rv_inv_includes h hvv i j = ()
 
+// Construct a Merkle path for a given index `k`, hashes `hs`, and rightmost
+// hashes `rhs`. Note that this operation copies "pointers" in the Merkle tree
+// to the output path.
 #reset-options "--z3rlimit 40"
 val mt_get_path:
   mt:mt_p ->
@@ -2168,6 +2184,10 @@ private let rec mt_flush_to_ lv hs pi i j =
   end
 #reset-options // reset "--admit_smt_queries true"
 
+// `mt_flush_to` flushes old hashes in the Merkle tree. It removes hash elements
+// from `MT?.i` to `index - 1`, but maintains the tree structure, i.e., the tree
+// still holds some old internal hashes (compressed from old hashes) which are
+// required to generate Merkle paths for remaining hashes.
 val mt_flush_to:
   mt:mt_p ->
   idx:index_t ->
@@ -2318,7 +2338,7 @@ private val buf_eq:
      // memory safety
      h0 == h1 /\
      // correctness
-     (b ==> S.equal (B.as_seq h0 (B.gsub b1 0ul len))
+     (b <==> S.equal (B.as_seq h0 (B.gsub b1 0ul len))
                     (B.as_seq h0 (B.gsub b2 0ul len)))))
 private let rec buf_eq #a b1 b2 len =
   admit ();
@@ -2351,6 +2371,13 @@ let mt_verify_precondition k j mtr p rt =
   let psz = V.size_of !*p in
   psz = 1ul + mt_path_length 0ul k j false
 
+// `mt_verify` verifies a Merkle path `p` with given target index `k` and
+// the number of elements `j`. It recursively iterates the path with an
+// accumulator `acc` (a compressed hash).
+//
+// Note that `mt_path_length` is given as a precondition of this operation.
+// This is a postcondition of `mt_get_path` so we can call `mt_verify` with
+// every path generated by `mt_get_path`.
 val mt_verify:
   k:index_t ->
   j:index_t{k < j} ->
@@ -2363,6 +2390,7 @@ val mt_verify:
      HST.is_eternal_region (B.frameOf rt) /\
      HH.disjoint (B.frameOf p) (B.frameOf rt) /\
      HH.disjoint mtr (B.frameOf rt) /\
+     // We need to add one since the first element is the hash to verify.
      V.size_of (B.get h0 p 0) == 1ul + mt_path_length 0ul k j false))
    (ensures (fun h0 b h1 ->
      // memory safety:
@@ -2374,6 +2402,7 @@ val mt_verify:
      S.equal (Rgl?.r_repr hreg h0 rt) (Rgl?.r_repr hreg h1 rt) /\
      b == High.mt_verify (U32.v k) (U32.v j)
             (lift_path h0 mtr p) (Rgl?.r_repr hreg h0 rt)))
+#reset-options "--z3rlimit 200 --max_fuel 8"
 let mt_verify k j mtr p rt =
   let hh0 = HST.get () in
   let nrid = RV.new_region_ (B.frameOf rt) in
