@@ -4,9 +4,11 @@ open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.ByteBuffer
 open Hacl.Impl.Curve25519.Fields
 
 #set-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 2"
+#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction noextract
 val fsquare_times_: #s:field_spec -> o:felem s -> i:felem s -> n:size_t{v n > 0} -> Stack unit
@@ -16,12 +18,13 @@ inline_for_extraction noextract
 let fsquare_times_ #s o i n = 
     fsqr #s o i;
     let h0 = ST.get() in
-    loop_nospec #h0 (n -! 1ul) o
-    (fun i -> fsqr o o)
+    loop1 h0 (n -! 1ul) o
+    (fun h -> (fun i s -> s))
+    (fun i -> fsqr #s o o; admit())
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let fsquare_times_51 o i n = fsquare_times_ #M51 o i n
+let fsquare_times_51 (o:felem M51) (i:felem M51) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i n
 inline_for_extraction
 let fsquare_times #s o i n =
   match s with
@@ -89,16 +92,8 @@ let finv #s o i =
 
 
 
-assume val uint64s_from_bytes_le: #len:size_t -> o:lbuffer uint64 len -> i:lbuffer uint8 (len *. 8ul) -> Stack unit
-					     (requires (fun h0 -> live h0 o /\ live h0 i))
-					     (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1))
-
-assume val uint64s_to_bytes_le: #len:size_t -> o:lbuffer uint8 (len *. 8ul) -> i:lbuffer uint64 len -> Stack unit
-					     (requires (fun h0 -> live h0 o /\ live h0 i))
-					     (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1))
-
-let scalar = lbuffer uint64 4ul
-let point (s:field_spec) = lbuffer (limb s) (2ul *. nlimb s)
+unfold let scalar = lbuffer uint64 4ul
+unfold let point (s:field_spec) = lbuffer (limb s) (2ul *. nlimb s)
 
 inline_for_extraction
 val decode_scalar: o:scalar -> i:lbuffer uint8 32ul -> Stack unit
@@ -106,7 +101,7 @@ val decode_scalar: o:scalar -> i:lbuffer uint8 32ul -> Stack unit
 			 (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
 inline_for_extraction
 let decode_scalar o i = 
-  uint64s_from_bytes_le o i;
+  uints_from_bytes_le #U64 o i;
   o.(0ul) <- o.(0ul) &. u64 0xfffffffffffffff8;
   o.(3ul) <- o.(3ul) &. u64 0x7fffffffffffffff;
   o.(3ul) <- o.(3ul) |. u64 0x40ffffffffffffff
@@ -127,7 +122,7 @@ inline_for_extraction
 let decode_point_ #s o i = 
   push_frame();
   let tmp = create 4ul (u64 0) in
-  uint64s_from_bytes_le tmp i;
+  uints_from_bytes_le #U64 tmp i;
   tmp.(3ul) <- tmp.(3ul) &. u64 0x7fffffffffffffff;
   let x : felem s = sub o 0ul (nlimb s) in
   let z : felem s = sub o (nlimb s) (nlimb s) in
@@ -159,7 +154,7 @@ let encode_point_ #s o i =
   finv #s tmp z;
   fmul #s tmp tmp x;
   store_felem u64s tmp;
-  uint64s_to_bytes_le o u64s;
+  uints_to_bytes_le #U64 4ul o u64s;
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
@@ -308,6 +303,12 @@ let l : List.Tot.llist byte_t 32 =
   l_
 
 let g25519 : x:ilbuffer byte_t 32ul{recallable x /\ witnessed x (Seq.of_list l)}= 
+  [@inline_let]
+  let l_ = [9uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy;
+	    0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy;
+	    0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy;
+	    0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy] in
+  assert_norm (List.Tot.length l_ == 32);
   createL_global l
 
 inline_for_extraction

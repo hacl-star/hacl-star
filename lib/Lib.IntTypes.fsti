@@ -181,7 +181,7 @@ inline_for_extraction
 val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v #U64 u == n}
 
 inline_for_extraction
-val u128: (n:nat{n <= maxint U128}) -> u:uint128{uint_v #U128 u == n}
+val u128: (n:nat{n <= maxint U64}) -> u:uint128{uint_v #U128 u == n}
 
 unfold inline_for_extraction
 let max_size_t = maxint U32

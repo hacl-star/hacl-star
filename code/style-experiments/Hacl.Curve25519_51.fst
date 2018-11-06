@@ -1,4 +1,4 @@
-module Hacl.Impl.Curve25519.Donna
+module Hacl.Curve25519_51
 open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes

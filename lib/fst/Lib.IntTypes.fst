@@ -55,7 +55,7 @@ let u64 x : uint64 = UInt64.uint_to_t x
 
 let u64_uL x = x
 
-let u128 x : uint128 = UInt128.uint_to_t x
+let u128 x : uint128 = FStar.UInt128.uint64_to_uint128 (u64 x)
 
 inline_for_extraction
 let size_ x : uint_t U32 PUB = UInt32.uint_to_t x
@@ -163,6 +163,8 @@ let mul_mod #t #l a b =
   | U16 -> (UInt16.mul_mod a b)
   | U32 -> (UInt32.mul_mod a b)
   | U64 -> (UInt64.mul_mod a b)
+
+let mul_mod_lemma #t #l a b = ()
 
 let mul #t #l a b =
   match t with
