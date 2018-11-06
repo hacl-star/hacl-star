@@ -317,7 +317,7 @@ let lemma_addlea_same_public (ts:taintState) (ins:tainted_ins{S.AddLea64? ins.i}
   = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
     Classical.move_requires (lemma_addlea_same_public_aux ts ins s1 s2 fuel b) ts'
 
-#set-options "--z3rlimit 250"
+#set-options "--z3rlimit 400"
 
 let lemma_addcarry_same_public_aux (ts:taintState) (ins:tainted_ins{S.AddCarry64? ins.i}) (s1:traceState) (s2:traceState)
                                (fuel:nat) (b:bool) (ts':taintState)
