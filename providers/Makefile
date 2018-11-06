@@ -106,31 +106,18 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -bundle 'Prims' \
 	  -bundle 'FStar.*' \
 	  -bundle 'C,C.*' \
-	  -bundle 'Hacl.Hash.*' \
-	  -bundle 'Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Lib.LoadStore32' \
-	  -bundle 'Hacl.Standalone.Poly1305_64=Hacl.Impl.Poly1305_64,Hacl.Impl.Poly1305_64.State,Hacl.Bignum.*' \
-	  -bundle 'Hacl.Chacha20Poly1305=Hacl.Policies' \
 	  -bundle 'EverCrypt.Spec.*' \
 	  -bundle 'Flag' \
 	  -bundle 'Spec.*' \
-	  -bundle 'Hacl.Spec.*,Hacl.Spe.*,Hacl.Impl.Xor.Lemmas,Seq.Create' \
-	  -bundle 'Hacl.Types' \
-	  -bundle 'Hacl.Constants' \
-	  -bundle 'Hacl.Endianness' \
-	  -bundle 'Hacl.Cast' \
-	  -bundle 'Hacl.UInt128.*' \
-	  -bundle 'Hacl.UInt64.*' \
-	  -bundle 'Hacl.UInt32.*' \
-	  -bundle 'Hacl.UInt16.*' \
-	  -bundle 'Hacl.UInt8.*' \
 	  -bundle 'LowStar.*' \
+	  -bundle 'Hacl.*' -library 'Hacl.*' \
 	  -no-prefix 'EverCrypt.Vale' \
 	  -tmpdir $(GENERATED_DIR) $^ -warn-error @9
 
 $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
-	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=* \
+	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=*[rename=EverCrypt.h]\
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \
@@ -138,7 +125,6 @@ $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
 	  -add-include '<kremlin/internal/compat.h>' \
 	  -tmpdir $(INCLUDE_DIR) $^
 	rm -rf $(INCLUDE_DIR)/Makefile.include $(INCLUDE_DIR)/*.c
-	mv $(INCLUDE_DIR)/EverCrypt_EverCrypt_Bytes_EverCrypt_AutoConfig_EverCrypt_HKDF_EverCrypt_HMAC_EverCrypt_Hash.h $@
 
 
 

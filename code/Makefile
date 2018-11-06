@@ -26,7 +26,7 @@ include Makefile.common
 
 verify: $(ALL_CHECKED_FILES)
 
-extract: $(OUTPUT_DIR)/Makefile.include
+extract: dist/compact/Makefile.include dist/generic/Makefile.include
 
 # Backwards compat target name
 extract-c: extract old-extract-c
@@ -50,12 +50,35 @@ test:
 .PRECIOUS: %.krml
 
 $(OUTPUT_DIR)/%.krml:
-	echo "< is: $<"
 	$(FSTAR) --codegen Kremlin \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-$(OUTPUT_DIR)/Makefile.include: $(ALL_KRML_FILES)
-	$(KRML) -tmpdir $(OUTPUT_DIR) -skip-compilation -bundle Spec.* $^ \
+dist/compact/Makefile.include: \
+  EXTRA=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2=Hacl.Hash.*[rename=Hacl_Hash] \
+    -bundle Prims \
+    -bundle LowStar.* \
+    -bundle C,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Kremlib] \
+    -minimal \
+    -add-include '"kremlin/internal/types.h"' \
+    -add-include '"kremlin/c_endianness.h"' \
+    -add-include '<string.h>' \
+    -fparentheses -fno-shadow -fcurly-braces
+
+# For the time being, we rely on the old extraction to give us self-contained
+# files
+HACL_OLD_FILES=\
+  curve25519/x25519-c/Hacl_Curve25519.c \
+  ed25519/ed25519-c/Hacl_Ed25519.c \
+  salsa-family/chacha-c/Hacl_Chacha20.c \
+  poly1305/poly-c/AEAD_Poly1305_64.c \
+  poly1305/poly-c/Hacl_Poly1305_64.c \
+  api/aead-c/Hacl_Chacha20Poly1305.c
+
+dist/%/Makefile.include: $(ALL_KRML_FILES)
+	mkdir -p $(dir $@)
+	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
+	$(KRML) $(EXTRA) -tmpdir $(dir $@) -skip-compilation \
+	  -bundle Spec.* $^ \
 	  -warn-error @4
