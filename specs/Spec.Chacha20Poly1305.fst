@@ -25,7 +25,7 @@ type nonce = lbytes size_nonce
 
 /// Specification
 
-let poly1305_padded (len:size_nat) (text:lbytes len) (tmp:lbytes Poly.blocksize) (st:Poly1305.state) : Poly1305.state =
+let poly1305_padded (len:size_nat) (text:lbytes len) (tmp:lbytes Poly.blocksize) (st:Poly1305.state) : Tot (Poly1305.state) =
   let n = len / Poly.blocksize in
   let r = len % Poly.blocksize in
   let blocks = sub text 0 (n * Poly.blocksize) in
@@ -35,9 +35,14 @@ let poly1305_padded (len:size_nat) (text:lbytes len) (tmp:lbytes Poly.blocksize)
   let st = Poly1305.update1 Poly1305.blocksize tmp st in
   st
 
-let poly1305_do (k:Poly.key) (len:size_nat{len <= max_size_t}) (m:lbytes len)
-        (aad_len:size_nat{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t}) (aad:lbytes aad_len)
-: Tot Poly.tag =
+let poly1305_do
+  (k:Poly.key)
+  (len:size_nat{len <= max_size_t})
+  (m:lbytes len)
+  (aad_len:size_nat{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t})
+  (aad:lbytes aad_len):
+  Tot Poly.tag =
+
   let st = Poly.poly1305_init k in
   let block = create Poly.blocksize (u8 0) in
   let st = poly1305_padded aad_len aad block st in
