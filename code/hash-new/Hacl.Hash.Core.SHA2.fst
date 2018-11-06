@@ -78,9 +78,13 @@ let alloca a () =
 
 #set-options "--max_fuel 0"
 
+noextract inline_for_extraction
 let alloca_224: alloca_st SHA2_224 = alloca SHA2_224
+noextract inline_for_extraction
 let alloca_256: alloca_st SHA2_256 = alloca SHA2_256
+noextract inline_for_extraction
 let alloca_384: alloca_st SHA2_384 = alloca SHA2_384
+noextract inline_for_extraction
 let alloca_512: alloca_st SHA2_512 = alloca SHA2_512
 
 (** Init *)
