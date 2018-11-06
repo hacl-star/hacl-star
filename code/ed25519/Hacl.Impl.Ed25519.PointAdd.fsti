@@ -11,6 +11,7 @@ open Hacl.Impl.Ed25519.ExtPoint
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 val point_add:
   out:point ->
   p:point{disjoint p out} ->

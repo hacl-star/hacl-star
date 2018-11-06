@@ -1,5 +1,6 @@
 # This file requires Python version >= 3.6
 # This file requires SCons version >= 3.00
+# See ./INSTALL.md for more information
 
 ##################################################################################################
 #
@@ -138,6 +139,8 @@ AddOptYesNo('FSTAR-MY-VERSION', dest = 'fstar_my_version', default = False,
   help = 'Use version of F* that does not necessarily match .tested_fstar_version')
 AddOptYesNo('Z3-MY-VERSION', dest = 'z3_my_version', default = False,
   help = 'Use version of Z3 that does not necessarily match .tested_z3_version')
+AddOptYesNo('VALE-MY-VERSION', dest = 'vale_my_version', default = False,
+  help = 'Use version of Vale that does not necessarily match .vale_version')
 AddOptYesNo('RECORD-HINTS', dest = 'record_hints', default = False,
   help = 'Record new F* .hints files into the hints directory')
 AddOptYesNo('USE-HINTS', dest = 'use_hints', default = True,
@@ -180,6 +183,7 @@ c_user_args = GetOption('c_user_args')
 openssl_path = GetOption('openssl_path')
 fstar_my_version = GetOption('fstar_my_version')
 z3_my_version = GetOption('z3_my_version')
+vale_my_version = GetOption('vale_my_version')
 fstar_extract = GetOption('fstar_extract')
 record_hints = GetOption('record_hints')
 use_hints = GetOption('use_hints')
@@ -358,8 +362,8 @@ verify_options = [
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding)),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding)),
   ('code/arch/x64/X64.Memory_s.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
   ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
-  ('code/arch/Memory_s.fst', BuildOptions(fstar_default_args.replace('--use_extracted_interfaces true', ''))),
   ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', ''))),
 
   # We copy these files from F*'s library because we need to generate a .checked file for them,
@@ -398,7 +402,7 @@ if not is_help:
         fstar_z3 = str(find_z3)
   else:
     found_z3 = True
-  fstar_z3_path = '--smt ' + fstar_z3
+  fstar_z3_path = '--smt ' + (os.path.abspath(fstar_z3) if dump_args else fstar_z3)
 else:
   fstar_z3_path = ''
 
@@ -499,9 +503,9 @@ def is_our_file(file):
 def compute_include_paths(src_include_paths, obj_include_paths, obj_prefix):
   return src_include_paths + [str(Dir('obj/external'))] + [str(Dir(f'{obj_prefix}/{x}')) for x in obj_include_paths]
 
-def compute_includes(src_include_paths, obj_include_paths, obj_prefix):
+def compute_includes(src_include_paths, obj_include_paths, obj_prefix, relative=True):
   fstar_include_paths = compute_include_paths(src_include_paths, obj_include_paths, obj_prefix)
-  return " ".join(["--include " + x for x in fstar_include_paths])
+  return " ".join(["--include " + (x if relative else os.path.abspath(x)) for x in fstar_include_paths])
 
 def CopyFile(target, source):
   Command(target, source, Copy(target, source))
@@ -556,7 +560,8 @@ def check_fstar_version():
       f' modify .tested_fstar_version, or use the --FSTAR-MY-VERSION option to override.' +
       f' (We try to update the F* version frequently; feel free to change .tested_fstar_version' +
       f' to a more recent F* version as long as the build still succeeds with the new version.' +
-      f' We try to maintain the invariant that the build succeeds with the F* version in .tested_fstar_version.)')
+      f' We try to maintain the invariant that the build succeeds with the F* version in .tested_fstar_version.)' +
+      f' See ./INSTALL.md for more information.')
 
 def check_z3_version(fstar_z3):
   import subprocess
@@ -578,14 +583,34 @@ def check_z3_version(fstar_z3):
     for line in lines:
       print_error('  ' + line)
     print_error_exit(
-      'Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested,' +
-      ' modify .tested_z3_version, or use the --Z3-MY-VERSION option to override.' +
-      ' (We rarely change the Z3 version; we strongly recommend using the expected version of Z3.)')
+      f'Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested,' +
+      f' modify .tested_z3_version, or use the --Z3-MY-VERSION option to override.' +
+      f' (We rarely change the Z3 version; we strongly recommend using the expected version of Z3.)' +
+      f' See ./INSTALL.md for more information.')
+
+def check_vale_version():
+  with open(".vale_version") as f:
+    version = f.read().splitlines()[0]
+  vale_version_file = f'{vale_path}/bin/.vale_version'
+  vale_version = '0.2.7 or older'
+  if os.path.isfile(vale_version_file):
+    with open(vale_version_file) as f:
+      vale_version = f.read().splitlines()[0]
+  if vale_version != version:
+    print_error(f'Expected Vale version {version}, but found Vale version {vale_version}')
+    print_error_exit(
+      f'Get version {version} from https://github.com/project-everest/vale/releases/download/v{version}/vale-release-{version}.zip,' +
+      f' modify .vale_version, or use the --VALE-MY-VERSION option to override.' +
+      f' See ./INSTALL.md for more information.')
 
 def print_dump_args():
-  print('Currently using the following F* args:')
-  fstar_includes = compute_includes(src_include_paths, obj_include_paths, 'obj')
-  for option in [fstar_z3_path, fstar_no_verify, fstar_includes, fstar_user_args, fstar_default_args]:
+  #print('Currently using the following F* args:')
+  options = fstar_default_args
+  if len(COMMAND_LINE_TARGETS) > 0:
+    options = get_build_options(File(COMMAND_LINE_TARGETS[0])).verifier_flags
+    #print("The options are: %s" % options.verifier_flags)
+  fstar_includes = compute_includes(src_include_paths, obj_include_paths, 'obj', relative=False)
+  for option in [fstar_z3_path, fstar_no_verify, fstar_includes, fstar_user_args, options]:
     if len(option) > 0:
       print(f'{option} ', end='')
   print()
@@ -1008,9 +1033,11 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
   cmd = [str(x) for x in cmd]
   #print(" ".join(cmd))
   try:
-    print('F* dependency analysis starting')
+    if not dump_args:
+      print('F* dependency analysis starting')
     o = subprocess.check_output(cmd, stderr = subprocess.STDOUT).decode('ascii')
-    print('F* dependency analysis finished')
+    if not dump_args:
+      print('F* dependency analysis finished')
   except (subprocess.CalledProcessError) as e:
     print(f'F* dependency analysis: error: {e.output}')
     Exit(1)
@@ -1040,7 +1067,7 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
       targets = [str(File(x)).replace(dummies_name, obj_name) for x in targets]
       for source in sources:
         for target in targets:
-          if target.startswith('specs') and (source.startswith('obj') or source.startswith('code')):
+          if target.startswith('specs') and (source.startswith('obj') or source.startswith('code')) and not dump_args:
             print(f'{yellow}Warning: file {target} in specs directory depends on file {source} outside specs directory{uncolor}')
       sources_ver = [to_obj_dir(File(re.sub('\.fst$', '.fst.verified', re.sub('\.fsti$', '.fsti.verified', x)))) for x in sources if is_our_file(File(x))]
       targets_ver = [to_obj_dir(File(re.sub('\.fst$', '.fst.verified.tmp', re.sub('\.fsti$', '.fsti.verified.tmp', x)))) for x in targets if is_our_file(File(x))]
@@ -1093,13 +1120,15 @@ if not is_help:
   pathlib.Path('obj/external').mkdir(parents = True, exist_ok = True)
   pathlib.Path('obj/cache_checked').mkdir(parents = True, exist_ok = True)
 
-  # Check F* and Z3 versions
+  # Check F*, Z3, and Vale versions
   if not fstar_my_version:
     check_fstar_version()
   if not z3_my_version:
     if not found_z3:
       print_error_exit('Could not find z3 executable.  Either put z3 in your path, or put it in the directory tools/Z3/, or use the --FSTARZ3=<z3-executable> option.')
     check_z3_version(fstar_z3)
+  if not vale_my_version:
+    check_vale_version()
 
   # HACK: copy external files
   for f in external_files:
@@ -1107,7 +1136,8 @@ if not is_help:
     target = f.obj_name()
     shutil.copy(source, target)
 
-  print('Processing source files')
+  if not dump_args:
+    print('Processing source files')
   process_files_in(env, verify_paths)
   if not is_single_vaf:
     compute_fstar_deps(env, verify_paths, compute_include_paths(src_include_paths, obj_include_paths, 'obj/dummies'))

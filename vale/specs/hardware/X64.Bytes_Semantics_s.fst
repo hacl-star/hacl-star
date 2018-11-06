@@ -468,6 +468,7 @@ let eval_ins (ins:ins) : st unit =
     update_cf new_carry  // We specify cf, but underspecify everything else
 
   | Adcx64 dst src ->
+    check_imm adx_enabled;;
     check (valid_operand src);;
     let old_carry = if cf(s.flags) then 1 else 0 in
     let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
@@ -476,6 +477,7 @@ let eval_ins (ins:ins) : st unit =
     update_cf new_carry // Explicitly touches only CF
 
   | Adox64 dst src ->
+    check_imm adx_enabled;;
     check (valid_operand src);;
     let old_carry = if overflow(s.flags) then 1 else 0 in
     let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
@@ -496,6 +498,7 @@ let eval_ins (ins:ins) : st unit =
     update_flags (havoc s ins)
 
   | Mulx64 dst_hi dst_lo src ->
+    check_imm bmi2_enabled;;
     check (valid_operand src);;
     let hi = FStar.UInt.mul_div #64 (eval_reg Rdx s) (eval_operand src s) in
     let lo = FStar.UInt.mul_mod #64 (eval_reg Rdx s) (eval_operand src s) in

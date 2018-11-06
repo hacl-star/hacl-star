@@ -11,6 +11,7 @@ open Seq.Create
 
 let h64 = Hacl.UInt64.t
 
+inline_for_extraction
 val make_h64_5: b:buffer h64{length b = 5} ->
   s0:h64 -> s1:h64 -> s2:h64 -> s3:h64 -> s4:h64 ->
   Stack unit
@@ -22,7 +23,7 @@ let make_h64_5 b s0 s1 s2 s3 s4 =
   let h = ST.get() in
   Seq.lemma_eq_intro (as_seq h b) (create_5 s0 s1 s2 s3 s4)
 
-
+inline_for_extraction
 val make_h64_10: b:buffer h64{length b = 10} ->
   s0:h64 -> s1:h64 -> s2:h64 -> s3:h64 -> s4:h64 ->
   s5:h64 -> s6:h64 -> s7:h64 -> s8:h64 -> s9:h64 ->

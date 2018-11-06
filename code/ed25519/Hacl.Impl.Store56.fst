@@ -16,7 +16,7 @@ let qelem   = buffer Hacl.UInt64.t
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ Substitute]
+inline_for_extraction
 private
 val hstore56_le:
   out:hint8_p{length out = 32} ->
@@ -28,7 +28,6 @@ val hstore56_le:
       live h1 out /\ modifies_1 (Buffer.sub out off 8ul) h0 h1 /\
       hlittle_endian (as_seq h1 (Buffer.sub out off 7ul)) == v x))
 #reset-options "--max_fuel 0 --z3rlimit 200"
-[@ Substitute]
 let hstore56_le out off x =
   let b8 = Buffer.sub out off 8ul in
   hstore64_le b8 x;

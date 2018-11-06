@@ -12,6 +12,7 @@ open Seq.Create
 
 let h128 = Hacl.UInt128.t
 
+inline_for_extraction
 val make_h128_9: b:buffer h128{length b = 9} ->
   s0:h128 -> s1:h128 -> s2:h128 -> s3:h128 -> s4:h128 ->
   s5:h128 -> s6:h128 -> s7:h128 -> s8:h128 ->

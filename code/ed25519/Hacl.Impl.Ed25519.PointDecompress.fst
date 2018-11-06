@@ -33,7 +33,7 @@ let lemma_most_significant_bit s =
   Math.Lemmas.small_division_lemma_1 (Endianness.little_endian (slice s 0 31)) (pow2 248)
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val most_significant_bit:
   s:buffer UInt8.t{length s = 32} ->
@@ -41,7 +41,6 @@ val most_significant_bit:
     (requires (fun h -> live h s))
     (ensures (fun h0 z h1 -> live h0 s /\ h1 == h0 /\
       v z == (Endianness.little_endian (as_seq h0 s) / pow2 255) % 2))
-[@ Substitute]
 let most_significant_bit s =
   let h = ST.get() in
   let s31 = s.(31ul) in
@@ -58,7 +57,7 @@ let most_significant_bit s =
   Int.Cast.uint8_to_uint64 z
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val copy:
   a:buffer Hacl.UInt64.t{length a = 5} ->
@@ -67,7 +66,6 @@ val copy:
     (requires (fun h -> live h a /\ live h b))
     (ensures (fun h0 _ h1 -> live h0 a /\ live h1 b /\ modifies_1 b h0 h1
       /\ as_seq h0 a == as_seq h1 b))
-[@ Substitute]
 let copy a b =
   let h = ST.get() in
   blit a 0ul b 0ul 5ul;
@@ -76,7 +74,7 @@ let copy a b =
   Seq.lemma_eq_intro (as_seq h' b) (Seq.slice (as_seq h' b) 0 5)
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val make_one:
   b:buffer Hacl.UInt64.t{length b = 5} ->
@@ -84,7 +82,6 @@ val make_one:
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 1
       /\ Hacl.Bignum25519.red_513 (as_seq h1 b)))
-[@ Substitute]
 let make_one b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   let one  = Hacl.Cast.uint64_to_sint64 1uL in
@@ -111,7 +108,7 @@ let lemma_modifies_1 #a h (b:buffer a{live h b}) :
   = lemma_intro_modifies_1 b h h
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val point_decompress_step_1:
   s:buffer UInt8.t{length s = 32} ->
@@ -129,10 +126,7 @@ val point_decompress_step_1:
                   red_513 x' /\ red_513 y' /\ b == true)
        else (None? x))
     ))
-
 #reset-options "--max_fuel 0 --z3rlimit 500"
-
-[@ Substitute]
 let point_decompress_step_1 s tmp =
   let h0 = ST.get() in
   let y    = Buffer.sub tmp 0ul 5ul in
@@ -150,7 +144,7 @@ let point_decompress_step_1 s tmp =
   z
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val point_decompress_:
   out:point ->
@@ -167,9 +161,7 @@ val point_decompress_:
          red_513 px /\ red_513 py /\ red_513 pz /\ red_513 pt)
        else None? (Spec.Ed25519.point_decompress (as_seq h0 s)) ))
     ))
-
 #reset-options "--max_fuel 0 --z3rlimit 200"
-[@ Substitute]
 let point_decompress_ out s tmp =
   let y    = Buffer.sub tmp 0ul 5ul in
   let x    = Buffer.sub tmp 5ul 5ul in
