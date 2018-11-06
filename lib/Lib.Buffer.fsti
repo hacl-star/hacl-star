@@ -23,7 +23,7 @@ module Loop = Lib.LoopCombinators
 inline_for_extraction noextract
 let v = size_v
 
-type buftype = 
+type buftype =
   | MUT
   | IMMUT
 
@@ -31,7 +31,7 @@ unfold let buffer_t (ty:buftype) (a:Type0) =
   match ty with
   | IMMUT -> IB.ibuffer a
   | MUT -> B.buffer a
-  
+
 (** Definition of a mutable Buffer *)
 unfold let buffer (a:Type0) = buffer_t MUT a
 
@@ -39,11 +39,11 @@ unfold let buffer (a:Type0) = buffer_t MUT a
 unfold let ibuffer (a:Type0) = buffer_t IMMUT a
 
 (** Length of buffers *)
-let length (#t:buftype) (#a:Type0) (b:buffer_t t a) = 
+let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   match t with
   | MUT-> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
-  
+
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
   b:buffer_t ty a{length #ty #a b == v len}
 
@@ -51,15 +51,15 @@ let lbuffer (a:Type0) (len:size_t) = lbuffer_t MUT a len
 let ilbuffer (a:Type0) (len:size_t) = lbuffer_t IMMUT a len
 
 (** Liveness of buffers *)
-let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type = 
+let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
   match t with
   | MUT -> B.live h (b <: buffer a)
   | IMMUT -> IB.live h (b <: ibuffer a)
 
-let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc = 
+let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc =
   match t with
   | MUT -> B.loc_buffer (b <: buffer a)
-  | IMMUT -> B.loc_buffer (b <: ibuffer a) 
+  | IMMUT -> B.loc_buffer (b <: ibuffer a)
 
 let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
 
@@ -75,7 +75,7 @@ let disjoint
   (#a1 #a2:Type0)
   (b1:buffer_t t1 a1)
   (b2:buffer_t t2 a2)
-  : GTot Type0 = 
+  : GTot Type0 =
     B.loc_disjoint (loc b1) (loc b2)
 
 (** Modification for no Buffer *)
@@ -121,7 +121,7 @@ let as_seq
   (#len:size_t)
   (h:HS.mem)
   (b:lbuffer_t t a len):
-  GTot (Seq.lseq a (v len)) = 
+  GTot (Seq.lseq a (v len)) =
   match t with
   | MUT -> B.as_seq h (b <: buffer a)
   | IMMUT -> IB.as_seq h (b <: ibuffer a)
@@ -134,13 +134,13 @@ let gsub
   (#len:size_t)
   (b:lbuffer_t t a len)
   (start:size_t)
-  (n:size_t{v start + v n <= v len}) : GTot (lbuffer_t t a n)= 
+  (n:size_t{v start + v n <= v len}) : GTot (lbuffer_t t a n)=
   match t with
-  | IMMUT-> 
+  | IMMUT->
     let b = IB.igsub (b <: ibuffer a) start n in
     assert (B.length b == v n);
     (b <: ilbuffer a n)
-  | MUT -> 
+  | MUT ->
     let b = B.gsub (b <: buffer a) start n in
     assert (B.length b == v n);
     (b <: lbuffer a n)
@@ -196,7 +196,7 @@ val upd:
   Stack unit
     (requires fun h0 -> live h0 b)
     (ensures  fun h0 _ h1 ->
-      modifies (loc  b) h0 h1 /\ 
+      modifies (loc  b) h0 h1 /\
       as_seq h1 b == Seq.upd #a #(v len) (as_seq h0 b) (v i) x)
 
 (** Operator definition to update a mutable Buffer *)
@@ -210,41 +210,47 @@ let op_Array_Access #t #a #len = index #t #a #len
 (** Access to the pure sequence-based value associated to an index of a mutable Buffer  *)
 (* We don't have access to Lib.Sequence.fst
    to get the fact `Lib.Sequence.index == FStar.Seq.index` *)
-let bget (#t:buftype) (#a:Type0) (#len:size_t) (h:mem) 
-	 (b:lbuffer_t t a len) (i:size_nat{i < v len}) 
+let bget (#t:buftype) (#a:Type0) (#len:size_t) (h:mem)
+	 (b:lbuffer_t t a len) (i:size_nat{i < v len})
 	 : GTot a =
     match t with
     | MUT -> B.get h (b <: buffer a) i
     | IMMUT -> IB.get h (b <: ibuffer a) i
 
 val bget_as_seq:#t:buftype -> #a:Type0 -> #len:size_t -> h:mem ->
-	 b:lbuffer_t t a len -> i:size_nat -> Lemma 
+	 b:lbuffer_t t a len -> i:size_nat -> Lemma
 	   (requires (i < v len))
 	   (ensures (bget #t #a #len h b i == Seq.index #a #(v len) (as_seq h b) i))
 	   [SMTPat (bget #t #a #len h b i)]
 
 (** Allocate a fixed-length mutable Buffer and initialize it to value [init] *)
 
-let stack_allocated (#a:Type0) (#len:size_t) (b:lbuffer a len) 
-		    (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) = 
-    let b: B.buffer a = b in 
+let stack_allocated (#a:Type0) (#len:size_t) (b:lbuffer a len)
+		    (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
+    let b: B.buffer a = b in
     B.alloc_post_mem_common b h0 h1 s /\
     B.frameOf b = HS.get_tip h0
 
-let global_allocated (#a:Type0) (#len:size_t) (b:ilbuffer a len) 
-		    (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) = 
-    let b: ibuffer a = b in 
-    B.frameOf b == HyperStack.root /\ 
-    B.alloc_post_mem_common b h0 h1 s 
+let global_allocated (#a:Type0) (#len:size_t) (b:ilbuffer a len)
+		    (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
+    let b: ibuffer a = b in
+    B.frameOf b == HyperStack.root /\
+    B.alloc_post_mem_common b h0 h1 s
 
 let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
     match t with
     | IMMUT ->  B.recallable (b <: ibuffer a)
     | MUT -> B.recallable (b <: buffer a)
-    
+
+inline_for_extraction noextract
+let recall (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
+    match t with
+    | IMMUT -> B.recall (b <: ibuffer a)
+    | MUT -> B.recall (b <: buffer a)
+
 private let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> FStar.Seq.equal s s1
-let witnessed (#a:Type0) (#len:size_t) (b:ilbuffer a len) (s:Seq.lseq a (v len)) = 
-    B.witnessed (b <: ibuffer a) (cpred s)  
+let witnessed (#a:Type0) (#len:size_t) (b:ilbuffer a len) (s:Seq.lseq a (v len)) =
+    B.witnessed (b <: ibuffer a) (cpred s)
 
 inline_for_extraction
 val create:
@@ -255,7 +261,7 @@ val create:
     (requires fun h0 -> v len > 0)
     (ensures  fun h0 b h1 -> stack_allocated b h0 h1 (Seq.create (v len) init))
 
-      
+
 (** Allocate a fixed-length mutable Buffer based on an existing List *)
 inline_for_extraction noextract
 val createL:
@@ -273,7 +279,8 @@ val createL_global:
   -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
   ST (b:ilbuffer a (size (normalize_term (List.Tot.length init))))
     (requires fun h0 -> B.gcmalloc_of_list_pre #a HyperStack.root init)
-    (ensures  fun h0 b h1 -> global_allocated b h0 h1 (Seq.of_list init) /\ 
+    (ensures  fun h0 b h1 -> global_allocated b h0 h1 (Seq.of_list init) /\
+                          recallable b /\
 			  witnessed b (Seq.of_list init))
 
 (** Recall the liveness and content of a global immutable Buffer *)
@@ -677,7 +684,7 @@ val fillT:
 inline_for_extraction
 val fill:
     #a:Type
-  -> h0:mem 
+  -> h0:mem
   -> clen:size_t
   -> o:lbuffer a clen
   -> spec:(mem -> GTot(i:size_nat{i < v clen} -> a))
@@ -724,4 +731,3 @@ val mapiT:
     (ensures  fun h0 _ h1 ->
       modifies (loc  o) h0 h1 /\
       as_seq h1 o == Seq.mapi (fun i -> f (size i)) (as_seq h0 i))
-
