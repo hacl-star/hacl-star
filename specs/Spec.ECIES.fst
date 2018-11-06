@@ -65,15 +65,15 @@ let const_label_key : lbytes 9 =
 
 /// Constants sizes
 
-inline_for_extraction let vsize_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
-inline_for_extraction let vsize_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + vsize_nonce cs - numbytes U32
-inline_for_extraction let vsize_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
+inline_for_extraction let size_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
+inline_for_extraction let size_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + size_nonce cs - numbytes U32
+inline_for_extraction let size_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
 
 /// Types
 
-type key_public_s (cs:ciphersuite) = lbytes (vsize_key_dh cs)
-type key_private_s (cs:ciphersuite) = lbytes (vsize_key_dh cs)
-type key_s (cs:ciphersuite) = lbytes (vsize_key cs)
+type key_public_s (cs:ciphersuite) = lbytes (size_key_dh cs)
+type key_private_s (cs:ciphersuite) = lbytes (size_key_dh cs)
+type key_s (cs:ciphersuite) = lbytes (size_key cs)
 
 
 /// Cryptographic Primitives
@@ -84,7 +84,7 @@ val encap:
   Tot (option (key_s cs & key_public_s cs))
 
 let encap cs kpub =
-  match crypto_random (vsize_key_dh cs) with
+  match crypto_random (size_key_dh cs) with
   | None -> None
   | Some eph_kpriv ->
     let eph_kpub = DH.secret_to_public (curve_of_cs cs) eph_kpriv in
@@ -93,7 +93,7 @@ let encap cs kpub =
     | Some secret ->
       let salt = (id_of_cs cs) @| eph_kpub @| kpub in
       let extracted = Spec.HKDF.hkdf_extract (hash_of_cs cs) salt secret in
-      let key = Spec.HKDF.hkdf_expand (hash_of_cs cs) extracted const_label_key (vsize_key cs) in
+      let key = Spec.HKDF.hkdf_expand (hash_of_cs cs) extracted const_label_key (size_key cs) in
       Some (key, eph_kpub)
 
 
@@ -110,7 +110,7 @@ let decap cs kpriv eph_kpub =
   | Some secret ->
     let salt = (id_of_cs cs) @| eph_kpub @| kpub in
     let extracted = Spec.HKDF.hkdf_extract (hash_of_cs cs) salt secret in
-    let key = Spec.HKDF.hkdf_expand (hash_of_cs cs) extracted const_label_key (vsize_key cs) in
+    let key = Spec.HKDF.hkdf_expand (hash_of_cs cs) extracted const_label_key (size_key cs) in
     Some key
 
 
@@ -127,7 +127,7 @@ val encrypt:
 let encrypt cs sk input aad counter =
   let klen = AEAD.size_key (aead_of_cs cs) in
   let key = sub sk 0 klen in
-  let nonce = sub sk klen (vsize_nonce cs - numbytes U32) in
+  let nonce = sub sk klen (size_nonce cs - numbytes U32) in
   let ctr = uint_to_bytes_le counter in
   AEAD.aead_encrypt (aead_of_cs cs) key (nonce @| ctr) input aad
 
@@ -145,6 +145,6 @@ val decrypt:
 let decrypt cs sk input aad counter =
   let klen = AEAD.size_key (aead_of_cs cs) in
   let key = sub sk 0 klen in
-  let nonce = sub sk klen (vsize_nonce cs - numbytes U32) in
+  let nonce = sub sk klen (size_nonce cs - numbytes U32) in
   let ctr = uint_to_bytes_le counter in
   AEAD.aead_decrypt (aead_of_cs cs) key (nonce @| ctr) input aad
