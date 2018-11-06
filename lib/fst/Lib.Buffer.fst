@@ -22,8 +22,10 @@ module ByteSeq = Lib.ByteSequence
 #set-options "--z3rlimit 100"
 
 let modifies_preserves_live #t #a b l h0 h1 = ()
-let live_gsub #t #a #len b start n h = ()
-let modifies_gsub #t #a #len b start n h0 h1 = ()
+let modifies_includes l1 l2 h0 h1 = ()
+let modifies_trans l1 l2 h0 h1 h2 = ()
+let live_sub #t #a #len b start n h = ()
+let modifies_sub #t #a #len b start n h0 h1 = ()
   
 let as_seq_gsub #t #a #len h b start n = ()
 

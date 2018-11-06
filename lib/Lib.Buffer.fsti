@@ -51,14 +51,11 @@ let lbuffer (a:Type0) (len:size_t) = lbuffer_t MUT a len
 let ilbuffer (a:Type0) (len:size_t) = lbuffer_t IMMUT a len
 
 (** Liveness of buffers *)
-
-(*
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type = 
   match t with
   | MUT -> B.live h (b <: buffer a)
   | IMMUT -> IB.live h (b <: ibuffer a)
-*)
-val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
+//val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 
 let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc = 
   match t with
@@ -69,34 +66,26 @@ let union (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
 let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
 
 (** Generalized modification clause for Buffer locations *)
-(*
 let modifies
   (s: B.loc)
   (h1 h2: HS.mem):
   GTot Type0 = B.modifies s h1 h2 /\ ST.equal_domains h1 h2
-*)
-val modifies: s:B.loc -> h1:HS.mem -> h2:HS.mem -> GTot Type0
+//val modifies: s:B.loc -> h1:HS.mem -> h2:HS.mem -> GTot Type0
+
 val modifies_preserves_live: #t:buftype -> #a:Type0 -> b:buffer_t t a -> l:B.loc ->
 			     h0:mem -> h1:mem -> Lemma
 			     (requires (modifies l h0 h1 /\ live h0 b))
 			     (ensures (live h1 b))
-			     [SMTPat (modifies l h0 h1); SMTPat (live h0 b)]  
-
-val modifies_same: l:B.loc ->  h0:mem -> h1:mem -> h2:mem -> Lemma
-		     (requires (modifies l h0 h1 /\ modifies l h1 h2))
-		     (ensures (modifies l h0 h2))
-		     [SMTPat (modifies l h0 h1); SMTPat (modifies l h1 h2)]
+			     [SMTPatOr [[SMTPat (modifies l h0 h1); SMTPat (live h0 b)];
+			                [SMTPat (modifies l h0 h1); SMTPat (live h1 b)]]]
 
 val modifies_includes: l1:B.loc -> l2:B.loc -> h0:mem -> h1:mem -> Lemma
 		     (requires (modifies l1 h0 h1 /\ B.loc_includes l2 l1))
 		     (ensures (modifies l2 h0 h1))
-		     [SMTPatOr [[SMTPat (modifies l1 h0 h1); SMTPat (B.loc_includes l2 l1)];
-			        [SMTPat (modifies l2 h0 h1); SMTPat (modifies l1 h0 h1)]]]
 
-val modifies_union: l1:B.loc ->  l2:B.loc -> h0:mem -> h1:mem -> h2:mem -> Lemma
+val modifies_trans: l1:B.loc ->  l2:B.loc -> h0:mem -> h1:mem -> h2:mem -> Lemma
 		     (requires (modifies l1 h0 h1 /\ modifies l2 h1 h2))
-		     (ensures (modifies (l1 |+| l2) h0 h2))
-		     [SMTPat (modifies l1 h0 h1); SMTPat (modifies l2 h1 h2)]
+		     (ensures (modifies (l1 |+| l2) h0 h2 /\ modifies (l2 |+| l1) h0 h2))
 
 
 
@@ -110,7 +99,7 @@ let disjoint
     B.loc_disjoint (loc b1) (loc b2)
 
 (** Modification for no Buffer *)
-let modifies0 (h1 h2: HS.mem) : GTot Type0 = B.modifies (B.loc_none) h1 h2
+let modifies0 (h1 h2: HS.mem) : GTot Type0 = modifies (B.loc_none) h1 h2
 
 (** Modification clause for one Buffer *)
 let modifies1
@@ -180,10 +169,7 @@ val live_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len ->
 			start:size_t -> n:size_t{v start + v n <= v len} ->
 			h:mem -> Lemma
 			     (ensures (live h b <==> live h (gsub b start n)))
-			     [SMTPatOr [
-			       [SMTPat (live h (gsub b start n))];
-			       [SMTPat (live h b); SMTPat (gsub b start n);]
-			     ]]
+			     [SMTPat (live h (gsub b start n))]
 
 val modifies_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len -> 
 			start:size_t -> n:size_t{v start + v n <= v len} ->
@@ -383,7 +369,7 @@ val update_sub:
   -> src:lbuffer_t t a n ->
   Stack unit
     (requires fun h -> live h dst /\ live h src /\ disjoint dst src)
-    (ensures  fun h0 _ h1 -> B.modifies (loc  dst) h0 h1 /\
+    (ensures  fun h0 _ h1 -> modifies (loc  dst) h0 h1 /\
       as_seq h1 dst == Seq.update_sub (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
 
 
@@ -666,7 +652,7 @@ val loopi_blocks:
   Stack unit
     (requires fun h -> live h inp /\ live h write /\ disjoint inp write)
     (ensures  fun h0 _ h1 ->
-      B.modifies (loc  write) h0 h1 /\
+      modifies (loc  write) h0 h1 /\
       as_seq h1 write ==
       Seq.repeati_blocks #a #(Seq.lseq b (v blen)) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
 
@@ -732,7 +718,7 @@ val fill:
   -> o:lbuffer a clen
   -> spec:(mem -> GTot(i:size_nat{i < v clen} -> a))
   -> impl:(i:size_t{v i < v clen} -> Stack unit
-          (requires fun h -> B.modifies (loc  o) h0 h)
+          (requires fun h -> modifies (loc  o) h0 h)
           (ensures  fun h _ h' ->
             modifies (loc  o) h h' /\
             as_seq h' o == Seq.upd (as_seq h o) (v i) (spec h0 (v i))))
