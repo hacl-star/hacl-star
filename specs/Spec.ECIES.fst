@@ -66,7 +66,7 @@ let const_label_key : lbytes 9 =
 /// Constants sizes
 
 inline_for_extraction let vsize_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
-inline_for_extraction let vsize_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + 8
+inline_for_extraction let vsize_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + vsize_nonce cs - numbytes U32
 inline_for_extraction let vsize_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
 
 /// Types
@@ -127,7 +127,7 @@ val encrypt:
 let encrypt cs sk input aad counter =
   let klen = AEAD.size_key (aead_of_cs cs) in
   let key = sub sk 0 klen in
-  let nonce = sub sk klen 8 in
+  let nonce = sub sk klen (vsize_nonce cs - numbytes U32) in
   let ctr = uint_to_bytes_le counter in
   AEAD.aead_encrypt (aead_of_cs cs) key (nonce @| ctr) input aad
 
@@ -145,6 +145,6 @@ val decrypt:
 let decrypt cs sk input aad counter =
   let klen = AEAD.size_key (aead_of_cs cs) in
   let key = sub sk 0 klen in
-  let nonce = sub sk klen 8 in
+  let nonce = sub sk klen (vsize_nonce cs - numbytes U32) in
   let ctr = uint_to_bytes_le counter in
   AEAD.aead_decrypt (aead_of_cs cs) key (nonce @| ctr) input aad
