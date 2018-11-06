@@ -1,7 +1,5 @@
 module Lib.Buffer
 
-//open FStar.HyperStack
-//open FStar.HyperStack.ST
 open FStar.Mul
 
 open Lib.IntTypes
@@ -149,6 +147,7 @@ let salloc_nospec #a #res h len x footprint impl =
   (* BB. `a` is a random type because it is unused, is there a better solution ? *)
   let spec (z:res) (h0:mem) = a in
   let spec_inv (#res:Type) (h1 h2 h3:mem) (r:res) = () in
+  admit();
   salloc1 #a #res h len x footprint spec spec_inv impl
 
 inline_for_extraction noextract
