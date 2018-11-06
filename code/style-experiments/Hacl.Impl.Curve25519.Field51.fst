@@ -7,7 +7,9 @@ open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 open FStar.Mul
-//open Lib.Utils
+
+#reset-options "--z3rlimit 20"
+
 
 let felem = lbuffer uint64 5ul
 let felem_wide = lbuffer uint128 5ul
@@ -121,8 +123,6 @@ let copy_felem f1 f2 =
     f1.(size 3) <- f2.(size 3);
     f1.(size 4) <- f2.(size 4)
 
-
-#reset-options "--z3rlimit 20"
 
 //inline_for_extraction
 [@ CInline]
@@ -393,3 +393,4 @@ val fsqr: out:felem -> f1:felem -> Stack unit
 [@ CInline]
 let fsqr out f1 = fmul out f1 f1
 
+ 

@@ -85,7 +85,7 @@ val modifies_includes: l1:B.loc -> l2:B.loc -> h0:mem -> h1:mem -> Lemma
 
 val modifies_trans: l1:B.loc ->  l2:B.loc -> h0:mem -> h1:mem -> h2:mem -> Lemma
 		     (requires (modifies l1 h0 h1 /\ modifies l2 h1 h2))
-		     (ensures (modifies (l1 |+| l2) h0 h2 /\ modifies (l2 |+| l1) h0 h2))
+		     (ensures (modifies (l1 |+| l2) h0 h2))
 
 
 
