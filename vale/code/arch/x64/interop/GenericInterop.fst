@@ -500,6 +500,7 @@ let vale_post (dom:list vale_type) =
     vale_post_tl dom
 
 let rec vale_sig_tl (#dom:list vale_type)
+                    (code:va_code)
                     (pre:vale_pre_tl dom)
                     (post:vale_post_tl dom)
   : Type =
@@ -509,29 +510,32 @@ let rec vale_sig_tl (#dom:list vale_type)
       stack_b:stack_buffer ->
       Ghost (va_state & va_fuel)
             (requires (elim_nil pre va_s0 stack_b))
-            (ensures (fun (va_s1, f) -> elim_nil post va_s0 stack_b va_s1 f))
+            (ensures (fun (va_s1, f) ->
+                       eval_code code va_s0 f va_s1 /\
+                       elim_nil post va_s0 stack_b va_s1 f))
 
     | hd::tl ->
       x:vale_type_as_type hd ->
-      vale_sig_tl #tl (elim_1 pre x) (elim_1 post x)
+      vale_sig_tl #tl code (elim_1 pre x) (elim_1 post x)
 
-let elim_vale_sig_cons (hd:vale_type)
+let elim_vale_sig_cons #code
+                       (hd:vale_type)
                        (tl:list vale_type)
                        (pre:vale_pre_tl (hd::tl))
                        (post:vale_post_tl (hd::tl))
-                       (v:vale_sig_tl pre post)
+                       (v:vale_sig_tl code pre post)
     : x:vale_type_as_type hd
-    -> vale_sig_tl (elim_1 pre x) (elim_1 post x)
+    -> vale_sig_tl code (elim_1 pre x) (elim_1 post x)
     = v
 
 let vale_sig (#dom:list vale_type)
              (pre:vale_pre dom)
              (post:vale_post dom)
   : Type =
-    va_b0:va_code ->
+    code:va_code ->
     win:bool ->
-    vale_sig_tl (pre va_b0 win)
-                (post va_b0 win)
+    vale_sig_tl code (pre code win)
+                     (post code win)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //lowstar_sig pre post:
@@ -559,6 +563,7 @@ let elim_down_cons (hd:vale_type)
     elim_dep_arrow_cons hd tl down x
 
 let rec as_lowstar_sig_tl (#dom:list vale_type)
+                          (code:va_code)
                           (acc:list b8)
                           (down:create_vale_initial_state_t dom acc)
                           (pre: vale_pre_tl dom)
@@ -587,19 +592,23 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
                             HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
                             B.frameOf b == HS.get_tip alloc_push_h0 /\
                             B.live alloc_push_h0 b /\
-                            elim_nil
+                            (let initial_state =
+                                 elim_down_nil acc down alloc_push_h0 b in
+                             elim_nil
                               post
-                              (elim_down_nil acc down alloc_push_h0 b)
+                              initial_state
                               b
                               final
                               fuel /\
+                            eval_code code initial_state fuel final /\
                             HS.poppable final.mem.hs /\
-                            h1 == HS.pop (final.mem.hs)))
+                            h1 == HS.pop (final.mem.hs))))
 
     | hd::tl ->
       x:vale_type_as_type hd ->
       as_lowstar_sig_tl
         #tl
+        code
         (maybe_cons_buffer hd x acc)
         (elim_down_cons hd tl acc down x)
         (elim_1 pre x)
@@ -608,9 +617,10 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
 let as_lowstar_sig  (#dom:list vale_type{List.length dom < max_arity win})
                     (pre: vale_pre dom)
                     (post: vale_post dom) =
-    va_b0:va_code ->
+    (va_b0:va_code) ->
     as_lowstar_sig_tl
       #dom
+        va_b0
       []
       (create_vale_initial_state dom [])
       (pre va_b0 win)
@@ -618,10 +628,10 @@ let as_lowstar_sig  (#dom:list vale_type{List.length dom < max_arity win})
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-let elim_vale_sig_nil  (pre:vale_pre_tl [])
+let elim_vale_sig_nil  #code
+                       (pre:vale_pre_tl [])
                        (post:vale_post_tl [])
-                       (v:vale_sig_tl pre post)
+                       (v:vale_sig_tl code pre post)
     : va_s0:va_state ->
       stack_b:stack_buffer ->
       Ghost (va_state & va_fuel)
@@ -635,11 +645,12 @@ let rec wrap_tl
          (down:create_vale_initial_state_t dom acc)
          (pre:vale_pre_tl dom)
          (post:vale_post_tl dom)
-         (v:vale_sig_tl pre post)
-    : as_lowstar_sig_tl acc down pre post
+         #code
+         (v:vale_sig_tl code pre post)
+    : as_lowstar_sig_tl code acc down pre post
     = match dom with
       | [] ->
-        let f : as_lowstar_sig_tl #[] acc down pre post =
+        let f : as_lowstar_sig_tl #[] code acc down pre post =
           fun () ->
             let h0 = get() in
             push_frame();
@@ -659,11 +670,12 @@ let rec wrap_tl
             ); //conveniently, st_put assumes that the shape of the stack did not change
             pop_frame()
         in
-        f <: as_lowstar_sig_tl #[] acc down pre post
+        f <: as_lowstar_sig_tl #[] code acc down pre post
 
       | hd::tl ->
         let f (x:vale_type_as_type hd)
-           : as_lowstar_sig_tl (maybe_cons_buffer hd x acc)
+           : as_lowstar_sig_tl code
+                               (maybe_cons_buffer hd x acc)
                                (elim_down_cons hd tl acc down x)
                                (elim_1 pre x)
                                (elim_1 post x)
@@ -682,8 +694,8 @@ let wrap (dom:list vale_type{List.length dom < max_arity win})
          (post:vale_post dom)
          (v:vale_sig pre post)
   : as_lowstar_sig pre post =
-  fun (va_b0:va_code) ->
-     wrap_tl dom [] (create_vale_initial_state dom []) (pre va_b0 win) (post va_b0 win) (v va_b0 win)
+  fun (code:va_code) ->
+    wrap_tl dom [] (create_vale_initial_state dom []) (pre code win) (post code win) (v code win)
 
 ////////////////////////////////////////////////////////////////////////////////
 //test
