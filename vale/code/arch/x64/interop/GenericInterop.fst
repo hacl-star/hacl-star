@@ -23,10 +23,13 @@ module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 
+friend X64.Interop_s
 friend X64.Memory_s
 friend X64.Memory
 friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
+
+module IS = X64.Interop_s
 
 ////////////////////////////////////////////////////////////////////////////////
 // Vale-specific types supported by the interop layer
@@ -463,19 +466,95 @@ let create_vale_initial_state_t (dom:list vale_type)
           dom
           (initial_vale_state_t dom acc)
 
-let create_vale_initial_state (dom:list vale_type{List.length dom < max_arity win})
-                              (acc:list b8)
-  : create_vale_initial_state_t dom
-                                acc
-  = create_initial_state_aux
+
+let create_trusted_initial_state_t (dom:list vale_type)
+                                   (acc:list b8)
+    = n_dep_arrow
           dom
-          win
-          0
-          Interop_assumptions.init_regs
-          init_xmms
-          acc
-          init_taint
-          create_initial_vale_state_core
+          (initial_state_t dom acc (TS.traceState & mem))
+
+let elim_down_1 (hd:vale_type)
+                (acc:list b8)
+                (down:create_vale_initial_state_t [hd] acc)
+                (x:vale_type_as_type hd)
+    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::maybe_cons_buffer hd x acc)} -> GTot va_state =
+    down x
+
+let elim_down_nil (acc:list b8)
+                  (down:create_vale_initial_state_t [] acc)
+    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc)} -> GTot va_state =
+    down
+
+let elim_down_cons (hd:vale_type)
+                   (tl:list vale_type)
+                   (acc:list b8)
+                   (down:create_vale_initial_state_t (hd::tl) acc)
+                   (x:vale_type_as_type hd)
+    : create_vale_initial_state_t tl (maybe_cons_buffer hd x acc) =
+    elim_dep_arrow_cons hd tl down x
+
+let elim_down_nil_t (acc:list b8)
+                  (down:create_trusted_initial_state_t [] acc)
+    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc)} -> GTot (TS.traceState & mem) =
+    down
+
+let elim_down_cons_t (hd:vale_type)
+                     (tl:list vale_type)
+                     (acc:list b8)
+                     (down:create_trusted_initial_state_t (hd::tl) acc)
+                     (x:vale_type_as_type hd)
+    : create_trusted_initial_state_t tl (maybe_cons_buffer hd x acc) =
+    elim_dep_arrow_cons hd tl down x
+
+let rec n_dep_arrow_equiv (dom:list vale_type)
+                          (acc:list b8)
+                          (f:create_trusted_initial_state_t dom acc)
+                          (g:create_vale_initial_state_t dom acc) =
+    match dom with
+    | [] ->
+      forall h0 (stack:b8{mem_roots_p h0 (stack::acc)}).
+        fst (elim_down_nil_t acc f h0 stack) == state_to_S (elim_down_nil acc g h0 stack)
+
+    | hd::tl ->
+      forall (x:vale_type_as_type hd).
+        n_dep_arrow_equiv tl (maybe_cons_buffer hd x acc)
+                             (elim_down_cons_t hd tl acc f x)
+                             (elim_down_cons hd tl acc g x)
+
+let rec equiv_create_trusted_and_vale_state
+          (dom:list vale_type)
+          (i:nat{i + List.length dom < max_arity win})
+          (regs:_)
+          (xmms:_)
+          (acc:list b8)
+          (taint:_)
+    : Lemma (n_dep_arrow_equiv
+                  dom
+                  acc
+                  (create_initial_state_aux dom win i regs xmms acc taint
+                                                         create_initial_trusted_state_core)
+                  (create_initial_state_aux dom win i regs xmms acc taint
+                                                         create_initial_vale_state_core))
+     = match dom with
+       | [] ->
+         FStar.Classical.forall_intro_2 (core_create_lemma acc regs xmms taint)
+       | hd::tl ->
+         let aux (x:vale_type_as_type hd)
+           : Lemma (n_dep_arrow_equiv
+                      tl
+                      (maybe_cons_buffer hd x acc)
+                      (create_initial_state_aux tl win (i + 1) (update_regs x win i regs) xmms (maybe_cons_buffer hd x acc) (update_taint_map x taint) create_initial_trusted_state_core)
+                      (create_initial_state_aux tl win (i + 1) (update_regs x win i regs) xmms (maybe_cons_buffer hd x acc) (update_taint_map x taint) create_initial_vale_state_core))
+         =
+           equiv_create_trusted_and_vale_state
+                tl
+                (i + 1)
+                (update_regs x win i regs)
+                xmms
+                (maybe_cons_buffer hd x acc)
+                (update_taint_map x taint)
+          in
+          FStar.Classical.forall_intro aux
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //vale_sig pre post: a template for a top-level signature provided by a vale function
@@ -542,25 +621,6 @@ let vale_sig (#dom:list vale_type)
 //    Interepreting a vale pre/post as a Low* function type
 //////////////////////////////////////////////////////////////////////////////////////////
 
-let elim_down_1 (hd:vale_type)
-                (acc:list b8)
-                (down:create_vale_initial_state_t [hd] acc)
-                (x:vale_type_as_type hd)
-    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::maybe_cons_buffer hd x acc)} -> GTot va_state =
-    down x
-
-let elim_down_nil (acc:list b8)
-                  (down:create_vale_initial_state_t [] acc)
-    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc)} -> GTot va_state =
-    down
-
-let elim_down_cons (hd:vale_type)
-                   (tl:list vale_type)
-                   (acc:list b8)
-                   (down:create_vale_initial_state_t (hd::tl) acc)
-                   (x:vale_type_as_type hd)
-    : create_vale_initial_state_t tl (maybe_cons_buffer hd x acc) =
-    elim_dep_arrow_cons hd tl down x
 
 let rec as_lowstar_sig_tl (#dom:list vale_type)
                           (code:va_code)
@@ -614,6 +674,34 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
         (elim_1 pre x)
         (elim_1 post x)
 
+let create_vale_initial_state
+      (is_win:bool)
+      (dom:list vale_type{List.length dom < max_arity is_win})
+    : create_vale_initial_state_t dom []
+    = create_initial_state_aux
+          dom
+          is_win
+          0
+          init_regs
+          init_xmms
+          []
+          init_taint
+          create_initial_vale_state_core
+
+let create_trusted_initial_state
+      (is_win:bool)
+      (dom:list vale_type{List.length dom < max_arity is_win})
+    : create_trusted_initial_state_t dom []
+    = create_initial_state_aux
+          dom
+          is_win
+          0
+          init_regs
+          init_xmms
+          []
+          init_taint
+          create_initial_trusted_state_core
+
 let as_lowstar_sig  (#dom:list vale_type{List.length dom < max_arity win})
                     (pre: vale_pre dom)
                     (post: vale_post dom) =
@@ -622,7 +710,7 @@ let as_lowstar_sig  (#dom:list vale_type{List.length dom < max_arity win})
       #dom
         va_b0
       []
-      (create_vale_initial_state dom [])
+      (create_vale_initial_state win dom)
       (pre va_b0 win)
       (post va_b0 win)
 
@@ -639,13 +727,14 @@ let elim_vale_sig_nil  #code
             (ensures (fun (va_s1, f) -> elim_nil post va_s0 stack_b va_s1 f))
     = v
 
+
 let rec wrap_tl
+         #code
          (dom:list vale_type)
          (acc:list b8)
          (down:create_vale_initial_state_t dom acc)
          (pre:vale_pre_tl dom)
          (post:vale_post_tl dom)
-         #code
          (v:vale_sig_tl code pre post)
     : as_lowstar_sig_tl code acc down pre post
     = match dom with
@@ -695,7 +784,7 @@ let wrap (dom:list vale_type{List.length dom < max_arity win})
          (v:vale_sig pre post)
   : as_lowstar_sig pre post =
   fun (code:va_code) ->
-    wrap_tl dom [] (create_vale_initial_state dom []) (pre code win) (post code win) (v code win)
+    wrap_tl dom [] (create_vale_initial_state win dom) (pre code win) (post code win) (v code win)
 
 ////////////////////////////////////////////////////////////////////////////////
 //test
@@ -771,3 +860,5 @@ val memcpy: dst:buffer64 -> src:buffer64 -> Stack unit
 let memcpy dst src =
   assume false; //TODO
   elim_lowstar_sig memcpy_raw (Vale_memcpy.va_code_memcpy win) dst src ()
+
+////////////////////////////////////////////////////////////////////////////////
