@@ -238,15 +238,29 @@ inline_for_extraction
 val add_mod: #t:inttype -> #l:secrecy_level ->
              a:uint_t t l ->
              b:uint_t t l ->
-             c:uint_t t l{uint_v c == (uint_v a + uint_v b) % modulus t}
+             c:uint_t t l
+
+inline_for_extraction
+val add_mod_lemma: #t:inttype -> #l:secrecy_level ->
+             a:uint_t t l ->
+             b:uint_t t l ->
+	     Lemma
+	     (ensures (uint_v #t #l (add_mod #t #l a b) == (uint_v a + uint_v b) % modulus t))
+	     [SMTPat (uint_v #t #l (add_mod #t #l a b))]
 
 inline_for_extraction
 val add: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
-  -> b:uint_t t l
-  -> Pure (uint_t t l)
-  (requires (uint_v a + uint_v b < modulus t))
-  (ensures (fun c -> uint_v c == uint_v a + uint_v b))
+  -> b:uint_t t l{uint_v a + uint_v b < modulus t}
+  -> uint_t t l
+  
+inline_for_extraction
+val add_lemma: #t:inttype -> #l:secrecy_level
+  -> a:uint_t t l
+  -> b:uint_t t l{uint_v a + uint_v b < modulus t}
+  -> Lemma
+    (ensures (uint_v #t #l (add #t #l a b) == uint_v a + uint_v b))
+    [SMTPat (uint_v #t #l (add #t #l a b))]
 
 inline_for_extraction
 val incr: #t:inttype -> #l:secrecy_level
@@ -256,12 +270,18 @@ val incr: #t:inttype -> #l:secrecy_level
   (ensures (fun c -> uint_v c == uint_v a + 1))
 
 inline_for_extraction
-val mul_mod: #t:inttype -> #l:secrecy_level
+val mul_mod: #t:inttype{t <> U128} -> #l:secrecy_level
   -> a:uint_t t l
   -> b:uint_t t l
-  -> Pure (uint_t t l)
-  (requires (t <> U128))
-  (ensures (fun c -> uint_v c == (uint_v a `op_Multiply` uint_v b) % modulus t))
+  -> uint_t t l
+
+inline_for_extraction
+val mul_mod_lemma: #t:inttype{t <> U128} -> #l:secrecy_level
+  -> a:uint_t t l
+  -> b:uint_t t l
+  -> Lemma
+  (ensures (uint_v #t #l (mul_mod #t #l a b) == (uint_v a `op_Multiply` uint_v b) % modulus t))
+  [SMTPat (uint_v #t #l (mul_mod #t #l a b))]
 
 inline_for_extraction
 val mul: #t:inttype{t <> U128} -> #l:secrecy_level
@@ -335,13 +355,28 @@ inline_for_extraction
 val shift_right: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
-  -> c:uint_t t l{uint_v #t c ==  uint_v #t a / pow2 (uint_v #U32 b)}
+  -> c:uint_t t l
+  
+val shift_right_lemma: #t:inttype -> #l:secrecy_level
+  -> a:uint_t t l
+  -> b:shiftval t
+  -> Lemma 
+    (uint_v #t #l (shift_right #t #l a b) ==  uint_v #t #l a / pow2 (uint_v #U32 #PUB b))
+    [SMTPat (uint_v #t #l (shift_right #t #l a b))]
 
 inline_for_extraction
 val shift_left: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
-  -> c:uint_t t l{uint_v #t c == (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % modulus t}
+  -> c:uint_t t l
+  
+
+val shift_left_lemma: #t:inttype -> #l:secrecy_level
+  -> a:uint_t t l
+  -> b:shiftval t
+  -> Lemma 
+    (uint_v #t #l (shift_left #t #l a b) == (uint_v #t #l a `op_Multiply` pow2 (uint_v #U32 #PUB b)) % modulus t)
+    [SMTPat (uint_v #t #l (shift_left #t #l a b))]
 
 inline_for_extraction
 val rotate_right: #t:inttype -> #l:secrecy_level

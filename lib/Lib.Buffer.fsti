@@ -51,23 +51,54 @@ let lbuffer (a:Type0) (len:size_t) = lbuffer_t MUT a len
 let ilbuffer (a:Type0) (len:size_t) = lbuffer_t IMMUT a len
 
 (** Liveness of buffers *)
+
+(*
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type = 
   match t with
   | MUT -> B.live h (b <: buffer a)
   | IMMUT -> IB.live h (b <: ibuffer a)
+*)
+val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 
 let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc = 
   match t with
   | MUT -> B.loc_buffer (b <: buffer a)
   | IMMUT -> B.loc_buffer (b <: ibuffer a) 
 
-let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
+let union (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
+let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
 
 (** Generalized modification clause for Buffer locations *)
+(*
 let modifies
   (s: B.loc)
   (h1 h2: HS.mem):
-  GTot Type0 = B.modifies s h1 h2
+  GTot Type0 = B.modifies s h1 h2 /\ ST.equal_domains h1 h2
+*)
+val modifies: s:B.loc -> h1:HS.mem -> h2:HS.mem -> GTot Type0
+val modifies_preserves_live: #t:buftype -> #a:Type0 -> b:buffer_t t a -> l:B.loc ->
+			     h0:mem -> h1:mem -> Lemma
+			     (requires (modifies l h0 h1 /\ live h0 b))
+			     (ensures (live h1 b))
+			     [SMTPat (modifies l h0 h1); SMTPat (live h0 b)]  
+
+val modifies_same: l:B.loc ->  h0:mem -> h1:mem -> h2:mem -> Lemma
+		     (requires (modifies l h0 h1 /\ modifies l h1 h2))
+		     (ensures (modifies l h0 h2))
+		     [SMTPat (modifies l h0 h1); SMTPat (modifies l h1 h2)]
+
+val modifies_includes: l1:B.loc -> l2:B.loc -> h0:mem -> h1:mem -> Lemma
+		     (requires (modifies l1 h0 h1 /\ B.loc_includes l2 l1))
+		     (ensures (modifies l2 h0 h1))
+		     [SMTPatOr [[SMTPat (modifies l1 h0 h1); SMTPat (B.loc_includes l2 l1)];
+			        [SMTPat (modifies l2 h0 h1); SMTPat (modifies l1 h0 h1)]]]
+
+val modifies_union: l1:B.loc ->  l2:B.loc -> h0:mem -> h1:mem -> h2:mem -> Lemma
+		     (requires (modifies l1 h0 h1 /\ modifies l2 h1 h2))
+		     (ensures (modifies (l1 |+| l2) h0 h2))
+		     [SMTPat (modifies l1 h0 h1); SMTPat (modifies l2 h1 h2)]
+
+
 
 (** Disjointness clause for Buffers *)
 let disjoint
@@ -145,6 +176,22 @@ let gsub
     assert (B.length b == v n);
     (b <: lbuffer a n)
 
+val live_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len -> 
+			start:size_t -> n:size_t{v start + v n <= v len} ->
+			h:mem -> Lemma
+			     (ensures (live h b <==> live h (gsub b start n)))
+			     [SMTPatOr [
+			       [SMTPat (live h (gsub b start n))];
+			       [SMTPat (live h b); SMTPat (gsub b start n);]
+			     ]]
+
+val modifies_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len -> 
+			start:size_t -> n:size_t{v start + v n <= v len} ->
+			h0:mem -> h1:mem -> Lemma
+			     (requires (modifies (loc (gsub b start n)) h0 h1))
+			     (ensures (modifies (loc b) h0 h1))
+			     [SMTPat (modifies (loc (gsub b start n)) h0 h1)]
+
 inline_for_extraction
 val as_seq_gsub:
     #t:buftype
@@ -170,7 +217,7 @@ val sub:
   -> n:size_t{v start + v n <= v len} ->
   Stack (lbuffer_t t a n)
     (requires fun h0 -> live h0 b)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == gsub b start n)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ live h1 r /\ r == gsub b start n)
 
 (** Access a specific value in an mutable Buffer *)
 inline_for_extraction
@@ -241,8 +288,9 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
     match t with
     | IMMUT ->  B.recallable (b <: ibuffer a)
     | MUT -> B.recallable (b <: buffer a)
-    
-private let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> FStar.Seq.equal s s1
+
+
+unfold private let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> FStar.Seq.equal s s1
 let witnessed (#a:Type0) (#len:size_t) (b:ilbuffer a len) (s:Seq.lseq a (v len)) = 
     B.witnessed (b <: ibuffer a) (cpred s)  
 
@@ -253,7 +301,7 @@ val create:
   -> init:a ->
   StackInline (lbuffer a len)
     (requires fun h0 -> v len > 0)
-    (ensures  fun h0 b h1 -> stack_allocated b h0 h1 (Seq.create (v len) init))
+    (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.create (v len) init))
 
       
 (** Allocate a fixed-length mutable Buffer based on an existing List *)
@@ -263,7 +311,7 @@ val createL:
   -> init:list a{List.Tot.length init <= max_size_t} ->
   StackInline (lbuffer a (size (normalize_term (List.Tot.length init))))
     (requires fun h0 -> B.alloca_of_list_pre #a init)
-    (ensures fun h0 b h1 -> stack_allocated b h0 h1 (Seq.of_list init))
+    (ensures fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.of_list init))
 
 
 (** Allocate a top-level fixed-length immutable Buffer and initialize it to value [init] *)
@@ -274,6 +322,7 @@ val createL_global:
   ST (b:ilbuffer a (size (normalize_term (List.Tot.length init))))
     (requires fun h0 -> B.gcmalloc_of_list_pre #a HyperStack.root init)
     (ensures  fun h0 b h1 -> global_allocated b h0 h1 (Seq.of_list init) /\ 
+                          recallable b /\
 			  witnessed b (Seq.of_list init))
 
 (** Recall the liveness and content of a global immutable Buffer *)
@@ -349,7 +398,8 @@ val update_sub_f:
   -> n:size_t{v start + v n <= v len}
   -> spec:(mem -> GTot (Seq.lseq a (v n)))
   -> f:(b:lbuffer a n -> Stack unit
-      (requires fun h -> h0 == h /\ live h b)
+      (requires fun h -> h0 == h /\ 
+		      live h b)
       (ensures  fun h0 _ h1 ->
              modifies (loc  b) h0 h1 /\
              as_seq h1 b == spec h0)) ->
@@ -492,7 +542,7 @@ val loop2:
 * Allocates a mutable buffer [b] in the stack, calls [impl b] and ovewrites the contents
 * of [b] before returning.
 *
-* `spec` is the functional post-condition of `impl`, it only takes the final memory
+<* `spec` is the functional post-condition of `impl`, it only takes the final memory
 * because the initial memory is determined by `h`
 
 * [spec_inv] is used to propagate the post-condition of [impl] to the final memory
@@ -509,20 +559,20 @@ val salloc1:
   -> spec: (res -> mem -> GTot Type0)
   -> spec_inv:(h1:mem -> h2:mem -> h3:mem -> r:res -> Lemma
       (requires
-        modifies0 h h1 /\
-        modifies (B.loc_union (B.loc_all_regions_from false (get_tip h1))
+        B.modifies (B.loc_none) h h1 /\
+        B.modifies (B.loc_union (B.loc_all_regions_from false (get_tip h1))
                             (Ghost.reveal footprint)) h1 h2 /\
-        modifies (B.loc_region_only false (get_tip h1)) h2 h3 /\
+        B.modifies (B.loc_region_only false (get_tip h1)) h2 h3 /\
         ~(live_region h (get_tip h1)) /\
         spec r h2)
       (ensures  spec r h3))
   -> impl:(b:lbuffer a len -> Stack res
       (requires fun h0 ->
 	let b:buffer a = b in
-        modifies0 h h0 /\ ~(live_region h (get_tip h0)) /\
+        B.modifies (B.loc_none)  h h0 /\ ~(live_region h (get_tip h0)) /\
         B.frameOf b == get_tip h0 /\ B.live h0 b /\ B.as_seq h0 b == Seq.create (v len) x)
       (ensures  fun h0 r h1 ->
-        modifies (B.loc_union (B.loc_all_regions_from false (get_tip h0))
+        B.modifies (B.loc_union (B.loc_all_regions_from false (get_tip h0))
                               (Ghost.reveal footprint)) h0 h1 /\
         spec r h1)) ->
   Stack res
@@ -541,19 +591,19 @@ val salloc1_trivial:
   -> impl:(b:lbuffer a len -> Stack res
       (requires fun h0 ->
         let b : buffer a = b in
-        modifies0 h h0 /\ ~(live_region h (get_tip h0)) /\
+        B.modifies (B.loc_none) h h0 /\ ~(live_region h (get_tip h0)) /\
         B.frameOf b == get_tip h0 /\ B.live h0 b /\ B.as_seq h0 b == Seq.create (v len) x)
       (ensures  fun h0 r h1 ->
-        modifies (B.loc_union (B.loc_all_regions_from false (get_tip h0))
+        B.modifies (B.loc_union (B.loc_all_regions_from false (get_tip h0))
                               (Ghost.reveal footprint)) h0 h1 /\
         spec r h1)) ->
   Stack res
     (requires fun h0 -> h0 == h /\
       (forall (h1 h2 h3:mem) (r:res).
-        (modifies0 h h1 /\
-         modifies (B.loc_union (B.loc_all_regions_from false (get_tip h1))
+        (B.modifies (B.loc_none) h h1 /\
+         B.modifies (B.loc_union (B.loc_all_regions_from false (get_tip h1))
                                (Ghost.reveal footprint)) h1 h2 /\
-         modifies (B.loc_region_only false (get_tip h1)) h2 h3 /\
+         B.modifies (B.loc_region_only false (get_tip h1)) h2 h3 /\
          ~(live_region h (get_tip h1)) /\
          spec r h2) ==> spec r h3))
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)

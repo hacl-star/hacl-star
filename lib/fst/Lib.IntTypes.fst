@@ -134,6 +134,8 @@ let add_mod #t #l a b =
   | U64 -> (UInt64.add_mod a b)
   | U128 -> (UInt128.add_mod a b)
 
+let add_mod_lemma #t #l a b = ()
+
 let add #t #l a b =
   match t with
   | U1 -> (UInt8.add a b)
@@ -142,6 +144,8 @@ let add #t #l a b =
   | U32 -> (UInt32.add a b)
   | U64 -> (UInt64.add a b)
   | U128 -> (UInt128.add a b)
+
+let add_lemma #t #l a b = ()
 
 let incr #t #l a =
   match t with
@@ -242,6 +246,8 @@ let shift_right #t #l a b =
   | U64 -> (UInt64.shift_right a b)
   | U128 -> (UInt128.shift_right a b)
 
+let shift_right_lemma #t #l a b = ()
+
 let shift_left #t #l a b =
   match t with
   | U1 -> (UInt8.shift_left a b)
@@ -250,6 +256,8 @@ let shift_left #t #l a b =
   | U32 -> (UInt32.shift_left a b)
   | U64 -> (UInt64.shift_left a b)
   | U128 -> (UInt128.shift_left a b)
+
+let shift_left_lemma #t #l a b = ()
 
 let rotate_right #t #l a b =
   (logor (shift_right a b)  (shift_left a (sub #U32 (size (bits t)) b)))

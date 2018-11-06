@@ -21,7 +21,10 @@ module ByteSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 100"
 
-
+let modifies_preserves_live #t #a b l h0 h1 = ()
+let live_gsub #t #a #len b start n h = ()
+let modifies_gsub #t #a #len b start n h0 h1 = ()
+  
 let as_seq_gsub #t #a #len h b start n = ()
 
 let sub #t #a #len b start n =
@@ -91,11 +94,12 @@ let update_sub #t #a #len dst start n src =
     (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
 
 let update_sub_f #a #len h0 buf start n spec f =
-  let h0 = ST.get () in
   let tmp = sub buf start n in
+  let h0 = ST.get () in
   f tmp;
   let h1 = ST.get () in
   B.modifies_buffer_elim (B.sub (buf <: buffer a) (size 0) start) (loc tmp) h0 h1;
+  assert (v (start +! n) + v (len -. start -. n) == v len);
   B.modifies_buffer_elim (B.sub (buf <: buffer a) (start +! n) (len -. start -. n)) (loc tmp) h0 h1;
   Sequence.lemma_update_sub (as_seq h0 buf) (v start) (v n) (spec h0) (as_seq h1 buf)
 
@@ -134,8 +138,9 @@ let salloc1 #a #res h len x footprint spec spec_inv impl =
 
 inline_for_extraction noextract
 let salloc1_trivial #a #res h len x footprint spec impl =
-  let trivial (#res:Type) (h1 h2 h3:mem) (r:res) = () in
-  salloc1 h len x footprint spec trivial impl
+  salloc1 #a #res h len x footprint spec 
+    (fun h1 h2 h3 (r:res) -> assert (spec r h2); assert (spec r h3)) 
+    impl
 
 inline_for_extraction noextract
 let salloc_nospec #a #res h len x footprint impl =
