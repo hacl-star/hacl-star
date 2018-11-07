@@ -327,7 +327,7 @@ let fillT #a clen o spec f =
       FStar.Seq.lemma_split (as_seq h' o) (v i)
     )
 
-let fill #a h0 clen o spec impl = 
+let fill #a h0 clen o spec impl =
   let open Seq in
   let h0 = ST.get() in
   let a_spec = createi_a a (v clen) (spec h0) in
@@ -344,26 +344,26 @@ let fill #a h0 clen o spec impl =
 
 #set-options "--max_fuel 0"
 
-let mapT #a #b clen out f inp = 
+let mapT #a #b clen out f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = as_seq h inp in Seq.map_inner f in_seq)
     (fun i -> out.(i) <- f inp.(i))
 
-let mapiT #a #b clen out spec_f f inp = 
+let mapiT #a #b clen out spec_f f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner spec_f in_seq)
     (fun i -> let xi = inp.(i) in out.(i) <- f i xi)
 
-let imapT #a #b #len out clen f inp = 
+let imapT #a #b #len out clen f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = ias_seq h inp in Seq.map_inner f in_seq)
     (fun i -> out.(i) <- f (iindex inp i))
 
 // 2018.11.1 SZ: This function is unspecified in Lib.Buffer.fsti (and thus visible only to friends). Do we need this function? What's the spec?
-let mapi #a #b h0 clen out inp spec impl = 
+let mapi #a #b h0 clen out inp spec impl =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner #a #b #(v clen) spec in_seq)
