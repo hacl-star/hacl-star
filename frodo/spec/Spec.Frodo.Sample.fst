@@ -21,9 +21,9 @@ let cdf_table: lseq uint16 cdf_table_len =
   assert_norm (List.Tot.length cdf_list == cdf_table_len);
   Seq.createL cdf_list
 
-val lemma_frodo_sample0: i:size_nat{i < cdf_table_len} 
+val lemma_frodo_sample0: i:size_nat{i < cdf_table_len}
   -> Lemma (uint_v (cdf_table.[i]) < pow2 15)
-let lemma_frodo_sample0 i = 
+let lemma_frodo_sample0 i =
   assert_norm (List.Tot.length cdf_list == cdf_table_len);
   lemma_cdf_list i
 
@@ -32,13 +32,13 @@ val lemma_frodo_sample1:
  -> b:uint16{uint_v b < pow2 15}
  -> Lemma
      (let c0 = if Lib.RawIntTypes.(uint_to_nat a > uint_to_nat b) then 1 else 0 in
-      let c1 = to_u16 (to_u32 (b -. a)) >>. size 15 in
+      let c1 = to_u16 (to_u32 (b -. a)) >>. 15ul in
       uint_v c1 == c0)
 let lemma_frodo_sample1 a b =
   let c = to_u16 (to_u32 (b -. a)) in
   assert (uint_v c < modulus U16);
   FStar.Math.Lemmas.lemma_div_lt (uint_v c) 16 15;
-  let c1 = c >>. size 15 in
+  let c1 = c >>. 15ul in
   assert (uint_v c1 = uint_v c / pow2 15);
   FStar.Math.Lemmas.pow2_minus 16 15;
   assert (uint_v c1 = 0 \/ uint_v c1 = 1)
@@ -78,10 +78,10 @@ let frodo_sample_res r0 e =
 
 val frodo_sample: r:uint16 -> uint16
 let frodo_sample r =
-  let t = r >>. size 1 in
+  let t = r >>. 1ul in
   let r0 = r &. u16 1 in
-  mod_mask_lemma r (size 1);
-  uintv_extensionality (mod_mask (size 1)) (u16 1);
+  mod_mask_lemma r 1ul;
+  uintv_extensionality (mod_mask 1ul) (u16 1);
   assert (uint_v r0 == 0 \/ uint_v r0 == 1);
   let e =
     Loops.repeati_inductive
@@ -92,16 +92,27 @@ let frodo_sample r =
 
 #set-options "--max_fuel 0"
 
-val frodo_sample_matrix_fc:
+val frodo_sample_matrix0:
     n1:size_nat
   -> n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> r:lbytes (2 * n1 * n2)
   -> i:size_nat{i < n1}
   -> j:size_nat{j < n2}
-  -> GTot uint16
-let frodo_sample_matrix_fc n1 n2 r i j =
+  -> res:matrix n1 n2
+  -> matrix n1 n2
+let frodo_sample_matrix0 n1 n2 r i j res =
   lemma_matrix_index_repeati1 n1 n2 i j;
-  frodo_sample (uint_from_bytes_le (Seq.sub r (2 * (n2 * i + j)) 2))
+  res.(i, j) <- frodo_sample (uint_from_bytes_le (Seq.sub r (2 * (n2 * i + j)) 2))
+
+val frodo_sample_matrix1:
+    n1:size_nat
+  -> n2:size_nat{2 * n1 * n2 <= max_size_t}
+  -> r:lbytes (2 * n1 * n2)
+  -> i:size_nat{i < n1}
+  -> res:matrix n1 n2
+  -> matrix n1 n2
+let frodo_sample_matrix1 n1 n2 r i res =
+  Loops.repeati n2 (frodo_sample_matrix0 n1 n2 r i) res
 
 val frodo_sample_matrix:
     n1:size_nat
@@ -110,23 +121,7 @@ val frodo_sample_matrix:
   -> seed:lbytes seedLen
   -> ctr:uint16
   -> res:matrix n1 n2
-    {let r = frodo_prf_spec seedLen seed ctr (2 * n1 * n2) in
-     (forall (i:size_nat{i < n1}) (j:size_nat{j < n2}).
-     res.(i, j) == frodo_sample_matrix_fc n1 n2 r i j)}
 let frodo_sample_matrix n1 n2 seedLen seed ctr =
   let res = Matrix.create n1 n2 in
   let r = frodo_prf_spec seedLen seed ctr (2 * n1 * n2) in
-  Loops.repeati_inductive n1
-  (fun i res ->
-    forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}).
-    res.(i0, j) == frodo_sample_matrix_fc n1 n2 r i0 j)
-  (fun i res ->
-    Loops.repeati_inductive n2
-    (fun j res0 ->
-      (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n2}). res0.(i0, j) == res.(i0, j)) /\
-      (forall (j0:size_nat{j0 < j}). res0.(i, j0) == frodo_sample_matrix_fc n1 n2 r i j0))
-    (fun j res ->
-      lemma_matrix_index_repeati1 n1 n2 i j;
-      res.(i, j) <- frodo_sample (uint_from_bytes_le (Seq.sub r (2 * (n2 * i + j)) 2))
-    ) res
-  ) res
+  Loops.repeati n1 (frodo_sample_matrix1 n1 n2 r) res
