@@ -902,10 +902,23 @@ let wrap (dom:list vale_type{List.length dom < max_arity win})
   fun (code:va_code) ->
     wrap_tl dom [] (create_vale_initial_state win dom) (pre code win) (post code win) (v code win)
 
+//A couple of utilities for the library
+let force (#a:Type) (x:a) : normal a = x
+let elim_normal (p:Type) : Lemma (requires (normal p)) (ensures p) = ()
+
+let elim_lowstar_sig (#dom:list vale_type{List.length dom < max_arity win})
+                     (#pre:vale_pre dom)
+                     (#post:vale_post dom)
+                     (f:as_lowstar_sig pre post)
+    : normal (as_lowstar_sig pre post)
+    = force f
+
 ////////////////////////////////////////////////////////////////////////////////
-//test
+// End generic interop
+// The rest of this file is specific to memcpy
 ////////////////////////////////////////////////////////////////////////////////
 open Vale_memcpy
+//TBD: Auto-generated to permute arguments
 let lem_memcpy (va_b0:va_code)
                (win:bool)
                (dst:buffer64)
@@ -917,6 +930,7 @@ let lem_memcpy (va_b0:va_code)
            (ensures (fun (va_sM, va_fM) -> va_post va_b0 va_s0 va_sM va_fM win stack_b dst src )) =
    Vale_memcpy.va_lemma_memcpy va_b0 va_s0 win stack_b dst src
 
+//TBD: Auto-generated for a specific vale arity
 [@reduce]
 unfold
 let dom : l:list vale_type{List.Tot.length l < max_arity win} =
@@ -924,6 +938,7 @@ let dom : l:list vale_type{List.Tot.length l < max_arity win} =
   assert_norm (List.Tot.length d < max_arity win);
   d
 
+//TBD: Auto-gen, permute arguments
 [@reduce]
 let pre : vale_pre dom =
   fun (va_b0:code)
@@ -934,6 +949,7 @@ let pre : vale_pre dom =
     (stack_b:buffer64) -> va_pre va_b0 va_s0 win stack_b dst src
 
 
+//TBD: Auto-gen, permute arguments
 [@reduce]
 let post : vale_post dom =
   fun (va_b0:code)
@@ -945,19 +961,125 @@ let post : vale_post dom =
     (va_sM:va_state)
     (va_fM:fuel) -> va_post va_b0 va_s0 va_sM va_fM win stack_b dst src
 
-let memcpy_raw
-    : as_lowstar_sig pre post
-    = wrap [VT_Buffer TUInt64; VT_Buffer TUInt64;] pre post lem_memcpy
+//TBD: Auto-gen, wrapper application
+let memcpy_wrapped : normal (as_lowstar_sig pre post) =
+    elim_lowstar_sig (wrap dom pre post lem_memcpy)
 
-let force (#a:Type) (x:a) : normal a = x
+//TBD: Auto-gen, creation of initial state for a given arity (dom)
+[@reduce]
+unfold
+let create_memcpy_initial_state
+        (dst: buffer (TBase (TUInt64)))
+        (src: buffer (TBase (TUInt64)))
+        (h0:HS.mem)
+        (stack:stack_buffer {normal (mem_roots_p h0 [stack;src;dst])}) =
+    elim_normal (mem_roots_p h0 [stack;src;dst]);
+    normal
+      (elim_down_nil [src;dst]
+        (elim_down_cons _ _ [dst]
+          (elim_down_cons _ _ []
+            (create_vale_initial_state win dom)
+            dst)
+        src)
+        h0
+        stack)
 
-let elim_lowstar_sig (#dom:list vale_type{List.length dom < max_arity win})
-                     (#pre:vale_pre dom)
-                     (#post:vale_post dom)
-                     (f:as_lowstar_sig pre post)
-    : normal (as_lowstar_sig pre post)
-    = force f
+#set-options "--max_fuel 0 --max_ifuel 0"
 
+[@reduce]
+let prestate_hyp
+         (h0:HS.mem)
+         (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+         (push_h0:Monotonic.HyperStack.mem)
+         (alloc_push_h0: Monotonic.HyperStack.mem)
+         (b: stack_buffer) =
+          Monotonic.HyperStack.fresh_frame h0 push_h0 /\
+          LowStar.Monotonic.Buffer.modifies loc_none push_h0 alloc_push_h0 /\
+          Monotonic.HyperStack.get_tip push_h0 ==
+          Monotonic.HyperStack.get_tip alloc_push_h0 /\
+          frameOf b == Monotonic.HyperStack.get_tip alloc_push_h0 /\
+          live alloc_push_h0 b /\
+          normal (mem_roots_p alloc_push_h0 (b::acc))
+
+[@reduce]
+let pre_in_prestate_ctx
+       (h0:HS.mem)
+       (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+       (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
+       (pre: (va_state -> b:stack_buffer -> Type)) =
+      forall (push_h0:Monotonic.HyperStack.mem)
+        (alloc_push_h0: Monotonic.HyperStack.mem)
+        (b: stack_buffer).
+          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
+          pre (create_initial_state alloc_push_h0 b) b
+
+[@reduce]
+let lift_vale_pre
+      (va_b0:code)
+      (dst: buffer (TBase (TUInt64)))
+      (src: buffer (TBase (TUInt64)))
+      (h0: HS.mem) =
+     disjoint_or_eq src dst /\
+     live h0 src /\
+     live h0 dst /\
+     (elim_normal (disjoint_or_eq_l [src;dst]);
+      elim_normal (live_l h0 [src;dst]);
+      pre_in_prestate_ctx h0 [src;dst] (create_memcpy_initial_state dst src) (pre va_b0 win dst src))
+
+[@reduce]
+let post_in_poststate_ctx
+         (va_b0:va_code)
+         (h0:HS.mem)
+         (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+         (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
+         (post: va_state -> stack_buffer -> va_state -> va_fuel -> Type)
+         (h1:HS.mem) =
+      exists (push_h0:Monotonic.HyperStack.mem)
+        (alloc_push_h0: Monotonic.HyperStack.mem)
+        (b: stack_buffer)
+        (final:va_state)
+        (fuel:va_fuel).
+          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
+          (let initial_state = create_initial_state alloc_push_h0 b in
+           post initial_state b final fuel /\
+           eval_code va_b0 initial_state fuel final /\
+           Monotonic.HyperStack.poppable (hs_of_va_state final) /\
+           h1 == Monotonic.HyperStack.pop (hs_of_va_state final))
+
+[@reduce]
+let lift_vale_post
+      (va_b0:code)
+      (dst: buffer (TBase (TUInt64)))
+      (src: buffer (TBase (TUInt64)))
+      (h0: HS.mem)
+      (h1: HS.mem) =
+     disjoint_or_eq src dst /\
+     live h0 src /\
+     live h0 dst /\
+     (elim_normal (disjoint_or_eq_l [src;dst]);
+      elim_normal (live_l h0 [src;dst]);
+      post_in_poststate_ctx
+                    va_b0
+                    h0
+                    [src;dst]
+                    (create_memcpy_initial_state dst src)
+                    (post va_b0 win dst src)
+                    h1)
+
+val memcpy_wrapped_annot :
+  va_b0: va_code ->
+  (dst: buffer (TBase (TUInt64))) ->
+  (src: buffer (TBase (TUInt64))) ->
+  (_: unit) ->
+  FStar.HyperStack.ST.Stack
+    unit
+    (requires (fun h0 -> normal (lift_vale_pre va_b0 dst src h0)))
+    (ensures (fun h0 _ h1 -> normal (lift_vale_post va_b0 dst src h0 h1)))
+let memcpy_wrapped_annot = memcpy_wrapped
+
+////////////////////////////////////////////////////////////////////////////////
+// MANUAL PROOF
+////////////////////////////////////////////////////////////////////////////////
 let pre_cond (h:HS.mem) (dst:b8) (src:b8) =
   live h dst /\
   live h src /\
@@ -982,126 +1104,9 @@ let full_post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8)  =
   post_cond h h' dst src  /\
   M.modifies (M.loc_buffer dst) h h'
 
-let wrapped_pre = normal (as_lowstar_sig pre post)
-
-let memcpy_wrapped : normal (as_lowstar_sig pre post) =
-  elim_lowstar_sig memcpy_raw
-
-let elim_normal (p:Type) : Lemma (requires (normal p)) (ensures p) = ()
-
-[@reduce]
-unfold
-let create_memcpy_initial_state
-        (dst: buffer (TBase (TUInt64)))
-        (src: buffer (TBase (TUInt64)))
-        (h0:HS.mem)
-        (stack:stack_buffer {normal (mem_roots_p h0 [stack;src;dst])}) =
-    elim_normal (mem_roots_p h0 [stack;src;dst]);
-    normal
-      (elim_down_nil [src;dst]
-        (elim_down_cons _ _ [dst]
-          (elim_down_cons _ _ []
-            (create_vale_initial_state win dom)
-            dst)
-        src)
-        h0
-        stack)
-
-#set-options "--z3rlimit_factor 3 --max_fuel 0 --max_ifuel 0"
-[@reduce]
-let prestate_hyp
-         (h0:HS.mem)
-         (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
-         (push_h0:Monotonic.HyperStack.mem)
-         (alloc_push_h0: Monotonic.HyperStack.mem)
-         (b: stack_buffer) =
-          Monotonic.HyperStack.fresh_frame h0 push_h0 /\
-          LowStar.Monotonic.Buffer.modifies loc_none push_h0 alloc_push_h0 /\
-          Monotonic.HyperStack.get_tip push_h0 ==
-          Monotonic.HyperStack.get_tip alloc_push_h0 /\
-          frameOf b == Monotonic.HyperStack.get_tip alloc_push_h0 /\
-          live alloc_push_h0 b /\
-          normal (mem_roots_p alloc_push_h0 (b::acc))
-
-[@reduce]
-let scaffold (h0:HS.mem) (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
-             (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
-             (pre: (va_state -> b:stack_buffer -> Type)) =
-      forall (push_h0:Monotonic.HyperStack.mem)
-        (alloc_push_h0: Monotonic.HyperStack.mem)
-        (b: stack_buffer).
-          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
-          pre (create_initial_state alloc_push_h0 b) b
-
-[@reduce]
-let lift_vale_pre
-      (va_b0:code)
-      (dst: buffer (TBase (TUInt64)))
-      (src: buffer (TBase (TUInt64)))
-      (h0: HS.mem) =
-     disjoint_or_eq src dst /\
-     live h0 src /\
-     live h0 dst /\
-     (elim_normal (disjoint_or_eq_l [src;dst]);
-      elim_normal (live_l h0 [src;dst]);
-      scaffold h0 [src;dst] (create_memcpy_initial_state dst src) (pre va_b0 win dst src))
-
-[@reduce]
-let scaffold_post (va_b0:va_code)
-                  (h0:HS.mem)
-                  (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
-                  (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
-                  (post: va_state -> stack_buffer -> va_state -> va_fuel -> Type)
-                  (h1:HS.mem) =
-      exists (push_h0:Monotonic.HyperStack.mem)
-        (alloc_push_h0: Monotonic.HyperStack.mem)
-        (b: stack_buffer)
-        (final:va_state)
-        (fuel:va_fuel).
-          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
-          (let initial_state = create_initial_state alloc_push_h0 b in
-           post initial_state b final fuel /\
-           eval_code va_b0 initial_state fuel final /\
-           Monotonic.HyperStack.poppable (hs_of_va_state final) /\
-           h1 == Monotonic.HyperStack.pop (hs_of_va_state final))
-
-
-[@reduce]
-let lift_vale_post
-      (va_b0:code)
-      (dst: buffer (TBase (TUInt64)))
-      (src: buffer (TBase (TUInt64)))
-      (h0: HS.mem)
-      (h1: HS.mem) =
-     disjoint_or_eq src dst /\
-     live h0 src /\
-     live h0 dst /\
-     (elim_normal (disjoint_or_eq_l [src;dst]);
-      elim_normal (live_l h0 [src;dst]);
-      scaffold_post va_b0
-                    h0
-                    [src;dst]
-                    (create_memcpy_initial_state dst src)
-                    (post va_b0 win dst src)
-                    h1)
-
-val memcpy_wrapped_annot :
-  va_b0: va_code ->
-  (dst: buffer (TBase (TUInt64))) ->
-  (src: buffer (TBase (TUInt64))) ->
-  (_: unit) ->
-  FStar.HyperStack.ST.Stack
-    unit
-    (requires (fun h0 -> normal (lift_vale_pre va_b0 dst src h0)))
-    (ensures (fun h0 _ h1 -> normal (lift_vale_post va_b0 dst src h0 h1)))
-let memcpy_wrapped_annot = memcpy_wrapped
-
 val memcpy: dst:buffer64 -> src:buffer64 -> Stack unit
         (requires (fun h -> pre_cond h dst src ))
         (ensures (fun h0 _ h1 -> full_post_cond h0 h1 dst src ))
 let memcpy dst src =
   assume false; //TODO
   memcpy_wrapped (Vale_memcpy.va_code_memcpy win) dst src ()
-
-
-// ////////////////////////////////////////////////////////////////////////////////
