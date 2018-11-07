@@ -207,6 +207,18 @@ let rec live_l (h:HS.mem) (bs:list b8) =
   | [] -> True
   | hd::tl -> live h hd /\ live_l h tl
 
+let equiv_disjoint_or_eq_l (roots:list b8)
+  : Lemma (ensures (disjoint_or_eq_l roots <==> Interop.list_disjoint_or_eq roots))
+          [SMTPatOr [[SMTPat (disjoint_or_eq_l roots)];
+                     [SMTPat (Interop.list_disjoint_or_eq roots)]]]
+  = admit()
+
+let equiv_live_l (h:HS.mem) (roots:list b8)
+  : Lemma (ensures (live_l h roots <==> Interop.list_live h roots))
+          [SMTPatOr [[SMTPat (live_l h roots)];
+                     [SMTPat (Interop.list_live h roots)]]]
+  = admit()
+
 [@reduce]
 let mem_roots_p (h0:HS.mem) (roots:list b8) =
   disjoint_or_eq_l roots /\
@@ -345,6 +357,44 @@ let regs_with_stack (regs:registers) (stack_b:b8) : registers =
       if r = Rsp then
         addrs stack_b
       else regs r
+
+unfold let normal (#a:Type) (x:a) : a =
+  FStar.Pervasives.norm
+    [iota;
+     zeta;
+     delta_attr [`%reduce];
+     delta_only [`%VT_Buffer?;
+                 `%Mkstate?.ok;
+                 `%Mkstate?.regs;
+                 `%Mkstate?.xmms;
+                 `%Mkstate?.flags;
+                 `%Mkstate?.mem;
+                 `%BS.Mkstate?.ok;
+                 `%BS.Mkstate?.regs;
+                 `%BS.Mkstate?.xmms;
+                 `%BS.Mkstate?.flags;
+                 `%BS.Mkstate?.mem;
+                 `%TS.MktraceState?.state;
+                 `%TS.MktraceState?.trace;
+                 `%TS.MktraceState?.memTaint;
+                 `%FStar.FunctionalExtensionality.on_dom;
+                 `%FStar.FunctionalExtensionality.on;
+                 `%Interop.list_disjoint_or_eq;
+                 `%Interop.list_live
+                 ];
+     primops;
+     simplify]
+     x
+
+[@reduce]
+let mk_mem (addrs:_)//IS.addr_map)
+           (ptrs:list b8)
+           (hs:HS.mem{normal (disjoint_or_eq_l ptrs) /\ normal (live_l hs ptrs)}) : mem =
+   assert (disjoint_or_eq_l ptrs);
+   assert (live_l hs ptrs);
+   {addrs;
+    ptrs;
+    hs}
 
 // Splitting the construction of the initial state into two functions
 // one that creates the initial trusted state (i.e., part of our TCB)
@@ -608,7 +658,7 @@ let rec equiv_create_trusted_and_vale_state
 //////////////////////////////////////////////////////////////////////////////////////////
 //vale_sig pre post: a template for a top-level signature provided by a vale function
 //////////////////////////////////////////////////////////////////////////////////////////
-let stack_buffer = buffer (TBase TUInt64)
+let stack_buffer = buffer64
 
 [@reduce]
 let vale_pre_tl (dom:list vale_type) =
@@ -679,6 +729,8 @@ let vale_sig (#dom:list vale_type)
 
 let hs_of_va_state (x:va_state) = x.mem.hs
 
+let stack_b (h:HS.mem) (acc:list b8) = s:stack_buffer{mem_roots_p h (s::acc)}
+
 [@reduce]
 let rec as_lowstar_sig_tl (#dom:list vale_type)
                           (code:va_code)
@@ -700,16 +752,18 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
                             M.modifies loc_none push_h0 alloc_push_h0 /\
                             HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
                             B.frameOf b == HS.get_tip alloc_push_h0 /\
-                            B.live alloc_push_h0 b ==>
+                            B.live alloc_push_h0 b /\
+                            mem_roots_p alloc_push_h0 (b::acc) ==>
                             elim_nil pre (elim_down_nil acc down alloc_push_h0 b) b)))
         (ensures (fun h0 _ h1 ->
-                       exists push_h0 alloc_push_h0 b final fuel.//  {:pattern
+                       exists push_h0 alloc_push_h0 (b:stack_buffer) final fuel.//  {:pattern
                                  // (post push_h0 alloc_push_h0 b final fuel)}
                             HS.fresh_frame h0 push_h0 /\
                             M.modifies loc_none push_h0 alloc_push_h0 /\
                             HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
                             B.frameOf b == HS.get_tip alloc_push_h0 /\
                             B.live alloc_push_h0 b /\
+                            mem_roots_p alloc_push_h0 (b::acc) /\
                             (let initial_state =
                                  elim_down_nil acc down alloc_push_h0 b in
                              elim_nil
@@ -810,6 +864,7 @@ let rec wrap_tl
             let h2 = get () in
             assert (HS.fresh_frame h0 h1);
             assert (mem_roots_p h2 acc);
+            assert (mem_roots_p h2 (stack_b::acc));
             st_put (fun h0' -> h0' == h2) (fun h0' ->
               let va_s0 = elim_down_nil acc down h0' stack_b in
               assert (B.frameOf stack_b = HS.get_tip h0');
@@ -862,6 +917,7 @@ let lem_memcpy (va_b0:va_code)
            (ensures (fun (va_sM, va_fM) -> va_post va_b0 va_s0 va_sM va_fM win stack_b dst src )) =
    Vale_memcpy.va_lemma_memcpy va_b0 va_s0 win stack_b dst src
 
+[@reduce]
 unfold
 let dom : l:list vale_type{List.Tot.length l < max_arity win} =
   let d = [VT_Buffer TUInt64; VT_Buffer TUInt64;] in
@@ -893,41 +949,13 @@ let memcpy_raw
     : as_lowstar_sig pre post
     = wrap [VT_Buffer TUInt64; VT_Buffer TUInt64;] pre post lem_memcpy
 
-unfold let norm (#a:Type) (x:a) : a =
-  FStar.Pervasives.norm
-    [iota;
-     zeta;
-     delta_attr [`%reduce];
-     delta_only [`%VT_Buffer?;
-                 `%Mkstate?.ok;
-                 `%Mkstate?.regs;
-                 `%Mkstate?.xmms;
-                 `%Mkstate?.flags;
-                 `%Mkstate?.mem;
-                 `%BS.Mkstate?.ok;
-                 `%BS.Mkstate?.regs;
-                 `%BS.Mkstate?.xmms;
-                 `%BS.Mkstate?.flags;
-                 `%BS.Mkstate?.mem;
-                 `%TS.MktraceState?.state;
-                 `%TS.MktraceState?.trace;
-                 `%TS.MktraceState?.memTaint;
-                 `%FStar.FunctionalExtensionality.on_dom;
-                 `%FStar.FunctionalExtensionality.on;
-                 `%Interop.list_disjoint_or_eq;
-                 `%Interop.list_live
-                 ];
-     primops;
-     simplify]
-     x
-
-let force (#a:Type) (x:a) : norm a = x
+let force (#a:Type) (x:a) : normal a = x
 
 let elim_lowstar_sig (#dom:list vale_type{List.length dom < max_arity win})
                      (#pre:vale_pre dom)
                      (#post:vale_post dom)
                      (f:as_lowstar_sig pre post)
-    : norm (as_lowstar_sig pre post)
+    : normal (as_lowstar_sig pre post)
     = force f
 
 let pre_cond (h:HS.mem) (dst:b8) (src:b8) =
@@ -954,19 +982,39 @@ let full_post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8)  =
   post_cond h h' dst src  /\
   M.modifies (M.loc_buffer dst) h h'
 
-let wrapped_pre = norm (as_lowstar_sig pre post)
+let wrapped_pre = normal (as_lowstar_sig pre post)
 
-let memcpy_wrapped : norm (as_lowstar_sig pre post) =
+let memcpy_wrapped : normal (as_lowstar_sig pre post) =
   elim_lowstar_sig memcpy_raw
 
-let mk_mem (addrs:_)//IS.addr_map)
-           (ptrs:list b8)
-           (hs:HS.mem{norm (disjoint_or_eq_l ptrs) /\ norm (live_l hs ptrs)}) : mem =
-   assume false; //TODO ... revise to use these non-quantifier based predicates
-   {addrs;
-    ptrs;
-    hs}
+[@reduce]
+unfold
+let create_memcpy_initial_state
+        (dst: buffer (TBase (TUInt64)))
+        (src: buffer (TBase (TUInt64)))
+        (h0:HS.mem)
+        (stack:stack_b h0 [src;dst]) =
+    normal
+      (elim_down_nil [src;dst]
+        (elim_down_cons _ _ [dst]
+          (elim_down_cons _ _ []
+            (create_vale_initial_state win dom)
+            dst)
+        src)
+        h0
+        stack)
 
+assume val dst: buffer (TBase (TUInt64))
+assume val src: buffer (TBase (TUInt64))
+assume val h0 : HS.mem
+assume val stack: stack_b h0 [src;dst]
+
+let test2 () =
+  create_memcpy_initial_state
+        dst
+        src
+        h0
+        stack
 
 let memcpy_wrapped_annot :
   va_b0: va_code ->
@@ -980,15 +1028,19 @@ let memcpy_wrapped_annot :
        live h0 src /\
        live h0 dst /\
        (forall (push_h0:Monotonic.HyperStack.mem{disjoint_or_eq src dst /\ live push_h0 src /\ live push_h0 dst})
-          (b: stack_buffer)
-          (alloc_push_h0: Monotonic.HyperStack.mem{disjoint_or_eq src dst /\ live alloc_push_h0 src /\ live alloc_push_h0 dst}).
+          (alloc_push_h0: Monotonic.HyperStack.mem{disjoint_or_eq src dst /\ live alloc_push_h0 src /\ live alloc_push_h0 dst})
+          (b: stack_buffer).
           Monotonic.HyperStack.fresh_frame h0 push_h0 /\
           LowStar.Monotonic.Buffer.modifies loc_none push_h0 alloc_push_h0 /\
           Monotonic.HyperStack.get_tip push_h0 ==
           Monotonic.HyperStack.get_tip alloc_push_h0 /\
           frameOf b == Monotonic.HyperStack.get_tip alloc_push_h0 /\
-          live alloc_push_h0 b ==>
-          va_pre va_b0
+          live alloc_push_h0 b ==> // /\
+          // mem_roots_p alloc_push_h0 [b;src;dst] ==>
+          (// let initial_state =
+           //  create_memcpy_initial_state dst src alloc_push_h0 b in
+
+          va_pre va_b0 // initial_state
                  (Mkstate true
                           (X64.Vale.Regs.of_fun (FunctionalExtensionality.on_domain reg
                                       (regs_with_stack
@@ -1007,7 +1059,7 @@ let memcpy_wrapped_annot :
                           win
                           b
                           dst
-                          src)))
+                          src))))
       (ensures (fun h0 _ h1 ->
                     exists (push_h0:HS.mem) (alloc_push_h0:HS.mem) b final fuel.
                       Monotonic.HyperStack.fresh_frame h0 push_h0 /\
@@ -1016,7 +1068,10 @@ let memcpy_wrapped_annot :
                       Monotonic.HyperStack.get_tip alloc_push_h0 /\
                       frameOf b == Monotonic.HyperStack.get_tip alloc_push_h0 /\
                       live alloc_push_h0 b /\
-                      va_post va_b0
+//                      mem_roots_p alloc_push_h0 [b;src;dst] /\
+                      (// let initial_state =
+                       //  create_memcpy_initial_state dst src alloc_push_h0 b in
+                       va_post va_b0 // initial_state
                         (Mkstate true
                             (X64.Vale.Regs.of_fun (FunctionalExtensionality.on_domain reg
                                     (regs_with_stack (upd_reg win
@@ -1038,6 +1093,7 @@ let memcpy_wrapped_annot :
                         dst
                         src /\
                       eval_code va_b0
+                        // initial_state
                         (Mkstate true
                             (X64.Vale.Regs.of_fun (FunctionalExtensionality.on_domain reg
                                     (regs_with_stack (upd_reg win
@@ -1055,7 +1111,7 @@ let memcpy_wrapped_annot :
                         fuel
                         final /\
                       Monotonic.HyperStack.poppable (hs_of_va_state final) /\
-                      (h1 == Monotonic.HyperStack.pop (hs_of_va_state final))))
+                      (h1 == Monotonic.HyperStack.pop (hs_of_va_state final)))))
    = memcpy_wrapped
 
 val memcpy: dst:buffer64 -> src:buffer64 -> Stack unit
@@ -1064,5 +1120,6 @@ val memcpy: dst:buffer64 -> src:buffer64 -> Stack unit
 let memcpy dst src =
   assume false; //TODO
   memcpy_wrapped (Vale_memcpy.va_code_memcpy win) dst src ()
+
 
 // ////////////////////////////////////////////////////////////////////////////////
