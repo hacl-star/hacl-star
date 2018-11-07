@@ -5,15 +5,13 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-
+open Lib.Random
 
 module DH = Spec.DH
 module AEAD = Spec.AEAD
 module Hash = Spec.Hash
+module HKDF = Spec.HKDF
 
-
-(* BB. TODO: Relocate this function *)
-assume val crypto_random: len:size_nat -> Tot (option (lbytes len))
 
 let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 2305843009213693952)
 let pow2_35_less_than_pow2_61 : _:unit{pow2 32 * pow2 3 <= pow2 61 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 61 - 1)
@@ -65,9 +63,14 @@ let const_label_key : lbytes 9 =
 
 /// Constants sizes
 
-inline_for_extraction let size_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
-inline_for_extraction let size_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + size_nonce cs - numbytes U32
-inline_for_extraction let size_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
+inline_for_extraction
+let size_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
+
+inline_for_extraction
+let size_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + size_nonce cs - numbytes U32
+
+inline_for_extraction
+let size_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
 
 /// Types
 
@@ -80,10 +83,11 @@ type key_s (cs:ciphersuite) = lbytes (size_key cs)
 
 val encap:
     cs: ciphersuite
-  -> kpub: key_public_s cs ->
+  -> kpub: key_public_s cs
+  -> context: lbytes 32 ->
   Tot (option (key_s cs & key_public_s cs))
 
-let encap cs kpub =
+let encap cs kpub context =
   match crypto_random (size_key_dh cs) with
   | None -> None
   | Some eph_kpriv ->
@@ -91,26 +95,29 @@ let encap cs kpub =
     match DH.dh (curve_of_cs cs) eph_kpriv kpub with
     | None -> None
     | Some secret ->
-      let salt = (id_of_cs cs) @| eph_kpub @| kpub in
-      let extracted = Spec.HKDF.hkdf_extract (hash_of_cs cs) salt secret in
-      let key = Spec.HKDF.hkdf_expand (hash_of_cs cs) extracted const_label_key (size_key cs) in
+      let salt = eph_kpub @| kpub in
+      let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
+      let info = (id_of_cs cs) @| const_label_key @| context in
+      let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
       Some (key, eph_kpub)
 
 
 val decap:
     cs: ciphersuite
   -> kpriv: key_private_s cs
-  -> eph_kpub: key_public_s cs ->
+  -> eph_kpub: key_public_s cs
+  -> context: lbytes 32 ->
   Tot (option (key_s cs))
 
-let decap cs kpriv eph_kpub =
+let decap cs kpriv eph_kpub context =
   let kpub = DH.secret_to_public (curve_of_cs cs) kpriv in
   match DH.dh (curve_of_cs cs) kpriv eph_kpub with
   | None -> None
   | Some secret ->
-    let salt = (id_of_cs cs) @| eph_kpub @| kpub in
-    let extracted = Spec.HKDF.hkdf_extract (hash_of_cs cs) salt secret in
-    let key = Spec.HKDF.hkdf_expand (hash_of_cs cs) extracted const_label_key (size_key cs) in
+    let salt = eph_kpub @| kpub in
+    let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
+    let info = (id_of_cs cs) @| const_label_key @| context in
+    let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
     Some key
 
 
