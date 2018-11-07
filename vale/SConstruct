@@ -341,13 +341,7 @@ verify_options = [
   # Special treatment for sensitive modules
 
   # Disable verification by adding 'filename': None
-  #TODO: Update taint analysis
-  ('code/arch/x64/X64.Leakage_Helpers.fst', None), 
-  ('code/arch/x64/X64.Leakage_Ins_Xmm.fsti', None),
-  ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None),
-  ('code/arch/x64/X64.Leakage_Ins.fsti', None),
-  ('code/arch/x64/X64.Leakage_Ins.fst', None),
-  ('code/arch/x64/X64.Leakage.fst', None),
+
   ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
@@ -369,8 +363,8 @@ verify_options = [
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding)),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding)),
   ('code/arch/x64/X64.Memory_s.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
   ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
-  ('code/arch/Memory_s.fst', BuildOptions(fstar_default_args.replace('--use_extracted_interfaces true', ''))),
   ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', ''))),
 
   # We copy these files from F*'s library because we need to generate a .checked file for them,

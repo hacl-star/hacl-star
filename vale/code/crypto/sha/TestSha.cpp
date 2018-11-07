@@ -6,7 +6,7 @@
 typedef unsigned char byte;
 double cpuFreq;
 
-extern "C" void sha256(byte* ctx, byte* input, int num_blocks, byte* k);
+extern "C" void sha256_update(byte* ctx, byte* input, int num_blocks, byte* k);
 
 #ifdef _WIN32
 #include <intrin.h>
@@ -175,7 +175,7 @@ void test() {
         int n = 10000;
         for (int j = 0; j < n; j++)
         {
-            sha256((byte*)hash, in, nblocks, (byte*)K);
+            sha256_update((byte*)hash, in, nblocks, (byte*)K);
 
         }
         uint64_t end = GetRDTSC();

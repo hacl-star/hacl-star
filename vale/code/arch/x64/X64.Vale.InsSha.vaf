@@ -57,7 +57,7 @@ friend X64.Memory
 //#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --initial_ifuel 2 --z3rlimit 60"
 #endverbatim
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src), list(), list()), Public))}{:quick exportOnly}{:typecheck false}{:public} 
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src)), Public))}{:quick exportOnly}{:typecheck false}{:public} 
           SHA256_rnds2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w, ghost hash_orig:hash256)
   reads xmm0;
   requires 
@@ -72,7 +72,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src), list(),
     lemma_sha256_rnds2(old(src), old(dst), old(xmm0), t, block, hash_orig);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src), list(), list()), Public))}{:quick exportOnly}{:typecheck false}{:public} 
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src)), Public))}{:quick exportOnly}{:typecheck false}{:public} 
           SHA256_msg1(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w)
   requires 
     sha_enabled;
@@ -85,7 +85,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src), list(), 
     lemma_sha256_msg1(old(dst), old(src), t, block);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg2(dst, src), list(), list()), Public))}{:quick exportOnly}{:typecheck false}{:public} 
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg2(dst, src)), Public))}{:quick exportOnly}{:typecheck false}{:public} 
           SHA256_msg2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w)
   requires 
     sha_enabled;
