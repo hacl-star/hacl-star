@@ -20,12 +20,10 @@ module HS = FStar.HyperStack
 module Lemmas = Spec.Frodo.Lemmas
 module S = Spec.Frodo.Sample
 module B = LowStar.Buffer
-module IB = LowStar.ImmutableBuffer
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '*'"
 
-// TODO: expose ImmutableBuffer types and operations in Lib.Buffer
-let cdf_table = IB.igcmalloc_of_list HyperStack.root cdf_list
+let cdf_table = icreateL_global cdf_list
 
 inline_for_extraction noextract
 val frodo_sample_f:
@@ -36,11 +34,12 @@ val frodo_sample_f:
      (ensures  fun h0 r h1 ->
        modifies loc_none h0 h1 /\ uint_v r == S.frodo_sample_f t (v i))
 let frodo_sample_f t i =
-  IB.recall_contents cdf_table (Seq.seq_of_list cdf_list);
-  let ti = IB.index cdf_table (Lib.RawIntTypes.size_to_UInt32 i) in
+  assert_norm (List.Tot.length cdf_list <= max_size_t);
+  recall_contents cdf_table (Seq.seq_of_list cdf_list);
+  let ti = iindex cdf_table (Lib.RawIntTypes.size_to_UInt32 i) in
   S.lemma_frodo_sample0 (v i);
   S.lemma_frodo_sample1 t ti;
-  to_u16 (to_u32 (ti -. t)) >>. u32 15
+  to_u16 (to_u32 (ti -. t)) >>. size 15
 
 inline_for_extraction noextract
 val frodo_sample_res:
@@ -60,10 +59,10 @@ val frodo_sample: r:uint16 -> Stack uint16
 [@"c_inline"]
 let frodo_sample r =
   push_frame();
-  let prnd = r >>. u32 1 in
+  let prnd = r >>. size 1 in
   let sign = r &. u16 1 in
-  mod_mask_lemma r (u32 1);
-  uintv_extensionality (mod_mask (u32 1)) (u16 1);
+  mod_mask_lemma r (size 1);
+  uintv_extensionality (mod_mask (size 1)) (u16 1);
   assert (uint_v sign == 0 \/ uint_v sign == 1);
   let sample = create #uint16 #1 (size 1) (u16 0) in
   let h = ST.get () in

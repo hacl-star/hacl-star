@@ -1,176 +1,157 @@
 module Spec.ECIES
 
+open FStar.Mul
 open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+open Lib.Random
+
+module DH = Spec.DH
+module AEAD = Spec.AEAD
+module Hash = Spec.Hash
+module HKDF = Spec.HKDF
 
 
-assume val crypto_random: len:size_nat -> Tot (lbytes len)
+let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 2305843009213693952)
+let pow2_35_less_than_pow2_61 : _:unit{pow2 32 * pow2 3 <= pow2 61 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 61 - 1)
+let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 125 - 1)
+
+#set-options "--z3rlimit 100"
+
+/// Types
+
+type ciphersuite = DH.algorithm & AEAD.algorithm & a:Hash.algorithm{a == Hash.SHA2_256 \/ a == Hash.SHA2_512}
+
+val id_of_cs: cs:ciphersuite -> Tot (lbytes 1)
+let id_of_cs cs =
+  match cs with
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 0)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 1)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 2)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 3)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 4)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 5)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 6)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 7)
+
+let curve_of_cs (cs:ciphersuite) : DH.algorithm =
+  let (c,a,h) = cs in c
+
+let aead_of_cs (cs:ciphersuite) : AEAD.algorithm =
+  let (c,a,h) = cs in a
+
+let hash_of_cs (cs:ciphersuite) : Hash.algorithm =
+  let (c,a,h) = cs in h
 
 
-(** Definition of a ECKEM IV *)
+/// Constants
+
+(** Constants for ECIES labels *)
+let const_label_nonce : lbytes 11 =
+  [@inline_let]
+  let l = [u8 0x65; u8 0x63; u8 0x69; u8 0x65; u8 0x73; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
+  assert_norm(List.Tot.length l == 11);
+  createL l
+
+let const_label_key : lbytes 9 =
+  [@inline_let]
+  let l = [u8 0x65; u8 0x63; u8 0x69; u8 0x65; u8 0x73; u8 0x20; u8 0x6b; u8 0x65; u8 0x79] in
+  assert_norm(List.Tot.length l == 9);
+  createL l
+
+
+/// Constants sizes
+
 inline_for_extraction
-let vsize_eckem_iv: size_nat = 12
-type eckem_iv_s = lbytes vsize_eckem_iv
+let size_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
 
-(** Definition of a ECKEM counter *)
-type eckem_counter_t = uint32
+inline_for_extraction
+let size_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + size_nonce cs - numbytes U32
 
-(** Definition of a ECKEM keys *)
-inline_for_extraction let vsize_eckem_key_asymmetric: size_nat = 32
-type eckem_key_public_s = lbytes vsize_eckem_key_asymmetric
-type eckem_key_private_s = lbytes vsize_eckem_key_asymmetric
+inline_for_extraction
+let size_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
 
+/// Types
 
-(** Definition of a ECKEM keypair *)
-type eckem_keypair_r = (eckem_key_public_s * option eckem_key_private_s)
-
-
-(** Generation of an EC public private keypair for Curve25519 *)
-val eckem_secret_to_public: eckem_key_private_s -> Tot eckem_key_public_s
-let eckem_secret_to_public kpriv =
-  let basepoint_zeros = create 32 (u8 0) in
-  let basepoint = upd basepoint_zeros 31 (u8 0x09) in
-  Spec.Curve25519.scalarmult kpriv basepoint
+type key_public_s (cs:ciphersuite) = lbytes (size_key_dh cs)
+type key_private_s (cs:ciphersuite) = lbytes (size_key_dh cs)
+type key_s (cs:ciphersuite) = lbytes (size_key cs)
 
 
-(** Generation of an EC public private keypair for Curve25519 *)
-val eckem_generate: unit -> Tot eckem_keypair_r
-let eckem_generate () =
-  let basepoint_zeros = create 32 (u8 0) in
-  let basepoint = upd basepoint_zeros 31 (u8 0x09) in
-  let kpriv = crypto_random vsize_eckem_key_asymmetric in
-  let kpub = eckem_secret_to_public kpriv in
-  kpub, Some kpriv
+/// Cryptographic Primitives
+
+val encap:
+    cs: ciphersuite
+  -> kpub: key_public_s cs
+  -> context: lbytes 32 ->
+  Tot (option (key_s cs & key_public_s cs))
+
+let encap cs kpub context =
+  match crypto_random (size_key_dh cs) with
+  | None -> None
+  | Some eph_kpriv ->
+    let eph_kpub = DH.secret_to_public (curve_of_cs cs) eph_kpriv in
+    match DH.dh (curve_of_cs cs) eph_kpriv kpub with
+    | None -> None
+    | Some secret ->
+      let salt = eph_kpub @| kpub in
+      let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
+      let info = (id_of_cs cs) @| const_label_key @| context in
+      let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
+      Some (key, eph_kpub)
 
 
-(** ECKEM Encryption *)
+val decap:
+    cs: ciphersuite
+  -> kpriv: key_private_s cs
+  -> eph_kpub: key_public_s cs
+  -> context: lbytes 32 ->
+  Tot (option (key_s cs))
+
+let decap cs kpriv eph_kpub context =
+  let kpub = DH.secret_to_public (curve_of_cs cs) kpriv in
+  match DH.dh (curve_of_cs cs) kpriv eph_kpub with
+  | None -> None
+  | Some secret ->
+    let salt = eph_kpub @| kpub in
+    let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
+    let info = (id_of_cs cs) @| const_label_key @| context in
+    let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
+    Some key
+
+
 val encrypt:
-    #olen: size_nat
-  -> receiver: eckem_key_public_s
-  -> sender: eckem_key_private_s
-  -> len: size_nat
-  -> input: lbytes len ->
-  Tot (lbytes olen)
+    cs: ciphersuite
+  -> sk: key_s cs
+  -> input: bytes{length input <= max_size_t
+           /\ length input + AEAD.size_block (aead_of_cs cs) <= max_size_t
+           /\ length input + AEAD.padlen (aead_of_cs cs) (length input) <= max_size_t}
+  -> aad: bytes {length aad <= max_size_t /\ length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
+  -> counter: uint32 ->
+  Tot bytes
 
-let encrypt #olen receiver sender len input =
-  let kdf_iv = crypto_random vsize_eckem_iv in
-  let ek: lbytes 32 = Spec.Curve25519.scalarmult receiver sender in
-  let unsafe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
-  let stream = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv kdf_iv 32 ek in
-  let key = sub stream 0 Spec.AESGCM.keylen in
-  let iv = sub stream Spec.AESGCM.keylen 12 in
-  let c = Spec.AESGCM.aead_encrypt key 12 iv len input 0 empty in
-  let zeros = create (len + vsize_eckem_iv) (u8 0) in
-  let out = create (len + vsize_eckem_iv) (u8 0) in
-  let out = update_sub out 0 vsize_eckem_iv iv in
-  let out = update_sub out vsize_eckem_iv len c in
-  if unsafe then zeros else out
+let encrypt cs sk input aad counter =
+  let klen = AEAD.size_key (aead_of_cs cs) in
+  let key = sub sk 0 klen in
+  let nonce = sub sk klen (size_nonce cs - numbytes U32) in
+  let ctr = uint_to_bytes_le counter in
+  AEAD.aead_encrypt (aead_of_cs cs) key (nonce @| ctr) input aad
 
 
-(** ECKEM Decryption *)
 val decrypt:
-    #olen: size_nat
-  -> sender: eckem_key_public_s
-  -> receiver: eckem_key_private_s
-  -> len: size_nat
-  -> input: lbytes len ->
-  Tot (lbytes olen)
+    cs: ciphersuite
+  -> sk: key_s cs
+  -> c: bytes{AEAD.size_tag (aead_of_cs cs) <= length c /\ length c <= max_size_t}
+  -> aad: bytes{length aad <= max_size_t
+             /\ (length c + length aad) / 64 <= max_size_t
+             /\ length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
+  -> counter:uint32 ->
+  Tot (option (lbytes (length c - AEAD.size_tag (aead_of_cs cs))))
 
-let decrypt #olen sender receiver len input =
-  let kdf_iv = sub input 0 vsize_eckem_iv in
-  let ek: lbytes 32 = Spec.Curve25519.scalarmult sender receiver in
-  let unsafe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
-  let stream = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv kdf_iv 32 ek in
-  let key = sub stream 0 Spec.AESGCM.keylen in
-  let iv = sub stream Spec.AESGCM.keylen 12 in
-  let ciphertext = sub input vsize_eckem_iv (len - vsize_eckem_iv) in
-  let out = Spec.AESGCM.aead_decrypt key 12 iv len ciphertext 0 empty in
-  let zeros = create (len + vsize_eckem_iv) (u8 0) in
-  if unsafe then zeros else out
-
-
-///
-/// Alternative API
-///
-
-
-(** ECKEM Encryption *)
-val encrypt_explicit_iv:
-    #olen: size_nat
-  -> iv: eckem_iv_s
-  -> receiver: eckem_key_public_s
-  -> sender: eckem_key_private_s
-  -> len: size_nat
-  -> input: lbytes len ->
-  Tot (lbytes olen)
-
-let encrypt_explicit_iv #olen kdf_iv receiver sender len input =
-  let ek: lbytes 32 = Spec.Curve25519.scalarmult receiver sender in
-  let unsafe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
-  let stream = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv kdf_iv 32 ek in
-  let key = sub stream 0 Spec.AESGCM.keylen in
-  let iv = sub stream Spec.AESGCM.keylen 12 in
-  let c = Spec.AESGCM.aead_encrypt key 12 iv len input 0 empty in
-  let zeros = create (len + vsize_eckem_iv) (u8 0) in
-  let out = create (len + vsize_eckem_iv) (u8 0) in
-  let out = update_sub out 0 vsize_eckem_iv iv in
-  let out = update_sub out vsize_eckem_iv len c in
-  if unsafe then zeros else out
-
-
-(** ECKEM Decryption *)
-val decrypt_explicit_iv:
-    #olen: size_nat
-  -> iv: eckem_iv_s
-  -> sender: eckem_key_public_s
-  -> receiver: eckem_key_private_s
-  -> len: size_nat
-  -> input: lbytes len ->
-  Tot (lbytes olen)
-
-let decrypt_explicit_iv #olen iv sender receiver len input =
-  let kdf_iv = sub input 0 vsize_eckem_iv in
-  let ek: lbytes 32 = Spec.Curve25519.scalarmult sender receiver in
-  let unsafe = for_all (fun a -> uint_to_nat #U8 a = 0) ek in
-  let stream = Spec.HKDF.hkdf_extract Spec.Hash.SHA2_256 vsize_eckem_iv kdf_iv 32 ek in
-  let key = sub stream 0 Spec.AESGCM.keylen in
-  let iv = sub stream Spec.AESGCM.keylen 12 in
-  let encrypted_plaintext = sub input vsize_eckem_iv (len - vsize_eckem_iv) in
-  let out = Spec.AESGCM.aead_decrypt key 12 iv len input 0 empty in
-  let zeros = create (len + vsize_eckem_iv) (u8 0) in
-  if unsafe then zeros else out
-
-
-///
-/// Alternative Design
-/// ------------------
-/// WIP: The motivation behind this alternative design is that
-/// generating a nonce for each encryption is costly. I beleive
-/// the call to HKDF can be used to derive an fresh nonce without
-/// risking entropy exhaustion by seeding the HKDF call with a
-/// counter. As for a nonce, the counter MUST not be reused.
-/// My expectation is that construction is INT-CTXT IND-CPA secure
-/// which remains to be proven correct.
-///
-
-(** ECKEM Encryption *)
-assume val encrypt_counter:
-    #olen: size_nat
-  -> i: eckem_counter_t
-  -> receiver: eckem_key_public_s
-  -> sender: eckem_key_private_s
-  -> len: size_nat
-  -> plaintext: lbytes len ->
-  Tot (lbytes olen)
-
-(** ECKEM Decryption *)
-assume val decrypt_counter:
-    #olen: size_nat
-  -> i: eckem_counter_t
-  -> sender: eckem_key_public_s
-  -> receiver: eckem_key_private_s
-  -> len: size_nat
-  -> ciphertext: lbytes len ->
-  Tot (lbytes olen)
+let decrypt cs sk input aad counter =
+  let klen = AEAD.size_key (aead_of_cs cs) in
+  let key = sub sk 0 klen in
+  let nonce = sub sk klen (size_nonce cs - numbytes U32) in
+  let ctr = uint_to_bytes_le counter in
+  AEAD.aead_decrypt (aead_of_cs cs) key (nonce @| ctr) input aad

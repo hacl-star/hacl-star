@@ -50,7 +50,7 @@ type uint128x2 = vec_t U128 2
 type uint64x2 = vec_t U64 2
 type uint64x4 = vec_t U64 2
 type uint32x4 = vec_t U32 4
-type uint32x8 = vec_t U32 
+type uint32x8 = vec_t U32
 type uint16x8 = vec_t U16 8
 type uint16x16 = vec_t U16 1
 type uint8x16 = vec_t U8 16
@@ -71,4 +71,3 @@ let ( >>| ) #t #w = vec_shift_right #t #w
 let ( <<| ) #t #w = vec_shift_left #t #w
 let ( >>>| ) #t #w = vec_rotate_right #t #w
 let ( <<<| ) #t #w = vec_rotate_left #t #w
-

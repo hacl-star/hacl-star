@@ -48,6 +48,7 @@ val create:
   -> s:lseq a len{to_seq s == Seq.create len init /\ (forall (i:nat).
     {:pattern (index s i)} i < len ==> index s i == init)}
 
+
 (** Concatenate sequences: use with care, may make implementation hard to verify *)
 val concat:
     #a:Type
@@ -83,7 +84,7 @@ abstract
 type equal (#a:Type) (#len:size_nat) (s1:lseq a len) (s2:lseq a len) =
   forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
 
-val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma 
+val eq_intro: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len -> Lemma
   (requires forall i. {:pattern index s1 i; index s2 i} index s1 i == index s2 i)
   (ensures equal s1 s2)
   [SMTPat (equal s1 s2)]
@@ -164,6 +165,35 @@ val lemma_update_sub:
     (ensures
       res == update_sub dst start n src)
 
+val lemma_concat2:
+    #a:Type0
+  -> len0:size_nat
+  -> s0:lseq a len0
+  -> len1:size_nat{len0 + len1 < max_size_t}
+  -> s1:lseq a len1
+  -> s:lseq a (len0 + len1)
+  -> Lemma
+    (requires
+      sub s 0 len0 == s0 /\
+      sub s len0 len1 == s1)
+    (ensures s == concat s0 s1)
+
+val lemma_concat3:
+    #a:Type0
+  -> len0:size_nat
+  -> s0:lseq a len0
+  -> len1:size_nat{len0 + len1 < max_size_t}
+  -> s1:lseq a len1
+  -> len2:size_nat{len0 + len1 + len2 < max_size_t}
+  -> s2:lseq a len2
+  -> s:lseq a (len0 + len1 + len2)
+  -> Lemma
+    (requires
+      sub s 0 len0 == s0 /\
+      sub s len0 len1 == s1 /\
+      sub s (len0 + len1) len2 == s2)
+    (ensures s == concat (concat s0 s1) s2)
+
 (** Updating a sub-Sequence from another fixed-length Sequence *)
 let update_slice
     (#a:Type)
@@ -175,18 +205,44 @@ let update_slice
   =
   update_sub #a i start (fin - start) upd
 
+(** Creation of a fixed-length Sequence from an initialization function *)
+val createi: #a:Type 
+  -> len:size_nat 
+  -> init:(i:nat{i < len} -> a)
+  -> s:lseq a len{(forall (i:nat).
+    {:pattern (index s i)} i < len ==> index s i == init i)}
+
+(** Mapi function for fixed-length Sequences *)
+val mapi:#a:Type -> #b:Type -> #len:size_nat
+  -> f:(i:nat{i < len} -> a -> Tot b)
+  -> s1:lseq a len
+  -> s2:lseq b len{(forall (i:nat).
+    {:pattern (index s2 i)} i < len ==> index s2 i == f i s1.[i])}
+
+
 (** Map function for fixed-length Sequences *)
 val map:#a:Type -> #b:Type -> #len:size_nat
-  -> (a -> Tot b)
+  -> f:(a -> Tot b)
+  -> s1:lseq a len
+  -> s2:lseq b len{(forall (i:nat).
+    {:pattern (index s2 i)} i < len ==> index s2 i == f s1.[i])}
+
+(** Map2i function for fixed-length Sequences *)
+val map2i:#a:Type -> #b:Type -> #c:Type -> #len:size_nat
+  -> f:(i:nat{i < len} -> a -> b -> Tot c)
   -> s1:lseq a len
   -> s2:lseq b len
+  -> s3:lseq c len{(forall (i:nat).
+    {:pattern (index s3 i)} i < len ==> index s3 i == f i s1.[i] s2.[i])}
 
 (** Map2 function for fixed-length Sequences *)
 val map2:#a:Type -> #b:Type -> #c:Type -> #len:size_nat
   -> f:(a -> b -> Tot c)
   -> s1:lseq a len
   -> s2:lseq b len
-  -> s3:lseq c len
+  -> s3:lseq c len{(forall (i:nat).
+    {:pattern (index s3 i)} i < len ==> index s3 i == f s1.[i] s2.[i])}
+
 
 (** Forall function for fixed-length Sequences *)
 val for_all:#a:Type -> #len:size_nat -> (a -> Tot bool) -> lseq a len -> bool
@@ -226,3 +282,13 @@ val repeat_blocks:
   -> l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b)
   -> init:b
   -> out:b
+
+(** Generates `n` blocks of length `len` by iteratively applying a function with an accumulator *)
+val generate_blocks:
+    #t:Type0
+  -> len:size_nat 
+  -> n:nat{n * len <= max_size_t}
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & lseq t len)
+  -> init:a 0
+  -> a n & lseq t (n * len)

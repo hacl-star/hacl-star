@@ -14,20 +14,24 @@ inline_for_extraction
 type lbytes (len:size_nat) = lseq uint8 len
 
 inline_for_extraction
-let to_lbytes (b:bytes{length b > 0 /\ length b < max_size_t}) : lbytes (length b) = 
+let to_lbytes (b:bytes{length b > 0 /\ length b < max_size_t}) : lbytes (length b) =
   to_lseq #uint8 b
 
 inline_for_extraction
 val lbytes_eq:#len:size_nat -> lseq uint8 len -> lseq uint8 len -> bool
 
+/// Constant for empty lbytes
+
+let lbytes_empty: lbytes 0 = create 0 (u8 0)
+
 /// Conversions between natural numbers and sequences
 
 inline_for_extraction
-val nat_from_intseq_be: #t:inttype -> #l:secrecy_level -> b:seq (uint_t t l) 
+val nat_from_intseq_be: #t:inttype -> #l:secrecy_level -> b:seq (uint_t t l)
   -> n:nat{n < pow2 (length b * bits t)}
 
 inline_for_extraction
-val nat_from_intseq_le: #t:inttype -> #l:secrecy_level 
+val nat_from_intseq_le: #t:inttype -> #l:secrecy_level
   -> b:seq (uint_t t l) -> n:nat{n < pow2 (length b * bits t)}
 
 inline_for_extraction
@@ -37,11 +41,11 @@ inline_for_extraction
 val nat_from_bytes_le: b:bytes -> n:nat{n < pow2 (length b * 8)}
 
 inline_for_extraction
-val nat_to_bytes_be: len:nat -> n:nat{n < pow2 (8 * len)} 
+val nat_to_bytes_be: len:nat -> n:nat{n < pow2 (8 * len)}
   -> b:bytes{length b == len /\ n == nat_from_intseq_be #U8 b}
 
 inline_for_extraction
-val nat_to_bytes_le: len:nat -> n:nat{n < pow2 (8 * len)} 
+val nat_to_bytes_le: len:nat -> n:nat{n < pow2 (8 * len)}
   -> b:bytes{length b == len /\ n == nat_from_intseq_le #U8 b}
 
 inline_for_extraction
@@ -56,11 +60,11 @@ inline_for_extraction
 val uint_to_bytes_be: #t:inttype -> #l:secrecy_level -> u:uint_t t l -> lbytes (numbytes t)
 
 inline_for_extraction
-val uint_from_bytes_le: #t:inttype{~(t == U1)} -> #l:secrecy_level 
+val uint_from_bytes_le: #t:inttype{~(t == U1)} -> #l:secrecy_level
   -> b:lbytes (numbytes t) -> uint_t t l
 
 inline_for_extraction
-val uint_from_bytes_be: #t:inttype{~(t == U1)} -> #l:secrecy_level 
+val uint_from_bytes_be: #t:inttype{~(t == U1)} -> #l:secrecy_level
   -> lbytes (numbytes t) -> uint_t t l
 
 inline_for_extraction

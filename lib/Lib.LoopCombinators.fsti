@@ -1,6 +1,5 @@
 module Lib.LoopCombinators
 
-
 (**
 * fold_left-like loop combinator:
 * [ repeat_left lo hi a f acc == f (hi - 1) .. ... (f (lo + 1) (f lo acc)) ]
@@ -20,6 +19,15 @@ val repeat_left:
   -> f:(i:nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
   -> acc:a lo
   -> Tot (a hi) (decreases (hi - lo))
+
+inline_for_extraction
+val repeat_left_all_ml:
+    lo:nat
+  -> hi:nat{lo <= hi}
+  -> a:(i:nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:nat{lo <= i /\ i < hi} -> a i -> FStar.All.ML (a (i + 1)))
+  -> acc:a lo
+  -> FStar.All.ML (a hi)
 
 (**
 * fold_right-like loop combinator:
@@ -124,6 +132,14 @@ val repeat_range:
   -> a
   -> Tot a (decreases (max - min))
 
+val repeat_range_all_ml:
+  #a:Type
+  -> min:nat
+  -> max:nat{min <= max}
+  -> (s:nat{s >= min /\ s < max} -> a -> FStar.All.ML a)
+  -> a
+  -> FStar.All.ML a
+
 unfold
 type repeatable (#a:Type) (#n:nat) (pred:(i:nat{i <= n} -> a -> Tot Type)) =
   i:nat{i < n} -> x:a{pred i x} -> y:a{pred (i+1) y}
@@ -144,3 +160,27 @@ val repeati_inductive:
  -> f:repeatable #a #n pred
  -> x0:a{pred 0 x0}
  -> res:a{pred n res}
+
+val repeati_inductive_repeat_gen:
+   #a:Type
+ -> n:nat
+ -> pred:(i:nat{i <= n} -> a -> Type)
+ -> f:repeatable #a #n pred
+ -> x0:a{pred 0 x0}
+ -> Lemma (repeati_inductive n pred f x0 == repeat_gen n (fun i -> x:a{pred i x}) f x0)
+
+type preserves_predicate (n:nat) 
+     (a:(i:nat{i <= n} -> Type)) 
+     (f:(i:nat{i < n} -> a i -> a (i + 1))) 
+     (pred:(i:nat{i <= n} -> a i -> Tot Type))=
+  forall (i:nat{i < n}) (x:a i). pred i x ==> pred (i + 1) (f i x)
+
+val repeat_gen_inductive:
+   n:nat
+ -> a:(i:nat{i <= n} -> Type)
+ -> pred:(i:nat{i <= n} -> a i -> Type0)
+ -> f:(i:nat{i < n} -> a i -> a (i + 1))
+ -> x0:a 0
+ -> Pure (a n)
+   (requires preserves_predicate n a f pred /\ pred 0 x0)
+   (ensures fun res -> pred n res /\ res == repeat_gen n a f x0)

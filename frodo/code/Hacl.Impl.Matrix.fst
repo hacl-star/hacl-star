@@ -470,21 +470,19 @@ let matrix_mul_s #n1 #n2 #n3 a b c =
 
 (* the end of the special matrix multiplication *)
 
+inline_for_extraction
 val eq_u32_m:
     m:size_t{0 < v m /\ v m <= 16}
   -> a:uint16
   -> b:uint16
   -> res:bool{res == M.eq_m (v m) a b}
-[@ "substitute"]
 let eq_u32_m m a b =
   let open Lib.RawIntTypes in
   let open FStar.UInt32 in
   [@inline_let]
-  let m1 = size_to_uint32 m in
-  [@inline_let]
-  let res = u32_to_UInt32 (to_u32 a &. ((u32 1 <<. m1) -. u32 1)) =^ u32_to_UInt32 (to_u32 b &. (u32 1 <<. m1) -. u32 1) in
-  Lemmas.modulo_pow2_u32 (to_u32 a) (uint_v m1);
-  Lemmas.modulo_pow2_u32 (to_u32 b) (uint_v m1);
+  let res = u32_to_UInt32 (to_u32 a &. ((u32 1 <<. m) -. u32 1)) =^ u32_to_UInt32 (to_u32 b &. (u32 1 <<. m) -. u32 1) in
+  Lemmas.modulo_pow2_u32 (to_u32 a) (uint_v m);
+  Lemmas.modulo_pow2_u32 (to_u32 b) (uint_v m);
   res
 
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"

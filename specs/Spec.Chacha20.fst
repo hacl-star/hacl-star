@@ -9,16 +9,22 @@ open Lib.LoopCombinators
 
 #set-options "--max_fuel 0 --z3rlimit 100"
 
-(* Constants *)
+/// Constants and Types
+
+let size_key = 32
+let size_block = 64
+let size_nonce = 12
+
+(* TODO: Remove, left here to avoid breaking implementation *)
 let keylen = 32   (* in bytes *)
 let blocklen = 64 (* in bytes *)
 let noncelen = 12 (* in bytes *)
 
-type key = lbytes keylen
-type block = lbytes blocklen
-type nonce = lbytes noncelen
+type key = lbytes size_key
+type block = lbytes size_block
+type nonce = lbytes size_nonce
 type counter = size_nat
-type subblock = b:bytes{length b <= blocklen}
+type subblock = b:bytes{length b <= size_block}
 
 // Internally, blocks are represented as 16 x 4-byte integers
 type state = lseq uint32 16
@@ -28,11 +34,14 @@ type shuffle = state -> Tot state
 // Using @ as a functional substitute for ;
 let op_At f g = fun x -> g (f x)
 
+
+/// Specification
+
 let line (a:idx) (b:idx) (d:idx) (s:rotval U32) (m:state) : Tot state =
   let m = m.[a] <- (m.[a] +. m.[b]) in
   let m = m.[d] <- ((m.[d] ^. m.[a]) <<<. s) in m
 
-let quarter_round a b c d : shuffle =
+let quarter_round a b c d : Tot shuffle =
   line a b d (size 16) @
   line c d b (size 12) @
   line a b d (size 8)  @
@@ -61,14 +70,10 @@ let chacha20_core (s:state) : Tot state =
   map2 (+.) k s
 
 (* state initialization *)
-inline_for_extraction
-let c0 = 0x61707865
-inline_for_extraction
-let c1 = 0x3320646e
-inline_for_extraction
-let c2 = 0x79622d32
-inline_for_extraction
-let c3 = 0x6b206574
+inline_for_extraction let c0 = 0x61707865
+inline_for_extraction let c1 = 0x3320646e
+inline_for_extraction let c2 = 0x79622d32
+inline_for_extraction let c3 = 0x6b206574
 
 let setup (k:key) (n:nonce) (st:state) : Tot state =
   let st = st.[0] <- u32 c0 in
@@ -100,23 +105,30 @@ let chacha20_encrypt_block (st0:state) (ctr0:counter) (incr:counter{ctr0 + incr 
   let kb = chacha20_key_block st in
   map2 (^.) b kb
 
-let chacha20_encrypt_last (st0:state) (ctr0:counter) 
-			  (incr:counter{ctr0 + incr <= max_size_t}) 
-			  (len:size_nat{len < blocklen})
-			  (b:lbytes len) : lbytes len =
-  let plain = create blocklen (u8 0) in
+let chacha20_encrypt_last
+  (st0: state)
+  (ctr0: counter)
+  (incr: counter{ctr0 + incr <= max_size_t})
+  (len: size_nat{len < size_block})
+  (b: lbytes len) :
+  Tot (lbytes len) =
+
+  let plain = create size_block (u8 0) in
   let plain = update_sub plain 0 (length b) b in
   let cipher = chacha20_encrypt_block st0 ctr0 incr plain in
   sub cipher 0 (length b)
 
+
 val chacha20_encrypt_bytes:
-  key -> nonce -> c:counter 
--> msg:bytes{length msg / blocklen + c <= max_size_t} 
--> cipher:bytes{length cipher == length msg}
+    k: key
+  -> n: nonce
+  -> c: counter
+  -> msg: bytes{length msg / size_block + c <= max_size_t}
+  -> cipher: bytes{length cipher == length msg}
 
 let chacha20_encrypt_bytes key nonce ctr0 msg =
   let cipher = msg in
   let st0 = chacha20_init key nonce in
-  map_blocks blocklen cipher
-    (chacha20_encrypt_block st0 ctr0) 
+  map_blocks size_block cipher
+    (chacha20_encrypt_block st0 ctr0)
     (chacha20_encrypt_last st0 ctr0)

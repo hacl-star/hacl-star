@@ -141,7 +141,6 @@ val state_theta:
 let state_theta s =
   let h0 = ST.get() in
   let spec _ h1 = as_seq h1 s == S.state_theta (as_seq h0 s) /\ live h1 s in
-  let footprint = Ghost.hide (loc_buffer s) in
   salloc1_trivial h0 (size 5) (u64 0) (Ghost.hide (loc_buffer s)) spec
     (fun _C -> state_theta0 s _C; state_theta1 s _C)
 
@@ -466,59 +465,25 @@ let absorb s rateInBytes inputByteLen input delimitedSuffix =
   (absorb_inner rateInBytes)
   (absorb_last delimitedSuffix rateInBytes) s
 
-private
-val lemma_rateInBytes:
-    inputByteLen:size_nat
-  -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
-  -> i:size_nat{i < inputByteLen / rateInBytes}
-  -> Lemma (i * rateInBytes + rateInBytes <= inputByteLen)
-let lemma_rateInBytes _ _ _ = ()
-
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
-
-val lemma_update_squeeze:
-    rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
-  -> outputByteLen:size_nat
-  -> i:size_nat{i < outputByteLen / rateInBytes}
-  -> s:S.state
-  -> o:LB.lbytes (i * rateInBytes)
-  -> o1:LB.lbytes (i * rateInBytes + rateInBytes)
-  -> Lemma
-    (requires
-      LSeq.sub o1 0 (i * rateInBytes) == LSeq.sub o 0 (i * rateInBytes) /\
-      LSeq.sub o1 (i * rateInBytes) rateInBytes == S.storeState rateInBytes s)
-    (ensures o1 == snd (S.squeeze_inner rateInBytes outputByteLen i (s, o)))
-let lemma_update_squeeze rateInBytes outputByteLen i s o o1 =
-  Seq.lemma_split (LSeq.sub o1 0 (i * rateInBytes + rateInBytes)) (i * rateInBytes)
-
 inline_for_extraction noextract
 val squeeze_inner:
     rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
-  -> i:size_t{v i < v (outputByteLen /. rateInBytes)}
   -> s:state
-  -> output:lbytes (v outputByteLen)
+  -> output:lbytes (v rateInBytes)
+  -> i:size_t{v i < v (outputByteLen /. rateInBytes)}
   -> Stack unit
     (requires fun h0 -> live h0 s /\ live h0 output /\ disjoint s output)
     (ensures  fun h0 _ h1 ->
-      lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
-      modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1 /\
-      (let o = as_seq h0 (gsub output (size 0) (i *! rateInBytes)) in
-       let s', output' =
-         S.squeeze_inner (v rateInBytes) (v outputByteLen) (v i) (as_seq h0 s, o) in
-       as_seq h1 s == s' /\
-       as_seq h1 (gsub output (size 0) ((i +! size 1) *! rateInBytes)) == output'))
-let squeeze_inner rateInBytes outputByteLen i s output =
-  lemma_rateInBytes (v outputByteLen) (v rateInBytes) (v i);
-  let h0 = ST.get () in
-  storeState rateInBytes s (sub output (i *! rateInBytes) rateInBytes);
-  let h1 = ST.get () in
-  state_permute s;
-  let o = as_seq h0 (gsub output (size 0) (i *! rateInBytes)) in
-  let o' = as_seq h1 (gsub  output (size 0) ((i +! size 1) *! rateInBytes)) in
-  lemma_update_squeeze (v rateInBytes) (v outputByteLen) (v i) (as_seq h1 s) o o'
+      modifies2 s output h0 h1 /\
+      (let s', block =
+         S.squeeze_inner (v rateInBytes) (v outputByteLen) (v i) (as_seq h0 s) in
+       as_seq h1 s == s' /\ as_seq h1 output == block))
+let squeeze_inner rateInBytes outputByteLen s output i =
+  storeState rateInBytes s output;
+  state_permute s
 
-#set-options "--max_ifuel 1"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 val squeeze:
     s:state
@@ -528,44 +493,28 @@ val squeeze:
   -> Stack unit
     (requires fun h0 -> live h0 s /\ live h0 output /\ disjoint s output)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer s) (loc_buffer output)) h0 h1 /\
-      as_seq h1 output ==
-      S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
+      modifies2 s output h0 h1 /\
+      as_seq h1 output == S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
 let squeeze s rateInBytes outputByteLen output =
-  let h0 = ST.get() in
-  assert_norm (norm [delta]
-    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) ==
-    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen));
   let outBlocks = outputByteLen /. rateInBytes in
   let remOut = outputByteLen %. rateInBytes in
-  let tmp = sub output (outputByteLen -. remOut) remOut in
+  assert_spinoff (v outputByteLen - v remOut == v outBlocks * v rateInBytes);
+  let last = B.sub output (outputByteLen -. remOut) remOut in
   [@ inline_let]
-  let a_spec (i:size_nat{i <= v outputByteLen / v rateInBytes}) =
-    S.state & (LB.lbytes (i * v rateInBytes)) in
-  [@ inline_let]
-  let refl h (i:size_nat{i <= v outBlocks}) :
-    GTot (S.state & (LB.lbytes (i * v rateInBytes))) =
-    assert (i * v rateInBytes <= v outputByteLen);
-    as_seq h s,
-    as_seq h (gsub output (size 0) (size i *! rateInBytes)) in
-  [@ inline_let]
-  let footprint i = loc_union (loc_buffer s) (loc_buffer output) in
-  [@ inline_let]
-  let spec h0: i:size_nat{i < v outBlocks} -> a_spec i -> a_spec (i + 1) =
-    S.squeeze_inner (v rateInBytes) (v outputByteLen) in
-  let h0 = ST.get () in
-  loop h0 outBlocks a_spec refl footprint spec
-  (fun i ->
-    Loop.unfold_repeat_gen (v outBlocks) a_spec (spec h0) (refl h0 0) (v i);
-    squeeze_inner rateInBytes outputByteLen i s output
-  );
-  storeState remOut s tmp;
+  let a_spec (i:nat{i <= v outputByteLen / v rateInBytes}) = S.state in
+  let blocks = sub output (size 0) (outBlocks *! rateInBytes) in
+  let h0 = ST.get() in
+  fill_blocks h0 rateInBytes outBlocks blocks a_spec
+    (fun h i -> as_seq h s)
+    (fun _ -> loc_buffer s)
+    (fun h0 -> S.squeeze_inner (v rateInBytes) (v outputByteLen))
+    (fun i block -> squeeze_inner rateInBytes outputByteLen s block i);
+  storeState remOut s last;
   let h1 = ST.get() in
-  Seq.lemma_split (as_seq h1 output) (v outputByteLen - v remOut);
-  Seq.lemma_eq_intro (LSeq.create 0 (u8 0))
-    (as_seq #_ #0 h0 (gsub output (size 0) (size 0)))
-
-#set-options "--max_ifuel 0"
+  Seq.lemma_split (as_seq h1 output) (v outBlocks * v rateInBytes);
+  assert_norm (norm [delta] 
+    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) ==
+    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
 
 val keccak:
     rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}

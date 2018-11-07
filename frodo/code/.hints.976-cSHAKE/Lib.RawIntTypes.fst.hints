@@ -1,5 +1,5 @@
 [
-  "5µÉiÕš9ŸHjØ}Þ·Ô",
+  "f<\t\\ª$\u0018ît\rƒâÄû•…",
   [
     [
       "Lib.RawIntTypes.u8_from_UInt8",
@@ -11,7 +11,7 @@
         "haseqLib.RawIntTypes_Tm_refine_ff71f07ca2c716a62af68d13a2bc4c23"
       ],
       0,
-      "c7d12b2ac27a952018d152983b99e996"
+      "80eb7d3be16560eddb8b4cb2946943e8"
     ],
     [
       "Lib.RawIntTypes.u8_from_UInt8",
@@ -21,10 +21,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U8@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "a98ff0e35aa4f0ffa33f5f945f70fb0c"
+      "c8f0ba51c700b0820956d6c13155362e"
     ],
     [
       "Lib.RawIntTypes.u16_from_UInt16",
@@ -36,7 +36,7 @@
         "haseqLib.RawIntTypes_Tm_refine_c974a8c1833b75ea818c2ab964487280"
       ],
       0,
-      "676ae66efff8491dd113007b88b41050"
+      "d284ab883f6cb43ec642b53be16911f0"
     ],
     [
       "Lib.RawIntTypes.u16_from_UInt16",
@@ -46,10 +46,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U16",
         "equality_tok_Lib.IntTypes.U16@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "c93f55962b32470304cc50eff423947e"
+      "2b0e4f74f3c27a772ab690b146041120"
     ],
     [
       "Lib.RawIntTypes.u32_from_UInt32",
@@ -61,7 +61,7 @@
         "haseqLib.RawIntTypes_Tm_refine_db707a327296a75a288aa91c1018c0e8"
       ],
       0,
-      "6d913b7a51668843394a7a49208f9a23"
+      "562a0f591f0da9cc6f68f26f275346dd"
     ],
     [
       "Lib.RawIntTypes.u32_from_UInt32",
@@ -71,10 +71,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "99af2e673efd8a36bcc10d62d2125230"
+      "2c4f9ab9aff7dcb73a2fadff064685aa"
     ],
     [
       "Lib.RawIntTypes.u64_from_UInt64",
@@ -86,7 +86,7 @@
         "haseqLib.RawIntTypes_Tm_refine_b66b7a06a50c8273f32d0581cb8a7d60"
       ],
       0,
-      "a4083e92075c6327480f489f6fb80c6a"
+      "eca785c2d0f1e9f9117814e3cfb9959e"
     ],
     [
       "Lib.RawIntTypes.u64_from_UInt64",
@@ -96,10 +96,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.U64@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "aa3f29c492c37a3cfde1d843377dc1a0"
+      "8c11da6954239833785f8befcc59d96f"
     ],
     [
       "Lib.RawIntTypes.u128_from_UInt128",
@@ -115,7 +115,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "df3c877045e8f352520933853029052b"
+      "350e36a21b1e0db440299dc11586e0d4"
     ],
     [
       "Lib.RawIntTypes.u128_from_UInt128",
@@ -125,10 +125,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U128",
         "equality_tok_Lib.IntTypes.U128@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "9654a8cd8d40b2dcea6fdad14ab06437"
+      "c5d7c3900b65fd1bdab2cffa28268431"
     ],
     [
       "Lib.RawIntTypes.size_from_UInt32",
@@ -140,7 +140,7 @@
         "haseqLib.RawIntTypes_Tm_refine_db707a327296a75a288aa91c1018c0e8"
       ],
       0,
-      "456d8bb498c66f6921f9255b89fd0e4a"
+      "5701765e32bf5217bb91a668cc79292d"
     ],
     [
       "Lib.RawIntTypes.size_from_UInt32",
@@ -148,12 +148,12 @@
       2,
       1,
       [
-        "@query", "constructor_distinct_Lib.IntTypes.SIZE",
-        "equality_tok_Lib.IntTypes.SIZE@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "@query", "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.pub_int_v"
       ],
       0,
-      "b4db117335fab0147e396b937d3d6678"
+      "1f38e56844aeab6560355c36bde8b198"
     ],
     [
       "Lib.RawIntTypes.u8_to_UInt8",
@@ -165,7 +165,7 @@
         "haseqLib.RawIntTypes_Tm_refine_ff71f07ca2c716a62af68d13a2bc4c23"
       ],
       0,
-      "89ed65fcc8b7e0185efc0157fc608502"
+      "8c464385e317db0b3d82d2f51c2d79c8"
     ],
     [
       "Lib.RawIntTypes.u8_to_UInt8",
@@ -175,10 +175,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U8@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "4d621dfa7093f46636822ddb511ba1a1"
+      "db2c2691f3bd891900a3354324ed3e83"
     ],
     [
       "Lib.RawIntTypes.u16_to_UInt16",
@@ -190,7 +190,7 @@
         "haseqLib.RawIntTypes_Tm_refine_c974a8c1833b75ea818c2ab964487280"
       ],
       0,
-      "ade2cef80fc8160db7a57d6a881a9263"
+      "fdbf11b5110ef63fcd15a76d73652109"
     ],
     [
       "Lib.RawIntTypes.u16_to_UInt16",
@@ -200,10 +200,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U16",
         "equality_tok_Lib.IntTypes.U16@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "c24dbc261ec90acc51448db6d712f58b"
+      "e2a34e069d9c377f9893b88708820b50"
     ],
     [
       "Lib.RawIntTypes.u32_to_UInt32",
@@ -215,7 +215,7 @@
         "haseqLib.RawIntTypes_Tm_refine_db707a327296a75a288aa91c1018c0e8"
       ],
       0,
-      "e98fae185594efb0d544c7170ca8d3b9"
+      "63cf1929afad637cda8122e5032a9ede"
     ],
     [
       "Lib.RawIntTypes.u32_to_UInt32",
@@ -225,10 +225,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "77112f20e32bb95a0d697db8a6aa17ee"
+      "68a7690b85e8eca6f04f192959b6be76"
     ],
     [
       "Lib.RawIntTypes.u64_to_UInt64",
@@ -240,7 +240,7 @@
         "haseqLib.RawIntTypes_Tm_refine_b66b7a06a50c8273f32d0581cb8a7d60"
       ],
       0,
-      "230dfbc920009d0e76ed7722b189f9e2"
+      "1240f74b29383f391e536cd6fe0cfd82"
     ],
     [
       "Lib.RawIntTypes.u64_to_UInt64",
@@ -250,10 +250,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.U64@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "fe4ad6a4e13ed33d5f1b1195bc459b4e"
+      "dc99a7a60a6968bcca596cac9c44a347"
     ],
     [
       "Lib.RawIntTypes.u128_to_UInt128",
@@ -269,7 +269,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1229c7231320164dd1351e975ffb8ca2"
+      "16c56a82e9428f076ffc4c7466f6dd21"
     ],
     [
       "Lib.RawIntTypes.u128_to_UInt128",
@@ -279,10 +279,10 @@
       [
         "@query", "constructor_distinct_Lib.IntTypes.U128",
         "equality_tok_Lib.IntTypes.U128@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v"
       ],
       0,
-      "a505db8a5a371f8d62b1c53dbcae5ca9"
+      "19a234abb1a4799eeb873e8a6015d8f7"
     ],
     [
       "Lib.RawIntTypes.size_to_UInt32",
@@ -294,7 +294,7 @@
         "haseqLib.RawIntTypes_Tm_refine_db707a327296a75a288aa91c1018c0e8"
       ],
       0,
-      "8d28958226505c5b31699c0926644fb2"
+      "b46ad609c619b81edfc12c090ff2ba2b"
     ],
     [
       "Lib.RawIntTypes.size_to_UInt32",
@@ -302,12 +302,12 @@
       2,
       1,
       [
-        "@query", "constructor_distinct_Lib.IntTypes.SIZE",
-        "equality_tok_Lib.IntTypes.SIZE@tok",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v"
+        "@query", "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.pub_int_v"
       ],
       0,
-      "3c817003581cf1eee8335043e12428f1"
+      "718f9c218ac042b364389f8481bd3e7c"
     ],
     [
       "Lib.RawIntTypes.uint_to_nat",
@@ -315,46 +315,13 @@
       2,
       1,
       [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.nat",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
-      ],
-      0,
-      "6ee7bd86cd7468faaa657290383aa0eb"
-    ],
-    [
-      "Lib.RawIntTypes.uint_to_nat",
-      2,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "b2t_def",
-        "constructor_distinct_Lib.IntTypes.NATm",
-        "constructor_distinct_Lib.IntTypes.SIZE",
-        "constructor_distinct_Lib.IntTypes.U128",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "disc_equation_Lib.IntTypes.NATm", "disc_equation_Lib.IntTypes.SIZE",
-        "disc_equation_Lib.IntTypes.U128", "disc_equation_Lib.IntTypes.U16",
-        "disc_equation_Lib.IntTypes.U32", "disc_equation_Lib.IntTypes.U64",
-        "disc_equation_Lib.IntTypes.U8", "equality_tok_Lib.IntTypes.U16@tok",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt128.n",
-        "equation_FStar.UInt32.n", "equation_Lib.IntTypes.uint_t",
-        "equation_Lib.IntTypes.uint_to_nat_", "equation_Lib.IntTypes.uint_v",
-        "equation_Prims.nat", "fuel_guarded_inversion_Lib.IntTypes.inttype",
-        "function_token_typing_FStar.UInt32.n",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Lib.IntTypes.NATm_m",
-        "refinement_interpretation_Lib.IntTypes_Tm_refine_6b863774fbb8da73abe958cf9c9c788f"
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "9fd6241175c263ef0555a743abb56b45"
+      "bcef52495916f8d870ec608181145caf"
     ]
   ]
 ]

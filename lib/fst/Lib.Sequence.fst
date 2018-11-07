@@ -6,15 +6,6 @@ open Lib.LoopCombinators
 
 #set-options "--z3rlimit 15"
 
-private inline_for_extraction noextract
-val map2_list: #a:Type -> #b:Type -> #c:Type
-  -> f:(a -> b -> c) -> l1:list a -> l2:list b{List.Tot.length l1 == List.Tot.length l2}
-  -> l:list c{List.Tot.length l == List.Tot.length l1}
-let rec map2_list #a #b #c f l1 l2 =
-  match l1, l2 with
-  | [], [] -> []
-  | x::l1', y::l2' -> f x y :: map2_list f l1' l2'
-
 let index #a #len s n = Seq.index s n
 
 let create #a len init = Seq.create #a len init
@@ -57,11 +48,56 @@ let lemma_update_sub #a #len dst start n src res =
   FStar.Seq.lemma_split res (start + n);
   FStar.Seq.lemma_split res1 (start + n)
 
+let lemma_concat2 #a len0 s0 len1 s1 s =
+  FStar.Seq.Properties.lemma_split s len0;
+  FStar.Seq.Properties.lemma_split (concat s0 s1) len0
+
+let lemma_concat3 #a len0 s0 len1 s1 len2 s2 s =
+  let s' = concat (concat s0 s1) s2 in
+  FStar.Seq.Properties.lemma_split (sub s 0 (len0 + len1)) len0;
+  FStar.Seq.Properties.lemma_split (sub s' 0 (len0 + len1)) len0;
+  FStar.Seq.Properties.lemma_split s (len0 + len1);
+  FStar.Seq.Properties.lemma_split s' (len0 + len1)
+
+let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = lseq a k
+let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) (s:createi_a a len init k) =
+  forall (i:nat). {:pattern (index s i)} i < k ==> index s i == init i
+let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
+	         (si:createi_a a len init i) 
+		 : r:createi_a a len init (i+1){
+		   createi_pred a len init i si ==>
+		   createi_pred a len init (i+1) r
+		 } = 
+    let s : lseq a (i+1) = FStar.Seq.snoc si (init i) in
+    assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
+    assert (createi_pred a len init i si ==> (forall (j:nat). j < (i+1) ==> index s j == init j));
+    s
+let createi #a len init_f = 
+    repeat_gen_inductive len 
+      (createi_a a len init_f) 
+      (createi_pred a len init_f)
+      (createi_step a len init_f)
+      (of_list []) 
+
+let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
+	       (f:(i:nat{i < len} -> a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
+		 f i s.[i]
+
+let mapi #a #b #len f s = 
+    createi #b len (mapi_inner #a #b #len f s)
+
+let map_inner (#a:Type) (#b:Type) (#len:size_nat)
+	       (f:(a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
+		 f s.[i]
+
 let map #a #b #len f s =
-  Seq.seq_of_list (List.Tot.map f (Seq.seq_to_list s))
+    createi #b len (map_inner #a #b #len f s)
+
+let map2i #a #b #c #len f s1 s2 =
+    createi #c len (fun i -> f i s1.[i] s2.[i])
 
 let map2 #a #b #c #len f s1 s2 =
-  Seq.seq_of_list (map2_list f (Seq.seq_to_list s1) (Seq.seq_to_list s2))
+    createi #c len (fun i -> f s1.[i] s2.[i])
 
 let for_all #a #len f x = Seq.for_all f x
 
@@ -158,3 +194,14 @@ let repeat_blocks #a #b bs inp f l init =
   let acc = repeati nb (repeat_blocks_f bs inp f nb) init in
   let last = seq_sub inp (nb * bs) rem in
   l rem last acc
+
+let generate_blocks #t len n a f acc0 =
+  let a' (i:nat{i <= n}) = a i & lseq t (i * len) in
+  let f' (i:nat{i < n}) (ao:a' i) = 
+    let acc, o = ao <: a i & lseq t (i * len) in
+    let acc', block = f i acc in
+    let o' : lseq t ((i + 1) * len) = o @| block in
+    acc', o'
+  in
+  let acc0' : a 0 & lseq t (0 * len) = acc0, Seq.empty in
+  repeat_gen n a' f' acc0'
