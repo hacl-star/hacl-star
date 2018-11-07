@@ -993,7 +993,8 @@ let create_memcpy_initial_state
         (dst: buffer (TBase (TUInt64)))
         (src: buffer (TBase (TUInt64)))
         (h0:HS.mem)
-        (stack:stack_b h0 [src;dst]) =
+        (stack:stack_buffer {normal (mem_roots_p h0 [stack;src;dst])}) =
+    assume (mem_roots_p h0 [stack;src;dst]);
     normal
       (elim_down_nil [src;dst]
         (elim_down_cons _ _ [dst]
@@ -1016,6 +1017,7 @@ let test2 () =
         h0
         stack
 
+#set-options "--z3rlimit_factor 3 --max_fuel 0 --max_ifuel 0"
 let memcpy_wrapped_annot :
   va_b0: va_code ->
   (dst: buffer (TBase (TUInt64))) ->
@@ -1035,27 +1037,26 @@ let memcpy_wrapped_annot :
           Monotonic.HyperStack.get_tip push_h0 ==
           Monotonic.HyperStack.get_tip alloc_push_h0 /\
           frameOf b == Monotonic.HyperStack.get_tip alloc_push_h0 /\
-          live alloc_push_h0 b ==> // /\
-          // mem_roots_p alloc_push_h0 [b;src;dst] ==>
-          (// let initial_state =
-           //  create_memcpy_initial_state dst src alloc_push_h0 b in
-
-          va_pre va_b0 // initial_state
-                 (Mkstate true
-                          (X64.Vale.Regs.of_fun (FunctionalExtensionality.on_domain reg
-                                      (regs_with_stack
-                                        (upd_reg win
-                                          (upd_reg win init_regs 0 (addrs dst))
-                                          1
-                                          (addrs src))
-                                          b)))
-                              (X64.Vale.Xmms.of_fun (FunctionalExtensionality.on_domain xmm
-                                      init_xmms))
-                              0
-                              (mk_mem addrs [b; src; dst] alloc_push_h0)
-                              (create_valid_memtaint (mk_mem addrs [b; src; dst] alloc_push_h0)
-                                  [b; src; dst]
-                                  (upd_taint_map (upd_taint_map init_taint dst) src)))
+          live alloc_push_h0 b /\
+          normal (mem_roots_p alloc_push_h0 [b;src;dst]) ==>
+          (let initial_state =
+            create_memcpy_initial_state dst src alloc_push_h0 b in
+           va_pre va_b0 initial_state
+                 // (Mkstate true
+                 //          (X64.Vale.Regs.of_fun (FunctionalExtensionality.on_domain reg
+                 //                      (regs_with_stack
+                 //                        (upd_reg win
+                 //                          (upd_reg win init_regs 0 (addrs dst))
+                 //                          1
+                 //                          (addrs src))
+                 //                          b)))
+                 //              (X64.Vale.Xmms.of_fun (FunctionalExtensionality.on_domain xmm
+                 //                      init_xmms))
+                 //              0
+                 //              (mk_mem addrs [b; src; dst] alloc_push_h0)
+                 //              (create_valid_memtaint (mk_mem addrs [b; src; dst] alloc_push_h0)
+                 //                  [b; src; dst]
+                 //                  (upd_taint_map (upd_taint_map init_taint dst) src)))
                           win
                           b
                           dst
@@ -1068,7 +1069,7 @@ let memcpy_wrapped_annot :
                       Monotonic.HyperStack.get_tip alloc_push_h0 /\
                       frameOf b == Monotonic.HyperStack.get_tip alloc_push_h0 /\
                       live alloc_push_h0 b /\
-//                      mem_roots_p alloc_push_h0 [b;src;dst] /\
+                      // normal (mem_roots_p alloc_push_h0 [b;src;dst]) /\
                       (// let initial_state =
                        //  create_memcpy_initial_state dst src alloc_push_h0 b in
                        va_post va_b0 // initial_state
