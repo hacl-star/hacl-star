@@ -114,23 +114,6 @@ let rec n_dep_arrow (dom:list vale_type) (codom: n_arrow dom Type) =
   | [] -> codom
   | hd::tl -> x:vale_type_as_type hd -> n_dep_arrow tl (elim_1 codom x)
 
-//unused
-let rec n_dep_arrow_uncurry
-        (prefix: Type)
-        (v:prefix)
-        (dom:list vale_type)
-        (codom: arr (as_left_tuple prefix dom) Type)
-  : Tot Type (decreases dom) =
-  match dom with
-  | [] -> codom v
-  | hd::tl ->
-    x:vale_type_as_type hd ->
-    n_dep_arrow_uncurry
-      (prefix & vale_type_as_type hd)
-      (v, x)
-      tl
-      codom
-
 let intro_dep_arrow_nil (b:Type)
                         (f:b)
   : n_dep_arrow [] b
@@ -172,12 +155,6 @@ let test : n_dep_arrow [VT_Base TUInt8] (fun (x:UInt8.t) -> y:UInt8.t{x == y}) =
 // an arity generic function that builds a trusted state `t:TS.state`
 // and a vale state `v:va_state` with a proof that `t == state_to_S v`
 ////////////////////////////////////////////////////////////////////////////////
-let rec create_buffer_list (dom:list vale_type) (acc:list b8)
-    : n_arrow dom (list b8) =
-    match dom with
-    | [] -> acc
-    | hd::tl ->
-      (fun (x:vale_type_as_type hd) -> create_buffer_list tl (if VT_Buffer? hd then x::acc else acc))
 
 let maybe_cons_buffer (a:vale_type) (x:vale_type_as_type a) (acc:list b8) : list b8 =
   if VT_Buffer? a then x::acc else acc
@@ -398,25 +375,25 @@ let create_trusted_initial_state_t (dom:list vale_type)
           dom
           (initial_trusted_state_t dom acc)
 
-let create_trusted_initial_state (dom:list vale_type{List.length dom < max_arity win})
-                              (acc:list b8)
-  : create_trusted_initial_state_t dom
-                                acc
-  = create_initial_state_aux
+let create_trusted_initial_state
+      (is_win:bool)
+      (dom:list vale_type{List.length dom < max_arity is_win})
+    : create_trusted_initial_state_t dom []
+    = create_initial_state_aux
           dom
-          win
+          is_win
           0
-          Interop_assumptions.init_regs
+          init_regs
           init_xmms
-          acc
+          []
           init_taint
           create_initial_trusted_state_core
 
 let stack_buffer = buffer (TBase TUInt64)
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//lowstar_sig pre post:
-//    Interepreting a vale pre/post as a Low* function type
+//lowstar_sig:
+//    Interepreting an assembly language type as a Low* function type
 //////////////////////////////////////////////////////////////////////////////////////////
 
 let elim_down_1 (hd:vale_type)
@@ -431,6 +408,9 @@ let elim_down_nil (acc:list b8)
     : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc)} -> GTot (TS.traceState & mem) =
     down
 
+let save_reg (r:reg) (s0 sN:TS.traceState) =
+  BS.eval_reg r s0.TS.state == BS.eval_reg r sN.TS.state
+
 let elim_down_cons (hd:vale_type)
                    (tl:list vale_type)
                    (acc:list b8)
@@ -441,7 +421,7 @@ let elim_down_cons (hd:vale_type)
 
 // (stack_bytes:nat)
 // stack_b:b8 ->
-let wrap_pre (c:code) (acc:list b8) (down:create_trusted_initial_state_t [] acc) (h0:HS.mem) =
+let prediction (c:code) (acc:list b8) (down:create_trusted_initial_state_t [] acc) (h0:HS.mem) =
   s0:TS.traceState ->
   push_h0:mem_roots acc ->
   alloc_push_h0:mem_roots acc ->
@@ -456,57 +436,69 @@ let wrap_pre (c:code) (acc:list b8) (down:create_trusted_initial_state_t [] acc)
       s0 == fst (elim_down_nil acc down alloc_push_h0 b)
     )
     (ensures fun (fuel, final_mem) ->
-      HS.poppable final_mem.hs /\
-      Some? (TS.taint_eval_code c fuel s0)
-  // TODO: down_mem final_mem.hs == (TS.taint_eval_code c fuel s0).TS.state.mem
-  // TODO: ok
-  // TODO: callee-save
+      Some? (TS.taint_eval_code c fuel s0) /\ (
+        let sN = Some?.v (TS.taint_eval_code c fuel s0) in
+        Interop.down_mem final_mem.hs final_mem.addrs final_mem.ptrs == sN.TS.state.BS.mem /\
+        save_reg Rbx s0 sN /\
+        save_reg Rsi s0 sN /\
+        save_reg Rdi s0 sN /\
+        save_reg Rbp s0 sN /\
+        save_reg Rsp s0 sN /\
+        save_reg R12 s0 sN /\
+        save_reg R13 s0 sN /\
+        save_reg R14 s0 sN /\
+        save_reg R15 s0 sN /\
+        // TODO: callee-save for xmms
+        sN.TS.state.BS.ok
+      )
     )
 
+noeq type as_lowstar_sig_ret (acc:list b8) =
+  | As_lowstar_sig_ret :
+      push_h0:mem_roots acc ->
+      alloc_push_h0:mem_roots acc ->
+      b:stack_buffer{mem_roots_p alloc_push_h0 (b::acc)} ->
+      fuel:nat ->
+      final_mem:mem ->
+      as_lowstar_sig_ret acc
+
+let as_lowstar_sig_post
+    (c:code)
+    (acc:list b8)
+    (down:create_trusted_initial_state_t [] acc)
+    (h0:HS.mem)
+    (predict:prediction c acc down h0)
+    (push_h0:mem_roots acc)
+    (alloc_push_h0:mem_roots acc)
+    (b:stack_buffer{mem_roots_p alloc_push_h0 (b::acc)})
+    (fuel:nat)
+    (final_mem:mem)
+    (h1:HS.mem) =
+  let s0 = fst (elim_down_nil acc down alloc_push_h0 b) in
+  HS.fresh_frame h0 push_h0 /\
+  M.modifies loc_none push_h0 alloc_push_h0 /\
+  HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
+  B.frameOf b == HS.get_tip alloc_push_h0 /\
+  B.live alloc_push_h0 b /\
+  (fuel, final_mem) == predict s0 push_h0 alloc_push_h0 b /\
+  HS.poppable final_mem.hs /\
+  h1 == HS.pop (final_mem.hs)
+
 let rec as_lowstar_sig_tl
-  (c:code)
-  (dom:list vale_type)
-                          (acc:list b8)
-                          (down:create_trusted_initial_state_t dom acc)
+    (c:code)
+    (dom:list vale_type)
+    (acc:list b8)
+    (down:create_trusted_initial_state_t dom acc)
     : Type =
     match dom with
     | [] ->
-      (h0:HS.mem) ->
-      wrap_pre c acc down h0 ->
-      Stack unit
-        (requires (fun h0' -> h0 == h0' /\
-                    mem_roots_p h0 acc /\
-//                    (forall (push_h0:mem_roots acc)
-//                       (alloc_push_h0:mem_roots acc)
-//                       (b:stack_buffer).
-//                            HS.fresh_frame h0 push_h0 /\
-//                            M.modifies loc_none push_h0 alloc_push_h0 /\
-//                            HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
-//                            B.frameOf b == HS.get_tip alloc_push_h0 /\
-//                            B.live alloc_push_h0 b ==>
-//                            elim_nil pre (elim_down_nil acc down alloc_push_h0 b) b)))
-True))
-        (ensures (fun h0 _ h1 ->
-//                       exists (push_h0:mem_roots acc) (alloc_push_h0:mem_roots acc) (b:stack_buffer) final.// fuel.//  {:pattern
-//                                 // (post push_h0 alloc_push_h0 b final fuel)}
-//                            HS.fresh_frame h0 push_h0 /\
-//                            M.modifies loc_none push_h0 alloc_push_h0 /\
-//                            HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
-//                            B.frameOf b == HS.get_tip alloc_push_h0 /\
-//                            B.live alloc_push_h0 b /\
-
-//                            elim_nil
-//                              post
-//                              (elim_down_nil acc down alloc_push_h0 b)
-//                              b
-//                              final
-//                              fuel /\
-
-//                            HS.poppable final.mem.hs /\
-//                            h1 == HS.pop (final.mem.hs) /\
-True
-                          ))
-
+      h0:HS.mem ->
+      predict:prediction c acc down h0 ->
+      Stack (as_lowstar_sig_ret acc)
+        (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 acc))
+        (ensures fun h0 (As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem) h1 ->
+          as_lowstar_sig_post c acc down h0 predict push_h0 alloc_push_h0 b fuel final_mem h1
+        )
     | hd::tl ->
       x:vale_type_as_type hd ->
       as_lowstar_sig_tl
@@ -520,22 +512,47 @@ let as_lowstar_sig (c:code) (dom:list vale_type{List.length dom < max_arity win}
       c
       dom
       []
-      (create_trusted_initial_state dom [])
+      (create_trusted_initial_state win dom)
 
 ////////////////////////////////////////////////////////////////////////////////
 
 let rec wrap_tl
+         (c:code)
          (dom:list vale_type)
          (acc:list b8)
          (down:create_trusted_initial_state_t dom acc)
-         (c:code)
     : as_lowstar_sig_tl c dom acc down
     = match dom with
       | [] ->
         let f : as_lowstar_sig_tl c [] acc down =
-          fun (h0:HS.mem) (pre:wrap_pre c acc down h0) ->
-            let h0' = get() in
-            push_frame();
+          let ff (h0:HS.mem) (predict:prediction c acc down h0)
+            : Stack (as_lowstar_sig_ret acc)
+              (requires fun h0' -> h0 == h0' /\ mem_roots_p h0 acc /\ True)
+              (ensures fun h0 (As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem) h1 ->
+                as_lowstar_sig_post c acc down h0 predict push_h0 alloc_push_h0 b fuel final_mem h1)
+            =
+            let h0' = get () in
+            push_frame ();
+            let h1 = get () in
+            let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 24) in
+            let h2 = get () in
+            assert (HS.fresh_frame h0 h1);
+            assert (mem_roots_p h2 acc);
+            let (fuel, final_mem) = st_put (fun h0' -> h0' == h2) (fun h0' ->
+              let va_s0, mem_s0 = elim_down_nil acc down h0' stack_b in
+              let (fuel, final_mem) = predict va_s0 h1 h2 stack_b in
+              assert (B.frameOf stack_b = HS.get_tip h0');
+              assert (B.live h0' stack_b);
+              let Some va_s1 = TS.taint_eval_code c fuel va_s0 in
+              ((fuel, final_mem), final_mem.hs)
+            ) in //conveniently, st_put assumes that the shape of the stack did not change
+            pop_frame ();
+            As_lowstar_sig_ret h1 h2 stack_b fuel final_mem
+          in ff
+(*
+          fun (h0:HS.mem) (predict:prediction c acc down h0) ->
+            let h0' = get () in
+            push_frame ();
             let h1 = get () in
             let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 24) in
             let h2 = get () in
@@ -543,14 +560,15 @@ let rec wrap_tl
             assert (mem_roots_p h2 acc);
             st_put (fun h0' -> h0' == h2) (fun h0' ->
               let va_s0, mem_s0 = elim_down_nil acc down h0' stack_b in
-              let (fuel, final_mem) = pre va_s0 h1 h2 stack_b in
+              let (fuel, final_mem) = predict va_s0 h1 h2 stack_b in
               assert (B.frameOf stack_b = HS.get_tip h0');
               assert (B.live h0' stack_b);
               let Some va_s1 = TS.taint_eval_code c fuel va_s0 in
               (), final_mem.hs
             ); //conveniently, st_put assumes that the shape of the stack did not change
-            pop_frame();
-            ()
+            pop_frame ();
+            (h1, h2, stack_b)
+*)
         in
         f <: as_lowstar_sig_tl c [] acc down
 
@@ -558,32 +576,25 @@ let rec wrap_tl
         let f (x:vale_type_as_type hd)
            : as_lowstar_sig_tl c tl (maybe_cons_buffer hd x acc)
                                (elim_down_cons hd tl acc down x)
-           = wrap_tl tl
+           = wrap_tl c tl
                   (maybe_cons_buffer hd x acc)
                   (elim_down_cons hd tl acc down x)
-                  c
         in
         f
 
 
-let wrap (dom:list vale_type{List.length dom < max_arity win})
-         (c:code)
+let wrap (c:code) (dom:list vale_type{List.length dom < max_arity win})
   : as_lowstar_sig c dom =
-     wrap_tl dom [] (create_trusted_initial_state dom []) c
+     wrap_tl c dom [] (create_trusted_initial_state win dom)
 
 (*
 ////////////////////////////////////////////////////////////////////////////////
 //test
 ////////////////////////////////////////////////////////////////////////////////
 open Vale_memcpy
-let lem_memcpy (va_b0:va_code)
-               (win:bool)
-               (dst:buffer64)
-               (src:buffer64)
-               (va_s0:va_state)
-               (stack_b:buffer64)
-  :  GTot (va_state & va_fuel) =
-   Vale_memcpy.va_lemma_memcpy va_b0 va_s0 win stack_b dst src
+friend X64.Vale.Decls
+
+let c : code = va_code_memcpy true
 
 unfold
 let dom : l:list vale_type{List.Tot.length l < max_arity win} =
@@ -591,57 +602,48 @@ let dom : l:list vale_type{List.Tot.length l < max_arity win} =
   assert_norm (List.Tot.length d < max_arity win);
   d
 
-(*
-let pre : vale_pre dom =
-  fun (va_b0:code)
-    (win:bool)
-    (dst:buffer64)
-    (src:buffer64)
-    (va_s0:va_state)
-    (stack_b:buffer64) -> va_pre va_b0 va_s0 win stack_b dst src
-
-let post : vale_post dom =
-  fun (va_b0:code)
-    (win:bool)
-    (dst:buffer64)
-    (src:buffer64)
-    (va_s0:va_state)
-    (stack_b:buffer64)
-    (va_sM:va_state)
-    (va_fM:fuel) -> va_post va_b0 va_s0 va_sM va_fM win stack_b dst src
-*)
-
 let memcpy_raw
-    : as_lowstar_sig c [VT_Buffer TUInt64; VT_Buffer TUInt64;]
-    = wrap [VT_Buffer TUInt64; VT_Buffer TUInt64;] lem_memcpy
+    : as_lowstar_sig c dom
+    = wrap c dom
 
-unfold let norm (#a:Type) (x:a) : a = normalize_term x
+unfold let normal_steps : list string =
+  [
+    `%as_lowstar_sig;
+    `%as_lowstar_sig_tl;
+    `%vale_type_as_type;
+    `%VT_Buffer?;
+    `%maybe_cons_buffer;
+    `%elim_down_cons;
+    `%create_trusted_initial_state;
+//    `%create_initial_state_aux;
+//    `%elim_dep_arrow_nil;
+//    `%elim_dep_arrow_cons;
+  ]
 
-let force (#a:Type) (x:a) : norm a = x
+unfold let normal (#a:Type) (x:a) : a = norm [iota; zeta; simplify; primops; delta_only normal_steps] x
+//unfold let normal (#a:Type) (x:a) : a = norm [delta_only normal_steps] x
 
-let elim_lowstar_sig (dom:list vale_type{List.length dom < max_arity win})
-                     (f:as_lowstar_sig c dom)
-    : norm (as_lowstar_sig c dom)
-    = force f
+let force (#a:Type) (x:a) : normal a = x
 
-let pre_cond (h:HS.mem) (dst:b8) (src:b8) = live h dst /\ live h src /\ bufs_disjoint [dst;src] /\ length dst % 8 == 0 /\ length src % 8 == 0 /\ length dst == 16 /\ length src == 16
+#reset-options "--debug X64.Interop_s --debug_level print_normalized_terms --use_two_phase_tc false"
+//let elim_lowstar_sig (dom:list vale_type{List.length dom < max_arity win})
+//                     (f:as_lowstar_sig c dom)
+//    : (assume False; normal (as_lowstar_sig c dom))
+//    =
+//admit ()
+//    assume False;
+//    force #(as_lowstar_sig c dom) f
 
-let post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8) =
-  live h dst /\ live h src /\
-  live h' dst /\ live h' src /\
-  length dst % 8 == 0 /\ length src % 8 == 0 /\
-  (let dst_b = BV.mk_buffer_view dst Views.view64 in
-  let src_b = BV.mk_buffer_view src Views.view64 in
-  Seq.equal (BV.as_seq h' dst_b) (BV.as_seq h' src_b))
-
-let full_post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8)  =
-  post_cond h h' dst src  /\
-  M.modifies (M.loc_buffer dst) h h'
-
-//val memcpy: dst:buffer64 -> src:buffer64 -> Stack unit
-//        (requires (fun h -> pre_cond h dst src ))
-//        (ensures (fun h0 _ h1 -> full_post_cond h0 h1 dst src ))
-//let memcpy dst src =
-//  assume false; //TODO
-//  elim_lowstar_sig memcpy_raw (Vale_memcpy.va_code_memcpy win) dst src ()
+val memcpy: dst:buffer64 -> src:buffer64 -> Stack unit
+        (requires (fun h -> True))
+        (ensures (fun h0 _ h1 -> True))
+let memcpy dst src =
+//  let f:normal (as_lowstar_sig c dom) = elim_lowstar_sig dom memcpy_raw in
+//  let f:normal (as_lowstar_sig c dom) = force #(as_lowstar_sig c dom) memcpy_raw in
+  let f1:normal (as_lowstar_sig c dom) = memcpy_raw in
+  let f2 = f1 dst src in
+  let h0 = get () in
+  let f3 = f2 h0 in
+//  f dst src ()
+()
 *)
