@@ -83,7 +83,6 @@ let finv_ #s o i =
 
 
 (* WRAPPER to Prevent Inlining *)
-[@CInline]
 let finv_51 o i = finv_ #M51 o i 
 inline_for_extraction
 let finv #s o i =
@@ -104,14 +103,14 @@ let decode_scalar o i =
   uints_from_bytes_le #U64 o i;
   o.(0ul) <- o.(0ul) &. u64 0xfffffffffffffff8;
   o.(3ul) <- o.(3ul) &. u64 0x7fffffffffffffff;
-  o.(3ul) <- o.(3ul) |. u64 0x40ffffffffffffff
+  o.(3ul) <- o.(3ul) |. u64 0x4000000000000000
 
 inline_for_extraction
 val scalar_bit: s:scalar -> n:size_t{v n < 256} -> Stack uint64 
 			 (requires fun h0 -> live h0 s)
 			 (ensures fun h0 r h1 -> h0 == h1)
 inline_for_extraction
-let scalar_bit s n = s.(n /. 64ul) >>. (n %. 64ul)
+let scalar_bit s n = (s.(n /. 64ul) >>. (n %. 64ul)) &. (u64 1)
 
 inline_for_extraction
 val decode_point_: #s:field_spec -> o:point s -> i:lbuffer uint8 32ul -> Stack unit 
@@ -221,7 +220,7 @@ inline_for_extraction
 let cswap_ #s bit p0 p1 = 
     let mask = u64 0 -. bit in
     let h0 = ST.get() in
-    loop2 h0 (nlimb s) p0 p1
+    loop2 h0 (2ul *. nlimb s) p0 p1
     (fun h -> (fun i s -> s))
     (fun i -> 
          let dummy = mask &. (p0.(i) ^. p1.(i)) in
@@ -257,15 +256,15 @@ let montgomery_ladder_ #s out key init =
   loop2 h0 256ul p0 p1
     (fun h -> (fun i s -> s))
     (fun i -> 
-         let bit = scalar_bit key i in
+         let bit = scalar_bit key (255ul -. i) in
          cswap #s bit p0 p1;   
          point_add_and_double #s init p0 p1;
+         cswap #s bit p0 p1;   
 	 admit());
   copy out p0;  
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
-[@CInline]
 let montgomery_ladder_51 out key init = montgomery_ladder_ #M51 out key init
 inline_for_extraction
 let montgomery_ladder #s out key init =

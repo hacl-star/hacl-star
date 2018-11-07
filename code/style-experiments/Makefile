@@ -229,8 +229,15 @@ curve51-c/Hacl_Curve25519_51.c: curve51-c/out.krml
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_51=*'
 
 curve-perf: 
-	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curvetest.c -o curve-perf.exe
+	gcc-8 -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curvetest.c -o curve-perf.exe
 	./curve-perf.exe
+
+CC=gcc-8
+#CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
+
+curve-snap: 
+	$(CC) -march=native -mtune=native -O3 -I ../../snapshots/kremlib -I . curve25519-donna-c64.c Hacl_Curve25519.c curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve-snap-test.c -o curve-snap.exe ~/Desktop/repositories/openssl/libcrypto.a
+	./curve-snap.exe
 
 
 curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c curve51-c/out.krml
