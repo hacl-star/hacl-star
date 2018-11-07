@@ -392,8 +392,8 @@ let create_trusted_initial_state
 let stack_buffer = buffer (TBase TUInt64)
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//lowstar_sig pre post:
-//    Interepreting a vale pre/post as a Low* function type
+//lowstar_sig:
+//    Interepreting an assembly language type as a Low* function type
 //////////////////////////////////////////////////////////////////////////////////////////
 
 let elim_down_1 (hd:vale_type)
@@ -408,6 +408,9 @@ let elim_down_nil (acc:list b8)
     : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc)} -> GTot (TS.traceState & mem) =
     down
 
+let save_reg (r:reg) (s0 sN:TS.traceState) =
+  BS.eval_reg r s0.TS.state == BS.eval_reg r sN.TS.state
+
 let elim_down_cons (hd:vale_type)
                    (tl:list vale_type)
                    (acc:list b8)
@@ -418,7 +421,7 @@ let elim_down_cons (hd:vale_type)
 
 // (stack_bytes:nat)
 // stack_b:b8 ->
-let wrap_pre (c:code) (acc:list b8) (down:create_trusted_initial_state_t [] acc) (h0:HS.mem) =
+let prediction (c:code) (acc:list b8) (down:create_trusted_initial_state_t [] acc) (h0:HS.mem) =
   s0:TS.traceState ->
   push_h0:mem_roots acc ->
   alloc_push_h0:mem_roots acc ->
@@ -433,74 +436,69 @@ let wrap_pre (c:code) (acc:list b8) (down:create_trusted_initial_state_t [] acc)
       s0 == fst (elim_down_nil acc down alloc_push_h0 b)
     )
     (ensures fun (fuel, final_mem) ->
-      Some? (TS.taint_eval_code c fuel s0)
-  // TODO: down_mem final_mem.hs == (TS.taint_eval_code c fuel s0).TS.state.mem
-  // TODO: ok
-  // TODO: callee-save
+      Some? (TS.taint_eval_code c fuel s0) /\ (
+        let sN = Some?.v (TS.taint_eval_code c fuel s0) in
+        Interop.down_mem final_mem.hs final_mem.addrs final_mem.ptrs == sN.TS.state.BS.mem /\
+        save_reg Rbx s0 sN /\
+        save_reg Rsi s0 sN /\
+        save_reg Rdi s0 sN /\
+        save_reg Rbp s0 sN /\
+        save_reg Rsp s0 sN /\
+        save_reg R12 s0 sN /\
+        save_reg R13 s0 sN /\
+        save_reg R14 s0 sN /\
+        save_reg R15 s0 sN /\
+        // TODO: callee-save for xmms
+        sN.TS.state.BS.ok
+      )
     )
 
+noeq type as_lowstar_sig_ret (acc:list b8) =
+  | As_lowstar_sig_ret :
+      push_h0:mem_roots acc ->
+      alloc_push_h0:mem_roots acc ->
+      b:stack_buffer{mem_roots_p alloc_push_h0 (b::acc)} ->
+      fuel:nat ->
+      final_mem:mem ->
+      as_lowstar_sig_ret acc
+
 let as_lowstar_sig_post
+    (c:code)
     (acc:list b8)
+    (down:create_trusted_initial_state_t [] acc)
     (h0:HS.mem)
+    (predict:prediction c acc down h0)
     (push_h0:mem_roots acc)
     (alloc_push_h0:mem_roots acc)
-    (b:stack_buffer)
+    (b:stack_buffer{mem_roots_p alloc_push_h0 (b::acc)})
+    (fuel:nat)
+    (final_mem:mem)
     (h1:HS.mem) =
+  let s0 = fst (elim_down_nil acc down alloc_push_h0 b) in
   HS.fresh_frame h0 push_h0 /\
   M.modifies loc_none push_h0 alloc_push_h0 /\
   HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
   B.frameOf b == HS.get_tip alloc_push_h0 /\
   B.live alloc_push_h0 b /\
-//  HS.poppable final.mem.hs /\
-//                            h1 == HS.pop (final.mem.hs) /\
-  True
+  (fuel, final_mem) == predict s0 push_h0 alloc_push_h0 b /\
+  HS.poppable final_mem.hs /\
+  h1 == HS.pop (final_mem.hs)
 
 let rec as_lowstar_sig_tl
-  (c:code)
-  (dom:list vale_type)
-                          (acc:list b8)
-                          (down:create_trusted_initial_state_t dom acc)
+    (c:code)
+    (dom:list vale_type)
+    (acc:list b8)
+    (down:create_trusted_initial_state_t dom acc)
     : Type =
     match dom with
     | [] ->
-      (h0:HS.mem) ->
-      wrap_pre c acc down h0 ->
-      Stack (mem_roots acc & mem_roots acc & stack_buffer)
-        (requires (fun h0' -> h0 == h0' /\
-                    mem_roots_p h0 acc /\
-//                    (forall (push_h0:mem_roots acc)
-//                       (alloc_push_h0:mem_roots acc)
-//                       (b:stack_buffer).
-//                            HS.fresh_frame h0 push_h0 /\
-//                            M.modifies loc_none push_h0 alloc_push_h0 /\
-//                            HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
-//                            B.frameOf b == HS.get_tip alloc_push_h0 /\
-//                            B.live alloc_push_h0 b ==>
-//                            elim_nil pre (elim_down_nil acc down alloc_push_h0 b) b)))
-True))
-        (ensures fun h0 (push_h0, alloc_push_h0, b) h1 ->
-          as_lowstar_sig_post acc h0 push_h0 alloc_push_h0 b h1
+      h0:HS.mem ->
+      predict:prediction c acc down h0 ->
+      Stack (as_lowstar_sig_ret acc)
+        (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 acc))
+        (ensures fun h0 (As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem) h1 ->
+          as_lowstar_sig_post c acc down h0 predict push_h0 alloc_push_h0 b fuel final_mem h1
         )
-//                       exists (push_h0:mem_roots acc) (alloc_push_h0:mem_roots acc) (b:stack_buffer) final.// fuel.//  {:pattern
-//                                 // (post push_h0 alloc_push_h0 b final fuel)}
-//                            HS.fresh_frame h0 push_h0 /\
-//                            M.modifies loc_none push_h0 alloc_push_h0 /\
-//                            HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
-//                            B.frameOf b == HS.get_tip alloc_push_h0 /\
-//                            B.live alloc_push_h0 b /\
-
-//                            elim_nil
-//                              post
-//                              (elim_down_nil acc down alloc_push_h0 b)
-//                              b
-//                              final
-//                              fuel /\
-
-//                            HS.poppable final.mem.hs /\
-//                            h1 == HS.pop (final.mem.hs) /\
-//True
-//                          ))
-
     | hd::tl ->
       x:vale_type_as_type hd ->
       as_lowstar_sig_tl
@@ -527,9 +525,11 @@ let rec wrap_tl
     = match dom with
       | [] ->
         let f : as_lowstar_sig_tl c [] acc down =
-          let ff (h0:HS.mem) (pre:wrap_pre c acc down h0) : Stack (mem_roots acc & mem_roots acc & stack_buffer)
-            (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 acc /\ True))
-            (ensures (fun h0 (push_h0, alloc_push_h0, b) h1 -> as_lowstar_sig_post acc h0 push_h0 alloc_push_h0 b h1))
+          let ff (h0:HS.mem) (predict:prediction c acc down h0)
+            : Stack (as_lowstar_sig_ret acc)
+              (requires fun h0' -> h0 == h0' /\ mem_roots_p h0 acc /\ True)
+              (ensures fun h0 (As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem) h1 ->
+                as_lowstar_sig_post c acc down h0 predict push_h0 alloc_push_h0 b fuel final_mem h1)
             =
             let h0' = get () in
             push_frame ();
@@ -538,19 +538,19 @@ let rec wrap_tl
             let h2 = get () in
             assert (HS.fresh_frame h0 h1);
             assert (mem_roots_p h2 acc);
-            st_put (fun h0' -> h0' == h2) (fun h0' ->
+            let (fuel, final_mem) = st_put (fun h0' -> h0' == h2) (fun h0' ->
               let va_s0, mem_s0 = elim_down_nil acc down h0' stack_b in
-              let (fuel, final_mem) = pre va_s0 h1 h2 stack_b in
+              let (fuel, final_mem) = predict va_s0 h1 h2 stack_b in
               assert (B.frameOf stack_b = HS.get_tip h0');
               assert (B.live h0' stack_b);
               let Some va_s1 = TS.taint_eval_code c fuel va_s0 in
-              (), final_mem.hs
-            ); //conveniently, st_put assumes that the shape of the stack did not change
+              ((fuel, final_mem), final_mem.hs)
+            ) in //conveniently, st_put assumes that the shape of the stack did not change
             pop_frame ();
-            (h1, h2, stack_b)
+            As_lowstar_sig_ret h1 h2 stack_b fuel final_mem
           in ff
 (*
-          fun (h0:HS.mem) (pre:wrap_pre c acc down h0) ->
+          fun (h0:HS.mem) (predict:prediction c acc down h0) ->
             let h0' = get () in
             push_frame ();
             let h1 = get () in
@@ -560,7 +560,7 @@ let rec wrap_tl
             assert (mem_roots_p h2 acc);
             st_put (fun h0' -> h0' == h2) (fun h0' ->
               let va_s0, mem_s0 = elim_down_nil acc down h0' stack_b in
-              let (fuel, final_mem) = pre va_s0 h1 h2 stack_b in
+              let (fuel, final_mem) = predict va_s0 h1 h2 stack_b in
               assert (B.frameOf stack_b = HS.get_tip h0');
               assert (B.live h0' stack_b);
               let Some va_s1 = TS.taint_eval_code c fuel va_s0 in

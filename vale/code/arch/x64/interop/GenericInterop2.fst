@@ -164,6 +164,9 @@ let vale_post (dom:list vale_type) =
     win:bool ->
     vale_post_tl dom
 
+let vale_save_reg (r:reg) (s0 s1:va_state) =
+  eval_reg r s0 == eval_reg r s1
+
 let rec vale_sig_tl (#dom:list vale_type)
                     (code:va_code)
                     (pre:vale_pre_tl dom)
@@ -177,6 +180,16 @@ let rec vale_sig_tl (#dom:list vale_type)
             (requires (elim_nil pre va_s0 stack_b))
             (ensures (fun (va_s1, f) ->
                        eval_code code va_s0 f va_s1 /\
+                       vale_save_reg Rbx va_s0 va_s1 /\
+                       vale_save_reg Rsi va_s0 va_s1 /\
+                       vale_save_reg Rdi va_s0 va_s1 /\
+                       vale_save_reg Rbp va_s0 va_s1 /\
+                       vale_save_reg Rsp va_s0 va_s1 /\
+                       vale_save_reg R12 va_s0 va_s1 /\
+                       vale_save_reg R13 va_s0 va_s1 /\
+                       vale_save_reg R14 va_s0 va_s1 /\
+                       vale_save_reg R15 va_s0 va_s1 /\
+                       va_s1.ok /\
                        elim_nil post va_s0 stack_b va_s1 f))
 
     | hd::tl ->
@@ -247,10 +260,8 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
                               final
                               fuel /\
                             eval_code code initial_state fuel final /\
-True
-// TODO:
-//                            HS.poppable final.mem.hs /\
-//                            h1 == HS.pop (final.mem.hs)
+                            HS.poppable final.mem.hs /\
+                            h1 == HS.pop (final.mem.hs)
                             )))
 
     | hd::tl ->
@@ -306,11 +317,12 @@ let elim_trusted_lowstar_sig_nil
       (acc:list b8)
       (down:create_trusted_initial_state_t [] acc)
       (v:IS.as_lowstar_sig_tl code [] acc down)
-    : (h0:HS.mem) ->
-      wrap_pre code acc down h0 ->
-      Stack (mem_roots acc & mem_roots acc & stack_buffer)
+    : h0:HS.mem ->
+      predict:prediction code acc down h0 ->
+      Stack (as_lowstar_sig_ret acc)
         (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 acc /\ True))
-        (ensures (fun h0 (push_h0, alloc_push_h0, b) h1 -> IS.as_lowstar_sig_post acc h0 push_h0 alloc_push_h0 b h1))
+        (ensures (fun h0 (As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem) h1 ->
+          IS.as_lowstar_sig_post code acc down h0 predict push_h0 alloc_push_h0 b fuel final_mem h1))
     = v
 
 let elim_trusted_lowstar_sig_cons
@@ -359,34 +371,35 @@ let rec wrap_tl
                   s0 == fst (IS.elim_down_nil acc t_down alloc_push_h0 b)
                 )
                 (ensures fun (fuel, final_mem) ->
-                  Some? (TS.taint_eval_code code fuel s0)
+                  Some? (TS.taint_eval_code code fuel s0) /\ (
+                    let sN = Some?.v (TS.taint_eval_code code fuel s0) in
+                    Interop.down_mem final_mem.hs final_mem.addrs final_mem.ptrs == sN.TS.state.BS.mem /\
+                    save_reg Rbx s0 sN /\
+                    save_reg Rsi s0 sN /\
+                    save_reg Rdi s0 sN /\
+                    save_reg Rbp s0 sN /\
+                    save_reg Rsp s0 sN /\
+                    save_reg R12 s0 sN /\
+                    save_reg R13 s0 sN /\
+                    save_reg R14 s0 sN /\
+                    save_reg R15 s0 sN /\
+                    sN.TS.state.BS.ok
+                  )
                 )
                 =
                 let va_s0 = elim_down_nil acc v_down alloc_push_h0 b in
                 let va_s1, fuel = elim_vale_sig_nil pre post v va_s0 b in
                 (fuel, va_s1.mem)
             in
-            let predict : wrap_pre code acc t_down h0 = f_predict in
-            let (push_h0, alloc_push_h0, b) = elim_trusted_lowstar_sig_nil acc t_down t_low h0 predict in
+            let predict : prediction code acc t_down h0 = f_predict in
+            let As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem =
+              elim_trusted_lowstar_sig_nil acc t_down t_low h0 predict in
             let h1 = get () in
             assert (
               let initial_state = elim_down_nil acc v_down alloc_push_h0 b in
               let (final, fuel) = elim_vale_sig_nil pre post v initial_state b in
               eval_code code initial_state fuel final
             );
-
-//TODO:
-//assert (
-//let initial_state = elim_down_nil acc v_down alloc_push_h0 b in
-//let (final, fuel) = elim_vale_sig_nil pre post v initial_state b in
-//HS.poppable final.mem.hs
-//);
-//assert (
-//let initial_state = elim_down_nil acc v_down alloc_push_h0 b in
-//let (final, fuel) = elim_vale_sig_nil pre post v initial_state b in
-//h1 == HS.pop (final.mem.hs)
-//);
-
             ()
         in
         f <: as_lowstar_sig_tl #[] code acc v_down pre post
@@ -431,7 +444,6 @@ let wrap #code
     (v code win)
     t_low
 
-(*
 ////////////////////////////////////////////////////////////////////////////////
 //test
 ////////////////////////////////////////////////////////////////////////////////
@@ -447,6 +459,7 @@ let lem_memcpy (va_b0:va_code)
            (ensures (fun (va_sM, va_fM) -> va_post va_b0 va_s0 va_sM va_fM win stack_b dst src )) =
    Vale_memcpy.va_lemma_memcpy va_b0 va_s0 win stack_b dst src
 
+(*
 unfold
 let dom : l:list vale_type{List.Tot.length l < max_arity win} =
   let d = [VT_Buffer TUInt64; VT_Buffer TUInt64;] in
