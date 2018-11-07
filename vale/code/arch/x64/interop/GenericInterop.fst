@@ -731,6 +731,55 @@ let hs_of_va_state (x:va_state) = x.mem.hs
 
 let stack_b (h:HS.mem) (acc:list b8) = s:stack_buffer{mem_roots_p h (s::acc)}
 
+
+[@reduce]
+let prestate_hyp
+         (h0:HS.mem)
+         (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+         (push_h0:Monotonic.HyperStack.mem)
+         (alloc_push_h0: Monotonic.HyperStack.mem)
+         (b: stack_buffer) =
+          Monotonic.HyperStack.fresh_frame h0 push_h0 /\
+          LowStar.Monotonic.Buffer.modifies loc_none push_h0 alloc_push_h0 /\
+          Monotonic.HyperStack.get_tip push_h0 ==
+          Monotonic.HyperStack.get_tip alloc_push_h0 /\
+          frameOf b == Monotonic.HyperStack.get_tip alloc_push_h0 /\
+          live alloc_push_h0 b /\
+          normal (mem_roots_p alloc_push_h0 (b::acc))
+
+[@reduce]
+let pre_in_prestate_ctx
+       (h0:HS.mem)
+       (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+       (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
+       (pre: (va_state -> b:stack_buffer -> Type)) =
+      forall (push_h0:Monotonic.HyperStack.mem)
+        (alloc_push_h0: Monotonic.HyperStack.mem)
+        (b: stack_buffer).
+          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
+          pre (create_initial_state alloc_push_h0 b) b
+
+
+[@reduce]
+let post_in_poststate_ctx
+         (va_b0:va_code)
+         (h0:HS.mem)
+         (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+         (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
+         (post: va_state -> stack_buffer -> va_state -> va_fuel -> Type)
+         (h1:HS.mem) =
+      exists (push_h0:Monotonic.HyperStack.mem)
+        (alloc_push_h0: Monotonic.HyperStack.mem)
+        (b: stack_buffer)
+        (final:va_state)
+        (fuel:va_fuel).
+          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
+          (let initial_state = create_initial_state alloc_push_h0 b in
+           post initial_state b final fuel /\
+           eval_code va_b0 initial_state fuel final /\
+           Monotonic.HyperStack.poppable (hs_of_va_state final) /\
+           h1 == Monotonic.HyperStack.pop (hs_of_va_state final))
+
 [@reduce]
 let rec as_lowstar_sig_tl (#dom:list vale_type)
                           (code:va_code)
@@ -913,6 +962,7 @@ let elim_lowstar_sig (#dom:list vale_type{List.length dom < max_arity win})
     : normal (as_lowstar_sig pre post)
     = force f
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // End generic interop
 // The rest of this file is specific to memcpy
@@ -986,33 +1036,7 @@ let create_memcpy_initial_state
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-[@reduce]
-let prestate_hyp
-         (h0:HS.mem)
-         (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
-         (push_h0:Monotonic.HyperStack.mem)
-         (alloc_push_h0: Monotonic.HyperStack.mem)
-         (b: stack_buffer) =
-          Monotonic.HyperStack.fresh_frame h0 push_h0 /\
-          LowStar.Monotonic.Buffer.modifies loc_none push_h0 alloc_push_h0 /\
-          Monotonic.HyperStack.get_tip push_h0 ==
-          Monotonic.HyperStack.get_tip alloc_push_h0 /\
-          frameOf b == Monotonic.HyperStack.get_tip alloc_push_h0 /\
-          live alloc_push_h0 b /\
-          normal (mem_roots_p alloc_push_h0 (b::acc))
-
-[@reduce]
-let pre_in_prestate_ctx
-       (h0:HS.mem)
-       (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
-       (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
-       (pre: (va_state -> b:stack_buffer -> Type)) =
-      forall (push_h0:Monotonic.HyperStack.mem)
-        (alloc_push_h0: Monotonic.HyperStack.mem)
-        (b: stack_buffer).
-          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
-          pre (create_initial_state alloc_push_h0 b) b
-
+//TBD: Auto-gen, from the definition of pre
 [@reduce]
 let lift_vale_pre
       (va_b0:code)
@@ -1026,26 +1050,7 @@ let lift_vale_pre
       elim_normal (live_l h0 [src;dst]);
       pre_in_prestate_ctx h0 [src;dst] (create_memcpy_initial_state dst src) (pre va_b0 win dst src))
 
-[@reduce]
-let post_in_poststate_ctx
-         (va_b0:va_code)
-         (h0:HS.mem)
-         (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
-         (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
-         (post: va_state -> stack_buffer -> va_state -> va_fuel -> Type)
-         (h1:HS.mem) =
-      exists (push_h0:Monotonic.HyperStack.mem)
-        (alloc_push_h0: Monotonic.HyperStack.mem)
-        (b: stack_buffer)
-        (final:va_state)
-        (fuel:va_fuel).
-          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
-          (let initial_state = create_initial_state alloc_push_h0 b in
-           post initial_state b final fuel /\
-           eval_code va_b0 initial_state fuel final /\
-           Monotonic.HyperStack.poppable (hs_of_va_state final) /\
-           h1 == Monotonic.HyperStack.pop (hs_of_va_state final))
-
+//TBD: Auto-gen, from the definition of post
 [@reduce]
 let lift_vale_post
       (va_b0:code)
@@ -1066,6 +1071,7 @@ let lift_vale_post
                     (post va_b0 win dst src)
                     h1)
 
+//TBD: Auto-gen, putting pieces together
 val memcpy_wrapped_annot :
   va_b0: va_code ->
   (dst: buffer (TBase (TUInt64))) ->
@@ -1104,9 +1110,23 @@ let full_post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8)  =
   post_cond h h' dst src  /\
   M.modifies (M.loc_buffer dst) h h'
 
+// TODO: Prove these two lemmas if they are not proven automatically
+let implies_pre (dst:b8) (src:b8) (h0:HS.mem)  : Lemma
+  (requires pre_cond h0 dst src)
+  (ensures (normal (lift_vale_pre (Vale_memcpy.va_code_memcpy win) dst src h0))) =
+  admit()
+
+let implies_post (dst src:buffer64) (h0 h1:HS.mem) : Lemma
+  (requires normal (lift_vale_post (Vale_memcpy.va_code_memcpy win) dst src h0 h1))
+  (ensures full_post_cond h0 h1 dst src)
+  = admit()
+
 val memcpy: dst:buffer64 -> src:buffer64 -> Stack unit
-        (requires (fun h -> pre_cond h dst src ))
+        (requires (fun h -> pre_cond h dst src))
         (ensures (fun h0 _ h1 -> full_post_cond h0 h1 dst src ))
 let memcpy dst src =
-  assume false; //TODO
-  memcpy_wrapped (Vale_memcpy.va_code_memcpy win) dst src ()
+  let h0 = get() in
+  implies_pre dst src h0;
+  memcpy_wrapped (Vale_memcpy.va_code_memcpy win) dst src ();
+  let h1 = get () in
+  implies_post dst src h0 h1
