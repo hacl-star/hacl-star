@@ -236,6 +236,10 @@ curve64-c/Hacl_Curve25519_64.c: curve64-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c  $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_64=*'
 
+curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c
+	gcc-8 -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curvetest.c -o curve25519_51.exe
+	./curve25519_51.exe
+
 curve-perf: 
 	gcc-8 -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curvetest.c -o curve-perf.exe
 	./curve-perf.exe
@@ -247,12 +251,6 @@ curve-snap:
 	$(CC) -march=native -mtune=native -O3 -I ../../snapshots/kremlib -I . curve25519-donna-c64.c Hacl_Curve25519.c curve51-c/Hacl_Curve25519_51.c curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve-snap-test.c -o curve-snap.exe ~/Desktop/repositories/openssl/libcrypto.a
 	./curve-snap.exe
 
-
-curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c curve51-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c \
-	  -no-prefix 'Hacl.Test.Curve25519_51' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
-	  -bundle 'Hacl.Test.Curve25519_51=*' -library Hacl.Curve25519_51 \
-	  $^ -o $@
 
 POLY1305_64_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
