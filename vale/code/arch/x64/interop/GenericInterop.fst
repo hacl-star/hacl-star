@@ -365,6 +365,7 @@ let update_taint_map (#a:vale_type)
       upd_taint_map taint x
     | _ -> taint
 
+// TODO: This should be updated with addrs stack_b + (8 * stack_b.length) as the stack goes down
 let regs_with_stack (regs:registers) (stack_b:b8) : registers =
     fun r ->
       if r = Rsp then
@@ -744,11 +745,11 @@ let hs_of_va_state (x:va_state) = x.mem.hs
 
 let stack_b (h:HS.mem) (acc:list b8) = s:stack_buffer{mem_roots_p h (s::acc)}
 
-
 [@reduce]
 let prestate_hyp
          (h0:HS.mem)
          (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+         (stack_slots:nat)
          (push_h0:Monotonic.HyperStack.mem)
          (alloc_push_h0: Monotonic.HyperStack.mem)
          (b: stack_buffer) =
@@ -758,18 +759,20 @@ let prestate_hyp
           Monotonic.HyperStack.get_tip alloc_push_h0 /\
           frameOf b == Monotonic.HyperStack.get_tip alloc_push_h0 /\
           live alloc_push_h0 b /\
+          length b == 8 `op_Multiply` stack_slots /\
           normal (mem_roots_p alloc_push_h0 (b::acc))
 
 [@reduce]
 let pre_in_prestate_ctx
        (h0:HS.mem)
        (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+       (stack_slots:nat)
        (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
        (pre: (va_state -> b:stack_buffer -> Type)) =
       forall (push_h0:Monotonic.HyperStack.mem)
         (alloc_push_h0: Monotonic.HyperStack.mem)
         (b: stack_buffer).
-          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
+          prestate_hyp h0 acc stack_slots push_h0 alloc_push_h0 b ==>
           pre (create_initial_state alloc_push_h0 b) b
 
 
@@ -778,6 +781,7 @@ let post_in_poststate_ctx
          (va_b0:va_code)
          (h0:HS.mem)
          (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+         (stack_slots:nat)
          (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
          (post: va_state -> stack_buffer -> va_state -> va_fuel -> Type)
          (h1:HS.mem) =
@@ -786,7 +790,7 @@ let post_in_poststate_ctx
         (b: stack_buffer)
         (final:va_state)
         (fuel:va_fuel).
-          prestate_hyp h0 acc push_h0 alloc_push_h0 b ==>
+          prestate_hyp h0 acc stack_slots push_h0 alloc_push_h0 b ==>
           (let initial_state = create_initial_state alloc_push_h0 b in
            post initial_state b final fuel /\
            eval_code va_b0 initial_state fuel final /\
@@ -797,6 +801,7 @@ let post_in_poststate_ctx
 let rec as_lowstar_sig_tl (#dom:list vale_type)
                           (code:va_code)
                           (acc:list b8)
+                          (stack_slots:nat)
                           (down:create_vale_initial_state_t dom acc)
                           (pre: vale_pre_tl dom)
                           (post: vale_post_tl dom)
@@ -815,6 +820,7 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
                             HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
                             B.frameOf b == HS.get_tip alloc_push_h0 /\
                             B.live alloc_push_h0 b /\
+                            B.length b == 8 `op_Multiply` stack_slots /\                            
                             mem_roots_p alloc_push_h0 (b::acc) ==>
                             elim_nil pre (elim_down_nil acc down alloc_push_h0 b) b)))
         (ensures (fun h0 _ h1 ->
@@ -825,6 +831,7 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
                             HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
                             B.frameOf b == HS.get_tip alloc_push_h0 /\
                             B.live alloc_push_h0 b /\
+                            B.length b == 8 `op_Multiply` stack_slots /\                            
                             mem_roots_p alloc_push_h0 (b::acc) /\
                             (let initial_state =
                                  elim_down_nil acc down alloc_push_h0 b in
@@ -844,6 +851,7 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
         #tl
         code
         (maybe_cons_buffer hd x acc)
+        stack_slots
         (elim_down_cons hd tl acc down x)
         (elim_1 pre x)
         (elim_1 post x)
@@ -880,6 +888,7 @@ let create_trusted_initial_state
 
 [@reduce]
 let as_lowstar_sig  (#dom:list vale_type{List.length dom < max_arity win})
+                    (#stack_slots:nat)
                     (pre: vale_pre dom)
                     (post: vale_post dom) =
     (va_b0:va_code) ->
@@ -887,6 +896,7 @@ let as_lowstar_sig  (#dom:list vale_type{List.length dom < max_arity win})
       #dom
         va_b0
       []
+      stack_slots
       (create_vale_initial_state win dom)
       (pre va_b0 win)
       (post va_b0 win)
@@ -909,20 +919,21 @@ let elim_vale_sig_nil  #code
 let rec wrap_tl
          #code
          (dom:list vale_type)
+         (stack_slots:nat{8 `op_Multiply` stack_slots < pow2_32 /\ stack_slots > 0})
          (acc:list b8)
          (down:create_vale_initial_state_t dom acc)
          (pre:vale_pre_tl dom)
          (post:vale_post_tl dom)
          (v:vale_sig_tl code pre post)
-    : as_lowstar_sig_tl code acc down pre post
+    : as_lowstar_sig_tl code acc stack_slots down pre post
     = match dom with
       | [] ->
-        let f : as_lowstar_sig_tl #[] code acc down pre post =
+        let f : as_lowstar_sig_tl #[] code acc stack_slots down pre post =
           fun () ->
             let h0 = get() in
             push_frame();
             let h1 = get () in
-            let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 24) in
+            let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t (8 `op_Multiply` stack_slots)) in
             let h2 = get () in
             assert (HS.fresh_frame h0 h1);
             assert (mem_roots_p h2 acc);
@@ -938,16 +949,18 @@ let rec wrap_tl
             ); //conveniently, st_put assumes that the shape of the stack did not change
             pop_frame()
         in
-        f <: as_lowstar_sig_tl #[] code acc down pre post
+        f <: as_lowstar_sig_tl #[] code acc stack_slots down pre post
 
       | hd::tl ->
         let f (x:vale_type_as_type hd)
            : as_lowstar_sig_tl code
                                (maybe_cons_buffer hd x acc)
+                               stack_slots
                                (elim_down_cons hd tl acc down x)
                                (elim_1 pre x)
                                (elim_1 post x)
            = wrap_tl tl
+                  stack_slots
                   (maybe_cons_buffer hd x acc)
                   (elim_down_cons hd tl acc down x)
                   (elim_1 pre x)
@@ -957,22 +970,24 @@ let rec wrap_tl
         f
 
 let wrap (dom:list vale_type{List.length dom < max_arity win})
+         (stack_slots:nat{8 `op_Multiply` stack_slots < pow2_32 /\ stack_slots > 0})            
          (pre:vale_pre dom)
          (post:vale_post dom)
          (v:vale_sig pre post)
   : as_lowstar_sig pre post =
   fun (code:va_code) ->
-    wrap_tl dom [] (create_vale_initial_state win dom) (pre code win) (post code win) (v code win)
+    wrap_tl dom stack_slots [] (create_vale_initial_state win dom) (pre code win) (post code win) (v code win)
 
 //A couple of utilities for the library
 let force (#a:Type) (x:a) : normal a = x
 let elim_normal (p:Type) : Lemma (requires (normal p)) (ensures p) = ()
 
 let elim_lowstar_sig (#dom:list vale_type{List.length dom < max_arity win})
+                     (#stack_slots:nat)
                      (#pre:vale_pre dom)
                      (#post:vale_post dom)
                      (f:as_lowstar_sig pre post)
-    : normal (as_lowstar_sig pre post)
+    : normal (as_lowstar_sig #dom #stack_slots pre post)
     = force f
 
 
@@ -1001,6 +1016,9 @@ let dom : l:list vale_type{List.Tot.length l < max_arity win} =
   assert_norm (List.Tot.length d < max_arity win);
   d
 
+//TBD: How to generate that?
+let stack_slots : nat = 4
+
 //TBD: Auto-gen, permute arguments
 [@reduce]
 let pre : vale_pre dom =
@@ -1025,8 +1043,8 @@ let post : vale_post dom =
     (va_fM:fuel) -> va_post va_b0 va_s0 va_sM va_fM win stack_b dst src
 
 //TBD: Auto-gen, wrapper application
-let memcpy_wrapped : normal (as_lowstar_sig pre post) =
-    elim_lowstar_sig (wrap dom pre post lem_memcpy)
+let memcpy_wrapped : normal (as_lowstar_sig #dom #stack_slots pre post) =
+    elim_lowstar_sig (wrap dom stack_slots pre post lem_memcpy)
 
 //TBD: Auto-gen, creation of initial state for a given arity (dom)
 [@reduce]
@@ -1061,7 +1079,7 @@ let lift_vale_pre
      live h0 dst /\
      (elim_normal (disjoint_or_eq_l [src;dst]);
       elim_normal (live_l h0 [src;dst]);
-      pre_in_prestate_ctx h0 [src;dst] (create_memcpy_initial_state dst src) (pre va_b0 win dst src))
+      pre_in_prestate_ctx h0 [src;dst] stack_slots (create_memcpy_initial_state dst src) (pre va_b0 win dst src))
 
 //TBD: Auto-gen, from the definition of post
 [@reduce]
@@ -1080,6 +1098,7 @@ let lift_vale_post
                     va_b0
                     h0
                     [src;dst]
+                    stack_slots
                     (create_memcpy_initial_state dst src)
                     (post va_b0 win dst src)
                     h1)
@@ -1094,6 +1113,7 @@ val memcpy_wrapped_annot :
     unit
     (requires (fun h0 -> normal (lift_vale_pre va_b0 dst src h0)))
     (ensures (fun h0 _ h1 -> normal (lift_vale_post va_b0 dst src h0 h1)))
+    
 let memcpy_wrapped_annot = memcpy_wrapped
 
 ////////////////////////////////////////////////////////////////////////////////
