@@ -25,6 +25,7 @@ module BS = X64.Bytes_Semantics_s
 open X64.Interop_s
 open GenericInterop2
 friend X64.Memory
+module MM = X64.Memory
 module IS = X64.Interop_s
 
 
@@ -107,7 +108,7 @@ let create_memcpy_initial_state
         h0
         stack)
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 40"
 
 //TBD: Auto-gen, from the definition of pre
 [@reduce]
@@ -187,11 +188,55 @@ let full_post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8)  =
   post_cond h h' dst src  /\
   M.modifies (M.loc_buffer dst) h h'
 
+open Test.Vale_memcpy
+
 // TODO: Prove these two lemmas if they are not proven automatically
 let implies_pre (dst:buffer64) (src:buffer64) (h0:HS.mem)  : Lemma
   (requires pre_cond h0 (to_b8 dst) (to_b8 src))
   (ensures (normal (lift_vale_pre (Vale_memcpy.va_code_memcpy win) dst src h0))) =
-  admit()
+let va_b0 = c in
+let dst' = to_b8 dst in
+let src' = to_b8 src in
+assert (disjoint_or_eq src' dst');
+assert (live h0 src');
+assert (live h0 dst');
+elim_normal (disjoint_or_eq_l [src'; dst']); 
+elim_normal (live_l h0 [src'; dst']); 
+let f (push_h0:HS.mem) (alloc_push_h0:HS.mem) (b:stack_buffer)
+  : Lemma
+    (requires prestate_hyp h0 [src'; dst'] push_h0 alloc_push_h0 (to_b8 b))
+    (ensures pre va_b0 win dst src (create_memcpy_initial_state dst src alloc_push_h0 (to_b8 b)) b) =
+  let init = create_memcpy_initial_state dst src alloc_push_h0 (to_b8 b) in
+  let va_s0 = init in
+  let (stack_b:buffer64) = b in
+  let t64 = MM.TBase MM.TUInt64 in
+
+assert (va_require_total va_b0 (va_code_memcpy win) va_s0);
+assert (va_get_ok va_s0);
+assume (locs_disjoint ([loc_buffer #t64 stack_b; loc_buffer #t64 dst; loc_buffer #t64 src]));
+assume (buffer_readable #t64 (va_get_mem va_s0) stack_b);
+assume (buffer_readable #t64 (va_get_mem va_s0) dst);
+assume (buffer_readable #t64 (va_get_mem va_s0) src);
+assume (valid_taint_buf64 stack_b (va_get_mem va_s0) (va_get_memTaint va_s0) Public);
+assume (valid_taint_buf64 dst (va_get_mem va_s0) (va_get_memTaint va_s0) Secret);
+assume (valid_taint_buf64 src (va_get_mem va_s0) (va_get_memTaint va_s0) Secret);
+assume (buffer_length #t64 src == 2);
+assume (buffer_length #t64 src == 2);
+assume (buffer_length #t64 dst == 2);
+assume (buffer_length #t64 stack_b >= 3);
+assume (valid_stack_slots (va_get_mem va_s0) (va_get_reg Rsp va_s0) stack_b 0 (va_get_memTaint va_s0));
+assume (win ==> va_get_reg Rcx va_s0 == buffer_addr dst (va_get_mem va_s0));
+assume (win ==> va_get_reg Rdx va_s0 == buffer_addr src (va_get_mem va_s0));
+assume (~win ==> va_get_reg Rdi va_s0 == buffer_addr dst (va_get_mem va_s0));
+assume (~win ==> va_get_reg Rsi va_s0 == buffer_addr src (va_get_mem va_s0));
+
+  assert (va_req_memcpy va_b0 va_s0 win stack_b dst src);
+  assert (va_pre c init win b dst src);
+  assert (pre c win dst src init b);
+  ()
+  in
+
+  assume False
 
 let implies_post (dst src:buffer64) (h0 h1:HS.mem) : Lemma
   (requires normal (lift_vale_post (Vale_memcpy.va_code_memcpy win) dst src h0 h1))
