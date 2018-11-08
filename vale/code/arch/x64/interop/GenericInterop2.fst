@@ -31,6 +31,8 @@ friend X64.Memory
 friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
 
+let get_hs m = m.hs
+
 let create_initial_vale_state_core acc regs xmms taint h0 stack =
     let t_state, mem = create_initial_trusted_state_core acc regs xmms taint h0 stack in
     {ok = TS.(BS.(t_state.state.ok));
@@ -97,46 +99,6 @@ let rec equiv_create_trusted_and_vale_state
           in
           FStar.Classical.forall_intro aux
 
-//////////////////////////////////////////////////////////////////////////////////////////
-//lowstar_sig pre post:
-//    Interepreting a vale pre/post as a Low* function type
-//////////////////////////////////////////////////////////////////////////////////////////
-
-let as_lowstar_sig_tl_req code acc down pre post h0 =
-                    mem_roots_p h0 acc /\
-                    (forall (push_h0:mem_roots acc)
-                       (alloc_push_h0:mem_roots acc)
-                       (b:stack_buffer).
-                            HS.fresh_frame h0 push_h0 /\
-                            M.modifies loc_none push_h0 alloc_push_h0 /\
-                            HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
-                            B.frameOf b == HS.get_tip alloc_push_h0 /\
-                            B.live alloc_push_h0 b ==>
-                            elim_nil pre (elim_down_nil acc down alloc_push_h0 b) b)
-
-let as_lowstar_sig_tl_ens code acc down pre post h0 _ h1 =
-                       exists push_h0 alloc_push_h0 b final fuel.//  {:pattern
-                                 // (post push_h0 alloc_push_h0 b final fuel)}
-                            HS.fresh_frame h0 push_h0 /\
-                            M.modifies loc_none push_h0 alloc_push_h0 /\
-                            HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
-                            B.frameOf b == HS.get_tip alloc_push_h0 /\
-                            B.live alloc_push_h0 b /\
-                            (let initial_state =
-                                 elim_down_nil acc down alloc_push_h0 b in
-                             elim_nil
-                              post
-                              initial_state
-                              b
-                              final
-                              fuel /\
-                            eval_code code initial_state fuel final /\
-                            HS.poppable final.mem.hs /\
-                            h1 == HS.pop (final.mem.hs)
-                            )
-
-////////////////////////////////////////////////////////////////////////////////
-
 #reset-options "--z3rlimit 50"
 
 let rec wrap_tl
@@ -165,7 +127,7 @@ let rec wrap_tl
                   (ensures prediction_post code acc t_down h0 s0 push_h0 alloc_push_h0 b)
                 =
                 let va_s0 = elim_down_nil acc v_down alloc_push_h0 b in
-                let va_s1, fuel = elim_vale_sig_nil pre post v va_s0 b in
+                let va_s1, fuel = elim_vale_sig_nil pre post v va_s0 (to_b8 b) in
                 (fuel, va_s1.mem)
             in
             let predict : prediction code acc t_down h0 = f_predict in

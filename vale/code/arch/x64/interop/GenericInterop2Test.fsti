@@ -1,0 +1,1 @@
+module GenericInterop2Test
