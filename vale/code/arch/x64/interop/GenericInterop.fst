@@ -207,17 +207,30 @@ let rec live_l (h:HS.mem) (bs:list b8) =
   | [] -> True
   | hd::tl -> live h hd /\ live_l h tl
 
-let equiv_disjoint_or_eq_l (roots:list b8)
+let rec equiv_disjoint_or_eq_l (roots:list b8)
   : Lemma (ensures (disjoint_or_eq_l roots <==> Interop.list_disjoint_or_eq roots))
           [SMTPatOr [[SMTPat (disjoint_or_eq_l roots)];
                      [SMTPat (Interop.list_disjoint_or_eq roots)]]]
-  = admit()
+  = 
+  let rec equiv_disjoint_or_eq_l_aux (b:b8) (tl:list b8) : Lemma
+    (disjoint_or_eq_l_aux b tl <==> (forall p. List.memP p tl ==> Interop.disjoint_or_eq b p))
+  = match tl with
+    | [] -> ()
+    | a::q -> equiv_disjoint_or_eq_l_aux b q
+  in
+  match roots with
+    | [] -> ()
+    | a::q -> 
+      equiv_disjoint_or_eq_l_aux a q;
+      equiv_disjoint_or_eq_l q
 
-let equiv_live_l (h:HS.mem) (roots:list b8)
+let rec equiv_live_l (h:HS.mem) (roots:list b8)
   : Lemma (ensures (live_l h roots <==> Interop.list_live h roots))
           [SMTPatOr [[SMTPat (live_l h roots)];
                      [SMTPat (Interop.list_live h roots)]]]
-  = admit()
+  = match roots with
+    | [] -> ()
+    | a::q -> equiv_live_l h q
 
 [@reduce]
 let mem_roots_p (h0:HS.mem) (roots:list b8) =

@@ -30,6 +30,31 @@ friend X64.Memory
 
 let to_b8 #bt m = m
 
+let rec equiv_disjoint_or_eq_l (roots:list b8)
+  : Lemma (ensures (disjoint_or_eq_l roots <==> Interop.list_disjoint_or_eq roots))
+          [SMTPatOr [[SMTPat (disjoint_or_eq_l roots)];
+                     [SMTPat (Interop.list_disjoint_or_eq roots)]]]
+  = 
+  let rec equiv_disjoint_or_eq_l_aux (b:b8) (tl:list b8) : Lemma
+    (disjoint_or_eq_l_aux b tl <==> (forall p. List.memP p tl ==> Interop.disjoint_or_eq b p))
+  = match tl with
+    | [] -> ()
+    | a::q -> equiv_disjoint_or_eq_l_aux b q
+  in
+  match roots with
+    | [] -> ()
+    | a::q -> 
+      equiv_disjoint_or_eq_l_aux a q;
+      equiv_disjoint_or_eq_l q
+
+let rec equiv_live_l (h:HS.mem) (roots:list b8)
+  : Lemma (ensures (live_l h roots <==> Interop.list_live h roots))
+          [SMTPatOr [[SMTPat (live_l h roots)];
+                     [SMTPat (Interop.list_live h roots)]]]
+  = match roots with
+    | [] -> ()
+    | a::q -> equiv_live_l h q
+
 // Splitting the construction of the initial state into two functions
 // one that creates the initial trusted state (i.e., part of our TCB)
 // and another that just creates the vale state, a view upon the trusted one
@@ -115,6 +140,7 @@ let rec wrap_tl
             let h2 = get () in
             assert (HS.fresh_frame h0 h1);
             assert (mem_roots_p h2 acc);
+            assert (mem_roots_p h2 (stack_b::acc));
             let (fuel, final_mem) = st_put (fun h0' -> h0' == h2) (fun h0' ->
               let va_s0, mem_s0 = elim_down_nil acc down h0' stack_b in
               let (fuel, final_mem) = predict va_s0 h1 h2 stack_b in

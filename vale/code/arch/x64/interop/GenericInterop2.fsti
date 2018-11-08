@@ -25,9 +25,13 @@ module BS = X64.Bytes_Semantics_s
 module IS = X64.Interop_s
 open X64.Interop_s
 
+val get_hs (m:X64.Memory.mem) : HS.mem
+
+[@reduce]
 let initial_vale_state_t (dom:list vale_type) (acc:list b8) =
   initial_state_t dom acc va_state
 
+[@reduce]
 val create_initial_vale_state_core
        (acc:list b8)
        (regs:registers)
@@ -48,6 +52,7 @@ val core_create_lemma
       (ensures (fst (create_initial_trusted_state_core acc regs xmms taint h0 stack) ==
                 state_to_S (create_initial_vale_state_core acc regs xmms taint h0 stack)))
 
+[@reduce]
 let create_vale_initial_state_t (dom:list vale_type)
                                 (acc:list b8)
     = n_dep_arrow
@@ -55,6 +60,7 @@ let create_vale_initial_state_t (dom:list vale_type)
           (initial_vale_state_t dom acc)
 
 
+[@reduce]
 let elim_down_1 (hd:vale_type)
                 (acc:list b8)
                 (down:create_vale_initial_state_t [hd] acc)
@@ -62,11 +68,13 @@ let elim_down_1 (hd:vale_type)
     : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::maybe_cons_buffer hd x acc)} -> GTot va_state =
     down x
 
+[@reduce]
 let elim_down_nil (acc:list b8)
                   (down:create_vale_initial_state_t [] acc)
     : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc)} -> GTot va_state =
     down
 
+[@reduce]
 let elim_down_cons (hd:vale_type)
                    (tl:list vale_type)
                    (acc:list b8)
@@ -79,18 +87,22 @@ let elim_down_cons (hd:vale_type)
 //vale_sig pre post: a template for a top-level signature provided by a vale function
 //////////////////////////////////////////////////////////////////////////////////////////
 
+[@reduce]
 let vale_pre_tl (dom:list vale_type) =
     n_arrow dom (va_state -> stack_buffer -> prop)
 
+[@reduce]
 let vale_pre (dom:list vale_type) =
     code:va_code ->
     win:bool ->
     vale_pre_tl dom
 
+[@reduce]
 let vale_post_tl (dom:list vale_type) =
     n_arrow dom
             (s0:va_state -> sb:stack_buffer -> s1:va_state -> f:va_fuel -> prop)
 
+[@reduce]
 let vale_post (dom:list vale_type) =
     code:va_code ->
     win:bool ->
@@ -126,6 +138,7 @@ let vale_calling_conventions (win:bool) (s0 s1:va_state) =
   ) /\
   s1.ok
 
+[@reduce]
 let rec vale_sig_tl (#dom:list vale_type)
                     (code:va_code)
                     (win:bool)
@@ -147,6 +160,7 @@ let rec vale_sig_tl (#dom:list vale_type)
       x:vale_type_as_type hd ->
       vale_sig_tl #tl code win (elim_1 pre x) (elim_1 post x)
 
+[@reduce]
 let elim_vale_sig_cons #code
                        (hd:vale_type)
                        (tl:list vale_type)
@@ -157,6 +171,7 @@ let elim_vale_sig_cons #code
     -> vale_sig_tl code win (elim_1 pre x) (elim_1 post x)
     = v
 
+[@reduce]
 let vale_sig (#dom:list vale_type)
              (pre:vale_pre dom)
              (post:vale_post dom)
@@ -171,22 +186,85 @@ let vale_sig (#dom:list vale_type)
 //    Interepreting a vale pre/post as a Low* function type
 //////////////////////////////////////////////////////////////////////////////////////////
 
-val as_lowstar_sig_tl_req (code:va_code)
-                          (acc:list b8)
-                          (down:create_vale_initial_state_t [] acc)
-                          (pre: vale_pre_tl [])
-                          (post: vale_post_tl [])
-                          (h0 : HS.mem) : Type0
+unfold let normal (#a:Type) (x:a) : a =
+  FStar.Pervasives.norm
+    [iota;
+     zeta;
+     delta_attr [`%reduce];
+     delta_only [`%VT_Buffer?;
+                 `%Mkstate?.ok;
+                 `%Mkstate?.regs;
+                 `%Mkstate?.xmms;
+                 `%Mkstate?.flags;
+                 `%Mkstate?.mem;
+                 `%BS.Mkstate?.ok;
+                 `%BS.Mkstate?.regs;
+                 `%BS.Mkstate?.xmms;
+                 `%BS.Mkstate?.flags;
+                 `%BS.Mkstate?.mem;
+                 `%TS.MktraceState?.state;
+                 `%TS.MktraceState?.trace;
+                 `%TS.MktraceState?.memTaint;
+                 `%FStar.FunctionalExtensionality.on_dom;
+                 `%FStar.FunctionalExtensionality.on;
+                 `%Interop.list_disjoint_or_eq;
+                 `%Interop.list_live
+                 ];
+     primops;
+     simplify]
+     x
 
-val as_lowstar_sig_tl_ens (code:va_code)
-                          (acc:list b8)
-                          (down:create_vale_initial_state_t [] acc)
-                          (pre: vale_pre_tl [])
-                          (post: vale_post_tl [])
-                          (h0 : HS.mem)
-                          (_ : unit)
-                          (h1 : HS.mem) : Type0
+[@reduce]
+unfold
+let prestate_hyp
+    (h0:HS.mem)
+    (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+    (push_h0:HS.mem)
+    (alloc_push_h0:HS.mem)
+    (b:b8)
+  : Type0 =
+  HS.fresh_frame h0 push_h0 /\
+  M.modifies M.loc_none push_h0 alloc_push_h0 /\
+  HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
+  B.frameOf b == HS.get_tip alloc_push_h0 /\
+  B.live alloc_push_h0 b /\
+  normal (mem_roots_p alloc_push_h0 (b::acc))
 
+[@reduce]
+let as_lowstar_sig_tl_req
+    (acc:list b8)
+    (down:create_vale_initial_state_t [] acc)
+    (pre:vale_pre_tl [])
+    (post:vale_post_tl [])
+    (h0:HS.mem)
+  : Type0 =
+  mem_roots_p h0 acc /\
+  (forall (push_h0:mem_roots acc) (alloc_push_h0:mem_roots acc) (b:stack_buffer).
+    let b' = to_b8 b in
+    prestate_hyp h0 acc push_h0 alloc_push_h0 b' ==>
+    elim_nil pre (elim_down_nil acc down alloc_push_h0 b') b)
+
+[@reduce]
+let as_lowstar_sig_tl_ens
+    (acc:list b8)
+    (down:create_vale_initial_state_t [] acc)
+    (pre:vale_pre_tl [])
+    (post:vale_post_tl [])
+    (h0:HS.mem)
+    (_:unit)
+    (h1:HS.mem)
+  : Type0 =
+  exists push_h0 alloc_push_h0 (b:stack_buffer) final (fuel:va_fuel).
+    let b' = to_b8 b in
+    mem_roots_p h0 acc /\
+    prestate_hyp h0 acc push_h0 alloc_push_h0 b' /\ (
+      let initial_state = elim_down_nil acc down alloc_push_h0 b' in
+      elim_nil post initial_state b final fuel /\
+      //not really needed: eval_code code initial_state fuel final /\
+      HS.poppable (get_hs final.mem) /\
+      h1 == HS.pop (get_hs final.mem))
+
+[@reduce]
 let rec as_lowstar_sig_tl (#dom:list vale_type)
                           (code:va_code)
                           (acc:list b8)
@@ -198,8 +276,8 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
     | [] ->
       unit ->
       Stack unit
-        (requires as_lowstar_sig_tl_req code acc down pre post)
-        (ensures as_lowstar_sig_tl_ens code acc down pre post)
+        (requires as_lowstar_sig_tl_req acc down pre post)
+        (ensures as_lowstar_sig_tl_ens acc down pre post)
     | hd::tl ->
       x:vale_type_as_type hd ->
       as_lowstar_sig_tl
@@ -210,6 +288,7 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
         (elim_1 pre x)
         (elim_1 post x)
 
+[@reduce]
 let create_vale_initial_state
       (is_win:bool)
       (dom:list vale_type{List.length dom < max_arity is_win})
@@ -224,6 +303,7 @@ let create_vale_initial_state
           init_taint
           create_initial_vale_state_core
 
+[@reduce]
 let as_lowstar_sig  (c:va_code) (dom:list vale_type{List.length dom < max_arity win})
                     (pre: vale_pre dom)
                     (post: vale_post dom) =
@@ -238,6 +318,7 @@ let as_lowstar_sig  (c:va_code) (dom:list vale_type{List.length dom < max_arity 
 
 ////////////////////////////////////////////////////////////////////////////////
 
+[@reduce]
 let elim_vale_sig_nil  #code #win
                        (pre:vale_pre_tl [])
                        (post:vale_post_tl [])
@@ -249,6 +330,7 @@ let elim_vale_sig_nil  #code #win
             (ensures (fun (va_s1, f) -> elim_nil post va_s0 stack_b va_s1 f))
     = v
 
+[@reduce]
 let elim_trusted_lowstar_sig_nil
       #code
       (acc:list b8)
@@ -262,6 +344,7 @@ let elim_trusted_lowstar_sig_nil
           IS.as_lowstar_sig_post code acc down h0 predict push_h0 alloc_push_h0 b fuel final_mem h1))
     = v
 
+[@reduce]
 let elim_trusted_lowstar_sig_cons
       #code
       (hd:vale_type)
@@ -286,3 +369,49 @@ val wrap (code:va_code) (dom:list vale_type{List.length dom < max_arity win})
          (t_low:IS.as_lowstar_sig (lower_code code) dom)
   : as_lowstar_sig code dom pre post
 
+//A couple of utilities for the library
+let force (#a:Type) (x:a) : normal a = x
+let elim_normal (p:Type) : Lemma (requires (normal p)) (ensures p) = ()
+
+let elim_lowstar_sig (#code:va_code) (#dom:list vale_type{List.length dom < max_arity win})
+                     (#pre:vale_pre dom)
+                     (#post:vale_post dom)
+                     (f:as_lowstar_sig code dom pre post)
+    : normal (as_lowstar_sig code dom pre post)
+    = force f
+
+let hs_of_va_state (x:va_state) : HS.mem = get_hs x.mem
+
+[@reduce]
+let pre_in_prestate_ctx
+       (h0:HS.mem)
+       (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+       (create_initial_state: (h:HS.mem -> b:b8{normal (mem_roots_p h (b::acc))} -> GTot va_state))
+       (pre: (va_state -> b:stack_buffer -> Type)) =
+      forall (push_h0:Monotonic.HyperStack.mem)
+        (alloc_push_h0: Monotonic.HyperStack.mem)
+        (b: stack_buffer).
+          let b' = to_b8 b in
+          prestate_hyp h0 acc push_h0 alloc_push_h0 b' ==>
+          pre (create_initial_state alloc_push_h0 b') b
+
+[@reduce]
+let post_in_poststate_ctx
+         (va_b0:va_code)
+         (h0:HS.mem)
+         (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
+         (create_initial_state: (h:HS.mem -> b:b8{normal (mem_roots_p h (b::acc))} -> GTot va_state))
+         (post: va_state -> stack_buffer -> va_state -> va_fuel -> Type)
+         (h1:HS.mem) =
+      exists (push_h0:Monotonic.HyperStack.mem)
+        (alloc_push_h0: Monotonic.HyperStack.mem)
+        (b: stack_buffer)
+        (final:va_state)
+        (fuel:va_fuel).
+          let b' = to_b8 b in
+          prestate_hyp h0 acc push_h0 alloc_push_h0 b' ==>
+          (let initial_state = create_initial_state alloc_push_h0 b' in
+           post initial_state b final fuel /\
+           //not really needed: eval_code va_b0 initial_state fuel final /\
+           Monotonic.HyperStack.poppable (hs_of_va_state final) /\
+           h1 == Monotonic.HyperStack.pop (hs_of_va_state final))
