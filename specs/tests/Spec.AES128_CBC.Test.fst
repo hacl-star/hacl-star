@@ -35,8 +35,6 @@ let test2_output: lbytes 16 = createL [u8 0x50; u8 0x86; u8 0xcb; u8 0x9b; u8 0x
 let test2_ciphertext: lbytes 16 = createL [u8 0x50; u8 0x86; u8 0xcb; u8 0x9b; u8 0x50; u8 0x72; u8 0x19; u8 0xee; u8 0x95; u8 0xdb; u8 0x11; u8 0x3a; u8 0x91; u8 0x76; u8 0x78; u8 0xb2]
 
 
-
-
 val test_aescbc:
     input: bytes
   -> key: lbytes size_block
@@ -45,22 +43,17 @@ val test_aescbc:
   FStar.All.ML unit
 
 let test_aescbc input key iv expected =
-  let computed = Spec.AES128_CBC.cbc_block iv key input in
+  let computed = Spec.AES128_CBC.aes128_cbc_encrypt input key iv in
   let result0 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed expected in
+  IO.print_string  "\nExpected ciphertext: ";
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list expected);
+  IO.print_string  "\nComputed ciphertext: ";
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list computed);
+  IO.print_string "\n";
   if result0 then IO.print_string "Success!\n"
-  else (IO.print_string "Failure!\n";
-    IO.print_string  "\nExpected ciphertext: ";
-    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list expected);
-    IO.print_string  "\nComputed ciphertext: ";
-    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list computed);
-    (* IO.print_string  "\nExpected xor: "; *)
-    (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list test1_input_block); *)
-    (* IO.print_string  "\nComputed xor: "; *)
-    (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list xor1); *)
-    IO.print_string "\n")
+  else (IO.print_string "Failure!\n")
 
 
 let _ =
   test_aescbc test1_plaintext key iv test1_output;
-  let test2: lbytes 32 = (test1_plaintext @| test2_plaintext) in
   test_aescbc (to_seq (test1_plaintext @| test2_plaintext)) key iv (test1_output @| test2_output)

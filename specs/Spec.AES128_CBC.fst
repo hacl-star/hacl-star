@@ -25,10 +25,10 @@ let cbc_block iv key block =
   AES.aes128_encrypt_block key aes_input
 
 
-val cbc_last: iv -> key -> input:bytes{length input <= size_block} -> Tot block
+val cbc_last: iv -> key -> input:bytes{length input < size_block} -> Tot block
 let cbc_last iv key input =
   let len = length input in
-  let block = create size_block (u8 0) in
+  let block = create size_block (u8 (size_block - len)) in
   let block = update_sub block 0 len input in
   cbc_block iv key block
 
@@ -50,5 +50,7 @@ let aes128_cbc_encrypt input k iv =
   if rem <> 0 then (
     let last = sub #uint8 #len input (n * size_block) rem in
     ciphertext @| (cbc_last last_iv k last))
-  else ciphertext
-
+  else (
+    let padding = create size_block (u8 size_block) in
+    let last_cipher_block = cbc_block last_iv k padding in
+    ciphertext @| last_cipher_block)
