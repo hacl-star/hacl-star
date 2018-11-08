@@ -244,31 +244,32 @@ let mem_roots (roots:list b8) =
 [@reduce]
 let rec initial_state_t
               (dom:list vale_type)
+              (slots:nat)
               (acc:list b8)
               (codom:Type)
   : n_arrow dom Type =
     match dom with
     | [] ->
       (h0:HS.mem ->
-       stack:b8{mem_roots_p h0 (stack::acc)} ->
+       stack:b8{mem_roots_p h0 (stack::acc) /\ length stack == 8 `op_Multiply` slots} ->
        GTot codom)
     | hd::tl ->
       fun (x:vale_type_as_type hd) ->
-         initial_state_t tl (maybe_cons_buffer hd x acc) codom
+         initial_state_t tl slots (maybe_cons_buffer hd x acc) codom
 
 // Some identity coercions that serve as proof hints
 // to introduce generic arrow types
 [@reduce]
 let fold_initial_state_t
   (#hd:vale_type) (#tl:list vale_type)
-  (#x:vale_type_as_type hd) (#acc:list b8) (#codom:Type)
-  (res:n_dep_arrow tl (initial_state_t tl (maybe_cons_buffer hd x acc) codom))
-  : n_dep_arrow tl (elim_1 (initial_state_t (hd::tl) acc codom) x)
+  (#x:vale_type_as_type hd) (#slots:nat) (#acc:list b8) (#codom:Type)
+  (res:n_dep_arrow tl (initial_state_t tl slots (maybe_cons_buffer hd x acc) codom))
+  : n_dep_arrow tl (elim_1 (initial_state_t (hd::tl) slots acc codom) x)
   = res
 
 [@reduce]
-let initial_trusted_state_t (dom:list vale_type) (acc:list b8) =
-  initial_state_t dom acc (TS.traceState & mem)
+let initial_trusted_state_t (dom:list vale_type) (slots:nat) (acc:list b8) =
+  initial_state_t dom slots acc (TS.traceState & mem)
 
 ////////////////////////////////////////////////////////////////////////////////
 //The calling convention w.r.t the register mapping
@@ -365,11 +366,10 @@ let update_taint_map (#a:vale_type)
       upd_taint_map taint x
     | _ -> taint
 
-//TODO: This should be set to addrs stack_b + 8*slots, where slots would be an additional argument since the stack goes down
-let regs_with_stack (regs:registers) (stack_b:b8) : registers =
+let regs_with_stack (regs:registers) (stack_b:b8) (slots:nat{8 `op_Multiply` slots == length stack_b}) : registers =
     fun r ->
       if r = Rsp then
-        addrs stack_b
+        addrs stack_b + 8 `op_Multiply` slots
       else regs r
 
 unfold let normal (#a:Type) (x:a) : a =
@@ -416,11 +416,12 @@ let mk_mem (addrs:_)//IS.addr_map)
 [@reduce]
 let create_initial_trusted_state_core
        (acc:list b8)
+       (slots:nat)
        (regs:registers)
        (xmms:xmms_t)
        (taint:taint_map)
        (h0:HS.mem)
-       (stack:b8{mem_roots_p h0 (stack::acc)})
+       (stack:b8{mem_roots_p h0 (stack::acc) /\ length stack == 8 `op_Multiply` slots})
   : GTot (TS.traceState & mem)
   = let acc = stack::acc in
     let (mem:mem) = {
@@ -428,7 +429,7 @@ let create_initial_trusted_state_core
       ptrs = acc;
       hs = h0
     } in
-    let regs = FunctionalExtensionality.on reg (regs_with_stack regs stack) in
+    let regs = FunctionalExtensionality.on reg (regs_with_stack regs stack slots) in
     let xmms = FunctionalExtensionality.on xmm xmms in
     let (s0:BS.state) = {
       BS.ok = true;
@@ -445,19 +446,20 @@ let create_initial_trusted_state_core
     mem
 
 [@reduce]
-let initial_vale_state_t (dom:list vale_type) (acc:list b8) =
-  initial_state_t dom acc va_state
+let initial_vale_state_t (dom:list vale_type) (slots:nat) (acc:list b8) =
+  initial_state_t dom slots acc va_state
 
 [@reduce]
 let create_initial_vale_state_core
        (acc:list b8)
+       (slots:nat)
        (regs:registers)
        (xmms:xmms_t)
        (taint:taint_map)
        (h0:HS.mem)
-       (stack:b8{mem_roots_p h0 (stack::acc)})
+       (stack:b8{mem_roots_p h0 (stack::acc) /\ length stack == 8 `op_Multiply` slots})       
   : GTot va_state
-  = let t_state, mem = create_initial_trusted_state_core acc regs xmms taint h0 stack in
+  = let t_state, mem = create_initial_trusted_state_core acc slots regs xmms taint h0 stack in
     {ok = TS.(BS.(t_state.state.ok));
      regs = X64.Vale.Regs.of_fun TS.(BS.(t_state.state.regs));
      xmms =  X64.Vale.Xmms.of_fun TS.(BS.(t_state.state.xmms));
@@ -467,40 +469,42 @@ let create_initial_vale_state_core
 
 let core_create_lemma
        (acc:list b8)
+       (slots:nat)
        (regs:registers)
        (xmms:xmms_t)
        (taint:taint_map)
        (h0:HS.mem)
-       (stack:b8{mem_roots_p h0 (stack::acc)})
+       (stack:b8{mem_roots_p h0 (stack::acc) /\ length stack == 8 `op_Multiply` slots})              
   : Lemma
-      (ensures (fst (create_initial_trusted_state_core acc regs xmms taint h0 stack) ==
-                state_to_S (create_initial_vale_state_core acc regs xmms taint h0 stack)))
-  = let s_init, _ = create_initial_trusted_state_core acc regs xmms taint h0 stack in
-    let s0 = create_initial_vale_state_core acc regs xmms taint h0 stack in
+      (ensures (fst (create_initial_trusted_state_core acc slots regs xmms taint h0 stack) ==
+                state_to_S (create_initial_vale_state_core acc slots regs xmms taint h0 stack)))
+  = let s_init, _ = create_initial_trusted_state_core acc slots regs xmms taint h0 stack in
+    let s0 = create_initial_vale_state_core acc slots regs xmms taint h0 stack in
     let s1 = state_to_S s0 in
     assert (FunctionalExtensionality.feq (regs' s1.TS.state) (regs' s_init.TS.state));
     assert (FunctionalExtensionality.feq (xmms' s1.TS.state) (xmms' s_init.TS.state))
 
 let create_both_initial_states_core
        (acc:list b8)
+       (slots:nat)
        (regs:registers)
        (xmms:xmms_t)
        (taint:taint_map)
        (h0:HS.mem)
-       (stack:b8{mem_roots_p h0 (stack::acc)})
+       (stack:b8{mem_roots_p h0 (stack::acc) /\ length stack == 8 `op_Multiply` slots})
     : GTot (t:TS.traceState &
             v:va_state{
               t == state_to_S v
             })
-    = let t, _ = create_initial_trusted_state_core acc regs xmms taint h0 stack in
-      let v = create_initial_vale_state_core acc regs xmms taint h0 stack in
-      core_create_lemma acc regs xmms taint h0 stack;
+    = let t, _ = create_initial_trusted_state_core acc slots regs xmms taint h0 stack in
+      let v = create_initial_vale_state_core acc slots regs xmms taint h0 stack in
+      core_create_lemma acc slots regs xmms taint h0 stack;
       (|t, v|)
 
 //The type of an arity-generic function that produces a pair
 //of related trusted and vale states
-let both_initial_states_t (dom:list vale_type) (acc:list b8) =
-  initial_state_t dom acc (t:TS.traceState & v:va_state{t == state_to_S v})
+let both_initial_states_t (dom:list vale_type) (slots:nat) (acc:list b8) =
+  initial_state_t dom slots acc (t:TS.traceState & v:va_state{t == state_to_S v})
 
 //This function folds over the `dom:list vale_type`
 //and builds an arity-generic dependent function that constructs
@@ -513,20 +517,21 @@ let rec create_initial_state_aux
         (dom:list vale_type)
         (is_win:bool)
         (i:nat{i + List.length dom < max_arity is_win})
+        (slots:nat)
         (regs:registers)
         (xmms:xmms_t)
         (acc:list b8)
         (taint:taint_map)
-        (f: (acc:list b8 -> registers -> xmms_t -> taint_map -> h:HS.mem -> stack:b8{mem_roots_p h (stack::acc)} -> GTot codom))
+        (f: (acc:list b8 -> slots:nat -> registers -> xmms_t -> taint_map -> h:HS.mem -> stack:b8{mem_roots_p h (stack::acc) /\ length stack == 8 `op_Multiply` slots} -> GTot codom))
       : n_dep_arrow
         dom
-        (initial_state_t dom acc codom) =
+        (initial_state_t dom slots acc codom) =
         match dom with
         | [] ->
           //no more args; build the state from a HS.mem
           intro_dep_arrow_nil
-              (initial_state_t [] acc codom)
-              (f acc regs xmms taint)
+              (initial_state_t [] slots acc codom)
+              (f acc slots regs xmms taint)
 
         | hd::tl ->
           //put the next arg hd in the ith register
@@ -536,13 +541,14 @@ let rec create_initial_state_aux
           intro_dep_arrow_cons
               hd
               tl
-              (initial_state_t dom acc codom)
+              (initial_state_t dom slots acc codom)
               (fun (x:vale_type_as_type hd) ->
                 fold_initial_state_t
                   (create_initial_state_aux
                     tl
                     is_win
                     (i + 1)
+                    slots
                     (update_regs x is_win i regs)
                     xmms
                     (maybe_cons_buffer hd x acc)
@@ -554,13 +560,15 @@ let init_taint : taint_map = fun r -> Public
 let create_both_initial_states
       (is_win:bool)
       (dom:list vale_type{List.length dom < max_arity is_win})
+      (slots:nat)
     : n_dep_arrow
          dom
-         (both_initial_states_t dom [])
+         (both_initial_states_t dom slots [])
     = create_initial_state_aux
           dom
           is_win
           0
+          slots
           init_regs
           init_xmms
           []
@@ -569,99 +577,112 @@ let create_both_initial_states
 
 [@reduce]
 let create_vale_initial_state_t (dom:list vale_type)
+                                (slots:nat)
                                 (acc:list b8)
     = n_dep_arrow
           dom
-          (initial_vale_state_t dom acc)
+          (initial_vale_state_t dom slots acc)
 
 
 let create_trusted_initial_state_t (dom:list vale_type)
+                                   (slots:nat)
                                    (acc:list b8)
     = n_dep_arrow
           dom
-          (initial_state_t dom acc (TS.traceState & mem))
+          (initial_state_t dom slots acc (TS.traceState & mem))
 
 [@reduce]
 let elim_down_1 (hd:vale_type)
+                (slots:nat)
                 (acc:list b8)
-                (down:create_vale_initial_state_t [hd] acc)
+                (down:create_vale_initial_state_t [hd] slots acc)
                 (x:vale_type_as_type hd)
-    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::maybe_cons_buffer hd x acc)} -> GTot va_state =
+    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::maybe_cons_buffer hd x acc) /\ length stack == 8 `op_Multiply` slots} -> GTot va_state =
     down x
 
 [@reduce]
 let elim_down_nil (acc:list b8)
-                  (down:create_vale_initial_state_t [] acc)
-    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc)} -> GTot va_state =
+                  (slots:nat)
+                  (down:create_vale_initial_state_t [] slots acc)
+    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc) /\ length stack == 8 `op_Multiply` slots} -> GTot va_state =
     down
 
 [@reduce]
 let elim_down_cons (hd:vale_type)
                    (tl:list vale_type)
+                   (slots:nat)
                    (acc:list b8)
-                   (down:create_vale_initial_state_t (hd::tl) acc)
+                   (down:create_vale_initial_state_t (hd::tl) slots acc)
                    (x:vale_type_as_type hd)
-    : create_vale_initial_state_t tl (maybe_cons_buffer hd x acc) =
+    : create_vale_initial_state_t tl slots (maybe_cons_buffer hd x acc) =
     elim_dep_arrow_cons hd tl down x
 
 [@reduce]
 let elim_down_nil_t (acc:list b8)
-                  (down:create_trusted_initial_state_t [] acc)
-    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc)} -> GTot (TS.traceState & mem) =
+                    (slots:nat)
+                  (down:create_trusted_initial_state_t [] slots acc)
+    : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::acc) /\ length stack == 8 `op_Multiply` slots} -> GTot (TS.traceState & mem) =
     down
 
 [@reduce]
 let elim_down_cons_t (hd:vale_type)
                      (tl:list vale_type)
+                     (slots:nat)
                      (acc:list b8)
-                     (down:create_trusted_initial_state_t (hd::tl) acc)
+                     (down:create_trusted_initial_state_t (hd::tl) slots acc)
                      (x:vale_type_as_type hd)
-    : create_trusted_initial_state_t tl (maybe_cons_buffer hd x acc) =
+    : create_trusted_initial_state_t tl slots (maybe_cons_buffer hd x acc) =
     elim_dep_arrow_cons hd tl down x
 
 let rec n_dep_arrow_equiv (dom:list vale_type)
+                          (slots:nat)
                           (acc:list b8)
-                          (f:create_trusted_initial_state_t dom acc)
-                          (g:create_vale_initial_state_t dom acc) =
+                          (f:create_trusted_initial_state_t dom slots acc)
+                          (g:create_vale_initial_state_t dom slots acc) =
     match dom with
     | [] ->
-      forall h0 (stack:b8{mem_roots_p h0 (stack::acc)}).
-        fst (elim_down_nil_t acc f h0 stack) == state_to_S (elim_down_nil acc g h0 stack)
+      forall h0 (stack:b8{mem_roots_p h0 (stack::acc) /\ length stack == 8 `op_Multiply` slots}).
+        fst (elim_down_nil_t acc slots f h0 stack) == state_to_S (elim_down_nil acc slots g h0 stack)
 
     | hd::tl ->
       forall (x:vale_type_as_type hd).
-        n_dep_arrow_equiv tl (maybe_cons_buffer hd x acc)
-                             (elim_down_cons_t hd tl acc f x)
-                             (elim_down_cons hd tl acc g x)
+        n_dep_arrow_equiv tl slots
+                             (maybe_cons_buffer hd x acc)
+                             (elim_down_cons_t hd tl slots acc f x)
+                             (elim_down_cons hd tl slots acc g x)
 
 let rec equiv_create_trusted_and_vale_state
           (dom:list vale_type)
           (i:nat{i + List.length dom < max_arity win})
+          (slots:nat)
           (regs:_)
           (xmms:_)
           (acc:list b8)
           (taint:_)
     : Lemma (n_dep_arrow_equiv
                   dom
+                  slots
                   acc
-                  (create_initial_state_aux dom win i regs xmms acc taint
+                  (create_initial_state_aux dom win i slots regs xmms acc taint
                                                          create_initial_trusted_state_core)
-                  (create_initial_state_aux dom win i regs xmms acc taint
+                  (create_initial_state_aux dom win i slots regs xmms acc taint
                                                          create_initial_vale_state_core))
      = match dom with
        | [] ->
-         FStar.Classical.forall_intro_2 (core_create_lemma acc regs xmms taint)
+         FStar.Classical.forall_intro_2 (core_create_lemma acc slots regs xmms taint)
        | hd::tl ->
          let aux (x:vale_type_as_type hd)
            : Lemma (n_dep_arrow_equiv
                       tl
+                      slots
                       (maybe_cons_buffer hd x acc)
-                      (create_initial_state_aux tl win (i + 1) (update_regs x win i regs) xmms (maybe_cons_buffer hd x acc) (update_taint_map x taint) create_initial_trusted_state_core)
-                      (create_initial_state_aux tl win (i + 1) (update_regs x win i regs) xmms (maybe_cons_buffer hd x acc) (update_taint_map x taint) create_initial_vale_state_core))
+                      (create_initial_state_aux tl win (i + 1) slots (update_regs x win i regs) xmms (maybe_cons_buffer hd x acc) (update_taint_map x taint) create_initial_trusted_state_core)
+                      (create_initial_state_aux tl win (i + 1) slots (update_regs x win i regs) xmms (maybe_cons_buffer hd x acc) (update_taint_map x taint) create_initial_vale_state_core))
          =
            equiv_create_trusted_and_vale_state
                 tl
                 (i + 1)
+                slots
                 (update_regs x win i regs)
                 xmms
                 (maybe_cons_buffer hd x acc)
@@ -767,7 +788,7 @@ let pre_in_prestate_ctx
        (h0:HS.mem)
        (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
        (stack_slots:nat)
-       (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
+       (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc) /\ length b == 8 `op_Multiply` stack_slots)} -> GTot va_state))
        (pre: (va_state -> b:stack_buffer -> Type)) =
       forall (push_h0:Monotonic.HyperStack.mem)
         (alloc_push_h0: Monotonic.HyperStack.mem)
@@ -782,7 +803,7 @@ let post_in_poststate_ctx
          (h0:HS.mem)
          (acc:list b8{disjoint_or_eq_l acc /\ live_l h0 acc})
          (stack_slots:nat)
-         (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc))} -> GTot va_state))
+         (create_initial_state: (h:HS.mem -> b:stack_buffer{normal (mem_roots_p h (b::acc) /\ length b == 8 `op_Multiply` stack_slots)} -> GTot va_state))
          (post: va_state -> stack_buffer -> va_state -> va_fuel -> Type)
          (h1:HS.mem) =
       exists (push_h0:Monotonic.HyperStack.mem)
@@ -802,7 +823,7 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
                           (code:va_code)
                           (acc:list b8)
                           (stack_slots:nat)
-                          (down:create_vale_initial_state_t dom acc)
+                          (down:create_vale_initial_state_t dom stack_slots acc)
                           (pre: vale_pre_tl dom)
                           (post: vale_post_tl dom)
     : Type =
@@ -822,7 +843,7 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
                             B.live alloc_push_h0 b /\
                             B.length b == 8 `op_Multiply` stack_slots /\                            
                             mem_roots_p alloc_push_h0 (b::acc) ==>
-                            elim_nil pre (elim_down_nil acc down alloc_push_h0 b) b)))
+                            elim_nil pre (elim_down_nil acc stack_slots down alloc_push_h0 b) b)))
         (ensures (fun h0 _ h1 ->
                        exists push_h0 alloc_push_h0 (b:stack_buffer) final fuel.//  {:pattern
                                  // (post push_h0 alloc_push_h0 b final fuel)}
@@ -834,7 +855,7 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
                             B.length b == 8 `op_Multiply` stack_slots /\                            
                             mem_roots_p alloc_push_h0 (b::acc) /\
                             (let initial_state =
-                                 elim_down_nil acc down alloc_push_h0 b in
+                                 elim_down_nil acc stack_slots down alloc_push_h0 b in
                              elim_nil
                               post
                               initial_state
@@ -852,7 +873,7 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
         code
         (maybe_cons_buffer hd x acc)
         stack_slots
-        (elim_down_cons hd tl acc down x)
+        (elim_down_cons hd tl stack_slots acc down x)
         (elim_1 pre x)
         (elim_1 post x)
 
@@ -860,11 +881,13 @@ let rec as_lowstar_sig_tl (#dom:list vale_type)
 let create_vale_initial_state
       (is_win:bool)
       (dom:list vale_type{List.length dom < max_arity is_win})
-    : create_vale_initial_state_t dom []
+      (slots:nat)
+    : create_vale_initial_state_t dom slots []
     = create_initial_state_aux
           dom
           is_win
           0
+          slots
           init_regs
           init_xmms
           []
@@ -875,11 +898,13 @@ let create_vale_initial_state
 let create_trusted_initial_state
       (is_win:bool)
       (dom:list vale_type{List.length dom < max_arity is_win})
-    : create_trusted_initial_state_t dom []
+      (slots:nat)
+    : create_trusted_initial_state_t dom slots []
     = create_initial_state_aux
           dom
           is_win
           0
+          slots
           init_regs
           init_xmms
           []
@@ -897,7 +922,7 @@ let as_lowstar_sig  (#dom:list vale_type{List.length dom < max_arity win})
         va_b0
       []
       stack_slots
-      (create_vale_initial_state win dom)
+      (create_vale_initial_state win dom stack_slots)
       (pre va_b0 win)
       (post va_b0 win)
 
@@ -921,7 +946,7 @@ let rec wrap_tl
          (dom:list vale_type)
          (stack_slots:nat{8 `op_Multiply` stack_slots < pow2_32 /\ stack_slots > 0})
          (acc:list b8)
-         (down:create_vale_initial_state_t dom acc)
+         (down:create_vale_initial_state_t dom stack_slots acc)
          (pre:vale_pre_tl dom)
          (post:vale_post_tl dom)
          (v:vale_sig_tl code pre post)
@@ -939,10 +964,10 @@ let rec wrap_tl
             assert (mem_roots_p h2 acc);
             assert (mem_roots_p h2 (stack_b::acc));
             st_put (fun h0' -> h0' == h2) (fun h0' ->
-              let va_s0 = elim_down_nil acc down h0' stack_b in
+              let va_s0 = elim_down_nil acc stack_slots down h0' stack_b in
               assert (B.frameOf stack_b = HS.get_tip h0');
               assert (B.live h0' stack_b);
-              assert (elim_nil pre (elim_down_nil acc down h0' stack_b) stack_b);
+              assert (elim_nil pre (elim_down_nil acc stack_slots down h0' stack_b) stack_b);
               let va_s1, fuel = elim_vale_sig_nil pre post v va_s0 stack_b in
               assert (elim_nil post va_s0 stack_b va_s1 fuel);
               (), va_s1.mem.hs
@@ -956,13 +981,13 @@ let rec wrap_tl
            : as_lowstar_sig_tl code
                                (maybe_cons_buffer hd x acc)
                                stack_slots
-                               (elim_down_cons hd tl acc down x)
+                               (elim_down_cons hd tl stack_slots acc down x)
                                (elim_1 pre x)
                                (elim_1 post x)
            = wrap_tl tl
                   stack_slots
                   (maybe_cons_buffer hd x acc)
-                  (elim_down_cons hd tl acc down x)
+                  (elim_down_cons hd tl stack_slots acc down x)
                   (elim_1 pre x)
                   (elim_1 post x)
                   (elim_vale_sig_cons hd tl pre post v x)
@@ -976,7 +1001,7 @@ let wrap (dom:list vale_type{List.length dom < max_arity win})
          (v:vale_sig pre post)
   : as_lowstar_sig pre post =
   fun (code:va_code) ->
-    wrap_tl dom stack_slots [] (create_vale_initial_state win dom) (pre code win) (post code win) (v code win)
+    wrap_tl dom stack_slots [] (create_vale_initial_state win dom stack_slots) (pre code win) (post code win) (v code win)
 
 //A couple of utilities for the library
 let force (#a:Type) (x:a) : normal a = x
@@ -1053,13 +1078,13 @@ let create_memcpy_initial_state
         (dst: buffer (TBase (TUInt64)))
         (src: buffer (TBase (TUInt64)))
         (h0:HS.mem)
-        (stack:stack_buffer {normal (mem_roots_p h0 [stack;src;dst])}) =
+        (stack:stack_buffer {normal (mem_roots_p h0 [stack;src;dst] /\ length stack == 8 `op_Multiply` stack_slots)}) =
     elim_normal (mem_roots_p h0 [stack;src;dst]);
     normal
-      (elim_down_nil [src;dst]
-        (elim_down_cons _ _ [dst]
-          (elim_down_cons _ _ []
-            (create_vale_initial_state win dom)
+      (elim_down_nil [src;dst] stack_slots
+        (elim_down_cons _ _ stack_slots [dst]
+          (elim_down_cons _ _ stack_slots []
+            (create_vale_initial_state win dom stack_slots )
             dst)
         src)
         h0
