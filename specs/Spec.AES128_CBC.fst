@@ -62,19 +62,19 @@ let aes128_cbc_encrypt input k iv =
     ciphertext @| last_cipher_block)
 
 
-val aes128_cbc_decrypt:
-    input: bytes{length input % size_block == 0}
-  -> k: key
-  -> iv: iv ->
-  Tot (option bytes)
+(* val aes128_cbc_decrypt: *)
+(*     input: bytes{length input % size_block == 0} *)
+(*   -> k: key *)
+(*   -> iv: iv -> *)
+(*   Tot (option bytes) *)
 
-let aes128_cbc_decrypt ciphertext k iv =
-  let clen = length ciphertext in
-  let n = clen / size_block in
-  let _, plaintext = generate_blocks size_block n (fun _ -> block) (fun i iv ->
-    let cblock_i = sub #uint8 #clen ciphertext (i * size_block) size_block in
-    let plain_block = cbc_decrypt_block iv k cblock_i in
-    cblock_i, plain_block) iv in
-  let last_byte = plaintext.[clen - 1] in
-  if last_byte > size_block then None
-  else if plaintext.[clen - las]
+(* let aes128_cbc_decrypt ciphertext k iv = *)
+(*   let clen = length ciphertext in *)
+(*   let n = clen / size_block in *)
+(*   let _, plaintext = generate_blocks size_block n (fun _ -> block) (fun i iv -> *)
+(*     let cblock_i = sub #uint8 #clen ciphertext (i * size_block) size_block in *)
+(*     let plain_block = cbc_decrypt_block iv k cblock_i in *)
+(*     cblock_i, plain_block) iv in *)
+(*   let last_byte = plaintext.[clen - 1] in *)
+(*   if last_byte > size_block then None *)
+(*   else if plaintext.[clen - las] *)
