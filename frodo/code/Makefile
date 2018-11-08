@@ -75,7 +75,7 @@ stage2: $(OUT_DIR)/test.exe
 else
 lib:
 	rm -f .depend && $(MAKE) .depend
-	rm -f $(OUTPUT_DIR)/Hacl_Impl_Frodo_Params.krml
+	rm -f $(CACHE_DIR)/Hacl.Impl.Frodo.Params.fst.checked
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
 
