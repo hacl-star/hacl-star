@@ -1110,11 +1110,96 @@ let full_post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8)  =
   post_cond h h' dst src  /\
   M.modifies (M.loc_buffer dst) h h'
 
-// TODO: Prove these two lemmas if they are not proven automatically
-let implies_pre (dst:b8) (src:b8) (h0:HS.mem)  : Lemma
+let intro_norm (p:Type) : Lemma (requires p) (ensures (normal p)) = ()
+
+// module T = Test.Vale_memcpy
+
+// open X64.Machine_s
+// open X64.Memory
+// open X64.Vale.State
+// open X64.Vale.Decls
+// open X64.Vale.InsBasic
+// open X64.Vale.InsMem
+// open X64.Vale.InsVector
+// open X64.Vale.QuickCode
+// open X64.Vale.QuickCodes
+
+// unfold
+// let va_req_memcpy (va_b0:va_code) (va_s0:va_state) (win:bool) (stack_b:buffer64) (dst:buffer64)
+//   (src:buffer64) : prop =
+//   let open B in
+//   (va_require_total va_b0 (va_code_memcpy win) va_s0 /\
+//    va_get_ok va_s0 /\
+//    locs_disjoint ([loc_buffer stack_b; loc_buffer dst; loc_buffer src]) /\
+//    buffer_readable (va_get_mem va_s0) stack_b /\
+//    buffer_readable (va_get_mem va_s0) dst /\
+//    buffer_readable (va_get_mem va_s0) src /\
+//    valid_taint_buf64 stack_b (va_get_mem va_s0) (va_get_memTaint va_s0) Public /\
+//    valid_taint_buf64 dst (va_get_mem va_s0) (va_get_memTaint va_s0) Secret /\
+//    valid_taint_buf64 src (va_get_mem va_s0) (va_get_memTaint va_s0) Secret /\
+//    buffer_length src == 2 /\
+//    buffer_length dst == 2 /\
+//    buffer_length stack_b >= 3 /\
+//    valid_stack_slots (va_get_mem va_s0) (va_get_reg Rsp va_s0) stack_b 0 (va_get_memTaint va_s0) /\
+//    (win ==> va_get_reg Rcx va_s0 == buffer_addr dst (va_get_mem va_s0)) /\
+//    (win ==> va_get_reg Rdx va_s0 == buffer_addr src (va_get_mem va_s0)) /\
+//    (~win ==> va_get_reg Rdi va_s0 == buffer_addr dst (va_get_mem va_s0)) /\
+//    (~win ==> va_get_reg Rsi va_s0 == buffer_addr src (va_get_mem va_s0)))
+
+// #set-options "--z3rlimit_factor 6 --initial_ifuel 2 --max_ifuel 2"
+// // TODO: Prove these two lemmas if they are not proven automatically
+
+// let move_requires_3 #a (#b:a -> Type) (#c:(x:a -> b x -> Type)) (#p:(x:a -> y:b x -> z:c x y -> Type)) (#q:(x:a -> y:b x -> z:c x y{p x y z} -> Type))
+//                     ($f:(x:a -> y:b x -> z:c x y -> Lemma (requires (p x y z)) (ensures (q x y z))))
+//    : Lemma (forall (x:a) (y:b x) (z:c x y). p x y z ==> q x y z)
+//    = admit()
+
+#reset-options "--z3rlimit_factor 6 --initial_ifuel 2 --max_ifuel 2 --max_fuel 0"
+let implies_pre (dst:buffer64) (src:buffer64) (h0:HS.mem)
+                (push_h0:Monotonic.HyperStack.mem)
+                (alloc_push_h0: Monotonic.HyperStack.mem)
+                (b: stack_buffer)
+   : Lemma
+     (requires (pre_cond h0 dst src /\
+               (elim_normal (disjoint_or_eq_l [src;dst]);
+                elim_normal (live_l h0 [src;dst]);
+                prestate_hyp h0 [src;dst] push_h0 alloc_push_h0 b)))
+     (ensures (pre (Vale_memcpy.va_code_memcpy win) win dst src (create_memcpy_initial_state dst src alloc_push_h0 b) b))
+   = let code = (Vale_memcpy.va_code_memcpy win) in
+     length_t_eq _ src;
+     length_t_eq _ dst;
+     // assert (view_n (X64.Memory_s.(TBase TUInt64)) == 8);
+     // assert (B.length src == 16);
+     // assert (B.length src == buffer_length src `op_Multiply` (view_n (X64.Memory_s.(TBase TUInt64))));
+     assume (X64.Memory_s.buffer_length src == 2);
+     assume (X64.Memory_s.buffer_length dst == 2);
+     elim_normal (disjoint_or_eq_l [src;dst]);
+     elim_normal (live_l h0 [src;dst]);
+     let initial_state = (create_memcpy_initial_state dst src alloc_push_h0 b) in
+     assume (B.length b == 24);
+     length_t_eq _ b;
+     assume (X64.Memory_s.buffer_length (b <: buffer64) == 3);
+     assert (initial_state.mem.ptrs == [b;src;dst]);
+     assume (List.memP b initial_state.mem.ptrs);
+     assume (List.memP src initial_state.mem.ptrs);
+     assume (List.memP dst initial_state.mem.ptrs)
+
+let implies_pre' (dst:b8) (src:b8) (h0:HS.mem)  : Lemma
   (requires pre_cond h0 dst src)
-  (ensures (normal (lift_vale_pre (Vale_memcpy.va_code_memcpy win) dst src h0))) =
-  admit()
+  (ensures (normal (lift_vale_pre (Vale_memcpy.va_code_memcpy win) dst src h0)))
+  = let code = (Vale_memcpy.va_code_memcpy win) in
+    elim_normal (disjoint_or_eq_l [src;dst]);
+    elim_normal (live_l h0 [src;dst]);
+    let aux (push_h0:Monotonic.HyperStack.mem)
+            (alloc_push_h0: Monotonic.HyperStack.mem)
+            (b: stack_buffer)
+       : Lemma (prestate_hyp h0 [src;dst] push_h0 alloc_push_h0 b ==>
+               (pre code win dst src (create_memcpy_initial_state dst src alloc_push_h0 b) b))
+       =  if FStar.StrongExcludedMiddle.strong_excluded_middle (prestate_hyp h0 [src;dst] push_h0 alloc_push_h0 b)
+          then implies_pre dst src h0 push_h0 alloc_push_h0 b
+    in
+    FStar.Classical.forall_intro_3 aux;
+    intro_norm (lift_vale_pre code dst src h0)
 
 let implies_post (dst src:buffer64) (h0 h1:HS.mem) : Lemma
   (requires normal (lift_vale_post (Vale_memcpy.va_code_memcpy win) dst src h0 h1))
@@ -1124,9 +1209,10 @@ let implies_post (dst src:buffer64) (h0 h1:HS.mem) : Lemma
 val memcpy: dst:buffer64 -> src:buffer64 -> Stack unit
         (requires (fun h -> pre_cond h dst src))
         (ensures (fun h0 _ h1 -> full_post_cond h0 h1 dst src ))
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 3"
 let memcpy dst src =
   let h0 = get() in
-  implies_pre dst src h0;
+  implies_pre' dst src h0;
   memcpy_wrapped (Vale_memcpy.va_code_memcpy win) dst src ();
   let h1 = get () in
   implies_post dst src h0 h1
