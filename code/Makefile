@@ -45,7 +45,7 @@ test:
 	$(FSTAR) $< && \
 	touch $@
 
-# 3. Extraction
+# 3. Extraction. Note that all the C files are prefixed with Hacl_. Cleaner!
 
 .PRECIOUS: %.krml
 
@@ -59,7 +59,7 @@ dist/compact/Makefile.include: \
   EXTRA=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2=Hacl.Hash.*[rename=Hacl_Hash] \
     -bundle Prims \
     -bundle LowStar.* \
-    -bundle C,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Kremlib] \
+    -bundle C,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
     -minimal \
     -add-include '"kremlin/internal/types.h"' \
     -add-include '"kremlin/c_endianness.h"' \
@@ -80,5 +80,5 @@ dist/%/Makefile.include: $(ALL_KRML_FILES)
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	$(KRML) $(EXTRA) -tmpdir $(dir $@) -skip-compilation \
-	  -bundle Spec.* $^ \
+	  -bundle Spec.*[rename=Hacl_Spec] $^ \
 	  -warn-error @4

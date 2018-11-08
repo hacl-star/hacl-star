@@ -20,9 +20,10 @@ else ifeq ($(OS),Windows_NT)
 endif
 
 VALE_FSTI_HACK	= $(HACL_HOME)/vale/code/arch/x64/interop/fsti
+HACL_CHECK	= $(HACL_HOME)/code/dist/compact/Makefile.include
 
-# Manual staging...
-all: $(VALE_FSTI_HACK)
+# Manual staging
+all: $(VALE_FSTI_HACK) $(HACL_CHECK)
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
@@ -34,6 +35,9 @@ $(VALE_FSTI_HACK): $(VALE_OBJ_DIR)
 
 $(VALE_OBJ_DIR):
 	echo "Please run scons in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
+
+$(HACL_CHECK):
+	echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false
 
 stage1: $(GENERATED_DIR)/Makefile.include $(INCLUDE_DIR)/EverCrypt.h
 
@@ -149,20 +153,9 @@ VALE_SOURCES	= $(addprefix $(VALE_DIR)/,sha256_main_i.c \
 VALE_ASM 	= $(addprefix $(VALE_DIR)/,\
   sha256-$(MARCH)$(VARIANT).S aes-$(MARCH)$(VARIANT).S aesgcm-$(MARCH)$(VARIANT).S)
 
-# TODO: understand why these two targets are broken/possibly switch to a HACL*
-# branch where their compilation is restored.
-# - aead-c: kremlin seems to generate an extra argument, JK had a hack to sed
-#   the code in place
-HACL_SOURCES	= \
-  $(HACL_CODE)/curve25519/x25519-c/Hacl_Curve25519.c \
-  $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
-  $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \
-  $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
-  $(HACL_CODE)/poly1305/poly-c/Hacl_Poly1305_64.c \
-  $(HACL_CODE)/api/policies-c/Hacl_Policies.c \
-  $(HACL_CODE)/api/aead-c/Hacl_Chacha20Poly1305.c
-#  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
+HACL_SOURCES	= $(wildcard $(HACL_CODE)/dist/compact/*.c)
 
+# JP: why are EverCrypt, EverCrypt_Helpers, etc. not already in ALL_GENERATED_FILES?
 EVERCRYPT_SOURCES = \
   $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c EverCrypt_ValeGlue.c) \
   $(addprefix evercrypt/c/evercrypt_,autoconfig.c bytes.c vale_stubs.c)
@@ -235,10 +228,6 @@ $(OUT_DIR)/libevercrypt.$(SO): $(ALL_OBJS) | $(OUT_DIR)
 	$(CC) -shared $^ $(LDFLAGS) -o $@ $(LIBKREMLIB)
 
 .PRECIOUS: %.o
-
-$(HACL_SOURCES):
-	$(error "Please run `make -j 8 -C $(HACL_CODE) extract-c` before invoking this Makefile")
-
 
 # 6. An OCaml library that exposes only the bytes-based interface, for now
 
