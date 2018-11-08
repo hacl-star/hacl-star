@@ -241,7 +241,6 @@ let point_add_and_double_ #s q nq nq_p1 =
 
 (* WRAPPER to Prevent Inlining *)
 let point_add_and_double_51  (q:point51) (nq:point51) (nq_p1:point51) = point_add_and_double_ #M51 q nq nq_p1
-inline_for_extraction
 let point_add_and_double_64  (q:point64) (nq:point64) (nq_p1:point64) = point_add_and_double_ #M64 q nq nq_p1
 inline_for_extraction
 val point_add_and_double: #s:field_spec -> q:point s -> nq: point s -> nq_p1:point s -> Stack unit
