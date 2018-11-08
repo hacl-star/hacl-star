@@ -209,24 +209,32 @@ aesgcm-test-only:
 	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_Impl_AesGCM.c aesgcm-ni-c/Hacl_Test_AesGCM.c $(KREMLIN_HOME)/kremlib/c/testlib.o -o aesgcm-ni.exe
 	./aesgcm-ni.exe
 
-CURVE25519_51_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	Hacl.Impl.Curve25519.Field64.fst \
 	Hacl.Impl.Curve25519.Field51.fst \
 	Hacl.Impl.Curve25519.Fields.fst \
-	Hacl.Impl.Curve25519.Generic.fst \
-	Hacl.Curve25519_51.fst 
+	Hacl.Impl.Curve25519.Generic.fst 
 
 
 KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
-curve51-c/out.krml: $(CURVE25519_51_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c $(CURVE25519_51_FILES) -skip-translation 
+
+curve51-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_51.fst
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c $(CURVE25519_FILES) Hacl.Curve25519_51.fst -skip-translation 
 
 curve51-c/Hacl_Curve25519_51.c: curve51-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c  $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_51=*'
+
+curve64-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_64.fst
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c $(CURVE25519_FILES) Hacl.Curve25519_64.fst -skip-translation 
+
+curve64-c/Hacl_Curve25519_64.c: curve64-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_64=*'
 
 curve-perf: 
 	gcc-8 -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curvetest.c -o curve-perf.exe

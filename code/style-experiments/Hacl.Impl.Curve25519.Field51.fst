@@ -390,6 +390,26 @@ let load_felem f u64s =
     f.(size 4) <- f3h
 
 
+let uint64_eq_mask (a:uint64) (b:uint64) : uint64
+  = let x = a ^. b in
+    let minus_x = (lognot x) +. (u64 1) in
+    let x_or_minus_x = x |. minus_x in
+    let xnx = x_or_minus_x >>. (u32 63) in
+    let c = xnx -. (u64 1) in
+    c
+
+let uint64_gte_mask (a:uint64) (b:uint64) : uint64
+  = let x = a in
+    let y = b in
+    let x_xor_y = logxor x y in
+    let x_sub_y = x -. y in
+    let x_sub_y_xor_y = x_sub_y ^. y in
+    let q = logor x_xor_y x_sub_y_xor_y in
+    let x_xor_q = logxor x q in
+    let x_xor_q_ = shift_right x_xor_q (u32 63) in
+    let c = sub_mod x_xor_q_ (u64 1) in
+    c
+
 val store_felem: u64s:lbuffer uint64 4ul -> f:felem -> Stack unit
                    (requires (fun h -> live h f /\ live h u64s))
 		   (ensures (fun h0 _ h1 -> modifies (loc u64s) h0 h1))
@@ -401,11 +421,11 @@ let store_felem u64s f =
     let f2 = f.(2ul) in
     let f3 = f.(3ul) in
     let f4 = f.(4ul) in
-    let m0 = gte_mask f0 (u64 0x7ffffffffffed) in
-    let m1 = eq_mask f1 (u64 0x7ffffffffffff) in
-    let m2 = eq_mask f2 (u64 0x7ffffffffffff) in
-    let m3 = eq_mask f3 (u64 0x7ffffffffffff) in
-    let m4 = eq_mask f4 (u64 0x7ffffffffffff) in
+    let m0 = uint64_gte_mask f0 (u64 0x7ffffffffffed) in
+    let m1 = uint64_eq_mask f1 (u64 0x7ffffffffffff) in
+    let m2 = uint64_eq_mask f2 (u64 0x7ffffffffffff) in
+    let m3 = uint64_eq_mask f3 (u64 0x7ffffffffffff) in
+    let m4 = uint64_eq_mask f4 (u64 0x7ffffffffffff) in
     let mask = m0 &. m1 &. m2 &. m3 &. m4 in
     let f0 = f0 -. (mask &. u64 0x7ffffffffffed) in
     let f1 = f1 -. (mask &. u64 0x7ffffffffffff) in

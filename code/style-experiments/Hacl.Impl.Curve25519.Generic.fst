@@ -6,6 +6,8 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 open Hacl.Impl.Curve25519.Fields
+module F51 = Hacl.Impl.Curve25519.Field51
+module F64 = Hacl.Impl.Curve25519.Field64
 
 #set-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 2"
 #set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
@@ -24,11 +26,19 @@ let fsquare_times_ #s o i n =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let fsquare_times_51 (o:felem M51) (i:felem M51) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i n
-inline_for_extraction
-let fsquare_times #s o i n =
+let fsquare_times_51 (o:F51.felem) (i:F51.felem) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i n
+[@CInline]
+let fsquare_times_64 (o:F64.felem) (i:F64.felem) (n:size_t{v n > 0}) = fsquare_times_ #M64 o i n
+
+inline_for_extraction noextract
+val fsquare_times: #s:field_spec -> o:felem s -> i:felem s -> n:size_t{v n > 0} -> Stack unit
+	     (requires (fun h0 -> live h0 o /\ live h0 i))
+	     (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1 /\ live h1 o /\ live h1 i))
+let fsquare_times (#s:field_spec) (o:felem s) (i:felem s) (n:size_t{v n > 0}) =
   match s with
   | M51 -> fsquare_times_51 o i n
+  | M64 -> fsquare_times_64 o i n
+(* WRAPPER to Prevent Inlining *)
 
 
 inline_for_extraction noextract
@@ -83,16 +93,28 @@ let finv_ #s o i =
 
 
 (* WRAPPER to Prevent Inlining *)
-let finv_51 o i = finv_ #M51 o i 
-inline_for_extraction
+let finv_51 (o:F51.felem) (i:F51.felem) = finv_ #M51 o i 
+let finv_64 (o:F64.felem) (i:F64.felem) = finv_ #M64 o i 
+inline_for_extraction noextract
+val finv: #s:field_spec -> o:felem s -> i:felem s -> Stack unit
+	     (requires (fun h0 -> live h0 o /\ live h0 i))
+	     (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1))
 let finv #s o i =
   match s with
-  | M51 -> finv_51 o i 
+  | M51 -> finv_51 o i
+  | M64 -> finv_64 o i
+ (* WRAPPER to Prevent Inlining *)
 
 
 
 unfold let scalar = lbuffer uint64 4ul
 unfold let point (s:field_spec) = lbuffer (limb s) (2ul *. nlimb s)
+
+(* NEEDED ONLY FOR WRAPPERS *)
+unfold let point51 = lbuffer uint64 10ul
+unfold let point64 = lbuffer uint64 8ul
+(* NEEDED ONLY FOR WRAPPERS *)
+
 
 inline_for_extraction
 val decode_scalar: o:scalar -> i:lbuffer uint8 32ul -> Stack unit
@@ -131,11 +153,18 @@ let decode_point_ #s o i =
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
-let decode_point_51 o i = decode_point_ #M51 o i
+let decode_point_51 (o:point51) i = decode_point_ #M51 o i
+let decode_point_64 (o:point64) i = decode_point_ #M64 o i
 inline_for_extraction
+val decode_point: #s:field_spec -> o:point s -> i:lbuffer uint8 32ul -> Stack unit 
+				  (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
+				 (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
+
 let decode_point #s o i = 
   match s with
   | M51 -> decode_point_51 o i
+  | M64 -> decode_point_64 o i
+(* WRAPPER to Prevent Inlining *)
 
 
 inline_for_extraction
@@ -157,11 +186,17 @@ let encode_point_ #s o i =
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
-let encode_point_51 o i = encode_point_ #M51 o i
+let encode_point_51 o (i:point51) = encode_point_ #M51 o i
+let encode_point_64 o (i:point64) = encode_point_ #M64 o i
 inline_for_extraction
+val encode_point: #s:field_spec -> o:lbuffer uint8 32ul -> i:point s  -> Stack unit 
+				  (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
+				 (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
 let encode_point #s o i = 
   match s with
   | M51 -> encode_point_51 o i
+  | M64 -> encode_point_64 o i
+(* WRAPPER to Prevent Inlining *)
 
 
 inline_for_extraction
@@ -205,11 +240,19 @@ let point_add_and_double_ #s q nq nq_p1 =
    pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
-let point_add_and_double_51  q nq nq_p1 = point_add_and_double_ #M51 q nq nq_p1
+let point_add_and_double_51  (q:point51) (nq:point51) (nq_p1:point51) = point_add_and_double_ #M51 q nq nq_p1
+inline_for_extraction
+let point_add_and_double_64  (q:point64) (nq:point64) (nq_p1:point64) = point_add_and_double_ #M64 q nq nq_p1
+inline_for_extraction
+val point_add_and_double: #s:field_spec -> q:point s -> nq: point s -> nq_p1:point s -> Stack unit
+				(requires fun h0 -> live h0 q /\ live h0 nq /\ live h0 nq_p1)
+				(ensures fun h0 _ h1 -> modifies (loc nq |+| loc nq_p1) h0 h1)
 inline_for_extraction
 let point_add_and_double #s q nq nq_p1 =
   match s with
   | M51 -> point_add_and_double_51 q nq nq_p1
+  | M64 -> point_add_and_double_64 q nq nq_p1
+(* WRAPPER to Prevent Inlining *)
 
 
 inline_for_extraction
@@ -229,13 +272,20 @@ let cswap_ #s bit p0 p1 =
 	 admit())
 
 
-[@CInline]
 (* WRAPPER to Prevent Inlining *)
-let cswap_51 bit p0 p1 = cswap_ #M51 bit p0 p1
+[@CInline]
+let cswap_51 bit (p0:point51) (p1:point51) = cswap_ #M51 bit p0 p1
+[@CInline]
+let cswap_64 bit (p0:point64) (p1:point64) = cswap_ #M64 bit p0 p1
 inline_for_extraction
+val cswap: #s:field_spec -> bit:uint64 -> p1:point s -> p2:point s -> Stack unit
+			 (requires (fun h0 -> live h0 p1 /\ live h0 p2))
+			 (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
 let cswap #s bit p0 p1 =
   match s with
   | M51 -> cswap_51 bit p0 p1
+  | M64 -> cswap_64 bit p0 p1
+(* WRAPPER to Prevent Inlining *)
 
 
 inline_for_extraction
@@ -265,11 +315,17 @@ let montgomery_ladder_ #s out key init =
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
-let montgomery_ladder_51 out key init = montgomery_ladder_ #M51 out key init
+let montgomery_ladder_51 (out:point51) key (init:point51) = montgomery_ladder_ #M51 out key init
+let montgomery_ladder_64 (out:point64) key (init:point64) = montgomery_ladder_ #M64 out key init
 inline_for_extraction
+val montgomery_ladder: #s:field_spec -> o:point s -> k:scalar -> i:point s -> Stack unit
+			  (requires (fun h0 -> live h0 o /\ live h0 k /\ live h0 i))
+			  (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1))
 let montgomery_ladder #s out key init =
   match s with
   | M51 -> montgomery_ladder_51 out key init
+  | M64 -> montgomery_ladder_64 out key init
+(* WRAPPER to Prevent Inlining *)
 
 inline_for_extraction
 val scalarmult: #s:field_spec 
