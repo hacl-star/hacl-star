@@ -365,7 +365,7 @@ let update_taint_map (#a:vale_type)
       upd_taint_map taint x
     | _ -> taint
 
-// TODO: This should be updated with addrs stack_b + (8 * stack_b.length) as the stack goes down
+//TODO: This should be set to addrs stack_b + 8*slots, where slots would be an additional argument since the stack goes down
 let regs_with_stack (regs:registers) (stack_b:b8) : registers =
     fun r ->
       if r = Rsp then
