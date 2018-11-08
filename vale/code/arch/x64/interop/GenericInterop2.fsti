@@ -23,23 +23,33 @@ module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 module IS = X64.Interop_s
+module MM = X64.Memory
 open X64.Interop_s
 
 val get_hs (m:X64.Memory.mem) : HS.mem
+val to_mem (m:ME.mem) : m':MM.mem{m === m'}
+val to_memtaint (m:X64.Machine_s.memTaint_t) : m':MM.memtaint{m === m'}
 
 [@reduce]
 let initial_vale_state_t (dom:list vale_type) (acc:list b8) =
   initial_state_t dom acc va_state
 
 [@reduce]
-val create_initial_vale_state_core
+let create_initial_vale_state_core
        (acc:list b8)
        (regs:registers)
        (xmms:xmms_t)
        (taint:taint_map)
        (h0:HS.mem)
        (stack:b8{mem_roots_p h0 (stack::acc)})
-  : GTot va_state
+  : GTot va_state =
+  let t_state, mem = create_initial_trusted_state_core acc regs xmms taint h0 stack in
+  { ok = TS.(BS.(t_state.state.ok));
+    regs = X64.Vale.Regs.of_fun TS.(BS.(t_state.state.regs));
+    xmms =  X64.Vale.Xmms.of_fun TS.(BS.(t_state.state.xmms));
+    flags = TS.(BS.(t_state.state.flags));
+    mem = to_mem mem;
+    memTaint = to_memtaint TS.(t_state.memTaint) }
 
 val core_create_lemma
        (acc:list b8)

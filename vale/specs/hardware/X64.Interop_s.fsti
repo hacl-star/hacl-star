@@ -19,9 +19,13 @@ module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 
+// === for refinement types
+noeq type h_equals_refine (a:Type) (x:a) : b:Type -> y:b -> Type =
+  | HReflRefine : p:(a -> Type0) -> q:squash (p x) -> h_equals_refine a x (y:a{p y}) x
+
 unfold let code = TS.tainted_code
 unfold let b8 = Interop.b8
-val to_b8 (#bt:X64.Memory_s.base_typ) (m:X64.Memory_s.buffer (TBase bt)) : b8
+val to_b8 (#bt:ME.base_typ) (m:ME.buffer (TBase bt)) : m':b8{h_equals_refine b8 m' (ME.buffer (TBase bt)) m}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Vale-specific types supported by the interop layer

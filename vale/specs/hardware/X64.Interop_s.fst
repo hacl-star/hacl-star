@@ -28,7 +28,16 @@ friend X64.Memory
 //friend X64.Vale.Decls
 //friend X64.Vale.StateLemmas
 
-let to_b8 #bt m = m
+let make_h_equals_refine (a:Type) (x:a) (p:a -> Type0) (q:squash (p x)) : h_equals_refine a x (y:a{p y}) x =
+  HReflRefine p q
+
+let prove_squash (a:Type) (x:a) : Lemma (squash a) = ()
+
+let to_b8 #bt m =
+  let p (b:b8) : Type0 = B.length b % view_n (TBase bt) == 0 in
+  let h : h_equals_refine b8 m (y:b8{p y}) m = make_h_equals_refine b8 m p () in //HReflRefine p () in
+  prove_squash (h_equals_refine b8 m (ME.buffer (TBase bt)) m) h;
+  m
 
 let rec equiv_disjoint_or_eq_l (roots:list b8)
   : Lemma (ensures (disjoint_or_eq_l roots <==> Interop.list_disjoint_or_eq roots))

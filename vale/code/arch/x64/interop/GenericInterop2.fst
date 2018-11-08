@@ -32,15 +32,8 @@ friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
 
 let get_hs m = m.hs
-
-let create_initial_vale_state_core acc regs xmms taint h0 stack =
-    let t_state, mem = create_initial_trusted_state_core acc regs xmms taint h0 stack in
-    {ok = TS.(BS.(t_state.state.ok));
-     regs = X64.Vale.Regs.of_fun TS.(BS.(t_state.state.regs));
-     xmms =  X64.Vale.Xmms.of_fun TS.(BS.(t_state.state.xmms));
-     flags = TS.(BS.(t_state.state.flags));
-     mem = mem;
-     memTaint = TS.(t_state.memTaint)}
+let to_mem m = m
+let to_memtaint m = m
 
 let core_create_lemma acc regs xmms taint h0 stack =
     let s_init, _ = create_initial_trusted_state_core acc regs xmms taint h0 stack in
