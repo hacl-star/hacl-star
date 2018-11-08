@@ -35,7 +35,20 @@ let get_hs m = m.hs
 let to_mem m = m
 let to_memtaint m = m
 
-let core_create_lemma acc regs xmms taint h0 stack =
+let lemma_create_initial_vale_state_core acc regs xmms taint h0 stack =
+  ()
+
+let core_create_lemma
+    (acc:list b8)
+    (regs:registers)
+    (xmms:xmms_t)
+    (taint:taint_map)
+    (h0:HS.mem)
+    (stack:b8{mem_roots_p h0 (stack::acc)})
+  : Lemma
+      (ensures (fst (create_initial_trusted_state_core acc regs xmms taint h0 stack) ==
+                state_to_S (create_initial_vale_state_core acc regs xmms taint h0 stack)))
+  =
     let s_init, _ = create_initial_trusted_state_core acc regs xmms taint h0 stack in
     let s0 = create_initial_vale_state_core acc regs xmms taint h0 stack in
     let s1 = state_to_S s0 in
