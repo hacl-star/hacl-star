@@ -105,6 +105,7 @@ let subborrow (x:uint64) (y:uint64) (cin:uint64) =
   let carry = u64 1 &. mask in
   res2, carry
 
+
 inline_for_extraction
 let mul64 (x:uint64) (y:uint64) =
   let res = mul64_wide x y in
