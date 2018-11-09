@@ -29,7 +29,7 @@ procedure {:quick}{:exportSpecs}{:public} memcpy(inline win:bool,ghost stack_b:b
         buffer_length(src) == 2;
         buffer_length(dst) == 2;        
         buffer_length(stack_b) >= 3;
-        valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 3, memTaint);
         win ==> rcx == buffer_addr(dst, mem);
         win ==> rdx == buffer_addr(src, mem);
         !win ==> rdi == buffer_addr(dst, mem);

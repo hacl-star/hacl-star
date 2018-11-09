@@ -1042,7 +1042,7 @@ let dom : l:list vale_type{List.Tot.length l < max_arity win} =
   d
 
 //TBD: How to generate that?
-let stack_slots : nat = 4
+let stack_slots : nat = 3
 
 //TBD: Auto-gen, permute arguments
 [@reduce]
@@ -1198,7 +1198,7 @@ let intro_norm (p:Type) : Lemma (requires p) (ensures (normal p)) = ()
 //    buffer_length src == 2 /\
 //    buffer_length dst == 2 /\
 //    buffer_length stack_b >= 3 /\
-//    valid_stack_slots (va_get_mem va_s0) (va_get_reg Rsp va_s0) stack_b 0 (va_get_memTaint va_s0) /\
+//    valid_stack_slots (va_get_mem va_s0) (va_get_reg Rsp va_s0) stack_b 3 (va_get_memTaint va_s0) /\
 //    (win ==> va_get_reg Rcx va_s0 == buffer_addr dst (va_get_mem va_s0)) /\
 //    (win ==> va_get_reg Rdx va_s0 == buffer_addr src (va_get_mem va_s0)) /\
 //    (~win ==> va_get_reg Rdi va_s0 == buffer_addr dst (va_get_mem va_s0)) /\
@@ -1221,7 +1221,7 @@ let implies_pre (dst:buffer64) (src:buffer64) (h0:HS.mem)
      (requires (pre_cond h0 dst src /\
                (elim_normal (disjoint_or_eq_l [src;dst]);
                 elim_normal (live_l h0 [src;dst]);
-                prestate_hyp h0 [src;dst] push_h0 alloc_push_h0 b)))
+                prestate_hyp h0 [src;dst] stack_slots push_h0 alloc_push_h0 b)))
      (ensures (pre (Vale_memcpy.va_code_memcpy win) win dst src (create_memcpy_initial_state dst src alloc_push_h0 b) b))
    = let code = (Vale_memcpy.va_code_memcpy win) in
      length_t_eq _ src;
@@ -1234,7 +1234,8 @@ let implies_pre (dst:buffer64) (src:buffer64) (h0:HS.mem)
      elim_normal (disjoint_or_eq_l [src;dst]);
      elim_normal (live_l h0 [src;dst]);
      let initial_state = (create_memcpy_initial_state dst src alloc_push_h0 b) in
-     assume (B.length b == 24);
+     // This verifies
+     // assert (B.length b == 24);
      length_t_eq _ b;
      assume (X64.Memory_s.buffer_length (b <: buffer64) == 3);
      assert (initial_state.mem.ptrs == [b;src;dst]);
@@ -1251,9 +1252,9 @@ let implies_pre' (dst:b8) (src:b8) (h0:HS.mem)  : Lemma
     let aux (push_h0:Monotonic.HyperStack.mem)
             (alloc_push_h0: Monotonic.HyperStack.mem)
             (b: stack_buffer)
-       : Lemma (prestate_hyp h0 [src;dst] push_h0 alloc_push_h0 b ==>
+       : Lemma (prestate_hyp h0 [src;dst] stack_slots push_h0 alloc_push_h0 b ==>
                (pre code win dst src (create_memcpy_initial_state dst src alloc_push_h0 b) b))
-       =  if FStar.StrongExcludedMiddle.strong_excluded_middle (prestate_hyp h0 [src;dst] push_h0 alloc_push_h0 b)
+       =  if FStar.StrongExcludedMiddle.strong_excluded_middle (prestate_hyp h0 [src;dst] stack_slots push_h0 alloc_push_h0 b)
           then implies_pre dst src h0 push_h0 alloc_push_h0 b
     in
     FStar.Classical.forall_intro_3 aux;
