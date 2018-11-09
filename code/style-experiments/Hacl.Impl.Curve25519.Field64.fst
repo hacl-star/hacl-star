@@ -87,19 +87,23 @@ let uint64_gte_mask (a:uint64) (b:uint64) : uint64
     let c = sub_mod x_xor_q_ (u64 1) in
     c
 
-inline_for_extraction
+[@CInline]
 let addcarry (x:uint64) (y:uint64) (cin:uint64) =
-  let res = x +. y +. cin in
-  let mask = lognot (uint64_gte_mask res x) in
+  let res1 = x +. cin in
+  let mask = lognot (uint64_gte_mask res1 x) in
+  let res2 = res1 +. y in
+  let mask = mask |. lognot (uint64_gte_mask res2 res1) in
   let carry = u64 1 &. mask in
-  res, carry
+  res2, carry
 
-inline_for_extraction
+[@CInline]
 let subborrow (x:uint64) (y:uint64) (cin:uint64) =
-  let res = x -. y -. cin in
-  let mask = lognot (uint64_gte_mask x res) in
+  let res1 = x -. cin in
+  let mask = lognot (uint64_gte_mask x res1) in
+  let res2 = res1 -. y in
+  let mask = mask |. lognot (uint64_gte_mask res1 res2) in
   let carry = u64 1 &. mask in
-  res, carry
+  res2, carry
 
 inline_for_extraction
 let mul64 (x:uint64) (y:uint64) =
@@ -312,8 +316,24 @@ val store_felem: u64s:lbuffer uint64 4ul -> f:felem -> Stack unit
                    (requires (fun h -> live h f /\ live h u64s))
 		   (ensures (fun h0 _ h1 -> modifies (loc u64s) h0 h1))
 let store_felem u64s f = 
-    u64s.(0ul) <- f.(0ul);
-    u64s.(1ul) <- f.(1ul);
-    u64s.(2ul) <- f.(2ul);
-    u64s.(3ul) <- f.(3ul)
+    let f0 = f.(0ul) in
+    let f1 = f.(1ul) in
+    let f2 = f.(2ul) in
+    let f3 = f.(3ul) in
+    let top_bit = f3 >>. 63ul in
+    let f3 = f3 &. u64 0x7fffffffffffffff in
+    let f0,carry = addcarry f0 (u64 19 *. top_bit) (u64 0) in
+    let f1,carry = addcarry f1 (u64 0) carry in
+    let f2,carry = addcarry f2 (u64 0) carry in
+    let f3,carry = addcarry f3 (u64 0) carry in
+    let top_bit = f3 >>. 63ul in
+    let f3 = f3 &. u64 0x7fffffffffffffff in
+    let f0,carry = addcarry f0 (u64 19 *. top_bit) (u64 0) in
+    let f1,carry = addcarry f1 (u64 0) carry in
+    let f2,carry = addcarry f2 (u64 0) carry in
+    let f3 = f3 +. carry in
+    u64s.(0ul) <- f0;
+    u64s.(1ul) <- f1;
+    u64s.(2ul) <- f2;
+    u64s.(3ul) <- f3
 
