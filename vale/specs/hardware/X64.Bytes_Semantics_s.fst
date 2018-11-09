@@ -500,7 +500,7 @@ let eval_ins (ins:ins) : st unit =
 
   | Sbb64 dst src ->
     let old_carry = if cf(s.flags) then 1 else 0 in
-    let diff = (eval_operand dst s) - ((eval_operand src s)) + old_carry in
+    let diff = eval_operand dst s - (eval_operand src s + old_carry) in
     let new_carry = diff < 0 in
     update_operand dst ins (diff % pow2_64);;
     update_cf new_carry  // We specify cf, but underspecify everything else (which update_operand havocs)

@@ -230,8 +230,8 @@ procedure{:instruction mk_taint_ins2(S.Sbb64, dst, src)}{:fast_instruction}{:qui
     modifies
         efl;
     ensures
-        dst == old(dst - src + (if cf(efl) then 1 else 0)) % pow2_64;
-        cf(efl) == old(dst - src + (if cf(efl) then 1 else 0)) < 0;
+        dst == old(dst - (src + (if cf(efl) then 1 else 0))) % pow2_64;
+        cf(efl) == old(dst - (src + (if cf(efl) then 1 else 0))) < 0;
 {
 }
 
