@@ -43,17 +43,41 @@ val test_aescbc:
   FStar.All.ML unit
 
 let test_aescbc input key iv expected =
-  let computed = Spec.AES128_CBC.aes128_cbc_encrypt input key iv in
-  let result0 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed expected in
-  IO.print_string  "\nExpected ciphertext: ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list expected);
-  IO.print_string  "\nComputed ciphertext: ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list computed);
-  IO.print_string "\n";
-  if result0 then IO.print_string "Success!\n"
-  else (IO.print_string "Failure!\n")
+  let ilen = length input in
+
+  let computed_encrypt = Spec.AES128_CBC.cbc_encrypt_block test1_plaintext key iv in
+  let computed_decrypt = Spec.AES128_CBC.cbc_decrypt_block computed_encrypt key iv in
+IO.print_string  "\nPlaintext: ";
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list test1_plaintext);
+  IO.print_string  "\nComputed Ciphertext: ";
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list computed_encrypt);
+  IO.print_string  "\nComputed Plaintext: ";
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list computed_decrypt)
+
+
+  (* IO.print_string  "\nPlaintext: "; *)
+  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list input); *)
+  (* let computed_encrypt = Spec.AES128_CBC.aes128_cbc_encrypt input key iv in *)
+  (* let result0 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed_encrypt expected in *)
+  (* IO.print_string  "\nExpected ciphertext: "; *)
+  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list expected); *)
+  (* IO.print_string  "\nComputed ciphertext: "; *)
+  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list computed_encrypt); *)
+
+  (* let ocomputed_decrypt = Spec.AES128_CBC.aes128_cbc_decrypt computed_encrypt key iv in *)
+  (* let result1 = *)
+  (*   match ocomputed_decrypt with *)
+  (*   | None -> IO.print_string "\nCould not decrypt!\n"; false *)
+  (*   | Some computed_decrypt -> begin *)
+  (*     let result1 = for_all2 #uint8 #uint8 #ilen (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed_decrypt input in *)
+  (*     IO.print_string  "\nComputed plaintext: "; *)
+  (*     List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list computed_decrypt); *)
+  (*     result1 end in *)
+  (* IO.print_string "\n"; *)
+  (* if result0 && result1 then IO.print_string "Success!\n" *)
+  (* else (IO.print_string "Failure!\n") *)
 
 
 let _ =
-  test_aescbc test1_plaintext key iv test1_output;
+  (* test_aescbc test1_plaintext key iv test1_output; *)
   test_aescbc (to_seq (test1_plaintext @| test2_plaintext)) key iv (test1_output @| test2_output)
