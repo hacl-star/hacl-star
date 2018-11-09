@@ -21,12 +21,14 @@ let op_String_Assignment = Map.upd
 type ins:eqtype =
   | Cpuid      : ins
   | Mov64      : dst:operand -> src:operand -> ins
+  | Cmovc64    : dst:operand -> src:operand -> ins
   | Add64      : dst:operand -> src:operand -> ins
   | AddLea64   : dst:operand -> src1:operand -> src2:operand -> ins
   | AddCarry64 : dst:operand -> src:operand -> ins
   | Adcx64     : dst:operand -> src:operand -> ins
   | Adox64     : dst:operand -> src:operand -> ins
   | Sub64      : dst:operand -> src:operand -> ins
+  | Sbb64      : dst:operand -> src:operand -> ins
   | Mul64      : src:operand -> ins
   | Mulx64     : dst_hi:operand -> dst_lo:operand -> src:operand -> ins
   | IMul64     : dst:operand -> src:operand -> ins
@@ -445,12 +447,16 @@ let eval_ins (ins:ins) : st unit =
   | Mov64 dst src ->
     check (valid_operand src);;
     update_operand_preserve_flags dst (eval_operand src s)
+    
+  | Cmovc64 dst src ->
+    check (valid_operand src);;
+    update_operand_preserve_flags dst (eval_operand (if cf s.flags then src else dst) s)
 
   | Add64 dst src ->
     check (valid_operand src);;
     let sum = (eval_operand dst s) + (eval_operand src s) in
     let new_carry = sum >= pow2_64 in
-    update_operand dst ins ((eval_operand dst s + eval_operand src s) % pow2_64);;
+    update_operand dst ins (sum % pow2_64);;
     update_cf new_carry
 
   | AddLea64 dst src1 src2 ->
@@ -487,8 +493,18 @@ let eval_ins (ins:ins) : st unit =
 
   | Sub64 dst src ->
     check (valid_operand src);;
-    update_operand dst ins ((eval_operand dst s - eval_operand src s) % pow2_64)
+    let diff = eval_operand dst s - eval_operand src s in
+    let new_carry = diff < 0 in
+    update_operand dst ins (diff % pow2_64);;
+    update_cf new_carry
 
+  | Sbb64 dst src ->
+    let old_carry = if cf(s.flags) then 1 else 0 in
+    let diff = (eval_operand dst s) - ((eval_operand src s)) + old_carry in
+    let new_carry = diff < 0 in
+    update_operand dst ins (diff % pow2_64);;
+    update_cf new_carry  // We specify cf, but underspecify everything else (which update_operand havocs)
+    
   | Mul64 src ->
     check (valid_operand src);;
     let hi = FStar.UInt.mul_div #64 (eval_reg Rax s) (eval_operand src s) in
