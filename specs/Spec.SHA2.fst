@@ -199,6 +199,7 @@ let h0Table (a:alg) : h0Table_t a =
 
 
 (* Definition: Algorithm constants *)
+inline_for_extraction let size_word (p:alg): size_nat = numbytes (wt p)
 inline_for_extraction let size_block_w: size_nat = 16
 inline_for_extraction let size_hash_w: size_nat = 8
 inline_for_extraction let size_block (p:alg): size_nat = size_block_w * numbytes (wt p)
