@@ -404,10 +404,10 @@ procedure{:quick} fast_multiply_a2b(
               a2b, a2b_0, a2b_1, a2b_2, a2b_3, a2b_4,
               b, b0, b1, b2, b3,
               d2, d3, r12, r14, rax); 
-    assert pow2_three(a0, a1, a2) * b == a0a1a2b;   // Conclusion from the lemma.  // PASSES
-    assert d0 == a0a1b_0;       // PASSES
-    assert d1 == a0a1b_1;       // PASSES
-    assert pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, r12, r14, rax);
+//    assert pow2_three(a0, a1, a2) * b == a0a1a2b;   // Conclusion from the lemma.  // PASSES
+//    assert d0 == a0a1b_0;       // PASSES
+//    assert d1 == a0a1b_1;       // PASSES
+//    assert pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, r12, r14, rax);
 }
 
 
