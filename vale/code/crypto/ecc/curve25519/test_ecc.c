@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <chrono>
+//#include <chrono>
 #include <math.h>
 #include <inttypes.h>
 
 typedef unsigned char byte;
 double cpuFreq;
 
-extern "C" void mul(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
-extern "C" void sqr(const uint64_t* dst, const uint64_t* in_a);
-extern "C" uint64_t mul1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
-extern "C" uint64_t add1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
-extern "C" uint64_t add(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+extern void mul(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+extern void sqr(const uint64_t* dst, const uint64_t* in_a);
+extern uint64_t mul1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
+extern uint64_t add1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
+extern uint64_t add(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 
 
 /*
@@ -67,46 +67,44 @@ void print_ints(int size, unsigned int ints[]) {
 		printf("%08x ", ints[i]);
 	}
 }
+*/
+
+void init_uint64s(uint64_t* buf, int len) {
+  for (int i = 0; i < len; i++) {
+    buf[i] = i;
+  }
+}
 
 void test() {
-    unsigned int K[64];
-    init_k(K);
+    uint64_t A[4];
+    uint64_t B[4];
+    uint64_t D[8];
 
-    unsigned int hash[8];
-    init_hash(hash);
+    init_uint64s(A, 4);
+    init_uint64s(B, 4);
 
-//    printf("The sha256 output for '' is: \n\t");
-//    print_ints(8, hash);
-//    printf("\nExpected answer is:\n\te3b0c442 98fc1c14 9afbf4c8 996fb924 27ae41e4 649b934c a495991b 7852b855\n");
-
-    int nblocks = 256;
-    byte *in = new byte[nblocks * 64+128];
-
-    // Make sure the buffers are 128-bit aligned
-    int byte_offset = 128 - (((unsigned long long) in) % 128);
-    in = (byte*) (((unsigned long long) in) + byte_offset); 
-    for (int i = 0; i < nblocks * 64; i++)
-    {
-        in[i] = i % 256;
-    }
+    
     for (int i = 0; i < 10; i++)
     {
-        auto time1 = std::chrono::high_resolution_clock::now();
-        uint64_t start = GetRDTSC();
+//        auto time1 = std::chrono::high_resolution_clock::now();
+//        uint64_t start = GetRDTSC();
         int n = 10000;
         for (int j = 0; j < n; j++)
         {
-            sha256((byte*)hash, in, nblocks, (byte*)K);
-
+            mul(D, A, B);
+            sqr(D, A);
+            uint64_t overflow;
+            overflow = mul1(D, A, 42);
+            overflow = add1(D, A, 330);
+            overflow = add (D, A, B);
         }
-        uint64_t end = GetRDTSC();
-        auto time2 = std::chrono::high_resolution_clock::now();
-        int dt = std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count();
-        printf("time = %d microseconds for %d iterations (%lf MB/s)\n", dt, n, double(n) * (nblocks * 64) / dt);
-        printf("cycle diff = %llu, time = %fs\n", end - start, (end - start) / cpuFreq);
+//        uint64_t end = GetRDTSC();
+//        auto time2 = std::chrono::high_resolution_clock::now();
+//        int dt = std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count();
+//        printf("time = %d microseconds for %d iterations (%lf MB/s)\n", dt, n, double(n) * (nblocks * 64) / dt);
+//        printf("cycle diff = %llu, time = %fs\n", end - start, (end - start) / cpuFreq);
     }
 }
-*/
 
 int main()
 {
@@ -121,8 +119,7 @@ int main()
 //
 //    printf("Measured CPU at %f GHz\n", cpuFreq/pow(10.0, 9));
 //
-//    test();
-
+    test();
 
     printf("goodbye\n");
     return 0;

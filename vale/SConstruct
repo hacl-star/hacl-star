@@ -1170,7 +1170,7 @@ if not is_help:
       CopyFile(sha256test_cpp, sha256test_src)
       sha256test_exe = env.Program(source = [sha256asm_obj, sha256test_cpp], target = 'obj/TestSha.exe')
       curve25519asm_obj = env.Object('obj/curve25519asm_openssl', curve25519_asm[0])
-      curve25519test_src = File('code/crypto/ecc/curve25519/TestEcc.cpp')
+      curve25519test_src = File('code/crypto/ecc/curve25519/test_ecc.c')
       curve25519test_cpp = to_obj_dir(curve25519test_src)
       CopyFile(curve25519test_cpp, curve25519test_src)
       curve25519test_exe = env.Program(source = [curve25519asm_obj, curve25519test_cpp], target = 'obj/TestEcc.exe')
