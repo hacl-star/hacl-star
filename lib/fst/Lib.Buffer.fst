@@ -269,12 +269,12 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l rem last w
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 250"
 
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   [@inline_let]
   let a_spec' (i:nat{i <= v n}) =
-    assert_spinoff (i * v len <= max_size_t);
+    assert (i * v len <= max_size_t);
     a_spec i & Seq.lseq t (i * v len) in
   [@inline_let]
   let refl' h (i:nat{i <= v n}) : GTot (a_spec' i) =
