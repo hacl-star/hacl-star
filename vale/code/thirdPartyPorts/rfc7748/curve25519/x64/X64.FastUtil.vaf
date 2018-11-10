@@ -328,7 +328,7 @@ procedure{:quick}{:public} fast_add1_stdcall(
 }
 
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 300"
 procedure{:quick} fast_sub1(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
@@ -344,7 +344,7 @@ procedure{:quick} fast_sub1(
 
         a := pow2_four(a0, a1, a2, a3);
     reads
-        dst_ptr; inA_ptr; memTaint;
+        dst_ptr; inA_ptr; b; memTaint;
 
     modifies
         rax; r8; r9; r10; r11; 
@@ -401,6 +401,7 @@ procedure{:quick} fast_sub1(
 //              r8, r9, r10, r11, bool_bit(c));
 }
 
+#reset-options "--z3rlimit 20"
 procedure{:quick}{:public} fast_sub1_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
@@ -438,7 +439,7 @@ procedure{:quick}{:public} fast_sub1_stdcall(
 
         let a := pow2_four(a0, a1, a2, a3);
         let d := pow2_four(d0, d1, d2, d3);
-        d - rax * pow2_256 == old(a - b);
+        d - rax * pow2_256 == old(a - inB_in);
         rax == 0 || rax == 1;
 
         //////////////////////////////////////
@@ -721,7 +722,7 @@ procedure{:quick} fast_sub(
 }
 
 
-procedure{:quick}{:public} {:verify true} fast_sub_stdcall(
+procedure{:quick}{:public} fast_sub_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
