@@ -187,7 +187,7 @@ let compress hash block =
 
 
 
-val truncate: hash:lbuffer word_t (Spec.size_hash Spec.SHA2_256) -> hw:hash_wp ->
+val truncate: hash:lbuffer uint8 (Spec.size_hash Spec.SHA2_256) -> hw:hash_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h hw /\ disjoint hash hw))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
@@ -298,7 +298,7 @@ let update #vlen hash input len =
     hash
 
 
-val finish: hash:lbuffer word_t (Spec.size_hash Spec.SHA2_256) -> hw:hash_wp ->
+val finish: hash:lbuffer uint8 (Spec.size_hash Spec.SHA2_256) -> hw:hash_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h hw /\ disjoint hash hw))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
