@@ -14,6 +14,7 @@ open Hacl.Impl.Ed25519.Ladder.Step
 
 let hint8_p = buffer Hacl.UInt8.t
 
+inline_for_extraction
 let op_String_Access (h:HyperStack.mem) (b:hint8_p{live h b}) =
   Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
@@ -47,7 +48,7 @@ let lemma_modifies_3 h0 h1 h2 h3 h4 h5 h6 a b c =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-private
+inline_for_extraction
 val append_to_sig:
   signature:hint8_p{length signature = 64} ->
   a:hint8_p{length a = 32 /\ disjoint a signature} ->
@@ -72,7 +73,7 @@ let append_to_sig signature a b =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ Substitute]
+inline_for_extraction
 private
 val sign__:
   signature:hint8_p{length signature = 64} ->
@@ -151,6 +152,8 @@ let lemma_modifies_3_to_modifies_2 #a #a' #a'' h0 h1 h2 h3 h4 b b' b'' =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+inline_for_extraction
+private
 val sign_:
   signature:hint8_p{length signature = 64} ->
   secret:hint8_p{length secret = 32} ->
@@ -163,7 +166,6 @@ val sign_:
       h1.[signature] == Spec.Ed25519.sign h0.[secret] h0.[msg]))
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
-
 let sign_ signature secret msg len =
   let hh0 = ST.get() in
   push_frame();
@@ -186,6 +188,7 @@ let sign_ signature secret msg len =
   ()
 
 
+inline_for_extraction
 val sign:
   signature:hint8_p{length signature = 64} ->
   secret:hint8_p{length secret = 32} ->

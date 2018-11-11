@@ -150,6 +150,16 @@ let sign (secret:lbytes 32) (msg:bytes{length msg < pow2 32 - 64}) =
   let s = (r + ((h * (little_endian a)) % q)) % q in
   rs @| little_bytes 32ul s
 
+let sign_expanded (ks:lbytes 96) (msg:bytes{length msg < pow2 32 - 64}) =
+  let a, prefix = Seq.slice ks 32 64, Seq.slice ks 64 96 in
+  let a' = Seq.slice ks 0 32 in
+  let r = sha512_modq (prefix @| msg) in
+  let r' = point_mul (little_bytes 32ul r) g in
+  let rs = point_compress r' in
+  let h = sha512_modq (rs @| a' @| msg) in
+  let s = (r + ((h * (little_endian a)) % q)) % q in
+  rs @| little_bytes 32ul s
+
 let point_equal (p:ext_point) (q:ext_point) =
   let px, py, pz, pt = p in
   let qx, qy, qz, qt = q in

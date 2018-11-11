@@ -37,6 +37,7 @@ let seval s = Hacl.Spec.Bignum.Bigint.seval s % Spec.Curve25519.prime
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let fsum a b =
   let h = ST.get() in
   assert_norm (pow2 63 > Hacl.Spec.EC.AddAndDouble.p513);
@@ -46,6 +47,7 @@ let fsum a b =
   Hacl.Spec.Bignum.Fsum.lemma_fsum_eval (as_seq h a) (as_seq h b);
   Hacl.Spec.EC.AddAndDouble.fsum_513_is_53 (as_seq h a) (as_seq h b)
 
+inline_for_extraction
 let fdifference a b =
   let h = ST.get() in
   assert_norm (pow2 63 > Hacl.Spec.EC.AddAndDouble.p513);
@@ -54,17 +56,20 @@ let fdifference a b =
 
 open Hacl.Spec.EC.AddAndDouble
 
-inline_for_extraction let mask_51 : p:Hacl.UInt64.t{Hacl.UInt64.v p = pow2 51 - 1} = assert_norm(pow2 51 - 1 = 0x7ffffffffffff);
+inline_for_extraction
+let mask_51 : p:Hacl.UInt64.t{Hacl.UInt64.v p = pow2 51 - 1} = assert_norm(pow2 51 - 1 = 0x7ffffffffffff);
   Hacl.Cast.uint64_to_sint64 0x7ffffffffffffuL
 
+inline_for_extraction
 private val lemma_carry_local: x:nat -> y:nat -> n:nat -> Lemma
   (pow2 n * x + pow2 (n+51) * y = pow2 n * (x % (pow2 51)) + pow2 (n+51) * ((x / pow2 51) + y))
-private let lemma_carry_local x y n =
+let lemma_carry_local x y n =
   Math.Lemmas.lemma_div_mod x (pow2 51);
   Math.Lemmas.pow2_plus n 51;
   Math.Lemmas.distributivity_add_right (pow2 n) (pow2 51 * (x / pow2 51)) (x % pow2 51);
   Math.Lemmas.distributivity_add_right (pow2 (n + 51)) (x / pow2 51) y
 
+inline_for_extraction
 private
 val fcontract_first_carry_pass_s: input:Hacl.Bignum.Parameters.seqelem{red_5413 input} ->
   GTot (s':Hacl.Bignum.Parameters.seqelem{
@@ -109,7 +114,7 @@ let fcontract_first_carry_pass_s s =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ Substitute]
+inline_for_extraction
 private val fcontract_first_carry_pass:
   input:felem ->
   Stack unit
@@ -117,8 +122,7 @@ private val fcontract_first_carry_pass:
     (ensures (fun h0 _ h1 -> Buffer.live h0 input /\ Hacl.Spec.EC.AddAndDouble.red_5413 (as_seq h0 input)
       /\ Buffer.live h1 input /\ modifies_1 input h0 h1
       /\ as_seq h1 input == fcontract_first_carry_pass_s (as_seq h0 input) ))
-[@ Substitute]
-private let fcontract_first_carry_pass input =
+let fcontract_first_carry_pass input =
   assert_norm(pow2 51 = 0x8000000000000);
   assert_norm(pow2 0 = 1);
   let t0 = input.(0ul) in
@@ -140,6 +144,7 @@ private let fcontract_first_carry_pass input =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 private
 val reduce_513_s: input:Hacl.Bignum.Parameters.seqelem{red_5413 input} ->
   GTot (s':Hacl.Bignum.Parameters.seqelem{red_513 s' /\ seval s' = seval input})
@@ -155,7 +160,7 @@ let reduce_513_s input =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
-[@ Substitute]
+inline_for_extraction
 val reduce_513_:
   a:felem ->
   Stack unit
@@ -163,11 +168,7 @@ val reduce_513_:
     (ensures (fun h0 _ h1 -> live h0 a /\ red_5413 (as_seq h0 a)
       /\ live h1 a /\ modifies_1 a h0 h1
       /\ as_seq h1 a == reduce_513_s (as_seq h0 a)))
-
-
 #reset-options "--max_fuel 0 --z3rlimit 500"
-
-[@ Substitute]
 let reduce_513_ a =
   assert_norm(pow2 51 = 0x8000000000000);
   assert_norm(pow2 63 = 0x8000000000000000);
@@ -178,16 +179,16 @@ let reduce_513_ a =
   Hacl.Spec.Bignum.Modulo.lemma_carry_top_spec_ (as_seq h a);
   Hacl.Bignum.Fproduct.carry_0_to_1 a
 
-
+inline_for_extraction
 let reduce_513 a =
   reduce_513_ a
 
-
+inline_for_extraction
 let fdifference_reduced a b =
   fdifference a b;
   reduce_513 a
 
-
+inline_for_extraction
 let fmul out a b =
   let h = ST.get() in
   Hacl.Spec.EC.AddAndDouble.fmul_53_55_is_fine (as_seq h a) (as_seq h b);
@@ -197,6 +198,7 @@ let fmul out a b =
 
 open Hacl.Cast
 
+inline_for_extraction
 let times_2 out a =
   let h = ST.get() in
   let a0 = a.(0ul) in
@@ -218,6 +220,7 @@ let times_2 out a =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let times_d out a =
   assert_norm(pow2 51 = 0x8000000000000);
   let h0 = ST.get() in
@@ -245,7 +248,7 @@ let times_d out a =
 
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
-
+inline_for_extraction
 let times_2d out a =
   assert_norm(pow2 51 = 0x8000000000000);
   let h0 = ST.get() in
@@ -273,6 +276,7 @@ let times_2d out a =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let fsquare out a =
   let h = ST.get() in
   push_frame();
@@ -296,6 +300,7 @@ let fsquare out a =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let fsquare_times out a n =
   let h = ST.get() in
   Hacl.Spec.Bignum.Crecip.lemma_fsquare_times_tot (as_seq h a) (FStar.UInt32.v n);
@@ -304,6 +309,7 @@ let fsquare_times out a n =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let fsquare_times_inplace out n =
   let h = ST.get() in
   Hacl.Spec.Bignum.Crecip.lemma_fsquare_times_tot (as_seq h out) (FStar.UInt32.v n);
@@ -312,11 +318,13 @@ let fsquare_times_inplace out n =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let inverse out a =
   Hacl.Bignum.Crecip.crecip out a
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let reduce out =
   Hacl.EC.Format.reduce out;
   let h = ST.get() in
@@ -324,27 +332,32 @@ let reduce out =
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let lemma_reveal_red_51 s =
   assert_norm(pow2 51 = 0x8000000000000)
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let lemma_intro_red_51 s =
   assert_norm (pow2 51 = 0x8000000000000)
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let lemma_reveal_red_513 s =
   assert_norm(pow2 51 = 0x8000000000000);
   assert_norm(pow2 13 = 0x2000)
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let lemma_intro_red_513 s =
   assert_norm (pow2 51 = 0x8000000000000);
   assert_norm(pow2 13 = 0x2000)
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
+inline_for_extraction
 let lemma_reveal_seval s =
   Hacl.Spec.Bignum.Modulo.lemma_seval_5 s

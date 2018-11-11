@@ -50,6 +50,7 @@ let lemma_modifies_1_is_modifies_2 #a #a' h h' b b' =
   lemma_intro_modifies_2 b b' h h'
 
 
+inline_for_extraction
 val verify__:
   public:uint8_p{length public = 32} ->
   msg:uint8_p ->
@@ -144,6 +145,7 @@ let verify__ public msg len signature tmp tmp' =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+inline_for_extraction
 val verify_:
   public:uint8_p{length public = 32} ->
   msg:uint8_p ->
@@ -175,7 +177,7 @@ let verify_ public msg len signature =
   (**) modifies_popped_0 h0 h1 h2 h3;
   res
 
-
+inline_for_extraction
 val verify:
   public:uint8_p{length public = 32} ->
   msg:uint8_p ->

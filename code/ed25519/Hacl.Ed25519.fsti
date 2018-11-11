@@ -47,3 +47,32 @@ val secret_to_public:
     (requires (fun h -> live h output /\ live h secret))
     (ensures (fun h0 _ h1 -> live h0 output /\ live h0 secret /\ live h1 output /\ modifies_1 output h0 h1 /\
       as_seq h1 output == Spec.Ed25519.secret_to_public h0.[secret]))
+
+
+val expand_keys:
+  ks:hint8_p{length ks = 96} ->
+  secret:hint8_p{length secret = 32} ->
+  Stack unit
+    (requires (fun h -> live h ks /\ live h secret /\ disjoint ks secret))
+    (ensures (fun h0 _ h1 ->
+                  live h0 ks /\ live h0 secret /\
+                  live h1 ks /\
+                  modifies_1 ks h0 h1 /\ (
+                    let pkey = Buffer.sub ks 0ul 32ul in
+                    let xlow = Buffer.sub ks 32ul 32ul in
+                    let xhigh = Buffer.sub ks 64ul 32ul in
+                    (h1.[xlow], h1.[xhigh]) == Spec.Ed25519.secret_expand h0.[secret] /\
+                    h1.[pkey] == Spec.Ed25519.secret_to_public h0.[secret])
+    ))
+
+
+val sign_expanded:
+  signature:hint8_p{length signature = 64} ->
+  ks:hint8_p{length ks = 96} ->
+  msg:hint8_p{length msg < pow2 32 - 64} ->
+  len:UInt32.t{UInt32.v len = length msg} ->
+  Stack unit
+    (requires (fun h -> live h signature /\ live h msg /\ live h ks))
+    (ensures (fun h0 _ h1 -> live h0 signature /\ live h0 msg /\ live h0 ks /\
+      live h1 signature /\ modifies_1 signature h0 h1 /\
+      h1.[signature] == Spec.Ed25519.sign_expanded h0.[ks] h0.[msg]))

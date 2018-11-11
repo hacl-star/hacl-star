@@ -12,8 +12,8 @@ unfold let fuel = nat
 
 let cf (flags:int) : bool = BS.cf (int_to_nat64 flags)
 let overflow (flags:int) : bool = BS.overflow (int_to_nat64 flags)
-let update_cf (flags:int) (new_cf:bool) = BS.update_cf (int_to_nat64 flags) new_cf
-let update_of (flags:int) (new_of:bool) = BS.update_of (int_to_nat64 flags) new_of
+let update_cf (flags:int) (new_cf:bool) = BS.update_cf' (int_to_nat64 flags) new_cf
+let update_of (flags:int) (new_of:bool) = BS.update_of' (int_to_nat64 flags) new_of
 
 let state_eq_S (s1 s2:TS.traceState) =
   s1 == {s2 with TS.trace = s1.TS.trace}

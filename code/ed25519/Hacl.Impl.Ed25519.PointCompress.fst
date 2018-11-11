@@ -101,7 +101,7 @@ let add_sign_spec out x =
   out'
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val add_sign:
   out:hint8_p{length out = 32} ->
@@ -110,7 +110,6 @@ val add_sign:
     (requires (fun h -> live h out /\ Hacl.Spec.Endianness.hlittle_endian (as_seq h out) < pow2 255))
     (ensures (fun h0 _ h1 -> live h0 out /\ live h1 out /\ modifies_1 out h0 h1
       /\ Hacl.Spec.Endianness.hlittle_endian (as_seq h1 out) == Hacl.Spec.Endianness.hlittle_endian (as_seq h0 out) + pow2 255 * v x))
-[@ Substitute]
 let add_sign out x =
   let h0 = ST.get() in
   let xbyte = Hacl.Cast.sint64_to_sint8 x in
@@ -120,7 +119,7 @@ let add_sign out x =
   assert(as_seq h1 out == add_sign_spec (as_seq h0 out) x)
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val point_compress_:
   tmp:buffer Hacl.UInt64.t{length tmp = 15} ->
@@ -151,7 +150,6 @@ val point_compress_:
         Hacl.Bignum25519.seval s' == Spec.Curve25519.(y `fmul` (z ** (prime - 2))))
     ))
 #reset-options "--max_fuel 0 --z3rlimit 100"
-[@ Substitute]
 let point_compress_ tmp p =
   let h0 = ST.get() in
   let zinv = Buffer.sub tmp 0ul  5ul in
@@ -212,7 +210,7 @@ let point_compress z p =
   (**) let h3 = ST.get() in
   (**) lemma_modifies_0_1' tmp h1 h2 h3;
   let b = x_mod_2 x in
-  Hacl.Impl.Store51.store_51 z out;
+  Hacl.EC.Format.fcontract_store z out;
   (**) let h4 = ST.get() in
   add_sign z b;
   let h5 = ST.get() in
