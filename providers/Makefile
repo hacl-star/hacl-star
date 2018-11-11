@@ -34,10 +34,10 @@ $(VALE_FSTI_HACK): $(VALE_OBJ_DIR)
 	ln -s $@/../*.fsti $@/
 
 $(VALE_OBJ_DIR):
-	echo "Please run scons in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
+	@echo "Please run scons in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
 
 $(HACL_CHECK):
-	echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false
+	@echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false
 
 stage1: $(GENERATED_DIR)/Makefile.include $(INCLUDE_DIR)/EverCrypt.h
 
