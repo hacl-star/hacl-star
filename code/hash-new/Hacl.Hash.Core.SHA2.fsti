@@ -7,13 +7,13 @@ open Hacl.Hash.Definitions
 (** A series of functions; we only expose the monomorphic variants, and leave it
   * up to EverCrypt.Hash to perform multiplexing. *)
 
-noextract inline_for_extraction
+inline_for_extraction noextract
 val alloca_224: alloca_st SHA2_224
-noextract inline_for_extraction
+inline_for_extraction noextract
 val alloca_256: alloca_st SHA2_256
-noextract inline_for_extraction
+inline_for_extraction noextract
 val alloca_384: alloca_st SHA2_384
-noextract inline_for_extraction
+inline_for_extraction noextract
 val alloca_512: alloca_st SHA2_512
 
 val init_224: init_st SHA2_224

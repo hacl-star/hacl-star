@@ -11,7 +11,6 @@ module ST = FStar.HyperStack.ST
 
 module AC = EverCrypt.AutoConfig2
 module SC = EverCrypt.StaticConfig
-friend EverCrypt.StaticConfig
 
 open LowStar.BufferOps
 open FStar.Integers
@@ -172,9 +171,6 @@ let update_multi #a s blocks len =
   | SHA2_512_s p ->
       let n = len / size_block_ul SHA2_512 in
       Hacl.Hash.SHA2.update_multi_512 p blocks n
-
-// Until we have inline_for_extraction behind interfaces
-friend Hacl.Hash.MD
 
 // Re-using the higher-order stateful combinator to get an instance of
 // update_last that is capable of calling Vale under the hood
