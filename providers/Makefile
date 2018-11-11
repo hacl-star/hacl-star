@@ -59,7 +59,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
 
-.PRECIOUS: %.krml
+.PRECIOUS: %.krml %.checked
 
 .depend:
 	$(FSTAR) --dep full $(ROOTS) \

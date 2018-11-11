@@ -128,7 +128,7 @@ let wrap_key a output key len =
 
 inline_for_extraction
 val part1:
-  a: alg -> 
+  a: alg ->
   acc: state a ->
   s2: uint8_pl (size_block a) ->
   data: uint8_p {
@@ -156,7 +156,7 @@ val part1:
 let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
   compress_many (acc0 #a) b
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 
 // we use auxiliary functions only for clarity and proof modularity
 inline_for_extraction
@@ -237,7 +237,7 @@ let part1 a (acc: state a) key data len =
 // the two parts have the same stucture; let's keep their proofs in sync.
 inline_for_extraction
 val part2:
-  a: alg -> 
+  a: alg ->
   acc: state a ->
   mac: uint8_pl (size_hash a) ->
   opad: uint8_pl (size_block a) ->
@@ -303,7 +303,7 @@ let part2 a acc mac opad tag =
 // similar spec as hmac with keylen = block_len a
 inline_for_extraction
 val hmac_core:
-  a: alg -> 
+  a: alg ->
   acc: state a ->
   tag: uint8_pl (size_hash a) ->
   key: uint8_pl (size_block a) {disjoint key tag} ->
@@ -350,6 +350,7 @@ let xor_bytes_inplace a b len =
 // TODO small improvements: part1 and part2 could return their tags in
 // mac, so that we can reuse the pad.
 
+module U32 = FStar.UInt32
 
 inline_for_extraction
 let hmac_core a acc tag key data len =
@@ -377,6 +378,9 @@ let hmac_core a acc tag key data len =
   frame_invariant (loc_union (loc_buffer ipad) (loc_buffer opad)) acc h01 h0;
   part1 a acc ipad data len;
   let h1 = ST.get() in
+  assert U32.(block_len a >=^ 64ul);
+  assert U32.(tag_len a <=^ 64ul);
+  assert U32.(tag_len a <=^ block_len a);
   let inner = sub ipad 0ul (tag_len a) in (* salvage memory *)
   part2 a acc tag opad inner;
   let h2 = ST.get() in
