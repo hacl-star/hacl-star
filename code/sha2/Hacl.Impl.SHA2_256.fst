@@ -34,7 +34,7 @@ type block_p  = lbuffer uint8 (Spec.size_block Spec.SHA2_256)
 
 let const_kTable = icreateL_global Spec.kTable_list_224_256
 let const_h0Table = icreateL_global Spec.h0Table_list_256
-
+let const_opTable = icreateL_global Spec.opTable_list_224_256
 
 
 val get_kTable:
@@ -62,6 +62,37 @@ let set_h0Table s =
   loop_nospec #h0 Spec.size_hash_w s
   (fun i -> s.(i) <- iindex const_h0Table i)
 
+val get_opTable:
+  s:size_t{size_v s < Spec.size_opTable} ->
+  Stack size_t
+    (requires (fun h -> True))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\
+      uint_v z == uint_v (Seq.index (Spec.opTable Spec.SHA2_256) (size_v s))))
+
+[@ Substitute ]
+let get_opTable s =
+  recall_contents const_opTable (Spec.opTable Spec.SHA2_256);
+  iindex const_opTable s
+
+
+
+let _Ch (x:uint32) (y:uint32) (z:uint32) : uint32 = ((x &. y) ^. ((~. x) &. z))
+let _Maj (x:uint32) (y:uint32) (z:uint32): uint32 = (x &. y) ^. ((x &. z) ^. (y &. z))
+
+val _Sigma0: uint32 -> Stack uint32 (requires (fun h -> True)) (ensures  (fun h0 _ h1 -> True))
+let _Sigma0 x = (x >>>. (get_opTable 0ul)) ^. ((x >>>. get_opTable 1ul) ^. (x >>>. get_opTable 2ul))
+
+val _Sigma1: uint32 -> Stack uint32 (requires (fun h -> True)) (ensures  (fun h0 _ h1 -> True))
+let _Sigma1 x = (x >>>. get_opTable 3ul) ^. ((x >>>. get_opTable 4ul) ^. (x >>>. get_opTable 5ul))
+
+val _sigma0: uint32 -> Stack uint32 (requires (fun h -> True)) (ensures  (fun h0 _ h1 -> True))
+let _sigma0 x = (x >>>. get_opTable 6ul) ^. ((x >>>. get_opTable 7ul) ^. (x >>. get_opTable 8ul))
+
+val _sigma1: uint32 -> Stack uint32 (requires (fun h -> True)) (ensures  (fun h0 _ h1 -> True))
+let _sigma1 x = (x >>>. get_opTable 9ul) ^. ((x >>>. get_opTable 10ul) ^. (x >>. get_opTable 11ul))
+
+
+
 val step_ws0:
     s: ws_wp
   -> b: block_wp
@@ -85,8 +116,8 @@ let step_ws1 s i =
   let t15 = s.(i - 15) in
   let t7  = s.(i - 7) in
   let t2  = s.(i - 2) in
-  let s1 = Spec._sigma1 Spec.SHA2_256 t2 in
-  let s0 = Spec._sigma0 Spec.SHA2_256 t15 in
+  let s1 = _sigma1 t2 in
+  let s0 = _sigma0 t15 in
   s.(i) <- s1 +. (t7 +. (s0 +. t16))
 
 
@@ -145,8 +176,10 @@ let shuffle_core hash wsTable i =
   let ws_i: uint32 = wsTable.(i) in
   let k_i: uint32 = get_kTable i in
   let r =  k_i +. ws_i in
-  let t1 = h0 +. (Spec._Sigma1 Spec.SHA2_256 e0) +. ((Spec._Ch Spec.SHA2_256 e0 f0 g0) +. r) in
-  let t2 = (Spec._Sigma0 Spec.SHA2_256 a0) +. (Spec._Maj Spec.SHA2_256 a0 b0 c0) in
+  let s0 = _Sigma0 a0 in
+  let s1 = _Sigma1 e0 in
+  let t1 = h0 +. s1 +. ((_Ch e0 f0 g0) +. r) in
+  let t2 = s0 +. (_Maj a0 b0 c0) in
 
   hash.(0ul) <- (t1 +. t2);
   hash.(1ul) <- a0;
@@ -183,7 +216,8 @@ let compress hash block =
   shuffle hash wsTable;
   let h0 = ST.get () in
   loop_nospec #h0 Spec.size_hash_w hash
-  (fun i -> hash.(i) <- hash.(i) ^. hash0.(i))
+  (fun i -> hash.(i) <- hash.(i) ^. hash0.(i));
+  pop_frame ()
 
 
 
@@ -207,23 +241,24 @@ let number_blocks_padding (len:size_t{v len <= Spec.size_block Spec.SHA2_256}) :
 
 (* Definition of the padding function for a single input block *)
 val pad:
-    #vlen: size_nat
-  -> blocks: lbuffer uint8 (2 * Spec.size_block Spec.SHA2_256)
+    blocks: lbuffer uint8 (2 * Spec.size_block Spec.SHA2_256)
   -> prev: uint64
-  -> last: lbuffer uint8 vlen
-  -> len: size_t{ v len == vlen
+  -> last: buffer uint8
+  -> len: size_t{ v len == length last
                /\ v len <= Spec.size_block Spec.SHA2_256
                /\ v len + v prev <= Spec.max_input Spec.SHA2_256} ->
   Stack unit
   (requires (fun h -> live h blocks /\ live h last /\ disjoint blocks last))
   (ensures  (fun h0 _ h1 -> modifies1 blocks h0 h1))
 
-let pad #vlen blocks prev last len =
+let pad blocks prev last len =
   let nr = number_blocks_padding len in
   // Create the padding and copy the partial block inside
   let h0 = ST.get () in
   loop_nospec #h0 len blocks
-  (fun i -> blocks.(i) <- last.(i));
+  (fun i ->
+    let x = index #uint8 #(v len) last i in
+    blocks.(i) <- x);
   // Write the 0x80 byte and the zeros in the padding
   blocks.(len) <- u8 0x80;
   // Encode and write the total length in bits at the end of the padding
@@ -255,18 +290,17 @@ let init hash = set_h0Table hash
 
 
 val update_last:
-    #vlen: size_nat
-  -> hash: hash_wp
+    hash: hash_wp
   -> prev: uint64
-  -> last: lbuffer uint8 vlen
-  -> len: size_t{ v len == vlen
+  -> last: buffer uint8
+  -> len: size_t{ v len == length last
                /\ v len <= Spec.size_block Spec.SHA2_256
                /\ v len + v prev <= Spec.max_input Spec.SHA2_256} ->
   Stack unit
   (requires (fun h -> live h hash /\ live h last /\ disjoint hash last))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
 
-let update_last #vlen hash prev last len =
+let update_last hash prev last len =
   let h0 = ST.get () in
   salloc_nospec h0 (2ul *. size Spec.size_block_w) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
   (fun blocks ->
@@ -281,20 +315,19 @@ let update_last #vlen hash prev last len =
 
 
 val update:
-    #vlen: size_nat
-  -> hash: hash_wp
-  -> input: lbuffer uint8 vlen
-  -> len: size_t{ v len == vlen
+    hash: hash_wp
+  -> input: buffer uint8
+  -> len: size_t{ v len == length input
                /\ v len <= Spec.max_input Spec.SHA2_256} ->
   Stack unit
   (requires (fun h -> live h hash /\ live h input /\ disjoint hash input))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
 
-let update #vlen hash input len =
+let update hash input len =
   let h0 = ST.get() in
   loopi_blocks_nospec (size (Spec.size_block Spec.SHA2_256)) len hash
     (fun i block hash -> update_block hash block)
-    (fun i len last hash -> update_last #(len %. size (Spec.size_block Spec.SHA2_256)) hash (len /. (size (Spec.size_block Spec.SHA2_256))) last len)
+    (fun i len last hash -> update_last hash (to_u64 i *. u64 (Spec.size_block Spec.SHA2_256)) last len)
     hash
 
 
@@ -316,5 +349,5 @@ let hash output input len =
   salloc_nospec h0 Spec.size_hash_w (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer output))
   (fun hash ->
     init hash;
-    update #(v len) hash input len;
+    update hash input len;
     finish output hash)

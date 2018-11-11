@@ -40,31 +40,29 @@ let update_block hash block = Impl.update_block hash block
 
 
 val update_last:
-    #vlen: size_nat
-  -> hash: lbuffer uint32 8
+    hash: lbuffer uint32 8
   -> prev: uint64
-  -> last: lbuffer uint8 vlen
-  -> len: size_t{ v len == vlen
+  -> last: buffer uint8
+  -> len: size_t{ v len == length last
                /\ v len <= 64
                /\ v len + uint_v prev <= pow2 61 - 1} ->
   Stack unit
   (requires (fun h -> live h hash /\ live h last /\ disjoint hash last))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
 
-let update_last #vlen hash prev last len = Impl.update_last #vlen hash prev last len
+let update_last hash prev last len = Impl.update_last hash prev last len
 
 
 val update:
-    #vlen: size_nat
-  -> hash: lbuffer uint32 8
-  -> input: lbuffer uint8 vlen
-  -> len: size_t{ v len == vlen
+    hash: lbuffer uint32 8
+  -> input: buffer uint8
+  -> len: size_t{ v len == length input
                /\ v len <= pow2 61} ->
   Stack unit
   (requires (fun h -> live h hash /\ live h input /\ disjoint hash input))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
 
-let update #vlen hash input len = Impl.update #vlen hash input len
+let update hash input len = Impl.update hash input len
 
 
 val finish:
