@@ -230,7 +230,8 @@ if not is_help:
       extended_info['BasicLimitInformation']['LimitFlags'] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
       win32job.SetInformationJobObject(hdl, win32job.JobObjectExtendedLimitInformation, extended_info)
   else:
-    common_env.Append(CCFLAGS = ['-O3', '-flto', '-g', '-DKRML_NOUINT128', '-std=c++11'])
+    common_env.Append(CCFLAGS = ['-O3', '-flto', '-g', '-DKRML_NOUINT128'])
+    common_env.Append(CXXFLAGS = ['-std=c++11'])  # This option is C++ specific
     mono = 'mono'
 
   if sys.platform == 'win32':
