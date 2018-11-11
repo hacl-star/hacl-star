@@ -87,6 +87,7 @@ let opTable (a:alg) : opTable_t a =
   | SHA2_384 | SHA2_512 -> (of_list opTable_list_384_512)
 
 
+inline_for_extraction
 let size_kTable (p:alg): size_nat =
   match p with
   | SHA2_224 | SHA2_256 -> 64
