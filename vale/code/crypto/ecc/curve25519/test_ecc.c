@@ -12,6 +12,8 @@ extern void sqr(const uint64_t* dst, const uint64_t* in_a);
 extern uint64_t mul1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
 extern uint64_t add1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
 extern uint64_t add(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+extern uint64_t sub1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
+extern uint64_t sub(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 
 
 /*
