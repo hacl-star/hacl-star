@@ -21,6 +21,20 @@ module Impl = Hacl.Impl.SHA2_256
 /// SHA-256
 ///
 
+
+val pad:
+    blocks: lbuffer uint8 (2 * Spec.size_block Spec.SHA2_256)
+  -> prev: uint64
+  -> last: buffer uint8
+  -> len: size_t{ v len == length last
+               /\ v len <= Spec.size_block Spec.SHA2_256
+               /\ v len + uint_v prev <= Spec.max_input Spec.SHA2_256} ->
+  Stack unit
+  (requires (fun h -> live h blocks /\ live h last /\ disjoint blocks last))
+  (ensures  (fun h0 _ h1 -> modifies1 blocks h0 h1))
+
+let pad blocks prev last len = Impl.pad blocks prev last len
+
 val init: hash:lbuffer uint32 8 ->
   Stack unit
   (requires (fun h -> live h hash))
