@@ -22,12 +22,14 @@ noeq type traceState = {
 let extract_operands (i:ins) : (list operand * list operand) =
   match i with
   | S.Mov64 dst src -> [dst], [src]
+  | S.Cmovc64 dst src -> [dst], [src; dst]
   | S.Add64 dst src -> [dst], [dst; src]
   | S.AddLea64 dst src1 src2 -> [dst], [dst; src1; src2]
   | S.AddCarry64 dst src -> [dst], [dst; src]
   | S.Adcx64 dst src -> [dst], [dst; src]
   | S.Adox64 dst src -> [dst], [dst; src]
   | S.Sub64 dst src -> [dst], [dst; src]
+  | S.Sbb64 dst src -> [dst], [dst; src]
   | S.Mul64 src -> [OReg Rax; OReg Rdx], [OReg Rax; src]
   | S.Mulx64 dst_hi dst_lo src -> [dst_hi; dst_lo], [OReg Rdx; src]
   | S.IMul64 dst src -> [dst], [dst; src]

@@ -347,8 +347,6 @@ verify_options = [
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
 
-  ('code/arch/x64/X64.Leakage_Ins.fst', None),
-
   ('code/*/*.fst', BuildOptions(fstar_default_args)),
   ('code/*/*.fsti', BuildOptions(fstar_default_args)),
   ('specs/*/*.fst', BuildOptions(fstar_default_args)),
