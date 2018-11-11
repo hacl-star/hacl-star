@@ -5,4 +5,6 @@ let _ =
       ("mul1", (fun win -> X64_FastUtil.va_code_fast_mul1_stdcall win));
       ("add1", (fun win -> X64_FastUtil.va_code_fast_add1_stdcall win));
       ("add",  (fun win -> X64_FastUtil.va_code_fast_add_stdcall win));
+      ("sub1", (fun win -> X64_FastUtil.va_code_fast_sub1_stdcall win));
+      ("sub",  (fun win -> X64_FastUtil.va_code_fast_sub_stdcall win));
     ]
