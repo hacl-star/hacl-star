@@ -449,7 +449,7 @@ let sub_carry (x y:nat64) (c:bit) : nat64 & (c':bit)
   (x - (y + c)) % pow2_64,
   (if x - (y + c) < 0 then 1 else 0)
 
-#push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 3000 --max_fuel 0 --max_ifuel 0"
 // Passes
 (*
 let lemma_sub2
