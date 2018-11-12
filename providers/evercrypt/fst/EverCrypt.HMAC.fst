@@ -395,8 +395,8 @@ let hmac_core a acc tag key data len =
     xor_lemma 0x5cuy k;
     // assert(k1 == as_seq h0 ipad);
     // assert(k2 == as_seq h1 opad);
-    assert(v1 == spec a S.(k1 @| vdata));
-    assert(v2 == spec a S.(k2 @| v1));
+    assert(Seq.equal v1 (spec a S.(k1 @| vdata)));
+    assert(Seq.equal v2 (spec a S.(k2 @| v1)));
 
     // TR: modifies clause now automatically proven thanks to
     // pattern provided in Hash.loc_includes_union_l_footprint
@@ -408,10 +408,14 @@ let hmac_core a acc tag key data len =
     // modified location that does not necessarily have its liveness
     // preserved (e.g. an abstract footprint) shall be disjoint from
     // any location whose liveness we want to preserve.
+    assert (modifies (loc_union (footprint acc h00) (loc_buffer tag)) h00 h3);
     modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 tag;
     modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 key;
     modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 data;
-
+    //modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 tag;
+    //
+    //
+    //admit ();
     //18-08-02 How to move those across pop?
     // assume(
     //   invariant acc h2 /\ footprint acc h2 == footprint acc h00 ==>
@@ -420,6 +424,7 @@ let hmac_core a acc tag key data len =
     // LowStar.Buffer.fresh_frame_loc_not_unused_in_disjoint
     frame_invariant (loc_region_only false (HyperStack.get_tip h1)) acc h2 h3
   )
+
 
 let compute a mac key keylen data datalen =
   let h00 = ST.get() in
