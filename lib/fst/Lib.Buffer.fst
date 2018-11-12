@@ -18,9 +18,7 @@ module HS = FStar.HyperStack
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 
-
-#set-options "--z3rlimit 100"
-
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let length #a b = B.length b
 
@@ -59,11 +57,15 @@ let createL #a init =
 
 let recall #a #len b = B.recall b
 
+#set-options "--max_fuel 1"
+
 let createL_global #a init =
   B.gcmalloc_of_list HyperStack.root init
 
 let icreateL_global #a init =
   IB.igcmalloc_of_list #a root init
+
+#set-options "--max_fuel 0"
 
 let recall_contents #a #len b s =
   B.recall_p b (cpred s)
@@ -134,6 +136,8 @@ let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
 
+#set-options "--max_fuel 1"
+
 let loop h0 n a_spec refl footprint spec impl =
   let inv h i = loop_inv h0 n a_spec refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
@@ -145,6 +149,8 @@ let loop1 #b #blen h0 n acc spec impl =
 let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
   let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
   Lib.Loops.for (size 0) n inv impl
+
+#set-options "--max_fuel 0"
 
 let salloc1 #a #res h len x footprint spec spec_inv impl =
   let h0 = ST.get() in
@@ -170,10 +176,7 @@ let salloc1_trivial #a #res h len x footprint spec impl =
 
 inline_for_extraction noextract
 let salloc_nospec #a #res h len x footprint impl =
-  (* BB. `a` is a random type because it is unused, is there a better solution ? *)
-  let spec (z:res) (h0:mem) = a in
-  let spec_inv (#res:Type) (h1 h2 h3:mem) (r:res) = () in
-  salloc1 #a #res h len x footprint spec spec_inv impl
+  salloc1_trivial #a #res h len x footprint (fun _ _ -> True) impl
 
 inline_for_extraction noextract
 val loopi_blocks_f:
@@ -204,9 +207,10 @@ val loopi_blocks_f:
       B.modifies (B.loc_buffer w) h0 h1 /\
       as_seq h1 w ==
       Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
-
 let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
-  assert ((v i + 1) * v bs <= v nb * v bs);
+  Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v nb);
+  assert ((v i + 1) * v bs == v i * v bs + v bs);
+  assert (v i * v bs + v bs <= v nb * v bs);
   let block = sub #_ #(v inpLen) inp (i *. bs) bs in
   f i block w
 
@@ -269,12 +273,10 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l rem last w
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
-
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   [@inline_let]
   let a_spec' (i:nat{i <= v n}) =
-    assert_spinoff (i * v len <= max_size_t);
+    Math.Lemmas.lemma_mult_le_right (v len) i (v n);
     a_spec i & Seq.lseq t (i * v len) in
   [@inline_let]
   let refl' h (i:nat{i <= v n}) : GTot (a_spec' i) =
@@ -362,9 +364,8 @@ let imapT #a #b #len out clen f inp =
     (fun h -> let in_seq = ias_seq h inp in Seq.map_inner f in_seq)
     (fun i -> out.(i) <- f (iindex inp i))
 
-// 2018.11.1 SZ: This function is unspecified in Lib.Buffer.fsti (and thus visible only to friends). Do we need this function? What's the spec?
-let mapi #a #b h0 clen out inp spec impl = 
+let mapi #a #b h0 clen out spec_f f inp = 
   let h0 = ST.get () in
   fill h0 clen out
-    (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner #a #b #(v clen) spec in_seq)
-    (fun i -> impl i)
+    (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner (spec_f h0) in_seq)
+    (fun i -> let xi = inp.(i) in out.(i) <- f i xi)

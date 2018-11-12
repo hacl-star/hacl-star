@@ -859,3 +859,22 @@ val imapT:
     (ensures  fun h0 _ h1 ->
       B.live h1 o /\ B.live h1 i /\ B.modifies (B.loc_buffer o) h0 h1 /\
       as_seq h1 o == Seq.map f (ias_seq h0 i))
+
+(** Map a stateful function with read effect on a buffer *)
+inline_for_extraction
+val mapi:
+    #a:Type
+  -> #b:Type
+  -> h0:mem
+  -> clen:size_t
+  -> o:lbuffer b (v clen)
+  -> spec_f:(mem -> GTot (i:size_nat{i < v clen} -> a -> b))
+  -> f:(i:size_t{v i < v clen} -> x:a -> Stack b 
+      (requires fun _ -> True)
+      (ensures  fun h y h1 -> y == spec_f h0 (v i) x /\ modifies0 h h1))
+  -> i:lbuffer a (v clen) ->
+  Stack unit
+    (requires fun h -> h == h0 /\ B.live h0 o /\ B.live h0 i /\ B.disjoint o i)
+    (ensures  fun h _ h1 ->
+      B.live h1 o /\ B.live h1 i /\ modifies1 o h h1 /\
+      as_seq h1 o == Seq.mapi (spec_f h0) (as_seq h i))
