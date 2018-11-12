@@ -17,26 +17,7 @@ module Spec = Spec.SHA2
 
 module Hash = Hacl.SHA2_256
 
-inline_for_extraction let size_hash: size_nat= 32
-
-///
-/// Testing function
-///
-
-val test_sha2_256:
-    msg_len: size_t
-  -> msg: lbytes (size_v msg_len)
-  -> expected: lbytes size_hash ->
-  Stack unit
-    (requires fun h -> live h msg /\ live h expected)
-    (ensures  fun h0 r h1 -> True)
-
-let test_sha2_256 msg_len msg expected =
-  push_frame();
-  let result = create #_ #size_hash (size size_hash) (u8 0xFF) in
-  Hacl.SHA2_256.hash result msg msg_len;
-  print_compare_display (size size_hash) result expected;
-  pop_frame()
+inline_for_extraction let size_hash: size_nat = 32
 
 ///
 /// Test 1
@@ -227,42 +208,35 @@ let test6_expected: b:lbytes size_hash =
 
 val main: unit -> St C.exit_code
 let main () =
-  C.String.print (C.String.of_literal "\nTEST 1. \n");
+
+  C.String.print (C.String.of_literal "TEST 1. \n");
   let result = create #_ #size_hash (size size_hash) (u8 0x00) in
-  (* let hash = create #_ #8 (size 8) (u32 0) in *)
-  (* let blocks = create #_ #128 (size 128) (u8 0) in *)
-  (* Hacl.SHA2_256.init hash; *)
-  (* Hacl.SHA2_256.pad blocks (u64 0) test1_plaintext test1_size_plaintext; *)
-  (* print_bytes (size 64) blocks; *)
-  (* Hacl.SHA2_256.update_last hash (u64 0) test1_plaintext test1_size_plaintext; *)
-  (* Hacl.SHA2_256.finish result hash; *)
-
   Hacl.SHA2_256.hash result test1_plaintext test1_size_plaintext;
-  print_compare_display (size size_hash) result test1_expected;
+  let r1 = result_compare_display (size size_hash) result test1_expected in
 
 
-  C.String.print (C.String.of_literal "\nTEST 2. \n");
+  C.String.print (C.String.of_literal "TEST 2. \n");
   let result2 = create #_ #size_hash (size size_hash) (u8 0x00) in
   Hacl.SHA2_256.hash result2 test2_plaintext test2_size_plaintext;
-  print_compare_display (size size_hash) result2 test2_expected;
+  let r2 = result_compare_display (size size_hash) result2 test2_expected in
 
-  C.String.print (C.String.of_literal "\nTEST 3. \n");
+  C.String.print (C.String.of_literal "TEST 3. \n");
   let result3 = create #_ #size_hash (size size_hash) (u8 0x00) in
   Hacl.SHA2_256.hash result3 test3_plaintext test3_size_plaintext;
-  print_compare_display (size size_hash) result3 test3_expected;
+  let r3 = result_compare_display (size size_hash) result3 test3_expected in
 
-  C.String.print (C.String.of_literal "\nTEST 4. \n");
+  C.String.print (C.String.of_literal "TEST 4. \n");
   let result4 = create #_ #size_hash (size size_hash) (u8 0x00) in
   Hacl.SHA2_256.hash result4 test4_plaintext test4_size_plaintext;
-  print_compare_display (size size_hash) result4 test4_expected;
+  let r4 = result_compare_display (size size_hash) result4 test4_expected in
 
-  C.String.print (C.String.of_literal "\nTEST 5. \n");
+  C.String.print (C.String.of_literal "TEST 5. \n");
   let result5 = create #_ #size_hash (size size_hash) (u8 0x00) in
   let test5_plaintext = create #uint8 #1000000 (size 1000000) (u8 0x61) in
   Hacl.SHA2_256.hash result5 test5_plaintext (size 1000000);
-  print_compare_display (size size_hash) result5 test5_expected;
+  let r5 = result_compare_display (size size_hash) result5 test5_expected in
 
-  C.String.print (C.String.of_literal "\nTEST 6. \n");
+  C.String.print (C.String.of_literal "TEST 6. \n");
   let result6 = create #_ #size_hash (size size_hash) (u8 0x00) in
   let state6 = create #uint32 #8 (size 8) (u32 0) in
   Hacl.SHA2_256.init state6;
@@ -273,6 +247,11 @@ let main () =
   );
   Hacl.SHA2_256.update_last state6 (16777215ul *. test6_size_plaintext) test6_plaintext test6_size_plaintext;
   Hacl.SHA2_256.finish result6 state6;
-  print_compare_display (size size_hash) result6 test6_expected;
+  let r6 = result_compare_display (size size_hash) result6 test6_expected in
 
-  C.EXIT_SUCCESS
+  if r1 && r2 && r3 && r4 && r5 && r6 then begin
+    C.String.print (C.String.of_literal "Composite Result: Success !\n");
+    C.EXIT_SUCCESS end
+  else begin
+    C.String.print (C.String.of_literal "Composite Result: Failure !\n");
+    C.EXIT_FAILURE end
