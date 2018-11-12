@@ -56,7 +56,7 @@ $(OUTPUT_DIR)/%.krml:
 	touch $@
 
 dist/compact/Makefile.include: \
-  EXTRA=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2=Hacl.Hash.*[rename=Hacl_Hash] \
+  EXTRA=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
     -bundle Prims \
     -bundle LowStar.* \
     -bundle C,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \

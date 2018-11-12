@@ -6,7 +6,6 @@ module BCrypt = EverCrypt.BCrypt
 module Hacl = EverCrypt.Hacl
 module OpenSSL = EverCrypt.OpenSSL
 module Vale = EverCrypt.Vale
-module ValeGlue = EverCrypt.ValeGlue
 
 module SC = EverCrypt.StaticConfig
 module AC = EverCrypt.AutoConfig

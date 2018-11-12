@@ -519,7 +519,7 @@ let sha_update_bytes_stdcall_aux
     M.loc_disjoint (M.loc_buffer k_b8) (M.loc_buffer stack_b))
     (fun h -> let h1 = ghost_sha_update ctx_b in_b num_val k_b stack_b ctx_b8 k_b8 h in (), h1)
 
-let sha_update_bytes_stdcall ctx_b in_b num_val k_b =
+let sha256_update ctx_b in_b num_val k_b =
   push_frame();
   let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t (if win then 264 else 104)) in
   let (ctx_b8:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in

@@ -134,7 +134,7 @@ let update_multi_256 s blocks n =
     assume (
       let k_b128 = LowStar.BufferView.mk_buffer_view k Views.view32_128 in
       SHA_helpers.k_reqs (LowStar.BufferView.as_seq h0 k_b128));
-    Sha_update_bytes_stdcall.sha_update_bytes_stdcall s blocks n k;
+    Sha_update_bytes_stdcall.sha256_update s blocks n k;
     admit ()
   end else
     Hacl.Hash.SHA2.update_multi_256 s blocks n

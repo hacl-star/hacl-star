@@ -6,16 +6,17 @@ UNAME		= $(shell uname)
 SED		= $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
 MARCH		= x86_64
 ifeq ($(UNAME),Darwin)
-  VARIANT	= -Darwin
+  VARIANT	= -darwin
   SO		= so
 else ifeq ($(UNAME),Linux)
   CFLAGS	+= -fPIC
-  VARIANT	= -Linux
+  VARIANT	= -linux
   SO 		= so
   LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
 else ifeq ($(OS),Windows_NT)
   CC		= $(MARCH)-w64-mingw32-gcc
   AR		= $(MARCH)-w64-mingw32-ar
+  VARIANT	= -mingw
   SO		= dll
 endif
 
@@ -23,13 +24,15 @@ VALE_FSTI_HACK	= $(HACL_HOME)/vale/code/arch/x64/interop/fsti
 HACL_CHECK	= $(HACL_HOME)/code/dist/compact/Makefile.include
 
 # Manual staging
-all: $(VALE_FSTI_HACK) $(HACL_CHECK)
+all: $(VALE_FSTI_HACK) $(VALE_OBJ_DIR) $(HACL_CHECK)
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
 	$(MAKE) -C quic_provider
 
-$(VALE_FSTI_HACK): $(VALE_OBJ_DIR)
+# Temporary workaround: we want Vale to offer a relatively small dependency
+# graph with just interfaces.
+$(VALE_FSTI_HACK):
 	mkdir -p $@
 ifeq ($(OS),Windows_NT)
 	cp $@/../*.fsti $@/
@@ -38,7 +41,7 @@ else
 endif
 
 $(VALE_OBJ_DIR):
-	@echo "Please run scons in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
+	@echo "Please run scons --FSTAR-MY-VERSION --NO-VERIFY --EXTRACT-FSTAR in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
 
 $(HACL_CHECK):
 	@echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false
@@ -118,8 +121,11 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -bundle 'Flag' \
 	  -bundle 'Spec.*' \
 	  -bundle 'LowStar.*' \
-	  -bundle 'Hacl.*' -library 'Hacl.*' \
+	  -bundle 'Hacl.*' -library 'Hacl.*' -library 'Spec.SHA2' \
 	  -no-prefix 'EverCrypt.Vale' \
+	  -no-prefix 'Sha_update_bytes_stdcall' \
+	  -no-prefix 'Check_sha_stdcall' \
+	  -no-prefix 'Check_aesni_stdcall' \
 	  -tmpdir $(GENERATED_DIR) $^ -warn-error @9
 
 $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
@@ -149,20 +155,13 @@ include $(GENERATED_DIR)/Makefile.include
 # 3. Collecting all of our source files, and generating corresponding object
 # files.
 
-# TODO: grab these directly from Vale and error out with a helpful make target,
-# like for HACL*.
-VALE_DIR 	= $(HACL_HOME)/secure_api/vale/asm
-VALE_SOURCES	= $(addprefix $(VALE_DIR)/,sha256_main_i.c \
-  vale_aes_glue.c Vale_Hash_SHA2_256.c)
-VALE_ASM 	= $(addprefix $(VALE_DIR)/,\
-  sha256-$(MARCH)$(VARIANT).S aes-$(MARCH)$(VARIANT).S aesgcm-$(MARCH)$(VARIANT).S)
+VALE_ASM 	= $(HACL_HOME)/secure_api/vale/asm/aes-$(MARCH)$(VARIANT).S \
+  $(patsubst %,$(VALE_OBJ_DIR)/%-$(MARCH)$(VARIANT).S,sha256 aesgcm curve25519)
 
 HACL_SOURCES	= $(wildcard $(HACL_CODE)/dist/compact/*.c)
 
-# JP: why are EverCrypt, EverCrypt_Helpers, etc. not already in ALL_GENERATED_FILES?
 EVERCRYPT_SOURCES = \
-  $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c EverCrypt_ValeGlue.c) \
-  $(addprefix evercrypt/c/evercrypt_,autoconfig.c bytes.c vale_stubs.c)
+  $(addprefix evercrypt/c/evercrypt_,bytes.c autoconfig.c vale_stubs.c)
 
 ifeq ($(CONFIG),noopenssl)
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_bcrypt.c

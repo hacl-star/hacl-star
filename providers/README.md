@@ -30,7 +30,7 @@ On top of these three building blocks, we have:
 
 # status of primitives
 
- primitive | hacl  | vale | openssl | c/bytes | ml/bytes 
+ primitive         | hacl  | vale | openssl | c/bytes | ml/bytes
 -------------------|------|------|---------|---------|---------
  sha256            | yes  | yes  | no      | no      | no
  sha384            | yes  | no   | no      | no      | no
