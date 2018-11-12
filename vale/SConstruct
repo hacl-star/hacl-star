@@ -891,7 +891,7 @@ def compute_module_types(env, source_vaf):
       collect_dumps_in_order(x)
   dumps_string = " ".join(['-in ' + str(x) for x in dumps])
   Depends(types_vaf, import_fstar_types_exe)
-  Command(types_vaf, dumps, f'{mono} {import_fstar_types_exe} {dumps_string} > {types_vaf}')
+  Command(types_vaf, dumps, f'{mono} {import_fstar_types_exe} {dumps_string} -out {types_vaf} > {types_vaf}.errors')
 
 def recursive_glob(env, pattern, strings = False):
   matches = []
