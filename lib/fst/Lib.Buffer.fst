@@ -65,8 +65,6 @@ let createL_global #a init =
 let icreateL_global #a init =
   IB.igcmalloc_of_list #a root init
 
-#set-options "--max_fuel 0"
-
 let recall_contents #a #len b s =
   B.recall_p b (cpred s)
 
@@ -84,6 +82,8 @@ let icopy #a #len o clen i =
 
 let memset #a #blen b init len =
   B.fill #a b init len
+
+#set-options "--max_fuel 0"
 
 let update_sub #a #len dst start n src =
   let h0 = ST.get () in
@@ -309,6 +309,8 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l rem last w
 
+#set-options "--z3rlimit 200"
+
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   [@inline_let]
   let a_spec' (i:nat{i <= v n}) =
@@ -316,6 +318,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
     a_spec i & Seq.lseq t (i * v len) in
   [@inline_let]
   let refl' h (i:nat{i <= v n}) : GTot (a_spec' i) =
+    Math.Lemmas.lemma_mult_le_right (v len) i (v n);
     refl h i, as_seq #_ #(i * v len) h (gsub output (size 0) (size i *! len))
   in
   let footprint' i = B.loc_union (footprint i) (B.loc_buffer output) in
@@ -323,6 +326,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   let spec' h0 : GTot (i:nat{i < v n} -> a_spec' i -> a_spec' (i + 1)) =
     let f = spec h0 in
     fun i so ->
+      Math.Lemmas.lemma_mult_le_right (v len) i (v n);
       let s, o = so <: a_spec i & Seq.lseq t (i * v len) in
       let s', block = f i s in
       let o' : Seq.lseq t ((i + 1) * v len) = Seq.(o @| block) in
@@ -348,7 +352,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
     Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) ==
     norm [delta] Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0))
 
-#set-options "--max_fuel 1"
+#set-options "--z3rlimit 100 --max_fuel 1"
 
 let fillT #a clen o spec f =
   let open Seq in
