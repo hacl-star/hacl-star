@@ -11,15 +11,15 @@ assume val hash_2_raw: hash_raw -> hash_raw -> GTot hash_raw
 
 type hash =
 | HRaw of hash_raw
-| HDummy
+| HPad // right padding to make the size of a Merkle tree be a power of 2
 
 val hash_2: lh:hash -> rh:hash -> GTot hash
 let hash_2 lh rh =
   match lh with
-  | HDummy -> rh
+  | HPad -> HPad
   | HRaw lhr ->
     match rh with
-    | HDummy -> lh
+    | HPad -> lh
     | HRaw rhr -> HRaw (hash_2_raw lhr rhr)
 
 val hash_seq: Type0
@@ -121,10 +121,16 @@ let rec mt_get_path_ok_ #n mt idx =
   
 /// Security
 
+// Two merkle trees collide when 
+// 1) they have the same height (thus the same number of elements),
+// 2) their contents differ, and
+// 3) their roots are valid (HRaw) and same.
 val mt_collide:
   #n:nat -> mt1:merkle_tree n -> mt2:merkle_tree n -> GTot bool
 let mt_collide #n mt1 mt2 =
-  mt1 <> mt2 && mt_get_root mt1 = mt_get_root mt2
+  mt1 <> mt2 && 
+  HRaw? (mt_get_root mt1) &&
+  mt_get_root mt1 = mt_get_root mt2
 
 val hash_2_raw_collide:
   lh1:hash_raw -> rh1:hash_raw ->
