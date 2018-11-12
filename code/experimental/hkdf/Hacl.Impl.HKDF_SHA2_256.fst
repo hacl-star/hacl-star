@@ -116,11 +116,12 @@ let hkdf_expand output prk plen info ilen len =
   hkdf_round0 t0 prk plen info ilen;
   update_sub t (size 0) (Spec.SHA2.size_hash a) t0;
   (* Compute T(1) ... T(N)*)
-  repeat_range (size 2) (n +. 1ul)
-    (fun i t ->
+  let h0 = ST.get () in
+  loop_range_nospec #h0 (size 2) (n +. 1ul) t
+    (fun i ->
        let ti = sub t ((i -. 2ul) *. size (Spec.SHA2.size_hash a)) (size (Spec.SHA2.size_hash a)) in
        let ti1 = sub t ((i -. 1ul) *. size (Spec.SHA2.size_hash a)) (size (Spec.SHA2.size_hash a)) in
-       hkdf_round ti1 prk info i ti
-    ) t;
-  let res = sub t (size 0) len in
-  copy output len res
+       hkdf_round ti1 prk plen info ilen i ti
+    );
+  let res = sub #uint8 #(v n * (Spec.SHA2.size_hash a)) t (size 0) len in
+  copy #uint8 #(v len) output len res
