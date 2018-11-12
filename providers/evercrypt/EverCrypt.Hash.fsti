@@ -37,6 +37,19 @@ type broken_alg = a:alg {a = MD5 \/ a = SHA1}
 /// based on those.
 type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 
+/// Alternative names from Cédric, to be aligned with naming conventions.
+noextract unfold
+let tagLength = Spec.Hash.Helpers.size_hash
+noextract unfold
+let blockLength = Spec.Hash.Helpers.size_block
+noextract unfold
+let maxLength = Spec.Hash.Helpers.max_input8
+noextract unfold
+let spec = Spec.Hash.Nist.hash
+noextract unfold
+let tagLen = Hacl.Hash.Definitions.size_hash_ul
+noextract unfold
+let blockLen = Hacl.Hash.Definitions.size_block_ul
 
 /// To specify their low-level incremental computations, we assume
 /// Merkle-Damgard/sponge-like algorithms:

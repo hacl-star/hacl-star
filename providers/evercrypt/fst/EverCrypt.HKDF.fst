@@ -20,9 +20,6 @@ type alg = EverCrypt.HMAC.ha
 // of the form | tagLen a | infolen | 1 |;
 // its prefix is overwritten by HMAC at each iteration.
 
-let tagLen = Hacl.Hash.Definitions.size_hash_ul
-let blockLen = Hacl.Hash.Definitions.size_block_ul
-
 val hkdf_expand_loop:
   a       : alg -> (
   okm     : uint8_p ->
@@ -51,7 +48,7 @@ val hkdf_expand_loop:
     as_seq h1 okm == expand0 a prk info (v len) (v i) last)))
 
 //18-07-13 how to improve this proof? should we use C.loops instead?
-#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 200"
 let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
   push_frame ();
 

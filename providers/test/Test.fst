@@ -14,6 +14,7 @@ module H = EverCrypt.Hash
 open Test.Vectors
 open LowStar.BufferOps
 open C.Failure
+open Spec.Hash.Helpers
 
 open Test.Lowstarize
 
@@ -27,9 +28,16 @@ let hash_vector = hash_alg * C.String.t * vec8 * UInt32.t
 noextract unfold inline_for_extraction
 let (!$) = C.String.((!$))
 
-let supported_hash_algorithm = function
-  | H.SHA256 | H.SHA384 -> true
-  | _ -> false
+let supported_hmac_algorithm = function
+  | MD5 | SHA2_224 -> false
+  | _ -> true
+
+let uint32_fits_maxLength a (x: UInt32.t): Lemma
+  (requires True)
+  (ensures (U32.v x < EverCrypt.Hash.maxLength a))
+=
+  assert_norm (pow2 32 <= pow2 61);
+  assert_norm (pow2 61 <= pow2 125)
 
 val compute:
   a: EverCrypt.Hash.alg ->
@@ -43,7 +51,7 @@ val compute:
   (ensures fun h0 () h1 ->
     B.live h1 text /\ B.live h1 tag0 /\
     //B.modifies (B.loc_buffer tag0) h0 h1 /\
-    U32.v len <= EverCrypt.Hash.maxLength a /\ (* required for subtyping the RHS below *)
+    U32.v len < EverCrypt.Hash.maxLength a /\ (* required for subtyping the RHS below *)
     B.as_seq h1 tag0 = EverCrypt.Hash.spec a (B.as_seq h0 text))
 //18-07-07 CF: TODO add deallocation; restore Stack (not ST); restore modifies clause
 let compute a len text tag0 =
@@ -52,7 +60,7 @@ let compute a len text tag0 =
   let open EverCrypt.Hash in
   push_frame();
   let s = create a in
-  assert_norm(U32.v len <= maxLength a);
+  uint32_fits_maxLength a len;
   let ll = len % blockLen a in
   let lb = len - ll in
   let blocks = B.sub text 0ul lb in
@@ -60,20 +68,19 @@ let compute a len text tag0 =
   let h1 = get() in
   init #(Ghost.hide a) s;
   let h10 = get() in
-  update_multi #(Ghost.hide a) (Ghost.hide Seq.empty) s blocks lb;
+  update_multi #(Ghost.hide a) s blocks lb;
   let h11 = get() in
   //18-07-10 CF: improve style on ghosts and lists?
   FStar.Seq.(lemma_eq_intro (empty @| (B.as_seq h10 blocks)) (B.as_seq h10 blocks));
-  update_last #(Ghost.hide a) (Ghost.hide (B.as_seq h11 blocks)) s last len;
+  update_last #(Ghost.hide a) s last (Int.Cast.Full.uint32_to_uint64 len);
   finish #(Ghost.hide a) s tag0;
   let h2 = get() in
   pop_frame();
 
   let vblocks = B.as_seq h1 blocks in
   let vlast = B.as_seq h1 last in
-  let vsuffix = suffix a (U32.v len) in
+  let vsuffix = Spec.Hash.Common.pad a (U32.v len) in
   FStar.Seq.(lemma_eq_intro (B.as_seq h1 text) (vblocks @| vlast));
-  lemma_hash2 (acc0 #a) vblocks FStar.Seq.(vlast @| vsuffix);
   Seq.append_assoc vblocks vlast vsuffix
 
 #set-options "--max_fuel 0"
@@ -85,7 +92,7 @@ let test_one_hash vec =
   let input_len = C.String.strlen input in
   let tlen = H.tagLen a in  
   if expected_len <> tlen then failwith !$"Wrong length of expected tag\n"
-  else if supported_hash_algorithm a then
+  else
     begin
     push_frame();
     let computed = B.alloca 0uy tlen in
@@ -94,7 +101,8 @@ let test_one_hash vec =
     if total_input_len = 0ul then
       begin
       let total_input = B.null in
-      assert_norm (v total_input_len <= EverCrypt.Hash.maxLength a);
+      uint32_fits_maxLength a total_input_len;
+      assert (v total_input_len <= EverCrypt.Hash.maxLength a);
 
       if AC.Vale? (AC.sha256_impl()) then
         compute a total_input_len total_input computed
@@ -113,7 +121,8 @@ let test_one_hash vec =
         assert (v input_len * v i + v input_len <= v input_len * v repeat);
         C.String.memcpy (B.sub total_input (input_len * i) input_len) input input_len
       );
-      assert_norm (v total_input_len <= EverCrypt.Hash.maxLength a);
+      uint32_fits_maxLength a total_input_len;
+      assert (v total_input_len <= EverCrypt.Hash.maxLength a);
 
       if AC.Vale? (AC.sha256_impl()) then
         compute a total_input_len total_input computed

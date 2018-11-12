@@ -10,9 +10,6 @@ open FStar.Integers
 
 let _: squash (inversion alg) = allow_inversion alg
 
-noextract inline_for_extraction
-let spec = Spec.Hash.Nist.hash
-
 #set-options "--max_fuel 0 --max_ifuel 0"
 let wrap (a:alg) (key: bytes{S.length key < max_input8 a}): GTot (lbytes (size_block a))
 =
@@ -23,7 +20,7 @@ let wrap (a:alg) (key: bytes{S.length key < max_input8 a}): GTot (lbytes (size_b
 let wrap_lemma (a:alg) (key: bytes{Seq.length key < max_input8 a}): Lemma
   (requires S.length key > size_block a)
   (ensures wrap a key == (
-    let key0 = spec a key in
+    let key0 = EverCrypt.Hash.spec a key in
     let paddingLength = size_block a - S.length key0 in
     S.append key0 (S.create paddingLength 0uy))) = ()
 
@@ -48,10 +45,10 @@ let rec xor_lemma (x: uint8_t) (v: bytes) : Lemma (requires True)
 
 let hmac a key data =
   let k = wrap a key in
-  let h1 = spec a S.(xor 0x36uy k @| data) in
+  let h1 = EverCrypt.Hash.spec a S.(xor 0x36uy k @| data) in
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
-  let h2 = spec a S.(xor 0x5cuy k @| h1) in
+  let h2 = EverCrypt.Hash.spec a S.(xor 0x5cuy k @| h1) in
   h2
 
 
@@ -116,7 +113,7 @@ let wrap_key a output key len =
     Hash.hash a nkey key len;
     let h1 = ST.get () in
     assert (Seq.equal (as_seq h1 zeroes) (as_seq h0 zeroes));
-    assert (Seq.equal (as_seq h1 nkey) (spec a (as_seq h0 key)));
+    assert (Seq.equal (as_seq h1 nkey) (EverCrypt.Hash.spec a (as_seq h0 key)));
     assert (Seq.equal (as_seq h1 output) (S.append (as_seq h1 nkey) (as_seq h1 zeroes)));
     Seq.lemma_eq_elim (as_seq h1 output) (S.append (as_seq h1 nkey) (as_seq h1 zeroes));
     assert (as_seq h1 output == wrap a (as_seq h0 key))
@@ -151,7 +148,7 @@ val part1:
       (
       let hash0 = Seq.slice (as_seq h1 s2) 0 (size_hash a) in
       length data + size_block a < max_input8 a /\ (*always true, required by spec below*)
-      hash0 == spec a (Seq.append (as_seq h0 s2) (as_seq h0 data))))
+      hash0 == EverCrypt.Hash.spec a (Seq.append (as_seq h0 s2) (as_seq h0 data))))
 
 let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
   compress_many (acc0 #a) b
@@ -232,7 +229,7 @@ let part1 a (acc: state a) key data len =
     Seq.append_assoc v2 last1 suffix1;
     Seq.append_assoc key1 blocks1 last1;
     assert(acc3 == hash0 #a S.((key1 @| data1) @| suffix1));
-    assert(extract acc3 == spec a S.(key1 @| data1)))
+    assert(extract acc3 == EverCrypt.Hash.spec a S.(key1 @| data1)))
 
 // the two parts have the same stucture; let's keep their proofs in sync.
 inline_for_extraction
@@ -257,7 +254,7 @@ val part2:
       modifies (loc_union (footprint acc h0) (loc_buffer mac)) h0 h1 /\
       ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in
         Seq.length payload < max_input8 a /\
-        as_seq h1 mac = spec a payload))
+        as_seq h1 mac = EverCrypt.Hash.spec a payload))
 
 #set-options "--z3rlimit 200"
 inline_for_extraction
@@ -298,7 +295,7 @@ let part2 a acc mac opad tag =
     //lemma_hash2 (acc0 #a) v1 S.(tag1 @| suffix1);
     Seq.append_assoc v1 tag1 suffix1;
     assert(acc2 == hash0 S.((v1 @| tag1) @| suffix1));
-    assert(extract acc2 = spec a S.(v1 @| tag1)))
+    assert(extract acc2 = EverCrypt.Hash.spec a S.(v1 @| tag1)))
 
 // similar spec as hmac with keylen = block_len a
 inline_for_extraction
@@ -329,9 +326,9 @@ val hmac_core:
       let k1 = xor 0x36uy k in
       let k2 = xor 0x5cuy k in
       length data + size_block a < max_input8 a /\ ( (*always true*)
-      let v1 = spec a S.(k1 @| as_seq h0 data) in
+      let v1 = EverCrypt.Hash.spec a S.(k1 @| as_seq h0 data) in
       Seq.length S.(k2 @| v1) < max_input8 a /\
-      as_seq h1 tag == spec a S.(k2 @| v1))))
+      as_seq h1 tag == EverCrypt.Hash.spec a S.(k2 @| v1))))
 
 inline_for_extraction
 val xor_bytes_inplace:
@@ -399,8 +396,8 @@ let hmac_core a acc tag key data len =
     xor_lemma 0x5cuy k;
     // assert(k1 == as_seq h0 ipad);
     // assert(k2 == as_seq h1 opad);
-    assert(Seq.equal v1 (spec a S.(k1 @| vdata)));
-    assert(Seq.equal v2 (spec a S.(k2 @| v1)));
+    assert(Seq.equal v1 (EverCrypt.Hash.spec a S.(k1 @| vdata)));
+    assert(Seq.equal v2 (EverCrypt.Hash.spec a S.(k2 @| v1)));
 
     // TR: modifies clause now automatically proven thanks to
     // pattern provided in Hash.loc_includes_union_l_footprint

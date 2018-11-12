@@ -11,8 +11,8 @@ INCLUDE_PATHS = \
   ../evercrypt \
   $(HACL_CODE)/lib/kremlin \
   $(HACL_CODE)/curve25519/interfaces \
-  $(HACL_CODE)/hash/interfaces \
   $(HACL_CODE)/api/interfaces \
+  $(HACL_CODE)/hash-new \
   ../../specs
 
 UNAME = $(shell uname)
@@ -90,8 +90,7 @@ clean:
 	  ../evercrypt $(KREMLIN_HOME)/kremlib \
           ../../code/lib/kremlin \
 	  ../../specs \
-	  ../../code/hash \
-	  ../../code/hash/interfaces \
+	  ../../code/hash-new \
 	  ../../code/curve25519 \
 	  ../../code/curve25519/interfaces \
 	  ../../code/bignum)
