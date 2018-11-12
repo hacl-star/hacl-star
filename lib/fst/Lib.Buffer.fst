@@ -134,6 +134,10 @@ let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
 
+let loop_range_nospec #h0 #a #len start n buf impl =
+  let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
+  Lib.Loops.for start (start +. n) inv impl
+
 let loop h0 n a_spec refl footprint spec impl =
   let inv h i = loop_inv h0 n a_spec refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
