@@ -108,8 +108,8 @@ let update_sub_f #a #len h0 buf start n spec f =
   let tmp = sub buf start n in
   f tmp;
   let h1 = ST.get () in
-  B.modifies_buffer_elim (sub #_ #len #(v start) buf (size 0) start) (B.loc_buffer tmp) h0 h1;
-  B.modifies_buffer_elim (sub #_ #len #(len - v start - v n) buf (start +! n) (size len -. start -. n)) (B.loc_buffer tmp) h0 h1;
+  B.modifies_buffer_elim (gsub buf (size 0) start) (B.loc_buffer tmp) h0 h1;
+  B.modifies_buffer_elim (gsub buf (start +! n) (size len -. start -. n)) (B.loc_buffer tmp) h0 h1;
   Sequence.lemma_update_sub #a #len (B.as_seq h0 buf) (v start) (v n) (spec h0) (B.as_seq h1 buf)
 
 let concat2 #a len0 s0 len1 s1 s =
