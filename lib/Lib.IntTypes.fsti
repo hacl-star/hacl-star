@@ -14,7 +14,6 @@ type inttype =
 ///
 
 inline_for_extraction
-unfold
 let bits (n:inttype) =
   match n with
   | U1 -> 1
@@ -25,7 +24,6 @@ let bits (n:inttype) =
   | U128 -> 128
 
 inline_for_extraction
-unfold
 let numbytes (n:inttype) =
   match n with
   | U1 -> 1
@@ -59,7 +57,7 @@ unfold let maxint (t:inttype) =
 (* PUBLIC Machine Integers *)
 
 inline_for_extraction
-unfold let pub_int_t (t:inttype) =
+let pub_int_t (t:inttype) =
   match t with
   | U1 -> u:UInt8.t{UInt8.v u < 2}
   | U8 -> UInt8.t
@@ -98,7 +96,6 @@ let uint_t (t:inttype) (l:secrecy_level) =
   | PUB -> pub_int_t t
   | SEC -> sec_int_t t
 
-unfold
 let uint_v #t #l (u:uint_t t l) : n:nat{n <= maxint t} =
   match l with
   | PUB -> pub_int_v #t u
@@ -113,7 +110,7 @@ val uintv_extensionality:
   (requires uint_v #t #l a == uint_v #t #l b)
   (ensures  a == b)
 // REMARK: We can't mark `uint_v` as `unfold` and keep this pattern
-// [SMTPat (uint_v #t #l a == uint_v #t #l b)]
+ [SMTPat (uint_v #t #l a == uint_v #t #l b)]
 
 ///
 /// Definition of machine integers
