@@ -26,7 +26,6 @@ let a = Spec.SHA2.SHA2_256
 
 
 
-
 val hkdf_extract:
     output: buffer uint8{length output == Spec.SHA2.size_hash a}
   -> salt: buffer uint8 {length salt <= Spec.SHA2.max_input a}
@@ -41,12 +40,16 @@ val hkdf_extract:
   (ensures  (fun h0 _ h1 -> modifies1 #uint8 #(Spec.SHA2.size_hash a) output h0 h1))
 
 let hkdf_extract output salt slen ikm ilen =
+  push_frame ();
   let salt0 = create #uint8 #(Spec.SHA2.size_hash a) (size (Spec.SHA2.size_hash a)) (u8 0) in
-  if slen = 0ul then
+  (if slen = size 0 then
     HMAC.hmac output salt0 (size (Spec.SHA2.size_hash a)) ikm ilen
   else
-    HMAC.hmac output salt slen ikm ilen
+    HMAC.hmac output salt slen ikm ilen);
+  pop_frame()
 
+
+#reset-options "--z3rlimit 25"
 
 val hkdf_round0:
     output: lbuffer uint8 (Spec.SHA2.size_hash a)
@@ -62,12 +65,12 @@ val hkdf_round0:
   (ensures  (fun h0 _ h1 -> modifies1 output h0 h1))
 
 let hkdf_round0 output prk plen info ilen =
+  push_frame ();
   let input = create (ilen +. 1ul) (u8 0) in
   update_sub input (size 0) ilen info;
   upd #uint8 #(v ilen + 1) input ilen (u8 1);
-  HMAC.hmac output prk plen input (ilen +. 1ul)
-
-
+  HMAC.hmac output prk plen input (ilen +. 1ul);
+  pop_frame ()
 
 
 val hkdf_round:
@@ -78,20 +81,21 @@ val hkdf_round:
   -> ilen: size_t{ v ilen == length info
                 /\ length info + Spec.SHA2.size_hash a + 1 <= max_size_t
                 /\ length prk + length info + 1 + Spec.SHA2.size_hash a + Spec.SHA2.size_block a <= Spec.SHA2.max_input a}
-  -> i:nat{1 < i /\ i <= 255}
+  -> i:size_t{1 < v i /\ v i <= 255}
   -> ti: lbuffer uint8 (Spec.SHA2.size_hash a) ->
   Stack unit
-  (requires (fun h -> live h output /\ live h prk /\ live h info
-                 /\ disjoint output prk /\ disjoint output info))
+  (requires (fun h -> live h output /\ live h prk /\ live h info /\ live h ti
+                 /\ disjoint output prk /\ disjoint output info /\ disjoint output ti))
   (ensures  (fun h0 _ h1 -> modifies1 output h0 h1))
 
 let hkdf_round output prk plen info ilen i ti =
+  push_frame ();
   let input = create (size (Spec.SHA2.size_hash a) +. ilen +. 1ul) (u8 0) in
   update_sub input 0ul (size (Spec.SHA2.size_hash a)) ti;
   update_sub input (size (Spec.SHA2.size_hash a)) ilen info;
-  upd #uint8 #(Spec.SHA2.size_hash a + v ilen + 1) input (size (Spec.SHA2.size_hash a) +. ilen) (u8 i);
-  HMAC.hmac output prk plen input ilen
-
+  upd #uint8 #(Spec.SHA2.size_hash a + v ilen + 1) input (size (Spec.SHA2.size_hash a) +. ilen) (to_u8 (size_to_uint32 i));
+  HMAC.hmac output prk plen input (size (Spec.SHA2.size_hash a) +. ilen +. 1ul);
+  pop_frame ()
 
 
 val hkdf_expand:
@@ -109,7 +113,8 @@ val hkdf_expand:
   (ensures  (fun h0 _ h1 -> modifies1 #uint8 #(v len) output h0 h1))
 
 let hkdf_expand output prk plen info ilen len =
-  let n : size_t = len /. (size (Spec.SHA2.size_hash a)) + 1 in
+  push_frame ();
+  let n : size_t = len /. (size (Spec.SHA2.size_hash a)) +. 1ul in
   let t0 = create #uint8 (size (Spec.SHA2.size_hash a)) (u8 0) in
   let t = create #uint8 (n *. size (Spec.SHA2.size_hash a)) (u8 0) in
   (* Compute T(0) *)
@@ -124,4 +129,5 @@ let hkdf_expand output prk plen info ilen len =
        hkdf_round ti1 prk plen info ilen i ti
     );
   let res = sub #uint8 #(v n * (Spec.SHA2.size_hash a)) t (size 0) len in
-  copy #uint8 #(v len) output len res
+  copy #uint8 #(v len) output len res;
+  pop_frame ()
