@@ -114,14 +114,14 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  $(VALE_BUNDLES) \
-	  -bundle 'Prims' \
-	  -bundle 'FStar.*' \
-	  -bundle 'C,C.*' \
+	  -bundle 'Prims,FStar.*,C,C.*[rename=EverCrypt_Kremlib]' \
 	  -bundle 'EverCrypt.Spec.*' \
+	  -bundle 'Crypto.Symmetric.*[rename=Hacl_Legacy]' \
 	  -bundle 'Flag' \
 	  -bundle 'Spec.*' \
 	  -bundle 'LowStar.*' \
-	  -bundle 'Hacl.*' -library 'Hacl.*' -library 'Spec.SHA2' \
+	  -bundle 'AEAD.*,Hacl.*[rename=Hacl]' -library 'Hacl.*,AEAD.*' \
+	  -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
 	  -no-prefix 'EverCrypt.Vale' \
 	  -no-prefix 'Sha_update_bytes_stdcall' \
 	  -no-prefix 'Check_sha_stdcall' \
@@ -177,8 +177,7 @@ endif
 # files for them in generated/. However, we are only interested in the header,
 # and drop these (mostly empty) C files, since the "real" ones are collected via
 # HACL_SOURCES above.
-ALL_OUR_FILES 	= $(filter-out Hacl_%.c AEAD_%.c FStar_%.c kremlinit.c, $(ALL_C_FILES))
-ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
+ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_C_FILES))
 
 ALL_SOURCES	= $(HACL_SOURCES) $(VALE_SOURCES) $(EVERCRYPT_SOURCES) $(ALL_GENERATED_FILES)
 ALL_OBJS	= $(patsubst %.c,%.o,$(ALL_SOURCES)) $(patsubst %.S,%.o,$(VALE_ASM))
