@@ -309,7 +309,7 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l rem last w
 
-#set-options "--z3rlimit 200"
+#set-options "--max_fuel 1"
 
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   [@inline_let]
@@ -351,8 +351,6 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   assert_norm (
     Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) ==
     norm [delta] Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0))
-
-#set-options "--z3rlimit 100 --max_fuel 1"
 
 let fillT #a clen o spec f =
   let open Seq in
