@@ -48,7 +48,7 @@ all: test
 test: test-unified-target test-individual-target
 
 test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2.exe
-test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aesgcm.exe rsapss.exe sha3.exe 
+test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
@@ -105,19 +105,20 @@ aes.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst tests/Spec.AES.Test.fst
 	./aes.exe
 
 # Under CI
-aesgcm.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AESGCM.fst tests/Spec.AESGCM.Test.fst
-	mkdir -p aesgcm-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.AESGCM  --extract_module Spec.AESGCM.Test --extract_module Spec.GF128 --odir aesgcm-ml $^
-	@echo 'let _ = test()' >> aesgcm-ml/Spec_AESGCM_Test.ml
-	$(OCAMLOPT) -I aesgcm-ml $(OCAML_INCLUDES) $(addprefix aesgcm-ml/, $(LIBS_ML)) aesgcm-ml/Spec_GaloisField.ml aesgcm-ml/Spec_AES.ml aesgcm-ml/Spec_GF128.ml aesgcm-ml/Spec_AESGCM.ml aesgcm-ml/Spec_AESGCM_Test.ml -o aesgcm.exe
-	./aesgcm.exe
-
 aes128gcm.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AES128_GCM.fst tests/Spec.AES128_GCM.Test.fst
 	mkdir -p aesgcm-ml
 	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.AES128_GCM  --extract_module Spec.AES128_GCM.Test --extract_module Spec.GF128 --odir aesgcm-ml $^
 	@echo 'let _ = test()' >> aesgcm-ml/Spec_AES128_GCM_Test.ml
 	$(OCAMLOPT) -I aesgcm-ml $(OCAML_INCLUDES) $(addprefix aesgcm-ml/, $(LIBS_ML)) aesgcm-ml/Spec_GaloisField.ml aesgcm-ml/Spec_AES.ml aesgcm-ml/Spec_GF128.ml aesgcm-ml/Spec_AES128_GCM.ml aesgcm-ml/Spec_AES128_GCM_Test.ml -o aes128gcm.exe
 	./aes128gcm.exe
+
+# Not Under CI
+aes128cbc.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst Spec.AES128_CBC.fst tests/Spec.AES128_CBC.Test.fst
+	mkdir -p aes128cbc-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.AES128_CBC  --extract_module Spec.AES128_CBC.Test --odir aes128cbc-ml $^
+	# @echo 'let _ = test()' >> aes128cbc-ml/Spec_AES128_CBC_Test.ml
+	$(OCAMLOPT) -I aes128cbc-ml $(OCAML_INCLUDES) $(addprefix aes128cbc-ml/, $(LIBS_ML)) aes128cbc-ml/Spec_GaloisField.ml aes128cbc-ml/Spec_AES.ml aes128cbc-ml/Spec_AES128_CBC.ml aes128cbc-ml/Spec_AES128_CBC_Test.ml -o aes128cbc.exe
+	./aes128cbc.exe
 
 # Under CI
 kyber.exe: $(LIBS_FILES) Spec.Kyber.fst

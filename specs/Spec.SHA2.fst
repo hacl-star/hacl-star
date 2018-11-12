@@ -297,13 +297,13 @@ let compress (p:alg) (block:block_w p) (hash0:hash_w p) : Tot (hash_w p) =
   map2 (fun x y -> x +. y) hash0 hash1
 
 (* Definition of the truncation function *)
-let truncate (p:alg) (hash:hash_w p) : lbytes (size_hash p) =
+let truncate (p:alg) (hash:hash_w p) : Tot (lbytes (size_hash p)) =
   let hash_final = uints_to_bytes_be hash in
   let h = sub hash_final 0 (size_hash p) in
   h
 
 (* Definition of the function returning the number of padding blocks for a single input block *)
-let number_blocks_padding (p:alg) (len:size_nat{len <= size_block p}) : size_nat =
+let number_blocks_padding (p:alg) (len:size_nat{len <= size_block p}) : Tot size_nat =
   if len < size_block p - numbytes (limb_inttype p) then 1 else 2
 
 (* Definition of the padding function for a single input block *)
@@ -345,6 +345,7 @@ let update_last
   (last:lbytes len)
   (hash:hash_w p):
   Tot (hash_w p) =
+
   let blocks = pad p prev len last in
   if number_blocks_padding p len = 1 then
     update_block p blocks hash
@@ -365,7 +366,7 @@ let finish p (hash:hash_w p) : lbytes (size_hash p) =
   truncate p hash
 
 (* Definition of the SHA2 ontime function *)
-let hash (p:alg) (input:bytes{length input <= max_input p}) : lbytes (size_hash p) =
+let hash (p:alg) (input:bytes{length input <= max_input p}) : Tot (lbytes (size_hash p)) =
   let len = length input in
   let s = init p in
   let s = update p input s in

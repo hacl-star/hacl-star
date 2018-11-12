@@ -214,6 +214,33 @@ let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   let block = sub #_ #(v inpLen) inp (i *. bs) bs in
   f i block w
 
+inline_for_extraction noextract
+val loopi_blocks_f_nospec:
+    #a:Type0
+  -> #b:Type0
+  -> #blen:size_nat
+  -> blocksize:size_t{v blocksize > 0}
+  -> inpLen:size_t
+  -> inp:lbuffer a (v inpLen)
+  -> f:(i:size_t{v i < v inpLen / v blocksize}
+       -> inp:lbuffer a (v blocksize)
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            B.live h inp /\ B.live h w /\ B.disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            B.modifies (B.loc_buffer w) h0 h1))
+  -> nb:size_t{v nb == v inpLen / v blocksize}
+  -> i:size_t{v i < v nb}
+  -> w:lbuffer b blen ->
+  Stack unit
+    (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
+    (ensures  fun h0 _ h1 -> B.modifies (B.loc_buffer w) h0 h1)
+
+let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
+  assert ((v i + 1) * v bs <= v nb * v bs);
+  let block = sub #_ #(v inpLen) inp (i *. bs) bs in
+  f i block w
+
 let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let nb = inpLen /. bs in
   let rem = inpLen %. bs in
@@ -224,6 +251,15 @@ let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   (fun i ->
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
     loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
+  let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
+  l nb rem last w
+
+let loopi_blocks_nospec #a #b #blen bs inpLen inp f l w =
+  let nb = inpLen /. bs in
+  let rem = inpLen %. bs in
+  let h0 = ST.get () in
+  loop_nospec #h0 #b #blen nb w
+  (fun i -> loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w);
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l nb rem last w
 
@@ -329,7 +365,7 @@ let fillT #a clen o spec f =
       FStar.Seq.lemma_split (as_seq h' o) (v i)
     )
 
-let fill #a h0 clen o spec impl = 
+let fill #a h0 clen o spec impl =
   let open Seq in
   let h0 = ST.get() in
   let a_spec = createi_a a (v clen) (spec h0) in
@@ -346,19 +382,19 @@ let fill #a h0 clen o spec impl =
 
 #set-options "--max_fuel 0"
 
-let mapT #a #b clen out f inp = 
+let mapT #a #b clen out f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = as_seq h inp in Seq.map_inner f in_seq)
     (fun i -> out.(i) <- f inp.(i))
 
-let mapiT #a #b clen out spec_f f inp = 
+let mapiT #a #b clen out spec_f f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner spec_f in_seq)
     (fun i -> let xi = inp.(i) in out.(i) <- f i xi)
 
-let imapT #a #b #len out clen f inp = 
+let imapT #a #b #len out clen f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = ias_seq h inp in Seq.map_inner f in_seq)
