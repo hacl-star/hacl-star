@@ -59,7 +59,7 @@ test:
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  $(addprefix --include ,$(FSTAR_INCLUDES))
+  $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
 
@@ -125,7 +125,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
-	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=*[rename=EverCrypt.h]\
+	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=*[rename=EverCrypt]\
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \
