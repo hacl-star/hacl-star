@@ -80,6 +80,13 @@ let main () =
   C.String.print (C.String.of_literal "\nTEST 1. \n");
   let test1_result = create #_ #size_hash (size size_hash) (u8 0x00) in
   let test1_key = create #uint8 #20 (size 20) (u8 0x0b) in
+  (* let block1 = create #uint8 #128 (size 128) (u8 0) in *)
+
+  (* C.String.print (C.String.of_literal "Okey: \n"); *)
+  (* Hacl.HMAC_SHA2_256.wrap_key block1 test1_key (size 20); *)
+  (* print_bytes (size 64) block1; *)
+  C.String.print (C.String.of_literal "\n");
+
   Hacl.HMAC_SHA2_256.hmac test1_result test1_key (size 20) test1_plaintext test1_size_plaintext;
   print_compare_display (size size_hash) test1_result test1_expected;
 
