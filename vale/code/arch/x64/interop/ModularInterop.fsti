@@ -127,6 +127,7 @@ let vale_sig
         VS.eval_reg (register_of_arg_i win 1) va_s0 == M.buffer_addr x1 va_s0.VS.mem /\
         V.eval_code code va_s0 f va_s1 /\
         // TODO: saved registers
+        V.modifies_mem (M.loc_union (M.loc_buffer x0) (M.loc_buffer x1)) va_s0.VS.mem va_s1.VS.mem /\
         post win x0 x1 va_s0 stack_b va_s1 f))
 
 let seq_nat64_to_seq_U64 (b:Seq.seq nat64) : (Seq.seq UInt64.t) =
@@ -160,20 +161,18 @@ let to_low_pre
   (forall
     (s0:V.va_state)
     (sb:stack_buffer).
-    // Why does Memcpy want 3 in one place and 0 in another place?
     let num_stack_slots = 3 in // TODO: generalize this
-    let num_stack_slots' = 0 in // TODO: generalize this
     ( low_assumptions hs_mem s0.VS.mem x0 x1 /\
       s0.VS.ok /\
       M.buffer_readable s0.VS.mem x0 /\
       M.buffer_readable s0.VS.mem x1 /\
-      M.buffer_length sb >= num_stack_slots /\
+//      M.buffer_length sb >= num_stack_slots /\
       M.locs_disjoint ([M.loc_buffer sb; M.loc_buffer x0; M.loc_buffer x1]) /\
       VS.eval_reg (register_of_arg_i IA.win 0) s0 == M.buffer_addr x0 s0.VS.mem /\
       VS.eval_reg (register_of_arg_i IA.win 1) s0 == M.buffer_addr x1 s0.VS.mem /\
       M.valid_taint_buf64 x0 s0.VS.mem s0.VS.memTaint Secret /\ // TODO: generalize this
       M.valid_taint_buf64 x1 s0.VS.mem s0.VS.memTaint Secret /\ // TODO: generalize this
-      V.valid_stack_slots s0.VS.mem (VS.eval_reg Rsp s0) sb num_stack_slots' s0.VS.memTaint
+      V.valid_stack_slots s0.VS.mem (VS.eval_reg Rsp s0) sb num_stack_slots s0.VS.memTaint
       ) ==>
     pre IA.win x0 x1 s0 sb)
 
@@ -185,7 +184,7 @@ let to_low_post
     (hs_mem1:HS.mem)
   : prop =
   // REVIEW: it would be more flexible to let low_assumptions/post take care of modifies:
-  // TODO: LB.modifies (LB.loc_union (LB.loc_buffer (to_b8 x0)) (LB.loc_buffer (to_b8 x1))) hs_mem0 hs_mem1 /\
+  LB.modifies (LB.loc_union (LB.loc_buffer (to_b8 x0)) (LB.loc_buffer (to_b8 x1))) hs_mem0 hs_mem1 /\
   (exists
     (s0:V.va_state)
     (sb:stack_buffer)

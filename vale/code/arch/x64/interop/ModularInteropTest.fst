@@ -60,7 +60,7 @@ let post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8) =
     Seq.equal (LBV.as_seq h' dst_b) (LBV.as_seq h' src_b))
 
 let full_post_cond (h:HS.mem) (h':HS.mem) (dst:b8) (src:b8)  =
-  //TODO: LB.modifies (LB.loc_buffer dst) h h' /\
+  LB.modifies (LB.loc_union (LB.loc_buffer dst) (LB.loc_buffer src)) h h' /\ // REVIEW: maybe support more fine-grained modifies
   post_cond h h' dst src
 
 let lem_memcpy (win:bool)
@@ -75,6 +75,7 @@ let lem_memcpy (win:bool)
         VS.eval_reg (register_of_arg_i win 1) va_s0 == M.buffer_addr x1 va_s0.VS.mem /\
         V.eval_code code va_s0 f va_s1 /\
         // TODO: saved registers
+        V.modifies_mem (M.loc_union (M.loc_buffer x0) (M.loc_buffer x1)) va_s0.VS.mem va_s1.VS.mem /\
         post win x0 x1 va_s0 stack_b va_s1 f))
   =
   let (va_s1, f) = X.va_lemma_memcpy code va_s0 win stack_b x0 x1 in
@@ -104,7 +105,7 @@ let assert_pre
       VS.eval_reg (register_of_arg_i IA.win 1) s0 == M.buffer_addr x1 s0.VS.mem /\
       M.valid_taint_buf64 x0 s0.VS.mem s0.VS.memTaint Secret /\ // TODO: generalize this
       M.valid_taint_buf64 x1 s0.VS.mem s0.VS.memTaint Secret /\ // TODO: generalize this
-      V.valid_stack_slots s0.VS.mem (VS.eval_reg Rsp s0) sb 0 s0.VS.memTaint
+      V.valid_stack_slots s0.VS.mem (VS.eval_reg Rsp s0) sb 3 s0.VS.memTaint
     )
     (ensures True)
   =
@@ -132,7 +133,7 @@ assert (buffer_length #t64 src == 2);
 assert (buffer_length #t64 src == 2);
 assert (buffer_length #t64 dst == 2);
 assert (buffer_length #t64 stack_b >= 3);
-assert (valid_stack_slots (va_get_mem va_s0) (va_get_reg Rsp va_s0) stack_b 0 (va_get_memTaint va_s0));
+assert (valid_stack_slots (va_get_mem va_s0) (va_get_reg Rsp va_s0) stack_b 3 (va_get_memTaint va_s0));
 assert (win ==> va_get_reg Rcx va_s0 == buffer_addr dst (va_get_mem va_s0));
 assert (win ==> va_get_reg Rdx va_s0 == buffer_addr src (va_get_mem va_s0));
 assert (~win ==> va_get_reg Rdi va_s0 == buffer_addr dst (va_get_mem va_s0));
@@ -144,6 +145,7 @@ assert (~win ==> va_get_reg Rsi va_s0 == buffer_addr src (va_get_mem va_s0));
   ()
 *)
 
+#reset-options "--z3rlimit 40"
 let memcpy
     (dst:M.buffer64)
     (src:M.buffer64)
