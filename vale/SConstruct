@@ -110,7 +110,7 @@ if sys.version_info < (3, 6):
 if 'VALE_HOME' in os.environ:
   vale_default_path = os.environ['VALE_HOME']
 else:
-  vale_default_path = 'tools/Vale'
+  vale_default_path = '../../vale'
 
 if 'KREMLIN_HOME' in os.environ:
   kremlin_default_path = os.environ['KREMLIN_HOME']
