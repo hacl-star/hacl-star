@@ -123,8 +123,8 @@ let vale_sig
     Ghost (V.va_state & V.va_fuel)
       (requires (pre win x0 x1 va_s0 stack_b))
       (ensures (fun (va_s1, f) ->
-        VS.eval_reg (register_of_arg_i win 0) va_s0 == M.buffer_addr x0 va_s0.VS.mem /\
-        VS.eval_reg (register_of_arg_i win 1) va_s0 == M.buffer_addr x1 va_s0.VS.mem /\
+//        VS.eval_reg (register_of_arg_i win 0) va_s0 == M.buffer_addr x0 va_s0.VS.mem /\
+//        VS.eval_reg (register_of_arg_i win 1) va_s0 == M.buffer_addr x1 va_s0.VS.mem /\
         V.eval_code code va_s0 f va_s1 /\
         // TODO: saved registers
         V.modifies_mem (M.loc_union (M.loc_buffer x0) (M.loc_buffer x1)) va_s0.VS.mem va_s1.VS.mem /\
