@@ -31,7 +31,11 @@ all: $(VALE_FSTI_HACK) $(HACL_CHECK)
 
 $(VALE_FSTI_HACK): $(VALE_OBJ_DIR)
 	mkdir -p $@
+ifeq ($(OS),Windows_NT)
+	cp $@/../*.fsti $@/
+else
 	ln -s $@/../*.fsti $@/
+endif
 
 $(VALE_OBJ_DIR):
 	@echo "Please run scons in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
