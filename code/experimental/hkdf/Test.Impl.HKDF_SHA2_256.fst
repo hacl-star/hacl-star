@@ -105,11 +105,15 @@ let main () =
   C.String.print (C.String.of_literal "TEST 1. \n");
   let test1_result_prk = create #_ #size_hash (size size_hash) (u8 0x00) in
   let test1_result_okm = create #_ #size_hash (size test1_size_expected_okm) (u8 0x00) in
+
   Hacl.HKDF_SHA2_256.hkdf_extract test1_result_prk test1_salt test1_size_salt test1_ikm test1_size_ikm;
-  let r1 = result_compare_display (size size_hash) test1_result_prk test1_expected_prk in
+  let r1a = result_compare_display (size size_hash) test1_result_prk test1_expected_prk in
+
+  Hacl.HKDF_SHA2_256.hkdf_expand test1_result_okm test1_result_prk (size size_hash) test1_info test1_size_info test1_size_expected_okm;
+  let r1b = result_compare_display test1_size_expected_okm test1_result_okm test1_expected_okm in
 
 
-  if r1 then begin
+  if r1a && r1b then begin
     C.String.print (C.String.of_literal "Composite Result: Success !\n");
     C.EXIT_SUCCESS end
   else begin
