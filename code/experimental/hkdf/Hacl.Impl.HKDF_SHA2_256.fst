@@ -45,7 +45,7 @@ let hkdf_extract output salt slen ikm ilen =
   if slen = 0ul then
     HMAC.hmac output salt0 (size (Spec.SHA2.size_hash a)) ikm ilen
   else
-    HMAC.hmac output salt (size (Spec.SHA2.size_hash a)) ikm ilen
+    HMAC.hmac output salt slen ikm ilen
 
 
 val hkdf_round0:
