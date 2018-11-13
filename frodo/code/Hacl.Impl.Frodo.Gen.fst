@@ -214,13 +214,15 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
 /// AES128
 
 val frodo_gen_matrix_aes:
-    n:size_t{v n * v n <= max_size_t}
+    n:size_t{v n * v n <= max_size_t /\ v n < maxint U16}
   -> seed_len:size_t{v seed_len == 16}
   -> seed:lbytes seed_len
   -> a:matrix_t n n
   -> Stack unit
     (requires fun h -> live h seed /\ live h a /\ disjoint seed a)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer a) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_buffer a) h0 h1 /\
+      as_matrix h1 a == S.frodo_gen_matrix_aes (v n) (v seed_len) (as_seq h0 seed))
 [@"c_inline"]
 let frodo_gen_matrix_aes n seed_len seed a =
   push_frame();
@@ -257,4 +259,6 @@ let frodo_gen_matrix_aes n seed_len seed a =
           Hacl.AES128.aes128_encrypt_block b b key
         )
     );
-  pop_frame()
+  pop_frame();
+  let h1 = ST.get() in
+  assume (as_matrix h1 a == S.frodo_gen_matrix_aes (v n) (v seed_len) (as_seq h0 seed))

@@ -154,10 +154,8 @@ val frodo_gen_matrix_aes:
 let frodo_gen_matrix_aes n seedLen seed =
   let res = Matrix.create n n in
   let key = aes128_key_expansion seed in
-
   let tmp = Seq.create 8 (u16 0) in
   let n1 = n / 8 in
-
   Loops.repeati n
   (fun i res ->
     Loops.repeati n1
@@ -165,7 +163,6 @@ let frodo_gen_matrix_aes n seedLen seed =
       let j = j * 8 in
       let tmp = tmp.[0] <- u16 i in
       let tmp = tmp.[1] <- u16 j in
-      //let res_i = aes128_encrypt_block seed (uints_to_bytes_le tmp) in
       let res_i = block_cipher key (uints_to_bytes_le tmp) in
       Loops.repeati 8
       (fun k res ->
