@@ -153,45 +153,31 @@ let step_ws1 s i =
 val loop_ws0: s:ws_wp -> b:block_wp ->
   Stack unit
   (requires (fun h -> live h s /\ live h b /\ disjoint s b))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
-                       /\ h1.[s] == Spec.loop_ws0 Spec.SHA2_256 h0.[b] h0.[s]))
-
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
+                       (* /\ h1.[s] == Spec.loop_ws0 Spec.SHA2_256 h0.[b] h0.[s])) *)
 let loop_ws0 s b =
   let h0 = ST.get () in
   loop_nospec #h0 (size 16) s
-  (fun i -> step_ws0 s b i);
-  admit()
-  (* let h0 = ST.get () in *)
-  (* [@inline_let] *)
-  (* let spec h = Spec.loop_ws0 in *)
-  (* loop1 h0 (size 16) s spec *)
-  (* (fun i -> *)
-  (*   Loops.unfold_repeati (Spec.loop_ws0 Spec.SHA2_256) (spec h0) (as_seq h0 s) (v i); *)
-  (*   step_ws0 s b i) *)
-
+  (fun i -> step_ws0 s b i)
 
 
 val loop_ws1: s: ws_wp ->
   Stack unit
   (requires (fun h -> live h s))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
-                       /\ h1.[s] == Spec.loop_ws1 Spec.SHA2_256 h0.[s]))
-
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
+                       (* /\ h1.[s] == Spec.loop_ws1 Spec.SHA2_256 h0.[s])) *)
 let loop_ws1 s =
   let h0 = ST.get () in
   loop_nospec #h0 (size (Spec.size_kTable Spec.SHA2_256) -. (size 16)) s
-  (fun i -> step_ws1 s (i +. size 16));
-  admit()
+  (fun i -> step_ws1 s (i +. size 16))
 
 
 val ws:
     s: ws_wp
   -> b: block_wp ->
   Stack unit
-  (requires (fun h -> live h s /\ live h b /\ disjoint s b
-                 /\ h.[s] == Lib.Sequence.create (Spec.size_kTable Spec.SHA2_256) (nat_to_uint #U32 #SEC 0)))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
-                       /\ h1.[s] == Spec.ws Spec.SHA2_256 h0.[b]))
+  (requires (fun h -> live h s /\ live h b /\ disjoint s b))
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
 
 let ws s b =
   loop_ws0 s b;
@@ -204,8 +190,8 @@ val shuffle_core:
   -> t: size_t{v t < Spec.size_kTable Spec.SHA2_256} ->
   Stack unit
   (requires (fun h -> live h s /\ live h wsTable /\ disjoint s wsTable))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
-                       /\ h1.[s] == Spec.shuffle_core Spec.SHA2_256 h0.[wsTable] (v t) h0.[s]))
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
+                       (* /\ h1.[s] == Spec.shuffle_core Spec.SHA2_256 h0.[wsTable] (v t) h0.[s])) *)
 
 let shuffle_core hash wsTable i =
   let a0 = hash.(0ul) in
@@ -232,28 +218,26 @@ let shuffle_core hash wsTable i =
   hash.(4ul) <- (d0 +. t1);
   hash.(5ul) <- e0;
   hash.(6ul) <- f0;
-  hash.(7ul) <- g0;
-  admit()
+  hash.(7ul) <- g0
 
 
 val shuffle: hash:hash_wp -> wsTable: ws_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h wsTable /\ disjoint hash wsTable))
-  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                       /\ h1.[hash] == Spec.shuffle Spec.SHA2_256 h0.[wsTable] h0.[hash]))
+  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
+                       (* /\ h1.[hash] == Spec.shuffle Spec.SHA2_256 h0.[wsTable] h0.[hash])) *)
 
 let shuffle hash wsTable =
   let h0 = ST.get () in
   loop_nospec #h0 (size (Spec.size_kTable Spec.SHA2_256)) hash
-  (fun i -> shuffle_core hash wsTable i);
-  admit()
+  (fun i -> shuffle_core hash wsTable i)
 
 
 val compress: hash:hash_wp -> block:block_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h block /\ disjoint hash block))
-  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                       /\ h1.[hash] == Spec.compress Spec.SHA2_256 h0.[block] h0.[hash]))
+  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
+                       (* /\ h1.[hash] == Spec.compress Spec.SHA2_256 h0.[block] h0.[hash])) *)
 
 let compress hash block =
   push_frame();
@@ -268,15 +252,14 @@ let compress hash block =
     let x0 = hash0.(i) in
     let x1 = hash.(i) in
     hash.(i) <- x0 +. x1);
-  pop_frame ();
-  admit()
+  pop_frame ()
 
 
 val truncate: hash:lbuffer uint8 (Spec.size_hash Spec.SHA2_256) -> hw:hash_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h hw /\ disjoint hash hw))
-  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                       /\ h1.[hash] == Spec.truncate Spec.SHA2_256 h0.[hw]))
+  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
+                       (* /\ h1.[hash] == Spec.truncate Spec.SHA2_256 h0.[hw])) *)
 
 let truncate hash hw =
   let h0 = ST.get () in
@@ -284,14 +267,14 @@ let truncate hash hw =
   (fun hash_full ->
     uints_to_bytes_be hash_full (size Spec.size_hash_w) hw;
     let hash_final = sub #uint8 #(Spec.size_hash_w * (Spec.size_word Spec.SHA2_256)) #(Spec.size_hash Spec.SHA2_256) hash_full (size 0) (size (Spec.size_hash Spec.SHA2_256)) in
-    copy hash (size (Spec.size_hash Spec.SHA2_256)) hash_final);
-  admit()
+    copy hash (size (Spec.size_hash Spec.SHA2_256)) hash_final)
 
 
 (* Definition of the function returning the number of padding blocks for a single input block *)
 let number_blocks_padding (len:size_t{v len <= Spec.size_block Spec.SHA2_256}) :
   Tot (r:size_t{v r == Spec.number_blocks_padding Spec.SHA2_256 (v len)}) =
   if len <. (size (Spec.size_block Spec.SHA2_256) -. 8ul) then 1ul else 2ul
+
 
 (* Definition of the padding function for a single input block *)
 val pad:
@@ -303,8 +286,7 @@ val pad:
                /\ v len + uint_v prev <= Spec.max_input Spec.SHA2_256} ->
   Stack unit
   (requires (fun h -> live h blocks /\ live h last /\ disjoint blocks last))
-  (ensures  (fun h0 _ h1 -> modifies1 blocks h0 h1
-                       /\ h1.[blocks] == Spec.pad Spec.SHA2_256 (uint_v prev) (v len) h0.[last]))
+  (ensures  (fun h0 _ h1 -> modifies1 blocks h0 h1))
 
 let pad blocks prev last len =
   let nr = number_blocks_padding len in
@@ -320,23 +302,20 @@ let pad blocks prev last len =
   let tlen = prev +. (to_u64 len) in
   let tlenbits = tlen *. (u64 8) in
   let encodedlen = sub blocks (nr *. size (Spec.size_block Spec.SHA2_256) -. 8ul) 8ul in
-  uint_to_bytes_be encodedlen tlenbits;
-  admit()
+  uint_to_bytes_be encodedlen tlenbits
 
 
 val update_block: hash:hash_wp -> block:block_p ->
   Stack unit
   (requires (fun h -> live h hash /\ live h block /\ disjoint hash block))
-  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                       /\ h1.[hash] == Spec.update_block Spec.SHA2_256 h0.[block] h0.[hash]))
+  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
 
 let update_block hash block =
   let h0 = ST.get () in
   salloc_nospec h0 (size Spec.size_block_w) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
   (fun blockw ->
     uints_from_bytes_be blockw (size Spec.size_block_w) block;
-    compress hash blockw);
-  admit()
+    compress hash blockw)
 
 
 val init: hash:hash_wp ->
@@ -366,7 +345,7 @@ let update_last hash prev last len =
     pad blocks prev last len;
     let block0 = sub blocks (size 0) (size (Spec.size_block Spec.SHA2_256)) in
     let block1 = sub blocks (size (Spec.size_block Spec.SHA2_256)) (size (Spec.size_block Spec.SHA2_256)) in
-    if number_blocks_padding len = 1ul then (
+    if number_blocks_padding len =. 1ul then (
       update_block hash block0)
     else (
       update_block hash block0;
