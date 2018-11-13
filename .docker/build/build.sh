@@ -18,9 +18,9 @@ function export_home() {
     export $1_HOME=$home_path
 
     # Update .bashrc file
-    token=$1_HOME=
-    if grep -q "$token" ~/.bashrc; then
-        sed -i -E "s/$token.*/$token$home_path/" ~/.bashrc
+    local s_token=$1_HOME=
+    if grep -q "$s_token" ~/.bashrc; then
+        sed -i -E "s@$s_token.*@$s_token$home_path@" ~/.bashrc
     else
         echo "export $1_HOME=$home_path" >> ~/.bashrc
     fi
