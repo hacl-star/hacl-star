@@ -1,5 +1,5 @@
-HACL_HOME=../..
-KREMLIN_HOME=../../../kremlin
+HACL_HOME = ../..
+KREMLIN_HOME ?= ../../../kremlin
 
 include ../Makefile.common
 

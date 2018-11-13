@@ -13,14 +13,14 @@ UNAME		= $(shell uname)
 SED		= $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
 MARCH		= x86_64
 ifeq ($(UNAME),Darwin)
-  VARIANT=-Darwin
+  VARIANT=-darwin
   DYLD_LIBRARY_PATH := $(DIST_DIR):$(DYLD_LIBRARY_PATH)
   SO = so
   QUICPROVIDER_SO_LDOPTS =
   export DYLD_LIBRARY_PATH
 else ifeq ($(UNAME),Linux)
   CCOPTS_EXTRA=-fPIC
-  VARIANT=-Linux
+  VARIANT=-linux
   LD_LIBRARY_PATH := $(DIST_DIR):$(LD_LIBRARY_PATH)
   SO = so
   QUICPROVIDER_SO_LDOPTS = -Xlinker -z -Xlinker noexecstack -Xlinker --version-script -Xlinker $(HACL_HOME)/secure_api/libquicprovider_version_script

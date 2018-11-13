@@ -68,7 +68,7 @@ ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
 
 .PRECIOUS: %.krml %.checked
 
-.depend:
+.depend: $(VALE_FSTI_HACK)
 	$(FSTAR) --dep full $(ROOTS) \
 	  --extract '* -Prims -FStar -C +C.Loops -EverCrypt.Bytes' > $@
 

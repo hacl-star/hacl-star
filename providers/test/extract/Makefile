@@ -1,6 +1,6 @@
-KREMLIN_HOME =../../../../kremlin
+KREMLIN_HOME ?= ../../../../kremlin
 
--include Makefile.include 
+-include Makefile.include
 
 EVERCRYPT_HOME=../../out
 MLCRYPTO_HOME?=../../../../MLCrypto
