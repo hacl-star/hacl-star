@@ -50,6 +50,17 @@ noextract unfold
 let tagLen = Hacl.Hash.Definitions.size_hash_ul
 noextract unfold
 let blockLen = Hacl.Hash.Definitions.size_block_ul
+noextract unfold
+let tag (a:alg) = s:Seq.seq UInt8.t { Seq.length s = tagLength a }
+
+/// miTLS relies quite a bit on this; providing a pattern for it
+let uint32_fits_maxLength (a: alg) (x: UInt32.t): Lemma
+  (requires True)
+  (ensures UInt32.v x < maxLength a)
+  [ SMTPat (UInt32.v x < maxLength a) ]
+=
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 61 < pow2 125)
 
 /// To specify their low-level incremental computations, we assume
 /// Merkle-Damgard/sponge-like algorithms:
