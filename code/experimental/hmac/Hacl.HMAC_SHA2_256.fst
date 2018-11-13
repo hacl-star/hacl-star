@@ -34,60 +34,61 @@ let wrap_key output key len = Impl.wrap_key output key len
 
 
 val init:
-    hash: lbuffer uint32 Spec.SHA2.size_hash_w
+    state: lbuffer uint32 Spec.SHA2.size_hash_w
   -> key: lbuffer uint8 (Spec.SHA2.size_block a) ->
   Stack unit
-  (requires (fun h -> live h hash /\ live h key /\ disjoint hash key))
-  (ensures  (fun h0 _ h1 -> modifies1 key h0 h1))
+  (requires (fun h -> live h state /\ live h key /\ disjoint state key))
+  (ensures  (fun h0 _ h1 -> modifies1 state h0 h1))
 
-let init hash key = Impl.init hash key
+let init state key = Impl.init state key
 
 
 val update_block:
-    hash: lbuffer uint32 Spec.SHA2.size_hash_w
+    state: lbuffer uint32 Spec.SHA2.size_hash_w
   -> block: lbuffer uint8 (Spec.SHA2.size_block a) ->
   Stack unit
-  (requires (fun h -> live h hash /\ live h block /\ disjoint hash block))
-  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
+  (requires (fun h -> live h state /\ live h block /\ disjoint state block))
+  (ensures  (fun h0 _ h1 -> modifies1 state h0 h1))
 
-let update_block hash block = Impl.update_block hash block
+let update_block state block = Impl.update_block state block
 
 
 val update_last:
-    hash: lbuffer uint32 Spec.SHA2.size_hash_w
+    state: lbuffer uint32 Spec.SHA2.size_hash_w
   -> prev: uint64
   -> last: buffer uint8
   -> len: size_t{ v len == length last
                /\ v len <= Spec.SHA2.size_block a
-               /\ v len + v prev <= Spec.SHA2.max_input a} ->
+               /\ v len + uint_v prev <= Spec.SHA2.max_input a} ->
   Stack unit
-  (requires (fun h -> live h hash /\ live h last /\ disjoint hash last))
-  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
+  (requires (fun h -> live h state /\ live h last /\ disjoint state last))
+  (ensures  (fun h0 _ h1 -> modifies1 state h0 h1))
 
-let update_last hash prev last len = Impl.update_last hash prev last len
+let update_last state prev last len = Impl.update_last state prev last len
 
 
 val update:
-    hash: lbuffer uint32 Spec.SHA2.size_hash_w
+    state: lbuffer uint32 Spec.SHA2.size_hash_w
   -> input: buffer uint8
   -> len: size_t{ v len == length input
                /\ v len <= Spec.SHA2.max_input a} ->
   Stack unit
-  (requires (fun h -> live h hash /\ live h input /\ disjoint hash input))
-  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
+  (requires (fun h -> live h state /\ live h input /\ disjoint state input))
+  (ensures  (fun h0 _ h1 -> modifies1 state h0 h1))
 
-let update hash input len = Impl.update hash input len
+let update state input len = Impl.update state input len
 
 
 val finish:
     hash: lbuffer uint8 (Spec.SHA2.size_hash a)
-  -> hw: lbuffer uint32 Spec.SHA2.size_hash_w
+  -> state: lbuffer uint32 Spec.SHA2.size_hash_w
   -> key: lbuffer uint8 (Spec.SHA2.size_block a) ->
   Stack unit
-  (requires (fun h -> live h hash /\ live h key /\ disjoint hash key))
-  (ensures  (fun h0 _ h1 -> modifies1 key h0 h1))
+  (requires (fun h -> live h hash /\ live h state /\ live h key
+                 /\ disjoint hash key /\ disjoint hash state))
+  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
 
-let finish hash hw key = Impl.finish hash hw key
+let finish hash state key = Impl.finish hash state key
 
 
 val hmac:
