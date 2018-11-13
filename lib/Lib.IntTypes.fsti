@@ -351,14 +351,12 @@ type shiftval (t:inttype) = u:size_t{uint_v u < bits t}
 inline_for_extraction
 type rotval  (t:inttype) = u:size_t{uint_v u > 0 /\ uint_v u < bits t}
 
-(* SZ: the refinements on the result of the next two lemmas were commented out in _dev;
-I restored them *)
 inline_for_extraction
 val shift_right: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
   -> c:uint_t t l
-  
+
 val shift_right_lemma: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
@@ -370,8 +368,7 @@ inline_for_extraction
 val shift_left: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
-  -> c:uint_t t l
-  
+  -> c:uint_t t l  
 
 val shift_left_lemma: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l

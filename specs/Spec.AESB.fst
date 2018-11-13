@@ -1,4 +1,4 @@
-module Spec.AES
+module Spec.AESB
 
 open FStar.Mul
 open Lib.IntTypes
@@ -23,10 +23,35 @@ let three = to_elem 3
 let ( <<<. ) x y = normalize_term (rotate_left #U8 #SEC x y)
 let ( ^. ) x y = normalize_term (logxor #U8 #SEC x y)
 
-(* Specification of the Rijndael S-Box : *)
+
+
+/// Constants and Types
+
+type algorithm =
+  | AES_128
+  | AES_192
+  | AES_256
+
+let size_block = 16
+let size_word = 32
+
 type word = lseq elem 4
 type block = lseq elem 16
 
+let size_key (a:algorithm) =
+  match a with
+  | AES_128 -> 4 * size_word
+  | AES_192 -> 6 * size_word
+  | AES_256 -> 8 * size_word
+
+let rounds (a:algorithm) =
+  match a with
+  | AES_128 -> 10
+  | AES_192 -> 12
+  | AES_256 -> 14
+
+
+(* Specification of the Rijndael S-Box : *)
 let sub_byte (input:elem) =
   let s = finv input in
   s ^.
@@ -45,9 +70,9 @@ let shiftRow (i:size_nat{i < 4}) (shift:size_nat{i < 4}) (state:block) : Tot blo
   let tmp2 = state.[i + (4 * ((shift + 2) % 4))] in
   let tmp3 = state.[i + (4 * ((shift + 3) % 4))] in
   let state = state.[i] <- tmp0 in
-  let state = state.[i+4] <- tmp1 in
-  let state = state.[i+8] <- tmp2 in
-  let state = state.[i+12] <- tmp3 in
+  let state = state.[i + 4] <- tmp1 in
+  let state = state.[i + 8] <- tmp2 in
+  let state = state.[i + 12] <- tmp3 in
   state
 
 let shiftRows (state: block) : Tot block =
@@ -68,9 +93,9 @@ let mixColumn (c:size_nat{c < 4}) (state:block) : Tot block =
   let s2 = state.[i0 + 2] in
   let s3 = state.[i0 + 3] in
   let state = state.[i0] <- mix4 s0 s1 s2 s3 in
-  let state = state.[i0+1] <- mix4 s1 s2 s3 s0 in
-  let state = state.[i0+2] <- mix4 s2 s3 s0 s1 in
-  let state = state.[i0+3] <- mix4 s3 s0 s1 s2 in
+  let state = state.[i0 + 1] <- mix4 s1 s2 s3 s0 in
+  let state = state.[i0 + 2] <- mix4 s2 s3 s0 s1 in
+  let state = state.[i0 + 3] <- mix4 s3 s0 s1 s2 in
   state
 
 let mixColumns (state:block) : Tot block =
@@ -99,16 +124,16 @@ let aes_enc_last (key:block) (state:block) : Tot block =
   let state = addRoundKey key state in
   state
 
-let rounds (key:lseq elem (9 * 16)) (state:block) : Tot block =
-  repeati 9 (fun i -> aes_enc (sub key (16*i) 16)) state
+let aes_rounds (a:algorithm) (key:lseq elem ((rounds a - 1) * size_block)) (state:block) : Tot block =
+  repeati (rounds a - 1) (fun i -> aes_enc (sub key (i * size_block) size_block)) state
 
-let block_cipher (key:lseq elem (11 * 16)) (input:block) : Tot block =
+let block_cipher (a:algorithm) (key:lseq elem ((rounds a + 1) * size_block)) (input:block) : Tot block =
   let state = input in
-  let k0 = slice key 0 16 in
-  let k = sub key 16 (9 * 16) in
-  let kn = sub key (10 * 16) 16 in
+  let k0 = slice key 0 size_block in
+  let k = sub key size_block ((rounds a - 1) * size_block) in
+  let kn = sub key ((rounds a) * size_block) size_block in
   let state = addRoundKey k0 state in
-  let state = rounds k state in
+  let state = aes_rounds a k state in
   let state = aes_enc_last kn state in
   state
 
@@ -166,104 +191,108 @@ let aes128_keygen_assist (rcon:elem) (s:block) : Tot block =
   st
 
 let key_expansion_step (p:block) (assist:block) : Tot block =
-  let p0 = create 16 (to_elem 0) in
+  let p0 = create size_block (to_elem 0) in
   let k = p in
   let k = xor_block k (update_sub p0 4 12 (sub k 0 12)) in
   let k = xor_block k (update_sub p0 4 12 (sub k 0 12)) in
   let k = xor_block k (update_sub p0 4 12 (sub k 0 12)) in
   xor_block k assist
 
-let aes128_key_expansion (key:block) : Tot (lseq elem (11 * 16)) =
-  let key_ex = create (11 * 16) (to_elem 0) in
-  let key_ex = repeati #(lseq elem (11 * 16)) 16 (fun i kex -> kex.[i] <- key.[i]) key_ex in
+
+let aes_key_expansion (a:algorithm) (key:block) : Tot (lseq elem (((rounds a) + 1) * 16)) =
+  let key_ex = create ((rounds a + 1) * 16) (to_elem 0) in
+  let key_ex = repeati #(lseq elem ((rounds a + 1) * 16)) 16 (fun i kex -> kex.[i] <- key.[i]) key_ex in
   let key_ex =
-    repeati #(lseq elem (11 * 16)) 10
+    repeati #(lseq elem ((rounds a + 1) * 16)) (rounds a)
       (fun i kex ->
 	     let p = sub kex (i * 16) 16 in
-	     let a = aes128_keygen_assist (rcon_spec (i+1)) p in
+	     let a = aes_keygen_assist (rcon_spec (i + 1)) p in
 	     let n = key_expansion_step p a in
-	     update_sub kex ((i+1) * 16) 16 n)
+	     update_sub kex ((i + 1) * 16) 16 n)
     key_ex in
   key_ex
 
-let aes128_block (k:block) (n:lbytes 12) (c:size_nat) : Tot block =
+let aes_block (a:algorithm) (k:block) (n:lbytes 12) (c:size_nat) : Tot block =
   let ctrby = nat_to_bytes_be 4 c in
-  let input = create 16 (u8 0) in
-  let input = repeati #(lbytes 16) 12 (fun i b -> b.[i] <- n.[i]) input in
-  let input = repeati #(lbytes 16) 4 (fun i b -> b.[12+i] <- (Seq.index ctrby i)) input in
-  let key_ex = aes128_key_expansion k in
-  let output = block_cipher key_ex input in
+  let input = create size_block (u8 0) in
+  let input = repeati #(lbytes size_block) 12 (fun i b -> b.[i] <- n.[i]) input in
+  let input = repeati #(lbytes size_block) 4 (fun i b -> b.[12+i] <- (Seq.index ctrby i)) input in
+  let key_ex = aes_key_expansion a k in
+  let output = block_cipher a key_ex input in
   output
 
-let aes128_encrypt_block (k:block) (m:block) : Tot block =
-  let key_ex = aes128_key_expansion k in
-  let output = block_cipher key_ex m in
+let encrypt_block (a:algorithm) (k:block) (m:block) : Tot block =
+  let key_ex = aes_key_expansion a k in
+  let output = block_cipher a key_ex m in
   output
 
-noeq type aes_state = {
-  key_ex: lbytes (11 * 16);
-  block:  lbytes 16;
+noeq type aes_state (a:algorithm) = {
+  key_ex: lbytes ((rounds a + 1) * size_block);
+  block:  lbytes size_block;
 }
 
-let aes_init (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot aes_state =
-  let input = create 16 (u8 0) in
-  let input = repeati #(lbytes 16) n_len (fun i b -> b.[i] <- n.[i]) input in
-  let key_ex = aes128_key_expansion k in
+let aes_init (a:algorithm) (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot (aes_state a) =
+  let input = create size_block (u8 0) in
+  let input = repeati #(lbytes size_block) n_len (fun i b -> b.[i] <- n.[i]) input in
+  let key_ex = aes_key_expansion a k in
   { key_ex = key_ex; block = input}
 
-let aes_set_counter (st:aes_state) (c:size_nat) : Tot aes_state =
+let aes_set_counter (a:algorithm) (st:aes_state a) (c:size_nat) : Tot (aes_state a) =
   let cby = nat_to_bytes_be 4 c in
   let nblock = update_sub st.block 12 4 cby in
   {st with block = nblock}
 
-let aes_key_block (st:aes_state) : Tot block =
-  block_cipher st.key_ex st.block
+let aes_key_block (a:algorithm) (st:aes_state a) : Tot block =
+  block_cipher a st.key_ex st.block
 
-let aes_key_block0 (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot block =
-  let st = aes_init k n_len n in
-  aes_key_block st
+let aes_key_block0 (a:algorithm) (k:block) (n_len:size_nat{n_len <= size_block}) (n:lbytes n_len) : Tot block =
+  let st = aes_init a k n_len n in
+  aes_key_block a st
 
-let aes_key_block1 (k:block) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot block =
-  let st = aes_init k n_len n in
-  let st = aes_set_counter st 1 in
-  aes_key_block st
+let aes_key_block1 (a:algorithm) (k:block) (n_len:size_nat{n_len <= size_block}) (n:lbytes n_len) : Tot block =
+  let st = aes_init a k n_len n in
+  let st = aes_set_counter a st 1 in
+  aes_key_block a st
 
 let aes_encrypt_block
-  (st0:aes_state)
-  (ctr0:size_nat)
-  (incr:size_nat{ctr0 + incr <= max_size_t})
+  (a: algorithm)
+  (st0: aes_state a)
+  (ctr0: size_nat)
+  (incr: size_nat{ctr0 + incr <= max_size_t})
   (b:block) :
   Tot block =
 
-  let st = aes_set_counter st0 (ctr0 + incr) in
-  let kb = aes_key_block st in
+  let st = aes_set_counter a st0 (ctr0 + incr) in
+  let kb = aes_key_block a st in
   map2 (^.) b kb
 
 let aes_encrypt_last
-  (st0:aes_state)
-  (ctr0:size_nat)
-  (incr:size_nat{ctr0 + incr <= max_size_t})
-  (len:size_nat{len < 16})
-  (b:lbytes len):
+  (a: algorithm)
+  (st0: aes_state a)
+  (ctr0: size_nat)
+  (incr: size_nat{ctr0 + incr <= max_size_t})
+  (len: size_nat{len < size_block})
+  (b: lbytes len):
   Tot (lbytes len) =
 
-  let plain = create 16 (u8 0) in
+  let plain = create size_block (u8 0) in
   let plain = update_sub plain 0 (length b) b in
-  let cipher = aes_encrypt_block st0 ctr0 incr plain in
+  let cipher = aes_encrypt_block a st0 ctr0 incr plain in
   sub cipher 0 (length b)
 
 
-val aes128_encrypt_bytes:
-    key:block
-  -> n_len:size_nat{n_len <= 16}
-  -> nonce:lbytes n_len
+val aes_encrypt:
+    a: algorithm
+  -> key: lbytes size_block
+  -> nonce: bytes{length nonce <= size_block}
   -> c:size_nat
-  -> msg:bytes{length msg / 16 + c <= max_size_t} ->
+  -> msg:bytes{length msg / size_block + c <= max_size_t} ->
   Tot (ciphertext:bytes{length ciphertext == length msg})
 
-let aes128_encrypt_bytes key n_len nonce ctr0 msg =
+let aes_encrypt a key nonce ctr0 msg =
+  let nlen = length nonce in
   let cipher = msg in
-  let st0 = aes_init key n_len nonce in
-  map_blocks 16 cipher
-    (aes_encrypt_block st0 ctr0)
-    (aes_encrypt_last st0 ctr0)
+  let st0 = aes_init a key nlen nonce in
+  map_blocks size_block cipher
+    (aes_encrypt_block a st0 ctr0)
+    (aes_encrypt_last a st0 ctr0)

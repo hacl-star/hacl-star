@@ -97,3 +97,9 @@ let scalarmult (k:scalar) (u:serialized_point) : Tot serialized_point =
   let u = decodePoint u in
   let res = montgomery_ladder u k in
   encodePoint res
+
+val secret_to_public: lbytes 56 -> Tot (lbytes 56)
+let secret_to_public kpriv =
+  let basepoint_zeros = create 56 (u8 0) in
+  let basepoint = upd basepoint_zeros (56 - 1) (u8 0x09) in
+  scalarmult kpriv basepoint
