@@ -33,6 +33,9 @@ let size_hash (a:algorithm) : Tot size_nat =
   | SHA2_512 -> 64
 
 inline_for_extraction
+let size_hash_w : size_nat = 8
+
+inline_for_extraction
 let max_input (a:algorithm) : Tot nat =
   match a with
   | SHA2_224 -> pow2 61 - 1

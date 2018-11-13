@@ -1,5 +1,6 @@
 module Lib.IntTypes
 
+open FStar.Mul
 open FStar.Math.Lemmas
 
 ///
@@ -260,20 +261,20 @@ val mul_mod: #t:inttype -> #l:secrecy_level
   -> b:uint_t t l
   -> Pure (uint_t t l)
   (requires (t <> U128))
-  (ensures (fun c -> uint_v c == (uint_v a `op_Multiply` uint_v b) % modulus t))
+  (ensures (fun c -> uint_v c == (uint_v a * uint_v b) % modulus t))
 
 inline_for_extraction
 val mul: #t:inttype{t <> U128} -> #l:secrecy_level
   -> a:uint_t t l
   -> b:uint_t t l
   -> Pure (uint_t t l)
-  (requires (uint_v a `op_Multiply` uint_v b < modulus t))
-  (ensures (fun c -> uint_v c == uint_v a `op_Multiply` uint_v b))
+  (requires (uint_v a * uint_v b < modulus t))
+  (ensures (fun c -> uint_v c == uint_v a * uint_v b))
 
 inline_for_extraction
 val mul64_wide: a:uint64 -> b:uint64 -> Pure (uint128)
   (requires (True))
-  (ensures (fun c -> uint_v #U128 c == uint_v #U64 a `op_Multiply` uint_v #U64 b))
+  (ensures (fun c -> uint_v #U128 c == uint_v #U64 a * uint_v #U64 b))
 
 (* KB: I would prefer the post-condition to say:
        uint_v c = (pow2 (bits t) + uint_v a - uint_v b) % pow2 (bits t)
@@ -334,13 +335,13 @@ inline_for_extraction
 val shift_right: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
-  -> c:uint_t t l{uint_v #t c ==  uint_v #t a / pow2 (uint_v #U32 b)}
+  -> c:uint_t t l{uint_v #t c == uint_v #t a / pow2 (uint_v #U32 b)}
 
 inline_for_extraction
 val shift_left: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
-  -> c:uint_t t l{uint_v #t c == (uint_v #t a `op_Multiply` pow2 (uint_v #U32 b)) % modulus t}
+  -> c:uint_t t l{uint_v #t c == (uint_v #t a * pow2 (uint_v #U32 b)) % modulus t}
 
 inline_for_extraction
 val rotate_right: #t:inttype -> #l:secrecy_level

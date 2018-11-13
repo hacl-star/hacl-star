@@ -464,6 +464,22 @@ val loop_nospec:
     (requires fun h -> h0 == h /\ B.live h0 buf)
     (ensures  fun _ _ h1 -> B.modifies (B.loc_buffer buf) h0 h1)
 
+(** Loop combinator with just memory safety specification *)
+inline_for_extraction noextract
+val loop_range_nospec:
+    #h0:mem
+  -> #a:Type0
+  -> #len:size_nat
+  -> start:size_t
+  -> n:size_t{v start + v n <= max_size_t}
+  -> buf:lbuffer a len
+  -> impl: (i:size_t{v start <= v i /\ v i < v start + v n} -> Stack unit
+      (requires fun h -> B.modifies (B.loc_buffer buf) h0 h)
+      (ensures  fun _ _ h1 -> B.modifies (B.loc_buffer buf) h0 h1)) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ B.live h0 buf)
+    (ensures  fun _ _ h1 -> B.modifies (B.loc_buffer buf) h0 h1)
+
 (**
 * A generalized loop combinator paremetrized by its state (e.g. an accumulator)
 *
@@ -826,7 +842,7 @@ val fillT:
 inline_for_extraction
 val fill:
     #a:Type
-  -> h0:mem 
+  -> h0:mem
   -> clen:size_t
   -> o:lbuffer a (v clen)
   -> spec:(mem -> GTot(i:size_nat{i < v clen} -> a))
