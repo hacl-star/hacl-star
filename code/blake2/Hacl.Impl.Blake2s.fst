@@ -296,7 +296,7 @@ let blake2_compress2 wv m =
   let spec h = Spec.blake2_round Spec.Blake2S h.[m] in
   loop1 h0 (size (Spec.rounds Spec.Blake2S)) wv spec
   (fun i ->
-    Loops.unfold_repeati (Spec.rounds Spec.Blake2S) (spec h0) (as_seq h0 wv) (v i);
+    Loops.unfold_repeati (Spec.rounds Spec.Blake2S) (spec h0) h0.[wv] (v i);
     blake2_round wv m i)
 
 
@@ -414,23 +414,23 @@ let blake2s_init_hash hash kk nn =
 val blake2s_init_branching:
     hash: hash_wp
   -> key_block: lbuffer uint8 64ul
-  -> k: buffer uint8
-  -> kk: size_t{v kk <= 32 /\ v kk == length k}
+  -> kk: size_t{v kk <= 32}
+  -> k: lbuffer uint8 kk
   -> nn: size_t{1 <= v nn /\ v nn <= 32} ->
   Stack unit
     (requires (fun h -> live h hash /\ live h k /\ live h key_block
                    /\ disjoint hash k /\ disjoint hash key_block /\ disjoint key_block k))
     (ensures  (fun h0 _ h1 -> modifies2 hash key_block h0 h1
                     /\ (if (v kk) = 0 then h1.[hash] == h0.[hash] else
-                       let key_block1 = Seq.update_sub h0.[key_block] 0 (v kk) (as_seq #MUT #uint8 #kk h0 k) in
+                       let key_block1 = Seq.update_sub h0.[key_block] 0 (v kk) h0.[k] in
                        h1.[hash] == Spec.blake2_update_block Spec.Blake2S (Spec.size_block Spec.Blake2S) key_block1 h0.[hash])))
 
 [@ Substitute ]
-let blake2s_init_branching hash key_block k kk nn =
+let blake2s_init_branching hash key_block kk k nn =
   let h0 = ST.get () in
   if kk <>. (size 0) then
   begin
-    update_sub #MUT #uint8 #kk key_block (size 0) kk k;
+    update_sub key_block (size 0) kk k;
     let prev = Spec.word_to_limb Spec.Blake2S (secret (size_block Spec.Blake2S)) in
     blake2s_update_block hash prev key_block
   end
@@ -440,24 +440,24 @@ let blake2s_init_branching hash key_block k kk nn =
 
 val blake2s_init:
     hash: hash_wp
-  -> k: buffer uint8
-  -> kk: size_t{v kk <= 32 /\ v kk == length k}
+  -> kk: size_t{v kk <= 32}
+  -> k: lbuffer uint8 kk
   -> nn: size_t{1 <= v nn /\ v nn <= 32} ->
   Stack unit
     (requires (fun h -> live h hash
                    /\ live h k
                    /\ disjoint hash k /\ disjoint k hash))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                         /\ h1.[hash] == Spec.Blake2.blake2_init Spec.Blake2S (v kk) (as_seq #MUT #uint8 #kk h0 k) (v nn)))
+                         /\ h1.[hash] == Spec.Blake2.blake2_init Spec.Blake2S (v kk) h0.[k] (v nn)))
 
 [@ Substitute ]
-let blake2s_init hash k kk nn =
+let blake2s_init hash kk k nn =
   let h0 = ST.get () in
   salloc1_trivial h0 (size 64) (u8 0) (Ghost.hide (loc hash))
-  (fun _ h1 -> live h1 hash /\ h1.[hash] == Spec.blake2_init Spec.Blake2S (size_v kk) (as_seq #MUT #uint8 #kk h0 k) (v nn))
+  (fun _ h1 -> live h1 hash /\ h1.[hash] == Spec.blake2_init Spec.Blake2S (size_v kk) h0.[k] (v nn))
   (fun key_block ->
     blake2s_init_hash hash kk nn;
-    blake2s_init_branching hash key_block k kk nn)
+    blake2s_init_branching hash key_block kk k nn)
 
 
 #reset-options "--z3rlimit 15"
@@ -465,18 +465,18 @@ let blake2s_init hash k kk nn =
 val blake2s_update_last:
     hash: hash_wp
   -> prev: uint64{uint_v prev <= Spec.Blake2.max_limb Spec.Blake2S}
-  -> last: buffer uint8
-  -> len: size_t{v len <= Spec.size_block Spec.Blake2S /\ v len == length last} ->
+  -> len: size_t{v len <= Spec.size_block Spec.Blake2S} 
+  -> last: lbuffer uint8 len ->
   Stack unit
     (requires (fun h -> live h hash /\ live h last /\ disjoint hash last))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                         /\ h1.[hash] == Spec.Blake2.blake2_update_last Spec.Blake2S (uint_v prev) (v len) (as_seq #MUT #uint8 #len h0 last) h0.[hash]))
+                         /\ h1.[hash] == Spec.Blake2.blake2_update_last Spec.Blake2S (uint_v prev) (v len) h0.[last] h0.[hash]))
 
-let blake2s_update_last hash prev last len =
+let blake2s_update_last hash prev len last =
   push_frame ();
-  let last_block = create #uint8 64ul (u8 0) in
-  let last_block_w = create #uint32 16ul (u32 0) in
-  update_sub #MUT #uint8 #len last_block (size 0) len last;
+  let last_block = create 64ul (u8 0) in
+  let last_block_w = create 16ul (u32 0) in
+  update_sub last_block (size 0) len last;
   uints_from_bytes_le last_block_w last_block;
   let offset = prev in
   blake2_compress hash last_block_w offset true;
@@ -487,21 +487,21 @@ let blake2s_update_last hash prev last len =
 #reset-options "--z3rlimit 25"
 
 val blake2s_finish:
-    output: buffer uint8
-  -> hash: hash_wp
-  -> nn: size_t{1 <= v nn /\ v nn <= 32 /\ v nn == length output} ->
+    nn: size_t{1 <= v nn /\ v nn <= 32} 
+  -> output: lbuffer uint8 nn
+  -> hash: hash_wp ->
   Stack unit
     (requires (fun h -> live h hash
                    /\ live h output /\ disjoint output hash /\ disjoint hash output))
-    (ensures  (fun h0 _ h1 -> modifies1 #uint8 #nn output h0 h1
-                         /\ (as_seq #MUT #uint8 #nn h1 output) == Spec.Blake2.blake2_finish Spec.Blake2S h0.[hash] (v nn)))
+    (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
+                         /\ h1.[output] == Spec.Blake2.blake2_finish Spec.Blake2S h0.[hash] (v nn)))
 
-let blake2s_finish output hash nn =
+let blake2s_finish nn output hash =
   let h0 = ST.get () in
   salloc1_trivial h0 (size 32) (u8 0) (Ghost.hide (loc output))
-  (fun _ h1 -> live h1 output /\ (as_seq #MUT #uint8 #nn h1 output) == Spec.Blake2.blake2_finish Spec.Blake2S h0.[hash] (v nn))
+  (fun _ h1 -> live h1 output /\ h1.[output] == Spec.Blake2.blake2_finish Spec.Blake2S h0.[hash] (v nn))
   (fun full ->
-    uints_to_bytes_le full (size 8) hash;
+    uints_to_bytes_le (size 8) full hash;
     let final = sub full (size 0) nn in
     copy output final)
 
@@ -541,48 +541,48 @@ let prev2 (klen:size_t{v klen == 0 \/ v klen == 1})
 inline_for_extraction
 val blake2s_update:
     hash: hash_wp
-  -> d: buffer uint8
-  -> ll: size_t{v ll == length d}
+  -> ll: size_t
+  -> d: lbuffer uint8 ll
   -> kk: size_t{v kk <= 32 /\ (if v kk = 0 then v ll < pow2 64 else v ll + 64 < pow2 64)} ->
   Stack unit
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                         /\ h1.[hash] == Spec.blake2_update Spec.Blake2S h0.[hash] (as_seq #MUT #uint8 #ll h0 d) (v kk)))
+                         /\ h1.[hash] == Spec.blake2_update Spec.Blake2S h0.[hash] h0.[d] (v kk)))
 
-let blake2s_update hash d ll kk =
+let blake2s_update hash ll d kk =
   let h0 = ST.get() in
   let klen = if kk =. size 0 then size 0 else size 1 in
   loopi_blocks (size_block Spec.Blake2S) ll d
     (Spec.spec_update_block Spec.Blake2S ((v klen + 1) * (Spec.size_block Spec.Blake2S)))
     (Spec.spec_update_last Spec.Blake2S (v klen * (Spec.size_block Spec.Blake2S) + v ll))
     (fun i block hash -> blake2s_update_block hash (prev1 klen ll i) block)
-    (fun i len last hash -> blake2s_update_last hash (prev2 klen ll i) last len)
+    (fun i len last hash -> blake2s_update_last hash (prev2 klen ll i) len last)
     hash
 
 
 #reset-options "--z3rlimit 50"
 
 val blake2s:
-    output: buffer uint8
-  -> d: buffer uint8
-  -> ll: size_t{length d == v ll}
-  -> k: buffer uint8
-  -> kk: size_t{length k == v kk /\ v kk <= 32 /\ (if v kk = 0 then v ll < pow2 64 else v ll + 64 < pow2 64)}
-  -> nn:size_t{v nn == length output /\ 1 <= v nn /\ v nn <= 32} ->
+    nn:size_t{1 <= v nn /\ v nn <= 32} 
+  -> output: lbuffer uint8 nn
+  -> ll: size_t
+  -> d: lbuffer uint8 ll
+  -> kk: size_t{v kk <= 32 /\ (if v kk = 0 then v ll < pow2 64 else v ll + 64 < pow2 64)}
+  -> k: lbuffer uint8 kk ->
   Stack unit
-    (requires (fun h -> LowStar.Buffer.live h output
-                   /\ LowStar.Buffer.live h d
-                   /\ LowStar.Buffer.live h k
-                   /\ LowStar.Buffer.disjoint output d
-                   /\ LowStar.Buffer.disjoint output k))
-    (ensures  (fun h0 _ h1 -> LowStar.Buffer.modifies (loc output) h0 h1
-                         /\ (as_seq #MUT #uint8 #nn h1 output) == Spec.Blake2.blake2s (as_seq #MUT #uint8 #ll h0 d) (v kk) (as_seq #MUT #uint8 #kk h0 k) (v nn)))
+    (requires (fun h -> live h output
+                   /\ live h d
+                   /\ live h k
+                   /\ disjoint output d
+                   /\ disjoint output k))
+    (ensures  (fun h0 _ h1 -> modifies (loc output) h0 h1
+                         /\ h1.[output] == Spec.Blake2.blake2s h0.[d] (v kk) h0.[k] (v nn)))
 
-let blake2s output d ll k kk nn =
+let blake2s nn output ll d kk k =
   let h0 = ST.get () in
   salloc1_trivial h0 (size 8) (u32 0) (Ghost.hide (loc output))
-  (fun _ h1 -> live h1 output /\ (as_seq #MUT #uint8 #nn h1 output) == Spec.Blake2.blake2s (as_seq #MUT #uint8 #ll h0 d) (v kk) (as_seq #MUT #uint8 #kk h0 k) (v nn))
+  (fun _ h1 -> live h1 output /\ h1.[output] == Spec.Blake2.blake2s h0.[d] (v kk) h0.[k] (v nn))
   (fun hash ->
-    blake2s_init hash k kk nn;
-    blake2s_update hash d ll kk;
-    blake2s_finish output hash nn)
+    blake2s_init hash kk k nn;
+    blake2s_update hash ll d kk;
+    blake2s_finish nn output hash)
