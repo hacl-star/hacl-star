@@ -1,5 +1,6 @@
 module MerkleTree.Spec
 
+open FStar.Classical
 open FStar.Mul
 open FStar.Seq
 
@@ -128,16 +129,54 @@ let rec mt_get_path_ok_ #n mt idx =
   
 /// Security
 
-// Two merkle trees collide when 
-// 1) they have the same height (thus the same number of elements),
+val raw_hashes: hs:S.seq hash -> GTot bool (decreases (S.length hs))
+let rec raw_hashes hs =
+  if S.length hs = 0 then true
+  else HRaw? (S.head hs) && raw_hashes (S.tail hs)
+
+val pad_hashes: hs:S.seq hash -> GTot bool (decreases (S.length hs))
+let rec pad_hashes hs =
+  if S.length hs = 0 then true
+  else HPad? (S.head hs) && pad_hashes (S.tail hs)
+
+type right_padded_merkle_tree (n:nat) =
+| RP: mt:merkle_tree n ->
+      i:nat{i <= pow2 n} ->
+      pf:unit{
+        raw_hashes (S.slice mt 0 i) &&
+        pad_hashes (S.slice mt i (S.length mt))} ->
+      right_padded_merkle_tree n
+
+type rpmt n = right_padded_merkle_tree n
+
+val rpmt_left: #n:nat{n > 0} -> mt:rpmt n -> GTot (rpmt (n-1))
+let rpmt_left #n mt = 
+  admit ();
+  RP (mt_left (RP?.mt mt))
+     (if RP?.i mt <= pow2 (n-1) then RP?.i mt else pow2 (n-1))
+     ()
+
+val rpmt_right: #n:nat{n > 0} -> mt:rpmt n -> GTot (rpmt (n-1))
+let rpmt_right #n mt = 
+  admit ();
+  RP (mt_right (RP?.mt mt))
+     (if RP?.i mt <= pow2 (n-1) then 0 else RP?.i mt - pow2 (n-1))
+     ()
+
+val rpmt_get_root: #n:nat -> mt:rpmt n -> GTot hash
+let rpmt_get_root #n mt = mt_get_root (RP?.mt mt)
+
+// Two right-padded merkle trees collide when 
+// 1) they have the same height (`n`) and the number of raw hashes (`RP?.i`),
 // 2) their contents differ, and
 // 3) their roots are valid (HRaw) and same.
 val mt_collide:
-  #n:nat -> mt1:merkle_tree n -> mt2:merkle_tree n -> GTot bool
+  #n:nat -> mt1:rpmt n -> mt2:rpmt n -> GTot bool
 let mt_collide #n mt1 mt2 =
-  mt1 <> mt2 && 
-  HRaw? (mt_get_root mt1) &&
-  mt_get_root mt1 = mt_get_root mt2
+  RP?.i mt1 = RP?.i mt2 &&
+  RP?.mt mt1 <> RP?.mt mt2 &&
+  HRaw? (rpmt_get_root mt1) &&
+  rpmt_get_root mt1 = rpmt_get_root mt2
 
 val hash_2_raw_collide:
   lh1:hash_raw -> rh1:hash_raw ->
@@ -147,47 +186,85 @@ let hash_2_raw_collide lh1 rh1 lh2 rh2 =
   (lh1, rh1) <> (lh2, rh2) && 
   hash_2_raw lh1 rh1 = hash_2_raw lh2 rh2
 
+val hash_2_raw_collide_helper:
+  lh1:hash_raw -> rh1:hash_raw -> lh2:hash_raw -> rh2:hash_raw ->
+  Lemma (requires (hash_2_raw_collide lh1 rh1 lh2 rh2))
+        (ensures (exists lh1 rh1 lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2))
+let hash_2_raw_collide_helper lh1 rh1 lh2 rh2 =
+  exists_intro (fun rh2 -> hash_2_raw_collide lh1 rh1 lh2 rh2) rh2;
+  exists_intro (fun lh2 -> exists rh2. hash_2_raw_collide lh1 rh1 lh2 rh2) lh2;
+  exists_intro (fun rh1 -> exists lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2) rh1;
+  exists_intro (fun lh1 -> exists rh1 lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2) lh1
+
 val mt_collide_0:
-  mt1:merkle_tree 0 -> mt2:merkle_tree 0 ->
+  mt1:rpmt 0 -> mt2:rpmt 0 ->
   Lemma (not (mt_collide mt1 mt2))
 let mt_collide_0 mt1 mt2 =
   if mt1 = mt2 then ()
-  else if mt_get_root mt1 <> mt_get_root mt2 then ()
-  else assert (S.equal mt1 mt2)
+  else if rpmt_get_root mt1 <> rpmt_get_root mt2 then ()
+  else assert (S.equal (RP?.mt mt1) (RP?.mt mt2))
 
-val mt_collide_cases:
-  #n:nat{n > 0} ->
-  mt1:merkle_tree n -> mt2:merkle_tree n ->
+val rpmt_get_root_step:
+  #n:nat{n > 0} -> mt:rpmt n ->
+  Lemma (rpmt_get_root mt =
+        hash_2 (rpmt_get_root (rpmt_left mt)) (rpmt_get_root (rpmt_right mt)))
+let rpmt_get_root_step #n mt =
+  admit ()
+
+val rpmt_get_root_pad:
+  #n:nat -> mt:rpmt n ->
+  Lemma (HPad? (rpmt_get_root mt) <==> RP?.i mt = 0)
+let rpmt_get_root_pad #n mt =
+  admit ()
+
+val rpmt_get_root_raw:
+  #n:nat -> mt:rpmt n ->
+  Lemma (HRaw? (rpmt_get_root mt) <==> RP?.i mt > 0)
+let rpmt_get_root_raw #n mt =
+  rpmt_get_root_pad #n mt
+
+val mt_collide_1:
+  mt1:rpmt 1 -> mt2:rpmt 1 ->
   Lemma (requires (mt_collide mt1 mt2))
-        (ensures ((exists lh1 rh1 lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2) \/
-                 mt_collide (mt_left mt1) (mt_left mt2) \/
-                 mt_collide (mt_right mt1) (mt_right mt2)))
-let mt_collide_cases #n mt1 mt2 =
-  if HPad? (mt_get_root mt1) then ()
-  else if HPad? (mt_get_root mt2) then ()
+        (ensures (exists lh1 rh1 lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2))
+let mt_collide_1 mt1 mt2 =
+  if RP?.i mt1 = 0 then ()
   else begin
-    let rt1 = HRaw?.hr (mt_get_root mt1) in
-    let rt2 = HRaw?.hr (mt_get_root mt2) in
-    assert (rt1 = rt2);
-    mt_get_root_step mt1; mt_get_root_step mt2;
-    if HPad? (mt_get_root (mt_left mt1)) then ()
-    else if HPad? (mt_get_root (mt_left mt2)) then ()
-    else admit () // need to know `HPad`s are only in RHS.
+    rpmt_get_root_raw mt1; rpmt_get_root_raw mt2;
+    rpmt_get_root_raw (rpmt_left mt1); rpmt_get_root_raw (rpmt_left mt2);
+    if RP?.i mt1 = 1 
+    then begin
+      rpmt_get_root_pad (rpmt_right mt1); rpmt_get_root_pad (rpmt_right mt2);
+      assert (S.equal (RP?.mt mt1) (RP?.mt mt2))
+    end
+    else begin
+      rpmt_get_root_raw (rpmt_right mt1); rpmt_get_root_raw (rpmt_right mt2);
+      let lrt1 = HRaw?.hr (rpmt_get_root (rpmt_left mt1)) in
+      let lrt2 = HRaw?.hr (rpmt_get_root (rpmt_left mt2)) in
+      let rrt1 = HRaw?.hr (rpmt_get_root (rpmt_right mt1)) in
+      let rrt2 = HRaw?.hr (rpmt_get_root (rpmt_right mt2)) in
+      if (lrt1, rrt1) = (lrt2, rrt2)
+      then assert (S.equal (RP?.mt mt1) (RP?.mt mt2))
+      else begin
+        hash_2_raw_collide_helper lrt1 rrt1 lrt2 rrt2
+      end
+    end
   end
 
+val mt_collide_n:
+  #n:nat{n > 0} ->
+  mt1:rpmt n -> mt2:rpmt n ->
+  Lemma (requires (mt_collide mt1 mt2))
+        (ensures (exists lh1 rh1 lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2))
+let mt_collide_n #n mt1 mt2 =
+  admit ()
+
+// The security property for right-padded Merkle trees
 val mt_collide_implies_hash_raw_collide:
-  #n:nat -> mt1:merkle_tree n -> mt2:merkle_tree n ->
+  #n:nat -> mt1:rpmt n -> mt2:rpmt n ->
   Lemma (requires (mt_collide mt1 mt2))
         (ensures (exists lh1 rh1 lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2))
 let rec mt_collide_implies_hash_raw_collide #n mt1 mt2 =
   if n = 0 then mt_collide_0 mt1 mt2
-  else if mt1 = mt2 then ()
-  else begin
-    mt_collide_cases mt1 mt2;
-    if mt_collide (mt_left mt1) (mt_left mt2) 
-    then mt_collide_implies_hash_raw_collide (mt_left mt1) (mt_left mt2)
-    else if mt_collide (mt_right mt1) (mt_right mt2)
-    then mt_collide_implies_hash_raw_collide (mt_right mt1) (mt_right mt2)
-    else ()
-  end
+  else mt_collide_n mt1 mt2
 
