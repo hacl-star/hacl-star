@@ -251,7 +251,7 @@ curve64-perf:
 	./curve64-perf.exe
 
 curve-perf: 
-	gcc-8 -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curvetest.c -o curve-perf.exe
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curvetest.c -o curve-perf.exe
 	./curve-perf.exe
 
 curve-snap: 

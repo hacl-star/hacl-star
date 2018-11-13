@@ -141,7 +141,7 @@ int main() {
   double time = (((double)tdiff1) / CLOCKS_PER_SEC);
   double nsigs = ((double)ROUNDS) / time;
   double nbytes = ((double)count/1000000.0) / time;
-  printf("Curve25519 (64-bit) PERF:\n");
+  printf("Curve25519 (51-bit) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 "s (%.2fus/byte)\n",count,(uint64_t)time,((double)time * 1000000.0)/count);
   printf("bw %8.2f MB/s\n",nbytes);

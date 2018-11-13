@@ -472,6 +472,7 @@ let absorb s rateInBytes inputByteLen input delimitedSuffix =
   (absorb_inner rateInBytes)
   (absorb_last delimitedSuffix rateInBytes) s
 
+<<<<<<< HEAD
 private
 val lemma_rateInBytes:
     inputByteLen:size_nat
@@ -497,12 +498,14 @@ val lemma_update_squeeze:
 let lemma_update_squeeze rateInBytes outputByteLen i s o o1 =
   Seq.lemma_split (LSeq.sub o1 0 (i * rateInBytes + rateInBytes)) (i * rateInBytes)
 
+=======
+>>>>>>> _dev
 inline_for_extraction noextract
 val squeeze_inner:
     rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
-  -> i:size_t{v i < v (outputByteLen /. rateInBytes)}
   -> s:state
+<<<<<<< HEAD
   -> output:lbuffer uint8 outputByteLen
   -> Stack unit
     (requires fun h0 -> live h0 s /\ live h0 output /\ disjoint s output)
@@ -524,6 +527,23 @@ let squeeze_inner rateInBytes outputByteLen i s output =
   let o' = as_seq h1 (gsub output 0ul ((i +! 1ul) *! rateInBytes)) in
   lemma_update_squeeze (v rateInBytes) (v outputByteLen) (v i) (as_seq h1 s) o o'
 
+=======
+  -> output:lbytes (v rateInBytes)
+  -> i:size_t{v i < v (outputByteLen /. rateInBytes)}
+  -> Stack unit
+    (requires fun h0 -> live h0 s /\ live h0 output /\ disjoint s output)
+    (ensures  fun h0 _ h1 ->
+      modifies2 s output h0 h1 /\
+      (let s', block =
+         S.squeeze_inner (v rateInBytes) (v outputByteLen) (v i) (as_seq h0 s) in
+       as_seq h1 s == s' /\ as_seq h1 output == block))
+let squeeze_inner rateInBytes outputByteLen s output i =
+  storeState rateInBytes s output;
+  state_permute s
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+>>>>>>> _dev
 val squeeze:
     s:state
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
@@ -532,16 +552,18 @@ val squeeze:
   -> Stack unit
     (requires fun h0 -> live h0 s /\ live h0 output /\ disjoint s output)
     (ensures  fun h0 _ h1 ->
+<<<<<<< HEAD
       modifies (loc_union (loc s) (loc output)) h0 h1 /\
       as_seq h1 output ==
       S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
+=======
+      modifies2 s output h0 h1 /\
+      as_seq h1 output == S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
+>>>>>>> _dev
 let squeeze s rateInBytes outputByteLen output =
-  let h0 = ST.get() in
-  assert_norm (norm [delta]
-    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) ==
-    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen));
   let outBlocks = outputByteLen /. rateInBytes in
   let remOut = outputByteLen %. rateInBytes in
+<<<<<<< HEAD
   let tmp = sub output (outputByteLen -. remOut) remOut in
   [@ inline_let]
   let a_spec (i:size_nat{i <= v outputByteLen / v rateInBytes}) =
@@ -554,22 +576,33 @@ let squeeze s rateInBytes outputByteLen output =
     as_seq h (gsub output 0ul (size i *! rateInBytes)) in
   [@ inline_let]
   let footprint i = loc_union (loc s) (loc output) in
+=======
+  assert_spinoff (v outputByteLen - v remOut == v outBlocks * v rateInBytes);
+  let last = B.sub output (outputByteLen -. remOut) remOut in
+>>>>>>> _dev
   [@ inline_let]
-  let spec h0: i:size_nat{i < v outBlocks} -> a_spec i -> a_spec (i + 1) =
-    S.squeeze_inner (v rateInBytes) (v outputByteLen) in
-  let h0 = ST.get () in
-  loop h0 outBlocks a_spec refl footprint spec
-  (fun i ->
-    Loop.unfold_repeat_gen (v outBlocks) a_spec (spec h0) (refl h0 0) (v i);
-    squeeze_inner rateInBytes outputByteLen i s output
-  );
-  storeState remOut s tmp;
+  let a_spec (i:nat{i <= v outputByteLen / v rateInBytes}) = S.state in
+  let blocks = sub output (size 0) (outBlocks *! rateInBytes) in
+  let h0 = ST.get() in
+  fill_blocks h0 rateInBytes outBlocks blocks a_spec
+    (fun h i -> as_seq h s)
+    (fun _ -> loc_buffer s)
+    (fun h0 -> S.squeeze_inner (v rateInBytes) (v outputByteLen))
+    (fun i block -> squeeze_inner rateInBytes outputByteLen s block i);
+  storeState remOut s last;
   let h1 = ST.get() in
+<<<<<<< HEAD
   Seq.lemma_split (as_seq h1 output) (v outputByteLen - v remOut);
   Seq.lemma_eq_intro (LSeq.create 0 (u8 0))
     (as_seq h0 (gsub output 0ul 0ul))
 
 #set-options "--max_ifuel 0"
+=======
+  Seq.lemma_split (as_seq h1 output) (v outBlocks * v rateInBytes);
+  assert_norm (norm [delta] 
+    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) ==
+    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
+>>>>>>> _dev
 
 val keccak:
     rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}

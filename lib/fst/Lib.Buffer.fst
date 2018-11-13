@@ -103,7 +103,30 @@ let update_sub_f #a #len h0 buf start n spec f =
   B.modifies_buffer_elim (B.sub (buf <: buffer a) (start +! n) (len -. start -. n)) (loc tmp) h0 h1;
   Sequence.lemma_update_sub (as_seq h0 buf) (v start) (v n) (spec h0) (as_seq h1 buf)
 
+<<<<<<< HEAD
 inline_for_extraction noextract
+=======
+let concat2 #a len0 s0 len1 s1 s =
+  let h0 = ST.get () in
+  update_sub s (size 0) len0 s0;
+  update_sub s len0 len1 s1;
+  let h1 = ST.get () in
+  Seq.eq_intro (Seq.sub (as_seq h1 s) 0 (v len0)) (as_seq h0 s0);
+  Seq.lemma_concat2 (v len0) (as_seq h0 s0) (v len1) (as_seq h0 s1) (as_seq h1 s)
+
+let concat3 #a len0 s0 len1 s1 len2 s2 s =
+  let h0 = ST.get () in
+  update_sub s (size 0) len0 s0;
+  update_sub s len0 len1 s1;
+  let h1 = ST.get () in
+  Seq.eq_intro (Seq.sub (as_seq h1 s) 0 (v len0)) (as_seq h0 s0);
+  update_sub s (len0 +! len1) len2 s2;
+  let h2 = ST.get () in
+  Seq.eq_intro (Seq.sub (as_seq h2 s) 0 (v len0)) (as_seq h0 s0);
+  Seq.eq_intro (Seq.sub (as_seq h2 s) (v len0) (v len1)) (as_seq h0 s1);
+  Seq.lemma_concat3 (v len0) (as_seq h0 s0) (v len1) (as_seq h0 s1) (v len2) (as_seq h0 s2) (as_seq h2 s)
+
+>>>>>>> _dev
 let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = modifies (loc buf) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
@@ -245,41 +268,100 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #_ #inpLen inp (nb *. bs) rem in
   l rem last w
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-let fillT #a clen o spec f = 
+let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
+  [@inline_let]
+  let a_spec' (i:nat{i <= v n}) =
+    assert_spinoff (i * v len <= max_size_t);
+    a_spec i & Seq.lseq t (i * v len) in
+  [@inline_let]
+  let refl' h (i:nat{i <= v n}) : GTot (a_spec' i) =
+    refl h i, as_seq #_ #(i * v len) h (gsub output (size 0) (size i *! len))
+  in
+  let footprint' i = B.loc_union (footprint i) (B.loc_buffer output) in
+  [@inline_let]
+  let spec' h0 : GTot (i:nat{i < v n} -> a_spec' i -> a_spec' (i + 1)) =
+    let f = spec h0 in
+    fun i so ->
+      let s, o = so <: a_spec i & Seq.lseq t (i * v len) in
+      let s', block = f i s in
+      let o' : Seq.lseq t ((i + 1) * v len) = Seq.(o @| block) in
+      s', o'
+  in
   let h0 = ST.get () in
+<<<<<<< HEAD
   loop h0 clen 
   (Seq.createi_a a (v clen) spec) 
   (fun h i -> Seq.sub (as_seq h o) 0 i)
   (fun i -> loc o)
   (fun h -> Seq.createi_step a (v clen) spec)
+=======
+  loop h0 n a_spec' refl' footprint' spec'
+>>>>>>> _dev
   (fun i ->
-    Loop.unfold_repeat_gen (v clen) (Seq.createi_a a (v clen) spec) (Seq.createi_step a (v clen) spec) (Seq.of_list []) (v i);
-    o.(i) <- f i;
-    let h' = ST.get () in
-    let sub_o = Seq.sub (as_seq h' o) 0 (v i+1) in
-    let (old,n) = FStar.Seq.un_snoc sub_o in 
-    ()
+    Loop.unfold_repeat_gen (v n) a_spec' (spec' h0) (refl' h0 0) (v i);
+    let block = B.sub output (i *! len) len in
+    impl i block;
+    let h = ST.get() in
+    B.loc_includes_union_l (footprint (v i + 1)) (B.loc_buffer output) (B.loc_buffer block);
+    B.loc_includes_union_l (footprint (v i + 1)) (B.loc_buffer output) (footprint (v i + 1));
+    assert ((v i + 1) * v len == v i * v len + v len);
+    FStar.Seq.lemma_split
+      (as_seq #_ #(v i * v len + v len) h (gsub output (size 0) (i *! len +! len)))
+      (v i * v len)
+  );
+  assert (Seq.equal
+    (as_seq #_ #0 h0 (gsub output (size 0) (size 0 *! len))) FStar.Seq.empty);
+  assert_norm (
+    Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) ==
+    norm [delta] Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0))
+
+#set-options "--max_fuel 1"
+
+let fillT #a clen o spec f =
+  let open Seq in
+  let h0 = ST.get () in
+  let a_spec = createi_a a (v clen) spec in
+  let refl h i = sub (as_seq h o) 0 i in
+  let footprint i = B.loc_buffer o in
+  let spec h = createi_step a (v clen) spec in
+  loop h0 clen a_spec refl footprint spec
+    (fun i ->
+      Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (of_list #a []) (v i);
+      o.(i) <- f i;
+      let h' = ST.get () in
+      FStar.Seq.lemma_split (as_seq h' o) (v i)
     )
 
 let fill #a h0 clen o spec impl = 
+<<<<<<< HEAD
   loop h0 clen 
   (Seq.createi_a a (v clen) (spec h0)) 
   (fun h i -> Seq.sub (as_seq h o) 0 i)
   (fun i -> loc o)
   (fun h -> Seq.createi_step a (v clen) (spec h0))
+=======
+  let open Seq in
+  let h0 = ST.get() in
+  let a_spec = createi_a a (v clen) (spec h0) in
+  let refl h i = sub (as_seq h o) 0 i in
+  let footprint i = B.loc_buffer o in
+  let spec h = createi_step a (v clen) (spec h0) in
+  loop h0 clen a_spec refl footprint spec
+>>>>>>> _dev
   (fun i ->
-    Loop.unfold_repeat_gen (v clen) (Seq.createi_a a (v clen) (spec h0)) (Seq.createi_step a (v clen) (spec h0)) (Seq.of_list []) (v i);
-    let h = ST.get () in
+    Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (of_list #a []) (v i);
     impl i;
     let h' = ST.get () in
-    let sub_o = Seq.sub (as_seq h' o) 0 (v i+1) in
-    let (old,n) = FStar.Seq.un_snoc sub_o in 
-    ()
-    )
+    FStar.Seq.lemma_split (as_seq h' o) (v i)
+  )
+
+#set-options "--max_fuel 0"
 
 let mapT #t #a #b clen out f inp = 
   let h0 = ST.get () in
+<<<<<<< HEAD
   fill #b h0 clen out 
   (fun h -> 
     let in_seq = as_seq h inp in
@@ -300,3 +382,27 @@ let mapiT #t #a #b clen out f inp =
 
 
   
+=======
+  fill h0 clen out
+    (fun h -> let in_seq = as_seq h inp in Seq.map_inner f in_seq)
+    (fun i -> out.(i) <- f inp.(i))
+
+let mapiT #a #b clen out spec_f f inp = 
+  let h0 = ST.get () in
+  fill h0 clen out
+    (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner spec_f in_seq)
+    (fun i -> let xi = inp.(i) in out.(i) <- f i xi)
+
+let imapT #a #b #len out clen f inp = 
+  let h0 = ST.get () in
+  fill h0 clen out
+    (fun h -> let in_seq = ias_seq h inp in Seq.map_inner f in_seq)
+    (fun i -> out.(i) <- f (iindex inp i))
+
+// 2018.11.1 SZ: This function is unspecified in Lib.Buffer.fsti (and thus visible only to friends). Do we need this function? What's the spec?
+let mapi #a #b h0 clen out inp spec impl = 
+  let h0 = ST.get () in
+  fill h0 clen out
+    (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner #a #b #(v clen) spec in_seq)
+    (fun i -> impl i)
+>>>>>>> _dev

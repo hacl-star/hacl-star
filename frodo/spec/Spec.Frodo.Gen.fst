@@ -7,6 +7,7 @@ open Lib.ByteSequence
 
 open Spec.Matrix
 open Spec.SHA3
+open Spec.AES
 
 module Matrix = Spec.Matrix
 module Seq = Lib.Sequence
@@ -25,6 +26,31 @@ let frodo_gen_matrix_cshake_fc n seedLen seed i j =
   let res_i = cshake128_frodo seedLen seed (u16 (256 + i)) (2 * n) in
   uint_from_bytes_le (Seq.sub res_i (j * 2) 2)
 
+val frodo_gen_matrix_cshake0:
+    n:size_nat{2 * n <= max_size_t /\ 256 + n < maxint U16 /\ n * n <= max_size_t}
+  -> i:size_nat{i < n}
+  -> res_i:lbytes (2 * n)
+  -> j:size_nat{j < n}
+  -> res0:matrix n n
+  -> res1:matrix n n
+let frodo_gen_matrix_cshake0 n i res_i j res0 =
+    res0.(i, j) <- uint_from_bytes_le (Seq.sub res_i (j * 2) 2)
+
+val frodo_gen_matrix_cshake1:
+    n:size_nat{2 * n <= max_size_t /\ 256 + n < maxint U16 /\ n * n <= max_size_t}
+  -> seedLen:size_nat
+  -> seed:lbytes seedLen
+  -> i:size_nat{i < n}
+  -> res:matrix n n
+  -> res1:matrix n n
+let frodo_gen_matrix_cshake1 n seedLen seed i res =
+  let res_i = cshake128_frodo seedLen seed (u16 (256 + i)) (2 * n) in
+  Loops.repeati_inductive' #(matrix n n) n
+  (fun j res0 ->
+    (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n}). res0.(i0, j) == res.(i0, j)) /\
+    (forall (j0:size_nat{j0 < j}). res0.(i, j0) == frodo_gen_matrix_cshake_fc n seedLen seed i j0))
+  (frodo_gen_matrix_cshake0 n i res_i) res
+
 val frodo_gen_matrix_cshake:
     n:size_nat{2 * n <= max_size_t /\ 256 + n < maxint U16 /\ n * n <= max_size_t}
   -> seedLen:size_nat
@@ -34,21 +60,11 @@ val frodo_gen_matrix_cshake:
      res.(i, j) == frodo_gen_matrix_cshake_fc n seedLen seed i j}
 let frodo_gen_matrix_cshake n seedLen seed =
   let res = Matrix.create n n in
-  let res = Loops.repeati_inductive n
+  Loops.repeati_inductive' #(matrix n n) n
   (fun i res ->
     forall (i0:size_nat{i0 < i}) (j:size_nat{j < n}).
     res.(i0, j) == frodo_gen_matrix_cshake_fc n seedLen seed i0 j)
-  (fun i res ->
-    let res_i = cshake128_frodo seedLen seed (u16 (256 + i)) (2 * n) in
-    Loops.repeati_inductive n
-    (fun j res0 ->
-      (forall (i0:size_nat{i0 < i}) (j:size_nat{j < n}). res0.(i0, j) == res.(i0, j)) /\
-      (forall (j0:size_nat{j0 < j}). res0.(i, j0) == frodo_gen_matrix_cshake_fc n seedLen seed i j0))
-    (fun j res0 ->
-      res0.(i, j) <- uint_from_bytes_le (Seq.sub res_i (j * 2) 2)
-    ) res
-  ) res in
-  res
+  (frodo_gen_matrix_cshake1 n seedLen seed) res
 
 val lemma_gen_matrix_4x:
      n:size_nat{0 < n /\ 2 * n <= max_size_t /\ 256 + n < maxint U16 /\ n * n <= max_size_t /\ n % 4 = 0}
@@ -105,3 +121,31 @@ let frodo_gen_matrix_cshake_4x n seedLen seed =
   lemma_gen_matrix_4x n seedLen seed res;
   Spec.Matrix.extensionality res (frodo_gen_matrix_cshake n seedLen seed);
   res
+
+val frodo_gen_matrix_aes:
+    n:size_nat{n * n <= max_size_t /\ n < maxint U16}
+  -> seedLen:size_nat{seedLen == 16}
+  -> seed:lbytes seedLen
+  -> res:matrix n n
+let frodo_gen_matrix_aes n seedLen seed =
+  let res = Matrix.create n n in
+  let key = aes128_key_expansion seed in
+
+  let tmp = Seq.create 8 (u16 0) in
+  let n1 = n / 8 in
+
+  Loops.repeati n
+  (fun i res ->
+    Loops.repeati n1
+    (fun j res ->
+      let j = j * 8 in
+      let tmp = tmp.[0] <- u16 i in
+      let tmp = tmp.[1] <- u16 j in
+      //let res_i = aes128_encrypt_block seed (uints_to_bytes_le tmp) in
+      let res_i = block_cipher key (uints_to_bytes_le tmp) in
+      Loops.repeati 8
+      (fun k res ->
+        res.(i, j + k) <- uint_from_bytes_le (Seq.sub res_i (k * 2) 2)
+      ) res
+    ) res
+  ) res

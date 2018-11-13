@@ -27,7 +27,6 @@ let keccak_rndc: lseq (uint_t U64 PUB) 24 =
   assert_norm (List.Tot.length rndc_list == 24);
   of_list rndc_list
 
-
 unfold
 type state = lseq uint64 25
 
@@ -163,33 +162,29 @@ let absorb (s:state)
   (absorb_inner rateInBytes)
   (absorb_last delimitedSuffix rateInBytes) s
 
-val squeeze_inner:
-    rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
-  -> outputByteLen:size_nat
-  -> i:size_nat{i < outputByteLen / rateInBytes}
-  -> so:(state & (lbytes (i * rateInBytes)))
-  -> Pure (state & (lbytes ((i + 1) * rateInBytes)))
-    (requires True)
-    (ensures fun (s', o') ->
-      let s, o = so in
-      s' == state_permute s /\
-      o' == o @| storeState rateInBytes s)
-let squeeze_inner rateInBytes outputByteLen i (s, o) =
+let squeeze_inner 
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+  (outputByteLen:size_nat)
+  (i:size_nat{i < outputByteLen / rateInBytes})
+  (s:state)
+  : state & lbytes rateInBytes 
+=
   let block = storeState rateInBytes s in
   let s = state_permute s in
-  s, o @| block
+  s, block
 
-let squeeze (s:state)
-	    (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
-	    (outputByteLen:size_nat)
-	    : lbytes outputByteLen =
+let squeeze 
+  (s:state)
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+  (outputByteLen:size_nat)
+  : lbytes outputByteLen 
+=
   let outBlocks = outputByteLen / rateInBytes in
+  let a (i:nat{i <= outBlocks}) = state in
   let s, output =
-    repeat_gen outBlocks
-      (fun (i:size_nat{i <= outputByteLen / rateInBytes}) ->
-         state & (lbytes (i * rateInBytes)))
-      (squeeze_inner rateInBytes outputByteLen)
-      (s, create 0 (u8 0)) in
+    generate_blocks rateInBytes outBlocks a
+      (squeeze_inner rateInBytes outputByteLen) s 
+  in
   let remOut = outputByteLen % rateInBytes in
   let block = storeState remOut s in
   output @| block
@@ -203,8 +198,8 @@ val keccak:
   -> outputByteLen:size_nat
   -> lbytes outputByteLen
 let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen =
-  let rateInBytes : size_nat = rate / 8 in
-  let s : state = create 25 (u64 0) in
+  let rateInBytes = rate / 8 in
+  let s = create 25 (u64 0) in
   let s = absorb s rateInBytes inputByteLen input delimitedSuffix in
   squeeze s rateInBytes outputByteLen
 

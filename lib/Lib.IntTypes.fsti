@@ -98,6 +98,7 @@ let uint_t (t:inttype) (l:secrecy_level) =
   | PUB -> pub_int_t t
   | SEC -> sec_int_t t
 
+unfold
 let uint_v #t #l (u:uint_t t l) : n:nat{n <= maxint t} =
   match l with
   | PUB -> pub_int_v #t u
@@ -111,7 +112,8 @@ val uintv_extensionality:
  -> Lemma
   (requires uint_v #t #l a == uint_v #t #l b)
   (ensures  a == b)
-  [SMTPat (uint_v #t #l a == uint_v #t #l b)]
+// REMARK: We can't mark `uint_v` as `unfold` and keep this pattern
+// [SMTPat (uint_v #t #l a == uint_v #t #l b)]
 
 ///
 /// Definition of machine integers
