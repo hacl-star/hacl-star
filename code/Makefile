@@ -76,7 +76,7 @@ HACL_OLD_FILES=\
   poly1305/poly-c/Hacl_Poly1305_64.c \
   api/aead-c/Hacl_Chacha20Poly1305.c
 
-dist/%/Makefile.include: $(ALL_KRML_FILES)
+dist/%/Makefile.include: $(ALL_KRML_FILES) old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	$(KRML) $(EXTRA) -tmpdir $(dir $@) -skip-compilation \
