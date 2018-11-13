@@ -10,7 +10,7 @@ assume val hash_raw: eqtype
 assume val hash_2_raw: hash_raw -> hash_raw -> GTot hash_raw
 
 type hash =
-| HRaw of hash_raw
+| HRaw: hr:hash_raw -> hash
 | HPad // right padding to make the size of a Merkle tree be a power of 2
 
 val hash_2: lh:hash -> rh:hash -> GTot hash
@@ -55,6 +55,13 @@ val mt_get_root: #n:nat -> mt:merkle_tree n -> GTot hash
 let rec mt_get_root #n mt =
   if n = 0 then mt_get mt 0
   else mt_get_root (mt_next_lv mt)
+
+val mt_get_root_step:
+  #n:nat{n > 0} -> mt:merkle_tree n ->
+  Lemma (mt_get_root mt =
+        hash_2 (mt_get_root (mt_left mt)) (mt_get_root (mt_right mt)))
+let mt_get_root_step #n mt =
+  admit ()
 
 type merkle_path n = p:S.seq hash{S.length p = n}
 
@@ -140,10 +147,47 @@ let hash_2_raw_collide lh1 rh1 lh2 rh2 =
   (lh1, rh1) <> (lh2, rh2) && 
   hash_2_raw lh1 rh1 = hash_2_raw lh2 rh2
 
+val mt_collide_0:
+  mt1:merkle_tree 0 -> mt2:merkle_tree 0 ->
+  Lemma (not (mt_collide mt1 mt2))
+let mt_collide_0 mt1 mt2 =
+  if mt1 = mt2 then ()
+  else if mt_get_root mt1 <> mt_get_root mt2 then ()
+  else assert (S.equal mt1 mt2)
+
+val mt_collide_cases:
+  #n:nat{n > 0} ->
+  mt1:merkle_tree n -> mt2:merkle_tree n ->
+  Lemma (requires (mt_collide mt1 mt2))
+        (ensures ((exists lh1 rh1 lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2) \/
+                 mt_collide (mt_left mt1) (mt_left mt2) \/
+                 mt_collide (mt_right mt1) (mt_right mt2)))
+let mt_collide_cases #n mt1 mt2 =
+  if HPad? (mt_get_root mt1) then ()
+  else if HPad? (mt_get_root mt2) then ()
+  else begin
+    let rt1 = HRaw?.hr (mt_get_root mt1) in
+    let rt2 = HRaw?.hr (mt_get_root mt2) in
+    assert (rt1 = rt2);
+    mt_get_root_step mt1; mt_get_root_step mt2;
+    if HPad? (mt_get_root (mt_left mt1)) then ()
+    else if HPad? (mt_get_root (mt_left mt2)) then ()
+    else admit () // need to know `HPad`s are only in RHS.
+  end
+
 val mt_collide_implies_hash_raw_collide:
   #n:nat -> mt1:merkle_tree n -> mt2:merkle_tree n ->
   Lemma (requires (mt_collide mt1 mt2))
         (ensures (exists lh1 rh1 lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2))
-let mt_collide_implies_hash_raw_collide #n mt1 mt2 =
-  admit ()
+let rec mt_collide_implies_hash_raw_collide #n mt1 mt2 =
+  if n = 0 then mt_collide_0 mt1 mt2
+  else if mt1 = mt2 then ()
+  else begin
+    mt_collide_cases mt1 mt2;
+    if mt_collide (mt_left mt1) (mt_left mt2) 
+    then mt_collide_implies_hash_raw_collide (mt_left mt1) (mt_left mt2)
+    else if mt_collide (mt_right mt1) (mt_right mt2)
+    then mt_collide_implies_hash_raw_collide (mt_right mt1) (mt_right mt2)
+    else ()
+  end
 
