@@ -62,13 +62,14 @@ let get_kTable s =
 val set_h0Table:
   buf: lbuffer word_t (size Spec.size_hash_w) ->
   Stack unit
-    (requires (fun h -> live h buf /\ disjoint buf const_h0Table))
+    (requires (fun h -> live h buf))
     (ensures  (fun h0 z h1 -> modifies1 buf h0 h1
                          /\ h1.[buf] == Spec.h0Table Spec.SHA2_256))
 
 [@ Substitute ]
 let set_h0Table s =
   recall_contents const_h0Table (Spec.h0Table Spec.SHA2_256);
+  assume(disjoint s const_h0Table);
   copy s const_h0Table
 
 
@@ -139,6 +140,8 @@ val step_ws0:
 
 let step_ws0 s b i = s.(i) <- b.(i)
 
+
+#reset-options "--z3rlimit 50"
 
 val step_ws1:
     s: ws_wp
@@ -328,7 +331,7 @@ let update_block hash block =
 
 val init: hash:hash_wp ->
   Stack unit
-  (requires (fun h -> live h hash /\ disjoint hash const_h0Table))
+  (requires (fun h -> live h hash))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                        /\ h1.[hash] == Spec.init Spec.SHA2_256))
 
