@@ -127,6 +127,10 @@ let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = modifies (loc buf) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
 
+let loop_range_nospec #h0 #a #len start n buf impl =
+  let inv h1 j = modifies (loc buf) h0 h1 in
+  Lib.Loops.for start (start +. n) inv impl
+
 let loop h0 n a_spec refl footprint spec impl =
   let inv h i = loop_inv h0 n a_spec refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
@@ -205,6 +209,33 @@ let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   let block = sub #_ #_ #inpLen inp (i *. bs) bs in
   f i block w
 
+inline_for_extraction noextract
+val loopi_blocks_f_nospec:
+    #a:Type0
+  -> #b:Type0
+  -> #blen:size_t
+  -> blocksize:size_t{v blocksize > 0}
+  -> inpLen:size_t
+  -> inp:lbuffer a inpLen
+  -> f:(i:size_t{v i < v inpLen / v blocksize}
+       -> inp:lbuffer a blocksize
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            live h inp /\ live h w /\ disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            modifies (loc w) h0 h1))
+  -> nb:size_t{v nb == v inpLen / v blocksize}
+  -> i:size_t{v i < v nb}
+  -> w:lbuffer b blen ->
+  Stack unit
+    (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
+    (ensures  fun h0 _ h1 -> modifies (loc w) h0 h1)
+
+let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
+  assert ((v i + 1) * v bs <= v nb * v bs);
+  let block = sub inp (i *. bs) bs in
+  f i block w
+
 let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let nb = inpLen /. bs in
   let rem = inpLen %. bs in
@@ -216,6 +247,15 @@ let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
     loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
   let last = sub #_ #_ #inpLen  inp (nb *. bs) rem in
+  l nb rem last w
+
+let loopi_blocks_nospec #a #b #blen bs inpLen inp f l w =
+  let nb = inpLen /. bs in
+  let rem = inpLen %. bs in
+  let h0 = ST.get () in
+  loop_nospec #h0 #b #blen nb w
+  (fun i -> loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w);
+  let last = sub inp (nb *. bs) rem in
   l nb rem last w
 
 inline_for_extraction noextract
@@ -322,6 +362,12 @@ let fillT #a clen o spec f =
       FStar.Seq.lemma_split (as_seq h' o) (v i)
     )
 
+(* let fill #a h0 clen o spec impl =  *)
+  (* loop h0 clen  *)
+  (* (Seq.createi_a a (v clen) (spec h0))  *)
+  (* (fun h i -> Seq.sub (as_seq h o) 0 i) *)
+  (* (fun i -> loc o) *)
+  (* (fun h -> Seq.createi_step a (v clen) (spec h0)) *)
 let fill #a h0 clen o spec impl =
   let open Seq in
   let h0 = ST.get() in

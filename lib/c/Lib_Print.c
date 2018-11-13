@@ -1,5 +1,6 @@
 #include "stdint.h"
 #include "stdio.h"
+#include "stdbool.h"
 #include "Lib_Print.h"
 
 void Lib_Print_print_bytes(uint32_t len, uint8_t* buffer) {
@@ -32,5 +33,20 @@ void Lib_Print_print_compare_display(uint32_t len, uint8_t* buffer1, uint8_t* bu
     printf("Failure !\n");
   }
   printf("\n");
+}
+
+bool Lib_Print_result_compare_display(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
+  Lib_Print_print_compare(len, buffer1, buffer2);
+  uint8_t res = 0;
+  for (uint32_t i = 0; i < len; i++) {
+    res |= buffer1[i] ^ buffer2[i];
+  }
+  if (res == 0) {
+    printf("Success !\n\n");
+    return true;
+  } else {
+    printf("Failure !\n\n");
+    return false;
+  }
 }
 

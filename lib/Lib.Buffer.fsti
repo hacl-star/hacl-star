@@ -446,6 +446,22 @@ val loop_nospec:
     (requires fun h -> h0 == h /\ live h0 buf)
     (ensures  fun _ _ h1 -> modifies (loc  buf) h0 h1)
 
+(** Loop combinator with just memory safety specification *)
+inline_for_extraction noextract
+val loop_range_nospec:
+    #h0:mem
+  -> #a:Type0
+  -> #len:size_t
+  -> start:size_t
+  -> n:size_t{v start + v n <= max_size_t}
+  -> buf:lbuffer a len
+  -> impl: (i:size_t{v start <= v i /\ v i < v start + v n} -> Stack unit
+      (requires fun h -> modifies (loc buf) h0 h)
+      (ensures  fun _ _ h1 -> modifies (loc buf) h0 h1)) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h0 buf)
+    (ensures  fun _ _ h1 -> modifies (loc buf) h0 h1)
+
 (**
 * A generalized loop combinator paremetrized by its state (e.g. an accumulator)
 *
@@ -692,6 +708,34 @@ val loopi_blocks:
       modifies (loc  write) h0 h1 /\
       as_seq h1 write ==
       Seq.repeati_blocks #a #(Seq.lseq b (v blen)) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
+
+inline_for_extraction noextract
+val loopi_blocks_nospec:
+    #a:Type0
+  -> #b:Type0
+  -> #blen:size_t
+  -> blocksize:size_t{v blocksize > 0}
+  -> inpLen:size_t
+  -> inp:lbuffer a inpLen
+  -> f:(i:size_t{v i < v inpLen / v blocksize}
+       -> inp:lbuffer a blocksize
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            live h inp /\ live h w /\ B.loc_disjoint (loc inp) (loc w))
+          (ensures  fun h0 _ h1 ->
+            modifies (loc w) h0 h1))
+  -> l:(i:size_t{v i == v inpLen / v blocksize}
+       -> len:size_t{v len == v inpLen % v blocksize}
+       -> inp:lbuffer a len
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            live h inp /\ live h w /\ B.loc_disjoint (loc inp) (loc w))
+          (ensures  fun h0 _ h1 ->
+            modifies (loc w) h0 h1))
+  -> write:lbuffer b blen ->
+  Stack unit
+    (requires fun h -> live h inp /\ live h write /\ disjoint inp write)
+    (ensures  fun h0 _ h1 -> modifies (loc write) h0 h1)
 
 inline_for_extraction noextract
 val loop_blocks:
