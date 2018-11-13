@@ -68,8 +68,8 @@ endif
 
 include .depend
 
-# Admit SMT queries for modules in FStar namespace and prims
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked: | .depend
+# Admit SMT queries for modules in the FStar and Lib namespaces, and prims
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked $(CACHE_DIR)/Lib.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
