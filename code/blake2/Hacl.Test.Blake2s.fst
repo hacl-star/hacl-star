@@ -25,8 +25,12 @@ val test_blake2s:
 
 let test_blake2s msg_len msg key_len key expected_len expected =
   push_frame();
+  let tmsg = create msg_len (u8 0) in
+  mapT msg_len tmsg secret msg;
+  let tkey = create key_len (u8 0) in
+  mapT key_len tkey secret key;
   let result = create expected_len (u8 0) in
-  blake2s result msg msg_len key key_len expected_len;
+  blake2s expected_len result msg_len tmsg key_len tkey;
   print_compare_display expected_len result expected;
   pop_frame()
 

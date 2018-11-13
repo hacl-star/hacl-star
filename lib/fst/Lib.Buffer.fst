@@ -350,9 +350,13 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
 let fillT #a clen o spec f =
   let open Seq in
   let h0 = ST.get () in
+  [@inline_let]
   let a_spec = createi_a a (v clen) spec in
+  [@inline_let]
   let refl h i = sub (as_seq h o) 0 i in
+  [@inline_let]
   let footprint i = loc o in
+  [@inline_let]
   let spec h = createi_step a (v clen) spec in
   loop h0 clen a_spec refl footprint spec
     (fun i ->
@@ -371,9 +375,13 @@ let fillT #a clen o spec f =
 let fill #a h0 clen o spec impl =
   let open Seq in
   let h0 = ST.get() in
+  [@inline_let]
   let a_spec = createi_a a (v clen) (spec h0) in
+  [@inline_let]
   let refl h i = sub (as_seq h o) 0 i in
+  [@inline_let]
   let footprint i = loc o in
+  [@inline_let]
   let spec h = createi_step a (v clen) (spec h0) in
   loop h0 clen a_spec refl footprint spec
   (fun i ->
