@@ -20,14 +20,14 @@ module SpecHMAC = Spec.HMAC
 module Hash = Hacl.Impl.SHA2_256
 
 
+
 inline_for_extraction noextract
 let a = Spec.SHA2.SHA2_256
 
 
-
 (* Key wrapping function *)
 val wrap_key:
-    output: lbuffer uint8 (Spec.SHA2.size_block a)
+    output: lbuffer uint8 (size (Spec.SHA2.size_block a))
   -> key: buffer uint8
   -> len: size_t{v len == length key /\ v len <= Spec.SHA2.max_input a} ->
   Stack unit
@@ -36,7 +36,7 @@ val wrap_key:
 
 let wrap_key output key len =
   if len <=. size (Spec.SHA2.size_block a) then
-    update_sub output (size 0) len key
+    update_sub #MUT output (size 0) len key
   else begin
     let output' = sub output (size 0) (size (Spec.SHA2.size_hash a)) in
     Hash.hash output' key len
@@ -46,8 +46,8 @@ let wrap_key output key len =
 #reset-options "--z3rlimit 25"
 
 val init:
-    state: lbuffer uint32 Spec.SHA2.size_hash_w
-  -> key: lbuffer uint8 (Spec.SHA2.size_block a) ->
+    state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
+  -> key: lbuffer uint8 (size (Spec.SHA2.size_block a)) ->
   Stack unit
   (requires (fun h -> live h state /\ live h key /\ disjoint state key))
   (ensures  (fun h0 _ h1 -> modifies1 state h0 h1))
@@ -61,13 +61,13 @@ let init state key =
   (fun i -> ipad.(i) <- ipad.(i) ^. key.(i));
   Hash.init state';
   Hash.update_block state' ipad;
-  copy state (size 8) state';
+  copy state state';
   pop_frame ()
 
 
 val update_block:
-    state: lbuffer uint32 Spec.SHA2.size_hash_w
-  -> block: lbuffer uint8 (Spec.SHA2.size_block a) ->
+    state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
+  -> block: lbuffer uint8 (size (Spec.SHA2.size_block a)) ->
   Stack unit
   (requires (fun h -> live h state /\ live h block /\ disjoint state block))
   (ensures  (fun h0 _ h1 -> modifies1 state h0 h1))
@@ -76,7 +76,7 @@ let update_block state block = Hacl.Impl.SHA2_256.update_block state block
 
 
 val update_last:
-    state: lbuffer uint32 Spec.SHA2.size_hash_w
+    state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
   -> prev: uint64
   -> last: buffer uint8
   -> len: size_t{ v len == length last
@@ -90,7 +90,7 @@ let update_last state prev last len = Hacl.Impl.SHA2_256.update_last state prev 
 
 
 val update:
-    state: lbuffer uint32 Spec.SHA2.size_hash_w
+    state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
   -> input: buffer uint8
   -> len: size_t{ v len == length input
                /\ v len <= Spec.SHA2.max_input a} ->
@@ -104,9 +104,9 @@ let update state input len = Hacl.Impl.SHA2_256.update state input len
 #set-options "--z3rlimit 50"
 
 val finish:
-    hash: lbuffer uint8 (Spec.SHA2.size_hash a)
-  -> state: lbuffer uint32 Spec.SHA2.size_hash_w
-  -> key: lbuffer uint8 (Spec.SHA2.size_block a) ->
+    hash: lbuffer uint8 (size (Spec.SHA2.size_hash a))
+  -> state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
+  -> key: lbuffer uint8 (size (Spec.SHA2.size_block a)) ->
   Stack unit
   (requires (fun h -> live h hash /\ live h key /\ live h state
                  /\ disjoint hash key /\ disjoint hash state))
@@ -116,8 +116,8 @@ let finish hash state key =
   push_frame();
   let scratch = create (size (Spec.SHA2.size_block a) +. size (Spec.SHA2.size_hash a)) (u8 0x5c) in
   let state2 = create (size Spec.SHA2.size_hash_w) (u32 0x00) in
-  let opad = sub #uint8 #(64 + 32) #64 scratch (size 0) (size (Spec.SHA2.size_block a)) in
-  let s4 = sub #uint8 #(64 + 32) #32 scratch (size (Spec.SHA2.size_block a)) (size (Spec.SHA2.size_hash a)) in
+  let opad = sub scratch (size 0) (size (Spec.SHA2.size_block a)) in
+  let s4 = sub scratch (size (Spec.SHA2.size_block a)) (size (Spec.SHA2.size_hash a)) in
   Hacl.Impl.SHA2_256.finish s4 state; (* s4 = hash *)
   let h0 = ST.get () in
   loop_nospec #h0 (size (Spec.SHA2.size_block a)) opad
@@ -131,7 +131,7 @@ let finish hash state key =
 
 
 val hmac:
-    mac: lbuffer uint8 (Spec.SHA2.size_hash a)
+    mac: lbuffer uint8 (size (Spec.SHA2.size_hash a))
   -> key: buffer uint8{length key <= Spec.SHA2.max_input a}
   -> klen: size_t{v klen == length key}
   -> input: buffer uint8{length key + length input + Spec.SHA2.size_block a <= Spec.SHA2.max_input a}
