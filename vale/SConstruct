@@ -992,8 +992,9 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   # Run executable to generate assembly files:
   output_target_base = 'obj/' + output_base_name
   def generate_asm(suffix, assembler, os):
-    # TODO: cross-compilation support
-    target = output_target_base + "-" + platform.machine () + suffix
+    # TODO: cross-compilation support; note that platform.machine() does not
+    # produce a consistent string across OSes
+    target = output_target_base + "-x86_64" + suffix
     return ocaml_env.Command(target, main_exe, f'{main_exe} {assembler} {os} > {target}')
   masm_win = generate_asm('-msvc.asm', 'MASM', 'Win')
   gcc_win = generate_asm('-mingw.S', 'GCC', 'Win')
