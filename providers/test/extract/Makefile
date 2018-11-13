@@ -1,6 +1,7 @@
+KREMLIN_HOME =../../../../kremlin
+
 -include Makefile.include 
 
-KREMLIN_HOME?=../../../../kremlin
 EVERCRYPT_HOME=../../out
 MLCRYPTO_HOME?=../../../../MLCrypto
 OPENSSL_HOME=$(MLCRYPTO_HOME)/openssl

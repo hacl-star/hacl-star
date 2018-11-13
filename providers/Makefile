@@ -156,7 +156,7 @@ include $(GENERATED_DIR)/Makefile.include
 # files.
 
 VALE_ASM 	= $(HACL_HOME)/secure_api/vale/asm/aes-$(MARCH)$(VARIANT).S \
-  $(patsubst %,$(VALE_OBJ_DIR)/%-$(MARCH)$(VARIANT).S,sha256 aesgcm curve25519)
+  $(patsubst %,$(VALE_OBJ_DIR)/%-$(MARCH)$(VARIANT).S,sha256 aesgcm curve25519 cpuid)
 
 HACL_SOURCES	= $(wildcard $(HACL_CODE)/dist/compact/*.c)
 

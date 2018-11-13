@@ -83,7 +83,7 @@ let compute a len text tag0 =
   FStar.Seq.(lemma_eq_intro (B.as_seq h1 text) (vblocks @| vlast));
   Seq.append_assoc vblocks vlast vsuffix
 
-#set-options "--max_fuel 0"
+#set-options "--max_fuel 0 --z3rlimit 200"
 
 val test_one_hash: hash_vector -> St unit
 let test_one_hash vec =
@@ -157,7 +157,7 @@ let test_one_hmac vec =
   let open FStar.Integers in
   let ha, (LB keylen key), (LB datalen data), (LB expectedlen expected) = vec in
   if expectedlen <> H.tagLen ha then failwith !$"Wrong length of expected tag\n" 
-  else if supported_hash_algorithm ha then
+  else if supported_hmac_algorithm ha then
     begin
     push_frame();
     assume (EverCrypt.HMAC.keysized ha (v keylen));
@@ -195,7 +195,7 @@ let test_one_hkdf vec =
     (LB infolen info), (LB prklen expected_prk), (LB okmlen expected_okm) = vec in
   if prklen <> H.tagLen ha then failwith !$"Wrong length of expected PRK\n"
   else if (okmlen > 255ul * H.tagLen ha) then failwith !$"Wrong output length\n"
-  else if supported_hash_algorithm ha then
+  else if supported_hmac_algorithm ha then
     begin
     push_frame();
     assume (EverCrypt.HMAC.keysized ha (v saltlen));
@@ -456,6 +456,8 @@ let test_dh () : St unit =
   ()
 
 let main (): St C.exit_code =
+  EverCrypt.AutoConfig2.init ();
+
   let open EverCrypt in
   let open C.String in
   push_frame ();
