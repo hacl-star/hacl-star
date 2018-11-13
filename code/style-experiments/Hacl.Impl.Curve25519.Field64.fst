@@ -283,6 +283,15 @@ let fmul out f1 f2 =
   pop_frame()
 
 [@ CInline]
+val fmul2: out1:felem -> out2:felem -> f1:felem -> f2:felem -> f3:felem -> f4:felem -> Stack unit
+                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2 /\ live h f3 /\ live h f4))
+		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+[@ CInline]
+let fmul2 out1 out2 f1 f2 f3 f4 =
+  fmul out1 f1 f2;
+  fmul out2 f3 f4
+
+[@ CInline]
 val fmul1: out:felem -> f1:felem -> f2:uint64 -> Stack unit
                    (requires (fun h -> live h out /\ live h f1))
 		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
@@ -301,6 +310,15 @@ val fsqr: out:felem -> f1:felem -> Stack unit
 		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
 let fsqr out f = fmul out f f 
+
+[@ CInline]
+val fsqr2: out1:felem -> out2:felem -> f1:felem -> f2:felem -> Stack unit
+                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2))
+		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+[@ CInline]
+let fsqr2 out1 out2 f1 f2 = 
+  fsqr out1 f1;
+  fsqr out2 f2
  
 
 inline_for_extraction

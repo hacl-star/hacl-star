@@ -145,6 +145,17 @@ inline static void Hacl_Impl_Curve25519_Field64_fmul(uint64_t *out, uint64_t *f1
   Hacl_Impl_Curve25519_Field64_carry_wide(out, tmp_w);
 }
 
+inline static void Hacl_Impl_Curve25519_Field64_fmul2(uint64_t *out1, uint64_t* out2, int64_t *f1, uint64_t *f2, uint64_t *f3, uint64_t *f4)
+{
+  uint64_t tmp_w[16U] = { 0U };
+  uint64_t* tmp_w1 = tmp_w;
+  uint64_t* tmp_w2 = tmp_w+8;
+  Hacl_Impl_Curve25519_Field64_mul_felem(tmp_w1, f1, f2);
+  Hacl_Impl_Curve25519_Field64_mul_felem(tmp_w2, f3, f4);
+  Hacl_Impl_Curve25519_Field64_carry_wide(out1, tmp_w1);
+  Hacl_Impl_Curve25519_Field64_carry_wide(out2, tmp_w2);
+}
+
 inline static void Hacl_Impl_Curve25519_Field64_fmul1(uint64_t *c, uint64_t *a){
   const uint64_t a24 = 121665;
   __asm__ __volatile__(
@@ -216,6 +227,19 @@ inline static void Hacl_Impl_Curve25519_Field64_fsqr(uint64_t *out, uint64_t *f)
  uint64_t tmp_w[8U] = { 0U };
  Hacl_Impl_Curve25519_Field64_fsqr_(tmp_w, f);
  Hacl_Impl_Curve25519_Field64_carry_wide(out, tmp_w);
+}
+
+
+inline static void Hacl_Impl_Curve25519_Field64_fsqr2(uint64_t *out1, uint64_t* out2, uint64_t *f1, uint64_t* f2)
+{
+//  Hacl_Impl_Curve25519_Field64_fmul(out, f, f);
+ uint64_t tmp_w[16U] = { 0U };
+ uint64_t* tmp_w1 = tmp_w;
+ uint64_t* tmp_w2 = tmp_w + 8;
+ Hacl_Impl_Curve25519_Field64_fsqr_(tmp_w1, f1);
+ Hacl_Impl_Curve25519_Field64_fsqr_(tmp_w2, f2);
+ Hacl_Impl_Curve25519_Field64_carry_wide(out1, tmp_w1);
+ Hacl_Impl_Curve25519_Field64_carry_wide(out2, tmp_w2);
 }
 
 
@@ -409,15 +433,19 @@ Hacl_Impl_Curve25519_Generic_point_add_and_double_64(
       Hacl_Impl_Curve25519_Field64_fsub((uint64_t *)b, x2, z2);
       Hacl_Impl_Curve25519_Field64_fadd((uint64_t *)c, x3, z3);
       Hacl_Impl_Curve25519_Field64_fsub((uint64_t *)d, x3, z3);
-      Hacl_Impl_Curve25519_Field64_fmul((uint64_t *)d, (uint64_t *)d, (uint64_t *)a);
-      Hacl_Impl_Curve25519_Field64_fmul((uint64_t *)c, (uint64_t *)c, (uint64_t *)b);
+//    Hacl_Impl_Curve25519_Field64_fmul((uint64_t *)d, (uint64_t *)d, (uint64_t *)a);
+//    Hacl_Impl_Curve25519_Field64_fmul((uint64_t *)c, (uint64_t *)c, (uint64_t *)b);
+      Hacl_Impl_Curve25519_Field64_fmul2((uint64_t *)c, (uint64_t *)d, (uint64_t *)c, (uint64_t *)b, (uint64_t *)d, (uint64_t *)a);
+
       Hacl_Impl_Curve25519_Field64_fadd(x3, (uint64_t *)d, (uint64_t *)c);
-      Hacl_Impl_Curve25519_Field64_fsqr(x3, x3);
       Hacl_Impl_Curve25519_Field64_fsub(z3, (uint64_t *)d, (uint64_t *)c);
-      Hacl_Impl_Curve25519_Field64_fsqr(z3, z3);
+ //     Hacl_Impl_Curve25519_Field64_fsqr(x3, x3);
+ //     Hacl_Impl_Curve25519_Field64_fsqr(z3, z3);
+     Hacl_Impl_Curve25519_Field64_fsqr2(x3, z3, x3, z3);
       Hacl_Impl_Curve25519_Field64_fmul(z3, z3, x1);
-      Hacl_Impl_Curve25519_Field64_fsqr((uint64_t *)c, (uint64_t *)a);
-      Hacl_Impl_Curve25519_Field64_fsqr((uint64_t *)d, (uint64_t *)b);
+//      Hacl_Impl_Curve25519_Field64_fsqr((uint64_t *)c, (uint64_t *)a);
+//      Hacl_Impl_Curve25519_Field64_fsqr((uint64_t *)d, (uint64_t *)b);
+      Hacl_Impl_Curve25519_Field64_fsqr2((uint64_t*)c,(uint64_t *)d, (uint64_t*)a,(uint64_t *)b);
       Hacl_Impl_Curve25519_Field64_fmul(x2, (uint64_t *)c, (uint64_t *)d);
       Hacl_Impl_Curve25519_Field64_fsub((uint64_t *)b, (uint64_t *)c, (uint64_t *)d);
       Hacl_Impl_Curve25519_Field64_fmul1((uint64_t *)a, (uint64_t *)b);

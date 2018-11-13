@@ -32,7 +32,6 @@ static __inline__ cycles cpucycles_end(void)
 }
 
 extern void Hacl_Curve25519_51_ecdh(uint8_t* sec, uint8_t* priv, uint8_t* pub);
-
 #define ROUNDS 10240
 #define SIZE   1
 

@@ -154,6 +154,7 @@ let fsub out f1 f2 =
 
 #reset-options "--z3rlimit 100"
 
+//inline_for_extraction
 [@ CInline]
 val smul_felem: out:felem_wide -> u1:uint64 -> f2:felem -> Stack unit
                    (requires (fun h -> live h out /\ live h f2))
@@ -323,6 +324,32 @@ let fmul out f1 f2 =
   carry_wide out tmp_w;
   pop_frame()
 
+
+[@ CInline]
+val fmul2: out1:felem -> out2:felem -> f1:felem -> f2:felem -> f3:felem -> f4:felem -> Stack unit
+                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2 /\ live h f3 /\ live h f4))
+		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+[@ CInline]
+let fmul2 out1 out2 f1 f2 f3 f4 =
+  push_frame();
+  let tmp1 = create_felem() in
+  let tmp2 = create_felem() in
+  let tmp_w1 = create_wide () in
+  let tmp_w2 = create_wide () in
+  tmp1.(1ul) <- f2.(1ul) *. u64 19;
+  tmp1.(2ul) <- f2.(2ul) *. u64 19;
+  tmp1.(3ul) <- f2.(3ul) *. u64 19;
+  tmp1.(4ul) <- f2.(4ul) *. u64 19;
+  tmp2.(1ul) <- f4.(1ul) *. u64 19;
+  tmp2.(2ul) <- f4.(2ul) *. u64 19;
+  tmp2.(3ul) <- f4.(3ul) *. u64 19;
+  tmp2.(4ul) <- f4.(4ul) *. u64 19;
+  mul_felem tmp_w1 f1 f2 tmp1;
+  mul_felem tmp_w2 f3 f4 tmp2;
+  carry_wide out1 tmp_w1;
+  carry_wide out2 tmp_w2;
+  pop_frame()
+
 [@ CInline]
 val fmul1: out:felem -> f1:felem -> f2:uint64 -> Stack unit
                    (requires (fun h -> live h out /\ live h f1))
@@ -337,14 +364,11 @@ let fmul1 out f1 f2 =
 
 
 [@ CInline]
-val fsqr: out:felem -> f1:felem -> Stack unit
+val fsqr_: out:felem_wide -> f1:felem -> Stack unit
                    (requires (fun h -> live h out /\ live h f1))
 		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
-let fsqr out f = 
-  push_frame();
-  let tmp_w = create_wide () in
-  //fmul out f1 f1
+let fsqr_ out f = 
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
@@ -361,14 +385,39 @@ let fsqr out f =
   let s2 = (mul64_wide d0 f2) +. (mul64_wide f1 f1) +. (mul64_wide d4 f3) in
   let s3 = (mul64_wide d0 f3) +. (mul64_wide d1 f2) +. (mul64_wide f4 d419) in
   let s4 = (mul64_wide d0 f4) +. (mul64_wide d1 f3) +. (mul64_wide f2 f2) in
-  tmp_w.(0ul) <- s0;
-  tmp_w.(1ul) <- s1;
-  tmp_w.(2ul) <- s2;
-  tmp_w.(3ul) <- s3;
-  tmp_w.(4ul) <- s4;
+  out.(0ul) <- s0;
+  out.(1ul) <- s1;
+  out.(2ul) <- s2;
+  out.(3ul) <- s3;
+  out.(4ul) <- s4
+
+[@ CInline]
+val fsqr: out:felem -> f1:felem -> Stack unit
+                   (requires (fun h -> live h out /\ live h f1))
+		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+[@ CInline]
+let fsqr out f = 
+  push_frame();
+  let tmp_w = create_wide () in
+  fsqr_ tmp_w f;
   carry_wide out tmp_w;
   pop_frame()
- 
+
+[@ CInline]
+val fsqr2: out1:felem -> out2:felem -> f1:felem -> f2:felem -> Stack unit
+                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2))
+		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+[@ CInline]
+let fsqr2 out1 out2 f1 f2 = 
+  push_frame();
+  let tmp_w1 = create_wide () in
+  let tmp_w2 = create_wide () in
+  fsqr_ tmp_w1 f1;
+  fsqr_ tmp_w2 f2;
+  carry_wide out1 tmp_w1;
+  carry_wide out2 tmp_w2;
+  pop_frame()
+
 
 inline_for_extraction
 val load_felem: f:felem -> u64s:lbuffer uint64 4ul -> Stack unit

@@ -154,6 +154,16 @@ let fmul #s out f1 f2=
   | M64 -> F64.fmul out f1 f2 
 
 inline_for_extraction
+val fmul2: #s:field_spec -> out1:felem s -> out2:felem s -> f1:felem s -> f2:felem s -> f3:felem s -> f4:felem s -> Stack unit
+                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2 /\ live h f3 /\ live h f4))
+		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+inline_for_extraction
+let fmul2 #s out1 out2 f1 f2 f3 f4=
+  match s with
+  | M51 -> F51.fmul2 out1 out2 f1 f2 f3 f4 
+  | M64 -> F64.fmul2 out1 out2 f1 f2 f3 f4 
+
+inline_for_extraction
 val fmul1: #s:field_spec -> out:felem s -> f1:felem s -> f2:uint64 -> Stack unit
                    (requires (fun h -> live h out /\ live h f1))
 		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ live h1 out /\ live h1 f1))
@@ -174,3 +184,14 @@ let fsqr #s out f1 =
   | M51 -> F51.fsqr out f1 
   | M64 -> F64.fsqr out f1 
 
+
+[@ CInline]
+val fsqr2: #s:field_spec -> out1:felem s -> out2:felem s -> f1:felem s -> f2:felem s -> Stack unit
+                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2))
+		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+[@ CInline]
+let fsqr2 #s out1 out2 f1 f2 = 
+  match s with
+  | M51 -> F51.fsqr2 out1 out2 f1 f2
+  | M64 -> F64.fsqr2 out1 out2 f1 f2
+  
