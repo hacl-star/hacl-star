@@ -333,11 +333,13 @@ type rotval  (t:inttype) = u:size_t{uint_v u > 0 /\ uint_v u < bits t}
 
 (* SZ: the refinements on the result of the next two lemmas were commented out in _dev;
 I restored them *)
+(* BB: this refinement make lax-typechecking impossible in certain cases like the
+SHA2._sigma functions *)
 inline_for_extraction
 val shift_right: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:shiftval t
-  -> c:uint_t t l{uint_v #t c ==  uint_v #t a / pow2 (uint_v #U32 b)}
+  -> c:uint_t t l //{uint_v #t c ==  uint_v #t a / pow2 (uint_v #U32 b)}
 
 inline_for_extraction
 val shift_left: #t:inttype -> #l:secrecy_level

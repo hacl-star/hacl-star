@@ -134,6 +134,10 @@ let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
 
+let loop_range_nospec #h0 #a #len start n buf impl =
+  let inv h1 j = B.modifies (B.loc_buffer buf) h0 h1 in
+  Lib.Loops.for start (start +. n) inv impl
+
 let loop h0 n a_spec refl footprint spec impl =
   let inv h i = loop_inv h0 n a_spec refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
@@ -210,6 +214,33 @@ let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   let block = sub #_ #(v inpLen) inp (i *. bs) bs in
   f i block w
 
+inline_for_extraction noextract
+val loopi_blocks_f_nospec:
+    #a:Type0
+  -> #b:Type0
+  -> #blen:size_nat
+  -> blocksize:size_t{v blocksize > 0}
+  -> inpLen:size_t
+  -> inp:lbuffer a (v inpLen)
+  -> f:(i:size_t{v i < v inpLen / v blocksize}
+       -> inp:lbuffer a (v blocksize)
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            B.live h inp /\ B.live h w /\ B.disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            B.modifies (B.loc_buffer w) h0 h1))
+  -> nb:size_t{v nb == v inpLen / v blocksize}
+  -> i:size_t{v i < v nb}
+  -> w:lbuffer b blen ->
+  Stack unit
+    (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
+    (ensures  fun h0 _ h1 -> B.modifies (B.loc_buffer w) h0 h1)
+
+let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
+  assert ((v i + 1) * v bs <= v nb * v bs);
+  let block = sub #_ #(v inpLen) inp (i *. bs) bs in
+  f i block w
+
 let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let nb = inpLen /. bs in
   let rem = inpLen %. bs in
@@ -220,6 +251,15 @@ let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   (fun i ->
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
     loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
+  let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
+  l nb rem last w
+
+let loopi_blocks_nospec #a #b #blen bs inpLen inp f l w =
+  let nb = inpLen /. bs in
+  let rem = inpLen %. bs in
+  let h0 = ST.get () in
+  loop_nospec #h0 #b #blen nb w
+  (fun i -> loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w);
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l nb rem last w
 
@@ -269,12 +309,12 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #(v inpLen)  inp (nb *. bs) rem in
   l rem last w
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 250"
 
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   [@inline_let]
   let a_spec' (i:nat{i <= v n}) =
-    assert_spinoff (i * v len <= max_size_t);
+    assert (i * v len <= max_size_t);
     a_spec i & Seq.lseq t (i * v len) in
   [@inline_let]
   let refl' h (i:nat{i <= v n}) : GTot (a_spec' i) =

@@ -34,14 +34,14 @@ let blake2s_init #vkk hash k kk nn = Impl.blake2s_init #vkk hash k kk nn
 
 val blake2s_update_block:
     hash:hash_wp
-  -> prev:size_t{size_v prev <= Spec.max_limb Spec.Blake2S}
+  -> prev:uint64{uint_v prev <= Spec.max_limb Spec.Blake2S}
   -> d:block_p ->
   Stack unit
     (requires (fun h -> LowStar.Buffer.live h hash
                    /\ LowStar.Buffer.live h d
                    /\ LowStar.Buffer.disjoint hash d))
     (ensures  (fun h0 _ h1 -> LowStar.Buffer.modifies (LowStar.Buffer.loc_buffer hash) h0 h1
-                         /\ h1.[hash] == Spec.blake2_update_block Spec.Blake2S (v prev) h0.[d] h0.[hash]))
+                         /\ h1.[hash] == Spec.blake2_update_block Spec.Blake2S (uint_v prev) h0.[d] h0.[hash]))
 
 let blake2s_update_block hash prev d = Impl.blake2s_update_block hash prev d
 
@@ -49,7 +49,7 @@ let blake2s_update_block hash prev d = Impl.blake2s_update_block hash prev d
 val blake2s_update_last:
     #vlen: size_t
   -> hash: hash_wp
-  -> prev: size_t{v prev <= Spec.max_limb Spec.Blake2S}
+  -> prev: uint64{uint_v prev <= Spec.max_limb Spec.Blake2S}
   -> last: lbuffer uint8 (v vlen)
   -> len: size_t{v len <= Spec.size_block Spec.Blake2S /\ len == vlen} ->
   Stack unit
@@ -57,7 +57,7 @@ val blake2s_update_last:
                    /\ LowStar.Buffer.live h last
                    /\ LowStar.Buffer.disjoint hash last))
     (ensures  (fun h0 _ h1 -> LowStar.Buffer.modifies (LowStar.Buffer.loc_buffer hash) h0 h1
-                         /\ h1.[hash] == Spec.Blake2.blake2_update_last Spec.Blake2S (v prev) (v len) h0.[last] h0.[hash]))
+                         /\ h1.[hash] == Spec.Blake2.blake2_update_last Spec.Blake2S (uint_v prev) (v len) h0.[last] h0.[hash]))
 
 let blake2s_update_last #vlen hash prev last len = Impl.blake2s_update_last #vlen hash prev last len
 
