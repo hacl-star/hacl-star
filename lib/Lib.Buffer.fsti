@@ -842,7 +842,7 @@ val fillT:
 inline_for_extraction
 val fill:
     #a:Type
-  -> h0:mem 
+  -> h0:mem
   -> clen:size_t
   -> o:lbuffer a (v clen)
   -> spec:(mem -> GTot(i:size_nat{i < v clen} -> a))
