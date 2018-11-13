@@ -80,7 +80,7 @@ let nat_to_uint #t #l x : uint_t t l =
   | U16 -> u16 x
   | U32 -> u32 x
   | U64 -> u64 x
-  | U128 -> u128 x
+  | U128 -> UInt128.uint_to_t x
 
 #reset-options "--z3rlimit 1000 --max_fuel 0"
 #set-options "--lax" // TODO: remove this

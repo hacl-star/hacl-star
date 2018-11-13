@@ -326,11 +326,11 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
       s', o'
   in
   let h0 = ST.get () in
-  loop h0 clen 
-  (Seq.createi_a a (v clen) spec) 
+  loop h0 len 
+  (Seq.createi_a a (v len) spec) 
   (fun h i -> Seq.sub (as_seq h o) 0 i)
   (fun i -> loc o)
-  (fun h -> Seq.createi_step a (v clen) spec)
+  (fun h -> Seq.createi_step a (v len) spec)
 //  loop h0 n a_spec' refl' footprint' spec'
   (fun i ->
     Loop.unfold_repeat_gen (v n) a_spec' (spec' h0) (refl' h0 0) (v i);
