@@ -15,10 +15,6 @@ module Loops = Lib.LoopCombinators
 module Spec = Spec.SHA2
 
 
-(** Operator definition to access a Buffer as a Sequence *)
-inline_for_extraction
-let op_String_Access #a #r0 #r1 m b = as_seq #a #r0 #r1 m b
-
 ///
 /// SHA-256
 ///
