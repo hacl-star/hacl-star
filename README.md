@@ -80,7 +80,7 @@ HACL* relies on [F*](https://github.com/FStarLang/FStar) (`stable` branch) and
 [KreMLin](https://github.com/FStarLang/kremlin) (`master` branch) for verification,
 extraction to OCaml (`specs/`) and extraction to C (`code/`).
 
-See [INSTALL.md](https://github.com/mitls/hacl-star/INSTALL.md) for more information on how to install the toolchain.
+See [INSTALL.md](https://github.com/project-everest/hacl-star/blob/master/INSTALL.md) for more information on how to install the toolchain.
 
 # Verifying and Building HACL*
 
