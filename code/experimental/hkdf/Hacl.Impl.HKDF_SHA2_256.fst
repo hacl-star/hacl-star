@@ -98,7 +98,7 @@ let hkdf_round output prk plen info ilen i ti =
   pop_frame ()
 
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 500"
 
 val hkdf_expand:
     output: buffer uint8
@@ -108,7 +108,9 @@ val hkdf_expand:
   -> ilen: size_t{ v ilen == length info
                 /\ length info + Spec.SHA2.size_hash a + 1 <= max_size_t
                 /\ length prk + length info + 1 + Spec.SHA2.size_hash a + Spec.SHA2.size_block a <= Spec.SHA2.max_input a}
-  -> len: size_t{v len == length output /\ v len + Spec.SHA2.size_hash a <= max_size_t} ->
+  -> len: size_t{ v len == length output
+               /\ v len + Spec.SHA2.size_hash a <= max_size_t
+               /\ v len / (Spec.SHA2.size_hash a) + 2 <= 255} ->
   Stack unit
   (requires (fun h -> live h output /\ live h prk /\ live h info
                  /\ disjoint output prk /\ disjoint output info))
@@ -117,17 +119,17 @@ val hkdf_expand:
 let hkdf_expand output prk plen info ilen len =
   push_frame ();
   let n : size_t = len /. (size (Spec.SHA2.size_hash a)) +. 1ul in
-  let t0 = create #uint8 (size (Spec.SHA2.size_hash a)) (u8 0) in
   let t = create #uint8 (n *. size (Spec.SHA2.size_hash a)) (u8 0) in
+  let t0 = sub t (size 0) (size (Spec.SHA2.size_hash a)) in
   (* Compute T(0) *)
   hkdf_round0 t0 prk plen info ilen;
-  update_sub t (size 0) (size (Spec.SHA2.size_hash a)) t0;
   (* Compute T(1) ... T(N)*)
+  assert(v n - 1 + 2 <= 255);
   let h0 = ST.get () in
   loop_range_nospec #h0 (size 2) (n -. 1ul) t
     (fun i ->
-       let ti0 = sub t ((i -. 2ul) *. size (Spec.SHA2.size_hash a)) (size (Spec.SHA2.size_hash a)) in
-       let ti1 = sub t ((i -. 1ul) *. size (Spec.SHA2.size_hash a)) (size (Spec.SHA2.size_hash a)) in
+       let ti0 = sub #uint8 #(v n * Spec.SHA2.size_hash a) t ((i -. 2ul) *. size (Spec.SHA2.size_hash a)) (size (Spec.SHA2.size_hash a)) in
+       let ti1 = sub #uint8 #(v n * Spec.SHA2.size_hash a) t ((i -. 1ul) *. size (Spec.SHA2.size_hash a)) (size (Spec.SHA2.size_hash a)) in
        hkdf_round ti1 prk plen info ilen i ti0
     );
   let res = sub #uint8 #(v n * (Spec.SHA2.size_hash a)) t (size 0) len in
