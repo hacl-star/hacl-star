@@ -48,8 +48,8 @@ ROOTS = Hacl.Test.SHA3.fst
 
 include .depend
 
-# Admit SMT queries for modules in FStar, LowStar, and C
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked: | .depend
+# Admit SMT queries for modules in FStar, LowStar, Lib, and C
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/Lib.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
