@@ -36,8 +36,9 @@ VALE_OBJ_DIR	= $(HACL_HOME)/vale/obj
 # - everything needed for the fsti of Vale to be parsed
 # - the directories containing .checked files from vale, in the hope that we can
 #   reuse them
-# - the spec directory, last, to override the copy of the spec files that live
-#   in vale/obj/external
+# We do not include:
+# - vale/obj/external, since it contains copies of files that already exist
+#   elsewhere, thus defeating reusability of checked files
 FSTAR_INCLUDES = \
   $(KREMLIN_HOME)/kremlib/compat \
   $(KREMLIN_HOME)/kremlib \
@@ -64,7 +65,6 @@ FSTAR_INCLUDES = \
   $(HACL_HOME)/vale/specs/crypto \
   $(HACL_HOME)/vale/specs/math \
   $(HACL_HOME)/vale/obj/cache_checked \
-  $(HACL_HOME)/vale/obj/external \
   $(HACL_SPEC)
 
 %.fst-in %.fsti-in:
