@@ -29,8 +29,8 @@ type buftype =
 
 unfold let buffer_t (ty:buftype) (a:Type0) =
   match ty with
-  | IMMUT -> IB.ibuffer a
-  | MUT -> B.buffer a
+  | IMMUT -> ib:IB.ibuffer a{B.frameOf ib == HyperStack.root}
+  | MUT -> b:B.buffer a{B.frameOf b <> HyperStack.root}
 
 (** Definition of a mutable Buffer *)
 unfold let buffer (a:Type0) = buffer_t MUT a
@@ -266,8 +266,9 @@ let stack_allocated (#a:Type0) (#len:size_t) (b:lbuffer a len)
 		    (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
     let b: B.buffer a = b in
     B.alloc_post_mem_common b h0 h1 s /\
-    B.frameOf b = HS.get_tip h0
-
+    B.frameOf b = HS.get_tip h0  /\
+    B.frameOf b <> HyperStack.root
+    
 let global_allocated (#a:Type0) (#len:size_t) (b:ilbuffer a len)
 		    (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
     let b: ibuffer a = b in
