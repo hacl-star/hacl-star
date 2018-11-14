@@ -307,6 +307,7 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
 #reset-options "--z3rlimit 250"
 
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
+  admit();
   [@inline_let]
   let a_spec' (i:nat{i <= v n}) =
     assert (i * v len <= max_size_t);
@@ -335,7 +336,6 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
     B.loc_includes_union_l (footprint (v i + 1)) (loc output) (loc block);
     B.loc_includes_union_l (footprint (v i + 1)) (loc output) (footprint (v i + 1));
     assert ((v i + 1) * v len == v i * v len + v len);
-    admit();
     FStar.Seq.lemma_split
       (as_seq h (gsub output (size 0) (i *! len +! len)))
       (v i * v len)
