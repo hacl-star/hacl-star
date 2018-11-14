@@ -60,6 +60,8 @@ let get_iv s =
 
 #set-options "--z3rlimit 50"
 
+let op_String_Access (#a:Type) (#len:size_t) (h:mem) (b:lbuffer a len) = as_seq h b
+
 val set_iv:
   hash: hash_wp ->
   Stack unit
@@ -70,7 +72,6 @@ val set_iv:
 let set_iv hash =
   recall_contents const_iv (Spec.ivTable Spec.Blake2S);
   let h0 = ST.get() in
-  assume(disjoint hash const_iv);
   mapT (size (Spec.size_hash_w)) hash secret const_iv
 
 
@@ -84,7 +85,7 @@ val set_iv_sub:
                       /\ (let b0: Seq.lseq uint32 16 = h0.[b] in
                          let b1: Seq.lseq uint32 16 = h1.[b] in
                          let src = Seq.map secret (Spec.ivTable Spec.Blake2S) in
-                         b1 == Seq.update_sub #uint32 #16 b0 8 8 src)))
+                         b1 == Seq.update_sub b0 8 8 src)))
 [@ Substitute ]
 let set_iv_sub b =
   let h0 = ST.get () in
@@ -93,17 +94,17 @@ let set_iv_sub b =
   let h1 = ST.get () in
   set_iv half1;
   let h2 = ST.get () in
-  Seq.eq_intro h2.[b] (Seq.concat #uint32 #8 #8 h2.[half0] h2.[half1]);
-  Seq.eq_intro h2.[b] (Seq.update_sub #uint32 #16 h0.[b] 8 8 (Seq.map secret (Spec.ivTable Spec.Blake2S)))
+  Seq.eq_intro h2.[b] (Seq.concat h2.[half0] h2.[half1]);
+  Seq.eq_intro h2.[b] (Seq.update_sub h0.[b] 8 8 (Seq.map secret (Spec.ivTable Spec.Blake2S)))
 
 
 #reset-options
 
 val get_sigma:
-  s: size_t{size_v s < 160} ->
+  s: size_t{v s < 160} ->
   Stack Spec.sigma_elt_t
     (requires (fun h -> True))
-    (ensures  (fun h0 z h1 -> h0 == h1 /\ v z == v (Seq.index Spec.const_sigma (size_v s))))
+    (ensures  (fun h0 z h1 -> h0 == h1 /\ v z == v (Seq.index Spec.const_sigma (v s))))
 
 [@ Substitute ]
 let get_sigma s =
@@ -127,7 +128,7 @@ let get_sigma_sub start i = get_sigma (start +. i)
 #reset-options
 
 val get_r:
-  s: size_t{size_v s < 4} ->
+  s: size_t{v s < 4} ->
   Stack (rotval U32)
     (requires (fun h -> True))
     (ensures  (fun h0 z h1 -> h0 == h1 /\ v z == v (Seq.index (Spec.rTable Spec.Blake2S) (v s))))
@@ -187,7 +188,7 @@ let blake2_mixing wv a b c d x y =
 
 #set-options "--z3rlimit 25"
 
-val blake2_round1 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
+val blake2_round1 : wv:vector_wp -> m:block_wp -> i:size_t{v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
                   /\ disjoint wv m))
@@ -196,24 +197,26 @@ val blake2_round1 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
 
 [@ Substitute ]
 let blake2_round1 wv m i =
-  let start_idx = (i %. 10ul) *. 16ul in
-  let s0 = get_sigma_sub start_idx 0ul in
-  let s1 = get_sigma_sub start_idx 1ul in
-  let s2 = get_sigma_sub start_idx 2ul in
-  let s3 = get_sigma_sub start_idx 3ul in
-  let s4 = get_sigma_sub start_idx 4ul in
-  let s5 = get_sigma_sub start_idx 5ul in
-  let s6 = get_sigma_sub start_idx 6ul in
-  let s7 = get_sigma_sub start_idx 7ul in
-  blake2_mixing wv 0ul 4ul  8ul 12ul m.(s0) m.(s1);
-  blake2_mixing wv 1ul 5ul  9ul 13ul m.(s2) m.(s3);
-  blake2_mixing wv 2ul 6ul 10ul 14ul m.(s4) m.(s5);
-  blake2_mixing wv 3ul 7ul 11ul 15ul m.(s6) m.(s7)
+  let start_idx = (i %. size 10) *. size 16 in
+  assert (v start_idx == (v i % 10) * 16);
+  let s0 = get_sigma_sub start_idx (size 0) in
+  let s1 = get_sigma_sub start_idx (size 1) in
+  let s2 = get_sigma_sub start_idx (size 2) in
+  let s3 = get_sigma_sub start_idx (size 3) in
+  let s4 = get_sigma_sub start_idx (size 4) in
+  let s5 = get_sigma_sub start_idx (size 5) in
+  let s6 = get_sigma_sub start_idx (size 6) in
+  let s7 = get_sigma_sub start_idx (size 7) in
+  blake2_mixing wv (size 0) (size 4) (size 8) (size 12) m.(s0) m.(s1);
+  blake2_mixing wv (size 1) (size 5) (size 9) (size 13) m.(s2) m.(s3);
+  blake2_mixing wv (size 2) (size 6) (size 10) (size 14) m.(s4) m.(s5);
+  blake2_mixing wv (size 3) (size 7) (size 11) (size 15) m.(s6) m.(s7)
+
 
 
 #set-options "--z3rlimit 25"
 
-val blake2_round2 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
+val blake2_round2 : wv:vector_wp -> m:block_wp -> i:size_t{v i <= 9} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
                   /\ disjoint wv m))
@@ -222,20 +225,21 @@ val blake2_round2 : wv:vector_wp -> m:block_wp -> i:size_t{size_v i <= 9} ->
 
 [@ Substitute ]
 let blake2_round2 wv m i =
-  let start_idx = (i %. 10ul) *. 16ul in
-  let s8 = get_sigma_sub start_idx 8ul in
-  let s9 = get_sigma_sub start_idx 9ul in
-  let s10 = get_sigma_sub start_idx 10ul in
-  let s11 = get_sigma_sub start_idx 11ul in
-  let s12 = get_sigma_sub start_idx 12ul in
-  let s13 = get_sigma_sub start_idx 13ul in
-  let s14 = get_sigma_sub start_idx 14ul in
-  let s15 = get_sigma_sub start_idx 15ul in
-  blake2_mixing wv 0ul 5ul 10ul 15ul m.(s8) m.(s9);
-  blake2_mixing wv 1ul 6ul 11ul 12ul m.(s10) m.(s11);
-  blake2_mixing wv 2ul 7ul  8ul 13ul m.(s12) m.(s13);
-  blake2_mixing wv 3ul 4ul  9ul 14ul m.(s14) m.(s15)
-
+  let start_idx = (i %. size 10) *. size 16 in
+  assert (v start_idx == (v i % 10) * 16);
+  let s0 = get_sigma_sub start_idx (size 8) in
+  let s1 = get_sigma_sub start_idx (size 9) in
+  let s2 = get_sigma_sub start_idx (size 10) in
+  let s3 = get_sigma_sub start_idx (size 11) in
+  let s4 = get_sigma_sub start_idx (size 12) in
+  let s5 = get_sigma_sub start_idx (size 13) in
+  let s6 = get_sigma_sub start_idx (size 14) in
+  let s7 = get_sigma_sub start_idx (size 15) in
+  blake2_mixing wv (size 0) (size 5) (size 10) (size 15) m.(s0) m.(s1);
+  blake2_mixing wv (size 1) (size 6) (size 11) (size 12) m.(s2) m.(s3);
+  blake2_mixing wv (size 2) (size 7) (size  8) (size 13) m.(s4) m.(s5);
+  blake2_mixing wv (size 3) (size 4) (size  9) (size 14) m.(s6) m.(s7)
+  
 
 #reset-options
 
@@ -289,22 +293,30 @@ val blake2_compress2 :
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ h1.[wv] == Spec.blake2_compress2 Spec.Blake2S h0.[wv] h0.[m]))
 
+noextract inline_for_extraction
+let rounds_nat:x:size_nat{x == Spec.rounds Spec.Blake2.Blake2S} = 10
+noextract inline_for_extraction
+let rounds_t:x:size_t{x == size rounds_nat} = 10ul
+
 [@ Substitute ]
 let blake2_compress2 wv m =
   let h0 = ST.get () in
   [@inline_let]
   let spec h = Spec.blake2_round Spec.Blake2S h.[m] in
-  loop1 h0 (size (Spec.rounds Spec.Blake2S)) wv spec
+  loop1 h0 rounds_t wv spec
   (fun i ->
-    Loops.unfold_repeati (Spec.rounds Spec.Blake2S) (spec h0) h0.[wv] (v i);
-    blake2_round wv m i)
+    Loops.unfold_repeati rounds_nat (spec h0) h0.[wv] (v i);
+    blake2_round wv m i;
+    let h' = ST.get() in
+    assert (modifies (loc wv) h0 h'))
+
 
 
 #reset-options "--z3rlimit 15"
 
 val blake2_compress3_inner :
     wv: vector_wp
-  -> i: size_t{size_v i < 8}
+  -> i: size_t{v i < 8}
   -> s: hash_wp ->
   Stack unit
     (requires (fun h -> live h s /\ live h wv
@@ -409,7 +421,7 @@ let blake2s_init_hash hash kk nn =
   hash.(size 0) <- s0'
 
 
-#reset-options "--z3rlimit 15"
+#reset-options "--z3rlimit 25"
 
 val blake2s_init_branching:
     hash: hash_wp
@@ -454,7 +466,7 @@ val blake2s_init:
 let blake2s_init hash kk k nn =
   let h0 = ST.get () in
   salloc1_trivial h0 (size 64) (u8 0) (Ghost.hide (loc hash))
-  (fun _ h1 -> live h1 hash /\ h1.[hash] == Spec.blake2_init Spec.Blake2S (size_v kk) h0.[k] (v nn))
+  (fun _ h1 -> live h1 hash /\ h1.[hash] == Spec.blake2_init Spec.Blake2S (v kk) h0.[k] (v nn))
   (fun key_block ->
     blake2s_init_hash hash kk nn;
     blake2s_init_branching hash key_block kk k nn)
