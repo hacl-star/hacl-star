@@ -39,6 +39,7 @@ let nlimb (s:field_spec) : size_t =
   | M64 -> 4ul
   
 type felem (s:field_spec) = lbuffer (limb s) (nlimb s)
+type felem2 (s:field_spec) = lbuffer (limb s) (2ul *. nlimb s)
 type felem_wide (s:field_spec) = lbuffer (wide s) (nlimb s)
 
 
@@ -154,14 +155,14 @@ let fmul #s out f1 f2=
   | M64 -> F64.fmul out f1 f2 
 
 inline_for_extraction
-val fmul2: #s:field_spec -> out1:felem s -> out2:felem s -> f1:felem s -> f2:felem s -> f3:felem s -> f4:felem s -> Stack unit
-                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2 /\ live h f3 /\ live h f4))
-		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+val fmul2: #s:field_spec -> out:felem2 s -> f1:felem2 s -> f2:felem2 s -> Stack unit
+                   (requires (fun h -> live h out /\ live h f1 /\ live h f2))
+		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 inline_for_extraction
-let fmul2 #s out1 out2 f1 f2 f3 f4=
+let fmul2 #s out f1 f2 =
   match s with
-  | M51 -> F51.fmul2 out1 out2 f1 f2 f3 f4 
-  | M64 -> F64.fmul2 out1 out2 f1 f2 f3 f4 
+  | M51 -> F51.fmul2 out f1 f2
+  | M64 -> F64.fmul2 out f1 f2
 
 inline_for_extraction
 val fmul1: #s:field_spec -> out:felem s -> f1:felem s -> f2:uint64 -> Stack unit
@@ -186,12 +187,12 @@ let fsqr #s out f1 =
 
 
 [@ CInline]
-val fsqr2: #s:field_spec -> out1:felem s -> out2:felem s -> f1:felem s -> f2:felem s -> Stack unit
-                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2))
-		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+val fsqr2: #s:field_spec -> out:felem2 s -> f:felem2 s -> Stack unit
+                   (requires (fun h -> live h out /\ live h f))
+		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
-let fsqr2 #s out1 out2 f1 f2 = 
+let fsqr2 #s out f = 
   match s with
-  | M51 -> F51.fsqr2 out1 out2 f1 f2
-  | M64 -> F64.fsqr2 out1 out2 f1 f2
+  | M51 -> F51.fsqr2 out f
+  | M64 -> F64.fsqr2 out f
   

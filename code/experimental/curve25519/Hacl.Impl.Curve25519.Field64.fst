@@ -12,6 +12,7 @@ open FStar.Mul
 
 
 let felem = lbuffer uint64 4ul
+let felem2 = lbuffer uint64 8ul
 let felem_wide = lbuffer uint64 8ul
 
 inline_for_extraction
@@ -283,11 +284,21 @@ let fmul out f1 f2 =
   pop_frame()
 
 [@ CInline]
-val fmul2: out1:felem -> out2:felem -> f1:felem -> f2:felem -> f3:felem -> f4:felem -> Stack unit
-                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2 /\ live h f3 /\ live h f4))
-		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+val fmul2:
+    out:felem2
+  -> f1:felem2
+  -> f2:felem2
+  -> Stack unit
+  (requires (fun h -> live h out /\ live h f1 /\ live h f2))
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
-let fmul2 out1 out2 f1 f2 f3 f4 =
+let fmul2 out f1 f2 =
+  let out1 = sub out 0ul 4ul in
+  let out2 = sub out 4ul 4ul in
+  let f1 = sub f1 0ul 4ul in
+  let f2 = sub f2 0ul 4ul in
+  let f3 = sub f1 4ul 4ul in
+  let f4 = sub f2 4ul 4ul in
   fmul out1 f1 f2;
   fmul out2 f3 f4
 
@@ -312,11 +323,15 @@ val fsqr: out:felem -> f1:felem -> Stack unit
 let fsqr out f = fmul out f f 
 
 [@ CInline]
-val fsqr2: out1:felem -> out2:felem -> f1:felem -> f2:felem -> Stack unit
-                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2))
-		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
+val fsqr2: out:felem2 -> f:felem2 -> Stack unit
+        (requires (fun h -> live h out /\ live h f))
+	(ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
-let fsqr2 out1 out2 f1 f2 = 
+let fsqr2 out f = 
+  let out1 = sub out 0ul 4ul in
+  let out2 = sub out 4ul 4ul in
+  let f1 = sub f 0ul 4ul in
+  let f2 = sub f 4ul 4ul in
   fsqr out1 f1;
   fsqr out2 f2
  

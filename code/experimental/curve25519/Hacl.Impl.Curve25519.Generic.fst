@@ -215,8 +215,8 @@ let point_add_and_double_ #s q nq nq_p1 =
    let tmp : lbuffer (limb s) (4ul *. nlimb s) = create (4ul *. nlimb s) (limb_zero s) in
    let a : felem s = sub tmp 0ul (nlimb s) in
    let b : felem s = sub tmp (nlimb s) (nlimb s) in
-   let c : felem s = sub tmp (2ul *. nlimb s) (nlimb s) in
-   let d : felem s = sub tmp (3ul *. nlimb s) (nlimb s) in
+   let d : felem s = sub tmp (2ul *. nlimb s) (nlimb s) in
+   let c : felem s = sub tmp (3ul *. nlimb s) (nlimb s) in
    let gloc = Ghost.hide (loc nq |+| loc nq_p1 |+| loc tmp) in
    let h0 = ST.get() in
    footprint h0 gloc (fun () -> fadd a x2 z2); // a = x2 + z2
@@ -225,30 +225,33 @@ let point_add_and_double_ #s q nq nq_p1 =
    footprint h0 gloc (fun () -> fsub d x3 z3); // d = x3 - z3
 
    (* CAN RUN IN PARALLEL *)
-   footprint h0 gloc (fun () -> fmul d d a);   // d = da = d * a 
-   footprint h0 gloc (fun () -> fmul c c b);   // c = cb = c * b
-//   footprint h0 gloc (fun () -> fmul2 d c d a c b);   // c = cb = c * b
+//   footprint h0 gloc (fun () -> fmul d d a);   // d = da = d * a 
+//   footprint h0 gloc (fun () -> fmul c c b);   // c = cb = c * b
+   footprint h0 gloc (fun () -> fmul2 d d a);   // d|c = d*a|c*b
    
    footprint h0 gloc (fun () -> fadd x3 d c);  // x3 = da + cb
    footprint h0 gloc (fun () -> fsub z3 d c);  // z3 = da - cb
 
    (* CAN RUN IN PARALLEL *)
-   footprint h0 gloc (fun () -> fsqr x3 x3);   // x3 = (da + cb) ^ 2
-   footprint h0 gloc (fun () -> fsqr z3 z3);   // z3 = (da - cb) ^ 2
-//   footprint h0 gloc (fun () -> fsqr2 x3 z3 x3 z3);   // z3 = (da - cb) ^ 2
+//   footprint h0 gloc (fun () -> fsqr x3 x3);   // x3 = (da + cb) ^ 2
+//   footprint h0 gloc (fun () -> fsqr z3 z3);   // z3 = (da - cb) ^ 2
+   footprint h0 gloc (fun () -> fsqr2 x3 x3);   // x3|z3 = x3*x3|z3*z3
    
    footprint h0 gloc (fun () -> fmul z3 z3 x1); // z3 = x1 * (da - cb) ^ 2
 
    (* CAN RUN IN PARALLEL *)
-   footprint h0 gloc (fun () -> fsqr c a);     // c = aa = a^2
-   footprint h0 gloc (fun () -> fsqr d b);     // d = bb = b^2
-//   footprint h0 gloc (fun () -> fsqr2 c d a b);     // d = bb = b^2
-   
-   footprint h0 gloc (fun () -> fmul x2 c d);  // x2 = aa * bb
-   footprint h0 gloc (fun () -> fsub b c d);   // b = e = aa - bb
-   footprint h0 gloc (fun () -> fmul1 a b (u64 121665)); // a = e * 121665
-   footprint h0 gloc (fun () -> fadd a a c);   // a = (e * 121665) + aa 
-   footprint h0 gloc (fun () -> fmul z2 b a);  // z2 = e * (aa + (e * 121665))
+//   footprint h0 gloc (fun () -> fsqr d a);     // d = aa = a^2
+//   footprint h0 gloc (fun () -> fsqr c b);     // c = bb = b^2
+   footprint h0 gloc (fun () -> fsqr2 d a);     // d|c = aa | bb
+   copy_felem a c;                           // a = bb
+   footprint h0 gloc (fun () -> fsub c d c);   // c = e = aa - bb
+   footprint h0 gloc (fun () -> fmul1 b c (u64 121665)); // b = e * 121665
+   footprint h0 gloc (fun () -> fadd b b d);   // b = (e * 121665) + aa 
+
+   (* CAN RUN IN PARALLEL *)
+//   footprint h0 gloc (fun () -> fmul x2 d a);  // x2 = aa * bb
+//   footprint h0 gloc (fun () -> fmul z2 c b);  // z2 = e * (aa + (e * 121665))
+   footprint h0 gloc (fun () -> fmul2 x2 d a);  // x2|z2 = aa * bb | e * (aa + (e * 121665))
    pop_frame()
 
 (* WRAPPER to Prevent Inlining *)

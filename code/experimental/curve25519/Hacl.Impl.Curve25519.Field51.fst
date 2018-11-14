@@ -15,6 +15,7 @@ module ST = FStar.HyperStack.ST
 #reset-options "--z3rlimit 20"
 
 let felem = lbuffer uint64 5ul
+let felem2 = lbuffer uint64 10ul
 let felem_wide = lbuffer uint128 5ul
 
 noextract
@@ -328,26 +329,27 @@ let fmul out f1 f2 =
   out.(size 4) <- o4
 
 val fmul2:
-    out1:felem
-  -> out2:felem
-  -> f1:felem
-  -> f2:felem
-  -> f3:felem
-  -> f4:felem
+    out:felem2
+  -> f1:felem2
+  -> f2:felem2
   -> Stack unit
     (requires fun h ->
-      felem_fits h f1 (9, 10, 9, 9, 9) /\
-      felem_fits h f2 (9, 10, 9, 9, 9) /\
-      felem_fits h f3 (9, 10, 9, 9, 9) /\
-      felem_fits h f4 (9, 10, 9, 9, 9) /\
-      live h out1 /\ live h out2 /\ live h f1 /\
-      live h f2 /\ live h f3 /\ live h f4 /\
-      disjoint out1 out2)
-    (ensures  fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1 /\
-      felem_fits h1 out1 (1, 2, 1, 1, 1) /\
-      felem_fits h1 out2 (1, 2, 1, 1, 1))
+      let f10 = gsub f1 0ul 5ul in
+      let f11 = gsub f1 5ul 5ul in
+      let f20 = gsub f2 0ul 5ul in
+      let f21 = gsub f2 5ul 5ul in
+      felem_fits h f10 (9, 10, 9, 9, 9) /\
+      felem_fits h f11 (9, 10, 9, 9, 9) /\
+      felem_fits h f20 (9, 10, 9, 9, 9) /\
+      felem_fits h f21 (9, 10, 9, 9, 9) /\
+      live h out /\ live h f1 /\ live h f2)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+     (let out0 = gsub out 0ul 5ul in
+      let out1 = gsub out 5ul 5ul in
+      felem_fits h1 out0 (1, 2, 1, 1, 1) /\
+      felem_fits h1 out1 (1, 2, 1, 1, 1)))
 [@ CInline]
-let fmul2 out1 out2 f1 f2 f3 f4 =
+let fmul2 out f1 f2 =
   let f10 = f1.(size 0) in
   let f11 = f1.(size 1) in
   let f12 = f1.(size 2) in
@@ -360,33 +362,33 @@ let fmul2 out1 out2 f1 f2 f3 f4 =
   let f23 = f2.(size 3) in
   let f24 = f2.(size 4) in
 
-  let f30 = f3.(size 0) in
-  let f31 = f3.(size 1) in
-  let f32 = f3.(size 2) in
-  let f33 = f3.(size 3) in
-  let f34 = f3.(size 4) in
+  let f30 = f1.(size 5) in
+  let f31 = f1.(size 6) in
+  let f32 = f1.(size 7) in
+  let f33 = f1.(size 8) in
+  let f34 = f1.(size 9) in
 
-  let f40 = f4.(size 0) in
-  let f41 = f4.(size 1) in
-  let f42 = f4.(size 2) in
-  let f43 = f4.(size 3) in
-  let f44 = f4.(size 4) in
+  let f40 = f2.(size 5) in
+  let f41 = f2.(size 6) in
+  let f42 = f2.(size 7) in
+  let f43 = f2.(size 8) in
+  let f44 = f2.(size 9) in
 
   let ((o10,o11,o12,o13,o14), (o20,o21,o22,o23,o24)) =
     fmul25 (f10,f11,f12,f13,f14) (f20,f21,f22,f23,f24)
      (f30,f31,f32,f33,f34) (f40,f41,f42,f43,f44) in
 
-  out1.(size 0) <- o10;
-  out1.(size 1) <- o11;
-  out1.(size 2) <- o12;
-  out1.(size 3) <- o13;
-  out1.(size 4) <- o14;
+  out.(size 0) <- o10;
+  out.(size 1) <- o11;
+  out.(size 2) <- o12;
+  out.(size 3) <- o13;
+  out.(size 4) <- o14;
 
-  out2.(size 0) <- o20;
-  out2.(size 1) <- o21;
-  out2.(size 2) <- o22;
-  out2.(size 3) <- o23;
-  out2.(size 4) <- o24
+  out.(size 5) <- o20;
+  out.(size 6) <- o21;
+  out.(size 7) <- o22;
+  out.(size 8) <- o23;
+  out.(size 9) <- o24
 
 val fmul1:
     out:felem
@@ -439,46 +441,47 @@ let fsqr out f =
   out.(size 4) <- o4
 
 val fsqr2:
-    out1:felem
-  -> out2:felem
-  -> f1:felem
-  -> f2:felem
+    out:felem2
+  -> f:felem2
   -> Stack unit
     (requires fun h ->
-      live h out1 /\ live h out2 /\ live h f1 /\ live h f2 /\
+      live h out /\ live h f /\
+     (let f1 = gsub f 0ul 5ul in
+      let f2 = gsub f 5ul 5ul in
       felem_fits h f1 (9, 10, 9, 9, 9) /\
-      felem_fits h f2 (9, 10, 9, 9, 9) /\
-      disjoint out1 out2)
+      felem_fits h f2 (9, 10, 9, 9, 9)))
     (ensures  fun h0 _ h1 ->
-      modifies (loc out1 |+| loc out2) h0 h1 /\
+      modifies (loc out) h0 h1 /\
+     (let out1 = gsub out 0ul 5ul in
+      let out2 = gsub out 5ul 5ul in
       felem_fits h1 out1 (1, 2, 1, 1, 1) /\
-      felem_fits h1 out2 (1, 2, 1, 1, 1))
+      felem_fits h1 out2 (1, 2, 1, 1, 1)))
 [@ CInline]
-let fsqr2 out1 out2 f1 f2 =
-  let f10 = f1.(0ul) in
-  let f11 = f1.(1ul) in
-  let f12 = f1.(2ul) in
-  let f13 = f1.(3ul) in
-  let f14 = f1.(4ul) in
+let fsqr2 out f =
+  let f10 = f.(0ul) in
+  let f11 = f.(1ul) in
+  let f12 = f.(2ul) in
+  let f13 = f.(3ul) in
+  let f14 = f.(4ul) in
 
-  let f20 = f2.(0ul) in
-  let f21 = f2.(1ul) in
-  let f22 = f2.(2ul) in
-  let f23 = f2.(3ul) in
-  let f24 = f2.(4ul) in
+  let f20 = f.(5ul) in
+  let f21 = f.(6ul) in
+  let f22 = f.(7ul) in
+  let f23 = f.(8ul) in
+  let f24 = f.(9ul) in
 
   let ((o10,o11,o12,o13,o14),(o20,o21,o22,o23,o24)) = fsqr25 (f10,f11,f12,f13,f14) (f20,f21,f22,f23,f24) in
-  out1.(size 0) <- o10;
-  out1.(size 1) <- o11;
-  out1.(size 2) <- o12;
-  out1.(size 3) <- o13;
-  out1.(size 4) <- o14;
+  out.(size 0) <- o10;
+  out.(size 1) <- o11;
+  out.(size 2) <- o12;
+  out.(size 3) <- o13;
+  out.(size 4) <- o14;
 
-  out2.(size 0) <- o20;
-  out2.(size 1) <- o21;
-  out2.(size 2) <- o22;
-  out2.(size 3) <- o23;
-  out2.(size 4) <- o24
+  out.(size 5) <- o20;
+  out.(size 6) <- o21;
+  out.(size 7) <- o22;
+  out.(size 8) <- o23;
+  out.(size 9) <- o24
 
 inline_for_extraction
 val load_felem:
