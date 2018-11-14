@@ -1,4 +1,4 @@
-include ../../Makefile.include
+include ../../../Makefile.include
 
 AES_BS_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
@@ -104,12 +104,12 @@ aes-ni-c/out.krml: $(AES_NI_FILES)
 
 aes-ni-c/Hacl_AesCTRNI.c: aes-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.AesCTRNI=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.AesCTRNI=*'
 
 aes-ni.exe: aes-ni-c/Hacl_AesCTRNI.c aes-ni-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-ni-c \
 	  -no-prefix 'Hacl.Test.AesCTR.NI' -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"'\
-	  -bundle 'Hacl.Test.AesCTR.NI=*' -library Hacl.AesCTRNI -library Lib.Vec128 \
+	  -bundle 'Hacl.Test.AesCTR.NI=*' -library Hacl.AesCTRNI -library Lib.Vec128 -drop Lib.Vec128 \
 	  $^ -o $@
 
 aes-test: aes-bitslice.exe aes-ni.exe
@@ -222,26 +222,7 @@ CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 
 KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
 
-curve51-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_51.fst
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c $(CURVE25519_FILES) Hacl.Curve25519_51.fst -skip-translation 
 
-curve51-c/Hacl_Curve25519_51.c: curve51-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_51=*'
-
-curve64-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_64.fst
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c $(CURVE25519_FILES) Hacl.Curve25519_64.fst -skip-translation 
-
-curve64-c/Hacl_Curve25519_64.c: curve64-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_64=*'
-
-curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c
-	gcc-8 -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curvetest.c -o curve25519_51.exe
-	./curve25519_51.exe
-
-CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-#CC=gcc-8
 
 curve64-perf:
 	$(CC) -march=native -mtune=native -O3 -I rfc7748_precomputed/include/ rfc7748_precomputed/src/fp25519_x64.c -c -o fp25519.o 

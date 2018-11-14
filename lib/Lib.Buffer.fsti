@@ -242,7 +242,7 @@ let op_Array_Access #t #a #len = index #t #a #len
 
 (** Operator definition to access a Buffer as a Sequence *)
 inline_for_extraction
-let op_String_Access #a #r0 #r1 m b = as_seq #a #r0 #r1 m b
+let op_Brack_Lens_Access #a #r0 #r1 m b = as_seq #a #r0 #r1 m b
 
 (** Access to the pure sequence-based value associated to an index of a mutable Buffer  *)
 (* We don't have access to Lib.Sequence.fst
