@@ -98,12 +98,21 @@ let uint_t (t:inttype) (l:secrecy_level) =
   | PUB -> pub_int_t t
   | SEC -> sec_int_t t
 
+val uint_v: #t:inttype -> #l:secrecy_level -> u:uint_t t l -> n:nat{n <= maxint t}
+(* WAS:
 unfold
 let uint_v #t #l (u:uint_t t l) : n:nat{n <= maxint t} =
   match l with
   | PUB -> pub_int_v #t u
   | SEC -> sec_int_v #t u
+*)
 
+
+val uint_v_pub_lemma: #t:inttype -> u:uint_t t PUB ->
+  Lemma
+  (ensures (uint_v #t u == pub_int_v #t u))
+  [SMTPat (uint_v #t #PUB u)]
+  
 val uintv_extensionality:
    #t:inttype
  -> #l:secrecy_level
@@ -266,10 +275,14 @@ val add_lemma: #t:inttype -> #l:secrecy_level
 
 inline_for_extraction
 val incr: #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l
-  -> Pure (uint_t t l)
-  (requires (uint_v a < maxint t))
-  (ensures (fun c -> uint_v c == uint_v a + 1))
+  -> a:uint_t t l{uint_v a < maxint t}
+  -> uint_t t l
+
+inline_for_extraction
+val incr_lemma: #t:inttype -> #l:secrecy_level
+  -> a:uint_t t l{uint_v a < maxint t}
+  -> Lemma
+  (ensures (uint_v #t #l (incr a) == uint_v a + 1))
 
 inline_for_extraction
 val mul_mod: #t:inttype{t <> U128} -> #l:secrecy_level
@@ -288,15 +301,28 @@ val mul_mod_lemma: #t:inttype{t <> U128} -> #l:secrecy_level
 inline_for_extraction
 val mul: #t:inttype{t <> U128} -> #l:secrecy_level
   -> a:uint_t t l
-  -> b:uint_t t l
-  -> Pure (uint_t t l)
-  (requires (uint_v a `op_Multiply` uint_v b < modulus t))
-  (ensures (fun c -> uint_v c == uint_v a `op_Multiply` uint_v b))
+  -> b:uint_t t l{uint_v a `op_Multiply` uint_v b < modulus t}
+  -> uint_t t l
+
 
 inline_for_extraction
-val mul64_wide: a:uint64 -> b:uint64 -> Pure (uint128)
-  (requires (True))
-  (ensures (fun c -> uint_v #U128 c == uint_v #U64 a `op_Multiply` uint_v #U64 b))
+val mul_lemma: #t:inttype{t <> U128} -> #l:secrecy_level
+  -> a:uint_t t l
+  -> b:uint_t t l{uint_v a `op_Multiply` uint_v b < modulus t}
+  -> Lemma
+  (ensures (uint_v #t #l (mul #t #l a b) == uint_v a `op_Multiply` uint_v b))
+  [SMTPat (uint_v #t #l (mul #t #l a b))]
+
+
+inline_for_extraction
+val mul64_wide: a:uint64 -> b:uint64 -> uint128
+
+inline_for_extraction
+val mul64_wide_lemma: a:uint64 -> b:uint64 
+  -> Lemma
+  (ensures (uint_v (mul64_wide a b) == uint_v a `op_Multiply` uint_v b))
+  [SMTPat (uint_v (mul64_wide a b))]
+
 
 (* KB: I would prefer the post-condition to say:
        uint_v c = (pow2 (bits t) + uint_v a - uint_v b) % pow2 (bits t)
@@ -305,22 +331,40 @@ inline_for_extraction
 val sub_mod: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:uint_t t l
-  -> c:uint_t t l{uint_v c == (uint_v a - uint_v b) % modulus t}
+  -> c:uint_t t l
+
+inline_for_extraction
+val sub_mod_lemma: #t:inttype -> #l:secrecy_level ->
+             a:uint_t t l ->
+             b:uint_t t l ->
+	     Lemma
+	     (ensures (uint_v #t #l (sub_mod #t #l a b) == (uint_v a - uint_v b) % modulus t))
+	     [SMTPat (uint_v #t #l (sub_mod #t #l a b))]
 
 inline_for_extraction
 val sub: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
-  -> b:uint_t t l
-  -> Pure (uint_t t l)
-  (requires (uint_v a >= uint_v b ))
-  (ensures (fun c -> uint_v c == uint_v a - uint_v b))
+  -> b:uint_t t l{uint_v a >= uint_v b}
+  -> uint_t t l
+
+inline_for_extraction
+val sub_lemma: #t:inttype -> #l:secrecy_level ->
+             a:uint_t t l ->
+             b:uint_t t l{uint_v a >= uint_v b} ->
+	     Lemma
+	     (ensures (uint_v #t #l (sub #t #l a b) == uint_v a - uint_v b))
+	     [SMTPat (uint_v #t #l (sub #t #l a b))]
 
 inline_for_extraction
 val decr: #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l
-  -> Pure (uint_t t l)
-  (requires (uint_v a > 0))
-  (ensures (fun c -> uint_v c == uint_v a - 1))
+  -> a:uint_t t l{uint_v a > 0}
+  -> uint_t t l
+
+inline_for_extraction
+val decr_lemma: #t:inttype -> #l:secrecy_level
+  -> a:uint_t t l{uint_v a > 0}
+  -> Lemma
+  (ensures (uint_v #t #l (decr a) == uint_v a - 1))
 
 inline_for_extraction
 val logxor: #t:inttype -> #l:secrecy_level
@@ -496,44 +540,99 @@ let ( ~. ) #t #l = lognot #t #l
 ///
 
 inline_for_extraction
-val div: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> Pure (uint_t t PUB)
-  (requires (t <> U128 /\ uint_v #t b > 0))
-  (ensures (fun c -> uint_v c == uint_v a / uint_v b))
+val div: #t:inttype{t <> U128} 
+  -> a:uint_t t PUB 
+  -> b:uint_t t PUB{uint_v b > 0}
+  -> uint_t t PUB
 
 inline_for_extraction
-val mod: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> Pure (uint_t t PUB)
-  (requires (t <> U128 /\ uint_v #t b > 0))
-  (ensures (fun c -> uint_v c == uint_v a % uint_v b))
+val div_lemma: #t:inttype{t <> U128} 
+  -> a:uint_t t PUB
+  -> b:uint_t t PUB{uint_v b > 0}
+  -> Lemma
+  (ensures (uint_v #t (div #t a b) == uint_v a / uint_v b))
+  [SMTPat (uint_v #t (div #t a b))]
+
 
 inline_for_extraction
-val eq: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> Pure bool
-  (requires (True))
-  (ensures (fun c -> c == (uint_v a = uint_v b)))
+val mod: #t:inttype{t <> U128} -> a:uint_t t PUB -> b:uint_t t PUB{uint_v b > 0} -> uint_t t PUB
 
 inline_for_extraction
-val ne: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> Pure bool
-  (requires (True))
-  (ensures (fun c -> c == (uint_v a <> uint_v b)))
+val mod_lemma: #t:inttype{t <> U128} 
+  -> a:uint_t t PUB
+  -> b:uint_t t PUB{uint_v b > 0}
+  -> Lemma
+  (ensures (uint_v #t (mod #t a b) == uint_v a % uint_v b))
+  [SMTPat (uint_v #t (mod #t a b))]
+
 
 inline_for_extraction
-val lt: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> Pure bool
-  (requires (True))
-  (ensures (fun c -> c == (uint_v a < uint_v b)))
+val eq: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
 
 inline_for_extraction
-val lte: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> Pure bool
-  (requires (True))
-  (ensures (fun c -> c == (uint_v a <= uint_v b)))
+val eq_lemma: #t:inttype 
+  -> a:uint_t t PUB
+  -> b:uint_t t PUB
+  -> Lemma
+  (ensures (eq #t a b == (uint_v a = uint_v b)))
+  [SMTPat (eq #t a b)]
 
 inline_for_extraction
-val gt: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> Pure bool
-  (requires (True))
-  (ensures (fun c -> c == (uint_v a > uint_v b)))
+val ne: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
 
 inline_for_extraction
-val gte: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> Pure bool
-  (requires (True))
-  (ensures (fun c -> c == (uint_v a >= uint_v b)))
+val ne_lemma: #t:inttype 
+  -> a:uint_t t PUB
+  -> b:uint_t t PUB
+  -> Lemma
+  (ensures (ne #t a b == (uint_v a <> uint_v b)))
+  [SMTPat (ne #t a b)]
+
+inline_for_extraction
+val lt: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+
+inline_for_extraction
+val lt_lemma: #t:inttype 
+  -> a:uint_t t PUB
+  -> b:uint_t t PUB
+  -> Lemma
+  (ensures (lt #t a b == (uint_v a < uint_v b)))
+  [SMTPat (lt #t a b)]
+
+inline_for_extraction
+val lte: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+
+inline_for_extraction
+val lte_lemma: #t:inttype 
+  -> a:uint_t t PUB
+  -> b:uint_t t PUB
+  -> Lemma
+  (ensures (lte #t a b == (uint_v a <= uint_v b)))
+  [SMTPat (lte #t a b)]
+
+
+inline_for_extraction
+val gt: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+
+inline_for_extraction
+val gt_lemma: #t:inttype 
+  -> a:uint_t t PUB
+  -> b:uint_t t PUB
+  -> Lemma
+  (ensures (gt #t a b == (uint_v a > uint_v b)))
+  [SMTPat (gt #t a b)]
+
+
+inline_for_extraction
+val gte: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+
+inline_for_extraction
+val gte_lemma: #t:inttype 
+  -> a:uint_t t PUB
+  -> b:uint_t t PUB
+  -> Lemma
+  (ensures (gte #t a b == (uint_v a >= uint_v b)))
+  [SMTPat (gte #t a b)]
 
 inline_for_extraction
 let (/.) #t = div #t
