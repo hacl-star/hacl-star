@@ -19,6 +19,7 @@ noeq type printer = {
   footer     : unit -> string;
   proc_name  : string -> string;
   ret        : string -> string;
+  sha256rnds2_explicit_xmm0: unit -> bool;
 }
 
 let print_reg_name (r:reg) =
@@ -218,7 +219,10 @@ let print_ins (ins:tainted_ins) (p:printer) =
   | AESNI_dec_last dst src -> "  aesdeclast " ^ print_xmms dst src
   | AESNI_imc dst src      -> "  aesimc "     ^ print_xmms dst src
   | AESNI_keygen_assist dst src imm -> "  aeskeygenassist " ^ print_pair (print_xmms dst src) (print_imm8 imm p)
-  | SHA256_rnds2 dst src   -> "  sha256rnds2 " ^ print_xmms dst src
+  | SHA256_rnds2 dst src   -> if p.sha256rnds2_explicit_xmm0() then 
+                               "  sha256rnds2 " ^ print_pair (print_xmms dst src) (print_xmm 0 p)
+                             else 
+                               "  sha256rnds2 " ^ print_xmms dst src
   | SHA256_msg1 dst src    -> "  sha256msg1 "  ^ print_xmms dst src
   | SHA256_msg2 dst src    -> "  sha256msg2 "  ^ print_xmms dst src
     
@@ -310,6 +314,7 @@ let masm : printer =
   footer     = footer;
   proc_name  = proc_name;
   ret        = ret;
+  sha256rnds2_explicit_xmm0 = (fun unit -> true);
   }
 
 let gcc : printer =
@@ -345,4 +350,5 @@ let gcc : printer =
   footer     = footer;
   proc_name  = proc_name;
   ret        = ret;
+  sha256rnds2_explicit_xmm0 = (fun unit -> false);
   }
