@@ -287,14 +287,7 @@ let carry_felem f =
   let f2 = f.(size 2) in
   let f3 = f.(size 3) in
   let f4 = f.(size 4) in
-  let tmp0,carry = carry51 f0 (u64 0) in
-  admit();
-  let tmp1,carry = carry51 f1 carry in
-  let tmp2,carry = carry51 f2 carry in
-  let tmp3,carry = carry51 f3 carry in
-  let tmp4,carry = carry51 f4 carry in
-  let tmp0,carry = carry51 tmp0 (carry *. u64 19) in
-  let tmp1 = tmp1 +. carry in
+  let (tmp0, tmp1, tmp2, tmp3, tmp4) = carry_felem5 (f0, f1, f2, f3, f4) in
   f.(size 0) <- tmp0;
   f.(size 1) <- tmp1;
   f.(size 2) <- tmp2;
@@ -334,30 +327,66 @@ let fmul out f1 f2 =
   out.(size 3) <- o3;
   out.(size 4) <- o4
 
+val fmul2:
+    out1:felem
+  -> out2:felem
+  -> f1:felem
+  -> f2:felem
+  -> f3:felem
+  -> f4:felem
+  -> Stack unit
+    (requires fun h ->
+      felem_fits h f1 (9, 10, 9, 9, 9) /\
+      felem_fits h f2 (9, 10, 9, 9, 9) /\
+      felem_fits h f3 (9, 10, 9, 9, 9) /\
+      felem_fits h f4 (9, 10, 9, 9, 9) /\
+      live h out1 /\ live h out2 /\ live h f1 /\
+      live h f2 /\ live h f3 /\ live h f4 /\
+      disjoint out1 out2)
+    (ensures  fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1 /\
+      felem_fits h1 out1 (1, 2, 1, 1, 1) /\
+      felem_fits h1 out2 (1, 2, 1, 1, 1))
 [@ CInline]
-val fmul2: out1:felem -> out2:felem -> f1:felem -> f2:felem -> f3:felem -> f4:felem -> Stack unit
-                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2 /\ live h f3 /\ live h f4))
-		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
-[@ CInline]
-let fmul2 out1 out2 f1 f2 f3 f4 = admit();
-  push_frame();
-  let tmp1 = create_felem() in
-  let tmp2 = create_felem() in
-  let tmp_w1 = create_wide () in
-  let tmp_w2 = create_wide () in
-  tmp1.(1ul) <- f2.(1ul) *. u64 19;
-  tmp1.(2ul) <- f2.(2ul) *. u64 19;
-  tmp1.(3ul) <- f2.(3ul) *. u64 19;
-  tmp1.(4ul) <- f2.(4ul) *. u64 19;
-  tmp2.(1ul) <- f4.(1ul) *. u64 19;
-  tmp2.(2ul) <- f4.(2ul) *. u64 19;
-  tmp2.(3ul) <- f4.(3ul) *. u64 19;
-  tmp2.(4ul) <- f4.(4ul) *. u64 19;
-  mul_felem tmp_w1 f1 f2 tmp1;
-  mul_felem tmp_w2 f3 f4 tmp2;
-  carry_wide out1 tmp_w1;
-  carry_wide out2 tmp_w2;
-  pop_frame()
+let fmul2 out1 out2 f1 f2 f3 f4 =
+  let f10 = f1.(size 0) in
+  let f11 = f1.(size 1) in
+  let f12 = f1.(size 2) in
+  let f13 = f1.(size 3) in
+  let f14 = f1.(size 4) in
+
+  let f20 = f2.(size 0) in
+  let f21 = f2.(size 1) in
+  let f22 = f2.(size 2) in
+  let f23 = f2.(size 3) in
+  let f24 = f2.(size 4) in
+
+  let f30 = f3.(size 0) in
+  let f31 = f3.(size 1) in
+  let f32 = f3.(size 2) in
+  let f33 = f3.(size 3) in
+  let f34 = f3.(size 4) in
+
+  let f40 = f4.(size 0) in
+  let f41 = f4.(size 1) in
+  let f42 = f4.(size 2) in
+  let f43 = f4.(size 3) in
+  let f44 = f4.(size 4) in
+
+  let ((o10,o11,o12,o13,o14), (o20,o21,o22,o23,o24)) =
+    fmul25 (f10,f11,f12,f13,f14) (f20,f21,f22,f23,f24)
+     (f30,f31,f32,f33,f34) (f40,f41,f42,f43,f44) in
+
+  out1.(size 0) <- o10;
+  out1.(size 1) <- o11;
+  out1.(size 2) <- o12;
+  out1.(size 3) <- o13;
+  out1.(size 4) <- o14;
+
+  out2.(size 0) <- o20;
+  out2.(size 1) <- o21;
+  out2.(size 2) <- o22;
+  out2.(size 3) <- o23;
+  out2.(size 4) <- o24
 
 val fmul1:
     out:felem
@@ -372,67 +401,84 @@ val fmul1:
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (1, 2, 1, 1, 1))
 [@ CInline]
-let fmul1 out f1 f2 = admit();
-  push_frame();
-  let tmp_w = create_wide () in
-  smul_felem tmp_w f2 f1;
-  let carry = carry_wide out tmp_w in
-  pop_frame()
+let fmul1 out f1 f2 =
+  let f10 = f1.(size 0) in
+  let f11 = f1.(size 1) in
+  let f12 = f1.(size 2) in
+  let f13 = f1.(size 3) in
+  let f14 = f1.(size 4) in
+  let (o0,o1,o2,o3,o4) = fmul15 (f10,f11,f12,f13,f14) f2 in
+  out.(size 0) <- o0;
+  out.(size 1) <- o1;
+  out.(size 2) <- o2;
+  out.(size 3) <- o3;
+  out.(size 4) <- o4
 
+val fsqr:
+     out:felem
+  -> f:felem
+  -> Stack unit
+    (requires fun h ->
+      live h out /\ live h f /\
+      felem_fits h f (9, 10, 9, 9, 9))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      felem_fits h1 out (1, 2, 1, 1, 1))
 [@ CInline]
-val fsqr_: out:felem_wide -> f1:felem -> Stack unit
-                   (requires (fun h -> live h out /\ live h f1))
-		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
-[@ CInline]
-let fsqr_ out f =
+let fsqr out f =
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
   let f3 = f.(3ul) in
   let f4 = f.(4ul) in
-  let d0 = u64 2 *. f0 in
-  let d1 = u64 2 *. f1 in
-  let d2 = u64 38 *. f2 in
-  let d3 = u64 19 *. f3 in
-  let d419 = u64 19 *. f4 in
-  let d4 = u64 2 *. d419 in
-  let s0 = (mul64_wide f0 f0) +. (mul64_wide d4 f1) +. (mul64_wide d2 f3) in
-  let s1 = (mul64_wide d0 f1) +. (mul64_wide d4 f2) +. (mul64_wide d3 f3) in
-  let s2 = (mul64_wide d0 f2) +. (mul64_wide f1 f1) +. (mul64_wide d4 f3) in
-  let s3 = (mul64_wide d0 f3) +. (mul64_wide d1 f2) +. (mul64_wide f4 d419) in
-  let s4 = (mul64_wide d0 f4) +. (mul64_wide d1 f3) +. (mul64_wide f2 f2) in
-  out.(0ul) <- s0;
-  out.(1ul) <- s1;
-  out.(2ul) <- s2;
-  out.(3ul) <- s3;
-  out.(4ul) <- s4
+  let (o0,o1,o2,o3,o4) = fsqr5 (f0,f1,f2,f3,f4) in
+  out.(size 0) <- o0;
+  out.(size 1) <- o1;
+  out.(size 2) <- o2;
+  out.(size 3) <- o3;
+  out.(size 4) <- o4
 
+val fsqr2:
+    out1:felem
+  -> out2:felem
+  -> f1:felem
+  -> f2:felem
+  -> Stack unit
+    (requires fun h ->
+      live h out1 /\ live h out2 /\ live h f1 /\ live h f2 /\
+      felem_fits h f1 (9, 10, 9, 9, 9) /\
+      felem_fits h f2 (9, 10, 9, 9, 9) /\
+      disjoint out1 out2)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out1 |+| loc out2) h0 h1 /\
+      felem_fits h1 out1 (1, 2, 1, 1, 1) /\
+      felem_fits h1 out2 (1, 2, 1, 1, 1))
 [@ CInline]
-val fsqr: out:felem -> f1:felem -> Stack unit
-                   (requires (fun h -> live h out /\ live h f1))
-		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
-[@ CInline]
-let fsqr out f = admit();
-  push_frame();
-  let tmp_w = create_wide () in
-  fsqr_ tmp_w f;
-  carry_wide out tmp_w;
-  pop_frame()
+let fsqr2 out1 out2 f1 f2 =
+  let f10 = f1.(0ul) in
+  let f11 = f1.(1ul) in
+  let f12 = f1.(2ul) in
+  let f13 = f1.(3ul) in
+  let f14 = f1.(4ul) in
 
-[@ CInline]
-val fsqr2: out1:felem -> out2:felem -> f1:felem -> f2:felem -> Stack unit
-                   (requires (fun h -> live h out1 /\ live h out2 /\ live h f1 /\ live h f2))
-		   (ensures (fun h0 _ h1 -> modifies (loc out1 |+| loc out2) h0 h1))
-[@ CInline]
-let fsqr2 out1 out2 f1 f2 = admit();
-  push_frame();
-  let tmp_w1 = create_wide () in
-  let tmp_w2 = create_wide () in
-  fsqr_ tmp_w1 f1;
-  fsqr_ tmp_w2 f2;
-  carry_wide out1 tmp_w1;
-  carry_wide out2 tmp_w2;
-  pop_frame()
+  let f20 = f2.(0ul) in
+  let f21 = f2.(1ul) in
+  let f22 = f2.(2ul) in
+  let f23 = f2.(3ul) in
+  let f24 = f2.(4ul) in
+
+  let ((o10,o11,o12,o13,o14),(o20,o21,o22,o23,o24)) = fsqr25 (f10,f11,f12,f13,f14) (f20,f21,f22,f23,f24) in
+  out1.(size 0) <- o10;
+  out1.(size 1) <- o11;
+  out1.(size 2) <- o12;
+  out1.(size 3) <- o13;
+  out1.(size 4) <- o14;
+
+  out2.(size 0) <- o20;
+  out2.(size 1) <- o21;
+  out2.(size 2) <- o22;
+  out2.(size 3) <- o23;
+  out2.(size 4) <- o24
 
 inline_for_extraction
 val load_felem:
