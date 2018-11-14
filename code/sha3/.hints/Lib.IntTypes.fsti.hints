@@ -1,5 +1,5 @@
 [
-  "hELõ†\u0000uQ“6zt’Ú\u0000»",
+  "Ð÷Ô\u001blÑöí*}äf¢ÁÖ\"",
   [
     [
       "Lib.IntTypes.bits",
@@ -105,16 +105,18 @@
       "604d4614166ab8a3b9cf7334ec9d2167"
     ],
     [
-      "Lib.IntTypes.uint_v_pub_lemma",
+      "Lib.IntTypes.uint_v",
       1,
       2,
       1,
       [
-        "@query", "constructor_distinct_Lib.IntTypes.PUB",
-        "equality_tok_Lib.IntTypes.PUB@tok", "equation_Lib.IntTypes.uint_t"
+        "@MaxIFuel_assumption", "@query", "disc_equation_Lib.IntTypes.PUB",
+        "disc_equation_Lib.IntTypes.SEC", "equation_Lib.IntTypes.uint_t",
+        "fuel_guarded_inversion_Lib.IntTypes.secrecy_level",
+        "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "ca9bb061399b51d9eaba4726075accd6"
+      "3624813fc70c87300901d64af543e9b9"
     ],
     [
       "Lib.IntTypes.uintv_extensionality",
@@ -123,7 +125,7 @@
       1,
       [ "@query" ],
       0,
-      "71d9ff9b4cbb4c39965ae3ee50383b1b"
+      "738d94ae58eb61542dc8a35ff3673756"
     ],
     [
       "Lib.IntTypes.secret",
@@ -132,7 +134,7 @@
       1,
       [ "@query" ],
       0,
-      "2d1f8d8daa85326c0300337efd6569f4"
+      "16bbbd54cb49ea7b31399e5f7d43e917"
     ],
     [
       "Lib.IntTypes.uint",
@@ -141,7 +143,7 @@
       1,
       [ "@query" ],
       0,
-      "b98375b3e28ebf30f9f05037bc73125e"
+      "075c06945f03d555ff10a0260ff333ea"
     ],
     [
       "Lib.IntTypes.u8",
@@ -150,7 +152,7 @@
       1,
       [ "@query" ],
       0,
-      "9950ffb64a66da93b605d25af1fff51b"
+      "2b627d5701beadc5202f4cbcbc2846f9"
     ],
     [
       "Lib.IntTypes.u16",
@@ -159,7 +161,7 @@
       1,
       [ "@query" ],
       0,
-      "0ecce5a69874fcf222d8e1414d12c153"
+      "4040c82a20da93ebbc17d687f9894811"
     ],
     [
       "Lib.IntTypes.u32",
@@ -168,7 +170,7 @@
       1,
       [ "@query" ],
       0,
-      "3fcc0ce3ce5b1b7c895c2eadfa94d443"
+      "f6d81180d769abf826fd34f3c7dd7c86"
     ],
     [
       "Lib.IntTypes.u64",
@@ -177,7 +179,7 @@
       1,
       [ "@query" ],
       0,
-      "fc5a6e6be886c753dc58cf0a10816647"
+      "f5da60a50afdf1fef76e23b56ab7b56d"
     ],
     [
       "Lib.IntTypes.u128",
@@ -186,7 +188,7 @@
       1,
       [ "@query" ],
       0,
-      "51f68078e09d9e241f752297efb9173a"
+      "f6442b48f7a04c9b377ff8782310a3c0"
     ],
     [
       "Lib.IntTypes.size",
@@ -195,20 +197,25 @@
       1,
       [ "@query" ],
       0,
-      "bea7f2d39aa1ffae7c8ff71f08e584c0"
+      "d18720ae5f254eea65a747d0f40a733d"
     ],
     [
-      "Lib.IntTypes.size_v",
+      "Lib.IntTypes.size_v_size_lemma",
       1,
       2,
       1,
-      [
-        "@query", "equality_tok_Lib.IntTypes.U32@tok",
-        "lemma_Lib.IntTypes.uint_v_pub_lemma",
-        "typing_tok_Lib.IntTypes.U32@tok"
-      ],
+      [ "@query" ],
       0,
-      "6b70e5d129a1d6e2ca29cd99c2f8d85b"
+      "5d671c4fe302151b4de25e8eeaf07fc2"
+    ],
+    [
+      "Lib.IntTypes.uint_v_size_lemma",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "f687e81943cd6e2f97a657ff5a616b09"
     ],
     [
       "Lib.IntTypes.byte",
@@ -217,7 +224,7 @@
       1,
       [ "@query" ],
       0,
-      "0cf99d3c4cf9e6e6917c5ea773271bd7"
+      "9bb461fe62d0707bac412792f7c2d5e4"
     ],
     [
       "Lib.IntTypes.byte_v",
@@ -232,25 +239,14 @@
         "constructor_distinct_Lib.IntTypes.PUB",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
-        "equation_Lib.IntTypes.uint_t", "equation_Prims.nat",
+        "equation_Lib.IntTypes.uint_v", "equation_Prims.nat",
         "function_token_typing_FStar.UInt32.n",
-        "lemma_Lib.IntTypes.pow2_values",
-        "lemma_Lib.IntTypes.uint_v_pub_lemma",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "757da2d0504bf0f94808c0a76af7cd8b"
-    ],
-    [
-      "Lib.IntTypes.size_to_uint32",
-      1,
-      2,
-      1,
-      [ "@query" ],
-      0,
-      "b6db1eaaf18c3a60a6e94278d4a3ca7b"
+      "48fa847321cbf70e486458895d47ca50"
     ],
     [
       "Lib.IntTypes.byte_to_uint8",
@@ -268,7 +264,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6ce5d56e2de834439bb3acf192bca09c"
+      "0e7ebd5b64c3ece040556f53ab2d7001"
     ],
     [
       "Lib.IntTypes.nat_to_uint",
@@ -277,7 +273,7 @@
       1,
       [ "@query" ],
       0,
-      "471c9aafc5e400615a8dbb557c061205"
+      "e289f3938b8fce73e07ee95ed4341e43"
     ],
     [
       "Lib.IntTypes.cast",
@@ -286,7 +282,7 @@
       1,
       [ "@query" ],
       0,
-      "cec8328eb882f86487dfcd75328190c1"
+      "79a83369a5f87ab01a9316ab89d3dbbc"
     ],
     [
       "Lib.IntTypes.to_u8",
@@ -300,7 +296,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "9543f7223af31a49705b0dc55524394e"
+      "73fe31c480d11c9025f38ec5d4b1ecda"
     ],
     [
       "Lib.IntTypes.to_u16",
@@ -314,7 +310,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "c4a78393933e8acdfaee98368a778e5a"
+      "1f488554c11290aa9a52455f79b71134"
     ],
     [
       "Lib.IntTypes.to_u32",
@@ -328,7 +324,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "1563fe674c90cf40e9096ae915f95082"
+      "6a5b9fe9834f679d8ca866e7d212277f"
     ],
     [
       "Lib.IntTypes.to_u64",
@@ -342,7 +338,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "0a2d406685f4e9693d0b0dbbde76d618"
+      "79b5b2b110ba4ab45d3009c0f726e188"
     ],
     [
       "Lib.IntTypes.to_u128",
@@ -356,7 +352,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "d4cbcdcf4c1ef5e7aaf3e447255d90c9"
+      "7af687ceca9cee353a5a4785427ed928"
     ],
     [
       "Lib.IntTypes.add_mod_lemma",
@@ -365,7 +361,7 @@
       1,
       [ "@query" ],
       0,
-      "7d48d7a59e2b4dd7ebe92bdcfe2160b7"
+      "5d2f938571f57d7e941e632e330a5fcf"
     ],
     [
       "Lib.IntTypes.mul_mod",
@@ -374,7 +370,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "48c487a4df04ec2de75b0c2e1e657662"
+      "d24cf83190f24a2ee2c5e3d07dcfd0fd"
     ],
     [
       "Lib.IntTypes.mul_mod_lemma",
@@ -383,7 +379,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "10bd9938e0abb8d76444e406a8c19e1f"
+      "37c1cc83ed1dc051add6d8a092dd24a5"
     ],
     [
       "Lib.IntTypes.mul",
@@ -392,7 +388,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "e09dea9a0e8dc1b5cc3876c03d72d954"
+      "2e0a919caf80ab278732849024e70d4e"
     ],
     [
       "Lib.IntTypes.mul_lemma",
@@ -401,7 +397,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "959124416ea6c91390947396d952d8de"
+      "35716322328acf65c14329506e282a22"
     ],
     [
       "Lib.IntTypes.sub_mod_lemma",
@@ -410,7 +406,7 @@
       1,
       [ "@query" ],
       0,
-      "2ba40fe2916bb7f5e6650566c05ff584"
+      "e02b06ea417bb0e961718e4a9247eb46"
     ],
     [
       "Lib.IntTypes.shift_right_lemma",
@@ -419,7 +415,7 @@
       1,
       [ "@query" ],
       0,
-      "e155a8ef03452dfd8bbed7cdc8a74166"
+      "522270c8472ca0cb5299d5c6b548a146"
     ],
     [
       "Lib.IntTypes.shift_left_lemma",
@@ -428,7 +424,7 @@
       1,
       [ "@query" ],
       0,
-      "cf7e1bc89a19fd071444f3318f397c06"
+      "654054f4af357ddbe416403e3588fa33"
     ],
     [
       "Lib.IntTypes.mod_mask",
@@ -448,7 +444,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "d15f2b70d6fa048113cba88139a53806"
+      "ead23dda34cf9b73c354b5129f9949be"
     ],
     [
       "Lib.IntTypes.mod_mask_lemma",
@@ -457,7 +453,7 @@
       1,
       [ "@query" ],
       0,
-      "eaecea28753df72b96914147c18673e9"
+      "fb6ae5e70c3d5ed4d9b5177c6ade2d70"
     ],
     [
       "Lib.IntTypes.op_Star_Bang",
@@ -466,7 +462,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "6c042e14dd015a4f52ab0ef139c826fb"
+      "a76a69dffde572978402236d830d10d3"
     ],
     [
       "Lib.IntTypes.op_Star_Dot",
@@ -475,7 +471,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "5a6e7dbbcaab8dec50168479bf1831de"
+      "704f117da87455c6cc8245dfbc50bcc5"
     ],
     [
       "Lib.IntTypes.div",
@@ -488,7 +484,7 @@
         "refinement_interpretation_Lib.IntTypes_Tm_refine_ee4ad4abf83c6129aeada9926e37ed33"
       ],
       0,
-      "1b5bf99251e8fa52e53c558c8e9f0fed"
+      "fb4d3c59204b6be3a8dca0d9384c39eb"
     ],
     [
       "Lib.IntTypes.div_lemma",
@@ -501,7 +497,7 @@
         "refinement_interpretation_Lib.IntTypes_Tm_refine_4a34935eeba50b27dccb698391a74562"
       ],
       0,
-      "77b50d1c15c870015c8a828382b3517a"
+      "9881490c3834462c4938724ee519f1bb"
     ],
     [
       "Lib.IntTypes.mod",
@@ -514,7 +510,7 @@
         "refinement_interpretation_Lib.IntTypes_Tm_refine_ee4ad4abf83c6129aeada9926e37ed33"
       ],
       0,
-      "9c8dc3710d299e8e4d109efb7b9983ae"
+      "fa808430865977f00659df0061a80aa0"
     ],
     [
       "Lib.IntTypes.mod_lemma",
@@ -527,7 +523,7 @@
         "refinement_interpretation_Lib.IntTypes_Tm_refine_4a34935eeba50b27dccb698391a74562"
       ],
       0,
-      "1d40ee9cea15d3f1b8a52759a1212b60"
+      "a3f79a9f95fe559a631e23a236612d88"
     ],
     [
       "Lib.IntTypes.eq_lemma",
@@ -541,7 +537,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "b0745c40757e5299b6d4dc1c0fdf0ba1"
+      "ff1423e9c888186419a93094e44d528e"
     ],
     [
       "Lib.IntTypes.ne_lemma",
@@ -555,7 +551,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "7cb7ab8e4ec792dda75f49520dc4f8ce"
+      "ff026d1076ca3a2a70499ae97e9c015b"
     ],
     [
       "Lib.IntTypes.op_Slash_Dot",
@@ -564,7 +560,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "4f4d02ca00d21343462964312073a01e"
+      "77d36b38801508df93cb9d57227dd22a"
     ],
     [
       "Lib.IntTypes.op_Percent_Dot",
@@ -573,7 +569,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "d39c1e48bdf088fa0aa9041d7127f52b"
+      "c4611aeb3387d359d555013f2fd57a84"
     ]
   ]
 ]

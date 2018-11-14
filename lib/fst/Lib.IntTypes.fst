@@ -19,12 +19,12 @@ let sec_int_t (t:inttype) = pub_int_t t
 
 let sec_int_v #t (u:sec_int_t t) = pub_int_v #t u
 
+(*
 let uint_v #t #l (u:uint_t t l) : n:nat{n <= maxint t} =
   match l with
   | PUB -> pub_int_v #t u
   | SEC -> sec_int_v #t u
-
-let uint_v_pub_lemma #t u = ()
+*)
 
 let uintv_extensionality #t #l a b =
   match t with
@@ -65,13 +65,13 @@ let u64_uL x = x
 let u128 x : uint128 = FStar.UInt128.uint64_to_uint128 (u64 x)
 
 inline_for_extraction
-let size_ x : uint_t U32 PUB = UInt32.uint_to_t x
-
-inline_for_extraction
 let byte_ x : uint_t U8 PUB = UInt8.uint_to_t x
 
 inline_for_extraction
-let size x = size_ x
+let size x : uint_t U32 PUB = UInt32.uint_to_t x
+
+let size_v_size_lemma s = ()
+let uint_v_size_lemma s = ()
 
 inline_for_extraction
 let byte x = byte_ x
@@ -446,3 +446,4 @@ let gte #t x y =
   | U128 -> UInt128.gte x y
 
 let gte_lemma #t x y = ()
+

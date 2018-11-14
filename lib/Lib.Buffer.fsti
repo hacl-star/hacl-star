@@ -20,9 +20,6 @@ module Loop = Lib.LoopCombinators
 
 #set-options "--z3rlimit 15"
 
-inline_for_extraction noextract
-let v = size_v
-
 type buftype =
   | MUT
   | IMMUT

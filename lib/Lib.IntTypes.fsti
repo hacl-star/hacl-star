@@ -98,21 +98,11 @@ let uint_t (t:inttype) (l:secrecy_level) =
   | PUB -> pub_int_t t
   | SEC -> sec_int_t t
 
-val uint_v: #t:inttype -> #l:secrecy_level -> u:uint_t t l -> n:nat{n <= maxint t}
-(* WAS:
-unfold
 let uint_v #t #l (u:uint_t t l) : n:nat{n <= maxint t} =
   match l with
   | PUB -> pub_int_v #t u
   | SEC -> sec_int_v #t u
-*)
 
-
-val uint_v_pub_lemma: #t:inttype -> u:uint_t t PUB ->
-  Lemma
-  (ensures (uint_v #t u == pub_int_v #t u))
-  [SMTPat (uint_v #t #PUB u)]
-  
 val uintv_extensionality:
    #t:inttype
  -> #l:secrecy_level
@@ -201,10 +191,23 @@ inline_for_extraction
 unfold type size_nat = n:nat{n <= max_size_t}
 
 inline_for_extraction
-val size: n:size_nat -> u:size_t{uint_v u == n}
+val size: n:size_nat -> u:size_t{uint_v u == n} 
 
-inline_for_extraction
-let size_v (s:size_t) : n:size_nat{uint_v s == n} = pub_int_v s
+unfold inline_for_extraction 
+let size_v (s:size_t) = uint_v #U32 #PUB s
+
+unfold inline_for_extraction noextract
+let v #t #l x = uint_v #t #l x
+
+val size_v_size_lemma: s:size_nat ->
+  Lemma
+  (ensures (size_v (size s) == s))
+  [SMTPat (size_v (size s))]
+
+val uint_v_size_lemma: s:size_nat ->
+  Lemma
+  (ensures (uint_v (size s) == s))
+  [SMTPat (uint_v (size s))]
 
 inline_for_extraction
 val byte: n:nat{n < 256} -> u:byte_t{uint_v u == n}
@@ -213,7 +216,7 @@ inline_for_extraction
 let byte_v (s:byte_t) : n:size_nat{uint_v s == n} = pub_int_v (s <: pub_int_t U8)
 
 inline_for_extraction
-val size_to_uint32: s:size_t -> u:uint32{u == u32 (size_v s)}
+val size_to_uint32: s:size_t -> u:uint32{u == u32 (uint_v s)}
 
 inline_for_extraction
 val byte_to_uint8: s:byte_t -> u:uint8{u == u8 (byte_v s)}
@@ -264,7 +267,7 @@ val add: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:uint_t t l{uint_v a + uint_v b < modulus t}
   -> uint_t t l
-  
+   
 inline_for_extraction
 val add_lemma: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
