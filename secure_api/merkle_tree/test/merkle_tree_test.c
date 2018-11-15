@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
   // Creation
   uint8_t *ih = init_hash();
-  mt_p mt = create_mt(ih);
+  mt_p mt = mt_create(ih);
   free_hash(ih);
 
   printf("A Merkle tree has been created!\n");
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 
     /* printf("Root: %d\n", root[0]); */
     
-    bool verified = mt_verify(k, j, path, root);
+    bool verified = mt_verify(mt, k, j, path, root);
     printf("Verification with k(%d), j(%d): %d\n", k, j, verified);
 
     clear_path(path);
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
   for (uint32_t k = flush_to; k <= num_elts; k++) {
     int j = mt_get_path(mt, k, path, root);
 
-    bool verified = mt_verify(k, j, path, root);
+    bool verified = mt_verify(mt, k, j, path, root);
     printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
 
     clear_path(path);
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
   for (uint32_t k = flush_to; k <= num_elts; k++) {
     int j = mt_get_path(mt, k, path, root);
 
-    bool verified = mt_verify(k, j, path, root);
+    bool verified = mt_verify(mt, k, j, path, root);
     printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
 
     clear_path(path);
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
   for (uint32_t k = flush_to; k <= num_elts; k++) {
     int j = mt_get_path(mt, k, path, root);
 
-    bool verified = mt_verify(k, j, path, root);
+    bool verified = mt_verify(mt, k, j, path, root);
     printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
 
     clear_path(path);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
   printf("All merkle paths are verified!\n");
 
   // Free
-  free_mt(mt);
+  mt_free(mt);
   free_path(path);
   free_hash(root);
 
