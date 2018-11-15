@@ -170,6 +170,7 @@ vale.build:
 # happening for anyone who wants to actually test ci. Removing it -- if this is
 # really important, it should be done at the level of the CI system.
 ci: providers.build secure_api.build # .clean-banner .clean-git .clean-snapshots
+	$(MAKE) extract-all
 	$(MAKE) build-make
 	$(MAKE) test-all
 	$(MAKE) package
