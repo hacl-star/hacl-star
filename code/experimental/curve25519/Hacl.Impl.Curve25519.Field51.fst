@@ -189,7 +189,7 @@ let fsub out f1 f2 =
   out.(3ul) <- f13 +! u64 0x3ffffffffffff8 -! f23;
   out.(4ul) <- f14 +! u64 0x3ffffffffffff8 -! f24
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 10"
 
 val smul_felem:
     out:felem_wide
@@ -212,6 +212,7 @@ let smul_felem out u1 f2 =
   out.(size 2) <- mul64_wide u1 f22;
   out.(size 3) <- mul64_wide u1 f23;
   out.(size 4) <- mul64_wide u1 f24
+
 
 val mul_felem:
     out:felem_wide
