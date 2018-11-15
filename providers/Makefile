@@ -59,10 +59,18 @@ test:
 # - verify every F* file in parallel to generate .checked files
 # - extract each .checked file into a .krml file in parallel
 
+VALE_NAMESPACES='X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
+  'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
+  Workarounds 'Math.*' Interop TypesNative_s
+
+# TODO: remove the exceptions for old-style HACL from already_cached
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi
+  $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi \
+  --already_cached 'FStar LowStar C Spec Hacl' \
+  $(addprefix --already_cached ,$(VALE_NAMESPACES)) \
+  --already_cached '-Hacl.UInt -C.Compat'
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
 
@@ -76,15 +84,8 @@ include .depend
 
 ADMIT=false
 
-# Admit ulib + Vale-related files, verified separately with different Z3
-# options.
-$(CACHE_DIR)/FStar.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/X64.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/Arch.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/Words.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/Vale.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/Collections.%.fst.checked: ADMIT=true
-
+# Thanks to --already_cached, this Makefile should never attempt to produce any
+# Vale file or F*/ulib file
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
 	  --admit_smt_queries $(ADMIT) \
@@ -103,9 +104,7 @@ ifneq (,$(EVEREST_WINDOWS))
 KOPTS		+=-falloca -ftail-calls
 endif
 
-VALE_BUNDLES=$(addprefix -bundle , 'X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
-  'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
-  Workarounds 'Math.*' Interop TypesNative_s)
+VALE_BUNDLES=$(addprefix -bundle ,$(VALE_NAMESPACES))
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
