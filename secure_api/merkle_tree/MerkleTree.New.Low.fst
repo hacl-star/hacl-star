@@ -28,6 +28,7 @@ module RVI = LowStar.Regional.Instances
 
 module S = FStar.Seq
 
+module U16 = FStar.UInt16
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module U8 = FStar.UInt8
@@ -2550,10 +2551,15 @@ let mt_verify mt k j mtr p rt =
   r
 
 
-
 /// Serialization
 
 private let has_space (buf:uint8_p) (pos:uint32_t) (n:uint32_t) = pos < uint32_32_max - n && (pos + n) < B.len buf
+
+private let serialize_bool (x:bool) (buf:uint8_p) (pos:uint32_t{has_space buf pos 1ul}): HST.ST (r:uint32_t{r = pos + 1ul})
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
+= B.upd buf pos (if x then 1uy else 0uy);
+  pos + 1ul
 
 private let serialize_uint8_t (x:uint8_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 1ul}): HST.ST (r:uint32_t{r = pos + 1ul})
   (requires (fun h0 -> B.live h0 buf))
@@ -2564,13 +2570,13 @@ private let serialize_uint8_t (x:uint8_t) (buf:uint8_p) (pos:uint32_t{has_space 
 private let serialize_uint16_t (x:uint16_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 2ul}): HST.ST (r:uint32_t{r = pos + 2ul})
   (requires (fun h0 -> B.live h0 buf))
   (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
-= let p1 = serialize_uint8_t (Int.Cast.uint16_to_uint8 (UInt16.shift_right x 8ul)) buf pos in
+= let p1 = serialize_uint8_t (Int.Cast.uint16_to_uint8 (U16.shift_right x 8ul)) buf pos in
   serialize_uint8_t (Int.Cast.uint16_to_uint8 x) buf p1
 
 private let serialize_uint32_t (x:uint32_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 4ul}): HST.ST (r:uint32_t{r = pos + 4ul})
   (requires (fun h0 -> B.live h0 buf))
   (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
-= let pos = serialize_uint16_t (Int.Cast.uint32_to_uint16 (UInt32.shift_right x 16ul)) buf pos in
+= let pos = serialize_uint16_t (Int.Cast.uint32_to_uint16 (U32.shift_right x 16ul)) buf pos in
   serialize_uint16_t (Int.Cast.uint32_to_uint16 x) buf pos
 
 private let serialize_uint64_t (x:uint64_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 8ul}): HST.ST (r:uint32_t{r = pos + 8ul})
@@ -2582,6 +2588,43 @@ private let serialize_uint64_t (x:uint64_t) (buf:uint8_p) (pos:uint32_t{has_spac
 private let serialize_offset_t = serialize_uint64_t
 private let serialize_index_t = serialize_uint32_t
 
+
+private let deserialize_bool (buf:uint8_p) (pos:uint32_t{has_space buf pos 1ul}): HST.ST (uint32_t & bool)
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun _ _ h1 -> B.live h1 buf))
+= pos + 1ul,
+  (match B.index buf 0ul with
+   | 0uy -> false
+   | _ -> true)
+
+private let deserialize_uint8_t (buf:uint8_p) (pos:uint32_t{has_space buf pos 1ul}): HST.ST (uint32_t & uint8_t)
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun _ _ h1 -> B.live h1 buf))
+= pos + 1ul, B.index buf 0ul
+
+private let deserialize_uint16_t (buf:uint8_p) (pos:uint32_t{has_space buf pos 2ul}): HST.ST (uint32_t & uint16_t)
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun _ _ h1 -> B.live h1 buf))
+= let _, b0 = deserialize_uint8_t buf pos in
+  let _, b1 = deserialize_uint8_t buf (pos + 1ul) in
+  pos + 2ul, (U16.shift_left (Int.Cast.uint8_to_uint16 b0) 8ul) + Int.Cast.uint8_to_uint16 b1
+
+private let deserialize_uint32_t (buf:uint8_p) (pos:uint32_t{has_space buf pos 4ul}): HST.ST (uint32_t & uint32_t)
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun _ _ h1 -> B.live h1 buf))
+= let _, b0 = deserialize_uint16_t buf pos in
+  let _, b1 = deserialize_uint16_t buf (pos + 2ul) in
+  pos + 4ul, (U32.shift_left (Int.Cast.uint16_to_uint32 b0) 16ul) + Int.Cast.uint16_to_uint32 b1
+
+private let deserialize_uint64_t (buf:uint8_p) (pos:uint32_t{has_space buf pos 8ul}): HST.ST (uint32_t & uint64_t)
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun _ _ h1 -> B.live h1 buf))
+= let _, b0 = deserialize_uint32_t buf pos in
+  let _, b1 = deserialize_uint32_t buf (pos + 2ul) in
+  8ul, (U64.shift_left (Int.Cast.uint32_to_uint64 b0) 32ul) + Int.Cast.uint32_to_uint64 b1
+
+private let deserialize_offset_t = deserialize_uint64_t
+private let deserialize_index_t = deserialize_uint32_t
 
 // | MT: offset:offset_t ->
 //       i:index_t -> j:index_t{j >= i /\ add64_fits offset j} ->
@@ -2602,10 +2645,25 @@ let mt_serialize mt output =
   let mtv = !*mt in
   let pos = serialize_uint32_t hash_size output 0ul in
   let pos = serialize_offset_t (MT?.offset mtv) output pos in
+  let pos = serialize_uint32_t (MT?.i mtv) output pos in
+  let pos = serialize_uint32_t (MT?.j mtv) output pos in
+  // hs
+  // rhs
+  let pos = serialize_bool (MT?.rhs_ok mtv) output pos in
+  // mroot
   pos
 
 val mt_deserialize: input:uint8_p -> mt:mt_p -> HST.ST bool
   (requires (fun h0 -> B.live h0 input))
   (ensures (fun _ _ h1 -> B.live h1 input))
 let mt_deserialize input mt =
+  assume (B.len input = uint32_32_max);
+  let _, hash_size = deserialize_uint32_t input 0ul in
+  let _, offset = deserialize_offset_t input 8ul in
+  let _, i = deserialize_index_t input 12ul in
+  let _, j = deserialize_index_t input 16ul in
+  // hs
+  // rhs
+  let _, rhs_ok = deserialize_bool input 32ul in
+  // mroot
   false
