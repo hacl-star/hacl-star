@@ -91,7 +91,7 @@ int main() {
   bool ok = true;
 
   Hacl_Curve25519_64_ecdh(comp,scalar1,pub1);
-  printf("Curve25519 (64-bit) Result:\n");
+  printf("Curve25519 (Vale 64-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 32; i++)
     printf("%02x",comp[i]);
@@ -107,7 +107,7 @@ int main() {
   else printf("**FAILED**\n");
 
   Hacl_Curve25519_64_ecdh(comp,scalar2,pub2);
-  printf("Curve25519 (64-bit) Result:\n");
+  printf("Curve25519 (Vale 64-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 32; i++)
     printf("%02x",comp[i]);
@@ -123,7 +123,7 @@ int main() {
   else printf("**FAILED**\n");
 
   x25519_shared_secret_x64(comp,pub1,scalar1);
-  printf("Curve25519 (64-bit) Result:\n");
+  printf("Curve25519 (RFC7794 Original 64-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 32; i++)
     printf("%02x",comp[i]);
@@ -139,7 +139,7 @@ int main() {
   else printf("**FAILED**\n");
 
   x25519_shared_secret_x64(comp,pub2,scalar2);
-  printf("Curve25519 (64-bit) Result:\n");
+  printf("Curve25519 (RFC7794 Original 64-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 32; i++)
     printf("%02x",comp[i]);
@@ -193,7 +193,7 @@ int main() {
   double time = (((double)tdiff1) / CLOCKS_PER_SEC);
   double nsigs = ((double)ROUNDS) / time;
   double nbytes = ((double)count/1000000.0) / time;
-  printf("Curve25519 (64-bit) PERF:\n");
+  printf("Curve25519 (Vale 64-bit) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 "s (%.2fus/byte)\n",count,(uint64_t)time,((double)time * 1000000.0)/count);
   printf("bw %8.2f MB/s\n",nbytes);
@@ -202,7 +202,7 @@ int main() {
   time = (((double)tdiff2) / CLOCKS_PER_SEC);
   nsigs = ((double)ROUNDS) / time;
   nbytes = ((double)count/1000000.0) / time;
-  printf("Curve25519 (RFC7748) PERF:\n");
+  printf("Curve25519 (RFC7748 Original) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff2,(double)cdiff2/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 "s (%.2fus/byte)\n",count,(uint64_t)time,((double)time * 1000000.0)/count);
   printf("bw %8.2f MB/s\n",nbytes);

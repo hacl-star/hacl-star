@@ -55,7 +55,6 @@ curve25519_64.exe: curve64-c/Hacl_Curve25519_64.c
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve64-test.c -o curve25519_64.exe vale25519.o fp25519.o x25519.o
 	./curve25519_64.exe
 
-
 test:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1

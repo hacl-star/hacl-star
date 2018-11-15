@@ -186,11 +186,12 @@ let fsqr #s out f1 =
   | M64 -> F64.fsqr out f1 
 
 
-[@ CInline]
+
+inline_for_extraction
 val fsqr2: #s:field_spec -> out:felem2 s -> f:felem2 s -> Stack unit
                    (requires (fun h -> live h out /\ live h f))
 		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
-[@ CInline]
+inline_for_extraction
 let fsqr2 #s out f = 
   match s with
   | M51 -> F51.fsqr2 out f
