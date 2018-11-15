@@ -148,7 +148,8 @@ providers:
 # CI
 #
 
-specs.build: extract-specs extract-all
+specs.build:
+	+$(MAKE) -C specs
 
 code.build: specs.build
 	+$(MAKE) -C code clean-c
