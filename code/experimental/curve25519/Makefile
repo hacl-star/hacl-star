@@ -37,11 +37,11 @@ curve51-c/Hacl_Curve25519_51.c: curve51-c/out.krml
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_51=*'
 
 curve64-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_64.fst
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c $(CURVE25519_FILES) Hacl.Curve25519_64.fst -skip-translation 
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c $(CURVE25519_FILES) Hacl.Curve25519_64.fst -drop Hacl.Impl.Curve25519.Field64.Core -no-prefix  Hacl.Impl.Curve25519.Field64.Core -skip-translation 
 
 curve64-c/Hacl_Curve25519_64.c: curve64-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_64=*'
+	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_64=*' -drop Hacl.Impl.Curve25519.Field64.Core -no-prefix  Hacl.Impl.Curve25519.Field64.Core -add-include '"vale_25519.h"'
 
 curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve51-test.c -o curve25519_51.exe
