@@ -87,10 +87,6 @@ $(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-$(CACHE_DIR)/Low.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
@@ -212,6 +208,7 @@ snapshot2: $(ALL_SOURCES)
 	cp -R $(GENERATED_DIR)/*.h snapshot
 	for i in $(ALL_SOURCES); do cp $$i snapshot; done
 	for i in $(ALL_TEST_FILES); do cp $$i snapshot; done
+	cp MerkleTree.h snapshot
 
 endif # COMPILE
 

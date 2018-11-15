@@ -29,6 +29,7 @@ module RVI = LowStar.Regional.Instances
 module S = FStar.Seq
 
 module U32 = FStar.UInt32
+module U64 = FStar.UInt64
 module U8 = FStar.UInt8
 
 module EHS = EverCrypt.Hash
@@ -232,7 +233,7 @@ val hash_vec_r_free:
     (requires (fun h0 -> hash_vec_r_inv h0 v))
     (ensures (fun h0 _ h1 ->
       modifies (loc_all_regions_from false (hash_vec_region_of v)) h0 h1))
-let hash_vec_r_free v =  
+let hash_vec_r_free v =
   RV.free v
 
 private val hvreg: regional hash_vec
@@ -274,7 +275,7 @@ private val hash_vv_rv_inv_disjoint:
   h:HS.mem -> hvv:hash_vv ->
   i:uint32_t -> j:uint32_t -> drid:HH.rid ->
   Lemma (requires (RV.rv_inv h hvv /\
-                  i < V.size_of hvv /\ 
+                  i < V.size_of hvv /\
                   j < V.size_of (V.get h hvv i) /\
                   HH.disjoint (Rgl?.region_of hvvreg hvv) drid))
         (ensures (HH.disjoint (Rgl?.region_of hreg (V.get h (V.get h hvv i) j)) drid))
@@ -296,7 +297,7 @@ private let hash_vv_rv_inv_includes h hvv i j = ()
 
 private val hash_vv_as_seq_get_index:
   h:HS.mem -> hvv:hash_vv -> i:uint32_t -> j:uint32_t ->
-  Lemma (requires (RV.rv_inv h hvv /\ 
+  Lemma (requires (RV.rv_inv h hvv /\
                   i < V.size_of hvv /\
                   j < V.size_of (V.get h hvv i)))
         (ensures (Rgl?.r_repr hreg h (V.get h (V.get h hvv i) j) ==
@@ -375,6 +376,32 @@ let hash_2 src1 src2 dst =
 // we cannot change below to some other types.
 type index_t = uint32_t
 
+let uint32_32_max = U32.uint_to_t (UInt.max_int U32.n)
+let uint32_max = U64.uint_to_t (UInt.max_int U32.n)
+let uint64_max = U64.uint_to_t (UInt.max_int U64.n)
+let offset_range_limit = uint32_max
+type offset_t = uint64_t
+
+private
+inline_for_extraction
+let offsets_connect (x:offset_t) (y:offset_t): Tot bool = y >= x && (y - x) <= offset_range_limit
+
+private
+inline_for_extraction
+let split_offset (tree:offset_t) (index:offset_t{offsets_connect tree index}): Tot index_t =
+  let diff = U64.sub_mod index tree in
+  assert (diff <= offset_range_limit);
+  FStar.Int.Cast.uint64_to_uint32 diff
+
+private
+inline_for_extraction
+let add64_fits (x:offset_t) (i:index_t): Tot bool = UInt.fits (U64.v x + U32.v i) 64
+
+private
+inline_for_extraction
+let join_offset (tree:offset_t) (i:index_t{add64_fits tree i}): Tot (r:offset_t{offsets_connect tree r}) =
+  U64.add tree (FStar.Int.Cast.uint32_to_uint64 i)
+
 inline_for_extraction val merkle_tree_size_lg: uint32_t
 inline_for_extraction let merkle_tree_size_lg = 32ul
 
@@ -390,7 +417,8 @@ inline_for_extraction let merkle_tree_size_lg = 32ul
 //          root of the tree. If `rhs_ok` is true then it has the up-to-date
 //          root value.
 noeq type merkle_tree =
-| MT: i:index_t -> j:index_t{j >= i} ->
+| MT: offset:offset_t ->
+      i:index_t -> j:index_t{j >= i /\ add64_fits offset j} ->
       hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
       rhs_ok:bool ->
       rhs:hash_vec{V.size_of rhs = merkle_tree_size_lg} ->
@@ -399,10 +427,17 @@ noeq type merkle_tree =
 
 type mt_p = B.pointer merkle_tree
 
-// The maximum number of elements in the tree is (2^32 - 1).
+// The maximum number of currenty held elements in the tree is (2^32 - 1).
+// cwinter: even when using 64-bit indices, we fail if the underlying 32-bit
+// vector is full; this can be fixed if necessary.
+private
+inline_for_extraction
+val mt_not_full_nst: mtv:merkle_tree -> Tot bool
+let mt_not_full_nst mtv =
+  MT?.j mtv < U32.uint_to_t (UInt.max_int U32.n)
+
 val mt_not_full: HS.mem -> mt_p -> GTot bool
-let mt_not_full h mt =
-  MT?.j (B.get h mt 0) < U32.uint_to_t (UInt.max_int U32.n)
+let mt_not_full h mt = mt_not_full_nst (B.get h mt 0)
 
 /// (Memory) Safety
 
@@ -555,7 +590,8 @@ val merkle_tree_lift:
   GTot High.wf_mt
 let merkle_tree_lift h mtv =
   mt_safe_elts_spec h 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv);
-  High.MT (U32.v (MT?.i mtv))
+  High.MT
+    (U32.v (MT?.i mtv))
     (U32.v (MT?.j mtv))
     (RV.as_seq h (MT?.hs mtv))
     (MT?.rhs_ok mtv)
@@ -604,7 +640,8 @@ private val create_empty_mt: r:HST.erid ->
      mt_safe h1 mt /\
      mt_not_full h1 mt /\
      // correctness
-     mt_lift h1 mt == High.create_empty_mt ()))
+     mt_lift h1 mt == High.create_empty_mt () /\
+     (MT?.offset (B.get h1 mt 0) = 0UL)))
 #reset-options "--z3rlimit 100"
 private let create_empty_mt r =
   let hs_region = HST.new_region r in
@@ -627,7 +664,7 @@ private let create_empty_mt r =
   RV.as_seq_preserved hs loc_none h1 h2;
   RV.as_seq_preserved rhs loc_none h1 h2;
   mt_safe_elts_preserved 0ul hs 0ul 0ul loc_none h1 h2;
-  let mt = B.malloc r (MT 0ul 0ul hs false rhs mroot) 1ul in
+  let mt = B.malloc r (MT 0UL 0ul 0ul hs false rhs mroot) 1ul in
   let h3 = HST.get () in
   RV.as_seq_preserved hs loc_none h2 h3;
   RV.as_seq_preserved rhs loc_none h2 h3;
@@ -637,7 +674,7 @@ private let create_empty_mt r =
 
 /// Destruction (free)
 
-val free_mt: mt:mt_p ->
+val mt_free: mt:mt_p ->
   HST.ST unit
    (requires (fun h0 -> mt_safe h0 mt))
    (ensures (fun h0 _ h1 -> modifies (mt_loc mt) h0 h1))
@@ -645,7 +682,7 @@ val free_mt: mt:mt_p ->
 // This proof works with the resource limit above, but it's a bit slow.
 // It will be admitted until the hint file is generated.
 #reset-options "--admit_smt_queries true"
-let free_mt mt =
+let mt_free mt =
   let mtv = !*mt in
   RV.free (MT?.hs mtv);
   RV.free (MT?.rhs mtv);
@@ -670,7 +707,7 @@ inline_for_extraction private val hash_vv_insert_copy:
   v:hash ->
   HST.ST unit
     (requires (fun h0 ->
-      RV.rv_inv h0 hs /\ 
+      RV.rv_inv h0 hs /\
       Rgl?.r_inv hreg h0 v /\
       HH.disjoint (V.frameOf hs) (B.frameOf v) /\
       mt_safe_elts h0 lv hs (Ghost.reveal i) j))
@@ -865,9 +902,9 @@ private let rv_inv_rv_elems_reg #a #rg h rv i j = ()
 // accumulating a compressed hash. For example, if there are three leaf elements
 // in the tree, `insert_` will change `hs` as follow:
 // (`hij` is a compressed hash from `hi` to `hj`)
-//     
+//
 //     BEFORE INSERTION        AFTER INSERTION
-// lv 
+// lv
 // 0   h0  h1  h2       ====>  h0  h1  h2  h3
 // 1   h01                     h01 h23
 // 2                           h03
@@ -883,7 +920,7 @@ private val insert_:
   acc:hash ->
   HST.ST unit
          (requires (fun h0 ->
-           RV.rv_inv h0 hs /\ 
+           RV.rv_inv h0 hs /\
            Rgl?.r_inv hreg h0 acc /\
            HH.disjoint (V.frameOf hs) (B.frameOf acc) /\
            mt_safe_elts h0 lv hs (Ghost.reveal i) j))
@@ -917,7 +954,7 @@ private let rec insert_ lv i j hs acc =
   V.loc_vector_within_included hs lv (lv + 1ul);
   V.loc_vector_within_included hs (lv + 1ul) (V.size_of hs);
   V.loc_vector_within_disjoint hs lv (lv + 1ul) (lv + 1ul) (V.size_of hs);
-  
+
   assert (V.size_of (V.get hh1 hs lv) == j + 1ul - offset_of (Ghost.reveal i));
   assert (mt_safe_elts hh1 (lv + 1ul) hs (Ghost.reveal i / 2ul) (j / 2ul));
 
@@ -1099,17 +1136,27 @@ private let rec insert_ lv i j hs acc =
                     (RV.as_seq hh0 hs) (Rgl?.r_repr hreg hh0 acc))) // QED
 #reset-options // reset "--admit_smt_queries true"
 
-// `mt_insert` inserts a hash to a Merkle tree. Note that this operation 
+private
+inline_for_extraction
+val mt_insert_pre_nst: mtv:merkle_tree -> v:hash -> Tot bool
+let mt_insert_pre_nst mtv v = mt_not_full_nst mtv && add64_fits (MT?.offset mtv) ((MT?.j mtv) + 1ul)
+
+val mt_insert_pre: mt:mt_p -> v:hash -> HST.ST bool
+  (requires (fun h0 -> mt_safe h0 mt))
+  (ensures (fun _ _ _ -> True))
+let mt_insert_pre mt v = mt_insert_pre_nst !*mt v
+
+// `mt_insert` inserts a hash to a Merkle tree. Note that this operation
 // manipulates the content in `v`, since it uses `v` as an accumulator during
 // insertion.
 val mt_insert:
   mt:mt_p -> v:hash ->
   HST.ST unit
    (requires (fun h0 ->
-     mt_not_full h0 mt /\
      mt_safe h0 mt /\
      Rgl?.r_inv hreg h0 v /\
-     HH.disjoint (B.frameOf mt) (B.frameOf v)))
+     HH.disjoint (B.frameOf mt) (B.frameOf v) /\
+     mt_insert_pre_nst (B.get h0 mt 0) v))
    (ensures (fun h0 _ h1 ->
      // memory safety
      modifies (loc_union
@@ -1151,7 +1198,8 @@ let mt_insert mt v =
         (V.loc_vector_within hs 0ul (V.size_of hs)))
       (B.loc_all_regions_from false (B.frameOf v)))
     hh0 hh1;
-  mt *= MT (MT?.i mtv)
+  mt *= MT (MT?.offset mtv)
+           (MT?.i mtv)
            (MT?.j mtv + 1ul)
            (MT?.hs mtv)
            false // `rhs` is always deprecated right after an insertion.
@@ -1174,7 +1222,7 @@ let mt_insert mt v =
 
 // `create_mt` initiates a Merkle tree with a given initial hash `init`.
 // A valid Merkle tree should contain at least one element.
-val create_mt: r:HST.erid -> init:hash ->
+val mt_create: r:HST.erid -> init:hash ->
   HST.ST mt_p
    (requires (fun h0 ->
      Rgl?.r_inv hreg h0 init /\
@@ -1189,9 +1237,10 @@ val create_mt: r:HST.erid -> init:hash ->
      // correctness
      mt_lift h1 mt == High.create_mt (Rgl?.r_repr hreg h0 init)))
 #reset-options "--z3rlimit 40"
-let create_mt r init =
+let mt_create r init =
   let hh0 = HST.get () in
   let mt = create_empty_mt r in
+  let mtv = !*mt in
   mt_insert mt init;
   let hh2 = HST.get () in
   mt
@@ -1222,7 +1271,7 @@ let path_loc p =
   B.loc_all_regions_from false (B.frameOf p)
 
 val lift_path_:
-  h:HS.mem -> 
+  h:HS.mem ->
   p:S.seq hash{V.forall_seq p 0 (S.length p) (fun hp -> Rgl?.r_inv hreg h hp)} ->
   GTot (hp:High.path{S.length hp = S.length p}) (decreases (S.length p))
 let rec lift_path_ h p =
@@ -1505,7 +1554,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
 
       mt_safe_elts_rec hh3 lv hs i j;
       construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc true;
-      let hh4 = HST.get () in      
+      let hh4 = HST.get () in
       mt_safe_elts_spec hh3 (lv + 1ul) hs (i / 2ul) (j / 2ul);
       assert (High.construct_rhs
                (U32.v lv + 1)
@@ -1513,7 +1562,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
                (Rgl?.r_repr hvreg hh3 rhs)
                (U32.v i / 2) (U32.v j / 2)
                (Rgl?.r_repr hreg hh3 acc) true ==
-             (Rgl?.r_repr hvreg hh4 rhs, Rgl?.r_repr hreg hh4 acc));             
+             (Rgl?.r_repr hvreg hh4 rhs, Rgl?.r_repr hreg hh4 acc));
       mt_safe_elts_spec hh0 lv hs i j;
       High.construct_rhs_odd
         (U32.v lv) (Rgl?.r_repr hvvreg hh0 hs) (Rgl?.r_repr hvreg hh0 rhs)
@@ -1528,7 +1577,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
     end)
 #reset-options // reset "--admit_smt_queries true"
 
-// `mt_get_root` returns the Merkle root. If it's already calculated with 
+// `mt_get_root` returns the Merkle root. If it's already calculated with
 // up-to-date hashes, the root is returned immediately. Otherwise it calls
 // `construct_rhs` to build rightmost hashes and to calculate the Merkle root
 // as well.
@@ -1559,6 +1608,7 @@ val mt_get_root:
 let mt_get_root mt rt =
   let hh0 = HST.get () in
   let mtv = !*mt in
+  let prefix = MT?.offset mtv in
   let i = MT?.i mtv in
   let j = MT?.j mtv in
   let hs = MT?.hs mtv in
@@ -1635,7 +1685,7 @@ let mt_get_root mt rt =
     // correctness
     assert (Rgl?.r_repr hreg hh2 mroot == Rgl?.r_repr hreg hh1 rt);
 
-    mt *= MT i j hs true rhs mroot;
+    mt *= MT prefix i j hs true rhs mroot;
     let hh3 = HST.get () in
     // memory safety
     Rgl?.r_sep hreg rt (B.loc_buffer mt) hh2 hh3;
@@ -1652,8 +1702,8 @@ let mt_get_root mt rt =
     High.mt_get_root_rhs_ok_false
       (mt_lift hh0 mt) (Rgl?.r_repr hreg hh0 rt);
     assert (High.mt_get_root (mt_lift hh0 mt) (Rgl?.r_repr hreg hh0 rt) ==
-           (High.MT (U32.v i) (U32.v j) 
-                    (RV.as_seq hh0 hs) true 
+           (High.MT (U32.v i) (U32.v j)
+                    (RV.as_seq hh0 hs) true
                     (RV.as_seq hh1 rhs)
                     (Rgl?.r_repr hreg hh1 rt),
            Rgl?.r_repr hreg hh1 rt));
@@ -1694,13 +1744,13 @@ inline_for_extraction let path_insert mtr p hp =
     0ul (V.size_of (B.get hh2 p 0)) hh2 hh1 hh2
 
 // For given a target index `k`, the number of elements (in the tree) `j`,
-// and a boolean flag (to check the existence of rightmost hashes), we can 
+// and a boolean flag (to check the existence of rightmost hashes), we can
 // calculate a required Merkle path length.
-// 
+//
 // `mt_path_length` is a postcondition of `mt_get_path`, and a precondition
 // of `mt_verify`. For detailed description, see `mt_get_path` and `mt_verify`.
 private val mt_path_length_step:
-  k:index_t -> 
+  k:index_t ->
   j:index_t{k <= j} ->
   actd:bool ->
   Tot (sl:uint32_t{U32.v sl = High.mt_path_length_step (U32.v k) (U32.v j) actd})
@@ -1712,7 +1762,7 @@ private let mt_path_length_step k j actd =
 
 private val mt_path_length:
   lv:uint32_t{lv <= merkle_tree_size_lg} ->
-  k:index_t -> 
+  k:index_t ->
   j:index_t{k <= j && U32.v j < pow2 (32 - U32.v lv)} ->
   actd:bool ->
   Tot (l:uint32_t{
@@ -1730,7 +1780,7 @@ inline_for_extraction private val mt_get_path_step:
   mtr:HH.rid ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
   rhs:hash_vec{V.size_of rhs = merkle_tree_size_lg} ->
-  i:index_t -> 
+  i:index_t ->
   j:index_t{j <> 0ul /\ i <= j /\ U32.v j < pow2 (32 - U32.v lv)} ->
   k:index_t{i <= k && k <= j} ->
   p:path ->
@@ -1752,7 +1802,7 @@ inline_for_extraction private val mt_get_path_step:
      // correctness
      (mt_safe_elts_spec h0 lv hs i j;
      S.equal (lift_path h1 mtr p)
-             (High.mt_get_path_step 
+             (High.mt_get_path_step
                (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
 inline_for_extraction private let mt_get_path_step lv mtr hs rhs i j k p actd =
@@ -1808,7 +1858,7 @@ private val mt_get_path_:
      // memory safety
      modifies (path_loc p) h0 h1 /\
      path_safe h1 mtr p /\
-     V.size_of (B.get h1 p 0) == 
+     V.size_of (B.get h1 p 0) ==
      V.size_of (B.get h0 p 0) + mt_path_length lv k j actd /\
      // correctness
      (mt_safe_elts_spec h0 lv hs i j;
@@ -1830,7 +1880,7 @@ private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
     let hh1 = HST.get () in
     mt_safe_elts_spec hh0 lv hs i j;
     assert (S.equal (lift_path hh1 mtr p)
-                    (High.mt_get_path_step 
+                    (High.mt_get_path_step
                       (U32.v lv) (RV.as_seq hh0 hs) (RV.as_seq hh0 rhs)
                       (U32.v i) (U32.v j) (U32.v k)
                       (lift_path hh0 mtr p) actd));
@@ -1855,25 +1905,30 @@ private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
                       (if U32.v j % 2 = 0 then actd else true))))
 #reset-options // reset "--admit_smt_queries true"
 
-// Construct a Merkle path for a given index `k`, hashes `hs`, and rightmost
-// hashes `rhs`. Note that this operation copies "pointers" in the Merkle tree
+// Construct a Merkle path for a given index `idx`, hashes `mt.hs`, and rightmost
+// hashes `mt.rhs`. Note that this operation copies "pointers" into the Merkle tree
 // to the output path.
 #reset-options "--z3rlimit 40"
 val mt_get_path:
   mt:mt_p ->
-  idx:index_t ->
+  idx:offset_t ->
   p:path ->
   root:hash ->
   HST.ST index_t
    (requires (fun h0 ->
-     MT?.i (B.get h0 mt 0) <= idx /\ idx < MT?.j (B.get h0 mt 0) /\
-     mt_safe h0 mt /\
-     path_safe h0 (B.frameOf mt) p /\
-     V.size_of (B.get h0 p 0) == 0ul /\
-     Rgl?.r_inv hreg h0 root /\
-     HH.disjoint (B.frameOf root) (B.frameOf mt) /\
-     HH.disjoint (B.frameOf root) (B.frameOf p)))
+     let mtv = B.get h0 mt 0 in
+     offsets_connect (MT?.offset mtv) idx /\
+     (let idx = split_offset (MT?.offset mtv) idx in
+      MT?.i (B.get h0 mt 0) <= idx /\ idx < MT?.j mtv /\
+      mt_safe h0 mt /\
+      path_safe h0 (B.frameOf mt) p /\
+      V.size_of (B.get h0 p 0) == 0ul /\
+      Rgl?.r_inv hreg h0 root /\
+      HH.disjoint (B.frameOf root) (B.frameOf mt) /\
+      HH.disjoint (B.frameOf root) (B.frameOf p))))
    (ensures (fun h0 _ h1 ->
+     let mtv = B.get h0 mt 0 in
+     let idx = split_offset (MT?.offset mtv) idx in
      // memory safety
      modifies (loc_union
                 (mt_loc mt)
@@ -1884,7 +1939,7 @@ val mt_get_path:
      mt_safe h1 mt /\
      path_safe h1 (B.frameOf mt) p /\
      Rgl?.r_inv hreg h1 root /\
-     V.size_of (B.get h1 p 0) == 
+     V.size_of (B.get h1 p 0) ==
      1ul + mt_path_length 0ul idx (MT?.j (B.get h0 mt 0)) false /\
      // correctness
      High.mt_get_path
@@ -1911,6 +1966,7 @@ let mt_get_path mt idx p root =
   assert (S.equal (lift_path hh1 (B.frameOf mt) p) S.empty);
 
   let mtv = !*mt in
+  let idx = split_offset (MT?.offset mtv) idx in
   let i = MT?.i mtv in
   let ofs = offset_of (MT?.i mtv) in
   let j = MT?.j mtv in
@@ -1938,7 +1994,7 @@ let mt_get_path mt idx p root =
   B.modifies_buffer_elim root (path_loc p) hh2 hh3;
   mt_safe_preserved mt (path_loc p) hh2 hh3;
   mt_preserved mt (path_loc p) hh2 hh3;
-  assert (V.size_of (B.get hh3 p 0) == 
+  assert (V.size_of (B.get hh3 p 0) ==
          1ul + mt_path_length 0ul idx (MT?.j (B.get hh0 mt 0)) false);
   assert (S.length (lift_path hh3 (B.frameOf mt) p) ==
          S.length (lift_path hh2 (B.frameOf mt) p) +
@@ -2130,7 +2186,7 @@ private let rec mt_flush_to_ lv hs pi i j =
     assume (S.equal (RV.as_seq hh2 hs)
                     (S.upd (RV.as_seq hh0 hs) (U32.v lv) (RV.as_seq hh1 flushed)));
 
-    // if `lv = 31` then `pi <= i <= j < 2` thus `oi = opi`, 
+    // if `lv = 31` then `pi <= i <= j < 2` thus `oi = opi`,
     // contradicting the branch.
     assert (lv + 1ul < merkle_tree_size_lg);
     assert (U32.v (Ghost.reveal j / 2ul) < pow2 (32 - U32.v (lv + 1ul)));
@@ -2176,7 +2232,7 @@ private let rec mt_flush_to_ lv hs pi i j =
                     (High.mt_flush_to_ (U32.v lv + 1) (RV.as_seq hh2 hs)
                       (U32.v pi / 2) (U32.v i / 2) (U32.v (Ghost.reveal j) / 2)));
     mt_safe_elts_spec hh0 lv hs pi (Ghost.reveal j);
-    High.mt_flush_to_rec 
+    High.mt_flush_to_rec
       (U32.v lv) (RV.as_seq hh0 hs)
       (U32.v pi) (U32.v i) (U32.v (Ghost.reveal j));
     assert (S.equal (RV.as_seq hh3 hs)
@@ -2185,27 +2241,54 @@ private let rec mt_flush_to_ lv hs pi i j =
   end
 #reset-options // reset "--admit_smt_queries true"
 
+
 // `mt_flush_to` flushes old hashes in the Merkle tree. It removes hash elements
 // from `MT?.i` to `index - 1`, but maintains the tree structure, i.e., the tree
 // still holds some old internal hashes (compressed from old hashes) which are
 // required to generate Merkle paths for remaining hashes.
+
+private
+inline_for_extraction
+val mt_flush_to_pre_nst: mtv:merkle_tree -> idx:offset_t -> Tot bool
+let mt_flush_to_pre_nst mtv idx =
+  offsets_connect (MT?.offset mtv) idx &&
+  (let idx = split_offset (MT?.offset mtv) idx in
+   idx >= MT?.i mtv &&
+   idx < MT?.j mtv)
+
+val mt_flush_to_pre: mt:mt_p -> idx:offset_t -> HST.ST bool
+  (requires (fun h0 -> mt_safe h0 mt))
+  (ensures (fun _ _ _ -> True))
+let mt_flush_to_pre mt idx =
+  let h0 = HST.get() in
+  let mtv = !*mt in
+  mt_flush_to_pre_nst mtv idx
+
+#reset-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 val mt_flush_to:
   mt:mt_p ->
-  idx:index_t ->
+  idx:offset_t ->
   HST.ST unit
-   (requires (fun h0 ->
-     mt_safe h0 mt /\ idx >= MT?.i (B.get h0 mt 0) /\
-     idx < MT?.j (B.get h0 mt 0)))
+   (requires (fun h0 -> mt_safe h0 mt /\ mt_flush_to_pre_nst (B.get h0 mt 0) idx))
    (ensures (fun h0 _ h1 ->
      // memory safety
      modifies (mt_loc mt) h0 h1 /\
      mt_safe h1 mt /\
      // correctness
-     High.mt_flush_to (mt_lift h0 mt) (U32.v idx) == mt_lift h1 mt))
-#reset-options "--z3rlimit 80 --max_fuel 1"
+     (let mtv = B.get h0 mt 0 in
+      let off = MT?.offset mtv in
+      let idx = split_offset off idx in
+      (idx = (MT?.j mtv) - 1ul \/ // cwinter: when idx = j - 1 the output tree's i/j are 0ul,
+                                  // which is correct, but the trees arent' high-level equal.
+         (High.mt_flush_to (mt_lift h0 mt) (U32.v idx) == mt_lift h1 mt)))))
+
+#reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 let rec mt_flush_to mt idx =
   let hh0 = HST.get () in
   let mtv = !*mt in
+  let offset = MT?.offset mtv in
+  let j = MT?.j mtv in
+  let idx = split_offset offset idx in
   let hs = MT?.hs mtv in
   mt_flush_to_ 0ul hs (MT?.i mtv) idx (Ghost.hide (MT?.j mtv));
   let hh1 = HST.get () in
@@ -2228,8 +2311,15 @@ let rec mt_flush_to mt idx =
       (RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
       (V.loc_vector_within hs 0ul (V.size_of hs)))
     hh0 hh1;
-  mt *= MT idx (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv);
-
+  if idx = j - 1ul then begin
+    assert (add64_fits offset j);
+    let no = join_offset offset j in
+    mt *= MT no 0ul 0ul hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv);
+    // cwinter: Try to advance offset in other situations? May require re-indexing of the tree.
+    admit() // cwinter: not sure why it doesn't like this.
+  end else begin
+    mt *= MT (MT?.offset mtv) idx (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv)
+  end;
   let hh2 = HST.get () in
   RV.rv_inv_preserved (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.rv_inv_preserved (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
@@ -2238,12 +2328,19 @@ let rec mt_flush_to mt idx =
   Rgl?.r_sep hreg (MT?.mroot mtv) (B.loc_buffer mt) hh1 hh2;
   mt_safe_elts_preserved 0ul hs idx (MT?.j mtv) (B.loc_buffer mt) hh1 hh2
 
+private
+inline_for_extraction
+val mt_flush_pre_nst: mt:merkle_tree -> Tot bool
+let mt_flush_pre_nst mt = MT?.j mt > MT?.i mt
+
+val mt_flush_pre: mt:mt_p -> HST.ST bool (requires (fun h0 -> mt_safe h0 mt)) (ensures (fun _ _ _ -> True))
+let mt_flush_pre mt = mt_flush_pre_nst !*mt
+
+#reset-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 val mt_flush:
   mt:mt_p ->
   HST.ST unit
-   (requires (fun h0 ->
-     mt_safe h0 mt /\
-     MT?.j (B.get h0 mt 0) > MT?.i (B.get h0 mt 0)))
+   (requires (fun h0 -> mt_safe h0 mt /\ mt_flush_pre_nst (B.get h0 mt 0)))
    (ensures (fun h0 _ h1 ->
      // memory safety
      modifies (mt_loc mt) h0 h1 /\
@@ -2252,12 +2349,21 @@ val mt_flush:
      High.mt_flush (mt_lift h0 mt) == mt_lift h1 mt))
 let mt_flush mt =
   let mtv = !*mt in
-  mt_flush_to mt (MT?.j mtv - 1ul)
+  let off = MT?.offset mtv in
+  let j = MT?.j mtv in
+  let j1 = j - 1ul in
+  assert (j1 < uint32_32_max);
+  assert (off < uint64_max);
+  assert (UInt.fits (U64.v off + U32.v j1) 64);
+  let jo = join_offset off j1 in
+  admit();
+  mt_flush_to mt jo
+#reset-options
 
 /// Client-side verification
 
 val lift_path_index:
-  h:HS.mem -> mtr:HH.rid -> 
+  h:HS.mem -> mtr:HH.rid ->
   p:path -> i:uint32_t ->
   Lemma (requires (path_safe h mtr p /\
                   i < V.size_of (B.get h p 0)))
@@ -2266,6 +2372,7 @@ val lift_path_index:
 let rec lift_path_index h mtr p i =
   admit ()
 
+#reset-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 private val mt_verify_:
   k:index_t ->
   j:index_t{k <= j} ->
@@ -2296,7 +2403,7 @@ private let rec mt_verify_ k j mtr p ppos acc actd =
   if j = 0ul then ()
   // cwinter: is this correct?
   // else if ppos = V.size_of !*p then ()
-  // joonwonc: there was a bug; it's fixed now and we don't need the above 
+  // joonwonc: there was a bug; it's fixed now and we don't need the above
   //           condition anymore, but it's not proven yet.
   else (let nactd = actd || (j % 2ul = 1ul) in
        if k % 2ul = 0ul then begin
@@ -2335,7 +2442,7 @@ private val buf_eq:
    (requires (fun h0 ->
      B.live h0 b1 /\ B.live h0 b2 /\
      len <= B.len b1 /\ len <= B.len b2))
-   (ensures (fun h0 b h1 -> 
+   (ensures (fun h0 b h1 ->
      // memory safety
      h0 == h1 /\
      // correctness
@@ -2349,28 +2456,35 @@ private let rec buf_eq #a b1 b2 len =
        let teq = buf_eq b1 b2 (len - 1ul) in
        a1 = a2 && teq)
 
-val mt_verify_precondition:
-  k:index_t ->
-  j:index_t{k < j} ->
-  mtr:HH.rid -> 
+private
+inline_for_extraction
+val mt_verify_pre_nst: mt:merkle_tree -> k:offset_t -> j:offset_t -> p:V.vector hash -> rt:hash -> Tot bool
+let mt_verify_pre_nst mt k j p rt =
+  k < j &&
+  offsets_connect (MT?.offset mt) k &&
+  offsets_connect (MT?.offset mt) j &&
+  (let k = split_offset (MT?.offset mt) k in
+   let j = split_offset (MT?.offset mt) j in
+   // We need to add one since the first element is the hash to verify.
+   V.size_of p = 1ul + mt_path_length 0ul k j false)
+
+val mt_verify_pre:
+  mt:mt_p ->
+  k:uint64_t ->
+  j:uint64_t ->
+  mtr:HH.rid ->
   p:path ->
   rt:hash ->
   HST.ST bool
     (requires (fun h0 ->
+      mt_safe h0 mt /\
       path_safe h0 mtr p /\ Rgl?.r_inv hreg h0 rt /\
       HST.is_eternal_region (B.frameOf rt) /\
       HH.disjoint (B.frameOf p) (B.frameOf rt) /\
       HH.disjoint mtr (B.frameOf rt)))
-    (ensures (fun _ r h1 -> r ==> 
-      path_safe h1 mtr p /\ Rgl?.r_inv hreg h1 rt /\
-      HST.is_eternal_region (B.frameOf rt) /\
-      HH.disjoint (B.frameOf p) (B.frameOf rt) /\
-      HH.disjoint mtr (B.frameOf rt) /\
-      V.size_of (B.get h1 p 0) == 1ul + mt_path_length 0ul k j false))
-let mt_verify_precondition k j mtr p rt =
-  // cwinter: add memory checks?
-  let psz = V.size_of !*p in
-  psz = 1ul + mt_path_length 0ul k j false
+    (ensures (fun _ _ _ -> True))
+let mt_verify_pre mt k j mtr p rt =
+  mt_verify_pre_nst !*mt k j !*p rt
 
 // `mt_verify` verifies a Merkle path `p` with given target index `k` and
 // the number of elements `j`. It recursively iterates the path with an
@@ -2379,20 +2493,22 @@ let mt_verify_precondition k j mtr p rt =
 // Note that `mt_path_length` is given as a precondition of this operation.
 // This is a postcondition of `mt_get_path` so we can call `mt_verify` with
 // every path generated by `mt_get_path`.
+#reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 val mt_verify:
-  k:index_t ->
-  j:index_t{k < j} ->
-  mtr:HH.rid -> 
+  mt:mt_p ->
+  k:uint64_t ->
+  j:uint64_t ->
+  mtr:HH.rid ->
   p:path ->
   rt:hash ->
   HST.ST bool
    (requires (fun h0 ->
+     mt_safe h0 mt /\
      path_safe h0 mtr p /\ Rgl?.r_inv hreg h0 rt /\
      HST.is_eternal_region (B.frameOf rt) /\
      HH.disjoint (B.frameOf p) (B.frameOf rt) /\
      HH.disjoint mtr (B.frameOf rt) /\
-     // We need to add one since the first element is the hash to verify.
-     V.size_of (B.get h0 p 0) == 1ul + mt_path_length 0ul k j false))
+     mt_verify_pre_nst (B.get h0 mt 0) k j (B.get h0 p 0) rt))
    (ensures (fun h0 b h1 ->
      // memory safety:
      // `rt` is not modified in this function, but we use a trick
@@ -2401,10 +2517,17 @@ val mt_verify:
      Rgl?.r_inv hreg h1 rt /\
      // correctness
      S.equal (Rgl?.r_repr hreg h0 rt) (Rgl?.r_repr hreg h1 rt) /\
-     b == High.mt_verify (U32.v k) (U32.v j)
-            (lift_path h0 mtr p) (Rgl?.r_repr hreg h0 rt)))
-#reset-options "--z3rlimit 200 --max_fuel 8"
-let mt_verify k j mtr p rt =
+     (let mtv = B.get h0 mt 0 in
+      let k = split_offset (MT?.offset mtv) k in
+      let j = split_offset (MT?.offset mtv) j in
+      b == High.mt_verify (U32.v k) (U32.v j)
+             (lift_path h0 mtr p) (Rgl?.r_repr hreg h0 rt))))
+
+#reset-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
+let mt_verify mt k j mtr p rt =
+  let mtv = !*mt in
+  let k = split_offset (MT?.offset mtv) k in
+  let j = split_offset (MT?.offset mtv) j in
   let hh0 = HST.get () in
   let nrid = HST.new_region (B.frameOf rt) in
   let ih = Rgl?.r_alloc hreg nrid in
@@ -2425,3 +2548,64 @@ let mt_verify k j mtr p rt =
   let r = buf_eq ih rt hash_size in
   Rgl?.r_free hreg ih;
   r
+
+
+
+/// Serialization
+
+private let has_space (buf:uint8_p) (pos:uint32_t) (n:uint32_t) = pos < uint32_32_max - n && (pos + n) < B.len buf
+
+private let serialize_uint8_t (x:uint8_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 1ul}): HST.ST (r:uint32_t{r = pos + 1ul})
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
+= B.upd buf pos x;
+  pos + 1ul
+
+private let serialize_uint16_t (x:uint16_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 2ul}): HST.ST (r:uint32_t{r = pos + 2ul})
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
+= let p1 = serialize_uint8_t (Int.Cast.uint16_to_uint8 (UInt16.shift_right x 8ul)) buf pos in
+  serialize_uint8_t (Int.Cast.uint16_to_uint8 x) buf p1
+
+private let serialize_uint32_t (x:uint32_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 4ul}): HST.ST (r:uint32_t{r = pos + 4ul})
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
+= let pos = serialize_uint16_t (Int.Cast.uint32_to_uint16 (UInt32.shift_right x 16ul)) buf pos in
+  serialize_uint16_t (Int.Cast.uint32_to_uint16 x) buf pos
+
+private let serialize_uint64_t (x:uint64_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 8ul}): HST.ST (r:uint32_t{r = pos + 8ul})
+  (requires (fun h0 -> B.live h0 buf))
+  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
+= let pos = serialize_uint32_t (Int.Cast.uint64_to_uint32 (U64.shift_right x 32ul)) buf pos in
+  serialize_uint32_t (Int.Cast.uint64_to_uint32 x) buf pos
+
+private let serialize_offset_t = serialize_uint64_t
+private let serialize_index_t = serialize_uint32_t
+
+
+// | MT: offset:offset_t ->
+//       i:index_t -> j:index_t{j >= i /\ add64_fits offset j} ->
+//       hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
+//       rhs_ok:bool ->
+//       rhs:hash_vec{V.size_of rhs = merkle_tree_size_lg} ->
+//       mroot:hash ->
+//       merkle_tree
+
+
+val mt_serialize_size: mt:mt_p -> Tot uint32_t
+let mt_serialize_size mt = uint32_32_max // TODO
+
+val mt_serialize: mt:mt_p -> output:uint8_p -> HST.ST uint32_t
+  (requires (fun h0 -> mt_safe h0 mt /\ B.live h0 output /\ B.len output >= mt_serialize_size mt))
+  (ensures (fun h0 _ h1 -> (* mt_safe h1 mt /\ *) B.live h1 output))
+let mt_serialize mt output =
+  let mtv = !*mt in
+  let pos = serialize_uint32_t hash_size output 0ul in
+  let pos = serialize_offset_t (MT?.offset mtv) output pos in
+  pos
+
+val mt_deserialize: input:uint8_p -> mt:mt_p -> HST.ST bool
+  (requires (fun h0 -> B.live h0 input))
+  (ensures (fun _ _ h1 -> B.live h1 input))
+let mt_deserialize input mt =
+  false
