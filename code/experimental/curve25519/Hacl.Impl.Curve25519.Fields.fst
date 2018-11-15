@@ -80,7 +80,7 @@ inline_for_extraction
 let store_felem #s b f =
   match s with
   | M51 -> F51.store_felem b f
-  | M64 -> F64.store_felem b f
+  | M64 -> admit(); F64.store_felem b f
 
 inline_for_extraction
 val set_bit1: #s:field_spec -> f:felem s -> i:size_t{size_v i < 255} -> Stack unit
