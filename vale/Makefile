@@ -7,7 +7,6 @@
 
 all:
 	# Protect against injection of malicious options
-	test -z "$$VALE_SCONS_PARALLEL_OPT" || { echo "$$VALE_SCONS_PARALLEL_OPT" | grep '^-j *[0-9]\+$$' ; }
 	./run_scons.sh $$VALE_SCONS_PARALLEL_OPT --FSTAR-MY-VERSION
 	./run_scons.sh $$VALE_SCONS_PARALLEL_OPT --FSTAR-MY-VERSION --FSTAR-EXTRACT
 
