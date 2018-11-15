@@ -324,7 +324,7 @@ void carry_wide2(uint64_t *const c, uint64_t *const a) {
 }
 
 static inline void fmul1(uint64_t *const c, uint64_t *const a, uint64_t ignored) {
-  const uint64_t a24 = 121666;
+  const uint64_t a24 = 121665;
   __asm__ __volatile__(
     "movq     %2, %%rdx ;"
     "mulx   (%1),  %%r8, %%r10 ;"

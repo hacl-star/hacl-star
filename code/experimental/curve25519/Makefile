@@ -14,8 +14,8 @@ all: curve25519_51.exe curve25519_64.exe
 
 verify: test
 
-#CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-CC=gcc-8
+CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
+#CC=gcc-8
 
 CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
@@ -54,6 +54,7 @@ curve25519_64.exe: curve64-c/Hacl_Curve25519_64.c
 	$(CC) -march=native -mtune=native -O3 vale/obj/curve25519-macos.S -c -o vale25519.o 
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve64-test.c -o curve25519_64.exe vale25519.o fp25519.o x25519.o
 	./curve25519_64.exe
+
 
 test:
 	rm -f .depend && $(MAKE) .depend

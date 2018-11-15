@@ -56,7 +56,7 @@ void fsqr(uint64_t* dst, const uint64_t* in_a) {
 }
 
 static inline
-uint64_t mul2(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b) {
+mul2(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b) {
   mul(dst,in_a,in_b);
   mul(dst+8,in_a+4,in_b+4);
 }
@@ -80,7 +80,7 @@ void fmul2(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b) {
 }
 
 static inline
-uint64_t sqr2(const uint64_t* dst, const uint64_t* in_a) {
+sqr2(const uint64_t* dst, const uint64_t* in_a) {
   sqr(dst,in_a);
   sqr(dst+8,in_a+4);
 }
