@@ -14,8 +14,8 @@ all: curve25519_51.exe curve25519_64.exe
 
 verify: test
 
-#CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-CC=gcc-8
+CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
+#CC=gcc-8
 
 CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
@@ -49,8 +49,8 @@ curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c
 
 
 curve25519_64.exe: curve64-c/Hacl_Curve25519_64.c
-	$(CC) -march=native -mtune=native -O3 -I rfc7748_precomputed/include/ rfc7748_precomputed/src/fp25519_x64.c -c -o fp25519.o 
-	$(CC) -march=native -mtune=native -O3 -I rfc7748_precomputed/include/ rfc7748_precomputed/src/x25519_x64.c -c -o x25519.o 
+	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/fp25519_x64.c -c -o fp25519.o 
+	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/x25519_x64.c -c -o x25519.o 
 	$(CC) -march=native -mtune=native -O3 vale/obj/curve25519-macos.S -c -o vale25519.o 
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve64-test.c -o curve25519_64.exe vale25519.o fp25519.o x25519.o
 	./curve25519_64.exe

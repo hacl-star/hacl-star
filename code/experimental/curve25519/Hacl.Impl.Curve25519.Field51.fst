@@ -189,112 +189,6 @@ let fsub out f1 f2 =
   out.(3ul) <- f13 +! u64 0x3ffffffffffff8 -! f23;
   out.(4ul) <- f14 +! u64 0x3ffffffffffff8 -! f24
 
-#reset-options "--z3rlimit 100"
-
-val smul_felem:
-    out:felem_wide
-  -> u1:uint64
-  -> f2:felem
-  -> Stack unit
-    (requires fun h -> live h out /\ live h f2)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
-      wide_as_nat h1 out == uint_v u1 * as_nat h0 f2)
-[@ CInline]
-let smul_felem out u1 f2 =
-  let f20 = f2.(size 0) in
-  let f21 = f2.(size 1) in
-  let f22 = f2.(size 2) in
-  let f23 = f2.(size 3) in
-  let f24 = f2.(size 4) in
-  out.(size 0) <- mul64_wide u1 f20;
-  out.(size 1) <- mul64_wide u1 f21;
-  out.(size 2) <- mul64_wide u1 f22;
-  out.(size 3) <- mul64_wide u1 f23;
-  out.(size 4) <- mul64_wide u1 f24
-
-val mul_felem:
-    out:felem_wide
-  -> f1:felem
-  -> r:felem
-  -> r19:felem
-  -> Stack unit
-    (requires fun h ->
-      live h out /\ live h f1 /\ live h r /\ live h r19 /\
-      felem_fits h f1 (9, 10, 9, 9, 9) /\
-      felem_fits h r (9, 10, 9, 9, 9) /\
-      felem_fits h r19 (171, 190, 171, 171, 171))
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      felem_wide_fits h1 out (6579, 4797, 3340, 1881, 423))
-[@ CInline]
-let mul_felem out f1 r r19 =
-  let f10 = f1.(size 0) in
-  let f11 = f1.(size 1) in
-  let f12 = f1.(size 2) in
-  let f13 = f1.(size 3) in
-  let f14 = f1.(size 4) in
-
-  let r0 = r.(size 0) in
-  let r1 = r.(size 1) in
-  let r2 = r.(size 2) in
-  let r3 = r.(size 3) in
-  let r4 = r.(size 4) in
-
-  let r190 = r19.(size 0) in
-  let r191 = r19.(size 1) in
-  let r192 = r19.(size 2) in
-  let r193 = r19.(size 3) in
-  let r194 = r19.(size 4) in
-  let (o0,o1,o2,o3,o4) = mul_felem5 (f10,f11,f12,f13,f14) (r0,r1,r2,r3,r4) (r190,r191,r192,r193,r194) in
-  out.(size 0) <- o0;
-  out.(size 1) <- o1;
-  out.(size 2) <- o2;
-  out.(size 3) <- o3;
-  out.(size 4) <- o4
-
-val carry_wide:
-    out:felem
-  -> inp:felem_wide
-  -> Stack unit
-    (requires fun h ->
-      live h out /\ live h inp /\
-      felem_wide_fits h inp (6579, 4797, 3340, 1881, 423))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
-      felem_fits h1 out (1, 2, 1, 1, 1))
-[@ CInline]
-let carry_wide out inp =
-  let i0 = inp.(size 0) in
-  let i1 = inp.(size 1) in
-  let i2 = inp.(size 2) in
-  let i3 = inp.(size 3) in
-  let i4 = inp.(size 4) in
-  let (tmp0, tmp1, tmp2, tmp3, tmp4) = carry_wide5 (i0, i1, i2, i3, i4) in
-  out.(size 0) <- tmp0;
-  out.(size 1) <- tmp1;
-  out.(size 2) <- tmp2;
-  out.(size 3) <- tmp3;
-  out.(size 4) <- tmp4
-
-val carry_felem:
-    f:felem
-  -> Stack unit
-    (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-[@ CInline]
-let carry_felem f =
-  let f0 = f.(size 0) in
-  let f1 = f.(size 1) in
-  let f2 = f.(size 2) in
-  let f3 = f.(size 3) in
-  let f4 = f.(size 4) in
-  let (tmp0, tmp1, tmp2, tmp3, tmp4) = carry_felem5 (f0, f1, f2, f3, f4) in
-  f.(size 0) <- tmp0;
-  f.(size 1) <- tmp1;
-  f.(size 2) <- tmp2;
-  f.(size 3) <- tmp3;
-  f.(size 4) <- tmp4
-
 val fmul:
     out:felem
   -> f1:felem
@@ -530,15 +424,15 @@ val store_felem:
   -> f:felem
   -> Stack unit
     (requires fun h -> live h f /\ live h u64s)
-    (ensures  fun h0 _ h1 -> modifies (union (loc u64s) (loc f)) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc u64s) h0 h1)
 let store_felem u64s f =
-  carry_felem f;
-  carry_felem f;
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
   let f3 = f.(3ul) in
   let f4 = f.(4ul) in
+  let (f0, f1, f2, f3, f4) = carry_felem5 (f0, f1, f2, f3, f4) in
+  let (f0, f1, f2, f3, f4) = carry_felem5 (f0, f1, f2, f3, f4) in
   let m0 = uint64_gte_mask f0 (u64 0x7ffffffffffed) in
   let m1 = uint64_eq_mask f1 (u64 0x7ffffffffffff) in
   let m2 = uint64_eq_mask f2 (u64 0x7ffffffffffff) in

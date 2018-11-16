@@ -56,6 +56,11 @@ let mul64 (x:uint64) (y:uint64) =
   let res = mul64_wide x y in
   (to_u64 res, to_u64 (res >>. 64ul))
 
+[@CInline]
+val add: out:u256 -> f1:u256  -> f2:u256  -> Stack uint64
+          (requires (fun h -> live h f1 /\ live h f2 /\ live h out))
+	  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+
 [@ CInline]
 let add out f1 f2 = 
   let f10 = f1.(0ul) in
@@ -95,6 +100,10 @@ let add1 out f1 f2 =
 
 
 [@ CInline]
+val sub: out:u256 -> f1:u256  -> f2:u256  -> Stack uint64
+          (requires (fun h -> live h f1 /\ live h f2 /\ live h out))
+	  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+[@ CInline]
 let sub out f1 f2 = 
   let f10 = f1.(0ul) in
   let f20 = f2.(0ul) in
@@ -116,6 +125,11 @@ let sub out f1 f2 =
 
 
 [@ CInline]
+val sub1: out:u256 -> f1:u256  -> f2:uint64  -> Stack uint64
+          (requires (fun h -> live h f1 /\ live h out))
+	  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+
+[@ CInline]
 let sub1 out f1 f2 = 
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
@@ -132,6 +146,10 @@ let sub1 out f1 f2 =
   carry
 
 
+[@ CInline]
+val mul1: out:u256 -> f1:u256 -> f2:uint64 -> Stack uint64
+         (requires (fun h -> live h out /\ live h f1))
+         (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
 let mul1 out f1 u2 = 
   let f20 = f1.(size 0) in
@@ -154,22 +172,30 @@ let mul1 out f1 u2 =
   carry
 
 [@ CInline]
-let mul1_add out f1 u2 = 
+val mul1_add: out:u256 -> f1:u256 -> f2:uint64 -> f3:u256 -> Stack uint64
+                   (requires (fun h -> live h out /\ live h f1))
+		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+[@ CInline]
+let mul1_add out f1 u2 f3 = 
   let o0 = out.(0ul) in
   let o1 = out.(1ul) in
   let o2 = out.(2ul) in
   let o3 = out.(3ul) in
   let o4 = mul1 out f1 u2 in
-  let o0,carry = addcarry out.(0ul) o0 (u64 0) in
-  let o1,carry = addcarry out.(1ul) o1 carry in
-  let o2,carry = addcarry out.(2ul) o2 carry in
-  let o3,carry = addcarry out.(3ul) o3 carry in
+  let o0,carry = addcarry f3.(0ul) o0 (u64 0) in
+  let o1,carry = addcarry f3.(1ul) o1 carry in
+  let o2,carry = addcarry f3.(2ul) o2 carry in
+  let o3,carry = addcarry f3.(3ul) o3 carry in
   out.(size 0) <- o0;
   out.(size 1) <- o1;
   out.(size 2) <- o2;
   out.(size 3) <- o3;
   o4 +. carry
 
+[@ CInline]
+val mul: out:u512 -> f1:u256 -> r:u256  -> Stack unit
+         (requires (fun h -> live h out /\ live h f1 /\ live h r))
+         (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
 let mul out f1 r = 
   let s4 = mul1 (B.sub out 0ul 4ul) r f1.(size 0) in
@@ -181,6 +207,11 @@ let mul out f1 r =
   let s7 = mul1_add (B.sub out 3ul 4ul) r f1.(size 3) in
   out.(7ul) <- s7
 
+
+[@ CInline]
+val mul2: out:u1024 -> f1:u512 -> f2:u512  -> Stack unit
+         (requires (fun h -> live h out /\ live h f1 /\ live h f2))
+         (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
 let mul2 out f1 f2 = 
   let out1 = B.sub out 0ul 8ul in
@@ -193,9 +224,18 @@ let mul2 out f1 f2 =
   mul out2 f11 f21
 
 
+
+[@ CInline]
+val sqr: out:u512 -> f:u256 -> Stack unit
+         (requires (fun h -> live h out /\ live h f))
+         (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
 let sqr out f = mul out f f 
 
+[@ CInline]
+val sqr2: out:u1024 -> f:u512  -> Stack unit
+         (requires (fun h -> live h out /\ live h f))
+         (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 [@ CInline]
 let sqr2 out f = 
   let out1 = B.sub out 0ul 8ul in
@@ -204,3 +244,81 @@ let sqr2 out f =
   let f1 = B.sub f 4ul 4ul in
   sqr out1 f0;
   sqr out2 f1
+
+
+[@ CInline]
+let fadd out f1 f2 =
+  let carry = add out f1 f2 in
+  let carry = add1 out out (u64 38 *. carry) in
+  out.(0ul) <- out.(0ul) +. (u64 38 *. carry)
+  
+[@ CInline]
+let fsub out f1 f2 = 
+  let carry = sub out f1 f2 in
+  let carry = sub1 out out (u64 38 *. carry) in
+  out.(0ul) <- out.(0ul) -. (u64 38 *. carry)
+
+[@ CInline]
+val carry_wide: out:u256 -> inp:u512 -> Stack unit
+                   (requires (fun h -> live h out /\ live h inp))
+		   (ensures (fun h0 _ h1 -> modifies (loc out |+| loc inp) h0 h1))
+
+[@ CInline]
+let carry_wide out inp =
+  out.(0ul) <- inp.(0ul);
+  out.(1ul) <- inp.(1ul);
+  out.(2ul) <- inp.(2ul);
+  out.(3ul) <- inp.(3ul);
+  let s5 = mul1_add out (sub inp 4ul 4ul) (u64 38) in
+  let carry = add1 out out (u64 38 *. s5) in
+  out.(0ul) <- out.(0ul) +. (u64 38 *. carry)
+
+[@ CInline]
+let fmul out f1 f2 =
+  push_frame();
+  let tmp_w = create 8ul (u64 0) in
+  mul tmp_w f1 f2;
+  carry_wide out tmp_w;
+  pop_frame()
+
+[@ CInline]
+let fmul2 out f1 f2 =
+  push_frame();
+  let tmp = create 16ul (u64 0) in
+  mul2 tmp f1 f2;
+  let out1 = sub out 0ul 4ul in
+  let out2 = sub out 4ul 4ul in
+  let tmp1 = sub tmp 0ul 8ul in
+  let tmp2 = sub tmp 8ul 8ul in
+  carry_wide out1 tmp1;
+  carry_wide out2 tmp2;
+  pop_frame()
+
+[@ CInline]
+let fmul1 out f1 f2 =
+  let s4 = mul1 out f1 f2 in
+  let carry = add1 out out (u64 38 *. s4) in
+  out.(0ul) <- out.(0ul) +. carry
+
+
+[@ CInline]
+let fsqr out f = 
+  push_frame();
+  let tmp = create 8ul (u64 0) in
+  sqr tmp f;
+  carry_wide out tmp;
+  pop_frame()
+
+[@ CInline]
+let fsqr2 out f = 
+  push_frame();
+  let tmp = create 16ul (u64 0) in
+  let tmp1 = sub tmp 0ul 8ul in
+  let tmp2 = sub tmp 8ul 8ul in
+  let out1 = sub out 0ul 4ul in
+  let out2 = sub out 4ul 4ul in
+  sqr2 tmp f;
+  carry_wide out1 tmp1;
+  carry_wide out2 tmp2;
+  pop_frame()
+ 

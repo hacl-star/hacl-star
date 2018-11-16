@@ -21,7 +21,7 @@ let nat5 = (nat * nat * nat * nat * nat)
 let scale64_5 = x:nat5{let (x1,x2,x3,x4,x5) = x in
 		       x1 <= 8192 /\ x2 <= 8192 /\ x3 <= 8192 /\ x4 <= 8192 /\ x5 <= 8192}
 let scale128_5 = x:nat5{let (x1,x2,x3,x4,x5) = x in
-		       x1 <= 67108864 /\ x2 <= 67108864 /\ x3 <= 67108864 /\ x4 <= 67108864 /\ x5 <= 67108864}
+ 		        x1 <= 67108864 /\ x2 <= 67108864 /\ x3 <= 67108864 /\ x4 <= 67108864 /\ x5 <= 67108864}
 
 let s64x5 (x:scale64) : scale64_5 = (x,x,x,x,x)
 let s128x5 (x:scale128) : scale128_5 = (x,x,x,x,x)
@@ -55,9 +55,10 @@ let ( ** ) (x:nat5) (y:nat5) : nat5 =
    x4 * y4 ,
    x5 * y5)
 
-#set-options "--z3rlimit 300"
+#set-options "--z3rlimit 100"
 
 let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
+  assert_norm (8192 * 8192 <= 67108864); 
   let (y1,y2,y3,y4,y5) = y in
   (x * y1 ,
    x * y2 ,
@@ -65,7 +66,7 @@ let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
    x * y4 ,
    x * y5)
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50  --using_facts_from '* -FStar.Seq'"
 
 assume val pow51: nat
 inline_for_extraction
@@ -151,6 +152,9 @@ let fsub5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   let o4 = f14 +! u64 0x3ffffffffffff8 -! f24 in
   (o0, o1, o2, o3, o4)
 
+
+#set-options "--z3rlimit 100"
+
 inline_for_extraction
 val mul_wide64:
     #m1:scale64
@@ -158,13 +162,8 @@ val mul_wide64:
   -> x:uint64{felem_fits1 x m1}
   -> y:uint64{felem_fits1 y m2 /\ m1 * m2 <= 67108864}
   -> z:uint128{uint_v z == uint_v x * uint_v y /\ felem_wide_fits1 z (m1 * m2)}
-let mul_wide64 #m1 #m2 x y =
-  [@inline_let]
-  let r = mul64_wide x y in
-  assert (uint_v r == uint_v x * uint_v y);
-  r
+let mul_wide64 #m1 #m2 x y = mul64_wide x y
 
-#set-options "--z3rlimit 300 --max_fuel 1"
 
 inline_for_extraction
 val smul_felem5:
