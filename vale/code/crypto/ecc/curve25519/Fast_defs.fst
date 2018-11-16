@@ -1,4 +1,4 @@
-module FastMul_defs
+module Fast_defs
 
 open Words_s
 open Types_s
@@ -25,3 +25,12 @@ let pow2_six (c0 c1 c2 c3 c4 c5:nat) : nat = pow2_five c0 c1 c2 c3 c4 + pow2_320
 let pow2_seven (c0 c1 c2 c3 c4 c5 c6:nat) : nat = pow2_six c0 c1 c2 c3 c4 c5 + pow2_384 * c6
 let pow2_eight (c0 c1 c2 c3 c4 c5 c6 c7:nat) : nat = pow2_seven c0 c1 c2 c3 c4 c5 c6 + pow2_448 * c7
 let pow2_nine (c0 c1 c2 c3 c4 c5 c6 c7 c8:nat) : nat = pow2_eight c0 c1 c2 c3 c4 c5 c6 c7 + pow2_512 * c8
+
+type bit = b:nat { b <= 1 }
+
+let bool_bit (b:bool) : bit = if b then 1 else 0
+
+let mul_nats (x y:nat) : nat = 
+  let prod = x * y in
+  Fast_lemmas.lemma_mul_bounds_le 0 x 0 y;
+  prod
