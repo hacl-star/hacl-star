@@ -39,6 +39,45 @@
       ],
       0,
       "2bb62c24ef3e72e114a9afd2b36a7272"
+    ],
+    [
+      "Hacl.UInt64.gt_mask",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero"
+      ],
+      0,
+      "f10c1e76dc3050a6a96cea27cb4f25e8"
+    ],
+    [
+      "Hacl.UInt64.lt_mask",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero"
+      ],
+      0,
+      "3008265a773ad015776284c4163157d7"
+    ],
+    [
+      "Hacl.UInt64.lte_mask",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.ones", "equation_FStar.UInt.zero",
+        "equation_Hacl.UInt64.gt_mask",
+        "refinement_interpretation_Hacl.UInt64_Tm_refine_b065aafc5b2779a68c07af24bfd039c6",
+        "typing_Hacl.UInt64.gt_mask"
+      ],
+      0,
+      "0a82f34cb389d7ea985e3a42f261a12d"
     ]
   ]
 ]

@@ -10,7 +10,8 @@ FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
-  --already_cached 'FStar LowStar C Spec.Loops -FStar.Endianness'
+  --already_cached 'FStar LowStar C Spec.Loops -FStar.Endianness' \
+  --use_extracted_interfaces true
 
 # TODO: move the specification tests to their own files so that we don't pollute
 # the specs with huge definitions in the scope

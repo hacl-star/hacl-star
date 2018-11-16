@@ -68,9 +68,9 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi \
-  --already_cached 'FStar LowStar C Spec Hacl' \
+  --already_cached 'FStar LowStar C Spec Hacl -Hacl.UInt8 -Hacl.UInt16 -Hacl.UInt32 -Hacl.UInt64 -C.Compat' \
   $(addprefix --already_cached ,$(VALE_NAMESPACES)) \
-  --already_cached '-Hacl.UInt -C.Compat'
+  --use_extracted_interfaces true
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
 
