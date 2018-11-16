@@ -854,6 +854,16 @@ private val insert_index_helper_odd:
                  j - offset_of i > 0ul))
 private let insert_index_helper_odd lv i j = ()
 
+private val loc_union_assoc_4:
+  a:loc -> b:loc -> c:loc -> d:loc ->
+  Lemma (loc_union (loc_union a b) (loc_union c d) ==
+        loc_union (loc_union a c) (loc_union b d))
+private let loc_union_assoc_4 a b c d =
+  loc_union_assoc (loc_union a b) c d;
+  loc_union_assoc a b c;
+  loc_union_assoc a c b;
+  loc_union_assoc (loc_union a c) b d
+
 private val insert_modifies_rec_helper:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
@@ -876,7 +886,41 @@ private val insert_modifies_rec_helper:
               (V.loc_vector_within hs lv (V.size_of hs)))
             aloc)
 private let insert_modifies_rec_helper lv hs aloc h =
-  admit ()
+  assert (V.loc_vector_within hs lv (V.size_of hs) ==
+         loc_union (V.loc_vector_within hs lv (lv + 1ul))
+                   (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
+  RV.rs_loc_elems_rec_inverse hvreg (V.as_seq h hs) (U32.v lv) (U32.v (V.size_of hs));
+  assert (RV.rv_loc_elems h hs lv (V.size_of hs) ==
+         loc_union (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+                   (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs)));
+
+  // Applying some association rules...
+  loc_union_assoc
+    (loc_union
+      (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+      (V.loc_vector_within hs lv (lv + 1ul))) aloc
+    (loc_union
+      (loc_union
+        (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+        (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
+      aloc);
+  loc_union_assoc
+    (loc_union
+      (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+      (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))) aloc aloc;
+  loc_union_assoc
+    (loc_union
+      (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+      (V.loc_vector_within hs lv (lv + 1ul)))
+    (loc_union
+      (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+      (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
+    aloc;
+  loc_union_assoc_4
+    (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+    (V.loc_vector_within hs lv (lv + 1ul))
+    (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+    (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))
 
 private val insert_modifies_union_loc_weakening:
   l1:loc -> l2:loc -> l3:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -2054,7 +2098,18 @@ private val mt_flush_to_modifies_rec_helper:
           (RV.rv_loc_elems h hs lv (V.size_of hs))
           (V.loc_vector_within hs lv (V.size_of hs)))
 private let mt_flush_to_modifies_rec_helper lv hs h =
-  admit ()
+  assert (V.loc_vector_within hs lv (V.size_of hs) ==
+         loc_union (V.loc_vector_within hs lv (lv + 1ul))
+                   (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
+  RV.rs_loc_elems_rec_inverse hvreg (V.as_seq h hs) (U32.v lv) (U32.v (V.size_of hs));
+  assert (RV.rv_loc_elems h hs lv (V.size_of hs) ==
+         loc_union (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+                   (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs)));
+  loc_union_assoc_4
+    (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+    (V.loc_vector_within hs lv (lv + 1ul))
+    (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+    (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))
 
 private val mt_flush_to_:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
