@@ -225,7 +225,7 @@ procedure{:quick} fast_sqr_part2()
                               Adcx64Wrap(r14, r14);
 }
 
-#reset-options "--z3rlimit 30000" 
+#reset-options "--z3rlimit 200"
 procedure{:quick} fast_sqr_part3(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
@@ -271,7 +271,6 @@ procedure{:quick} fast_sqr_part3(
         validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
-    assume(false); // TODO: Fix this
     xor_lemmas();
 
 //    "movq   (%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* A[0]^2 */
@@ -287,20 +286,33 @@ procedure{:quick} fast_sqr_part3(
 //    "adcq %%rax, %%r13 ;"   "movq %%r13, 48(%0) ;"
 //    "adcq %%rcx, %%r14 ;"   "movq %%r14, 56(%0) ;"
 
-    Load64_buffer(rdx, inA_ptr,  0, Secret, inA_b, 0);   Mulx64(rcx, rax, rdx);  /* A[0]^2 */
+    Load64_buffer(rdx, inA_ptr,  0, Secret, inA_b, 0);   Mulx64(rcx, rax, rdx);  /* A[0]^2 */                ghost var a0_sqr_hi := rcx; ghost var a0_sqr_lo := rax;  
     /********************/                               Store64_buffer(dst_ptr, rax,  0, Secret, dst_b, 0);
     Add64Wrap(r8, rcx);                                  Store64_buffer(dst_ptr,  r8,  8, Secret, dst_b, 1);
-    Load64_buffer(rdx, inA_ptr,  8, Secret, inA_b, 1);   Mulx64(rcx, rax, rdx);  /* A[1]^2Secret,  */
+    Load64_buffer(rdx, inA_ptr,  8, Secret, inA_b, 1);   Mulx64(rcx, rax, rdx);  /* A[1]^2 */                ghost var a1_sqr_hi := rcx; ghost var a1_sqr_lo := rax;  
     Adcx64Wrap( r9, rax);                                Store64_buffer(dst_ptr,  r9, 16, Secret, dst_b, 2);
     Adcx64Wrap(r10, rcx);                                Store64_buffer(dst_ptr, r10, 24, Secret, dst_b, 3);
-    Load64_buffer(rdx, inA_ptr, 16, Secret, inA_b, 2);   Mulx64(rcx, rax, rdx);  /* A[2]^2Secret,  */
+    Load64_buffer(rdx, inA_ptr, 16, Secret, inA_b, 2);   Mulx64(rcx, rax, rdx);  /* A[2]^2 */                ghost var a2_sqr_hi := rcx; ghost var a2_sqr_lo := rax;  
     Adcx64Wrap(r11, rax);                                Store64_buffer(dst_ptr, r11, 32, Secret, dst_b, 4);
     Adcx64Wrap(r12, rcx);                                Store64_buffer(dst_ptr, r12, 40, Secret, dst_b, 5);
-    Load64_buffer(rdx, inA_ptr, 24, Secret, inA_b, 3);   Mulx64(rcx, rax, rdx);  /* A[3]^2Secret,  */       lemma_prod_bounds(rcx, rax, rdx, rdx);
+    Load64_buffer(rdx, inA_ptr, 24, Secret, inA_b, 3);   Mulx64(rcx, rax, rdx);  /* A[3]^2 */       lemma_prod_bounds(rcx, rax, rdx, rdx);                ghost var a3_sqr_hi := rcx; ghost var a3_sqr_lo := rax;  
     Adcx64Wrap(r13, rax);                                Store64_buffer(dst_ptr, r13, 48, Secret, dst_b, 6);
     Adcx64Wrap(r14, rcx);                                Store64_buffer(dst_ptr, r14, 56, Secret, dst_b, 7);
+
+    lemma_sqr_part3(a, a0, a1, a2, a3, a0_sqr_hi, a0_sqr_lo, a1_sqr_hi, a1_sqr_lo, a2_sqr_hi, a2_sqr_lo, a3_sqr_hi, a3_sqr_lo,
+                    old(r8), old(r9), old(r10), old(r11), old(r12), old(r13), old(r14), 
+                    buffer64_read(dst_b, 0, mem),
+                    buffer64_read(dst_b, 1, mem),
+                    buffer64_read(dst_b, 2, mem),
+                    buffer64_read(dst_b, 3, mem),
+                    buffer64_read(dst_b, 4, mem),
+                    buffer64_read(dst_b, 5, mem),
+                    buffer64_read(dst_b, 6, mem),
+                    buffer64_read(dst_b, 7, mem),
+                    bool_bit(cf(efl)));
 }
 
+#reset-options "--z3rlimit 300" 
 procedure{:quick} fast_sqr(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
@@ -343,7 +355,6 @@ procedure{:quick} fast_sqr(
         validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
-    assume(false); // TODO: Fix this
     assert_by_tactic(a*a == pow2_seven(mul_nats(a0,a0), 2*mul_nats(a0,a1), 2*mul_nats(a0,a2) + mul_nats(a1,a1), 2*(mul_nats(a0,a3)+mul_nats(a1,a2)), 2*mul_nats(a1,a3) + mul_nats(a2,a2), 2*mul_nats(a2,a3), mul_nats(a3,a3)), int_canon);      // PASSES
     fast_sqr_part1(inA_b);
 
