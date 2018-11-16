@@ -69,7 +69,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi \
-  --already_cached 'FStar LowStar C Spec Hacl.Hash -C.Compat' \
+  --already_cached 'FStar LowStar C -C.Compat Spec Hacl.Hash' \
   $(addprefix --already_cached ,$(subst .*,,$(VALE_NAMESPACES))) \
   --use_extracted_interfaces true
 

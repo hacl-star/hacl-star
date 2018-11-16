@@ -386,7 +386,7 @@ fstar_no_verify = ''
 verify = GetOption('verify')
 if not verify:
   print('***\n*** WARNING:  NOT VERIFYING ANY CODE\n***')
-  fstar_no_verify = '--lax'
+  fstar_no_verify = '--admit_smt_queries true'
 
 # Find Z3 for F*
 found_z3 = False
@@ -1143,6 +1143,9 @@ if not is_help:
     source = f.filename
     target = f.obj_name()
     shutil.copy(source, target)
+    checked_source = FindFile(f'{source}.checked', os.path.dirname(source))
+    if checked_source != None:
+      shutil.copy(str(checked_source), f'{target}.checked')
 
   if not dump_args:
     print('Processing source files')
