@@ -22,7 +22,7 @@ module Impl = Hacl.Impl.SHA2_256
 ///
 
 
-val init: hash:lbuffer uint32 8 ->
+val init: hash:lbuffer uint32 8ul ->
   Stack unit
   (requires (fun h -> live h hash))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
@@ -31,8 +31,8 @@ let init hash = Impl.init hash
 
 
 val update_block:
-    hash: lbuffer uint32 8
-  -> block: lbuffer uint8 64 ->
+    hash: lbuffer uint32 8ul
+  -> block: lbuffer uint8 64ul ->
   Stack unit
   (requires (fun h -> live h hash /\ live h block /\ disjoint hash block))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
@@ -41,7 +41,7 @@ let update_block hash block = Impl.update_block hash block
 
 
 val update_last:
-    hash: lbuffer uint32 8
+    hash: lbuffer uint32 8ul
   -> prev: uint64
   -> last: buffer uint8
   -> len: size_t{ v len == length last
@@ -55,7 +55,7 @@ let update_last hash prev last len = Impl.update_last hash prev last len
 
 
 val update:
-    hash: lbuffer uint32 8
+    hash: lbuffer uint32 8ul
   -> input: buffer uint8
   -> len: size_t{ v len == length input
                /\ v len <= pow2 61 - 1} ->
@@ -67,8 +67,8 @@ let update hash input len = Impl.update hash input len
 
 
 val finish:
-    hash: lbuffer uint8 32
-  -> hw: lbuffer uint32 8 ->
+    hash: lbuffer uint8 32ul
+  -> hw: lbuffer uint32 8ul ->
   Stack unit
   (requires (fun h -> live h hash /\ live h hw /\ disjoint hash hw))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
@@ -77,7 +77,7 @@ let finish hash hw = Impl.finish hash hw
 
 
 val hash:
-    output: lbuffer uint8 32
+    output: lbuffer uint8 32ul
   -> input: buffer uint8
   -> len: size_t{length input == v len /\ v len <= pow2 61 - 1} ->
   Stack unit

@@ -158,9 +158,9 @@ let smul_felem out u1 f2 =
   let f20 = f2.(size 0) in
   let f21 = f2.(size 1) in
   let f22 = f2.(size 2) in
-  out.(size 0) <- mul_wide u1 f20;
-  out.(size 1) <- mul_wide u1 f21;
-  out.(size 2) <- mul_wide u1 f22
+  out.(size 0) <- mul64_wide u1 f20;
+  out.(size 1) <- mul64_wide u1 f21;
+  out.(size 2) <- mul64_wide u1 f22
 
 //[@ CInline]
 inline_for_extraction
@@ -184,9 +184,9 @@ let smul_add_felem out u1 f2 =
   let o0 = out.(size 0) in
   let o1 = out.(size 1) in
   let o2 = out.(size 2) in
-  out.(size 0) <- o0 +. mul_wide u1 f20;
-  out.(size 1) <- o1 +. mul_wide u1 f21;
-  out.(size 2) <- o2 +. mul_wide u1 f22
+  out.(size 0) <- o0 +. mul64_wide u1 f20;
+  out.(size 1) <- o1 +. mul64_wide u1 f21;
+  out.(size 2) <- o2 +. mul64_wide u1 f22
 
 //inline_for_extraction
 [@ CInline]

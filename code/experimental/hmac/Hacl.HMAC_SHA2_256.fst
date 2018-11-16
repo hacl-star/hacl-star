@@ -23,7 +23,7 @@ let a = Spec.SHA2.SHA2_256
 
 (* Key wrapping function *)
 val wrap_key:
-    output: lbuffer uint8 (Spec.SHA2.size_block a)
+    output: lbuffer uint8 (size (Spec.SHA2.size_block a))
   -> key: buffer uint8
   -> len: size_t{v len == length key /\ v len <= Spec.SHA2.max_input a} ->
   Stack unit
@@ -34,8 +34,8 @@ let wrap_key output key len = Impl.wrap_key output key len
 
 
 val init:
-    state: lbuffer uint32 Spec.SHA2.size_hash_w
-  -> key: lbuffer uint8 (Spec.SHA2.size_block a) ->
+    state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
+  -> key: lbuffer uint8 (size (Spec.SHA2.size_block a)) ->
   Stack unit
   (requires (fun h -> live h state /\ live h key /\ disjoint state key))
   (ensures  (fun h0 _ h1 -> modifies1 state h0 h1))
@@ -44,8 +44,8 @@ let init state key = Impl.init state key
 
 
 val update_block:
-    state: lbuffer uint32 Spec.SHA2.size_hash_w
-  -> block: lbuffer uint8 (Spec.SHA2.size_block a) ->
+    state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
+  -> block: lbuffer uint8 (size (Spec.SHA2.size_block a)) ->
   Stack unit
   (requires (fun h -> live h state /\ live h block /\ disjoint state block))
   (ensures  (fun h0 _ h1 -> modifies1 state h0 h1))
@@ -54,7 +54,7 @@ let update_block state block = Impl.update_block state block
 
 
 val update_last:
-    state: lbuffer uint32 Spec.SHA2.size_hash_w
+    state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
   -> prev: uint64
   -> last: buffer uint8
   -> len: size_t{ v len == length last
@@ -68,7 +68,7 @@ let update_last state prev last len = Impl.update_last state prev last len
 
 
 val update:
-    state: lbuffer uint32 Spec.SHA2.size_hash_w
+    state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
   -> input: buffer uint8
   -> len: size_t{ v len == length input
                /\ v len <= Spec.SHA2.max_input a} ->
@@ -80,9 +80,9 @@ let update state input len = Impl.update state input len
 
 
 val finish:
-    hash: lbuffer uint8 (Spec.SHA2.size_hash a)
-  -> state: lbuffer uint32 Spec.SHA2.size_hash_w
-  -> key: lbuffer uint8 (Spec.SHA2.size_block a) ->
+    hash: lbuffer uint8 (size (Spec.SHA2.size_hash a))
+  -> state: lbuffer uint32 (size Spec.SHA2.size_hash_w)
+  -> key: lbuffer uint8 (size (Spec.SHA2.size_block a)) ->
   Stack unit
   (requires (fun h -> live h hash /\ live h state /\ live h key
                  /\ disjoint hash key /\ disjoint hash state))
@@ -92,7 +92,7 @@ let finish hash state key = Impl.finish hash state key
 
 
 val hmac:
-    mac: lbuffer uint8 (Spec.SHA2.size_hash a)
+    mac: lbuffer uint8 (size (Spec.SHA2.size_hash a))
   -> key: buffer uint8{length key <= Spec.SHA2.max_input a}
   -> klen: size_t{v klen == length key}
   -> input: buffer uint8{length key + length input + Spec.SHA2.size_block a <= Spec.SHA2.max_input a}
