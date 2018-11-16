@@ -123,31 +123,34 @@ extern bool mt_verify_pre(merkle_tree mt, uint64_t tgt, uint64_t max, hash *path
  *
  * @return the number of bytes required to serialize the tree
  */
-extern uint32_t mt_serialize_size(merkle_tree mt);
+extern uint64_t mt_serialize_size(merkle_tree mt);
 
 
 /** Serialization
  *
  * @param[in]  mt   The Merkle tree
  * @param[out] buf  The buffer to serialize the tree into
+ * #param[in]  len  Length of buf
  *
  * @return the number of bytes written
  *
- * Note: buf must be a buffer of size mt_serialize_size(mt) or larger.
+ * Note: buf must be a buffer of size mt_serialize_size(mt) or larger, but
+ * smaller than 2^32 (larger buffers are currently not supported).
  */
-extern uint32_t mt_serialize(merkle_tree mt, char *buf);
+extern uint32_t mt_serialize(merkle_tree mt, char *buf, uint64_t len);
 
 
 /** Deserialization
  *
  * @param[in]  buf  The buffer to deserialize the tree from
+ * @param[in]  len  Length of buf
  * @param[out] mt   The Merkle tree
  *
  * @return true if the deserialization succeeded, false otherwise
  *
- * Note: buf must be a buffer of size mt_serialize_size(mt) or larger.
+ * Note: buf must point to an allocated buffer.
  */
-extern bool mt_deserialize(const char *buf, merkle_tree mt);
+extern bool mt_deserialize(const char *buf, uint64_t len, merkle_tree mt);
 
 
 #ifdef __cplusplus

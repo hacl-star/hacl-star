@@ -57,17 +57,20 @@ FSTARR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
 ENABLE_HINTS = --use_hints
 #--use_hint_hashes --record_hints --query_stats
 
-%.fst-in:
+$(HINT_DIR):
+	mkdir -p $@
+
+%.fst-in: $(HINT_DIR)
 	@echo --cache_checked_modules --cache_dir $(CACHE_DIR) \
 	$(FSTAR_INCLUDES) \
 	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
 
-%.fsti-in:
+%.fsti-in: $(HINT_DIR)
 	@echo --cache_checked_modules --cache_dir $(CACHE_DIR) \
 	$(FSTAR_INCLUDES) \
 	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
-ROOTS = MerkleTree.New.Low.fst
+ROOTS = MerkleTree.New.Low.fst MerkleTree.New.Low.Serialization.fst
 
 # We don't want to delete .krml files during extraction.
 .PRECIOUS: %.krml
@@ -87,7 +90,7 @@ $(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-$(CACHE_DIR)/%.checked: | .depend
+$(CACHE_DIR)/%.checked: | .depend $(HINT_DIR)
 	$(FSTAR) $< \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@

@@ -144,8 +144,8 @@ let hash_copy src dst =
 // `hash_dummy ()` is is also a trick to extract the C code using KreMLin.
 // If we just define and use `hash_dummy` as a constant, then gcc complains with
 // the error "initializer element is not a compile-time constant".
-private val hreg: regional hash
-private let hreg =
+val hreg: regional hash
+let hreg =
   Rgl hash_region_of
       (hash_dummy ())
       hash_r_inv
@@ -237,8 +237,8 @@ val hash_vec_r_free:
 let hash_vec_r_free v =
   RV.free v
 
-private val hvreg: regional hash_vec
-private let hvreg =
+val hvreg: regional hash_vec
+let hvreg =
   Rgl hash_vec_region_of
       hash_vec_dummy
       hash_vec_r_inv
@@ -253,8 +253,8 @@ private let hvreg =
 
 type hash_vv = RV.rvector hvreg
 
-noextract private val hvvreg: regional hash_vv
-noextract private let hvvreg =
+noextract val hvvreg: regional hash_vv
+noextract let hvvreg =
   RVI.vector_regional hvreg
 
 private val hash_vec_rv_inv_r_inv:
@@ -382,6 +382,8 @@ let uint32_max = U64.uint_to_t (UInt.max_int U32.n)
 let uint64_max = U64.uint_to_t (UInt.max_int U64.n)
 let offset_range_limit = uint32_max
 type offset_t = uint64_t
+let u32_64 = Int.Cast.uint32_to_uint64
+let u64_32 = Int.Cast.uint64_to_uint32
 
 private
 inline_for_extraction
@@ -392,7 +394,7 @@ inline_for_extraction
 let split_offset (tree:offset_t) (index:offset_t{offsets_connect tree index}): Tot index_t =
   let diff = U64.sub_mod index tree in
   assert (diff <= offset_range_limit);
-  FStar.Int.Cast.uint64_to_uint32 diff
+  Int.Cast.uint64_to_uint32 diff
 
 private
 inline_for_extraction
@@ -401,7 +403,7 @@ let add64_fits (x:offset_t) (i:index_t): Tot bool = UInt.fits (U64.v x + U32.v i
 private
 inline_for_extraction
 let join_offset (tree:offset_t) (i:index_t{add64_fits tree i}): Tot (r:offset_t{offsets_connect tree r}) =
-  U64.add tree (FStar.Int.Cast.uint32_to_uint64 i)
+  U64.add tree (u32_64 i)
 
 inline_for_extraction val merkle_tree_size_lg: uint32_t
 inline_for_extraction let merkle_tree_size_lg = 32ul
@@ -427,6 +429,12 @@ noeq type merkle_tree =
       merkle_tree
 
 type mt_p = B.pointer merkle_tree
+
+inline_for_extraction
+let merkle_tree_conditions (offset:uint64_t) (i j:uint32_t) (hs:hash_vv) (rhs_ok:bool) (rhs:hash_vec) (mroot:hash): Tot bool =
+  j >= i && add64_fits offset j &&
+  V.size_of hs = merkle_tree_size_lg &&
+  V.size_of rhs = merkle_tree_size_lg
 
 // The maximum number of currenty held elements in the tree is (2^32 - 1).
 // cwinter: even when using 64-bit indices, we fail if the underlying 32-bit
@@ -629,7 +637,7 @@ let mt_preserved mt p h0 h1 =
 
 /// Construction
 
-// Note that the public function for creation is `create_mt` defined below,
+// Note that the public function for creation is `mt_create` defined below,
 // which builds a tree with an initial hash.
 private val create_empty_mt: r:HST.erid ->
   HST.ST mt_p
@@ -1221,7 +1229,7 @@ let mt_insert mt v =
     hh1 hh2
 #reset-options // reset "--max_fuel 0"
 
-// `create_mt` initiates a Merkle tree with a given initial hash `init`.
+// `mt_create` initiates a Merkle tree with a given initial hash `init`.
 // A valid Merkle tree should contain at least one element.
 val mt_create: r:HST.erid -> init:hash ->
   HST.ST mt_p
@@ -2549,121 +2557,3 @@ let mt_verify mt k j mtr p rt =
   let r = buf_eq ih rt hash_size in
   Rgl?.r_free hreg ih;
   r
-
-
-/// Serialization
-
-private let has_space (buf:uint8_p) (pos:uint32_t) (n:uint32_t) = pos < uint32_32_max - n && (pos + n) < B.len buf
-
-private let serialize_bool (x:bool) (buf:uint8_p) (pos:uint32_t{has_space buf pos 1ul}): HST.ST (r:uint32_t{r = pos + 1ul})
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
-= B.upd buf pos (if x then 1uy else 0uy);
-  pos + 1ul
-
-private let serialize_uint8_t (x:uint8_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 1ul}): HST.ST (r:uint32_t{r = pos + 1ul})
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
-= B.upd buf pos x;
-  pos + 1ul
-
-private let serialize_uint16_t (x:uint16_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 2ul}): HST.ST (r:uint32_t{r = pos + 2ul})
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
-= let p1 = serialize_uint8_t (Int.Cast.uint16_to_uint8 (U16.shift_right x 8ul)) buf pos in
-  serialize_uint8_t (Int.Cast.uint16_to_uint8 x) buf p1
-
-private let serialize_uint32_t (x:uint32_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 4ul}): HST.ST (r:uint32_t{r = pos + 4ul})
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
-= let pos = serialize_uint16_t (Int.Cast.uint32_to_uint16 (U32.shift_right x 16ul)) buf pos in
-  serialize_uint16_t (Int.Cast.uint32_to_uint16 x) buf pos
-
-private let serialize_uint64_t (x:uint64_t) (buf:uint8_p) (pos:uint32_t{has_space buf pos 8ul}): HST.ST (r:uint32_t{r = pos + 8ul})
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun h0 _ h1 -> B.live h1 buf /\ modifies (B.loc_region_only false (B.frameOf buf)) h0 h1))
-= let pos = serialize_uint32_t (Int.Cast.uint64_to_uint32 (U64.shift_right x 32ul)) buf pos in
-  serialize_uint32_t (Int.Cast.uint64_to_uint32 x) buf pos
-
-private let serialize_offset_t = serialize_uint64_t
-private let serialize_index_t = serialize_uint32_t
-
-
-private let deserialize_bool (buf:uint8_p) (pos:uint32_t{has_space buf pos 1ul}): HST.ST (uint32_t & bool)
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
-= pos + 1ul,
-  (match B.index buf 0ul with
-   | 0uy -> false
-   | _ -> true)
-
-private let deserialize_uint8_t (buf:uint8_p) (pos:uint32_t{has_space buf pos 1ul}): HST.ST (uint32_t & uint8_t)
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
-= pos + 1ul, B.index buf 0ul
-
-private let deserialize_uint16_t (buf:uint8_p) (pos:uint32_t{has_space buf pos 2ul}): HST.ST (uint32_t & uint16_t)
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
-= let _, b0 = deserialize_uint8_t buf pos in
-  let _, b1 = deserialize_uint8_t buf (pos + 1ul) in
-  pos + 2ul, (U16.shift_left (Int.Cast.uint8_to_uint16 b0) 8ul) + Int.Cast.uint8_to_uint16 b1
-
-private let deserialize_uint32_t (buf:uint8_p) (pos:uint32_t{has_space buf pos 4ul}): HST.ST (uint32_t & uint32_t)
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
-= let _, b0 = deserialize_uint16_t buf pos in
-  let _, b1 = deserialize_uint16_t buf (pos + 2ul) in
-  pos + 4ul, (U32.shift_left (Int.Cast.uint16_to_uint32 b0) 16ul) + Int.Cast.uint16_to_uint32 b1
-
-private let deserialize_uint64_t (buf:uint8_p) (pos:uint32_t{has_space buf pos 8ul}): HST.ST (uint32_t & uint64_t)
-  (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
-= let _, b0 = deserialize_uint32_t buf pos in
-  let _, b1 = deserialize_uint32_t buf (pos + 2ul) in
-  8ul, (U64.shift_left (Int.Cast.uint32_to_uint64 b0) 32ul) + Int.Cast.uint32_to_uint64 b1
-
-private let deserialize_offset_t = deserialize_uint64_t
-private let deserialize_index_t = deserialize_uint32_t
-
-// | MT: offset:offset_t ->
-//       i:index_t -> j:index_t{j >= i /\ add64_fits offset j} ->
-//       hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
-//       rhs_ok:bool ->
-//       rhs:hash_vec{V.size_of rhs = merkle_tree_size_lg} ->
-//       mroot:hash ->
-//       merkle_tree
-
-
-val mt_serialize_size: mt:mt_p -> Tot uint32_t
-let mt_serialize_size mt = uint32_32_max // TODO
-
-val mt_serialize: mt:mt_p -> output:uint8_p -> HST.ST uint32_t
-  (requires (fun h0 -> mt_safe h0 mt /\ B.live h0 output /\ B.len output >= mt_serialize_size mt))
-  (ensures (fun h0 _ h1 -> (* mt_safe h1 mt /\ *) B.live h1 output))
-let mt_serialize mt output =
-  let mtv = !*mt in
-  let pos = serialize_uint32_t hash_size output 0ul in
-  let pos = serialize_offset_t (MT?.offset mtv) output pos in
-  let pos = serialize_uint32_t (MT?.i mtv) output pos in
-  let pos = serialize_uint32_t (MT?.j mtv) output pos in
-  // hs
-  // rhs
-  let pos = serialize_bool (MT?.rhs_ok mtv) output pos in
-  // mroot
-  pos
-
-val mt_deserialize: input:uint8_p -> mt:mt_p -> HST.ST bool
-  (requires (fun h0 -> B.live h0 input))
-  (ensures (fun _ _ h1 -> B.live h1 input))
-let mt_deserialize input mt =
-  assume (B.len input = uint32_32_max);
-  let _, hash_size = deserialize_uint32_t input 0ul in
-  let _, offset = deserialize_offset_t input 8ul in
-  let _, i = deserialize_index_t input 12ul in
-  let _, j = deserialize_index_t input 16ul in
-  // hs
-  // rhs
-  let _, rhs_ok = deserialize_bool input 32ul in
-  // mroot
-  false
