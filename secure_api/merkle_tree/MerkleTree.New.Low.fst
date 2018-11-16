@@ -862,6 +862,16 @@ private val insert_index_helper_odd:
                  j - offset_of i > 0ul))
 private let insert_index_helper_odd lv i j = ()
 
+private val loc_union_assoc_4:
+  a:loc -> b:loc -> c:loc -> d:loc ->
+  Lemma (loc_union (loc_union a b) (loc_union c d) ==
+        loc_union (loc_union a c) (loc_union b d))
+private let loc_union_assoc_4 a b c d =
+  loc_union_assoc (loc_union a b) c d;
+  loc_union_assoc a b c;
+  loc_union_assoc a c b;
+  loc_union_assoc (loc_union a c) b d
+
 private val insert_modifies_rec_helper:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
@@ -884,7 +894,41 @@ private val insert_modifies_rec_helper:
               (V.loc_vector_within hs lv (V.size_of hs)))
             aloc)
 private let insert_modifies_rec_helper lv hs aloc h =
-  admit ()
+  assert (V.loc_vector_within hs lv (V.size_of hs) ==
+         loc_union (V.loc_vector_within hs lv (lv + 1ul))
+                   (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
+  RV.rs_loc_elems_rec_inverse hvreg (V.as_seq h hs) (U32.v lv) (U32.v (V.size_of hs));
+  assert (RV.rv_loc_elems h hs lv (V.size_of hs) ==
+         loc_union (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+                   (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs)));
+
+  // Applying some association rules...
+  loc_union_assoc
+    (loc_union
+      (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+      (V.loc_vector_within hs lv (lv + 1ul))) aloc
+    (loc_union
+      (loc_union
+        (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+        (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
+      aloc);
+  loc_union_assoc
+    (loc_union
+      (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+      (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))) aloc aloc;
+  loc_union_assoc
+    (loc_union
+      (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+      (V.loc_vector_within hs lv (lv + 1ul)))
+    (loc_union
+      (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+      (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
+    aloc;
+  loc_union_assoc_4
+    (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+    (V.loc_vector_within hs lv (lv + 1ul))
+    (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+    (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))
 
 private val insert_modifies_union_loc_weakening:
   l1:loc -> l2:loc -> l3:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -1294,6 +1338,29 @@ val lift_path:
   GTot (hp:High.path{S.length hp = U32.v (V.size_of (B.get h p 0))})
 let lift_path h mtr p =
   lift_path_ h (V.as_seq h (B.get h p 0))
+
+val lift_path_index_:
+  h:HS.mem ->
+  hs:S.seq hash{V.forall_seq hs 0 (S.length hs) (fun hp -> Rgl?.r_inv hreg h hp)} ->
+  i:nat ->
+  Lemma (requires (i < S.length hs))
+        (ensures (Rgl?.r_repr hreg h (S.index hs i) ==
+                 S.index (lift_path_ h hs) i))
+        (decreases i)
+let rec lift_path_index_ h hs i =
+  if S.length hs = 0 then ()
+  else if i = 0 then ()
+  else lift_path_index_ h (S.tail hs) (i - 1)
+
+val lift_path_index:
+  h:HS.mem -> mtr:HH.rid ->
+  p:path -> i:uint32_t ->
+  Lemma (requires (path_safe h mtr p /\
+                  i < V.size_of (B.get h p 0)))
+        (ensures (Rgl?.r_repr hreg h (V.get h (B.get h p 0) i) ==
+                 S.index (lift_path h mtr p) (U32.v i)))
+let rec lift_path_index h mtr p i =
+  lift_path_index_ h (V.as_seq h (B.get h p 0)) (U32.v i)
 
 private val path_safe_preserved_:
   mtr:HH.rid -> hvec:V.vector hash -> dl:loc ->
@@ -2039,7 +2106,18 @@ private val mt_flush_to_modifies_rec_helper:
           (RV.rv_loc_elems h hs lv (V.size_of hs))
           (V.loc_vector_within hs lv (V.size_of hs)))
 private let mt_flush_to_modifies_rec_helper lv hs h =
-  admit ()
+  assert (V.loc_vector_within hs lv (V.size_of hs) ==
+         loc_union (V.loc_vector_within hs lv (lv + 1ul))
+                   (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
+  RV.rs_loc_elems_rec_inverse hvreg (V.as_seq h hs) (U32.v lv) (U32.v (V.size_of hs));
+  assert (RV.rv_loc_elems h hs lv (V.size_of hs) ==
+         loc_union (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+                   (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs)));
+  loc_union_assoc_4
+    (RV.rs_loc_elem hvreg (V.as_seq h hs) (U32.v lv))
+    (V.loc_vector_within hs lv (lv + 1ul))
+    (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
+    (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))
 
 private val mt_flush_to_:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
@@ -2371,16 +2449,6 @@ let mt_flush mt =
 
 /// Client-side verification
 
-val lift_path_index:
-  h:HS.mem -> mtr:HH.rid ->
-  p:path -> i:uint32_t ->
-  Lemma (requires (path_safe h mtr p /\
-                  i < V.size_of (B.get h p 0)))
-        (ensures (Rgl?.r_repr hreg h (V.get h (B.get h p 0) i) ==
-                 S.index (lift_path h mtr p) (U32.v i)))
-let rec lift_path_index h mtr p i =
-  admit ()
-
 #reset-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 private val mt_verify_:
   k:index_t ->
@@ -2410,10 +2478,6 @@ private val mt_verify_:
 private let rec mt_verify_ k j mtr p ppos acc actd =
   let hh0 = HST.get () in
   if j = 0ul then ()
-  // cwinter: is this correct?
-  // else if ppos = V.size_of !*p then ()
-  // joonwonc: there was a bug; it's fixed now and we don't need the above
-  //           condition anymore, but it's not proven yet.
   else (let nactd = actd || (j % 2ul = 1ul) in
        if k % 2ul = 0ul then begin
          if j = k || (j = k + 1ul && not actd) then
@@ -2455,10 +2519,9 @@ private val buf_eq:
      // memory safety
      h0 == h1 /\
      // correctness
-     (b <==> S.equal (B.as_seq h0 (B.gsub b1 0ul len))
-                    (B.as_seq h0 (B.gsub b2 0ul len)))))
+     (b <==> (forall (i:nat{i < U32.v len}).
+               S.index (B.as_seq h0 b1) i = S.index (B.as_seq h0 b2) i))))
 private let rec buf_eq #a b1 b2 len =
-  admit ();
   if len = 0ul then true
   else (let a1 = B.index b1 (len - 1ul) in
        let a2 = B.index b2 (len - 1ul) in
@@ -2555,5 +2618,8 @@ let mt_verify mt k j mtr p rt =
          High.mt_verify_ (U32.v k) (U32.v j) (lift_path hh1 mtr p)
            1 (Rgl?.r_repr hreg hh1 ih) false);
   let r = buf_eq ih rt hash_size in
+  assert (if r 
+         then S.equal (Rgl?.r_repr hreg hh2 ih) (Rgl?.r_repr hreg hh2 rt)
+         else True);
   Rgl?.r_free hreg ih;
   r

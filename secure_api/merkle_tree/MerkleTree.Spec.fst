@@ -4,11 +4,23 @@ open FStar.Classical
 open FStar.Mul
 open FStar.Seq
 
+open EverCrypt
+open EverCrypt.Helpers
+
 module List = FStar.List.Tot
 module S = FStar.Seq
 
-assume val hash_raw: eqtype
-assume val hash_2_raw: hash_raw -> hash_raw -> GTot hash_raw
+module EHS = EverCrypt.Hash
+
+val hash_size: nat
+let hash_size = UInt32.v (EHS.tagLen EHS.SHA256)
+
+val hash_raw: eqtype
+let hash_raw = b:EHS.bytes{S.length b = hash_size}
+
+val hash_2_raw: hash_raw -> hash_raw -> GTot hash_raw
+let hash_2_raw src1 src2 =
+  EHS.extract (EHS.hash0 #EHS.SHA256 (S.append src1 src2))
 
 type hash =
 | HRaw: hr:hash_raw -> hash
@@ -71,6 +83,7 @@ val hs_next_lv_slice:
         (ensures (S.equal (hs_next_lv #(j - i) (S.slice hs (2 * i) (2 * j)))
                           (S.slice (hs_next_lv #n hs) i j)))
         (decreases (j - i))
+#reset-options "--z3rlimit 10"
 let rec hs_next_lv_slice #n hs i j =
   if i = j then ()
   else begin

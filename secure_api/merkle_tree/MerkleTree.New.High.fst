@@ -3,6 +3,8 @@ module MerkleTree.New.High
 open EverCrypt
 open EverCrypt.Helpers
 
+open MerkleTree.Spec
+
 open FStar.All
 open FStar.Ghost
 open FStar.Seq
@@ -16,13 +18,10 @@ type uint32_t = U32.t
 type uint8_t = U8.t
 
 module EHS = EverCrypt.Hash
-module EHL = EverCrypt.Helpers
-
-val hash_size: nat
-let hash_size = U32.v (EHS.tagLen EHS.SHA256)
+module MTS = MerkleTree.Spec
 
 val hash: Type0
-let hash = b:EHS.bytes{S.length b = hash_size}
+let hash = MTS.hash_raw
 
 val hash_seq: Type0
 let hash_seq = S.seq hash
@@ -33,8 +32,7 @@ let hash_ss = S.seq hash_seq
 let hash_init: hash = S.create hash_size 0uy
 
 val hash_2: src1:hash -> src2:hash -> GTot hash
-let hash_2 src1 src2 =
-  EHS.extract (EHS.hash0 #EHS.SHA256 (S.append src1 src2))
+let hash_2 = MTS.hash_2_raw
 
 /// High-level Merkle tree data structure
 
