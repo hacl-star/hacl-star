@@ -13,7 +13,7 @@
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_5077f55bb8c2178e0da6c05cda8379c0"
       ],
       0,
-      "93bfdcf9ccff5e86d1c75d17de6f95f6"
+      "2af76177b84d3093ef62d2fa807c1440"
     ],
     [
       "Spec.Frodo.Encode.ec",
@@ -25,24 +25,25 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U16",
+        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U16@tok", "equation_FStar.UInt32.n",
+        "equality_tok_Lib.IntTypes.U16@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.UInt32.n",
         "equation_Frodo.Params.crypto_bytes",
         "equation_Frodo.Params.params_logq",
         "equation_Frodo.Params.params_n", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.op_Less_Less_Dot",
         "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.uint_v",
         "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Spec.Frodo.Params.crypto_bytes",
         "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_n",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_Frodo.Params.crypto_bytes",
         "function_token_typing_Frodo.Params.params_logq",
         "function_token_typing_Frodo.Params.params_n",
-        "function_token_typing_Spec.Frodo.Params.crypto_bytes",
-        "function_token_typing_Spec.Frodo.Params.params_logq",
         "function_token_typing_Spec.Frodo.Params.params_n", "int_inversion",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
+        "lemma_Lib.IntTypes.pow2_values",
+        "lemma_Lib.IntTypes.shift_left_lemma", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Frodo.Params_Tm_refine_12d98075a3d6da513028b3242eef754b",
@@ -55,15 +56,13 @@
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_3873e00ad21ef92a37856768756d2121",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_3a3d06d0defdee93e6b2bc90c72ae093",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_5077f55bb8c2178e0da6c05cda8379c0",
-        "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_b129a3c1b180c1ee6e9e3c9a6a306faa",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_1769cc33113b2058a1df470af9e19b49",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_5028a2405ae221f4411860248dc3c632",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_60d5fe827e64cc50b7f22eb0f3f2c5c3",
-        "typing_Lib.IntTypes.uint_v", "typing_Spec.Frodo.Params.params_n",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U16@tok"
+        "token_correspondence_Lib.IntTypes.op_Less_Less_Dot",
+        "token_correspondence_Lib.IntTypes.shift_left",
+        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U16@tok"
       ],
       0,
-      "657a383f188f21a51ada3ce0c57d9614"
+      "d07a4206e6df309412dc28f017c75d84"
     ],
     [
       "Spec.Frodo.Encode.dc",
@@ -82,7 +81,7 @@
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_615479e12143d8edb3b8433e4abacccb"
       ],
       0,
-      "a844413bd258515dc4ff1956c6c25580"
+      "e6b0a928aec31380cbb5e2d4ed9bac0d"
     ],
     [
       "Spec.Frodo.Encode.dc",
@@ -92,78 +91,60 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Lib.IntTypes_interpretation_Tm_arrow_708936967bcaed13886a4139d6687921",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U16@tok",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.UInt32.n",
         "equation_Frodo.Params.crypto_bytes",
         "equation_Frodo.Params.params_logq",
-        "equation_Frodo.Params.params_n",
-        "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.bits",
+        "equation_Frodo.Params.params_n", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.op_Greater_Greater_Dot",
         "equation_Lib.IntTypes.op_Less_Less_Dot",
+        "equation_Lib.IntTypes.op_Plus_Dot",
         "equation_Lib.IntTypes.shiftval", "equation_Lib.IntTypes.uint16",
         "equation_Lib.IntTypes.uint_v", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Frodo.Params.crypto_bytes",
-        "equation_Spec.Frodo.Params.params_logq",
+        "equation_Prims.pos", "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_n",
         "equation_Spec.Frodo.Params.params_nbar",
-        "equation_Spec.GaloisField.gf",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_Frodo.Params.crypto_bytes",
         "function_token_typing_Frodo.Params.params_logq",
         "function_token_typing_Frodo.Params.params_n",
-        "function_token_typing_Frodo.Params.params_nbar",
-        "function_token_typing_Lib.IntTypes.shift_left",
-        "function_token_typing_Spec.AES.gf8",
-        "function_token_typing_Spec.Frodo.Params.crypto_bytes",
-        "function_token_typing_Spec.Frodo.Params.params_logq",
-        "function_token_typing_Spec.Frodo.Params.params_n",
-        "function_token_typing_Spec.Frodo.Params.params_nbar",
-        "int_inversion", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.GaloisField.GF_t",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
+        "function_token_typing_Spec.Frodo.Params.params_n", "int_inversion",
+        "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.IntTypes.pow2_values",
+        "lemma_Lib.IntTypes.shift_left_lemma",
+        "lemma_Lib.IntTypes.shift_right_lemma",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Frodo.Params_Tm_refine_12d98075a3d6da513028b3242eef754b",
-        "refinement_interpretation_Frodo.Params_Tm_refine_3001bddcbfb8ca3f31e1daa126c2d807",
         "refinement_interpretation_Frodo.Params_Tm_refine_6da86bec07f4b6134ea04a42dcd28a6b",
         "refinement_interpretation_Frodo.Params_Tm_refine_b6b093b2ad92d45b4e02c84394ae276d",
-        "refinement_interpretation_Lib.ByteSequence_Tm_refine_70597463dd221580f371f83615527f81",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_2fc20626185ef89b248d6472cf9d8525",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_92eedd657384b0981bcfc64b33308eaf",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_a023f390483b324d20370f23ed0795dc",
-        "refinement_interpretation_Lib.IntTypes_Tm_refine_f63d267428d8ebcfc1f957d8db3cac8d",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_313a91647aa9f150d3a51977408c980d",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_3873e00ad21ef92a37856768756d2121",
-        "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_4d674bb52fc3574595c0c4da59a78697",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_615479e12143d8edb3b8433e4abacccb",
-        "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_7b659e5f6ef99742255dcf067a30ce67",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_80040e4b4fc245408c32b4494e086cad",
-        "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_cda2253a102a2c0fa81de54fe2ad2147",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_1769cc33113b2058a1df470af9e19b49",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_2bdf8cbe33a87550673e36c155c81ed4",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_5028a2405ae221f4411860248dc3c632",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_60d5fe827e64cc50b7f22eb0f3f2c5c3",
+        "token_correspondence_Lib.IntTypes.add_mod",
+        "token_correspondence_Lib.IntTypes.op_Greater_Greater_Dot",
         "token_correspondence_Lib.IntTypes.op_Less_Less_Dot",
+        "token_correspondence_Lib.IntTypes.op_Plus_Dot",
+        "token_correspondence_Lib.IntTypes.shift_left",
+        "token_correspondence_Lib.IntTypes.shift_right",
         "typing_Lib.IntTypes.size", "typing_Lib.IntTypes.uint_v",
-        "typing_Prims.pow2", "typing_Spec.Frodo.Params.params_n",
-        "typing_Spec.Frodo.Params.params_nbar",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Prims.pow2", "typing_Spec.Frodo.Params.params_nbar",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U16@tok"
       ],
       0,
-      "6e749a7bc94fd64b8bcb01ab6ee32ef9"
+      "f1055507b1066533712dbc35aee6a2be"
     ],
     [
       "Spec.Frodo.Encode.ec1",
@@ -192,7 +173,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "583f80f7dbf294c2a584d9fffb8d9f10"
+      "d1bfbb108144626e2605f22d2d2d618c"
     ],
     [
       "Spec.Frodo.Encode.ec1",
@@ -208,6 +189,7 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "disc_equation_Lib.IntTypes.SEC",
+        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U16@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
@@ -215,24 +197,27 @@
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
         "equation_Frodo.Params.params_logq",
-        "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.op_Amp_Dot", "equation_Lib.IntTypes.to_u16",
-        "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.uint_v",
+        "equation_Frodo.Params.params_n", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.op_Amp_Dot",
+        "equation_Lib.IntTypes.op_Greater_Greater_Dot",
+        "equation_Lib.IntTypes.to_u16", "equation_Lib.IntTypes.uint16",
+        "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.uint_v",
         "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_nbar",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_Frodo.Params.params_logq",
-        "function_token_typing_Frodo.Params.params_nbar",
-        "function_token_typing_Spec.Frodo.Params.params_logq",
-        "function_token_typing_Spec.Frodo.Params.params_nbar",
-        "int_inversion", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "function_token_typing_Frodo.Params.params_n", "int_inversion",
+        "lemma_Lib.IntTypes.pow2_values",
+        "lemma_Lib.IntTypes.shift_right_lemma",
+        "lemma_Lib.IntTypes.size_v_size_lemma", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Frodo.Params_Tm_refine_3001bddcbfb8ca3f31e1daa126c2d807",
+        "refinement_interpretation_Frodo.Params_Tm_refine_12d98075a3d6da513028b3242eef754b",
         "refinement_interpretation_Frodo.Params_Tm_refine_6da86bec07f4b6134ea04a42dcd28a6b",
+        "refinement_interpretation_Lib.IntTypes_Tm_refine_0a44a9c52461f7b29dab1fe1db7afc62",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_4c82af8a46684f75d7fe12f75a0fb1a7",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_a023f390483b324d20370f23ed0795dc",
@@ -242,12 +227,12 @@
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_324527479c2681cc9b8ac9d2a58aa774",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_3a1982a11679004cc46be9849b6ee682",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_5969cae49a2b3e54797f46338c17a176",
-        "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_8c1f2b92bbc3ed48bc3502b3669ba65b",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_ecf5660241746917c5e44248a33782a4",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_1769cc33113b2058a1df470af9e19b49",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_2bdf8cbe33a87550673e36c155c81ed4",
         "token_correspondence_Lib.IntTypes.logand",
         "token_correspondence_Lib.IntTypes.op_Amp_Dot",
+        "token_correspondence_Lib.IntTypes.op_Greater_Greater_Dot",
+        "token_correspondence_Lib.IntTypes.shift_right",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_Lib.IntTypes.cast", "typing_Lib.IntTypes.to_u16",
         "typing_Lib.IntTypes.uint_v", "typing_Prims.pow2",
         "typing_Spec.Frodo.Params.params_nbar",
@@ -255,7 +240,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "171b1d6468420d8cb66a13da54846381"
+      "85ae2482d619ededef92833dd52779f3"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode0",
@@ -281,7 +266,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "ad9b2754e857cffc28c66cb055bcf869"
+      "aeb38ce26f4adca1bda0e361b0b97904"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode0",
@@ -307,7 +292,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "64217275ba1952758ef0b9982268baa8"
+      "6c4c401b5ab5087e65e9425b8fc0bfa7"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode0",
@@ -318,21 +303,26 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Frodo.Params.params_n",
         "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "equation_Spec.Frodo.Params.params_nbar",
+        "equation_Lib.IntTypes.uint_v", "equation_Prims.nat",
+        "equation_Spec.Frodo.Params.params_n",
+        "equation_Spec.Frodo.Params.params_nbar",
+        "function_token_typing_Frodo.Params.params_n",
         "function_token_typing_Frodo.Params.params_nbar",
-        "function_token_typing_Spec.Frodo.Params.params_nbar",
+        "function_token_typing_Spec.Frodo.Params.params_n",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Frodo.Params_Tm_refine_12d98075a3d6da513028b3242eef754b",
         "refinement_interpretation_Frodo.Params_Tm_refine_3001bddcbfb8ca3f31e1daa126c2d807",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
         "refinement_interpretation_Spec.Frodo.Encode_Tm_refine_ecf5660241746917c5e44248a33782a4",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_2bdf8cbe33a87550673e36c155c81ed4",
         "typing_Spec.Frodo.Params.params_nbar"
       ],
       0,
-      "5ff156c0dcc13d7d7ea691f425f2fb52"
+      "c209b3a75138b3b49d4e54aa8a93db3b"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode1",
@@ -358,7 +348,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "3731cf0fc9c3aa436b76e7cd68c1a239"
+      "54a3718e5dc6a0ab16df2339e70f7a5e"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode1",
@@ -384,7 +374,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "6edf84c9b609e643baf721eca760d7c6"
+      "601726cfd3a0c73b937afaba6f87773d"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode1",
@@ -437,7 +427,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "51b91d85bd08348ed7f193d359fddfb6"
+      "d292fe6eeb4d440221dff553e04cca15"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode2",
@@ -463,7 +453,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "3c186a3cf15833165d0532b41d572870"
+      "febf8dda5ad684faaecce7e70ab692a2"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode2",
@@ -489,7 +479,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "8a88e43c5b8702e2d522ecc8a57f9852"
+      "47f940f086bfe02a0c7b0fa09cdf953a"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode2",
@@ -500,20 +490,25 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Frodo.Params.params_n",
         "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "equation_Spec.Frodo.Params.params_nbar",
+        "equation_Lib.IntTypes.uint_v", "equation_Prims.nat",
+        "equation_Spec.Frodo.Params.params_n",
+        "equation_Spec.Frodo.Params.params_nbar",
+        "function_token_typing_Frodo.Params.params_n",
         "function_token_typing_Frodo.Params.params_nbar",
-        "function_token_typing_Spec.Frodo.Params.params_nbar",
+        "function_token_typing_Spec.Frodo.Params.params_n",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Frodo.Params_Tm_refine_12d98075a3d6da513028b3242eef754b",
         "refinement_interpretation_Frodo.Params_Tm_refine_3001bddcbfb8ca3f31e1daa126c2d807",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_2bdf8cbe33a87550673e36c155c81ed4",
         "typing_Spec.Frodo.Params.params_nbar"
       ],
       0,
-      "143cf9cc8a781bd7a1d4a950239c449f"
+      "2624814c7f4385b03beecaef4c5599c3"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode",
@@ -539,7 +534,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "86d84053d9b7af070ac5b4093a7ddc50"
+      "42c3324abaded546a15d40aed615f60d"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode",
@@ -565,7 +560,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "7623291e11270c2ea093594a65b5bb7b"
+      "3ce3c60d5e6bfe0eb6be4a0d6b484e40"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_encode",
@@ -576,20 +571,25 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Frodo.Params.params_n",
         "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "equation_Spec.Frodo.Params.params_nbar",
+        "equation_Lib.IntTypes.uint_v", "equation_Prims.nat",
+        "equation_Spec.Frodo.Params.params_n",
+        "equation_Spec.Frodo.Params.params_nbar",
+        "function_token_typing_Frodo.Params.params_n",
         "function_token_typing_Frodo.Params.params_nbar",
-        "function_token_typing_Spec.Frodo.Params.params_nbar",
+        "function_token_typing_Spec.Frodo.Params.params_n",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Frodo.Params_Tm_refine_12d98075a3d6da513028b3242eef754b",
         "refinement_interpretation_Frodo.Params_Tm_refine_3001bddcbfb8ca3f31e1daa126c2d807",
         "refinement_interpretation_Lib.IntTypes_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
-        "refinement_interpretation_Spec.Frodo.Params_Tm_refine_2bdf8cbe33a87550673e36c155c81ed4",
         "typing_Spec.Frodo.Params.params_nbar"
       ],
       0,
-      "72282849303ad0fa5ab8f16e135aff8d"
+      "fdce667c0c61216c5da11d4c968642f9"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode0",
@@ -600,18 +600,19 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "equation_Spec.Frodo.Params.params_nbar",
+        "equation_Lib.IntTypes.uint_v",
+        "equation_Spec.Frodo.Params.params_nbar",
         "function_token_typing_Frodo.Params.params_nbar",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Frodo.Params_Tm_refine_3001bddcbfb8ca3f31e1daa126c2d807",
-        "refinement_interpretation_Lib.IntTypes_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
         "typing_Spec.Frodo.Params.params_nbar"
       ],
       0,
-      "bd00f605cb5420ac1fefca1b3032ea5f"
+      "667e95793711ef4a6a038a77f70b8ae3"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode0",
@@ -622,18 +623,19 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "equation_Spec.Frodo.Params.params_nbar",
+        "equation_Lib.IntTypes.uint_v",
+        "equation_Spec.Frodo.Params.params_nbar",
         "function_token_typing_Frodo.Params.params_nbar",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Frodo.Params_Tm_refine_3001bddcbfb8ca3f31e1daa126c2d807",
-        "refinement_interpretation_Lib.IntTypes_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
         "typing_Spec.Frodo.Params.params_nbar"
       ],
       0,
-      "cc9d1e3e8a8609fc7327914bde0ae14c"
+      "b1db250c6847c08ec3e1303814510b52"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode0",
@@ -677,7 +679,7 @@
         "typing_Spec.Frodo.Params.params_nbar"
       ],
       0,
-      "f5fe22bc94069d6ada5edfea9cb12a0f"
+      "f80c534bcc7d5adcf6acfa34a0b162f4"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode1",
@@ -703,7 +705,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "10486c4a46f8ddb061ae54e20ba33af3"
+      "136d1407b7d5aab60906881611bf9848"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode1",
@@ -729,7 +731,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "fc0c2622ee6d89a4df576f0756e8a84e"
+      "1aef07a8288eeff5445b7633c3808b43"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode1",
@@ -762,7 +764,7 @@
         "typing_Spec.Frodo.Params.params_nbar"
       ],
       0,
-      "c9f10639b64a3f89dc8328e81a148628"
+      "640f5975784b1076b467b8d3102f73f8"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode2",
@@ -788,7 +790,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "fd11a6c57dfc381541008143b9caf789"
+      "13266daee5ad9cac733b5923914b7381"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode2",
@@ -814,7 +816,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "f3aa6097c6a958ecc6253af74072bce7"
+      "da362a461370f5128df0d20a7f8b2224"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode2",
@@ -845,7 +847,7 @@
         "typing_Spec.Frodo.Params.params_nbar"
       ],
       0,
-      "c55e3327a9611fe5b8992102a01a3424"
+      "5f327c528ab520cee78d11b796bfb8bf"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode",
@@ -871,7 +873,7 @@
         "typing_Spec.Frodo.Params.params_n"
       ],
       0,
-      "7827034ab023764708257854e84e9609"
+      "e8411891d81c2168a9892f241d269e5d"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode",
@@ -882,18 +884,19 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equation_Frodo.Params.params_nbar", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "equation_Spec.Frodo.Params.params_nbar",
+        "equation_Lib.IntTypes.uint_v",
+        "equation_Spec.Frodo.Params.params_nbar",
         "function_token_typing_Frodo.Params.params_nbar",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Frodo.Params_Tm_refine_3001bddcbfb8ca3f31e1daa126c2d807",
-        "refinement_interpretation_Lib.IntTypes_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
         "typing_Spec.Frodo.Params.params_nbar"
       ],
       0,
-      "f7e8750a50ee636490afeae0d6d84ca6"
+      "17268f6e549fdc919f39af97e4ea3372"
     ],
     [
       "Spec.Frodo.Encode.frodo_key_decode",
@@ -927,7 +930,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d8625a19167b9b46b1f0e41ba5016cfc"
+      "8d6821651f294ebb18c4aae9a4e126d2"
     ]
   ]
 ]
