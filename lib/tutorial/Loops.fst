@@ -286,27 +286,39 @@ let set_true a =
 
 /// Tests
 
+let b1: b:ilbuffer uint8 (size 3){recallable b} =
+  [@inline_let]
+  let l = [u8 1; u8 2; u8 3] in
+  createL_global l
+
+let b2: b:ilbuffer uint8 3ul{recallable b} =
+  [@inline_let]
+  let l = [u8 3; u8 2; u8 1] in
+  createL_global l
+
+let a1: b:ilbuffer uint8 4ul{recallable b} =
+  [@inline_let]
+  let l = [u8 1; u8 2; u8 3; u8 4] in
+  createL_global l
+
+let a2: b:ilbuffer uint8 4ul{recallable b} =
+  [@inline_let]
+  let l = [u8 4; u8 3; u8 2; u8 1] in
+  createL_global l
+
 val main: unit -> St int
 let main () =
   push_frame();
+  B.recall b1;
+  B.recall b2;
+  B.recall a1;
+  B.recall a2;
   [@inline_let]
   let l0 = [u8 1; u8 2; u8 3] in
   let b0 : lbuffer uint8 3ul = createL l0 in
   [@inline_let]
-  let l1 = [u8 1; u8 2; u8 3] in
-  let b1 : lbuffer uint8 3ul = createL l1 in
-  [@inline_let]
-  let l2 = [u8 3; u8 2; u8 1] in
-  let b2 : lbuffer uint8 3ul = createL l2 in
-  [@inline_let]
-  let l3 = [u8 1; u8 2; u8 3; u8 4] in
-  let a0 : lbuffer uint8 4ul = createL l3 in  
-  [@inline_let]
-  let l4 = [u8 1; u8 2; u8 3; u8 4] in
-  let a1 : lbuffer uint8 4ul = createL l4 in
-  [@inline_let]
-  let l5 = [u8 4; u8 3; u8 2; u8 1] in
-  let a2 : lbuffer uint8 4ul = createL l5 in
+  let l1 = [u8 1; u8 2; u8 3; u8 4] in
+  let a0 : lbuffer uint8 4ul = createL l1 in  
   reverse_inplace 3ul b0;
   print_compare_display (size 3) b0 b2;
   reverse 3ul b0;

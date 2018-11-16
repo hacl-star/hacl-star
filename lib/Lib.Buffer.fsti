@@ -37,7 +37,7 @@ unfold let ibuffer (a:Type0) = buffer_t IMMUT a
 
 let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   match t with
-  | MUT-> B.length (b <: buffer a)
+  | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
 
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
