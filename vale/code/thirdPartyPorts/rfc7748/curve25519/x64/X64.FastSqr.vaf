@@ -1,7 +1,8 @@
 include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../../arch/x64/X64.Vale.InsMem.vaf"
-include{:fstar}{:open} "FastMul_helpers"
-include{:fstar}{:open} "FastMul_defs"
+include{:fstar}{:open} "Fast_defs"
+include{:fstar}{:open} "Fast_lemmas_external"
+include{:fstar}{:open} "FastSqr_helpers"
 include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.FastSqr
@@ -19,7 +20,7 @@ open X64.Vale.InsBasic
 open X64.Vale.InsMem
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
-open FastMul_defs
+open Fast_defs
 open X64.CPU_Features_s
 #endverbatim
 
@@ -35,8 +36,9 @@ open X64.Vale.InsMem
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open FStar.Tactics
-open FastMul_defs
-open FastMul_helpers
+open Fast_defs
+open Fast_lemmas_external
+open FastSqr_helpers
 open X64.CPU_Features_s
 #endverbatim
 
