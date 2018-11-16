@@ -70,7 +70,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi \
   --already_cached 'FStar LowStar C Spec Hacl.Hash -C.Compat' \
-  $(addprefix --already_cached ,$(VALE_NAMESPACES)) \
+  $(addprefix --already_cached ,$(subst .*,,$(VALE_NAMESPACES))) \
   --use_extracted_interfaces true
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
