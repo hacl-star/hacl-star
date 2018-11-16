@@ -233,16 +233,15 @@ let point_add_and_double_ #s q nq nq_p1 =
    footprint h0 gloc (fun () -> fsub z3 d c);  // z3 = da - cb
 
    (* CAN RUN IN PARALLEL *)
-//   footprint h0 gloc (fun () -> fsqr x3 x3);   // x3 = (da + cb) ^ 2
-//   footprint h0 gloc (fun () -> fsqr z3 z3);   // z3 = (da - cb) ^ 2
-   footprint h0 gloc (fun () -> fsqr2 x3 x3);   // x3|z3 = x3*x3|z3*z3
-   
-   footprint h0 gloc (fun () -> fmul z3 z3 x1); // z3 = x1 * (da - cb) ^ 2
-
-   (* CAN RUN IN PARALLEL *)
 //   footprint h0 gloc (fun () -> fsqr d a);     // d = aa = a^2
 //   footprint h0 gloc (fun () -> fsqr c b);     // c = bb = b^2
    footprint h0 gloc (fun () -> fsqr2 d a);     // d|c = aa | bb
+
+   (* CAN RUN IN PARALLEL *)
+//   footprint h0 gloc (fun () -> fsqr x3 x3);   // x3 = (da + cb) ^ 2
+//   footprint h0 gloc (fun () -> fsqr z3 z3);   // z3 = (da - cb) ^ 2
+   footprint h0 gloc (fun () -> fsqr2 x3 x3);   // x3|z3 = x3*x3|z3*z3
+      
    copy_felem a c;                           // a = bb
    footprint h0 gloc (fun () -> fsub c d c);   // c = e = aa - bb
    footprint h0 gloc (fun () -> fmul1 b c (u64 121665)); // b = e * 121665
@@ -252,6 +251,7 @@ let point_add_and_double_ #s q nq nq_p1 =
 //   footprint h0 gloc (fun () -> fmul x2 d a);  // x2 = aa * bb
 //   footprint h0 gloc (fun () -> fmul z2 c b);  // z2 = e * (aa + (e * 121665))
    footprint h0 gloc (fun () -> fmul2 x2 d a);  // x2|z2 = aa * bb | e * (aa + (e * 121665))
+   footprint h0 gloc (fun () -> fmul z3 z3 x1); // z3 = x1 * (da - cb) ^ 2
    pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
