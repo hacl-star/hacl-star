@@ -1287,6 +1287,29 @@ val lift_path:
 let lift_path h mtr p =
   lift_path_ h (V.as_seq h (B.get h p 0))
 
+val lift_path_index_:
+  h:HS.mem ->
+  hs:S.seq hash{V.forall_seq hs 0 (S.length hs) (fun hp -> Rgl?.r_inv hreg h hp)} ->
+  i:nat ->
+  Lemma (requires (i < S.length hs))
+        (ensures (Rgl?.r_repr hreg h (S.index hs i) ==
+                 S.index (lift_path_ h hs) i))
+        (decreases i)
+let rec lift_path_index_ h hs i =
+  if S.length hs = 0 then ()
+  else if i = 0 then ()
+  else lift_path_index_ h (S.tail hs) (i - 1)
+
+val lift_path_index:
+  h:HS.mem -> mtr:HH.rid ->
+  p:path -> i:uint32_t ->
+  Lemma (requires (path_safe h mtr p /\
+                  i < V.size_of (B.get h p 0)))
+        (ensures (Rgl?.r_repr hreg h (V.get h (B.get h p 0) i) ==
+                 S.index (lift_path h mtr p) (U32.v i)))
+let rec lift_path_index h mtr p i =
+  lift_path_index_ h (V.as_seq h (B.get h p 0)) (U32.v i)
+
 private val path_safe_preserved_:
   mtr:HH.rid -> hvec:V.vector hash -> dl:loc ->
   i:index_t -> j:index_t{i <= j && j <= V.size_of hvec} ->
@@ -2363,16 +2386,6 @@ let mt_flush mt =
 
 /// Client-side verification
 
-val lift_path_index:
-  h:HS.mem -> mtr:HH.rid ->
-  p:path -> i:uint32_t ->
-  Lemma (requires (path_safe h mtr p /\
-                  i < V.size_of (B.get h p 0)))
-        (ensures (Rgl?.r_repr hreg h (V.get h (B.get h p 0) i) ==
-                 S.index (lift_path h mtr p) (U32.v i)))
-let rec lift_path_index h mtr p i =
-  admit ()
-
 #reset-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 private val mt_verify_:
   k:index_t ->
@@ -2402,10 +2415,6 @@ private val mt_verify_:
 private let rec mt_verify_ k j mtr p ppos acc actd =
   let hh0 = HST.get () in
   if j = 0ul then ()
-  // cwinter: is this correct?
-  // else if ppos = V.size_of !*p then ()
-  // joonwonc: there was a bug; it's fixed now and we don't need the above
-  //           condition anymore, but it's not proven yet.
   else (let nactd = actd || (j % 2ul = 1ul) in
        if k % 2ul = 0ul then begin
          if j = k || (j = k + 1ul && not actd) then
@@ -2447,10 +2456,9 @@ private val buf_eq:
      // memory safety
      h0 == h1 /\
      // correctness
-     (b <==> S.equal (B.as_seq h0 (B.gsub b1 0ul len))
-                    (B.as_seq h0 (B.gsub b2 0ul len)))))
+     (b <==> (forall (i:nat{i < U32.v len}).
+               S.index (B.as_seq h0 b1) i = S.index (B.as_seq h0 b2) i))))
 private let rec buf_eq #a b1 b2 len =
-  admit ();
   if len = 0ul then true
   else (let a1 = B.index b1 (len - 1ul) in
        let a2 = B.index b2 (len - 1ul) in
@@ -2547,6 +2555,9 @@ let mt_verify mt k j mtr p rt =
          High.mt_verify_ (U32.v k) (U32.v j) (lift_path hh1 mtr p)
            1 (Rgl?.r_repr hreg hh1 ih) false);
   let r = buf_eq ih rt hash_size in
+  assert (if r 
+         then S.equal (Rgl?.r_repr hreg hh2 ih) (Rgl?.r_repr hreg hh2 rt)
+         else True);
   Rgl?.r_free hreg ih;
   r
 
