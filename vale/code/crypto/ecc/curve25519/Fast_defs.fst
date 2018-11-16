@@ -32,5 +32,12 @@ let bool_bit (b:bool) : bit = if b then 1 else 0
 
 let mul_nats (x y:nat) : nat = 
   let prod = x * y in
-  Fast_lemmas.lemma_mul_bounds_le 0 x 0 y;
+  Fast_lemmas_internal.lemma_mul_bounds_le 0 x 0 y;
   prod
+
+open Arch.Types
+let add_carry (x y:nat64) (c:bit) : nat64 & (c':nat{c = 0 || c = 1})
+  =
+  add_wrap64 (add_wrap64 x y) c,
+  (if x + y + c >= pow2_64 then 1 else 0)
+

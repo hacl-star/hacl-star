@@ -1,7 +1,8 @@
 include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../../arch/x64/X64.Vale.InsMem.vaf"
-include{:fstar}{:open} "FastMul_helpers"
 include{:fstar}{:open} "Fast_defs"
+include{:fstar}{:open} "Fast_lemmas_external"
+include{:fstar}{:open} "FastMul_helpers"
 include{:fstar}{:open} "X64.CPU_Features_s"
 
 //include{:fstar}{:open} "Prop_s"
@@ -37,6 +38,7 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open FStar.Tactics
 open Fast_defs
+open Fast_lemmas_external
 open FastMul_helpers
 open X64.CPU_Features_s
 #endverbatim
@@ -46,7 +48,7 @@ const int_canon:tactic extern;
 ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 60"
 procedure{:quick} fast_multiply_a0b(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
