@@ -64,11 +64,12 @@ VALE_NAMESPACES='X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
   Workarounds 'Math.*' Interop TypesNative_s
 
 # TODO: remove the exceptions for old-style HACL from already_cached
+# TODO: make it Hacl instead of Hacl.Hash, eventually
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi \
-  --already_cached 'FStar LowStar C Spec Hacl -Hacl.UInt8 -Hacl.UInt16 -Hacl.UInt32 -Hacl.UInt64 -Hacl.UInt128 -C.Compat' \
+  --already_cached 'FStar LowStar C Spec Hacl.Hash -C.Compat' \
   $(addprefix --already_cached ,$(VALE_NAMESPACES)) \
   --use_extracted_interfaces true
 
