@@ -701,6 +701,29 @@ let mt_free mt =
 
 /// Insertion
 
+private val as_seq_sub_upd:
+  #a:Type0 -> #rg:regional a ->
+  h:HS.mem -> rv:rvector rg -> 
+  i:uint32_t{i < V.size_of rv} -> v:Rgl?.repr rg ->
+  Lemma (requires (RV.rv_inv h rv))
+        (ensures (S.equal (S.upd (RV.as_seq h rv) (U32.v i) v)
+                          (S.append
+                            (RV.as_seq_sub h rv 0ul i)
+                            (S.cons v (RV.as_seq_sub h rv (i + 1ul) (V.size_of rv))))))
+#reset-options "--z3rlimit 20"
+private let as_seq_sub_upd #a #rg h rv i v =
+  Seq.Properties.slice_upd (RV.as_seq h rv) 0 (U32.v i) (U32.v i) v;
+  Seq.Properties.slice_upd (RV.as_seq h rv) (U32.v i + 1) (U32.v (V.size_of rv)) (U32.v i) v;
+  RV.as_seq_seq_slice rg h (V.as_seq h rv) 
+    0 (U32.v (V.size_of rv)) 0 (U32.v i);
+  assert (S.equal (S.slice (RV.as_seq h rv) 0 (U32.v i))
+                  (RV.as_seq_sub h rv 0ul i));
+  RV.as_seq_seq_slice rg h (V.as_seq h rv) 
+    0 (U32.v (V.size_of rv)) (U32.v i + 1) (U32.v (V.size_of rv));
+  assert (S.equal (S.slice (RV.as_seq h rv) (U32.v i + 1) (U32.v (V.size_of rv)))
+                  (RV.as_seq_sub h rv (i + 1ul) (V.size_of rv)));
+  assert (S.index (S.upd (RV.as_seq h rv) (U32.v i) v) (U32.v i) == v)
+
 // `hash_vv_insert_copy` inserts a hash element at a level `lv`, by copying
 // and pushing its content to `hs[lv]`. For detailed insertion procedure, see
 // `insert_` and `mt_insert`.
@@ -840,8 +863,7 @@ inline_for_extraction private let hash_vv_insert_copy lv i j hs v =
                     (RV.as_seq_sub hh0 hs 0ul lv)
                     (S.cons (RV.as_seq hh1 ihv)
                             (RV.as_seq_sub hh0 hs (lv + 1ul) merkle_tree_size_lg))));
-  assume (S.equal (RV.as_seq hh2 hs)
-                  (S.upd (RV.as_seq hh0 hs) (U32.v lv) (RV.as_seq hh1 ihv)))
+  as_seq_sub_upd hh0 hs lv (RV.as_seq hh1 ihv)
 
 private val insert_index_helper_even:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
@@ -2337,8 +2359,9 @@ private let rec mt_flush_to_ lv hs pi i j =
                       (RV.as_seq_sub hh0 hs 0ul lv)
                       (S.cons (RV.as_seq hh1 flushed)
                               (RV.as_seq_sub hh0 hs (lv + 1ul) merkle_tree_size_lg))));
-    assume (S.equal (RV.as_seq hh2 hs)
-                    (S.upd (RV.as_seq hh0 hs) (U32.v lv) (RV.as_seq hh1 flushed)));
+    as_seq_sub_upd hh0 hs lv (RV.as_seq hh1 flushed);
+    // assume (S.equal (RV.as_seq hh2 hs)
+    //                 (S.upd (RV.as_seq hh0 hs) (U32.v lv) (RV.as_seq hh1 flushed)));
 
     // if `lv = 31` then `pi <= i <= j < 2` thus `oi = opi`,
     // contradicting the branch.
