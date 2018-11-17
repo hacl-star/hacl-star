@@ -270,6 +270,55 @@ let point_add_and_double #s q nq nq_p1 =
   | M64 -> point_add_and_double_64 q nq nq_p1
 (* WRAPPER to Prevent Inlining *)
 
+inline_for_extraction
+val point_double_: #s:field_spec -> nq: point s -> Stack unit
+				(requires fun h0 -> live h0 nq)
+				(ensures fun h0 _ h1 -> modifies (loc nq) h0 h1)
+inline_for_extraction
+let point_double_ #s nq =
+   push_frame();
+   let x2 = sub nq 0ul (nlimb s) in
+   let z2 = sub nq (nlimb s) (nlimb s) in
+   let tmp : lbuffer (limb s) (4ul *. nlimb s) = create (4ul *. nlimb s) (limb_zero s) in
+   let a : felem s = sub tmp 0ul (nlimb s) in
+   let b : felem s = sub tmp (nlimb s) (nlimb s) in
+   let d : felem s = sub tmp (2ul *. nlimb s) (nlimb s) in
+   let c : felem s = sub tmp (3ul *. nlimb s) (nlimb s) in
+   let gloc = Ghost.hide (loc nq) in
+   let h0 = ST.get() in
+   footprint h0 gloc (fun () -> fadd a x2 z2); // a = x2 + z2
+   footprint h0 gloc (fun () -> fsub b x2 z2); // b = x2 - z2
+
+   (* CAN RUN IN PARALLEL *)
+//   footprint h0 gloc (fun () -> fsqr d a);     // d = aa = a^2
+//   footprint h0 gloc (fun () -> fsqr c b);     // c = bb = b^2
+   footprint h0 gloc (fun () -> fsqr2 d a);     // d|c = aa | bb
+
+   copy_felem a c;                           // a = bb
+   footprint h0 gloc (fun () -> fsub c d c);   // c = e = aa - bb
+   footprint h0 gloc (fun () -> fmul1 b c (u64 121665)); // b = e * 121665
+   footprint h0 gloc (fun () -> fadd b b d);   // b = (e * 121665) + aa 
+
+   (* CAN RUN IN PARALLEL *)
+//   footprint h0 gloc (fun () -> fmul x2 d a);  // x2 = aa * bb
+//   footprint h0 gloc (fun () -> fmul z2 c b);  // z2 = e * (aa + (e * 121665))
+   footprint h0 gloc (fun () -> fmul2 x2 d a);  // x2|z2 = aa * bb | e * (aa + (e * 121665))
+   pop_frame()
+
+(* WRAPPER to Prevent Inlining *)
+let point_double_51  (nq:point51) = point_double_ #M51 nq 
+let point_double_64  (nq:point64) = point_double_ #M64 nq
+inline_for_extraction
+val point_double: #s:field_spec -> nq: point s -> Stack unit
+				(requires fun h0 -> live h0 nq)
+				(ensures fun h0 _ h1 -> modifies (loc nq) h0 h1)
+inline_for_extraction
+let point_double #s nq =
+  match s with
+  | M51 -> point_double_51 nq
+  | M64 -> point_double_64 nq
+(* WRAPPER to Prevent Inlining *)
+
 
 inline_for_extraction
 val cswap_: #s:field_spec -> bit:uint64 -> p1:point s -> p2:point s -> Stack unit
@@ -321,15 +370,18 @@ let montgomery_ladder_ #s out key init =
   set_bit1 x0 0ul;
   let h0 = ST.get() in
   //TODO, loop iteration 0 is useless, try to squeeze out more speed here.
-  loop2 h0 256ul p0 p1
+  loop2 h0 252ul p0 p1
     (fun h -> (fun i s -> s))
     (fun i -> 
       //TODO, do only one cswap here, pending 1K speedup
-         let bit = scalar_bit key (255ul -. i) in
+         let bit = scalar_bit key (254ul -. i) in
          cswap #s bit p0 p1;   
          point_add_and_double #s init p0 p1;
          cswap #s bit p0 p1;   
 	 admit());
+  point_double p0;
+  point_double p0;
+  point_double p0;
   copy out p0;  
   pop_frame()
 
