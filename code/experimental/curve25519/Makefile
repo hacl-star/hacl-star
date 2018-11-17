@@ -57,7 +57,7 @@ curve25519_64_mixed.exe: curve64-c/Hacl_Curve25519_64.c rfc7748_25519.h
 	cp -f vale_25519.h tmp_25519.h
 	cp -f rfc7748_25519.h vale_25519.h
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve64-test.c -o curve25519_64_mixed.exe 
-	cp -f tmp_25519.h rfc7748_25519.h
+	cp -f tmp_25519.h vale_25519.h
 	./curve25519_64_mixed.exe
 
 curve25519_64_rfc.exe: curve64-c/Hacl_Curve25519_64.c
