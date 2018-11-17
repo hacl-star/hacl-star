@@ -237,6 +237,7 @@ let point_add_and_double_ #s q nq nq_p1 =
 //   footprint h0 gloc (fun () -> fsqr c b);     // c = bb = b^2
    footprint h0 gloc (fun () -> fsqr2 d a);     // d|c = aa | bb
 
+   //moving the following line gave me a 2k speedup.
    (* CAN RUN IN PARALLEL *)
 //   footprint h0 gloc (fun () -> fsqr x3 x3);   // x3 = (da + cb) ^ 2
 //   footprint h0 gloc (fun () -> fsqr z3 z3);   // z3 = (da - cb) ^ 2
@@ -251,6 +252,7 @@ let point_add_and_double_ #s q nq nq_p1 =
 //   footprint h0 gloc (fun () -> fmul x2 d a);  // x2 = aa * bb
 //   footprint h0 gloc (fun () -> fmul z2 c b);  // z2 = e * (aa + (e * 121665))
    footprint h0 gloc (fun () -> fmul2 x2 d a);  // x2|z2 = aa * bb | e * (aa + (e * 121665))
+   // moving the following line gives a 2k speedup
    footprint h0 gloc (fun () -> fmul z3 z3 x1); // z3 = x1 * (da - cb) ^ 2
    pop_frame()
 
@@ -310,16 +312,19 @@ val montgomery_ladder_: #s:field_spec -> o:point s -> k:scalar -> i:point s -> S
 inline_for_extraction
 let montgomery_ladder_ #s out key init = 
   push_frame();
-  let p0 : point s = create (2ul *. nlimb s) (limb_zero s) in
-  let p1 : point s = create (2ul *. nlimb s) (limb_zero s) in
+  let p01 = create (4ul *. nlimb s) (limb_zero s) in
+  let p0 : point s = sub p01 0ul (2ul *. nlimb s) in
+  let p1 : point s = sub p01 (2ul *. nlimb s) (2ul *. nlimb s) in
   copy p1 init;
   let x0 : felem s = sub p0 0ul (nlimb s) in
   let z0 : felem s = sub p0 (nlimb s) (nlimb s) in
   set_bit1 x0 0ul;
   let h0 = ST.get() in
+  //TODO, loop iteration 0 is useless, try to squeeze out more speed here.
   loop2 h0 256ul p0 p1
     (fun h -> (fun i s -> s))
     (fun i -> 
+      //TODO, do only one cswap here, pending 1K speedup
          let bit = scalar_bit key (255ul -. i) in
          cswap #s bit p0 p1;   
          point_add_and_double #s init p0 p1;

@@ -197,6 +197,27 @@ _add1:
   pop %rsi
   ret
 
+.global _add1_38
+_add1_38:
+  push %rsi
+  mov %rdx, %rcx
+  xor %r8, %r8
+  xor %r9, %r9
+  xor %r10, %r10
+  movq $38, %r11		;
+  xor %rax, %rax
+  addq 0(%rsi), %rcx
+  movq %rcx, 0(%rdi)
+  adcxq 8(%rsi), %r8
+  movq %r8, 8(%rdi)
+  adcxq 16(%rsi), %r9
+  movq %r9, 16(%rdi)
+  adcxq 24(%rsi), %r10
+  movq %r10, 24(%rdi)
+  cmovc %r11, %rax
+  pop %rsi
+  ret
+
 .global _add
 _add:
   push %rsi
@@ -217,6 +238,30 @@ _add:
   adcxq 24(%rsi), %r12
   movq %r12, 24(%rdi)
   adcx %r8, %rax
+  pop %r12
+  pop %rsi
+  ret
+
+.global _add_38
+_add_38:
+  push %rsi
+  push %r12
+  mov %rdx, %rcx
+  movq $38, %r8
+  xor %rax, %rax
+  movq 0(%rcx), %r9
+  addq 0(%rsi), %r9
+  movq %r9, 0(%rdi)
+  movq 8(%rcx), %r10
+  adcxq 8(%rsi), %r10
+  movq %r10, 8(%rdi)
+  movq 16(%rcx), %r11
+  adcxq 16(%rsi), %r11
+  movq %r11, 16(%rdi)
+  movq 24(%rcx), %r12
+  adcxq 24(%rsi), %r12
+  movq %r12, 24(%rdi)
+  cmovc %r8, %rax
   pop %r12
   pop %rsi
   ret
@@ -247,6 +292,32 @@ _sub1:
   pop %rsi
   ret
 
+.global _sub1_38
+_sub1_38:
+  push %rsi
+  mov %rdx, %rcx
+  xor %r8, %r8
+  xor %r9, %r9
+  xor %r10, %r10
+  xor %r11, %r11
+  xor %rax, %rax
+  movq 0(%rsi), %r8
+  sub %rcx, %r8
+  movq %r8, 0(%rdi)
+  movq 8(%rsi), %r9
+  sbb %r10, %r9
+  movq %r9, 8(%rdi)
+  movq 16(%rsi), %r10
+  sbb %r11, %r10
+  movq %r10, 16(%rdi)
+  movq 24(%rsi), %r11
+  sbb %rax, %r11
+  movq %r11, 24(%rdi)
+  movq $38, %r11
+  cmovc %r11, %rax
+  pop %rsi
+  ret
+
 .global _sub
 _sub:
   push %rsi
@@ -266,6 +337,31 @@ _sub:
   sbbq 24(%rcx), %r11
   movq %r11, 24(%rdi)
   adc %rax, %rax
+  pop %r12
+  pop %rsi
+  ret
+
+
+.global _sub_38
+_sub_38:
+  push %rsi
+  push %r12
+  mov %rdx, %rcx
+  xor %rax, %rax
+  movq 0(%rsi), %r8
+  subq 0(%rcx), %r8
+  movq %r8, 0(%rdi)
+  movq 8(%rsi), %r9
+  sbbq 8(%rcx), %r9
+  movq %r9, 8(%rdi)
+  movq 16(%rsi), %r10
+  sbbq 16(%rcx), %r10
+  movq %r10, 16(%rdi)
+  movq 24(%rsi), %r11
+  sbbq 24(%rcx), %r11
+  movq %r11, 24(%rdi)
+  movq $38, %r11
+  cmovc %r11, %rax
   pop %r12
   pop %rsi
   ret
