@@ -1315,7 +1315,7 @@ let path_safe h mtr p =
   HST.is_eternal_region (V.frameOf (B.get h p 0)) /\
   V.forall_all h (B.get h p 0)
     (fun hp -> Rgl?.r_inv hreg h hp /\
-               HH.includes mtr (B.frameOf hp)) /\
+               HH.includes mtr (Rgl?.region_of hreg hp)) /\
   HH.extends (V.frameOf (B.get h p 0)) (B.frameOf p) /\
   HH.disjoint mtr (B.frameOf p)
 
@@ -1325,32 +1325,39 @@ let path_loc p =
 
 val lift_path_:
   h:HS.mem ->
-  p:S.seq hash{V.forall_seq p 0 (S.length p) (fun hp -> Rgl?.r_inv hreg h hp)} ->
-  GTot (hp:High.path{S.length hp = S.length p}) (decreases (S.length p))
-let rec lift_path_ h p =
-  if S.length p = 0 then S.empty
-  else (S.cons (Rgl?.r_repr hreg h (S.head p))
-               (lift_path_ h (S.tail p)))
+  hs:S.seq hash ->
+  i:nat ->
+  j:nat{
+    i <= j /\ j <= S.length hs /\
+    V.forall_seq hs i j (fun hp -> Rgl?.r_inv hreg h hp)} ->
+  GTot (hp:High.path{S.length hp = j - i}) (decreases j)
+let rec lift_path_ h hs i j =
+  if i = j then S.empty
+  else (S.snoc (lift_path_ h hs i (j - 1))
+               (Rgl?.r_repr hreg h (S.index hs (j - 1))))
 
 // Representation of a path
 val lift_path:
   h:HS.mem -> mtr:HH.rid -> p:path{path_safe h mtr p} ->
   GTot (hp:High.path{S.length hp = U32.v (V.size_of (B.get h p 0))})
 let lift_path h mtr p =
-  lift_path_ h (V.as_seq h (B.get h p 0))
+  lift_path_ h (V.as_seq h (B.get h p 0)) 
+    0 (S.length (V.as_seq h (B.get h p 0)))
 
 val lift_path_index_:
   h:HS.mem ->
-  hs:S.seq hash{V.forall_seq hs 0 (S.length hs) (fun hp -> Rgl?.r_inv hreg h hp)} ->
-  i:nat ->
-  Lemma (requires (i < S.length hs))
-        (ensures (Rgl?.r_repr hreg h (S.index hs i) ==
-                 S.index (lift_path_ h hs) i))
-        (decreases i)
-let rec lift_path_index_ h hs i =
-  if S.length hs = 0 then ()
-  else if i = 0 then ()
-  else lift_path_index_ h (S.tail hs) (i - 1)
+  hs:S.seq hash ->
+  i:nat -> j:nat{i <= j && j <= S.length hs} -> 
+  k:nat{i <= k && k < j} ->
+  Lemma (requires (V.forall_seq hs i j (fun hp -> Rgl?.r_inv hreg h hp)))
+        (ensures (Rgl?.r_repr hreg h (S.index hs k) ==
+                 S.index (lift_path_ h hs i j) (k - i)))
+        (decreases j)
+        [SMTPat (S.index (lift_path_ h hs i j) (k - i))]
+let rec lift_path_index_ h hs i j k =
+  if i = j then ()
+  else if k = j - 1 then ()
+  else lift_path_index_ h hs i (j - 1) k
 
 val lift_path_index:
   h:HS.mem -> mtr:HH.rid ->
@@ -1360,32 +1367,60 @@ val lift_path_index:
         (ensures (Rgl?.r_repr hreg h (V.get h (B.get h p 0) i) ==
                  S.index (lift_path h mtr p) (U32.v i)))
 let rec lift_path_index h mtr p i =
-  lift_path_index_ h (V.as_seq h (B.get h p 0)) (U32.v i)
+  lift_path_index_ h (V.as_seq h (B.get h p 0))
+    0 (S.length (V.as_seq h (B.get h p 0))) (U32.v i)
+
+val lift_path_eq:
+  h:HS.mem ->
+  hs1:S.seq hash -> hs2:S.seq hash ->
+  i:nat -> j:nat ->
+  Lemma (requires (i <= j /\ j <= S.length hs1 /\ j <= S.length hs2 /\
+                  S.equal (S.slice hs1 i j) (S.slice hs2 i j) /\
+                  V.forall_seq hs1 i j (fun hp -> Rgl?.r_inv hreg h hp) /\
+                  V.forall_seq hs2 i j (fun hp -> Rgl?.r_inv hreg h hp)))
+        (ensures (S.equal (lift_path_ h hs1 i j) (lift_path_ h hs2 i j)))
+let lift_path_eq h hs1 hs2 i j =
+  assert (forall (k:nat{i <= k && k < j}).
+           S.index (lift_path_ h hs1 i j) (k - i) ==
+           Rgl?.r_repr hreg h (S.index hs1 k));
+  assert (forall (k:nat{i <= k && k < j}).
+           S.index (lift_path_ h hs2 i j) (k - i) ==
+           Rgl?.r_repr hreg h (S.index hs2 k));
+  assert (forall (k:nat{k < j - i}).
+           S.index (lift_path_ h hs1 i j) k ==
+           Rgl?.r_repr hreg h (S.index hs1 (k + i)));
+  assert (forall (k:nat{k < j - i}).
+           S.index (lift_path_ h hs2 i j) k ==
+           Rgl?.r_repr hreg h (S.index hs2 (k + i)));
+  assert (forall (k:nat{k < j - i}).
+           S.index (S.slice hs1 i j) k == S.index (S.slice hs2 i j) k);
+  assert (forall (k:nat{i <= k && k < j}).
+           S.index (S.slice hs1 i j) (k - i) == S.index (S.slice hs2 i j) (k - i))
 
 private val path_safe_preserved_:
-  mtr:HH.rid -> hvec:V.vector hash -> dl:loc ->
-  i:index_t -> j:index_t{i <= j && j <= V.size_of hvec} ->
-  h:HS.mem -> h0:HS.mem -> h1:HS.mem ->
+  mtr:HH.rid -> hs:S.seq hash ->
+  i:nat -> j:nat{i <= j && j <= S.length hs} ->
+  dl:loc -> h0:HS.mem -> h1:HS.mem ->
   Lemma
-    (requires (V.forall_ h hvec i j
+    (requires (V.forall_seq hs i j
                 (fun hp ->
                   Rgl?.r_inv hreg h0 hp /\
-                  HH.includes mtr (B.frameOf hp)) /\
+                  HH.includes mtr (Rgl?.region_of hreg hp)) /\
               loc_disjoint dl (B.loc_all_regions_from false mtr) /\
               modifies dl h0 h1))
-    (ensures (V.forall_ h hvec i j
+    (ensures (V.forall_seq hs i j
                (fun hp ->
                  Rgl?.r_inv hreg h1 hp /\
-                 HH.includes mtr (B.frameOf hp))))
-    (decreases (U32.v j))
-private let rec path_safe_preserved_ mtr hvec dl i j h h0 h1 =
+                 HH.includes mtr (Rgl?.region_of hreg hp))))
+    (decreases j)
+private let rec path_safe_preserved_ mtr hs i j dl h0 h1 =
   if i = j then ()
   else (assert (loc_includes
                  (B.loc_all_regions_from false mtr)
                  (B.loc_all_regions_from false
-                   (B.frameOf (V.get h hvec (j - 1ul)))));
-       Rgl?.r_sep hreg (V.get h hvec (j - 1ul)) dl h0 h1;
-       path_safe_preserved_ mtr hvec dl i (j - 1ul) h h0 h1)
+                   (Rgl?.region_of hreg (S.index hs (j - 1)))));
+       Rgl?.r_sep hreg (S.index hs (j - 1)) dl h0 h1;
+       path_safe_preserved_ mtr hs i (j - 1) dl h0 h1)
 
 val path_safe_preserved:
   mtr:HH.rid -> p:path ->
@@ -1399,8 +1434,8 @@ let path_safe_preserved mtr p dl h0 h1 =
   assert (loc_includes (path_loc p) (B.loc_buffer p));
   assert (loc_includes (path_loc p) (V.loc_vector (B.get h0 p 0)));
   path_safe_preserved_
-    mtr (B.get h0 p 0) dl 0ul (V.size_of (B.get h0 p 0))
-    h0 h0 h1
+    mtr (V.as_seq h0 (B.get h0 p 0)) 
+    0 (S.length (V.as_seq h0 (B.get h0 p 0))) dl h0 h1
 
 val path_safe_init_preserved:
   mtr:HH.rid -> p:path ->
@@ -1415,6 +1450,30 @@ let path_safe_init_preserved mtr p dl h0 h1 =
   assert (loc_includes (path_loc p) (B.loc_buffer p));
   assert (loc_includes (path_loc p) (V.loc_vector (B.get h0 p 0)))
 
+val path_preserved_:
+  mtr:HH.rid ->
+  hs:S.seq hash ->
+  i:nat -> j:nat{i <= j && j <= S.length hs} ->
+  dl:loc -> h0:HS.mem -> h1:HS.mem ->
+  Lemma (requires (V.forall_seq hs i j 
+                    (fun hp -> Rgl?.r_inv hreg h0 hp /\
+                               HH.includes mtr (Rgl?.region_of hreg hp)) /\
+                  loc_disjoint dl (B.loc_all_regions_from false mtr) /\
+                  modifies dl h0 h1))
+        (ensures (path_safe_preserved_ mtr hs i j dl h0 h1;
+                 S.equal (lift_path_ h0 hs i j)
+                         (lift_path_ h1 hs i j)))
+        (decreases j)
+let rec path_preserved_ mtr hs i j dl h0 h1 =
+  if i = j then ()
+  else (path_safe_preserved_ mtr hs i (j - 1) dl h0 h1;
+       path_preserved_ mtr hs i (j - 1) dl h0 h1;
+       assert (loc_includes
+                (B.loc_all_regions_from false mtr)
+                (B.loc_all_regions_from false
+                  (Rgl?.region_of hreg (S.index hs (j - 1)))));
+       Rgl?.r_sep hreg (S.index hs (j - 1)) dl h0 h1)
+
 val path_preserved:
   mtr:HH.rid -> p:path ->
   dl:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -1425,7 +1484,11 @@ val path_preserved:
         (ensures (path_safe_preserved mtr p dl h0 h1;
                  S.equal (lift_path h0 mtr p) (lift_path h1 mtr p)))
 let path_preserved mtr p dl h0 h1 =
-  admit () // TODO: should be easy
+  assert (loc_includes (path_loc p) (B.loc_buffer p));
+  assert (loc_includes (path_loc p) (V.loc_vector (B.get h0 p 0)));
+  path_preserved_ mtr (V.as_seq h0 (B.get h0 p 0))
+    0 (S.length (V.as_seq h0 (B.get h0 p 0)))
+    dl h0 h1
 
 val init_path:
   mtr:HH.rid -> r:HST.erid ->
@@ -1805,19 +1868,33 @@ inline_for_extraction val path_insert:
       S.equal (lift_path h1 mtr p)
               (High.path_insert (lift_path h0 mtr p) (Rgl?.r_repr hreg h0 hp))))
 inline_for_extraction let path_insert mtr p hp =
-  admit ();
-  let hh0 = HST.get () in
   let pv = B.index p 0ul in
+  let hh0 = HST.get () in
   let ipv = V.insert pv hp in
   let hh1 = HST.get () in
   path_safe_preserved_
-    mtr ipv (B.loc_all_regions_from false (V.frameOf ipv))
-    0ul (V.size_of pv) hh1 hh0 hh1;
+    mtr (V.as_seq hh0 pv) 0 (S.length (V.as_seq hh0 pv))
+    (B.loc_all_regions_from false (V.frameOf ipv)) hh0 hh1;
+  path_preserved_
+    mtr (V.as_seq hh0 pv) 0 (S.length (V.as_seq hh0 pv))
+    (B.loc_all_regions_from false (V.frameOf ipv)) hh0 hh1;
+  Rgl?.r_sep hreg hp
+    (B.loc_all_regions_from false (V.frameOf ipv)) hh0 hh1;
   p *= ipv;
   let hh2 = HST.get () in
   path_safe_preserved_
-    mtr (B.get hh2 p 0) (B.loc_region_only false (B.frameOf p))
-    0ul (V.size_of (B.get hh2 p 0)) hh2 hh1 hh2
+    mtr (V.as_seq hh1 ipv) 0 (S.length (V.as_seq hh1 ipv))
+    (B.loc_region_only false (B.frameOf p)) hh1 hh2;
+  path_preserved_
+    mtr (V.as_seq hh1 ipv) 0 (S.length (V.as_seq hh1 ipv))
+    (B.loc_region_only false (B.frameOf p)) hh1 hh2;
+  Rgl?.r_sep hreg hp
+    (B.loc_region_only false (B.frameOf p)) hh1 hh2;
+  assert (S.equal (lift_path hh2 mtr p)
+                  (lift_path_ hh1 (S.snoc (V.as_seq hh0 pv) hp)
+                    0 (S.length (V.as_seq hh1 ipv))));
+  lift_path_eq hh1 (S.snoc (V.as_seq hh0 pv) hp) (V.as_seq hh0 pv)
+    0 (S.length (V.as_seq hh0 pv))
 
 // For given a target index `k`, the number of elements (in the tree) `j`,
 // and a boolean flag (to check the existence of rightmost hashes), we can
@@ -1886,11 +1963,6 @@ inline_for_extraction private let mt_get_path_step lv mtr hs rhs i j k p actd =
   let ofs = offset_of i in
   if k % 2ul = 1ul
   then begin
-    //assert (HH.includes mtr (V.frameOf (V.get hh0 hs lv)));
-    // assert (RV.rv_inv hh0 (V.get hh0 hs lv));
-    // assert (HH.extends
-    //          (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k - 1ul - ofs)))
-    //          (V.frameOf (V.get hh0 hs lv)));
     hash_vv_rv_inv_includes hh0 hs lv (k - 1ul - ofs);
     assert (HH.includes mtr
              (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k - 1ul - ofs))));
@@ -1902,12 +1974,7 @@ inline_for_extraction private let mt_get_path_step lv mtr hs rhs i j k p actd =
     then (if actd
          then (assert (HH.includes mtr (B.frameOf (V.get hh0 rhs lv)));
               path_insert mtr p (V.index rhs lv)))
-    else (// assert (HH.includes mtr (V.frameOf (V.get hh0 hs lv)));
-         // assert (RV.rv_inv hh0 (V.get hh0 hs lv));
-         // assert (HH.extends
-         //          (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k + 1ul - ofs)))
-         //          (V.frameOf (V.get hh0 hs lv)));
-         hash_vv_rv_inv_includes hh0 hs lv (k + 1ul - ofs);
+    else (hash_vv_rv_inv_includes hh0 hs lv (k + 1ul - ofs);
          assert (HH.includes mtr
                   (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k + 1ul - ofs))));
          path_insert mtr p (V.index (V.index hs lv) (k + 1ul - ofs)))
@@ -2565,7 +2632,7 @@ let mt_verify_pre mt k j mtr p rt =
 // Note that `mt_path_length` is given as a precondition of this operation.
 // This is a postcondition of `mt_get_path` so we can call `mt_verify` with
 // every path generated by `mt_get_path`.
-#reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 150 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 val mt_verify:
   mt:mt_p ->
   k:uint64_t ->
