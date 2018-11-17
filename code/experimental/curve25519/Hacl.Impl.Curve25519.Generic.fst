@@ -370,11 +370,11 @@ let montgomery_ladder_ #s out key init =
   set_bit1 x0 0ul;
   let swap = create 1ul (u64 0) in
   let h0 = ST.get() in
-  //TODO, loop iteration 0 is useless, try to squeeze out more speed here.
+  //Got about 1K speedup by removing 4 iterations here.
+  //First iteration can be skipped because top bit of scalar is 0
   loop2 h0 252ul p01 swap
     (fun h -> (fun i s -> s))
     (fun i -> 
-      //TODO, do only one cswap here, pending 1K speedup
          let bit = scalar_bit key (254ul -. i) in
 	 let sw = swap.(0ul) ^. bit in
          cswap #s sw p0 p1;   
@@ -382,6 +382,7 @@ let montgomery_ladder_ #s out key init =
 	 swap.(0ul) <- bit;
 	 admit());
   cswap #s swap.(0ul) p0 p1;   
+  //Last three iterations are point doublings because the bottom 3 bits are 0
   point_double p0;
   point_double p0;
   point_double p0;
