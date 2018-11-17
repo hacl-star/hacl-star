@@ -2420,9 +2420,14 @@ private let rec mt_flush_to_ lv hs pi i j =
 
 
 // `mt_flush_to` flushes old hashes in the Merkle tree. It removes hash elements
-// from `MT?.i` to `index - 1`, but maintains the tree structure, i.e., the tree
-// still holds some old internal hashes (compressed from old hashes) which are
-// required to generate Merkle paths for remaining hashes.
+// from `MT?.i` to **`offset_of (idx - 1)`**, but maintains the tree structure, 
+// i.e., the tree still holds some old internal hashes (compressed from old 
+// hashes) which are required to generate Merkle paths for remaining hashes.
+//
+// Note that `mt_flush_to` (and `mt_flush`) always remain at least one base hash
+// elements. If there are `MT?.j` number of elements in the tree, because of the
+// precondition `MT?.i <= idx < MT?.j` we still have `idx`-th element after
+// flushing.
 
 private
 inline_for_extraction
@@ -2455,9 +2460,7 @@ val mt_flush_to:
      (let mtv = B.get h0 mt 0 in
       let off = MT?.offset mtv in
       let idx = split_offset off idx in
-      (idx = (MT?.j mtv) - 1ul \/ // cwinter: when idx = j - 1 the output tree's i/j are 0ul,
-                                  // which is correct, but the trees arent' high-level equal.
-         (High.mt_flush_to (mt_lift h0 mt) (U32.v idx) == mt_lift h1 mt)))))
+      High.mt_flush_to (mt_lift h0 mt) (U32.v idx) == mt_lift h1 mt)))
 
 #reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 let rec mt_flush_to mt idx =
@@ -2488,15 +2491,7 @@ let rec mt_flush_to mt idx =
       (RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
       (V.loc_vector_within hs 0ul (V.size_of hs)))
     hh0 hh1;
-  if idx = j - 1ul then begin
-    assert (add64_fits offset j);
-    let no = join_offset offset j in
-    mt *= MT no 0ul 0ul hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv);
-    // cwinter: Try to advance offset in other situations? May require re-indexing of the tree.
-    admit() // cwinter: not sure why it doesn't like this.
-  end else begin
-    mt *= MT (MT?.offset mtv) idx (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv)
-  end;
+  mt *= MT (MT?.offset mtv) idx (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv);
   let hh2 = HST.get () in
   RV.rv_inv_preserved (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.rv_inv_preserved (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
@@ -2533,7 +2528,6 @@ let mt_flush mt =
   assert (off < uint64_max);
   assert (UInt.fits (U64.v off + U32.v j1) 64);
   let jo = join_offset off j1 in
-  admit();
   mt_flush_to mt jo
 #reset-options
 
