@@ -91,24 +91,30 @@ private let serialize_hash (x:hash) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) 
 
 private unfold let hash_vec_bytes (v:hash_vec) = 4UL + U64.mul (u32_64 (V.size_of v)) (u32_64 hash_size)
 
+// joonwonc: `RV.rv_inv` recursively includes liveness of elements.
+// joonwonc: I think `buf` and `x` should be disjoint to preserve liveness of `x`?
 private let serialize_hash_vec (x:hash_vec) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t) : HST.ST (bool & uint32_t)
-  (requires (fun h0 -> B.live h0 buf /\ V.live h0 x))
-  (ensures (fun h0 _ h1 -> B.live h1 buf /\ V.live h1 x /\ modifies (B.loc_buffer buf) h0 h1))
+  (requires (fun h0 -> B.live h0 buf /\ RV.rv_inv h0 x /\ HS.disjoint (B.frameOf buf) (Rgl?.region_of hvreg x)))
+  (ensures (fun h0 _ h1 -> B.live h1 buf /\ RV.rv_inv h1 x /\ modifies (B.loc_buffer buf) h0 h1))
 = if pos >= sz then (false, 0ul)
   else begin
     let rec serialize_hash_vec_i pos (i:uint32_t): HST.ST (bool & uint32_t)
-      (requires (fun h0 -> B.live h0 buf /\ V.live h0 x))
-      (ensures (fun h0 _ h1 -> B.live h1 buf /\ V.live h1 x /\ modifies (B.loc_buffer buf) h0 h1))
+      (requires (fun h0 -> B.live h0 buf /\ RV.rv_inv h0 x))
+      (ensures (fun h0 _ h1 -> B.live h1 buf /\ RV.rv_inv h1 x /\ modifies (B.loc_buffer buf) h0 h1))
     = if pos >= sz then (false, 0ul)
       else if i >= V.size_of x then (true, pos)
       else begin
         let vi = V.index x i in
         let h0 = HST.get() in
-        assume (B.live h0 vi /\ B.len vi = hash_size);
         let _, pos = serialize_hash vi buf sz pos in
+        let h1 = HST.get() in
+        RV.rv_inv_preserved x (B.loc_buffer buf) h0 h1;
         serialize_hash_vec_i pos (i+1ul)
       end in
+    let h0 = HST.get() in
     let _, pos = serialize_uint32_t (V.size_of x) buf sz pos in
+    let h1 = HST.get() in
+    RV.rv_inv_preserved x (B.loc_buffer buf) h0 h1;
     serialize_hash_vec_i pos 0ul
   end
 
@@ -129,26 +135,29 @@ private let rec hash_vv_bytes (vv:hash_vv{V.size_of vv = merkle_tree_size_lg}): 
   hash_vv_bytes_i vv 0ul
 
 private let serialize_hash_vv (x:hash_vv) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t): HST.ST (bool & uint32_t)
-  (requires (fun h0 -> B.live h0 buf /\ V.live h0 x))
-  (ensures (fun h0 _ h1 -> B.live h1 buf /\ V.live h1 x /\ modifies (B.loc_buffer buf) h0 h1))
+  (requires (fun h0 -> B.live h0 buf /\ RV.rv_inv h0 x /\ HS.disjoint (B.frameOf buf) (Rgl?.region_of hvvreg x)))
+  (ensures (fun h0 _ h1 -> B.live h1 buf /\ RV.rv_inv h1 x /\ modifies (B.loc_buffer buf) h0 h1))
 = if pos >= sz then (false, 0ul)
   else begin
     let rec serialize_hash_vv_i pos (i:uint32_t): HST.ST (bool & uint32_t)
-      (requires (fun h0 -> B.live h0 buf /\ V.live h0 x))
-      (ensures (fun h0 _ h1 -> B.live h1 buf /\ V.live h1 x /\ modifies (B.loc_buffer buf) h0 h1))
+      (requires (fun h0 -> B.live h0 buf /\ RV.rv_inv h0 x /\ HS.disjoint (B.frameOf buf) (Rgl?.region_of hvvreg x)))
+      (ensures (fun h0 _ h1 -> B.live h1 buf /\ RV.rv_inv h1 x /\ modifies (B.loc_buffer buf) h0 h1))
     = if pos >= sz then (false, 0ul)
       else if i >= V.size_of x then (true, pos)
       else begin
         let vi = V.index x i in
         let h0 = HST.get() in
-        assume (V.live h0 vi);
         let _, pos = serialize_hash_vec vi buf sz pos in
+        let h1 = HST.get() in
+        RV.rv_inv_preserved x (B.loc_buffer buf) h0 h1;
         serialize_hash_vv_i pos (i+1ul)
       end in
+    let h0 = HST.get() in
     let _, pos = serialize_uint32_t (V.size_of x) buf sz pos in
+    let h1 = HST.get() in
+    RV.rv_inv_preserved x (B.loc_buffer buf) h0 h1;
     serialize_hash_vv_i pos 0ul
   end
-
 
 private let deserialize_bool (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t): HST.ST (bool & uint32_t & bool)
   (requires (fun h0 -> B.live h0 buf))
@@ -196,20 +205,20 @@ private let deserialize_offset_t = deserialize_uint64_t
 private let deserialize_index_t = deserialize_uint32_t
 
 private let deserialize_hash (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t): HST.ST (bool & uint32_t & hash)
-  (requires (fun h0 -> B.live h0 buf))
+  (requires (fun h0 -> B.live h0 buf /\ HS.disjoint (B.frameOf buf) r))
   (ensures (fun h0 _ h1 -> B.live h1 buf))
 = if pos >= sz then (false, pos, Rgl?.dummy hreg)
   else begin
     let h0 = HST.get() in
     let hash = Rgl?.r_alloc hreg r in
-    assume (B.disjoint buf hash);
     assume (sz - pos >= hash_size);
     B.blit buf pos hash 0ul hash_size;
     (true, pos, hash)
   end
 
+// joonwonc: there is a quite hard disjointness problem here; need to talk about it.
 private let deserialize_hash_vec (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t): HST.ST (bool & uint32_t & hash_vec)
-  (requires (fun h0 -> B.live h0 buf))
+  (requires (fun h0 -> B.live h0 buf /\ HS.disjoint (B.frameOf buf) r))
   (ensures (fun h0 _ h1 -> B.live h1 buf))
 = if pos >= sz then (false, pos, Rgl?.dummy hvreg)
   else begin
@@ -237,7 +246,7 @@ private let deserialize_hash_vec (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:
   end
 
 private let deserialize_hash_vv (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t): HST.ST (bool & uint32_t & hash_vv)
-  (requires (fun h0 -> B.live h0 buf))
+  (requires (fun h0 -> B.live h0 buf /\ HS.disjoint (B.frameOf buf) r))
   (ensures (fun h0 _ h1 -> B.live h1 buf))
 = if pos >= sz then (false, pos, Rgl?.dummy hvvreg)
   else begin
@@ -286,23 +295,34 @@ let mt_serialize_size mt =
 
 #set-options "--z3rlimit 10"
 val mt_serialize: mt:mt_p -> output:uint8_p -> sz:uint32_t -> HST.ST uint32_t
-  (requires (fun h0 -> mt_safe h0 mt /\ B.live h0 output /\ B.len output = sz))
-  (ensures (fun h0 _ h1 -> (* mt_safe h1 mt /\ *) B.live h1 output))
+  (requires (fun h0 -> mt_safe h0 mt /\ B.live h0 output /\ B.len output = sz /\ 
+                       HS.disjoint (B.frameOf output) (B.frameOf mt)))
+  (ensures (fun h0 _ h1 -> mt_safe h1 mt /\ B.live h1 output))
 let mt_serialize mt output sz =
   let mtv = !*mt in
+  let h0 = HST.get() in
   let _, pos = serialize_uint8_t 0uy output sz 0ul in // format version = 0uy
+  let h1 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h0 h1;
   let _, pos = serialize_uint32_t hash_size output sz pos in
+  let h2 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h1 h2;
   let _, pos = serialize_offset_t (MT?.offset mtv) output sz pos in
+  let h3 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h2 h3;
   let _, pos = serialize_uint32_t (MT?.i mtv) output sz pos in
+  let h4 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h3 h4;
   let _, pos = serialize_uint32_t (MT?.j mtv) output sz pos in
+  let h5 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h4 h5;
   let _, pos = serialize_hash_vv (MT?.hs mtv) output sz pos in
+  let h6 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h5 h6;
   let _, pos = serialize_bool (MT?.rhs_ok mtv) output sz pos in
+  let h7 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h6 h7;
   let _, pos = serialize_hash_vec (MT?.rhs mtv) output sz pos in
+  let h8 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h7 h8;
   let k, pos = serialize_hash (MT?.mroot mtv) output sz pos in
+  let h9 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h8 h9;
   if k then pos else 0ul
 
 val mt_deserialize: rid:HST.erid -> input:uint8_p -> sz:uint32_t{B.len input = sz} -> mt:mt_p -> HST.ST bool
-  (requires (fun h0 -> B.live h0 input /\ mt_safe h0 mt))
+  (requires (fun h0 -> B.live h0 input /\ mt_safe h0 mt /\ HS.disjoint (B.frameOf input) rid))
   (ensures (fun _ _ h1 -> B.live h1 input))
 let mt_deserialize rid input sz mt =
   let _, pos, format_version = deserialize_uint8_t input sz 0ul in
