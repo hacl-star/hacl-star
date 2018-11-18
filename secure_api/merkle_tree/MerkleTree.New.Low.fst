@@ -581,7 +581,7 @@ val mt_safe_elts_spec:
   j:index_t{j >= i} ->
   Lemma (requires (RV.rv_inv h hs /\
                   mt_safe_elts h lv hs i j))
-        (ensures (High.mt_wf_elts
+        (ensures (High.hs_wf_elts
                    (U32.v lv) (RV.as_seq h hs)
                    (U32.v i) (U32.v j)))
         (decreases (32 - U32.v lv))

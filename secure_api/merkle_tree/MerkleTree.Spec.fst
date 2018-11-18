@@ -202,6 +202,13 @@ let rec raw_hashes hs =
   if S.length hs = 0 then true
   else (HRaw? (S.head hs) /\ raw_hashes (S.tail hs))
 
+val raw_hashes_raws: 
+  hs:S.seq hash{raw_hashes hs} -> 
+  GTot (S.seq hash_raw) (decreases (S.length hs))
+let rec raw_hashes_raws hs =
+  if S.length hs = 0 then S.empty
+  else S.cons (HRaw?.hr (S.head hs)) (raw_hashes_raws (S.tail hs))
+
 val raw_hashes_index:
   hs:S.seq hash -> i:nat{i < S.length hs} ->
   Lemma (requires (raw_hashes hs))
@@ -243,6 +250,10 @@ type right_padded_merkle_tree (n:nat) =
       right_padded_merkle_tree n
 
 type rpmt n = right_padded_merkle_tree n
+
+val rpmt_raws: #n:nat -> mt:rpmt n -> GTot (S.seq hash_raw)
+let rpmt_raws #n mt =
+  raw_hashes_raws (S.slice (RP?.mt mt) 0 (RP?.i mt))
 
 val rpmt_i_0:
   #n:nat -> mt:rpmt n ->
