@@ -596,7 +596,7 @@ val merkle_tree_lift:
     RV.rv_inv h (MT?.rhs mtv) /\
     Rgl?.r_inv hreg h (MT?.mroot mtv) /\
     mt_safe_elts h 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv)} ->
-  GTot High.wf_mt
+  GTot (r:High.merkle_tree{High.mt_wf_elts r})
 let merkle_tree_lift h mtv =
   mt_safe_elts_spec h 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv);
   High.MT
@@ -609,7 +609,7 @@ let merkle_tree_lift h mtv =
 
 val mt_lift:
   h:HS.mem -> mt:mt_p{mt_safe h mt} ->
-  GTot High.wf_mt
+  GTot (r:High.merkle_tree{High.mt_wf_elts r})
 let mt_lift h mt =
   merkle_tree_lift h (B.get h mt 0)
 
