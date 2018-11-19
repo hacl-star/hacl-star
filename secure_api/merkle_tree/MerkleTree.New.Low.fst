@@ -377,13 +377,14 @@ let hash_2 src1 src2 dst =
 // we cannot change below to some other types.
 type index_t = uint32_t
 
-let uint32_32_max = U32.uint_to_t (UInt.max_int U32.n)
-let uint32_max = U64.uint_to_t (UInt.max_int U32.n)
-let uint64_max = U64.uint_to_t (UInt.max_int U64.n)
+let uint32_32_max = 4294967295ul
+let uint32_max = 4294967295UL
+let uint64_max = 18446744073709551615UL
 let offset_range_limit = uint32_max
+
 type offset_t = uint64_t
-let u32_64 = Int.Cast.uint32_to_uint64
-let u64_32 = Int.Cast.uint64_to_uint32
+inline_for_extraction unfold let u32_64 = Int.Cast.uint32_to_uint64
+inline_for_extraction unfold let u64_32 = Int.Cast.uint64_to_uint32
 
 private
 inline_for_extraction
