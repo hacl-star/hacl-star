@@ -48,11 +48,11 @@ let lbuffer (a:Type0) (len:size_t) = lbuffer_t MUT a len
 let ilbuffer (a:Type0) (len:size_t) = lbuffer_t IMMUT a len
 
 (** Liveness of buffers *)
+//val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
   match t with
   | MUT -> B.live h (b <: buffer a)
   | IMMUT -> IB.live h (b <: ibuffer a)
-//val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 
 let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc =
   match t with
@@ -63,27 +63,43 @@ let union (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
 let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
 
 (** Generalized modification clause for Buffer locations *)
+//val modifies: s:B.loc -> h1:HS.mem -> h2:HS.mem -> GTot Type0
 let modifies
   (s: B.loc)
   (h1 h2: HS.mem):
   GTot Type0 = B.modifies s h1 h2 /\ ST.equal_domains h1 h2
-//val modifies: s:B.loc -> h1:HS.mem -> h2:HS.mem -> GTot Type0
 
-val modifies_preserves_live: #t:buftype -> #a:Type0 -> b:buffer_t t a -> l:B.loc ->
-			     h0:mem -> h1:mem -> Lemma
-			     (requires (modifies l h0 h1 /\ live h0 b))
-			     (ensures (live h1 b))
-			     [SMTPatOr [[SMTPat (modifies l h0 h1); SMTPat (live h0 b)];
-			                [SMTPat (modifies l h0 h1); SMTPat (live h1 b)]]]
+val modifies_preserves_live:
+    #t:buftype
+  -> #a:Type0
+  -> b:buffer_t t a
+  -> l:B.loc
+  -> h0:mem
+  -> h1:mem ->
+  Lemma
+    (requires (modifies l h0 h1 /\ live h0 b))
+	 (ensures (live h1 b))
+	 [SMTPatOr [[SMTPat (modifies l h0 h1); SMTPat (live h0 b)];
+		         [SMTPat (modifies l h0 h1); SMTPat (live h1 b)]]]
 
-val modifies_includes: l1:B.loc -> l2:B.loc -> h0:mem -> h1:mem -> Lemma
-		     (requires (modifies l1 h0 h1 /\ B.loc_includes l2 l1))
-		     (ensures (modifies l2 h0 h1))
+val modifies_includes:
+    l1:B.loc
+  -> l2:B.loc
+  -> h0:mem
+  -> h1:mem ->
+  Lemma
+    (requires (modifies l1 h0 h1 /\ B.loc_includes l2 l1))
+	 (ensures (modifies l2 h0 h1))
 
-val modifies_trans: l1:B.loc ->  l2:B.loc -> h0:mem -> h1:mem -> h2:mem -> Lemma
-		     (requires (modifies l1 h0 h1 /\ modifies l2 h1 h2))
-		     (ensures (modifies (l1 |+| l2) h0 h2))
-
+val modifies_trans:
+    l1:B.loc
+  -> l2:B.loc
+  -> h0:mem
+  -> h1:mem
+  -> h2:mem ->
+  Lemma
+    (requires (modifies l1 h0 h1 /\ modifies l2 h1 h2))
+	 (ensures (modifies (l1 |+| l2) h0 h2))
 
 
 (** Disjointness clause for Buffers *)
@@ -91,9 +107,8 @@ let disjoint
   (#t1 #t2:buftype)
   (#a1 #a2:Type0)
   (b1:buffer_t t1 a1)
-  (b2:buffer_t t2 a2)
-  : GTot Type0 =
-    B.loc_disjoint (loc b1) (loc b2)
+  (b2:buffer_t t2 a2):
+  GTot Type0 = B.loc_disjoint (loc b1) (loc b2)
 
 (** Modification for no Buffer *)
 let modifies0 (h1 h2: HS.mem) : GTot Type0 = modifies (B.loc_none) h1 h2
@@ -162,18 +177,31 @@ let gsub
     assert (B.length b == v n);
     (b <: lbuffer a n)
 
-val live_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len ->
-			start:size_t -> n:size_t{v start + v n <= v len} ->
-			h:mem -> Lemma
-			     (ensures (live h b <==> live h (gsub b start n)))
-			     [SMTPat (live h (gsub b start n))]
+val live_sub:
+    #t:buftype
+  -> #a:Type0
+  -> #len:size_t
+  -> b:lbuffer_t t a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= v len}
+  -> h:mem ->
+  Lemma
+    (ensures (live h b <==> live h (gsub b start n)))
+    [SMTPat (live h (gsub b start n))]
 
-val modifies_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len ->
-			start:size_t -> n:size_t{v start + v n <= v len} ->
-			h0:mem -> h1:mem -> Lemma
-			     (requires (modifies (loc (gsub b start n)) h0 h1))
-			     (ensures (modifies (loc b) h0 h1))
-			     [SMTPat (modifies (loc (gsub b start n)) h0 h1)]
+val modifies_sub:
+    #t:buftype
+  -> #a:Type0
+  -> #len:size_t
+  -> b:lbuffer_t t a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= v len}
+  -> h0:mem
+  -> h1:mem ->
+  Lemma
+    (requires (modifies (loc (gsub b start n)) h0 h1))
+	 (ensures (modifies (loc b) h0 h1))
+	 [SMTPat (modifies (loc (gsub b start n)) h0 h1)]
 
 inline_for_extraction
 val as_seq_gsub:
@@ -265,7 +293,7 @@ let stack_allocated (#a:Type0) (#len:size_t) (b:lbuffer a len)
     B.alloc_post_mem_common b h0 h1 s /\
     B.frameOf b = HS.get_tip h0  /\
     B.frameOf b <> HyperStack.root
-    
+
 let global_allocated (#a:Type0) (#len:size_t) (b:ilbuffer a len)
 		    (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
     let b: ibuffer a = b in
@@ -408,8 +436,8 @@ val concat2:
   -> s0:lbuffer a len0
   -> len1:size_t{v len0 + v len1 < max_size_t}
   -> s1:lbuffer a len1
-  -> s:lbuffer a (len0 +! len1)
-  -> Stack unit
+  -> s:lbuffer a (len0 +! len1) ->
+  Stack unit
     (requires fun h ->
       live h s0 /\ live h s1 /\ live h s /\
       disjoint s s0 /\ disjoint s s1)
@@ -425,8 +453,8 @@ val concat3:
   -> s1:lbuffer a len1
   -> len2:size_t{v len0 + v len1 + v len2 < max_size_t}
   -> s2:lbuffer a len2
-  -> s:lbuffer a (len0 +! len1 +! len2)
-  -> Stack unit
+  -> s:lbuffer a (len0 +! len1 +! len2) ->
+  Stack unit
     (requires fun h ->
       live h s0 /\ live h s1 /\ live h s2 /\ live h s /\
       disjoint s s0 /\ disjoint s s1 /\ disjoint s s2)
@@ -818,8 +846,8 @@ val fillT:
   -> clen:size_t
   -> o:lbuffer a clen
   -> spec_f:(i:size_nat{i < v clen} -> a)
-  -> f:(i:size_t{v i < v clen} -> r:a{r == spec_f (size_v i)})
-  -> Stack unit
+  -> f:(i:size_t{v i < v clen} -> r:a{r == spec_f (size_v i)}) ->
+  Stack unit
     (requires fun h0 -> live h0 o)
     (ensures  fun h0 _ h1 ->
       live h1 o /\ modifies (loc  o) h0 h1 /\
@@ -837,8 +865,8 @@ val fill:
           (requires fun h -> modifies (loc  o) h0 h)
           (ensures  fun h _ h' ->
             modifies (loc  o) h h' /\
-            as_seq h' o == Seq.upd (as_seq h o) (v i) (spec h0 (v i))))
-  -> Stack unit
+            as_seq h' o == Seq.upd (as_seq h o) (v i) (spec h0 (v i)))) ->
+  Stack unit
     (requires fun h -> h == h0 /\ live h0 o)
     (ensures  fun h _ h' ->
       modifies (loc  o) h h' /\
