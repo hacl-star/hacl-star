@@ -1,13 +1,7 @@
 module Hacl.Spec.Curve25519.Field51
 
-open FStar.HyperStack
-open FStar.HyperStack.All
-
 open Lib.Sequence
 open Lib.IntTypes
-open Lib.Buffer
-
-module ST = FStar.HyperStack.ST
 
 #reset-options "--z3rlimit 20"
 
@@ -58,7 +52,7 @@ let ( ** ) (x:nat5) (y:nat5) : nat5 =
 #set-options "--z3rlimit 100"
 
 let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
-  assert_norm (8192 * 8192 <= 67108864); 
+  assert_norm (8192 * 8192 <= 67108864);
   let (y1,y2,y3,y4,y5) = y in
   (x * y1 ,
    x * y2 ,
@@ -79,7 +73,7 @@ assume val lemma_pow_128_51: _:unit{pow2 128 == 67108864 * pow51 * pow51}
 // assume val lemma_pow_51_3: _:unit{pow2 153 == pow51 * pow51 * pow51}
 // assume val lemma_pow_51_4: _:unit{pow2 204 == pow51 * pow51 * pow51 * pow51}
 
-let prime = pow2 255 - 19
+let prime:pos = pow2 255 - 19
 
 let felem_fits1 (x:uint64) (m:scale64) =
   uint_v x <= m * max51
@@ -325,10 +319,12 @@ inline_for_extraction
 val fmul5:
     f1:felem5{felem_fits5 f1 (9, 10, 9, 9, 9)}
   -> f2:felem5{felem_fits5 f2 (9, 10, 9, 9, 9)}
-  -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1)}
+  -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1) /\
+    (as_nat5 out) % prime == (as_nat5 f1 * as_nat5 f2) % prime}
 let fmul5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   let (tmp0, tmp1, tmp2, tmp3, tmp4) = precomp_r19 (f20, f21, f22, f23, f24) in
   let (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4) = mul_felem5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) (tmp0, tmp1, tmp2, tmp3, tmp4) in
+  admit();
   carry_wide5 (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4)
 
 inline_for_extraction
@@ -363,7 +359,8 @@ let fmul15 (f10, f11, f12, f13, f14) f2 =
 inline_for_extraction
 val fsqr5:
     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
-  -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1)}
+  -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1) /\
+    (as_nat5 out) % prime == (as_nat5 f * as_nat5 f) % prime}
 let fsqr5 (f0, f1, f2, f3, f4) =
   let d0 = u64 2 *. f0 in
   let d1 = u64 2 *. f1 in
