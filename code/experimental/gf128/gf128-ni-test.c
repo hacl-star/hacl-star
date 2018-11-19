@@ -33,7 +33,7 @@ static __inline__ cycles cpucycles_end(void)
 
 extern void Hacl_Gf128_NI_ghash(uint8_t* out, int in_len, uint8_t* in, uint8_t* k);
 
-#define ROUNDS 10240
+#define ROUNDS 100000
 #define SIZE   16384
 
 int main() {

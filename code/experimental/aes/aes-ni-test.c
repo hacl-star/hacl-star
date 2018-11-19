@@ -33,7 +33,7 @@ static __inline__ cycles cpucycles_end(void)
 
 extern void Hacl_Aes_NI_aes128_ctr_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
 
-#define ROUNDS 10240
+#define ROUNDS 100000
 #define SIZE   16384
 
 int main() {

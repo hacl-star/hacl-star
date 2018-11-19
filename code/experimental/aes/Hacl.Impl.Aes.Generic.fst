@@ -229,6 +229,11 @@ val aes128_init_bitslice:  ctx:aes_ctx M32 -> key:skey -> nonce:lbuffer uint8 12
 			     (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1))
 let aes128_init_bitslice ctx key nonce = aes128_init_ #M32 ctx key nonce			     
 
+val aes128_init_ni:  ctx:aes_ctx MAES -> key:skey -> nonce:lbuffer uint8 12ul -> ST unit
+			     (requires (fun h -> live h ctx /\ live h nonce /\ live h key))
+			     (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1))
+let aes128_init_ni ctx key nonce = aes128_init_ #MAES ctx key nonce			     
+
 inline_for_extraction
 val aes128_init: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbuffer uint8 12ul -> ST unit
 			     (requires (fun h -> live h ctx /\ live h nonce /\ live h key))
@@ -336,6 +341,11 @@ val aes_ctr_bitslice: len:size_t -> out:lbuffer uint8 len -> inp:lbuffer uint8 l
 			     (requires (fun h -> live h out /\ live h inp /\ live h ctx))
 			     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 let aes_ctr_bitslice len out inp ctx counter rounds = aes_ctr_ #M32 len out inp ctx counter rounds
+
+val aes_ctr_ni: len:size_t -> out:lbuffer uint8 len -> inp:lbuffer uint8 len -> ctx:aes_ctx MAES -> counter:size_t -> rounds:size_t{v rounds == 10} -> ST unit
+			     (requires (fun h -> live h out /\ live h inp /\ live h ctx))
+			     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+let aes_ctr_ni len out inp ctx counter rounds = aes_ctr_ #MAES len out inp ctx counter rounds
 
 inline_for_extraction
 val aes_ctr: #m:m_spec -> len:size_t -> out:lbuffer uint8 len -> inp:lbuffer uint8 len -> ctx:aes_ctx m -> counter:size_t -> rounds:size_t{v rounds == 10} -> ST unit
