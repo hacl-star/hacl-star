@@ -383,8 +383,8 @@ let uint64_max = 18446744073709551615UL
 let offset_range_limit = uint32_max
 
 type offset_t = uint64_t
-inline_for_extraction unfold let u32_64 = Int.Cast.uint32_to_uint64
-inline_for_extraction unfold let u64_32 = Int.Cast.uint64_to_uint32
+inline_for_extraction noextract unfold let u32_64 = Int.Cast.uint32_to_uint64
+inline_for_extraction noextract unfold let u64_32 = Int.Cast.uint64_to_uint32
 
 private
 inline_for_extraction
