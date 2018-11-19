@@ -2,7 +2,7 @@ module Hacl.Spec.Aes.BitSlice
 
 open Lib.IntTypes
 
-inline_for_extraction
+
 let transpose_bits64 (x:uint64) : Tot uint64 = 
      (x &. u64 0x8040201008040201)    |.
     ((x &. u64 0x4020100804020100) >>. size 7) |.

@@ -145,7 +145,6 @@ let xor_state_key1 st ost =
     loop_nospec #h0 (size 8) st 
       (fun i -> st.(i) <- st.(i) ^. ost.(i))
 
-inline_for_extraction
 val xor_block: out:lbuffer uint8 64ul -> st:state -> b:lbuffer uint8 64ul -> ST unit
 			     (requires (fun h -> live h st /\ live h out /\ live h b))
 			     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
@@ -273,7 +272,6 @@ let key_expand1 (p:uint64) (n:uint64) =
       ^. ((p &. u64 0x000f000f000f000f) <<. size 12) in
       n ^. p
 
-inline_for_extraction 
 val key_expansion_step: next:state -> prev:state -> ST unit
 			     (requires (fun h -> live h prev /\ live h next))
 			     (ensures (fun h0 _ h1 -> live h1 prev /\ live h1 next /\ modifies (loc next) h0 h1))

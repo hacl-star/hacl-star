@@ -32,6 +32,15 @@ static __inline__ cycles cpucycles_end(void)
 }
 
 extern void Hacl_Aes_BitSlice_aes128_ctr_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
+extern void Hacl_Aes_BitSlice_aes128_init(uint64_t *ctx, uint8_t *key, uint8_t *nonce);
+extern void
+Hacl_Aes_BitSlice_aes_ctr(
+  uint32_t len,
+  uint8_t *out,
+  uint8_t *inp,
+  uint64_t *ctx,
+  uint32_t counter,
+  uint32_t rounds);
 
 #define ROUNDS 10240
 #define SIZE   16384
@@ -57,7 +66,12 @@ int main() {
   uint8_t comp[32] = {0};
   bool ok = true;
   
-  Hacl_Aes_BitSlice_aes128_ctr_encrypt(in_len,comp,in,k,n,1);
+  uint64_t ctx[(uint32_t)8U + (uint32_t)15U * (uint32_t)8U] = {0};
+
+//  Hacl_Aes_BitSlice_aes128_ctr_encrypt(in_len,comp,in,k,n,1);
+  Hacl_Aes_BitSlice_aes128_init(ctx,k,n);
+  Hacl_Aes_BitSlice_aes_ctr(in_len,comp,in,ctx,1,10);
+
   printf("AES-BitSlice computed:");
   for (int i = 0; i < 32; i++)
     printf("%02x",comp[i]);
@@ -89,7 +103,10 @@ int main() {
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Aes_BitSlice_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
+   Hacl_Aes_BitSlice_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
+ //   Hacl_Aes_BitSlice_aes128_init(ctx,key,nonce);
+ //   Hacl_Aes_BitSlice_aes_ctr(SIZE,plain,plain,ctx,1,10);
+
   }
   b = cpucycles_end();
   t2 = clock();

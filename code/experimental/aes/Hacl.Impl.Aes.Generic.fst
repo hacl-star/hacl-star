@@ -214,14 +214,30 @@ let key_expansion256 #m keyx key =
     
 
 inline_for_extraction
-val aes128_init: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbuffer uint8 12ul -> ST unit
+val aes128_init_: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbuffer uint8 12ul -> ST unit
 			     (requires (fun h -> live h ctx /\ live h nonce /\ live h key))
 			     (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1))
-let aes128_init #m ctx key nonce = 
+let aes128_init_ #m ctx key nonce = 
   let kex = get_kex ctx in
   let n = get_nonce ctx in
   key_expansion128 #m kex key ; 
   load_nonce #m n nonce
+
+(* PATTERN FOR AVOIDING INLINING *)
+val aes128_init_bitslice:  ctx:aes_ctx M32 -> key:skey -> nonce:lbuffer uint8 12ul -> ST unit
+			     (requires (fun h -> live h ctx /\ live h nonce /\ live h key))
+			     (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1))
+let aes128_init_bitslice ctx key nonce = aes128_init_ #M32 ctx key nonce			     
+
+inline_for_extraction
+val aes128_init: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbuffer uint8 12ul -> ST unit
+			     (requires (fun h -> live h ctx /\ live h nonce /\ live h key))
+			     (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1))
+let aes128_init #m ctx key nonce = 
+  match m with
+  | M32 -> aes128_init_bitslice ctx key nonce 
+  | MAES -> aes128_init_ #MAES ctx key nonce
+(* END PATTERN *)
 
 
 inline_for_extraction
@@ -275,7 +291,6 @@ let aes128_key_block #m kb ctx counter =
     pop_frame()
 
 
-
 inline_for_extraction
 val aes_update4: #m:m_spec -> out:lbuffer uint8 64ul -> inp:lbuffer uint8 64ul -> ctx:aes_ctx m -> counter:size_t -> rounds:size_t{v rounds == 10} -> ST unit
 			     (requires (fun h -> live h out /\ live h inp /\ live h ctx))
@@ -291,10 +306,10 @@ let aes_update4 #m out inp ctx ctr rounds =
   pop_frame()
 
 inline_for_extraction
-val aes_ctr: #m:m_spec -> len:size_t -> out:lbuffer uint8 len -> inp:lbuffer uint8 len -> ctx:aes_ctx m -> counter:size_t -> rounds:size_t{v rounds == 10} -> ST unit
+val aes_ctr_: #m:m_spec -> len:size_t -> out:lbuffer uint8 len -> inp:lbuffer uint8 len -> ctx:aes_ctx m -> counter:size_t -> rounds:size_t{v rounds == 10} -> ST unit
 			     (requires (fun h -> live h out /\ live h inp /\ live h ctx))
 			     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
-let aes_ctr #m len out inp ctx counter rounds = 
+let aes_ctr_ #m len out inp ctx counter rounds = 
   push_frame();
   let blocks64 = len /. size 64 in
   let h0 = ST.get() in
@@ -314,6 +329,24 @@ let aes_ctr #m len out inp ctx counter rounds =
       aes_update4 #m last last ctx ctr rounds;
       copy ob (sub last 0ul rem));
   pop_frame()
+
+
+(* PATTERN FOR AVOIDING INLINING *)
+val aes_ctr_bitslice: len:size_t -> out:lbuffer uint8 len -> inp:lbuffer uint8 len -> ctx:aes_ctx M32 -> counter:size_t -> rounds:size_t{v rounds == 10} -> ST unit
+			     (requires (fun h -> live h out /\ live h inp /\ live h ctx))
+			     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+let aes_ctr_bitslice len out inp ctx counter rounds = aes_ctr_ #M32 len out inp ctx counter rounds
+
+inline_for_extraction
+val aes_ctr: #m:m_spec -> len:size_t -> out:lbuffer uint8 len -> inp:lbuffer uint8 len -> ctx:aes_ctx m -> counter:size_t -> rounds:size_t{v rounds == 10} -> ST unit
+			     (requires (fun h -> live h out /\ live h inp /\ live h ctx))
+			     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+let aes_ctr #m len out inp ctx counter rounds = 
+  match m with
+  | M32 -> aes_ctr_bitslice len out inp ctx counter rounds 
+  | MAES -> aes_ctr_ #MAES len out inp ctx counter rounds
+(* END PATTERN *)
+
 
 inline_for_extraction
 let aes128_ctr_encrypt (#m:m_spec) in_len out inp k n c = 
