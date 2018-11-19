@@ -241,7 +241,7 @@ val aes128_init: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbuffer uint8 1
 let aes128_init #m ctx key nonce = 
   match m with
   | M32 -> aes128_init_bitslice ctx key nonce 
-  | MAES -> aes128_init_ #MAES ctx key nonce
+  | MAES -> aes128_init_ni ctx key nonce
 (* END PATTERN *)
 
 
@@ -354,7 +354,7 @@ val aes_ctr: #m:m_spec -> len:size_t -> out:lbuffer uint8 len -> inp:lbuffer uin
 let aes_ctr #m len out inp ctx counter rounds = 
   match m with
   | M32 -> aes_ctr_bitslice len out inp ctx counter rounds 
-  | MAES -> aes_ctr_ #MAES len out inp ctx counter rounds
+  | MAES -> aes_ctr_ni len out inp ctx counter rounds
 (* END PATTERN *)
 
 
