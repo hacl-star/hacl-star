@@ -666,3 +666,17 @@ let p_t (t:inttype) =
   match t with
   | U32 -> UInt32.t
   | _ -> UInt64.t
+
+
+inline_for_extraction 
+val to_be: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+
+inline_for_extraction 
+val to_le: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+
+inline_for_extraction 
+val from_be: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+
+inline_for_extraction 
+val from_le: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+

@@ -4,67 +4,80 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes
-open LowStar.Buffer
-open Lib.Utils
+open Lib.Buffer
 open Hacl.Impl.Aes.Core
+
+
+(* TODO: AES-256. All the AES-256 functions below are untested and most likely wrong. *)
 
 (* Parameters for AES-128 *)
 noextract inline_for_extraction let nb =  4
 noextract inline_for_extraction let nk =  4 // 4, 6, or 8 for 128/192/256
 noextract inline_for_extraction let nr =  10 // 10, 12, or 14 for 128/192/256
 
-type skey  = lbytes 16
-type skey256  = lbytes 32
+type skey  = lbuffer uint8 16ul
+type skey256  = lbuffer uint8 32ul
 
 unfold
-type keyr (m:m_spec) =  lbuffer (stelem m) (9 `op_Multiply` klen m)
+type keyr (m:m_spec) =  lbuffer (stelem m) (9ul *. klen m)
 unfold
-type keyex (m:m_spec) = lbuffer (stelem m) (15 `op_Multiply` klen m) // Saving space for AES-256
+type keyex (m:m_spec) = lbuffer (stelem m) (15ul *. klen m) // Saving space for AES-256
 
 unfold
-let ctxlen (m:m_spec) =  nlen m + (15 `op_Multiply` klen m)
+let ctxlen (m:m_spec) =  nlen m +. (15ul *. klen m)
 
 unfold
 type aes_ctx (m:m_spec) = lbuffer (stelem m) (ctxlen m) 
 
 inline_for_extraction
-let get_nonce (#m:m_spec) (ctx:aes_ctx m) = sub ctx (size 0) (size (nlen m))
+val get_nonce: #m:m_spec -> ctx:aes_ctx m -> Stack (lbuffer (stelem m) (nlen m))
+			 (requires (fun h -> live h ctx))
+			 (ensures (fun h0 x h1 -> h0 == h1 /\ live h1 x /\ 
+				     x == gsub ctx 0ul (nlen m)))
 inline_for_extraction
-let get_kex (#m:m_spec) (ctx:aes_ctx m) = sub ctx (size (nlen m)) (size 15 
-*. size (klen m))
+let get_nonce (#m:m_spec) (ctx:aes_ctx m) = sub ctx (size 0) (nlen m)
+
+inline_for_extraction
+val get_kex: #m:m_spec -> ctx:aes_ctx m -> Stack (lbuffer (stelem m) (15ul *. klen m))
+			 (requires (fun h -> live h ctx))
+			 (ensures (fun h0 x h1 -> h0 == h1 /\ live h1 x /\
+				     x == gsub ctx (nlen m ) (15ul *. klen m)))
+inline_for_extraction
+let get_kex (#m:m_spec) (ctx:aes_ctx m) = sub ctx (nlen m) (15ul *. klen m)
 
 inline_for_extraction
 val create_ctx: m:m_spec -> StackInline (aes_ctx m)
                    (requires (fun h -> True))
 		   (ensures (fun h0 f h1 -> live h1 f))
-let create_ctx (m:m_spec) = create (elem_zero m) (size (ctxlen m))
+let create_ctx (m:m_spec) = create (ctxlen m ) (elem_zero m)
 
 
 
 inline_for_extraction
 val add_round_key: #m:m_spec -> st:state m -> key:key1 m -> ST unit
 			     (requires (fun h -> live h st /\ live h key))
-			     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc_buffer st) h0 h1))
+			     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc st) h0 h1))
 let add_round_key #m st key = xor_state_key1 #m st key
 
 
 inline_for_extraction
-val enc_rounds: #m:m_spec -> st:state m -> key:keyr m -> n:size_t -> ST unit
+val enc_rounds: #m:m_spec -> st:state m -> key:keyr m -> n:size_t{v n <= 9} -> ST unit
 	     (requires (fun h -> live h st /\ live h key))
-	     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc_buffer st) h0 h1))
+	     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc st) h0 h1))
 let enc_rounds #m st key n = 
     let h0 = ST.get() in
     loop_nospec #h0 n st 
-      (fun i -> let sub_key = sub key (i *. size (klen m)) (size (klen m)) in aes_enc #m st sub_key)
+      (fun i -> 
+	let sub_key = sub key (i *. klen m) (klen m) in aes_enc #m st sub_key)
 
 
 inline_for_extraction
-val block_cipher: #m:m_spec -> st:state m -> key:keyex m -> n:size_t -> ST unit
+val block_cipher: #m:m_spec -> st:state m -> key:keyex m -> n:size_t{v n == 10} -> ST unit
 	     (requires (fun h -> live h st /\ live h key))
-	     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc_buffer st) h0 h1))
+	     (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc st) h0 h1))
 let block_cipher #m st key n = 
     let inner_rounds = n -. size 1 in
-    let klen = size (klen m) in
+    let klen = klen m in
     let k0 = sub key (size 0) klen in
     let kr = sub key klen (inner_rounds *. klen) in
     let kn = sub key (n *. klen) klen in
@@ -72,18 +85,14 @@ let block_cipher #m st key n =
     enc_rounds #m st kr (n -. size 1);
     aes_enc_last #m st kn
 
-
-let rcon =  gcreateL [u8(0x8d); u8(0x01); u8(0x02); u8(0x04); u8(0x08); u8(0x10); u8(0x20); u8(0x40); u8(0x80); u8(0x1b); u8(0x36)]
-
-
-//[@ CInline ]
+#set-options "--admit_smt_queries true"
 inline_for_extraction
-val key_expansion128: #m:m_spec -> keyx:keyex m -> key:lbytes 16 -> ST unit
+val key_expansion128: #m:m_spec -> keyx:keyex m -> key:lbuffer uint8 16ul -> ST unit
 			     (requires (fun h -> live h keyx /\ live h key))
-			     (ensures (fun h0 _ h1 -> live h1 keyx /\ live h1 key /\ modifies (loc_buffer keyx) h0 h1))
+			     (ensures (fun h0 _ h1 -> live h1 keyx /\ live h1 key /\ modifies (loc keyx) h0 h1))
 [@ CInline ]
 let key_expansion128 #m keyx key = 
-    let klen = size (klen m) in
+    let klen = klen m in
     load_key1 (sub keyx (size 0) klen) key;
     let h0 = ST.get() in
     (* I WOULD LIKE TO HAVE A LOOP HERE BUT AES_KEYGEN_ASSIST INSISTS ON AN IMMEDIATE RCON *)
@@ -138,11 +147,11 @@ let key_expansion128 #m keyx key =
        
 
 inline_for_extraction
-val key_expansion256: #m:m_spec -> keyx:keyex m -> key:lbytes 32 -> ST unit
+val key_expansion256: #m:m_spec -> keyx:keyex m -> key:lbuffer uint8 32ul -> ST unit
 			     (requires (fun h -> live h keyx /\ live h key))
-			     (ensures (fun h0 _ h1 -> live h1 keyx /\ live h1 key /\ modifies (loc_buffer keyx) h0 h1))
+			     (ensures (fun h0 _ h1 -> live h1 keyx /\ live h1 key /\ modifies (loc keyx) h0 h1))
 let key_expansion256 #m keyx key = 
-    let klen = size (klen m) in
+    let klen = klen m in
     load_key1 (sub keyx (size 0) klen) (sub key (size 0) (size 16));
     load_key1 (sub keyx klen klen) (sub key (size 16) (size 16));
     let h0 = ST.get() in
@@ -201,12 +210,13 @@ let key_expansion256 #m keyx key =
        let next0 = sub keyx (klen *. size 14) (klen) in
        aes_keygen_assist #m next0 prev1 (u8 0x40);
        key_expansion_step #m next0 prev0
+#set-options "--admit_smt_queries false"
     
 
 inline_for_extraction
-val aes128_init: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbytes 12 -> ST unit
+val aes128_init: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbuffer uint8 12ul -> ST unit
 			     (requires (fun h -> live h ctx /\ live h nonce /\ live h key))
-			     (ensures (fun h0 b h1 -> modifies (loc_buffer ctx) h0 h1))
+			     (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1))
 let aes128_init #m ctx key nonce = 
   let kex = get_kex ctx in
   let n = get_nonce ctx in
@@ -215,45 +225,61 @@ let aes128_init #m ctx key nonce =
 
 
 inline_for_extraction
-val aes128_set_nonce: #m:m_spec -> ctx:aes_ctx m -> nonce:lbytes 12 -> ST unit
+val aes128_set_nonce: #m:m_spec -> ctx:aes_ctx m -> nonce:lbuffer uint8 12ul -> ST unit
 			     (requires (fun h -> live h ctx /\ live h nonce))
-			     (ensures (fun h0 b h1 -> modifies (loc_buffer ctx) h0 h1))
+			     (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1))
 let aes128_set_nonce #m ctx nonce = 
   let n = get_nonce ctx in
   load_nonce #m n nonce
 
-  
+#set-options "--admit_smt_queries true"  
 inline_for_extraction
-val aes256_init: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbytes 12 -> ST unit
+val aes256_init: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbuffer uint8 12ul -> ST unit
 			     (requires (fun h -> live h ctx /\ live h nonce /\ live h key))
-			     (ensures (fun h0 b h1 -> modifies (loc_buffer ctx) h0 h1))
+			     (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1))
 let aes256_init #m ctx key nonce = 
   let kex = get_kex ctx in
   let n = get_nonce ctx in
   key_expansion256 #m kex key ; 
   load_nonce #m n nonce
+#set-options "--admit_smt_queries false"  
 
 
 inline_for_extraction
-val aes128_key_block: #m:m_spec -> kb:lbytes 16 -> ctx:aes_ctx m -> counter:size_t -> ST unit
+val aes128_encrypt_block: #m:m_spec -> ob:lbuffer uint8 16ul -> ctx:aes_ctx m -> ib:lbuffer uint8 16ul -> ST unit
+			     (requires (fun h -> live h ob /\ live h ctx /\ live h ib))
+			     (ensures (fun h0 _ h1 -> modifies (loc ob) h0 h1))
+let aes128_encrypt_block #m ob ctx ib =
+    push_frame();
+    let kex = get_kex ctx in
+    let n = get_nonce ctx in
+    let st = create_state #m in
+    load_block0 #m st ib;
+    block_cipher #m st kex (size 10);
+    store_block0 #m ob st;
+    pop_frame()
+
+
+inline_for_extraction
+val aes128_key_block: #m:m_spec -> kb:lbuffer uint8 16ul -> ctx:aes_ctx m -> counter:size_t -> ST unit
 			     (requires (fun h -> live h kb /\ live h ctx))
-			     (ensures (fun h0 _ h1 -> modifies (loc_buffer kb) h0 h1))
+			     (ensures (fun h0 _ h1 -> modifies (loc kb) h0 h1))
 let aes128_key_block #m kb ctx counter = 
     push_frame();
     let kex = get_kex ctx in
     let n = get_nonce ctx in
     let st = create_state #m in
-    load_state #m st n <counter;
+    load_state #m st n counter;
     block_cipher #m st kex (size 10);
     store_block0 #m kb st;
     pop_frame()
-    
+
 
 
 inline_for_extraction
-val aes_update4: #m:m_spec -> out:lbytes 64 -> inp:lbytes 64 -> ctx:aes_ctx m -> counter:size_t -> rounds:size_t -> ST unit
+val aes_update4: #m:m_spec -> out:lbuffer uint8 64ul -> inp:lbuffer uint8 64ul -> ctx:aes_ctx m -> counter:size_t -> rounds:size_t{v rounds == 10} -> ST unit
 			     (requires (fun h -> live h out /\ live h inp /\ live h ctx))
-			     (ensures (fun h0 b h1 -> modifies (loc_buffer out) h0 h1))
+			     (ensures (fun h0 b h1 -> modifies (loc out) h0 h1))
 let aes_update4 #m out inp ctx ctr rounds =
   push_frame();
   let st = create_state #m in
@@ -265,10 +291,10 @@ let aes_update4 #m out inp ctx ctr rounds =
   pop_frame()
 
 inline_for_extraction
-val aes_ctr: #m:m_spec -> out:bytes -> inp:bytes -> len:size_t -> ctx:aes_ctx m -> counter:size_t -> rounds:size_t -> ST unit
+val aes_ctr: #m:m_spec -> len:size_t -> out:lbuffer uint8 len -> inp:lbuffer uint8 len -> ctx:aes_ctx m -> counter:size_t -> rounds:size_t{v rounds == 10} -> ST unit
 			     (requires (fun h -> live h out /\ live h inp /\ live h ctx))
-			     (ensures (fun h0 _ h1 -> modifies (loc_buffer out) h0 h1))
-let aes_ctr #m out inp len ctx counter rounds = 
+			     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+let aes_ctr #m len out inp ctx counter rounds = 
   push_frame();
   let blocks64 = len /. size 64 in
   let h0 = ST.get() in
@@ -283,32 +309,32 @@ let aes_ctr #m out inp len ctx counter rounds =
       let ctr = counter +. (blocks64 *. size 4) in
       let ib = sub inp (blocks64 *. size 64) rem in
       let ob = sub out (blocks64 *. size 64) rem in
-      let last = alloca 0uy 64ul in
-      blit ib (size 0) last (size 0) rem;
+      let last = create 64ul (u8 0) in
+      copy (sub last 0ul rem) ib;
       aes_update4 #m last last ctx ctr rounds;
-      blit last (size 0) ob (size 0) rem);
+      copy ob (sub last 0ul rem));
   pop_frame()
 
 inline_for_extraction
-let aes128_ctr_encrypt (#m:m_spec) out inp in_len k n c = 
+let aes128_ctr_encrypt (#m:m_spec) in_len out inp k n c = 
   push_frame();
   let ctx = create_ctx m in
   aes128_init #m ctx k n;
-  aes_ctr #m out inp in_len ctx c (size 10);
+  aes_ctr #m in_len out inp ctx c (size 10);
   pop_frame()
 
 inline_for_extraction
-let aes128_ctr_decrypt (#m:m_spec) out inp in_len k n c = 
-  aes128_ctr_encrypt #m out inp in_len k n c
+let aes128_ctr_decrypt (#m:m_spec) in_len out inp  k n c = 
+  aes128_ctr_encrypt #m in_len out inp k n c
 
 inline_for_extraction
-let aes256_ctr_encrypt (#m:m_spec) out inp in_len k n c = 
+let aes256_ctr_encrypt (#m:m_spec) in_len out inp k n c = 
   push_frame();
   let ctx = create_ctx m in
   aes256_init #m ctx k n;
-  aes_ctr #m out inp in_len ctx c (size 14);
+  aes_ctr #m in_len out inp ctx c (size 14);
   pop_frame()
 
 inline_for_extraction
-let aes256_ctr_decrypt (#m:m_spec) out inp in_len k n c = 
-  aes256_ctr_encrypt #m out inp in_len k n c
+let aes256_ctr_decrypt (#m:m_spec) inp_len out inp k n c = 
+  aes256_ctr_encrypt #m inp_len out inp k n c
