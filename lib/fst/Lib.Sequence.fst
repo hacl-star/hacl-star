@@ -31,7 +31,7 @@ let eq_elim #a #len s1 s2 =
 
 let upd #a #len s n x = Seq.upd #a s n x
 
-let mem #a #len x l = Seq.count x l > 0
+let member #a #len x l = Seq.count x l > 0
 
 let sub #a #len s start n = Seq.slice #a s start (start + n)
 

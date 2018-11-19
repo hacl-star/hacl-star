@@ -7,6 +7,8 @@ open Hacl.Spec.Curve25519.Field51
 
 #reset-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+let felem5 = (| fits:(nat * nat * nat * nat * nat) & x:felem5{felem_fits5 x fits} |)
+
 let felem5 = x:felem5{felem_fits5 x (1, 2, 1, 1, 1)}
 let one5:felem5 = (u64 1, u64 0, u64 0, u64 0, u64 0)
 

@@ -110,7 +110,7 @@ val upd:
     {:pattern (index s i)} (i < len /\ i <> n) ==> index o i == index s i)})
 
 (** Membership of an element to a fixed-length Sequence *)
-val mem: #a:eqtype -> #len: size_nat -> a -> lseq a len -> Tot bool
+val member: #a:eqtype -> #len: size_nat -> a -> lseq a len -> Tot bool
 
 (** Operator for accessing an element of a fixed-length Sequence *)
 unfold
