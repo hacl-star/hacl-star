@@ -194,7 +194,7 @@ HACL_SOURCES	= \
 #  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
 
 EVERCRYPT_SOURCES = \
-  $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_Helpers.c EverCrypt_ValeGlue.c) \
+  $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_ValeGlue.c) \
   $(addprefix evercrypt/c/evercrypt_,autoconfig.c bytes.c vale_stubs.c)
 
 ifeq ($(CONFIG),noopenssl)
