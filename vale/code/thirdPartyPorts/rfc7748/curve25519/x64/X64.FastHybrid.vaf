@@ -2,7 +2,7 @@ include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../../arch/x64/X64.Vale.InsMem.vaf"
 include{:fstar}{:open} "Fast_defs"
 include{:fstar}{:open} "Fast_lemmas_external"
-include{:fstar}{:open} "FastUtil_helpers"
+include{:fstar}{:open} "FastHybrid_helpers"
 include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.FastHybrid
@@ -38,7 +38,7 @@ open X64.Vale.QuickCodes
 open FStar.Tactics
 open Fast_defs
 open Fast_lemmas_external
-open FastUtil_helpers
+open FastHybrid_helpers
 open X64.CPU_Features_s
 #endverbatim
 
@@ -46,13 +46,12 @@ type tactic:Type(0) extern;
 const int_canon:tactic extern;
 ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 600"
 
 procedure{:quick} fast_mul1(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
     lets
-        //dst_ptr @= rdi;
         inA_ptr @= rsi;
         b @= rdx;
 
@@ -63,7 +62,7 @@ procedure{:quick} fast_mul1(
 
         a := pow2_four(a0, a1, a2, a3);
     reads
-        /*dst_ptr;*/ inA_ptr; b; memTaint;
+        inA_ptr; b; memTaint;
 
     modifies
         rax; r8; r9; r10; r11; r12; r13; r14;
@@ -71,17 +70,12 @@ procedure{:quick} fast_mul1(
 
     requires
         adx_enabled && bmi2_enabled;
-        //buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
-        //validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
 
     ensures
-//        let d := pow2_five(r8, r10, r12, r14, rax);
-//        d == old(a * b);
-
-//        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
-//        modifies_buffer(dst_b, old(mem), mem);
+        let d := pow2_five(r8, r10, r12, r14, rax);
+        d == old(a * b);
 {
     xor_lemmas();
     
@@ -90,7 +84,7 @@ procedure{:quick} fast_mul1(
     lemma_load_mem64(inA_b, 1, mem);    
     Mulx64(r11, r10, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[1]*B */ lemma_prod_bounds(r11, r10, b, a1); 
     Add64Wrap(r10, r9);
-    Xor64(r9, r9);
+    Mov64(r9, 0);
     lemma_load_mem64(inA_b, 2, mem);    
     Mulx64(r13, r12, Mem(inA_ptr, 16, inA_b, 2, Secret));  /* A[2]*B */ lemma_prod_bounds(r13, r12, b, a2); 
     Adcx64Wrap(r12, r11);
