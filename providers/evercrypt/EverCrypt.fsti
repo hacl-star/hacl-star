@@ -124,69 +124,8 @@ let block_cipher_blockLen = function
 type stream_cipher_alg = 
   | RC4_128
 
-/// Agile AEAD
-
-type aead_alg =
-  | AES128_GCM
-  | AES256_GCM
-  | CHACHA20_POLY1305
-  // the algorithms below are used in TLS 1.3 but not yet supported by
-  // EverCrypt or miTLS; they are included e.g. for parsing
-  | AES128_CCM  // "Counter with CBC-Message Authentication Code"
-  | AES256_CCM
-  | AES128_CCM8 // variant with truncated 8-byte tags
-  | AES256_CCM8
-
-let supported_aead_alg (a:aead_alg): GTot bool = 
-  match a with 
-  | AES128_GCM
-  | AES256_GCM
-  | CHACHA20_POLY1305 -> true
-  | _ -> false
-
-let aead_keyLen = function
-  | AES128_GCM        -> 16ul
-  | AES256_GCM        -> 32ul
-  | CHACHA20_POLY1305 -> 32ul
-  | AES128_CCM        -> 16ul
-  | AES128_CCM8       -> 16ul
-  | AES256_CCM        -> 32ul
-  | AES256_CCM8       -> 32ul
-
-let aead_tagLen = function
-  | AES128_CCM8       ->  8ul
-  | AES256_CCM8       ->  8ul
-  | AES128_GCM        -> 16ul
-  | AES256_GCM        -> 16ul
-  | CHACHA20_POLY1305 -> 16ul
-  | AES128_CCM        -> 16ul
-  | AES256_CCM        -> 16ul
-
-let aead_ivLen (a:aead_alg) = 12ul
-
-
-[@CAbstractStruct]
-val aead_state_s: Type0
-
-let aead_state = B.pointer aead_state_s
-
-val aead_create: a:aead_alg {supported_aead_alg a} -> key:uint8_p ->
-  ST aead_state aead_create_pre aead_create_post
-
-val aead_encrypt: key:aead_state -> iv:uint8_p ->
-  ad:uint8_p -> adlen:uint32_t ->
-  plain:uint8_p -> len:uint32_t ->
-  cipher:uint8_p -> tag:uint8_p ->
-  ST unit aead_encrypt_pre aead_encrypt_post
-
-val aead_decrypt: key:aead_state -> iv:uint8_p ->
-  ad:uint8_p -> adlen:uint32_t ->
-  plain:uint8_p -> len:uint32_t ->
-  cipher:uint8_p -> tag:uint8_p ->
-  ST uint32_t aead_decrypt_pre aead_decrypt_post
-
-val aead_free: aead_state ->
-  ST unit aead_free_pre aead_free_post
+/// AEAD
+include EverCrypt.AEAD
 
 /// DH
 
