@@ -308,73 +308,48 @@ procedure{:quick}{:public} fast_mul1_add_stdcall(
     Pop(r15, stack_b, 4);
 }
 
-/*
 #reset-options "--z3rlimit 300"
-procedure{:quick} fast_add1(
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64)
+procedure{:quick} carry_pass()
     lets
-        dst_ptr @= rdi;
-        inA_ptr @= rsi;
-        b @= rcx;
-
-        a0 := buffer64_read(inA_b, 0, mem);
-        a1 := buffer64_read(inA_b, 1, mem);
-        a2 := buffer64_read(inA_b, 2, mem);
-        a3 := buffer64_read(inA_b, 3, mem);
-
-        a := pow2_four(a0, a1, a2, a3);
-    reads
-        dst_ptr; inA_ptr; memTaint;
-
+        a0 @= r8;
+        a1 @= r10;
+        a2 @= r12;
+        a3 @= r14;
     modifies
-        rax; b; r8; r9; r10; r11; 
-        mem; efl;
+        rax; rcx; a0; a1; a2; a3;
+        efl;
 
     requires
         adx_enabled && bmi2_enabled;
-        buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
-
-        validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
 
     ensures
-        let d0 := buffer64_read(dst_b, 0, mem);
-        let d1 := buffer64_read(dst_b, 1, mem);
-        let d2 := buffer64_read(dst_b, 2, mem);
-        let d3 := buffer64_read(dst_b, 3, mem);
-        let d := pow2_five(d0, d1, d2, d3, rax);
-        d == old(a + b);
-
-        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
-        modifies_buffer(dst_b, old(mem), mem);
+//        let sum := old(pow2_four(a0, a1, a2, a3) + bool_bit(cf(efl)) * 38);
+//        let carry := bool_bit(sum >= pow2_256);
+//        let a0_new := (old(a0) + old(bool_bit(cf(efl))) * 38 + carry*38) % pow2_64;
+//        pow2_four(a0, a1, a2, a3) == old(pow2_four(a0_new, a1, a2, a3));
 {
-    xor_lemmas();
-    Xor64( r8,  r8);
-    Xor64( r9,  r9);
-    Xor64(r10, r10);
-    Xor64(r11, r11);
-    Xor64(rax, rax);
+    //xor_lemmas();
+    Mov64(rax, 0);
+    Mov64(rcx, 38);
+    Cmovc64(rax, rcx);
+    assert rax == bool_bit(cf(efl)) * 38;
 
-    lemma_load_mem64(inA_b, 0, mem);    
-    Add64Wrap(b, Mem(inA_ptr,  0, inA_b, 0, Secret));
-    Store64_buffer(dst_ptr, b,  0, Secret, dst_b, 0);  
+    Add64Wrap(r8, rax); 
+    Adcx64Wrap(r10, 0); 
+    Adcx64Wrap(r12, 0);
+    Adcx64Wrap(r14, 0);
+    assert pow2_five(r8, r10, r12, r14, bool_bit(cf(efl))) == old(pow2_four(r8, r10, r12, r14) + bool_bit(cf(efl)) * 38);
+    ghost var sum := old(pow2_four(r8, r10, r12, r14) + bool_bit(cf(efl)) * 38);
+    ghost var carry := bool_bit(cf(efl));
+    assert carry == bool_bit(sum >= pow2_256);
 
-    lemma_load_mem64(inA_b, 1, mem);    
-    Adcx64Wrap(r8, Mem(inA_ptr,  8, inA_b, 1, Secret));
-    Store64_buffer(dst_ptr, r8,  8, Secret, dst_b, 1);  
-
-    lemma_load_mem64(inA_b, 2, mem);    
-    Adcx64Wrap(r9, Mem(inA_ptr, 16, inA_b, 2, Secret));
-    Store64_buffer(dst_ptr, r9, 16, Secret, dst_b, 2);  
-
-    lemma_load_mem64(inA_b, 3, mem);    
-    Adcx64Wrap(r10, Mem(inA_ptr, 24, inA_b, 3, Secret));
-    Store64_buffer(dst_ptr, r10, 24, Secret, dst_b, 3);  
-
-    Adcx64Wrap(rax, r11);
+    Mov64(rax, 0);
+    Cmovc64(rax, rcx);
+    Add64Wrap(r8, rax);
+    assert r8 == (old(a0) + old(bool_bit(cf(efl))) * 38 + carry*38) % pow2_64;
 }
 
+/*
 #reset-options "--z3rlimit 20"
 
 procedure{:quick}{:public} fast_add1_stdcall(
