@@ -5,7 +5,6 @@ open EverCrypt.Helpers
 
 open MerkleTree.Spec
 
-open FStar.Classical
 open FStar.Ghost
 open FStar.Seq
 
@@ -36,10 +35,8 @@ let hash_2 = MTS.hash_2_raw
 
 /// High-level Merkle tree data structure
 
-let merkle_tree_size_lg = 32
-
 noeq type merkle_tree =
-| MT: i:nat -> j:nat{j >= i && j < pow2 merkle_tree_size_lg} ->
+| MT: i:nat -> j:nat{j >= i && j < pow2 32} ->
       hs:S.seq hash_seq{S.length hs = 32} ->
       rhs_ok:bool -> rhs:hash_seq{S.length rhs = 32} ->
       mroot:hash ->
@@ -47,7 +44,7 @@ noeq type merkle_tree =
 
 val mt_not_full: merkle_tree -> GTot bool
 let mt_not_full mt =
-  MT?.j mt < pow2 merkle_tree_size_lg - 1
+  MT?.j mt < pow2 32 - 1
 
 val mt_empty: merkle_tree -> GTot bool
 let mt_empty mt =
@@ -56,29 +53,6 @@ let mt_empty mt =
 val mt_not_empty: merkle_tree -> GTot bool
 let mt_not_empty mt =
   MT?.j mt > 0
-
-val log_of: n:nat{n > 0} -> GTot nat
-let rec log_of n =
-  if n = 1 then 0
-  else 1 + log_of (n / 2)
-
-val log_of_bound:
-  m:nat -> n:nat{n > 0 && n < pow2 m} ->
-  Lemma (log_of n < m)
-        [SMTPatOr [[SMTPat (n < pow2 m)]; [SMTPat (n < pow2 m - 1)]]]
-let rec log_of_bound m n =
-  if n = 1 then ()
-  else log_of_bound (m - 1) (n / 2)
-
-val mt_depth: mt:merkle_tree{mt_not_empty mt} -> GTot nat
-let mt_depth mt = log_of (MT?.j mt)
-
-val mt_depth_ok:
-  mt:merkle_tree{mt_not_empty mt} ->
-  Lemma (S.length (MT?.hs mt) > mt_depth mt)
-        [SMTPat (mt_depth mt)]
-let mt_depth_ok mt =
-  log_of_bound merkle_tree_size_lg (MT?.j mt)
 
 /// Well-formedness w.r.t. indices of base hash elements
 
@@ -121,77 +95,6 @@ val mt_wf_elts: merkle_tree -> GTot Type0
 let mt_wf_elts mt =
   hs_wf_elts 0 (MT?.hs mt) (MT?.i mt) (MT?.j mt)
 
-/// Connection to Merkle tree specification
-
-val merge_hs: 
-  hs1:hash_ss -> hs2:hash_ss{S.length hs1 = S.length hs2} -> 
-  GTot (mhs:hash_ss{S.length mhs = S.length hs1})
-       (decreases (S.length hs1))
-let rec merge_hs hs1 hs2 =
-  if S.length hs1 = 0 then S.empty
-  else S.cons (S.append (S.head hs1) (S.head hs2))
-              (merge_hs (S.tail hs1) (S.tail hs2))
-
-val hash_ss_length_in_spec: 
-  n:nat -> fhs:hash_ss -> GTot Type0
-let rec hash_ss_length_in_spec n fhs =
-  S.length fhs = n + 1 /\
-  (forall (i:nat{i <= n}). S.length (S.index fhs i) <= pow2 (n - i))
-
-val hash_seq_lift: hs:hash_seq -> GTot MTS.hash_seq (decreases (S.length hs))
-let rec hash_seq_lift hs =
-  if S.length hs = 0 then S.empty
-  else S.cons (HRaw (S.head hs)) (hash_seq_lift (S.tail hs))
-
-val hash_seq_in_spec:
-  n:nat -> hs:hash_seq{S.length hs <= pow2 n} -> smt:MTS.merkle_tree n -> GTot Type0
-let hash_seq_in_spec n hs smt =
-  S.equal (hash_seq_lift hs) (S.slice smt 0 (S.length hs))
-
-// `fhs` should contain deprecated hashes.
-val hash_ss_in_spec:
-  #n:nat -> fhs:hash_ss{hash_ss_length_in_spec n fhs} ->
-  smt:MTS.merkle_tree n ->
-  GTot Type0
-let rec hash_ss_in_spec #n fhs smt =
-  if n = 0 then hash_seq_in_spec n (S.head fhs) smt
-  else hash_ss_in_spec #(n-1) (S.tail fhs) (mt_next_lv smt)
-
-// NOTE: unlike actual high-level design, here `rhs` should contain the root!
-val hs_wf_rpmt_:
-  #n:nat ->
-  olds:hash_ss{S.length olds = n + 1} ->
-  hs:hash_ss{S.length hs = n + 1} ->
-  smt:MTS.merkle_tree n ->
-  GTot Type0
-let hs_wf_rpmt_ #n olds hs smt =
-  hash_ss_length_in_spec n (merge_hs olds hs) /\
-  hash_ss_in_spec #n (merge_hs olds hs) smt
-
-val hs_wf_rpmt: n:nat -> hs:hash_ss{S.length hs = n + 1} -> GTot Type0
-let hs_wf_rpmt n hs =
-  exists (olds:hash_ss{S.length olds = n + 1}) 
-         (smt:MTS.merkle_tree n).
-    hs_wf_rpmt_ #n olds hs smt
-
-val hs_wf_rpmt_ex:
-  n:nat -> hs:hash_ss{S.length hs = n + 1} ->
-  olds:hash_ss{S.length olds = n + 1} -> 
-  smt:MTS.merkle_tree n ->
-  Lemma (requires (hs_wf_rpmt_ #n olds hs smt))
-        (ensures (hs_wf_rpmt n hs))
-let hs_wf_rpmt_ex n hs olds smt =
-  exists_intro (fun smt -> hs_wf_rpmt_ #n olds hs smt) smt;
-  exists_intro
-    (fun (olds:hash_ss{S.length olds = n + 1}) ->
-      exists smt. hs_wf_rpmt_ #n olds hs smt) olds
-
-val mt_wf_rpmt: mt:merkle_tree -> GTot Type0
-let mt_wf_rpmt mt =
-  mt_empty mt \/
-  // See [SMTPat] in `mt_depth_ok` to check why below `S.slice` works.
-  hs_wf_rpmt (mt_depth mt) (S.slice (MT?.hs mt) 0 (mt_depth mt + 1))
-
 /// Construction
 
 val hs_wf_elts_empty:
@@ -205,9 +108,7 @@ let rec hs_wf_elts_empty lv =
 
 // NOTE: the public function is `create_mt` defined below, which
 // builds a tree with an initial hash.
-// NOTE: the empty Merkle tree does not satisfy `mt_wf_rpmt` since it requires
-
-val create_empty_mt: unit -> GTot (mt:merkle_tree{mt_wf_elts mt /\ mt_wf_rpmt mt})
+val create_empty_mt: unit -> GTot (mt:merkle_tree{mt_wf_elts mt})
 let create_empty_mt _ =
   hs_wf_elts_empty 0;
   MT 0 0 (S.create 32 S.empty) false (S.create 32 hash_init) hash_init
