@@ -1,6 +1,6 @@
 module X64.Bytes_Semantics
 open Opaque_s
-open Views
+open Views_s
 
 #reset-options "--z3rlimit 100 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 

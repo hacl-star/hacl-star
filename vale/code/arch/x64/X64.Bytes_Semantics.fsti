@@ -6,15 +6,15 @@ open X64.Machine_s
 open Words_s
 
 val nat8s_to_nat32_injective (v1 v2 v3 v4 v1' v2' v3' v4':nat8) :
-  Lemma (Views.nat8s_to_nat32 v1 v2 v3 v4 == Views.nat8s_to_nat32 v1' v2' v3' v4' ==>
+  Lemma (Views_s.nat8s_to_nat32 v1 v2 v3 v4 == Views_s.nat8s_to_nat32 v1' v2' v3' v4' ==>
          v1 == v1' /\
          v2 == v2' /\
          v3 == v3' /\
          v4 == v4')
 
 val nat8s_to_nat64_injective (v1 v2 v3 v4 v5 v6 v7 v8 v1' v2' v3' v4' v5' v6' v7' v8':nat8) :
-  Lemma (Views.nat8s_to_nat64 v1 v2 v3 v4 v5 v6 v7 v8 ==
-         Views.nat8s_to_nat64 v1' v2' v3' v4' v5' v6' v7' v8' ==>
+  Lemma (Views_s.nat8s_to_nat64 v1 v2 v3 v4 v5 v6 v7 v8 ==
+         Views_s.nat8s_to_nat64 v1' v2' v3' v4' v5' v6' v7' v8' ==>
          v1 == v1' /\
          v2 == v2' /\
          v3 == v3' /\
