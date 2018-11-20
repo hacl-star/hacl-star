@@ -10,27 +10,23 @@ extern "C" {
 
 #include "stdint.h"
 
-extern hash_vec;
-extern merkle_tree;
+#include "MerkleTree_New_Low.h"
 
-typedef uint8_t *hash;
-typedef merkle_tree *mt_p;
-typedef hash_vec *path;
 
 /* Utilities */
 
-extern hash init_hash();
-extern void free_hash(hash h);
+extern hash (*init_hash)();
+extern void (*free_hash)(hash x0);
 
 extern path init_path();
 extern void free_path(path p);
 extern void clear_path(path p);
 
 /** Construction */
-extern merkle_tree mt_create(hash init);
+extern merkle_tree *mt_create(uint8_t *init1);
 
 /** Destrcution */
-extern void mt_free(merkle_tree mt);
+extern void mt_free(merkle_tree *mt);
 
 /* Insertion
  *
@@ -40,10 +36,10 @@ extern void mt_free(merkle_tree mt);
  *
  * Note: The content of the hash will be overwritten with an arbitrary value.
  */
-extern void mt_insert(merkle_tree mt, hash v);
+extern void mt_insert(merkle_tree *mt, hash v);
 
 /** Precondition predicate for mt_insert */
-extern bool mt_insert_pre(merkle_tree mt, hash v);
+extern bool mt_insert_pre(merkle_tree *mt, hash v);
 
 
 /** Getting the Merkle root
@@ -51,10 +47,10 @@ extern bool mt_insert_pre(merkle_tree mt, hash v);
  * @param[in]  mt   The Merkle tree
  * @param[out] root The Merkle root returned as a hash pointer
  */
-extern void mt_get_root(merkle_tree mt, hash root);
+extern void mt_get_root(merkle_tree *mt, hash root);
 
 /** Precondition predicate for mt_get_root */
-extern vool mt_get_root_pre(merkle_tree mt, hash root);
+extern bool mt_get_root_pre(merkle_tree *mt, hash root);
 
 
 /** Getting a Merkle path
@@ -72,20 +68,20 @@ extern vool mt_get_root_pre(merkle_tree mt, hash root);
  * - idx must be within the currently held indices in the tree (past the
  *   last flush index).
  */
-extern uint32_t mt_get_path(merkle_tree mt, uint64_t idx, hash root, hash *path);
+extern uint32_t mt_get_path(merkle_tree *mt, uint64_t idx, path p, hash root);
 
 /** Precondition predicate for mt_get_path */
-extern bool mt_get_path_pre(merkle_tree mt, uint64_t idx, hash root, hash *path);
+extern bool mt_get_path_pre(merkle_tree *mt, uint64_t idx, path p, hash root);
 
 
 /** Flush the Merkle tree
  *
  * @param[in]  mt   The Merkle tree
  */
-extern void mt_flush(merkle_tree mt);
+extern void mt_flush(merkle_tree *mt);
 
 /** Precondition predicate for mt_flush */
-extern bool mt_flush_pre(merkle_tree mt);
+extern bool mt_flush_pre(merkle_tree *mt);
 
 
 /** Flush the Merkle tree up to a given index
@@ -93,10 +89,10 @@ extern bool mt_flush_pre(merkle_tree mt);
  * @param[in]  mt   The Merkle tree
  * @param[in]  idx The index up to which to flush the tree
  */
-extern void mt_flush_to(merkle_tree mt, uint64_t idx);
+extern void mt_flush_to(merkle_tree *mt, uint64_t idx);
 
 /** Precondition predicate for mt_flush_to */
-extern bool mt_flush_to_pre(merkle_tree mt, uint64_t idx);
+extern bool mt_flush_to_pre(merkle_tree *mt, uint64_t idx);
 
 
 /** Client-side verification
@@ -111,10 +107,10 @@ extern bool mt_flush_to_pre(merkle_tree mt, uint64_t idx);
  *
  * Note: max - tgt must be less than 2^32.
  */
-extern bool mt_verify(merkle_tree mt, uint64_t tgt, uint64_t max, hash *path, hash root);
+extern bool mt_verify(merkle_tree *mt, uint64_t tgt, uint64_t max, path path, hash root);
 
 /** Precondition predicate for mt_verify */
-extern bool mt_verify_pre(merkle_tree mt, uint64_t tgt, uint64_t max, hash *path, hash root);
+extern bool mt_verify_pre(merkle_tree *mt, uint64_t tgt, uint64_t max, path path, hash root);
 
 
 /** Serialization size
@@ -123,7 +119,7 @@ extern bool mt_verify_pre(merkle_tree mt, uint64_t tgt, uint64_t max, hash *path
  *
  * @return the number of bytes required to serialize the tree
  */
-extern uint64_t mt_serialize_size(merkle_tree mt);
+extern uint64_t mt_serialize_size(merkle_tree *mt);
 
 
 /** Serialization
@@ -137,7 +133,7 @@ extern uint64_t mt_serialize_size(merkle_tree mt);
  * Note: buf must be a buffer of size mt_serialize_size(mt) or larger, but
  * smaller than 2^32 (larger buffers are currently not supported).
  */
-extern uint32_t mt_serialize(merkle_tree mt, char *buf, uint64_t len);
+extern uint32_t mt_serialize(merkle_tree *mt, char *buf, uint64_t len);
 
 
 /** Deserialization
@@ -150,8 +146,7 @@ extern uint32_t mt_serialize(merkle_tree mt, char *buf, uint64_t len);
  *
  * Note: buf must point to an allocated buffer.
  */
-extern bool mt_deserialize(const char *buf, uint64_t len, merkle_tree mt);
-
+extern bool mt_deserialize(const char *buf, uint64_t len, merkle_tree *mt);
 
 #ifdef __cplusplus
 }

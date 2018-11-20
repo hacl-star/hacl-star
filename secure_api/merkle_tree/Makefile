@@ -212,6 +212,8 @@ snapshot2: $(ALL_SOURCES)
 	for i in $(ALL_SOURCES); do cp $$i snapshot; done
 	for i in $(ALL_TEST_FILES); do cp $$i snapshot; done
 	cp MerkleTree.h snapshot
+	rm -f snapshot/kremlin/kremlib/extracted/FStar_UInt.c
+	sed "s/static Prims_int FStar_UInt_min_int/Prims_int FStar_UInt_min_int/" -i snapshot/FStar.c
 
 endif # COMPILE
 
