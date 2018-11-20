@@ -212,7 +212,6 @@ let key_expansion256 #m keyx key =
        key_expansion_step #m next0 prev0
 #set-options "--admit_smt_queries false"
     
-
 inline_for_extraction
 val aes128_init_: #m:m_spec -> ctx:aes_ctx m -> key:skey -> nonce:lbuffer uint8 12ul -> ST unit
 			     (requires (fun h -> live h ctx /\ live h nonce /\ live h key))
