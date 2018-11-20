@@ -115,6 +115,48 @@ val mt_next_lv_mt_right:
 let mt_next_lv_mt_right #n mt = 
   hs_next_lv_slice #(pow2 (n-1)) mt (pow2 (n-2)) (pow2 (n-1))
 
+// private val seq_slice_equal_index:
+//   #a:Type -> 
+//   s1:S.seq a -> s2:S.seq a ->
+//   n:nat -> m:nat{n <= m && m <= S.length s1 && m <= S.length s2} ->
+//   Lemma (requires (forall (i:nat{n <= i && i < m}).
+//                     S.index s1 i == S.index s2 i))
+//         (ensures (S.equal (S.slice s1 n m) (S.slice s2 n m)))
+// private let seq_slice_equal_index #a s1 s2 n m = ()
+
+val hs_next_lv_equiv:
+  j:nat -> n:nat{n > 0 && j <= 2 * n} ->
+  hs1:S.seq hash{S.length hs1 = 2 * n} ->
+  hs2:S.seq hash{S.length hs2 = 2 * n} ->
+  Lemma (requires (S.equal (S.slice hs1 0 j) (S.slice hs2 0 j)))
+        (ensures (S.equal (S.slice (hs_next_lv #n hs1) 0 (j / 2))
+                          (S.slice (hs_next_lv #n hs2) 0 (j / 2))))
+let hs_next_lv_equiv j n hs1 hs2 =
+  forall_intro (hs_next_lv_index #n hs1);
+  forall_intro (hs_next_lv_index #n hs2);
+  assert (forall (i:nat{i < j / 2}).
+           S.index (hs_next_lv #n hs1) i ==
+           hash_2 (S.index hs1 (2 * i)) (S.index hs1 (2 * i + 1)));
+  assert (forall (i:nat{i < j / 2}).
+           S.index (hs_next_lv #n hs2) i ==
+           hash_2 (S.index hs2 (2 * i)) (S.index hs2 (2 * i + 1)));
+  assert (forall (i:nat{i < j}).
+           S.index (S.slice hs1 0 j) i == S.index (S.slice hs2 0 j) i);
+  assert (forall (i:nat{i < j}). S.index hs1 i == S.index hs2 i);
+  assert (forall (i:nat{i < j / 2}). S.index hs1 (2 * i) == S.index hs2 (2 * i));
+  assert (forall (i:nat{i < j / 2}). S.index hs1 (2 * i + 1) == S.index hs2 (2 * i + 1));
+  assert (forall (i:nat{i < j / 2}).
+           S.index (hs_next_lv #n hs1) i == S.index (hs_next_lv #n hs2) i)
+
+val mt_next_lv_equiv:
+  j:nat -> n:nat{n > 0 && j <= pow2 n} ->
+  mt1:merkle_tree n -> mt2:merkle_tree n ->
+  Lemma (requires (S.equal (S.slice mt1 0 j) (S.slice mt2 0 j)))
+        (ensures (S.equal (S.slice (mt_next_lv mt1) 0 (j / 2))
+                          (S.slice (mt_next_lv mt2) 0 (j / 2))))
+let mt_next_lv_equiv j n mt1 mt2 =
+  hs_next_lv_equiv j (pow2 (n-1)) mt1 mt2
+
 val mt_get_root: #n:nat -> mt:merkle_tree n -> GTot hash
 let rec mt_get_root #n mt =
   if n = 0 then mt_get mt 0
