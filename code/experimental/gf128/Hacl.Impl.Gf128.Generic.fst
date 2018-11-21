@@ -101,7 +101,7 @@ let poly4_add_mul #s ctx len text =
     admit();
     loop_nospec #h0 blocks acc // + b4
       (fun i -> encode4 b4 (sub text (i *. size 64) (size 64)); 
-             fadd_mul4 acc b4 pre);
+             fadd_mul4 acc b4 pre );
     let rem = len %. size 64 in
     let last = sub text (blocks *. size 64) rem in
     poly #s ctx rem last;
@@ -151,7 +151,9 @@ val gcm_init: #s:field_spec -> ctx:gcm_ctx s -> key:block -> Stack unit
 	  (requires (fun h -> live h ctx /\ live h key))
 	  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
 let gcm_init #s ctx key = 
+    let acc = get_acc ctx in
     let pre = get_precomp ctx in
+    felem_set_zero acc;
     load_precompute_r pre key;
     admit()
     
@@ -179,7 +181,6 @@ let ghash_mul_add #s tag len text key =
   let ctx = create_ctx s in
   gcm_init ctx key;
   poly4_mul_add ctx len text;
-//  poly ctx len text;
   let acc = get_acc ctx in
   decode tag acc;
   pop_frame()

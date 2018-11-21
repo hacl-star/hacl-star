@@ -59,6 +59,16 @@ let create_felem s =
   | FNI -> create 1ul vec128_zero
 
 inline_for_extraction
+val felem_set_zero: #s:field_spec -> f:felem s -> StackInline unit
+	  (requires (fun h -> live h f))
+	  (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))    
+let felem_set_zero #s f =  
+  match s with
+  | F32 -> Hacl.Impl.Gf128.FieldPreComp.felem_set_zero f
+  | FNI -> Hacl.Impl.Gf128.FieldNI.felem_set_zero f
+
+
+inline_for_extraction
 val create_felem4: s:field_spec -> StackInline (felem4 s)
 	  (requires (fun h -> True))
 	  (ensures (fun h0 f h1 -> live h1 f /\ 

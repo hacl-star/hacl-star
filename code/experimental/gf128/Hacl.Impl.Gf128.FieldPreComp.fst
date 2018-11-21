@@ -18,6 +18,12 @@ type gcm_ctx = lbuffer uint64 266ul // acc + precomp
 inline_for_extraction
 let bit_mask64 (u:uint64) = u64 0 -. (u &. u64 1)
 
+inline_for_extraction
+val felem_set_zero: f:felem -> StackInline unit
+	  (requires (fun h -> live h f))
+	  (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))    
+let felem_set_zero f =  f.(0ul) <- u64 0; f.(1ul) <- u64 0
+
 
 inline_for_extraction
 val load_felem: x:felem -> y:block -> Stack unit

@@ -75,7 +75,6 @@ int main() {
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
 
-
   uint8_t plain[SIZE];
   uint64_t res = 0;
   uint8_t tag[16];
