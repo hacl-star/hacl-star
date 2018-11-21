@@ -27,7 +27,7 @@ CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.Impl.Curve25519.Fields.fst \
 	Hacl.Impl.Curve25519.Generic.fst 
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I ./lemmas -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
 
 curve51-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_51.fst
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c $(CURVE25519_FILES) Hacl.Curve25519_51.fst -skip-translation 
