@@ -331,7 +331,7 @@ procedure{:quick}{:public} fast_add1_stdcall(
 
 
 #reset-options "--z3rlimit 300"
-procedure{:quick} fast_sub1(
+procedure{:quick} {:verify true} fast_sub1(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
     lets
@@ -371,11 +371,6 @@ procedure{:quick} fast_sub1(
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
-
-    Xor64( r8,  r8);
-    Xor64( r9,  r9);
-    Xor64(r10, r10);
-    Xor64(r11, r11);
     Xor64(rax, rax);
 
     Load64_buffer( r8, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
@@ -383,15 +378,15 @@ procedure{:quick} fast_sub1(
     Store64_buffer(dst_ptr,  r8,  0, Secret, dst_b, 0);  
 
     Load64_buffer( r9, inA_ptr,  8, Secret, inA_b, 1);     /* A[1] */
-    Sbb64(r9, r10);          
+    Sbb64(r9, 0);          
     Store64_buffer(dst_ptr, r9,  8, Secret, dst_b, 1);  
 
     Load64_buffer(r10, inA_ptr, 16, Secret, inA_b, 2);     /* A[2] */
-    Sbb64(r10, r11);         
+    Sbb64(r10, 0);         
     Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2);  
     
     Load64_buffer(r11, inA_ptr, 24, Secret, inA_b, 3);     /* A[3] */
-    Sbb64(r11, rax);         
+    Sbb64(r11, 0);         
     Store64_buffer(dst_ptr, r11, 24, Secret, dst_b, 3);  
 
     ghost var c := cf(efl);
