@@ -3,6 +3,7 @@
 #include <sys/time.h>
 #include "merkle_tree_test.h"
 #include "MerkleTree_New_Low.h"
+#include "MerkleTree_New_Low_Serialization.h"
 
 static struct timeval timer;
 
@@ -14,7 +15,7 @@ int timer_tick() {
   int time_cur_usec = timer.tv_usec;
   int time_cur_sec = timer.tv_sec;
   gettimeofday(&timer, NULL);
-  
+
   return (timer.tv_sec * 1000000 + timer.tv_usec -
 	  time_cur_sec * 1000000 - time_cur_usec);
 }
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]) {
     /* printf("\n"); */
 
     /* printf("Root: %d\n", root[0]); */
-    
+
     bool verified = mt_verify(mt, k, j, path, root);
     printf("Verification with k(%d), j(%d): %d\n", k, j, verified);
 
@@ -127,12 +128,26 @@ int main(int argc, char *argv[]) {
 
     bool verified = mt_verify(mt, k, j, path, root);
     printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
-
-    clear_path(path);
   }
 
   // printf("All merkle paths are verified: %d\n", timer_tick());
   printf("All merkle paths are verified!\n");
+
+  printf("Testing (de)serialization...\n");
+  size_t num_bytes = mt_serialize_size(mt) * sizeof(uint8_t);
+  uint8_t *buf = malloc(num_bytes);
+  uint32_t written = mt_serialize(mt, buf, num_bytes);
+  merkle_tree *mtd = mt_deserialize(buf, written);
+
+  printf("Re-verifying paths on deserialized tree...\n");
+  for (uint32_t k = flush_to; k <= num_elts; k++) {
+    int j = mt_get_path(mt, k, path, root);
+
+    bool verified = mt_verify(mt, k, j, path, root);
+    printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
+
+    clear_path(path);
+  }
 
   // Free
   mt_free(mt);
@@ -141,6 +156,6 @@ int main(int argc, char *argv[]) {
 
   // printf("The Merkle tree is freed: %d\n", timer_tick());
   printf("The Merkle tree is freed\n");
-  
+
   return 0;
 }

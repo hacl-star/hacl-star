@@ -1316,7 +1316,6 @@ val mt_create: r:HST.erid -> init:hash ->
 let mt_create r init =
   let hh0 = HST.get () in
   let mt = create_empty_mt r in
-  let mtv = !*mt in
   mt_insert mt init;
   let hh2 = HST.get () in
   mt

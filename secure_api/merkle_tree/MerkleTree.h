@@ -25,7 +25,7 @@ extern void clear_path(path p);
 /** Construction */
 extern merkle_tree *mt_create(uint8_t *init1);
 
-/** Destrcution */
+/** Destruction */
 extern void mt_free(merkle_tree *mt);
 
 /* Insertion
@@ -140,13 +140,12 @@ extern uint32_t mt_serialize(merkle_tree *mt, char *buf, uint64_t len);
  *
  * @param[in]  buf  The buffer to deserialize the tree from
  * @param[in]  len  Length of buf
- * @param[out] mt   The Merkle tree
  *
- * @return true if the deserialization succeeded, false otherwise
+ * @return pointer to the new tree if successful, NULL otherwise
  *
  * Note: buf must point to an allocated buffer.
  */
-extern bool mt_deserialize(const char *buf, uint64_t len, merkle_tree *mt);
+extern merkle_tree *mt_deserialize(const char *buf, uint64_t len);
 
 #ifdef __cplusplus
 }

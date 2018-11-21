@@ -113,6 +113,7 @@ KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'MerkleTree.New.Low' \
+	-no-prefix 'MerkleTree.New.Low.Serialization' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'Low.*' \
