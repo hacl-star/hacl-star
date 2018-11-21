@@ -25,7 +25,7 @@ extern void clear_path(path p);
 /** Construction */
 extern merkle_tree *mt_create(uint8_t *init1);
 
-/** Destrcution */
+/** Destruction */
 extern void mt_free(merkle_tree *mt);
 
 /* Insertion
