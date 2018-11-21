@@ -5,7 +5,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-open Lib.Random
+open Lib.RandomSequence
 
 let test () =
   let len: size_nat = 32 in
