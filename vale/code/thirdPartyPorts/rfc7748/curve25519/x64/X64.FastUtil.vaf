@@ -92,6 +92,7 @@ procedure{:quick} fast_mul1(
     lemma_load_mem64(inA_b, 0, mem);    
     Mulx64( r9,  r8, Mem(inA_ptr,  0, inA_b, 0, Secret));  /* A[0]*B */ lemma_prod_bounds(r9, r8, b, a0); ghost var old_r8 := r8;
     Store64_buffer(dst_ptr, r8,  0, Secret, dst_b, 0);  
+    Xor64(r8, r8);
     lemma_load_mem64(inA_b, 1, mem);    
     Mulx64(r11, r10, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[1]*B */ lemma_prod_bounds(r11, r10, b, a1); 
     Add64Wrap(r10, r9);
@@ -104,7 +105,7 @@ procedure{:quick} fast_mul1(
     Mulx64(rax, r14, Mem(inA_ptr, 24, inA_b, 3, Secret));  /* A[3]*B */ lemma_prod_bounds(rax, r14, b, a3); 
     Adcx64Wrap(r14, r13);
     Store64_buffer(dst_ptr, r14, 24, Secret, dst_b, 3);  
-    Adcx64Wrap(rax, 0);
+    Adcx64Wrap(rax, r8);
     
     ghost var carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
@@ -371,6 +372,10 @@ procedure{:quick} fast_sub1(
 {
     xor_lemmas();
 
+    Xor64( r8,  r8);
+    Xor64( r9,  r9);
+    Xor64(r10, r10);
+    Xor64(r11, r11);
     Xor64(rax, rax);
 
     Load64_buffer( r8, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
@@ -378,15 +383,15 @@ procedure{:quick} fast_sub1(
     Store64_buffer(dst_ptr,  r8,  0, Secret, dst_b, 0);  
 
     Load64_buffer( r9, inA_ptr,  8, Secret, inA_b, 1);     /* A[1] */
-    Sbb64(r9, 0);          
+    Sbb64(r9, r10);          
     Store64_buffer(dst_ptr, r9,  8, Secret, dst_b, 1);  
 
     Load64_buffer(r10, inA_ptr, 16, Secret, inA_b, 2);     /* A[2] */
-    Sbb64(r10, 0);         
+    Sbb64(r10, r11);         
     Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2);  
     
     Load64_buffer(r11, inA_ptr, 24, Secret, inA_b, 3);     /* A[3] */
-    Sbb64(r11, 0);         
+    Sbb64(r11, rax);         
     Store64_buffer(dst_ptr, r11, 24, Secret, dst_b, 3);  
 
     ghost var c := cf(efl);
@@ -521,6 +526,7 @@ procedure{:quick} fast_add(
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
+    Xor64( r8,  r8);
     Xor64(rax, rax);
 
     Load64_buffer( r9, inB_ptr,  0, Secret, inB_b, 0);     /* B[0] */
@@ -543,7 +549,7 @@ procedure{:quick} fast_add(
     Adcx64Wrap(r12, Mem(inA_ptr, 24, inA_b, 3, Secret));
     Store64_buffer(dst_ptr, r12, 24, Secret, dst_b, 3);  
 
-    Adcx64Wrap(rax, 0);
+    Adcx64Wrap(rax, r8);
 }
 
 procedure{:quick}{:public} fast_add_stdcall(
