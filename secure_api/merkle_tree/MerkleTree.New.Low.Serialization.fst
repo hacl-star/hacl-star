@@ -91,8 +91,6 @@ private let serialize_hash (x:hash) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) 
 
 private unfold let hash_vec_bytes (v:hash_vec) = 4UL + U64.mul (u32_64 (V.size_of v)) (u32_64 hash_size)
 
-// joonwonc: `RV.rv_inv` recursively includes liveness of elements.
-// joonwonc: I think `buf` and `x` should be disjoint to preserve liveness of `x`?
 private let serialize_hash_vec (x:hash_vec) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t) : HST.ST (bool & uint32_t)
   (requires (fun h0 -> B.live h0 buf /\ RV.rv_inv h0 x /\ HS.disjoint (B.frameOf buf) (Rgl?.region_of hvreg x)))
   (ensures (fun h0 _ h1 -> B.live h1 buf /\ RV.rv_inv h1 x /\ modifies (B.loc_buffer buf) h0 h1))
@@ -208,10 +206,10 @@ private let deserialize_hash (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.
   (requires (fun h0 -> B.live h0 buf /\ HS.disjoint (B.frameOf buf) r))
   (ensures (fun h0 _ h1 -> B.live h1 buf))
 = if pos >= sz then (false, pos, Rgl?.dummy hreg)
+  else if sz - pos < hash_size then (false, pos, Rgl?.dummy hreg)
   else begin
     let h0 = HST.get() in
     let hash = Rgl?.r_alloc hreg r in
-    assume (sz - pos >= hash_size);
     B.blit buf pos hash 0ul hash_size;
     (true, pos, hash)
   end
@@ -321,10 +319,10 @@ let mt_serialize mt output sz =
   let h9 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h8 h9;
   if k then pos else 0ul
 
-val mt_deserialize: rid:HST.erid -> input:uint8_p -> sz:uint32_t{B.len input = sz} -> mt:mt_p -> HST.ST bool
-  (requires (fun h0 -> B.live h0 input /\ mt_safe h0 mt /\ HS.disjoint (B.frameOf input) rid))
+val mt_deserialize: rid:HST.erid -> input:uint8_p -> sz:uint32_t{B.len input = sz} -> HST.ST (B.pointer_or_null merkle_tree)
+  (requires (fun h0 -> B.live h0 input /\ HS.disjoint (B.frameOf input) rid))
   (ensures (fun _ _ h1 -> B.live h1 input))
-let mt_deserialize rid input sz mt =
+let mt_deserialize rid input sz =
   let _, pos, format_version = deserialize_uint8_t input sz 0ul in
   let _, pos, hash_size = deserialize_uint32_t input sz pos in
   let _, pos, offset = deserialize_offset_t input sz pos in
@@ -334,9 +332,9 @@ let mt_deserialize rid input sz mt =
   let _, pos, rhs_ok = deserialize_bool input sz pos in
   let _, pos, rhs = deserialize_hash_vec input sz rid pos in
   let k, pos, mroot = deserialize_hash input sz rid pos in
-  if not (merkle_tree_conditions offset i j hs rhs_ok rhs mroot)
-  then false
-  else begin
-    // mt *= MT offset i j hs rhs_ok rhs mroot;
-    k
+  begin
+    if not k || not (merkle_tree_conditions offset i j hs rhs_ok rhs mroot)
+    then B.null #merkle_tree
+    else B.malloc rid (MT offset i j hs rhs_ok rhs mroot) 1ul
   end
+
