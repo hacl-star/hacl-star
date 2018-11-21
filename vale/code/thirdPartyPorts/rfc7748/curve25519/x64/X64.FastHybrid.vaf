@@ -85,13 +85,14 @@ procedure{:quick} fast_mul1(
     lemma_load_mem64(inA_b, 1, mem);    
     Mulx64(r11, r10, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[1]*B */ lemma_prod_bounds(r11, r10, b, a1); 
     Add64Wrap(r10, r9);
+    Mov64(r9, 0);
     lemma_load_mem64(inA_b, 2, mem);    
     Mulx64(r13, r12, Mem(inA_ptr, 16, inA_b, 2, Secret));  /* A[2]*B */ lemma_prod_bounds(r13, r12, b, a2); 
     Adcx64Wrap(r12, r11);
     lemma_load_mem64(inA_b, 3, mem);    
     Mulx64(rax, r14, Mem(inA_ptr, 24, inA_b, 3, Secret));  /* A[3]*B */ lemma_prod_bounds(rax, r14, b, a3); 
     Adcx64Wrap(r14, r13);
-    Adcx64Wrap(rax, 0);
+    Adcx64Wrap(rax, r9);
 
     ghost var carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
@@ -145,6 +146,7 @@ procedure{:quick} fast_add(
     Load64_buffer( r9, inB_ptr,  0, Secret, inB_b, 0);     /* B[0] */
     Add64Wrap(r9, r8);
     Store64_buffer(dst_ptr,  r9,  0, Secret, dst_b, 0);  
+    Mov64(r9, 0);
 
     Load64_buffer(r11, inB_ptr,  8, Secret, inB_b, 1);     /* B[1] */
     Adcx64Wrap(r11, r10);
@@ -158,7 +160,7 @@ procedure{:quick} fast_add(
     Adcx64Wrap(r15, r14);
     Store64_buffer(dst_ptr, r15, 24, Secret, dst_b, 3);  
 
-    Adcx64Wrap(rax, 0);
+    Adcx64Wrap(rax, r9);
 }
 
 #reset-options "--z3rlimit 20"
