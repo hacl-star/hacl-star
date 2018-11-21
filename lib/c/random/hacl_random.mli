@@ -1,4 +1,4 @@
-module Spec_Random : sig
+module Lib_RandomSequence : sig
   val write : Bytes.t -> unit
   (** [write buf] writes random bytes on [buf]. *)
 

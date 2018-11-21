@@ -1,6 +1,6 @@
 open Bytes
 
-module Spec_Random = struct
+module Lib_RandomSequence = struct
   external write : Bytes.t -> unit =
     "ml_randombytes" [@@noalloc]
 
