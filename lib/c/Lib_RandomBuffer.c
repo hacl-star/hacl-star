@@ -8,7 +8,7 @@
 #include <wincrypt.h>
 #include <malloc.h>
 
-bool read_random_bytes(uint64_t len, uint8_t * buf) {
+bool read_random_bytes(uint32_t len, uint8_t * buf) {
   HCRYPTPROV ctxt;
   if (! (CryptAcquireContext(&ctxt, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))) {
     DWORD error = GetLastError();
@@ -16,7 +16,7 @@ bool read_random_bytes(uint64_t len, uint8_t * buf) {
     return false;
   }
   bool pass = true;
-  if (! (CryptGenRandom(ctxt, len, buf))) {
+  if (! (CryptGenRandom(ctxt, (uint64_t)len, buf))) {
     printf("Cannot read random bytes\n");
     pass = false;
   }
@@ -45,15 +45,15 @@ void hacl_aligned_free(void * ptr) {
 #include <unistd.h>
 #include <stdlib.h>
 
-bool read_random_bytes(uint64_t len, uint8_t * buf) {
+bool read_random_bytes(uint32_t len, uint8_t * buf) {
   int fd = open("/dev/urandom", O_RDONLY);
   if (fd == -1) {
     printf("Cannot open /dev/urandom\n");
     return false;
   }
   bool pass = true;
-  uint64_t res = read(fd, buf, len);
-  if (res != len) {
+  uint64_t res = read(fd, buf, (uint64_t)len);
+  if (res != (uint64_t)len) {
     printf("Error on reading, expected %" PRIu64 " bytes, got %" PRIu64 " bytes\n", len, res);
     pass = false;
   }
@@ -76,7 +76,7 @@ void hacl_aligned_free(void * ptr) {
 
 #endif // HACL_IS_WINDOWS
 
-void randombytes(uint8_t * x,uint64_t len) {
+void randombytes(uint8_t * x,uint32_t len) {
   if (! (read_random_bytes(len, x)))
     exit(1);
 }
