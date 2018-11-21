@@ -8,6 +8,7 @@ open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 
+include Hacl.Spec.Curve25519.Field51.Definition
 include Hacl.Spec.Curve25519.Field51
 
 module ST = FStar.HyperStack.ST
