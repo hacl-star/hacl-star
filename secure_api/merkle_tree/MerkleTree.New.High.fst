@@ -33,6 +33,45 @@ let hash_init: hash = S.create hash_size 0uy
 val hash_2: src1:hash -> src2:hash -> GTot hash
 let hash_2 = MTS.hash_2_raw
 
+/// Facts about sequence
+
+val seq_slice_equal_index:
+  #a:Type -> s1:S.seq a -> s2:S.seq a ->
+  i:nat -> j:nat{i <= j && j <= S.length s1 && j <= S.length s2} ->
+  k:nat{i <= k && k < j} ->
+  Lemma (requires (S.equal (S.slice s1 i j) (S.slice s2 i j)))
+        (ensures (S.index s1 k == S.index s2 k))
+        [SMTPat (S.equal (S.slice s1 i j) (S.slice s2 i j));
+        SMTPat (S.index s1 k)]
+let seq_slice_equal_index #a s1 s2 i j k =
+  assert (S.index (S.slice s1 i j) (k - i) == S.index (S.slice s2 i j) (k - i))
+
+private val seq_slice_more_equal:
+  #a:Type -> s1:S.seq a -> s2:S.seq a ->
+  n:nat -> m:nat{n <= m && m <= S.length s1 && m <= S.length s2} ->
+  k:nat{n <= k} -> l:nat{k <= l && l <= m} ->
+  Lemma (requires (S.equal (S.slice s1 n m) (S.slice s2 n m)))
+        (ensures (S.equal (S.slice s1 k l) (S.slice s2 k l)))
+        [SMTPat (S.equal (S.slice s1 n m) (S.slice s2 n m));
+        SMTPat (S.equal (S.slice s1 k l) (S.slice s2 k l))]
+private let seq_slice_more_equal #a s1 s2 n m k l =
+  slice_slice s1 n m (k - n) (l - n);
+  slice_slice s2 n m (k - n) (l - n)
+
+/// Facts about "2"
+
+val remainder_2_not_1_div:
+  n:nat -> 
+  Lemma (requires (n % 2 <> 1))
+        (ensures (n / 2 = (n + 1) / 2))
+let remainder_2_not_1_div n = ()
+
+val remainder_2_1_div:
+  n:nat -> 
+  Lemma (requires (n % 2 = 1))
+        (ensures (n / 2 + 1 = (n + 1) / 2))
+let remainder_2_1_div n = ()  
+
 /// High-level Merkle tree data structure
 
 noeq type merkle_tree =
@@ -133,13 +172,27 @@ val insert_:
   j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   acc:hash ->
-  GTot (ihs:hash_ss{S.length ihs = 32})
+  GTot (ihs:hash_ss{
+         S.length ihs = 32 /\
+         hs_wf_elts lv ihs i (j + 1) /\
+         S.equal (S.slice hs 0 lv) (S.slice ihs 0 lv)})
        (decreases j)
 let rec insert_ lv i j hs acc =
   let ihs = hash_ss_insert lv i j hs acc in
+  assert (S.equal (S.slice hs 0 lv) (S.slice ihs 0 lv));
   if j % 2 = 1 // S.length (S.index hs lv) > 0 
-  then (let nacc = hash_2 (S.last (S.index hs lv)) acc in
-       insert_ (lv + 1) (i / 2) (j / 2) ihs nacc)
+  then begin
+    remainder_2_1_div j;
+    let nacc = hash_2 (S.last (S.index hs lv)) acc in
+    let rihs = insert_ (lv + 1) (i / 2) (j / 2) ihs nacc in
+    assert (hs_wf_elts (lv + 1) rihs (i / 2) (j / 2 + 1));
+    assert (S.equal (S.slice ihs 0 (lv + 1)) (S.slice rihs 0 (lv + 1)));
+    assert (S.index ihs lv == S.index rihs lv);
+    assert (S.length (S.index rihs lv) = (j + 1) - offset_of i);
+    assert (S.equal (S.slice ihs 0 (lv + 1)) (S.slice rihs 0 (lv + 1)));
+    assert (S.equal (S.slice ihs 0 lv) (S.slice rihs 0 lv));
+    rihs
+  end
   else ihs
 
 val insert_base:
@@ -168,7 +221,8 @@ val insert_rec:
 let insert_rec lv i j hs acc = ()
 
 val mt_insert:
-  mt:merkle_tree{mt_wf_elts mt /\ mt_not_full mt} -> v:hash -> GTot merkle_tree
+  mt:merkle_tree{mt_wf_elts mt /\ mt_not_full mt} -> v:hash -> 
+  GTot (imt:merkle_tree{mt_wf_elts imt})
 let mt_insert mt v =
   MT (MT?.i mt)
      (MT?.j mt + 1)
@@ -177,7 +231,7 @@ let mt_insert mt v =
      (MT?.rhs mt)
      (MT?.mroot mt)
 
-val create_mt: init:hash -> GTot merkle_tree
+val create_mt: init:hash -> GTot (mt:merkle_tree{mt_wf_elts mt})
 let create_mt init =
   mt_insert (create_empty_mt ()) init
 

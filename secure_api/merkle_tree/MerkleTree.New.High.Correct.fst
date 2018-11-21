@@ -22,20 +22,6 @@ type uint8_t = U8.t
 module EHS = EverCrypt.Hash
 module MTS = MerkleTree.Spec
 
-/// Facts about "2"
-
-val remainder_2_not_1_div:
-  n:nat -> 
-  Lemma (requires (n % 2 <> 1))
-        (ensures (n / 2 = (n + 1) / 2))
-let remainder_2_not_1_div n = ()
-
-val remainder_2_1_div:
-  n:nat -> 
-  Lemma (requires (n % 2 = 1))
-        (ensures (n / 2 + 1 = (n + 1) / 2))
-let remainder_2_1_div n = ()  
-
 /// Invariants of high-level Merkle tree design
 
 val mt_hashes_lth_inv:
@@ -67,6 +53,35 @@ let rec mt_hashes_inv lv j fhs =
   if lv = 31 then true
   else (mt_hashes_next_rel j (S.index fhs lv) (S.index fhs (lv + 1)) /\
        mt_hashes_inv (lv + 1) (j / 2) fhs)
+
+val mt_hashes_lth_inv_equiv:
+  lv:nat{lv < 32} ->
+  j:nat{j < pow2 (32 - lv)} ->
+  fhs1:hash_ss{S.length fhs1 = 32} ->
+  fhs2:hash_ss{S.length fhs2 = 32} ->
+  Lemma (requires (mt_hashes_lth_inv lv j fhs1 /\
+                  S.equal (S.slice fhs1 lv 32) (S.slice fhs2 lv 32)))
+        (ensures (mt_hashes_lth_inv lv j fhs2))
+        (decreases (32 - lv))
+let rec mt_hashes_lth_inv_equiv lv j fhs1 fhs2 =
+  if lv = 31 then ()
+  else (assert (S.index fhs1 lv == S.index fhs2 lv);
+       mt_hashes_lth_inv_equiv (lv + 1) (j / 2) fhs1 fhs2)
+
+val mt_hashes_inv_equiv:
+  lv:nat{lv < 32} ->
+  j:nat{j < pow2 (32 - lv)} ->
+  fhs1:hash_ss{S.length fhs1 = 32 /\ mt_hashes_lth_inv lv j fhs1} ->
+  fhs2:hash_ss{S.length fhs2 = 32 /\ mt_hashes_lth_inv lv j fhs2} ->
+  Lemma (requires (mt_hashes_inv lv j fhs1 /\
+                  S.equal (S.slice fhs1 lv 32) (S.slice fhs2 lv 32)))
+        (ensures (mt_hashes_inv lv j fhs2))
+        (decreases (32 - lv))
+let rec mt_hashes_inv_equiv lv j fhs1 fhs2 =
+  if lv = 31 then ()
+  else (assert (S.index fhs1 lv == S.index fhs2 lv);
+       assert (S.index fhs1 (lv + 1) == S.index fhs2 (lv + 1));
+       mt_hashes_inv_equiv (lv + 1) (j / 2) fhs1 fhs2)
 
 val merge_hs:
   hs1:hash_ss ->
@@ -135,24 +150,36 @@ val mt_inv:
 let mt_inv mt olds =
   mt_olds_hs_inv 0 (MT?.i mt) (MT?.j mt) olds (MT?.hs mt)
 
+/// Correctness of construction
+
+val empty_olds: unit -> GTot hash_ss
+let empty_olds _ = S.create 32 S.empty
+
+val empty_olds_inv:
+  lv:nat{lv <= 32} ->
+  Lemma (requires True)
+        (ensures (mt_olds_inv lv 0 (empty_olds ())))
+        (decreases (32 - lv))
+let rec empty_olds_inv lv =
+  if lv = 32 then ()
+  else empty_olds_inv (lv + 1)
+
+val create_empty_mt_inv:
+  unit -> 
+  Lemma (empty_olds_inv 0;
+        mt_inv (create_empty_mt ()) (empty_olds ()))
+let create_empty_mt_inv _ =
+  admit () // so trivial
+
 /// Correctness of insertion
 
-assume val insert_hs_wf_elts:
-  lv:nat{lv < 32} ->
-  i:nat ->
-  j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
-  hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
-  acc:hash ->
-  Lemma (requires (hs_wf_elts lv hs i j))
-        (ensures (hs_wf_elts lv (insert_ lv i j hs acc) i (j + 1)))
-
-val mt_insert_mt_wf_elts:
-  mt:merkle_tree{mt_wf_elts mt /\ mt_not_full mt} ->
-  v:hash ->
-  Lemma (requires (mt_wf_elts mt))
-        (ensures (mt_wf_elts (mt_insert mt v)))
-let mt_insert_mt_wf_elts mt v =
-  insert_hs_wf_elts 0 (MT?.i mt) (MT?.j mt) (MT?.hs mt) v
+val mt_hashes_next_rel_insert_even:
+  j:nat{j % 2 <> 1} ->
+  hs:hash_seq{S.length hs = j} -> v:hash ->
+  nhs:hash_seq{S.length nhs = j / 2} ->
+  Lemma (requires (mt_hashes_next_rel j hs nhs))
+        (ensures (mt_hashes_next_rel (j + 1) (S.snoc hs v) nhs))
+let mt_hashes_next_rel_insert_even j hs v nhs = ()
 
 val insert_inv_preserved:
   lv:nat{lv < 32} ->
@@ -162,17 +189,69 @@ val insert_inv_preserved:
   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   acc:hash ->
   Lemma (requires (mt_olds_hs_inv lv i j olds hs))
-        (ensures (insert_hs_wf_elts lv i j hs acc;
-                 mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc)))
+        (ensures (mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc)))
+        (decreases (32 - lv))
+#reset-options "--z3rlimit 40 --max_fuel 2"
 let rec insert_inv_preserved lv i j olds hs acc =
-  admit ()
+  let ihs = hash_ss_insert lv i j hs acc in
+  mt_olds_hs_lth_inv_ok lv i j olds hs;
+  assert (mt_hashes_inv lv j (merge_hs olds hs));
+  assume (S.equal (S.slice (merge_hs olds hs) (lv + 1) 32)
+                  (S.slice (merge_hs olds ihs) (lv + 1) 32));
+  
+  if j % 2 = 1 
+  then begin
+    remainder_2_1_div j;
+
+    // Recursion
+    mt_hashes_lth_inv_equiv (lv + 1) (j / 2)
+      (merge_hs olds hs) (merge_hs olds ihs);
+    mt_hashes_inv_equiv (lv + 1) (j / 2)
+      (merge_hs olds hs) (merge_hs olds ihs);
+    let nacc = hash_2 (S.last (S.index hs lv)) acc in
+    let rihs = insert_ (lv + 1) (i / 2) (j / 2) ihs nacc in
+    insert_inv_preserved (lv + 1) (i / 2) (j / 2) olds ihs nacc;
+
+    // Head proof of `mt_hashes_inv`
+    // mt_olds_hs_lth_inv_ok lv i (j + 1) olds rihs;
+    // assume (mt_hashes_next_rel (j + 1)
+    //          (S.index (merge_hs olds rihs) lv)
+    //          (S.index (merge_hs olds rihs) (lv + 1)));
+
+    // Tail proof of `mt_hashes_inv` by recursion
+    assert (mt_olds_hs_inv (lv + 1) (i / 2) (j / 2 + 1) olds rihs);
+    admit ()
+  end
+  else begin
+    remainder_2_not_1_div j;
+    if lv = 31 then ()
+    else begin
+      // Facts
+      assert (S.index (merge_hs olds hs) (lv + 1) ==
+             S.index (merge_hs olds ihs) (lv + 1));
+
+      // Head proof of `mt_hashes_inv`
+      mt_hashes_next_rel_insert_even j 
+        (S.index (merge_hs olds hs) lv) acc
+        (S.index (merge_hs olds hs) (lv + 1));
+      assert (mt_hashes_next_rel (j + 1)
+               (S.index (merge_hs olds ihs) lv)
+               (S.index (merge_hs olds ihs) (lv + 1)));
+
+      // Tail proof of `mt_hashes_inv`
+      mt_hashes_lth_inv_equiv (lv + 1) ((j + 1) / 2)
+        (merge_hs olds hs) (merge_hs olds ihs);
+      mt_hashes_inv_equiv (lv + 1) ((j + 1) / 2)
+        (merge_hs olds hs) (merge_hs olds ihs);
+      assert (mt_hashes_inv (lv + 1) ((j + 1) / 2) (merge_hs olds ihs))
+    end
+  end
 
 val mt_insert_inv_preserved:
   mt:merkle_tree{mt_wf_elts mt /\ mt_not_full mt} -> v:hash ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds} ->
   Lemma (requires (mt_inv mt olds))
-        (ensures (mt_insert_mt_wf_elts mt v;
-                 mt_inv (mt_insert mt v) olds))
+        (ensures (mt_inv (mt_insert mt v) olds))
 let mt_insert_inv_preserved mt v olds =
   insert_inv_preserved 0 (MT?.i mt) (MT?.j mt) olds (MT?.hs mt) v
 
