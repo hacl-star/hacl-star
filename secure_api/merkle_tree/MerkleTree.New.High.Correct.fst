@@ -24,6 +24,20 @@ module MTS = MerkleTree.Spec
 
 /// Invariants of high-level Merkle tree design
 
+val empty_hashes: len:nat -> GTot (hs:hash_ss{S.length hs = len})
+let empty_hashes len = S.create len S.empty
+
+val empty_hashes_head:
+  len:nat{len > 0} ->
+  Lemma (S.head (empty_hashes len) == S.empty)
+let empty_hashes_head len = ()
+
+val empty_hashes_tail:
+  len:nat{len > 0} ->
+  Lemma (S.equal (S.tail (empty_hashes len))
+                 (empty_hashes (len - 1)))
+let empty_hashes_tail len = ()
+
 val mt_hashes_lth_inv:
   lv:nat{lv <= 32} ->
   j:nat{j < pow2 (32 - lv)} ->
@@ -33,6 +47,15 @@ let rec mt_hashes_lth_inv lv j fhs =
   if lv = 32 then true
   else (S.length (S.index fhs lv) == j /\
        mt_hashes_lth_inv (lv + 1) (j / 2) fhs)
+
+val mt_hashes_lth_inv_empty:
+  lv:nat{lv <= 32} ->
+  Lemma (requires True)
+        (ensures (mt_hashes_lth_inv lv 0 (empty_hashes 32)))
+        (decreases (32 - lv))
+let rec mt_hashes_lth_inv_empty lv =
+  if lv = 32 then ()
+  else mt_hashes_lth_inv_empty (lv + 1)
 
 val mt_hashes_next_rel:
   j:nat ->
@@ -53,6 +76,16 @@ let rec mt_hashes_inv lv j fhs =
   if lv = 31 then true
   else (mt_hashes_next_rel j (S.index fhs lv) (S.index fhs (lv + 1)) /\
        mt_hashes_inv (lv + 1) (j / 2) fhs)
+
+val mt_hashes_inv_empty:
+  lv:nat{lv < 32} ->
+  Lemma (requires True)
+        (ensures (mt_hashes_lth_inv_empty lv;
+                 mt_hashes_inv lv 0 (empty_hashes 32)))
+        (decreases (32 - lv))
+let rec mt_hashes_inv_empty lv =
+  if lv = 31 then ()
+  else mt_hashes_inv_empty (lv + 1)
 
 val mt_hashes_lth_inv_equiv:
   lv:nat{lv < 32} ->
@@ -93,6 +126,22 @@ let rec merge_hs hs1 hs2 =
   else (S.cons (S.append (S.head hs1) (S.head hs2))
                (merge_hs (S.tail hs1) (S.tail hs2)))
 
+val merge_hs_empty:
+  len:nat ->
+  Lemma (S.equal (merge_hs (empty_hashes len) (empty_hashes len))
+                 (empty_hashes len))
+let rec merge_hs_empty len =
+  if len = 0 then ()
+  else (empty_hashes_head len;
+       empty_hashes_tail len;
+       assert (S.equal (S.append #hash S.empty S.empty)
+                       (S.empty #hash));
+       assert (S.equal (merge_hs (empty_hashes len) (empty_hashes len))
+                       (S.cons S.empty
+                               (merge_hs (empty_hashes (len - 1))
+                                         (empty_hashes (len - 1)))));
+       merge_hs_empty (len - 1))
+
 val merge_hs_index:
   hs1:hash_ss ->
   hs2:hash_ss{S.length hs1 = S.length hs2} ->
@@ -106,6 +155,23 @@ let rec merge_hs_index hs1 hs2 i =
   if S.length hs1 = 0 then ()
   else if i = 0 then ()
   else merge_hs_index (S.tail hs1) (S.tail hs2) (i - 1)
+
+val merge_hs_slice_equal:
+  ahs1:hash_ss ->
+  ahs2:hash_ss{S.length ahs1 = S.length ahs2} ->
+  bhs1:hash_ss ->
+  bhs2:hash_ss{S.length bhs1 = S.length bhs2} ->
+  i:nat -> j:nat{i <= j && j <= S.length ahs1 && j <= S.length bhs1} ->
+  Lemma (requires (S.equal (S.slice ahs1 i j) (S.slice bhs1 i j) /\
+                  S.equal (S.slice ahs2 i j) (S.slice bhs2 i j)))
+        (ensures (S.equal (S.slice (merge_hs ahs1 ahs2) i j)
+                          (S.slice (merge_hs bhs1 bhs2) i j)))
+        (decreases (j - i))
+let rec merge_hs_slice_equal ahs1 ahs2 bhs1 bhs2 i j =
+  if i = j then ()
+  else (assert (S.index ahs1 i == S.index bhs1 i);
+       assert (S.index ahs2 i == S.index bhs2 i);
+       merge_hs_slice_equal ahs1 ahs2 bhs1 bhs2 (i + 1) j)
 
 val mt_olds_inv:
   lv:nat{lv <= 32} ->
@@ -152,13 +218,10 @@ let mt_inv mt olds =
 
 /// Correctness of construction
 
-val empty_olds: unit -> GTot hash_ss
-let empty_olds _ = S.create 32 S.empty
-
 val empty_olds_inv:
   lv:nat{lv <= 32} ->
   Lemma (requires True)
-        (ensures (mt_olds_inv lv 0 (empty_olds ())))
+        (ensures (mt_olds_inv lv 0 (empty_hashes 32)))
         (decreases (32 - lv))
 let rec empty_olds_inv lv =
   if lv = 32 then ()
@@ -167,11 +230,23 @@ let rec empty_olds_inv lv =
 val create_empty_mt_inv:
   unit -> 
   Lemma (empty_olds_inv 0;
-        mt_inv (create_empty_mt ()) (empty_olds ()))
+        mt_inv (create_empty_mt ()) (empty_hashes 32))
 let create_empty_mt_inv _ =
-  admit () // so trivial
+  empty_olds_inv 0;
+  hs_wf_elts_empty 0;
+  merge_hs_empty 32;
+  mt_hashes_inv_empty 0
 
 /// Correctness of insertion
+
+val mt_hashes_next_rel_insert_odd:
+  j:nat{j % 2 = 1} ->
+  hs:hash_seq{S.length hs = j} -> v:hash ->
+  nhs:hash_seq{S.length nhs = j / 2} ->
+  Lemma (requires (mt_hashes_next_rel j hs nhs))
+        (ensures (mt_hashes_next_rel (j + 1)
+                   (S.snoc hs v) (S.snoc nhs (hash_2 (S.last hs) v))))
+let mt_hashes_next_rel_insert_odd j hs v nhs = ()
 
 val mt_hashes_next_rel_insert_even:
   j:nat{j % 2 <> 1} ->
@@ -180,6 +255,57 @@ val mt_hashes_next_rel_insert_even:
   Lemma (requires (mt_hashes_next_rel j hs nhs))
         (ensures (mt_hashes_next_rel (j + 1) (S.snoc hs v) nhs))
 let mt_hashes_next_rel_insert_even j hs v nhs = ()
+
+val insert_head:
+  lv:nat{lv < 32} ->
+  i:nat ->
+  j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
+  hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
+  acc:hash ->
+  Lemma (S.equal (S.index (insert_ lv i j hs acc) lv)
+                 (S.snoc (S.index hs lv) acc))
+let insert_head lv i j hs acc = ()
+
+val insert_inv_preserved_even:
+  lv:nat{lv < 32} ->
+  i:nat ->
+  j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
+  olds:hash_ss{S.length olds = 32 /\ mt_olds_inv lv i olds} ->
+  hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
+  acc:hash ->
+  Lemma (requires (j % 2 <> 1 /\ mt_olds_hs_inv lv i j olds hs))
+        (ensures (mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc)))
+        (decreases (32 - lv))
+#reset-options "--z3rlimit 20"
+let insert_inv_preserved_even lv i j olds hs acc =
+  let ihs = hash_ss_insert lv i j hs acc in
+  mt_olds_hs_lth_inv_ok lv i j olds hs;
+  assert (mt_hashes_inv lv j (merge_hs olds hs));
+  merge_hs_slice_equal olds hs olds ihs (lv + 1) 32;
+  remainder_2_not_1_div j;
+  insert_base lv i j hs acc;
+
+  if lv = 31 then ()
+  else begin
+    // Facts
+    assert (S.index (merge_hs olds hs) (lv + 1) ==
+           S.index (merge_hs olds ihs) (lv + 1));
+
+    // Head proof of `mt_hashes_inv`
+    mt_hashes_next_rel_insert_even j 
+      (S.index (merge_hs olds hs) lv) acc
+      (S.index (merge_hs olds hs) (lv + 1));
+    assert (mt_hashes_next_rel (j + 1)
+             (S.index (merge_hs olds ihs) lv)
+             (S.index (merge_hs olds ihs) (lv + 1)));
+
+    // Tail proof of `mt_hashes_inv`
+    mt_hashes_lth_inv_equiv (lv + 1) ((j + 1) / 2)
+      (merge_hs olds hs) (merge_hs olds ihs);
+    mt_hashes_inv_equiv (lv + 1) ((j + 1) / 2)
+      (merge_hs olds hs) (merge_hs olds ihs);
+    assert (mt_hashes_inv (lv + 1) ((j + 1) / 2) (merge_hs olds ihs))
+  end
 
 val insert_inv_preserved:
   lv:nat{lv < 32} ->
@@ -191,17 +317,17 @@ val insert_inv_preserved:
   Lemma (requires (mt_olds_hs_inv lv i j olds hs))
         (ensures (mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc)))
         (decreases (32 - lv))
-#reset-options "--z3rlimit 40 --max_fuel 2"
+#reset-options "--z3rlimit 80 --max_fuel 2"
 let rec insert_inv_preserved lv i j olds hs acc =
-  let ihs = hash_ss_insert lv i j hs acc in
-  mt_olds_hs_lth_inv_ok lv i j olds hs;
-  assert (mt_hashes_inv lv j (merge_hs olds hs));
-  assume (S.equal (S.slice (merge_hs olds hs) (lv + 1) 32)
-                  (S.slice (merge_hs olds ihs) (lv + 1) 32));
-  
   if j % 2 = 1 
   then begin
+    let ihs = hash_ss_insert lv i j hs acc in
+    mt_olds_hs_lth_inv_ok lv i j olds hs;
+    merge_hs_slice_equal olds hs olds ihs (lv + 1) 32;
+    assert (mt_hashes_inv lv j (merge_hs olds hs));
+    
     remainder_2_1_div j;
+    insert_rec lv i j hs acc;
 
     // Recursion
     mt_hashes_lth_inv_equiv (lv + 1) (j / 2)
@@ -213,38 +339,27 @@ let rec insert_inv_preserved lv i j olds hs acc =
     insert_inv_preserved (lv + 1) (i / 2) (j / 2) olds ihs nacc;
 
     // Head proof of `mt_hashes_inv`
-    // mt_olds_hs_lth_inv_ok lv i (j + 1) olds rihs;
-    // assume (mt_hashes_next_rel (j + 1)
-    //          (S.index (merge_hs olds rihs) lv)
-    //          (S.index (merge_hs olds rihs) (lv + 1)));
+    mt_olds_hs_lth_inv_ok lv i (j + 1) olds rihs;
+    mt_hashes_next_rel_insert_odd j
+      (S.index (merge_hs olds hs) lv) acc
+      (S.index (merge_hs olds hs) (lv + 1));
+    assert (S.equal (S.index rihs lv) (S.index ihs lv));
+    insert_head (lv + 1) (i / 2) (j / 2) ihs nacc;
+    assert (S.equal (S.index ihs (lv + 1)) (S.index hs (lv + 1)));
+    assert (mt_hashes_next_rel (j + 1)
+             (S.index (merge_hs olds rihs) lv)
+             (S.index (merge_hs olds rihs) (lv + 1)));
 
     // Tail proof of `mt_hashes_inv` by recursion
-    assert (mt_olds_hs_inv (lv + 1) (i / 2) (j / 2 + 1) olds rihs);
-    admit ()
+    assert (mt_olds_hs_inv (lv + 1) (i / 2) ((j + 1) / 2) olds rihs);
+
+    assert (mt_hashes_inv lv (j + 1) (merge_hs olds rihs));
+    assert (mt_olds_hs_inv lv i (j + 1) olds rihs);
+    assert (mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc))
   end
   else begin
-    remainder_2_not_1_div j;
-    if lv = 31 then ()
-    else begin
-      // Facts
-      assert (S.index (merge_hs olds hs) (lv + 1) ==
-             S.index (merge_hs olds ihs) (lv + 1));
-
-      // Head proof of `mt_hashes_inv`
-      mt_hashes_next_rel_insert_even j 
-        (S.index (merge_hs olds hs) lv) acc
-        (S.index (merge_hs olds hs) (lv + 1));
-      assert (mt_hashes_next_rel (j + 1)
-               (S.index (merge_hs olds ihs) lv)
-               (S.index (merge_hs olds ihs) (lv + 1)));
-
-      // Tail proof of `mt_hashes_inv`
-      mt_hashes_lth_inv_equiv (lv + 1) ((j + 1) / 2)
-        (merge_hs olds hs) (merge_hs olds ihs);
-      mt_hashes_inv_equiv (lv + 1) ((j + 1) / 2)
-        (merge_hs olds hs) (merge_hs olds ihs);
-      assert (mt_hashes_inv (lv + 1) ((j + 1) / 2) (merge_hs olds ihs))
-    end
+    insert_inv_preserved_even lv i j olds hs acc;
+    assert (mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc))
   end
 
 val mt_insert_inv_preserved:
