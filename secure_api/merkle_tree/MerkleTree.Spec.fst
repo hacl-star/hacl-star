@@ -351,6 +351,11 @@ type hash2_raw_collide = | Collision2:
     (lh1 <> lh2 \/ rh1 <> rh2) /\
     hash2_raw lh1 rh1 = hash2_raw lh2 rh2 } -> hash2_raw_collide
 
+val extract:
+  #n:nat -> #i:nat{i <= pow2 n} -> mt_collide n i -> hash2_raw_collide 
+
+/// auxiliary lemmas for the proof
+
 val rpmt_pad_hashes_0:
   #n:nat -> #i:nat{i <= pow2 n} -> mt:rpmt n i ->
   Lemma (i = 0 <==> pad_hashes mt )
@@ -391,64 +396,32 @@ val rpmt_get_root_raw:
 let rpmt_get_root_raw #n #i mt =
   rpmt_get_root_pad mt
 
-val no_extract0: 
-  #n:nat -> #i:nat{i <= pow2 n} -> mt_collide n i -> Lemma (n <> 0)
-let no_extract0 #n #i (Collision mt1 mt2) = 
-  if n = 0 then assert(Seq.equal mt1 mt2)
-
-val extract1:
-  #i:nat{i <= 2} -> mt_collide 1 i -> hash2_raw_collide
-let extract1 #i (Collision t1 t2) =
+#set-options "--z3rlimit 100"
+let rec extract #n #i (Collision t1 t2) =
+  assert(n = 0 ==> Seq.equal t1 t2); // excludes n = 0
+  mt_left_right t1; mt_left_right t2;
+  mt_get_root_step t1; 
+  mt_get_root_step t2;
+  rpmt_get_root_pad t1;
   assert(i <> 0);
-  rpmt_get_root_raw t1; rpmt_get_root_raw t2;
   let l1 = rpmt_left t1 in 
   let l2 = rpmt_left t2 in 
   let r1 = rpmt_right t1 in 
   let r2 = rpmt_right t2 in 
-  rpmt_get_root_raw l1; rpmt_get_root_raw l2;
-  rpmt_get_root_pad r1; rpmt_get_root_pad r2;
-  assert(i = 1 ==> Seq.equal t1 t2);
-  let HRaw lh1 = mt_get_root l1 in
-  let HRaw lh2 = mt_get_root l2 in
-  let HRaw rh1 = mt_get_root r1 in
-  let HRaw rh2 = mt_get_root r2 in
-  assert(lh1 = lh2 /\ rh1 = rh2 ==> Seq.equal t1 t2);
-  Collision2 lh1 rh1 lh2 rh2 
-
-val extract:
-  #n:nat -> #i:nat{i <= pow2 n} -> mt_collide n i -> hash2_raw_collide 
-
-#set-options "--z3rlimit 100"
-let rec extract #n #i x =
-  no_extract0 x;
-  if n = 1 
-  then 
-    extract1 #i x
-  else 
-    let Collision t1 t2 = x in 
-    mt_left_right t1; mt_left_right t2;
-    mt_get_root_step t1; 
-    mt_get_root_step t2;
-    rpmt_get_root_pad t1;
-    assert(i <> 0);
-    let l1 = rpmt_left t1 in 
-    let l2 = rpmt_left t2 in 
-    let r1 = rpmt_right t1 in 
-    let r2 = rpmt_right t2 in 
-    if i <= pow2 (n-1)
-    then (
-      rpmt_get_root_pad r1; rpmt_get_root_pad r2;
-      rpmt_i_0 r1; rpmt_i_0 r2;
-      extract (Collision l1 l2))
-    else (
-      rpmt_get_root_raw l1; rpmt_get_root_raw l2;
-      rpmt_get_root_raw r1; rpmt_get_root_raw r2;
-      let HRaw lh1 = mt_get_root l1 in
-      let HRaw lh2 = mt_get_root l2 in
-      let HRaw rh1 = mt_get_root r1 in
-      let HRaw rh2 = mt_get_root r2 in
-      if lh1 <> lh2 || rh1 <> rh2 
-      then Collision2 lh1 rh1 lh2 rh2  
-      else if l1 = l2 
-        then extract (Collision r1 r2)
-        else extract (Collision l1 l2))
+  if i <= pow2 (n-1)
+  then (
+    rpmt_get_root_pad r1; rpmt_get_root_pad r2;
+    rpmt_i_0 r1; rpmt_i_0 r2;
+    extract (Collision l1 l2))
+  else (
+    rpmt_get_root_raw l1; rpmt_get_root_raw l2;
+    rpmt_get_root_raw r1; rpmt_get_root_raw r2;
+    let HRaw lh1 = mt_get_root l1 in
+    let HRaw lh2 = mt_get_root l2 in
+    let HRaw rh1 = mt_get_root r1 in
+    let HRaw rh2 = mt_get_root r2 in
+    if lh1 <> lh2 || rh1 <> rh2 
+    then Collision2 lh1 rh1 lh2 rh2  
+    else if l1 = l2 
+      then extract (Collision r1 r2)
+      else extract (Collision l1 l2))
