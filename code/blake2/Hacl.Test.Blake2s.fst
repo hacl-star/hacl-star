@@ -7,7 +7,7 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Print
+open Lib.PrintBuffer
 open Hacl.Blake2s
 
 

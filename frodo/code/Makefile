@@ -179,7 +179,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_INPUTS) | .depend
 	-bundle 'Hacl.SHA3=Hacl.Impl.SHA3,Hacl.SHA3' \
 	-library 'Hacl.AES128,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
-	-add-include '"c/Lib_Print.h"' \
+	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -210,7 +210,7 @@ ALL_SOURCES = \
   include/random.c \
   include/$(KECCAK) \
   include/clearwords.c \
-  $(HACL_HOME)/lib/c/Lib_Print.c
+  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
 	$(LWEKE_HOME)/objs/aes/aes.o \

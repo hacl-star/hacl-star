@@ -1,4 +1,4 @@
-module Lib.Print
+module Lib.PrintBuffer
 
 open Lib.IntTypes
 open Lib.Buffer

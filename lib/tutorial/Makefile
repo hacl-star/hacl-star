@@ -19,7 +19,7 @@ FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 all: test
 
-ALL_SOURCES = $(HACL_HOME)/lib/c/Lib_Print.c
+ALL_SOURCES = $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 # GNU Make manual section 4.14
 %.d: %.c
@@ -38,7 +38,7 @@ INCLUDE_DIRS = \
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
 
-OBJS = $(HACL_HOME)/lib/c/Lib_Print.o $(OUT_DIR)/Loops.o
+OBJS = $(HACL_HOME)/lib/c/Lib_PrintBuffer.o $(OUT_DIR)/Loops.o
 
 HACL_LIBS = \
   $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
@@ -53,7 +53,7 @@ $(OUT_DIR)/out.krml: $(HACL_LIBS) Loops.fst
 
 $(OUT_DIR)/Loops.c: $(OUT_DIR)/out.krml
 	$(KREMLIN) \
-	  -add-include '"c/Lib_Print.h"' \
+	  -add-include '"c/Lib_PrintBuffer.h"' \
 	  -add-include '"extracted/TestLib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -skip-compilation \

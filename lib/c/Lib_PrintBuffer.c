@@ -1,16 +1,16 @@
 #include "stdint.h"
 #include "stdio.h"
 #include "stdbool.h"
-#include "Lib_Print.h"
+#include "Lib_PrintBuffer.h"
 
-void Lib_Print_print_bytes(uint32_t len, uint8_t* buffer) {
+void Lib_PrintBuffer_print_bytes(uint32_t len, uint8_t* buffer) {
   for (uint32_t i = 0; i < len; i++){
     printf("%02x ", buffer[i]);
   }
   printf("\n");
 }
 
-void Lib_Print_print_compare(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
+void Lib_PrintBuffer_print_compare(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
   for (uint32_t i = 0; i < len; i++){
     printf("%02x ", buffer1[i]);
   }
@@ -21,8 +21,8 @@ void Lib_Print_print_compare(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
   printf("\n");
 }
 
-void Lib_Print_print_compare_display(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
-  Lib_Print_print_compare(len, buffer1, buffer2);
+void Lib_PrintBuffer_print_compare_display(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
+  Lib_PrintBuffer_print_compare(len, buffer1, buffer2);
   uint8_t res = 0;
   for (uint32_t i = 0; i < len; i++) {
     res |= buffer1[i] ^ buffer2[i];
@@ -35,8 +35,8 @@ void Lib_Print_print_compare_display(uint32_t len, uint8_t* buffer1, uint8_t* bu
   printf("\n");
 }
 
-bool Lib_Print_result_compare_display(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
-  Lib_Print_print_compare(len, buffer1, buffer2);
+bool Lib_PrintBuffer_result_compare_display(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
+  Lib_PrintBuffer_print_compare(len, buffer1, buffer2);
   uint8_t res = 0;
   for (uint32_t i = 0; i < len; i++) {
     res |= buffer1[i] ^ buffer2[i];

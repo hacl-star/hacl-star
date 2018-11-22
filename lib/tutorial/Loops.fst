@@ -86,7 +86,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.LoopCombinators
 open Lib.Buffer
-open Lib.Print
+open Lib.PrintBuffer
 
 module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
