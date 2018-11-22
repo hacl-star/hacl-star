@@ -95,6 +95,7 @@ let mt_not_empty mt =
 
 /// Well-formedness w.r.t. indices of base hash elements
 
+noextract
 val offset_of: i:nat -> Tot nat
 let offset_of i =
   if i % 2 = 0 then i else i - 1

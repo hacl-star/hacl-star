@@ -399,7 +399,7 @@ let split_offset (tree:offset_t) (index:offset_t{offsets_connect tree index}): T
 
 private
 inline_for_extraction
-let add64_fits (x:offset_t) (i:index_t): Tot bool = UInt.fits (U64.v x + U32.v i) 64
+let add64_fits (x:offset_t) (i:index_t): Tot bool = uint64_max - x >= (u32_64 i)
 
 private
 inline_for_extraction

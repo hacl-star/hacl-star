@@ -1,3 +1,4 @@
+
 module MerkleTree.Spec
 
 open FStar.Classical
@@ -35,9 +36,11 @@ let hash_2 lh rh =
     | HPad -> lh
     | HRaw rhr -> HRaw (hash_2_raw lhr rhr)
 
+noextract
 val hash_seq: Type0
 let hash_seq = S.seq hash
 
+noextract
 val hash_ss: Type0
 let hash_ss = S.seq hash_seq
 
@@ -319,6 +322,7 @@ let rpmt_left #n mt =
          0 (pow2 (n-1))
      end)
 
+#reset-options "--z3rlimit 20"
 val rpmt_right: #n:nat{n > 0} -> mt:rpmt n -> GTot (rpmt (n-1))
 let rpmt_right #n mt = 
   RP (mt_right (RP?.mt mt))
@@ -334,6 +338,7 @@ let rpmt_right #n mt =
          (S.slice (RP?.mt mt) 0 (RP?.i mt))
          (pow2 (n-1)) (RP?.i mt)
      end)
+#reset-options
 
 val rpmt_left_right:
   #n:nat{n > 0} -> mt:rpmt n ->
