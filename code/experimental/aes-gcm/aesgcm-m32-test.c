@@ -20,9 +20,9 @@ static __inline__ cycles cpucycles(void)
 }
 
 
-extern void Hacl_AesGCM_NI_aes128_gcm_init(Lib_Vec128_vec128* ctx, uint8_t* k, uint8_t* n);
-extern void Hacl_AesGCM_NI_aes128_gcm_encrypt(Lib_Vec128_vec128* ctx, int in_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
-extern bool Hacl_AesGCM_NI_aes128_gcm_decrypt(Lib_Vec128_vec128* ctx, int out_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
+extern void Hacl_AesGCM_M32_aes128_gcm_init(uint64_t* ctx, uint8_t* k, uint8_t* n);
+extern void Hacl_AesGCM_M32_aes128_gcm_encrypt(uint64_t* ctx, int in_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
+extern bool Hacl_AesGCM_M32_aes128_gcm_decrypt(uint64_t* ctx, int out_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
 
 #define ROUNDS 100000
 #define SIZE   16384
@@ -78,14 +78,14 @@ int main() {
   uint8_t comp[76] = {0};
   bool ok = true;
 
-  Lib_Vec128_vec128 ctx[22] = {0};
-  Hacl_AesGCM_NI_aes128_gcm_init(ctx,k,n);
-  Hacl_AesGCM_NI_aes128_gcm_encrypt(ctx,60,comp,in,20,aad);
-  printf("AESGCM-NI computed:");
+  uint64_t ctx[396] = {0};
+  Hacl_AesGCM_M32_aes128_gcm_init(ctx,k,n);
+  Hacl_AesGCM_M32_aes128_gcm_encrypt(ctx,60,comp,in,20,aad);
+  printf("AESGCM-M32 computed:");
   for (int i = 0; i < 76; i++)
     printf("%02x",comp[i]);
   printf("\n");
-  printf("AESGCM_NI expected:");
+  printf("AESGCM_M32 expected:");
   for (int i = 0; i < 76; i++)
     printf("%02x",exp[i]);
   printf("\n");
@@ -97,16 +97,16 @@ int main() {
   if (ok) printf("Encrypt Success!\n");
   else printf("Encrypt FAILURE!\n");
 
-  Hacl_AesGCM_NI_aes128_gcm_init(ctx,k,n);
-  bool res = Hacl_AesGCM_NI_aes128_gcm_decrypt(ctx,60,comp,exp,20,aad);
+  Hacl_AesGCM_M32_aes128_gcm_init(ctx,k,n);
+  bool res = Hacl_AesGCM_M32_aes128_gcm_decrypt(ctx,60,comp,exp,20,aad);
   if (!res) 
-    printf("AESGCM-NI Decrypt GCM FAILED! \n");
+    printf("AESGCM-M32 Decrypt failed!\n");
   else {
-    printf("AESGCM-NI Decrypt computed:");
+    printf("AESGCM-M32 Decrypt computed:");
     for (int i = 0; i < 60; i++)
       printf("%02x",comp[i]);
     printf("\n");
-    printf("AESGCM_NI Decrypt expected:");
+    printf("AESGCM_M32 Decrypt expected:");
     for (int i = 0; i < 60; i++)
       printf("%02x",in[i]);
     printf("\n");
@@ -119,13 +119,13 @@ int main() {
 
 
   uint8_t comp2[668] = {0};
-  Hacl_AesGCM_NI_aes128_gcm_init(ctx,k2,n2);
-  Hacl_AesGCM_NI_aes128_gcm_encrypt(ctx,652,comp2,in2,0,aad2);
-  printf("AESGCM-NI computed:");
+  Hacl_AesGCM_M32_aes128_gcm_init(ctx,k2,n2);
+  Hacl_AesGCM_M32_aes128_gcm_encrypt(ctx,652,comp2,in2,0,aad2);
+  printf("AESGCM-M32 computed:");
   for (int i = 0; i < 668; i++)
     printf("%02x",comp2[i]);
   printf("\n");
-  printf("AESGCM_NI expected:");
+  printf("AESGCM_M32 expected:");
   for (int i = 0; i < 668; i++)
     printf("%02x",exp2[i]);
   printf("\n");
@@ -139,16 +139,16 @@ int main() {
   if (ok) printf("Encrypt Success!\n");
   else printf("Encrypt FAILURE at %d!\n",i);
 
-  Hacl_AesGCM_NI_aes128_gcm_init(ctx,k2,n2);
-  res = Hacl_AesGCM_NI_aes128_gcm_decrypt(ctx,652,comp2,exp2,0,aad2);
+  Hacl_AesGCM_M32_aes128_gcm_init(ctx,k2,n2);
+  res = Hacl_AesGCM_M32_aes128_gcm_decrypt(ctx,652,comp2,exp2,0,aad2);
   if (!res) 
-    printf("AESGCM-NI Decrypt GCM failed! \n");
+    printf("AESGCM-M32 Decrypt failed!\n");
   else {
-    printf("AESGCM-NI Decrypt computed:");
+    printf("AESGCM-M32 Decrypt computed:");
     for (int i = 0; i < 652; i++)
       printf("%02x",comp2[i]);
     printf("\n");
-    printf("AESGCM_NI Decrypt expected:");
+    printf("AESGCM_M32 Decrypt expected:");
     for (int i = 0; i < 652; i++)
       printf("%02x",in2[i]);
     printf("\n");
@@ -171,22 +171,22 @@ int main() {
   memset(key,'K',16);
   memset(nonce,'N',12);
 
-  Hacl_AesGCM_NI_aes128_gcm_init(ctx,key,nonce);
+  Hacl_AesGCM_M32_aes128_gcm_init(ctx,key,nonce);
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_AesGCM_NI_aes128_gcm_encrypt(ctx,SIZE,plain,plain,20,aad);
+    Hacl_AesGCM_M32_aes128_gcm_encrypt(ctx,SIZE,plain,plain,20,aad);
   }
 
   t1 = clock();
   a = cpucycles();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_AesGCM_NI_aes128_gcm_encrypt(ctx,SIZE,plain,plain,20,aad);
+    Hacl_AesGCM_M32_aes128_gcm_encrypt(ctx,SIZE,plain,plain,20,aad);
   }
   b = cpucycles();
   t2 = clock();
   clock_t tdiff1 = t2 - t1;
   cycles cdiff1 = b - a;
 
-  printf("AES-NI PERF:\n");
+  printf("AES-M32 PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));

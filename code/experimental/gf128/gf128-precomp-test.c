@@ -82,6 +82,7 @@ int main() {
   clock_t t1,t2;
   uint64_t count = ROUNDS * SIZE;
 
+
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   for (int j = 0; j < ROUNDS; j++) {
@@ -103,4 +104,5 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));
+
 }

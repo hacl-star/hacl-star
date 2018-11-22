@@ -34,6 +34,22 @@ AESGCM_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.AesGCM.NI.fst
 
 
+AESGCM_M32_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	../gf128/Hacl.Impl.Gf128.FieldPreComp.fst \
+	../gf128/Hacl.Impl.Gf128.Fields.fst \
+	../gf128/Hacl.Impl.Gf128.Generic.fst \
+	../gf128/Hacl.Gf128.PreComp.fst \
+	../aes/Hacl.Impl.Aes.CoreBitSlice.fst \
+	../aes/Hacl.Impl.Aes.Core.fst \
+	../aes/Hacl.Impl.Aes.Generic.fst \
+	../aes/Hacl.Aes.BitSlice.fst \
+	Hacl.AesGCM.M32.fst
+
+
 KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -I $(HACL_HOME)/code/experimental/aes -I $(HACL_HOME)/code/experimental/gf128 -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces 
 
 aesgcm-ni-c/out.krml: $(AESGCM_NI_FILES)
@@ -47,8 +63,20 @@ aesgcm-ni.exe: aesgcm-ni-c/Hacl_AesGCM_NI.c aesgcm-ni-test.c
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_AesGCM_NI.c $(KREMLIN_HOME)/kremlib/c/testlib.o aesgcm-ni-test.c -o aesgcm-ni.exe
 	./aesgcm-ni.exe
 
-aesgcm-perf: aesgcm-ni.exe
+aesgcm-m32-c/out.krml: $(AESGCM_M32_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-m32-c $(AESGCM_M32_FILES) -skip-translation
+
+aesgcm-m32-c/Hacl_AesGCM_M32.c: aesgcm-m32-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-m32-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.AesGCM.M32=*'
+
+aesgcm-m32.exe: aesgcm-m32-c/Hacl_AesGCM_M32.c aesgcm-m32-test.c
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-m32-c/Hacl_AesGCM_M32.c $(KREMLIN_HOME)/kremlib/c/testlib.o aesgcm-m32-test.c -o aesgcm-m32.exe
+	./aesgcm-m32.exe
+
+aesgcm-perf: aesgcm-ni.exe  aesgcm-m32.exe
 	./aesgcm-ni.exe
+	./aesgcm-m32.exe
 
 test:
 	rm -f .depend && $(MAKE) .depend
