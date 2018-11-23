@@ -1738,6 +1738,21 @@ private let rec construct_rhs lv hs rhs i j acc actd =
     end)
 #reset-options // reset "--admit_smt_queries true"
 
+private
+inline_for_extraction
+val mt_get_root_pre_nst: mtv:merkle_tree -> rt:hash -> Tot bool
+let mt_get_root_pre_nst mtv rt = true 
+
+val mt_get_root_pre:
+  mt:mt_p ->
+  rt:hash ->
+  HST.ST bool
+   (requires (fun h0 ->
+     mt_safe h0 mt /\ Rgl?.r_inv hreg h0 rt /\
+     HH.disjoint (B.frameOf mt) (B.frameOf rt)))
+   (ensures (fun _ _ _ -> True))
+let mt_get_root_pre mt rt = mt_get_root_pre_nst !*mt rt
+
 // `mt_get_root` returns the Merkle root. If it's already calculated with
 // up-to-date hashes, the root is returned immediately. Otherwise it calls
 // `construct_rhs` to build rightmost hashes and to calculate the Merkle root
@@ -1747,6 +1762,7 @@ val mt_get_root:
   rt:hash ->
   HST.ST unit
    (requires (fun h0 ->
+     mt_get_root_pre_nst (B.get h0 mt 0) rt /\
      mt_safe h0 mt /\ Rgl?.r_inv hreg h0 rt /\
      HH.disjoint (B.frameOf mt) (B.frameOf rt)))
    (ensures (fun h0 _ h1 ->
@@ -2070,6 +2086,25 @@ private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
                       (if U32.v j % 2 = 0 then actd else true))))
 #reset-options // reset "--admit_smt_queries true"
 
+private
+inline_for_extraction
+val mt_get_path_pre_nst: mtv:merkle_tree -> idx:offset_t -> p:(vector hash) -> root:hash-> Tot bool
+let mt_get_path_pre_nst mtv idx p root = 
+  offsets_connect (MT?.offset mtv) idx &&
+  (let idx = split_offset (MT?.offset mtv) idx in
+   MT?.i mtv <= idx && idx < MT?.j mtv &&
+   V.size_of p = 0ul)
+
+val mt_get_path_pre: mt:mt_p -> idx:offset_t -> p:path -> root:hash -> HST.ST bool
+   (requires (fun h0 ->
+     mt_safe h0 mt /\
+     path_safe h0 (B.frameOf mt) p /\
+     Rgl?.r_inv hreg h0 root /\
+     HH.disjoint (B.frameOf root) (B.frameOf mt) /\
+     HH.disjoint (B.frameOf root) (B.frameOf p)))
+   (ensures (fun _ _ _ -> True))
+let mt_get_path_pre mt idx p root = mt_get_path_pre_nst !*mt idx !*p root
+
 // Construct a Merkle path for a given index `idx`, hashes `mt.hs`, and rightmost
 // hashes `mt.rhs`. Note that this operation copies "pointers" into the Merkle tree
 // to the output path.
@@ -2081,16 +2116,12 @@ val mt_get_path:
   root:hash ->
   HST.ST index_t
    (requires (fun h0 ->
-     let mtv = B.get h0 mt 0 in
-     offsets_connect (MT?.offset mtv) idx /\
-     (let idx = split_offset (MT?.offset mtv) idx in
-      MT?.i (B.get h0 mt 0) <= idx /\ idx < MT?.j mtv /\
+      mt_get_path_pre_nst (B.get h0 mt 0) idx (B.get h0 p 0) root /\
       mt_safe h0 mt /\
       path_safe h0 (B.frameOf mt) p /\
-      V.size_of (B.get h0 p 0) == 0ul /\
       Rgl?.r_inv hreg h0 root /\
       HH.disjoint (B.frameOf root) (B.frameOf mt) /\
-      HH.disjoint (B.frameOf root) (B.frameOf p))))
+      HH.disjoint (B.frameOf root) (B.frameOf p)))
    (ensures (fun h0 _ h1 ->
      let mtv = B.get h0 mt 0 in
      let idx = split_offset (MT?.offset mtv) idx in
