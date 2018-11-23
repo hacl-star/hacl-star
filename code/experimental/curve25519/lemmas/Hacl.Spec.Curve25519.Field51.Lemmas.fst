@@ -53,7 +53,7 @@ let lemma_prime () =
   assert_norm (19 < prime);
   FStar.Math.Lemmas.modulo_lemma 19 prime
 
-
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val lemma_add_zero:
   f1:felem5{felem_fits5 f1 (1, 2, 1, 1, 1)}
@@ -102,7 +102,7 @@ let lemma_add_zero f1 =
   //   v f14 * pow51 * pow51 * pow51 * pow51) % prime == feval f1);
   assert_spinoff (feval out == feval f1)
 
-#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 300"
 
 val lemma_fmul5_pow51: r:felem5
   -> Lemma
@@ -128,6 +128,8 @@ let lemma_fmul5_pow51 r =
   lemma_prime ();
   assert_norm ((v r4 * pow2 255) % prime == (v r4 * 19) % prime);
   FStar.Math.Lemmas.lemma_mod_plus_distr_r p51r0123 (v r4 * 19) prime
+
+#set-options "--z3rlimit 150"
 
 val lemma_fmul5_pow51_pow51:r:felem5
   -> Lemma
@@ -380,7 +382,7 @@ val lemma_fmul5:
   -> Lemma
    (let (f10, f11, f12, f13, f14) = f1 in
     let (r0, r1, r2, r3, r4) = r in
-    (as_nat5 f1 * as_nat5 r) % prime ==
+    fmul (feval f1) (feval r) ==
      (v f10 * as_nat5 (r0, r1, r2, r3, r4) +
       v f11 * as_nat5 (r4 *! u64 19, r0, r1, r2, r3) +
       v f12 * as_nat5 (r3 *! u64 19, r4 *! u64 19, r0, r1, r2) +
@@ -397,4 +399,89 @@ let lemma_fmul5 f1 r =
   lemma_fmul5_1 f1 r;
   lemma_fmul5_2 f1 r;
   lemma_fmul5_3 f1 r;
-  lemma_fmul5_4 f1 r
+  lemma_fmul5_4 f1 r;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 f1) (as_nat5 r) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat5 f1 % prime) (as_nat5 r) prime
+
+val lemma_carry51:
+    l:uint64
+  -> cin:uint64
+  -> Lemma
+    (requires v l + v cin < pow2 64)
+    (ensures (let l0 = (l +! cin) &. mask51 in
+      let l1 = (l +! cin) >>. 51ul in
+      v l + v cin == v l1 * pow2 51 + v l0 /\
+      felem_fits1 l0 1 /\ v l1 < pow2 13))
+let lemma_carry51 l cin =
+  let l' = l +! cin in
+  let l0 = l' &. mask51 in
+  let l1 = l' >>. 51ul in
+  mod_mask_lemma (to_u64 l') 51ul;
+  uintv_extensionality (mod_mask #U64 #SEC 51ul) mask51;
+  FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 51 64;
+  FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 51);
+  FStar.Math.Lemmas.pow2_minus 64 51
+
+val lemma_carry51_wide:
+    #m:scale64{m < 8192}
+  -> l:uint128{felem_wide_fits1 l m}
+  -> cin:uint64
+  -> Lemma (
+      let l' = l +! to_u128 cin in
+      let l0 = (to_u64 l') &. mask51 in
+      let l1 = to_u64 (l' >>. 51ul) in
+      v l + v cin == v l1 * pow2 51 + v l0 /\
+      felem_fits1 l0 1 /\ felem_fits1 l1 (m + 1))
+let lemma_carry51_wide #m l cin =
+  let l' = l +! to_u128 cin in
+  //assert_norm (8192 * pow51 * pow51 == pow2 115);
+  //assert (v l' < pow2 115);
+  let l0 = (to_u64 l') &. mask51 in
+  let l1 = to_u64 (l' >>. 51ul) in
+  mod_mask_lemma (to_u64 l') 51ul;
+  uintv_extensionality (mod_mask #U64 #SEC 51ul) mask51;
+  FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 51 64;
+  FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 51)
+
+val lemma_carry_wide5_simplify:
+  inp:felem_wide5{felem_wide_fits5 inp (6579, 4797, 3340, 1881, 423)} ->
+  c0:uint64 -> c1:uint64 -> c2:uint64 -> c3:uint64 -> c4:uint64 ->
+  t0:uint64 -> t1:uint64 -> t2:uint64 -> t3:uint64 -> t4:uint64 ->
+  Lemma
+    (requires
+    feval_wide inp ==
+    (v c0 * pow2 51 + v t0 +
+    (v c1 * pow2 51 + v t1 - v c0) * pow51 +
+    (v c2 * pow2 51 + v t2 - v c1) * pow51 * pow51 +
+    (v c3 * pow2 51 + v t3 - v c2) * pow51 * pow51 * pow51 +
+    (v c4 * pow2 51 + v t4 - v c3) * pow51 * pow51 * pow51 * pow51) % prime)
+   (ensures
+    feval_wide inp ==
+    (v t0 + v c4 * 19 + v t1 * pow51 + v t2 * pow51 * pow51 +
+     v t3 * pow51 * pow51 * pow51 + v t4 * pow51 * pow51 * pow51 * pow51) % prime)
+let lemma_carry_wide5_simplify inp c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
+  assert (
+    v c0 * pow2 51 + v t0 +
+    (v c1 * pow2 51 + v t1 - v c0) * pow51 +
+    (v c2 * pow2 51 + v t2 - v c1) * pow51 * pow51 +
+    (v c3 * pow2 51 + v t3 - v c2) * pow51 * pow51 * pow51 +
+    (v c4 * pow2 51 + v t4 - v c3) * pow51 * pow51 * pow51 * pow51 ==
+    v t0 + v t1 * pow51 + v t2 * pow51 * pow51 + v t3 * pow51 * pow51 * pow51 +
+    v t4 * pow51 * pow51 * pow51 * pow51 + v c4 * pow2 51 * pow51 * pow51 * pow51 * pow51);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r
+   (v t0 + v t1 * pow51 +
+    v t2 * pow51 * pow51 +
+    v t3 * pow51 * pow51 * pow51 +
+    v t4 * pow51 * pow51 * pow51 * pow51)
+   (v c4 * pow2 51 * pow51 * pow51 * pow51 * pow51) prime;
+  lemma_mul_assos_6 (v c4) (pow2 51) pow51 pow51 pow51 pow51;
+  assert_norm (pow2 51 * pow51 * pow51 * pow51 * pow51 = pow2 255);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v c4) (pow2 255) prime;
+  lemma_prime ();
+  assert_norm ((v c4 * pow2 255) % prime == (v c4 * 19) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r
+   (v t0 + v t1 * pow51 +
+    v t2 * pow51 * pow51 +
+    v t3 * pow51 * pow51 * pow51 +
+    v t4 * pow51 * pow51 * pow51 * pow51)
+   (v c4 * 19) prime

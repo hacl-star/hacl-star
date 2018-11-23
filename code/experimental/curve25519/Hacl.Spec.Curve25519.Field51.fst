@@ -10,9 +10,6 @@ open Hacl.Spec.Curve25519.Field51.Lemmas
 #reset-options "--z3rlimit 50  --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction
-let mask51 = u64 0x7ffffffffffff
-
-inline_for_extraction
 val fadd5:
     f1:felem5{felem_fits5 f1 (1, 2, 1, 1, 1)}
   -> f2:felem5{felem_fits5 f2 (1, 2, 1, 1, 1)}
@@ -164,7 +161,7 @@ val mul_felem5:
   -> r:felem5{felem_fits5 r (9, 10, 9, 9, 9)}
   -> r19:felem5{felem_fits5 r19 (171, 190, 171, 171, 171) /\ r19 == precomp_r19 r}
   -> out:felem_wide5{felem_wide_fits5 out (6579, 4797, 3340, 1881, 423) /\
-      wide_as_nat5 out % prime == (as_nat5 f1 * as_nat5 r) % prime}
+      feval_wide out == fmul (feval f1) (feval r)}
 let mul_felem5 (f10, f11, f12, f13, f14) (r0, r1, r2, r3, r4) (r190, r191, r192, r193, r194) =
   let (o0, o1, o2, o3, o4) = smul_felem5 #9 #(9, 10, 9, 9, 9) f10 (r0, r1, r2, r3, r4) in
   let (o0, o1, o2, o3, o4) = smul_add_felem5 #10 #(171, 9, 10, 9, 9) #(81, 90, 81, 81, 81)
@@ -184,11 +181,17 @@ val carry51:
   -> cin:uint64
   -> Pure (uint64 & uint64)
     (requires uint_v l + uint_v cin < pow2 64)
-    (ensures fun (l0, l1) -> felem_fits1 l0 1 /\ uint_v l1 < pow2 13)
+    (ensures fun (l0, l1) ->
+      v l + v cin == v l1 * pow2 51 + v l0 /\
+      felem_fits1 l0 1 /\ uint_v l1 < pow2 13)
 let carry51 l cin =
-  let l = l +! cin in
-  admit();
-  (l &. mask51, l >>. 51ul)
+  let l' = l +! cin in
+  [@inline_let]
+  let l0 = l' &. mask51 in
+  [@inline_let]
+  let l1 = l' >>. 51ul in
+  lemma_carry51 l cin;
+  (l0, l1)
 
 inline_for_extraction
 val carry51_wide:
@@ -197,17 +200,17 @@ val carry51_wide:
   -> cin:uint64
   -> Pure (uint64 & uint64)
     (requires True)
-    (ensures fun (l0, l1) -> felem_fits1 l0 1 /\ felem_fits1 l1 (m + 1)) //or m
+    (ensures fun (l0, l1) ->
+      v l + v cin == v l1 * pow2 51 + v l0 /\
+      felem_fits1 l0 1 /\ felem_fits1 l1 (m + 1))
 let carry51_wide #m l cin =
-  let l = l +! to_u128 cin in
+  let l' = l +! to_u128 cin in
   [@inline_let]
-  let l0 = to_u64 l &. mask51 in
+  let l0 = (to_u64 l') &. mask51 in
   [@inline_let]
-  let l1 = to_u64 (l >>. 51ul) in
-  admit();
+  let l1 = to_u64 (l' >>. 51ul) in
+  lemma_carry51_wide #m l cin;
   (l0, l1)
-
-#set-options "--max_fuel 1"
 
 inline_for_extraction
 val carry_felem5: felem5 -> felem5
@@ -225,20 +228,22 @@ let carry_felem5 (f0, f1, f2, f3, f4) =
 inline_for_extraction
 val carry_wide5:
     inp:felem_wide5{felem_wide_fits5 inp (6579, 4797, 3340, 1881, 423)}
-  -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1)}
+  -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1) /\
+      feval out == feval_wide inp}
 let carry_wide5 (i0, i1, i2, i3, i4) =
   assert_norm (6579 < pow2 13);
   assert_norm (pow2 13 < max51);
-  let tmp0, c = carry51_wide #6579 i0 (u64 0) in
-  let tmp1, c = carry51_wide #4797 i1 c in
-  let tmp2, c = carry51_wide #3340 i2 c in
-  let tmp3, c = carry51_wide #1881 i3 c in
-  let tmp4, c = carry51_wide #423 i4 c in
-
-  let tmp0, c = carry51 tmp0 (c *! u64 19) in
+  let tmp0, c0 = carry51_wide #6579 i0 (u64 0) in
+  let tmp1, c1 = carry51_wide #4797 i1 c0 in
+  let tmp2, c2 = carry51_wide #3340 i2 c1 in
+  let tmp3, c3 = carry51_wide #1881 i3 c2 in
+  let tmp4, c4 = carry51_wide #423 i4 c3 in
+  lemma_carry_wide5_simplify (i0, i1, i2, i3, i4)
+    c0 c1 c2 c3 c4 tmp0 tmp1 tmp2 tmp3 tmp4;
+  let tmp0', c5 = carry51 tmp0 (c4 *! u64 19) in
   [@inline_let]
-  let tmp1 = tmp1 +! c in
-  (tmp0, tmp1, tmp2, tmp3, tmp4)
+  let tmp1' = tmp1 +! c5 in
+  (tmp0', tmp1', tmp2, tmp3, tmp4)
 
 inline_for_extraction
 val fmul5:
@@ -250,7 +255,6 @@ let fmul5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   let (tmp0, tmp1, tmp2, tmp3, tmp4) = precomp_r19 (f20, f21, f22, f23, f24) in
   let (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4) =
     mul_felem5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) (tmp0, tmp1, tmp2, tmp3, tmp4) in
-  admit();
   carry_wide5 (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4)
 
 inline_for_extraction
@@ -263,7 +267,9 @@ val fmul25:
     (requires True)
     (ensures fun (out1, out2) ->
       felem_fits5 out1 (1, 2, 1, 1, 1) /\
-      felem_fits5 out2 (1, 2, 1, 1, 1))
+      felem_fits5 out2 (1, 2, 1, 1, 1) /\
+      feval out1 == fmul (feval f1) (feval f2) /\
+      feval out2 == fmul (feval f3) (feval f4))
 let fmul25 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) (f30, f31, f32, f33, f34) (f40, f41, f42, f43, f44) =
   let (tmp10, tmp11, tmp12, tmp13, tmp14) = precomp_r19 (f20, f21, f22, f23, f24) in
   let (tmp20, tmp21, tmp22, tmp23, tmp24) = precomp_r19 (f40, f41, f42, f43, f44) in
