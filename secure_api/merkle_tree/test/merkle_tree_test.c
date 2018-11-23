@@ -137,19 +137,33 @@ int main(int argc, char *argv[]) {
   size_t num_bytes = mt_serialize_size(mt) * sizeof(uint8_t);
   uint8_t *buf = malloc(num_bytes);
   uint32_t written = mt_serialize(mt, buf, num_bytes);
+
+  if (written != num_bytes) {
+    printf("Serialization failed!\n");
+    return 1;
+  }
+
   merkle_tree *mtd = mt_deserialize(buf, written);
+
+  if (mtd == NULL) {
+    printf("Deserialization failed!\n");
+    return 1;
+  }
+
+  free(buf);
 
   printf("Re-verifying paths on deserialized tree...\n");
   for (uint32_t k = flush_to; k <= num_elts; k++) {
-    int j = mt_get_path(mt, k, path, root);
+    int j = mt_get_path(mtd, k, path, root);
 
-    bool verified = mt_verify(mt, k, j, path, root);
-    printf("Verification (after flushing) with k(%d), j(%d): %d\n", k, j, verified);
+    bool verified = mt_verify(mtd, k, j, path, root);
+    printf("Verification with k(%d), j(%d): %d\n", k, j, verified);
 
     clear_path(path);
   }
 
   // Free
+  mt_free(mtd);
   mt_free(mt);
   free_path(path);
   free_hash(root);
