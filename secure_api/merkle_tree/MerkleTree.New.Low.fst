@@ -444,7 +444,7 @@ private
 inline_for_extraction
 val mt_not_full_nst: mtv:merkle_tree -> Tot bool
 let mt_not_full_nst mtv =
-  MT?.j mtv < U32.uint_to_t (UInt.max_int U32.n)
+  MT?.j mtv < uint32_32_max
 
 val mt_not_full: HS.mem -> mt_p -> GTot bool
 let mt_not_full h mt = mt_not_full_nst (B.get h mt 0)
@@ -735,7 +735,7 @@ inline_for_extraction private val hash_vv_insert_copy:
   j:index_t{
     Ghost.reveal i <= j &&
     U32.v j < pow2 (32 - U32.v lv) - 1 &&
-    j < U32.uint_to_t (UInt.max_int U32.n)} ->
+    j < uint32_32_max} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
   v:hash ->
   HST.ST unit
@@ -878,7 +878,7 @@ private val insert_index_helper_odd:
   i:index_t ->
   j:index_t{i <= j && U32.v j < pow2 (32 - U32.v lv) - 1} ->
   Lemma (requires (j % 2ul = 1ul /\
-                  j < U32.uint_to_t (UInt.max_int U32.n)))
+                  j < uint32_32_max))
         (ensures (U32.v j % 2 = 1 /\
                  U32.v (j / 2ul) < pow2 (32 - U32.v (lv + 1ul)) - 1 /\
                  (j + 1ul) / 2ul == j / 2ul + 1ul /\
@@ -991,7 +991,7 @@ private val insert_:
   j:index_t{
     Ghost.reveal i <= j &&
     U32.v j < pow2 (32 - U32.v lv) - 1 &&
-    j < U32.uint_to_t (UInt.max_int U32.n)} ->
+    j < uint32_32_max} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
   acc:hash ->
   HST.ST unit
