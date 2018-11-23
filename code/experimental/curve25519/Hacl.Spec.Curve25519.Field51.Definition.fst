@@ -66,6 +66,11 @@ assume val pow51: nat
 inline_for_extraction
 let max51 = pow51 - 1
 
+inline_for_extraction
+let mask51 : x:uint64{v x == pow2 51 - 1} =
+  assert_norm (pow2 51 - 1 == 0x7ffffffffffff);
+  u64 0x7ffffffffffff
+
 assume val lemma_pow_64_51: _:unit{pow2 64 == 8192 * pow51}
 assume val lemma_pow_128_51: _:unit{pow2 128 == 67108864 * pow51 * pow51}
 
@@ -117,6 +122,7 @@ let wide_as_nat5 f =
 
 let felem = x:nat{x < prime}
 let feval (f:felem5) : GTot felem = (as_nat5 f) % prime
+let feval_wide (f:felem_wide5) : GTot felem = (wide_as_nat5 f) % prime
 
 val fadd: felem -> felem -> felem
 let fadd f1 f2 = (f1 + f2) % prime
