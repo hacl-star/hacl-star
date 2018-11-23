@@ -21,16 +21,17 @@ let gcm_init ctx key = gcm_init #F32 ctx key
 
 
 inline_for_extraction
-val gcm_update_blocks4: ctx:gcm_ctx -> len:size_t{v len % 64 == 0} -> text:lbuffer uint8 len -> Stack unit
-	  (requires (fun h -> live h ctx /\ live h text))
-	  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
-let gcm_update_blocks4  ctx len text = poly4_mul_add #F32 ctx len text
-
-inline_for_extraction
 val gcm_update_blocks: ctx:gcm_ctx -> len:size_t{v len % 16 == 0} -> text:lbuffer uint8 len -> Stack unit
 	  (requires (fun h -> live h ctx /\ live h text))
 	  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
-let gcm_update_blocks  ctx len text = poly #F32 ctx len text
+let gcm_update_blocks  ctx len text = poly4_mul_add #F32 ctx len text
+
+inline_for_extraction
+val gcm_update_blocks_padded: ctx:gcm_ctx -> len:size_t -> text:lbuffer uint8 len -> Stack unit
+	  (requires (fun h -> live h ctx /\ live h text))
+	  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
+let gcm_update_blocks_padded  ctx len text = poly4_mul_add #F32 ctx len text
+
 
 inline_for_extraction
 val gcm_update_last: ctx:gcm_ctx -> len:size_t{v len < 16} -> text:lbuffer uint8 len -> Stack unit

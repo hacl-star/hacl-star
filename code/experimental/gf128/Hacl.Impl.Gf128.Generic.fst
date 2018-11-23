@@ -66,7 +66,6 @@ let update_last #s acc l x r =
     fmul acc r;
     pop_frame()
 
-
 inline_for_extraction
 val poly: #s:field_spec -> ctx:gcm_ctx s -> len:size_t -> text:lbuffer uint8 len -> Stack unit
 	  (requires (fun h -> live h ctx /\ live h text))
@@ -86,6 +85,31 @@ let poly #s ctx len text =
     pop_frame();
     admit()
 
+inline_for_extraction
+val poly_pre: #s:field_spec -> ctx:gcm_ctx s -> len:size_t -> text:lbuffer uint8 len -> Stack unit
+	  (requires (fun h -> live h ctx /\ live h text))
+	  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
+let poly_pre #s ctx len text = 
+    push_frame ();
+    let acc = get_acc ctx in
+    let pre = get_precomp ctx in
+    let b = create_felem s in
+    let blocks = len /. size 16 in
+    let h0 = ST.get() in
+    loop_nospec #h0 blocks acc 
+    (fun i -> 
+      encode b (sub text (i *. size 16) (size 16));
+      fadd acc b;
+      fmul_pre acc pre);
+    let rem = len %. size 16 in
+    if (rem >. size 0) then (
+       let last = sub text (blocks *. size 16) rem in
+       encode_last b rem last;
+       fadd acc b;
+       fmul_pre acc pre);
+    pop_frame();
+    admit()
+
 
 inline_for_extraction
 val poly4_add_mul: #s:field_spec -> ctx:gcm_ctx s -> len:size_t -> text:lbuffer uint8 len -> Stack unit
@@ -101,7 +125,7 @@ let poly4_add_mul #s ctx len text =
     admit();
     loop_nospec #h0 blocks acc // + b4
       (fun i -> encode4 b4 (sub text (i *. size 64) (size 64)); 
-             fadd_mul4 acc b4 pre);
+             fadd_mul4 acc b4 pre );
     let rem = len %. size 64 in
     let last = sub text (blocks *. size 64) rem in
     poly #s ctx rem last;
@@ -119,28 +143,32 @@ let poly4_mul_add #s ctx len text =
     let acc4 = create_felem4 s in
     copy (sub acc4 0ul (felem_len s)) acc;
     let blocks = len /. size 64 in
-    let h0 = ST.get() in
-    admit();
-    loop_nospec #h0 blocks acc // + b4
-      (fun i -> encode4 b4 (sub text (i *. size 64) (size 64)); 
-             fmul4 acc4 pre;
-	     fadd4 acc4 b4);
-    let r4 = sub pre 0ul 2ul in
-    let r3 = sub pre 2ul 2ul in
-    let r2 = sub pre 4ul 2ul in
-    let r = sub pre 6ul 2ul in
-    let acc0 = sub acc4 0ul 2ul in
-    let acc1 = sub acc4 2ul 2ul in
-    let acc2 = sub acc4 4ul 2ul in
-    let acc3 = sub acc4 6ul 2ul in
-    fmul acc0 r4;
-    fmul acc1 r3;
-    fmul acc2 r2;
-    fmul acc3 r;
-    copy acc acc0;
-    fadd acc acc1;
-    fadd acc acc2;
-    fadd acc acc3;
+    if (blocks >. 0ul) then (
+      encode4 b4 (sub text (size 0) (size 64)); 
+      fadd4 acc4 b4;
+      let h0 = ST.get() in
+      admit();
+      loop_nospec #h0 (blocks -. 1ul) acc // + b4
+	(fun i -> encode4 b4 (sub text ((i +. size 1) *. size 64) (size 64)); 
+               fmul4 acc4 pre;
+	       fadd4 acc4 b4);
+      let r4 = sub pre 0ul 2ul in
+      let r3 = sub pre 2ul 2ul in
+      let r2 = sub pre 4ul 2ul in
+      let r = sub pre 6ul 2ul in
+      let acc0 = sub acc4 0ul 2ul in
+      let acc1 = sub acc4 2ul 2ul in
+      let acc2 = sub acc4 4ul 2ul in
+      let acc3 = sub acc4 6ul 2ul in
+      fmul acc0 r4;
+      fmul acc1 r3;
+      fmul acc2 r2;
+      fmul acc3 r;
+      copy acc acc0;
+      fadd acc acc1;
+      fadd acc acc2;
+      fadd acc acc3)
+    else ();
     let rem = len %. size 64 in
     let last = sub text (blocks *. size 64) rem in
     poly #s ctx rem last;
@@ -151,7 +179,9 @@ val gcm_init: #s:field_spec -> ctx:gcm_ctx s -> key:block -> Stack unit
 	  (requires (fun h -> live h ctx /\ live h key))
 	  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
 let gcm_init #s ctx key = 
+    let acc = get_acc ctx in
     let pre = get_precomp ctx in
+    felem_set_zero acc;
     load_precompute_r pre key;
     admit()
     
@@ -179,7 +209,7 @@ let ghash_mul_add #s tag len text key =
   let ctx = create_ctx s in
   gcm_init ctx key;
   poly4_mul_add ctx len text;
-//  poly ctx len text;
+//  poly_pre ctx len text;
   let acc = get_acc ctx in
   decode tag acc;
   pop_frame()

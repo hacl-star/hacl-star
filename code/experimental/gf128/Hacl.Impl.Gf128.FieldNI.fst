@@ -181,6 +181,13 @@ val create_felem: unit -> StackInline felem
 let create_felem () = create 1ul vec128_zero 
 
 inline_for_extraction
+val felem_set_zero: f:felem -> StackInline unit
+	  (requires (fun h -> live h f))
+	  (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))    
+let felem_set_zero f =  f.(0ul) <- vec128_zero
+
+
+inline_for_extraction
 val create_felem4: unit -> StackInline felem4
 	  (requires (fun h -> True))
 	  (ensures (fun h0 f h1 -> live h1 f))
@@ -302,7 +309,7 @@ let fadd_mul4 (acc:felem) (x:felem4) (pre:precomp) =
     let y3 = pre.(size 2) in
     let y4 = pre.(size 3) in
     let acc0 = acc.(size 0) in
-    let x1 = cl_add acc0 x1 in
+    let acc0 = cl_add acc0 x1 in
     let (hi,lo) = clmul_wide4 acc0 x2 x3 x4 y1 y2 y3 y4 in
     let lo = gf128_reduce hi lo in
     acc.(size 0) <- lo
