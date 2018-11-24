@@ -261,41 +261,58 @@ val log2_div:
         [SMTPat (log2 (n / 2))]
 let rec log2_div n = ()
 
+val log2c: 
+  n:nat -> 
+  GTot (c:nat{c = 0 || (pow2 (c-1) <= n && n < pow2 c)})
+let log2c n =
+  if n = 0 then 0 else (log2 n + 1)
+
+val log2c_bound:
+  n:nat -> c:nat{n < pow2 c} ->
+  Lemma (log2c n <= c)
+        [SMTPat (n < pow2 c)]
+let rec log2c_bound n c =
+  if n = 0 then ()
+  else log2c_bound (n / 2) (c - 1)
+
 val mt_hashes_lth_inv_log:
-  j:nat{j > 0} ->
-  fhs:hash_ss{S.length fhs = log2 j + 1} ->
+  j:nat ->
+  fhs:hash_ss{S.length fhs = log2c j} ->
   GTot Type0 (decreases j)
 let rec mt_hashes_lth_inv_log j fhs =
-  if j = 1 then S.length (S.head fhs) == j
+  if j = 0 then true
   else (S.length (S.head fhs) == j /\
        mt_hashes_lth_inv_log (j / 2) (S.tail fhs))
 
 val mt_hashes_inv_log:
-  j:nat{j > 0} ->
-  fhs:hash_ss{S.length fhs = log2 j + 1 /\ mt_hashes_lth_inv_log j fhs} ->
+  j:nat ->
+  fhs:hash_ss{S.length fhs = log2c j /\ mt_hashes_lth_inv_log j fhs} ->
   GTot Type0 (decreases j)
 let rec mt_hashes_inv_log j fhs =
-  if j = 1 then true
+  if j <= 1 then true
   else (mt_hashes_next_rel j (S.index fhs 0) (S.index fhs 1) /\
        mt_hashes_inv_log (j / 2) (S.tail fhs))
 
 val mt_hashes_lth_inv_log_converted_:
   lv:nat{lv <= 32} ->
-  j:nat{j > 0 && j < pow2 (32 - lv)} ->
+  j:nat{j < pow2 (32 - lv)} ->
   fhs:hash_ss{S.length fhs = 32} ->
   Lemma (requires (mt_hashes_lth_inv lv j fhs))
-        (ensures (mt_hashes_lth_inv_log j (S.slice fhs lv (lv + log2 j + 1))))
+        (ensures (log2c_bound j (32 - lv);
+                 mt_hashes_lth_inv_log j (S.slice fhs lv (lv + log2c j))))
         (decreases j)
 #reset-options "--z3rlimit 10"
 let rec mt_hashes_lth_inv_log_converted_ lv j fhs =
-  if j = 1 then ()
-  else mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) fhs
+  if j = 0 then ()
+  else (log2c_bound (j / 2) (32 - (lv + 1));
+       mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) fhs)
 
 val mt_hashes_lth_inv_log_converted:
-  j:nat{j > 0 && j < pow2 32} ->
+  j:nat{j < pow2 32} ->
   fhs:hash_ss{S.length fhs = 32} ->
   Lemma (requires (mt_hashes_lth_inv 0 j fhs))
-        (ensures (mt_hashes_lth_inv_log j (S.slice fhs 0 (log2 j + 1))))
+        (ensures (log2c_bound j 32;
+                 mt_hashes_lth_inv_log j (S.slice fhs 0 (log2c j))))
 let rec mt_hashes_lth_inv_log_converted j fhs =
   mt_hashes_lth_inv_log_converted_ 0 j fhs
 
@@ -305,7 +322,7 @@ val mt_hashes_inv_log_converted_:
   fhs:hash_ss{S.length fhs = 32 /\ mt_hashes_lth_inv lv j fhs} ->
   Lemma (requires (mt_hashes_inv lv j fhs))
         (ensures (mt_hashes_lth_inv_log_converted_ lv j fhs;
-                 mt_hashes_inv_log j (S.slice fhs lv (lv + log2 j + 1))))
+                 mt_hashes_inv_log j (S.slice fhs lv (lv + log2c j))))
         (decreases j)
 #reset-options "--z3rlimit 20"
 let rec mt_hashes_inv_log_converted_ lv j fhs =
@@ -318,7 +335,7 @@ val mt_hashes_inv_log_converted:
   fhs:hash_ss{S.length fhs = 32 /\ mt_hashes_lth_inv 0 j fhs} ->
   Lemma (requires (mt_hashes_inv 0 j fhs))
         (ensures (mt_hashes_lth_inv_log_converted_ 0 j fhs;
-                 mt_hashes_inv_log j (S.slice fhs 0 (log2 j + 1))))
+                 mt_hashes_inv_log j (S.slice fhs 0 (log2c j))))
 let rec mt_hashes_inv_log_converted j fhs =
   mt_hashes_inv_log_converted_ 0 j fhs
 
@@ -348,22 +365,21 @@ let hash_seq_spec hs =
            (create_pads (pow2 (log2 (S.length hs) + 1) - S.length hs))
 
 val hs_sim:
-  j:nat{j > 0} -> 
+  j:nat ->
   hs:hash_ss{
-    S.length hs = log2 j + 1 /\ 
+    S.length hs = log2c j /\ 
     mt_hashes_lth_inv_log j hs} ->
-  smt:MTS.merkle_tree (log2 j + 1) ->
+  smt:MTS.merkle_tree (log2c j) ->
   GTot Type0 (decreases j)
 let rec hs_sim j hs smt =
-  if j = 1 
-  then seq_prefix (hash_seq_lift (S.head hs)) smt
+  if j = 0 then true
   else (seq_prefix (hash_seq_lift (S.head hs)) smt /\
        hs_sim (j / 2) (S.tail hs) (mt_next_lv #(log2 j + 1) smt))
 
 val mt_hashes_inv_log_sim:
-  j:nat{j > 0} -> 
+  j:nat{j > 0} ->
   hs:hash_ss{
-    S.length hs = log2 j + 1 /\ 
+    S.length hs = log2c j /\ 
     mt_hashes_lth_inv_log j hs /\
     mt_hashes_inv_log j hs} ->
   Lemma (requires True)
@@ -407,8 +423,8 @@ let mt_inv mt olds =
   then (mt_olds_hs_lth_inv_ok 0 i j olds hs;
        mt_hashes_lth_inv_log_converted j fhs;
        (let bhs = S.append (S.head olds) (S.head hs) in
-       mt_rhs_inv (log2 j + 1) (hash_seq_spec bhs)
-                  (S.slice rhs 0 (log2 j + 1)) /\
+       mt_rhs_inv (log2c j) (hash_seq_spec bhs)
+                  (S.slice rhs 0 (log2c j)) /\
        mt_root_inv bhs rt))
   else true)
 
@@ -436,19 +452,15 @@ let create_empty_mt_inv _ =
 /// Correctness of rightmost hashes
 
 val construct_rhs_full:
-  j:nat{j > 0} ->
+  j:nat ->
   fhs:hash_ss{
-    S.length fhs = log2 j + 1 /\
+    S.length fhs = log2c j /\
     mt_hashes_lth_inv_log j fhs} ->
   acc:hash ->
   actd:bool ->
-  GTot (rhs:hash_seq{S.length rhs = log2 j + 1} * hash) (decreases j)
+  GTot (rhs:hash_seq{S.length rhs = log2c j} * hash) (decreases j)
 let rec construct_rhs_full j fhs acc actd =
-  if j = 1
-  then (S.cons (if actd then acc else hash_init) S.empty,
-       (if actd 
-       then hash_2 (S.index (S.head fhs) 0) acc
-       else S.index (S.head fhs) 0))
+  if j = 0 then (S.empty, acc)
   else begin
     if j % 2 = 0
     then (let nrhsh = construct_rhs_full (j / 2) (S.tail fhs) acc actd in
@@ -464,15 +476,14 @@ let rec construct_rhs_full j fhs acc actd =
 val construct_rhs_full_inv_ok:
   j:nat{j > 0} ->
   fhs:hash_ss{
-    S.length fhs = log2 j + 1 /\
+    S.length fhs = log2c j /\
     mt_hashes_lth_inv_log j fhs /\
     mt_hashes_inv_log j fhs} ->
   acc:hash ->
   actd:bool ->
   Lemma (requires True)
         (ensures (let crhs = construct_rhs_full j fhs acc actd in
-                 mt_rhs_inv (log2 j + 1) 
-                   (hash_seq_spec (S.head fhs)) (fst crhs) /\
+                 mt_rhs_inv (log2c j) (hash_seq_spec (S.head fhs)) (fst crhs) /\
                  mt_root_inv (S.head fhs) (snd crhs)))
 
 // TODO: put role of `acc` and `actd: if `actd = true` then `acc` should be
@@ -495,7 +506,6 @@ val construct_rhs_full_inv_ok:
 //                    (S.slice (merge_hs olds hs) lv (lv + log2 j + 1))
 //                    (S.slice (fst crhs) lv (lv + log2 j)) /\
 //                  mt_root_inv (S.index (merge_hs olds hs) lv) (snd crhs))))
-
 
 /// Correctness of insertion
 
