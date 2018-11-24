@@ -122,18 +122,81 @@ let add0carry x y =
   let c = if lt_u64 res x then u64 1 else u64 0 in
   res, c
 
+val lemma_prime: unit ->
+  Lemma (pow2 256 % prime == 38)
+let lemma_prime () =
+  assert_norm (pow2 256 = 2 * pow2 255);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r 2 (pow2 255) prime;
+  //assert (pow2 256 % prime == (2 * (pow2 255 % prime)) % prime);
+  assert_norm (pow2 255 % prime = 19 % prime);
+  assert_norm (19 < prime);
+  FStar.Math.Lemmas.modulo_lemma 19 prime;
+  //assert (pow2 256 % prime == (2 * 19) % prime);
+  assert_norm (38 < prime);
+  FStar.Math.Lemmas.modulo_lemma 38 prime
+
+val lemma_mul_assos_5:
+  a:nat -> b:nat -> c:nat -> d:nat -> e:nat ->
+  Lemma (a * b * c * d * e == a * (b * c * d * e))
+let lemma_mul_assos_5 a b c d e = ()
+
 val add1:
     f:felem4
   -> cin:uint64
-  -> uint64 & felem4
+  -> Pure (uint64 & felem4)
+    (requires True)
+    (ensures fun (c, r) ->
+      as_nat4 r + v c * pow2 256 == as_nat4 f + v cin)
 let add1 f cin =
   let (f0, f1, f2, f3) = f in
+  assert (as_nat4 f + v cin ==
+    v f0 + v f1 * pow2 64 + v f2 * pow2 64 * pow2 64 +
+    v f3 * pow2 64 * pow2 64 * pow2 64 + v cin);
   let o0, c0 = add0carry f0 cin in
+  //assert (v o0 + v c0 * pow2 64 == v f0 + v cin);
   let o1, c1 = add0carry f1 c0 in
+  //assert (v o1 + v c1 * pow2 64 == v f1 + v c0);
   let o2, c2 = add0carry f2 c1 in
+  //assert (v o2 + v c2 * pow2 64 == v f2 + v c1);
   let o3, c3 = add0carry f3 c2 in
+  //assert (v o3 + v c3 * pow2 64 == v f3 + v c2);
+  assert (as_nat4 f + v cin ==
+    v o0 + v c0 * pow2 64 +
+    (v o1 + v c1 * pow2 64 - v c0) * pow2 64 +
+    (v o2 + v c2 * pow2 64 - v c1) * pow2 64 * pow2 64 +
+    (v o3 + v c3 * pow2 64 - v c2) * pow2 64 * pow2 64 * pow2 64);
+
   let out = (o0, o1, o2, o3) in
+  assert (as_nat4 f + v cin ==
+    v o0 + v o1 * pow2 64 + v o2 * pow2 64 * pow2 64 +
+    v o3 * pow2 64 * pow2 64 * pow2 64 +
+    v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 f + v cin ==
+    as_nat4 out + v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   c3, out
+
+val lemma_mul_pow256_add: f:felem4 -> c:uint64
+  -> Lemma ((as_nat4 f + v c * pow2 256) % prime == (as_nat4 f + v c * 38) % prime)
+let lemma_mul_pow256_add f c =
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 f) (v c * pow2 256) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v c) (pow2 256) prime;
+  lemma_prime ();
+  assert ((v c * pow2 256) % prime == (v c * 38) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 f) (v c * 38) prime
+
+val carry_pass:
+    f:felem4
+  -> cin:uint64{v cin * 38 < pow2 63}
+  -> out:felem4{feval out == (as_nat4 f + v cin * pow2 256) % prime}
+let carry_pass f cin =
+  lemma_mul_pow256_add f cin;
+  let carry, out0 = add1 f (cin *! u64 38) in
+  let (o0, o1, o2, o3) = out0 in
+  lemma_mul_pow256_add out0 carry;
+  let o0' = o0 +! carry *! u64 38 in
+  (o0', o1, o2, o3)
 
 val sub1:
     f:felem4
@@ -183,20 +246,10 @@ let mul1_add f1 u2 f3 =
   let out = (o0, o1, o2, o3) in
   c4, out
 
-val carry_pass:
-    f:felem4
-  -> cin:uint64
-  -> out:felem4
-let carry_pass f cin =
-  let carry, out0 = add1 f (cin *. u64 38) in
-  let (o0, o1, o2, o3) = out0 in
-  let o0' = o0 +. carry *. u64 38 in
-  (o0', o1, o2, o3)
-
 val carry_wide:
     f:felem_wide4
   -> out:felem4
-let carry_wide f =
+let carry_wide f = admit();
   let (f0, f1, f2, f3, f4, f5, f6, f7) = f in
   let c0, out0 = mul1_add (f4, f5, f6, f7) (u64 38) (f0, f1, f2, f3) in
   carry_pass out0 c0
@@ -271,7 +324,7 @@ let fmul4 f1 r =
   carry_wide tmp
 
 val fmul14: f1:felem4 -> f2:uint64 -> out:felem4
-let fmul14 f1 f2 =
+let fmul14 f1 f2 = admit();
   let c0, out0 = mul1 f1 f2 in
   carry_pass out0 c0
 
