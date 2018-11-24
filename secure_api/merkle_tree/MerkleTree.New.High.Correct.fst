@@ -7,7 +7,6 @@ open MerkleTree.Spec
 open MerkleTree.New.High
 
 open FStar.Classical
-open FStar.Mul
 open FStar.Ghost
 open FStar.Seq
 
@@ -67,7 +66,8 @@ val mt_hashes_next_rel:
 let mt_hashes_next_rel j hs nhs =
   forall (i:nat{i < j / 2}).
     S.index nhs i == 
-    hash_2 (S.index hs (2 * i)) (S.index hs (2 * i + 1))
+    hash_2 (S.index hs (op_Multiply 2 i))
+           (S.index hs (op_Multiply 2 i + 1))
 
 val mt_hashes_inv:
   lv:nat{lv < 32} ->
@@ -372,19 +372,17 @@ let rec mt_hashes_inv_log_sim j hs =
   admit ()
 
 val mt_rhs_inv:
-  j:nat{j > 0} ->
-  hs:hash_ss{
-    S.length hs = log2 j + 1 /\ 
-    mt_hashes_lth_inv_log j hs} ->
-  rhs:hash_seq{S.length rhs = log2 j} ->
-  GTot Type0 (decreases j)
-let rec mt_rhs_inv j hs rhs =
-  if j = 1 then true
+  n:nat ->
+  smt:MTS.merkle_tree n ->
+  rhs:hash_seq{S.length rhs = n} ->
+  GTot Type0 (decreases n)
+let rec mt_rhs_inv n smt rhs =
+  if n = 0 then true
   else begin
-    (match S.last (hash_seq_spec (S.head hs)) with
+    (match S.last smt with
     | HRaw hr -> hr == S.head rhs
     | HPad -> true) /\
-    mt_rhs_inv (j / 2) (S.tail hs) (S.tail rhs)
+    mt_rhs_inv (n - 1) (mt_next_lv smt) (S.tail rhs)
   end
 
 val mt_root_inv:
@@ -408,8 +406,10 @@ let mt_inv mt olds =
   (if j > 0 && MT?.rhs_ok mt
   then (mt_olds_hs_lth_inv_ok 0 i j olds hs;
        mt_hashes_lth_inv_log_converted j fhs;
-       mt_rhs_inv j (S.slice fhs 0 (log2 j + 1)) (S.slice rhs 0 (log2 j)) /\
-       mt_root_inv (S.append (S.head olds) (S.head hs)) rt)
+       (let bhs = S.append (S.head olds) (S.head hs) in
+       mt_rhs_inv (log2 j + 1) (hash_seq_spec bhs)
+                  (S.slice rhs 0 (log2 j + 1)) /\
+       mt_root_inv bhs rt))
   else true)
 
 /// Correctness of construction
@@ -432,6 +432,70 @@ let create_empty_mt_inv _ =
   hs_wf_elts_empty 0;
   merge_hs_empty 32;
   mt_hashes_inv_empty 0
+
+/// Correctness of rightmost hashes
+
+val construct_rhs_full:
+  j:nat{j > 0} ->
+  fhs:hash_ss{
+    S.length fhs = log2 j + 1 /\
+    mt_hashes_lth_inv_log j fhs} ->
+  acc:hash ->
+  actd:bool ->
+  GTot (rhs:hash_seq{S.length rhs = log2 j + 1} * hash) (decreases j)
+let rec construct_rhs_full j fhs acc actd =
+  if j = 1
+  then (S.cons (if actd then acc else hash_init) S.empty,
+       (if actd 
+       then hash_2 (S.index (S.head fhs) 0) acc
+       else S.index (S.head fhs) 0))
+  else begin
+    if j % 2 = 0
+    then (let nrhsh = construct_rhs_full (j / 2) (S.tail fhs) acc actd in
+         (S.cons hash_init (fst nrhsh), snd nrhsh))
+    else (let rhd = if actd then acc else hash_init in
+         let nacc = if actd 
+                    then hash_2 (S.last (S.head fhs)) acc
+                    else S.last (S.head fhs) in
+         let nrhsh = construct_rhs_full (j / 2) (S.tail fhs) nacc true in
+         (S.cons rhd (fst nrhsh), snd nrhsh))
+  end
+
+val construct_rhs_full_inv_ok:
+  j:nat{j > 0} ->
+  fhs:hash_ss{
+    S.length fhs = log2 j + 1 /\
+    mt_hashes_lth_inv_log j fhs /\
+    mt_hashes_inv_log j fhs} ->
+  acc:hash ->
+  actd:bool ->
+  Lemma (requires True)
+        (ensures (let crhs = construct_rhs_full j fhs acc actd in
+                 mt_rhs_inv (log2 j + 1) 
+                   (hash_seq_spec (S.head fhs)) (fst crhs) /\
+                 mt_root_inv (S.head fhs) (snd crhs)))
+
+// TODO: put role of `acc` and `actd: if `actd = true` then `acc` should be
+//       appended as the rightmost hash of `(olds+hs)[lv]`.
+// val construct_rhs_inv_ok:
+//   lv:nat{lv <= 32} ->
+//   i:nat ->
+//   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
+//   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
+//   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv lv i olds} ->
+//   rhs:hash_seq{S.length rhs = 32} ->
+//   acc:hash ->
+//   actd:bool ->
+//   Lemma (requires (j > 0))
+//         (ensures (log2_bound j (32 - lv);
+//                  mt_olds_hs_lth_inv_ok lv i j olds hs;
+//                  mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
+//                  (let crhs = construct_rhs lv hs rhs i j acc actd in
+//                  mt_rhs_inv j
+//                    (S.slice (merge_hs olds hs) lv (lv + log2 j + 1))
+//                    (S.slice (fst crhs) lv (lv + log2 j)) /\
+//                  mt_root_inv (S.index (merge_hs olds hs) lv) (snd crhs))))
+
 
 /// Correctness of insertion
 
