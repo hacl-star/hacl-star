@@ -412,6 +412,8 @@ let mt_get_path mt idx drt =
     (MT?.i umt) (MT?.j umt) idx np false,
   root)
 
+/// Flushing
+
 val mt_flush_to_:
   lv:nat{lv < 32} ->
   hs:hash_ss{S.length hs = 32} ->
@@ -420,7 +422,10 @@ val mt_flush_to_:
   j:nat{
     j >= i /\ j < pow2 (32 - lv) /\
     hs_wf_elts lv hs pi j} ->
-  GTot (fhs:hash_ss{S.length fhs = 32}) (decreases i)
+  GTot (fhs:hash_ss{
+         S.length fhs = 32 /\ 
+         S.equal (S.slice hs 0 lv) (S.slice fhs 0 lv) /\
+         hs_wf_elts lv fhs i j}) (decreases i)
 let rec mt_flush_to_ lv hs pi i j =
   let oi = offset_of i in
   let opi = offset_of pi in
@@ -453,12 +458,14 @@ let mt_flush_to_rec lv hs pi i j = ()
 val mt_flush_to: 
   mt:merkle_tree{mt_wf_elts mt} -> 
   idx:nat{idx >= MT?.i mt /\ idx < MT?.j mt} ->
-  GTot merkle_tree
+  GTot (fmt:merkle_tree{mt_wf_elts fmt})
 let mt_flush_to mt idx =
   let fhs = mt_flush_to_ 0 (MT?.hs mt) (MT?.i mt) idx (MT?.j mt) in
   MT idx (MT?.j mt) fhs (MT?.rhs_ok mt) (MT?.rhs mt) (MT?.mroot mt)
 
-val mt_flush: mt:merkle_tree{mt_wf_elts mt /\ MT?.j mt > MT?.i mt} -> GTot merkle_tree
+val mt_flush: 
+  mt:merkle_tree{mt_wf_elts mt /\ MT?.j mt > MT?.i mt} -> 
+  GTot (fmt:merkle_tree{mt_wf_elts fmt})
 let mt_flush mt = 
   mt_flush_to mt (MT?.j mt - 1)
 
