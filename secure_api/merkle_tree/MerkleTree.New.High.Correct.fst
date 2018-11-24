@@ -22,7 +22,9 @@ type uint8_t = U8.t
 module EHS = EverCrypt.Hash
 module MTS = MerkleTree.Spec
 
-/// Invariants of high-level Merkle tree design
+/// Invariants and simulation relation of high-level Merkle tree design
+
+// Invariants of internal hashes
 
 val empty_hashes: len:nat -> GTot (hs:hash_ss{S.length hs = len})
 let empty_hashes len = S.create len S.empty
@@ -237,13 +239,178 @@ let mt_olds_hs_inv lv i j olds hs =
   mt_olds_hs_lth_inv_ok lv i j olds hs;
   mt_hashes_inv lv j (merge_hs olds hs)
 
-// joonwonc: some other invariants (e.g., about `MT?.rhs`) will be added later.
+// Construction of spec from internal hashes, 
+// and invariants of rightmost hashes.
+
+val log2: n:nat{n > 0} -> GTot (c:nat{pow2 c <= n && n < pow2 (c+1)})
+let rec log2 n =
+  if n = 1 then 0
+  else 1 + log2 (n / 2)
+
+val log2_bound:
+  n:nat{n > 0} -> c:nat{n < pow2 c} ->
+  Lemma (log2 n <= c-1)
+        [SMTPat (n < pow2 c)]
+let rec log2_bound n c =
+  if n = 1 then ()
+  else log2_bound (n / 2) (c - 1)
+
+val log2_div:
+  n:nat{n > 1} ->
+  Lemma (log2 (n / 2) = log2 n - 1)
+        [SMTPat (log2 (n / 2))]
+let rec log2_div n = ()
+
+val mt_hashes_lth_inv_log:
+  j:nat{j > 0} ->
+  fhs:hash_ss{S.length fhs = log2 j + 1} ->
+  GTot Type0 (decreases j)
+let rec mt_hashes_lth_inv_log j fhs =
+  if j = 1 then S.length (S.head fhs) == j
+  else (S.length (S.head fhs) == j /\
+       mt_hashes_lth_inv_log (j / 2) (S.tail fhs))
+
+val mt_hashes_inv_log:
+  j:nat{j > 0} ->
+  fhs:hash_ss{S.length fhs = log2 j + 1 /\ mt_hashes_lth_inv_log j fhs} ->
+  GTot Type0 (decreases j)
+let rec mt_hashes_inv_log j fhs =
+  if j = 1 then true
+  else (mt_hashes_next_rel j (S.index fhs 0) (S.index fhs 1) /\
+       mt_hashes_inv_log (j / 2) (S.tail fhs))
+
+val mt_hashes_lth_inv_log_converted_:
+  lv:nat{lv <= 32} ->
+  j:nat{j > 0 && j < pow2 (32 - lv)} ->
+  fhs:hash_ss{S.length fhs = 32} ->
+  Lemma (requires (mt_hashes_lth_inv lv j fhs))
+        (ensures (mt_hashes_lth_inv_log j (S.slice fhs lv (lv + log2 j + 1))))
+        (decreases j)
+#reset-options "--z3rlimit 10"
+let rec mt_hashes_lth_inv_log_converted_ lv j fhs =
+  if j = 1 then ()
+  else mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) fhs
+
+val mt_hashes_lth_inv_log_converted:
+  j:nat{j > 0 && j < pow2 32} ->
+  fhs:hash_ss{S.length fhs = 32} ->
+  Lemma (requires (mt_hashes_lth_inv 0 j fhs))
+        (ensures (mt_hashes_lth_inv_log j (S.slice fhs 0 (log2 j + 1))))
+let rec mt_hashes_lth_inv_log_converted j fhs =
+  mt_hashes_lth_inv_log_converted_ 0 j fhs
+
+val mt_hashes_inv_log_converted_:
+  lv:nat{lv <= 32} ->
+  j:nat{j > 0 && j < pow2 (32 - lv)} ->
+  fhs:hash_ss{S.length fhs = 32 /\ mt_hashes_lth_inv lv j fhs} ->
+  Lemma (requires (mt_hashes_inv lv j fhs))
+        (ensures (mt_hashes_lth_inv_log_converted_ lv j fhs;
+                 mt_hashes_inv_log j (S.slice fhs lv (lv + log2 j + 1))))
+        (decreases j)
+#reset-options "--z3rlimit 20"
+let rec mt_hashes_inv_log_converted_ lv j fhs =
+  if j = 1 then ()
+  else (mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) fhs;
+       mt_hashes_inv_log_converted_ (lv + 1) (j / 2) fhs)
+
+val mt_hashes_inv_log_converted:
+  j:nat{j > 0 && j < pow2 32} ->
+  fhs:hash_ss{S.length fhs = 32 /\ mt_hashes_lth_inv 0 j fhs} ->
+  Lemma (requires (mt_hashes_inv 0 j fhs))
+        (ensures (mt_hashes_lth_inv_log_converted_ 0 j fhs;
+                 mt_hashes_inv_log j (S.slice fhs 0 (log2 j + 1))))
+let rec mt_hashes_inv_log_converted j fhs =
+  mt_hashes_inv_log_converted_ 0 j fhs
+
+val hash_seq_lift: 
+  hs:hash_seq -> 
+  GTot (shs:MTS.hash_seq{S.length shs = S.length hs})
+       (decreases (S.length hs))
+let rec hash_seq_lift hs =
+  if S.length hs = 0 then S.empty
+  else S.cons (HRaw (S.head hs)) (hash_seq_lift (S.tail hs))
+
+val seq_prefix:
+  #a:Type -> s1:S.seq a -> 
+  s2:S.seq a{S.length s1 <= S.length s2} ->
+  GTot Type0
+let seq_prefix #a s1 s2 =
+  S.equal s1 (S.slice s2 0 (S.length s1)) 
+
+val create_pads: len:nat -> GTot (pads:MTS.hash_seq{S.length pads = len})
+let create_pads len = S.create len HPad
+
+val hash_seq_spec:
+  hs:hash_seq{S.length hs > 0} ->
+  GTot (smt:MTS.merkle_tree (log2 (S.length hs) + 1))
+let hash_seq_spec hs =
+  S.append (hash_seq_lift hs)
+           (create_pads (pow2 (log2 (S.length hs) + 1) - S.length hs))
+
+val hs_sim:
+  j:nat{j > 0} -> 
+  hs:hash_ss{
+    S.length hs = log2 j + 1 /\ 
+    mt_hashes_lth_inv_log j hs} ->
+  smt:MTS.merkle_tree (log2 j + 1) ->
+  GTot Type0 (decreases j)
+let rec hs_sim j hs smt =
+  if j = 1 
+  then seq_prefix (hash_seq_lift (S.head hs)) smt
+  else (seq_prefix (hash_seq_lift (S.head hs)) smt /\
+       hs_sim (j / 2) (S.tail hs) (mt_next_lv #(log2 j + 1) smt))
+
+val mt_hashes_inv_log_sim:
+  j:nat{j > 0} -> 
+  hs:hash_ss{
+    S.length hs = log2 j + 1 /\ 
+    mt_hashes_lth_inv_log j hs /\
+    mt_hashes_inv_log j hs} ->
+  Lemma (requires True)
+        (ensures (hs_sim j hs (hash_seq_spec (S.head hs))))
+let rec mt_hashes_inv_log_sim j hs =
+  admit ()
+
+val mt_rhs_inv:
+  j:nat{j > 0} ->
+  hs:hash_ss{
+    S.length hs = log2 j + 1 /\ 
+    mt_hashes_lth_inv_log j hs} ->
+  rhs:hash_seq{S.length rhs = log2 j} ->
+  GTot Type0 (decreases j)
+let rec mt_rhs_inv j hs rhs =
+  if j = 1 then true
+  else begin
+    (match S.last (hash_seq_spec (S.head hs)) with
+    | HRaw hr -> hr == S.head rhs
+    | HPad -> true) /\
+    mt_rhs_inv (j / 2) (S.tail hs) (S.tail rhs)
+  end
+
+val mt_root_inv:
+  hs0:hash_seq{S.length hs0 > 0} -> 
+  rt:hash -> GTot Type0
+let mt_root_inv hs0 rt =
+  MTS.mt_get_root #(log2 (S.length hs0) + 1) (hash_seq_spec hs0) == HRaw rt
+
 val mt_inv: 
   mt:merkle_tree{mt_wf_elts mt} ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds} ->
   GTot Type0
 let mt_inv mt olds =
-  mt_olds_hs_inv 0 (MT?.i mt) (MT?.j mt) olds (MT?.hs mt)
+  let i = MT?.i mt in
+  let j = MT?.j mt in
+  let hs = MT?.hs mt in
+  let rhs = MT?.rhs mt in
+  let fhs = merge_hs olds hs in
+  let rt = MT?.mroot mt in
+  mt_olds_hs_inv 0 i j olds hs /\
+  (if j > 0 && MT?.rhs_ok mt
+  then (mt_olds_hs_lth_inv_ok 0 i j olds hs;
+       mt_hashes_lth_inv_log_converted j fhs;
+       mt_rhs_inv j (S.slice fhs 0 (log2 j + 1)) (S.slice rhs 0 (log2 j)) /\
+       mt_root_inv (S.append (S.head olds) (S.head hs)) rt)
+  else true)
 
 /// Correctness of construction
 
@@ -520,7 +687,10 @@ val mt_flush_to_inv_preserved:
         (ensures (mt_inv (mt_flush_to mt idx)
                          (mt_flush_to_olds 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt))))
 let mt_flush_to_inv_preserved mt olds idx =
-  mt_flush_to_inv_preserved_ 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt)
+  mt_flush_to_inv_preserved_ 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt);
+  // TODO: need to prove that flushing does not affect
+  //       the validness of rightmost hashes
+  admit ()
 
 val mt_flush_inv_preserved:
   mt:merkle_tree{mt_wf_elts mt /\ MT?.j mt > MT?.i mt} ->
