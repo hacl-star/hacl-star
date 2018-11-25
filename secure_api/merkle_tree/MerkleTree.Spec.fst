@@ -1,4 +1,3 @@
-
 module MerkleTree.Spec
 
 open FStar.Classical
@@ -118,15 +117,6 @@ val mt_next_lv_mt_right:
 let mt_next_lv_mt_right #n mt = 
   hs_next_lv_slice #(pow2 (n-1)) mt (pow2 (n-2)) (pow2 (n-1))
 
-// private val seq_slice_equal_index:
-//   #a:Type -> 
-//   s1:S.seq a -> s2:S.seq a ->
-//   n:nat -> m:nat{n <= m && m <= S.length s1 && m <= S.length s2} ->
-//   Lemma (requires (forall (i:nat{n <= i && i < m}).
-//                     S.index s1 i == S.index s2 i))
-//         (ensures (S.equal (S.slice s1 n m) (S.slice s2 n m)))
-// private let seq_slice_equal_index #a s1 s2 n m = ()
-
 val hs_next_lv_equiv:
   j:nat -> n:nat{n > 0 && j <= 2 * n} ->
   hs1:S.seq hash{S.length hs1 = 2 * n} ->
@@ -159,6 +149,79 @@ val mt_next_lv_equiv:
                           (S.slice (mt_next_lv mt2) 0 (j / 2))))
 let mt_next_lv_equiv j n mt1 mt2 =
   hs_next_lv_equiv j (pow2 (n-1)) mt1 mt2
+
+val hs_next_rel:
+  n:nat ->
+  hs:S.seq hash{S.length hs = 2 * n} ->
+  nhs:S.seq hash{S.length nhs = n} ->
+  GTot Type0
+let hs_next_rel n hs nhs =
+  forall (i:nat{i < n}).
+    S.index nhs i ==
+    hash_2 (S.index hs (2 * i)) (S.index hs (2 * i + 1))
+
+val mt_next_rel:
+  n:nat{n > 0} ->
+  mt:merkle_tree n ->
+  nmt:merkle_tree (n - 1) ->
+  GTot Type0
+let mt_next_rel n mt nmt =
+  hs_next_rel (pow2 (n-1)) mt nmt
+
+val hs_next_rel_next_lv:
+  n:nat ->
+  hs:S.seq hash{S.length hs = 2 * n} ->
+  nhs:S.seq hash{S.length nhs = n} ->
+  Lemma (requires (hs_next_rel n hs nhs))
+        (ensures (S.equal nhs (hs_next_lv #n hs)))
+let rec hs_next_rel_next_lv n hs nhs =
+  if n = 0 then ()
+  else hs_next_rel_next_lv (n - 1)
+         (S.slice hs 2 (S.length hs))
+         (S.slice nhs 1 (S.length nhs))
+
+val mt_next_rel_next_lv:
+  n:nat{n > 0} ->
+  mt:merkle_tree n ->
+  nmt:merkle_tree (n - 1) ->
+  Lemma (requires (mt_next_rel n mt nmt))
+        (ensures (S.equal nmt (mt_next_lv mt)))
+let mt_next_rel_next_lv n mt nmt =
+  hs_next_rel_next_lv (pow2 (n-1)) mt nmt
+
+val mt_next_rel_upd_even:
+  n:nat{n > 0} ->
+  mt:merkle_tree n ->
+  nmt:merkle_tree (n - 1) ->
+  i:nat{i < pow2 (n-1)} -> v:hash ->
+  Lemma (requires (mt_next_rel n mt nmt))
+        (ensures (mt_next_rel n
+                   (S.upd mt (2 * i) v)
+                   (S.upd nmt i (hash_2 v (S.index mt (2 * i + 1))))))
+let mt_next_rel_upd_even n mt nmt i v = ()
+
+val mt_next_rel_upd_even_pad:
+  n:nat{n > 0} ->
+  mt:merkle_tree n ->
+  nmt:merkle_tree (n - 1) ->
+  i:nat{i < pow2 (n-1)} -> v:hash ->
+  Lemma (requires (mt_next_rel n mt nmt /\
+                  S.index mt (2 * i + 1) == HPad))
+        (ensures (mt_next_rel n
+                   (S.upd mt (2 * i) v)
+                   (S.upd nmt i v)))
+let mt_next_rel_upd_even_pad n mt nmt i v = ()
+
+val mt_next_rel_upd_odd:
+  n:nat{n > 0} ->
+  mt:merkle_tree n ->
+  nmt:merkle_tree (n - 1) ->
+  i:nat{i < pow2 (n-1)} -> v:hash ->
+  Lemma (requires (mt_next_rel n mt nmt))
+        (ensures (mt_next_rel n
+                   (S.upd mt (2 * i + 1) v)
+                   (S.upd nmt i (hash_2 (S.index mt (2 * i)) v))))
+let mt_next_rel_upd_odd n mt nmt i v = ()
 
 val mt_get_root: #n:nat -> mt:merkle_tree n -> GTot hash
 let rec mt_get_root #n mt =
