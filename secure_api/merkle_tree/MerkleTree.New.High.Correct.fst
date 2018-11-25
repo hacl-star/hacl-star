@@ -21,7 +21,29 @@ type uint8_t = U8.t
 module EHS = EverCrypt.Hash
 module MTS = MerkleTree.Spec
 
+/// Sequence helpers
+
+val seq_prefix:
+  #a:Type -> s1:S.seq a -> 
+  s2:S.seq a{S.length s1 <= S.length s2} ->
+  GTot Type0
+let seq_prefix #a s1 s2 =
+  S.equal s1 (S.slice s2 0 (S.length s1)) 
+
+val seq_head_cons:
+  #a:Type -> x:a -> s:S.seq a -> 
+  Lemma (S.head (S.cons x s) == x)
+        [SMTPat (S.cons x s)]
+let seq_head_cons #a x s = ()
+
+val seq_tail_cons:
+  #a:Type -> x:a -> s:S.seq a -> 
+  Lemma (S.equal (S.tail (S.cons x s)) s)
+        [SMTPat (S.cons x s)]
+let seq_tail_cons #a x s = ()
+
 /// Invariants and simulation relation of high-level Merkle tree design
+#reset-options "--z3rlimit 20"
 
 // Invariants of internal hashes
 
@@ -284,6 +306,14 @@ let rec mt_hashes_lth_inv_log j fhs =
   else (S.length (S.head fhs) == j /\
        mt_hashes_lth_inv_log (j / 2) (S.tail fhs))
 
+val mt_hashes_lth_inv_log_next:
+  j:nat{j > 1} ->
+  fhs:hash_ss{S.length fhs = log2c j} ->
+  Lemma (requires (mt_hashes_lth_inv_log j fhs))
+        (ensures (S.length (S.head fhs) == j /\
+                 S.length (S.head (S.tail fhs)) == j / 2))
+let rec mt_hashes_lth_inv_log_next j fhs = ()
+
 val mt_hashes_inv_log:
   j:nat ->
   fhs:hash_ss{S.length fhs = log2c j /\ mt_hashes_lth_inv_log j fhs} ->
@@ -301,7 +331,6 @@ val mt_hashes_lth_inv_log_converted_:
         (ensures (log2c_bound j (32 - lv);
                  mt_hashes_lth_inv_log j (S.slice fhs lv (lv + log2c j))))
         (decreases j)
-#reset-options "--z3rlimit 10"
 let rec mt_hashes_lth_inv_log_converted_ lv j fhs =
   if j = 0 then ()
   else (log2c_bound (j / 2) (32 - (lv + 1));
@@ -324,7 +353,6 @@ val mt_hashes_inv_log_converted_:
         (ensures (mt_hashes_lth_inv_log_converted_ lv j fhs;
                  mt_hashes_inv_log j (S.slice fhs lv (lv + log2c j))))
         (decreases j)
-#reset-options "--z3rlimit 20"
 let rec mt_hashes_inv_log_converted_ lv j fhs =
   if j = 1 then ()
   else (mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) fhs;
@@ -347,22 +375,15 @@ let rec hash_seq_lift hs =
   if S.length hs = 0 then S.empty
   else S.cons (HRaw (S.head hs)) (hash_seq_lift (S.tail hs))
 
-val seq_prefix:
-  #a:Type -> s1:S.seq a -> 
-  s2:S.seq a{S.length s1 <= S.length s2} ->
-  GTot Type0
-let seq_prefix #a s1 s2 =
-  S.equal s1 (S.slice s2 0 (S.length s1)) 
-
 val create_pads: len:nat -> GTot (pads:MTS.hash_seq{S.length pads = len})
 let create_pads len = S.create len HPad
 
 val hash_seq_spec:
   hs:hash_seq{S.length hs > 0} ->
-  GTot (smt:MTS.merkle_tree (log2 (S.length hs) + 1))
+  GTot (smt:MTS.merkle_tree (log2c (S.length hs)))
 let hash_seq_spec hs =
   S.append (hash_seq_lift hs)
-           (create_pads (pow2 (log2 (S.length hs) + 1) - S.length hs))
+           (create_pads (pow2 (log2c (S.length hs)) - S.length hs))
 
 val hs_sim:
   j:nat ->
@@ -374,7 +395,7 @@ val hs_sim:
 let rec hs_sim j hs smt =
   if j = 0 then true
   else (seq_prefix (hash_seq_lift (S.head hs)) smt /\
-       hs_sim (j / 2) (S.tail hs) (mt_next_lv #(log2 j + 1) smt))
+       hs_sim (j / 2) (S.tail hs) (mt_next_lv #(log2c j) smt))
 
 val mt_hashes_inv_log_sim:
   j:nat{j > 0} ->
@@ -388,24 +409,26 @@ let rec mt_hashes_inv_log_sim j hs =
   admit ()
 
 val mt_rhs_inv:
-  n:nat ->
-  smt:MTS.merkle_tree n ->
-  rhs:hash_seq{S.length rhs = n} ->
-  GTot Type0 (decreases n)
-let rec mt_rhs_inv n smt rhs =
-  if n = 0 then true
+  j:nat ->
+  smt:MTS.merkle_tree (log2c j) ->
+  rhs:hash_seq{S.length rhs = log2c j} ->
+  actd:bool ->
+  GTot Type0 (decreases j)
+let rec mt_rhs_inv j smt rhs actd =
+  if j = 0 then true
   else begin
-    (match S.last smt with
-    | HRaw hr -> hr == S.head rhs
-    | HPad -> true) /\
-    mt_rhs_inv (n - 1) (mt_next_lv smt) (S.tail rhs)
+    (if j % 2 = 1 && actd 
+    then (S.index smt j == HRaw (S.head rhs))
+    else true) /\
+    mt_rhs_inv (j / 2) (mt_next_lv #(log2c j) smt) (S.tail rhs)
+      (actd || (j % 2 = 1))
   end
 
 val mt_root_inv:
   hs0:hash_seq{S.length hs0 > 0} -> 
   rt:hash -> GTot Type0
 let mt_root_inv hs0 rt =
-  MTS.mt_get_root #(log2 (S.length hs0) + 1) (hash_seq_spec hs0) == HRaw rt
+  MTS.mt_get_root #(log2c (S.length hs0)) (hash_seq_spec hs0) == HRaw rt
 
 val mt_inv: 
   mt:merkle_tree{mt_wf_elts mt} ->
@@ -423,8 +446,7 @@ let mt_inv mt olds =
   then (mt_olds_hs_lth_inv_ok 0 i j olds hs;
        mt_hashes_lth_inv_log_converted j fhs;
        (let bhs = S.append (S.head olds) (S.head hs) in
-       mt_rhs_inv (log2c j) (hash_seq_spec bhs)
-                  (S.slice rhs 0 (log2c j)) /\
+       mt_rhs_inv j (hash_seq_spec bhs) (S.slice rhs 0 (log2c j)) false /\
        mt_root_inv bhs rt))
   else true)
 
@@ -451,6 +473,7 @@ let create_empty_mt_inv _ =
 
 /// Correctness of rightmost hashes
 
+// Localized version of `construct_rhs`
 val construct_rhs_full:
   j:nat ->
   fhs:hash_ss{
@@ -473,6 +496,70 @@ let rec construct_rhs_full j fhs acc actd =
          (S.cons rhd (fst nrhsh), snd nrhsh))
   end
 
+val construct_rhs_full_base:
+  hs:hash_seq{S.length hs > 0} ->
+  acc:hash -> actd:bool ->
+  GTot (smt:MTS.merkle_tree (log2c (S.length hs)))
+let construct_rhs_full_base hs acc actd =
+  if actd
+  then (S.upd (hash_seq_spec hs) (S.length hs) (HRaw acc))
+  else hash_seq_spec hs
+
+val construct_rhs_full_base_case_true:
+  hs:hash_seq{S.length hs > 0} ->
+  acc:hash ->
+  Lemma (S.index (construct_rhs_full_base hs acc true) (S.length hs) == 
+        HRaw acc)
+let construct_rhs_full_base_case_true hs acc = ()  
+
+val construct_rhs_full_base_even_next:
+  j:nat{j > 0} ->
+  hs:hash_seq{S.length hs = j} ->
+  nhs:hash_seq{S.length nhs = j / 2} ->
+  acc:hash -> actd:bool ->
+  Lemma
+    (requires (j % 2 = 0 /\
+              S.equal (hash_seq_spec nhs)
+                      (mt_next_lv #(log2c j) (hash_seq_spec hs))))
+    (ensures (S.equal (construct_rhs_full_base nhs acc actd)
+                      (mt_next_lv #(log2c j)
+                        (construct_rhs_full_base hs acc actd))))
+let construct_rhs_full_base_even_next j hs nhs acc actd =
+  admit ()
+
+val construct_rhs_full_base_odd_next:
+  j:nat{j > 1} ->
+  hs:hash_seq{S.length hs = j} ->
+  nhs:hash_seq{S.length nhs = j / 2} ->
+  acc:hash -> actd:bool -> nacc:hash ->
+  Lemma
+    (requires (j % 2 = 1 /\
+              S.equal (hash_seq_spec nhs)
+                      (mt_next_lv #(log2c j) (hash_seq_spec hs)) /\
+              nacc == (if actd then hash_2 (S.last hs) acc else S.last hs)))
+    (ensures (S.equal (construct_rhs_full_base nhs nacc true)
+                      (mt_next_lv #(log2c j)
+                        (construct_rhs_full_base hs acc actd))))
+let construct_rhs_full_base_odd_next j hs nhs acc actd nacc =
+  admit ()
+
+val construct_rhs_full_inv_ok_0:
+  fhs:hash_ss{
+    S.length fhs = 1 /\
+    mt_hashes_lth_inv_log 1 fhs /\
+    mt_hashes_inv_log 1 fhs} ->
+  acc:hash ->
+  actd:bool ->
+  Lemma (requires True)
+        (ensures (let crhs = construct_rhs_full 1 fhs acc actd in
+                 mt_rhs_inv 1
+                   (construct_rhs_full_base (S.head fhs) acc actd)
+                   (fst crhs) actd /\
+                 MTS.mt_get_root #1
+                   (construct_rhs_full_base (S.head fhs) acc actd) ==
+                 HRaw (snd crhs)))
+let construct_rhs_full_inv_ok_0 fhs acc actd = ()
+
 val construct_rhs_full_inv_ok:
   j:nat{j > 0} ->
   fhs:hash_ss{
@@ -483,29 +570,88 @@ val construct_rhs_full_inv_ok:
   actd:bool ->
   Lemma (requires True)
         (ensures (let crhs = construct_rhs_full j fhs acc actd in
-                 mt_rhs_inv (log2c j) (hash_seq_spec (S.head fhs)) (fst crhs) /\
-                 mt_root_inv (S.head fhs) (snd crhs)))
+                 mt_rhs_inv j
+                   (construct_rhs_full_base (S.head fhs) acc actd)
+                   (fst crhs) actd /\
+                 MTS.mt_get_root #(log2c j)
+                   (construct_rhs_full_base (S.head fhs) acc actd) == 
+                 HRaw (snd crhs)))
+        (decreases j)
+#reset-options "--z3rlimit 240 --max_fuel 2"
+let rec construct_rhs_full_inv_ok j fhs acc actd =
+  if j = 1 then construct_rhs_full_inv_ok_0 fhs acc actd
 
-// TODO: put role of `acc` and `actd: if `actd = true` then `acc` should be
-//       appended as the rightmost hash of `(olds+hs)[lv]`.
-// val construct_rhs_inv_ok:
-//   lv:nat{lv <= 32} ->
-//   i:nat ->
-//   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
-//   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
-//   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv lv i olds} ->
-//   rhs:hash_seq{S.length rhs = 32} ->
-//   acc:hash ->
-//   actd:bool ->
-//   Lemma (requires (j > 0))
-//         (ensures (log2_bound j (32 - lv);
-//                  mt_olds_hs_lth_inv_ok lv i j olds hs;
-//                  mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
-//                  (let crhs = construct_rhs lv hs rhs i j acc actd in
-//                  mt_rhs_inv j
-//                    (S.slice (merge_hs olds hs) lv (lv + log2 j + 1))
-//                    (S.slice (fst crhs) lv (lv + log2 j)) /\
-//                  mt_root_inv (S.index (merge_hs olds hs) lv) (snd crhs))))
+  else if j % 2 = 0 then begin
+    construct_rhs_full_inv_ok (j / 2) (S.tail fhs) acc actd;
+    let rcrhs = construct_rhs_full (j / 2) (S.tail fhs) acc actd in
+    assert (mt_rhs_inv (j / 2)
+             (construct_rhs_full_base (S.head (S.tail fhs)) acc actd)
+             (fst rcrhs) actd);
+    assert (MTS.mt_get_root #(log2c j - 1)
+             (construct_rhs_full_base (S.head (S.tail fhs)) acc actd) ==
+           HRaw (snd rcrhs));
+
+    let crhs = (S.cons hash_init (fst rcrhs), snd rcrhs) in
+    mt_hashes_lth_inv_log_next j fhs;
+    // TODO: below assumption should be proven, and it's a step version of
+    // `mt_hashes_inv_log_sim` so it will use the proof as well.
+    assume (S.equal (hash_seq_spec (S.head (S.tail fhs)))
+                    (mt_next_lv #(log2c j) (hash_seq_spec (S.head fhs))));
+    construct_rhs_full_base_even_next
+      j (S.head fhs) (S.head (S.tail fhs)) acc actd;
+    assert (mt_rhs_inv (j / 2)
+             (mt_next_lv #(log2c j)
+               (construct_rhs_full_base (S.head fhs) acc actd))
+             (fst rcrhs) actd);
+
+    assert (mt_rhs_inv j
+             (construct_rhs_full_base (S.head fhs) acc actd)
+             (fst crhs) actd);
+    assert (MTS.mt_get_root #(log2c j)
+             (construct_rhs_full_base (S.head fhs) acc actd) ==
+           HRaw (snd rcrhs))
+  end
+
+  else begin
+    let rhd = if actd then acc else hash_init in
+    let nacc = if actd 
+               then hash_2 (S.last (S.head fhs)) acc
+               else S.last (S.head fhs) in
+    construct_rhs_full_inv_ok (j / 2) (S.tail fhs) nacc true;
+    let rcrhs = construct_rhs_full (j / 2) (S.tail fhs) nacc true in
+    assert (mt_rhs_inv (j / 2)
+             (construct_rhs_full_base (S.head (S.tail fhs)) nacc true)
+             (fst rcrhs) true);
+    assert (MTS.mt_get_root #(log2c j - 1)
+             (construct_rhs_full_base (S.head (S.tail fhs)) nacc true) ==
+           HRaw (snd rcrhs));
+
+    let crhs = (S.cons rhd (fst rcrhs), snd rcrhs) in
+    mt_hashes_lth_inv_log_next j fhs;
+    // TODO: below assumption should be proven, and it's a step version of
+    // `mt_hashes_inv_log_sim` so it will use the proof as well.
+    assume (S.equal (hash_seq_spec (S.head (S.tail fhs)))
+                    (mt_next_lv #(log2c j) (hash_seq_spec (S.head fhs))));
+    construct_rhs_full_base_odd_next
+      j (S.head fhs) (S.head (S.tail fhs)) acc actd nacc;
+    (if actd then construct_rhs_full_base_case_true (S.head fhs) acc);
+    assert (if actd
+           then (S.index (construct_rhs_full_base (S.head fhs) acc actd) j ==
+                HRaw rhd)
+           else true);
+    assert (mt_rhs_inv (j / 2)
+             (mt_next_lv #(log2c j)
+               (construct_rhs_full_base (S.head fhs) acc actd))
+             (fst rcrhs) true);
+
+    assert (mt_rhs_inv j
+             (construct_rhs_full_base (S.head fhs) acc actd)
+             (fst crhs) actd);
+    assert (MTS.mt_get_root #(log2c j)
+             (construct_rhs_full_base (S.head fhs) acc actd) == 
+           HRaw (snd crhs))
+  end
+
 
 /// Correctness of insertion
 
