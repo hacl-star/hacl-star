@@ -70,6 +70,7 @@ val addcarry:
   -> Pure (uint64 & uint64)
     (requires True)
     (ensures fun (r, c) ->
+      v c <= 2 /\
       v r + v c * pow2 64 == v x + v y + v cin)
 [@CInline]
 let addcarry x y cin =
@@ -201,137 +202,507 @@ let carry_pass f cin =
 val sub1:
     f:felem4
   -> cin:uint64
-  -> uint64 & felem4
+  -> Pure (uint64 & felem4)
+    (requires True)
+    (ensures fun (c, r) ->
+      as_nat4 r - v c * pow2 256 == as_nat4 f - v cin)
 let sub1 f cin =
   let (f0, f1, f2, f3) = f in
+  assert (as_nat4 f - v cin ==
+    v f0 + v f1 * pow2 64 + v f2 * pow2 64 * pow2 64 +
+    v f3 * pow2 64 * pow2 64 * pow2 64 - v cin);
   let o0, c0 = subborrow f0 cin (u64 0) in
+  //assert (v o0 - v c0 * pow2 64 == v f0 - v cin);
   let o1, c1 = subborrow f1 (u64 0) c0 in
+  //assert (v o1 - v c1 * pow2 64 == v f1 - v c0);
   let o2, c2 = subborrow f2 (u64 0) c1 in
+  //assert (v o2 - v c2 * pow2 64 == v f2 - v c1);
   let o3, c3 = subborrow f3 (u64 0) c2 in
+  //assert (v o3 - v c3 * pow2 64 == v f3 - v c2);
   let out = (o0, o1, o2, o3) in
+  assert (as_nat4 f - v cin ==
+    v o0 - v c0 * pow2 64 +
+    (v o1 - v c1 * pow2 64 + v c0) * pow2 64 +
+    (v o2 - v c2 * pow2 64 + v c1) * pow2 64 * pow2 64 +
+    (v o3 - v c3 * pow2 64 + v c2) * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 f - v cin ==
+    v o0 + v o1 * pow2 64 +
+    v o2 * pow2 64 * pow2 64 +
+    v o3 * pow2 64 * pow2 64 * pow2 64 -
+    v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 f - v cin ==
+    as_nat4 out - v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   c3, out
+
+val add4:
+    f1:felem4
+  -> f2:felem4
+  -> Pure (uint64 & felem4)
+    (requires True)
+    (ensures fun (c, r) ->
+      v c <= 1 /\
+      as_nat4 r + v c * pow2 256 == as_nat4 f1 + as_nat4 f2)
+let add4 f1 f2 =
+  let (f10, f11, f12, f13) = f1 in
+  let (f20, f21, f22, f23) = f2 in
+  let o0, c0 = addcarry f10 f20 (u64 0) in
+  //assert (v o0 + v c0 * pow2 64 == v f10 + v f20);
+  let o1, c1 = addcarry f11 f21 c0 in
+  //assert (v o1 + v c1 * pow2 64 == v f11 + v f21 + v c0);
+  let o2, c2 = addcarry f12 f22 c1 in
+  //assert (v o2 + v c2 * pow2 64 == v f12 + v f22 + v c1);
+  let o3, c3 = addcarry f13 f23 c2 in
+  //assert (v o3 + v c3 * pow2 64 == v f13 + v f23 + v c2);
+  let out = (o0, o1, o2, o3) in
+  assert (as_nat4 out + v c3 * pow2 256 ==
+    v o0 + v o1 * pow2 64 + v o2 * pow2 64 * pow2 64 +
+    v o3 * pow2 64 * pow2 64 * pow2 64 + v c3 * pow2 256);
+  assert (as_nat4 out + v c3 * pow2 256 ==
+    v f10 + v f20 - v c0 * pow2 64 +
+    (v f11 + v f21 + v c0 - v c1 * pow2 64) * pow2 64 +
+    (v f12 + v f22 + v c1 - v c2 * pow2 64) * pow2 64 * pow2 64 +
+    (v f13 + v f23 + v c2 - v c3 * pow2 64) * pow2 64 * pow2 64 * pow2 64 +
+    v c3 * pow2 256);
+  assert (as_nat4 out + v c3 * pow2 256 ==
+    v f10 + v f20 +
+    v f11 * pow2 64 + v f21 * pow2 64 +
+    v f12 * pow2 64 * pow2 64 + v f22 * pow2 64 * pow2 64 +
+    v f13 * pow2 64 * pow2 64 * pow2 64 + v f23 * pow2 64 * pow2 64 * pow2 64 -
+    v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v c3 * pow2 256);
+  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  c3, out
+
+val fadd4:
+    f1:felem4
+  -> f2:felem4
+  -> out:felem4{feval out == fadd (feval f1) (feval f2)}
+let fadd4 f1 f2 =
+  let c0, out0 = add4 f1 f2 in
+  assert (as_nat4 out0 + v c0 * pow2 256 == as_nat4 f1 + as_nat4 f2);
+  let out = carry_pass out0 c0 in
+  assert (feval out == (as_nat4 out0 + v c0 * pow2 256) % prime);
+  assert (feval out == (as_nat4 f1 + as_nat4 f2) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (as_nat4 f1) (as_nat4 f2) prime;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r ((as_nat4 f1) % prime) (as_nat4 f2) prime;
+  out
+
+val sub4:
+    f1:felem4
+  -> f2:felem4
+  -> Pure (uint64 & felem4)
+    (requires True)
+    (ensures fun (c, r) ->
+      v c <= 1 /\
+      as_nat4 r - v c * pow2 256 == as_nat4 f1 - as_nat4 f2)
+let sub4 f1 f2 =
+  let (f10, f11, f12, f13) = f1 in
+  let (f20, f21, f22, f23) = f2 in
+  let o0, c0 = subborrow f10 f20 (u64 0) in
+  assert (v o0 - v c0 * pow2 64 == v f10 - v f20);
+  let o1, c1 = subborrow f11 f21 c0 in
+  assert (v o1 - v c1 * pow2 64 == v f11 - v f21 - v c0);
+  let o2, c2 = subborrow f12 f22 c1 in
+  assert (v o2 - v c2 * pow2 64 == v f12 - v f22 - v c1);
+  let o3, c3 = subborrow f13 f23 c2 in
+  assert (v o3 - v c3 * pow2 64 == v f13 - v f23 - v c2);
+  let out = (o0, o1, o2, o3) in
+  assert (as_nat4 out - v c3 * pow2 256 ==
+    v o0 + v o1 * pow2 64 + v o2 * pow2 64 * pow2 64 +
+    v o3 * pow2 64 * pow2 64 * pow2 64 - v c3 * pow2 256);
+  assert (as_nat4 out - v c3 * pow2 256 ==
+    v f10 - v f20 + v c0 * pow2 64 +
+    (v f11 - v f21 - v c0 + v c1 * pow2 64) * pow2 64 +
+    (v f12 - v f22 - v c1 + v c2 * pow2 64) * pow2 64 * pow2 64 +
+    (v f13 - v f23 - v c2 + v c3 * pow2 64) * pow2 64 * pow2 64 * pow2 64 -
+    v c3 * pow2 256);
+
+  assert (as_nat4 out - v c3 * pow2 256 ==
+    v f10 - v f20 +
+    v f11 * pow2 64 - v f21 * pow2 64 +
+    v f12 * pow2 64 * pow2 64 - v f22 * pow2 64 * pow2 64 +
+    v f13 * pow2 64 * pow2 64 * pow2 64 - v f23 * pow2 64 * pow2 64 * pow2 64 +
+    v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64 - v c3 * pow2 256);
+  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  c3, out
+
+val lemma_mod_sub_distr: a:int -> b:int -> n:pos ->
+  Lemma ((a - b % n) % n = (a - b) % n)
+let lemma_mod_sub_distr a b n =
+  FStar.Math.Lemmas.lemma_div_mod b n;
+  FStar.Math.Lemmas.distributivity_sub_left 0 (b / n) n;
+  // (a - b) % n == (a - (b % n) - (b / n) * n) % n
+  FStar.Math.Lemmas.lemma_mod_plus (a - (b % n)) (-(b / n)) n
+
+val fsub4:
+    f1:felem4
+  -> f2:felem4
+  -> out:felem4{feval out == fsub (feval f1) (feval f2)}
+let fsub4 f1 f2 =
+  let c0, out0 = sub4 f1 f2 in
+  assert (as_nat4 out0 - v c0 * pow2 256 == as_nat4 f1 - as_nat4 f2);
+  let c1, out1 = sub1 out0 (c0 *! u64 38) in
+  assert (as_nat4 out1 - v c1 * pow2 256 == as_nat4 out0 - v c0 * 38);
+  assert (as_nat4 out1 - v c1 * pow2 256 ==
+    as_nat4 f1 - as_nat4 f2 + v c0 * pow2 256 - v c0 * 38);
+  let (o0, o1, o2, o3) = out1 in
+  let o0' = o0 -! c1 *! u64 38 in
+  assert (v o0' == v o0 - v c1 * 38);
+  let out2 = (o0', o1, o2, o3) in
+  assert (as_nat4 out2 ==
+    v o0 - v c1 * 38 +
+    v o1 * pow2 64 +
+    v o2 * pow2 64 * pow2 64 +
+    v o3 * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 out2 == as_nat4 out1 - v c1 * 38);
+  assert (as_nat4 out2 == as_nat4 f1 - as_nat4 f2 + v c0 * pow2 256 -
+    v c0 * 38 + v c1 * pow2 256 - v c1 * 38);
+  assert (feval out2 == (as_nat4 f1 - as_nat4 f2 + v c0 * pow2 256 -
+    v c0 * 38 + v c1 * pow2 256 - v c1 * 38) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 f1 - as_nat4 f2 + v c0 * pow2 256 -
+    v c0 * 38 - v c1 * 38) (v c1 * pow2 256) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v c1) (pow2 256) prime;
+  lemma_prime ();
+  assert ((v c1 * pow2 256) % prime == (v c1 * 38) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 f1 - as_nat4 f2 + v c0 * pow2 256 -
+    v c0 * 38 - v c1 * 38) (v c1 * 38) prime;
+  assert (feval out2 == (as_nat4 f1 - as_nat4 f2 + v c0 * pow2 256 - v c0 * 38) % prime);
+
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 f1 - as_nat4 f2 - v c0 * 38) (v c0 * pow2 256) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v c0) (pow2 256) prime;
+  lemma_prime ();
+  assert ((v c0 * pow2 256) % prime == (v c0 * 38) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 f1 - as_nat4 f2 - v c0 * 38) (v c0 * 38) prime;
+  assert (feval out2 == (as_nat4 f1 - as_nat4 f2) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (as_nat4 f1) (- as_nat4 f2) prime;
+  lemma_mod_sub_distr ((as_nat4 f1) % prime) (as_nat4 f2) prime;
+  out2
+
+val lemma_as_nat4:
+    f:felem4
+  -> Lemma (as_nat4 f < pow2 256)
+let lemma_as_nat4 f =
+  let (f0, f1, f2, f3) = f in
+  assert (as_nat4 f == v f0 + v f1 * pow2 64 +
+    v f2 * pow2 64 * pow2 64 + v f3 * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 f <= pow2 64 - 1 + (pow2 64 - 1) * pow2 64 +
+    (pow2 64 - 1) * pow2 64 * pow2 64 + (pow2 64 - 1) * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 f <= pow2 64 - 1 + pow2 64 * pow2 64 - pow2 64 +
+    pow2 64 * pow2 64 * pow2 64 - pow2 64 * pow2 64 +
+    pow2 64 * pow2 64 * pow2 64 * pow2 64 - pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 f <= pow2 64 * pow2 64 * pow2 64 * pow2 64 - 1);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert (as_nat4 f <= pow2 256 - 1)
+
+val lemma_mul1:
+    f:felem4
+  -> u:uint64
+  -> Lemma (as_nat4 f * v u < pow2 320)
+let lemma_mul1 f u =
+  lemma_as_nat4 f;
+  assert (as_nat4 f * v u <= (pow2 256 - 1) * v u);
+  assert_spinoff (v u < pow2 64);
+  assert_spinoff (as_nat4 f * v u < (pow2 256 - 1) * pow2 64);
+  assert_norm (pow2 256 * pow2 64 = pow2 320)
+
+val lemma_mul1_no_carry:
+    a:nat{a < pow2 256}
+  -> b:nat{b < pow2 320}
+  -> c:nat
+  -> Lemma
+    (requires a + c * pow2 256 == b)
+    (ensures c < pow2 64)
+let lemma_mul1_no_carry a b c =
+  assert (a + c * pow2 256 < pow2 320);
+  assert_norm (pow2 64 * pow2 256 = pow2 320)
 
 val mul1:
     f:felem4
   -> u:uint64
-  -> uint64 & felem4
+  -> Pure (uint64 & felem4)
+    (requires True)
+    (ensures fun (c, r) ->
+      as_nat4 r + v c * pow2 256 == as_nat4 f * v u)
 let mul1 f u =
   let (f0, f1, f2, f3) = f in
   let l0, h0 = mul64 f0 u in
+  assert (v l0 + v h0 * pow2 64 = v f0 * v u);
   let l1, h1 = mul64 f1 u in
+  assert (v l1 + v h1 * pow2 64 = v f1 * v u);
   let l2, h2 = mul64 f2 u in
+  assert (v l2 + v h2 * pow2 64 = v f2 * v u);
   let l3, h3 = mul64 f3 u in
+  assert (v l3 + v h3 * pow2 64 = v f3 * v u);
   let o0 = l0 in
   let o1, c0 = addcarry l1 h0 (u64 0) in
+  assert (v o1 + v c0 * pow2 64 == v l1 + v h0);
   let o2, c1 = addcarry l2 h1 c0 in
+  assert (v o2 + v c1 * pow2 64 == v l2 + v h1 + v c0);
   let o3, c2 = addcarry l3 h2 c1 in
-  let c3 = h3 +. c2 in
+  assert (v o3 + v c2 * pow2 64 == v l3 + v h2 + v c1);
   let out = (o0, o1, o2, o3) in
+
+  assert (as_nat4 out  ==
+    v o0 + v o1 * pow2 64 + v o2 * pow2 64 * pow2 64 + v o3 * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 out  ==
+    v l0 +
+    (v l1 + v h0 - v c0 * pow2 64) * pow2 64 +
+    (v l2 + v h1 + v c0 - v c1 * pow2 64) * pow2 64 * pow2 64 +
+    (v l3 + v h2 + v c1 - v c2 * pow2 64) * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 out  ==
+    v f0 * v u - v h0 * pow2 64 +
+    (v f1 * v u - v h1 * pow2 64 + v h0 - v c0 * pow2 64) * pow2 64 +
+    (v f2 * v u - v h2 * pow2 64 + v h1 + v c0 - v c1 * pow2 64) * pow2 64 * pow2 64 +
+    (v f3 * v u - v h3 * pow2 64 + v h2 + v c1 - v c2 * pow2 64) * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 out  ==
+    v f0 * v u - v h0 * pow2 64 +
+    v f1 * v u * pow2 64 - v h1 * pow2 64 * pow2 64 +
+      v h0 * pow2 64 - v c0 * pow2 64 * pow2 64 +
+    v f2 * v u * pow2 64 * pow2 64 - v h2 * pow2 64 * pow2 64 * pow2 64 +
+      v h1 * pow2 64 * pow2 64 + v c0 * pow2 64 * pow2 64 - v c1 * pow2 64 * pow2 64 * pow2 64 +
+    v f3 * v u * pow2 64 * pow2 64 * pow2 64 - v h3 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+      v h2 * pow2 64 * pow2 64 * pow2 64 + v c1 * pow2 64 * pow2 64 * pow2 64 - v c2 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+
+  assert (as_nat4 out ==
+    v f0 * v u +
+    v f1 * v u * pow2 64  +
+    v f2 * v u * pow2 64 * pow2 64 +
+    v f3 * v u * pow2 64 * pow2 64 * pow2 64 -
+    v h3 * pow2 64 * pow2 64 * pow2 64 * pow2 64 -
+    v c2 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+
+  assume (as_nat4 f * v u ==
+    v f0 * v u +
+    v f1 * v u * pow2 64  +
+    v f2 * v u * pow2 64 * pow2 64 +
+    v f3 * v u * pow2 64 * pow2 64 * pow2 64);
+
+  assert (as_nat4 out ==
+    as_nat4 f * v u -
+    v h3 * pow2 64 * pow2 64 * pow2 64 * pow2 64 -
+    v c2 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+
+  lemma_mul_assos_5 (v h3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
+  lemma_mul_assos_5 (v c2) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert (as_nat4 out == as_nat4 f * v u - v h3 * pow2 256 - v c2 * pow2 256);
+  assert (as_nat4 out + v h3 * pow2 256 + v c2 * pow2 256 == as_nat4 f * v u);
+  FStar.Math.Lemmas.distributivity_add_left (v h3) (v c2) (pow2 256);
+  assert (as_nat4 out + (v h3 + v c2) * pow2 256 == as_nat4 f * v u);
+  lemma_mul1 f u;
+  lemma_as_nat4 out;
+  lemma_mul1_no_carry (as_nat4 out) (as_nat4 f * v u) (v h3 + v c2);
+  assert (v h3 + v c2 < pow2 64);
+  let c3 = h3 +! c2 in
   c3, out
 
 val mul1_add:
     f1:felem4
   -> u2:uint64
   -> f3:felem4
-  -> uint64 & felem4
+  -> Pure (uint64 & felem4)
+    (requires as_nat4 f3 + as_nat4 f1 * v u2 < pow2 320)
+    (ensures fun (c, r) ->
+      as_nat4 r + v c * pow2 256 == as_nat4 f3 + as_nat4 f1 * v u2)
 let mul1_add f1 u2 f3 =
   let c, out0 = mul1 f1 u2 in
+  assert (as_nat4 out0 + v c * pow2 256 == as_nat4 f1 * v u2);
   let (o0, o1, o2, o3) = out0 in
   let (f30, f31, f32, f33) = f3 in
-  let o0, c0 = addcarry f30 o0 (u64 0) in
-  let o1, c1 = addcarry f31 o1 c0 in
-  let o2, c2 = addcarry f32 o2 c1 in
-  let o3, c3 = addcarry f33 o3 c2 in
-  let c4 = c +. c3 in
-  let out = (o0, o1, o2, o3) in
+  let o0', c0 = addcarry f30 o0 (u64 0) in
+  //assert (v o0' + v c0 * pow2 64 == v f30 + v o0);
+  let o1', c1 = addcarry f31 o1 c0 in
+  //assert (v o1' + v c1 * pow2 64 == v f31 + v o1 + v c0);
+  let o2', c2 = addcarry f32 o2 c1 in
+  //assert (v o2' + v c2 * pow2 64 == v f32 + v o2 + v c1);
+  let o3', c3 = addcarry f33 o3 c2 in
+  //assert (v o3' + v c3 * pow2 64 == v f33 + v o3 + v c2);
+  let out = (o0', o1', o2', o3') in
+  assert (as_nat4 out ==
+   v o0' + v o1' * pow2 64 + v o2' * pow2 64 * pow2 64 +
+   v o3' * pow2 64 * pow2 64 * pow2 64);
+  assert (as_nat4 out ==
+   v f30 + v o0 - v c0 * pow2 64 +
+   (v f31 + v o1 + v c0 - v c1 * pow2 64) * pow2 64 +
+   (v f32 + v o2 + v c1 - v c2 * pow2 64) * pow2 64 * pow2 64 +
+   (v f33 + v o3 + v c2 - v c3 * pow2 64) * pow2 64 * pow2 64 * pow2 64);
+
+  assume (as_nat4 out ==
+   v f30 + v o0 - v c0 * pow2 64 +
+   v f31 * pow2 64 + v o1 * pow2 64 + v c0 * pow2 64 - v c1 * pow2 64 * pow2 64 +
+   v f32 * pow2 64 * pow2 64 + v o2 * pow2 64 * pow2 64 + v c1 * pow2 64 * pow2 64 -
+     v c2 * pow2 64 * pow2 64 * pow2 64 +
+   v f33 * pow2 64 * pow2 64 * pow2 64 + v o3 * pow2 64 * pow2 64 * pow2 64 +
+     v c2 * pow2 64 * pow2 64 * pow2 64 - v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+
+  assert (as_nat4 out ==
+   v f30 + v o0  +
+   v f31 * pow2 64 + v o1 * pow2 64 +
+   v f32 * pow2 64 * pow2 64 + v o2 * pow2 64 * pow2 64 +
+   v f33 * pow2 64 * pow2 64 * pow2 64 + v o3 * pow2 64 * pow2 64 * pow2 64 -
+   v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+
+  assert (as_nat4 out == as_nat4 f3 + as_nat4 out0 -
+   v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert (as_nat4 out == as_nat4 f3 + as_nat4 out0 - v c3 * pow2 256);
+  assert (as_nat4 out == as_nat4 f3 + as_nat4 f1 * v u2 - v c * pow2 256 - v c3 * pow2 256);
+  assert (as_nat4 out + v c * pow2 256 + v c3 * pow2 256 == as_nat4 f3 + as_nat4 f1 * v u2);
+  FStar.Math.Lemmas.distributivity_add_left (v c) (v c3) (pow2 256);
+  assert (as_nat4 out + (v c + v c3) * pow2 256 == as_nat4 f3 + as_nat4 f1 * v u2);
+  lemma_as_nat4 out;
+  assert (as_nat4 out < pow2 256);
+  assert (as_nat4 f3 + as_nat4 f1 * v u2 < pow2 320);
+  //lemma_mul1_no_carry (as_nat4 out) (as_nat4 f3 + as_nat4 f1 * v u2) (v c + v c3);
+  assume (v c + v c3 < pow2 64); //FIXME
+  let c4 = c +! c3 in
   c4, out
+
+val lemma_feval_wide:
+  f:felem_wide4
+  -> Lemma (let (f0, f1, f2, f3, f4, f5, f6, f7) = f in
+     (feval_wide f == (as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * 38) % prime))
+let lemma_feval_wide f = admit()
+
+val lemma_carry_wide:
+    a:nat{a < pow2 256}
+  -> b:nat{b < pow2 263}
+  -> c:nat
+  -> Lemma
+    (requires a + c * pow2 256 == b)
+    (ensures c < pow2 7)
+let lemma_carry_wide a b c =
+  assert (a + c * pow2 256 < pow2 263);
+  assert_norm (pow2 7 * pow2 256 = pow2 263)
 
 val carry_wide:
     f:felem_wide4
-  -> out:felem4
-let carry_wide f = admit();
+  -> out:felem4{feval out == feval_wide f}
+let carry_wide f =
   let (f0, f1, f2, f3, f4, f5, f6, f7) = f in
+  lemma_as_nat4 (f4, f5, f6, f7);
+  lemma_as_nat4 (f0, f1, f2, f3);
+  assert_norm (38 < pow2 6);
+  assert_norm (pow2 6 * pow2 256 = pow2 262);
+  assert (as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * 38 < pow2 263);
+  assert_norm (pow2 263 < pow2 320);
   let c0, out0 = mul1_add (f4, f5, f6, f7) (u64 38) (f0, f1, f2, f3) in
-  carry_pass out0 c0
+  assert (as_nat4 out0 + v c0 * pow2 256 == as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * 38);
+  lemma_as_nat4 out0;
+  lemma_carry_wide (as_nat4 out0) (as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * 38) (v c0);
+  let out1 = carry_pass out0 c0 in
+  assert (feval out1 == (as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * 38) % prime);
+  lemma_feval_wide f;
+  out1
 
-val add4:
-    f1:felem4
-  -> f2:felem4
-  -> uint64 & felem4
-let add4 f1 f2 =
-  let (f10, f11, f12, f13) = f1 in
-  let (f20, f21, f22, f23) = f2 in
-  let o0, c0 = addcarry f10 f20 (u64 0) in
-  let o1, c1 = addcarry f11 f21 c0 in
-  let o2, c2 = addcarry f12 f22 c1 in
-  let o3, c3 = addcarry f13 f23 c2 in
-  let out = (o0, o1, o2, o3) in
-  c3, out
+val lemma_mul4_no_carry0:
+    a:nat{a < pow2 64}
+  -> b:nat{b < pow2 384}
+  -> c:nat
+  -> Lemma
+    (requires a + c * pow2 64 == b)
+    (ensures c < pow2 320)
+let lemma_mul4_no_carry0 a b c =
+  assert (a + c * pow2 64 < pow2 384);
+  assert_norm (pow2 320 * pow2 64 = pow2 384)
 
-val fadd4:
-    f1:felem4
-  -> f2:felem4
-  -> felem4
-let fadd4 f1 f2 =
-  let c0, out0 = add4 f1 f2 in
-  carry_pass out0 c0
-
-val sub4:
-    f1:felem4
-  -> f2:felem4
-  -> uint64 & felem4
-let sub4 f1 f2 =
-  let (f10, f11, f12, f13) = f1 in
-  let (f20, f21, f22, f23) = f2 in
-  let o0, c0 = subborrow f10 f20 (u64 0) in
-  let o1, c1 = subborrow f11 f21 c0 in
-  let o2, c2 = subborrow f12 f22 c1 in
-  let o3, c3 = subborrow f13 f23 c2 in
-  let out = (o0, o1, o2, o3) in
-  c3, out
-
-val fsub4:
-    f1:felem4
-  -> f2:felem4
-  -> felem4
-let fsub4 f1 f2 =
-  let c0, out0 = sub4 f1 f2 in
-  let c1, out1 = sub1 out0 (c0 *. u64 38) in
-  let (o0, o1, o2, o3) = out1 in
-  let o0' = o0 -. c1 *. u64 38 in
-  (o0', o1, o2, o3)
+val lemma_mul4_no_carry1:
+    a:nat{a < pow2 128}
+  -> b:nat{b < pow2 448}
+  -> c:nat
+  -> Lemma
+    (requires a + c * pow2 64 * pow2 64 == b)
+    (ensures c < pow2 320)
+let lemma_mul4_no_carry1 a b c =
+  assert (a + c * pow2 64 * pow2 64 < pow2 448);
+  assert_norm (pow2 320 * pow2 64 * pow2 64 = pow2 448)
 
 val mul4:
     f1:felem4
   -> r:felem4
-  -> out:felem_wide4
-let mul4 f1 r =
+  -> out:felem_wide4{wide_as_nat4 out == as_nat4 f1 * as_nat4 r}
+let mul4 f1 r = admit();
   let (f0, f1, f2, f3) = f1 in
   let c0, out0 = mul1 r f0 in
-  let (o0, o1, o2, o3) = out0 in
-  let c1, out1 = mul1_add r f1 (o1, o2, o3, c0) in
-  let (o1, o2, o3, o4) = out1 in
-  let c2, out2 = mul1_add r f2 (o2, o3, o4, c1) in
-  let (o2, o3, o4, o5) = out2 in
-  let c3, out3 = mul1_add r f3 (o3, o4, o5, c2) in
-  let (o3, o4, o5, o6) = out3 in
-  let o7 = c3 in
-  (o0, o1, o2, o3, o4, o5, o6, o7)
+  assert (as_nat4 out0 + v c0 * pow2 256 == as_nat4 r * v f0);
+  let (o00, o01, o02, o03) = out0 in
 
-val fmul4: f1:felem4 -> r:felem4 -> out:felem4
+  let c1, out1 = mul1_add r f1 (o01, o02, o03, c0) in
+  assert (as_nat4 out1 + v c1 * pow2 256 == as_nat4 (o01, o02, o03, c0) + as_nat4 r * v f1);
+  let (o11, o12, o13, o14) = out1 in
+
+  let c2, out2 = mul1_add r f2 (o12, o13, o14, c1) in
+  assert (as_nat4 out2 + v c2 * pow2 256 == as_nat4 (o12, o13, o14, c1) + as_nat4 r * v f2);
+  let (o22, o23, o24, o25) = out2 in
+
+  let c3, out3 = mul1_add r f3 (o23, o24, o25, c2) in
+  assert (as_nat4 out3 + v c3 * pow2 256 == as_nat4 (o23, o24, o25, c2) + as_nat4 r * v f3);
+  let (o33, o34, o35, o36) = out3 in
+
+  let o37 = c3 in
+  let out = (o00, o11, o22, o33, o34, o35, o36, o37) in
+  out
+
+val fmul4:
+    f1:felem4
+  -> r:felem4
+  -> out:felem4{feval out == fmul (feval f1) (feval r)}
 let fmul4 f1 r =
   let tmp = mul4 f1 r in
-  carry_wide tmp
+  assert (wide_as_nat4 tmp == as_nat4 f1 * as_nat4 r);
+  let out = carry_wide tmp in
+  assert (feval out == (as_nat4 f1 * as_nat4 r) % prime);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat4 f1) (as_nat4 r) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat4 f1 % prime) (as_nat4 r) prime;
+  out
 
-val fmul14: f1:felem4 -> f2:uint64 -> out:felem4
-let fmul14 f1 f2 = admit();
+val lemma_fmul14:
+  a:nat{a < pow2 256} -> b:nat{b < pow2 17}
+  -> Lemma (a * b < pow2 273)
+let lemma_fmul14 a b =
+  assert_norm (pow2 256 * pow2 17 = pow2 273)
+
+val lemma_fmul14_no_carry0:
+    a:nat{a < pow2 256}
+  -> b:nat{b < pow2 273}
+  -> c:nat
+  -> Lemma
+    (requires a + c * pow2 256 == b)
+    (ensures c < pow2 17)
+let lemma_fmul14_no_carry0 a b c =
+  assert (a + c * pow2 256 < pow2 273);
+  assert_norm (pow2 17 * pow2 256 = pow2 273)
+
+val fmul14:
+    f1:felem4
+  -> f2:uint64{v f2 < pow2 17} //121665 < pow2 17
+  -> out:felem4{feval out == (feval f1 * v f2) % prime}
+let fmul14 f1 f2 =
   let c0, out0 = mul1 f1 f2 in
-  carry_pass out0 c0
+  assert (as_nat4 out0 + v c0 * pow2 256 == as_nat4 f1 * v f2);
+  lemma_as_nat4 f1;
+  lemma_fmul14 (as_nat4 f1) (v f2);
+  assert (as_nat4 f1 * v f2 < pow2 273);
+  lemma_as_nat4 out0;
+  lemma_fmul14_no_carry0 (as_nat4 out0) (as_nat4 f1 * v f2) (v c0);
+  let out1 = carry_pass out0 c0 in
+  assert (feval out1 == (as_nat4 f1 * v f2) % prime);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat4 f1) (v f2) prime;
+  out1
 
-val sqr4: f:felem4 -> out:felem_wide4
+val sqr4: f:felem4 -> out:felem_wide4{wide_as_nat4 out == as_nat4 f * as_nat4 f}
 let sqr4 f = mul4 f f
 
-val fsqr4: f:felem4 -> out:felem4
+val fsqr4: f:felem4 -> out:felem4{feval out == fmul (feval f) (feval f)}
 let fsqr4 f =
   let tmp = sqr4 f in
-  carry_wide tmp
+  let out = carry_wide tmp in
+  assert (feval out == (as_nat4 f * as_nat4 f) % prime);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat4 f) (as_nat4 f) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat4 f % prime) (as_nat4 f) prime;
+  out
