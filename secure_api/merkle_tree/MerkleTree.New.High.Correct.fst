@@ -513,6 +513,26 @@ let hash_seq_spec_full_odd_next j hs nhs acc actd nacc =
          (hash_seq_spec_full nhs nacc true)
 #reset-options
 
+val hash_seq_spec_full_next:
+  j:nat{j > 1} ->
+  hs:hash_seq{S.length hs = j} ->
+  nhs:hash_seq{S.length nhs = j / 2} ->
+  acc:hash -> actd:bool -> nacc:hash -> nactd:bool ->
+  Lemma
+    (requires (mt_hashes_next_rel j hs nhs /\
+              nacc == (if j % 2 = 0 then acc
+                      else if actd 
+                      then hash_2 (S.last hs) acc
+                      else S.last hs) /\
+              nactd == (actd || j % 2 = 1)))
+    (ensures (S.equal (hash_seq_spec_full nhs nacc nactd)
+                      (mt_next_lv #(log2c j)
+                        (hash_seq_spec_full hs acc actd))))
+let hash_seq_spec_full_next j hs nhs acc actd nacc nactd =
+  if j % 2 = 0 
+  then hash_seq_spec_full_even_next j hs nhs acc actd
+  else hash_seq_spec_full_odd_next j hs nhs acc actd nacc
+
 val hs_sim:
   j:nat ->
   hs:hash_ss{
@@ -542,7 +562,17 @@ val mt_hashes_inv_log_sim:
   Lemma (requires True)
         (ensures (hs_sim j hs (hash_seq_spec_full (S.head hs) acc actd) acc actd))
 let rec mt_hashes_inv_log_sim j hs acc actd =
-  admit ()
+  if j = 1 then ()
+  else begin
+    let nacc = if j % 2 = 0 then acc
+               else if actd 
+               then hash_2 (S.last (S.head hs)) acc
+               else S.last (S.head hs) in
+    let nactd = actd || j % 2 = 1 in
+    mt_hashes_inv_log_sim (j / 2) (S.tail hs) nacc nactd;
+    hash_seq_spec_full_next j (S.head hs) (S.head (S.tail hs))
+      acc actd nacc nactd
+  end
 
 val mt_rhs_inv:
   j:nat ->
