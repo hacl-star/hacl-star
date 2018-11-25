@@ -253,18 +253,26 @@ val construct_rhs:
     hs_wf_elts lv hs i j} ->
   acc:hash ->
   actd:bool ->
-  GTot (crhs:hash_seq{S.length crhs = 32} * hash) (decreases j)
+  GTot (crhs:hash_seq{
+         S.length crhs = 32 /\
+         S.equal (S.slice rhs 0 lv) (S.slice crhs 0 lv)} * hash)
+       (decreases j)
 let rec construct_rhs lv hs rhs i j acc actd =
   let ofs = offset_of i in
   if j = 0 then (rhs, acc)
   else
     (if j % 2 = 0
-    then construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) acc actd
+    then (let rrhs, rt = construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) acc actd in
+         assert (S.equal (S.slice rhs 0 lv) (S.slice rrhs 0 lv));
+         (rrhs, rt))
     else (let nrhs = if actd then S.upd rhs lv acc else rhs in
          let nacc = if actd 
                     then hash_2 (S.index (S.index hs lv) (j - 1 - ofs)) acc
                     else S.index (S.index hs lv) (j - 1 - ofs) in
-         construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true))
+         let rrhs, rt = construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true in
+         assert (S.equal (S.slice nrhs 0 lv) (S.slice rrhs 0 lv));
+         assert (S.equal (S.slice rhs 0 lv) (S.slice nrhs 0 lv));
+         (rrhs, rt)))
 
 val construct_rhs_even:
   lv:nat{lv <= 32} ->
