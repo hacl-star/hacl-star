@@ -381,7 +381,7 @@ val concat2:
   -> #a:Type0
   -> len0:size_t
   -> s0:lbuffer_t t0 a len0
-  -> len1:size_t{v len0 + v len1 < max_size_t}
+  -> len1:size_t{v len0 + v len1 <= max_size_t}
   -> s1:lbuffer_t t1 a len1
   -> s:lbuffer a (len0 +! len1)
   -> Stack unit
@@ -401,9 +401,9 @@ val concat3:
   -> #a:Type0
   -> len0:size_t
   -> s0:lbuffer_t t0 a len0
-  -> len1:size_t{v len0 + v len1 < max_size_t}
+  -> len1:size_t{v len0 + v len1 <= max_size_t}
   -> s1:lbuffer_t t1 a len1
-  -> len2:size_t{v len0 + v len1 + v len2 < max_size_t}
+  -> len2:size_t{v len0 + v len1 + v len2 <= max_size_t}
   -> s2:lbuffer_t t2 a len2
   -> s:lbuffer a (len0 +! len1 +! len2)
   -> Stack unit
@@ -481,10 +481,10 @@ val loop:
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1)))
   -> impl:(i:size_t{v i < v n} -> Stack unit
       (requires loop_inv h0 n a_spec refl footprint spec (v i))
-      (ensures  fun _ _ -> loop_inv h0 n a_spec refl footprint spec (v i + 1))) ->
+      (ensures  fun _ _ h -> loop_inv h0 n a_spec refl footprint spec (v i + 1) h)) ->
   Stack unit
     (requires fun h -> h0 == h)
-    (ensures  fun _ _ -> loop_inv h0 n a_spec refl footprint spec (v n))
+    (ensures  fun h0 _ h1 -> loop_inv h0 n a_spec refl footprint spec (v n) h1)
 
 let loop1_inv
     (h0:mem)
