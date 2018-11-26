@@ -24,8 +24,9 @@ module MTS = MerkleTree.Spec
 
 /// Correctness of rightmost hashes
 
-// Localized version of `construct_rhs`
-val construct_rhs_full:
+// Another version of `construct_rhs` that recursively 
+// accumulates rightmost hashes.
+val construct_rhs_acc:
   j:nat ->
   fhs:hash_ss{
     S.length fhs = log2c j /\
@@ -33,21 +34,21 @@ val construct_rhs_full:
   acc:hash ->
   actd:bool ->
   GTot (rhs:hash_seq{S.length rhs = log2c j} * hash) (decreases j)
-let rec construct_rhs_full j fhs acc actd =
+let rec construct_rhs_acc j fhs acc actd =
   if j = 0 then (S.empty, acc)
   else begin
     if j % 2 = 0
-    then (let nrhsh = construct_rhs_full (j / 2) (S.tail fhs) acc actd in
+    then (let nrhsh = construct_rhs_acc (j / 2) (S.tail fhs) acc actd in
          (S.cons hash_init (fst nrhsh), snd nrhsh))
     else (let rhd = if actd then acc else hash_init in
          let nacc = if actd 
                     then hash_2 (S.last (S.head fhs)) acc
                     else S.last (S.head fhs) in
-         let nrhsh = construct_rhs_full (j / 2) (S.tail fhs) nacc true in
+         let nrhsh = construct_rhs_acc (j / 2) (S.tail fhs) nacc true in
          (S.cons rhd (fst nrhsh), snd nrhsh))
   end
 
-val construct_rhs_full_inv_ok_0:
+val construct_rhs_acc_inv_ok_0:
   fhs:hash_ss{
     S.length fhs = 1 /\
     mt_hashes_lth_inv_log 1 fhs /\
@@ -55,16 +56,16 @@ val construct_rhs_full_inv_ok_0:
   acc:hash ->
   actd:bool ->
   Lemma (requires True)
-        (ensures (let crhs = construct_rhs_full 1 fhs acc actd in
+        (ensures (let crhs = construct_rhs_acc 1 fhs acc actd in
                  mt_rhs_inv 1
                    (hash_seq_spec_full (S.head fhs) acc actd)
                    (fst crhs) actd /\
                  MTS.mt_get_root #1
                    (hash_seq_spec_full (S.head fhs) acc actd) ==
                  HRaw (snd crhs)))
-let construct_rhs_full_inv_ok_0 fhs acc actd = ()
+let construct_rhs_acc_inv_ok_0 fhs acc actd = ()
 
-val construct_rhs_full_inv_ok:
+val construct_rhs_acc_inv_ok:
   j:nat{j > 0} ->
   fhs:hash_ss{
     S.length fhs = log2c j /\
@@ -73,7 +74,7 @@ val construct_rhs_full_inv_ok:
   acc:hash ->
   actd:bool ->
   Lemma (requires True)
-        (ensures (let crhs = construct_rhs_full j fhs acc actd in
+        (ensures (let crhs = construct_rhs_acc j fhs acc actd in
                  mt_rhs_inv j
                    (hash_seq_spec_full (S.head fhs) acc actd)
                    (fst crhs) actd /\
@@ -82,12 +83,12 @@ val construct_rhs_full_inv_ok:
                  HRaw (snd crhs)))
         (decreases j)
 #reset-options "--z3rlimit 240 --max_fuel 2"
-let rec construct_rhs_full_inv_ok j fhs acc actd =
-  if j = 1 then construct_rhs_full_inv_ok_0 fhs acc actd
+let rec construct_rhs_acc_inv_ok j fhs acc actd =
+  if j = 1 then construct_rhs_acc_inv_ok_0 fhs acc actd
 
   else if j % 2 = 0 then begin
-    construct_rhs_full_inv_ok (j / 2) (S.tail fhs) acc actd;
-    let rcrhs = construct_rhs_full (j / 2) (S.tail fhs) acc actd in
+    construct_rhs_acc_inv_ok (j / 2) (S.tail fhs) acc actd;
+    let rcrhs = construct_rhs_acc (j / 2) (S.tail fhs) acc actd in
     assert (mt_rhs_inv (j / 2)
              (hash_seq_spec_full (S.head (S.tail fhs)) acc actd)
              (fst rcrhs) actd);
@@ -117,8 +118,8 @@ let rec construct_rhs_full_inv_ok j fhs acc actd =
     let nacc = if actd 
                then hash_2 (S.last (S.head fhs)) acc
                else S.last (S.head fhs) in
-    construct_rhs_full_inv_ok (j / 2) (S.tail fhs) nacc true;
-    let rcrhs = construct_rhs_full (j / 2) (S.tail fhs) nacc true in
+    construct_rhs_acc_inv_ok (j / 2) (S.tail fhs) nacc true;
+    let rcrhs = construct_rhs_acc (j / 2) (S.tail fhs) nacc true in
     assert (mt_rhs_inv (j / 2)
              (hash_seq_spec_full (S.head (S.tail fhs)) nacc true)
              (fst rcrhs) true);
@@ -188,7 +189,7 @@ let rec rhs_equiv_inv_preserved j smt rhs1 rhs2 actd =
   end
 #reset-options
 
-val construct_rhs_full_consistent:
+val construct_rhs_acc_consistent:
   lv:nat{lv <= 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
@@ -202,23 +203,23 @@ val construct_rhs_full_consistent:
           (log2c_bound j (32 - lv);
           mt_olds_hs_lth_inv_ok lv i j olds hs;
           mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
-          (let rrf = construct_rhs_full j
+          (let rrf = construct_rhs_acc j
                        (S.slice (merge_hs olds hs) lv (lv + log2c j)) acc actd in
           let rr = construct_rhs lv hs rhs i j acc actd in
           rhs_equiv j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
           snd rrf == snd rr)))
         (decreases j)
 #reset-options "--z3rlimit 400 --max_fuel 1"
-let rec construct_rhs_full_consistent lv i j olds hs rhs acc actd =
+let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
   mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
-  let rrf = construct_rhs_full j
+  let rrf = construct_rhs_acc j
               (S.slice (merge_hs olds hs) lv (lv + log2c j)) acc actd in
   let rr = construct_rhs lv hs rhs i j acc actd in
   if j = 0 then ()
   else if j % 2 = 0 then begin
-    construct_rhs_full_consistent (lv + 1) (i / 2) (j / 2)
+    construct_rhs_acc_consistent (lv + 1) (i / 2) (j / 2)
       olds hs rhs acc actd
   end
   else begin
@@ -231,11 +232,11 @@ let rec construct_rhs_full_consistent lv i j olds hs rhs acc actd =
                     (S.slice (merge_hs olds hs) 
                       (lv + 1) (lv + 1 + log2c (j / 2))));
 
-    // Recursion step for `construct_rhs_full`
+    // Recursion step for `construct_rhs_acc`
     log2c_bound (j / 2) (32 - (lv + 1));
     mt_olds_hs_lth_inv_ok (lv + 1) (i / 2) (j / 2) olds hs;
     mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) (merge_hs olds hs);
-    let nrrf = construct_rhs_full (j / 2)
+    let nrrf = construct_rhs_acc (j / 2)
                  (S.slice (merge_hs olds hs) (lv + 1) (lv + 1 + (log2c (j / 2))))
                  nacc true in
     assert (S.equal (fst rrf) (S.cons rhd (fst nrrf)));
@@ -253,7 +254,7 @@ let rec construct_rhs_full_consistent lv i j olds hs rhs acc actd =
     assert (snd rr == snd nrr);
 
     // Recursion for the proof
-    construct_rhs_full_consistent (lv + 1) (i / 2) (j / 2)
+    construct_rhs_acc_consistent (lv + 1) (i / 2) (j / 2)
       olds hs nrhs nacc true;
     assert (rhs_equiv (j / 2) (fst nrrf)
              (S.slice (fst nrr) (lv + 1) (lv + 1 + log2c (j / 2))) true);
@@ -303,10 +304,10 @@ let construct_rhs_inv_ok lv i j olds hs rhs acc actd =
   mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
   mt_hashes_inv_log_converted_ lv j (merge_hs olds hs);
   let crhs = construct_rhs lv hs rhs i j acc actd in
-  let crhsf = construct_rhs_full j
+  let crhsf = construct_rhs_acc j
                 (S.slice (merge_hs olds hs) lv (lv + log2c j)) acc actd in
-  construct_rhs_full_consistent lv i j olds hs rhs acc actd;
-  construct_rhs_full_inv_ok j
+  construct_rhs_acc_consistent lv i j olds hs rhs acc actd;
+  construct_rhs_acc_inv_ok j
     (S.slice (merge_hs olds hs) lv (lv + log2c j)) acc actd;
   rhs_equiv_inv_preserved j
     (hash_seq_spec_full (S.index (merge_hs olds hs) lv) acc actd)
