@@ -23,7 +23,7 @@ module S = Spec.Frodo.KEM.Encaps
 module M = Spec.Matrix
 module LSeq = Lib.Sequence
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val frodo_mul_add_sa_plus_e:
@@ -35,13 +35,14 @@ val frodo_mul_add_sa_plus_e:
     (requires fun h ->
       live h seed_a /\ live h seed_e /\ live h sp_matrix /\ live h bp_matrix /\
       disjoint bp_matrix seed_a /\ disjoint bp_matrix seed_e /\ disjoint bp_matrix sp_matrix)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer bp_matrix) h0 h1 /\
+    (ensures  fun h0 _ h1 -> 
+      modifies1 bp_matrix h0 h1 /\
       as_matrix h1 bp_matrix ==
       S.frodo_mul_add_sa_plus_e (as_seq h0 seed_a) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
 let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix bp_matrix =
   assert_norm (v params_n * v params_nbar % 2 = 0);
   push_frame();
-  let a_matrix = matrix_create params_n params_n in
+  let a_matrix  = matrix_create params_n params_n in
   let ep_matrix = matrix_create params_nbar params_n in
   frodo_gen_matrix params_n bytes_seed_a seed_a a_matrix;
   frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 5) ep_matrix;
@@ -60,7 +61,7 @@ val frodo_mul_add_sb_plus_e:
     (requires fun h ->
       live h b /\ live h seed_e /\ live h v_matrix /\ live h sp_matrix /\
       disjoint v_matrix b /\ disjoint v_matrix seed_e /\ disjoint v_matrix sp_matrix)
-    (ensures fun h0 _ h1 -> modifies (loc_buffer v_matrix) h0 h1 /\
+    (ensures fun h0 _ h1 -> modifies1 v_matrix h0 h1 /\
       as_matrix h1 v_matrix ==
       S.frodo_mul_add_sb_plus_e (as_seq h0 b) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
 let frodo_mul_add_sb_plus_e b seed_e sp_matrix v_matrix =
@@ -68,7 +69,6 @@ let frodo_mul_add_sb_plus_e b seed_e sp_matrix v_matrix =
   push_frame();
   let b_matrix   = matrix_create params_n params_nbar in
   let epp_matrix = matrix_create params_nbar params_nbar in
-  assert (v params_nbar % 8 = 0);
   frodo_unpack params_n params_nbar params_logq b b_matrix;
   frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) epp_matrix;
   matrix_mul sp_matrix b_matrix v_matrix;
@@ -87,14 +87,14 @@ val frodo_mul_add_sb_plus_e_plus_mu:
       live h b /\ live h seed_e /\ live h coins /\ live h v_matrix /\ live h sp_matrix /\
       disjoint v_matrix b /\ disjoint v_matrix seed_e /\ disjoint v_matrix sp_matrix /\
       disjoint v_matrix coins)
-    (ensures fun h0 _ h1 -> modifies (loc_buffer v_matrix) h0 h1 /\
+    (ensures fun h0 _ h1 -> modifies1 v_matrix h0 h1 /\
       as_matrix h1 v_matrix ==
       S.frodo_mul_add_sb_plus_e_plus_mu (as_seq h0 b) (as_seq h0 seed_e) (as_seq h0 coins) (as_matrix h0 sp_matrix))
 [@"c_inline"]
 let frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix v_matrix =
   push_frame();
   frodo_mul_add_sb_plus_e b seed_e sp_matrix v_matrix;
-  let mu_encode  = matrix_create params_nbar params_nbar in
+  let mu_encode = matrix_create params_nbar params_nbar in
   frodo_key_encode params_extracted_bits coins mu_encode;
   matrix_add v_matrix mu_encode;
   pop_frame()
@@ -110,7 +110,7 @@ val crypto_kem_enc_ct_pack_c1:
       live h seed_a /\ live h seed_e /\ live h sp_matrix /\ live h c1 /\
       disjoint seed_a c1 /\ disjoint seed_e c1 /\ disjoint sp_matrix c1)
     (ensures fun h0 _ h1 ->
-      modifies (loc_buffer c1) h0 h1 /\
+      modifies1 c1 h0 h1 /\
       as_seq h1 c1 ==
       S.crypto_kem_enc_ct_pack_c1 (as_seq h0 seed_a) (as_seq h0 seed_e) (as_matrix h0 sp_matrix))
 let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix c1 =
@@ -131,7 +131,7 @@ val crypto_kem_enc_ct_pack_c2:
     (requires fun h ->
       live h seed_e /\ live h coins /\ live h b /\ live h sp_matrix /\ live h c2 /\
       disjoint seed_e c2 /\ disjoint coins c2 /\ disjoint b c2 /\ disjoint sp_matrix c2)
-    (ensures fun h0 _ h1 -> modifies (loc_buffer c2) h0 h1 /\
+    (ensures fun h0 _ h1 -> modifies1 c2 h0 h1 /\
       as_seq h1 c2 ==
       S.crypto_kem_enc_ct_pack_c2 (as_seq h0 seed_e) (as_seq h0 coins) (as_seq h0 b) (as_matrix h0 sp_matrix))
 let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix c2 =
@@ -158,7 +158,7 @@ val crypto_kem_enc_ct0:
       live h sp_matrix /\ live h ct /\ live h d /\
       disjoint coins ct /\ disjoint b ct /\ disjoint d ct /\
       disjoint seed_a ct /\ disjoint seed_e ct /\ disjoint sp_matrix ct)
-    (ensures fun h0 _ h1 -> modifies (loc_buffer ct) h0 h1 /\
+    (ensures fun h0 _ h1 -> modifies1 ct h0 h1 /\
      (let c1 = S.crypto_kem_enc_ct_pack_c1 (as_seq h0 seed_a) (as_seq h0 seed_e) (as_seq h0 sp_matrix) in
       let c2 = S.crypto_kem_enc_ct_pack_c2 (as_seq h0 seed_e) (as_seq h0 coins) (as_seq h0 b) (as_seq h0 sp_matrix) in
       Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
@@ -196,7 +196,7 @@ val crypto_kem_enc_ct:
     (requires fun h ->
       live h pk /\ live h g /\ live h coins /\ live h ct /\
       disjoint g ct /\ disjoint ct pk /\ disjoint coins ct)
-    (ensures fun h0 _ h1 -> modifies (loc_buffer ct) h0 h1 /\
+    (ensures fun h0 _ h1 -> modifies1 ct h0 h1 /\
       as_seq h1 ct == S.crypto_kem_enc_ct (as_seq h0 pk) (as_seq h0 g) (as_seq h0 coins))
 [@"c_inline"]
 let crypto_kem_enc_ct pk g coins ct =
@@ -220,7 +220,7 @@ val crypto_kem_enc_ss:
     (requires fun h ->
       live h g /\ live h ct /\ live h ss /\
       disjoint ct ss /\ disjoint g ct /\ disjoint g ss)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer ss) h0 h1 /\
+    (ensures  fun h0 _ h1 -> modifies1 ss h0 h1 /\
      as_seq h1 ss == S.crypto_kem_enc_ss (as_seq h0 g) (as_seq h0 ct))
 [@"c_inline"]
 let crypto_kem_enc_ss g ct ss =
@@ -242,7 +242,8 @@ val crypto_kem_enc_g:
     (requires fun h ->
       live h coins /\ live h pk /\ live h g /\
       disjoint g coins /\ disjoint g pk)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer g) h0 h1 /\
+    (ensures  fun h0 _ h1 -> 
+      modifies1 g h0 h1 /\
       (let pk_coins = LSeq.concat (as_seq h0 pk) (as_seq h0 coins) in
       as_seq h1 g ==
       Spec.Frodo.Params.frodo_prf_spec (v crypto_publickeybytes + v bytes_mu) pk_coins (u16 3) (3 * v crypto_bytes)))
@@ -267,14 +268,14 @@ val crypto_kem_enc_ct_ss:
       disjoint coins ss /\ disjoint coins ct /\ disjoint g ct /\
       disjoint g ss /\ disjoint g coins /\ disjoint g pk)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_union (loc_buffer ct) (loc_buffer ss)) (loc_buffer g)) h0 h1 /\
+      modifies ((loc ct |+| loc ss) |+| loc g) h0 h1 /\
       as_seq h1 ct == S.crypto_kem_enc_ct (as_seq h0 pk) (as_seq h0 g) (as_seq h0 coins) /\
       as_seq h1 ss == S.crypto_kem_enc_ss (as_seq h0 g) (as_seq h1 ct))
 let crypto_kem_enc_ct_ss g coins ct ss pk =
   assert_spinoff (2 * v crypto_bytes % 4 == 0);
   crypto_kem_enc_ct pk g coins ct;
   crypto_kem_enc_ss g ct ss;
-  clear_words_u8 (size 2 *! crypto_bytes) (sub #_ #_ #(2 * v crypto_bytes) g (size 0) (size 2 *! crypto_bytes))
+  clear_words_u8 (size 2 *! crypto_bytes) (sub g (size 0) (size 2 *! crypto_bytes))
 
 inline_for_extraction noextract
 val crypto_kem_enc_:
@@ -288,7 +289,7 @@ val crypto_kem_enc_:
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk /\
       disjoint coins ss /\ disjoint coins ct /\ disjoint coins pk)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer ct) (loc_buffer ss)) h0 h1 /\
+      modifies2 ct ss h0 h1 /\
       (as_seq h1 ct, as_seq h1 ss) == S.crypto_kem_enc_ (as_seq h0 coins) (as_seq h0 pk))
 let crypto_kem_enc_ coins ct ss pk =
   push_frame();
@@ -308,10 +309,10 @@ val crypto_kem_enc:
       live h ct /\ live h ss /\ live h pk /\
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer state) (loc_union (loc_buffer ct) (loc_buffer ss))) h0 h1 /\
+      modifies (loc state |+| (loc ct |+| loc ss)) h0 h1 /\
       (as_seq h1 ct, as_seq h1 ss) == S.crypto_kem_enc (as_seq h0 state) (as_seq h0 pk))
 let crypto_kem_enc ct ss pk =
-  LowStar.Buffer.recall state;
+  recall state;
   push_frame();
   let coins = create bytes_mu (u8 0) in
   recall state;

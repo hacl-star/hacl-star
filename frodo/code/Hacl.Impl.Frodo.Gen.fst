@@ -31,7 +31,7 @@ val frodo_gen_matrix_cshake0:
   -> Stack unit
     (requires fun h -> live h r /\ live h res)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer res) h0 h1 /\
+      modifies1 res h0 h1 /\
       as_matrix h1 res ==
       S.frodo_gen_matrix_cshake0 (v n) (v i) (as_seq h0 r) (v j) (as_matrix h0 res))
 let frodo_gen_matrix_cshake0 n i r j res =
@@ -51,7 +51,7 @@ val frodo_gen_matrix_cshake1:
       live h seed /\ live h res /\ live h r /\
       disjoint res seed /\ disjoint res r /\ disjoint r seed)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer res) (loc_buffer r)) h0 h1 /\
+      modifies2 res r h0 h1 /\
       as_matrix h1 res == S.frodo_gen_matrix_cshake1 (v n) (v seed_len) (as_seq h0 seed) (v i) (as_matrix h0 res))
 let frodo_gen_matrix_cshake1 n seed_len seed r i res =
   let ctr = size_to_uint32 (size 256 +. i) in
@@ -74,19 +74,19 @@ val frodo_gen_matrix_cshake:
   -> Stack unit
     (requires fun h -> live h seed /\ live h res /\ disjoint seed res)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer res) h0 h1 /\
+      modifies1 res h0 h1 /\
       as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 [@"c_inline"]
 let frodo_gen_matrix_cshake n seed_len seed res =
   push_frame ();
-  let r = create #_ #(2 * v n) (size 2 *! n) (u8 0) in
+  let r = create (size 2 *! n) (u8 0) in
   memset res (u16 0) (n *! n);
   let h0 = ST.get () in
   Lib.Sequence.eq_intro (Lib.Sequence.sub (as_seq h0 res) 0 (v n * v n)) (as_seq h0 res);
   [@ inline_let]
   let refl h i = as_matrix h res in
   [@ inline_let]
-  let footprint i = loc_union (loc_buffer res) (loc_buffer r) in
+  let footprint i = loc res |+| loc r in
   [@ inline_let]
   let spec h0 = S.frodo_gen_matrix_cshake1 (v n) (v seed_len) (as_seq h0 seed) in
   let h0 = ST.get () in
@@ -112,10 +112,9 @@ val frodo_gen_matrix_cshake_4x0:
       live h r0 /\ live h r1 /\ live h r2 /\
       live h r3 /\ live h res /\
       B.loc_pairwise_disjoint
-        [loc_buffer res; loc_buffer r0; loc_buffer r1;
-         loc_buffer r2; loc_buffer r3])
+        [loc res; loc r0; loc r1; loc r2; loc r3])
     (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer res) h0 h1 /\
+      modifies1 res h0 h1 /\
       as_matrix h1 res ==
       S.frodo_gen_matrix_cshake_4x0 (v n) (v i) (as_seq h0 r0) (as_seq h0 r1)
 	(as_seq h0 r2) (as_seq h0 r3) (v j) (as_matrix h0 res))
@@ -144,7 +143,7 @@ val frodo_gen_matrix_cshake_4x1:
       live h seed /\ live h res /\ live h r /\
       disjoint res seed /\ disjoint res r /\ disjoint r seed)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer res) (loc_buffer r)) h0 h1 /\
+      modifies2 res r h0 h1 /\
       as_matrix h1 res ==
       S.frodo_gen_matrix_cshake_4x1 (v n) (v seed_len) (as_seq h0 seed) (v i) (as_matrix h0 res))
 let frodo_gen_matrix_cshake_4x1 n seed_len seed r i res =
@@ -185,18 +184,18 @@ val frodo_gen_matrix_cshake_4x:
       8 * v n <= max_size_t /\
       live h seed /\ live h res /\ disjoint seed res)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer res) h0 h1 /\
+      modifies1 res h0 h1 /\
       as_matrix h1 res == S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
 let frodo_gen_matrix_cshake_4x n seed_len seed res =
   push_frame ();
-  let r = create #_ #(8 * v n) (size 8 *! n) (u8 0) in
+  let r = create (size 8 *! n) (u8 0) in
   memset res (u16 0) (n *! n);
   let h0 = ST.get () in
   Lib.Sequence.eq_intro (Lib.Sequence.sub (as_seq h0 res) 0 (v n * v n)) (as_seq h0 res);
   [@ inline_let]
   let refl h i = as_matrix h res in
   [@ inline_let]
-  let footprint i = loc_union (loc_buffer res) (loc_buffer r) in
+  let footprint i = loc res |+| loc r in
   [@ inline_let]
   let spec h0 = S.frodo_gen_matrix_cshake_4x1 (v n) (v seed_len) (as_seq h0 seed) in
   let n4 = n /. size 4 in
@@ -221,21 +220,21 @@ val frodo_gen_matrix_aes:
   -> Stack unit
     (requires fun h -> live h seed /\ live h a /\ disjoint seed a)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer a) h0 h1 /\
+      modifies1 a h0 h1 /\
       as_matrix h1 a == S.frodo_gen_matrix_aes (v n) (v seed_len) (as_seq h0 seed))
 [@"c_inline"]
 let frodo_gen_matrix_aes n seed_len seed a =
   push_frame();
-  let key = B.alloca (u8 0) 176ul in
+  let key = create (size 176) (u8 0) in
   Hacl.AES128.aes128_key_expansion seed key;
 
   let h0 = ST.get() in
   Lib.Loops.for (size 0) n
-    (fun h1 i -> modifies (loc_buffer a) h0 h1)
+    (fun h1 i -> modifies1 a h0 h1)
     (fun i ->
       let h1 = ST.get() in
       Lib.Loops.for (size 0) (n /. size 8)
-        (fun h2 j -> modifies (loc_buffer a) h1 h2)
+        (fun h2 j -> modifies1 a h1 h2)
         (fun j ->
           let j = j *! size 8 in
           a.[i, j] <- to_u16 (size_to_uint32 i);
@@ -245,11 +244,11 @@ let frodo_gen_matrix_aes n seed_len seed a =
 
   let h0 = ST.get() in
   Lib.Loops.for (size 0) n
-    (fun h1 i -> modifies (loc_buffer a) h0 h1)
+    (fun h1 i -> modifies1 a h0 h1)
     (fun i ->
       let h1 = ST.get() in
       Lib.Loops.for (size 0) (n /. size 8)
-        (fun h2 j -> modifies (loc_buffer a) h1 h2)
+        (fun h2 j -> modifies1 a h1 h2)
         (fun j ->
           let j = j *! size 8 in
           assert (v j + 8 <= v n);
