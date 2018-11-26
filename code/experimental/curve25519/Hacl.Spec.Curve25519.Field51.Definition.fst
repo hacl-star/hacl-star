@@ -52,7 +52,7 @@ let ( ** ) (x:nat5) (y:nat5) : nat5 =
 #set-options "--z3rlimit 100"
 
 let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
-  assert_norm (8192 * 8192 <= 67108864);
+  assert_norm (8192 * 8192 = 67108864);
   let (y1,y2,y3,y4,y5) = y in
   (x * y1 ,
    x * y2 ,
@@ -132,3 +132,6 @@ let fsub f1 f2 = (f1 - f2) % prime
 
 val fmul: felem -> felem -> felem
 let fmul f1 f2 = (f1 * f2) % prime
+
+val fsqr: felem -> felem
+let fsqr f1 = (f1 * f1) % prime

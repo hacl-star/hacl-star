@@ -63,6 +63,20 @@ let fsub5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   lemma_mod_sub_distr ((as_nat5 (t0, t1, t2, t3, t4)) % prime) (as_nat5 (f20, f21, f22, f23, f24)) prime;
   out
 
+val lemma_fsub:
+    f1:felem5{felem_fits5 f1 (1, 2, 1, 1, 1)}
+  -> f2:felem5{felem_fits5 f2 (1, 2, 1, 1, 1)}
+  -> Lemma (let (f10, f11, f12, f13, f14) = f1 in
+      let (f20, f21, f22, f23, f24) = f2 in
+      let o0 = f10 +! u64 0x3fffffffffff68 -! f20 in
+      let o1 = f11 +! u64 0x3ffffffffffff8 -! f21 in
+      let o2 = f12 +! u64 0x3ffffffffffff8 -! f22 in
+      let o3 = f13 +! u64 0x3ffffffffffff8 -! f23 in
+      let o4 = f14 +! u64 0x3ffffffffffff8 -! f24 in
+      let out = (o0, o1, o2, o3, o4) in
+      out == fsub5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24))
+let lemma_fsub f1 f2 = ()
+
 inline_for_extraction
 val mul_wide64:
     #m1:scale64
@@ -70,7 +84,10 @@ val mul_wide64:
   -> x:uint64{felem_fits1 x m1}
   -> y:uint64{felem_fits1 y m2 /\ m1 * m2 <= 67108864}
   -> z:uint128{uint_v z == uint_v x * uint_v y /\ felem_wide_fits1 z (m1 * m2)}
-let mul_wide64 #m1 #m2 x y = mul64_wide x y
+let mul_wide64 #m1 #m2 x y =
+  assert (v x * v y <= m1 * max51 * m2 * max51);
+  assert (v x * v y <= m1 * m2 * max51 * max51);
+  mul64_wide x y
 
 inline_for_extraction
 val smul_felem5:
@@ -94,6 +111,7 @@ let smul_felem5 #m1 #m2 u1 (f20, f21, f22, f23, f24) =
   let o4 = mul_wide64 #m1 #m24 u1 f24 in
   [@inline_let]
   let out = (o0, o1, o2, o3, o4) in
+  lemma_smul_felem5 #m1 #m2 u1 (f20, f21, f22, f23, f24);
   out
 
 inline_for_extraction
@@ -107,8 +125,6 @@ val mul_add_wide128:
   -> r:uint128{uint_v r == uint_v z + uint_v x * uint_v y /\ felem_wide_fits1 r (m3 + m1 * m2)}
 let mul_add_wide128 #m1 #m2 #m3 x y z =
   z +! mul_wide64 #m1 #m2 x y
-
-#set-options "--z3rlimit 150"
 
 inline_for_extraction
 val smul_add_felem5:
@@ -136,6 +152,7 @@ let smul_add_felem5 #m1 #m2 #m3 u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4
   let o4' = mul_add_wide128 #m1 #m24 #m34 u1 f24 o4 in
   [@inline_let]
   let out = (o0', o1', o2', o3', o4') in
+  lemma_smul_add_felem5 #m1 #m2 #m3 u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4);
   out
 
 inline_for_extraction
@@ -285,8 +302,9 @@ inline_for_extraction
 val fmul15:
     f1:felem5{felem_fits5 f1 (9, 10, 9, 9, 9)}
   -> f2:uint64{felem_fits1 f2 1}
-  -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1)}
-let fmul15 (f10, f11, f12, f13, f14) f2 =
+  -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1) /\
+    feval out == (feval f1 * v f2) % prime}
+let fmul15 (f10, f11, f12, f13, f14) f2 = admit();
   let (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4) =
     smul_felem5 #1 #(9, 10, 9, 9, 9) f2 (f10, f11, f12, f13, f14) in
   carry_wide5 (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4)
@@ -295,7 +313,7 @@ inline_for_extraction
 val fsqr5:
     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
   -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1) /\
-    (as_nat5 out) % prime == (as_nat5 f * as_nat5 f) % prime}
+    feval out == fsqr (feval f)}
 let fsqr5 (f0, f1, f2, f3, f4) =
   let d0 = u64 2 *. f0 in
   let d1 = u64 2 *. f1 in
@@ -324,7 +342,9 @@ val fsqr25:
     (requires True)
     (ensures fun (out1, out2) ->
       felem_fits5 out1 (1, 2, 1, 1, 1) /\
-      felem_fits5 out2 (1, 2, 1, 1, 1))
+      felem_fits5 out2 (1, 2, 1, 1, 1) /\
+      feval out1 == fsqr (feval f1) /\
+      feval out2 == fsqr (feval f2))
 let fsqr25 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   let d10 = u64 2 *. f10 in
   let d11 = u64 2 *. f11 in

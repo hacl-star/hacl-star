@@ -3,31 +3,24 @@ module Hacl.Spec.Curve25519.Finv.Field51
 open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
+
+open Hacl.Spec.Curve25519.Field51.Definition
 open Hacl.Spec.Curve25519.Field51
 
 #reset-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-let felem5 = (| fits:(nat * nat * nat * nat * nat) & x:felem5{felem_fits5 x fits} |)
-
 let felem5 = x:felem5{felem_fits5 x (1, 2, 1, 1, 1)}
 let one5:felem5 = (u64 1, u64 0, u64 0, u64 0, u64 0)
 
-let felem = x:nat{x < prime}
-let feval (f:felem5) : GTot felem = (as_nat5 f) % prime
 let one:felem =
   assert_norm (1 < prime);
   1
 
 val fmul5: f1:felem5 -> f2:felem5 -> r:felem5{feval r == (feval f1 * feval f2) % prime}
-let fmul5 f1 f2 =
-  let r = fmul5 f1 f2 in
-  assert ((as_nat5 r) % prime == (as_nat5 f1 * as_nat5 f2) % prime);
-  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 f1) (as_nat5 f2) prime;
-  FStar.Math.Lemmas.lemma_mod_mul_distr_r ((as_nat5 f1) % prime) (as_nat5 f2) prime;
-  r
+let fmul5 f1 f2 = fmul5 f1 f2
 
-val fmul: felem -> felem -> felem
-let fmul f1 f2 = (f1 * f2) % prime
+val fsqr5: f1:felem5 -> r:felem5{feval r == (feval f1 * feval f1) % prime}
+let fsqr5 f1 = fsqr5 f1
 
 val pow: a:felem -> b:nat -> res:felem
 let rec pow a b =
@@ -72,25 +65,17 @@ val lemma_pow_mul: x:felem -> n:nat -> m:nat
     (requires True)
     (ensures  pow (pow x n) m == pow x (n * m))
 let rec lemma_pow_mul x n m =
+  assert (n + n * (m - 1) = n * m);
   if m = 0 then ()
   else begin
-    //assert (pow (pow x n) m == fmul (pow x n) (pow (pow x n) (m - 1)));
+    assert (pow (pow x n) m == fmul (pow x n) (pow (pow x n) (m - 1)));
     lemma_pow_mul x n (m - 1);
-    //assert (pow (pow x n) (m - 1) == pow x (n * (m - 1)));
+    assert (pow (pow x n) (m - 1) == pow x (n * (m - 1)));
     lemma_pow_add x n (n * (m - 1));
-    assert_spinoff (n + n * (m - 1) = n * m)
+    assert (pow (pow x n) m == fmul (pow x n) (pow x (n * (m - 1))));
+    assert (pow (pow x n) m == pow x (n + n * (m - 1)))
   end
 
-val fsqr: felem -> felem
-let fsqr f1 = (f1 * f1) % prime
-
-val fsqr5: f1:felem5 -> r:felem5{feval r == (feval f1 * feval f1) % prime}
-let fsqr5 f1 =
-  let r = fsqr5 f1 in
-  assert ((as_nat5 r) % prime == (as_nat5 f1 * as_nat5 f1) % prime);
-  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 f1) (as_nat5 f1) prime;
-  FStar.Math.Lemmas.lemma_mod_mul_distr_r ((as_nat5 f1) % prime) (as_nat5 f1) prime;
-  r
 
 val fsquare_times:
     inp:felem
