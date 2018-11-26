@@ -12,15 +12,20 @@ module S = FStar.Seq
 
 module EHS = EverCrypt.Hash
 
+let hash_alg = Spec.Hash.Helpers.SHA2_256
+
 val hash_size: nat
-let hash_size = UInt32.v (EHS.tagLen EHS.SHA256)
+let hash_size = UInt32.v (EHS.tagLen hash_alg)
 
 val hash_raw: eqtype
-let hash_raw = b:EHS.bytes{S.length b = hash_size}
+let hash_raw = b:Spec.Hash.Helpers.bytes_block hash_alg{S.length b = hash_size}
 
 val hash_2_raw: hash_raw -> hash_raw -> GTot hash_raw
 let hash_2_raw src1 src2 =
-  EHS.extract (EHS.hash0 #EHS.SHA256 (S.append src1 src2))
+  let acc = EHS.acc0 #hash_alg in
+  let acc = EHS.compress #hash_alg acc src1 in
+  let acc = EHS.compress #hash_alg acc src2 in
+  EHS.extract #hash_alg acc
 
 type hash =
 | HRaw: hr:hash_raw -> hash
