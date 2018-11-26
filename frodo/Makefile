@@ -44,16 +44,16 @@ code:
 	$(MAKE) -C NIST/Reference_Implementation/reference/FrodoKEM-976 tests
 	NIST/Reference_Implementation/reference/FrodoKEM-976/frodo/test_KEM
 # ====================================================================
-# Optimized x64 976-AES
+# Optimized x64 976-cSHAKE
 # ====================================================================
-	$(MAKE) -C code VARIANT=976-AES TARGET=x64 lib
-	$(MAKE) -C code VARIANT=976-AES TARGET=x64 benchmark KATs
+	$(MAKE) -C code VARIANT=976-cSHAKE TARGET=x64 lib
+	$(MAKE) -C code VARIANT=976-cSHAKE TARGET=x64 benchmark KATs
 	$(MAKE) -C NIST/Additional_Implementations/x64/FrodoKEM-976 tests
 	NIST/Additional_Implementations/x64/FrodoKEM-976/frodo/test_KEM
 # ====================================================================
 # Optimized x64 976-AES
 # ====================================================================
-	$(MAKE) -C code VARIANT=640-AES TARGET=x64 lib
-	$(MAKE) -C code VARIANT=640-AES TARGET=x64 benchmark KATs
+	$(MAKE) -C code VARIANT=976-AES TARGET=x64 lib
+	$(MAKE) -C code VARIANT=976-AES TARGET=x64 benchmark KATs
 	$(MAKE) -C NIST/Additional_Implementations/x64/FrodoKEM-976 GENERATION_A=AES128 tests
 	NIST/Additional_Implementations/x64/FrodoKEM-976/frodo/test_KEM
