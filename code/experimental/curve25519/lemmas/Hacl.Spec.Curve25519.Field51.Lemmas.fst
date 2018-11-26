@@ -485,3 +485,46 @@ let lemma_carry_wide5_simplify inp c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
     v t3 * pow51 * pow51 * pow51 +
     v t4 * pow51 * pow51 * pow51 * pow51)
    (v c4 * 19) prime
+
+val lemma_smul_felem5:
+    #m1:scale64
+  -> #m2:scale64_5
+  -> u1:uint64{felem_fits1 u1 m1}
+  -> f2:felem5{felem_fits5 f2 m2 /\ m1 *^ m2 <=* s128x5 67108864}
+  -> Lemma (let (f20, f21, f22, f23, f24) = f2 in
+      v u1 * as_nat5 f2 == v u1 * v f20 + v u1 * v f21 * pow51 +
+      v u1 * v f22 * pow51 * pow51 + v u1 * v f23 * pow51 * pow51 * pow51 +
+      v u1 * v f24 * pow51 * pow51 * pow51 * pow51)
+let lemma_smul_felem5 #m1 #m2 u1 f2 =
+  let (f20, f21, f22, f23, f24) = f2 in
+  assert (v u1 * as_nat5 f2 == v u1 * (v f20 + v f21 * pow51 + v f22 * pow51 * pow51 +
+    v f23 * pow51 * pow51 * pow51 + v f24 * pow51 * pow51 * pow51 * pow51));
+  lemma_mul5_distr_l (v u1) (v f20) (v f21 * pow51) (v f22 * pow51 * pow51)
+    (v f23 * pow51 * pow51 * pow51) (v f24 * pow51 * pow51 * pow51 * pow51)
+
+
+val lemma_smul_add_felem5:
+    #m1:scale64
+  -> #m2:scale64_5
+  -> #m3:scale128_5
+  -> u1:uint64{felem_fits1 u1 m1}
+  -> f2:felem5{felem_fits5 f2 m2}
+  -> acc1:felem_wide5{felem_wide_fits5 acc1 m3 /\ m3 +* m1 *^ m2 <=* s128x5 67108864}
+  -> Lemma (let (f20, f21, f22, f23, f24) = f2 in
+      let (o0, o1, o2, o3, o4) = acc1 in
+      wide_as_nat5 acc1 + uint_v u1 * as_nat5 f2 ==
+      v o0 + v o1 * pow51 + v o2 * pow51 * pow51 +
+      v o3 * pow51 * pow51 * pow51 + v o4 * pow51 * pow51 * pow51 * pow51 +
+      v u1 * v f20 + v u1 * v f21 * pow51 +
+      v u1 * v f22 * pow51 * pow51 + v u1 * v f23 * pow51 * pow51 * pow51 +
+      v u1 * v f24 * pow51 * pow51 * pow51 * pow51)
+let lemma_smul_add_felem5 #m1 #m2 #m3 u1 f2 acc1 =
+  let (f20, f21, f22, f23, f24) = f2 in
+  let (o0, o1, o2, o3, o4) = acc1 in
+  assert (wide_as_nat5 acc1 + uint_v u1 * as_nat5 f2 ==
+    v o0 + v o1 * pow51 + v o2 * pow51 * pow51 +
+    v o3 * pow51 * pow51 * pow51 + v o4 * pow51 * pow51 * pow51 * pow51 +
+    v u1 * (v f20 + v f21 * pow51 + v f22 * pow51 * pow51 +
+    v f23 * pow51 * pow51 * pow51 + v f24 * pow51 * pow51 * pow51 * pow51));
+  lemma_mul5_distr_l (v u1) (v f20) (v f21 * pow51) (v f22 * pow51 * pow51)
+    (v f23 * pow51 * pow51 * pow51) (v f24 * pow51 * pow51 * pow51 * pow51)
