@@ -209,7 +209,7 @@ val construct_rhs_acc_consistent:
           rhs_equiv j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
           snd rrf == snd rr)))
         (decreases j)
-#reset-options "--z3rlimit 400 --max_fuel 1"
+#reset-options "--z3rlimit 480 --max_fuel 1"
 let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
@@ -217,6 +217,9 @@ let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
   let rrf = construct_rhs_acc j
               (S.slice (merge_hs olds hs) lv (lv + log2c j)) acc actd in
   let rr = construct_rhs lv hs rhs i j acc actd in
+  construct_rhs_unchanged lv hs rhs i j acc actd;
+  assert (S.equal (S.slice rhs 0 lv) (S.slice (fst rr) 0 lv));
+
   if j = 0 then ()
   else if j % 2 = 0 then begin
     construct_rhs_acc_consistent (lv + 1) (i / 2) (j / 2)
@@ -249,6 +252,8 @@ let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
     assert (hs_wf_elts (lv + 1) hs (i / 2) (j / 2));
     let nrhs = if actd then S.upd rhs lv acc else rhs in
     let nrr = construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true in
+    construct_rhs_unchanged (lv + 1) hs nrhs (i / 2) (j / 2) nacc true;
+    assert (S.equal (S.slice nrhs 0 (lv + 1)) (S.slice (fst nrr) 0 (lv + 1)));
     assert (S.index (fst nrr) lv == S.index nrhs lv);
     assert (S.equal (fst rr) (fst nrr));
     assert (snd rr == snd nrr);
@@ -361,7 +366,14 @@ val mt_get_root_inv_ok:
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds} ->
   Lemma (requires (mt_inv mt olds))
         (ensures (let nmt, rt = mt_get_root mt drt in
-                 mt_inv nmt olds /\ rt == MT?.mroot nmt))
+                 // Only `MT?.rhs` and `MT?.mroot` are changed.
+                 MT?.i mt == MT?.i nmt /\
+                 MT?.j mt == MT?.j nmt /\
+                 MT?.hs mt == MT?.hs nmt /\
+                 // A Merkle tree with new `MT?.rhs` and `MT?.mroot` is valid.
+                 mt_inv nmt olds /\
+                 // A returned root is indeed the Merkle root.
+                 rt == MT?.mroot nmt))
 let mt_get_root_inv_ok mt drt olds =
   if MT?.rhs_ok mt then ()
   else if MT?.j mt = 0 then ()

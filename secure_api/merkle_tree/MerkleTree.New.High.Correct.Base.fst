@@ -495,7 +495,7 @@ val hash_seq_spec_full_odd_next:
     (ensures (S.equal (hash_seq_spec_full nhs nacc true)
                       (mt_next_lv #(log2c j)
                         (hash_seq_spec_full hs acc actd))))
-#reset-options "--z3rlimit 60"
+#reset-options "--z3rlimit 80"
 let hash_seq_spec_full_odd_next j hs nhs acc actd nacc =
   mt_hashes_next_rel_lift_odd j hs nhs;
   if actd
@@ -598,10 +598,25 @@ let mt_root_inv hs0 acc actd rt =
   MTS.mt_get_root #(log2c (S.length hs0))
     (hash_seq_spec_full hs0 acc actd) == HRaw rt
 
+val mt_base:
+  mt:merkle_tree{mt_wf_elts mt} ->
+  olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds} ->
+  GTot (bhs:hash_seq{S.length bhs = MT?.j mt})
+let mt_base mt olds =
+  S.head (merge_hs olds (MT?.hs mt))
+
+val mt_spec:
+  mt:merkle_tree{mt_wf_elts mt /\ MT?.j mt > 0} ->
+  olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds} ->
+  GTot (smt:MTS.merkle_tree (log2c (MT?.j mt)))
+let mt_spec mt olds =
+  hash_seq_spec (mt_base mt olds)
+
 val mt_inv: 
   mt:merkle_tree{mt_wf_elts mt} ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds} ->
   GTot Type0
+#reset-options "--z3rlimit 10"
 let mt_inv mt olds =
   let i = MT?.i mt in
   let j = MT?.j mt in
@@ -613,8 +628,7 @@ let mt_inv mt olds =
   (if j > 0 && MT?.rhs_ok mt
   then (mt_olds_hs_lth_inv_ok 0 i j olds hs;
        mt_hashes_lth_inv_log_converted j fhs;
-       (let bhs = S.append (S.head olds) (S.head hs) in
-       mt_rhs_inv j (hash_seq_spec bhs) (S.slice rhs 0 (log2c j)) false /\
-       mt_root_inv bhs hash_init false rt))
+       (mt_rhs_inv j (mt_spec mt olds) (S.slice rhs 0 (log2c j)) false /\
+       mt_root_inv (mt_base mt olds) hash_init false rt))
   else true)
 
