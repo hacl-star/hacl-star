@@ -41,6 +41,7 @@ stage2: $(OUT_DIR)/libmerkletree.a
 FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/code/lib \
+  $(HACL_HOME)/code/hash-new \
   $(HACL_HOME)/providers/evercrypt \
   $(KREMLIN_HOME)/kremlib
 
