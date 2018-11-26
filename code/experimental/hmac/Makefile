@@ -17,9 +17,9 @@ CFLAGS=-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/include
 # HMAC_SHA2_256
 #
 
-BASE_OBJ = ../../../lib/c/Lib_Print.o
+BASE_OBJ = ../../../lib/c/Lib_PrintBuffer.o
 
-HACL_LIBS = ../../../lib/fst/Lib.IntTypes.fst ../../../lib/fst/Lib.RawIntTypes.fst ../../../lib/c/Lib.Loops.fst ../../../lib/fst/Lib.Buffer.fst  ../../../lib/fst/Lib.ByteBuffer.fst ../../../lib/Lib.Print.fsti
+HACL_LIBS = ../../../lib/fst/Lib.IntTypes.fst ../../../lib/fst/Lib.RawIntTypes.fst ../../../lib/c/Lib.Loops.fst ../../../lib/fst/Lib.Buffer.fst  ../../../lib/fst/Lib.ByteBuffer.fst ../../../lib/Lib.PrintBuffer.fsti
 
 
 hmac_sha2_256-c/out.krml: $(HACL_LIBS) ../sha2/Hacl.Impl.SHA2_256.fst ../sha2/Hacl.SHA2_256.fst Hacl.Impl.HMAC_SHA2_256.fst Hacl.HMAC_SHA2_256.fst Test.Impl.HMAC_SHA2_256.fst
@@ -29,7 +29,7 @@ hmac_sha2_256-c/out.krml: $(HACL_LIBS) ../sha2/Hacl.Impl.SHA2_256.fst ../sha2/Ha
 
 
 hmac_sha2_256-c/Hacl_HMAC_SHA2_256.c: hmac_sha2_256-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"../../../../lib/c/Lib_Print.h"' -add-include '"C_String.h"' -fparentheses -tmpdir hmac_sha2_256-c -no-prefix 'Test.Impl.HMAC_SHA2_256' \
+	$(KREMLIN) $(KREMLIN_ARGS) -add-include '"../../../../lib/c/Lib_PrintBuffer.h"' -add-include '"C_String.h"' -fparentheses -tmpdir hmac_sha2_256-c -no-prefix 'Test.Impl.HMAC_SHA2_256' \
 	-skip-compilation -bundle 'Hacl.HMAC_SHA2_256=Hacl.Impl.*,Hacl.HMAC_SHA2_256' \
 	$^ -o $@
 

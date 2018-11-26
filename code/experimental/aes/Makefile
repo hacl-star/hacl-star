@@ -1,0 +1,228 @@
+FSTAR_HOME   ?= ../../../../FStar
+KREMLIN_HOME ?= ../../../../kremlin
+HACL_HOME    ?= ../../..
+
+CACHE_DIR     = .cache
+OUTPUT_DIR    = .output
+HINT_DIR      = .hints
+GENERATED_DIR = x25519-c
+OUT_DIR	      = x25519-c
+
+.PHONY: all test stage1 stage2 clean clean-c distclean
+
+all: curve25519_51.exe curve25519_64.exe
+
+verify: test
+
+CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
+#CC=gcc-8
+
+AES_BS_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	Hacl.Impl.Aes.CoreBitSlice.fst \
+	Hacl.Impl.Aes.Core.fst \
+	Hacl.Impl.Aes.Generic.fst \
+	Hacl.Aes.BitSlice.fst
+
+
+AES_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	Hacl.Impl.Aes.CoreNI.fst \
+	Hacl.Impl.Aes.Core.fst \
+	Hacl.Impl.Aes.Generic.fst \
+	Hacl.Aes.NI.fst 
+
+
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
+
+aes-bitslice-c/out.krml: $(AES_BS_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-bitslice-c $(AES_BS_FILES) -skip-translation
+
+aes-bitslice-c/Hacl_Aes_BitSlice.c: aes-bitslice-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-bitslice-c $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Aes.BitSlice=*'
+
+aes128-bitslice.exe: aes-bitslice-c/Hacl_Aes_BitSlice.c aes-bitslice-test.c
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aes-bitslice-c/Hacl_Aes_BitSlice.c $(KREMLIN_HOME)/kremlib/c/testlib.o aes-bitslice-test.c -o aes128-bitslice.exe
+	./aes128-bitslice.exe
+
+
+aes-ni-c/out.krml: $(AES_NI_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-ni-c $(AES_NI_FILES) -skip-translation
+
+aes-ni-c/Hacl_Aes_NI.c: aes-ni-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-ni-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Aes.NI=*'
+
+aes128-ni.exe: aes-ni-c/Hacl_Aes_NI.c aes-ni-test.c
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aes-ni-c/Hacl_Aes_NI.c $(KREMLIN_HOME)/kremlib/c/testlib.o aes-ni-test.c -o aes128-ni.exe
+	./aes128-ni.exe
+
+aes-perf: aes128-bitslice.exe aes128-ni.exe
+	./aes128-bitslice.exe
+	./aes128-ni.exe
+
+test:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) stage1
+	STAGE=2 $(MAKE) stage2
+
+stage1: $(GENERATED_DIR)/Makefile.include
+
+stage2: $(OUT_DIR)/test.exe
+	$(OUT_DIR)/test.exe
+
+FSTAR_INCLUDE_DIRS = \
+  $(HACL_KREMLIN) \
+  $(KREMLIN_HOME)/kremlib \
+  $(HACL_HOME)/specs \
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/lib/fst \
+  $(HACL_HOME)/lib/c
+
+FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
+
+ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
+
+ROOTS = Hacl.AesCTRNI.fst
+
+
+.PRECIOUS: %.krml
+
+.depend:
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
+
+include .depend
+
+# Admit SMT queries for modules in FStar, LowStar, and C
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/%.checked: | .depend
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
+
+$(OUTPUT_DIR)/%.krml: | .depend
+	$(FSTAR) --codegen Kremlin \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
+
+# 2. Generation of .c files
+
+KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
+
+KREMLIN=$(KREMLIN_HOME)/krml
+
+# 2. Generation of .c files
+
+# We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
+$(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-no-prefix 'Hacl.Test.SHA3' \
+	-no-prefix 'Hacl.Impl.SHA3' \
+	-no-prefix 'Hacl.SHA3' \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.*' \
+	-bundle 'C=C.Endianness' \
+	-bundle 'Hacl.SHA3=Hacl.Impl.*,Hacl.SHA3' \
+	-library 'C,FStar' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
+	-add-include '"c/Lib_PrintBuffer.h"' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
+
+# The Makefile is manually staged because GNU Make does not understand
+# dependencies between the Makefiles we include, i.e. it won't first generate
+# the .depend, parse it, then generate Makefile.include, parse it, then
+# generate dependencies among the C files
+ifeq ($(STAGE),2)
+
+# The top-level invocation guarantees that stage1 has been run and this file is
+# there.
+include $(GENERATED_DIR)/Makefile.include
+
+# 3. Collecting all of our source files, and generating corresponding object
+# files.
+
+# This is auto-generated by KreMLin; since the Makefile is staged via the
+# inclusion of Makefile.include, the automated dependency analysis via $(CC) -MM
+# also captures the dependencies between these files.
+#
+# KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
+# files for them in $(GENERATED_DIR). However, we are only interested in the header,
+# and drop these (mostly empty) C files.
+ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
+ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
+
+ALL_SOURCES = \
+  $(ALL_GENERATED_FILES) \
+  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
+
+ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
+
+INCLUDE_DIRS = \
+  $(KREMLIN_HOME)/include \
+  $(KREMLIN_HOME)/kremlib \
+  $(HACL_HOME)/lib
+
+# TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
+CFLAGS += -O3 -march=native -mtune=native -funroll-loops
+CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
+  -Wno-incompatible-pointer-types
+
+# GNU Make manual section 4.14
+%.d: %.c
+	@set -e; rm -f $@; \
+	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
+	  rm -f $@.$$$$
+
+-include $(patsubst %.c,%.d,$(ALL_SOURCES))
+
+$(OUT_DIR):
+	mkdir -p $@
+
+$(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
+	$(info ALL_SOURCES is $(ALL_SOURCES))
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
+
+.PRECIOUS: %.o
+
+endif # STAGE=2
+
+# 5. Targets for interactive mode
+
+%.fst-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
+
+# 6. Clean targets
+
+SHELL=/bin/bash
+
+clean:
+	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
+	rm -rf include/*.o include/*.d
+
+clean-c:
+	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
+
+distclean: clean
+	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)

@@ -796,8 +796,8 @@ val fillT:
   -> clen:size_t
   -> o:lbuffer a clen
   -> spec_f:(i:size_nat{i < v clen} -> a)
-  -> f:(i:size_t{v i < v clen} -> r:a{r == spec_f (size_v i)})
-  -> Stack unit
+  -> f:(i:size_t{v i < v clen} -> r:a{r == spec_f (size_v i)}) ->
+  Stack unit
     (requires fun h0 -> live h0 o)
     (ensures  fun h0 _ h1 ->
       modifies1 o h0 h1 /\

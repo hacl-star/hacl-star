@@ -235,7 +235,7 @@ random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
 	mkdir -p random-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.LoopCombinators --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Random.Test --odir random-ml $^
 	@echo 'let _ = test()' >> random-ml/Spec_Random_Test.ml
-	$(OCAMLOPT) -package cryptokit -I random-ml -I ../lib/ml ../lib/ml/Lib_Random.ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_Sequence.ml random-ml/Lib_ByteSequence.ml random-ml/Spec_Random_Test.ml -o random.exe
+	$(OCAMLOPT) -package cryptokit -I random-ml -I ../lib/ml ../lib/ml/Lib_RandomSequence.ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_Sequence.ml random-ml/Lib_ByteSequence.ml random-ml/Spec_Random_Test.ml -o random.exe
 	./random.exe
 
 # NOT Under CI

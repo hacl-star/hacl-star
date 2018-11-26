@@ -243,7 +243,7 @@ let aes128_key_block #m kb ctx counter =
     let kex = get_kex ctx in
     let n = get_nonce ctx in
     let st = create_state #m in
-    load_state #m st n counter;
+    load_state #m st n <counter;
     block_cipher #m st kex (size 10);
     store_block0 #m kb st;
     pop_frame()

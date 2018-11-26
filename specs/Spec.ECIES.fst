@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Lib.Random
+open Lib.RandomSequence
 
 module DH = Spec.DH
 module AEAD = Spec.AEAD

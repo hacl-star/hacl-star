@@ -34,7 +34,6 @@ static __inline__ cycles cpucycles_end(void)
 }
 
 extern void Hacl_Curve25519_64_ecdh(uint8_t* sec, uint8_t* priv, uint8_t* pub);
-extern void x25519_shared_secret_x64(uint8_t* sec, uint8_t* priv, uint8_t* pub);
 
 #define ROUNDS 100000
 #define SIZE   1
@@ -122,56 +121,6 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
-  x25519_shared_secret_x64(comp,pub1,scalar1);
-  printf("Curve25519 (RFC7794 Original 64-bit) Result:\n");
-  printf("computed:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",comp[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",exp1[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 32; i++)
-    ok = ok & (exp1[i] == comp[i]);
-  if (ok) printf("Success!\n");
-  else printf("**FAILED**\n");
-
-  x25519_shared_secret_x64(comp,pub2,scalar2);
-  printf("Curve25519 (RFC7794 Original 64-bit) Result:\n");
-  printf("computed:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",comp[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",exp2[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 32; i++)
-    ok = ok & (exp2[i] == comp[i]);
-  if (ok) printf("Success!\n");
-  else printf("**FAILED**\n");
-
-
-  memset(pub,'P',32);
-  memset(priv,'S',32);
-  for (int j = 0; j < ROUNDS; j++) {
-    x25519_shared_secret_x64(pub,priv,pub);
-  }
-
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    x25519_shared_secret_x64(key,priv,pub);
-    res ^= key[0] ^ key[15];
-  }
-  b = cpucycles_end();
-  t2 = clock();
-  clock_t tdiff2 = t2 - t1;
-  cycles cdiff2 = b - a;
-
   memset(pub,'P',32);
   memset(priv,'S',32);
   for (int j = 0; j < ROUNDS; j++) {
@@ -195,15 +144,6 @@ int main() {
   double nbytes = ((double)count/1000000.0) / time;
   printf("Curve25519 (Vale 64-bit) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 "s (%.2fus/byte)\n",count,(uint64_t)time,((double)time * 1000000.0)/count);
-  printf("bw %8.2f MB/s\n",nbytes);
-  printf("smult %8.2f mul/s\n",nsigs);
-
-  time = (((double)tdiff2) / CLOCKS_PER_SEC);
-  nsigs = ((double)ROUNDS) / time;
-  nbytes = ((double)count/1000000.0) / time;
-  printf("Curve25519 (RFC7748 Original) PERF:\n");
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff2,(double)cdiff2/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 "s (%.2fus/byte)\n",count,(uint64_t)time,((double)time * 1000000.0)/count);
   printf("bw %8.2f MB/s\n",nbytes);
   printf("smult %8.2f mul/s\n",nsigs);

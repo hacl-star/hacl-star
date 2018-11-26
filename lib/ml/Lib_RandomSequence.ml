@@ -7,11 +7,17 @@ let uint8s_to_bytes s =
 
 let uint8s_from_bytes s =
   let rec exp i l =
-    if i < 0 then l else exp (i - 1) ((Char.code s.[i]) :: l) in
+    if i < 0 then l else exp (i - 1) ((Char.code (Bytes.get s i)) :: l) in
   exp (Bytes.length s - 1) []
 
 
-let generate len =
+let crypto_random len =
+  let buf = Bytes.create (Z.to_int len) in
+  let rng = Random.hardware_rng () in
+  rng#random_bytes buf 0 (Z.to_int len);
+  FStar_Pervasives_Native.Some (uint8s_from_bytes buf)
+
+let crypto_random3 len =
   let buf = Bytes.create (Z.to_int len) in
   let rng = Random.hardware_rng () in
   rng#random_bytes buf 0 (Z.to_int len);

@@ -148,7 +148,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Hacl.RSAPSS=Hacl.Impl.*,Hacl.RSAPSS' \
 	-library 'Hacl.SHA256,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
-	-add-include '"c/Lib_Print.h"' \
+	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -177,7 +177,7 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_Print.c \
+  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
   include/Hacl_SHA256.c \
   $(HACL_HOME)/snapshots/hacl-c/Hacl_SHA2_256.c
 

@@ -31,6 +31,8 @@ let eq_elim #a #len s1 s2 =
 
 let upd #a #len s n x = Seq.upd #a s n x
 
+let member #a #len x l = Seq.count x l > 0
+
 let sub #a #len s start n = Seq.slice #a s start (start + n)
 
 let update_sub #a #len s start n x =
@@ -63,27 +65,27 @@ let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= l
 let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) (s:createi_a a len init k) =
   forall (i:nat). {:pattern (index s i)} i < k ==> index s i == init i
 let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
-	         (si:createi_a a len init i) 
+	         (si:createi_a a len init i)
 		 : r:createi_a a len init (i+1){
 		   createi_pred a len init i si ==>
 		   createi_pred a len init (i+1) r
-		 } = 
+		 } =
     let s : lseq a (i+1) = FStar.Seq.snoc si (init i) in
     assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
     assert (createi_pred a len init i si ==> (forall (j:nat). j < (i+1) ==> index s j == init j));
     s
-let createi #a len init_f = 
-    repeat_gen_inductive len 
-      (createi_a a len init_f) 
+let createi #a len init_f =
+    repeat_gen_inductive len
+      (createi_a a len init_f)
       (createi_pred a len init_f)
       (createi_step a len init_f)
-      (of_list []) 
+      (of_list [])
 
 let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
 	       (f:(i:nat{i < len} -> a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
 		 f i s.[i]
 
-let mapi #a #b #len f s = 
+let mapi #a #b #len f s =
     createi #b len (mapi_inner #a #b #len f s)
 
 let map_inner (#a:Type) (#b:Type) (#len:size_nat)
@@ -197,7 +199,7 @@ let repeat_blocks #a #b bs inp f l init =
 
 let generate_blocks #t len n a f acc0 =
   let a' (i:nat{i <= n}) = a i & lseq t (i * len) in
-  let f' (i:nat{i < n}) (ao:a' i) = 
+  let f' (i:nat{i < n}) (ao:a' i) =
     let acc, o = ao <: a i & lseq t (i * len) in
     let acc', block = f i acc in
     let o' : lseq t ((i + 1) * len) = o @| block in

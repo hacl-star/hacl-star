@@ -60,7 +60,7 @@ int main() {
     0x93,0x6e,0x89,0x0b,0xd9,0x71,0xa8,0xbf};
   uint8_t comp[16] = {0};
   bool ok = true;
-
+/*
   Hacl_Gf128_PreComp_ghash(comp,in,92,key);
   printf("GF128 (with PreComutation) Result:\n");
   printf("computed:");
@@ -75,7 +75,7 @@ int main() {
   for (int i = 0; i < 16; i++)
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
-
+*/
   Hacl_Gf128_NI_ghash(comp,in,92,key);
   printf("GF128 NI Result:\n");
   printf("computed:");
@@ -91,7 +91,7 @@ int main() {
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
 
-
+/*
   uint8_t plain[SIZE];
   uint64_t res = 0;
   uint8_t tag[16];
@@ -142,5 +142,5 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff2,(double)cdiff2/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff2,(double)tdiff2/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff2 / CLOCKS_PER_SEC) * 1000000.0));
-
+*/
 }

@@ -10,7 +10,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.LoopCombinators
-open Lib.Print
+open Lib.PrintBuffer
 
 
 module Spec = Spec.SHA2
