@@ -33,6 +33,8 @@ let hash_init: hash = S.create hash_size 0uy
 val hash_2: src1:hash -> src2:hash -> GTot hash
 let hash_2 = MTS.hash_2_raw
 
+#reset-options "--z3rlimit 10" // default for this file
+
 /// Facts about sequence
 
 val seq_slice_equal_index:
@@ -253,26 +255,49 @@ val construct_rhs:
     hs_wf_elts lv hs i j} ->
   acc:hash ->
   actd:bool ->
-  GTot (crhs:hash_seq{
-         S.length crhs = 32 /\
-         S.equal (S.slice rhs 0 lv) (S.slice crhs 0 lv)} * hash)
+  GTot (crhs:hash_seq{S.length crhs = 32} * hash)
        (decreases j)
 let rec construct_rhs lv hs rhs i j acc actd =
   let ofs = offset_of i in
   if j = 0 then (rhs, acc)
   else
     (if j % 2 = 0
-    then (let rrhs, rt = construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) acc actd in
-         assert (S.equal (S.slice rhs 0 lv) (S.slice rrhs 0 lv));
-         (rrhs, rt))
+    then (construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) acc actd)
     else (let nrhs = if actd then S.upd rhs lv acc else rhs in
          let nacc = if actd 
                     then hash_2 (S.index (S.index hs lv) (j - 1 - ofs)) acc
                     else S.index (S.index hs lv) (j - 1 - ofs) in
-         let rrhs, rt = construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true in
-         assert (S.equal (S.slice nrhs 0 lv) (S.slice rrhs 0 lv));
-         assert (S.equal (S.slice rhs 0 lv) (S.slice nrhs 0 lv));
-         (rrhs, rt)))
+         construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true))
+
+val construct_rhs_unchanged:
+  lv:nat{lv <= 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  rhs:hash_seq{S.length rhs = 32} ->
+  i:nat ->
+  j:nat{
+    i <= j /\ j < pow2 (32 - lv) /\
+    hs_wf_elts lv hs i j} ->
+  acc:hash ->
+  actd:bool ->
+  Lemma (requires True)
+        (ensures (S.equal (S.slice rhs 0 lv)
+                          (S.slice (fst (construct_rhs lv hs rhs i j acc actd)) 0 lv)))
+        (decreases j)
+let rec construct_rhs_unchanged lv hs rhs i j acc actd =
+  let ofs = offset_of i in
+  if j = 0 then ()
+  else if j % 2 = 0
+  then (construct_rhs_unchanged (lv + 1) hs rhs (i / 2) (j / 2) acc actd;
+       let rrhs = fst (construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) acc actd) in
+       assert (S.equal (S.slice rhs 0 lv) (S.slice rrhs 0 lv)))
+  else (let nrhs = if actd then S.upd rhs lv acc else rhs in
+       let nacc = if actd 
+                  then hash_2 (S.index (S.index hs lv) (j - 1 - ofs)) acc
+                  else S.index (S.index hs lv) (j - 1 - ofs) in
+       construct_rhs_unchanged (lv + 1) hs nrhs (i / 2) (j / 2) nacc true;
+       let rrhs = fst (construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true) in
+       assert (S.equal (S.slice nrhs 0 lv) (S.slice rrhs 0 lv));
+       assert (S.equal (S.slice rhs 0 lv) (S.slice nrhs 0 lv)))
 
 val construct_rhs_even:
   lv:nat{lv <= 32} ->
@@ -369,7 +394,7 @@ val mt_get_path_step:
   k:nat{i <= k && k <= j} ->
   p:path ->
   actd:bool ->
-  GTot path (decreases (32 - lv))
+  GTot path
 let mt_get_path_step lv hs rhs i j k p actd =
   let ofs = offset_of i in
   if k % 2 = 1
@@ -403,6 +428,30 @@ let rec mt_get_path_ lv hs rhs i j k p actd =
     (let np = mt_get_path_step lv hs rhs i j k p actd in
     mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np
     		 (if j % 2 = 0 then actd else true))
+
+val mt_get_path_unchanged:
+  lv:nat{lv <= 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  rhs:hash_seq{S.length rhs = 32} ->
+  i:nat -> 
+  j:nat{
+    i <= j /\ j < pow2 (32 - lv) /\
+    hs_wf_elts lv hs i j} ->
+  k:nat{i <= k && k <= j} ->
+  p:path ->
+  actd:bool ->
+  Lemma (requires True)
+        (ensures (S.equal p (S.slice (mt_get_path_ lv hs rhs i j k p actd)
+                                     0 (S.length p))))
+        (decreases (32 - lv))
+let rec mt_get_path_unchanged lv hs rhs i j k p actd =
+  let ofs = offset_of i in
+  if j = 0 then ()
+  else
+    (let np = mt_get_path_step lv hs rhs i j k p actd in
+    assert (S.equal p (S.slice np 0 (S.length p)));
+    mt_get_path_unchanged (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np
+      (if j % 2 = 0 then actd else true))
 
 val mt_get_path: 
   mt:merkle_tree{mt_wf_elts mt} ->
