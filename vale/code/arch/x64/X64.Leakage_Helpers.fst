@@ -4,11 +4,9 @@ open X64.Machine_s
 open X64.Taint_Semantics_s
 open X64.Leakage_s
 
-let merge_taint t1 t2 =
-  if Secret? t1 || Secret? t2 then
-    Secret
-  else
-    Public
+let merge_taint (t1:taint) (t2:taint) :taint =
+  if Secret? t1 || Secret? t2 then Secret
+  else Public
 
 (* Also pass the taint of the instruction *)
 let operand_taint (op:operand) ts taint =
@@ -42,7 +40,7 @@ let lemma_operand_obs ts dst s1 s2 = match dst with
 let set_taint (dst:operand) ts taint : Tot taintState =
   match dst with
   | OConst _ -> ts  (* Shouldn't actually happen *)
-  | OReg r -> TaintState (fun x -> if x = r then taint else ts.regTaint x) ts.flagsTaint ts.cfFlagsTaint ts.xmmTaint
+  | OReg r -> TaintState (FunctionalExtensionality.on reg (fun x -> if x = r then taint else ts.regTaint x)) ts.flagsTaint ts.cfFlagsTaint ts.xmmTaint
   | OMem m -> ts (* Ensured by taint semantics *)
 
 let rec operands_do_not_use_secrets ops ts = match ops with
@@ -76,20 +74,41 @@ let ins_consumes_fixed_time (ins : tainted_ins) (ts:taintState) (res:bool*taintS
   ((b2t b) ==> isConstantTime (Ins ins) ts)
 
 val lemma_taint_sources: (ins:tainted_ins) -> (ts:taintState) -> Lemma
-(let i, d, s = ins.ops in
+(let i = ins.i in
+ let d, s = extract_operands i in
 forall src. List.Tot.Base.mem src s /\ Public? (sources_taint s ts ins.t) ==> Public? (operand_taint src ts ins.t))
 
 let lemma_taint_sources ins ts = ()
 
-val lemma_public_op_are_same: (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState) -> Lemma
-(requires operand_does_not_use_secrets op ts /\ Public? (operand_taint op ts Public) /\ publicValuesAreSame ts s1 s2 /\ taint_match op Public s1.memTaint s1.state /\ taint_match op Public s2.memTaint s2.state /\ valid_operand op s1.state /\ valid_operand op s2.state)
-(ensures eval_operand op s1.state == eval_operand op s2.state)
+#set-options "--z3rlimit 20"
 
-let lemma_public_op_are_same ts op s1 s2 = ()
+val lemma_public_op_are_same:
+  (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState)
+   -> Lemma (requires (operand_does_not_use_secrets op ts   /\
+                      Public? (operand_taint op ts Public) /\
+		      publicValuesAreSame ts s1 s2         /\
+		      taint_match op Public s1.memTaint s1.state /\
+		      taint_match op Public s2.memTaint s2.state))
+           (ensures eval_operand op s1.state == eval_operand op s2.state)
+let lemma_public_op_are_same ts op s1 s2 =
+  match op with
+  | OConst _ -> ()
+  | OReg _ -> ()
+  | OMem m ->
+    let a1 = eval_maddr m s1.state in
+    let a2 = eval_maddr m s2.state in
+    assert (a1 == a2);
+    assert (forall a. (a >= a1 /\ a < a1 + 8) ==> s1.state.mem.[a] == s2.state.mem.[a]);
+    Opaque_s.reveal_opaque get_heap_val64_def
 
-val lemma_public_op_are_same2: (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState) -> Lemma
-(requires operand_does_not_use_secrets op ts /\ Public? (operand_taint op ts Secret) /\ publicValuesAreSame ts s1 s2 /\ taint_match op Public s1.memTaint s1.state /\ taint_match op Public s2.memTaint s2.state /\ valid_operand op s1.state /\ valid_operand op s2.state)
-(ensures eval_operand op s1.state == eval_operand op s2.state)
+val lemma_public_op_are_same2: 
+  (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState) -> 
+  Lemma (requires operand_does_not_use_secrets op ts /\ 
+                  Public? (operand_taint op ts Secret) /\ 
+                  publicValuesAreSame ts s1 s2 /\ 
+                  taint_match op Public s1.memTaint s1.state /\ 
+                  taint_match op Public s2.memTaint s2.state)
+        (ensures eval_operand op s1.state == eval_operand op s2.state)
 
 let lemma_public_op_are_same2 ts op s1 s2 = ()
 

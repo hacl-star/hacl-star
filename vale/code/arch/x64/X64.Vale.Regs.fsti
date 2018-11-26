@@ -54,6 +54,13 @@ let eta (m:t) : t =
   let m12_15 = ((eta_sel R12 m, eta_sel R13 m), (eta_sel R14 m, eta_sel R15 m)) in
   ((m0_3, m4_7), (m8_11, m12_15))
 
+let to_fun (m:t) : (FStar.FunctionalExtensionality.restricted_t reg (fun _ -> nat64)) =
+  FStar.FunctionalExtensionality.on reg (fun (r:reg) -> sel r m)
+
+val of_fun (m:reg -> nat64) : Pure t
+  (requires True)
+  (ensures fun m' -> (forall (r:reg).{:pattern (m r) \/ (sel r m')} m r == sel r m'))
+
 val lemma_upd_eq (r:reg) (v:nat64) (m:t) : Lemma
   (requires True)
   (ensures sel r (upd r v m) == v)

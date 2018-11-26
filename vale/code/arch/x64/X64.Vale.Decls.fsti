@@ -3,7 +3,7 @@ module M = X64.Memory
 
 // This interface should hide all of Semantics_s.
 // (It should not refer to Semantics_s, directly or indirectly.)
-// It should not refer to Memory_s, StateLemmas, Lemmas, or Print_s,
+// It should not refer to StateLemmas, Lemmas, or Print_s,
 // because they refer to Semantics_s.
 // Memory, Regs and State are ok, because they do not refer to Semantics_s.
 
@@ -16,8 +16,10 @@ unfold let quad32 = quad32
 
 val cf : (flags:int) -> bool
 val overflow (flags:int) : bool
-val update_cf (flags:int) (new_cf:bool) : (new_flags:int)
-val update_of (flags:int) (new_of:bool) : (new_flags:int)
+val update_cf (flags:int) (new_cf:bool) : (new_flags:int { cf new_flags == new_cf /\ 
+                                                       overflow new_flags == overflow flags} )
+val update_of (flags:int) (new_of:bool) : (new_flags:int { overflow new_flags == new_of /\
+                                                       cf new_flags == cf flags })
 
 //unfold let va_subscript = Map.sel
 unfold let va_subscript (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y

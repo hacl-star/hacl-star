@@ -6,10 +6,8 @@ module BCrypt = EverCrypt.BCrypt
 module Hacl = EverCrypt.Hacl
 module OpenSSL = EverCrypt.OpenSSL
 module Vale = EverCrypt.Vale
-module ValeGlue = EverCrypt.ValeGlue
 
 module SC = EverCrypt.StaticConfig
-friend EverCrypt.StaticConfig
 module AC = EverCrypt.AutoConfig
 module U32 = FStar.UInt32
 module HS = FStar.HyperStack
@@ -546,10 +544,10 @@ let ecdh_load_curve g =
     if SC.openssl && i = AC.OpenSSL then
       let g' = match g with
         | ECC_P256 -> OpenSSL.ECC_P256
-	| ECC_P384 -> OpenSSL.ECC_P384
-	| ECC_P521 -> OpenSSL.ECC_P521
-	| ECC_X25519 -> OpenSSL.ECC_X25519
-	| ECC_X448 -> OpenSSL.ECC_X448 in
+        | ECC_P384 -> OpenSSL.ECC_P384
+        | ECC_P521 -> OpenSSL.ECC_P521
+        | ECC_X25519 -> OpenSSL.ECC_X25519
+        | ECC_X448 -> OpenSSL.ECC_X448 in
       ECDH_OPENSSL (OpenSSL.ecdh_load_curve g')
     else
       failwith !$"ERROR: inconsistent configuration (ecdh_load_curve)"

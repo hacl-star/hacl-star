@@ -19,8 +19,8 @@ let lemma_mul_nat (x:nat) (y:nat) : Lemma (ensures 0 <= (x `op_Multiply` y)) = (
 
 let cf = Lemmas.cf
 let overflow = Lemmas.overflow
-let update_cf = Lemmas.update_cf
-let update_of = Lemmas.update_of
+let update_cf (flags:int) (new_cf:bool) = Lemmas.update_cf flags new_cf
+let update_of (flags:int) (new_of:bool) = Lemmas.update_of flags new_of
 let ins = TS.tainted_ins
 type ocmp = TS.tainted_ocmp
 type va_fuel = nat

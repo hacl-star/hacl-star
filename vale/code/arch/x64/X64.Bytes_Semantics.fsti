@@ -58,6 +58,10 @@ val same_domain_update128 (ptr:int) (v:quad32) (mem:heap) : Lemma
   (requires valid_addr128 ptr mem)
   (ensures Map.domain mem == Map.domain (update_heap128 ptr v mem))
 
+val same_mem_get_heap_val128 (ptr:int) (mem1 mem2:heap) : Lemma
+  (requires get_heap_val128 ptr mem1 == get_heap_val128 ptr mem2)
+  (ensures forall i. i >= ptr /\ i < ptr + 16 ==> mem1.[i] == mem2.[i])
+
 val eval_ins_domains (ins:TS.tainted_ins) (s0:TS.traceState) : Lemma
   (let s1 = TS.taint_eval_ins ins s0 in
   Set.equal (Map.domain s0.TS.state.mem) (Map.domain s1.TS.state.mem))

@@ -19,6 +19,7 @@ noeq type printer = {
   footer     : unit -> string;
   proc_name  : string -> string;
   ret        : string -> string;
+  sha256rnds2_explicit_xmm0: unit -> bool;
 }
 
 let print_reg_name (r:reg) =
@@ -166,11 +167,12 @@ let print_ins (ins:tainted_ins) (p:printer) =
     let first, second = p.op_order (print_xmm dst p) (print_xmm src p) in
       first ^ ", " ^ second
   in
-  let ins, _, _ = ins.ops in
+  let ins = ins.i in
   match ins with
   | Cpuid -> "  cpuid"
-  | Mov64 dst src -> p.ins_name "  mov" [dst; src] ^ print_ops dst src
-  | Add64 dst src -> p.ins_name "  add" [dst; src] ^ print_ops dst src
+  | Mov64 dst src -> p.ins_name   "  mov"   [dst; src] ^ print_ops dst src
+  | Cmovc64 dst src -> p.ins_name "  cmovc" [dst; src] ^ print_ops dst src  
+  | Add64 dst src -> p.ins_name   "  add"   [dst; src] ^ print_ops dst src
   | AddLea64 dst src1 src2 -> let name = p.ins_name "  lea" [dst; src1; src2] in
                              let src = OMem (if OReg? src1 && OConst? src2 then
                                                 MReg (OReg?.r src1) (OConst?.n src2)
@@ -183,6 +185,7 @@ let print_ins (ins:tainted_ins) (p:printer) =
   | Adcx64 dst src -> p.ins_name "  adcx" [dst; src] ^ print_ops dst src
   | Adox64 dst src -> p.ins_name "  adox" [dst; src] ^ print_ops dst src
   | Sub64 dst src -> p.ins_name "  sub" [dst; src] ^ print_ops dst src
+  | Sbb64 dst src -> p.ins_name "  sbb" [dst; src] ^ print_ops dst src
   | Mul64 src -> p.ins_name "  mul" [src] ^ (print_operand src p)
   | Mulx64 dst_hi dst_lo src ->
     let dst_s = print_ops dst_hi dst_lo in
@@ -216,7 +219,10 @@ let print_ins (ins:tainted_ins) (p:printer) =
   | AESNI_dec_last dst src -> "  aesdeclast " ^ print_xmms dst src
   | AESNI_imc dst src      -> "  aesimc "     ^ print_xmms dst src
   | AESNI_keygen_assist dst src imm -> "  aeskeygenassist " ^ print_pair (print_xmms dst src) (print_imm8 imm p)
-  | SHA256_rnds2 dst src   -> "  sha256rnds2 " ^ print_xmms dst src
+  | SHA256_rnds2 dst src   -> if p.sha256rnds2_explicit_xmm0() then 
+                               "  sha256rnds2 " ^ print_pair (print_xmms dst src) (print_xmm 0 p)
+                             else 
+                               "  sha256rnds2 " ^ print_xmms dst src
   | SHA256_msg1 dst src    -> "  sha256msg1 "  ^ print_xmms dst src
   | SHA256_msg2 dst src    -> "  sha256msg2 "  ^ print_xmms dst src
     
@@ -308,6 +314,7 @@ let masm : printer =
   footer     = footer;
   proc_name  = proc_name;
   ret        = ret;
+  sha256rnds2_explicit_xmm0 = (fun unit -> true);
   }
 
 let gcc : printer =
@@ -343,4 +350,5 @@ let gcc : printer =
   footer     = footer;
   proc_name  = proc_name;
   ret        = ret;
+  sha256rnds2_explicit_xmm0 = (fun unit -> false);
   }

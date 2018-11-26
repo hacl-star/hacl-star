@@ -9,7 +9,7 @@ INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/lib/kremlin
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
-  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES)
+  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi
 
 # TODO: move the specification tests to their own files so that we don't pollute
 # the specs with huge definitions in the scope
