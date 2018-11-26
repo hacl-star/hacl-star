@@ -63,6 +63,20 @@ let fsub5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   lemma_mod_sub_distr ((as_nat5 (t0, t1, t2, t3, t4)) % prime) (as_nat5 (f20, f21, f22, f23, f24)) prime;
   out
 
+val lemma_fsub:
+    f1:felem5{felem_fits5 f1 (1, 2, 1, 1, 1)}
+  -> f2:felem5{felem_fits5 f2 (1, 2, 1, 1, 1)}
+  -> Lemma (let (f10, f11, f12, f13, f14) = f1 in
+      let (f20, f21, f22, f23, f24) = f2 in
+      let o0 = f10 +! u64 0x3fffffffffff68 -! f20 in
+      let o1 = f11 +! u64 0x3ffffffffffff8 -! f21 in
+      let o2 = f12 +! u64 0x3ffffffffffff8 -! f22 in
+      let o3 = f13 +! u64 0x3ffffffffffff8 -! f23 in
+      let o4 = f14 +! u64 0x3ffffffffffff8 -! f24 in
+      let out = (o0, o1, o2, o3, o4) in
+      out == fsub5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24))
+let lemma_fsub f1 f2 = ()
+
 inline_for_extraction
 val mul_wide64:
     #m1:scale64

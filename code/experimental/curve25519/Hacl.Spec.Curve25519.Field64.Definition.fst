@@ -44,3 +44,6 @@ let fsub f1 f2 = (f1 - f2) % prime
 
 val fmul: felem -> felem -> felem
 let fmul f1 f2 = (f1 * f2) % prime
+
+val fsqr: felem -> felem
+let fsqr f1 = (f1 * f1) % prime
