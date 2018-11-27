@@ -172,8 +172,39 @@ val mt_get_path_acc_inv_ok:
                           (MTS.mt_get_path #(log2c j)
                             (hash_seq_spec_full (S.head fhs) acc actd) k)))
         (decreases j)
-let mt_get_path_acc_inv_ok j fhs rhs k acc actd =
-  admit ()
+#reset-options "--z3rlimit 40 --max_fuel 1"
+let rec mt_get_path_acc_inv_ok j fhs rhs k acc actd =
+  let ipa_head = mt_get_path_step_acc j (S.head fhs) (S.head rhs) k actd in
+  let ipa = mt_get_path_acc j fhs rhs k actd in
+  let ip = path_spec k j actd ipa in
+  let smt = hash_seq_spec_full (S.head fhs) acc actd in
+  let sp = MTS.mt_get_path #(log2c j) smt k in
+  let nacc = (if j % 2 = 0 then acc
+             else if actd
+             then hash_2 (S.last (S.head fhs)) acc
+             else S.last (S.head fhs)) in
+  let nactd = actd || j % 2 = 1 in
+  let nipa = mt_get_path_acc (j / 2) (S.tail fhs) (S.tail rhs) (k / 2) nactd in
+
+  if j = 1 then ()
+  else if k % 2 = 0
+  then begin
+    admit ()
+  end
+  else begin
+    assert (ipa_head == Some (S.index (S.head fhs) (k - 1)));
+    assert (S.equal ipa (S.cons (Some?.v ipa_head) nipa));
+    assert (S.equal ip (S.cons (HRaw (Some?.v ipa_head))
+                               (path_spec (k / 2) (j / 2) nactd nipa)));
+    assert (S.equal sp (S.cons (S.index smt (k - 1))
+                               (MTS.mt_get_path #(log2c (j / 2))
+                                 (MTS.mt_next_lv #(log2c j) smt) (k / 2))));
+    assume (S.index smt (k - 1) == HRaw (S.index (S.head fhs) (k - 1)));
+
+    mt_hashes_lth_inv_log_next j fhs;
+    hash_seq_spec_full_next j (S.head fhs) (S.head (S.tail fhs)) acc actd nacc nactd;
+    mt_get_path_acc_inv_ok (j / 2) (S.tail fhs) (S.tail rhs) (k / 2) nacc nactd
+  end
 
 val mt_get_path_inv_ok_:
   lv:nat{lv <= 32} ->
