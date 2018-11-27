@@ -2,7 +2,7 @@ module X64.Memory_Sems
 
 open Prop_s
 open X64.Machine_s
-open X64.Memory_s
+open X64.Memory
 module S = X64.Bytes_Semantics_s
 
 val same_domain: (h:mem) -> (m:S.heap) -> prop0
