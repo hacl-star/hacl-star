@@ -17,7 +17,6 @@ friend X64.CryptoInstructions_s
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
 
-
 // Define these specific converters here, so that F* only reasons about 
 // the correctness of the conversion once, rather that at every call site
 let vv (u:UInt32.t) : nat32 = v u

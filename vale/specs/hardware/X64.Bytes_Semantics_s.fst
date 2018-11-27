@@ -21,12 +21,14 @@ let op_String_Assignment = Map.upd
 type ins:eqtype =
   | Cpuid      : ins
   | Mov64      : dst:operand -> src:operand -> ins
+  | Cmovc64    : dst:operand -> src:operand -> ins
   | Add64      : dst:operand -> src:operand -> ins
   | AddLea64   : dst:operand -> src1:operand -> src2:operand -> ins
   | AddCarry64 : dst:operand -> src:operand -> ins
   | Adcx64     : dst:operand -> src:operand -> ins
   | Adox64     : dst:operand -> src:operand -> ins
   | Sub64      : dst:operand -> src:operand -> ins
+  | Sbb64      : dst:operand -> src:operand -> ins
   | Mul64      : src:operand -> ins
   | Mulx64     : dst_hi:operand -> dst_lo:operand -> src:operand -> ins
   | IMul64     : dst:operand -> src:operand -> ins
@@ -95,7 +97,7 @@ unfold let eval_reg (r:reg) (s:state) : nat64 = s.regs r
 unfold let eval_xmm (i:xmm) (s:state) : quad32 = s.xmms i
 
 let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
-    Views.nat8s_to_nat64
+    Views_s.nat8s_to_nat64
       mem.[ptr]
       mem.[ptr+1]
       mem.[ptr+2]
@@ -107,7 +109,7 @@ let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
 let get_heap_val64 = make_opaque get_heap_val64_def
 
 let get_heap_val32_def (ptr:int) (mem:heap) : nat32 =
-  Views.nat8s_to_nat32
+  Views_s.nat8s_to_nat32
     mem.[ptr]
     mem.[ptr+1]
     mem.[ptr+2]
@@ -298,7 +300,7 @@ let _ = assert (2048 == normalize_term (pow2 11))
 let overflow(flags:nat64) : bool =
   (flags / 2048) % 2 = 1  // OF is the 12th bit, so dividing by 2^11 shifts right 11 bits
 
-let update_cf (flags:nat64) (new_cf:bool) : (new_flags:nat64{cf new_flags == new_cf}) =
+let update_cf' (flags:nat64) (new_cf:bool) : (new_flags:nat64{cf new_flags == new_cf}) =
   if new_cf then
     if not (cf flags) then
       flags + 1
@@ -310,7 +312,7 @@ let update_cf (flags:nat64) (new_cf:bool) : (new_flags:nat64{cf new_flags == new
     else
       flags
 
-let update_of (flags:nat64) (new_of:bool) : (new_flags:nat64{overflow new_flags == new_of}) =
+let update_of' (flags:nat64) (new_of:bool) : (new_flags:nat64{overflow new_flags == new_of}) =
   if new_of then
     if not (overflow flags) then
       flags + 2048
@@ -420,9 +422,17 @@ let update_flags (new_flags:nat64) :st unit =
   s <-- get;
   set ( { s with flags = new_flags } )
 
+let update_cf (new_cf:bool) :st unit =
+  s <-- get;
+  set ( { s with flags = update_cf' s.flags new_cf } )
+
+let update_of (new_of:bool) :st unit =
+  s <-- get;
+  set ( { s with flags = update_of' s.flags new_of } )
+
 let update_cf_of (new_cf new_of:bool) :st unit =
   s <-- get;
-  set ( { s with flags = update_cf (update_of s.flags new_of) new_cf } )
+  set ( { s with flags = update_cf' (update_of' s.flags new_of) new_cf } )
 
 (* Core definition of instruction semantics *)
 let eval_ins (ins:ins) : st unit =
@@ -437,13 +447,17 @@ let eval_ins (ins:ins) : st unit =
   | Mov64 dst src ->
     check (valid_operand src);;
     update_operand_preserve_flags dst (eval_operand src s)
+    
+  | Cmovc64 dst src ->
+    check (valid_operand src);;
+    update_operand_preserve_flags dst (eval_operand (if cf s.flags then src else dst) s)
 
   | Add64 dst src ->
     check (valid_operand src);;
     let sum = (eval_operand dst s) + (eval_operand src s) in
     let new_carry = sum >= pow2_64 in
-    update_operand dst ins ((eval_operand dst s + eval_operand src s) % pow2_64);;
-    update_flags (update_cf s.flags new_carry)
+    update_operand dst ins (sum % pow2_64);;
+    update_cf new_carry
 
   | AddLea64 dst src1 src2 ->
     check (valid_operand src1);;
@@ -457,28 +471,40 @@ let eval_ins (ins:ins) : st unit =
     let new_carry = sum >= pow2_64 in
     update_operand dst ins (sum % pow2_64);;
     update_flags (havoc s ins);;
-    update_flags (update_cf s.flags new_carry)  // We specify cf, but underspecify everything else
+    update_cf new_carry  // We specify cf, but underspecify everything else
 
   | Adcx64 dst src ->
+    check_imm adx_enabled;;
     check (valid_operand src);;
     let old_carry = if cf(s.flags) then 1 else 0 in
     let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
     let new_carry = sum >= pow2_64 in
-    update_operand dst ins (sum % pow2_64);;
-    update_flags (update_cf s.flags new_carry)  // Explicitly touches only CF
+    update_operand_preserve_flags dst (sum % pow2_64);;
+    update_cf new_carry // Explicitly touches only CF
 
   | Adox64 dst src ->
+    check_imm adx_enabled;;
     check (valid_operand src);;
     let old_carry = if overflow(s.flags) then 1 else 0 in
     let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
     let new_carry = sum >= pow2_64 in
-    update_operand dst ins (sum % pow2_64);;
-    update_flags (update_of s.flags new_carry)  // Explicitly touches only OF
+    update_operand_preserve_flags dst (sum % pow2_64);;
+    update_of new_carry  // Explicitly touches only OF
 
   | Sub64 dst src ->
     check (valid_operand src);;
-    update_operand dst ins ((eval_operand dst s - eval_operand src s) % pow2_64)
+    let diff = eval_operand dst s - eval_operand src s in
+    let new_carry = diff < 0 in
+    update_operand dst ins (diff % pow2_64);;
+    update_cf new_carry
 
+  | Sbb64 dst src ->
+    let old_carry = if cf(s.flags) then 1 else 0 in
+    let diff = eval_operand dst s - (eval_operand src s + old_carry) in
+    let new_carry = diff < 0 in
+    update_operand dst ins (diff % pow2_64);;
+    update_cf new_carry  // We specify cf, but underspecify everything else (which update_operand havocs)
+    
   | Mul64 src ->
     check (valid_operand src);;
     let hi = FStar.UInt.mul_div #64 (eval_reg Rax s) (eval_operand src s) in
@@ -488,6 +514,7 @@ let eval_ins (ins:ins) : st unit =
     update_flags (havoc s ins)
 
   | Mulx64 dst_hi dst_lo src ->
+    check_imm bmi2_enabled;;
     check (valid_operand src);;
     let hi = FStar.UInt.mul_div #64 (eval_reg Rdx s) (eval_operand src s) in
     let lo = FStar.UInt.mul_mod #64 (eval_reg Rdx s) (eval_operand src s) in

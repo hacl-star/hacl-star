@@ -6,15 +6,15 @@ open X64.Machine_s
 open Words_s
 
 val nat8s_to_nat32_injective (v1 v2 v3 v4 v1' v2' v3' v4':nat8) :
-  Lemma (Views.nat8s_to_nat32 v1 v2 v3 v4 == Views.nat8s_to_nat32 v1' v2' v3' v4' ==>
+  Lemma (Views_s.nat8s_to_nat32 v1 v2 v3 v4 == Views_s.nat8s_to_nat32 v1' v2' v3' v4' ==>
          v1 == v1' /\
          v2 == v2' /\
          v3 == v3' /\
          v4 == v4')
 
 val nat8s_to_nat64_injective (v1 v2 v3 v4 v5 v6 v7 v8 v1' v2' v3' v4' v5' v6' v7' v8':nat8) :
-  Lemma (Views.nat8s_to_nat64 v1 v2 v3 v4 v5 v6 v7 v8 ==
-         Views.nat8s_to_nat64 v1' v2' v3' v4' v5' v6' v7' v8' ==>
+  Lemma (Views_s.nat8s_to_nat64 v1 v2 v3 v4 v5 v6 v7 v8 ==
+         Views_s.nat8s_to_nat64 v1' v2' v3' v4' v5' v6' v7' v8' ==>
          v1 == v1' /\
          v2 == v2' /\
          v3 == v3' /\
@@ -57,6 +57,10 @@ val correct_update_get128 (ptr:int) (v:quad32) (mem:heap) : Lemma (
 val same_domain_update128 (ptr:int) (v:quad32) (mem:heap) : Lemma
   (requires valid_addr128 ptr mem)
   (ensures Map.domain mem == Map.domain (update_heap128 ptr v mem))
+
+val same_mem_get_heap_val128 (ptr:int) (mem1 mem2:heap) : Lemma
+  (requires get_heap_val128 ptr mem1 == get_heap_val128 ptr mem2)
+  (ensures forall i. i >= ptr /\ i < ptr + 16 ==> mem1.[i] == mem2.[i])
 
 val eval_ins_domains (ins:TS.tainted_ins) (s0:TS.traceState) : Lemma
   (let s1 = TS.taint_eval_ins ins s0 in

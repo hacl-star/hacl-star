@@ -28,8 +28,6 @@ ED25519_SPECIFIC= \
 	Hacl.Impl.Ed25519.Ladder.Step.fst \
 	Hacl.Impl.Ed25519.Ladder.fsti \
 	Hacl.Impl.Ed25519.Ladder.fst \
-	Hacl.Impl.Store51.fsti \
-	Hacl.Impl.Store51.fst \
 	Hacl.Impl.Ed25519.PointCompress.fst \
 	Hacl.Impl.Ed25519.G.fst \
 	Hacl.Impl.Ed25519.SecretExpand.fsti \
@@ -48,6 +46,7 @@ ED25519_SPECIFIC= \
 	Hacl.Impl.Store56.fst \
 	Hacl.Impl.Ed25519.Sign.Steps.fst \
 	Hacl.Impl.Ed25519.Sign.fst \
+	Hacl.Impl.Ed25519.Sign.Expanded.fst \
 	Hacl.Impl.Load51.fsti \
 	Hacl.Impl.Load51.fst \
 	Hacl.Impl.Ed25519.Pow2_252m2.fsti \
@@ -71,7 +70,6 @@ FSTS=   Hacl.Bignum25519.fst \
 	../hash/Hacl.SHA2_512.fst \
 	Hacl.Impl.Load56.fst \
 	Hacl.Impl.Load51.fst \
-	Hacl.Impl.Store51.fst \
 	Hacl.Impl.BignumQ.Mul.fst \
 	Hacl.Impl.SHA512.ModQ.fst \
 	Hacl.Impl.Sha512.fst \
@@ -105,7 +103,7 @@ FSTAR_INCLUDES+=--include $(HACL_HOME)/code/bignum --include $(HACL_HOME)/code/c
 	$(FSTAR_INCLUDES)
 
 ct: $(addsuffix -lax, $(ED25519_FILES))
-	$(FSTAR) --lax --verify_all Hacl.Impl.Ed25519.SecretToPublic.fst Hacl.Impl.Ed25519.Sign.fst
+	$(FSTAR) --lax --verify_all Hacl.Impl.Ed25519.SecretToPublic.fst Hacl.Impl.Ed25519.Sign.fst Hacl.Impl.Ed25519.Sign.Exanded.fst
 all-ct: ct
 
 bignum-ver: $(addsuffix -reloc-verify, $(BIGNUM))
@@ -133,8 +131,9 @@ ed25519-c/out.krml: $(ED25519_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) $(FSTS) -skip-translation
 
 ed25519-c/Hacl_Ed25519.c: ed25519-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Ed25519=*'
+	 $(KREMLIN) $(KREMLIN_ARGS) \
+		-bundle 'Hacl.Ed25519=*' -minimal -add-include '"kremlib.h"' \
+		-skip-compilation $^ -o $@
 
 extract-c: ed25519-c/Hacl_Ed25519.c
 

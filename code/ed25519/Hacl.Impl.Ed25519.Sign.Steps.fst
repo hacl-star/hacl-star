@@ -31,7 +31,7 @@ let lemma_point_inv h p h' p' = ()
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ Substitute]
+inline_for_extraction
 private
 val point_mul_compress:
   out:hint8_p{length out = 32} ->
@@ -65,7 +65,7 @@ let point_mul_compress out s p =
 
 open Hacl.Spec.Endianness
 
-[@ Substitute]
+inline_for_extraction
 private
 val point_mul_g:
   result:point ->
@@ -95,8 +95,7 @@ let point_mul_g result scalar =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ Substitute]
-private
+inline_for_extraction
 val point_mul_g_compress:
   out:hint8_p{length out = 32} ->
   s:hint8_p{length s = 32 /\ disjoint s out} ->
@@ -124,7 +123,7 @@ let point_mul_g_compress out s =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ Substitute]
+inline_for_extraction
 val copy_bytes:
   output:hint8_p ->
   input:hint8_p{disjoint input output} ->
@@ -184,7 +183,7 @@ let lemma_append2 h buf len1 len2 =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ Substitute]
+inline_for_extraction
 val sign_step_1:
   secret:hint8_p{length secret = 32} ->
   tmp_bytes:hint8_p{length tmp_bytes = 352 /\ disjoint tmp_bytes secret} ->
@@ -219,7 +218,7 @@ let sign_step_1 secret tmp_bytes =
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
-[@ Substitute]
+inline_for_extraction
 val sign_step_2:
   msg:hint8_p{length msg < pow2 32 - 64} ->
   len:UInt32.t{UInt32.v len = length msg} ->
@@ -269,7 +268,7 @@ let sign_step_2 msg len tmp_bytes tmp_ints =
 
 #reset-options "--max_fuel 0 --z3rlimit 50"
 
-[@ Substitute]
+inline_for_extraction
 val sign_step_4:
   msg:hint8_p{length msg < pow2 32 - 64} ->
   len:UInt32.t{UInt32.v len = length msg} ->

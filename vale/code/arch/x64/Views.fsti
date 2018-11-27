@@ -4,6 +4,7 @@ open LowStar.BufferView
 open Words_s
 open Types_s
 open Opaque_s
+open Views_s
 
 module U8 = FStar.UInt8
 
@@ -63,16 +64,6 @@ val inverses32 (u:unit) : Lemma (inverses get32 put32)
 
 let view32 = inverses32(); View 4 get32 put32
 
-let nat8s_to_nat64 (v1 v2 v3 v4 v5 v6 v7 v8:nat8) : nat64 =
-    v1 +
-    v2 `op_Multiply` 0x100 +
-    v3 `op_Multiply` 0x10000 +
-    v4 `op_Multiply` 0x1000000 +
-    v5 `op_Multiply` 0x100000000 +
-    v6 `op_Multiply` 0x10000000000 +
-    v7 `op_Multiply` 0x1000000000000 +
-    v8 `op_Multiply` 0x100000000000000
-
 let get64_def (s:Seq.lseq U8.t 8) =
   UInt64.uint_to_t (
   nat8s_to_nat64
@@ -100,12 +91,6 @@ let put64 = make_opaque put64_def
 val inverses64 (u:unit) : Lemma (inverses get64 put64)
 
 let view64 = inverses64 (); View 8 get64 put64
-
-let nat8s_to_nat32 (v1 v2 v3 v4:nat8) : nat32 =
-    v1 +
-    v2 `op_Multiply` 0x100 +
-    v3 `op_Multiply` 0x10000 +
-    v4 `op_Multiply` 0x1000000
 
 let get128_def (s:Seq.lseq U8.t 16) =
   Mkfour

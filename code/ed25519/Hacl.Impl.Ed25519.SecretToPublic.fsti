@@ -11,9 +11,11 @@ open FStar.Buffer
 
 let hint8_p = buffer Hacl.UInt8.t
 
+inline_for_extraction
 let op_String_Access (h:HyperStack.mem) (b:hint8_p{live h b}) =
   Hacl.Spec.Endianness.reveal_sbytes (as_seq h b)
 
+inline_for_extraction
 val secret_to_public:
   out:hint8_p{length out = 32} ->
   secret:hint8_p{length secret = 32 /\ disjoint out secret} ->

@@ -91,7 +91,7 @@ let elemB = b:buffer Hacl.UInt64.t{length b = 5}
 open Hacl.Bignum25519
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val make_zero:
   b:elemB ->
@@ -99,7 +99,6 @@ val make_zero:
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 0
       /\ red_513 (as_seq h1 b)))
-[@ Substitute]
 let make_zero b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   Hacl.Lib.Create64.make_h64_5 b zero zero zero zero zero;
@@ -110,7 +109,7 @@ let make_zero b =
   lemma_red_51_is_red_513 (as_seq h b)
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val make_one:
   b:elemB ->
@@ -118,7 +117,6 @@ val make_one:
     (requires (fun h -> live h b))
     (ensures (fun h0 _ h1 -> live h1 b /\ modifies_1 b h0 h1 /\ seval (as_seq h1 b) == 1
       /\ Hacl.Bignum25519.red_513 (as_seq h1 b)))
-[@ Substitute]
 let make_one b =
   let zero = Hacl.Cast.uint64_to_sint64 0uL in
   let one  = Hacl.Cast.uint64_to_sint64 1uL in
@@ -130,7 +128,7 @@ let make_one b =
   lemma_red_51_is_red_513 (as_seq h b)
 
 
-[@ Substitute]
+inline_for_extraction
 private
 val make_point_inf:
   b:buffer Hacl.UInt64.t{length b = 20} ->
