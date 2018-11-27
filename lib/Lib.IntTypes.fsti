@@ -1,5 +1,6 @@
 module Lib.IntTypes
 
+open FStar.Mul
 open FStar.Math.Lemmas
 
 ///
@@ -14,7 +15,6 @@ type inttype =
 ///
 
 inline_for_extraction
-unfold
 let bits (n:inttype) =
   match n with
   | U1 -> 1
@@ -25,7 +25,6 @@ let bits (n:inttype) =
   | U128 -> 128
 
 inline_for_extraction
-unfold
 let numbytes (n:inttype) =
   match n with
   | U1 -> 1
@@ -59,7 +58,7 @@ unfold let maxint (t:inttype) =
 (* PUBLIC Machine Integers *)
 
 inline_for_extraction
-unfold let pub_int_t (t:inttype) =
+let pub_int_t (t:inttype) =
   match t with
   | U1 -> u:UInt8.t{UInt8.v u < 2}
   | U8 -> UInt8.t
@@ -112,7 +111,7 @@ val uintv_extensionality:
   (requires uint_v #t #l a == uint_v #t #l b)
   (ensures  a == b)
 // REMARK: We can't mark `uint_v` as `unfold` and keep this pattern
-// [SMTPat (uint_v #t #l a == uint_v #t #l b)]
+ [SMTPat (uint_v #t #l a == uint_v #t #l b)]
 
 ///
 /// Definition of machine integers
@@ -325,7 +324,6 @@ val mul64_wide_lemma: a:uint64 -> b:uint64
   -> Lemma
   (ensures (uint_v (mul64_wide a b) == uint_v a `op_Multiply` uint_v b))
   [SMTPat (uint_v (mul64_wide a b))]
-
 
 (* KB: I would prefer the post-condition to say:
        uint_v c = (pow2 (bits t) + uint_v a - uint_v b) % pow2 (bits t)

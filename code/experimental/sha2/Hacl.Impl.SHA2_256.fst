@@ -114,16 +114,18 @@ val _sigma0: x:uint32 ->
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec._sigma0 Spec.SHA2_256 x))
 
-let _sigma0 x = (x >>>. get_opTable 6ul) ^. ((x >>>. get_opTable 7ul) ^. (x >>. get_opTable 8ul))
+let _sigma0 x =
+  let n = get_opTable 3ul in
+  (x >>>. get_opTable 6ul) ^. ((x >>>. get_opTable 7ul) ^. (x >>. n))
 
 val _sigma1: x: uint32 ->
   Stack uint32
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec._sigma1 Spec.SHA2_256 x))
 
-let _sigma1 x = (x >>>. get_opTable 9ul) ^. ((x >>>. get_opTable 10ul) ^. (x >>. get_opTable 11ul))
-
-
+let _sigma1 x =
+  let n = get_opTable 11ul in
+  (x >>>. get_opTable 9ul) ^. ((x >>>. get_opTable 10ul) ^. (x >>. n))
 
 val step_ws0:
     s: ws_wp

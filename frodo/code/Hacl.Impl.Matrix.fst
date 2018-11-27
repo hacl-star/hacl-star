@@ -22,18 +22,14 @@ module Lemmas = Spec.Frodo.Lemmas
 type elem = uint16
 
 inline_for_extraction
-let lbytes len = lbuffer uint8 (v len)
-
-inline_for_extraction noextract unfold
-let v = size_v
+let lbytes len = lbuffer uint8 len
 
 type matrix_t (n1:size_t) (n2:size_t{v n1 * v n2 <= max_size_t}) =
-  lbuffer elem (v n1 * v n2)
+  lbuffer elem (n1 *! n2)
 
-/// It's important to mark it as [unfold] for triggering patterns in [LowStar]
 unfold
 let as_matrix #n1 #n2 h (m:matrix_t n1 n2) : GTot (M.matrix (v n1) (v n2)) =
-  B.as_seq h m
+  as_seq h m
 
 inline_for_extraction noextract
 val matrix_create:
@@ -42,8 +38,7 @@ val matrix_create:
   -> StackInline (matrix_t n1 n2)
     (requires fun h0 -> True)
     (ensures  fun h0 a h1 ->
-      B.alloc_post_mem_common a h0 h1 (as_matrix h1 a) /\
-      B.frameOf a == HS.get_tip h0 /\
+      stack_allocated a h0 h1 (as_matrix h1 a) /\
       as_matrix h1 a == M.create (v n1) (v n2))
 let matrix_create n1 n2 =
   [@inline_let]
@@ -58,7 +53,7 @@ val mget:
   -> i:size_t{v i < v n1}
   -> j:size_t{v j < v n2}
   -> Stack elem
-    (requires fun h0 -> B.live h0 a)
+    (requires fun h0 -> live h0 a)
     (ensures  fun h0 x h1 ->
       modifies loc_none h0 h1 /\
       x == M.mget (as_matrix h0 a) (v i) (v j))
@@ -75,10 +70,10 @@ val mset:
   -> j:size_t{v j < v n2}
   -> x:elem
   -> Stack unit
-    (requires fun h0 -> B.live h0 a)
+    (requires fun h0 -> live h0 a)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer a) h0 h1 /\
-      B.live h1 a /\
+      modifies1 a h0 h1 /\
+      live h1 a /\
       as_matrix h1 a == M.mset (as_matrix h0 a) (v i) (v j) x)
 let mset #n1 #n2 a i j x =
   M.index_lt (v n1) (v n2) (v i) (v j);
@@ -108,8 +103,8 @@ val map2_inner_inv:
   -> j:size_nat
   -> Type0
 let map2_inner_inv #n1 #n2 h0 h1 h2 f a b c i j =
-  B.live h2 a /\ B.live h2 b /\ B.live h2 c /\
-  modifies (loc_buffer c) h1 h2 /\
+  live h2 a /\ live h2 b /\ live h2 c /\
+  modifies1 c h1 h2 /\
   j <= v n2 /\
   (forall (i0:nat{i0 < v i}) (j:nat{j < v n2}). get h2 c i0 j == get h1 c i0 j) /\
   (forall (j0:nat{j0 < j}). get h2 c (v i) j0 == f (get h0 a (v i) j0) (get h2 b (v i) j0)) /\
@@ -125,7 +120,7 @@ val map2_inner:
   -> f:(elem -> elem -> elem)
   -> a:matrix_t n1 n2
   -> b:matrix_t n1 n2
-  -> c:matrix_t n1 n2{a == c /\ B.disjoint b c}
+  -> c:matrix_t n1 n2{a == c /\ disjoint b c}
   -> i:size_t{v i < v n1}
   -> j:size_t{v j < v n2}
   -> Stack unit
@@ -136,8 +131,8 @@ let map2_inner #n1 #n2 h0 h1 f a b c i j =
 
 /// In-place [map2], a == map2 f a b
 ///
-/// A non in-place variant can be obtained by weakening the pre-condition to B.disjoint a c,
-/// or the two variants can be merged by requiring (a == c \/ B.disjoint a c) instead of a == c
+/// A non in-place variant can be obtained by weakening the pre-condition to disjoint a c,
+/// or the two variants can be merged by requiring (a == c \/ disjoint a c) instead of a == c
 /// See commit 91916b8372fa3522061eff5a42d0ebd1d19a8a49
 inline_for_extraction
 val map2:
@@ -149,15 +144,15 @@ val map2:
   -> c:matrix_t n1 n2
   -> Stack unit
     (requires fun h0 ->
-      B.live h0 a /\ B.live h0 b /\ B.live h0 c /\ a == c /\ B.disjoint b c)
+      live h0 a /\ live h0 b /\ live h0 c /\ a == c /\ disjoint b c)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_buffer c) h0 h1 /\
+      modifies1 c h0 h1 /\
       as_matrix h1 c == M.map2 #(v n1) #(v n2) f (as_matrix h0 a) (as_matrix h0 b))
 let map2 #n1 #n2 f a b c =
   let h0 = ST.get () in
   Lib.Loops.for (size 0) n1
-    (fun h1 i -> B.live h1 a /\ B.live h1 b /\ B.live h1 c /\
-      modifies (loc_buffer c) h0 h1 /\ i <= v n1 /\
+    (fun h1 i -> live h1 a /\ live h1 b /\ live h1 c /\
+      modifies1 c h0 h1 /\ i <= v n1 /\
       (forall (i0:nat{i0 < i}) (j:nat{j < v n2}).
         get h1 c i0 j == f (get h0 a i0 j) (get h0 b i0 j)) /\
       (forall (i0:nat{i <= i0 /\ i0 < v n1}) (j:nat{j < v n2}).
@@ -177,8 +172,8 @@ val matrix_add:
   -> a:matrix_t n1 n2
   -> b:matrix_t n1 n2
   -> Stack unit
-    (requires fun h -> B.live h a /\ B.live h b /\ B.disjoint a b)
-    (ensures  fun h0 r h1 -> B.live h1 a /\ modifies (loc_buffer a) h0 h1 /\
+    (requires fun h -> live h a /\ live h b /\ disjoint a b)
+    (ensures  fun h0 r h1 -> live h1 a /\ modifies1 a h0 h1 /\
       as_matrix h1 a == M.add (as_matrix h0 a) (as_matrix h0 b))
 [@"c_inline"]
 let matrix_add #n1 #n2 a b =
@@ -190,8 +185,8 @@ val matrix_sub:
   -> a:matrix_t n1 n2
   -> b:matrix_t n1 n2
   -> Stack unit
-    (requires fun h -> B.live h a /\ B.live h b /\ B.disjoint a b)
-    (ensures  fun h0 r h1 -> B.live h1 b /\ modifies (loc_buffer b) h0 h1 /\
+    (requires fun h -> live h a /\ live h b /\ disjoint a b)
+    (ensures  fun h0 r h1 -> live h1 b /\ modifies1 b h0 h1 /\
       as_matrix h1 b == M.sub (as_matrix h0 a) (as_matrix h0 b))
 [@"c_inline"]
 let matrix_sub #n1 #n2 a b =
@@ -216,7 +211,7 @@ val mul_inner:
   -> i:size_t{v i < v n1}
   -> k:size_t{v k < v n3}
   -> Stack uint16
-    (requires fun h -> B.live h a /\ B.live h b)
+    (requires fun h -> live h a /\ live h b)
     (ensures  fun h0 r h1 ->
       modifies loc_none h0 h1 /\
       r == M.mul_inner (as_matrix h0 a) (as_matrix h0 b) (v i) (v k))
@@ -225,13 +220,13 @@ let mul_inner #n1 #n2 #n3 a b i k =
   let h0 = ST.get() in
   [@ inline_let ]
   let f l = get h0 a (v i) l *. get h0 b l (v k) in
-  let res = create #uint16 #1 (size 1) (u16 0) in
+  let res = create #uint16 (size 1) (u16 0) in
 
   let h1 = ST.get() in
   Lib.Loops.for (size 0) n2
-    (fun h2 j -> B.live h1 res /\ B.live h2 res /\
-      modifies (loc_buffer res) h1 h2 /\
-      B.get h2 res 0 == M.sum_ #(v n2) f j)
+    (fun h2 j -> live h1 res /\ live h2 res /\
+      modifies1 res h1 h2 /\
+      bget h2 res 0 == M.sum_ #(v n2) f j)
     (fun j ->
       let aij = a.[i,j] in
       let bjk = b.[j,k] in
@@ -262,8 +257,8 @@ val mul_inner_inv:
   -> k:size_nat
   -> Type0
 let mul_inner_inv #n1 #n2 #n3 h0 h1 h2 a b c f i k =
-  B.live h2 a /\ B.live h2 b /\ B.live h2 c /\
-  modifies (loc_buffer c) h1 h2 /\
+  live h2 a /\ live h2 b /\ live h2 c /\
+  modifies1 c h1 h2 /\
   k <= v n3 /\
   (forall (i1:nat{i1 < v i}) (k:nat{k < v n3}). get h2 c i1 k == get h1 c i1 k) /\
   (forall (k1:nat{k1 < k}). get h2 c (v i) k1 == f k1) /\
@@ -281,7 +276,7 @@ val mul_inner1:
   -> h1:HS.mem
   -> a:matrix_t n1 n2
   -> b:matrix_t n2 n3
-  -> c:matrix_t n1 n3{B.disjoint a c /\ B.disjoint b c}
+  -> c:matrix_t n1 n3{disjoint a c /\ disjoint b c}
   -> i:size_t{v i < v n1}
   -> k:size_t{v k < v n3}
   -> f:(k:nat{k < v n3}
@@ -311,10 +306,10 @@ val matrix_mul:
   -> c:matrix_t n1 n3
   -> Stack unit
     (requires fun h ->
-      B.live h a /\ B.live h b /\ B.live h c /\ B.disjoint a c /\ B.disjoint b c)
+      live h a /\ live h b /\ live h c /\ disjoint a c /\ disjoint b c)
     (ensures  fun h0 _ h1 ->
-      B.live h1 c /\
-      modifies (loc_buffer c) h0 h1 /\
+      live h1 c /\
+      modifies1 c h0 h1 /\
       as_matrix h1 c == M.mul (as_matrix h0 a) (as_matrix h0 b))
 [@"c_inline"]
 let matrix_mul #n1 #n2 #n3 a b c =
@@ -325,8 +320,8 @@ let matrix_mul #n1 #n2 #n3 a b c =
   in
   Lib.Loops.for (size 0) n1
     (fun h1 i ->
-      B.live h1 a /\ B.live h1 b /\ B.live h1 c /\
-      modifies (loc_buffer c) h0 h1 /\ i <= v n1 /\
+      live h1 a /\ live h1 b /\ live h1 c /\
+      modifies1 c h0 h1 /\ i <= v n1 /\
       (forall (i1:nat{i1 < i}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k) /\
       (forall (i1:nat{i <= i1 /\ i1 < v n1}) (k:nat{k < v n3}). get h1 c i1 k == get h0 c i1 k))
     (fun i ->
@@ -352,7 +347,7 @@ val mget_s:
   -> i:size_t{v i < v n1}
   -> j:size_t{v j < v n2}
   -> Stack elem
-    (requires fun h0 -> B.live h0 a)
+    (requires fun h0 -> live h0 a)
     (ensures  fun h0 x h1 ->
       modifies loc_none h0 h1 /\
       x == M.mget_s (as_matrix h0 a) (v i) (v j))
@@ -375,22 +370,22 @@ val mul_inner_s:
   -> i:size_t{v i < v n1}
   -> k:size_t{v k < v n3}
   -> Stack uint16
-    (requires fun h -> B.live h a /\ B.live h b)
+    (requires fun h -> live h a /\ live h b)
     (ensures  fun h0 r h1 ->
-      modifies loc_none h0 h1 /\
+      modifies0 h0 h1 /\
       r == M.mul_inner_s (as_matrix h0 a) (as_matrix h0 b) (v i) (v k))
 let mul_inner_s #n1 #n2 #n3 a b i k =
   push_frame();
   let h0 = ST.get() in
   [@ inline_let ]
   let f l = get h0 a (v i) l *. get_s h0 b l (v k) in
-  let res = create #uint16 #1 (size 1) (u16 0) in
+  let res = create #uint16 (size 1) (u16 0) in
 
   let h1 = ST.get() in
   Lib.Loops.for (size 0) n2
-    (fun h2 j -> B.live h1 res /\ B.live h2 res /\
-      modifies (loc_buffer res) h1 h2 /\
-      B.get h2 res 0 == M.sum_ #(v n2) f j)
+    (fun h2 j -> live h1 res /\ live h2 res /\
+      modifies1 res h1 h2 /\
+      bget h2 res 0 == M.sum_ #(v n2) f j)
     (fun j ->
       let aij = mget a i j in
       let bjk = mget_s b j k in
@@ -414,7 +409,7 @@ val mul_inner1_s:
   -> h1:HS.mem
   -> a:matrix_t n1 n2
   -> b:matrix_t n2 n3
-  -> c:matrix_t n1 n3{B.disjoint a c /\ B.disjoint b c}
+  -> c:matrix_t n1 n3{disjoint a c /\ disjoint b c}
   -> i:size_t{v i < v n1}
   -> k:size_t{v k < v n3}
   -> f:(k:nat{k < v n3}
@@ -438,10 +433,10 @@ val matrix_mul_s:
   -> c:matrix_t n1 n3
   -> Stack unit
     (requires fun h ->
-      B.live h a /\ B.live h b /\ B.live h c /\ B.disjoint a c /\ B.disjoint b c)
+      live h a /\ live h b /\ live h c /\ disjoint a c /\ disjoint b c)
     (ensures  fun h0 _ h1 ->
-      B.live h1 c /\
-      modifies (loc_buffer c) h0 h1 /\
+      live h1 c /\
+      modifies1 c h0 h1 /\
       as_matrix h1 c == M.mul_s (as_matrix h0 a) (as_matrix h0 b))
 [@"c_inline"]
 let matrix_mul_s #n1 #n2 #n3 a b c =
@@ -452,8 +447,8 @@ let matrix_mul_s #n1 #n2 #n3 a b c =
   in
   Lib.Loops.for (size 0) n1
     (fun h1 i ->
-      B.live h1 a /\ B.live h1 b /\ B.live h1 c /\
-      modifies (loc_buffer c) h0 h1 /\ i <= v n1 /\
+      live h1 a /\ live h1 b /\ live h1 c /\
+      modifies1 c h0 h1 /\ i <= v n1 /\
       (forall (i1:nat{i1 < i}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k) /\
       (forall (i1:nat{i <= i1 /\ i1 < v n1}) (k:nat{k < v n3}). get h1 c i1 k == get h0 c i1 k))
     (fun i ->
@@ -494,20 +489,20 @@ val matrix_eq:
   -> a:matrix_t n1 n2
   -> b:matrix_t n1 n2
   -> Stack bool
-    (requires fun h -> B.live h a /\ B.live h b)
-    (ensures  fun h0 r h1 -> modifies loc_none h0 h1 /\
+    (requires fun h -> live h a /\ live h b)
+    (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
       r == M.matrix_eq #(v n1) #(v n2) (v m) (as_matrix h0 a) (as_matrix h0 b))
 [@"c_inline"]
 let matrix_eq #n1 #n2 m a b =
   push_frame();
-  let res = create #bool #1 (size 1) true in
+  let res = create (size 1) true in
 
   let n = n1 *! n2 in
   let h0 = ST.get() in
   Lib.Loops.for (size 0) n
   (fun h1 i ->
-    B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
-    B.get h1 res 0 == M.matrix_eq_fc #(v n1) #(v n2) (v m) (as_matrix h0 a) (as_matrix h0 b) i)
+    live h1 res /\ modifies1 res h0 h1 /\
+    bget h1 res 0 == M.matrix_eq_fc #(v n1) #(v n2) (v m) (as_matrix h0 a) (as_matrix h0 b) i)
   (fun i ->
     let ai = a.(i) in
     let bi = b.(i) in
@@ -528,29 +523,27 @@ val matrix_to_lbytes:
   -> Stack unit
     (requires fun h -> live h m /\ live h res /\ disjoint m res)
     (ensures  fun h0 r h1 ->
-      live h1 res /\ modifies (loc_buffer res) h0 h1 /\
-      B.as_seq h1 res == M.matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m))
+      live h1 res /\ modifies1 res h0 h1 /\
+      as_seq h1 res == M.matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m))
 [@"c_inline"]
 let matrix_to_lbytes #n1 #n2 m res =
   let h0 = ST.get () in
   let n = n1 *! n2 in
   Lib.Loops.for (size 0) n
   (fun h1 i ->
-    B.live h1 m /\ B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
-    (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). M.matrix_to_lbytes_fc (as_matrix h0 m) (B.as_seq h1 res) i0 k))
+    live h1 m /\ live h1 res /\ modifies1 res h0 h1 /\
+    (forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). M.matrix_to_lbytes_fc (as_matrix h0 m) (as_seq h1 res) i0 k))
   (fun i ->
     Lib.ByteSequence.index_uint_to_bytes_le
-      (Seq.index #uint16 #(v n1 * v n2) (B.as_seq h0 m) (v i));
+      (Seq.index #uint16 #(v n1 * v n2) (as_seq h0 m) (v i));
     let tmp = sub res (size 2 *! i) (size 2) in
     let h0 = ST.get () in
     uint_to_bytes_le tmp m.(i);
     let h1 = ST.get () in
-    modifies_buffer_elim ((sub #_ #(2 * v n1 * v n2) #(2 * v i) res (size 0) (size 2 *! i))) (loc_buffer tmp) h0 h1;
-    //assert (Seq.sub #_ #(2 * v n1 * v n2) (as_seq h1 res) 0 (2 * v i) == Seq.sub #_ #(2 * v n1 * v n2) (as_seq h0 res) 0 (2 * v i));
-    M.lemma_matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m) (B.as_seq h0 res) (B.as_seq h1 res) (v i)
+    M.lemma_matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m) (as_seq h0 res) (as_seq h1 res) (v i)
   );
   let h1 = ST.get () in
-  M.lemma_matrix_to_lbytes_ext #(v n1) #(v n2) (as_matrix h0 m) (B.as_seq h1 res) (M.matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m))
+  M.lemma_matrix_to_lbytes_ext #(v n1) #(v n2) (as_matrix h0 m) (as_seq h1 res) (M.matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m))
 
 val matrix_from_lbytes:
     #n1:size_t
@@ -560,18 +553,18 @@ val matrix_from_lbytes:
   -> Stack unit
     (requires fun h -> live h b /\ live h res /\ disjoint b res)
     (ensures  fun h0 _ h1 ->
-      live h1 res /\ modifies (loc_buffer res) h0 h1 /\
-      B.as_seq h1 res == M.matrix_from_lbytes (v n1) (v n2) (B.as_seq h0 b))
+      live h1 res /\ modifies1 res h0 h1 /\
+      as_seq h1 res == M.matrix_from_lbytes (v n1) (v n2) (as_seq h0 b))
 [@"c_inline"]
 let matrix_from_lbytes #n1 #n2 b res =
   let h0 = ST.get () in
   let n = n1 *! n2 in
   Lib.Loops.for (size 0) n
   (fun h1 i ->
-    B.live h1 b /\ B.live h1 res /\ modifies (loc_buffer res) h0 h1 /\
-    (forall (i0:size_nat{i0 < i}). bget h1 res i0 == M.matrix_from_lbytes_fc (v n1) (v n2) (B.as_seq h0 b) i0))
+    live h1 b /\ live h1 res /\ modifies1 res h0 h1 /\
+    (forall (i0:size_nat{i0 < i}). bget h1 res i0 == M.matrix_from_lbytes_fc (v n1) (v n2) (as_seq h0 b) i0))
   (fun i ->
     res.(i) <- uint_from_bytes_le #U16 (sub b (size 2 *! i) (size 2))
   );
   let h1 = ST.get () in
-  Seq.eq_intro (B.as_seq h1 res) (M.matrix_from_lbytes (v n1) (v n2) (B.as_seq h0 b))
+  Seq.eq_intro (as_seq h1 res) (M.matrix_from_lbytes (v n1) (v n2) (as_seq h0 b))

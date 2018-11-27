@@ -16,8 +16,7 @@ module HS = FStar.HyperStack
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 
-
-#set-options "--z3rlimit 100"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let modifies_preserves_live #t #a b l h0 h1 = ()
 let modifies_includes l1 l2 h0 h1 = ()
@@ -52,6 +51,8 @@ let create #a clen init =
 let createL #a init =
   B.alloca_of_list init
 
+#set-options "--max_fuel 1"
+
 let createL_global #a init =
   IB.igcmalloc_of_list #a root init
 
@@ -73,6 +74,8 @@ let copy #t #a #len o i =
 
 let memset #a #blen b init len =
   B.fill #a (b <: buffer a) init len
+
+#set-options "--max_fuel 0"
 
 let update_sub #t #a #len dst start n src =
   match t with
@@ -98,12 +101,12 @@ let update_sub_f #a #len h0 buf start n spec f =
   let h0 = ST.get () in
   f tmp;
   let h1 = ST.get () in
-  B.modifies_buffer_elim (B.sub (buf <: buffer a) (size 0) start) (loc tmp) h0 h1;
-  assert (v (start +! n) + v (len -. start -. n) == v len);
-  B.modifies_buffer_elim (B.sub (buf <: buffer a) (start +! n) (len -. start -. n)) (loc tmp) h0 h1;
+  assert (v (len -! (start +! n)) == v len - v (start +! n));
+  B.modifies_buffer_elim (B.gsub #a buf 0ul start) (loc tmp) h0 h1;
+  B.modifies_buffer_elim (B.gsub #a buf (start +! n) (len -! (start +! n))) (loc tmp) h0 h1;
   Sequence.lemma_update_sub (as_seq h0 buf) (v start) (v n) (spec h0) (as_seq h1 buf)
 
-let concat2 #a len0 s0 len1 s1 s =
+let concat2 #a #t0 #t1 len0 s0 len1 s1 s =
   let h0 = ST.get () in
   update_sub s (size 0) len0 s0;
   update_sub s len0 len1 s1;
@@ -111,7 +114,7 @@ let concat2 #a len0 s0 len1 s1 s =
   Seq.eq_intro (Seq.sub (as_seq h1 s) 0 (v len0)) (as_seq h0 s0);
   Seq.lemma_concat2 (v len0) (as_seq h0 s0) (v len1) (as_seq h0 s1) (as_seq h1 s)
 
-let concat3 #a len0 s0 len1 s1 len2 s2 s =
+let concat3 #a #t0 #t1 #t2 len0 s0 len1 s1 len2 s2 s =
   let h0 = ST.get () in
   update_sub s (size 0) len0 s0;
   update_sub s len0 len1 s1;
@@ -131,6 +134,8 @@ let loop_range_nospec #h0 #a #len start n buf impl =
   let inv h1 j = modifies (loc buf) h0 h1 in
   Lib.Loops.for start (start +. n) inv impl
 
+#set-options "--max_fuel 1"
+
 let loop h0 n a_spec refl footprint spec impl =
   let inv h i = loop_inv h0 n a_spec refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
@@ -142,6 +147,8 @@ let loop1 #b #blen h0 n acc spec impl =
 let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
   let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
   Lib.Loops.for (size 0) n inv impl
+
+#set-options "--max_fuel 0"
 
 let salloc1 #a #res h len x footprint spec spec_inv impl =
   let h0 = ST.get() in
@@ -168,11 +175,7 @@ let salloc1_trivial #a #res h len x footprint spec impl =
 
 inline_for_extraction noextract
 let salloc_nospec #a #res h len x footprint impl =
-  (* BB. `a` is a random type because it is unused, is there a better solution ? *)
-  let spec (z:res) (h0:mem) = a in
-  let spec_inv (#res:Type) (h1 h2 h3:mem) (r:res) = () in
-  admit();
-  salloc1 #a #res h len x footprint spec spec_inv impl
+  salloc1_trivial #a #res h len x footprint (fun _ _ -> True) impl
 
 inline_for_extraction noextract
 val loopi_blocks_f:
@@ -203,10 +206,11 @@ val loopi_blocks_f:
       modifies (loc w) h0 h1 /\
       as_seq h1 w ==
       Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
-
 let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
-  assert ((v i + 1) * v bs <= v nb * v bs);
-  let block = sub #_ #_ #inpLen inp (i *. bs) bs in
+  Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v nb);
+  assert ((v i + 1) * v bs == v i * v bs + v bs);
+  assert (v i * v bs + v bs <= v nb * v bs);
+  let block = sub inp (i *. bs) bs in
   f i block w
 
 inline_for_extraction noextract
@@ -304,16 +308,17 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #_ #inpLen inp (nb *. bs) rem in
   l rem last w
 
-#reset-options "--z3rlimit 250"
+#set-options "--max_fuel 1"
 
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   admit();
   [@inline_let]
   let a_spec' (i:nat{i <= v n}) =
-    assert (i * v len <= max_size_t);
+    Math.Lemmas.lemma_mult_le_right (v len) i (v n);
     a_spec i & Seq.lseq t (i * v len) in
   [@inline_let]
   let refl' h (i:nat{i <= v n}) : GTot (a_spec' i) =
+    Math.Lemmas.lemma_mult_le_right (v len) i (v n);
     refl h i, as_seq h (gsub output (size 0) (size i *! len))
   in
   let footprint' i = B.loc_union (footprint i) (loc output) in
@@ -321,6 +326,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   let spec' h0 : GTot (i:nat{i < v n} -> a_spec' i -> a_spec' (i + 1)) =
     let f = spec h0 in
     fun i so ->
+      Math.Lemmas.lemma_mult_le_right (v len) i (v n);
       let s, o = so <: a_spec i & Seq.lseq t (i * v len) in
       let s', block = f i s in
       let o' : Seq.lseq t ((i + 1) * v len) = Seq.(o @| block) in
@@ -346,8 +352,6 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
     Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) ==
     norm [delta] Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0))
 
-#set-options "--max_fuel 1"
-
 let fillT #a clen o spec f =
   let open Seq in
   let h0 = ST.get () in
@@ -367,12 +371,6 @@ let fillT #a clen o spec f =
       FStar.Seq.lemma_split (as_seq h' o) (v i)
     )
 
-(* let fill #a h0 clen o spec impl =  *)
-  (* loop h0 clen  *)
-  (* (Seq.createi_a a (v clen) (spec h0))  *)
-  (* (fun h i -> Seq.sub (as_seq h o) 0 i) *)
-  (* (fun i -> loc o) *)
-  (* (fun h -> Seq.createi_step a (v clen) (spec h0)) *)
 let fill #a h0 clen o spec impl =
   let open Seq in
   let h0 = ST.get() in
@@ -404,4 +402,10 @@ let mapiT #t #a #b clen out f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner (fun i -> f (size i)) in_seq)
+    (fun i -> let xi = inp.(i) in out.(i) <- f i xi)
+
+let mapi #a #b h0 clen out spec_f f inp = 
+  let h0 = ST.get () in
+  fill h0 clen out
+    (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner (spec_f h0) in_seq)
     (fun i -> let xi = inp.(i) in out.(i) <- f i xi)

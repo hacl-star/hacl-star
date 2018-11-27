@@ -174,7 +174,7 @@ val lemma_concat2:
     #a:Type0
   -> len0:size_nat
   -> s0:lseq a len0
-  -> len1:size_nat{len0 + len1 < max_size_t}
+  -> len1:size_nat{len0 + len1 <= max_size_t}
   -> s1:lseq a len1
   -> s:lseq a (len0 + len1) ->
   Lemma
@@ -187,9 +187,9 @@ val lemma_concat3:
     #a:Type0
   -> len0:size_nat
   -> s0:lseq a len0
-  -> len1:size_nat{len0 + len1 < max_size_t}
+  -> len1:size_nat{len0 + len1 <= max_size_t}
   -> s1:lseq a len1
-  -> len2:size_nat{len0 + len1 + len2 < max_size_t}
+  -> len2:size_nat{len0 + len1 + len2 <= max_size_t}
   -> s2:lseq a len2
   -> s:lseq a (len0 + len1 + len2) ->
   Lemma

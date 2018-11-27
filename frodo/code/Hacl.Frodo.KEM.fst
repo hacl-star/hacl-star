@@ -25,7 +25,7 @@ val crypto_kem_keypair:
       live h pk /\ live h sk /\
       disjoint pk sk /\ disjoint state pk /\ disjoint state sk)
     (ensures  fun h0 r h1 ->
-      modifies (loc_union (loc_buffer state) (loc_union (loc_buffer pk) (loc_buffer sk))) h0 h1 /\
+      modifies (loc state |+| (loc pk |+| loc sk)) h0 h1 /\
       (as_seq h1 pk, as_seq h1 sk) == S.crypto_kem_keypair (as_seq h0 state))
 let crypto_kem_keypair pk sk =
   Hacl.Impl.Frodo.KEM.KeyGen.crypto_kem_keypair pk sk
@@ -40,7 +40,7 @@ val crypto_kem_enc:
       disjoint ct ss /\ disjoint ct pk /\ disjoint ss pk /\
       disjoint state ct /\ disjoint state ss /\ disjoint state pk)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer state) (loc_union (loc_buffer ct) (loc_buffer ss))) h0 h1 /\
+      modifies (loc state |+| (loc ct |+| loc ss)) h0 h1 /\
       (as_seq h1 ct, as_seq h1 ss) == S.crypto_kem_enc (as_seq h0 state) (as_seq h0 pk))
 let crypto_kem_enc ct ss pk =
   Hacl.Impl.Frodo.KEM.Encaps.crypto_kem_enc ct ss pk
@@ -54,7 +54,7 @@ val crypto_kem_dec:
       live h ss /\ live h ct /\ live h sk /\
       disjoint ss ct /\ disjoint ss sk /\ disjoint ct sk)
     (ensures  fun h0 r h1 ->
-      modifies (loc_buffer ss) h0 h1 /\
+      modifies1 ss h0 h1 /\
       as_seq h1 ss == S.crypto_kem_dec (as_seq h0 ct) (as_seq h0 sk))
 let crypto_kem_dec ss ct sk =
   Hacl.Impl.Frodo.KEM.Decaps.crypto_kem_dec ss ct sk

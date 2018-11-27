@@ -138,9 +138,9 @@ let uint_from_bytes_be #t #l b =
   nat_to_uint #t #l n
 
 let uints_to_bytes_le #t #l #len ul =
-  let b = create (len * numbytes t) (u8 0) in
+  let b = create #uint8 (len * numbytes t) (u8 0) in
   repeati len
-    (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_le  ul.[i])) b
+    (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_le ul.[i])) b
 
 let uints_to_bytes_be #t #l #len ul =
   let b = create (len * numbytes t) (u8 0) in
