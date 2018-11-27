@@ -195,17 +195,16 @@ lib: $(ALL_OBJS) | $(OUT_DIR)
 snapshot2: $(ALL_SOURCES)
 	mkdir -p snapshot
 	mkdir -p snapshot/kremlin
-	cp -R $(KREMLIN_HOME)/include snapshot/kremlin/include
 	mkdir -p snapshot/kremlin/kremlib/extracted
+	cp -R $(KREMLIN_HOME)/include snapshot/kremlin/include
 	cp -R $(KREMLIB)/extracted/*.{c,h} snapshot/kremlin/kremlib/extracted
 	cp -R $(KREMLIB)/c/*.c snapshot/kremlin
 	mkdir -p snapshot/hacl
-	#cp -R $(HACL_HOME)/code/hash/sha2-c/*.{c,h} snapshot/hacl
 	cp -R $(HACL_HOME)/code/dist/compact/*.{c,h} snapshot/hacl
 	mkdir -p snapshot/evercrypt/include
-	cp -R $(HACL_HOME)/providers/include/*.h snapshot/evercrypt/include
 	mkdir -p snapshot/evercrypt/generated
 	mkdir -p snapshot/evercrypt/c
+	cp -R $(HACL_HOME)/providers/include/*.h snapshot/evercrypt/include
 	cp $(HACL_HOME)/providers/generated/*.{c,h} snapshot/evercrypt/generated
 	rm -f snapshot/evercrypt/generated/AEAD_Poly1305_64.{c,h}
 	for i in evercrypt_autoconfig.c evercrypt_bytes.c; do cp $(HACL_HOME)/providers/evercrypt/c/$$i snapshot/evercrypt/c; done
@@ -216,7 +215,6 @@ snapshot2: $(ALL_SOURCES)
 	for i in $(ALL_TEST_FILES); do cp $$i snapshot; done
 	cp MerkleTree.h snapshot
 	rm -f snapshot/kremlin/kremlib/extracted/FStar_UInt.c
-	#sed "s/static Prims_int FStar_UInt_min_int/Prims_int FStar_UInt_min_int/" -i snapshot/FStar.c
 
 endif # COMPILE
 
