@@ -1,10 +1,10 @@
 
 all: libmerkletree.a merkle_tree_test
 
-CFLAGS+=-I kremlin/include -I kremlin/kremlib -I kremlin/kremlib/extracted -I evercrypt/include 
+CFLAGS+=-I kremlin/include -I kremlin/kremlib -I kremlin/kremlib/extracted -I evercrypt/include -I evercrypt/generated
 
 THIS_SOURCE=$(wildcard *.c)
-EVERCRYPT_SRC=$(wildcard evercrypt/extracted/*.c)
+EVERCRYPT_SRC=$(wildcard evercrypt/generated/*.c) evercrypt/c/evercrypt_autoconfig.c
 KREMLIB_SRC=$(wildcard kremlin/kremlib/extracted/*.c) $(wildcard kremlin/*.c)
 HACL_SRC=$(wildcard hacl/*.c)
 VALE_SRC=$(wildcard vale/*.c)

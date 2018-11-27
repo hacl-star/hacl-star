@@ -14,9 +14,10 @@ OUT_DIR = c
 KREMLIN=$(KREMLIN_HOME)/krml
 KREMLIB=$(KREMLIN_HOME)/kremlib
 
-VALE=$(HACL_HOME)/secure_api/vale/asm
-VALE_SRC=$(addprefix $(VALE)/,sha256_main_i.c vale_aes_glue.c Vale_Hash_SHA2_256.c)
-VALE_ASM=$(addprefix $(VALE)/,sha256-$(MARCH)$(VARIANT).S aes-$(MARCH)$(VARIANT).S aesgcm-$(MARCH)$(VARIANT).S)
+MARCH?=x86_64
+VARIANT?=linux
+VALE=$(HACL_HOME)/vale/obj
+VALE_ASM=$(addprefix $(VALE)/,aesgcm-$(MARCH)-$(VARIANT).S cpuid-$(MARCH)-$(VARIANT).S curve25519-$(MARCH)-$(VARIANT).S sha256-$(MARCH)-$(VARIANT).S)
 
 ALL_TEST_FILES= \
   ./test/merkle_tree_test.h \
@@ -55,7 +56,7 @@ FSTARR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) \
   --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
 
-ENABLE_HINTS = --use_hints
+ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 #--use_hint_hashes --record_hints --query_stats
 
 $(HINT_DIR):
@@ -118,9 +119,8 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'Low.*' \
-	-bundle 'EverCrypt.*' \
 	-library 'EverCrypt,EverCrypt.*' \
-	-drop 'Spec,Lib,C.*,C.Loops.*' \
+	-drop 'Lib,C.*,C.Loops.*' \
 	-I $(HACL_HOME)/specs \
 	-I $(HACL_HOME)/code/lib \
 	-I $(HACL_HOME)/providers/evercrypt \
@@ -190,7 +190,7 @@ lib: $(ALL_OBJS) | $(OUT_DIR)
 
 .PRECIOUS: %.o
 
-# This snapshot assumes EverCrypt is built via `CONFIG=hacl-vale make` $(HACL_HOME)/providers
+# This snapshot assumes EverCrypt is built via `CONFIG=everest make` $(HACL_HOME)/providers
 .PHONY: snapshot2
 snapshot2: $(ALL_SOURCES)
 	mkdir -p snapshot
@@ -200,22 +200,23 @@ snapshot2: $(ALL_SOURCES)
 	cp -R $(KREMLIB)/extracted/*.{c,h} snapshot/kremlin/kremlib/extracted
 	cp -R $(KREMLIB)/c/*.c snapshot/kremlin
 	mkdir -p snapshot/hacl
-	cp -R $(HACL_HOME)/code/hash/sha2-c/*.{c,h} snapshot/hacl
+	#cp -R $(HACL_HOME)/code/hash/sha2-c/*.{c,h} snapshot/hacl
+	cp -R $(HACL_HOME)/code/dist/compact/*.{c,h} snapshot/hacl
 	mkdir -p snapshot/evercrypt/include
 	cp -R $(HACL_HOME)/providers/include/*.h snapshot/evercrypt/include
-	mkdir -p snapshot/evercrypt/extracted
-	cp $(HACL_HOME)/providers/generated/*.{c,h} snapshot/evercrypt/extracted
-	for i in evercrypt_autoconfig.c evercrypt_bytes.c; do cp $(HACL_HOME)/providers/evercrypt/c/$$i snapshot/evercrypt/extracted; done
+	mkdir -p snapshot/evercrypt/generated
+	mkdir -p snapshot/evercrypt/c
+	cp $(HACL_HOME)/providers/generated/*.{c,h} snapshot/evercrypt/generated
+	rm -f snapshot/evercrypt/generated/AEAD_Poly1305_64.{c,h}
+	for i in evercrypt_autoconfig.c evercrypt_bytes.c; do cp $(HACL_HOME)/providers/evercrypt/c/$$i snapshot/evercrypt/c; done
 	mkdir -p snapshot/vale
-	for i in $(VALE_SRC); do cp $$i snapshot/vale; done
-	cp $(VALE)/*.h snapshot/vale
-	cp $(VALE)/*.S snapshot/vale
+	for i in $(VALE_ASM); do cp $$i snapshot/vale; done
 	cp -R $(GENERATED_DIR)/*.h snapshot
 	for i in $(ALL_SOURCES); do cp $$i snapshot; done
 	for i in $(ALL_TEST_FILES); do cp $$i snapshot; done
 	cp MerkleTree.h snapshot
 	rm -f snapshot/kremlin/kremlib/extracted/FStar_UInt.c
-	sed "s/static Prims_int FStar_UInt_min_int/Prims_int FStar_UInt_min_int/" -i snapshot/FStar.c
+	#sed "s/static Prims_int FStar_UInt_min_int/Prims_int FStar_UInt_min_int/" -i snapshot/FStar.c
 
 endif # COMPILE
 

@@ -38,8 +38,9 @@ module EHL = EverCrypt.Helpers
 
 module High = MerkleTree.New.High
 
-private
-let hash_alg = Spec.Hash.Helpers.SHA2_256
+unfold
+noextract
+let hash_alg = MerkleTree.Spec.hash_alg
 
 val hash_size: uint32_t
 let hash_size = EHS.tagLen hash_alg
@@ -334,8 +335,6 @@ val hash_2:
          (Rgl?.r_repr hreg h0 src2))))
 #reset-options "--z3rlimit 40"
 let hash_2 src1 src2 dst =
-  let hh0 = HST.get () in
-  HST.push_frame ();
   // KreMLin can't extract `EHS.blockLen hash_alg` (= 64ul)
   let cb = B.alloca 0uy 64ul in
   B.blit src1 0ul cb 0ul hash_size;
@@ -343,37 +342,10 @@ let hash_2 src1 src2 dst =
 
   let st = EHS.create hash_alg in
   EHS.init #(Ghost.hide hash_alg) st;
-  let hh1 = HST.get () in
-  assert (S.equal (S.append
-                    (Rgl?.r_repr hreg hh0 src1)
-                    (Rgl?.r_repr hreg hh0 src2))
-                  (B.as_seq hh1 cb));
-  EHS.update #(Ghost.hide hash_alg) (Ghost.hide S.empty) st cb;
-  let hh2 = HST.get () in
-  assert (EHS.hashing st hh2 (S.append S.empty (B.as_seq hh1 cb)));
-  assert (S.equal (S.append S.empty (B.as_seq hh1 cb))
-                  (B.as_seq hh1 cb));
+  EHS.update #(Ghost.hide hash_alg) st cb;
   EHS.finish #(Ghost.hide hash_alg) st dst;
-  let hh3 = HST.get () in
-  assert (S.equal (B.as_seq hh3 dst)
-                  (EHS.extract (EHS.repr st hh2)));
-  assert (S.equal (B.as_seq hh3 dst)
-                  (EHS.extract
-                    (EHS.hash0 #hash_alg (B.as_seq hh1 cb))));
-  assert (S.equal (B.as_seq hh3 dst)
-                  (High.hash_2
-                    (Rgl?.r_repr hreg hh0 src1)
-                    (Rgl?.r_repr hreg hh0 src2)));
-  EHS.free #(Ghost.hide hash_alg) st;
-  HST.pop_frame ();
-  let hh4 = HST.get () in
-  assert (S.equal (B.as_seq hh4 dst)
-                  (High.hash_2
-                    (Rgl?.r_repr hreg hh0 src1)
-                    (Rgl?.r_repr hreg hh0 src2)));
-  // TODO: need to deal with the region of `st` (= HH.root)
-  assume (modifies (B.loc_region_only false (B.frameOf dst)) hh0 hh4)
-
+  EHS.free #(Ghost.hide hash_alg) st
+  
 /// Low-level Merkle tree data structure
 
 // NOTE: because of a lack of 64-bit LowStar.Buffer support, currently
@@ -2394,8 +2366,6 @@ private let rec mt_flush_to_ lv hs pi i j =
                       (S.cons (RV.as_seq hh1 flushed)
                               (RV.as_seq_sub hh0 hs (lv + 1ul) merkle_tree_size_lg))));
     as_seq_sub_upd hh0 hs lv (RV.as_seq hh1 flushed);
-    // assume (S.equal (RV.as_seq hh2 hs)
-    //                 (S.upd (RV.as_seq hh0 hs) (U32.v lv) (RV.as_seq hh1 flushed)));
 
     // if `lv = 31` then `pi <= i <= j < 2` thus `oi = opi`,
     // contradicting the branch.

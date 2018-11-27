@@ -29,7 +29,7 @@ val hash_ss: Type0
 let hash_ss = S.seq hash_seq
 
 let hash_init: hash = 
-  assume (Spec.Hash.Helpers.size_block hash_alg = hash_size);
+  assume (Spec.Hash.Helpers.size_block MTS.hash_alg = hash_size);
   Seq.create hash_size 0uy
 
 val hash_2: src1:hash -> src2:hash -> GTot hash
