@@ -63,7 +63,7 @@ let p #a (s: state_s a): Hacl.Hash.Definitions.state a =
   | SHA2_512_s p -> p
 
 let footprint_s #a (s: state_s a) =
-  M.loc_addr_of_buffer (p s)
+  B.loc_addr_of_buffer (p s)
 
 let invariant_s #a (s: state_s a) h =
   B.live h (p s)
@@ -129,8 +129,8 @@ let update_multi_256 s blocks n =
     // Hack alert!
     let k = such_a_bad_hack k224_256 in
     let h0 = ST.get () in
-    assume (M.loc_disjoint (M.loc_buffer k) (M.loc_buffer s));
-    assume (M.loc_disjoint (M.loc_buffer k) (M.loc_buffer blocks));
+    assume (B.loc_disjoint (B.loc_buffer k) (B.loc_buffer s));
+    assume (B.loc_disjoint (B.loc_buffer k) (B.loc_buffer blocks));
     assume (
       let k_b128 = LowStar.BufferView.mk_buffer_view k Views.view32_128 in
       SHA_helpers.k_reqs (LowStar.BufferView.as_seq h0 k_b128));
@@ -192,9 +192,9 @@ let update_last_st (#a:e_alg) =
   (requires fun h0 ->
     B.live h0 p /\
     B.live h0 last /\
-    M.(loc_disjoint (loc_buffer p) (loc_buffer last)))
+    B.(loc_disjoint (loc_buffer p) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
-    M.(modifies (loc_buffer p) h0 h1) /\
+    B.(modifies (loc_buffer p) h0 h1) /\
     (B.length last + Seq.length (Spec.Hash.Common.pad a (v total_len))) % size_block a = 0 /\
     B.as_seq h1 p ==
       compress_many (B.as_seq h0 p)
