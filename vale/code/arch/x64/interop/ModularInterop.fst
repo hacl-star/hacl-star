@@ -1,6 +1,5 @@
 module ModularInterop
 
-friend X64.Memory_s
 friend X64.Memory
 
 open X64.Machine_s
@@ -11,18 +10,18 @@ let make_h_equals_refine (a:Type) (x:a) (p:a -> Type0) (q:squash (p x)) : h_equa
 let prove_squash (a:Type) (x:a) : Lemma (squash a) = ()
 
 let to_b8 m =
-  let p (b:b8) : Type0 = LB.length b % MS.view_n (MS.TBase MS.TUInt64) == 0 in
+  let p (b:b8) : Type0 = LB.length b % M.view_n (M.TBase M.TUInt64) == 0 in
   let h : h_equals_refine b8 m (y:b8{p y}) m = make_h_equals_refine b8 m p () in //HReflRefine p () in
-  prove_squash (h_equals_refine b8 m (MS.buffer (MS.TBase MS.TUInt64)) m) h;
+  prove_squash (h_equals_refine b8 m (M.buffer (M.TBase M.TUInt64)) m) h;
   m
 
 let regs_with_stack (regs:registers) (stack_b:b8) (rsp:nat64) : registers =
   fun r -> if r = Rsp then rsp else regs r
 
 let create_memory (acc:list b8) (h0:HS.mem{mem_roots_p h0 acc}) : M.mem =
-  { MS.addrs = IA.addrs;
-    MS.ptrs = acc;
-    MS.hs = h0; }
+  { M.addrs = IA.addrs;
+    M.ptrs = acc;
+    M.hs = h0; }
 
 let create_initial_trusted_state_core
        (acc:list b8)
@@ -32,9 +31,9 @@ let create_initial_trusted_state_core
        (taint:taint_map)
        (h0:HS.mem)
        (stack:b8{mem_roots_p h0 (stack::acc)})
-  : GTot (TS.traceState & MS.mem)
+  : GTot (TS.traceState & M.mem)
   = let acc = stack::acc in
-    let (mem:MS.mem) = create_memory acc h0 in
+    let (mem:M.mem) = create_memory acc h0 in
     let regs = FunctionalExtensionality.on reg (regs_with_stack regs stack rsp) in
     let xmms = FunctionalExtensionality.on xmm xmms in
     let (s0:BS.state) = {
@@ -47,7 +46,7 @@ let create_initial_trusted_state_core
     {
       TS.state = s0;
       TS.trace = [];
-      TS.memTaint = MS.create_valid_memtaint mem acc taint
+      TS.memTaint = M.create_valid_memtaint mem acc taint
     },
     mem
 
@@ -123,8 +122,8 @@ let lemma_low_assumptions_seq (acc:list b8) (hs_mem:HS.mem) (b:M.buffer64) :
 //  let contents (i:nat{i < len}) : nat64 = UInt64.v (Seq.index s i) in
 //  let s' = Seq.init len contents in
 //
-//  assert (M.buffer_as_seq va_mem b == MS.buffer_as_seq #(MS.TBase MS.TUInt64) va_mem b);
-//  assert (Seq.equal (MS.buffer_as_seq #(MS.TBase MS.TUInt64) va_mem b) s');
+//  assert (M.buffer_as_seq va_mem b == M.buffer_as_seq #(M.TBase M.TUInt64) va_mem b);
+//  assert (Seq.equal (M.buffer_as_seq #(M.TBase M.TUInt64) va_mem b) s');
 //
 //  assert (Seq.equal
 //    (seq_nat64_to_seq_U64 s')
@@ -160,7 +159,7 @@ let wrap code pre post v = fun (x0:M.buffer64) (x1:M.buffer64) ->
     #(x:(V.va_state & V.va_state & V.va_fuel){
       let (va_s0, va_s1, fuel) = x in
       low_assumptions h0 va_s0.VS.mem x0 x1 /\
-      LB.modifies (LB.loc_union (LB.loc_buffer (to_b8 stack_b)) (LB.loc_union (LB.loc_buffer (to_b8 x0)) (LB.loc_buffer (to_b8 x1)))) h2 va_s1.VS.mem.MS.hs /\
+      LB.modifies (LB.loc_union (LB.loc_buffer (to_b8 stack_b)) (LB.loc_union (LB.loc_buffer (to_b8 x0)) (LB.loc_buffer (to_b8 x1)))) h2 va_s1.VS.mem.M.hs /\
       post IA.win x0 x1 va_s0 stack_b va_s1 fuel
     })
     (fun h0' -> h0' == h2) (fun h0' ->
@@ -193,8 +192,8 @@ let wrap code pre post v = fun (x0:M.buffer64) (x1:M.buffer64) ->
     let va_s1, fuel = v IA.win x0 x1 va_s0 stack_b in
     assert (post IA.win x0 x1 va_s0 stack_b va_s1 fuel);
     assert (V.modifies_mem (M.loc_union (M.loc_buffer x0) (M.loc_buffer x1)) va_s0.VS.mem va_s1.VS.mem);
-    assert (LB.modifies (LB.loc_union (LB.loc_buffer (to_b8 stack_b)) (LB.loc_union (LB.loc_buffer (to_b8 x0)) (LB.loc_buffer (to_b8 x1)))) h2 va_s1.VS.mem.MS.hs);
-    ((va_s0, va_s1, fuel), va_s1.VS.mem.MS.hs)
+    assert (LB.modifies (LB.loc_union (LB.loc_buffer (to_b8 stack_b)) (LB.loc_union (LB.loc_buffer (to_b8 x0)) (LB.loc_buffer (to_b8 x1)))) h2 va_s1.VS.mem.M.hs);
+    ((va_s0, va_s1, fuel), va_s1.VS.mem.M.hs)
   ) in //conveniently, st_put assumes that the shape of the stack did not change
   let h3 = HST.get () in
   assert (LB.modifies (LB.loc_union (LB.loc_buffer (to_b8 stack_b)) (LB.loc_union (LB.loc_buffer (to_b8 x0)) (LB.loc_buffer (to_b8 x1)))) h2 h3);

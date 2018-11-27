@@ -43,7 +43,6 @@ module TS = X64.Taint_Semantics_s
 
 friend X64.Vale.StateLemmas // TODO: this shouldn't be here
 friend X64.Vale.Decls
-friend X64.Memory
 
 //TODO: Find a better place for this
 val lemma_valid_taint_match: (t:tainted_operand) -> (s:state) -> Lemma
@@ -57,7 +56,7 @@ let lemma_valid_taint_match o s = match o with
     let aux (b:buffer64) (i:int) : Lemma
       (requires valid_maddr addr s.mem s.memTaint b i t)
       (ensures TS.taint_match (t_op_to_op o) (get_taint o) s.memTaint (state_to_S s).TS.state) = 
-      X64.Memory_s.lemma_valid_taint64 b s.memTaint s.mem i t
+      X64.Memory.lemma_valid_taint64 b s.memTaint s.mem i t
     in Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
   | _ -> ()
 
@@ -328,9 +327,9 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Xmm(dst), Mov128Me
         dst == buffer128_read(b, index, mem);
         valid_taint_buf128(b, mem, memTaint, t);
 {
-    low_lemma_valid_mem128(#buffer128_s(b), #nat(index), #mem_s(mem));
-    low_lemma_load_mem128(#buffer128_s(b), #nat(index), #mem_s(mem));
-    lemma_valid_taint128(#buffer128_s(b), #memTaint_t(memTaint), #mem_s(mem), #nat(index), t);
+    low_lemma_valid_mem128(b, #nat(index), mem);
+    low_lemma_load_mem128(b, #nat(index), mem);
+    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(dst), offset)), Mov128Xmm(src))), t))}{:quick exportOnly}{:public} Store128_buffer(
@@ -353,10 +352,10 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(d
         valid_taint_buf128(b, mem, memTaint, t);
         mem == old(buffer128_write(b, index, src, mem));
 {
-    low_lemma_valid_mem128(#buffer128_s(b), #nat(index), old(#mem_s(mem)));
-    low_lemma_store_mem128(#buffer128_s(b), #nat(index), old(src), old(#mem_s(mem)));
-    lemma_valid_taint128(#buffer128_s(b), old(#memTaint_t(memTaint)), old(#mem_s(mem)), #nat(index), t);
-    same_memTaint128(#buffer128_s(b), old(#mem_s(mem)), #mem_s(mem), old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+    low_lemma_valid_mem128(b, #nat(index), old(mem));
+    low_lemma_store_mem128(b, #nat(index), old(src), old(mem));
+    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
+    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
 procedure {:quick exportOnly}{:public} PushXmm(

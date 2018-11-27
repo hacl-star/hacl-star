@@ -12,7 +12,7 @@ open Interop
 open Words_s
 open Types_s
 open X64.Machine_s
-open X64.Memory_s
+open X64.Memory
 open X64.Vale.State
 open X64.Vale.Decls
 open BufferViewHelpers
@@ -20,11 +20,10 @@ open Interop_assumptions
 open X64.Vale.StateLemmas
 open X64.Vale.Lemmas
 module TS = X64.Taint_Semantics_s
-module ME = X64.Memory_s
+module ME = X64.Memory
 module BS = X64.Bytes_Semantics_s
 
 friend X64.Interop_s
-friend X64.Memory_s
 friend X64.Memory
 friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
@@ -39,12 +38,12 @@ module IS = X64.Interop_s
 let reduce = ()
 
 type vale_type =
-  | VT_Base of X64.Memory_s.base_typ
-  | VT_Buffer of X64.Memory_s.base_typ
+  | VT_Base of X64.Memory.base_typ
+  | VT_Buffer of X64.Memory.base_typ
 
 #set-options "--initial_ifuel 1"
 [@reduce]
-let base_type_as_type : X64.Memory_s.base_typ -> Type =
+let base_type_as_type : X64.Memory.base_typ -> Type =
   function
   | TUInt8 -> UInt8.t
   | TUInt16 -> UInt16.t
@@ -56,7 +55,7 @@ let base_type_as_type : X64.Memory_s.base_typ -> Type =
 let vale_type_as_type : vale_type -> Type =
   function
   | VT_Base bt -> base_type_as_type bt
-  | VT_Buffer bt -> X64.Memory_s.buffer (TBase bt)
+  | VT_Buffer bt -> X64.Memory.buffer (TBase bt)
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1229,18 +1228,18 @@ let intro_norm (p:Type) : Lemma (requires p) (ensures (normal p)) = ()
 //    = let code = (Vale_memcpy.va_code_memcpy win) in
 //      length_t_eq _ src;
 //      length_t_eq _ dst;
-//      // assert (view_n (X64.Memory_s.(TBase TUInt64)) == 8);
+//      // assert (view_n (X64.Memory.(TBase TUInt64)) == 8);
 //      // assert (B.length src == 16);
-//      // assert (B.length src == buffer_length src `op_Multiply` (view_n (X64.Memory_s.(TBase TUInt64))));
-//      assume (X64.Memory_s.buffer_length src == 2);
-//      assume (X64.Memory_s.buffer_length dst == 2);
+//      // assert (B.length src == buffer_length src `op_Multiply` (view_n (X64.Memory.(TBase TUInt64))));
+//      assume (X64.Memory.buffer_length src == 2);
+//      assume (X64.Memory.buffer_length dst == 2);
 //      elim_normal (disjoint_or_eq_l [src;dst]);
 //      elim_normal (live_l h0 [src;dst]);
 //      let initial_state = (create_memcpy_initial_state dst src alloc_push_h0 b) in
 //      // This verifies
 //      // assert (B.length b == 24);
 //      length_t_eq _ b;
-//      assume (X64.Memory_s.buffer_length (b <: buffer64) == 3);
+//      assume (X64.Memory.buffer_length (b <: buffer64) == 3);
 //      assert (initial_state.mem.ptrs == [b;src;dst]);
 //      assume (List.memP b initial_state.mem.ptrs);
 //      assume (List.memP src initial_state.mem.ptrs);

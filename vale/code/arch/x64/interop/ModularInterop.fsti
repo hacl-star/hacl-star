@@ -6,7 +6,6 @@ module LM = LowStar.Modifies
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
 module TS = X64.Taint_Semantics_s
-module MS = X64.Memory_s
 module M = X64.Memory
 module BS = X64.Bytes_Semantics_s
 module I = Interop

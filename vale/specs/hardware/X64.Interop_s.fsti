@@ -12,11 +12,11 @@ module HS = FStar.HyperStack
 open Words_s
 open Types_s
 open X64.Machine_s
-open X64.Memory_s
+open X64.Memory
 open BufferViewHelpers
 open Interop_assumptions
 module TS = X64.Taint_Semantics_s
-module ME = X64.Memory_s
+module ME = X64.Memory
 module BS = X64.Bytes_Semantics_s
 
 // === for refinement types
@@ -36,12 +36,12 @@ val to_b8 (#bt:ME.base_typ) (m:ME.buffer (TBase bt)) : m':b8{h_equals_refine b8 
 let reduce = ()
 
 type vale_type =
-  | VT_Base of X64.Memory_s.base_typ
-  | VT_Buffer of X64.Memory_s.base_typ
+  | VT_Base of X64.Memory.base_typ
+  | VT_Buffer of X64.Memory.base_typ
 
 #set-options "--initial_ifuel 1"
 [@reduce]
-let base_type_as_type : X64.Memory_s.base_typ -> Type =
+let base_type_as_type : X64.Memory.base_typ -> Type =
   function
   | TUInt8 -> UInt8.t
   | TUInt16 -> UInt16.t
@@ -53,7 +53,7 @@ let base_type_as_type : X64.Memory_s.base_typ -> Type =
 let vale_type_as_type : vale_type -> Type =
   function
   | VT_Base bt -> base_type_as_type bt
-  | VT_Buffer bt -> X64.Memory_s.buffer (TBase bt)
+  | VT_Buffer bt -> X64.Memory.buffer (TBase bt)
 
 
 ////////////////////////////////////////////////////////////////////////////////
