@@ -44,7 +44,19 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/code/lib \
   $(HACL_HOME)/code/hash-new \
   $(HACL_HOME)/providers/evercrypt \
-  $(KREMLIN_HOME)/kremlib
+  $(KREMLIN_HOME)/kremlib \
+  $(HACL_HOME)/vale/code/arch/x64/interop/fsti \
+  $(HACL_HOME)/vale/code/arch/x64 \
+  $(HACL_HOME)/vale/specs/defs \
+  $(HACL_HOME)/vale/specs/hardware \
+  $(HACL_HOME)/vale/code/crypto/sha \
+  $(HACL_HOME)/vale/code/arch \
+  $(HACL_HOME)/vale/code/lib/collections \
+  $(HACL_HOME)/vale/code/lib/util \
+  $(HACL_HOME)/vale/specs/crypto \
+  $(HACL_HOME)/vale/specs/math \
+  $(HACL_HOME)/vale/obj/cache_checked 
+
 
 FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 

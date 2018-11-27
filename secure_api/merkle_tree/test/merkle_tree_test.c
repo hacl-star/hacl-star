@@ -4,6 +4,7 @@
 #include "merkle_tree_test.h"
 #include "MerkleTree_New_Low.h"
 #include "MerkleTree_New_Low_Serialization.h"
+#include "EverCrypt_AutoConfig2.h"
 
 static struct timeval timer;
 
@@ -28,7 +29,7 @@ int main(int argc, char *argv[]) {
 
   // Should call below two functions in the beginning of `main`.
   kremlinit_globals();
-  hash_cfg(EverCrypt_AutoConfig_Vale);
+  EverCrypt_AutoConfig2_init();
 
   timer_start();
 

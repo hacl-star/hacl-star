@@ -47,10 +47,6 @@ let hash_size = EHS.tagLen hash_alg
 
 type hash = uint8_p
 
-val hash_cfg: EverCrypt.AutoConfig.impl -> HST.St unit
-let hash_cfg i =
-  EverCrypt.AutoConfig.init (EverCrypt.AutoConfig.Prefer i)
-
 // We cannot use `Low.RVector.Instances`, where we have some general
 // typeclass instances of `regional`, e.g., if `rg:regional a` then
 // `regional (rvector rg)`. In FStar we can use this, but KreMLin currently
