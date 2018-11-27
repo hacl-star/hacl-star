@@ -34,17 +34,17 @@ val path_spec:
   actd:bool ->
   p:path{S.length p = mt_path_length k j actd} ->
   GTot (sp:S.seq MTS.hash{S.length sp = log2c j})
-       (decreases (S.length p))
+       (decreases j)
 #reset-options "--z3rlimit 20"
 let rec path_spec k j actd p =
-  if S.length p = 0 then S.empty
-  else if j = 0 then S.empty
-  else (S.cons
-         (if k % 2 = 0
-         then (if j = k || (j = k + 1 && not actd) 
-              then HPad else HRaw (S.head p))
-         else HRaw (S.head p))
-         (path_spec (k / 2) (j / 2) (actd || (j % 2 = 1)) (S.tail p)))
+  if j = 0 then S.empty
+  else (if k % 2 = 0
+       then (if j = k || (j = k + 1 && not actd) 
+            then S.cons HPad (path_spec (k / 2) (j / 2) (actd || (j % 2 = 1)) p)
+            else S.cons (HRaw (S.head p))
+                   (path_spec (k / 2) (j / 2) (actd || (j % 2 = 1)) (S.tail p)))
+       else S.cons (HRaw (S.head p))
+              (path_spec (k / 2) (j / 2) (actd || (j % 2 = 1)) (S.tail p)))
 #reset-options
 
 val mt_get_path_step_acc:
@@ -241,4 +241,95 @@ let mt_get_path_inv_ok mt olds idx drt =
   assert (S.length (S.tail p) == mt_path_length idx (MT?.j mt) false);
   mt_get_path_inv_ok_ 0 (MT?.i umt) (MT?.j umt)
     olds (MT?.hs umt) (MT?.rhs umt) idx ip hash_init false
+
+val mt_verify_ok_:
+  k:nat ->
+  j:nat{k <= j} ->
+  p:path ->
+  ppos:nat ->
+  acc:hash ->
+  actd:bool ->
+  Lemma (requires (ppos + mt_path_length k j actd <= S.length p))
+        (ensures (HRaw (mt_verify_ k j p ppos acc actd) ==
+                 MTS.mt_verify_ #(log2c j)
+                   (path_spec k j actd
+                     (S.slice p ppos (ppos + mt_path_length k j actd)))
+                   k (HRaw acc)))
+        (decreases j)
+#reset-options "--z3rlimit 40 --max_fuel 1"
+let rec mt_verify_ok_ k j p ppos acc actd =
+  if j = 0 then ()
+  else begin
+    let vi = mt_verify_ k j p ppos acc actd in
+    let plen = mt_path_length k j actd in
+    let vs = MTS.mt_verify_ #(log2c j)
+               (path_spec k j actd (S.slice p ppos (ppos + plen)))
+               k (HRaw acc) in
+    let nactd = actd || (j % 2 = 1) in
+    let nplen = mt_path_length (k / 2) (j / 2) nactd in
+
+    if k % 2 = 0
+    then begin
+      if j = k || (j = k + 1 && not actd) 
+      then begin
+        assert (vi == mt_verify_ (k / 2) (j / 2) p ppos acc nactd);
+        assert (plen == nplen);
+        assert (S.equal (path_spec k j actd (S.slice p ppos (ppos + plen)))
+                        (S.cons HPad 
+                          (path_spec (k / 2) (j / 2) nactd
+                            (S.slice p ppos (ppos + plen)))));
+        assert (vs ==
+               MTS.mt_verify_ #(log2c (j / 2))
+                 (path_spec (k / 2) (j / 2) nactd (S.slice p ppos (ppos + plen)))
+                 (k / 2) (HRaw acc));
+        mt_verify_ok_ (k / 2) (j / 2) p ppos acc nactd
+      end
+      else begin
+        let nacc = hash_2 acc (S.index p ppos) in
+        assert (vi == mt_verify_ (k / 2) (j / 2) p (ppos + 1) nacc nactd);
+        assert (plen == nplen + 1);
+        assert (S.equal (S.tail (S.slice p ppos (ppos + plen)))
+                        (S.slice p (ppos + 1) (ppos + 1 + nplen)));
+        assert (S.equal (path_spec k j actd (S.slice p ppos (ppos + plen)))
+                        (S.cons (HRaw (S.index p ppos))
+                          (path_spec (k / 2) (j / 2) nactd
+                            (S.slice p (ppos + 1) (ppos + 1 + nplen)))));
+        assert (vs ==
+               MTS.mt_verify_ #(log2c (j / 2))
+                 (path_spec (k / 2) (j / 2) nactd
+                   (S.slice p (ppos + 1) (ppos + 1 + nplen)))
+                 (k / 2) (HRaw nacc));
+        mt_verify_ok_ (k / 2) (j / 2) p (ppos + 1) nacc nactd
+      end
+    end
+    else begin
+      let nacc = hash_2 (S.index p ppos) acc in
+      assert (vi == mt_verify_ (k / 2) (j / 2) p (ppos + 1) nacc nactd);
+      assert (plen == 1 + nplen);
+      assert (S.equal (S.tail (S.slice p ppos (ppos + plen)))
+                      (S.slice p (ppos + 1) (ppos + 1 + nplen)));
+      assert (S.equal (path_spec k j actd (S.slice p ppos (ppos + plen)))
+                      (S.cons (HRaw (S.index p ppos))
+                        (path_spec (k / 2) (j / 2) nactd
+                          (S.slice p (ppos + 1) (ppos + 1 + nplen)))));
+      assert (vs ==
+             MTS.mt_verify_ #(log2c (j / 2))
+               (path_spec (k / 2) (j / 2) nactd
+                 (S.slice p (ppos + 1) (ppos + 1 + nplen)))
+               (k / 2) (HRaw nacc));
+      mt_verify_ok_ (k / 2) (j / 2) p (ppos + 1) nacc nactd
+    end
+  end
+#reset-options  
+
+val mt_verify_ok:
+  k:nat ->
+  j:nat{k < j} ->
+  p:path{S.length p = 1 + mt_path_length k j false} ->
+  rt:hash ->
+  Lemma (mt_verify k j p rt ==
+        MTS.mt_verify #(log2c j) 
+          (path_spec k j false (S.tail p)) k (HRaw (S.head p)) (HRaw rt))
+let mt_verify_ok k j p rt =
+  mt_verify_ok_ k j p 1 (S.head p) false
 
