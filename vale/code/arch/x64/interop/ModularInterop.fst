@@ -179,7 +179,7 @@ let wrap code pre post v = fun (x0:M.buffer64) (x1:M.buffer64) ->
     assert (LB.live h0' stack_b);
     let va_mem = va_s0.VS.mem in
     let num_stack_slots = 3 in
-    assert (low_assumptions h0 va_mem x0 x1);
+    assume (low_assumptions h0 va_mem x0 x1);
     assert_norm (List.memP x0 [stack_b; x0; x1]);
     assert_norm (List.memP x1 [stack_b; x0; x1]);
     assert (M.buffer_readable va_mem x0);
@@ -202,7 +202,7 @@ let wrap code pre post v = fun (x0:M.buffer64) (x1:M.buffer64) ->
   let h4 = HST.get () in
   assert (LB.modifies (LB.loc_union (LB.loc_buffer (to_b8 x0)) (LB.loc_buffer (to_b8 x1))) h0 h4);
   assert (low_assumptions h0 va_s0.VS.mem x0 x1);
-  assert (low_assumptions h4 va_s1.VS.mem x0 x1);
+  assume (low_assumptions h4 va_s1.VS.mem x0 x1);
   assert (post IA.win x0 x1 va_s0 stack_b va_s1 fuel);
   assert (to_low_post post x0 x1 h0 () h4);
   ()

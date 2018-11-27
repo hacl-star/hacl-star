@@ -145,7 +145,7 @@ assert (~win ==> va_get_reg Rsi va_s0 == buffer_addr src (va_get_mem va_s0));
   ()
 *)
 
-#reset-options "--z3rlimit 40"
+#reset-options "--z3rlimit 40 --query_stats"
 let memcpy
     (dst:M.buffer64)
     (src:M.buffer64)
