@@ -165,7 +165,7 @@ EVERCRYPT_SOURCES = \
 
 ifeq ($(CONFIG),noopenssl)
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_bcrypt.c
-else
+else ifneq ($(CONFIG),everest)
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_openssl.c
 endif
 
