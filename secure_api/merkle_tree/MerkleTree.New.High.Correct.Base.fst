@@ -405,6 +405,13 @@ let hash_seq_spec hs =
   S.append (hash_seq_lift hs)
            (create_pads (pow2 (log2c (S.length hs)) - S.length hs))
 
+val hash_seq_spec_index_raw:
+  hs:hash_seq{S.length hs > 0} ->
+  i:nat{i < S.length hs} ->
+  Lemma (S.index (hash_seq_spec hs) i == HRaw (S.index hs i))
+let hash_seq_spec_index_raw hs i =
+  hash_seq_lift_index hs
+
 // Now about recovering rightmost hashes
 
 val mt_hashes_next_rel_lift_even:
@@ -451,6 +458,14 @@ let hash_seq_spec_full hs acc actd =
   if actd
   then (S.upd (hash_seq_spec hs) (S.length hs) (HRaw acc))
   else hash_seq_spec hs
+
+val hash_seq_spec_full_index_raw:
+  hs:hash_seq{S.length hs > 0} ->
+  acc:hash -> actd:bool -> i:nat{i < S.length hs} ->
+  Lemma (S.index (hash_seq_spec_full hs acc actd) i ==
+        HRaw (S.index hs i))
+let hash_seq_spec_full_index_raw hs acc actd i =
+  hash_seq_spec_index_raw hs i
 
 val hash_seq_spec_full_case_true:
   hs:hash_seq{S.length hs > 0} -> acc:hash ->
