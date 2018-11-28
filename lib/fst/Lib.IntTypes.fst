@@ -447,35 +447,3 @@ let gte #t x y =
 
 let gte_lemma #t x y = ()
 
-(* let to_be #t #l u =  *)
-(*   match t with *)
-(*   | U1 -> u *)
-(*   | U8 -> u *)
-(*   | U16 -> C.Endianness.htobe16 u *)
-(*   | U32 -> C.Endianness.htobe32 u *)
-(*   | U64 -> C.Endianness.htobe64 u *)
-
-(* let to_le #t #l u =  *)
-(*   match t with *)
-(*   | U1 -> u *)
-(*   | U8 -> u *)
-(*   | U16 -> C.Endianness.htole16 u *)
-(*   | U32 -> C.Endianness.htole32 u *)
-(*   | U64 -> C.Endianness.htole64 u *)
-
-(* let from_be #t #l u =  *)
-(*   match t with *)
-(*   | U1 -> u *)
-(*   | U8 -> u *)
-(*   | U16 -> C.Endianness.be16toh u *)
-(*   | U32 -> C.Endianness.be32toh u *)
-(*   | U64 -> C.Endianness.be64toh u *)
-
-(* let from_le #t #l u =  *)
-(*   match t with *)
-(*   | U1 -> u *)
-(*   | U8 -> u *)
-(*   | U16 -> C.Endianness.le16toh u *)
-(*   | U32 -> C.Endianness.le32toh u *)
-(*   | U64 -> C.Endianness.le64toh u *)
-

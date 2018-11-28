@@ -59,10 +59,11 @@ val load_state: st:state -> nonce:nonce -> counter:size_t -> ST unit
 			     (requires (fun h -> live h st /\ live h nonce))
 			     (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1))
 let load_state st nonce counter = 
-    let counter0 = secret (to_be counter) in
-    let counter1 = secret (to_be (counter +. 1ul)) in
-    let counter2 = secret (to_be (counter +. 2ul)) in
-    let counter3 = secret (to_be (counter +. 3ul)) in
+    let counter = secret counter in
+    let counter0 = Lib.ByteBuffer.uint_to_be counter in
+    let counter1 = Lib.ByteBuffer.uint_to_be (counter +. u32 1) in
+    let counter2 = Lib.ByteBuffer.uint_to_be (counter +. u32 2) in
+    let counter3 = Lib.ByteBuffer.uint_to_be (counter +. u32 3) in
     st.(size 0) <- vec128_insert32 nonce.(size 0) counter0 (u8 3);
     st.(size 1) <- vec128_insert32 nonce.(size 0) counter1 (u8 3);
     st.(size 2) <- vec128_insert32 nonce.(size 0) counter2 (u8 3);

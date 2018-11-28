@@ -13,6 +13,21 @@ module BS = Lib.ByteSequence
 
 open FStar.Mul
 
+
+inline_for_extraction
+val uint_to_be: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+
+inline_for_extraction
+val uint_to_le: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+
+inline_for_extraction
+val uint_from_be: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+
+inline_for_extraction
+val uint_from_le: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+
+
+
 (** Compares two byte buffers of equal length returning a bool *)
 inline_for_extraction
 val lbytes_eq:
