@@ -3,6 +3,7 @@ include "../../../../arch/x64/X64.Vale.InsMem.vaf"
 include{:fstar}{:open} "Fast_defs"
 include{:fstar}{:open} "Fast_lemmas_external"
 include{:fstar}{:open} "FastHybrid_helpers"
+include{:fstar}{:open} "FastUtil_helpers"
 include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.FastHybrid
@@ -40,6 +41,7 @@ open FStar.Tactics
 open Fast_defs
 open Fast_lemmas_external
 open FastHybrid_helpers
+open FastUtil_helpers
 open X64.CPU_Features_s
 #endverbatim
 
@@ -377,6 +379,48 @@ procedure{:quick} carry_pass(inline use_cf:bool)
 }
 
 #reset-options "--z3rlimit 300"
+procedure{:quick} carry_sub_pass()
+    lets
+        carry @= rax;
+        tmp @= rcx;
+        a0 @= r8;
+        a1 @= r10;
+        a2 @= r12;
+        a3 @= r14;
+    modifies
+        carry; tmp; a0; a1; a2; a3;
+        efl;
+
+    requires
+        adx_enabled && bmi2_enabled;
+
+    ensures
+//        let sum := old(pow2_four(a0, a1, a2, a3) + bool_bit(cf(efl)) * 38);
+//        let carry := bool_bit(sum >= pow2_256);
+//        let a0_new := (old(a0) + old(bool_bit(cf(efl))) * 38 + carry*38) % pow2_64;
+//        pow2_four(a0, a1, a2, a3) == old(pow2_four(a0_new, a1, a2, a3));
+{
+    Mov64(carry, 0);
+    carry_times_38(tmp);
+
+    Sub64Wrap(a0, carry);      
+    Sbb64(a1, 0);          
+    Sbb64(a2, 0);          
+    Sbb64(a3, 0);          
+
+    ghost var old_carry := old(bool_bit(cf(efl)));
+    assert pow2_four(a0, a1, a2, a3) - bool_bit(cf(efl))*pow2_256 == old(pow2_four(a0, a1, a2, a3) - old_carry * 38);
+    ghost var sum:int := old(pow2_four(a0, a1, a2, a3) - old_carry * 38);
+    ghost var new_carry := bool_bit(cf(efl));
+    assert new_carry == bool_bit(sum < 0);
+
+    Mov64(carry, 0);
+    Cmovc64(carry, tmp);
+    Sub64Wrap(a0, carry);
+    assert a0 == (old(a0) - old_carry * 38 - new_carry*38) % pow2_64;
+}
+
+#reset-options "--z3rlimit 300"
 procedure{:quick} fast_add(
     ghost inA_b:buffer64,
     ghost inB_b:buffer64)
@@ -436,6 +480,69 @@ procedure{:quick} fast_add(
     Adcx64Wrap(d3, Mem(inA_ptr, 24, inA_b, 3, Secret));
 }
 
+#reset-options "--z3rlimit 300"
+procedure{:quick} fast_sub(
+    ghost inA_b:buffer64,
+    ghost inB_b:buffer64)
+    lets
+        inA_ptr @= rsi;
+        inB_ptr @= rcx;
+
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
+
+        b0 := buffer64_read(inB_b, 0, mem);
+        b1 := buffer64_read(inB_b, 1, mem);
+        b2 := buffer64_read(inB_b, 2, mem);
+        b3 := buffer64_read(inB_b, 3, mem);
+
+        a := pow2_four(a0, a1, a2, a3);
+        b := pow2_four(b0, b1, b2, b3);
+
+        d0 @= r8;
+        d1 @= r10;
+        d2 @= r12;
+        d3 @= r14;
+    reads
+        inA_ptr; inB_ptr; mem; memTaint;
+
+    modifies
+        d0; d1; d2; d3;
+        efl;
+
+    requires
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inB_ptr, inB_b, 4, memTaint, Secret);
+
+    ensures
+        let d := pow2_four(d0, d1, d2, d3);
+        d - bool_bit(cf(efl)) * pow2_256 == old(a - b);
+{
+    xor_lemmas();
+
+    Load64_buffer(d0, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
+    lemma_load_mem64(inB_b, 0, mem);   
+    Sub64Wrap(d0, Mem(inB_ptr, 0, inB_b, 0, Secret));      /* A[0] - B[0] */
+
+    Load64_buffer(d1, inA_ptr,  8, Secret, inA_b, 1);     /* A[1] */
+    lemma_load_mem64(inB_b, 1, mem);   
+    Sbb64(d1, Mem(inB_ptr, 8, inB_b, 1, Secret));          /* A[1] - B[1] */
+
+    Load64_buffer(d2, inA_ptr, 16, Secret, inA_b, 2);     /* A[2] */
+    lemma_load_mem64(inB_b, 2, mem);   
+    Sbb64(d2, Mem(inB_ptr,16, inB_b, 2, Secret));         /* A[2] - B[2] */
+    
+    Load64_buffer(d3, inA_ptr, 24, Secret, inA_b, 3);     /* A[3] */
+    lemma_load_mem64(inB_b, 3, mem);   
+    Sbb64(d3, Mem(inB_ptr,24, inB_b, 3, Secret));         /* A[3] - B[3] */
+
+    lemma_sub(a, a0, a1, a2, a3,
+              b, b0, b1, b2, b3,
+              d0, d1, d2, d3, bool_bit(cf(efl)));
+}
+
 #reset-options "--z3rlimit 30"
 procedure{:quick} store4(ghost dst_b:buffer64)
     lets
@@ -459,7 +566,7 @@ procedure{:quick} store4(ghost dst_b:buffer64)
 
 
 #reset-options "--z3rlimit 300"
-procedure{:quick} {:verify true} fadd(
+procedure{:quick} fadd(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
     ghost inB_b:buffer64)
@@ -480,7 +587,6 @@ procedure{:quick} {:verify true} fadd(
 
         a := pow2_four(a0, a1, a2, a3);
         b := pow2_four(b0, b1, b2, b3);
-
 
         tmp0 @= r8;
         tmp1 @= r10;
@@ -516,6 +622,67 @@ procedure{:quick} {:verify true} fadd(
 {
     fast_add(inA_b, inB_b);
     carry_pass(true);
+    store4(dst_b);
+}
+
+#reset-options "--z3rlimit 300"
+procedure{:quick} {:verify true} fsub(
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64,
+    ghost inB_b:buffer64)
+    lets
+        dst_ptr @= rdi;
+        inA_ptr @= rsi;
+        inB_ptr @= rcx;
+
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
+
+        b0 := buffer64_read(inB_b, 0, mem);
+        b1 := buffer64_read(inB_b, 1, mem);
+        b2 := buffer64_read(inB_b, 2, mem);
+        b3 := buffer64_read(inB_b, 3, mem);
+
+        a := pow2_four(a0, a1, a2, a3);
+        b := pow2_four(b0, b1, b2, b3);
+
+        tmp0 @= r8;
+        tmp1 @= r10;
+        tmp2 @= r12;
+        tmp3 @= r14;
+    reads
+        dst_ptr; inA_ptr; memTaint;
+
+    modifies
+        rax; inB_ptr;
+        tmp0; tmp1; tmp2; tmp3;
+        mem; efl;
+
+    requires
+        adx_enabled && bmi2_enabled;
+        buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
+        buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
+
+        validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inB_ptr, inB_b, 4, memTaint, Secret);
+
+    ensures
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+        let d := pow2_four(d0, d1, d2, d3);
+        //d == old(a - b);
+
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
+{
+    fast_sub(inA_b, inB_b);
+    carry_sub_pass();
+    store4(dst_b);
 }
 
 /*
