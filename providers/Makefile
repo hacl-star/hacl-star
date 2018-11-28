@@ -103,8 +103,8 @@ ifneq (,$(EVEREST_WINDOWS))
 KOPTS		+=-falloca -ftail-calls
 endif
 
-VALE_BUNDLES=$(addprefix -bundle , 'X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
-  'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
+VALE_BUNDLES=$(addprefix -bundle , 'X64.*' 'Arch.*' 'Words.*' 'Vale.*[rename=Vale_Misc]' \
+  'Collections.*,Collections[rename=Collections]' 'SHA_helpers' Prop_s Types_s Words_s Views AES_s \
   Workarounds 'Math.*' Interop TypesNative_s)
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
