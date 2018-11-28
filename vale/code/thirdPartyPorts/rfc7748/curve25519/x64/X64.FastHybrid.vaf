@@ -22,6 +22,7 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open Fast_defs
 open X64.CPU_Features_s
+
 #endverbatim
 
 #verbatim{:implementation}
@@ -310,19 +311,40 @@ procedure{:quick}{:public} fast_mul1_add_stdcall(
     Pop(r15, stack_b, 4);
 }
 
-#reset-options "--z3rlimit 300"
-procedure{:quick} carry_pass()
+#reset-options "--z3rlimit 10"
+procedure {:quick exportOnly} carry_times_38(inout tmp:dst_opr64)
     lets
+        carry @= rax;
+    modifies carry;
+    reads efl;
+    requires 
+        carry == 0;
+        @tmp != TReg(Rax);
+    ensures 
+        carry == bool_bit(cf(efl)) * 38;
+        tmp == 38;
+{
+    Mov64(tmp, 38);
+    Cmovc64(carry, tmp);
+}
+
+#reset-options "--z3rlimit 300"
+procedure{:quick} carry_pass(inline use_cf:bool)
+    lets
+        carry @= rax;
+        tmp @= rcx;
         a0 @= r8;
         a1 @= r10;
         a2 @= r12;
         a3 @= r14;
     modifies
-        rax; rcx; a0; a1; a2; a3;
+        carry; rcx; a0; a1; a2; a3;
         efl;
 
     requires
         adx_enabled && bmi2_enabled;
+
+        !use_cf ==> carry * 38 < pow2_64;
 
     ensures
 //        let sum := old(pow2_four(a0, a1, a2, a3) + bool_bit(cf(efl)) * 38);
@@ -330,25 +352,28 @@ procedure{:quick} carry_pass()
 //        let a0_new := (old(a0) + old(bool_bit(cf(efl))) * 38 + carry*38) % pow2_64;
 //        pow2_four(a0, a1, a2, a3) == old(pow2_four(a0_new, a1, a2, a3));
 {
-    //xor_lemmas();
-    Mov64(rax, 0);
-    Mov64(rcx, 38);
-    Cmovc64(rax, rcx);
-    assert rax == bool_bit(cf(efl)) * 38;
+    ghost var carry_in:nat64 := if use_cf then (if cf(efl) then 1 else 0) else carry;
+    inline if (use_cf) {
+        Mov64(carry, 0);
+        carry_times_38(tmp);
+    } else {
+        Mov64(tmp, 38);
+        IMul64(carry, tmp);
+    }
 
-    Add64Wrap(r8, rax); 
-    Adcx64Wrap(r10, 0); 
-    Adcx64Wrap(r12, 0);
-    Adcx64Wrap(r14, 0);
-    assert pow2_five(r8, r10, r12, r14, bool_bit(cf(efl))) == old(pow2_four(r8, r10, r12, r14) + bool_bit(cf(efl)) * 38);
-    ghost var sum := old(pow2_four(r8, r10, r12, r14) + bool_bit(cf(efl)) * 38);
-    ghost var carry := bool_bit(cf(efl));
-    assert carry == bool_bit(sum >= pow2_256);
+    Add64Wrap(a0, carry); 
+    Adcx64Wrap(a1, 0); 
+    Adcx64Wrap(a2, 0);
+    Adcx64Wrap(a3, 0);
+    assert pow2_five(a0, a1, a2, a3, bool_bit(cf(efl))) == old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
+    ghost var sum := old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
+    ghost var new_carry := bool_bit(cf(efl));
+    assert new_carry == bool_bit(sum >= pow2_256);
 
-    Mov64(rax, 0);
-    Cmovc64(rax, rcx);
-    Add64Wrap(r8, rax);
-    assert r8 == (old(a0) + old(bool_bit(cf(efl))) * 38 + carry*38) % pow2_64;
+    Mov64(carry, 0);
+    Cmovc64(carry, tmp);
+    Add64Wrap(a0, carry);
+    assert a0 == (old(a0) + carry_in * 38 + new_carry*38) % pow2_64;
 }
 
 /*
