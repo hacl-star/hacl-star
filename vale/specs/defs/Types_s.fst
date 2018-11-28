@@ -67,7 +67,7 @@ let le_quad32_to_bytes_def (b:quad32) : Pure (seq nat8) (requires True) (ensures
   seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))
 let le_quad32_to_bytes = make_opaque le_quad32_to_bytes_def
 
-let le_seq_quad32_to_bytes_def (b:seq quad32) : seq nat8 =
+let le_seq_quad32_to_bytes_def (b:seq quad32) : Pure (seq nat8) (requires True) (ensures fun s -> length s == 16 `op_Multiply` length b) =
   seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE b)
 let le_seq_quad32_to_bytes = make_opaque le_seq_quad32_to_bytes_def
 
