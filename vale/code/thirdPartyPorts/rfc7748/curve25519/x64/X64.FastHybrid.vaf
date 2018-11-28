@@ -377,8 +377,7 @@ procedure{:quick} carry_pass(inline use_cf:bool)
 }
 
 #reset-options "--z3rlimit 300"
-procedure{:quick} {:verify true} fast_add(
-    ghost dst_b:buffer64,
+procedure{:quick} fast_add(
     ghost inA_b:buffer64,
     ghost inB_b:buffer64)
     lets
@@ -436,6 +435,28 @@ procedure{:quick} {:verify true} fast_add(
     lemma_load_mem64(inA_b, 3, mem);    
     Adcx64Wrap(d3, Mem(inA_ptr, 24, inA_b, 3, Secret));
 }
+
+#reset-options "--z3rlimit 30"
+procedure{:quick} store4(ghost dst_b:buffer64)
+    lets
+        dst_ptr @= rdi;
+        d0 @= r8;
+        d1 @= r10;
+        d2 @= r12;
+        d3 @= r14;
+    reads dst_ptr; d0; d1; d2; d3; memTaint;
+    modifies mem;
+    requires validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+    ensures 
+        modifies_buffer(dst_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+{
+    Store64_buffer(dst_ptr, d0,  0, Secret, dst_b, 0);  
+    Store64_buffer(dst_ptr, d1,  8, Secret, dst_b, 1);  
+    Store64_buffer(dst_ptr, d2, 16, Secret, dst_b, 2);  
+    Store64_buffer(dst_ptr, d3, 24, Secret, dst_b, 3);  
+}
+
 
 /*
 #reset-options "--z3rlimit 20"
