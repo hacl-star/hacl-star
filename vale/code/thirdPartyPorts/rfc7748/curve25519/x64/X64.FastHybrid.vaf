@@ -412,7 +412,7 @@ procedure {:quick exportOnly} carry_times_38(inout tmp:dst_opr64)
 }
 
 #reset-options "--z3rlimit 300"
-procedure{:quick} carry_pass(inline use_cf:bool)
+procedure{:quick} {:verify true} carry_pass(inline use_cf:bool)
     lets
         carry @= rax;
         tmp @= rcx;
@@ -420,6 +420,8 @@ procedure{:quick} carry_pass(inline use_cf:bool)
         a1 @= r10;
         a2 @= r12;
         a3 @= r14;
+    
+        carry_in:nat64 := if use_cf then (if cf(efl) then 1 else 0) else carry;
     modifies
         carry; tmp; a0; a1; a2; a3;
         efl;
@@ -427,13 +429,11 @@ procedure{:quick} carry_pass(inline use_cf:bool)
     requires
         adx_enabled && bmi2_enabled;
 
-        !use_cf ==> carry * 38 < pow2_64;
+        //!use_cf ==> carry * 38 < pow2_64;
+        carry_in * 38 < pow2_63;
 
     ensures
-//        let sum := old(pow2_four(a0, a1, a2, a3) + bool_bit(cf(efl)) * 38);
-//        let carry := bool_bit(sum >= pow2_256);
-//        let a0_new := (old(a0) + old(bool_bit(cf(efl))) * 38 + carry*38) % pow2_64;
-//        pow2_four(a0, a1, a2, a3) == old(pow2_four(a0_new, a1, a2, a3));
+        pow2_four(a0, a1, a2, a3) == old(pow2_four(a0, a1, a2, a3) + carry_in * 38) % prime;
 {
     ghost var carry_in:nat64 := if use_cf then (if cf(efl) then 1 else 0) else carry;
     inline if (use_cf) {
