@@ -219,7 +219,7 @@ snapshot2: $(ALL_SOURCES)
 	cp -R $(HACL_HOME)/providers/include/*.h snapshot/evercrypt/include
 	cp $(HACL_HOME)/providers/generated/*.{c,h} snapshot/evercrypt/generated
 	rm -f snapshot/evercrypt/generated/AEAD_Poly1305_64.{c,h}
-	for i in evercrypt_autoconfig.c evercrypt_bytes.c; do cp $(HACL_HOME)/providers/evercrypt/c/$$i snapshot/evercrypt/c; done
+	for i in evercrypt_autoconfig.c; do cp $(HACL_HOME)/providers/evercrypt/c/$$i snapshot/evercrypt/c; done
 	mkdir -p snapshot/vale
 	for i in $(VALE_ASM); do cp $$i snapshot/vale; done
 	cp -R $(GENERATED_DIR)/*.h snapshot
