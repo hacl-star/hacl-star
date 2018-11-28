@@ -453,6 +453,52 @@ let rec mt_get_path_unchanged lv hs rhs i j k p actd =
     mt_get_path_unchanged (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np
       (if j % 2 = 0 then actd else true))
 
+val mt_get_path_pull:
+  lv:nat{lv <= 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  rhs:hash_seq{S.length rhs = 32} ->
+  i:nat -> 
+  j:nat{
+    i <= j /\ j < pow2 (32 - lv) /\
+    hs_wf_elts lv hs i j} ->
+  k:nat{i <= k && k <= j} ->
+  p:path ->
+  actd:bool ->
+  Lemma (requires True)
+        (ensures (S.equal (mt_get_path_ lv hs rhs i j k p actd)
+                          (S.append p (mt_get_path_ lv hs rhs i j k S.empty actd))))
+        (decreases (32 - lv))
+#reset-options "--z3rlimit 20 --max_fuel 1"
+let rec mt_get_path_pull lv hs rhs i j k p actd =
+  let ofs = offset_of i in
+  if j = 0 then ()
+  else 
+    (let np = mt_get_path_step lv hs rhs i j k p actd in
+    let nactd = if j % 2 = 0 then actd else true in
+    mt_get_path_pull (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np nactd;
+    mt_get_path_pull (lv + 1) hs rhs (i / 2) (j / 2) (k / 2)
+      (mt_get_path_step lv hs rhs i j k S.empty actd) nactd)
+#reset-options "--z3rlimit 10"
+
+val mt_get_path_slice:
+  lv:nat{lv <= 32} ->
+  hs:hash_ss{S.length hs = 32} ->
+  rhs:hash_seq{S.length rhs = 32} ->
+  i:nat -> 
+  j:nat{
+    i <= j /\ j < pow2 (32 - lv) /\
+    hs_wf_elts lv hs i j} ->
+  k:nat{i <= k && k <= j} ->
+  p:path ->
+  actd:bool ->
+  Lemma (requires True)
+        (ensures (S.equal (S.slice (mt_get_path_ lv hs rhs i j k p actd)
+                            (S.length p) (S.length p + mt_path_length k j actd))
+                          (mt_get_path_ lv hs rhs i j k S.empty actd)))
+        (decreases (32 - lv))
+let rec mt_get_path_slice lv hs rhs i j k p actd =
+  mt_get_path_pull lv hs rhs i j k p actd
+
 val mt_get_path: 
   mt:merkle_tree{mt_wf_elts mt} ->
   idx:nat{MT?.i mt <= idx /\ idx < MT?.j mt} ->

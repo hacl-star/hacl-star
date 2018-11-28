@@ -9,4 +9,5 @@ open MerkleTree.New.High.Correct.Base
 open MerkleTree.New.High.Correct.Insertion
 open MerkleTree.New.High.Correct.Rhs
 open MerkleTree.New.High.Correct.Flushing
+open MerkleTree.New.High.Correct.Path
 

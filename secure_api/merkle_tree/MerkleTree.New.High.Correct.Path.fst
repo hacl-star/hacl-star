@@ -24,7 +24,7 @@ type uint8_t = U8.t
 module EHS = EverCrypt.Hash
 module MTS = MerkleTree.Spec
 
-#reset-options "--z3rlimit 10" // default for this file
+#reset-options "--z3rlimit 20" // default for this file
 
 /// Correctness of path generation
 
@@ -35,7 +35,6 @@ val path_spec:
   p:path{S.length p = mt_path_length k j actd} ->
   GTot (sp:S.seq MTS.hash{S.length sp = log2c j})
        (decreases j)
-#reset-options "--z3rlimit 20"
 let rec path_spec k j actd p =
   if j = 0 then S.empty
   else (if k % 2 = 0
@@ -45,7 +44,6 @@ let rec path_spec k j actd p =
                    (path_spec (k / 2) (j / 2) (actd || (j % 2 = 1)) (S.tail p)))
        else S.cons (HRaw (S.head p))
               (path_spec (k / 2) (j / 2) (actd || (j % 2 = 1)) (S.tail p)))
-#reset-options
 
 val mt_get_path_step_acc:
   j:nat{j > 0} ->
@@ -70,7 +68,6 @@ val mt_get_path_acc:
   actd:bool ->
   GTot (np:path{S.length np = mt_path_length k j actd})
        (decreases j)
-#reset-options "--z3rlimit 20"
 let rec mt_get_path_acc j fhs rhs k actd =
   if j = 0 then S.empty
   else 
@@ -89,7 +86,6 @@ val mt_get_path_step_acc_consistent:
   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   rhs:hash_seq{S.length rhs = 32} ->
   k:nat{i <= k && k <= j} ->
-  p:path ->
   actd:bool ->
   Lemma (requires (j <> 0))
         (ensures
@@ -100,10 +96,18 @@ val mt_get_path_step_acc_consistent:
                    (S.index (merge_hs olds hs) lv) (S.index rhs lv)
                    k actd with
           | Some v -> 
-            S.equal (mt_get_path_step lv hs rhs i j k p actd) (path_insert p v)
+            S.equal (mt_get_path_step lv hs rhs i j k S.empty actd) 
+                    (S.cons v S.empty)
           | None -> 
-            S.equal (mt_get_path_step lv hs rhs i j k p actd) p)))
-let mt_get_path_step_acc_consistent lv i j olds hs rhs k p actd = ()
+            S.equal (mt_get_path_step lv hs rhs i j k S.empty actd) 
+                    S.empty)))
+let mt_get_path_step_acc_consistent lv i j olds hs rhs k actd = ()
+
+private val seq_cons_append:
+  #a:Type -> hd:a -> tl:S.seq a ->
+  Lemma (S.equal (S.append (S.cons hd S.empty) tl)
+                 (S.cons hd tl))
+private let seq_cons_append #a hd tl = ()
 
 val mt_get_path_acc_consistent:
   lv:nat{lv <= 32} ->
@@ -113,7 +117,6 @@ val mt_get_path_acc_consistent:
   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   rhs:hash_seq{S.length rhs = 32} ->
   k:nat{i <= k && k <= j} ->
-  p:path ->
   actd:bool ->
   Lemma (requires True)
         (ensures
@@ -123,40 +126,67 @@ val mt_get_path_acc_consistent:
           S.equal (mt_get_path_acc j 
                     (S.slice (merge_hs olds hs) lv (lv + log2c j))
                     (S.slice rhs lv (lv + log2c j)) k actd)
-                  (S.slice (mt_get_path_ lv hs rhs i j k p actd)
-                    (S.length p) (S.length p + mt_path_length k j actd))))
+                  (mt_get_path_ lv hs rhs i j k S.empty actd)))
         (decreases j)
-#reset-options "--z3rlimit 20 --max_fuel 1"
-let rec mt_get_path_acc_consistent lv i j olds hs rhs k p actd =
+#reset-options "--z3rlimit 200 --max_fuel 1"
+let rec mt_get_path_acc_consistent lv i j olds hs rhs k actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
   mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
 
   if j = 0 then ()
   else begin
-    mt_get_path_step_acc_consistent lv i j olds hs rhs k p actd;
-    mt_get_path_acc_consistent (lv + 1) (i / 2) (j / 2)
-      olds hs rhs (k / 2) (mt_get_path_step lv hs rhs i j k p actd)
-      (if j % 2 = 0 then actd else true);
+    let nactd = if j % 2 = 0 then actd else true in
+    let nactd_ = actd || j % 2 = 1 in
+    assert (nactd == nactd_);
 
-    // (match mt_get_path_step_acc j (S.index (merge_hs olds hs) lv) 
-    //         (S.index rhs lv) k actd with
-    // | Some v -> begin
-    //   assert (S.equal (mt_get_path_step lv hs rhs i j k p actd) (path_insert p v));
-    //   assert (S.equal (mt_get_path_ lv hs rhs i j k p actd)
-    //                   (mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2)
-    //                                 (path_insert p v)
-    //                                 (if j % 2 = 0 then actd else true)))
-    // end
-    // | None -> begin
-    //   assert (S.equal (mt_get_path_step lv hs rhs i j k p actd) p);
-    //   assert (S.equal (mt_get_path_ lv hs rhs i j k p actd)
-    //                   (mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) p
-    //                                 (if j % 2 = 0 then actd else true)))
-    // end);
-    admit ()
+    let pa = mt_get_path_acc j 
+               (S.slice (merge_hs olds hs) lv (lv + log2c j))
+               (S.slice rhs lv (lv + log2c j)) k actd in
+    let p = mt_get_path_ lv hs rhs i j k S.empty actd in
+
+    log2c_bound (j / 2) (32 - (lv + 1));
+    assert (mt_hashes_lth_inv (lv + 1) (j / 2) (merge_hs olds hs));
+    assert (mt_hashes_lth_inv_log (j / 2)
+             (S.slice (merge_hs olds hs) (lv + 1) (lv + 1 + log2c (j / 2))));
+    let npsa = mt_get_path_step_acc j
+                 (S.index (merge_hs olds hs) lv) (S.index rhs lv) k actd in
+    let npa = mt_get_path_acc (j / 2)
+                (S.slice (merge_hs olds hs) (lv + 1) (lv + 1 + log2c (j / 2)))
+                (S.slice rhs (lv + 1) (lv + 1 + log2c (j / 2))) (k / 2) nactd_ in
+    let nps = mt_get_path_step lv hs rhs i j k S.empty actd in
+    let np = mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) nps nactd in
+    let npe = mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) S.empty nactd in
+    mt_get_path_pull (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) nps nactd;
+    assert (S.equal p np);
+    assert (S.equal np (S.append nps npe));
+    assert (S.equal p (S.append nps npe));
+    assert (S.equal pa (if Some? npsa
+                       then S.cons (Some?.v npsa) npa
+                       else npa));
+
+    mt_get_path_acc_consistent (lv + 1) (i / 2) (j / 2)
+      olds hs rhs (k / 2) nactd;
+    assert (S.equal npa npe);
+
+    mt_get_path_step_acc_consistent lv i j olds hs rhs k actd;
+    if Some? npsa
+    then begin
+      assert (S.equal nps (S.cons (Some?.v npsa) S.empty));
+      assert (S.equal p (S.append (S.cons (Some?.v npsa) S.empty) npa));
+      assert (S.equal pa (S.cons (Some?.v npsa) npa));
+      seq_cons_append (Some?.v npsa) npa;
+      assert (S.equal pa p)
+    end
+    else begin
+      assert (S.equal nps S.empty);
+      S.append_empty_l npe;
+      assert (S.equal p npe);
+      assert (S.equal pa npa);
+      assert (S.equal pa p)
+    end
   end
-#reset-options "--z3rlimit 10"
+#reset-options "--z3rlimit 20"
 
 val mt_get_path_acc_inv_ok:
   j:nat ->
@@ -200,9 +230,11 @@ let rec mt_get_path_acc_inv_ok j fhs rhs k acc actd =
       hash_seq_spec_full_index_raw (S.head fhs) acc actd (k - 1)
     end
   end
+#reset-options "--z3rlimit 20"
 
+#reset-options "--max_fuel 1"
 val mt_get_path_inv_ok_:
-  lv:nat{lv <= 32} ->
+  lv:nat{lv < 32} ->
   i:nat -> 
   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv lv i olds} ->
@@ -224,17 +256,20 @@ val mt_get_path_inv_ok_:
                           (MTS.mt_get_path #(log2c j)
                             (hash_seq_spec_full
                               (S.index (merge_hs olds hs) lv) acc actd) k)))
+#reset-options "--z3rlimit 40 --max_fuel 0"
 let mt_get_path_inv_ok_ lv i j olds hs rhs k p acc actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
   mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
   mt_hashes_inv_log_converted_ lv j (merge_hs olds hs);
 
-  mt_get_path_acc_consistent lv i j olds hs rhs k p actd;
+  mt_get_path_acc_consistent lv i j olds hs rhs k actd;
+  mt_get_path_slice lv hs rhs i j k p actd;
   mt_get_path_acc_inv_ok j 
     (S.slice (merge_hs olds hs) lv (lv + log2c j))
     (S.slice rhs lv (lv + log2c j))
     k acc actd
+#reset-options "--z3rlimit 20"
 
 val mt_get_path_inv_ok:
   mt:merkle_tree{mt_wf_elts mt} ->
@@ -346,7 +381,7 @@ let rec mt_verify_ok_ k j p ppos acc actd =
       mt_verify_ok_ (k / 2) (j / 2) p (ppos + 1) nacc nactd
     end
   end
-#reset-options  
+#reset-options "--z3rlimit 20"
 
 val mt_verify_ok:
   k:nat ->
