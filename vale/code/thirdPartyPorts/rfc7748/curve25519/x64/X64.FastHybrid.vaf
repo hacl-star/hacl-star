@@ -52,15 +52,16 @@ ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 #reset-options "--z3rlimit 300"
 
 procedure{:quick} fast_mul1(
+    inline offset:nat,
     ghost inA_b:buffer64)
     lets
         inA_ptr @= rsi;
         b @= rdx;
 
-        a0 := buffer64_read(inA_b, 0, mem);
-        a1 := buffer64_read(inA_b, 1, mem);
-        a2 := buffer64_read(inA_b, 2, mem);
-        a3 := buffer64_read(inA_b, 3, mem);
+        a0 := buffer64_read(inA_b, 0 + offset, mem);
+        a1 := buffer64_read(inA_b, 1 + offset, mem);
+        a2 := buffer64_read(inA_b, 2 + offset, mem);
+        a3 := buffer64_read(inA_b, 3 + offset, mem);
 
         a := pow2_four(a0, a1, a2, a3);
 
@@ -77,8 +78,9 @@ procedure{:quick} fast_mul1(
 
     requires
         adx_enabled && bmi2_enabled;
+        offset == 0 || offset == 4;
 
-        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4 + offset, memTaint, Secret);
 
     ensures
         let d := pow2_five(d0, d1, d2, d3, rax);
@@ -88,17 +90,17 @@ procedure{:quick} fast_mul1(
 {
     xor_lemmas();
     
-    lemma_load_mem64(inA_b, 0, mem);    
-    Mulx64( r9,  d0, Mem(inA_ptr,  0, inA_b, 0, Secret));  /* A[0]*B */ lemma_prod_bounds(r9, d0, b, a0); 
-    lemma_load_mem64(inA_b, 1, mem);    
-    Mulx64(r11, d1, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[1]*B */ lemma_prod_bounds(r11, d1, b, a1); 
+    lemma_load_mem64(inA_b, 0 + offset, mem);    
+    Mulx64( r9,  d0, Mem(inA_ptr, 0 + 8 * offset, inA_b, 0 + offset, Secret));  /* A[0]*B */ lemma_prod_bounds(r9, d0, b, a0); 
+    lemma_load_mem64(inA_b, 1 + offset, mem);    
+    Mulx64(r11, d1, Mem(inA_ptr,  8 + 8 * offset, inA_b, 1 + offset, Secret));  /* A[1]*B */ lemma_prod_bounds(r11, d1, b, a1); 
     Add64Wrap(d1, r9);
     Mov64(r9, 0);
-    lemma_load_mem64(inA_b, 2, mem);    
-    Mulx64(r13, d2, Mem(inA_ptr, 16, inA_b, 2, Secret));  /* A[2]*B */ lemma_prod_bounds(r13, d2, b, a2); 
+    lemma_load_mem64(inA_b, 2 + offset, mem);    
+    Mulx64(r13, d2, Mem(inA_ptr, 16 + 8 * offset, inA_b, 2 + offset, Secret));  /* A[2]*B */ lemma_prod_bounds(r13, d2, b, a2); 
     Adcx64Wrap(d2, r11);
-    lemma_load_mem64(inA_b, 3, mem);    
-    Mulx64(rax, d3, Mem(inA_ptr, 24, inA_b, 3, Secret));  /* A[3]*B */ lemma_prod_bounds(rax, d3, b, a3); 
+    lemma_load_mem64(inA_b, 3 + offset, mem);    
+    Mulx64(rax, d3, Mem(inA_ptr, 24 + 8 * offset, inA_b, 3 + offset, Secret));  /* A[3]*B */ lemma_prod_bounds(rax, d3, b, a3); 
     Adcx64Wrap(d3, r13);
     Adcx64Wrap(rax, r9);
 
@@ -171,6 +173,59 @@ procedure{:quick} fast_add_after_mul1(
     Adcx64Wrap(rax, r9);
 }
 
+#reset-options "--z3rlimit 300"
+procedure{:quick} fast_add_after_mul1_regs(
+    ghost inB_b:buffer64)
+    lets
+        inB_ptr @= rsi;
+
+        d0 @= r8;
+        d1 @= r10;
+        d2 @= r12;
+        d3 @= r14;
+
+        b0 := buffer64_read(inB_b, 0, mem);
+        b1 := buffer64_read(inB_b, 1, mem);
+        b2 := buffer64_read(inB_b, 2, mem);
+        b3 := buffer64_read(inB_b, 3, mem);
+
+        a := pow2_five(d0, d1, d2, d3, rax);
+        b := pow2_four(b0, b1, b2, b3);
+
+    reads
+        inB_ptr; mem; memTaint;
+
+    modifies
+        rax; d0; r9; d1; r11; d2; r13; d3; r15;
+        efl;
+
+    requires
+        adx_enabled && bmi2_enabled;
+
+        validSrcAddrs64(mem, inB_ptr, inB_b, 4, memTaint, Secret);
+
+        rax < pow2_64 - 1;
+
+    ensures
+        let d := pow2_five(d0, d1, d2, d3, rax);
+        d == old(a + b);
+{
+    Load64_buffer( r9, inB_ptr,  0, Secret, inB_b, 0);     /* B[0] */
+    Add64Wrap(d0, r9);
+    Mov64(r9, 0);
+
+    Load64_buffer(r11, inB_ptr,  8, Secret, inB_b, 1);     /* B[1] */
+    Adcx64Wrap(d1, r11);
+
+    Load64_buffer(r13, inB_ptr, 16, Secret, inB_b, 2);     /* B[2] */
+    Adcx64Wrap(d2, r13);
+
+    Load64_buffer(r15, inB_ptr, 24, Secret, inB_b, 3);     /* B[3] */
+    Adcx64Wrap(d3, r15);
+
+    Adcx64Wrap(rax, r9);
+}
+
 #reset-options "--z3rlimit 20"
 procedure{:quick} fast_mul1_add(
     ghost dst_b:buffer64,
@@ -220,7 +275,7 @@ procedure{:quick} fast_mul1_add(
         validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
-    fast_mul1(inA_b);
+    fast_mul1(0, inA_b);
     fast_add_after_mul1(dst_b, inB_b);
 }
 
@@ -318,6 +373,27 @@ procedure{:quick}{:public} fast_mul1_add_stdcall(
     Pop(r15, stack_b, 4);
 }
 
+#reset-options "--z3rlimit 30"
+procedure{:quick} store4(ghost dst_b:buffer64)
+    lets
+        dst_ptr @= rdi;
+        d0 @= r8;
+        d1 @= r10;
+        d2 @= r12;
+        d3 @= r14;
+    reads dst_ptr; d0; d1; d2; d3; memTaint;
+    modifies mem;
+    requires validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+    ensures 
+        modifies_buffer(dst_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+{
+    Store64_buffer(dst_ptr, d0,  0, Secret, dst_b, 0);  
+    Store64_buffer(dst_ptr, d1,  8, Secret, dst_b, 1);  
+    Store64_buffer(dst_ptr, d2, 16, Secret, dst_b, 2);  
+    Store64_buffer(dst_ptr, d3, 24, Secret, dst_b, 3);  
+}
+
 #reset-options "--z3rlimit 10"
 procedure {:quick exportOnly} carry_times_38(inout tmp:dst_opr64)
     lets
@@ -381,6 +457,64 @@ procedure{:quick} carry_pass(inline use_cf:bool)
     Cmovc64(carry, tmp);
     Add64Wrap(a0, carry);
     assert a0 == (old(a0) + carry_in * 38 + new_carry*38) % pow2_64;
+}
+
+
+#reset-options "--z3rlimit 30"
+procedure{:quick} carry_wide(
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64)
+    lets
+        dst_ptr @= rdi;
+        inA_ptr @= rsi;
+
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
+        a4 := buffer64_read(inA_b, 4, mem);
+        a5 := buffer64_read(inA_b, 5, mem);
+        a6 := buffer64_read(inA_b, 6, mem);
+        a7 := buffer64_read(inA_b, 7, mem);
+
+        a := pow2_four(a0, a1, a2, a3);
+
+        tmp0 @= r8;
+        tmp1 @= r10;
+        tmp2 @= r12;
+        tmp3 @= r14;
+    reads
+        dst_ptr; inA_ptr; memTaint;
+
+    modifies
+        rax; rcx; rdx;
+        tmp0; r9; tmp1; r11; tmp2; r13; tmp3; r15;
+        mem; efl;
+
+    requires
+        adx_enabled && bmi2_enabled;
+        buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
+
+        validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 8, memTaint, Secret);
+
+    ensures
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+        //let d := pow2_four(d0, d1, d2, d3);
+        //d == old(a * b);
+
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
+{
+    Mov64(rdx, 38);
+
+    fast_mul1(4, inA_b);
+    fast_add_after_mul1_regs(inA_b);
+    carry_pass(false);
+    store4(dst_b);
 }
 
 #reset-options "--z3rlimit 300"
@@ -548,27 +682,6 @@ procedure{:quick} fast_sub(
               d0, d1, d2, d3, bool_bit(cf(efl)));
 }
 
-#reset-options "--z3rlimit 30"
-procedure{:quick} store4(ghost dst_b:buffer64)
-    lets
-        dst_ptr @= rdi;
-        d0 @= r8;
-        d1 @= r10;
-        d2 @= r12;
-        d3 @= r14;
-    reads dst_ptr; d0; d1; d2; d3; memTaint;
-    modifies mem;
-    requires validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
-    ensures 
-        modifies_buffer(dst_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
-{
-    Store64_buffer(dst_ptr, d0,  0, Secret, dst_b, 0);  
-    Store64_buffer(dst_ptr, d1,  8, Secret, dst_b, 1);  
-    Store64_buffer(dst_ptr, d2, 16, Secret, dst_b, 2);  
-    Store64_buffer(dst_ptr, d3, 24, Secret, dst_b, 3);  
-}
-
 
 #reset-options "--z3rlimit 300"
 procedure{:quick} fadd(
@@ -691,7 +804,7 @@ procedure{:quick} fsub(
 }
 
 #reset-options "--z3rlimit 300"
-procedure{:quick} {:verify true} fmul1(
+procedure{:quick} fmul1(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
     lets
@@ -737,7 +850,7 @@ procedure{:quick} {:verify true} fmul1(
         validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
-    fast_mul1(inA_b);
+    fast_mul1(0, inA_b);
 
     assume rax * 38 < pow2_64;
     carry_pass(false);
