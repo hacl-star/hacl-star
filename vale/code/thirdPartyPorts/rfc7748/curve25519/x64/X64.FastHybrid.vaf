@@ -338,7 +338,7 @@ procedure{:quick} carry_pass(inline use_cf:bool)
         a2 @= r12;
         a3 @= r14;
     modifies
-        carry; rcx; a0; a1; a2; a3;
+        carry; tmp; a0; a1; a2; a3;
         efl;
 
     requires
@@ -457,6 +457,66 @@ procedure{:quick} store4(ghost dst_b:buffer64)
     Store64_buffer(dst_ptr, d3, 24, Secret, dst_b, 3);  
 }
 
+
+#reset-options "--z3rlimit 300"
+procedure{:quick} {:verify true} fadd(
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64,
+    ghost inB_b:buffer64)
+    lets
+        dst_ptr @= rdi;
+        inA_ptr @= rsi;
+        inB_ptr @= rcx;
+
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
+
+        b0 := buffer64_read(inB_b, 0, mem);
+        b1 := buffer64_read(inB_b, 1, mem);
+        b2 := buffer64_read(inB_b, 2, mem);
+        b3 := buffer64_read(inB_b, 3, mem);
+
+        a := pow2_four(a0, a1, a2, a3);
+        b := pow2_four(b0, b1, b2, b3);
+
+
+        tmp0 @= r8;
+        tmp1 @= r10;
+        tmp2 @= r12;
+        tmp3 @= r14;
+    reads
+        dst_ptr; inA_ptr; memTaint;
+
+    modifies
+        rax; inB_ptr;
+        tmp0; tmp1; tmp2; tmp3;
+        mem; efl;
+
+    requires
+        adx_enabled && bmi2_enabled;
+        buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
+        buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
+
+        validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inB_ptr, inB_b, 4, memTaint, Secret);
+
+    ensures
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+        let d := pow2_four(d0, d1, d2, d3);
+        //d == old(a + b);
+
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
+{
+    fast_add(inA_b, inB_b);
+    carry_pass(true);
+}
 
 /*
 #reset-options "--z3rlimit 20"
