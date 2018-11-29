@@ -435,7 +435,6 @@ procedure{:quick} {:verify true} carry_pass(inline use_cf:bool)
     ensures
         pow2_four(a0, a1, a2, a3) == old(pow2_four(a0, a1, a2, a3) + carry_in * 38) % prime;
 {
-    ghost var carry_in:nat64 := if use_cf then (if cf(efl) then 1 else 0) else carry;
     inline if (use_cf) {
         Mov64(carry, 0);
         carry_times_38(tmp);

@@ -20,12 +20,11 @@ let lemma_mul_pow256_add (x y:nat) :
   assert_norm (pow2_256 % prime == 38);
   ()
 
-#reset-options "--z3rlimit 100"
 let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
   (requires pow2_five a0' a1' a2' a3' carry == pow2_four a0 a1 a2 a3 + carry_in * 38 /\
             carry_in * 38 - 1 + 38 < pow2_64)
   (ensures a0' + carry * 38 < pow2_64 /\
-           pow2_four (a0' + carry * 38) a1' a2' a3' == (pow2_four a0 a1 a2 a3 + carry_in * pow2_256) % prime)
+           (pow2_four (a0' + carry * 38) a1' a2' a3') % prime == (pow2_four a0 a1 a2 a3 + carry_in * pow2_256) % prime)
   =
   (*
   if a0 + carry_in * 38 < pow2_64 then (
@@ -36,13 +35,10 @@ let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) :
   );*)
   assert (a0' + carry * 38 < pow2_64);
   
-
-
   // calc {
   //   (pow2_four a0 a1 a2 a3 + carry_in * pow2_256) % prime
-       lemma_mul_pow256_add (pow2_four a0 a1 a2 a3) carry_in;
+       lemma_mul_pow256_add (pow2_four a0 a1 a2 a3) carry_in;       
   //   (pow2_four a0 a1 a2 a3 + carry_in * 38) % prime
-  assert ((pow2_four a0 a1 a2 a3 + carry_in * 38) % prime == (pow2_five a0' a1' a2' a3' carry) % prime);
   //   (pow2_five a0' a1' a2' a3' carry) % prime
        assert_by_tactic (pow2_five a0' a1' a2' a3' carry == pow2_four a0' a1' a2' a3' + (carry * pow2_256)) int_canon;
   //   (pow2_four a0' a1' a2' a3' + (carry * pow2_256)) % prime
@@ -55,28 +51,4 @@ let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) :
        // }  
   //   pow2_four (a0' + carry * 38) a1' a2' a3'
   // }
-  admit();
   ()
-
-(*
-open X64.Vale.Decls
-open X64.Machine_s
-let get_reg (to:tainted_operand{TReg? to}) : reg = TReg?.r to
-*)
-(*
-
-
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
-let test (a:nat) 
-         (a0 a1 a2 a3:nat64)
-         (a0' a1' a2' a3':nat64)
-         (c:nat64) (b:bit) : Lemma
-  (requires a == pow2_four a0 a1 a2 a3 /\ 
-            pow2_five a0' a1' a2' a3' b == a + c * 38 /\
-            True)
-  (ensures (pow2_four (a0' + b * 38) a1' a2' a3') % p = (a + c) % p)
-  =
-  assert_norm (pow2_256 % p == 38);
-  //admit();
-  ()
-*)
