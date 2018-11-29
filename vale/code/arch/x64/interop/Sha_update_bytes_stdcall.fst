@@ -12,7 +12,7 @@ open Interop
 open Words_s
 open Types_s
 open X64.Machine_s
-open X64.Memory_s
+open X64.Memory
 open X64.Memory_Sems
 open X64.Vale.State
 open X64.Vale.Decls
@@ -24,7 +24,6 @@ module TS = X64.Taint_Semantics_s
 module ME = X64.Memory_s
 module BS = X64.Bytes_Semantics_s
 
-friend X64.Memory_s
 friend X64.Memory_Sems
 friend X64.Memory
 friend X64.Vale.Decls
