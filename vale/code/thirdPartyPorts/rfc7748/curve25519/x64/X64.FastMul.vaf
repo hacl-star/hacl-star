@@ -284,7 +284,7 @@ procedure{:quick} fast_multiply_a1b(
     assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the lemma
 }
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 400"
 procedure{:quick} fast_multiply_a2b(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -399,14 +399,14 @@ procedure{:quick} fast_multiply_a2b(
     ghost var a0a1a2b := pow2_seven(d0, d1, d2, d3, r12, r14, rax);
 
     assert_by_tactic(a2 * b == pow2_four(a2*b0, a2*b1, a2*b2, a2*b3), int_canon);   // PASSES
-    assert a2b == a2 * b;  // PASSES
+    //assert a2b == a2 * b;  // PASSES
 
     lemma_sum_a2b(a0, a1, a2,
               a0a1b, a0a1b_0, a0a1b_1, a0a1b_2, a0a1b_3, a0a1b_4, a0a1b_5,
               a2b, a2b_0, a2b_1, a2b_2, a2b_3, a2b_4,
               b, b0, b1, b2, b3,
               d2, d3, r12, r14, rax); 
-//    assert pow2_three(a0, a1, a2) * b == a0a1a2b;   // Conclusion from the lemma.  // PASSES
+    //assert pow2_three(a0, a1, a2) * b == a0a1a2b;   // Conclusion from the lemma.  // PASSES
 //    assert d0 == a0a1b_0;       // PASSES
 //    assert d1 == a0a1b_1;       // PASSES
 //    assert pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, r12, r14, rax);
