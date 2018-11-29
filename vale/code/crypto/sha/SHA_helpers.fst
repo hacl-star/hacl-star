@@ -729,7 +729,6 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   admit()
 
 
-#push-options "--z3rlimit 30"
 let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
   Lemma (requires length quads % 4 == 0 /\
@@ -851,7 +850,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     // assert (h_final == h_bytes2); // Conclusion of Goal    
     ()    
   end
-#pop-options
+  
   
 
   

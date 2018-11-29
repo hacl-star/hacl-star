@@ -159,7 +159,7 @@ let index_be (a: sha2_alg) (b: B.buffer U8.t) (i: U32.t):
   | SHA2_224 | SHA2_256 -> C.Endianness.index_32_be b i
   | SHA2_384 | SHA2_512 -> C.Endianness.index_64_be b i
 
-#set-options "--max_fuel 1 --z3rlimit 200"
+#set-options "--max_fuel 1 --z3rlimit 100"
 
 inline_for_extraction
 let ws a b ws =
