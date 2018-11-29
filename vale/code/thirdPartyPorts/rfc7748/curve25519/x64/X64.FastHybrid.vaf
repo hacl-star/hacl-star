@@ -429,7 +429,7 @@ procedure{:quick} carry_pass(inline use_cf:bool)
         carry_in:nat64 := if use_cf then (if cf(efl) then 1 else 0) else carry;
     modifies
         carry; tmp; a0; a1; a2; a3;
-        r9; r11; r13; 
+        r9; 
         efl;
 
     requires
@@ -451,13 +451,11 @@ procedure{:quick} carry_pass(inline use_cf:bool)
 
     xor_lemmas();
     Xor64( r9,  r9);
-    Xor64(r11, r11);
-    Xor64(r13, r13);
 
     Add64Wrap(a0, carry); 
     Adcx64Wrap(a1, r9); 
-    Adcx64Wrap(a2, r11);
-    Adcx64Wrap(a3, r13);
+    Adcx64Wrap(a2, r9);
+    Adcx64Wrap(a3, r9);
     assert pow2_five(a0, a1, a2, a3, bool_bit(cf(efl))) == old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
     ghost var sum := old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
     ghost var new_carry := bool_bit(cf(efl));
@@ -655,7 +653,7 @@ procedure{:quick} fast_add(
     ghost inB_b:buffer64)
     lets
         inA_ptr @= rsi;
-        inB_ptr @= rcx;
+        inB_ptr @= rdx;
         
         d0 @= r8;
         d1 @= r10;
@@ -715,7 +713,7 @@ procedure{:quick} fast_sub(
     ghost inB_b:buffer64)
     lets
         inA_ptr @= rsi;
-        inB_ptr @= rcx;
+        inB_ptr @= rdx;
 
         a0 := buffer64_read(inA_b, 0, mem);
         a1 := buffer64_read(inA_b, 1, mem);
@@ -781,7 +779,7 @@ procedure{:quick} fadd(
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
-        inB_ptr @= rcx;
+        inB_ptr @= rdx;
 
         a0 := buffer64_read(inA_b, 0, mem);
         a1 := buffer64_read(inA_b, 1, mem);
@@ -801,10 +799,10 @@ procedure{:quick} fadd(
         tmp2 @= r12;
         tmp3 @= r14;
     reads
-        dst_ptr; inA_ptr; memTaint;
+        dst_ptr; inA_ptr; inB_ptr; memTaint;
 
     modifies
-        rax; inB_ptr;
+        rax; rcx;
         tmp0; tmp1; tmp2; tmp3;
         r9; r11; r13; 
         mem; efl;
@@ -844,7 +842,7 @@ procedure{:quick}{:public} fadd_stdcall(
     ghost inB_b:buffer64,
     ghost stack_b:buffer64)
     lets
-        dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rcx;
+        dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rdx;
         dst_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         inB_in := (if win then r8 else rdx);
@@ -912,9 +910,7 @@ procedure{:quick}{:public} fadd_stdcall(
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(inB_ptr, r8);
-    } else {
-        Mov64(inB_ptr, rdx);
-    }
+    } 
 
     fadd(dst_b, inA_b, inB_b);
 
@@ -932,7 +928,7 @@ procedure{:quick} fsub(
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
-        inB_ptr @= rcx;
+        inB_ptr @= rdx;
 
         a0 := buffer64_read(inA_b, 0, mem);
         a1 := buffer64_read(inA_b, 1, mem);
@@ -952,10 +948,10 @@ procedure{:quick} fsub(
         tmp2 @= r12;
         tmp3 @= r14;
     reads
-        dst_ptr; inA_ptr; memTaint;
+        dst_ptr; inA_ptr; inB_ptr; memTaint;
 
     modifies
-        rax; inB_ptr;
+        rax; rcx;
         tmp0; tmp1; tmp2; tmp3;
         mem; efl;
 
@@ -991,7 +987,7 @@ procedure{:quick}{:public} fsub_stdcall(
     ghost inB_b:buffer64,
     ghost stack_b:buffer64)
     lets
-        dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rcx;
+        dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rdx;
         dst_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         inB_in := (if win then r8 else rdx);
@@ -1058,9 +1054,7 @@ procedure{:quick}{:public} fsub_stdcall(
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(inB_ptr, r8);
-    } else {
-        Mov64(inB_ptr, rdx);
-    }
+    } 
 
     fsub(dst_b, inA_b, inB_b);
 
