@@ -9,7 +9,6 @@ open Fast_defs
 
 let int_canon = fun _ -> canon_semiring int_cr //; dump "Final"
 
-unfold let prime:nat = 57896044618658097711785492504343953926634992332820282019728792003956564819949 //(pow2 255) - 19
 unfold let pow2_63:nat = 0x8000000000000000 
 
 let _ = assert_norm (pow2_63 == pow2 63)

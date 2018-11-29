@@ -26,6 +26,8 @@ let pow2_seven (c0 c1 c2 c3 c4 c5 c6:nat) : nat = pow2_six c0 c1 c2 c3 c4 c5 + p
 let pow2_eight (c0 c1 c2 c3 c4 c5 c6 c7:nat) : nat = pow2_seven c0 c1 c2 c3 c4 c5 c6 + pow2_448 * c7
 let pow2_nine (c0 c1 c2 c3 c4 c5 c6 c7 c8:nat) : nat = pow2_eight c0 c1 c2 c3 c4 c5 c6 c7 + pow2_512 * c8
 
+unfold let prime:nat = 57896044618658097711785492504343953926634992332820282019728792003956564819949 //(pow2 255) - 19
+
 type bit = b:nat { b <= 1 }
 
 let bool_bit (b:bool) : bit = if b then 1 else 0
