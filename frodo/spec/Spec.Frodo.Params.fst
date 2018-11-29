@@ -1,7 +1,6 @@
 module Spec.Frodo.Params
 
 open Lib.IntTypes
-open Lib.Sequence
 
 open Frodo.Params
 
