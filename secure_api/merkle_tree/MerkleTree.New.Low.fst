@@ -268,8 +268,9 @@ private val hash_vv_rv_inv_r_inv:
   Lemma (requires (RV.rv_inv h hvv /\
                   i < V.size_of hvv /\
                   j < V.size_of (V.get h hvv i)))
-        (ensures (Rgl?.r_inv hreg h (V.get h (V.get h hvv i) j)))
-private let hash_vv_rv_inv_r_inv h hvv lv i = ()
+        (ensures (Rgl?.r_inv hvreg h (V.get h hvv i) /\
+                 Rgl?.r_inv hreg h (V.get h (V.get h hvv i) j)))
+private let hash_vv_rv_inv_r_inv h hvv i j = ()
 
 private val hash_vv_rv_inv_disjoint:
   h:HS.mem -> hvv:hash_vv ->
@@ -691,7 +692,7 @@ val mt_free: mt:mt_p ->
   HST.ST unit
    (requires (fun h0 -> mt_safe h0 mt))
    (ensures (fun h0 _ h1 -> modifies (mt_loc mt) h0 h1))
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 100 --max_fuel 0"
 let mt_free mt =
   let mtv = !*mt in
   RV.free (MT?.hs mtv);
@@ -1016,10 +1017,8 @@ private val insert_:
                    (High.insert_ (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
                      (RV.as_seq h0 hs) (Rgl?.r_repr hreg h0 acc)))))
          (decreases (U32.v j))
-// #reset-options "--z3rlimit 800 --max_fuel 1"
-// This proof works with the resource limit above, but it's a bit slow.
-// It will be admitted until the hint file is generated.
-#reset-options "--admit_smt_queries true"
+#reset-options "--z3rlimit 800 --max_fuel 1"
+// #reset-options "--admit_smt_queries true"
 private let rec insert_ lv i j hs acc =
   let hh0 = HST.get () in
   hash_vv_insert_copy lv i j hs acc;
@@ -1589,10 +1588,8 @@ private val construct_rhs:
        (Rgl?.r_repr hreg h0 acc) actd ==
      (Rgl?.r_repr hvreg h1 rhs, Rgl?.r_repr hreg h1 acc))))
    (decreases (U32.v j))
-// #reset-options "--z3rlimit 400 --max_fuel 1"
-// This proof works with the resource limit above, but it's a bit slow.
-// It will be admitted until the hint file is generated.
-#reset-options "--admit_smt_queries true"
+#reset-options "--z3rlimit 400 --max_fuel 1"
+// #reset-options "--admit_smt_queries true"
 private let rec construct_rhs lv hs rhs i j acc actd =
   let hh0 = HST.get () in
   let ofs = offset_of i in
@@ -1735,7 +1732,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
                (Rgl?.r_repr hreg hh0 acc) actd ==
              (Rgl?.r_repr hvreg hh4 rhs, Rgl?.r_repr hreg hh4 acc))
     end)
-#reset-options // reset "--admit_smt_queries true"
+#reset-options
 
 private
 inline_for_extraction
@@ -1775,6 +1772,7 @@ val mt_get_root:
      let mtv1 = B.get h1 mt 0 in
      MT?.i mtv1 = MT?.i mtv0 /\ MT?.j mtv1 = MT?.j mtv0 /\
      MT?.hs mtv1 == MT?.hs mtv0 /\ MT?.rhs mtv1 == MT?.rhs mtv0 /\
+     MT?.offset mtv1 == MT?.offset mtv0 /\
      MT?.rhs_ok mtv1 = true /\
      Rgl?.r_inv hreg h1 rt /\
      // correctness
@@ -2046,12 +2044,12 @@ private val mt_get_path_:
              (High.mt_get_path_ (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
    (decreases (32 - U32.v lv))
-// #reset-options "--z3rlimit 200 --max_fuel 1"
-// This proof works with the resource limit above, but it's a bit slow.
-// It will be admitted until the hint file is generated.
-#reset-options "--admit_smt_queries true"
+#reset-options "--z3rlimit 300 --max_fuel 1"
+// #reset-options "--admit_smt_queries true"
 private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
   let hh0 = HST.get () in
+  mt_safe_elts_spec hh0 lv hs i j;
+
   let ofs = offset_of i in
   if j = 0ul then ()
   else
@@ -2064,26 +2062,33 @@ private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
                       (U32.v lv) (RV.as_seq hh0 hs) (RV.as_seq hh0 rhs)
                       (U32.v i) (U32.v j) (U32.v k)
                       (lift_path hh0 mtr p) actd));
+
     RV.rv_inv_preserved hs (path_loc p) hh0 hh1;
     RV.rv_inv_preserved rhs (path_loc p) hh0 hh1;
     RV.as_seq_preserved hs (path_loc p) hh0 hh1;
     RV.as_seq_preserved rhs (path_loc p) hh0 hh1;
     V.loc_vector_within_included hs lv (V.size_of hs);
     mt_safe_elts_preserved lv hs i j (path_loc p) hh0 hh1;
+    assert (mt_safe_elts hh1 lv hs i j);
+    mt_safe_elts_rec hh1 lv hs i j;
+    mt_safe_elts_spec hh1 (lv + 1ul) hs (i / 2ul) (j / 2ul);
 
     mt_get_path_ (lv + 1ul) mtr hs rhs (i / 2ul) (j / 2ul) (k / 2ul) p
       (if j % 2ul = 0ul then actd else true);
 
     let hh2 = HST.get () in
-
-    mt_safe_elts_spec hh1 (lv + 1ul) hs (i / 2ul) (j / 2ul);
     assert (S.equal (lift_path hh2 mtr p)
                     (High.mt_get_path_ (U32.v lv + 1)
                       (RV.as_seq hh1 hs) (RV.as_seq hh1 rhs)
                       (U32.v i / 2) (U32.v j / 2) (U32.v k / 2)
                       (lift_path hh1 mtr p)
-                      (if U32.v j % 2 = 0 then actd else true))))
-#reset-options // reset "--admit_smt_queries true"
+                      (if U32.v j % 2 = 0 then actd else true)));
+    assert (S.equal (lift_path hh2 mtr p)
+                    (High.mt_get_path_ (U32.v lv)
+                      (RV.as_seq hh0 hs) (RV.as_seq hh0 rhs)
+                      (U32.v i) (U32.v j) (U32.v k)
+                      (lift_path hh0 mtr p) actd)))
+#reset-options
 
 private
 inline_for_extraction
@@ -2104,10 +2109,15 @@ val mt_get_path_pre: mt:mt_p -> idx:offset_t -> p:path -> root:hash -> HST.ST bo
    (ensures (fun _ _ _ -> True))
 let mt_get_path_pre mt idx p root = mt_get_path_pre_nst !*mt idx !*p root
 
+val mt_get_path_loc_union_helper:
+  l1:loc -> l2:loc ->
+  Lemma (loc_union (loc_union l1 l2) l2 == loc_union l1 l2)
+let mt_get_path_loc_union_helper l1 l2 = ()
+
 // Construct a Merkle path for a given index `idx`, hashes `mt.hs`, and rightmost
 // hashes `mt.rhs`. Note that this operation copies "pointers" into the Merkle tree
 // to the output path.
-#reset-options "--z3rlimit 40"
+#reset-options "--z3rlimit 60 --max_fuel 0"
 val mt_get_path:
   mt:mt_p ->
   idx:offset_t ->
@@ -2126,10 +2136,10 @@ val mt_get_path:
      let idx = split_offset (MT?.offset mtv) idx in
      // memory safety
      modifies (loc_union
-                (mt_loc mt)
                 (loc_union
-                  (path_loc p)
-                  (B.loc_all_regions_from false (B.frameOf root))))
+                  (mt_loc mt)
+                  (B.loc_all_regions_from false (B.frameOf root)))
+                (path_loc p))
               h0 h1 /\
      mt_safe h1 mt /\
      path_safe h1 (B.frameOf mt) p /\
@@ -2137,15 +2147,13 @@ val mt_get_path:
      V.size_of (B.get h1 p 0) ==
      1ul + mt_path_length 0ul idx (MT?.j (B.get h0 mt 0)) false /\
      // correctness
-     High.mt_get_path
-       (mt_lift h0 mt) (U32.v idx) (Rgl?.r_repr hreg h0 root) ==
-     (U32.v (MT?.j (B.get h1 mt 0)),
-     lift_path h1 (B.frameOf mt) p,
-     Rgl?.r_repr hreg h1 root)))
-// #reset-options "--z3rlimit 300 --max_fuel 1"
-// This proof works, but it's a bit slow.
-// It will be admitted until the hint file is generated.
-#reset-options "--admit_smt_queries true"
+     (let sj, sp, srt = 
+       High.mt_get_path
+         (mt_lift h0 mt) (U32.v idx) (Rgl?.r_repr hreg h0 root) in
+     sj == U32.v (MT?.j (B.get h1 mt 0)) /\
+     S.equal sp (lift_path h1 (B.frameOf mt) p) /\
+     srt == Rgl?.r_repr hreg h1 root)))
+#reset-options "--z3rlimit 300 --max_fuel 1"
 let mt_get_path mt idx p root =
   let copy = Cpy?.copy hcpy in
   let hh0 = HST.get () in
@@ -2167,18 +2175,24 @@ let mt_get_path mt idx p root =
   let j = MT?.j mtv in
   let hs = MT?.hs mtv in
   let rhs = MT?.rhs mtv in
-  let ih = V.index (V.index hs 0ul) (idx - ofs) in
+
+  assert (mt_safe_elts hh1 0ul hs i j);
+  assert (V.size_of (V.get hh1 hs 0ul) == j - ofs);
+  assert (idx < j);
+
   hash_vv_rv_inv_includes hh1 hs 0ul (idx - ofs);
   hash_vv_rv_inv_r_inv hh1 hs 0ul (idx - ofs);
+  hash_vv_as_seq_get_index hh1 hs 0ul (idx - ofs);
+
+  let ih = V.index (V.index hs 0ul) (idx - ofs) in
   path_insert (B.frameOf mt) p ih;
 
   let hh2 = HST.get () in
-  hash_vv_as_seq_get_index hh1 hs 0ul (idx - ofs);
   assert (S.equal (lift_path hh2 (B.frameOf mt) p)
                   (High.path_insert
                     (lift_path hh1 (B.frameOf mt) p)
                     (S.index (S.index (RV.as_seq hh1 hs) 0) (U32.v idx - U32.v ofs))));
-  B.modifies_buffer_elim root (path_loc p) hh1 hh2;
+  Rgl?.r_sep hreg root (path_loc p) hh1 hh2;
   mt_safe_preserved mt (path_loc p) hh1 hh2;
   mt_preserved mt (path_loc p) hh1 hh2;
   assert (V.size_of (B.get hh2 p 0) == 1ul);
@@ -2186,7 +2200,13 @@ let mt_get_path mt idx p root =
   mt_get_path_ 0ul (B.frameOf mt) hs rhs i j idx p false;
 
   let hh3 = HST.get () in
-  B.modifies_buffer_elim root (path_loc p) hh2 hh3;
+
+  // memory safety
+  mt_get_path_loc_union_helper
+    (loc_union (mt_loc mt)
+               (B.loc_all_regions_from false (B.frameOf root)))
+    (path_loc p);
+  Rgl?.r_sep hreg root (path_loc p) hh2 hh3;
   mt_safe_preserved mt (path_loc p) hh2 hh3;
   mt_preserved mt (path_loc p) hh2 hh3;
   assert (V.size_of (B.get hh3 p 0) ==
@@ -2195,6 +2215,19 @@ let mt_get_path mt idx p root =
          S.length (lift_path hh2 (B.frameOf mt) p) +
          High.mt_path_length (U32.v idx) (U32.v (MT?.j (B.get hh0 mt 0))) false);
 
+  assert (modifies (loc_union
+                     (loc_union
+                       (mt_loc mt)
+                       (B.loc_all_regions_from false (B.frameOf root)))
+                     (path_loc p))
+                   hh0 hh3);
+  assert (mt_safe hh3 mt);
+  assert (path_safe hh3 (B.frameOf mt) p);
+  assert (Rgl?.r_inv hreg hh3 root);
+  assert (V.size_of (B.get hh3 p 0) ==
+         1ul + mt_path_length 0ul idx (MT?.j (B.get hh0 mt 0)) false);
+
+  // correctness
   mt_safe_elts_spec hh2 0ul hs i j;
   assert (S.equal (lift_path hh3 (B.frameOf mt) p)
                   (High.mt_get_path_ 0 (RV.as_seq hh2 hs) (RV.as_seq hh2 rhs)
@@ -2206,7 +2239,7 @@ let mt_get_path mt idx p root =
          lift_path hh3 (B.frameOf mt) p,
          Rgl?.r_repr hreg hh3 root));
   j
-#reset-options // reset "--admit_smt_queries true"
+#reset-options
 
 /// Flushing
 
@@ -2265,10 +2298,8 @@ private val mt_flush_to_:
                (U32.v lv) (RV.as_seq h0 hs) (U32.v pi)
                (U32.v i) (U32.v (Ghost.reveal j))))))
    (decreases (U32.v i))
-// #reset-options "--z3rlimit 800 --max_fuel 1"
-// This proof works with the resource limit above, but it's a bit slow.
-// It will be admitted until the hint file is generated.
-#reset-options "--admit_smt_queries true"
+#reset-options "--z3rlimit 800 --max_fuel 1"
+// #reset-options "--admit_smt_queries true"
 private let rec mt_flush_to_ lv hs pi i j =
   let hh0 = HST.get () in
 
@@ -2444,7 +2475,7 @@ private let rec mt_flush_to_ lv hs pi i j =
                     (High.mt_flush_to_ (U32.v lv) (RV.as_seq hh0 hs)
                       (U32.v pi) (U32.v i) (U32.v (Ghost.reveal j))))
   end
-#reset-options // reset "--admit_smt_queries true"
+#reset-options
 
 
 // `mt_flush_to` flushes old hashes in the Merkle tree. It removes hash elements
@@ -2586,7 +2617,7 @@ private val mt_verify_:
      Rgl?.r_repr hreg h1 acc ==
      High.mt_verify_ (U32.v k) (U32.v j) (lift_path h0 mtr p)
        (U32.v ppos) (Rgl?.r_repr hreg h0 acc) actd))
-#reset-options "--z3rlimit 200 --max_fuel 8"
+#reset-options "--z3rlimit 200 --max_fuel 1"
 private let rec mt_verify_ k j mtr p ppos acc actd =
   let hh0 = HST.get () in
   if j = 0ul then ()
