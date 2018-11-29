@@ -82,15 +82,13 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 VALE_ASM 	= $(wildcard \
   $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
-  $(VALE_OBJ_DIR)/*.S)
-
-VALE_ASM_MSVC 	= $(wildcard \
   $(HACL_HOME)/secure_api/vale/asm/aes-*.asm \
-  $(VALE_OBJ_DIR)/*.asm)
+  $(VALE_OBJ_DIR)/*.asm $(VALE_OBJ_DIR)/*.S)
 
 EVERCRYPT_SOURCES = \
   $(addprefix evercrypt/c/evercrypt_,bytes.c autoconfig.c vale_stubs.c)
-
+EVERCRYPT_MAYBE_SOURCES = \
+  $(addprefix evercrypt/c/evercrypt_,openssl.c bcrypt.c)
 
 # 3. Distributing EverCrypt
 
@@ -142,17 +140,11 @@ dist/header/Makefile.basic: \
 
 dist/compact/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS)
-dist/compact/Makefile.basic: \
-  EVERCRYPT_SOURCES += evercrypt/c/evercrypt_openssl.c
 
 dist/compact-msvc/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS) -falloca -ftail-calls
 dist/compact-msvc/Makefile.basic: \
-  VALE_ASM = $(VALE_ASM_MSVC)
-dist/compact-msvc/Makefile.basic: \
   HACL_SOURCES = $(HACL_SOURCES_MSVC)
-dist/compact-msvc/Makefile.basic: \
-  EVERCRYPT_SOURCES += evercrypt/c/evercrypt_bcrypt.c
 
 dist/%/Makefile.basic: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal $(KOPTS) -tmpdir $(dir $@) $^ \
@@ -161,12 +153,17 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) | .depend
 	  -add-include '"kremlin/internal/compat.h"' \
 	  $(notdir $(EVERCRYPT_SOURCES)) \
 	  $(EXTRA)
-	$(COPY) && cp $(VALE_ASM) $(EVERCRYPT_SOURCES) $(dir $@) || true
+	$(COPY) && cp $(VALE_ASM) $(EVERCRYPT_SOURCES) $(EVERCRYPT_MAYBE_SOURCES) $(dir $@) || true
 	! $(COPY) && rm -rf $(dir $@)/Makefile.* || true
+
+.PRECIOUS: dist/%/Makefile
+dist/%/Makefile: dist/%/Makefile.basic dist/Makefile
+	mkdir -p $(dir $@)
+	cp $< $@
 
 # 5. Compiling it
 
-dist/%/libevercrypt.$(SO): dist/%/Makefile.basic
+dist/%/libevercrypt.$(SO): dist/%/Makefile
 	$(MAKE) -C $(dir $<)
 
 # 6. An OCaml library that exposes only the bytes-based interface, for now
