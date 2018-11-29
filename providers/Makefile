@@ -1,34 +1,21 @@
 include Makefile.common
 
-# 0. The usual pseudo auto-configuration
-
-UNAME		= $(shell uname)
-SED		= $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
-MARCH		= x86_64
-ifeq ($(UNAME),Darwin)
-  VARIANT	= -darwin
-  SO		= so
-else ifeq ($(UNAME),Linux)
-  CFLAGS	+= -fPIC
-  VARIANT	= -linux
-  SO 		= so
-  LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
-else ifeq ($(OS),Windows_NT)
-  CC		= $(MARCH)-w64-mingw32-gcc
-  AR		= $(MARCH)-w64-mingw32-ar
-  VARIANT	= -mingw
-  SO		= dll
+ifeq ($(OS),Windows_NT)
+  SO=dll
+else
+  SO=so
 endif
 
+# 1. Main entry points, along with some sanity checks
+
 VALE_FSTI_HACK	= $(HACL_HOME)/vale/code/arch/x64/interop/fsti
-HACL_CHECK	= $(HACL_HOME)/code/dist/compact/Makefile.include
+
+all: $(VALE_FSTI_HACK) $(VALE_OBJ_DIR) $(HACL_CHECK) $(KREMLIB_CHECK)
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) all_
 
 # Manual staging
-all: $(VALE_FSTI_HACK) $(VALE_OBJ_DIR) $(HACL_CHECK)
-	rm -f .depend && $(MAKE) .depend
-	$(MAKE) stage1
-	STAGE=2 $(MAKE) stage2
-	$(MAKE) -C quic_provider
+all_: dist/compact/libevercrypt.$(SO) dist/compact/evercrypt.cmxa
 
 # Temporary workaround: we want Vale to offer a relatively small dependency
 # graph with just interfaces.
@@ -42,13 +29,6 @@ endif
 
 $(VALE_OBJ_DIR):
 	@echo "Please run scons --FSTAR-MY-VERSION --NO-VERIFY --EXTRACT-FSTAR in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
-
-$(HACL_CHECK):
-	@echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false
-
-stage1: $(GENERATED_DIR)/Makefile.include $(INCLUDE_DIR)/EverCrypt.h
-
-stage2: $(OUT_DIR)/libevercrypt.a $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)/evercrypt.cmxa
 
 .PHONY: test
 test:
@@ -77,7 +57,7 @@ include .depend
 ADMIT=false
 
 # Admit ulib + Vale-related files, verified separately with different Z3
-# options.
+# options. Normally the .checked files for these should already exist.
 $(CACHE_DIR)/FStar.%.fst.checked: ADMIT=true
 $(CACHE_DIR)/X64.%.fst.checked: ADMIT=true
 $(CACHE_DIR)/Arch.%.fst.checked: ADMIT=true
@@ -98,147 +78,103 @@ $(OUTPUT_DIR)/%.krml: | .depend
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-# 2. Generation of the .c files
-ifneq (,$(EVEREST_WINDOWS))
-KOPTS		+=-falloca -ftail-calls
-endif
+# 2. All the sources that will be part of the distribution
 
-VALE_BUNDLES=$(addprefix -bundle , 'X64.*' 'Arch.*' 'Words.*' 'Vale.*[rename=Vale_Misc]' \
-  'Collections.*,Collections[rename=Collections]' 'SHA_helpers' Prop_s Types_s Words_s Views AES_s \
-  Workarounds 'Math.*' Interop TypesNative_s)
+VALE_ASM 	= $(wildcard \
+  $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
+  $(VALE_OBJ_DIR)/*.S)
 
-$(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
-	  $(KOPTS) \
-	  -warn-error '-6' \
-	  -add-include '"kremlib.h"' \
-	  -add-include '"kremlin/internal/compat.h"' \
-	  $(VALE_BUNDLES) \
-	  -bundle 'Prims,FStar.*,C,C.*[rename=EverCrypt_Kremlib]' \
-	  -bundle 'EverCrypt.Spec.*' \
-	  -bundle 'Crypto.Symmetric.*[rename=Hacl_Legacy]' \
-	  -bundle 'Flag' \
-	  -bundle 'Spec.*' \
-	  -bundle 'LowStar.*' \
-	  -bundle 'AEAD.*,Hacl.*[rename=Hacl]' -library 'Hacl.*,AEAD.*' \
-	  -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
-	  -no-prefix 'EverCrypt.Vale' \
-	  -no-prefix 'Sha_update_bytes_stdcall' \
-	  -no-prefix 'Check_sha_stdcall' \
-	  -no-prefix 'Check_aesni_stdcall' \
-	  -tmpdir $(GENERATED_DIR) $^ -warn-error @9
-
-$(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
-	  $(KOPTS) \
-	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=*[rename=EverCrypt]\
-	  -library EverCrypt,EverCrypt.* \
-	  -add-include '<inttypes.h>' \
-	  -add-include '<stdbool.h>' \
-	  -add-include '<kremlin/internal/types.h>' \
-	  -add-include '<kremlin/internal/compat.h>' \
-	  -tmpdir $(INCLUDE_DIR) $^
-	rm -rf $(INCLUDE_DIR)/Makefile.include $(INCLUDE_DIR)/*.c
-
-
-
-# The Makefile is manually staged because GNU Make does not understand
-# dependencies between the Makefiles we include, i.e. it won't first generate
-# the .depend, parse it, then generate Makefile.include, parse it, then
-# generate dependencies among the C files
-ifeq ($(STAGE),2)
-
-# The top-level invocation guarantees that stage1 has been run and this file is
-# there.
-include $(GENERATED_DIR)/Makefile.include
-
-# 3. Collecting all of our source files, and generating corresponding object
-# files.
-
-VALE_ASM 	= $(HACL_HOME)/secure_api/vale/asm/aes-$(MARCH)$(VARIANT).S \
-  $(patsubst %,$(VALE_OBJ_DIR)/%-$(MARCH)$(VARIANT).S,sha256 aesgcm curve25519 cpuid)
-
-HACL_SOURCES	= $(wildcard $(HACL_CODE)/dist/compact/*.c)
+VALE_ASM_MSVC 	= $(wildcard \
+  $(HACL_HOME)/secure_api/vale/asm/aes-*.asm \
+  $(VALE_OBJ_DIR)/*.asm)
 
 EVERCRYPT_SOURCES = \
   $(addprefix evercrypt/c/evercrypt_,bytes.c autoconfig.c vale_stubs.c)
 
-ifeq ($(CONFIG),noopenssl)
-EVERCRYPT_SOURCES += evercrypt/c/evercrypt_bcrypt.c
-else ifneq ($(CONFIG),everest)
-EVERCRYPT_SOURCES += evercrypt/c/evercrypt_openssl.c
-endif
 
-# This is auto-generated by KreMLin; since the Makefile is staged via the
-# inclusion of Makefile.include, the automated dependency analysis via $(CC) -MM
-# also captures the dependencies between these files.
-#
-# KreMLin sees the fsti's for the various Hacl_* modules and creates .h/.c
-# files for them in generated/. However, we are only interested in the header,
-# and drop these (mostly empty) C files, since the "real" ones are collected via
-# HACL_SOURCES above.
-ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_C_FILES))
+# 3. Distributing EverCrypt
 
-ALL_SOURCES	= $(HACL_SOURCES) $(VALE_SOURCES) $(EVERCRYPT_SOURCES) $(ALL_GENERATED_FILES)
-ALL_OBJS	= $(patsubst %.c,%.o,$(ALL_SOURCES)) $(patsubst %.S,%.o,$(VALE_ASM))
+# This achieves a pretty tight packaging of EverCrypt.
+# - Modules that contain no useful declarations are -bundle'd, and since nothing
+#   remains in them, no C file is generated
+# - Everything else is packaged into files that start with EverCrypt_ using the
+#   new rename= feature.
+# - HACL* is already extracted and compiled separately, so use -library for
+#   modules coming from code/
+# - Use -library to ensure that modules that KreMLin generates no C file for
+#   modules that are implemented by hand in C
+# - Modules that export ASM symbols have -no-prefix
+# - We generate a .so which statically links in libkremlib and libhacl
+# - We provide hand-written C files and Vale-provided ASM files
+COMPACT_FLAGS = \
+  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers \
+  -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s \
+  -bundle 'EverCrypt.Spec.*' \
+  -bundle 'Flag' \
+  -bundle 'LowStar.*' \
+  -bundle 'Crypto.Symmetric.*[rename=Hacl_Legacy]' \
+  -bundle 'Prims,FStar.*,C,C.*[rename=EverCrypt_Kremlib]' \
+  -bundle 'AEAD.*,Hacl.*,Spec.*[rename=Hacl]' -library 'Hacl.*,AEAD.*' \
+  -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
+  -library EverCrypt.Bytes,EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
+  -no-prefix 'EverCrypt.Vale' \
+  -no-prefix 'Sha_update_bytes_stdcall' \
+  -no-prefix 'Check_sha_stdcall' \
+  -no-prefix 'Check_aesni_stdcall' \
+  -o libevercrypt.a
 
-INCLUDE_DIRS	= $(foreach c,$(ALL_SOURCES),$(dir $(c))) \
-  $(HACL_HOME)/secure_api/out/runtime_switch/extracted \
-  $(HACL_HOME)/snapshots/common $(KREMLIN_HOME)/include \
-  $(OPENSSL_HOME)/include $(KREMLIN_HOME)
+# This is for distributing to clients of libevercrypt.so, a clean header that
+# exposes everything useful from EverCrypt
+HEADER_FLAGS = \
+  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=*[rename=EverCrypt]\
+  -library EverCrypt,EverCrypt.* \
+  -add-include '<inttypes.h>' \
+  -add-include '<stdbool.h>' \
+  -add-include '<kremlin/internal/types.h>' \
+  -add-include '<kremlin/internal/compat.h>' \
 
+COPY=true
 
-CFLAGS		+= $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror -Wno-unknown-warning-option \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-infinite-recursion -g
+dist/header/Makefile.basic: \
+  EXTRA = $(HEADER_FLAGS)
+dist/header/Makefile.basic: \
+  COPY = false
 
-# GNU Make manual section 4.14
-%.d: %.c
-	@set -e; rm -f $@; \
-	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
-	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
-	  rm -f $@.$$$$
+dist/compact/Makefile.basic: \
+  EXTRA = $(COMPACT_FLAGS)
+dist/compact/Makefile.basic: \
+  EVERCRYPT_SOURCES += evercrypt/c/evercrypt_openssl.c
 
--include $(patsubst %.c,%.d,$(ALL_SOURCES))
+dist/compact-msvc/Makefile.basic: \
+  EXTRA = $(COMPACT_FLAGS) -falloca -ftail-calls
+dist/compact-msvc/Makefile.basic: \
+  VALE_ASM = $(VALE_ASM_MSVC)
+dist/compact-msvc/Makefile.basic: \
+  HACL_SOURCES = $(HACL_SOURCES_MSVC)
+dist/compact-msvc/Makefile.basic: \
+  EVERCRYPT_SOURCES += evercrypt/c/evercrypt_bcrypt.c
 
-$(OUT_DIR):
-	mkdir -p $@
+dist/%/Makefile.basic: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN_HOME)/krml -skip-compilation -minimal $(KOPTS) -tmpdir $(dir $@) $^ \
+	  -warn-error '-6@9' \
+	  -add-include '"kremlib.h"' \
+	  -add-include '"kremlin/internal/compat.h"' \
+	  $(notdir $(EVERCRYPT_SOURCES)) \
+	  $(EXTRA)
+	$(COPY) && cp $(VALE_ASM) $(EVERCRYPT_SOURCES) $(dir $@) || true
+	! $(COPY) && rm -rf $(dir $@)/Makefile.* || true
 
-# 4. Collecting all of the object files into a static and a dynamic library.
+# 5. Compiling it
 
-ifeq (,$(EVEREST_WINDOWS))
-LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
-else
-LDFLAGS += -lbcrypt
-endif
-
-ifeq ($(UNAME),Linux)
-LDFLAGS += -ldl -lpthread
-endif
-
-LIBKREMLIB = $(KREMLIN_HOME)/kremlib/out/libkremlib.a
-
-$(LIBKREMLIB):
-	$(error Please run make -C $(KREMLIN_HOME)/kremlib to generate libkremlib.a)
-
-# Note: see
-# https://www.gnu.org/software/make/manual/html_node/Archive-Pitfalls.html#Archive-Pitfalls
-# for why we are not using libhacl.a($(OBJS))
-$(OUT_DIR)/libevercrypt.a: $(ALL_OBJS) | $(OUT_DIR)
-	$(AR) cr $@ $^
-
-$(OUT_DIR)/libevercrypt.$(SO): $(ALL_OBJS) | $(OUT_DIR)
-	$(CC) -shared $^ $(LDFLAGS) -o $@ $(LIBKREMLIB)
-
-.PRECIOUS: %.o
+dist/%/libevercrypt.$(SO): dist/%/Makefile.basic
+	$(MAKE) -C $(dir $<)
 
 # 6. An OCaml library that exposes only the bytes-based interface, for now
 
-$(OUT_DIR)/evercrypt.cmxa: evercrypt/ml/EverCrypt_Bytes.ml | $(OUT_DIR)/libevercrypt.$(SO) $(OUT_DIR)
-	ocamlfind mklib -package ctypes,ctypes.foreign -levercrypt -Lout \
+dist/compact/evercrypt.cmxa: evercrypt/ml/EverCrypt_Bytes.ml dist/compact/libevercrypt.$(SO)
+	ocamlfind mklib -package ctypes,ctypes.foreign -levercrypt -Ldist/compact \
 	  $(addprefix -cclib ,$(LDFLAGS)) \
-	  -o $(patsubst %.cmxa,%,$@) $^
-
-endif # COMPILE
+	  -o $(patsubst %.cmxa,%,$@) $<
 
 # 7. Clean targets that do not re-trigger anything except perhaps the generation
 # of the .depend file.
@@ -252,7 +188,7 @@ clean:
 
 .PHONY: clean-c
 clean-c:
-	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
+	rm -rf dist
 	rm -rf $(CACHE_DIR)/EverCrypt.StaticConfig.fst.checked
 
 .PHONY: distclean
