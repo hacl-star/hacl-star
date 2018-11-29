@@ -10,8 +10,7 @@ open Spec.Matrix
 module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar 
-+FStar.Pervasives -Spec +Spec.Frodo +Spec.Frodo.Params +Spec.Matrix'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar +FStar.Pervasives -Spec +Spec.Frodo +Spec.Frodo.Params +Spec.Matrix'"
 
 /// Pack
 
@@ -44,18 +43,18 @@ let frodo_pack8 d a =
 
 val frodo_pack_state:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
-  -> d:size_nat{d * (n1 * n2 / 8) <= max_size_t /\ d <= 16}
-  -> i:size_nat{i <= n1 * n2 / 8} 
-  -> Type0 
+  -> #n2:size_nat{n1 * n2 <= max_size_t /\ (n1 * n2) % 8 = 0}
+  -> d:size_nat{d * ((n1 * n2) / 8) <= max_size_t /\ d <= 16}
+  -> i:size_nat{i <= (n1 * n2) / 8}
+  -> Type0
 let frodo_pack_state #n1 #n2 d i = lseq uint8 (d * i)
 
 val frodo_pack_inner:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
-  -> d:size_nat{d * (n1 * n2 / 8) <= max_size_t /\ d <= 16}
+  -> #n2:size_nat{n1 * n2 <= max_size_t /\ (n1 * n2) % 8 = 0}
+  -> d:size_nat{d * ((n1 * n2) / 8) <= max_size_t /\ d <= 16}
   -> a:matrix n1 n2
-  -> i:size_nat{i < n1 * n2 / 8}
+  -> i:size_nat{i < (n1 * n2) / 8}
   -> frodo_pack_state #n1 #n2 d i
   -> frodo_pack_state #n1 #n2 d (i + 1)
 let frodo_pack_inner #n1 #n2 d a i s =
@@ -63,12 +62,12 @@ let frodo_pack_inner #n1 #n2 d a i s =
 
 val frodo_pack:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
-  -> d:size_nat{d * (n1 * n2 / 8) <= max_size_t /\ d <= 16}
+  -> #n2:size_nat{n1 * n2 <= max_size_t /\ (n1 * n2) % 8 = 0}
+  -> d:size_nat{d * ((n1 * n2) / 8) <= max_size_t /\ d <= 16}
   -> a:matrix n1 n2
-  -> res:lbytes (d * (n1 * n2 / 8))
+  -> res:lbytes (d * ((n1 * n2) / 8))
 let frodo_pack #n1 #n2 d a =
-  Loops.repeat_gen (n1 * n2 / 8)
+  Loops.repeat_gen ((n1 * n2) / 8)
     (frodo_pack_state #n1 #n2 d)
     (frodo_pack_inner #n1 #n2 d a)
     (Seq.create 0 (u8 0))
@@ -97,17 +96,17 @@ let frodo_unpack8 d b =
 
 val frodo_unpack_state:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
-  -> i:size_nat{i <= n1 * n2 / 8} 
-  -> Type0 
+  -> #n2:size_nat{n1 * n2 <= max_size_t /\ (n1 * n2) % 8 = 0}
+  -> i:size_nat{i <= (n1 * n2) / 8}
+  -> Type0
 let frodo_unpack_state #n1 #n2 i = lseq uint16 (8 * i)
 
 val frodo_unpack_inner:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
-  -> d:size_nat{d * (n1 * n2 / 8) <= max_size_t /\ d <= 16}
-  -> b:lbytes (d * (n1 * n2 / 8))
-  -> i:size_nat{i < n1 * n2 / 8}
+  -> #n2:size_nat{n1 * n2 <= max_size_t /\ (n1 * n2) % 8 = 0}
+  -> d:size_nat{d * ((n1 * n2) / 8) <= max_size_t /\ d <= 16}
+  -> b:lbytes (d * ((n1 * n2) / 8))
+  -> i:size_nat{i < (n1 * n2) / 8}
   -> frodo_unpack_state #n1 #n2 i
   -> frodo_unpack_state #n1 #n2 (i + 1)
 let frodo_unpack_inner #n1 #n2 d b i s =
@@ -115,13 +114,12 @@ let frodo_unpack_inner #n1 #n2 d b i s =
 
 val frodo_unpack:
     #n1:size_nat
-  -> #n2:size_nat{n1 * n2 <= max_size_t /\ n2 % 8 = 0}
-  -> d:size_nat{d * (n1 * n2 / 8) <= max_size_t /\ d <= 16}
-  -> b:lbytes (d * (n1 * n2 / 8))
+  -> #n2:size_nat{n1 * n2 <= max_size_t /\ (n1 * n2) % 8 = 0}
+  -> d:size_nat{d * ((n1 * n2) / 8) <= max_size_t /\ d <= 16}
+  -> lbytes (d * ((n1 * n2) / 8))
   -> matrix n1 n2
 let frodo_unpack #n1 #n2 d b =
-  assert (8 * (n1 * (n2 / 8)) == n1 * n2);
-  Loops.repeat_gen (n1 * n2 / 8) 
+  Loops.repeat_gen ((n1 * n2) / 8)
     (frodo_unpack_state #n1 #n2)
     (frodo_unpack_inner #n1 #n2 d b)
-    (Seq.create 0 (u16 0))
+    FStar.Seq.empty

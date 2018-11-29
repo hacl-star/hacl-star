@@ -23,11 +23,11 @@ FILES = $(addprefix fst/, \
 	Lib.Sequence.fst \
 	Lib.ByteSequence.fst \
 	Lib.Buffer.fst \
-	Lib.ByteBuffer.fst)
+	Lib.ByteBuffer.fst \
+	Lib.LoopCombinators.fst )
 
 FIXME = $(addprefix fst/, \
-	Lib.IntVector.fst \
-	Lib.LoopCombinators.fst)
+	Lib.IntVector.fst )
 
 %.fst-v: %.fst
 	$(FSTAR) $(FSTAR_INCLUDES) --use_hints $<
