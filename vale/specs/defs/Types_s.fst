@@ -44,6 +44,15 @@ let insert_nat64 (q:quad32) (n:nat64) (i:nat1) : quad32 =
 
 open FStar.Seq
 
+let le_bytes_to_nat32 (b:seq4 nat8) : nat32 =
+  four_to_nat 8 (seq_to_four_LE b)
+
+let nat32_to_le_bytes (n:nat32) : b:seq4 nat8 {
+  le_bytes_to_nat32 b == n} =
+  let b = four_to_seq_LE (nat_to_four 8 n) in
+  assume (le_bytes_to_nat32 b == n);
+  b
+
 let be_bytes_to_nat32 (b:seq4 nat8) : nat32 =
   four_to_nat 8 (seq_to_four_BE b)
 

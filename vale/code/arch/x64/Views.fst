@@ -62,30 +62,8 @@ let inverses64 (u:unit) =
 let inverses128 (u:unit) =
   reveal_opaque get128_def;
   reveal_opaque put128_def;
-  reveal_opaque put32_def;
-  reveal_opaque get32_def;
-  inverses32 ();
-  let aux1 (x:Seq.lseq U8.t 16) : Lemma (put128 (get128 x) == x) =
-    let vg = get128 x in
-    let vp = put128 vg in
-    assert (vg.lo0 == UInt32.v (get32 (Seq.slice x 0 4)));
-    assert (vg.lo1 == UInt32.v (get32 (Seq.slice x 4 8)));
-    assert (vg.hi2 == UInt32.v (get32 (Seq.slice x 8 12)));
-    assert (vg.hi3 == UInt32.v (get32 (Seq.slice x 12 16)));
-    assert (Seq.equal x vp)
-  in
-  let aux2 (x:quad32) : Lemma (get128 (put128 x) == x) =
-    let vp = put128 x in
-    let vg = get128 vp in
-    assert (vg.lo0 == UInt32.v (get32 (Seq.slice vp 0 4)));
-    assert (vg.lo1 == UInt32.v (get32 (Seq.slice vp 4 8)));
-    assert (vg.hi2 == UInt32.v (get32 (Seq.slice vp 8 12)));
-    assert (vg.hi3 == UInt32.v (get32 (Seq.slice vp 12 16)));
-    ()
-  in
-  Classical.forall_intro aux1;
-  Classical.forall_intro aux2
-
+  Classical.forall_intro  Arch.Types.le_quad32_to_bytes_to_quad32;
+  Classical.forall_intro  Arch.Types.le_bytes_to_quad32_to_bytes
 
 let get32_128_aux1 (x: Seq.lseq U32.t 4): Lemma (put32_128 (get32_128 x) == x) =
   reveal_opaque put32_128_def;

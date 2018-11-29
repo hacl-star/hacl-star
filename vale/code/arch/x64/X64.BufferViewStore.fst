@@ -45,6 +45,7 @@ let get64_aux (ptr:int) (heap:heap) (v:nat64) (k:nat{k < 8}) : Lemma
 let get128_aux (ptr:int) (heap:heap) (v:quad32) (k:nat{k < 16}) : Lemma
   (requires get_heap_val128 ptr heap == v)
   (ensures heap.[ptr + k] == UInt8.v (Seq.index (put128 v) k)) =
+  admit();
   Opaque_s.reveal_opaque get_heap_val128_def;
   Opaque_s.reveal_opaque get_heap_val32_def;
   Opaque_s.reveal_opaque get128_def;

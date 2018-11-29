@@ -8,6 +8,24 @@ open Views_s
 
 module U8 = FStar.UInt8
 
+let seq_uint8_to_nat8 (s:Seq.seq UInt8.t) (n:nat{Seq.length s == n}) : Seq.lseq nat8 n =
+  let f (i:nat{i < n}) = UInt8.v (Seq.index s i) in
+  Seq.init n f
+
+let seq_nat8_to_uint8 (s:Seq.seq nat8) (n:nat{Seq.length s == n}) : Seq.lseq UInt8.t n =
+  let f (i:nat{i < n}) = UInt8.uint_to_t (Seq.index s i) in
+  Seq.init n f
+
+let seq_uint8_nat8_lemma (s:Seq.seq UInt8.t) (n:nat{Seq.length s == n}) : Lemma
+  (seq_nat8_to_uint8 (seq_uint8_to_nat8 s n) n == s)
+  [SMTPat (seq_nat8_to_uint8 (seq_uint8_to_nat8 s n) n)] =
+  assert (Seq.equal (seq_nat8_to_uint8 (seq_uint8_to_nat8 s n) n) s)
+
+let seq_nat8_uint8_lemma (s:Seq.seq nat8) (n:nat{Seq.length s == n}) : Lemma
+  (seq_uint8_to_nat8 (seq_nat8_to_uint8 s n) n == s)
+  [SMTPat (seq_uint8_to_nat8 (seq_nat8_to_uint8 s n) n)] =
+  assert (Seq.equal (seq_uint8_to_nat8 (seq_nat8_to_uint8 s n) n) s)
+
 let get8_def (s:Seq.lseq U8.t 1) = Seq.index s 0
 let put8_def (x:U8.t) : GTot (Seq.lseq U8.t 1) =
   let contents (i:nat{i<1}) = x in
@@ -93,34 +111,10 @@ val inverses64 (u:unit) : Lemma (inverses get64 put64)
 let view64 = inverses64 (); View 8 get64 put64
 
 let get128_def (s:Seq.lseq U8.t 16) =
-  Mkfour
-  (nat8s_to_nat32
-    (U8.v (Seq.index s 0))
-    (U8.v (Seq.index s 1))
-    (U8.v (Seq.index s 2))
-    (U8.v (Seq.index s 3)))
- (nat8s_to_nat32
-    (U8.v (Seq.index s 4))
-    (U8.v (Seq.index s 5))
-    (U8.v (Seq.index s 6))
-    (U8.v (Seq.index s 7)))
- (nat8s_to_nat32
-    (U8.v (Seq.index s 8))
-    (U8.v (Seq.index s 9))
-    (U8.v (Seq.index s 10))
-    (U8.v (Seq.index s 11)))
- (nat8s_to_nat32
-    (U8.v (Seq.index s 12))
-    (U8.v (Seq.index s 13))
-    (U8.v (Seq.index s 14))
-    (U8.v (Seq.index s 15)))
+  le_bytes_to_quad32 (seq_uint8_to_nat8 s 16)
 
 let put128_def (a:quad32) : GTot (Seq.lseq U8.t 16) =
-  let s0 = put32 (UInt32.uint_to_t a.lo0) in
-  let s1 = put32 (UInt32.uint_to_t a.lo1) in
-  let s2 = put32 (UInt32.uint_to_t a.hi2) in
-  let s3 = put32 (UInt32.uint_to_t a.hi3) in
-  Seq.append (Seq.append s0 s1) (Seq.append s2 s3)
+  seq_nat8_to_uint8 (le_quad32_to_bytes a) 16
 
 let get128 = make_opaque get128_def
 let put128 = make_opaque put128_def
