@@ -7,7 +7,7 @@ module U32 = FStar.UInt32
 open FStar.HyperStack.ST
 open EverCrypt.Helpers
 
-module AC = EverCrypt.AutoConfig
+module AC = EverCrypt.AutoConfig2
 module SC = EverCrypt.StaticConfig
 module H = EverCrypt.Hash
 
@@ -104,7 +104,7 @@ let test_one_hash vec =
       uint32_fits_maxLength a total_input_len;
       assert (v total_input_len <= EverCrypt.Hash.maxLength a);
 
-      if AC.Vale? (AC.sha256_impl()) then
+      if AC.has_shaext () then
         compute a total_input_len total_input computed
       else 
         EverCrypt.Hash.hash a computed total_input total_input_len
@@ -124,7 +124,7 @@ let test_one_hash vec =
       uint32_fits_maxLength a total_input_len;
       assert (v total_input_len <= EverCrypt.Hash.maxLength a);
 
-      if AC.Vale? (AC.sha256_impl()) then
+      if AC.has_shaext () then
         compute a total_input_len total_input computed
       else
         EverCrypt.Hash.hash a computed total_input total_input_len;
@@ -468,6 +468,16 @@ let main (): St C.exit_code =
   print !$"\n  FINITE-FIELD DIFFIE-HELLMAN\n";
   test_dh ();
 
+  if EverCrypt.StaticConfig.vale then begin
+    print !$"===========Vale===========\n";
+    AC.(init (Prefer Vale));
+    test_aead aead_vectors_low;
+    test_hash hash_vectors_low;
+    test_cipher block_cipher_vectors_low;
+    Test.Hash.main ()
+  end;
+  AC.disable_vale ();
+
   print !$"===========Hacl===========\n";
   AC.(init (Prefer Hacl));
   test_hash hash_vectors_low;
@@ -478,15 +488,7 @@ let main (): St C.exit_code =
   test_chacha20 chacha20_vectors_low;
   Test.Hash.main ();
   Test.Bytes.main ();
-
-  if EverCrypt.StaticConfig.vale then begin
-    print !$"===========Vale===========\n";
-    AC.(init (Prefer Vale));
-    test_aead aead_vectors_low;
-    test_hash hash_vectors_low;
-    test_cipher block_cipher_vectors_low;
-    Test.Hash.main ()
-  end;
+  AC.disable_hacl ();
 
   if EverCrypt.StaticConfig.openssl then begin
     print !$"==========OpenSSL=========\n";
@@ -494,6 +496,7 @@ let main (): St C.exit_code =
     test_aead aead_vectors_low;
     test_cipher block_cipher_vectors_low
   end;
+  AC.disable_openssl ();
 
   if EverCrypt.StaticConfig.bcrypt then begin
     print !$"==========BCrypt==========\n";

@@ -86,7 +86,7 @@ VALE_ASM 	= $(wildcard \
   $(VALE_OBJ_DIR)/*.asm $(VALE_OBJ_DIR)/*.S)
 
 EVERCRYPT_SOURCES = \
-  $(addprefix evercrypt/c/evercrypt_,bytes.c autoconfig.c vale_stubs.c)
+  $(addprefix evercrypt/c/evercrypt_,bytes.c vale_stubs.c)
 EVERCRYPT_MAYBE_SOURCES = \
   $(addprefix evercrypt/c/evercrypt_,openssl.c bcrypt.c)
 
@@ -119,6 +119,7 @@ COMPACT_FLAGS = \
   -no-prefix 'Sha_update_bytes_stdcall' \
   -no-prefix 'Check_sha_stdcall' \
   -no-prefix 'Check_aesni_stdcall' \
+  -fparentheses -fno-shadow -fcurly-braces \
   -o libevercrypt.a
 
 # This is for distributing to clients of libevercrypt.so, a clean header that
