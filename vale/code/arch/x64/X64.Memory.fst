@@ -133,7 +133,7 @@ let index64_heap_aux (s:Seq.lseq UInt8.t 8) (heap:S.heap) (ptr:int) : Lemma
   (ensures UInt64.v (Views.get64 s) == S.get_heap_val64 ptr heap) =
   Opaque_s.reveal_opaque Views.get64_def;
   Opaque_s.reveal_opaque S.get_heap_val64_def;
-  ()
+  Opaque_s.reveal_opaque Types_s.le_bytes_to_nat64_def
 
 let index_helper (x y:int) (heap:S.heap) : Lemma
   (requires x == y)

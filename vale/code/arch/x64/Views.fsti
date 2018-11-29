@@ -4,27 +4,11 @@ open LowStar.BufferView
 open Words_s
 open Types_s
 open Opaque_s
-open Views_s
+open Collections.Seqs_s
+open Words.Seq_s
+open Words.Seq
 
 module U8 = FStar.UInt8
-
-let seq_uint8_to_nat8 (s:Seq.seq UInt8.t) (n:nat{Seq.length s == n}) : Seq.lseq nat8 n =
-  let f (i:nat{i < n}) = UInt8.v (Seq.index s i) in
-  Seq.init n f
-
-let seq_nat8_to_uint8 (s:Seq.seq nat8) (n:nat{Seq.length s == n}) : Seq.lseq UInt8.t n =
-  let f (i:nat{i < n}) = UInt8.uint_to_t (Seq.index s i) in
-  Seq.init n f
-
-let seq_uint8_nat8_lemma (s:Seq.seq UInt8.t) (n:nat{Seq.length s == n}) : Lemma
-  (seq_nat8_to_uint8 (seq_uint8_to_nat8 s n) n == s)
-  [SMTPat (seq_nat8_to_uint8 (seq_uint8_to_nat8 s n) n)] =
-  assert (Seq.equal (seq_nat8_to_uint8 (seq_uint8_to_nat8 s n) n) s)
-
-let seq_nat8_uint8_lemma (s:Seq.seq nat8) (n:nat{Seq.length s == n}) : Lemma
-  (seq_uint8_to_nat8 (seq_nat8_to_uint8 s n) n == s)
-  [SMTPat (seq_uint8_to_nat8 (seq_nat8_to_uint8 s n) n)] =
-  assert (Seq.equal (seq_uint8_to_nat8 (seq_nat8_to_uint8 s n) n) s)
 
 let get8_def (s:Seq.lseq U8.t 1) = Seq.index s 0
 let put8_def (x:U8.t) : GTot (Seq.lseq U8.t 1) =
@@ -83,25 +67,10 @@ val inverses32 (u:unit) : Lemma (inverses get32 put32)
 let view32 = inverses32(); View 4 get32 put32
 
 let get64_def (s:Seq.lseq U8.t 8) =
-  UInt64.uint_to_t (
-  nat8s_to_nat64
-    (U8.v (Seq.index s 0))
-    (U8.v (Seq.index s 1))
-    (U8.v (Seq.index s 2))
-    (U8.v (Seq.index s 3))
-    (U8.v (Seq.index s 4))
-    (U8.v (Seq.index s 5))
-    (U8.v (Seq.index s 6))
-    (U8.v (Seq.index s 7))
-  )
+  UInt64.uint_to_t (le_bytes_to_nat64 (seq_uint8_to_seq_nat8 s))
 
 let put64_def (a:UInt64.t) : GTot (Seq.lseq U8.t 8) =
-  let u0 = UInt32.uint_to_t (UInt64.v a % 0x100000000) in
-  let u1 = UInt32.uint_to_t ((UInt64.v a / 0x100000000) % 0x100000000) in
-  let s0 = put32_def u0 in
-  let s1 = put32_def u1 in
-  Seq.append s0 s1
-
+  seq_nat8_to_seq_uint8 (le_nat64_to_bytes (UInt64.v a))
 
 let get64 = make_opaque get64_def
 let put64 = make_opaque put64_def
@@ -111,10 +80,10 @@ val inverses64 (u:unit) : Lemma (inverses get64 put64)
 let view64 = inverses64 (); View 8 get64 put64
 
 let get128_def (s:Seq.lseq U8.t 16) =
-  le_bytes_to_quad32 (seq_uint8_to_nat8 s 16)
+  le_bytes_to_quad32 (seq_uint8_to_seq_nat8 s)
 
 let put128_def (a:quad32) : GTot (Seq.lseq U8.t 16) =
-  seq_nat8_to_uint8 (le_quad32_to_bytes a) 16
+  seq_nat8_to_seq_uint8 (le_quad32_to_bytes a)
 
 let get128 = make_opaque get128_def
 let put128 = make_opaque put128_def
@@ -131,18 +100,10 @@ let nat32s_to_nat128 (v1 v2 v3 v4: nat32): nat128 =
 module U32 = FStar.UInt32
 
 let get32_128_def (s: Seq.lseq U32.t 4) : quad32 =
-  Mkfour
-    (U32.v (Seq.index s 0))
-    (U32.v (Seq.index s 1))
-    (U32.v (Seq.index s 2))
-    (U32.v (Seq.index s 3))
+  seq_to_four_LE (seq_map UInt32.v s)
 
 let put32_128_def (a:quad32) : GTot (Seq.lseq U32.t 4) =
-  let s0 = UInt32.uint_to_t a.lo0 in
-  let s1 = UInt32.uint_to_t a.lo1 in
-  let s2 = UInt32.uint_to_t a.hi2 in
-  let s3 = UInt32.uint_to_t a.hi3 in  
-Seq.append (Seq.cons s0 (Seq.create 1 s1)) (Seq.cons s2 (Seq.create 1 s3))
+  seq_map UInt32.uint_to_t (four_to_seq_LE a)
 
 let get32_128 = make_opaque get32_128_def
 let put32_128 = make_opaque put32_128_def

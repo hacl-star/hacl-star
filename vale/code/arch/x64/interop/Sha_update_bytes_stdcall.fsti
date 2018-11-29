@@ -39,7 +39,7 @@ let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:uint32_p) (in_b:b8) (num_val:UInt64.
   length in_b == 64 `op_Multiply` num_val /\
   (let ctx_b128 = BV.mk_buffer_view ctx_b Views.view32_128 in
   let in_b128 = BV.mk_buffer_view in_b Views.view128 in
-  let input_LE = seq_nat8_to_seq_byte (le_seq_quad32_to_bytes (BV.as_seq h' in_b128)) in
+  let input_LE = seq_nat8_to_seq_b (le_seq_quad32_to_bytes (BV.as_seq h' in_b128)) in
   let hash_in = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h ctx_b128)) in
   let hash_out = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h' ctx_b128)) in
   (Seq.length input_LE) % 64 = 0 /\

@@ -21,7 +21,7 @@ open Interop_assumptions
 open X64.Vale.StateLemmas
 open X64.Vale.Lemmas
 module TS = X64.Taint_Semantics_s
-module ME = X64.Memory_s
+module ME = X64.Memory
 module BS = X64.Bytes_Semantics_s
 
 friend X64.Memory_Sems

@@ -24,7 +24,6 @@ let to_uint32 (n:nat32) : UInt32.t = uint_to_t n
 
 let word = UInt32.t
 let k = (Spec.SHA2.k0 SHA2_256)
-let byte = UInt8.t
 
 unfold let ws_opaque_aux = make_opaque ws
 let ws_opaque (b:block_w) (t:counter{t < size_k_w_256}) : nat32 = 
@@ -710,7 +709,7 @@ let update_multi_one (h:hash256) (b:bytes_blocks {length b = size_block}) : Lemm
 let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
             qs == reverse_bytes_quad32_seq quads /\
-            input2 == seq_nat8_to_seq_byte (le_seq_quad32_to_bytes quads))
+            input2 == seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads))
   (ensures  quads_to_block qs == words_of_bytes SHA2_256 size_block_w input2)
   =
   // calc {
@@ -734,7 +733,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
   Lemma (requires length quads % 4 == 0 /\
                   r_quads == reverse_bytes_quad32_seq quads /\
                   nat8s == le_seq_quad32_to_bytes quads /\
-                  blocks == seq_nat8_to_seq_byte nat8s /\
+                  blocks == seq_nat8_to_seq_uint8 nat8s /\
                   hash' == update_multi_quads r_quads hash)        
         (ensures 
            length blocks % 64 == 0 /\
@@ -781,16 +780,16 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     let r_prefix = reverse_bytes_quad32_seq prefix in
     lemma_update_multi_equiv_vale hash h_prefix r_prefix prefix 
                              (le_seq_quad32_to_bytes r_prefix) 
-                             (seq_nat8_to_seq_byte (le_seq_quad32_to_bytes r_prefix));
-    assert (h_prefix == update_multi SHA2_256 hash (seq_nat8_to_seq_byte (le_seq_quad32_to_bytes r_prefix)));    
+                             (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes r_prefix));
+    assert (h_prefix == update_multi SHA2_256 hash (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes r_prefix)));    
     // To show that h_prefix == h_bytes1, we need to show that:
     // seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix) == input1
     // calc {
     //   input1
     //   slice blocks 0 bytes_pivot
     //   slice ( (le_seq_quad32_to_bytes quads)) 0 bytes_pivot
-    assert (equal (slice (seq_nat8_to_seq_byte (le_seq_quad32_to_bytes quads)) 0 bytes_pivot)
-                  (seq_nat8_to_seq_byte (slice (le_seq_quad32_to_bytes quads) 0 bytes_pivot)));
+    assert (equal (slice (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads)) 0 bytes_pivot)
+                  (seq_nat8_to_seq_uint8 (slice (le_seq_quad32_to_bytes quads) 0 bytes_pivot)));
     //   seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads) 0 bytes_pivot)
     slice_commutes_le_seq_quad32_to_bytes0 quads (bytes_pivot / 16);
     //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads 0 (bytes_pivot / 16)))
@@ -821,8 +820,8 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     //   input2
     //   slice blocks bytes_pivot (length blocks)
     //   slice (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads)) bytes_pivot (length blocks)
-    assert (equal (slice (seq_nat8_to_seq_byte (le_seq_quad32_to_bytes quads)) bytes_pivot (length blocks))
-                  (seq_nat8_to_seq_byte (slice (le_seq_quad32_to_bytes quads)  bytes_pivot (length blocks))));
+    assert (equal (slice (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads)) bytes_pivot (length blocks))
+                  (seq_nat8_to_seq_uint8 (slice (le_seq_quad32_to_bytes quads)  bytes_pivot (length blocks))));
     //   seq_nat8_to_seq_U8 (slice (le_seq_quad32_to_bytes quads) bytes_pivot (length blocks))
     slice_commutes_le_seq_quad32_to_bytes quads (bytes_pivot/16) ((length blocks)/16);
     //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads bytes_pivot/16 (length blocks)/16)

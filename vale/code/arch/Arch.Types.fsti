@@ -140,7 +140,13 @@ val lemma_insrq_extrq_relations (x y:quad32) :
          z == Mkfour y.lo0 y.lo1 x.hi2 x.hi3 /\
         (let z = insert_nat64_opaque x (hi64 y) 1 in
          z == Mkfour x.lo0 x.lo1 y.hi2 y.hi3))
-        
+
+val le_bytes_to_nat64_to_bytes (s:nat64) :
+  Lemma (le_bytes_to_nat64 (le_nat64_to_bytes s) == s)
+
+val le_nat64_to_bytes_to_nat64 (s:seq nat8 { length s == 8 }) :
+  Lemma (le_nat64_to_bytes (le_bytes_to_nat64 s) == s)
+
 val le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) == create 1 b)
 
