@@ -429,6 +429,7 @@ procedure{:quick} carry_pass(inline use_cf:bool)
         carry_in:nat64 := if use_cf then (if cf(efl) then 1 else 0) else carry;
     modifies
         carry; tmp; a0; a1; a2; a3;
+        r9; r11; r13; 
         efl;
 
     requires
@@ -448,10 +449,15 @@ procedure{:quick} carry_pass(inline use_cf:bool)
         IMul64(carry, tmp);
     }
 
+    xor_lemmas();
+    Xor64( r9,  r9);
+    Xor64(r11, r11);
+    Xor64(r13, r13);
+
     Add64Wrap(a0, carry); 
-    Adcx64Wrap(a1, 0); 
-    Adcx64Wrap(a2, 0);
-    Adcx64Wrap(a3, 0);
+    Adcx64Wrap(a1, r9); 
+    Adcx64Wrap(a2, r11);
+    Adcx64Wrap(a3, r13);
     assert pow2_five(a0, a1, a2, a3, bool_bit(cf(efl))) == old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
     ghost var sum := old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
     ghost var new_carry := bool_bit(cf(efl));
@@ -800,6 +806,7 @@ procedure{:quick} fadd(
     modifies
         rax; inB_ptr;
         tmp0; tmp1; tmp2; tmp3;
+        r9; r11; r13; 
         mem; efl;
 
     requires
@@ -857,7 +864,7 @@ procedure{:quick}{:public} fadd_stdcall(
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 3, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 4, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -895,6 +902,7 @@ procedure{:quick}{:public} fadd_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
+    Push(r13, stack_b, 3);
     Push(r14, stack_b, 2);
     Push(rsi, stack_b, 1);
     Push(r12, stack_b, 0);
@@ -913,6 +921,7 @@ procedure{:quick}{:public} fadd_stdcall(
     Pop(r12, stack_b, 0);
     Pop(rsi, stack_b, 1);
     Pop(r14, stack_b, 2);
+    Pop(r13, stack_b, 3);
 }
 
 #reset-options "--z3rlimit 30"
