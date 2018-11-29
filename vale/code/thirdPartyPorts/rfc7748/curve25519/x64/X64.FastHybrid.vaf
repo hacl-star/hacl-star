@@ -385,6 +385,11 @@ procedure{:quick} store4(ghost dst_b:buffer64)
     modifies mem;
     requires validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
     ensures 
+        d0 == buffer64_read(dst_b, 0, mem);
+        d1 == buffer64_read(dst_b, 1, mem);
+        d2 == buffer64_read(dst_b, 2, mem);
+        d3 == buffer64_read(dst_b, 3, mem);
+
         modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
 {
@@ -412,7 +417,7 @@ procedure {:quick exportOnly} carry_times_38(inout tmp:dst_opr64)
 }
 
 #reset-options "--z3rlimit 50"
-procedure{:quick} {:verify true} carry_pass(inline use_cf:bool)
+procedure{:quick} carry_pass(inline use_cf:bool)
     lets
         carry @= rax;
         tmp @= rcx;
@@ -684,7 +689,7 @@ procedure{:quick} fast_sub(
 }
 
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 30"
 procedure{:quick} fadd(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -734,17 +739,20 @@ procedure{:quick} fadd(
         let d2 := buffer64_read(dst_b, 2, mem);
         let d3 := buffer64_read(dst_b, 3, mem);
         let d := pow2_four(d0, d1, d2, d3);
-        //d == old(a + b);
+        //d % prime == old(a + b) % prime;
 
         validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
     fast_add(inA_b, inB_b);
+    assert_by_tactic(  
+        pow2_five(tmp0, tmp1, tmp2, tmp3, bool_bit(cf(efl))) ==
+        pow2_four(tmp0, tmp1, tmp2, tmp3) + bool_bit(cf(efl)) * pow2_256, int_canon);
     carry_pass(true);
     store4(dst_b);
 }
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 30"
 procedure{:quick} fsub(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,

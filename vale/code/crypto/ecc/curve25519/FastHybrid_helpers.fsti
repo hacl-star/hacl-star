@@ -52,3 +52,11 @@ let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) :
   //   pow2_four (a0' + carry * 38) a1' a2' a3'
   // }
   ()
+
+let lemma_test (a b:nat) (d0 d1 d2 d3 t0 t1 t2 t3:nat64) (carry:bit) : Lemma
+  (requires pow2_five d0 d1 d2 d3 carry == a + b /\
+            pow2_four t0 t1 t2 t3 % prime == (pow2_four d0 d1 d2 d3 + carry * pow2_256) % prime)
+  (ensures  pow2_four t0 t1 t2 t3 % prime == (a + b) % prime)
+  =
+  assert_by_tactic (pow2_five d0 d1 d2 d3 carry == pow2_four d0 d1 d2 d3 + (carry * pow2_256)) int_canon;
+  ()
