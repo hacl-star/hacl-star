@@ -975,7 +975,7 @@ procedure{:quick} fsub(
     store4(dst_b);
 }
 
-procedure{:quick}{:public} {:verify} fsub_stdcall(
+procedure{:quick}{:public} fsub_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -1108,9 +1108,11 @@ procedure{:quick} fmul1(
         modifies_buffer(dst_b, old(mem), mem);
 {
     fast_mul1(0, inA_b);
+    assert validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
 ////////////////////////////////////////////  TODO!
-    assume rax * 38 < pow2_64;
+    assume rax * 38 < pow2_63;
     carry_pass(false);
+    assert validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
     store4(dst_b);
 }
 
