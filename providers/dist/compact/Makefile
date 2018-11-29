@@ -9,7 +9,7 @@ ifeq ($(UNAME),Darwin)
   VARIANT	= -darwin
   SO		= so
 else ifeq ($(UNAME),Linux)
-  CFLAGS	+= -fPIC
+  CFLAGS	+= -fPIC -fstack-check
   LDFLAGS += -ldl -lpthread
   VARIANT	= -linux
   SO 		= so
@@ -23,9 +23,7 @@ endif
 
 # 2. Parameters we want to compile with, for the generated Makefile
 
-CFLAGS		+= -Wall -Wextra -Werror -Wno-unknown-warning-option \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
-  -Wno-unused-but-set-variable -Wno-infinite-recursion -g
+CFLAGS		+= -Wno-parentheses -g
 
 # This is a regular (with OpenSSL) build; compact-msvc contains a build that is
 # windows-compatible and wants -lbcrypt instead of this
@@ -36,7 +34,7 @@ LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
 
 include Makefile.basic
 
-all: libevercrypt.$(SO)
+OBJS += $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
 $(HACL_A):
 	@echo "Please run make in the $(KREMLIN_HOME)/kremlib directory before invoking this Makefile" && false
@@ -47,8 +45,10 @@ $(KREMLIB_A):
 HACL_A = $(HACL_HOME)/code/dist/compact/libhacl.a
 KREMLIB_A = $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
-libevercrypt.$(SO): libevercrypt.a $(HACL_A) $(KREMLIB_A)
-	$(CC) $(CFLAGS) -shared -o $@ $^
+all: libevercrypt.$(SO)
+
+libevercrypt.$(SO): $(OBJS) $(HACL_A) $(KREMLIB_A)
+	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o $@ $^
 
 libevercrypt.a: aes-$(MARCH)$(VARIANT).o \
   $(addsuffix -$(MARCH)$(VARIANT).o,sha256 aesgcm curve25519 cpuid)
