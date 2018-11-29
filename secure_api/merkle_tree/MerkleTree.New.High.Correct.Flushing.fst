@@ -143,9 +143,7 @@ val mt_flush_to_inv_preserved:
                          (mt_flush_to_olds 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt))))
 let mt_flush_to_inv_preserved mt olds idx =
   mt_flush_to_inv_preserved_ 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt);
-  // TODO: need to prove that flushing does not affect
-  //       the validness of rightmost hashes
-  admit ()
+  mt_flush_to_merge_preserved 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt)
 
 val mt_flush_inv_preserved:
   mt:merkle_tree{mt_wf_elts mt /\ MT?.j mt > MT?.i mt} ->

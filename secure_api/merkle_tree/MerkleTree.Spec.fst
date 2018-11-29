@@ -14,17 +14,22 @@ module EHS = EverCrypt.Hash
 
 let hash_alg = Spec.Hash.Helpers.SHA2_256
 
+// size_word SHA2_256 = 4
+// size_hash_final_w SHA2_256 = 8
+// size_hash SHA2_256 = 32
 val hash_size: nat
-let hash_size = UInt32.v (EHS.tagLen hash_alg)
+let hash_size = Spec.Hash.Helpers.size_hash hash_alg
 
+// Thus `hash_raw` is bytes of length 32
 val hash_raw: eqtype
-let hash_raw = b:Spec.Hash.Helpers.bytes_block hash_alg{S.length b = hash_size}
+let hash_raw = b:Spec.Hash.Helpers.bytes_hash hash_alg
 
+// size_block SHA2_256 = 64
+// Thus we can append `src1` and `src2` together to make it as a single block.
 val hash_2_raw: hash_raw -> hash_raw -> GTot hash_raw
 let hash_2_raw src1 src2 =
   let acc = EHS.acc0 #hash_alg in
-  let acc = EHS.compress #hash_alg acc src1 in
-  let acc = EHS.compress #hash_alg acc src2 in
+  let acc = EHS.compress #hash_alg acc (S.append src1 src2) in
   EHS.extract #hash_alg acc
 
 type hash =
