@@ -34,7 +34,6 @@ module U64 = FStar.UInt64
 module U8 = FStar.UInt8
 
 module EHS = EverCrypt.Hash
-module EHL = EverCrypt.Helpers
 
 module High = MerkleTree.New.High
 
@@ -43,7 +42,7 @@ noextract
 let hash_alg = MerkleTree.Spec.hash_alg
 
 val hash_size: uint32_t
-let hash_size = EHS.tagLen hash_alg
+let hash_size = UInt32.uint_to_t (MerkleTree.Spec.hash_size)
 
 type hash = uint8_p
 
@@ -329,20 +328,53 @@ val hash_2:
        (High.hash_2
          (Rgl?.r_repr hreg h0 src1)
          (Rgl?.r_repr hreg h0 src2))))
-#reset-options "--z3rlimit 40"
+#reset-options "--z3rlimit 40 --max_fuel 0"
 let hash_2 src1 src2 dst =
-  // KreMLin can't extract `EHS.blockLen hash_alg` (= 64ul)
+  let hh0 = HST.get () in
+  HST.push_frame ();
+  // KreMLin can't extract `EHS.blockLen EHS.SHA256` (= 64ul)
   let cb = B.alloca 0uy 64ul in
   B.blit src1 0ul cb 0ul hash_size;
   B.blit src2 0ul cb 32ul hash_size;
 
   let st = EHS.create hash_alg in
   EHS.init #(Ghost.hide hash_alg) st;
+  let hh1 = HST.get () in
+  assert (S.equal (S.append
+                    (Rgl?.r_repr hreg hh0 src1)
+                    (Rgl?.r_repr hreg hh0 src2))
+                  (B.as_seq hh1 cb));
+
   EHS.update #(Ghost.hide hash_alg) st cb;
+  let hh2 = HST.get () in
+  assert (EHS.repr st hh2 == EHS.compress #hash_alg EHS.acc0 (B.as_seq hh1 cb));
+  assert (S.equal (S.append S.empty (B.as_seq hh1 cb))
+                  (B.as_seq hh1 cb));
+
   EHS.finish #(Ghost.hide hash_alg) st dst;
-  EHS.free #(Ghost.hide hash_alg) st
+  let hh3 = HST.get () in
+  assert (S.equal (B.as_seq hh3 dst)
+                  (EHS.extract (EHS.repr st hh2)));
+  assert (S.equal (B.as_seq hh3 dst)
+                  (EHS.extract (EHS.compress #hash_alg EHS.acc0 (B.as_seq hh1 cb))));
+  assert (S.equal (B.as_seq hh3 dst)
+                  (High.hash_2
+                    (Rgl?.r_repr hreg hh0 src1)
+                    (Rgl?.r_repr hreg hh0 src2)));
+  EHS.free #(Ghost.hide hash_alg) st;
+  HST.pop_frame ();
   
+  let hh4 = HST.get () in
+  assert (S.equal (B.as_seq hh4 dst)
+                  (High.hash_2
+                    (Rgl?.r_repr hreg hh0 src1)
+                    (Rgl?.r_repr hreg hh0 src2)));
+  // TODO: need to deal with the region of `st` (= HH.root)
+  assume (modifies (B.loc_region_only false (B.frameOf dst)) hh0 hh4)
+
 /// Low-level Merkle tree data structure
+
+#reset-options "--z3rlimit 20"
 
 // NOTE: because of a lack of 64-bit LowStar.Buffer support, currently
 // we cannot change below to some other types.
@@ -659,17 +691,13 @@ val mt_free: mt:mt_p ->
   HST.ST unit
    (requires (fun h0 -> mt_safe h0 mt))
    (ensures (fun h0 _ h1 -> modifies (mt_loc mt) h0 h1))
-// #reset-options "--z3rlimit 100"
-// This proof works with the resource limit above, but it's a bit slow.
-// It will be admitted until the hint file is generated.
-#reset-options "--admit_smt_queries true"
+#reset-options "--z3rlimit 100"
 let mt_free mt =
   let mtv = !*mt in
   RV.free (MT?.hs mtv);
   RV.free (MT?.rhs mtv);
   Rgl?.r_free hreg (MT?.mroot mtv);
   B.free mt
-#reset-options // reset "--admit_smt_queries true"
 
 /// Insertion
 
@@ -988,7 +1016,7 @@ private val insert_:
                    (High.insert_ (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
                      (RV.as_seq h0 hs) (Rgl?.r_repr hreg h0 acc)))))
          (decreases (U32.v j))
-// #reset-options "--z3rlimit 800"
+// #reset-options "--z3rlimit 800 --max_fuel 1"
 // This proof works with the resource limit above, but it's a bit slow.
 // It will be admitted until the hint file is generated.
 #reset-options "--admit_smt_queries true"
@@ -1181,7 +1209,7 @@ private let rec insert_ lv i j hs acc =
   assert (S.equal (RV.as_seq hh4 hs)
                   (High.insert_ (U32.v lv) (U32.v (Ghost.reveal i)) (U32.v j)
                     (RV.as_seq hh0 hs) (Rgl?.r_repr hreg hh0 acc))) // QED
-#reset-options // reset "--admit_smt_queries true"
+#reset-options
 
 private
 inline_for_extraction
@@ -2018,7 +2046,7 @@ private val mt_get_path_:
              (High.mt_get_path_ (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
    (decreases (32 - U32.v lv))
-// #reset-options "--z3rlimit 150 --max_fuel 1"
+// #reset-options "--z3rlimit 200 --max_fuel 1"
 // This proof works with the resource limit above, but it's a bit slow.
 // It will be admitted until the hint file is generated.
 #reset-options "--admit_smt_queries true"

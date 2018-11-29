@@ -548,45 +548,45 @@ let hash_seq_spec_full_next j hs nhs acc actd nacc nactd =
   then hash_seq_spec_full_even_next j hs nhs acc actd
   else hash_seq_spec_full_odd_next j hs nhs acc actd nacc
 
-val hs_sim:
-  j:nat ->
-  hs:hash_ss{
-    S.length hs = log2c j /\ 
-    mt_hashes_lth_inv_log j hs} ->
-  smt:MTS.merkle_tree (log2c j) ->
-  acc:hash -> actd:bool ->
-  GTot Type0 (decreases j)
-let rec hs_sim j hs smt acc actd =
-  if j = 0 then true
-  else (S.equal smt (hash_seq_spec_full (S.head hs) acc actd) /\
-       hs_sim (j / 2) (S.tail hs) (mt_next_lv #(log2c j) smt)
-         (if j % 2 = 0 then acc
-         else if actd 
-         then hash_2 (S.last (S.head hs)) acc
-         else S.last (S.head hs))
-         (actd || j % 2 = 1))
+// val hs_sim:
+//   j:nat ->
+//   hs:hash_ss{
+//     S.length hs = log2c j /\ 
+//     mt_hashes_lth_inv_log j hs} ->
+//   smt:MTS.merkle_tree (log2c j) ->
+//   acc:hash -> actd:bool ->
+//   GTot Type0 (decreases j)
+// let rec hs_sim j hs smt acc actd =
+//   if j = 0 then true
+//   else (S.equal smt (hash_seq_spec_full (S.head hs) acc actd) /\
+//        hs_sim (j / 2) (S.tail hs) (mt_next_lv #(log2c j) smt)
+//          (if j % 2 = 0 then acc
+//          else if actd 
+//          then hash_2 (S.last (S.head hs)) acc
+//          else S.last (S.head hs))
+//          (actd || j % 2 = 1))
 
-val mt_hashes_inv_log_sim:
-  j:nat{j > 0} ->
-  hs:hash_ss{
-    S.length hs = log2c j /\ 
-    mt_hashes_lth_inv_log j hs /\
-    mt_hashes_inv_log j hs} ->
-  acc:hash -> actd:bool ->
-  Lemma (requires True)
-        (ensures (hs_sim j hs (hash_seq_spec_full (S.head hs) acc actd) acc actd))
-let rec mt_hashes_inv_log_sim j hs acc actd =
-  if j = 1 then ()
-  else begin
-    let nacc = if j % 2 = 0 then acc
-               else if actd 
-               then hash_2 (S.last (S.head hs)) acc
-               else S.last (S.head hs) in
-    let nactd = actd || j % 2 = 1 in
-    mt_hashes_inv_log_sim (j / 2) (S.tail hs) nacc nactd;
-    hash_seq_spec_full_next j (S.head hs) (S.head (S.tail hs))
-      acc actd nacc nactd
-  end
+// val mt_hashes_inv_log_sim:
+//   j:nat{j > 0} ->
+//   hs:hash_ss{
+//     S.length hs = log2c j /\ 
+//     mt_hashes_lth_inv_log j hs /\
+//     mt_hashes_inv_log j hs} ->
+//   acc:hash -> actd:bool ->
+//   Lemma (requires True)
+//         (ensures (hs_sim j hs (hash_seq_spec_full (S.head hs) acc actd) acc actd))
+// let rec mt_hashes_inv_log_sim j hs acc actd =
+//   if j = 1 then ()
+//   else begin
+//     let nacc = if j % 2 = 0 then acc
+//                else if actd 
+//                then hash_2 (S.last (S.head hs)) acc
+//                else S.last (S.head hs) in
+//     let nactd = actd || j % 2 = 1 in
+//     mt_hashes_inv_log_sim (j / 2) (S.tail hs) nacc nactd;
+//     hash_seq_spec_full_next j (S.head hs) (S.head (S.tail hs))
+//       acc actd nacc nactd
+//   end
 
 val mt_rhs_inv:
   j:nat ->
