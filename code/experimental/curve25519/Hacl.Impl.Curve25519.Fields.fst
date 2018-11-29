@@ -11,7 +11,6 @@ module ST = FStar.HyperStack.ST
 
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
-module S = Spec.Curve25519
 
 type field_spec =
   | M51
