@@ -153,7 +153,7 @@ dist/coco/Makefile.basic: \
   -bundle EverCrypt.Hash= -bundle EverCrypt.AutoConfig2= \
   -bundle EverCrypt= \
   -bundle EverCrypt.Hacl -bundle EverCrypt.OpenSSL= \
-  -bundle '\*[rename=Unused]'
+  -bundle '\*[rename=EverCrypt_Misc]'
 
 dist/compact-msvc/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS) -falloca -ftail-calls
