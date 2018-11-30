@@ -482,6 +482,7 @@ let rec rpmt_pad_hashes_index_0 #n mt = ()
 val mt_get_root_pad_index_0:
   #n:nat -> mt:merkle_tree n ->
   Lemma (HPad? (S.index mt 0) <==> HPad? (mt_get_root mt))
+#reset-options "--z3rlimit 40"
 let rec mt_get_root_pad_index_0 #n mt =
   if n = 0 then ()
   else mt_get_root_pad_index_0 (mt_next_lv mt)
@@ -539,6 +540,7 @@ val mt_collide_n:
   mt1:rpmt n -> mt2:rpmt n ->
   Lemma (requires (mt_collide mt1 mt2))
         (ensures (exists lh1 rh1 lh2 rh2. hash_2_raw_collide lh1 rh1 lh2 rh2))
+#reset-options "--z3rlimit 40"
 let rec mt_collide_n #n mt1 mt2 =
   if n = 1 then mt_collide_1 mt1 mt2
   else begin
