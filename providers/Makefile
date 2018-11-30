@@ -15,7 +15,8 @@ all: $(VALE_FSTI_HACK) $(VALE_OBJ_DIR) $(HACL_CHECK) $(KREMLIB_CHECK)
 	$(MAKE) all_
 
 # Manual staging
-all_: dist/compact/libevercrypt.$(SO) dist/compact/evercrypt.cmxa
+all_: dist/compact/libevercrypt.$(SO) dist/compact/evercrypt.cmxa \
+  dist/header/EverCrypt.h dist/coco/libevercrypt.$(SO)
 
 # Temporary workaround: we want Vale to offer a relatively small dependency
 # graph with just interfaces.
@@ -86,9 +87,9 @@ VALE_ASM 	= $(wildcard \
   $(VALE_OBJ_DIR)/*.asm $(VALE_OBJ_DIR)/*.S)
 
 EVERCRYPT_SOURCES = \
-  $(addprefix evercrypt/c/evercrypt_,bytes.c vale_stubs.c)
+  $(addprefix evercrypt/c/evercrypt_,vale_stubs.c)
 EVERCRYPT_MAYBE_SOURCES = \
-  $(addprefix evercrypt/c/evercrypt_,openssl.c bcrypt.c)
+  $(addprefix evercrypt/c/evercrypt_,openssl.c bcrypt.c bytes.c)
 
 # 3. Distributing EverCrypt
 
@@ -125,7 +126,7 @@ COMPACT_FLAGS = \
 # This is for distributing to clients of libevercrypt.so, a clean header that
 # exposes everything useful from EverCrypt
 HEADER_FLAGS = \
-  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=*[rename=EverCrypt]\
+  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=*[rename=EverCrypt] \
   -library EverCrypt,EverCrypt.* \
   -add-include '<inttypes.h>' \
   -add-include '<stdbool.h>' \
@@ -134,6 +135,7 @@ HEADER_FLAGS = \
 
 COPY=true
 
+dist/header/EverCrypt.h: dist/header/Makefile.basic
 dist/header/Makefile.basic: \
   EXTRA = $(HEADER_FLAGS)
 dist/header/Makefile.basic: \
@@ -141,6 +143,17 @@ dist/header/Makefile.basic: \
 
 dist/compact/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS)
+
+# Note: EverCrypt.OpenSSL should go once we compile dist/coco with
+#   EVERCRYPT_OPENSSL=false
+# Note: this is not as tight as it could be because EverCrypt.fst has everything
+#   while Coco just wants AES-NI
+dist/coco/Makefile.basic: \
+  EXTRA = $(COMPACT_FLAGS) \
+  -bundle EverCrypt.Hash= -bundle EverCrypt.AutoConfig2= \
+  -bundle EverCrypt= \
+  -bundle EverCrypt.Hacl -bundle EverCrypt.OpenSSL= \
+  -bundle '\*[rename=Unused]'
 
 dist/compact-msvc/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS) -falloca -ftail-calls

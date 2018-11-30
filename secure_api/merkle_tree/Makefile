@@ -122,9 +122,9 @@ test: test/merkle_tree_test.exe
 	./$<
 
 test/merkle_tree_test.exe: test/merkle_tree_test.c dist/compact/libmerkletree.a \
-  $(HACL_HOME)/providers/dist/compact/libevercrypt.a \
+  $(HACL_HOME)/providers/dist/coco/libevercrypt.a \
   $(HACL_HOME)/code/dist/compact/libhacl.a \
-  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+  $(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
 	$(CC) $(CFLAGS) -Idist/compact -I$(KREMLIN_HOME)/include \
 	  -I$(HACL_HOME)/providers/dist/compact $^ -o $@
 

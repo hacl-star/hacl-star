@@ -20,8 +20,6 @@
 # - libevercrypt.so, a shared object where unused symbols have been removed
 # - libevercrypt.a, a static archive that includes libhacl.a and libkremlib.a
 
-include Makefile.basic
-
 EVERCRYPT_OPENSSL	?= true
 EVERCRYPT_BCRYPT	?= false
 EVERCRYPT_VALE		?= true
@@ -56,17 +54,25 @@ ifeq ($(EVERCRYPT_OPENSSL),true)
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
   LDFLAGS	+= -ldl -lpthread
-  USER_C_FILES	+= evercrypt_openssl.c
+  SOURCES	+= evercrypt_openssl.c
 endif
 
 ifeq ($(EVERCRYPT_BCRYPT),true)
   LDFLAGS	+= -lbcrypt
-  USER_C_FILES	+= evercrypt_bcrypt.c
+  SOURCES	+= evercrypt_bcrypt.c
 endif
 
 ifeq ($(EVERCRYPT_VALE),true)
   OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 endif
+
+# Note: some distributions (e.g. coco) don't want bytes
+
+ifneq (,$(wildcard EverCrypt_Bytes.h))
+  SOURCES	+= evercrypt_bytes.c
+endif
+
+include Makefile.basic
 
 $(HACL_A):
 	@echo "Please run make in the $(KREMLIN_HOME)/kremlib directory before invoking this Makefile" && false
