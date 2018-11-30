@@ -12,6 +12,7 @@ module S = FStar.Seq
 
 module EHS = EverCrypt.Hash
 
+inline_for_extraction noextract
 let hash_alg = Spec.Hash.Helpers.SHA2_256
 
 val hash_size: nat

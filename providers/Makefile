@@ -158,7 +158,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) | .depend
 	! $(COPY) && rm -rf $(dir $@)/Makefile.* || true
 
 .PRECIOUS: dist/%/Makefile
-dist/%/Makefile: dist/%/Makefile.basic dist/Makefile
+dist/%/Makefile: dist/Makefile dist/%/Makefile.basic
 	mkdir -p $(dir $@)
 	cp $< $@
 

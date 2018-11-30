@@ -2,7 +2,6 @@ module MerkleTree.New.Low
 
 open EverCrypt
 open EverCrypt.Helpers
-open EverCrypt.AutoConfig
 
 open FStar.All
 open FStar.Integers
@@ -349,6 +348,7 @@ let hash_2 src1 src2 dst =
 type index_t = uint32_t
 
 let uint32_32_max = 4294967295ul
+inline_for_extraction
 let uint32_max = 4294967295UL
 let uint64_max = 18446744073709551615UL
 let offset_range_limit = uint32_max
