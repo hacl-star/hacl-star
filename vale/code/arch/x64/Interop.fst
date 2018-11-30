@@ -269,6 +269,7 @@ let rec frame_down_mem_aux (ptrs:list b8{list_disjoint_or_eq ptrs})
       let base = addrs b in
       i < base \/ i >= base + B.length b) ==>
       h.[i] == heap.[i]) =
+  admit(); //NS: 11/30/2018
   match ps with
   | [] -> ()
   | a::q ->
