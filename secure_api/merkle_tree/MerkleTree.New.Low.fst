@@ -61,8 +61,10 @@ val hash_region_of:
 let hash_region_of v =
   B.frameOf v
 
-private val hash_dummy: unit -> Tot hash
-private let hash_dummy _ = B.null
+noextract
+inline_for_extraction
+private val hash_dummy: hash
+private let hash_dummy = B.null
 
 val hash_r_inv: h:HS.mem -> v:hash -> GTot Type0
 let hash_r_inv h v =
@@ -140,13 +142,12 @@ val hash_copy:
 let hash_copy src dst =
   B.blit src 0ul dst 0ul hash_size
 
-// `hash_dummy ()` is is also a trick to extract the C code using KreMLin.
-// If we just define and use `hash_dummy` as a constant, then gcc complains with
-// the error "initializer element is not a compile-time constant".
+noextract
+inline_for_extraction
 val hreg: regional hash
 let hreg =
   Rgl hash_region_of
-      (hash_dummy ())
+      hash_dummy
       hash_r_inv
       hash_r_inv_reg
       hash_repr
@@ -236,6 +237,8 @@ val hash_vec_r_free:
 let hash_vec_r_free v =
   RV.free v
 
+noextract
+inline_for_extraction
 val hvreg: regional hash_vec
 let hvreg =
   Rgl hash_vec_region_of
@@ -253,7 +256,7 @@ let hvreg =
 type hash_vv = RV.rvector hvreg
 
 noextract val hvvreg: regional hash_vv
-noextract let hvvreg =
+let hvvreg =
   RVI.vector_regional hvreg
 
 private val hash_vec_rv_inv_r_inv:

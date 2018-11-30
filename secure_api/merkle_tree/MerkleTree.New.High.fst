@@ -28,6 +28,7 @@ let hash_seq = S.seq hash
 val hash_ss: Type0
 let hash_ss = S.seq hash_seq
 
+noextract
 let hash_init: hash =
   Seq.create hash_size 0uy
 
