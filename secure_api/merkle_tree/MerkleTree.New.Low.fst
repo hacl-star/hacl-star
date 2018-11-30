@@ -64,6 +64,8 @@ let hash_region_of v =
 noextract
 inline_for_extraction
 private val hash_dummy: hash
+noextract
+inline_for_extraction
 private let hash_dummy = B.null
 
 val hash_r_inv: h:HS.mem -> v:hash -> GTot Type0
@@ -256,7 +258,7 @@ let hvreg =
 type hash_vv = RV.rvector hvreg
 
 noextract val hvvreg: regional hash_vv
-let hvvreg =
+noextract let hvvreg =
   RVI.vector_regional hvreg
 
 private val hash_vec_rv_inv_r_inv:
