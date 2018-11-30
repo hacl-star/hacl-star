@@ -61,7 +61,7 @@ val insert_inv_preserved_even:
   Lemma (requires (j % 2 <> 1 /\ mt_olds_hs_inv lv i j olds hs))
         (ensures (mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc)))
         (decreases (32 - lv))
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40 --max_fuel 2"
 let insert_inv_preserved_even lv i j olds hs acc =
   let ihs = hash_ss_insert lv i j hs acc in
   mt_olds_hs_lth_inv_ok lv i j olds hs;
@@ -102,7 +102,7 @@ val insert_inv_preserved:
   Lemma (requires (mt_olds_hs_inv lv i j olds hs))
         (ensures (mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc)))
         (decreases (32 - lv))
-#reset-options "--z3rlimit 160 --max_fuel 2"
+#reset-options "--z3rlimit 240 --max_fuel 2"
 let rec insert_inv_preserved lv i j olds hs acc =
   if j % 2 = 1 
   then begin
@@ -155,4 +155,32 @@ val mt_insert_inv_preserved:
         (ensures (mt_inv (mt_insert mt v) olds))
 let mt_insert_inv_preserved mt v olds =
   insert_inv_preserved 0 (MT?.i mt) (MT?.j mt) olds (MT?.hs mt) v
+
+/// Correctness of `create_mt`
+
+val empty_olds_inv:
+  lv:nat{lv <= 32} ->
+  Lemma (requires True)
+        (ensures (mt_olds_inv lv 0 (empty_hashes 32)))
+        (decreases (32 - lv))
+let rec empty_olds_inv lv =
+  if lv = 32 then ()
+  else empty_olds_inv (lv + 1)
+
+val create_empty_mt_inv_ok:
+  unit ->
+  Lemma (empty_olds_inv 0;
+        mt_inv (create_empty_mt ()) (empty_hashes 32))
+let create_empty_mt_inv_ok _ =
+  merge_hs_empty 32;
+  mt_hashes_inv_empty 0
+
+val create_mt_inv_ok:
+  init:hash ->
+  Lemma (empty_olds_inv 0;
+        mt_inv (create_mt init) (empty_hashes 32))
+let create_mt_inv_ok init =
+  create_empty_mt_inv_ok ();
+  empty_olds_inv 0;
+  mt_insert_inv_preserved (create_empty_mt ()) init (empty_hashes 32)
 
