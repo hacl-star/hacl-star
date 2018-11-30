@@ -134,6 +134,8 @@ test/merkle_tree_test.exe: test/merkle_tree_test.c dist/compact/libmerkletree.a 
 make-snapshot:
 	mkdir -p snapshot/kremlib
 	cp -R $(KREMLIN_HOME)/kremlib/dist/minimal/ snapshot/kremlib/
+	mkdir -p snapshot/include
+	cp -R $(KREMLIN_HOME)/include/ snapshot/include/
 	mkdir -p snapshot/hacl
 	cp -R $(HACL_HOME)/code/dist/compact/ snapshot/hacl/
 	mkdir -p snapshot/evercrypt
