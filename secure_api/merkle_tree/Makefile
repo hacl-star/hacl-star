@@ -130,27 +130,13 @@ test/merkle_tree_test.exe: test/merkle_tree_test.c dist/compact/libmerkletree.a 
 
 
 # This snapshot assumes EverCrypt is built via `CONFIG=everest make` $(HACL_HOME)/providers
-.PHONY: snapshot2
-snapshot2: $(ALL_SOURCES)
-	mkdir -p snapshot
-	mkdir -p snapshot/kremlin
-	mkdir -p snapshot/kremlin/kremlib/extracted
-	cp -R $(KREMLIN_HOME)/include snapshot/kremlin/include
-	cp -R $(KREMLIB)/extracted/*.{c,h} snapshot/kremlin/kremlib/extracted
-	cp -R $(KREMLIB)/c/*.c snapshot/kremlin
+.PHONY: make-snapshot
+make-snapshot:
+	mkdir -p snapshot/kremlib
+	cp -R $(KREMLIN_HOME)/kremlib/dist/minimal/ snapshot/kremlib/
 	mkdir -p snapshot/hacl
-	cp -R $(HACL_HOME)/code/dist/compact/*.{c,h} snapshot/hacl
-	mkdir -p snapshot/evercrypt/include
-	mkdir -p snapshot/evercrypt/generated
-	mkdir -p snapshot/evercrypt/c
-	cp -R $(HACL_HOME)/providers/include/*.h snapshot/evercrypt/include
-	cp $(HACL_HOME)/providers/generated/*.{c,h} snapshot/evercrypt/generated
-	rm -f snapshot/evercrypt/generated/AEAD_Poly1305_64.{c,h}
-	for i in evercrypt_autoconfig.c; do cp $(HACL_HOME)/providers/evercrypt/c/$$i snapshot/evercrypt/c; done
-	mkdir -p snapshot/vale
-	for i in $(VALE_ASM); do cp $$i snapshot/vale; done
-	cp -R $(GENERATED_DIR)/*.h snapshot
-	for i in $(ALL_SOURCES); do cp $$i snapshot; done
-	for i in $(ALL_TEST_FILES); do cp $$i snapshot; done
-	cp MerkleTree.h snapshot
-	rm -f snapshot/kremlin/kremlib/extracted/FStar_UInt.c
+	cp -R $(HACL_HOME)/code/dist/compact/ snapshot/hacl/
+	mkdir -p snapshot/evercrypt
+	cp -R $(HACL_HOME)/providers/dist/coco/ snapshot/evercrypt/
+	mkdir -p snapshot/merkle
+	cp -R dist/compact snapshot/merkle/

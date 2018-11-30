@@ -51,15 +51,19 @@ CFLAGS		+= -Wno-parentheses -g
 # 3. Honor configurations
 
 ifeq ($(EVERCRYPT_OPENSSL),true)
+ifneq (,$(wildcard EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
   LDFLAGS	+= -ldl -lpthread
   SOURCES	+= evercrypt_openssl.c
 endif
+endif
 
 ifeq ($(EVERCRYPT_BCRYPT),true)
+ifneq (,$(wildcard EverCrypt_BCrypt.h))
   LDFLAGS	+= -lbcrypt
   SOURCES	+= evercrypt_bcrypt.c
+endif
 endif
 
 ifeq ($(EVERCRYPT_VALE),true)

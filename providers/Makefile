@@ -152,7 +152,7 @@ dist/coco/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS) \
   -bundle EverCrypt.Hash= -bundle EverCrypt.AutoConfig2= \
   -bundle EverCrypt= \
-  -bundle EverCrypt.Hacl -bundle EverCrypt.OpenSSL= \
+  -bundle EverCrypt.Hacl -bundle EverCrypt.OpenSSL \
   -bundle '\*[rename=EverCrypt_Misc]'
 
 dist/compact-msvc/Makefile.basic: \
