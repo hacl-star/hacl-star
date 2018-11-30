@@ -95,6 +95,7 @@ $(OUTPUT_DIR)/%.krml: | .depend
 #
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 
+.PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) -skip-compilation \
 	  -no-prefix 'MerkleTree.New.Low' \

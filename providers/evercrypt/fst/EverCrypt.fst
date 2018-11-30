@@ -16,30 +16,35 @@ open EverCrypt.Helpers
 open C.Failure
 open LowStar.BufferOps
 
+inline_for_extraction
 let vale (): Stack bool (fun _ -> True) (fun h0 _ h1 -> B.modifies B.loc_none h0 h1) =
   if SC.vale then
     AC.wants_vale ()
   else
     false
 
+inline_for_extraction
 let vale_and_aesni (): Stack bool (fun _ -> True) (fun h0 _ h1 -> B.modifies B.loc_none h0 h1) =
   if vale () then
     AC.has_aesni ()
   else
     false
 
+inline_for_extraction
 let hacl (): Stack bool (fun _ -> True) (fun h0 _ h1 -> B.modifies B.loc_none h0 h1) =
   if SC.hacl then
     AC.wants_hacl ()
   else
     false
 
+inline_for_extraction
 let openssl (): Stack bool (fun _ -> True) (fun h0 _ h1 -> B.modifies B.loc_none h0 h1) =
   if SC.openssl then
     AC.wants_openssl ()
   else
     false
 
+inline_for_extraction
 let bcrypt (): Stack bool (fun _ -> True) (fun h0 _ h1 -> B.modifies B.loc_none h0 h1) =
   if SC.bcrypt then
     AC.wants_bcrypt ()
