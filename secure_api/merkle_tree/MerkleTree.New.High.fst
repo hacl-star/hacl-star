@@ -574,6 +574,47 @@ val mt_flush:
 let mt_flush mt = 
   mt_flush_to mt (MT?.j mt - 1)
 
+
+/// Retraction
+
+private let l hs = S.length hs
+
+val mt_retract_to_:
+  lv:nat ->
+  hs:hash_ss{l hs = 32 && lv < l hs} ->
+  i:nat ->
+  r:nat ->
+  j:nat{ i <= r /\ r <= j /\ 
+         j < pow2 (l hs - lv) /\
+         hs_wf_elts lv hs i j} ->
+  GTot (nhs:hash_ss{
+         l nhs = l hs /\
+         S.equal (S.slice hs 0 lv) (S.slice nhs 0 lv) /\
+         hs_wf_elts lv nhs i r})
+  (decreases (l hs - lv))
+let rec mt_retract_to_ lv hs i r j =
+  if r = j then hs
+  else begin
+    let hvec = S.index hs lv in
+    let keep = r - offset_of i in
+    let retracted = S.slice hvec 0 keep in
+    let nhs = S.upd hs lv retracted in
+    hs_wf_elts_equal (lv + 1) hs nhs (i / 2) (j / 2);
+    if lv >= l hs - 1 then nhs else
+    mt_retract_to_ (lv + 1) nhs (i / 2) (r / 2) (j / 2)
+  end
+
+val mt_retract_to: 
+  mt:merkle_tree{mt_wf_elts mt} -> 
+  r:nat{MT?.i mt <= r /\ r < MT?.j mt} ->
+  GTot (fmt:merkle_tree{mt_wf_elts fmt /\ MT?.i fmt = MT?.i mt /\ MT?.j fmt = r})
+let mt_retract_to mt r =
+  let nhs = mt_retract_to_ 0 (MT?.hs mt) (MT?.i mt) r (MT?.j mt) in
+  MT (MT?.i mt) r nhs (MT?.rhs_ok mt) (MT?.rhs mt) (MT?.mroot mt)
+  
+
+/// Verification
+
 val mt_verify_:
   k:nat ->
   j:nat{k <= j} ->
