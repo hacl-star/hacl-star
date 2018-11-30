@@ -32,7 +32,7 @@ let hash_init: hash =
   Seq.create hash_size 0uy
 
 val hash_2: src1:hash -> src2:hash -> GTot hash
-let hash_2 = MTS.hash_2_raw
+let hash_2 = MTS.hash2_raw
 
 #reset-options "--z3rlimit 10" // default for this file
 

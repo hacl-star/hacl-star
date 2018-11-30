@@ -15,9 +15,10 @@ module EHS = EverCrypt.Hash // EverCrypt includes EverCrypt.Hash, so no need for
 let hash_alg = Spec.Hash.Helpers.SHA2_256
 
 // fournet: hashLength would be closer to our naming conventions
-// size_word SHA2_256 = 4
-// size_hash_final_w SHA2_256 = 8
-// size_hash SHA2_256 = 32
+// joonwonc: Some calculations
+// - Spec.Hash.Helpers.size_word SHA2_256 = 4
+// - Spec.Hash.Helpers.size_hash_final_w SHA2_256 = 8
+// - Spec.Hash.Helpers.size_hash SHA2_256 = 32
 val hash_size: nat
 let hash_size = Spec.Hash.Helpers.size_hash hash_alg
 
@@ -26,10 +27,10 @@ let hash_size = Spec.Hash.Helpers.size_hash hash_alg
 val hash_raw: eqtype
 let hash_raw = b:Spec.Hash.Helpers.bytes_hash hash_alg
 
-// size_block SHA2_256 = 64
+// joonwonc: Spec.Hash.Helpers.size_block SHA2_256 = 64
 // Thus we can append `src1` and `src2` together to make it as a single block.
-val hash_2_raw: hash_raw -> hash_raw -> GTot hash_raw
-let hash_2_raw src1 src2 =
+val hash2_raw: hash_raw -> hash_raw -> GTot hash_raw
+let hash2_raw src1 src2 =
   let acc = EHS.acc0 #hash_alg in
   let acc = EHS.compress #hash_alg acc (S.append src1 src2) in
   EHS.extract #hash_alg acc
@@ -45,7 +46,7 @@ type hash =
 | HRaw: hr:hash_raw -> hash
 | HPad // right padding to make the size of a Merkle tree be a power of 2
 
-val hash2: lh:hash -> rh:hash -> hash
+val hash2: lh:hash -> rh:hash -> GTot hash
 let hash2 lh rh =
   match lh with
   | HPad -> HPad
@@ -81,7 +82,7 @@ let mt_left_right #n mt = ()
 
 val hs_next_lv: 
   #n:nat -> hs:Seq.seq hash{Seq.length hs = 2 * n} ->
-  nhs:Seq.seq hash{Seq.length nhs = n}
+  GTot (nhs:Seq.seq hash{Seq.length nhs = n})
 let rec hs_next_lv #n hs =
   if n = 0 then Seq.empty
   else Seq.cons 
@@ -115,7 +116,7 @@ let rec hs_next_lv_slice #n hs i j =
   end
 
 val mt_next_lv:
-  #n:nat{n>0} -> mt:merkle_tree n -> merkle_tree (n-1)
+  #n:nat{n>0} -> mt:merkle_tree n -> GTot (merkle_tree (n-1))
 let mt_next_lv #n mt = hs_next_lv #(pow2 (n-1)) mt
 
 val mt_next_lv_mt_left:
@@ -169,7 +170,7 @@ val hs_next_rel:
 let hs_next_rel n hs nhs =
   forall (i:nat{i < n}).
     S.index nhs i ==
-    hash_2 (S.index hs (2 * i)) (S.index hs (2 * i + 1))
+    hash2 (S.index hs (2 * i)) (S.index hs (2 * i + 1))
 
 val mt_next_rel:
   n:nat{n > 0} ->
@@ -208,7 +209,7 @@ val mt_next_rel_upd_even:
   Lemma (requires (mt_next_rel n mt nmt))
         (ensures (mt_next_rel n
                    (S.upd mt (2 * i) v)
-                   (S.upd nmt i (hash_2 v (S.index mt (2 * i + 1))))))
+                   (S.upd nmt i (hash2 v (S.index mt (2 * i + 1))))))
 let mt_next_rel_upd_even n mt nmt i v = ()
 
 val mt_next_rel_upd_even_pad:
@@ -231,11 +232,11 @@ val mt_next_rel_upd_odd:
   Lemma (requires (mt_next_rel n mt nmt))
         (ensures (mt_next_rel n
                    (S.upd mt (2 * i + 1) v)
-                   (S.upd nmt i (hash_2 (S.index mt (2 * i)) v))))
+                   (S.upd nmt i (hash2 (S.index mt (2 * i)) v))))
 let mt_next_rel_upd_odd n mt nmt i v = ()
 
 // fournet: just [root]? 
-val mt_get_root: #n:nat -> mt:merkle_tree n -> hash
+val mt_get_root: #n:nat -> mt:merkle_tree n -> GTot hash
 let rec mt_get_root #n mt =
   if n = 0 then mt.[0]
   else mt_get_root (mt_next_lv mt)
@@ -257,7 +258,7 @@ type merkle_path n = p:Seq.seq hash{Seq.length p = n}
 /// We first specify full paths, including padding.
 
 val mt_get_path:
-  #n:nat -> mt:merkle_tree n -> i:nat{i < pow2 n} -> merkle_path n
+  #n:nat -> mt:merkle_tree n -> i:nat{i < pow2 n} -> GTot (merkle_path n)
 let rec mt_get_path #n t i =
   if n = 0 then Seq.empty
   else Seq.cons 
@@ -265,7 +266,7 @@ let rec mt_get_path #n t i =
     (mt_get_path (mt_next_lv t) (i / 2))
 
 val mt_verify_:
-  #n:nat -> p:merkle_path n -> idx:nat{idx < pow2 n} -> hash -> hash
+  #n:nat -> p:merkle_path n -> idx:nat{idx < pow2 n} -> hash -> GTot hash
 let rec mt_verify_ #n p idx h =
   if n = 0 then h
   else mt_verify_ #(n-1) (Seq.tail p) (idx / 2)
@@ -274,7 +275,7 @@ let rec mt_verify_ #n p idx h =
                   else hash2 (Seq.head p) h)
 
 val mt_verify:
-  #n:nat -> p:merkle_path n -> idx:nat{idx < pow2 n} -> hash -> hash -> bool
+  #n:nat -> p:merkle_path n -> idx:nat{idx < pow2 n} -> hash -> hash -> GTot bool
 let mt_verify #n p idx h rt =
   rt = mt_verify_ p idx h
 
@@ -420,9 +421,6 @@ type hash2_raw_collide = | Collision2:
     (lh1 <> lh2 \/ rh1 <> rh2) /\
     hash2_raw lh1 rh1 = hash2_raw lh2 rh2 } -> hash2_raw_collide
 
-val extract:
-  #n:nat -> #i:nat{i <= pow2 n} -> mt_collide n i -> hash2_raw_collide 
-
 /// Auxiliary lemmas for the proof
 
 val rpmt_pad_hashes_0:
@@ -467,6 +465,8 @@ val rpmt_get_root_raw:
 let rpmt_get_root_raw #n #i mt =
   rpmt_get_root_pad mt
 
+val extract:
+  #n:nat -> #i:nat{i <= pow2 n} -> mt_collide n i -> GTot hash2_raw_collide
 #set-options "--z3rlimit 100"
 let rec extract #n #i (Collision t1 t2) =
   assert(n = 0 ==> Seq.equal t1 t2); // excludes n = 0
@@ -496,4 +496,4 @@ let rec extract #n #i (Collision t1 t2) =
     else if l1 = l2 
       then extract (Collision r1 r2)
       else extract (Collision l1 l2))
->>>>>>> origin/fournet_merkle_tree
+
