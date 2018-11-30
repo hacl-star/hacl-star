@@ -46,92 +46,17 @@ type tactic:Type(0) extern;
 const int_canon:tactic extern;
 ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
-/*
-void sqr2_256x256_integer_x64(uint64_t *const c, uint64_t *const a) {
-  __asm__ __volatile__(
-    "movq   (%1), %%rdx        ;" /* A[0]      */
-    "mulx  8(%1),  %%r8, %%r14 ;" /* A[1]*A[0] */  "xorl %%r15d, %%r15d;"
-    "mulx 16(%1),  %%r9, %%r10 ;" /* A[2]*A[0] */  "adcx %%r14,  %%r9 ;"
-    "mulx 24(%1), %%rax, %%rcx ;" /* A[3]*A[0] */  "adcx %%rax, %%r10 ;"
-    "movq 24(%1), %%rdx        ;" /* A[3]      */
-    "mulx  8(%1), %%r11, %%r12 ;" /* A[1]*A[3] */  "adcx %%rcx, %%r11 ;"
-    "mulx 16(%1), %%rax, %%r13 ;" /* A[2]*A[3] */  "adcx %%rax, %%r12 ;"
-    "movq  8(%1), %%rdx        ;" /* A[1]      */  "adcx %%r15, %%r13 ;"
-    "mulx 16(%1), %%rax, %%rcx ;" /* A[2]*A[1] */  "movq    $0, %%r14 ;"
-    /*******************************************/  "adcx %%r15, %%r14 ;"
-
-    "xorl %%r15d, %%r15d;"
-    "adox %%rax, %%r10 ;"  "adcx  %%r8,  %%r8 ;"
-    "adox %%rcx, %%r11 ;"  "adcx  %%r9,  %%r9 ;"
-    "adox %%r15, %%r12 ;"  "adcx %%r10, %%r10 ;"
-    "adox %%r15, %%r13 ;"  "adcx %%r11, %%r11 ;"
-    "adox %%r15, %%r14 ;"  "adcx %%r12, %%r12 ;"
-                           "adcx %%r13, %%r13 ;"
-                           "adcx %%r14, %%r14 ;"
-
-    "movq   (%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* A[0]^2 */
-    /********************/  "movq %%rax,  0(%0) ;"
-    "addq %%rcx,  %%r8 ;"   "movq  %%r8,  8(%0) ;"
-    "movq  8(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* A[1]^2 */
-    "adcq %%rax,  %%r9 ;"   "movq  %%r9, 16(%0) ;"
-    "adcq %%rcx, %%r10 ;"   "movq %%r10, 24(%0) ;"
-    "movq 16(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* A[2]^2 */
-    "adcq %%rax, %%r11 ;"   "movq %%r11, 32(%0) ;"
-    "adcq %%rcx, %%r12 ;"   "movq %%r12, 40(%0) ;"
-    "movq 24(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* A[3]^2 */
-    "adcq %%rax, %%r13 ;"   "movq %%r13, 48(%0) ;"
-    "adcq %%rcx, %%r14 ;"   "movq %%r14, 56(%0) ;"
-
-
-    "movq 32(%1), %%rdx        ;" /* B[0]      */
-    "mulx 40(%1),  %%r8, %%r14 ;" /* B[1]*B[0] */  "xorl %%r15d, %%r15d;"
-    "mulx 48(%1),  %%r9, %%r10 ;" /* B[2]*B[0] */  "adcx %%r14,  %%r9 ;"
-    "mulx 56(%1), %%rax, %%rcx ;" /* B[3]*B[0] */  "adcx %%rax, %%r10 ;"
-    "movq 56(%1), %%rdx        ;" /* B[3]      */
-    "mulx 40(%1), %%r11, %%r12 ;" /* B[1]*B[3] */  "adcx %%rcx, %%r11 ;"
-    "mulx 48(%1), %%rax, %%r13 ;" /* B[2]*B[3] */  "adcx %%rax, %%r12 ;"
-    "movq 40(%1), %%rdx        ;" /* B[1]      */  "adcx %%r15, %%r13 ;"
-    "mulx 48(%1), %%rax, %%rcx ;" /* B[2]*B[1] */  "movq    $0, %%r14 ;"
-    /*******************************************/  "adcx %%r15, %%r14 ;"
-
-    "xorl %%r15d, %%r15d;"
-    "adox %%rax, %%r10 ;"  "adcx  %%r8,  %%r8 ;"
-    "adox %%rcx, %%r11 ;"  "adcx  %%r9,  %%r9 ;"
-    "adox %%r15, %%r12 ;"  "adcx %%r10, %%r10 ;"
-    "adox %%r15, %%r13 ;"  "adcx %%r11, %%r11 ;"
-    "adox %%r15, %%r14 ;"  "adcx %%r12, %%r12 ;"
-                           "adcx %%r13, %%r13 ;"
-                           "adcx %%r14, %%r14 ;"
-
-    "movq 32(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* B[0]^2 */
-    /********************/  "movq %%rax,  64(%0) ;"
-    "addq %%rcx,  %%r8 ;"   "movq  %%r8,  72(%0) ;"
-    "movq 40(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* B[1]^2 */
-    "adcq %%rax,  %%r9 ;"   "movq  %%r9,  80(%0) ;"
-    "adcq %%rcx, %%r10 ;"   "movq %%r10,  88(%0) ;"
-    "movq 48(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* B[2]^2 */
-    "adcq %%rax, %%r11 ;"   "movq %%r11,  96(%0) ;"
-    "adcq %%rcx, %%r12 ;"   "movq %%r12, 104(%0) ;"
-    "movq 56(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* B[3]^2 */
-    "adcq %%rax, %%r13 ;"   "movq %%r13, 112(%0) ;"
-    "adcq %%rcx, %%r14 ;"   "movq %%r14, 120(%0) ;"
-  :
-  : "r" (c), "r" (a)
-  : "memory", "cc", "%rax", "%rcx", "%rdx",
-    "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15"
-  );}
-*/
-
 #reset-options "--z3rlimit 300"
 procedure{:quick} fast_sqr_part1(
+    inline offset:nat,
     ghost inA_b:buffer64)
     lets
         inA_ptr @= rsi;
 
-        a0 := buffer64_read(inA_b, 0, mem);
-        a1 := buffer64_read(inA_b, 1, mem);
-        a2 := buffer64_read(inA_b, 2, mem);
-        a3 := buffer64_read(inA_b, 3, mem);
+        a0 := buffer64_read(inA_b, 0 + offset, mem);
+        a1 := buffer64_read(inA_b, 1 + offset, mem);
+        a2 := buffer64_read(inA_b, 2 + offset, mem);
+        a3 := buffer64_read(inA_b, 3 + offset, mem);
 
         a := pow2_four(a0, a1, a2, a3);
     reads
@@ -143,8 +68,9 @@ procedure{:quick} fast_sqr_part1(
 
     requires
         adx_enabled && bmi2_enabled;
+        offset == 0 || offset == 4;
 
-        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4 + offset, memTaint, Secret);
 
     ensures
         pow2_six(r8, r9, r10, r11, r12, r13) ==
@@ -167,31 +93,31 @@ procedure{:quick} fast_sqr_part1(
 //    "mulx 16(%1), %%rax, %%rcx ;" /* A[2]*A[1] */  "movq    $0, %%r14 ;"
 //    /*******************************************/  "adcx %%r15, %%r14 ;"
 
-    Load64_buffer(rdx, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
-    lemma_load_mem64(inA_b, 1, mem);
+    Load64_buffer(rdx, inA_ptr,  0 + offset*8, Secret, inA_b, 0 + offset);     /* A[0] */
+    lemma_load_mem64(inA_b, 1 + offset, mem);
     /* The Xor64 clears the flags used for carry bits; NOTE: Original code uses xorl with r15d, maybe produces smaller code? */
-    Mulx64(r14, r8, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[0]*A[1] */ lemma_prod_bounds(r14,  r8, a0, a1);  Xor64(r15, r15);  
+    Mulx64(r14, r8, Mem(inA_ptr,  8 + offset*8, inA_b, 1 + offset, Secret));  /* A[0]*A[1] */ lemma_prod_bounds(r14,  r8, a0, a1);  Xor64(r15, r15);  
 
-    lemma_load_mem64(inA_b, 2, mem);
-    Mulx64(r10, r9, Mem(inA_ptr, 16, inA_b, 2, Secret));  /* A[0]*A[2] */ lemma_prod_bounds(r10,  r9, a0, a2);  Adcx64Wrap( r9, r14);    
+    lemma_load_mem64(inA_b, 2 + offset, mem);
+    Mulx64(r10, r9, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[0]*A[2] */ lemma_prod_bounds(r10,  r9, a0, a2);  Adcx64Wrap( r9, r14);    
     
-    lemma_load_mem64(inA_b, 3, mem);
-    Mulx64(rcx,rax, Mem(inA_ptr, 24, inA_b, 3, Secret));  /* A[0]*A[3] */ lemma_prod_bounds(rcx, rax, a0, a3);  Adcx64Wrap(r10, rax);    
+    lemma_load_mem64(inA_b, 3 + offset, mem);
+    Mulx64(rcx,rax, Mem(inA_ptr, 24 + offset*8, inA_b, 3 + offset, Secret));  /* A[0]*A[3] */ lemma_prod_bounds(rcx, rax, a0, a3);  Adcx64Wrap(r10, rax);    
 
-    Load64_buffer(rdx, inA_ptr,  24, Secret, inA_b, 3);     /* A[3] */
+    Load64_buffer(rdx, inA_ptr,  24 + offset*8, Secret, inA_b, 3 + offset);     /* A[3] */
 
-    lemma_load_mem64(inA_b, 1, mem);
-    Mulx64(r12,r11, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[3]*A[1] */ lemma_prod_bounds(r12, r11, a3, a1);  Adcx64Wrap(r11, rcx);
+    lemma_load_mem64(inA_b, 1 + offset, mem);
+    Mulx64(r12,r11, Mem(inA_ptr,  8 + offset*8, inA_b, 1 + offset, Secret));  /* A[3]*A[1] */ lemma_prod_bounds(r12, r11, a3, a1);  Adcx64Wrap(r11, rcx);
 
-    lemma_load_mem64(inA_b, 2, mem);
-    Mulx64(r13,rax, Mem(inA_ptr, 16, inA_b, 2, Secret));  /* A[3]*A[2] */ lemma_prod_bounds(r13, rax, a3, a2);  Adcx64Wrap(r12, rax);    
+    lemma_load_mem64(inA_b, 2 + offset, mem);
+    Mulx64(r13,rax, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[3]*A[2] */ lemma_prod_bounds(r13, rax, a3, a2);  Adcx64Wrap(r12, rax);    
 
-    Load64_buffer(rdx, inA_ptr,   8, Secret, inA_b, 1);     /* A[1] */                                          Adcx64Wrap(r13, r15);  // r15 = 0, r13 < pow2_64 - 1, so this wraps the carry into r13
+    Load64_buffer(rdx, inA_ptr,   8 + offset*8, Secret, inA_b, 1 + offset);     /* A[1] */                                          Adcx64Wrap(r13, r15);  // r15 = 0, r13 < pow2_64 - 1, so this wraps the carry into r13
 
 //    assert !cf(efl);
 
-    lemma_load_mem64(inA_b, 2, mem);
-    Mulx64(rcx,rax, Mem(inA_ptr, 16, inA_b, 2, Secret));  /* A[1]*A[2] */ lemma_prod_bounds(rcx, rax, a1, a2);  Mov64(r14, 0);
+    lemma_load_mem64(inA_b, 2 + offset, mem);
+    Mulx64(rcx,rax, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[1]*A[2] */ lemma_prod_bounds(rcx, rax, a1, a2);  Mov64(r14, 0);
 
 //    assert r14 == 0;
 //    assert r15 == 0;
@@ -229,16 +155,17 @@ procedure{:quick} fast_sqr_part2()
 
 #reset-options "--z3rlimit 200"
 procedure{:quick} fast_sqr_part3(
+    inline offset:nat,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
 
-        a0 := buffer64_read(inA_b, 0, mem);
-        a1 := buffer64_read(inA_b, 1, mem);
-        a2 := buffer64_read(inA_b, 2, mem);
-        a3 := buffer64_read(inA_b, 3, mem);
+        a0 := buffer64_read(inA_b, 0 + offset, mem);
+        a1 := buffer64_read(inA_b, 1 + offset, mem);
+        a2 := buffer64_read(inA_b, 2 + offset, mem);
+        a3 := buffer64_read(inA_b, 3 + offset, mem);
 
         a := pow2_four(a0, a1, a2, a3);
     reads
@@ -250,27 +177,28 @@ procedure{:quick} fast_sqr_part3(
 
     requires
         adx_enabled && bmi2_enabled;
+        offset == 0 || offset == 4;
         buffers_disjoint(dst_b, inA_b);
 
         r14 <= 2;
 
-        validDstAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+        validDstAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4 + offset, memTaint, Secret);
 
     ensures
-        let d0 := buffer64_read(dst_b, 0, mem);
-        let d1 := buffer64_read(dst_b, 1, mem);
-        let d2 := buffer64_read(dst_b, 2, mem);
-        let d3 := buffer64_read(dst_b, 3, mem);
-        let d4 := buffer64_read(dst_b, 4, mem);
-        let d5 := buffer64_read(dst_b, 5, mem);
-        let d6 := buffer64_read(dst_b, 6, mem);
-        let d7 := buffer64_read(dst_b, 7, mem);
+        let d0 := buffer64_read(dst_b, 0 + offset*2, mem);
+        let d1 := buffer64_read(dst_b, 1 + offset*2, mem);
+        let d2 := buffer64_read(dst_b, 2 + offset*2, mem);
+        let d3 := buffer64_read(dst_b, 3 + offset*2, mem);
+        let d4 := buffer64_read(dst_b, 4 + offset*2, mem);
+        let d5 := buffer64_read(dst_b, 5 + offset*2, mem);
+        let d6 := buffer64_read(dst_b, 6 + offset*2, mem);
+        let d7 := buffer64_read(dst_b, 7 + offset*2, mem);
         
         pow2_nine(d0, d1, d2, d3, d4, d5, d6, d7, bool_bit(cf(efl))) ==
         old(pow2_eight(mul_nats(a0,a0), r8, mul_nats(a1,a1) + r9, r10, mul_nats(a2,a2) + r11, r12, mul_nats(a3,a3) + r13, r14));
 
-        validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
@@ -288,44 +216,45 @@ procedure{:quick} fast_sqr_part3(
 //    "adcq %%rax, %%r13 ;"   "movq %%r13, 48(%0) ;"
 //    "adcq %%rcx, %%r14 ;"   "movq %%r14, 56(%0) ;"
 
-    Load64_buffer(rdx, inA_ptr,  0, Secret, inA_b, 0);   Mulx64(rcx, rax, rdx);  /* A[0]^2 */                ghost var a0_sqr_hi := rcx; ghost var a0_sqr_lo := rax;  
-    /********************/                               Store64_buffer(dst_ptr, rax,  0, Secret, dst_b, 0);
-    Add64Wrap(r8, rcx);                                  Store64_buffer(dst_ptr,  r8,  8, Secret, dst_b, 1);
-    Load64_buffer(rdx, inA_ptr,  8, Secret, inA_b, 1);   Mulx64(rcx, rax, rdx);  /* A[1]^2 */                ghost var a1_sqr_hi := rcx; ghost var a1_sqr_lo := rax;  
-    Adcx64Wrap( r9, rax);                                Store64_buffer(dst_ptr,  r9, 16, Secret, dst_b, 2);
-    Adcx64Wrap(r10, rcx);                                Store64_buffer(dst_ptr, r10, 24, Secret, dst_b, 3);
-    Load64_buffer(rdx, inA_ptr, 16, Secret, inA_b, 2);   Mulx64(rcx, rax, rdx);  /* A[2]^2 */                ghost var a2_sqr_hi := rcx; ghost var a2_sqr_lo := rax;  
-    Adcx64Wrap(r11, rax);                                Store64_buffer(dst_ptr, r11, 32, Secret, dst_b, 4);
-    Adcx64Wrap(r12, rcx);                                Store64_buffer(dst_ptr, r12, 40, Secret, dst_b, 5);
-    Load64_buffer(rdx, inA_ptr, 24, Secret, inA_b, 3);   Mulx64(rcx, rax, rdx);  /* A[3]^2 */       lemma_prod_bounds(rcx, rax, rdx, rdx);                ghost var a3_sqr_hi := rcx; ghost var a3_sqr_lo := rax;  
-    Adcx64Wrap(r13, rax);                                Store64_buffer(dst_ptr, r13, 48, Secret, dst_b, 6);
-    Adcx64Wrap(r14, rcx);                                Store64_buffer(dst_ptr, r14, 56, Secret, dst_b, 7);
+    Load64_buffer(rdx, inA_ptr,  0 + offset*8, Secret, inA_b, 0 + offset);   Mulx64(rcx, rax, rdx);  /* A[0]^2 */                ghost var a0_sqr_hi := rcx; ghost var a0_sqr_lo := rax;  
+    /********************/                               Store64_buffer(dst_ptr, rax,  0 + offset*16, Secret, dst_b, 0 + offset*2);
+    Add64Wrap(r8, rcx);                                  Store64_buffer(dst_ptr,  r8,  8 + offset*16, Secret, dst_b, 1 + offset*2);
+    Load64_buffer(rdx, inA_ptr,  8 + offset*8, Secret, inA_b, 1 + offset);   Mulx64(rcx, rax, rdx);  /* A[1]^2 */                ghost var a1_sqr_hi := rcx; ghost var a1_sqr_lo := rax;  
+    Adcx64Wrap( r9, rax);                                Store64_buffer(dst_ptr,  r9, 16 + offset*16, Secret, dst_b, 2 + offset*2);
+    Adcx64Wrap(r10, rcx);                                Store64_buffer(dst_ptr, r10, 24 + offset*16, Secret, dst_b, 3 + offset*2);
+    Load64_buffer(rdx, inA_ptr, 16 + offset*8, Secret, inA_b, 2 + offset);   Mulx64(rcx, rax, rdx);  /* A[2]^2 */                ghost var a2_sqr_hi := rcx; ghost var a2_sqr_lo := rax;  
+    Adcx64Wrap(r11, rax);                                Store64_buffer(dst_ptr, r11, 32 + offset*16, Secret, dst_b, 4 + offset*2);
+    Adcx64Wrap(r12, rcx);                                Store64_buffer(dst_ptr, r12, 40 + offset*16, Secret, dst_b, 5 + offset*2);
+    Load64_buffer(rdx, inA_ptr, 24 + offset*8, Secret, inA_b, 3 + offset);   Mulx64(rcx, rax, rdx);  /* A[3]^2 */       lemma_prod_bounds(rcx, rax, rdx, rdx);                ghost var a3_sqr_hi := rcx; ghost var a3_sqr_lo := rax;  
+    Adcx64Wrap(r13, rax);                                Store64_buffer(dst_ptr, r13, 48 + offset*16, Secret, dst_b, 6 + offset*2);
+    Adcx64Wrap(r14, rcx);                                Store64_buffer(dst_ptr, r14, 56 + offset*16, Secret, dst_b, 7 + offset*2);
 
     lemma_sqr_part3(a, a0, a1, a2, a3, a0_sqr_hi, a0_sqr_lo, a1_sqr_hi, a1_sqr_lo, a2_sqr_hi, a2_sqr_lo, a3_sqr_hi, a3_sqr_lo,
                     old(r8), old(r9), old(r10), old(r11), old(r12), old(r13), old(r14), 
-                    buffer64_read(dst_b, 0, mem),
-                    buffer64_read(dst_b, 1, mem),
-                    buffer64_read(dst_b, 2, mem),
-                    buffer64_read(dst_b, 3, mem),
-                    buffer64_read(dst_b, 4, mem),
-                    buffer64_read(dst_b, 5, mem),
-                    buffer64_read(dst_b, 6, mem),
-                    buffer64_read(dst_b, 7, mem),
+                    buffer64_read(dst_b, 0 + offset*2, mem),
+                    buffer64_read(dst_b, 1 + offset*2, mem),
+                    buffer64_read(dst_b, 2 + offset*2, mem),
+                    buffer64_read(dst_b, 3 + offset*2, mem),
+                    buffer64_read(dst_b, 4 + offset*2, mem),
+                    buffer64_read(dst_b, 5 + offset*2, mem),
+                    buffer64_read(dst_b, 6 + offset*2, mem),
+                    buffer64_read(dst_b, 7 + offset*2, mem),
                     bool_bit(cf(efl)));
 }
 
 #reset-options "--z3rlimit 300" 
 procedure{:quick} fast_sqr(
+    inline offset:nat,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
 
-        a0 := buffer64_read(inA_b, 0, mem);
-        a1 := buffer64_read(inA_b, 1, mem);
-        a2 := buffer64_read(inA_b, 2, mem);
-        a3 := buffer64_read(inA_b, 3, mem);
+        a0 := buffer64_read(inA_b, 0 + offset, mem);
+        a1 := buffer64_read(inA_b, 1 + offset, mem);
+        a2 := buffer64_read(inA_b, 2 + offset, mem);
+        a3 := buffer64_read(inA_b, 3 + offset, mem);
 
         a := pow2_four(a0, a1, a2, a3);
     reads
@@ -337,28 +266,29 @@ procedure{:quick} fast_sqr(
 
     requires
         adx_enabled && bmi2_enabled;
+        offset == 0 || offset == 4;
         buffers_disjoint(dst_b, inA_b);
 
-        validDstAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+        validDstAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4 + offset, memTaint, Secret);
 
     ensures
-        let d0 := buffer64_read(dst_b, 0, mem);
-        let d1 := buffer64_read(dst_b, 1, mem);
-        let d2 := buffer64_read(dst_b, 2, mem);
-        let d3 := buffer64_read(dst_b, 3, mem);
-        let d4 := buffer64_read(dst_b, 4, mem);
-        let d5 := buffer64_read(dst_b, 5, mem);
-        let d6 := buffer64_read(dst_b, 6, mem);
-        let d7 := buffer64_read(dst_b, 7, mem);
+        let d0 := buffer64_read(dst_b, 0 + offset*2, mem);
+        let d1 := buffer64_read(dst_b, 1 + offset*2, mem);
+        let d2 := buffer64_read(dst_b, 2 + offset*2, mem);
+        let d3 := buffer64_read(dst_b, 3 + offset*2, mem);
+        let d4 := buffer64_read(dst_b, 4 + offset*2, mem);
+        let d5 := buffer64_read(dst_b, 5 + offset*2, mem);
+        let d6 := buffer64_read(dst_b, 6 + offset*2, mem);
+        let d7 := buffer64_read(dst_b, 7 + offset*2, mem);
         let d := pow2_eight(d0, d1, d2, d3, d4, d5, d6, d7);
         d == a * a;
 
-        validSrcAddrs64(mem, dst_ptr, dst_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
     assert_by_tactic(a*a == pow2_seven(mul_nats(a0,a0), 2*mul_nats(a0,a1), 2*mul_nats(a0,a2) + mul_nats(a1,a1), 2*(mul_nats(a0,a3)+mul_nats(a1,a2)), 2*mul_nats(a1,a3) + mul_nats(a2,a2), 2*mul_nats(a2,a3), mul_nats(a3,a3)), int_canon);      // PASSES
-    fast_sqr_part1(inA_b);
+    fast_sqr_part1(offset, inA_b);
 
     ghost var old_r8  := r8;
     ghost var old_r9  := r9;
@@ -379,16 +309,16 @@ procedure{:quick} fast_sqr(
     ghost var mid_r13 := r13;
     ghost var mid_r14 := r14;
 
-    fast_sqr_part3(dst_b, inA_b);
+    fast_sqr_part3(offset, dst_b, inA_b);
 
-    ghost var d0 := buffer64_read(dst_b, 0, mem);
-    ghost var d1 := buffer64_read(dst_b, 1, mem);
-    ghost var d2 := buffer64_read(dst_b, 2, mem);
-    ghost var d3 := buffer64_read(dst_b, 3, mem);
-    ghost var d4 := buffer64_read(dst_b, 4, mem);
-    ghost var d5 := buffer64_read(dst_b, 5, mem);
-    ghost var d6 := buffer64_read(dst_b, 6, mem);
-    ghost var d7 := buffer64_read(dst_b, 7, mem);
+    ghost var d0 := buffer64_read(dst_b, 0 + offset*2, mem);
+    ghost var d1 := buffer64_read(dst_b, 1 + offset*2, mem);
+    ghost var d2 := buffer64_read(dst_b, 2 + offset*2, mem);
+    ghost var d3 := buffer64_read(dst_b, 3 + offset*2, mem);
+    ghost var d4 := buffer64_read(dst_b, 4 + offset*2, mem);
+    ghost var d5 := buffer64_read(dst_b, 5 + offset*2, mem);
+    ghost var d6 := buffer64_read(dst_b, 6 + offset*2, mem);
+    ghost var d7 := buffer64_read(dst_b, 7 + offset*2, mem);
     lemma_sqr(a, a0, a1, a2, a3, 
               old_r8, old_r9, old_r10, old_r11, old_r12, old_r13, old_rax, old_rcx,
               mid_r8, mid_r9, mid_r10, mid_r11, mid_r12, mid_r13, mid_r14,
@@ -470,7 +400,7 @@ procedure{:quick}{:public} fast_sqr_stdcall(
         Mov64(inA_ptr, rdx);
     } 
 
-    fast_sqr(dst_b, inA_b);
+    fast_sqr(0, dst_b, inA_b);
 
     Pop(r14, stack_b, 0);
     Pop(r13, stack_b, 1);
