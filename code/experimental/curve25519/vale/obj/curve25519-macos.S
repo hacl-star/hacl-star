@@ -549,15 +549,15 @@ _fadd:
   movq 24(%rdx), %r11
   adcxq 24(%rsi), %r11
   mov $0, %rax
-  mov $38, %rcx
-  cmovc %rcx, %rax
-  xor %rdx, %rdx
+  mov $38, %rdx
+  cmovc %rdx, %rax
+  xor %rcx, %rcx
   add %rax, %r8
-  adcx %rdx, %r9
-  adcx %rdx, %r10
-  adcx %rdx, %r11
+  adcx %rcx, %r9
+  adcx %rcx, %r10
+  adcx %rcx, %r11
   mov $0, %rax
-  cmovc %rcx, %rax
+  cmovc %rdx, %rax
   add %rax, %r8
   movq %r8, 0(%rdi)
   movq %r9, 8(%rdi)
@@ -604,15 +604,14 @@ _fmul1:
   mulxq 24(%rsi), %r11, %rax
   adcx %r13, %r11
   adcx %rcx, %rax
-  mov $38, %rcx
-  imul %rcx, %rax
-  xor %rdx, %rdx
+  mov $38, %rdx
+  imul %rdx, %rax
   add %rax, %r8
-  adcx %rdx, %r9
-  adcx %rdx, %r10
-  adcx %rdx, %r11
+  adcx %rcx, %r9
+  adcx %rcx, %r10
+  adcx %rcx, %r11
   mov $0, %rax
-  cmovc %rcx, %rax
+  cmovc %rdx, %rax
   add %rax, %r8
   movq %r8, 0(%rdi)
   movq %r9, 8(%rdi)
@@ -627,34 +626,27 @@ _carry_wide:
   push %r12
   push %r13
   mov $38, %rdx
-  mulxq 32(%rsi), %r8, %rcx
+  mulxq 32(%rsi), %r8, %r13
+  xor %rcx, %rcx
+  adoxq 0(%rsi), %r8
   mulxq 40(%rsi), %r9, %r12
-  add %rcx, %r9
-  mov $0, %rcx
+  adcx %r13, %r9
+  adoxq 8(%rsi), %r9
   mulxq 48(%rsi), %r10, %r13
   adcx %r12, %r10
+  adoxq 16(%rsi), %r10
   mulxq 56(%rsi), %r11, %rax
   adcx %r13, %r11
+  adoxq 24(%rsi), %r11
   adcx %rcx, %rax
-  movq 0(%rsi), %rcx
-  add %rcx, %r8
-  mov $0, %rcx
-  movq 8(%rsi), %rdx
-  adcx %rdx, %r9
-  movq 16(%rsi), %r12
-  adcx %r12, %r10
-  movq 24(%rsi), %r13
-  adcx %r13, %r11
-  adcx %rcx, %rax
-  mov $38, %rcx
-  imul %rcx, %rax
-  xor %rdx, %rdx
+  adox %rcx, %rax
+  imul %rdx, %rax
   add %rax, %r8
-  adcx %rdx, %r9
-  adcx %rdx, %r10
-  adcx %rdx, %r11
+  adcx %rcx, %r9
+  adcx %rcx, %r10
+  adcx %rcx, %r11
   mov $0, %rax
-  cmovc %rcx, %rax
+  cmovc %rdx, %rax
   add %rax, %r8
   movq %r8, 0(%rdi)
   movq %r9, 8(%rdi)
