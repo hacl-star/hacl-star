@@ -257,8 +257,8 @@ let down_mem mem addrs ptrs =
   let heap = Map.restrict Set.empty heap in
   down_mem_aux ptrs addrs mem ptrs [] heap
 
-//private
-val frame_down_mem_aux (ptrs:list b8{list_disjoint_or_eq ptrs})
+private
+let rec frame_down_mem_aux (ptrs:list b8{list_disjoint_or_eq ptrs})
   (addrs:addr_map)
   (mem:HS.mem)
   (ps:list b8)
@@ -268,9 +268,7 @@ val frame_down_mem_aux (ptrs:list b8{list_disjoint_or_eq ptrs})
    forall i. (forall (b:b8{List.memP b ptrs}). 
       let base = addrs b in
       i < base \/ i >= base + B.length b) ==>
-      h.[i] == heap.[i])
-
-let rec frame_down_mem_aux ptrs addrs mem ps accu h =
+      h.[i] == heap.[i]) =
   match ps with
   | [] -> ()
   | a::q ->
