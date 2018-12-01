@@ -38,24 +38,24 @@ val lbytes_eq:
     (requires fun h -> live h a /\ live h b)
     (ensures  fun h0 r h1 ->
       B.modifies B.loc_none h0 h1 /\
-      r == BS.lbytes_eq #(v len) (as_seq h0 a) (as_seq h0 b))
+      r == BS.lbytes_eq (as_seq h0 a) (as_seq h0 b))
 
 inline_for_extraction
 val uint_from_bytes_le:
     #t:inttype{~(t == U1)}
   -> #l:secrecy_level
-  -> i:lbuffer uint8 (size (numbytes t)) ->
+  -> i:lbuffer (uint_t U8 l) (size (numbytes t)) ->
   Stack (uint_t t l)
     (requires fun h0 -> live h0 i)
     (ensures  fun h0 o h1 ->
       h0 == h1 /\ live h1 i /\
-      o == BS.uint_from_bytes_le #t (as_seq h0 i))
+      o == BS.uint_from_bytes_le #t #l (as_seq h0 i))
 
 inline_for_extraction
 val uint_from_bytes_be:
     #t:inttype{~(t == U1)}
   -> #l:secrecy_level
-  -> i:lbuffer uint8 (size (numbytes t)) ->
+  -> i:lbuffer (uint_t U8 l) (size (numbytes t)) ->
   Stack (uint_t t l)
     (requires fun h0 -> live h0 i)
     (ensures  fun h0 o h1 ->
@@ -66,7 +66,7 @@ inline_for_extraction
 val uint_to_bytes_le:
     #t:inttype
   -> #l:secrecy_level
-  -> o:lbuffer uint8 (size (numbytes t))
+  -> o:lbuffer (uint_t U8 l) (size (numbytes t))
   -> i:uint_t t l ->
   Stack unit
     (requires fun h0 -> live h0 o)
@@ -78,7 +78,7 @@ inline_for_extraction
 val uint_to_bytes_be:
     #t:inttype
   -> #l:secrecy_level
-  -> o:lbuffer uint8 (size (numbytes t))
+  -> o:lbuffer (uint_t U8 l) (size (numbytes t))
   -> i:uint_t t l ->
   Stack unit
     (requires fun h0 -> live h0 o)
@@ -92,7 +92,7 @@ val uints_from_bytes_le:
   -> #l:secrecy_level
   -> #len:size_t{v len * numbytes t <= max_size_t}
   -> o:lbuffer (uint_t t l) len
-  -> i:lbuffer uint8 (len *! size (numbytes t)) ->
+  -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) ->
   Stack unit
         (requires (fun h0 -> live h0 o /\ live h0 i))
         (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1 /\
@@ -105,7 +105,7 @@ val uints_from_bytes_be:
   -> #l:secrecy_level
   -> #len:size_t{v len * numbytes t <= max_size_t}
   -> o:lbuffer (uint_t t l) len
-  -> i:lbuffer uint8 (len *! size (numbytes t)) ->
+  -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) ->
   Stack unit
         (requires (fun h0 -> live h0 o /\ live h0 i))
         (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1 /\
@@ -117,7 +117,7 @@ val uints_to_bytes_le:
     #t:inttype
   -> #l:secrecy_level
   -> len:size_t{v len * numbytes t <= max_size_t}
-  -> o:lbuffer uint8 (len *! size (numbytes t))
+  -> o:lbuffer (uint_t U8 l) (len *! size (numbytes t))
   -> i:lbuffer (uint_t t l) len ->
   Stack unit
         (requires (fun h0 -> live h0 o /\ live h0 i))
@@ -130,7 +130,7 @@ val uints_to_bytes_be:
     #t:inttype
   -> #l:secrecy_level
   -> len:size_t{v len * numbytes t <= max_size_t}
-  -> o:lbuffer uint8 (len *! size (numbytes t))
+  -> o:lbuffer (uint_t U8 l) (len *! size (numbytes t))
   -> i:lbuffer (uint_t t l) len ->
   Stack unit
         (requires (fun h0 -> live h0 o /\ live h0 i /\ disjoint o i))

@@ -58,7 +58,7 @@ let lbytes_eq #len a b =
   [@ inline_let]
   let refl h _ = bget h res 0 in
   [@ inline_let]
-  let spec h0 = ByteSeq.lbytes_eq_inner #(v len) (as_seq h0 a) (as_seq h0 b) in
+  let spec h0 = ByteSeq.lbytes_eq_inner (as_seq h0 a) (as_seq h0 b) in
   let h0 = ST.get () in
   loop h0 len (ByteSeq.lbytes_eq_state (v len)) refl
     (fun i -> loc res) spec

@@ -376,7 +376,9 @@ static inline
 void fmul2(uint64_t* dst, uint64_t* in_a, uint64_t* in_b) {
   uint64_t tmp[16] = {0};
   mul2(tmp,in_a,in_b);
-  carry_wide2(dst,tmp);
+  carry_wide(dst,tmp);
+  carry_wide(dst+4,tmp+8);
+//  carry_wide2(dst,tmp);
 }
 
 static inline
@@ -390,6 +392,8 @@ static inline
 void fsqr2(uint64_t* dst, uint64_t* in_a) {
   uint64_t tmp[16] = {0};
   sqr2(tmp,in_a);
-  carry_wide2(dst,tmp);
+  carry_wide(dst,tmp);
+  carry_wide(dst+4,tmp+8);
+//  carry_wide2(dst,tmp);
 }
 
