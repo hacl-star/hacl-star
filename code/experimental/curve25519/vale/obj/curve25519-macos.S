@@ -554,15 +554,15 @@ _fadd:
   xor %rcx, %rcx
   add %rax, %r8
   adcx %rcx, %r9
+  movq %r9, 8(%rdi)
   adcx %rcx, %r10
+  movq %r10, 16(%rdi)
   adcx %rcx, %r11
+  movq %r11, 24(%rdi)
   mov $0, %rax
   cmovc %rdx, %rax
   add %rax, %r8
   movq %r8, 0(%rdi)
-  movq %r9, 8(%rdi)
-  movq %r10, 16(%rdi)
-  movq %r11, 24(%rdi)
   ret
 
 .global _fsub
@@ -608,15 +608,15 @@ _fmul1:
   imul %rdx, %rax
   add %rax, %r8
   adcx %rcx, %r9
+  movq %r9, 8(%rdi)
   adcx %rcx, %r10
+  movq %r10, 16(%rdi)
   adcx %rcx, %r11
+  movq %r11, 24(%rdi)
   mov $0, %rax
   cmovc %rdx, %rax
   add %rax, %r8
   movq %r8, 0(%rdi)
-  movq %r9, 8(%rdi)
-  movq %r10, 16(%rdi)
-  movq %r11, 24(%rdi)
   pop %r13
   pop %r12
   ret
@@ -643,15 +643,15 @@ _carry_wide:
   imul %rdx, %rax
   add %rax, %r8
   adcx %rcx, %r9
+  movq %r9, 8(%rdi)
   adcx %rcx, %r10
+  movq %r10, 16(%rdi)
   adcx %rcx, %r11
+  movq %r11, 24(%rdi)
   mov $0, %rax
   cmovc %rdx, %rax
   add %rax, %r8
   movq %r8, 0(%rdi)
-  movq %r9, 8(%rdi)
-  movq %r10, 16(%rdi)
-  movq %r11, 24(%rdi)
   pop %r13
   pop %r12
   ret
