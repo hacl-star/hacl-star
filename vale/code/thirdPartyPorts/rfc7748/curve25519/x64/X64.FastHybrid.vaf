@@ -377,8 +377,9 @@ procedure {:quick exportOnly} carry_times_38(inout tmp:dst_opr64)
 }
 
 #reset-options "--z3rlimit 50"
-procedure{:quick} carry_pass(inline use_cf:bool)
+procedure{:quick} carry_pass(inline use_cf:bool, ghost dst_b:buffer64)
     lets
+        dst_ptr @= rdi;
         carry @= rax;
         tmp @= rdx;
         zero @= rcx;
@@ -388,9 +389,10 @@ procedure{:quick} carry_pass(inline use_cf:bool)
         a3 @= r11;
     
         carry_in:nat64 := if use_cf then (if cf(efl) then 1 else 0) else carry;
+    reads dst_ptr; memTaint;
     modifies
         carry; tmp; zero; a0; a1; a2; a3;
-        efl;
+        efl; mem;
 
     requires
         adx_enabled && bmi2_enabled;
@@ -398,8 +400,17 @@ procedure{:quick} carry_pass(inline use_cf:bool)
         carry_in * 38 < pow2_63;
         !use_cf ==> zero == 0 && tmp == 38;
 
+     validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
     ensures
-        pow2_four(a0, a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) + carry_in * pow2_256) % prime;
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+        
+        pow2_four(d0, d1, d2, d3) % prime == old(pow2_four(a0, a1, a2, a3) + carry_in * pow2_256) % prime;
+
+        modifies_buffer(dst_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
 {
     inline if (use_cf) {
         Mov64(carry, 0);
@@ -413,8 +424,11 @@ procedure{:quick} carry_pass(inline use_cf:bool)
 
     Add64Wrap(a0, carry); 
     Adcx64Wrap(a1, zero); 
+    Store64_buffer(dst_ptr, a1,  8, Secret, dst_b, 1);  
     Adcx64Wrap(a2, zero);
+    Store64_buffer(dst_ptr, a2, 16, Secret, dst_b, 2);  
     Adcx64Wrap(a3, zero);
+    Store64_buffer(dst_ptr, a3, 24, Secret, dst_b, 3);  
     assert pow2_five(a0, a1, a2, a3, bool_bit(cf(efl))) == old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
     ghost var sum := old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
     ghost var new_carry := bool_bit(cf(efl));
@@ -426,6 +440,7 @@ procedure{:quick} carry_pass(inline use_cf:bool)
     Cmovc64(carry, tmp);
     Add64Wrap(a0, carry);
     assert a0 == a0' + new_carry * 38;
+    Store64_buffer(dst_ptr, a0,  0, Secret, dst_b, 0);  
 }
 
 
@@ -482,8 +497,8 @@ procedure{:quick} carry_wide(
 
     fast_mul1_add(inA_b);
     assume rax * 38 < pow2_63;
-    carry_pass(false);
-    store4(dst_b);
+    carry_pass(false, dst_b);
+    //store4(dst_b);
 }
 
 procedure{:quick}{:public} carry_wide_stdcall(
@@ -785,8 +800,7 @@ procedure{:quick} fadd(
     assert_by_tactic(  
         pow2_five(tmp0, tmp1, tmp2, tmp3, bool_bit(cf(efl))) ==
         pow2_four(tmp0, tmp1, tmp2, tmp3) + bool_bit(cf(efl)) * pow2_256, int_canon);
-    carry_pass(true);
-    store4(dst_b);
+    carry_pass(true, dst_b);
 }
 
 procedure{:quick}{:public} fadd_stdcall(
@@ -1065,9 +1079,8 @@ procedure{:quick} fmul1(
 ////////////////////////////////////////////  TODO!
     assume rax * 38 < pow2_63;
     Mov64(b, 38);
-    carry_pass(false);
-    assert validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
-    store4(dst_b);
+    carry_pass(false, dst_b);
+    //store4(dst_b);
 }
 
 procedure{:quick}{:public} fmul1_stdcall(
