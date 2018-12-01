@@ -560,7 +560,7 @@ procedure{:quick}{:public} carry_wide_stdcall(
     Pop(r12, stack_b, 2);
 }
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 400"
 procedure{:quick} carry_sub_pass()
     lets
         carry @= rax;
