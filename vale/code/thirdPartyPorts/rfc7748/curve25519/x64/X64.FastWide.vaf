@@ -53,7 +53,7 @@ open X64.FastHybrid
 
 #reset-options "--z3rlimit 30"
 
-procedure{:quick}{:public} {:verify true} fmul_stdcall(
+procedure{:quick}{:public} fmul_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -147,6 +147,142 @@ procedure{:quick}{:public} {:verify true} fmul_stdcall(
     Mov64(inA_ptr, tmp_ptr);
     Pop(rdi, stack_b, 0);
     carry_wide(0, dst_b, tmp_b);
+
+    inline if (win) {
+        Pop(rsi, stack_b, 1);
+    } 
+
+    Pop(r14, stack_b, 1 + bool_bit(win));
+    Pop(r13, stack_b, 2 + bool_bit(win));
+    Pop(r12, stack_b, 3 + bool_bit(win));
+}
+
+
+procedure{:quick}{:public} {:verify true} fmul2_stdcall(
+    inline win:bool,
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64,
+    ghost inB_b:buffer64,
+    ghost tmp_b:buffer64,
+    ghost stack_b:buffer64)
+    lets
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
+        tmp_in := (if win then rcx else rdi);
+        inA_in := (if win then rdx else rsi);
+        dst_in := (if win then r8  else rdx);
+        inB_in := (if win then r9  else rcx);
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
+        rsp; efl; mem;
+    requires
+        adx_enabled && bmi2_enabled;
+        buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
+        buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
+        buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
+
+        buffers_disjoint(stack_b, dst_b);
+        buffers_disjoint(stack_b, inA_b);
+        buffers_disjoint(stack_b, inB_b);
+        buffers_disjoint(stack_b, tmp_b);
+
+        buffers_disjoint(tmp_b, inA_b);
+        buffers_disjoint(tmp_b, inB_b);
+
+        validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, inB_in, inB_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
+        valid_stack_slots(mem, rsp, stack_b, if win then 5 else 4, memTaint);
+    ensures
+        let a0 := old(buffer64_read(inA_b, 0, mem));
+        let a1 := old(buffer64_read(inA_b, 1, mem));
+        let a2 := old(buffer64_read(inA_b, 2, mem));
+        let a3 := old(buffer64_read(inA_b, 3, mem));
+
+        let b0 := old(buffer64_read(inB_b, 0, mem));
+        let b1 := old(buffer64_read(inB_b, 1, mem));
+        let b2 := old(buffer64_read(inB_b, 2, mem));
+        let b3 := old(buffer64_read(inB_b, 3, mem));
+
+        let a := pow2_four(a0, a1, a2, a3);
+        let b := pow2_four(b0, b1, b2, b3);
+
+        let a0' := old(buffer64_read(inA_b, 0 + 4, mem));
+        let a1' := old(buffer64_read(inA_b, 1 + 4, mem));
+        let a2' := old(buffer64_read(inA_b, 2 + 4, mem));
+        let a3' := old(buffer64_read(inA_b, 3 + 4, mem));
+
+        let b0' := old(buffer64_read(inB_b, 0 + 4, mem));
+        let b1' := old(buffer64_read(inB_b, 1 + 4, mem));
+        let b2' := old(buffer64_read(inB_b, 2 + 4, mem));
+        let b3' := old(buffer64_read(inB_b, 3 + 4, mem));
+
+        let a' := pow2_four(a0', a1', a2', a3');
+        let b' := pow2_four(b0', b1', b2', b3');
+
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+        let d4 := buffer64_read(dst_b, 4, mem);
+        let d5 := buffer64_read(dst_b, 5, mem);
+        let d6 := buffer64_read(dst_b, 6, mem);
+        let d7 := buffer64_read(dst_b, 7, mem);
+
+        let d := pow2_eight(d0, d1, d2, d3, d4, d5, d6, d7);
+
+        let d0' := buffer64_read(dst_b, 0 + 8, mem);
+        let d1' := buffer64_read(dst_b, 1 + 8, mem);
+        let d2' := buffer64_read(dst_b, 2 + 8, mem);
+        let d3' := buffer64_read(dst_b, 3 + 8, mem);
+        let d4' := buffer64_read(dst_b, 4 + 8, mem);
+        let d5' := buffer64_read(dst_b, 5 + 8, mem);
+        let d6' := buffer64_read(dst_b, 6 + 8, mem);
+        let d7' := buffer64_read(dst_b, 7 + 8, mem);
+
+        let d' := pow2_eight(d0', d1', d2', d3', d4', d5', d6', d7');
+
+        //d % prime == old(a + b) % prime;
+
+        //////////////////////////////////////
+        //   Framing
+        //////////////////////////////////////
+
+        modifies_buffer_3(dst_b, tmp_b, stack_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
+
+        win ==> rsi == old(rsi);
+        r12 == old(r12);
+        r13 == old(r13);
+        r14 == old(r14);
+
+        rsp == old(rsp);
+{
+    Push(r12, stack_b, 3 + bool_bit(win));
+    Push(r13, stack_b, 2 + bool_bit(win));
+    Push(r14, stack_b, 1 + bool_bit(win));
+
+    // Line up the rest of the arguments
+    inline if (win) {
+        // Store callee-save registers
+        Push(rsi, stack_b, 1);
+
+        Mov64(tmp_ptr, rcx);
+        Mov64(inA_ptr, rdx);
+        Mov64(inB_ptr, r9);
+        //Mov64(dst_ptr, r9);
+        Push(r8, stack_b, 0);        // Save dst_ptr, since fast_multiply will clobber it
+    } else {
+        Push(dst_ptr, stack_b, 0);   // Save dst_ptr, since fast_multiply will clobber it
+    }
+
+    fast_multiply(0, tmp_b, inA_b, inB_b);
+    fast_multiply(4, tmp_b, inA_b, inB_b);
+    Mov64(inA_ptr, tmp_ptr);
+    Pop(rdi, stack_b, 0);
+    carry_wide(0, dst_b, tmp_b);
+    carry_wide(4, dst_b, tmp_b);
 
     inline if (win) {
         Pop(rsi, stack_b, 1);
