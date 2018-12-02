@@ -384,6 +384,7 @@ procedure{:quick}{:public} fast_sqr_stdcall(
         r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
+        r15 == old(r15);
 
         rsp == old(rsp);
 {
@@ -466,6 +467,7 @@ procedure{:quick}{:public} sqr2_stdcall(
         r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
+        r15 == old(r15);
 
         rsp == old(rsp);
 {
