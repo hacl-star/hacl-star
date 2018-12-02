@@ -487,7 +487,8 @@ def is_our_file(file):
   return True in [path.startswith(str(Dir(p))) for p in ['obj'] + verify_paths]
 
 def compute_include_paths(src_include_paths, obj_include_paths, obj_prefix):
-  return src_include_paths + [str(Dir('obj/external'))] + [str(Dir(f'{obj_prefix}/{x}')) for x in obj_include_paths]
+  return (src_include_paths + [str(Dir('obj/external'))] + [str(Dir(f'{obj_prefix}/{x}')) for x in obj_include_paths]
+    + [str(Dir(x)) for x in ['../specs', '../lib', '../lib/fst']]) # HACK
 
 def compute_includes(src_include_paths, obj_include_paths, obj_prefix):
   fstar_include_paths = compute_include_paths(src_include_paths, obj_include_paths, obj_prefix)
