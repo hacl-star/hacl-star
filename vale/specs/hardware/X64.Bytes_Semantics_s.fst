@@ -97,7 +97,7 @@ unfold let eval_reg (r:reg) (s:state) : nat64 = s.regs r
 unfold let eval_xmm (i:xmm) (s:state) : quad32 = s.xmms i
 
 let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
-    Views.nat8s_to_nat64
+    Views_s.nat8s_to_nat64
       mem.[ptr]
       mem.[ptr+1]
       mem.[ptr+2]
@@ -109,7 +109,7 @@ let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
 let get_heap_val64 = make_opaque get_heap_val64_def
 
 let get_heap_val32_def (ptr:int) (mem:heap) : nat32 =
-  Views.nat8s_to_nat32
+  Views_s.nat8s_to_nat32
     mem.[ptr]
     mem.[ptr+1]
     mem.[ptr+2]

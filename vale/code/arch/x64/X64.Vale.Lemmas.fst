@@ -4,9 +4,8 @@ open X64.Vale.State
 open X64.Vale.StateLemmas
 module BS = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
-module ME = X64.Memory_s
+module ME = X64.Memory
 
-friend X64.Memory
 friend X64.Vale.StateLemmas
 
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 20"

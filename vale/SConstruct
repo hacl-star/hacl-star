@@ -312,7 +312,10 @@ no_extraction_files = [File(x) for x in [
   'obj/ml_out/CanonCommSemiring.ml',
   'obj/ml_out/X64_Poly1305_Math.ml',
   'obj/ml_out/Vale_Tactics.ml',
+  'obj/ml_out/FastHybrid_helpers.ml',
   'obj/ml_out/FastMul_helpers.ml',
+  'obj/ml_out/FastSqr_helpers.ml',
+  'obj/ml_out/FastUtil_helpers.ml',
 ]]
 
 #
@@ -345,7 +348,8 @@ verify_options = [
 
 #  ('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastSqr.vaf', None),
 
-  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
+  ('code/arch/x64/interop/*', None), 
+#  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
 
@@ -365,7 +369,7 @@ verify_options = [
   ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding)),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding)),
-  ('code/arch/x64/X64.Memory_s.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
   ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
   ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
   ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', ''))),
@@ -1169,6 +1173,7 @@ if not is_help:
       [File('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf')], File('code/lib/util/CmdLineParser.ml'))
     curve25519_asm = extract_assembly_code(env, 'curve25519', File('code/crypto/ecc/curve25519/Main25519.ml'), [
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastUtil.vaf'),
+        File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastHybrid.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastSqr.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastMul.vaf')],
       File('code/lib/util/CmdLineParser.ml'))
