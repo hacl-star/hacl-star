@@ -79,7 +79,7 @@ let remainder_2_1_div n = ()
 /// High-level Merkle tree data structure
 
 noeq type merkle_tree =
-| MT: i:nat -> j:nat{j >= i && j < pow2 32} ->
+| MT: i:nat -> j:nat{i <= j && j < pow2 32} ->
       hs:S.seq hash_seq{S.length hs = 32} ->
       rhs_ok:bool -> rhs:hash_seq{S.length rhs = 32} ->
       mroot:hash ->
@@ -577,40 +577,44 @@ let mt_flush mt =
 
 /// Retraction
 
-private let l hs = S.length hs
-
 val mt_retract_to_:
-  lv:nat ->
-  hs:hash_ss{l hs = 32 && lv < l hs} ->
+  hs:hash_ss{S.length hs = 32} ->
+  lv:nat{lv < S.length hs} ->
   i:nat ->
-  r:nat ->
-  j:nat{ i <= r /\ r <= j /\ 
-         j < pow2 (l hs - lv) /\
+  s:nat -> // s is the first index excluded from nhs
+  j:nat{ i <= s /\ s <= j /\ 
+         j < pow2 (S.length hs - lv) /\
          hs_wf_elts lv hs i j} ->
   GTot (nhs:hash_ss{
-         l nhs = l hs /\
+         S.length nhs = S.length hs /\
          S.equal (S.slice hs 0 lv) (S.slice nhs 0 lv) /\
-         hs_wf_elts lv nhs i r})
-  (decreases (l hs - lv))
-let rec mt_retract_to_ lv hs i r j =
-  if r = j then hs
+         hs_wf_elts lv nhs i s})
+  (decreases (S.length hs - lv))  
+let rec mt_retract_to_ hs lv i s j =
+  if lv >= S.length hs then hs
   else begin
     let hvec = S.index hs lv in
-    let keep = r - offset_of i in
-    let retracted = S.slice hvec 0 keep in
+    let old_len = j - offset_of i in
+    let new_len = s - offset_of i in
+    assert (S.length hvec = old_len);
+    assert (new_len <= old_len);
+    assert (new_len <= S.length hvec);
+    let retracted = S.slice hvec 0 new_len in
     let nhs = S.upd hs lv retracted in
-    hs_wf_elts_equal (lv + 1) hs nhs (i / 2) (j / 2);
-    if lv >= l hs - 1 then nhs else
-    mt_retract_to_ (lv + 1) nhs (i / 2) (r / 2) (j / 2)
+    if lv >= S.length hs - 1 then nhs else
+    begin
+      hs_wf_elts_equal (lv + 1) hs nhs (i / 2) (j / 2);
+      mt_retract_to_ nhs (lv + 1) (i / 2) (s / 2) (j / 2)
+    end
   end
 
 val mt_retract_to: 
   mt:merkle_tree{mt_wf_elts mt} -> 
   r:nat{MT?.i mt <= r /\ r < MT?.j mt} ->
-  GTot (fmt:merkle_tree{mt_wf_elts fmt /\ MT?.i fmt = MT?.i mt /\ MT?.j fmt = r})
+  GTot (rmt:merkle_tree{mt_wf_elts rmt /\ MT?.i rmt = MT?.i mt /\ MT?.j rmt = r + 1})
 let mt_retract_to mt r =
-  let nhs = mt_retract_to_ 0 (MT?.hs mt) (MT?.i mt) r (MT?.j mt) in
-  MT (MT?.i mt) r nhs (MT?.rhs_ok mt) (MT?.rhs mt) (MT?.mroot mt)
+  let nhs = mt_retract_to_ (MT?.hs mt) 0 (MT?.i mt) (r+1) (MT?.j mt) in  
+  MT (MT?.i mt) (r+1) nhs (MT?.rhs_ok mt) (MT?.rhs mt) (MT?.mroot mt)
   
 
 /// Verification
