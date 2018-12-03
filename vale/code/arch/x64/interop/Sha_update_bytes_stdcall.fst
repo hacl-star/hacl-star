@@ -29,7 +29,7 @@ friend X64.Memory_Sems
 friend X64.Memory
 friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
-#set-options "--z3rlimit 60"
+#set-options "--z3rlimit 120"
 
 open Vale_sha_update_bytes_stdcall
 
