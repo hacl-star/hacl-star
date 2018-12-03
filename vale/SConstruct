@@ -970,7 +970,7 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
     x_obj = ml_out_file(x_ml, '.o')
     if x_ml != pointer_ml:
       Depends(x_cmx, pointer_cmx)
-    cmx = ocaml_env.Command(x_cmx, x_ml,
+    cmx = ocaml_env.Command([x_cmx, x_obj], x_ml,
       f'ocamlfind ocamlopt -c -package fstarlib -package fstar-tactics-lib -o {x_cmx} {x_ml} -I obj/ml_out')
     cmxs.append(cmx[0])
     objs.append(x_obj)
