@@ -379,7 +379,7 @@ let blake2_compress s m offset flag =
     blake2_compress3 wv s)
 
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
 
 val blake2s_update_block:
     hash: hash_wp
@@ -391,7 +391,7 @@ val blake2s_update_block:
                          /\ h1.[hash] == Spec.blake2_update_block Spec.Blake2S (uint_v prev) h0.[d] h0.[hash]))
 
 let blake2s_update_block hash prev d =
-  admit();
+  uintv_extensionality prev (u64 (uint_v prev));
   let h0 = ST.get () in
   [@inline_let]
   let spec _ h1 = live h1 hash /\ h1.[hash] == Spec.blake2_update_block Spec.Blake2S (uint_v prev) h0.[d] h0.[hash] in
@@ -400,7 +400,6 @@ let blake2s_update_block hash prev d =
      uints_from_bytes_le block_w d;
      let offset = prev in
      blake2_compress hash block_w offset false)
-
 
 #reset-options
 
