@@ -26,6 +26,7 @@ let sha2_alg = a:hash_alg { is_sha2 a }
 (** Maximum input data length. *)
 
 (* In bytes. *)
+inline_for_extraction noextract
 let max_input8: hash_alg -> Tot nat = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> pow2 61
@@ -85,14 +86,17 @@ let size_word: hash_alg -> Tot nat = function
   | SHA2_384 | SHA2_512 -> 8
 
 (* Number of words for a block size *)
+noextract
 let size_block_w = 16
 
 (* Define the size block in bytes *)
+noextract
 let size_block a =
   let open FStar.Mul in
   size_word a * size_block_w
 
 (* Number of words for intermediate hash, i.e. the working state. *)
+inline_for_extraction noextract
 let size_hash_w a =
   match a with
   | MD5 -> 4
@@ -113,6 +117,7 @@ let size_hash_final_w: hash_alg -> Tot nat = function
   | SHA2_512 -> 8
 
 (* Define the final hash length in bytes *)
+noextract
 let size_hash a =
   let open FStar.Mul in
   size_word a * size_hash_final_w a
@@ -128,18 +133,28 @@ let pad0_length (a:hash_alg) (len:nat): Tot (n:nat{(len + 1 + n + size_len_8 a) 
 let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % size_block a = 0 }) =
   pad0_length a len + 1 + size_len_8 a
 
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
+  (requires blocks % size_block a = 0)
+  (ensures (pad_length a rest = pad_length a (blocks + rest)))
+  [ SMTPat (pad_length a (blocks + rest)) ]
+=
+  ()
+#pop-options
 
 (** Endian-ness *)
 
 module E = FStar.Kremlin.Endianness
 
+let lbytes (l:nat) = b:Seq.seq UInt8.t {Seq.length b = l}
+
 (* Define word based operators *)
-let bytes_of_words: a:hash_alg -> Tot (s:Seq.seq (word a) -> Tot (Spec.Lib.lbytes FStar.Mul.(size_word a * Seq.length s))) = function
+let bytes_of_words: a:hash_alg -> Tot (s:Seq.seq (word a) -> Tot (lbytes FStar.Mul.(size_word a * Seq.length s))) = function
   | MD5 -> E.le_of_seq_uint32
   | SHA1 | SHA2_224 | SHA2_256 -> E.be_of_seq_uint32
   | SHA2_384 | SHA2_512 -> E.be_of_seq_uint64
 
-let words_of_bytes: a:hash_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(size_word a * len) -> Tot (s:Seq.seq (word a){Seq.length s = len})) = function
+let words_of_bytes: a:hash_alg -> Tot (len:nat -> b:lbytes FStar.Mul.(size_word a * len) -> Tot (s:Seq.seq (word a){Seq.length s = len})) = function
   | MD5 -> E.seq_uint32_of_le
   | SHA1 | SHA2_224 | SHA2_256 -> E.seq_uint32_of_be
   | SHA2_384 | SHA2_512 -> E.seq_uint64_of_be
@@ -150,6 +165,10 @@ let words_of_bytes: a:hash_alg -> Tot (len:nat -> b:Spec.Lib.lbytes FStar.Mul.(s
 (* Input data. *)
 type bytes =
   m:Seq.seq UInt8.t
+
+(* Input data, multiple of a block length. *)
+let bytes_block a =
+  l:bytes { Seq.length l = size_block a }
 
 (* Input data, multiple of a block length. *)
 let bytes_blocks a =

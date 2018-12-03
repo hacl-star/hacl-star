@@ -147,8 +147,8 @@ let put32_128_def (a:quad32) : GTot (Seq.lseq U32.t 4) =
   let s0 = UInt32.uint_to_t a.lo0 in
   let s1 = UInt32.uint_to_t a.lo1 in
   let s2 = UInt32.uint_to_t a.hi2 in
-  let s3 = UInt32.uint_to_t a.hi3 in  
-Seq.append (Seq.cons s0 (Seq.create 1 s1)) (Seq.cons s2 (Seq.create 1 s3))
+  let s3 = UInt32.uint_to_t a.hi3 in
+  Seq.append (Seq.cons s0 (Seq.create 1 s1)) (Seq.cons s2 (Seq.create 1 s3))
 
 let get32_128 = make_opaque get32_128_def
 let put32_128 = make_opaque put32_128_def

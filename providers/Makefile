@@ -1,29 +1,4 @@
-FSTAR_HOME	?= ../../FStar
-KREMLIN_HOME	?= ../../kremlin
-HACL_HOME	?= ..
-MLCRYPTO_HOME	?= ../../MLCrypto
-OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
-
-# The noopenssl config no means: enable bcrypt + disable openssl
-ifeq (,$(EVEREST_WINDOWS))
-ifeq (,$(KAIZALA))
-CONFIG		?= default
-else
-CONFIG		= kaizala
-endif
-else
-CONFIG		= noopenssl
-endif
-
-CACHE_DIR	= .cache
-OUTPUT_DIR	= .output
-HINT_DIR	= .hints
-GENERATED_DIR	= generated
-OUT_DIR		= out
-INCLUDE_DIR	= include
-
-HACL_CODE	= $(HACL_HOME)/code
-HACL_SPEC	= $(HACL_HOME)/specs
+include Makefile.common
 
 # 0. The usual pseudo auto-configuration
 
@@ -31,25 +6,45 @@ UNAME		= $(shell uname)
 SED		= $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
 MARCH		= x86_64
 ifeq ($(UNAME),Darwin)
-  VARIANT	= -Darwin
+  VARIANT	= -darwin
   SO		= so
 else ifeq ($(UNAME),Linux)
   CFLAGS	+= -fPIC
-  VARIANT	= -Linux
+  VARIANT	= -linux
   SO 		= so
   LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
 else ifeq ($(OS),Windows_NT)
   CC		= $(MARCH)-w64-mingw32-gcc
   AR		= $(MARCH)-w64-mingw32-ar
+  VARIANT	= -mingw
   SO		= dll
 endif
 
-# Manual staging...
-all:
+VALE_FSTI_HACK	= $(HACL_HOME)/vale/code/arch/x64/interop/fsti
+HACL_CHECK	= $(HACL_HOME)/code/dist/compact/Makefile.include
+
+# Manual staging
+all: $(VALE_FSTI_HACK) $(VALE_OBJ_DIR) $(HACL_CHECK)
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
 	$(MAKE) -C quic_provider
+
+# Temporary workaround: we want Vale to offer a relatively small dependency
+# graph with just interfaces.
+$(VALE_FSTI_HACK):
+	mkdir -p $@
+ifeq ($(OS),Windows_NT)
+	cp $@/../*.fsti $@/
+else
+	ln -s $@/../*.fsti $@/
+endif
+
+$(VALE_OBJ_DIR):
+	@echo "Please run scons --FSTAR-MY-VERSION --NO-VERIFY --EXTRACT-FSTAR in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
+
+$(HACL_CHECK):
+	@echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false
 
 stage1: $(GENERATED_DIR)/Makefile.include $(INCLUDE_DIR)/EverCrypt.h
 
@@ -64,50 +59,35 @@ test:
 # - verify every F* file in parallel to generate .checked files
 # - extract each .checked file into a .krml file in parallel
 
-# TODO: some of these directories have no interfaces, meaning that we end up
-# with way too much HACL* code in our verification dependency graph; ideally,
-# every HACL* algorithm should have an interfaces directory that allows us to
-# cut the dependency graph
-
-FSTAR_INCLUDES = \
-  $(KREMLIN_HOME)/kremlib/compat \
-  $(KREMLIN_HOME)/kremlib \
-  evercrypt evercrypt/fst \
-  evercrypt/config/$(CONFIG) \
-  $(HACL_CODE)/lib/kremlin \
-  $(HACL_CODE)/experimental/aesgcm \
-  $(HACL_CODE)/curve25519/interfaces \
-  $(HACL_CODE)/hash/interfaces \
-  $(HACL_CODE)/api/interfaces \
-  $(HACL_CODE)/api \
-  $(HACL_CODE)/salsa-family \
-  $(HACL_CODE)/poly1305 \
-  $(HACL_CODE)/bignum \
-  $(HACL_SPEC) \
-  $(HACL_HOME)/specs/old # REMOVE ASAP
-
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  $(addprefix --include ,$(FSTAR_INCLUDES))
+  $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
 
-.PRECIOUS: %.krml
+.PRECIOUS: %.krml %.checked
 
-.depend:
+.depend: $(VALE_FSTI_HACK)
 	$(FSTAR) --dep full $(ROOTS) \
 	  --extract '* -Prims -FStar -C +C.Loops -EverCrypt.Bytes' > $@
 
 include .depend
 
-# Admit SMT queries for modules in FStar namespace
-$(CACHE_DIR)/FStar.%.fst.checked: | .depend
-	$(FSTAR) --admit_smt_queries true $< && \
-	touch $@
+ADMIT=false
+
+# Admit ulib + Vale-related files, verified separately with different Z3
+# options.
+$(CACHE_DIR)/FStar.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/X64.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/Arch.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/Words.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/Vale.%.fst.checked: ADMIT=true
+$(CACHE_DIR)/Collections.%.fst.checked: ADMIT=true
 
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
+	  --admit_smt_queries $(ADMIT) \
 	  --use_hints --record_hints \
 	  --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
@@ -123,29 +103,35 @@ ifneq (,$(EVEREST_WINDOWS))
 KOPTS		+=-falloca -ftail-calls
 endif
 
+VALE_BUNDLES=$(addprefix -bundle , 'X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
+  'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
+  Workarounds 'Math.*' Interop TypesNative_s)
+
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
+	  -warn-error '-6' \
 	  -add-include '"kremlib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
-	  -bundle 'FStar.*' \
-	  -bundle 'C,C.*' \
-	  -bundle 'Hacl.*' \
+	  $(VALE_BUNDLES) \
+	  -bundle 'Prims,FStar.*,C,C.*[rename=EverCrypt_Kremlib]' \
 	  -bundle 'EverCrypt.Spec.*' \
-	  -drop 'Spec.*' \
-	  -drop 'Hacl.Spec.*' \
-	  -drop 'Hacl.Spe.*' \
-	  -drop 'EverCrypt.Spec' \
-	  -drop Seq.Create \
+	  -bundle 'Crypto.Symmetric.*[rename=Hacl_Legacy]' \
+	  -bundle 'Flag' \
+	  -bundle 'Spec.*' \
 	  -bundle 'LowStar.*' \
-	  -library 'Hacl.*' \
+	  -bundle 'AEAD.*,Hacl.*[rename=Hacl]' -library 'Hacl.*,AEAD.*' \
+	  -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
 	  -no-prefix 'EverCrypt.Vale' \
+	  -no-prefix 'Sha_update_bytes_stdcall' \
+	  -no-prefix 'Check_sha_stdcall' \
+	  -no-prefix 'Check_aesni_stdcall' \
 	  -tmpdir $(GENERATED_DIR) $^ -warn-error @9
 
 $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal \
 	  $(KOPTS) \
-	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=* \
+	  -bundle EverCrypt+EverCrypt.Bytes+EverCrypt.AutoConfig+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash=*[rename=EverCrypt]\
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \
@@ -153,7 +139,6 @@ $(INCLUDE_DIR)/EverCrypt.h: $(ALL_KRML_FILES) | .depend
 	  -add-include '<kremlin/internal/compat.h>' \
 	  -tmpdir $(INCLUDE_DIR) $^
 	rm -rf $(INCLUDE_DIR)/Makefile.include $(INCLUDE_DIR)/*.c
-	mv $(INCLUDE_DIR)/EverCrypt_EverCrypt_Bytes_EverCrypt_AutoConfig_EverCrypt_HKDF_EverCrypt_HMAC_EverCrypt_Hash.h $@
 
 
 
@@ -170,36 +155,17 @@ include $(GENERATED_DIR)/Makefile.include
 # 3. Collecting all of our source files, and generating corresponding object
 # files.
 
-# TODO: grab these directly from Vale and error out with a helpful make target,
-# like for HACL*.
-VALE_DIR 	= $(HACL_HOME)/secure_api/vale/asm
-VALE_SOURCES	= $(addprefix $(VALE_DIR)/,sha256_main_i.c \
-  vale_aes_glue.c Vale_Hash_SHA2_256.c)
-VALE_ASM 	= $(addprefix $(VALE_DIR)/,\
-  sha256-$(MARCH)$(VARIANT).S aes-$(MARCH)$(VARIANT).S aesgcm-$(MARCH)$(VARIANT).S)
+VALE_ASM 	= $(HACL_HOME)/secure_api/vale/asm/aes-$(MARCH)$(VARIANT).S \
+  $(patsubst %,$(VALE_OBJ_DIR)/%-$(MARCH)$(VARIANT).S,sha256 aesgcm curve25519 cpuid)
 
-# TODO: understand why these two targets are broken/possibly switch to a HACL*
-# branch where their compilation is restored.
-# - aead-c: kremlin seems to generate an extra argument, JK had a hack to sed
-#   the code in place
-HACL_SOURCES	= \
-  $(addprefix $(HACL_CODE)/hash/sha2-c/Hacl_SHA2_,256.c 384.c 512.c) \
-  $(HACL_CODE)/curve25519/x25519-c/Hacl_Curve25519.c \
-  $(HACL_CODE)/ed25519/ed25519-c/Hacl_Ed25519.c \
-  $(HACL_CODE)/salsa-family/chacha-c/Hacl_Chacha20.c \
-  $(HACL_CODE)/poly1305/poly-c/AEAD_Poly1305_64.c \
-  $(HACL_CODE)/poly1305/poly-c/Hacl_Poly1305_64.c \
-  $(HACL_CODE)/api/policies-c/Hacl_Policies.c \
-  $(HACL_CODE)/api/aead-c/Hacl_Chacha20Poly1305.c
-#  $(HACL_CODE)/hmac/hmac-sha256-c/Hacl_HMAC_SHA2_256.c \
+HACL_SOURCES	= $(wildcard $(HACL_CODE)/dist/compact/*.c)
 
 EVERCRYPT_SOURCES = \
-  $(addprefix $(GENERATED_DIR)/,EverCrypt.c EverCrypt_ValeGlue.c) \
-  $(addprefix evercrypt/c/evercrypt_,autoconfig.c bytes.c vale_stubs.c)
+  $(addprefix evercrypt/c/evercrypt_,bytes.c autoconfig.c vale_stubs.c)
 
 ifeq ($(CONFIG),noopenssl)
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_bcrypt.c
-else
+else ifneq ($(CONFIG),everest)
 EVERCRYPT_SOURCES += evercrypt/c/evercrypt_openssl.c
 endif
 
@@ -211,8 +177,7 @@ endif
 # files for them in generated/. However, we are only interested in the header,
 # and drop these (mostly empty) C files, since the "real" ones are collected via
 # HACL_SOURCES above.
-ALL_OUR_FILES 	= $(filter-out Hacl_%.c AEAD_%.c FStar_%.c kremlinit.c, $(ALL_C_FILES))
-ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
+ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_C_FILES))
 
 ALL_SOURCES	= $(HACL_SOURCES) $(VALE_SOURCES) $(EVERCRYPT_SOURCES) $(ALL_GENERATED_FILES)
 ALL_OBJS	= $(patsubst %.c,%.o,$(ALL_SOURCES)) $(patsubst %.S,%.o,$(VALE_ASM))
@@ -265,10 +230,6 @@ $(OUT_DIR)/libevercrypt.$(SO): $(ALL_OBJS) | $(OUT_DIR)
 	$(CC) -shared $^ $(LDFLAGS) -o $@ $(LIBKREMLIB)
 
 .PRECIOUS: %.o
-
-$(HACL_SOURCES):
-	$(error "Please run `make -j 8 -C $(HACL_CODE) extract-c` before invoking this Makefile")
-
 
 # 6. An OCaml library that exposes only the bytes-based interface, for now
 

@@ -110,7 +110,7 @@ if sys.version_info < (3, 6):
 if 'VALE_HOME' in os.environ:
   vale_default_path = os.environ['VALE_HOME']
 else:
-  vale_default_path = 'tools/Vale'
+  vale_default_path = '../../vale'
 
 if 'KREMLIN_HOME' in os.environ:
   kremlin_default_path = os.environ['KREMLIN_HOME']
@@ -166,7 +166,7 @@ AddOptYesNo('COLOR', dest = 'do_color', default = True,
 AddOptYesNo('DUMP-ARGS', dest = 'dump_args', default = False,
   help = "Print arguments that will be passed to the verification tools")
 AddOptYesNo('FSTAR-EXTRACT', dest = 'fstar_extract', default = False,
-  help = "Extract .ml files from F* files")
+  help = "Generate .S and .asm files via F* extraction to OCaml")
 AddOptYesNo('MIN-TEST', dest = 'min_test', default = False,
   help = "Only run on a minimal set of test files")
 AddOptYesNo('PROFILE', dest = 'profile', default = False,
@@ -968,14 +968,18 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   Depends(main_cmx, main_ml)
   done = set()
   cmxs = []
+  objs = []
   def add_cmx(x_ml):
     x_cmx = ml_out_file(x_ml, '.cmx')
+    x_obj = ml_out_file(x_ml, '.o')
     if x_ml != pointer_ml:
       Depends(x_cmx, pointer_cmx)
-    cmx = ocaml_env.Command(x_cmx, x_ml,
+    cmx = ocaml_env.Command([x_cmx, x_obj], x_ml,
       f'ocamlfind ocamlopt -c -package fstarlib -package fstar-tactics-lib -o {x_cmx} {x_ml} -I obj/ml_out')
     cmxs.append(cmx[0])
+    objs.append(x_obj)
     Depends(main_exe, cmx[0])
+    Depends(main_exe, x_obj)
   def collect_cmxs_in_order(x_ml):
     if not (x_ml in done):
       done.add(x_ml)
@@ -991,17 +995,19 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   add_cmx(cmdline_ml)
   add_cmx(main_ml)
   cmxs_string = " ".join([str(cmx) for cmx in cmxs])
-  ocaml_env.Command(main_exe, cmxs,
+  ocaml_env.Command(main_exe, cmxs + objs,
     f'ocamlfind ocamlopt -linkpkg -package fstarlib -package fstar-tactics-lib {cmxs_string} -o {main_exe}')
   # Run executable to generate assembly files:
   output_target_base = 'obj/' + output_base_name
-  def generate_asm(suffix, assembler, platform):
-    target = output_target_base + suffix
-    return ocaml_env.Command(target, main_exe, f'{main_exe} {assembler} {platform} > {target}')
-  masm_win = generate_asm('.asm', 'MASM', 'Win')
-  gcc_win = generate_asm('-gcc.S', 'GCC', 'Win')
+  def generate_asm(suffix, assembler, os):
+    # TODO: cross-compilation support; note that platform.machine() does not
+    # produce a consistent string across OSes
+    target = output_target_base + "-x86_64" + suffix
+    return ocaml_env.Command(target, main_exe, f'{main_exe} {assembler} {os} > {target}')
+  masm_win = generate_asm('-msvc.asm', 'MASM', 'Win')
+  gcc_win = generate_asm('-mingw.S', 'GCC', 'Win')
   gcc_linux = generate_asm('-linux.S', 'GCC', 'Linux')
-  gcc_macos = generate_asm('-macos.S', 'GCC', 'MacOS')
+  gcc_macos = generate_asm('-darwin.S', 'GCC', 'MacOS')
   if sys.platform.startswith('linux'):
     return [gcc_linux, masm_win, gcc_win, gcc_macos]
   elif sys.platform == 'win32':

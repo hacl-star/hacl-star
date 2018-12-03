@@ -75,6 +75,7 @@ let word_rotate_right: a:sha2_alg -> Tot (word a -> s:U32.t{0 < U32.v s /\ U32.v
   | SHA2_224 | SHA2_256 -> rotate_right32
   | SHA2_384 | SHA2_512 -> rotate_right64
 
+inline_for_extraction noextract
 type ops = {
   c0: U32.t; c1: U32.t; c2: U32.t;
   c3: U32.t; c4: U32.t; c5: U32.t;
@@ -83,6 +84,7 @@ type ops = {
 }
 
 (* Definition of constants used in word functions *)
+inline_for_extraction noextract
 let op224_256: ops = {
   c0 = 2ul; c1 = 13ul; c2 = 22ul;
   c3 = 6ul; c4 = 11ul; c5 = 25ul;
@@ -90,6 +92,7 @@ let op224_256: ops = {
   e3 = 17ul; e4 = 19ul; e5 = 10ul
 }
 
+inline_for_extraction noextract
 let op384_512: ops = {
   c0 = 28ul; c1 = 34ul; c2 = 39ul;
   c3 = 14ul; c4 = 18ul; c5 = 41ul;

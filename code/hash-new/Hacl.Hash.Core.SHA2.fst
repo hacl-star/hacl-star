@@ -18,6 +18,7 @@ module B = LowStar.Buffer
 module G = FStar.Ghost
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
+module IB = LowStar.ImmutableBuffer
 
 open Spec.Hash.Helpers
 open LowStar.BufferOps
@@ -26,9 +27,6 @@ open Hacl.Hash.Definitions
 
 friend Spec.SHA2
 friend Hacl.Hash.PadFinish
-
-
-module IB = LowStar.ImmutableBuffer
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
@@ -60,9 +58,7 @@ let index_h (a: sha2_alg) (i: U32.t): ST.Stack (word a)
     | SHA2_384 -> B.recall h384; IB.recall_contents h384 Constants.h384; h384.(i)
     | SHA2_512 -> B.recall h512; IB.recall_contents h512 Constants.h512; h512.(i)
 
-let k224_256 = IB.igcmalloc_of_list HS.root Constants.k224_256_l
-let k384_512 = IB.igcmalloc_of_list HS.root Constants.k384_512_l
-
+open Hacl.Hash.Core.SHA2.Constants
 
 (** Alloca *)
 
@@ -82,9 +78,13 @@ let alloca a () =
 
 #set-options "--max_fuel 0"
 
+inline_for_extraction noextract
 let alloca_224: alloca_st SHA2_224 = alloca SHA2_224
+inline_for_extraction noextract
 let alloca_256: alloca_st SHA2_256 = alloca SHA2_256
+inline_for_extraction noextract
 let alloca_384: alloca_st SHA2_384 = alloca SHA2_384
+inline_for_extraction noextract
 let alloca_512: alloca_st SHA2_512 = alloca SHA2_512
 
 (** Init *)

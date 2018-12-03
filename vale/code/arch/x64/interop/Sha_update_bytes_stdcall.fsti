@@ -46,11 +46,12 @@ let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:uint32_p) (in_b:b8) (num_val:UInt64.
   hash_out == update_multi_transparent hash_in input_LE
  )
 
+unfold
 let full_post_cond (h:HS.mem) (h':HS.mem) (ctx_b:uint32_p) (in_b:b8) (num_val:UInt64.t) (k_b:uint32_p)  =
   post_cond h h' ctx_b in_b num_val k_b  /\
   M.modifies (M.loc_buffer ctx_b) h h'
 
 [@ (CCConv "stdcall") ]
-val sha_update_bytes_stdcall: ctx_b:uint32_p -> in_b:b8 -> num_val:UInt64.t -> k_b:uint32_p -> Stack unit
+val sha256_update: ctx_b:uint32_p -> in_b:b8 -> num_val:UInt64.t -> k_b:uint32_p -> Stack unit
 	(requires (fun h -> pre_cond h ctx_b in_b num_val k_b ))
 	(ensures (fun h0 _ h1 -> full_post_cond h0 h1 ctx_b in_b num_val k_b ))

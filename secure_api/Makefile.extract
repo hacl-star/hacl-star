@@ -41,7 +41,7 @@ abstract: $(CRYPTO_DIR)/Crypto_AEAD_Main.h base
 
 concrete: $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.h base
 
-base: $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h
+base: $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h
 
 %.test: %
 	./$<
@@ -60,8 +60,7 @@ LAX = .lax
 endif
 
 # The entry points
-FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst \
-  hkdf/Crypto.HKDF.fst
+FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst
 
 EXTRACT='* -FStar -CryptoTypes'
 # Automatic dependency analysis; the hack forces this target to be rebuilt
@@ -115,9 +114,6 @@ $(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(ALL_KRML_FILES)
 # Manually override the default argument for bundles, so as to provide a +
 $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.c \
   $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.h: BUNDLE=Crypto_AEAD_Main+Crypto_Symmetric_Cipher+Crypto_Indexing
-
-$(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.c \
-  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h: BUNDLE=Crypto_HKDF+Crypto_HMAC
 
 # This is without the indexing id.
 $(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
@@ -195,7 +191,6 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib -g -I $(FSTAR_HOME)/uli
 
 ARCHIVE_FILES= $(VALE_OBJ) \
     $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.o \
-    $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
     $(CHACHA_DIR)/Hacl_Chacha20.o \
     $(POLY_DIR)/AEAD_Poly1305_64.o \
     $(POLICIES_DIR)/Hacl_Policies.o \
