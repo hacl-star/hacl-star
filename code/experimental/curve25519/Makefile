@@ -48,9 +48,9 @@ curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c
 	./curve25519_51.exe
 
 
-curve25519_64_vale.exe: curve64-c/Hacl_Curve25519_64.c vale_25519.h
-	$(CC) -march=native -mtune=native -O3 vale/obj/curve25519-macos.S -c -o vale25519.o 
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve64-test.c -o curve25519_64_vale.exe vale25519.o
+curve25519_64_vale.exe: curve64-c/Hacl_Curve25519_64.c vale_25519.h vale/obj/curve25519-macos.S
+	$(CC) -march=native -mtune=native -flto -O3 vale/obj/curve25519-macos.S -c -o vale25519.o 
+	$(CC) -march=native -mtune=native -flto -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve64-test.c -o curve25519_64_vale.exe vale25519.o 
 	./curve25519_64_vale.exe
 
 curve25519_64_mixed.exe: curve64-c/Hacl_Curve25519_64.c rfc7748_25519.h

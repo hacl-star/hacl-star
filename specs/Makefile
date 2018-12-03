@@ -169,9 +169,9 @@ sha3.exe: $(LIBS_FILES) Spec.SHA3.Constants.fst Spec.SHA3.fst tests/Spec.SHA3.Te
 # NOT Under CI
 argon2i.exe: $(LIBS_FILES) Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
 	mkdir -p argon2i-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Blake2b --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Blake2 --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
 	@echo 'let _ = test()' >> argon2i-ml/Spec_Argon2i_Test.ml
-	$(OCAMLOPT) -I argon2i-ml $(OCAML_INCLUDES) $(addprefix argon2i-ml/, $(LIBS_ML)) argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
+	$(OCAMLOPT) -I argon2i-ml $(OCAML_INCLUDES) $(addprefix argon2i-ml/, $(LIBS_ML)) argon2i-ml/Spec_Blake2.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
 	./argon2i.exe
 
 # Under CI

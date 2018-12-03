@@ -7,6 +7,7 @@ extern uint64_t sub1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
 extern uint64_t sub(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 extern void mul2(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 extern void sqr2(const uint64_t* dst, const uint64_t* in_a);
+
 extern void fmul_v(const uint64_t* tmp, const uint64_t* in_a, const uint64_t* dst, const uint64_t* in_b);
 extern void fmul2_v(const uint64_t* tmp, const uint64_t* in_a, const uint64_t* dst, const uint64_t* in_b);
 extern void fsqr_v(const uint64_t* tmp, const uint64_t* in_a, const uint64_t* dst);
