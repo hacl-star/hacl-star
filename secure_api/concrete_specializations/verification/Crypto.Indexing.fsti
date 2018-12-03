@@ -29,16 +29,22 @@ type aesImpl =
   | ValeAES
   | HaclAES
 
+inline_for_extraction
 val id:Type0
 
+inline_for_extraction
 val aeadAlg_of_id: i:id -> Tot aeadAlg
 
+inline_for_extraction
 val macAlg_of_id: i:id -> Tot macAlg
 
+inline_for_extraction
 val cipherAlg_of_id: i:id -> Tot cipherAlg
 
+inline_for_extraction
 val aesImpl_of_id: i:id -> Tot aesImpl
 
+inline_for_extraction
 val aeadAlg_cipherAlg: i:id -> Lemma
   (requires True)
   (ensures
@@ -46,4 +52,5 @@ val aeadAlg_cipherAlg: i:id -> Lemma
      (aeadAlg_of_id i == AES_256_GCM ==> cipherAlg_of_id i == AES256) /\
      (aeadAlg_of_id i == CHACHA20_POLY1305 ==> cipherAlg_of_id i == CHACHA20)))
 
+inline_for_extraction
 val testId: a:aeadAlg -> Tot (i:id{aeadAlg_of_id i = a})

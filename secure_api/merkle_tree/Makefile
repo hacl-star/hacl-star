@@ -50,7 +50,8 @@ FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
   --cache_checked_modules --cache_dir $(CACHE_DIR) \
   --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES) --cmi \
-  --use_hints --use_hint_hashes --record_hints --query_stats
+  --use_hints --use_hint_hashes --record_hints --query_stats \
+  --already_cached 'FStar LowStar C Spec EverCrypt Hacl'
 
 $(HINT_DIR):
 	mkdir -p $@

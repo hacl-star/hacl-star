@@ -191,7 +191,6 @@ let rec wp_compute #a cs qcs mods s0 =
       wp_compute cs qcs' mods s0
 
 let rec wp_sound #a cs qcs mods k s0 =
-  let qcs0 = qcs in
   match qcs with
   | QEmpty g ->
       update_state_mods_refl mods s0;
@@ -209,7 +208,6 @@ let rec wp_sound #a cs qcs mods k s0 =
       let fN' = va_lemma_merge_total (c::cs) s0 fM sM fN sN in
       update_state_mods_weaken qc.mods mods sM s0;
       update_state_mods_trans mods s0 sM sN;
-      wp_monotone (c::cs) qcs0 mods k k_true s0;
       ()
   | QBind _ _ qc qcs ->
       let QProc c' _ wp1' monotone compute proof = qc in
@@ -224,7 +222,6 @@ let rec wp_sound #a cs qcs mods k s0 =
       let fN' = va_lemma_merge_total (c::cs) s0 fM sM fN sN in
       update_state_mods_weaken qc.mods mods sM s0;
       update_state_mods_trans mods s0 sM sN;
-      wp_monotone (c::cs) qcs0 mods k k_true s0;
       ()
   | QGetState f ->
       let c::cs = cs in

@@ -4,7 +4,6 @@ module List = FStar.List.Tot.Base
 module HS = FStar.Monotonic.HyperStack
 module HH = FStar.Monotonic.HyperHeap
 module B = LowStar.Buffer
-module MB = LowStar.Monotonic.Buffer
 module M = LowStar.Modifies
 
 open Opaque_s
@@ -41,22 +40,10 @@ let buf_disjoint_from (b:b8) (ls:list b8) : Type0 =
                                        `%locs_disjoint_rec]] (loc_locs_disjoint_rec b ls)
 
 unfold
-let disjoint (#a #b:Type0)
-  (#ra1 #ra2: MB.srel a)
-  (#rb1 #rb2: MB.srel b)
-  (ptr1: MB.mbuffer a ra1 ra2)
-  (ptr2:MB.mbuffer b rb1 rb2)
-=
-  M.loc_disjoint (M.loc_buffer ptr1) (M.loc_buffer ptr2)
+let disjoint (#a:Type0) (ptr1 ptr2:B.buffer a) = M.loc_disjoint (M.loc_buffer ptr1) (M.loc_buffer ptr2)
 
 unfold
-let disjoint_or_eq (#a #b:Type0)
-  (#ra1 #ra2: MB.srel a)
-  (#rb1 #rb2: MB.srel b)
-  (ptr1: MB.mbuffer a ra1 ra2)
-  (ptr2:MB.mbuffer b rb1 rb2)
-=
-  disjoint ptr1 ptr2 \/ ptr1 === ptr2
+let disjoint_or_eq ptr1 ptr2 = disjoint ptr1 ptr2 \/ ptr1 == ptr2
 
 let list_disjoint_or_eq (#a:Type0) (ptrs:list (B.buffer a)) =
   forall p1 p2. List.memP p1 ptrs /\ List.memP p2 ptrs ==> disjoint_or_eq p1 p2

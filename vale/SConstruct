@@ -1151,9 +1151,11 @@ if not is_help:
     source = f.filename
     target = f.obj_name()
     shutil.copy(source, target)
-    checked_source = FindFile(f'{source}.checked', os.path.dirname(source))
-    if checked_source != None:
+    checked_source = f'{source}.checked'
+    if os.path.isfile(checked_source):
       shutil.copy(str(checked_source), f'{target}.checked')
+    else:
+      print(f'External file {source}.checked does not exist -- please make F*, KreMLin, and hacl-star/specs first')
 
   if not dump_args:
     print('Processing source files')

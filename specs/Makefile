@@ -10,8 +10,7 @@ FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
-  --already_cached 'FStar LowStar C Spec.Loops -FStar.Endianness' \
-  --use_extracted_interfaces true
+  --already_cached 'FStar LowStar C Spec.Loops -FStar.Endianness'
 
 # TODO: move the specification tests to their own files so that we don't pollute
 # the specs with huge definitions in the scope
@@ -23,7 +22,7 @@ ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
   Spec.Salsa20.fst Spec.Chacha20Poly1305.fst $(wildcard Spec.*.Test.fst) \
   Spec.Ed25519.fst
 
-OTHER_ROOTS=Spec.Hash.Incremental.fst
+OTHER_ROOTS=Spec.Hash.Incremental.fst $(HACL_HOME)/code/lib/kremlin/FStar.Endianness.fst
 
 # TODO: decide what to do with the following (excluded) specs:
 #  Spec.HMAC.SHA2_256.fst Spec.HMAC.SHA2_384.fst Spec.HMAC.SHA2_512.fst

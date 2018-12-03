@@ -58,7 +58,9 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/secure_api/uf1cma \
 	$(HACL_HOME)/secure_api/utils \
 	$(CONCRETE_DIR) \
+	$(CONCRETE_DIR)/verification \
 	$(CONCRETE_DIR)/$(IMPL_CHOICE) \
+	$(HACL_HOME)/secure_api/ideal_flags \
 	$(HACL_HOME)/secure_api/test)
 	#$(HACL_HOME)/code/salsa-family/interfaces \
 	#$(HACL_HOME)/code/poly1305/interfaces \

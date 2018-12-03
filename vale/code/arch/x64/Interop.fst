@@ -281,18 +281,14 @@ let rec frame_down_mem_aux (ptrs:list b8{list_disjoint_or_eq ptrs})
     correct_down_p_frame mem addrs h a;
     assert (forall p. List.memP p accu ==> disjoint_or_eq p a);
     domain_write_buffer a h mem addrs;
-    addrs_set_concat accu a addrs;
-    let new_heap' = down_mem_aux ptrs addrs mem q (a::accu) new_heap in
+    addrs_set_concat accu a addrs;    
     frame_down_mem_aux ptrs addrs mem q (a::accu) new_heap;
     frame_write_vale_mem contents length addr 0 h;
-    assert_norm (down_mem_aux ptrs addrs mem (a::q) accu h ==
-                 new_heap') //NS: 11/30, unfolding a recursive function via smt
-                            //requires non-trivial proofs of typing;
-                            //do it via normalization instead
- 
+    ()
+
 let same_unspecified_down mem1 mem2 addrs ptrs =
   let heap = Map.const 0 in
-  let heap = Map.restrict Set.empty heap in 
+  let heap = Map.restrict Set.empty heap in
   let heapf1 = down_mem_aux ptrs addrs mem1 ptrs [] heap in
   let heapf2 = down_mem_aux ptrs addrs mem2 ptrs [] heap in
   frame_down_mem_aux ptrs addrs mem1 ptrs [] heap;
