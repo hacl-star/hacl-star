@@ -10,10 +10,11 @@ open Lib.Buffer
 module Spec = Spec.Blake2
 module Impl = Hacl.Impl.Blake2s
 
+inline_for_extraction
+let op_String_Access #t #n h (b:lbuffer t n) = as_seq h b
 
-let hash_wp = lbuffer uint32 8
-let block_p = lbuffer uint8 64
-
+let hash_wp = lbuffer uint32 (size 8)
+let block_p = lbuffer uint8 (size 64)
 
 val blake2s_init:
     hash: hash_wp
