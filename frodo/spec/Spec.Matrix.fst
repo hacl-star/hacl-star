@@ -425,8 +425,8 @@ val matrix_to_lbytes:
   -> #n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> m:matrix n1 n2
   -> res:lbytes (2 * n1 * n2)
-    {forall (i:size_nat{i < n1 * n2}) (k:size_nat{k < 2}).
-      matrix_to_lbytes_fc #n1 #n2 m res i k}
+     {forall (i:size_nat{i < n1 * n2}) (k:size_nat{k < 2}).
+      matrix_to_lbytes_fc #n1 #n2 m res i k} 
 let matrix_to_lbytes #n1 #n2 m =
   let res = Seq.create (2 * n1 * n2) (u8 0) in
   Loops.repeati_inductive (n1 * n2)
@@ -434,9 +434,10 @@ let matrix_to_lbytes #n1 #n2 m =
     forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res i0 k)
   (fun i res ->
     index_uint_to_bytes_le m.[i];
-    let res1 = update_sub res (2 * i) 2 (uint_to_bytes_le m.[i]) in
+    let res1 = update_sub res (2 * i) 2 (uint_to_bytes_le #U16 #SEC m.[i]) in
     eq_intro (Seq.sub res1 0 (2 * i)) (Seq.sub res 0 (2 * i));
     lemma_matrix_to_lbytes #n1 #n2 m res res1 i;
+    admit();
     res1
   ) res
 

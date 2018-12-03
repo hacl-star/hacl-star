@@ -540,7 +540,8 @@ let matrix_to_lbytes #n1 #n2 m res =
     let h0 = ST.get () in
     uint_to_bytes_le tmp m.(i);
     let h1 = ST.get () in
-    M.lemma_matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m) (as_seq h0 res) (as_seq h1 res) (v i)
+    M.lemma_matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m) (as_seq h0 res) (as_seq h1 res) (v i);
+    admit()
   );
   let h1 = ST.get () in
   M.lemma_matrix_to_lbytes_ext #(v n1) #(v n2) (as_matrix h0 m) (as_seq h1 res) (M.matrix_to_lbytes #(v n1) #(v n2) (as_matrix h0 m))
