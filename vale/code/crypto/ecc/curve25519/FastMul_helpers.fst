@@ -72,6 +72,7 @@ let mul_nats (x y:nat) : nat =
   lemma_mul_bounds_le 0 x 0 y;
   prod
 
+#push-options "--z3rlimit 10"
 let lemma_mul_pow2_bound (b:nat{b > 1}) (x y:natN (pow2 b)) :
   Lemma (x * y < pow2 (2*b) - 1 /\
          x * y <= pow2 (2*b) - 2*pow2(b) + 1)
@@ -80,6 +81,7 @@ let lemma_mul_pow2_bound (b:nat{b > 1}) (x y:natN (pow2 b)) :
   pow2_plus b b;
   assert ( (pow2 b - 1) * (pow2 b -1) = pow2 (2*b) - 2*pow2(b) + 1);
   ()
+#pop-options
 
 let lemma_mul_bound64 (x y:nat64) :
   Lemma (x * y < pow2_128 - 1 /\ x * y <= pow2_128 - 2*pow2_64 + 1)
@@ -449,7 +451,7 @@ let sub_carry (x y:nat64) (c:bit) : nat64 & (c':bit)
   (x - (y + c)) % pow2_64,
   (if x - (y + c) < 0 then 1 else 0)
 
-#push-options "--z3rlimit 3000 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 3000 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 // Passes
 (*
 let lemma_sub2
@@ -484,7 +486,6 @@ let lemma_sub3
   (ensures a - b == pow2_three s1 s2 s3 - c * pow2_192)
   =
   ()
-#pop-options
 
 // Unclear why lemma_sub2 and lemma_sub3 pass, but lemma_sub4 fails without explicit help
 
