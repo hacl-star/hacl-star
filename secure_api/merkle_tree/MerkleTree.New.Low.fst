@@ -2715,8 +2715,8 @@ private let rec mt_retract_to_ hs lv i s j =
     assert (S.equal (RV.as_seq hh1 retracted)
                     (S.slice (RV.as_seq hh0 (V.get hh0 hs lv)) 0 (U32.v new_len)));
 
-    RV.assign hs lv retracted;  
-    
+    RV.assign hs lv retracted;      
+
     let hh2 = HST.get() in       
 
     // 2-1) For the `modifies` postcondition.
@@ -2736,6 +2736,7 @@ private let rec mt_retract_to_ hs lv i s j =
     mt_safe_elts_preserved
       (lv + 1ul) hs (i / 2ul) (j / 2ul)
       (V.loc_vector_within hs lv (lv + 1ul)) hh1 hh2;
+    
 
     // 2-4) Correctness
     RV.as_seq_sub_preserved hs 0ul lv (loc_rvector retracted) hh0 hh1;
@@ -2746,76 +2747,62 @@ private let rec mt_retract_to_ hs lv i s j =
                       (S.cons (RV.as_seq hh1 retracted)
                               (RV.as_seq_sub hh0 hs (lv + 1ul) merkle_tree_size_lg))));
     as_seq_sub_upd hh0 hs lv (RV.as_seq hh1 retracted);
-
-    // if `lv = 31` then `i <= s <= j < 2` thus `os = oi`,
-    // contradicting the branch.
-    // assert (lv + 1ul < merkle_tree_size_lg);
-    // assert (U32.v (j / 2ul) < pow2 (32 - U32.v (lv + 1ul)));
-    // assert (RV.rv_inv hh2 hs);
-    // assert (mt_safe_elts hh2 (lv + 1ul) hs (i / 2ul) (j / 2ul));
-    
-    assert (S.equal (S.slice (V.as_seq hh0 hvec) 0 (U32.v new_len)) 
-                    (S.slice (V.as_seq hh1 retracted) 0 (U32.v new_len)));
-    assert (S.equal (S.slice (RV.as_seq hh1 hs) 0 (U32.v lv))
-                    (S.slice (RV.as_seq hh2 hs) 0 (U32.v lv)));
+   
     if lv + 1ul >= V.size_of hs then () else
     begin
-      assert (RV.rv_inv hh2 hs);
-      assume (mt_safe_elts hh2 lv hs i j);
-      assume (mt_safe_elts hh2 lv hs (i/2ul) (j/2ul));
-      assume (mt_safe_elts hh2 lv hs (i/2ul) (s/2ul));
-      mt_retract_to_ hs (lv + 1ul) (i / 2ul) (s / 2ul) (j / 2ul)
-    end;
-    let hh_end = HST.get () in
-    admit()
+      assert (mt_safe_elts hh2 (lv + 1ul) hs (i / 2ul) (j / 2ul));
+      assume (mt_safe_elts hh2 (lv + 1ul) hs (i / 2ul) (s / 2ul));
+      mt_safe_elts_spec hh2 (lv + 1ul) hs (i / 2ul) (j / 2ul);
+      mt_safe_elts_spec hh2 (lv + 1ul) hs (i / 2ul) (s / 2ul);
+            
+      mt_retract_to_ hs (lv + 1ul) (i / 2ul) (s / 2ul) (j / 2ul);
+
+      admit();
+      // 3-0) Memory safety brought from the postcondition of the recursion
+      let hh3 = HST.get () in
+      assert (modifies
+             (loc_union
+               (loc_union
+                 (RV.rs_loc_elem hvreg (V.as_seq hh0 hs) (U32.v lv))
+                   (V.loc_vector_within hs lv (lv + 1ul)))
+                 (loc_union
+                   (RV.rv_loc_elems hh0 hs (lv + 1ul) (V.size_of hs))
+                   (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))))
+               hh0 hh3);
+      mt_flush_to_modifies_rec_helper lv hs hh0;
+      V.loc_vector_within_disjoint hs lv (lv + 1ul) (lv + 1ul) (V.size_of hs);
+      V.loc_vector_within_included hs lv (lv + 1ul);
+      RV.rv_loc_elems_included hh2 hs (lv + 1ul) (V.size_of hs);
+      assert (loc_disjoint
+             (V.loc_vector_within hs lv (lv + 1ul))
+               (RV.rv_loc_elems hh2 hs (lv + 1ul) (V.size_of hs)));
+      V.get_preserved hs lv
+        (loc_union
+          (RV.rv_loc_elems hh2 hs (lv + 1ul) (V.size_of hs))
+          (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
+        hh2 hh3;
+      assert (V.size_of (V.get hh3 hs lv) == s - offset_of i);
+      assert (RV.rv_inv hh3 hs);
+      mt_safe_elts_constr hh3 lv hs i s;
+      assert (mt_safe_elts hh3 lv hs i s);
+
+      // 3-1) Correctness
+      mt_safe_elts_spec hh2 (lv + 1ul) hs (i / 2ul) (s / 2ul);
+      assert (U32.v lv + 1 < S.length (RV.as_seq hh3 hs) ==> 
+                    S.equal (RV.as_seq hh3 hs)
+                      (High.mt_retract_to_ (RV.as_seq hh2 hs) (U32.v lv + 1)
+                        (U32.v i / 2) (U32.v s / 2) (U32.v j / 2)));
+      assert (RV.rv_inv hh0 hs);
+      assert (mt_safe_elts hh0 lv hs i j);
+      mt_safe_elts_spec hh0 lv hs i j;
+      // High.mt_retract_to_rec
+      //   (U32.v lv) (RV.as_seq hh0 hs)
+      //   (U32.v i) (U32.v s) (U32.v j);
+      assert (S.equal (RV.as_seq hh3 hs)
+                      (High.mt_retract_to_ (RV.as_seq hh0 hs) (U32.v lv)
+                        (U32.v i) (U32.v s) (U32.v j)))
+    end
   end
- 
-    // /// 3) Recursion
-    // mt_retract_to_ (lv + 1ul) hs (pi / 2ul) (i / 2ul)
-    //   (Ghost.hide ( j / 2ul));
-    // let hh3 = HST.get () in
-
-    // // 3-0) Memory safety brought from the postcondition of the recursion
-    // assert (modifies
-    //          (loc_union
-    //            (loc_union
-    //              (RV.rs_loc_elem hvreg (V.as_seq hh0 hs) (U32.v lv))
-    //              (V.loc_vector_within hs lv (lv + 1ul)))
-    //            (loc_union
-    //              (RV.rv_loc_elems hh0 hs (lv + 1ul) (V.size_of hs))
-    //              (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))))
-    //          hh0 hh3);
-    // mt_retract_to_modifies_rec_helper lv hs hh0;
-    // V.loc_vector_within_disjoint hs lv (lv + 1ul) (lv + 1ul) (V.size_of hs);
-    // V.loc_vector_within_included hs lv (lv + 1ul);
-    // RV.rv_loc_elems_included hh2 hs (lv + 1ul) (V.size_of hs);
-    // assert (loc_disjoint
-    //          (V.loc_vector_within hs lv (lv + 1ul))
-    //          (RV.rv_loc_elems hh2 hs (lv + 1ul) (V.size_of hs)));
-    // V.get_preserved hs lv
-    //   (loc_union
-    //     (RV.rv_loc_elems hh2 hs (lv + 1ul) (V.size_of hs))
-    //     (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)))
-    //   hh2 hh3;
-    // assert (V.size_of (V.get hh3 hs lv) ==
-    //         j - offset_of i);
-    // assert (RV.rv_inv hh3 hs);
-    // mt_safe_elts_constr hh3 lv hs i ( j);
-    // assert (mt_safe_elts hh3 lv hs i ( j));
-
-    // // 3-1) Correctness
-    // mt_safe_elts_spec hh2 (lv + 1ul) hs (pi / 2ul) ( j / 2ul);
-    // assert (S.equal (RV.as_seq hh3 hs)
-    //                 (High.mt_retract_to_ (U32.v lv + 1) (RV.as_seq hh2 hs)
-    //                   (U32.v pi / 2) (U32.v i / 2) (U32.v ( j) / 2)));
-    // mt_safe_elts_spec hh0 lv hs pi ( j);
-    // High.mt_retract_to_rec
-    //   (U32.v lv) (RV.as_seq hh0 hs)
-    //   (U32.v pi) (U32.v i) (U32.v ( j));
-    // assert (S.equal (RV.as_seq hh3 hs)
-    //                 (High.mt_retract_to_ (U32.v lv) (RV.as_seq hh0 hs)
-    //                   (U32.v pi) (U32.v i) (U32.v ( j))))
-//  end
 #reset-options
 
 private
