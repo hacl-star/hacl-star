@@ -8,7 +8,7 @@ open CanonCommSemiring
 open Fast_defs
 open Fast_lemmas_internal
 
-#push-options "--z3rlimit 3000 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 5000 --max_fuel 0 --max_ifuel 0"
 // Passes
 (*
 let lemma_sub2
