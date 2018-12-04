@@ -17,7 +17,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "7f76603dfd8ff6de433133b7cdbd6156"
+      "e10f0399c646583777a8222caccf5526"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.little_bytes_def_1",
@@ -47,7 +47,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "5c2858228e21c68a5d77e022653ea9d7"
+      "3ece7edf1ab81609a74afdfda8571e71"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.little_bytes_def_0",
@@ -55,14 +55,34 @@
       1,
       1,
       [
-        "@MaxFuel_assumption",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.Endianness.little_bytes.fuel_instrumented",
-        "@query",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.n",
+        "equation_Prims.nat", "equation_Prims.pos",
         "equation_with_fuel_FStar.Endianness.little_bytes.fuel_instrumented",
-        "primitive_Prims.op_Equality"
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt8.t", "int_typing",
+        "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Endianness_Tm_refine_1e62df159c33fd3091667f8254d1ab80",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_b913a3f691ca99086652e0a655e72f17",
+        "refinement_interpretation_FStar.UInt32_Tm_refine_6c25b42778726de94cd4dac42edb4860",
+        "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_FStar.Seq.Base.empty", "typing_FStar.Seq.Base.length",
+        "typing_FStar.UInt32.uint_to_t", "typing_Prims.pow2"
       ],
       0,
-      "f0d1f702bc26754f2b8d69c531c9507b"
+      "e263db1cb23abe48438e95065aaa10a5"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.little_bytes_def_1",
@@ -105,7 +125,7 @@
         "typing_FStar.Seq.Base.createEmpty", "typing_FStar.UInt32.v"
       ],
       0,
-      "bdb62d9c115ef309c14a545d0cdf9306"
+      "50c694fb6b903662900e5810b65dcb77"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.little_bytes_def_1",
@@ -148,7 +168,7 @@
         "typing_FStar.Seq.Base.empty", "typing_FStar.UInt32.v"
       ],
       0,
-      "06e6ca981f65b4f0c053ebaeb7627fbe"
+      "c949a743218b65b16113882fdfad1b3a"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_uint32_to_le_def",
@@ -173,7 +193,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "c72bfeaf439bc8983ecd9322c703494c"
+      "1e41256022f9c39ef1eec232ef18115c"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_uint32_to_le_def",
@@ -254,7 +274,7 @@
         "typing_Seq.Create.create_4"
       ],
       0,
-      "ed573958fa1d341d106e33cdfa831565"
+      "041f94ebe83d431fae3fb07cc37113d1"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec1",
@@ -292,7 +312,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "efc0cbf24ae9e6ec6303b3e3d08eee3e"
+      "03ae1e516aff0ace1d584a92242cab5b"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec1",
@@ -339,7 +359,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "748fcbd7d244ea456d800d56afe42f44"
+      "ce7127e50923034317dd373b41d7cb30"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec2",
@@ -367,7 +387,7 @@
         "typing_FStar.UInt.to_vec", "typing_FStar.UInt32.v"
       ],
       0,
-      "38427ed958abb6a969999d0d47fef801"
+      "275829bc7473824f1d365644bdf5514a"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec2",
@@ -425,7 +445,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "af2a0761c64ad60627d204f8fa678e8a"
+      "a2d8e12cb1b7ab31088cbaf2e5d1f9fb"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec3",
@@ -450,7 +470,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "4272677a05469957eb9cc5117b0299bc"
+      "6e4aca12ad84f7798bea2b7c60dfb6ee"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec3",
@@ -509,7 +529,7 @@
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length"
       ],
       0,
-      "b05d11d28ab664b087249f60daa5a789"
+      "f98082315c8c7501f49e1ce808b5877e"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec4",
@@ -536,7 +556,7 @@
         "typing_FStar.UInt.to_vec", "typing_FStar.UInt32.v"
       ],
       0,
-      "98f4094c3f45490102c5ca3ac3cae02f"
+      "bdc1d284d55039cd83ac8bc11d2c5e6e"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec4",
@@ -589,7 +609,7 @@
         "typing_FStar.UInt.to_vec", "typing_FStar.UInt32.v"
       ],
       0,
-      "a8a49cfeb5a7627e5823e333e3a1c6ec"
+      "4b23e168a65c4244e438e8ac4c72cf5e"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec5",
@@ -618,7 +638,7 @@
         "typing_FStar.UInt.to_vec", "typing_FStar.UInt32.v"
       ],
       0,
-      "376c1390ce9249b7644ba38f202bf961"
+      "9dea93c807300defce247db0272e2a23"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_vec5",
@@ -656,7 +676,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "98023654dbbe6a6b5f02cdea1acc6c7a"
+      "dfd2e7322a7e2b57ffeb8ab33c2e8a9c"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_uint32_to_uint8_vec",
@@ -688,7 +708,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "3a1094a68a8c3c4b8e6399eebf6c9265"
+      "da68b7e2236493a21d201bce5f509655"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_uint32_to_uint8_vec",
@@ -730,7 +750,7 @@
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v"
       ],
       0,
-      "0a24bfe151b18ac12b8621fc0ef08da9"
+      "715179eb6c13ca82ea9d658a1da513b9"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_uint32_to_le_def2",
@@ -762,7 +782,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "a0b91d715a7c684541ab27c18fe02109"
+      "2a156b4768d71444d50627aa9c24518e"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_uint32_to_le_def2",
@@ -771,7 +791,7 @@
       1,
       [ "@query" ],
       0,
-      "d56d0784ca58b528244f776b853e73e8"
+      "7b7d4751baee4a820953a444138505fa"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_uint32_to_bytes",
@@ -792,7 +812,7 @@
         "typing_Spec.Lib.uint32_to_le"
       ],
       0,
-      "26e49b2bf5c9679a76201db73dc8bfa0"
+      "8193a6dc0280ee111a913be681809f5e"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_uint32_to_bytes",
@@ -809,12 +829,12 @@
         "function_token_typing_Prims.int",
         "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Hacl.Impl.Xor.Lemmas_Tm_refine_ea78bb93e358db6edb27708a2c05bb99",
+        "refinement_interpretation_Hacl.Impl.Xor.Lemmas_Tm_refine_82fc8cd94b282e7afae235d2c66f40c2",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "typing_Spec.Lib.uint32_to_le"
       ],
       0,
-      "05418aa709cd840de32268cf6e8ea467"
+      "40809bf91ac4e3ede9e8b0c2621ee320"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_uint32_to_bytes",
@@ -872,7 +892,7 @@
         "typing_FStar.UInt8.v", "typing_Seq.Create.create_4"
       ],
       0,
-      "326964d41c27fa42221180daace2ddd2"
+      "b8adaf29b9dbf88db57406d78b24e7eb"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes_",
@@ -896,7 +916,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "68efb1b20e7f4c83c1a170ebe101e7a1"
+      "500319146449a2821d2f080d18ccebc2"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes_",
@@ -920,7 +940,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "d34632430c550895b57bf0e749df0e0c"
+      "0ad81c25f9e7357269bb20d977670c0a"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes_",
@@ -992,7 +1012,7 @@
         "typing_Spec.Loops.seq_map2", "well-founded-ordering-on-nat"
       ],
       0,
-      "6b089e613753cbde9736516bf23e8af0"
+      "7685263f77f5f4e243dd2d1f897b8fd1"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes",
@@ -1016,7 +1036,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "7b1a48339c256b30d299fdfb39cd1cad"
+      "ce380fa660567094f102f666a5837e2a"
     ],
     [
       "Hacl.Impl.Xor.Lemmas.lemma_xor_uint32s_to_bytes",
@@ -1036,7 +1056,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "ed8053126e82c9bd3bdd2174e980253e"
+      "c335fb1915865a09e3b5ed4e57d529ce"
     ]
   ]
 ]
