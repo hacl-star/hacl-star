@@ -118,6 +118,8 @@ COMPACT_FLAGS = \
   -bundle 'Prims,FStar.*,C,C.*[rename=EverCrypt_Kremlib]' \
   -bundle 'AEAD.*,Hacl.*,Spec.*[rename=Hacl]' -library 'Hacl.*,AEAD.*' \
   -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
+  -bundle EverCrypt.BCrypt \
+  -bundle EverCrypt.OpenSSL \
   -library EverCrypt.Bytes,EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -no-prefix 'EverCrypt.Vale' \
   -no-prefix 'Sha_update_bytes_stdcall' \
@@ -155,7 +157,9 @@ dist/coco/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS) \
   -bundle EverCrypt.Hash= -bundle EverCrypt.AutoConfig2= \
   -bundle EverCrypt= \
-  -bundle EverCrypt.Hacl -bundle EverCrypt.OpenSSL \
+  -bundle EverCrypt.Hacl \
+  -bundle EverCrypt.OpenSSL \
+  -bundle EverCrypt.BCrypt \
   -bundle '\*[rename=EverCrypt_Misc]'
 
 dist/compact-msvc/Makefile.basic: \

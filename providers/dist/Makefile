@@ -2,28 +2,23 @@
 # - It is copied from hacl-star/providers/dist/Makefile
 # - It relies on the KreMLin-generated Makefile.basic and Makefile.include
 #
-# This Makefile can be parameterized using four environment variables:
-# - EVERCRYPT_OPENSSL (default = true)
-# - EVERCRYPT_BCRYPT (default = false)
-# - EVERCRYPT_VALE (default = true)
-# - EVERCRYPT_HACL (default = true, currently unused)
-# Each variable triggers the right: extra C files, extra ASM files, compiler and
-# linker flags.
+# This Makefile detects whether OpenSSL and BCrypt are enabled automatically. It
+# does so by checking for the presence of EverCrypt_OpenSSL.h and
+# EverCrypt_BCrypt.h ; as such, it assumes -bundle EverCrypt.OpenSSL and -bundle
+# EverCrypt.BCrypt.
+#
+# This Makefile may (conservatively) link in some Vale assemblies that may end
+# up un-needed in the final shared object.
 #
 # Additionally, this Makefile works out of the box on Linux, OSX and
 # Cygwin/MinGW.
 #
 # The Makefile assumes KREMLIN_HOME and HACL_HOME to be suitably defined. When
-# using EVERCRYPT_OPENSSL=true, it also expects OPENSSL_HOME to be defined.
+# using OpenSSL, it also expects OPENSSL_HOME to be defined.
 #
 # The Makefile produces:
 # - libevercrypt.so, a shared object where unused symbols have been removed
 # - libevercrypt.a, a static archive that includes libhacl.a and libkremlib.a
-
-EVERCRYPT_OPENSSL	?= true
-EVERCRYPT_BCRYPT	?= false
-EVERCRYPT_VALE		?= true
-EVERCRYPT_HACL		?= true
 
 # 1. The usual pseudo auto-configuration
 
@@ -50,20 +45,16 @@ CFLAGS		+= -Wno-parentheses -g
 
 # 3. Honor configurations
 
-ifeq ($(EVERCRYPT_OPENSSL),true)
 ifneq (,$(wildcard EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
   LDFLAGS	+= -ldl -lpthread
   SOURCES	+= evercrypt_openssl.c
 endif
-endif
 
-ifeq ($(EVERCRYPT_BCRYPT),true)
 ifneq (,$(wildcard EverCrypt_BCrypt.h))
   LDFLAGS	+= -lbcrypt
   SOURCES	+= evercrypt_bcrypt.c
-endif
 endif
 
 ifeq ($(EVERCRYPT_VALE),true)

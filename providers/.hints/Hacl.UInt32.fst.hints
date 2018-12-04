@@ -11,7 +11,7 @@
         "equation_FStar.UInt.zero"
       ],
       0,
-      "c32e27c3c3e6034ef989366d181c6caa"
+      "eb1aee31519fc9aae6802c2e323ade68"
     ],
     [
       "Hacl.UInt32.lt_mask",
@@ -23,7 +23,7 @@
         "equation_FStar.UInt.zero"
       ],
       0,
-      "f2528b3fb2cc4368ba265cb15cbe1047"
+      "63f59d8b635d15bda7240445cd4544b2"
     ],
     [
       "Hacl.UInt32.lte_mask",
@@ -38,46 +38,7 @@
         "typing_Hacl.UInt32.gt_mask"
       ],
       0,
-      "bdb27c32472409174b72c3e43cdca393"
-    ],
-    [
-      "Hacl.UInt32.gt_mask",
-      2,
-      2,
-      1,
-      [
-        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
-        "equation_FStar.UInt.zero"
-      ],
-      0,
-      "7e82463ffaa0a4a00a667e90d14007f1"
-    ],
-    [
-      "Hacl.UInt32.lt_mask",
-      2,
-      2,
-      1,
-      [
-        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
-        "equation_FStar.UInt.zero"
-      ],
-      0,
-      "38212136aebe6f57630010f6a6a343dc"
-    ],
-    [
-      "Hacl.UInt32.lte_mask",
-      2,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.ones", "equation_FStar.UInt.zero",
-        "equation_Hacl.UInt32.gt_mask",
-        "refinement_interpretation_Hacl.UInt32_Tm_refine_c45c7a76f0517b63572241dc6527b2ce",
-        "typing_Hacl.UInt32.gt_mask"
-      ],
-      0,
-      "e7f8a66887c6c3172bbf27ff36cffbf4"
+      "06cae459b4b33d33e824672b06cb65fb"
     ]
   ]
 ]
