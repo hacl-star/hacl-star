@@ -483,3 +483,148 @@ procedure{:quick}{:public} fsqr2_stdcall(
     Pop(r12, stack_b, 3 + bool_bit(win));
     Pop(r15, stack_b, 4 + bool_bit(win));
 }
+
+
+procedure{:quick}{:public} fsqr_loop_stdcall(
+    inline win:bool,
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64,
+    ghost tmp_b:buffer64,
+    ghost stack_b:buffer64)
+    lets
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; count @= rbx; saved_dst_ptr @= rbp;
+        tmp_in := (if win then rcx else rdi);
+        inA_in := (if win then rdx else rsi);
+        dst_in := (if win then r8  else rdx);
+        count_in := (if win then r9  else rcx);
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rbp; rsp; efl; mem;
+    requires
+        adx_enabled && bmi2_enabled;
+        
+        count_in >= 1;
+
+        buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
+        buffers_disjoint(dst_b, tmp_b); 
+
+        buffers_disjoint(stack_b, dst_b);
+        buffers_disjoint(stack_b, inA_b);
+        buffers_disjoint(stack_b, tmp_b);
+
+        buffers_disjoint(tmp_b, inA_b);
+
+        validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
+        valid_stack_slots(mem, rsp, stack_b, if win then 7 else 6, memTaint);
+    ensures
+        let a0 := old(buffer64_read(inA_b, 0, mem));
+        let a1 := old(buffer64_read(inA_b, 1, mem));
+        let a2 := old(buffer64_read(inA_b, 2, mem));
+        let a3 := old(buffer64_read(inA_b, 3, mem));
+
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+
+        let a := pow2_four(a0, a1, a2, a3);
+        let d := pow2_four(d0, d1, d2, d3);
+
+        //d % prime == old(a + b) % prime;
+
+        //////////////////////////////////////
+        //   Framing
+        //////////////////////////////////////
+
+        modifies_buffer_3(dst_b, tmp_b, stack_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
+
+        win ==> rsi == old(rsi);
+        r12 == old(r12);
+        r13 == old(r13);
+        r14 == old(r14);
+        r15 == old(r15);
+
+        rsp == old(rsp);
+        rbp == old(rbp);
+{
+    Push(rbp, stack_b, 5 + bool_bit(win));
+    Push(rbx, stack_b, 4 + bool_bit(win));
+    Push(r15, stack_b, 3 + bool_bit(win));
+    Push(r12, stack_b, 2 + bool_bit(win));
+    Push(r13, stack_b, 1 + bool_bit(win));
+    Push(r14, stack_b, 0 + bool_bit(win));
+
+    // Line up the rest of the arguments
+    inline if (win) {
+        // Store callee-save registers
+        Push(rsi, stack_b, 0);
+
+        Mov64(tmp_ptr, rcx);
+        Mov64(inA_ptr, rdx);
+        Mov64(saved_dst_ptr, r8);    // Save dst_ptr, since fast_multiply will clobber it
+        Mov64(count, r9);
+    } else {
+        Mov64(saved_dst_ptr, rdx);   // Save dst_ptr, since fast_multiply will clobber it
+        Mov64(count, rcx);
+    }
+
+    // rdi = tmp_ptr
+    // rsi = inA_ptr
+    fast_sqr(0, tmp_b, inA_b);
+
+    // Align arguments to carry_wide, which expects rdi = saved_dst_ptr, and rsi = tmp buffer
+    Mov64(inA_ptr, tmp_ptr);
+    Mov64(rdi, saved_dst_ptr);
+    carry_wide(0, dst_b, tmp_b);
+
+    // Prepare for loop, which repeatedly squares dst
+    // Need: rdi = tmp_ptr, and rsi = dst_ptr
+    Mov64(rdi, rsi);    // Restore tmp_ptr (in preparaton for another iteration of fast_sqr)
+    Mov64(rsi, saved_dst_ptr);
+
+    Sub64(count, 1);
+
+    ghost var pre_loop_mem := mem;
+    while (count > 0) 
+        invariant
+            0 <= count < old(count_in);
+
+            adx_enabled && bmi2_enabled;
+            //offset == 0 || offset == 4;
+            buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
+            buffers_disjoint(dst_b, tmp_b); 
+            buffers_disjoint(tmp_b, inA_b);
+            buffers_disjoint(tmp_b, inA_b);
+
+            saved_dst_ptr == rsi;
+            validDstAddrs64(mem, rsi, dst_b, 4 + 0, memTaint, Secret);
+            validSrcAddrs64(mem, tmp_ptr, tmp_b, 8 + 0*2, memTaint, Secret);
+        
+            modifies_buffer_2(dst_b, tmp_b, pre_loop_mem, mem);
+        decreases count;
+    {
+        fast_sqr(0, tmp_b, dst_b);
+        // Align arguments to carry_wide
+        Mov64(inA_ptr, tmp_ptr);
+        Mov64(rdi, saved_dst_ptr);
+        carry_wide(0, dst_b, tmp_b);
+        Mov64(tmp_ptr, inA_ptr);    // Restore tmp_ptr (in preparaton for another iteration of fast_sqr)
+        Mov64(inA_ptr, saved_dst_ptr);        // Restore dst
+        Sub64(count, 1);
+    }
+
+    inline if (win) {
+        Pop(rsi, stack_b, 0);
+    } 
+
+    Pop(r14, stack_b, 0 + bool_bit(win));
+    Pop(r13, stack_b, 1 + bool_bit(win));
+    Pop(r12, stack_b, 2 + bool_bit(win));
+    Pop(r15, stack_b, 3 + bool_bit(win));
+    Pop(rbx, stack_b, 4 + bool_bit(win));
+    Pop(rbp, stack_b, 5 + bool_bit(win));
+}
