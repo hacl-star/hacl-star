@@ -206,9 +206,6 @@ val alloc: region:erid -> i:id
  *     the refinement in the signature seems to be commented out
  *)
 let alloc region i ak k =
-  // JP: this proof stopped going through as I was adding --cmi to this
-  // directory... unsure what's happening, but it seemed fairly broken already.
-  admit ();
   let h0 = ST.get () in
   // FIXME(adl) these 2 allocations leak on every encryption!
   // mitigated with unsound_free below
@@ -485,7 +482,6 @@ val update: #i:id -> st:state i -> acc:accBuffer i -> w:lbuffer 16 ->
 
 #reset-options "--z3rlimit 100"
 let update #i st acc w =
-  admit ();
   let h0 = ST.get () in
   if mac_log then
     begin

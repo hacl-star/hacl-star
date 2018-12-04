@@ -15,11 +15,11 @@
 # IMPL_CHOICE.
 HACL_HOME=..
 
-DIST_DIR	= $(HACL_HOME)/secure_api/out/$(IMPL_CHOICE)
-
-all: verification $(DIST_DIR)/krml-test.exe concrete test vale
-
 include Makefile.common
+
+# Warning: these are not always buildable, depending on IMPL_CHOICE...! Consult
+# the main Makefile for valid combinations.
+all: $(DIST_DIR)/krml-test.exe
 
 ################################################################################
 # This Makefile ought to work with and without compiler support for UInt128    #
@@ -53,6 +53,12 @@ krml-test: $(DIST_DIR)/krml-test.exe.test
 # Building upon the generated .depend file				       #
 ################################################################################
 
+# Extraction runs F* in --lax mode
+ifeq (,$(VERIFY))
+FSTAR += --lax
+LAX = .lax
+endif
+
 # The entry points
 FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst
 
@@ -76,7 +82,6 @@ verification: $(addprefix $(CACHE_DIR)/,$(notdir $(addsuffix .checked,$(ALL_FST_
 	touch $@
 
 # Filling out the right invocations to generate a .krml
-.PRECIOUS: $(OUTPUT_DIR)/%.krml
 $(OUTPUT_DIR)/%.krml: | $(OUTPUT_DIR)
 	$(FSTAR) \
           $(subst $(CACHE_DIR)/,,$(subst .checked$(LAX),,$<)) \

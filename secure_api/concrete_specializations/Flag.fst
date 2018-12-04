@@ -33,6 +33,14 @@ let prf_cpa = false
 inline_for_extraction
 let safeHS (i:id) = false
 
+// controls PRF idealization of ciphers (move to PRF?)
+inline_for_extraction
+let prf (i: id): Tot bool = false
+
+// controls INT1CMA idealization of MACs (move to MAC?)
+inline_for_extraction
+let mac1 (i:id) : Tot bool = false
+
 // controls abstraction of plaintexts
 // (kept abstract, but requires all the crypto steps above)
 inline_for_extraction
@@ -41,6 +49,11 @@ let safeId (i:id) = false
 (* IDEALIZATION DEPENDENCIES *) 
 
 // review usage of these lemmas
+
+let mac1_implies_mac_log (i:id) : Lemma
+  (requires (mac1 i))
+  (ensures mac_log)
+  [SMTPat (mac1 i)] = ()
 
 let mac1_implies_prf (i:id) : Lemma
   (requires (mac1 i))
