@@ -24,7 +24,7 @@ let sk1 = List.Tot.map u8_from_UInt8 [
 let inputPoint = JacobianNat
 	(to_elem(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296))
 	(to_elem(0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5))
-	(to_elem(0x1))   
+	(to_elem(0x1))
 
 let outputPoint = JacobianNat
 	(to_elem(0x339150844EC15234807FE862A86BE77977DBFB3AE3D96F4C22795513AEAAB82F))
@@ -32,25 +32,22 @@ let outputPoint = JacobianNat
 	(to_elem(0x01))
 
 
-let test () = 
+let test () =
 	assert_norm(List.Tot.length sk1 = 32);
-	let scalar = of_list sk1 in 
+	let scalar = of_list sk1 in
 
 	let output = montgomery_ladder inputPoint scalar in
-	let x = output.xN in 
-	let y = output.yN in 
-	let z = output.zN in 
+	let x = output.xN in
+	let y = output.yN in
+	let z = output.zN in
 
-	let output = norm output in 
+	let output = norm output in
 
-	let x = output.xN in 
-	let y = output.yN in 
-	let z = output.zN in 
+	let x = output.xN in
+	let y = output.yN in
+	let z = output.zN in
 
+	let result1 = point_compare outputPoint output in
 
-
-	let result1 = point_compare outputPoint output in 
-
-	(* let result1 = true in  *)
 	if result1 then   IO.print_string "\nSuccess!\n"
   	else IO.print_string "\nFailure :(\n"
