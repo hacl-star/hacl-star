@@ -34,4 +34,6 @@ val print_label_dec_nat8: string -> x:nat{x <= maxint U8} -> FStar.All.ML unit
 val print_label_dec_nat32: string -> x:nat{x <= maxint U32} -> FStar.All.ML unit
 val print_label_dec_nat64: string -> x:nat{x <= maxint U64} -> FStar.All.ML unit
 
+val print_list_dec_nat32: list size_nat -> FStar.All.ML unit
+
 val print_compare: len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML bool
