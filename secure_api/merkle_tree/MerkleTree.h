@@ -87,12 +87,25 @@ extern bool mt_flush_pre(merkle_tree *mt);
 /** Flush the Merkle tree up to a given index
  *
  * @param[in]  mt   The Merkle tree
- * @param[in]  idx The index up to which to flush the tree
+ * @param[in]  idx  The index up to which to flush the tree
  */
 extern void mt_flush_to(merkle_tree *mt, uint64_t idx);
 
 /** Precondition predicate for mt_flush_to */
 extern bool mt_flush_to_pre(merkle_tree *mt, uint64_t idx);
+
+
+/** Retract the Merkle tree down to a given index
+ *
+ * @param[in]  mt   The Merkle tree
+ * @param[in]  idx  The index to retract the tree to
+ *
+ * Note: The element and idx will remain in the tree.
+ */
+extern void mt_retract_to(merkle_tree *mt, uint64_t idx);
+
+/** Precondition predicate for mt_retract_to */
+extern bool mt_retract_to_pre(merkle_tree *mt, uint64_t idx);
 
 
 /** Client-side verification

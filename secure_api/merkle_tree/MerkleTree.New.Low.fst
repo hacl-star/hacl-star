@@ -2627,7 +2627,7 @@ private val mt_retract_to_:
      ))
    (decreases (U32.v merkle_tree_size_lg - U32.v lv))
 
-#reset-options "--z3rlimit 800 --max_fuel 1 --admit_smt_queries true"
+#reset-options "--z3rlimit 800 --max_fuel 1"
 private let rec mt_retract_to_ hs lv i s j =
   let hh0 = HST.get () in
 
@@ -2850,7 +2850,7 @@ val mt_retract_to:
       let r = split_offset off r in
       High.mt_retract_to (mt_lift h0 mt) (U32.v r) == mt_lift h1 mt)))
 
-#reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0 --admit_smt_queries true"
+#reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 let rec mt_retract_to mt r =
   let hh0 = HST.get () in
   let mtv = !*mt in
@@ -2878,14 +2878,14 @@ let rec mt_retract_to mt r =
       (RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
       (V.loc_vector_within hs 0ul (V.size_of hs)))
     hh0 hh1;
-  mt *= MT (MT?.offset mtv) (r+1ul) (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv);
+  mt *= MT (MT?.offset mtv) (MT?.i mtv) (r+1ul) hs false (MT?.rhs mtv) (MT?.mroot mtv);
   let hh2 = HST.get () in
   RV.rv_inv_preserved (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.rv_inv_preserved (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.as_seq_preserved (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.as_seq_preserved (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
   Rgl?.r_sep hreg (MT?.mroot mtv) (B.loc_buffer mt) hh1 hh2;
-  mt_safe_elts_preserved 0ul hs (r+1ul) (MT?.j mtv) (B.loc_buffer mt) hh1 hh2
+  mt_safe_elts_preserved 0ul hs (MT?.i mtv) (r+1ul) (B.loc_buffer mt) hh1 hh2
 #reset-options
 
 /// Client-side verification
