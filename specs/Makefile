@@ -30,7 +30,7 @@ OTHER_ROOTS=Spec.Hash.Incremental.fst $(HACL_HOME)/code/lib/kremlin/FStar.Endian
 
 ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS) $(OTHER_ROOTS))
 
-all: verify test
+all: verify
 
 verify: $(ALL_CHECKED_FILES)
 

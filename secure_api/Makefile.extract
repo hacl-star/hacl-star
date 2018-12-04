@@ -76,6 +76,7 @@ verification: $(addprefix $(CACHE_DIR)/,$(notdir $(addsuffix .checked,$(ALL_FST_
 	touch $@
 
 # Filling out the right invocations to generate a .krml
+.PRECIOUS: $(OUTPUT_DIR)/%.krml
 $(OUTPUT_DIR)/%.krml: | $(OUTPUT_DIR)
 	$(FSTAR) \
           $(subst $(CACHE_DIR)/,,$(subst .checked$(LAX),,$<)) \

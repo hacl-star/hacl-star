@@ -48,8 +48,8 @@ INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/code/hash \
 	$(HACL_HOME)/code/hash/interfaces \
 	$(HACL_HOME)/code/salsa-family \
-	$(KREMLIN_HOME)/kremlib \
 	$(KREMLIN_HOME)/kremlib/compat \
+	$(KREMLIN_HOME)/kremlib \
 	$(HACL_HOME)/secure_api \
 	$(HACL_HOME)/secure_api/aead \
 	$(HACL_HOME)/secure_api/prf \
@@ -70,7 +70,7 @@ FSTAR_FLAGS=$(OTHERFLAGS) \
         --cache_checked_modules \
         $(INCLUDE_PATHS) \
         --odir $(OUTPUT_DIR) \
-        --use_hints
+        --use_hints --cmi
 
 # The F* compiler and the entry points.
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
