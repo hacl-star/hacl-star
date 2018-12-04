@@ -4,12 +4,9 @@ all: secure_api.build merkle_tree.build
 	$(MAKE) -C $*
 
 code.build: specs.build
-
-vale.build: VALE_SCONS_PARALLEL_OPT=-j 24
 vale.build: specs.build
-
+	SCONS_PARALLEL_OPT="-j 24" $(MAKE) -C vale
 providers.build: code.build vale.build
-
 secure_api.build: code.build
 
 merkle_tree.build: providers.build

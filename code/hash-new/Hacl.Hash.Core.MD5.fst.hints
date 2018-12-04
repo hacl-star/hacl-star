@@ -17,7 +17,7 @@
         "refinement_interpretation_FStar.Pervasives.Native_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5"
       ],
       0,
-      "105006fa4e76a256ce3285c14360c0a4"
+      "039f8309f36c8be806ed5c67931f6c5d"
     ],
     [
       "Hacl.Hash.Core.MD5._t",
@@ -35,7 +35,7 @@
         "refinement_interpretation_FStar.Pervasives.Native_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5"
       ],
       0,
-      "3edeb895c2b613034317bd2332a66088"
+      "b1912f147c49893937e3d315856d97dc"
     ],
     [
       "Hacl.Hash.Core.MD5.alloca",
@@ -67,7 +67,7 @@
         "typing_Spec.SHA2.Constants.k224_256"
       ],
       0,
-      "f969c9bfe3dc47d9f04e36981a36e1d3"
+      "abd3300a735a387e627ece637985babf"
     ],
     [
       "Hacl.Hash.Core.MD5.h0",
@@ -109,7 +109,7 @@
         "typing_LowStar.ImmutableBuffer.immutable_preorder"
       ],
       0,
-      "04aee2416647f40e08dde419564fcbfa"
+      "e4e5eebabb88ce0a0d8d6152925c286d"
     ],
     [
       "Hacl.Hash.Core.MD5.t",
@@ -143,7 +143,7 @@
         "typing_LowStar.ImmutableBuffer.immutable_preorder"
       ],
       0,
-      "5a8a4ed64b52087dc00dd2544b4805e7"
+      "139fa4604129e6f1f17d57ce730924e2"
     ],
     [
       "Hacl.Hash.Core.MD5.seq_index_upd",
@@ -183,7 +183,7 @@
         "typing_LowStar.Monotonic.Buffer.len", "unit_typing"
       ],
       0,
-      "a44d2665dd1969873012948522aa6ce5"
+      "3f3b3dc87648213ef16a82ea6df4c545"
     ],
     [
       "Hacl.Hash.Core.MD5.init",
@@ -191,11 +191,8 @@
       2,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "constructor_distinct_Prims.Cons",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Spec.Hash.Helpers.MD5",
         "equality_tok_Spec.Hash.Helpers.MD5@tok",
         "equation_FStar.Monotonic.HyperStack.mem", "equation_FStar.UInt32.n",
@@ -210,7 +207,6 @@
         "equation_Spec.Hash.Helpers.word", "equation_Spec.Hash.init",
         "equation_Spec.MD5.abcd_idx", "equation_Spec.MD5.ia",
         "equation_Spec.MD5.init", "equation_Spec.MD5.init_as_list",
-        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
         "function_token_typing_FStar.UInt32.n",
         "function_token_typing_FStar.UInt32.t",
         "function_token_typing_LowStar.Buffer.trivial_preorder",
@@ -238,9 +234,6 @@
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Prims.Cons_a",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_cd046bc4a887ee7e1b05946e0bf5772b",
@@ -261,7 +254,7 @@
         "typing_Spec.Hash.init", "typing_tok_Spec.Hash.Helpers.MD5@tok"
       ],
       0,
-      "68e4809dba57098927e38ee3b75f8473"
+      "fedbc228828b1dde75332583b8a4089d"
     ],
     [
       "Hacl.Hash.Core.MD5.round_op_gen",
@@ -296,7 +289,7 @@
         "typing_FStar.UInt32.v", "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "40c2e8451f80b58c730ba57612684ecf"
+      "ef8189a9d76d818d2ca915cc36ab90bb"
     ],
     [
       "Hacl.Hash.Core.MD5.round_op_gen",
@@ -393,7 +386,7 @@
         "typing_Spec.SHA2.Constants.k224_256"
       ],
       0,
-      "b46e0bc20cfa2b44fb4fe88bffc216b9"
+      "2132b74a923aca53acfc08055043c9ae"
     ],
     [
       "Hacl.Hash.Core.MD5.round1",
@@ -460,7 +453,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "169835a669da5cf30953517085959daf"
+      "7a15fcb975fae0288a1a01911a7e975e"
     ],
     [
       "Hacl.Hash.Core.MD5.round2",
@@ -533,7 +526,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "0ec5f4d83602f8d2127539f72332fae2"
+      "4808f8b46c5698964f42230893f21c8a"
     ],
     [
       "Hacl.Hash.Core.MD5.round3",
@@ -606,7 +599,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "2a3bb88b33cf5e845f61550cab56e24f"
+      "cfc03a4ed9549cac3428cb76f8fd3a74"
     ],
     [
       "Hacl.Hash.Core.MD5.round4",
@@ -680,7 +673,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "bf5875402973cf470a7c71a8f83a058b"
+      "b11fafb3619aead153e1237ac52a1c19"
     ],
     [
       "Hacl.Hash.Core.MD5.rounds",
@@ -711,7 +704,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "0252b30585c39f80cd8e61dfd2a5e68f"
+      "7e25621da5fb7eead557cb02412a7c5d"
     ],
     [
       "Hacl.Hash.Core.MD5.overwrite",
@@ -770,7 +763,7 @@
         "typing_tok_Spec.Hash.Helpers.MD5@tok"
       ],
       0,
-      "5756d1faf374727b4d5c5dafdf1b215e"
+      "dccfc7af470e2d830172d745b9883bde"
     ],
     [
       "Hacl.Hash.Core.MD5.update'",
@@ -816,7 +809,7 @@
         "typing_tok_Spec.Hash.Helpers.MD5@tok"
       ],
       0,
-      "206ee6b61d49c63d2a663933e8db286c"
+      "ffec401657afe369ef95a35c367b74a4"
     ],
     [
       "Hacl.Hash.Core.MD5.uu___90",
@@ -828,7 +821,7 @@
         "equality_tok_Spec.Hash.Helpers.MD5@tok", "equation_Spec.Hash.update"
       ],
       0,
-      "5db68697d6e3e493c17aa9945fc12c63"
+      "8ba924921dbf2450a77229d81607cdfb"
     ],
     [
       "Hacl.Hash.Core.MD5.update",
@@ -872,7 +865,7 @@
         "typing_tok_Spec.Hash.Helpers.MD5@tok"
       ],
       0,
-      "4f4d0a1f482d66f38e6494ce4a434faa"
+      "28e8bd90411600605c39ab9e123c86ec"
     ]
   ]
 ]
