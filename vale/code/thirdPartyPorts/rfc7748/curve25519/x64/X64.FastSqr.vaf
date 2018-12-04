@@ -410,6 +410,162 @@ procedure{:quick}{:public} fast_sqr_stdcall(
     Pop(r15, stack_b, 4);
 }
 
+/*
+#reset-options "--z3rlimit 30" 
+procedure{:quick} fast_sqr_loop(
+    inline offset:nat,
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64)
+    lets
+        dst_ptr @= rdi;
+        inA_ptr @= rsi;
+        count   @= rbx;
+
+        a0 := buffer64_read(inA_b, 0 + offset, mem);
+        a1 := buffer64_read(inA_b, 1 + offset, mem);
+        a2 := buffer64_read(inA_b, 2 + offset, mem);
+        a3 := buffer64_read(inA_b, 3 + offset, mem);
+
+        a := pow2_four(a0, a1, a2, a3);
+    reads
+        dst_ptr; inA_ptr; memTaint;
+
+    modifies
+        rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15;
+        mem; efl;
+
+    requires
+        adx_enabled && bmi2_enabled;
+        offset == 0 || offset == 4;
+        buffers_disjoint(dst_b, inA_b);
+
+        validDstAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4 + offset, memTaint, Secret);
+
+    ensures
+        let d0 := buffer64_read(dst_b, 0 + offset*2, mem);
+        let d1 := buffer64_read(dst_b, 1 + offset*2, mem);
+        let d2 := buffer64_read(dst_b, 2 + offset*2, mem);
+        let d3 := buffer64_read(dst_b, 3 + offset*2, mem);
+        let d4 := buffer64_read(dst_b, 4 + offset*2, mem);
+        let d5 := buffer64_read(dst_b, 5 + offset*2, mem);
+        let d6 := buffer64_read(dst_b, 6 + offset*2, mem);
+        let d7 := buffer64_read(dst_b, 7 + offset*2, mem);
+        let d := pow2_eight(d0, d1, d2, d3, d4, d5, d6, d7);
+        //d == a * a;
+
+        validSrcAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
+        modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
+{
+    while (count > 0) 
+        invariant
+            0 <= count <= old(count);
+
+            adx_enabled && bmi2_enabled;
+            offset == 0 || offset == 4;
+            buffers_disjoint(dst_b, inA_b);
+
+            validDstAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
+            validSrcAddrs64(mem, inA_ptr, inA_b, 4 + offset, memTaint, Secret);
+        
+            modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
+        decreases count;
+    {
+        fast_sqr(offset, dst_b, inA_b);
+        Sub64(count, 1);
+    }
+}
+
+#reset-options "--z3rlimit 20"
+
+procedure{:quick}{:public} fast_sqr_loop_stdcall(
+    inline win:bool,
+    ghost dst_b:buffer64,
+    ghost inA_b:buffer64,
+    ghost stack_b:buffer64)
+    lets
+        dst_ptr @= rdi; inA_ptr @= rsi; count @= rbx;
+        dst_in   := (if win then rcx else rdi);
+        inA_in   := (if win then rdx else rsi);
+        count_in := (if win then  r8 else rdx);
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rsp; efl; mem;
+    requires
+        adx_enabled && bmi2_enabled;
+        buffers_disjoint(dst_b, inA_b);
+
+        buffers_disjoint(stack_b, dst_b);
+        buffers_disjoint(stack_b, inA_b);
+
+        validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
+        valid_stack_slots(mem, rsp, stack_b, 6, memTaint);
+    ensures
+        let a0 := old(buffer64_read(inA_b, 0, mem));
+        let a1 := old(buffer64_read(inA_b, 1, mem));
+        let a2 := old(buffer64_read(inA_b, 2, mem));
+        let a3 := old(buffer64_read(inA_b, 3, mem));
+
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+        let d4 := buffer64_read(dst_b, 4, mem);
+        let d5 := buffer64_read(dst_b, 5, mem);
+        let d6 := buffer64_read(dst_b, 6, mem);
+        let d7 := buffer64_read(dst_b, 7, mem);
+
+        let a := a0 + pow2_64 * a1 + pow2_128 * a2 + pow2_192 * a3;
+
+        let d := d0 + pow2_64 * d1 + pow2_128 * d2 + pow2_192 * d3 +
+                 pow2_256 * d4 + pow2_320 * d5 + pow2_384 * d6 + pow2_448 * d7;
+        d == a * a;
+
+        //////////////////////////////////////
+        //   Framing
+        //////////////////////////////////////
+
+        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
+
+        rbx == old(rbx);
+        rsi == old(rsi);
+        r12 == old(r12);
+        r13 == old(r13);
+        r14 == old(r14);
+        r15 == old(r15);
+
+        rsp == old(rsp);
+{
+    // Store callee-save registers
+    Push(rbx, stack_b, 5);
+    Push(r15, stack_b, 4);
+    Push(rsi, stack_b, 3);
+    Push(r12, stack_b, 2);
+    Push(r13, stack_b, 1);
+    Push(r14, stack_b, 0);
+
+    // Line up the rest of the arguments
+    inline if (win) {
+        Mov64(dst_ptr, rcx);
+        Mov64(inA_ptr, rdx);
+        Mov64(count, r8);
+    } else {
+        Mov64(count, rdx);
+    }
+
+    fast_sqr(0, dst_b, inA_b);
+
+    Pop(r14, stack_b, 0);
+    Pop(r13, stack_b, 1);
+    Pop(r12, stack_b, 2);
+    Pop(rsi, stack_b, 3);
+    Pop(r15, stack_b, 4);
+    Pop(rbx, stack_b, 5);
+}
+*/
 
 procedure{:quick}{:public} sqr2_stdcall(
     inline win:bool,
