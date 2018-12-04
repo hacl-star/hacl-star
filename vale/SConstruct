@@ -254,7 +254,11 @@ class BuildOptions:
 #
 ##################################################################################################
 
-fstar_default_args_nosmtencoding = ('--max_fuel 1 --max_ifuel 1'
+def fstar_default_args_nosmtencoding(relative=True):
+  cache_dir = 'obj/cache_checked'
+  cache_dir = cache_dir if relative else os.path.abspath(cache_dir)
+
+  return ('--max_fuel 1 --max_ifuel 1'
   + (' --initial_ifuel 1' if is_single_vaf else ' --initial_ifuel 0')
   # The main purpose of --z3cliopt smt.QI.EAGER_THRESHOLD=100 is to make sure that matching loops get caught
   # Don't remove unless you're sure you've used the axiom profiler to make sure you have no matching loops
@@ -262,10 +266,12 @@ fstar_default_args_nosmtencoding = ('--max_fuel 1 --max_ifuel 1'
   + ' --hint_info'
   + (' --use_hints --use_hint_hashes' if use_hints else '')
   + (' --cache_off' if record_hints else ' --cache_checked_modules')
-  + ' --cache_dir obj/cache_checked'
+  + ' --cache_dir ' + cache_dir
   + ' --use_extracted_interfaces true'
   )
-fstar_default_args = (fstar_default_args_nosmtencoding
+
+def fstar_default_args(relative=True):
+  return (fstar_default_args_nosmtencoding(relative)
   + ' --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped'
   )
 
@@ -337,7 +343,7 @@ manual_dependencies = {
 # Table of special-case sources which requires non-default arguments
 #
 verify_options = [
-  ('code/lib/util/operator.vaf', BuildOptions(fstar_default_args, vale_includes = '')),
+  ('code/lib/util/operator.vaf', BuildOptions(fstar_default_args(), vale_includes = '')),
 
   # Special treatment for sensitive modules
 
@@ -345,37 +351,37 @@ verify_options = [
 
 #  ('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastSqr.vaf', None),
 
-  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
+  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
 
-  ('code/*/*.fst', BuildOptions(fstar_default_args)),
-  ('code/*/*.fsti', BuildOptions(fstar_default_args)),
-  ('specs/*/*.fst', BuildOptions(fstar_default_args)),
-  ('specs/*/*.fsti', BuildOptions(fstar_default_args)),
+  ('code/*/*.fst', BuildOptions(fstar_default_args())),
+  ('code/*/*.fsti', BuildOptions(fstar_default_args())),
+  ('specs/*/*.fst', BuildOptions(fstar_default_args())),
+  ('specs/*/*.fsti', BuildOptions(fstar_default_args())),
 
   # .fst/.fsti files default to this set of options
-  ('.fst', BuildOptions(fstar_default_args + ' --use_two_phase_tc false')),
-  ('.fsti', BuildOptions(fstar_default_args + ' --use_two_phase_tc false')),
+  ('.fst', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
+  ('.fsti', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
 
-  ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
-  ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
+  ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args().replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
+  ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args().replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
 
-  ('code/arch/x64/X64.BufferViewStore.fst', BuildOptions(fstar_default_args_nosmtencoding + ' --smtencoding.elim_box true')),
-  ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
-  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding)),
-  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding)),
-  ('code/arch/x64/X64.Memory_s.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
-  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
-  ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
-  ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', ''))),
+  ('code/arch/x64/X64.BufferViewStore.fst', BuildOptions(fstar_default_args_nosmtencoding() + ' --smtencoding.elim_box true')),
+  ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
+  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding())),
+  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding())),
+  ('code/arch/x64/X64.Memory_s.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
+  ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', ''))),
 
   # We copy these files from F*'s library because we need to generate a .checked file for them,
   # but we don't need to reverify them:
   ('obj/external/*.fst', BuildOptions('--cache_checked_modules --admit_smt_queries true')),
 
   # .vaf files default to this set of options when compiling .fst/.fsti
-  ('.vaf', BuildOptions(fstar_default_args + ' --use_two_phase_tc false'))
+  ('.vaf', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false'))
 ]
 
 verify_options_dict = { k:v for (k,v) in verify_options}
@@ -609,7 +615,7 @@ def check_vale_version():
 
 def print_dump_args():
   #print('Currently using the following F* args:')
-  options = fstar_default_args
+  options = fstar_default_args(relative=False)
   if len(COMMAND_LINE_TARGETS) > 0:
     options = get_build_options(File(COMMAND_LINE_TARGETS[0])).verifier_flags
     #print("The options are: %s" % options.verifier_flags)
