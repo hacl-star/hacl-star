@@ -5,12 +5,12 @@ HACL_HOME    ?= ../../..
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
-GENERATED_DIR = x25519-c
-OUT_DIR	      = x25519-c
+GENERATED_DIR = aes128-bitslice-c
+OUT_DIR	      = aes128-bitslice-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: curve25519_51.exe curve25519_64.exe
+all: aes128-ni.exe aes128-bitslice.exe
 
 verify: test
 
@@ -41,30 +41,30 @@ AES_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 
 KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
 
-aes-bitslice-c/out.krml: $(AES_BS_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-bitslice-c $(AES_BS_FILES) -skip-translation
+aes128-bitslice-c/out.krml: $(AES_BS_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes128-bitslice-c $(AES_BS_FILES) -skip-translation
 
-aes-bitslice-c/Hacl_Aes_BitSlice.c: aes-bitslice-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-bitslice-c $^ -skip-compilation \
+aes128-bitslice-c/Hacl_Aes_BitSlice.c: aes128-bitslice-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes128-bitslice-c $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Aes.BitSlice=*'
 
-aes128-bitslice.exe: aes-bitslice-c/Hacl_Aes_BitSlice.c aes-bitslice-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aes-bitslice-c/Hacl_Aes_BitSlice.c $(KREMLIN_HOME)/kremlib/c/testlib.o aes-bitslice-test.c -o aes128-bitslice.exe
+aes128-bitslice.exe: aes128-bitslice-c/Hacl_Aes_BitSlice.c aes128-bitslice-test.c
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aes128-bitslice-c/Hacl_Aes_BitSlice.c $(KREMLIN_HOME)/kremlib/c/testlib.o aes128-bitslice-test.c -o aes128-bitslice.exe
 	./aes128-bitslice.exe
 
 
-aes-ni-c/out.krml: $(AES_NI_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-ni-c $(AES_NI_FILES) -skip-translation
+aes128-ni-c/out.krml: $(AES_NI_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes128-ni-c $(AES_NI_FILES) -skip-translation
 
-aes-ni-c/Hacl_Aes_NI.c: aes-ni-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes-ni-c  $^ -skip-compilation \
+aes128-ni-c/Hacl_Aes_NI.c: aes128-ni-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes128-ni-c  $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Aes.NI=*'
 
-aes128-ni.exe: aes-ni-c/Hacl_Aes_NI.c aes-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aes-ni-c/Hacl_Aes_NI.c $(KREMLIN_HOME)/kremlib/c/testlib.o aes-ni-test.c -o aes128-ni.exe
+aes128-ni.exe: aes128-ni-c/Hacl_Aes_NI.c aes128-ni-test.c
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aes128-ni-c/Hacl_Aes_NI.c $(KREMLIN_HOME)/kremlib/c/testlib.o aes128-ni-test.c -o aes128-ni.exe
 	./aes128-ni.exe
 
-aes-perf: aes128-bitslice.exe aes128-ni.exe
+aes128-perf: aes128-bitslice.exe aes128-ni.exe
 	./aes128-bitslice.exe
 	./aes128-ni.exe
 
