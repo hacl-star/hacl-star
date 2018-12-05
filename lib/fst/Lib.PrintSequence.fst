@@ -98,6 +98,12 @@ let print_label_dec_nat64 s x =
   print_dec_nat64 x;
   IO.print_string "\n"
 
+let print_list_dec_nat32 l =
+  repeat_range_all_ml 0 (List.Tot.length l) (fun i _ ->
+    print_dec_nat32 (List.Tot.index l i);
+    IO.print_string " "
+) ()
+
 let print_compare len expected result =
   IO.print_string "\n\nResult:   ";
   List.iter (fun a -> print_hex_uint8 a) (to_list result);
