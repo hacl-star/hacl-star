@@ -22,11 +22,21 @@ extern path init_path();
 extern void free_path(path p);
 extern void clear_path(path p);
 
-/** Construction */
-extern merkle_tree *mt_create(uint8_t *init1);
+/** Construction
+ *
+ * @param[in]  i   The initial hash
+ *
+ */
+extern merkle_tree *mt_create(hash i);
 
-/** Destruction */
+
+/** Destruction
+ *
+ * @param[in]  mt  The Merkle tree
+ *
+ */
 extern void mt_free(merkle_tree *mt);
+
 
 /* Insertion
  *
