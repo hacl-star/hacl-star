@@ -14,11 +14,10 @@
         "function_token_typing_Types_s.twobits",
         "function_token_typing_Words_s.nat8",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "haseqGCTR_s_Tm_refine_e5e1444c782916d97951a08c4f200853",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "81357cf881db931cdfa456221ec8db81"
+      "9fcd7db055cae7642f3d1644820a5fc3"
     ],
     [
       "GCTR_s.gctr_plain_internal_LE",
@@ -32,7 +31,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "bd6a3477563e8111574121d2ae592839"
+      "071b7c7dd7db3513da8cf6f1bec6f41c"
     ],
     [
       "GCTR_s.inc32",
@@ -41,7 +40,7 @@
       0,
       [ "@query" ],
       0,
-      "23acbf21b85aa831cc1c1eed46d41821"
+      "61dcb6ee499521428fb4fbab2833f30b"
     ],
     [
       "GCTR_s.gctr_encrypt_block",
@@ -50,177 +49,49 @@
       0,
       [ "@query" ],
       0,
-      "f831df4df176dbd85df4d99dc84b6899"
+      "11ef265294e6ea55f777537d72a08fb3"
     ],
     [
       "GCTR_s.gctr_encrypt_recursive",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "binder_x_6b6e0a8b559c53eb08aca5475e30d343_1",
-        "binder_x_b079fbd7382f17288f472bd4c6b675a7_3",
-        "equality_tok_Prims.LexTop@tok", "equation_AES_s.aes_key_LE",
-        "equation_FStar.Seq.Properties.tail",
-        "equation_GCTR_s.gctr_plain_internal_LE", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.quad32",
-        "equation_Words_s.nat32", "function_token_typing_Types_s.quad32",
-        "int_inversion", "int_typing",
-        "lemma_FStar.Seq.Base.lemma_len_slice",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_AES_s_Tm_refine_76ed5239a4c8f168059df36a5006e0f8",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
-      ],
-      0,
-      "48e12662e1314297b802ca4db61ad078"
-    ],
-    [
-      "GCTR_s.pad_to_128_bits",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.nat",
-        "equation_Words_s.nat8", "equation_Words_s.natN",
-        "function_token_typing_Words_s.nat8", "int_typing",
-        "lemma_FStar.Seq.Base.lemma_create_len",
-        "lemma_FStar.Seq.Base.lemma_len_append",
-        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
-      ],
-      0,
-      "481909d01f61430022aca29f47d014c4"
-    ],
-    [
-      "GCTR_s.gctr_encrypt_LE_def",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "b2t_def", "equation_FStar.Seq.Base.op_At_Bar",
-        "equation_FStar.Seq.Properties.split",
-        "equation_GCTR_s.is_gctr_plain_LE",
-        "equation_GCTR_s.pad_to_128_bits", "equation_Prims.nat",
-        "equation_Words_s.nat8", "equation_Words_s.natN",
-        "function_token_typing_Words_s.nat8", "int_inversion", "int_typing",
-        "lemma_FStar.Seq.Base.lemma_create_len",
-        "lemma_FStar.Seq.Base.lemma_len_append",
-        "lemma_FStar.Seq.Base.lemma_len_slice",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length"
-      ],
-      0,
-      "8070ca54017b49cbae9db37910be2ff8"
-    ],
-    [
-      "GCTR_s.gctr_plain_LE",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "assumption_FStar.Seq.Base.seq__uu___haseq", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.twobits",
-        "equation_Words_s.nat8", "equation_Words_s.natN",
-        "function_token_typing_Types_s.twobits",
-        "function_token_typing_Words_s.nat8",
-        "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "haseqGCTR_s_Tm_refine_e5e1444c782916d97951a08c4f200853",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "b9780f67c853de33a1c19cf3140decd1"
-    ],
-    [
-      "GCTR_s.gctr_plain_internal_LE",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "assumption_FStar.Seq.Base.seq__uu___haseq", "equation_Prims.eqtype",
-        "equation_Types_s.quad32", "function_token_typing_Types_s.quad32",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "4254bf6d70094998a7235ff68ba4c251"
-    ],
-    [
-      "GCTR_s.inc32",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "0e6937018a20a642e47a4dd59b1b5bcc"
-    ],
-    [
-      "GCTR_s.gctr_encrypt_block",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "96bc339c322ff0347a9d6a52b2c4e4cd"
-    ],
-    [
-      "GCTR_s.gctr_encrypt_recursive",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "binder_x_6b6e0a8b559c53eb08aca5475e30d343_1",
-        "binder_x_b079fbd7382f17288f472bd4c6b675a7_3",
-        "equality_tok_Prims.LexTop@tok", "equation_AES_s.aes_key_LE",
-        "equation_FStar.Seq.Properties.tail",
-        "equation_GCTR_s.gctr_plain_internal_LE", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.quad32",
-        "equation_Words_s.nat32", "function_token_typing_Types_s.quad32",
-        "int_inversion", "int_typing",
-        "lemma_FStar.Seq.Base.lemma_len_slice",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_AES_s_Tm_refine_76ed5239a4c8f168059df36a5006e0f8",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
-      ],
-      0,
-      "b84ba7c696bb67e4c76d94422213d147"
-    ],
-    [
-      "GCTR_s.pad_to_128_bits",
-      2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "equation_FStar.Seq.Base.op_At_Bar",
-        "equation_Prims.nat", "equation_Words_s.nat8",
-        "equation_Words_s.natN", "equation_Words_s.pow2_1",
-        "function_token_typing_Words_s.nat8",
+        "binder_x_6b6e0a8b559c53eb08aca5475e30d343_1",
+        "binder_x_b079fbd7382f17288f472bd4c6b675a7_3",
+        "equality_tok_Prims.LexTop@tok", "equation_AES_s.aes_key_LE",
+        "equation_FStar.Seq.Properties.tail",
+        "equation_GCTR_s.gctr_plain_internal_LE", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Types_s.quad32",
+        "equation_Words_s.nat32", "equation_Words_s.pow2_1",
+        "function_token_typing_Types_s.quad32",
+        "function_token_typing_Words_s.pow2_1", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_AES_s_Tm_refine_76ed5239a4c8f168059df36a5006e0f8",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
+      ],
+      0,
+      "20b948f84a09e92231b1c9fbb0ff6c40"
+    ],
+    [
+      "GCTR_s.pad_to_128_bits",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.nat",
+        "equation_Words_s.nat8", "equation_Words_s.natN",
+        "equation_Words_s.pow2_1", "function_token_typing_Words_s.nat8",
         "function_token_typing_Words_s.pow2_1", "int_typing",
         "lemma_FStar.Seq.Base.lemma_create_len",
         "lemma_FStar.Seq.Base.lemma_len_append",
@@ -230,17 +101,16 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "dd2f4cdd788e232a4ff2fda351ea6772"
+      "dd3557b4648f5fee08d603c49155d4c0"
     ],
     [
       "GCTR_s.gctr_encrypt_LE_def",
-      2,
+      1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_Prims.HasEq_int", "b2t_def",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "equation_FStar.Seq.Base.op_At_Bar",
         "equation_FStar.Seq.Properties.split",
         "equation_GCTR_s.is_gctr_plain_LE",
@@ -263,7 +133,141 @@
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length"
       ],
       0,
-      "b63fc0a26d2f1a56dae63e57cebc1261"
+      "aed16a83488c052681556d26de870254"
+    ],
+    [
+      "GCTR_s.gctr_plain_LE",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.Seq.Base.seq__uu___haseq", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Types_s.twobits",
+        "equation_Words_s.nat8", "equation_Words_s.natN",
+        "function_token_typing_Types_s.twobits",
+        "function_token_typing_Words_s.nat8",
+        "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "f851bb5b2f24b0e439290470a4218ec0"
+    ],
+    [
+      "GCTR_s.gctr_plain_internal_LE",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.Seq.Base.seq__uu___haseq", "equation_Prims.eqtype",
+        "equation_Types_s.quad32", "function_token_typing_Types_s.quad32",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "b494e6389eb1b1f8e32706f9b799bcc7"
+    ],
+    [
+      "GCTR_s.inc32",
+      2,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "f8dbe1a7fd66043f1ba454a57a780726"
+    ],
+    [
+      "GCTR_s.gctr_encrypt_block",
+      2,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "0392099a834d63e857c03e83c7937097"
+    ],
+    [
+      "GCTR_s.gctr_encrypt_recursive",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_6b6e0a8b559c53eb08aca5475e30d343_1",
+        "binder_x_b079fbd7382f17288f472bd4c6b675a7_3",
+        "equality_tok_Prims.LexTop@tok", "equation_AES_s.aes_key_LE",
+        "equation_FStar.Seq.Properties.tail",
+        "equation_GCTR_s.gctr_plain_internal_LE", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Types_s.quad32",
+        "equation_Words_s.nat32", "equation_Words_s.pow2_1",
+        "function_token_typing_Types_s.quad32",
+        "function_token_typing_Words_s.pow2_1", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_AES_s_Tm_refine_76ed5239a4c8f168059df36a5006e0f8",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
+      ],
+      0,
+      "e1cf5bbd0af01efd33f2ab1e91b8bfa2"
+    ],
+    [
+      "GCTR_s.pad_to_128_bits",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.nat",
+        "equation_Words_s.nat8", "equation_Words_s.natN",
+        "equation_Words_s.pow2_1", "function_token_typing_Words_s.nat8",
+        "function_token_typing_Words_s.pow2_1", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+      ],
+      0,
+      "b3efdb492d6b60bfc3eed2468093ae84"
+    ],
+    [
+      "GCTR_s.gctr_encrypt_LE_def",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_FStar.Seq.Properties.split",
+        "equation_GCTR_s.is_gctr_plain_LE",
+        "equation_GCTR_s.pad_to_128_bits", "equation_Prims.nat",
+        "equation_Words_s.nat8", "equation_Words_s.natN",
+        "equation_Words_s.pow2_1", "function_token_typing_Words_s.nat8",
+        "function_token_typing_Words_s.pow2_1", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length"
+      ],
+      0,
+      "67b9abeb93123475ad6bb333035a064f"
     ]
   ]
 ]

@@ -1,5 +1,5 @@
 [
-  "!}æN[\u0016â>\u000bPžo\u00177\u000e\u001f",
+  ")2\u001bZôY3Vÿöýlµ¬”™",
   [
     [
       "X64.Leakage_s.publicFlagValuesAreSame",
@@ -15,16 +15,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "aecc77d5dc7723535792aa84d7079346"
-    ],
-    [
-      "X64.Leakage_s.publicCfFlagValuesAreSame",
-      1,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_bool" ],
-      0,
-      "8357dad330e525200ed2ed508f08ec18"
+      "a396a88b068ea63ff5d42a605b0adf3f"
     ],
     [
       "X64.Leakage_s.publicRegisterValuesAreSame",
@@ -40,16 +31,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "ada28fe332bb6eb521c6344119b23465"
-    ],
-    [
-      "X64.Leakage_s.publicMemValuesAreSame",
-      1,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0,
-      "1583de0a551785bce3115dd27e3e96be"
+      "5caa63b8222c0ab6bd2821ce432e9323"
     ],
     [
       "X64.Leakage_s.constTimeInvariant",
@@ -64,7 +46,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "caeac8a1b13f1364e6dd86fc279f0a74"
+      "b7ab3505aa6b4f47c51780fb6eec902b"
     ],
     [
       "X64.Leakage_s.isConstantTimeGivenStates",
@@ -79,16 +61,25 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e921f19596dd8cc7fb71d9fddaa36e81"
+      "fb37b7344e60dc70670ed5b9d5a386a4"
     ],
     [
-      "X64.Leakage_s.isExplicitLeakageFreeGivenStates",
+      "X64.Leakage_s.is_explicit_leakage_free_lhs",
       1,
       1,
       0,
       [ "@query" ],
       0,
-      "19a137e44c6a205b66da915c08cad0db"
+      "db0a0563d079829d62cc532bb610fb91"
+    ],
+    [
+      "X64.Leakage_s.is_explicit_leakage_free_rhs",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "f599a40e76b1d8a775b16451aa7f2258"
     ],
     [
       "X64.Leakage_s.publicFlagValuesAreSame",
@@ -104,16 +95,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "48dfc4c54cdaacef2f8250e9df2f9feb"
-    ],
-    [
-      "X64.Leakage_s.publicCfFlagValuesAreSame",
-      2,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_bool" ],
-      0,
-      "c15b62d7006445d86191086bbf94f256"
+      "ba617747231d7f7d04b24155af5877cb"
     ],
     [
       "X64.Leakage_s.publicRegisterValuesAreSame",
@@ -129,16 +111,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "87faff01d7860e1d64d49b3e8226737c"
-    ],
-    [
-      "X64.Leakage_s.publicMemValuesAreSame",
-      2,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0,
-      "c61ee037c9506871250dcbadac11f49e"
+      "242725e697becd81b6ab2b29dae9887f"
     ],
     [
       "X64.Leakage_s.constTimeInvariant",
@@ -153,7 +126,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "b70aa86386d336e511c3476ad61b712b"
+      "1c87e43810b65f9ca7bf553f78f5f90c"
     ],
     [
       "X64.Leakage_s.isConstantTimeGivenStates",
@@ -168,16 +141,25 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "32281bb456f3c84191a205989110f559"
+      "a29d6f63715239afee4f96e44a5d55d9"
     ],
     [
-      "X64.Leakage_s.isExplicitLeakageFreeGivenStates",
+      "X64.Leakage_s.is_explicit_leakage_free_lhs",
       2,
       1,
       0,
       [ "@query" ],
       0,
-      "9f4563fc2f3f625d377948d77f594d90"
+      "8ef002e0f45d880c9d1fc17d71c4dc38"
+    ],
+    [
+      "X64.Leakage_s.is_explicit_leakage_free_rhs",
+      2,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "d138a0a9de35e507a9f558c31158a1e9"
     ]
   ]
 ]

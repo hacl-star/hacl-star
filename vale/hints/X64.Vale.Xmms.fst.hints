@@ -1,38 +1,103 @@
 [
-  "§æ„H0B‡·’0‚≈¿DÊ·",
+  "\u0003J/8\u0004˝Ã˚Mù·Éé›=Q",
   [
+    [
+      "X64.Vale.Xmms.of_fun",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Words_s.pow2_1", "equation_X64.Machine_s.xmm",
+        "function_token_typing_Words_s.pow2_1", "int_inversion",
+        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd"
+      ],
+      0,
+      "ed4a8544e00990eb40273aa37589c040"
+    ],
+    [
+      "X64.Vale.Xmms.lemma_upd_eq",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Map16.map2",
+        "equation_Map16.map4", "equation_Map16.sel2", "equation_Map16.sel4",
+        "equation_Map16.sel8", "equation_Map16.upd2", "equation_Map16.upd4",
+        "equation_Map16.upd8", "equation_Types_s.quad32",
+        "equation_Words_s.nat32", "equation_X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Words_s.four", "int_inversion", "int_typing",
+        "primitive_Prims.op_LessThan",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd"
+      ],
+      0,
+      "4114281cad7cc783695c007d132a4513"
+    ],
+    [
+      "X64.Vale.Xmms.lemma_upd_ne",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Map16.map2",
+        "equation_Map16.map4", "equation_Map16.sel2", "equation_Map16.sel4",
+        "equation_Map16.sel8", "equation_Map16.upd2", "equation_Map16.upd4",
+        "equation_Map16.upd8", "equation_Types_s.quad32",
+        "equation_Words_s.nat32", "equation_X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Words_s.four", "int_inversion", "int_typing",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd"
+      ],
+      0,
+      "51382b4d186c0d4c314663c24b37cbcd"
+    ],
     [
       "X64.Vale.Xmms.lemma_equal_intro",
       1,
       1,
       0,
       [
-        "@query", "equation_FStar.FunctionalExtensionality.feq",
-        "equation_X64.Machine_s.xmm", "equation_X64.Vale.Xmms.equal"
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "eq2-interp",
+        "equation_Words_s.pow2_1", "equation_X64.Machine_s.xmm",
+        "equation_X64.Vale.Xmms.equal",
+        "function_token_typing_Words_s.pow2_1", "int_inversion",
+        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd"
       ],
       0,
-      "592ca6da3673b3a365b42aa19306ed9e"
+      "931308e2f954949c688faf55df868dfc"
     ],
     [
       "X64.Vale.Xmms.lemma_equal_elim",
       1,
       1,
       0,
+      [ "@query", "eq2-interp", "equation_X64.Vale.Xmms.equal" ],
+      0,
+      "ea260a65a6373d2579a7bc99793dcf9c"
+    ],
+    [
+      "X64.Vale.Xmms.lemma_eta",
+      1,
+      1,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
-        "equation_FStar.FunctionalExtensionality.is_restricted",
-        "equation_FStar.FunctionalExtensionality.restricted_t",
-        "equation_Prims.eqtype", "equation_Types_s.quad32",
-        "equation_X64.Machine_s.xmm", "equation_X64.Vale.Xmms.equal",
-        "equation_X64.Vale.Xmms.t",
-        "function_token_typing_X64.Machine_s.xmm",
-        "lemma_FStar.FunctionalExtensionality.extensionality",
-        "refinement_interpretation_FStar.FunctionalExtensionality_Tm_refine_2b7181aa5e69259183420adaa263965b",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "typing_FStar.FunctionalExtensionality_Tm_abs_33c425e9d5a70900b1deadec7d52bee0"
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Words_s.pow2_1", "equation_X64.Machine_s.xmm",
+        "function_token_typing_Words_s.pow2_1", "int_inversion",
+        "lemma_X64.Vale.Xmms.lemma_equal_elim",
+        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
+        "typing_X64.Vale.Xmms.eta"
       ],
       0,
-      "e3a14370de07cbf49f9076151347a055"
+      "25c4b1072affb75762b5f2deebd4ee53"
     ]
   ]
 ]
