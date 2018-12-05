@@ -121,16 +121,17 @@ let print_list_nat64 l =
 
 
 let print_lbytes #len b =
-  let n = len / 32 in
-  let r = len % 32 in
+  let q = 32 in
+  let n = len / q in
+  let r = len % q in
   if n = 0 then (
-    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list b))
+    List.iter (fun a -> print_uint8_hex_pad a) (to_list b))
   else (
   repeat_range_all_ml 0 n (fun i _ ->
-    let sb = sub #uint8 #len b (i * 32) 32 in
+    let sb = sub #uint8 #len b (i * q) q in
     List.iter (fun a -> print_uint8_hex_pad a) (to_list sb);
     IO.print_string "\n") ();
-  let sb = sub #uint8 #len b (n * 32) r in
+  let sb = sub #uint8 #len b (n * q) r in
   List.iter (fun a -> print_uint8_hex_pad a) (to_list sb))
 
 let print_compare len expected result =
