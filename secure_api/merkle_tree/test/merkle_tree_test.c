@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
 
   flush_to = retract_to;
   mt_flush_to(mt, flush_to);
-  printf("Retracted tree to [%ld,%ld]\n", flush_to, retract_to);
+  printf("Flushed tree to [%ld,%ld]\n", flush_to, retract_to);
   {
     uint64_t k = flush_to;
     uint32_t j = mt_get_path(mt, k, path, root);
