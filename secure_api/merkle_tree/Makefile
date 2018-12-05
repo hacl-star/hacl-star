@@ -42,7 +42,6 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/vale/code/lib/util \
   $(HACL_HOME)/vale/specs/crypto \
   $(HACL_HOME)/vale/specs/math \
-  $(HACL_HOME)/vale/obj/cache_checked \
   $(HACL_HOME)/providers/.cache \
 
 
