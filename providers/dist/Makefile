@@ -57,9 +57,7 @@ ifneq (,$(wildcard EverCrypt_BCrypt.h))
   SOURCES	+= evercrypt_bcrypt.c
 endif
 
-ifeq ($(EVERCRYPT_VALE),true)
-  OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
-endif
+OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
 # Note: some distributions (e.g. coco) don't want bytes
 
