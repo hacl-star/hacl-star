@@ -614,7 +614,7 @@ val mt_retract_to:
   GTot (rmt:merkle_tree{mt_wf_elts rmt /\ MT?.i rmt = MT?.i mt /\ MT?.j rmt = r + 1})
 let mt_retract_to mt r =
   let nhs = mt_retract_to_ (MT?.hs mt) 0 (MT?.i mt) (r+1) (MT?.j mt) in  
-  MT (MT?.i mt) (r+1) nhs (MT?.rhs_ok mt) (MT?.rhs mt) (MT?.mroot mt)
+  MT (MT?.i mt) (r+1) nhs false (MT?.rhs mt) (MT?.mroot mt)
   
 
 /// Verification
