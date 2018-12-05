@@ -22,7 +22,7 @@ ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
   Spec.Salsa20.fst Spec.Chacha20Poly1305.fst $(wildcard Spec.*.Test.fst) \
   Spec.Ed25519.fst
 
-OTHER_ROOTS=Spec.Hash.Incremental.fst $(HACL_HOME)/code/lib/kremlin/FStar.Endianness.fst
+OTHER_ROOTS=$(wildcard *.fst) $(HACL_HOME)/code/lib/kremlin/FStar.Endianness.fst
 
 # TODO: decide what to do with the following (excluded) specs:
 #  Spec.HMAC.SHA2_256.fst Spec.HMAC.SHA2_384.fst Spec.HMAC.SHA2_512.fst
