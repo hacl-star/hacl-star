@@ -5,71 +5,100 @@ HACL_HOME    ?= ../../..
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
-GENERATED_DIR = x25519-c
-OUT_DIR	      = x25519-c
+GENERATED_DIR = poly64-c
+OUT_DIR	      = poly64-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: curve25519_51.exe curve25519_64.exe
+all: chacha20.exe
 
 verify: test
 
 #CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-#CC=gcc-8
+CC=gcc-8
 
-CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+POLY1305_64_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/c/Lib.Loops.fst \
-	Hacl.Impl.Curve25519.Field64.fst \
-	Hacl.Impl.Curve25519.Field51.fst \
-	Hacl.Impl.Curve25519.Fields.fst \
-	Hacl.Impl.Curve25519.Generic.fst 
+	Hacl.Impl.Poly1305.Field64.fst \
+	Hacl.Impl.Poly1305.Fields.fst \
+	Hacl.Impl.Poly1305.fst \
+	Hacl.Poly1305_64.fst 
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I ./lemmas -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
+poly64-c/out.krml: $(POLY1305_64_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c $(POLY1305_64_FILES) -skip-translation 
 
-curve51-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_51.fst
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c $(CURVE25519_FILES) Hacl.Curve25519_51.fst -skip-translation 
+poly64-c/Hacl_Poly1305_64.c: poly64-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Poly1305_64=*'
 
-curve51-c/Hacl_Curve25519_51.c: curve51-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_51=*'
+POLY1305_32_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	Hacl.Impl.Poly1305.Field32.fst \
+	Hacl.Impl.Poly1305.Fields.fst \
+	Hacl.Impl.Poly1305.fst \
+	Hacl.Poly1305_32.fst 
 
-curve64-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_64.fst
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c $(CURVE25519_FILES) Hacl.Curve25519_64.fst -drop Hacl.Impl.Curve25519.Field64.Core -no-prefix  Hacl.Impl.Curve25519.Field64.Core -skip-translation 
+poly32-c/out.krml: $(POLY1305_32_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly32-c $(POLY1305_32_FILES) -skip-translation 
 
-curve64-c/Hacl_Curve25519_64.c: curve64-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_64=*' -drop Hacl.Impl.Curve25519.Field64.Core -no-prefix  Hacl.Impl.Curve25519.Field64.Core -add-include '"vale_25519.h"'
+poly32-c/Hacl_Poly1305_32.c: poly32-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly32-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Poly1305_32=*'
 
-curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve51-test.c -o curve25519_51.exe
-	./curve25519_51.exe
+POLY1305_128_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	Lib.Vec128.fsti \
+	Hacl.Impl.Poly1305.Field128.fst \
+	Hacl.Impl.Poly1305.Fields.fst \
+	Hacl.Impl.Poly1305.fst \
+	Hacl.Poly1305_128.fst 
 
+poly128-c/out.krml: $(POLY1305_128_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly128-c $(POLY1305_128_FILES) -skip-translation 
 
-curve25519_64_vale.exe: curve64-c/Hacl_Curve25519_64.c vale_25519.h vale/obj/curve25519-macos.S
-	$(CC) -march=native -mtune=native -flto -O3 vale/obj/curve25519-macos.S -c -o vale25519.o 
-	$(CC) -march=native -mtune=native -flto -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve64-test.c -o curve25519_64_vale.exe vale25519.o 
-	./curve25519_64_vale.exe
+poly128-c/Hacl_Poly1305_128.c: poly128-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly128-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Poly1305_128=*'
 
-curve25519_64_mixed.exe: curve64-c/Hacl_Curve25519_64.c rfc7748_25519.h
-	cp -f vale_25519.h tmp_25519.h
-	cp -f rfc7748_25519.h vale_25519.h
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve64-test.c -o curve25519_64_mixed.exe 
-	cp -f tmp_25519.h vale_25519.h
-	./curve25519_64_mixed.exe
+POLY1305_256_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	Lib.Vec256.fsti \
+	Hacl.Impl.Poly1305.Field256.fst \
+	Hacl.Impl.Poly1305.Fields.fst \
+	Hacl.Impl.Poly1305.fst \
+	Hacl.Poly1305_256.fst 
 
-curve25519_64_rfc.exe: curve64-c/Hacl_Curve25519_64.c
-	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/fp25519_x64.c -c -o fp25519.o 
-	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/x25519_x64.c -c -o x25519.o 
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(KREMLIN_HOME)/kremlib/c/testlib.o curve64-rfc-test.c -o curve25519_64_rfc.exe fp25519.o x25519.o
-	./curve25519_64_rfc.exe
+poly256-c/out.krml: $(POLY1305_256_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly256-c $(POLY1305_256_FILES) -skip-translation 
 
-curve25519_64.exe: curve25519_64_vale.exe curve25519_64_mixed.exe curve25519_64_rfc.exe
-	./curve25519_64_vale.exe
-	./curve25519_64_rfc.exe
-	./curve25519_64_mixed.exe
+poly256-c/Hacl_Poly1305_256.c: poly256-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly256-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec256.h"' -drop Lib.Vec256 -bundle 'Hacl.Poly1305_256=*'
+
+poly1305.exe: poly32-c/Hacl_Poly1305_32.c poly64-c/Hacl_Poly1305_64.c poly128-c/Hacl_Poly1305_128.c poly256-c/Hacl_Poly1305_256.c 
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . poly32-c/Hacl_Poly1305_32.c poly64-c/Hacl_Poly1305_64.c poly128-c/Hacl_Poly1305_128.c poly256-c/Hacl_Poly1305_256.c $(KREMLIN_HOME)/kremlib/c/testlib.o poly1305_test.c -o poly1305.exe 
+	./poly1305.exe
+
+poly1305-test: poly1305.exe
+	./poly1305.exe
+
+poly1305-perf: poly1305_64.exe poly1305_32.exe poly1305_128.exe poly1305_256.exe
+	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . poly64-c/Hacl_Poly1305_64.c poly32-c/Hacl_Poly1305_32.c poly128-c/Hacl_Poly1305_128.c  poly256-c/Hacl_Poly1305_256.c $(KREMLIN_HOME)/kremlib/c/testlib.o poly1305_test.c -o poly1305-perf.exe 
+	./poly1305-perf.exe
+
 
 test:
 	rm -f .depend && $(MAKE) .depend
@@ -97,7 +126,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Curve25519_51.fst
+ROOTS = Hacl.Poly1305_64.fst
 
 
 .PRECIOUS: %.krml

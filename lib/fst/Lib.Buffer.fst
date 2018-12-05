@@ -73,6 +73,7 @@ let copy #t #a #len o i =
     assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
 
 let memset #a #blen b init len =
+  admit();
   B.fill #a (b <: buffer a) init len
 
 #set-options "--max_fuel 0"

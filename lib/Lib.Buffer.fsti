@@ -232,7 +232,7 @@ val bget_as_seq:
     (ensures  bget #t #a #len h b i == Seq.index #a #(v len) (as_seq h b) i)
     [SMTPat (bget #t #a #len h b i)]
 
-let stack_allocated (#a:Type0) (#len:size_t) (b:lbuffer a len)
+  let stack_allocated (#a:Type0) (#len:size_t) (b:lbuffer a len)
                     (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
   let b: B.buffer a = b in
   B.alloc_post_mem_common b h0 h1 s /\

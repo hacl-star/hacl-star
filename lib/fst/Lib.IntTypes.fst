@@ -48,33 +48,15 @@ let uint #t #l x =
   | U64 -> UInt64.uint_to_t x
   | U128 -> UInt128.uint_to_t x
 
-let u8 x : uint8  = UInt8.uint_to_t x
-
-let u16 x : uint16 = UInt16.uint_to_t x
-
 let u16_us x = x
-
-let u32 x : uint32 = UInt32.uint_to_t x
-
 let u32_ul x = x
-
-let u64 x : uint64 = UInt64.uint_to_t x
-
 let u64_uL x = x
 
 let u128 x : uint128 = FStar.UInt128.uint64_to_uint128 (u64 x)
 
-inline_for_extraction
-let byte_ x : uint_t U8 PUB = UInt8.uint_to_t x
-
-inline_for_extraction
-let size x : uint_t U32 PUB = UInt32.uint_to_t x
-
 let size_v_size_lemma s = ()
 let uint_v_size_lemma s = ()
 
-inline_for_extraction
-let byte x = byte_ x
 
 let size_to_uint32 x = x <: UInt32.t
 

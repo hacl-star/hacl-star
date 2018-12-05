@@ -156,8 +156,6 @@ unfold type pub_uint64 = uint_t U64 PUB
 inline_for_extraction
 unfold type pub_uint128 = uint_t U128 PUB
 
-
-
 ///
 /// Casts between natural numbers and machine integers
 ///
@@ -169,19 +167,21 @@ inline_for_extraction
 val uint: #t:inttype -> #l:secrecy_level -> (n:nat{n <= maxint t}) -> u:uint_t t l{uint_v u == n}
 
 inline_for_extraction
-val u8: (n:nat{n <= maxint U8}) -> u:uint8{uint_v #U8 u == n}
+let u8 (n:nat{n <= maxint U8}) : u:uint8{uint_v #U8 u == n} = uint #U8 #SEC n
 
 inline_for_extraction
-val u16: (n:nat{n <= maxint U16}) -> u:uint16{uint_v #U16 u == n}
+let u16 (n:nat{n <= maxint U16}) : u:uint16{uint_v #U16 u == n} = uint #U16 #SEC n
 
 inline_for_extraction
-val u32: (n:nat{n <= maxint U32}) -> u:uint32{uint_v #U32 u == n}
+let u32 (n:nat{n <= maxint U32}) : u:uint32{uint_v #U32 u == n} = uint #U32 #SEC n
 
 inline_for_extraction
-val u64: (n:nat{n <= maxint U64}) -> u:uint64{uint_v #U64 u == n}
+let u64 (n:nat{n <= maxint U64}) : u:uint64{uint_v #U64 u == n} = uint #U64 #SEC n
 
+(* We only support 64-bit literals, hence the unexpected upper limit in the following function *)
 inline_for_extraction
-val u128: (n:nat{n <= maxint U64}) -> u:uint128{uint_v #U128 u == n}
+val u128: n:nat{n <= maxint U64} -> u:uint128{uint_v #U128 u == n}
+
 
 unfold inline_for_extraction
 let max_size_t = maxint U32
@@ -190,8 +190,8 @@ inline_for_extraction
 unfold type size_nat = n:nat{n <= max_size_t}
 
 inline_for_extraction
-val size: n:size_nat -> u:size_t{uint_v u == n} 
-
+let size (n:size_nat) : size_t = uint #U32 #PUB n
+  
 unfold inline_for_extraction 
 let size_v (s:size_t) = uint_v #U32 #PUB s
 
@@ -209,7 +209,7 @@ val uint_v_size_lemma: s:size_nat ->
   [SMTPat (uint_v (size s))]
 
 inline_for_extraction
-val byte: n:nat{n < 256} -> u:byte_t{uint_v u == n}
+let byte (n:nat{n < 256}) : b:byte_t{uint_v b == n} = uint #U8 #PUB n
 
 inline_for_extraction
 let byte_v (s:byte_t) : n:size_nat{uint_v s == n} = pub_int_v (s <: pub_int_t U8)
