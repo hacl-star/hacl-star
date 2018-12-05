@@ -7,7 +7,7 @@
 typedef unsigned char byte;
 double cpuFreq;
 
-extern void mul(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+//extern void mul(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 extern void sqr(const uint64_t* dst, const uint64_t* in_a);
 extern uint64_t mul1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
 extern uint64_t add1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
@@ -93,7 +93,7 @@ void test() {
         int n = 10000;
         for (int j = 0; j < n; j++)
         {
-            mul(D, A, B);
+            //mul(D, A, B);
             sqr(D, A);
             uint64_t overflow;
             overflow = mul1(D, A, 42);
