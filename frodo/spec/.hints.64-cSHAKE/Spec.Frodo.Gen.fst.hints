@@ -26,7 +26,7 @@
         "refinement_interpretation_Spec.Frodo.Gen_Tm_refine_94eb0614d65c46d658d7670b1b011088"
       ],
       0,
-      "6205db95345155ed23c4857ecfe8cd5e"
+      "be0f6569437637f7ae761355555852a7"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake0",
@@ -44,7 +44,7 @@
         "refinement_interpretation_Spec.Frodo.Gen_Tm_refine_94eb0614d65c46d658d7670b1b011088"
       ],
       0,
-      "cde7e64455f67e056af232964a96e18d"
+      "1a9912db9b5bfc96f4e31d6dbb76ecce"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake0",
@@ -62,7 +62,7 @@
         "refinement_interpretation_Spec.Frodo.Gen_Tm_refine_94eb0614d65c46d658d7670b1b011088"
       ],
       0,
-      "8b9731969844af6111ba7187713edb9d"
+      "6d4ea99f8c1511bc810ed920a591c362"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake0",
@@ -81,7 +81,7 @@
         "refinement_interpretation_Spec.Frodo.Gen_Tm_refine_94eb0614d65c46d658d7670b1b011088"
       ],
       0,
-      "c9ebc7043f7c0bcc1f2d63df095f3e3b"
+      "ecef11b6313e604682d61e8b762a7ba7"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake1",
@@ -90,7 +90,7 @@
       0,
       [ "@query" ],
       0,
-      "f5278edd87fa0cae79629b5f16b3850e"
+      "cd34d2a2a43497d3e5f69b2c93d34db9"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake1",
@@ -99,7 +99,7 @@
       0,
       [ "@query" ],
       0,
-      "9cc1ab8c50959066006d4d85a9e5e376"
+      "ea03b9c5de906aefa160b81a9588ee63"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake1",
@@ -119,8 +119,8 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.numbytes",
-        "equation_Lib.IntTypes.uint16",
+        "equation_FStar.UInt8.n", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.uint16",
         "equation_Lib.LoopCombinators.preserves",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
         "equation_Prims.nat", "equation_Spec.AES.elem",
@@ -130,12 +130,13 @@
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
         "equation_Spec.Matrix.matrix",
         "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_FStar.UInt8.n",
         "function_token_typing_Spec.AES.elem",
         "function_token_typing_Spec.AES.gf8",
         "function_token_typing_Spec.Frodo.Gen.frodo_gen_matrix_cshake0",
         "int_inversion", "int_typing",
         "interpretation_Spec.Frodo.Gen_Tm_abs_20ad2ae47c242b0150487eed14af59b7",
-        "l_and-interp", "l_quant_interp__5824", "l_quant_interp__5830",
+        "l_and-interp", "l_quant_interp__5828", "l_quant_interp__5834",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
@@ -158,13 +159,13 @@
         "refinement_interpretation_Spec.Matrix_Tm_refine_21ac9a31890b4d0bf15a6e4c97d09422",
         "refinement_interpretation_Spec.Matrix_Tm_refine_eedeba6add56d542441d101d6ce15eb3",
         "typing_Lib.ByteSequence.uint_from_bytes_le",
-        "typing_Lib.IntTypes.bits", "typing_Lib.Sequence.sub",
+        "typing_Lib.Sequence.sub",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Matrix.mset", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U16@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.U16@tok"
       ],
       0,
-      "73e88cad46ef02727db63b6d3263adf3"
+      "24377687185ded14aeff9ee119a18d15"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake",
@@ -173,7 +174,7 @@
       0,
       [ "@query" ],
       0,
-      "cd42c159d6daf3babc5b181130516fc0"
+      "53110b8f124fc76cbdea217d1eabc4b2"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake",
@@ -198,6 +199,7 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.numbytes",
+        "equation_Lib.IntTypes.u16", "equation_Lib.IntTypes.u8",
         "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.uint_v",
         "equation_Lib.LoopCombinators.preserves",
@@ -222,8 +224,8 @@
         "int_inversion", "int_typing",
         "interpretation_Spec.Frodo.Gen_Tm_abs_2f29c7225f8f254661f96f0393a58118",
         "interpretation_Spec.Frodo.Gen_Tm_abs_9bb7897b0fc33a9d5b8b7bc5e6b3c783",
-        "l_and-interp", "l_quant_interp__5877", "l_quant_interp__5884",
-        "l_quant_interp__5943", "lemma_Lib.IntTypes.pow2_values",
+        "l_and-interp", "l_quant_interp__5881", "l_quant_interp__5888",
+        "l_quant_interp__5947", "lemma_Lib.IntTypes.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
@@ -267,7 +269,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7296c0f92c54178fa54f0bf2d0e33e32"
+      "10fedb3049ee0888a08f28426b38b324"
     ],
     [
       "Spec.Frodo.Gen.lemma_gen_matrix_4x",
@@ -287,7 +289,7 @@
         "refinement_interpretation_Spec.Frodo.Gen_Tm_refine_e300e714521590ea59437a0388f83cd7"
       ],
       0,
-      "e59ce94d2aba7d4cd56039b376fac56e"
+      "76ecf2ac01ff89f560db2ad87538e88f"
     ],
     [
       "Spec.Frodo.Gen.lemma_gen_matrix_4x",
@@ -296,7 +298,7 @@
       0,
       [ "@query" ],
       0,
-      "5bcfde0a85d21bc5dae5f31e6d3a9437"
+      "54e33492ec6f32621fd639e9d92e4b07"
     ],
     [
       "Spec.Frodo.Gen.lemma_gen_matrix_4x",
@@ -336,7 +338,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "69ea89aa5c355262c4914ea1244f8a6b"
+      "b72ed0ed818f5c6bf8a714cd2e2403dd"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake_4x0",
@@ -353,7 +355,7 @@
         "refinement_interpretation_Spec.Frodo.Gen_Tm_refine_94eb0614d65c46d658d7670b1b011088"
       ],
       0,
-      "03a8336120447c6d29f33fb3fbd59363"
+      "558b963b373b0cc61df447e1c854fc83"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake_4x0",
@@ -370,7 +372,7 @@
         "refinement_interpretation_Spec.Frodo.Gen_Tm_refine_94eb0614d65c46d658d7670b1b011088"
       ],
       0,
-      "2c5fc5eda4d8d33371abb81f56ef05d4"
+      "c3dce884ec47a793bef853461bc38f19"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake_4x0",
@@ -390,7 +392,7 @@
         "refinement_interpretation_Spec.Frodo.Gen_Tm_refine_94eb0614d65c46d658d7670b1b011088"
       ],
       0,
-      "c2d178d9135e8b870df980be1abb02e8"
+      "f0890d800add2272860132ac0740b649"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake_4x1",
@@ -399,7 +401,7 @@
       0,
       [ "@query" ],
       0,
-      "9de948ba6b53f382009b50a13245c75c"
+      "3e54856283c400e4cdf31fc159719bdf"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake_4x1",
@@ -408,7 +410,7 @@
       0,
       [ "@query" ],
       0,
-      "7a8ca78829c733d4f3196e5d25775d0a"
+      "d017edce5ddfb6fcd0ca57f98e94ae27"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake_4x1",
@@ -429,6 +431,7 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.numbytes",
+        "equation_Lib.IntTypes.u16", "equation_Lib.IntTypes.u8",
         "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.uint_v",
         "equation_Lib.LoopCombinators.preserves",
@@ -446,7 +449,7 @@
         "function_token_typing_Spec.Frodo.Gen.frodo_gen_matrix_cshake_4x0",
         "int_inversion", "int_typing",
         "interpretation_Spec.Frodo.Gen_Tm_abs_2c02080faa9da1583ae63667a6e63c4c",
-        "l_and-interp", "l_quant_interp__6367", "l_quant_interp__6378",
+        "l_and-interp", "l_quant_interp__6371", "l_quant_interp__6382",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
@@ -484,7 +487,7 @@
         "typing_tok_Lib.IntTypes.U16@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ef236a76f4a8d10420fce9be6dab0dcc"
+      "045f5424baf7c161729a49bf4ac6f7bb"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake_4x",
@@ -493,7 +496,7 @@
       0,
       [ "@query" ],
       0,
-      "b7b6cf84091747ffa145d7a9ff0e25bb"
+      "f0a2b9864808004ef2bc1020e7a2d03c"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_cshake_4x",
@@ -518,7 +521,8 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt32.n",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.numbytes",
-        "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.u16", "equation_Lib.IntTypes.uint16",
+        "equation_Lib.IntTypes.uint8",
         "equation_Lib.LoopCombinators.preserves",
         "equation_Lib.LoopCombinators.preserves_predicate",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
@@ -541,8 +545,8 @@
         "int_inversion", "int_typing",
         "interpretation_Spec.Frodo.Gen_Tm_abs_34f675b6ec03080a9bab22c558ba7755",
         "interpretation_Spec.Frodo.Gen_Tm_abs_4f6f65344eb8509c6addeda059c9e047",
-        "l_and-interp", "l_quant_interp__6441", "l_quant_interp__6454",
-        "l_quant_interp__6527", "lemma_Lib.IntTypes.pow2_values",
+        "l_and-interp", "l_quant_interp__6445", "l_quant_interp__6458",
+        "l_quant_interp__6531", "lemma_Lib.IntTypes.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
@@ -590,7 +594,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ecb3fea3e8a280787eaeeacac3c848a1"
+      "af30ba0d5a246802a14687aaa1b4727c"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_aes",
@@ -599,7 +603,7 @@
       0,
       [ "@query" ],
       0,
-      "79182db4724a8c553059aeaa5ace3a17"
+      "b9f8f29d98a1acd35fbe5f0e25998335"
     ],
     [
       "Spec.Frodo.Gen.frodo_gen_matrix_aes",
@@ -652,7 +656,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "be219b3794f2c2b501b4a5897aad7d5a"
+      "50eb73c730dd9084ee0e61c9d847a857"
     ]
   ]
 ]

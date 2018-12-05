@@ -68,9 +68,7 @@ int main() {
   
   uint64_t ctx[(uint32_t)8U + (uint32_t)15U * (uint32_t)8U] = {0};
 
-//  Hacl_Aes_BitSlice_aes128_ctr_encrypt(in_len,comp,in,k,n,1);
-  Hacl_Aes_BitSlice_aes128_init(ctx,k,n);
-  Hacl_Aes_BitSlice_aes_ctr(in_len,comp,in,ctx,1,10);
+  Hacl_Aes_BitSlice_aes128_ctr_encrypt(in_len,comp,in,k,n,1);
 
   printf("AES-BitSlice computed:");
   for (int i = 0; i < 32; i++)

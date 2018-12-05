@@ -14,7 +14,7 @@ all: curve25519_51.exe curve25519_64.exe
 
 verify: test
 
-CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
+#CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
 #CC=gcc-8
 
 CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \

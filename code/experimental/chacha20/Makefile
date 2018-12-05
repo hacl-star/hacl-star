@@ -5,68 +5,41 @@ HACL_HOME    ?= ../../..
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
-GENERATED_DIR = gf128-ni-c
-OUT_DIR	      = gf128-ni-c
+GENERATED_DIR = chacha20-c
+OUT_DIR	      = chacha20-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: gf128-ni.exe gf128-precomp.exe
+all: chacha20.exe
 
 verify: test
 
 CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
 #CC=gcc-8
 
-GF128_PRECOMP_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+CHACHA20_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/c/Lib.Loops.fst \
-	Hacl.Impl.Gf128.FieldPreComp.fst \
-	Hacl.Impl.Gf128.Fields.fst \
-	Hacl.Impl.Gf128.Generic.fst \
-	Hacl.Gf128.PreComp.fst 
+	Hacl.Impl.Chacha20.Core32.fst \
+	Hacl.Impl.Chacha20.fst \
+	Hacl.Chacha20.fst 
 
-GF128_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.Loops.fst \
-	Hacl.Impl.Gf128.FieldNI.fst \
-	Hacl.Impl.Gf128.Fields.fst \
-	Hacl.Impl.Gf128.Generic.fst \
-	Hacl.Gf128.NI.fst 
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
 
+chacha20-c/out.krml: $(CHACHA20_FILES)
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-c $(CHACHA20_FILES) -skip-translation 
 
+chacha20-c/Hacl_Chacha20.c: chacha20-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Chacha20=*'
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces 
+chacha20.exe: chacha20-c/Hacl_Chacha20.c chacha20-c/out.krml
+	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . chacha20-c/Hacl_Chacha20.c $(KREMLIN_HOME)/kremlib/c/testlib.o chacha20-test.c -o chacha20.exe 
+	./chacha20.exe
 
-gf128-precomp-c/out.krml: $(GF128_PRECOMP_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-precomp-c $(GF128_PRECOMP_FILES) -skip-translation
-
-gf128-precomp-c/Hacl_Gf128_PreComp.c: gf128-precomp-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-precomp-c $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Gf128.PreComp=*'
-
-gf128-precomp.exe: gf128-precomp-c/Hacl_Gf128_PreComp.c gf128-precomp-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . gf128-precomp-c/Hacl_Gf128_PreComp.c $(KREMLIN_HOME)/kremlib/c/testlib.o gf128-precomp-test.c -o gf128-precomp.exe
-	./gf128-precomp.exe
-
-
-gf128-ni-c/out.krml: $(GF128_NI_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-ni-c $(GF128_NI_FILES) -skip-translation
-
-gf128-ni-c/Hacl_Gf128_NI.c: gf128-ni-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Gf128.NI=*'
-
-gf128-ni.exe: gf128-ni-c/Hacl_Gf128_NI.c gf128-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128_NI.c $(KREMLIN_HOME)/kremlib/c/testlib.o gf128-ni-test.c -o gf128-ni.exe
-	./gf128-ni.exe
-
-gf128-perf: gf128-precomp.exe gf128-ni.exe
-	./gf128-precomp.exe
-	./gf128-ni.exe
+chacha20-perf: chacha20.exe
 
 test:
 	rm -f .depend && $(MAKE) .depend
@@ -94,7 +67,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Gf128.NI.fst
+ROOTS = Hacl.Chacha20.fst
 
 
 .PRECIOUS: %.krml

@@ -256,7 +256,7 @@ poly64-c/out.krml: $(POLY1305_64_FILES)
 
 poly64-c/Hacl_Poly1305_64.c: poly64-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Poly1305_64=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Poly1305_64=*'
 
 poly1305_64.exe: poly64-c/Hacl_Poly1305_64.c poly64-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c \
@@ -278,7 +278,7 @@ poly32-c/out.krml: $(POLY1305_32_FILES)
 
 poly32-c/Hacl_Poly1305_32.c: poly32-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly32-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Poly1305_32=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Poly1305_32=*'
 
 poly1305_32.exe: poly32-c/Hacl_Poly1305_32.c poly32-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly32-c \
@@ -301,7 +301,7 @@ poly128-c/out.krml: $(POLY1305_128_FILES)
 
 poly128-c/Hacl_Poly1305_128.c: poly128-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly128-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Poly1305_128=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Poly1305_128=*'
 
 poly1305_128.exe: poly128-c/Hacl_Poly1305_128.c poly128-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly128-c \
@@ -325,7 +325,7 @@ poly256-c/out.krml: $(POLY1305_256_FILES)
 
 poly256-c/Hacl_Poly1305_256.c: poly256-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly256-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec256.h"' -bundle 'Hacl.Poly1305_256=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec256.h"' -drop Lib.Vec256 -bundle 'Hacl.Poly1305_256=*'
 
 poly1305_256.exe: poly256-c/Hacl_Poly1305_256.c poly256-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly256-c \
