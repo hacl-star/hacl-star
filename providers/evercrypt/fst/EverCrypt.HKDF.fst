@@ -48,7 +48,7 @@ val hkdf_expand_loop:
     as_seq h1 okm == expand0 a prk info (v len) (v i) last)))
 
 //18-07-13 how to improve this proof? should we use C.loops instead?
-#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 200"
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 800"
 let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
   push_frame ();
 

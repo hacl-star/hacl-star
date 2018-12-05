@@ -10,7 +10,7 @@ let all_defs =
   zero == of_poly D.zero /\
   one == of_poly D.one /\
   (forall (n:nat).{:pattern (monomial n)} monomial n == of_poly (D.monomial n)) /\
-  (forall (p:poly) (n:nat).{:pattern (shift p n)} shift p n == of_poly (D.shift (to_poly p) n)) /\
+  (forall (p:poly) (n:int).{:pattern (shift p n)} shift p n == of_poly (D.shift (to_poly p) n)) /\
   (forall (p:poly) (n:nat).{:pattern (reverse p n)} reverse p n == of_poly (D.reverse (to_poly p) n)) /\
   (forall (p:poly) (n:int).{:pattern (poly_index p n)} poly_index p n == D.poly_index (to_poly p) n) /\
   (forall (a b:poly).{:pattern (add a b)} add a b == of_poly (D.add (to_poly a) (to_poly b))) /\
