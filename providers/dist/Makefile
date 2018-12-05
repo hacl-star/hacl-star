@@ -46,7 +46,7 @@ CFLAGS		+= -Wno-parentheses -g
 # 3. Honor configurations
 
 # Backwards-compat
-ifneq (,$(MLCRYTO_HOME))
+ifneq (,$(MLCRYPTO_HOME))
 OPENSSL_HOME 	= $(MLCRYPTO_HOME)/openssl
 endif
 

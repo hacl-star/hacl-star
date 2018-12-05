@@ -1594,7 +1594,7 @@ private val construct_rhs:
      (Rgl?.r_repr hvreg h1 rhs, Rgl?.r_repr hreg h1 acc))))
    (decreases (U32.v j))
 #reset-options "--z3rlimit 400 --max_fuel 1"
-// #reset-options "--admit_smt_queries true"
+#push-options "--admit_smt_queries true"
 private let rec construct_rhs lv hs rhs i j acc actd =
   let hh0 = HST.get () in
   let ofs = offset_of i in
@@ -1737,6 +1737,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
                (Rgl?.r_repr hreg hh0 acc) actd ==
              (Rgl?.r_repr hvreg hh4 rhs, Rgl?.r_repr hreg hh4 acc))
     end)
+#pop-options
 #reset-options
 
 private
@@ -2304,7 +2305,7 @@ private val mt_flush_to_:
                (U32.v i) (U32.v (Ghost.reveal j))))))
    (decreases (U32.v i))
 #reset-options "--z3rlimit 800 --max_fuel 1"
-// #reset-options "--admit_smt_queries true"
+#push-options "--admit_smt_queries true"
 private let rec mt_flush_to_ lv hs pi i j =
   let hh0 = HST.get () in
 
@@ -2480,6 +2481,7 @@ private let rec mt_flush_to_ lv hs pi i j =
                     (High.mt_flush_to_ (U32.v lv) (RV.as_seq hh0 hs)
                       (U32.v pi) (U32.v i) (U32.v (Ghost.reveal j))))
   end
+#pop-options
 #reset-options
 
 

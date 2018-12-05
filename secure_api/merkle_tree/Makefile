@@ -100,6 +100,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) -skip-compilation \
 	  -no-prefix 'MerkleTree.New.Low' \
 	  -no-prefix 'MerkleTree.New.Low.Serialization' \
+	  -add-include '"kremlin/internal/compat.h"' \
 	  -bundle Prims,FStar.*,LowStar.*,C,C.*[rename=Merkle_Kremlib] \
 	  -bundle MerkleTree.New.Low= \
 	  -bundle MerkleTree.New.Low.Serialization= \
