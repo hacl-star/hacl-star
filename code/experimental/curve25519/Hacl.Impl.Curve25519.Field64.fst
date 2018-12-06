@@ -112,6 +112,7 @@ let load_felem f u64s =
   f.(2ul) <- u64s.(2ul);
   f.(3ul) <- u64s.(3ul)
 
+inline_for_extraction
 val store_felem:
     u64s:lbuffer uint64 4ul
   -> f:felem
