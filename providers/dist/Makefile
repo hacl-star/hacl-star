@@ -90,4 +90,4 @@ KREMLIB_A 	= $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 all: libevercrypt.$(SO)
 
 libevercrypt.$(SO): $(OBJS) $(HACL_A) $(KREMLIB_A)
-	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o $@ $^
+	$(CC) $(CFLAGS) -shared -o $@ $^ $(LDFLAGS)
