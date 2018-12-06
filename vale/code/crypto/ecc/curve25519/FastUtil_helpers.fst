@@ -8,6 +8,8 @@ open CanonCommSemiring
 open Fast_defs
 open Fast_lemmas_internal
 
+#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection -CanonCommMonoid -CanonCommSwaps -CanonCommSemiring'"
+
 #push-options "--z3rlimit 5000 --max_fuel 0 --max_ifuel 0"
 // Passes
 (*
