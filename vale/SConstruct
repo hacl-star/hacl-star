@@ -960,10 +960,10 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   alg_cmxs = [ml_out_file(x, '.cmx') for x in alg_files]
   cmdline_ml = ml_out_file(cmdline_file, '.ml')
   cmdline_cmx = ml_out_file(cmdline_file, '.cmx')
-  pointer_src = File('code/lib/util/FStar_Pointer_Base.ml')
-  pointer_ml = ml_out_file(pointer_src, '.ml')
-  pointer_cmx = ml_out_file(pointer_src, '.cmx')
-  CopyFile(pointer_ml, pointer_src)
+  #pointer_src = File('code/lib/util/FStar_Pointer_Base.ml')
+  #pointer_ml = ml_out_file(pointer_src, '.ml')
+  #pointer_cmx = ml_out_file(pointer_src, '.cmx')
+  #CopyFile(pointer_ml, pointer_src)
   CopyFile(cmdline_ml, cmdline_file)
   CopyFile(main_ml, main_file)
   for alg_cmx in alg_cmxs:
@@ -978,8 +978,6 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   def add_cmx(x_ml):
     x_cmx = ml_out_file(x_ml, '.cmx')
     x_obj = ml_out_file(x_ml, '.o')
-    if x_ml != pointer_ml:
-      Depends(x_cmx, pointer_cmx)
     cmx = ocaml_env.Command([x_cmx, x_obj], x_ml,
       f'ocamlfind ocamlopt -c -package fstarlib -o {x_cmx} {x_ml} -I obj/ml_out')
     cmxs.append(cmx[0])
@@ -993,9 +991,7 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
         # if x depends on y, y must appear first in ocaml link step
         Depends(ml_out_file(x_ml, '.cmx'), ml_out_file(y_ml, '.cmx'))
         collect_cmxs_in_order(y_ml)
-      Depends(x_ml, pointer_ml)
       add_cmx(x_ml)
-  add_cmx(pointer_ml)
   for alg_ml in alg_mls:
     collect_cmxs_in_order(alg_ml)
   add_cmx(cmdline_ml)
