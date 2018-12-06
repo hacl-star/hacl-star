@@ -188,6 +188,8 @@ let rec test_hmac (LB len vs) =
 
 let hkdf_vector = hash_alg * vec8 * vec8 * vec8 * vec8 * vec8
 
+// JP: this function generates code that uses void* but I see no obvious reason.
+// TODO: investigate
 val test_one_hkdf: hkdf_vector -> St unit
 let test_one_hkdf vec =
   let open FStar.Integers in
@@ -339,25 +341,32 @@ type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
 
 val test_aes_ecb: block_cipher_vector -> St unit
 let test_aes_ecb v =
-  push_frame();
-  let block, (LB key_len key), (LB plain_len plain), (LB cipher_len cipher) = v in
-  let cipher' = B.alloca 0uy 16ul in
-  let s0 = TestLib.cpucycles () in
-  let () =
-    match block with
-    | AES128 ->
-      let k = EverCrypt.aes128_create key in
-      EverCrypt.aes128_compute k plain cipher';
-      EverCrypt.aes128_free k
-    | AES256 ->
-      let k = EverCrypt.aes256_create key in
-      EverCrypt.aes256_compute k plain cipher';
-      EverCrypt.aes256_free k
-    in
-  let s1 = TestLib.cpucycles () in
-  TestLib.print_cycles_per_round s0 s1 1ul;
-  TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
-  pop_frame()
+  let wh = AC.wants_hacl () in
+  let wv = AC.wants_vale () in
+  if not wh && not wv then
+    C.String.print !$"Warning: not testing aes_ecb because Vale & Hacl are \
+      disabled, no implementation\n"
+  else begin
+    push_frame();
+    let block, (LB key_len key), (LB plain_len plain), (LB cipher_len cipher) = v in
+    let cipher' = B.alloca 0uy 16ul in
+    let s0 = TestLib.cpucycles () in
+    let () =
+      match block with
+      | AES128 ->
+        let k = EverCrypt.aes128_create key in
+        EverCrypt.aes128_compute k plain cipher';
+        EverCrypt.aes128_free k
+      | AES256 ->
+        let k = EverCrypt.aes256_create key in
+        EverCrypt.aes256_compute k plain cipher';
+        EverCrypt.aes256_free k
+      in
+    let s1 = TestLib.cpucycles () in
+    TestLib.print_cycles_per_round s0 s1 1ul;
+    TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
+    pop_frame()
+  end
 
 /// Test drivers
 
@@ -470,7 +479,6 @@ let main (): St C.exit_code =
 
   if EverCrypt.StaticConfig.vale then begin
     print !$"===========Vale===========\n";
-    AC.(init (Prefer Vale));
     test_aead aead_vectors_low;
     test_hash hash_vectors_low;
     test_cipher block_cipher_vectors_low;
@@ -479,7 +487,6 @@ let main (): St C.exit_code =
   AC.disable_vale ();
 
   print !$"===========Hacl===========\n";
-  AC.(init (Prefer Hacl));
   test_hash hash_vectors_low;
   test_hmac hmac_vectors_low;
   test_hkdf hkdf_vectors_low;
@@ -492,7 +499,6 @@ let main (): St C.exit_code =
 
   if EverCrypt.StaticConfig.openssl then begin
     print !$"==========OpenSSL=========\n";
-    AC.(init (Prefer OpenSSL));
     test_aead aead_vectors_low;
     test_cipher block_cipher_vectors_low
   end;
@@ -500,7 +506,6 @@ let main (): St C.exit_code =
 
   if EverCrypt.StaticConfig.bcrypt then begin
     print !$"==========BCrypt==========\n";
-    AC.(init (Prefer BCrypt));
     test_aead aead_vectors_low;
     test_cipher block_cipher_vectors_low
   end;

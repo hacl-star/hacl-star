@@ -3,6 +3,8 @@ KREMLIN_HOME ?= ../../../kremlin
 
 include ../Makefile.common
 
+FSTAR_INCLUDES += $(HACL_HOME)/providers/.cache
+
 EVERCRYPT_HOME ?= ..
 MLCRYPTO_HOME ?= ../../../MLCrypto
 
@@ -21,11 +23,11 @@ ifeq ($(OS),Windows_NT)
     EVERCRYPT_HOME_RUN := $(EVERCRYPT_HOME)
     MLCRYPTO_HOME_RUN := $(MLCRYPTO_HOME)
   endif
-  PREFIX = PATH="$(MLCRYPTO_HOME_RUN)/openssl:$(EVERCRYPT_HOME_RUN)/out:$(PATH)"
+  PREFIX = PATH="$(MLCRYPTO_HOME_RUN)/openssl:$(EVERCRYPT_HOME_RUN)/dist/compact:$(PATH)"
 else ifeq ($(UNAME),Darwin)
-  PREFIX = DYLD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(DYLD_LIBRARY_PATH)
+  PREFIX = DYLD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/dist/compact:$(DYLD_LIBRARY_PATH)
 else ifeq ($(UNAME),Linux)
-  PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(LD_LIBRARY_PATH)
+  PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/dist/compact:$(LD_LIBRARY_PATH)
 endif
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe
@@ -41,17 +43,17 @@ all:
 	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  --cache_dir $(CACHE_DIR) \
 	  --odir $(EXTRACT_DIR) \
-	  --dep full Test.fst Test.Bytes.fst > .depend 
+	  --dep full Test.fst Test.Bytes.fst > .depend
 
 include .depend
 
 %.checked: | .depend
 	$(FSTAR) \
 	  --cache_checked_modules \
-	  --admit_smt_queries true \
+	  --already_cached "EverCrypt FStar LowStar C Hacl" \
 	  --cache_dir $(CACHE_DIR) \
 	  $(addprefix --include , $(FSTAR_INCLUDES)) \
-	  $<
+	  $< && touch $@
 
 $(EXTRACT_DIR)/%.krml:
 	$(FSTAR) --codegen Kremlin \
