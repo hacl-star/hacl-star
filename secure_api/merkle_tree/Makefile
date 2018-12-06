@@ -42,7 +42,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/vale/code/lib/util \
   $(HACL_HOME)/vale/specs/crypto \
   $(HACL_HOME)/vale/specs/math \
-  $(HACL_HOME)/vale/obj/cache_checked
+  $(HACL_HOME)/providers/.cache \
 
 
 FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
@@ -100,6 +100,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) -skip-compilation \
 	  -no-prefix 'MerkleTree.New.Low' \
 	  -no-prefix 'MerkleTree.New.Low.Serialization' \
+	  -add-include '"kremlin/internal/compat.h"' \
 	  -bundle Prims,FStar.*,LowStar.*,C,C.*[rename=Merkle_Kremlib] \
 	  -bundle MerkleTree.New.Low= \
 	  -bundle MerkleTree.New.Low.Serialization= \

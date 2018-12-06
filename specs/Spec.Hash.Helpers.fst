@@ -133,7 +133,7 @@ let pad0_length (a:hash_alg) (len:nat): Tot (n:nat{(len + 1 + n + size_len_8 a) 
 let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % size_block a = 0 }) =
   pad0_length a len + 1 + size_len_8 a
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
   (requires blocks % size_block a = 0)
   (ensures (pad_length a rest = pad_length a (blocks + rest)))

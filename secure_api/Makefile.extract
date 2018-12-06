@@ -104,9 +104,11 @@ $(OUTPUT_DIR)/%.ml: | $(OUTPUT_DIR)
 CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable \
   -Wno-parentheses -Werror -Wno-unknown-warning-option
 
+MY_KRML_FILES=$(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
+
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
-$(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(ALL_KRML_FILES)
+$(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(MY_KRML_FILES)
 	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
 	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremlin/internal/compat.h"' \
 	  $(EXTRA)
@@ -157,7 +159,8 @@ $(DIST_DIR)/copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
 
 # Note: this does not yet use the standalone C file because the test still
 # bypasses Crypto.AEAD.Main
-$(DIST_DIR)/krml-test.exe: $(ALL_KRML_FILES) $($(IMPL_CHOICE)_EXTRA)
+.PRECIOUS: $(DIST_DIR)/krml-test.exe
+$(DIST_DIR)/krml-test.exe: $(MY_KRML_FILES) $($(IMPL_CHOICE)_EXTRA)
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
 	    Crypto.AEAD.Main=Crypto.* -tmpdir $(OUTPUT_DIR) \

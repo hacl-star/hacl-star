@@ -40,10 +40,18 @@ test:
 # - verify every F* file in parallel to generate .checked files
 # - extract each .checked file into a .krml file in parallel
 
+VALE_NAMESPACES='X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
+  'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
+  Workarounds 'Math.*' Interop TypesNative_s
+
+# TODO: remove the exceptions for old-style HACL from already_cached
+# TODO: make it Hacl instead of Hacl.Hash, eventually
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi
+  $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi \
+  --already_cached 'FStar LowStar C -C.Compat Spec Hacl.Hash' \
+  $(addprefix --already_cached ,$(subst .*,,$(VALE_NAMESPACES)))
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
 
@@ -57,15 +65,8 @@ include .depend
 
 ADMIT=false
 
-# Admit ulib + Vale-related files, verified separately with different Z3
-# options. Normally the .checked files for these should already exist.
-$(CACHE_DIR)/FStar.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/X64.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/Arch.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/Words.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/Vale.%.fst.checked: ADMIT=true
-$(CACHE_DIR)/Collections.%.fst.checked: ADMIT=true
-
+# Thanks to --already_cached, this Makefile should never attempt to produce any
+# Vale file or F*/ulib file
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
 	  --admit_smt_queries $(ADMIT) \
@@ -85,6 +86,8 @@ VALE_ASM 	= $(wildcard \
   $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
   $(HACL_HOME)/secure_api/vale/asm/aes-*.asm \
   $(VALE_OBJ_DIR)/*.asm $(VALE_OBJ_DIR)/*.S)
+
+VALE_BUNDLES=$(addprefix -bundle ,$(VALE_NAMESPACES))
 
 EVERCRYPT_SOURCES = \
   $(addprefix evercrypt/c/evercrypt_,vale_stubs.c)
@@ -115,6 +118,8 @@ COMPACT_FLAGS = \
   -bundle 'Prims,FStar.*,C,C.*[rename=EverCrypt_Kremlib]' \
   -bundle 'AEAD.*,Hacl.*,Spec.*[rename=Hacl]' -library 'Hacl.*,AEAD.*' \
   -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
+  -bundle EverCrypt.BCrypt \
+  -bundle EverCrypt.OpenSSL \
   -library EverCrypt.Bytes,EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -no-prefix 'EverCrypt.Vale' \
   -no-prefix 'Sha_update_bytes_stdcall' \
@@ -152,7 +157,9 @@ dist/coco/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS) \
   -bundle EverCrypt.Hash= -bundle EverCrypt.AutoConfig2= \
   -bundle EverCrypt= \
-  -bundle EverCrypt.Hacl -bundle EverCrypt.OpenSSL \
+  -bundle EverCrypt.Hacl \
+  -bundle EverCrypt.OpenSSL \
+  -bundle EverCrypt.BCrypt \
   -bundle '\*[rename=EverCrypt_Misc]'
 
 dist/compact-msvc/Makefile.basic: \

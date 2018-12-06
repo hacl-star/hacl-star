@@ -2,14 +2,14 @@ module X64.Memory_Sems
 
 open Prop_s
 open X64.Machine_s
-open X64.Memory_s
+open X64.Memory
 open Words_s
 module I = Interop
 module S = X64.Bytes_Semantics_s
 module B = LowStar.Buffer
 module BV = LowStar.BufferView
 
-friend X64.Memory_s
+friend X64.Memory
 
 let same_domain h m = Set.equal (I.addrs_set h.ptrs h.addrs) (Map.domain m)
 

@@ -3,7 +3,7 @@ open X64.Machine_s
 open X64.Vale.State
 open FStar.FunctionalExtensionality
 module BS = X64.Bytes_Semantics_s
-module ME = X64.Memory_s
+module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 open Prop_s
 

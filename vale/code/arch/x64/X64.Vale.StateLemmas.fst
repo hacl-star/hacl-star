@@ -3,10 +3,9 @@ open X64.Machine_s
 open X64.Vale.State
 module BS = X64.Bytes_Semantics_s
 module MS = X64.Memory_Sems
-module ME = X64.Memory_s
+module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 
-friend X64.Memory
 module F = FStar.FunctionalExtensionality
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
@@ -94,39 +93,39 @@ let lemma_to_of_eval_code c s0 =
   MS.get_heap_hs heap s0.mem;
   ()
 
-val lemma_valid_taint64: (b:X64.Memory.buffer64) ->
-                         (memTaint:X64.Memory.memtaint) ->
-                         (mem:X64.Memory.mem) ->
-                         (i:nat{i < X64.Memory.buffer_length b}) ->
+val lemma_valid_taint64: (b:ME.buffer64) ->
+                         (memTaint:ME.memtaint) ->
+                         (mem:ME.mem) ->
+                         (i:nat{i < ME.buffer_length b}) ->
                          (t:taint) -> Lemma
-  (requires X64.Memory.valid_taint_buf64 b mem memTaint t /\ X64.Memory.buffer_readable mem b)
-  (ensures memTaint.[X64.Memory.buffer_addr b mem + 8 `op_Multiply` i] == t)
+  (requires ME.valid_taint_buf64 b mem memTaint t /\ ME.buffer_readable mem b)
+  (ensures memTaint.[ME.buffer_addr b mem + 8 `op_Multiply` i] == t)
 
-val lemma_valid_taint128: (b:X64.Memory.buffer128) ->
-                         (memTaint:X64.Memory.memtaint) ->
-                         (mem:X64.Memory.mem) ->
-                         (i:nat{i < X64.Memory.buffer_length b}) ->
+val lemma_valid_taint128: (b:ME.buffer128) ->
+                         (memTaint:ME.memtaint) ->
+                         (mem:ME.mem) ->
+                         (i:nat{i < ME.buffer_length b}) ->
                          (t:taint) -> Lemma
-  (requires X64.Memory.valid_taint_buf128 b mem memTaint t /\ X64.Memory.buffer_readable mem b)
-  (ensures memTaint.[X64.Memory.buffer_addr b mem + 16 `op_Multiply` i] == t /\
-           memTaint.[X64.Memory.buffer_addr b mem + 16 `op_Multiply` i + 8] == t)
+  (requires ME.valid_taint_buf128 b mem memTaint t /\ ME.buffer_readable mem b)
+  (ensures memTaint.[ME.buffer_addr b mem + 16 `op_Multiply` i] == t /\
+           memTaint.[ME.buffer_addr b mem + 16 `op_Multiply` i + 8] == t)
 
 
-val same_memTaint64: (b:X64.Memory.buffer64) ->
-                   (mem0:X64.Memory.mem) ->
-                   (mem1:X64.Memory.mem) ->
-                   (memtaint0:X64.Memory.memtaint) ->
-                   (memtaint1:X64.Memory.memtaint) -> Lemma
-  (requires (X64.Memory.modifies (X64.Memory.loc_buffer b) mem0 mem1 /\
+val same_memTaint64: (b:ME.buffer64) ->
+                   (mem0:ME.mem) ->
+                   (mem1:ME.mem) ->
+                   (memtaint0:ME.memtaint) ->
+                   (memtaint1:ME.memtaint) -> Lemma
+  (requires (ME.modifies (ME.loc_buffer b) mem0 mem1 /\
     (forall p. Map.sel memtaint0 p == Map.sel memtaint1 p)))
   (ensures memtaint0 == memtaint1)
 
-val same_memTaint128: (b:X64.Memory.buffer128) ->
-                   (mem0:X64.Memory.mem) ->
-                   (mem1:X64.Memory.mem) ->
-                   (memtaint0:X64.Memory.memtaint) ->
-                   (memtaint1:X64.Memory.memtaint) -> Lemma
-  (requires (X64.Memory.modifies (X64.Memory.loc_buffer b) mem0 mem1 /\
+val same_memTaint128: (b:ME.buffer128) ->
+                   (mem0:ME.mem) ->
+                   (mem1:ME.mem) ->
+                   (memtaint0:ME.memtaint) ->
+                   (memtaint1:ME.memtaint) -> Lemma
+  (requires (ME.modifies (ME.loc_buffer b) mem0 mem1 /\
     (forall p. Map.sel memtaint0 p == Map.sel memtaint1 p)))
   (ensures memtaint0 == memtaint1)
 

@@ -29,7 +29,7 @@ friend X64.Memory_Sems
 friend X64.Memory
 friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
-#set-options "--z3rlimit 60"
+#set-options "--z3rlimit 120"
 
 open Vale_sha_update_bytes_stdcall
 
@@ -237,7 +237,7 @@ let lemma_ghost_sha_update_bytes_stdcall is_win ctx_b in_b num_val k_b stack_b h
 #set-options "--max_fuel 0 --max_ifuel 0"
 
 let nat32_to_nat8s (v:UInt32.t) : GTot (s:Seq.lseq UInt8.t 4{
-  v == UInt32.uint_to_t (Views.nat8s_to_nat32
+  v == UInt32.uint_to_t (Views_s.nat8s_to_nat32
     (UInt8.v (Seq.index s 0))
     (UInt8.v (Seq.index s 1))
     (UInt8.v (Seq.index s 2))
@@ -247,7 +247,7 @@ let nat32_to_nat8s (v:UInt32.t) : GTot (s:Seq.lseq UInt8.t 4{
 let seq32_to_8 (s:Seq.seq UInt32.t) : GTot (s':Seq.seq UInt8.t{
   Seq.length s' = 4 `op_Multiply` Seq.length s /\
   (forall (i:nat{i < Seq.length s}). 
-  Seq.index s i == UInt32.uint_to_t (Views.nat8s_to_nat32
+  Seq.index s i == UInt32.uint_to_t (Views_s.nat8s_to_nat32
     (UInt8.v (Seq.index s' (4 `op_Multiply` i)))
     (UInt8.v (Seq.index s' (4 `op_Multiply` i + 1)))
     (UInt8.v (Seq.index s' (4 `op_Multiply` i + 2)))
@@ -256,7 +256,7 @@ let seq32_to_8 (s:Seq.seq UInt32.t) : GTot (s':Seq.seq UInt8.t{
   let n = Seq.length s in
   let rec aux (i:nat{i <= n}) : GTot (s':Seq.lseq UInt8.t (4 `op_Multiply` (n - i)){
     (forall (j:nat{j < n - i}). 
-    Seq.index s (i + j) == UInt32.uint_to_t (Views.nat8s_to_nat32
+    Seq.index s (i + j) == UInt32.uint_to_t (Views_s.nat8s_to_nat32
     (UInt8.v (Seq.index s' (4 `op_Multiply` j)))
     (UInt8.v (Seq.index s' (4 `op_Multiply` j + 1)))
     (UInt8.v (Seq.index s' (4 `op_Multiply` j + 2)))
@@ -268,7 +268,7 @@ let seq32_to_8 (s:Seq.seq UInt32.t) : GTot (s':Seq.seq UInt8.t{
       let s_aux = aux (i+1) in
       let s' = Seq.append (nat32_to_nat8s (Seq.index s i)) s_aux in
       let aux2 (j:nat{j < n-i /\ j > 0}) : Lemma (
-        Seq.index s (i + j) == UInt32.uint_to_t (Views.nat8s_to_nat32
+        Seq.index s (i + j) == UInt32.uint_to_t (Views_s.nat8s_to_nat32
           (UInt8.v (Seq.index s' (4 `op_Multiply` j)))
           (UInt8.v (Seq.index s' (4 `op_Multiply` j + 1)))
           (UInt8.v (Seq.index s' (4 `op_Multiply` j + 2)))
@@ -326,7 +326,7 @@ let b32_to_b8 (b32:uint32_p) (b8:b8) (h0:HS.mem) : Ghost HS.mem
 let seq8_to_32 (s:Seq.seq UInt8.t{Seq.length s % 16 = 0}) : GTot (s':Seq.seq UInt32.t{
   Seq.length s == 4 `op_Multiply` Seq.length s' /\
   (forall (i:nat{i < Seq.length s'}).
-    UInt32.v (Seq.index s' i) == Views.nat8s_to_nat32
+    UInt32.v (Seq.index s' i) == Views_s.nat8s_to_nat32
       (UInt8.v (Seq.index s (4 `op_Multiply` i)))
       (UInt8.v (Seq.index s (4 `op_Multiply` i + 1)))
       (UInt8.v (Seq.index s (4 `op_Multiply` i + 2)))
@@ -335,14 +335,14 @@ let seq8_to_32 (s:Seq.seq UInt8.t{Seq.length s % 16 = 0}) : GTot (s':Seq.seq UIn
   let rec aux (i:nat{i <= n}) (accu:Seq.lseq UInt32.t i) : Ghost (Seq.lseq UInt32.t n)
     (requires
       (forall (j:nat{j < Seq.length accu}).
-    UInt32.v (Seq.index accu j) == Views.nat8s_to_nat32
+    UInt32.v (Seq.index accu j) == Views_s.nat8s_to_nat32
       (UInt8.v (Seq.index s (4 `op_Multiply` j)))
       (UInt8.v (Seq.index s (4 `op_Multiply` j + 1)))
       (UInt8.v (Seq.index s (4 `op_Multiply` j + 2)))
       (UInt8.v (Seq.index s (4 `op_Multiply` j + 3)))))
     (ensures fun s' ->
       (forall (j:nat{j < n}).
-    UInt32.v (Seq.index s' j) == Views.nat8s_to_nat32
+    UInt32.v (Seq.index s' j) == Views_s.nat8s_to_nat32
       (UInt8.v (Seq.index s (4 `op_Multiply` j)))
       (UInt8.v (Seq.index s (4 `op_Multiply` j + 1)))
       (UInt8.v (Seq.index s (4 `op_Multiply` j + 2)))
@@ -351,7 +351,7 @@ let seq8_to_32 (s:Seq.seq UInt8.t{Seq.length s % 16 = 0}) : GTot (s':Seq.seq UIn
     if i = n then accu else
     aux (i+1) (Seq.append 
       accu 
-      (Seq.create 1 (UInt32.uint_to_t (Views.nat8s_to_nat32
+      (Seq.create 1 (UInt32.uint_to_t (Views_s.nat8s_to_nat32
         (UInt8.v (Seq.index s (4 `op_Multiply` i)))
         (UInt8.v (Seq.index s (4 `op_Multiply` i + 1)))
         (UInt8.v (Seq.index s (4 `op_Multiply` i + 2)))

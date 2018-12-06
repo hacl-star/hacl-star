@@ -1,95 +1,75 @@
 [
-  "#0_j\\_~É\u0000Dü»Mã_2",
+  "<eTŸ®árv¶†æ¬P\u0007¬â",
   [
     [
-      "X64.FastMul.uu___267",
+      "X64.FastMul.va_lemma_fast_mul_stdcall",
       1,
       1,
       0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equality_tok_X64.Machine_s.R8@tok",
+        "equality_tok_X64.Machine_s.Rcx@tok",
+        "equality_tok_X64.Machine_s.Rdi@tok",
+        "equality_tok_X64.Machine_s.Rdx@tok",
+        "equality_tok_X64.Machine_s.Rsi@tok",
+        "equality_tok_X64.Machine_s.Secret@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Decls.validSrcAddrs64",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.CPU_Features_s.adx_enabled",
+        "function_token_typing_X64.CPU_Features_s.bmi2_enabled",
+        "proj_equation_X64.Vale.State.Mkstate_mem",
+        "proj_equation_X64.Vale.State.Mkstate_memTaint",
+        "proj_equation_X64.Vale.State.Mkstate_regs",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.FastMul_Tm_refine_44f3539c1e3563d4166fe63d38695ed0",
+        "typing_X64.Vale.Regs.sel",
+        "typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.R8@tok",
+        "typing_tok_X64.Machine_s.Rcx@tok",
+        "typing_tok_X64.Machine_s.Rdi@tok",
+        "typing_tok_X64.Machine_s.Rdx@tok",
+        "typing_tok_X64.Machine_s.Rsi@tok"
+      ],
       0,
-      "fca6690af900aced371e2bd8816a33b7"
+      "55dc6ecc9aad6c6542f896db33bf03c0"
     ],
     [
-      "X64.FastMul.uu___267",
-      2,
+      "X64.FastMul.va_wp_fast_mul_stdcall",
+      1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equation_Prims.nat", "equation_Words_s.nat64",
+        "equation_Words_s.natN", "equation_X64.Vale.Decls.va_if",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_Words_s.nat64",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "typing_X64.FastMul_Tm_abs_0b85c5cdf81ff9d981d06a423bf17bd6",
+        "typing_X64.FastMul_Tm_abs_494c4553ff5247f2c81506c212bacc26",
+        "typing_X64.FastMul_Tm_abs_50ad851d36622cc25536b7edc233d114",
+        "typing_X64.FastMul_Tm_abs_86b4602d570d0a24c17faa370bd6d79e",
+        "typing_X64.Vale.Decls.va_if", "unit_typing"
+      ],
       0,
-      "a2449e26d256317e2c016977f4ddce45"
+      "c416a750e253faa3162096cd83b218fa"
     ],
     [
-      "X64.FastMul.uu___268",
+      "X64.FastMul.va_wpProof_fast_mul_stdcall",
       1,
       1,
       0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
       0,
-      "21cb5fe2421a321b6b8d2788f2cfb0a2"
-    ],
-    [
-      "X64.FastMul.uu___268",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "7626d0a76702b4efbcfaf68d47c26558"
-    ],
-    [
-      "X64.FastMul.uu___269",
-      1,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0,
-      "463ab75e67be3945fe54f4a8a86dc71d"
-    ],
-    [
-      "X64.FastMul.uu___269",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "1a178182e5dd7cde05abd3b418236864"
-    ],
-    [
-      "X64.FastMul.uu___270",
-      1,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0,
-      "47f38d71d8fa6fc4d13a4cfc0ea36c50"
-    ],
-    [
-      "X64.FastMul.uu___270",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "38fc2862c8595e1b7430d053d1edb382"
-    ],
-    [
-      "X64.FastMul.uu___271",
-      1,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0,
-      "ec38597bab3956ba8b163af0a237adbd"
-    ],
-    [
-      "X64.FastMul.uu___271",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "53ed351d3b7ccb4028a8c93b4f2f6310"
+      "9c2b608bee6312e8b3474a1528388454"
     ]
   ]
 ]

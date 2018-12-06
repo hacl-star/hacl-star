@@ -5,10 +5,8 @@ open Types_s
 open FStar.Mul
 open FStar.Tactics
 open CanonCommSemiring
-open FastMul_defs
+open Fast_defs
 
-
-let int_canon = fun _ -> canon_semiring int_cr //; dump "Final"
 
 (*
 let simple_helper2 (a0 b0 b1 a0b0_lo a0b0_hi a0b1_lo a0b1_hi sum:nat64) (overflow:bool) : Lemma
@@ -72,6 +70,7 @@ let mul_nats (x y:nat) : nat =
   lemma_mul_bounds_le 0 x 0 y;
   prod
 
+#push-options "--z3rlimit 10"
 let lemma_mul_pow2_bound (b:nat{b > 1}) (x y:natN (pow2 b)) :
   Lemma (x * y < pow2 (2*b) - 1 /\
          x * y <= pow2 (2*b) - 2*pow2(b) + 1)
@@ -80,6 +79,7 @@ let lemma_mul_pow2_bound (b:nat{b > 1}) (x y:natN (pow2 b)) :
   pow2_plus b b;
   assert ( (pow2 b - 1) * (pow2 b -1) = pow2 (2*b) - 2*pow2(b) + 1);
   ()
+#pop-options
 
 let lemma_mul_bound64 (x y:nat64) :
   Lemma (x * y < pow2_128 - 1 /\ x * y <= pow2_128 - 2*pow2_64 + 1)
@@ -119,23 +119,6 @@ let lemma_double_bound (x:nat64) :
 
 type bit = b:nat { b <= 1 }
 
-let bool_bit (b:bool) : bit = if b then 1 else 0
-
-open Arch.Types
-let add_carry (x y:nat64) (c:bit) : nat64 & (c':nat{c = 0 || c = 1})
-  =
-  add_wrap64 (add_wrap64 x y) c,
-  (if x + y + c >= pow2_64 then 1 else 0)
-
-
-let lemma_overflow (dst_hi dst_lo addend:nat64) (old_overflow:bit) : Lemma
-  (requires dst_hi < pow2_64 - 1 /\
-            (dst_hi < pow2_64 - 2 \/ dst_lo <= 1) /\
-            addend < pow2_64 - 1 /\
-            (old_overflow = 0 \/ addend < pow2_64 - 2))
-  (ensures dst_hi < pow2_64 - 2 \/ dst_lo + addend + old_overflow < pow2_64)
-  =
-  ()
 
 let lemma_offset_sum (a_agg:nat) (a0 a1 a2 a3 a4:nat64)
                       (b_agg:nat) (b0 b1 b2 b3 b4:nat64) : Lemma
@@ -449,7 +432,7 @@ let sub_carry (x y:nat64) (c:bit) : nat64 & (c':bit)
   (x - (y + c)) % pow2_64,
   (if x - (y + c) < 0 then 1 else 0)
 
-#push-options "--z3rlimit 3000 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 3000 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 // Passes
 (*
 let lemma_sub2
@@ -484,7 +467,6 @@ let lemma_sub3
   (ensures a - b == pow2_three s1 s2 s3 - c * pow2_192)
   =
   ()
-#pop-options
 
 // Unclear why lemma_sub2 and lemma_sub3 pass, but lemma_sub4 fails without explicit help
 

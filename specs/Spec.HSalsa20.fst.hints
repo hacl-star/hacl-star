@@ -1,0 +1,81 @@
+[
+  "d¥GÆ‚Oû\u0017M{\u0004/µUã\u001c",
+  [
+    [
+      "Spec.HSalsa20.key",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.HSalsa20.keylen",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "de02aefb272bf53abc41380b4c941410"
+    ],
+    [
+      "Spec.HSalsa20.nonce",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.HSalsa20.noncelen",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "0fb2006f43eb0c38ced6c19172139bbb"
+    ],
+    [
+      "Spec.HSalsa20.block",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.HSalsa20.blocklen",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "5462d52d724f8cb6b83e8d21462a0d87"
+    ],
+    [
+      "Spec.HSalsa20.setup",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.UInt32.n", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Spec.HSalsa20_Tm_refine_93df21c232b9036c43f55597cf78cad5",
+        "refinement_interpretation_Spec.HSalsa20_Tm_refine_a38ba213f7d10ad82997d9720a14fea1"
+      ],
+      0,
+      "85995d935d4f9c98f04f977728c63ad1"
+    ],
+    [
+      "Spec.HSalsa20.hsalsa20",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_interpretation_Tm_arrow_f82c3fb9ac6610efb97620a59b378092",
+        "equation_Spec.HSalsa20.state", "equation_Spec.Salsa20.rounds",
+        "equation_Spec.Salsa20.shuffle", "equation_Spec.Salsa20.state",
+        "function_token_typing_Spec.Salsa20.rounds",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Spec.Salsa20_Tm_refine_aca10fb50cc7162d8b55c168416f714b",
+        "typing_Spec.HSalsa20.setup"
+      ],
+      0,
+      "6b72e56d42a16c81d3302cf12812f99b"
+    ]
+  ]
+]
