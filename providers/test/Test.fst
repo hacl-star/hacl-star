@@ -254,29 +254,36 @@ let aead_vector = cipher * vec8 * vec8 * vec8 * vec8 * vec8 * vec8
 
 val test_chacha20_poly1305: aead_vector -> St unit
 let test_chacha20_poly1305 vec =
-  push_frame();
+  let wh = AC.wants_hacl () in
+  let wo = AC.wants_openssl () in
 
-  let cipher, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
-    (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = vec
-  in
-  let plaintext'    = B.alloca 0uy plaintext_len in
-  let ciphertext'   = B.alloca 0uy plaintext_len in
-  let tag'          = B.alloca 0uy 16ul in
+  if not wh && not wo then
+    C.String.print !$"Warning: skipping test_chacha20_poly1305 (hacl and openssl disabled)"
+  else begin
+    push_frame();
 
-  let s0 = TestLib.cpucycles () in
-  EverCrypt.chacha20_poly1305_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
-  let s1 = TestLib.cpucycles () in
-  TestLib.print_cycles_per_round s0 s1 1ul;
-  TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
-  TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
+    let cipher, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
+      (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = vec
+    in
+    let plaintext'    = B.alloca 0uy plaintext_len in
+    let ciphertext'   = B.alloca 0uy plaintext_len in
+    let tag'          = B.alloca 0uy 16ul in
 
-  match EverCrypt.chacha20_poly1305_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
-  | 1ul ->
-    TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len
-  | _ ->
-    C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
+    let s0 = TestLib.cpucycles () in
+    EverCrypt.chacha20_poly1305_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
+    let s1 = TestLib.cpucycles () in
+    TestLib.print_cycles_per_round s0 s1 1ul;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
 
-  pop_frame()
+    match EverCrypt.chacha20_poly1305_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
+    | 1ul ->
+      TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len
+    | _ ->
+      C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
+
+    pop_frame()
+  end
 
 val test_aes128_gcm: aead_vector -> St unit
 let test_aes128_gcm vec =
@@ -398,30 +405,37 @@ let rec test_chacha20 (LB len vs) =
   end
 
 let test_aead_st (v:aead_vector) : St unit =
-  push_frame();
 
   let alg, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
     (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = v
   in
 
-  let cipher = match alg with
-    | CHACHA20_POLY1305 -> EverCrypt.CHACHA20_POLY1305
-    | AES_128_GCM -> EverCrypt.AES128_GCM
-    | AES_256_GCM -> EverCrypt.AES256_GCM in
-  let st = EverCrypt.aead_create cipher key in
-  let plaintext'    = B.alloca 0uy plaintext_len in
-  let ciphertext'   = B.alloca 0uy plaintext_len in
-  let tag' = B.alloca 0uy tag_len in
-  
-  EverCrypt.aead_encrypt st iv aad aad_len plaintext plaintext_len ciphertext' tag';
-  (match EverCrypt.aead_decrypt st iv aad aad_len plaintext' plaintext_len ciphertext' tag' with
-  | 1ul ->
-    TestLib.compare_and_print !$"of AEAD cipher" ciphertext ciphertext' plaintext_len;
-    TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
-    TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
-  | _ -> C.portable_exit 1l);
-  EverCrypt.aead_free st;
-  pop_frame ()
+  let wh = AC.wants_hacl () in
+  let wo = AC.wants_openssl () in
+
+  if alg = CHACHA20_POLY1305 && not wh && not wo then
+    C.String.print !$"Warning: skipping test_aead_st/chachapoly because no BCrypt implementation\n"
+  else begin
+    push_frame();
+    let cipher = match alg with
+      | CHACHA20_POLY1305 -> EverCrypt.CHACHA20_POLY1305
+      | AES_128_GCM -> EverCrypt.AES128_GCM
+      | AES_256_GCM -> EverCrypt.AES256_GCM in
+    let st = EverCrypt.aead_create cipher key in
+    let plaintext'    = B.alloca 0uy plaintext_len in
+    let ciphertext'   = B.alloca 0uy plaintext_len in
+    let tag' = B.alloca 0uy tag_len in
+    
+    EverCrypt.aead_encrypt st iv aad aad_len plaintext plaintext_len ciphertext' tag';
+    (match EverCrypt.aead_decrypt st iv aad aad_len plaintext' plaintext_len ciphertext' tag' with
+    | 1ul ->
+      TestLib.compare_and_print !$"of AEAD cipher" ciphertext ciphertext' plaintext_len;
+      TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
+      TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
+    | _ -> C.portable_exit 1l);
+    EverCrypt.aead_free st;
+    pop_frame ()
+  end
 
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0 --using_facts_from '* -Test.Vectors'"
 
