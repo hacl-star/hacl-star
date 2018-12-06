@@ -27,8 +27,6 @@ int main(int argc, char *argv[]) {
   if (argc > 1)
     num_elts = atoi(argv[1]);
 
-  // Should call below two functions in the beginning of `main`.
-  kremlinit_globals();
   EverCrypt_AutoConfig2_init();
 
   timer_start();
