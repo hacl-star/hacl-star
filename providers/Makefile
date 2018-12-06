@@ -15,8 +15,9 @@ all: $(VALE_FSTI_HACK) $(VALE_OBJ_DIR) $(HACL_CHECK) $(KREMLIB_CHECK)
 	$(MAKE) all_
 
 # Manual staging
-all_: dist/compact/libevercrypt.$(SO) dist/compact/evercrypt.cmxa \
-  dist/header/EverCrypt.h dist/coco/libevercrypt.$(SO)
+all_: dist/compact-msvc/libevercrypt.$(SO) dist/compact/libevercrypt.$(SO) \
+  dist/compact/evercrypt.cmxa dist/header/EverCrypt.h \
+  dist/coco/libevercrypt.$(SO)
 
 # Temporary workaround: we want Vale to offer a relatively small dependency
 # graph with just interfaces.
@@ -164,8 +165,6 @@ dist/coco/Makefile.basic: \
 
 dist/compact-msvc/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS) -falloca -ftail-calls
-dist/compact-msvc/Makefile.basic: \
-  HACL_SOURCES = $(HACL_SOURCES_MSVC)
 
 dist/%/Makefile.basic: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN_HOME)/krml -skip-compilation -minimal $(KOPTS) -tmpdir $(dir $@) $^ \
