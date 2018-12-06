@@ -367,40 +367,6 @@ let point_double #s nq tmp1 tmp2 =
 (* WRAPPER to Prevent Inlining *)
 
 
-inline_for_extraction
-val cswap_: #s:field_spec -> bit:uint64 -> p1:point s -> p2:point s -> Stack unit
-			 (requires (fun h0 -> live h0 p1 /\ live h0 p2))
-			 (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
-inline_for_extraction
-let cswap_ #s bit p0 p1 = 
-    let mask = u64 0 -. bit in
-    let h0 = ST.get() in
-    loop2 h0 (2ul *. nlimb s) p0 p1
-    (fun h -> (fun i s -> s))
-    (fun i -> 
-         let dummy = mask &. (p0.(i) ^. p1.(i)) in
-         p0.(i) <- p0.(i) ^. dummy;
-         p1.(i) <- p1.(i) ^. dummy;
-	 admit())
-
-
-(* WRAPPER to Prevent Inlining *)
-[@CInline]
-let cswap_26 bit (p0:point26) (p1:point26) = cswap_ #M26 bit p0 p1
-[@CInline]
-let cswap_51 bit (p0:point51) (p1:point51) = cswap_ #M51 bit p0 p1
-[@CInline]
-let cswap_64 bit (p0:point64) (p1:point64) = cswap_ #M64 bit p0 p1
-inline_for_extraction
-val cswap: #s:field_spec -> bit:uint64 -> p1:point s -> p2:point s -> Stack unit
-			 (requires (fun h0 -> live h0 p1 /\ live h0 p2))
-			 (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
-let cswap #s bit p0 p1 =
-  match s with
-  | M26 -> cswap_26 bit p0 p1
-  | M51 -> cswap_51 bit p0 p1
-  | M64 -> cswap_64 bit p0 p1
-(* WRAPPER to Prevent Inlining *)
 
 
 inline_for_extraction
@@ -430,11 +396,11 @@ let montgomery_ladder_ #s out key init =
     (fun i -> 
          let bit = scalar_bit key (254ul -. i) in
 	 let sw = swap.(0ul) ^. bit in
-         cswap #s sw p0 p1;   
+         cswap2 #s sw p0 p1;   
          point_add_and_double #s init p0 p1 tmp1 tmp2;
 	 swap.(0ul) <- bit;
 	 admit());
-  cswap #s swap.(0ul) p0 p1;   
+  cswap2 #s swap.(0ul) p0 p1;   
   //Last three iterations are point doublings because the bottom 3 bits are 0
   point_double p0 tmp1 tmp2;
   point_double p0 tmp1 tmp2;

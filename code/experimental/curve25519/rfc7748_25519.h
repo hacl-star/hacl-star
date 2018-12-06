@@ -396,3 +396,34 @@ void fsqr2(uint64_t* dst, uint64_t* in_a, uint64_t* tmp) {
 //  carry_wide2(dst,tmp);
 }
 
+static inline void cswap1(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
+  uint64_t temp;
+  __asm__ __volatile__(
+    "test %9, %9 ;"
+    "movq %0, %8 ;"
+    "cmovnzq %4, %0 ;"
+    "cmovnzq %8, %4 ;"
+    "movq %1, %8 ;"
+    "cmovnzq %5, %1 ;"
+    "cmovnzq %8, %5 ;"
+    "movq %2, %8 ;"
+    "cmovnzq %6, %2 ;"
+    "cmovnzq %8, %6 ;"
+    "movq %3, %8 ;"
+    "cmovnzq %7, %3 ;"
+    "cmovnzq %8, %7 ;"
+    : "+r"(p0[0]), "+r"(p0[1]), "+r"(p0[2]), "+r"(p0[3]),
+      "+r"(p1[0]), "+r"(p1[1]), "+r"(p1[2]), "+r"(p1[3]),
+      "=r"(temp)
+    : "r"(bit)
+    : "cc"
+  );
+}
+
+static inline void cswap2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
+  cswap1(bit,p0,p1);
+  cswap1(bit,p0+4,p1+4);
+}
+
+
+

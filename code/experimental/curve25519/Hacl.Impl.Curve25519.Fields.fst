@@ -421,3 +421,15 @@ let fsqr2 #s out f tmp =
   | M26 -> admit();F26.fsqr2 out f
   | M51 -> F51.fsqr2 out f
   | M64 -> F64.fsqr2 out f tmp
+
+inline_for_extraction
+val cswap2: #s:field_spec -> bit:uint64 -> p1:felem2 s -> p2:felem2 s -> Stack unit
+    (requires (fun h0 -> live h0 p1 /\ live h0 p2))
+    (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
+[@CInline]
+let cswap2 #s bit p0 p1 = 
+  match s with
+  | M26 -> admit()
+  | M51 -> F51.cswap2 bit p0 p1
+  | M64 -> F64.cswap2 bit p0 p1
+  

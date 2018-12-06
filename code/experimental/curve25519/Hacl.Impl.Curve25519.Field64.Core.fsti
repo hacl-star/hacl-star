@@ -119,3 +119,10 @@ val fsqr2: out:u512 -> f:u512 -> tmp:u1024
       let f2 = gsub f 4ul 4ul in
       fevalh h1 out1 == S.fsqr (fevalh h0 f1) /\
       fevalh h1 out2 == S.fsqr (fevalh h0 f2)))
+
+[@ CInline]
+val cswap2: bit:uint64 -> p0:u512 -> p1:u512 
+  -> Stack unit
+    (requires fun h -> live h p0 /\ live h p1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p0 |+| loc p1) h0 h1)
