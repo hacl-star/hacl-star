@@ -61,45 +61,47 @@ let lemma_concat3 #a len0 s0 len1 s1 len2 s2 s =
   FStar.Seq.Properties.lemma_split s (len0 + len1);
   FStar.Seq.Properties.lemma_split s' (len0 + len1)
 
-let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = lseq a k
-let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) (s:createi_a a len init k) =
-  forall (i:nat). {:pattern (index s i)} i < k ==> index s i == init i
+let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = 
+  lseq a k
+
+let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len})
+  (s:createi_a a len init k) =
+  forall (i:nat).{:pattern (index s i)} i < k ==> index s i == init i
+
 let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
 	         (si:createi_a a len init i)
-		 : r:createi_a a len init (i+1){
-		   createi_pred a len init i si ==>
-		   createi_pred a len init (i+1) r
-		 } =
-    let s : lseq a (i+1) = FStar.Seq.snoc si (init i) in
-    assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
-    assert (createi_pred a len init i si ==> (forall (j:nat). j < (i+1) ==> index s j == init j));
-    s
+  : r:createi_a a len init (i + 1)
+      {createi_pred a len init i si ==> createi_pred a len init (i + 1) r}
+  =
+  assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
+  Seq.snoc si (init i)
+
 let createi #a len init_f =
-    repeat_gen_inductive len
-      (createi_a a len init_f)
-      (createi_pred a len init_f)
-      (createi_step a len init_f)
-      (of_list [])
+  repeat_gen_inductive len
+    (createi_a a len init_f)
+    (createi_pred a len init_f)
+    (createi_step a len init_f)
+    (of_list [])
 
 let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
-	       (f:(i:nat{i < len} -> a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
-		 f i s.[i]
+  (f:(i:nat{i < len} -> a -> b)) (s:lseq a len) (i:size_nat{i < len}) =
+  f i s.[i]
 
 let mapi #a #b #len f s =
-    createi #b len (mapi_inner #a #b #len f s)
+  createi #b len (mapi_inner #a #b #len f s)
 
 let map_inner (#a:Type) (#b:Type) (#len:size_nat)
-	       (f:(a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
-		 f s.[i]
+  (f:(a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
+  f s.[i]
 
 let map #a #b #len f s =
-    createi #b len (map_inner #a #b #len f s)
+  createi #b len (map_inner #a #b #len f s)
 
 let map2i #a #b #c #len f s1 s2 =
-    createi #c len (fun i -> f i s1.[i] s2.[i])
+  createi #c len (fun i -> f i s1.[i] s2.[i])
 
 let map2 #a #b #c #len f s1 s2 =
-    createi #c len (fun i -> f s1.[i] s2.[i])
+  createi #c len (fun i -> f s1.[i] s2.[i])
 
 let for_all #a #len f x = Seq.for_all f x
 
