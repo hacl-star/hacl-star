@@ -53,7 +53,8 @@ include .depend
 	  --already_cached "EverCrypt FStar LowStar C Hacl" \
 	  --cache_dir $(CACHE_DIR) \
 	  $(addprefix --include , $(FSTAR_INCLUDES)) \
-	  $< && touch $@
+	  $< && \
+	touch $@
 
 $(EXTRACT_DIR)/%.krml:
 	$(FSTAR) --codegen Kremlin \

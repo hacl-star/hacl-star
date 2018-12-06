@@ -76,7 +76,7 @@ verification: $(addprefix $(CACHE_DIR)/,$(notdir $(addsuffix .checked,$(ALL_FST_
 # .depend.* is re-generated. Otherwise it can happen that this rule is executed
 # in parallel with the .depend rule, where this rule uses the old .depend file.
 %.checked: | .depend.$(IMPL_CHOICE) $(CACHE_DIR) $(OUTPUT_DIR)
-	$(FSTAR) $<
+	$(FSTAR) $< && \
 	touch $@
 
 # Filling out the right invocations to generate a .krml
