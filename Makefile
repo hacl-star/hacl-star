@@ -151,7 +151,7 @@ providers:
 CC = $(GCC)
 
 ci: .clean-banner .clean-git .clean-snapshots
-	$(MAKE) verify -C lib
+	$(MAKE) -C lib
 	$(MAKE) verify -C code/blake2
 	$(MAKE) -C code/sha3
 	$(MAKE) -C frodo

@@ -25,21 +25,14 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = $(addprefix fst/, \
-	Lib.IntTypes.fst \
-	Lib.RawIntTypes.fst \
-	Lib.Sequence.fst \
-	Lib.ByteSequence.fst \
-	Lib.ByteBuffer.fst \
-	Lib.Buffer.fst \
-	Lib.LoopCombinators.fst \
-	Lib.PrintSequence.fst \
-	Lib.NatMod.fst) \
-	c/Lib.Loops.fst
+ALL_SOURCES = $(wildcard fst/*.fst) $(wildcard c/*.fst) $(wildcard *.fsti)
 
-FIXME = fst/Lib.IntVector.fst
+FIXME = fst/Lib.IntVector.fst Lib.IntVector.fsti
+
+ROOTS = $(filter-out $(FIXME),$(ALL_SOURCES))
 
 .depend:
+	$(info $(ROOTS))
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
 
 include .depend
@@ -74,3 +67,5 @@ SHELL=/bin/bash
 
 clean:
 	rm -rf $(CACHE_DIR)
+
+distclean: clean

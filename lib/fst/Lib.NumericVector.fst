@@ -39,7 +39,7 @@ type vector_ (m:nat) (t:numeric m -> Type0) : numeric m -> size_nat -> Type0 =
 (** Interpretation of numeric types *)
 val uint_t: #m:nat -> a:numeric m -> Tot Type0 (decreases (dimension a))
 let rec uint_t #m = function
-  | Int t    -> Lib.IntTypes.uint_t t
+  | Int t    -> Lib.IntTypes.uint_t t PUB
   | Vec a' n -> vector_ (m - 1) uint_t a' n
 
 let vector_t #m t n = vector_ m uint_t t n
@@ -49,7 +49,7 @@ let vector_t #m t n = vector_ m uint_t t n
 /// Example
 private
 val v : uint_t #2 (Vec (Vec (Int U8) 1) 2)
-let v = VCons (VCons (u8 1) VNil) (VCons (VCons (u8 2) VNil) VNil)
+let v = VCons (VCons 1uy VNil) (VCons (VCons 2uy VNil) VNil)
 
 let size_pos = n:size_nat{0 < n}
 
@@ -149,7 +149,7 @@ let rec map2 #m #len #a #b #c f v1 v2 =
 val add: #m:nat -> #t:numeric m -> x:uint_t t -> y:uint_t t -> Tot (uint_t t) (decreases (dimension t))
 let rec add #m #t x y =
   match t with
-  | Int t    -> IntTypes.add_mod #t x y
+  | Int t    -> IntTypes.add_mod #t #PUB x y
   | Vec t' n ->
     let x: uint_t (Vec t' n) = x in
     let y: uint_t (Vec t' n) = y in
@@ -161,7 +161,7 @@ let ( +. ) #m #t = add #m #t
 val sub: #m:nat -> #t:numeric m -> x:uint_t t -> y:uint_t t -> Tot (uint_t t) (decreases (dimension t))
 let rec sub #m #t x y =
   match t with
-  | Int t    -> IntTypes.sub_mod #t x y
+  | Int t    -> IntTypes.sub_mod #t #PUB x y
   | Vec t' n ->
     let x: uint_t (Vec t' n) = x in
     let y: uint_t (Vec t' n) = y in
@@ -173,7 +173,7 @@ let ( -. ) #m #t = sub #m #t
 val mul: #m:nat -> #t:numeric m -> x:uint_t t -> y:uint_t t -> Tot (uint_t t) (decreases (dimension t))
 let rec mul #m #t x y =
   match t with
-  | Int t    -> IntTypes.sub_mod #t x y
+  | Int t    -> IntTypes.sub_mod #t #PUB x y
   | Vec t' n ->
     let x: uint_t (Vec t' n) = x in
     let y: uint_t (Vec t' n) = y in
@@ -216,13 +216,13 @@ let op_Array_Assignment (#t:numeric 0) (m:matrix t) (i,j) x = set m i j x
 let m:matrix (Int U16) =
   M 2 2 (
   VCons
-      (VCons (u16 0) (VCons (u16 1) VNil))
+      (VCons 0us (VCons 1us VNil))
     (VCons
-      (VCons (u16 2) (VCons (u16 3) VNil))
+      (VCons 2us (VCons 3us VNil))
       VNil))
 
-let _ = assert_norm (m.(0,0) == u16 0 /\ m.(1,0) == u16 1 /\ m.(0,1) == u16 2 /\ m.(1,1) == u16 3)
-let _ = assert_norm (let m' = m.(0,0) <- u16 4 in m'.(0,0) == u16 4)
+let _ = assert_norm (m.(0,0) == 0us /\ m.(1,0) == 1us /\ m.(0,1) == 2us /\ m.(1,1) == 3us)
+let _ = assert_norm (let m' = m.(0,0) <- 4us in m'.(0,0) == 4us)
 
 val set_def1 (#a:numeric 0) (m:matrix a) (i:_) (j:_) (v:_) :
   Lemma (rows (set m i j v) == rows m)
