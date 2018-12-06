@@ -10,7 +10,7 @@ OUT_DIR	      = x25519-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: curve25519_51.exe curve25519_64.exe curve25519_26.exe 
+all: curve25519_51.exe curve25519_64.exe
 
 verify: test
 
