@@ -347,9 +347,7 @@ procedure{:quick} poly1305_blocks(
 
 
         Add64Wrap(h0, Mem(inp, 0, inp_b, word_index, Public)); // accumulate input
-        lemma_load_mem64(inp_b, word_index, mem);   // TODO: Really shouldn't need this, but it's the only connection between eval_operand and buffer64_read
         Adc64Wrap(h1, Mem(inp, 8, inp_b, word_index+1, Public));
-        lemma_load_mem64(inp_b, word_index + 1, mem);   // TODO: Really shouldn't need this, but it's the only connection between eval_operand and buffer64_read
         AddLea64(inp, inp, 16);
         Adc64Wrap(h2, padbit);
 

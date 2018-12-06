@@ -177,7 +177,8 @@ val va_opr_lemma_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) 
     M.valid_taint_buf64 b s.mem s.memTaint t /\
     eval_operand (t_op_to_op base) s + offset == M.buffer_addr b s.mem + 8 `op_Multiply` index
   )
-  (ensures valid_operand (va_opr_code_Mem base offset t) s)
+  (ensures valid_operand (va_opr_code_Mem base offset t) s /\
+           M.load_mem64 (M.buffer_addr b s.mem + 8 `op_Multiply` index) s.mem == M.buffer_read b index s.mem)
 
 val taint_at (memTaint:M.memtaint) (addr:int) : taint
 

@@ -28,7 +28,8 @@ let va_opr_lemma_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) 
   let t = va_opr_code_Mem base offset t in
   M.lemma_valid_mem64 b index s.mem;
   let TMem m t = t in
-  assert (valid_maddr (eval_maddr m s) s.mem s.memTaint b index t)
+  assert (valid_maddr (eval_maddr m s) s.mem s.memTaint b index t);
+  M.lemma_load_mem64 b index s.mem
 
 let taint_at memTaint addr = Map.sel memTaint addr
 
