@@ -10,7 +10,7 @@ OUT_DIR	      = x25519-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: curve25519_51.exe curve25519_64.exe
+all: curve25519_51.exe curve25519_64.exe curve25519_26.exe 
 
 verify: test
 
@@ -22,6 +22,7 @@ CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	Hacl.Impl.Curve25519.Field26.fst \
 	Hacl.Impl.Curve25519.Field64.fst \
 	Hacl.Impl.Curve25519.Field51.fst \
 	Hacl.Impl.Curve25519.Fields.fst \
@@ -36,6 +37,13 @@ curve51-c/Hacl_Curve25519_51.c: curve51-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c  $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_51=*'
 
+curve26-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_26.fst
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve26-c $(CURVE25519_FILES) Hacl.Curve25519_26.fst -skip-translation 
+
+curve26-c/Hacl_Curve25519_26.c: curve26-c/out.krml
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve26-c  $^ -skip-compilation \
+	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_26=*'
+
 curve64-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_64.fst
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c $(CURVE25519_FILES) Hacl.Curve25519_64.fst -drop Hacl.Impl.Curve25519.Field64.Core -no-prefix  Hacl.Impl.Curve25519.Field64.Core -skip-translation 
 
@@ -46,6 +54,10 @@ curve64-c/Hacl_Curve25519_64.c: curve64-c/out.krml
 curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve51-test.c -o curve25519_51.exe
 	./curve25519_51.exe
+
+curve25519_26.exe: curve26-c/Hacl_Curve25519_26.c
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve26-c/Hacl_Curve25519_26.c $(KREMLIN_HOME)/kremlib/c/testlib.o curve26-test.c -o curve25519_26.exe
+	./curve25519_26.exe
 
 
 curve25519_64_vale.exe: curve64-c/Hacl_Curve25519_64.c vale_25519.h vale/obj/curve25519-macos.S

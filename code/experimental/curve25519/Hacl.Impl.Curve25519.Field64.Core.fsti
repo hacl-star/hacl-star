@@ -69,19 +69,19 @@ val fsub: out:u256 -> f1:u256 -> f2:u256
       fevalh h1 out == S.fsub (fevalh h0 f1) (fevalh h0 f2))
 
 [@ CInline]
-val fmul: out:u256 -> f1:u256 -> f2:u256
+val fmul: out:u256 -> f1:u256 -> f2:u256 -> tmp:u1024
   -> Stack unit
-    (requires fun h -> live h out /\ live h f1 /\ live h f2)
+    (requires fun h -> live h out /\ live h f1 /\ live h f2 /\ live h tmp)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
+      modifies (loc out |+| loc tmp) h0 h1 /\
       fevalh h1 out == S.fmul (fevalh h0 f1) (fevalh h0 f2))
 
 [@ CInline]
-val fmul2: out:u512 -> f1:u512 -> f2:u512
+val fmul2: out:u512 -> f1:u512 -> f2:u512 -> tmp:u1024
   -> Stack unit
-    (requires fun h -> live h out /\ live h f1 /\ live h f2)
+    (requires fun h -> live h out /\ live h f1 /\ live h f2 /\ live h tmp)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
+      modifies (loc out |+| loc tmp) h0 h1 /\
      (let out0 = gsub out 0ul 4ul in
       let out1 = gsub out 4ul 4ul in
       let f10 = gsub f1 0ul 4ul in
@@ -100,19 +100,19 @@ val fmul1: out:u256 -> f1:u256 -> f2:uint64{v f2 < pow2 17}
       fevalh h1 out == (fevalh h0 f1 * v f2) % S.prime)
 
 [@ CInline]
-val fsqr: out:u256 -> f1:u256
+val fsqr: out:u256 -> f1:u256 -> tmp:u1024
   -> Stack unit
-    (requires fun h -> live h out /\ live h f1)
+    (requires fun h -> live h out /\ live h f1 /\ live h tmp)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
+      modifies (loc out |+| loc tmp) h0 h1 /\
       fevalh h1 out == S.fsqr (fevalh h0 f1))
 
 [@ CInline]
-val fsqr2: out:u512 -> f:u512
+val fsqr2: out:u512 -> f:u512 -> tmp:u1024
   -> Stack unit
-    (requires fun h -> live h out /\ live h f)
+    (requires fun h -> live h out /\ live h f /\ live h tmp)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
+      modifies (loc out |+| loc tmp) h0 h1 /\
      (let out1 = gsub out 0ul 4ul in
       let out2 = gsub out 4ul 4ul in
       let f1 = gsub f 0ul 4ul in

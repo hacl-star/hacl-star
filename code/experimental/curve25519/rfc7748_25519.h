@@ -368,16 +368,14 @@ static force_inline uint64_t add1(uint64_t *const c, const uint64_t* a, uint64_t
 }
 
 static force_inline
-void fmul(uint64_t* dst, uint64_t* in_a, uint64_t* in_b) {
-  uint64_t tmp[8] = {0};
+void fmul(uint64_t* dst, uint64_t* in_a, uint64_t* in_b, uint64_t* tmp) {
   mul(tmp,in_a,in_b);
   carry_wide(dst,tmp);
 }
 
 
 static force_inline
-void fmul2(uint64_t* dst, uint64_t* in_a, uint64_t* in_b) {
-  uint64_t tmp[16] = {0};
+void fmul2(uint64_t* dst, uint64_t* in_a, uint64_t* in_b, uint64_t* tmp) {
   mul2(tmp,in_a,in_b);
   carry_wide(dst,tmp);
   carry_wide(dst+4,tmp+8);
@@ -385,15 +383,13 @@ void fmul2(uint64_t* dst, uint64_t* in_a, uint64_t* in_b) {
 }
 
 static force_inline
-void fsqr(uint64_t* dst, uint64_t* in_a) {
-  uint64_t tmp[8] = {0};
+void fsqr(uint64_t* dst, uint64_t* in_a, uint64_t* tmp) {
   sqr(tmp,in_a);
   carry_wide(dst,tmp);
 }
 
 static force_inline
-void fsqr2(uint64_t* dst, uint64_t* in_a) {
-  uint64_t tmp[16] = {0};
+void fsqr2(uint64_t* dst, uint64_t* in_a, uint64_t* tmp) {
   sqr2(tmp,in_a);
   carry_wide(dst,tmp);
   carry_wide(dst+4,tmp+8);

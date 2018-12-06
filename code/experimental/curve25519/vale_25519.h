@@ -30,29 +30,25 @@ extern void fmul1(uint64_t* dst, const uint64_t* in_a, const uint64_t in_b);
 
 // Done in C in rfc7748_25519.h
 static inline
-void fmul(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b) {
-  uint64_t tmp[8] = {0};
+void fmul(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b, uint64_t* tmp) {
   fmul_v(tmp, in_a, dst, in_b);
 }
 
 // Done in C in rfc7748_25519.h
 static inline
-void fsqr(uint64_t* dst, const uint64_t* in_a) {
-  uint64_t tmp[8] = {0};
+void fsqr(uint64_t* dst, const uint64_t* in_a, uint64_t* tmp) {
   fsqr_v(tmp,in_a, dst);
 }
 
 // Done in C in rfc7748_25519.h
 static inline
-void fmul2(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b) {
-  uint64_t tmp[16] = {0};
+void fmul2(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b, uint64_t* tmp) {
   fmul2_v(tmp, in_a, dst, in_b);
 }
 
 // Done in C in rfc7748_25519.h
 static inline
-void fsqr2(uint64_t* dst, const uint64_t* in_a) {
-  uint64_t tmp[16] = {0};
+void fsqr2(uint64_t* dst, const uint64_t* in_a, uint64_t* tmp) {
   fsqr2_v(tmp, in_a, dst);
 }
 
