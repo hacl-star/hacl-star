@@ -26,6 +26,9 @@ ALL_SOURCES = Test.c
 $(info All sources are $(ALL_SOURCES))
 
 LDFLAGS += $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+ifeq ($(OS),Windows_NT)
+LDFLAGS += $(EVERCRYPT_HOME)/libevercrypt.dll -lbcrypt
+endif
 
 # See https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
 %.d: %.c
