@@ -134,6 +134,11 @@ let print_lbytes #len b =
   let sb = sub #uint8 #len b (n * q) r in
   List.iter (fun a -> print_uint8_hex_pad a) (to_list sb))
 
+let print_label_lbytes #len label b =
+  IO.print_string label;
+  IO.print_string ": ";
+  print_lbytes #len b
+
 let print_compare len expected result =
   IO.print_string "\nResult:   ";
   List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
