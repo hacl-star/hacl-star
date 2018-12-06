@@ -6,6 +6,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 open Hacl.Impl.Curve25519.Fields
+module F26 = Hacl.Impl.Curve25519.Field26
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 
@@ -13,31 +14,35 @@ module F64 = Hacl.Impl.Curve25519.Field64
 #set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction noextract
-val fsquare_times_: #s:field_spec -> o:felem s -> i:felem s -> n:size_t{v n > 0} -> Stack unit
-	     (requires (fun h0 -> live h0 o /\ live h0 i))
-	     (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1 /\ live h1 o /\ live h1 i))
+val fsquare_times_: #s:field_spec -> o:felem s -> i:felem s -> tmp:felem_wide2 s -> n:size_t{v n > 0} -> Stack unit
+	     (requires (fun h0 -> live h0 o /\ live h0 i /\ live h0 tmp))
+	     (ensures (fun h0 _ h1 -> modifies (loc o |+| loc tmp) h0 h1 /\ live h1 o /\ live h1 i))
 inline_for_extraction noextract
-let fsquare_times_ #s o i n = 
-    fsqr #s o i;
+let fsquare_times_ #s o i tmp n = 
+    admit();
+    fsqr #s o i tmp;
     let h0 = ST.get() in
     loop1 h0 (n -! 1ul) o
     (fun h -> (fun i s -> s))
-    (fun i -> fsqr #s o o; admit())
+    (fun i -> fsqr #s o o tmp)
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let fsquare_times_51 (o:F51.felem) (i:F51.felem) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i n
+let fsquare_times_26 (o:F26.felem) (i:F26.felem) (tmp:felem_wide2 M26) (n:size_t{v n > 0}) = fsquare_times_ #M26 o i tmp n
 [@CInline]
-let fsquare_times_64 (o:F64.felem) (i:F64.felem) (n:size_t{v n > 0}) = fsquare_times_ #M64 o i n
+let fsquare_times_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide2 M51) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i tmp n
+[@CInline]
+let fsquare_times_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide2 M64) (n:size_t{v n > 0}) = fsquare_times_ #M64 o i tmp n
 
 inline_for_extraction noextract
-val fsquare_times: #s:field_spec -> o:felem s -> i:felem s -> n:size_t{v n > 0} -> Stack unit
-	     (requires (fun h0 -> live h0 o /\ live h0 i))
-	     (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1 /\ live h1 o /\ live h1 i))
-let fsquare_times (#s:field_spec) (o:felem s) (i:felem s) (n:size_t{v n > 0}) =
+val fsquare_times: #s:field_spec -> o:felem s -> i:felem s -> tmp:felem_wide2 s -> n:size_t{v n > 0} -> Stack unit
+	     (requires (fun h0 -> live h0 o /\ live h0 i /\ live h0 tmp))
+	     (ensures (fun h0 _ h1 -> modifies (loc o |+| loc tmp) h0 h1 /\ live h1 o /\ live h1 i))
+let fsquare_times (#s:field_spec) (o:felem s) (i:felem s) tmp (n:size_t{v n > 0}) =
   match s with
-  | M51 -> fsquare_times_51 o i n
-  | M64 -> fsquare_times_64 o i n
+  | M26 -> fsquare_times_26 o i tmp n
+  | M51 -> fsquare_times_51 o i tmp n
+  | M64 -> fsquare_times_64 o i tmp n
 (* WRAPPER to Prevent Inlining *)
 
 
@@ -54,55 +59,61 @@ inline_for_extraction noextract
 let footprint h0 l impl = impl()
 	      
 inline_for_extraction noextract
-val finv_: #s:field_spec -> o:felem s -> i:felem s -> Stack unit
-	     (requires (fun h0 -> live h0 o /\ live h0 i))
-	     (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1))
+val finv_: #s:field_spec -> o:felem s -> i:felem s -> tmp:felem_wide2 s -> Stack unit
+	     (requires (fun h0 -> live h0 o /\ live h0 i /\ live h0 tmp))
+	     (ensures (fun h0 _ h1 -> modifies (loc o |+| loc tmp) h0 h1))
 inline_for_extraction noextract
-let finv_ #s o i = 
+let finv_ #s o i tmp = 
   push_frame();
-  let tmp = create (4ul *. nlimb s) (limb_zero s) in
-  let a : felem s = sub tmp 0ul (nlimb s) in
-  let b : felem s = sub tmp (nlimb s) (nlimb s) in
-  let c : felem s = sub tmp (2ul *. nlimb s) (nlimb s) in
-  let t0 : felem s = sub tmp (3ul *. nlimb s) (nlimb s) in 
+  admit();
+  let t1 = create (4ul *. nlimb s) (limb_zero s) in
+  let a : felem s = sub t1 0ul (nlimb s) in
+  let b : felem s = sub t1 (nlimb s) (nlimb s) in
+  let c : felem s = sub t1 (2ul *. nlimb s) (nlimb s) in
+  let t0 : felem s = sub t1 (3ul *. nlimb s) (nlimb s) in 
   let h0 = ST.get() in
-  let gloc = Ghost.hide (loc tmp |+| loc o) in
-  (* 2 *) footprint h0 gloc (fun () -> fsquare_times #s a i  1ul); 
-  (* 8 *) footprint h0 gloc (fun () -> fsquare_times #s t0 a 2ul); 
-  (* 9 *) footprint h0 gloc (fun () -> fmul #s b t0 i); 
-  (* 11 *) footprint h0 gloc (fun () -> fmul #s a b a); 
-  (* 22 *) footprint h0 gloc (fun () -> fsquare_times #s t0 a 1ul); 
-  (* 2^5 - 2^0 = 31 *) footprint h0 gloc (fun () -> fmul #s b t0 b);
-  (* 2^10 - 2^5 *) footprint h0 gloc (fun () -> fsquare_times #s t0 b 5ul); 
-  (* 2^10 - 2^0 *) footprint h0 gloc (fun () -> fmul #s b t0 b); 
-  (* 2^20 - 2^10 *) footprint h0 gloc (fun () -> fsquare_times #s t0 b 10ul); 
-  (* 2^20 - 2^0 *) footprint h0 gloc (fun () -> fmul #s c t0 b); 
-  (* 2^40 - 2^20 *) footprint h0 gloc (fun () -> fsquare_times #s t0 c 20ul); 
-  (* 2^40 - 2^0 *) footprint h0 gloc (fun () -> fmul #s t0 t0 c); 
-  (* 2^50 - 2^10 *) footprint h0 gloc (fun () -> fsquare_times #s t0 t0 10ul);
-  (* 2^50 - 2^0 *) footprint h0 gloc (fun () -> fmul #s b t0 b); 
-  (* 2^100 - 2^50 *) footprint h0 gloc (fun () -> fsquare_times #s t0 b 50ul);
-  (* 2^100 - 2^0 *) footprint h0 gloc (fun () -> fmul #s c t0 b); 
-  (* 2^200 - 2^100 *) footprint h0 gloc (fun () -> fsquare_times #s t0 c 100ul); 
-  (* 2^200 - 2^0 *) footprint h0 gloc (fun () -> fmul #s t0 t0 c); 
-  (* 2^250 - 2^50 *) footprint h0 gloc (fun () -> fsquare_times #s t0 t0 50ul); 
-  (* 2^250 - 2^0 *) footprint h0 gloc (fun () -> fmul #s t0 t0 b); 
-  (* 2^255 - 2^5 *) footprint h0 gloc (fun () -> fsquare_times #s t0 t0 5ul); 
-  (* 2^255 - 21 *) footprint h0 gloc (fun () -> fmul #s o t0 a);
+  let gloc = Ghost.hide (loc t1 |+| loc o |+| loc tmp) in
+  (* 2 *) footprint h0 gloc (fun () -> fsquare_times #s a i tmp  1ul); 
+  (* 8 *) footprint h0 gloc (fun () -> fsquare_times #s t0 a tmp 2ul); 
+  (* 9 *) footprint h0 gloc (fun () -> fmul #s b t0 i tmp); 
+  (* 11 *) footprint h0 gloc (fun () -> fmul #s a b a tmp); 
+  (* 22 *) footprint h0 gloc (fun () -> fsquare_times #s t0 a tmp 1ul); 
+  (* 2^5 - 2^0 = 31 *) footprint h0 gloc (fun () -> fmul #s b t0 b tmp);
+  (* 2^10 - 2^5 *) footprint h0 gloc (fun () -> fsquare_times #s t0 b tmp 5ul); 
+  (* 2^10 - 2^0 *) footprint h0 gloc (fun () -> fmul #s b t0 b tmp); 
+  (* 2^20 - 2^10 *) footprint h0 gloc (fun () -> fsquare_times #s t0 b tmp 10ul); 
+  (* 2^20 - 2^0 *) footprint h0 gloc (fun () -> fmul #s c t0 b tmp); 
+  (* 2^40 - 2^20 *) footprint h0 gloc (fun () -> fsquare_times #s t0 c tmp 20ul); 
+  (* 2^40 - 2^0 *) footprint h0 gloc (fun () -> fmul #s t0 t0 c tmp); 
+  (* 2^50 - 2^10 *) footprint h0 gloc (fun () -> fsquare_times #s t0 t0 tmp 10ul);
+  (* 2^50 - 2^0 *) footprint h0 gloc (fun () -> fmul #s b t0 b tmp); 
+  (* 2^100 - 2^50 *) footprint h0 gloc (fun () -> fsquare_times #s t0 b tmp 50ul);
+  (* 2^100 - 2^0 *) footprint h0 gloc (fun () -> fmul #s c t0 b tmp); 
+  (* 2^200 - 2^100 *) footprint h0 gloc (fun () -> fsquare_times #s t0 c tmp 100ul); 
+  (* 2^200 - 2^0 *) footprint h0 gloc (fun () -> fmul #s t0 t0 c tmp); 
+  (* 2^250 - 2^50 *) footprint h0 gloc (fun () -> fsquare_times #s t0 t0 tmp 50ul); 
+  (* 2^250 - 2^0 *) footprint h0 gloc (fun () -> fmul #s t0 t0 b tmp); 
+  (* 2^255 - 2^5 *) footprint h0 gloc (fun () -> fsquare_times #s t0 t0 tmp 5ul); 
+  (* 2^255 - 21 *) footprint h0 gloc (fun () -> fmul #s o t0 a tmp);
   pop_frame()
 
 
 (* WRAPPER to Prevent Inlining *)
-let finv_51 (o:F51.felem) (i:F51.felem) = finv_ #M51 o i 
-let finv_64 (o:F64.felem) (i:F64.felem) = finv_ #M64 o i 
+[@CInline]
+let finv_26 (o:F26.felem) (i:F26.felem) (tmp:felem_wide2 M26) = finv_ #M26 o i tmp
+[@CInline]
+let finv_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide2 M51) = finv_ #M51 o i tmp
+[@CInline]
+let finv_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide2 M64) = finv_ #M64 o i tmp
 inline_for_extraction noextract
-val finv: #s:field_spec -> o:felem s -> i:felem s -> Stack unit
-	     (requires (fun h0 -> live h0 o /\ live h0 i))
-	     (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1))
-let finv #s o i =
+val finv: #s:field_spec -> o:felem s -> i:felem s -> tmp:felem_wide2 s -> Stack unit
+	     (requires (fun h0 -> live h0 o /\ live h0 i /\ live h0 tmp))
+	     (ensures (fun h0 _ h1 -> modifies (loc o |+| loc tmp) h0 h1))
+let finv #s o i tmp =
   match s with
-  | M51 -> finv_51 o i
-  | M64 -> finv_64 o i
+  | M26 -> finv_26 o i tmp
+  | M51 -> finv_51 o i tmp
+  | M64 -> finv_64 o i tmp
  (* WRAPPER to Prevent Inlining *)
 
 
@@ -111,6 +122,7 @@ unfold let scalar = lbuffer uint64 4ul
 unfold let point (s:field_spec) = lbuffer (limb s) (2ul *. nlimb s)
 
 (* NEEDED ONLY FOR WRAPPERS *)
+unfold let point26 = lbuffer uint64 20ul
 unfold let point51 = lbuffer uint64 10ul
 unfold let point64 = lbuffer uint64 8ul
 (* NEEDED ONLY FOR WRAPPERS *)
@@ -147,21 +159,26 @@ let decode_point_ #s o i =
   tmp.(3ul) <- tmp.(3ul) &. u64 0x7fffffffffffffff;
   let x : felem s = sub o 0ul (nlimb s) in
   let z : felem s = sub o (nlimb s) (nlimb s) in
-  set_zero z;
-  set_bit1 z 0ul;
+  set_one z;
   load_felem x tmp;
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
+inline_for_extraction
+let decode_point_26 (o:point26) i = decode_point_ #M26 o i
+inline_for_extraction
 let decode_point_51 (o:point51) i = decode_point_ #M51 o i
+inline_for_extraction
 let decode_point_64 (o:point64) i = decode_point_ #M64 o i
 inline_for_extraction
 val decode_point: #s:field_spec -> o:point s -> i:lbuffer uint8 32ul -> Stack unit 
 				  (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
 				 (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
 
+inline_for_extraction
 let decode_point #s o i = 
   match s with
+  | M26 -> decode_point_26 o i
   | M51 -> decode_point_51 o i
   | M64 -> decode_point_64 o i
 (* WRAPPER to Prevent Inlining *)
@@ -179,46 +196,58 @@ let encode_point_ #s o i =
   let z : felem s = sub i (nlimb s) (nlimb s) in
   let tmp = create_felem s in
   let u64s = create 4ul (u64 0) in
-  finv #s tmp z;
-  fmul #s tmp tmp x;
+  let tmp_w = create (2ul *. nwide s) (wide_zero s) in
+  finv #s tmp z tmp_w;
+  admit();
+  fmul #s tmp tmp x tmp_w;
   store_felem u64s tmp;
   uints_to_bytes_le #U64 4ul o u64s;
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
+inline_for_extraction
+let encode_point_26 o (i:point26) = encode_point_ #M26 o i
+inline_for_extraction
 let encode_point_51 o (i:point51) = encode_point_ #M51 o i
+inline_for_extraction
 let encode_point_64 o (i:point64) = encode_point_ #M64 o i
 inline_for_extraction
 val encode_point: #s:field_spec -> o:lbuffer uint8 32ul -> i:point s  -> Stack unit 
 				  (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
 				 (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
+inline_for_extraction
 let encode_point #s o i = 
   match s with
+  | M26 -> encode_point_26 o i
   | M51 -> encode_point_51 o i
   | M64 -> encode_point_64 o i
 (* WRAPPER to Prevent Inlining *)
 
 
 inline_for_extraction
-val point_add_and_double_: #s:field_spec -> q:point s -> nq: point s -> nq_p1:point s -> Stack unit
-				(requires fun h0 -> live h0 q /\ live h0 nq /\ live h0 nq_p1)
-				(ensures fun h0 _ h1 -> modifies (loc nq |+| loc nq_p1) h0 h1)
+val point_add_and_double_: #s:field_spec -> q:point s -> nq: point s -> nq_p1:point s -> 
+			   tmp1:lbuffer (limb s) (4ul *. nlimb s) ->
+			   tmp2:felem_wide2 s ->
+    Stack unit
+    (requires fun h0 -> live h0 q /\ live h0 nq /\ live h0 nq_p1 /\ live h0 tmp1 /\ live h0 tmp2)
+    (ensures fun h0 _ h1 -> modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1)
 inline_for_extraction
-let point_add_and_double_ #s q nq nq_p1 =
-   push_frame();
+let point_add_and_double_ #s q nq nq_p1 tmp1 tmp2 =
    let x1 = sub q 0ul (nlimb s) in
    let z1 = sub q (nlimb s) (nlimb s) in
    let x2 = sub nq 0ul (nlimb s) in
    let z2 = sub nq (nlimb s) (nlimb s) in
    let x3 = sub nq_p1 0ul (nlimb s) in
    let z3 = sub nq_p1 (nlimb s) (nlimb s) in
-   let tmp : lbuffer (limb s) (4ul *. nlimb s) = create (4ul *. nlimb s) (limb_zero s) in
-   let a : felem s = sub tmp 0ul (nlimb s) in
-   let b : felem s = sub tmp (nlimb s) (nlimb s) in
-   let d : felem s = sub tmp (2ul *. nlimb s) (nlimb s) in
-   let c : felem s = sub tmp (3ul *. nlimb s) (nlimb s) in
-   let gloc = Ghost.hide (loc nq |+| loc nq_p1 |+| loc tmp) in
+   let a : felem s = sub tmp1 0ul (nlimb s) in
+   let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
+   let d : felem s = sub tmp1 (2ul *. nlimb s) (nlimb s) in
+   let c : felem s = sub tmp1 (3ul *. nlimb s) (nlimb s) in
+   let ab : felem2 s = sub tmp1 0ul (2ul *. nlimb s) in
+   let dc : felem2 s = sub tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+   let gloc = Ghost.hide (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) in
    let h0 = ST.get() in
+   admit();
    footprint h0 gloc (fun () -> fadd a x2 z2); // a = x2 + z2
    footprint h0 gloc (fun () -> fsub b x2 z2); // b = x2 - z2
    footprint h0 gloc (fun () -> fadd c x3 z3); // c = x3 + z3
@@ -227,7 +256,7 @@ let point_add_and_double_ #s q nq nq_p1 =
    (* CAN RUN IN PARALLEL *)
 //   footprint h0 gloc (fun () -> fmul d d a);   // d = da = d * a 
 //   footprint h0 gloc (fun () -> fmul c c b);   // c = cb = c * b
-   footprint h0 gloc (fun () -> fmul2 d d a);   // d|c = d*a|c*b
+   footprint h0 gloc (fun () -> fmul2 dc dc ab tmp2);   // d|c = d*a|c*b
    
    footprint h0 gloc (fun () -> fadd x3 d c);  // x3 = da + cb
    footprint h0 gloc (fun () -> fsub z3 d c);  // z3 = da - cb
@@ -235,13 +264,13 @@ let point_add_and_double_ #s q nq nq_p1 =
    (* CAN RUN IN PARALLEL *)
 //   footprint h0 gloc (fun () -> fsqr d a);     // d = aa = a^2
 //   footprint h0 gloc (fun () -> fsqr c b);     // c = bb = b^2
-   footprint h0 gloc (fun () -> fsqr2 d a);     // d|c = aa | bb
+   footprint h0 gloc (fun () -> fsqr2 dc ab tmp2);     // d|c = aa | bb
 
    //moving the following line gave me a 2k speedup.
    (* CAN RUN IN PARALLEL *)
 //   footprint h0 gloc (fun () -> fsqr x3 x3);   // x3 = (da + cb) ^ 2
 //   footprint h0 gloc (fun () -> fsqr z3 z3);   // z3 = (da - cb) ^ 2
-   footprint h0 gloc (fun () -> fsqr2 x3 x3);   // x3|z3 = x3*x3|z3*z3
+   footprint h0 gloc (fun () -> fsqr2 nq_p1 nq_p1 tmp2);   // x3|z3 = x3*x3|z3*z3
       
    copy_felem a c;                           // a = bb
    footprint h0 gloc (fun () -> fsub c d c);   // c = e = aa - bb
@@ -251,48 +280,59 @@ let point_add_and_double_ #s q nq nq_p1 =
    (* CAN RUN IN PARALLEL *)
 //   footprint h0 gloc (fun () -> fmul x2 d a);  // x2 = aa * bb
 //   footprint h0 gloc (fun () -> fmul z2 c b);  // z2 = e * (aa + (e * 121665))
-   footprint h0 gloc (fun () -> fmul2 x2 d a);  // x2|z2 = aa * bb | e * (aa + (e * 121665))
+   footprint h0 gloc (fun () -> fmul2 nq dc ab tmp2);  // x2|z2 = aa * bb | e * (aa + (e * 121665))
    // moving the following line gives a 2k speedup
-   footprint h0 gloc (fun () -> fmul z3 z3 x1); // z3 = x1 * (da - cb) ^ 2
-   pop_frame()
+   footprint h0 gloc (fun () -> fmul z3 z3 x1 tmp2) // z3 = x1 * (da - cb) ^ 2
 
 (* WRAPPER to Prevent Inlining *)
-let point_add_and_double_51  (q:point51) (nq:point51) (nq_p1:point51) = point_add_and_double_ #M51 q nq nq_p1
-let point_add_and_double_64  (q:point64) (nq:point64) (nq_p1:point64) = point_add_and_double_ #M64 q nq nq_p1
+[@CInline]
+let point_add_and_double_26  (q:point26) (nq:point26) (nq_p1:point26) tmp1 tmp2 = point_add_and_double_ #M26 q nq nq_p1 tmp1 tmp2 
+[@CInline]
+let point_add_and_double_51  (q:point51) (nq:point51) (nq_p1:point51) tmp1 tmp2 = point_add_and_double_ #M51 q nq nq_p1 tmp1 tmp2 
+[@CInline]
+let point_add_and_double_64  (q:point64) (nq:point64) (nq_p1:point64) tmp1 tmp2 = point_add_and_double_ #M64 q nq nq_p1 tmp1 tmp2
 inline_for_extraction
-val point_add_and_double: #s:field_spec -> q:point s -> nq: point s -> nq_p1:point s -> Stack unit
-				(requires fun h0 -> live h0 q /\ live h0 nq /\ live h0 nq_p1)
-				(ensures fun h0 _ h1 -> modifies (loc nq |+| loc nq_p1) h0 h1)
+val point_add_and_double: #s:field_spec -> q:point s -> nq: point s -> nq_p1:point s -> 
+			   tmp1:lbuffer (limb s) (4ul *. nlimb s) ->
+			   tmp2:felem_wide2 s -> Stack unit
+				(requires fun h0 -> live h0 q /\ live h0 nq /\ live h0 nq_p1 /\ live h0 tmp1 /\ live h0 tmp2)
+				(ensures fun h0 _ h1 -> modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1)
 inline_for_extraction
-let point_add_and_double #s q nq nq_p1 =
+let point_add_and_double #s q nq nq_p1 tmp1 tmp2 =
   match s with
-  | M51 -> point_add_and_double_51 q nq nq_p1
-  | M64 -> point_add_and_double_64 q nq nq_p1
+  | M26 -> point_add_and_double_26 q nq nq_p1 tmp1 tmp2 
+  | M51 -> point_add_and_double_51 q nq nq_p1 tmp1 tmp2
+  | M64 -> point_add_and_double_64 q nq nq_p1 tmp1 tmp2
 (* WRAPPER to Prevent Inlining *)
 
 inline_for_extraction
-val point_double_: #s:field_spec -> nq: point s -> Stack unit
-				(requires fun h0 -> live h0 nq)
-				(ensures fun h0 _ h1 -> modifies (loc nq) h0 h1)
+val point_double_: #s:field_spec -> nq: point s -> 
+		   tmp1:lbuffer (limb s) (4ul *. nlimb s) ->
+		   tmp2:felem_wide2 s ->
+		   Stack unit
+				(requires fun h0 -> live h0 nq /\ live h0 tmp1 /\ live h0 tmp2)
+				(ensures fun h0 _ h1 -> modifies (loc nq |+| loc tmp1 |+| loc tmp2) h0 h1)
 inline_for_extraction
-let point_double_ #s nq =
+let point_double_ #s nq tmp1 tmp2 =
    push_frame();
    let x2 = sub nq 0ul (nlimb s) in
    let z2 = sub nq (nlimb s) (nlimb s) in
-   let tmp : lbuffer (limb s) (4ul *. nlimb s) = create (4ul *. nlimb s) (limb_zero s) in
-   let a : felem s = sub tmp 0ul (nlimb s) in
-   let b : felem s = sub tmp (nlimb s) (nlimb s) in
-   let d : felem s = sub tmp (2ul *. nlimb s) (nlimb s) in
-   let c : felem s = sub tmp (3ul *. nlimb s) (nlimb s) in
-   let gloc = Ghost.hide (loc nq) in
+   let a : felem s = sub tmp1 0ul (nlimb s) in
+   let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
+   let d : felem s = sub tmp1 (2ul *. nlimb s) (nlimb s) in
+   let c : felem s = sub tmp1 (3ul *. nlimb s) (nlimb s) in
+   let ab : felem2 s = sub tmp1 0ul (2ul *. nlimb s) in
+   let dc : felem2 s = sub tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+   let gloc = Ghost.hide (loc nq |+| loc tmp1 |+| loc tmp2) in
    let h0 = ST.get() in
+   admit();
    footprint h0 gloc (fun () -> fadd a x2 z2); // a = x2 + z2
    footprint h0 gloc (fun () -> fsub b x2 z2); // b = x2 - z2
 
    (* CAN RUN IN PARALLEL *)
 //   footprint h0 gloc (fun () -> fsqr d a);     // d = aa = a^2
 //   footprint h0 gloc (fun () -> fsqr c b);     // c = bb = b^2
-   footprint h0 gloc (fun () -> fsqr2 d a);     // d|c = aa | bb
+   footprint h0 gloc (fun () -> fsqr2 dc ab tmp2);     // d|c = aa | bb
 
    copy_felem a c;                           // a = bb
    footprint h0 gloc (fun () -> fsub c d c);   // c = e = aa - bb
@@ -302,55 +342,31 @@ let point_double_ #s nq =
    (* CAN RUN IN PARALLEL *)
 //   footprint h0 gloc (fun () -> fmul x2 d a);  // x2 = aa * bb
 //   footprint h0 gloc (fun () -> fmul z2 c b);  // z2 = e * (aa + (e * 121665))
-   footprint h0 gloc (fun () -> fmul2 x2 d a);  // x2|z2 = aa * bb | e * (aa + (e * 121665))
+   footprint h0 gloc (fun () -> fmul2 nq dc ab tmp2);  // x2|z2 = aa * bb | e * (aa + (e * 121665))
    pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
-let point_double_51  (nq:point51) = point_double_ #M51 nq 
-let point_double_64  (nq:point64) = point_double_ #M64 nq
-inline_for_extraction
-val point_double: #s:field_spec -> nq: point s -> Stack unit
-				(requires fun h0 -> live h0 nq)
-				(ensures fun h0 _ h1 -> modifies (loc nq) h0 h1)
-inline_for_extraction
-let point_double #s nq =
-  match s with
-  | M51 -> point_double_51 nq
-  | M64 -> point_double_64 nq
-(* WRAPPER to Prevent Inlining *)
-
-
-inline_for_extraction
-val cswap_: #s:field_spec -> bit:uint64 -> p1:point s -> p2:point s -> Stack unit
-			 (requires (fun h0 -> live h0 p1 /\ live h0 p2))
-			 (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
-inline_for_extraction
-let cswap_ #s bit p0 p1 = 
-    let mask = u64 0 -. bit in
-    let h0 = ST.get() in
-    loop2 h0 (2ul *. nlimb s) p0 p1
-    (fun h -> (fun i s -> s))
-    (fun i -> 
-         let dummy = mask &. (p0.(i) ^. p1.(i)) in
-         p0.(i) <- p0.(i) ^. dummy;
-         p1.(i) <- p1.(i) ^. dummy;
-	 admit())
-
-
-(* WRAPPER to Prevent Inlining *)
 [@CInline]
-let cswap_51 bit (p0:point51) (p1:point51) = cswap_ #M51 bit p0 p1
+let point_double_26  (nq:point26) tmp1 tmp2 = point_double_ #M26 nq  tmp1 tmp2
 [@CInline]
-let cswap_64 bit (p0:point64) (p1:point64) = cswap_ #M64 bit p0 p1
+let point_double_51  (nq:point51) tmp1 tmp2 = point_double_ #M51 nq tmp1 tmp2
+[@CInline]
+let point_double_64  (nq:point64) tmp1 tmp2 = point_double_ #M64 nq tmp1 tmp2
 inline_for_extraction
-val cswap: #s:field_spec -> bit:uint64 -> p1:point s -> p2:point s -> Stack unit
-			 (requires (fun h0 -> live h0 p1 /\ live h0 p2))
-			 (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
-let cswap #s bit p0 p1 =
+val point_double: #s:field_spec -> nq: point s -> 
+		   tmp1:lbuffer (limb s) (4ul *. nlimb s) ->
+		   tmp2:felem_wide2 s -> Stack unit
+				(requires fun h0 -> live h0 nq /\ live h0 tmp1 /\ live h0 tmp2)
+				(ensures fun h0 _ h1 -> modifies (loc nq |+| loc tmp1 |+| loc tmp2) h0 h1)
+inline_for_extraction
+let point_double #s nq tmp1 tmp2 =
   match s with
-  | M51 -> cswap_51 bit p0 p1
-  | M64 -> cswap_64 bit p0 p1
+  | M26 -> point_double_26 nq tmp1 tmp2
+  | M51 -> point_double_51 nq tmp1 tmp2
+  | M64 -> point_double_64 nq tmp1 tmp2
 (* WRAPPER to Prevent Inlining *)
+
+
 
 
 inline_for_extraction
@@ -361,14 +377,17 @@ val montgomery_ladder_: #s:field_spec -> o:point s -> k:scalar -> i:point s -> S
 inline_for_extraction
 let montgomery_ladder_ #s out key init = 
   push_frame();
+  admit();
   let p01 = create (4ul *. nlimb s) (limb_zero s) in
   let p0 : point s = sub p01 0ul (2ul *. nlimb s) in
   let p1 : point s = sub p01 (2ul *. nlimb s) (2ul *. nlimb s) in
   copy p1 init;
   let x0 : felem s = sub p0 0ul (nlimb s) in
   let z0 : felem s = sub p0 (nlimb s) (nlimb s) in
-  set_bit1 x0 0ul;
+  set_one x0;
   let swap = create 1ul (u64 0) in
+  let tmp1 = create (4ul *. nlimb s) (limb_zero s) in
+  let tmp2 = create (2ul *. nwide s) (wide_zero s) in
   let h0 = ST.get() in
   //Got about 1K speedup by removing 4 iterations here.
   //First iteration can be skipped because top bit of scalar is 0
@@ -377,20 +396,24 @@ let montgomery_ladder_ #s out key init =
     (fun i -> 
          let bit = scalar_bit key (254ul -. i) in
 	 let sw = swap.(0ul) ^. bit in
-         cswap #s sw p0 p1;   
-         point_add_and_double #s init p0 p1;
+         cswap2 #s sw p0 p1;   
+         point_add_and_double #s init p0 p1 tmp1 tmp2;
 	 swap.(0ul) <- bit;
 	 admit());
-  cswap #s swap.(0ul) p0 p1;   
+  cswap2 #s swap.(0ul) p0 p1;   
   //Last three iterations are point doublings because the bottom 3 bits are 0
-  point_double p0;
-  point_double p0;
-  point_double p0;
+  point_double p0 tmp1 tmp2;
+  point_double p0 tmp1 tmp2;
+  point_double p0 tmp1 tmp2;
   copy out p0;  
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
+[@CInline]
+let montgomery_ladder_26 (out:point26) key (init:point26) = montgomery_ladder_ #M26 out key init
+[@CInline]
 let montgomery_ladder_51 (out:point51) key (init:point51) = montgomery_ladder_ #M51 out key init
+[@CInline]
 let montgomery_ladder_64 (out:point64) key (init:point64) = montgomery_ladder_ #M64 out key init
 inline_for_extraction
 val montgomery_ladder: #s:field_spec -> o:point s -> k:scalar -> i:point s -> Stack unit
@@ -398,6 +421,7 @@ val montgomery_ladder: #s:field_spec -> o:point s -> k:scalar -> i:point s -> St
 			  (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1))
 let montgomery_ladder #s out key init =
   match s with
+  | M26 -> montgomery_ladder_26 out key init
   | M51 -> montgomery_ladder_51 out key init
   | M64 -> montgomery_ladder_64 out key init
 (* WRAPPER to Prevent Inlining *)

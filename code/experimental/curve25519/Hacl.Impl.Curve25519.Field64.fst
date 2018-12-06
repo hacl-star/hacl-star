@@ -71,6 +71,19 @@ let set_zero f =
   f.(3ul) <- u64 0
 
 inline_for_extraction
+val set_one:
+  f:felem -> Stack unit
+  (requires fun h -> live h f)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc f) h0 h1 /\
+    as_nat h1 f == 1)
+let set_one f =
+  f.(0ul) <- u64 1;
+  f.(1ul) <- u64 0;
+  f.(2ul) <- u64 0;
+  f.(3ul) <- u64 0
+
+inline_for_extraction
 val copy_felem:
     f1:felem
   -> f2:felem
@@ -99,6 +112,7 @@ let load_felem f u64s =
   f.(2ul) <- u64s.(2ul);
   f.(3ul) <- u64s.(3ul)
 
+inline_for_extraction
 val store_felem:
     u64s:lbuffer uint64 4ul
   -> f:felem

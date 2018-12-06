@@ -91,7 +91,6 @@ val create_wide:
     wide_as_nat h1 f == 0)
 let create_wide () = create 5ul (u128 0)
 
-
 inline_for_extraction
 val set_bit1:
     f:felem
@@ -121,6 +120,20 @@ val set_zero:
     as_nat h1 f == 0)
 let set_zero f =
   f.(0ul) <- u64 0;
+  f.(1ul) <- u64 0;
+  f.(2ul) <- u64 0;
+  f.(3ul) <- u64 0;
+  f.(4ul) <- u64 0
+
+inline_for_extraction
+val set_one:
+  f:felem -> Stack unit
+  (requires fun h -> live h f)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc f) h0 h1 /\
+    as_nat h1 f == 1)
+let set_one f =
+  f.(0ul) <- u64 1;
   f.(1ul) <- u64 0;
   f.(2ul) <- u64 0;
   f.(3ul) <- u64 0;
@@ -492,3 +505,22 @@ let store_felem u64s f =
   u64s.(1ul) <- f1;
   u64s.(2ul) <- f2;
   u64s.(3ul) <- f3
+
+
+[@CInline]
+val cswap2: bit:uint64 -> p1:felem2 -> p2:felem2 -> Stack unit
+    (requires (fun h0 -> live h0 p1 /\ live h0 p2))
+    (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
+[@CInline]
+let cswap2 bit p0 p1 = 
+    let mask = u64 0 -. bit in
+    let h0 = ST.get() in
+    loop2 h0 10ul p0 p1
+    (fun h -> (fun i s -> s))
+    (fun i -> 
+         let dummy = mask &. (p0.(i) ^. p1.(i)) in
+         p0.(i) <- p0.(i) ^. dummy;
+         p1.(i) <- p1.(i) ^. dummy;
+	 admit())
+
+
