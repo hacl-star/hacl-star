@@ -65,6 +65,14 @@ clean:
 	./$*.exe
 
 # Under CI
+dh.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.Curve448.fst Spec.DH.fst tests/Spec.DH.Test.fst
+	mkdir -p dh-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Curve25519 --extract_module Spec.Curve448 --extract_module Spec.DH --extract_module Spec.DH.Test --odir dh-ml $^
+	@echo 'let _ = test()' >> dh-ml/Spec_DH_Test.ml
+	$(OCAMLOPT) -I dh-ml $(addprefix dh-ml/, $(LIBS_ML)) dh-ml/Spec_Curve25519.ml dh-ml/Spec_Curve448.ml dh-ml/Spec_DH.ml dh-ml/Spec_DH_Test.ml -o dh.exe
+	./dh.exe
+
+# Under CI
 Salsa20.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Salsa20.fst tests/Spec.Salsa20.Test.fst
 	mkdir -p Salsa20-ml
 	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.CTR --extract_module Spec.Salsa20 --extract_module Spec.Salsa20.Test --odir Salsa20-ml $^
