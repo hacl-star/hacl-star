@@ -48,7 +48,7 @@ all: test
 test: test-unified-target test-individual-target
 
 test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2.exe
-test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe
+test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe ecies.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
@@ -157,6 +157,14 @@ hkdf.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst 
 	@echo 'let _ = test()' >> hkdf-ml/Spec_HKDF_Test.ml
 	$(OCAMLOPT) -I hkdf-ml $(OCAML_INCLUDES) $(addprefix hkdf-ml/, $(LIBS_ML)) hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Hash.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
 	./hkdf.exe
+
+ecies.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst Spec.Curve25519.fst Spec.Curve448.fst Spec.DH.fst Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AES128_GCM.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst Spec.AEAD.fst Spec.ECIES.fst tests/Spec.ECIES.Test.fst
+	mkdir -p ecies-ml
+	cp $(HACL_HOME)/lib/ml/Lib_RandomSequence.ml ecies-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HKDF --extract_module Spec.Curve25519 --extract_module Spec.Curve448 --extract_module Spec.DH --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.GF128 --extract_module Spec.AES128_GCM --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.AEAD --extract_module Spec.ECIES --extract_module Spec.ECIES.Test --odir ecies-ml $^
+	@echo 'let _ = test()' >> ecies-ml/Spec_ECIES_Test.ml
+	$(OCAMLOPT) -package cryptokit -I ecies-ml $(OCAML_INCLUDES) $(addprefix ecies-ml/, $(LIBS_ML)) ecies-ml/Spec_SHA2.ml ecies-ml/Spec_Hash.ml ecies-ml/Spec_HMAC.ml ecies-ml/Spec_HKDF.ml ecies-ml/Spec_Curve25519.ml ecies-ml/Spec_Curve448.ml ecies-ml/Spec_DH.ml ecies-ml/Spec_GaloisField.ml ecies-ml/Spec_AES.ml ecies-ml/Spec_GF128.ml ecies-ml/Spec_AES128_GCM.ml ecies-ml/Spec_Chacha20.ml ecies-ml/Spec_Poly1305.ml ecies-ml/Spec_Chacha20Poly1305.ml ecies-ml/Spec_AEAD.ml ecies-ml/Spec_ECIES.ml ecies-ml/Spec_ECIES_Test.ml -o ecies.exe
+	./ecies.exe
 
 # Under CI
 sha3.exe: $(LIBS_FILES) Spec.SHA3.Constants.fst Spec.SHA3.fst tests/Spec.SHA3.Test.fst
