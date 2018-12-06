@@ -28,6 +28,8 @@ extern void fadd(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 extern void fsub(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 extern void fmul1(uint64_t* dst, const uint64_t* in_a, const uint64_t in_b);
 
+#define inline inline __attribute((always_inline))
+
 // Done in C in rfc7748_25519.h
 static inline
 void fmul(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b, uint64_t* tmp) {

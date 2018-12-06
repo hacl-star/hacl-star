@@ -1,7 +1,7 @@
 
-#define force_inline inline __attribute((always_inline))
+#define inline inline __attribute((always_inline))
 
-static force_inline void fadd(uint64_t *const c, uint64_t *const a, uint64_t *const b) {
+static inline void fadd(uint64_t *const c, uint64_t *const a, uint64_t *const b) {
   __asm__ __volatile__(
     "mov     $38, %%eax ;"
     "xorl  %%ecx, %%ecx ;"
@@ -24,7 +24,7 @@ static force_inline void fadd(uint64_t *const c, uint64_t *const a, uint64_t *co
   );
 }
 
-static force_inline void fsub(uint64_t *const c, uint64_t *const a, uint64_t *const b) {
+static inline void fsub(uint64_t *const c, uint64_t *const a, uint64_t *const b) {
   __asm__ __volatile__(
     "mov     $38, %%eax ;"
     "movq   (%1),  %%r8 ;"  "subq   (%2),  %%r8 ;"
@@ -46,7 +46,7 @@ static force_inline void fsub(uint64_t *const c, uint64_t *const a, uint64_t *co
   );
 }
 
-static force_inline
+static inline
 void mul(uint64_t *const c, uint64_t *const a, uint64_t *const b) {
   __asm__ __volatile__(
     "movq   (%1), %%rdx; " /* A[0] */
@@ -83,7 +83,7 @@ void mul(uint64_t *const c, uint64_t *const a, uint64_t *const b) {
   );
 }
 
-static force_inline
+static inline
 void mul2(uint64_t *const c, uint64_t *const a, uint64_t *const b) {
   __asm__ __volatile__(
     "xorl %%r14d, %%r14d ;"
@@ -149,7 +149,7 @@ void mul2(uint64_t *const c, uint64_t *const a, uint64_t *const b) {
   );
 }
 
-static force_inline
+static inline
 void sqr(uint64_t *const c, uint64_t *const a) {
   __asm__ __volatile__(
     "movq   (%1), %%rdx        ;" /* A[0]      */
@@ -191,7 +191,7 @@ void sqr(uint64_t *const c, uint64_t *const a) {
   );
 }
 
-static force_inline
+static inline
 void sqr2(uint64_t *const c, uint64_t *const a) {
   __asm__ __volatile__(
     "movq   (%1), %%rdx        ;" /* A[0]      */
@@ -267,7 +267,7 @@ void sqr2(uint64_t *const c, uint64_t *const a) {
   );
 }
 
-static force_inline
+static inline
 void carry_wide(uint64_t *const c, uint64_t *const a) {
   __asm__ __volatile__(
     "movl    $38, %%edx ;" /* 2*c = 38 = 2^256 */
@@ -289,7 +289,7 @@ void carry_wide(uint64_t *const c, uint64_t *const a) {
   : "memory", "cc", "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11"
   );
 }
-static force_inline
+static inline
 void carry_wide2(uint64_t *const c, uint64_t *const a) {
   __asm__ __volatile__(
     "movl    $38, %%edx; " /* 2*c = 38 = 2^256 */
@@ -326,7 +326,7 @@ void carry_wide2(uint64_t *const c, uint64_t *const a) {
   );
 }
 
-static force_inline void fmul1(uint64_t *const c, uint64_t *const a, uint64_t ignored) {
+static inline void fmul1(uint64_t *const c, uint64_t *const a, uint64_t ignored) {
   const uint64_t a24 = 121665;
   __asm__ __volatile__(
     "movq     %2, %%rdx ;"
@@ -350,7 +350,7 @@ static force_inline void fmul1(uint64_t *const c, uint64_t *const a, uint64_t ig
   );
 }
 
-static force_inline uint64_t add1(uint64_t *const c, const uint64_t* a, uint64_t x) {
+static inline uint64_t add1(uint64_t *const c, const uint64_t* a, uint64_t x) {
   uint64_t carry;
   __asm__ __volatile__ (
     /* Add either 19 or 38 to c */
@@ -367,14 +367,14 @@ static force_inline uint64_t add1(uint64_t *const c, const uint64_t* a, uint64_t
   return carry;
 }
 
-static force_inline
+static inline
 void fmul(uint64_t* dst, uint64_t* in_a, uint64_t* in_b, uint64_t* tmp) {
   mul(tmp,in_a,in_b);
   carry_wide(dst,tmp);
 }
 
 
-static force_inline
+static inline
 void fmul2(uint64_t* dst, uint64_t* in_a, uint64_t* in_b, uint64_t* tmp) {
   mul2(tmp,in_a,in_b);
   carry_wide(dst,tmp);
@@ -382,13 +382,13 @@ void fmul2(uint64_t* dst, uint64_t* in_a, uint64_t* in_b, uint64_t* tmp) {
 //  carry_wide2(dst,tmp);
 }
 
-static force_inline
+static inline
 void fsqr(uint64_t* dst, uint64_t* in_a, uint64_t* tmp) {
   sqr(tmp,in_a);
   carry_wide(dst,tmp);
 }
 
-static force_inline
+static inline
 void fsqr2(uint64_t* dst, uint64_t* in_a, uint64_t* tmp) {
   sqr2(tmp,in_a);
   carry_wide(dst,tmp);
