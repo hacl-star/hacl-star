@@ -7,6 +7,7 @@ open FStar.Tactics
 open CanonCommSemiring
 open Fast_defs
 
+#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection -CanonCommMonoid -CanonCommSwaps -CanonCommSemiring'"
 
 (*
 let simple_helper2 (a0 b0 b1 a0b0_lo a0b0_hi a0b1_lo a0b1_hi sum:nat64) (overflow:bool) : Lemma
