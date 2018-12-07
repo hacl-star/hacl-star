@@ -19,7 +19,7 @@ ci: all test
 
 # ---
 
-%.test:
+%.test: %.build
 	$(MAKE) -C $* test
 
 %.build:
