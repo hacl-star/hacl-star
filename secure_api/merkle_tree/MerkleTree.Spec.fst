@@ -20,8 +20,10 @@ let hash_alg = Spec.Hash.Helpers.SHA2_256
 // - Spec.Hash.Helpers.size_word SHA2_256 = 4
 // - Spec.Hash.Helpers.size_hash_final_w SHA2_256 = 8
 // - Spec.Hash.Helpers.size_hash SHA2_256 = 32
+inline_for_extraction noextract
 val hash_size: nat
 // joonwonc: KreMLin can't extract `Spec.Hash.Helpers.size_hash hash_alg`
+inline_for_extraction noextract
 let hash_size = 32 
 
 // fournet: [tag] is a better name than [hash] for this
