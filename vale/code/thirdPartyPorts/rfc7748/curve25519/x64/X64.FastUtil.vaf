@@ -785,3 +785,270 @@ procedure{:quick}{:public} fast_sub_stdcall(
     Pop(r12, stack_b, 0);
     Pop(rsi, stack_b, 1);
 }
+
+
+#reset-options "--z3rlimit 20"
+procedure{:quick} cswap_single(
+    inline offset:nat,
+    ghost p0_b:buffer64,
+    ghost p1_b:buffer64)
+    lets
+        p0_ptr @= rdi;
+        p1_ptr @= rsi;
+
+        tmp0 @= r8;
+        tmp1 @= r9;
+        tmp2 @= r10;
+
+        old_p0_val := buffer64_read(p0_b, 0 + offset, mem);
+        old_p1_val := buffer64_read(p1_b, 0 + offset, mem);
+    reads
+        p0_ptr; p1_ptr; memTaint; efl;
+    modifies
+        tmp0; tmp1; tmp2;
+        mem; 
+
+    requires
+        offset < 8;
+
+        buffers_disjoint(p1_b, p0_b) || p1_b == p0_b;
+
+        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+
+    ensures
+        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+
+        modifies_buffer_2(p0_b, p1_b, old(mem), mem);
+
+        forall i:nat :: //{:pattern (Seq.index (M.buffer_as_seq h2 b) i)}
+                        0 <= i < 8
+                     && i != offset
+                    ==> buffer64_read(p0_b, i, mem)
+                     == buffer64_read(p0_b, i, old(mem)) &&
+                        buffer64_read(p1_b, i, mem)
+                     == buffer64_read(p1_b, i, old(mem));
+
+        let p0_val := buffer64_read(p0_b, 0 + offset, mem);
+        let p1_val := buffer64_read(p1_b, 0 + offset, mem);
+        p0_val == (if cf(efl) then old_p1_val else old_p0_val);
+        p1_val == (if cf(efl) then old_p0_val else old_p1_val);
+{
+    Load64_buffer(tmp0, p0_ptr,  0 + offset * 8, Secret, p0_b, 0 + offset);
+    Load64_buffer(tmp1, p1_ptr,  0 + offset * 8, Secret, p1_b, 0 + offset);
+    Mov64(tmp2, tmp0);
+    Cmovc64(tmp0, tmp1);
+    Cmovc64(tmp1, tmp2);
+    Store64_buffer(p0_ptr, tmp0,  0 + offset * 8, Secret, p0_b, 0 + offset);
+    Store64_buffer(p1_ptr, tmp1,  0 + offset * 8, Secret, p1_b, 0 + offset);
+}
+
+procedure{:quick} cswap2(
+    ghost p0_b:buffer64,
+    ghost p1_b:buffer64)
+    lets
+        p0_ptr @= rdi;
+        p1_ptr @= rsi;
+        bit @= rdx;
+
+        tmp0 @= r8;
+        tmp1 @= r9;
+        tmp2 @= r10;
+
+        old_p0_0 := buffer64_read(p0_b, 0, mem);
+        old_p0_1 := buffer64_read(p0_b, 1, mem);
+        old_p0_2 := buffer64_read(p0_b, 2, mem);
+        old_p0_3 := buffer64_read(p0_b, 3, mem);
+        old_p0_4 := buffer64_read(p0_b, 4, mem);
+        old_p0_5 := buffer64_read(p0_b, 5, mem);
+        old_p0_6 := buffer64_read(p0_b, 6, mem);
+        old_p0_7 := buffer64_read(p0_b, 7, mem);
+
+        old_p1_0 := buffer64_read(p1_b, 0, mem);
+        old_p1_1 := buffer64_read(p1_b, 1, mem);
+        old_p1_2 := buffer64_read(p1_b, 2, mem);
+        old_p1_3 := buffer64_read(p1_b, 3, mem);
+        old_p1_4 := buffer64_read(p1_b, 4, mem);
+        old_p1_5 := buffer64_read(p1_b, 5, mem);
+        old_p1_6 := buffer64_read(p1_b, 6, mem);
+        old_p1_7 := buffer64_read(p1_b, 7, mem);
+    reads
+        p0_ptr; p1_ptr; memTaint; 
+    modifies
+        bit; tmp0; tmp1; tmp2;
+        efl; mem; 
+
+    requires
+        bit <= 1;
+        buffers_disjoint(p1_b, p0_b) || p1_b == p0_b;
+
+        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+
+    ensures
+        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+
+        modifies_buffer_2(p0_b, p1_b, old(mem), mem);
+
+        let p0_0 := buffer64_read(p0_b, 0, mem);
+        let p0_1 := buffer64_read(p0_b, 1, mem);
+        let p0_2 := buffer64_read(p0_b, 2, mem);
+        let p0_3 := buffer64_read(p0_b, 3, mem);
+        let p0_4 := buffer64_read(p0_b, 4, mem);
+        let p0_5 := buffer64_read(p0_b, 5, mem);
+        let p0_6 := buffer64_read(p0_b, 6, mem);
+        let p0_7 := buffer64_read(p0_b, 7, mem);
+
+        let p1_0 := buffer64_read(p1_b, 0, mem);
+        let p1_1 := buffer64_read(p1_b, 1, mem);
+        let p1_2 := buffer64_read(p1_b, 2, mem);
+        let p1_3 := buffer64_read(p1_b, 3, mem);
+        let p1_4 := buffer64_read(p1_b, 4, mem);
+        let p1_5 := buffer64_read(p1_b, 5, mem);
+        let p1_6 := buffer64_read(p1_b, 6, mem);
+        let p1_7 := buffer64_read(p1_b, 7, mem);
+
+        p0_0 == (if old(bit) = 1 then old_p1_0 else old_p0_0);
+        p0_1 == (if old(bit) = 1 then old_p1_1 else old_p0_1);
+        p0_2 == (if old(bit) = 1 then old_p1_2 else old_p0_2);
+        p0_3 == (if old(bit) = 1 then old_p1_3 else old_p0_3);
+        p0_4 == (if old(bit) = 1 then old_p1_4 else old_p0_4);
+        p0_5 == (if old(bit) = 1 then old_p1_5 else old_p0_5);
+        p0_6 == (if old(bit) = 1 then old_p1_6 else old_p0_6);
+        p0_7 == (if old(bit) = 1 then old_p1_7 else old_p0_7);
+
+        p1_0 == (if old(bit) = 1 then old_p0_0 else old_p1_0);
+        p1_1 == (if old(bit) = 1 then old_p0_1 else old_p1_1);
+        p1_2 == (if old(bit) = 1 then old_p0_2 else old_p1_2);
+        p1_3 == (if old(bit) = 1 then old_p0_3 else old_p1_3);
+        p1_4 == (if old(bit) = 1 then old_p0_4 else old_p1_4);
+        p1_5 == (if old(bit) = 1 then old_p0_5 else old_p1_5);
+        p1_6 == (if old(bit) = 1 then old_p0_6 else old_p1_6);
+        p1_7 == (if old(bit) = 1 then old_p0_7 else old_p1_7);
+{
+    Add64Wrap(bit, 0xFFFFFFFFFFFFFFFF);
+
+    cswap_single(0, p0_b, p1_b);
+    cswap_single(1, p0_b, p1_b);
+    cswap_single(2, p0_b, p1_b);
+    cswap_single(3, p0_b, p1_b);
+    cswap_single(4, p0_b, p1_b);
+    cswap_single(5, p0_b, p1_b);
+    cswap_single(6, p0_b, p1_b);
+    cswap_single(7, p0_b, p1_b);
+}
+
+procedure{:quick}{:public} cswap2_stdcall(
+    inline win:bool,
+    ghost p0_b:buffer64,
+    ghost p1_b:buffer64,
+    ghost stack_b:buffer64)
+    lets
+        p0_ptr @= rdi; p1_ptr @= rsi; bit @= rdx;
+        p0_in := (if win then rcx else rdi);
+        p1_in := (if win then rdx else rsi);
+        bit_in := (if win then r8  else rdx);
+
+        old_p0_0 := buffer64_read(p0_b, 0, mem);
+        old_p0_1 := buffer64_read(p0_b, 1, mem);
+        old_p0_2 := buffer64_read(p0_b, 2, mem);
+        old_p0_3 := buffer64_read(p0_b, 3, mem);
+        old_p0_4 := buffer64_read(p0_b, 4, mem);
+        old_p0_5 := buffer64_read(p0_b, 5, mem);
+        old_p0_6 := buffer64_read(p0_b, 6, mem);
+        old_p0_7 := buffer64_read(p0_b, 7, mem);
+
+        old_p1_0 := buffer64_read(p1_b, 0, mem);
+        old_p1_1 := buffer64_read(p1_b, 1, mem);
+        old_p1_2 := buffer64_read(p1_b, 2, mem);
+        old_p1_3 := buffer64_read(p1_b, 3, mem);
+        old_p1_4 := buffer64_read(p1_b, 4, mem);
+        old_p1_5 := buffer64_read(p1_b, 5, mem);
+        old_p1_6 := buffer64_read(p1_b, 6, mem);
+        old_p1_7 := buffer64_read(p1_b, 7, mem);
+
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rsp; efl; mem;
+    requires
+        bit_in <= 1;
+        //adx_enabled && bmi2_enabled;
+        buffers_disjoint(p0_b, p1_b) || p1_b == p0_b;
+
+        buffers_disjoint(stack_b, p0_b);
+        buffers_disjoint(stack_b, p1_b);
+
+        validSrcAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
+        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
+    ensures
+        let p0_0 := buffer64_read(p0_b, 0, mem);
+        let p0_1 := buffer64_read(p0_b, 1, mem);
+        let p0_2 := buffer64_read(p0_b, 2, mem);
+        let p0_3 := buffer64_read(p0_b, 3, mem);
+        let p0_4 := buffer64_read(p0_b, 4, mem);
+        let p0_5 := buffer64_read(p0_b, 5, mem);
+        let p0_6 := buffer64_read(p0_b, 6, mem);
+        let p0_7 := buffer64_read(p0_b, 7, mem);
+
+        let p1_0 := buffer64_read(p1_b, 0, mem);
+        let p1_1 := buffer64_read(p1_b, 1, mem);
+        let p1_2 := buffer64_read(p1_b, 2, mem);
+        let p1_3 := buffer64_read(p1_b, 3, mem);
+        let p1_4 := buffer64_read(p1_b, 4, mem);
+        let p1_5 := buffer64_read(p1_b, 5, mem);
+        let p1_6 := buffer64_read(p1_b, 6, mem);
+        let p1_7 := buffer64_read(p1_b, 7, mem);
+
+        p0_0 == (if old(bit_in) = 1 then old_p1_0 else old_p0_0);
+        p0_1 == (if old(bit_in) = 1 then old_p1_1 else old_p0_1);
+        p0_2 == (if old(bit_in) = 1 then old_p1_2 else old_p0_2);
+        p0_3 == (if old(bit_in) = 1 then old_p1_3 else old_p0_3);
+        p0_4 == (if old(bit_in) = 1 then old_p1_4 else old_p0_4);
+        p0_5 == (if old(bit_in) = 1 then old_p1_5 else old_p0_5);
+        p0_6 == (if old(bit_in) = 1 then old_p1_6 else old_p0_6);
+        p0_7 == (if old(bit_in) = 1 then old_p1_7 else old_p0_7);
+
+        p1_0 == (if old(bit_in) = 1 then old_p0_0 else old_p1_0);
+        p1_1 == (if old(bit_in) = 1 then old_p0_1 else old_p1_1);
+        p1_2 == (if old(bit_in) = 1 then old_p0_2 else old_p1_2);
+        p1_3 == (if old(bit_in) = 1 then old_p0_3 else old_p1_3);
+        p1_4 == (if old(bit_in) = 1 then old_p0_4 else old_p1_4);
+        p1_5 == (if old(bit_in) = 1 then old_p0_5 else old_p1_5);
+        p1_6 == (if old(bit_in) = 1 then old_p0_6 else old_p1_6);
+        p1_7 == (if old(bit_in) = 1 then old_p0_7 else old_p1_7);
+        //////////////////////////////////////
+        //   Framing
+        //////////////////////////////////////
+
+        modifies_buffer_3(p0_b, p1_b, stack_b, old(mem), mem);
+        validSrcAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
+        validSrcAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
+
+        rbx == old(rbx);
+        rsi == old(rsi);
+        r12 == old(r12);
+        r13 == old(r13);
+        r14 == old(r14);
+
+        rsp == old(rsp);
+{
+    // Line up the rest of the arguments
+    inline if (win) {
+        // Store callee-save registers
+        Push(rsi, stack_b, 0);
+        Mov64(p0_ptr, rcx);
+        Mov64(p1_ptr, rdx);
+        Mov64(bit, r8);
+    } 
+
+    cswap2(p0_b, p1_b);
+    
+    inline if (win) {
+        Pop(rsi, stack_b, 0);
+    }
+
+}

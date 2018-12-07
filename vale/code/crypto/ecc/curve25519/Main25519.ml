@@ -20,4 +20,5 @@ let _ =
       ("fsqr2_v", (fun win -> X64_FastWide.va_code_fsqr2_stdcall win));
       (* ("fast_sqr_loop", (fun win -> X64_FastSqr.va_code_fast_sqr_loop_stdcall win)); *)
       ("fsqr_loop", (fun win -> X64_FastWide.va_code_fsqr_loop_stdcall win));
+      ("cswap2", (fun win -> X64_FastUtil.va_code_cswap2_stdcall win));
     ]
