@@ -408,7 +408,7 @@ procedure {:quick} aes_ctr_ghash(
 
 }
 
-#reset-options "--z3rlimit 500"
+#reset-options "--z3rlimit 800"
 // Intel's LOOP_4
 procedure{:quick} aes_ctr_loop_body(
     inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
