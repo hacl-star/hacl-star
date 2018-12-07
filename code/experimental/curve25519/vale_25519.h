@@ -55,6 +55,11 @@ void fsqr2(uint64_t* dst, const uint64_t* in_a, uint64_t* tmp) {
 }
 
 
+extern void cswap2_v(uint64_t *const p0, uint64_t *const p1, uint8_t bit);
+static inline void cswap2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
+  cswap2_v(p0, p1, bit);
+}
+/*
 static inline void cswap1(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
   uint64_t temp;
   __asm__ __volatile__(
@@ -83,6 +88,7 @@ static inline void cswap2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
   cswap1(bit,p0,p1);
   cswap1(bit,p0+4,p1+4);
 }
+*/
 
 
 
