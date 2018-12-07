@@ -28,6 +28,8 @@ let counter = nat
 val k : (s:seq word {length s = size_k_w_256})
 let hash256 = m:Seq.seq word {Seq.length m = 8}
 
+val reveal_word (u:unit) : Lemma (word == UInt32.t)
+
 (* Input data. *)
 type byte = UInt8.t
 type bytes =  m:Seq.seq byte
@@ -226,7 +228,7 @@ let le_bytes_to_hash (b:seq nat8) : hash256 =
      init 8 f)
   else (
      let open Words.Seq_s in
-     Spec.Loops.seq_map nat32_to_word (seq_nat8_to_seq_nat32_LE b)
+     Collections.Seqs_s.seq_map nat32_to_word (seq_nat8_to_seq_nat32_LE b)
   )
 
 val lemma_hash_to_bytes (s:seq quad32) : Lemma

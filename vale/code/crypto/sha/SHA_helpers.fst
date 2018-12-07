@@ -21,9 +21,10 @@ friend X64.CryptoInstructions_s
 // the correctness of the conversion once, rather that at every call site
 let vv (u:UInt32.t) : nat32 = v u
 let to_uint32 (n:nat32) : UInt32.t = uint_to_t n
-
 let word = UInt32.t
 let k = (Spec.SHA2.k0 SHA2_256)
+
+let reveal_word () = ()
 
 unfold let ws_opaque_aux = make_opaque ws
 let ws_opaque (b:block_w) (t:counter{t < size_k_w_256}) : nat32 = 
@@ -891,10 +892,10 @@ let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) 
 let lemma_le_bytes_to_hash_quads_part1 (s:seq quad32) : Lemma
   (requires length s == 2)
   (ensures  le_bytes_to_hash (le_seq_quad32_to_bytes s) ==
-            Spec.Loops.seq_map nat32_to_word (Words.Seq_s.seq_four_to_seq_LE s))
+            Collections.Seqs_s.seq_map nat32_to_word (Words.Seq_s.seq_four_to_seq_LE s))
   =
   let lhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in  
-  assert (lhs == Spec.Loops.seq_map nat32_to_word (Words.Seq_s.seq_nat8_to_seq_nat32_LE (le_seq_quad32_to_bytes s)));
+  assert (lhs == Collections.Seqs_s.seq_map nat32_to_word (Words.Seq_s.seq_nat8_to_seq_nat32_LE (le_seq_quad32_to_bytes s)));
   reveal_opaque le_seq_quad32_to_bytes_def;
   Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_LE (Words.Seq_s.seq_four_to_seq_LE s);
   ()
@@ -916,7 +917,7 @@ let lemma_le_bytes_to_hash_quads (s:seq quad32) : Lemma
   =
   let rhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in  
   lemma_le_bytes_to_hash_quads_part1 s;
-  assert (rhs == Spec.Loops.seq_map nat32_to_word (Words.Seq_s.seq_four_to_seq_LE s));
+  assert (rhs == Collections.Seqs_s.seq_map nat32_to_word (Words.Seq_s.seq_four_to_seq_LE s));
   ()
 #pop-options
 
