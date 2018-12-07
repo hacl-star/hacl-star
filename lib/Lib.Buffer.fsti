@@ -93,18 +93,17 @@ let modifies0 (h1 h2:HS.mem) =
   modifies (B.loc_none) h1 h2
 
 (** Modifies one buffer *)
-let modifies1 (#a:Type0) (#len:size_t) (b:lbuffer a len) (h1 h2:HS.mem) =
+let modifies1 (#a:Type0) (b:buffer_t MUT a) (h1 h2:HS.mem) =
   modifies (loc b) h1 h2
 
 (** Modifies two buffers *)
-let modifies2 (#a0:Type0) (#a1:Type0) (#len0:size_t) (#len1:size_t)
-  (b0:lbuffer a0 len0) (b1:lbuffer a1 len1) (h1 h2: HS.mem) =
+let modifies2 (#a0:Type0) (#a1:Type0)
+  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (h1 h2: HS.mem) =
   modifies (loc b0 |+| loc b1) h1 h2
 
 (** Modification three buffers *)
 let modifies3 (#a0:Type0) (#a1:Type0) (#a2:Type0)
-  (#len0:size_t) (#len1:size_t) (#len2:size_t)
-  (b0:lbuffer a0 len0) (b1:lbuffer a1 len1) (b2:lbuffer a1 len1) (h1 h2: HS.mem) =
+  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a1) (h1 h2: HS.mem) =
   modifies (loc b0 |+| loc b1 |+| loc b2) h1 h2
 
 (** Ghost reveal a buffer as a sequence *)
