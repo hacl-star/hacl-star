@@ -3,6 +3,8 @@ KREMLIN_HOME ?= ../../../kremlin
 
 include ../Makefile.common
 
+FSTAR_INCLUDES += $(HACL_HOME)/providers/.cache
+
 EVERCRYPT_HOME ?= ..
 MLCRYPTO_HOME ?= ../../../MLCrypto
 
@@ -41,14 +43,14 @@ all:
 	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  --cache_dir $(CACHE_DIR) \
 	  --odir $(EXTRACT_DIR) \
-	  --dep full Test.fst Test.Bytes.fst > .depend 
+	  --dep full Test.fst Test.Bytes.fst > .depend
 
 include .depend
 
 %.checked: | .depend
 	$(FSTAR) \
 	  --cache_checked_modules \
-	  --admit_smt_queries true \
+	  --already_cached "EverCrypt FStar LowStar C Hacl"
 	  --cache_dir $(CACHE_DIR) \
 	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  $<
