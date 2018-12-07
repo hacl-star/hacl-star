@@ -36,7 +36,7 @@ verify: $(ALL_CHECKED_FILES)
 
 # Always generate the dependency file
 .depend:
-	$(FSTAR) --dep full $(ROOTS) $(OTHER_ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' | tee $@
+	$(FSTAR) --dep full $(ROOTS) $(OTHER_ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
 include .depend
 
