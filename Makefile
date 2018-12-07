@@ -155,7 +155,7 @@ ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) -C code/blake2 verify
 	$(MAKE) -C code/sha3
 	$(MAKE) -C frodo/spec
-	$(MAKE) -C frodo/code
+	$(MAKE) -C frodo/code TARGET=
 	# $(MAKE) extract-specs
 	# $(MAKE) extract-all
 	# $(MAKE) -C code clean-c
