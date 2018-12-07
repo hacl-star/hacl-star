@@ -34,13 +34,35 @@ let size_word_ul (a: hash_alg): n:U32.t { U32.v n = size_word a } =
 
 inline_for_extraction
 let size_block_ul (a: hash_alg): n:U32.t { U32.v n = size_block a } =
-  U32.(size_word_ul a *^ 16ul)
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 64ul
+  | SHA2_384 | SHA2_512 -> 128ul
 
 inline_for_extraction
 let size_len_ul (a: hash_alg): n:U32.t { U32.v n = size_len_8 a } =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
+
+inline_for_extraction
+let size_hash_final_w_ul (a: hash_alg): n:U32.t { U32.v n = size_hash_final_w a } =
+  match a with
+  | MD5 -> 4ul
+  | SHA1 -> 5ul
+  | SHA2_224 -> 7ul
+  | SHA2_256 -> 8ul
+  | SHA2_384 -> 6ul
+  | SHA2_512 -> 8ul
+
+inline_for_extraction
+let size_hash_ul (a: hash_alg): n:U32.t { U32.v n = size_hash a } =
+  match a with
+  | MD5 -> 16ul
+  | SHA1 -> 20ul
+  | SHA2_224 -> 28ul
+  | SHA2_256 -> 32ul
+  | SHA2_384 -> 48ul
+  | SHA2_512 -> 64ul
 
 inline_for_extraction
 let blocks_t (a: hash_alg) =

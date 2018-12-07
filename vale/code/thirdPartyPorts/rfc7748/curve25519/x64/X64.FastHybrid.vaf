@@ -96,16 +96,12 @@ procedure{:quick} fast_mul1(
 {
     xor_lemmas();
     
-    lemma_load_mem64(inA_b, 0 + offset, mem);    
     Mulx64( tmp0,  d0, Mem(inA_ptr, 0 + 8 * offset, inA_b, 0 + offset, Secret));  /* A[0]*B */ lemma_prod_bounds(tmp0, d0, b, a0); 
-    lemma_load_mem64(inA_b, 1 + offset, mem);    
     Mulx64(tmp1, d1, Mem(inA_ptr,  8 + 8 * offset, inA_b, 1 + offset, Secret));  /* A[1]*B */ lemma_prod_bounds(tmp1, d1, b, a1); 
     Add64Wrap(d1, tmp0);
     Mov64(tmp0, 0);
-    lemma_load_mem64(inA_b, 2 + offset, mem);    
     Mulx64(tmp2, d2, Mem(inA_ptr, 16 + 8 * offset, inA_b, 2 + offset, Secret));  /* A[2]*B */ lemma_prod_bounds(tmp2, d2, b, a2); 
     Adcx64Wrap(d2, tmp1);
-    lemma_load_mem64(inA_b, 3 + offset, mem);    
     Mulx64(carry, d3, Mem(inA_ptr, 24 + 8 * offset, inA_b, 3 + offset, Secret));  /* A[3]*B */ lemma_prod_bounds(carry, d3, b, a3); 
     Adcx64Wrap(d3, tmp2);
     Adcx64Wrap(carry, tmp0);
@@ -297,33 +293,25 @@ procedure{:quick} fast_mul1_add(
     xor_lemmas();
 
     
-    lemma_load_mem64(inA_b, 4 + offset, mem);    
     Mulx64( tmp0,  d0, Mem(inA_ptr, 32 + offset*8, inA_b, 4 + offset, Secret));  /* A[4]*B */ lemma_prod_bounds(tmp0, d0, b, a4); 
     
     Xor64(zero, zero);  // Create a zero and clear the flags
 
-    lemma_load_mem64(inA_b, 0 + offset, mem);    
     Adox64Wrap(d0, Mem(inA_ptr, 0 + offset*8, inA_b, 0 + offset, Secret));
 
-    lemma_load_mem64(inA_b, 5 + offset, mem);    
     Mulx64(tmp1, d1, Mem(inA_ptr,  40 + offset*8, inA_b, 5 + offset, Secret));  /* A[5]*B */ lemma_prod_bounds(tmp1, d1, b, a5); 
     Adcx64Wrap(d1, tmp0);
 
-    lemma_load_mem64(inA_b, 1 + offset, mem);    
     Adox64Wrap(d1, Mem(inA_ptr, 8 + offset*8, inA_b, 1 + offset, Secret));
 
-    lemma_load_mem64(inA_b, 6 + offset, mem);    
     Mulx64(tmp0, d2, Mem(inA_ptr, 48 + offset*8, inA_b, 6 + offset, Secret));  /* A[6]*B */ lemma_prod_bounds(tmp0, d2, b, a6); 
     Adcx64Wrap(d2, tmp1);
     
-    lemma_load_mem64(inA_b, 2 + offset, mem);    
     Adox64Wrap(d2, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));
 
-    lemma_load_mem64(inA_b, 7 + offset, mem);    
     Mulx64(carry, d3, Mem(inA_ptr, 56 + offset*8, inA_b, 7 + offset, Secret));  /* A[7]*B */ lemma_prod_bounds(carry, d3, b, a7); 
     Adcx64Wrap(d3, tmp0);
 
-    lemma_load_mem64(inA_b, 3 + offset, mem);    
     Adox64Wrap(d3, Mem(inA_ptr, 24 + offset*8, inA_b, 3 + offset, Secret));
 
     Adcx64Wrap(carry, zero);
@@ -665,19 +653,15 @@ procedure{:quick} fast_add(
 {
     xor_lemmas();
     Load64_buffer(d0, inB_ptr,  0, Secret, inB_b, 0);     /* B[0] */
-    lemma_load_mem64(inA_b, 0, mem);    
     Add64Wrap(d0, Mem(inA_ptr,  0, inA_b, 0, Secret));
 
     Load64_buffer(d1, inB_ptr,  8, Secret, inB_b, 1);     /* B[1] */
-    lemma_load_mem64(inA_b, 1, mem);    
     Adcx64Wrap(d1, Mem(inA_ptr,  8, inA_b, 1, Secret));
 
     Load64_buffer(d2, inB_ptr, 16, Secret, inB_b, 2);     /* B[2] */
-    lemma_load_mem64(inA_b, 2, mem);    
     Adcx64Wrap(d2, Mem(inA_ptr, 16, inA_b, 2, Secret));
 
     Load64_buffer(d3, inB_ptr, 24, Secret, inB_b, 3);     /* B[3] */
-    lemma_load_mem64(inA_b, 3, mem);    
     Adcx64Wrap(d3, Mem(inA_ptr, 24, inA_b, 3, Secret));
 }
 
@@ -724,19 +708,15 @@ procedure{:quick} fast_sub(
     xor_lemmas();
 
     Load64_buffer(d0, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
-    lemma_load_mem64(inB_b, 0, mem);   
     Sub64Wrap(d0, Mem(inB_ptr, 0, inB_b, 0, Secret));      /* A[0] - B[0] */
 
     Load64_buffer(d1, inA_ptr,  8, Secret, inA_b, 1);     /* A[1] */
-    lemma_load_mem64(inB_b, 1, mem);   
     Sbb64(d1, Mem(inB_ptr, 8, inB_b, 1, Secret));          /* A[1] - B[1] */
 
     Load64_buffer(d2, inA_ptr, 16, Secret, inA_b, 2);     /* A[2] */
-    lemma_load_mem64(inB_b, 2, mem);   
     Sbb64(d2, Mem(inB_ptr,16, inB_b, 2, Secret));         /* A[2] - B[2] */
     
     Load64_buffer(d3, inA_ptr, 24, Secret, inA_b, 3);     /* A[3] */
-    lemma_load_mem64(inB_b, 3, mem);   
     Sbb64(d3, Mem(inB_ptr,24, inB_b, 3, Secret));         /* A[3] - B[3] */
 
     lemma_sub(a, a0, a1, a2, a3,

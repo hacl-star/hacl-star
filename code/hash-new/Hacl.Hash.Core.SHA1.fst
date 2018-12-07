@@ -19,6 +19,7 @@ friend Hacl.Hash.PadFinish
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 
+noextract inline_for_extraction
 let alloca () =
   B.alloca_of_list Spec.init_as_list
 

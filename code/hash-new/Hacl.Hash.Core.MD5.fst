@@ -20,6 +20,7 @@ friend Hacl.Hash.PadFinish
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 let _t = IB.igcmalloc_of_list HS.root Spec.t_as_list
 
+noextract inline_for_extraction
 let alloca () =
   B.alloca_of_list Spec.init_as_list
 

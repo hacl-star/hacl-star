@@ -1,19 +1,15 @@
+HACL_HOME = ../..
+KREMLIN_HOME ?= ../../../kremlin
+
+include ../Makefile.common
+
 EVERCRYPT_HOME ?= ..
-KREMLIN_HOME   ?= ../../../kremlin
 MLCRYPTO_HOME ?= ../../../MLCrypto
 
 HACL_CODE = ../../code
 
 EXTRACT_DIR = extract
 CACHE_DIR   = cache
-INCLUDE_PATHS = \
-  $(KREMLIN_HOME)/kremlib \
-  ../evercrypt \
-  $(HACL_CODE)/lib/kremlin \
-  $(HACL_CODE)/curve25519/interfaces \
-  $(HACL_CODE)/hash/interfaces \
-  $(HACL_CODE)/api/interfaces \
-  ../../specs
 
 UNAME = $(shell uname)
 
@@ -38,9 +34,11 @@ all:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) test
 
+.PRECIOUS: %.krml %.checked
+
 .depend:
 	$(FSTAR) \
-	  $(addprefix --include , $(INCLUDE_PATHS)) \
+	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  --cache_dir $(CACHE_DIR) \
 	  --odir $(EXTRACT_DIR) \
 	  --dep full Test.fst Test.Bytes.fst > .depend 
@@ -52,14 +50,14 @@ include .depend
 	  --cache_checked_modules \
 	  --admit_smt_queries true \
 	  --cache_dir $(CACHE_DIR) \
-	  $(addprefix --include , $(INCLUDE_PATHS)) \
+	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  $<
 
 $(EXTRACT_DIR)/%.krml:
 	$(FSTAR) --codegen Kremlin \
 	  --cache_checked_modules \
 	  --cache_dir $(CACHE_DIR) \
-	  $(addprefix --include , $(INCLUDE_PATHS)) \
+	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  --odir $(EXTRACT_DIR) \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(subst $(CACHE_DIR)/,,$(subst .checked,,$<))
@@ -86,12 +84,4 @@ clean:
         | xargs rm -f
 
 %.fst-in:
-	@echo $(addprefix --include ,\
-	  ../evercrypt $(KREMLIN_HOME)/kremlib \
-          ../../code/lib/kremlin \
-	  ../../specs \
-	  ../../code/hash \
-	  ../../code/hash/interfaces \
-	  ../../code/curve25519 \
-	  ../../code/curve25519/interfaces \
-	  ../../code/bignum)
+	@echo $(addprefix --include ,$(FSTAR_INCLUDES))

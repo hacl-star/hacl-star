@@ -20,7 +20,7 @@ type alg = EverCrypt.HMAC.ha
 // of the form | tagLen a | infolen | 1 |;
 // its prefix is overwritten by HMAC at each iteration.
 
-private val hkdf_expand_loop:
+val hkdf_expand_loop:
   a       : alg -> (
   okm     : uint8_p ->
   prk     : uint8_p ->
@@ -48,14 +48,10 @@ private val hkdf_expand_loop:
     as_seq h1 okm == expand0 a prk info (v len) (v i) last)))
 
 //18-07-13 how to improve this proof? should we use C.loops instead?
-#set-options "--z3rlimit 100"
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 800"
 let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
   push_frame ();
-  // admit ();
-  // 20180723 JP: proof definitely not going through
-  // 18-08-02 it does go through using emacs, but [make] takes forever.
 
-  admit (); //AR: 08/24: FIXME: does not work anymore with monotonic buffer changes
   let tlen = tagLen a in
   let tag = sub hashed 0ul tlen in
   let info_counter = offset hashed tlen in
@@ -144,7 +140,11 @@ let hkdf_expand a okm prk prklen info infolen len =
   let tlen = tagLen a in
   let text = alloca 0uy (tlen + infolen + 1ul) in
   blit info 0ul text tlen infolen;
-  assert_norm(
-    tagLength a + pow2 32 + blockLength a <= maxLength a);
+  assert (tagLength a <= 64);
+  assert (blockLength a <= 128);
+  assert_norm (64 + pow2 32 + 128 < pow2 61);
+  assert_norm (pow2 61 < pow2 125);
+  assert(
+    tagLength a + pow2 32 + blockLength a < maxLength a);
   hkdf_expand_loop a okm prk prklen infolen len text 0uy;
   pop_frame()
