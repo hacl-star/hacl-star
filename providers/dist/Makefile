@@ -53,7 +53,9 @@ endif
 ifneq (,$(wildcard EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
+ifneq ($(OS),Windows_NT)
   LDFLAGS	+= -ldl -lpthread
+endif
   SOURCES	+= evercrypt_openssl.c
 endif
 
