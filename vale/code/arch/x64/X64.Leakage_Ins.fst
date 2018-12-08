@@ -469,8 +469,6 @@ let lemma_addcarry_same_public (ts:taintState) (ins:tainted_ins{S.AddCarry64? in
   = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
     Classical.move_requires (lemma_addcarry_same_public_aux ts ins s1 s2 fuel b) ts'
 
-#set-options "--z3rlimit 300"
-
 let lemma_adcx_same_public_aux (ts:taintState) (ins:tainted_ins{S.Adcx64? ins.i}) (s1:traceState) (s2:traceState)
                                (fuel:nat) (b:bool) (ts':taintState)
   :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\

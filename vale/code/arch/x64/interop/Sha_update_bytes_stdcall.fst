@@ -11,8 +11,13 @@ module HS = FStar.HyperStack
 open Interop
 open Words_s
 open Types_s
+open Words.Seq_s
+open Words.Seq
+open Words.Four_s
+open Arch.Types
+open Collections.Seqs_s
 open X64.Machine_s
-open X64.Memory_s
+open X64.Memory
 open X64.Memory_Sems
 open X64.Vale.State
 open X64.Vale.Decls
@@ -21,15 +26,15 @@ open Interop_assumptions
 open X64.Vale.StateLemmas
 open X64.Vale.Lemmas
 module TS = X64.Taint_Semantics_s
-module ME = X64.Memory_s
+module ME = X64.Memory
 module BS = X64.Bytes_Semantics_s
 
-friend X64.Memory_s
 friend X64.Memory_Sems
 friend X64.Memory
 friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
-#set-options "--z3rlimit 120"
+friend SHA_helpers
+#set-options "--z3rlimit 60"
 
 open Vale_sha_update_bytes_stdcall
 
@@ -56,7 +61,7 @@ let post_cond8 (h:HS.mem) (h':HS.mem) (ctx_b:b8) (in_b:b8) (num_val:nat64) (k_b:
   length in_b == 64 `op_Multiply` num_val /\
   (let ctx_b128 = BV.mk_buffer_view ctx_b Views.view128 in
   let in_b128 = BV.mk_buffer_view in_b Views.view128 in
-  let input_LE = seq_nat8_to_seq_byte (le_seq_quad32_to_bytes (BV.as_seq h' in_b128)) in
+  let input_LE = seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (BV.as_seq h' in_b128)) in
   let hash_in = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h ctx_b128)) in
   let hash_out = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h' ctx_b128)) in
   (Seq.length input_LE) % 64 = 0 /\
@@ -235,7 +240,7 @@ let lemma_ghost_sha_update_bytes_stdcall is_win ctx_b in_b num_val k_b stack_b h
   (s1, f_v, s_v.mem.hs)
 
 #set-options "--max_fuel 0 --max_ifuel 0"
-
+(*
 let nat32_to_nat8s (v:UInt32.t) : GTot (s:Seq.lseq UInt8.t 4{
   v == UInt32.uint_to_t (Views_s.nat8s_to_nat32
     (UInt8.v (Seq.index s 0))
@@ -282,6 +287,7 @@ let seq32_to_8 (s:Seq.seq UInt32.t) : GTot (s':Seq.seq UInt8.t{
       s'
     end
   in aux 0
+*)
 
 let b32_to_b8 (b32:uint32_p) (b8:b8) (h0:HS.mem) : Ghost HS.mem
   (requires live h0 b32 /\ live h0 b8 /\ length b8 == 4 `op_Multiply` length b32 /\
@@ -297,6 +303,8 @@ let b32_to_b8 (b32:uint32_p) (b8:b8) (h0:HS.mem) : Ghost HS.mem
     BV.as_buffer_mk_buffer_view b8 Views.view128;
     BV.as_buffer_mk_buffer_view b32 Views.view32_128;
     BV.as_seq h1 b128_8 == BV.as_seq h0 b128_32)) =
+  admit()
+(*  
   let h1 = B.g_upd_seq b8 (seq32_to_8 (B.as_seq h0 b32)) h0 in
   B.g_upd_seq_as_seq b8 (seq32_to_8 (B.as_seq h0 b32)) h0;
   let b128_8 = BV.mk_buffer_view b8 Views.view128 in
@@ -322,7 +330,9 @@ let b32_to_b8 (b32:uint32_p) (b8:b8) (h0:HS.mem) : Ghost HS.mem
     (BV.as_seq h1 b128_8)
     (BV.as_seq h0 b128_32));
   h1
+*)
 
+(*
 let seq8_to_32 (s:Seq.seq UInt8.t{Seq.length s % 16 = 0}) : GTot (s':Seq.seq UInt32.t{
   Seq.length s == 4 `op_Multiply` Seq.length s' /\
   (forall (i:nat{i < Seq.length s'}).
@@ -357,7 +367,7 @@ let seq8_to_32 (s:Seq.seq UInt8.t{Seq.length s % 16 = 0}) : GTot (s':Seq.seq UIn
         (UInt8.v (Seq.index s (4 `op_Multiply` i + 2)))
         (UInt8.v (Seq.index s (4 `op_Multiply` i + 3)))))))
   in aux 0 Seq.empty
-
+*)
 let b8_to_b32 (b32:uint32_p) (b8:b8) (h0:HS.mem) : Ghost HS.mem
   (requires live h0 b32 /\ live h0 b8 /\ length b8 == 4 `op_Multiply` length b32 /\
     length b8 % 16 == 0 /\ M.loc_disjoint (M.loc_buffer b8) (M.loc_buffer b32))
@@ -372,6 +382,8 @@ let b8_to_b32 (b32:uint32_p) (b8:b8) (h0:HS.mem) : Ghost HS.mem
     BV.as_buffer_mk_buffer_view b8 Views.view128;
     BV.as_buffer_mk_buffer_view b32 Views.view32_128;
     BV.as_seq h0 b128_8 == BV.as_seq h1 b128_32)) =
+  admit()
+(*  
   let h1 = B.g_upd_seq b32 (seq8_to_32 (B.as_seq h0 b8)) h0 in
   B.g_upd_seq_as_seq b32 (seq8_to_32 (B.as_seq h0 b8)) h0;
   let b128_8 = BV.mk_buffer_view b8 Views.view128 in
@@ -397,6 +409,89 @@ let b8_to_b32 (b32:uint32_p) (b8:b8) (h0:HS.mem) : Ghost HS.mem
     (BV.as_seq h0 b128_8)
     (BV.as_seq h1 b128_32));
   h1
+*)
+
+(* Lemmas to simplify the post condition and remove Vale-specific functions *)
+
+let simplify_bytes_hash_aux (b:B.buffer UInt32.t) (h:HS.mem) : Lemma
+  (requires B.live h b /\ B.length b % 4 == 0)
+  (ensures (BV.length (BV.mk_buffer_view b Views.view32_128) == B.length b / 4))
+  =
+  BV.as_buffer_mk_buffer_view b Views.view32_128;
+  BV.get_view_mk_buffer_view b Views.view32_128;
+  BV.length_eq (BV.mk_buffer_view b Views.view32_128)
+
+let simplify_bytes_hash_aux2 (b:B.buffer UInt32.t) (h:HS.mem) (i:nat{i < B.length b}) : Lemma
+  (requires B.live h b /\ B.length b % 4 == 0)
+  (ensures (let b128 = BV.mk_buffer_view b Views.view32_128 in
+    let s = BV.as_seq h b128 in
+    simplify_bytes_hash_aux b h;
+    UInt32.uint_to_t (four_select (Seq.index s (i/4)) (i%4)) == Seq.index (B.as_seq h b) i)) =
+  let b128 = BV.mk_buffer_view b Views.view32_128 in
+  let s = BV.as_seq h b128 in
+  simplify_bytes_hash_aux b h;
+  let i' = i/4 in
+  BV.as_seq_sel h b128 i';
+  BV.get_sel h b128 i';
+  assert (Seq.index s i' == 
+     Views.get32_128 (Seq.slice (B.as_seq h b) (i' `op_Multiply` 4) (i' `op_Multiply` 4 + 4)));
+  Opaque_s.reveal_opaque Views.get32_128_def
+
+let simplify_bytes_hash (b:B.buffer UInt32.t) (h:HS.mem) : Lemma
+  (requires B.live h b /\ B.length b == 8 /\ B.length b % 4 == 0)
+  (ensures (
+    let b128 = BV.mk_buffer_view b Views.view32_128 in
+    le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h b128)) == B.as_seq h b
+  )) =
+  let s_init = B.as_seq h b in
+  let b128 = BV.mk_buffer_view b Views.view32_128 in
+  let s = BV.as_seq h b128 in
+  let s' = le_seq_quad32_to_bytes s in
+  let s_f = le_bytes_to_hash s' in
+  simplify_bytes_hash_aux b h;
+  lemma_le_seq_quad32_to_bytes_length s;
+  Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  let s_map = seq_map UInt32.uint_to_t (seq_four_to_seq_LE s) in
+  assert (Seq.equal s_f s_map);
+  let aux (i:nat{i < Seq.length s_map}) : Lemma (Seq.index s_map i == Seq.index s_init i) = 
+    assert (Seq.index s_map i = UInt32.uint_to_t (four_select (Seq.index s (i / 4)) (i % 4)));
+    simplify_bytes_hash_aux2 b h i
+  in Classical.forall_intro aux;
+  assert (Seq.equal s_map s_init)
+
+let simplify_quad_aux (b:B.buffer UInt8.t) (h:HS.mem) : Lemma
+  (requires B.live h b /\ B.length b % 16 == 0)
+  (ensures (BV.length (BV.mk_buffer_view b Views.view128) == B.length b / 16))
+  =
+  BV.as_buffer_mk_buffer_view b Views.view128;
+  BV.get_view_mk_buffer_view b Views.view128;
+  BV.length_eq (BV.mk_buffer_view b Views.view128)
+
+
+let simplify_quad_bytes (b:B.buffer UInt8.t) (h:HS.mem) : Lemma
+  (requires B.length b % 16 == 0 /\ B.live h b)
+  (ensures (let b128 = BV.mk_buffer_view b Views.view128 in
+    seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (BV.as_seq h b128)) == B.as_seq h b)) =
+  let s_init = B.as_seq h b in
+  let b128 = BV.mk_buffer_view b Views.view128 in
+  let s = BV.as_seq h b128 in
+  let s' = le_seq_quad32_to_bytes s in
+  Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  assert (s' == seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s)));
+  let s_f = seq_nat8_to_seq_uint8 s' in
+  simplify_quad_aux b h;
+  lemma_le_seq_quad32_to_bytes_length s;
+  let aux (i:nat{i < Seq.length s_f}) : Lemma (Seq.index s_init i == Seq.index s_f i) = 
+    let i' = i/16 in
+    BV.as_seq_sel h b128 i';
+    BV.get_sel h b128 i'; 
+    assert (Seq.index s i' == Views.get128 (Seq.slice s_init (i' `op_Multiply` 16) (i' `op_Multiply` 16 + 16)));
+    Opaque_s.reveal_opaque Views.get128_def;
+    let s_slice = seq_uint8_to_seq_nat8 (Seq.slice s_init (i' `op_Multiply` 16) (i' `op_Multiply` 16 +16)) in
+    Opaque_s.reveal_opaque le_bytes_to_quad32_def;
+    le_quad32_to_bytes_to_quad32 s_slice
+  in Classical.forall_intro aux;
+  assert (Seq.equal s_f s_init)
 
 let post_cond8_post_cond (h h' h0 h1:HS.mem)(ctx_b:uint32_p) (in_b:b8) (num_val:UInt64.t) (k_b:uint32_p) (ctx_b8:b8) (k_b8:b8) (stack_b:b8) : Lemma
   (requires 
@@ -412,8 +507,9 @@ let post_cond8_post_cond (h h' h0 h1:HS.mem)(ctx_b:uint32_p) (in_b:b8) (num_val:
     BV.as_seq h' ctx_b128 == BV.as_seq h1 ctx_b128_8)
     )
   (ensures post_cond h h' ctx_b in_b num_val k_b) =
-  ()
-
+  simplify_bytes_hash ctx_b h;
+  simplify_bytes_hash ctx_b h';
+  simplify_quad_bytes in_b h'
 
 let ghost_sha_update
   (ctx_b:uint32_p) 

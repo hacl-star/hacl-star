@@ -97,23 +97,21 @@ unfold let eval_reg (r:reg) (s:state) : nat64 = s.regs r
 unfold let eval_xmm (i:xmm) (s:state) : quad32 = s.xmms i
 
 let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
-    Views_s.nat8s_to_nat64
-      mem.[ptr]
-      mem.[ptr+1]
-      mem.[ptr+2]
-      mem.[ptr+3]
-      mem.[ptr+4]
-      mem.[ptr+5]
-      mem.[ptr+6]
-      mem.[ptr+7]
+  two_to_nat 32
+  (Mktwo
+    (four_to_nat 8 (Mkfour mem.[ptr] mem.[ptr+1] mem.[ptr+2] mem.[ptr+3]))
+    (four_to_nat 8 (Mkfour mem.[ptr+4] mem.[ptr+5] mem.[ptr+6] mem.[ptr+7]))
+  )
 let get_heap_val64 = make_opaque get_heap_val64_def
 
 let get_heap_val32_def (ptr:int) (mem:heap) : nat32 =
-  Views_s.nat8s_to_nat32
+  four_to_nat 8 
+  (Mkfour
     mem.[ptr]
     mem.[ptr+1]
     mem.[ptr+2]
-    mem.[ptr+3]
+    mem.[ptr+3])
+
 let get_heap_val32 = make_opaque get_heap_val32_def
 
 let get_heap_val128_def (ptr:int) (mem:heap) : quad32 = Mkfour
@@ -164,32 +162,26 @@ val mod_8: (n:nat{n < pow2_64}) -> nat8
 let mod_8 n = n % 0x100
 
 let update_heap32_def (ptr:int) (v:nat32) (mem:heap) : heap =
-  let mem = mem.[ptr] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+1] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+2] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+3] <- (mod_8 v) in
+  let v = nat_to_four 8 v in
+  let mem = mem.[ptr] <- v.lo0 in
+  let mem = mem.[ptr+1] <- v.lo1 in
+  let mem = mem.[ptr+2] <- v.hi2 in
+  let mem = mem.[ptr+3] <- v.hi3 in
   mem
 let update_heap32 = make_opaque update_heap32_def
 
 let update_heap64_def (ptr:int) (v:nat64) (mem:heap) : heap =
-  let mem = mem.[ptr] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+1] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+2] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+3] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+4] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+5] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+6] <- (mod_8 v) in
-  let v = v `op_Division` 0x100 in
-  let mem = mem.[ptr+7] <- (mod_8 v) in
+  let v = nat_to_two 32 v in
+  let lo = nat_to_four 8 v.lo in
+  let hi = nat_to_four 8 v.hi in
+  let mem = mem.[ptr] <- lo.lo0 in
+  let mem = mem.[ptr+1] <- lo.lo1 in
+  let mem = mem.[ptr+2] <- lo.hi2 in
+  let mem = mem.[ptr+3] <- lo.hi3 in
+  let mem = mem.[ptr+4] <- hi.lo0 in
+  let mem = mem.[ptr+5] <- hi.lo1 in
+  let mem = mem.[ptr+6] <- hi.hi2 in
+  let mem = mem.[ptr+7] <- hi.hi3 in
   mem
 let update_heap64 = make_opaque update_heap64_def
 

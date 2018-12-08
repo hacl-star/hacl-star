@@ -354,8 +354,7 @@ verify_options = [
 
 #  ('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastSqr.vaf', None),
 
-#  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
-  ('code/arch/x64/interop/*', None),
+  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
 
@@ -375,8 +374,8 @@ verify_options = [
   ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding())),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding())),
-  ('code/arch/x64/X64.Memory.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
-  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
   ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
   ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', ''))),
 
