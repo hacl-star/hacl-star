@@ -7,6 +7,11 @@ open Words.Seq_s
 open FStar.Mul
 open Util.Meta
 
+let two_to_seq_to_two_LE #a x =
+  assert (equal (two_to_seq_LE (seq_to_two_LE x)) x)
+
+let seq_to_two_to_seq_LE #a x = ()
+  
 let seq_to_seq_four_to_seq_LE  (#a:Type) (x:seq (four a)) :
   Lemma (seq_to_seq_four_LE (seq_four_to_seq_LE x) == x)
   [SMTPat (seq_to_seq_four_LE (seq_four_to_seq_LE x))]
@@ -134,6 +139,18 @@ let seq_nat8_to_seq_nat32_to_seq_nat8_LE (x:seq nat32) :
   assert (equal (seq_nat8_to_seq_nat32_LE (seq_nat32_to_seq_nat8_LE x)) x);
   ()
 
+let seq_nat32_to_seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) :
+  Lemma (seq_nat32_to_seq_nat8_LE (seq_nat8_to_seq_nat32_LE x) == x)
+  =
+  assert (equal (seq_nat32_to_seq_nat8_LE (seq_nat8_to_seq_nat32_LE x)) x);
+  ()
+
+let seq_nat8_to_seq_uint8_to_seq_nat8 (x:seq UInt8.t) =
+  assert (equal (seq_nat8_to_seq_uint8 (seq_uint8_to_seq_nat8 x)) x)  
+
+let seq_uint8_to_seq_nat8_to_seq_uint8 (x:seq nat8) =
+  assert (equal (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 x)) x)
+  
 let seq_four_to_seq_LE_injective (a:eqtype) :
   Lemma (forall (x x': seq (four a)). seq_four_to_seq_LE #a x == seq_four_to_seq_LE #a x' ==> x == x')
   =

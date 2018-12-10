@@ -133,7 +133,7 @@ let index64_heap_aux (s:Seq.lseq UInt8.t 8) (heap:S.heap) (ptr:int) : Lemma
   (ensures UInt64.v (Views.get64 s) == S.get_heap_val64 ptr heap) =
   Opaque_s.reveal_opaque Views.get64_def;
   Opaque_s.reveal_opaque S.get_heap_val64_def;
-  ()
+  Opaque_s.reveal_opaque Types_s.le_bytes_to_nat64_def
 
 let index_helper (x y:int) (heap:S.heap) : Lemma
   (requires x == y)
@@ -184,6 +184,11 @@ val index128_get_heap_val128 (h:mem)
 
 #set-options "--z3rlimit 50"
 
+open Types_s
+open Words.Seq_s
+open Words.Four_s
+open Collections.Seqs_s
+
 let index128_get_heap_val128_aux (s:Seq.lseq UInt8.t 16) (ptr:int) (heap:S.heap) : Lemma
   (requires (forall (j:nat) . j < 16 ==> UInt8.v (Seq.index s j) == heap.[ptr+j]))
   (ensures Views.get128 s == Mkfour
@@ -193,7 +198,7 @@ let index128_get_heap_val128_aux (s:Seq.lseq UInt8.t 16) (ptr:int) (heap:S.heap)
     (S.get_heap_val32 (ptr+12) heap)) =
   Opaque_s.reveal_opaque S.get_heap_val32_def;
   Opaque_s.reveal_opaque Views.get128_def;
-  ()
+  Opaque_s.reveal_opaque Types_s.le_bytes_to_quad32_def
 
 
 let index128_get_heap_val128 h b heap i =

@@ -10,6 +10,7 @@ open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 open Interop
 open Types_s
+open Words.Seq_s
 open SHA_helpers
 open X64.CPU_Features_s
 
@@ -37,13 +38,14 @@ let post_cond (h:HS.mem) (h':HS.mem) (ctx_b:uint32_p) (in_b:b8) (num_val:UInt64.
   length k_b == 64 /\
   length ctx_b == 8 /\
   length in_b == 64 `op_Multiply` num_val /\
-  (let ctx_b128 = BV.mk_buffer_view ctx_b Views.view32_128 in
-  let in_b128 = BV.mk_buffer_view in_b Views.view128 in
-  let input_LE = seq_nat8_to_seq_byte (le_seq_quad32_to_bytes (BV.as_seq h' in_b128)) in
-  let hash_in = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h ctx_b128)) in
-  let hash_out = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h' ctx_b128)) in
+  length ctx_b % 4 == 0 /\
+  length in_b % 16 == 0 /\
+  (let input_LE = B.as_seq h' in_b in
+  let hash_in = B.as_seq h ctx_b in
+  let hash_out = B.as_seq h' ctx_b in
   (Seq.length input_LE) % 64 = 0 /\
-  hash_out == update_multi_transparent hash_in input_LE
+  (reveal_word ();
+  hash_out == update_multi_transparent hash_in input_LE)
  )
 
 unfold
