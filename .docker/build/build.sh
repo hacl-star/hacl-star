@@ -26,6 +26,13 @@ function export_home() {
     fi
 }
 
+function vale_test() {
+  echo Running Vale Test &&
+  fetch_kremlin &&
+        fetch_and_make_vale &&
+        env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads vale.build -k
+}
+
 function hacl_test() {
     fetch_and_make_kremlin &&
         fetch_and_make_mlcrypto &&
@@ -187,7 +194,11 @@ function exec_build() {
 
     if [[ $target == "hacl-ci" ]]; then
         echo target - >hacl-ci
-        hacl_test &&
+        if [[ $branchname == "vale" ||  $branchname == "_vale" ]]; then
+          vale_test 
+        else
+          hacl_test 
+        fi
         echo -n true >$status_file
     elif [[ $target == "hacl-nightly" ]]; then
         echo target - >hacl-nightly
