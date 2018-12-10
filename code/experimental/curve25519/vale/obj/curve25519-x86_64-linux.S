@@ -1356,8 +1356,8 @@ L1:
   pop %rbp
   ret
 
-.global cswap2
-cswap2:
+.global cswap2_v
+cswap2_v:
   add $18446744073709551615, %rdx
   movq 0(%rdi), %r8
   movq 0(%rsi), %r9
