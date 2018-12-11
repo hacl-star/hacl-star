@@ -398,6 +398,7 @@ let rpmt_left #n #i mt =
   else raw_hashes_slice (Seq.slice mt 0 i) 0 (pow2 (n-1)); 
   mt_left mt
   
+#reset-options "--z3rlimit 40"
 val rpmt_right: 
   #n:nat{n > 0} -> #i:nat{i <= pow2 n} -> rpmt n i -> 
   rpmt (n-1) (if i <= pow2 (n-1) then 0 else i - pow2 (n-1))
@@ -441,7 +442,6 @@ let rec rpmt_pad_hashes_index_0 #n #i mt = ()
 val mt_get_root_pad_index_0:
   #n:nat -> mt:merkle_tree n ->
   Lemma (HPad? mt.[0] <==> HPad? (mt_get_root mt)) 
-#reset-options "--z3rlimit 40"
 let rec mt_get_root_pad_index_0 #n (mt:merkle_tree n) =
   if n = 0 then ()
   else 
