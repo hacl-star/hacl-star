@@ -220,6 +220,10 @@ let frame_invariant_implies_footprint_preservation
 let preserves_freeable #a (s: state a) (h0 h1: HS.mem): Type0 =
   freeable h0 s ==> freeable h1 s
 
+/// This function will generally not extract properly, so it should be used with
+/// great care. Callers must:
+/// - run with evercrypt/fst in scope to benefit from the definition of this function
+/// - know, at call-site, the concrete value of a via suitable usage of inline_for_extraction
 inline_for_extraction noextract
 val alloca: a:alg -> StackInline (state a)
   (requires (fun _ -> True))
