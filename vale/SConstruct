@@ -354,8 +354,7 @@ verify_options = [
 
 #  ('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastSqr.vaf', None),
 
-#  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
-  ('code/arch/x64/interop/*', None),
+  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
 
@@ -375,8 +374,8 @@ verify_options = [
   ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding())),
   ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding())),
-  ('code/arch/x64/X64.Memory.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
-  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
   ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
   ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', ''))),
 
@@ -975,11 +974,15 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   done = set()
   cmxs = []
   objs = []
+  ignore_warnings = [ "8", # Warning 8: this pattern-matching is not exhaustive.
+                     "20", # Warning 20: this argument will not be used by the function.
+                     "26"] # Warning 26: unused variable
+  ignore_warnings_str = "-w " + "".join(["-" + s for s in ignore_warnings])
   def add_cmx(x_ml):
     x_cmx = ml_out_file(x_ml, '.cmx')
     x_obj = ml_out_file(x_ml, '.o')
     cmx = ocaml_env.Command([x_cmx, x_obj], x_ml,
-      f'ocamlfind ocamlopt -c -package fstarlib -o {x_cmx} {x_ml} -I obj/ml_out')
+      f'ocamlfind ocamlopt -c -package fstarlib -o {x_cmx} {x_ml} -I obj/ml_out {ignore_warnings_str}')
     cmxs.append(cmx[0])
     objs.append(x_obj)
     Depends(main_exe, cmx[0])

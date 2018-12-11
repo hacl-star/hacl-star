@@ -5,6 +5,7 @@ open Opaque_s
 open X64.CryptoInstructions_s
 open Types_s
 open Words_s
+open Words.Seq_s
 open FStar.Seq
 open Arch.Types
 
@@ -27,8 +28,10 @@ let counter = nat
 val k : (s:seq word {length s = size_k_w_256})
 let hash256 = m:Seq.seq word {Seq.length m = 8}
 
+val reveal_word (u:unit) : Lemma (word == UInt32.t)
+
 (* Input data. *)
-val byte:Type0
+type byte = UInt8.t
 type bytes =  m:Seq.seq byte
 
 (* Input data, multiple of a block length. *)
@@ -194,16 +197,13 @@ let rec update_multi_quads (s:seq quad32) (hash_orig:hash256) : Tot (hash256) (d
     let hash = update_block h_prefix (quads_to_block qs) in
     hash
 
-let seq_nat8_to_seq_byte (b:seq nat8) : (b':seq byte) =
-  init (length b) (fun (i:nat { i < length b }) -> let x:byte = nat8_to_byte (index b i) in x)
-
 
 val lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq byte) :
   Lemma (requires length quads % 4 == 0 /\
                   r_quads == reverse_bytes_quad32_seq quads /\
                   nat8s == le_seq_quad32_to_bytes quads /\
-                  blocks == seq_nat8_to_seq_byte nat8s /\
+                  blocks == seq_nat8_to_seq_uint8 nat8s /\
                   hash' == update_multi_quads r_quads hash)        
         (ensures 
            length blocks % size_k_w_256 == 0 /\
@@ -228,7 +228,7 @@ let le_bytes_to_hash (b:seq nat8) : hash256 =
      init 8 f)
   else (
      let open Words.Seq_s in
-     Spec.Loops.seq_map nat32_to_word (seq_nat8_to_seq_nat32_LE b)
+     Collections.Seqs_s.seq_map nat32_to_word (seq_nat8_to_seq_nat32_LE b)
   )
 
 val lemma_hash_to_bytes (s:seq quad32) : Lemma

@@ -7,6 +7,13 @@ module BV = LowStar.BufferView
 module HS = FStar.HyperStack
 open BufferViewHelpers
 open Types_s
+open Words_s
+open Words.Two_s
+open Words.Two
+open Words.Four_s
+open Words.Seq_s
+open Words.Seq
+open Arch.Types
 
 friend LowStar.BufferView
 
@@ -22,75 +29,24 @@ let get64_aux (ptr:int) (heap:heap) (v:nat64) (k:nat{k < 8}) : Lemma
   (requires get_heap_val64 ptr heap == v)
   (ensures heap.[ptr + k] == UInt8.v (Seq.index (put64 (UInt64.uint_to_t v)) k)) =
   Opaque_s.reveal_opaque get_heap_val64_def;
-  Opaque_s.reveal_opaque get64_def;
-  let s = put64 (UInt64.uint_to_t v) in
-  X64.Bytes_Semantics.nat8s_to_nat64_injective
-       heap.[ptr]
-       heap.[ptr + 1]
-       heap.[ptr + 2]
-       heap.[ptr + 3]
-       heap.[ptr + 4]
-       heap.[ptr + 5]
-       heap.[ptr + 6]
-       heap.[ptr + 7]
-       (UInt8.v (Seq.index s 0))
-       (UInt8.v (Seq.index s 1))
-       (UInt8.v (Seq.index s 2))
-       (UInt8.v (Seq.index s 3))
-       (UInt8.v (Seq.index s 4))
-       (UInt8.v (Seq.index s 5))
-       (UInt8.v (Seq.index s 6))
-       (UInt8.v (Seq.index s 7))
+  Opaque_s.reveal_opaque put64_def;
+  Opaque_s.reveal_opaque le_nat64_to_bytes_def;
+  four_to_nat_8_injective ();
+  two_to_nat_32_injective ()
 
 let get128_aux (ptr:int) (heap:heap) (v:quad32) (k:nat{k < 16}) : Lemma
   (requires get_heap_val128 ptr heap == v)
   (ensures heap.[ptr + k] == UInt8.v (Seq.index (put128 v) k)) =
   Opaque_s.reveal_opaque get_heap_val128_def;
   Opaque_s.reveal_opaque get_heap_val32_def;
-  Opaque_s.reveal_opaque get128_def;
-  Opaque_s.reveal_opaque get32_def;
-  let s = put128 v in
-  X64.Bytes_Semantics.nat8s_to_nat32_injective
-       heap.[ptr]
-       heap.[ptr + 1]
-       heap.[ptr + 2]
-       heap.[ptr + 3]
-       (UInt8.v (Seq.index s 0))
-       (UInt8.v (Seq.index s 1))
-       (UInt8.v (Seq.index s 2))
-       (UInt8.v (Seq.index s 3));       
-  X64.Bytes_Semantics.nat8s_to_nat32_injective
-       heap.[ptr + 4]
-       heap.[ptr + 5]
-       heap.[ptr + 6]
-       heap.[ptr + 7]
-       (UInt8.v (Seq.index s 4))
-       (UInt8.v (Seq.index s 5))
-       (UInt8.v (Seq.index s 6))
-       (UInt8.v (Seq.index s 7));
-  X64.Bytes_Semantics.nat8s_to_nat32_injective
-       heap.[ptr + 8]
-       heap.[ptr + 9]
-       heap.[ptr + 10]
-       heap.[ptr + 11]
-       (UInt8.v (Seq.index s 8))
-       (UInt8.v (Seq.index s 9))
-       (UInt8.v (Seq.index s 10))
-       (UInt8.v (Seq.index s 11));
-  X64.Bytes_Semantics.nat8s_to_nat32_injective
-       heap.[ptr + 12]
-       heap.[ptr + 13]
-       heap.[ptr + 14]
-       heap.[ptr + 15]
-       (UInt8.v (Seq.index s 12))
-       (UInt8.v (Seq.index s 13))
-       (UInt8.v (Seq.index s 14))
-       (UInt8.v (Seq.index s 15))
+  Opaque_s.reveal_opaque put128_def;
+  Opaque_s.reveal_opaque le_quad32_to_bytes_def;
+  four_to_nat_8_injective ()
 
 #set-options "--z3refresh --max_fuel 1 --initial_fuel 1 --z3rlimit 200"
 
 let bv_upd_update_heap64 b heap i v addrs ptrs h =
-admit();
+  admit();
   let bv = BV.mk_buffer_view b view64 in
   BV.as_buffer_mk_buffer_view b view64;
   BV.get_view_mk_buffer_view b view64;
