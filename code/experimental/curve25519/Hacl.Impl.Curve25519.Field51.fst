@@ -11,6 +11,7 @@ open Lib.Buffer
 include Hacl.Spec.Curve25519.Field51
 include Hacl.Spec.Curve25519.Field51.Definition
 
+module P = NatPrime
 module S = Hacl.Spec.Curve25519.Field51.Definition
 module ST = FStar.HyperStack.ST
 
@@ -43,12 +44,12 @@ let wide_as_nat h e =
   S.wide_as_nat5 (s0, s1, s2, s3, s4)
 
 noextract
-val fevalh: h:mem -> f:felem -> GTot S.felem
-let fevalh h f = (as_nat h f) % S.prime
+val fevalh: h:mem -> f:felem -> GTot P.felem
+let fevalh h f = (as_nat h f) % P.prime
 
 noextract
-val feval_wideh: h:mem -> f:felem_wide -> GTot S.felem
-let feval_wideh h f = (wide_as_nat h f) % S.prime
+val feval_wideh: h:mem -> f:felem_wide -> GTot P.felem
+let feval_wideh h f = (wide_as_nat h f) % P.prime
 
 noextract
 val felem_fits: h:mem -> f:felem -> m:S.scale64_5 -> Type0
@@ -170,7 +171,7 @@ val fadd:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (2, 4, 2, 2, 2) /\
-      fevalh h1 out == S.fadd (fevalh h0 f1) (fevalh h0 f2))
+      fevalh h1 out == P.fadd (fevalh h0 f1) (fevalh h0 f2))
 [@ CInline]
 let fadd out f1 f2 =
   let h0 = ST.get () in
@@ -192,9 +193,9 @@ let fadd out f1 f2 =
   let h1 = ST.get () in
   assert (as_nat h1 out == as_nat h0 f1 + as_nat h0 f2);
   FStar.Math.Lemmas.lemma_mod_plus_distr_l
-    (as_nat h0 f1) (as_nat h0 f2) S.prime;
+    (as_nat h0 f1) (as_nat h0 f2) P.prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
-    (as_nat h0 f1 % S.prime) (as_nat h0 f2) S.prime
+    (as_nat h0 f1 % P.prime) (as_nat h0 f2) P.prime
 
 val fsub:
     out:felem
@@ -208,7 +209,7 @@ val fsub:
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (9, 10, 9, 9, 9) /\
-      fevalh h1 out == S.fsub (fevalh h0 f1) (fevalh h0 f2))
+      fevalh h1 out == P.fsub (fevalh h0 f1) (fevalh h0 f2))
 [@ CInline]
 let fsub out f1 f2 =
   let f10 = f1.(0ul) in
@@ -240,7 +241,7 @@ val fmul:
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (1, 2, 1, 1, 1) /\
-      fevalh h1 out == S.fmul (fevalh h0 f1) (fevalh h0 f2))
+      fevalh h1 out == P.fmul (fevalh h0 f1) (fevalh h0 f2))
 [@ CInline]
 let fmul out f1 f2 =
   let f10 = f1.(size 0) in
@@ -286,8 +287,8 @@ val fmul2:
       let f21 = gsub f2 5ul 5ul in
       felem_fits h1 out0 (1, 2, 1, 1, 1) /\
       felem_fits h1 out1 (1, 2, 1, 1, 1) /\
-      fevalh h1 out0 == S.fmul (fevalh h0 f10) (fevalh h0 f20) /\
-      fevalh h1 out1 == S.fmul (fevalh h0 f11) (fevalh h0 f21)))
+      fevalh h1 out0 == P.fmul (fevalh h0 f10) (fevalh h0 f20) /\
+      fevalh h1 out1 == P.fmul (fevalh h0 f11) (fevalh h0 f21)))
 [@ CInline]
 let fmul2 out f1 f2 =
   let f10 = f1.(size 0) in
@@ -342,7 +343,7 @@ val fmul1:
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (1, 2, 1, 1, 1) /\
-      fevalh h1 out == (fevalh h0 f1 * v f2) % S.prime)
+      fevalh h1 out == (fevalh h0 f1 * v f2) % P.prime)
 [@ CInline]
 let fmul1 out f1 f2 =
   let f10 = f1.(size 0) in
@@ -367,7 +368,7 @@ val fsqr:
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (1, 2, 1, 1, 1) /\
-      fevalh h1 out == S.fsqr (fevalh h0 f))
+      fevalh h1 out == P.fsqr (fevalh h0 f))
 [@ CInline]
 let fsqr out f =
   let f0 = f.(0ul) in
@@ -400,8 +401,8 @@ val fsqr2:
       let f2 = gsub f 5ul 5ul in
       felem_fits h1 out1 (1, 2, 1, 1, 1) /\
       felem_fits h1 out2 (1, 2, 1, 1, 1) /\
-      fevalh h1 out1 == S.fsqr (fevalh h0 f1) /\
-      fevalh h1 out2 == S.fsqr (fevalh h0 f2)))
+      fevalh h1 out1 == P.fsqr (fevalh h0 f1) /\
+      fevalh h1 out2 == P.fsqr (fevalh h0 f2)))
 [@ CInline]
 let fsqr2 out f =
   let f10 = f.(0ul) in
@@ -512,15 +513,13 @@ val cswap2: bit:uint64 -> p1:felem2 -> p2:felem2 -> Stack unit
     (requires (fun h0 -> live h0 p1 /\ live h0 p2))
     (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
 [@CInline]
-let cswap2 bit p0 p1 = 
+let cswap2 bit p0 p1 =
     let mask = u64 0 -. bit in
     let h0 = ST.get() in
     loop2 h0 10ul p0 p1
     (fun h -> (fun i s -> s))
-    (fun i -> 
+    (fun i ->
          let dummy = mask &. (p0.(i) ^. p1.(i)) in
          p0.(i) <- p0.(i) ^. dummy;
          p1.(i) <- p1.(i) ^. dummy;
 	 admit())
-
-

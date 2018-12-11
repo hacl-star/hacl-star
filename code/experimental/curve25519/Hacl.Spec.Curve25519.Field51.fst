@@ -3,6 +3,7 @@ module Hacl.Spec.Curve25519.Field51
 open Lib.Sequence
 open Lib.IntTypes
 open FStar.Mul
+open NatPrime
 
 open Hacl.Spec.Curve25519.Field51.Definition
 open Hacl.Spec.Curve25519.Field51.Lemmas

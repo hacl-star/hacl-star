@@ -12,6 +12,7 @@ module ST = FStar.HyperStack.ST
 module F26 = Hacl.Impl.Curve25519.Field26
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
+module P = NatPrime
 
 type field_spec =
   | M26
@@ -75,34 +76,8 @@ let as_nat #s h e =
   | M51 -> F51.as_nat h e
   | M64 -> F64.as_nat h e
 
-(* Open Spec.Curve25519.fst / Lib.NatMod ? *)
 noextract
-let prime:pos =
-  assert_norm (pow2 255 - 19 > 0);
-  pow2 255 - 19
-
-noextract
-let felemn = x:nat{x < prime}
-
-val faddn: felemn -> felemn -> felemn
-let faddn f1 f2 = (f1 + f2) % prime
-
-noextract
-val fsubn: felemn -> felemn -> felemn
-let fsubn f1 f2 = (f1 - f2) % prime
-
-noextract
-val fmuln: felemn -> felemn -> felemn
-let fmuln f1 f2 = (f1 * f2) % prime
-
-noextract
-val fsqrn: felemn -> felemn
-let fsqrn f1 = (f1 * f1) % prime
-
-(* End *)
-
-noextract
-val feval: #s:field_spec -> h:mem -> e:felem s -> GTot felemn
+val feval: #s:field_spec -> h:mem -> e:felem s -> GTot P.felem
 let feval #s h e =
   match s with
   | M26 -> admit()
@@ -221,7 +196,7 @@ val fadd:
     (requires fun h -> live h out /\ live h f1 /\ live h f2 /\ fadd_fsub_pre h f1 f2)
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\ fadd_post h1 out /\
-      feval h1 out == faddn (feval h0 f1) (feval h0 f2))
+      feval h1 out == P.fadd (feval h0 f1) (feval h0 f2))
 let fadd #s out f1 f2=
   match s with
   | M26 -> admit(); F26.fadd out f1 f2
@@ -247,7 +222,7 @@ val fsub:
       fadd_fsub_pre h f1 f2)
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\ fsub_post h1 out /\
-      feval h1 out == fsubn (feval h0 f1) (feval h0 f2))
+      feval h1 out == P.fsub (feval h0 f1) (feval h0 f2))
 let fsub #s out f1 f2=
   match s with
   | M26 -> admit(); F26.fsub out f1 f2
@@ -280,7 +255,7 @@ val fmul:
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\ fmul_pre h f1 f2)
     (ensures fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ fmul_fsqr_post h1 out /\
-      feval h1 out == fmuln (feval h0 f1) (feval h0 f2))
+      feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
 let fmul #s out f1 f2 tmp =
   match s with
   | M26 -> admit(); F26.fmul out f1 f2
@@ -333,8 +308,8 @@ val fmul2:
       let f11 = gsub f1 (nlimb s) (nlimb s) in
       let f20 = gsub f2 0ul (nlimb s) in
       let f21 = gsub f2 (nlimb s) (nlimb s) in
-      feval h1 out0 == fmuln (feval h0 f10) (feval h0 f20) /\
-      feval h1 out1 == fmuln (feval h0 f11) (feval h0 f21)))
+      feval h1 out0 == P.fmul (feval h0 f10) (feval h0 f20) /\
+      feval h1 out1 == P.fmul (feval h0 f11) (feval h0 f21)))
 let fmul2 #s out f1 f2 tmp =
   match s with
   | M26 -> admit(); F26.fmul2 out f1 f2
@@ -358,7 +333,7 @@ val fmul1:
     (requires fun h -> live h out /\ live h f1 /\ fmul1_pre h f1 f2)
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\ fmul_fsqr_post h1 out /\
-      feval h1 out == (feval h0 f1 * v f2) % prime)
+      feval h1 out == (feval h0 f1 * v f2) % P.prime)
 let fmul1 #s out f1 f2 =
   match s with
   | M26 -> admit(); F26.fmul1 out f1 f2
@@ -382,7 +357,7 @@ val fsqr:
     (requires fun h -> live h out /\ live h f1 /\ live h tmp /\ fsqr_pre h f1)
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ fmul_fsqr_post h1 out /\
-      feval h1 out == fmuln (feval h0 f1) (feval h0 f1))
+      feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
 let fsqr #s out f1 tmp =
   match s with
   | M26 -> admit(); F26.fsqr out f1
@@ -414,8 +389,8 @@ val fsqr2:
       let out2 = gsub out (nlimb s) (nlimb s) in
       let f1 = gsub f 0ul (nlimb s) in
       let f2 = gsub f (nlimb s) (nlimb s) in
-      feval h1 out1 == fmuln (feval h0 f1) (feval h0 f1) /\
-      feval h1 out2 == fmuln (feval h0 f2) (feval h0 f2)))
+      feval h1 out1 == P.fmul (feval h0 f1) (feval h0 f1) /\
+      feval h1 out2 == P.fmul (feval h0 f2) (feval h0 f2)))
 let fsqr2 #s out f tmp =
   match s with
   | M26 -> admit();F26.fsqr2 out f
@@ -427,9 +402,8 @@ val cswap2: #s:field_spec -> bit:uint64 -> p1:felem2 s -> p2:felem2 s -> Stack u
     (requires (fun h0 -> live h0 p1 /\ live h0 p2))
     (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
 [@CInline]
-let cswap2 #s bit p0 p1 = 
+let cswap2 #s bit p0 p1 =
   match s with
   | M26 -> admit()
   | M51 -> F51.cswap2 bit p0 p1
   | M64 -> F64.cswap2 bit p0 p1
-  
