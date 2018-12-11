@@ -8,9 +8,7 @@ endif
 
 # 1. Main entry points, along with some sanity checks
 
-VALE_FSTI_HACK	= $(HACL_HOME)/vale/code/arch/x64/interop/fsti
-
-all: $(VALE_FSTI_HACK) $(VALE_OBJ_DIR) $(HACL_CHECK) $(KREMLIB_CHECK)
+all: $(VALE_OBJ_DIR) $(HACL_CHECK) $(KREMLIB_CHECK)
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) all_
 
@@ -18,16 +16,6 @@ all: $(VALE_FSTI_HACK) $(VALE_OBJ_DIR) $(HACL_CHECK) $(KREMLIB_CHECK)
 all_: dist/compact-msvc/libevercrypt.$(SO) dist/compact/libevercrypt.$(SO) \
   dist/compact/evercrypt.cmxa dist/header/EverCrypt.h \
   dist/coco/libevercrypt.$(SO)
-
-# Temporary workaround: we want Vale to offer a relatively small dependency
-# graph with just interfaces.
-$(VALE_FSTI_HACK):
-	mkdir -p $@
-ifeq ($(OS),Windows_NT)
-	cp $@/../*.fsti $@/
-else
-	ln -s $@/../*.fsti $@/
-endif
 
 $(VALE_OBJ_DIR):
 	@echo "Please run scons --FSTAR-MY-VERSION --NO-VERIFY --EXTRACT-FSTAR in the $(HACL_HOME)/vale directory before invoking this Makefile" && false
@@ -126,6 +114,9 @@ COMPACT_FLAGS = \
   -no-prefix 'Sha_update_bytes_stdcall' \
   -no-prefix 'Check_sha_stdcall' \
   -no-prefix 'Check_aesni_stdcall' \
+  -library 'Sha_update_bytes_stdcall' \
+  -library 'Check_sha_stdcall' \
+  -library 'Check_aesni_stdcall' \
   -fparentheses -fno-shadow -fcurly-braces \
   -o libevercrypt.a
 
