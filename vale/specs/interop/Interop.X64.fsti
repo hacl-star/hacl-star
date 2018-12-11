@@ -175,66 +175,12 @@ let state_builder_t (args:list arg) (codom:Type) =
     stack:b8{mem_roots_p h0 (arg_of_b8 stack::args)} ->
     GTot codom
 
-[@reduce]
-let rec initial_state_t
-              (dom:list td)
-              (args:list arg)
-              (codom:Type)
-  : n_arrow dom Type =
-  match dom with
-  | [] ->
-    state_builder_t args codom
-  | hd::tl ->
-    fun (x:td_as_type hd) ->
-      initial_state_t tl ((|hd, x|)::args) codom
-
-// Some identity coercions that serve as proof hints
-// to introduce generic arrow types
-[@reduce]
-let fold_initial_state_t
-  (#hd:td) (#tl:list td)
-  (#x:td_as_type hd) (#acc:list arg) (#codom:Type)
-  (res:n_dep_arrow tl (initial_state_t tl ((| hd, x |) :: acc) codom))
-  : n_dep_arrow tl (elim_1 (initial_state_t (hd::tl) acc codom) x)
-  = res
-
-
-[@reduce]
-let rec create_initial_state_aux
-        (#codom:Type)
-        (dom:list td)
-        (args:list arg{List.Tot.length dom + List.Tot.length args < max_arity})
-        (f: (args:arity_ok arg -> state_builder_t args codom))
-  : n_dep_arrow dom (initial_state_t dom args codom) =
-  match dom with
-  | [] ->
-    //no more args; build the state from a HS.mem
-    intro_dep_arrow_nil
-         (initial_state_t [] args codom)
-         (f args)
-
-  | hd::tl ->
-    //put the next arg hd in the ith register
-    //update the taint map
-    //maybe add the next arg to the list of buffers
-    //recur
-    intro_dep_arrow_cons
-         hd
-         tl
-         (initial_state_t dom args codom)
-         (fun (x:td_as_type hd) ->
-                fold_initial_state_t
-                  (create_initial_state_aux
-                    tl
-                    ((|hd,x|)::args)
-                    f))
-
 let init_taint : taint_map = fun r -> MS.Public
 
 // Splitting the construction of the initial state into two functions
 // one that creates the initial trusted state (i.e., part of our TCB)
 // and another that just creates the vale state, a view upon the trusted one
-let create_initial_trusted_state_core (args:arity_ok arg)
+let create_initial_trusted_state (args:arity_ok arg)
   : state_builder_t args (TS.traceState & ME.mem) =
   fun h0 stack ->
     let open MS in
@@ -258,20 +204,6 @@ let create_initial_trusted_state_core (args:arity_ok arg)
     },
     mem
 
-let create_trusted_initial_state_t (dom:list td)
-                                   (args:list arg)
-    = n_dep_arrow
-          dom
-          (initial_state_t dom args (TS.traceState & ME.mem))
-
-let create_trusted_initial_state
-      (dom:arity_ok td)
-    : create_trusted_initial_state_t dom []
-    = create_initial_state_aux
-          dom
-          []
-          create_initial_trusted_state_core
-
 ////////////////////////////////////////////////////////////////////////////////
 let stack_buffer = lowstar_buffer (ME.TBase ME.TUInt64)
 
@@ -289,7 +221,7 @@ let prediction_pre
   HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
   B.frameOf b == HS.get_tip alloc_push_h0 /\
   B.live alloc_push_h0 b /\
-  s0 == fst (create_initial_trusted_state_core args alloc_push_h0 b)
+  s0 == fst (create_initial_trusted_state args alloc_push_h0 b)
 
 let prediction_post
     (c:TS.tainted_code)
@@ -330,7 +262,7 @@ noeq type as_lowstar_sig_ret (args:arity_ok arg) =
       final_mem:ME.mem ->
       as_lowstar_sig_ret args
 
-val as_lowstar_sig_post
+let as_lowstar_sig_post
     (c:TS.tainted_code)
     (args:arity_ok arg)
     (h0:mem_roots args)
@@ -340,8 +272,12 @@ val as_lowstar_sig_post
     (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)})
     (fuel:nat)
     (final_mem:ME.mem)
-    (h1:HS.mem)
-    : Type0
+    (h1:HS.mem) =
+  let s0 = fst (create_initial_trusted_state args alloc_push_h0 b) in
+  prediction_pre c args h0 s0 push_h0 alloc_push_h0 b /\
+  (fuel, final_mem) == predict s0 push_h0 alloc_push_h0 b /\
+  HS.poppable (Adapters.hs_of_mem final_mem) /\
+  h1 == HS.pop (Adapters.hs_of_mem final_mem)
 
 let rec as_lowstar_sig
     (c:TS.tainted_code)

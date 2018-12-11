@@ -199,23 +199,25 @@ type addr_map = m:(b8 -> ME.nat64){
 ////////////////////////////////////////////////////////////////////////////////
 
 [@reduce]
+let disjoint_or_eq_1 (a:arg) (b:arg) =
+    match a, b with
+    | (| TD_Buffer tx, xb |), (| TD_Buffer ty, yb |) ->
+      B.disjoint #UInt8.t xb yb \/ eq2 #b8 xb yb
+    | _ -> True
+
+[@reduce]
 let disjoint_or_eq (l:list arg) =
-  BigOps.pairwise_and
-    (fun (x:arg) (y:arg) ->
-      match x, y with
-      | (| TD_Buffer tx, xb |), (| TD_Buffer ty, yb |) ->
-        B.disjoint #UInt8.t xb yb \/ eq2 #b8 xb yb
-      | _ -> True)
-    l
+  BigOps.pairwise_and disjoint_or_eq_1  l
+
+[@reduce]
+let live_arg (h:HS.mem) (x:arg) =
+    match x with
+    | (|TD_Buffer _, x|) -> B.live h x
+    | _ -> True
 
 [@reduce]
 let all_live (h:HS.mem) (bs:list arg) =
-  BigOps.big_and 
-    (fun (x:arg) ->
-      match x with
-      | (|TD_Buffer _, x|) -> B.live h x
-      | _ -> True)
-    bs
+  BigOps.big_and (live_arg h) bs
 
 [@reduce]
 let mem_roots_p (h0:HS.mem) (args:list arg) =
@@ -225,7 +227,37 @@ let mem_roots_p (h0:HS.mem) (args:list arg) =
 [@reduce]
 let mem_roots (args:list arg) =
     h0:HS.mem{ mem_roots_p h0 args }
-  
+
+let elim_all_live (hd:arg) (tl:list arg) (h0:HS.mem)
+  : Lemma 
+    (requires all_live h0 (hd :: tl))
+    (ensures live_arg h0 hd /\ all_live h0 tl)
+  = ()
+
+let elim_disjoint_or_eq (hd:arg) (tl:list arg)
+  : Lemma 
+    (requires disjoint_or_eq (hd::tl))
+    (ensures BigOps.big_and (disjoint_or_eq_1 hd) tl /\ disjoint_or_eq tl)
+  = admit()
+
+let rec cons_mem_roots_p (args:list arg) (h0:HS.mem) (h1:HS.mem)
+  : Lemma 
+    (requires 
+      mem_roots_p h0 args /\
+      B.modifies B.loc_none h0 h1)
+    (ensures
+      mem_roots_p h1 args)
+  = match args with
+    | [] -> ()
+    | hd::tl ->
+      elim_disjoint_or_eq hd tl;
+      cons_mem_roots_p tl h0 h1;
+      match hd with
+      | (| TD_Base _, _ |) -> ()
+      | (| TD_Buffer _, x |) -> ()
+
+       
+    
     
 // open LowStar.Buffer
 // module B = LowStar.Buffer
