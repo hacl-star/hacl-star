@@ -10,6 +10,7 @@ module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
+module IM = Interop.Mem
 
 ////////////////////////////////////////////////////////////////////////////////
 //The calling convention w.r.t the register mapping
@@ -57,6 +58,7 @@ let calling_conventions (s0:TS.traceState) (s1:TS.traceState) =
 
 let max_arity : nat = if IA.win then 4 else 6
 let reg_nat = i:nat{i < max_arity}
+let arity_ok 'a = l:list 'a { List.Tot.length l < max_arity }
 
 [@reduce]
 let register_of_arg_i (i:reg_nat) : MS.reg =
@@ -166,20 +168,25 @@ let update_taint_map (#a:td)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+let arg_of_b8 (x:b8) : arg = (| TD_Buffer ME.TUInt8, x |)
+
+let state_builder_t (args:list arg) (codom:Type) =
+    h0:HS.mem ->
+    stack:b8{mem_roots_p h0 (arg_of_b8 stack::args)} ->
+    GTot codom
+
 [@reduce]
 let rec initial_state_t
               (dom:list td)
-              (acc:list arg)
+              (args:list arg)
               (codom:Type)
   : n_arrow dom Type =
-    match dom with
-    | [] ->
-      (h0:HS.mem ->
-       stack:b8{mem_roots_p h0 ((|TD_Buffer ME.TUInt8, stack|)::acc)} ->
-       GTot codom)
-    | hd::tl ->
-      fun (x:td_as_type hd) ->
-         initial_state_t tl ((|hd, x|)::acc) codom
+  match dom with
+  | [] ->
+    state_builder_t args codom
+  | hd::tl ->
+    fun (x:td_as_type hd) ->
+      initial_state_t tl ((|hd, x|)::args) codom
 
 // Some identity coercions that serve as proof hints
 // to introduce generic arrow types
@@ -191,47 +198,171 @@ let fold_initial_state_t
   : n_dep_arrow tl (elim_1 (initial_state_t (hd::tl) acc codom) x)
   = res
 
+
 [@reduce]
-let initial_trusted_state_t (dom:list td) (acc:list arg) =
-  initial_state_t dom acc (TS.traceState & ME.mem)
+let rec create_initial_state_aux
+        (#codom:Type)
+        (dom:list td)
+        (args:list arg{List.Tot.length dom + List.Tot.length args < max_arity})
+        (f: (args:arity_ok arg -> state_builder_t args codom))
+  : n_dep_arrow dom (initial_state_t dom args codom) =
+  match dom with
+  | [] ->
+    //no more args; build the state from a HS.mem
+    intro_dep_arrow_nil
+         (initial_state_t [] args codom)
+         (f args)
 
-// //This function folds over the `dom:list vale_type`
-// //and builds an arity-generic dependent function that constructs
-// //the initial states
-// //It's maybe more generic than it needs to be, since it is now applied only
-// //once, i.e., with f = create_both_initial_states
-// [@reduce]
-// let rec create_initial_state_aux
-//         #codom
-//         (args:list arg{List.Tot.length args < max_arity})
-//         (f: (acc:list b8 -> registers -> xmms_t -> taint_map -> h:HS.mem -> stack:b8{mem_roots_p h (stack::acc)} -> GTot codom))
-//       : n_dep_arrow
-//         dom
-//         (initial_state_t dom acc codom) =
-//         match dom with
-//         | [] ->
-//           //no more args; build the state from a HS.mem
-//           intro_dep_arrow_nil
-//               (initial_state_t [] acc codom)
-//               (f acc regs xmms taint)
+  | hd::tl ->
+    //put the next arg hd in the ith register
+    //update the taint map
+    //maybe add the next arg to the list of buffers
+    //recur
+    intro_dep_arrow_cons
+         hd
+         tl
+         (initial_state_t dom args codom)
+         (fun (x:td_as_type hd) ->
+                fold_initial_state_t
+                  (create_initial_state_aux
+                    tl
+                    ((|hd,x|)::args)
+                    f))
 
-//         | hd::tl ->
-//           //put the next arg hd in the ith register
-//           //update the taint map
-//           //maybe add the next arg to the list of buffers
-//           //recur
-//           intro_dep_arrow_cons
-//               hd
-//               tl
-//               (initial_state_t dom acc codom)
-//               (fun (x:vale_type_as_type hd) ->
-//                 fold_initial_state_t
-//                   (create_initial_state_aux
-//                     tl
-//                     is_win
-//                     (i + 1)
-//                     (update_regs x is_win i regs)
-//                     xmms
-//                     (maybe_cons_buffer hd x acc)
-//                     (update_taint_map x taint)
-//                     f))
+let init_taint : taint_map = fun r -> MS.Public
+
+// Splitting the construction of the initial state into two functions
+// one that creates the initial trusted state (i.e., part of our TCB)
+// and another that just creates the vale state, a view upon the trusted one
+let create_initial_trusted_state_core (args:arity_ok arg)
+  : state_builder_t args (TS.traceState & ME.mem) =
+  fun h0 stack ->
+    let open MS in
+    let regs = register_of_args (List.Tot.length args) args IA.init_regs in
+    let regs = FunctionalExtensionality.on reg (regs_with_stack regs stack) in
+    let xmms = FunctionalExtensionality.on xmm IA.init_xmms in
+    let args = arg_of_b8 stack::args in
+    Adapters.liveness_disjointness args h0;
+    let mem:ME.mem = Adapters.mk_mem args h0 in
+    let (s0:BS.state) = {
+      BS.ok = true;
+      BS.regs = regs;
+      BS.xmms = xmms;
+      BS.flags = 0;
+      BS.mem = IM.down_mem h0 IA.addrs (Adapters.args_b8 args)
+    } in
+    {
+      TS.state = s0;
+      TS.trace = [];
+      TS.memTaint = Adapters.create_valid_memtaint mem (Adapters.args_b8 args) init_taint
+    },
+    mem
+
+let create_trusted_initial_state_t (dom:list td)
+                                   (args:list arg)
+    = n_dep_arrow
+          dom
+          (initial_state_t dom args (TS.traceState & ME.mem))
+
+let create_trusted_initial_state
+      (dom:arity_ok td)
+    : create_trusted_initial_state_t dom []
+    = create_initial_state_aux
+          dom
+          []
+          create_initial_trusted_state_core
+
+////////////////////////////////////////////////////////////////////////////////
+let stack_buffer = lowstar_buffer (ME.TBase ME.TUInt64)
+
+let prediction_pre
+    (c:TS.tainted_code)
+    (args:arity_ok arg)
+    (h0:mem_roots args)
+    (s0:TS.traceState)
+    (push_h0:mem_roots args)
+    (alloc_push_h0:mem_roots args)
+    (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)})
+    =
+  HS.fresh_frame h0 push_h0 /\
+  B.modifies B.loc_none push_h0 alloc_push_h0 /\
+  HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
+  B.frameOf b == HS.get_tip alloc_push_h0 /\
+  B.live alloc_push_h0 b /\
+  s0 == fst (create_initial_trusted_state_core args alloc_push_h0 b)
+
+let prediction_post
+    (c:TS.tainted_code)
+    (args:arity_ok arg)
+    (h0:mem_roots args)
+    (s0:TS.traceState)
+    (push_h0:mem_roots args)
+    (alloc_push_h0:mem_roots args)
+    (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)})
+    (fuel_mem:nat & ME.mem) =
+  let fuel, final_mem = fuel_mem in
+  Some? (TS.taint_eval_code c fuel s0) /\ (
+    let sN = Some?.v (TS.taint_eval_code c fuel s0) in
+    IM.down_mem (Adapters.hs_of_mem final_mem)
+                (IA.addrs)
+                (Adapters.ptrs_of_mem final_mem) == sN.TS.state.BS.mem /\
+    calling_conventions s0 sN
+  )
+
+let prediction
+    (c:TS.tainted_code)
+    (args:arity_ok arg)
+    (h0:mem_roots args) =
+  s0:TS.traceState ->
+  push_h0:mem_roots args ->
+  alloc_push_h0:mem_roots args ->
+  b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
+  Ghost (nat & ME.mem)
+    (requires prediction_pre c args h0 s0 push_h0 alloc_push_h0 b)
+    (ensures prediction_post c args h0 s0 push_h0 alloc_push_h0 b)
+
+noeq type as_lowstar_sig_ret (args:arity_ok arg) =
+  | As_lowstar_sig_ret :
+      push_h0:mem_roots args ->
+      alloc_push_h0:mem_roots args ->
+      b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
+      fuel:nat ->
+      final_mem:ME.mem ->
+      as_lowstar_sig_ret args
+
+val as_lowstar_sig_post
+    (c:TS.tainted_code)
+    (args:arity_ok arg)
+    (h0:mem_roots args)
+    (predict:prediction c args h0)
+    (push_h0:mem_roots args)
+    (alloc_push_h0:mem_roots args)
+    (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)})
+    (fuel:nat)
+    (final_mem:ME.mem)
+    (h1:HS.mem)
+    : Type0
+
+let rec as_lowstar_sig
+    (c:TS.tainted_code)
+    (dom:list td)
+    (args:list arg{List.length dom + List.length args < max_arity})
+    : Type =
+    match dom with
+    | [] ->
+      h0:mem_roots args ->
+      predict:prediction c args h0 ->
+      FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+        (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 args))
+        (ensures fun h0 (As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem) h1 ->
+          as_lowstar_sig_post c args h0 predict push_h0 alloc_push_h0 b fuel final_mem h1
+        )
+    | hd::tl ->
+      x:td_as_type hd ->
+      as_lowstar_sig
+        c
+        tl
+        ((|hd, x|)::args)
+
+val wrap (c:TS.tainted_code) (dom:arity_ok td)
+  : as_lowstar_sig c dom []

@@ -225,8 +225,8 @@ let mem_roots_p (h0:HS.mem) (args:list arg) =
 [@reduce]
 let mem_roots (args:list arg) =
     h0:HS.mem{ mem_roots_p h0 args }
-
-
+  
+    
 // open LowStar.Buffer
 // module B = LowStar.Buffer
 // module BV = LowStar.BufferView
