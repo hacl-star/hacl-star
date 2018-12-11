@@ -8,7 +8,8 @@ open CanonCommSemiring
 open Fast_defs
 open Fast_lemmas_internal
 
-#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection -CanonCommMonoid -CanonCommSwaps -CanonCommSemiring' --max_fuel 0 --max_ifuel 0"
+#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection \
+  -CanonCommMonoid -CanonCommSwaps -CanonCommSemiring' --max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 let lemma_sub2
       (a:nat) (a0 a1:nat64)      
