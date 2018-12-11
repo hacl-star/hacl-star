@@ -195,11 +195,10 @@ function exec_build() {
     if [[ $target == "hacl-ci" ]]; then
         echo target - >hacl-ci
         if [[ $branchname == "vale" ||  $branchname == "_vale" ]]; then
-          vale_test 
+          vale_test && echo -n true >$status_file
         else
-          hacl_test 
+          hacl_test && echo -n true >$status_file
         fi
-        echo -n true >$status_file
     elif [[ $target == "hacl-nightly" ]]; then
         echo target - >hacl-nightly
         export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
