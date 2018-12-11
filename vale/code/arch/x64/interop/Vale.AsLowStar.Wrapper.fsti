@@ -1,21 +1,24 @@
 module Vale.AsLowStar.Wrapper
-open Vale.AsLowStar.Signature
-open Vale.AsLowStar.Util
+open Interop.Base
 module B = LowStar.Buffer
+module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module IA = Interop_assumptions
-module IS = X64.Interop_s
+module LU = LowStar.Util
 module ME = X64.Memory
+module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
+module IA = Interop.Assumptions
+module IM = Interop.Mem
 module V = X64.Vale.Decls
 module VS = X64.Vale.State
+module IX64 = Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
 
 val wrap
     (code:V.va_code)
-    (dom:sig_arity_ok)
+    (dom:IX64.arity_ok td)
     (num_stack_slots:nat)
     (pre:VSig.vale_pre dom)
     (post:VSig.vale_post dom)

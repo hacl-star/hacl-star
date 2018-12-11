@@ -85,7 +85,7 @@ let base_typ_as_type : X64.Memory.base_typ -> Type =
   | TUInt16 -> UInt16.t
   | TUInt32 -> UInt32.t
   | TUInt64 -> UInt64.t
-  | TUInt128 -> False
+  | TUInt128 -> UInt128.t
 
 [@reduce]
 let td_as_type : td -> Type =
