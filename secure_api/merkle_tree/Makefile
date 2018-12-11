@@ -32,18 +32,39 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/code/hash-new \
   $(HACL_HOME)/providers/evercrypt \
   $(KREMLIN_HOME)/kremlib \
-  $(HACL_HOME)/vale/code/arch/x64/interop/fsti \
-  $(HACL_HOME)/vale/code/arch/x64 \
-  $(HACL_HOME)/vale/specs/defs \
-  $(HACL_HOME)/vale/specs/hardware \
-  $(HACL_HOME)/vale/code/crypto/sha \
-  $(HACL_HOME)/vale/code/arch \
-  $(HACL_HOME)/vale/code/lib/collections \
+  $(HACL_HOME)/vale/code/lib/math \
   $(HACL_HOME)/vale/code/lib/util \
-  $(HACL_HOME)/vale/specs/crypto \
+  $(HACL_HOME)/vale/code/lib/collections \
+  $(HACL_HOME)/vale/code/arch/x64/interop \
+  $(HACL_HOME)/vale/code/arch/x64 \
+  $(HACL_HOME)/vale/code/arch \
+  $(HACL_HOME)/vale/code/crypto/poly1305/x64 \
+  $(HACL_HOME)/vale/code/crypto/aes \
+  $(HACL_HOME)/vale/code/crypto/sha \
+  $(HACL_HOME)/vale/code/crypto/ecc/curve25519 \
   $(HACL_HOME)/vale/specs/math \
-  $(HACL_HOME)/providers/.cache \
+  $(HACL_HOME)/vale/specs/defs \
+  $(HACL_HOME)/vale/specs/crypto \
+  $(HACL_HOME)/vale/specs/hardware \
+  $(HACL_HOME)/vale/obj/external \
+  $(HACL_HOME)/vale/obj/code/lib/util/x64/stdcalls \
+  $(HACL_HOME)/vale/obj/code/lib/util/x64 \
+  $(HACL_HOME)/vale/obj/code/lib/util \
+  $(HACL_HOME)/vale/obj/code/arch/x64 \
+  $(HACL_HOME)/vale/obj/code/crypto/aes/x64/stdcalls \
+  $(HACL_HOME)/vale/obj/code/crypto/aes/x64 \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/Intel/aes/x64 \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/poly1305/x64 \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/sha \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/rfc7748/curve25519/x64 \
+  $(HACL_HOME)/vale/obj/code/test
 
+EVERCRYPT_CACHE_DIR=$(HACL_HOME)/providers/.cache
+
+# Still be cool with a not-built EverCrypt in interactive mode
+ifneq (,$(wildcard $(EVERCRYPT_CACHE_DIR)))
+  FSTAR_INCLUDE_DIRS += $(EVERCRYPT_CACHE_DIR)
+endif
 
 FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
