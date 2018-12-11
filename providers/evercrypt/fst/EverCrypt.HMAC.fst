@@ -79,7 +79,7 @@ val wrap_key:
       live h1 output /\ live h1 key /\ live h0 output /\ live h0 key /\
       as_seq h0 output == Seq.create (size_block a) 0uy /\
       modifies (loc_buffer output) h0 h1 /\
-      as_seq h1 output == wrap a (as_seq h0 key) )
+      as_seq h1 output == wrap a (as_seq h0 key))
 
 unfold
 let block_len a = Hacl.Hash.Definitions.size_block_ul a
@@ -144,6 +144,7 @@ val part1:
       live h1 s2 /\ live h1 data /\
       invariant acc h1 /\
       footprint acc h1 == footprint acc h0 /\ //18-08-02 avoidable? this footprint is constant!
+      preserves_freeable acc h0 h1 /\
       modifies (loc_union (footprint acc h0) (loc_buffer s2)) h0 h1 /\
       (
       let hash0 = Seq.slice (as_seq h1 s2) 0 (size_hash a) in
@@ -253,6 +254,7 @@ val part2:
     (ensures fun h0 _ h1 ->
       live h1 mac /\ live h1 opad /\ live h1 tag /\
       invariant acc h1 /\ footprint acc h1 == footprint acc h0 /\
+      preserves_freeable acc h0 h1 /\
       modifies (loc_union (footprint acc h0) (loc_buffer mac)) h0 h1 /\
       ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in
         Seq.length payload < max_input8 a /\
@@ -323,6 +325,7 @@ val hmac_core:
     live h1 tag /\ live h0 tag /\
     live h1 key /\ live h0 key /\
     live h1 data /\ live h0 data /\
+    preserves_freeable acc h0 h1 /\
     modifies (loc_union (footprint acc h0) (loc_buffer tag)) h0 h1 /\
     ( let k = as_seq h0 key in
       let k1 = xor 0x36uy k in
@@ -442,10 +445,13 @@ let compute a mac key keylen data datalen =
   let h0 = ST.get() in
   wrap_key a keyblock key keylen;
   let h1 = ST.get() in
+  assert (Hash.freeable_s #a (get h1 acc 0));
   Hash.frame_invariant (loc_buffer keyblock) acc h0 h1;
   Hash.frame_invariant_implies_footprint_preservation (loc_buffer keyblock) acc h0 h1;
   hmac_core a acc mac keyblock data datalen;
   let h2 = ST.get() in
+  assert (freeable acc);
+  assert (Hash.freeable_s #a (get h2 acc 0));
   Hash.free #(Ghost.hide a) acc;
   pop_frame ();
   let hf = ST.get () in
