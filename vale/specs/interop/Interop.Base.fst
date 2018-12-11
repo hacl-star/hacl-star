@@ -10,6 +10,41 @@ module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 let reduce = ()
 
+let view_n (x:ME.typ) =
+  let open ME in
+  match x with
+  | TBase TUInt8 -> 1
+  | TBase TUInt16 -> 2
+  | TBase TUInt32 -> 4
+  | TBase TUInt64 -> 8
+  | TBase TUInt128 -> 16
+
+let b8 = B.buffer UInt8.t
+
+let lowstar_buffer (t:ME.typ) = b:b8{B.length b % view_n t == 0}
+
+//TODO: This should be provided by X64.Memory
+let buffer_equiv (t:ME.typ)
+  : Lemma (ME.buffer t == lowstar_buffer t)
+  = admit()
+
+[@reduce]
+let coerce (x:'a{'a == 'b}) : 'b = x
+
+[@reduce]
+let as_lowstar_buffer (#t:ME.typ) (x:ME.buffer t)
+  : Tot (lowstar_buffer t)
+  = buffer_equiv t;
+    coerce x
+
+[@reduce]
+let as_vale_buffer (#t:ME.typ) (x:lowstar_buffer t)
+  : Tot (b:ME.buffer t)
+  = buffer_equiv t;
+    coerce x
+
+////////////////////////////////////////////////////////////////////////////////
+
 //type descriptors
 type td =
   | TD_Base of ME.base_typ
@@ -53,11 +88,13 @@ let base_typ_as_type : X64.Memory.base_typ -> Type =
   | TUInt128 -> False
 
 [@reduce]
-let td_as_vale_type : td -> Type =
+let td_as_type : td -> Type =
   let open ME in
   function
   | TD_Base bt -> base_typ_as_type bt
-  | TD_Buffer bt -> ME.buffer (TBase bt)
+  | TD_Buffer bt -> lowstar_buffer (TBase bt)
+
+let arg = t:td & td_as_type t
 
 ////////////////////////////////////////////////////////////////////////////////
 // n_arrow: Arrows with a generic number of vale types as the domain
@@ -67,7 +104,7 @@ let td_as_vale_type : td -> Type =
 let rec n_arrow (dom:list td) (codom:Type) =
   match dom with
   | [] -> codom
-  | hd::tl -> td_as_vale_type hd -> n_arrow tl codom
+  | hd::tl -> td_as_type hd -> n_arrow tl codom
 
 [@(unifier_hint_injective) (reduce)]
 let arr (dom:Type) (codom:Type) = dom -> codom
@@ -76,7 +113,7 @@ let arr (dom:Type) (codom:Type) = dom -> codom
 let elim_1 (#dom:list td{Cons? dom})
            (#r:Type)
            (f:n_arrow dom r)
-    : td_as_vale_type (Cons?.hd dom) -> n_arrow (Cons?.tl dom) r =
+    : td_as_type (Cons?.hd dom) -> n_arrow (Cons?.tl dom) r =
     f
 
 [@reduce]
@@ -93,7 +130,7 @@ let intro_n_arrow_nil (a:Type) (x:a)
 
 [@reduce]
 let intro_n_arrow_cons (hd:td) (b:Type) (tl:list td)
-                       (x:td_as_vale_type hd -> n_arrow tl b)
+                       (x:td_as_type hd -> n_arrow tl b)
   : n_arrow (hd::tl) b
   = x
 
@@ -105,7 +142,7 @@ let intro_n_arrow_cons (hd:td) (b:Type) (tl:list td)
 let rec n_dep_arrow (dom:list td) (codom: n_arrow dom Type) =
   match dom with
   | [] -> codom
-  | hd::tl -> x:td_as_vale_type hd -> n_dep_arrow tl (elim_1 codom x)
+  | hd::tl -> x:td_as_type hd -> n_dep_arrow tl (elim_1 codom x)
 
 [@reduce]
 let intro_dep_arrow_nil (b:Type)
@@ -116,7 +153,7 @@ let intro_dep_arrow_nil (b:Type)
 [@reduce]
 let intro_dep_arrow_1 (a:td)
                       (b:n_arrow [a] Type)
-                      (f:(x:td_as_vale_type a -> elim_1 b x))
+                      (f:(x:td_as_type a -> elim_1 b x))
   : n_dep_arrow [a] b
   = f
 
@@ -124,7 +161,7 @@ let intro_dep_arrow_1 (a:td)
 let intro_dep_arrow_cons (hd:td)
                          (tl:list td)
                          (b: n_arrow (hd::tl) Type)
-                         (f: (x:td_as_vale_type hd -> n_dep_arrow tl (elim_1 b x)))
+                         (f: (x:td_as_type hd -> n_dep_arrow tl (elim_1 b x)))
   : n_dep_arrow (hd::tl) b
   = f
 
@@ -139,48 +176,14 @@ let elim_dep_arrow_cons (hd:td)
                         (tl:list td)
                         (#codom:n_arrow (hd::tl) Type)
                         (f:n_dep_arrow (hd::tl) codom)
-    : x:td_as_vale_type hd ->
+    : x:td_as_type hd ->
       n_dep_arrow tl (elim_1 codom x)
    = f
 
 //Just a small test function to see how these coercions work
 let __test : n_dep_arrow [TD_Base ME.TUInt8] (fun (x:UInt8.t) -> y:UInt8.t{x == y}) =
   fun (x:UInt8.t) -> intro_dep_arrow_nil (y:UInt8.t{x == y}) x
-
 ////////////////////////////////////////////////////////////////////////////////
-let view_n (x:ME.typ) =
-  let open ME in
-  match x with
-  | TBase TUInt8 -> 1
-  | TBase TUInt16 -> 2
-  | TBase TUInt32 -> 4
-  | TBase TUInt64 -> 8
-  | TBase TUInt128 -> 16
-
-let lowstar_buffer (t:ME.typ) = b:B.buffer UInt8.t{B.length b % view_n t == 0}
-
-//TODO: This should be provided by X64.Memory
-let buffer_equiv (t:ME.typ)
-  : Lemma (ME.buffer t == lowstar_buffer t)
-  = admit()
-
-[@reduce]
-let coerce (x:'a{'a == 'b}) : 'b = x
-
-[@reduce]
-let as_lowstar_buffer (#t:ME.typ) (x:ME.buffer t)
-  : Tot (lowstar_buffer t)
-  = buffer_equiv t;
-    coerce x
-
-[@reduce]
-let as_vale_buffer (#t:ME.typ) (x:lowstar_buffer t)
-  : Tot (b:ME.buffer t)
-  = buffer_equiv t;
-    coerce x
-
-////////////////////////////////////////////////////////////////////////////////
-let b8 = B.buffer UInt8.t
 
 let disjoint_addr addr1 length1 addr2 length2 =
   (* The first buffer is completely before the second, or the opposite *)
@@ -192,6 +195,37 @@ type addr_map = m:(b8 -> ME.nat64){
     B.disjoint buf1 buf2 ==> 
     disjoint_addr (m buf1) (B.length buf1) (m buf2) (B.length buf2)) /\
   (forall (b:b8).{:pattern (m b)} m b + B.length b < MS.pow2_64)}
+
+////////////////////////////////////////////////////////////////////////////////
+
+[@reduce]
+let disjoint_or_eq (l:list arg) =
+  BigOps.pairwise_and
+    (fun (x:arg) (y:arg) ->
+      match x, y with
+      | (| TD_Buffer tx, xb |), (| TD_Buffer ty, yb |) ->
+        B.disjoint #UInt8.t xb yb \/ eq2 #b8 xb yb
+      | _ -> True)
+    l
+
+[@reduce]
+let all_live (h:HS.mem) (bs:list arg) =
+  BigOps.big_and 
+    (fun (x:arg) ->
+      match x with
+      | (|TD_Buffer _, x|) -> B.live h x
+      | _ -> True)
+    bs
+
+[@reduce]
+let mem_roots_p (h0:HS.mem) (args:list arg) =
+  disjoint_or_eq args /\
+  all_live h0 args
+
+[@reduce]
+let mem_roots (args:list arg) =
+    h0:HS.mem{ mem_roots_p h0 args }
+
 
 // open LowStar.Buffer
 // module B = LowStar.Buffer
@@ -243,14 +277,14 @@ type addr_map = m:(b8 -> ME.nat64){
 // ////////////////////////////////////////////////////////////////////////////////
 // let rec as_right_tuple (dom:list td{Cons? dom}) =
 //   match dom with
-//   | [x] -> td_as_vale_type x
-//   | hd::tl -> td_as_vale_type hd & as_right_tuple tl
+//   | [x] -> td_as_type x
+//   | hd::tl -> td_as_type hd & as_right_tuple tl
 
 // let rec as_left_tuple (acc:Type) (dom:list td)
 //   : Tot Type (decreases dom) =
 //   match dom with
 //   | [] -> acc
-//   | hd::tl -> as_left_tuple (acc & td_as_vale_type hd) tl
+//   | hd::tl -> as_left_tuple (acc & td_as_type hd) tl
 
 
 // ////////////////////////////////////////////////////////////////////////////////
@@ -261,7 +295,7 @@ type addr_map = m:(b8 -> ME.nat64){
 // ////////////////////////////////////////////////////////////////////////////////
 
 // [@reduce]
-// let maybe_cons_buffer (a:td) (x:td_as_vale_type a) (acc:list b8) : list b8 =
+// let maybe_cons_buffer (a:td) (x:td_as_type a) (acc:list b8) : list b8 =
 //   match a with TD_Buffer bt -> (to_b8 #bt x)::acc | _ -> acc
 
 // [@reduce]
@@ -313,7 +347,7 @@ type addr_map = m:(b8 -> ME.nat64){
 //        stack:b8{mem_roots_p h0 (stack::acc)} ->
 //        GTot codom)
 //     | hd::tl ->
-//       fun (x:td_as_vale_type hd) ->
+//       fun (x:td_as_type hd) ->
 //          initial_state_t tl (maybe_cons_buffer hd x acc) codom
 
 // // Some identity coercions that serve as proof hints
@@ -321,7 +355,7 @@ type addr_map = m:(b8 -> ME.nat64){
 // [@reduce]
 // let fold_initial_state_t
 //   (#hd:td) (#tl:list td)
-//   (#x:td_as_vale_type hd) (#acc:list b8) (#codom:Type)
+//   (#x:td_as_type hd) (#acc:list b8) (#codom:Type)
 //   (res:n_dep_arrow tl (initial_state_t tl (maybe_cons_buffer hd x acc) codom))
 //   : n_dep_arrow tl (elim_1 (initial_state_t (hd::tl) acc codom) x)
 //   = res
@@ -385,7 +419,7 @@ type addr_map = m:(b8 -> ME.nat64){
 
 // [@reduce]
 // let update_regs (#a:td)
-//                 (x:td_as_vale_type a)
+//                 (x:td_as_type a)
 //                 (is_win:bool)
 //                 (i:nat{i < max_arity is_win})
 //                 (regs:registers)
@@ -418,7 +452,7 @@ type addr_map = m:(b8 -> ME.nat64){
 
 // [@reduce]
 // let update_taint_map (#a:td)
-//                      (x:td_as_vale_type a)
+//                      (x:td_as_type a)
 //                      (taint:taint_map) =
 //     match a with
 //     | TD_Buffer bt ->
@@ -502,7 +536,7 @@ type addr_map = m:(b8 -> ME.nat64){
 //               hd
 //               tl
 //               (initial_state_t dom acc codom)
-//               (fun (x:td_as_vale_type hd) ->
+//               (fun (x:td_as_type hd) ->
 //                 fold_initial_state_t
 //                   (create_initial_state_aux
 //                     tl
@@ -546,7 +580,7 @@ type addr_map = m:(b8 -> ME.nat64){
 // let elim_down_1 (hd:td)
 //                 (acc:list b8)
 //                 (down:create_trusted_initial_state_t [hd] acc)
-//                 (x:td_as_vale_type hd)
+//                 (x:td_as_type hd)
 //     : h0:HS.mem -> stack:b8{mem_roots_p h0 (stack::maybe_cons_buffer hd x acc)} -> GTot (TS.traceState & mem) =
 //     down x
 
@@ -562,7 +596,7 @@ type addr_map = m:(b8 -> ME.nat64){
 //                    (tl:list td)
 //                    (acc:list b8)
 //                    (down:create_trusted_initial_state_t (hd::tl) acc)
-//                    (x:td_as_vale_type hd)
+//                    (x:td_as_type hd)
 //     : create_trusted_initial_state_t tl (maybe_cons_buffer hd x acc) =
 //     elim_dep_arrow_cons hd tl down x
 
@@ -639,7 +673,7 @@ type addr_map = m:(b8 -> ME.nat64){
 //           as_lowstar_sig_post c acc down h0 predict push_h0 alloc_push_h0 b fuel final_mem h1
 //         )
 //     | hd::tl ->
-//       x:td_as_vale_type hd ->
+//       x:td_as_type hd ->
 //       as_lowstar_sig_tl
 //         c
 //         tl
