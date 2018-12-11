@@ -16,7 +16,7 @@
         "typing_Crypto.Indexing.aeadAlg_of_id"
       ],
       0,
-      "e089166d73317bd47787854598f1d651"
+      "a17bef3421a74c21ba2451044c78cdde"
     ],
     [
       "Crypto.Symmetric.UF1CMA.skeyed",
@@ -45,7 +45,7 @@
         "typing_Crypto.Indexing.aeadAlg_of_id"
       ],
       0,
-      "d6e0c2a4e06d04abfdd6379ce94b7685"
+      "92b5056bfa21d0860527ab32a6fcb758"
     ],
     [
       "Crypto.Symmetric.UF1CMA.skey",
@@ -60,7 +60,7 @@
         "typing_Crypto.Symmetric.UF1CMA.skeylen", "typing_FStar.UInt32.v"
       ],
       0,
-      "7b56dd4a6a9bde6c6d590e3d28a8b990"
+      "3edb2c1774488d3982215f4354c5125b"
     ],
     [
       "Crypto.Symmetric.UF1CMA.__proj__Just__item___0",
@@ -74,7 +74,7 @@
         "refinement_interpretation_Crypto.Symmetric.UF1CMA_Tm_refine_17e6f7e8c0703d47ec55e45fc1706122"
       ],
       0,
-      "dd94c3d169c4a7dd4741c3bcf899428f"
+      "be4ccf7bf88b0b5d666e17144733d11c"
     ],
     [
       "Crypto.Symmetric.UF1CMA.get_skey",
@@ -89,7 +89,7 @@
         "refinement_interpretation_Crypto.Symmetric.UF1CMA_Tm_refine_761906eb43fbaa9bb918f912735b6eff"
       ],
       0,
-      "72b1d665e9ede77dca943c2695e7d7ac"
+      "102620b3ac0205c3a7e695731d862815"
     ],
     [
       "Crypto.Symmetric.UF1CMA.mk_akey",
@@ -107,7 +107,7 @@
         "refinement_interpretation_Crypto.Symmetric.UF1CMA_Tm_refine_d8069891b69408306450e91ee31a888f"
       ],
       0,
-      "14e0e0ccaa5bb5c94d121e71140c573d"
+      "baf0d65d64257e560d3a5020b02010f9"
     ],
     [
       "Crypto.Symmetric.UF1CMA.mk_akey_null",
@@ -122,7 +122,7 @@
         "refinement_interpretation_Crypto.Symmetric.UF1CMA_Tm_refine_5f52c8744bad307ee72292daea70cf41"
       ],
       0,
-      "31791aa8556d8a3301cb01e35c15e1f9"
+      "d92f5675e79534887f194c0a41b3a464"
     ],
     [
       "Crypto.Symmetric.UF1CMA.akey_gen",
@@ -139,7 +139,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "3ea774c6904fb6586b57116d87bf3477"
+      "2514e6f0f67a641f249672f5882bda43"
     ],
     [
       "Crypto.Symmetric.UF1CMA.akey_gen",
@@ -227,7 +227,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "b1d8bc3d7728ac38512e09a092826cc9"
+      "b303777fc0ee41deec3f2ea241044ecc"
     ],
     [
       "Crypto.Symmetric.UF1CMA.akey_coerce",
@@ -256,7 +256,7 @@
         "typing_Hacl.Bignum.Parameters.clen"
       ],
       0,
-      "ae391e38ab98431329ab76b811462666"
+      "885403ec563e98ea59d6875f2fdb0dc5"
     ],
     [
       "Crypto.Symmetric.UF1CMA.akey_coerce",
@@ -389,7 +389,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "36b963116c0e24d856e2250f1d1a734a"
+      "2e6825fd024ac0e7238300fc27d70e8b"
     ],
     [
       "Crypto.Symmetric.UF1CMA.akey_coerce",
@@ -512,19 +512,18 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "dd52903135700b4a8413877393b41e51"
+      "91fdeb80cdf0f85c4d25b8907b91eae7"
     ],
     [
       "Crypto.Symmetric.UF1CMA.log_cmp",
       1,
-      0,
-      0,
+      2,
+      1,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "bool_inversion", "bool_typing",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some", "eq2-interp",
+        "data_elim_FStar.Pervasives.Native.Some", "eq2-interp",
         "equation_Crypto.Symmetric.Bytes.lbytes",
         "equation_Crypto.Symmetric.MAC.id",
         "equation_Crypto.Symmetric.MAC.text",
@@ -542,6 +541,7 @@
         "equation_Hacl.Bignum.Parameters.climb_size",
         "equation_Hacl.Bignum.Parameters.len", "equation_Prims.l_False",
         "equation_Prims.l_True", "equation_Prims.logical", "false_interp",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.option",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "function_token_typing_Crypto.Symmetric.MAC.text",
         "function_token_typing_Crypto.Symmetric.MAC.wlen",
@@ -551,11 +551,10 @@
         "function_token_typing_Hacl.Bignum.Parameters.clen",
         "function_token_typing_Hacl.Bignum.Parameters.climb_size",
         "int_typing",
-        "interpretation_Crypto.Symmetric.UF1CMA_Tm_abs_826b41a263e50902f8d60f4fe41bb225",
+        "interpretation_Crypto.Symmetric.UF1CMA_Tm_abs_c807c78297b6a675642bc4853706f0d4",
         "kinding_FStar.Pervasives.Native.option@tok",
         "kinding_FStar.Pervasives.Native.tuple2@tok", "l_and-interp",
-        "lemma_FStar.Buffer.lemma_size",
-        "lemma_FStar.Pervasives.invertOption", "lemma_FStar.UInt32.vu_inv",
+        "lemma_FStar.Buffer.lemma_size", "lemma_FStar.UInt32.vu_inv",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -570,7 +569,7 @@
         "typing_Hacl.Bignum.Parameters.climb_size"
       ],
       0,
-      "f52b4b8a34dc0464042af4800696e2a0"
+      "6dc20a1edd962e19c4e7112c291c8259"
     ],
     [
       "Crypto.Symmetric.UF1CMA.ilog",
@@ -587,7 +586,7 @@
         "refinement_interpretation_Crypto.Symmetric.UF1CMA_Tm_refine_69e6af1acc9e11dcb19ac30d2ca2b600"
       ],
       0,
-      "a80c75bbc2e45a04ac8ec43b7d1185f6"
+      "1661e29abaf6984cd9a447a06088fd5f"
     ],
     [
       "Crypto.Symmetric.UF1CMA.__proj__State__item__r",
@@ -604,7 +603,7 @@
         "typing_Crypto.Symmetric.MAC.alg"
       ],
       0,
-      "225e92798de35974ead4f8a3d33ebe1d"
+      "b7e424f5249a371522cdcddcd493d36e"
     ],
     [
       "Crypto.Symmetric.UF1CMA.__proj__State__item__r",
@@ -623,7 +622,7 @@
         "typing_Crypto.Symmetric.MAC.alg"
       ],
       0,
-      "c08de3939add1dc9773f224e70696709"
+      "9ac398d26b63437fd72e286eb2a605f4"
     ],
     [
       "Crypto.Symmetric.UF1CMA.__proj__State__item__s",
@@ -637,7 +636,7 @@
         "projection_inverse_Crypto.Symmetric.UF1CMA.State_region"
       ],
       0,
-      "bb9dcc66d282f50bb1c867ffbb7a6575"
+      "850671024df1be2fdc5be7218be65d15"
     ],
     [
       "Crypto.Symmetric.UF1CMA.__proj__State__item__log",
@@ -656,7 +655,7 @@
         "typing_FStar.Monotonic.HyperStack.is_eternal_color"
       ],
       0,
-      "ed374819a412650c206d2c9ece778600"
+      "d2c45ba400d79488933cf5c40c1123e6"
     ],
     [
       "Crypto.Symmetric.UF1CMA.mac_is_unset",
@@ -665,7 +664,7 @@
       0,
       [ "@query" ],
       0,
-      "a1d9601a0ec587c1a30704a179b51b97"
+      "276b9ba5fadba828b0e59407cb29b808"
     ],
     [
       "Crypto.Symmetric.UF1CMA.alloc",
@@ -685,7 +684,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "859a05a0ff19a78502f7dfdc0c22b1b5"
+      "b2c5c0d780c7e10105aee39ca937fec0"
     ],
     [
       "Crypto.Symmetric.UF1CMA.alloc",
@@ -705,7 +704,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "72742806d4f941592ef4961c109a034d"
+      "dfac722998d5151e69774769fcdf3e60"
     ],
     [
       "Crypto.Symmetric.UF1CMA.alloc",
@@ -914,7 +913,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "fa1e5c50600ee966a4f3d9a03a320063"
+      "b00e90a0a918c6b45066c7e0deba875f"
     ],
     [
       "Crypto.Symmetric.UF1CMA.gen",
@@ -928,7 +927,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "a99461dd8db6b072b6526a97d0442dbb"
+      "93125bb7d0908d2f86ada04d2ee90d61"
     ],
     [
       "Crypto.Symmetric.UF1CMA.gen",
@@ -1038,7 +1037,7 @@
         "typing_FStar.UInt128.t", "typing_FStar.UInt32.v"
       ],
       0,
-      "cc891b0fc8190d216fcfb7a5785df286"
+      "a99ad34d4080add718bed5d910536d75"
     ],
     [
       "Crypto.Symmetric.UF1CMA.coerce",
@@ -1059,7 +1058,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "bf8e619998a73213c4606fc2c07dadfa"
+      "5ae4e65ea4a94c422478ca95fbdbb808"
     ],
     [
       "Crypto.Symmetric.UF1CMA.coerce",
@@ -1080,7 +1079,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "cf5932e603d46c24879b15d0af2d066b"
+      "aa1748339a963e8191f6b2b8db60e58a"
     ],
     [
       "Crypto.Symmetric.UF1CMA.__proj__Acc__item__l",
@@ -1105,7 +1104,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum.Parameters.clen"
       ],
       0,
-      "927244ba774b92fe325ee215e321e695"
+      "4d7b3fcedcc7406b3d4fa4f477d50721"
     ],
     [
       "Crypto.Symmetric.UF1CMA.alog",
@@ -1124,7 +1123,7 @@
         "typing_Crypto.Symmetric.UF1CMA.__proj__Acc__item__l"
       ],
       0,
-      "b8ea872b8947df1c1674637e251d1b78"
+      "f07dfc91c09f9e515dbd6f2b7cf7a76a"
     ],
     [
       "Crypto.Symmetric.UF1CMA.acc_inv",
@@ -1166,7 +1165,7 @@
         "typing_FStar.Buffer.length", "typing_FStar.UInt32.v"
       ],
       0,
-      "688a578be9ee63eb164a65da7d78ac49"
+      "aa0469bc91ba39385dd26ce4acf9cbc7"
     ],
     [
       "Crypto.Symmetric.UF1CMA.frame_acc_inv",
@@ -1180,7 +1179,7 @@
         "token_correspondence_FStar.Heap.trivial_preorder", "true_interp"
       ],
       0,
-      "19a098f79c3c2c87e697beaf7cf9ba34"
+      "b9b6cfa4fe8653842d45ee1f2a540504"
     ],
     [
       "Crypto.Symmetric.UF1CMA.frame_acc_inv",
@@ -1249,7 +1248,7 @@
         "typing_FStar.Monotonic.HyperStack.live_region"
       ],
       0,
-      "85279cd87b20642d9f6d3b0954e76adc"
+      "cfd85d2aacc7ad0fe1f4ca697782923a"
     ],
     [
       "Crypto.Symmetric.UF1CMA.start",
@@ -1268,7 +1267,7 @@
         "refinement_kinding_FStar.Endianness_Tm_refine_b769c0bf16cb286238e7b11ff583e99b"
       ],
       0,
-      "f4509c0874d3fc98c6d39157af33f79b"
+      "940045e8482400b0fe47daff28ac9f1d"
     ],
     [
       "Crypto.Symmetric.UF1CMA.start",
@@ -1321,7 +1320,7 @@
         "typing_FStar.UInt128.t"
       ],
       0,
-      "842ca8467072a25c5b3bc72db5d4fc7c"
+      "51618a71ab00871e75c37476c5d1abc7"
     ],
     [
       "Crypto.Symmetric.UF1CMA.modifies_buf_and_ref",
@@ -1339,7 +1338,7 @@
         "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "3dcf53bf0219359cc7999a9dc1d17a7a"
+      "85499c304b48fe17c345782d866a42fd"
     ],
     [
       "Crypto.Symmetric.UF1CMA.sel_word",
@@ -1355,7 +1354,7 @@
         "refinement_interpretation_Hacl.Spec.Bignum.Bigint_Tm_refine_04d3395c881847f65dd2a6cf9d8a71b5"
       ],
       0,
-      "840dc95ec306aac4b43e02169225bbce"
+      "44a04103f5b29bb0a4ae5d8c352381b0"
     ],
     [
       "Crypto.Symmetric.UF1CMA._read_word",
@@ -1387,7 +1386,7 @@
         "typing_FStar.Buffer.as_seq", "typing_FStar.UInt32.v"
       ],
       0,
-      "01ce516c4556b13e4d03cc12e8b8f844"
+      "0365fce729224efb28dfabf8e0b68966"
     ],
     [
       "Crypto.Symmetric.UF1CMA._read_word",
@@ -1480,7 +1479,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "f02dd53156d937c0287f0085c1cc58b2"
+      "f1ac807f15b90e77ba70a07d0304016d"
     ],
     [
       "Crypto.Symmetric.UF1CMA._read_word",
@@ -1573,7 +1572,7 @@
         "typing_FStar.Seq.Base.op_At_Bar", "typing_FStar.UInt32.v"
       ],
       0,
-      "1e98795af6fd6c4b7a9a27595d731491"
+      "250c2742065ebbbd904ff959de52111f"
     ],
     [
       "Crypto.Symmetric.UF1CMA.read_word",
@@ -1585,7 +1584,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "bedc256a765a798996bc7172dd8f01f3"
+      "c5a26ad9b86410dcde5dc08e996898d7"
     ],
     [
       "Crypto.Symmetric.UF1CMA.read_word",
@@ -1621,7 +1620,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "4e8a626ac219f64ea3516118602875b8"
+      "d9bb2f56976225f18803127061a5b48b"
     ],
     [
       "Crypto.Symmetric.UF1CMA.read_word",
@@ -1657,7 +1656,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "a220c1f402b5593d46d3af99512d5525"
+      "2b4f526593426aa525b4ffd6e464d7a6"
     ],
     [
       "Crypto.Symmetric.UF1CMA.update",
@@ -1687,7 +1686,7 @@
         "refinement_interpretation_Crypto.Symmetric.UF1CMA_Tm_refine_6bc757530f34f8db8f688623743ee7b8"
       ],
       0,
-      "57d69b3762da30883f5e7c1b7f1eaf9a"
+      "bc21482b04e7183d9ae6e28b608954c0"
     ],
     [
       "Crypto.Symmetric.UF1CMA.update",
@@ -1748,7 +1747,7 @@
         "typing_FStar.UInt128.t"
       ],
       0,
-      "71406594cb763b2948cab440fb97e8d6"
+      "ac69b9e8846d3bc2c6a1093ef798606c"
     ],
     [
       "Crypto.Symmetric.UF1CMA.modifies_bufs_and_ref",
@@ -1765,7 +1764,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "4a9e2b55256c73e68eae3d4eaa69ffeb"
+      "7825b0d6b5ff45aa9d772fce7beb69b1"
     ],
     [
       "Crypto.Symmetric.UF1CMA.mac_ensures",
@@ -1800,7 +1799,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "151c4ee67533bc22ccb0ca6d76181d26"
+      "8801b4f2078f040eaff1ed319ac32245"
     ],
     [
       "Crypto.Symmetric.UF1CMA.mac",
@@ -1846,7 +1845,7 @@
         "typing_FStar.Monotonic.HyperStack.is_mm"
       ],
       0,
-      "aafe5cb42f943830deaf13e93f906815"
+      "52552fe5c58e3132b6ac2a975ae347ab"
     ],
     [
       "Crypto.Symmetric.UF1CMA.mac",
@@ -1920,7 +1919,7 @@
         "typing_FStar.UInt128.t", "unit_inversion", "unit_typing"
       ],
       0,
-      "5c67faa9742a9bfc64064a6093e4e550"
+      "d5e3abb757dbeb28910b13fdbd2abfe8"
     ],
     [
       "Crypto.Symmetric.UF1CMA.verify_ok",
@@ -1972,7 +1971,7 @@
         "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "93b8729259650ed94f8041b59db3e7d1"
+      "f6939fd4895b5aa52087bc82287a6a27"
     ],
     [
       "Crypto.Symmetric.UF1CMA.modifies_verify_aux",
@@ -2081,7 +2080,7 @@
         "typing_FStar.StrongExcludedMiddle.strong_excluded_middle"
       ],
       0,
-      "a5b7afda9f5509dcce3e615ff7ede0db"
+      "6f3f610dfd4f9e54d42cf6983dcc104a"
     ],
     [
       "Crypto.Symmetric.UF1CMA.verify",
@@ -2188,7 +2187,7 @@
         "typing_FStar.UInt128.t"
       ],
       0,
-      "4e710e309c252ebfd91d69c5720fde96"
+      "569496ddb58d4389ba70755046af2688"
     ]
   ]
 ]
