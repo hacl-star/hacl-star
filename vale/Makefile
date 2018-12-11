@@ -2,7 +2,7 @@
 # by GNU Make 4.2 onwards (--jobserver-auth in MAKEFLAGS)
 
 all:
-	./run_scons.sh -j 24 --FSTAR-MY-VERSION --FSTAR-EXTRACT --FARGS='--already_cached "Spec FStar LowStar C"'
+	./run_scons.sh -j 24 --FSTAR-MY-VERSION --FSTAR-EXTRACT --FARGS='--already_cached "Spec FStar LowStar C" $(OTHERFLAGS)'
 
 clean:
 	./run_scons.sh --clean
