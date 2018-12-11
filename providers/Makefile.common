@@ -54,7 +54,6 @@ FSTAR_INCLUDES = \
   $(HACL_CODE)/salsa-family \
   $(HACL_CODE)/poly1305 \
   $(HACL_CODE)/bignum \
-  $(HACL_HOME)/vale/code/arch/x64/interop/fsti \
   $(HACL_HOME)/vale/code/arch/x64 \
   $(HACL_HOME)/vale/specs/defs \
   $(HACL_HOME)/vale/specs/hardware \
@@ -66,6 +65,12 @@ FSTAR_INCLUDES = \
   $(HACL_HOME)/vale/specs/math \
   $(HACL_HOME)/vale/obj/cache_checked \
   $(HACL_SPEC)
+
+VALE_HACK=$(HACL_HOME)/vale/code/arch/x64/interop/fsti
+
+ifneq (,$(wildcard $(VALE_HACK)))
+  FSTAR_INCLUDES += $(VALE_HACK)
+endif
 
 %.fst-in %.fsti-in:
 	@echo $(addprefix --include ,$(FSTAR_INCLUDES))

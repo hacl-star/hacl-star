@@ -55,6 +55,8 @@ krml-test: $(DIST_DIR)/krml-test.exe.test
 
 ifeq (,$(VERIFY))
 FSTAR += --admit_smt_queries true
+# --record_hints + --admit_smt_queries true = empty hints files
+FSTAR := $(filter-out --record_hints,$(FSTAR))
 endif
 
 # The entry points
