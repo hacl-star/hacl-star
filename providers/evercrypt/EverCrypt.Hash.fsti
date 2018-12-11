@@ -230,7 +230,8 @@ val alloca: a:alg -> StackInline (state a)
   (ensures (fun h0 s h1 ->
     invariant s h1 /\
     M.(modifies loc_none h0 h1) /\
-    fresh_loc (footprint s h1) h0 h1))
+    fresh_loc (footprint s h1) h0 h1 /\
+    M.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint s h1))))
 
 val create: a:alg -> ST (state a)
   (requires fun h0 -> True)
