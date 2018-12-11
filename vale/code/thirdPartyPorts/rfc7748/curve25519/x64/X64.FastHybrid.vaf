@@ -493,6 +493,7 @@ procedure{:quick} {:public} carry_wide(
     //store4(dst_b);
 }
 
+/*
 procedure{:quick}{:public} carry_wide_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
@@ -566,6 +567,7 @@ procedure{:quick}{:public} carry_wide_stdcall(
     Pop(r13, stack_b, 1);
     Pop(r12, stack_b, 2);
 }
+*/
 
 #reset-options "--z3rlimit 400"
 procedure{:quick} carry_sub_pass()

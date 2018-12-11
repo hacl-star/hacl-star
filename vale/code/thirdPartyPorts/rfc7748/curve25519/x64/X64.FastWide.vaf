@@ -485,6 +485,7 @@ procedure{:quick}{:public} fsqr2_stdcall(
 }
 
 
+/*
 procedure{:quick}{:public} fsqr_loop_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
@@ -628,3 +629,4 @@ procedure{:quick}{:public} fsqr_loop_stdcall(
     Pop(rbx, stack_b, 4 + bool_bit(win));
     Pop(rbp, stack_b, 5 + bool_bit(win));
 }
+*/

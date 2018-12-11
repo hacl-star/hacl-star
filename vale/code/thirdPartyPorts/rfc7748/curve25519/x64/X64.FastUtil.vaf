@@ -108,6 +108,7 @@ procedure{:quick} fast_mul1(
     assert_by_tactic(a * b == pow2_four(b*a0, b*a1, b*a2, b*a3), int_canon);   // PASSES
 }
 
+/*
 #reset-options "--z3rlimit 20"
 
 procedure{:quick}{:public} fast_mul1_stdcall(
@@ -185,6 +186,7 @@ procedure{:quick}{:public} fast_mul1_stdcall(
     Pop(r12, stack_b, 2);
     Pop(rsi, stack_b, 3);
 }
+*/
 
 #reset-options "--z3rlimit 300"
 procedure{:quick} fast_add1(
@@ -248,6 +250,7 @@ procedure{:quick} fast_add1(
     Adcx64Wrap(rax, r11);
 }
 
+/*
 #reset-options "--z3rlimit 20"
 
 procedure{:quick}{:public} fast_add1_stdcall(
@@ -320,7 +323,7 @@ procedure{:quick}{:public} fast_add1_stdcall(
 
     Pop(rsi, stack_b, 0);
 }
-
+*/
 
 #reset-options "--z3rlimit 300"
 procedure{:quick} fast_sub1(
@@ -390,6 +393,7 @@ procedure{:quick} fast_sub1(
 //              r8, r9, r10, r11, bool_bit(c));
 }
 
+/*
 #reset-options "--z3rlimit 20"
 procedure{:quick}{:public} fast_sub1_stdcall(
     inline win:bool,
@@ -461,7 +465,7 @@ procedure{:quick}{:public} fast_sub1_stdcall(
 
     Pop(rsi, stack_b, 0);
 }
-
+*/
 
 #reset-options "--z3rlimit 300"
 procedure{:quick} fast_add(
@@ -535,6 +539,7 @@ procedure{:quick} fast_add(
     Adcx64Wrap(rax, r8);
 }
 
+/*
 procedure{:quick}{:public} fast_add_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
@@ -617,7 +622,7 @@ procedure{:quick}{:public} fast_add_stdcall(
     Pop(r12, stack_b, 0);
     Pop(rsi, stack_b, 1);
 }
-
+*/
 
 #reset-options "--z3rlimit 300"
 procedure{:quick} fast_sub(
@@ -702,7 +707,7 @@ procedure{:quick} fast_sub(
               r8, r9, r10, r11, bool_bit(c));
 }
 
-
+/*
 procedure{:quick}{:public} fast_sub_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
@@ -785,7 +790,7 @@ procedure{:quick}{:public} fast_sub_stdcall(
     Pop(r12, stack_b, 0);
     Pop(rsi, stack_b, 1);
 }
-
+*/
 
 #reset-options "--z3rlimit 20"
 procedure{:quick} cswap_single(
