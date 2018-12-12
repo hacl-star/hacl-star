@@ -16,18 +16,18 @@ module Spec = Spec.ECIES
 //
 
 
-let test1_pk = List.Tot.map u8_from_UInt8 [
-  0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy;
-  0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy;
-  0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy;
-  0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy
+let test1_sk = List.Tot.map u8_from_UInt8 [
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy
 ]
 
 let test1_context = List.Tot.map u8_from_UInt8 [
-  0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy;
-  0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy;
-  0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy;
-  0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy; 0x0buy
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
+  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy
 ]
 
 //
@@ -40,27 +40,41 @@ let cs: Spec.ciphersuite = Spec.DH.DH_Curve25519, Spec.AEAD.AEAD_AES128_GCM, Spe
 let test () =
 
   IO.print_string "\nTEST 1\n";
-  let test1_pk = of_list test1_pk in
-  let test1_sk = create 32 (u8 0xAA) in
+  let test1_sk = of_list test1_sk in
+  let test1_pk = Spec.DH.secret_to_public (Spec.ECIES.curve_of_cs cs) test1_sk in
   let test1_context = create 32 (u8 0) in
   let test1_input = create 32 (u8 0xFF) in
-  Lib.PrintSequence.print_label_lbytes #32 "Random" (Lib.RandomSequence.crypto_random3 32);
   (match Spec.ECIES.encap cs test1_pk test1_context with
   | None -> IO.print_string "Error: Spec.ECIES.encap failed\n"
-  | Some (k, sk, pk) ->
-    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "ECIES Secret" k;
-    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Ephemeral Secret" sk;
-    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Ephemeral Public" pk);
-  let ciphertext = Spec.ECIES.encrypt cs test1_sk test1_input lbytes_empty (u32 0) in
-  Lib.PrintSequence.print_label_lbytes #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) "Ciphertext" ciphertext;
-  IO.print_newline ()
+  | Some (ek, esk, epk) -> (
+    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "ECIES Encap Secret" ek;
+    IO.print_newline ();
+    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Encap Ephemeral Secret" esk;
+    IO.print_newline ();
+    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Encap Ephemeral Public" epk);
+    IO.print_newline ();
+    let ciphertext = Spec.ECIES.encrypt cs ek test1_input lbytes_empty (u32 0) in
+    Lib.PrintSequence.print_label_lbytes #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) "ECIES Ciphertext" ciphertext;
+    IO.print_newline ();
+    match Spec.ECIES.decap cs test1_sk epk test1_context with
+    | None -> IO.print_string "Error: Spec.ECIES.decap failed\n"
+    | Some dk -> (
+      Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "ECIES Decap Secret" dk;
+      IO.print_newline ();
+      let result_decap = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) ek dk in
+      if result_decap then ()
+      else IO.print_string "\nECIES Decap: Failure\n";
+      match Spec.ECIES.decrypt cs dk ciphertext lbytes_empty (u32 0) with
+      | None -> IO.print_string "Error: Spec.ECIES.decrypt failed\n"
+      | Some plaintext ->
+        Lib.PrintSequence.print_label_lbytes #32 "ECIES Computed Plaintext" plaintext;
+        IO.print_newline ();
+        let result_decrypt = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_input plaintext in
+        if result_decap then ()
+        else IO.print_string "\nECIES Decap: Failure\n";
 
-  (* if r1_a then IO.print_string "\nHKDF Extract: Success!\n" *)
-  (* else IO.print_string "\nHKDF Extract: Failure :(\n"; *)
-  (* if r1_b then IO.print_string "HKDF Expand: Success!\n" *)
-  (* else IO.print_string "HKDF Expand: Failure :(\n"; *)
-
-
-  (* // Composite result *)
-  (* if r1_a && r1_b && r2_a && r2_b && r3_a && r3_b then IO.print_string "\nComposite result: Success!\n" *)
-  (* else IO.print_string "\nComposite result: Failure :(\n" *)
+        if result_decap && result_decrypt
+        then IO.print_string "\nComposite result: Success! \o/ \n"
+        else IO.print_string "\nComposite result: Failure :(\n"
+    )
+  )
