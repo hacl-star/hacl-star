@@ -64,19 +64,21 @@ let vale_calling_conventions (s0 s1:V.va_state) =
   ) /\
   s1.VS.ok
 
-let maybe_cons_buffer_fp
-       (#t:td)
-       (x:td_as_type t)
+let maybe_union_arg_fp
+       (a:arg)
        (loc: ME.loc) =
-    match t with
-    | TD_Base _ ->
+    match a with
+    | (| TD_Base _, _|) ->
       loc
-    | TD_Buffer bt ->
+    | (| TD_Buffer bt, x |) ->
       ME.loc_union (ME.loc_buffer #(ME.TBase bt) (as_vale_buffer x)) loc
+
+let fp_of_args (l:list arg) : GTot ME.loc =
+  BigOps.foldr_gtot l maybe_union_arg_fp ME.loc_none
 
 [@reduce]
 let rec vale_sig_tl (#dom:list td)
-                    (fp:ME.loc)
+                    (args:list arg)
                     (code:V.va_code)
                     (pre:vale_pre_tl dom)
                     (post:vale_post_tl dom)
@@ -91,22 +93,22 @@ let rec vale_sig_tl (#dom:list td)
                        V.eval_code code va_s0 f va_s1 /\
                        vale_calling_conventions va_s0 va_s1 /\
                        elim_nil post va_s0 stack_b va_s1 f /\
-                       ME.modifies fp va_s0.VS.mem va_s1.VS.mem))
+                       ME.modifies (fp_of_args args) va_s0.VS.mem va_s1.VS.mem))
 
     | hd::tl ->
       x:td_as_type hd ->
-      vale_sig_tl #tl (maybe_cons_buffer_fp x fp) code (elim_1 pre x) (elim_1 post x)
+      vale_sig_tl #tl ((|hd,x|)::args) code (elim_1 pre x) (elim_1 post x)
 
 [@reduce]
 let elim_vale_sig_cons #code
                        (hd:td)
                        (tl:list td)
-                       (fp:ME.loc)
+                       (args:list arg)
                        (pre:vale_pre_tl (hd::tl))
                        (post:vale_post_tl (hd::tl))
-                       (v:vale_sig_tl fp code pre post)
+                       (v:vale_sig_tl args code pre post)
     : x:td_as_type hd
-    -> vale_sig_tl (maybe_cons_buffer_fp x fp) code (elim_1 pre x) (elim_1 post x)
+    -> vale_sig_tl ((|hd, x|)::args) code (elim_1 pre x) (elim_1 post x)
     = v
 
 [@reduce]
@@ -117,7 +119,7 @@ let vale_sig (#dom:list td)
     code:V.va_code ->
     win:bool ->
     vale_sig_tl
-      ME.loc_none
+      []
       code
       (pre code)
       (post code)

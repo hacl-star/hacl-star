@@ -123,6 +123,8 @@ let arg_as_nat64 (a:arg) : GTot ME.nat64 =
      UInt32.v x
   | TD_Base TUInt64 ->
      UInt64.v x
+  | TD_Base TUInt128 ->
+     admit()
   | TD_Buffer bt ->
     IA.addrs x
 
@@ -279,26 +281,14 @@ let as_lowstar_sig_post
   HS.poppable (Adapters.hs_of_mem final_mem) /\
   h1 == HS.pop (Adapters.hs_of_mem final_mem)
 
-let rec as_lowstar_sig
-    (c:TS.tainted_code)
-    (dom:list td)
-    (args:list arg{List.length dom + List.length args < max_arity})
-    : Type =
-    match dom with
-    | [] ->
-      h0:mem_roots args ->
-      predict:prediction c args h0 ->
-      FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+let as_lowstar_sig (c:TS.tainted_code) =
+    args:arity_ok arg ->
+    h0:mem_roots args ->
+    predict:prediction c args h0 ->
+    FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
         (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 args))
         (ensures fun h0 (As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem) h1 ->
           as_lowstar_sig_post c args h0 predict push_h0 alloc_push_h0 b fuel final_mem h1
         )
-    | hd::tl ->
-      x:td_as_type hd ->
-      as_lowstar_sig
-        c
-        tl
-        ((|hd, x|)::args)
 
-val wrap (c:TS.tainted_code) (dom:arity_ok td)
-  : as_lowstar_sig c dom []
+val wrap (c:TS.tainted_code) : as_lowstar_sig c

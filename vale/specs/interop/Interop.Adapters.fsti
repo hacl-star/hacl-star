@@ -30,3 +30,7 @@ val create_valid_memtaint
 val mk_mem (args:list arg) (h:mem_roots args) : ME.mem
 val hs_of_mem (m:ME.mem) : HS.mem
 val ptrs_of_mem (m:ME.mem) : l:list b8{IM.list_disjoint_or_eq l}
+
+val mk_mem_injective (args:list arg) (h:mem_roots args)
+  : Lemma (hs_of_mem (mk_mem args h) == h /\
+           ptrs_of_mem (mk_mem args h) == args_b8 args)
