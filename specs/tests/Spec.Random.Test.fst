@@ -21,5 +21,5 @@ let test () =
   Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random2 len]" output;
   IO.print_newline ();
   let output = crypto_random3 len in
-  Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random len]" output;
+  Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random3 len]" output;
   IO.print_newline ()
