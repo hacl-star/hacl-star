@@ -5,13 +5,15 @@ let uint8s_to_bytes s =
   List.iteri (fun i c -> Bytes.set b i (Char.chr c)) s;
   b
 
-let uint8s_from_bytes s =
+let uint8s_from_bytes: bytes -> (FStar_UInt8.t, unit) Lib_Sequence.lseq =
+  fun s ->
   let rec exp i l =
     if i < 0 then l else exp (i - 1) ((Char.code (Bytes.get s i)) :: l) in
-  exp (Bytes.length s - 1) []
+  FStar_Seq_Properties.seq_of_list (exp (Bytes.length s - 1) [])
 
-
-let crypto_random len =
+let crypto_random : Prims.int -> (FStar_UInt8.t, unit) Lib_Sequence.lseq
+                                  FStar_Pervasives_Native.option =
+  fun len ->
   let buf = Bytes.create (Z.to_int len) in
   let rng = Random.hardware_rng () in
   rng#random_bytes buf 0 (Z.to_int len);
