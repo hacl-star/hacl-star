@@ -16,6 +16,10 @@ open Spec.Hash.Helpers
 friend Spec.MD5
 friend Hacl.Hash.PadFinish
 
+open LowStar.Modifies.Linear
+
+#reset-options "--log_queries --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 let _t = IB.igcmalloc_of_list HS.root Spec.t_as_list
@@ -107,7 +111,7 @@ val round_op_gen
     B.as_seq h' abcd == Spec.round_op_gen f (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x)) (U32.v a) (U32.v b) (U32.v c) (U32.v d) (U32.v k) s (U32.v i)
   ))
 
-#reset-options "--z3rlimit 16" // --using_facts_from '* -FStar.Int8 -FStar.Int16 -FStar.Int32 -FStar.Int64 -FStar.Int128 -FStar.UInt16 -FStar.UInt64 -FStar.UInt128'"
+#set-options "--max_fuel 0 --max_ifuel 0"
 
 let round_op_gen f abcd x a b c d k s i =
   let h = HST.get () in
@@ -123,10 +127,7 @@ let round_op_gen f abcd x a b c d k s i =
   let ti = t (i `U32.sub` 1ul) in
   let v = (vb `U32.add_mod` ((va `U32.add_mod` f vb vc vd `U32.add_mod` xk `U32.add_mod` ti) <<< s)) in
   B.upd abcd a v;
-  let h' = HST.get () in
-  ()
-
-#reset-options
+  reveal_opaque [delta_only [`%Spec.round_op_gen]] Spec.round_op_gen
 
 inline_for_extraction let ia : abcd_idx = 0ul
 inline_for_extraction let ib : abcd_idx = 1ul
@@ -153,6 +154,7 @@ let round1
     B.as_seq h' abcd == Spec.round1 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
+  let h = HST.get () in
   let _ = round1_op abcd x ia ib ic id  0ul  7ul  1ul in
   let _ = round1_op abcd x id ia ib ic  1ul 12ul  2ul in
   let _ = round1_op abcd x ic id ia ib  2ul 17ul  3ul in
@@ -172,12 +174,15 @@ let round1
   let _ = round1_op abcd x id ia ib ic 13ul 12ul 14ul in
   let _ = round1_op abcd x ic id ia ib 14ul 17ul 15ul in
   let _ = round1_op abcd x ib ic id ia 15ul 22ul 16ul in
+  let h' = HST.get () in
 
-  ()
+  reveal_opaque [delta_only [`%Spec.round1]] Spec.round1;
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.round1 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
 let round2_op = round_op_gen Spec.g
 
+#set-options "--z3rlimit 10"
 inline_for_extraction
 let round2
   (abcd: abcd_t)
@@ -195,6 +200,7 @@ let round2
     B.as_seq h' abcd == Spec.round2 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
+  let h = HST.get () in
   let _ = round2_op abcd x ia ib ic id 1ul 5ul 17ul in
   let _ = round2_op abcd x id ia ib ic 6ul 9ul 18ul in
   let _ = round2_op abcd x ic id ia ib 11ul 14ul 19ul in
@@ -214,8 +220,10 @@ let round2
   let _ = round2_op abcd x id ia ib ic 2ul 9ul 30ul in
   let _ = round2_op abcd x ic id ia ib 7ul 14ul 31ul in
   let _ = round2_op abcd x ib ic id ia 12ul 20ul 32ul in
+  let h' = HST.get () in
 
-  ()
+  reveal_opaque [delta_only [`%Spec.round2]] Spec.round2;
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.round2 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
 let round3_op = round_op_gen Spec.h
@@ -237,6 +245,7 @@ let round3
     B.as_seq h' abcd == Spec.round3 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
+  let h = HST.get () in
   let _ = round3_op abcd x ia ib ic id 5ul 4ul 33ul in
   let _ = round3_op abcd x id ia ib ic 8ul 11ul 34ul in
   let _ = round3_op abcd x ic id ia ib 11ul 16ul 35ul in
@@ -256,8 +265,10 @@ let round3
   let _ = round3_op abcd x id ia ib ic 12ul 11ul 46ul in
   let _ = round3_op abcd x ic id ia ib 15ul 16ul 47ul in
   let _ = round3_op abcd x ib ic id ia 2ul 23ul 48ul in
+  let h' = HST.get () in
 
-  ()
+  reveal_opaque [delta_only [`%Spec.round3]] Spec.round3;
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.round3 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
 let round4_op = round_op_gen Spec.i
@@ -279,6 +290,7 @@ let round4
     B.as_seq h' abcd == Spec.round4 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
+  let h = HST.get () in
   let _ = round4_op abcd x ia ib ic id 0ul 6ul 49ul in
   let _ = round4_op abcd x id ia ib ic 7ul 10ul 50ul in
   let _ = round4_op abcd x ic id ia ib 14ul 15ul 51ul in
@@ -298,8 +310,10 @@ let round4
   let _ = round4_op abcd x id ia ib ic 11ul 10ul 62ul in
   let _ = round4_op abcd x ic id ia ib 2ul 15ul 63ul in
   let _ = round4_op abcd x ib ic id ia 9ul 21ul 64ul in
+  let h' = HST.get () in
 
-  ()
+  reveal_opaque [delta_only [`%Spec.round4]] Spec.round4;
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.round4 (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
 let rounds
@@ -318,11 +332,14 @@ let rounds
     B.as_seq h' abcd == Spec.rounds (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))
   ))
 =
+  let h = HST.get () in
   round1 abcd x;
   round2 abcd x;
   round3 abcd x;
   round4 abcd x;
-  ()
+  let h' = HST.get () in
+  reveal_opaque [delta_only [`%Spec.rounds]] Spec.rounds;
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.rounds (B.as_seq h abcd) (E.seq_uint32_of_le 16 (B.as_seq h x))))
 
 inline_for_extraction
 let overwrite
@@ -336,12 +353,14 @@ let overwrite
       B.live h1 abcd /\
       B.as_seq h1 abcd == Spec.overwrite (B.as_seq h0 abcd) a' b' c' d'))
 = 
+  let h0 = HST.get () in
   B.upd abcd ia a';
   B.upd abcd ib b';
   B.upd abcd ic c';
-  B.upd abcd id d'
-
-#reset-options "--z3rlimit 64 --z3cliopt smt.arith.nl=false --using_facts_from '* -FStar.Int8 -FStar.Int16 -FStar.Int32 -FStar.Int64 -FStar.Int128 -FStar.UInt16 -FStar.UInt64 -FStar.UInt128'"
+  B.upd abcd id d';
+  let h1 = HST.get () in
+  reveal_opaque [delta_only [`%Spec.overwrite]] Spec.overwrite;
+  assert (Seq.equal (B.as_seq h1 abcd) (Spec.overwrite (B.as_seq h0 abcd) a' b' c' d'))
 
 inline_for_extraction
 let update'
@@ -355,6 +374,7 @@ let update'
       B.live h1 abcd /\
       B.as_seq h1 abcd == Spec.update (B.as_seq h0 abcd) (B.as_seq h0 x)))
 =
+  let h0 = HST.get () in
   assert_norm (U32.v ia == Spec.ia);
   assert_norm (U32.v ib == Spec.ib);
   assert_norm (U32.v ic == Spec.ic);
@@ -372,15 +392,10 @@ let update'
     (a `U32.add_mod` aa)
     (b `U32.add_mod` bb)
     (c `U32.add_mod` cc)
-    (d `U32.add_mod` dd)
-
-#reset-options
-
-(* NOTE: do not remove this, and do not move this into the definition
-   of `update` below: within `update` the context will be too crowded
-   for F* to complete a proof of equality between two functions *)
-noextract
-let _ : squash (Spec.Hash.update MD5 == Spec.update) = ()
+    (d `U32.add_mod` dd);
+  let h1 = HST.get () in
+  reveal_opaque [delta_only [`%Spec.update]] Spec.update;
+  assert (Seq.equal (B.as_seq h1 abcd) (Spec.update (B.as_seq h0 abcd) (B.as_seq h0 x)))
 
 let update abcd x = update' abcd x
 
