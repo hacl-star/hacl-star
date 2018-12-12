@@ -288,7 +288,8 @@ val update_round:
       v len + v (State?.buf_size s) = size_block a /\
       State?.buf_size s <> 0ul)
     (ensures fun h0 s' h1 ->
-      update_post a s s' prev data len h0 h1)
+      update_post a s s' prev data len h0 h1 /\
+      State?.buf_size s' = 0ul)
 
 let split_at_last_block (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
@@ -319,55 +320,45 @@ let update_round a s prev data len =
   B.modifies_inert_intro (B.loc_buffer buf) h0 h1;
   Hash.frame_invariant (B.loc_buffer buf) hash_state h0 h1;
   Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf) hash_state h0 h1;
-  Hash.update #(G.hide a) hash_state buf0;
+  Hash.update_multi #(G.hide a) hash_state buf0 (size_block_ul a);
   let h2 = ST.get () in
-  Spec.Hash.update_multi_update a (Hash.repr hash_state h1) (B.as_seq h0 buf0);
-  assert (S.equal (Hash.repr hash_state h2)
-    (Hash.compress_many (Hash.repr hash_state h1) (B.as_seq h1 buf0)));
-  assert (
-    let blocks, rest = split_at_last a (G.reveal prev) in
-    S.equal (Hash.repr hash_state h2)
-      (Hash.compress_many (Hash.acc0 #a)
-        (S.append blocks (B.as_seq h1 buf0))));
-  assert (
-    let blocks, rest = split_at_last a (G.reveal prev) in
-    S.equal rest (B.as_seq h1 buf1) /\
-    S.equal (B.as_seq h2 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 buf2)) /\
-    S.equal (B.as_seq h1 buf2) (B.as_seq h0 data));
   (
     let blocks, rest = split_at_last a (G.reveal prev) in
-    S.append_assoc blocks rest (B.as_seq h0 data));
-  split_at_last_block a (G.reveal prev) (B.as_seq h0 data);
-  assert (
-    let blocks, rest = split_at_last a (G.reveal prev) in
-    S.equal (Hash.repr hash_state h2)
+    assert (S.equal (Hash.repr hash_state h2)
+      (Hash.compress_many (Hash.repr hash_state h1) (B.as_seq h1 buf0)));
+    assert (S.equal (B.as_seq h0 buf1) (B.as_seq h1 buf1));
+    assert (S.equal rest (B.as_seq h1 buf1));
+    assert (S.equal (B.as_seq h0 data) (B.as_seq h1 data));
+    assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
+    assert (S.equal (Hash.repr hash_state h2)
       (Hash.compress_many (Hash.acc0 #a)
-        (S.append blocks (S.append (B.as_seq h1 buf1) (B.as_seq h1 buf2)))));
-  assert (
-    let blocks, rest = split_at_last a (G.reveal prev) in
-    S.equal (B.as_seq h1 buf1) rest /\
-    S.equal (Hash.repr hash_state h2)
+        (S.append blocks (B.as_seq h1 buf0))));
+    assert (S.equal (Hash.repr hash_state h2)
       (Hash.compress_many (Hash.acc0 #a)
-        (S.append (S.append blocks (B.as_seq h1 buf1)) (B.as_seq h1 buf2))));
-  assert (
-    let blocks, rest = split_at_last a (G.reveal prev) in
-    S.equal (S.append blocks rest) (G.reveal prev));
-  assert (
-    let blocks, rest = split_at_last a (G.reveal prev) in
-    S.equal (Hash.repr hash_state h2)
+        (S.append blocks (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)))));
+    S.append_assoc blocks (B.as_seq h1 buf1) (B.as_seq h1 data);
+    assert (S.equal (Hash.repr hash_state h2)
       (Hash.compress_many (Hash.acc0 #a)
-        (S.append (G.reveal prev) (B.as_seq h1 buf2))));
-  assert (S.equal (Hash.repr hash_state h2)
-    (Hash.compress_many (Hash.acc0 #a)
-      (S.append (G.reveal prev) (B.as_seq h0 data))));
-
+        (S.append (S.append blocks (B.as_seq h1 buf1)) (B.as_seq h1 data))));
+    assert (S.equal (S.append blocks rest) (G.reveal prev));
+    assert (S.equal (Hash.repr hash_state h2)
+      (Hash.compress_many (Hash.acc0 #a)
+        (S.append (G.reveal prev) (B.as_seq h1 data))));
+    assert (S.equal (Hash.repr hash_state h2)
+      (Hash.compress_many (Hash.acc0 #a)
+        (S.append (G.reveal prev) (B.as_seq h0 data))));
+    split_at_last_block a (G.reveal prev) (B.as_seq h0 data);
+    let blocks', rest' = split_at_last a (S.append (G.reveal prev) (B.as_seq h0 data)) in
+    assert (S.equal rest' S.empty);
+    assert (B.live h2 buf /\
+      B.(loc_disjoint (loc_buffer buf) (Hash.footprint hash_state h2)) /\
+      Hash.invariant hash_state h2);
+    ()
+  );
   let s' = State hash_state buf 0ul in
-
   assert (hashes h2 s' (S.append (G.reveal prev) (B.as_seq h0 data)));
-
-admit ()
-
   s'
+#pop-options
 
 val update:
   a:Hash.alg ->
@@ -376,15 +367,23 @@ val update:
   data: B.buffer UInt8.t ->
   len: UInt32.t ->
   Stack (state a)
-    (requires fun h0 ->
-      hashes h0 s (G.reveal prev) /\
-      B.live h0 data /\
-      v len = B.length data /\
-      B.(loc_disjoint (loc_buffer data) (footprint s h0)))
-    (ensures fun h0 s' h1 ->
-      B.(modifies (footprint s h0) h0 h1) /\
-      footprint s h0 == footprint s' h1 /\
-      hashes h1 s' (Seq.append (G.reveal prev) (B.as_seq h0 data)) /\
-      preserves_freeable s h0 h1 /\
-      State?.hash_state s == State?.hash_state s' /\
-      State?.buf s == State?.buf s')
+    (requires fun h0 -> update_pre a s prev data len h0)
+    (ensures fun h0 s' h1 -> update_post a s s' prev data len h0 h1)
+
+#push-options "--z3rlimit 200"
+let update a s prev data len =
+  let State hash_state buf sz = s in
+  if len < size_block_ul a - sz then
+    update_small a s prev data len
+  else if sz = 0ul then
+    update_empty_buf a s prev data len
+  else begin
+    let h0 = ST.get () in
+    let diff = size_block_ul a - sz in
+    let data1 = B.sub data 0ul diff in
+    let data2 = B.sub data diff (len - diff) in
+    let s = update_round a s prev data1 diff in
+    S.append_assoc (G.reveal prev) (B.as_seq h0 data1) (B.as_seq h0 data2);
+    admit ();
+    update_empty_buf a s (G.hide (S.append (G.reveal prev) (B.as_seq h0 data1))) data2 (len - diff)
+  end
