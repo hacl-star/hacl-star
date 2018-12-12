@@ -184,7 +184,7 @@ let sub_mod_lemma #t #l a b = ()
 
 let sub #t #l a b =
   match t with
-  | U1 -> (UInt8.sub a b) 
+  | U1 -> (UInt8.sub a b)
   | U8 -> (UInt8.sub a b)
   | U16 -> (UInt16.sub a b)
   | U32 -> (UInt32.sub a b)
@@ -206,7 +206,7 @@ let decr_lemma #t #l a = ()
 
 let logxor #t #l a b =
   match t with
-  | U1 -> (UInt8.logxor a b) 
+  | U1 -> (UInt8.logxor a b)
   | U8 -> (UInt8.logxor a b)
   | U16 -> (UInt16.logxor a b)
   | U32 -> (UInt32.logxor a b)
@@ -428,4 +428,3 @@ let gte #t x y =
   | U128 -> UInt128.gte x y
 
 let gte_lemma #t x y = ()
-
