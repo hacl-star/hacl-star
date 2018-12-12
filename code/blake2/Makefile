@@ -5,8 +5,8 @@ HACL_HOME    ?= ../..
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
-GENERATED_DIR = sha3-c
-OUT_DIR	      = sha3-c
+GENERATED_DIR = blake2-c
+OUT_DIR	      = blake2-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
