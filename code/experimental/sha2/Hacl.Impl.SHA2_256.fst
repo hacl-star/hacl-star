@@ -115,7 +115,7 @@ val _sigma0: x:uint32 ->
   (ensures  (fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec._sigma0 Spec.SHA2_256 x))
 
 let _sigma0 x =
-  let n = get_opTable 3ul in
+  let n = get_opTable 8ul in
   (x >>>. get_opTable 6ul) ^. ((x >>>. get_opTable 7ul) ^. (x >>. n))
 
 val _sigma1: x: uint32 ->
