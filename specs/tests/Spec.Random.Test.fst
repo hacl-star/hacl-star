@@ -7,17 +7,19 @@ open Lib.ByteSequence
 
 open Lib.RandomSequence
 
+assume val entropy_init: Lib.RandomSequence.entropy
+
 let test () =
   let len: size_nat = 32 in
-  match crypto_random len with
-  | None -> IO.print_string "\nBuffer after [generate len]: \n"
+  (match crypto_random len with
+  | None -> IO.print_string "\nError: crypto_random Failed !\n"
   | Some output ->
-    IO.print_string "\nBuffer after [generate len]: \n";
-    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list output);
-    IO.print_string "\n"
-
-  (* let result = write len output in *)
-  (* IO.print_string "\nBuffer after [write len output]: "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list output); *)
-  (* if result then IO.print_string "\nRandom write: Success!\n" *)
-  (* else IO.print_string "\nRandom write: Failure :(\n" *)
+    Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random len]" output;
+    IO.print_newline ()
+  );
+  let e, output = crypto_random2 entropy_init len in
+  Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random2 len]" output;
+  IO.print_newline ();
+  let output = crypto_random3 len in
+  Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random len]" output;
+  IO.print_newline ()

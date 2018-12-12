@@ -1,5 +1,7 @@
 open Cryptokit
 
+type entropy = int
+
 let uint8s_to_bytes s =
   let b = Bytes.create (List.length s) in
   List.iteri (fun i c -> Bytes.set b i (Char.chr c)) s;
@@ -19,7 +21,16 @@ let crypto_random : Prims.int -> (FStar_UInt8.t, unit) Lib_Sequence.lseq
   rng#random_bytes buf 0 (Z.to_int len);
   FStar_Pervasives_Native.Some (uint8s_from_bytes buf)
 
-let crypto_random3 len =
+let crypto_random2 : entropy -> Prims.int -> (entropy * (FStar_UInt8.t, unit) Lib_Sequence.lseq) =
+  fun _ ->
+  fun len ->
+  let buf = Bytes.create (Z.to_int len) in
+  let rng = Random.hardware_rng () in
+  rng#random_bytes buf 0 (Z.to_int len);
+  0,(uint8s_from_bytes buf)
+
+let crypto_random3 : Prims.int -> (FStar_UInt8.t, unit) Lib_Sequence.lseq =
+  fun len ->
   let buf = Bytes.create (Z.to_int len) in
   let rng = Random.hardware_rng () in
   rng#random_bytes buf 0 (Z.to_int len);
