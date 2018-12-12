@@ -73,8 +73,7 @@ let copy #t #a #len o i =
     assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
 
 let memset #a #blen b init len =
-  admit();
-  B.fill #a (b <: buffer a) init len
+  B.fill #a #(fun _ _ -> True) #(fun _ _ -> True) b init len
 
 #set-options "--max_fuel 0"
 
@@ -312,7 +311,6 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
 #set-options "--max_fuel 1"
 
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
-  admit();
   [@inline_let]
   let a_spec' (i:nat{i <= v n}) =
     Math.Lemmas.lemma_mult_le_right (v len) i (v n);
@@ -353,20 +351,21 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
     Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) ==
     norm [delta] Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0))
 
-let fillT #a clen o spec f =
+let fillT #a clen o spec_f f =
   let open Seq in
   let h0 = ST.get () in
   [@inline_let]
-  let a_spec = createi_a a (v clen) spec in
+  let a_spec = createi_a a (v clen) spec_f  in
   [@inline_let]
   let refl h i = sub (as_seq h o) 0 i in
   [@inline_let]
   let footprint i = loc o in
   [@inline_let]
-  let spec h = createi_step a (v clen) spec in
+  let spec h = createi_step a (v clen) spec_f in
+  eq_intro (of_list []) (refl h0 0);
   loop h0 clen a_spec refl footprint spec
     (fun i ->
-      Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (of_list #a []) (v i);
+      Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (refl h0 0) (v i);
       o.(i) <- f i;
       let h' = ST.get () in
       FStar.Seq.lemma_split (as_seq h' o) (v i)
@@ -381,11 +380,13 @@ let fill #a h0 clen o spec impl =
   let refl h i = sub (as_seq h o) 0 i in
   [@inline_let]
   let footprint i = loc o in
+  let spec' = spec in
   [@inline_let]
   let spec h = createi_step a (v clen) (spec h0) in
+  eq_intro (of_list []) (refl h0 0);
   loop h0 clen a_spec refl footprint spec
   (fun i ->
-    Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (of_list #a []) (v i);
+    Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (refl h0 0) (v i);
     impl i;
     let h' = ST.get () in
     FStar.Seq.lemma_split (as_seq h' o) (v i)

@@ -295,7 +295,7 @@ let carry_wide out i =
   out.(3ul) <- o3
 
 [@ CInline]
-let fmul out f1 f2 =
+let fmul out f1 f2 tmp =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -314,7 +314,7 @@ let fmul out f1 f2 =
   out.(3ul) <- o3
 
 [@ CInline]
-let fmul2 out f1 f2 =
+let fmul2 out f1 f2 tmp =
   push_frame();
   let tmp = create 16ul (u64 0) in
   mul2 tmp f1 f2;
@@ -341,7 +341,7 @@ let fmul1 out f1 f2 =
   out.(3ul) <- o3
 
 [@ CInline]
-let fsqr out f1 =
+let fsqr out f1 tmp =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -354,7 +354,7 @@ let fsqr out f1 =
   out.(3ul) <- o3
 
 [@ CInline]
-let fsqr2 out f =
+let fsqr2 out f tmp =
   push_frame();
   let tmp = create 16ul (u64 0) in
   let tmp1 = B.sub tmp 0ul 8ul in

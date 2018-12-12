@@ -3,6 +3,7 @@ module Hacl.Spec.Curve25519.Field64.Lemmas
 open Lib.Sequence
 open Lib.IntTypes
 open FStar.Mul
+open NatPrime
 
 open Hacl.Spec.Curve25519.Field64.Definition
 
@@ -26,7 +27,6 @@ let lemma_mod_sub_distr a b n =
   FStar.Math.Lemmas.distributivity_sub_left 0 (b / n) n;
   // (a - b) % n == (a - (b % n) - (b / n) * n) % n
   FStar.Math.Lemmas.lemma_mod_plus (a - (b % n)) (-(b / n)) n
-
 
 val lemma_prime: unit ->
   Lemma (pow2 256 % prime == 38)

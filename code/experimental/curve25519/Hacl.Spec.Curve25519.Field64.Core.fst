@@ -3,6 +3,7 @@ module Hacl.Spec.Curve25519.Field64.Core
 open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
+open NatPrime
 
 open Hacl.Spec.Curve25519.Field64.Definition
 open Hacl.Spec.Curve25519.Field64.Lemmas
@@ -123,6 +124,8 @@ let sub1 f cin =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   c3, out
 
+#set-options "--max_fuel 0"
+
 val mul1:
     f:felem4
   -> u:uint64
@@ -209,6 +212,8 @@ let carry_pass f cin =
   lemma_mul_pow256_add out0 carry;
   let o0' = o0 +! carry *! u64 38 in
   (o0', o1, o2, o3)
+
+#set-options "--max_fuel 2"
 
 val carry_wide:
     f:felem_wide4

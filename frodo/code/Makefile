@@ -127,7 +127,7 @@ ROOTS = Hacl.Test.Frodo.fst
 include .depend
 
 # Admit SMT queries for modules in FStar, LowStar, C, Lib, and Spec namespaces
-$(CACHE_DIR)/FStar.%.checked: | .depend
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 

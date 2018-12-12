@@ -434,10 +434,9 @@ let matrix_to_lbytes #n1 #n2 m =
     forall (i0:size_nat{i0 < i}) (k:size_nat{k < 2}). matrix_to_lbytes_fc m res i0 k)
   (fun i res ->
     index_uint_to_bytes_le m.[i];
-    let res1 = update_sub res (2 * i) 2 (uint_to_bytes_le #U16 #SEC m.[i]) in
+    let res1 = update_sub res (2 * i) 2 (uint_to_bytes_le m.[i]) in
     eq_intro (Seq.sub res1 0 (2 * i)) (Seq.sub res 0 (2 * i));
     lemma_matrix_to_lbytes #n1 #n2 m res res1 i;
-    admit();
     res1
   ) res
 

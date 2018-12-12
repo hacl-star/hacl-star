@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-new val networkStream: eqtype u#0
+new val networkStream: eqtype
 new val tcpListener: Type0
 
 val set_nonblock: networkStream -> unit
