@@ -42,7 +42,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   --already_cached 'FStar LowStar C -C.Compat Spec Hacl.Hash' \
   $(addprefix --already_cached ,$(subst .*,,$(VALE_NAMESPACES)))
 
-ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst
+ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst EverCrypt.Hash.Incremental.fst
 
 .PRECIOUS: %.krml %.checked
 
