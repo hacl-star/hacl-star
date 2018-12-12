@@ -38,6 +38,7 @@ let bytes = S.seq UInt8.t
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
+noextract
 let split_at_last (a: Hash.alg) (b: bytes):
   bytes_blocks a & (r: bytes {
     S.length r < size_block a
