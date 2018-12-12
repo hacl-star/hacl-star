@@ -99,18 +99,21 @@ let alloca a =
   in
   B.alloca s 1ul
 
-let create a =
+let create_in a r =
   let h0 = ST.get () in
   let s: state_s a =
     match a with
-    | MD5 -> MD5_s (B.malloc HS.root 0ul 4ul)
-    | SHA1 -> SHA1_s (B.malloc HS.root 0ul 5ul)
-    | SHA2_224 -> SHA2_224_s (B.malloc HS.root 0ul 8ul)
-    | SHA2_256 -> SHA2_256_s (B.malloc HS.root 0ul 8ul)
-    | SHA2_384 -> SHA2_384_s (B.malloc HS.root 0UL 8ul)
-    | SHA2_512 -> SHA2_512_s (B.malloc HS.root 0UL 8ul)
+    | MD5 -> MD5_s (B.malloc r 0ul 4ul)
+    | SHA1 -> SHA1_s (B.malloc r 0ul 5ul)
+    | SHA2_224 -> SHA2_224_s (B.malloc r 0ul 8ul)
+    | SHA2_256 -> SHA2_256_s (B.malloc r 0ul 8ul)
+    | SHA2_384 -> SHA2_384_s (B.malloc r 0UL 8ul)
+    | SHA2_512 -> SHA2_512_s (B.malloc r 0UL 8ul)
   in
-  B.malloc HS.root s 1ul
+  B.malloc r s 1ul
+
+let create a =
+  create_in a HS.root
 
 let init #a s =
   match !*s with

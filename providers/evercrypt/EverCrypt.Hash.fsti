@@ -233,6 +233,15 @@ val alloca: a:alg -> StackInline (state a)
     fresh_loc (footprint s h1) h0 h1 /\
     M.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint s h1))))
 
+val create_in: a:alg -> r:HS.rid -> ST (state a)
+  (requires (fun _ -> HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    invariant s h1 /\
+    M.(modifies loc_none h0 h1) /\
+    fresh_loc (footprint s h1) h0 h1 /\
+    M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
+    freeable h1 s))
+
 val create: a:alg -> ST (state a)
   (requires fun h0 -> True)
   (ensures fun h0 s h1 ->
