@@ -34,7 +34,7 @@ val frodo_mul_add_as_plus_e:
     (requires fun h ->
       live h seed_a /\ live h seed_e /\ live h s_matrix /\ live h b_matrix /\
       disjoint b_matrix seed_a /\ disjoint b_matrix seed_e /\ disjoint b_matrix s_matrix)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer b_matrix) h0 h1 /\
+    (ensures  fun h0 _ h1 -> modifies1 b_matrix h0 h1 /\
      (let a_matrix = Spec.Frodo.Params.frodo_gen_matrix (v params_n) (v bytes_seed_a) (as_seq h0 seed_a) in
       let e_matrix = Spec.Frodo.Sample.frodo_sample_matrix (v params_n) (v params_nbar)
 	(v crypto_bytes) (as_seq h0 seed_e) (u16 2) in
@@ -61,7 +61,7 @@ val frodo_mul_add_as_plus_e_pack0:
     (requires fun h ->
       live h seed_a /\ live h seed_e /\ live h s_matrix /\
       live h b /\ disjoint seed_a b)
-    (ensures fun h0 r h1 -> modifies (loc_buffer b) h0 h1 /\
+    (ensures fun h0 r h1 -> modifies1 b h0 h1 /\
      (let a_matrix = Spec.Frodo.Params.frodo_gen_matrix (v params_n) (v bytes_seed_a) (as_seq h0 seed_a) in
       let e_matrix = Spec.Frodo.Sample.frodo_sample_matrix (v params_n) (v params_nbar)
 	(v crypto_bytes) (as_seq h0 seed_e) (u16 2) in
@@ -71,7 +71,6 @@ let frodo_mul_add_as_plus_e_pack0 seed_a seed_e s_matrix b =
   push_frame();
   let b_matrix = matrix_create params_n params_nbar in
   frodo_mul_add_as_plus_e seed_a seed_e s_matrix b_matrix;
-  assert (v params_nbar % 8 = 0);
   frodo_pack params_logq b_matrix b;
   pop_frame()
 
@@ -86,7 +85,7 @@ val frodo_mul_add_as_plus_e_pack:
       disjoint b s /\ disjoint seed_a b /\ disjoint seed_e b /\
       disjoint seed_a s /\ disjoint seed_e s)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer s) (loc_buffer b)) h0 h1 /\
+      modifies2 s b h0 h1 /\
       (as_seq h1 b, as_seq h1 s) == S.frodo_mul_add_as_plus_e_pack (as_seq h0 seed_a) (as_seq h0 seed_e))
 [@"c_inline"]
 let frodo_mul_add_as_plus_e_pack seed_a seed_e b s =
@@ -109,7 +108,7 @@ val crypto_kem_keypair_:
       live h pk /\ live h sk /\ live h coins /\
       disjoint pk sk /\ disjoint coins sk /\ disjoint coins pk)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer pk) (loc_buffer sk)) h0 h1 /\
+      modifies2 pk sk h0 h1 /\
       (as_seq h1 pk, as_seq h1 sk) == S.crypto_kem_keypair_ (as_seq h0 coins))
 let crypto_kem_keypair_ coins pk sk =
   let h0 = ST.get () in
@@ -141,13 +140,13 @@ val crypto_kem_keypair:
   -> sk:lbytes crypto_secretkeybytes
   -> Stack uint32
     (requires fun h ->
-      disjoint state pk /\ disjoint state sk /\
-      live h pk /\ live h sk /\ disjoint pk sk)
+      disjoint state pk /\ disjoint state sk /\ disjoint pk sk /\
+      live h pk /\ live h sk)
     (ensures  fun h0 r h1 ->
-      modifies (loc_union (loc_buffer state) (loc_union (loc_buffer pk) (loc_buffer sk))) h0 h1 /\
+      modifies (loc state |+| (loc pk |+| loc sk)) h0 h1 /\
       (as_seq h1 pk, as_seq h1 sk) == S.crypto_kem_keypair (as_seq h0 state))
 let crypto_kem_keypair pk sk =
-  LowStar.Buffer.recall state;
+  recall state;
   push_frame();
   let coins = create (size 2 *! crypto_bytes +! bytes_seed_a) (u8 0) in
   randombytes_ (size 2 *! crypto_bytes +! bytes_seed_a) coins;

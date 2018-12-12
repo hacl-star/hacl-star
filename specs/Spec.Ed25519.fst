@@ -27,6 +27,8 @@ let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
+let _:_:unit{max_input SHA2_512 > pow2 32} = assert_norm (max_input SHA2_512 > pow2 32)
+
 let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
   (nat_from_bytes_le (hash512 s) % q)
 

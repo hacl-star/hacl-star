@@ -7,17 +7,17 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Print
+open Lib.PrintBuffer
 open Hacl.Blake2s
 
 
 val test_blake2s:
     msg_len:size_t
-  -> msg:lbytes (size_v msg_len)
+  -> msg:ilbuffer uint8 msg_len
   -> key_len:size_t{v key_len <= 32 /\ (if v key_len = 0 then v msg_len < pow2 64 else v msg_len + 64 < pow2 64)}
-  -> key:lbytes (size_v key_len)
+  -> key:ilbuffer uint8 key_len
   -> expected_len:size_t{1 <= v expected_len /\ v expected_len <= 32}
-  -> expected:lbytes (size_v expected_len)
+  -> expected:ilbuffer uint8 expected_len
   -> Stack unit
     (requires fun h ->
       live h msg /\ live h expected /\ live h key)
@@ -25,8 +25,12 @@ val test_blake2s:
 
 let test_blake2s msg_len msg key_len key expected_len expected =
   push_frame();
-  let result = create #_ #(v expected_len) expected_len (u8 0) in
-  blake2s result msg msg_len key key_len expected_len;
+  let tmsg = create msg_len (u8 0) in
+  mapT msg_len tmsg secret msg;
+  let tkey = create key_len (u8 0) in
+  mapT key_len tkey secret key;
+  let result = create expected_len (u8 0) in
+  blake2s expected_len result msg_len tmsg key_len tkey;
   print_compare_display expected_len result expected;
   pop_frame()
 
@@ -35,8 +39,8 @@ let test_blake2s msg_len msg key_len key expected_len expected =
 /// Test 1
 ///
 
-inline_for_extraction let test1_size_plaintext = size 3
-let test1_plaintext: b:lbytes (v test1_size_plaintext){ recallable b } =
+inline_for_extraction let test1_size_plaintext = 3ul
+let test1_plaintext: b:ilbuffer uint8 test1_size_plaintext{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -46,7 +50,7 @@ let test1_plaintext: b:lbytes (v test1_size_plaintext){ recallable b } =
   createL_global l
 
 inline_for_extraction let test1_size_key = size 0
-let test1_key: b:lbytes (v test1_size_key){ recallable b } =
+let test1_key: b:ilbuffer uint8 test1_size_key{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -55,7 +59,7 @@ let test1_key: b:lbytes (v test1_size_key){ recallable b } =
   createL_global l
 
 inline_for_extraction let test1_size_expected = size 32
-let test1_expected: b:lbytes (v test1_size_expected){ recallable b } =
+let test1_expected: b:ilbuffer uint8 test1_size_expected{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -71,8 +75,8 @@ let test1_expected: b:lbytes (v test1_size_expected){ recallable b } =
 /// Test 2
 ///
 
-inline_for_extraction let test2_size_plaintext = size 1
-let test2_plaintext: b:lbytes (v test2_size_plaintext){ recallable b } =
+inline_for_extraction let test2_size_plaintext = 1ul
+let test2_plaintext: b:ilbuffer uint8 test2_size_plaintext{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -81,8 +85,8 @@ let test2_plaintext: b:lbytes (v test2_size_plaintext){ recallable b } =
   assert_norm (List.Tot.length l == 1);
   createL_global l
 
-inline_for_extraction let test2_size_key = size 32
-let test2_key: b:lbytes (v test2_size_key){ recallable b } =
+inline_for_extraction let test2_size_key = 32ul
+let test2_key: b:ilbuffer uint8 test2_size_key{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -95,8 +99,8 @@ let test2_key: b:lbytes (v test2_size_key){ recallable b } =
   assert_norm (List.Tot.length l == 32);
   createL_global l
 
-inline_for_extraction let test2_size_expected = size 32
-let test2_expected: b:lbytes (v test2_size_expected){ recallable b } =
+inline_for_extraction let test2_size_expected = 32ul
+let test2_expected: b:ilbuffer uint8 test2_size_expected{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -113,7 +117,7 @@ let test2_expected: b:lbytes (v test2_size_expected){ recallable b } =
 ///
 
 inline_for_extraction let test3_size_plaintext = size 255
-let test3_plaintext: b:lbytes (v test3_size_plaintext){ recallable b } =
+let test3_plaintext: b:ilbuffer uint8 test3_size_plaintext{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -154,7 +158,7 @@ let test3_plaintext: b:lbytes (v test3_size_plaintext){ recallable b } =
   createL_global l
 
 inline_for_extraction let test3_size_key = size 32
-let test3_key: b:lbytes (v test3_size_key){ recallable b } =
+let test3_key: b:ilbuffer uint8 test3_size_key{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -168,7 +172,7 @@ let test3_key: b:lbytes (v test3_size_key){ recallable b } =
   createL_global l
 
 inline_for_extraction let test3_size_expected = size 32
-let test3_expected: b:lbytes (v test3_size_expected){ recallable b } =
+let test3_expected: b:ilbuffer uint8 test3_size_expected{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -185,7 +189,7 @@ let test3_expected: b:lbytes (v test3_size_expected){ recallable b } =
 ///
 
 inline_for_extraction let test4_size_plaintext = size 251
-let test4_plaintext: b:lbytes (v test4_size_plaintext){ recallable b } =
+let test4_plaintext: b:ilbuffer uint8 test4_size_plaintext{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -226,7 +230,7 @@ let test4_plaintext: b:lbytes (v test4_size_plaintext){ recallable b } =
   createL_global l
 
 inline_for_extraction let test4_size_key = size 32
-let test4_key: b:lbytes (v test4_size_key){ recallable b } =
+let test4_key: b:ilbuffer uint8 test4_size_key{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -240,7 +244,7 @@ let test4_key: b:lbytes (v test4_size_key){ recallable b } =
   createL_global l
 
 inline_for_extraction let test4_size_expected = size 32
-let test4_expected: b:lbytes (v test4_size_expected){ recallable b } =
+let test4_expected: b:ilbuffer uint8 test4_size_expected{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8

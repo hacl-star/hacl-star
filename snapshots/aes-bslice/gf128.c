@@ -208,6 +208,17 @@ static inline void encode(elem_t e, const block_t b) {
   e[0] = load64_be(b+8);
 }
 
+static inline void encode4(elem_t e, const block_t b) {
+  e[1] = load64_be(b);
+  e[0] = load64_be(b+8);
+  e[3] = load64_be(b+16);
+  e[2] = load64_be(b+24);
+  e[5] = load64_be(b+32);
+  e[4] = load64_be(b+40);
+  e[7] = load64_be(b+48);
+  e[6] = load64_be(b+56);
+}
+
 static inline void encode_last(elem_t e, const block_t b, int blen) {
   uint8_t block[16] = {0};
   memcpy(block,b,blen);
@@ -224,6 +235,19 @@ static inline void update(elem_t acc, const block_t b, const precomp_t pre) {
   uint64_t tmp[2] = {0};
   encode(tmp,b);
   fadd(acc,tmp);
+  fmul_pre(acc,pre);
+}
+
+static inline void update4(elem_t acc, const block_t b, const precomp_t pre) {
+  uint64_t tmp[8] = {0};
+  encode4(tmp,b);
+  fadd(acc,tmp);
+  fmul_pre(acc,pre);
+  fadd(acc,tmp+2);
+  fmul_pre(acc,pre);
+  fadd(acc,tmp+4);
+  fmul_pre(acc,pre);
+  fadd(acc,tmp+6);
   fmul_pre(acc,pre);
 }
 
@@ -246,6 +270,18 @@ static inline void poly(elem_t acc, uint8_t* text, int tlen, const precomp_t pre
   }
 }
 
+static inline void poly4(elem_t acc, uint8_t* text, int tlen, const precomp_t pre) {
+  acc[0] = 0;
+  acc[1] = 0;
+  int blocks = tlen / 64;
+  for (int i = 0; i < blocks; i++) {
+    update4(acc,text + 64*i, pre);
+  }
+  if (tlen % 64 > 0) {
+    poly(acc,text + 64*blocks, tlen % 64, pre);
+  }
+}
+
 void ghash(uint8_t* tag, uint8_t* text, int tlen, uint8_t* key) {
   uint64_t acc[2] = {0};
   uint64_t pre[256] = {0};
@@ -253,7 +289,7 @@ void ghash(uint8_t* tag, uint8_t* text, int tlen, uint8_t* key) {
   prepare(pre,acc);
   //pre[0] = acc[0];
   //pre[1] = acc[1];
-  poly(acc,text,tlen,pre);
+  poly4(acc,text,tlen,pre);
   decode(tag,acc);
 }
 	  

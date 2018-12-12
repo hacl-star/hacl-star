@@ -1,12 +1,30 @@
-# FSTAR_HOME ?= $(HACL_HOME)/../FStar
+FSTAR_HOME ?= ../../../FStar
+HACL_HOME  ?= ../..
+
+CACHE_DIR = ../.cache
+HINT_DIR  = ../.hints
 
 include $(HACL_HOME)/Makefile.include
 
-FSTAR_INCLUDES+=--include $(HACL_HOME)/lib --include $(HACL_HOME)/lib/fst --include $(HACL_HOME)/specs/lemmas
+FSTAR_INCLUDE_DIRS = \
+  $(KREMLIN_HOME)/kremlib \
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/lib/fst
 
-Lib.Buffer.fst-verify: Lib.Buffer.fst
-	$(FSTAR) --cache_checked_modules $< #--expose_interfaces Lib.IntTypes.fst $<
+FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) \
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
-Lib.RawIntTypes.fst-verify: Lib.RawIntTypes.fst
-	$(FSTAR) --cache_checked_modules --expose_interfaces Lib.IntTypes.fst $<
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
+ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
+
+# Targets for interactive mode
+
+%.fst-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints

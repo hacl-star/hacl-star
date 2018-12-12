@@ -75,7 +75,7 @@ stage2: $(OUT_DIR)/test.exe
 else
 lib:
 	rm -f .depend && $(MAKE) .depend
-	rm -f $(OUTPUT_DIR)/Hacl_Impl_Frodo_Params.krml
+	rm -f $(CACHE_DIR)/Hacl.Impl.Frodo.Params.fst.checked
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
 
@@ -126,8 +126,24 @@ ROOTS = Hacl.Test.Frodo.fst
 
 include .depend
 
-# Admit SMT queries for modules in FStar, LowStar, C, and Spec namespaces
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked $(CACHE_DIR)/Spec.%.checked: | .depend $(CACHE_DIR)/prims.fst.checked
+# Admit SMT queries for modules in FStar, LowStar, C, Lib, and Spec namespaces
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/LowStar.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/C.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/Lib.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/Spec.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
@@ -179,7 +195,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_INPUTS) | .depend
 	-bundle 'Hacl.SHA3=Hacl.Impl.SHA3,Hacl.SHA3' \
 	-library 'Hacl.AES128,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
-	-add-include '"c/Lib_Print.h"' \
+	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -210,7 +226,7 @@ ALL_SOURCES = \
   include/random.c \
   include/$(KECCAK) \
   include/clearwords.c \
-  $(HACL_HOME)/lib/c/Lib_Print.c
+  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
 	$(LWEKE_HOME)/objs/aes/aes.o \

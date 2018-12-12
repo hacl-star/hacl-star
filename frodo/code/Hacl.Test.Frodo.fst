@@ -7,7 +7,7 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Print
+open Lib.PrintBuffer
 
 open Hacl.Impl.Frodo.KEM
 open Hacl.Frodo.KEM
@@ -18,11 +18,11 @@ open Frodo.Params
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq -Spec.Frodo.KEM.KeyGen -Spec.Frodo.KEM.Encaps -Spec.Frodo.KEM.Decaps'"
 
 val test_frodo: 
-  seed: lbuffer uint8 48 ->
-  ss_expected: lbytes crypto_bytes ->
-  pk_expected: lbytes crypto_publickeybytes ->
-  ct_expected: lbytes crypto_ciphertextbytes ->
-  sk_expected: lbytes crypto_secretkeybytes ->
+  seed: lbytes 48ul ->
+  ss_expected: ilbuffer uint8 crypto_bytes ->
+  pk_expected: ilbuffer uint8 crypto_publickeybytes ->
+  ct_expected: ilbuffer uint8 crypto_ciphertextbytes ->
+  sk_expected: ilbuffer uint8 crypto_secretkeybytes ->
   Stack unit
     (requires
       fun h ->
@@ -30,32 +30,25 @@ val test_frodo:
         live h sk_expected)
     (ensures fun h0 r h1 -> True)
 let test_frodo seed ss_expected pk_expected ct_expected sk_expected =
-  LowStar.Buffer.recall state;
-  push_frame ();
+  recall state;
   randombytes_init_ seed;
+  push_frame ();
   let pk_len = crypto_publickeybytes in
   let sk_len = crypto_secretkeybytes in
   let ct_len = crypto_ciphertextbytes in
   let ss_len = crypto_bytes in
-  assert_norm (v crypto_publickeybytes =
-      v bytes_seed_a + (v params_logq * v params_n * v params_nbar) / 8);
-  assert_norm (v crypto_ciphertextbytes =
-      ((v params_nbar * v params_n + v params_nbar * v params_nbar) * v params_logq) / 8 +
-      v crypto_bytes);
-  assert_norm (v crypto_secretkeybytes =
-      v crypto_bytes + v crypto_publickeybytes + 2 * v params_n * v params_nbar);
-  let pk = create #_ #(v crypto_publickeybytes) pk_len (u8 0) in
-  let sk = create #_ #(v sk_len) sk_len (u8 0) in
-  let ss1 = create #_ #(v ss_len) ss_len (u8 0) in
-  let ct = create #_ #(v ct_len) ct_len (u8 0) in
-  let ss2 = create #_ #(v ss_len) ss_len (u8 0) in
+  let pk = create pk_len (u8 0) in
+  let sk = create sk_len (u8 0) in
+  let ss1 = create ss_len (u8 0) in
+  let ct = create ct_len (u8 0) in
+  let ss2 = create ss_len (u8 0) in
   let _ = crypto_kem_keypair pk sk in
   let _ = crypto_kem_enc ct ss1 pk in
   let _ = crypto_kem_dec ss2 ct sk in
   print_compare_display pk_len pk pk_expected;
   print_compare_display sk_len sk sk_expected;
   print_compare_display ss_len ss1 ss_expected;
-  print_compare_display ss_len ss1 ss2;
+  print_compare_display ss_len ss2 ss_expected;
   print_compare_display ct_len ct ct_expected;
   pop_frame ()
 
@@ -67,7 +60,7 @@ let u8 n = u8 n
 // The rest verifies for params_n = 64
 // It expectedly fails for FrodoKEM-{640,976}.
 
-let test1_ss_expected: b: lbytes crypto_bytes {recallable b} =
+let test1_ss_expected: b: ilbuffer uint8 crypto_bytes {recallable b} =
   [@ inline_let ]let l =
     [
       u8 0xdf; u8 0xc5; u8 0x2a; u8 0x95; u8 0x6c; u8 0xe4; u8 0xbc; u8 0xa5; u8 0x53; u8 0x70;
@@ -76,7 +69,7 @@ let test1_ss_expected: b: lbytes crypto_bytes {recallable b} =
   in
   createL_global l
 
-let test1_pk_expected: b: lbytes crypto_publickeybytes {recallable b} =
+let test1_pk_expected: b: ilbuffer uint8 crypto_publickeybytes {recallable b} =
   [@ inline_let ]let l =
     [
       u8 0x92; u8 0x44; u8 0x4d; u8 0x91; u8 0xa2; u8 0xad; u8 0xad; u8 0x05; u8 0x2c; u8 0xa2;
@@ -181,7 +174,7 @@ let test1_pk_expected: b: lbytes crypto_publickeybytes {recallable b} =
   in
   createL_global l
 
-let test1_ct_expected: b: lbytes crypto_ciphertextbytes {recallable b} =
+let test1_ct_expected: b: ilbuffer uint8 crypto_ciphertextbytes {recallable b} =
   [@ inline_let ]let l =
     [
       u8 0x9d; u8 0x0e; u8 0x6e; u8 0xec; u8 0xc3; u8 0xd0; u8 0xa5; u8 0x9f; u8 0xba; u8 0xf9;
@@ -298,7 +291,7 @@ let test1_ct_expected: b: lbytes crypto_ciphertextbytes {recallable b} =
   in
   createL_global l
 
-let test1_sk_expected: b: lbytes crypto_secretkeybytes {recallable b} =
+let test1_sk_expected: b: ilbuffer uint8 crypto_secretkeybytes {recallable b} =
   [@ inline_let ]let l: list uint8 =
     [
       u8 0x4b; u8 0x62; u8 0x2d; u8 0xe1; u8 0x35; u8 0x01; u8 0x19; u8 0xc4; u8 0x5a; u8 0x9f;
@@ -507,7 +500,7 @@ let test1_sk_expected: b: lbytes crypto_secretkeybytes {recallable b} =
   in
   createL_global l
 
-let seed: b: lbuffer uint8 48 {recallable b} =
+let seed: b: ilbuffer uint8 48ul {recallable b} =
   [@ inline_let ]let l =
     [
       u8 0x64; u8 0x33; u8 0x5b; u8 0xf2; u8 0x9e; u8 0x5d; u8 0xe6; u8 0x28; u8 0x42; u8 0xc9;
@@ -526,5 +519,9 @@ let main () =
   recall test1_pk_expected;
   recall test1_ct_expected;
   recall test1_sk_expected;
-  test_frodo seed test1_ss_expected test1_pk_expected test1_ct_expected test1_sk_expected;
+  push_frame();
+  let seed' = create 48ul (u8 0) in
+  copy seed' seed;
+  test_frodo seed' test1_ss_expected test1_pk_expected test1_ct_expected test1_sk_expected;
+  pop_frame();
   C.EXIT_SUCCESS

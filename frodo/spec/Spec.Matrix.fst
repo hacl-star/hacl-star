@@ -32,7 +32,7 @@ val index_lt_s:
 let index_lt_s n1 n2 i j =
   assert (j * n1 + i <= (n2 - 1) * n1 + n1 - 1)
 
-// This proof is fragile; we set the Z3 seed to a value known to succeed
+// This proof is fragile
 private
 val index_neq:
     #n1:size_nat
@@ -42,7 +42,6 @@ val index_neq:
   -> i':nat{i' < n1}
   -> j':nat{j' < n2}
   -> Lemma (((i', j') <> (i, j) ==> (i' * n2 + j' <> i * n2 + j) /\ i' * n2 + j' < n1 * n2))
-#reset-options "--max_fuel 0 --max_ifuel 1 --z3seed 2"
 let index_neq #n1 #n2 i j i' j' =
   index_lt n1 n2 i' j';
   if i' < i then
@@ -56,8 +55,6 @@ let index_neq #n1 #n2 i j i' j' =
     assert (i * n2 + j < n2 * (i + 1));
     assert (i * n2 + j < n2 * i' + j')
     end
-
-#reset-options "--max_fuel 0 --max_ifuel 0"
 
 /// Matrices as flat sequences
 
@@ -428,8 +425,8 @@ val matrix_to_lbytes:
   -> #n2:size_nat{2 * n1 * n2 <= max_size_t}
   -> m:matrix n1 n2
   -> res:lbytes (2 * n1 * n2)
-    {forall (i:size_nat{i < n1 * n2}) (k:size_nat{k < 2}).
-      matrix_to_lbytes_fc #n1 #n2 m res i k}
+     {forall (i:size_nat{i < n1 * n2}) (k:size_nat{k < 2}).
+      matrix_to_lbytes_fc #n1 #n2 m res i k} 
 let matrix_to_lbytes #n1 #n2 m =
   let res = Seq.create (2 * n1 * n2) (u8 0) in
   Loops.repeati_inductive (n1 * n2)

@@ -48,8 +48,20 @@ ROOTS = Hacl.Test.SHA3.fst
 
 include .depend
 
-# Admit SMT queries for modules in FStar, LowStar, and C
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked: | .depend
+# Admit SMT queries for modules in FStar, LowStar, C, and Lib
+$(CACHE_DIR)/FStar.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/LowStar.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/C.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/Lib.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
@@ -83,7 +95,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Hacl.SHA3=Hacl.Impl.*,Hacl.SHA3' \
 	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
-	-add-include '"c/Lib_Print.h"' \
+	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -112,7 +124,7 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_Print.c
+  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 

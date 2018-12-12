@@ -19,6 +19,13 @@ let sec_int_t (t:inttype) = pub_int_t t
 
 let sec_int_v #t (u:sec_int_t t) = pub_int_v #t u
 
+(*
+let uint_v #t #l (u:uint_t t l) : n:nat{n <= maxint t} =
+  match l with
+  | PUB -> pub_int_v #t u
+  | SEC -> sec_int_v #t u
+*)
+
 let uintv_extensionality #t #l a b =
   match t with
   | U1   -> ()
@@ -41,33 +48,15 @@ let uint #t #l x =
   | U64 -> UInt64.uint_to_t x
   | U128 -> UInt128.uint_to_t x
 
-let u8 x : uint8  = UInt8.uint_to_t x
-
-let u16 x : uint16 = UInt16.uint_to_t x
-
 let u16_us x = x
-
-let u32 x : uint32 = UInt32.uint_to_t x
-
 let u32_ul x = x
-
-let u64 x : uint64 = UInt64.uint_to_t x
-
 let u64_uL x = x
 
-let u128 x : uint128 = UInt128.uint_to_t x
+let u128 x : uint128 = FStar.UInt128.uint64_to_uint128 (u64 x)
 
-inline_for_extraction
-let size_ x : uint_t U32 PUB = UInt32.uint_to_t x
+let size_v_size_lemma s = ()
+let uint_v_size_lemma s = ()
 
-inline_for_extraction
-let byte_ x : uint_t U8 PUB = UInt8.uint_to_t x
-
-inline_for_extraction
-let size x = size_ x
-
-inline_for_extraction
-let byte x = byte_ x
 
 let size_to_uint32 x = x <: UInt32.t
 
@@ -80,7 +69,7 @@ let nat_to_uint #t #l x : uint_t t l =
   | U16 -> u16 x
   | U32 -> u32 x
   | U64 -> u64 x
-  | U128 -> u128 x
+  | U128 -> UInt128.uint_to_t x
 
 #reset-options "--z3rlimit 1000 --max_fuel 0"
 #set-options "--lax" // TODO: remove this
@@ -134,6 +123,8 @@ let add_mod #t #l a b =
   | U64 -> (UInt64.add_mod a b)
   | U128 -> (UInt128.add_mod a b)
 
+let add_mod_lemma #t #l a b = ()
+
 let add #t #l a b =
   match t with
   | U1 -> (UInt8.add a b)
@@ -142,6 +133,8 @@ let add #t #l a b =
   | U32 -> (UInt32.add a b)
   | U64 -> (UInt64.add a b)
   | U128 -> (UInt128.add a b)
+
+let add_lemma #t #l a b = ()
 
 let incr #t #l a =
   match t with
@@ -152,6 +145,8 @@ let incr #t #l a =
   | U64 -> (UInt64.add a 0x1uL)
   | U128 -> (UInt128.add a (UInt128.uint_to_t 1))
 
+let incr_lemma #t #l a = ()
+
 let mul_mod #t #l a b =
   match t with
   | U1 -> (UInt8.mul_mod a b)
@@ -159,6 +154,8 @@ let mul_mod #t #l a b =
   | U16 -> (UInt16.mul_mod a b)
   | U32 -> (UInt32.mul_mod a b)
   | U64 -> (UInt64.mul_mod a b)
+
+let mul_mod_lemma #t #l a b = ()
 
 let mul #t #l a b =
   match t with
@@ -168,7 +165,11 @@ let mul #t #l a b =
   | U32 -> (UInt32.mul a b)
   | U64 -> (UInt64.mul a b)
 
+let mul_lemma #t #l a b = ()
+
 let mul64_wide a b = UInt128.mul_wide a b
+
+let mul64_wide_lemma a b = ()
 
 let sub_mod #t #l a b =
   match t with
@@ -179,14 +180,18 @@ let sub_mod #t #l a b =
   | U64 -> (UInt64.sub_mod a b)
   | U128 -> (UInt128.sub_mod a b)
 
+let sub_mod_lemma #t #l a b = ()
+
 let sub #t #l a b =
   match t with
-  | U1 -> (UInt8.sub a b)
+  | U1 -> (UInt8.sub a b) 
   | U8 -> (UInt8.sub a b)
   | U16 -> (UInt16.sub a b)
   | U32 -> (UInt32.sub a b)
   | U64 -> (UInt64.sub a b)
   | U128 -> (UInt128.sub a b)
+
+let sub_lemma #t #l a b = ()
 
 let decr #t #l a =
   match t with
@@ -197,9 +202,11 @@ let decr #t #l a =
   | U64 -> (UInt64.sub a 0x1uL)
   | U128 -> (UInt128.sub a (UInt128.uint_to_t 1))
 
+let decr_lemma #t #l a = ()
+
 let logxor #t #l a b =
   match t with
-  | U1 -> (UInt8.logxor a b)
+  | U1 -> (UInt8.logxor a b) 
   | U8 -> (UInt8.logxor a b)
   | U16 -> (UInt16.logxor a b)
   | U32 -> (UInt32.logxor a b)
@@ -242,6 +249,8 @@ let shift_right #t #l a b =
   | U64 -> (UInt64.shift_right a b)
   | U128 -> (UInt128.shift_right a b)
 
+let shift_right_lemma #t #l a b = ()
+
 let shift_left #t #l a b =
   match t with
   | U1 -> (UInt8.shift_left a b)
@@ -250,6 +259,8 @@ let shift_left #t #l a b =
   | U32 -> (UInt32.shift_left a b)
   | U64 -> (UInt64.shift_left a b)
   | U128 -> (UInt128.shift_left a b)
+
+let shift_left_lemma #t #l a b = ()
 
 let rotate_right #t #l a b =
   (logor (shift_right a b)  (shift_left a (sub #U32 (size (bits t)) b)))
@@ -340,6 +351,8 @@ let div #t x y =
   | U32 -> UInt32.div x y
   | U64 -> UInt64.div x y
 
+let div_lemma #t x y = ()
+
 let mod #t x y =
   match t with
   | U1  -> UInt8.rem x y
@@ -347,6 +360,8 @@ let mod #t x y =
   | U16 -> UInt16.rem x y
   | U32 -> UInt32.rem x y
   | U64 -> UInt64.rem x y
+
+let mod_lemma #t x y = ()
 
 let eq #t x y =
   match t with
@@ -357,6 +372,8 @@ let eq #t x y =
   | U64 -> UInt64.eq x y
   | U128 -> UInt128.eq x y
 
+let eq_lemma #t x y = ()
+
 let ne #t x y =
   match t with
   | U1  -> not (UInt8.eq x y)
@@ -365,6 +382,8 @@ let ne #t x y =
   | U32 -> not (UInt32.eq x y)
   | U64 -> not (UInt64.eq x y)
   | U128 -> not (UInt128.eq x y)
+
+let ne_lemma #t x y = ()
 
 let lt #t x y =
   match t with
@@ -375,6 +394,8 @@ let lt #t x y =
   | U64 -> UInt64.lt x y
   | U128 -> UInt128.lt x y
 
+let lt_lemma #t x y = ()
+
 let lte #t x y =
   match t with
   | U1  -> UInt8.lte x y
@@ -383,6 +404,8 @@ let lte #t x y =
   | U32 -> UInt32.lte x y
   | U64 -> UInt64.lte x y
   | U128 -> UInt128.lte x y
+
+let lte_lemma #t x y = ()
 
 let gt #t x y =
   match t with
@@ -393,6 +416,8 @@ let gt #t x y =
   | U64 -> UInt64.gt x y
   | U128 -> UInt128.gt x y
 
+let gt_lemma #t x y = ()
+
 let gte #t x y =
   match t with
   | U1  -> UInt8.gte x y
@@ -401,4 +426,6 @@ let gte #t x y =
   | U32 -> UInt32.gte x y
   | U64 -> UInt64.gte x y
   | U128 -> UInt128.gte x y
+
+let gte_lemma #t x y = ()
 

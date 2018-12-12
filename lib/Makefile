@@ -1,46 +1,71 @@
+FSTAR_HOME ?= ../../FStar
+HACL_HOME  ?= ..
+
+CACHE_DIR = .cache
+HINT_DIR  = .hints
+
 include ../Makefile.include
 
-CACHE_DIR     = .cache
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
+.PHONY: all verify clean
 
-all: verify
+all:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) verify
 
 FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/fst
 
-FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
-
-FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
+FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) \
-  --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
-FILES = $(addprefix fst/, \
-	Lib.IntTypes.fst \
-	Lib.RawIntTypes.fst \
-	Lib.Sequence.fst \
-	Lib.ByteSequence.fst \
-	Lib.Buffer.fst \
-	Lib.ByteBuffer.fst)
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
-FIXME = $(addprefix fst/, \
-	Lib.IntVector.fst \
-	Lib.LoopCombinators.fst)
+ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-%.fst-v: %.fst
-	$(FSTAR) $(FSTAR_INCLUDES) --use_hints $<
+ALL_SOURCES = $(wildcard fst/*.fst) $(wildcard c/*.fst) $(wildcard *.fsti)
 
-%.fsti-v: %.fsti
-	$(FSTAR) $(FSTAR_INCLUDES) --use_hints $<
+FIXME = fst/Lib.IntVector.fst Lib.IntVector.fsti
 
-%.fst-h: %.fst
-	$(FSTAR) $(FSTAR_INCLUDES) --record_hints $<
+ROOTS = $(filter-out $(FIXME),$(ALL_SOURCES))
 
-%.fsti-h: %.fsti
-	$(FSTAR) $(FSTAR_INCLUDES) --record_hints $<
+.depend:
+	$(info $(ROOTS))
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
 
+include .depend
 
-verify: $(addsuffix -v, $(FILES))
-hints: $(addsuffix -h, $(FILES))
+$(HINT_DIR):
+	mkdir -p $@
+
+# Admit SMT queries for modules in the FStar namespace and prims
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked: | .depend
+	$(FSTAR) $< --admit_smt_queries true && \
+	touch $@
+
+$(CACHE_DIR)/%.checked: | .depend $(HINT_DIR)
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
+	touch $@
+
+verify: $(addsuffix .checked, $(addprefix $(CACHE_DIR)/,$(notdir $(ROOTS))))
+
+# Targets for interactive mode
+
+%.fst-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
+
+# Clean targets
+
+SHELL=/bin/bash
+
+clean:
+	rm -rf $(CACHE_DIR)
+
+distclean: clean

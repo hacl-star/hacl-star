@@ -14,6 +14,7 @@ module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 module Spec = Spec.SHA2
 
+
 ///
 /// SHA-256
 ///
@@ -24,17 +25,22 @@ module Spec = Spec.SHA2
 type word_t = Spec.word_t Spec.SHA2_256
 type limb_t = Spec.limb_t Spec.SHA2_256
 
-type block_wp = lbuffer word_t Spec.size_block_w
-type hash_wp  = lbuffer word_t Spec.size_hash_w
-type ws_wp    = lbuffer word_t (Spec.size_kTable Spec.SHA2.SHA2_256)
+type block_wp = lbuffer word_t (size Spec.size_block_w)
+type hash_wp  = lbuffer word_t (size Spec.size_hash_w)
+type ws_wp    = lbuffer word_t (size (Spec.size_kTable Spec.SHA2.SHA2_256))
 
-type block_p  = lbuffer uint8 (Spec.size_block Spec.SHA2_256)
+type block_p  = lbuffer uint8 (size (Spec.size_block Spec.SHA2_256))
 
 
 
-let const_kTable = icreateL_global Spec.kTable_list_224_256
-let const_h0Table = icreateL_global Spec.h0Table_list_256
-let const_opTable = icreateL_global Spec.opTable_list_224_256
+let const_kTable: x:ilbuffer uint32 64ul{witnessed x (Spec.SHA2.kTable Spec.SHA2.SHA2_256) /\ recallable x} =
+  createL_global Spec.kTable_list_224_256
+
+let const_h0Table: x:ilbuffer uint32 8ul{witnessed x (Spec.SHA2.h0Table Spec.SHA2.SHA2_256) /\ recallable x} =
+  createL_global Spec.h0Table_list_256
+
+let const_opTable: x:ilbuffer (rotval U32) 12ul{witnessed x (Spec.SHA2.opTable Spec.SHA2.SHA2_256) /\ recallable x} =
+  createL_global Spec.opTable_list_224_256
 
 
 val get_kTable:
@@ -47,21 +53,20 @@ val get_kTable:
 [@ Substitute ]
 let get_kTable s =
   recall_contents const_kTable (Spec.kTable Spec.SHA2_256);
-  iindex const_kTable s
+  index const_kTable s
 
 val set_h0Table:
-  buf: lbuffer word_t Spec.size_hash_w ->
+  buf: lbuffer word_t (size Spec.size_hash_w) ->
   Stack unit
     (requires (fun h -> live h buf))
     (ensures  (fun h0 z h1 -> modifies1 buf h0 h1
-                         /\ h1.[buf] == Spec.h0Table Spec.SHA2_256 ))
+                         /\ h1.[buf] == Spec.h0Table Spec.SHA2_256))
 
 [@ Substitute ]
 let set_h0Table s =
   recall_contents const_h0Table (Spec.h0Table Spec.SHA2_256);
-  let h0 = ST.get () in
   assume(disjoint s const_h0Table);
-  icopy s (size Spec.size_hash_w) const_h0Table
+  copy s const_h0Table
 
 
 val get_opTable:
@@ -74,7 +79,7 @@ val get_opTable:
 [@ Substitute ]
 let get_opTable s =
   recall_contents const_opTable (Spec.opTable Spec.SHA2_256);
-  iindex const_opTable s
+  index const_opTable s
 
 
 
@@ -109,16 +114,18 @@ val _sigma0: x:uint32 ->
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec._sigma0 Spec.SHA2_256 x))
 
-let _sigma0 x = (x >>>. get_opTable 6ul) ^. ((x >>>. get_opTable 7ul) ^. (x >>. get_opTable 8ul))
+let _sigma0 x =
+  let n = get_opTable 3ul in
+  (x >>>. get_opTable 6ul) ^. ((x >>>. get_opTable 7ul) ^. (x >>. n))
 
 val _sigma1: x: uint32 ->
   Stack uint32
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec._sigma1 Spec.SHA2_256 x))
 
-let _sigma1 x = (x >>>. get_opTable 9ul) ^. ((x >>>. get_opTable 10ul) ^. (x >>. get_opTable 11ul))
-
-
+let _sigma1 x =
+  let n = get_opTable 11ul in
+  (x >>>. get_opTable 9ul) ^. ((x >>>. get_opTable 10ul) ^. (x >>. n))
 
 val step_ws0:
     s: ws_wp
@@ -131,6 +138,8 @@ val step_ws0:
 
 let step_ws0 s b i = s.(i) <- b.(i)
 
+
+#reset-options "--z3rlimit 50"
 
 val step_ws1:
     s: ws_wp
@@ -244,7 +253,7 @@ let compress hash block =
   let wsTable = create (size (Spec.size_kTable Spec.SHA2_256)) (u32 0) in
   let hash0 = create (size Spec.size_hash_w) (u32 0) in
   ws wsTable block;
-  copy hash0 (size Spec.size_hash_w) hash;
+  copy hash0 hash;
   shuffle hash wsTable;
   let h0 = ST.get () in
   loop_nospec #h0 (size Spec.size_hash_w) hash
@@ -255,7 +264,7 @@ let compress hash block =
   pop_frame ()
 
 
-val truncate: hash:lbuffer uint8 (Spec.size_hash Spec.SHA2_256) -> hw:hash_wp ->
+val truncate: hash:lbuffer uint8 (size (Spec.size_hash Spec.SHA2_256)) -> hw:hash_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h hw /\ disjoint hash hw))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
@@ -263,11 +272,11 @@ val truncate: hash:lbuffer uint8 (Spec.size_hash Spec.SHA2_256) -> hw:hash_wp ->
 
 let truncate hash hw =
   let h0 = ST.get () in
-  salloc_nospec h0 (size Spec.size_hash_w *. size (Spec.size_word Spec.SHA2_256)) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
+  salloc_nospec h0 (size Spec.size_hash_w *. size (Spec.size_word Spec.SHA2_256)) (u8 0) (Ghost.hide (loc hash))
   (fun hash_full ->
-    uints_to_bytes_be hash_full (size Spec.size_hash_w) hw;
-    let hash_final = sub #uint8 #(Spec.size_hash_w * (Spec.size_word Spec.SHA2_256)) #(Spec.size_hash Spec.SHA2_256) hash_full (size 0) (size (Spec.size_hash Spec.SHA2_256)) in
-    copy hash (size (Spec.size_hash Spec.SHA2_256)) hash_final)
+    uints_to_bytes_be (size Spec.size_hash_w) hash_full hw;
+    let hash_final = sub hash_full (size 0) (size (Spec.size_hash Spec.SHA2_256)) in
+    copy hash hash_final)
 
 
 (* Definition of the function returning the number of padding blocks for a single input block *)
@@ -278,7 +287,7 @@ let number_blocks_padding (len:size_t{v len <= Spec.size_block Spec.SHA2_256}) :
 
 (* Definition of the padding function for a single input block *)
 val pad:
-    blocks: lbuffer uint8 (2 * Spec.size_block Spec.SHA2_256)
+    blocks: lbuffer uint8 (size (2 * Spec.size_block Spec.SHA2_256))
   -> prev: uint64
   -> last: buffer uint8
   -> len: size_t{ v len == length last
@@ -294,7 +303,7 @@ let pad blocks prev last len =
   let h0 = ST.get () in
   loop_nospec #h0 len blocks
   (fun i ->
-    let x = index #uint8 #(v len) last i in
+    let x = index #MUT #uint8 #len last i in
     blocks.(i) <- x);
   // Write the 0x80 byte and the zeros in the padding
   blocks.(len) <- u8 0x80;
@@ -312,9 +321,9 @@ val update_block: hash:hash_wp -> block:block_p ->
 
 let update_block hash block =
   let h0 = ST.get () in
-  salloc_nospec h0 (size Spec.size_block_w) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
+  salloc_nospec h0 (size Spec.size_block_w) (u32 0) (Ghost.hide (loc hash))
   (fun blockw ->
-    uints_from_bytes_be blockw (size Spec.size_block_w) block;
+    uints_from_bytes_be blockw block;
     compress hash blockw)
 
 
@@ -340,7 +349,7 @@ val update_last:
 
 let update_last hash prev last len =
   let h0 = ST.get () in
-  salloc_nospec h0 (2ul *. size (Spec.size_block Spec.SHA2_256)) (u8 0) (Ghost.hide (LowStar.Buffer.loc_buffer hash))
+  salloc_nospec h0 (2ul *. size (Spec.size_block Spec.SHA2_256)) (u8 0) (Ghost.hide (loc hash))
   (fun blocks ->
     pad blocks prev last len;
     let block0 = sub blocks (size 0) (size (Spec.size_block Spec.SHA2_256)) in
@@ -369,7 +378,7 @@ let update hash input len =
     hash
 
 
-val finish: hash:lbuffer uint8 (Spec.size_hash Spec.SHA2_256) -> hw:hash_wp ->
+val finish: hash:lbuffer uint8 (size (Spec.size_hash Spec.SHA2_256)) -> hw:hash_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h hw /\ disjoint hash hw))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
@@ -378,7 +387,7 @@ let finish hash hw = truncate hash hw
 
 
 val hash:
-    output: lbuffer uint8 (Spec.size_hash Spec.SHA2_256)
+    output: lbuffer uint8 (size (Spec.size_hash Spec.SHA2_256))
   -> input: buffer uint8
   -> len: size_t{length input == v len /\ v len <= Spec.max_input Spec.SHA2_256} ->
   Stack unit
@@ -387,7 +396,7 @@ val hash:
 
 let hash output input len =
   let h0 = ST.get () in
-  salloc_nospec h0 (size Spec.size_hash_w) (u32 0) (Ghost.hide (LowStar.Buffer.loc_buffer output))
+  salloc_nospec h0 (size Spec.size_hash_w) (u32 0) (Ghost.hide (loc output))
   (fun hash ->
     init hash;
     update hash input len;

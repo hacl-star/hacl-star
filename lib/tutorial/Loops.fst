@@ -86,7 +86,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.LoopCombinators
 open Lib.Buffer
-open Lib.Print
+open Lib.PrintBuffer
 
 module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
@@ -133,34 +133,34 @@ let reverse_spec n s =
 /// attribute will result in Kremlin dropping the whole definition as
 /// non-Low*. A telltale sign is Kremlin trying to extract
 /// definitions in ``Lib.Sequence``.
-val reverse: n:size_nat{0 < n} -> a:lbuffer uint8 n -> Stack unit
+val reverse: n:size_t{0 < v n} -> a:lbuffer uint8 n -> Stack unit
   (requires fun h0 -> live h0 a)
   (ensures  fun h0 _ h1 ->
-    modifies1 a h0 h1 /\ as_seq h1 a == reverse_spec n (as_seq h0 a))
+    modifies1 a h0 h1 /\ as_seq h1 a == reverse_spec (v n) (as_seq h0 a))
 let reverse n a =
   push_frame();
   // We use a local buffer as the Low* state
-  let b = create (size n) (u8 0) in
+  let b = create n (u8 0) in
   let h0 = ST.get() in
   // We annotate this so that Kremlin doesn't try to extract it
   [@ inline_let]
-  let spec h0 = reverse_inner n (as_seq h0 a) in
-  loop h0 (size n) (reverse_state n)
+  let spec h0 = reverse_inner (v n) (as_seq h0 a) in
+  loop h0 n (reverse_state (v n))
     /// We recover the spec accumulator by viewing the buffer as a sequence
     (fun h i -> as_seq h b)
-    (fun i -> B.loc_buffer b)
+    (fun i -> loc b)
     spec
     (fun i ->
       // This is the inductive hypothesis, for the sake of the example.
       // The explicit assertion is of course unnecessary
       let h1 = ST.get() in
       assert (as_seq h1 b ==
-              repeat (v i) (reverse_state n) (spec h0) (Seq.create n (u8 0)));
-      b.(i) <- a.(size n -! i -! size 1);
+              repeat (v i) (reverse_state (v n)) (spec h0) (Seq.create (v n) (u8 0)));
+      b.(i) <- a.(n -! i -! size 1);
       let h2 = ST.get() in
       // This is what we know at this point from the IH
       assert (as_seq h2 b == spec h0 (v i)
-        (repeat (v i) (reverse_state n) (spec h0) (Seq.create n (u8 0))));
+        (repeat (v i) (reverse_state (v n)) (spec h0) (Seq.create (v n) (u8 0))));
       // And this is what we need to prove. This follows from the recursive
       // equation of ``repeat`, using 1 unit of fuel, but its definition is hidden
       // behind ``Lib.Sequence.fsti``.
@@ -169,9 +169,9 @@ let reverse n a =
       //  (repeat (v i + 1) (reverse_state n) (spec h0) (Seq.create n (u8 0))))
       //
       // We thus apply a lemma to unfold ``repeat``
-      unfold_repeat_gen n (reverse_state n) (spec h0) (Seq.create n (u8 0)) (v i)
+      unfold_repeat_gen (v n) (reverse_state (v n)) (spec h0) (Seq.create (v n) (u8 0)) (v i)
     );
-  copy a (size n) b;
+  copy a b;
   pop_frame()
 
 
@@ -193,23 +193,23 @@ val reverse_inplace_spec: n:size_nat -> s:lseq uint8 n -> lseq uint8 n
 let reverse_inplace_spec n s =
   repeat (n / 2) (reverse_inplace_state n) (reverse_inplace_inner n) s
 
-val reverse_inplace: n:size_nat{0 < n} -> a:lbuffer uint8 n -> Stack unit
+val reverse_inplace: n:size_t{0 < v n} -> a:lbuffer uint8 n -> Stack unit
   (requires fun h0 -> live h0 a)
   (ensures  fun h0 _ h1 ->
     modifies1 a h0 h1 /\ as_seq h1 a ==
-    reverse_inplace_spec n (as_seq h0 a))
+    reverse_inplace_spec (v n) (as_seq h0 a))
 let reverse_inplace n a =
   push_frame();
   let h0 = ST.get() in
-  loop h0 (size n /. size 2) (reverse_inplace_state n)
+  loop h0 (n /. size 2) (reverse_inplace_state (v n))
     (fun h i -> as_seq h a)
-    (fun i -> B.loc_buffer a)
-    (fun h0 -> reverse_inplace_inner n)
+    (fun i -> loc a)
+    (fun h0 -> reverse_inplace_inner (v n))
     (fun i ->
-      unfold_repeat (n / 2) (reverse_inplace_state n) (reverse_inplace_inner n) (as_seq h0 a) (v i);
+      unfold_repeat (v n / 2) (reverse_inplace_state (v n)) (reverse_inplace_inner (v n)) (as_seq h0 a) (v i);
       let tmp = a.(i) in
-      a.(i) <- a.(size n -! i -! size 1);
-      a.(size n -! i -! size 1) <- tmp
+      a.(i) <- a.(n -! i -! size 1);
+      a.(n -! i -! size 1) <- tmp
     );
   pop_frame()
 
@@ -232,12 +232,12 @@ val fib: n:size_nat -> Stack nat
   (ensures  fun h0 res h1 -> modifies0 h0 h1 /\ res == fib_spec n)
 let fib n =
   push_frame();
-  let a:lbuffer nat 1 = create (size 1) 0 in
-  let b:lbuffer nat 1 = create (size 1) 1 in
+  let a = create (size 1) 0 in
+  let b = create (size 1) 1 in
   let h0 = ST.get () in
   loop h0 (size n) (fib_state n)
   (fun h _ -> bget h a 0, bget h b 0)
-  (fun _ -> B.loc_union (B.loc_buffer a) (B.loc_buffer b))
+  (fun _ -> loc a |+| loc b)
   (fun _ -> fib_inner n)
   (fun i ->
     unfold_repeat n (fib_state n) (fib_inner n) (0,1) (size_v i);
@@ -268,81 +268,70 @@ let fib n =
 /// the final memory. The ``salloc1_trivial`` variant doesn't take this argument and
 /// attempts to prove this automatically; it works in most cases.
 
-val set_true_spec: a:lbuffer bool 1 -> mem -> bool -> mem -> GTot Type0
-let set_true_spec a h0 r h1 = B.get h1 a 0 == true /\ r == B.get h0 a 0
+val set_true_spec: a:lbuffer bool (size 1) -> mem -> bool -> mem -> GTot Type0
+let set_true_spec a h0 r h1 = bget h1 a 0 == true /\ r == bget h0 a 0 /\ live h1 a
 
 (** Sets a.(0) to true, returning the previous value *)
-val set_true: a:lbuffer bool 1 -> Stack bool
+val set_true: a:lbuffer bool (size 1) -> Stack bool
   (requires fun h -> live h a)
   (ensures  fun h0 _ h1 -> modifies1 a h0 h1)
 let set_true a =
   let h = ST.get() in
-  let footprint = Ghost.hide (B.loc_buffer a) in
+  let footprint = Ghost.hide (loc a) in
   salloc1_trivial h 1ul true footprint (set_true_spec a h)
     (fun b ->
-      let open LowStar.BufferOps in
       b.(0ul) <- a.(0ul);
       a.(0ul) <- true;
       b.(0ul))
 
 /// Tests
 
-let b0: b:lbuffer uint8 3{B.recallable b} =
+let b1: b:ilbuffer uint8 (size 3){recallable b} =
   [@inline_let]
   let l = [u8 1; u8 2; u8 3] in
-  assert_norm (List.Tot.length l <= max_size_t);
   createL_global l
 
-let b1: b:lbuffer uint8 3{B.recallable b} =
-  [@inline_let]
-  let l = [u8 1; u8 2; u8 3] in
-  assert_norm (List.Tot.length l <= max_size_t);
-  createL_global l
-
-let b2: b:lbuffer uint8 3{B.recallable b} =
+let b2: b:ilbuffer uint8 3ul{recallable b} =
   [@inline_let]
   let l = [u8 3; u8 2; u8 1] in
-  assert_norm (List.Tot.length l <= max_size_t);
   createL_global l
 
-let a0: b:lbuffer uint8 4{B.recallable b} =
+let a1: b:ilbuffer uint8 4ul{recallable b} =
   [@inline_let]
   let l = [u8 1; u8 2; u8 3; u8 4] in
-  assert_norm (List.Tot.length l <= max_size_t);
   createL_global l
 
-let a1: b:lbuffer uint8 4{B.recallable b} =
-  [@inline_let]
-  let l = [u8 1; u8 2; u8 3; u8 4] in
-  assert_norm (List.Tot.length l <= max_size_t);
-  createL_global l
-
-let a2: b:lbuffer uint8 4{B.recallable b} =
+let a2: b:ilbuffer uint8 4ul{recallable b} =
   [@inline_let]
   let l = [u8 4; u8 3; u8 2; u8 1] in
-  assert_norm (List.Tot.length l <= max_size_t);
   createL_global l
 
 val main: unit -> St int
 let main () =
-  recall b0;
-  reverse_inplace 3 b0;
+  push_frame();
+  B.recall b1;
+  B.recall b2;
+  B.recall a1;
+  B.recall a2;
+  [@inline_let]
+  let l0 = [u8 1; u8 2; u8 3] in
+  let b0 : lbuffer uint8 3ul = createL l0 in
+  [@inline_let]
+  let l1 = [u8 1; u8 2; u8 3; u8 4] in
+  let a0 : lbuffer uint8 4ul = createL l1 in  
+  reverse_inplace 3ul b0;
   print_compare_display (size 3) b0 b2;
-  recall b0;
-  reverse 3 b0;
+  reverse 3ul b0;
   print_compare_display (size 3) b0 b1;
-  recall a0;
-  reverse_inplace 4 a0;
+  reverse_inplace 4ul a0;
   print_compare_display (size 4) a0 a2;
-  recall a0;
-  reverse 4 a0;
+  reverse 4ul a0;  
   print_compare_display (size 4) a0 a1;
   let open TestLib in
   let n = fib 10 in
   assume (UInt.fits (fib_spec 10) 32);
   TestLib.checku32 (UInt32.uint_to_t n) 55ul;
-  push_frame();
-  let a = create #_ #1 1ul false in
+  let a = create 1ul false in
   let b = set_true a in
   TestLib.check (a.(size 0));
   TestLib.check (not b);
