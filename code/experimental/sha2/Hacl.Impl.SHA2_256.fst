@@ -60,7 +60,7 @@ val set_h0Table:
   Stack unit
     (requires (fun h -> live h buf))
     (ensures  (fun h0 z h1 -> modifies1 buf h0 h1
-                         /\ h1.[buf] == Spec.h0Table Spec.SHA2_256))
+                         /\ h1.[|buf|] == Spec.h0Table Spec.SHA2_256))
 
 [@ Substitute ]
 let set_h0Table s =
@@ -134,7 +134,7 @@ val step_ws0:
   Stack unit
   (requires (fun h -> live h b /\ live h s /\ disjoint b s))
   (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
-                       /\ h1.[s] == Spec.step_ws0 Spec.SHA2_256 h0.[b] (v i) h0.[s]))
+                       /\ h1.[|s|] == Spec.step_ws0 Spec.SHA2_256 h0.[|b|] (v i) h0.[|s|]))
 
 let step_ws0 s b i = s.(i) <- b.(i)
 
@@ -147,7 +147,7 @@ val step_ws1:
   Stack unit
   (requires (fun h -> live h s))
   (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
-                       /\ h1.[s] == Spec.step_ws1 Spec.SHA2_256 (v i) h0.[s]))
+                       /\ h1.[|s|] == Spec.step_ws1 Spec.SHA2_256 (v i) h0.[|s|]))
 
 let step_ws1 s i =
   let t16 = s.(i -. 16ul) in
@@ -163,7 +163,7 @@ val loop_ws0: s:ws_wp -> b:block_wp ->
   Stack unit
   (requires (fun h -> live h s /\ live h b /\ disjoint s b))
   (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
-                       (* /\ h1.[s] == Spec.loop_ws0 Spec.SHA2_256 h0.[b] h0.[s])) *)
+                       (* /\ h1.[|s|] == Spec.loop_ws0 Spec.SHA2_256 h0.[|b|] h0.[|s|])) *)
 let loop_ws0 s b =
   let h0 = ST.get () in
   loop_nospec #h0 (size 16) s
@@ -174,7 +174,7 @@ val loop_ws1: s: ws_wp ->
   Stack unit
   (requires (fun h -> live h s))
   (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
-                       (* /\ h1.[s] == Spec.loop_ws1 Spec.SHA2_256 h0.[s])) *)
+                       (* /\ h1.[|s|] == Spec.loop_ws1 Spec.SHA2_256 h0.[|s|])) *)
 let loop_ws1 s =
   let h0 = ST.get () in
   loop_nospec #h0 (size (Spec.size_kTable Spec.SHA2_256) -. (size 16)) s
@@ -200,7 +200,7 @@ val shuffle_core:
   Stack unit
   (requires (fun h -> live h s /\ live h wsTable /\ disjoint s wsTable))
   (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
-                       (* /\ h1.[s] == Spec.shuffle_core Spec.SHA2_256 h0.[wsTable] (v t) h0.[s])) *)
+                       (* /\ h1.[|s|] == Spec.shuffle_core Spec.SHA2_256 h0.[|wsTable|] (v t) h0.[|s|])) *)
 
 let shuffle_core hash wsTable i =
   let a0 = hash.(0ul) in
@@ -234,7 +234,7 @@ val shuffle: hash:hash_wp -> wsTable: ws_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h wsTable /\ disjoint hash wsTable))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
-                       (* /\ h1.[hash] == Spec.shuffle Spec.SHA2_256 h0.[wsTable] h0.[hash])) *)
+                       (* /\ h1.[|hash|] == Spec.shuffle Spec.SHA2_256 h0.[|wsTable|] h0.[|hash|])) *)
 
 let shuffle hash wsTable =
   let h0 = ST.get () in
@@ -246,7 +246,7 @@ val compress: hash:hash_wp -> block:block_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h block /\ disjoint hash block))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
-                       (* /\ h1.[hash] == Spec.compress Spec.SHA2_256 h0.[block] h0.[hash])) *)
+                       (* /\ h1.[|hash|] == Spec.compress Spec.SHA2_256 h0.[|block|] h0.[|hash|])) *)
 
 let compress hash block =
   push_frame();
@@ -268,7 +268,7 @@ val truncate: hash:lbuffer uint8 (size (Spec.size_hash Spec.SHA2_256)) -> hw:has
   Stack unit
   (requires (fun h -> live h hash /\ live h hw /\ disjoint hash hw))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
-                       (* /\ h1.[hash] == Spec.truncate Spec.SHA2_256 h0.[hw])) *)
+                       (* /\ h1.[|hash|] == Spec.truncate Spec.SHA2_256 h0.[|hw|])) *)
 
 let truncate hash hw =
   let h0 = ST.get () in
@@ -331,7 +331,7 @@ val init: hash:hash_wp ->
   Stack unit
   (requires (fun h -> live h hash))
   (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                       /\ h1.[hash] == Spec.init Spec.SHA2_256))
+                       /\ h1.[|hash|] == Spec.init Spec.SHA2_256))
 
 let init hash = set_h0Table hash
 

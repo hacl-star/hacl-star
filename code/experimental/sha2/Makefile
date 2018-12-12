@@ -13,6 +13,13 @@ CFLAGS=-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/include
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+
+
+all: test
+
+test: test-sha2_256.exe
+
+
 #
 # SHA2_256
 #
