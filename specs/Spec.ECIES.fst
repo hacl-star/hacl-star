@@ -83,23 +83,22 @@ type key_s (cs:ciphersuite) = lbytes (size_key cs)
 
 val encap:
     cs: ciphersuite
+  -> e: entropy
   -> pk: key_public_s cs
   -> context: lbytes 32 ->
-  Tot (option (key_s cs & key_private_s cs & key_public_s cs))
+  Tot (entropy & (option (key_s cs & key_private_s cs & key_public_s cs)))
 
-let encap cs pk context =
-  match crypto_random (size_key_dh cs) with
-  | None -> None
-  | Some esk ->
-    let epk = DH.secret_to_public (curve_of_cs cs) esk in
-    match DH.dh (curve_of_cs cs) esk pk with
-    | None -> None
-    | Some secret ->
-      let salt = epk @| pk in
-      let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
-      let info = (id_of_cs cs) @| const_label_key @| context in
-      let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
-      Some (key, esk, epk)
+let encap cs e pk context =
+  let e', esk = crypto_random2 e (size_key_dh cs) in
+  let epk = DH.secret_to_public (curve_of_cs cs) esk in
+  match DH.dh (curve_of_cs cs) esk pk with
+  | None -> e', None
+  | Some secret ->
+    let salt = epk @| pk in
+    let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
+    let info = (id_of_cs cs) @| const_label_key @| context in
+    let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
+    e', Some (key, esk, epk)
 
 
 val decap:

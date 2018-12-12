@@ -34,6 +34,7 @@ let test1_context = List.Tot.map u8_from_UInt8 [
 // Main
 //
 
+assume val e: Lib.RandomSequence.entropy
 
 let cs: Spec.ciphersuite = Spec.DH.DH_Curve25519, Spec.AEAD.AEAD_AES128_GCM, Spec.Hash.SHA2_256
 
@@ -44,9 +45,9 @@ let test () =
   let test1_pk = Spec.DH.secret_to_public (Spec.ECIES.curve_of_cs cs) test1_sk in
   let test1_context = create 32 (u8 0) in
   let test1_input = create 32 (u8 0xFF) in
-  (match Spec.ECIES.encap cs test1_pk test1_context with
-  | None -> IO.print_string "Error: Spec.ECIES.encap failed\n"
-  | Some (ek, esk, epk) -> (
+  (match Spec.ECIES.encap cs e test1_pk test1_context with
+  | _, None -> IO.print_string "Error: Spec.ECIES.encap failed\n"
+  | _, Some (ek, esk, epk) -> (
     Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "ECIES Encap Secret" ek;
     IO.print_newline ();
     Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Encap Ephemeral Secret" esk;
