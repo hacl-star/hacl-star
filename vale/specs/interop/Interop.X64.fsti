@@ -269,17 +269,16 @@ let as_lowstar_sig_post
     (args:arity_ok arg)
     (h0:mem_roots args)
     (predict:prediction c args h0)
-    (push_h0:mem_roots args)
-    (alloc_push_h0:mem_roots args)
-    (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)})
-    (fuel:nat)
-    (final_mem:ME.mem)
+    (ret:as_lowstar_sig_ret args)
     (h1:HS.mem) =
+  let As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem = ret in
   let s0 = fst (create_initial_trusted_state args alloc_push_h0 b) in
+  let pre_pop = Adapters.hs_of_mem final_mem in
   prediction_pre c args h0 s0 push_h0 alloc_push_h0 b /\
   (fuel, final_mem) == predict s0 push_h0 alloc_push_h0 b /\
-  HS.poppable (Adapters.hs_of_mem final_mem) /\
-  h1 == HS.pop (Adapters.hs_of_mem final_mem)
+  FStar.HyperStack.ST.equal_domains alloc_push_h0 pre_pop /\
+  HS.poppable pre_pop /\
+  h1 == HS.pop pre_pop
 
 let as_lowstar_sig (c:TS.tainted_code) =
     args:arity_ok arg ->
@@ -287,8 +286,6 @@ let as_lowstar_sig (c:TS.tainted_code) =
     predict:prediction c args h0 ->
     FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
         (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 args))
-        (ensures fun h0 (As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem) h1 ->
-          as_lowstar_sig_post c args h0 predict push_h0 alloc_push_h0 b fuel final_mem h1
-        )
+        (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 predict ret h1)
 
 val wrap (c:TS.tainted_code) : as_lowstar_sig c

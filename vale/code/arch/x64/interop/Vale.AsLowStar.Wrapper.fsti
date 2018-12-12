@@ -16,11 +16,11 @@ module IX64 = Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
 
-val wrap
-    (code:V.va_code)
-    (dom:IX64.arity_ok td)
-    (num_stack_slots:nat)
-    (pre:VSig.vale_pre dom)
-    (post:VSig.vale_post dom)
-    (v:VSig.vale_sig pre post)
-  : LSig.as_lowstar_sig code dom num_stack_slots pre post
+val lowstar_lemma
+          (dom:IX64.arity_ok td)
+          (code:V.va_code)
+          (num_stack_slots:nat)
+          (pre:VSig.vale_pre dom)
+          (post:VSig.vale_post dom)
+          (v:VSig.vale_sig pre post)
+    : LSig.lowstar_lemma_typ #dom code [] num_stack_slots (pre code) (post code)

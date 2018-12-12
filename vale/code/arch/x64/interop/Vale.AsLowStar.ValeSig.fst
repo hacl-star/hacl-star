@@ -14,6 +14,9 @@ module V = X64.Vale.Decls
 module VS = X64.Vale.State
 module IX64 = Interop.X64
 
+assume
+val code_equiv : squash (V.va_code == TS.tainted_code)
+
 [@reduce]
 let vale_pre_tl (dom:list td) =
     n_arrow dom (V.va_state -> IX64.stack_buffer -> prop)
@@ -76,6 +79,23 @@ let maybe_union_arg_fp
 let fp_of_args (l:list arg) : GTot ME.loc =
   BigOps.foldr_gtot l maybe_union_arg_fp ME.loc_none
 
+unfold
+let vale_sig_nil (args:list arg)
+                 (code:V.va_code)
+                 (pre:vale_pre_tl [])
+                 (post:vale_post_tl []) =
+    va_s0:V.va_state ->
+    stack_b:IX64.stack_buffer ->
+    Ghost (V.va_state & V.va_fuel)
+     (requires
+       elim_nil pre va_s0 stack_b)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       vale_calling_conventions va_s0 va_s1 /\
+       elim_nil post va_s0 stack_b va_s1 f /\
+       ME.modifies (fp_of_args args) va_s0.VS.mem va_s1.VS.mem))
+
+
 [@reduce]
 let rec vale_sig_tl (#dom:list td)
                     (args:list arg)
@@ -85,19 +105,21 @@ let rec vale_sig_tl (#dom:list td)
   : Type =
     match dom with
     | [] ->
-      va_s0:V.va_state ->
-      stack_b:IX64.stack_buffer ->
-      Ghost (V.va_state & V.va_fuel)
-            (requires (elim_nil pre va_s0 stack_b))
-            (ensures (fun (va_s1, f) ->
-                       V.eval_code code va_s0 f va_s1 /\
-                       vale_calling_conventions va_s0 va_s1 /\
-                       elim_nil post va_s0 stack_b va_s1 f /\
-                       ME.modifies (fp_of_args args) va_s0.VS.mem va_s1.VS.mem))
+      vale_sig_nil args code pre post
 
     | hd::tl ->
       x:td_as_type hd ->
       vale_sig_tl #tl ((|hd,x|)::args) code (elim_1 pre x) (elim_1 post x)
+
+
+[@reduce]
+let elim_vale_sig_nil #code
+                       (#args:list arg)
+                       (#pre:vale_pre_tl [])
+                       (#post:vale_post_tl [])
+                       (v:vale_sig_tl #[] args code pre post)
+    : vale_sig_nil args code pre post
+    = v
 
 [@reduce]
 let elim_vale_sig_cons #code
