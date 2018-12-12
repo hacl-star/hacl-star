@@ -41,14 +41,19 @@ let test () =
 
   IO.print_string "\nTEST 1\n";
   let test1_pk = of_list test1_pk in
+  let test1_sk = create 32 (u8 0xAA) in
   let test1_context = create 32 (u8 0) in
+  let test1_input = create 32 (u8 0xFF) in
   Lib.PrintSequence.print_label_lbytes #32 "Random" (Lib.RandomSequence.crypto_random3 32);
-  match Spec.ECIES.encap cs test1_pk test1_context with
+  (match Spec.ECIES.encap cs test1_pk test1_context with
   | None -> IO.print_string "Error: Spec.ECIES.encap failed\n"
   | Some (k, sk, pk) ->
     Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "ECIES Secret" k;
     Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Ephemeral Secret" sk;
-    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Ephemeral Public" pk
+    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Ephemeral Public" pk);
+  let ciphertext = Spec.ECIES.encrypt cs test1_sk test1_input lbytes_empty (u32 0) in
+  Lib.PrintSequence.print_label_lbytes #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) "Ciphertext" ciphertext;
+  IO.print_newline ()
 
   (* if r1_a then IO.print_string "\nHKDF Extract: Success!\n" *)
   (* else IO.print_string "\nHKDF Extract: Failure :(\n"; *)
