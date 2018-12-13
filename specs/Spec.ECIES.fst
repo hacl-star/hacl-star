@@ -89,7 +89,7 @@ val encap:
   Tot (entropy & (option (key_s cs & key_private_s cs & key_public_s cs)))
 
 let encap cs e pk context =
-  let e', esk = crypto_random2 e (size_key_dh cs) in
+  let e', esk = crypto_random e (size_key_dh cs) in
   let epk = DH.secret_to_public (curve_of_cs cs) esk in
   match DH.dh (curve_of_cs cs) esk pk with
   | None -> e', None
