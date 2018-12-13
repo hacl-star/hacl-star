@@ -92,6 +92,31 @@ let lemma_addition (a d:nat) (a0 a1 a2 a3 d0 d1 d2 d3 d4:nat64)
   =
   ()
 
+let lemma_carry_wide (a0 a1 a2 a3 a4 a5 a6 a7
+                      d0 d1 d2 d3 carry
+                      d0' d1' d2' d3':nat64) : Lemma
+  (requires pow2_five d0 d1 d2 d3 carry == 38 * pow2_four a4 a5 a6 a7 + pow2_four a0 a1 a2 a3 /\
+            pow2_four d0' d1' d2' d3' % prime == ((pow2_four d0 d1 d2 d3) + carry * pow2_256) % prime)
+  (ensures (pow2_four d0' d1' d2' d3') % prime == (pow2_eight a0 a1 a2 a3 a4 a5 a6 a7) % prime)
+  =
+  calc (==) {
+    pow2_four d0' d1' d2' d3' % prime;
+    == { calc (==) {
+           (pow2_four d0 d1 d2 d3) + carry * pow2_256;
+           == { _ by (int_canon()) }
+           pow2_five d0 d1 d2 d3 carry;
+         }
+       }
+    pow2_five d0 d1 d2 d3 carry % prime;
+    == {}
+    (pow2_four a0 a1 a2 a3 + 38 * pow2_four a4 a5 a6 a7) % prime;
+    == { lemma_mul_pow256_add (pow2_four a0 a1 a2 a3) (pow2_four a4 a5 a6 a7) }
+    (pow2_four a0 a1 a2 a3 + pow2_256 * pow2_four a4 a5 a6 a7) % prime;
+    == { _ by (int_canon()) }
+    (pow2_eight a0 a1 a2 a3 a4 a5 a6 a7) % prime;
+  }
+
+
 let pow2int_four (c0 c1 c2 c3:int) : int = c0 + c1 * pow2_64 + c2 * pow2_128 + c3 * pow2_192
 
 let lemma_mul_pow256_sub (x y:nat) : 
@@ -124,4 +149,19 @@ let lemma_carry_sub_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bi
        }
     (pow2_four (a0' - carry * 38) a1' a2' a3') % prime;
   };
+  ()
+
+
+let lemma_fmul (a0 a1 a2 a3 b d0 d1 d2 d3 carry:nat64) : Lemma
+  (requires pow2_five d0 d1 d2 d3 carry == b * pow2_four a0 a1 a2 a3 /\
+            b <= 121665)
+  (ensures carry * 38 < pow2_63)
+  =
+  assert (pow2_four a0 a1 a2 a3 < pow2_256);
+  assert_norm (121665 < pow2 17);
+  lemma_mul_bounds_le (pow2_four a0 a1 a2 a3) pow2_256 121665  (pow2 17);
+  assert ((pow2_four a0 a1 a2 a3) * 121665 <= pow2_256 * pow2 17);
+  lemma_mul_bounds_le b 121665 (pow2_four a0 a1 a2 a3) (pow2_four a0 a1 a2 a3);
+  assert ((pow2_four a0 a1 a2 a3) * b <= pow2_256 * pow2 17);
+  assert_norm (131072 == pow2 17);
   ()

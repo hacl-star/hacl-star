@@ -1046,7 +1046,7 @@ procedure{:quick}{:public} fsub_stdcall(
 }
 
 #reset-options "--z3rlimit 300"
-procedure{:quick} fmul1(
+procedure{:quick}fmul1(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
     lets
@@ -1080,22 +1080,22 @@ procedure{:quick} fmul1(
 
         validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
-
+        
+        b <= 121665;
     ensures
         let d0 := buffer64_read(dst_b, 0, mem);
         let d1 := buffer64_read(dst_b, 1, mem);
         let d2 := buffer64_read(dst_b, 2, mem);
         let d3 := buffer64_read(dst_b, 3, mem);
         let d := pow2_four(d0, d1, d2, d3);
-        //d == old(a - b);
+        d % prime == old(a * b) % prime;
 
         validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
     fast_mul1(0, inA_b);
-    assert validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
-////////////////////////////////////////////  TODO!
-    assume rax * 38 < pow2_63;
+    lemma_fmul(old(a0), old(a1), old(a2), old(a3), old(b), tmp0, tmp1, tmp2, tmp3, rax);
+    assert rax * 38 < pow2_63;
     Mov64(b, 38);
     carry_pass(false, 0, dst_b);
     //store4(dst_b);
@@ -1125,6 +1125,8 @@ procedure{:quick}{:public} fmul1_stdcall(
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, 3, memTaint);
+
+        inB_in <= 121665;
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -1137,9 +1139,9 @@ procedure{:quick}{:public} fmul1_stdcall(
         let d3 := buffer64_read(dst_b, 3, mem);
 
         let a := pow2_four(a0, a1, a2, a3);
-        let d := pow2_five(d0, d1, d2, d3, rax);
+        let d := pow2_four(d0, d1, d2, d3);
                  
-        //d == a * old(inB_in);
+        d % prime == (old(a) * inB_in) % prime;
 
         //////////////////////////////////////
         //   Framing
