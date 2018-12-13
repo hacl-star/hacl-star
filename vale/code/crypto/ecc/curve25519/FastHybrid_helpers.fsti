@@ -20,36 +20,13 @@ let lemma_mul_pow256_add (x y:nat) :
   assert_norm (pow2_256 % prime == 38);
   ()
 
-let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
+val lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
   (requires pow2_five a0' a1' a2' a3' carry == pow2_four a0 a1 a2 a3 + carry_in * 38 /\
             carry_in * 38 - 1 + 38 < pow2_64)
   (ensures a0' + carry * 38 < pow2_64 /\
            (pow2_four (a0' + carry * 38) a1' a2' a3') % prime == (pow2_four a0 a1 a2 a3 + carry_in * pow2_256) % prime)
-  =
-  assert (a0' + carry * 38 < pow2_64);
 
-  calc (==) {
-    (pow2_four a0 a1 a2 a3 + carry_in * pow2_256) % prime;
-    == { lemma_mul_pow256_add (pow2_four a0 a1 a2 a3) carry_in }
-    (pow2_four a0 a1 a2 a3 + carry_in * 38) % prime;
-    == {}
-    (pow2_five a0' a1' a2' a3' carry) % prime;
-    == { _ by (int_canon()) }    
-    (pow2_four a0' a1' a2' a3' + (carry * pow2_256)) % prime;
-    == { lemma_mul_pow256_add (pow2_four a0' a1' a2' a3') carry }
-    (pow2_four a0' a1' a2' a3' + (carry * 38)) % prime;
-    == {  calc (==) {
-            (pow2_four a0' a1' a2' a3') + (carry * 38);            
-            == { _ by (int_canon()) }
-            pow2_four (a0' + carry * 38) a1' a2' a3';
-          }
-       }
-    (pow2_four (a0' + carry * 38) a1' a2' a3') % prime;
-  };
-  ()
-
-#reset-options "--z3rlimit 30"
-let lemma_fast_mul1 (a:nat) 
+val lemma_fast_mul1 (a:nat) 
                (b a0 a1 a2 a3 
                 ba0_hi ba0_lo 
                 ba1_hi ba1_lo 
@@ -74,16 +51,8 @@ let lemma_fast_mul1 (a:nat)
             c4 == 0)
   )
   (ensures pow2_five ba0_lo s1 s2 s3 s4 == a * b)
-  =
-  assert_by_tactic (b * pow2_four a0 a1 a2 a3 == pow2_four (b*a0) (b*a1) (b*a2) (b*a3)) int_canon;
-  //lemma_prod_bounds ba0_hi ba0_lo b a0;
-  //lemma_prod_bounds ba1_hi ba1_lo b a1;
-  //lemma_prod_bounds ba2_hi ba2_lo b a2;
-  //lemma_prod_bounds ba3_hi ba3_lo b a3;
-  ()
 
-
-let lemma_addition (a d:nat) (a0 a1 a2 a3 d0 d1 d2 d3 d4:nat64)
+val lemma_addition (a d:nat) (a0 a1 a2 a3 d0 d1 d2 d3 d4:nat64)
                    (s0 s1 s2 s3 s4:nat64) : Lemma
   (requires a = pow2_four a0 a1 a2 a3 /\
             d = pow2_five d0 d1 d2 d3 d4 /\
@@ -99,5 +68,3 @@ let lemma_addition (a d:nat) (a0 a1 a2 a3 d0 d1 d2 d3 d4:nat64)
             s4 == s4' /\
             c4 == 0))
   (ensures a + d == pow2_five s0 s1 s2 s3 s4)
-  =
-  ()
