@@ -34,13 +34,13 @@ let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) :
     (pow2_four a0 a1 a2 a3 + carry_in * 38) % prime;
     == {}
     (pow2_five a0' a1' a2' a3' carry) % prime;
-    == { assert_by_tactic (pow2_five a0' a1' a2' a3' carry == pow2_four a0' a1' a2' a3' + (carry * pow2_256)) int_canon }    
+    == { _ by (int_canon()) }    
     (pow2_four a0' a1' a2' a3' + (carry * pow2_256)) % prime;
     == { lemma_mul_pow256_add (pow2_four a0' a1' a2' a3') carry }
     (pow2_four a0' a1' a2' a3' + (carry * 38)) % prime;
     == {  calc (==) {
             (pow2_four a0' a1' a2' a3') + (carry * 38);            
-            == { assert_by_tactic (pow2_four (a0' + carry * 38) a1' a2' a3' == (pow2_four a0' a1' a2' a3') + (carry * 38)) int_canon }
+            == { _ by (int_canon()) }
             pow2_four (a0' + carry * 38) a1' a2' a3';
           }
        }
