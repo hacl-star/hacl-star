@@ -7,19 +7,18 @@ open Lib.ByteSequence
 
 open Lib.RandomSequence
 
-assume val entropy_init: Lib.RandomSequence.entropy
 
 let test () =
   let len: size_nat = 32 in
-  (match crypto_random len with
+  let e, output = crypto_random Lib.RandomSequence.entropy0 len in
+  Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random len]" output;
+  IO.print_newline ();
+  (match unsound_crypto_random1 len with
   | None -> IO.print_string "\nError: crypto_random Failed !\n"
   | Some output ->
-    Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random len]" output;
+    Lib.PrintSequence.print_label_lbytes #32 "Result [unsound_crypto_random1 len]" output;
     IO.print_newline ()
   );
-  let e, output = crypto_random2 entropy_init len in
-  Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random2 len]" output;
-  IO.print_newline ();
-  let output = crypto_random3 len in
-  Lib.PrintSequence.print_label_lbytes #32 "Result [crypto_random3 len]" output;
+  let output = unsound_crypto_random2 len in
+  Lib.PrintSequence.print_label_lbytes #32 "Result [unsound_crypto_random2 len]" output;
   IO.print_newline ()
