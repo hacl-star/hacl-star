@@ -40,9 +40,11 @@ let bytes = S.seq UInt8.t
 
 noextract
 let split_at_last (a: Hash.alg) (b: bytes):
-  bytes_blocks a & (r: bytes {
-    S.length r < size_block a
-  })
+  Pure (bytes_blocks a & bytes)
+    (requires True)
+    (ensures (fun (blocks, rest) ->
+      S.length rest < size_block a /\
+      S.equal (S.append blocks rest) b))
 =
   let n = S.length b / size_block a in
   let blocks, rest = S.split b (n * size_block a) in
