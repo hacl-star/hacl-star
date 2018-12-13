@@ -130,13 +130,13 @@ let print_lbytes #len b =
   repeat_range_all_ml 0 n (fun i _ ->
     let sb = sub #uint8 #len b (i * q) q in
     List.iter (fun a -> print_uint8_hex_pad a) (to_list sb);
-    IO.print_string "\n") ();
+    (if i < n - 1 then IO.print_string "\n" else ())) ();
   let sb = sub #uint8 #len b (n * q) r in
   List.iter (fun a -> print_uint8_hex_pad a) (to_list sb))
 
 let print_label_lbytes #len label b =
   IO.print_string label;
-  IO.print_string ": ";
+  IO.print_string ": \n";
   print_lbytes #len b
 
 let print_compare len expected result =
