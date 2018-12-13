@@ -359,6 +359,23 @@ val free:
   (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1)))
 
+val copy:
+  #a:e_alg -> (
+  let a = Ghost.reveal a in
+  s_src:state a ->
+  s_dst:state a ->
+  Stack unit
+    (requires (fun h0 ->
+      invariant s_src h0 /\
+      invariant s_dst h0 /\
+      B.(loc_disjoint (footprint s_src h0) (footprint s_dst h0))))
+    (ensures fun h0 _ h1 ->
+      M.(modifies (footprint s_dst h0) h0 h1) /\
+      footprint s_dst h0 == footprint s_dst h1 /\
+      preserves_freeable s_dst h0 h1 /\
+      invariant s_dst h1 /\
+      repr s_dst h1 == repr s_src h0))
+
 val hash:
   a:alg ->
   dst:uint8_p {B.length dst = size_hash a} ->

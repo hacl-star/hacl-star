@@ -119,15 +119,13 @@ val update:
     (requires fun h0 -> update_pre a s prev data len h0)
     (ensures fun h0 s' h1 -> update_post a s s' prev data len h0 h1)
 
-/// Writes out the final hash in the destination buffer, and resets the state.
-/// Note: taking UInt32 here, but we could either do UInt64 (with pre-conditions
-/// that the size does not overflow) or even len_t, with a layer of
-/// specialization+multiplexing.
-val finish:
+/// Note: the state is left to be reused by the caller to feed more data into
+/// the hash.
+inline_for_extraction
+let finish_st =
   a:Hash.alg ->
   s:state a ->
   prev:G.erased bytes ->
-  len:UInt32.t { UInt32.v len = S.length (G.reveal prev) } -> // JP: just v doesn't work (why?)
   dst: Hacl.Hash.Definitions.hash_t a ->
   Stack unit
     (requires fun h0 ->
@@ -136,4 +134,8 @@ val finish:
       B.(loc_disjoint (loc_buffer dst) (footprint s h0)))
     (ensures fun h0 s' h1 ->
       hashes h1 s (G.reveal prev) /\
+      preserves_freeable s h0 h1 /\
+      footprint s h0 == footprint s h1 /\
       B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1))
+
+val finish: finish_st

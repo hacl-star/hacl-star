@@ -17,7 +17,9 @@ open FStar.HyperStack.ST
 open Spec.Hash.Helpers
 open FStar.Integers
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+
+open LowStar.Modifies.Linear
 
 let _: squash (inversion Hash.alg) = allow_inversion Hash.alg
 
@@ -330,10 +332,22 @@ let update a s prev data len =
   end
 #pop-options
 
-#push-options "--z3rlimit 100"
-let finish a s prev len dst =
+inline_for_extraction noextract
+val mk_finish: finish_st
+
+#push-options "--z3rlimit 200"
+inline_for_extraction noextract
+let mk_finish a s prev dst =
   let h0 = ST.get () in
   let State hash_state buf total_len = s in
+
+  push_frame ();
+  let h1 = ST.get () in
+  B.fresh_frame_modifies h0 h1;
+  B.modifies_inert_intro B.loc_none h0 h1;
+  Hash.frame_invariant B.loc_none hash_state h0 h1;
+  Hash.frame_invariant_implies_footprint_preservation B.loc_none hash_state h0 h1;
+  assert (Hash.invariant hash_state h1);
 
   assert_norm (pow2 61 < pow2 125);
   assert (v total_len < max_input8 a);
@@ -341,6 +355,78 @@ let finish a s prev len dst =
   assert (
     let r = rest a total_len in
     (v total_len - v r) % size_block a = 0);
-  EverCrypt.Hash.update_last #(G.hide a) hash_state buf total_len;
-  admit ();
-  EverCrypt.Hash.finish #(G.hide a) hash_state dst
+
+  let tmp_hash_state = Hash.alloca a in
+
+  let h2 = ST.get () in
+  assert (B.(loc_disjoint (Hash.footprint tmp_hash_state h2) (Hash.footprint hash_state h1)));
+  B.modifies_inert_intro B.(loc_region_only false (HS.get_tip h2)) h1 h2;
+  Hash.frame_invariant B.(loc_region_only false (HS.get_tip h2)) hash_state h1 h2;
+  Hash.frame_invariant_implies_footprint_preservation
+    B.(loc_region_only false (HS.get_tip h2)) hash_state h1 h2;
+  assert (Hash.invariant hash_state h2);
+  assert (Hash.invariant tmp_hash_state h2);
+  assert (Hash.footprint hash_state h2 == Hash.footprint hash_state h1);
+
+  Hash.copy #(G.hide a) hash_state tmp_hash_state;
+
+  let h3 = ST.get () in
+  assert (Hash.footprint tmp_hash_state h2 == Hash.footprint tmp_hash_state h3);
+  B.modifies_inert_intro (Hash.footprint tmp_hash_state h2) h2 h3;
+  Hash.frame_invariant (Hash.footprint tmp_hash_state h2) hash_state h2 h3;
+  Hash.frame_invariant_implies_footprint_preservation
+    (Hash.footprint tmp_hash_state h2) hash_state h2 h3;
+  assert (Hash.invariant hash_state h3);
+
+  EverCrypt.Hash.update_last #(G.hide a) tmp_hash_state buf total_len;
+
+  let h4 = ST.get () in
+  B.modifies_inert_intro (Hash.footprint tmp_hash_state h3) h3 h4;
+  Hash.frame_invariant (Hash.footprint tmp_hash_state h3) hash_state h3 h4;
+  Hash.frame_invariant_implies_footprint_preservation
+    (Hash.footprint tmp_hash_state h3) hash_state h3 h4;
+  assert (Hash.invariant hash_state h4);
+
+  EverCrypt.Hash.finish #(G.hide a) tmp_hash_state dst;
+
+  let h5 = ST.get () in
+  B.modifies_inert_intro (B.loc_buffer dst) h4 h5;
+  Hash.frame_invariant (B.loc_buffer dst) hash_state h4 h5;
+  Hash.frame_invariant_implies_footprint_preservation
+    (B.loc_buffer dst) hash_state h4 h5;
+  assert (Hash.invariant hash_state h5);
+
+  pop_frame ();
+
+  let h6 = ST.get () in
+  B.popped_modifies h5 h6;
+  B.modifies_inert_intro B.(loc_region_only false (HS.get_tip h5)) h5 h6;
+  Hash.frame_invariant B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
+  Hash.frame_invariant_implies_footprint_preservation
+    B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
+  assert (Hash.invariant hash_state h6);
+
+  assert (hashes h6 s (G.reveal prev));
+  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1);
+  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h1 h2);
+  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h2);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h2 h3);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h3 h4);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h4 h5);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h2 h4);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h2 h5);
+  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h6)
+
+  // So much for automated proofs.
+
+#pop-options

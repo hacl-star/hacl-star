@@ -278,6 +278,39 @@ let free #ea s =
   end;
   B.free s
 
+let copy #a s_src s_dst =
+  match !*s_src with
+  | MD5_s p_src ->
+      [@inline_let]
+      let s_dst: state MD5 = s_dst in
+      let p_dst = MD5_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 4ul
+  | SHA1_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA1 = s_dst in
+      let p_dst = SHA1_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 5ul
+  | SHA2_224_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA2_224 = s_dst in
+      let p_dst = SHA2_224_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 8ul
+  | SHA2_256_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA2_256 = s_dst in
+      let p_dst = SHA2_256_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 8ul
+  | SHA2_384_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA2_384 = s_dst in
+      let p_dst = SHA2_384_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 8ul
+  | SHA2_512_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA2_512 = s_dst in
+      let p_dst = SHA2_512_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 8ul
+
 // A full one-shot hash that relies on vale at each multiplexing point
 val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
 let hash_256 input input_len dst =
