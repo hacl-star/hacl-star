@@ -44,6 +44,7 @@ let split_at_last (a: Hash.alg) (b: bytes):
     (requires True)
     (ensures (fun (blocks, rest) ->
       S.length rest < size_block a /\
+      S.length rest = S.length b % size_block a /\
       S.equal (S.append blocks rest) b))
 =
   let n = S.length b / size_block a in
@@ -178,7 +179,8 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
 =
    ()
 
-#push-options "--z3rlimit 200"
+// Larger rlimit required for batch mode.
+#push-options "--z3rlimit 300 --z3refresh"
 let update_small a s prev data len =
   let State hash_state buf sz = s in
   let h0 = ST.get () in
@@ -233,20 +235,32 @@ val update_empty_buf:
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
+#set-options "--z3rlimit 100"
 let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last a b in
     S.equal rest S.empty))
   (ensures (
-    let blocks, _ = split_at_last a b in
+    let blocks, rest = split_at_last a b in
     let blocks', rest' = split_at_last a d in
     let blocks'', rest'' = split_at_last a (S.append b d) in
     S.equal blocks'' (S.append blocks blocks') /\
     S.equal rest' rest''))
 =
-   ()
+  let blocks, rest = split_at_last a b in
+  let blocks', rest' = split_at_last a d in
+  let blocks'', rest'' = split_at_last a (S.append b d) in
+  let b' = S.append blocks rest in
+  let d' = S.append blocks' rest' in
+  assert (S.equal (S.append b' d') (S.append blocks'' rest''));
+  assert (S.equal b' blocks);
+  assert (S.equal (S.append b' d') (S.append (S.append blocks blocks') rest'));
+  assert (S.equal (S.append blocks'' rest'') (S.append (S.append blocks blocks') rest'));
+  assert (S.length b % size_block a = 0);
+  assert (S.length rest' = S.length rest'');
+  Seq.Properties.append_slices (S.append blocks blocks') rest';
+  Seq.Properties.append_slices blocks'' rest''
 
-#set-options "--z3rlimit 100"
 let update_empty_buf a s prev data len =
   let State hash_state buf sz = s in
   let h0 = ST.get () in
@@ -324,6 +338,7 @@ let update_round a s prev data len =
   Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf) hash_state h0 h1;
   Hash.update_multi #(G.hide a) hash_state buf0 (size_block_ul a);
   let h2 = ST.get () in
+  // JP: no clue why I had to go through all these manual steps.
   (
     let blocks, rest = split_at_last a (G.reveal prev) in
     assert (S.equal (Hash.repr hash_state h2)
