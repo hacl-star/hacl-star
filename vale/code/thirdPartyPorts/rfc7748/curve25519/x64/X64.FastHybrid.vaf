@@ -454,7 +454,7 @@ procedure{:quick} carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:
 
 
 #reset-options "--z3rlimit 300"
-procedure{:quick} {:public} {:verify true} carry_wide(
+procedure{:quick} {:public} carry_wide(
     inline offset:nat,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
@@ -601,8 +601,8 @@ procedure{:quick}{:public} carry_wide_stdcall(
 }
 */
 
-#reset-options "--z3rlimit 400"
-procedure{:quick} carry_sub_pass()
+#reset-options "--z3rlimit 300"
+procedure{:quick} {:verify true} carry_sub_pass()
     lets
         carry @= rax;
         tmp @= rcx;
@@ -618,10 +618,7 @@ procedure{:quick} carry_sub_pass()
         adx_enabled && bmi2_enabled;
 
     ensures
-//        let sum := old(pow2_four(a0, a1, a2, a3) + bool_bit(cf(efl)) * 38);
-//        let carry := bool_bit(sum >= pow2_256);
-//        let a0_new := (old(a0) + old(bool_bit(cf(efl))) * 38 + carry*38) % pow2_64;
-//        pow2_four(a0, a1, a2, a3) == old(pow2_four(a0_new, a1, a2, a3));
+       // pow2_four(a0, a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) - carry * pow2_256) % prime;
 {
     Mov64(carry, 0);
     carry_times_38(tmp);
@@ -636,11 +633,14 @@ procedure{:quick} carry_sub_pass()
     ghost var sum:int := old(pow2_four(a0, a1, a2, a3) - old_carry * 38);
     ghost var new_carry := bool_bit(cf(efl));
     assert new_carry == bool_bit(sum < 0);
+    lemma_carry_sub_prime(old(a0), old(a1), old(a2), old(a3), a0, a1, a2, a3, old_carry, new_carry);
+    //assert pow2_four(#nat(a0 - new_carry * 38), a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) - old_carry * pow2_256) % prime;
 
     Mov64(carry, 0);
     Cmovc64(carry, tmp);
     Sub64Wrap(a0, carry);
     assert a0 == (old(a0) - old_carry * 38 - new_carry*38) % pow2_64;
+
 }
 
 #reset-options "--z3rlimit 300"
@@ -953,7 +953,7 @@ procedure{:quick} fsub(
         let d2 := buffer64_read(dst_b, 2, mem);
         let d3 := buffer64_read(dst_b, 3, mem);
         let d := pow2_four(d0, d1, d2, d3);
-        //d == old(a - b);
+        d % prime == old(a - b) % prime;
 
         validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);

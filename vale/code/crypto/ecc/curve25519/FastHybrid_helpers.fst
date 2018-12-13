@@ -91,3 +91,37 @@ let lemma_addition (a d:nat) (a0 a1 a2 a3 d0 d1 d2 d3 d4:nat64)
   (ensures a + d == pow2_five s0 s1 s2 s3 s4)
   =
   ()
+
+let pow2int_four (c0 c1 c2 c3:int) : int = c0 + c1 * pow2_64 + c2 * pow2_128 + c3 * pow2_192
+
+let lemma_mul_pow256_sub (x y:nat) : 
+  Lemma ((x - y * pow2_256) % prime == (x - y * 38) % prime)
+  =
+  assert_norm (pow2_256 % prime == 38);
+  ()
+  
+let lemma_carry_sub_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
+  (requires pow2_four a0' a1' a2' a3' - carry * pow2_256 == pow2_four a0 a1 a2 a3 - carry_in * 38 /\
+            carry_in * 38 - 1 + 38 < pow2_64)
+  (ensures a0' - carry * 38 >= 0 /\
+           (pow2_four (a0' - carry * 38) a1' a2' a3') % prime == (pow2_four a0 a1 a2 a3 - carry_in * pow2_256) % prime)
+  =  
+  assert (a0' - carry * 38 >= 0);
+
+  calc (==) {
+    (pow2_four a0 a1 a2 a3 - carry_in * pow2_256) % prime;
+    == { lemma_mul_pow256_sub (pow2_four a0 a1 a2 a3) carry_in }
+    (pow2_four a0 a1 a2 a3 - carry_in * 38) % prime;
+    == {}  
+    (pow2_four a0' a1' a2' a3' - (carry * pow2_256)) % prime;
+    == { lemma_mul_pow256_sub (pow2_four a0' a1' a2' a3') carry }
+    (pow2_four a0' a1' a2' a3' - (carry * 38)) % prime;
+    == {  calc (==) {
+            (pow2_four a0' a1' a2' a3') - (carry * 38);            
+            == { _ by (int_canon()) }
+            pow2int_four (a0' - carry * 38) a1' a2' a3';
+          }
+       }
+    (pow2_four (a0' - carry * 38) a1' a2' a3') % prime;
+  };
+  ()

@@ -20,6 +20,7 @@ let lemma_mul_pow256_add (x y:nat) :
   assert_norm (pow2_256 % prime == 38);
   ()
 
+
 val lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
   (requires pow2_five a0' a1' a2' a3' carry == pow2_four a0 a1 a2 a3 + carry_in * 38 /\
             carry_in * 38 - 1 + 38 < pow2_64)
@@ -93,3 +94,12 @@ let lemma_carry_wide (a0 a1 a2 a3 a4 a5 a6 a7
     == { _ by (int_canon()) }
     (pow2_eight a0 a1 a2 a3 a4 a5 a6 a7) % prime;
   }
+
+
+
+
+val lemma_carry_sub_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
+  (requires pow2_four a0' a1' a2' a3' - carry * pow2_256 == pow2_four a0 a1 a2 a3 - carry_in * 38 /\
+            carry_in * 38 - 1 + 38 < pow2_64)
+  (ensures a0' - carry * 38 >= 0 /\
+           (pow2_four (a0' - carry * 38) a1' a2' a3') % prime == (pow2_four a0 a1 a2 a3 - carry_in * pow2_256) % prime)
