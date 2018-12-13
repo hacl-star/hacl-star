@@ -974,11 +974,15 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   done = set()
   cmxs = []
   objs = []
+  ignore_warnings = [ "8", # Warning 8: this pattern-matching is not exhaustive.
+                     "20", # Warning 20: this argument will not be used by the function.
+                     "26"] # Warning 26: unused variable
+  ignore_warnings_str = "-w " + "".join(["-" + s for s in ignore_warnings])
   def add_cmx(x_ml):
     x_cmx = ml_out_file(x_ml, '.cmx')
     x_obj = ml_out_file(x_ml, '.o')
     cmx = ocaml_env.Command([x_cmx, x_obj], x_ml,
-      f'ocamlfind ocamlopt -c -package fstarlib -o {x_cmx} {x_ml} -I obj/ml_out')
+      f'ocamlfind ocamlopt -c -package fstarlib -o {x_cmx} {x_ml} -I obj/ml_out {ignore_warnings_str}')
     cmxs.append(cmx[0])
     objs.append(x_obj)
     Depends(main_exe, cmx[0])
