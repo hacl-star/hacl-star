@@ -602,7 +602,7 @@ procedure{:quick}{:public} carry_wide_stdcall(
 */
 
 #reset-options "--z3rlimit 300"
-procedure{:quick} {:verify true} carry_sub_pass()
+procedure{:quick} carry_sub_pass()
     lets
         carry @= rax;
         tmp @= rcx;
@@ -618,7 +618,7 @@ procedure{:quick} {:verify true} carry_sub_pass()
         adx_enabled && bmi2_enabled;
 
     ensures
-       // pow2_four(a0, a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) - carry * pow2_256) % prime;
+       pow2_four(a0, a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) - bool_bit(cf(efl)) * pow2_256) % prime;
 {
     Mov64(carry, 0);
     carry_times_38(tmp);
@@ -639,7 +639,7 @@ procedure{:quick} {:verify true} carry_sub_pass()
     Mov64(carry, 0);
     Cmovc64(carry, tmp);
     Sub64Wrap(a0, carry);
-    assert a0 == (old(a0) - old_carry * 38 - new_carry*38) % pow2_64;
+    //assert a0 == (old(a0) - old_carry * 38 - new_carry*38) % pow2_64;
 
 }
 
@@ -1011,7 +1011,7 @@ procedure{:quick}{:public} fsub_stdcall(
         let b := pow2_four(b0, b1, b2, b3);
         let d := pow2_four(d0, d1, d2, d3);
 
-        //d % prime == old(a - b) % prime;
+        d % prime == old(a - b) % prime;
 
         //////////////////////////////////////
         //   Framing
