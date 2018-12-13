@@ -233,27 +233,36 @@ let prediction_post
     (push_h0:mem_roots args)
     (alloc_push_h0:mem_roots args)
     (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)})
+    (rel: (nat & ME.mem) -> TS.traceState -> prop)
     (fuel_mem:nat & ME.mem) =
   let fuel, final_mem = fuel_mem in
   Some? (TS.taint_eval_code c fuel s0) /\ (
     let sN = Some?.v (TS.taint_eval_code c fuel s0) in
-    IM.down_mem (Adapters.hs_of_mem final_mem)
-                (IA.addrs)
-                (Adapters.ptrs_of_mem final_mem) == sN.TS.state.BS.mem /\
+    rel fuel_mem sN /\
+    // IM.down_mem (Adapters.hs_of_mem final_mem)
+    //             (IA.addrs)
+    //             (Adapters.ptrs_of_mem final_mem) == sN.TS.state.BS.mem /\
     calling_conventions s0 sN
   )
 
 let prediction
     (c:TS.tainted_code)
     (args:arity_ok arg)
-    (h0:mem_roots args) =
+    (h0:mem_roots args)
+    (rel: (TS.traceState ->
+           push_h0:mem_roots args ->
+           alloc_push_h0:mem_roots args ->
+           b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
+           (nat & ME.mem) ->
+           TS.traceState ->
+           prop)) =
   s0:TS.traceState ->
   push_h0:mem_roots args ->
   alloc_push_h0:mem_roots args ->
   b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
   Ghost (nat & ME.mem)
     (requires prediction_pre c args h0 s0 push_h0 alloc_push_h0 b)
-    (ensures prediction_post c args h0 s0 push_h0 alloc_push_h0 b)
+    (ensures prediction_post c args h0 s0 push_h0 alloc_push_h0 b (rel s0 push_h0 alloc_push_h0 b))
 
 noeq type as_lowstar_sig_ret (args:arity_ok arg) =
   | As_lowstar_sig_ret :
@@ -268,7 +277,8 @@ let as_lowstar_sig_post
     (c:TS.tainted_code)
     (args:arity_ok arg)
     (h0:mem_roots args)
-    (predict:prediction c args h0)
+    (#rel: _)
+    (predict:prediction c args h0 rel)
     (ret:as_lowstar_sig_ret args)
     (h1:HS.mem) =
   let As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem = ret in
@@ -283,9 +293,10 @@ let as_lowstar_sig_post
 let as_lowstar_sig (c:TS.tainted_code) =
     args:arity_ok arg ->
     h0:mem_roots args ->
-    predict:prediction c args h0 ->
+    #rel:_ ->
+    predict:prediction c args h0 rel ->
     FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
         (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 args))
-        (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 predict ret h1)
+        (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 #rel predict ret h1)
 
 val wrap (c:TS.tainted_code) : as_lowstar_sig c

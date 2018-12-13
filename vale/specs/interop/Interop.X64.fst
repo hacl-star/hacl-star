@@ -9,7 +9,7 @@ module TS = X64.Taint_Semantics_s
 module IA = Interop.Assumptions
 module ST = FStar.HyperStack.ST
 
-let wrap c args h0 predict =
+let wrap c args h0 #rel predict =
   let h0' = ST.get () in
   assert (mem_roots_p h0' args);
   ST.push_frame ();
