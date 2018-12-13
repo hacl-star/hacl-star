@@ -145,8 +145,6 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   padding_round a total_input_len;
   assert (U32.v tmp_len % size_block a = 0);
 
-  (* Bonus, not strictly necessary, could be useful to get rid of the
-     variable-length allocation below. *)
   pad_length_bound a total_input_len;
   assert (U32.v tmp_len <= 2 * size_block a);
 

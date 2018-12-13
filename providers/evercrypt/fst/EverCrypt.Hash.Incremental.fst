@@ -3,7 +3,7 @@ module EverCrypt.Hash.Incremental
 open FStar.Mul
 
 /// An alternative API on top of EverCrypt.Hash that holds an internal buffer.
-/// No abstraction for now, can be added later on as we wish.
+/// No state abstraction for now, can be added later on as we wish.
 
 module B = LowStar.Buffer
 module S = FStar.Seq
@@ -15,66 +15,11 @@ module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
 open Spec.Hash.Helpers
-open Hacl.Hash.Definitions
 open FStar.Integers
-
-noeq
-type state a =
-| State:
-    hash_state: Hash.state a ->
-    buf: B.buffer UInt8.t { B.length buf = 2 * size_block a } ->
-    buf_size: UInt32.t ->
-    state a
-
-let footprint #a (s: state a) h =
-  let State hash_state buf _ = s in
-  B.(loc_union (loc_buffer buf) (Hash.footprint hash_state h))
-
-let freeable #a (s: state a) h =
-  let State hash_state buf _ = s in
-  B.freeable buf /\ Hash.freeable h hash_state
-
-let bytes = S.seq UInt8.t
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-noextract
-let split_at_last (a: Hash.alg) (b: bytes):
-  Pure (bytes_blocks a & bytes)
-    (requires True)
-    (ensures (fun (blocks, rest) ->
-      S.length rest < size_block a /\
-      S.length rest = S.length b % size_block a /\
-      S.equal (S.append blocks rest) b))
-=
-  let n = S.length b / size_block a in
-  let blocks, rest = S.split b (n * size_block a) in
-  assert (S.length blocks = n * size_block a);
-  assert ((n * size_block a) % size_block a = 0);
-  assert (S.length rest = S.length b - n * size_block a);
-  assert (S.length b - n * size_block a < size_block a);
-  blocks, rest
-
-unfold
-let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
-  let State hash_state buf sz = s in
-  let blocks, rest = split_at_last a b in
-  B.live h buf /\
-  B.(loc_disjoint (loc_buffer buf) (Hash.footprint hash_state h)) /\
-  Hash.invariant hash_state h /\
-  v sz < size_block a /\
-  S.equal (Hash.repr hash_state h) (Hash.compress_many (Hash.acc0 #a) blocks) /\
-  S.equal (S.slice (B.as_seq h buf) 0 (v sz)) rest
-
 let _: squash (inversion Hash.alg) = allow_inversion Hash.alg
-
-val create (a: Hash.alg): ST (state a)
-  (requires (fun _ -> True))
-  (ensures (fun h0 s h1 ->
-    hashes h1 s S.empty /\
-    B.(modifies (footprint s h1) h0 h1) /\
-    Hash.fresh_loc (footprint s h1) h0 h1 /\
-    freeable s h1))
 
 let split_at_last_empty (a: Hash.alg): Lemma
   (ensures (
@@ -86,7 +31,7 @@ let split_at_last_empty (a: Hash.alg): Lemma
 let create a =
   // Allocate all the state
   let h0 = ST.get () in
-  let buf = B.malloc HS.root 0uy (2ul * size_block_ul a) in
+  let buf = B.malloc HS.root 0uy (2ul * Hacl.Hash.Definitions.size_block_ul a) in
   let h1 = ST.get () in
   assert (Hash.fresh_loc (B.loc_buffer buf) h0 h1);
   let hash_state = Hash.create a in
@@ -117,42 +62,8 @@ let create a =
   assert (Hash.fresh_loc (footprint s h3) h0 h3);
   s
 
-let preserves_freeable #a (s: state a) (h0 h1: HS.mem) =
-  let State hash_state buf _ = s in
-  Hash.preserves_freeable hash_state h0 h1
-
 /// We split update into several versions, to all be simplified into a single
 /// large one at extraction-time.
-
-unfold
-let update_pre
-  (a: Hash.alg)
-  (s: state a)
-  (prev: G.erased bytes)
-  (data: B.buffer UInt8.t)
-  (len: UInt32.t)
-  (h0: HS.mem)
-=
-  hashes h0 s (G.reveal prev) /\
-  B.live h0 data /\
-  v len = B.length data /\
-  B.(loc_disjoint (loc_buffer data) (footprint s h0))
-
-unfold
-let update_post
-  (a: Hash.alg)
-  (s s': state a)
-  (prev: G.erased bytes)
-  (data: B.buffer UInt8.t)
-  (len: UInt32.t)
-  (h0 h1: HS.mem)
-=
-  B.(modifies (footprint s h0) h0 h1) /\
-  footprint s h0 == footprint s' h1 /\
-  hashes h1 s' (Seq.append (G.reveal prev) (B.as_seq h0 data)) /\
-  preserves_freeable s h0 h1 /\
-  State?.hash_state s == State?.hash_state s' /\
-  State?.buf s == State?.buf s'
 
 /// Case 1: we just need to grow the buffer, no call to the hash function.
 val update_small:
@@ -221,7 +132,7 @@ let update_no_copy a s prev data len =
   s
 #pop-options
 
-/// Case 3: we have no buffered data
+/// Case 3: we have no buffered data. TODO: reuse case 2 above.
 val update_empty_buf:
   a:Hash.alg ->
   s:state a ->
@@ -235,7 +146,7 @@ val update_empty_buf:
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
-#set-options "--z3rlimit 100"
+#push-options "--z3rlimit 100"
 let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last a b in
@@ -269,8 +180,8 @@ let update_empty_buf a s prev data len =
     S.equal blocks (G.reveal prev) /\
     S.equal rest S.empty);
   split_at_last_blocks a (G.reveal prev) (B.as_seq h0 data);
-  let n_blocks = len / size_block_ul a in
-  let data1_len = n_blocks * size_block_ul a in
+  let n_blocks = len / Hacl.Hash.Definitions.size_block_ul a in
+  let data1_len = n_blocks * Hacl.Hash.Definitions.size_block_ul a in
   let data2_len = len - data1_len in
   let data1 = B.sub data 0ul data1_len in
   let data2 = B.sub data data1_len data2_len in
@@ -289,6 +200,7 @@ let update_empty_buf a s prev data len =
     (S.append (G.reveal prev) (S.append (B.as_seq h0 data1) (B.as_seq h0 data2))));
 
   State hash_state buf data2_len
+#pop-options
 
 
 /// Case 4: we are given just enough data to end up on the boundary
@@ -324,8 +236,8 @@ let _ = ()
 let update_round a s prev data len =
   let State hash_state buf sz = s in
   let h0 = ST.get () in
-  let diff = size_block_ul a - sz in
-  let buf0 = B.sub buf 0ul (size_block_ul a) in
+  let diff = Hacl.Hash.Definitions.size_block_ul a - sz in
+  let buf0 = B.sub buf 0ul (Hacl.Hash.Definitions.size_block_ul a) in
   let buf1 = B.sub buf0 0ul sz in
   let buf2 = B.sub buf0 sz diff in
   assert (B.(loc_pairwise_disjoint
@@ -336,7 +248,7 @@ let update_round a s prev data len =
   B.modifies_inert_intro (B.loc_buffer buf) h0 h1;
   Hash.frame_invariant (B.loc_buffer buf) hash_state h0 h1;
   Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf) hash_state h0 h1;
-  Hash.update_multi #(G.hide a) hash_state buf0 (size_block_ul a);
+  Hash.update_multi #(G.hide a) hash_state buf0 (Hacl.Hash.Definitions.size_block_ul a);
   let h2 = ST.get () in
   // JP: no clue why I had to go through all these manual steps.
   (
@@ -377,26 +289,16 @@ let update_round a s prev data len =
   s'
 #pop-options
 
-val update:
-  a:Hash.alg ->
-  s:state a ->
-  prev:G.erased bytes ->
-  data: B.buffer UInt8.t ->
-  len: UInt32.t ->
-  Stack (state a)
-    (requires fun h0 -> update_pre a s prev data len h0)
-    (ensures fun h0 s' h1 -> update_post a s s' prev data len h0 h1)
-
 #push-options "--z3rlimit 200"
 let update a s prev data len =
   let State hash_state buf sz = s in
-  if len < size_block_ul a - sz then
+  if len < Hacl.Hash.Definitions.size_block_ul a - sz then
     update_small a s prev data len
   else if sz = 0ul then
     update_empty_buf a s prev data len
   else begin
     let h0 = ST.get () in
-    let diff = size_block_ul a - sz in
+    let diff = Hacl.Hash.Definitions.size_block_ul a - sz in
     let data1 = B.sub data 0ul diff in
     let data2 = B.sub data diff (len - diff) in
     let s1 = update_round a s prev data1 diff in
@@ -420,3 +322,47 @@ let update a s prev data len =
     s2
   end
 #pop-options
+
+friend Hacl.Hash.PadFinish
+friend Hacl.Hash.MD
+
+#push-options "--z3rlimit 100"
+let finish a s prev len dst =
+  let h0 = ST.get () in
+  let State hash_state buf sz = s in
+
+  // This reuses a bunch of stuff from Hacl.Hash.MD. The match below reduces for
+  // extraction to the exact same code in the two branches. Ideally, we would have
+  // a version of pad_len that works with uint32 or uint64, but that proof was
+  // horrible to perform and I don't want to touch this code.
+  let pad_len = match a with
+    | SHA1 | MD5 | SHA2_224 | SHA2_256 ->
+        [@ inline_let ] // JP: why?
+        let len: len_t a = len in
+        Hacl.Hash.PadFinish.pad_len a (Int.Cast.Full.uint32_to_uint64 len)
+    | SHA2_384 | SHA2_512 ->
+        Hacl.Hash.PadFinish.pad_len a
+          (Int.Cast.Full.uint64_to_uint128 (Int.Cast.Full.uint32_to_uint64 len))
+  in
+
+  //Hacl.Hash.MD.pad_length_mod (v len - v sz) (v sz);
+  assert (pad_length a (v len) <= 2 * size_block a);
+
+  let buf0 = B.sub buf 0ul (sz + pad_len) in
+  let buf1 = B.sub buf 0ul sz in
+  let buf2 = B.sub buf sz pad_len in
+  begin match a with
+    | SHA1 | MD5 | SHA2_224 | SHA2_256 ->
+        Hacl.Hash.PadFinish.pad a len buf2
+    | SHA2_384 | SHA2_512 ->
+        Hacl.Hash.PadFinish.pad a (Int.Cast.Full.uint64_to_uint128 len) buf2
+  end;
+  let h1 = ST.get () in
+
+  B.modifies_inert_intro (B.loc_buffer buf) h0 h1;
+  Hash.frame_invariant (B.loc_buffer buf) hash_state h0 h1;
+  Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf) hash_state h0 h1;
+  EverCrypt.Hash.update_multi #(G.hide a) hash_state buf0 (sz + pad_len);
+  EverCrypt.Hash.finish #(G.hide a) hash_state dst;
+  EverCrypt.Hash.init #(G.hide a) hash_state;
+  State hash_state buf 0ul

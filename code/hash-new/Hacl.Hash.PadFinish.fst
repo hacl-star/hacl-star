@@ -57,7 +57,7 @@ let store_len a len b =
 
 #set-options "--z3rlimit 20"
 
-inline_for_extraction
+inline_for_extraction noextract
 let len_mod_32 (a: hash_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = len_v a len % Helpers.size_block a })
 =
