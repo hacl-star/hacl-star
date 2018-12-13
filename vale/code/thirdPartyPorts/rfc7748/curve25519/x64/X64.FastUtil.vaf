@@ -250,7 +250,6 @@ procedure{:quick} fast_add1(
     Adcx64Wrap(rax, r11);
 }
 
-/*
 #reset-options "--z3rlimit 20"
 
 procedure{:quick}{:public} fast_add1_stdcall(
@@ -323,7 +322,6 @@ procedure{:quick}{:public} fast_add1_stdcall(
 
     Pop(rsi, stack_b, 0);
 }
-*/
 
 #reset-options "--z3rlimit 300"
 procedure{:quick} fast_sub1(

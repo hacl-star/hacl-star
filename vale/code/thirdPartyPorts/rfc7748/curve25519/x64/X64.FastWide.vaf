@@ -109,7 +109,7 @@ procedure{:quick}{:public} fmul_stdcall(
         let b := pow2_four(b0, b1, b2, b3);
         let d := pow2_four(d0, d1, d2, d3);
 
-        //d % prime == old(a + b) % prime;
+        d % prime == old(a * b) % prime;
 
         //////////////////////////////////////
         //   Framing
@@ -158,6 +158,7 @@ procedure{:quick}{:public} fmul_stdcall(
 }
 
 
+#reset-options "--z3rlimit 30"
 procedure{:quick}{:public} fmul2_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
@@ -225,25 +226,18 @@ procedure{:quick}{:public} fmul2_stdcall(
         let d1 := buffer64_read(dst_b, 1, mem);
         let d2 := buffer64_read(dst_b, 2, mem);
         let d3 := buffer64_read(dst_b, 3, mem);
-        let d4 := buffer64_read(dst_b, 4, mem);
-        let d5 := buffer64_read(dst_b, 5, mem);
-        let d6 := buffer64_read(dst_b, 6, mem);
-        let d7 := buffer64_read(dst_b, 7, mem);
 
-        let d := pow2_eight(d0, d1, d2, d3, d4, d5, d6, d7);
+        let d := pow2_four(d0, d1, d2, d3);
 
-        let d0' := buffer64_read(dst_b, 0 + 8, mem);
-        let d1' := buffer64_read(dst_b, 1 + 8, mem);
-        let d2' := buffer64_read(dst_b, 2 + 8, mem);
-        let d3' := buffer64_read(dst_b, 3 + 8, mem);
-        let d4' := buffer64_read(dst_b, 4 + 8, mem);
-        let d5' := buffer64_read(dst_b, 5 + 8, mem);
-        let d6' := buffer64_read(dst_b, 6 + 8, mem);
-        let d7' := buffer64_read(dst_b, 7 + 8, mem);
+        let d0' := buffer64_read(dst_b, 0 + 4, mem);
+        let d1' := buffer64_read(dst_b, 1 + 4, mem);
+        let d2' := buffer64_read(dst_b, 2 + 4, mem);
+        let d3' := buffer64_read(dst_b, 3 + 4, mem);
 
-        let d' := pow2_eight(d0', d1', d2', d3', d4', d5', d6', d7');
+        let d' := pow2_four(d0', d1', d2', d3');
 
-        //d % prime == old(a + b) % prime;
+        d % prime == old(a * b) % prime;
+        d' % prime == old(a' * b') % prime;
 
         //////////////////////////////////////
         //   Framing
@@ -279,8 +273,10 @@ procedure{:quick}{:public} fmul2_stdcall(
 
     fast_multiply(0, tmp_b, inA_b, inB_b);
     fast_multiply(4, tmp_b, inA_b, inB_b);
+
     Mov64(inA_ptr, tmp_ptr);
     Pop(rdi, stack_b, 0);
+
     carry_wide(0, dst_b, tmp_b);
     carry_wide(4, dst_b, tmp_b);
 
@@ -338,7 +334,7 @@ procedure{:quick}{:public} fsqr_stdcall(
         let a := pow2_four(a0, a1, a2, a3);
         let d := pow2_four(d0, d1, d2, d3);
 
-        //d % prime == old(a + b) % prime;
+        d % prime == old(a * a) % prime;
 
         //////////////////////////////////////
         //   Framing
@@ -419,20 +415,31 @@ procedure{:quick}{:public} fsqr2_stdcall(
         validSrcAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, if win then 6 else 5, memTaint);
     ensures
-        let a0 := old(buffer64_read(inA_b, 0, mem));
-        let a1 := old(buffer64_read(inA_b, 1, mem));
-        let a2 := old(buffer64_read(inA_b, 2, mem));
-        let a3 := old(buffer64_read(inA_b, 3, mem));
+        let a0  := old(buffer64_read(inA_b, 0, mem));
+        let a1  := old(buffer64_read(inA_b, 1, mem));
+        let a2  := old(buffer64_read(inA_b, 2, mem));
+        let a3  := old(buffer64_read(inA_b, 3, mem));
+        let a0' := old(buffer64_read(inA_b, 0 + 4, mem));
+        let a1' := old(buffer64_read(inA_b, 1 + 4, mem));
+        let a2' := old(buffer64_read(inA_b, 2 + 4, mem));
+        let a3' := old(buffer64_read(inA_b, 3 + 4, mem));
 
-        let d0 := buffer64_read(dst_b, 0, mem);
-        let d1 := buffer64_read(dst_b, 1, mem);
-        let d2 := buffer64_read(dst_b, 2, mem);
-        let d3 := buffer64_read(dst_b, 3, mem);
+        let d0  := buffer64_read(dst_b, 0, mem);
+        let d1  := buffer64_read(dst_b, 1, mem);
+        let d2  := buffer64_read(dst_b, 2, mem);
+        let d3  := buffer64_read(dst_b, 3, mem);
+        let d0' := buffer64_read(dst_b, 0 + 4, mem);
+        let d1' := buffer64_read(dst_b, 1 + 4, mem);
+        let d2' := buffer64_read(dst_b, 2 + 4, mem);
+        let d3' := buffer64_read(dst_b, 3 + 4, mem);
 
-        let a := pow2_four(a0, a1, a2, a3);
-        let d := pow2_four(d0, d1, d2, d3);
+        let a  := pow2_four(a0,  a1,  a2,  a3);
+        let a' := pow2_four(a0', a1', a2', a3');
+        let d  := pow2_four(d0,  d1,  d2,  d3);
+        let d' := pow2_four(d0', d1', d2', d3');
 
-        //d % prime == old(a + b) % prime;
+        d  % prime == old(a * a)   % prime;
+        d' % prime == old(a' * a') % prime;
 
         //////////////////////////////////////
         //   Framing
