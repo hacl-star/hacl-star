@@ -728,6 +728,11 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   // }
   admit()
 
+let lemma_mod_transform (quads:seq quad32) : Lemma
+  (requires length quads % 4 == 0)
+  (ensures length (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads)) % 64 == 0)
+  =
+  ()
 
 let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
@@ -742,6 +747,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
         (decreases (length quads)) 
   =
   let open FStar.Mul in
+  lemma_mod_transform quads;
   assert (length blocks % 64 == 0);
   reveal_opaque update_multi;
   if length quads = 0 then begin
