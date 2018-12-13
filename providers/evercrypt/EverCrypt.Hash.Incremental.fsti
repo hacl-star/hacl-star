@@ -21,8 +21,8 @@ noeq
 type state a =
 | State:
     hash_state: Hash.state a ->
-    buf: B.buffer UInt8.t { B.length buf = 2 * size_block a } ->
-    buf_size: UInt32.t ->
+    buf: B.buffer UInt8.t { B.length buf = size_block a } ->
+    total_len: UInt64.t ->
     state a
 
 let footprint #a (s: state a) h =
@@ -54,16 +54,19 @@ let split_at_last (a: Hash.alg) (b: bytes):
   assert (S.length b - n * size_block a < size_block a);
   blocks, rest
 
+#set-options "--max_fuel 0 --max_ifuel 0"
 unfold
 let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
-  let State hash_state buf sz = s in
+  let State hash_state buf total_len = s in
   let blocks, rest = split_at_last a b in
+  S.length blocks + S.length rest = v total_len /\
+  S.length b = v total_len /\
+  v total_len < pow2 61 /\
   B.live h buf /\
   B.(loc_disjoint (loc_buffer buf) (Hash.footprint hash_state h)) /\
   Hash.invariant hash_state h /\
-  v sz < size_block a /\
   S.equal (Hash.repr hash_state h) (Hash.compress_many (Hash.acc0 #a) blocks) /\
-  S.equal (S.slice (B.as_seq h buf) 0 (v sz)) rest
+  S.equal (S.slice (B.as_seq h buf) 0 (v total_len % size_block a)) rest
 
 let bytes = S.seq UInt8.t
 
@@ -87,6 +90,7 @@ let update_pre
   hashes h0 s (G.reveal prev) /\
   B.live h0 data /\
   v len = B.length data /\
+  S.length (G.reveal prev) + v len < pow2 61 /\
   B.(loc_disjoint (loc_buffer data) (footprint s h0))
 
 unfold
@@ -125,15 +129,11 @@ val finish:
   prev:G.erased bytes ->
   len:UInt32.t { UInt32.v len = S.length (G.reveal prev) } -> // JP: just v doesn't work (why?)
   dst: Hacl.Hash.Definitions.hash_t a ->
-  Stack (state a)
+  Stack unit
     (requires fun h0 ->
       hashes h0 s (G.reveal prev) /\
       B.live h0 dst /\
       B.(loc_disjoint (loc_buffer dst) (footprint s h0)))
     (ensures fun h0 s' h1 ->
-      B.(modifies (footprint s h0) h0 h1) /\
-      footprint s h0 == footprint s' h1 /\
-      hashes h1 s' S.empty /\
-      preserves_freeable s h0 h1 /\
-      State?.hash_state s == State?.hash_state s' /\
-      State?.buf s == State?.buf s')
+      hashes h1 s (G.reveal prev) /\
+      B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1))
