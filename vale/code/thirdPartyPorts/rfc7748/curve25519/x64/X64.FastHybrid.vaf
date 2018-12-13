@@ -453,7 +453,7 @@ procedure{:quick} carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:
 }
 
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 300"
 procedure{:quick} {:public} {:verify true} carry_wide(
     inline offset:nat,
     ghost dst_b:buffer64,
@@ -471,7 +471,9 @@ procedure{:quick} {:public} {:verify true} carry_wide(
         a6 := buffer64_read(inA_b, 6 + offset*2, mem);
         a7 := buffer64_read(inA_b, 7 + offset*2, mem);
 
-        a := pow2_four(a0, a1, a2, a3);
+//        a  := pow2_four(a0, a1, a2, a3);
+//        a' := pow2_four(a4, a5, a6, a7);
+        a := pow2_eight(a0, a1, a2, a3, a4, a5, a6, a7);
 
         tmp0 @= r8;
         tmp1 @= r9;
@@ -498,16 +500,28 @@ procedure{:quick} {:public} {:verify true} carry_wide(
         let d1 := buffer64_read(dst_b, 1 + offset, mem);
         let d2 := buffer64_read(dst_b, 2 + offset, mem);
         let d3 := buffer64_read(dst_b, 3 + offset, mem);
-        //let d := pow2_four(d0, d1, d2, d3);
-        //d == old(a * b);
+        let d := pow2_four(d0, d1, d2, d3);
+
+        d % prime == old(a) % prime;
 
         validSrcAddrs64(mem, dst_ptr, dst_b, 4 + offset, memTaint, Secret);
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset, 4 + offset - 1);
 {
     Mov64(rdx, 38);
 
-    fast_mul1_add(offset*2, inA_b);
-    carry_pass(false, offset, dst_b);
+    fast_mul1_add(offset*2, inA_b);   // Gives d+carry == a' * 38 + a
+    ghost var d0_mid := tmp0;
+    ghost var d1_mid := tmp1;
+    ghost var d2_mid := tmp2;
+    ghost var d3_mid := tmp3;
+    ghost var carry_mid := rax;
+    carry_pass(false, offset, dst_b); // Gives d % prime == old (d + carry * pow2_256) % prime
+
+    ghost var d0 := buffer64_read(dst_b, 0 + offset, mem);
+    ghost var d1 := buffer64_read(dst_b, 1 + offset, mem);
+    ghost var d2 := buffer64_read(dst_b, 2 + offset, mem);
+    ghost var d3 := buffer64_read(dst_b, 3 + offset, mem);
+    lemma_carry_wide(a0, a1, a2, a3, a4, a5, a6, a7, d0_mid, d1_mid, d2_mid, d3_mid, carry_mid, d0, d1, d2, d3);
     //store4(dst_b);
 }
 

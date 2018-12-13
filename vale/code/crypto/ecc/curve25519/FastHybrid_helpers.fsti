@@ -68,3 +68,28 @@ val lemma_addition (a d:nat) (a0 a1 a2 a3 d0 d1 d2 d3 d4:nat64)
             s4 == s4' /\
             c4 == 0))
   (ensures a + d == pow2_five s0 s1 s2 s3 s4)
+
+//#reset-options "--z3rlimit 20"
+let lemma_carry_wide (a0 a1 a2 a3 a4 a5 a6 a7
+                      d0 d1 d2 d3 carry
+                      d0' d1' d2' d3':nat64) : Lemma
+  (requires pow2_five d0 d1 d2 d3 carry == 38 * pow2_four a4 a5 a6 a7 + pow2_four a0 a1 a2 a3 /\
+            pow2_four d0' d1' d2' d3' % prime == ((pow2_four d0 d1 d2 d3) + carry * pow2_256) % prime)
+  (ensures (pow2_four d0' d1' d2' d3') % prime == (pow2_eight a0 a1 a2 a3 a4 a5 a6 a7) % prime)
+  =
+  calc (==) {
+    pow2_four d0' d1' d2' d3' % prime;
+    == { calc (==) {
+           (pow2_four d0 d1 d2 d3) + carry * pow2_256;
+           == { _ by (int_canon()) }
+           pow2_five d0 d1 d2 d3 carry;
+         }
+       }
+    pow2_five d0 d1 d2 d3 carry % prime;
+    == {}
+    (pow2_four a0 a1 a2 a3 + 38 * pow2_four a4 a5 a6 a7) % prime;
+    == { lemma_mul_pow256_add (pow2_four a0 a1 a2 a3) (pow2_four a4 a5 a6 a7) }
+    (pow2_four a0 a1 a2 a3 + pow2_256 * pow2_four a4 a5 a6 a7) % prime;
+    == { _ by (int_canon()) }
+    (pow2_eight a0 a1 a2 a3 a4 a5 a6 a7) % prime;
+  }
