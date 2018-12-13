@@ -8,7 +8,7 @@ open CanonCommSemiring
 open Fast_defs
 open Fast_lemmas_internal
 
-#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection -CanonCommMonoid -CanonCommSwaps -CanonCommSemiring' --max_fuel 0 --max_ifuel 0"
+#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection -CanonCommMonoid -CanonCommSwaps -CanonCommSemiring' --z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 
 let lemma_sub2
       (a:nat) (a0 a1:nat64)      
@@ -41,7 +41,7 @@ let lemma_pow2_int_34 (c0 c1 c2 c3:int) :
   =
   ()
 
-#push-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 // Passes
 let lemma_sub3
       (a:nat) (a0 a1 a2:nat64)      
@@ -73,7 +73,6 @@ let lemma_sub3
   assert_by_tactic ((a2 - b2 - c2) * pow2_128 == s3 * pow2_128 - c * pow2_192) int_canon;
   assert_by_tactic (pow2_two s1 s2 + s3 * pow2_128 == pow2_three s1 s2 s3) int_canon;
   ()
-#pop-options
 
 //
 #push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"

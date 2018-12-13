@@ -623,4 +623,5 @@ let sha256_update ctx_b in_b num_val k_b =
   let (k_b8:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 256) in
   let h0:HS.mem = HyperStack.ST.get() in
   sha_update_bytes_stdcall_aux ctx_b in_b num_val k_b stack_b ctx_b8 k_b8;
-  pop_frame()
+  pop_frame();
+  admit()
