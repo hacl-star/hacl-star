@@ -239,8 +239,8 @@ procedure{:quick} fast_add_after_mul1_regs(
     Adox64Wrap(carry, tmp0);
 }
 
-#reset-options "--z3rlimit 30" 
-procedure{:quick} {:verify true} fast_mul1_add(  
+#reset-options "--z3rlimit 300" 
+procedure{:quick} fast_mul1_add(  
     inline offset:nat,
     ghost inA_b:buffer64)
     lets
@@ -294,32 +294,51 @@ procedure{:quick} {:verify true} fast_mul1_add(
 
     
     Mulx64( tmp0,  d0, Mem(inA_ptr, 32 + offset*8, inA_b, 4 + offset, Secret));  /* A[4]*B */ lemma_prod_bounds(tmp0, d0, b, a4); 
+    ghost var ba4_hi := tmp0;
+    ghost var ba4_lo := d0;
     
     Xor64(zero, zero);  // Create a zero and clear the flags
 
     Adox64Wrap(d0, Mem(inA_ptr, 0 + offset*8, inA_b, 0 + offset, Secret));
 
     Mulx64(tmp1, d1, Mem(inA_ptr,  40 + offset*8, inA_b, 5 + offset, Secret));  /* A[5]*B */ lemma_prod_bounds(tmp1, d1, b, a5); 
+    ghost var ba5_hi := tmp1;
+    ghost var ba5_lo := d1;
     Adcx64Wrap(d1, tmp0);
+    ghost var s1 := d1;
 
     Adox64Wrap(d1, Mem(inA_ptr, 8 + offset*8, inA_b, 1 + offset, Secret));
 
     Mulx64(tmp0, d2, Mem(inA_ptr, 48 + offset*8, inA_b, 6 + offset, Secret));  /* A[6]*B */ lemma_prod_bounds(tmp0, d2, b, a6); 
+    ghost var ba6_hi := tmp0;
+    ghost var ba6_lo := d2;
     Adcx64Wrap(d2, tmp1);
+    ghost var s2 := d2;
     
     Adox64Wrap(d2, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));
 
     Mulx64(carry, d3, Mem(inA_ptr, 56 + offset*8, inA_b, 7 + offset, Secret));  /* A[7]*B */ lemma_prod_bounds(carry, d3, b, a7); 
+    ghost var ba7_hi := carry;
+    ghost var ba7_lo := d3;
     Adcx64Wrap(d3, tmp0);
+    ghost var s3 := d3;
 
     Adox64Wrap(d3, Mem(inA_ptr, 24 + offset*8, inA_b, 3 + offset, Secret));
 
     Adcx64Wrap(carry, zero);
+    ghost var s4 := carry;
     Adox64Wrap(carry, zero);
 
     ghost var carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
-    assert_by_tactic(a' * b == pow2_four(b*a4, b*a5, b*a6, b*a7), int_canon);   // PASSES
+    lemma_fast_mul1(a', old(b), a4, a5, a6, a7, 
+                    ba4_hi, ba4_lo, ba5_hi, ba5_lo, ba6_hi, ba6_lo, ba7_hi, ba7_lo,
+                    s1, s2, s3, s4);
+    ghost var d := pow2_five(ba4_lo, s1, s2, s3, s4);
+    lemma_addition(a, d, 
+                   a0, a1, a2, a3, 
+                   ba4_lo, s1, s2, s3, s4,
+                   d0, d1, d2, d3, carry);
 }
 
 
@@ -435,7 +454,7 @@ procedure{:quick} carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:
 
 
 #reset-options "--z3rlimit 30"
-procedure{:quick} {:public} carry_wide(
+procedure{:quick} {:public} {:verify true} carry_wide(
     inline offset:nat,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
@@ -488,7 +507,6 @@ procedure{:quick} {:public} carry_wide(
     Mov64(rdx, 38);
 
     fast_mul1_add(offset*2, inA_b);
-    assume rax * 38 < pow2_63;
     carry_pass(false, offset, dst_b);
     //store4(dst_b);
 }
