@@ -48,27 +48,27 @@ let test () =
   (match Spec.ECIES.encap cs e test1_pk test1_context with
   | _, None -> IO.print_string "Error: Spec.ECIES.encap failed\n"
   | _, Some (ek, esk, epk) -> (
-    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "ECIES Encap Secret" ek;
+    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "\nECIES Encap Secret" ek;
     IO.print_newline ();
-    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Encap Ephemeral Secret" esk;
+    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "\nECIES Encap Ephemeral Secret" esk;
     IO.print_newline ();
-    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "ECIES Encap Ephemeral Public" epk);
+    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "\nECIES Encap Ephemeral Public" epk);
     IO.print_newline ();
     let ciphertext = Spec.ECIES.encrypt cs ek test1_input lbytes_empty (u32 0) in
-    Lib.PrintSequence.print_label_lbytes #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) "ECIES Ciphertext" ciphertext;
+    Lib.PrintSequence.print_label_lbytes #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) "\nECIES Ciphertext" ciphertext;
     IO.print_newline ();
     match Spec.ECIES.decap cs test1_sk epk test1_context with
-    | None -> IO.print_string "Error: Spec.ECIES.decap failed\n"
+    | None -> IO.print_string "\nError: Spec.ECIES.decap failed\n"
     | Some dk -> (
-      Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "ECIES Decap Secret" dk;
+      Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "\nECIES Decap Secret" dk;
       IO.print_newline ();
       let result_decap = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) ek dk in
       if result_decap then ()
       else IO.print_string "\nECIES Decap: Failure\n";
       match Spec.ECIES.decrypt cs dk ciphertext lbytes_empty (u32 0) with
-      | None -> IO.print_string "Error: Spec.ECIES.decrypt failed\n"
+      | None -> IO.print_string "\nError: Spec.ECIES.decrypt failed\n"
       | Some plaintext ->
-        Lib.PrintSequence.print_label_lbytes #32 "ECIES Computed Plaintext" plaintext;
+        Lib.PrintSequence.print_label_lbytes #32 "\nECIES Computed Plaintext" plaintext;
         IO.print_newline ();
         let result_decrypt = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_input plaintext in
         if result_decap then ()
