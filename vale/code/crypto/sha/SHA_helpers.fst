@@ -126,7 +126,7 @@ let shuffle_core_properties (block:block_w) (hash:hash256) (t:counter{t < size_k
           h.[6] == f0 /\
           h.[7] == g0)
   =
-  Pervasives.reveal_opaque [delta_only [`%shuffle_core]] shuffle_core;
+  Pervasives.reveal_opaque (`%shuffle_core) shuffle_core;
   let h = shuffle_core SHA2_256 block hash t in
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -265,8 +265,8 @@ let lemma_sha256_rnds2_spec_update_is_shuffle_core (hash:hash256) (wk:UInt32.t) 
   let l = [a'; b'; c'; d'; e'; f'; g'; h'] in                                          
   let u = seq_of_list l in
   let c = shuffle_core_opaque block hash t in
-  Pervasives.reveal_opaque [delta_only [`%shuffle_core]] shuffle_core;
-  Pervasives.reveal_opaque [delta_only [`%ws]] ws;
+  Pervasives.reveal_opaque (`%shuffle_core) shuffle_core;
+  Pervasives.reveal_opaque (`%ws) ws;
   shuffle_core_properties block hash t;
   elim_of_list l;
   lemma_add_mod_a hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk;
@@ -446,7 +446,7 @@ let ws_computed (b:block_w) (t:counter{t < size_k_w_256}): Tot (UInt32.t) =
 let lemma_ws_computed_is_ws (b:block_w) (t:counter{t < size_k_w_256}) :
   Lemma (ws_computed b t == ws SHA2_256 b t)
   =
-  Pervasives.reveal_opaque [delta_only [`%ws]] ws;
+  Pervasives.reveal_opaque (`%ws) ws;
   if t < size_block_w then (
     assert (vv (ws_computed b t) == ws_opaque b t);
     assert (to_uint32 (ws_opaque b t) == ws SHA2_256 b t);
@@ -467,7 +467,7 @@ let lemma_ws_computed_is_ws_opaque (b:block_w) (t:counter{t < size_k_w_256}) :
   Lemma (vv (ws_computed b t) == ws_opaque b t)
   =
   lemma_ws_computed_is_ws b t;
-  Pervasives.reveal_opaque [delta_only [`%ws]] ws;
+  Pervasives.reveal_opaque (`%ws) ws;
   ()
 
 let ws_computed_quad32 (t:counter{t < size_k_w_256 - 3}) (block:block_w) : quad32 =
@@ -614,7 +614,7 @@ let update_block (hash:hash256) (block:block_w): Tot (hash256) =
 let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = size_block}) :
   Lemma (update_block hash (words_of_bytes SHA2_256 size_block_w block) == update SHA2_256 hash block)
   =
-  Pervasives.reveal_opaque [delta_only [`%Spec.SHA2.update]] Spec.SHA2.update;
+  Pervasives.reveal_opaque (`%Spec.SHA2.update) Spec.SHA2.update;
   assert (equal (update_block hash (words_of_bytes SHA2_256 size_block_w block)) (update SHA2_256 hash block));
   ()
 
@@ -630,8 +630,8 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
   =
   let hash_orig = make_hash h0 h1 in
   let hash_1 = shuffle_opaque SHA2_256 hash_orig block in
-  Pervasives.reveal_opaque [delta_only [`%shuffle]] shuffle;
-  Pervasives.reveal_opaque [delta_only [`%shuffle_core]] shuffle_core;
+  Pervasives.reveal_opaque (`%shuffle) shuffle;
+  Pervasives.reveal_opaque (`%shuffle_core) shuffle_core;
   let h = make_hash src1 src2 in
   assert (forall (block:block_w) (hash:hash256) . FStar.FunctionalExtensionality.feq (shuffle_core_opaque block hash) (shuffle_core_opaque_aux SHA2_256 block hash));
   //assert (forall (block:block_w) . (shuffle_core_opaque block) == (shuffle_core_opaque_aux SHA2_256 block));

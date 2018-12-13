@@ -172,7 +172,7 @@ let ws a b ws =
     M.(modifies (loc_buffer ws) h0 h1) /\
     S.equal (S.slice (B.as_seq h1 ws) 0 i) (S.init i (Spec.ws a b))
   in
-  reveal_opaque [delta_only [`%Spec.ws]] Spec.ws;
+  reveal_opaque (`%Spec.ws) Spec.ws;
   let f (i: U32.t { U32.(0 <= v i /\ v i < Spec.size_k_w a) }):
     ST.Stack unit
       (requires (fun h -> inv h (U32.v i)))
@@ -285,7 +285,7 @@ let shuffle_core a block hash ws t =
   hash.(6ul) <- f0;
   hash.(7ul) <- g0;
 
-  (**) reveal_opaque [delta_only [`%Spec.shuffle_core]] Spec.shuffle_core;
+  (**) reveal_opaque (`%Spec.shuffle_core) Spec.shuffle_core;
   (**) let h = ST.get () in
   (**) [@inline_let]
   (**) let l = [ add a t1 t2; a0; b0; c0; add a d0 t1; e0; f0; g0 ] in
@@ -337,7 +337,7 @@ let shuffle a block hash ws =
   in
   (**) Spec.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
   C.Loops.for 0ul (size_k_w a) inv f;
-  reveal_opaque [delta_only [`%Spec.shuffle]] Spec.shuffle
+  reveal_opaque (`%Spec.shuffle) Spec.shuffle
 
 inline_for_extraction
 let zero (a: sha2_alg): word a =
@@ -363,7 +363,7 @@ let update a hash block =
   shuffle a (G.hide block) hash1 computed_ws;
   C.Loops.in_place_map2 hash hash1 8ul (add a);
   (**) ST.pop_frame ();
-  (**) reveal_opaque [delta_only [`%Spec.update]] Spec.update
+  (**) reveal_opaque (`%Spec.update) Spec.update
 
 let update_224: update_st SHA2_224 = update SHA2_224
 let update_256: update_st SHA2_256 = update SHA2_256
