@@ -399,8 +399,24 @@ let update a s prev data len =
     let diff = size_block_ul a - sz in
     let data1 = B.sub data 0ul diff in
     let data2 = B.sub data diff (len - diff) in
-    let s = update_round a s prev data1 diff in
-    S.append_assoc (G.reveal prev) (B.as_seq h0 data1) (B.as_seq h0 data2);
-    admit ();
-    update_empty_buf a s (G.hide (S.append (G.reveal prev) (B.as_seq h0 data1))) data2 (len - diff)
+    let s1 = update_round a s prev data1 diff in
+    let h1 = ST.get () in
+    let s2 = update_empty_buf a s1
+      (G.hide (S.append (G.reveal prev) (B.as_seq h0 data1))) data2 (len - diff)
+    in
+    let h2 = ST.get () in
+    (
+      let prev = G.reveal prev in
+      assert (hashes h1 s1 (S.append prev (B.as_seq h0 data1)));
+      assert (hashes h2 s2 (S.append (S.append prev (B.as_seq h0 data1)) (B.as_seq h0 data2)));
+      S.append_assoc prev (B.as_seq h0 data1) (B.as_seq h0 data2);
+      assert (S.equal (S.append (B.as_seq h0 data1) (B.as_seq h0 data2)) (B.as_seq h0 data));
+      assert (S.equal
+        (S.append (S.append prev (B.as_seq h0 data1)) (B.as_seq h0 data2))
+        (S.append prev (B.as_seq h0 data)));
+      assert (hashes h2 s2 (S.append prev (B.as_seq h0 data)));
+      ()
+    );
+    s2
   end
+#pop-options
