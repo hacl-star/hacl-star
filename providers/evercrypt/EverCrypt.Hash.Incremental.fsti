@@ -122,8 +122,7 @@ val update:
 /// Note: the state is left to be reused by the caller to feed more data into
 /// the hash.
 inline_for_extraction
-let finish_st =
-  a:Hash.alg ->
+let finish_st (a: Hash.alg) =
   s:state a ->
   prev:G.erased bytes ->
   dst: Hacl.Hash.Definitions.hash_t a ->
@@ -138,4 +137,4 @@ let finish_st =
       footprint s h0 == footprint s h1 /\
       B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1))
 
-val finish: finish_st
+val finish: a:Hash.alg -> finish_st a

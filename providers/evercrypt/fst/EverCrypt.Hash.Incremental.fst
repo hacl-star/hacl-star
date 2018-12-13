@@ -333,7 +333,7 @@ let update a s prev data len =
 #pop-options
 
 inline_for_extraction noextract
-val mk_finish: finish_st
+val mk_finish: a:Hash.alg -> finish_st a
 
 #push-options "--z3rlimit 200"
 inline_for_extraction noextract
@@ -430,3 +430,21 @@ let mk_finish a s prev dst =
   // So much for automated proofs.
 
 #pop-options
+
+/// The wrapper pattern, to ensure that the stack-allocated state is properly
+/// monomorphized.
+let finish_md5: finish_st MD5 = mk_finish MD5
+let finish_sha1: finish_st SHA1 = mk_finish SHA1
+let finish_sha224: finish_st SHA2_224 = mk_finish SHA2_224
+let finish_sha256: finish_st SHA2_256 = mk_finish SHA2_256
+let finish_sha384: finish_st SHA2_384 = mk_finish SHA2_384
+let finish_sha512: finish_st SHA2_512 = mk_finish SHA2_512
+
+let finish a s prev dst =
+  match a with
+  | MD5 -> finish_md5 s prev dst
+  | SHA1 -> finish_sha1 s prev dst
+  | SHA2_224 -> finish_sha224 s prev dst
+  | SHA2_256 -> finish_sha256 s prev dst
+  | SHA2_384 -> finish_sha384 s prev dst
+  | SHA2_512 -> finish_sha512 s prev dst
