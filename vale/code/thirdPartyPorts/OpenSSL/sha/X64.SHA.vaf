@@ -95,7 +95,7 @@ procedure {:quick} preamble(
     Palignr8(abef, cdgh);                             // abef := LSB: FEBA == abef in big endian
     // OpenSSL uses punpcklqdq here:
     Shufpd(cdgh, Wi, 0);                              // cdgh := LSB: HGDC == cdgh in big endian
-    assert equal(#(seq(FStar.UInt32.t))(make_hash(abef, cdgh)), #(seq(FStar.UInt32.t))(make_ordered_hash(abcd, efgh)));
+    assert equal(#(seq(SHA_helpers.word))(make_hash(abef, cdgh)), #(seq(SHA_helpers.word))(make_ordered_hash(abcd, efgh)));
 }
 
 #reset-options "--z3rlimit 40"
@@ -618,7 +618,7 @@ procedure {:quick} epilogue(
     Store128_buffer(ctx, cdgh, 16, Secret, ctx_b, 1);
     ghost var abcd := buffer128_read(ctx_b, 0, mem);
     ghost var efgh := buffer128_read(ctx_b, 1, mem);
-    assert equal(#(seq(FStar.UInt32.t))(make_hash(old(abef), old(cdgh))), #(seq(FStar.UInt32.t))(make_ordered_hash(abcd, efgh)));
+    assert equal(#(seq(SHA_helpers.word))(make_hash(old(abef), old(cdgh))), #(seq(SHA_helpers.word))(make_ordered_hash(abcd, efgh)));
 }
 
 

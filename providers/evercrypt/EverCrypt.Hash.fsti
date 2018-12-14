@@ -115,7 +115,15 @@ type e_alg = G.erased alg
 // abstract implementation state
 [@CAbstractStruct]
 val state_s: alg -> Type0
-let state alg = b:B.pointer (state_s alg) { B.freeable b }
+
+// pointer to abstract implementation state
+let state alg = b:B.pointer (state_s alg)
+
+// abstract freeable (deep) predicate; only needed for create/free pairs
+val freeable_s: #(a: alg) -> state_s a -> Type0
+
+let freeable (#a: alg) (h: HS.mem) (p: state a) =
+  B.freeable p /\ freeable_s (B.deref h p)
 
 // NS: note that the state is the first argument to the invariant so that we can
 // do partial applications in pre- and post-conditions
@@ -209,12 +217,38 @@ let frame_invariant_implies_footprint_preservation
 =
   ()
 
+let preserves_freeable #a (s: state a) (h0 h1: HS.mem): Type0 =
+  freeable h0 s ==> freeable h1 s
+
+/// This function will generally not extract properly, so it should be used with
+/// great care. Callers must:
+/// - run with evercrypt/fst in scope to benefit from the definition of this function
+/// - know, at call-site, the concrete value of a via suitable usage of inline_for_extraction
+inline_for_extraction noextract
+val alloca: a:alg -> StackInline (state a)
+  (requires (fun _ -> True))
+  (ensures (fun h0 s h1 ->
+    invariant s h1 /\
+    M.(modifies loc_none h0 h1) /\
+    fresh_loc (footprint s h1) h0 h1 /\
+    M.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint s h1))))
+
+val create_in: a:alg -> r:HS.rid -> ST (state a)
+  (requires (fun _ -> HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    invariant s h1 /\
+    M.(modifies loc_none h0 h1) /\
+    fresh_loc (footprint s h1) h0 h1 /\
+    M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
+    freeable h1 s))
+
 val create: a:alg -> ST (state a)
   (requires fun h0 -> True)
   (ensures fun h0 s h1 ->
     invariant s h1 /\
     M.(modifies loc_none h0 h1) /\
-    fresh_loc (footprint s h1) h0 h1)
+    fresh_loc (footprint s h1) h0 h1 /\
+    freeable h1 s)
 
 val init: #a:e_alg -> (
   let a = Ghost.reveal a in
@@ -224,7 +258,8 @@ val init: #a:e_alg -> (
     invariant s h1 /\
     repr s h1 == acc0 #a /\
     M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1))
+    footprint s h0 == footprint s h1 /\
+    preserves_freeable s h0 h1))
 
 // Note: this function relies implicitly on the fact that we are running with
 // code/lib/kremlin and that we know that machine integers and secret integers
@@ -244,7 +279,8 @@ val update:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     invariant s h1 /\
-    repr s h1 == compress (repr s h0) (B.as_seq h0 block)))
+    repr s h1 == compress (repr s h0) (B.as_seq h0 block) /\
+    preserves_freeable s h0 h1))
 
 // Note that we pass the data length in bytes (rather than blocks).
 val update_multi:
@@ -262,7 +298,8 @@ val update_multi:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     invariant s h1 /\
-    repr s h1 == compress_many (repr s h0) (B.as_seq h0 blocks)))
+    repr s h1 == compress_many (repr s h0) (B.as_seq h0 blocks) /\
+    preserves_freeable s h0 h1))
 
 // 18-03-05 note the *new* length-passing convention!
 // 18-03-03 it is best to let the caller keep track of lengths.
@@ -292,7 +329,8 @@ val update_last:
       compress_many (repr s h0)
         (Seq.append (B.as_seq h0 last) (Spec.Hash.Common.pad a (v total_len))) /\
     M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1))
+    footprint s h0 == footprint s h1 /\
+    preserves_freeable s h0 h1))
 
 val finish:
   #a:e_alg -> (
@@ -308,13 +346,15 @@ val finish:
     invariant s h1 /\
     M.(modifies (loc_buffer dst) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    B.as_seq h1 dst == extract (repr s h0)))
+    B.as_seq h1 dst == extract (repr s h0) /\
+    preserves_freeable s h0 h1))
 
 val free:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a -> ST unit
   (requires fun h0 ->
+    freeable h0 s /\
     invariant s h0)
   (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1)))

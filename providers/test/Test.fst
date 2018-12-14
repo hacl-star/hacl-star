@@ -75,6 +75,7 @@ let compute a len text tag0 =
   update_last #(Ghost.hide a) s last (Int.Cast.Full.uint32_to_uint64 len);
   finish #(Ghost.hide a) s tag0;
   let h2 = get() in
+  // JP: this leaks memory and the pop_frame is not efficient
   pop_frame();
 
   let vblocks = B.as_seq h1 blocks in

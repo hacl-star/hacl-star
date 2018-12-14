@@ -138,7 +138,7 @@ let hkdf_extract a prk salt saltlen ikm ikmlen =
 let hkdf_expand a okm prk prklen info infolen len =
   push_frame();
   let tlen = tagLen a in
-  let text = alloca 0uy (tlen + infolen + 1ul) in
+  let text = LowStar.Buffer.alloca 0uy (tlen + infolen + 1ul) in
   blit info 0ul text tlen infolen;
   assert (tagLength a <= 64);
   assert (blockLength a <= 128);

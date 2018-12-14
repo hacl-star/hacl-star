@@ -27,11 +27,21 @@ all_: dist/compact/libmerkletree.a
 # - extract each .checked file into a .krml file in parallel
 
 FSTAR_INCLUDE_DIRS = \
-  $(HACL_HOME)/specs \
-  $(HACL_HOME)/code/lib \
-  $(HACL_HOME)/code/hash-new \
-  $(HACL_HOME)/providers/evercrypt \
+  $(KREMLIN_HOME)/kremlib/compat \
   $(KREMLIN_HOME)/kremlib \
+  $(HACL_HOME)/specs \
+  $(HACL_HOME)/providers/evercrypt \
+  $(HACL_HOME)/providers/evercrypt/fst \
+  $(HACL_HOME)/providers/evercrypt/config/$(CONFIG) \
+  $(HACL_HOME)/code/lib/kremlin \
+  $(HACL_HOME)/code/experimental/aesgcm \
+  $(HACL_HOME)/code/curve25519/interfaces \
+  $(HACL_HOME)/code/hash-new \
+  $(HACL_HOME)/code/api/interfaces \
+  $(HACL_HOME)/code/api \
+  $(HACL_HOME)/code/salsa-family \
+  $(HACL_HOME)/code/poly1305 \
+  $(HACL_HOME)/code/bignum \
   $(HACL_HOME)/vale/code/lib/math \
   $(HACL_HOME)/vale/code/lib/util \
   $(HACL_HOME)/vale/code/lib/collections \

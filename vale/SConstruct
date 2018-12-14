@@ -427,7 +427,8 @@ def add_from_os_env(env, name):
   if name in os.environ:
     env['ENV'][name] = os.environ[name]
 
-ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH']})
+ocaml_env = Environment()
+add_from_os_env(ocaml_env, 'PATH')
 add_from_os_env(ocaml_env, 'OCAMLPATH')
 add_from_os_env(ocaml_env, 'OCAMLLIB')
 add_from_os_env(ocaml_env, 'OCAML_TOPLEVEL_PATH')

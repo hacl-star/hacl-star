@@ -342,7 +342,8 @@ let hash_2 src1 src2 dst =
   B.blit src1 0ul cb 0ul hash_size;
   B.blit src2 0ul cb 32ul hash_size;
 
-  let st = EHS.create hash_alg in
+  // ONLY WORKS BECAUSE hash_alg is inline_for_extraction and is known to be SHA2_256
+  let st = EHS.alloca hash_alg in
   EHS.init #(Ghost.hide hash_alg) st;
   let hh1 = HST.get () in
   assert (S.equal (S.append
@@ -366,16 +367,13 @@ let hash_2 src1 src2 dst =
                   (High.hash_2
                     (Rgl?.r_repr hreg hh0 src1)
                     (Rgl?.r_repr hreg hh0 src2)));
-  EHS.free #(Ghost.hide hash_alg) st;
   HST.pop_frame ();
   
   let hh4 = HST.get () in
   assert (S.equal (B.as_seq hh4 dst)
                   (High.hash_2
                     (Rgl?.r_repr hreg hh0 src1)
-                    (Rgl?.r_repr hreg hh0 src2)));
-  // TODO: need to deal with the region of `st` (= HH.root)
-  assume (modifies (B.loc_region_only false (B.frameOf dst)) hh0 hh4)
+                    (Rgl?.r_repr hreg hh0 src2)))
 
 /// Low-level Merkle tree data structure
 
