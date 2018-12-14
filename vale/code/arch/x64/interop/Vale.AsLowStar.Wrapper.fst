@@ -15,28 +15,7 @@ module VS = X64.Vale.State
 module IX64 = Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
-// open Vale.AsLowStar.Signature
-// open Vale.AsLowStar.Util
-// friend X64.Interop_s
-// friend X64.Memory
-// friend X64.Vale.Decls
-// friend X64.Vale.StateLemmas
-// friend X64.Memory_Sems
-// module B = LowStar.Buffer
-// module BV = LowStar.BufferView
-// module HS = FStar.HyperStack
-// module IA = Interop_assumptions
-// module IS = X64.Interop_s
-// module ME = X64.Memory
-// module MS = X64.Machine_s
-// module V = X64.Vale.Decls
-// module VS = X64.Vale.State
-// module VSig = Vale.AsLowStar.ValeSig
-// module LSig = Vale.AsLowStar.LowStarSig
-// module TS = X64.Taint_Semantics_s
 module SL = X64.Vale.StateLemmas
-// module BS = X64.Bytes_Semantics_s
-// module MS = X64.Memory_Sems
 module VL = X64.Vale.Lemmas
 
 [@reduce]
@@ -185,6 +164,11 @@ let prediction_rel
      va_s1.VS.mem == snd fuel_mem /\
      VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1))
 
+let pop_is_popped (m:HS.mem{HS.poppable m})
+  : Lemma (HS.popped m (HS.pop m))
+  = ()
+
+#set-options "--z3rlimit_factor 2"
 let vale_lemma_as_prediction
           (code:V.va_code)
           (args:IX64.arity_ok arg)
@@ -226,6 +210,22 @@ let vale_lemma_as_prediction
        assume (IM.down_mem h1
                            (IA.addrs)
                            (Interop.Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem);
+       let h1_pre_pop = Interop.Adapters.hs_of_mem final_mem in
+       assert (IM.down_mem h1_pre_pop (IA.addrs) (Interop.Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem);
+       assert (va_s1.VS.mem == final_mem);
+       mem_correspondence_refl args va_s1;
+       assert (HS.poppable h1_pre_pop);
+       let h2 = HS.pop h1_pre_pop in
+       args_fp args h0 push_h0;
+       assert (HS.get_tip push_h0 == HS.get_tip h1_pre_pop);
+       pop_is_popped h1_pre_pop;
+       assert (HS.popped h1_pre_pop h2);
+       B.popped_modifies h1_pre_pop h2;
+       frame_mem_correspondence args h1_pre_pop h2 va_s1 (B.loc_regions false (Set.singleton (HS.get_tip h1_pre_pop)));
+       assert (B.modifies (loc_args args) alloc_push_h0 h1_pre_pop);
+       assume (B.modifies (loc_args args) h0 h2);
+       assume (mem_roots_p h2 args);
+       assert (LSig.(to_low_post post args h0 () h2));
        coerce f, va_s1.VS.mem
 
 let lowstar_lemma_post
