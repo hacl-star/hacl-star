@@ -17,7 +17,8 @@ open FStar.HyperStack.ST
 open Spec.Hash.Helpers
 open FStar.Integers
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3refresh \
+  --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
 
 open LowStar.Modifies.Linear
 
@@ -46,9 +47,6 @@ let create a =
   Hash.init #(G.hide a) hash_state;
 
   let h3 = ST.get () in
-  // JP: I don't understand the need for this assertion. This proof fails if I
-  // put the assertion further down.
-  assert (ST.equal_stack_domains h0 h3);
   Spec.Hash.update_multi_zero a (Hash.repr hash_state h3);
   split_at_last_empty a;
   assert (Hash.invariant hash_state h3);
@@ -118,7 +116,7 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   ()
 
 // Larger rlimit required for batch mode.
-#push-options "--z3rlimit 400 --z3refresh"
+#push-options "--z3rlimit 400"
 let update_small a s prev data len =
   let State hash_state buf total_len = s in
   let sz = rest a total_len in
@@ -404,30 +402,7 @@ let mk_finish a s prev dst =
   Hash.frame_invariant B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
   Hash.frame_invariant_implies_footprint_preservation
     B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
-  assert (Hash.invariant hash_state h6);
-
-  assert (hashes h6 s (G.reveal prev));
-  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1);
-  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h1 h2);
-  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h2);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h2 h3);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h3 h4);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h4 h5);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h2 h4);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h2 h5);
-  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h6)
-
-  // So much for automated proofs.
+  assert (Hash.invariant hash_state h6)
 
 #pop-options
 
