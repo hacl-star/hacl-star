@@ -151,3 +151,47 @@ let lemma_carry_wide5_simplify inp c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
     v t3 * pow26 * pow26 * pow26 +
     v t4 * pow26 * pow26 * pow26 * pow26)
    (v c4 * 5) prime
+
+(* the same proof as for lemma_carry_wide5_simplify *)
+val lemma_carry_felem5_full_simplify:
+  inp:felem5 ->
+  c0:uint32 -> c1:uint32 -> c2:uint32 -> c3:uint32 -> c4:uint32 ->
+  t0:uint32 -> t1:uint32 -> t2:uint32 -> t3:uint32 -> t4:uint32 ->
+  Lemma
+    (requires
+    feval inp ==
+    (v c0 * pow2 26 + v t0 +
+    (v c1 * pow2 26 + v t1 - v c0) * pow26 +
+    (v c2 * pow2 26 + v t2 - v c1) * pow26 * pow26 +
+    (v c3 * pow2 26 + v t3 - v c2) * pow26 * pow26 * pow26 +
+    (v c4 * pow2 26 + v t4 - v c3) * pow26 * pow26 * pow26 * pow26) % prime)
+   (ensures
+    feval inp ==
+    (v t0 + v c4 * 5 + v t1 * pow26 + v t2 * pow26 * pow26 +
+     v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % prime)
+let lemma_carry_felem5_full_simplify inp c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
+  assert (
+    v c0 * pow2 26 + v t0 +
+    (v c1 * pow2 26 + v t1 - v c0) * pow26 +
+    (v c2 * pow2 26 + v t2 - v c1) * pow26 * pow26 +
+    (v c3 * pow2 26 + v t3 - v c2) * pow26 * pow26 * pow26 +
+    (v c4 * pow2 26 + v t4 - v c3) * pow26 * pow26 * pow26 * pow26 ==
+    v t0 + v t1 * pow26 + v t2 * pow26 * pow26 + v t3 * pow26 * pow26 * pow26 +
+    v t4 * pow26 * pow26 * pow26 * pow26 + v c4 * pow2 26 * pow26 * pow26 * pow26 * pow26);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r
+   (v t0 + v t1 * pow26 +
+    v t2 * pow26 * pow26 +
+    v t3 * pow26 * pow26 * pow26 +
+    v t4 * pow26 * pow26 * pow26 * pow26)
+   (v c4 * pow2 26 * pow26 * pow26 * pow26 * pow26) prime;
+  lemma_mul_assos_6 (v c4) (pow2 26) pow26 pow26 pow26 pow26;
+  assert_norm (pow2 26 * pow26 * pow26 * pow26 * pow26 = pow2 130);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v c4) (pow2 130) prime;
+  lemma_prime ();
+  assert_norm ((v c4 * pow2 130) % prime == (v c4 * 5) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r
+   (v t0 + v t1 * pow26 +
+    v t2 * pow26 * pow26 +
+    v t3 * pow26 * pow26 * pow26 +
+    v t4 * pow26 * pow26 * pow26 * pow26)
+   (v c4 * 5) prime

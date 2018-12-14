@@ -51,10 +51,15 @@ val smul_felem5:
       wide_as_nat5 out == uint_v u1 * as_nat5 f2}
 let smul_felem5 #m1 #m2 u1 (f20,f21,f22,f23,f24) =
   let (m20, m21, m22, m23, m24) = m2 in
+  [@inline_let]
   let o0 = mul_wide32 #m1 #m20 u1 f20 in
+  [@inline_let]
   let o1 = mul_wide32 #m1 #m21 u1 f21 in
+  [@inline_let]
   let o2 = mul_wide32 #m1 #m22 u1 f22 in
+  [@inline_let]
   let o3 = mul_wide32 #m1 #m23 u1 f23 in
+  [@inline_let]
   let o4 = mul_wide32 #m1 #m24 u1 f24 in
   lemma_smul_felem5 #m1 #m2 u1 (f20,f21,f22,f23,f24);
   (o0, o1, o2, o3, o4)
@@ -159,11 +164,31 @@ let carry26_wide #m l cin =
   lemma_carry26_wide #m l cin;
   (to_u32 l1 &. mask26, to_u32 (l1 >>. 26ul))
 
+val lemma_acc_inv:
+    acc:felem5{felem_fits5 acc (1, 1, 1, 1, 1)}
+  -> cin:uint32{v cin < pow2 26}
+  -> Lemma
+    (let (i0, i1, i2, i3, i4) = acc in
+     let i1' = i1 +! cin in
+     let out = (i0, i1', i2, i3, i4) in
+     if (v i1 + v cin) / pow2 26 > 0 then
+       felem_fits5 out (1, 2, 1, 1, 1) /\ (v i1 + v cin) % pow2 26 < v cin
+     else felem_fits5 out (1, 1, 1, 1, 1))
+let lemma_acc_inv acc cin = ()
+
+let acc_inv_t (acc:felem5) =
+  let (o0, o1, o2, o3, o4) = acc in
+  if v o1 >= pow2 26 then
+    felem_fits5 acc (1, 2, 1, 1, 1) /\ v o1 % pow2 26 < 64
+  else felem_fits5 acc (1, 1, 1, 1, 1)
+
 inline_for_extraction
 val carry_wide5:
     inp:felem_wide5{felem_wide_fits5 inp (47, 35, 27, 19, 11)}
-  -> out:felem5{felem_fits5 out (1, 2, 1, 1, 1) /\
-      feval out == feval_wide inp}
+  -> Pure felem5
+    (requires True)
+    (ensures fun out ->
+      feval out == feval_wide inp /\ acc_inv_t out)
 let carry_wide5 (i0, i1, i2, i3, i4) =
   assert_norm (47 < 64);
   assert_norm (64 < max26);
@@ -175,6 +200,7 @@ let carry_wide5 (i0, i1, i2, i3, i4) =
   lemma_carry_wide5_simplify (i0, i1, i2, i3, i4) c0 c1 c2 c3 c4 tmp0 tmp1 tmp2 tmp3 tmp4;
   let tmp0', c5 = carry26 tmp0 (c4 *! u32 5) in
   let tmp1' = tmp1 +! c5 in
+  lemma_acc_inv (tmp0', tmp1, tmp2, tmp3, tmp4) c5;
   (tmp0', tmp1', tmp2, tmp3, tmp4)
 
 inline_for_extraction
@@ -189,8 +215,8 @@ val fmul_r5:
       felem_fits5 r5 (5, 5, 5, 5, 5) /\
       r5 == precomp_r5 r))
     (ensures fun out ->
+      acc_inv_t out /\
      (let r, r5 = p in
-      felem_fits5 out (1, 2, 1, 1, 1) /\
       feval out == fmul (feval f1) (feval r)))
 let fmul_r5 f1 p =
   let r, r5 = p in
@@ -211,8 +237,8 @@ val fadd_mul_r5:
       felem_fits5 r5 (5, 5, 5, 5, 5) /\
       r5 == precomp_r5 r))
     (ensures fun out ->
+      acc_inv_t out /\
      (let r, r5 = p in
-      felem_fits5 out (1, 2, 1, 1, 1) /\
       feval out == fmul (fadd (feval acc) (feval f1)) (feval r)))
 let fadd_mul_r5 acc f1 p =
   let r, r5 = p in
@@ -220,29 +246,22 @@ let fadd_mul_r5 acc f1 p =
   let tmp = mul_felem5 acc r r5 in
   carry_wide5 tmp
 
-(* reduce_felem *)
-
 inline_for_extraction
-val carry_felem5:
-    inp:felem5{felem_fits5 inp (1, 2, 1, 1, 1)}
-  -> out:felem5{felem_fits5 out (1, 1, 1, 1, 2)}
-let carry_felem5 (f0, f1, f2, f3, f4) =
-  let tmp0, c = carry26 f0 (u32 0) in
-  let tmp1, c = carry26 f1 c in
-  let tmp2, c = carry26 f2 c in
-  let tmp3, c = carry26 f3 c in
-  let tmp4 = f4 +. c in
-  (tmp0, tmp1, tmp2, tmp3, tmp4)
-
-inline_for_extraction
-val carry_top_felem5:
-    f:felem5{felem_fits5 f (1, 1, 1, 1, 2)}
-  -> out:felem5//{felem_fits5 f (1, 2, 1, 1, 1)}
-let carry_top_felem5 (f0, f1, f2, f3, f4) =
-  let tmp4, carry = carry26 f4 (u32 0) in
-  let tmp0, carry = carry26 f0 (carry *. u32 5) in
-  let tmp1 = f1 +. carry in
-  (tmp0, tmp1, f2, f3, tmp4)
+val carry_felem5_full:
+    inp:felem5{acc_inv_t inp}
+  -> out:felem5{feval inp == feval out /\ felem_fits5 out (1, 1, 1, 1, 1)}
+let carry_felem5_full (f0, f1, f2, f3, f4) =
+  let tmp0, c0 = carry26 f0 (u32 0) in
+  let tmp1, c1 = carry26 f1 c0 in
+  assert (if v f1 < pow2 26 then v tmp1 < pow2 26 else v tmp1 < 64);
+  let tmp2, c2 = carry26 f2 c1 in
+  let tmp3, c3 = carry26 f3 c2 in
+  let tmp4, c4 = carry26 f4 c3 in
+  lemma_carry_felem5_full_simplify (f0, f1, f2, f3, f4) c0 c1 c2 c3 c4 tmp0 tmp1 tmp2 tmp3 tmp4;
+  let tmp0', c5 = carry26 tmp0 (c4 *. u32 5) in
+  //assert (if v f1 < pow2 26 then v c5 = 0 else v c5 <= 1);
+  let tmp1' = tmp1 +! c5 in
+  (tmp0', tmp1', tmp2, tmp3, tmp4)
 
 inline_for_extraction
 val subtract_p5:
@@ -268,9 +287,8 @@ let subtract_p5 (f0, f1, f2, f3, f4) =
 
 inline_for_extraction
 val reduce_felem:
-    f:felem5{felem_fits5 f (1, 2, 1, 1, 1)}
+    f:felem5{acc_inv_t f}
   -> out:felem5
 let reduce_felem f =
-  let f = carry_felem5 f in
-  let f = carry_top_felem5 f in
+  let f = carry_felem5_full f in
   subtract_p5 f
