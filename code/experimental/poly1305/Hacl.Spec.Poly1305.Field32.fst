@@ -2,119 +2,14 @@ module Hacl.Spec.Poly1305.Field32
 
 open Lib.Sequence
 open Lib.IntTypes
+open FStar.Mul
 open NatPrime
 
-#reset-options "--z3rlimit 50  --using_facts_from '* -FStar.Seq'"
+open Hacl.Spec.Poly1305.Field32.Lemmas
 
-let felem5 = (uint32 * uint32 * uint32 * uint32 * uint32)
-let felem_wide5 = (uint64 * uint64 * uint64 * uint64 * uint64)
+include Hacl.Spec.Poly1305.Field32.Definition
 
-let scale32 = s:nat{s <= 64}
-let scale64 = s:nat{s <= 4096}
-let nat5 = (nat * nat * nat * nat * nat)
-
-let scale32_5 = x:nat5{let (x1,x2,x3,x4,x5) = x in
-		       x1 <= 64 /\ x2 <= 64 /\ x3 <= 64 /\ x4 <= 64 /\ x5 <= 64}
-let scale64_5 = x:nat5{let (x1,x2,x3,x4,x5) = x in
-		       x1 <= 4096 /\ x2 <= 4096 /\ x3 <= 4096 /\ x4 <= 4096 /\ x5 <= 4096}
-
-let s32x5 (x:scale32) : scale32_5 = (x,x,x,x,x)
-let s64x5 (x:scale64) : scale64_5 = (x,x,x,x,x)
-
-open FStar.Mul
-
-let ( <=* ) (x:nat5) (y:nat5) : Type =
-  let (x1,x2,x3,x4,x5) = x in
-  let (y1,y2,y3,y4,y5) = y in
-  (x1 <= y1) /\
-  (x2 <= y2) /\
-  (x3 <= y3) /\
-  (x4 <= y4) /\
-  (x5 <= y5)
-
-let ( +* ) (x:nat5) (y:nat5) : nat5 =
-  let (x1,x2,x3,x4,x5) = x in
-  let (y1,y2,y3,y4,y5) = y in
-  (x1 + y1 ,
-   x2 + y2 ,
-   x3 + y3 ,
-   x4 + y4 ,
-   x5 + y5)
-
-let ( ** ) (x:nat5) (y:nat5) : nat5 =
-  let (x1,x2,x3,x4,x5) = x in
-  let (y1,y2,y3,y4,y5) = y in
-  (x1 * y1 ,
-   x2 * y2 ,
-   x3 * y3 ,
-   x4 * y4 ,
-   x5 * y5)
-
-#set-options "--z3rlimit 100"
-
-let ( *^ ) (x:scale32) (y:scale32_5) : scale64_5 =
-  let (y1,y2,y3,y4,y5) = y in
-  (x * y1 ,
-   x * y2 ,
-   x * y3 ,
-   x * y4 ,
-   x * y5)
-
-assume val pow26: nat
-inline_for_extraction
-let max26 = pow26 - 1
-
-assume val lemma_pow_32_26: _:unit{pow2 32 == 64 * pow26}
-assume val lemma_pow_64_26: _:unit{pow2 64 == 4096 * pow26 * pow26}
-
-//let _ : (x:unit{pow2 32 == 64 * pow2 26}) =
-//      assert_norm (pow2 32 == 64 * pow2 26)
-//let _ : (x:unit{pow2 64 == 4096 * pow2 26 * pow2 26}) =
-//      assert_norm (pow2 64 == 4096 * pow2 26 * pow2 26)
-
-
-let felem_fits1 (x:uint32) (m:scale32) =
-  uint_v x <= m * max26
-
-let felem_wide_fits1 (x:uint64) (m:scale64) =
-  uint_v x <= m * max26 * max26
-
-let felem_fits5 (f:felem5) (m:scale32_5) =
-  let (x1,x2,x3,x4,x5) = f in
-  let (m1,m2,m3,m4,m5) = m in
-  felem_fits1 x1 m1 /\
-  felem_fits1 x2 m2 /\
-  felem_fits1 x3 m3 /\
-  felem_fits1 x4 m4 /\
-  felem_fits1 x5 m5
-
-let felem_wide_fits5 (f:felem_wide5) (m:scale64_5) =
-  let (x1,x2,x3,x4,x5) = f in
-  let (m1,m2,m3,m4,m5) = m in
-  felem_wide_fits1 x1 m1 /\
-  felem_wide_fits1 x2 m2 /\
-  felem_wide_fits1 x3 m3 /\
-  felem_wide_fits1 x4 m4 /\
-  felem_wide_fits1 x5 m5
-
-noextract
-val as_nat5: f:felem5 -> GTot nat
-let as_nat5 f =
-  let (s0,s1,s2,s3,s4) = f in
-  uint_v s0 + (uint_v s1 * pow26) + (uint_v s2 * pow26 * pow26) +
-    (uint_v s3 * pow26 * pow26 * pow26) + (uint_v s4 * pow26 * pow26 * pow26 * pow26)
-
-noextract
-val wide_as_nat5: f:felem_wide5 -> GTot nat
-let wide_as_nat5 f =
-  let (s0,s1,s2,s3,s4) = f in
-  uint_v s0 + (uint_v s1 * pow26) + (uint_v s2 * pow26 * pow26) +
-    (uint_v s3 * pow26 * pow26 * pow26) + (uint_v s4 * pow26 * pow26 * pow26 * pow26)
-
-let feval (f:felem5) : GTot felem = (as_nat5 f) % prime
-let feval_wide (f:felem_wide5) : GTot felem = (wide_as_nat5 f) % prime
-
-#set-options "--max_fuel 0"
+#reset-options "--z3rlimit 50 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction
 val fadd5:
@@ -146,20 +41,6 @@ let mul_wide32 #m1 #m2 x y =
   assert (v x * v y <= m1 * m2 * max26 * max26);
   to_u64 x *! to_u64 y
 
-val lemma_smul_felem5:
-    #m1:scale32
-  -> #m2:scale32_5
-  -> u1:uint32{felem_fits1 u1 m1}
-  -> f2:felem5{felem_fits5 f2 m2 /\ m1 *^ m2 <=* s64x5 4096}
-  -> Lemma (let (f20, f21, f22, f23, f24) = f2 in
-      v u1 * as_nat5 f2 == v u1 * v f20 + v u1 * v f21 * pow26 +
-      v u1 * v f22 * pow26 * pow26 + v u1 * v f23 * pow26 * pow26 * pow26 +
-      v u1 * v f24 * pow26 * pow26 * pow26 * pow26)
-let lemma_smul_felem5 #m1 #m2 u1 f2 =
-  let (f20, f21, f22, f23, f24) = f2 in
-  assert (v u1 * as_nat5 f2 == v u1 * (v f20 + v f21 * pow26 + v f22 * pow26 * pow26 +
-    v f23 * pow26 * pow26 * pow26 + v f24 * pow26 * pow26 * pow26 * pow26))
-
 inline_for_extraction
 val smul_felem5:
     #m1:scale32
@@ -189,32 +70,6 @@ val mul_add_wide64:
   -> r:uint64{uint_v r == uint_v z + uint_v x * uint_v y /\ felem_wide_fits1 r (m3 + m1 * m2)}
 let mul_add_wide64 #m1 #m2 #m3 x y z =
   z +! mul_wide32 #m1 #m2 x y
-
-#set-options "--z3rlimit 100"
-
-val lemma_smul_add_felem5:
-    #m1:scale32
-  -> #m2:scale32_5
-  -> #m3:scale64_5
-  -> u1:uint32{felem_fits1 u1 m1}
-  -> f2:felem5{felem_fits5 f2 m2}
-  -> acc1:felem_wide5{felem_wide_fits5 acc1 m3 /\ m3 +* m1 *^ m2 <=* s64x5 4096}
-  -> Lemma (let (f20, f21, f22, f23, f24) = f2 in
-      let (o0, o1, o2, o3, o4) = acc1 in
-      wide_as_nat5 acc1 + uint_v u1 * as_nat5 f2 ==
-      v o0 + v o1 * pow26 + v o2 * pow26 * pow26 +
-      v o3 * pow26 * pow26 * pow26 + v o4 * pow26 * pow26 * pow26 * pow26 +
-      v u1 * v f20 + v u1 * v f21 * pow26 +
-      v u1 * v f22 * pow26 * pow26 + v u1 * v f23 * pow26 * pow26 * pow26 +
-      v u1 * v f24 * pow26 * pow26 * pow26 * pow26)
-let lemma_smul_add_felem5 #m1 #m2 #m3 u1 f2 acc1 =
-  let (f20, f21, f22, f23, f24) = f2 in
-  let (o0, o1, o2, o3, o4) = acc1 in
-  assert (wide_as_nat5 acc1 + uint_v u1 * as_nat5 f2 ==
-    v o0 + v o1 * pow26 + v o2 * pow26 * pow26 +
-    v o3 * pow26 * pow26 * pow26 + v o4 * pow26 * pow26 * pow26 * pow26 +
-    v u1 * (v f20 + v f21 * pow26 + v f22 * pow26 * pow26 +
-    v f23 * pow26 * pow26 * pow26 + v f24 * pow26 * pow26 * pow26 * pow26))
 
 inline_for_extraction
 val smul_add_felem5:
@@ -276,31 +131,6 @@ let mul_felem5 (f10,f11,f12,f13,f14) (r0,r1,r2,r3,r4) (r50,r51,r52,r53,r54) =
   (a0,a1,a2,a3,a4)
 
 inline_for_extraction
-let mask26: x:uint32{v x == pow2 26 - 1} =
-  assert_norm (pow2 26 - 1 == 0x3ffffff);
-  u32 0x3ffffff
-
-val lemma_carry26:
-    l:uint32
-  -> cin:uint32
-  -> Lemma
-    (requires felem_fits1 l 2 /\ felem_fits1 cin 62)
-    (ensures
-     (let l0 = (l +! cin) &. mask26 in
-      let l1 = (l +! cin) >>. 26ul in
-      v l + v cin == v l1 * pow2 26 + v l0 /\
-      felem_fits1 l0 1 /\ v l1 <= 64))
-let lemma_carry26 l cin =
-  let l' = l +! cin in
-  let l0 = l' &. mask26 in
-  let l1 = l' >>. 26ul in
-  mod_mask_lemma (to_u64 l') 26ul;
-  uintv_extensionality (mod_mask #U32 #SEC 26ul) mask26;
-  FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 26 32;
-  FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 26);
-  FStar.Math.Lemmas.pow2_minus 32 26
-
-inline_for_extraction
 val carry26:
     l:uint32
   -> cin:uint32
@@ -313,25 +143,6 @@ let carry26 l cin =
   let l1 = l +! cin in
   lemma_carry26 l cin;
   (l1 &. mask26, l1 >>. 26ul)
-
-val lemma_carry26_wide:
-    #m:scale64{m < 64}
-  -> l:uint64{felem_wide_fits1 l m}
-  -> cin:uint32{felem_fits1 cin 64}
-  -> Lemma (
-      let l' = l +! to_u64 cin in
-      let l0 = (to_u32 l') &. mask26 in
-      let l1 = to_u32 (l' >>. 26ul) in
-      v l + v cin == v l1 * pow2 26 + v l0 /\
-      felem_fits1 l0 1 /\ felem_fits1 l1 (m + 1))
-let lemma_carry26_wide #m l cin =
-  let l' = l +! to_u64 cin in
-  let l0 = (to_u32 l') &. mask26 in
-  let l1 = to_u32 (l' >>. 26ul) in
-  mod_mask_lemma (to_u32 l') 26ul;
-  uintv_extensionality (mod_mask #U32 #SEC 26ul) mask26;
-  FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 26 32;
-  FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 26)
 
 inline_for_extraction
 val carry26_wide:
@@ -347,61 +158,6 @@ let carry26_wide #m l cin =
   let l1 = l +! to_u64 cin in
   lemma_carry26_wide #m l cin;
   (to_u32 l1 &. mask26, to_u32 (l1 >>. 26ul))
-
-val lemma_prime: unit ->
-  Lemma (pow2 130 % prime = 5)
-let lemma_prime () =
-  assert_norm (pow2 130 % prime = 5 % prime);
-  assert_norm (5 < prime);
-  FStar.Math.Lemmas.modulo_lemma 5 prime
-
-val lemma_mul_assos_6:
-  a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat ->
-  Lemma (a * b * c * d * e * f == a * (b * c * d * e * f))
-let lemma_mul_assos_6 a b c d e f = ()
-
-val lemma_carry_wide5_simplify:
-  inp:felem_wide5{felem_wide_fits5 inp (47, 35, 27, 19, 11)} ->
-  c0:uint32 -> c1:uint32 -> c2:uint32 -> c3:uint32 -> c4:uint32 ->
-  t0:uint32 -> t1:uint32 -> t2:uint32 -> t3:uint32 -> t4:uint32 ->
-  Lemma
-    (requires
-    feval_wide inp ==
-    (v c0 * pow2 26 + v t0 +
-    (v c1 * pow2 26 + v t1 - v c0) * pow26 +
-    (v c2 * pow2 26 + v t2 - v c1) * pow26 * pow26 +
-    (v c3 * pow2 26 + v t3 - v c2) * pow26 * pow26 * pow26 +
-    (v c4 * pow2 26 + v t4 - v c3) * pow26 * pow26 * pow26 * pow26) % prime)
-   (ensures
-    feval_wide inp ==
-    (v t0 + v c4 * 5 + v t1 * pow26 + v t2 * pow26 * pow26 +
-     v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % prime)
-let lemma_carry_wide5_simplify inp c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
-  assert (
-    v c0 * pow2 26 + v t0 +
-    (v c1 * pow2 26 + v t1 - v c0) * pow26 +
-    (v c2 * pow2 26 + v t2 - v c1) * pow26 * pow26 +
-    (v c3 * pow2 26 + v t3 - v c2) * pow26 * pow26 * pow26 +
-    (v c4 * pow2 26 + v t4 - v c3) * pow26 * pow26 * pow26 * pow26 ==
-    v t0 + v t1 * pow26 + v t2 * pow26 * pow26 + v t3 * pow26 * pow26 * pow26 +
-    v t4 * pow26 * pow26 * pow26 * pow26 + v c4 * pow2 26 * pow26 * pow26 * pow26 * pow26);
-  FStar.Math.Lemmas.lemma_mod_plus_distr_r
-   (v t0 + v t1 * pow26 +
-    v t2 * pow26 * pow26 +
-    v t3 * pow26 * pow26 * pow26 +
-    v t4 * pow26 * pow26 * pow26 * pow26)
-   (v c4 * pow2 26 * pow26 * pow26 * pow26 * pow26) prime;
-  lemma_mul_assos_6 (v c4) (pow2 26) pow26 pow26 pow26 pow26;
-  assert_norm (pow2 26 * pow26 * pow26 * pow26 * pow26 = pow2 130);
-  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v c4) (pow2 130) prime;
-  lemma_prime ();
-  assert_norm ((v c4 * pow2 130) % prime == (v c4 * 5) % prime);
-  FStar.Math.Lemmas.lemma_mod_plus_distr_r
-   (v t0 + v t1 * pow26 +
-    v t2 * pow26 * pow26 +
-    v t3 * pow26 * pow26 * pow26 +
-    v t4 * pow26 * pow26 * pow26 * pow26)
-   (v c4 * 5) prime
 
 inline_for_extraction
 val carry_wide5:
