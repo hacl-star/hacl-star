@@ -33,6 +33,7 @@ open EverCrypt.Helpers
    (we used to require [disjoint data tag])
 *)
 
+inline_for_extraction
 let compute_st (a: ha) =
   tag: uint8_pl (size_hash a) ->
   key: uint8_p{ keysized a (length key) /\ disjoint key tag } ->
