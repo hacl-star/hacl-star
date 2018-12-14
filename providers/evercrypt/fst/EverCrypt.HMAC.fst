@@ -66,7 +66,7 @@ module ST = FStar.HyperStack.ST
 
 // we rely on the output being zero-initialized for the correctness of padding
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 inline_for_extraction
 val wrap_key:

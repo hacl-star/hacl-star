@@ -737,7 +737,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "b2f8355e2e30b38f6b074ce735c80523"
+      "31cd598f6d4592e974828d8cdaccea47"
     ],
     [
       "EverCrypt.Hash.init",
@@ -1160,7 +1160,7 @@
         "typing_tok_Spec.Hash.Helpers.SHA2_256@tok"
       ],
       0,
-      "f32f4f5d7ee1e5f480c1334d244e2286"
+      "44d5798b0f13e05dc9cfcfe0e76d82b5"
     ],
     [
       "EverCrypt.Hash.update",
@@ -1768,10 +1768,12 @@
         "equation_Spec.Hash.Helpers.is_sha2",
         "equation_Spec.Hash.Helpers.len_t",
         "equation_Spec.Hash.Helpers.len_v",
+        "equation_Spec.Hash.Helpers.max_input8",
         "equation_Spec.Hash.Helpers.sha2_alg",
         "equation_Spec.Hash.Helpers.size_block",
         "equation_Spec.Hash.Helpers.size_block_w",
         "equation_Spec.Hash.Helpers.size_hash_w",
+        "equation_Spec.Hash.Helpers.size_len_8",
         "equation_Spec.Hash.Helpers.size_word",
         "equation_Spec.Hash.Helpers.word",
         "equation_Spec.Hash.Incremental.update_last",
@@ -1804,8 +1806,6 @@
         "refinement_interpretation_EverCrypt.Hash_Tm_refine_7ccaec4baf0811316df5ac79d96d87e3",
         "refinement_interpretation_EverCrypt.Hash_Tm_refine_d70af58ab71e8e6b1d13200bb5ce8f88",
         "refinement_interpretation_EverCrypt.Hash_Tm_refine_d97af2b3c572e0bb09cf4c5c56552f44",
-        "refinement_interpretation_EverCrypt.Helpers_Tm_refine_156677950ba130498d26fd9f8eb20439",
-        "refinement_interpretation_FStar.Int.Cast_Tm_refine_7aa05f464301e3cb4272fba6147da28f",
         "refinement_interpretation_FStar.Int.Cast_Tm_refine_c43881637fea8b5528f4439c75737f91",
         "refinement_interpretation_FStar.Integers_Tm_refine_02d424c39415c96f7607749bbecdfca1",
         "refinement_interpretation_FStar.Integers_Tm_refine_55573c13df1ad79625a0017d3021d789",
@@ -1827,8 +1827,7 @@
         "refinement_interpretation_Spec.Hash.Incremental_Tm_refine_d26dcf3ac9dfc86c4c270ede43356d79",
         "refinement_interpretation_Spec.SHA2_Tm_refine_5bded820311f914dee4bc92653e81962",
         "typing_FStar.Ghost.reveal",
-        "typing_FStar.Int.Cast.uint32_to_uint64",
-        "typing_FStar.Int.Cast.uint64_to_uint32", "typing_FStar.Integers.v",
+        "typing_FStar.Int.Cast.uint32_to_uint64", "typing_FStar.Integers.v",
         "typing_FStar.Monotonic.HyperStack.live_region",
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt.mod",
         "typing_FStar.UInt32.v", "typing_FStar.UInt64.rem",
