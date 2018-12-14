@@ -26,11 +26,11 @@ let k = (Spec.SHA2.k0 SHA2_256)
 
 let reveal_word () = ()
 
-unfold let ws_opaque_aux = make_opaque ws
+unfold let ws_opaque_aux = ws
 let ws_opaque (b:block_w) (t:counter{t < size_k_w_256}) : nat32 = 
   vv (ws_opaque_aux SHA2_256 b t)
 
-unfold let shuffle_core_opaque_aux = make_opaque shuffle_core
+unfold let shuffle_core_opaque_aux = shuffle_core
 let shuffle_core_opaque (block:block_w) (hash:hash256) (t:counter{t < size_k_w_256}):hash256 =
   shuffle_core_opaque_aux SHA2_256 block hash t
 
@@ -126,7 +126,7 @@ let shuffle_core_properties (block:block_w) (hash:hash256) (t:counter{t < size_k
           h.[6] == f0 /\
           h.[7] == g0)
   =
-  reveal_opaque shuffle_core;
+  Pervasives.reveal_opaque (`%shuffle_core) shuffle_core;
   let h = shuffle_core SHA2_256 block hash t in
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -265,8 +265,8 @@ let lemma_sha256_rnds2_spec_update_is_shuffle_core (hash:hash256) (wk:UInt32.t) 
   let l = [a'; b'; c'; d'; e'; f'; g'; h'] in                                          
   let u = seq_of_list l in
   let c = shuffle_core_opaque block hash t in
-  reveal_opaque shuffle_core;
-  reveal_opaque ws;
+  Pervasives.reveal_opaque (`%shuffle_core) shuffle_core;
+  Pervasives.reveal_opaque (`%ws) ws;
   shuffle_core_properties block hash t;
   elim_of_list l;
   lemma_add_mod_a hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk;
@@ -446,9 +446,9 @@ let ws_computed (b:block_w) (t:counter{t < size_k_w_256}): Tot (UInt32.t) =
 let lemma_ws_computed_is_ws (b:block_w) (t:counter{t < size_k_w_256}) :
   Lemma (ws_computed b t == ws SHA2_256 b t)
   =
+  Pervasives.reveal_opaque (`%ws) ws;
   if t < size_block_w then (
     assert (vv (ws_computed b t) == ws_opaque b t);
-    reveal_opaque ws;
     assert (to_uint32 (ws_opaque b t) == ws SHA2_256 b t);
     ()
   ) else (
@@ -459,17 +459,15 @@ let lemma_ws_computed_is_ws (b:block_w) (t:counter{t < size_k_w_256}) :
     let s1 = _sigma1 SHA2_256 t2 in
     let s0 = _sigma0 SHA2_256 t15 in
     lemma_add_mod_ws_rearrangement s1 t7 s0 t16;
-    reveal_opaque ws;
     ()
-  );
-  ()
+  )
 #pop-options
 
 let lemma_ws_computed_is_ws_opaque (b:block_w) (t:counter{t < size_k_w_256}) :
   Lemma (vv (ws_computed b t) == ws_opaque b t)
   =
   lemma_ws_computed_is_ws b t;
-  reveal_opaque ws;
+  Pervasives.reveal_opaque (`%ws) ws;
   ()
 
 let ws_computed_quad32 (t:counter{t < size_k_w_256 - 3}) (block:block_w) : quad32 =
@@ -607,7 +605,7 @@ let translate_hash_update (h0 h1 h0' h1' a0 a1:quad32) : Lemma
   assert (equal mapped h');
   ()
          
-unfold let shuffle_opaque = make_opaque shuffle
+unfold let shuffle_opaque = shuffle
   
 let update_block (hash:hash256) (block:block_w): Tot (hash256) =
   let hash_1 = shuffle_opaque SHA2_256 hash block in
@@ -616,7 +614,7 @@ let update_block (hash:hash256) (block:block_w): Tot (hash256) =
 let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = size_block}) :
   Lemma (update_block hash (words_of_bytes SHA2_256 size_block_w block) == update SHA2_256 hash block)
   =
-  reveal_opaque shuffle;
+  Pervasives.reveal_opaque (`%Spec.SHA2.update) Spec.SHA2.update;
   assert (equal (update_block hash (words_of_bytes SHA2_256 size_block_w block)) (update SHA2_256 hash block));
   ()
 
@@ -632,8 +630,8 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
   =
   let hash_orig = make_hash h0 h1 in
   let hash_1 = shuffle_opaque SHA2_256 hash_orig block in
-  reveal_opaque shuffle;
-  reveal_opaque shuffle_core;
+  Pervasives.reveal_opaque (`%shuffle) shuffle;
+  Pervasives.reveal_opaque (`%shuffle_core) shuffle_core;
   let h = make_hash src1 src2 in
   assert (forall (block:block_w) (hash:hash256) . FStar.FunctionalExtensionality.feq (shuffle_core_opaque block hash) (shuffle_core_opaque_aux SHA2_256 block hash));
   //assert (forall (block:block_w) . (shuffle_core_opaque block) == (shuffle_core_opaque_aux SHA2_256 block));
@@ -728,7 +726,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   // }
   admit()
 
-
+#reset-options "--max_fuel 0 --max_ifuel 0"
 let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
   Lemma (requires length quads % 4 == 0 /\
