@@ -9,8 +9,9 @@ module TS = X64.Taint_Semantics_s
 module IA = Interop.Assumptions
 module ST = FStar.HyperStack.ST
 
-let wrap_variadic c args h0 #rel predict =
-  let h0' = ST.get () in
+let wrap_variadic c args #pre_rel #post_rel predict =
+  let h0 = ST.get () in
+  let h0' = h0 in
   assert (mem_roots_p h0' args);
   ST.push_frame ();
   let push_h0 = ST.get () in
@@ -32,7 +33,7 @@ let wrap_variadic c args h0 #rel predict =
       (fun h0' ->
         let va_s0, mem_s0 =
           create_initial_trusted_state args h0' stack_b in
-        let (fuel, final_mem) = predict va_s0 push_h0 alloc_push_h0 stack_b in
+        let (fuel, final_mem) = predict h0 va_s0 push_h0 alloc_push_h0 stack_b in
         assert (B.frameOf stack_b = HS.get_tip h0');
         assert (B.live h0' stack_b);
         let Some va_s1 = TS.taint_eval_code c fuel va_s0 in
@@ -47,17 +48,17 @@ let rec wrap_aux
     (c:TS.tainted_code)
     (dom:list td)
     (args:list arg{List.length dom + List.length args < max_arity})
-    (#rel:prediction_rel)
-    (#h0:HS.mem)
-    (predict:prediction_t c dom args rel h0)
+    (#pre_rel:_)
+    (#post_rel:_)
+    (predict:prediction_t c dom args pre_rel post_rel)
   : as_lowstar_sig_t c dom args predict
   = match dom with
     | [] ->
       let f () :
         FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
-           (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 args))
-           (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 #rel (elim_predict_t_nil predict) ret h1) =
-        wrap_variadic c args h0 (elim_predict_t_nil predict)
+           (requires (fun h0 -> mem_roots_p h0 args /\ pre_rel c args h0))
+           (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1) =
+        wrap_variadic c args (elim_predict_t_nil predict)
       in
       f <: as_lowstar_sig_t c [] args predict
 
