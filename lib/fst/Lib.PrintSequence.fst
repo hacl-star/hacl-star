@@ -137,7 +137,8 @@ let print_lbytes #len b =
 let print_label_lbytes #len label b =
   IO.print_string label;
   IO.print_string ": \n";
-  print_lbytes #len b
+  print_lbytes #len b;
+  IO.print_newline ()
 
 let print_compare len expected result =
   IO.print_string "\nResult:   ";
