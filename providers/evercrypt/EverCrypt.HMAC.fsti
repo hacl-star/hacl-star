@@ -32,8 +32,8 @@ open EverCrypt.Helpers
    we tolerate overlaps between tag and data.
    (we used to require [disjoint data tag])
 *)
-val compute:
-  a: ha ->
+
+let compute_st (a: ha) =
   tag: uint8_pl (size_hash a) ->
   key: uint8_p{ keysized a (length key) /\ disjoint key tag } ->
   keylen: UInt32.t{ UInt32.v keylen = length key } ->
@@ -49,4 +49,5 @@ val compute:
     length data + size_block a < max_input8 a /\ (* required for subtyping the RHS below *)
     as_seq h1 tag == hmac a (as_seq h0 key) (as_seq h0 data))
 
+val compute: a: ha -> compute_st a
 //18-07-13 pick uniform names? hash{spec} vs compute{hmac}

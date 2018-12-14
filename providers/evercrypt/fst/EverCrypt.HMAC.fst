@@ -10,7 +10,10 @@ open FStar.Integers
 
 let _: squash (inversion alg) = allow_inversion alg
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+
+open LowStar.Modifies.Linear
+
 let wrap (a:alg) (key: bytes{S.length key < max_input8 a}): GTot (lbytes (size_block a))
 =
   let key0 = if S.length key <= size_block a then key else spec a key in
@@ -153,10 +156,6 @@ val part1:
 
 let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
   compress_many (acc0 #a) b
-
-#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
-
-open LowStar.Modifies.Linear
 
 // we use auxiliary functions only for clarity and proof modularity
 inline_for_extraction
@@ -432,7 +431,11 @@ let hmac_core a acc tag key data len =
   )
 
 
-let compute a mac key keylen data datalen =
+inline_for_extraction noextract
+val mk_compute: a: ha -> compute_st a
+
+inline_for_extraction noextract
+let mk_compute a mac key keylen data datalen =
   let h00 = ST.get() in
   push_frame ();
   assert (size_block a <= 128);
@@ -441,20 +444,28 @@ let compute a mac key keylen data datalen =
   assert(pow2 32 + size_block a < max_input8 a);
   assert(length data + size_block a <= max_input8 a);
   let keyblock = alloca 0x00uy (block_len a) in
-  let acc = Hash.create a in
+  let acc = Hash.alloca a in
   let h0 = ST.get() in
   wrap_key a keyblock key keylen;
   let h1 = ST.get() in
-  assert (Hash.freeable_s #a (get h1 acc 0));
   Hash.frame_invariant (loc_buffer keyblock) acc h0 h1;
   Hash.frame_invariant_implies_footprint_preservation (loc_buffer keyblock) acc h0 h1;
   hmac_core a acc mac keyblock data datalen;
   let h2 = ST.get() in
-  assert (freeable acc);
-  assert (Hash.freeable_s #a (get h2 acc 0));
-  Hash.free #(Ghost.hide a) acc;
   pop_frame ();
   let hf = ST.get () in
   // TR: modifies clause proven by erasing all memory locations that
   // were unused in h00:
   LowStar.Buffer.modifies_only_not_unused_in (loc_buffer mac) h00 hf
+
+let compute_sha1: compute_st SHA1 = mk_compute SHA1
+let compute_sha2_256: compute_st SHA2_256 = mk_compute SHA2_256
+let compute_sha2_384: compute_st SHA2_384 = mk_compute SHA2_384
+let compute_sha2_512: compute_st SHA2_512 = mk_compute SHA2_512
+
+let compute a mac key keylen data datalen =
+  match a with
+  | SHA1 -> compute_sha1 mac key keylen data datalen
+  | SHA2_256 -> compute_sha2_256 mac key keylen data datalen
+  | SHA2_384 -> compute_sha2_384 mac key keylen data datalen
+  | SHA2_512 -> compute_sha2_512 mac key keylen data datalen
