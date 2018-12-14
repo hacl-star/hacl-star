@@ -467,7 +467,7 @@ let simplify_quad_aux (b:B.buffer UInt8.t) (h:HS.mem) : Lemma
   BV.get_view_mk_buffer_view b Views.view128;
   BV.length_eq (BV.mk_buffer_view b Views.view128)
 
-
+#reset-options "--z3rlimit 60"
 let simplify_quad_bytes (b:B.buffer UInt8.t) (h:HS.mem) : Lemma
   (requires B.length b % 16 == 0 /\ B.live h b)
   (ensures (let b128 = BV.mk_buffer_view b Views.view128 in
@@ -615,6 +615,7 @@ let sha_update_bytes_stdcall_aux
     M.loc_disjoint (M.loc_buffer k_b8) (M.loc_buffer stack_b))
     (fun h -> let h1 = ghost_sha_update ctx_b in_b num_val k_b stack_b ctx_b8 k_b8 h in (), h1)
 
+#reset-options "--z3rlimit 200 --z3refresh --max_fuel 0 --max_ifuel 0"
 let sha256_update ctx_b in_b num_val k_b =
   push_frame();
   let (stack_b:b8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t (if win then 264 else 104)) in
