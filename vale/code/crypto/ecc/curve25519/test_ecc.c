@@ -8,12 +8,12 @@ typedef unsigned char byte;
 double cpuFreq;
 
 //extern void mul(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
-extern void sqr(const uint64_t* dst, const uint64_t* in_a);
-extern uint64_t mul1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
+//extern void sqr(const uint64_t* dst, const uint64_t* in_a);
+//extern uint64_t mul1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
 extern uint64_t add1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
-extern uint64_t add(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
-extern uint64_t sub1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
-extern uint64_t sub(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+//extern uint64_t add(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+//extern uint64_t sub1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
+//extern uint64_t sub(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 //extern uint64_t mul1_add(const uint64_t* dst, const uint64_t* in_a, uint64_t x, const uint64_t* in_b);
 
 
@@ -95,11 +95,11 @@ void test() {
         for (int j = 0; j < n; j++)
         {
             //mul(D, A, B);
-            sqr(D, A);
+            //sqr(D, A);
             uint64_t overflow;
-            overflow = mul1(D, A, 42);
+            //overflow = mul1(D, A, 42);
             overflow = add1(D, A, 330);
-            overflow = add (D, A, B);
+            //overflow = add (D, A, B);
             //overflow = mul1_add (D, A, 33, B);
         }
 //        uint64_t end = GetRDTSC();
