@@ -9,7 +9,7 @@ module TS = X64.Taint_Semantics_s
 module IA = Interop.Assumptions
 module ST = FStar.HyperStack.ST
 
-let wrap c args h0 #rel predict =
+let wrap_variadic c args h0 #rel predict =
   let h0' = ST.get () in
   assert (mem_roots_p h0' args);
   ST.push_frame ();
@@ -42,3 +42,27 @@ let wrap c args h0 #rel predict =
   ST.pop_frame ();
   assert (ST.equal_domains alloc_push_h0 (Adapters.hs_of_mem final_mem));
   As_lowstar_sig_ret push_h0 alloc_push_h0 stack_b fuel final_mem
+
+let rec wrap_aux
+    (c:TS.tainted_code)
+    (dom:list td)
+    (args:list arg{List.length dom + List.length args < max_arity})
+    (#rel:prediction_rel)
+    (#h0:HS.mem)
+    (predict:prediction_t c dom args rel h0)
+  : as_lowstar_sig_t c dom args predict
+  = match dom with
+    | [] ->
+      let f () :
+        FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+           (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 args))
+           (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 #rel (elim_predict_t_nil predict) ret h1) =
+        wrap_variadic c args h0 (elim_predict_t_nil predict)
+      in
+      f <: as_lowstar_sig_t c [] args predict
+
+    | hd::tl ->
+      fun (x:td_as_type hd) ->
+      wrap_aux c tl (x ++ args) (elim_predict_t_cons hd tl predict x)
+
+let wrap c dom = wrap_aux c dom []

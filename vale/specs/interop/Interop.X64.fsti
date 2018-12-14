@@ -247,24 +247,30 @@ let prediction_post
     rel fuel_mem s1
   )
 
+let prediction_rel_t =
+    c:TS.tainted_code ->
+    args:arity_ok arg ->
+    h0:mem_roots args ->
+    s0:TS.traceState ->
+    push_h0:mem_roots args ->
+    alloc_push_h0:mem_roots args ->
+    b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
+    (nat & ME.mem) ->
+    sn:TS.traceState ->
+    prop
+
 let prediction
+    (rel:prediction_rel_t)
     (c:TS.tainted_code)
     (args:arity_ok arg)
-    (h0:mem_roots args)
-    (rel: (TS.traceState ->
-           push_h0:mem_roots args ->
-           alloc_push_h0:mem_roots args ->
-           b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
-           (nat & ME.mem) ->
-           TS.traceState ->
-           prop)) =
+    (h0:HS.mem) =
   s0:TS.traceState ->
   push_h0:mem_roots args ->
   alloc_push_h0:mem_roots args ->
-  b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
+  b:stack_buffer{mem_roots_p h0 args /\ mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
   Ghost (nat & ME.mem)
     (requires prediction_pre c args h0 s0 push_h0 alloc_push_h0 b)
-    (ensures prediction_post c args h0 s0 push_h0 alloc_push_h0 b (rel s0 push_h0 alloc_push_h0 b))
+    (ensures prediction_post c args h0 s0 push_h0 alloc_push_h0 b (rel c args h0 s0 push_h0 alloc_push_h0 b))
 
 noeq type as_lowstar_sig_ret (args:arity_ok arg) =
   | As_lowstar_sig_ret :
@@ -280,7 +286,7 @@ let as_lowstar_sig_post
     (args:arity_ok arg)
     (h0:mem_roots args)
     (#rel: _)
-    (predict:prediction c args h0 rel)
+    (predict:prediction rel c args h0)
     (ret:as_lowstar_sig_ret args)
     (h1:HS.mem) =
   let As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem = ret in
@@ -296,9 +302,76 @@ let as_lowstar_sig (c:TS.tainted_code) =
     args:arity_ok arg ->
     h0:mem_roots args ->
     #rel:_ ->
-    predict:prediction c args h0 rel ->
+    predict:prediction rel c args h0 ->
     FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
-        (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 args))
+        (requires (fun h0' -> h0 == h0'))
         (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 #rel predict ret h1)
 
-val wrap (c:TS.tainted_code) : as_lowstar_sig c
+val wrap_variadic (c:TS.tainted_code) : as_lowstar_sig c
+
+let (++) (#t:td) (x:td_as_type t) (args:list arg) = (| t, x |) :: args
+module List = FStar.List.Tot
+
+let rec prediction_t
+      (c:TS.tainted_code)
+      (dom:list td)
+      (args:list arg{List.length dom + List.length args < max_arity})
+      (rel:prediction_rel_t)
+      (h0:HS.mem)
+    = match dom with
+      | [] ->
+        prediction rel c args h0
+
+      | hd::tl ->
+        x:td_as_type hd ->
+        prediction_t c tl (x ++ args) rel h0
+
+let elim_predict_t_nil
+      (#c:TS.tainted_code)
+      (#args:arity_ok arg)
+      (#rel:prediction_rel_t)
+      (#h0:HS.mem)
+      (p:prediction_t c [] args rel h0)
+   : prediction rel c args h0
+   = p
+
+let elim_predict_t_cons
+      (#c:TS.tainted_code)
+      (hd:td)
+      (tl:list td)
+      (#args:list arg{List.length (hd::tl) + List.length args < max_arity})
+      (#rel:prediction_rel_t)
+      (#h0:HS.mem)
+      (p:prediction_t c (hd::tl) args rel h0)
+   : x:td_as_type hd ->
+     prediction_t c tl (x ++ args) rel h0
+   = p
+
+let rec as_lowstar_sig_t
+      (c:TS.tainted_code)
+      (dom:list td)
+      (args:list arg{List.length dom + List.length args < max_arity})
+      (#rel:prediction_rel_t)
+      (#h0:HS.mem)
+      (predict:prediction_t c dom args rel h0) =
+      match dom with
+      | [] ->
+        (unit ->
+         FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+           (requires (fun h0' -> h0 == h0' /\ mem_roots_p h0 args))
+           (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 #rel (elim_predict_t_nil predict) ret h1))
+      | hd::tl ->
+        x:td_as_type hd ->
+        as_lowstar_sig_t
+          c
+          tl
+          (x ++ args)
+          (elim_predict_t_cons hd tl predict x)
+
+val wrap
+    (c:TS.tainted_code)
+    (dom:arity_ok td)
+    (#rel:prediction_rel_t)
+    (#h0:HS.mem)
+    (predict:prediction_t c dom [] rel h0)
+  : as_lowstar_sig_t c dom [] predict
