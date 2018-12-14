@@ -56,18 +56,6 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/vale/specs/defs \
   $(HACL_HOME)/vale/specs/crypto \
   $(HACL_HOME)/vale/specs/hardware \
-  $(HACL_HOME)/vale/obj/external \
-  $(HACL_HOME)/vale/obj/code/lib/util/x64/stdcalls \
-  $(HACL_HOME)/vale/obj/code/lib/util/x64 \
-  $(HACL_HOME)/vale/obj/code/lib/util \
-  $(HACL_HOME)/vale/obj/code/arch/x64 \
-  $(HACL_HOME)/vale/obj/code/crypto/aes/x64/stdcalls \
-  $(HACL_HOME)/vale/obj/code/crypto/aes/x64 \
-  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/Intel/aes/x64 \
-  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/poly1305/x64 \
-  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/sha \
-  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/rfc7748/curve25519/x64 \
-  $(HACL_HOME)/vale/obj/code/test
 
 EVERCRYPT_CACHE_DIR=$(HACL_HOME)/providers/.cache
 
@@ -81,7 +69,8 @@ FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
   --cache_checked_modules --cache_dir $(CACHE_DIR) \
   --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES) --cmi \
-  --use_hints --use_hint_hashes --record_hints --query_stats
+  --use_hints --use_hint_hashes --record_hints --query_stats \
+  --already_cached '* -MerkleTree'
 
 $(HINT_DIR):
 	mkdir -p $@
@@ -101,18 +90,8 @@ ROOTS = MerkleTree.New.Low.fst MerkleTree.New.Low.Serialization.fst
 
 include .depend
 
-ADMIT=false
-
-# JP: to be fixed with --already_cached
-$(CACHE_DIR)/FStar.%.checked: ADMIT=true
-$(CACHE_DIR)/LowStar.%.checked: ADMIT=true
-$(CACHE_DIR)/C.%.checked: ADMIT=true
-$(CACHE_DIR)/prims.fst.checked: ADMIT=true
-$(CACHE_DIR)/Spec.Loops.fst.checked: ADMIT=true
-$(CACHE_DIR)/Spec.Matrix.fst.checked: ADMIT=true
-
 $(CACHE_DIR)/%.checked: | .depend $(HINT_DIR)
-	$(FSTAR) $< --admit_smt_queries $(ADMIT) \
+	$(FSTAR) $< \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 

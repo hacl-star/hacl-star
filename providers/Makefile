@@ -39,8 +39,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi \
-  --already_cached 'FStar LowStar C -C.Compat Spec Hacl.Hash' \
-  $(addprefix --already_cached ,$(subst .*,,$(VALE_NAMESPACES)))
+  --already_cached '* -C.Compat -EverCrypt'
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst EverCrypt.Hash.Incremental.fst
 
