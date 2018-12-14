@@ -10,7 +10,7 @@ open FStar.Integers
 
 let _: squash (inversion alg) = allow_inversion alg
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+#set-options "--max_fuel 0 --max_ifuel 0"
 
 open LowStar.Modifies.Linear
 
@@ -156,6 +156,10 @@ val part1:
 
 let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
   compress_many (acc0 #a) b
+
+#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+
+open LowStar.Modifies.Linear
 
 // we use auxiliary functions only for clarity and proof modularity
 inline_for_extraction
