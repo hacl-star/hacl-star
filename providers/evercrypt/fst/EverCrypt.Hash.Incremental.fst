@@ -95,7 +95,7 @@ val update_small:
   Stack (state a)
     (requires fun h0 ->
       update_pre a s prev data len h0 /\
-      v len < size_block a - (v (rest a (State?.total_len s)) % size_block a))
+      v len < size_block a - v (rest a (State?.total_len s)))
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
@@ -115,12 +115,20 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   assert (S.equal (S.append (S.append blocks rest) d) (S.append blocks' rest'));
   ()
 
-// Larger rlimit required for batch mode.
-#push-options "--z3rlimit 400"
+let add_len_small a (total_len: UInt64.t) (len: UInt32.t): Lemma
+  (requires
+    v len < size_block a - v (rest a total_len) /\
+    v total_len + v len < pow2 61)
+  (ensures (rest a (add_len total_len len) = rest a total_len + len))
+=
+  FStar.Math.Lemmas.small_modulo_lemma_1 (v len) (size_block a);
+  FStar.Math.Lemmas.modulo_distributivity (v total_len) (v len) (size_block a)
+
+#push-options "--z3rlimit 50"
 let update_small a s prev data len =
   let State hash_state buf total_len = s in
   let sz = rest a total_len in
-  assert (rest a (add_len total_len len) = sz + len);
+  add_len_small a total_len len;
   let h0 = ST.get () in
   let buf1 = B.sub buf 0ul sz in
   let buf2 = B.sub buf sz len in
