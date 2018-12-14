@@ -237,12 +237,14 @@ let prediction_post
     (fuel_mem:nat & ME.mem) =
   let fuel, final_mem = fuel_mem in
   Some? (TS.taint_eval_code c fuel s0) /\ (
-    let sN = Some?.v (TS.taint_eval_code c fuel s0) in
-    rel fuel_mem sN /\
-    // IM.down_mem (Adapters.hs_of_mem final_mem)
-    //             (IA.addrs)
-    //             (Adapters.ptrs_of_mem final_mem) == sN.TS.state.BS.mem /\
-    calling_conventions s0 sN
+    let s1 = Some?.v (TS.taint_eval_code c fuel s0) in
+    let h1 = Adapters.hs_of_mem final_mem in
+    FStar.HyperStack.ST.equal_domains alloc_push_h0 h1 /\
+    B.modifies (loc_args args) alloc_push_h0 h1 /\
+    IM.down_mem h1 (IA.addrs)
+                (Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem /\
+    calling_conventions s0 s1 /\
+    rel fuel_mem s1
   )
 
 let prediction

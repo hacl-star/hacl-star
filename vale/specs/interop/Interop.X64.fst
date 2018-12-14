@@ -37,9 +37,8 @@ let wrap c args h0 #rel predict =
         assert (B.live h0' stack_b);
         let Some va_s1 = TS.taint_eval_code c fuel va_s0 in
         let final_hs = Adapters.hs_of_mem final_mem in
-//        assume (ST.equal_domains alloc_push_h0 final_hs);
         ((fuel, final_mem), Adapters.hs_of_mem final_mem)
-      ) in //too conveniently, st_put assumes that the shape of the stack did not change; TODO: FIX THAT!
+      ) in
   ST.pop_frame ();
   assert (ST.equal_domains alloc_push_h0 (Adapters.hs_of_mem final_mem));
   As_lowstar_sig_ret push_h0 alloc_push_h0 stack_b fuel final_mem

@@ -3,11 +3,9 @@ open Interop.Base
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module MS = X64.Machine_s
-// module TS = X64.Taint_Semantics_s
-// module BS = X64.Bytes_Semantics_s
 
 assume 
-val st_put (#a:Type) (p:HS.mem -> Type0) (f:(h0:HS.mem{p h0}) -> GTot (a & HS.mem))
+val st_put (#a:Type) (p:HS.mem -> Type0) (f:(h0:HS.mem{p h0}) -> GTot (x:(a & HS.mem){ST.equal_domains h0 (snd x)}))
   : ST.Stack a 
     (requires p)
     (ensures fun h0 x h1 -> f h0 == (x,h1))

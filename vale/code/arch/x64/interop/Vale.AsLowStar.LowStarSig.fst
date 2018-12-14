@@ -55,45 +55,6 @@ let hprop = HS.mem -> prop
 let hsprop = HS.mem -> VS.state -> prop
 
 [@reduce]
-let to_low_pre
-    (pre:VSig.vale_pre_tl [])
-    (args:list arg)
-    (arg_pre_hyp:sprop)
-    (mem_correspondence:hsprop)
-    (num_stack_slots:nat)
-    (hs_mem:mem_roots args)
-  : prop =
-  (forall (s0:V.va_state)
-     (sb:IX64.stack_buffer).
-    s0.VS.ok /\
-    arg_pre_hyp s0 /\
-    mem_correspondence hs_mem s0 /\
-    V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) num_stack_slots s0.VS.memTaint ==>
-    elim_nil pre s0 sb)
-
-[@reduce]
-let to_low_post
-    (post:VSig.vale_post_tl [])
-    (args:list arg)
-    (args_fp:B.loc)
-    (mem_correspondence: hsprop)
-    (hs_mem0:mem_roots args)
-    (_:unit)
-    (hs_mem1:mem_roots args)
-  : prop =
-  let open V in
-  // REVIEW: it would be more flexible to let low_assumptions/post take care of modifies:
-  B.modifies args_fp hs_mem0 hs_mem0 /\
-  (exists
-    (s0:va_state)
-    (sb:IX64.stack_buffer)
-    (s1:va_state)
-    (f:va_fuel).
-       mem_correspondence hs_mem0 s0 /\
-       mem_correspondence hs_mem1 s1 /\
-       elim_nil post s0 sb s1 f)
-
-[@reduce]
 let mem_correspondence_1
       (t:ME.base_typ)
       (x:lowstar_buffer (ME.TBase t))
@@ -204,35 +165,37 @@ let vale_pre_hyp (args:IX64.arity_ok arg) : sprop =
       register_args (List.length args) args s0 /\
       taint_hyp args s0
 
+[@reduce]
+let to_low_pre
+    (pre:VSig.vale_pre_tl [])
+    (args:IX64.arity_ok arg)
+    (num_stack_slots:nat)
+    (hs_mem:mem_roots args)
+  : prop =
+  (forall (s0:V.va_state)
+     (sb:IX64.stack_buffer).
+    s0.VS.ok /\
+    vale_pre_hyp args s0 /\
+    mem_correspondence args hs_mem s0 /\
+    V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) num_stack_slots s0.VS.memTaint ==>
+    elim_nil pre s0 sb)
 
 [@reduce]
-let rec lowstar_lemma_typ
-          (#dom:list td)
-          (code:V.va_code)
-          (args:list arg{List.length args + List.length dom < IX64.max_arity})
-          (num_stack_slots:nat)
-          (pre:VSig.vale_pre_tl dom)
-          (post:VSig.vale_post_tl dom)
-    : Type =
-    let open FStar.HyperStack.ST in
-    match dom with
-    | [] ->
-      let mem_corr = mem_correspondence args in
-      h0:mem_roots args ->
-      predict:IX64.prediction (coerce code) args h0 ->
-      ret:IX64.as_lowstar_sig_ret args ->
-      h1:mem_roots args ->
-      Lemma
-        (requires (to_low_pre pre args (vale_pre_hyp args) mem_corr num_stack_slots h0 /\
-                   IX64.as_lowstar_sig_post (coerce code) args h0 predict ret h1))
-        (ensures (to_low_post post args (mk_modifies_loc args) mem_corr h0 () h1))
-
-    | hd::tl ->
-      x:td_as_type hd ->
-      lowstar_lemma_typ
-        #tl
-        code
-        ((| hd, x |)::args)
-        num_stack_slots
-        (elim_1 pre x)
-        (elim_1 post x)
+let to_low_post
+    (post:VSig.vale_post_tl [])
+    (args:list arg)
+    (hs_mem0:mem_roots args)
+    (_:unit)
+    (hs_mem1:mem_roots args)
+  : prop =
+  let open V in
+  // REVIEW: it would be more flexible to let low_assumptions/post take care of modifies:
+  B.modifies (loc_args args) hs_mem0 hs_mem1 /\
+  (exists
+    (s0:va_state)
+    (sb:IX64.stack_buffer)
+    (s1:va_state)
+    (f:va_fuel).
+       mem_correspondence args hs_mem0 s0 /\
+       mem_correspondence args hs_mem1 s1 /\
+       elim_nil post s0 sb s1 f)

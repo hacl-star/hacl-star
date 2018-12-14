@@ -96,6 +96,7 @@ let td_as_type : td -> Type =
 
 let arg = t:td & td_as_type t
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // n_arrow: Arrows with a generic number of vale types as the domain
 //          and a result type `codom` that does not depend on the domain
@@ -227,6 +228,16 @@ let mem_roots_p (h0:HS.mem) (args:list arg) =
 [@reduce]
 let mem_roots (args:list arg) =
     h0:HS.mem{ mem_roots_p h0 args }
+
+[@reduce]
+let arg_loc (x:arg) : GTot B.loc =
+    match x with
+    | (|TD_Buffer _, x|) -> B.loc_buffer x
+    | _ -> B.loc_none
+
+[@reduce]
+let loc_args (args:list arg) : GTot B.loc =
+    LowStar.Util.loc_union_l (BigOps.map_gtot arg_loc args)
 
 let all_live_cons (hd:arg) (tl:list arg) (h0:HS.mem)
   : Lemma 

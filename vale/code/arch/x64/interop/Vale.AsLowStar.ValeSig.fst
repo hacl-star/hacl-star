@@ -67,17 +67,16 @@ let vale_calling_conventions (s0 s1:V.va_state) =
   ) /\
   s1.VS.ok
 
-let maybe_union_arg_fp
-       (a:arg)
-       (loc: ME.loc) =
-    match a with
-    | (| TD_Base _, _|) ->
-      loc
-    | (| TD_Buffer bt, x |) ->
-      ME.loc_union (ME.loc_buffer #(ME.TBase bt) (as_vale_buffer x)) loc
 
-let fp_of_args (l:list arg) : GTot ME.loc =
-  BigOps.foldr_gtot l maybe_union_arg_fp ME.loc_none
+[@reduce]
+let arg_mloc (x:arg) : GTot ME.loc =
+    match x with
+    | (|TD_Buffer td, x|) -> ME.loc_buffer (as_vale_buffer #(ME.TBase td) x)
+    | _ -> ME.loc_none
+
+[@reduce]
+let mloc_args (args:list arg) : GTot ME.loc =
+    BigOps.foldr_gtot (BigOps.map_gtot arg_mloc args) ME.loc_union ME.loc_none
 
 unfold
 let vale_sig_nil (args:list arg)
@@ -93,8 +92,7 @@ let vale_sig_nil (args:list arg)
        V.eval_code code va_s0 f va_s1 /\
        vale_calling_conventions va_s0 va_s1 /\
        elim_nil post va_s0 stack_b va_s1 f /\
-       ME.modifies (fp_of_args args) va_s0.VS.mem va_s1.VS.mem))
-
+       ME.modifies (mloc_args args) va_s0.VS.mem va_s1.VS.mem))
 
 [@reduce]
 let rec vale_sig_tl (#dom:list td)
