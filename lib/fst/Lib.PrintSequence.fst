@@ -131,6 +131,7 @@ let print_lbytes #len b =
     let sb = sub #uint8 #len b (i * q) q in
     List.iter (fun a -> print_uint8_hex_pad a) (to_list sb);
     (if i < n - 1 then IO.print_string "\n" else ())) ();
+  (if r <> 0 then IO.print_newline ());
   let sb = sub #uint8 #len b (n * q) r in
   List.iter (fun a -> print_uint8_hex_pad a) (to_list sb))
 
