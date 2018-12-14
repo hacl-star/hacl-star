@@ -410,7 +410,29 @@ let mk_finish a s prev dst =
   Hash.frame_invariant B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
   Hash.frame_invariant_implies_footprint_preservation
     B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
-  assert (Hash.invariant hash_state h6)
+
+  assert (hashes h6 s (G.reveal prev));
+  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1);
+  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h1 h2);
+  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h2);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h2 h3);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h3 h4);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h4 h5);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h2 h4);
+  assert B.(modifies (loc_union
+    (Hash.footprint tmp_hash_state h2)
+    (loc_union (loc_buffer dst) (footprint s h0))) h2 h5);
+  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h6)
+
+  // So much for automated proofs.
 
 #pop-options
 
