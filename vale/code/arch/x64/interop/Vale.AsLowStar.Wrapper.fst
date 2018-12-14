@@ -156,13 +156,12 @@ let prediction_rel
           (sb:IX64.stack_buffer{mem_roots_p alloc_push_h0 (IX64.arg_of_b8 sb::args)})
           (fuel_mem:(nat & ME.mem))
           (s1:TS.traceState) : prop =
-    let va_s0 = create_initial_vale_state args alloc_push_h0 sb in
-    LSig.mem_correspondence args h0 va_s0 /\
-    elim_nil pre va_s0 sb /\
-    (let va_s1, f = VSig.elim_vale_sig_nil v va_s0 sb in
-     coerce f == fst fuel_mem /\
-     va_s1.VS.mem == snd fuel_mem /\
-     VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1))
+    let open Interop.Adapters in
+    let h1_pre_pop = hs_of_mem (snd fuel_mem) in
+    HS.poppable h1_pre_pop /\ (
+    let h1 = HS.pop h1_pre_pop in
+    mem_roots_p h1 args /\
+    LSig.(to_low_post post args h0 () h1))
 
 let pop_is_popped (m:HS.mem{HS.poppable m})
   : Lemma (HS.popped m (HS.pop m))
@@ -228,45 +227,6 @@ let vale_lemma_as_prediction
        assert (LSig.(to_low_post post args h0 () h2));
        coerce f, va_s1.VS.mem
 
-let lowstar_lemma_post
-          (code:V.va_code)
-          (args:IX64.arity_ok arg)
-          (num_stack_slots:nat)
-          (pre:VSig.vale_pre_tl [])
-          (post:VSig.vale_post_tl [])
-          (v:VSig.vale_sig_tl args (coerce code) pre post)
-          (h0:mem_roots args{LSig.(to_low_pre pre args num_stack_slots h0)})
-          (predict: IX64.prediction (coerce code) args h0 (prediction_rel code args num_stack_slots pre post v h0))
-          (ret:IX64.as_lowstar_sig_ret args)
-          (h1:mem_roots args)
-  : Lemma
-      (requires (IX64.as_lowstar_sig_post (coerce code) args h0 predict ret h1))
-      (ensures LSig.(to_low_post post args h0 () h1))
-  = let open LSig in
-    let open IX64 in
-    let As_lowstar_sig_ret push_h0 alloc_push_h0 stack_buf fuel final_mem = ret in
-    let s0 = fst (create_initial_trusted_state args alloc_push_h0 stack_buf) in
-    let Some s1 = TS.taint_eval_code (coerce code) fuel s0 in
-    let va_s0 = create_initial_vale_state args alloc_push_h0 stack_buf in
-    let va_s1, f = VSig.elim_vale_sig_nil v va_s0 stack_buf in
-    assert (V.eval_code (coerce code) va_s0 f va_s1);
-    assert (VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1));
-    assert (VSig.vale_calling_conventions va_s0 va_s1);
-    assert (elim_nil post va_s0 stack_buf va_s1 f);
-    assert (ME.modifies (VSig.mloc_args args) va_s0.VS.mem va_s1.VS.mem);
-    let h1_pre_pop = Interop.Adapters.hs_of_mem final_mem in
-    assert (IM.down_mem h1_pre_pop (IA.addrs) (Interop.Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem);
-    assert (va_s1.VS.mem == final_mem);
-    mem_correspondence_refl args va_s1;
-    assert (HS.poppable h1_pre_pop);
-    assert (h1 == HS.pop h1_pre_pop);
-    args_fp args h0 push_h0;
-    assert (HS.get_tip push_h0 == HS.get_tip h1_pre_pop);
-    B.popped_modifies h1_pre_pop h1;
-    frame_mem_correspondence args h1_pre_pop h1 va_s1 (B.loc_regions false (Set.singleton (HS.get_tip h1_pre_pop)));
-    assert (B.modifies (loc_args args) alloc_push_h0 h1_pre_pop);
-    assume (B.modifies (loc_args args) h0 h1)
-
 [@reduce]
 let rec lowstar_typ
           (#dom:list td)
@@ -298,6 +258,7 @@ let rec lowstar_typ
         (elim_1 pre x)
         (elim_1 post x)
 
+#set-options "--initial_ifuel 1"
 let rec wrap (#dom:list td)
              (code:V.va_code)
              (args:list arg{List.length args + List.length dom < IX64.max_arity})
@@ -319,11 +280,10 @@ let rec wrap (#dom:list td)
             LSig.to_low_post post args h0 () h1)) =
          fun () ->
            let h0 = ST.get () in
-           let prediction = vale_lemma_as_prediction code args num_stack_slots pre post v h0 in
-           let ix64_ret = IX64.wrap (coerce code) args h0 prediction in
-           let h1 = ST.get() in
-           assume (mem_roots_p h1 args);
-           lowstar_lemma_post code args num_stack_slots pre post v h0 prediction ix64_ret h1
+           let prediction =
+             vale_lemma_as_prediction _ _ num_stack_slots _ _ v h0 in
+           let _ = IX64.wrap (coerce code) args h0 prediction in
+           ()
       in
       f <: lowstar_typ #[] code args num_stack_slots pre post
     | hd::tl ->
