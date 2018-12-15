@@ -322,8 +322,8 @@ let rec mk_prediction
        (dom:list td)
        (args:list arg{IX64.arity_ok_2 dom args})
        (n:nat)
-       (pre:VSig.vale_pre_tl dom)
-       (post:VSig.vale_post_tl dom)
+       (#pre:VSig.vale_pre_tl dom)
+       (#post:VSig.vale_post_tl dom)
        (v:VSig.vale_sig_tl args (coerce code) pre post)
    :  IX64.prediction_t
           (coerce code)
@@ -342,8 +342,8 @@ let rec mk_prediction
           tl
           (x ++ args)
           n
-          (elim_1 pre x)
-          (elim_1 post x)
+          #(elim_1 pre x)
+          #(elim_1 post x)
           (VSig.elim_vale_sig_cons hd tl args pre post v x)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -364,5 +364,5 @@ assume val c: V.va_code
 open Interop.X64
 
 [@reduce]
-let call_c_t = as_lowstar_sig_t c dom [] _ _ (mk_prediction c dom [] n (pre c) (post c) (v c IA.win))
-let call_c : call_c_t = IX64.wrap c dom (mk_prediction c dom [] n (pre c) (post c) (v c IA.win))
+let call_c_t = as_lowstar_sig_t c dom [] _ _ (mk_prediction c dom [] n (v c IA.win))
+let call_c : call_c_t = IX64.wrap c dom (mk_prediction c dom [] n (v c IA.win))
