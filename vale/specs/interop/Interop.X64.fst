@@ -47,7 +47,7 @@ let wrap_variadic c args #pre_rel #post_rel predict =
 let rec wrap_aux
     (c:TS.tainted_code)
     (dom:list td)
-    (args:list arg{List.length dom + List.length args < max_arity})
+    (args:list arg{arity_ok_2 dom args})
     (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
     (post_rel:rel_gen_t c dom args (prediction_post_rel_t c))
     (predict:prediction_t c dom args pre_rel post_rel)
@@ -56,8 +56,10 @@ let rec wrap_aux
     | [] ->
       let f () :
         FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
-           (requires (fun h0 -> mem_roots_p h0 args /\ elim_rel_gen_t_nil pre_rel h0))
-           (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1) =
+           (requires fun h0 ->
+             mem_roots_p h0 args /\ elim_rel_gen_t_nil pre_rel h0)
+           (ensures fun h0 ret h1 ->
+             as_lowstar_sig_post c args h0 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1) =
         wrap_variadic c args (elim_predict_t_nil predict)
       in
       f <: as_lowstar_sig_t c [] args pre_rel post_rel predict

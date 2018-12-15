@@ -111,28 +111,6 @@ let eval_code_rel (c:TS.tainted_code)
      (ensures (eval_code_ts c (SL.state_to_S va_s0) (coerce f) (SL.state_to_S va_s1)))
   = admit()
 
-// assume
-// val increase_fuel (c:TS.tainted_code)
-//                   (s0:TS.traceState)
-//                   (f0:nat)
-//                   (sN:TS.traceState)
-//                   (fN:nat) : Lemma
-//   (requires eval_code_ts c s0 f0 sN /\ f0 <= fN)
-//   (ensures eval_code_ts c s0 fN sN)
-
-// let fuel_irrelevance (c:TS.tainted_code)
-//                      (s0:TS.traceState)
-//                      (f1:nat)
-//                      (s1:TS.traceState)
-//                      (f2:nat)
-//                      (s2:TS.traceState)
-//   : Lemma
-//   (requires eval_code_ts c s0 f1 s1 /\
-//             eval_code_ts c s0 f2 s2)
-//   (ensures  VL.state_eq_opt (Some s1) (Some s2))
-//   = if f1 <= f2 then increase_fuel c s0 f1 s1 f2
-//     else increase_fuel c s0 f2 s2 f1
-
 ////////////////////////////////////////////////////////////////////////////////
 
 let mem_correspondence_refl (args:list arg)
@@ -142,13 +120,22 @@ let mem_correspondence_refl (args:list arg)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+let prediction_pre_rel
+          (num_stack_slots:nat)
+          (pre:VSig.vale_pre_tl [])
+          (code:V.va_code)
+          (args:IX64.arity_ok arg)
+   : IX64.prediction_pre_rel_t code args
+   = fun (h0:mem_roots args) ->
+      LSig.(to_low_pre pre args num_stack_slots h0)
+
 let prediction_post_rel
           (num_stack_slots:nat)
           (post:VSig.vale_post_tl [])
-   : IX64.prediction_post_rel_t
-   = fun (code:V.va_code)
-       (args:IX64.arity_ok arg)
-       (h0:mem_roots args)
+          (code:V.va_code)
+          (args:IX64.arity_ok arg)
+   : IX64.prediction_post_rel_t code args
+   = fun (h0:mem_roots args)
        (s0:TS.traceState)
        (push_h0:mem_roots args)
        (alloc_push_h0:mem_roots args)
@@ -161,15 +148,6 @@ let prediction_post_rel
     let h1 = HS.pop h1_pre_pop in
     mem_roots_p h1 args /\
     LSig.(to_low_post post args h0 () h1))
-
-let prediction_pre_rel
-          (num_stack_slots:nat)
-          (pre:VSig.vale_pre_tl [])
-   : IX64.prediction_pre_rel_t
-   = fun (code:V.va_code)
-       (args:IX64.arity_ok arg)
-       (h0:mem_roots args) ->
-      LSig.(to_low_pre pre args num_stack_slots h0)
 
 let pop_is_popped (m:HS.mem{HS.poppable m})
   : Lemma (HS.popped m (HS.pop m))
@@ -184,10 +162,10 @@ let vale_lemma_as_prediction
           (post:VSig.vale_post_tl [])
           (v:VSig.vale_sig_tl args (coerce code) pre post)
    : IX64.prediction
-             (prediction_pre_rel num_stack_slots pre)
-             (prediction_post_rel num_stack_slots post)
              (coerce code)
              args
+             (prediction_pre_rel num_stack_slots pre (coerce code) args)
+             (prediction_post_rel num_stack_slots post (coerce code) args)
    = fun h0 s0 push_h0 alloc_push_h0 sb ->
        let va_s0 = create_initial_vale_state args alloc_push_h0 sb in
        core_create_lemma args alloc_push_h0 sb;
@@ -242,7 +220,7 @@ let vale_lemma_as_prediction
 let rec lowstar_typ
           (#dom:list td)
           (code:V.va_code)
-          (args:list arg{List.length args + List.length dom < IX64.max_arity})
+          (args:list arg{IX64.arity_ok_2 dom args})
           (num_stack_slots:nat)
           (pre:VSig.vale_pre_tl dom)
           (post:VSig.vale_post_tl dom)
@@ -272,7 +250,7 @@ let rec lowstar_typ
 #set-options "--initial_ifuel 1"
 let rec wrap (#dom:list td)
              (code:V.va_code)
-             (args:list arg{List.length args + List.length dom < IX64.max_arity})
+             (args:list arg{IX64.arity_ok_2 dom args})
              (num_stack_slots:nat)
              (pre:VSig.vale_pre_tl dom)
              (post:VSig.vale_post_tl dom)
@@ -310,66 +288,80 @@ let rec wrap (#dom:list td)
 // ////////////////////////////////////////////////////////////////////////////////
 // //Wrap abstract
 // ////////////////////////////////////////////////////////////////////////////////
+let rec pre_rel_generic
+      (n:nat)
+      (code:V.va_code)
+      (dom:list td)
+      (args:list arg{IX64.arity_ok_2 dom args})
+      (pre:VSig.vale_pre_tl dom)
+   : IX64.rel_gen_t code dom args (IX64.prediction_pre_rel_t (coerce code))
+   = match dom with
+     | [] ->
+       prediction_pre_rel n pre (coerce code) args
+     | hd::tl ->
+       fun (x:td_as_type hd) ->
+       pre_rel_generic n code tl IX64.(x ++ args) (elim_1 pre x)
 
-// let rec prediction_builder_t
-//        (code:V.va_code)
-//        (dom:list td)
-//        (args:list arg{List.length dom + List.length args < IX64.max_arity})
-//        (num_stack_slots:nat)
-//        (pre:VSig.vale_pre_tl dom)
-//        (post:VSig.vale_post_tl dom)
-//    :  IX64.prediction_t
-//           (coerce code)
-//           dom
-//           args
-//           (prediction_pre_rel num_stack_slots pre)
-//           (prediction_post_rel num_stack_slots post)
-//    = admit()
+let rec post_rel_generic
+      (n:nat)
+      (code:V.va_code)
+      (dom:list td)
+      (args:list arg{IX64.arity_ok_2 dom args})
+      (post:VSig.vale_post_tl dom)
+   : IX64.rel_gen_t code dom args (IX64.prediction_post_rel_t (coerce code))
+   = match dom with
+     | [] ->
+       prediction_post_rel n post (coerce code) args
+     | hd::tl ->
+       fun (x:td_as_type hd) ->
+       post_rel_generic n code tl IX64.(x ++ args) (elim_1 post x)
 
-//    = let open IX64 in
-//      match dom with
-//      | [] ->
-//        h0:HS.mem{mem_roots_p h0 args /\
-//                  LSig.to_low_pre pre args num_stack_slots h0} ->
-//        prediction_t (coerce code) dom args (prediction_rel num_stack_slots post) h0
+let rec mk_prediction
+       (code:V.va_code)
+       (dom:list td)
+       (args:list arg{IX64.arity_ok_2 dom args})
+       (n:nat)
+       (pre:VSig.vale_pre_tl dom)
+       (post:VSig.vale_post_tl dom)
+       (v:VSig.vale_sig_tl args (coerce code) pre post)
+   :  IX64.prediction_t
+          (coerce code)
+          dom
+          args
+          (pre_rel_generic n code dom args pre)
+          (post_rel_generic n code dom args post)
+   = let open IX64 in
+     match dom with
+     | [] ->
+       vale_lemma_as_prediction _ _ n _ _ v
+     | hd::tl ->
+       fun (x:td_as_type hd) ->
+        mk_prediction
+          code
+          tl
+          (x ++ args)
+          n
+          (elim_1 pre x)
+          (elim_1 post x)
+          (VSig.elim_vale_sig_cons hd tl args pre post v x)
 
-//      | hd::tl ->
-//        x:td_as_type hd ->
-//        prediction_builder_t code tl (x ++ args) num_stack_slots (elim_1 pre x) (elim_1 post x)
+////////////////////////////////////////////////////////////////////////////////
+//test
+////////////////////////////////////////////////////////////////////////////////
 
-// let rec mk_prediction
-//        (code:V.va_code)
-//        (dom:list td)
-//        (args:list arg{List.length dom + List.length args < IX64.max_arity})
-//        (num_stack_slots:nat)
-//        (pre:VSig.vale_pre_tl dom)
-//        (post:VSig.vale_post_tl dom)
-//        (v:VSig.vale_sig_tl args (coerce code) pre post)
-//     : prediction_builder_t code dom args num_stack_slots pre post
-//     = let open IX64 in
-//       match dom with
-//       | [] ->
-//         vale_lemma_as_prediction _ _ num_stack_slots _ _ v
-//       | hd::tl ->
-//         fun (x:td_as_type hd) ->
-//         mk_prediction
-//           code
-//           tl
-//           (x ++ args)
-//           num_stack_slots
-//           (elim_1 pre x)
-//           (elim_1 post x)
-//           (VSig.elim_vale_sig_cons hd tl args pre post v x)
+let t = TD_Buffer ME.TUInt64
+unfold let dom : (x:list td {List.length x == 2}) =
+  let y = [t; t] in
+  assert_norm (List.length y = 2);
+  y
 
-// ////////////////////////////////////////////////////////////////////////////////
-// //test
-// ////////////////////////////////////////////////////////////////////////////////
-// let _t = TD_Buffer ME.TUInt64
-// unfold
-// let _dom = [_t; _t]
-// assume val _pre : VSig.vale_pre _dom
-// assume val _post : VSig.vale_post _dom
-// assume val _n : nat
-// assume val _v: VSig.vale_sig _pre _post
-// assume val _c: V.va_code
-// open Interop.X64
+assume val pre : VSig.vale_pre dom
+assume val post : VSig.vale_post dom
+assume val n : nat
+assume val v: VSig.vale_sig pre post
+assume val c: V.va_code
+open Interop.X64
+
+let call_c
+  : as_lowstar_sig_t c dom [] _ _ (mk_prediction c dom [] n (pre c) (post c) (v c IA.win))
+  = IX64.wrap c dom (mk_prediction c dom [] n (pre c) (post c) (v c IA.win))
