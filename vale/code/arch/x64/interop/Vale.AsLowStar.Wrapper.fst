@@ -316,6 +316,7 @@ let rec post_rel_generic
        fun (x:td_as_type hd) ->
        post_rel_generic n code tl IX64.(x ++ args) (elim_1 post x)
 
+[@reduce]
 let rec mk_prediction
        (code:V.va_code)
        (dom:list td)
@@ -362,6 +363,6 @@ assume val v: VSig.vale_sig pre post
 assume val c: V.va_code
 open Interop.X64
 
-let call_c
-  : as_lowstar_sig_t c dom [] _ _ (mk_prediction c dom [] n (pre c) (post c) (v c IA.win))
-  = IX64.wrap c dom (mk_prediction c dom [] n (pre c) (post c) (v c IA.win))
+[@reduce]
+let call_c_t = as_lowstar_sig_t c dom [] _ _ (mk_prediction c dom [] n (pre c) (post c) (v c IA.win))
+let call_c : call_c_t = IX64.wrap c dom (mk_prediction c dom [] n (pre c) (post c) (v c IA.win))
