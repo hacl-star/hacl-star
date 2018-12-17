@@ -132,9 +132,11 @@ let finish_st (a: Hash.alg) =
       B.live h0 dst /\
       B.(loc_disjoint (loc_buffer dst) (footprint s h0)))
     (ensures fun h0 s' h1 ->
+      assert_norm (pow2 61 < pow2 125);
       hashes h1 s (G.reveal prev) /\
       preserves_freeable s h0 h1 /\
       footprint s h0 == footprint s h1 /\
-      B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1))
+      B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1) /\
+      S.equal (B.as_seq h1 dst) (Spec.Hash.Nist.hash a (G.reveal prev)))
 
 val finish: a:Hash.alg -> finish_st a

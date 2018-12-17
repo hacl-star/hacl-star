@@ -396,6 +396,9 @@ let mk_finish a s prev dst =
   EverCrypt.Hash.finish #(G.hide a) tmp_hash_state dst;
 
   let h5 = ST.get () in
+  Spec.Hash.Incremental.hash_is_hash_incremental a (G.reveal prev);
+  assert (S.equal (B.as_seq h5 dst) (Spec.Hash.Nist.hash a (G.reveal prev)));
+
   B.modifies_inert_intro (B.loc_buffer dst) h4 h5;
   Hash.frame_invariant (B.loc_buffer dst) hash_state h4 h5;
   Hash.frame_invariant_implies_footprint_preservation
