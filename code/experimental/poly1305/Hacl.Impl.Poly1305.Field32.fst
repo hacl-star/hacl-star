@@ -2,6 +2,7 @@ module Hacl.Impl.Poly1305.Field32
 
 open FStar.HyperStack
 open FStar.HyperStack.All
+open FStar.Mul
 
 open Lib.Sequence
 open Lib.IntTypes
@@ -11,6 +12,7 @@ open Lib.ByteBuffer
 include Hacl.Spec.Poly1305.Field32
 
 module ST = FStar.HyperStack.ST
+module P = NatPrime
 
 let felem = lbuffer uint32 5ul
 let felem_wide = lbuffer uint64 5ul
@@ -60,6 +62,24 @@ let wide_as_nat h e =
   let s4 = s.[4] in
   wide_as_nat5 (s0,s1,s2,s3,s4)
 
+noextract
+let as_felem (h:mem) (f:felem) : GTot felem5 =
+  let s = as_seq h f in
+  let s0 = s.[0] in
+  let s1 = s.[1] in
+  let s2 = s.[2] in
+  let s3 = s.[3] in
+  let s4 = s.[4] in
+  (s0, s1, s2, s3, s4)
+
+noextract
+val fevalh: h:mem -> f:felem -> GTot P.felem
+let fevalh h f = (as_nat h f) % P.prime
+
+noextract
+val feval_wideh: h:mem -> f:felem_wide -> GTot P.felem
+let feval_wideh h f = (wide_as_nat h f) % P.prime
+
 inline_for_extraction
 val create_felem: unit
   -> StackInline felem
@@ -85,20 +105,22 @@ val load_felem:
   -> hi:uint64
   -> Stack unit
     (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1))
 let load_felem f lo hi =
   f.(0ul) <- (to_u32 lo) &. mask26;
   f.(1ul) <- (to_u32 (lo >>. 26ul)) &. mask26;
   f.(2ul) <- (to_u32 (lo >>. 52ul)) ^. (((to_u32 hi &. u32 0x3fff) <<. 12ul));
   f.(3ul) <- (to_u32 (hi >>. 14ul)) &. mask26;
-  f.(4ul) <- to_u32 (hi >>. 40ul)
+  f.(4ul) <- to_u32 (hi >>. 40ul); admit()
 
 inline_for_extraction
 val store_felem:
     f:felem
   -> Stack (uint64 & uint64)
-    (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> h0 == h1)
+    (requires fun h -> live h f /\ felem_fits h f (1, 1, 1, 1, 1))
+    (ensures  fun h0 r h1 -> h0 == h1)
 let store_felem f =
   let f0 = to_u64 f.(0ul) |. ((to_u64 f.(1ul)) <<. 26ul) |. ((to_u64 f.(2ul)) <<. 52ul) in
   let f1 = ((to_u64 f.(2ul)) >>. 12ul) |. ((to_u64 f.(3ul)) <<. 14ul) |. ((to_u64 f.(4ul)) <<. 40ul) in
@@ -164,16 +186,27 @@ val load_precompute_r:
   -> r1:uint64
   -> Stack unit
     (requires fun h -> live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p) h0 h1 /\
+     (let r = gsub p 0ul 5ul in
+      let r5 = gsub p 5ul 5ul in
+      felem_fits h1 r (1, 1, 1, 1, 1) /\
+      as_felem h1 r5 == precomp_r5 (as_felem h1 r)))
 let load_precompute_r p r0 r1 =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
   load_felem r r0 r1;
-  r5.(0ul) <- r.(0ul) *. u32 5;
-  r5.(1ul) <- r.(1ul) *. u32 5;
-  r5.(2ul) <- r.(2ul) *. u32 5;
-  r5.(3ul) <- r.(3ul) *. u32 5;
-  r5.(4ul) <- r.(4ul) *. u32 5
+
+  let r0 = r.(0ul) in
+  let r1 = r.(1ul) in
+  let r2 = r.(2ul) in
+  let r3 = r.(3ul) in
+  let r4 = r.(4ul) in
+  r5.(0ul) <- r0 *! u32 5;
+  r5.(1ul) <- r1 *! u32 5;
+  r5.(2ul) <- r2 *! u32 5;
+  r5.(3ul) <- r3 *! u32 5;
+  r5.(4ul) <- r4 *! u32 5
 
 #reset-options "--z3rlimit 100 --max_fuel 1"
 
@@ -190,8 +223,9 @@ val fadd_:
       felem_fits h f1 m1 /\ felem_fits h f2 m2 /\ (m1 +* m2) <=* s32x5 64)
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-      as_nat h1 out == as_nat h0 f1 + as_nat h0 f2)
+      fevalh h1 out == P.fadd (fevalh h0 f1) (fevalh h0 f2))
 let fadd_ #m1 #m2 out f1 f2 =
+  let h0 = ST.get () in
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -202,11 +236,17 @@ let fadd_ #m1 #m2 out f1 f2 =
   let f22 = f2.(2ul) in
   let f23 = f2.(3ul) in
   let f24 = f2.(4ul) in
-  out.(size 0) <- f10 +! f20;
-  out.(size 1) <- f11 +! f21;
-  out.(size 2) <- f12 +! f22;
-  out.(size 3) <- f13 +! f23;
-  out.(size 4) <- f14 +! f24
+  out.(0ul) <- f10 +! f20;
+  out.(1ul) <- f11 +! f21;
+  out.(2ul) <- f12 +! f22;
+  out.(3ul) <- f13 +! f23;
+  out.(4ul) <- f14 +! f24;
+  let h1 = ST.get () in
+  assert (as_nat h1 out == as_nat h0 f1 + as_nat h0 f2);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l
+    (as_nat h0 f1) (as_nat h0 f2) P.prime;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r
+    (as_nat h0 f1 % P.prime) (as_nat h0 f2) P.prime
 
 [@CInline]
 val fadd:
@@ -219,31 +259,33 @@ val fadd:
       felem_fits h f1 (s32x5 32) /\ felem_fits h f2 (s32x5 32))
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-      as_nat h1 out == as_nat h0 f1 + as_nat h0 f2)
+      fevalh h1 out == P.fadd (fevalh h0 f1) (fevalh h0 f2))
 let fadd out f1 f2 = fadd_ #(s32x5 32) #(s32x5 32) out f1 f2
 
+//inline_for_extraction
 [@CInline]
-val mul_felem:
-    out:felem_wide
+val fmul_r:
+    out:felem
   -> f1:felem
-  -> r:felem
-  -> r5:felem
+  -> p:precomp_r
   -> Stack unit
     (requires fun h ->
-      live h out /\ live h f1 /\ live h r /\ live h r5 /\
-      felem_fits h f1 (2,3,2,2,2) /\
-      felem_fits h r (1,1,1,1,1) /\
-      felem_fits h r5 (5,5,5,5,5))
+      live h out /\ live h f1 /\ live h p /\
+      felem_fits h f1 (2, 3, 2, 2, 2) /\
+     (let r = gsub p 0ul 5ul in
+      let r5 = gsub p 5ul 5ul in
+      felem_fits h r (1, 1, 1, 1, 1) /\
+      felem_fits h r5 (5, 5, 5, 5, 5) /\
+      as_felem h r5 == precomp_r5 (as_felem h r)))
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-      felem_wide_fits h1 out (47,35,27,19,11))
-let mul_felem out f1 r r5 =
-  let f10 = f1.(0ul) in
-  let f11 = f1.(1ul) in
-  let f12 = f1.(2ul) in
-  let f13 = f1.(3ul) in
-  let f14 = f1.(4ul) in
-
+      acc_inv_t (as_felem h1 out) /\
+     (let r = gsub p 0ul 5ul in
+      let r5 = gsub p 5ul 5ul in
+      fevalh h1 out == P.fmul (fevalh h0 f1) (fevalh h0 r)))
+let fmul_r out f1 p =
+  let r = sub p 0ul 5ul in
+  let r5 = sub p 5ul 5ul in
   let r0 = r.(0ul) in
   let r1 = r.(1ul) in
   let r2 = r.(2ul) in
@@ -255,131 +297,79 @@ let mul_felem out f1 r r5 =
   let r52 = r5.(2ul) in
   let r53 = r5.(3ul) in
   let r54 = r5.(4ul) in
-  assume ((r50,r51,r52,r53,r54) == precomp_r5 (r0,r1,r2,r3,r4));
-  let (o0,o1,o2,o3,o4) =
-    mul_felem5 (f10,f11,f12,f13,f14) (r0,r1,r2,r3,r4) (r50,r51,r52,r53,r54) in
+
+  let f10 = f1.(0ul) in
+  let f11 = f1.(1ul) in
+  let f12 = f1.(2ul) in
+  let f13 = f1.(3ul) in
+  let f14 = f1.(4ul) in
+
+  let (o0, o1, o2, o3, o4) =
+    fmul_r5 (f10, f11, f12, f13, f14)
+      ((r0, r1, r2, r3, r4), (r50, r51, r52, r53, r54)) in
   out.(0ul) <- o0;
   out.(1ul) <- o1;
   out.(2ul) <- o2;
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-inline_for_extraction
-val carry_wide:
-    out:felem
-  -> inp:felem_wide
-  -> Stack uint32
-    (requires fun h ->
-      live h out /\ live h inp /\
-      felem_wide_fits h inp (47,35,27,19,11))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
-      felem_fits h1 out (1,2,1,1,1))
-let carry_wide out inp =
-  let i0 = inp.(0ul) in
-  let i1 = inp.(1ul) in
-  let i2 = inp.(2ul) in
-  let i3 = inp.(3ul) in
-  let i4 = inp.(4ul) in
-  let tmp0,carry = carry26_wide #47 i0 (u32 0) in
-  let tmp1,carry = carry26_wide #35 i1 carry in
-  let tmp2,carry = carry26_wide #27 i2 carry in
-  let tmp3,carry = carry26_wide #19 i3 carry in
-  let tmp4,carry = carry26_wide #11 i4 carry in
-  let tmp0,carry = carry26 tmp0 (carry *. u32 5) in
-  let tmp1 = tmp1 +. carry in
-  out.(0ul) <- tmp0;
-  out.(1ul) <- tmp1;
-  out.(2ul) <- tmp2;
-  out.(3ul) <- tmp3;
-  out.(4ul) <- tmp4;
-  carry
-
-inline_for_extraction
-val carry_felem:
-    f:felem
-  -> Stack unit
-    (requires fun h -> live h f /\ felem_fits h f (1,2,1,1,1))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc f) h0 h1 /\
-      felem_fits h1 f (1,1,1,1,2))
-let carry_felem f =
-  let f0 = f.(0ul) in
-  let f1 = f.(1ul) in
-  let f2 = f.(2ul) in
-  let f3 = f.(3ul) in
-  let f4 = f.(4ul) in
-  let tmp0,carry = carry26 f0 (u32 0) in
-  let tmp1,carry = carry26 f1 carry in
-  let tmp2,carry = carry26 f2 carry in
-  let tmp3,carry = carry26 f3 carry in
-  let tmp4 = f4 +. carry in
-  f.(0ul) <- tmp0;
-  f.(1ul) <- tmp1;
-  f.(2ul) <- tmp2;
-  f.(3ul) <- tmp3;
-  f.(4ul) <- tmp4
-
-inline_for_extraction
-val carry_top_felem:
-    f:felem
-  -> Stack unit
-    (requires fun h -> live h f /\ felem_fits h f (1,1,1,1,2))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc f) h0 h1 /\ felem_fits h1 f (1,2,1,1,1))
-let carry_top_felem f =
-  let f0 = f.(0ul) in
-  let f1 = f.(1ul) in
-  let f2 = f.(2ul) in
-  let f3 = f.(3ul) in
-  let f4 = f.(4ul) in
-  let tmp4,carry = carry26 f4 (u32 0) in
-  let tmp0,carry = carry26 f0 (carry *. u32 5) in
-  let tmp1 = f1 +. carry in
-  f.(0ul) <- tmp0;
-  f.(1ul) <- tmp1;
-  f.(4ul) <- tmp4
-
-inline_for_extraction
-val fmul_r:
+//inline_for_extraction
+[@CInline]
+val fadd_mul_r:
     out:felem
   -> f1:felem
   -> p:precomp_r
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f1 /\ live h p /\
-      felem_fits h f1 (1,1,1,1,1) /\
-      felem_fits h (gsub p 0ul 5ul) (1,1,1,1,1) /\
-      felem_fits h (gsub p 5ul 5ul) (5,5,5,5,5))
-    (ensures fun h0 _ h1 -> modifies (loc out) h0 h1)
-let fmul_r out f1 p =
-  push_frame();
-  let r = sub p 0ul 5ul in
-  let r5 = sub p 5ul 5ul in
-  let tmp = create_wide () in
-  admit();
-  mul_felem tmp f1 r r5;
-  let carry = carry_wide out tmp in
-  pop_frame()
-
-inline_for_extraction
-val fadd_mul_r:
-    out:felem
-  -> f1:felem
-  -> p:precomp_r
-  -> Stack unit
-    (requires fun h -> live h out /\ live h f1 /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+      felem_fits h out (1, 2, 1, 1, 1) /\
+      felem_fits h f1 (1, 1, 1, 1, 1) /\
+     (let r = gsub p 0ul 5ul in
+      let r5 = gsub p 5ul 5ul in
+      felem_fits h r (1, 1, 1, 1, 1) /\
+      felem_fits h r5 (5, 5, 5, 5, 5) /\
+      as_felem h r5 == precomp_r5 (as_felem h r)))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      acc_inv_t (as_felem h1 out) /\
+     (let r = gsub p 0ul 5ul in
+      let r5 = gsub p 5ul 5ul in
+      fevalh h1 out == P.fmul (P.fadd (fevalh h0 out) (fevalh h0 f1)) (fevalh h0 r)))
 let fadd_mul_r out f1 p =
-  push_frame();
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
-  let tmp = create_wide () in
-  admit();
-  fadd out out f1;
-  mul_felem tmp out r r5;
-  let carry = carry_wide out tmp in
-  pop_frame()
+  let r0 = r.(0ul) in
+  let r1 = r.(1ul) in
+  let r2 = r.(2ul) in
+  let r3 = r.(3ul) in
+  let r4 = r.(4ul) in
+
+  let r50 = r5.(0ul) in
+  let r51 = r5.(1ul) in
+  let r52 = r5.(2ul) in
+  let r53 = r5.(3ul) in
+  let r54 = r5.(4ul) in
+
+  let f10 = f1.(0ul) in
+  let f11 = f1.(1ul) in
+  let f12 = f1.(2ul) in
+  let f13 = f1.(3ul) in
+  let f14 = f1.(4ul) in
+
+  let a0 = out.(0ul) in
+  let a1 = out.(1ul) in
+  let a2 = out.(2ul) in
+  let a3 = out.(3ul) in
+  let a4 = out.(4ul) in
+
+  let (o0, o1, o2, o3, o4) =
+    fadd_mul_r5 (a0, a1, a2, a3, a4) (f10, f11, f12, f13, f14)
+      ((r0, r1, r2, r3, r4), (r50, r51, r52, r53, r54)) in
+  out.(0ul) <- o0;
+  out.(1ul) <- o1;
+  out.(2ul) <- o2;
+  out.(3ul) <- o3;
+  out.(4ul) <- o4
 
 inline_for_extraction
 val fmul_rn:
@@ -405,43 +395,25 @@ let fmul_rn_normalize out p =
   fmul_r out out p
 
 inline_for_extraction
-val subtract_p:
+val reduce_felem:
     f:felem
   -> Stack unit
-    (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let subtract_p f =
+    (requires fun h -> live h f /\ acc_inv_t (as_felem h f))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      as_nat h1 f == fevalh h0 f)
+let reduce_felem f =
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
   let f3 = f.(3ul) in
   let f4 = f.(4ul) in
-  let mask = eq_mask f4 (u32 0x3ffffff) in
-  let mask = mask &. eq_mask f3 (u32 0x3ffffff) in
-  let mask = mask &. eq_mask f2 (u32 0x3ffffff) in
-  let mask = mask &. eq_mask f1 (u32 0x3ffffff) in
-  let mask = mask &. gte_mask f0 (u32 0x3fffffb) in
-  let p0 = mask &. u32 0x3fffffb in
-  let p1 = mask &. u32 0x3ffffff in
-  let p2 = mask &. u32 0x3ffffff in
-  let p3 = mask &. u32 0x3ffffff in
-  let p4 = mask &. u32 0x3ffffff in
-  f.(0ul) <- f0 -. p0;
-  f.(1ul) <- f1 -. p1;
-  f.(2ul) <- f2 -. p2;
-  f.(3ul) <- f3 -. p3;
-  f.(4ul) <- f4 -. p4
-
-inline_for_extraction
-val reduce_felem:
-    f:felem
-  -> Stack unit
-    (requires fun h -> live h f /\ felem_fits h f (1,2,1,1,1))
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let reduce_felem f =
-  carry_felem f;
-  carry_top_felem f;
-  subtract_p f
+  let (o0, o1, o2, o3, o4) = reduce_felem5 (f0, f1, f2, f3, f4) in
+  f.(0ul) <- o0;
+  f.(1ul) <- o1;
+  f.(2ul) <- o2;
+  f.(3ul) <- o3;
+  f.(4ul) <- o4
 
 inline_for_extraction
 val load_felem_le:
@@ -478,11 +450,37 @@ val load_felems_le:
 let load_felems_le f b = load_felem_le f b
 
 inline_for_extraction
+val carry_felem:
+    f:felem
+  -> Stack unit
+    (requires fun h -> live h f /\ acc_inv_t (as_felem h f))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1,1,1,1,1) /\
+      fevalh h1 f == fevalh h0 f)
+let carry_felem f =
+  let f0 = f.(0ul) in
+  let f1 = f.(1ul) in
+  let f2 = f.(2ul) in
+  let f3 = f.(3ul) in
+  let f4 = f.(4ul) in
+  let tmp0,carry = carry26 f0 (u32 0) in
+  let tmp1,carry = carry26 f1 carry in
+  let tmp2,carry = carry26 f2 carry in
+  let tmp3,carry = carry26 f3 carry in
+  let tmp4 = f4 +. carry in admit();
+  f.(0ul) <- tmp0;
+  f.(1ul) <- tmp1;
+  f.(2ul) <- tmp2;
+  f.(3ul) <- tmp3;
+  f.(4ul) <- tmp4
+
+inline_for_extraction
 val store_felem_le:
     b:lbuffer uint8 16ul
   -> f:felem
   -> Stack unit
-    (requires fun h -> live h f /\ live h b /\ felem_fits h f (1,2,1,1,1))
+    (requires fun h -> live h f /\ live h b /\ acc_inv_t (as_felem h f))
     (ensures  fun h0 _ h1 -> modifies (loc f |+| loc b) h0 h1)
 let store_felem_le b f =
   carry_felem f;

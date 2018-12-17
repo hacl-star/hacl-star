@@ -18,10 +18,15 @@ val fadd5:
   -> out:felem5{felem_fits5 f2 (2, 3, 2, 2, 2) /\
       feval out == fadd (feval f1) (feval f2)}
 let fadd5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
+  [@inline_let]
   let o0 = f10 +! f20 in
+  [@inline_let]  
   let o1 = f11 +! f21 in
+  [@inline_let]  
   let o2 = f12 +! f22 in
+  [@inline_let]  
   let o3 = f13 +! f23 in
+  [@inline_let]  
   let o4 = f14 +! f24 in
   FStar.Math.Lemmas.lemma_mod_plus_distr_l
     (as_nat5 (f10, f11, f12, f13, f14)) (as_nat5 (f20, f21, f22, f23, f24)) prime;
@@ -198,7 +203,9 @@ let carry_wide5 (i0, i1, i2, i3, i4) =
   let tmp3, c3 = carry26_wide #19 i3 c2 in
   let tmp4, c4 = carry26_wide #11 i4 c3 in
   lemma_carry_wide5_simplify (i0, i1, i2, i3, i4) c0 c1 c2 c3 c4 tmp0 tmp1 tmp2 tmp3 tmp4;
+  [@inline_let]
   let tmp0', c5 = carry26 tmp0 (c4 *! u32 5) in
+  [@inline_let]
   let tmp1' = tmp1 +! c5 in
   lemma_acc_inv (tmp0', tmp1, tmp2, tmp3, tmp4) c5;
   (tmp0', tmp1', tmp2, tmp3, tmp4)
@@ -218,10 +225,9 @@ val fmul_r5:
       acc_inv_t out /\
      (let r, r5 = p in
       feval out == fmul (feval f1) (feval r)))
-let fmul_r5 f1 p =
-  let r, r5 = p in
-  let tmp = mul_felem5 f1 r r5 in
-  carry_wide5 tmp
+let fmul_r5 (f10, f11, f12, f13, f14) ((r0, r1, r2, r3, r4), (r50, r51, r52, r53, r54)) =
+  let (t0, t1, t2, t3, t4) = mul_felem5 (f10, f11, f12, f13, f14) (r0, r1, r2, r3, r4) (r50, r51, r52, r53, r54) in
+  carry_wide5 (t0, t1, t2, t3, t4)
 
 inline_for_extraction
 val fadd_mul_r5:
@@ -240,11 +246,10 @@ val fadd_mul_r5:
       acc_inv_t out /\
      (let r, r5 = p in
       feval out == fmul (fadd (feval acc) (feval f1)) (feval r)))
-let fadd_mul_r5 acc f1 p =
-  let r, r5 = p in
-  let acc = fadd5 acc f1 in
-  let tmp = mul_felem5 acc r r5 in
-  carry_wide5 tmp
+let fadd_mul_r5 (a0, a1, a2, a3, a4) (f10, f11, f12, f13, f14) ((r0, r1, r2, r3, r4), (r50, r51, r52, r53, r54)) =
+  let (a0, a1, a2, a3, a4) = fadd5 (a0, a1, a2, a3, a4) (f10, f11, f12, f13, f14) in
+  let (t0, t1, t2, t3, t4) = mul_felem5 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r50, r51, r52, r53, r54) in
+  carry_wide5 (t0, t1, t2, t3, t4)
 
 inline_for_extraction
 val carry_felem5_full:
@@ -258,37 +263,42 @@ let carry_felem5_full (f0, f1, f2, f3, f4) =
   let tmp3, c3 = carry26 f3 c2 in
   let tmp4, c4 = carry26 f4 c3 in
   lemma_carry_felem5_full_simplify (f0, f1, f2, f3, f4) c0 c1 c2 c3 c4 tmp0 tmp1 tmp2 tmp3 tmp4;
+  [@inline_let]
   let tmp0', c5 = carry26 tmp0 (c4 *. u32 5) in
   //assert (if v f1 < pow2 26 then v c5 = 0 else v c5 <= 1);
+  [@inline_let]
   let tmp1' = tmp1 +! c5 in
   (tmp0', tmp1', tmp2, tmp3, tmp4)
 
 inline_for_extraction
 val subtract_p5:
-    f:felem5
-  -> out:felem5
+    f:felem5{felem_fits5 f (1, 1, 1, 1, 1)}
+  -> out:felem5{as_nat5 out = feval f}
 let subtract_p5 (f0, f1, f2, f3, f4) =
   let mask = eq_mask f4 (u32 0x3ffffff) in
   let mask = mask &. eq_mask f3 (u32 0x3ffffff) in
   let mask = mask &. eq_mask f2 (u32 0x3ffffff) in
   let mask = mask &. eq_mask f1 (u32 0x3ffffff) in
   let mask = mask &. gte_mask f0 (u32 0x3fffffb) in
+
   let p0 = mask &. u32 0x3fffffb in
   let p1 = mask &. u32 0x3ffffff in
   let p2 = mask &. u32 0x3ffffff in
   let p3 = mask &. u32 0x3ffffff in
   let p4 = mask &. u32 0x3ffffff in
-  let f0 = f0 -. p0 in
-  let f1 = f1 -. p1 in
-  let f2 = f2 -. p2 in
-  let f3 = f3 -. p3 in
-  let f4 = f4 -. p4 in
-  (f0, f1, f2, f3, f4)
+
+  let f0' = f0 -. p0 in
+  let f1' = f1 -. p1 in
+  let f2' = f2 -. p2 in
+  let f3' = f3 -. p3 in
+  let f4' = f4 -. p4 in
+  admit();
+  (f0', f1', f2', f3', f4')
 
 inline_for_extraction
-val reduce_felem:
+val reduce_felem5:
     f:felem5{acc_inv_t f}
-  -> out:felem5
-let reduce_felem f =
-  let f = carry_felem5_full f in
-  subtract_p5 f
+  -> out:felem5{as_nat5 out == feval f}
+let reduce_felem5 (f0, f1, f2, f3, f4) =
+  let (f0, f1, f2, f3, f4) = carry_felem5_full (f0, f1, f2, f3, f4) in
+  subtract_p5 (f0, f1, f2, f3, f4)
