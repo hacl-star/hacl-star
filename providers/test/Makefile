@@ -38,20 +38,23 @@ all:
 
 .PRECIOUS: %.krml %.checked
 
+ROOTS=$(wildcard *.fst)
+
 .depend:
 	$(FSTAR) \
 	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  --cache_dir $(CACHE_DIR) \
 	  --odir $(EXTRACT_DIR) \
-	  --dep full Test.fst Test.Bytes.fst > .depend
+	  --dep full $(ROOTS) > .depend
 
 include .depend
 
 %.checked: | .depend
 	$(FSTAR) \
 	  --cache_checked_modules \
-	  --already_cached "EverCrypt FStar LowStar C Hacl" \
+	  --already_cached "* -Test" \
 	  --cache_dir $(CACHE_DIR) \
+	  --use_hints --record_hints --use_hint_hashes \
 	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  $< && \
 	touch $@
