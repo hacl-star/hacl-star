@@ -37,6 +37,28 @@ let preserves_freeable #a (s: state a) (h0 h1: HS.mem) =
   let State hash_state buf _ = s in
   Hash.preserves_freeable hash_state h0 h1
 
+/// A lemma to be used by all clients, to show that a stateful operation that
+/// operates on a disjoint fragment of the heap preserves the invariants of this
+/// module. Note: it might be useful to call `Hash.fresh_is_disjoint` to turn
+/// the `fresh_loc` post-condition of create_in into a more useful
+/// `loc_disjoint` clause.
+let modifies_disjoint_preserves #a (l: B.loc) (h0 h1: HS.mem) (s: state a): Lemma
+  (requires (
+    let hash_state = State?.hash_state s in
+    B.modifies l h0 h1 /\
+    B.loc_disjoint l (footprint s h0) /\
+    Hash.invariant hash_state h0))
+  (ensures (
+    let hash_state = State?.hash_state s in
+    Hash.invariant hash_state h1 /\
+    Hash.repr hash_state h1 == Hash.repr hash_state h0 /\
+    footprint s h0 == footprint s h1))
+=
+  let hash_state = State?.hash_state s in
+  B.modifies_inert_intro l h0 h1;
+  Hash.frame_invariant l hash_state h0 h1;
+  Hash.frame_invariant_implies_footprint_preservation l hash_state h0 h1
+
 noextract
 let split_at_last (a: Hash.alg) (b: bytes):
   Pure (bytes_blocks a & bytes)
@@ -70,12 +92,14 @@ let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
 
 let bytes = S.seq UInt8.t
 
-val create (a: Hash.alg): ST (state a)
-  (requires (fun _ -> True))
+val create_in (a: Hash.alg) (r: HS.rid): ST (state a)
+  (requires (fun _ ->
+    HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     hashes h1 s S.empty /\
     B.(modifies (footprint s h1) h0 h1) /\
     Hash.fresh_loc (footprint s h1) h0 h1 /\
+    B.(loc_includes (loc_region_only true r) (footprint s h1)) /\
     freeable s h1))
 
 unfold

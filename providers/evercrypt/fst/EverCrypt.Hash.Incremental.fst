@@ -31,13 +31,13 @@ let split_at_last_empty (a: Hash.alg): Lemma
 =
   ()
 
-let create a =
+let create_in a r =
   // Allocate all the state
   let h0 = ST.get () in
-  let buf = B.malloc HS.root 0uy (Hacl.Hash.Definitions.size_block_ul a) in
+  let buf = B.malloc r 0uy (Hacl.Hash.Definitions.size_block_ul a) in
   let h1 = ST.get () in
   assert (Hash.fresh_loc (B.loc_buffer buf) h0 h1);
-  let hash_state = Hash.create a in
+  let hash_state = Hash.create_in a r in
   let h2 = ST.get () in
   assert (Hash.fresh_loc (Hash.footprint hash_state h2) h0 h2);
   assert (Hash.fresh_loc (B.loc_buffer buf) h0 h2);
@@ -115,6 +115,7 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   assert (S.equal (S.append (S.append blocks rest) d) (S.append blocks' rest'));
   ()
 
+#push-options "--z3rlimit 100"
 let add_len_small a (total_len: UInt64.t) (len: UInt32.t): Lemma
   (requires
     v len < size_block a - v (rest a total_len) /\
@@ -123,6 +124,7 @@ let add_len_small a (total_len: UInt64.t) (len: UInt32.t): Lemma
 =
   FStar.Math.Lemmas.small_modulo_lemma_1 (v len) (size_block a);
   FStar.Math.Lemmas.modulo_distributivity (v total_len) (v len) (size_block a)
+#pop-options
 
 #push-options "--z3rlimit 50"
 let update_small a s prev data len =
