@@ -20,13 +20,13 @@ val fadd5:
 let fadd5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   [@inline_let]
   let o0 = f10 +! f20 in
-  [@inline_let]  
+  [@inline_let]
   let o1 = f11 +! f21 in
-  [@inline_let]  
+  [@inline_let]
   let o2 = f12 +! f22 in
-  [@inline_let]  
+  [@inline_let]
   let o3 = f13 +! f23 in
-  [@inline_let]  
+  [@inline_let]
   let o4 = f14 +! f24 in
   FStar.Math.Lemmas.lemma_mod_plus_distr_l
     (as_nat5 (f10, f11, f12, f13, f14)) (as_nat5 (f20, f21, f22, f23, f24)) prime;
@@ -169,18 +169,6 @@ let carry26_wide #m l cin =
   lemma_carry26_wide #m l cin;
   (to_u32 l1 &. mask26, to_u32 (l1 >>. 26ul))
 
-val lemma_acc_inv:
-    acc:felem5{felem_fits5 acc (1, 1, 1, 1, 1)}
-  -> cin:uint32{v cin < pow2 26}
-  -> Lemma
-    (let (i0, i1, i2, i3, i4) = acc in
-     let i1' = i1 +! cin in
-     let out = (i0, i1', i2, i3, i4) in
-     if (v i1 + v cin) / pow2 26 > 0 then
-       felem_fits5 out (1, 2, 1, 1, 1) /\ (v i1 + v cin) % pow2 26 < v cin
-     else felem_fits5 out (1, 1, 1, 1, 1))
-let lemma_acc_inv acc cin = ()
-
 let acc_inv_t (acc:felem5) =
   let (o0, o1, o2, o3, o4) = acc in
   if v o1 >= pow2 26 then
@@ -275,24 +263,24 @@ val subtract_p5:
     f:felem5{felem_fits5 f (1, 1, 1, 1, 1)}
   -> out:felem5{as_nat5 out = feval f}
 let subtract_p5 (f0, f1, f2, f3, f4) =
-  let mask = eq_mask f4 (u32 0x3ffffff) in
-  let mask = mask &. eq_mask f3 (u32 0x3ffffff) in
-  let mask = mask &. eq_mask f2 (u32 0x3ffffff) in
-  let mask = mask &. eq_mask f1 (u32 0x3ffffff) in
-  let mask = mask &. gte_mask f0 (u32 0x3fffffb) in
+  let mask0 = eq_mask f4 (u32 0x3ffffff) in
+  let mask1 = mask0 &. eq_mask f3 (u32 0x3ffffff) in
+  let mask2 = mask1 &. eq_mask f2 (u32 0x3ffffff) in
+  let mask3 = mask2 &. eq_mask f1 (u32 0x3ffffff) in
+  let mask4 = mask3 &. gte_mask f0 (u32 0x3fffffb) in
 
-  let p0 = mask &. u32 0x3fffffb in
-  let p1 = mask &. u32 0x3ffffff in
-  let p2 = mask &. u32 0x3ffffff in
-  let p3 = mask &. u32 0x3ffffff in
-  let p4 = mask &. u32 0x3ffffff in
+  let p0 = mask4 &. u32 0x3fffffb in
+  let p1 = mask4 &. u32 0x3ffffff in
+  let p2 = mask4 &. u32 0x3ffffff in
+  let p3 = mask4 &. u32 0x3ffffff in
+  let p4 = mask4 &. u32 0x3ffffff in
 
   let f0' = f0 -. p0 in
   let f1' = f1 -. p1 in
   let f2' = f2 -. p2 in
   let f3' = f3 -. p3 in
   let f4' = f4 -. p4 in
-  admit();
+  lemma_subtract_p5 (f0, f1, f2, f3, f4) (f0', f1', f2', f3', f4');
   (f0', f1', f2', f3', f4')
 
 inline_for_extraction
