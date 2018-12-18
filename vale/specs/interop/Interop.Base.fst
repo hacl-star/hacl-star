@@ -210,7 +210,7 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
 
 [@__reduce__]
 let disjoint_or_eq (l:list arg) =
-  BigOps.pairwise_and disjoint_or_eq_1  l
+  BigOps.pairwise_and' disjoint_or_eq_1  l
 
 [@__reduce__]
 let live_arg (h:HS.mem) (x:arg) =
@@ -220,7 +220,7 @@ let live_arg (h:HS.mem) (x:arg) =
 
 [@__reduce__]
 let all_live (h:HS.mem) (bs:list arg) =
-  BigOps.big_and (live_arg h) bs
+  BigOps.big_and' (live_arg h) bs
 
 [@__reduce__]
 let mem_roots_p (h0:HS.mem) (args:list arg) =
@@ -247,14 +247,12 @@ let all_live_cons (hd:arg) (tl:list arg) (h0:HS.mem)
   = ()
 
 let disjoint_or_eq_def (l:list arg)
-   : Lemma (disjoint_or_eq l == BigOps.pairwise_and disjoint_or_eq_1 l)
+   : Lemma (disjoint_or_eq l == BigOps.pairwise_and' disjoint_or_eq_1 l)
    = ()
 
 let disjoint_or_eq_cons (hd:arg) (tl:list arg)
-  : Lemma (disjoint_or_eq (hd::tl) <==> (BigOps.big_and (disjoint_or_eq_1 hd) tl /\ disjoint_or_eq tl))
-  = BigOps.pairwise_and'_cons disjoint_or_eq_1 hd tl;
-    BigOps.normal_eq (BigOps.big_and' (disjoint_or_eq_1 hd) tl);
-    disjoint_or_eq_def (hd::tl)
+  : Lemma (disjoint_or_eq (hd::tl) <==> (BigOps.big_and' (disjoint_or_eq_1 hd) tl /\ disjoint_or_eq tl))
+  = BigOps.pairwise_and'_cons disjoint_or_eq_1 hd tl
 
 let rec mem_roots_p_modifies_none (args:list arg) (h0:HS.mem) (h1:HS.mem)
   : Lemma 
@@ -282,7 +280,7 @@ let rec disjoint_or_eq_fresh
       all_live h0 args /\
       x `B.unused_in` h0)
     (ensures
-      BigOps.big_and (disjoint_or_eq_1 (arg_of_lb x)) args)
+      BigOps.big_and' (disjoint_or_eq_1 (arg_of_lb x)) args)
   = match args with
     | [] -> ()
     | hd::tl ->

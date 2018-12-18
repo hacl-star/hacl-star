@@ -19,7 +19,7 @@ let disjoint_or_eq_b8 (ptr1 ptr2:b8) = M.loc_disjoint (M.loc_buffer ptr1) (M.loc
 [@__reduce__]
 let disjoint_or_eq_b8_l (ptrs:list b8)
  : prop
- = BigOps.pairwise_and disjoint_or_eq_b8 ptrs
+ = BigOps.pairwise_and' disjoint_or_eq_b8 ptrs
 
 let list_disjoint_or_eq (ptrs:list b8) =
   forall (p1 p2:b8). List.memP p1 ptrs /\ List.memP p2 ptrs ==> disjoint_or_eq_b8 p1 p2
