@@ -6,12 +6,11 @@ include $(FSTAR_HOME)/ulib/ml/Makefile.include
 HACL_HOME ?= ..
 KREMLIN_HOME ?= ../../kremlin
 
-DIRS=$(HACL_HOME)/code/hash-new
+DIRS=$(HACL_HOME)/code/hash
 
 INCLUDES = \
   $(DIRS) \
   $(KREMLIN_HOME)/kremlib \
-  $(HACL_HOME)/code/lib/kremlin \
   $(HACL_HOME)/specs
 
 # 1. FStar

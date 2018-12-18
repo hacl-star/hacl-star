@@ -3,18 +3,19 @@ all: compile verify extract test
 # Old targets, backwards-compat:
 .PHONY: old-%
 old-%:
-	$(MAKE) -f Makefile.old $*
+	$(MAKE) -C old -f Makefile.old $*
 
 # 0. Paths and includes
 
 HACL_HOME ?= ..
 
-HASH_DIR=$(HACL_HOME)/code/hash-new
+HASH_DIR=$(HACL_HOME)/code/hash
 
 ROOTS=$(addprefix $(HASH_DIR)/Hacl.Hash.,MD5.fst SHA1.fst SHA2.fst)
 
 ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 
+.PHONY: .depend
 .depend:
 	@$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
@@ -31,8 +32,8 @@ extract: dist/compact/Makefile.basic dist/generic/Makefile.basic \
 
 compile: compile-compact compile-generic compile-compact-msvc
 
-# Backwards compat target name
-extract-c: extract old-extract-c
+# Backwards compat
+extract: old-extract-c
 
 clean: clean-c
 	find $(DIRS) -iname '*.checked' | xargs rm -rf
@@ -71,12 +72,12 @@ COMPACT_FLAGS=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.
 # For the time being, we rely on the old extraction to give us self-contained
 # files
 HACL_OLD_FILES=\
-  curve25519/x25519-c/Hacl_Curve25519.c \
-  ed25519/ed25519-c/Hacl_Ed25519.c \
-  salsa-family/chacha-c/Hacl_Chacha20.c \
-  poly1305/poly-c/AEAD_Poly1305_64.c \
-  poly1305/poly-c/Hacl_Poly1305_64.c \
-  api/aead-c/Hacl_Chacha20Poly1305.c
+  old/curve25519/x25519-c/Hacl_Curve25519.c \
+  old/ed25519/ed25519-c/Hacl_Ed25519.c \
+  old/salsa-family/chacha-c/Hacl_Chacha20.c \
+  old/poly1305/poly-c/AEAD_Poly1305_64.c \
+  old/poly1305/poly-c/Hacl_Poly1305_64.c \
+  old/api/aead-c/Hacl_Chacha20Poly1305.c
 
 dist/compact/Makefile.basic: EXTRA=$(COMPACT_FLAGS)
 

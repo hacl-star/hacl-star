@@ -4,7 +4,7 @@ HACL_HOME ?= ..
 
 OUTPUT_DIR = extracted
 
-INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/lib/kremlin
+INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/old/lib/kremlin old
 
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
@@ -18,11 +18,9 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
 # NOTE: we assume every single one of these files defines a function named test,
 # of type unit -> bool -- this Makefile will auto-generate test drivers  based
 # on that assumption
-ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
-  Spec.Salsa20.fst Spec.Chacha20Poly1305.fst $(wildcard Spec.*.Test.fst) \
-  Spec.Ed25519.fst
+ROOTS=$(wildcard old/*.fst) $(wildcard Spec.*.Test.fst)
 
-OTHER_ROOTS=$(wildcard *.fst) $(HACL_HOME)/code/lib/kremlin/FStar.Endianness.fst
+OTHER_ROOTS=$(wildcard *.fst) $(HACL_HOME)/code/old/lib/kremlin/FStar.Endianness.fst
 
 # TODO: decide what to do with the following (excluded) specs:
 #  Spec.HMAC.SHA2_256.fst Spec.HMAC.SHA2_384.fst Spec.HMAC.SHA2_512.fst
