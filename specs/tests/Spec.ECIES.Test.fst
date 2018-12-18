@@ -47,10 +47,8 @@ let test () =
   let test1_input = create 32 (u8 0xFF) in
   (match Spec.ECIES.encap cs e test1_pk test1_context with
   | _, None -> IO.print_string "Error: Spec.ECIES.encap failed\n"
-  | _, Some (ek, esk, epk) -> (
+  | _, Some (ek, epk) -> (
     Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key cs) "\nECIES Encap Secret" ek;
-    IO.print_newline ();
-    Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "\nECIES Encap Ephemeral Secret" esk;
     IO.print_newline ();
     Lib.PrintSequence.print_label_lbytes #(Spec.ECIES.size_key_dh cs) "\nECIES Encap Ephemeral Public" epk);
     IO.print_newline ();
