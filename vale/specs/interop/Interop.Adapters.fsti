@@ -7,15 +7,15 @@ module ME = X64.Memory
 module MS = X64.Machine_s
 module IM = Interop.Mem
 
-[@reduce]
+[@__reduce__]
 let maybe_cons_buffer (x:arg) (args:list b8) : list b8 =
     match x with
     | (|TD_Buffer _, x|) -> x :: args
     | _ -> args
 
-[@reduce]
+[@__reduce__]
 let args_b8 (args:list arg) : GTot (list b8) =
-  BigOps.foldr_gtot args maybe_cons_buffer []
+  List.Tot.fold_right_gtot args maybe_cons_buffer []
 
 val liveness_disjointness (args:list arg) (h:mem_roots args)
   : Lemma (IM.list_disjoint_or_eq (args_b8 args) /\
