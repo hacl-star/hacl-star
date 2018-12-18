@@ -74,15 +74,15 @@ let lbytes_eq #len a b =
   res
 
 // TODO: Fix this
-#set-options "--admit_smt_queries true"
+//#set-options "--admit_smt_queries true"
 
 let uint_from_bytes_le #t #l i =
   match t with
   | U8 -> i.(0ul)
-  | U16 -> let u = C.load16_le i in u16_from_UInt16 u
-  | U32 -> let u = C.load32_le i in u32_from_UInt32 u
-  | U64 -> let u = C.load64_le i in u64_from_UInt64 u
-  | U128 -> let u = C.load128_le i in u128_from_UInt128 u
+  | U16 -> let u = C.load16_le i in to_u16 u
+  | U32 -> let u = C.load32_le i in to_u32 u
+  | U64 -> let u = C.load64_le i in to_u64 u
+  | U128 -> let u = C.load128_le i in to_u128 u
 
 let uint_from_bytes_be #t #l i =
   match t with

@@ -28,34 +28,34 @@ extern void fadd(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 extern void fsub(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
 extern void fmul1(uint64_t* dst, const uint64_t* in_a, const uint64_t in_b);
 
-#define inline inline __attribute((always_inline))
+#define force_inline inline __attribute((always_inline))
 
 // Done in C in rfc7748_25519.h
-static inline
+static force_inline
 void fmul(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b, uint64_t* tmp) {
   fmul_v(tmp, in_a, dst, in_b);
 }
 
 // Done in C in rfc7748_25519.h
-static inline
+static force_inline
 void fsqr(uint64_t* dst, const uint64_t* in_a, uint64_t* tmp) {
   fsqr_v(tmp,in_a, dst);
 }
 
 // Done in C in rfc7748_25519.h
-static inline
+static force_inline
 void fmul2(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b, uint64_t* tmp) {
   fmul2_v(tmp, in_a, dst, in_b);
 }
 
 // Done in C in rfc7748_25519.h
-static inline
+static force_inline
 void fsqr2(uint64_t* dst, const uint64_t* in_a, uint64_t* tmp) {
   fsqr2_v(tmp, in_a, dst);
 }
 
 
-static inline void cswap1(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
+static force_inline void cswap1(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
   uint64_t temp;
   __asm__ __volatile__(
     "test %9, %9 ;"
@@ -79,10 +79,32 @@ static inline void cswap1(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
   );
 }
 
-static inline void cswap2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
+static force_inline void cswap2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
   cswap1(bit,p0,p1);
   cswap1(bit,p0+4,p1+4);
 }
 
+
+
+static force_inline void cselect1(uint8_t bit, uint64_t *const px,
+                           uint64_t *const py) {
+  __asm__ __volatile__(
+    "test %4, %4 ;"
+    "cmovnzq %5, %0 ;"
+    "cmovnzq %6, %1 ;"
+    "cmovnzq %7, %2 ;"
+    "cmovnzq %8, %3 ;"
+    : "+r"(px[0]), "+r"(px[1]), "+r"(px[2]), "+r"(px[3])
+    : "r"(bit), "rm"(py[0]), "rm"(py[1]), "rm"(py[2]), "rm"(py[3])
+    : "cc"
+  );
+}
+
+
+
+static force_inline void cselect2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
+  cswap1(bit,p0,p1);
+  cswap1(bit,p0+4,p1+4);
+}
 
 

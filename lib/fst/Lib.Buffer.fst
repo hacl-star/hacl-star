@@ -371,43 +371,98 @@ let fillT #a clen o spec_f f =
       FStar.Seq.lemma_split (as_seq h' o) (v i)
     )
 
-let fill #a h0 clen o spec impl =
-  let open Seq in
+let fill #a h0 clen out spec impl =
   let h0 = ST.get() in
   [@inline_let]
-  let a_spec = createi_a a (v clen) (spec h0) in
+  let a_spec = Seq.createi_a a (v clen) (spec h0) in
   [@inline_let]
-  let refl h i = sub (as_seq h o) 0 i in
+  let refl h i = Seq.sub (as_seq h out) 0 i in
   [@inline_let]
-  let footprint i = loc o in
-  let spec' = spec in
+  let footprint (i:size_nat{i <= v clen}) = loc (gsub out 0ul (size i)) in
   [@inline_let]
-  let spec h = createi_step a (v clen) (spec h0) in
-  eq_intro (of_list []) (refl h0 0);
+  let spec h = Seq.createi_step a (v clen) (spec h0) in
+  Seq.eq_intro (Seq.of_list []) (refl h0 0);
   loop h0 clen a_spec refl footprint spec
   (fun i ->
-    Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (refl h0 0) (v i);
-    impl i;
-    let h' = ST.get () in
-    FStar.Seq.lemma_split (as_seq h' o) (v i)
+           Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (refl h0 0) (v i);
+	   let os = sub out 0ul (i +! 1ul) in 
+	   let h = ST.get() in
+	   let x = impl i in
+	   os.(i) <- x;
+	   let h' = ST.get() in
+	   assert (Seq.equal (refl h' (v i + 1)) (spec h0 (v i) (refl h (v i))))
   )
 
-#set-options "--max_fuel 0"
+inline_for_extraction noextract
+val lemma_eq_disjoint:     
+    #t2:buftype
+  -> #a1:Type
+  -> #a2:Type
+  -> clen1:size_t
+  -> clen2:size_t
+  -> b1:lbuffer a1 clen1
+  -> b2:lbuffer_t t2 a2 clen2
+  -> n: size_t{v n < v clen2 /\ v n < v clen1}
+  -> h0: mem
+  -> h1: mem
+  -> Lemma
+  (requires (live h0 b1 /\ live h0 b2 /\ eq_or_disjoint b1 b2 /\
+	     modifies1 #a1 #n (gsub b1 0ul n) h0 h1))
+  (ensures (let b2s = gsub b2 n (clen2 -! n) in
+	    as_seq h0 b2s == as_seq h1 b2s /\
+	    Seq.index (as_seq h0 b2) (v n) ==
+	    Seq.index (as_seq h1 b2) (v n)))
 
+let lemma_eq_disjoint #t2 #a1 #a2 clen1 clen2 b1 b2 n h0 h1 = 
+  let b1s = gsub b1 0ul n in
+  let b2s = gsub b2 0ul n in
+  assert (modifies (loc b1s) h0 h1);
+  assert (disjoint b1 b2 ==> Seq.equal (as_seq h0 b2) (as_seq h1 b2));
+  assert (disjoint b1 b2 ==> Seq.equal (as_seq h0 b2s) (as_seq h1 b2s));
+  assert (Seq.index (as_seq h1 b2) (v n) == Seq.index (as_seq h1 (gsub b2 n (clen2 -! n))) 0)
+
+          
+
+
+#set-options "--z3rlimit 50 --max_fuel 0"
+
+inline_for_extraction
 let mapT #t #a #b clen out f inp =
   let h0 = ST.get () in
-  fill h0 clen out
-    (fun h -> let in_seq = as_seq h inp in Seq.map_inner f in_seq)
-    (fun i -> out.(i) <- f inp.(i))
+  [@inline_let]
+  let spec h = Seq.map_inner f (as_seq h inp) in
+  fill h0 clen out spec
+    (fun i -> let x = inp.(i) in
+	   let h1 = ST.get() in
+	   lemma_eq_disjoint #t clen clen out inp i h0 h1;
+	   f x)
+	   
+inline_for_extraction
+let map2T #t #a1 #a2 #b clen out f inp1 inp2 =
+  let h0 = ST.get () in
+  [@inline_let]
+  let spec (h:mem) = Seq.map2_inner #a1 #a2 #b #(v clen) f (as_seq h inp1) (as_seq h inp2) in
+  fill h0 clen out spec
+    (fun i -> 	   
+      let h1 = ST.get () in
+      lemma_eq_disjoint #t clen clen out inp1 i h0 h1;
+      lemma_eq_disjoint #t clen clen out inp2 i h0 h1;
+      f inp1.(i) inp2.(i))
 
 let mapiT #t #a #b clen out f inp =
   let h0 = ST.get () in
   fill h0 clen out
-    (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner (fun i -> f (size i)) in_seq)
-    (fun i -> let xi = inp.(i) in out.(i) <- f i xi)
+    (fun h -> Seq.mapi_inner (fun i -> f (size i)) (as_seq h inp))
+    (fun i -> 
+      let h1 = ST.get () in
+      lemma_eq_disjoint #t clen clen out inp i h0 h1;
+      let xi = inp.(i) in f i xi)
 
 let mapi #a #b h0 clen out spec_f f inp = 
   let h0 = ST.get () in
   fill h0 clen out
-    (fun h -> let in_seq = as_seq h inp in Seq.mapi_inner (spec_f h0) in_seq)
-    (fun i -> let xi = inp.(i) in out.(i) <- f i xi)
+    (fun h -> Seq.mapi_inner (spec_f h0) (as_seq h inp))
+    (fun i -> 
+      let h1 = ST.get () in
+      lemma_eq_disjoint clen clen out inp i h0 h1;
+      let xi = inp.(i) in f i xi)

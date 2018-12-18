@@ -34,6 +34,7 @@ let unfold_repeat_gen n a f acc0 i = ()
 *)
 
 let fixed_a (a:Type) (i:nat) = a
+let fixed_i f (i:nat) = f
 
 let repeati #a n f acc0 =
   repeat_gen n (fixed_a a) f acc0
@@ -42,7 +43,13 @@ let unfold_repeati #a n f acc0 i =
   unfold_repeat_gen n (fixed_a a) f acc0 i
 
 let repeat #a n f acc0 =
-  repeati n (fun i -> f) acc0
+  repeati n (fixed_i f) acc0
+
+let eq_repeat0 #a f acc0 = ()
+
+let unfold_repeat #a n f acc0 i =
+  unfold_repeati #a n (fixed_i f) acc0 i
+
 
 let repeat_range #a min max f x =
   repeat_left min max (fun _ -> a) f x
