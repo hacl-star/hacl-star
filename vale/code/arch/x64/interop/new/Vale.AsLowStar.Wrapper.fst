@@ -4,7 +4,6 @@ module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module LU = LowStar.Util
 module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
@@ -17,8 +16,9 @@ module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
 module SL = X64.Vale.StateLemmas
 module VL = X64.Vale.Lemmas
+module ST = FStar.HyperStack.ST
 
-[@reduce]
+[@__reduce__]
 let create_initial_vale_state
        (args:IX64.arity_ok arg)
   : IX64.state_builder_t args V.va_state =
@@ -28,14 +28,14 @@ let create_initial_vale_state
     { ok = true;
       regs = X64.Vale.Regs.of_fun t_state.TS.state.BS.regs;
       xmms = X64.Vale.Xmms.of_fun t_state.TS.state.BS.xmms;
-      flags = 0; // REVIEW
+      flags = 0; // TODO: REVIEW
       mem = mem;
       memTaint = TS.(t_state.memTaint) }
 
 let lemma_create_initial_vale_state_core
     (args:IX64.arity_ok arg)
     (h0:HS.mem)
-    (stack:IM.b8{mem_roots_p h0 (IX64.arg_of_b8 stack::args)})
+    (stack:b8{mem_roots_p h0 (IX64.arg_of_b8 stack::args)})
   : Lemma
       (ensures (
         let s = create_initial_vale_state args h0 stack in
@@ -54,7 +54,7 @@ let core_create_lemma
                 LSig.mk_vale_disjointness args /\
                 LSig.mk_readable args va_s /\
                 LSig.vale_pre_hyp args va_s))
-  = admit() //needs the definition of SL.state_to_S; not sure why its hidden in StateLemma
+  = admit() //TODO: needs the definition of SL.state_to_S; not sure why its hidden in StateLemma
 
 let frame_mem_correspondence_back
        (args:list arg)
@@ -69,7 +69,7 @@ let frame_mem_correspondence_back
        B.loc_disjoint (LSig.mk_modifies_loc args) l)
      (ensures
        LSig.mem_correspondence args h0 va_s)
- = admit()
+ = admit() //TODO: easy
 
 
 let frame_mem_correspondence
@@ -85,16 +85,15 @@ let frame_mem_correspondence
        B.loc_disjoint (LSig.mk_modifies_loc args) l)
      (ensures
        LSig.mem_correspondence args h1 va_s)
- = admit()
+ = admit() //TODO: easy
 
 let args_fp (args:list arg)
             (h0:mem_roots args)
             (h1:HS.mem{HS.fresh_frame h0 h1})
    : Lemma (B.loc_disjoint (LSig.mk_modifies_loc args) (B.loc_regions false (Set.singleton (HS.get_tip h1))))
-   = admit()
+   = admit() //TODO: easy
 
-module ST = FStar.HyperStack.ST
-assume
+assume //TODO: Should be provided by Vale.Decls
 val fuel_eq : squash (V.va_fuel == nat)
 
 
@@ -109,17 +108,16 @@ let eval_code_rel (c:TS.tainted_code)
   : Lemma
      (requires (V.eval_code c va_s0 f va_s1))
      (ensures (eval_code_ts c (SL.state_to_S va_s0) (coerce f) (SL.state_to_S va_s1)))
-  = admit()
-
-////////////////////////////////////////////////////////////////////////////////
+  = admit() //TODO: Should be provided by StateLemmas
 
 let mem_correspondence_refl (args:list arg)
                             (va_s:V.va_state)
  : Lemma (ensures LSig.mem_correspondence args (Interop.Adapters.hs_of_mem va_s.VS.mem) va_s)
- = admit()
+ = admit() //TODO: prove using correct_down
 
 ////////////////////////////////////////////////////////////////////////////////
 
+[@__reduce__]
 let prediction_pre_rel
           (num_stack_slots:nat)
           (pre:VSig.vale_pre_tl [])
@@ -129,6 +127,7 @@ let prediction_pre_rel
    = fun (h0:mem_roots args) ->
       LSig.(to_low_pre pre args num_stack_slots h0)
 
+[@__reduce__]
 let prediction_post_rel
           (num_stack_slots:nat)
           (post:VSig.vale_post_tl [])
@@ -216,7 +215,7 @@ let vale_lemma_as_prediction
        assert (LSig.(to_low_post post args h0 () h2));
        coerce f, va_s1.VS.mem
 
-[@reduce]
+[@__reduce__]
 let rec lowstar_typ
           (#dom:list td)
           (code:V.va_code)
@@ -248,7 +247,8 @@ let rec lowstar_typ
         (elim_1 post x)
 
 #set-options "--initial_ifuel 1"
-let rec wrap (#dom:list td)
+private
+let rec __test__wrap (#dom:list td)
              (code:V.va_code)
              (args:list arg{IX64.arity_ok_2 dom args})
              (num_stack_slots:nat)
@@ -277,7 +277,7 @@ let rec wrap (#dom:list td)
       f <: lowstar_typ #[] code args num_stack_slots pre post
     | hd::tl ->
       fun (x:td_as_type hd) ->
-        wrap
+        __test__wrap
           code
           IX64.(x ++ args)
           num_stack_slots
@@ -288,6 +288,7 @@ let rec wrap (#dom:list td)
 // ////////////////////////////////////////////////////////////////////////////////
 // //Wrap abstract
 // ////////////////////////////////////////////////////////////////////////////////
+[@__reduce__]
 let rec pre_rel_generic
       (n:nat)
       (code:V.va_code)
@@ -302,6 +303,7 @@ let rec pre_rel_generic
        fun (x:td_as_type hd) ->
        pre_rel_generic n code tl IX64.(x ++ args) (elim_1 pre x)
 
+[@__reduce__]
 let rec post_rel_generic
       (n:nat)
       (code:V.va_code)
@@ -316,7 +318,6 @@ let rec post_rel_generic
        fun (x:td_as_type hd) ->
        post_rel_generic n code tl IX64.(x ++ args) (elim_1 post x)
 
-[@reduce]
 let rec mk_prediction
        (code:V.va_code)
        (dom:list td)
@@ -345,24 +346,3 @@ let rec mk_prediction
           #(elim_1 pre x)
           #(elim_1 post x)
           (VSig.elim_vale_sig_cons hd tl args pre post v x)
-
-////////////////////////////////////////////////////////////////////////////////
-//test
-////////////////////////////////////////////////////////////////////////////////
-
-let t = TD_Buffer ME.TUInt64
-unfold let dom : (x:list td {List.length x == 2}) =
-  let y = [t; t] in
-  assert_norm (List.length y = 2);
-  y
-
-assume val pre : VSig.vale_pre dom
-assume val post : VSig.vale_post dom
-assume val n : nat
-assume val v: VSig.vale_sig pre post
-assume val c: V.va_code
-open Interop.X64
-
-[@reduce]
-let call_c_t = as_lowstar_sig_t c dom [] _ _ (mk_prediction c dom [] n (v c IA.win))
-let call_c : call_c_t = IX64.wrap c dom (mk_prediction c dom [] n (v c IA.win))

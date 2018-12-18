@@ -4,7 +4,6 @@ module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module LU = LowStar.Util
 module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
@@ -15,9 +14,10 @@ module VS = X64.Vale.State
 module IX64 = Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 
-assume
+assume //TODO: UInt128
 val quad32_to_nat : ME.quad32 -> UInt.uint_t UInt128.n
-assume
+
+assume //TODO: UInt128
 val view128 : LowStar.BufferView.view UInt8.t UInt128.t
 
 let nat_to_uint (t:ME.base_typ) (x:ME.type_of_typ (ME.TBase t))
@@ -54,19 +54,19 @@ let sprop = VS.state -> prop
 let hprop = HS.mem -> prop
 let hsprop = HS.mem -> VS.state -> prop
 
-[@reduce]
+[@__reduce__]
 let mem_correspondence_1
       (t:ME.base_typ)
       (x:lowstar_buffer (ME.TBase t))
       (h:HS.mem)
       (s:VS.state) =
   let y = as_vale_buffer x in
-  assume (t <> ME.TUInt128);
+  assume (t <> ME.TUInt128); //TODO: UInt128
   Seq.equal
     (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.mem y))
     (BV.as_seq h (BV.mk_buffer_view x (view_of_base_typ t)))
 
-[@reduce]
+[@__reduce__]
 let rec mem_correspondence (args:list arg) : hsprop =
   match args with
   | [] -> fun h s -> True
@@ -80,7 +80,7 @@ let rec mem_correspondence (args:list arg) : hsprop =
     | _ ->
       mem_correspondence tl
 
-[@reduce]
+[@__reduce__]
 let mk_vale_disjointness (args:list arg) : prop =
   let rec aux (args:list arg) : GTot (list ME.loc) =
     match args with
@@ -93,7 +93,7 @@ let mk_vale_disjointness (args:list arg) : prop =
   in
   ME.locs_disjoint (aux args)
 
-[@reduce]
+[@__reduce__]
 let mk_readable (args:list arg) : sprop =
   let rec aux (args:list arg) (out:sprop) : sprop =
     match args with
@@ -112,7 +112,7 @@ let mk_readable (args:list arg) : sprop =
   in
   aux [] (fun h -> True)
 
-[@reduce]
+[@__reduce__]
 let rec register_args (n:nat)
                       (args:IX64.arity_ok arg{List.length args = n}) : sprop =
     match args with
@@ -122,7 +122,7 @@ let rec register_args (n:nat)
         register_args (n - 1) tl s /\
         VS.eval_reg (IX64.register_of_arg_i n) s == IX64.arg_as_nat64 hd
 
-[@reduce]
+[@__reduce__]
 let rec taint_hyp (args:list arg) : sprop =
     match args with
     | [] -> (fun s -> True)
@@ -146,7 +146,7 @@ let rec taint_hyp (args:list arg) : sprop =
       | _ ->
         taint_hyp tl
 
-[@reduce]
+[@__reduce__]
 let rec mk_modifies_loc (args:list arg) : GTot B.loc =
     match args with
     | [] -> B.loc_none
@@ -157,7 +157,7 @@ let rec mk_modifies_loc (args:list arg) : GTot B.loc =
       | _ ->
         mk_modifies_loc tl
 
-[@reduce]
+[@__reduce__]
 let vale_pre_hyp (args:IX64.arity_ok arg) : sprop =
     fun s0 ->
       mk_vale_disjointness args /\
@@ -165,7 +165,7 @@ let vale_pre_hyp (args:IX64.arity_ok arg) : sprop =
       register_args (List.length args) args s0 /\
       taint_hyp args s0
 
-[@reduce]
+[@__reduce__]
 let to_low_pre
     (pre:VSig.vale_pre_tl [])
     (args:IX64.arity_ok arg)
@@ -180,7 +180,7 @@ let to_low_pre
     V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) num_stack_slots s0.VS.memTaint ==>
     elim_nil pre s0 sb)
 
-[@reduce]
+[@__reduce__]
 let to_low_post
     (post:VSig.vale_post_tl [])
     (args:list arg)

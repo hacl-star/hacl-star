@@ -10,6 +10,7 @@ module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
 module IM = Interop.Mem
+module List = FStar.List.Tot
 
 ////////////////////////////////////////////////////////////////////////////////
 //The calling convention w.r.t the register mapping
@@ -223,6 +224,7 @@ let prediction_post_rel_t (c:TS.tainted_code) (args:arity_ok arg) =
     sn:TS.traceState ->
     prop
 
+[@__reduce__]
 let prediction_pre
     (c:TS.tainted_code)
     (args:arity_ok arg)
@@ -241,6 +243,7 @@ let prediction_pre
   B.live alloc_push_h0 b /\
   s0 == fst (create_initial_trusted_state args alloc_push_h0 b)
 
+[@__reduce__]
 let prediction_post
     (c:TS.tainted_code)
     (args:arity_ok arg)
@@ -262,8 +265,6 @@ let prediction_post
     calling_conventions s0 s1 /\
     post_rel h0 s0 push_h0 alloc_push_h0 b fuel_mem s1
   )
-
-
 
 let prediction
     (c:TS.tainted_code)
@@ -288,6 +289,7 @@ noeq type as_lowstar_sig_ret (args:arity_ok arg) =
       final_mem:ME.mem ->
       as_lowstar_sig_ret args
 
+[@__reduce__]
 let as_lowstar_sig_post
     (c:TS.tainted_code)
     (args:arity_ok arg)
@@ -302,10 +304,12 @@ let as_lowstar_sig_post
   let pre_pop = Adapters.hs_of_mem final_mem in
   prediction_pre c args pre_rel h0 s0 push_h0 alloc_push_h0 b /\
   (fuel, final_mem) == predict h0 s0 push_h0 alloc_push_h0 b /\
+  prediction_post c args post_rel h0 s0 push_h0 alloc_push_h0 b (fuel, final_mem) /\
   FStar.HyperStack.ST.equal_domains alloc_push_h0 pre_pop /\
   HS.poppable pre_pop /\
   h1 == HS.pop pre_pop
 
+[@__reduce__]
 let as_lowstar_sig (c:TS.tainted_code) =
     args:arity_ok arg ->
     #pre_rel:_ ->
@@ -317,11 +321,12 @@ let as_lowstar_sig (c:TS.tainted_code) =
 
 val wrap_variadic (c:TS.tainted_code) : as_lowstar_sig c
 
+[@__reduce__]
 let (++) (#t:td) (x:td_as_type t) (args:list arg) = (| t, x |) :: args
-module List = FStar.List.Tot
 
 let arity_ok_2 (l:list 'a) (m:list 'b) = List.length l + List.length m < max_arity
 
+[@__reduce__]
 let rec rel_gen_t
       (c:TS.tainted_code)
       (td:list td)
@@ -333,15 +338,16 @@ let rec rel_gen_t
       x:td_as_type hd ->
       rel_gen_t c tl (x++args) f
 
+[@__reduce__]
 let elim_rel_gen_t_nil #c #args #f (x:rel_gen_t c [] args f)
   : f args
   = x
 
+[@__reduce__]
 let elim_rel_gen_t_cons #c hd tl #args #f (p:rel_gen_t c (hd::tl) args f)
   : (x:td_as_type hd ->
       rel_gen_t c tl (x++args) f)
   = p
-
 
 let rec prediction_t
       (c:TS.tainted_code)
@@ -362,6 +368,7 @@ let rec prediction_t
           (elim_rel_gen_t_cons hd tl pre_rel x)
           (elim_rel_gen_t_cons hd tl post_rel x)
 
+[@__reduce__]
 let elim_predict_t_nil
       (#c:TS.tainted_code)
       (#args:arity_ok arg)
@@ -371,6 +378,7 @@ let elim_predict_t_nil
    : prediction c args pre_rel post_rel
    = p
 
+[@__reduce__]
 let elim_predict_t_cons
       (#c:TS.tainted_code)
       (hd:td)
@@ -385,6 +393,7 @@ let elim_predict_t_cons
        (elim_rel_gen_t_cons hd tl post_rel x)
    = p
 
+[@__reduce__]
 let rec as_lowstar_sig_t
       (c:TS.tainted_code)
       (dom:list td)

@@ -4,7 +4,6 @@ module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module LU = LowStar.Util
 module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
@@ -13,25 +12,26 @@ module IM = Interop.Mem
 module V = X64.Vale.Decls
 module VS = X64.Vale.State
 module IX64 = Interop.X64
+module List = FStar.List.Tot
 
-assume
+assume //TODO: this equivalence should be provided by Vale.Decls
 val code_equiv : squash (V.va_code == TS.tainted_code)
 
-[@reduce]
+[@__reduce__]
 let vale_pre_tl (dom:list td) =
     n_arrow dom (V.va_state -> IX64.stack_buffer -> prop)
 
-[@reduce]
+[@__reduce__]
 let vale_pre (dom:list td) =
     code:V.va_code ->
     vale_pre_tl dom
 
-[@reduce]
+[@__reduce__]
 let vale_post_tl (dom:list td) =
     n_arrow dom
-               (s0:V.va_state -> sb:IX64.stack_buffer -> s1:V.va_state -> f:V.va_fuel -> prop)
+            (s0:V.va_state -> sb:IX64.stack_buffer -> s1:V.va_state -> f:V.va_fuel -> prop)
 
-[@reduce]
+[@__reduce__]
 let vale_post (dom:list td) =
     code:V.va_code ->
     vale_post_tl dom
@@ -68,15 +68,15 @@ let vale_calling_conventions (s0 s1:V.va_state) =
   s1.VS.ok
 
 
-[@reduce]
+[@__reduce__]
 let arg_mloc (x:arg) : GTot ME.loc =
     match x with
     | (|TD_Buffer td, x|) -> ME.loc_buffer (as_vale_buffer #(ME.TBase td) x)
     | _ -> ME.loc_none
 
-[@reduce]
+[@__reduce__]
 let mloc_args (args:list arg) : GTot ME.loc =
-    BigOps.foldr_gtot (BigOps.map_gtot arg_mloc args) ME.loc_union ME.loc_none
+    List.fold_right_gtot (List.map_gtot arg_mloc args) ME.loc_union ME.loc_none
 
 unfold
 let vale_sig_nil (args:list arg)
@@ -94,7 +94,7 @@ let vale_sig_nil (args:list arg)
        elim_nil post va_s0 stack_b va_s1 f /\
        ME.modifies (mloc_args args) va_s0.VS.mem va_s1.VS.mem))
 
-[@reduce]
+[@__reduce__]
 let rec vale_sig_tl (#dom:list td)
                     (args:list arg)
                     (code:V.va_code)
@@ -110,7 +110,7 @@ let rec vale_sig_tl (#dom:list td)
       vale_sig_tl #tl ((|hd,x|)::args) code (elim_1 pre x) (elim_1 post x)
 
 
-[@reduce]
+[@__reduce__]
 let elim_vale_sig_nil #code
                        (#args:list arg)
                        (#pre:vale_pre_tl [])
@@ -119,7 +119,7 @@ let elim_vale_sig_nil #code
     : vale_sig_nil args code pre post
     = v
 
-[@reduce]
+[@__reduce__]
 let elim_vale_sig_cons #code
                        (hd:td)
                        (tl:list td)
@@ -131,7 +131,7 @@ let elim_vale_sig_cons #code
     -> vale_sig_tl ((|hd, x|)::args) code (elim_1 pre x) (elim_1 post x)
     = v
 
-[@reduce]
+[@__reduce__]
 let vale_sig (#dom:list td)
              (pre:vale_pre dom)
              (post:vale_post dom)
