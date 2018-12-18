@@ -5,7 +5,6 @@ module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module LU = LowStar.Util
 module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
@@ -60,7 +59,7 @@ let max_arity : nat = if IA.win then 4 else 6
 let reg_nat = i:nat{i < max_arity}
 let arity_ok 'a = l:list 'a { List.Tot.length l < max_arity }
 
-[@reduce]
+[@__reduce__]
 let register_of_arg_i (i:reg_nat) : MS.reg =
   let open MS in
   if IA.win then
@@ -79,7 +78,7 @@ let register_of_arg_i (i:reg_nat) : MS.reg =
     | 5 -> R9
 
 //A partial inverse of the above function
-[@reduce]
+[@__reduce__]
 let arg_of_register (r:MS.reg)
   : option (i:reg_nat{register_of_arg_i i = r})
   = let open MS in
@@ -110,7 +109,7 @@ let upd_reg (regs:registers) (i:nat) (v:_) : registers =
         else regs r
       | _ -> regs r
 
-[@reduce]
+[@__reduce__]
 let arg_as_nat64 (a:arg) : GTot ME.nat64 =
   let (| tag, x |) = a in
   let open ME in
@@ -128,7 +127,7 @@ let arg_as_nat64 (a:arg) : GTot ME.nat64 =
   | TD_Buffer bt ->
     IA.addrs x
 
-[@reduce]
+[@__reduce__]
 let update_regs (x:arg)
                 (i:reg_nat)
                 (regs:registers)
@@ -141,7 +140,7 @@ let regs_with_stack (regs:registers) (stack_b:b8) : registers =
         IA.addrs stack_b
       else regs r
 
-[@reduce]
+[@__reduce__]
 let rec register_of_args (n:nat{n < max_arity})
                          (args:list arg{List.Tot.length args = n})
                          (regs:registers) : GTot registers =
@@ -159,7 +158,7 @@ let upd_taint_map (taint:taint_map) (x:b8) : taint_map =
           MS.Secret
         else taint y
 
-[@reduce]
+[@__reduce__]
 let update_taint_map (#a:td)
                      (x:td_as_type a)
                      (taint:taint_map) =
@@ -170,6 +169,7 @@ let update_taint_map (#a:td)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+[@__reduce__]
 let arg_of_b8 (x:b8) : arg = (| TD_Buffer ME.TUInt8, x |)
 
 let state_builder_t (args:list arg) (codom:Type) =
@@ -308,7 +308,6 @@ let as_lowstar_sig_post
 
 let as_lowstar_sig (c:TS.tainted_code) =
     args:arity_ok arg ->
-//    h0:mem_roots args ->
     #pre_rel:_ ->
     #post_rel:_ ->
     predict:prediction c args pre_rel post_rel ->
@@ -392,7 +391,6 @@ let rec as_lowstar_sig_t
       (args:list arg{List.length dom + List.length args < max_arity})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c))
-      // (#h0:HS.mem)
       (predict:prediction_t c dom args pre_rel post_rel) =
       match dom with
       | [] ->
