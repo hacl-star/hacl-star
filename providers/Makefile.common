@@ -1,9 +1,9 @@
 # This makefile can be safely included from a subdirectory for the purposes of
 # exposing the %.fst-in target
-FSTAR_HOME	?= ../../FStar
-KREMLIN_HOME	?= ../../kremlin
 HACL_HOME	?= ..
-MLCRYPTO_HOME	?= ../../MLCrypto
+FSTAR_HOME	?= $(HACL_HOME)/../FStar
+KREMLIN_HOME	?= $(HACL_HOME)/../kremlin
+MLCRYPTO_HOME	?= $(HACL_HOME)/../MLCrypto
 OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
 
 # The noopenssl config no means: enable bcrypt + disable openssl
