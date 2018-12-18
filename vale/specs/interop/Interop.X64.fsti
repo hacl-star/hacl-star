@@ -123,7 +123,7 @@ let arg_as_nat64 (a:arg) : GTot ME.nat64 =
   | TD_Base TUInt64 ->
      UInt64.v x
   | TD_Base TUInt128 ->
-     admit()
+     admit() //TODO: UInt128
   | TD_Buffer bt ->
     IA.addrs x
 

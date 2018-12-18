@@ -24,10 +24,9 @@ let b8 = B.buffer UInt8.t
 [@__reduce__]
 let lowstar_buffer (t:ME.typ) = b:b8{B.length b % view_n t == 0}
 
-//TODO: This should be provided by X64.Memory
 let buffer_equiv (t:ME.typ)
   : Lemma (ME.buffer t == lowstar_buffer t)
-  = admit()
+  = admit() //TODO: This should be provided by X64.Memory
 
 [@__reduce__]
 let coerce (x:'a{'a == 'b}) : 'b = x
