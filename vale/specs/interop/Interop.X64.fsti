@@ -60,7 +60,6 @@ let max_arity : nat = if IA.win then 4 else 6
 let reg_nat = i:nat{i < max_arity}
 let arity_ok 'a = l:list 'a { List.Tot.length l < max_arity }
 
-[@__reduce__]
 let register_of_arg_i (i:reg_nat) : MS.reg =
   let open MS in
   if IA.win then
@@ -148,7 +147,7 @@ let rec register_of_args (n:nat{n < max_arity})
     match args with
     | [] -> regs
     | hd::tl ->
-      update_regs hd n (register_of_args (n - 1) tl regs)
+      update_regs hd (n - 1) (register_of_args (n - 1) tl regs)
 
 ////////////////////////////////////////////////////////////////////////////////
 let taint_map = b8 -> GTot MS.taint
@@ -299,7 +298,12 @@ let as_lowstar_sig_post
     (predict:prediction c args pre_rel post_rel)
     (ret:as_lowstar_sig_ret args)
     (h1:HS.mem) =
-  let As_lowstar_sig_ret push_h0 alloc_push_h0 b fuel final_mem = ret in
+  (* write it this way to be reduction friendly *)
+  let push_h0 = As_lowstar_sig_ret?.push_h0 ret in
+  let alloc_push_h0 = As_lowstar_sig_ret?.alloc_push_h0 ret in
+  let b = As_lowstar_sig_ret?.b ret in
+  let fuel = As_lowstar_sig_ret?.fuel ret in
+  let final_mem = As_lowstar_sig_ret?.final_mem ret in
   let s0 = fst (create_initial_trusted_state args alloc_push_h0 b) in
   let pre_pop = Adapters.hs_of_mem final_mem in
   prediction_pre c args pre_rel h0 s0 push_h0 alloc_push_h0 b /\
@@ -308,6 +312,32 @@ let as_lowstar_sig_post
   FStar.HyperStack.ST.equal_domains alloc_push_h0 pre_pop /\
   HS.poppable pre_pop /\
   h1 == HS.pop pre_pop
+
+[@__reduce__]
+let as_lowstar_sig_post_weak
+    (c:TS.tainted_code)
+    (args:arity_ok arg)
+    (h0:mem_roots args)
+    (#pre_rel:_)
+    (#post_rel: _)
+    (predict:prediction c args pre_rel post_rel)
+    (ret:as_lowstar_sig_ret args)
+    (h1:HS.mem) =
+  (* write it this way to be reduction friendly *)
+  let push_h0 = As_lowstar_sig_ret?.push_h0 ret in
+  let alloc_push_h0 = As_lowstar_sig_ret?.alloc_push_h0 ret in
+  let b = As_lowstar_sig_ret?.b ret in
+  let fuel = As_lowstar_sig_ret?.fuel ret in
+  let final_mem = As_lowstar_sig_ret?.final_mem ret in
+  let s0 = fst (create_initial_trusted_state args alloc_push_h0 b) in
+  let pre_pop = Adapters.hs_of_mem final_mem in
+  (exists fuel
+     final_mem
+     _s1.
+     let pre_pop = Adapters.hs_of_mem final_mem in
+     HS.poppable pre_pop /\
+     h1 == HS.pop pre_pop /\
+     post_rel h0 s0 push_h0 alloc_push_h0 b (fuel, final_mem) _s1)
 
 [@__reduce__]
 let as_lowstar_sig (c:TS.tainted_code) =
@@ -424,3 +454,36 @@ val wrap
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c))
     (predict:prediction_t c dom [] pre_rel post_rel)
   : as_lowstar_sig_t c dom [] pre_rel post_rel predict
+
+
+[@__reduce__]
+let rec as_lowstar_sig_t_weak
+      (c:TS.tainted_code)
+      (dom:list td)
+      (args:list arg{List.length dom + List.length args < max_arity})
+      (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
+      (post_rel:rel_gen_t c dom args (prediction_post_rel_t c))
+      (predict:prediction_t c dom args pre_rel post_rel) =
+      match dom with
+      | [] ->
+        (unit ->
+         FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+           (requires (fun h0 -> mem_roots_p h0 args /\ (elim_rel_gen_t_nil pre_rel h0)))
+           (ensures fun h0 ret h1 -> as_lowstar_sig_post_weak c args h0 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1))
+      | hd::tl ->
+        x:td_as_type hd ->
+        as_lowstar_sig_t_weak
+          c
+          tl
+          (x ++ args)
+          (elim_rel_gen_t_cons hd tl pre_rel x)
+          (elim_rel_gen_t_cons hd tl post_rel x)
+          (elim_predict_t_cons hd tl predict x)
+
+val wrap_weak
+    (c:TS.tainted_code)
+    (dom:arity_ok td)
+    (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
+    (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c))
+    (predict:prediction_t c dom [] pre_rel post_rel)
+  : as_lowstar_sig_t_weak c dom [] pre_rel post_rel predict

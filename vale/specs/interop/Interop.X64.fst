@@ -73,3 +73,35 @@ let rec wrap_aux
         (elim_predict_t_cons hd tl predict x)
 
 let wrap c dom #pre_rel #post_rel predict = wrap_aux c dom [] pre_rel post_rel predict
+
+
+
+let rec wrap_aux_weak
+    (c:TS.tainted_code)
+    (dom:list td)
+    (args:list arg{arity_ok_2 dom args})
+    (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
+    (post_rel:rel_gen_t c dom args (prediction_post_rel_t c))
+    (predict:prediction_t c dom args pre_rel post_rel)
+  : as_lowstar_sig_t_weak c dom args pre_rel post_rel predict
+  = match dom with
+    | [] ->
+      let f () :
+        FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+           (requires fun h0 ->
+             mem_roots_p h0 args /\ elim_rel_gen_t_nil pre_rel h0)
+           (ensures fun h0 ret h1 ->
+             as_lowstar_sig_post_weak c args h0 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1) =
+         wrap_variadic c args (elim_predict_t_nil predict)
+      in
+      f <: as_lowstar_sig_t_weak c [] args pre_rel post_rel predict
+
+    | hd::tl ->
+      fun (x:td_as_type hd) ->
+      wrap_aux_weak c tl
+        (x ++ args)
+        (elim_rel_gen_t_cons hd tl pre_rel x)
+        (elim_rel_gen_t_cons hd tl post_rel x)
+        (elim_predict_t_cons hd tl predict x)
+
+let wrap_weak c dom #pre_rel #post_rel predict = wrap_aux_weak c dom [] pre_rel post_rel predict

@@ -50,7 +50,7 @@ type td =
   | TD_Base of ME.base_typ
   | TD_Buffer of ME.base_typ
 
-unfold 
+unfold
 let normal (#a:Type) (x:a) : a =
   FStar.Pervasives.norm
     [iota;
@@ -69,6 +69,11 @@ let normal (#a:Type) (x:a) : a =
                  `%FStar.FunctionalExtensionality.on;
                  `%List.Tot.fold_right_gtot;
                  `%List.Tot.map_gtot;
+                 `%List.Tot.length;
+                 `%fst;
+                 `%snd;
+                 `%Mktuple2?._1;
+                 `%Mktuple2?._2
                  // `%Interop.list_disjoint_or_eq;
                  // `%Interop.list_live
                  ];
@@ -194,8 +199,8 @@ let disjoint_addr addr1 length1 addr2 length2 =
   addr2 + length2 < addr1
 
 type addr_map = m:(b8 -> ME.nat64){
-  (forall (buf1 buf2:b8).{:pattern (m buf1); (m buf2)} 
-    B.disjoint buf1 buf2 ==> 
+  (forall (buf1 buf2:b8).{:pattern (m buf1); (m buf2)}
+    B.disjoint buf1 buf2 ==>
     disjoint_addr (m buf1) (B.length buf1) (m buf2) (B.length buf2)) /\
   (forall (b:b8).{:pattern (m b)} m b + B.length b < MS.pow2_64)}
 
@@ -239,10 +244,11 @@ let arg_loc (x:arg) : GTot B.loc =
 
 [@__reduce__]
 let loc_args (args:list arg) : GTot B.loc =
-    B.loc_union_l (List.Tot.map_gtot arg_loc args)
+    let l = List.Tot.map_gtot arg_loc args in
+    List.Tot.fold_right_gtot l B.loc_union B.loc_none
 
 let all_live_cons (hd:arg) (tl:list arg) (h0:HS.mem)
-  : Lemma 
+  : Lemma
     (all_live h0 (hd :: tl) <==> (live_arg h0 hd /\ all_live h0 tl))
   = ()
 
@@ -255,8 +261,8 @@ let disjoint_or_eq_cons (hd:arg) (tl:list arg)
   = BigOps.pairwise_and'_cons disjoint_or_eq_1 hd tl
 
 let rec mem_roots_p_modifies_none (args:list arg) (h0:HS.mem) (h1:HS.mem)
-  : Lemma 
-    (requires 
+  : Lemma
+    (requires
       mem_roots_p h0 args /\
       B.modifies B.loc_none h0 h1)
     (ensures
@@ -275,8 +281,8 @@ let rec disjoint_or_eq_fresh
        (x:lowstar_buffer (ME.TBase t))
        (args:list arg)
        (h0:HS.mem)
-  : Lemma 
-    (requires 
+  : Lemma
+    (requires
       all_live h0 args /\
       x `B.unused_in` h0)
     (ensures

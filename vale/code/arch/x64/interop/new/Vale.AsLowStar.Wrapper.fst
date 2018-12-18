@@ -135,18 +135,19 @@ let prediction_post_rel
           (args:IX64.arity_ok arg)
    : IX64.prediction_post_rel_t code args
    = fun (h0:mem_roots args)
-       (s0:TS.traceState)
-       (push_h0:mem_roots args)
-       (alloc_push_h0:mem_roots args)
-       (sb:IX64.stack_buffer{mem_roots_p alloc_push_h0 (IX64.arg_of_b8 sb::args)})
+       (_s0:TS.traceState)
+       (_push_h0:mem_roots args)
+       (_alloc_push_h0:mem_roots args)
+       (_sb:IX64.stack_buffer)//{mem_roots_p alloc_push_h0 (IX64.arg_of_b8 _sb::args)})
        (fuel_mem:(nat & ME.mem))
-       (s1:TS.traceState) ->
+       (_s1:TS.traceState) ->
     let open Interop.Adapters in
-    let h1_pre_pop = hs_of_mem (snd fuel_mem) in
-    HS.poppable h1_pre_pop /\ (
-    let h1 = HS.pop h1_pre_pop in
-    mem_roots_p h1 args /\
-    LSig.(to_low_post post args h0 () h1))
+    exists h1_pre_pop.
+      h1_pre_pop == hs_of_mem (snd fuel_mem) /\
+      HS.poppable h1_pre_pop /\ (
+      exists h1. h1 == HS.pop h1_pre_pop /\
+        mem_roots_p h1 args /\
+        LSig.(to_low_post post args h0 () h1))
 
 let pop_is_popped (m:HS.mem{HS.poppable m})
   : Lemma (HS.popped m (HS.pop m))

@@ -20,6 +20,7 @@ val quad32_to_nat : ME.quad32 -> UInt.uint_t UInt128.n
 assume //TODO: UInt128
 val view128 : LowStar.BufferView.view UInt8.t UInt128.t
 
+[@__reduce__]
 let nat_to_uint (t:ME.base_typ) (x:ME.type_of_typ (ME.TBase t))
   : base_typ_as_type t
   = let open ME in
@@ -36,6 +37,7 @@ let nat_to_uint_seq_t
     : Seq.seq (base_typ_as_type t)
     = Seq.init (Seq.length b) (fun (i:nat{i < Seq.length b}) -> nat_to_uint t (Seq.index b i))
 
+[@__reduce__]
 let view_of_base_typ (t:ME.base_typ)
   : BV.view UInt8.t (base_typ_as_type t)
   = let open ME in
@@ -82,16 +84,7 @@ let rec mem_correspondence (args:list arg) : hsprop =
 
 [@__reduce__]
 let mk_vale_disjointness (args:list arg) : prop =
-  let rec aux (args:list arg) : GTot (list ME.loc) =
-    match args with
-    | [] -> []
-    | hd::tl ->
-      match hd with
-      | (| TD_Buffer bt, x |) ->
-        ME.loc_buffer (as_vale_buffer #(ME.TBase bt) x) :: aux tl
-      | _ -> aux tl
-  in
-  ME.locs_disjoint (aux args)
+  Interop.Mem.disjoint_or_eq_b8_l (Interop.Adapters.args_b8 args)
 
 [@__reduce__]
 let mk_readable (args:list arg) : sprop =
@@ -110,7 +103,7 @@ let mk_readable (args:list arg) : sprop =
       | _ ->
         aux tl out
   in
-  aux [] (fun h -> True)
+  aux args (fun h -> True)
 
 [@__reduce__]
 let rec register_args (n:nat)
@@ -120,7 +113,7 @@ let rec register_args (n:nat)
     | hd::tl ->
       fun s ->
         register_args (n - 1) tl s /\
-        VS.eval_reg (IX64.register_of_arg_i n) s == IX64.arg_as_nat64 hd
+        VS.eval_reg (IX64.register_of_arg_i (n - 1)) s == IX64.arg_as_nat64 hd
 
 [@__reduce__]
 let rec taint_hyp (args:list arg) : sprop =
