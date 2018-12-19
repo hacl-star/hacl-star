@@ -1,5 +1,7 @@
 all: compile verify extract test
 
+include Makefile.common
+
 # Old targets, backwards-compat:
 .PHONY: old-%
 old-%:
@@ -7,21 +9,10 @@ old-%:
 
 # 0. Paths and includes
 
-HACL_HOME ?= ..
-
-HASH_DIR=$(HACL_HOME)/code/hash
-
-ROOTS=$(addprefix $(HASH_DIR)/Hacl.Hash.,MD5.fst SHA1.fst SHA2.fst)
+ROOTS = $(wildcard $(addsuffix /*.fst,$(DIRS)))
 
 ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
 
-.PHONY: .depend
-.depend:
-	@$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
-
-include .depend
-
-include Makefile.common
 
 # 1. Top-level entry points for this Makefile
 
@@ -35,13 +26,13 @@ compile: compile-compact compile-generic compile-compact-msvc
 # Backwards compat
 extract: old-extract-c
 
+test: test-Test_SHA3 test-Test_CSHAKE
+
 clean: clean-c
 	find $(DIRS) -iname '*.checked' | xargs rm -rf
 
 clean-c: old-clean-c
 	rm -rf $(OUTPUT_DIR)
-
-test:
 
 # 2. Verification
 
@@ -60,14 +51,19 @@ $(OUTPUT_DIR)/%.krml:
 	touch $@
 
 COMPACT_FLAGS=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
-    -bundle Prims \
-    -bundle LowStar.* \
-    -bundle C,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
-    -minimal \
-    -add-include '"kremlin/internal/types.h"' \
-    -add-include '"kremlin/c_endianness.h"' \
-    -add-include '<string.h>' \
-    -fno-shadow -fcurly-braces
+  -bundle Hacl.Impl.SHA3,Hacl.SHA3=[rename=Hacl_SHA3] \
+  -bundle Prims \
+  -bundle LowStar.* \
+  -bundle C,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
+  -bundle Test.* \
+  -minimal \
+  -add-include '"kremlin/internal/types.h"' \
+  -add-include '"kremlin/c_endianness.h"' \
+  -add-include '<string.h>' \
+  -fno-shadow -fcurly-braces
+
+DEFAULT_FLAGS=\
+  -library Lib.PrintBuffer,Lib.RandomBuffer
 
 # For the time being, we rely on the old extraction to give us self-contained
 # files
@@ -86,16 +82,34 @@ dist/compact-msvc/Makefile.basic: EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 dist/%/Makefile.basic: $(ALL_KRML_FILES) | old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
-	$(KRML) $(EXTRA) -tmpdir $(dir $@) -skip-compilation \
+	cp $(wildcard $(LIB_DIR)/c/*.c) $(dir $@)
+	$(KRML) $(DEFAULT_FLAGS) $(EXTRA) \
+	  -tmpdir $(dir $@) -skip-compilation \
 	  -bundle Spec.*[rename=Hacl_Spec] $^ \
-	  -ccopts -Wno-unused-variable,-Wno-unused-but-set-variable \
-	  -ccopts -Wno-parentheses,-Wno-unused-parameter \
+	  -ccopt -Wno-unused \
 	  -warn-error @4 \
 	  -fparentheses \
 	  $(notdir $(HACL_OLD_FILES)) \
+	  $(notdir $(wildcard $(LIB_DIR)/c/*.c)) \
 	  -o libhacl.a
+
+dist/test/%.c: $(ALL_KRML_FILES)
+	$(KRML) $(DEFAULT_FLAGS) \
+	  -tmpdir $(dir $@) -skip-compilation \
+	  -no-prefix $(subst Test_,Test.,$*) \
+	  -library Hacl \
+	  -fparentheses -fcurly-braces -fno-shadow \
+	  -bundle '$(subst Test_,Test.)=*'
 
 # 4. Compilation
 
 compile-%: dist/%/Makefile.basic
 	$(MAKE) -C $(dir $<) -f $(notdir $<)
+
+dist/test/%.exe: dist/test/%.c compile-generic
+	# Linking with full kremlib since tests may use TestLib, etc.
+	$(CC) -Wall -Wextra -Werror $< -o $@ dist/generic/libhacl.a \
+	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+
+test-%: dist/test/%.exe
+	$@
