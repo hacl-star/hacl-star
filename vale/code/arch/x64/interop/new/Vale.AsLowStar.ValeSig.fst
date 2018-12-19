@@ -78,7 +78,9 @@ let arg_mloc (x:arg) : GTot ME.loc =
 let mloc_args (args:list arg) : GTot ME.loc =
     List.fold_right_gtot (List.map_gtot arg_mloc args) ME.loc_union ME.loc_none
 
-unfold
+let state_of (x:(V.va_state & V.va_fuel)) = fst x
+let fuel_of (x:(V.va_state & V.va_fuel)) = snd x
+[@__reduce__] unfold
 let vale_sig_nil (args:list arg)
                  (code:V.va_code)
                  (pre:vale_pre_tl [])
@@ -88,7 +90,9 @@ let vale_sig_nil (args:list arg)
     Ghost (V.va_state & V.va_fuel)
      (requires
        elim_nil pre va_s0 stack_b)
-     (ensures (fun (va_s1, f) ->
+     (ensures (fun r ->
+       let va_s1 = state_of r in
+       let f = fuel_of r in
        V.eval_code code va_s0 f va_s1 /\
        vale_calling_conventions va_s0 va_s1 /\
        elim_nil post va_s0 stack_b va_s1 f /\

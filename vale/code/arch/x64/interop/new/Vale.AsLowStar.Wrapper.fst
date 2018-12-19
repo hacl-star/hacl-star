@@ -138,7 +138,7 @@ let prediction_post_rel
        (_s0:TS.traceState)
        (_push_h0:mem_roots args)
        (_alloc_push_h0:mem_roots args)
-       (_sb:IX64.stack_buffer)//{mem_roots_p alloc_push_h0 (IX64.arg_of_b8 _sb::args)})
+       (_sb:IX64.stack_buffer)
        (fuel_mem:(nat & ME.mem))
        (_s1:TS.traceState) ->
     let open Interop.Adapters in
