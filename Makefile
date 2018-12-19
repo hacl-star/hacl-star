@@ -23,9 +23,9 @@ all: secure_api.build secure_api/merkle_tree.build \
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
-test: providers.test secure_api/merkle_tree.test \
-  $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
-  $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
+test: providers.test secure_api/merkle_tree.test test-c test-ml
+test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst))))
+test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci: all test
 
@@ -43,7 +43,7 @@ include Makefile.common
 
 ifndef MAKE_RESTARTS
 .depend: .FORCE
-	@$(FSTAR_NO_FLAGS) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
+	@$(FSTAR_NO_FLAGS) --dep full $(ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
 .PHONY: .FORCE
 .FORCE:
@@ -85,13 +85,15 @@ COMPACT_FLAGS=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.
   -bundle Test.* \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
+  -add-include '"kremlin/internal/target.h"' \
   -add-include '"kremlin/c_endianness.h"' \
   -add-include '<string.h>' \
   -fno-shadow -fcurly-braces
 
 HAND_WRITTEN_C	= Lib.PrintBuffer Lib.RandomBuffer
+HAND_WRITTEN_FILES = $(wildcard $(LIB_DIR)/c/*.c)
 DEFAULT_FLAGS	= $(addprefix -library ,$(HAND_WRITTEN_C)) \
-  -bundle Lib.*[rename=Hacl_Lib]
+  -bundle Lib.*[rename=Hacl_Lib] -bundle Hacl.Test.*
 
 # For the time being, we rely on the old extraction to give us self-contained
 # files
@@ -112,40 +114,43 @@ dist/compact/Makefile.basic: EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
-dist/%/Makefile.basic: $(ALL_KRML_FILES) | old-extract-c dist/headers
+.PRECIOUS: dist/%/Makefile.basic
+dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/headers/Makefile.basic $(HAND_WRITTEN_FILES) | old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
-	cp $(wildcard $(LIB_DIR)/c/*.c) $(dir $@)
-	cp $(wildcard dist/headers/*.h) $(dir $@)
+	cp $(HAND_WRITTEN_FILES) dist/headers/*.h $(dir $@)
 	$(KRML) $(DEFAULT_FLAGS) $(EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \
-	  -bundle Spec.*[rename=Hacl_Spec] $^ \
+	  -bundle Spec.*[rename=Hacl_Spec] $(filter %.krml,$^) \
 	  -ccopt -Wno-unused \
 	  -warn-error @4 \
 	  -fparentheses \
 	  $(notdir $(HACL_OLD_FILES)) \
-	  $(notdir $(wildcard $(LIB_DIR)/c/*.c)) \
+	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libhacl.a
 
 # Auto-generates headers for the hand-written C files. If a signature changes on
 # the F* side, hopefully this will ensure the C file breaks. Note that there's
 # no conflict between the headers because this generates
 # Lib_Foobar while the run above generates a single Hacl_Lib.
-dist/headers: $(ALL_KRML_FILES)
+dist/headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) \
-	  -tmpdir $@ -skip-compilation \
+	  -tmpdir $(dir $@) -skip-compilation \
 	  $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
 	  $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
+	  -minimal -add-include '"kremlib.h"' \
 	  -bundle '\*,WindowsBug' $^
 
 # Auto-generates a single C test file.
+.PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
-	$(KRML) $(DEFAULT_FLAGS) \
+	$(KRML) \
 	  -tmpdir $(dir $@) -skip-compilation \
-	  -no-prefix $(subst Test_,Test.,$*) \
-	  -library Hacl \
+	  -no-prefix $(subst _,.,$*) \
+	  -library Hacl,Lib \
 	  -fparentheses -fcurly-braces -fno-shadow \
-	  -bundle '$(subst Test_,Test.)=*' $^
+	  -minimal -add-include '"kremlib.h"' \
+	  -bundle '*[rename=$*]' $^
 
 # 4. Compilation (recursive make invocation relying on KreMLin-generated Makefile)
 
@@ -154,13 +159,15 @@ compile-%: dist/%/Makefile.basic
 
 # 5. C tests
 
+.PRECIOUS: dist/test/c/%.exe
 dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
-	$(CC) -Wall -Wextra -Werror $< -o $@ dist/generic/libhacl.a \
+	$(CC) -Wall -Wextra -Werror -Wno-unused-parameter $< -o $@ dist/generic/libhacl.a \
+	  -I $(dir $@) -I $(KREMLIN_HOME)/include \
 	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
 test-c-%: dist/test/c/%.exe
-	$@
+	$<
 
 # 5. OCaml tests, for specs
 
@@ -168,8 +175,6 @@ include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
 TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 
-# Can't be super subtle here... because the F* dependency analysis doesn't give
-# us a way to name the cmx dependencies of a given module
 ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
 
 OCAMLOPT += -I $(OUTPUT_DIR)
@@ -180,11 +185,15 @@ OCAMLOPT += -I $(OUTPUT_DIR)
 $(OUTPUT_DIR)/%.ml:
 	$(FSTAR) $(subst .checked,,$<) --codegen OCaml --extract_module $(subst .fst.checked,,$(notdir $<))
 
+.PRECIOUS: dist/test/ml/%_AutoTest.ml
 dist/test/ml/%_AutoTest.ml:
+	mkdir -p $(dir $@)
 	echo "if not ($*.test ()) then (print_endline \"$* failed\"; exit 1)" > $@
 
-dist/test/ml/%.exe: $(filter Spec_%,$(ALL_CMX_FILES)) dist/test/ml/%_AutoTest.ml
+# Relying on the --extract argument of fstar --dep to have a reasonable
+# over-approximation.
+dist/test/ml/%.exe: $(ALL_CMX_FILES) dist/test/ml/%_AutoTest.ml
 	$(OCAMLOPT) $^ -o $@
 
 test-ml-%: dist/test/ml/%.exe
-	$@
+	$<

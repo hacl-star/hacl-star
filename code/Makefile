@@ -112,4 +112,4 @@ dist/test/%.exe: dist/test/%.c compile-generic
 	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
 test-%: dist/test/%.exe
-	$@
+	$<

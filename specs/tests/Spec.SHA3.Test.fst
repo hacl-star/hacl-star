@@ -283,5 +283,5 @@ let test () =
   let res_shake256 = res_shake256_1 && res_shake256_2 && res_shake256_3 && res_shake256_4 in
 
   let result = res_sha3 && res_shake128 in
-  if result then IO.print_string "\n\nSHA3 : Success!\n"
-  else IO.print_string "\n\nSHA3: Failure :(\n"
+  if result then begin IO.print_string "\n\nSHA3 : Success!\n"; true end
+  else begin IO.print_string "\n\nSHA3: Failure :(\n"; false end

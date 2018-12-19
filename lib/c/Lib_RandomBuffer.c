@@ -54,7 +54,7 @@ bool read_random_bytes(uint32_t len, uint8_t * buf) {
   bool pass = true;
   uint64_t res = read(fd, buf, (uint64_t)len);
   if (res != (uint64_t)len) {
-    printf("Error on reading, expected %" PRIu64 " bytes, got %" PRIu64 " bytes\n", len, res);
+    printf("Error on reading, expected %" PRIu32 " bytes, got %" PRIu64 " bytes\n", len, res);
     pass = false;
   }
   close(fd);

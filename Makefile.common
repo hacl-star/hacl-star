@@ -7,8 +7,8 @@ FSTAR_HOME	?= $(HACL_HOME)/../FStar
 
 LIB_DIR		= $(HACL_HOME)/lib
 SPECS_DIR 	= $(HACL_HOME)/specs
-CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash sha3)
-DIRS		= $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS)
+CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash sha3 tests)
+DIRS		= $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(SPECS_DIR)/tests
 
 INCLUDES = \
   $(DIRS) \
@@ -20,13 +20,13 @@ OUTPUT_DIR = .extracted
 
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
-FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
+FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints --use_hint_hashes \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'FStar LowStar C'
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 
-%.fst-in:
+%.fst-in %.fsti-in:
 	@echo $(FSTAR_INCLUDES)
 
 # 2. Kremlin
