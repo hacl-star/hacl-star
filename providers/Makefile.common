@@ -80,7 +80,8 @@ FSTAR_INCLUDES = \
   $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/sha \
   $(HACL_HOME)/vale/obj/code/thirdPartyPorts/rfc7748/curve25519/x64 \
   $(HACL_HOME)/vale/obj/code/test \
-  $(HACL_SPEC)
+  $(HACL_SPEC) \
+  $(HACL_SPEC)/old
 
 VALE_CACHE_DIR=$(VALE_OBJ_DIR)/cache_checked
 
