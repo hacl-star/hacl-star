@@ -32,9 +32,9 @@ let test () =
   assert_norm(List.Tot.length k        = 32);
   assert_norm(List.Tot.length expected = 16);
   let msg      : lseq uint8 34  = of_list #uint8 msg in
-  let k        : lseq uint8 keysize  = of_list #uint8 k   in
-  let expected : lseq uint8 blocksize = of_list #uint8 expected in
-  let mac      : lseq uint8 blocksize = poly1305 msg k in
+  let k        : lseq uint8 size_key  = of_list #uint8 k   in
+  let expected : lseq uint8 size_block = of_list #uint8 expected in
+  let mac      : lseq uint8 size_block = poly1305 msg k in
   let result : bool = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac expected in
   IO.print_string   "Expected MAC:";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected);

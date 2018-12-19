@@ -107,7 +107,8 @@ val load_felem:
     (requires fun h -> live h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      felem_fits h1 f (1, 1, 1, 1, 1))
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
+      fevalh h1 f == v hi * pow2 64 + v lo)
 let load_felem f lo hi =
   f.(0ul) <- (to_u32 lo) &. mask26;
   f.(1ul) <- (to_u32 (lo >>. 26ul)) &. mask26;
@@ -119,11 +120,14 @@ inline_for_extraction
 val store_felem:
     f:felem
   -> Stack (uint64 & uint64)
-    (requires fun h -> live h f /\ felem_fits h f (1, 1, 1, 1, 1))
-    (ensures  fun h0 r h1 -> h0 == h1)
+    (requires fun h ->
+      live h f /\ felem_fits h f (1, 1, 1, 1, 1))
+    (ensures  fun h0 (lo, hi) h1 ->
+      h0 == h1 /\ v hi * pow2 64 + v lo == fevalh h0 f)
 let store_felem f =
   let f0 = to_u64 f.(0ul) |. ((to_u64 f.(1ul)) <<. 26ul) |. ((to_u64 f.(2ul)) <<. 52ul) in
   let f1 = ((to_u64 f.(2ul)) >>. 12ul) |. ((to_u64 f.(3ul)) <<. 14ul) |. ((to_u64 f.(4ul)) <<. 40ul) in
+  admit();
   (f0, f1)
 
 inline_for_extraction
@@ -178,6 +182,8 @@ let copy_felem f1 f2 =
   f1.(2ul) <- f22;
   f1.(3ul) <- f23;
   f1.(4ul) <- f24
+
+#set-options "--max_fuel 0"
 
 inline_for_extraction
 val load_precompute_r:
@@ -377,10 +383,21 @@ val fmul_rn:
   -> f1:felem
   -> p:precomp_r
   -> Stack unit
-    (requires fun h -> live h out /\ live h f1 /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (requires fun h ->
+      live h out /\ live h f1 /\ live h p /\
+      felem_fits h f1 (2, 3, 2, 2, 2) /\
+     (let r = gsub p 0ul 5ul in
+      let r5 = gsub p 5ul 5ul in
+      felem_fits h r (1, 1, 1, 1, 1) /\
+      felem_fits h r5 (5, 5, 5, 5, 5) /\
+      as_felem h r5 == precomp_r5 (as_felem h r)))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      acc_inv_t (as_felem h1 out) /\
+     (let r = gsub p 0ul 5ul in
+      let r5 = gsub p 5ul 5ul in
+      fevalh h1 out == P.fmul (fevalh h0 f1) (fevalh h0 r)))
 let fmul_rn out f1 p =
-  admit();
   fmul_r out f1 p
 
 inline_for_extraction
@@ -388,17 +405,29 @@ val fmul_rn_normalize:
     out:felem
   -> p:precomp_r
   -> Stack unit
-    (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (requires fun h ->
+      live h out /\ live h p /\
+      felem_fits h out (2, 3, 2, 2, 2) /\
+     (let r = gsub p 0ul 5ul in
+      let r5 = gsub p 5ul 5ul in
+      felem_fits h r (1, 1, 1, 1, 1) /\
+      felem_fits h r5 (5, 5, 5, 5, 5) /\
+      as_felem h r5 == precomp_r5 (as_felem h r)))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      acc_inv_t (as_felem h1 out) /\
+     (let r = gsub p 0ul 5ul in
+      let r5 = gsub p 5ul 5ul in
+      fevalh h1 out == P.fmul (fevalh h0 out) (fevalh h0 r)))
 let fmul_rn_normalize out p =
-  admit();
   fmul_r out out p
 
 inline_for_extraction
 val reduce_felem:
     f:felem
   -> Stack unit
-    (requires fun h -> live h f /\ acc_inv_t (as_felem h f))
+    (requires fun h ->
+      live h f /\ acc_inv_t (as_felem h f))
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       as_nat h1 f == fevalh h0 f)
@@ -464,11 +493,12 @@ let carry_felem f =
   let f2 = f.(2ul) in
   let f3 = f.(3ul) in
   let f4 = f.(4ul) in
-  let tmp0,carry = carry26 f0 (u32 0) in
-  let tmp1,carry = carry26 f1 carry in
-  let tmp2,carry = carry26 f2 carry in
-  let tmp3,carry = carry26 f3 carry in
-  let tmp4 = f4 +. carry in admit();
+  let tmp0, c0 = carry26 f0 (u32 0) in
+  let tmp1, c1 = carry26 f1 c0 in
+  let tmp2, c2 = carry26 f2 c1 in
+  let tmp3, c3 = carry26 f3 c2 in
+  let tmp4 = f4 +. c3 in
+  admit();
   f.(0ul) <- tmp0;
   f.(1ul) <- tmp1;
   f.(2ul) <- tmp2;
