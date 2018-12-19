@@ -131,6 +131,10 @@ let lowstar_memcpy : lowstar_memcpy_t  =
    That said, here's what you get by computing `normal lowstar_memcpy_t`,
    slightly rewritten to give distinct names (x0, x1) to the two arguments
 
+   Can we prove that the va_pre implication in the precondition is satisfied?
+
+   Can we prove that the va_post in the ensures clause yields what one
+   would hope for an ensures clause for memcpy in Low*?
 
 x0: (b: b8{LowStar.Monotonic.Buffer.length b % 8 == 0} <: Type0) ->
   Prims.Tot
