@@ -4,7 +4,7 @@ HACL_HOME ?= ..
 
 OUTPUT_DIR = extracted
 
-INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/old/lib/kremlin old
+INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/old/lib/kremlin old tests
 
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
@@ -12,21 +12,14 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'FStar LowStar C Spec.Loops -FStar.Endianness'
 
-# TODO: move the specification tests to their own files so that we don't pollute
-# the specs with huge definitions in the scope
-#
 # NOTE: we assume every single one of these files defines a function named test,
-# of type unit -> bool -- this Makefile will auto-generate test drivers  based
+# of type unit -> bool -- this Makefile will auto-generate test drivers based
 # on that assumption
-ROOTS=$(wildcard old/*.fst) $(wildcard Spec.*.Test.fst)
+TEST_ROOTS=$(wildcard tests/*.fst)
 
-OTHER_ROOTS=$(wildcard *.fst) $(HACL_HOME)/code/old/lib/kremlin/FStar.Endianness.fst
+OTHER_ROOTS=$(wildcard old/*.fst) $(wildcard *.fst) $(HACL_HOME)/code/old/lib/kremlin/FStar.Endianness.fst
 
-# TODO: decide what to do with the following (excluded) specs:
-#  Spec.HMAC.SHA2_256.fst Spec.HMAC.SHA2_384.fst Spec.HMAC.SHA2_512.fst
-
-
-ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS) $(OTHER_ROOTS))
+ALL_CHECKED_FILES = $(addsuffix .checked,$(TEST_ROOTS) $(OTHER_ROOTS))
 
 all: verify
 
@@ -34,7 +27,7 @@ verify: $(ALL_CHECKED_FILES)
 
 # Always generate the dependency file
 .depend:
-	$(FSTAR) --dep full $(ROOTS) $(OTHER_ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
+	$(FSTAR) --dep full $(TEST_ROOTS) $(OTHER_ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
 include .depend
 
@@ -53,7 +46,7 @@ $(OUTPUT_DIR)/%_AutoTest.ml:
 $(OUTPUT_DIR)/%.ml:
 	$(FSTAR) $(subst .checked,,$<) --codegen OCaml --extract_module $(subst .fst.checked,,$(notdir $<))
 
-test: $(subst .,_,$(patsubst %.fst,test-%,$(ROOTS)))
+test: $(subst .,_,$(patsubst %.fst,test-%,$(notdir $(TEST_ROOTS))))
 
 test-%: $(OUTPUT_DIR)/%_AutoTest.exe
 	$<

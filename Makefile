@@ -6,8 +6,8 @@
 #                merkle_tree
 #                |
 #   secure_api   evercrypt
-#            \  /  \
-#            code  vale
+#          \    /  \
+#        lib+code  vale
 #               \  /
 #               specs
 
