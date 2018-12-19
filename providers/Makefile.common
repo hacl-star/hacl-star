@@ -45,15 +45,15 @@ FSTAR_INCLUDES = \
   $(HACL_HOME)/providers/evercrypt \
   $(HACL_HOME)/providers/evercrypt/fst \
   $(HACL_HOME)/providers/evercrypt/config/$(CONFIG) \
-  $(HACL_CODE)/lib/kremlin \
-  $(HACL_CODE)/experimental/aesgcm \
-  $(HACL_CODE)/curve25519/interfaces \
-  $(HACL_CODE)/hash-new \
-  $(HACL_CODE)/api/interfaces \
-  $(HACL_CODE)/api \
-  $(HACL_CODE)/salsa-family \
-  $(HACL_CODE)/poly1305 \
-  $(HACL_CODE)/bignum \
+  $(HACL_CODE)/hash \
+  $(HACL_CODE)/old/lib/kremlin \
+  $(HACL_CODE)/old/experimental/aesgcm \
+  $(HACL_CODE)/old/curve25519/interfaces \
+  $(HACL_CODE)/old/api/interfaces \
+  $(HACL_CODE)/old/api \
+  $(HACL_CODE)/old/salsa-family \
+  $(HACL_CODE)/old/poly1305 \
+  $(HACL_CODE)/old/bignum \
   $(HACL_HOME)/vale/code/lib/math \
   $(HACL_HOME)/vale/code/lib/util \
   $(HACL_HOME)/vale/code/lib/collections \

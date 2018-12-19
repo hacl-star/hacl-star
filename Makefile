@@ -29,9 +29,11 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 
 ci: all test
 
+.PHONY: %.test
 %.test: %.build
 	$(MAKE) -C $* test
 
+.PHONY: %.build
 %.build:
 	$(MAKE) -C $*
 
@@ -81,7 +83,7 @@ COMPACT_FLAGS=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
   -bundle Prims \
   -bundle LowStar.* \
-  -bundle C,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
+  -bundle C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle Test.* \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
