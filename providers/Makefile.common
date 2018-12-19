@@ -1,9 +1,9 @@
 # This makefile can be safely included from a subdirectory for the purposes of
 # exposing the %.fst-in target
-FSTAR_HOME	?= ../../FStar
-KREMLIN_HOME	?= ../../kremlin
 HACL_HOME	?= ..
-MLCRYPTO_HOME	?= ../../MLCrypto
+FSTAR_HOME	?= $(HACL_HOME)/../FStar
+KREMLIN_HOME	?= $(HACL_HOME)/../kremlin
+MLCRYPTO_HOME	?= $(HACL_HOME)/../MLCrypto
 OPENSSL_HOME	?= $(MLCRYPTO_HOME)/openssl
 
 # The noopenssl config no means: enable bcrypt + disable openssl
@@ -54,18 +54,40 @@ FSTAR_INCLUDES = \
   $(HACL_CODE)/salsa-family \
   $(HACL_CODE)/poly1305 \
   $(HACL_CODE)/bignum \
-  $(HACL_HOME)/vale/code/arch/x64/interop/fsti \
-  $(HACL_HOME)/vale/code/arch/x64 \
-  $(HACL_HOME)/vale/specs/defs \
-  $(HACL_HOME)/vale/specs/hardware \
-  $(HACL_HOME)/vale/code/crypto/sha \
-  $(HACL_HOME)/vale/code/arch \
-  $(HACL_HOME)/vale/code/lib/collections \
+  $(HACL_HOME)/vale/code/lib/math \
   $(HACL_HOME)/vale/code/lib/util \
-  $(HACL_HOME)/vale/specs/crypto \
+  $(HACL_HOME)/vale/code/lib/collections \
+  $(HACL_HOME)/vale/code/arch/x64/interop \
+  $(HACL_HOME)/vale/code/arch/x64 \
+  $(HACL_HOME)/vale/code/arch \
+  $(HACL_HOME)/vale/code/crypto/poly1305/x64 \
+  $(HACL_HOME)/vale/code/crypto/aes \
+  $(HACL_HOME)/vale/code/crypto/sha \
+  $(HACL_HOME)/vale/code/crypto/ecc/curve25519 \
   $(HACL_HOME)/vale/specs/math \
-  $(HACL_HOME)/vale/obj/cache_checked \
+  $(HACL_HOME)/vale/specs/defs \
+  $(HACL_HOME)/vale/specs/crypto \
+  $(HACL_HOME)/vale/specs/hardware \
+  $(HACL_HOME)/vale/obj/external \
+  $(HACL_HOME)/vale/obj/code/lib/util/x64/stdcalls \
+  $(HACL_HOME)/vale/obj/code/lib/util/x64 \
+  $(HACL_HOME)/vale/obj/code/lib/util \
+  $(HACL_HOME)/vale/obj/code/arch/x64 \
+  $(HACL_HOME)/vale/obj/code/crypto/aes/x64/stdcalls \
+  $(HACL_HOME)/vale/obj/code/crypto/aes/x64 \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/Intel/aes/x64 \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/poly1305/x64 \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/sha \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/rfc7748/curve25519/x64 \
+  $(HACL_HOME)/vale/obj/code/test \
   $(HACL_SPEC)
+
+VALE_CACHE_DIR=$(VALE_OBJ_DIR)/cache_checked
+
+# Still be cool with a not-built Vale in interactive mode
+ifneq (,$(wildcard $(VALE_CACHE_DIR)))
+  FSTAR_INCLUDES += $(VALE_CACHE_DIR)
+endif
 
 %.fst-in %.fsti-in:
 	@echo $(addprefix --include ,$(FSTAR_INCLUDES))

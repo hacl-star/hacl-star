@@ -32,8 +32,9 @@ open EverCrypt.Helpers
    we tolerate overlaps between tag and data.
    (we used to require [disjoint data tag])
 *)
-val compute:
-  a: ha ->
+
+inline_for_extraction
+let compute_st (a: ha) =
   tag: uint8_pl (size_hash a) ->
   key: uint8_p{ keysized a (length key) /\ disjoint key tag } ->
   keylen: UInt32.t{ UInt32.v keylen = length key } ->
@@ -48,5 +49,14 @@ val compute:
     LowStar.Modifies.(modifies (loc_buffer tag) h0 h1) /\
     length data + size_block a < max_input8 a /\ (* required for subtyping the RHS below *)
     as_seq h1 tag == hmac a (as_seq h0 key) (as_seq h0 data))
+
+// Four monomorphized variants, for callers who already know which algorithm they want.
+val compute_sha1: compute_st SHA1
+val compute_sha2_256: compute_st SHA2_256
+val compute_sha2_384: compute_st SHA2_384
+val compute_sha2_512: compute_st SHA2_512
+
+// The agile version that dynamically dispatches between the above four.
+val compute: a: ha -> compute_st a
 
 //18-07-13 pick uniform names? hash{spec} vs compute{hmac}

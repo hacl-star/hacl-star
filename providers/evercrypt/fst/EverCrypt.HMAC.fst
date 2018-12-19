@@ -11,6 +11,9 @@ open FStar.Integers
 let _: squash (inversion alg) = allow_inversion alg
 
 #set-options "--max_fuel 0 --max_ifuel 0"
+
+open LowStar.Modifies.Linear
+
 let wrap (a:alg) (key: bytes{S.length key < max_input8 a}): GTot (lbytes (size_block a))
 =
   let key0 = if S.length key <= size_block a then key else spec a key in
@@ -63,7 +66,7 @@ module ST = FStar.HyperStack.ST
 
 // we rely on the output being zero-initialized for the correctness of padding
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 inline_for_extraction
 val wrap_key:
@@ -79,7 +82,7 @@ val wrap_key:
       live h1 output /\ live h1 key /\ live h0 output /\ live h0 key /\
       as_seq h0 output == Seq.create (size_block a) 0uy /\
       modifies (loc_buffer output) h0 h1 /\
-      as_seq h1 output == wrap a (as_seq h0 key) )
+      as_seq h1 output == wrap a (as_seq h0 key))
 
 unfold
 let block_len a = Hacl.Hash.Definitions.size_block_ul a
@@ -144,6 +147,7 @@ val part1:
       live h1 s2 /\ live h1 data /\
       invariant acc h1 /\
       footprint acc h1 == footprint acc h0 /\ //18-08-02 avoidable? this footprint is constant!
+      preserves_freeable acc h0 h1 /\
       modifies (loc_union (footprint acc h0) (loc_buffer s2)) h0 h1 /\
       (
       let hash0 = Seq.slice (as_seq h1 s2) 0 (size_hash a) in
@@ -153,7 +157,9 @@ val part1:
 let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
   compress_many (acc0 #a) b
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+
+open LowStar.Modifies.Linear
 
 // we use auxiliary functions only for clarity and proof modularity
 inline_for_extraction
@@ -251,6 +257,7 @@ val part2:
     (ensures fun h0 _ h1 ->
       live h1 mac /\ live h1 opad /\ live h1 tag /\
       invariant acc h1 /\ footprint acc h1 == footprint acc h0 /\
+      preserves_freeable acc h0 h1 /\
       modifies (loc_union (footprint acc h0) (loc_buffer mac)) h0 h1 /\
       ( let payload = Seq.append (as_seq h0 opad) (as_seq h0 tag) in
         Seq.length payload < max_input8 a /\
@@ -321,6 +328,7 @@ val hmac_core:
     live h1 tag /\ live h0 tag /\
     live h1 key /\ live h0 key /\
     live h1 data /\ live h0 data /\
+    preserves_freeable acc h0 h1 /\
     modifies (loc_union (footprint acc h0) (loc_buffer tag)) h0 h1 /\
     ( let k = as_seq h0 key in
       let k1 = xor 0x36uy k in
@@ -427,7 +435,11 @@ let hmac_core a acc tag key data len =
   )
 
 
-let compute a mac key keylen data datalen =
+inline_for_extraction noextract
+val mk_compute: a: ha -> compute_st a
+
+inline_for_extraction noextract
+let mk_compute a mac key keylen data datalen =
   let h00 = ST.get() in
   push_frame ();
   assert (size_block a <= 128);
@@ -436,7 +448,7 @@ let compute a mac key keylen data datalen =
   assert(pow2 32 + size_block a < max_input8 a);
   assert(length data + size_block a <= max_input8 a);
   let keyblock = alloca 0x00uy (block_len a) in
-  let acc = Hash.create a in
+  let acc = Hash.alloca a in
   let h0 = ST.get() in
   wrap_key a keyblock key keylen;
   let h1 = ST.get() in
@@ -444,58 +456,20 @@ let compute a mac key keylen data datalen =
   Hash.frame_invariant_implies_footprint_preservation (loc_buffer keyblock) acc h0 h1;
   hmac_core a acc mac keyblock data datalen;
   let h2 = ST.get() in
-  Hash.free #(Ghost.hide a) acc;
   pop_frame ();
   let hf = ST.get () in
   // TR: modifies clause proven by erasing all memory locations that
   // were unused in h00:
   LowStar.Buffer.modifies_only_not_unused_in (loc_buffer mac) h00 hf
 
-
-
-
-
-(* 18-08-02 older stuff. Was:
-// not much point in separating hmac_core? verbose, but it helps
-// monomorphise stack allocations.
+let compute_sha1: compute_st SHA1 = mk_compute SHA1
+let compute_sha2_256: compute_st SHA2_256 = mk_compute SHA2_256
+let compute_sha2_384: compute_st SHA2_384 = mk_compute SHA2_384
+let compute_sha2_512: compute_st SHA2_512 = mk_compute SHA2_512
 
 let compute a mac key keylen data datalen =
-  push_frame ();
-  assert_norm(pow2 32 <= max_input8 a);
-  let keyblock = Buffer.create 0x00uy (block_len a) in
-  wrap_key a keyblock key keylen;
-  ( match a with
-  | SHA256 ->
-      push_frame();
-      // 18-04-15 hardcoding the type to prevent extraction errors :(
-      let acc = Buffer.create #UInt32.t (state_zero a) (state_size a) in
-      hmac_core SHA256 acc mac keyblock data datalen;
-      pop_frame()
-  | SHA384 ->
-      push_frame();
-      let acc = Buffer.create #UInt64.t (state_zero a) (state_size a) in
-      hmac_core SHA384 acc mac keyblock data datalen;
-      pop_frame()
-  | SHA512 ->
-      push_frame();
-      let acc = Buffer.create #UInt64.t (state_zero a) (state_size a) in
-      hmac_core SHA512 acc mac keyblock data datalen;
-      pop_frame());
-  pop_frame ()
-
-// 18-04-11 this alternative is leaky and does not typecheck.
-// I get an error pointing to `sub_effect DIV ~> GST = lift_div_gst` in HyperStack
-
-let compute a mac key keylen data datalen =
-  push_frame ();
-  let keyblock = Buffer.create 0x00uy (block_len a) in
-  assert_norm(pow2 32 <= max_input8 a);
-  wrap_key a keyblock key keylen;
-  let acc =
-    match a with
-    | SHA256 -> Buffer.rcreate HyperStack.root 0ul (state_size a)
-    | SHA384 -> Buffer.rcreate HyperStack.root 0UL (state_size a)
-    | SHA512 -> Buffer.rcreate HyperStack.root 0UL (state_size a) in
-  hmac_core SHA256 acc mac keyblock data datalen;
-  pop_frame ()
-*)
+  match a with
+  | SHA1 -> compute_sha1 mac key keylen data datalen
+  | SHA2_256 -> compute_sha2_256 mac key keylen data datalen
+  | SHA2_384 -> compute_sha2_384 mac key keylen data datalen
+  | SHA2_512 -> compute_sha2_512 mac key keylen data datalen

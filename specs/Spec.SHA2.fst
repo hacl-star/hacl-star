@@ -166,20 +166,23 @@ unfold
 let (.[]) = S.index
 
 (* Scheduling function *)
-let rec ws (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
+let rec ws_aux (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
   if t < size_block_w then b.[t]
   else
-    let t16 = ws a b (t - 16) in
-    let t15 = ws a b (t - 15) in
-    let t7  = ws a b (t - 7) in
-    let t2  = ws a b (t - 2) in
+    let t16 = ws_aux a b (t - 16) in
+    let t15 = ws_aux a b (t - 15) in
+    let t7  = ws_aux a b (t - 7) in
+    let t2  = ws_aux a b (t - 2) in
 
     let s1 = _sigma1 a t2 in
     let s0 = _sigma0 a t15 in
     (word_add_mod a s1 (word_add_mod a t7 (word_add_mod a s0 t16)))
 
+[@"opaque_to_smt"]
+let ws = ws_aux
+
 (* Core shuffling function *)
-let shuffle_core (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}): Tot (hash_w a) =
+let shuffle_core_aux (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}): Tot (hash_w a) =
   (**) assert(7 <= S.length hash);
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -199,21 +202,26 @@ let shuffle_core (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < s
   assert_norm (List.Tot.length l = 8);
   S.seq_of_list l
 
+[@"opaque_to_smt"]
+let shuffle_core = shuffle_core_aux
 
 (* Full shuffling function *)
-let shuffle (a:sha2_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
+let shuffle_aux (a:sha2_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
   Spec.Loops.repeat_range 0 (size_k_w a) (shuffle_core a block) hash
+
+[@"opaque_to_smt"]
+let shuffle = shuffle_aux
 
 let init = h0
 
 (* Compression function *)
-let update (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block a}): Tot (hash_w a) =
+let update_aux (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block a}): Tot (hash_w a) =
   let block_w = words_of_bytes a size_block_w block in
   let hash_1 = shuffle a hash block_w in
   Spec.Loops.seq_map2 (word_add_mod a) hash hash_1
 
-
-#set-options "--max_fuel 0 --max_ifuel 0"
+[@"opaque_to_smt"]
+let update = update_aux
 
 let pad = Spec.Hash.Common.pad
 

@@ -132,12 +132,15 @@ let rotl (x:U32.t) (n_ : rotate_idx): Tot U32.t =
 
 let (<<<) = rotl
 
-let round_op_gen (f: (U32.t -> U32.t -> U32.t -> Tot U32.t)) (abcd: abcd_t) (x: x_t) (a b c d: abcd_idx) (k: x_idx) (s: rotate_idx) (i: t_idx) : Tot abcd_t =
+let round_op_gen_aux (f: (U32.t -> U32.t -> U32.t -> Tot U32.t)) (abcd: abcd_t) (x: x_t) (a b c d: abcd_idx) (k: x_idx) (s: rotate_idx) (i: t_idx) : Tot abcd_t =
   let va = Seq.index abcd a in
   let vb = Seq.index abcd b in
   let vc = Seq.index abcd c in
   let vd = Seq.index abcd d in
   Seq.upd abcd a (vb `U32.add_mod` ((va `U32.add_mod` f vb vc vd `U32.add_mod` Seq.index x k `U32.add_mod` Seq.index t (i - 1)) <<< s))
+
+[@"opaque_to_smt"]
+let round_op_gen = round_op_gen_aux
 
 (* Round 1 *)
 
@@ -148,7 +151,7 @@ let ib : abcd_idx = 1
 let ic : abcd_idx = 2
 let id : abcd_idx = 3
 
-let round1 (abcd: abcd_t) (x: x_t) : Tot abcd_t =
+let round1_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
   let abcd = round1_op abcd x ia ib ic id  0  7ul  1 in
   let abcd = round1_op abcd x id ia ib ic  1 12ul  2 in
   let abcd = round1_op abcd x ic id ia ib  2 17ul  3 in
@@ -171,9 +174,12 @@ let round1 (abcd: abcd_t) (x: x_t) : Tot abcd_t =
      
   abcd
 
+[@"opaque_to_smt"]
+let round1 = round1_aux
+
 let round2_op = round_op_gen g
 
-let round2 (abcd: abcd_t) (x: x_t) : Tot abcd_t =
+let round2_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
   let abcd = round2_op abcd x ia ib ic id 1 5ul 17 in
   let abcd = round2_op abcd x id ia ib ic 6 9ul 18 in
   let abcd = round2_op abcd x ic id ia ib 11 14ul 19 in
@@ -196,9 +202,12 @@ let round2 (abcd: abcd_t) (x: x_t) : Tot abcd_t =
 
   abcd
 
+[@"opaque_to_smt"]
+let round2 = round2_aux
+
 let round3_op = round_op_gen h
 
-let round3 (abcd: abcd_t) (x: x_t) : Tot abcd_t =
+let round3_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
   let abcd = round3_op abcd x ia ib ic id 5 4ul 33 in
   let abcd = round3_op abcd x id ia ib ic 8 11ul 34 in
   let abcd = round3_op abcd x ic id ia ib 11 16ul 35 in
@@ -221,9 +230,12 @@ let round3 (abcd: abcd_t) (x: x_t) : Tot abcd_t =
 
   abcd
 
+[@"opaque_to_smt"]
+let round3 = round3_aux
+
 let round4_op = round_op_gen i
 
-let round4 (abcd: abcd_t) (x: x_t) : Tot abcd_t =
+let round4_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
   let abcd = round4_op abcd x ia ib ic id 0 6ul 49 in
   let abcd = round4_op abcd x id ia ib ic 7 10ul 50 in
   let abcd = round4_op abcd x ic id ia ib 14 15ul 51 in
@@ -246,23 +258,32 @@ let round4 (abcd: abcd_t) (x: x_t) : Tot abcd_t =
 
   abcd
 
+[@"opaque_to_smt"]
+let round4 = round4_aux
+
 module E = FStar.Kremlin.Endianness
 
-let rounds (abcd: abcd_t) (x: x_t) : Tot abcd_t =
+let rounds_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
   let abcd = round1 abcd x in
   let abcd = round2 abcd x in
   let abcd = round3 abcd x in
   let abcd = round4 abcd x in
   abcd
 
-let overwrite (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot abcd_t =
+[@"opaque_to_smt"]
+let rounds = rounds_aux
+
+let overwrite_aux (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot abcd_t =
   let abcd : abcd_t = Seq.upd abcd ia a' in
   let abcd : abcd_t = Seq.upd abcd ib b' in
   let abcd : abcd_t = Seq.upd abcd ic c' in
   let abcd : abcd_t = Seq.upd abcd id d' in
   abcd
 
-let update abcd x =
+[@"opaque_to_smt"]
+let overwrite = overwrite_aux
+
+let update_aux abcd x =
   let x = words_of_bytes MD5 16 x in
   let aa = Seq.index abcd ia in
   let bb = Seq.index abcd ib in
@@ -275,6 +296,9 @@ let update abcd x =
     (Seq.index abcd ib `U32.add_mod` bb)
     (Seq.index abcd ic `U32.add_mod` cc)
     (Seq.index abcd id `U32.add_mod` dd)
+
+[@"opaque_to_smt"]
+let update = update_aux
 
 (* Sections 3.1 and 3.2 *)
 

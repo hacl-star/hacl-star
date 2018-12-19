@@ -27,6 +27,7 @@ module CHACHA = Hacl.SecureAPI.Chacha20
 type alg = cipherAlg
 let algi = cipherAlg_of_id
 
+#push-options "--max_ifuel 1"
 inline_for_extraction let keylen = function
   | AES128   -> 16ul
   | AES256   -> 32ul
@@ -47,6 +48,7 @@ inline_for_extraction let statelen = function
   | AES256   -> 496ul // 256 + 240
   | CHACHA20 -> 32ul
   (* | CHACHA20 -> 16ul *)
+#pop-options
 
 (*17-02-11  why?
 inline_for_extraction let stlen = function

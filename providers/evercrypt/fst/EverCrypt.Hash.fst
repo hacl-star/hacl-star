@@ -38,12 +38,12 @@ let uint64_p = B.buffer uint_64
 //   kindly offers a wrapper that is compatible with the HACL* representation
 noeq
 type state_s: alg -> Type0 =
-| MD5_s: p:Hacl.Hash.Definitions.state MD5 { B.freeable p } -> state_s MD5
-| SHA1_s: p:Hacl.Hash.Definitions.state SHA1 { B.freeable p } -> state_s SHA1
-| SHA2_224_s: p:Hacl.Hash.Definitions.state SHA2_224 { B.freeable p } -> state_s SHA2_224
-| SHA2_256_s: p:Hacl.Hash.Definitions.state SHA2_256 { B.freeable p } -> state_s SHA2_256
-| SHA2_384_s: p:Hacl.Hash.Definitions.state SHA2_384 { B.freeable p } -> state_s SHA2_384
-| SHA2_512_s: p:Hacl.Hash.Definitions.state SHA2_512 { B.freeable p } -> state_s SHA2_512
+| MD5_s: p:Hacl.Hash.Definitions.state MD5 -> state_s MD5
+| SHA1_s: p:Hacl.Hash.Definitions.state SHA1 -> state_s SHA1
+| SHA2_224_s: p:Hacl.Hash.Definitions.state SHA2_224 -> state_s SHA2_224
+| SHA2_256_s: p:Hacl.Hash.Definitions.state SHA2_256 -> state_s SHA2_256
+| SHA2_384_s: p:Hacl.Hash.Definitions.state SHA2_384 -> state_s SHA2_384
+| SHA2_512_s: p:Hacl.Hash.Definitions.state SHA2_512 -> state_s SHA2_512
 
 let invert_state_s (a: alg): Lemma
   (requires True)
@@ -61,6 +61,8 @@ let p #a (s: state_s a): Hacl.Hash.Definitions.state a =
   | SHA2_256_s p -> p
   | SHA2_384_s p -> p
   | SHA2_512_s p -> p
+
+let freeable_s #a s = B.freeable (p #a s)
 
 let footprint_s #a (s: state_s a) =
   B.loc_addr_of_buffer (p s)
@@ -83,18 +85,35 @@ let frame_invariant #a l s h0 h1 =
   let state = B.deref h0 s in
   assert (repr_eq (repr s h0) (repr s h1))
 
-let create a =
+inline_for_extraction noextract
+let alloca a =
   let h0 = ST.get () in
   let s: state_s a =
     match a with
-    | MD5 -> MD5_s (B.malloc HS.root 0ul 4ul)
-    | SHA1 -> SHA1_s (B.malloc HS.root 0ul 5ul)
-    | SHA2_224 -> SHA2_224_s (B.malloc HS.root 0ul 8ul)
-    | SHA2_256 -> SHA2_256_s (B.malloc HS.root 0ul 8ul)
-    | SHA2_384 -> SHA2_384_s (B.malloc HS.root 0UL 8ul)
-    | SHA2_512 -> SHA2_512_s (B.malloc HS.root 0UL 8ul)
+    | MD5 -> MD5_s (B.alloca 0ul 4ul)
+    | SHA1 -> SHA1_s (B.alloca 0ul 5ul)
+    | SHA2_224 -> SHA2_224_s (B.alloca 0ul 8ul)
+    | SHA2_256 -> SHA2_256_s (B.alloca 0ul 8ul)
+    | SHA2_384 -> SHA2_384_s (B.alloca 0UL 8ul)
+    | SHA2_512 -> SHA2_512_s (B.alloca 0UL 8ul)
   in
-  B.malloc HS.root s 1ul
+  B.alloca s 1ul
+
+let create_in a r =
+  let h0 = ST.get () in
+  let s: state_s a =
+    match a with
+    | MD5 -> MD5_s (B.malloc r 0ul 4ul)
+    | SHA1 -> SHA1_s (B.malloc r 0ul 5ul)
+    | SHA2_224 -> SHA2_224_s (B.malloc r 0ul 8ul)
+    | SHA2_256 -> SHA2_256_s (B.malloc r 0ul 8ul)
+    | SHA2_384 -> SHA2_384_s (B.malloc r 0UL 8ul)
+    | SHA2_512 -> SHA2_512_s (B.malloc r 0UL 8ul)
+  in
+  B.malloc r s 1ul
+
+let create a =
+  create_in a HS.root
 
 let init #a s =
   match !*s with
@@ -258,6 +277,39 @@ let free #ea s =
     | SHA2_512_s p -> B.free p
   end;
   B.free s
+
+let copy #a s_src s_dst =
+  match !*s_src with
+  | MD5_s p_src ->
+      [@inline_let]
+      let s_dst: state MD5 = s_dst in
+      let p_dst = MD5_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 4ul
+  | SHA1_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA1 = s_dst in
+      let p_dst = SHA1_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 5ul
+  | SHA2_224_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA2_224 = s_dst in
+      let p_dst = SHA2_224_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 8ul
+  | SHA2_256_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA2_256 = s_dst in
+      let p_dst = SHA2_256_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 8ul
+  | SHA2_384_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA2_384 = s_dst in
+      let p_dst = SHA2_384_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 8ul
+  | SHA2_512_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA2_512 = s_dst in
+      let p_dst = SHA2_512_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 8ul
 
 // A full one-shot hash that relies on vale at each multiplexing point
 val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256

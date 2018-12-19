@@ -1,5 +1,5 @@
 [
-  "\u0017ì\t\u0014A\u0010FØù\u0015–íª¬\u00027",
+  "U!ˆ\u000eåŠŸ”4\u001fh[µå\u0012‹",
   [
     [
       "Sha_update_bytes_stdcall.pre_cond",
@@ -7,13 +7,14 @@
       1,
       0,
       [
-        "@query", "equation_Types_s.quad32", "equation_Views.view128",
+        "@query", "equation_Types_s.quad32", "equation_Views.view32_128",
+        "primitive_Prims.op_Modulus",
         "proj_equation_LowStar.BufferView.View_n",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_LowStar.BufferView.View_n"
       ],
       0,
-      "5f49110303ae39579299449b59ad68a0"
+      "4f798ee994938d5a12a862cf9a8ab628"
     ],
     [
       "Sha_update_bytes_stdcall.post_cond",
@@ -21,13 +22,19 @@
       1,
       0,
       [
-        "@query", "assumption_Prims.HasEq_int", "equation_Types_s.quad32",
-        "equation_Views.view128", "proj_equation_LowStar.BufferView.View_n",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_LowStar.BufferView.View_n"
+        "@MaxIFuel_assumption", "@query", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_SHA_helpers.byte", "equation_SHA_helpers.size_block",
+        "equation_SHA_helpers.size_block_w_256",
+        "equation_Sha_update_bytes_stdcall.uint32_p",
+        "function_token_typing_FStar.UInt32.t",
+        "function_token_typing_SHA_helpers.size_block", "int_inversion",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "7b8c1281007393858f4da7e13b0d973c"
+      "1959acc31af3ba25fd21ebf0396dc983"
     ]
   ]
 ]

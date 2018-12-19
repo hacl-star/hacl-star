@@ -115,12 +115,12 @@ else:
 if 'KREMLIN_HOME' in os.environ:
   kremlin_default_path = os.environ['KREMLIN_HOME']
 else:
-  kremlin_default_path = 'tools/Kremlin'
+  kremlin_default_path = '../../kremlin'
 
 if 'FSTAR_HOME' in os.environ:
   fstar_default_path = os.environ['FSTAR_HOME']
 else:
-  fstar_default_path = 'tools/FStar'
+  fstar_default_path = '../../FStar'
 
 def AddOptYesNo(name, dest, default, help):
   AddOption('--' + name, dest = dest, default = default, action = 'store_true', help = f'{help} (default {default})')
@@ -395,7 +395,7 @@ fstar_no_verify = ''
 verify = GetOption('verify')
 if not verify:
   print('***\n*** WARNING:  NOT VERIFYING ANY CODE\n***')
-  fstar_no_verify = '--lax'
+  fstar_no_verify = '--admit_smt_queries true'
 
 # Find Z3 for F*
 found_z3 = False
@@ -427,7 +427,8 @@ def add_from_os_env(env, name):
   if name in os.environ:
     env['ENV'][name] = os.environ[name]
 
-ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH']})
+ocaml_env = Environment()
+add_from_os_env(ocaml_env, 'PATH')
 add_from_os_env(ocaml_env, 'OCAMLPATH')
 add_from_os_env(ocaml_env, 'OCAMLLIB')
 add_from_os_env(ocaml_env, 'OCAML_TOPLEVEL_PATH')
@@ -1156,6 +1157,11 @@ if not is_help:
     source = f.filename
     target = f.obj_name()
     shutil.copy(source, target)
+    checked_source = f'{source}.checked'
+    if os.path.isfile(checked_source):
+      shutil.copy(str(checked_source), f'{target}.checked')
+    else:
+      print(f'External file {source}.checked does not exist -- please make F*, KreMLin, and hacl-star/specs first')
 
   if not dump_args:
     print('Processing source files')

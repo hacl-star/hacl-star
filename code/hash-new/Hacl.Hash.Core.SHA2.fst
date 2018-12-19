@@ -28,7 +28,9 @@ open Hacl.Hash.Definitions
 friend Spec.SHA2
 friend Hacl.Hash.PadFinish
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+open LowStar.Modifies.Linear
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
 
 (** Top-level constant arrays for the SHA2 algorithms. *)
 
@@ -159,7 +161,7 @@ let index_be (a: sha2_alg) (b: B.buffer U8.t) (i: U32.t):
   | SHA2_224 | SHA2_256 -> C.Endianness.index_32_be b i
   | SHA2_384 | SHA2_512 -> C.Endianness.index_64_be b i
 
-#set-options "--max_fuel 1 --z3rlimit 100"
+#set-options "--max_fuel 1 --z3rlimit 20"
 
 inline_for_extraction
 let ws a b ws =
@@ -170,6 +172,7 @@ let ws a b ws =
     M.(modifies (loc_buffer ws) h0 h1) /\
     S.equal (S.slice (B.as_seq h1 ws) 0 i) (S.init i (Spec.ws a b))
   in
+  reveal_opaque (`%Spec.ws) Spec.ws;
   let f (i: U32.t { U32.(0 <= v i /\ v i < Spec.size_k_w a) }):
     ST.Stack unit
       (requires (fun h -> inv h (U32.v i)))
@@ -210,7 +213,7 @@ let ws a b ws =
   in
   C.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f
 
-#set-options "--max_fuel 0 --z3rlimit 20"
+#set-options "--max_fuel 0"
 
 inline_for_extraction
 let hash_w (a: sha2_alg) =
@@ -282,6 +285,7 @@ let shuffle_core a block hash ws t =
   hash.(6ul) <- f0;
   hash.(7ul) <- g0;
 
+  (**) reveal_opaque (`%Spec.shuffle_core) Spec.shuffle_core;
   (**) let h = ST.get () in
   (**) [@inline_let]
   (**) let l = [ add a t1 t2; a0; b0; c0; add a d0 t1; e0; f0; g0 ] in
@@ -332,8 +336,8 @@ let shuffle a block hash ws =
     (**) Spec.Loops.repeat_range_induction 0 (U32.v i + 1) (Spec.shuffle_core a block) hash
   in
   (**) Spec.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
-  C.Loops.for 0ul (size_k_w a) inv f
-
+  C.Loops.for 0ul (size_k_w a) inv f;
+  reveal_opaque (`%Spec.shuffle) Spec.shuffle
 
 inline_for_extraction
 let zero (a: sha2_alg): word a =
@@ -341,7 +345,7 @@ let zero (a: sha2_alg): word a =
   | SHA2_224 | SHA2_256 -> 0ul
   | SHA2_384 | SHA2_512 -> 0UL
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#set-options "--max_fuel 0 --max_ifuel 0"
 
 noextract inline_for_extraction
 val update: a:sha2_alg -> update_st a
@@ -358,7 +362,8 @@ let update a hash block =
   (**) assert (S.equal (B.as_seq h1 hash) (B.as_seq h0 hash));
   shuffle a (G.hide block) hash1 computed_ws;
   C.Loops.in_place_map2 hash hash1 8ul (add a);
-  (**) ST.pop_frame ()
+  (**) ST.pop_frame ();
+  (**) reveal_opaque (`%Spec.update) Spec.update
 
 let update_224: update_st SHA2_224 = update SHA2_224
 let update_256: update_st SHA2_256 = update SHA2_256

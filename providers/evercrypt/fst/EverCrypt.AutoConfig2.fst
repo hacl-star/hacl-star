@@ -24,10 +24,10 @@ let cpu_has_shaext: cached_flag X64.CPU_Features_s.sha_enabled =
 let cpu_has_aesni: cached_flag X64.CPU_Features_s.aesni_enabled =
   B.gcmalloc_of_list HS.root [ false ]
 
-let user_wants_hacl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ false ]
-let user_wants_vale: eternal_pointer bool = B.gcmalloc_of_list HS.root [ false ]
-let user_wants_openssl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ false ]
-let user_wants_bcrypt: eternal_pointer bool = B.gcmalloc_of_list HS.root [ false ]
+let user_wants_hacl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ true ]
+let user_wants_vale: eternal_pointer bool = B.gcmalloc_of_list HS.root [ true ]
+let user_wants_openssl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ true ]
+let user_wants_bcrypt: eternal_pointer bool = B.gcmalloc_of_list HS.root [ true ]
 
 inline_for_extraction
 let mk_getter #b (f: cached_flag b): getter b = fun () ->

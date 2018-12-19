@@ -79,10 +79,8 @@ depend:
 poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
-# We need one invocation of kremlin for each bundle because of KreMLin bug #43
-poly-c/Hacl_Poly1305_64.c poly-c/Hacl_Test_Poly1305_64.c: poly-c/out.krml
+poly-c/Hacl_Poly1305_64.c: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
-		-no-prefix Hacl.Test.Poly1305_64 \
 		-add-include '"kremlib.h"' -minimal -bundle 'Hacl_Poly1305_64=*' \
 	$^ -o $@
 

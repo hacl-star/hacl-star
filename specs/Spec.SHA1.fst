@@ -151,7 +151,7 @@ let k (t: U32.t { U32.v t <= 79 } ) : Tot (word SHA1) =
 
 let word_block = Seq.lseq (word SHA1) size_block_w
 
-let step3_body'
+let step3_body'_aux
   (mi: word_block)
   (st: hash_w SHA1)
   (t: U32.t {U32.v t < 80})
@@ -176,6 +176,9 @@ let step3_body'
     e;
   ]
 
+[@"opaque_to_smt"]
+let step3_body' = step3_body'_aux
+
 [@unifier_hint_injective]
 inline_for_extraction
 let step3_body_w_t
@@ -198,16 +201,19 @@ let index_compute_w
 : Tot (step3_body_w_t mi)
 = fun (t: nat {t < 80}) -> (Seq.index cwt t <: (wt: word SHA1 { wt == w' mi t }))
 
-let step3
+let step3_aux
   (mi: word_block)
   (h: hash_w SHA1)
 : Tot (hash_w SHA1)
 = let cwt = compute_w mi 0 Seq.empty in
   Spec.Loops.repeat_range 0 80 (step3_body mi (index_compute_w mi cwt)) h
 
+[@"opaque_to_smt"]
+let step3 = step3_aux
+
 (* Section 6.1.2 Step 4 *)
 
-let step4
+let step4_aux
   (mi: word_block)
   (h: hash_w SHA1)
 : Tot (hash_w SHA1) =
@@ -224,6 +230,9 @@ let step4
     std `U32.add_mod` Seq.index h 3;
     ste `U32.add_mod` Seq.index h 4;
   ]
+
+[@"opaque_to_smt"]
+let step4 = step4_aux
 
 (* Section 3.1 al. 2: words and bytes, big-endian *)
 
