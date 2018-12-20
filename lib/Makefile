@@ -1,2 +1,2 @@
 # For the interactive mode
-include ../code/Makefile.common
+include ../Makefile.common
