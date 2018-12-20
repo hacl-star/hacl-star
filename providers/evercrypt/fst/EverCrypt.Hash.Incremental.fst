@@ -249,11 +249,11 @@ let split_at_last_block (a: Hash.alg) (b: bytes) (d: bytes): Lemma
    ()
 
 let update_round a s prev data len =
-  let State hash_state buf total_len = s in
+  let State hash_state buf_ total_len = s in
   let h0 = ST.get () in
   let sz = rest a total_len in
   let diff = Hacl.Hash.Definitions.size_block_ul a - sz in
-  let buf0 = B.sub buf 0ul (Hacl.Hash.Definitions.size_block_ul a) in
+  let buf0 = B.sub buf_ 0ul (Hacl.Hash.Definitions.size_block_ul a) in
   let buf1 = B.sub buf0 0ul sz in
   let buf2 = B.sub buf0 sz diff in
   assert (B.(loc_pairwise_disjoint
@@ -261,9 +261,9 @@ let update_round a s prev data len =
   B.blit data 0ul buf2 0ul diff;
   let h1 = ST.get () in
   assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
-  B.modifies_inert_intro (B.loc_buffer buf) h0 h1;
-  Hash.frame_invariant (B.loc_buffer buf) hash_state h0 h1;
-  Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf) hash_state h0 h1;
+  B.modifies_inert_intro (B.loc_buffer buf_) h0 h1;
+  Hash.frame_invariant (B.loc_buffer buf_) hash_state h0 h1;
+  Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf_) hash_state h0 h1;
   Hash.update_multi #(G.hide a) hash_state buf0 (Hacl.Hash.Definitions.size_block_ul a);
   let h2 = ST.get () in
   // JP: no clue why I had to go through all these manual steps.
@@ -295,19 +295,19 @@ let update_round a s prev data len =
     split_at_last_block a (G.reveal prev) (B.as_seq h0 data);
     let blocks', rest' = split_at_last a (S.append (G.reveal prev) (B.as_seq h0 data)) in
     assert (S.equal rest' S.empty);
-    assert (B.live h2 buf /\
-      B.(loc_disjoint (loc_buffer buf) (Hash.footprint hash_state h2)) /\
+    assert (B.live h2 buf_ /\
+      B.(loc_disjoint (loc_buffer buf_) (Hash.footprint hash_state h2)) /\
       Hash.invariant hash_state h2);
     ()
   );
-  let s' = State hash_state buf (add_len total_len len) in
+  let s' = State hash_state buf_ (add_len total_len len) in
   assert (hashes h2 s' (S.append (G.reveal prev) (B.as_seq h0 data)));
   s'
 #pop-options
 
 #push-options "--z3rlimit 200"
 let update a s prev data len =
-  let State hash_state buf total_len = s in
+  let State hash_state buf_ total_len = s in
   let sz = rest a total_len in
   if len < Hacl.Hash.Definitions.size_block_ul a - sz then
     update_small a s prev data len
@@ -343,11 +343,11 @@ let update a s prev data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 inline_for_extraction noextract
 let mk_finish a s prev dst =
   let h0 = ST.get () in
-  let State hash_state buf total_len = s in
+  let State hash_state buf_ total_len = s in
 
   push_frame ();
   let h1 = ST.get () in
@@ -359,7 +359,7 @@ let mk_finish a s prev dst =
 
   assert_norm (pow2 61 < pow2 125);
   assert (v total_len < max_input8 a);
-  let buf = B.sub buf 0ul (rest a total_len) in
+  let buf_ = B.sub buf_ 0ul (rest a total_len) in
   assert (
     let r = rest a total_len in
     (v total_len - v r) % size_block a = 0);
@@ -386,7 +386,7 @@ let mk_finish a s prev dst =
     (Hash.footprint tmp_hash_state h2) hash_state h2 h3;
   assert (Hash.invariant hash_state h3);
 
-  EverCrypt.Hash.update_last #(G.hide a) tmp_hash_state buf total_len;
+  EverCrypt.Hash.update_last #(G.hide a) tmp_hash_state buf_ total_len;
 
   let h4 = ST.get () in
   B.modifies_inert_intro (Hash.footprint tmp_hash_state h3) h3 h4;
