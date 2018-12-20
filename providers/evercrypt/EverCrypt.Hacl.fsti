@@ -9,7 +9,7 @@ open FStar.HyperStack.ST
 
 /// Curve
 
-[@ (CPrologue "#define EverCrypt_Hacl_x25519 Hacl_Curve25519_x25519")]
+[@ (CPrologue "#define EverCrypt_Hacl_x25519 Hacl_Curve25519_crypto_scalarmult")]
 val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
   Stack unit curve_x25519_pre curve_x25519_post
 
@@ -44,11 +44,11 @@ val chacha20: key:uint8_p -> iv:uint8_p -> ctr: uint32_t ->
 
 /// Chacha20-Poly1305
 
-[@ (CPrologue "#define EverCrypt_Hacl_chacha20_poly1305_encrypt Hacl_Chacha20Poly1305_encrypt")]
+[@ (CPrologue "#define EverCrypt_Hacl_chacha20_poly1305_encrypt Hacl_Chacha20Poly1305_aead_encrypt")]
 val chacha20_poly1305_encrypt: c:uint8_p -> mac:uint8_p -> m:uint8_p -> m_len:uint32_t ->
   aad:uint8_p -> aad_len:uint32_t -> k:uint8_p -> n:uint8_p ->
   Stack uint32_t chacha20_poly1305_encrypt_pre chacha20_poly1305_encrypt_post
-[@ (CPrologue "#define EverCrypt_Hacl_chacha20_poly1305_decrypt Hacl_Chacha20Poly1305_decrypt")]
+[@ (CPrologue "#define EverCrypt_Hacl_chacha20_poly1305_decrypt Hacl_Chacha20Poly1305_aead_decrypt")]
 val chacha20_poly1305_decrypt: m:uint8_p -> c:uint8_p -> m_len:uint32_t -> mac:uint8_p ->
   aad:uint8_p -> aad_len:uint32_t -> k:uint8_p -> n:uint8_p ->
   Stack uint32_t chacha20_poly1305_decrypt_pre chacha20_poly1305_decrypt_post
