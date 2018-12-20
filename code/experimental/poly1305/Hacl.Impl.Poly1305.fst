@@ -29,12 +29,10 @@ val poly1305_encode_block:
     (requires fun h -> live h b /\ live h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      as_nat #s h1 f ==
-      S.fadd (pow2 (8 * 16)) (BSeq.nat_from_bytes_be (as_seq h0 b)))
+      as_nat #s h1 f == pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 b))
 let poly1305_encode_block #s f b =
   load_felem_le f b;
-  set_bit128 f;
-  admit()
+  set_bit128 f
 
 inline_for_extraction
 val poly1305_encode_blocks:
@@ -43,13 +41,12 @@ val poly1305_encode_blocks:
   -> b:lbuffer uint8 (blocklen s)
   -> Stack unit
     (requires fun h -> live h b /\ live h f)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc f) h0 h1)
-      //as_nat #s h1 f ==
-      //S.fadd (pow2 (8 * 16)) (BSeq.nat_from_bytes_be (as_seq h0 b)))
-let poly1305_encode_blocks #s f b =
+    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
+let poly1305_encode_blocks #s f b = admit();
   load_felems_le f b;
   set_bit128 f
+
+#set-options "--max_fuel 0"
 
 inline_for_extraction
 val poly1305_encode_last:
@@ -58,19 +55,24 @@ val poly1305_encode_last:
   -> len:size_t{v len < 16}
   -> b:lbuffer uint8 len
   -> Stack unit
-    (requires fun h -> live h b /\ live h f)
+    (requires fun h -> live h b /\ live h f /\ disjoint b f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-     (Math.Lemmas.pow2_le_compat 128 (8 * v len);
-      as_nat #s h1 f ==
-      S.fadd (pow2 (8 * v len)) (BSeq.nat_from_bytes_be (as_seq h0 b))))
+      as_nat h1 f == pow2 (8 * v len) + BSeq.nat_from_bytes_le (as_seq h0 b))
 let poly1305_encode_last #s f len b =
   push_frame();
   let tmp = create 16ul (u8 0) in
   copy (sub tmp 0ul len) (sub b 0ul len);
+  let h0 = ST.get () in
+  assume (BSeq.nat_from_bytes_le (as_seq h0 tmp) == BSeq.nat_from_bytes_le (as_seq h0 b));
   load_felem_le f tmp;
+  let h1 = ST.get () in
+  assert (as_nat h1 f == BSeq.nat_from_bytes_le (as_seq h0 tmp));
+  assert (BSeq.nat_from_bytes_le (as_seq h0 b) < pow2 (v len * 8));
   set_bit f (len *! 8ul);
-  admit();
+  let h2 = ST.get () in
+  assert (as_nat h2 f == pow2 (v len * 8) + BSeq.nat_from_bytes_le (as_seq h0 tmp));
+  assert (as_nat h2 f == pow2 (8 * v len) + BSeq.nat_from_bytes_le (as_seq h0 b));
   pop_frame()
 
 inline_for_extraction
@@ -156,9 +158,7 @@ let poly1305_init_ #s ctx key =
   let h0 = ST.get () in
   set_zero acc;
   poly1305_encode_r precomp_r kr;
-  load_felem_le sk ks;
-  let h1 = ST.get () in
-  assume (as_nat h1 sk == BSeq.nat_from_bytes_le (as_seq h0 ks))
+  load_felem_le sk ks
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
@@ -197,7 +197,6 @@ let poly1305_init #s ctx key =
   | M128 -> poly1305_init_128 ctx key
   | M256 -> poly1305_init_256 ctx key
 (* WRAPPER to Prevent Inlining *)
-
 
 inline_for_extraction
 val poly1305_nblocks:
@@ -253,7 +252,8 @@ val poly1305_update_:
 	(S.create_st (as_nat h0 r) (as_nat h0 sk) (as_nat h0 acc)) in
       as_nat h1 acc == S.get_acc st /\
       as_nat h1 r == S.get_r st /\
-      as_nat h1 sk == S.get_s st))
+      as_nat h1 sk == S.get_s st /\
+      fadd_carry_pre h1 acc sk))
 let poly1305_update_ #s ctx len text = admit();
   push_frame();
   let acc = get_acc ctx in
@@ -323,7 +323,8 @@ val poly1305_update:
 	(S.create_st (as_nat h0 r) (as_nat h0 sk) (as_nat h0 acc)) in
       as_nat h1 acc == S.get_acc st /\
       as_nat h1 r == S.get_r st /\
-      as_nat h1 sk == S.get_s st))
+      as_nat h1 sk == S.get_s st /\
+      fadd_carry_pre h1 acc sk))
 let poly1305_update #s ctx len text =
   match s with
   | M32 -> poly1305_update_32 ctx len text
@@ -344,9 +345,10 @@ val poly1305_finish_:
       let precomp_r = gsub ctx (nlimb s) (precomplen s) in
       let r = gsub precomp_r 0ul (nlimb s) in
       let sk = gsub ctx (nlimb s +. precomplen s) (nlimb s) in
-      as_nat h r < S.prime /\ as_nat h sk < S.prime /\ as_nat h acc < S.prime))
+      as_nat h r < S.prime /\ as_nat h sk < S.prime /\ as_nat h acc < S.prime /\
+      fadd_carry_pre h acc sk))
     (ensures  fun h0 _ h1 ->
-      modifies (loc tag) h0 h1 /\
+      modifies (loc tag |+| loc ctx) h0 h1 /\
      (let acc = gsub ctx 0ul (nlimb s) in
       let precomp_r = gsub ctx (nlimb s) (precomplen s) in
       let r = gsub precomp_r 0ul (nlimb s) in
@@ -357,8 +359,7 @@ let poly1305_finish_ #s ctx tag =
   let sk = get_s ctx in
 
   fadd_carry acc acc sk;
-  store_felem_le tag acc;
-  admit()
+  store_felem_le tag acc
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
@@ -385,9 +386,10 @@ val poly1305_finish:
       let precomp_r = gsub ctx (nlimb s) (precomplen s) in
       let r = gsub precomp_r 0ul (nlimb s) in
       let sk = gsub ctx (nlimb s +. precomplen s) (nlimb s) in
-      as_nat h r < S.prime /\ as_nat h sk < S.prime /\ as_nat h acc < S.prime))
+      as_nat h r < S.prime /\ as_nat h sk < S.prime /\ as_nat h acc < S.prime /\
+      fadd_carry_pre h acc sk))
     (ensures  fun h0 _ h1 ->
-      modifies (loc tag) h0 h1 /\
+      modifies (loc tag |+| loc ctx) h0 h1 /\
      (let acc = gsub ctx 0ul (nlimb s) in
       let precomp_r = gsub ctx (nlimb s) (precomplen s) in
       let r = gsub precomp_r 0ul (nlimb s) in
