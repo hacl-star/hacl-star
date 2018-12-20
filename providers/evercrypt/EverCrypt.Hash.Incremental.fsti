@@ -26,8 +26,8 @@ type state a =
     state a
 
 let footprint #a (s: state a) h =
-  let State hash_state buf _ = s in
-  B.(loc_union (loc_buffer buf) (Hash.footprint hash_state h))
+  let State hash_state buf_ _ = s in
+  B.(loc_union (loc_buffer buf_) (Hash.footprint hash_state h))
 
 let freeable #a (s: state a) h =
   let State hash_state buf _ = s in
@@ -79,16 +79,16 @@ let split_at_last (a: Hash.alg) (b: bytes):
 #set-options "--max_fuel 0 --max_ifuel 0"
 unfold
 let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
-  let State hash_state buf total_len = s in
+  let State hash_state buf_ total_len = s in
   let blocks, rest = split_at_last a b in
   S.length blocks + S.length rest = v total_len /\
   S.length b = v total_len /\
   v total_len < pow2 61 /\
-  B.live h buf /\
-  B.(loc_disjoint (loc_buffer buf) (Hash.footprint hash_state h)) /\
+  B.live h buf_ /\
+  B.(loc_disjoint (loc_buffer buf_) (Hash.footprint hash_state h)) /\
   Hash.invariant hash_state h /\
   S.equal (Hash.repr hash_state h) (Hash.compress_many (Hash.acc0 #a) blocks) /\
-  S.equal (S.slice (B.as_seq h buf) 0 (v total_len % size_block a)) rest
+  S.equal (S.slice (B.as_seq h buf_) 0 (v total_len % size_block a)) rest
 
 let bytes = S.seq UInt8.t
 
