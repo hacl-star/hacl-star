@@ -265,7 +265,7 @@ let poly1305_update_ #s ctx len text = admit();
     let t0 = sub text 0ul len0 in
     poly1305_nblocks ctx len0 t0
   );
-  
+
   let len = len -. len0 in
   let text = sub text len0 len in
   let e = create (nlimb s) (limb_zero s) in
@@ -356,7 +356,7 @@ let poly1305_finish_ #s ctx tag =
   let acc = get_acc ctx in
   let sk = get_s ctx in
 
-  fadd acc acc sk;
+  fadd_carry acc acc sk;
   store_felem_le tag acc;
   admit()
 

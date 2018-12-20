@@ -53,7 +53,8 @@ let update1 (len:size_nat{len <= size_block}) (b:lbytes len) (st:state) : Tot st
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
   assert_norm (pow2 128 < prime);
-  let n = (pow2 (8 * len)) `fadd` nat_from_bytes_le b in
+  assert_norm (pow2 128 + nat_from_bytes_le b < prime);
+  let n = pow2 (8 * len) + nat_from_bytes_le b in
   let acc = (n `fadd` st.acc) `fmul` st.r in
   set_acc st acc
 
