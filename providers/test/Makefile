@@ -66,7 +66,7 @@ $(EXTRACT_DIR)/%.krml:
 	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  --odir $(EXTRACT_DIR) \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(subst $(CACHE_DIR)/,,$(subst .checked,,$<))
+	  $(notdir $(subst .checked,,$<))
 
 # hacks.h defines monomorphized types for `option string` and `uint8_t * uint8_t`, which are
 # needed by fstar_bytes.h, and then includes fstar_bytes.h only if EverCrypt.h has been
