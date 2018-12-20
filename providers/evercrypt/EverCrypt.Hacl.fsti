@@ -36,8 +36,8 @@ val aes256_cipher: cipher:uint8_p -> plain:uint8_p -> w:uint8_p -> sb:uint8_p ->
   Stack unit aes256_compute_pre aes256_compute_post
 
 /// ChaCha20
-
-[@ (CPrologue "#define EverCrypt_Hacl_chacha20 Hacl_Chacha20_chacha20")]
+[@ (CPrologue "#define EverCrypt_Hacl_chacha20(key, iv, ctr, plain, len, cipher) \
+  Hacl_Chacha20_chacha20(cipher, plain, len, key, iv, ctr)")]
 val chacha20: key:uint8_p -> iv:uint8_p -> ctr: uint32_t ->
   plain: uint8_p -> len: uint32_t -> cipher: uint8_p ->
   Stack unit chacha20_pre chacha20_post
