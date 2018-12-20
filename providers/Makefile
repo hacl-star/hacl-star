@@ -101,11 +101,9 @@ COMPACT_FLAGS = \
   -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers \
   -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s \
   -bundle 'EverCrypt.Spec.*' \
-  -bundle 'Flag' \
   -bundle 'LowStar.*' \
-  -bundle 'Crypto.Symmetric.*[rename=Hacl_Legacy]' \
   -bundle 'Prims,FStar.*,C,C.*[rename=EverCrypt_Kremlib]' \
-  -bundle 'AEAD.*,Hacl.*,Spec.*[rename=Hacl]' -library 'Hacl.*,AEAD.*' \
+  -bundle 'Hacl.*,Spec.*[rename=Hacl]' -library 'Hacl.*' \
   -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
