@@ -182,18 +182,13 @@ let encrypt_single cs e pk input context =
 val decrypt_single:
     cs: ciphersuite
   -> sk: key_private_s cs
-  -> epk: key_public_s cs
   -> input: bytes {size_key_dh cs + AEAD.size_tag (aead_of_cs cs) <= length input /\ length input <= max_size_t}
   -> context: lbytes 32 ->
-  Tot (option (lbytes (length input - AEAD.size_tag ((aead_of_cs cs)))))
+  Tot (option (lbytes (length input - (size_key_dh cs) - AEAD.size_tag ((aead_of_cs cs)))))
 
-let decrypt_single cs sk epk input context =
+let decrypt_single cs sk input context =
   let epk = sub #uint8 #(length input) input 0 (size_key_dh cs) in
   let ciphertext = sub #uint8 #(length input) input (size_key_dh cs) ((length input) - size_key_dh cs) in
   match decap cs sk epk context with
   | None -> None
-  | Some key ->
-    match decrypt cs key ciphertext lbytes_empty (u32 0) with
-    | None -> None
-    | Some plaintext ->
-      Some (concat #uint8 #(size_key_dh cs) #(length input - (size_key_dh cs) - AEAD.size_tag (aead_of_cs cs)) epk plaintext)
+  | Some key -> decrypt cs key ciphertext lbytes_empty (u32 0)
