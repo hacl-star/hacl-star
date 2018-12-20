@@ -56,7 +56,7 @@ include .depend
 # 1. Manual, finely crafted dependency edges (see artistic rendition above).
 
 ALL_CHECKED_FILES	= $(addsuffix .checked,$(ALL_FST_FILES))
-SPEC_CHECKED_FILES	= $(filter Spec.%,$(ALL_CHECKED_FILES))
+SPEC_CHECKED_FILES	= $(filter $(HACL_HOME)/specs/%,$(ALL_CHECKED_FILES))
 
 vale.build: $(SPEC_CHECKED_FILES)
 providers.build: compile-compact vale.build
