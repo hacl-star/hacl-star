@@ -104,6 +104,7 @@ let aes128_create k =
     else if hacl () then
       let w    = B.malloc HS.root 0uy 176ul in
       let sbox = B.malloc HS.root 0uy 256ul in
+      Hacl.aes128_mk_sbox sbox;
       Hacl.aes128_keyExpansion k w sbox;
       AES128_HACL w sbox
   //  else if openssl () then
@@ -159,6 +160,7 @@ let aes256_create k =
     if hacl () then
       let w    = B.malloc HS.root 0uy 240ul in
       let sbox = B.malloc HS.root 0uy 256ul in
+      Hacl.aes256_mk_sbox sbox;
       Hacl.aes256_keyExpansion k w sbox;
       AES256_HACL w sbox
   //  else if openssl () then

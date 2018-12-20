@@ -3,13 +3,13 @@
 # The dependency graph, encoded by hand in this Makefile, is artistically
 # rendered as follows:
 #
-#                merkle_tree
+#            merkle_tree
 #                |
-#   secure_api   evercrypt
-#          \    /  \
-#           code   vale
-#           /   \  /
-#         lib   specs
+#             evercrypt               secure_api
+#               /  \                      |
+#           code   vale                cold/old
+#           /   \  /                      |
+#         lib   specs                  specs/old
 #
 # This Makefile verifies, tests, extracts and compiles HACL*. It delegates
 # building secure_api, vale, providers, merkle_tree to recursive make
@@ -61,7 +61,6 @@ SPEC_CHECKED_FILES	= $(filter Spec.%,$(ALL_CHECKED_FILES))
 vale.build: $(SPEC_CHECKED_FILES)
 providers.build: compile-compact vale.build
 secure_api/merkle_tree.build: providers.build
-secure_api.build: $(ALL_CHECKED_FILES)
 
 # 2. Verification
 
@@ -105,6 +104,7 @@ old-%:
 	$(MAKE) -C code/old -f Makefile.old $*
 
 HACL_OLD_FILES=\
+  code/old/experimental/aesgcm/Hacl_AES.c \
   code/old/curve25519/x25519-c/Hacl_Curve25519.c \
   code/old/ed25519/ed25519-c/Hacl_Ed25519.c \
   code/old/salsa-family/chacha-c/Hacl_Chacha20.c \

@@ -40,20 +40,12 @@ VALE_OBJ_DIR	= $(HACL_HOME)/vale/obj
 # - vale/obj/external, since it contains copies of files that already exist
 #   elsewhere, thus defeating reusability of checked files
 FSTAR_INCLUDES = \
-  $(KREMLIN_HOME)/kremlib/compat \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/providers/evercrypt \
   $(HACL_HOME)/providers/evercrypt/fst \
   $(HACL_HOME)/providers/evercrypt/config/$(CONFIG) \
   $(HACL_CODE)/hash \
-  $(HACL_CODE)/old/lib/kremlin \
-  $(HACL_CODE)/old/experimental/aesgcm \
-  $(HACL_CODE)/old/curve25519/interfaces \
-  $(HACL_CODE)/old/api/interfaces \
-  $(HACL_CODE)/old/api \
-  $(HACL_CODE)/old/salsa-family \
-  $(HACL_CODE)/old/poly1305 \
-  $(HACL_CODE)/old/bignum \
+  $(HACL_CODE)/sha3 \
   $(HACL_HOME)/vale/code/lib/math \
   $(HACL_HOME)/vale/code/lib/util \
   $(HACL_HOME)/vale/code/lib/collections \
