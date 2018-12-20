@@ -34,14 +34,14 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/providers/evercrypt/fst \
   $(HACL_HOME)/providers/evercrypt/config/$(CONFIG) \
   $(HACL_HOME)/code/hash \
-  $(HACL_HOME)/old/code/lib/kremlin \
-  $(HACL_HOME)/old/code/experimental/aesgcm \
-  $(HACL_HOME)/old/code/curve25519/interfaces \
-  $(HACL_HOME)/old/code/api/interfaces \
-  $(HACL_HOME)/old/code/api \
-  $(HACL_HOME)/old/code/salsa-family \
-  $(HACL_HOME)/old/code/poly1305 \
-  $(HACL_HOME)/old/code/bignum \
+  $(HACL_HOME)/code/old/lib/kremlin \
+  $(HACL_HOME)/code/old/experimental/aesgcm \
+  $(HACL_HOME)/code/old/curve25519/interfaces \
+  $(HACL_HOME)/code/old/api/interfaces \
+  $(HACL_HOME)/code/old/api \
+  $(HACL_HOME)/code/old/salsa-family \
+  $(HACL_HOME)/code/old/poly1305 \
+  $(HACL_HOME)/code/old/bignum \
   $(HACL_HOME)/vale/code/lib/math \
   $(HACL_HOME)/vale/code/lib/util \
   $(HACL_HOME)/vale/code/lib/collections \
