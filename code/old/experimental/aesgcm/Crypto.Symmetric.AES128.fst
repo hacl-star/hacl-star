@@ -25,6 +25,7 @@ module H32  = FStar.UInt32
 
 type bytes = FStar.Buffer.buffer byte
 type lbytes l = b:bytes {length b = l} 
+noextract
 let v (x:UInt32.t) : nat  = UInt32.v x
 
 (* Parameters for AES-128 *)

@@ -104,7 +104,7 @@ old-%:
 	$(MAKE) -C code/old -f Makefile.old $*
 
 HACL_OLD_FILES=\
-  code/old/experimental/aesgcm/Hacl_AES.c \
+  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
   code/old/curve25519/x25519-c/Hacl_Curve25519.c \
   code/old/ed25519/ed25519-c/Hacl_Ed25519.c \
   code/old/salsa-family/chacha-c/Hacl_Chacha20.c \
