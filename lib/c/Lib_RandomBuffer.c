@@ -3,8 +3,9 @@
 
 #if (defined(_WIN32) || defined(_WIN64))
 
+#include <inttypes.h>
+#include <stdbool.h>
 #include <malloc.h>
-#include <wincrypt.h>
 #include <windows.h>
 
 bool read_random_bytes(uint32_t len, uint8_t *buf) {
