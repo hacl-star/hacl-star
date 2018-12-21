@@ -16,6 +16,9 @@ open Spec.AEAD
 noextract
 let bytes = Seq.seq UInt8.t
 
+let supported_alg =
+  a:alg { supported_alg a }
+
 let frozen_preorder (s: bytes): MB.srel UInt8.t = fun (s1 s2: bytes) ->
   S.equal s1 s ==> S.equal s2 s
 
@@ -29,7 +32,7 @@ type expanded_key (a: alg) =
     expanded_key a
 
 val expand_in:
-  #a:alg ->
+  #a:supported_alg ->
   r:HS.rid ->
   k:B.buffer UInt8.t { B.length k = key_length a } ->
   ST (expanded_key a)
@@ -47,7 +50,7 @@ let ad_p a = ad:B.buffer UInt8.t { B.length ad <= max_length a }
 let plain_p a = p:B.buffer UInt8.t { B.length p <= max_length a }
 
 val encrypt:
-  #a:alg ->
+  #a:supported_alg ->
   ek:expanded_key a ->
   iv:iv_p a ->
   ad:ad_p a ->
