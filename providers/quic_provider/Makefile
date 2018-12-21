@@ -67,7 +67,7 @@ LDFLAGS += -lbcrypt
 endif
 
 LDFLAGS += $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
-LDFLAGS += ../../code/dist/compact/libhacl.a
+LDFLAGS += ../../dist/compact/libhacl.a
 
 .PHONY: all test
 
