@@ -69,3 +69,28 @@ val encrypt:
       B.(modifies (loc_buffer dst) h0 h1) /\
       S.equal (B.as_seq h1 dst)
         (encrypt (G.reveal (EK?.kv ek)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain)))
+
+val decrypt:
+  #a:supported_alg ->
+  ek:expanded_key a ->
+  iv:iv_p a ->
+  ad:ad_p a ->
+  ad_len: UInt32.t { v ad_len = B.length ad } ->
+  cipher: plain_p a ->
+  cipher_len: UInt32.t { v cipher_len = B.length cipher } ->
+  dst: B.buffer UInt8.t { B.length dst = B.length cipher - tag_length a } ->
+  Stack bool
+    (requires fun h0 ->
+      B.live h0 (EK?.ek ek) /\
+      B.live h0 iv /\
+      B.live h0 ad /\
+      B.live h0 cipher /\
+      B.live h0 dst)
+    (ensures fun h0 success h1 ->
+      B.(modifies (loc_buffer dst) h0 h1) /\ (
+      let kv = G.reveal (EK?.kv ek) in
+      let plain = decrypt kv (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 cipher) in
+      if success then
+        Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst)
+      else
+        None? plain))
