@@ -48,29 +48,35 @@ let iv_length (a: alg): nat =
   12
 
 // TODO
-val max_plain_length: alg -> nat
+val ekv_length (a: alg): nat
+
+// Maximum length for both plaintexts and additional data.
+// TODO... 16 * 2**31, or something like that (to be completed, depends on the
+// block size for the algorithm), but it always fits in 32 bits
+val max_length: alg -> nat
 
 // TODO: move to a shared place
 let lbytes (l:nat) = b:Seq.seq UInt8.t { Seq.length b = l }
 
-// Question: <= max_plain_length or <? I think <= is better?
+// Note: using <= for maximum admissible lengths
 // Note: not indexing the types over their lengths; we can use S.length in specs
 let kv a = lbytes (key_length a)
 let iv a = lbytes (iv_length a)
-let plain a = s:S.seq UInt8.t { S.length s <= max_plain_length a }
+let ad a = s:S.seq UInt8.t { S.length s <= max_length a }
+let plain a = s:S.seq UInt8.t { S.length s <= max_length a }
 let cipher a = s:S.seq UInt8.t { S.length s >= tag_length a }
 
-// TODO
-val cipher_length: #a -> plain a -> nat
-val plain_length: #a -> cipher a -> nat
+let cipher_length #a (p: plain a) =
+  S.length p + tag_length a
 
 // Convenient abbreviations
 let encrypted #a (p: plain a) = c:cipher a { S.length c = cipher_length p }
-let decrypted #a (c: cipher a) = p:plain a { S.length p = plain_length p }
+let decrypted #a (c: cipher a) = p:plain a { S.length c = cipher_length p }
 
 // Note: no GTot, specs need to be executable for testing
 
-val ekv (a: alg): Type0
+// Expanded key value. Can't be abstract (see type ekv in implementation).
+let ekv (a: alg) = lbytes (ekv_length a)
 
 // Note: expand corresponds to the "beginning" of the spec of encrypt. We know
 // nothing about it, even though, under this interface:
@@ -84,6 +90,6 @@ val ekv (a: alg): Type0
 // still expresses its post-condition using Spec.AEAD.encrypt. So, encrypt takes
 // a kv, not an ekv.
 
-val expand: #a -> kv a -> ekv a
-val encrypt: #a -> kv a -> iv a -> ad a -> p:plain a -> encrypted p
-val decrypt: #a -> kv a -> iv a -> ad a -> c:cipher a -> option (decrypted c)
+val expand: #(a: alg) -> kv a -> ekv a
+val encrypt: #(a: alg) -> kv a -> iv a -> ad a -> p:plain a -> encrypted p
+val decrypt: #(a: alg) -> kv a -> iv a -> ad a -> c:cipher a -> option (decrypted c)
