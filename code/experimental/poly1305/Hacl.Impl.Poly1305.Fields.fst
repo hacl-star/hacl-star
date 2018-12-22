@@ -120,14 +120,6 @@ let create_felem s =
   | M128 -> admit(); (F128.create_felem ()) <: felem s
   | M256 -> admit(); (F256.create_felem ()) <: felem s
 
-val load_felem_le_post: #s:field_spec -> h:mem -> f:felem s -> Type0
-let load_felem_le_post #s h f =
-  match s with
-  | M32 -> F32.felem_fits h f (1, 1, 1, 1, 1)
-  | M64 -> True
-  | M128 -> True
-  | M256 -> True
-
 inline_for_extraction
 val load_felem_le:
     #s:field_spec
@@ -137,7 +129,6 @@ val load_felem_le:
     (requires fun h -> live h f /\ live h b)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      load_felem_le_post h1 f /\
       as_nat h1 f == BSeq.nat_from_bytes_le (as_seq h0 b))
 let load_felem_le #s f b =
   match s with
@@ -192,12 +183,9 @@ val set_bit:
   -> f:felem s
   -> i:size_t{size_v i < 130}
   -> Stack unit
-    (requires fun h ->
-      live h f /\ as_nat h f < pow2 (v i) /\
-      load_felem_le_post h f)
+    (requires fun h -> live h f /\ as_nat h f < pow2 (v i))
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      load_felem_le_post h1 f /\
       as_nat h1 f == as_nat h0 f + pow2 (v i))
 let set_bit #s f i =
   match s with
@@ -211,12 +199,9 @@ val set_bit128:
     #s:field_spec
   -> f:felem s
   -> Stack unit
-    (requires fun h ->
-      live h f /\ as_nat h f < pow2 128 /\
-      load_felem_le_post h f)
+    (requires fun h -> live h f /\ as_nat h f < pow2 128)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      load_felem_le_post h1 f /\
       as_nat h1 f == as_nat h0 f + pow2 128)
 let set_bit128 #s f =
   match s with
