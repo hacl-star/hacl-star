@@ -29,7 +29,8 @@ val poly1305_encode_block:
     (requires fun h -> live h b /\ live h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      as_nat #s h1 f == pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 b))
+      load_felem_le_post h1 f /\
+      as_nat h1 f == pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 b))
 let poly1305_encode_block #s f b =
   load_felem_le f b;
   set_bit128 f
@@ -58,6 +59,7 @@ val poly1305_encode_last:
     (requires fun h -> live h b /\ live h f /\ disjoint b f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      load_felem_le_post h1 f /\
       as_nat h1 f == pow2 (8 * v len) + BSeq.nat_from_bytes_le (as_seq h0 b))
 let poly1305_encode_last #s f len b =
   push_frame();
@@ -86,6 +88,7 @@ val poly1305_encode_r:
       modifies (loc p) h0 h1 /\
      (let r = gsub p 0ul (nlimb s) in
       let r5 = gsub p (nlimb s) (nlimb s) in
+      load_precompute_r_post h1 r r5 /\
       as_nat h1 r == S.encode_r (as_seq h0 b)))
 let poly1305_encode_r #s p b =
   let lo = uint_from_bytes_le (sub b 0ul 8ul) in
@@ -94,8 +97,7 @@ let poly1305_encode_r #s p b =
   let mask1 = u64 0x0ffffffc0ffffffc in
   let lo = lo &. mask0 in
   let hi = hi &. mask1 in
-  load_precompute_r p lo hi;
-  admit()
+  load_precompute_r p lo hi
 
 inline_for_extraction
 type poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s *. 2ul +. precomplen s)
@@ -198,6 +200,121 @@ let poly1305_init #s ctx key =
   | M256 -> poly1305_init_256 ctx key
 (* WRAPPER to Prevent Inlining *)
 
+#set-options "--z3rlimit 150 --max_ifuel 1"
+
+inline_for_extraction
+val update_block:
+    #s:field_spec
+  -> b:lbuffer uint8 16ul
+  -> pre:lbuffer (limb s) (precomplen s)
+  -> acc:lbuffer (limb s) (nlimb s)
+  -> Stack unit
+    (requires fun h ->
+      live h b /\ live h pre /\ live h acc /\
+     (let r = gsub pre 0ul (nlimb s) in
+      let r5 = gsub pre (nlimb s) (nlimb s) in
+      fadd_mul_r_pre h acc acc r r5 /\
+      as_nat h r < S.prime))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+     (let r = gsub pre 0ul (nlimb s) in
+      feval h1 acc == S.update1 (as_nat h0 r) 16 (as_seq h0 b) (feval h0 acc) /\
+      reduce_felem_pre h1 acc))
+let update_block #s b pre acc =
+  push_frame();
+  let e = create (nlimb s) (limb_zero s) in
+  let h0 = ST.get () in
+  poly1305_encode_block e b;
+  let h1 = ST.get () in
+  assert (as_nat h1 e == pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 b));
+  fadd_mul_r acc e pre;
+  let h2 = ST.get () in
+  assume (feval h1 e == as_nat h1 e);
+  assume (feval h0 (gsub pre 0ul (nlimb s)) == as_nat h0 (gsub pre 0ul (nlimb s)));
+  assert (feval h2 acc == S.fmul (S.fadd (feval h0 acc) (feval h1 e)) (feval h0 (gsub pre 0ul (nlimb s))));
+  pop_frame ()
+
+inline_for_extraction
+val update_last:
+    #s:field_spec
+  -> len:size_t{v len < 16}
+  -> b:lbuffer uint8 len
+  -> pre:lbuffer (limb s) (precomplen s)
+  -> acc:lbuffer (limb s) (nlimb s)
+  -> Stack unit
+    (requires fun h ->
+      live h b /\ live h pre /\ live h acc /\
+     (let r = gsub pre 0ul (nlimb s) in
+      let r5 = gsub pre (nlimb s) (nlimb s) in
+      fadd_mul_r_pre h acc acc r r5 /\
+      as_nat h r < S.prime))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+     (let r = gsub pre 0ul (nlimb s) in
+      feval h1 acc == S.update1 (as_nat h0 r) (v len) (as_seq h0 b) (feval h0 acc) /\
+      reduce_felem_pre h1 acc))
+let update_last #s len b pre acc =
+  push_frame ();
+  let e = create (nlimb s) (limb_zero s) in
+  let h0 = ST.get () in
+  poly1305_encode_last e len b;
+  let h1 = ST.get () in
+  assert (as_nat h1 e == pow2 (8 * v len) + BSeq.nat_from_bytes_le (as_seq h0 b));
+  fadd_mul_r acc e pre;
+  let h2 = ST.get () in
+  assume (feval h1 e == as_nat h1 e);
+  assume (feval h0 (gsub pre 0ul (nlimb s)) == as_nat h0 (gsub pre 0ul (nlimb s)));
+  assert (feval h2 acc == S.fmul (S.fadd (feval h0 acc) (feval h1 e)) (feval h0 (gsub pre 0ul (nlimb s))));
+  pop_frame ()
+
+inline_for_extraction
+val poly1305_update_1:
+    #s:field_spec
+  -> ctx:poly1305_ctx s
+  -> len:size_t
+  -> text:lbuffer uint8 len
+  -> Stack unit
+    (requires fun h ->
+      live h ctx /\ live h text /\
+     (let acc = gsub ctx 0ul (nlimb s) in
+      let precomp_r = gsub ctx (nlimb s) (precomplen s) in
+      let r = gsub precomp_r 0ul (nlimb s) in
+      let r5 = gsub precomp_r (nlimb s) (nlimb s) in
+      let sk = gsub ctx (nlimb s +. precomplen s) (nlimb s) in
+      as_nat h r < S.prime /\ as_nat h sk < S.prime /\ as_nat h acc < S.prime))
+      //fadd_mul_r_pre h acc acc r r5))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc ctx) h0 h1 /\
+     (let acc = gsub ctx 0ul (nlimb s) in
+      let precomp_r = gsub ctx (nlimb s) (precomplen s) in
+      let r = gsub precomp_r 0ul (nlimb s) in
+      let sk = gsub ctx (nlimb s +. precomplen s) (nlimb s) in
+      let st : S.state = S.poly (as_seq h0 text)
+	(S.create_st (as_nat h0 r) (as_nat h0 sk) (as_nat h0 acc)) in
+      as_nat h1 acc == S.get_acc st /\
+      as_nat h1 r == S.get_r st /\
+      as_nat h1 sk == S.get_s st /\
+      fadd_carry_pre h1 acc sk))
+let poly1305_update_1 #s ctx len text =
+  let acc = get_acc ctx in
+  let pre = get_precomp_r ctx in
+
+  let blocks = len /. 16ul in
+  let rem = len %. 16ul in
+
+  let h0 = ST.get () in admit();
+  loop_nospec #h0 blocks ctx
+  (fun i ->
+    let b = sub text (i *! 16ul) 16ul in
+    update_block b pre acc
+  );
+
+  if (rem >. 0ul) then (
+    let b = sub text (blocks *! 16ul) rem in
+    update_last rem b pre acc
+  );
+  reduce_felem acc
+
 inline_for_extraction
 val poly1305_nblocks:
     #s:field_spec
@@ -229,6 +346,31 @@ let poly1305_nblocks #s ctx len text =
   pop_frame()
 
 inline_for_extraction
+val poly1305_update_n:
+    #s:field_spec
+  -> ctx:poly1305_ctx s
+  -> len:size_t
+  -> text:lbuffer uint8 len
+  -> Stack unit
+    (requires fun h -> live h ctx /\ live h text)
+    (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
+let poly1305_update_n #s ctx len text =
+  let acc = get_acc ctx in
+  let pre = get_precomp_r ctx in
+
+  let sz_block = blocklen s in
+  //let len0 = if sz_block >. 16ul then (len /. sz_block) *. sz_block else 0ul in
+  //if (sz_block >. 16ul) then (
+  let len0 = (len /. sz_block) *. sz_block in
+  let t0 = sub text 0ul len0 in
+  poly1305_nblocks ctx len0 t0;
+  //);
+
+  let len = len -. len0 in
+  let text = sub text len0 len in admit();
+  poly1305_update_1 ctx len text
+
+inline_for_extraction
 val poly1305_update_:
     #s:field_spec
   -> ctx:poly1305_ctx s
@@ -240,6 +382,7 @@ val poly1305_update_:
      (let acc = gsub ctx 0ul (nlimb s) in
       let precomp_r = gsub ctx (nlimb s) (precomplen s) in
       let r = gsub precomp_r 0ul (nlimb s) in
+      let r5 = gsub precomp_r (nlimb s) (nlimb s) in
       let sk = gsub ctx (nlimb s +. precomplen s) (nlimb s) in
       as_nat h r < S.prime /\ as_nat h sk < S.prime /\ as_nat h acc < S.prime))
     (ensures  fun h0 _ h1 ->
@@ -254,37 +397,12 @@ val poly1305_update_:
       as_nat h1 r == S.get_r st /\
       as_nat h1 sk == S.get_s st /\
       fadd_carry_pre h1 acc sk))
-let poly1305_update_ #s ctx len text = admit();
-  push_frame();
-  let acc = get_acc ctx in
-  let pre = get_precomp_r ctx in
-
-  let sz_block = blocklen s in
-  let len0 = if sz_block >. 16ul then (len /. sz_block) *. sz_block else 0ul in
-  if (sz_block >. 16ul) then (
-    let t0 = sub text 0ul len0 in
-    poly1305_nblocks ctx len0 t0
-  );
-
-  let len = len -. len0 in
-  let text = sub text len0 len in
-  let e = create (nlimb s) (limb_zero s) in
-  let blocks = len /. 16ul in
-  let h0 = ST.get() in
-  loop_nospec #h0 blocks ctx
-  (fun i ->
-    let b = sub text (i *! 16ul) 16ul in
-    poly1305_encode_block e b;
-    fadd_mul_r acc e pre
-  );
-
-  let rem = len %. 16ul in
-  if (rem >. 0ul) then (
-    let b = sub text (blocks *! 16ul) 16ul in
-    poly1305_encode_last e rem b;
-    fadd_mul_r acc e pre);
-  reduce_felem acc;
-  pop_frame()
+let poly1305_update_ #s ctx len text =
+  match s with
+  | M32 -> poly1305_update_1 #M32 ctx len text
+  | M64 -> poly1305_update_1 #M64 ctx len text
+  | M128 -> admit(); poly1305_update_n #M128 ctx len text
+  | M256 -> admit(); poly1305_update_n #M256 ctx len text
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]

@@ -35,50 +35,55 @@ noeq type state = {
   acc: felem
 }
 
+let create_st (r:felem) (s:felem) (acc:felem) : state =
+  {r = r; s = s; acc = acc}
+
 let get_r (st:state) : felem = st.r
 
 let get_s (st:state) : felem = st.s
 
 let get_acc (st:state) : felem = st.acc
 
-let create_st (r:felem) (s:felem) (acc:felem) : state =
-  {r = r; s = s; acc = acc}
-
-/// Specification
-
 let set_acc (st:state) (acc:felem) =
   {st with acc = acc}
 
-let update1 (len:size_nat{len <= size_block}) (b:lbytes len) (st:state) : Tot state =
+/// Specification
+
+let update1 (r:felem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:felem) : Tot felem =
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
   assert_norm (pow2 128 < prime);
   assert_norm (pow2 128 + nat_from_bytes_le b < prime);
   let n = pow2 (8 * len) + nat_from_bytes_le b in
-  let acc = (n `fadd` st.acc) `fmul` st.r in
-  set_acc st acc
+  let acc = (n `fadd` acc) `fmul` r in
+  acc
+
+let update_last (r:felem) (len:size_nat{len < size_block}) (b:lbytes len) (acc:felem) : Tot felem =
+  if len = 0 then acc
+  else update1 r len b acc
 
 let poly (text:bytes) (st:state) : Tot state =
-  repeat_blocks #uint8 #state size_block text
-    (fun b -> update1 size_block b)
-    (fun l b a -> if l = 0 then a else update1 l b a)
-  st
+  let acc =
+    repeat_blocks #uint8 #felem size_block text
+    (update1 st.r size_block)
+    (update_last st.r)
+    st.acc in
+  set_acc st acc
 
 let finish (st:state) : Tot tag =
+  //replace with the u128 addition
   let n = (st.acc + st.s) % pow2 128 in
   nat_to_bytes_le 16 n
 
 let encode_r (rb:block) : Tot felem =
-  let (&.) = logand #U8 in
-  let rb = rb.[3] <- rb.[3] &. u8 15 in
-  let rb = rb.[7] <- rb.[7] &. u8 15 in
-  let rb = rb.[11] <- rb.[11] &. u8 15 in
-  let rb = rb.[15] <- rb.[15] &. u8 15 in
-  let rb = rb.[4] <- rb.[4] &. u8 252 in
-  let rb : lseq uint8 16 = rb.[8] <- rb.[8] &. u8 252 in
-  let rb : lseq uint8 16 = rb.[12] <- rb.[12] &. u8 252 in
+  let lo = uint_from_bytes_le (sub rb 0 8) in
+  let hi = uint_from_bytes_le (sub rb 8 8) in
+  let mask0 = u64 0x0ffffffc0fffffff in
+  let mask1 = u64 0x0ffffffc0ffffffc in
+  let lo = lo &. mask0 in
+  let hi = hi &. mask1 in
   assert_norm (pow2 128 < prime);
-  nat_from_bytes_le rb
+  uint_v hi * pow2 64 + uint_v lo
 
 let poly1305_init (k:key) : Tot state =
   assert_norm (pow2 128 < prime);

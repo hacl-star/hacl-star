@@ -127,6 +127,7 @@ val load_felem_le:
     (requires fun h -> live h f /\ live h b)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
       as_nat h1 f == BSeq.nat_from_bytes_le (as_seq h0 b))
 let load_felem_le f b =
   let lo = uint_from_bytes_le (sub b 0ul 8ul) in
@@ -189,9 +190,12 @@ val set_bit:
     f:felem
   -> i:size_t{size_v i < 130}
   -> Stack unit
-    (requires fun h -> live h f /\ as_nat h f < pow2 (v i))
+    (requires fun h ->
+      live h f /\ as_nat h f < pow2 (v i) /\
+      felem_fits h f (1, 1, 1, 1, 1))
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
       as_nat h1 f == as_nat h0 f + pow2 (v i))
 let set_bit f i = admit();
   f.(i /. 26ul) <- f.(i /. 26ul) |. (u32 1 <<. (i %. 26ul))
@@ -200,9 +204,12 @@ inline_for_extraction
 val set_bit128:
     f:felem
   -> Stack unit
-    (requires fun h -> live h f /\ as_nat h f < pow2 128)
+    (requires fun h ->
+      live h f /\ as_nat h f < pow2 128 /\
+      felem_fits h f (1, 1, 1, 1, 1))
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
       as_nat h1 f == as_nat h0 f + pow2 128)
 let set_bit128 f = admit();
   f.(4ul) <- f.(4ul) |. u32 0x1000000
