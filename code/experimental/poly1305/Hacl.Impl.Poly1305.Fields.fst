@@ -98,7 +98,12 @@ let as_nat #s h e =
 
 noextract
 val feval: #s:field_spec -> h:mem -> e:felem s -> GTot P.felem
-let feval #s h e = (as_nat #s h e) % P.prime
+let feval #s h e =
+  match s with
+  | M32 -> F32.fevalh h e
+  | M64 -> admit()
+  | M128 -> admit()
+  | M256 -> admit()
 
 inline_for_extraction
 val create_felem:
