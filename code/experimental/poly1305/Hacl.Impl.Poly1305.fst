@@ -226,13 +226,16 @@ let update_block #s b pre acc =
   let h0 = ST.get () in
   poly1305_encode_block e b;
   let h1 = ST.get () in
+  assert (BSeq.nat_from_bytes_le (as_seq h0 b) < pow2 128);
   assert (as_nat h1 e == pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 b));
+  assert_norm (pow2 128 + pow2 128 < S.prime);
+  assert (as_nat h1 e < S.prime);
   fadd_mul_r acc e pre;
   let h2 = ST.get () in
-  assume (feval h1 e == as_nat h1 e);
-  assume (feval h0 (gsub pre 0ul (nlimb s)) == as_nat h0 (gsub pre 0ul (nlimb s)));
+  FStar.Math.Lemmas.modulo_lemma (as_nat h1 e) S.prime;
+  FStar.Math.Lemmas.modulo_lemma (as_nat h0 (gsub pre 0ul (nlimb s))) S.prime;
   assert (feval h2 acc == S.fmul (S.fadd (feval h0 acc) (feval h1 e)) (feval h0 (gsub pre 0ul (nlimb s))));
-  pop_frame ()
+  pop_frame()
 
 inline_for_extraction
 val update_last:
@@ -260,10 +263,13 @@ let update_last #s len b pre acc =
   poly1305_encode_last e len b;
   let h1 = ST.get () in
   assert (as_nat h1 e == pow2 (8 * v len) + BSeq.nat_from_bytes_le (as_seq h0 b));
+  FStar.Math.Lemmas.pow2_lt_compat 128 (8 * v len);
+  assert_norm (pow2 128 + pow2 128 < S.prime);
+  assert (as_nat h1 e < S.prime);
   fadd_mul_r acc e pre;
   let h2 = ST.get () in
-  assume (feval h1 e == as_nat h1 e);
-  assume (feval h0 (gsub pre 0ul (nlimb s)) == as_nat h0 (gsub pre 0ul (nlimb s)));
+  FStar.Math.Lemmas.modulo_lemma (as_nat h1 e) S.prime;
+  FStar.Math.Lemmas.modulo_lemma (as_nat h0 (gsub pre 0ul (nlimb s))) S.prime;
   assert (feval h2 acc == S.fmul (S.fadd (feval h0 acc) (feval h1 e)) (feval h0 (gsub pre 0ul (nlimb s))));
   pop_frame ()
 
