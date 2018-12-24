@@ -145,6 +145,7 @@ let seq_update_sub #a s start n x =
   Seq.lemma_eq_intro (Seq.slice o start (start + n)) x;
   o
 
+(*
 let map_blocks #a bs inp f g =
   let len = length inp in
   let nb = len / bs in
@@ -159,6 +160,8 @@ let map_blocks #a bs inp f g =
   if rem > 0 then
     seq_update_sub out (nb * bs) rem (g nb rem (seq_sub inp (nb * bs) rem))
   else out
+
+*)
 
 val repeati_blocks_f:
     #a:Type0
@@ -206,13 +209,46 @@ let repeat_blocks #a #b bs inp f l init =
   let last = seq_sub inp (nb * bs) rem in
   l rem last acc
 
-let generate_blocks #t len n a f acc0 =
-  let a' (i:nat{i <= n}) = a i & lseq t (i * len) in
-  let f' (i:nat{i < n}) (ao:a' i) =
-    let acc, o = ao <: a i & lseq t (i * len) in
+let generate_blocks_a (t:Type) (blocklen:size_nat) (n:nat) (a:(i:nat{i <= n} -> Type)) (i:nat{i <= n}) = a i & s:seq t{length s == i * blocklen}
+
+let generate_blocks_inner (t:Type) (blocklen:size_nat) (n:nat) (a:(i:nat{i <= n} -> Type)) (f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == blocklen})) (i:nat{i < n}) (acc:generate_blocks_a t blocklen n a i) : generate_blocks_a t blocklen n a (i + 1) = 
+    let acc, o = acc in
     let acc', block = f i acc in
-    let o' : lseq t ((i + 1) * len) = o @| block in
+    let o' : s:seq t{length s == ((i + 1) * blocklen)} = Seq.append o block in
     acc', o'
-  in
-  let acc0' : a 0 & lseq t (0 * len) = acc0, Seq.empty in
-  repeat_gen n a' f' acc0'
+
+let generate_blocks #t len n a f acc0 =
+  let acc0 : generate_blocks_a t len n a 0 = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  repeat_gen n (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) acc0
+
+let fixed_a a i = a
+let map_blocks_inner #a (bs:size_nat{bs > 0}) (inp:seq a) (f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)) (i:nat{i < length inp / bs}) () = 
+  (), f i (Seq.slice inp (i*bs) ((i+1)*bs))
+
+
+let map_blocks #a blocksize inp f g =
+  let len = length inp in
+  let nb = len / blocksize in
+  let rem = len % blocksize in
+  let _,bs = generate_blocks #a blocksize nb (fixed_a unit) (map_blocks_inner blocksize inp f) () in
+  if (rem > 0) then
+    Seq.append bs (g nb rem (Seq.slice inp (nb * blocksize) len))
+  else bs
+
+
+(*
+let map_blocks #a bs inp f g =
+  let len = length inp in
+  let nb = len / bs in
+  let rem = len % bs in
+  let out = inp in
+  let out =
+    repeati #(s:seq a{length s == len}) nb
+    (fun i out ->
+      assert ((i+1) * bs <= nb * bs);
+      seq_update_sub out (i * bs) bs (f i (seq_sub inp (i * bs) bs))
+    ) out in
+  if rem > 0 then
+    seq_update_sub out (nb * bs) rem (g nb rem (seq_sub inp (nb * bs) rem))
+  else out
+*)

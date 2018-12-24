@@ -257,15 +257,6 @@ val for_all2:#a:Type -> #b:Type -> #len:size_nat
   -> s2:lseq b len ->
   Tot bool
 
-(* The following functions allow us to bridge between unbounded and bounded sequences *)
-val map_blocks:
-    #a:Type0
-  -> blocksize:size_nat{blocksize > 0}
-  -> inp:seq a
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
-  -> g:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
-  Tot (out:seq a {length out == length inp})
-
 val repeati_blocks:
     #a:Type0
   -> #b:Type0
@@ -290,8 +281,18 @@ val repeat_blocks:
 val generate_blocks:
     #t:Type0
   -> len:size_nat
-  -> n:nat{n * len <= max_size_t}
+  -> n:nat
   -> a:(i:nat{i <= n} -> Type)
-  -> f:(i:nat{i < n} -> a i -> a (i + 1) & lseq t len)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
-  Tot (a n & lseq t (n * len))
+  Tot (a n & s:seq t{ length s == n * len})
+  
+(* The following functions allow us to bridge between unbounded and bounded sequences *)
+val map_blocks:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
+  -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
+  Tot (out:seq a {length out == length inp})
+
