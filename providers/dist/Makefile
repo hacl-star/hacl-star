@@ -80,7 +80,7 @@ $(HACL_A):
 $(KREMLIB_A):
 	@echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false
 
-HACL_A 		= $(HACL_HOME)/code/dist/compact/libhacl.a
+HACL_A 		= $(HACL_HOME)/dist/compact/libhacl.a
 KREMLIB_A 	= $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
 all: libevercrypt.$(SO)

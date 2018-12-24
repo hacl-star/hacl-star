@@ -33,15 +33,15 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/providers/evercrypt \
   $(HACL_HOME)/providers/evercrypt/fst \
   $(HACL_HOME)/providers/evercrypt/config/$(CONFIG) \
-  $(HACL_HOME)/code/lib/kremlin \
-  $(HACL_HOME)/code/experimental/aesgcm \
-  $(HACL_HOME)/code/curve25519/interfaces \
-  $(HACL_HOME)/code/hash-new \
-  $(HACL_HOME)/code/api/interfaces \
-  $(HACL_HOME)/code/api \
-  $(HACL_HOME)/code/salsa-family \
-  $(HACL_HOME)/code/poly1305 \
-  $(HACL_HOME)/code/bignum \
+  $(HACL_HOME)/code/hash \
+  $(HACL_HOME)/code/old/lib/kremlin \
+  $(HACL_HOME)/code/old/experimental/aesgcm \
+  $(HACL_HOME)/code/old/curve25519/interfaces \
+  $(HACL_HOME)/code/old/api/interfaces \
+  $(HACL_HOME)/code/old/api \
+  $(HACL_HOME)/code/old/salsa-family \
+  $(HACL_HOME)/code/old/poly1305 \
+  $(HACL_HOME)/code/old/bignum \
   $(HACL_HOME)/vale/code/lib/math \
   $(HACL_HOME)/vale/code/lib/util \
   $(HACL_HOME)/vale/code/lib/collections \
@@ -155,7 +155,7 @@ test: test/merkle_tree_test.exe
 
 test/merkle_tree_test.exe: test/merkle_tree_test.c dist/compact/libmerkletree.a \
   $(HACL_HOME)/providers/dist/coco/libevercrypt.a \
-  $(HACL_HOME)/code/dist/compact/libhacl.a \
+  $(HACL_HOME)/dist/compact/libhacl.a \
   $(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
 	$(CC) $(CFLAGS) -Idist/compact -I$(KREMLIN_HOME)/include \
 	  -I$(HACL_HOME)/providers/dist/compact $^ -o $@

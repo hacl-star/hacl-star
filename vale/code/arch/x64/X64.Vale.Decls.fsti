@@ -348,6 +348,7 @@ let rec buffers_readable (h: M.mem) (l: list M.buffer64) : GTot prop0 (decreases
 
 unfold let modifies_buffer (b:M.buffer64) (h1 h2:M.mem) = modifies_mem (loc_buffer b) h1 h2
 unfold let modifies_buffer_2 (b1 b2:M.buffer64) (h1 h2:M.mem) =modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
+unfold let modifies_buffer_3 (b1 b2 b3:M.buffer64) (h1 h2:M.mem) =modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
 unfold let modifies_buffer128 (b:M.buffer128) (h1 h2:M.mem) = modifies_mem (loc_buffer b) h1 h2
 unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
 

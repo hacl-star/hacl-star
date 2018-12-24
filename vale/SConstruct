@@ -303,14 +303,12 @@ external_files = [
   ExternalFile('../specs/Spec.SHA2.fst'),
   ExternalFile('../specs/Spec.SHA2.fsti'),
   ExternalFile('../specs/Spec.SHA2.Constants.fst'),
-  ExternalFile('../specs/Spec.Lib.fst'),
   ExternalFile('../specs/Spec.SHA1.fsti'),
   ExternalFile('../specs/Spec.SHA1.fst'),
   ExternalFile('../specs/Spec.MD5.fst'),
   ExternalFile('../specs/Spec.MD5.fsti'),
   ExternalFile('../specs/Spec.Hash.fst'),
   ExternalFile('../specs/Spec.Hash.Helpers.fst'),
-  ExternalFile('../code/lib/kremlin/FStar.Endianness.fst'),
 ]
 
 no_extraction_files = [File(x) for x in [
@@ -1182,6 +1180,7 @@ if not is_help:
     curve25519_asm = extract_assembly_code(env, 'curve25519', File('code/crypto/ecc/curve25519/Main25519.ml'), [
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastUtil.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastHybrid.vaf'),
+        File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastWide.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastSqr.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastMul.vaf')],
       File('code/lib/util/CmdLineParser.ml'))

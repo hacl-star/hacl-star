@@ -1,7 +1,7 @@
 HACL_HOME ?= ..
 KREMLIN_HOME ?= ../../kremlin
 
-include $(HACL_HOME)/Makefile.include
+include $(HACL_HOME)/code/old/Makefile.include
 
 OPENSSL_HOME=$(FSTAR_HOME)/ucontrib/CoreCrypto/ml/openssl
 
@@ -21,7 +21,7 @@ else
 endif
 
 
-KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_api/uf1cma $(HACL_HOME)/secure_api/vale $(HACL_HOME)/secure_api/vale/asm $(HACL_HOME)/secure_api/prf $(HACL_HOME)/secure_api/hkdf $(HACL_HOME)/secure_api/utils $(HACL_HOME)/secure_api/indexing $(HACL_HOME)/code/experimental/aesgcm $(HACL_HOME)/code/bignum $(HACL_HOME)/code/poly1305 $(HACL_HOME)/code/salsa-family $(HACL_HOME)/code/hash $(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/specs $(KREMLIN_HOME)/kremlib/compat $(KREMLIN_HOME)/test)
+KRML_INCLUDES=$(addprefix -I ,$(HACL_HOME)/secure_api/aead $(HACL_HOME)/secure_api/uf1cma $(HACL_HOME)/secure_api/vale $(HACL_HOME)/secure_api/vale/asm $(HACL_HOME)/secure_api/prf $(HACL_HOME)/secure_api/hkdf $(HACL_HOME)/secure_api/utils $(HACL_HOME)/secure_api/indexing $(HACL_HOME)/code/experimental/aesgcm $(HACL_HOME)/code/old/bignum $(HACL_HOME)/code/poly1305 $(HACL_HOME)/code/salsa-family $(HACL_HOME)/code/hash $(HACL_HOME)/code/lib/kremlin $(HACL_HOME)/specs $(KREMLIN_HOME)/kremlib/compat $(KREMLIN_HOME)/test)
 
 # 2017.08.15 SZ: Made these warnings non-fatal
 # - Warning 4 (dropping toplevel definition)
@@ -98,12 +98,12 @@ OTHERFLAGS+=--max_fuel 4 --initial_fuel 0 --max_ifuel 2 --initial_ifuel 0 --z3rl
 
 # A bit much!!
 OTHERFLAGS+= \
---include $(HACL_HOME)/code/bignum \
---include $(HACL_HOME)/code/experimental/aesgcm \
---include $(HACL_HOME)/code/lib/kremlin \
---include $(HACL_HOME)/code/poly1305 \
---include $(HACL_HOME)/code/salsa-family \
---include $(HACL_HOME)/code/hash \
+--include $(HACL_HOME)/code/old/bignum \
+--include $(HACL_HOME)/code/old/experimental/aesgcm \
+--include $(HACL_HOME)/code/old/lib/kremlin \
+--include $(HACL_HOME)/code/old/poly1305 \
+--include $(HACL_HOME)/code/old/salsa-family \
+--include $(HACL_HOME)/code/old/hash \
 --include $(HACL_HOME)/secure_api/aead \
 --include $(HACL_HOME)/secure_api/prf \
 --include $(HACL_HOME)/secure_api/vale \

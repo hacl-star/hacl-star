@@ -201,8 +201,12 @@ function exec_build() {
         fi
     elif [[ $target == "hacl-nightly" ]]; then
         echo target - >hacl-nightly
-        export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
-        hacl_test_and_hints && echo -n true >$status_file
+        if [[ $branchname == "vale" ||  $branchname == "_vale" ]]; then
+          vale_test && echo -n true >$status_file
+        else
+          export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
+          hacl_test_and_hints && echo -n true >$status_file
+        fi
     else
         echo "Invalid target"
         echo Failure >$result_file

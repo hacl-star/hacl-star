@@ -40,20 +40,12 @@ VALE_OBJ_DIR	= $(HACL_HOME)/vale/obj
 # - vale/obj/external, since it contains copies of files that already exist
 #   elsewhere, thus defeating reusability of checked files
 FSTAR_INCLUDES = \
-  $(KREMLIN_HOME)/kremlib/compat \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/providers/evercrypt \
   $(HACL_HOME)/providers/evercrypt/fst \
   $(HACL_HOME)/providers/evercrypt/config/$(CONFIG) \
-  $(HACL_CODE)/lib/kremlin \
-  $(HACL_CODE)/experimental/aesgcm \
-  $(HACL_CODE)/curve25519/interfaces \
-  $(HACL_CODE)/hash-new \
-  $(HACL_CODE)/api/interfaces \
-  $(HACL_CODE)/api \
-  $(HACL_CODE)/salsa-family \
-  $(HACL_CODE)/poly1305 \
-  $(HACL_CODE)/bignum \
+  $(HACL_CODE)/hash \
+  $(HACL_CODE)/sha3 \
   $(HACL_HOME)/vale/code/lib/math \
   $(HACL_HOME)/vale/code/lib/util \
   $(HACL_HOME)/vale/code/lib/collections \
@@ -68,7 +60,6 @@ FSTAR_INCLUDES = \
   $(HACL_HOME)/vale/specs/defs \
   $(HACL_HOME)/vale/specs/crypto \
   $(HACL_HOME)/vale/specs/hardware \
-  $(HACL_HOME)/vale/obj/external \
   $(HACL_HOME)/vale/obj/code/lib/util/x64/stdcalls \
   $(HACL_HOME)/vale/obj/code/lib/util/x64 \
   $(HACL_HOME)/vale/obj/code/lib/util \
@@ -80,7 +71,8 @@ FSTAR_INCLUDES = \
   $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/sha \
   $(HACL_HOME)/vale/obj/code/thirdPartyPorts/rfc7748/curve25519/x64 \
   $(HACL_HOME)/vale/obj/code/test \
-  $(HACL_SPEC)
+  $(HACL_SPEC) \
+  $(HACL_SPEC)/old
 
 VALE_CACHE_DIR=$(VALE_OBJ_DIR)/cache_checked
 

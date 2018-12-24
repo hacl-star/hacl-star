@@ -1,0 +1,465 @@
+[
+  "â€\u0019ìr\u001aèÿÆ.\u0007ª\u0014\u0019U'",
+  [
+    [
+      "Hacl.Endianness.store32_le",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
+      ],
+      0,
+      "b9d7f3da23035e510ce93d822e26d0e6"
+    ],
+    [
+      "Hacl.Endianness.load32_le",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_1ec852aff28ab568526a8c54c3e853ec"
+      ],
+      0,
+      "14e4219c07fd2bf7e076e06b3d2a532b"
+    ],
+    [
+      "Hacl.Endianness.store32_be",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
+      ],
+      0,
+      "5a68c108f78e8ef675e3cd4cc533db27"
+    ],
+    [
+      "Hacl.Endianness.load32_be",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_1ec852aff28ab568526a8c54c3e853ec"
+      ],
+      0,
+      "4bf756559e8e909fa4f4c8d4600b47d7"
+    ],
+    [
+      "Hacl.Endianness.store64_le",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_a32c05d74e0c23b69c1f684beb5f0d5a"
+      ],
+      0,
+      "daea6accb4d3a2349cd5c4bdea3e2001"
+    ],
+    [
+      "Hacl.Endianness.load64_le",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_30ee2740b61b52de050963778329a6a5"
+      ],
+      0,
+      "12ba75bf48887e9c42e4f52d74f0a1ff"
+    ],
+    [
+      "Hacl.Endianness.store64_be",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_a32c05d74e0c23b69c1f684beb5f0d5a"
+      ],
+      0,
+      "e2f72b6d78e0673d554439d9ef2fb1e0"
+    ],
+    [
+      "Hacl.Endianness.load64_be",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_30ee2740b61b52de050963778329a6a5"
+      ],
+      0,
+      "242b572c2998b19f00a68e7e6567c693"
+    ],
+    [
+      "Hacl.Endianness.load128_le",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_FStar.UInt32.n", "function_token_typing_FStar.UInt32.n",
+        "haseqHacl.Endianness_Tm_refine_530be526726c3b66223dd819f9d65058",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "9e3b41e34b6a9693cbd0eec19c802d97"
+    ],
+    [
+      "Hacl.Endianness.store128_le",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_FStar.UInt32.n", "function_token_typing_FStar.UInt32.n",
+        "haseqHacl.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "4b6dc84fbe6e1976e13dda48ac57a922"
+    ],
+    [
+      "Hacl.Endianness.load128_be",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_FStar.UInt32.n", "function_token_typing_FStar.UInt32.n",
+        "haseqHacl.Endianness_Tm_refine_530be526726c3b66223dd819f9d65058",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "40edc39c2a213044c18247609d933e83"
+    ],
+    [
+      "Hacl.Endianness.store128_be",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt128.n",
+        "equation_FStar.UInt32.n", "function_token_typing_FStar.UInt32.n",
+        "haseqHacl.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "d5e351fbfbb84ccd9cc8aba60791acfd"
+    ],
+    [
+      "Hacl.Endianness.hstore32_le",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
+      ],
+      0,
+      "e0ad7a4aad1a9778a28d73a474e45011"
+    ],
+    [
+      "Hacl.Endianness.hload32_le",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_1ec852aff28ab568526a8c54c3e853ec"
+      ],
+      0,
+      "b2b099f625c7e6d6ab52ae9075ff5380"
+    ],
+    [
+      "Hacl.Endianness.hstore32_be",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
+      ],
+      0,
+      "93e7d854583378909d6280d7c9ff9b12"
+    ],
+    [
+      "Hacl.Endianness.hload32_be",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_1ec852aff28ab568526a8c54c3e853ec"
+      ],
+      0,
+      "9805c90a3884837cec24e48035e62c0c"
+    ],
+    [
+      "Hacl.Endianness.hstore64_le",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_a32c05d74e0c23b69c1f684beb5f0d5a"
+      ],
+      0,
+      "74c1cc48616fbf2000a2cb0e82ac20c2"
+    ],
+    [
+      "Hacl.Endianness.hload64_le",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_30ee2740b61b52de050963778329a6a5"
+      ],
+      0,
+      "0b322d0ae5e8991ebc7c141f5fd04d18"
+    ],
+    [
+      "Hacl.Endianness.hstore64_be",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_a32c05d74e0c23b69c1f684beb5f0d5a"
+      ],
+      0,
+      "51cb540b6d0bca2585664c36747fb932"
+    ],
+    [
+      "Hacl.Endianness.hload64_be",
+      1,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int",
+        "haseqHacl.Endianness_Tm_refine_30ee2740b61b52de050963778329a6a5"
+      ],
+      0,
+      "6caa441c9e3aa9daa8abd7ae09d2b89f"
+    ],
+    [
+      "Hacl.Endianness.hstore128_le",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_Hacl.UInt128.n", "function_token_typing_FStar.UInt32.n",
+        "haseqHacl.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "249e015f4020333a4e4e3f98d8529c57"
+    ],
+    [
+      "Hacl.Endianness.hload128_le",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_Hacl.UInt128.n", "function_token_typing_FStar.UInt32.n",
+        "haseqHacl.Endianness_Tm_refine_530be526726c3b66223dd819f9d65058",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "7ab67874a83057c5389e6f4a899883b6"
+    ],
+    [
+      "Hacl.Endianness.hstore128_be",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_Hacl.UInt128.n", "function_token_typing_FStar.UInt32.n",
+        "haseqHacl.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "b776cc213958e2a556b7febbf553f209"
+    ],
+    [
+      "Hacl.Endianness.hload128_be",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "equation_Hacl.UInt128.n", "function_token_typing_FStar.UInt32.n",
+        "haseqHacl.Endianness_Tm_refine_530be526726c3b66223dd819f9d65058",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "e7542eafdfda7ef73d089868e3ba3790"
+    ],
+    [
+      "Hacl.Endianness.hstore32_le",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "6aeb24ee0f9162353fb8b12bb0083375"
+    ],
+    [
+      "Hacl.Endianness.hstore32_be",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "4c717934bd07f800be244ce2a4995609"
+    ],
+    [
+      "Hacl.Endianness.hstore64_le",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt64.n",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "37fdd69ceb47c27e602b610725907f18"
+    ],
+    [
+      "Hacl.Endianness.hstore64_be",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt64.n",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "cf5606037007e7eef70c205e9f614c61"
+    ],
+    [
+      "Hacl.Endianness.hstore128_le",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int", "equation_Hacl.UInt128.v" ],
+      0,
+      "25d9ba7017027ea875a4b491f2c97220"
+    ],
+    [
+      "Hacl.Endianness.hstore128_be",
+      2,
+      2,
+      1,
+      [ "@query", "assumption_Prims.HasEq_int", "equation_Hacl.UInt128.v" ],
+      0,
+      "3c60aef678cf6a3f86da8736f4ad05f7"
+    ],
+    [
+      "Hacl.Endianness.hload32_le",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "d5c93156b46d36008ad6d8181a77ab4d"
+    ],
+    [
+      "Hacl.Endianness.hload32_be",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt32.n",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "9b70db131d84faccc5556560a47f027f"
+    ],
+    [
+      "Hacl.Endianness.hload64_le",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt64.n",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "cc82f1b33f5ce187de8546bc575466fc"
+    ],
+    [
+      "Hacl.Endianness.hload64_be",
+      2,
+      0,
+      1,
+      [
+        "@query", "assumption_Prims.HasEq_int", "equation_FStar.UInt64.n",
+        "haseqHacl.Spec.Endianness_Tm_refine_f2c63b31fd0059912139424a133143ce",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "450cb8c144615cb12ced5a509b523832"
+    ],
+    [
+      "Hacl.Endianness.hload128_le",
+      2,
+      2,
+      1,
+      [ "@query", "equation_Hacl.UInt128.t", "equation_Hacl.UInt128.v" ],
+      0,
+      "c76d65ba195998779e3b69f3df9ef787"
+    ],
+    [
+      "Hacl.Endianness.hload128_be",
+      2,
+      2,
+      1,
+      [ "@query", "equation_Hacl.UInt128.t", "equation_Hacl.UInt128.v" ],
+      0,
+      "8dd67aca21d5389811956b9379f05bbc"
+    ]
+  ]
+]

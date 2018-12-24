@@ -41,13 +41,13 @@ CCOPTS=-Wall -Wextra $(CFLAGS) -I $(KREMLIN_HOME)/include $(CCOPTS_EXTRA)
 INCLUDE_PATHS=$(addprefix --include , \
 	$(HACL_HOME)/specs \
 	$(HACL_HOME)/specs/old \
-	$(HACL_HOME)/code/bignum \
-	$(HACL_HOME)/code/experimental/aesgcm \
-	$(HACL_HOME)/code/lib/kremlin \
-	$(HACL_HOME)/code/poly1305 \
-	$(HACL_HOME)/code/hash \
-	$(HACL_HOME)/code/hash/interfaces \
-	$(HACL_HOME)/code/salsa-family \
+	$(HACL_HOME)/code/old/bignum \
+	$(HACL_HOME)/code/old/experimental/aesgcm \
+	$(HACL_HOME)/code/old/lib/kremlin \
+	$(HACL_HOME)/code/old/poly1305 \
+	$(HACL_HOME)/code/old/hash \
+	$(HACL_HOME)/code/old/hash/interfaces \
+	$(HACL_HOME)/code/old/salsa-family \
 	$(KREMLIN_HOME)/kremlib \
 	$(KREMLIN_HOME)/kremlib/compat \
 	$(HACL_HOME)/secure_api \

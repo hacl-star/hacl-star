@@ -36,9 +36,10 @@
         "equation_Prims.l_imp", "equation_Prims.logical",
         "equation_Prims.nat", "equation_Prims.squash",
         "equation_Prop_s.prop0", "equation_Types_s.quad32",
-        "equation_Words_s.nat64", "equation_Words_s.pow2_1",
-        "equation_Words_s.pow2_2", "equation_Words_s.pow2_4",
-        "equation_X64.Machine_s.xmm", "equation_X64.Memory.buffer64",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_Words_s.pow2_1", "equation_Words_s.pow2_2",
+        "equation_Words_s.pow2_4", "equation_X64.Machine_s.xmm",
+        "equation_X64.Memory.buffer64",
         "equation_X64.Memory.type_of_base_typ",
         "equation_X64.Memory.type_of_typ", "equation_X64.Memory.vuint64",
         "equation_X64.Vale.Decls.va_ensure_total",
@@ -67,7 +68,7 @@
         "interpretation_X64.Stack_Tm_abs_b3f3bbc1719e9607cca931009bfd9e40",
         "interpretation_X64.Stack_Tm_abs_fa19408a1b325145084f7cd22fbf9471",
         "kinding_Tm_arrow_9cb3c953faf527c316d427b2ce8bd81b", "l_imp-interp",
-        "l_quant_interp__6629", "lemma_FStar.Seq.Base.lemma_index_upd1",
+        "l_quant_interp__6645", "lemma_FStar.Seq.Base.lemma_index_upd1",
         "lemma_FStar.Seq.Base.lemma_index_upd2",
         "lemma_FStar.Seq.Base.lemma_len_upd", "lemma_FStar.UInt.pow2_values",
         "lemma_X64.Memory.buffer_length_buffer_as_seq",
@@ -102,6 +103,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_regs",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_2ca062977a42c36634b89c1c4f193f79",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_b5ad1dbfbd48faaf34d92bafda76205d",
         "refinement_interpretation_FStar.StrongExcludedMiddle_Tm_refine_94f72bfda5e23ac3960136c8bc3f958c",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
@@ -147,7 +149,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "0bbf1340e5feab42ccdd503e52b554de"
+      "78e2598b876e898b16c404075b1d2d7b"
     ],
     [
       "X64.Stack.va_wpMonotone_callee_save_registers",
@@ -166,7 +168,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "8ef42e7be22dcb6469dfe4a24dfbf50f"
+      "58e81f125c92b8fb333e25f4f809c1a9"
     ],
     [
       "X64.Stack.va_wpCompute_callee_save_registers",
@@ -186,7 +188,7 @@
         "typing_X64.Vale.State.__proj__Mkstate__item__ok", "unit_typing"
       ],
       0,
-      "542dccdb43b8b84fd2e3485450622171"
+      "db1b0e0071e7e90f5a8907da23596f12"
     ],
     [
       "X64.Stack.va_wpProof_callee_save_registers",
@@ -198,7 +200,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "c624adae4e83a74d1c11bf221a962df1"
+      "14fa783d9a2166b40518351b1189036c"
     ],
     [
       "X64.Stack.va_wpProof_callee_save_registers",
@@ -265,7 +267,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "6dcefd8b0e38ab0069450aad59b4b9b2"
+      "a68813f019a4a575ead3c0c64d0501b5"
     ],
     [
       "X64.Stack.va_lemma_callee_restore_registers",
@@ -372,7 +374,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "d3747f1ad507fb94f08813ec4fd49a50"
+      "da060e03031dde0e00645159f9f304b9"
     ],
     [
       "X64.Stack.va_wpMonotone_callee_restore_registers",
@@ -411,7 +413,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "1a2ca9bf8ed71cb44eec8e0bbee7089e"
+      "f2d0182a65e24b9b84a6b67122a677cb"
     ],
     [
       "X64.Stack.va_wpCompute_callee_restore_registers",
@@ -436,7 +438,7 @@
         "typing_X64.Vale.State.__proj__Mkstate__item__ok", "unit_typing"
       ],
       0,
-      "4874328bf8c9f0ecb9fce5dfece7ff0b"
+      "a9fc17e676787fe8ce5f6483e4878eeb"
     ],
     [
       "X64.Stack.va_wpProof_callee_restore_registers",
@@ -448,7 +450,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "676f281a8bed59925942403347f87f0c"
+      "ba59a358817d8fb3f004c61fbb0b971f"
     ],
     [
       "X64.Stack.va_wpProof_callee_restore_registers",
@@ -532,7 +534,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "c47b760dfca5bb2fe578c02cac9cf184"
+      "162b6357f146ff249ad2d8d13c66e5a6"
     ]
   ]
 ]
