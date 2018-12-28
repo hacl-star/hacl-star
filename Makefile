@@ -5,9 +5,9 @@
 #
 #            merkle_tree
 #                |
-#             evercrypt               secure_api
+#             evercrypt                secure_api
 #               /  \                      |
-#           code   vale                cold/old
+#           code   vale                code/old
 #           /   \  /                      |
 #         lib   specs                  specs/old
 #
@@ -115,6 +115,9 @@ HACL_OLD_FILES=\
 dist/compact/Makefile.basic: EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
+
+dist/compact-c89/Makefile.basic: EXTRA=$(COMPACT_FLAGS) -fc89 -ccopt -std=c89
+dist/compact-c89/Makefile.basic: HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
 .PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/headers/Makefile.basic $(HAND_WRITTEN_FILES) | old-extract-c

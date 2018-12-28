@@ -29,7 +29,7 @@ all-ci: $(addsuffix -verify, $(filter-out $(SLOW) $(TODO), $(API_FILES)))
 
 api: verify
 
-extract-c: aead-c/Hacl_Chacha20Poly1305.c box-c/NaCl.c policies-c/Hacl_Policies.c
+extract-c: aead-c89/Hacl_Chacha20Poly1305.c aead-c/Hacl_Chacha20Poly1305.c box-c/NaCl.c policies-c/Hacl_Policies.c
 
 test:
 
@@ -44,6 +44,13 @@ box-c/NaCl.c: $(HACL_HOME)/code/old/poly1305/Hacl.Poly1305_64.fsti $(HACL_HOME)/
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir box-c NaCl.fst -skip-compilation \
 		-bundle "NaCl=*" -minimal -add-include '"kremlib.h"' \
 		-library "Hacl.Policies"
+
+aead-c89/Hacl_Chacha20Poly1305.c: $(HACL_HOME)/code/old/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/old/salsa-family/Hacl.Chacha20.fsti Hacl.Chacha20Poly1305.fst
+	$(KREMLIN) $(KREMLIN_ARGS) -I interfaces -tmpdir aead-c89 Hacl.Chacha20Poly1305.fst -skip-compilation -fc89 \
+	-add-include '"Hacl_Chacha20.h"' -add-include '"AEAD_Poly1305_64.h"' \
+	-minimal -add-include '"kremlib.h"' -bundle 'Hacl.Chacha20Poly1305=*' \
+	# TODO: FIX FOR KREMLIN EXTRACTION ISSUE, CHECK WITH JP
+	$(SED) -i 's/(void \*)(uint8_t)0U, //g' aead-c89/Hacl_Chacha20Poly1305.c
 
 aead-c/Hacl_Chacha20Poly1305.c: $(HACL_HOME)/code/old/poly1305/AEAD.Poly1305_64.fsti $(HACL_HOME)/code/old/salsa-family/Hacl.Chacha20.fsti Hacl.Chacha20Poly1305.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -I interfaces -tmpdir aead-c Hacl.Chacha20Poly1305.fst -skip-compilation \
