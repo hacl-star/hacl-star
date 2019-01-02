@@ -180,7 +180,7 @@ let poly1305_update_ #s ctx len text =
        fadd_mul_r acc e pre);
   let rem = len %. size 16 in
   if (rem >. size 0) then (
-     let b = sub text (blocks *. size 16) (size 16) in
+     let b = sub text (blocks *. size 16) rem in
      poly1305_encode_last e rem b;
      fadd_mul_r acc e pre);
   pop_frame()
