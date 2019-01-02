@@ -6,7 +6,6 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
-open Lib.Vec128
 open Lib.Vec256
 module F32 = Hacl.Impl.Poly1305.Field32
 module F64 = Hacl.Impl.Poly1305.Field64
@@ -25,7 +24,7 @@ let limb (s:field_spec) =
   match s with
   | M32 -> uint32
   | M64 -> uint64
-  | M128 -> vec128
+  | M128 -> F128.uint64x2
   | M256 -> vec256
 
 unfold
@@ -33,7 +32,7 @@ let limb_zero (s:field_spec) : limb s=
   match s with
   | M32 -> u32 0 
   | M64 -> u64 0
-  | M128 -> vec128_zero
+  | M128 -> F128.zero
   | M256 -> vec256_zero
 
 unfold
@@ -41,7 +40,7 @@ let wide (s:field_spec) =
   match s with
   | M32 -> uint64
   | M64 -> uint128
-  | M128 -> vec128
+  | M128 -> F128.uint64x2
   | M256 -> vec256
 
 unfold

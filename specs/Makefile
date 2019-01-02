@@ -11,6 +11,7 @@ FSTAR_INCLUDES+= \
 	--expose_interfaces
 
 SPEC_FILES=	Spec.Chacha20.fst \
+		Spec.Chacha20.Vec.fst \
 		Spec.Poly1305.fst \
 		Spec.Chacha20.fst \
 		Spec.Chacha20Poly1305.fst \
@@ -31,9 +32,9 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.ECIES.fst \
 		Spec.HSalsa20.fst
 
-LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst
+LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.IntVector.fst
 LIBS_FILES= $(addprefix ../lib/fst/, $(LIBS))
-LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml
+LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml Lib_IntVector.ml
 LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=))
 
 #
@@ -47,7 +48,7 @@ all: test
 
 test: test-unified-target test-individual-target
 
-test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2.exe
+test-unified-target: Chacha20.exe Chacha20.Vec.exe Curve25519.exe Curve448.exe SHA2.exe Blake2.exe
 test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe ecies.exe
 
 clean:

@@ -97,7 +97,7 @@ val eq_elim: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len ->
   [SMTPat (equal s1 s2)]
 
 (* Alias for creation from a list *)
-let createL #a l = of_list #a l
+unfold let createL #a l = of_list #a l
 
 (** Updating an element of a fixed-length Sequence *)
 val upd:

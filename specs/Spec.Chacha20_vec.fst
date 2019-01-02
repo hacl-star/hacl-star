@@ -1,166 +1,210 @@
-module Spec.Chacha20_vec
+module Spec.Chacha20_Vec
 
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Lib.RawIntTypes
 open Lib.LoopCombinators
-(* This should go elsewhere! *)
+open Lib.IntVector
 
-#reset-options "--max_fuel 0 --z3rlimit 100"
+#set-options "--max_fuel 0 --z3rlimit 100"
 
-let keylen = 32 (* in bytes *)
-let blocklen = 64  (* in bytes *)
+/// Constants and Types
+
+let size_key = 32
+let size_block = 64
+let size_nonce = 12
+
+(* TODO: Remove, left here to avoid breaking implementation *)
+let keylen = 32   (* in bytes *)
+let blocklen = 64 (* in bytes *)
 let noncelen = 12 (* in bytes *)
 
-type key = lbytes keylen
-type block = lbytes blocklen
-type nonce = lbytes noncelen
+type key = lbytes size_key
+type block1 = lbytes size_block
+type nonce = lbytes size_nonce
 type counter = size_nat
+type subblock = b:bytes{length b <= size_block}
 
-// using @ as a functional substitute for ;
-// internally, blocks are represented as 16 x 4-byte integers
-type vec   = lseq uint32 4
-type state = lseq vec 4
-type idx = n:nat{n < 4}
-type shuffle = state -> Tot state
+// Internally, blocks are represented as 16 x 4-byte integers
+let lanes = n:width{n == 1 \/ n == 4 \/ n == 8 \/ n == 16}
+let uint32xN (w:lanes) = vec_t U32 w
+type state (w:lanes) = lseq (uint32xN w) 16
+type idx = n:size_nat{n < 16}
+type shuffle (w:lanes) = state w -> state w
+type blocks (w:lanes) = lbytes (w * 64)
 
-let op_Plus_Percent_Hat (x:vec) (y:vec) : Tot vec =
-       map2 (+.) x y
-
-let op_Hat_Hat (x:vec) (y:vec) : Tot vec =
-       map2 (logxor #U32) x y
-
-let op_Less_Less_Less (x:vec) (n:rotval U32) : Tot vec =
-       map (fun x -> rotate_left #U32 x n) x
-
-let shuffle_right (x:vec) (n:idx) : Tot vec =
-        let z:nat = n in
-        let x0 = index x ((0+z)%4) in
-        let x1 = index x ((1+z)%4) in
-        let x2 = index x ((2+z)%4) in
-        let x3 = index x ((3+z)%4) in
-	let x = upd x 0 x0 in
-	let x = upd x 1 x1 in
-	let x = upd x 2 x2 in
-	let x = upd x 3 x3 in
-	x
-
-let shuffle_row (i:idx) (n:idx) (s:state) : Tot state =
-       upd s i (shuffle_right (index s i) n)
-
-val line: idx -> idx -> idx -> rotval U32 -> st:state -> Tot state
-let line a b d s m =
-  let ma = index m a in let mb = index m b in let md = index m d in
-  let ma = ma +%^ mb in
-  let md = (md ^^  ma) <<< s in
-  let m = upd m a ma in
-  let m = upd m d md in
-  m
-
-let round (st:state) : Tot state =
-  let st = line 0 1 3 (size 16) st in
-  let st = line 2 3 1 (size 12) st in
-  let st = line 0 1 3 (size 8)  st in
-  let st = line 2 3 1 (size 7)  st in
-  st
-
-let shuffle_rows_0123 (st:state) : Tot state =
-  let st = shuffle_row 1 1 st in
-  let st = shuffle_row 2 2 st in
-  let st = shuffle_row 3 3 st in
-  st
-
-let shuffle_rows_0321 (st:state) : Tot state =
-  let st = shuffle_row 1 3 st in
-  let st = shuffle_row 2 2 st in
-  let st = shuffle_row 3 1 st in
-  st
-
-let column_round (st:state) : Tot state = round st
-
-let diagonal_round (st:state) : Tot state =
-  let st = shuffle_rows_0123 st in
-  let st = round           st in
-  let st = shuffle_rows_0321 st in
-  st
-
-let double_round (st:state) : Tot state =
-  let st = column_round st in
-  let st = diagonal_round st in
-  st
-
-let rounds (st:state) : Tot state =
-    repeat 10 double_round st (* 20 rounds *)
-
-let chacha20_core (s:state) : Tot state =
-    let s' = rounds s in
-    map2 (+%^) s' s
-
-(* state initialization *)
-let c0 = u32 0x61707865
-let c1 = u32 0x3320646e
-let c2 = u32 0x79622d32
-let c3 = u32 0x6b206574
-let constants : list uint32 = [c0;c1;c2;c3]
-
-#reset-options "--z3rlimit 100"
-// JK: I have to add those assertions to typechecks, would be nice to get rid of it
-let chacha20_init (k:key) (n_len:size_nat) (n:nonce) : Tot state =
-  assert_norm(List.Tot.length constants == 4);
-  let constants : vec = createL #uint32 constants in
-  let key_part_1:vec =  uints_from_bytes_le #U32 (slice k 0 16)  in
-  let key_part_2:vec = uints_from_bytes_le #U32 (slice k 16 32) in
-  let nonce :vec = create 4 (u32 0) in
-  let nonce :vec = update_slice nonce 1 4 (uints_from_bytes_le #U32 n) in
-  createL [constants; key_part_1; key_part_2; nonce]
+// Using @ as a functional substitute for ;
+let op_At f g = fun x -> g (f x)
 
 
-let chacha20_set_counter (st:state) (c:counter) : Tot state =
-  let st3 = st.[3] in
-  let st3 = st3.[0] <- u32 c in
-  st.[3] <- st3
+/// Specification
 
-let chacha20_key_block (st:state): Tot block =
-    let st' : state  = chacha20_core st in
-    let b : block = create 64 (u8 0) in
-    let b : block = update_sub b 0 16 (uints_to_bytes_le #U32 st'.[0]) in
-    let b : block = update_sub b 16 16 (uints_to_bytes_le #U32 st'.[1]) in
-    let b : block = update_sub b 32 16 (uints_to_bytes_le #U32 st'.[2]) in
-    let b : block = update_sub b 48 16 (uints_to_bytes_le #U32 st'.[3]) in
-    b
+let line (#w:lanes) (a:idx) (b:idx) (d:idx) (s:rotval U32) (m:state w) : state w =
+  let m = m.[a] <- (m.[a] +| m.[b]) in
+  let m = m.[d] <- ((m.[d] ^| m.[a]) <<<| s) in m
+
+let quarter_round (#w:lanes) a b c d : shuffle w =
+  line a b d (size 16) @
+  line c d b (size 12) @
+  line a b d (size 8)  @
+  line c d b (size 7)
+
+let column_round (#w:lanes) : shuffle w =
+  quarter_round 0 4 8  12 @
+  quarter_round 1 5 9  13 @
+  quarter_round 2 6 10 14 @
+  quarter_round 3 7 11 15
+
+let diagonal_round (#w:lanes) : shuffle w =
+  quarter_round 0 5 10 15 @
+  quarter_round 1 6 11 12 @
+  quarter_round 2 7 8  13 @
+  quarter_round 3 4 9  14
+
+let double_round (#w:lanes) : shuffle w =
+  column_round @ diagonal_round (* 2 rounds *)
+
+let rounds (#w:lanes) : shuffle w =
+  repeat 10 double_round (* 20 rounds *)
+
+let chacha20_core (#w:lanes) (s0:state w) 
+		  (ctr:counter) : state w =
+  let k = s0 in
+  let cv = vec_load (u32 w *. u32 ctr) w in
+  let k = k.[12] <- k.[12] +| cv in
+  let k = rounds k in
+  let k = map2 (+|) k s0 in
+  k.[12] <- k.[12] +| cv
+
+inline_for_extraction
+let c0 = 0x61707865ul
+inline_for_extraction
+let c1 = 0x3320646eul
+inline_for_extraction
+let c2 = 0x79622d32ul
+inline_for_extraction
+let c3 = 0x6b206574ul
+
+let chacha20_constants : lseq size_t 4 = 
+  [@ inline_let]
+  let l = [c0;c1;c2;c3] in
+  assert_norm(List.Tot.length l == 4);
+  createL l
+  
+let setup1 (k:key) (n:nonce) (ctr0:counter) : lseq uint32 16 =
+  let st1 = create 16 (u32 0) in
+  let st1 = update_sub st1 0 4 (map secret chacha20_constants) in
+  let st1 = update_sub st1 4 8 (uints_from_bytes_le #U32 #SEC #8 k) in
+  let st1 = st1.[12] <- u32 ctr0 in
+  let st1 = update_sub st1 13 3 (uints_from_bytes_le #U32 #SEC #3 n) in
+  st1
+
+inline_for_extraction
+let vec_load_i (#t:v_inttype) (w:width) (x:uint_t t SEC) = vec_load #t x w
+
+let chacha20_init (#w:lanes) (k:key) (n:nonce) (ctr0:counter) : state w = 
+  let st1 = setup1 k n ctr0 in
+  let st = map (vec_load_i w) st1 in
+  let c = vec_counter U32 w in
+  st.[12] <- st.[12] +| c
+
+let transpose_store_blocks (#w:lanes) (st:state w) : lseq uint32 (w * 16)  = 
+  createi (w * 16) (fun i -> (vec_v st.[i % 16]).[i / 16]) 
+
+let store_blocks (#w:lanes) (st:state w) : lseq uint32 (w * 16)  = 
+  createi (w * 16) (fun i -> (vec_v st.[i / w]).[i % w]) 
+
+let load_blocks1 (sq:lseq uint32 16) : state 1 = 
+  createi 16 (fun i -> vec_load sq.[i] 1)
+
+let load_blocks4 (sq:lseq uint32 64) : state 4 = 
+  createi 16 (fun i -> vec_load4 sq.[4*i] sq.[4*i+1] sq.[4*i+2] sq.[4*i+3])
+
+let load_blocks8 (sq:lseq uint32 128) : state 8 = 
+  createi 16 (fun i -> vec_load8 sq.[8*i] sq.[8*i+1] sq.[8*i+2] sq.[8*i+3] 
+			      sq.[8*4] sq.[8*i+5] sq.[8*i+6] sq.[8*i+7])
+
+let load_blocks16 (sq:lseq uint32 256) : state 16 = 
+  createi 16 (fun i -> vec_load16 sq.[16*i] sq.[16*i+1] sq.[16*i+2] sq.[16*i+3] 
+			      sq.[16*4] sq.[16*i+5] sq.[16*i+6] sq.[16*i+7]
+			      sq.[16*8] sq.[16*i+9] sq.[16*i+10] sq.[16*i+11] 
+			      sq.[16*12] sq.[16*i+13] sq.[16*i+14] sq.[16*i+15])
 
 
-let chacha20_block (k:key) (n:nonce) (c:counter): Tot block =
-    let st = chacha20_init k noncelen n in
-    let st = chacha20_set_counter st c in
-    chacha20_key_block st
+let load_blocks (#w:lanes) (sq:lseq uint32 (w * 16)) : state w = 
+  match w with
+  | 1 -> load_blocks1 sq
+  | 4 -> load_blocks4 sq
+  | 8 -> load_blocks8 sq
+  | 16 -> load_blocks16 sq
 
-let chacha20_encrypt_block (st0:state) (ctr0:counter) (incr:counter{ctr0 + incr <= max_size_t}) (b:block) : Tot block =
-  let st = chacha20_set_counter st0 (ctr0 + incr) in
-  let kb = chacha20_key_block st in
-  map2 (^.) b kb
+let transpose (#w:lanes) (st:state w) : state w = 
+  load_blocks (transpose_store_blocks st)
+  
+let chacha20_key_block0 (#w:lanes) (k:key) (n:nonce) : Tot block1 =
+  let st = chacha20_init #w k n 0 in
+  let kb = transpose_store_blocks st in
+  uints_to_bytes_le (sub kb 0 16)
 
-let chacha20_encrypt_last (st0:state) (ctr0:counter) 
-			  (incr:counter{ctr0 + incr <= max_size_t}) 
-			  (len:size_nat{len < blocklen})
-			  (b:lbytes len) : lbytes len =
-  let plain = create blocklen (u8 0) in
-  let plain = update_sub plain 0 (length b) b in
-  let cipher = chacha20_encrypt_block st0 ctr0 incr plain in
+let xor_block (#w:lanes) (k:state w) (b:blocks w) : blocks w  = 
+  let iby = uints_from_bytes_le b in
+  let ib = load_blocks iby in 
+  let kb = transpose k in
+  let ob = map2 (^|) ib kb in
+  let oby = store_blocks ob in
+  uints_to_bytes_le oby
+
+let chacha20_encrypt_block (#w:lanes) (st0:state w) (incr:counter) (b:blocks w) : blocks w =
+  let k = chacha20_core st0 incr in
+  xor_block k b
+  
+let chacha20_encrypt_last
+  (#w:lanes)
+  (st0: state w)
+  (incr: counter)
+  (len: size_nat{len < w * size_block})
+  (b: lbytes len) :
+  Tot (lbytes len) =
+
+  let plain = create (w * size_block) (u8 0) in
+  let plain = update_sub plain 0 len b in
+  let cipher = chacha20_encrypt_block st0 incr plain in
   sub cipher 0 (length b)
 
-val chacha20_encrypt_bytes:
-  key -> nonce -> c:counter 
--> msg:bytes{length msg / blocklen + c <= max_size_t} 
--> cipher:bytes{length cipher == length msg}
 
-let chacha20_encrypt_bytes key nonce ctr0 msg =
+val chacha20_update:
+    #w:lanes
+  -> st0: state w
+  -> msg: bytes{length msg / (w * size_block)  <= max_size_t}
+  -> cipher: bytes{length cipher == length msg}
+let chacha20_update #w st0 msg = 
   let cipher = msg in
-  let st0 = chacha20_init key 12 nonce in
-  map_blocks blocklen cipher
-    (chacha20_encrypt_block st0 ctr0) 
-    (chacha20_encrypt_last st0 ctr0)
+  map_blocks (w * size_block) cipher
+    (chacha20_encrypt_block st0)
+    (chacha20_encrypt_last st0)
 
 
+val chacha20encrypt_bytes:
+    #w:lanes
+  -> k: key
+  -> n: nonce
+  -> c: counter
+  -> msg: bytes{length msg / (w * size_block) <= max_size_t}
+  -> cipher: bytes{length cipher == length msg}
+
+let chacha20_encrypt_bytes #w key nonce ctr0 msg =
+  let st0 = chacha20_init #w key nonce ctr0 in
+  chacha20_update #w st0 msg
+
+val chacha20_decrypt_bytes:
+    #w:lanes
+  -> k: key
+  -> n: nonce
+  -> c: counter
+  -> cipher: bytes{length cipher / (w * size_block) <= max_size_t}
+  -> msg: bytes{length cipher == length msg}
+
+let chacha20_decrypt_bytes #w key nonce ctr0 cipher =
+  let st0 = chacha20_init #w key nonce ctr0 in
+  chacha20_update #w st0 cipher

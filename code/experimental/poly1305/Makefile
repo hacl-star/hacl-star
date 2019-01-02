@@ -56,8 +56,9 @@ POLY1305_128_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/c/Lib.IntVector.Intrinsics.fsti \
+	$(HACL_HOME)/lib/c/Lib.IntVector.fst \
 	$(HACL_HOME)/lib/c/Lib.Loops.fst \
-	Lib.Vec128.fsti \
 	Hacl.Impl.Poly1305.Field128.fst \
 	Hacl.Impl.Poly1305.Fields.fst \
 	Hacl.Impl.Poly1305.fst \
@@ -68,7 +69,7 @@ poly128-c/out.krml: $(POLY1305_128_FILES)
 
 poly128-c/Hacl_Poly1305_128.c: poly128-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly128-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Poly1305_128=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec-intrin.h"' -drop Lib.IntVector.Intrinsics -bundle 'Hacl.Poly1305_128=*'
 
 POLY1305_256_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
@@ -89,7 +90,7 @@ poly256-c/Hacl_Poly1305_256.c: poly256-c/out.krml
 	   -minimal -add-include '"kremlib.h"' -add-include '"vec256.h"' -drop Lib.Vec256 -bundle 'Hacl.Poly1305_256=*'
 
 poly1305.exe: poly32-c/Hacl_Poly1305_32.c poly64-c/Hacl_Poly1305_64.c poly128-c/Hacl_Poly1305_128.c poly256-c/Hacl_Poly1305_256.c 
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . poly32-c/Hacl_Poly1305_32.c poly64-c/Hacl_Poly1305_64.c poly128-c/Hacl_Poly1305_128.c poly256-c/Hacl_Poly1305_256.c $(KREMLIN_HOME)/kremlib/c/testlib.o poly1305_test.c -o poly1305.exe 
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I $(HACL_HOME)/lib/c -I . poly32-c/Hacl_Poly1305_32.c poly64-c/Hacl_Poly1305_64.c poly128-c/Hacl_Poly1305_128.c poly256-c/Hacl_Poly1305_256.c $(KREMLIN_HOME)/kremlib/c/testlib.o poly1305_test.c -o poly1305.exe 
 	./poly1305.exe
 
 poly1305-test: poly1305.exe
