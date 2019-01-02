@@ -313,29 +313,28 @@ let gt_mask #t #l a b =
 let lte_mask #t #l a b =
   logor (lt_mask #t #l a b) (eq_mask #t #l a b)
 
-#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 10 --max_fuel 1 --max_ifuel 1"
 
-private
-val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t ->
-  Lemma (uint_v (mod_mask #t #l m) == pow2 (uint_v m) - 1)
+let logand_commute #t #l (x y: uint_t t l): Lemma
+  (requires True)
+  (ensures uint_v #t #l (logand #t #l x y) =
+    FStar.UInt.logand #(bits t) (uint_v #t #l x) (uint_v #t #l y))
+=
+  match t with
+  | U1 -> FStar.UInt.logand_definition #1 (uint_v x) (uint_v y) 0
+  | _ -> ()
 
-let mod_mask_value #t #l m =
-  admit();
-  if uint_v m > 0 then begin
-    let m = uint_v m in
-    pow2_lt_compat (bits t) m;
-    small_modulo_lemma_1 (pow2 m) (pow2 (bits t));
-    assert (FStar.Mul.(1 * pow2 m) == pow2 m);
-    UInt.shift_left_value_lemma #(bits t) 1 m
-  end
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-let mod_mask_lemma #t #l a m =
-  admit();
-  mod_mask_value #t #l m;
-  if uint_v m = 0 then
-    UInt.logand_lemma_1 #(bits t) (uint_v a)
-  else
-    UInt.logand_mask #(bits t) (uint_v a) (uint_v m)
+let mod_mask_lemma #t #l x m =
+  logand_commute x (mod_mask #t m);
+  if uint_v m = 0 then begin
+    assert_norm (uint_v (mod_mask #t #l m) = 0);
+    FStar.UInt.logand_lemma_1 #(bits t) (uint_v x);
+    assert_norm (pow2 0 = 1);
+    assert_norm (uint_v x % 1 = 0)
+  end else
+    FStar.UInt.logand_mask #(bits t) (uint_v x) (uint_v m)
 
 #reset-options "--z3rlimit 100"
 
