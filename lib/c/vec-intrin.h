@@ -202,10 +202,10 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
   (_mm256_srli_epi32(x0, x1))
 
 #define Lib_IntVector_Intrinsics_vec256_shuffle64(x0,  x1, x2, x3, x4)	\
-  (_mm256_shuffle_epi32(x0, _MM_SHUFFLE(x1,x2,x3,x4)))
+  (_mm256_permute4x64_epi64(x0, _MM_SHUFFLE(x1,x2,x3,x4)))
 
-#define Lib_IntVector_Intrinsics_vec256_shuffle32(x0, x1, x2, x3, x4)	\
-  (_mm256_shuffle_epi32(x0, _MM_SHUFFLE(x1,x2,x3,x4)))
+#define Lib_IntVector_Intrinsics_vec256_shuffle32(x0, x1, x2, x3, x4, x5, x6, x7, x8)	\
+  (_mm256_permutevar8x32_epi32(x0, _mm256_set_epi32(x1,x2,x3,x4,x5,x6,x7,x8)))
 
 #define Lib_IntVector_Intrinsics_vec256_load_le(x0) \
   (_mm256_loadu_si256((__m256i*)(x0)))
