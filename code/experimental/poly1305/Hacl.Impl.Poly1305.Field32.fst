@@ -28,6 +28,8 @@ let s64x5 (x:scale64) : scale64_5 = (x,x,x,x,x)
 
 open FStar.Mul
 
+let nat5xN (w:lanes) = (lseq nat w * lseq nat w * lseq nat w * lseq nat w * lseq nat w)
+
 let ( <=* ) (x:nat5) (y:nat5) : Type =
     let (x1,x2,x3,x4,x5) = x in
     let (y1,y2,y3,y4,y5) = y in

@@ -245,6 +245,14 @@ let vec_permute16 #vt v i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 =
 
 let vec_permute32 #vt v i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i20 i21 i22 i23 i24 i25 i26 i27 i28 i29 i30 i31 i32 = create32  v.[i1] v.[i2] v.[i3] v.[i4] v.[i5] v.[i6] v.[i7] v.[i8] v.[i9] v.[i10] v.[i11] v.[i12] v.[i13] v.[i14] v.[i15] v.[i16] v.[i17] v.[i18] v.[i19] v.[i20] v.[i21] v.[i22] v.[i23] v.[i24] v.[i25] v.[i26] v.[i27] v.[i28] v.[i29] v.[i30] v.[i31] v.[i32]
 
+let cast #t #w x = admit()
+let vec_aes_enc x = admit()
+let vec_aes_enc_last x = admit()
+let vec_aes_keygen_assist x = admit()
+let vec_clmul_lo_lo x = admit()
+let vec_clmul_lo_hi x = admit()
+let vec_clmul_hi_lo x = admit()
+let vec_clmul_hi_hi x = admit()
 let vec_load_le vt w b = admit()
 let vec_load_be vt w b = admit()
 let vec_store_le #vt #w b v = admit()

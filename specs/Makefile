@@ -11,8 +11,9 @@ FSTAR_INCLUDES+= \
 	--expose_interfaces
 
 SPEC_FILES=	Spec.Chacha20.fst \
-		Spec.Chacha20.Vec.fst \
+		Spec.Chacha20_Vec.fst \
 		Spec.Poly1305.fst \
+		Spec.Poly1305_Vec.fst \
 		Spec.Chacha20.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.Curve25519.fst \
@@ -48,7 +49,7 @@ all: test
 
 test: test-unified-target test-individual-target
 
-test-unified-target: Chacha20.exe Chacha20.Vec.exe Curve25519.exe Curve448.exe SHA2.exe Blake2.exe
+test-unified-target: Chacha20.exe Chacha20_Vec.exe Poly1305_Vec.exe Curve25519.exe Curve448.exe SHA2.exe Blake2.exe
 test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe ecies.exe
 
 clean:
