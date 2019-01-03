@@ -8,8 +8,8 @@ type protocol =
   | UDP
   | TCP
 
-new val stream: #p:protocol -> eqtype
-new val listener: #p:protocol -> eqtype
+val stream: #p:protocol -> eqtype
+val listener: #p:protocol -> eqtype
 
 (* Server side *)
 val listen: #p:protocol -> s:string -> port:size_nat -> Tot (option (listener #p))
@@ -26,4 +26,3 @@ val recv: #p:protocol -> stream #p -> max:size_nat -> Tot (option (len:size_nat{
 val send: #p:protocol -> stream #p -> len:size_nat -> b:lbytes len -> Tot bool
 val send_retry: #p:protocol -> stream #p -> retries:nat -> len:size_nat -> b:lbytes len -> Tot bool
 val close: #p:protocol -> stream #p -> Tot bool
-
