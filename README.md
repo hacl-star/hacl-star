@@ -77,7 +77,7 @@ The latest version of the Web Assembly code is available
 in [snapshots/hacl-c-wasm](snapshots/hacl-c-wasm).
 
 HACL* relies on [F*](https://github.com/FStarLang/FStar) (`stable` branch) and
-[KreMLin](https://github.com/FStarLang/kremlin) (`master` branch) for verification,
+[KreMLin](https://github.com/FStarLang/kremlin) (`stable` branch) for verification,
 extraction to OCaml (`specs/`) and extraction to C (`code/`).
 
 See [INSTALL.md](https://github.com/project-everest/hacl-star/blob/master/INSTALL.md) for more information on how to install the toolchain.
