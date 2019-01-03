@@ -96,8 +96,14 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
 
 
 
+#define Lib_IntVector_Intrinsics_vec128_insert8(x0, x1, x2)	\
+  (_mm_insert_epi8(x0, x1, x2))
+
 #define Lib_IntVector_Intrinsics_vec128_insert32(x0, x1, x2)	\
   (_mm_insert_epi32(x0, x1, x2))
+
+#define Lib_IntVector_Intrinsics_vec128_insert64(x0, x1, x2)	\
+  (_mm_insert_epi64(x0, x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec128_zero  \
   (_mm_set1_epi16((uint16_t)0))
@@ -213,8 +219,14 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
 #define Lib_IntVector_Intrinsics_vec256_store_le(x0, x1) \
   (_mm256_storeu_si256((__m256i*)(x0), x1))
 
+#define Lib_IntVector_Intrinsics_vec256_insert8(x0, x1, x2)	\
+  (_mm256_insert_epi8(x0, x1, x2))
+
 #define Lib_IntVector_Intrinsics_vec256_insert32(x0, x1, x2)	\
   (_mm256_insert_epi32(x0, x1, x2))
+
+#define Lib_IntVector_Intrinsics_vec256_insert64(x0, x1, x2)	\
+  (_mm256_insert_epi64(x0, x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec256_zero  \
   (_mm256_set1_epi16((uint16_t)0))

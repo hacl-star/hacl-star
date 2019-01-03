@@ -114,7 +114,14 @@ val vec128_store64_be: b:lbuffer uint8 16ul -> vec128 -> ST unit
 			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 
 noextract
-val vec128_insert32: vec128 -> uint32 -> uint8 -> vec128
+val vec128_insert8: vec128 -> uint8 -> size_t -> vec128
+
+noextract
+val vec128_insert32: vec128 -> uint32 -> size_t -> vec128
+
+noextract
+val vec128_insert64: vec128 -> uint64 -> size_t -> vec128
+
 noextract
 val vec128_zero: vec128
 
@@ -238,7 +245,13 @@ val vec256_store_be: b:lbuffer uint8 32ul -> vec256 -> ST unit
 			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 
 noextract
-val vec256_insert32: vec256 -> uint32 -> uint8 -> vec256
+val vec256_insert8: vec256 -> uint8 -> size_t -> vec256
+
+noextract
+val vec256_insert32: vec256 -> uint32 -> size_t -> vec256
+
+noextract
+val vec256_insert64: vec256 -> uint64 -> size_t -> vec256
 
 noextract
 val vec256_zero: vec256

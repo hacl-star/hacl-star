@@ -5,7 +5,7 @@ open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Vec128
+open Lib.IntVector
 
 inline_for_extraction
 let create_state (#m:m_spec) = 

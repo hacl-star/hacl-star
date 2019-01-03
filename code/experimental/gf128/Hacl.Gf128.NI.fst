@@ -6,12 +6,12 @@ open Lib.IntTypes
 open Lib.Buffer
 open Hacl.Impl.Gf128.Fields
 open Hacl.Impl.Gf128.Generic
-open Lib.Vec128
+open Lib.IntVector
 
-let gcm_ctx_elem = vec128
+let gcm_ctx_elem = uint128x1
 let gcm_ctx_len = 5ul
 inline_for_extraction noextract
-let gcm_ctx_elem_zero = vec128_zero
+let gcm_ctx_elem_zero = vec_zero U128 1
 let gcm_ctx = lbuffer gcm_ctx_elem gcm_ctx_len 
 
 [@ CInline ]

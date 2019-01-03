@@ -76,17 +76,29 @@ val vec_load16: #t:v_inttype -> i0:uint_t t SEC -> i1:uint_t t SEC  -> i2:uint_t
 inline_for_extraction noextract
 val vec_load32: #t:v_inttype -> i0:uint_t t SEC -> i1:uint_t t SEC  -> i2:uint_t t SEC -> i3:uint_t t SEC -> i4:uint_t t SEC -> i5:uint_t t SEC  -> i6:uint_t t SEC -> i7:uint_t t SEC  -> i8:uint_t t SEC -> i9:uint_t t SEC  -> i10:uint_t t SEC -> i11:uint_t t SEC -> i12:uint_t t SEC -> i13:uint_t t SEC  -> i14:uint_t t SEC -> i15:uint_t t SEC  -> i16:uint_t t SEC -> i17:uint_t t SEC  -> i18:uint_t t SEC -> i19:uint_t t SEC -> i20:uint_t t SEC -> i21:uint_t t SEC  -> i22:uint_t t SEC -> i23:uint_t t SEC  -> i24:uint_t t SEC -> i25:uint_t t SEC  -> i26:uint_t t SEC -> i27:uint_t t SEC -> i28:uint_t t SEC -> i29:uint_t t SEC  -> i30:uint_t t SEC -> i31:uint_t t SEC -> v:vec_t t 32{vec_v v == create32 i0 i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i20 i21 i22 i23 i24 i25 i26 i27 i28 i29 i30 i31}
 
+inline_for_extraction noextract
+val vec_set: #t:v_inttype -> #w:width -> v:vec_t t w -> i:vec_index w -> x:uint_t t SEC -> v':vec_t t w{
+  vec_v v' == upd (vec_v v) (size_v i) x}
 
 inline_for_extraction noextract
-val vec_add_mod: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 ( +. ) (vec_v v1) (vec_v v2)}
+val vec_add_mod: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w
+noextract
+val vec_add_mod_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> 
+		       Lemma (ensures (vec_v (vec_add_mod v1 v2) == map2 ( +. ) (vec_v v1) (vec_v v2)))
+			     [SMTPat (vec_v (vec_add_mod #t #w v1 v2))]
 inline_for_extraction noextract
 val vec_sub_mod: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 ( -. ) (vec_v v1) (vec_v v2)}
 inline_for_extraction noextract
 val vec_mul_mod: #t:v_inttype{t <> U128} -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 ( *. ) (vec_v v1) (vec_v v2)}
 inline_for_extraction noextract
 val vec_smul_mod: #t:v_inttype{t <> U128} -> #w:width -> v1:vec_t t w -> v2:uint_t t SEC -> v3:vec_t t w{vec_v v3 == map ( mul_mod v2 ) (vec_v v1)}
+
 inline_for_extraction noextract
-val vec_xor: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 ( ^. ) (vec_v v1) (vec_v v2)}
+val vec_xor: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w
+val vec_xor_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> 
+		   Lemma (ensures (vec_v (vec_xor v1 v2) == map2 ( ^. ) (vec_v v1) (vec_v v2)))
+			 [SMTPat (vec_v #t #w (vec_xor v1 v2))]
+
 inline_for_extraction noextract
 val vec_and: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 ( &. ) (vec_v v1) (vec_v v2)}
 inline_for_extraction noextract
@@ -164,20 +176,31 @@ type uint8x16 = vec_t U8 16
 type uint8x32 = vec_t U8 32
 
 inline_for_extraction noextract
-val vec_aes_enc: key:uint8x16 -> state:uint8x16 -> res:uint8x16{vec_v res == Spec.AES.aes_enc (vec_v key) (vec_v state)
-}
+val vec_aes_enc: key:uint128x1 -> state:uint128x1 -> res:uint128x1
+val vec_aes_enc_lemma: key:uint128x1 -> state:uint128x1 -> Lemma
+		       (ensures (vec_v (vec_aes_enc key state) == Spec.AES.aes_enc (vec_v key) (vec_v state)))
+		       [SMTPat (vec_v (vec_aes_enc key state))]
+
 inline_for_extraction noextract
-val vec_aes_enc_last: key:uint8x16 -> state:uint8x16 -> res:uint8x16{vec_v res == Spec.AES.aes_enc_last (vec_v key) (vec_v state)}
+val vec_aes_enc_last: key:uint128x1 -> state:uint128x1 -> res:uint128x1
+val vec_aes_enc_last_lemma: key:uint128x1 -> state:uint128x1 -> Lemma
+			    (ensures (vec_v (vec_aes_enc_last key state) == Spec.AES.aes_enc_last (vec_v key) (vec_v state)))
+				     [SMTPat (vec_v (vec_aes_enc_last key state))]
+
 inline_for_extraction noextract
-val vec_aes_keygen_assist: s:uint8x16 -> rcon:uint8 -> res:uint8x16{vec_v res == Spec.AES.aes_keygen_assist rcon (vec_v s)}
+val vec_aes_keygen_assist: s:uint128x1 -> rcon:uint8 -> res:uint128x1
+val vec_aes_keygen_assist_lemma: s:uint128x1 -> rcon:uint8 -> 
+				 Lemma (ensures (vec_v (vec_aes_keygen_assist s rcon) == Spec.AES.aes_keygen_assist rcon (vec_v s)))
+				       [SMTPat (vec_v (vec_aes_keygen_assist s rcon))]
+
 inline_for_extraction noextract
-val vec_clmul_lo_lo: uint64x2 -> uint64x2 -> uint128x1
+val vec_clmul_lo_lo: uint128x1 -> uint128x1 -> uint128x1
 inline_for_extraction noextract
-val vec_clmul_lo_hi: uint64x2 -> uint64x2 -> uint128x1
+val vec_clmul_lo_hi: uint128x1 -> uint128x1 -> uint128x1
 inline_for_extraction noextract
-val vec_clmul_hi_lo: uint64x2 -> uint64x2 -> uint128x1
+val vec_clmul_hi_lo: uint128x1 -> uint128x1 -> uint128x1
 inline_for_extraction noextract
-val vec_clmul_hi_hi: uint64x2 -> uint64x2 -> uint128x1
+val vec_clmul_hi_hi: uint128x1 -> uint128x1 -> uint128x1
 
 inline_for_extraction noextract
 let ( +| ) #t #w = vec_add_mod #t #w

@@ -170,10 +170,12 @@ let vec_load8 #vt i1 i2 i3 i4 i5 i6 i7 i8 = create8 i1 i2 i3 i4 i5 i6 i7 i8
 let vec_load16 #vt i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 = create16  i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 
 let vec_load32 #vt i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i20 i21 i22 i23 i24 i25 i26 i27 i28 i29 i30 i31 i32 = create32  i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i20 i21 i22 i23 i24 i25 i26 i27 i28 i29 i30 i31 i32 
 
-
+let vec_set #vt #w v i x = upd v (size_v i) x
 
 let vec_add_mod #vt #w (v1:vec_t vt w) (v2:vec_t vt w) : vec_t vt w =
 map2 (Ints.add_mod #vt) v1 v2
+
+let vec_add_mod_lemma #vt #w (v1:vec_t vt w) (v2:vec_t vt w) = ()
 
 let vec_sub_mod #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) : vec_t vt w =
 map2 (Ints.sub_mod #vt) v1 v2
@@ -186,6 +188,8 @@ map (Ints.mul_mod #vt #SEC v2) v1
 
 let vec_xor #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) : vec_t vt w =
 map2 (Ints.logxor #vt) v1 v2
+
+let vec_xor_lemma #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) = ()
 
 let vec_and #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) : vec_t vt w =
 map2 (Ints.logand #vt) v1 v2
