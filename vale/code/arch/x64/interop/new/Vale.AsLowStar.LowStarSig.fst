@@ -82,9 +82,15 @@ let rec mem_correspondence (args:list arg) : hsprop =
     | _ ->
       mem_correspondence tl
 
+
 [@__reduce__]
-let mk_vale_disjointness (args:list arg) : prop =
-  Interop.Mem.disjoint_or_eq_b8_l (Interop.Adapters.args_b8 args)
+let disjoint_b8 (ptr1 ptr2:b8) = B.loc_disjoint (B.loc_buffer ptr1) (B.loc_buffer ptr2)
+
+[@__reduce__]
+let mk_vale_disjointness (sb:IX64.stack_buffer) (args:list arg) : prop =
+  let args_b8 = Interop.Adapters.args_b8 args in
+  Interop.Mem.disjoint_or_eq_b8_l args_b8 /\
+  BigOps.big_and' (disjoint_b8 sb) args_b8
 
 [@__reduce__]
 let mk_readable (args:list arg) : sprop =
@@ -105,6 +111,28 @@ let mk_readable (args:list arg) : sprop =
   in
   aux args (fun h -> True)
 
+let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state) :
+  Lemma (0 <= ME.buffer_addr x VS.(s.mem) /\ ME.buffer_addr x VS.(s.mem) < pow2 64) = admit()
+
+[@__reduce__]
+let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
+  let (| tag, x |) = a in
+  let open ME in
+  match tag with
+  | TD_Base TUInt8 ->
+     UInt8.v x
+  | TD_Base TUInt16 ->
+     UInt16.v x
+  | TD_Base TUInt32 ->
+     UInt32.v x
+  | TD_Base TUInt64 ->
+     UInt64.v x
+  | TD_Base TUInt128 ->
+     admit() //TODO: UInt128
+  | TD_Buffer bt ->
+     buffer_addr_is_nat64 (as_vale_buffer #(TBase bt) x) s;
+     ME.buffer_addr (as_vale_buffer #(TBase bt) x) VS.(s.mem)
+
 [@__reduce__]
 let rec register_args (n:nat)
                       (args:IX64.arity_ok arg{List.length args = n}) : sprop =
@@ -113,7 +141,7 @@ let rec register_args (n:nat)
     | hd::tl ->
       fun s ->
         register_args (n - 1) tl s /\
-        VS.eval_reg (IX64.register_of_arg_i (n - 1)) s == IX64.arg_as_nat64 hd
+        VS.eval_reg (IX64.register_of_arg_i (n - 1)) s == arg_as_nat64 hd s
 
 [@__reduce__]
 let rec taint_hyp (args:list arg) : sprop =
@@ -151,10 +179,11 @@ let rec mk_modifies_loc (args:list arg) : GTot B.loc =
         mk_modifies_loc tl
 
 [@__reduce__]
-let vale_pre_hyp (args:IX64.arity_ok arg) : sprop =
+let vale_pre_hyp (sb:IX64.stack_buffer) (args:IX64.arity_ok arg) : sprop =
     fun s0 ->
-      mk_vale_disjointness args /\
-      mk_readable args s0 /\
+      let s_args = arg_of_lb sb :: args in
+      mk_vale_disjointness sb args /\
+      mk_readable s_args s0 /\
       register_args (List.length args) args s0 /\
       taint_hyp args s0
 
@@ -167,8 +196,8 @@ let to_low_pre
   : prop =
   (forall (s0:V.va_state)
      (sb:IX64.stack_buffer).
-    s0.VS.ok /\
-    vale_pre_hyp args s0 /\
+    V.va_get_ok s0 /\
+    vale_pre_hyp sb args s0 /\
     mem_correspondence args hs_mem s0 /\
     V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) num_stack_slots s0.VS.memTaint ==>
     elim_nil pre s0 sb)

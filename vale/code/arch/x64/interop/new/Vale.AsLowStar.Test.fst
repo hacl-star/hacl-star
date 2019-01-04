@@ -8,6 +8,11 @@ module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
 module W = Vale.AsLowStar.Wrapper
 
+
+(* A little utility to trigger normalization in types *)
+let as_t (#a:Type) (x:normal a) : a = x
+let as_normal_t (#a:Type) (x:a) : normal a = x
+
 ////////////////////////////////////////////////////////////////////////////////
 //First a little standalone, toy experiment
 [@__reduce__] unfold
@@ -30,7 +35,9 @@ assume val c: V.va_code
 [@__reduce__]
 let call_c_t = IX64.as_lowstar_sig_t_weak c dom [] _ _ (W.mk_prediction c dom [] n (v c IA.win))
 let call_c : call_c_t = IX64.wrap_weak c dom (W.mk_prediction c dom [] n (v c IA.win))
-//You can ask emacs to evaluate `normal call_c_t` and see what you get
+let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
+//You can ask emacs to show you the type of call_c_normal_t ...
+
 ////////////////////////////////////////////////////////////////////////////////
 //Now memcpy
 module VM = Vale_memcpy
@@ -92,9 +99,6 @@ let vm_lemma'
                                                     ME.loc_none)) va_s0.VS.mem va_s1.VS.mem);
     va_s1, f
 
-(* A little utility to trigger normalization in types *)
-let as_t (#a:Type) (x:normal a) : a = x
-
 (* Prove that vm_lemma' has the requires type *)
 let vm_lemma = as_t #(VSig.vale_sig vm_pre vm_post) vm_lemma'
 
@@ -118,6 +122,45 @@ let lowstar_memcpy : lowstar_memcpy_t  =
     code_memcpy
     vm_dom
     (W.mk_prediction code_memcpy vm_dom [] 3 (vm_lemma code_memcpy IA.win))
+
+let lowstar_memcpy_normal_t : normal lowstar_memcpy_t
+  = as_normal_t #lowstar_memcpy_t lowstar_memcpy
+module B = LowStar.Monotonic.Buffer
+open FStar.HyperStack.ST
+
+let as_vale_buffer_len (#t:ME.typ) (x:lowstar_buffer t)
+   : Lemma (V.buffer_length (as_vale_buffer x) == B.length x / view_n t)
+           [SMTPat (V.buffer_length (as_vale_buffer x))]
+   = admit()
+
+module M = X64.Memory
+
+let as_vale_buffer_disjoint (#t1 #t2:ME.typ) (x:lowstar_buffer t1) (y:lowstar_buffer t2)
+   : Lemma (B.disjoint x y ==> M.loc_disjoint (M.loc_buffer (as_vale_buffer x)) (M.loc_buffer (as_vale_buffer y)))
+           [SMTPat (M.loc_disjoint (M.loc_buffer (as_vale_buffer x)) (M.loc_buffer (as_vale_buffer y)))]
+   = admit()
+
+let test (x:b64) = assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)
+
+module T = FStar.Tactics
+#reset-options "--use_two_phase_tc false --__temp_fast_implicits"
+let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
+  : Stack unit
+    (requires fun h0 ->
+      B.live h0 dst /\
+      B.live h0 src /\
+      B.disjoint dst src /\
+      B.length dst == 16 /\
+      B.length src == 16)
+    (ensures fun h0 _ h1 ->
+      B.modifies (B.loc_union (B.loc_buffer dst) (B.loc_buffer src)) h0 h1 /\
+//      B.as_seq h1 dst == B.as_seq h0 src /\ //TODO
+      True)
+  by (T.dump "D"; T.norm [delta_only [`%X64.Memory.loc_disjoint]; iota; zeta]; T.dump "E")
+  = let _ = lowstar_memcpy_normal_t dst src () in
+    ()
+
+
 (*
    -- Some things to fix up: I need to make it return an erased result type,
       so that KreMLin generates the right signature ... should be easy.

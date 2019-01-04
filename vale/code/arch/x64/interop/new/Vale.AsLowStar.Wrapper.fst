@@ -35,25 +35,25 @@ let create_initial_vale_state
 let lemma_create_initial_vale_state_core
     (args:IX64.arity_ok arg)
     (h0:HS.mem)
-    (stack:b8{mem_roots_p h0 (IX64.arg_of_b8 stack::args)})
+    (stack:IX64.stack_buffer{mem_roots_p h0 (arg_of_lb stack::args)})
   : Lemma
       (ensures (
         let s = create_initial_vale_state args h0 stack in
         Interop.Adapters.hs_of_mem VS.(s.mem) == h0
       ))
-  = Interop.Adapters.mk_mem_injective (IX64.arg_of_b8 stack::args) h0
+  = Interop.Adapters.mk_mem_injective (arg_of_lb stack::args) h0
 
 let core_create_lemma
     (args:IX64.arity_ok arg)
     (h0:HS.mem)
-    (stack:b8{mem_roots_p h0 (IX64.arg_of_b8 stack::args)})
+    (stack:IX64.stack_buffer{mem_roots_p h0 (arg_of_lb stack::args)})
   : Lemma
       (ensures (let va_s = create_initial_vale_state args h0 stack in
                 fst (IX64.create_initial_trusted_state args h0 stack) == SL.state_to_S va_s /\
                 LSig.mem_correspondence args h0 va_s /\
-                LSig.mk_vale_disjointness args /\
+                LSig.mk_vale_disjointness stack args /\
                 LSig.mk_readable args va_s /\
-                LSig.vale_pre_hyp args va_s))
+                LSig.vale_pre_hyp stack args va_s))
   = admit() //TODO: needs the definition of SL.state_to_S; not sure why its hidden in StateLemma
 
 let frame_mem_correspondence_back
@@ -176,7 +176,7 @@ let vale_lemma_as_prediction
        frame_mem_correspondence_back args h0 alloc_push_h0 va_s0 B.loc_none;
        assert (LSig.mem_correspondence args h0 va_s0);
        assert (va_s0.VS.ok);
-       assert (LSig.vale_pre_hyp args va_s0);
+       assert (LSig.vale_pre_hyp sb args va_s0);
        assume (V.valid_stack_slots
                 va_s0.VS.mem
                 (VS.eval_reg MS.Rsp va_s0)
@@ -193,11 +193,11 @@ let vale_lemma_as_prediction
        assert (ME.modifies (VSig.mloc_args args) va_s0.VS.mem va_s1.VS.mem);
        let h1 = (Interop.Adapters.hs_of_mem va_s1.VS.mem) in
        let final_mem = va_s1.VS.mem in
-       assume (B.modifies (loc_args args) alloc_push_h0 h1);
-       assume (FStar.HyperStack.ST.equal_domains alloc_push_h0 h1);
+       assume (B.modifies (loc_args args) alloc_push_h0 h1); //Requires relating M.modifies to B.modifies ...
+       assume (FStar.HyperStack.ST.equal_domains alloc_push_h0 h1); //Vale code does not prove that it does not allocate
        assume (IM.down_mem h1
                            (IA.addrs)
-                           (Interop.Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem);
+                           (Interop.Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem); //needing StateLemmas
        let h1_pre_pop = Interop.Adapters.hs_of_mem final_mem in
        assert (IM.down_mem h1_pre_pop (IA.addrs) (Interop.Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem);
        assert (va_s1.VS.mem == final_mem);
@@ -211,8 +211,8 @@ let vale_lemma_as_prediction
        B.popped_modifies h1_pre_pop h2;
        frame_mem_correspondence args h1_pre_pop h2 va_s1 (B.loc_regions false (Set.singleton (HS.get_tip h1_pre_pop)));
        assert (B.modifies (loc_args args) alloc_push_h0 h1_pre_pop);
-       assume (B.modifies (loc_args args) h0 h2);
-       assume (mem_roots_p h2 args);
+       assume (B.modifies (loc_args args) h0 h2); //TODO: seems easy, need to investigate more
+       assume (mem_roots_p h2 args); //TODO: maintaining liveness of the args at the end ... seems easy, need to investigate more
        assert (LSig.(to_low_post post args h0 () h2));
        coerce f, va_s1.VS.mem
 

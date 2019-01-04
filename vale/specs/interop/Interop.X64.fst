@@ -17,7 +17,7 @@ let wrap_variadic c args #pre_rel #post_rel predict =
   let push_h0 = ST.get () in
   B.fresh_frame_modifies h0' push_h0;
   mem_roots_p_modifies_none args h0' push_h0;
-  let stack_b : lowstar_buffer ME.(TBase TUInt8) = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 24) in
+  let stack_b : stack_buffer = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 24) in
   let alloc_push_h0 = ST.get () in
   assert (HS.fresh_frame h0 push_h0);
   mem_roots_p_modifies_none args push_h0 alloc_push_h0;
@@ -73,8 +73,6 @@ let rec wrap_aux
         (elim_predict_t_cons hd tl predict x)
 
 let wrap c dom #pre_rel #post_rel predict = wrap_aux c dom [] pre_rel post_rel predict
-
-
 
 let rec wrap_aux_weak
     (c:TS.tainted_code)

@@ -30,6 +30,7 @@ assume
 val win: bool
 
 (* If two refs have the same address, and are in the heap, they are equal *)
+//TODO: may not be needed anymore
 assume
 val ref_extensionality
       (#a:Type0)

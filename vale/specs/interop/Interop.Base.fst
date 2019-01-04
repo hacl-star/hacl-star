@@ -31,13 +31,11 @@ let buffer_equiv (t:ME.typ)
 [@__reduce__]
 let coerce (x:'a{'a == 'b}) : 'b = x
 
-[@__reduce__]
 let as_lowstar_buffer (#t:ME.typ) (x:ME.buffer t)
   : Tot (lowstar_buffer t)
   = buffer_equiv t;
     coerce x
 
-[@__reduce__]
 let as_vale_buffer (#t:ME.typ) (x:lowstar_buffer t)
   : Tot (b:ME.buffer t)
   = buffer_equiv t;

@@ -134,7 +134,9 @@ let update_regs (x:arg)
   : GTot registers
   = upd_reg regs i (arg_as_nat64 x)
 
-let regs_with_stack (regs:registers) (stack_b:b8) : registers =
+let stack_buffer = lowstar_buffer (ME.TBase ME.TUInt64)
+
+let regs_with_stack (regs:registers) (stack_b:stack_buffer) : registers =
     fun r ->
       if r = MS.Rsp then
         IA.addrs stack_b
@@ -169,12 +171,9 @@ let update_taint_map (#a:td)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-[@__reduce__]
-let arg_of_b8 (x:b8) : arg = (| TD_Buffer ME.TUInt8, x |)
-
 let state_builder_t (args:list arg) (codom:Type) =
     h0:HS.mem ->
-    stack:b8{mem_roots_p h0 (arg_of_b8 stack::args)} ->
+    stack:stack_buffer{mem_roots_p h0 (arg_of_lb stack::args)} ->
     GTot codom
 
 let init_taint : taint_map = fun r -> MS.Public
@@ -189,7 +188,7 @@ let create_initial_trusted_state (args:arity_ok arg)
     let regs = register_of_args (List.Tot.length args) args IA.init_regs in
     let regs = FunctionalExtensionality.on reg (regs_with_stack regs stack) in
     let xmms = FunctionalExtensionality.on xmm IA.init_xmms in
-    let args = arg_of_b8 stack::args in
+    let args = arg_of_lb stack::args in
     Adapters.liveness_disjointness args h0;
     let mem:ME.mem = Adapters.mk_mem args h0 in
     let (s0:BS.state) = {
@@ -207,8 +206,6 @@ let create_initial_trusted_state (args:arity_ok arg)
     mem
 
 ////////////////////////////////////////////////////////////////////////////////
-let stack_buffer = lowstar_buffer (ME.TBase ME.TUInt64)
-
 let prediction_pre_rel_t (c:TS.tainted_code) (args:arity_ok arg) =
     h0:mem_roots args ->
     prop
@@ -218,7 +215,7 @@ let prediction_post_rel_t (c:TS.tainted_code) (args:arity_ok arg) =
     s0:TS.traceState ->
     push_h0:mem_roots args ->
     alloc_push_h0:mem_roots args ->
-    b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
+    b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_lb b::args)} ->
     (nat & ME.mem) ->
     sn:TS.traceState ->
     prop
@@ -232,7 +229,7 @@ let prediction_pre
     (s0:TS.traceState)
     (push_h0:mem_roots args)
     (alloc_push_h0:mem_roots args)
-    (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)})
+    (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_lb b::args)})
     =
   pre_rel h0 /\
   HS.fresh_frame h0 push_h0 /\
@@ -251,7 +248,7 @@ let prediction_post
     (s0:TS.traceState)
     (push_h0:mem_roots args)
     (alloc_push_h0:mem_roots args)
-    (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)})
+    (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_lb b::args)})
     (fuel_mem:nat & ME.mem) =
   let fuel, final_mem = fuel_mem in
   Some? (TS.taint_eval_code c fuel s0) /\ (
@@ -274,7 +271,7 @@ let prediction
   s0:TS.traceState ->
   push_h0:mem_roots args ->
   alloc_push_h0:mem_roots args ->
-  b:stack_buffer{mem_roots_p h0 args /\ mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
+  b:stack_buffer{mem_roots_p h0 args /\ mem_roots_p alloc_push_h0 (arg_of_lb b::args)} ->
   Ghost (nat & ME.mem)
     (requires prediction_pre c args pre_rel h0 s0 push_h0 alloc_push_h0 b)
     (ensures prediction_post c args post_rel h0 s0 push_h0 alloc_push_h0 b)
@@ -283,7 +280,7 @@ noeq type as_lowstar_sig_ret (args:arity_ok arg) =
   | As_lowstar_sig_ret :
       push_h0:mem_roots args ->
       alloc_push_h0:mem_roots args ->
-      b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_b8 b::args)} ->
+      b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_lb b::args)} ->
       fuel:nat ->
       final_mem:ME.mem ->
       as_lowstar_sig_ret args
