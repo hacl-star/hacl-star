@@ -24,17 +24,25 @@ let q: n:nat{n < pow2 446} =
   assert_norm(pow2 446 - 13818066809895115352007386748515426880336692474882178609894547503885 < prime);
   (pow2 446 - 13818066809895115352007386748515426880336692474882178609894547503885) // Group order
 
-(* let _:_:unit{max_input SHA2_512 > pow2 32} = assert_norm (max_input SHA2_512 > pow2 32) *)
+inline_for_extraction
+let size_label_SigEd448: size_nat = 8
 
-let dom4 x y = x
+inline_for_extraction
+let label_SigEd448_list =
+  [@inline_let]
+  let l = [
+    u8 0x53; u8 0x69; u8 0x67; u8 0x45; u8 0x64; u8 0x34; u8 0x34; u8 0x38
+  ]  in
+  assert_norm(List.Tot.length l == size_label_SigEd448);
+  l
 
+let label_SigEd448: lseq uint8 size_label_SigEd448 =
+  assert_norm (List.Tot.length label_SigEd448_list == size_label_SigEd448);
+  of_list label_SigEd448_list
 
-let label = [0x53; 0x69; 0x67; 0x45; 0x64; 0x34; 0x34; 0x38]
+(* let dom4 (x:nat{0 <= x /\ x <= 255}) (y:bytes{length y <= 255}) = *)
+(*   label_SigEd448 @| u8 x @| (nat_to_bytes_le (length y)) @| y *)
 
-/// The octet string "SigEd448" || octet(x) ||
-///                  octet(OLEN(y)) || y, where x is in range 0-255 and y
-///                  is an octet string of at most 255 octets.  "SigEd448"
-///                  is in ASCII (8 octets)
 
 let shake256_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
   (nat_from_bytes_le (shake256 len s 16) % q)
@@ -116,8 +124,6 @@ let g_x : elem = to_elem 2245800402959243001876043340998960362467896416325641342
 
 let g_y : elem = to_elem
 298819210078481492676017930443930673437544040154080242095928241372331506189835876003536878655418784733982303233503462500531545062832660
-
-
 
 let g: ext_point = (g_x, g_y, to_elem 1, g_x *% g_y)
 
