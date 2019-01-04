@@ -155,11 +155,11 @@ let feval_wideh h f = (wide_as_nat h f) % prime
 
 inline_for_extraction
 val fadd5_:
-    #w:lanes 
+    #w:lanes
   -> f1:felem5 w{felem_fits5 f1 (1, 2, 1, 1, 1)}
   -> f2:felem5 w{felem_fits5 f2 (1, 1, 1, 1, 1)}
-  -> out:felem5 w{felem_fits5 out (2, 3, 2, 2, 2)} 
-  (* /\ 
+  -> out:felem5 w{felem_fits5 out (2, 3, 2, 2, 2)}
+  (* /\
       feval out == pfadd (feval f1) (feval f2)} *)
 let fadd5_ #w (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   [@inline_let]
@@ -183,9 +183,9 @@ let as_nat5  f =
   uint_v s0 + (uint_v s1 * pow26) + (uint_v s2 * pow26 * pow26) +
     (uint_v s3 * pow26 * pow26 * pow26) + (uint_v s4 * pow26 * pow26 * pow26 * pow26)
 
-let as_pfelem5 (f:tup64_5) : pfelem = 
+let as_pfelem5 (f:tup64_5) : pfelem =
   (as_nat5 f) % prime
-  
+
 let transpose (#w:lanes) (f:felem5 w) : lseq tup64_5 w =
   let (f0,f1,f2,f3,f4) = f in
   let v0 = vec_v f0 in
@@ -194,16 +194,16 @@ let transpose (#w:lanes) (f:felem5 w) : lseq tup64_5 w =
   let v3 = vec_v f3 in
   let v4 = vec_v f4 in
   createi #tup64_5 w (fun i -> (v0.[i],v1.[i],v2.[i],v3.[i],v4.[i]))
-  
+
 let feval5 (#w:lanes) (f:felem5 w) : lseq pfelem w =
   map as_pfelem5 (transpose f)
 
-let feval (#w:lanes) (h:mem) (f:felem w) : GTot (lseq pfelem w) = 
+let feval (#w:lanes) (h:mem) (f:felem w) : GTot (lseq pfelem w) =
   feval5 (as_tup5 h f)
-  
+
 inline_for_extraction
 val fadd5:
-    #w:lanes 
+    #w:lanes
   -> f1:felem5 w
   -> f2:felem5 w
   -> out:felem5 w
@@ -221,7 +221,7 @@ let fadd5 #w (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   (o0, o1, o2, o3, o4)
 
 val fadd5_fits_lemma :
-    #w:lanes 
+    #w:lanes
   -> f1:felem5 w
   -> f2:felem5 w
   -> Lemma (requires (felem_fits5 f1 (1,2,1,1,1) /\ felem_fits5 f2 (1,1,1,1,1)))
@@ -229,29 +229,78 @@ val fadd5_fits_lemma :
 	  [SMTPat (fadd5 f1 f2)]
 let fadd5_fits_lemma #w f1 f2 = ()
 
+val fadd5_eval_lemma_i:
+    #w:lanes
+  -> f1:felem5 w
+  -> f2:felem5 w
+  -> i:nat{i < w}
+  -> Lemma
+    (requires (felem_fits5 f1 (1,2,1,1,1) /\ felem_fits5 f2 (1,1,1,1,1)))
+    (ensures (feval5 (fadd5 f1 f2)).[i] == pfadd (feval5 f1).[i] (feval5 f2).[i])
+let fadd5_eval_lemma_i #w f1 f2 i =
+  let (f10, f11, f12, f13, f14) = f1 in
+  let (f20, f21, f22, f23, f24) = f2 in
+  let o = fadd5 f1 f2 in
+  let (o0, o1, o2, o3, o4) = o in
+
+  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f10).[i]) + v ((vec_v f20).[i])) (pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f11).[i]) + v ((vec_v f21).[i])) (pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f12).[i]) + v ((vec_v f22).[i])) (pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f13).[i]) + v ((vec_v f23).[i])) (pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f14).[i]) + v ((vec_v f24).[i])) (pow2 64);
+  assert (as_nat5 ((vec_v o0).[i],(vec_v o1).[i],(vec_v o2).[i],(vec_v o3).[i],(vec_v o4).[i]) ==
+      	    as_nat5 ((vec_v f10).[i],(vec_v f11).[i],(vec_v f12).[i],(vec_v f13).[i],(vec_v f14).[i]) +
+      	    as_nat5 ((vec_v f20).[i],(vec_v f21).[i],(vec_v f22).[i],(vec_v f23).[i],(vec_v f24).[i]));
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l
+       (as_nat5 ((vec_v f10).[i],(vec_v f11).[i],(vec_v f12).[i],(vec_v f13).[i],(vec_v f14).[i]))
+       (as_nat5 ((vec_v f20).[i],(vec_v f21).[i],(vec_v f22).[i],(vec_v f23).[i],(vec_v f24).[i])) prime;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r
+       ((as_nat5 ((vec_v f10).[i],(vec_v f11).[i],(vec_v f12).[i],(vec_v f13).[i],(vec_v f14).[i])) % prime)
+       (as_nat5 ((vec_v f20).[i],(vec_v f21).[i],(vec_v f22).[i],(vec_v f23).[i],(vec_v f24).[i])) prime;
+  assert ((feval5 o).[i] == pfadd (feval5 f1).[i] (feval5 f2).[i])
+
 val fadd5_eval_lemma :
-    #w:lanes 
+    #w:lanes
   -> f1:felem5 w
   -> f2:felem5 w
   -> Lemma (requires (felem_fits5 f1 (1,2,1,1,1) /\ felem_fits5 f2 (1,1,1,1,1)))
 	  (ensures (feval5 (fadd5 f1 f2) == map2 pfadd (feval5 f1) (feval5 f2)))
 	  [SMTPat (fadd5 f1 f2)]
-let fadd5_eval_lemma #w f1 f2 = 
-    assert(Seq.equal (feval5 (fadd5 f1 f2)) (map2 pfadd (feval5 f1) (feval5 f2)))
+let fadd5_eval_lemma #w f1 f2 =
+  let o = fadd5 f1 f2 in
+
+  match w with
+  | 1 ->
+    fadd5_eval_lemma_i f1 f2 0;
+    eq_intro (feval5 o) (map2 pfadd (feval5 f1) (feval5 f2))
+  | 2 ->
+    fadd5_eval_lemma_i f1 f2 0;
+    fadd5_eval_lemma_i f1 f2 1;
+    eq_intro (feval5 o) (map2 pfadd (feval5 f1) (feval5 f2))
+  | 4 ->
+    fadd5_eval_lemma_i f1 f2 0;
+    fadd5_eval_lemma_i f1 f2 1;
+    fadd5_eval_lemma_i f1 f2 2;
+    fadd5_eval_lemma_i f1 f2 3;
+    eq_intro (feval5 o) (map2 pfadd (feval5 f1) (feval5 f2))
 
 [@CInline]
-val fadd:
+val fadd_:
     #w:lanes
   -> out:felem w
   -> f1:felem w
   -> f2:felem w
   -> Stack unit
     (requires fun h ->
-      live h f1 /\ live h f2 /\ live h out)
+      live h f1 /\ live h f2 /\ live h out /\
+      felem_fits h f1 (1,2,1,1,1) /\
+      felem_fits h f2 (1,1,1,1,1))
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-      as_tup5 h1 out == fadd5 (as_tup5 h0 f1) (as_tup5 h0 f2))
-let fadd #w out f1 f2 =
+      as_tup5 h1 out == fadd5 (as_tup5 h0 f1) (as_tup5 h0 f2) /\
+      felem_fits h1 out (2, 3, 2, 2, 2) /\
+      feval h1 out == map2 pfadd (feval h0 f1) (feval h0 f2))
+let fadd_ #w out f1 f2 =
   let h0 = ST.get () in
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
@@ -270,3 +319,21 @@ let fadd #w out f1 f2 =
   out.(3ul) <- o3;
   out.(4ul) <- o4;
   ()
+
+
+[@CInline]
+val fadd:
+    #w:lanes
+  -> out:felem w
+  -> f1:felem w
+  -> f2:felem w
+  -> Stack unit
+    (requires fun h ->
+      live h f1 /\ live h f2 /\ live h out /\
+      felem_fits h f1 (1,2,1,1,1) /\
+      felem_fits h f2 (1,1,1,1,1))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      felem_fits h1 out (2, 3, 2, 2, 2) /\
+      feval h1 out == map2 pfadd (feval h0 f1) (feval h0 f2))
+let fadd #w out f1 f2 = fadd_ #w out f1 f2
