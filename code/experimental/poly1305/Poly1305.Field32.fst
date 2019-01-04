@@ -29,6 +29,9 @@ let pfadd f1 f2 = (f1 + f2) % prime
 let felem5 = (uint32 * uint32 * uint32 * uint32 * uint32)
 let felem_wide5 = (uint64 * uint64 * uint64 * uint64 * uint64)
 
+
+
+
 let scale32 = s:nat{s <= 64}
 let scale64 = s:nat{s <= 4096}
 let nat5 = (nat * nat * nat * nat * nat)
@@ -62,7 +65,7 @@ open FStar.Mul
 //   let (x1,x2,x3,x4,x5) = x in
 //   let (y1,y2,y3,y4,y5) = y in
 //   (x1 * y1 ,
-//    x2 * y2 ,
+<//    x2 * y2 ,
 //    x3 * y3 ,
 //    x4 * y4 ,
 //    x5 * y5)

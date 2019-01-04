@@ -100,11 +100,18 @@ val vec_xor_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w ->
 			 [SMTPat (vec_v #t #w (vec_xor v1 v2))]
 
 inline_for_extraction noextract
-val vec_and: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 ( &. ) (vec_v v1) (vec_v v2)}
+val vec_and: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w
+val vec_and_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> 
+		Lemma (ensures (vec_v (vec_and v1 v2) == map2 ( &. ) (vec_v v1) (vec_v v2)))
+		      [SMTPat (vec_v #t #w (vec_and v1 v2))]
+		      
 inline_for_extraction noextract
 val vec_or: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 ( |. ) (vec_v v1) (vec_v v2)}
 inline_for_extraction noextract
-val vec_not: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w{vec_v v2 == map lognot (vec_v v1)}
+val vec_not: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w
+val vec_not_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> Lemma 
+		   (ensures (vec_v (vec_not v1) == map lognot (vec_v v1)))
+		   [SMTPat (vec_v #t #w (vec_not v1))]
 
 inline_for_extraction noextract
 let shift_right_i (#t:v_inttype) (s:shiftval t) (u:uint_t t SEC) : uint_t t SEC = shift_right u s
