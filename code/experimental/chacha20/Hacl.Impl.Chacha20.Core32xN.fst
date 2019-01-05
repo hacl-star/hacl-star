@@ -10,6 +10,10 @@ open Lib.ByteBuffer
 open Lib.IntVector
 module Spec = Spec.Chacha20_Vec
 
+open LowStar.Modifies.Linear
+
+#reset-options "--using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans -FStar.Seq'"
+
 let lanes = Spec.lanes
 
 inline_for_extraction
@@ -75,7 +79,7 @@ val sum_state: #w:lanes -> st:state w -> ost:state w -> ST unit
 		  (requires (fun h -> live h st /\ live h ost /\ eq_or_disjoint st ost))
    		  (ensures (fun h0 _ h1 -> 
 		    modifies (loc st) h0 h1 /\
-		    as_seq h1 st == Lib.Sequence.map2 ( +| ) (as_seq h0 st) (as_seq h0 ost)))
+		    as_seq h1 st == Spec.sum_state (as_seq h0 st) (as_seq h0 ost)))
 let sum_state #w st ost =  map2T (size 16) st ( +| ) st ost
       
 inline_for_extraction
@@ -107,10 +111,19 @@ val transpose_state4: st:state 4 -> ST unit
 		  (requires (fun h -> live h st))
    		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1))
 let transpose_state4 st = 
+  let h0 = ST.get() in
   transpose_4x4 (sub st 0ul 4ul);
+  let h1 = ST.get() in
+  assert (modifies (loc st) h0 h1);
   transpose_4x4 (sub st 4ul 4ul);
+  let h1 = ST.get() in
+  assert (modifies (loc st) h0 h1);
   transpose_4x4 (sub st 8ul 4ul);
+  let h1 = ST.get() in
+  assert (modifies (loc st) h0 h1);
   transpose_4x4 (sub st 12ul 4ul);
+  let h1 = ST.get() in
+  assert (modifies (loc st) h0 h1);
   let v0 = st.(0ul) in
   let v1 = st.(4ul) in
   let v2 = st.(8ul) in
@@ -135,6 +148,8 @@ let transpose_state4 st =
   st.(5ul) <- v5;
   st.(6ul) <- v6;
   st.(7ul) <- v7;
+  let h1 = ST.get() in
+  assert (modifies (loc st) h0 h1);
   st.(8ul) <- v8;
   st.(9ul) <- v9;
   st.(10ul) <- v10;
@@ -142,7 +157,9 @@ let transpose_state4 st =
   st.(12ul) <- v12;
   st.(13ul) <- v13;
   st.(14ul) <- v14;
-  st.(15ul) <- v15
+  st.(15ul) <- v15;
+  let h1 = ST.get() in
+  assert (modifies (loc st) h0 h1)
 
 
 inline_for_extraction
@@ -188,8 +205,11 @@ val transpose_state8: st:state 8 -> ST unit
 		  (requires (fun h -> live h st))
    		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1))
 let transpose_state8 st = 
+  let h0 = ST.get() in
   transpose_8x8 (sub st 0ul 8ul);
   transpose_8x8 (sub st 8ul 8ul);
+  let h1 = ST.get() in
+  assert (modifies (loc st)  h0 h1);
   let v0 = st.(0ul) in
   let v1 = st.(8ul) in
   let v2 = st.(1ul) in
@@ -215,14 +235,17 @@ let transpose_state8 st =
   st.(6ul) <- v6;
   st.(7ul) <- v7;
   st.(8ul) <- v8;
+  let h1 = ST.get() in
+  assert (modifies (loc st)  h0 h1);
   st.(9ul) <- v9;
   st.(10ul) <- v10;
   st.(11ul) <- v11;
   st.(12ul) <- v12;
   st.(13ul) <- v13;
   st.(14ul) <- v14;
-  st.(15ul) <- v15
-
+  st.(15ul) <- v15;
+  let h1 = ST.get() in
+  assert (modifies (loc st)  h0 h1)
   
 inline_for_extraction
 val transpose_state: #w:lanes -> st:state w -> ST unit
@@ -301,8 +324,6 @@ let double_round1 st = double_round_ #1 st
 let double_round4 st = double_round_ #4 st
 [@CInline]
 let double_round8 st = double_round_ #8 st
-[@CInline]
-let double_round16 st = double_round_ #16 st
 
 inline_for_extraction
 val double_round: #w:lanes -> st:state w -> ST unit
@@ -315,5 +336,5 @@ let double_round #w st =
   | 1 -> double_round1 st
   | 4 -> double_round4 st
   | 8 -> double_round8 st
-  | 16 -> double_round16 st
+
   

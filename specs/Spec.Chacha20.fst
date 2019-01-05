@@ -65,7 +65,7 @@ let double_round : shuffle =
 let rounds : shuffle =
   repeat 10 double_round (* 20 rounds *)
 
-let chacha20_core (s0:state) (ctr:counter{v s0.[12] + ctr <= max_size_t}) : Tot state =
+let chacha20_core (s0:state) (ctr:counter) : Tot state =
   let k = s0 in
   let k = k.[12] <- k.[12] +. u32 ctr in
   let k = rounds k in
