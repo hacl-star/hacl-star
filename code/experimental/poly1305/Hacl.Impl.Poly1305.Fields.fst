@@ -7,10 +7,10 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.Vec256
-module F32 = Hacl.Impl.Poly1305.Field32
+//module F32 = Hacl.Impl.Poly1305.Field32
 module F64 = Hacl.Impl.Poly1305.Field64
-module F128 = Hacl.Impl.Poly1305.Field128
-module F256 = Hacl.Impl.Poly1305.Field256
+//module F128 = Hacl.Impl.Poly1305.Field128
+//module F256 = Hacl.Impl.Poly1305.Field256
 module F32xN = Hacl.Impl.Poly1305.Field32xN
 
 type field_spec = 
