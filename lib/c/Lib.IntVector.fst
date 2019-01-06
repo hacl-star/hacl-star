@@ -143,6 +143,7 @@ let vec_xor (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
 
 let vec_xor_lemma (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = admit()
 
+
 let vec_and (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = 
   match t,w with
   | U128,1 -> vec128_and x y
@@ -154,6 +155,8 @@ let vec_and (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_and x y
   | U64,4 -> vec256_and x y
   | U128,2 -> admit()
+
+let vec_and_lemma (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = admit()
 
 let vec_or (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = 
   match t,w with
@@ -178,6 +181,8 @@ let vec_not (#t:v_inttype) (#w:width) (x:vec_t t w) =
   | U32,8 -> vec256_lognot x 
   | U64,4 -> vec256_lognot x 
   | U128,2 -> admit()
+
+let vec_not_lemma #vt #w (v1:vec_t vt w) = admit()
 
 let vec_shift_right (#t:v_inttype) (#w:width) (x:vec_t t w) (y:shiftval t) = 
   match t,w with

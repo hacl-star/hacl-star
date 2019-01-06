@@ -194,12 +194,15 @@ let vec_xor_lemma #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) = ()
 let vec_and #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) : vec_t vt w =
 map2 (Ints.logand #vt) v1 v2
 
+let vec_and_lemma #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) = ()
+
 let vec_or #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) : vec_t vt w =
 map2 (Ints.logor #vt) v1 v2
 
 let vec_not #vt #w (v1:vec_t vt w) : vec_t vt w =
 map (Ints.lognot #vt) v1
 
+let vec_not_lemma #vt #w (v1:vec_t vt w) = admit()
 
 let vec_shift_right #vt #w v1 s =
   map (shift_right_i s) v1
