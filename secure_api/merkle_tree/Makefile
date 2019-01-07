@@ -26,6 +26,8 @@ all_: dist/compact/libmerkletree.a
 # - verify every F* file in parallel to generate .checked files
 # - extract each .checked file into a .krml file in parallel
 
+#TODO: AR: 01/07: directories at the tail end, starting from cache_checked should be added if they exist
+
 FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib/compat \
   $(KREMLIN_HOME)/kremlib \
@@ -56,6 +58,18 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/vale/specs/defs \
   $(HACL_HOME)/vale/specs/crypto \
   $(HACL_HOME)/vale/specs/hardware \
+  $(HACL_HOME)/vale/obj/cache_checked \
+  $(HACL_HOME)/vale/obj/code/lib/util/x64/stdcalls \
+  $(HACL_HOME)/vale/obj/code/lib/util/x64 \
+  $(HACL_HOME)/vale/obj/code/lib/util \
+  $(HACL_HOME)/vale/obj/code/arch/x64 \
+  $(HACL_HOME)/vale/obj/code/crypto/aes/x64/stdcalls \
+  $(HACL_HOME)/vale/obj/code/crypto/aes/x64 \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/Intel/aes/x64 \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/poly1305/x64 \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/OpenSSL/sha \
+  $(HACL_HOME)/vale/obj/code/thirdPartyPorts/rfc7748/curve25519/x64 \
+  $(HACL_HOME)/vale/obj/code/test \
 
 EVERCRYPT_CACHE_DIR=$(HACL_HOME)/providers/.cache
 
