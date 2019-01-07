@@ -81,7 +81,7 @@ all-ci: bignum-ci specific-ci
 
 
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
-KREMLIN_ARGS+=-tmpdir x25519-c -I ../bignum \
+KREMLIN_ARGS+= -I ../bignum \
 	$(KREMLIN_TESTLIB)
 
 # Acknowledge the F* dependency graph
@@ -91,24 +91,30 @@ depend:
 -include .depend
 
 x25519-c/out.krml: $(X25519_FILES) Hacl.Test.X25519.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
+	$(KREMLIN) -tmpdir x25519-c $(KREMLIN_ARGS) -skip-translation $^ -o $@
 
 x25519-c/Hacl_Test_X25519.c: x25519-c/Hacl_Curve25519.c
 
 x25519-c/Hacl_Curve25519.c:  x25519-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) \
+	$(KREMLIN) -tmpdir x25519-c $(KREMLIN_ARGS) \
 	 	-bundle 'Hacl.Curve25519=*' \
 		-minimal -add-include '"kremlib.h"' \
 		-skip-compilation $^ -o $@
 
+x25519-c89/Hacl_Curve25519.c:  x25519-c/out.krml
+	$(KREMLIN) -tmpdir x25519-c89 $(KREMLIN_ARGS) \
+	 	-bundle 'Hacl.Curve25519=*' \
+		-minimal -add-include '"kremlib.h"' \
+		-skip-compilation $^ -o $@ -fc89
+
 x25519.exe: x25519-c/Hacl_Curve25519.c x25519-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -no-prefix Hacl.Test.X25519 \
+	$(KREMLIN) -tmpdir x25519-c $(KREMLIN_ARGS) -no-prefix Hacl.Test.X25519 \
 	 	-bundle 'Hacl.Test.X25519=*' \
 		-minimal -add-include '"kremlib.h"' \
 		$^ -o $@
 	./$@
 
-extract-c: x25519-c/Hacl_Curve25519.c x25519-c/Hacl_Test_X25519.c
+extract-c: x25519-c89/Hacl_Curve25519.c x25519-c/Hacl_Curve25519.c x25519-c/Hacl_Test_X25519.c
 
 test: x25519.exe
 

@@ -66,7 +66,7 @@ all-ci: bignum-ci specific-ci
 # By default, KreMLin drops a bunch of spec-related module that are not meant to
 # extract.
 CFLAGS=-Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
-KREMLIN_ARGS+=-I ../bignum -tmpdir poly-c \
+KREMLIN_ARGS+=-I ../bignum \
 	-fparentheses
 
 # Acknowledge the F* dependency graph
@@ -77,26 +77,37 @@ depend:
 
 # The F* -> out.krml step only depends on F* files.
 poly-c/out.krml: $(POLY1305_FILES) Hacl.Test.Poly1305_64.fst
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -o $@
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-translation $^ -tmpdir poly-c -o $@
 
 poly-c/Hacl_Poly1305_64.c: poly-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -tmpdir poly-c \
 		-add-include '"kremlib.h"' -minimal -bundle 'Hacl_Poly1305_64=*' \
 	$^ -o $@
 
 poly-c/AEAD_Poly1305_64.c: poly-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation \
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -tmpdir poly-c \
 		-add-include '"kremlib.h"' -minimal -bundle 'AEAD.Poly1305_64=*' \
+	$^ -o $@
+
+poly-c89/Hacl_Poly1305_64.c: poly-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -tmpdir poly-c89 \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl_Poly1305_64=*' -fc89 \
+	$^ -o $@
+
+poly-c89/AEAD_Poly1305_64.c: poly-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -skip-compilation -tmpdir poly-c89 \
+		-add-include '"kremlib.h"' -minimal -bundle 'AEAD.Poly1305_64=*' -fc89 \
 	$^ -o $@
 
 poly1305.exe: poly-c/out.krml
 	$(KREMLIN) $(KREMLIN_ARGS) \
-		-drop AEAD_Poly1305_64 -no-prefix Hacl.Test.Poly1305_64 \
+		-drop AEAD_Poly1305_64 -no-prefix Hacl.Test.Poly1305_64 -tmpdir poly-c \
 		-add-include '"kremlib.h"' -minimal -bundle 'Hacl_Poly1305_64=*' \
 		$^ -o $@
 	./$@
 
-extract-c: poly-c/Hacl_Poly1305_64.c poly-c/AEAD_Poly1305_64.c
+extract-c: poly-c/Hacl_Poly1305_64.c poly-c/AEAD_Poly1305_64.c \
+  poly-c89/Hacl_Poly1305_64.c poly-c89/AEAD_Poly1305_64.c
 
 test: poly1305.exe
 
