@@ -672,7 +672,22 @@ val mul_felem5_fits_lemma:
     (ensures
       felem_wide_fits5 (mul_felem5 #w f1 r r5) (47, 35, 27, 19, 11))
     [SMTPat (mul_felem5 #w f1 r r5)]
-let mul_felem5_fits_lemma #w f1 r r5 = admit()
+let mul_felem5_fits_lemma #w f1 r r5 =
+  let (r0, r1, r2, r3, r4) = r in
+  let (f10, f11, f12, f13, f14) = f1 in
+  let (r50, r51, r52, r53, r54) = r5 in
+
+  let (a0,a1,a2,a3,a4) = smul_felem5 #w f10 (r0,r1,r2,r3,r4) in
+  smul_felem5_fits_lemma #w #2 #(1,1,1,1,1) f10 (r0,r1,r2,r3,r4);
+  assert (felem_wide_fits5 (a0,a1,a2,a3,a4) (2,2,2,2,2));
+  let (a10,a11,a12,a13,a14) = smul_add_felem5 #w f11 (r54,r0,r1,r2,r3) (a0,a1,a2,a3,a4) in
+  smul_add_felem5_fits_lemma #w #3 #(5,1,1,1,1) #(2,2,2,2,2) f11 (r54,r0,r1,r2,r3) (a0,a1,a2,a3,a4);
+  let (a20,a21,a22,a23,a24) = smul_add_felem5 #w f12 (r53,r54,r0,r1,r2) (a10,a11,a12,a13,a14) in
+  smul_add_felem5_fits_lemma #w #2 #(5,5,1,1,1) #(17,5,5,5,5) f12 (r53,r54,r0,r1,r2) (a10,a11,a12,a13,a14);
+  let (a30,a31,a32,a33,a34) = smul_add_felem5 #w f13 (r52,r53,r54,r0,r1) (a20,a21,a22,a23,a24) in
+  smul_add_felem5_fits_lemma #w #2 #(5,5,5,1,1) #(27,15,7,7,7) f13 (r52,r53,r54,r0,r1) (a20,a21,a22,a23,a24);
+  let (a40,a41,a42,a43,a44) = smul_add_felem5 #w f14 (r51,r52,r53,r54,r0) (a30,a31,a32,a33,a34) in
+  smul_add_felem5_fits_lemma #w #2 #(5,5,5,5,1) #(37,25,17,9,9) f14 (r51,r52,r53,r54,r0) (a30,a31,a32,a33,a34)
 
 noextract
 val precomp_r5:
@@ -686,6 +701,15 @@ let precomp_r5 #w (r0, r1, r2, r3, r4) =
   let r53 = vec_smul_mod r3 (u64 5) in
   let r54 = vec_smul_mod r4 (u64 5) in
   (r50, r51, r52, r53, r54)
+
+noextract
+let acc_inv_t (#w:lanes) (acc:felem5 w) : Type0 =
+  let (o0, o1, o2, o3, o4) = acc in
+  forall (i:nat). i < w ==>
+   (if uint_v (vec_v o1).[i] >= pow2 26 then
+      felem_fits5 acc (1, 2, 1, 1, 1) /\
+      uint_v (vec_v o1).[i] % pow2 26 < 64
+    else felem_fits5 acc (1, 1, 1, 1, 1))
 
 val mul_felem5_eval_lemma:
     #w:lanes
@@ -713,6 +737,33 @@ let carry26 #w l cin =
   let l = vec_add_mod l cin in
   (vec_and l (mask26 w), vec_shift_right l 26ul)
 
+let uint64xN_fits (#w:lanes) (x:uint64xN w) (m:nat) =
+  forall (i:nat). i < w ==> uint_v (vec_v x).[i] <= m
+
+val carry26_fits_lemma:
+    #w:lanes
+  -> l:uint64xN w
+  -> cin:uint64xN w
+  -> Lemma
+    (requires felem_fits1 l 2 /\ felem_fits1 cin 62)
+    (ensures
+     (let (l0, l1) = carry26 #w l cin in
+      felem_fits1 l0 1 /\ uint64xN_fits l1 64))
+let carry26_fits_lemma #w l cin = admit()
+
+val carry26_eval_lemma:
+    #w:lanes
+  -> l:uint64xN w
+  -> cin:uint64xN w
+  -> Lemma
+    (requires felem_fits1 l 2 /\ felem_fits1 cin 62)
+    (ensures
+     (let (l0, l1) = carry26 #w l cin in
+      (forall (i:nat). i < w ==>
+	(uint64xN_v l).[i] + (uint64xN_v cin).[i] ==
+	(uint64xN_v l1).[i] * pow2 26 + (uint64xN_v l0).[i])))
+let carry26_eval_lemma #w l cin = admit()
+
 inline_for_extraction noextract
 val carry26_wide:
     #w:lanes
@@ -721,11 +772,23 @@ val carry26_wide:
   -> uint64xN w & uint64xN w
 let carry26_wide #w l cin = carry26 #w l cin
 
+val carry26_wide_fits_lemma:
+    #w:lanes
+  -> #m:scale64{m < 64}
+  -> l:uint64xN w
+  -> cin:uint64xN w
+  -> Lemma
+    (requires felem_wide_fits1 l m /\ felem_fits1 cin 64)
+    (ensures
+     (let (l0, l1) = carry26 #w l cin in
+      felem_fits1 l0 1 /\ felem_fits1 l1 (m + 1)))
+let carry26_wide_fits_lemma #w #m l cin = admit()
+
 inline_for_extraction noextract
 val carry_wide_felem5:
     #w:lanes
-  -> inp:felem5 w
-  -> out:felem_wide5 w
+  -> inp:felem_wide5 w
+  -> out:felem5 w
 let carry_wide_felem5 #w (i0, i1, i2, i3, i4) =
   let tmp0,c0 = carry26_wide i0 (zero w) in
   let tmp1,c1 = carry26_wide i1 c0 in
@@ -735,6 +798,22 @@ let carry_wide_felem5 #w (i0, i1, i2, i3, i4) =
   let tmp0,c5 = carry26 tmp0 (vec_smul_mod c4 (u64 5)) in
   let tmp1 = vec_add_mod tmp1 c5 in
   (tmp0, tmp1, tmp2, tmp3, tmp4)
+
+val carry_wide_felem5_fits_lemma:
+    #w:lanes
+  -> inp:felem_wide5 w
+  -> Lemma
+    (requires felem_wide_fits5 inp (47, 35, 27, 19, 11))
+    (ensures acc_inv_t (carry_wide_felem5 #w inp))
+let carry_wide_felem5_fits_lemma #w inp = admit()
+
+val carry_wide_felem5_eval_lemma:
+    #w:lanes
+  -> inp:felem_wide5 w
+  -> Lemma
+    (requires felem_wide_fits5 inp (47, 35, 27, 19, 11))
+    (ensures feval5 (carry_wide_felem5 #w inp) == feval5 inp)
+let carry_wide_felem5_eval_lemma #w inp = admit()
 
 inline_for_extraction noextract
 val fmul_r5:
@@ -747,15 +826,6 @@ let fmul_r5 #w (f10, f11, f12, f13, f14) (r0, r1, r2, r3, r4) (r50, r51, r52, r5
   let (t0, t1, t2, t3, t4) =
     mul_felem5 (f10, f11, f12, f13, f14) (r0, r1, r2, r3, r4) (r50, r51, r52, r53, r54) in
   carry_wide_felem5 (t0, t1, t2, t3, t4)
-
-noextract
-let acc_inv_t (#w:lanes) (acc:felem5 w) : Type0 =
-  let (o0, o1, o2, o3, o4) = acc in
-  forall (i:nat). i < w ==>
-   (if uint_v (vec_v o1).[i] >= pow2 26 then
-      felem_fits5 acc (1, 2, 1, 1, 1) /\
-      uint_v (vec_v o1).[i] % pow2 26 < 64
-    else felem_fits5 acc (1, 1, 1, 1, 1))
 
 val fmul_r5_fits_lemma:
     #w:lanes
@@ -770,7 +840,11 @@ val fmul_r5_fits_lemma:
     (ensures
       acc_inv_t (fmul_r5 #w f1 r r5))
     [SMTPat (fmul_r5 #w f1 r r5)]
-let fmul_r5_fits_lemma #w f1 r r5 = admit()
+let fmul_r5_fits_lemma #w f1 r r5 =
+  let tmp = mul_felem5 f1 r r5 in
+  mul_felem5_fits_lemma #w f1 r r5;
+  let res = carry_wide_felem5 tmp in
+  carry_wide_felem5_fits_lemma #w tmp
 
 val fmul_r5_eval_lemma:
     #w:lanes
@@ -786,7 +860,11 @@ val fmul_r5_eval_lemma:
     (ensures
       feval5 (fmul_r5 #w f1 r r5) == map2 (pfmul) (feval5 f1) (feval5 r))
     [SMTPat (fmul_r5 #w f1 r r5)]
-let fmul_r5_eval_lemma #w f1 r r5 = admit()
+let fmul_r5_eval_lemma #w f1 r r5 =
+  let tmp = mul_felem5 f1 r r5 in
+  mul_felem5_eval_lemma #w f1 r r5;
+  let res = carry_wide_felem5 tmp in
+  carry_wide_felem5_eval_lemma #w tmp
 
 inline_for_extraction noextract
 val fadd_mul_r5:
@@ -816,7 +894,13 @@ val fadd_mul_r5_fits_lemma:
     (ensures
       acc_inv_t (fadd_mul_r5 acc f1 r r5))
     [SMTPat (fadd_mul_r5 acc f1 r r5)]
-let fadd_mul_r5_fits_lemma #w acc f1 r r5 = admit()
+let fadd_mul_r5_fits_lemma #w acc f1 r r5 =
+  let acc1 = fadd5 acc f1 in
+  fadd5_fits_lemma #w acc f1;
+  let tmp = mul_felem5 acc1 r r5 in
+  mul_felem5_fits_lemma #w acc1 r r5;
+  let res = carry_wide_felem5 tmp in
+  carry_wide_felem5_fits_lemma #w tmp
 
 val fadd_mul_r5_eval_lemma:
     #w:lanes
@@ -835,7 +919,13 @@ val fadd_mul_r5_eval_lemma:
       feval5 (fadd_mul_r5 acc f1 r r5) ==
 	map2 (pfmul) (map2 (pfadd) (feval5 acc) (feval5 f1)) (feval5 r))
     [SMTPat (fadd_mul_r5 acc f1 r r5)]
-let fadd_mul_r5_eval_lemma #w acc f1 r r5 = admit()
+let fadd_mul_r5_eval_lemma #w acc f1 r r5 =
+  let acc1 = fadd5 acc f1 in
+  fadd5_eval_lemma #w acc f1;
+  let tmp = mul_felem5 acc1 r r5 in
+  mul_felem5_eval_lemma #w acc1 r r5;
+  let res = carry_wide_felem5 tmp in
+  carry_wide_felem5_eval_lemma #w tmp
 
 inline_for_extraction noextract
 val fmul_rn5:
