@@ -42,7 +42,7 @@ let wrap_variadic c args #pre_rel #post_rel predict =
       ) in
   ST.pop_frame ();
   assert (ST.equal_domains alloc_push_h0 (Adapters.hs_of_mem final_mem));
-  As_lowstar_sig_ret push_h0 alloc_push_h0 stack_b fuel final_mem
+  Ghost.hide (As_lowstar_sig_ret args push_h0 alloc_push_h0 stack_b fuel final_mem)
 
 let rec wrap_aux
     (c:TS.tainted_code)
@@ -55,7 +55,7 @@ let rec wrap_aux
   = match dom with
     | [] ->
       let f () :
-        FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+        FStar.HyperStack.ST.Stack als_ret
            (requires fun h0 ->
              mem_roots_p h0 args /\ elim_rel_gen_t_nil pre_rel h0)
            (ensures fun h0 ret h1 ->
@@ -85,7 +85,7 @@ let rec wrap_aux_weak
   = match dom with
     | [] ->
       let f () :
-        FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+        FStar.HyperStack.ST.Stack als_ret
            (requires fun h0 ->
              mem_roots_p h0 args /\ elim_rel_gen_t_nil pre_rel h0)
            (ensures fun h0 ret h1 ->

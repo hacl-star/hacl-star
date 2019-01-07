@@ -276,14 +276,18 @@ let prediction
     (requires prediction_pre c args pre_rel h0 s0 push_h0 alloc_push_h0 b)
     (ensures prediction_post c args post_rel h0 s0 push_h0 alloc_push_h0 b)
 
-noeq type as_lowstar_sig_ret (args:arity_ok arg) =
+noeq
+type as_lowstar_sig_ret =
   | As_lowstar_sig_ret :
+      args:arity_ok arg ->
       push_h0:mem_roots args ->
       alloc_push_h0:mem_roots args ->
       b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_lb b::args)} ->
       fuel:nat ->
       final_mem:ME.mem ->
-      as_lowstar_sig_ret args
+      as_lowstar_sig_ret
+
+let als_ret = Ghost.erased as_lowstar_sig_ret
 
 [@__reduce__]
 let as_lowstar_sig_post
@@ -293,10 +297,12 @@ let as_lowstar_sig_post
     (#pre_rel:_)
     (#post_rel: _)
     (predict:prediction c args pre_rel post_rel)
-    (ret:as_lowstar_sig_ret args)
+    (ret:als_ret)
     (h1:HS.mem) =
   (* write it this way to be reduction friendly *)
-  let push_h0 = As_lowstar_sig_ret?.push_h0 ret in
+  let ret = Ghost.reveal ret in
+  args == As_lowstar_sig_ret?.args ret /\
+ (let push_h0 = As_lowstar_sig_ret?.push_h0 ret in
   let alloc_push_h0 = As_lowstar_sig_ret?.alloc_push_h0 ret in
   let b = As_lowstar_sig_ret?.b ret in
   let fuel = As_lowstar_sig_ret?.fuel ret in
@@ -308,7 +314,7 @@ let as_lowstar_sig_post
   prediction_post c args post_rel h0 s0 push_h0 alloc_push_h0 b (fuel, final_mem) /\
   FStar.HyperStack.ST.equal_domains alloc_push_h0 pre_pop /\
   HS.poppable pre_pop /\
-  h1 == HS.pop pre_pop
+  h1 == HS.pop pre_pop)
 
 [@__reduce__]
 let as_lowstar_sig_post_weak
@@ -318,10 +324,12 @@ let as_lowstar_sig_post_weak
     (#pre_rel:_)
     (#post_rel: _)
     (predict:prediction c args pre_rel post_rel)
-    (ret:as_lowstar_sig_ret args)
+    (ret:als_ret)
     (h1:HS.mem) =
   (* write it this way to be reduction friendly *)
-  let push_h0 = As_lowstar_sig_ret?.push_h0 ret in
+  let ret = Ghost.reveal ret in
+  args == As_lowstar_sig_ret?.args ret /\
+ (let push_h0 = As_lowstar_sig_ret?.push_h0 ret in
   let alloc_push_h0 = As_lowstar_sig_ret?.alloc_push_h0 ret in
   let b = As_lowstar_sig_ret?.b ret in
   let fuel = As_lowstar_sig_ret?.fuel ret in
@@ -334,7 +342,7 @@ let as_lowstar_sig_post_weak
      let pre_pop = Adapters.hs_of_mem final_mem in
      HS.poppable pre_pop /\
      h1 == HS.pop pre_pop /\
-     post_rel h0 s0 push_h0 alloc_push_h0 b (fuel, final_mem) _s1)
+     post_rel h0 s0 push_h0 alloc_push_h0 b (fuel, final_mem) _s1))
 
 [@__reduce__]
 let as_lowstar_sig (c:TS.tainted_code) =
@@ -342,7 +350,7 @@ let as_lowstar_sig (c:TS.tainted_code) =
     #pre_rel:_ ->
     #post_rel:_ ->
     predict:prediction c args pre_rel post_rel ->
-    FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+    FStar.HyperStack.ST.Stack als_ret
         (requires (fun h0 -> mem_roots_p h0 args /\ pre_rel h0))
         (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 predict ret h1)
 
@@ -431,8 +439,8 @@ let rec as_lowstar_sig_t
       match dom with
       | [] ->
         (unit ->
-         FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
-           (requires (fun h0 -> mem_roots_p h0 args /\ (elim_rel_gen_t_nil pre_rel h0)))
+         FStar.HyperStack.ST.Stack als_ret
+           (requires (fun h0 -> mem_roots_p h0 args /\ elim_rel_gen_t_nil pre_rel h0))
            (ensures fun h0 ret h1 -> as_lowstar_sig_post c args h0 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1))
       | hd::tl ->
         x:td_as_type hd ->
@@ -464,7 +472,7 @@ let rec as_lowstar_sig_t_weak
       match dom with
       | [] ->
         (unit ->
-         FStar.HyperStack.ST.Stack (as_lowstar_sig_ret args)
+         FStar.HyperStack.ST.Stack als_ret
            (requires (fun h0 -> mem_roots_p h0 args /\ (elim_rel_gen_t_nil pre_rel h0)))
            (ensures fun h0 ret h1 -> as_lowstar_sig_post_weak c args h0 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1))
       | hd::tl ->

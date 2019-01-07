@@ -165,7 +165,7 @@ let lbv_as_seq_eq #a #b #rrel #rel x y v h =
   FStar.Classical.forall_intro aux
 
 //#reset-options// "--use_two_phase_tc false --__temp_fast_implicits"
-let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
+let memcpy_test (dst:b64) (src:b64)
   : Stack unit
     (requires fun h0 ->
       B.live h0 dst /\
@@ -174,17 +174,19 @@ let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
       B.length dst == 16 /\
       B.length src == 16)
     (ensures fun h0 _ h1 ->
+      //The framework provides an overapproximation of modifies; TODO: tighten    
       B.modifies (B.loc_union (B.loc_buffer dst) (B.loc_buffer src)) h0 h1 /\
-      Seq.equal (B.as_seq h1 dst) (B.as_seq h1 src) /\
-      True)
-  by (T.dump "D"; T.norm [delta_only [`%X64.Memory.loc_disjoint; `%List.Tot.length]; iota; zeta; primops]; T.dump "E")
-  = let _ = lowstar_memcpy_normal_t dst src () in
-    (let h1 = get () in
-     let dst1 : Seq.seq UInt64.t = LBV.as_seq h1 (LBV.mk_buffer_view dst Views.view64) in
-     let src0 : Seq.seq UInt64.t = LBV.as_seq h1 (LBV.mk_buffer_view src Views.view64) in
-     assert (dst1 == src0);
-     lbv_as_seq_eq dst src Views.view64 h1);
-    ()
+      Seq.equal (B.as_seq h1 dst) (B.as_seq h1 src))
+  by (T.dump "A"; T.norm [delta_only [`%X64.Memory.loc_disjoint; `%List.Tot.length]; iota; zeta; primops])
+  = let _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
+    let h1 = get () in
+    lbv_as_seq_eq dst src Views.view64 h1 //And a lemma to rephrase the Vale postcondition 
+                                          //with equalities of buffer views
+                                          //back to equalities of buffers
+    
+     // let dst1 : Seq.seq UInt64.t = LBV.as_seq h1 (LBV.mk_buffer_view dst Views.view64) in
+     // let src0 : Seq.seq UInt64.t = LBV.as_seq h1 (LBV.mk_buffer_view src Views.view64) in
+     // assert (dst1 == src0);
 
 
 (*
