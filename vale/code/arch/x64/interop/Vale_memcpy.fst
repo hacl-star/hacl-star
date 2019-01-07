@@ -10,7 +10,6 @@ val va_code_memcpy: bool -> va_code
 
 let va_code_memcpy = va_code_memcpy
 
-unfold 
 let va_pre (va_b0:va_code) (va_s0:va_state) (win:bool) (stack_b:buffer64)
 (dst:buffer64) (src:buffer64)  = va_req_memcpy va_b0 va_s0 win stack_b dst src 
 

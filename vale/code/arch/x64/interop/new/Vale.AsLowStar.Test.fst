@@ -21,7 +21,7 @@ let b64 = lowstar_buffer ME.(TBase TUInt64)
 let t = TD_Buffer ME.TUInt64
 
 [@__reduce__] unfold
-let dom : (x:list td {List.length x == 2}) =
+let dom : IX64.arity_ok td =
   let y = [t;t] in
   assert_norm (List.length y = 2);
   y
@@ -123,7 +123,7 @@ let lowstar_memcpy : lowstar_memcpy_t  =
     vm_dom
     (W.mk_prediction code_memcpy vm_dom [] 3 (vm_lemma code_memcpy IA.win))
 
-let lowstar_memcpy_normal_t : normal lowstar_memcpy_t
+let lowstar_memcpy_normal_t //: normal lowstar_memcpy_t
   = as_normal_t #lowstar_memcpy_t lowstar_memcpy
 module B = LowStar.Monotonic.Buffer
 open FStar.HyperStack.ST
@@ -143,7 +143,28 @@ let as_vale_buffer_disjoint (#t1 #t2:ME.typ) (x:lowstar_buffer t1) (y:lowstar_bu
 let test (x:b64) = assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)
 
 module T = FStar.Tactics
-#reset-options "--use_two_phase_tc false --__temp_fast_implicits"
+module LBV = LowStar.BufferView
+val lbv_as_seq_eq (#a #b:Type) (#rrel #rel:B.srel a) (x y: B.mbuffer a rrel rel) (v:LBV.view a b) (h:_)
+  : Lemma
+    (requires (B.length x == B.length y /\
+               B.length x % LBV.View?.n v == 0 /\
+               Seq.equal (LBV.as_seq h (LBV.mk_buffer_view x v))
+                         (LBV.as_seq h (LBV.mk_buffer_view y v))))
+    (ensures (Seq.equal (B.as_seq h x) (B.as_seq h y)))
+let lbv_as_seq_eq #a #b #rrel #rel x y v h =
+  let vx = LBV.mk_buffer_view x v in 
+  let vy = LBV.mk_buffer_view y v in
+  LBV.as_buffer_mk_buffer_view x v;
+  LBV.as_buffer_mk_buffer_view y v;  
+  assert (LBV.as_buffer vx === x);
+  assert (LBV.as_buffer vy === y);
+  let aux (i:nat{i < B.length x})
+    : Lemma (Seq.index (B.as_seq h x) i == Seq.index (B.as_seq h y) i)
+    = admit()
+  in
+  FStar.Classical.forall_intro aux
+
+//#reset-options// "--use_two_phase_tc false --__temp_fast_implicits"
 let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
   : Stack unit
     (requires fun h0 ->
@@ -154,10 +175,15 @@ let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
       B.length src == 16)
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer dst) (B.loc_buffer src)) h0 h1 /\
-//      B.as_seq h1 dst == B.as_seq h0 src /\ //TODO
+      Seq.equal (B.as_seq h1 dst) (B.as_seq h1 src) /\
       True)
-  by (T.dump "D"; T.norm [delta_only [`%X64.Memory.loc_disjoint]; iota; zeta]; T.dump "E")
+  by (T.dump "D"; T.norm [delta_only [`%X64.Memory.loc_disjoint; `%List.Tot.length]; iota; zeta; primops]; T.dump "E")
   = let _ = lowstar_memcpy_normal_t dst src () in
+    (let h1 = get () in
+     let dst1 : Seq.seq UInt64.t = LBV.as_seq h1 (LBV.mk_buffer_view dst Views.view64) in
+     let src0 : Seq.seq UInt64.t = LBV.as_seq h1 (LBV.mk_buffer_view src Views.view64) in
+     assert (dst1 == src0);
+     lbv_as_seq_eq dst src Views.view64 h1);
     ()
 
 
