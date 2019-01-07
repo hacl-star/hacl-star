@@ -157,6 +157,7 @@ let lemma_iand_pow2 (n:pos) (x:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
   );
   ()
 
+#set-options "--max_fuel 1 --max_ifuel 0"
 let lemma_ishr_pow2_diff (n:pos) (i:nat{i < n}) (j:nat{i <= j /\ j < n}) : Lemma
   (pow2 j < pow2 n /\ ishr #(pow2 n) (pow2 j) (j - i) == pow2 i)
   =
@@ -245,4 +246,3 @@ let lemma_iand_maybe_pow2_64 (x y:nat64) (i:nat{i < 64}) : Lemma
   (ensures not (iand x y = 0) <==> not (x = 0) /\ not (y = 0))
   =
   lemma_iand_maybe_pow2 64 x y i
-
