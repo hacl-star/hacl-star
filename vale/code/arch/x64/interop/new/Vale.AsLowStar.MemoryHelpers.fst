@@ -22,36 +22,47 @@ module ST = FStar.HyperStack.ST
 
 friend X64.Memory
 friend X64.Memory_Sems
+friend X64.Vale.Decls
 
 open Interop.Adapters
 
 let down_mem_unify () : Lemma (IM.down_mem == Interop.down_mem) = 
   admit() // TODO: We should only have one def for down_mem
 
-let mk_mem_reveal (args:list arg) (h0:mem_roots args) : Lemma
+let mem_reveal (mem:ME.mem) : Lemma 
+  (hs_of_mem mem == mem.ME.hs /\ ptrs_of_mem mem == mem.ME.ptrs)
+  = admit() // TODO: Will be provable with an implementation for Interop.Adapters
+
+let mk_mem_addrs_reveal (args:list arg) (h0:mem_roots args) : Lemma
   (let mem = mk_mem args h0 in
-   hs_of_mem mem == mem.ME.hs /\
-   ptrs_of_mem mem == mem.ME.ptrs /\
    IA.addrs == mem.ME.addrs) =
    admit() // TODO: Will be provable with an implementation for Interop.Adapters
 
 let buffer_readable_reveal bt x args h0 stack =
   let mem = mk_mem (arg_of_lb stack::args) h0 in
   mk_mem_injective (arg_of_lb stack::args) h0;
-  mk_mem_reveal (arg_of_lb stack::args) h0
+  mem_reveal mem
 
 let get_heap_mk_mem_reveal args h0 stack =
-  let mem = mk_mem (arg_of_lb stack::args) h0 in
   mk_mem_injective (arg_of_lb stack::args) h0;
   down_mem_unify ();
-  mk_mem_reveal (arg_of_lb stack::args) h0
+  mk_mem_addrs_reveal (arg_of_lb stack::args) h0;
+  mem_reveal (mk_mem (arg_of_lb stack::args) h0)
 
 let buffer_as_seq_reveal t x args h0 stack =
-  let y = as_vale_buffer x in
-  let mem = mk_mem (arg_of_lb stack::args) h0 in
   assume (t <> ME.TUInt128); // TODO: TUInt128
   mk_mem_injective (arg_of_lb stack::args) h0;
-  mk_mem_reveal (arg_of_lb stack::args) h0
-
+  mem_reveal (mk_mem (arg_of_lb stack::args) h0)
+  
+let buffer_as_seq_reveal2 t x va_s =
+  assume (t <> ME.TUInt128); // TODO: TUInt128
+  let mem = va_s.VS.mem in
+  mem_reveal mem
+  
 let buffer_addr_reveal t x args h0 =
-  mk_mem_reveal args h0
+  mk_mem_addrs_reveal args h0;
+  mem_reveal (mk_mem args h0)
+
+let fuel_eq = ()
+
+let decls_eval_code_reveal c va_s0 va_s1 f = ()

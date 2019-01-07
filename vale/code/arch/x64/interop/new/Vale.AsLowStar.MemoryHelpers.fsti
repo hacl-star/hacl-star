@@ -51,6 +51,17 @@ val buffer_as_seq_reveal
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq mem y))
     (BV.as_seq h0 (BV.mk_buffer_view x (LSig.view_of_base_typ t))))
 
+val buffer_as_seq_reveal2
+  (t:ME.base_typ)
+  (x:lowstar_buffer (ME.TBase t))
+  (va_s:V.va_state) : Lemma
+  (let y = as_vale_buffer x in
+  let h = Interop.Adapters.hs_of_mem va_s.VS.mem in
+  assume (t <> ME.TUInt128); // TODO: UInt128
+  Seq.equal 
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq va_s.VS.mem y))
+    (BV.as_seq h (BV.mk_buffer_view x (LSig.view_of_base_typ t))))
+
 val buffer_addr_reveal
   (t:ME.base_typ)
   (x:lowstar_buffer (ME.TBase t))
@@ -58,3 +69,12 @@ val buffer_addr_reveal
   (h0:HS.mem{mem_roots_p h0 args}) : Lemma
   (let mem = Interop.Adapters.mk_mem args h0 in
   IA.addrs x == ME.buffer_addr (as_vale_buffer #(ME.TBase t) x) mem)
+
+val fuel_eq : squash (V.va_fuel == nat)
+
+val decls_eval_code_reveal
+  (c:TS.tainted_code)
+  (va_s0 va_s1:_)
+  (f:V.va_fuel) : Lemma
+  (requires (V.eval_code c va_s0 f va_s1))
+  (ensures (VL.eval_code c va_s0 (coerce f) va_s1))

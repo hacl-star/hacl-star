@@ -323,9 +323,7 @@ let rec args_fp (args:list arg)
    | [] -> ()
    | hd::tl -> args_fp tl h0 h1
 
-assume //TODO: Should be provided by Vale.Decls
-val fuel_eq : squash (V.va_fuel == nat)
-
+let fuel_eq : squash (V.va_fuel == nat) = Vale.AsLowStar.MemoryHelpers.fuel_eq
 
 let eval_code_ts (c:TS.tainted_code)
                  (s0:TS.traceState)
@@ -338,12 +336,21 @@ let eval_code_rel (c:TS.tainted_code)
   : Lemma
      (requires (V.eval_code c va_s0 f va_s1))
      (ensures (eval_code_ts c (SL.state_to_S va_s0) (coerce f) (SL.state_to_S va_s1)))
-  = admit() //TODO: Should be provided by StateLemmas
+  = Vale.AsLowStar.MemoryHelpers.decls_eval_code_reveal c va_s0 va_s1 f
 
-let mem_correspondence_refl (args:list arg)
+let rec mem_correspondence_refl (args:list arg)
                             (va_s:V.va_state)
  : Lemma (ensures LSig.mem_correspondence args (Interop.Adapters.hs_of_mem va_s.VS.mem) va_s)
- = admit() //TODO: prove using correct_down
+ = 
+ let h = Interop.Adapters.hs_of_mem va_s.VS.mem in
+ match args with
+ | [] -> ()
+ | hd::tl -> mem_correspondence_refl tl va_s;
+   match hd with
+   | (| TD_Buffer bt, x |) ->
+     assume (bt <> ME.TUInt128); // TODO: TUInt128
+     Vale.AsLowStar.MemoryHelpers.buffer_as_seq_reveal2 bt x va_s
+   | _ -> ()
 
 ////////////////////////////////////////////////////////////////////////////////
 
