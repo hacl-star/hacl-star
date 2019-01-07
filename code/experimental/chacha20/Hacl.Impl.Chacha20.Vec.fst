@@ -23,18 +23,6 @@ val rounds: #w:lanes -> st:state w -> ST unit
 
 [@ CInline]
 let rounds #w st =
-  let h0 = ST.get () in
-  Loop.eq_repeat0 #(Spec.state w) Spec.double_round (as_seq h0 st);
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 0;
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 1;
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 2;
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 3;
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 4;
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 5;
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 6;
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 7;
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 8;
-  Loop.unfold_repeat 10 Spec.double_round (as_seq h0 st) 9;
   double_round st;
   double_round st;
   double_round st;

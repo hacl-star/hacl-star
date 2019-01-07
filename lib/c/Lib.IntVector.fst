@@ -270,9 +270,9 @@ let vec_permute4 #t v i1 i2 i3 i4 =
   | U32 -> vec128_shuffle32 v i1 i2 i3 i4
   | U64 -> vec256_shuffle64 v i1 i2 i3 i4
 
-let vec_permute8 = admit()
-let vec_permute16 = admit()
-let vec_permute32 = admit()
+let vec_permute8 #t v i1 i2 i3 i4 i5 i6 i7 i8 = admit()
+let vec_permute16 #t = admit()
+let vec_permute32 #t = admit()
 
 let cast #t #w t' w' v = v
 
@@ -304,6 +304,9 @@ let vec_clmul_hi_lo x y =
 let vec_clmul_hi_hi x y = 
   ni_clmul x y (u8 0x11)
 
+let vec_from_bytes_le t w b = admit()
+let vec_from_bytes_be t w b = admit()
+
 let vec_load_le t w b = 
   match t,w with
   | U128,1 -> vec128_load_le b
@@ -320,6 +323,9 @@ let vec_load_be t w b =
   | _,1 -> Lib.ByteBuffer.uint_from_bytes_be #t #SEC b
   | U32,4 -> vec128_load32_be b
   | U64,2 -> vec128_load64_be b
+
+let vec_to_bytes_le #vt #w v = admit()
+let vec_to_bytes_be #vt #w v = admit()
 
 let vec_store_le #t #w b v = 
   match t,w with

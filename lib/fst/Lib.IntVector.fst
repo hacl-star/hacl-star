@@ -241,27 +241,35 @@ let vec_interleave_high #vt #w v1 v2 =
   createi w (fun i -> if i % 2 = 0 then v1.[w/2 + i/2] else v2.[w/2 + i/2])
 
 let vec_permute2 #vt v i1 i2 = 
-  create2 v.[i1] v.[i2]
+  create2 v.[size_v i1] v.[size_v i2]
 
 let vec_permute4 #vt v i1 i2 i3 i4 = 
-  create4 v.[i1] v.[i2] v.[i3] v.[i4]
+  create4 v.[size_v i1] v.[size_v i2] v.[size_v i3] v.[size_v i4]
 
-let vec_permute8 #vt v i1 i2 i3 i4 i5 i6 i7 i8 = create8 v.[i1] v.[i2] v.[i3] v.[i4] v.[i5] v.[i6] v.[i7] v.[i8]
+let vec_permute8 #vt v i1 i2 i3 i4 i5 i6 i7 i8 = create8 v.[size_v i1] v.[size_v i2] v.[size_v i3] v.[size_v i4] v.[size_v i5] v.[size_v i6] v.[size_v i7] v.[size_v i8]
 
-let vec_permute16 #vt v i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 = create16  v.[i1] v.[i2] v.[i3] v.[i4] v.[i5] v.[i6] v.[i7] v.[i8] v.[i9] v.[i10] v.[i11] v.[i12] v.[i13] v.[i14] v.[i15] v.[i16]
+let vec_permute16 #vt v i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 = create16  v.[size_v i1] v.[size_v i2] v.[size_v i3] v.[size_v i4] v.[size_v i5] v.[size_v i6] v.[size_v i7] v.[size_v i8] v.[size_v i9] v.[size_v i10] v.[size_v i11] v.[size_v i12] v.[size_v i13] v.[size_v i14] v.[size_v i15] v.[size_v i16]
 
-let vec_permute32 #vt v i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i20 i21 i22 i23 i24 i25 i26 i27 i28 i29 i30 i31 i32 = create32  v.[i1] v.[i2] v.[i3] v.[i4] v.[i5] v.[i6] v.[i7] v.[i8] v.[i9] v.[i10] v.[i11] v.[i12] v.[i13] v.[i14] v.[i15] v.[i16] v.[i17] v.[i18] v.[i19] v.[i20] v.[i21] v.[i22] v.[i23] v.[i24] v.[i25] v.[i26] v.[i27] v.[i28] v.[i29] v.[i30] v.[i31] v.[i32]
+let vec_permute32 #vt v i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i20 i21 i22 i23 i24 i25 i26 i27 i28 i29 i30 i31 i32 = create32  v.[size_v i1] v.[size_v i2] v.[size_v i3] v.[size_v i4] v.[size_v i5] v.[size_v i6] v.[size_v i7] v.[size_v i8] v.[size_v i9] v.[size_v i10] v.[size_v i11] v.[size_v i12] v.[size_v i13] v.[size_v i14] v.[size_v i15] v.[size_v i16] v.[size_v i17] v.[size_v i18] v.[size_v i19] v.[size_v i20] v.[size_v i21] v.[size_v i22] v.[size_v i23] v.[size_v i24] v.[size_v i25] v.[size_v i26] v.[size_v i27] v.[size_v i28] v.[size_v i29] v.[size_v i30] v.[size_v i31] v.[size_v i32]
 
-let cast #t #w x = admit()
-let vec_aes_enc x = admit()
-let vec_aes_enc_last x = admit()
-let vec_aes_keygen_assist x = admit()
-let vec_clmul_lo_lo x = admit()
-let vec_clmul_lo_hi x = admit()
-let vec_clmul_hi_lo x = admit()
-let vec_clmul_hi_hi x = admit()
+let cast #t #w t' w' x = admit()
+let vec_aes_enc key state = admit()
+let vec_aes_enc_lemma key state = admit()
+let vec_aes_enc_last key state = admit()
+let vec_aes_enc_last_lemma key state = admit()
+let vec_aes_keygen_assist key state = admit()
+let vec_aes_keygen_assist_lemma key state = admit()
+let vec_clmul_lo_lo x y = admit()
+let vec_clmul_lo_hi x y = admit()
+let vec_clmul_hi_lo x y = admit()
+let vec_clmul_hi_hi x y = admit()
+
+let vec_from_bytes_le vt w b = uints_from_bytes_le #vt #SEC #w b
+let vec_from_bytes_be vt w b = uints_from_bytes_be #vt #SEC #w b
 let vec_load_le vt w b = admit()
 let vec_load_be vt w b = admit()
+let vec_to_bytes_le #vt #w v = uints_to_bytes_le #vt #SEC #w v
+let vec_to_bytes_be #vt #w v = uints_to_bytes_be #vt #SEC #w v
 let vec_store_le #vt #w b v = admit()
 let vec_store_be #vt #w b v = admit()
     

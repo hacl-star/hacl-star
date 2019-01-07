@@ -183,20 +183,20 @@ type uint8x16 = vec_t U8 16
 type uint8x32 = vec_t U8 32
 
 inline_for_extraction noextract
-val vec_aes_enc: key:uint128x1 -> state:uint128x1 -> res:uint128x1
-val vec_aes_enc_lemma: key:uint128x1 -> state:uint128x1 -> Lemma
-		       (ensures (vec_v (vec_aes_enc key state) == Spec.AES.aes_enc (vec_v key) (vec_v state)))
+val vec_aes_enc: key:uint8x16 -> state:uint8x16 -> res:uint8x16
+val vec_aes_enc_lemma: key:uint8x16 -> state:uint8x16 -> Lemma
+	   	       (ensures (vec_v (vec_aes_enc key state) == Spec.AES.aes_enc (vec_v key) (vec_v state)))
 		       [SMTPat (vec_v (vec_aes_enc key state))]
 
 inline_for_extraction noextract
-val vec_aes_enc_last: key:uint128x1 -> state:uint128x1 -> res:uint128x1
-val vec_aes_enc_last_lemma: key:uint128x1 -> state:uint128x1 -> Lemma
+val vec_aes_enc_last: key:uint8x16 -> state:uint8x16 -> res:uint8x16
+val vec_aes_enc_last_lemma: key:uint8x16 -> state:uint8x16 -> Lemma
 			    (ensures (vec_v (vec_aes_enc_last key state) == Spec.AES.aes_enc_last (vec_v key) (vec_v state)))
 				     [SMTPat (vec_v (vec_aes_enc_last key state))]
 
 inline_for_extraction noextract
-val vec_aes_keygen_assist: s:uint128x1 -> rcon:uint8 -> res:uint128x1
-val vec_aes_keygen_assist_lemma: s:uint128x1 -> rcon:uint8 -> 
+val vec_aes_keygen_assist: s:uint8x16 -> rcon:uint8 -> res:uint8x16
+val vec_aes_keygen_assist_lemma: s:uint8x16 -> rcon:uint8 -> 
 				 Lemma (ensures (vec_v (vec_aes_keygen_assist s rcon) == Spec.AES.aes_keygen_assist rcon (vec_v s)))
 				       [SMTPat (vec_v (vec_aes_keygen_assist s rcon))]
 
@@ -238,22 +238,35 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 
 inline_for_extraction noextract
+val vec_from_bytes_le: vt:v_inttype -> w:width -> b:lseq uint8 ((numbytes vt) * w) -> v:vec_t vt w{vec_v v == uints_from_bytes_le b}
+
+inline_for_extraction noextract
+val vec_from_bytes_be: vt:v_inttype -> w:width -> b:lseq uint8 ((numbytes vt) * w) -> v:vec_t vt w{vec_v v == uints_from_bytes_be b}
+
+inline_for_extraction noextract
 val vec_load_le: vt:v_inttype -> w:width -> b:Lib.Buffer.lbuffer uint8 (size (numbytes vt) *! size w) -> Stack (vec_t vt w)
 			   (requires (fun h -> live h b))
-			   (ensures (fun h0 r h1 ->  h1 == h0 /\ vec_v r == uints_from_bytes_le (as_seq h0 b)))
+			   (ensures (fun h0 r h1 ->  h1 == h0 /\ r == vec_from_bytes_le vt w (as_seq h0 b)))
 
 inline_for_extraction noextract
 val vec_load_be: vt:v_inttype -> w:width -> b:Lib.Buffer.lbuffer uint8 (size (numbytes vt) *! size w) -> Stack (vec_t vt w)
 			   (requires (fun h -> live h b))
-			   (ensures (fun h0 r h1 ->  h1 == h0 /\ vec_v r == uints_from_bytes_be (as_seq h0 b)))
+			   (ensures (fun h0 r h1 ->  h1 == h0 /\ r == vec_from_bytes_be vt w (as_seq h0 b)))
+
+
+inline_for_extraction noextract
+val vec_to_bytes_le: #vt:v_inttype -> #w:width -> v:vec_t vt w -> b:lseq uint8 ((numbytes vt) * w){b == uints_to_bytes_le (vec_v v)}
+
+inline_for_extraction noextract
+val vec_to_bytes_be: #vt:v_inttype -> #w:width -> v:vec_t vt w -> b:lseq uint8 ((numbytes vt) * w){b == uints_to_bytes_be (vec_v v)}
 
 inline_for_extraction noextract
 val vec_store_le: #vt:v_inttype -> #w:width -> b:Lib.Buffer.lbuffer uint8 (size (numbytes vt) *! size w) -> v:vec_t vt w -> Stack unit
 			   (requires (fun h -> live h b))
-			   (ensures (fun h0 r h1 ->  h1 == h0 /\ as_seq h1 b == uints_to_bytes_le (vec_v v)))
+			   (ensures (fun h0 r h1 ->  h1 == h0 /\ as_seq h1 b == vec_to_bytes_le v))
 
 inline_for_extraction noextract
 val vec_store_be: #vt:v_inttype -> #w:width -> b:Lib.Buffer.lbuffer uint8 (size (numbytes vt) *! size w) -> v:vec_t vt w -> Stack unit
 			   (requires (fun h -> live h b))
-			   (ensures (fun h0 r h1 ->  h1 == h0 /\ as_seq h1 b == uints_to_bytes_be (vec_v v)))
+			   (ensures (fun h0 r h1 ->  h1 == h0 /\ as_seq h1 b == vec_to_bytes_be v))
 

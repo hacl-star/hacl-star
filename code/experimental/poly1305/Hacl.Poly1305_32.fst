@@ -5,7 +5,7 @@ open Lib.Buffer
 
 let ctxlen = size 20
 let blocklen = size 16
-type poly1305_ctx = lbuffer uint32 20ul
+type poly1305_ctx = lbuffer (Lib.IntVector.vec_t U64 1) 30ul
 
 let poly1305_init (ctx:poly1305_ctx) (key:lbuffer uint32 32ul) = 
     Hacl.Impl.Poly1305.poly1305_init #M32 ctx key
