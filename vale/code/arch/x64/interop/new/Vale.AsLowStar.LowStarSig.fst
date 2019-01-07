@@ -93,23 +93,24 @@ let mk_vale_disjointness (sb:IX64.stack_buffer) (args:list arg) : prop =
   BigOps.big_and' (disjoint_b8 sb) args_b8
 
 [@__reduce__]
-let mk_readable (args:list arg) : sprop =
-  let rec aux (args:list arg) (out:sprop) : sprop =
-    match args with
-    | [] -> out
-    | hd::tl ->
-      match hd with
-      | (| TD_Buffer bt, x |) ->
-        let out : sprop =
-          fun s0 ->
-            out s0 /\
-            ME.buffer_readable VS.(s0.mem) (as_vale_buffer #(ME.TBase bt) x)
-        in
-        aux tl out
-      | _ ->
-        aux tl out
-  in
-  aux args (fun h -> True)
+let create_out_readable (out:sprop) (bt:ME.base_typ) x : sprop =
+  fun s0 ->
+    out s0 /\
+    ME.buffer_readable VS.(s0.mem) (as_vale_buffer #(ME.TBase bt) x)
+
+[@__reduce__]
+let rec mk_readable_aux (args:list arg) (out:sprop) : sprop =
+  match args with
+  | [] -> out
+  | hd::tl ->
+    match hd with
+    | (| TD_Buffer bt, x |) ->
+      mk_readable_aux tl (create_out_readable out bt x)
+    | _ ->
+      mk_readable_aux tl out
+
+[@__reduce__]
+let mk_readable (args:list arg) : sprop = mk_readable_aux args (fun h -> True)
 
 let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state) :
   Lemma (0 <= ME.buffer_addr x VS.(s.mem) /\ ME.buffer_addr x VS.(s.mem) < pow2 64) = admit()

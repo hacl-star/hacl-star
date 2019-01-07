@@ -4,6 +4,7 @@ open X64.Vale.State
 open FStar.FunctionalExtensionality
 module BS = X64.Bytes_Semantics_s
 module ME = X64.Memory
+module MS = X64.Memory_Sems
 module TS = X64.Taint_Semantics_s
 open Prop_s
 
@@ -41,6 +42,9 @@ val lemma_to_reg : s:state -> r:reg -> Lemma
 val lemma_to_xmm : s:state -> x:xmm -> Lemma
   (ensures Xmms.sel x s.xmms == xmms' (state_to_S s).TS.state x)
   [SMTPat (Xmms.sel x s.xmms)]
+
+val lemma_to_mem : s:state -> Lemma
+  (ensures MS.get_heap s.mem == mem' (state_to_S s).TS.state)
 
 val lemma_to_trace : s:state -> Lemma
   (ensures [] == trace' (state_to_S s))
