@@ -270,7 +270,7 @@ let core_create_lemma
     core_create_lemma_taint_hyp args h0 stack;
     core_create_lemma_state args h0 stack
   
-let frame_mem_correspondence_back
+let rec frame_mem_correspondence_back
        (args:list arg)
        (h0:mem_roots args)
        (h1:mem_roots args)
@@ -283,10 +283,16 @@ let frame_mem_correspondence_back
        B.loc_disjoint (LSig.mk_modifies_loc args) l)
      (ensures
        LSig.mem_correspondence args h0 va_s)
- = admit() //TODO: easy
+ = match args with
+ | [] -> ()
+ | hd::tl -> frame_mem_correspondence_back tl h0 h1 va_s l;
+    match hd with
+   | (| TD_Buffer bt, x |) -> 
+     assume (bt <> ME.TUInt128); // TODO: TUInt128
+     BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
+   | _ -> ()
 
-
-let frame_mem_correspondence
+let rec frame_mem_correspondence
        (args:list arg)
        (h0:HS.mem)
        (h1:HS.mem)
@@ -299,13 +305,24 @@ let frame_mem_correspondence
        B.loc_disjoint (LSig.mk_modifies_loc args) l)
      (ensures
        LSig.mem_correspondence args h1 va_s)
- = admit() //TODO: easy
+ =  match args with
+ | [] -> ()
+ | hd::tl -> frame_mem_correspondence tl h0 h1 va_s l;
+    match hd with
+   | (| TD_Buffer bt, x |) ->
+     assume (B.live h0 x /\ B.live h1 x); // TODO: Is this missing?
+     assume (bt <> ME.TUInt128); // TODO: TUInt128
+     assume (B.modifies l h1 h0); // Is modifies symetric?
+     BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
+   | _ -> ()
 
-let args_fp (args:list arg)
+let rec args_fp (args:list arg)
             (h0:mem_roots args)
             (h1:HS.mem{HS.fresh_frame h0 h1})
    : Lemma (B.loc_disjoint (LSig.mk_modifies_loc args) (B.loc_regions false (Set.singleton (HS.get_tip h1))))
-   = admit() //TODO: easy
+   = match args with
+   | [] -> ()
+   | hd::tl -> args_fp tl h0 h1
 
 assume //TODO: Should be provided by Vale.Decls
 val fuel_eq : squash (V.va_fuel == nat)
