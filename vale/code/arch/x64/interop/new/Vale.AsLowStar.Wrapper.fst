@@ -312,7 +312,6 @@ let rec frame_mem_correspondence
    | (| TD_Buffer bt, x |) ->
      assume (B.live h0 x /\ B.live h1 x); // TODO: Is this missing?
      assume (bt <> ME.TUInt128); // TODO: TUInt128
-     assume (B.modifies l h1 h0); // Is modifies symetric?
      BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
    | _ -> ()
 
