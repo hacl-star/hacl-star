@@ -740,6 +740,51 @@ let carry26 #w l cin =
 let uint64xN_fits (#w:lanes) (x:uint64xN w) (m:nat) =
   forall (i:nat). i < w ==> uint_v (vec_v x).[i] <= m
 
+val carry26_lemma1:
+    #w:lanes
+  -> l:uint64
+  -> cin:uint64
+  -> Lemma
+    (requires v l <= 2 * max26 /\ v cin <= 62 * max26)
+    (ensures
+     (let l' = l +. cin in
+      let l0 = l' &. (u64 0x3ffffff) in
+      let l1 = l' >>. 26ul in
+      v l + v cin == v l1 * pow2 26 + v l0 /\
+      v l0 <= max26 /\ v l1 <= 64))
+let carry26_lemma1 #w l cin =
+  let mask26 = u64 0x3ffffff in
+  assert_norm (0x3ffffff = pow2 26 - 1);
+  let l'' = l +. cin in
+  assert (v l'' == (v l + v cin) % pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v l + v cin) (pow2 64);
+  let l' = l +! cin in
+  assert (v l' == v l'');
+  let l0 = l' &. mask26 in
+  let l1 = l' >>. 26ul in
+  mod_mask_lemma l' 26ul;
+  uintv_extensionality (mod_mask #U64 26ul) mask26;
+  assert (v l0 == v l' % pow2 26);
+  FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 26 32;
+  FStar.Math.Lemmas.pow2_minus 32 26
+
+val carry26_lemma_i:
+    #w:lanes
+  -> l:uint64xN w
+  -> cin:uint64xN w
+  -> i:nat{i < w}
+  -> Lemma
+    (requires felem_fits1 l 2 /\ felem_fits1 cin 62)
+    (ensures
+     (let (l0, l1) = carry26 #w l cin in
+      (uint64xN_v l0).[i] <= max26 /\ (uint64xN_v l1).[i] <= 64 /\
+      (uint64xN_v l).[i] + (uint64xN_v cin).[i] ==
+	(uint64xN_v l1).[i] * pow2 26 + (uint64xN_v l0).[i]))
+let carry26_lemma_i #w l cin i =
+  let li = (vec_v l).[i] in
+  let cini = (vec_v cin).[i] in
+  carry26_lemma1 #w li cini
+
 val carry26_fits_lemma:
     #w:lanes
   -> l:uint64xN w
@@ -749,7 +794,18 @@ val carry26_fits_lemma:
     (ensures
      (let (l0, l1) = carry26 #w l cin in
       felem_fits1 l0 1 /\ uint64xN_fits l1 64))
-let carry26_fits_lemma #w l cin = admit()
+let carry26_fits_lemma #w l cin =
+  match w with
+  | 1 ->
+    carry26_lemma_i #w l cin 0
+  | 2 ->
+    carry26_lemma_i #w l cin 0;
+    carry26_lemma_i #w l cin 1
+  | 4 ->
+    carry26_lemma_i #w l cin 0;
+    carry26_lemma_i #w l cin 1;
+    carry26_lemma_i #w l cin 2;
+    carry26_lemma_i #w l cin 3
 
 val carry26_eval_lemma:
     #w:lanes
@@ -762,7 +818,18 @@ val carry26_eval_lemma:
       (forall (i:nat). i < w ==>
 	(uint64xN_v l).[i] + (uint64xN_v cin).[i] ==
 	(uint64xN_v l1).[i] * pow2 26 + (uint64xN_v l0).[i])))
-let carry26_eval_lemma #w l cin = admit()
+let carry26_eval_lemma #w l cin =
+  match w with
+  | 1 ->
+    carry26_lemma_i #w l cin 0
+  | 2 ->
+    carry26_lemma_i #w l cin 0;
+    carry26_lemma_i #w l cin 1
+  | 4 ->
+    carry26_lemma_i #w l cin 0;
+    carry26_lemma_i #w l cin 1;
+    carry26_lemma_i #w l cin 2;
+    carry26_lemma_i #w l cin 3
 
 inline_for_extraction noextract
 val carry26_wide:
@@ -771,6 +838,50 @@ val carry26_wide:
   -> cin:uint64xN w
   -> uint64xN w & uint64xN w
 let carry26_wide #w l cin = carry26 #w l cin
+
+val carry26_wide_lemma1:
+    #w:lanes
+  -> #m:scale64{m < 64}
+  -> l:uint64{v l <= m * max26 * max26}
+  -> cin:uint64{v cin <= 64 * max26}
+  -> Lemma (
+      let l' = l +. cin in
+      let l0 = l' &. (u64 0x3ffffff) in
+      let l1 = l' >>. 26ul in
+      v l + v cin == v l1 * pow2 26 + v l0 /\
+      v l0 <= max26 /\ v l1 <= (m + 1) * max26)
+let carry26_wide_lemma1 #w #m l cin =
+  let mask26 = u64 0x3ffffff in
+  assert_norm (0x3ffffff = pow2 26 - 1);
+  let l'' = l +. cin in
+  assert (v l'' == (v l + v cin) % pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v l + v cin) (pow2 64);
+  let l' = l +! cin in
+  assert (v l' == v l'');
+  let l0 = l' &. mask26 in
+  let l1 = l' >>. 26ul in
+  mod_mask_lemma l' 26ul;
+  uintv_extensionality (mod_mask #U64 26ul) mask26;
+  FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 26 32;
+  FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 26)
+
+val carry26_wide_lemma_i:
+    #w:lanes
+  -> #m:scale64{m < 64}
+  -> l:uint64xN w
+  -> cin:uint64xN w
+  -> i:nat{i < w}
+  -> Lemma
+    (requires felem_wide_fits1 l m /\ felem_fits1 cin 64)
+    (ensures
+     (let (l0, l1) = carry26 #w l cin in
+      (uint64xN_v l0).[i] <= max26 /\ (uint64xN_v l1).[i] <= (m + 1) * max26 /\
+      (uint64xN_v l).[i] + (uint64xN_v cin).[i] ==
+	(uint64xN_v l1).[i] * pow2 26 + (uint64xN_v l0).[i]))
+let carry26_wide_lemma_i #w #m l cin i =
+  let li = (vec_v l).[i] in
+  let cini = (vec_v cin).[i] in
+  carry26_wide_lemma1 #w #m li cini
 
 val carry26_wide_fits_lemma:
     #w:lanes
@@ -782,7 +893,41 @@ val carry26_wide_fits_lemma:
     (ensures
      (let (l0, l1) = carry26 #w l cin in
       felem_fits1 l0 1 /\ felem_fits1 l1 (m + 1)))
-let carry26_wide_fits_lemma #w #m l cin = admit()
+let carry26_wide_fits_lemma #w #m l cin =
+  match w with
+  | 1 ->
+    carry26_wide_lemma_i #w #m l cin 0
+  | 2 ->
+    carry26_wide_lemma_i #w #m l cin 0;
+    carry26_wide_lemma_i #w #m l cin 1
+  | 4 ->
+    carry26_wide_lemma_i #w #m l cin 0;
+    carry26_wide_lemma_i #w #m l cin 1;
+    carry26_wide_lemma_i #w #m l cin 2;
+    carry26_wide_lemma_i #w #m l cin 3
+
+val carry26_wide_eval_lemma:
+    #w:lanes
+  -> #m:scale64{m < 64}
+  -> l:uint64xN w
+  -> cin:uint64xN w
+  -> Lemma
+    (requires felem_wide_fits1 l m /\ felem_fits1 cin 64)
+    (ensures
+     (let (l0, l1) = carry26 #w l cin in
+      felem_fits1 l0 1 /\ felem_fits1 l1 (m + 1)))
+let carry26_wide_eval_lemma #w #m l cin =
+  match w with
+  | 1 ->
+    carry26_wide_lemma_i #w #m l cin 0
+  | 2 ->
+    carry26_wide_lemma_i #w #m l cin 0;
+    carry26_wide_lemma_i #w #m l cin 1
+  | 4 ->
+    carry26_wide_lemma_i #w #m l cin 0;
+    carry26_wide_lemma_i #w #m l cin 1;
+    carry26_wide_lemma_i #w #m l cin 2;
+    carry26_wide_lemma_i #w #m l cin 3
 
 inline_for_extraction noextract
 val carry_wide_felem5:
@@ -799,13 +944,45 @@ let carry_wide_felem5 #w (i0, i1, i2, i3, i4) =
   let tmp1 = vec_add_mod tmp1 c5 in
   (tmp0, tmp1, tmp2, tmp3, tmp4)
 
+val vec_smul_mod_fits_lemma:
+    #w:lanes
+  -> c4:uint64xN w
+  -> Lemma
+    (requires felem_fits1 c4 12)
+    (ensures  felem_fits1 (vec_smul_mod c4 (u64 5)) 62)
+let vec_smul_mod_fits_lemma #w c4 = admit()
+
 val carry_wide_felem5_fits_lemma:
     #w:lanes
   -> inp:felem_wide5 w
   -> Lemma
     (requires felem_wide_fits5 inp (47, 35, 27, 19, 11))
     (ensures acc_inv_t (carry_wide_felem5 #w inp))
-let carry_wide_felem5_fits_lemma #w inp = admit()
+let carry_wide_felem5_fits_lemma #w inp =
+  let (i0, i1, i2, i3, i4) = inp in
+  let tmp0,c0 = carry26_wide i0 (zero w) in
+  carry26_wide_eval_lemma #w #47 i0 (zero w);
+  assert (felem_fits1 tmp0 1 /\ felem_fits1 c0 48);
+  let tmp1,c1 = carry26_wide i1 c0 in
+  carry26_wide_eval_lemma #w #35 i1 c0;
+  assert (felem_fits1 tmp1 1 /\ felem_fits1 c1 36);
+  let tmp2,c2 = carry26_wide i2 c1 in
+  carry26_wide_eval_lemma #w #27 i2 c1;
+  assert (felem_fits1 tmp2 1 /\ felem_fits1 c2 28);
+  let tmp3,c3 = carry26_wide i3 c2 in
+  carry26_wide_eval_lemma #w #19 i3 c2;
+  assert (felem_fits1 tmp3 1 /\ felem_fits1 c3 20);
+  let tmp4,c4 = carry26_wide i4 c3 in
+  carry26_wide_eval_lemma #w #11 i4 c3;
+  assert (felem_fits1 tmp4 1 /\ felem_fits1 c4 12);
+  let tmp0',c5 = carry26 tmp0 (vec_smul_mod c4 (u64 5)) in
+  vec_smul_mod_fits_lemma #w c4;
+  carry26_fits_lemma #w tmp0 (vec_smul_mod c4 (u64 5));
+  assert (felem_fits1 tmp0' 1 /\ uint64xN_fits c5 64);
+  let tmp1' = vec_add_mod tmp1 c5 in
+  admit();
+  let o = (tmp0', tmp1', tmp2, tmp3, tmp4) in
+  ()
 
 val carry_wide_felem5_eval_lemma:
     #w:lanes
