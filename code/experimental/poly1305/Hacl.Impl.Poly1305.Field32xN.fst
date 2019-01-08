@@ -9,6 +9,7 @@ open Lib.ByteBuffer
 open Lib.IntVector
 
 include Hacl.Spec.Poly1305.Field32xN
+open Hacl.Spec.Poly1305.Field32xN.Lemmas
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
