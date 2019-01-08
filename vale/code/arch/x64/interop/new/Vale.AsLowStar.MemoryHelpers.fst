@@ -38,6 +38,12 @@ let mk_mem_addrs_reveal (args:list arg) (h0:mem_roots args) : Lemma
    IA.addrs == mem.ME.addrs) =
    admit() // TODO: Will be provable with an implementation for Interop.Adapters
 
+let reveal_readable (#t:_) (x:lowstar_buffer t) (s:ME.mem)
+  = mem_reveal s
+
+let readable_live (#t:_) (x:lowstar_buffer t) (s:ME.mem)
+  = mem_reveal s
+
 let buffer_readable_reveal bt x args h0 stack =
   let mem = mk_mem (arg_of_lb stack::args) h0 in
   mk_mem_injective (arg_of_lb stack::args) h0;

@@ -20,6 +20,17 @@ module SL = X64.Vale.StateLemmas
 module VL = X64.Vale.Lemmas
 module ST = FStar.HyperStack.ST
 
+
+val reveal_readable (#t:_) (x:lowstar_buffer t) (s:ME.mem)
+  : Lemma 
+      ( List.memP x (Interop.Adapters.ptrs_of_mem s) <==>
+        ME.buffer_readable s (as_vale_buffer x) )
+
+val readable_live (#t:_) (x:lowstar_buffer t) (s:ME.mem)
+  : Lemma 
+      ( ME.buffer_readable s (as_vale_buffer x) ==>
+        B.live (Interop.Adapters.hs_of_mem s) x)
+
 val buffer_readable_reveal 
   (bt:ME.base_typ)
   (x:lowstar_buffer (ME.TBase bt)) 

@@ -151,7 +151,7 @@ let vale_pre_hyp (sb:IX64.stack_buffer) (args:IX64.arity_ok arg) : VSig.sprop =
     fun s0 ->
       let s_args = arg_of_lb sb :: args in
       mk_vale_disjointness sb args /\
-      VSig.mk_readable s_args s0 /\
+      VSig.readable s_args VS.(s0.mem) /\
       register_args (List.length args) args s0 /\
       taint_hyp args s0
 

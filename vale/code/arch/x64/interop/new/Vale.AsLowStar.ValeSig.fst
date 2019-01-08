@@ -83,24 +83,15 @@ let fuel_of (x:(V.va_state & V.va_fuel)) = snd x
 let sprop = VS.state -> prop
 
 [@__reduce__]
-let create_out_readable (out:sprop) (bt:ME.base_typ) x : sprop =
-  fun s0 ->
-    out s0 /\
-    ME.buffer_readable VS.(s0.mem) (as_vale_buffer #(ME.TBase bt) x)
+let readable_one (s:ME.mem) (arg:arg) : prop =
+  match arg with
+  | (|TD_Buffer bt _, x |) ->
+    ME.buffer_readable s (as_vale_buffer #(ME.TBase bt) x) /\ True
+  | _ -> True
 
 [@__reduce__]
-let rec mk_readable_aux (args:list arg) (out:sprop) : sprop =
-  match args with
-  | [] -> out
-  | hd::tl ->
-    match hd with
-    | (| TD_Buffer bt _, x |) ->
-      mk_readable_aux tl (create_out_readable out bt x)
-    | _ ->
-      mk_readable_aux tl out
-
-[@__reduce__]
-let mk_readable (args:list arg) : sprop = mk_readable_aux args (fun h -> True)
+let readable (args:list arg) (s:ME.mem) : prop =
+  BigOps.big_and' (readable_one s) args
 
 [@__reduce__] unfold
 let vale_sig_nil (args:list arg)
@@ -118,7 +109,7 @@ let vale_sig_nil (args:list arg)
        V.eval_code code va_s0 f va_s1 /\
        vale_calling_conventions va_s0 va_s1 /\
        elim_nil post va_s0 stack_b va_s1 f /\
-       mk_readable args va_s1 /\
+       readable args VS.(va_s1.mem) /\
        ME.modifies (mloc_modified_args args) va_s0.VS.mem va_s1.VS.mem))
 
 [@__reduce__]
