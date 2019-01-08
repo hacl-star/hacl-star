@@ -24,6 +24,8 @@ https://arxiv.org/abs/1703.00053
 
 While HACL* is used in several products such as Mozilla Firefox or Wireguard,
 we highly recommand to consult the authors before using HACL* in production systems.
+Active development happens in different branches between releases and should not be
+used without advice. Next release is due for 2019.
 
 # Supported Cryptographic Algorithms
 
