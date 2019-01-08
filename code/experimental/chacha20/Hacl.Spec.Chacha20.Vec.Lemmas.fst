@@ -7,7 +7,7 @@ open Lib.ByteSequence
 open Lib.LoopCombinators
 open Lib.IntVector
 module Scalar = Spec.Chacha20
-open Spec.Chacha20_Vec
+open Hacl.Spec.Chacha20.Vec
 
 #set-options "--max_fuel 1 --z3rlimit 300"
 
@@ -297,7 +297,7 @@ let chacha20_core_lemma #w ctr s0 =
 val chacha20_init_lemma: #w:lanes -> k:key -> n:nonce -> ctr0:counter{ctr0+3 <= max_size_t} -> 
     Lemma (transpose_state (chacha20_init #w k n ctr0) ==
 	   map (Scalar.chacha20_init k n) (create4 ctr0 (ctr0+1) (ctr0+2) (ctr0+3)))
-let chacha20_init_lemma #w k n ctro = admit()
+let chacha20_init_lemma #w k n ctro = ()
 
 val xor_block_lemma: #w:lanes -> k:state w -> b:blocks w -> 
     Lemma (ensures (
