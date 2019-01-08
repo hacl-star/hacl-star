@@ -496,7 +496,6 @@ let vale_lemma_as_prediction
        frame_mem_correspondence args h1_pre_pop h2 va_s1 (B.loc_regions false (Set.singleton (HS.get_tip h1_pre_pop)));
        assert (B.modifies (loc_modified_args args) alloc_push_h0 h1_pre_pop);
        assume (B.modifies (loc_modified_args args) h0 h2); //TODO: seems easy, need to investigate more
-       assume (mem_roots_p h2 args); //TODO: maintaining liveness of the args at the end ... seems easy, need to investigate more
        assert (LSig.(to_low_post post args h0 () h2));
        coerce f, va_s1.VS.mem
 
