@@ -48,6 +48,7 @@ type buffer_qualifiers = {
   secret:bool
 }
 
+[@__reduce__]
 let default_bq = {
   modified=true;
   secret=true
@@ -252,8 +253,12 @@ let modified_arg_loc (x:arg) : GTot B.loc =
 
 [@__reduce__]
 let loc_modified_args (args:list arg) : GTot B.loc =
-    let l = List.Tot.map_gtot modified_arg_loc args in
-    List.Tot.fold_right_gtot l B.loc_union B.loc_none
+    let maybe_union_loc (x:arg) l =
+      match x with
+      | (|TD_Buffer _ {modified=true}, x|) -> B.loc_union (B.loc_buffer x) l
+      | _ -> l
+    in
+    List.Tot.fold_right_gtot args maybe_union_loc B.loc_none
 
 [@__reduce__]
 let arg_loc (x:arg) : GTot B.loc =

@@ -70,6 +70,38 @@ let rec args_b8_lemma (args:list arg) (x:arg)
       then () 
       else args_b8_lemma q x
 
+[@__reduce__]
+let readable_one (s:V.va_state) (arg:arg) : prop =
+  match arg with
+  | (|TD_Buffer bt _, x |) -> 
+    ME.buffer_readable VS.(s.mem) (as_vale_buffer #(ME.TBase bt) x) /\ True
+  | _ -> True
+
+[@__reduce__]
+let readable (args:list arg) (s:V.va_state) : prop =
+  BigOps.big_and' (readable_one s) args
+
+let readable_cons (hd:arg) (tl:list arg) (s:V.va_state)
+  : Lemma 
+      (requires (readable (hd::tl) s))
+      (ensures (readable_one s hd /\ readable tl s))
+  = BigOps.big_and'_cons (readable_one s) hd tl
+
+let readable_live_one (a:arg) (h:HS.mem) (s:V.va_state)
+  : Lemma 
+      (requires
+        live_arg h a /\
+        Interop.Adapters.hs_of_mem VS.(s.mem) == h)
+      (ensures
+        readable_one s a)
+  = admit()
+  // match a with
+  //   | (| TD_Buffer bt _, x |) ->
+  //       let open Vale.AsLowStar.MemoryHelpers in
+  //       buffer_readable_reveal bt x [] h x//stack
+      
+  //   | _ -> ()
+  
 let core_create_lemma_readable
     (args:IX64.arity_ok arg)
     (h0:HS.mem)
@@ -77,15 +109,15 @@ let core_create_lemma_readable
   : Lemma
       (ensures 
         (let va_s = create_initial_vale_state args h0 stack in
-         LSig.mk_readable (arg_of_lb stack::args) va_s))
+         VSig.mk_readable (arg_of_lb stack::args) va_s))
     = 
     let va_s = create_initial_vale_state args h0 stack in
     let args2 = arg_of_lb stack::args in
     let rec aux (args':list arg{forall x. List.memP x args' ==> List.memP x args2})
-                (out:LSig.sprop) 
+                (out:VSig.sprop) 
       : Lemma
           (requires out va_s)
-          (ensures LSig.mk_readable_aux args' out va_s)
+          (ensures VSig.mk_readable_aux args' out va_s)
       = match args' with
         | [] -> ()
         | a::q ->
@@ -96,7 +128,7 @@ let core_create_lemma_readable
               buffer_readable_reveal bt x args h0 stack;
               Interop.Adapters.mk_mem_injective (arg_of_lb stack::args) h0;
               args_b8_lemma args2 a;
-              aux q (LSig.create_out_readable out bt x)
+              aux q (VSig.create_out_readable out bt x)
             end
           | _ -> aux q out
     in
@@ -109,14 +141,14 @@ let core_create_lemma_readable2
   : Lemma
       (ensures 
         (let va_s = create_initial_vale_state args h0 stack in
-         LSig.mk_readable args va_s))
+         VSig.mk_readable args va_s))
   = 
     let va_s = create_initial_vale_state args h0 stack in
     let rec aux (args':list arg{forall x. List.memP x args' ==> List.memP x args})
-                (out:LSig.sprop)
+                (out:VSig.sprop)
       : Lemma
           (requires out va_s)
-          (ensures LSig.mk_readable_aux args' out va_s)
+          (ensures VSig.mk_readable_aux args' out va_s)
       = match args' with
         | [] -> ()
         | a::q ->
@@ -127,7 +159,7 @@ let core_create_lemma_readable2
               buffer_readable_reveal bt x args h0 stack;
               Interop.Adapters.mk_mem_injective (arg_of_lb stack::args) h0;
               args_b8_lemma (arg_of_lb stack::args) a;
-              aux q (LSig.create_out_readable out bt x)
+              aux q (VSig.create_out_readable out bt x)
             end
         | _ -> aux q out
     in 
@@ -280,7 +312,7 @@ let core_create_lemma
          fst (IX64.create_initial_trusted_state args h0 stack) == SL.state_to_S va_s /\
          LSig.mem_correspondence args h0 va_s /\
          LSig.mk_vale_disjointness stack args /\
-         LSig.mk_readable args va_s /\
+         VSig.mk_readable args va_s /\
          LSig.vale_pre_hyp stack args va_s))
   = let va_s = create_initial_vale_state args h0 stack in
     core_create_lemma_mem_correspondance args h0 stack;
@@ -472,7 +504,10 @@ let vale_lemma_as_prediction
        pop_is_popped h1_pre_pop;
        assert (HS.popped h1_pre_pop h2);
        B.popped_modifies h1_pre_pop h2;
-       assume (mem_roots_p h1_pre_pop args);
+       assert (VSig.mk_readable args va_s1);
+       assert (disjoint_or_eq args);
+       assume (all_live h1_pre_pop args);
+       assert (mem_roots_p h1_pre_pop args);
        frame_mem_correspondence args h1_pre_pop h2 va_s1 (B.loc_regions false (Set.singleton (HS.get_tip h1_pre_pop)));
        assert (B.modifies (loc_modified_args args) alloc_push_h0 h1_pre_pop);
        assume (B.modifies (loc_modified_args args) h0 h2); //TODO: seems easy, need to investigate more

@@ -7,7 +7,7 @@ module IX64 = Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
 module W = Vale.AsLowStar.Wrapper
-
+module VS = X64.Vale.State
 
 (* A little utility to trigger normalization in types *)
 let as_t (#a:Type) (x:normal a) : a = x
@@ -89,6 +89,8 @@ let vm_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 /\
        vm_post code dst src va_s0 sb va_s1 f /\
+       (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer src) /\
+        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst)) /\       
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
                                  ME.loc_none) va_s0.VS.mem va_s1.VS.mem
  ))
@@ -98,8 +100,8 @@ let vm_lemma'
     //should follow automatically by weakening, but seems to require the lemma above
     assert (ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
                                        ME.loc_none) va_s0.VS.mem va_s1.VS.mem);
-    assert (ME.buffer_readable X64.Vale.State.(va_s1.mem) (as_vale_buffer dst));
-    assert (ME.buffer_readable X64.Vale.State.(va_s1.mem) (as_vale_buffer src));    
+    assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst));
+    assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer src));    
     va_s1, f
 
 (* Prove that vm_lemma' has the required type *)
@@ -177,8 +179,10 @@ let memcpy_test (dst:b64) (src:b64)
       B.length src == 16)
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_buffer dst) h0 h1 /\
-      Seq.equal (B.as_seq h1 dst) (B.as_seq h1 src))
-  by (T.dump "A"; T.norm [delta_only [`%X64.Memory.loc_disjoint]; iota; zeta; primops])
+      B.live h1 src /\
+      B.live h1 dst /\
+      B.as_seq h1 dst == B.as_seq h1 src)
+  by (T.dump "A"; T.norm [delta_only [`%X64.Memory.loc_disjoint]; iota; zeta; primops]; T.dump "B")
   = let _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
     lbv_as_seq_eq dst src Views.view64 h1 //And a lemma to rephrase the Vale postcondition 

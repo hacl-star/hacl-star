@@ -52,7 +52,6 @@ let view_of_base_typ (t:ME.base_typ)
 //lowstar_sig pre post:
 //    Interepreting a vale pre/post as a Low* function type
 //////////////////////////////////////////////////////////////////////////////////////////
-let sprop = VS.state -> prop
 let hprop = HS.mem -> prop
 let hsprop = HS.mem -> VS.state -> prop
 
@@ -82,7 +81,6 @@ let rec mem_correspondence (args:list arg) : hsprop =
     | _ ->
       mem_correspondence tl
 
-
 [@__reduce__]
 let disjoint_b8 (ptr1 ptr2:b8) = B.loc_disjoint (B.loc_buffer ptr1) (B.loc_buffer ptr2)
 
@@ -91,26 +89,6 @@ let mk_vale_disjointness (sb:IX64.stack_buffer) (args:list arg) : prop =
   let args_b8 = Interop.Adapters.args_b8 args in
   Interop.Mem.disjoint_or_eq_b8_l args_b8 /\
   BigOps.big_and' (disjoint_b8 sb) args_b8
-
-[@__reduce__]
-let create_out_readable (out:sprop) (bt:ME.base_typ) x : sprop =
-  fun s0 ->
-    out s0 /\
-    ME.buffer_readable VS.(s0.mem) (as_vale_buffer #(ME.TBase bt) x)
-
-[@__reduce__]
-let rec mk_readable_aux (args:list arg) (out:sprop) : sprop =
-  match args with
-  | [] -> out
-  | hd::tl ->
-    match hd with
-    | (| TD_Buffer bt _, x |) ->
-      mk_readable_aux tl (create_out_readable out bt x)
-    | _ ->
-      mk_readable_aux tl out
-
-[@__reduce__]
-let mk_readable (args:list arg) : sprop = mk_readable_aux args (fun h -> True)
 
 let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state) :
   Lemma (0 <= ME.buffer_addr x VS.(s.mem) /\ ME.buffer_addr x VS.(s.mem) < pow2 64) = admit()
@@ -136,7 +114,7 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
 
 [@__reduce__]
 let rec register_args (n:nat)
-                      (args:IX64.arity_ok arg{List.length args = n}) : sprop =
+                      (args:IX64.arity_ok arg{List.length args = n}) : VSig.sprop =
     match args with
     | [] -> (fun s -> True)
     | hd::tl ->
@@ -145,7 +123,7 @@ let rec register_args (n:nat)
         VS.eval_reg (IX64.register_of_arg_i (n - 1)) s == arg_as_nat64 hd s
 
 [@__reduce__]
-let rec taint_hyp (args:list arg) : sprop =
+let rec taint_hyp (args:list arg) : VSig.sprop =
     match args with
     | [] -> (fun s -> True)
     | hd::tl ->
@@ -169,11 +147,11 @@ let rec taint_hyp (args:list arg) : sprop =
         taint_hyp tl
 
 [@__reduce__]
-let vale_pre_hyp (sb:IX64.stack_buffer) (args:IX64.arity_ok arg) : sprop =
+let vale_pre_hyp (sb:IX64.stack_buffer) (args:IX64.arity_ok arg) : VSig.sprop =
     fun s0 ->
       let s_args = arg_of_lb sb :: args in
       mk_vale_disjointness sb args /\
-      mk_readable s_args s0 /\
+      VSig.mk_readable s_args s0 /\
       register_args (List.length args) args s0 /\
       taint_hyp args s0
 
