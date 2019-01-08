@@ -43,10 +43,20 @@ let as_vale_buffer (#t:ME.typ) (x:lowstar_buffer t)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type buffer_qualifiers = {
+  modified:bool;
+  secret:bool
+}
+
+let default_bq = {
+  modified=true;
+  secret=true
+}
+
 //type descriptors
 type td =
   | TD_Base of ME.base_typ
-  | TD_Buffer of ME.base_typ
+  | TD_Buffer : ME.base_typ -> buffer_qualifiers -> td
 
 unfold
 let normal (#a:Type) (x:a) : a =
@@ -97,7 +107,7 @@ let td_as_type : td -> Type =
   let open ME in
   function
   | TD_Base bt -> base_typ_as_type bt
-  | TD_Buffer bt -> lowstar_buffer (TBase bt)
+  | TD_Buffer bt _ -> lowstar_buffer (TBase bt)
 
 let arg = t:td & td_as_type t
 
@@ -207,7 +217,7 @@ type addr_map = m:(b8 -> ME.nat64){
 [@__reduce__]
 let disjoint_or_eq_1 (a:arg) (b:arg) =
     match a, b with
-    | (| TD_Buffer tx, xb |), (| TD_Buffer ty, yb |) ->
+    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
       B.disjoint #UInt8.t xb yb \/ eq2 #b8 xb yb
     | _ -> True
 
@@ -218,7 +228,7 @@ let disjoint_or_eq (l:list arg) =
 [@__reduce__]
 let live_arg (h:HS.mem) (x:arg) =
     match x with
-    | (|TD_Buffer _, x|) -> B.live h x
+    | (|TD_Buffer tx _, x|) -> B.live h x
     | _ -> True
 
 [@__reduce__]
@@ -235,13 +245,24 @@ let mem_roots (args:list arg) =
     h0:HS.mem{ mem_roots_p h0 args }
 
 [@__reduce__]
-let arg_loc (x:arg) : GTot B.loc =
+let modified_arg_loc (x:arg) : GTot B.loc =
     match x with
-    | (|TD_Buffer _, x|) -> B.loc_buffer x
+    | (|TD_Buffer _ {modified=true}, x|) -> B.loc_buffer x
     | _ -> B.loc_none
 
 [@__reduce__]
-let loc_args (args:list arg) : GTot B.loc =
+let loc_modified_args (args:list arg) : GTot B.loc =
+    let l = List.Tot.map_gtot modified_arg_loc args in
+    List.Tot.fold_right_gtot l B.loc_union B.loc_none
+
+[@__reduce__]
+let arg_loc (x:arg) : GTot B.loc =
+    match x with
+    | (|TD_Buffer _ _, x|) -> B.loc_buffer x
+    | _ -> B.loc_none
+
+[@__reduce__]
+let loc_all_args (args:list arg) : GTot B.loc =
     let l = List.Tot.map_gtot arg_loc args in
     List.Tot.fold_right_gtot l B.loc_union B.loc_none
 
@@ -272,7 +293,7 @@ let rec mem_roots_p_modifies_none (args:list arg) (h0:HS.mem) (h1:HS.mem)
       mem_roots_p_modifies_none tl h0 h1
 
 [@__reduce__]
-let arg_of_lb #t (x:lowstar_buffer (ME.TBase t)) : arg = (| TD_Buffer t, x |)
+let arg_of_lb #t (x:lowstar_buffer (ME.TBase t)) : arg = (| TD_Buffer t default_bq, x |)
 
 let rec disjoint_or_eq_fresh
        #t

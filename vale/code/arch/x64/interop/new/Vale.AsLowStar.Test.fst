@@ -18,11 +18,13 @@ let as_normal_t (#a:Type) (x:a) : normal a = x
 [@__reduce__] unfold
 let b64 = lowstar_buffer ME.(TBase TUInt64)
 [@__reduce__] unfold
-let t = TD_Buffer ME.TUInt64
+let t64_mod = TD_Buffer ME.TUInt64 default_bq
+[@__reduce__] unfold
+let t64_no_mod = TD_Buffer ME.TUInt64 ({default_bq with modified=false})
 
 [@__reduce__] unfold
 let dom : IX64.arity_ok td =
-  let y = [t;t] in
+  let y = [t64_mod;t64_no_mod] in
   assert_norm (List.length y = 2);
   y
 
@@ -87,22 +89,23 @@ let vm_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 /\
        vm_post code dst src va_s0 sb va_s1 f /\
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer src))
-                                 (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                               ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
+                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
  ))
  =  let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_buffer src) in
     assert (ME.modifies (ME.loc_buffer (as_vale_buffer dst)) va_s0.VS.mem va_s1.VS.mem);
-    //should follow by weakening, but does not for some reason
-    assume (ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer src))
-                                      (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                                    ME.loc_none)) va_s0.VS.mem va_s1.VS.mem);
+    ME.loc_includes_union_l (ME.loc_buffer (as_vale_buffer dst)) ME.loc_none (ME.loc_buffer (as_vale_buffer dst));
+    //should follow automatically by weakening, but seems to require the lemma above
+    assert (ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
+                                       ME.loc_none) va_s0.VS.mem va_s1.VS.mem);
+    assert (ME.buffer_readable X64.Vale.State.(va_s1.mem) (as_vale_buffer dst));
+    assert (ME.buffer_readable X64.Vale.State.(va_s1.mem) (as_vale_buffer src));    
     va_s1, f
 
-(* Prove that vm_lemma' has the requires type *)
+(* Prove that vm_lemma' has the required type *)
 let vm_lemma = as_t #(VSig.vale_sig vm_pre vm_post) vm_lemma'
 
-let code_memcpy =     (VM.va_code_memcpy IA.win)
+let code_memcpy = VM.va_code_memcpy IA.win
 
 
 (* Here's the type expected for the memcpy wrapper *)
@@ -164,7 +167,6 @@ let lbv_as_seq_eq #a #b #rrel #rel x y v h =
   in
   FStar.Classical.forall_intro aux
 
-//#reset-options// "--use_two_phase_tc false --__temp_fast_implicits"
 let memcpy_test (dst:b64) (src:b64)
   : Stack unit
     (requires fun h0 ->
@@ -174,8 +176,7 @@ let memcpy_test (dst:b64) (src:b64)
       B.length dst == 16 /\
       B.length src == 16)
     (ensures fun h0 _ h1 ->
-      //The framework provides an overapproximation of modifies; TODO: tighten    
-      B.modifies (B.loc_union (B.loc_buffer dst) (B.loc_buffer src)) h0 h1 /\
+      B.modifies (B.loc_buffer dst) h0 h1 /\
       Seq.equal (B.as_seq h1 dst) (B.as_seq h1 src))
   by (T.dump "A"; T.norm [delta_only [`%X64.Memory.loc_disjoint]; iota; zeta; primops])
   = let _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
@@ -183,10 +184,6 @@ let memcpy_test (dst:b64) (src:b64)
     lbv_as_seq_eq dst src Views.view64 h1 //And a lemma to rephrase the Vale postcondition 
                                           //with equalities of buffer views
                                           //back to equalities of buffers
-    
-     // let dst1 : Seq.seq UInt64.t = LBV.as_seq h1 (LBV.mk_buffer_view dst Views.view64) in
-     // let src0 : Seq.seq UInt64.t = LBV.as_seq h1 (LBV.mk_buffer_view src Views.view64) in
-     // assert (dst1 == src0);
 
 
 (*

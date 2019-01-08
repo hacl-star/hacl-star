@@ -10,7 +10,7 @@ module IM = Interop.Mem
 [@__reduce__]
 let maybe_cons_buffer (x:arg) (args:list b8) : list b8 =
     match x with
-    | (|TD_Buffer _, x|) -> x :: args
+    | (|TD_Buffer _ _, x|) -> x :: args
     | _ -> args
 
 [@__reduce__]

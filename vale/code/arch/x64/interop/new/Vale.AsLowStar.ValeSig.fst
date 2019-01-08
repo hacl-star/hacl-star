@@ -69,14 +69,14 @@ let vale_calling_conventions (s0 s1:V.va_state) =
 
 
 [@__reduce__]
-let arg_mloc (x:arg) : GTot ME.loc =
+let modified_arg_mloc (x:arg) : GTot ME.loc =
     match x with
-    | (|TD_Buffer td, x|) -> ME.loc_buffer (as_vale_buffer #(ME.TBase td) x)
+    | (|TD_Buffer td {modified=true}, x|) -> ME.loc_buffer (as_vale_buffer #(ME.TBase td) x)
     | _ -> ME.loc_none
 
 [@__reduce__]
-let mloc_args (args:list arg) : GTot ME.loc =
-    List.fold_right_gtot (List.map_gtot arg_mloc args) ME.loc_union ME.loc_none
+let mloc_modified_args (args:list arg) : GTot ME.loc =
+    List.fold_right_gtot (List.map_gtot modified_arg_mloc args) ME.loc_union ME.loc_none
 
 let state_of (x:(V.va_state & V.va_fuel)) = fst x
 let fuel_of (x:(V.va_state & V.va_fuel)) = snd x
@@ -96,7 +96,7 @@ let vale_sig_nil (args:list arg)
        V.eval_code code va_s0 f va_s1 /\
        vale_calling_conventions va_s0 va_s1 /\
        elim_nil post va_s0 stack_b va_s1 f /\
-       ME.modifies (mloc_args args) va_s0.VS.mem va_s1.VS.mem))
+       ME.modifies (mloc_modified_args args) va_s0.VS.mem va_s1.VS.mem))
 
 [@__reduce__]
 let rec vale_sig_tl (#dom:list td)

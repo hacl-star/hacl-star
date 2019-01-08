@@ -75,7 +75,7 @@ let rec mem_correspondence (args:list arg) : hsprop =
   | hd :: tl ->
     let (| tag, x |) = hd in
     match tag with
-    | TD_Buffer bt ->
+    | TD_Buffer bt _ ->
       fun h s ->
         mem_correspondence_1 bt x h s /\
         mem_correspondence tl h s
@@ -104,7 +104,7 @@ let rec mk_readable_aux (args:list arg) (out:sprop) : sprop =
   | [] -> out
   | hd::tl ->
     match hd with
-    | (| TD_Buffer bt, x |) ->
+    | (| TD_Buffer bt _, x |) ->
       mk_readable_aux tl (create_out_readable out bt x)
     | _ ->
       mk_readable_aux tl out
@@ -130,7 +130,7 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
      UInt64.v x
   | TD_Base TUInt128 ->
      admit() //TODO: UInt128
-  | TD_Buffer bt ->
+  | TD_Buffer bt _ ->
      buffer_addr_is_nat64 (as_vale_buffer #(TBase bt) x) s;
      ME.buffer_addr (as_vale_buffer #(TBase bt) x) VS.(s.mem)
 
@@ -151,14 +151,14 @@ let rec taint_hyp (args:list arg) : sprop =
     | hd::tl ->
       let (| tag, x |) = hd in
       match tag with
-      | TD_Buffer ME.TUInt64 ->
+      | TD_Buffer ME.TUInt64 _ ->
         fun s0 ->
           ME.valid_taint_buf64
             (as_vale_buffer #ME.(TBase TUInt64) x)
             s0.VS.mem
             s0.VS.memTaint MS.Secret /\
           taint_hyp tl s0
-      | TD_Buffer ME.TUInt128 ->
+      | TD_Buffer ME.TUInt128 _ ->
         fun s0 ->
           ME.valid_taint_buf128
             (as_vale_buffer #ME.(TBase TUInt128) x)
@@ -167,17 +167,6 @@ let rec taint_hyp (args:list arg) : sprop =
           taint_hyp tl s0
       | _ ->
         taint_hyp tl
-
-[@__reduce__]
-let rec mk_modifies_loc (args:list arg) : GTot B.loc =
-    match args with
-    | [] -> B.loc_none
-    | hd::tl ->
-      match hd with
-      | (| TD_Buffer bt, x |) ->
-        (B.loc_buffer x) `B.loc_union` (mk_modifies_loc tl)
-      | _ ->
-        mk_modifies_loc tl
 
 [@__reduce__]
 let vale_pre_hyp (sb:IX64.stack_buffer) (args:IX64.arity_ok arg) : sprop =
@@ -212,8 +201,7 @@ let to_low_post
     (hs_mem1:mem_roots args)
   : prop =
   let open V in
-  // REVIEW: it would be more flexible to let low_assumptions/post take care of modifies:
-  B.modifies (loc_args args) hs_mem0 hs_mem1 /\
+  B.modifies (loc_modified_args args) hs_mem0 hs_mem1 /\
   (exists
     (s0:va_state)
     (sb:IX64.stack_buffer)

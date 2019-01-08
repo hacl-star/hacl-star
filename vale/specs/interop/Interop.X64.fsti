@@ -124,7 +124,7 @@ let arg_as_nat64 (a:arg) : GTot ME.nat64 =
      UInt64.v x
   | TD_Base TUInt128 ->
      admit() //TODO: UInt128
-  | TD_Buffer bt ->
+  | TD_Buffer _ _ ->
     IA.addrs x
 
 [@__reduce__]
@@ -165,7 +165,7 @@ let update_taint_map (#a:td)
                      (x:td_as_type a)
                      (taint:taint_map) =
     match a with
-    | TD_Buffer bt ->
+    | TD_Buffer bt _ ->
       upd_taint_map taint x
     | _ -> taint
 
@@ -255,7 +255,7 @@ let prediction_post
     let s1 = Some?.v (TS.taint_eval_code c fuel s0) in
     let h1 = Adapters.hs_of_mem final_mem in
     FStar.HyperStack.ST.equal_domains alloc_push_h0 h1 /\
-    B.modifies (loc_args args) alloc_push_h0 h1 /\
+    B.modifies (loc_modified_args args) alloc_push_h0 h1 /\
     IM.down_mem h1 (IA.addrs)
                 (Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem /\
     calling_conventions s0 s1 /\
