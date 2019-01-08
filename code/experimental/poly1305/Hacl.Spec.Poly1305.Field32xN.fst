@@ -717,6 +717,327 @@ let mul_felem5_fits_lemma #w f1 r r5 =
   let (a40,a41,a42,a43,a44) = smul_add_felem5 #w f14 (r51,r52,r53,r54,r0) (a30,a31,a32,a33,a34) in
   smul_add_felem5_fits_lemma #w #2 #(5,5,5,5,1) #(37,25,17,9,9) f14 (r51,r52,r53,r54,r0) (a30,a31,a32,a33,a34)
 
+val lemma_mul5_distr_l:
+  a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat ->
+  Lemma (a * (b + c + d + e + f) == a * b + a * c + a * d + a * e + a * f)
+let lemma_mul5_distr_l a b c d e f = ()
+
+val lemma_prime: unit ->
+  Lemma (pow2 130 % prime = 5)
+let lemma_prime () =
+  assert_norm (pow2 130 % prime = 5 % prime);
+  assert_norm (5 < prime);
+  FStar.Math.Lemmas.modulo_lemma 5 prime
+
+val lemma_fmul5_pow26:
+  r:tup64_5
+  -> Lemma
+    (requires
+      (let (r0, r1, r2, r3, r4) = r in v r4 * 5 <= 5 * pow26))
+    (ensures
+      (let (r0, r1, r2, r3, r4) = r in
+      (pow26 * as_nat5 r) % prime == as_nat5 (r4 *! u64 5, r0, r1, r2, r3) % prime))
+let lemma_fmul5_pow26 r =
+  let (r0, r1, r2, r3, r4) = r in
+  assert (pow26 * as_nat5 r ==
+    pow26 * (v r0 + v r1 * pow26 + v r2 * pow26 * pow26 +
+    v r3 * pow26 * pow26 * pow26 + v r4 * pow26 * pow26 * pow26 * pow26));
+  lemma_mul5_distr_l pow26 (v r0) (v r1 * pow26) (v r2 * pow26 * pow26)
+    (v r3 * pow26 * pow26 * pow26) (v r4 * pow26 * pow26 * pow26 * pow26);
+
+  let p26r0123 = pow26 * v r0 + pow26 * v r1 * pow26 +
+    pow26 * v r2 * pow26 * pow26 + pow26 * v r3 * pow26 * pow26 * pow26 in
+  let p26r4 = pow26 * v r4 * pow26 * pow26 * pow26 * pow26 in
+  assert ((pow26 * as_nat5 r) % prime == (p26r0123 + p26r4) % prime);
+
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r p26r0123 p26r4 prime;
+  assert_norm (p26r4 % prime == (v r4 * pow2 130) % prime);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v r4) (pow2 130) prime;
+  lemma_prime ();
+  assert_norm ((v r4 * pow2 130) % prime == (v r4 * 5) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r p26r0123 (v r4 * 5) prime
+
+val lemma_fmul5_pow26_pow26:
+    r:tup64_5
+  -> Lemma
+    (requires
+     (let (r0, r1, r2, r3, r4) = r in
+      v r4 * 5 <= 5 * pow26 /\ v r3 * 5 <= 5 * pow26))
+    (ensures
+      (let (r0, r1, r2, r3, r4) = r in
+      (pow26 * pow26 * as_nat5 r) % prime ==
+       as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) % prime))
+let lemma_fmul5_pow26_pow26 r =
+  let (r0, r1, r2, r3, r4) = r in
+  let p26r = pow26 * as_nat5 r in
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 p26r prime;
+  assert ((pow26 * pow26 * as_nat5 r) % prime == (pow26 * (p26r % prime)) % prime);
+  lemma_fmul5_pow26 r;
+  assert ((pow26 * pow26 * as_nat5 r) % prime ==
+    (pow26 * (as_nat5 (r4 *! u64 5, r0, r1, r2, r3) % prime)) % prime);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) prime;
+  lemma_fmul5_pow26 (r4 *! u64 5, r0, r1, r2, r3);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) prime
+
+val lemma_fmul5_pow26_pow26_pow26:
+  r:tup64_5
+  -> Lemma
+    (requires
+     (let (r0, r1, r2, r3, r4) = r in
+      v r4 * 5 <= 5 * pow26 /\ v r3 * 5 <= 5 * pow26 /\
+      v r2 * 5 <= 5 * pow26))
+    (ensures
+      (let (r0, r1, r2, r3, r4) = r in
+      (pow26 * pow26 * pow26 * as_nat5 r) % prime ==
+       as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) % prime))
+let lemma_fmul5_pow26_pow26_pow26 r =
+  let (r0, r1, r2, r3, r4) = r in
+  let p26p26r = pow26 * pow26 * as_nat5 r in
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 p26p26r prime;
+  assert ((pow26 * pow26 * pow26 * as_nat5 r) % prime == (pow26 * (p26p26r % prime)) % prime);
+  lemma_fmul5_pow26_pow26 r;
+  assert ((pow26 * pow26 * pow26 * as_nat5 r) % prime ==
+    (pow26 * (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) % prime)) % prime);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) prime;
+  lemma_fmul5_pow26 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime
+
+val lemma_fmul5_pow26_pow26_pow26_pow26:
+    r:tup64_5
+  -> Lemma
+    (requires
+      (let (r0, r1, r2, r3, r4) = r in
+      v r4 * 5 <= 5 * pow26 /\ v r3 * 5 <= 5 * pow26 /\
+      v r2 * 5 <= 5 * pow26 /\ v r1 * 5 <= 5 * pow26))
+    (ensures
+      (let (r0, r1, r2, r3, r4) = r in
+      (pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime ==
+       as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0) % prime))
+let lemma_fmul5_pow26_pow26_pow26_pow26 r =
+  let (r0, r1, r2, r3, r4) = r in
+  //lemma_mul_assos_5 pow26 pow26 pow26 pow26 (as_nat5 r);
+  let p26p26p26r = pow26 * pow26 * pow26 * as_nat5 r in
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 p26p26p26r prime;
+  assert ((pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime == (pow26 * (p26p26p26r % prime)) % prime);
+  lemma_fmul5_pow26_pow26_pow26 r;
+  assert ((pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime ==
+    (pow26 * (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) % prime)) % prime);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime;
+  lemma_fmul5_pow26 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r pow26 (as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) prime
+
+val lemma_mul_assos_3:
+  a:nat -> b:nat -> c:nat ->
+  Lemma (a * b * c == a * (b * c))
+let lemma_mul_assos_3 a b c = ()
+
+val lemma_fmul5_1:
+    f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
+  -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
+  -> Lemma
+    (requires
+     (let (f10, f11, f12, f13, f14) = f1 in
+      let (r0, r1, r2, r3, r4) = r in
+     (as_nat5 f1 * as_nat5 r) % prime ==
+     (v f10 * as_nat5 r +
+      v f11 * pow26 * as_nat5 r +
+      v f12 * pow26 * pow26 * as_nat5 r +
+      v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+      v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime))
+   (ensures
+    (let (f10, f11, f12, f13, f14) = f1 in
+     let (r0, r1, r2, r3, r4) = r in
+    (as_nat5 f1 * as_nat5 r) % prime ==
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * pow26 * pow26 * as_nat5 r +
+     v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime))
+let lemma_fmul5_1 f1 r =
+  let (f10, f11, f12, f13, f14) = f1 in
+  let (r0, r1, r2, r3, r4) = r in
+  assert ((as_nat5 f1 * as_nat5 r) % prime ==
+    (v f10 * as_nat5 r +
+     v f11 * pow26 * as_nat5 r +
+     v f12 * pow26 * pow26 * as_nat5 r +
+     v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v f11 * pow26 * as_nat5 r)
+    (v f10 * as_nat5 r +
+     v f12 * pow26 * pow26 * as_nat5 r +
+     v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) prime;
+  lemma_mul_assos_3 (v f11) pow26 (as_nat5 r);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f11) (pow26 * as_nat5 r) prime;
+  lemma_fmul5_pow26 (r0, r1, r2, r3, r4);
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f11) (as_nat5 (r4 *! u64 5, r0, r1, r2, r3)) prime;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3))
+    (v f10 * as_nat5 r +
+     v f12 * pow26 * pow26 * as_nat5 r +
+     v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) prime
+
+val lemma_mul_assos_4:
+  a:nat -> b:nat -> c:nat -> d:nat ->
+  Lemma (a * b * c * d == a * (b * c * d))
+let lemma_mul_assos_4 a b c d = ()
+
+val lemma_fmul5_2:
+    f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
+  -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
+  -> Lemma
+    (requires
+     (let (f10, f11, f12, f13, f14) = f1 in
+      let (r0, r1, r2, r3, r4) = r in
+     (as_nat5 f1 * as_nat5 r) % prime ==
+     (v f10 * as_nat5 r +
+      v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+      v f12 * pow26 * pow26 * as_nat5 r +
+      v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+      v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime))
+   (ensures (let (f10, f11, f12, f13, f14) = f1 in
+     let (r0, r1, r2, r3, r4) = r in
+    (as_nat5 f1 * as_nat5 r) % prime ==
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+     v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime))
+let lemma_fmul5_2 f1 r =
+  let (f10, f11, f12, f13, f14) = f1 in
+  let (r0, r1, r2, r3, r4) = r in
+  lemma_mul_assos_4 (v f12) pow26 pow26 (as_nat5 r);
+  let p26p26r = pow26 * pow26 * as_nat5 r in
+  assert ((as_nat5 f1 * as_nat5 r) % prime ==
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * p26p26r +
+     v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime);
+
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v f12 * p26p26r)
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f12) p26p26r prime;
+  lemma_fmul5_pow26_pow26 r;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f12) (as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2)) prime;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2))
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) prime
+
+val lemma_mul_assos_5:
+  a:nat -> b:nat -> c:nat -> d:nat -> e:nat ->
+  Lemma (a * b * c * d * e == a * (b * c * d * e))
+let lemma_mul_assos_5 a b c d e = ()
+
+val lemma_fmul5_3:
+    f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
+  -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
+  -> Lemma
+    (requires
+     (let (f10, f11, f12, f13, f14) = f1 in
+      let (r0, r1, r2, r3, r4) = r in
+     (as_nat5 f1 * as_nat5 r) % prime ==
+     (v f10 * as_nat5 r +
+      v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+      v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+      v f13 * pow26 * pow26 * pow26 * as_nat5 r +
+      v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime))
+   (ensures (let (f10, f11, f12, f13, f14) = f1 in
+     let (r0, r1, r2, r3, r4) = r in
+    (as_nat5 f1 * as_nat5 r) % prime ==
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+     v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime))
+let lemma_fmul5_3 f1 r =
+  let (f10, f11, f12, f13, f14) = f1 in
+  let (r0, r1, r2, r3, r4) = r in
+  lemma_mul_assos_5 (v f13) pow26 pow26 pow26 (as_nat5 r);
+  let p26p26p26r = pow26 * pow26 * pow26 * as_nat5 r in
+  assert ((as_nat5 f1 * as_nat5 r) % prime ==
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+     v f13 * p26p26p26r +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime);
+
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v f13 * p26p26p26r)
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f13) p26p26p26r prime;
+  lemma_fmul5_pow26_pow26_pow26 r;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f13) (as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1))
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+     v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) prime
+
+val lemma_mul_assos_6:
+  a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat ->
+  Lemma (a * b * c * d * e * f == a * (b * c * d * e * f))
+let lemma_mul_assos_6 a b c d e f = ()
+
+val lemma_fmul5_4:
+    f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
+  -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
+  -> Lemma
+    (requires
+     (let (f10, f11, f12, f13, f14) = f1 in
+      let (r0, r1, r2, r3, r4) = r in
+     (as_nat5 f1 * as_nat5 r) % prime ==
+     (v f10 * as_nat5 r +
+      v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+      v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+      v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) +
+      v f14 * pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime))
+   (ensures (let (f10, f11, f12, f13, f14) = f1 in
+     let (r0, r1, r2, r3, r4) = r in
+    (as_nat5 f1 * as_nat5 r) % prime ==
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+     v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) +
+     v f14 * as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) % prime))
+let lemma_fmul5_4 f1 r =
+  let (f10, f11, f12, f13, f14) = f1 in
+  let (r0, r1, r2, r3, r4) = r in
+  lemma_mul_assos_6 (v f14) pow26 pow26 pow26 pow26 (as_nat5 r);
+  let p26p26p26p26r = pow26 * pow26 * pow26 * pow26 * as_nat5 r in
+  assert ((as_nat5 f1 * as_nat5 r) % prime ==
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+     v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) +
+     v f14 * p26p26p26p26r) % prime);
+
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v f14 * p26p26p26p26r)
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+     v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f14) p26p26p26p26r prime;
+  lemma_fmul5_pow26_pow26_pow26_pow26 r;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (v f14) (as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) prime;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v f14 * as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0))
+    (v f10 * as_nat5 r +
+     v f11 * as_nat5 (r4 *! u64 5, r0, r1, r2, r3) +
+     v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
+     v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1)) prime
+
+val lemma_mul5_distr_r:
+  a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat ->
+  Lemma ((a + b + c + d + e) * f == a * f + b * f + c * f + d * f + e * f)
+let lemma_mul5_distr_r a b c d e f = ()
+
 val mul_felem5_lemma:
     f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
   -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
@@ -729,7 +1050,20 @@ val mul_felem5_lemma:
       v f12 * as_nat5 (r3 *! u64 5, r4 *! u64 5, r0, r1, r2) +
       v f13 * as_nat5 (r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0, r1) +
       v f14 * as_nat5 (r1 *! u64 5, r2 *! u64 5, r3 *! u64 5, r4 *! u64 5, r0)) % prime)
-let mul_felem5_lemma f1 r = admit()
+let mul_felem5_lemma f1 r =
+  let (f10, f11, f12, f13, f14) = f1 in
+  let (r0, r1, r2, r3, r4) = r in
+  assert ((as_nat5 f1 * as_nat5 r) % prime ==
+    (v f10 + v f11 * pow26 + v f12 * pow26 * pow26 + v f13 * pow26 * pow26 * pow26 +
+    v f14 * pow26 * pow26 * pow26 * pow26) * as_nat5 r % prime);
+  lemma_mul5_distr_r (v f10) (v f11 * pow26) (v f12 * pow26 * pow26)
+    (v f13 * pow26 * pow26 * pow26) (v f14 * pow26 * pow26 * pow26 * pow26) (as_nat5 r);
+  lemma_fmul5_1 f1 r;
+  lemma_fmul5_2 f1 r;
+  lemma_fmul5_3 f1 r;
+  lemma_fmul5_4 f1 r;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 f1) (as_nat5 r) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat5 f1 % prime) (as_nat5 r) prime
 
 val precomp_r5_as_tup64:
     #w:lanes
@@ -1155,13 +1489,6 @@ let carry_wide_felem5_fits_lemma #w inp =
   carry26_fits_lemma #w tmp0 (vec_smul_mod c4 (u64 5));
   let tmp1' = vec_add_mod tmp1 c5 in
   acc_inv_lemma #w (tmp0', tmp1, tmp2, tmp3, tmp4) c5
-
-val lemma_prime: unit ->
-  Lemma (pow2 130 % prime = 5)
-let lemma_prime () =
-  assert_norm (pow2 130 % prime = 5 % prime);
-  assert_norm (5 < prime);
-  FStar.Math.Lemmas.modulo_lemma 5 prime
 
 val carry_wide_felem5_lemma:
   vc0:nat -> vc1:nat -> vc2:nat -> vc3:nat -> vc4:nat ->
