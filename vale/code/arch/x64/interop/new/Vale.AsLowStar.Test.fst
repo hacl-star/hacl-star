@@ -177,7 +177,7 @@ let memcpy_test (dst:b64) (src:b64)
       //The framework provides an overapproximation of modifies; TODO: tighten    
       B.modifies (B.loc_union (B.loc_buffer dst) (B.loc_buffer src)) h0 h1 /\
       Seq.equal (B.as_seq h1 dst) (B.as_seq h1 src))
-  by (T.dump "A"; T.norm [delta_only [`%X64.Memory.loc_disjoint; `%List.Tot.length]; iota; zeta; primops])
+  by (T.dump "A"; T.norm [delta_only [`%X64.Memory.loc_disjoint]; iota; zeta; primops])
   = let _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
     lbv_as_seq_eq dst src Views.view64 h1 //And a lemma to rephrase the Vale postcondition 
