@@ -485,6 +485,30 @@ let mapi #a #b h0 clen out spec_f f inp =
       let xi = inp.(i) in f i xi)
 
 #set-options "--z3rlimit 1000 --max_fuel 3"
+let map_blocks_multi #t #a h0 len blocksize inp output spec_f impl_f = 
+  let nb = len /. blocksize in
+  let h0 = ST.get() in 			
+  assert(Sequence.length (as_seq h0 inp) == v len);
+  assert(v len == v nb * v blocksize);
+  [@inline_let]
+  let a_spec = Sequence.fixed_a unit in
+  [@inline_let]
+  let refl h i = () in
+  [@inline_let]
+  let footprint (i:size_nat {i <= v  nb}) : GTot (l:B.loc{B.loc_disjoint l (loc output) /\
+			       B.address_liveness_insensitive_locs `B.loc_includes` l}) = B.loc_none in			
+  [@inline_let]
+  let spec h : GTot (i:size_nat{i < v nb} -> unit -> unit & Seq.lseq a (v blocksize)) = 
+    let iseq = as_seq h inp in
+    Sequence.map_blocks_inner (v blocksize) iseq (spec_f h) in
+  fill_blocks #a h0 blocksize nb output a_spec refl footprint spec impl_f;
+  let h1 = ST.get() in
+  assert (let s, o = Sequence.generate_blocks (v blocksize) (v nb) a_spec (spec h0) (refl h0 0) in as_seq h1 (gsub output 0ul (nb *! blocksize)) == o);
+  assert_norm (
+    Sequence.map_blocks_multi (v blocksize) (as_seq h0 inp) (spec_f h0) ==
+    norm [delta] Sequence.map_blocks_multi (v blocksize) (as_seq h0 inp) (spec_f h0));
+  admit()
+
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l = 
   let nb = len /. blocksize in
   let rem = len %. blocksize in

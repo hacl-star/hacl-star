@@ -286,7 +286,59 @@ val generate_blocks:
   -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
   Tot (a n & s:seq t{ length s == n * len})
-  
+
+val eq_generate_blocks0:
+    #t:Type0
+  -> len:size_nat
+  -> n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
+  -> init:a 0 ->
+  Lemma (generate_blocks #t len 0 a f init == 
+	 (init,Seq.empty))
+	 
+
+val unfold_generate_blocks:
+    #t:Type0
+  -> len:size_nat
+  -> n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
+  -> init:a 0 
+  -> i:nat{i < n} ->
+  Lemma (generate_blocks #t len (i+1) a f init == 
+	   (let (acc,s) = generate_blocks #t len i a f init in
+	    let (acc',s') = f i acc in
+	    (acc',Seq.append s s')))
+
+
+
+val generate_blocks1_lemma:
+    #t:Type0
+  -> len:size_nat
+  -> a:(i:nat{i <= 1} -> Type)
+  -> f:(i:nat{i < 1} -> a i -> a (i + 1) & s:seq t{length s == len})
+  -> init:a 0 ->
+  Lemma (ensures (let (a,s) = generate_blocks #t len 1 a f init in
+		  (a,s) == f 0 init))
+
+(* The following functions allow us to bridge between unbounded and bounded sequences *)
+val map_blocks_multi:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a{length inp % blocksize == 0}
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) ->
+  Tot (out:seq a {length out == length inp})
+
+val map_blocks_multi1_lemma:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a{length inp == blocksize}
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) ->
+  Lemma (ensures (map_blocks_multi blocksize inp f ==
+		  f 0 inp))
+
+
 (* The following functions allow us to bridge between unbounded and bounded sequences *)
 val map_blocks:
     #a:Type0

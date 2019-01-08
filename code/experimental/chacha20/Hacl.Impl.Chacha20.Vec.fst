@@ -9,7 +9,7 @@ open Lib.ByteBuffer
 open Lib.IntVector
 open FStar.Mul
 open Hacl.Impl.Chacha20.Core32xN
-module Spec = Spec.Chacha20_Vec
+module Spec = Hacl.Spec.Chacha20.Vec
 module Loop = Lib.LoopCombinators
 
 #set-options "--z3rlimit 100"
@@ -38,16 +38,16 @@ inline_for_extraction
 val chacha20_core_: #w:lanes -> k:state w -> ctx0:state w -> ctr:size_t{w * v ctr <= max_size_t}  -> ST unit
 		  (requires (fun h -> live h ctx0 /\ live h k /\ disjoint ctx0 k))
 		  (ensures (fun h0 _ h1 -> modifies (loc k) h0 h1 /\
-					as_seq h1 k == Spec.chacha20_core (as_seq h0 ctx0) (v ctr)))
+					as_seq h1 k == Spec.chacha20_core (v ctr) (as_seq h0 ctx0)))
+
+
 let chacha20_core_ #w k ctx ctr =
     copy_state k ctx;
     let cv = vec_load (u32 w *! size_to_uint32 ctr) w  in
-    let k12 = k.(12ul) in
-    k.(12ul) <- k12 +| cv;
+    k.(12ul) <- k.(12ul) +| cv;
     rounds k;
     sum_state k ctx;
-    let k12 = k.(12ul) in
-    k.(12ul) <- k12 +| cv
+    k.(12ul) <- k.(12ul) +| cv
 
 [@CInline]
 let chacha20_core1 k ctx0 ctr = chacha20_core_ #1 k ctx0 ctr
@@ -60,7 +60,7 @@ inline_for_extraction
 val chacha20_core: #w:lanes -> k:state w -> ctx0:state w -> ctr:size_t{w * v ctr <= max_size_t} -> ST unit
 		  (requires (fun h -> live h ctx0 /\ live h k /\ disjoint ctx0 k))
 		  (ensures (fun h0 _ h1 -> modifies (loc k) h0 h1 /\
-					as_seq h1 k == Spec.chacha20_core (as_seq h0 ctx0) (v ctr)))
+					as_seq h1 k == Spec.chacha20_core (v ctr) (as_seq h0 ctx0)))
 let chacha20_core #w k ctx ctr =
   match w with
   | 1 -> chacha20_core1 k ctx ctr
@@ -100,9 +100,8 @@ let setup1 ctx k n ctr =
     let h3 = ST.get() in
     update_sub_f h3 ctx 13ul 3ul
       (fun h -> Lib.ByteSequence.uints_from_bytes_le (as_seq h n))
-      (fun b -> uints_from_bytes_le b n);
-    let h4 = ST.get() in  
-    assert (as_seq h4 ctx == Spec.setup1 (as_seq h0 k) (as_seq h0 n) (v ctr))
+      (fun b -> uints_from_bytes_le b n)
+
 
 inline_for_extraction
 val chacha20_init_: #w:lanes -> ctx:state w -> k:lbuffer uint8 32ul -> n:lbuffer uint8 12ul -> ctr0:size_t -> ST unit

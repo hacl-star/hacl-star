@@ -218,14 +218,67 @@ let generate_blocks_inner (t:Type) (blocklen:size_nat) (n:nat) (a:(i:nat{i <= n}
     acc', o'
 
 let generate_blocks #t len n a f acc0 =
-  let acc0 : generate_blocks_a t len n a 0 = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
-  repeat_gen n (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) acc0
+  let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  repeat_gen n (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0
+
+#set-options "--z3rlimit 50 --max_ifuel 2"
+let eq_generate_blocks0 #t len n a f acc0 = 
+  let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  eq_repeat_gen0 n (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0;
+  admit()
+  
+
+let unfold_generate_blocks #t len n a f acc0 i = 
+  let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  unfold_repeat_gen (i+1) (generate_blocks_a t len (i+1) a) (generate_blocks_inner t len (i+1) a f) a0 i;
+  assert (generate_blocks #t len (i+1) a f acc0 == 
+	  repeat_gen (i+1) (generate_blocks_a t len (i+1) a) (generate_blocks_inner t len (i+1) a f) a0);
+  assert (generate_blocks #t len (i+1) a f acc0 == 
+	  generate_blocks_inner t len (i+1) a f i (repeat_gen i (generate_blocks_a t len (i+1) a) (generate_blocks_inner t len (i+1) a f) a0));
+  assert (forall j. generate_blocks_a t len i a j == generate_blocks_a t len (i+1) a j);
+  assert (forall j b. generate_blocks_inner t len i a f j b == generate_blocks_inner t len (i+1) a f j b);
+  assert (generate_blocks #t len i a f acc0 == 
+	  repeat_gen i (generate_blocks_a t len i a) (generate_blocks_inner t len i a f) a0);
+  assume (generate_blocks #t len i a f acc0 == 
+	  repeat_gen i (generate_blocks_a t len (i+1) a) (generate_blocks_inner t len (i+1) a f) a0)
+          			  
+  
+let generate_blocks1_lemma #t len a f acc0 = 
+  let a0 : generate_blocks_a t len 1 a 0 = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  unfold_repeat_gen 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0 0;
+  eq_repeat_gen0 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0;
+  let a',b = f 0 acc0 in
+  assert (Seq.equal (Seq.append Seq.empty b) b)
+
 
 let fixed_a a i = a
 let map_blocks_inner #a (bs:size_nat{bs > 0}) (inp:seq a) (f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)) (i:nat{i < length inp / bs}) () = 
   (), f i (Seq.slice inp (i*bs) ((i+1)*bs))
 
 
+let map_blocks_multi #a blocksize inp f =
+  let len = length inp in
+  let nb = len / blocksize in
+  snd (generate_blocks #a blocksize nb (fixed_a unit) (map_blocks_inner blocksize inp f) ())
+
+let map_blocks_multi1_lemma #a blocksize inp f =  
+  let len = length inp in
+  let nb = len / blocksize in
+  let f1 = generate_blocks blocksize 1 in
+  let fnb = generate_blocks blocksize nb in
+  assert (f1 == fnb);
+  assert (map_blocks_multi blocksize inp f ==
+	  snd (fnb (fixed_a unit) (map_blocks_inner blocksize inp f) ()));
+  assume (map_blocks_multi blocksize inp f ==
+	  snd (f1 (fixed_a unit) (map_blocks_inner blocksize inp f) ()));
+  generate_blocks1_lemma #a blocksize (fixed_a unit) (map_blocks_inner blocksize inp f) ();
+  assert (map_blocks_multi blocksize inp f == snd (map_blocks_inner blocksize inp f 0 ()));
+  assert (Seq.equal (Seq.slice inp 0 blocksize) inp)
+
+	  
+  
+
+  
 let map_blocks #a blocksize inp f g =
   let len = length inp in
   let nb = len / blocksize in

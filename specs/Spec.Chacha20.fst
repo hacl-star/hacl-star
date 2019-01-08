@@ -65,12 +65,17 @@ let double_round : shuffle =
 let rounds : shuffle =
   repeat 10 double_round (* 20 rounds *)
 
-let chacha20_core (s0:state) (ctr:counter) : Tot state =
-  let k = s0 in
-  let k = k.[12] <- k.[12] +. u32 ctr in
+let sum_state (s0:state) (s1:state) : Tot state = 
+  map2 (+.) s0 s1 
+
+let add_counter (ctr:counter) (s0:state) : Tot state = 
+  s0.[12] <- s0.[12] +. u32 ctr
+  
+let chacha20_core (ctr:counter) (s0:state) : Tot state =
+  let k = add_counter ctr s0 in
   let k = rounds k in
-  let k = map2 (+.) k s0 in
-  k.[12] <- k.[12] +. u32 ctr
+  let k = sum_state s0 k in
+  add_counter ctr k
 
 inline_for_extraction
 let c0 = 0x61707865ul
@@ -120,13 +125,13 @@ let xor_block (k:state) (b:block) : block  =
   let ob = map2 (^.) ib k in
   uints_to_bytes_le ob
 
-let chacha20_encrypt_block (st0:state) (incr:counter{v st0.[12] + incr <= max_size_t}) (b:block) : Tot block =
-  let k = chacha20_core st0 incr in
+let chacha20_encrypt_block (st0:state) (incr:counter) (b:block) : Tot block =
+  let k = chacha20_core incr st0 in
   xor_block k b
   
 let chacha20_encrypt_last
   (st0: state)
-  (incr: counter{v st0.[12] + incr <= max_size_t})
+  (incr: counter)
   (len: size_nat{len < size_block})
   (b: lbytes len) :
   Tot (lbytes len) =

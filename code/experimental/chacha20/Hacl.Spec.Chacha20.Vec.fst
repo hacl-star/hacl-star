@@ -1,4 +1,4 @@
-module Spec.Chacha20_Vec
+module Hacl.Spec.Chacha20.Vec
 
 open FStar.Mul
 open Lib.IntTypes
@@ -89,16 +89,16 @@ let sum_state (#w:lanes) (st1:state w) (st2:state w) : state w =
   map2 (+|) st1 st2 
 
 
-let add_counter (#w:lanes) (st:state w) (ctr:counter{w * ctr <= max_size_t}) : state w =
+let add_counter (#w:lanes) (ctr:counter{w * ctr <= max_size_t}) (st:state w) : state w =
   let cv = vec_load (u32 w *! u32 ctr) w in
   st.[12] <- st.[12] +| cv 
 
 
-let chacha20_core (#w:lanes) (s0:state w) (ctr:counter{w * ctr <= max_size_t}) : state w =
-  let k = add_counter s0 ctr in
+let chacha20_core (#w:lanes) (ctr:counter{w * ctr <= max_size_t}) (s0:state w) : state w =
+  let k = add_counter ctr s0 in
   let k = rounds k in
-  let k = sum_state k s0 in
-  add_counter k ctr
+  let k = sum_state s0 k in
+  add_counter ctr k
 
     
 inline_for_extraction
@@ -130,6 +130,7 @@ let chacha20_init (#w:lanes) (k:key) (n:nonce) (ctr0:counter) : state w =
 
 let transpose1 (st:state 1) : state 1 = st
 
+inline_for_extraction
 let transpose4x4 (vs:uint32xN 4 & uint32xN 4 & uint32xN 4 & uint32xN 4) 
 		 : uint32xN 4 & uint32xN 4 & uint32xN 4 & uint32xN 4 =
   let (v0,v1,v2,v3) = vs in
@@ -150,6 +151,7 @@ let transpose4 (st:state 4) : state 4 =
   let (v12,v13,v14,v15) = transpose4x4 (st.[12],st.[13],st.[14],st.[15]) in
   create16 v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
 
+inline_for_extraction
 let transpose8x8 (vs:uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8)
 		 : uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 =
   let (v0,v1,v2,v3,v4,v5,v6,v7) = vs in
@@ -169,14 +171,14 @@ let transpose8x8 (vs:uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32x
   let v5'' = cast U32 8 (vec_interleave_high (cast U64 4 v4') (cast U64 4 v6')) in
   let v6'' = cast U32 8 (vec_interleave_low (cast U64 4 v5') (cast U64 4 v7')) in
   let v7'' = cast U32 8 (vec_interleave_high (cast U64 4 v5') (cast U64 4 v7')) in
-  let v0''' = cast U32 8 (vec_interleave_low (cast U128 2 v0') (cast U128 2 v4')) in
-  let v1''' = cast U32 8 (vec_interleave_high (cast U128 2 v0') (cast U128 2 v4')) in
-  let v2''' = cast U32 8 (vec_interleave_low (cast U128 2 v1') (cast U128 2 v5')) in
-  let v3''' = cast U32 8 (vec_interleave_high (cast U128 2 v1') (cast U128 2 v5')) in
-  let v4''' = cast U32 8 (vec_interleave_low (cast U128 2 v2') (cast U128 2 v6')) in
-  let v5''' = cast U32 8 (vec_interleave_high (cast U128 2 v2') (cast U128 2 v6')) in
-  let v6''' = cast U32 8 (vec_interleave_low (cast U128 2 v3') (cast U128 2 v7')) in
-  let v7''' = cast U32 8 (vec_interleave_high (cast U128 2 v3') (cast U128 2 v7')) in
+  let v0''' = cast U32 8 (vec_interleave_low (cast U128 2 v0'') (cast U128 2 v4'')) in
+  let v1''' = cast U32 8 (vec_interleave_high (cast U128 2 v0'') (cast U128 2 v4'')) in
+  let v2''' = cast U32 8 (vec_interleave_low (cast U128 2 v1'') (cast U128 2 v5'')) in
+  let v3''' = cast U32 8 (vec_interleave_high (cast U128 2 v1'') (cast U128 2 v5'')) in
+  let v4''' = cast U32 8 (vec_interleave_low (cast U128 2 v2'') (cast U128 2 v6'')) in
+  let v5''' = cast U32 8 (vec_interleave_high (cast U128 2 v2'') (cast U128 2 v6'')) in
+  let v6''' = cast U32 8 (vec_interleave_low (cast U128 2 v3'') (cast U128 2 v7'')) in
+  let v7''' = cast U32 8 (vec_interleave_high (cast U128 2 v3'') (cast U128 2 v7'')) in
   (v0''',v1''',v2''',v3''',v4''',v5''',v6''',v7''')
 
 let transpose8 (st:state 8) : state 8 =
@@ -195,29 +197,38 @@ let store_block0 (#w:lanes) (st:state w) : Tot block1 =
   repeati (16 / w) 
     (fun i bl -> update_sub bl (i * w * 4) (w * 4) (vec_to_bytes_le st.[i])) bl 
 
+let store_blocks_a (i:nat{i <= 16}) = unit
+let store_blocks_inner (#w:lanes) (st:state w) 
+		       (i:nat{i < 16}) (p:unit) : 
+		       unit & lseq uint8 (w * 4) = 
+    (),vec_to_bytes_le st.[i]		       
 let store_blocks (#w:lanes) (st:state w) : blocks w = 
-  let bl = create (w * 64) (u8 0) in
-  repeati 16 
-    (fun i bl -> update_sub bl (i * w * 4) (w * 4) (vec_to_bytes_le st.[i])) bl 
-
+  let p,s = 
+    generate_blocks (w * 4) 16 
+    store_blocks_a
+    (store_blocks_inner #w st)
+    () in
+  s
+  
+let load_blocks_inner (#w:lanes) (b:blocks w) (i:nat{i < 16}) = 
+  vec_from_bytes_le U32 w (sub b (i * w * 4) (w * 4))
+  
 let load_blocks (#w:lanes) (b:blocks w) : state w = 
-  createi 16 (fun i -> vec_from_bytes_le U32 w (sub b (i * w * 4) (w * 4)))
+  createi 16 (load_blocks_inner #w b)
 
 let chacha20_key_block0 (#w:lanes) (k:key) (n:nonce) : Tot block1 =
   let st0 = chacha20_init #w k n 0 in
-  let k = chacha20_core st0 0 in
+  let k = chacha20_core 0 st0 in
   store_block0 k
 
 let xor_block (#w:lanes) (k:state w) (b:blocks w) : blocks w  = 
-  let iby = uints_from_bytes_le b in
-  let ib = load_blocks iby in 
+  let ib = load_blocks b in 
   let kb = transpose k in
   let ob = map2 (^|) ib kb in
-  let oby = store_blocks ob in
-  uints_to_bytes_le oby
+  store_blocks ob 
 
 let chacha20_encrypt_block (#w:lanes) (st0:state w) (incr:counter{incr * w <= max_size_t}) (b:blocks w) : blocks w =
-  let k = chacha20_core st0 incr in
+  let k = chacha20_core incr st0 in
   xor_block k b
   
 let chacha20_encrypt_last

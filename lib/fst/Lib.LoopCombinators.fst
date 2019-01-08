@@ -33,6 +33,8 @@ let unfold_repeat_gen n a f acc0 i = ()
   repeat_left_right 0 i a f acc0
 *)
 
+let eq_repeat_gen0 n a f acc0 = ()
+
 let fixed_a (a:Type) (i:nat) = a
 let fixed_i f (i:nat) = f
 

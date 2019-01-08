@@ -941,6 +941,31 @@ val mapi:
 
 #set-options "--z3rlimit 200"
 inline_for_extraction noextract
+val map_blocks_multi:
+    #t:buftype
+  -> #a:Type0
+  -> h0: mem
+  -> len:size_t
+  -> blocksize:size_t{v blocksize > 0 /\ v len % v blocksize == 0}
+  -> inp:lbuffer_t t a len 
+  -> output:lbuffer a len
+  -> spec_f:(mem -> GTot (i:nat{i < v len / v blocksize} -> Seq.lseq a (v blocksize) -> Seq.lseq a (v blocksize)))
+  -> impl_f:(i:size_t{v i < v len / v blocksize} -> Stack unit
+      (requires fun h1 -> 
+	(v i + 1) * v blocksize <= max_size_t /\
+        modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1) 
+      (ensures  fun h1 _ h2 ->
+	let iblock = gsub inp (i *! blocksize) blocksize in
+	let oblock = gsub output (i *! blocksize) blocksize in
+        let ob = spec_f h0 (v i) (as_seq h1 iblock) in
+        B.modifies (loc oblock) h1 h2 /\
+        as_seq h2 oblock == ob))
+  -> Stack unit
+    (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
+    (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
+	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (as_seq h0 inp) (spec_f h0))
+
+inline_for_extraction noextract
 val map_blocks:
     #t:buftype
   -> #a:Type0
