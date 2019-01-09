@@ -24,7 +24,7 @@
         "typing_FStar.UInt32.v", "typing_Spec.Hash.Helpers.max_input8"
       ],
       0,
-      "3cb6ecd5856db1af06313c361542cea3"
+      "61c190da01de93a6b3f9d440d9555460"
     ],
     [
       "Test.compute",
@@ -58,7 +58,7 @@
         "typing_Spec.Hash.Helpers.size_word"
       ],
       0,
-      "6448c6edd6ee5ddef084ccf24cbaf0c1"
+      "8935c3b8378fe0ce58371ee77f1718ea"
     ],
     [
       "Test.compute",
@@ -84,7 +84,7 @@
         "typing_Spec.Hash.Helpers.size_word"
       ],
       0,
-      "4c1d2c4aed92c46dc690dd66693f66ac"
+      "de643b0e9d56522e182759f4108b1eb6"
     ],
     [
       "Test.compute",
@@ -282,7 +282,7 @@
         "typing_Spec.Hash.Helpers.size_word", "typing_Spec.Hash.Helpers.word"
       ],
       0,
-      "c0e97ceb887ecffa6542df91eca96490"
+      "7e58a8cb8269f5a0d8c8feb1f5d43b3c"
     ],
     [
       "Test.test_one_hash",
@@ -304,8 +304,8 @@
         "equality_tok_FStar.Integers.W128@tok",
         "equality_tok_FStar.Integers.W32@tok",
         "equality_tok_FStar.Integers.Winfinite@tok",
-        "equation_C.String.length", "equation_EverCrypt.Helpers.uint8_t",
-        "equation_FStar.Bytes.lbytes",
+        "equation_C.String.length", "equation_C.String.well_formed",
+        "equation_EverCrypt.Helpers.uint8_t", "equation_FStar.Bytes.lbytes",
         "equation_FStar.HyperStack.ST.equal_domains",
         "equation_FStar.HyperStack.ST.equal_stack_domains",
         "equation_FStar.HyperStack.ST.inline_stack_inv",
@@ -361,7 +361,6 @@
         "lemma_FStar.Map.lemma_InDomUpd1",
         "lemma_FStar.Map.lemma_SelRestrict", "lemma_FStar.Map.lemma_SelUpd2",
         "lemma_FStar.Map.lemma_UpdDomain",
-        "lemma_FStar.Map.lemma_equal_elim",
         "lemma_FStar.Monotonic.HyperHeap.lemma_extends_includes",
         "lemma_FStar.Monotonic.HyperHeap.lemma_extends_parent",
         "lemma_FStar.Monotonic.HyperHeap.lemma_includes_trans",
@@ -420,6 +419,7 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__3",
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__4",
         "refinement_interpretation_C.String_Tm_refine_4b72efbcfb2ff1568cbb1422b6ca3ebb",
+        "refinement_interpretation_C.String_Tm_refine_72f6d6556b75c266fe5293885ad412ce",
         "refinement_interpretation_FStar.Bytes_Tm_refine_b0383769854f2b8d05d9f8fb03a8cbd4",
         "refinement_interpretation_FStar.Monotonic.HyperHeap_Tm_refine_f0496eb03f3fb51b5e4ca0d53ea58c01",
         "refinement_interpretation_FStar.Monotonic.HyperStack_Tm_refine_7ea9f37bf9c70666fe884ce8fc3bf12b",
@@ -442,7 +442,8 @@
         "refinement_interpretation_Test_Tm_refine_bc0f4361ec95c8d8c6bb5041d209b7b9",
         "refinement_interpretation_Test_Tm_refine_ca2c77f69acff4fca0b44c61a9e317a7",
         "refinement_interpretation_Test_Tm_refine_e94605b29d4cc479bae8fbe9a0bad584",
-        "true_interp", "typing_C.String.length", "typing_C.String.strlen",
+        "true_interp", "typing_C.String.__proj__S__item__s",
+        "typing_C.String.length", "typing_C.String.strlen",
         "typing_FStar.Bytes.len", "typing_FStar.Map.contains",
         "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
         "typing_FStar.Map.upd", "typing_FStar.Monotonic.HyperHeap.includes",
@@ -470,7 +471,7 @@
         "typing_Spec.Hash.Helpers.size_word", "unit_inversion", "unit_typing"
       ],
       0,
-      "66a9c4cd1dff287908f7ed9cd14cc349"
+      "9ade43b94b607c29e0e1942195c8772f"
     ],
     [
       "Test.test_hash",
@@ -536,7 +537,7 @@
         "typing_FStar.UInt32.v", "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "c3fc8ef2dc3505f450147c1c9f5a5967"
+      "938cb61e3d06b29b0c85272009fb7167"
     ],
     [
       "Test.test_one_hmac",
@@ -669,7 +670,7 @@
         "typing_Spec.Hash.Helpers.size_hash", "unit_inversion", "unit_typing"
       ],
       0,
-      "a45fc5e029627fdfaa3eb33302beb93d"
+      "62bc129e9a1e346f49117f6bf324e519"
     ],
     [
       "Test.test_hmac",
@@ -739,7 +740,7 @@
         "unit_typing"
       ],
       0,
-      "8195e632668a9e823902482be9909327"
+      "0d30f7dfd5dd535e7e96b32b3747436c"
     ],
     [
       "Test.test_one_hkdf",
@@ -894,7 +895,7 @@
         "typing_Spec.Hash.Helpers.size_word", "unit_inversion", "unit_typing"
       ],
       0,
-      "f893b32cd160f04d45a0ba4990e67faa"
+      "0b3ef3ee2f47c49539c98046cee58cf5"
     ],
     [
       "Test.test_hkdf",
@@ -964,7 +965,7 @@
         "unit_typing"
       ],
       0,
-      "5608c5fe6a7446c763c0e192b2957972"
+      "d14d9292f41484a1b28dc6436133efa3"
     ],
     [
       "Test.test_aead",
@@ -1030,7 +1031,7 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "a745f1c946db36e1f42ac389b77cf961"
+      "6ca2e4bcf5a858346d6490c8d7cbc2df"
     ],
     [
       "Test.test_rng",
@@ -1043,7 +1044,7 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro"
       ],
       0,
-      "3c6c1e55c452684c6ef9dc17ba858e79"
+      "8bb74f66317044d76fa82a4d0fb390e3"
     ],
     [
       "Test.test_dh",
@@ -1056,7 +1057,7 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro"
       ],
       0,
-      "45d08c8fa210866f0901d96c1055d294"
+      "8fdf40c2eb5fd6c8d18b7cebed5d8593"
     ],
     [
       "Test.main",
@@ -1121,7 +1122,7 @@
         "typing_FStar.Set.singleton", "typing_tok_C.EXIT_SUCCESS@tok"
       ],
       0,
-      "7046350ada536381b687345a8a7a7411"
+      "6c3789ffc6147e32ff78c3f3c4522a38"
     ]
   ]
 ]
