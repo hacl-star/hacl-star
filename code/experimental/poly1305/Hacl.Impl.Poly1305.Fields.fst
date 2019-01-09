@@ -212,8 +212,8 @@ val fmul_rn: #s:field_spec -> out:felem s -> f1:felem s -> precomp:precomp_r s -
 				    (let rn = gsub precomp 10ul 5ul in
 				     let rn_5 = gsub precomp 15ul 5ul in
 				     felem_fits h out (2,3,2,2,2) /\
-				     felem_fits h rn (1,1,1,1,1) /\
-				     felem_fits h rn_5 (5,5,5,5,5) /\
+				     felem_fits h rn (1,2,1,1,1) /\
+				     felem_fits h rn_5 (5,10,5,5,5) /\
 				     as_tup5 #(width s) h rn_5 == precomp_r5 (as_tup5 h rn))))
 		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
 					 (let rn = gsub precomp 10ul 5ul in 
