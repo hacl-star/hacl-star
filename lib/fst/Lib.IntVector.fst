@@ -194,12 +194,15 @@ let vec_xor_lemma #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) = ()
 let vec_and #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) : vec_t vt w =
 map2 (Ints.logand #vt) v1 v2
 
+let vec_and_lemma #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) = ()
+
 let vec_or #vt #w  (v1:vec_t vt w) (v2:vec_t vt w) : vec_t vt w =
 map2 (Ints.logor #vt) v1 v2
 
 let vec_not #vt #w (v1:vec_t vt w) : vec_t vt w =
 map (Ints.lognot #vt) v1
 
+let vec_not_lemma #vt #w (v1:vec_t vt w) = ()
 
 let vec_shift_right #vt #w v1 s =
   map (shift_right_i s) v1
@@ -251,8 +254,11 @@ let vec_permute32 #vt v i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i
 
 let cast #t #w x = admit()
 let vec_aes_enc x = admit()
+let vec_aes_enc_lemma x = admit()
 let vec_aes_enc_last x = admit()
+let vec_aes_enc_last_lemma x = admit()
 let vec_aes_keygen_assist x = admit()
+let vec_aes_keygen_assist_lemma x = admit()
 let vec_clmul_lo_lo x = admit()
 let vec_clmul_lo_hi x = admit()
 let vec_clmul_hi_lo x = admit()
