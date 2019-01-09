@@ -91,15 +91,22 @@ let vm_lemma'
        vm_post code dst src va_s0 sb va_s1 f /\
        (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer src) /\
         ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst)) /\       
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
+                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  ))
  =  let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_buffer src) in
     assert (ME.modifies (ME.loc_buffer (as_vale_buffer dst)) va_s0.VS.mem va_s1.VS.mem);
+    //modifies clause in the postcondition should follow automatically by weakening
+    //but seems to require a bunch of hand-holding
     ME.loc_includes_union_l (ME.loc_buffer (as_vale_buffer dst)) ME.loc_none (ME.loc_buffer (as_vale_buffer dst));
-    //should follow automatically by weakening, but seems to require the lemma above
-    assert (ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                       ME.loc_none) va_s0.VS.mem va_s1.VS.mem);
+
+    let l = (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
+                                      ME.loc_none) in
+    assert (ME.modifies l va_s0.VS.mem va_s1.VS.mem);
+    ME.loc_includes_union_l (ME.loc_buffer (as_vale_buffer sb)) l l;
+    assert (ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb)) l)
+                        va_s0.VS.mem va_s1.VS.mem);
     assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst));
     assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer src));    
     va_s1, f

@@ -110,7 +110,7 @@ let vale_sig_nil (args:list arg)
        vale_calling_conventions va_s0 va_s1 /\
        elim_nil post va_s0 stack_b va_s1 f /\
        readable args VS.(va_s1.mem) /\
-       ME.modifies (mloc_modified_args args) va_s0.VS.mem va_s1.VS.mem))
+       ME.modifies (mloc_modified_args (arg_of_lb stack_b :: args)) va_s0.VS.mem va_s1.VS.mem))
 
 [@__reduce__]
 let rec vale_sig_tl (#dom:list td)

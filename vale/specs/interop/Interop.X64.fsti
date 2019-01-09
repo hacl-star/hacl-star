@@ -248,18 +248,18 @@ let prediction_post
     (s0:TS.traceState)
     (push_h0:mem_roots args)
     (alloc_push_h0:mem_roots args)
-    (b:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_lb b::args)})
+    (sb:stack_buffer{mem_roots_p alloc_push_h0 (arg_of_lb sb::args)})
     (fuel_mem:nat & ME.mem) =
   let fuel, final_mem = fuel_mem in
   Some? (TS.taint_eval_code c fuel s0) /\ (
     let s1 = Some?.v (TS.taint_eval_code c fuel s0) in
     let h1 = Adapters.hs_of_mem final_mem in
     FStar.HyperStack.ST.equal_domains alloc_push_h0 h1 /\
-    B.modifies (loc_modified_args args) alloc_push_h0 h1 /\
+    B.modifies (loc_modified_args (arg_of_lb sb :: args)) alloc_push_h0 h1 /\
     IM.down_mem h1 (IA.addrs)
                 (Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem /\
     calling_conventions s0 s1 /\
-    post_rel h0 s0 push_h0 alloc_push_h0 b fuel_mem s1
+    post_rel h0 s0 push_h0 alloc_push_h0 sb fuel_mem s1
   )
 
 let prediction
