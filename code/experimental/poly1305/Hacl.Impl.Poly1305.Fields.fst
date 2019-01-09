@@ -6,58 +6,46 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
-open Lib.Vec256
-//module F32 = Hacl.Impl.Poly1305.Field32
-module F64 = Hacl.Impl.Poly1305.Field64
-//module F128 = Hacl.Impl.Poly1305.Field128
-//module F256 = Hacl.Impl.Poly1305.Field256
 module F32xN = Hacl.Impl.Poly1305.Field32xN
+open F32xN
 
 type field_spec = 
   | M32 
-  | M64 
   | M128 
   | M256
 
-
-unfold
-let limb (s:field_spec) =
+unfold 
+let width (s:field_spec) : lanes =
   match s with
-//  | M32 -> uint32
+  | M32 -> 1
+  | M128 -> 2
+  | M256 -> 4
+  
+unfold
+let limb (s:field_spec) = 
+  match s with
   | M32 -> F32xN.uint64xN 1
-  | M64 -> uint64
-//  | M128 -> F128.uint64x2
   | M128 -> F32xN.uint64xN 2
-//  | M256 -> vec256
   | M256 -> F32xN.uint64xN 4
 
 unfold
 let limb_zero (s:field_spec) : limb s=
   match s with
-//  | M32 -> u32 0 
   | M32 -> F32xN.zero 1 
-  | M64 -> u64 0
-//  | M128 -> F128.zero
   | M128 -> F32xN.zero 2
-//| M256 -> vec256_zero
   | M256 -> F32xN.zero 4
   
 unfold
 let wide (s:field_spec) =
   match s with
-//  | M32 -> uint64
   | M32 -> F32xN.uint64xN 1
-  | M64 -> uint128
-//  | M128 -> F128.uint64x2
   | M128 -> F32xN.uint64xN 2
-//  | M256 -> vec256
   | M256 -> F32xN.uint64xN 4
 
 unfold
 let nlimb (s:field_spec) : size_t =
   match s with
   | M32 -> 5ul
-  | M64 -> 3ul
   | M128 -> 5ul
   | M256 -> 5ul
 
@@ -65,7 +53,6 @@ unfold
 let blocklen (s:field_spec) : size_t =
   match s with
   | M32 -> 16ul
-  | M64 -> 16ul
   | M128 -> 32ul
   | M256 -> 64ul
 
@@ -73,16 +60,13 @@ unfold
 let nelem (s:field_spec) : size_t =
   match s with
   | M32 -> 1ul
-  | M64 -> 1ul
   | M128 -> 2ul
   | M256 -> 4ul
 
 unfold
 let precomplen (s:field_spec) : size_t =
   match s with
-//  | M32 -> 10ul
   | M32 -> 20ul
-  | M64 -> 6ul
   | M128 -> 20ul
   | M256 -> 20ul
 
@@ -90,27 +74,32 @@ let precomplen (s:field_spec) : size_t =
 type felem (s:field_spec) = lbuffer (limb s) (nlimb s)
 type felem_wide (s:field_spec) = lbuffer (wide s) (nlimb s)
 type precomp_r (s:field_spec) = lbuffer (limb s) (precomplen s)
-noextract 
-val as_nat: #s:field_spec -> h:mem -> e:felem s-> GTot nat 
-let as_nat #s h (e:felem s) = 
+
+noextract
+val felem_fits: (#s:field_spec) -> h:mem -> f:felem s -> m:scale32_5 -> Type0
+let felem_fits #s h f m = 
   match s with
-  | M32 -> admit() //F32.as_nat h e
-  | M64 -> F64.as_nat h e
-  | M128 -> admit()
-  | M256 -> admit()
+  | M32 -> felem_fits #1 h f m
+  | M128 -> felem_fits #2 h f  m
+  | M256 -> felem_fits #4 h f m
+
+
+noextract 
+val feval: #s:field_spec -> h:mem -> e:felem s -> GTot (Lib.Sequence.lseq pfelem (width s))
+let feval #s h e = 
+  match s with
+  | M32 -> feval #1 h e
+  | M128 -> feval #2 h e
+  | M256 -> feval #4 h e
   
 inline_for_extraction
 val create_felem: s:field_spec -> StackInline (felem s)
                    (requires (fun h -> True))
-		   (ensures (fun h0 f h1 -> live h1 f))
+		   (ensures (fun h0 f h1 -> live h1 f /\ stack_allocated f h0 h1 (Lib.Sequence.create 5 (zero (width s)))))
 let create_felem s = 
   match s with
-//  | M32 -> (F32.create_felem ()) <: felem s
   | M32 -> (F32xN.create_felem 1) <: felem s
-  | M64 -> (F64.create_felem ()) <: felem s
-//  | M128 -> (F128.create_felem ()) <: felem s
   | M128 -> (F32xN.create_felem 2) <: felem s
-//  | M256 -> (F256.create_felem ()) <: felem s
   | M256 -> (F32xN.create_felem 4) <: felem s
 
 
@@ -120,12 +109,8 @@ val load_felem_le: #s:field_spec -> f:felem s -> b:lbuffer uint8 16ul -> Stack u
 		   (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))
 let load_felem_le (#s:field_spec) (f:felem s) (b:lbuffer uint8 16ul) =
   match s with
-//  | M32 -> F32.load_felem_le f b
   | M32 -> F32xN.load_felem_le #1 f b
-  | M64 -> F64.load_felem_le f b
-//  | M128 -> F128.load_felem_le f b
   | M128 -> F32xN.load_felem_le #2 f b
-//  | M256 -> F256.load_felem_le f b
   | M256 -> F32xN.load_felem_le #4 f b
 
 inline_for_extraction
@@ -134,12 +119,8 @@ val load_felems_le: #s:field_spec -> f:felem s -> b:lbuffer uint8 (blocklen s) -
 		   (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))
 let load_felems_le (#s:field_spec) (f:felem s) (b:lbuffer uint8 (blocklen s)) =
   match s with
-//  | M32 -> F32.load_felems_le f b
   | M32 -> F32xN.load_felems_le #1 f b
-  | M64 -> F64.load_felems_le f b
-//  | M128 -> F128.load_felems_le f b
   | M128 -> F32xN.load_felems_le #2 f b
-//  | M256 -> F256.load_felems_le f b
   | M256 -> F32xN.load_felems_le #4 f b
 
 inline_for_extraction
@@ -148,12 +129,8 @@ val store_felem_le: #s:field_spec -> b:lbuffer uint8 16ul -> f:felem s -> Stack 
 		   (ensures (fun h0 _ h1 -> modifies (loc b |+| loc f) h0 h1))
 let store_felem_le #s b f = 
   match s with
-//  | M32 -> admit(); F32.store_felem_le b f 
   | M32 -> F32xN.store_felem_le #1 b f 
-  | M64 -> F64.store_felem_le b f 
-//  | M128 -> F128.store_felem_le b f 
   | M128 -> F32xN.store_felem_le #2 b f 
-//  | M256 -> F256.store_felem_le b f 
   | M256 -> F32xN.store_felem_le #4 b f 
 
 inline_for_extraction
@@ -162,12 +139,8 @@ val set_bit: #s:field_spec -> f:felem s -> i:size_t{size_v i < 130} -> Stack uni
 		   (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))
 let set_bit (#s:field_spec) (f:felem s) (i:size_t{size_v i < 130}) = 
   match s with
-//  | M32 -> F32.set_bit f i
   | M32 -> F32xN.set_bit #1 f i
-  | M64 -> F64.set_bit f i
-//  | M128 -> F128.set_bit f i
   | M128 -> F32xN.set_bit #2 f i
-//| M256 -> F256.set_bit f i
   | M256 -> F32xN.set_bit #4 f i
   
 inline_for_extraction
@@ -176,12 +149,8 @@ val set_bit128: #s:field_spec -> f:felem s -> Stack unit
 		   (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))
 let set_bit128 (#s:field_spec) (f:felem s) = 
   match s with
-//  | M32 -> F32.set_bit128 f
   | M32 -> F32xN.set_bit128 #1 f
-  | M64 -> F64.set_bit128 f
-//  | M128 -> F128.set_bit128 f
   | M128 -> F32xN.set_bit128 #2 f
-//  | M256 -> F256.set_bit128 f
   | M256 -> F32xN.set_bit128 #4 f
 
 
@@ -191,12 +160,8 @@ val set_zero: #s:field_spec -> f:felem s -> Stack unit
 		   (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))
 let set_zero (#s:field_spec) (f:felem s) = 
   match s with
-//  | M32 -> F32.set_zero f
   | M32 -> F32xN.set_zero #1 f
-  | M64 -> F64.set_zero f
-//  | M128 -> F128.set_zero f
   | M128 -> F32xN.set_zero #2 f
-//  | M256 -> F256.set_zero f
   | M256 -> F32xN.set_zero #4 f
 
 inline_for_extraction
@@ -205,12 +170,8 @@ val copy_felem: #s:field_spec -> f:felem s -> f':felem s -> Stack unit
 		   (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))
 let copy_felem (#s:field_spec) (f:felem s) (f':felem s) = 
   match s with
-//  | M32 -> F32.copy_felem f f'
   | M32 -> F32xN.copy_felem #1 f f'
-  | M64 -> F64.copy_felem f f'
-//  | M128 -> F128.copy_felem f f'
   | M128 -> F32xN.copy_felem #2 f f'
-//  | M256 -> F256.copy_felem f f'
   | M256 -> F32xN.copy_felem #4 f f'
 
 
@@ -220,42 +181,20 @@ val reduce_felem: #s:field_spec -> f:felem s -> Stack unit
 		   (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))
 let reduce_felem #s f =
   match s with
-//  | M32 -> admit(); F32.reduce_felem f
   | M32 -> F32xN.reduce_felem #1 f
-  | M64 -> F64.reduce_felem f
-//  | M128 -> F128.reduce_felem f
   | M128 -> F32xN.reduce_felem #2 f
-//  | M256 -> F256.reduce_felem f
   | M256 -> F32xN.reduce_felem #4 f
   
 inline_for_extraction
 val load_precompute_r: #s:field_spec -> p:precomp_r s -> r0:uint64 -> r1:uint64 -> Stack unit
                    (requires (fun h -> live h p))
-		   (ensures (fun h0 _ h1 -> modifies (loc p) h0 h1))
+		   (ensures (fun h0 _ h1 -> modifies (loc p) h0 h1 ))
 let load_precompute_r #s p r0 r1 = 
   match s with
-//  | M32 -> F32.load_precompute_r p r0 r1
   | M32 -> F32xN.load_precompute_r #1 p r0 r1
-  | M64 -> F64.load_precompute_r p r0 r1
-//  | M128 -> F128.load_precompute_r p r0 r1
   | M128 -> F32xN.load_precompute_r #2 p r0 r1
-//  | M256 -> F256.load_precompute_r p r0 r1
   | M256 -> F32xN.load_precompute_r #4 p r0 r1
 
-
-inline_for_extraction
-val fmul_r: #s:field_spec -> out:felem s -> f1:felem s -> precomp:precomp_r s -> Stack unit
-                   (requires (fun h -> live h out /\ live h f1 /\ live h precomp))
-		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
-let fmul_r #s out f1 precomp =
-  match s with
-//  | M32 -> admit(); F32.fmul_r out f1 precomp
-  | M32 -> F32xN.fmul_r #1 out f1 precomp
-  | M64 -> F64.fmul_r out f1 precomp
-//  | M128 -> F128.fmul_r out f1 precomp
-  | M128 -> F32xN.fmul_r #2 out f1 precomp
-//  | M256 -> F256.fmul_r out f1 precomp
-  | M256 -> F32xN.fmul_r #4 out f1 precomp
 
 inline_for_extraction
 val fadd_mul_r: #s:field_spec -> out:felem s -> f1:felem s -> precomp:precomp_r s -> Stack unit
@@ -263,52 +202,64 @@ val fadd_mul_r: #s:field_spec -> out:felem s -> f1:felem s -> precomp:precomp_r 
 		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
 let fadd_mul_r #s out f1 precomp =
   match s with
-//  | M32 -> F32.fadd_mul_r out f1 precomp
   | M32 -> F32xN.fadd_mul_r #1 out f1 precomp
-  | M64 -> F64.fadd_mul_r out f1 precomp
-//  | M128 -> F128.fadd_mul_r out f1 precomp
   | M128 -> F32xN.fadd_mul_r #2 out f1 precomp
-//  | M256 -> F256.fadd_mul_r out f1 precomp
   | M256 -> F32xN.fadd_mul_r #4 out f1 precomp
 
 inline_for_extraction
 val fmul_rn: #s:field_spec -> out:felem s -> f1:felem s -> precomp:precomp_r s -> Stack unit
-                   (requires (fun h -> live h out /\ live h f1 /\ live h precomp))
-		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+                   (requires (fun h -> live h out /\ live h f1 /\ live h precomp /\
+				    (let rn = gsub precomp 10ul 5ul in
+				     let rn_5 = gsub precomp 15ul 5ul in
+				     felem_fits h out (2,3,2,2,2) /\
+				     felem_fits h rn (1,1,1,1,1) /\
+				     felem_fits h rn_5 (5,5,5,5,5) /\
+				     as_tup5 #(width s) h rn_5 == precomp_r5 (as_tup5 h rn))))
+		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+					 (let rn = gsub precomp 10ul 5ul in 
+					  acc_inv_t #(width s) (as_tup5 h1 out) /\
+					  feval h1 out == Lib.Sequence.map2 pfmul (feval h0 f1) (feval h0 rn))))
 let fmul_rn #s out f1 precomp =
+  admit();
   match s with
-//  | M32 -> F32.fmul_rn out f1 precomp
   | M32 -> F32xN.fmul_rn #1 out f1 precomp
-  | M64 -> F64.fmul_rn out f1 precomp
-//  | M128 -> F128.fmul_rn out f1 precomp
   | M128 -> F32xN.fmul_rn #2 out f1 precomp
-//  | M256 -> F256.fmul_rn out f1 precomp
   | M256 -> F32xN.fmul_rn #4 out f1 precomp
+
+let norm (#w:lanes) (n:Lib.Sequence.lseq pfelem w) (r:pfelem) = 
+  match w with
+  | 1 -> pfmul n.[0] r
+  | 2 -> let r2 = pfmul r r in pfadd (pfmul n.[0] r2) (pfmul n.[1] r)
+  | 4 -> let r2 = pfmul r r in let r3 = pfmul r2 r in let r4 = pfmul r2 r2 in 
+	pfadd (pfmul n.[0] r4) (pfadd (pfmul n.[1] r3) (pfadd (pfmul n.[2] r2) (pfmul n.[3] r)))
+
 
 inline_for_extraction
 val fmul_rn_normalize: #s:field_spec -> out:felem s -> precomp:precomp_r s -> Stack unit
-                   (requires (fun h -> live h out /\ live h precomp))
-		   (ensures (fun h0 _ h1 -> modifies (loc out |+| loc precomp) h0 h1))
+                   (requires (fun h -> live h out /\ live h precomp /\
+				    (let r = gsub precomp 0ul 5ul in
+				     let r_5 = gsub precomp 5ul 5ul in
+				     felem_fits h out (2,3,2,2,2) /\
+				     felem_fits h r (1,1,1,1,1) /\
+				     felem_fits h r_5 (5,5,5,5,5) /\
+				     as_tup5 #(width s) h r_5 == precomp_r5 (as_tup5 h r))))
+		   (ensures (fun h0 _ h1 -> modifies (loc out |+| loc precomp) h0 h1 /\ 
+					 (let r = (feval h0 (gsub precomp 0ul 5ul)).[0] in 
+					  acc_inv_t #(width s) (as_tup5 h1 out) /\
+					  (feval h1 out).[0] == norm (feval h0 out) r)))
 let fmul_rn_normalize #s out precomp =
+  admit();
   match s with
-//  | M32 -> F32.fmul_rn_normalize out precomp
   | M32 -> F32xN.fmul_rn_normalize #1 out precomp
-  | M64 -> F64.fmul_rn_normalize out precomp
-//  | M128 -> F128.fmul_rn_normalize out precomp
   | M128 -> F32xN.fmul_rn_normalize #2 out precomp
-//  | M256 -> F256.fmul_rn_normalize out precomp
   | M256 -> F32xN.fmul_rn_normalize #4 out precomp
-
+ 
 inline_for_extraction
 val fadd: #s:field_spec -> out:felem s -> f1:felem s -> f2:felem s -> Stack unit
-                   (requires (fun h -> live h out /\ live h f1 /\ live h f2))
-		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+                   (requires (fun h -> live h out /\ live h f1 /\ live h f2 /\ felem_fits h f1 (1,2,1,1,1) /\ felem_fits h f2 (1,1,1,1,1)))
+		   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ felem_fits h1 out (2,3,2,2,2) /\ feval h1 out == Lib.Sequence.map2 pfadd (feval h0 f1) (feval h0 f2)))
 let fadd #s out f1 f2=
   match s with
-//  | M32 -> admit(); F32.fadd out f1 f2 
   | M32 -> F32xN.fadd #1 out f1 f2 
-  | M64 -> admit(); F64.fadd out f1 f2 
-//  | M128 -> F128.fadd out f1 f2 
   | M128 -> F32xN.fadd #2 out f1 f2 
-//  | M256 -> F256.fadd out f1 f2 
   | M256 -> F32xN.fadd #4 out f1 f2 
