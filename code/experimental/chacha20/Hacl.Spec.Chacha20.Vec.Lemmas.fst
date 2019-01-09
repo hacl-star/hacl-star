@@ -307,38 +307,6 @@ val xor_block_lemma: #w:lanes -> k:state w -> b:blocks w ->
 	   [SMTPat (xor_block k b)]
 let xor_block_lemma #w k b = admit()    
 
-val map_blocks_multi_lemma:
-    #a:Type0
-  -> blocksize:size_nat{blocksize > 0}
-  -> inp:seq a{length inp % blocksize == 0}
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) 
-  -> i:nat{i < length inp} ->
-  Lemma (
-    Seq.index (map_blocks_multi blocksize inp f) i ==
-    Seq.index (f (i/blocksize) (Seq.slice inp ((i/blocksize) * blocksize) ((i/blocksize+1)*blocksize))) (i % blocksize))
-    [SMTPat (Seq.index (map_blocks_multi #a blocksize inp f) i)]
-
-let map_blocks_multi_lemma #a blocksize inp f i = admit()
-
-val map_blocks_lemma:
-    #a:Type0
-  -> blocksize:size_nat{blocksize > 0}
-  -> inp:seq a{length inp % blocksize == 0}
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) 
-  -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) 
-  -> i:nat{i < length inp} ->
-  Lemma (
-    let blocks = length inp / blocksize in
-    let rem = length inp % blocksize in
-    (if i < blocksize * blocks then
-      Seq.index (map_blocks blocksize inp f g) i ==
-      Seq.index (f (i/blocksize) (Seq.slice inp ((i/blocksize) * blocksize) ((i/blocksize+1)*blocksize))) (i % blocksize)
-     else
-      Seq.index (map_blocks blocksize inp f g) i ==
-      Seq.index (g blocks rem (Seq.slice inp (blocks * blocksize) (length inp))) (i % blocksize)))
-    [SMTPat (Seq.index (map_blocks #a blocksize inp f g) i)]
-let map_blocks_lemma #a blocksize inp f g i = admit()
-
 #set-options "--z3rlimit 50"
 val chacha20_encrypt_block_lemma: #w:lanes -> st0:state w -> incr:counter{w * incr <= max_size_t} -> b:blocks w ->
 	Lemma (ensures (

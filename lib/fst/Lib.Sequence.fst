@@ -243,42 +243,20 @@ let unfold_generate_blocks #t len n a f acc0 i =
 	  repeat_gen i (generate_blocks_a t len (i+1) a) (generate_blocks_inner t len (i+1) a f) a0)
           			  
   
-let generate_blocks1_lemma #t len a f acc0 = 
-  let a0 : generate_blocks_a t len 1 a 0 = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
-  unfold_repeat_gen 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0 0;
-  eq_repeat_gen0 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0;
-  let a',b = f 0 acc0 in
-  assert (Seq.equal (Seq.append Seq.empty b) b)
-
-
 let fixed_a a i = a
 let map_blocks_inner #a (bs:size_nat{bs > 0}) (inp:seq a) (f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)) (i:nat{i < length inp / bs}) () = 
   (), f i (Seq.slice inp (i*bs) ((i+1)*bs))
 
+#set-options "--z3rlimit 200 --max_ifuel 2"
 
-let map_blocks_multi #a blocksize inp f =
-  let len = length inp in
-  let nb = len / blocksize in
+let map_blocks_multi #a blocksize nb inp f =
+  assert (length inp == nb * blocksize);
+  assert (length inp / blocksize == nb * blocksize / blocksize);
+  Math.Lemmas.multiple_division_lemma nb blocksize;
+  assert (length inp / blocksize == nb);
   snd (generate_blocks #a blocksize nb (fixed_a unit) (map_blocks_inner blocksize inp f) ())
 
-let map_blocks_multi1_lemma #a blocksize inp f =  
-  let len = length inp in
-  let nb = len / blocksize in
-  let f1 = generate_blocks blocksize 1 in
-  let fnb = generate_blocks blocksize nb in
-  assert (f1 == fnb);
-  assert (map_blocks_multi blocksize inp f ==
-	  snd (fnb (fixed_a unit) (map_blocks_inner blocksize inp f) ()));
-  assume (map_blocks_multi blocksize inp f ==
-	  snd (f1 (fixed_a unit) (map_blocks_inner blocksize inp f) ()));
-  generate_blocks1_lemma #a blocksize (fixed_a unit) (map_blocks_inner blocksize inp f) ();
-  assert (map_blocks_multi blocksize inp f == snd (map_blocks_inner blocksize inp f 0 ()));
-  assert (Seq.equal (Seq.slice inp 0 blocksize) inp)
-
-	  
-  
-
-  
+    
 let map_blocks #a blocksize inp f g =
   let len = length inp in
   let nb = len / blocksize in
@@ -287,6 +265,38 @@ let map_blocks #a blocksize inp f g =
   if (rem > 0) then
     Seq.append bs (g nb rem (Seq.slice inp (nb * blocksize) len))
   else bs
+
+let map_blocks_multi_lemma #a blocksize n inp f i = admit()
+let map_blocks_lemma #a blocksize inp f g i = admit()
+
+let map_blocks_n_fits_lemma len blocksize n i j =
+  assert (i < len / (n * blocksize));
+  assert (i+1 <= len / (n*blocksize));
+  assert ((i + 1) * n * blocksize <= len);
+  assert (((i + 1) * n) * blocksize <= len);
+  Math.Lemmas.lemma_div_le (((i+1) * n)*blocksize) len blocksize;
+  assert ((((i + 1) * n) * blocksize) / blocksize <= len / blocksize);
+  Math.Lemmas.multiple_division_lemma ((i + 1) * n) blocksize;
+  assert ((i + 1) * n <= len / blocksize);
+  assert (i * n + n - 1 < len / blocksize);
+  assert (n * i + j < len / blocksize)
+
+let map_blocks_n_lemma #a blocksize n inp f g = admit()
+
+let repeat_blocks_n_fits_lemma blocksize n len = admit()
+
+let repeat_blocks_n_lemma #a #b blocksize n inp f l init = admit()
+
+let generate_blocks1_lemma #t len a f acc0 = 
+  let a0 : generate_blocks_a t len 1 a 0 = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  unfold_repeat_gen 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0 0;
+  eq_repeat_gen0 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0;
+  let a',b = f 0 acc0 in
+  assert (Seq.equal (Seq.append Seq.empty b) b)
+
+
+let map_blocks_multi1_lemma #a blocksize inp f =  admit()
+
 
 
 (*
