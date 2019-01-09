@@ -198,115 +198,13 @@ let memcpy_test (dst:b64) (src:b64)
 
 
 (*
-   -- Some things to fix up: I need to make it return an erased result type,
-      so that KreMLin generates the right signature ... should be easy.
-
+   Some things to fix up
+   
    -- Stack slots are not properly modeled yet ... so that "3" above
       is kinda random
 
-   -- Modifies clauses need to be finer grained: as it stands, the
-      wrapped type of memcpy says it modifies both buffers.
+   -- Supporting return values
 
    That said, here's what you get by computing `normal lowstar_memcpy_t`,
    slightly rewritten to give distinct names (x0, x1) to the two arguments
-
-   Can we prove that the va_pre implication in the precondition is satisfied?
-
-   Can we prove that the va_post in the ensures clause yields what one
-   would hope for an ensures clause for memcpy in Low*?
-
-x0: (b: b8{LowStar.Monotonic.Buffer.length b % 8 == 0} <: Type0) ->
-  Prims.Tot
-  (x1: (b: b8{LowStar.Monotonic.Buffer.length b % 8 == 0} <: Type0) ->
-      Prims.Tot
-      (_: unit ->
-          FStar.HyperStack.ST.Stack
-            (Interop.X64.as_lowstar_sig_ret [
-                  (| TD_Buffer (X64.Memory.TUInt64), x1 |);
-                  (| TD_Buffer (X64.Memory.TUInt64), x0 |)
-                ])
-            (fun h0 ->
-                (LowStar.Monotonic.Buffer.disjoint x1 x0 \/ x1 == x0) /\
-                LowStar.Monotonic.Buffer.live h0 x0 /\ LowStar.Monotonic.Buffer.live h0 x1 /\
-                (forall (s0: X64.Vale.Decls.va_state) (sb: Interop.X64.stack_buffer).
-                    Mkstate?.ok s0 /\
-                    (LowStar.Monotonic.Buffer.loc_disjoint (LowStar.Monotonic.Buffer.loc_buffer x1)
-                        (LowStar.Monotonic.Buffer.loc_buffer x0) \/ x0 == x1) /\
-                    (X64.Memory.buffer_readable (Mkstate?.mem s0) x0 /\
-                    X64.Memory.buffer_readable (Mkstate?.mem s0) x1) /\
-                    ((X64.Vale.State.eval_reg (Interop.X64.register_of_arg_i 0) s0 ==
-                      Interop.Assumptions.addrs x0) /\
-                    (X64.Vale.State.eval_reg (Interop.X64.register_of_arg_i 1) s0 ==
-                      Interop.Assumptions.addrs x1)) /\
-                    (X64.Memory.valid_taint_buf64 x1
-                      (Mkstate?.mem s0)
-                      (Mkstate?.memTaint s0)
-                      (X64.Machine_s.Secret) /\
-                    X64.Memory.valid_taint_buf64 x0
-                      (Mkstate?.mem s0)
-                      (Mkstate?.memTaint s0)
-                      (X64.Machine_s.Secret)) /\
-                    Seq.Base.equal (LowStarSig.nat_to_uint_seq_t (X64.Memory.TUInt64)
-                          (X64.Memory.buffer_as_seq (Mkstate?.mem s0) x1))
-                      (LowStar.BufferView.as_seq h0
-                          (LowStar.BufferView.mk_buffer_view x1 Views.view64)) /\
-                    Seq.Base.equal (LowStarSig.nat_to_uint_seq_t (X64.Memory.TUInt64)
-                          (X64.Memory.buffer_as_seq (Mkstate?.mem s0) x0))
-                      (LowStar.BufferView.as_seq h0
-                          (LowStar.BufferView.mk_buffer_view x0 Views.view64)) /\
-                    X64.Vale.Decls.valid_stack_slots (Mkstate?.mem s0)
-                      (X64.Vale.State.eval_reg (X64.Machine_s.Rsp) s0)
-                      sb
-                      3
-                      (Mkstate?.memTaint s0) ==>
-                    Vale_memcpy.va_pre code_memcpy s0 Interop.Assumptions.win sb x0 x1))
-            (fun h0 _ h1 ->
-                exists (fuel: nat)
-                  (_s1: X64.Taint_Semantics_s.traceState)
-                  (final_mem: X64.Memory.mem).
-                  Monotonic.HyperStack.poppable (Interop.Adapters.hs_of_mem final_mem) /\
-                  h1 == Monotonic.HyperStack.pop (Interop.Adapters.hs_of_mem final_mem) /\
-                  (exists (h1_pre_pop:_).
-                      h1_pre_pop == Interop.Adapters.hs_of_mem final_mem /\
-                      Monotonic.HyperStack.poppable h1_pre_pop /\
-                      (exists (h1:_).
-                          h1 == Monotonic.HyperStack.pop h1_pre_pop /\
-                          (LowStar.Monotonic.Buffer.disjoint x1 x0 \/ x1 == x0) /\
-                          (LowStar.Monotonic.Buffer.live h1 x1 /\ LowStar.Monotonic.Buffer.live h1 x0) /\
-                          LowStar.Monotonic.Buffer.modifies (LowStar.Monotonic.Buffer.loc_union (LowStar.Monotonic.Buffer.loc_buffer
-                                    x1)
-                                (LowStar.Monotonic.Buffer.loc_union (LowStar.Monotonic.Buffer.loc_buffer
-                                        x0)
-                                    LowStar.Monotonic.Buffer.loc_none))
-                            h0
-                            h1 /\
-                          (exists (s0: X64.Vale.Decls.va_state)
-                              (s1: X64.Vale.Decls.va_state)
-                              (f: X64.Vale.Decls.va_fuel)
-                              (sb: Interop.X64.stack_buffer).
-                              Seq.Base.equal (LowStarSig.nat_to_uint_seq_t (X64.Memory.TUInt64)
-                                    (X64.Memory.buffer_as_seq (Mkstate?.mem s0) x1))
-                                (LowStar.BufferView.as_seq h0
-                                    (LowStar.BufferView.mk_buffer_view x1 Views.view64)) /\
-                              Seq.Base.equal (LowStarSig.nat_to_uint_seq_t (X64.Memory.TUInt64)
-                                    (X64.Memory.buffer_as_seq (Mkstate?.mem s0) x0))
-                                (LowStar.BufferView.as_seq h0
-                                    (LowStar.BufferView.mk_buffer_view x0 Views.view64)) /\
-                              Seq.Base.equal (LowStarSig.nat_to_uint_seq_t (X64.Memory.TUInt64)
-                                    (X64.Memory.buffer_as_seq (Mkstate?.mem s1) x1))
-                                (LowStar.BufferView.as_seq h1
-                                    (LowStar.BufferView.mk_buffer_view x1 Views.view64)) /\
-                              Seq.Base.equal (LowStarSig.nat_to_uint_seq_t (X64.Memory.TUInt64)
-                                    (X64.Memory.buffer_as_seq (Mkstate?.mem s1) x0))
-                                (LowStar.BufferView.as_seq h1
-                                    (LowStar.BufferView.mk_buffer_view x0 Views.view64)) /\
-                              Vale_memcpy.va_post code_memcpy s0 s1 f Interop.Assumptions.win sb x0 x1
-                          ))))
-        <:
-        Type0)
-    <:
-    Type0)
-
 *)
-
-
