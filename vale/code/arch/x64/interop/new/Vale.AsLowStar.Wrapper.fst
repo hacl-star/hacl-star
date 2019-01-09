@@ -297,7 +297,8 @@ let core_create_lemma
          LSig.mem_correspondence args h0 va_s /\
          LSig.mk_vale_disjointness stack args /\
          VSig.readable args VS.(va_s.mem) /\
-         LSig.vale_pre_hyp stack args va_s))
+         LSig.vale_pre_hyp stack args va_s /\
+         Interop.Adapters.hs_of_mem va_s.VS.mem == h0))
   = let va_s = create_initial_vale_state args h0 stack in
     core_create_lemma_mem_correspondance args h0 stack;
     core_create_lemma_disjointness args h0 stack;
@@ -305,7 +306,9 @@ let core_create_lemma
     core_create_lemma_readable2 args h0 stack;
     core_create_lemma_register_args args h0 stack;
     core_create_lemma_taint_hyp args h0 stack;
-    core_create_lemma_state args h0 stack
+    core_create_lemma_state args h0 stack;
+    Interop.Adapters.mk_mem_injective (arg_of_lb stack :: args) h0
+    
   
 let rec frame_mem_correspondence_back
        (args:list arg)
@@ -432,8 +435,22 @@ let pop_is_popped (m:HS.mem{HS.poppable m})
   : Lemma (HS.popped m (HS.pop m))
   = ()
 
+let push_pop_modifies (h0:HS.mem) 
+                      (h1:HS.mem{HS.fresh_frame h0 h1})
+                      (h2:HS.mem{HS.get_tip h1 == HS.get_tip h2})
+                      (h3:HS.mem{HS.popped h2 h3})
+                      (x:b8) =
+    assume (B.live h0 x);
+    assume (B.modifies (B.loc_buffer x) h0 h2);
+    assume (B.modifies (B.loc_buffer x) h1 h2);    
+    B.popped_modifies h2 h3;
+    assert (B.loc_disjoint (B.loc_buffer x) (B.loc_region_only false (HS.get_tip h2)));
+    B.modifies_fresh_frame_popped h0 h1 (B.loc_buffer x) h2 h3;
+    assert (B.modifies (B.loc_buffer x) h0 h3)
+
+                      
 #set-options "--z3rlimit_factor 2"
-let vale_lemma_as_prediction
+val vale_lemma_as_prediction
           (code:V.va_code)
           (args:IX64.arity_ok arg)
           (num_stack_slots:nat)
@@ -445,7 +462,16 @@ let vale_lemma_as_prediction
              args
              (prediction_pre_rel num_stack_slots pre (coerce code) args)
              (prediction_post_rel num_stack_slots post (coerce code) args)
+
+let vale_lemma_as_prediction
+          (code:V.va_code)
+          (args:IX64.arity_ok arg)
+          (num_stack_slots:nat)
+          (pre:VSig.vale_pre_tl [])
+          (post:VSig.vale_post_tl [])
+          (v:VSig.vale_sig_tl args (coerce code) pre post)
    = fun h0 s0 push_h0 alloc_push_h0 sb ->
+       let s_args = arg_of_lb sb :: args in
        let va_s0 = create_initial_vale_state args alloc_push_h0 sb in
        core_create_lemma args alloc_push_h0 sb;
        assert (SL.state_to_S va_s0 == s0);
@@ -470,14 +496,17 @@ let vale_lemma_as_prediction
        assert (VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1));
        assert (IX64.calling_conventions s0 s1);
        assert (ME.modifies (VSig.mloc_modified_args args) va_s0.VS.mem va_s1.VS.mem);
-       let h1 = (Interop.Adapters.hs_of_mem va_s1.VS.mem) in
+       let h1 = Interop.Adapters.hs_of_mem va_s1.VS.mem in
        let final_mem = va_s1.VS.mem in
-       assume (B.modifies (loc_modified_args args) alloc_push_h0 h1); //Requires relating M.modifies to B.modifies ...
-       assume (FStar.HyperStack.ST.equal_domains alloc_push_h0 h1); //Vale code does not prove that it does not allocate
-       assume (IM.down_mem h1
+       Vale.AsLowStar.MemoryHelpers.relate_modifies args va_s0.VS.mem va_s1.VS.mem;
+       assert (B.modifies (loc_modified_args args) alloc_push_h0 h1);
+       assume (FStar.HyperStack.ST.equal_domains alloc_push_h0 h1); //TODO: Vale code does not prove that it does not allocate
+       Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
+       assert (IM.down_mem h1
                            (IA.addrs)
-                           (Interop.Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem); //needing StateLemmas
+                           (Interop.Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem);
        let h1_pre_pop = Interop.Adapters.hs_of_mem final_mem in
+       assert (h1_pre_pop == h1);
        assert (IM.down_mem h1_pre_pop (IA.addrs) (Interop.Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem);
        assert (va_s1.VS.mem == final_mem);
        mem_correspondence_refl args va_s1;
@@ -495,7 +524,11 @@ let vale_lemma_as_prediction
        assert (mem_roots_p h1_pre_pop args);
        frame_mem_correspondence args h1_pre_pop h2 va_s1 (B.loc_regions false (Set.singleton (HS.get_tip h1_pre_pop)));
        assert (B.modifies (loc_modified_args args) alloc_push_h0 h1_pre_pop);
-       assume (B.modifies (loc_modified_args args) h0 h2); //TODO: seems easy, need to investigate more
+       assert (B.modifies (loc_modified_args args) push_h0 h1_pre_pop);        
+       assert (B.modifies (loc_modified_args args) h0 h1_pre_pop);       
+       B.loc_includes_union_l (B.loc_all_regions_from false (HS.get_tip push_h0)) (loc_modified_args args)  (loc_modified_args args);
+       B.modifies_fresh_frame_popped h0 push_h0 (loc_modified_args args) h1_pre_pop h2;
+       assert (B.modifies (loc_modified_args args) h0 h2); //TODO: seems easy, need to investigate more
        assert (LSig.(to_low_post post args h0 () h2));
        coerce f, va_s1.VS.mem
 

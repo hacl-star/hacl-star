@@ -23,7 +23,7 @@ module ST = FStar.HyperStack.ST
 friend X64.Memory
 friend X64.Memory_Sems
 friend X64.Vale.Decls
-
+friend X64.Vale.StateLemmas
 open Interop.Adapters
 
 let down_mem_unify () : Lemma (IM.down_mem == Interop.down_mem) = 
@@ -32,6 +32,22 @@ let down_mem_unify () : Lemma (IM.down_mem == Interop.down_mem) =
 let mem_reveal (mem:ME.mem) : Lemma 
   (hs_of_mem mem == mem.ME.hs /\ ptrs_of_mem mem == mem.ME.ptrs)
   = admit() // TODO: Will be provable with an implementation for Interop.Adapters
+
+let state_eq_down_mem (va_s1:V.va_state) (s1:_)
+  = down_mem_unify();
+    mem_reveal va_s1.VS.mem;
+    assume (va_s1.VS.mem.ME.addrs == IA.addrs) //TODO: Needs a stronger invariant on mem.addrs
+
+let rec loc_eq (args:list arg)
+  : Lemma (VSig.mloc_modified_args args == loc_modified_args args)
+  = match args with
+    | [] -> ()
+    | hd :: tl -> loc_eq tl
+
+let relate_modifies (args:list arg) (m0 m1 : ME.mem)
+  = loc_eq args;
+    mem_reveal m0;
+    mem_reveal m1
 
 let mk_mem_addrs_reveal (args:list arg) (h0:mem_roots args) : Lemma
   (let mem = mk_mem args h0 in

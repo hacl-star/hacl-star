@@ -20,6 +20,27 @@ module SL = X64.Vale.StateLemmas
 module VL = X64.Vale.Lemmas
 module ST = FStar.HyperStack.ST
 
+val state_eq_down_mem (va_s1:V.va_state) (s1:_)
+  : Lemma 
+      (requires 
+        VL.state_eq_opt (Some (SL.state_to_S va_s1)) 
+                        (Some s1))
+      (ensures (
+         let h1 = (Interop.Adapters.hs_of_mem va_s1.VS.mem) in
+         let final_mem = va_s1.VS.mem in
+         IM.down_mem h1
+                     IA.addrs
+                     (Interop.Adapters.ptrs_of_mem final_mem) ==
+         s1.TS.state.BS.mem))
+
+val relate_modifies (args:list arg) (m0 m1 : ME.mem)
+  : Lemma 
+      (requires 
+        ME.modifies (VSig.mloc_modified_args args) m0 m1)
+      (ensures 
+        B.modifies (loc_modified_args args) 
+                   (Interop.Adapters.hs_of_mem m0)
+                   (Interop.Adapters.hs_of_mem m1))
 
 val reveal_readable (#t:_) (x:lowstar_buffer t) (s:ME.mem)
   : Lemma 
