@@ -435,20 +435,6 @@ let pop_is_popped (m:HS.mem{HS.poppable m})
   : Lemma (HS.popped m (HS.pop m))
   = ()
 
-let push_pop_modifies (h0:HS.mem) 
-                      (h1:HS.mem{HS.fresh_frame h0 h1})
-                      (h2:HS.mem{HS.get_tip h1 == HS.get_tip h2})
-                      (h3:HS.mem{HS.popped h2 h3})
-                      (x:b8) =
-    assume (B.live h0 x);
-    assume (B.modifies (B.loc_buffer x) h0 h2);
-    assume (B.modifies (B.loc_buffer x) h1 h2);    
-    B.popped_modifies h2 h3;
-    assert (B.loc_disjoint (B.loc_buffer x) (B.loc_region_only false (HS.get_tip h2)));
-    B.modifies_fresh_frame_popped h0 h1 (B.loc_buffer x) h2 h3;
-    assert (B.modifies (B.loc_buffer x) h0 h3)
-
-
 let loc_includes_union (l1 l1' l:B.loc)
   : Lemma (requires B.(loc_includes l1 l1'))
           (ensures  B.(loc_includes (loc_union l1 l) (loc_union l1' l)))
