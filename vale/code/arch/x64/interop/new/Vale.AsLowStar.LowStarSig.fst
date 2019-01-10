@@ -85,7 +85,7 @@ let rec mem_correspondence (args:list arg) : hsprop =
 let disjoint_b8 (ptr1 ptr2:b8) = B.loc_disjoint (B.loc_buffer ptr1) (B.loc_buffer ptr2)
 
 [@__reduce__]
-let mk_vale_disjointness (sb:IX64.stack_buffer) (args:list arg) : prop =
+let mk_vale_disjointness #n (sb:IX64.stack_buffer n) (args:list arg) : prop =
   let args_b8 = Interop.Adapters.args_b8 args in
   Interop.Mem.disjoint_or_eq_b8_l args_b8 /\
   BigOps.big_and' (disjoint_b8 sb) args_b8
@@ -147,7 +147,7 @@ let rec taint_hyp (args:list arg) : VSig.sprop =
         taint_hyp tl
 
 [@__reduce__]
-let vale_pre_hyp (sb:IX64.stack_buffer) (args:IX64.arity_ok arg) : VSig.sprop =
+let vale_pre_hyp #n (sb:IX64.stack_buffer n) (args:IX64.arity_ok arg) : VSig.sprop =
     fun s0 ->
       let s_args = arg_of_lb sb :: args in
       mk_vale_disjointness sb args /\
@@ -157,22 +157,23 @@ let vale_pre_hyp (sb:IX64.stack_buffer) (args:IX64.arity_ok arg) : VSig.sprop =
 
 [@__reduce__]
 let to_low_pre
-    (pre:VSig.vale_pre_tl [])
+    (#n:IX64.max_slots)
+    (pre:VSig.vale_pre_tl n [])
     (args:IX64.arity_ok arg)
-    (num_stack_slots:nat)
     (hs_mem:mem_roots args)
   : prop =
   (forall (s0:V.va_state)
-     (sb:IX64.stack_buffer).
+     (sb:IX64.stack_buffer n).
     V.va_get_ok s0 /\
     vale_pre_hyp sb args s0 /\
     mem_correspondence args hs_mem s0 /\
-    V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) num_stack_slots s0.VS.memTaint ==>
+    V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) (n / 8) s0.VS.memTaint ==>
     elim_nil pre s0 sb)
 
 [@__reduce__]
 let to_low_post
-    (post:VSig.vale_post_tl [])
+    (#n:IX64.max_slots)
+    (post:VSig.vale_post_tl n [])
     (args:list arg)
     (hs_mem0:mem_roots args)
     (_:unit)
@@ -182,7 +183,7 @@ let to_low_post
   B.modifies (loc_modified_args args) hs_mem0 hs_mem1 /\
   (exists
     (s0:va_state)
-    (sb:IX64.stack_buffer)
+    (sb:IX64.stack_buffer n)
     (s1:va_state)
     (f:va_fuel).
        mem_correspondence args hs_mem0 s0 /\

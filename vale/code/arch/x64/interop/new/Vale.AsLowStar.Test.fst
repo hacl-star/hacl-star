@@ -28,15 +28,15 @@ let dom : IX64.arity_ok td =
   assert_norm (List.length y = 2);
   y
 
-assume val pre : VSig.vale_pre dom
-assume val post : VSig.vale_post dom
-assume val n : nat
+assume val n : IX64.max_slots
+assume val pre : VSig.vale_pre n dom
+assume val post : VSig.vale_post n dom
 assume val v: VSig.vale_sig pre post
 assume val c: V.va_code
 
 [@__reduce__]
-let call_c_t = IX64.as_lowstar_sig_t_weak c dom [] _ _ (W.mk_prediction c dom [] n (v c IA.win))
-let call_c : call_c_t = IX64.wrap_weak c dom (W.mk_prediction c dom [] n (v c IA.win))
+let call_c_t = IX64.as_lowstar_sig_t_weak c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
+let call_c : call_c_t = IX64.wrap_weak c n dom (W.mk_prediction c dom [] (v c IA.win))
 let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //You can ask emacs to show you the type of call_c_normal_t ...
 
@@ -49,21 +49,21 @@ let vm_dom = dom
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] unfold
-let vm_pre : VSig.vale_pre vm_dom =
+let vm_pre : VSig.vale_pre 24 vm_dom =
   fun (c:V.va_code)
     (dst:b64)
     (src:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer) ->
+    (sb:IX64.stack_buffer 24) ->
       VM.va_pre c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_buffer src)
 
 [@__reduce__] unfold
-let vm_post : VSig.vale_post vm_dom =
+let vm_post : VSig.vale_post 24 vm_dom =
   fun (c:V.va_code)
     (dst:b64)
     (src:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer)
+    (sb:IX64.stack_buffer 24)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
       VM.va_post c va_s0 va_s1 f IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_buffer src)
@@ -81,7 +81,7 @@ let vm_lemma'
     (dst:b64)
     (src:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer)
+    (sb:IX64.stack_buffer 24)
  : Ghost (V.va_state & V.va_fuel)
      (requires
        vm_pre code dst src va_s0 sb)
@@ -122,18 +122,20 @@ let code_memcpy = VM.va_code_memcpy IA.win
 let lowstar_memcpy_t =
   IX64.as_lowstar_sig_t_weak
     code_memcpy
+    24
     vm_dom
     []
     _
     _
-    (W.mk_prediction code_memcpy vm_dom [] 3 (vm_lemma code_memcpy IA.win))
+    (W.mk_prediction code_memcpy vm_dom [] (vm_lemma code_memcpy IA.win))
 
 (* And here's the memcpy wrapper itself *)
 let lowstar_memcpy : lowstar_memcpy_t  =
   IX64.wrap_weak
     code_memcpy
+    24
     vm_dom
-    (W.mk_prediction code_memcpy vm_dom [] 3 (vm_lemma code_memcpy IA.win))
+    (W.mk_prediction code_memcpy vm_dom [] (vm_lemma code_memcpy IA.win))
 
 let lowstar_memcpy_normal_t //: normal lowstar_memcpy_t
   = as_normal_t #lowstar_memcpy_t lowstar_memcpy
