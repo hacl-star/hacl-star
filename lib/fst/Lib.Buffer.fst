@@ -505,8 +505,8 @@ let map_blocks_multi #t #a h0 len blocksize inp output spec_f impl_f =
   let h1 = ST.get() in
   assert (let s, o = Sequence.generate_blocks (v blocksize) (v nb) a_spec (spec h0) (refl h0 0) in as_seq h1 (gsub output 0ul (nb *! blocksize)) == o);
   assert_norm (
-    Sequence.map_blocks_multi (v blocksize) (as_seq h0 inp) (spec_f h0) ==
-    norm [delta] Sequence.map_blocks_multi (v blocksize) (as_seq h0 inp) (spec_f h0));
+    Sequence.map_blocks_multi (v blocksize) (length inp / v blocksize) (as_seq h0 inp) (spec_f h0) ==
+    norm [delta] Sequence.map_blocks_multi (v blocksize) (length inp / v blocksize) (as_seq h0 inp) (spec_f h0));
   admit()
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l = 
