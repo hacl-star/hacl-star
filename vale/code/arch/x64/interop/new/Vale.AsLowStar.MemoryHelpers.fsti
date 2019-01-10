@@ -20,6 +20,11 @@ module SL = X64.Vale.StateLemmas
 module VL = X64.Vale.Lemmas
 module ST = FStar.HyperStack.ST
 
+
+val as_vale_buffer_len (#t:ME.typ) (x:lowstar_buffer t)
+   : Lemma (V.buffer_length (as_vale_buffer x) == B.length x / view_n t)
+           [SMTPat (V.buffer_length (as_vale_buffer x))]
+
 val state_eq_down_mem (va_s1:V.va_state) (s1:_)
   : Lemma 
       (requires 

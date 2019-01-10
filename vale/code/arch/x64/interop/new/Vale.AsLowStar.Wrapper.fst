@@ -295,6 +295,16 @@ let core_create_lemma_state
     assert (FunctionalExtensionality.feq tr_s.TS.state.BS.xmms sl_s.TS.state.BS.xmms);
     Vale.AsLowStar.MemoryHelpers.get_heap_mk_mem_reveal args h0 stack
 
+unfold
+let valid_stack_slots (m:ME.mem) (rsp:int) (b:ME.buffer64) (num_slots:int) (memTaint:ME.memtaint) =
+    ME.valid_taint_buf64 b m memTaint X64.Machine_s.Public /\
+    ME.buffer_readable m b /\
+    num_slots <= ME.buffer_length b /\
+    (let open FStar.Mul in
+     rsp == ME.buffer_addr b m + 8 * num_slots /\
+     0 <= rsp - 8 * num_slots /\
+     rsp < Words_s.pow2_64)
+
 let core_create_lemma
     #n
     (args:IX64.arity_ok arg)
@@ -308,7 +318,13 @@ let core_create_lemma
          LSig.mk_vale_disjointness stack args /\
          VSig.readable args VS.(va_s.mem) /\
          LSig.vale_pre_hyp stack args va_s /\
-         Interop.Adapters.hs_of_mem va_s.VS.mem == h0))
+         Interop.Adapters.hs_of_mem va_s.VS.mem == h0 /\
+         V.valid_stack_slots
+                va_s.VS.mem
+                (VS.eval_reg MS.Rsp va_s)
+                (as_vale_buffer stack)
+                (n / 8)
+                va_s.VS.memTaint))
   = let va_s = create_initial_vale_state args h0 stack in
     core_create_lemma_mem_correspondance args h0 stack;
     core_create_lemma_disjointness args h0 stack;
@@ -317,8 +333,10 @@ let core_create_lemma
     core_create_lemma_register_args args h0 stack;
     core_create_lemma_taint_hyp args h0 stack;
     core_create_lemma_state args h0 stack;
-    Interop.Adapters.mk_mem_injective (arg_of_lb stack :: args) h0
-    
+    Interop.Adapters.mk_mem_injective (arg_of_lb stack :: args) h0;
+    assume (ME.valid_taint_buf64 (as_vale_buffer stack) va_s.VS.mem va_s.VS.memTaint X64.Machine_s.Public);
+    assume (ME.buffer_length (as_vale_buffer stack) = B.length stack / 8);
+    assume (ME.buffer_addr (as_vale_buffer stack) va_s.VS.mem == IA.addrs stack)
   
 let rec frame_mem_correspondence_back
        (args:list arg)
@@ -488,12 +506,6 @@ let vale_lemma_as_prediction
        assert (LSig.mem_correspondence args h0 va_s0);
        assert (va_s0.VS.ok);
        assert (LSig.vale_pre_hyp sb args va_s0);
-       assume (V.valid_stack_slots
-                va_s0.VS.mem
-                (VS.eval_reg MS.Rsp va_s0)
-                (as_vale_buffer sb)
-                (n / 8)
-                va_s0.VS.memTaint);
        assert (elim_nil pre va_s0 sb);
        let va_s1, f = VSig.elim_vale_sig_nil v va_s0 sb in
        assert (V.eval_code (c_code) va_s0 f va_s1);

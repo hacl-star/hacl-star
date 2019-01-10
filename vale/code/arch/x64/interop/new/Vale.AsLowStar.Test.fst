@@ -142,11 +142,6 @@ let lowstar_memcpy_normal_t //: normal lowstar_memcpy_t
 module B = LowStar.Monotonic.Buffer
 open FStar.HyperStack.ST
 
-let as_vale_buffer_len (#t:ME.typ) (x:lowstar_buffer t)
-   : Lemma (V.buffer_length (as_vale_buffer x) == B.length x / view_n t)
-           [SMTPat (V.buffer_length (as_vale_buffer x))]
-   = admit()
-
 module M = X64.Memory
 
 let as_vale_buffer_disjoint (#t1 #t2:ME.typ) (x:lowstar_buffer t1) (y:lowstar_buffer t2)
@@ -202,11 +197,6 @@ let memcpy_test (dst:b64) (src:b64)
 (*
    Some things to fix up
    
-   -- Stack slots are not properly modeled yet ... so that "3" above
-      is kinda random
-
    -- Supporting return values
 
-   That said, here's what you get by computing `normal lowstar_memcpy_t`,
-   slightly rewritten to give distinct names (x0, x1) to the two arguments
 *)

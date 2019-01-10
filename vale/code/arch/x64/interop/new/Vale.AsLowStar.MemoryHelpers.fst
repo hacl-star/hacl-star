@@ -26,8 +26,11 @@ friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
 open Interop.Adapters
 
+let as_vale_buffer_len (#t:ME.typ) (x:lowstar_buffer t)
+   = admit()
+
 let down_mem_unify () : Lemma (IM.down_mem == Interop.down_mem) = 
-  admit() // TODO: We should only have one def for down_mem
+     admit() // TODO: We should only have one def for down_mem
 
 let mem_reveal (mem:ME.mem) : Lemma 
   (hs_of_mem mem == mem.ME.hs /\ ptrs_of_mem mem == mem.ME.ptrs)
@@ -60,18 +63,18 @@ let reveal_readable (#t:_) (x:lowstar_buffer t) (s:ME.mem)
 let readable_live (#t:_) (x:lowstar_buffer t) (s:ME.mem)
   = mem_reveal s
 
-let buffer_readable_reveal bt x args h0 stack =
+let buffer_readable_reveal #n bt x args h0 stack =
   let mem = mk_mem (arg_of_lb stack::args) h0 in
   mk_mem_injective (arg_of_lb stack::args) h0;
   mem_reveal mem
 
-let get_heap_mk_mem_reveal args h0 stack =
+let get_heap_mk_mem_reveal #n args h0 stack =
   mk_mem_injective (arg_of_lb stack::args) h0;
   down_mem_unify ();
   mk_mem_addrs_reveal (arg_of_lb stack::args) h0;
   mem_reveal (mk_mem (arg_of_lb stack::args) h0)
 
-let buffer_as_seq_reveal t x args h0 stack =
+let buffer_as_seq_reveal #n t x args h0 stack =
   assume (t <> ME.TUInt128); // TODO: TUInt128
   mk_mem_injective (arg_of_lb stack::args) h0;
   mem_reveal (mk_mem (arg_of_lb stack::args) h0)
