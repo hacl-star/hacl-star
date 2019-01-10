@@ -6,9 +6,9 @@ KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
 
 LIB_DIR		= $(HACL_HOME)/lib
-SPECS_DIR 	= $(HACL_HOME)/specs
+SPECS_DIR 	= $(HACL_HOME)/specs $(HACL_HOME)/specs/derived $(HACL_HOME)/specs/tests
 CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash sha3 tests)
-DIRS		= $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(SPECS_DIR)/tests
+DIRS		= $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS)
 
 INCLUDES = \
   $(DIRS) \

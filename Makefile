@@ -15,7 +15,7 @@
 # building secure_api, vale, providers, merkle_tree to recursive make
 # invocations.
 
-# 0. Top-level entry points, delegating to recursive make invocations via pattern
+# -2. Top-level entry points, delegating to recursive make invocations via pattern
 # rules.
 
 all: secure_api.build secure_api/merkle_tree.build \
@@ -37,7 +37,7 @@ ci: all test
 %.build:
 	$(MAKE) -C $*
 
-# 0. Complete dependency graph for HACL*
+# -1. Complete dependency graph for HACL*
 
 ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
 
@@ -53,10 +53,17 @@ endif
 
 include .depend
 
-# 1. Manual, finely crafted dependency edges (see artistic rendition above).
+# 0. Convenience targets for subsets of HACL*
 
-ALL_CHECKED_FILES	= $(addsuffix .checked,$(ALL_FST_FILES))
+ALL_CHECKED_FILES	= $(addsuffix .checked,$(ROOTS))
+
 SPEC_CHECKED_FILES	= $(filter $(HACL_HOME)/specs/%,$(ALL_CHECKED_FILES))
+CODE_CHECKED_FILES	= $(filter $(HACL_HOME)/code/%,$(ALL_CHECKED_FILES))
+
+verify-specs: $(SPEC_CHECKED_FILES)
+verify-code: $(CODE_CHECKED_FILES)
+
+# 1. Manual, finely crafted dependency edges (see artistic rendition above).
 
 vale.build: $(SPEC_CHECKED_FILES)
 providers.build: compile-compact vale.build

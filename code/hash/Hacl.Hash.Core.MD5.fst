@@ -11,7 +11,7 @@ module E = FStar.Kremlin.Endianness
 module CE = C.Endianness
 
 open Hacl.Hash.Definitions
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 friend Spec.MD5
 friend Hacl.Hash.PadFinish

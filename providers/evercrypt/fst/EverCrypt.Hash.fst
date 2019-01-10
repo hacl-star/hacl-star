@@ -214,10 +214,10 @@ let update_last_st (#a:e_alg) =
     B.(loc_disjoint (loc_buffer p) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
     B.(modifies (loc_buffer p) h0 h1) /\
-    (B.length last + Seq.length (Spec.Hash.Common.pad a (v total_len))) % size_block a = 0 /\
+    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % size_block a = 0 /\
     B.as_seq h1 p ==
       compress_many (B.as_seq h0 p)
-        (Seq.append (B.as_seq h0 last) (Spec.Hash.Common.pad a (v total_len))))
+        (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))))
 
 inline_for_extraction
 val update_last_64 (a: e_alg{ G.reveal a <> SHA2_384 /\ G.reveal a <> SHA2_512 })

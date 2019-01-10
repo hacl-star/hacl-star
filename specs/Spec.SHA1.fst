@@ -1,6 +1,6 @@
 module Spec.SHA1
 
-module H = Spec.Hash.Helpers
+module H = Spec.Hash.Definitions
 module U32 = FStar.UInt32
 module Seq = FStar.Seq
 module E = FStar.Kremlin.Endianness
@@ -249,8 +249,8 @@ let update h l =
 
 (* Section 5.1.1: padding *)
 
-let pad = Spec.Hash.Common.pad SHA1
+let pad = Spec.Hash.PadFinish.pad SHA1
 
 (* Section 6.1.2: no truncation needed *)
 
-let finish = Spec.Hash.Common.finish _
+let finish = Spec.Hash.PadFinish.finish _

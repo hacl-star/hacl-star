@@ -1,6 +1,6 @@
 module Hacl.Hash.Core.SHA2
 
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 

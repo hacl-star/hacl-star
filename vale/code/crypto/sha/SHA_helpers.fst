@@ -4,7 +4,8 @@ open Prop_s
 open Opaque_s
 open Spec.SHA2
 open Spec.Hash
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
+open Spec.Hash.Lemmas
 open X64.CryptoInstructions_s
 open Types_s
 open Words_s

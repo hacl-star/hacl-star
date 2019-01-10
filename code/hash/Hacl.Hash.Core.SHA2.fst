@@ -7,7 +7,7 @@ module U128 = FStar.UInt128
 
 module Cast = FStar.Int.Cast.Full
 module Constants = Spec.SHA2.Constants
-module Helpers = Spec.Hash.Helpers
+module Helpers = Spec.Hash.Definitions
 module Endianness = FStar.Kremlin.Endianness
 module Math = FStar.Math.Lemmas
 module Spec = Spec.SHA2
@@ -20,7 +20,7 @@ module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 module IB = LowStar.ImmutableBuffer
 
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open LowStar.BufferOps
 open Hacl.Hash.Lemmas
 open Hacl.Hash.Definitions

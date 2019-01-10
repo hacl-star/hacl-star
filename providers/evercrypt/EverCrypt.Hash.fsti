@@ -3,7 +3,7 @@ module EverCrypt.Hash
 open EverCrypt.Helpers
 open FStar.HyperStack.ST
 open FStar.Integers
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 /// Stating the obvious: TODO remove me
@@ -23,7 +23,7 @@ let bad_hack (): Stack unit (fun _ -> True) (fun _ _ _ -> True) = ()
 ///   purpose only
 /// * SHA3 will be provided by HACL*
 ///
-/// ``hash_alg``, from Spec.Hash.Helpers, lists all supported algorithms
+/// ``hash_alg``, from Spec.Hash.Definitions, lists all supported algorithms
 unfold
 let alg = hash_alg
 
@@ -39,13 +39,13 @@ type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 
 /// Alternative names from Cédric, to be aligned with naming conventions.
 noextract unfold
-let tagLength = Spec.Hash.Helpers.size_hash
+let tagLength = Spec.Hash.Definitions.size_hash
 noextract unfold
-let blockLength = Spec.Hash.Helpers.size_block
+let blockLength = Spec.Hash.Definitions.size_block
 noextract unfold
-let maxLength = Spec.Hash.Helpers.max_input8
+let maxLength = Spec.Hash.Definitions.max_input8
 noextract unfold
-let spec = Spec.Hash.Nist.hash
+let spec = Spec.Hash.hash
 unfold
 let tagLen = Hacl.Hash.Definitions.size_hash_ul
 unfold
@@ -97,7 +97,7 @@ let compress_many (#a: alg) (s: acc a) (b:bytes_blocks a): GTot (acc a) =
 (* extracts the tag from the (possibly larger) accumulator *)
 noextract
 let extract (#a:alg) (s: acc a): GTot (bytes_hash a) =
-  Spec.Hash.Common.finish a s
+  Spec.Hash.PadFinish.finish a s
 
 
 /// Stateful interface implementing the agile specifications.
@@ -325,10 +325,10 @@ val update_last:
     M.(loc_disjoint (footprint s h0) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
-    (B.length last + Seq.length (Spec.Hash.Common.pad a (v total_len))) % size_block a = 0 /\
+    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % size_block a = 0 /\
     repr s h1 ==
       compress_many (repr s h0)
-        (Seq.append (B.as_seq h0 last) (Spec.Hash.Common.pad a (v total_len))) /\
+        (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
@@ -389,4 +389,4 @@ val hash:
     M.(loc_disjoint (loc_buffer input) (loc_buffer dst)))
   (ensures fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst == Spec.Hash.Nist.hash a (B.as_seq h0 input))
+    B.as_seq h1 dst == Spec.Hash.hash a (B.as_seq h0 input))

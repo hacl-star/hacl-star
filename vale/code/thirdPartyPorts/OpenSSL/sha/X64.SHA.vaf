@@ -12,8 +12,8 @@ include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "Spec.SHA2"
 include{:fstar}{:open} "SHA_helpers"
 include{:fstar}{:open} "Spec.Hash"
-include{:fstar}{:open} "Spec.Hash.Common"
-include{:fstar}{:open} "Spec.Hash.Helpers"
+include{:fstar}{:open} "Spec.Hash.PadFinish"
+include{:fstar}{:open} "Spec.Hash.Definitions"
 include{:fstar}{:open} "Workarounds"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Vale.State"
@@ -43,8 +43,8 @@ open Arch.Types
 open SHA_helpers
 open Spec.SHA2
 open Spec.Hash
-open Spec.Hash.Common
-open Spec.Hash.Helpers
+open Spec.Hash.PadFinish
+open Spec.Hash.Definitions
 open Workarounds
 open Spec.Loops
 open X64.Stack

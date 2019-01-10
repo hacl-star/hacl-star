@@ -157,7 +157,7 @@ val part1:
 let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
   compress_many (acc0 #a) b
 
-#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+#push-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
 
 open LowStar.Modifies.Linear
 
@@ -184,7 +184,7 @@ let part1 a (acc: state a) key data len =
   assert(
     let k = as_seq h0 key in
     FStar.Seq.lemma_eq_intro (Seq.append (Seq.empty #UInt8.t) k) k;
-    repr acc h1 == hash0 k);
+    Seq.equal (repr acc h1) (hash0 k));
   Hash.update_multi
     #(Ghost.hide a)
     acc blocks lb;
@@ -201,7 +201,7 @@ let part1 a (acc: state a) key data len =
   assert (S.equal (as_seq h0 last) (as_seq h2 last));
   assert (repr acc h3 ==
     compress_many (hash0 (S.append (as_seq h0 key) (as_seq h0 blocks)))
-      (S.append (as_seq h0 last) (Spec.Hash.Common.pad a (v (block_len a + len)))));
+      (S.append (as_seq h0 last) (Spec.Hash.PadFinish.pad a (v (block_len a + len)))));
   // assert(LowStar.Buffer.live h3 key);
   let tag = sub key 0ul (tag_len a) in (* Salvage memory *)
   Hash.finish #(Ghost.hide a) acc tag;
@@ -223,7 +223,7 @@ let part1 a (acc: state a) key data len =
     assert(acc2 == hash0 #a v2);
     let data1 = as_seq h1 data in
     let last1 = as_seq h1 last in
-    let suffix1 = Spec.Hash.Common.pad a (p + v len) in
+    let suffix1 = Spec.Hash.PadFinish.pad a (p + v len) in
     Seq.lemma_eq_intro data1 S.(blocks1 @| last1);
     let acc3 = repr acc h3 in
     let ls = Seq.length suffix1 in
@@ -263,7 +263,7 @@ val part2:
         Seq.length payload < max_input8 a /\
         as_seq h1 mac = EverCrypt.Hash.spec a payload))
 
-#set-options "--z3rlimit 200"
+#set-options "--z3rlimit 300"
 inline_for_extraction
 let part2 a acc mac opad tag =
   let totLen = block_len a + tag_len a in
@@ -284,6 +284,7 @@ let part2 a acc mac opad tag =
   assert(
     let k = as_seq h0 opad in
     FStar.Seq.lemma_eq_intro (Seq.append (Seq.empty #UInt8.t) k) k;
+    S.equal (repr acc h1) (hash0 k) /\
     repr acc h1 == hash0 k);
   Hash.update_last #(Ghost.hide a) acc tag (Int.Cast.Full.uint32_to_uint64 totLen);
   let h2 = ST.get() in
@@ -297,7 +298,7 @@ let part2 a acc mac opad tag =
     //lemma_compress (acc0 #a) v1;
     assert(acc1 == hash0 v1);
     let tag1 = as_seq h1 tag in
-    let suffix1 = Spec.Hash.Common.pad a (size_block a + size_hash a) in
+    let suffix1 = Spec.Hash.PadFinish.pad a (size_block a + size_hash a) in
     let acc2 = repr acc h2 in
     //lemma_hash2 (acc0 #a) v1 S.(tag1 @| suffix1);
     Seq.append_assoc v1 tag1 suffix1;

@@ -1,11 +1,12 @@
-module Spec.Hash.Common
+module Spec.Hash.PadFinish
 
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module E = FStar.Kremlin.Endianness
 module S = FStar.Seq
 
-open Spec.Hash.Helpers
+open Spec.Hash.Lemmas0
+open Spec.Hash.Definitions
 
 (** This module contains specifications shared across all the Merkle-Damgård
     constructions. *)

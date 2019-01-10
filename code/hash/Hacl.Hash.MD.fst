@@ -14,7 +14,7 @@ module ST = FStar.HyperStack.ST
 
 open Hacl.Hash.Definitions
 open Hacl.Hash.Lemmas
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open FStar.Mul
 
 (** Auxiliary helpers *)
@@ -158,7 +158,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   let h2 = ST.get () in
   assert (S.equal (B.as_seq h2 tmp) (S.append (B.as_seq h2 tmp_rest) (B.as_seq h2 tmp_pad)));
   assert (S.equal (B.as_seq h2 tmp_rest) (B.as_seq h1 rest));
-  assert (S.equal (B.as_seq h2 tmp_pad) (Spec.Hash.Common.pad a (len_v a total_input_len)));
+  assert (S.equal (B.as_seq h2 tmp_pad) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)));
 
   (* Update multi those last few blocks *)
   update_multi s tmp U32.(tmp_len /^ size_block_ul a);
@@ -166,11 +166,11 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   let h3 = ST.get () in
   assert (S.equal (B.as_seq h3 s)
     (Spec.Hash.update_multi a (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
-      (S.append (B.as_seq h1 rest) (Spec.Hash.Common.pad a (len_v a total_input_len)))));
+      (S.append (B.as_seq h1 rest) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)))));
   assert (
     let s1 = B.as_seq h1 blocks in
     let s2 = B.as_seq h2 rest in
-    let s3 = Spec.Hash.Common.pad a (len_v a total_input_len) in
+    let s3 = Spec.Hash.PadFinish.pad a (len_v a total_input_len) in
     S.equal (S.append s1 (S.append s2 s3)) (S.append (S.append s1 s2) s3));
 
   ST.pop_frame ()
@@ -204,4 +204,4 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   update_last s (u32_to_len a blocks_len) rest rest_len;
   finish s dst;
   ST.pop_frame ();
-  Spec.Hash.Incremental.hash_is_hash_incremental a (B.as_seq h0 input)
+  Spec.Hash.Lemmas.hash_is_hash_incremental a (B.as_seq h0 input)

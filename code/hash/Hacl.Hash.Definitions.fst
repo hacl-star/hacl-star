@@ -8,9 +8,9 @@ module ST = FStar.HyperStack.ST
 
 module M = LowStar.Modifies
 module B = LowStar.Buffer
-module Spec = Spec.Hash.Common
+module Spec = Spec.Hash.PadFinish
 
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open FStar.Mul
 
 (** The low-level types that our clients need to be aware of, in order to
@@ -151,7 +151,7 @@ let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
     B.live h dst))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
-    Seq.equal (B.as_seq h1 dst) (Spec.Hash.Common.finish a (B.as_seq h0 s))))
+    Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish a (B.as_seq h0 s))))
 
 inline_for_extraction
 let hash_st (a: hash_alg) =
@@ -166,5 +166,5 @@ let hash_st (a: hash_alg) =
       B.length input < max_input8 a))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1) /\
-      Seq.equal (B.as_seq h1 dst) (Spec.Hash.Nist.hash a (B.as_seq h0 input))))
+      Seq.equal (B.as_seq h1 dst) (Spec.Hash.hash a (B.as_seq h0 input))))
 

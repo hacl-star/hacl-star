@@ -4,7 +4,7 @@ module EverCrypt.HMAC
 /// 18-03-03 Do we get specialized extraction of HMAC?
 
 open EverCrypt.Hash
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 let ha = a:alg {a = SHA1 \/ a = SHA2_256 \/ a = SHA2_384 \/ a = SHA2_512}
 

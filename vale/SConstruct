@@ -299,7 +299,10 @@ external_files = [
   ExternalFile(f'{kremlin_path}/kremlib/C.Loops.fst'),
   ExternalFile(f'{kremlin_path}/kremlib/Spec.Loops.fst'),
   ExternalFile(f'{kremlin_path}/kremlib/FStar.Kremlin.Endianness.fst'),
-  ExternalFile('../specs/Spec.Hash.Common.fst'),
+  ExternalFile('../specs/Spec.Hash.PadFinish.fst'),
+  ExternalFile('../specs/Spec.Hash.Lemmas0.fst'),
+  ExternalFile('../specs/Spec.Hash.Lemmas.fst'),
+  ExternalFile('../specs/derived/Spec.Hash.Incremental.fst'),
   ExternalFile('../specs/Spec.SHA2.fst'),
   ExternalFile('../specs/Spec.SHA2.fsti'),
   ExternalFile('../specs/Spec.SHA2.Constants.fst'),
@@ -308,7 +311,7 @@ external_files = [
   ExternalFile('../specs/Spec.MD5.fst'),
   ExternalFile('../specs/Spec.MD5.fsti'),
   ExternalFile('../specs/Spec.Hash.fst'),
-  ExternalFile('../specs/Spec.Hash.Helpers.fst'),
+  ExternalFile('../specs/Spec.Hash.Definitions.fst'),
 ]
 
 no_extraction_files = [File(x) for x in [

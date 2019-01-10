@@ -1,7 +1,7 @@
 module Hacl.Hash.MD
 
 open Hacl.Hash.Definitions
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 noextract inline_for_extraction
 val mk_update_multi: a:hash_alg -> update:update_st a -> update_multi_st a

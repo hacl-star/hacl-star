@@ -1,4 +1,4 @@
-module Spec.Hash.Helpers
+module Spec.Hash.Definitions
 
 (* This module contains shared definitions across all hash algorithms. It
  * defines a common, shared `hash_alg` type, along with word sizes, type of the
@@ -57,18 +57,6 @@ inline_for_extraction
 let size_len_ul_8: a:hash_alg -> Tot (n:UInt32.t{UInt32.v n = size_len_8 a}) = function
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
-
-(* A useful lemma for all the operations that involve going from bytes to bits. *)
-let max_input_size_len (a: hash_alg): Lemma
-  (ensures FStar.Mul.(max_input8 a * 8 = pow2 (size_len_8 a * 8)))
-=
-  let open FStar.Mul in
-  match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
-      assert_norm (max_input8 a * 8 = pow2 (size_len_8 a * 8))
-  | SHA2_384 | SHA2_512 ->
-      assert_norm (max_input8 a * 8 = pow2 (size_len_8 a * 8))
-
 
 (** Working state of the algorithms. *)
 
@@ -132,15 +120,6 @@ let pad0_length (a:hash_alg) (len:nat): Tot (n:nat{(len + 1 + n + size_len_8 a) 
 (* Total length for the padding, a.k.a. the suffix length. *)
 let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % size_block a = 0 }) =
   pad0_length a len + 1 + size_len_8 a
-
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
-let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
-  (requires blocks % size_block a = 0)
-  (ensures (pad_length a rest = pad_length a (blocks + rest)))
-  [ SMTPat (pad_length a (blocks + rest)) ]
-=
-  ()
-#pop-options
 
 (** Endian-ness *)
 

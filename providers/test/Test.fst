@@ -14,7 +14,7 @@ module H = EverCrypt.Hash
 open Test.Vectors
 open LowStar.BufferOps
 open C.Failure
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 open Test.Lowstarize
 

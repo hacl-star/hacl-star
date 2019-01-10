@@ -11,7 +11,7 @@ module MP = LowStar.ModifiesPat
 module B = LowStar.Buffer
 
 open LowStar.BufferOps
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 open ST
 

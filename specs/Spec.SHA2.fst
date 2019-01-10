@@ -6,7 +6,7 @@ module C = Spec.SHA2.Constants
 module S = FStar.Seq
 module E = FStar.Kremlin.Endianness
 
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 (* The core compression, padding and extraction functions for all SHA2
  * algorithms. *)
@@ -223,6 +223,6 @@ let update_aux (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_b
 [@"opaque_to_smt"]
 let update = update_aux
 
-let pad = Spec.Hash.Common.pad
+let pad = Spec.Hash.PadFinish.pad
 
-let finish = Spec.Hash.Common.finish
+let finish = Spec.Hash.PadFinish.finish

@@ -11,14 +11,14 @@ module E = FStar.Kremlin.Endianness
 module CE = C.Endianness
 
 open Hacl.Hash.Definitions
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 friend Spec.SHA1
 friend Hacl.Hash.PadFinish
 
 open LowStar.Modifies.Linear
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans' --z3rlimit 100"
 
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
@@ -102,12 +102,13 @@ let index_32_be' (n: Ghost.erased nat) (b: B.buffer UInt8.t) (i: UInt32.t):
       r = Seq.index (E.seq_uint32_of_be (Ghost.reveal n) (B.as_seq h0 b)) (UInt32.v i)))
 = CE.index_32_be b i
 
+#push-options "--max_fuel 1"
 inline_for_extraction
 let w_body_value (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t) : HST.Stack U32.t
   (requires (fun h -> w_loop_inv h0 m b h (U32.v i) /\ U32.v i < 80))
   (ensures (fun h v h' -> B.modifies B.loc_none h h' /\ v == Spec.w (E.seq_uint32_of_be size_block_w (B.as_seq (Ghost.reveal h0) m)) i))
-= if U32.lt i 16ul
-  then
+=
+  if U32.lt i 16ul then
     index_32_be' (Ghost.hide size_block_w) m i
   else
     let wmit3 = B.index b (i `U32.sub` 3ul) in
@@ -115,6 +116,7 @@ let w_body_value (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t) : HS
     let wmit14 = B.index b (i `U32.sub` 14ul) in
     let wmit16 = B.index b (i `U32.sub` 16ul) in
     Spec.rotl 1ul (wmit3 `U32.logxor` wmit8 `U32.logxor` wmit14 `U32.logxor` wmit16)
+#pop-options
 
 let lt_S_r (j i: nat) : Lemma
   (requires (j < i + 1))

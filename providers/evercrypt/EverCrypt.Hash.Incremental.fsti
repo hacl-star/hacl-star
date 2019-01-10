@@ -14,7 +14,7 @@ module G = FStar.Ghost
 module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open FStar.Integers
 
 noeq
@@ -161,6 +161,6 @@ let finish_st (a: Hash.alg) =
       preserves_freeable s h0 h1 /\
       footprint s h0 == footprint s h1 /\
       B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1) /\
-      S.equal (B.as_seq h1 dst) (Spec.Hash.Nist.hash a (G.reveal prev)))
+      S.equal (B.as_seq h1 dst) (Spec.Hash.hash a (G.reveal prev)))
 
 val finish: a:Hash.alg -> finish_st a
