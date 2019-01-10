@@ -302,7 +302,7 @@ let chacha20_init_lemma #w k n ctro = ()
 val xor_block_lemma: #w:lanes -> k:state w -> b:blocks w -> 
     Lemma (ensures (
 		let res = xor_block k b in
-		res == map_blocks_multi size_block b 
+		res == map_blocks_multi size_block w b 
 		  (fun i -> Scalar.xor_block (transpose_state k).[i])))
 	   [SMTPat (xor_block k b)]
 let xor_block_lemma #w k b = admit()    
