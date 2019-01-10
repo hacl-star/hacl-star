@@ -11,6 +11,7 @@ open Lib.IntVector
 include Hacl.Spec.Poly1305.Field32xN
 open Hacl.Spec.Poly1305.Field32xN.Lemmas
 
+module S = Hacl.Spec.Poly1305.Vec
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 
@@ -43,7 +44,7 @@ let felem_wide_fits #w h f m =
   felem_wide_fits5 (as_tup5 h f) m
 
 noextract
-let feval (#w:lanes) (h:mem) (f:felem w) : GTot (LSeq.lseq pfelem w) =
+let feval (#w:lanes) (h:mem) (f:felem w) : GTot (LSeq.lseq S.pfelem w) =
   feval5 (as_tup5 h f)
 
 noextract
@@ -62,11 +63,11 @@ val create_felem:
     (requires fun h -> True)
     (ensures  fun h0 b h1 ->
       stack_allocated b h0 h1 (LSeq.create 5 (zero w)) /\
-      fas_nat h1 b == LSeq.create w 0)
+      feval h1 b == LSeq.create w 0)
 let create_felem w =
   let r = create 5ul (zero w) in
   let h1 = ST.get () in
-  LSeq.eq_intro (fas_nat h1 r) (LSeq.create w 0);
+  LSeq.eq_intro (feval h1 r) (LSeq.create w 0);
   r
 
 inline_for_extraction
@@ -83,7 +84,7 @@ val set_bit:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
      (Math.Lemmas.pow2_le_compat 128 (v i);
-      feval h1 f == LSeq.map (pfadd (pow2 (v i))) (feval h0 f)))
+      feval h1 f == LSeq.map (S.pfadd (pow2 (v i))) (feval h0 f)))
 let set_bit #w f i = admit();
   let b = u64 1 <<. (i %. 26ul) in
   let mask = vec_load b w in
@@ -102,7 +103,7 @@ val set_bit128:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      feval h1 f == LSeq.map (pfadd (pow2 128)) (feval h0 f))
+      feval h1 f == LSeq.map (S.pfadd (pow2 128)) (feval h0 f))
 let set_bit128 #w f = admit();
   let b = u64 0x1000000 in
   let mask = vec_load b w in
@@ -117,7 +118,7 @@ val set_zero:
     (requires fun h -> live h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      fas_nat h1 f == LSeq.create w 0)
+      feval h1 f == LSeq.create w 0)
 let set_zero #w f =
   f.(0ul) <- zero w;
   f.(1ul) <- zero w;
@@ -125,7 +126,7 @@ let set_zero #w f =
   f.(3ul) <- zero w;
   f.(4ul) <- zero w;
   let h1 = ST.get () in
-  LSeq.eq_intro (fas_nat h1 f) (LSeq.create w 0)
+  LSeq.eq_intro (feval h1 f) (LSeq.create w 0)
 
 inline_for_extraction
 val copy_felem:
@@ -137,7 +138,7 @@ val copy_felem:
       live h f1 /\ live h f2 /\ disjoint f1 f2)
     (ensures  fun h0 _ h1 ->
       modifies (loc f1) h0 h1 /\
-      fas_nat h1 f1 == fas_nat h0 f2)
+      feval h1 f1 == feval h0 f2)
 let copy_felem #w f1 f2 =
   let h0 = ST.get () in
   f1.(0ul) <- f2.(0ul);
@@ -146,7 +147,7 @@ let copy_felem #w f1 f2 =
   f1.(3ul) <- f2.(3ul);
   f1.(4ul) <- f2.(4ul);
   let h1 = ST.get () in
-  LSeq.eq_intro (fas_nat h1 f1) (fas_nat h0 f2)
+  LSeq.eq_intro (feval h1 f1) (feval h0 f2)
 
 //[@CInline]
 inline_for_extraction
@@ -164,7 +165,7 @@ val fadd:
       modifies (loc out) h0 h1 /\
       //as_tup5 h1 out == fadd5 (as_tup5 h0 f1) (as_tup5 h0 f2) /\
       felem_fits h1 out (2, 3, 2, 2, 2) /\
-      feval h1 out == LSeq.map2 pfadd (feval h0 f1) (feval h0 f2))
+      feval h1 out == LSeq.map2 S.pfadd (feval h0 f1) (feval h0 f2))
 let fadd #w out f1 f2 =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
@@ -203,7 +204,7 @@ val mul_felem:
       modifies (loc out) h0 h1 /\
       //as_tup5 h1 out == mul_felem5 (as_tup5 h0 f1) (as_tup5 h0 r) (as_tup5 h0 r5) /\
       felem_wide_fits h1 out (47, 35, 27, 19, 11) /\
-      feval h1 out == LSeq.map2 (pfmul) (feval h0 f1) (feval h0 r))
+      feval h1 out == LSeq.map2 (S.pfmul) (feval h0 f1) (feval h0 r))
 [@ CInline]
 let mul_felem #w out f1 r r5 =
   let r0 = r.(0ul) in
@@ -255,7 +256,7 @@ val fmul_r:
       let r5 = gsub p 5ul 5ul in
       //as_tup5 h1 out == fmul_r5 (as_tup5 h0 f1) (as_tup5 h0 r) (as_tup5 h0 r5)))
       acc_inv_t (as_tup5 h1 out) /\
-      feval h1 out == LSeq.map2 (pfmul) (feval h0 f1) (feval h0 r)))
+      feval h1 out == LSeq.map2 (S.pfmul) (feval h0 f1) (feval h0 r)))
 let fmul_r #w out f1 p =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -308,7 +309,7 @@ val fadd_mul_r:
       let r5 = gsub p 5ul 5ul in
       //as_tup5 h1 acc == fadd_mul_r5 (as_tup5 h0 acc) (as_tup5 h0 f1) (as_tup5 h0 r) (as_tup5 h0 r5) /\
       acc_inv_t (as_tup5 h1 acc) /\
-      feval h1 acc == LSeq.map2 (pfmul) (LSeq.map2 (pfadd) (feval h0 acc) (feval h0 f1)) (feval h0 r)))
+      feval h1 acc == LSeq.map2 (S.pfmul) (LSeq.map2 (S.pfadd) (feval h0 acc) (feval h0 f1)) (feval h0 r)))
 let fadd_mul_r #w out f1 p =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in

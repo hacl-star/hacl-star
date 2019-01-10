@@ -9,11 +9,11 @@ open Lib.Buffer
 open Lib.ByteBuffer
 
 open Hacl.Impl.Poly1305.Fields
+module S = Hacl.Spec.Poly1305.Vec
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
 
-module F32 = Hacl.Impl.Poly1305.Field32
-//module F64 = Hacl.Impl.Poly1305.Field64
-module F128 = Hacl.Impl.Poly1305.Field128
-module F256 = Hacl.Impl.Poly1305.Field256
+#reset-options "--z3rlimit 50"
 
 inline_for_extraction
 val poly1305_encode_block:
@@ -22,7 +22,10 @@ val poly1305_encode_block:
   -> b:lbuffer uint8 16ul
   -> Stack unit
     (requires fun h -> live h b /\ live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
+      feval h1 f == LSeq.map (S.pfadd (pow2 128)) (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b))))
 let poly1305_encode_block #s f b =
   load_felem_le f b;
   set_bit128 f
@@ -35,7 +38,7 @@ val poly1305_encode_blocks:
   -> Stack unit
     (requires fun h -> live h b /\ live h f)
     (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let poly1305_encode_blocks #s f b =
+let poly1305_encode_blocks #s f b = admit();
   load_felems_le f b;
   set_bit128 f
 

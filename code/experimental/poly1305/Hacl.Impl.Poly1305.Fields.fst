@@ -91,15 +91,7 @@ let felem_fits #s h f m =
   | M256 -> felem_fits #4 h f m
 
 noextract
-val as_nat: #s:field_spec -> h:mem -> e:felem s -> GTot (LSeq.lseq nat (width s))
-let as_nat #s h e =
-  match s with
-  | M32  -> fas_nat #1 h e
-  | M128 -> fas_nat #2 h e
-  | M256 -> fas_nat #4 h e
-
-noextract
-val feval: #s:field_spec -> h:mem -> e:felem s -> GTot (LSeq.lseq pfelem (width s))
+val feval: #s:field_spec -> h:mem -> e:felem s -> GTot (LSeq.lseq S.pfelem (width s))
 let feval #s h e =
   match s with
   | M32  -> feval #1 h e
@@ -113,7 +105,7 @@ val create_felem:
     (requires fun h -> True)
     (ensures  fun h0 f h1 ->
       stack_allocated f h0 h1 (LSeq.create 5 (zero (width s))) /\
-      fas_nat h1 f == LSeq.create (width s) 0)
+      feval h1 f == LSeq.create (width s) 0)
 let create_felem s =
   match s with
   | M32  -> (F32xN.create_felem 1) <: felem s
@@ -130,7 +122,8 @@ val load_felem_le:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      as_nat h1 f == LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b)))
+      felem_less #(width s) h1 f (pow2 128) /\
+      feval h1 f == LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b)))
 let load_felem_le #s f b =
   admit();
   match s with
@@ -186,7 +179,7 @@ val set_bit:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
      (Math.Lemmas.pow2_le_compat 128 (v i);
-      feval h1 f == LSeq.map (pfadd (pow2 (v i))) (feval h0 f)))
+      feval h1 f == LSeq.map (S.pfadd (pow2 (v i))) (feval h0 f)))
 let set_bit #s f i =
   match s with
   | M32  -> F32xN.set_bit #1 f i
@@ -205,7 +198,7 @@ val set_bit128:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      feval h1 f == LSeq.map (pfadd (pow2 128)) (feval h0 f))
+      feval h1 f == LSeq.map (S.pfadd (pow2 128)) (feval h0 f))
 let set_bit128 #s f =
   match s with
   | M32  -> F32xN.set_bit128 #1 f
@@ -220,7 +213,7 @@ val set_zero:
     (requires fun h -> live h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      fas_nat h1 f == LSeq.create (width s) 0)
+      feval h1 f == LSeq.create (width s) 0)
 let set_zero #s f =
   match s with
   | M32  -> F32xN.set_zero #1 f
@@ -237,7 +230,7 @@ val copy_felem:
       live h f /\ live h f' /\ disjoint f f')
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      fas_nat #(width s) h1 f == fas_nat h0 f')
+      feval h1 f == feval h0 f')
 let copy_felem #s f f' =
   match s with
   | M32  -> F32xN.copy_felem #1 f f'
@@ -254,7 +247,7 @@ val reduce_felem:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       feval h1 f == feval h0 f /\
-      felem_less #(width s) h1 f prime)
+      felem_less #(width s) h1 f S.prime)
 let reduce_felem #s f = admit();
   match s with
   | M32  -> F32xN.reduce_felem #1 f
@@ -296,7 +289,7 @@ val fadd_mul_r:
       modifies (loc out) h0 h1 /\
      (let r = gsub precomp 0ul 5ul in
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-      feval h1 out == LSeq.map2 (pfmul) (LSeq.map2 (pfadd) (feval h0 out) (feval h0 f1)) (feval h0 r)))
+      feval h1 out == LSeq.map2 (S.pfmul) (LSeq.map2 (S.pfadd) (feval h0 out) (feval h0 f1)) (feval h0 r)))
 let fadd_mul_r #s out f1 precomp =
   match s with
   | M32  -> F32xN.fadd_mul_r #1 out f1 precomp
@@ -322,7 +315,7 @@ val fmul_rn:
       modifies (loc out) h0 h1 /\
      (let rn = gsub precomp 10ul 5ul in
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-      feval h1 out == LSeq.map2 pfmul (feval h0 f1) (feval h0 rn)))
+      feval h1 out == LSeq.map2 S.pfmul (feval h0 f1) (feval h0 rn)))
 let fmul_rn #s out f1 precomp =
   admit();
   match s with
@@ -330,12 +323,12 @@ let fmul_rn #s out f1 precomp =
   | M128 -> F32xN.fmul_rn #2 out f1 precomp
   | M256 -> F32xN.fmul_rn #4 out f1 precomp
 
-let norm (#w:lanes) (n:LSeq.lseq pfelem w) (r:pfelem) =
+let norm (#w:lanes) (n:LSeq.lseq S.pfelem w) (r:S.pfelem) =
   match w with
-  | 1 -> pfmul n.[0] r
-  | 2 -> let r2 = pfmul r r in pfadd (pfmul n.[0] r2) (pfmul n.[1] r)
-  | 4 -> let r2 = pfmul r r in let r3 = pfmul r2 r in let r4 = pfmul r2 r2 in
-	pfadd (pfmul n.[0] r4) (pfadd (pfmul n.[1] r3) (pfadd (pfmul n.[2] r2) (pfmul n.[3] r)))
+  | 1 -> S.pfmul n.[0] r
+  | 2 -> let r2 = S.pfmul r r in S.pfadd (S.pfmul n.[0] r2) (S.pfmul n.[1] r)
+  | 4 -> let r2 = S.pfmul r r in let r3 = S.pfmul r2 r in let r4 = S.pfmul r2 r2 in
+	S.pfadd (S.pfmul n.[0] r4) (S.pfadd (S.pfmul n.[1] r3) (S.pfadd (S.pfmul n.[2] r2) (S.pfmul n.[3] r)))
 
 
 inline_for_extraction
@@ -378,7 +371,7 @@ val fadd:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (2,3,2,2,2) /\
-      feval h1 out == LSeq.map2 pfadd (feval h0 f1) (feval h0 f2))
+      feval h1 out == LSeq.map2 S.pfadd (feval h0 f1) (feval h0 f2))
 let fadd #s out f1 f2 =
   match s with
   | M32  -> F32xN.fadd #1 out f1 f2

@@ -4,14 +4,7 @@ open Lib.IntTypes
 open Lib.IntVector
 open Lib.Sequence
 
-(* high-level spec *)
-let prime:pos =
-  assert_norm (pow2 130 - 5 > 0);
-  pow2 130 - 5
-
-let pfelem = x:nat{x < prime}
-let pfadd (f1:pfelem) (f2:pfelem) : pfelem = (f1 + f2) % prime
-let pfmul (f1:pfelem) (f2:pfelem) : pfelem = (f1 `op_Multiply` f2) % prime
+open Hacl.Spec.Poly1305.Vec
 
 (* low-level spec *)
 let scale32 = s:nat{s <= 64}

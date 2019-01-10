@@ -5,6 +5,7 @@ open Lib.IntVector
 open Lib.Sequence
 open FStar.Mul
 
+open Hacl.Spec.Poly1305.Vec
 include Hacl.Spec.Poly1305.Field32xN
 
 #reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"

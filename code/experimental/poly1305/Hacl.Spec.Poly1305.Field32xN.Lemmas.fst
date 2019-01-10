@@ -7,6 +7,7 @@ open FStar.Mul
 
 open Hacl.Spec.Poly1305.Field32xN
 open Hacl.Poly1305.Field32xN.Lemmas
+module S = Hacl.Spec.Poly1305.Vec
 
 #reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
 
@@ -43,24 +44,24 @@ val fadd5_eval_lemma:
   -> f2:felem5 w
   -> Lemma
     (requires felem_fits5 f1 (1,2,1,1,1) /\ felem_fits5 f2 (1,1,1,1,1))
-    (ensures  feval5 (fadd5 f1 f2) == map2 pfadd (feval5 f1) (feval5 f2))
+    (ensures  feval5 (fadd5 f1 f2) == map2 S.pfadd (feval5 f1) (feval5 f2))
     [SMTPat (fadd5 f1 f2)]
 let fadd5_eval_lemma #w f1 f2 =
   let o = fadd5 f1 f2 in
   match w with
   | 1 ->
     fadd5_eval_lemma_i f1 f2 0;
-    eq_intro (feval5 o) (map2 pfadd (feval5 f1) (feval5 f2))
+    eq_intro (feval5 o) (map2 S.pfadd (feval5 f1) (feval5 f2))
   | 2 ->
     fadd5_eval_lemma_i f1 f2 0;
     fadd5_eval_lemma_i f1 f2 1;
-    eq_intro (feval5 o) (map2 pfadd (feval5 f1) (feval5 f2))
+    eq_intro (feval5 o) (map2 S.pfadd (feval5 f1) (feval5 f2))
   | 4 ->
     fadd5_eval_lemma_i f1 f2 0;
     fadd5_eval_lemma_i f1 f2 1;
     fadd5_eval_lemma_i f1 f2 2;
     fadd5_eval_lemma_i f1 f2 3;
-    eq_intro (feval5 o) (map2 pfadd (feval5 f1) (feval5 f2))
+    eq_intro (feval5 o) (map2 S.pfadd (feval5 f1) (feval5 f2))
 
 val smul_felem5_fits_lemma1:
     #w:lanes
@@ -264,7 +265,7 @@ val mul_felem5_eval_lemma_i:
       felem_fits5 r5 (5, 5, 5, 5, 5) /\
       r5 == precomp_r5 r)
     (ensures
-      (feval5 (mul_felem5 #w f1 r r5)).[i] == (feval5 f1).[i] `pfmul` (feval5 r).[i])
+      (feval5 (mul_felem5 #w f1 r r5)).[i] == (feval5 f1).[i] `S.pfmul` (feval5 r).[i])
 let mul_felem5_eval_lemma_i #w f1 r r5 i =
   let (r0, r1, r2, r3, r4) = r in
   let (f10, f11, f12, f13, f14) = f1 in
@@ -312,10 +313,10 @@ val mul_felem5_eval_lemma:
       felem_fits5 r5 (5, 5, 5, 5, 5) /\
       r5 == precomp_r5 r)
     (ensures
-      feval5 (mul_felem5 #w f1 r r5) == map2 (pfmul) (feval5 f1) (feval5 r))
+      feval5 (mul_felem5 #w f1 r r5) == map2 (S.pfmul) (feval5 f1) (feval5 r))
     [SMTPat (mul_felem5 #w f1 r r5)]
 let mul_felem5_eval_lemma #w f1 r r5 =
-  let tmp = map2 (pfmul) (feval5 f1) (feval5 r) in
+  let tmp = map2 (S.pfmul) (feval5 f1) (feval5 r) in
   match w with
   | 1 ->
     mul_felem5_eval_lemma_i #w f1 r r5 0;
@@ -476,7 +477,7 @@ val carry_wide_felem5_eval_lemma_i_0:
       felem_fits5 tmp (1, 1, 1, 1, 1) /\
       (feval5 inp).[i] ==
 	(v t0 + vc4 * 5 + v t1 * pow26 + v t2 * pow26 * pow26 +
-	v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % prime))
+	v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % S.prime))
 let carry_wide_felem5_eval_lemma_i_0 #w inp i =
   let (i0, i1, i2, i3, i4) = inp in
   let tmp0,c0 = carry26_wide i0 (zero w) in
@@ -514,7 +515,7 @@ let carry_wide_felem5_eval_lemma_i_0 #w inp i =
     (vc0 * pow2 26 + v t0 + (vc1 * pow2 26 + v t1 - vc0) * pow26 +
     (vc2 * pow2 26 + v t2 - vc1) * pow26 * pow26 +
     (vc3 * pow2 26 + v t3 - vc2) * pow26 * pow26 * pow26 +
-    (vc4 * pow2 26 + v t4 - vc3) * pow26 * pow26 * pow26 * pow26) % prime);
+    (vc4 * pow2 26 + v t4 - vc3) * pow26 * pow26 * pow26 * pow26) % S.prime);
 
   carry_wide_felem5_lemma vc0 vc1 vc2 vc3 vc4 (v t0) (v t1) (v t2) (v t3) (v t4)
 
@@ -544,7 +545,7 @@ let carry_wide_felem5_eval_lemma_i #w inp i =
   let vc4 = (uint64xN_v c4).[i] in
   assert ((feval5 inp).[i] ==
     (v t0 + vc4 * 5 + v t1 * pow26 + v t2 * pow26 * pow26 +
-    v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % prime);
+    v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % S.prime);
   assert (vc4 <= 12 * max26);
   assert (felem_fits5 tmp (1, 1, 1, 1, 1));
 
@@ -562,11 +563,11 @@ let carry_wide_felem5_eval_lemma_i #w inp i =
   let (o0, o1, o2, o3, o4) = as_tup64_i out i in
   assert ((feval5 out).[i] ==
     (v o0 + v o1 * pow26 + v t2 * pow26 * pow26 +
-     v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % prime);
+     v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % S.prime);
   assert_norm (pow26 = pow2 26);
   assert ((feval5 out).[i] ==
     (v t0 + vc4 * 5 - (uint64xN_v c5).[i] * pow26 + (v t1 + (uint64xN_v c5).[i]) * pow26 + v t2 * pow26 * pow26 +
-     v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % prime);
+     v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % S.prime);
   FStar.Math.Lemmas.distributivity_add_left (v t1) (uint64xN_v c5).[i] pow26
 
 val carry_wide_felem5_eval_lemma:
@@ -623,7 +624,7 @@ val fmul_r5_eval_lemma:
       felem_fits5 r5 (5, 5, 5, 5, 5) /\
       r5 == precomp_r5 r)
     (ensures
-      feval5 (fmul_r5 #w f1 r r5) == map2 (pfmul) (feval5 f1) (feval5 r))
+      feval5 (fmul_r5 #w f1 r r5) == map2 (S.pfmul) (feval5 f1) (feval5 r))
     [SMTPat (fmul_r5 #w f1 r r5)]
 let fmul_r5_eval_lemma #w f1 r r5 =
   let tmp = mul_felem5 f1 r r5 in
@@ -669,7 +670,7 @@ val fadd_mul_r5_eval_lemma:
       r5 == precomp_r5 r)
     (ensures
       feval5 (fadd_mul_r5 acc f1 r r5) ==
-	map2 (pfmul) (map2 (pfadd) (feval5 acc) (feval5 f1)) (feval5 r))
+	map2 (S.pfmul) (map2 (S.pfadd) (feval5 acc) (feval5 f1)) (feval5 r))
     [SMTPat (fadd_mul_r5 acc f1 r r5)]
 let fadd_mul_r5_eval_lemma #w acc f1 r r5 =
   let acc1 = fadd5 acc f1 in
