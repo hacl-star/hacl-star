@@ -13,25 +13,25 @@ module S = FStar.Seq
 module EHS = EverCrypt.Hash // EverCrypt includes EverCrypt.Hash, so no need for this? 
 
 inline_for_extraction noextract
-let hash_alg = Spec.Hash.Helpers.SHA2_256
+let hash_alg = Spec.Hash.Definitions.SHA2_256
 
 // fournet: hashLength would be closer to our naming conventions
 // joonwonc: Some calculations
-// - Spec.Hash.Helpers.size_word SHA2_256 = 4
-// - Spec.Hash.Helpers.size_hash_final_w SHA2_256 = 8
-// - Spec.Hash.Helpers.size_hash SHA2_256 = 32
+// - Spec.Hash.Definitions.size_word SHA2_256 = 4
+// - Spec.Hash.Definitions.size_hash_final_w SHA2_256 = 8
+// - Spec.Hash.Definitions.size_hash SHA2_256 = 32
 inline_for_extraction noextract
 val hash_size: nat
-// joonwonc: KreMLin can't extract `Spec.Hash.Helpers.size_hash hash_alg`
+// joonwonc: KreMLin can't extract `Spec.Hash.Definitions.size_hash hash_alg`
 inline_for_extraction noextract
 let hash_size = 32 
 
 // fournet: [tag] is a better name than [hash] for this
 // Thus `hash_raw` is bytes of length 32
 val hash_raw: eqtype
-let hash_raw = b:Spec.Hash.Helpers.bytes_hash hash_alg
+let hash_raw = b:Spec.Hash.Definitions.bytes_hash hash_alg
 
-// joonwonc: Spec.Hash.Helpers.size_block SHA2_256 = 64
+// joonwonc: Spec.Hash.Definitions.size_block SHA2_256 = 64
 // Thus we can append `src1` and `src2` together to make it as a single block.
 val hash2_raw: hash_raw -> hash_raw -> GTot hash_raw
 let hash2_raw src1 src2 =

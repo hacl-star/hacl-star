@@ -7,6 +7,7 @@ module S = FStar.Seq
 
 open EverCrypt.Helpers
 open FStar.Integers
+open Spec.Hash.Lemmas
 
 let _: squash (inversion alg) = allow_inversion alg
 
@@ -157,7 +158,7 @@ val part1:
 let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
   compress_many (acc0 #a) b
 
-#push-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
 
 open LowStar.Modifies.Linear
 
