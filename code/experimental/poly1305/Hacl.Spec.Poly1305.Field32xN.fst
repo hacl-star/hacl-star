@@ -277,6 +277,79 @@ let carry26 #w l cin =
   (vec_and l (mask26 w), vec_shift_right l 26ul)
 
 inline_for_extraction noextract
+val carry_felem5:
+    #w:lanes
+  -> inp:felem5 w
+  -> out:felem5 w
+let carry_felem5 #w (i0, i1, i2, i3, i4) =
+  let tmp0,c0 = carry26 i0 (zero w) in
+  let tmp1,c1 = carry26 i1 c0 in
+  let tmp2,c2 = carry26 i2 c1 in
+  let tmp3,c3 = carry26 i3 c2 in
+  let tmp4 = vec_add_mod i4 c3 in
+  (tmp0, tmp1, tmp2, tmp3, tmp4)
+
+inline_for_extraction noextract
+val carry_full_felem5:
+    #w:lanes
+  -> inp:felem5 w
+  -> out:felem5 w
+let carry_full_felem5 #w (f0, f1, f2, f3, f4) =
+  let tmp0,c0 = carry26 f0 (zero w) in
+  let tmp1,c1 = carry26 f1 c0 in
+  let tmp2,c2 = carry26 f2 c1 in
+  let tmp3,c3 = carry26 f3 c2 in
+  let tmp4,c4 = carry26 f4 c3 in
+  [@inline_let]
+  let tmp0',c5 = carry26 tmp0 (vec_smul_mod c4 (u64 5)) in
+  [@inline_let]
+  let tmp1' = vec_add_mod tmp1 c5 in
+  (tmp0', tmp1', tmp2, tmp3, tmp4)
+
+
+inline_for_extraction noextract
+val subtract_p5:
+    #w:lanes
+  -> f:felem5 w
+  -> out:felem5 w
+let subtract_p5 #w (f0, f1, f2, f3, f4) =
+  let mh = vec_load (u64 0x3ffffff) w in
+  let ml = vec_load (u64 0x3fffffb) w in
+  let mask = vec_eq_mask f4 mh in
+  let mask = vec_and mask (vec_eq_mask f3 mh) in
+  let mask = vec_and mask (vec_eq_mask f2 mh) in
+  let mask = vec_and mask (vec_eq_mask f1 mh) in
+  let mask = vec_and mask (vec_gte_mask f0 ml) in
+  let ph = vec_and mask mh in
+  let pl = vec_and mask ml in
+  let o0 = vec_sub_mod f0 pl in
+  let o1 = vec_sub_mod f1 ph in
+  let o2 = vec_sub_mod f2 ph in
+  let o3 = vec_sub_mod f3 ph in
+  let o4 = vec_sub_mod f4 ph in
+  (o0, o1, o2, o3, o4)
+
+inline_for_extraction noextract
+val reduce_felem5:
+    #w:lanes
+  -> f:felem5 w
+  -> out:felem5 w
+let reduce_felem5 #w (f0, f1, f2, f3, f4) =
+  let (f0, f1, f2, f3, f4) = carry_full_felem5 (f0, f1, f2, f3, f4) in
+  subtract_p5 (f0, f1, f2, f3, f4)
+
+inline_for_extraction noextract
+val store_felem5:
+    #w:lanes
+  -> f:felem5 w
+  -> uint64xN w & uint64xN w
+let store_felem5 #w (f0, f1, f2, f3, f4) =
+  let (f0, f1, f2, f3, f4) = carry_felem5 (f0, f1, f2, f3, f4) in
+  let lo = vec_or (vec_or f0 (vec_shift_left f1 26ul)) (vec_shift_left f2 52ul) in
+  let hi = vec_or (vec_or (vec_shift_right f2 12ul) (vec_shift_left f3 14ul)) (vec_shift_left f4 40ul) in
+  lo, hi
+
+inline_for_extraction noextract
 val carry26_wide:
     #w:lanes
   -> l:uint64xN w
