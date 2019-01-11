@@ -4,6 +4,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack
 open FStar.HyperStack.All
+open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
@@ -254,6 +255,26 @@ let reduce_felem #s f = admit();
   | M128 -> F32xN.reduce_felem #2 f
   | M256 -> F32xN.reduce_felem #4 f
 
+noextract
+val load_precompute_r_post:
+    #s:field_spec
+  -> h:mem
+  -> p:precomp_r s
+  -> Type0
+let load_precompute_r_post #s h p =
+  assert_norm (pow2 128 < S.prime);
+  let r = gsub p 0ul 5ul in
+  let r_5 = gsub p 5ul 5ul in
+  let rn = gsub p 10ul 5ul in
+  let rn_5 = gsub p 15ul 5ul in
+  felem_fits h r (1, 1, 1, 1, 1) /\
+  felem_fits h r_5 (5, 5, 5, 5, 5) /\
+  felem_fits h rn (1, 2, 1, 1, 1) /\
+  felem_fits h rn_5 (5, 10, 5, 5, 5) /\
+  as_tup5 #(width s) h r_5 == precomp_r5 (as_tup5 h r) /\
+  as_tup5 #(width s) h rn_5 == precomp_r5 (as_tup5 h rn) /\
+  feval h rn == S.compute_rw #(width s) (feval h r)
+
 inline_for_extraction
 val load_precompute_r:
     #s:field_spec
@@ -262,8 +283,12 @@ val load_precompute_r:
   -> r1:uint64
   -> Stack unit
     (requires fun h -> live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1)
-let load_precompute_r #s p r0 r1 =
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p) h0 h1 /\
+      load_precompute_r_post #s h1 p /\
+      feval h1 (gsub p 0ul 5ul) == 
+        LSeq.create (width s) (uint_v r1 * pow2 64 + uint_v r0))
+let load_precompute_r #s p r0 r1 = admit();
   match s with
   | M32  -> F32xN.load_precompute_r #1 p r0 r1
   | M128 -> F32xN.load_precompute_r #2 p r0 r1

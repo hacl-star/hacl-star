@@ -3,6 +3,7 @@ module Hacl.Impl.Poly1305
 module ST = FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.HyperStack.All
+open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
@@ -12,6 +13,7 @@ open Hacl.Impl.Poly1305.Fields
 module S = Hacl.Spec.Poly1305.Vec
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
+module F32xN = Hacl.Impl.Poly1305.Field32xN
 
 #reset-options "--z3rlimit 50"
 
@@ -25,7 +27,8 @@ val poly1305_encode_block:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      feval h1 f == LSeq.map (S.pfadd (pow2 128)) (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b))))
+      feval h1 f == LSeq.map (S.pfadd (pow2 128))
+        (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b))))
 let poly1305_encode_block #s f b =
   load_felem_le f b;
   set_bit128 f
@@ -49,15 +52,30 @@ val poly1305_encode_last:
   -> len:size_t{v len < 16}
   -> b:lbuffer uint8 len
   -> Stack unit
-    (requires fun h -> live h b /\ live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-#reset-options "--z3rlimit 200"
+    (requires fun h -> live h b /\ live h f /\ disjoint b f)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
+      (Math.Lemmas.pow2_le_compat 128 (8 * v len);
+      feval h1 f == LSeq.map (S.pfadd (pow2 (8 * v len)))
+        (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b)))))
 let poly1305_encode_last #s f len b =
   push_frame();
-  let tmp = create (size 16) (u8 0) in
+  let tmp = create 16ul (u8 0) in
   copy (sub tmp 0ul len) (sub b 0ul len);
+  let h0 = ST.get () in
+  assume (BSeq.nat_from_bytes_le (as_seq h0 b) == BSeq.nat_from_bytes_le (as_seq h0 tmp));
   load_felem_le f tmp;
-  set_bit f (len *. size 8);
+  let h1 = ST.get () in
+  assert (feval h1 f == LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 tmp)));
+  LSeq.eq_intro (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 tmp)))
+    (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b)));
+  assert (BSeq.nat_from_bytes_le (as_seq h0 b) < pow2 (v len * 8));
+  Math.Lemmas.pow2_le_compat 128 (v len * 8);
+  assume (F32xN.felem_less #(width s) h1 f (pow2 (v len * 8)));
+  set_bit f (len *! 8ul);
+  let h2 = ST.get () in
+  assert (feval h2 f == LSeq.map (S.pfadd (pow2 (v len * 8))) (feval h1 f));
   pop_frame()
 
 inline_for_extraction
@@ -67,7 +85,10 @@ val poly1305_encode_r:
   -> b:lbuffer uint8 16ul
   -> Stack unit
     (requires fun h -> live h b /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p) h0 h1 /\
+      load_precompute_r_post h1 p /\
+      feval h1 (gsub p 0ul 5ul) == S.encode_r (as_seq h0 b))
 let poly1305_encode_r #s p b =
   let lo = uint_from_bytes_le (sub b 0ul 8ul) in
   let hi = uint_from_bytes_le (sub b 8ul 8ul) in
@@ -75,7 +96,12 @@ let poly1305_encode_r #s p b =
   let mask1 = u64 0x0ffffffc0ffffffc in
   let lo = lo &. mask0 in
   let hi = hi &. mask1 in
-  load_precompute_r p lo hi
+  let h0 = ST.get () in
+  load_precompute_r p lo hi;
+  let h1 = ST.get () in
+  assert (feval h1 (gsub p 0ul 5ul) == LSeq.create (width s) (uint_v hi * pow2 64 + uint_v lo));
+  assume (S.encode_r (as_seq h0 b) == S.to_elem (width s) (uint_v hi * pow2 64 + uint_v lo));
+  LSeq.eq_intro (feval h1 (gsub p 0ul 5ul)) (S.encode_r (as_seq h0 b))
 
 inline_for_extraction
 type poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s +. precomplen s)
@@ -105,13 +131,23 @@ val poly1305_init_:
   -> ctx:poly1305_ctx s
   -> key:lbuffer uint8 32ul
   -> Stack unit
-    (requires fun h -> live h ctx /\ live h key)
-    (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
+    (requires fun h ->
+      live h ctx /\ live h key /\ disjoint ctx key)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc ctx) h0 h1 /\
+     (let (acc_s, r_s) = S.poly1305_init (as_seq h0 key) in
+      let acc = gsub ctx 0ul (nlimb s) in
+      let p = gsub ctx (nlimb s) (precomplen s) in
+      load_precompute_r_post h1 p /\
+      feval h1 (gsub p 0ul 5ul) == r_s /\ feval h1 acc == acc_s))
 let poly1305_init_ #s ctx key =
-  let kr = sub key (size 0) (size 16) in
+  let kr = sub key 0ul 16ul in
   let acc = get_acc ctx in
   let precomp_r = get_precomp_r ctx in
+  let h0 = ST.get () in
   set_zero acc;
+  let h1 = ST.get () in
+  LSeq.eq_intro (feval h1 acc) (fst (S.poly1305_init (as_seq h0 key)));
   poly1305_encode_r precomp_r kr
 
 (* WRAPPER TO PREVENT INLINING *)
@@ -128,15 +164,21 @@ val poly1305_init:
   -> ctx:poly1305_ctx s
   -> key:lbuffer uint8 32ul
   -> Stack unit
-    (requires fun h -> live h ctx /\ live h key)
-    (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
+    (requires fun h ->
+      live h ctx /\ live h key /\ disjoint ctx key)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc ctx) h0 h1 /\
+     (let (acc_s, r_s) = S.poly1305_init (as_seq h0 key) in
+      let acc = gsub ctx 0ul (nlimb s) in
+      let p = gsub ctx (nlimb s) (precomplen s) in
+      load_precompute_r_post h1 p /\
+      feval h1 (gsub p 0ul 5ul) == r_s /\ feval h1 acc == acc_s))
 let poly1305_init #s ctx key =
   match s with
-  | M32 -> poly1305_init_32 ctx key
+  | M32  -> poly1305_init_32 ctx key
   | M128 -> poly1305_init_128 ctx key
   | M256 -> poly1305_init_256 ctx key
 (* WRAPPER to Prevent Inlining *)
-
 
 
 inline_for_extraction

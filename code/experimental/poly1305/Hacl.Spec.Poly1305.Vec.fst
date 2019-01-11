@@ -139,7 +139,7 @@ let poly (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot (elem w) =
   acc
 
 let finish (#w:lanes) (k:key) (acc:elem w) : Tot tag =
-  let s = nat_from_bytes_le (slice k 16 32) in
+  let s = nat_from_bytes_le (sub k 16 16) in
   let n = (from_elem acc + s) % pow2 128 in
   nat_to_bytes_le 16 n
 
@@ -154,7 +154,7 @@ let encode_r (#w:lanes) (rb:block) : Tot (elem w) =
   to_elem w (uint_v hi * pow2 64 + uint_v lo)
 
 let poly1305_init (#w:lanes) (k:key) : Tot (elem w & elem w) =
-  let r = encode_r (slice k 0 16) in
+  let r = encode_r (sub k 0 16) in
   zero w, r
 
 let poly1305 (#w:lanes) (msg:bytes) (k:key) : Tot tag =
