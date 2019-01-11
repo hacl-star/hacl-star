@@ -85,7 +85,7 @@ let mk_update_multi a update s blocks n_blocks =
     (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 (U32.v i + 1)))
   =
     let h1 = ST.get () in
-    let sz = size_block_ul a in
+    let sz = block_len a in
     let blocks0 = B.sub blocks 0ul U32.(sz *^ i) in
     let block = B.sub blocks U32.(sz *^ i) sz in
     update s block;
@@ -116,8 +116,8 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   let h0 = ST.get () in
 
   (* Get a series of complete blocks. *)
-  let blocks_n = U32.(input_len /^ size_block_ul a) in
-  let blocks_len = U32.(blocks_n *^ size_block_ul a) in
+  let blocks_n = U32.(input_len /^ block_len a) in
+  let blocks_len = U32.(blocks_n *^ block_len a) in
   assert (U32.v blocks_len % block_length a = 0);
   let blocks = B.sub input 0ul blocks_len in
 
@@ -148,7 +148,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   pad_length_bound a total_input_len;
   assert (U32.v tmp_len <= 2 * block_length a);
 
-  let tmp_twoblocks = B.alloca 0uy U32.(2ul *^ size_block_ul a) in
+  let tmp_twoblocks = B.alloca 0uy U32.(2ul *^ block_len a) in
   let tmp = B.sub tmp_twoblocks 0ul tmp_len in
   let tmp_rest = B.sub tmp 0ul rest_len in
   let tmp_pad = B.sub tmp rest_len pad_len in
@@ -161,7 +161,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   assert (S.equal (B.as_seq h2 tmp_pad) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)));
 
   (* Update multi those last few blocks *)
-  update_multi s tmp U32.(tmp_len /^ size_block_ul a);
+  update_multi s tmp U32.(tmp_len /^ block_len a);
 
   let h3 = ST.get () in
   assert (S.equal (B.as_seq h3 s)
@@ -195,8 +195,8 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   let h0 = ST.get () in
   ST.push_frame ();
   let s = alloca () in
-  let blocks_n = U32.(input_len /^ size_block_ul a) in
-  let blocks_len = U32.(blocks_n *^ size_block_ul a) in
+  let blocks_n = U32.(input_len /^ block_len a) in
+  let blocks_len = U32.(blocks_n *^ block_len a) in
   let blocks = B.sub input 0ul blocks_len in
   let rest_len = U32.(input_len -^ blocks_len) in
   let rest = B.sub input blocks_len rest_len in

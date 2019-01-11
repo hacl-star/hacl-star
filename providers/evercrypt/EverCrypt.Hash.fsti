@@ -47,9 +47,9 @@ let maxLength = Spec.Hash.Definitions.max_input_length
 noextract unfold
 let spec = Spec.Hash.hash
 unfold
-let tagLen = Hacl.Hash.Definitions.size_hash_ul
+let tagLen = Hacl.Hash.Definitions.hash_len
 unfold
-let blockLen = Hacl.Hash.Definitions.size_block_ul
+let blockLen = Hacl.Hash.Definitions.block_len
 noextract unfold
 let tag (a:alg) = s:Seq.seq UInt8.t { Seq.length s = tagLength a }
 

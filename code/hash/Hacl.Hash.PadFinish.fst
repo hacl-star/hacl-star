@@ -37,8 +37,8 @@ val store_len: a:hash_alg -> len:len_t a -> b:B.buffer U8.t ->
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer b) h0 h1) /\ (
       match a with
-      | MD5 -> B.as_seq h1 b == Endianness.n_to_le (size_len_ul a) (len_v a len)
-      | _ -> B.as_seq h1 b == Endianness.n_to_be (size_len_ul a) (len_v a len))))
+      | MD5 -> B.as_seq h1 b == Endianness.n_to_le (len_len a) (len_v a len)
+      | _ -> B.as_seq h1 b == Endianness.n_to_be (len_len a) (len_v a len))))
 
 inline_for_extraction
 let store_len a len b =
@@ -62,20 +62,20 @@ inline_for_extraction noextract
 let len_mod_32 (a: hash_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = len_v a len % Helpers.block_length a })
 =
-  assert (size_block_ul a <> 0ul);
+  assert (block_len a <> 0ul);
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
-      Math.lemma_mod_lt (U64.v len) (U32.v (size_block_ul a));
-      Math.modulo_lemma (U64.v len % U32.v (size_block_ul a)) (pow2 32);
-      Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (size_block_ul a)))
+      Math.lemma_mod_lt (U64.v len) (U32.v (block_len a));
+      Math.modulo_lemma (U64.v len % U32.v (block_len a)) (pow2 32);
+      Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (block_len a)))
   | _ ->
-      // this case is more difficult because we do: (len % pow2 64) % size_block_ul
-      // and then we need to show it's equal to len % size_block_ul
+      // this case is more difficult because we do: (len % pow2 64) % block_len
+      // and then we need to show it's equal to len % block_len
       [@inline_let]
       let len = Cast.uint128_to_uint64 len in
-      Math.lemma_mod_lt (U64.v len) (U32.v (size_block_ul a));
-      Math.modulo_lemma (U64.v len % U32.v (size_block_ul a)) (pow2 32);
-      Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (size_block_ul a)))
+      Math.lemma_mod_lt (U64.v len) (U32.v (block_len a));
+      Math.modulo_lemma (U64.v len % U32.v (block_len a)) (pow2 32);
+      Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (block_len a)))
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --z3seed 1"
 
@@ -88,35 +88,35 @@ let pad0_len (a: hash_alg) (len: len_t a):
   let open U32 in
   (* 1. *)
   Math.lemma_mod_mod (U32.v (len_mod_32 a len)) (len_v a len) (block_length a);
-  assert (U32.v (len_mod_32 a len) % U32.v (size_block_ul a) =
-    len_v a len % U32.v (size_block_ul a));
-  assert ((- U32.v (len_mod_32 a len)) % U32.v (size_block_ul a) =
-    (- len_v a len) % (U32.v (size_block_ul a)));
-  Math.modulo_add (U32.v (size_block_ul a)) (- U32.v (size_len_ul a) - 1)
+  assert (U32.v (len_mod_32 a len) % U32.v (block_len a) =
+    len_v a len % U32.v (block_len a));
+  assert ((- U32.v (len_mod_32 a len)) % U32.v (block_len a) =
+    (- len_v a len) % (U32.v (block_len a)));
+  Math.modulo_add (U32.v (block_len a)) (- U32.v (len_len a) - 1)
     (- U32.v (len_mod_32 a len)) (- len_v a len);
-  assert ((- (U32.v (size_len_ul a) + 1 + U32.v (len_mod_32 a len))) % U32.v (size_block_ul a) =
-    (- (U32.v (size_len_ul a) + 1 + len_v a len)) % (U32.v (size_block_ul a)));
+  assert ((- (U32.v (len_len a) + 1 + U32.v (len_mod_32 a len))) % U32.v (block_len a) =
+    (- (U32.v (len_len a) + 1 + len_v a len)) % (U32.v (block_len a)));
   (* 2. *)
-  Math.lemma_mod_plus (U32.v (size_block_ul a)) 1 (U32.v (size_block_ul a));
-  assert ((U32.v (size_block_ul a) + U32.v (size_block_ul a)) % U32.v (size_block_ul a) =
-    (U32.v (size_block_ul a)) % U32.v (size_block_ul a));
+  Math.lemma_mod_plus (U32.v (block_len a)) 1 (U32.v (block_len a));
+  assert ((U32.v (block_len a) + U32.v (block_len a)) % U32.v (block_len a) =
+    (U32.v (block_len a)) % U32.v (block_len a));
   (* Combine 1 and 2 *)
-  Math.modulo_add (U32.v (size_block_ul a))
-    (U32.v (size_block_ul a))
-    (- (U32.v (size_len_ul a) + 1 + U32.v (len_mod_32 a len)))
-    (- (U32.v (size_len_ul a) + 1 + len_v a len));
+  Math.modulo_add (U32.v (block_len a))
+    (U32.v (block_len a))
+    (- (U32.v (len_len a) + 1 + U32.v (len_mod_32 a len)))
+    (- (U32.v (len_len a) + 1 + len_v a len));
   assert (
-    (U32.v (size_block_ul a) - (U32.v (size_len_ul a) + 1 + U32.v (len_mod_32 a len))) %
-      U32.v (size_block_ul a) =
-    (U32.v (size_block_ul a) - (U32.v (size_len_ul a) + 1 + len_v a len)) %
-      U32.v (size_block_ul a));
-  Math.modulo_add (U32.v (size_block_ul a))
-    (- (U32.v (size_len_ul a) + 1 + U32.v (len_mod_32 a len)))
-    (U32.v (size_block_ul a))
-    (U32.v (size_block_ul a) + U32.v (size_block_ul a));
+    (U32.v (block_len a) - (U32.v (len_len a) + 1 + U32.v (len_mod_32 a len))) %
+      U32.v (block_len a) =
+    (U32.v (block_len a) - (U32.v (len_len a) + 1 + len_v a len)) %
+      U32.v (block_len a));
+  Math.modulo_add (U32.v (block_len a))
+    (- (U32.v (len_len a) + 1 + U32.v (len_mod_32 a len)))
+    (U32.v (block_len a))
+    (U32.v (block_len a) + U32.v (block_len a));
   [@inline_let]
-  let r = (size_block_ul a +^ size_block_ul a) -^ (size_len_ul a +^ 1ul +^ len_mod_32 a len) in
-  r %^ size_block_ul a
+  let r = (block_len a +^ block_len a) -^ (len_len a +^ 1ul +^ len_mod_32 a len) in
+  r %^ block_len a
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
@@ -204,7 +204,7 @@ let pad a len dst =
   pad_2 a len dst2;
 
   (* iii) Encoded length *)
-  let dst3 = B.sub dst U32.(1ul +^ (pad0_len a len)) (size_len_ul a) in
+  let dst3 = B.sub dst U32.(1ul +^ (pad0_len a len)) (len_len a) in
   pad_3 a len dst3;
 
   (**) let h2 = ST.get () in
@@ -220,11 +220,11 @@ let pad a len dst =
 
 inline_for_extraction noextract
 let pad_len (a: hash_alg) (len: len_t a) =
-  U32.(1ul +^ pad0_len a len +^ size_len_ul a)
+  U32.(1ul +^ pad0_len a len +^ len_len a)
 
 #set-options "--max_ifuel 1"
 inline_for_extraction
-let size_hash_final_w_ul (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
+let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
   match a with
   | MD5 -> 4ul
   | SHA1 -> 5ul
@@ -279,5 +279,5 @@ let finish a s dst =
         Endianness.be_of_seq_uint64_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
           (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
   in
-  C.Loops.for 0ul (size_hash_final_w_ul a) inv f
+  C.Loops.for 0ul (hash_word_len a) inv f
 

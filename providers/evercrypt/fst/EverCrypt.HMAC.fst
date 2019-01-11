@@ -86,10 +86,10 @@ val wrap_key:
       as_seq h1 output == wrap a (as_seq h0 key))
 
 unfold
-let block_len a = Hacl.Hash.Definitions.size_block_ul a
+let block_len a = Hacl.Hash.Definitions.block_len a
 
 unfold
-let tag_len a = Hacl.Hash.Definitions.size_hash_ul a
+let tag_len a = Hacl.Hash.Definitions.hash_len a
 
 inline_for_extraction
 let helper_smtpat (a: ha) (len: uint32_t{ v len < max_input_length a }):

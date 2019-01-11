@@ -34,7 +34,7 @@ let split_at_last_empty (a: Hash.alg): Lemma
 let create_in a r =
   // Allocate all the state
   let h0 = ST.get () in
-  let buf = B.malloc r 0uy (Hacl.Hash.Definitions.size_block_ul a) in
+  let buf = B.malloc r 0uy (Hacl.Hash.Definitions.block_len a) in
   let h1 = ST.get () in
   assert (Hash.fresh_loc (B.loc_buffer buf) h0 h1);
   let hash_state = Hash.create_in a r in
@@ -70,7 +70,7 @@ let create_in a r =
 inline_for_extraction noextract
 let rest a (total_len: UInt64.t): (x:UInt32.t { v x = v total_len % block_length a }) =
   let open FStar.Int.Cast.Full in
-  uint64_to_uint32 (total_len % uint32_to_uint64 (Hacl.Hash.Definitions.size_block_ul a))
+  uint64_to_uint32 (total_len % uint32_to_uint64 (Hacl.Hash.Definitions.block_len a))
 
 inline_for_extraction noextract
 let add_len (total_len: UInt64.t) (len: UInt32.t):
@@ -196,8 +196,8 @@ let update_empty_buf a s prev data len =
     S.equal blocks (G.reveal prev) /\
     S.equal rest S.empty);
   split_at_last_blocks a (G.reveal prev) (B.as_seq h0 data);
-  let n_blocks = len / Hacl.Hash.Definitions.size_block_ul a in
-  let data1_len = n_blocks * Hacl.Hash.Definitions.size_block_ul a in
+  let n_blocks = len / Hacl.Hash.Definitions.block_len a in
+  let data1_len = n_blocks * Hacl.Hash.Definitions.block_len a in
   let data2_len = len - data1_len in
   let data1 = B.sub data 0ul data1_len in
   let data2 = B.sub data data1_len data2_len in
@@ -252,8 +252,8 @@ let update_round a s prev data len =
   let State hash_state buf_ total_len = s in
   let h0 = ST.get () in
   let sz = rest a total_len in
-  let diff = Hacl.Hash.Definitions.size_block_ul a - sz in
-  let buf0 = B.sub buf_ 0ul (Hacl.Hash.Definitions.size_block_ul a) in
+  let diff = Hacl.Hash.Definitions.block_len a - sz in
+  let buf0 = B.sub buf_ 0ul (Hacl.Hash.Definitions.block_len a) in
   let buf1 = B.sub buf0 0ul sz in
   let buf2 = B.sub buf0 sz diff in
   assert (B.(loc_pairwise_disjoint
@@ -264,7 +264,7 @@ let update_round a s prev data len =
   B.modifies_inert_intro (B.loc_buffer buf_) h0 h1;
   Hash.frame_invariant (B.loc_buffer buf_) hash_state h0 h1;
   Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf_) hash_state h0 h1;
-  Hash.update_multi #(G.hide a) hash_state buf0 (Hacl.Hash.Definitions.size_block_ul a);
+  Hash.update_multi #(G.hide a) hash_state buf0 (Hacl.Hash.Definitions.block_len a);
   let h2 = ST.get () in
   // JP: no clue why I had to go through all these manual steps.
   (
@@ -309,13 +309,13 @@ let update_round a s prev data len =
 let update a s prev data len =
   let State hash_state buf_ total_len = s in
   let sz = rest a total_len in
-  if len < Hacl.Hash.Definitions.size_block_ul a - sz then
+  if len < Hacl.Hash.Definitions.block_len a - sz then
     update_small a s prev data len
   else if sz = 0ul then
     update_empty_buf a s prev data len
   else begin
     let h0 = ST.get () in
-    let diff = Hacl.Hash.Definitions.size_block_ul a - sz in
+    let diff = Hacl.Hash.Definitions.block_len a - sz in
     let data1 = B.sub data 0ul diff in
     let data2 = B.sub data diff (len - diff) in
     let s1 = update_round a s prev data1 diff in

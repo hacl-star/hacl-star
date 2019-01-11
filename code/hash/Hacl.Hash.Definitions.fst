@@ -27,25 +27,19 @@ type state (a: hash_alg) =
   b:B.buffer (word a) { B.length b = state_word_length a }
 
 inline_for_extraction
-let size_word_ul (a: hash_alg): n:U32.t { U32.v n = word_length a } =
+let word_len (a: hash_alg): n:U32.t { U32.v n = word_length a } =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 4ul
   | SHA2_384 | SHA2_512 -> 8ul
 
 inline_for_extraction
-let size_block_ul (a: hash_alg): n:U32.t { U32.v n = block_length a } =
+let block_len (a: hash_alg): n:U32.t { U32.v n = block_length a } =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 64ul
   | SHA2_384 | SHA2_512 -> 128ul
 
 inline_for_extraction
-let size_len_ul (a: hash_alg): n:U32.t { U32.v n = len_length a } =
-  match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
-  | SHA2_384 | SHA2_512 -> 16ul
-
-inline_for_extraction
-let size_hash_final_w_ul (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
+let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
   match a with
   | MD5 -> 4ul
   | SHA1 -> 5ul
@@ -55,7 +49,7 @@ let size_hash_final_w_ul (a: hash_alg): n:U32.t { U32.v n = hash_word_length a }
   | SHA2_512 -> 8ul
 
 inline_for_extraction
-let size_hash_ul (a: hash_alg): n:U32.t { U32.v n = hash_length a } =
+let hash_len (a: hash_alg): n:U32.t { U32.v n = hash_length a } =
   match a with
   | MD5 -> 16ul
   | SHA1 -> 20ul

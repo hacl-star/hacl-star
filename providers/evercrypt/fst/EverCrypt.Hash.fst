@@ -173,22 +173,22 @@ let update #a s block =
 let update_multi #a s blocks len =
   match !*s with
   | MD5_s p ->
-      let n = len / size_block_ul MD5 in
+      let n = len / block_len MD5 in
       Hacl.Hash.MD5.update_multi p blocks n
   | SHA1_s p ->
-      let n = len / size_block_ul SHA1 in
+      let n = len / block_len SHA1 in
       Hacl.Hash.SHA1.update_multi p blocks n
   | SHA2_224_s p ->
-      let n = len / size_block_ul SHA2_224 in
+      let n = len / block_len SHA2_224 in
       Hacl.Hash.SHA2.update_multi_224 p blocks n
   | SHA2_256_s p ->
-      let n = len / size_block_ul SHA2_256 in
+      let n = len / block_len SHA2_256 in
       update_multi_256 p blocks n
   | SHA2_384_s p ->
-      let n = len / size_block_ul SHA2_384 in
+      let n = len / block_len SHA2_384 in
       Hacl.Hash.SHA2.update_multi_384 p blocks n
   | SHA2_512_s p ->
-      let n = len / size_block_ul SHA2_512 in
+      let n = len / block_len SHA2_512 in
       Hacl.Hash.SHA2.update_multi_512 p blocks n
 
 // Re-using the higher-order stateful combinator to get an instance of
@@ -225,7 +225,7 @@ val update_last_64 (a: e_alg{ G.reveal a <> SHA2_384 /\ G.reveal a <> SHA2_512 }
   update_last_st #a
 inline_for_extraction
 let update_last_64 a update_last p last total_len =
-  let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul MD5) in
+  let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (block_len MD5) in
   let prev_len = total_len - input_len in
   update_last p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
 
@@ -236,7 +236,7 @@ val update_last_128 (a: e_alg{ G.reveal a = SHA2_384 \/ G.reveal a = SHA2_512 })
   update_last_st #a
 inline_for_extraction
 let update_last_128 a update_last p last total_len =
-  let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (size_block_ul SHA2_384) in
+  let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (block_len SHA2_384) in
   let prev_len = Int.Cast.Full.uint64_to_uint128 (total_len - input_len) in
   update_last p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
 #pop-options
