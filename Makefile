@@ -65,7 +65,7 @@ verify-code: $(CODE_CHECKED_FILES)
 
 # 1. Manual, finely crafted dependency edges (see artistic rendition above).
 
-vale.build: $(SPEC_CHECKED_FILES)
+vale.build: verify-specs
 providers.build: compile-compact vale.build
 secure_api/merkle_tree.build: providers.build
 

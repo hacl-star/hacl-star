@@ -14,7 +14,7 @@
         "constructor_distinct_Spec.Hash.Definitions.MD5",
         "data_elim_Prims.Cons", "data_typing_intro_Prims.Nil@tok",
         "equality_tok_Spec.Hash.Definitions.MD5@tok", "equation_Prims.nat",
-        "equation_Spec.Hash.Definitions.size_hash_w",
+        "equation_Spec.Hash.Definitions.state_word_length",
         "equation_Spec.Hash.Definitions.word",
         "equation_Spec.MD5.init_as_list",
         "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
@@ -29,7 +29,7 @@
         "typing_FStar.List.Tot.Base.length"
       ],
       0,
-      "cb25699156e7827f977e5b40672fa14f"
+      "ebe760e2c899812b0137192dcbfffb77"
     ],
     [
       "Spec.MD5.t",
@@ -46,7 +46,7 @@
         "typing_FStar.Seq.Properties.seq_of_list"
       ],
       0,
-      "fa3d4c69f2980af436467e3a3cbc48ef"
+      "bf93b8029fd9a9aa8e50afb2efdb2972"
     ],
     [
       "Spec.MD5.rotl",
@@ -92,7 +92,7 @@
         "typing_FStar.Seq.Properties.seq_of_list", "typing_FStar.UInt32.v"
       ],
       0,
-      "b86f300e16f534689f51ff784bf18206"
+      "fc212d816a82713e702a50fb22cd99f8"
     ],
     [
       "Spec.MD5.round_op_gen_aux",
@@ -119,7 +119,7 @@
         "refinement_interpretation_Spec.MD5_Tm_refine_fef6205e5051f619a8333726d8adfeb8"
       ],
       0,
-      "75b5fa88824f07de8233ecb71ec45aa7"
+      "6d7b314c5e1495a28c319946a6d76335"
     ],
     [
       "Spec.MD5.overwrite_aux",
@@ -144,7 +144,7 @@
         "refinement_interpretation_Spec.MD5_Tm_refine_fef6205e5051f619a8333726d8adfeb8"
       ],
       0,
-      "c08b1f3af5f59dccc6df2a5718ac7021"
+      "a34eff48aadcd5e8a66614b39bd642d2"
     ],
     [
       "Spec.MD5.update_aux",
@@ -154,11 +154,11 @@
       [
         "@query", "constructor_distinct_Spec.Hash.Definitions.MD5",
         "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_Spec.Hash.Definitions.size_word",
+        "equation_Spec.Hash.Definitions.word_length",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "fe61fbae3a5a3f60b4b7642a16337b4e"
+      "9ed04a4487b99ece5fb40454ed59b929"
     ],
     [
       "Spec.MD5.update_aux",
@@ -189,7 +189,7 @@
         "refinement_interpretation_Spec.MD5_Tm_refine_93df21c232b9036c43f55597cf78cad5"
       ],
       0,
-      "26bba7bc050b39d0d3417cbf021eca2b"
+      "e3a76ee053f5b0e976e25c94efafb449"
     ],
     [
       "Spec.MD5.update",
@@ -199,13 +199,13 @@
       [
         "@query", "constructor_distinct_Spec.Hash.Definitions.MD5",
         "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_Spec.Hash.Definitions.size_block",
-        "equation_Spec.Hash.Definitions.size_block_w",
-        "equation_Spec.Hash.Definitions.size_hash_w",
+        "equation_Spec.Hash.Definitions.block_length",
+        "equation_Spec.Hash.Definitions.block_word_length",
+        "equation_Spec.Hash.Definitions.state_word_length",
         "equation_Spec.Hash.Definitions.word"
       ],
       0,
-      "faa874c09577776f3e63c09f4dd71dc7"
+      "b237da9d87a5bc664449b69d86239f18"
     ]
   ]
 ]
