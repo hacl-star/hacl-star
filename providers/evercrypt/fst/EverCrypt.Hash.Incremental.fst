@@ -68,7 +68,7 @@ let create_in a r =
 /// SHA384/512.
 
 inline_for_extraction noextract
-let rest a (total_len: UInt64.t): (x:UInt32.t { v x = v total_len % size_block a }) =
+let rest a (total_len: UInt64.t): (x:UInt32.t { v x = v total_len % block_length a }) =
   let open FStar.Int.Cast.Full in
   uint64_to_uint32 (total_len % uint32_to_uint64 (Hacl.Hash.Definitions.size_block_ul a))
 
@@ -95,14 +95,14 @@ val update_small:
   Stack (state a)
     (requires fun h0 ->
       update_pre a s prev data len h0 /\
-      v len < size_block a - v (rest a (State?.total_len s)))
+      v len < block_length a - v (rest a (State?.total_len s)))
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
 let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last a b in
-    S.length rest + S.length d < size_block a))
+    S.length rest + S.length d < block_length a))
   (ensures (
     let blocks, rest = split_at_last a b in
     let blocks', rest' = split_at_last a (S.append b d) in
@@ -110,20 +110,20 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
 =
   let blocks, rest = split_at_last a b in
   let blocks', rest' = split_at_last a (S.append b d) in
-  assert (S.length blocks = (S.length b / size_block a) * size_block a);
-  assert ((S.length b + S.length d) / size_block a = S.length b / size_block a);
+  assert (S.length blocks = (S.length b / block_length a) * block_length a);
+  assert ((S.length b + S.length d) / block_length a = S.length b / block_length a);
   assert (S.equal (S.append (S.append blocks rest) d) (S.append blocks' rest'));
   ()
 
 #push-options "--z3rlimit 100"
 let add_len_small a (total_len: UInt64.t) (len: UInt32.t): Lemma
   (requires
-    v len < size_block a - v (rest a total_len) /\
+    v len < block_length a - v (rest a total_len) /\
     v total_len + v len < pow2 61)
   (ensures (rest a (add_len total_len len) = rest a total_len + len))
 =
-  FStar.Math.Lemmas.small_modulo_lemma_1 (v len) (size_block a);
-  FStar.Math.Lemmas.modulo_distributivity (v total_len) (v len) (size_block a)
+  FStar.Math.Lemmas.small_modulo_lemma_1 (v len) (block_length a);
+  FStar.Math.Lemmas.modulo_distributivity (v total_len) (v len) (block_length a)
 #pop-options
 
 #push-options "--z3rlimit 50"
@@ -182,7 +182,7 @@ let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   assert (S.equal b' blocks);
   assert (S.equal (S.append b' d') (S.append (S.append blocks blocks') rest'));
   assert (S.equal (S.append blocks'' rest'') (S.append (S.append blocks blocks') rest'));
-  assert (S.length b % size_block a = 0);
+  assert (S.length b % block_length a = 0);
   assert (S.length rest' = S.length rest'');
   Seq.Properties.append_slices (S.append blocks blocks') rest';
   Seq.Properties.append_slices blocks'' rest''
@@ -231,16 +231,16 @@ val update_round:
     (requires fun h0 ->
       update_pre a s prev data len h0 /\ (
       let r = rest a (State?.total_len s) in
-      v len + v r = size_block a /\
+      v len + v r = block_length a /\
       r <> 0ul))
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1 /\
-      v (State?.total_len s') % size_block a = 0)
+      v (State?.total_len s') % block_length a = 0)
 
 let split_at_last_block (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last a b in
-    S.length rest + S.length d = size_block a))
+    S.length rest + S.length d = block_length a))
   (ensures (
     let blocks, rest = split_at_last a b in
     let blocks', rest' = split_at_last a (S.append b d) in
@@ -358,11 +358,11 @@ let mk_finish a s prev dst =
   assert (Hash.invariant hash_state h1);
 
   assert_norm (pow2 61 < pow2 125);
-  assert (v total_len < max_input8 a);
+  assert (v total_len < max_input_length a);
   let buf_ = B.sub buf_ 0ul (rest a total_len) in
   assert (
     let r = rest a total_len in
-    (v total_len - v r) % size_block a = 0);
+    (v total_len - v r) % block_length a = 0);
 
   let tmp_hash_state = Hash.alloca a in
 

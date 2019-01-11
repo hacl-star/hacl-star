@@ -56,7 +56,7 @@ private inline_for_extraction let u64_to_h64 = Hacl.Cast.uint64_to_sint64
 #set-options "--max_fuel 0 --z3rlimit 25"
 
 (* Size and positions of objects in the state *)
-inline_for_extraction let size_key_w = Hash.size_block_w
+inline_for_extraction let size_key_w = Hash.block_word_length
 inline_for_extraction let size_state = size_key_w +^ Hash.size_state
 inline_for_extraction let pos_key_w = 0ul
 inline_for_extraction let pos_state_hash0 = pos_key_w +^ size_key_w
@@ -75,14 +75,14 @@ let xor_bytes_inplace a b len = C.Compat.Loops.in_place_map2 a b len (fun x y ->
 
 [@"substitute"]
 val wrap_key:
-  output :uint8_p  {length output = v Hash.size_block} ->
+  output :uint8_p  {length output = v Hash.block_length} ->
   key    :uint8_p  {disjoint output key} ->
   len    :uint32_t {v len = length key /\ v len < Spec_Hash.max_input_len_8} ->
   Stack unit
         (requires (fun h -> live h output /\ live h key /\
-                  reveal_sbytes (as_seq h output) == Seq.create (v Hash.size_block) 0uy))
+                  reveal_sbytes (as_seq h output) == Seq.create (v Hash.block_length) 0uy))
         (ensures  (fun h0 _ h1 -> live h1 output /\ live h1 key /\ live h0 output /\ live h0 key /\ modifies_1 output h0 h1
-                  /\ reveal_sbytes (as_seq h0 output) == Seq.create (v Hash.size_block) 0uy
+                  /\ reveal_sbytes (as_seq h0 output) == Seq.create (v Hash.block_length) 0uy
                   /\ reveal_sbytes (as_seq h1 output) == Spec.wrap_key (reveal_sbytes (as_seq h0 key))))
 
 #reset-options "--max_fuel 0  --z3rlimit 250"
@@ -90,34 +90,34 @@ val wrap_key:
 [@"substitute"]
 let wrap_key output key len =
  (**) let h0 = ST.get () in
-  if len <=^ Hash.size_block then begin
-    (**) assert(v Hash.size_block - v len >= 0);
-    (**) assert(reveal_sbytes (as_seq h0 output) == Seq.create (v Hash.size_block) 0uy);
+  if len <=^ Hash.block_length then begin
+    (**) assert(v Hash.block_length - v len >= 0);
+    (**) assert(reveal_sbytes (as_seq h0 output) == Seq.create (v Hash.block_length) 0uy);
     Buffer.blit key 0ul output 0ul len;
     (**) let h1 = ST.get () in
     (**) Seq.lemma_eq_intro (Seq.slice (as_seq h1 output) 0 (v len)) (as_seq h0 key);
     (**) assert(Seq.slice (as_seq h1 output) 0 (v len) == as_seq h0 key);
-    (**) Seq.lemma_eq_intro (reveal_sbytes (Seq.slice (as_seq h1 output) (v len) (v Hash.size_block))) (Seq.create (v Hash.size_block - v len) 0uy);
-    (**) assert(reveal_sbytes (Seq.slice (as_seq h1 output) (v len) (v Hash.size_block)) == Seq.create (v Hash.size_block - v len) 0uy);
-    (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 output)) (Seq.append (reveal_sbytes (as_seq h0 key)) (Seq.create (v Hash.size_block - v len) 0uy));
-    (**) assert(reveal_sbytes (as_seq h1 output) == Seq.append (reveal_sbytes (as_seq h0 key)) (Seq.create (v Hash.size_block - v len) 0uy)) end
+    (**) Seq.lemma_eq_intro (reveal_sbytes (Seq.slice (as_seq h1 output) (v len) (v Hash.block_length))) (Seq.create (v Hash.block_length - v len) 0uy);
+    (**) assert(reveal_sbytes (Seq.slice (as_seq h1 output) (v len) (v Hash.block_length)) == Seq.create (v Hash.block_length - v len) 0uy);
+    (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1 output)) (Seq.append (reveal_sbytes (as_seq h0 key)) (Seq.create (v Hash.block_length - v len) 0uy));
+    (**) assert(reveal_sbytes (as_seq h1 output) == Seq.append (reveal_sbytes (as_seq h0 key)) (Seq.create (v Hash.block_length - v len) 0uy)) end
   else begin
-    (**) assert(v Hash.size_block - v Hash.size_hash >= 0);
-    (**) assert(reveal_sbytes (as_seq h0 output) == Seq.create (v Hash.size_block) 0uy);
-    (**) Seq.lemma_eq_intro (Seq.slice (reveal_sbytes (as_seq h0 output)) 0 (v Hash.size_hash)) (Seq.create (v Hash.size_hash) 0uy);
-    (**) assert(Seq.slice (reveal_sbytes (as_seq h0 output)) 0 (v Hash.size_hash) == Seq.create (v Hash.size_hash) 0uy);
-    (**) Seq.lemma_eq_intro (Seq.slice (reveal_sbytes (as_seq h0 output)) (v Hash.size_hash) (v Hash.size_block)) (Seq.create (v Hash.size_block - v Hash.size_hash) 0uy);
-    (**) assert(Seq.slice (reveal_sbytes (as_seq h0 output)) (v Hash.size_hash) (v Hash.size_block) == Seq.create (v Hash.size_block - v Hash.size_hash) 0uy);
-    let nkey = Buffer.sub output 0ul Hash.size_hash in
+    (**) assert(v Hash.block_length - v Hash.hash_length >= 0);
+    (**) assert(reveal_sbytes (as_seq h0 output) == Seq.create (v Hash.block_length) 0uy);
+    (**) Seq.lemma_eq_intro (Seq.slice (reveal_sbytes (as_seq h0 output)) 0 (v Hash.hash_length)) (Seq.create (v Hash.hash_length) 0uy);
+    (**) assert(Seq.slice (reveal_sbytes (as_seq h0 output)) 0 (v Hash.hash_length) == Seq.create (v Hash.hash_length) 0uy);
+    (**) Seq.lemma_eq_intro (Seq.slice (reveal_sbytes (as_seq h0 output)) (v Hash.hash_length) (v Hash.block_length)) (Seq.create (v Hash.block_length - v Hash.hash_length) 0uy);
+    (**) assert(Seq.slice (reveal_sbytes (as_seq h0 output)) (v Hash.hash_length) (v Hash.block_length) == Seq.create (v Hash.block_length - v Hash.hash_length) 0uy);
+    let nkey = Buffer.sub output 0ul Hash.hash_length in
     Hash.hash nkey key len;
     (**) let h1' = ST.get () in
     (**) assert(reveal_sbytes (as_seq h1' nkey) == Spec_Hash.hash (reveal_sbytes (as_seq h0 key)));
-    (**) assert(Seq.slice (reveal_sbytes (as_seq h1' output)) 0 (v Hash.size_hash) == Spec_Hash.hash (reveal_sbytes (as_seq h0 key)));
-    (**) no_upd_lemma_1 h0 h1' (Buffer.sub output 0ul Hash.size_hash) (Buffer.sub output Hash.size_hash (Hash.size_block -^ Hash.size_hash));
-    (**) Seq.lemma_eq_intro (Seq.slice (reveal_sbytes (as_seq h1' output)) (v Hash.size_hash) (v Hash.size_block)) (Seq.create (v Hash.size_block - v Hash.size_hash) 0uy);
-    (**) assert(Seq.slice (reveal_sbytes (as_seq h1' output)) (v Hash.size_hash) (v Hash.size_block) == Seq.create (v Hash.size_block - v Hash.size_hash) 0uy);
-    (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1' output)) (Seq.append (reveal_sbytes (as_seq h1' nkey)) (Seq.create (v Hash.size_block - v Hash.size_hash) 0uy));
-    (**) assert(reveal_sbytes (as_seq h1' output) == Seq.append (reveal_sbytes (as_seq h1' nkey)) (Seq.create (v Hash.size_block - v Hash.size_hash) 0uy))
+    (**) assert(Seq.slice (reveal_sbytes (as_seq h1' output)) 0 (v Hash.hash_length) == Spec_Hash.hash (reveal_sbytes (as_seq h0 key)));
+    (**) no_upd_lemma_1 h0 h1' (Buffer.sub output 0ul Hash.hash_length) (Buffer.sub output Hash.hash_length (Hash.block_length -^ Hash.hash_length));
+    (**) Seq.lemma_eq_intro (Seq.slice (reveal_sbytes (as_seq h1' output)) (v Hash.hash_length) (v Hash.block_length)) (Seq.create (v Hash.block_length - v Hash.hash_length) 0uy);
+    (**) assert(Seq.slice (reveal_sbytes (as_seq h1' output)) (v Hash.hash_length) (v Hash.block_length) == Seq.create (v Hash.block_length - v Hash.hash_length) 0uy);
+    (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h1' output)) (Seq.append (reveal_sbytes (as_seq h1' nkey)) (Seq.create (v Hash.block_length - v Hash.hash_length) 0uy));
+    (**) assert(reveal_sbytes (as_seq h1' output) == Seq.append (reveal_sbytes (as_seq h1' nkey)) (Seq.create (v Hash.block_length - v Hash.hash_length) 0uy))
   end
 
 
@@ -136,7 +136,7 @@ let lemma_alloc s = ()
 
 val init:
   state :uint32_p {length state = v size_state} ->
-  key   :uint8_p  {length key = v Hash.size_block} ->
+  key   :uint8_p  {length key = v Hash.block_length} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 key))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
@@ -150,7 +150,7 @@ let init state key =
   (**) push_frame();
 
   (* Allocate and set initial values for ipad *)
-  let ipad = Buffer.create (uint8_to_sint8 0x36uy) Hash.size_block in
+  let ipad = Buffer.create (uint8_to_sint8 0x36uy) Hash.block_length in
 
   (* Retreive memory to store the key *)
   let key_w = Buffer.sub state pos_key_w size_key_w in
@@ -165,7 +165,7 @@ let init state key =
   Hash.init state_hash0;
 
   (* Step 2: xor "result of step 1" with ipad *)
-  xor_bytes_inplace ipad key Hash.size_block;
+  xor_bytes_inplace ipad key Hash.block_length;
   let s2 = ipad in
 
   (* Step 3a: feed s2 to the inner hash function *)
@@ -179,7 +179,7 @@ let init state key =
 
 val update :
   state :uint32_p{length state = v size_state} ->
-  data  :uint8_p {length data = v Hash.size_block} ->
+  data  :uint8_p {length data = v Hash.block_length} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 r h1 -> live h1 state /\ modifies_1 state h0 h1))
@@ -199,8 +199,8 @@ let update state data =
 
 val update_multi:
   state :uint32_p{length state = v size_state} ->
-  data  :uint8_p {length data % v Hash.size_block = 0 /\ disjoint state data} ->
-  n     :uint32_t{v n * v Hash.size_block = length data} ->
+  data  :uint8_p {length data % v Hash.block_length = 0 /\ disjoint state data} ->
+  n     :uint32_t{v n * v Hash.block_length = length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
         (ensures  (fun h0 _ h1 -> live h1 state /\ modifies_1 state h0 h1))
@@ -213,10 +213,10 @@ let rec update_multi state data n =
   else
     begin
     (* Get the current block for the data *)
-    let b = Buffer.sub data 0ul Hash.size_block in
+    let b = Buffer.sub data 0ul Hash.block_length in
 
     (* Remove the current block from the data left to process *)
-    let data = Buffer.offset data Hash.size_block in
+    let data = Buffer.offset data Hash.block_length in
     assert(disjoint b data);
 
     (* Call the update function on the current block *)
@@ -230,7 +230,7 @@ let rec update_multi state data n =
 
 val update_last:
   state :uint32_p{length state = v Hash.size_state} ->
-  data  :uint8_p {length data <= v Hash.size_block} ->
+  data  :uint8_p {length data <= v Hash.block_length} ->
   len   :uint32_t {v len = length data} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 data))
@@ -251,7 +251,7 @@ let update_last state data len =
 
 val finish:
   state :uint32_p{length state = U32.v size_state} ->
-  mac   :uint8_p {length mac = U32.v Hash.size_hash} ->
+  mac   :uint8_p {length mac = U32.v Hash.hash_length} ->
   Stack unit
         (requires (fun h0 -> live h0 state /\ live h0 mac))
         (ensures  (fun h0 _ h1 -> live h1 state /\ live h1 mac /\ modifies_2 state mac h0 h1))
@@ -264,10 +264,10 @@ let finish state mac =
   (**) push_frame();
 
   (* Allocate and set initial values for ipad and opad *)
-  let opad = Buffer.create (uint8_to_sint8 0x5cuy) Hash.size_block in
+  let opad = Buffer.create (uint8_to_sint8 0x5cuy) Hash.block_length in
 
   (* Allocate memory for the key conversions from words to bytes *)
-  let key = Buffer.create (uint8_to_sint8 0x00uy) Hash.size_block in
+  let key = Buffer.create (uint8_to_sint8 0x00uy) Hash.block_length in
 
   (* Allocate memory for the outer hash state *)
   let state_hash1 = Buffer.create (uint32_to_sint32 0ul) Hash.size_state in
@@ -279,14 +279,14 @@ let finish state mac =
   let state_hash0 = Buffer.sub state pos_state_hash0 Hash.size_state in
 
   (* Store the key into a flat buffer of bytes *)
-  uint32s_to_be_bytes key key_w Hash.size_block;
+  uint32s_to_be_bytes key key_w Hash.block_length;
 
   (* Step 4: apply H to "result of step 3" *)
   Hash.finish state_hash0 mac; (* mac = s4 *)
   let s4 = mac in
 
   (* Step 5: xor "result of step 1" with opad *)
-  xor_bytes_inplace opad key Hash.size_block;
+  xor_bytes_inplace opad key Hash.block_length;
   let s5 = opad in
 
   (* Initialize outer hash state *)
@@ -295,7 +295,7 @@ let finish state mac =
   (* Step 6: append "result of step 4" to "result of step 5" *)
   (* Step 7: apply H to "result of step 6" *)
   Hash.update state_hash1 s5;
-  Hash.update_last state_hash1 s4 Hash.size_hash;
+  Hash.update_last state_hash1 s4 Hash.hash_length;
   Hash.finish state_hash1 mac;
 
   (* Pop memory frame *)
@@ -306,14 +306,14 @@ let finish state mac =
 
 [@"substitute"]
 val hmac_part1:
-  s2     :uint8_p {length s2 = v Hash.size_block} ->
-  data   :uint8_p  {length data + v Hash.size_block < pow2 32 /\ disjoint data s2} ->
+  s2     :uint8_p {length s2 = v Hash.block_length} ->
+  data   :uint8_p  {length data + v Hash.block_length < pow2 32 /\ disjoint data s2} ->
   len    :uint32_t {length data = v len} ->
   Stack unit
         (requires (fun h ->  live h s2 /\ live h data))
         (ensures  (fun h0 _ h1 -> live h1 s2 /\ live h0 s2
                              /\ live h1 data /\ live h0 data /\ modifies_1 s2 h0 h1
-                             /\ (let hash0 = Seq.slice (reveal_sbytes (as_seq h1 s2)) 0 (v Hash.size_hash) in
+                             /\ (let hash0 = Seq.slice (reveal_sbytes (as_seq h1 s2)) 0 (v Hash.hash_length) in
                              hash0 == Spec_Hash.hash (Seq.append (reveal_sbytes (as_seq h0 s2)) (reveal_sbytes (as_seq h0 data))))))
 
 #reset-options "--max_fuel 0  --z3rlimit 200"
@@ -335,14 +335,14 @@ let hmac_part1 s2 data len =
 
   (* Step 3: append data to "result of step 2" *)
   (* Step 4: apply Hash to "result of step 3" *)
-  (**) assert(Hash.size_block <> 0ul);
-  (**) Math.Lemmas.lemma_div_mod (v len) (v Hash.size_block);
-  let n0 = U32.div len Hash.size_block in
-  let r0 = U32.rem len Hash.size_block in
-  let blocks0 = Buffer.sub data 0ul (n0 *^ Hash.size_block) in
-  let last0 = Buffer.offset data (n0 *^ Hash.size_block) in
-  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) 0 (U32.v (n0 *^ Hash.size_block))) (as_seq h blocks0);
-  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) (U32.v (n0 *^ Hash.size_block)) (length data)) (as_seq h last0);
+  (**) assert(Hash.block_length <> 0ul);
+  (**) Math.Lemmas.lemma_div_mod (v len) (v Hash.block_length);
+  let n0 = U32.div len Hash.block_length in
+  let r0 = U32.rem len Hash.block_length in
+  let blocks0 = Buffer.sub data 0ul (n0 *^ Hash.block_length) in
+  let last0 = Buffer.offset data (n0 *^ Hash.block_length) in
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) 0 (U32.v (n0 *^ Hash.block_length))) (as_seq h blocks0);
+  (**) Seq.lemma_eq_intro (Seq.slice (as_seq h data) (U32.v (n0 *^ Hash.block_length)) (length data)) (as_seq h last0);
   Hash.init state0;
   (**) let h' = ST.get() in
   (**) no_upd_lemma_1 h h' state0 s2;
@@ -360,7 +360,7 @@ let hmac_part1 s2 data len =
   (**) let h1 = ST.get () in
 
   let h'''' = ST.get() in
-  let hash0 = Buffer.sub s2 0ul Hash.size_hash in (* Salvage memory *)
+  let hash0 = Buffer.sub s2 0ul Hash.hash_length in (* Salvage memory *)
   Hash.finish state0 hash0; (* s4 = hash (s2 @| data) *)
   (**) Spec_Hash.lemma_hash_all_prepend_block (reveal_sbytes (as_seq h0 s2)) (reveal_sbytes (as_seq h0 data));
 
@@ -372,9 +372,9 @@ let hmac_part1 s2 data len =
 
 [@"substitute"]
 val hmac_part2:
-  mac :uint8_p {length mac = v Hash.size_hash} ->
-  s5  :uint8_p {length s5 = v Hash.size_block /\ disjoint s5 mac} ->
-  s4  :uint8_p {length s4 = v Hash.size_hash /\ disjoint s4 mac /\ disjoint s4 s5} ->
+  mac :uint8_p {length mac = v Hash.hash_length} ->
+  s5  :uint8_p {length s5 = v Hash.block_length /\ disjoint s5 mac} ->
+  s4  :uint8_p {length s4 = v Hash.hash_length /\ disjoint s4 mac /\ disjoint s4 s5} ->
   Stack unit
         (requires (fun h -> live h mac /\ live h s5 /\ live h s4))
         (ensures  (fun h0 _ h1 -> live h1 mac /\ live h0 mac
@@ -420,7 +420,7 @@ let hmac_part2 mac s5 s4 =
   (**) no_upd_lemma_1 h' h'' state1 s4;
   (**) no_upd_lemma_1 h' h'' state1 mac;
   (**) assert(as_seq h'' s4 == as_seq hinit s4);
-  Hash.update_last state1 s4 Hash.size_hash;
+  Hash.update_last state1 s4 Hash.hash_length;
   (**) let h''' = ST.get() in
   (**) no_upd_lemma_1 h' h'' state1 s4;
   (**) no_upd_lemma_1 h' h'' state1 mac;
@@ -437,9 +437,9 @@ let hmac_part2 mac s5 s4 =
 #reset-options "--max_fuel 0  --z3rlimit 10"
 
 val hmac_core_incremental:
-  mac  :uint8_p  {length mac = v Hash.size_hash} ->
-  key  :uint8_p  {length key = v Hash.size_block /\ disjoint key mac} ->
-  data :uint8_p  {length data + v Hash.size_block < pow2 32 /\ disjoint data mac /\ disjoint data key} ->
+  mac  :uint8_p  {length mac = v Hash.hash_length} ->
+  key  :uint8_p  {length key = v Hash.block_length /\ disjoint key mac} ->
+  data :uint8_p  {length data + v Hash.block_length < pow2 32 /\ disjoint data mac /\ disjoint data key} ->
   len  :uint32_t {length data = v len} ->
   Stack unit
         (requires (fun h -> live h mac /\ live h key /\ live h data))
@@ -459,10 +459,10 @@ let hmac_core_incremental mac key data datalen =
   let state = Buffer.create (u32_to_h32 0ul) size_state in
 
   (* Compute the number of blocks to process *)
-  let n = datalen /^ Hash.size_block in
-  let r = datalen %^ Hash.size_block in
-  (**) cut(v datalen % v Hash.size_block <= v Hash.size_block);
-  (**) cut(v r <= v Hash.size_block);
+  let n = datalen /^ Hash.block_length in
+  let r = datalen %^ Hash.block_length in
+  (**) cut(v datalen % v Hash.block_length <= v Hash.block_length);
+  (**) cut(v r <= v Hash.block_length);
 
   (* Initialize the mac state *)
   init state key;
@@ -471,7 +471,7 @@ let hmac_core_incremental mac key data datalen =
   update_multi state data n;
 
   (* Get the last block *)
-  let input_last = Buffer.offset data (n *^ Hash.size_block) in
+  let input_last = Buffer.offset data (n *^ Hash.block_length) in
 
   (* Process the last block of data *)
   update_last state input_last r;
@@ -486,9 +486,9 @@ let hmac_core_incremental mac key data datalen =
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
 val hmac_core:
-  mac  :uint8_p  {length mac = v Hash.size_hash} ->
-  key  :uint8_p  {length key = v Hash.size_block /\ disjoint key mac} ->
-  data :uint8_p  {length data + v Hash.size_block < pow2 32 /\ disjoint data mac /\ disjoint data key} ->
+  mac  :uint8_p  {length mac = v Hash.hash_length} ->
+  key  :uint8_p  {length key = v Hash.block_length /\ disjoint key mac} ->
+  data :uint8_p  {length data + v Hash.block_length < pow2 32 /\ disjoint data mac /\ disjoint data key} ->
   len  :uint32_t {length data = v len} ->
   Stack unit
         (requires (fun h -> live h mac /\ live h key /\ live h data))
@@ -507,28 +507,28 @@ let hmac_core mac key data len =
   let h0 = ST.get () in
 
   (* Initialize constants *)
-  let ipad = Buffer.create (u8_to_h8 0x36uy) Hash.size_block in
-  let opad = Buffer.create (u8_to_h8 0x5cuy) Hash.size_block in
+  let ipad = Buffer.create (u8_to_h8 0x36uy) Hash.block_length in
+  let opad = Buffer.create (u8_to_h8 0x5cuy) Hash.block_length in
   (**) let h1 = ST.get () in
-  (**) assert(reveal_sbytes (as_seq h1 ipad) == Seq.create (v Hash.size_block) 0x36uy);
-  (**) assert(reveal_sbytes (as_seq h1 opad) == Seq.create (v Hash.size_block) 0x5cuy);
+  (**) assert(reveal_sbytes (as_seq h1 ipad) == Seq.create (v Hash.block_length) 0x36uy);
+  (**) assert(reveal_sbytes (as_seq h1 opad) == Seq.create (v Hash.block_length) 0x5cuy);
 
   (* Step 2: xor "result of step 1" with ipad *)
-  xor_bytes_inplace ipad key Hash.size_block;
+  xor_bytes_inplace ipad key Hash.block_length;
   (**) let h2 = ST.get () in
   (**) assert(reveal_sbytes (as_seq h2 ipad) == Spec.xor_bytes (reveal_sbytes (as_seq h1 ipad)) (reveal_sbytes (as_seq h0 key)));
 
   (* Step 3: append data to "result of step 2" *)
   (* Step 4: apply Hash to "result of step 3" *)
   hmac_part1 ipad data len; (* s2 = ipad *)
-  let s4 = Buffer.sub ipad 0ul Hash.size_hash in (* Salvage memory *)
+  let s4 = Buffer.sub ipad 0ul Hash.hash_length in (* Salvage memory *)
   (**) let h3 = ST.get () in
-  (**) Seq.lemma_eq_intro (as_seq h3 (Buffer.sub ipad 0ul Hash.size_hash)) (Seq.slice (as_seq h3 ipad) 0 (v Hash.size_hash));
+  (**) Seq.lemma_eq_intro (as_seq h3 (Buffer.sub ipad 0ul Hash.hash_length)) (Seq.slice (as_seq h3 ipad) 0 (v Hash.hash_length));
   (**) assert(reveal_sbytes (as_seq h3 s4) == Spec_Hash.hash (Seq.append (reveal_sbytes (as_seq h2 ipad)) (reveal_sbytes (as_seq h0 data))));
   (**) assert(reveal_sbytes (as_seq h3 s4) == Spec_Hash.hash (Seq.append (Spec.xor_bytes (reveal_sbytes (as_seq h1 ipad)) (reveal_sbytes (as_seq h0 key))) (reveal_sbytes (as_seq h0 data))));
 
   (* Step 5: xor "result of step 1" with opad *)
-  xor_bytes_inplace opad key Hash.size_block;
+  xor_bytes_inplace opad key Hash.block_length;
   (**) let h4 = ST.get () in
   (**) assert(reveal_sbytes (as_seq h4 opad) == Spec.xor_bytes (reveal_sbytes (as_seq h1 opad)) (reveal_sbytes (as_seq h0 key)));
 
@@ -545,10 +545,10 @@ let hmac_core mac key data len =
 #reset-options "--max_fuel 0  --z3rlimit 20"
 
 val hmac:
-  mac     :uint8_p  {length mac = v Hash.size_hash} ->
-  key     :uint8_p  {length key = v Hash.size_block /\ disjoint key mac} ->
+  mac     :uint8_p  {length mac = v Hash.hash_length} ->
+  key     :uint8_p  {length key = v Hash.block_length /\ disjoint key mac} ->
   keylen  :uint32_t {v keylen = length key} ->
-  data    :uint8_p  {length data + v Hash.size_block < pow2 32 /\ disjoint data mac /\ disjoint data key} ->
+  data    :uint8_p  {length data + v Hash.block_length < pow2 32 /\ disjoint data mac /\ disjoint data key} ->
   datalen :uint32_t {v datalen = length data} ->
   Stack unit
         (requires (fun h -> live h mac /\ live h key /\ live h data))
@@ -565,7 +565,7 @@ let hmac mac key keylen data datalen =
   (**) push_frame ();
 
   (* Allocate memory for the wrapped key *)
-  let nkey = Buffer.create (u8_to_h8 0x00uy) Hash.size_block in
+  let nkey = Buffer.create (u8_to_h8 0x00uy) Hash.block_length in
 
   (* Call the key wrapping function *)
   wrap_key nkey key keylen;

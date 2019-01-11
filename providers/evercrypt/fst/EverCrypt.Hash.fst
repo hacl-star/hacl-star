@@ -203,10 +203,10 @@ inline_for_extraction
 let update_last_st (#a:e_alg) =
   let a = Ghost.reveal a in
   p:Hacl.Hash.Definitions.state a ->
-  last:uint8_p { B.length last < size_block a } ->
+  last:uint8_p { B.length last < block_length a } ->
   total_len:uint64_t {
-    v total_len < max_input8 a /\
-    (v total_len - B.length last) % size_block a = 0 } ->
+    v total_len < max_input_length a /\
+    (v total_len - B.length last) % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->
     B.live h0 p /\
@@ -214,7 +214,7 @@ let update_last_st (#a:e_alg) =
     B.(loc_disjoint (loc_buffer p) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
     B.(modifies (loc_buffer p) h0 h1) /\
-    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % size_block a = 0 /\
+    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
     B.as_seq h1 p ==
       compress_many (B.as_seq h0 p)
         (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))))

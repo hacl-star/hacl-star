@@ -219,9 +219,9 @@ type vec =
   | Vec : 
     a: hash_alg ->
     plain:
-    list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length plain < max_input8 a) == true} ->
+    list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length plain < max_input_length a) == true} ->
     hash:
-    list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length hash = size_hash a) == true} ->
+    list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length hash = hash_length a) == true} ->
     vec
 
 let test_vectors: list vec =

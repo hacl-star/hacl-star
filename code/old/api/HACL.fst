@@ -19,13 +19,13 @@ let hacl_chacha20 output plain len k n ctr = Hacl.Impl.Chacha20.chacha20 output 
 /// SHA2
 ///
 
-let hacl_sha2_256_size_hash = Hacl.Hash.SHA2_256.size_hash
-let hacl_sha2_384_size_hash = Hacl.Hash.SHA2_384.size_hash
-let hacl_sha2_512_size_hash = Hacl.Hash.SHA2_512.size_hash
+let hacl_sha2_256_size_hash = Hacl.Hash.SHA2_256.hash_length
+let hacl_sha2_384_size_hash = Hacl.Hash.SHA2_384.hash_length
+let hacl_sha2_512_size_hash = Hacl.Hash.SHA2_512.hash_length
 
-let hacl_sha2_256_size_block = Hacl.Hash.SHA2_256.size_block
-let hacl_sha2_384_size_block = Hacl.Hash.SHA2_384.size_block
-let hacl_sha2_512_size_block = Hacl.Hash.SHA2_512.size_block
+let hacl_sha2_256_size_block = Hacl.Hash.SHA2_256.block_length
+let hacl_sha2_384_size_block = Hacl.Hash.SHA2_384.block_length
+let hacl_sha2_512_size_block = Hacl.Hash.SHA2_512.block_length
 
 let hacl_sha2_256_alloc () = Hacl.Hash.SHA2_256.alloc ()
 let hacl_sha2_384_alloc () = Hacl.Hash.SHA2_384.alloc ()

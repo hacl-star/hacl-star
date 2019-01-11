@@ -23,13 +23,13 @@ open FStar.Mul
 
 let padding_round (a: hash_alg) (len: len_t a): Lemma
   (ensures (
-    (len_v a len + pad_length a (len_v a len)) % size_block a = 0))
+    (len_v a len + pad_length a (len_v a len)) % block_length a = 0))
 =
   ()
 
 let pad0_length_mod (a: hash_alg) (base_len: nat) (len: nat): Lemma
   (requires (
-    base_len % size_block a = 0))
+    base_len % block_length a = 0))
   (ensures (
     pad0_length a (base_len + len) = pad0_length a len))
 =
@@ -37,14 +37,14 @@ let pad0_length_mod (a: hash_alg) (base_len: nat) (len: nat): Lemma
 
 let pad_length_mod (a: hash_alg) (base_len len: nat): Lemma
   (requires (
-    base_len % size_block a = 0))
+    base_len % block_length a = 0))
   (ensures (
     pad_length a (base_len + len) = pad_length a len))
 =
   pad0_length_mod a base_len len
 
 let pad_length_bound (a: hash_alg) (len: len_t a): Lemma
-  (ensures (pad_length a (len_v a len) <= 2 * size_block a))
+  (ensures (pad_length a (len_v a len) <= 2 * block_length a))
 =
   ()
 
@@ -54,7 +54,7 @@ let pad_length_bound (a: hash_alg) (len: len_t a): Lemma
 noextract inline_for_extraction
 let len_add32 (a: hash_alg)
   (prev_len: len_t a)
-  (input_len: U32.t { U32.v input_len + len_v a prev_len < max_input8 a }):
+  (input_len: U32.t { U32.v input_len + len_v a prev_len < max_input_length a }):
   x:len_t a { len_v a x = len_v a prev_len + U32.v input_len }
 =
   let open FStar.Int.Cast.Full in
@@ -73,7 +73,7 @@ noextract inline_for_extraction
 let mk_update_multi a update s blocks n_blocks =
   let h0 = ST.get () in
   let inv (h: HS.mem) (i: nat) =
-    let i_block = size_block a * i in
+    let i_block = block_length a * i in
     i <= U32.v n_blocks /\
     B.live h s /\ B.live h blocks /\
     B.(modifies (loc_buffer s) h0 h) /\
@@ -99,12 +99,12 @@ let mk_update_multi a update s blocks n_blocks =
       let blocks0 = B.as_seq h0 blocks0 in
       let i = U32.v i in
       let n_blocks = U32.v n_blocks in
-      size_block a * (i + 1) <= S.length blocks /\
-      (size_block a * (i + 1) - size_block a * i) % size_block a = 0 /\
-      S.equal block (S.slice blocks (size_block a * i) (size_block a * (i + 1))) /\
+      block_length a * (i + 1) <= S.length blocks /\
+      (block_length a * (i + 1) - block_length a * i) % block_length a = 0 /\
+      S.equal block (S.slice blocks (block_length a * i) (block_length a * (i + 1))) /\
       S.equal s2 (Spec.Hash.update_multi a s1 block))
   in
-  assert (B.length blocks = U32.v n_blocks * size_block a);
+  assert (B.length blocks = U32.v n_blocks * block_length a);
   C.Loops.for 0ul n_blocks inv f
 
 #push-options "--max_fuel 0 --z3rlimit 400"
@@ -118,12 +118,12 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   (* Get a series of complete blocks. *)
   let blocks_n = U32.(input_len /^ size_block_ul a) in
   let blocks_len = U32.(blocks_n *^ size_block_ul a) in
-  assert (U32.v blocks_len % size_block a = 0);
+  assert (U32.v blocks_len % block_length a = 0);
   let blocks = B.sub input 0ul blocks_len in
 
   (* The rest that doesn't make up a complete block *)
   let rest_len = U32.(input_len -^ blocks_len) in
-  assert (U32.v rest_len < size_block a);
+  assert (U32.v rest_len < block_length a);
   let rest = B.sub input blocks_len rest_len in
 
   update_multi s blocks blocks_n;
@@ -139,14 +139,14 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   let pad_len = Hacl.Hash.PadFinish.pad_len a total_input_len in
   let tmp_len = U32.( rest_len +^ pad_len ) in
   assert (len_v a total_input_len = len_v a prev_len + U32.v blocks_len + U32.v rest_len);
-  Lemmas.modulo_distributivity (len_v a prev_len) (U32.v blocks_len) (size_block a);
-  assert ((len_v a prev_len + U32.v blocks_len) % size_block a = 0);
+  Lemmas.modulo_distributivity (len_v a prev_len) (U32.v blocks_len) (block_length a);
+  assert ((len_v a prev_len + U32.v blocks_len) % block_length a = 0);
   pad_length_mod a (len_v a prev_len + U32.v blocks_len) (U32.v rest_len);
   padding_round a total_input_len;
-  assert (U32.v tmp_len % size_block a = 0);
+  assert (U32.v tmp_len % block_length a = 0);
 
   pad_length_bound a total_input_len;
-  assert (U32.v tmp_len <= 2 * size_block a);
+  assert (U32.v tmp_len <= 2 * block_length a);
 
   let tmp_twoblocks = B.alloca 0uy U32.(2ul *^ size_block_ul a) in
   let tmp = B.sub tmp_twoblocks 0ul tmp_len in

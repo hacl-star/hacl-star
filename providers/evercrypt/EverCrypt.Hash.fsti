@@ -39,11 +39,11 @@ type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 
 /// Alternative names from Cédric, to be aligned with naming conventions.
 noextract unfold
-let tagLength = Spec.Hash.Definitions.size_hash
+let tagLength = Spec.Hash.Definitions.hash_length
 noextract unfold
-let blockLength = Spec.Hash.Definitions.size_block
+let blockLength = Spec.Hash.Definitions.block_length
 noextract unfold
-let maxLength = Spec.Hash.Definitions.max_input8
+let maxLength = Spec.Hash.Definitions.max_input_length
 noextract unfold
 let spec = Spec.Hash.hash
 unfold
@@ -78,7 +78,7 @@ let uint32_fits_maxLength (a: alg) (x: UInt32.t): Lemma
 
 noextract
 let acc (a: alg): Type0 =
-  hash_w a
+  words_state a
 
 (* the initial value of the accumulator *)
 noextract
@@ -270,7 +270,7 @@ val update:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  block:uint8_p { B.length block = size_block a } ->
+  block:uint8_p { B.length block = block_length a } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -288,7 +288,7 @@ val update_multi:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  blocks:uint8_p { B.length blocks % size_block a = 0 } ->
+  blocks:uint8_p { B.length blocks % block_length a = 0 } ->
   len: UInt32.t { v len = B.length blocks } ->
   Stack unit
   (requires fun h0 ->
@@ -314,10 +314,10 @@ val update_last:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  last:uint8_p { B.length last < size_block a } ->
+  last:uint8_p { B.length last < block_length a } ->
   total_len:uint64_t {
-    v total_len < max_input8 a /\
-    (v total_len - B.length last) % size_block a = 0 } ->
+    v total_len < max_input_length a /\
+    (v total_len - B.length last) % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -325,7 +325,7 @@ val update_last:
     M.(loc_disjoint (footprint s h0) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
-    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % size_block a = 0 /\
+    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
     repr s h1 ==
       compress_many (repr s h0)
         (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))) /\
@@ -337,7 +337,7 @@ val finish:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  dst:uint8_p { B.length dst = size_hash a } ->
+  dst:uint8_p { B.length dst = hash_length a } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -379,9 +379,9 @@ val copy:
 
 val hash:
   a:alg ->
-  dst:uint8_p {B.length dst = size_hash a} ->
+  dst:uint8_p {B.length dst = hash_length a} ->
   input:uint8_p ->
-  len:uint32_t {B.length input = v len /\ v len < max_input8 a} ->
+  len:uint32_t {B.length input = v len /\ v len < max_input_length a} ->
   Stack unit
   (requires fun h0 ->
     B.live h0 dst /\

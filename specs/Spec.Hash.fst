@@ -26,13 +26,13 @@ let update a: update_t a =
 (* A helper that deals with the modulo proof obligation to make things go smoothly. *)
 let split_block (a: hash_alg)
   (blocks: bytes_blocks a)
-  (n: nat{n <= S.length blocks / size_block a}):
+  (n: nat{n <= S.length blocks / block_length a}):
   Tot (bytes_blocks a * bytes_blocks a)
 =
-  let block, rem = S.split blocks FStar.Mul.(n * size_block a) in
+  let block, rem = S.split blocks FStar.Mul.(n * block_length a) in
   assert (S.length rem = S.length blocks - S.length block);
-  Math.Lemmas.modulo_distributivity (S.length rem) (S.length block) (size_block a);
-  assert (S.length rem % size_block a = 0);
+  Math.Lemmas.modulo_distributivity (S.length rem) (S.length block) (block_length a);
+  assert (S.length rem % block_length a = 0);
   block, rem
 
 (* Compression function for multiple blocks. Note: this one could be
@@ -40,9 +40,9 @@ let split_block (a: hash_alg)
  * but that's perhaps too much hassle. *)
 let rec update_multi
   (a:hash_alg)
-  (hash:hash_w a)
+  (hash:words_state a)
   (blocks:bytes_blocks a):
-  Tot (hash_w a) (decreases (S.length blocks))
+  Tot (words_state a) (decreases (S.length blocks))
 =
   if S.length blocks = 0 then
     hash
@@ -52,8 +52,8 @@ let rec update_multi
     update_multi a hash rem
 
 (* As defined in the NIST standard; pad, then update, then finish. *)
-let hash (a:hash_alg) (input:bytes{S.length input < max_input8 a}):
-  Tot (hash:bytes{Seq.length hash = size_hash a})
+let hash (a:hash_alg) (input:bytes{S.length input < max_input_length a}):
+  Tot (hash:bytes{Seq.length hash = hash_length a})
 =
   let padding = pad a (S.length input) in
   finish a (update_multi a (init a) S.(input @| padding))

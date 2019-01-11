@@ -125,16 +125,16 @@ let init_512: init_st SHA2_512 = init SHA2_512
 
 inline_for_extraction
 let block_w (a: sha2_alg) =
-  b:B.buffer (word a) { B.length b = Helpers.size_block_w }
+  b:B.buffer (word a) { B.length b = Helpers.block_word_length }
 
 let block_b (a: sha2_alg) =
-  b:B.buffer U8.t { FStar.Mul.(B.length b = size_block_w * size_word a) }
+  b:B.buffer U8.t { FStar.Mul.(B.length b = block_word_length * word_length a) }
 
 inline_for_extraction
 let ws_w (a: sha2_alg) = b:B.buffer (word a) { B.length b = Spec.size_k_w a }
 
 let block_words_be (a: sha2_alg) (h: HS.mem) (b: block_b a) =
-  words_of_bytes a size_block_w (B.as_seq h b)
+  words_of_bytes a block_word_length (B.as_seq h b)
 
 inline_for_extraction
 val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
@@ -150,12 +150,12 @@ inline_for_extraction
 let index_be (a: sha2_alg) (b: B.buffer U8.t) (i: U32.t):
   ST.Stack (word a)
     (requires (fun h ->
-      B.length b % size_word a = 0 /\
+      B.length b % word_length a = 0 /\
       B.live h b /\
-      U32.v i < B.length b / size_word a))
+      U32.v i < B.length b / word_length a))
     (ensures (fun h0 r h1 ->
        M.(modifies loc_none h0 h1) /\
-       r = S.index (words_of_bytes a (B.length b / size_word a) (B.as_seq h0 b)) (U32.v i)))
+       r = S.index (words_of_bytes a (B.length b / word_length a) (B.as_seq h0 b)) (U32.v i)))
 =
   match a with
   | SHA2_224 | SHA2_256 -> C.Endianness.index_32_be b i
@@ -216,8 +216,8 @@ let ws a b ws =
 #set-options "--max_fuel 0"
 
 inline_for_extraction
-let hash_w (a: sha2_alg) =
-  b:B.buffer (word a) { B.length b = size_hash_w a }
+let words_state (a: sha2_alg) =
+  b:B.buffer (word a) { B.length b = state_word_length a }
 
 inline_for_extraction
 val k0 (a: sha2_alg): ST.Stack (IB.ibuffer (word a))
@@ -243,7 +243,7 @@ let add = Spec.word_add_mod
 inline_for_extraction
 val shuffle_core (a: sha2_alg)
   (block: G.erased (block_b a))
-  (hash: hash_w a)
+  (hash: words_state a)
   (ws: ws_w a)
   (t: U32.t { U32.v t < Spec.size_k_w a }):
   ST.Stack unit
@@ -293,7 +293,7 @@ let shuffle_core a block hash ws t =
   (**) S.intro_of_list #(word a) (B.as_seq h hash) l
 
 inline_for_extraction
-val shuffle: a:sha2_alg -> block:G.erased (block_b a) -> hash:hash_w a -> ws:ws_w a ->
+val shuffle: a:sha2_alg -> block:G.erased (block_b a) -> hash:words_state a -> ws:ws_w a ->
   ST.Stack unit
     (requires (fun h ->
       let block = G.reveal block in
@@ -353,7 +353,7 @@ noextract inline_for_extraction
 let update a hash block =
   (**) ST.push_frame ();
   (**) let h0 = ST.get () in
-  let hash1: hash_w a = B.alloca (zero a) 8ul in
+  let hash1: words_state a = B.alloca (zero a) 8ul in
   let computed_ws: ws_w a = B.alloca (zero a) (U32.uint_to_t (Spec.size_k_w a)) in
   ws a block computed_ws;
   B.blit hash 0ul hash1 0ul 8ul;

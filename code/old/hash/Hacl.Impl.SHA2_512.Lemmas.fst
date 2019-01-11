@@ -55,20 +55,20 @@ private let uint8_p  = Buffer.buffer uint8_ht
 //
 
 (* Define word size *)
-inline_for_extraction let size_word = 8ul // Size of the word in bytes
+inline_for_extraction let word_length = 8ul // Size of the word in bytes
 
 (* Define algorithm parameters *)
-inline_for_extraction let size_hash_w   = 8ul // 8 words (Final hash output size)
-inline_for_extraction let size_block_w  = 16ul  // 16 words (Working data block size)
-inline_for_extraction let size_hash     = size_word *^ size_hash_w
-inline_for_extraction let size_block    = size_word *^ size_block_w
+inline_for_extraction let state_word_length   = 8ul // 8 words (Final hash output size)
+inline_for_extraction let block_word_length  = 16ul  // 16 words (Working data block size)
+inline_for_extraction let hash_length     = word_length *^ state_word_length
+inline_for_extraction let block_length    = word_length *^ block_word_length
 
 (* Sizes of objects in the state *)
-inline_for_extraction let size_k_w     = 80ul  // 80 words of 64 bits (size_block)
+inline_for_extraction let size_k_w     = 80ul  // 80 words of 64 bits (block_length)
 inline_for_extraction let size_ws_w    = size_k_w
-inline_for_extraction let size_whash_w = size_hash_w
+inline_for_extraction let size_whash_w = state_word_length
 inline_for_extraction let size_count_w = 1ul  // 1 word
-inline_for_extraction let size_len_8   = 2ul *^ size_word
+inline_for_extraction let len_length   = 2ul *^ word_length
 
 inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
 
@@ -128,7 +128,7 @@ let lemma_ws_def_1 b t = ()
 #reset-options " --max_fuel 1 --z3rlimit 20"
 
 val lemma_spec_ws_def2:
-  b:Seq.seq UInt64.t{Seq.length b = Spec.size_block_w} ->
+  b:Seq.seq UInt64.t{Seq.length b = Spec.block_word_length} ->
   t:nat{16 <= t /\ t < 80} ->
   Lemma(let t16 = Spec.ws b (t - 16) in
         let t15 = Spec.ws b (t - 15) in
@@ -161,7 +161,7 @@ let lemma_blit_slices_eq (#t:Type) (h0:HyperStack.mem) (h1:HyperStack.mem) (a:bu
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-val lemma_update_multi_def0: (hash:Spec.hash_w) -> (blocks:Spec.bytes{Seq.length blocks = 0}) -> Lemma
+val lemma_update_multi_def0: (hash:Spec.words_state) -> (blocks:Spec.bytes{Seq.length blocks = 0}) -> Lemma
   (Spec.update_multi hash blocks = hash)
 
 #reset-options "--max_fuel 1 --z3rlimit 20"
@@ -171,11 +171,11 @@ let lemma_update_multi_def0 hash blocks = ()
 
 #reset-options "--max_fuel 0 --z3rlimit 200"
 
-val lemma_update_multi_def: (hash:Spec.hash_w) -> (blocks:Spec.bytes{Seq.length blocks % Spec.size_block = 0}) -> Lemma
+val lemma_update_multi_def: (hash:Spec.words_state) -> (blocks:Spec.bytes{Seq.length blocks % Spec.block_length = 0}) -> Lemma
   (Spec.update_multi hash blocks = (
     if Seq.length blocks = 0 then hash
     else (
-      let (block,rem) = Seq.split blocks Spec.size_block in
+      let (block,rem) = Seq.split blocks Spec.block_length in
       let hash = Spec.update hash block in
       Spec.update_multi hash rem)))
 
@@ -243,29 +243,29 @@ Seq.lemma_eq_intro (as_seq h g) (Seq.append (Seq.append seq_a seq_b) seq_c)
 
 #reset-options "--max_fuel 0  --z3rlimit 50"
 
-let lemma_pad_aux_seq (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) <= (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
+let lemma_pad_aux_seq (n:uint64_ht) (len:uint64_t {(U64.v len + v len_length + 1) <= (2 * v block_length) /\ H64.v n * v block_length + U64.v len < Spec.max_input_len_8}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
   (requires (a == Seq.create 1 0x80uy
             /\ (b == Seq.create (Spec.pad0_length (U64.v len)) 0uy)
-            /\ (c == Endianness.big_bytes size_len_8 ((H64.v n * v size_block + U64.v len) * 8))))
-  (ensures  (Seq.append (Seq.append a b) c == Spec.pad (H64.v n * v size_block) (U64.v len))) =
+            /\ (c == Endianness.big_bytes len_length ((H64.v n * v block_length + U64.v len) * 8))))
+  (ensures  (Seq.append (Seq.append a b) c == Spec.pad (H64.v n * v block_length) (U64.v len))) =
 Seq.lemma_eq_intro (Seq.append (Seq.append a b) c) (Seq.append a (Seq.append b c))
 
 
 #reset-options "--max_fuel 0  --z3rlimit 200"
 
-let lemma_pad_aux (h:HyperStack.mem) (n:uint64_ht) (len:uint64_t {(U64.v len + v size_len_8 + 1) <= (2 * v size_block) /\ H64.v n * v size_block + U64.v len < Spec.max_input_len_8}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
+let lemma_pad_aux (h:HyperStack.mem) (n:uint64_ht) (len:uint64_t {(U64.v len + v len_length + 1) <= (2 * v block_length) /\ H64.v n * v block_length + U64.v len < Spec.max_input_len_8}) (a:uint8_p) (b:uint8_p) (c:uint8_p) : Lemma
   (requires (live h a /\ live h b /\ live h c
             /\ (let seq_a = reveal_sbytes (as_seq h a) in
             let seq_b = reveal_sbytes (as_seq h b) in
             let seq_c = reveal_sbytes (as_seq h c) in
             seq_a == Seq.create 1 0x80uy
             /\ (seq_b == Seq.create (Spec.pad0_length (U64.v len)) 0uy)
-            /\ (seq_c == Endianness.big_bytes size_len_8 ((H64.v n * v size_block + U64.v len) * 8)))))
+            /\ (seq_c == Endianness.big_bytes len_length ((H64.v n * v block_length + U64.v len) * 8)))))
   (ensures  (live h a /\ live h b /\ live h c
             /\ (let seq_a = reveal_sbytes (as_seq h a) in
             let seq_b = reveal_sbytes (as_seq h b) in
             let seq_c = reveal_sbytes (as_seq h c) in
-            (Seq.append (Seq.append seq_a seq_b) seq_c == Spec.pad (H64.v n * v size_block) (U64.v len))))) =
+            (Seq.append (Seq.append seq_a seq_b) seq_c == Spec.pad (H64.v n * v block_length) (U64.v len))))) =
 let seq_a = reveal_sbytes (as_seq h a) in
 let seq_b = reveal_sbytes (as_seq h b) in
 let seq_c = reveal_sbytes (as_seq h c) in
@@ -275,7 +275,7 @@ lemma_pad_aux_seq n len seq_a seq_b seq_c
 #reset-options " --max_fuel 0 --z3rlimit 20"
 
 val lemma_spec_ws_def:
-  b:Seq.seq UInt64.t{Seq.length b = Spec.size_block_w} ->
+  b:Seq.seq UInt64.t{Seq.length b = Spec.block_word_length} ->
   i:nat{i < 16} ->
   Lemma (Spec.ws b i == Seq.index b i)
 
