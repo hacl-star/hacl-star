@@ -2624,7 +2624,7 @@ private val mt_retract_to_:
                (U32.v i) (U32.v s) (U32.v j)))
      ))
    (decreases (U32.v merkle_tree_size_lg - U32.v lv))
-#reset-options "--z3rlimit 800 --max_fuel 1"
+#reset-options "--z3rlimit 250  --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 private let rec mt_retract_to_ hs lv i s j =
   let hh0 = HST.get () in
 
@@ -2792,6 +2792,19 @@ private let rec mt_retract_to_ hs lv i s j =
       assert (S.equal (RV.as_seq hh3 hs)
                       (High.mt_retract_to_ (RV.as_seq hh0 hs) (U32.v lv)
                         (U32.v i) (U32.v s) (U32.v j)))
+    end
+    else begin
+      let hh3 = HST.get() in
+      assert ((modifies (loc_union
+                 (RV.rv_loc_elems hh0 hs lv (V.size_of hs))
+                 (V.loc_vector_within hs lv (V.size_of hs)))
+              hh0 hh3));
+      assert (RV.rv_inv hh3 hs /\ mt_safe_elts hh3 lv hs i s);
+      mt_safe_elts_spec hh0 lv hs i j;
+      assert (S.equal (RV.as_seq hh3 hs)
+                      (High.mt_retract_to_
+                      (RV.as_seq hh0 hs) (U32.v lv)
+                      (U32.v i) (U32.v s) (U32.v j)))
     end
   end
 #reset-options
