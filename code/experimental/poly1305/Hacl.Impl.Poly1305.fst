@@ -180,6 +180,70 @@ let poly1305_init #s ctx key =
   | M256 -> poly1305_init_256 ctx key
 (* WRAPPER to Prevent Inlining *)
 
+inline_for_extraction
+val update1:
+    #s:field_spec
+  -> p:precomp_r s
+  -> b:lbuffer uint8 16ul
+  -> acc:felem s
+  -> Stack unit
+    (requires fun h ->
+      live h p /\ live h b /\ live h acc /\
+      load_precompute_r_post h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      feval h1 acc ==
+        S.update1 #(width s) (feval h0 (gsub p 0ul 5ul)) 16 (as_seq h0 b) (feval h0 acc))
+let update1 #s pre b acc = admit();
+  push_frame ();
+  let e = create (nlimb s) (limb_zero s) in
+  poly1305_encode_block e b;
+  fadd_mul_r acc e pre;
+  pop_frame ()
+
+inline_for_extraction
+val update1_last:
+    #s:field_spec
+  -> p:precomp_r s
+  -> len:size_t{v len < 16}
+  -> b:lbuffer uint8 len
+  -> acc:felem s
+  -> Stack unit
+    (requires fun h ->
+      live h p /\ live h b /\ live h acc /\
+      load_precompute_r_post h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      feval h1 acc ==
+        S.update1 #(width s) (feval h0 (gsub p 0ul 5ul)) (v len) (as_seq h0 b) (feval h0 acc))
+let update1_last #s pre len b acc = admit();
+  push_frame ();
+  let e = create (nlimb s) (limb_zero s) in
+  poly1305_encode_last e len b;
+  fadd_mul_r acc e pre;
+  pop_frame ()
+
+inline_for_extraction
+val updaten:
+    #s:field_spec
+  -> p:precomp_r s
+  -> b:lbuffer uint8 (blocklen s)
+  -> acc:felem s
+  -> Stack unit
+    (requires fun h ->
+      live h p /\ live h b /\ live h acc /\
+      load_precompute_r_post h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      feval h1 acc ==
+        S.updaten #(width s) (feval h0 (gsub p 10ul 5ul)) (as_seq h0 b) (feval h0 acc))
+let updaten #s pre b acc = admit();
+  push_frame ();
+  let e = create (nlimb s) (limb_zero s) in
+  poly1305_encode_blocks e b;
+  fmul_rn acc acc pre;
+  fadd acc acc e;
+  pop_frame ()
 
 inline_for_extraction
 val poly1305_nblocks:
@@ -191,10 +255,8 @@ val poly1305_nblocks:
     (requires fun h -> live h ctx /\ live h text)
     (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
 let poly1305_nblocks #s ctx len text =
-  push_frame();
   let acc = get_acc ctx in
   let pre = get_precomp_r ctx in
-  let e = create (nlimb s) (limb_zero s) in
   let sz_block = blocklen s in
   let blocks = len /. sz_block in
   let h0 = ST.get() in
@@ -202,12 +264,9 @@ let poly1305_nblocks #s ctx len text =
   loop_nospec #h0 blocks ctx
   (fun i ->
     let b = sub text (i *. sz_block) sz_block in
-    poly1305_encode_blocks e b;
-    fmul_rn acc acc pre;
-    fadd acc acc e
+    updaten #s pre b acc
   );
-  fmul_rn_normalize acc pre;
-  pop_frame()
+  fmul_rn_normalize acc pre
 
 inline_for_extraction
 val poly1305_update_:
@@ -219,33 +278,29 @@ val poly1305_update_:
     (requires fun h -> live h ctx /\ live h text)
     (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
 let poly1305_update_ #s ctx len text =
-  push_frame();
   let acc = get_acc ctx in
   let pre = get_precomp_r ctx in
   let sz_block = blocklen s in
-  let len0 = if sz_block >. size 16 then (len /. sz_block) *. sz_block else size 0 in
-  if (sz_block >. size 16) then (
-    let t0 = sub text (size 0) len0 in
+  let len0 = if sz_block >. 16ul then (len /. sz_block) *. sz_block else 0ul in
+  if (sz_block >. 16ul) then (
+    let t0 = sub text 0ul len0 in
     poly1305_nblocks ctx len0 t0
   );
   let len = len -. len0 in
   let text = sub text len0 len in
-  let e = create (nlimb s) (limb_zero s) in
-  let blocks = len /. size 16 in
+
+  let blocks = len /. 16ul in
+  let rem = len %. 16ul in
   let h0 = ST.get() in
   admit();
   loop_nospec #h0 blocks ctx
   (fun i ->
-    let b = sub text (i *. size 16) (size 16) in
-    poly1305_encode_block e b;
-    fadd_mul_r acc e pre
+    let b = sub text (i *. 16ul) 16ul in
+    update1 #s pre b acc
   );
-  let rem = len %. size 16 in
-  if (rem >. size 0) then (
-    let b = sub text (blocks *. size 16) rem in
-    poly1305_encode_last e rem b;
-    fadd_mul_r acc e pre);
-  pop_frame()
+  if (rem >. 0ul) then (
+    let b = sub text (blocks *. 16ul) rem in
+    update1_last #s pre rem b acc)
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
