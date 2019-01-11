@@ -49,13 +49,10 @@ ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst EverCrypt.Hash.Inc
 
 include .depend
 
-ADMIT=false
-
 # Thanks to --already_cached, this Makefile should never attempt to produce any
 # Vale file or F*/ulib file
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
-	  --admit_smt_queries $(ADMIT) \
 	  --use_hints --record_hints \
 	  --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
@@ -136,10 +133,11 @@ dist/header/Makefile.basic: \
 dist/compact/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS)
 
-# Note: EverCrypt.OpenSSL should go once we compile dist/coco with
-#   EVERCRYPT_OPENSSL=false
 # Note: this is not as tight as it could be because EverCrypt.fst has everything
 #   while Coco just wants AES-NI
+ifeq ($(CONFIG),everest)
+dist/coco/Makefile.basic: EVERCRYPT_MAYBE_SOURCES =
+endif
 dist/coco/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS) \
   -bundle EverCrypt.Hash= -bundle EverCrypt.AutoConfig2= \
