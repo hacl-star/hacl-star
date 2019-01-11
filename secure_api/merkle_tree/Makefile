@@ -30,6 +30,7 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib/compat \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
+  $(HACL_HOME)/specs/derived \
   $(HACL_HOME)/providers/evercrypt \
   $(HACL_HOME)/providers/evercrypt/fst \
   $(HACL_HOME)/providers/evercrypt/config/$(CONFIG) \

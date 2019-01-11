@@ -12,6 +12,7 @@ module B = LowStar.Buffer
 
 open LowStar.BufferOps
 open Spec.Hash.Definitions
+open Spec.Hash.Lemmas
 
 open ST
 
@@ -59,6 +60,6 @@ let test_incremental_api (): St unit =
 
   let h4 = ST.get () in
   assert (Seq.equal (B.as_seq h4 dst)
-    (Spec.Hash.Nist.hash SHA2_256 (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2))));
+    (Spec.Hash.hash SHA2_256 (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2))));
 
   pop_frame ()

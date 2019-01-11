@@ -33,13 +33,11 @@ VALE_NAMESPACES='X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
   'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
   Workarounds 'Math.*' Interop TypesNative_s
 
-# TODO: remove the exceptions for old-style HACL from already_cached
-# TODO: make it Hacl instead of Hacl.Hash, eventually
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi \
-  --already_cached '* -C.Compat -EverCrypt'
+  --already_cached '* -EverCrypt'
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst EverCrypt.Hash.Incremental.fst
 
