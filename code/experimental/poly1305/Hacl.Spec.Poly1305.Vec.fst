@@ -23,6 +23,7 @@ let pfmul (x:pfelem) (y:pfelem) : pfelem = (x * y) % prime
 let lanes = w:width{w == 1 \/ w == 2 \/ w == 4}
 type elem (w:lanes) = lseq pfelem w
 
+unfold
 let to_elem (w:lanes) (x:pfelem) : elem w = create w x
 let from_elem (#w:lanes) (x:elem w) : pfelem = x.[0]
 let zero (w:lanes) : elem w = to_elem w 0
@@ -75,8 +76,9 @@ let update1 (#w:lanes) (r:elem w) (len:size_nat{len <= size_block}) (b:lbytes le
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
   assert_norm (pow2 128 + pow2 128 < prime);
-  let n = to_elem w (pow2 (8 * len) + nat_from_bytes_le b) in
-  let acc : elem w = fmul (fadd n acc) r in
+  let e = to_elem w (nat_from_bytes_le b) in
+  let e = map (pfadd (pow2 (8 * len))) e in
+  let acc : elem w = fmul (fadd acc e) r in
   acc
 
 let updaten (#w:lanes) (r_w:elem w) (b:lbytes (w * size_block)) (acc:elem w) : Tot (elem w) =

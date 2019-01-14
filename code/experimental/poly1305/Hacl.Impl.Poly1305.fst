@@ -40,8 +40,12 @@ val poly1305_encode_blocks:
   -> b:lbuffer uint8 (blocklen s)
   -> Stack unit
     (requires fun h -> live h b /\ live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let poly1305_encode_blocks #s f b = admit();
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
+      feval h1 f == LSeq.map (S.pfadd (pow2 128))
+        (S.load_elem #(width s) (as_seq h0 b)))
+let poly1305_encode_blocks #s f b =
   load_felems_le f b;
   set_bit128 f
 
@@ -189,12 +193,14 @@ val update1:
   -> Stack unit
     (requires fun h ->
       live h p /\ live h b /\ live h acc /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
       load_precompute_r_post h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
-      feval h1 acc ==
-        S.update1 #(width s) (feval h0 (gsub p 0ul 5ul)) 16 (as_seq h0 b) (feval h0 acc))
-let update1 #s pre b acc = admit();
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+      feval h1 acc == S.update1 #(width s)
+        (feval h0 (gsub p 0ul 5ul)) 16 (as_seq h0 b) (feval h0 acc))
+let update1 #s pre b acc =
   push_frame ();
   let e = create (nlimb s) (limb_zero s) in
   poly1305_encode_block e b;
@@ -211,17 +217,21 @@ val update1_last:
   -> Stack unit
     (requires fun h ->
       live h p /\ live h b /\ live h acc /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
       load_precompute_r_post h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
-      feval h1 acc ==
-        S.update1 #(width s) (feval h0 (gsub p 0ul 5ul)) (v len) (as_seq h0 b) (feval h0 acc))
-let update1_last #s pre len b acc = admit();
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+      feval h1 acc == S.update1 #(width s)
+        (feval h0 (gsub p 0ul 5ul)) (v len) (as_seq h0 b) (feval h0 acc))
+let update1_last #s pre len b acc =
   push_frame ();
   let e = create (nlimb s) (limb_zero s) in
   poly1305_encode_last e len b;
   fadd_mul_r acc e pre;
   pop_frame ()
+
+#set-options "--z3rlimit 150"
 
 inline_for_extraction
 val updaten:
@@ -232,17 +242,32 @@ val updaten:
   -> Stack unit
     (requires fun h ->
       live h p /\ live h b /\ live h acc /\
+      disjoint acc p /\ disjoint acc b /\
+      felem_fits h acc (2, 3, 2, 2, 2) /\
       load_precompute_r_post h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
+      felem_fits h1 acc (2, 3, 2, 2, 2) /\
       feval h1 acc ==
         S.updaten #(width s) (feval h0 (gsub p 10ul 5ul)) (as_seq h0 b) (feval h0 acc))
-let updaten #s pre b acc = admit();
+let updaten #s pre b acc =
   push_frame ();
   let e = create (nlimb s) (limb_zero s) in
+  let h0 = ST.get () in
   poly1305_encode_blocks e b;
+  let h1 = ST.get () in
+  assert (feval h1 e == LSeq.map (S.pfadd (pow2 128)) (S.load_elem #(width s) (as_seq h0 b)));
   fmul_rn acc acc pre;
+  let h2 = ST.get () in
+  assert (feval h2 acc == LSeq.map2 S.pfmul (feval h1 acc) (feval h0 (gsub pre 10ul 5ul)));
+  assert (felem_fits h2 acc (1, 2, 1, 1, 1));
+  assert (felem_fits h2 e (1, 1, 1, 1, 1));
   fadd acc acc e;
+  let h3 = ST.get () in
+  assert (feval h3 acc == LSeq.map2 S.pfadd (feval h2 acc) (feval h2 e));
+  assert (felem_fits h3 acc (2, 3, 2, 2, 2));
+  LSeq.eq_intro (feval h3 acc)
+        (S.updaten #(width s) (feval h0 (gsub pre 10ul 5ul)) (as_seq h0 b) (feval h0 acc));
   pop_frame ()
 
 inline_for_extraction

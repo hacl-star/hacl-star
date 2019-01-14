@@ -142,6 +142,7 @@ val load_felems_le:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
+      felem_less #(width s) h1 f (pow2 128) /\
       feval h1 f == S.load_elem #(width s) (as_seq h0 b))
 let load_felems_le #s f b =
   admit();
@@ -244,7 +245,7 @@ val reduce_felem:
   -> f:felem s
   -> Stack unit
     (requires fun h ->
-      live h f /\ acc_inv_t (as_tup5 #(width s) h f))
+      live h f /\ acc_inv_t #(width s) (as_tup5 h f))
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       feval h1 f == feval h0 f /\
@@ -286,7 +287,7 @@ val load_precompute_r:
     (ensures  fun h0 _ h1 ->
       modifies (loc p) h0 h1 /\
       load_precompute_r_post #s h1 p /\
-      feval h1 (gsub p 0ul 5ul) == 
+      feval h1 (gsub p 0ul 5ul) ==
         LSeq.create (width s) (uint_v r1 * pow2 64 + uint_v r0))
 let load_precompute_r #s p r0 r1 = admit();
   match s with
@@ -312,9 +313,9 @@ val fadd_mul_r:
       as_tup5 #(width s) h r_5 == precomp_r5 (as_tup5 h r)))
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-     (let r = gsub precomp 0ul 5ul in
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-      feval h1 out == LSeq.map2 (S.pfmul) (LSeq.map2 (S.pfadd) (feval h0 out) (feval h0 f1)) (feval h0 r)))
+      feval h1 out == LSeq.map2 (S.pfmul)
+        (LSeq.map2 (S.pfadd) (feval h0 out) (feval h0 f1)) (feval h0 (gsub precomp 0ul 5ul)))
 let fadd_mul_r #s out f1 precomp =
   match s with
   | M32  -> F32xN.fadd_mul_r #1 out f1 precomp
@@ -332,15 +333,14 @@ val fmul_rn:
       live h out /\ live h f1 /\ live h precomp /\
      (let rn = gsub precomp 10ul 5ul in
       let rn_5 = gsub precomp 15ul 5ul in
-      felem_fits h out (2,3,2,2,2) /\
+      felem_fits h f1 (2,3,2,2,2) /\
       felem_fits h rn (1,2,1,1,1) /\
       felem_fits h rn_5 (5,10,5,5,5) /\
       as_tup5 #(width s) h rn_5 == precomp_r5 (as_tup5 h rn)))
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-     (let rn = gsub precomp 10ul 5ul in
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-      feval h1 out == LSeq.map2 S.pfmul (feval h0 f1) (feval h0 rn)))
+      feval h1 out == LSeq.map2 S.pfmul (feval h0 f1) (feval h0 (gsub precomp 10ul 5ul)))
 let fmul_rn #s out f1 precomp =
   admit();
   match s with
