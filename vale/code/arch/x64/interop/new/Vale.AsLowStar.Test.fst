@@ -20,7 +20,7 @@ let b64 = lowstar_buffer ME.(TBase TUInt64)
 [@__reduce__] unfold
 let t64_mod = TD_Buffer ME.TUInt64 default_bq
 [@__reduce__] unfold
-let t64_no_mod = TD_Buffer ME.TUInt64 ({default_bq with modified=false})
+let t64_no_mod = TD_Buffer ME.TUInt64 ({modified=false; strict_disjointness=false; secret=true})
 
 [@__reduce__] unfold
 let dom : IX64.arity_ok td =
@@ -144,10 +144,10 @@ open FStar.HyperStack.ST
 
 module M = X64.Memory
 
-let as_vale_buffer_disjoint (#t1 #t2:ME.typ) (x:lowstar_buffer t1) (y:lowstar_buffer t2)
-   : Lemma (B.disjoint x y ==> M.loc_disjoint (M.loc_buffer (as_vale_buffer x)) (M.loc_buffer (as_vale_buffer y)))
-           [SMTPat (M.loc_disjoint (M.loc_buffer (as_vale_buffer x)) (M.loc_buffer (as_vale_buffer y)))]
-   = admit()
+// let as_vale_buffer_disjoint (#t1 #t2:ME.typ) (x:lowstar_buffer t1) (y:lowstar_buffer t2)
+//    : Lemma (B.disjoint x y ==> M.loc_disjoint (M.loc_buffer (as_vale_buffer x)) (M.loc_buffer (as_vale_buffer y)))
+//            [SMTPat (M.loc_disjoint (M.loc_buffer (as_vale_buffer x)) (M.loc_buffer (as_vale_buffer y)))]
+//    = admit()
 
 let test (x:b64) = assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)
 
@@ -173,7 +173,14 @@ let lbv_as_seq_eq #a #b #rrel #rel x y v h =
   in
   FStar.Classical.forall_intro aux
 
-let memcpy_test (dst:b64) (src:b64)
+
+let loc_disjoint_sym (x y:ME.loc)
+   : Lemma (ME.loc_disjoint x y <==> ME.loc_disjoint y x)
+           [SMTPat (ME.loc_disjoint x y)]
+   = admit()
+
+//#reset-options "--print_implicits"
+let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
   : Stack unit
     (requires fun h0 ->
       B.live h0 dst /\

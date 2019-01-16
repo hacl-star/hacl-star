@@ -45,13 +45,22 @@ let as_vale_buffer (#t:ME.typ) (x:lowstar_buffer t)
 
 type buffer_qualifiers = {
   modified:bool;
-  secret:bool
+  secret:bool;
+  strict_disjointness:bool
 }
 
 [@__reduce__]
 let default_bq = {
   modified=true;
-  secret=true
+  secret=true;
+  strict_disjointness=false
+}
+
+[@__reduce__]
+let stack_bq = {
+  modified=true;
+  secret=true;
+  strict_disjointness=true
 }
 
 //type descriptors
@@ -82,7 +91,8 @@ let normal (#a:Type) (x:a) : a =
                  `%fst;
                  `%snd;
                  `%Mktuple2?._1;
-                 `%Mktuple2?._2
+                 `%Mktuple2?._2;
+                 `%ME.TBase?.b;
                  // `%Interop.list_disjoint_or_eq;
                  // `%Interop.list_live
                  ];
@@ -218,6 +228,9 @@ type addr_map = m:(b8 -> ME.nat64){
 [@__reduce__]
 let disjoint_or_eq_1 (a:arg) (b:arg) =
     match a, b with
+    | (| TD_Buffer tx {strict_disjointness=true}, xb |), (| TD_Buffer ty _, yb |)
+    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |) ->
+      B.disjoint #UInt8.t xb yb
     | (| TD_Buffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
       B.disjoint #UInt8.t xb yb \/ eq2 #b8 xb yb
     | _ -> True
@@ -225,6 +238,23 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
 [@__reduce__]
 let disjoint_or_eq (l:list arg) =
   BigOps.pairwise_and' disjoint_or_eq_1  l
+
+[@__reduce__]
+let vale_disjoint_or_eq_1 (a:arg) (b:arg) =
+    match a, b with
+    | (| TD_Buffer tx {strict_disjointness=true}, xb |), (| TD_Buffer ty _, yb |)
+    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #ME.(TBase tx) xb))
+                      (ME.loc_buffer (as_vale_buffer #ME.(TBase ty) yb))
+    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #ME.(TBase tx) xb))
+                      (ME.loc_buffer (as_vale_buffer #ME.(TBase ty) yb)) \/
+      eq2 #b8 xb yb
+    | _ -> True
+
+[@__reduce__]
+let vale_disjoint_or_eq (l:list arg) =
+  BigOps.pairwise_and' vale_disjoint_or_eq_1 l
 
 [@__reduce__]
 let live_arg (h:HS.mem) (x:arg) =
@@ -277,8 +307,8 @@ let all_live_cons (hd:arg) (tl:list arg) (h0:HS.mem)
   = ()
 
 let disjoint_or_eq_def (l:list arg)
-   : Lemma (disjoint_or_eq l == BigOps.pairwise_and' disjoint_or_eq_1 l)
-   = ()
+  : Lemma (disjoint_or_eq l == BigOps.pairwise_and' disjoint_or_eq_1 l)
+  = ()
 
 let disjoint_or_eq_cons (hd:arg) (tl:list arg)
   : Lemma (disjoint_or_eq (hd::tl) <==> (BigOps.big_and' (disjoint_or_eq_1 hd) tl /\ disjoint_or_eq tl))
@@ -294,11 +324,14 @@ let rec mem_roots_p_modifies_none (args:list arg) (h0:HS.mem) (h1:HS.mem)
   = match args with
     | [] -> ()
     | hd::tl ->
-      disjoint_or_eq_cons hd tl;
+      all_live_cons hd tl h0;
       mem_roots_p_modifies_none tl h0 h1
 
 [@__reduce__]
 let arg_of_lb #t (x:lowstar_buffer (ME.TBase t)) : arg = (| TD_Buffer t default_bq, x |)
+
+[@__reduce__]
+let arg_of_sb #t (x:lowstar_buffer t) :arg = (| TD_Buffer (ME.TBase?.b t) stack_bq, x |)
 
 let rec disjoint_or_eq_fresh
        #t
@@ -310,7 +343,7 @@ let rec disjoint_or_eq_fresh
       all_live h0 args /\
       x `B.unused_in` h0)
     (ensures
-      BigOps.big_and' (disjoint_or_eq_1 (arg_of_lb x)) args)
+      BigOps.big_and' (disjoint_or_eq_1 (arg_of_sb x)) args)
   = match args with
     | [] -> ()
     | hd::tl ->

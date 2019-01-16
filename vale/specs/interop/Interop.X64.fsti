@@ -179,7 +179,7 @@ let update_taint_map (#a:td)
 
 let state_builder_t (num_b8_slots:max_slots) (args:list arg) (codom:Type) =
     h0:HS.mem ->
-    stack:stack_buffer num_b8_slots{mem_roots_p h0 (arg_of_lb stack::args)} ->
+    stack:stack_buffer num_b8_slots{mem_roots_p h0 (arg_of_sb stack::args)} ->
     GTot codom
 
 let init_taint : taint_map = fun r -> MS.Public
@@ -194,7 +194,7 @@ let create_initial_trusted_state (num_b8_slots:max_slots) (args:arity_ok arg)
     let regs = register_of_args (List.Tot.length args) args IA.init_regs in
     let regs = FunctionalExtensionality.on reg (regs_with_stack regs stack) in
     let xmms = FunctionalExtensionality.on xmm IA.init_xmms in
-    let args = arg_of_lb stack::args in
+    let args = arg_of_sb stack::args in
     Adapters.liveness_disjointness args h0;
     let mem:ME.mem = Adapters.mk_mem args h0 in
     let (s0:BS.state) = {
@@ -221,7 +221,7 @@ let prediction_post_rel_t (c:TS.tainted_code) (num_b8_slots:max_slots) (args:ari
     s0:TS.traceState ->
     push_h0:mem_roots args ->
     alloc_push_h0:mem_roots args ->
-    b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_lb b::args)} ->
+    b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
     (nat & ME.mem) ->
     sn:TS.traceState ->
     prop
@@ -236,7 +236,7 @@ let prediction_pre
     (s0:TS.traceState)
     (push_h0:mem_roots args)
     (alloc_push_h0:mem_roots args)
-    (b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_lb b::args)})
+    (b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_sb b::args)})
     =
   pre_rel h0 /\
   HS.fresh_frame h0 push_h0 /\
@@ -256,14 +256,14 @@ let prediction_post
     (s0:TS.traceState)
     (push_h0:mem_roots args)
     (alloc_push_h0:mem_roots args)
-    (sb:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_lb sb::args)})
+    (sb:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_sb sb::args)})
     (fuel_mem:nat & ME.mem) =
   let fuel, final_mem = fuel_mem in
   Some? (TS.taint_eval_code c fuel s0) /\ (
     let s1 = Some?.v (TS.taint_eval_code c fuel s0) in
     let h1 = Adapters.hs_of_mem final_mem in
     FStar.HyperStack.ST.equal_domains alloc_push_h0 h1 /\
-    B.modifies (loc_modified_args (arg_of_lb sb :: args)) alloc_push_h0 h1 /\
+    B.modifies (loc_modified_args (arg_of_sb sb :: args)) alloc_push_h0 h1 /\
     IM.down_mem h1 (IA.addrs)
                 (Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem /\
     calling_conventions s0 s1 /\
@@ -280,7 +280,7 @@ let prediction
   s0:TS.traceState ->
   push_h0:mem_roots args ->
   alloc_push_h0:mem_roots args ->
-  b:stack_buffer num_b8_slots{mem_roots_p h0 args /\ mem_roots_p alloc_push_h0 (arg_of_lb b::args)} ->
+  b:stack_buffer num_b8_slots{mem_roots_p h0 args /\ mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
   Ghost (nat & ME.mem)
     (requires prediction_pre c num_b8_slots args pre_rel h0 s0 push_h0 alloc_push_h0 b)
     (ensures prediction_post c num_b8_slots args post_rel h0 s0 push_h0 alloc_push_h0 b)
@@ -292,7 +292,7 @@ type as_lowstar_sig_ret =
       args:arity_ok arg ->
       push_h0:mem_roots args ->
       alloc_push_h0:mem_roots args ->
-      b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_lb b::args)} ->
+      b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
       fuel:nat ->
       final_mem:ME.mem ->
       as_lowstar_sig_ret

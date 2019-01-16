@@ -22,7 +22,7 @@ let wrap_variadic c num_b8_slots args #pre_rel #post_rel predict =
   assert (HS.fresh_frame h0 push_h0);
   mem_roots_p_modifies_none args push_h0 alloc_push_h0;
   assert (mem_roots_p alloc_push_h0 args);
-  let sarg = arg_of_lb stack_b in
+  let sarg = arg_of_sb stack_b in
   all_live_cons sarg args alloc_push_h0;
   disjoint_or_eq_cons sarg args;
   disjoint_or_eq_fresh stack_b args push_h0;

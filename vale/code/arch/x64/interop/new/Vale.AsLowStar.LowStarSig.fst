@@ -81,15 +81,6 @@ let rec mem_correspondence (args:list arg) : hsprop =
     | _ ->
       mem_correspondence tl
 
-[@__reduce__]
-let disjoint_b8 (ptr1 ptr2:b8) = B.loc_disjoint (B.loc_buffer ptr1) (B.loc_buffer ptr2)
-
-[@__reduce__]
-let mk_vale_disjointness #n (sb:IX64.stack_buffer n) (args:list arg) : prop =
-  let args_b8 = Interop.Adapters.args_b8 args in
-  Interop.Mem.disjoint_or_eq_b8_l args_b8 /\
-  BigOps.big_and' (disjoint_b8 sb) args_b8
-
 let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state) :
   Lemma (0 <= ME.buffer_addr x VS.(s.mem) /\ ME.buffer_addr x VS.(s.mem) < pow2 64) = admit()
 
@@ -149,8 +140,8 @@ let rec taint_hyp (args:list arg) : VSig.sprop =
 [@__reduce__]
 let vale_pre_hyp #n (sb:IX64.stack_buffer n) (args:IX64.arity_ok arg) : VSig.sprop =
     fun s0 ->
-      let s_args = arg_of_lb sb :: args in
-      mk_vale_disjointness sb args /\
+      let s_args = arg_of_sb sb :: args in
+      vale_disjoint_or_eq s_args /\
       VSig.readable s_args VS.(s0.mem) /\
       register_args (List.length args) args s0 /\
       taint_hyp args s0

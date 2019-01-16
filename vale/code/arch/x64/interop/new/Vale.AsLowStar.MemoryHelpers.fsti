@@ -63,8 +63,8 @@ val buffer_readable_reveal
   (x:lowstar_buffer (ME.TBase bt)) 
   (args:IX64.arity_ok arg)
   (h0:HS.mem)
-  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_lb stack::args)}) : Lemma (
-    let mem = Interop.Adapters.mk_mem (arg_of_lb stack::args) h0 in
+  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma (
+    let mem = Interop.Adapters.mk_mem (arg_of_sb stack::args) h0 in
     ME.buffer_readable mem (as_vale_buffer #(ME.TBase bt) x) <==>
       List.memP x (Interop.Adapters.ptrs_of_mem mem))
 
@@ -72,10 +72,10 @@ val get_heap_mk_mem_reveal
   (#n:_)
   (args:IX64.arity_ok arg)
   (h0:HS.mem)
-  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_lb stack::args)}) : Lemma
-  (let mem = Interop.Adapters.mk_mem (arg_of_lb stack::args) h0 in
-   Interop.Adapters.liveness_disjointness (arg_of_lb stack::args) h0;
-   MES.get_heap mem == IM.down_mem h0 IA.addrs (Interop.Adapters.args_b8 (arg_of_lb stack::args)))
+  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma
+  (let mem = Interop.Adapters.mk_mem (arg_of_sb stack::args) h0 in
+   Interop.Adapters.liveness_disjointness (arg_of_sb stack::args) h0;
+   MES.get_heap mem == IM.down_mem h0 IA.addrs (Interop.Adapters.args_b8 (arg_of_sb stack::args)))
 
 val buffer_as_seq_reveal
   (#n:_)
@@ -83,9 +83,9 @@ val buffer_as_seq_reveal
   (x:lowstar_buffer (ME.TBase t))
   (args:IX64.arity_ok arg)
   (h0:HS.mem)
-  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_lb stack::args)}) : Lemma
+  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma
   (let y = as_vale_buffer x in
-  let mem = Interop.Adapters.mk_mem (arg_of_lb stack::args) h0 in
+  let mem = Interop.Adapters.mk_mem (arg_of_sb stack::args) h0 in
   assume (t <> ME.TUInt128); // TODO: UInt128
   Seq.equal 
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq mem y))
