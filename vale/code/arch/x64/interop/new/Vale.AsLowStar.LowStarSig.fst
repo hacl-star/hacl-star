@@ -14,12 +14,6 @@ module VS = X64.Vale.State
 module IX64 = Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 
-assume //TODO: UInt128
-val quad32_to_nat : ME.quad32 -> UInt.uint_t UInt128.n
-
-assume //TODO: UInt128
-val view128 : LowStar.BufferView.view UInt8.t UInt128.t
-
 [@__reduce__]
 let nat_to_uint (t:ME.base_typ) (x:ME.type_of_typ (ME.TBase t))
   : base_typ_as_type t
@@ -29,7 +23,7 @@ let nat_to_uint (t:ME.base_typ) (x:ME.type_of_typ (ME.TBase t))
     | TUInt16  -> UInt16.uint_to_t x
     | TUInt32  -> UInt32.uint_to_t x
     | TUInt64  -> UInt64.uint_to_t x
-    | TUInt128  -> UInt128.uint_to_t (quad32_to_nat x)
+    | TUInt128 -> x
 
 let nat_to_uint_seq_t
       (t:ME.base_typ)
@@ -46,7 +40,7 @@ let view_of_base_typ (t:ME.base_typ)
     | TUInt16 -> Views.view16
     | TUInt32 -> Views.view32
     | TUInt64 -> Views.view64
-    | TUInt128 -> view128
+    | TUInt128 -> Views.view128
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //lowstar_sig pre post:
@@ -62,7 +56,6 @@ let mem_correspondence_1
       (h:HS.mem)
       (s:VS.state) =
   let y = as_vale_buffer x in
-  assume (t <> ME.TUInt128); //TODO: UInt128
   Seq.equal
     (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.mem y))
     (BV.as_seq h (BV.mk_buffer_view x (view_of_base_typ t)))
@@ -97,8 +90,6 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
      UInt32.v x
   | TD_Base TUInt64 ->
      UInt64.v x
-  | TD_Base TUInt128 ->
-     admit() //TODO: UInt128
   | TD_Buffer bt _ ->
      buffer_addr_is_nat64 (as_vale_buffer #(TBase bt) x) s;
      ME.buffer_addr (as_vale_buffer #(TBase bt) x) VS.(s.mem)

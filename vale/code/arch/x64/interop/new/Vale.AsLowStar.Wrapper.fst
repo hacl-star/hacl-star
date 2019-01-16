@@ -50,6 +50,7 @@ let as_vale_buffer_disjoint (#t1 #t2:ME.typ) (x:lowstar_buffer t1) (y:lowstar_bu
            [SMTPat (ME.loc_disjoint (ME.loc_buffer (as_vale_buffer x)) (ME.loc_buffer (as_vale_buffer y)))]
    = admit()
 
+#reset-options "--initial_ifuel 2 --max_ifuel 2"
 let rec core_create_lemma_disjointness
     (args:list arg{disjoint_or_eq args})
   : Lemma
@@ -68,10 +69,11 @@ let rec core_create_lemma_disjointness
         | [] -> ()
         | n::ns ->
           BigOps.big_and'_cons (disjoint_or_eq_1 hd) n ns;
-          BigOps.big_and'_cons (vale_disjoint_or_eq_1 hd) n ns;          
+          BigOps.big_and'_cons (vale_disjoint_or_eq_1 hd) n ns;
           aux ns
       in
       aux tl
+#reset-options
 
 let rec args_b8_lemma (args:list arg) (x:arg) 
   : Lemma
@@ -373,7 +375,6 @@ let rec frame_mem_correspondence_back
      frame_mem_correspondence_back tl h0 h1 va_s l;
      match hd with
      | (| TD_Buffer bt _, x |) -> 
-       assume (bt <> ME.TUInt128); // TODO: TUInt128
        BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
      | _ -> ()
 
@@ -397,7 +398,6 @@ let rec frame_mem_correspondence
    frame_mem_correspondence tl h0 h1 va_s l;
    match hd with
    | (| TD_Buffer bt _, x |) ->
-     assume (bt <> ME.TUInt128); // TODO: TUInt128
      BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
    | _ -> ()
 
@@ -437,7 +437,6 @@ let rec mem_correspondence_refl (args:list arg)
      mem_correspondence_refl tl va_s;
      match hd with
      | (| TD_Buffer bt _, x |) ->
-       assume (bt <> ME.TUInt128); // TODO: TUInt128
        Vale.AsLowStar.MemoryHelpers.buffer_as_seq_reveal2 bt x va_s
      | _ -> ()
 

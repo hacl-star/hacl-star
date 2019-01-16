@@ -63,9 +63,11 @@ let stack_bq = {
   strict_disjointness=true
 }
 
+let valid_base_type = x:ME.base_typ{x <> ME.TUInt128}
+
 //type descriptors
 type td =
-  | TD_Base of ME.base_typ
+  | TD_Base of valid_base_type
   | TD_Buffer : ME.base_typ -> buffer_qualifiers -> td
 
 unfold
@@ -93,8 +95,6 @@ let normal (#a:Type) (x:a) : a =
                  `%Mktuple2?._1;
                  `%Mktuple2?._2;
                  `%ME.TBase?.b;
-                 // `%Interop.list_disjoint_or_eq;
-                 // `%Interop.list_live
                  ];
      primops;
      simplify]
@@ -104,14 +104,14 @@ let normal (#a:Type) (x:a) : a =
 
 #set-options "--initial_ifuel 1"
 [@__reduce__]
-let base_typ_as_type : X64.Memory.base_typ -> Type =
+let base_typ_as_type : ME.base_typ -> Type =
   let open ME in
   function
   | TUInt8 -> UInt8.t
   | TUInt16 -> UInt16.t
   | TUInt32 -> UInt32.t
   | TUInt64 -> UInt64.t
-  | TUInt128 -> UInt128.t
+  | TUInt128 -> ME.quad32
 
 [@__reduce__]
 let td_as_type : td -> Type =
@@ -121,7 +121,6 @@ let td_as_type : td -> Type =
   | TD_Buffer bt _ -> lowstar_buffer (TBase bt)
 
 let arg = t:td & td_as_type t
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // n_arrow: Arrows with a generic number of vale types as the domain
