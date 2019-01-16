@@ -9,6 +9,14 @@ open Hacl.Spec.Curve25519.Field64.Definition
 
 #reset-options "--z3rlimit 20 --using_facts_from '* -FStar.Seq'"
 
+val lemma_add_mul_le:
+   a:nat -> b:nat -> c:nat
+  -> a0:nat -> b0:nat -> c0:nat
+  -> Lemma
+    (requires a <= a0 /\ b <= b0 /\ c <= c0)
+    (ensures a + b * c <= a0 + b0 * c0)
+let lemma_add_mul_le a b c a0 b0 c0 = ()
+
 val lemma_nat_from_uints64_le_4: b:lseq uint64 4 ->
   Lemma (Lib.ByteSequence.nat_from_intseq_le b ==
     v b.[0] + v b.[1] * pow2 64 +
@@ -74,6 +82,16 @@ val lemma_mul_felem_u64: f:felem4 -> u:uint64
     v f2 * v u * pow2 64 * pow2 64 +
     v f3 * v u * pow2 64 * pow2 64 * pow2 64)
 let lemma_mul_felem_u64 f u = ()
+
+val lemma_mul1_add_pre: f1:felem4 -> u2:uint64 -> f3:felem4 ->
+  Lemma (as_nat4 f3 + as_nat4 f1 * v u2 < pow2 320)
+let lemma_mul1_add_pre f1 u2 f3 =
+  lemma_as_nat4 f1;
+  lemma_as_nat4 f3;
+  lemma_add_mul_le (as_nat4 f3) (as_nat4 f1) (v u2) (pow2 256 - 1) (pow2 256 - 1) (pow2 64 - 1);
+  assert (as_nat4 f3 + as_nat4 f1 * v u2 <= pow2 256 - 1 + (pow2 256 - 1) * (pow2 64 - 1));
+  assert (as_nat4 f3 + as_nat4 f1 * v u2 <= pow2 256 * pow2 64 - pow2 64);
+  assert_norm (pow2 256 * pow2 64 = pow2 320)
 
 val lemma_mul1: f:felem4 -> u:uint64
   -> Lemma (as_nat4 f * v u < pow2 320)
