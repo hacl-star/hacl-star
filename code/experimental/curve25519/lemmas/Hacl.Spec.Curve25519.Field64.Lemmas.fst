@@ -9,6 +9,12 @@ open Hacl.Spec.Curve25519.Field64.Definition
 
 #reset-options "--z3rlimit 20 --using_facts_from '* -FStar.Seq'"
 
+val lemma_nat_from_uints64_le_4: b:lseq uint64 4 ->
+  Lemma (Lib.ByteSequence.nat_from_intseq_le b ==
+    v b.[0] + v b.[1] * pow2 64 +
+    v b.[2] * pow2 64 * pow2 64 + v b.[3] * pow2 64 * pow2 64 * pow2 64)
+let lemma_nat_from_uints64_le_4 b = admit()
+
 val lemma_mul_lt: a:nat -> b:nat -> c:pos -> d:pos
   -> Lemma
     (requires a < c /\ b < d)
@@ -176,7 +182,24 @@ val lemma_feval_wide:
   f:felem_wide4
   -> Lemma (let (f0, f1, f2, f3, f4, f5, f6, f7) = f in
      (feval_wide f == (as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * 38) % prime))
-let lemma_feval_wide f = admit()
+let lemma_feval_wide f =
+  let (f0, f1, f2, f3, f4, f5, f6, f7) = f in
+  assert (feval_wide f ==
+    (v f0 + v f1 * pow2 64 + v f2 * pow2 64 * pow2 64 +
+    v f3 * pow2 64 * pow2 64 * pow2 64 +
+    v f4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v f5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v f6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v f7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64) % prime);
+  assert (feval_wide f ==
+    (as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * pow2 64 * pow2 64 * pow2 64 * pow2 64) % prime);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  lemma_mul_assos_5 (as_nat4 (f4, f5, f6, f7)) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
+  assert (feval_wide f == (as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * pow2 256) % prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 (f0, f1, f2, f3)) (as_nat4 (f4, f5, f6, f7) * pow2 256) prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat4 (f4, f5, f6, f7)) (pow2 256) prime;
+  lemma_prime ();
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 (f0, f1, f2, f3)) (as_nat4 (f4, f5, f6, f7) * 38) prime
 
 val lemma_fsub4:
     out:felem4 -> f1:felem4 -> f2:felem4

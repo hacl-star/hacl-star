@@ -13,6 +13,8 @@ module F26 = Hacl.Impl.Curve25519.Field26
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 module P = NatPrime
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
 
 type field_spec =
   | M26
@@ -78,11 +80,7 @@ let as_nat #s h e =
 
 noextract
 val feval: #s:field_spec -> h:mem -> e:felem s -> GTot P.felem
-let feval #s h e =
-  match s with
-  | M26 -> admit()
-  | M51 -> F51.fevalh h e
-  | M64 -> F64.fevalh h e
+let feval #s h e = (as_nat h e) % P.prime
 
 inline_for_extraction
 val create_felem:
@@ -90,7 +88,7 @@ val create_felem:
   -> StackInline (felem s)
     (requires fun h -> True)
     (ensures  fun h0 f h1 ->
-      stack_allocated f h0 h1 (Seq.create (v (nlimb s)) (limb_zero s)) /\
+      stack_allocated f h0 h1 (LSeq.create (v (nlimb s)) (limb_zero s)) /\
       as_nat h1 f == 0)
 let create_felem s =
   match s with
@@ -104,12 +102,15 @@ val load_felem:
   -> f:felem s
   -> u64s:lbuffer uint64 4ul
   -> Stack unit
-    (requires fun h -> live h f /\ live h u64s)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
+    (requires fun h ->
+      live h f /\ live h u64s /\ disjoint f u64s)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      as_nat h1 f == BSeq.nat_from_intseq_le (as_seq h0 u64s))
 let load_felem #s f b =
   match s with
-  | M26 -> F26.load_felem f b
-  | M51 -> F51.load_felem f b
+  | M26 -> admit(); F26.load_felem f b
+  | M51 -> admit(); F51.load_felem f b
   | M64 -> F64.load_felem f b
 
 inline_for_extraction
@@ -118,8 +119,9 @@ val store_felem:
   -> b:lbuffer uint64 4ul
   -> f:felem s
   -> Stack unit
-    (requires (fun h -> live h f /\ live h b))
-    (ensures (fun h0 _ h1 -> modifies (loc b |+| loc f) h0 h1))
+    (requires fun h ->
+      live h f /\ live h b /\ disjoint f b)
+    (ensures  fun h0 _ h1 -> modifies (loc b |+| loc f) h0 h1)
 let store_felem #s b f =
   match s with
   | M26 -> F26.store_felem b f
