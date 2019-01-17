@@ -110,7 +110,7 @@ val load_felem:
 let load_felem #s f b =
   match s with
   | M26 -> admit(); F26.load_felem f b
-  | M51 -> admit(); F51.load_felem f b
+  | M51 -> F51.load_felem f b
   | M64 -> F64.load_felem f b
 
 inline_for_extraction
@@ -289,8 +289,6 @@ let fmul2_fsqr2_post #s h out =
       F51.felem_fits h out0 (1, 2, 1, 1, 1) /\
       F51.felem_fits h out1 (1, 2, 1, 1, 1)
   | M64 -> True
-
-#set-options "--max_fuel 0 --max_ifuel 1"
 
 inline_for_extraction
 val fmul2:

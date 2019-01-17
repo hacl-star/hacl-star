@@ -14,6 +14,9 @@ include Hacl.Spec.Curve25519.Field51.Definition
 module P = NatPrime
 module S = Hacl.Spec.Curve25519.Field51.Definition
 module ST = FStar.HyperStack.ST
+module LSeq = Lib.Sequence
+module BSeq = Lib.ByteSequence
+module Lemmas = Hacl.Spec.Curve25519.Field51.Lemmas
 
 #reset-options "--z3rlimit 20"
 
@@ -73,44 +76,14 @@ let felem_wide_fits h f m =
   let s4 = s.[4] in
   S.felem_wide_fits5 (s0, s1, s2, s3, s4) m
 
-
 inline_for_extraction
-val create_felem:
-  unit -> StackInline felem
-  (requires fun _ -> True)
-  (ensures  fun h0 f h1 ->
-    stack_allocated f h0 h1 (Seq.create 5 (u64 0)) /\
-    as_nat h1 f == 0)
+val create_felem: unit
+  -> StackInline felem
+    (requires fun _ -> True)
+    (ensures  fun h0 f h1 ->
+      stack_allocated f h0 h1 (LSeq.create 5 (u64 0)) /\
+      as_nat h1 f == 0)
 let create_felem () = create 5ul (u64 0)
-
-inline_for_extraction
-val create_wide:
-  unit -> StackInline felem_wide
-  (requires fun _ -> True)
-  (ensures  fun h0 f h1 ->
-    stack_allocated f h0 h1 (Seq.create 5 (u128 0)) /\
-    wide_as_nat h1 f == 0)
-let create_wide () = create 5ul (u128 0)
-
-inline_for_extraction
-val set_bit1:
-    f:felem
-  -> i:size_t{v i < 255}
-  -> Stack unit
-    (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let set_bit1 f i =
-  f.(i /. size 51) <- f.(i /. size 51) |. (u64 1 <<. (i %. size 51))
-
-inline_for_extraction
-val set_bit0:
-    f:felem
-  -> i:size_t{v i < 255}
-  -> Stack unit
-    (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let set_bit0 f i =
-  f.(i /. size 51) <- f.(i /. size 51) &. lognot (u64 1 <<. (i %. size 51))
 
 inline_for_extraction
 val set_zero:
@@ -151,11 +124,11 @@ val copy_felem:
       modifies (loc f1) h0 h1 /\
       as_nat h1 f1 == as_nat h0 f2)
 let copy_felem f1 f2 =
-  f1.(size 0) <- f2.(size 0);
-  f1.(size 1) <- f2.(size 1);
-  f1.(size 2) <- f2.(size 2);
-  f1.(size 3) <- f2.(size 3);
-  f1.(size 4) <- f2.(size 4)
+  f1.(0ul) <- f2.(0ul);
+  f1.(1ul) <- f2.(1ul);
+  f1.(2ul) <- f2.(2ul);
+  f1.(3ul) <- f2.(3ul);
+  f1.(4ul) <- f2.(4ul)
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
@@ -244,24 +217,25 @@ val fmul:
       fevalh h1 out == P.fmul (fevalh h0 f1) (fevalh h0 f2))
 [@ CInline]
 let fmul out f1 f2 =
-  let f10 = f1.(size 0) in
-  let f11 = f1.(size 1) in
-  let f12 = f1.(size 2) in
-  let f13 = f1.(size 3) in
-  let f14 = f1.(size 4) in
+  let f10 = f1.(0ul) in
+  let f11 = f1.(1ul) in
+  let f12 = f1.(2ul) in
+  let f13 = f1.(3ul) in
+  let f14 = f1.(4ul) in
 
-  let f20 = f2.(size 0) in
-  let f21 = f2.(size 1) in
-  let f22 = f2.(size 2) in
-  let f23 = f2.(size 3) in
-  let f24 = f2.(size 4) in
+  let f20 = f2.(0ul) in
+  let f21 = f2.(1ul) in
+  let f22 = f2.(2ul) in
+  let f23 = f2.(3ul) in
+  let f24 = f2.(4ul) in
 
-  let (o0,o1,o2,o3,o4) = fmul5 (f10,f11,f12,f13,f14) (f20,f21,f22,f23,f24) in
-  out.(size 0) <- o0;
-  out.(size 1) <- o1;
-  out.(size 2) <- o2;
-  out.(size 3) <- o3;
-  out.(size 4) <- o4
+  let (o0,o1,o2,o3,o4) =
+    fmul5 (f10,f11,f12,f13,f14) (f20,f21,f22,f23,f24) in
+  out.(0ul) <- o0;
+  out.(1ul) <- o1;
+  out.(2ul) <- o2;
+  out.(3ul) <- o3;
+  out.(4ul) <- o4
 
 val fmul2:
     out:felem2
@@ -291,45 +265,45 @@ val fmul2:
       fevalh h1 out1 == P.fmul (fevalh h0 f11) (fevalh h0 f21)))
 [@ CInline]
 let fmul2 out f1 f2 =
-  let f10 = f1.(size 0) in
-  let f11 = f1.(size 1) in
-  let f12 = f1.(size 2) in
-  let f13 = f1.(size 3) in
-  let f14 = f1.(size 4) in
+  let f10 = f1.(0ul) in
+  let f11 = f1.(1ul) in
+  let f12 = f1.(2ul) in
+  let f13 = f1.(3ul) in
+  let f14 = f1.(4ul) in
 
-  let f20 = f2.(size 0) in
-  let f21 = f2.(size 1) in
-  let f22 = f2.(size 2) in
-  let f23 = f2.(size 3) in
-  let f24 = f2.(size 4) in
+  let f20 = f2.(0ul) in
+  let f21 = f2.(1ul) in
+  let f22 = f2.(2ul) in
+  let f23 = f2.(3ul) in
+  let f24 = f2.(4ul) in
 
-  let f30 = f1.(size 5) in
-  let f31 = f1.(size 6) in
-  let f32 = f1.(size 7) in
-  let f33 = f1.(size 8) in
-  let f34 = f1.(size 9) in
+  let f30 = f1.(5ul) in
+  let f31 = f1.(6ul) in
+  let f32 = f1.(7ul) in
+  let f33 = f1.(8ul) in
+  let f34 = f1.(9ul) in
 
-  let f40 = f2.(size 5) in
-  let f41 = f2.(size 6) in
-  let f42 = f2.(size 7) in
-  let f43 = f2.(size 8) in
-  let f44 = f2.(size 9) in
+  let f40 = f2.(5ul) in
+  let f41 = f2.(6ul) in
+  let f42 = f2.(7ul) in
+  let f43 = f2.(8ul) in
+  let f44 = f2.(9ul) in
 
   let ((o10,o11,o12,o13,o14), (o20,o21,o22,o23,o24)) =
     fmul25 (f10,f11,f12,f13,f14) (f20,f21,f22,f23,f24)
      (f30,f31,f32,f33,f34) (f40,f41,f42,f43,f44) in
 
-  out.(size 0) <- o10;
-  out.(size 1) <- o11;
-  out.(size 2) <- o12;
-  out.(size 3) <- o13;
-  out.(size 4) <- o14;
+  out.(0ul) <- o10;
+  out.(1ul) <- o11;
+  out.(2ul) <- o12;
+  out.(3ul) <- o13;
+  out.(4ul) <- o14;
 
-  out.(size 5) <- o20;
-  out.(size 6) <- o21;
-  out.(size 7) <- o22;
-  out.(size 8) <- o23;
-  out.(size 9) <- o24
+  out.(5ul) <- o20;
+  out.(6ul) <- o21;
+  out.(7ul) <- o22;
+  out.(8ul) <- o23;
+  out.(9ul) <- o24
 
 val fmul1:
     out:felem
@@ -346,17 +320,17 @@ val fmul1:
       fevalh h1 out == (fevalh h0 f1 * v f2) % P.prime)
 [@ CInline]
 let fmul1 out f1 f2 =
-  let f10 = f1.(size 0) in
-  let f11 = f1.(size 1) in
-  let f12 = f1.(size 2) in
-  let f13 = f1.(size 3) in
-  let f14 = f1.(size 4) in
+  let f10 = f1.(0ul) in
+  let f11 = f1.(1ul) in
+  let f12 = f1.(2ul) in
+  let f13 = f1.(3ul) in
+  let f14 = f1.(4ul) in
   let (o0,o1,o2,o3,o4) = fmul15 (f10,f11,f12,f13,f14) f2 in
-  out.(size 0) <- o0;
-  out.(size 1) <- o1;
-  out.(size 2) <- o2;
-  out.(size 3) <- o3;
-  out.(size 4) <- o4
+  out.(0ul) <- o0;
+  out.(1ul) <- o1;
+  out.(2ul) <- o2;
+  out.(3ul) <- o3;
+  out.(4ul) <- o4
 
 val fsqr:
      out:felem
@@ -377,11 +351,11 @@ let fsqr out f =
   let f3 = f.(3ul) in
   let f4 = f.(4ul) in
   let (o0,o1,o2,o3,o4) = fsqr5 (f0,f1,f2,f3,f4) in
-  out.(size 0) <- o0;
-  out.(size 1) <- o1;
-  out.(size 2) <- o2;
-  out.(size 3) <- o3;
-  out.(size 4) <- o4
+  out.(0ul) <- o0;
+  out.(1ul) <- o1;
+  out.(2ul) <- o2;
+  out.(3ul) <- o3;
+  out.(4ul) <- o4
 
 val fsqr2:
     out:felem2
@@ -419,26 +393,30 @@ let fsqr2 out f =
 
   let ((o10,o11,o12,o13,o14),(o20,o21,o22,o23,o24)) =
     fsqr25 (f10,f11,f12,f13,f14) (f20,f21,f22,f23,f24) in
-  out.(size 0) <- o10;
-  out.(size 1) <- o11;
-  out.(size 2) <- o12;
-  out.(size 3) <- o13;
-  out.(size 4) <- o14;
+  out.(0ul) <- o10;
+  out.(1ul) <- o11;
+  out.(2ul) <- o12;
+  out.(3ul) <- o13;
+  out.(4ul) <- o14;
 
-  out.(size 5) <- o20;
-  out.(size 6) <- o21;
-  out.(size 7) <- o22;
-  out.(size 8) <- o23;
-  out.(size 9) <- o24
+  out.(5ul) <- o20;
+  out.(6ul) <- o21;
+  out.(7ul) <- o22;
+  out.(8ul) <- o23;
+  out.(9ul) <- o24
 
 inline_for_extraction
 val load_felem:
     f:felem
   -> u64s:lbuffer uint64 4ul
   -> Stack unit
-    (requires fun h -> live h u64s /\ live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
+    (requires fun h ->
+      live h u64s /\ live h f /\ disjoint u64s f)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      as_nat h1 f == BSeq.nat_from_intseq_le (as_seq h0 u64s))
 let load_felem f u64s =
+  let h0 = ST.get () in
   let f0l = u64s.(0ul) &. S.mask51 in
   let f0h = u64s.(0ul) >>. 51ul in
   let f1l = (u64s.(1ul) &. u64 0x3fffffffff) <<. 13ul in
@@ -447,11 +425,12 @@ let load_felem f u64s =
   let f2h = u64s.(2ul) >>. 25ul in
   let f3l = (u64s.(3ul) &. u64 0xfff) <<. 39ul in
   let f3h = u64s.(3ul) >>. 12ul in
-  f.(size 0) <- f0l;
-  f.(size 1) <- f0h ^. f1l;
-  f.(size 2) <- f1h ^. f2l;
-  f.(size 3) <- f2h ^. f3l;
-  f.(size 4) <- f3h
+  f.(0ul) <- f0l;
+  f.(1ul) <- f0h |. f1l;
+  f.(2ul) <- f1h |. f2l;
+  f.(3ul) <- f2h |. f3l;
+  f.(4ul) <- f3h;
+  Lemmas.lemma_load_felem (as_seq h0 u64s)
 
 let uint64_eq_mask (a:uint64) (b:uint64) : uint64 =
   let x = a ^. b in
