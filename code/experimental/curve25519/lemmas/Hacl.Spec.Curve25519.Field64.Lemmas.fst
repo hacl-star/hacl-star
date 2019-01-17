@@ -7,7 +7,7 @@ open NatPrime
 
 open Hacl.Spec.Curve25519.Field64.Definition
 
-#reset-options "--z3rlimit 20 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 30 --using_facts_from '* -FStar.Seq'"
 
 val lemma_add_mul_le:
    a:nat -> b:nat -> c:nat
@@ -41,6 +41,10 @@ let lemma_mod_sub_distr a b n =
   FStar.Math.Lemmas.distributivity_sub_left 0 (b / n) n;
   // (a - b) % n == (a - (b % n) - (b / n) * n) % n
   FStar.Math.Lemmas.lemma_mod_plus (a - (b % n)) (-(b / n)) n
+
+val lemma_mul_distr_r4: a:nat -> b:nat -> c:nat -> d:nat -> e:nat ->
+  Lemma (a * b + a * c + a * d + a * e == a * (b + c + d + e))
+let lemma_mul_distr_r4 a b c d e = ()
 
 val lemma_prime: unit ->
   Lemma (pow2 256 % prime == 38)
@@ -286,3 +290,46 @@ val lemma_fmul14_no_carry0:
 let lemma_fmul14_no_carry0 a b c =
   assert (a + c * pow2 256 < pow2 273);
   assert_norm (pow2 17 * pow2 256 = pow2 273)
+
+val lemma_mul4:
+    r:nat -> f0:nat -> f1:nat -> f2:nat -> f3:nat
+  -> c0:nat -> c1:nat -> c2:nat -> c3:nat
+  -> o01:nat -> o02:nat -> o03:nat
+  -> o12:nat -> o13:nat -> o14:nat
+  -> o23:nat -> o24:nat -> o25:nat
+  -> o34:nat -> o35:nat -> o36:nat
+  -> Lemma (
+      r * f0 - c0 * pow2 256 - o01 * pow2 64 - o02 * pow2 64 * pow2 64 - o03 * pow2 64 * pow2 64 * pow2 64 +
+      (o01 + o02 * pow2 64 + o03 * pow2 64 * pow2 64 + c0 * pow2 64 * pow2 64 * pow2 64 + r * f1 - c1 * pow2 256 -
+      o12 * pow2 64 - o13 * pow2 64 * pow2 64 - o14 * pow2 64 * pow2 64 * pow2 64) * pow2 64 +
+      (o12 + o13 * pow2 64 + o14 * pow2 64 * pow2 64 + c1 * pow2 64 * pow2 64 * pow2 64 + r * f2 - c2 * pow2 256 -
+      o23 * pow2 64 - o24 * pow2 64 * pow2 64 - o25 * pow2 64 * pow2 64 * pow2 64) * pow2 64 * pow2 64 +
+      (o23 + o24 * pow2 64 + o25 * pow2 64 * pow2 64 + c2 * pow2 64 * pow2 64 * pow2 64 + r * f3 - c3 * pow2 256 -
+      o34 * pow2 64 - o35 * pow2 64 * pow2 64 - o36 * pow2 64 * pow2 64 * pow2 64) * pow2 64 * pow2 64 * pow2 64 +
+      o34 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+      o35 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+      o36 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+      c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 ==
+      r * f0 + r * f1 * pow2 64 + r * f2 * pow2 64 * pow2 64 + r * f3 * pow2 64 * pow2 64 * pow2 64)
+let lemma_mul4 r f0 f1 f2 f3 c0 c1 c2 c3 o01 o02 o03 o12 o13 o14 o23 o24 o25 o34 o35 o36 =
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+
+  assert_norm (pow2 256 * pow2 64 = pow2 320);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320);
+
+  assert_norm (pow2 256 * pow2 64 * pow2 64 = pow2 384);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
+
+  assert_norm (pow2 256 * pow2 64 * pow2 64 * pow2 64 == pow2 448);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 448)
+
+#set-options "--z3rlimit 50"
+
+val lemma_mul4_expand:
+    f:felem4
+  -> r:felem4
+  -> Lemma (let (f0, f1, f2, f3) = f in
+      as_nat4 r * v f0 + as_nat4 r * v f1 * pow2 64 +
+      as_nat4 r * v f2 * pow2 64 * pow2 64 + as_nat4 r * v f3 * pow2 64 * pow2 64 * pow2 64 ==
+      as_nat4 f * as_nat4 r)
+let lemma_mul4_expand f r = ()

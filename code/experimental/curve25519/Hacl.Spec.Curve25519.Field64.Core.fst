@@ -302,27 +302,27 @@ let fsub4 f1 f2 =
   lemma_fsub4 out2 f1 f2 c0 c1;
   out2
 
+#set-options "--z3rlimit 150 --max_fuel 0"
+
 val mul4:
-    f1:felem4
+    f:felem4
   -> r:felem4
-  -> out:felem_wide4{wide_as_nat4 out == as_nat4 f1 * as_nat4 r}
-let mul4 f1 r =
-  let (f0, f1, f2, f3) = f1 in
+  -> out:felem_wide4{wide_as_nat4 out == as_nat4 f * as_nat4 r}
+let mul4 f r =
+  let (f0, f1, f2, f3) = f in
   let c0, out0 = mul1 r f0 in
-  assert (as_nat4 out0 + v c0 * pow2 256 == as_nat4 r * v f0);
   let (o00, o01, o02, o03) = out0 in
   let c1, out1 = mul1_add r f1 (o01, o02, o03, c0) in
-  assert (as_nat4 out1 + v c1 * pow2 256 == as_nat4 (o01, o02, o03, c0) + as_nat4 r * v f1);
   let (o11, o12, o13, o14) = out1 in
   let c2, out2 = mul1_add r f2 (o12, o13, o14, c1) in
-  assert (as_nat4 out2 + v c2 * pow2 256 == as_nat4 (o12, o13, o14, c1) + as_nat4 r * v f2);
   let (o22, o23, o24, o25) = out2 in
   let c3, out3 = mul1_add r f3 (o23, o24, o25, c2) in
-  assert (as_nat4 out3 + v c3 * pow2 256 == as_nat4 (o23, o24, o25, c2) + as_nat4 r * v f3);
   let (o33, o34, o35, o36) = out3 in
   let o37 = c3 in
   let out = (o00, o11, o22, o33, o34, o35, o36, o37) in
-    admit();
+  lemma_mul4 (as_nat4 r) (v f0) (v f1) (v f2) (v f3) (v c0) (v c1) (v c2) (v c3)
+    (v o01) (v o02) (v o03) (v o12) (v o13) (v o14) (v o23) (v o24) (v o25) (v o34) (v o35) (v o36);
+  lemma_mul4_expand f r;
   out
 
 val fmul4:
@@ -336,6 +336,8 @@ let fmul4 f1 r =
   FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat4 f1 % prime) (as_nat4 r) prime;
   out
 
+#reset-options "--z3rlimit 150"
+
 val fmul14:
     f1:felem4
   -> f2:uint64{v f2 < pow2 17} //121665 < pow2 17
@@ -347,6 +349,8 @@ let fmul14 f1 f2 =
   lemma_fmul14 (as_nat4 f1) (v f2);
   lemma_as_nat4 out0;
   lemma_fmul14_no_carry0 (as_nat4 out0) (as_nat4 f1 * v f2) (v c0);
+  assert (v c0 < pow2 17);
+  assert_norm (38 * pow2 17 < pow2 63);
   let out1 = carry_pass out0 c0 in
   assert (feval out1 == (as_nat4 f1 * v f2) % prime);
   FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat4 f1) (v f2) prime;
