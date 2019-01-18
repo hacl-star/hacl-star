@@ -172,7 +172,7 @@ let acc_inv_t (#w:lanes) (acc:felem5 w) : Type0 =
   forall (i:nat). i < w ==>
    (if uint_v (vec_v o1).[i] >= pow2 26 then
       tup64_fits5 (as_tup64_i acc i) (1, 2, 1, 1, 1) /\
-      uint_v (vec_v o1).[i] % pow2 26 < 64
+      uint_v (vec_v o1).[i] % pow2 26 < 73
     else tup64_fits5 (as_tup64_i acc i) (1, 1, 1, 1, 1))
 
 noextract
