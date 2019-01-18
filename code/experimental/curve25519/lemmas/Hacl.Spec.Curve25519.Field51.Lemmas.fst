@@ -410,7 +410,7 @@ val lemma_carry51:
     l:uint64
   -> cin:uint64
   -> Lemma
-    (requires v l + v cin < pow2 64)
+    (requires felem_fits1 l 2 /\ felem_fits1 cin 8190)
     (ensures (let l0 = (l +! cin) &. mask51 in
       let l1 = (l +! cin) >>. 51ul in
       v l + v cin == v l1 * pow2 51 + v l0 /\
@@ -446,23 +446,18 @@ let lemma_carry51_wide #m l cin =
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 51 64;
   FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 51)
 
-val lemma_carry_wide5_simplify:
-  inp:felem_wide5{felem_wide_fits5 inp (6579, 4797, 3340, 1881, 423)} ->
+val lemma_carry5_simplify:
   c0:uint64 -> c1:uint64 -> c2:uint64 -> c3:uint64 -> c4:uint64 ->
   t0:uint64 -> t1:uint64 -> t2:uint64 -> t3:uint64 -> t4:uint64 ->
   Lemma
-    (requires
-    feval_wide inp ==
-    (v c0 * pow2 51 + v t0 +
+   ((v c0 * pow2 51 + v t0 +
     (v c1 * pow2 51 + v t1 - v c0) * pow51 +
     (v c2 * pow2 51 + v t2 - v c1) * pow51 * pow51 +
     (v c3 * pow2 51 + v t3 - v c2) * pow51 * pow51 * pow51 +
-    (v c4 * pow2 51 + v t4 - v c3) * pow51 * pow51 * pow51 * pow51) % prime)
-   (ensures
-    feval_wide inp ==
+    (v c4 * pow2 51 + v t4 - v c3) * pow51 * pow51 * pow51 * pow51) % prime ==
     (v t0 + v c4 * 19 + v t1 * pow51 + v t2 * pow51 * pow51 +
      v t3 * pow51 * pow51 * pow51 + v t4 * pow51 * pow51 * pow51 * pow51) % prime)
-let lemma_carry_wide5_simplify inp c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
+let lemma_carry5_simplify c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
   assert (
     v c0 * pow2 51 + v t0 +
     (v c1 * pow2 51 + v t1 - v c0) * pow51 +

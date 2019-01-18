@@ -113,6 +113,13 @@ let load_felem #s f b =
   | M51 -> F51.load_felem f b
   | M64 -> F64.load_felem f b
 
+val store_felem_pre: #s:field_spec -> h:mem -> f:felem s -> Type0
+let store_felem_pre #s h f =
+  match s with
+  | M26 -> True
+  | M51 -> F51.mul_inv_t h f
+  | M64 -> True
+
 inline_for_extraction
 val store_felem:
     #s:field_spec
@@ -120,7 +127,8 @@ val store_felem:
   -> f:felem s
   -> Stack unit
     (requires fun h ->
-      live h f /\ live h b /\ disjoint f b)
+      live h f /\ live h b /\ disjoint f b /\
+      store_felem_pre h f)
     (ensures  fun h0 _ h1 -> modifies (loc b |+| loc f) h0 h1)
 let store_felem #s b f =
   match s with
@@ -242,7 +250,7 @@ val fmul_fsqr_post:#s:field_spec -> h:mem -> out:felem s -> Type0
 let fmul_fsqr_post #s h out =
   match s with
   | M26 -> True
-  | M51 -> F51.felem_fits h out (1, 2, 1, 1, 1)
+  | M51 -> F51.mul_inv_t h out
   | M64 -> True
 
 inline_for_extraction
@@ -286,8 +294,8 @@ let fmul2_fsqr2_post #s h out =
   | M51 ->
       let out0 = gsub out 0ul 5ul in
       let out1 = gsub out 5ul 5ul in
-      F51.felem_fits h out0 (1, 2, 1, 1, 1) /\
-      F51.felem_fits h out1 (1, 2, 1, 1, 1)
+      F51.mul_inv_t h out0 /\
+      F51.mul_inv_t h out1
   | M64 -> True
 
 inline_for_extraction

@@ -76,6 +76,21 @@ let felem_wide_fits h f m =
   let s4 = s.[4] in
   S.felem_wide_fits5 (s0, s1, s2, s3, s4) m
 
+noextract
+let as_felem (h:mem) (f:felem) : GTot felem5 =
+  let s = as_seq h f in
+  let s0 = s.[0] in
+  let s1 = s.[1] in
+  let s2 = s.[2] in
+  let s3 = s.[3] in
+  let s4 = s.[4] in
+  (s0, s1, s2, s3, s4)
+
+noextract
+let mul_inv_t (h:mem) (f:felem) : GTot Type0 =
+  let f = as_felem h f in
+  mul_inv_t f
+
 inline_for_extraction
 val create_felem: unit
   -> StackInline felem
@@ -213,7 +228,7 @@ val fmul:
       felem_fits h f2 (9, 10, 9, 9, 9))
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-      felem_fits h1 out (1, 2, 1, 1, 1) /\
+      mul_inv_t h1 out /\
       fevalh h1 out == P.fmul (fevalh h0 f1) (fevalh h0 f2))
 [@ CInline]
 let fmul out f1 f2 =
@@ -259,8 +274,8 @@ val fmul2:
       let f11 = gsub f1 5ul 5ul in
       let f20 = gsub f2 0ul 5ul in
       let f21 = gsub f2 5ul 5ul in
-      felem_fits h1 out0 (1, 2, 1, 1, 1) /\
-      felem_fits h1 out1 (1, 2, 1, 1, 1) /\
+      mul_inv_t h1 out0 /\
+      mul_inv_t h1 out1 /\
       fevalh h1 out0 == P.fmul (fevalh h0 f10) (fevalh h0 f20) /\
       fevalh h1 out1 == P.fmul (fevalh h0 f11) (fevalh h0 f21)))
 [@ CInline]
@@ -316,7 +331,7 @@ val fmul1:
       S.felem_fits1 f2 1)
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-      felem_fits h1 out (1, 2, 1, 1, 1) /\
+      mul_inv_t h1 out /\
       fevalh h1 out == (fevalh h0 f1 * v f2) % P.prime)
 [@ CInline]
 let fmul1 out f1 f2 =
@@ -341,7 +356,7 @@ val fsqr:
       felem_fits h f (9, 10, 9, 9, 9))
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-      felem_fits h1 out (1, 2, 1, 1, 1) /\
+      mul_inv_t h1 out /\
       fevalh h1 out == P.fsqr (fevalh h0 f))
 [@ CInline]
 let fsqr out f =
@@ -373,8 +388,8 @@ val fsqr2:
       let out2 = gsub out 5ul 5ul in
       let f1 = gsub f 0ul 5ul in
       let f2 = gsub f 5ul 5ul in
-      felem_fits h1 out1 (1, 2, 1, 1, 1) /\
-      felem_fits h1 out2 (1, 2, 1, 1, 1) /\
+      mul_inv_t h1 out1 /\
+      mul_inv_t h1 out2 /\
       fevalh h1 out1 == P.fsqr (fevalh h0 f1) /\
       fevalh h1 out2 == P.fsqr (fevalh h0 f2)))
 [@ CInline]
@@ -432,31 +447,12 @@ let load_felem f u64s =
   f.(4ul) <- f3h;
   Lemmas.lemma_load_felem (as_seq h0 u64s)
 
-let uint64_eq_mask (a:uint64) (b:uint64) : uint64 =
-  let x = a ^. b in
-  let minus_x = (lognot x) +. (u64 1) in
-  let x_or_minus_x = x |. minus_x in
-  let xnx = x_or_minus_x >>. 63ul in
-  let c = xnx -. (u64 1) in
-  c
-
-let uint64_gte_mask (a:uint64) (b:uint64) : uint64 =
-  let x = a in
-  let y = b in
-  let x_xor_y = logxor x y in
-  let x_sub_y = x -. y in
-  let x_sub_y_xor_y = x_sub_y ^. y in
-  let q = logor x_xor_y x_sub_y_xor_y in
-  let x_xor_q = logxor x q in
-  let x_xor_q_ = shift_right x_xor_q 63ul in
-  let c = sub_mod x_xor_q_ (u64 1) in
-  c
-
 val store_felem:
     u64s:lbuffer uint64 4ul
   -> f:felem
   -> Stack unit
-    (requires fun h -> live h f /\ live h u64s)
+    (requires fun h ->
+      live h f /\ live h u64s /\ mul_inv_t h f)
     (ensures  fun h0 _ h1 -> modifies (loc u64s) h0 h1)
 let store_felem u64s f =
   let f0 = f.(0ul) in
@@ -464,19 +460,7 @@ let store_felem u64s f =
   let f2 = f.(2ul) in
   let f3 = f.(3ul) in
   let f4 = f.(4ul) in
-  let (f0, f1, f2, f3, f4) = carry_felem5 (f0, f1, f2, f3, f4) in
-  let (f0, f1, f2, f3, f4) = carry_felem5 (f0, f1, f2, f3, f4) in
-  let m0 = uint64_gte_mask f0 (u64 0x7ffffffffffed) in
-  let m1 = uint64_eq_mask f1 (u64 0x7ffffffffffff) in
-  let m2 = uint64_eq_mask f2 (u64 0x7ffffffffffff) in
-  let m3 = uint64_eq_mask f3 (u64 0x7ffffffffffff) in
-  let m4 = uint64_eq_mask f4 (u64 0x7ffffffffffff) in
-  let mask = m0 &. m1 &. m2 &. m3 &. m4 in
-  let f0 = f0 -. (mask &. u64 0x7ffffffffffed) in
-  let f1 = f1 -. (mask &. u64 0x7ffffffffffff) in
-  let f2 = f2 -. (mask &. u64 0x7ffffffffffff) in
-  let f3 = f3 -. (mask &. u64 0x7ffffffffffff) in
-  let f4 = f4 -. (mask &. u64 0x7ffffffffffff) in
+  let (f0, f1, f2, f3, f4) = reduce_felem5 (f0, f1, f2, f3, f4) in
   let f0 = f0 ^. (f1 <<. 51ul) in
   let f1 = (f1 >>. 13ul) ^. (f2 <<. 38ul) in
   let f2 = (f2 >>. 26ul) ^. (f3 <<. 25ul) in
@@ -485,7 +469,6 @@ let store_felem u64s f =
   u64s.(1ul) <- f1;
   u64s.(2ul) <- f2;
   u64s.(3ul) <- f3
-
 
 [@CInline]
 val cswap2: bit:uint64 -> p1:felem2 -> p2:felem2 -> Stack unit
