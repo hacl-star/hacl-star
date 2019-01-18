@@ -259,7 +259,7 @@ val lemma_fmul5_pow26:
   r:tup64_5
   -> Lemma
     (requires
-      (let (r0, r1, r2, r3, r4) = r in v r4 * 5 <= 5 * pow26))
+      (let (r0, r1, r2, r3, r4) = r in v r4 * 5 <= 10 * pow26))
     (ensures
       (let (r0, r1, r2, r3, r4) = r in
       (pow26 * as_nat5 r) % prime == as_nat5 (r4 *! u64 5, r0, r1, r2, r3) % prime))
@@ -288,7 +288,7 @@ val lemma_fmul5_pow26_pow26:
   -> Lemma
     (requires
      (let (r0, r1, r2, r3, r4) = r in
-      v r4 * 5 <= 5 * pow26 /\ v r3 * 5 <= 5 * pow26))
+      v r4 * 5 <= 10 * pow26 /\ v r3 * 5 <= 10 * pow26))
     (ensures
       (let (r0, r1, r2, r3, r4) = r in
       (pow26 * pow26 * as_nat5 r) % prime ==
@@ -310,8 +310,8 @@ val lemma_fmul5_pow26_pow26_pow26:
   -> Lemma
     (requires
      (let (r0, r1, r2, r3, r4) = r in
-      v r4 * 5 <= 5 * pow26 /\ v r3 * 5 <= 5 * pow26 /\
-      v r2 * 5 <= 5 * pow26))
+      v r4 * 5 <= 10 * pow26 /\ v r3 * 5 <= 10 * pow26 /\
+      v r2 * 5 <= 10 * pow26))
     (ensures
       (let (r0, r1, r2, r3, r4) = r in
       (pow26 * pow26 * pow26 * as_nat5 r) % prime ==
@@ -333,8 +333,8 @@ val lemma_fmul5_pow26_pow26_pow26_pow26:
   -> Lemma
     (requires
       (let (r0, r1, r2, r3, r4) = r in
-      v r4 * 5 <= 5 * pow26 /\ v r3 * 5 <= 5 * pow26 /\
-      v r2 * 5 <= 5 * pow26 /\ v r1 * 5 <= 5 * pow26))
+      v r4 * 5 <= 10 * pow26 /\ v r3 * 5 <= 10 * pow26 /\
+      v r2 * 5 <= 10 * pow26 /\ v r1 * 5 <= 10 * pow26))
     (ensures
       (let (r0, r1, r2, r3, r4) = r in
       (pow26 * pow26 * pow26 * pow26 * as_nat5 r) % prime ==
@@ -354,7 +354,7 @@ let lemma_fmul5_pow26_pow26_pow26_pow26 r =
 
 val lemma_fmul5_1:
     f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
-  -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
+  -> r:tup64_5{tup64_fits5 r (1, 2, 1, 1, 1)}
   -> Lemma
     (requires
      (let (f10, f11, f12, f13, f14) = f1 in
@@ -400,7 +400,7 @@ let lemma_fmul5_1 f1 r =
 
 val lemma_fmul5_2:
     f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
-  -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
+  -> r:tup64_5{tup64_fits5 r (1, 2, 1, 1, 1)}
   -> Lemma
     (requires
      (let (f10, f11, f12, f13, f14) = f1 in
@@ -447,7 +447,7 @@ let lemma_fmul5_2 f1 r =
 
 val lemma_fmul5_3:
     f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
-  -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
+  -> r:tup64_5{tup64_fits5 r (1, 2, 1, 1, 1)}
   -> Lemma
     (requires
      (let (f10, f11, f12, f13, f14) = f1 in
@@ -494,7 +494,7 @@ let lemma_fmul5_3 f1 r =
 
 val lemma_fmul5_4:
     f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
-  -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
+  -> r:tup64_5{tup64_fits5 r (1, 2, 1, 1, 1)}
   -> Lemma
     (requires
      (let (f10, f11, f12, f13, f14) = f1 in
@@ -541,7 +541,7 @@ let lemma_fmul5_4 f1 r =
 
 val mul_felem5_lemma:
     f1:tup64_5{tup64_fits5 f1 (2, 3, 2, 2, 2)}
-  -> r:tup64_5{tup64_fits5 r (1, 1, 1, 1, 1)}
+  -> r:tup64_5{tup64_fits5 r (1, 2, 1, 1, 1)}
   -> Lemma
     (let (f10, f11, f12, f13, f14) = f1 in
      let (r0, r1, r2, r3, r4) = r in
@@ -571,7 +571,7 @@ val precomp_r5_as_tup64:
   -> r:felem5 w
   -> i:nat{i < w}
   -> Lemma
-    (requires felem_fits5 r (1, 1, 1, 1, 1))
+    (requires felem_fits5 r (1, 2, 1, 1, 1))
     (ensures
      (let r5 = precomp_r5 r in
       let (tr50, tr51, tr52, tr53, tr54) = as_tup64_i r5 i in
@@ -608,8 +608,8 @@ val mul_felem5_eval_as_tup64:
   -> Lemma
     (requires
       felem_fits5 f1 (2, 3, 2, 2, 2) /\
-      felem_fits5 r (1, 1, 1, 1, 1) /\
-      felem_fits5 r5 (5, 5, 5, 5, 5) /\
+      felem_fits5 r (1, 2, 1, 1, 1) /\
+      felem_fits5 r5 (5, 10, 5, 5, 5) /\
       r5 == precomp_r5 r)
     (ensures
      (let (r0, r1, r2, r3, r4) = r in
@@ -700,14 +700,6 @@ let carry26_wide_lemma_i #w #m l cin i =
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 26 32;
   FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 26)
 
-val vec_smul_mod_fits_lemma:
-    #w:lanes
-  -> c4:uint64xN w
-  -> Lemma
-    (requires felem_fits1 c4 12)
-    (ensures  felem_fits1 (vec_smul_mod c4 (u64 5)) 62)
-let vec_smul_mod_fits_lemma #w c4 = ()
-
 val acc_inv_lemma_i:
     #w:lanes
   -> acc:felem5 w
@@ -757,6 +749,14 @@ let acc_inv_lemma #w acc cin =
     acc_inv_lemma_i #w acc cin 1;
     acc_inv_lemma_i #w acc cin 2;
     acc_inv_lemma_i #w acc cin 3
+
+val vec_smul_mod_fits_lemma:
+    #w:lanes
+  -> c4:uint64xN w
+  -> Lemma
+    (requires felem_fits1 c4 12)
+    (ensures  felem_fits1 (vec_smul_mod c4 (u64 5)) 62)
+let vec_smul_mod_fits_lemma #w c4 = ()
 
 val carry_wide_felem5_lemma:
   vc0:nat -> vc1:nat -> vc2:nat -> vc3:nat -> vc4:nat ->

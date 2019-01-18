@@ -126,7 +126,6 @@ val load_felem_le:
       felem_less #(width s) h1 f (pow2 128) /\
       feval h1 f == LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b)))
 let load_felem_le #s f b =
-  admit();
   match s with
   | M32  -> F32xN.load_felem_le #1 f b
   | M128 -> F32xN.load_felem_le #2 f b
@@ -145,7 +144,6 @@ val load_felems_le:
       felem_less #(width s) h1 f (pow2 128) /\
       feval h1 f == S.load_elem #(width s) (as_seq h0 b))
 let load_felems_le #s f b =
-  admit();
   match s with
   | M32  -> F32xN.load_felems_le #1 f b
   | M128 -> F32xN.load_felems_le #2 f b
@@ -250,7 +248,7 @@ val reduce_felem:
       modifies (loc f) h0 h1 /\
       feval h1 f == feval h0 f /\
       felem_less #(width s) h1 f S.prime)
-let reduce_felem #s f = admit();
+let reduce_felem #s f =
   match s with
   | M32  -> F32xN.reduce_felem #1 f
   | M128 -> F32xN.reduce_felem #2 f
@@ -289,7 +287,7 @@ val load_precompute_r:
       load_precompute_r_post #s h1 p /\
       feval h1 (gsub p 0ul 5ul) ==
         LSeq.create (width s) (uint_v r1 * pow2 64 + uint_v r0))
-let load_precompute_r #s p r0 r1 = admit();
+let load_precompute_r #s p r0 r1 =
   match s with
   | M32  -> F32xN.load_precompute_r #1 p r0 r1
   | M128 -> F32xN.load_precompute_r #2 p r0 r1
@@ -342,11 +340,11 @@ val fmul_rn:
       acc_inv_t #(width s) (as_tup5 h1 out) /\
       feval h1 out == LSeq.map2 S.pfmul (feval h0 f1) (feval h0 (gsub precomp 10ul 5ul)))
 let fmul_rn #s out f1 precomp =
-  admit();
   match s with
   | M32  -> F32xN.fmul_rn #1 out f1 precomp
   | M128 -> F32xN.fmul_rn #2 out f1 precomp
   | M256 -> F32xN.fmul_rn #4 out f1 precomp
+
 
 let norm (#w:lanes) (n:LSeq.lseq S.pfelem w) (r:S.pfelem) =
   match w with

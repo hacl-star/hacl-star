@@ -162,7 +162,9 @@ let uint64xN_v (#w:lanes) (e:uint64xN w) : lseq nat w =
 let uint64xN_fits (#w:lanes) (x:uint64xN w) (m:nat) =
   forall (i:nat). i < w ==> uint_v (vec_v x).[i] < m
 
-
+noextract
+let felem_less5 (#w:lanes) (f:felem5 w) (max:nat) : Type0 =
+  forall (i:nat). i < w ==> as_nat5 (as_tup64_i f i) < max
 
 noextract
 let acc_inv_t (#w:lanes) (acc:felem5 w) : Type0 =

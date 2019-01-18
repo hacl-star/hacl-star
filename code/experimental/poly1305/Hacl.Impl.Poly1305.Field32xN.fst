@@ -2,6 +2,7 @@ module Hacl.Impl.Poly1305.Field32xN
 
 open FStar.HyperStack
 open FStar.HyperStack.All
+open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
@@ -14,6 +15,7 @@ open Hacl.Spec.Poly1305.Field32xN.Lemmas
 module S = Hacl.Spec.Poly1305.Vec
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
+module BSeq = Lib.ByteSequence
 
 let felem (w:lanes) = lbuffer (uint64xN w) 5ul
 let felem_wide (w:lanes) = felem w
@@ -53,8 +55,7 @@ let fas_nat (#w:lanes) (h:mem) (f:felem w) : GTot (LSeq.lseq nat w) =
 
 noextract
 let felem_less (#w:lanes) (h:mem) (f:felem w) (max:nat) : Type0 =
-  let f = as_tup5 h f in
-  forall (i:nat). i < w ==> as_nat5 (as_tup64_i f i) < max
+  felem_less5 (as_tup5 h f) max
 
 inline_for_extraction
 val create_felem:
@@ -183,54 +184,6 @@ let fadd #w out f1 f2 =
   out.(1ul) <- o1;
   out.(2ul) <- o2;
   out.(3ul) <- o3;
-  out.(4ul) <- o4;
-  ()
-
-inline_for_extraction
-val mul_felem:
-    #w:lanes
-  -> out:felem_wide w
-  -> f1:felem w
-  -> r:felem w
-  -> r5:felem w
-  -> Stack unit
-    (requires fun h ->
-      live h out /\ live h f1 /\ live h r /\ live h r5 /\
-      felem_fits h f1 (2, 3, 2, 2, 2) /\
-      felem_fits h r (1, 1, 1, 1, 1) /\
-      felem_fits h r5 (5, 5, 5, 5, 5) /\
-      as_tup5 h r5 == precomp_r5 (as_tup5 h r))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
-      //as_tup5 h1 out == mul_felem5 (as_tup5 h0 f1) (as_tup5 h0 r) (as_tup5 h0 r5) /\
-      felem_wide_fits h1 out (47, 35, 27, 19, 11) /\
-      feval h1 out == LSeq.map2 (S.pfmul) (feval h0 f1) (feval h0 r))
-[@ CInline]
-let mul_felem #w out f1 r r5 =
-  let r0 = r.(0ul) in
-  let r1 = r.(1ul) in
-  let r2 = r.(2ul) in
-  let r3 = r.(3ul) in
-  let r4 = r.(4ul) in
-
-  let r50 = r5.(0ul) in
-  let r51 = r5.(1ul) in
-  let r52 = r5.(2ul) in
-  let r53 = r5.(3ul) in
-  let r54 = r5.(4ul) in
-
-  let f10 = f1.(0ul) in
-  let f11 = f1.(1ul) in
-  let f12 = f1.(2ul) in
-  let f13 = f1.(3ul) in
-  let f14 = f1.(4ul) in
-  let (o0, o1, o2, o3, o4) =
-    mul_felem5 #w (f10, f11, f12, f13, f14)
-      (r0, r1, r2, r3, r4) (r50, r51, r52, r53, r54) in
-  out.(0ul) <- o0;
-  out.(1ul) <- o1;
-  out.(2ul) <- o2;
-  out.(3ul) <- o3;
   out.(4ul) <- o4
 
 #reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq'"
@@ -240,26 +193,21 @@ val fmul_r:
     #w:lanes
   -> out:felem w
   -> f1:felem w
-  -> p:precomp_r w
+  -> r:felem w
+  -> r5:felem w
   -> Stack unit
     (requires fun h ->
-      live h out /\ live h f1 /\ live h p /\
-     (let r = gsub p 0ul 5ul in
-      let r5 = gsub p 5ul 5ul in
+      live h out /\ live h f1 /\
+      live h r /\ live h r5 /\
       felem_fits h f1 (2, 3, 2, 2, 2) /\
-      felem_fits h r (1, 1, 1, 1, 1) /\
-      felem_fits h r5 (5, 5, 5, 5, 5) /\
-      as_tup5 h r5 == precomp_r5 (as_tup5 h r)))
+      felem_fits h r (1, 2, 1, 1, 1) /\
+      felem_fits h r5 (5, 10, 5, 5, 5) /\
+      as_tup5 h r5 == precomp_r5 (as_tup5 h r))
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-     (let r = gsub p 0ul 5ul in
-      let r5 = gsub p 5ul 5ul in
-      //as_tup5 h1 out == fmul_r5 (as_tup5 h0 f1) (as_tup5 h0 r) (as_tup5 h0 r5)))
       acc_inv_t (as_tup5 h1 out) /\
-      feval h1 out == LSeq.map2 (S.pfmul) (feval h0 f1) (feval h0 r)))
-let fmul_r #w out f1 p =
-  let r = sub p 0ul 5ul in
-  let r5 = sub p 5ul 5ul in
+      feval h1 out == LSeq.map2 (S.pfmul) (feval h0 f1) (feval h0 r))
+let fmul_r #w out f1 r r5 =
   let r0 = r.(0ul) in
   let r1 = r.(1ul) in
   let r2 = r.(2ul) in
@@ -305,11 +253,10 @@ val fadd_mul_r:
       as_tup5 h r5 == precomp_r5 (as_tup5 h r)))
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
-     (let r = gsub p 0ul 5ul in
-      let r5 = gsub p 5ul 5ul in
       //as_tup5 h1 acc == fadd_mul_r5 (as_tup5 h0 acc) (as_tup5 h0 f1) (as_tup5 h0 r) (as_tup5 h0 r5) /\
       acc_inv_t (as_tup5 h1 acc) /\
-      feval h1 acc == LSeq.map2 (S.pfmul) (LSeq.map2 (S.pfadd) (feval h0 acc) (feval h0 f1)) (feval h0 r)))
+      feval h1 acc == LSeq.map2 (S.pfmul)
+        (LSeq.map2 (S.pfadd) (feval h0 acc) (feval h0 f1)) (feval h0 (gsub p 0ul 5ul)))
 let fadd_mul_r #w out f1 p =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -353,46 +300,34 @@ val fmul_rn:
   -> f1:felem w
   -> p:precomp_r w
   -> Stack unit
-    (requires fun h -> live h out /\ live h f1 /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (requires fun h ->
+      live h out /\ live h f1 /\ live h p /\
+     (let rn = gsub p 10ul 5ul in
+      let rn_5 = gsub p 15ul 5ul in
+      felem_fits h f1 (2, 3, 2, 2, 2) /\
+      felem_fits h rn (1, 2, 1, 1, 1) /\
+      felem_fits h rn_5 (5, 10, 5, 5, 5) /\
+      as_tup5 h rn_5 == precomp_r5 (as_tup5 h rn)))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      acc_inv_t (as_tup5 h1 out) /\
+      feval h1 out == LSeq.map2 S.pfmul (feval h0 f1) (feval h0 (gsub p 10ul 5ul)))
 let fmul_rn #w out f1 p =
   let rn = sub p 10ul 5ul in
   let rn5 = sub p 15ul 5ul in
-
-  let rn0 = rn.(0ul) in
-  let rn1 = rn.(1ul) in
-  let rn2 = rn.(2ul) in
-  let rn3 = rn.(3ul) in
-  let rn4 = rn.(4ul) in
-
-  let rn50 = rn5.(0ul) in
-  let rn51 = rn5.(1ul) in
-  let rn52 = rn5.(2ul) in
-  let rn53 = rn5.(3ul) in
-  let rn54 = rn5.(4ul) in
-
-  let f10 = f1.(0ul) in
-  let f11 = f1.(1ul) in
-  let f12 = f1.(2ul) in
-  let f13 = f1.(3ul) in
-  let f14 = f1.(4ul) in
-
-  let (o0, o1, o2, o3, o4) =
-    fmul_rn5 #w (f10, f11, f12, f13, f14)
-      (rn0, rn1, rn2, rn3, rn4) (rn50, rn51, rn52, rn53, rn54) in
-  out.(0ul) <- o0;
-  out.(1ul) <- o1;
-  out.(2ul) <- o2;
-  out.(3ul) <- o3;
-  out.(4ul) <- o4
+  fmul_r #w out f1 rn rn5
 
 inline_for_extraction
 val reduce_felem:
     #w:lanes
   -> f:felem w
   -> Stack unit
-    (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
+    (requires fun h ->
+      live h f /\ acc_inv_t (as_tup5 h f))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      feval h1 f == feval h0 f /\
+      felem_less h1 f S.prime)
 let reduce_felem #w f =
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
@@ -429,176 +364,25 @@ let precompute_shift_reduce #w f1 f2 =
   f1.(3ul) <- vec_smul_mod f23 (u64 5);
   f1.(4ul) <- vec_smul_mod f24 (u64 5)
 
-//[@ CInline]
-inline_for_extraction
-val carry_wide_felem:
+noextract
+val load_precompute_r_post:
     #w:lanes
-  -> out:felem w
-  -> inp:felem_wide w
-  -> Stack unit
-    (requires fun h -> live h out /\ live h inp)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
-[@ CInline]
-let carry_wide_felem #w out inp =
-  let i0 = inp.(0ul) in
-  let i1 = inp.(1ul) in
-  let i2 = inp.(2ul) in
-  let i3 = inp.(3ul) in
-  let i4 = inp.(4ul) in
-  let (t0, t1, t2, t3, t4) =
-    carry_wide_felem5 (i0, i1, i2, i3, i4) in
-  out.(0ul) <- t0;
-  out.(1ul) <- t1;
-  out.(2ul) <- t2;
-  out.(3ul) <- t3;
-  out.(4ul) <- t4
-
-//[@ CInline]
-inline_for_extraction
-val carry_full_felem:
-    #w:lanes
-  -> out:felem w
-  -> inp:felem_wide w
-  -> Stack unit
-    (requires fun h -> live h out /\ live h inp)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
-[@ CInline]
-let carry_full_felem #w out inp =
-  let i0 = inp.(0ul) in
-  let i1 = inp.(1ul) in
-  let i2 = inp.(2ul) in
-  let i3 = inp.(3ul) in
-  let i4 = inp.(4ul) in
-  let (t0, t1, t2, t3, t4) =
-    carry_full_felem5 (i0, i1, i2, i3, i4) in
-  out.(0ul) <- t0;
-  out.(1ul) <- t1;
-  out.(2ul) <- t2;
-  out.(3ul) <- t3;
-  out.(4ul) <- t4
-
-inline_for_extraction
-val fmul_r1_normalize:
-    out:felem 1
-  -> p:precomp_r 1
-  -> Stack unit
-    (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
-[@ CInline]
-let fmul_r1_normalize out p =
-  push_frame();
-  admit();
-  let tmp = create_felem 1 in
-  let r = sub p 0ul 5ul in
-  let r_5 = sub p 5ul 5ul in
-  mul_felem tmp out r r_5;
-  carry_wide_felem out tmp;
-  pop_frame()
-
-inline_for_extraction
-val fmul_r2_normalize:
-    out:felem 2
-  -> p:precomp_r 2
-  -> Stack unit
-    (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
-[@ CInline]
-let fmul_r2_normalize out p =
-  push_frame();
-  admit();
-  let tmp = create_felem 2 in
-  let r = sub p 0ul 5ul in
-  let r2 = sub p 10ul 5ul in
-  let r2_5 = sub p 15ul 5ul in
-  r2.(0ul) <- vec_interleave_low r2.(0ul) r.(0ul);
-  r2.(1ul) <- vec_interleave_low r2.(1ul) r.(1ul);
-  r2.(2ul) <- vec_interleave_low r2.(2ul) r.(2ul);
-  r2.(3ul) <- vec_interleave_low r2.(3ul) r.(3ul);
-  r2.(4ul) <- vec_interleave_low r2.(4ul) r.(4ul);
-  precompute_shift_reduce r2_5 r2;
-  mul_felem tmp out r2 r2_5;
-  carry_wide_felem out tmp;
-  let o0 = out.(0ul) in
-  let o1 = out.(1ul) in
-  let o2 = out.(2ul) in
-  let o3 = out.(3ul) in
-  let o4 = out.(4ul) in
-  let o0 = vec_add_mod o0 (vec_interleave_high o0 o0) in
-  let o1 = vec_add_mod o1 (vec_interleave_high o1 o1) in
-  let o2 = vec_add_mod o2 (vec_interleave_high o2 o2) in
-  let o3 = vec_add_mod o3 (vec_interleave_high o3 o3) in
-  let o4 = vec_add_mod o4 (vec_interleave_high o4 o4) in
-  let (o0, o1, o2, o3, o4) = carry_full_felem5 (o0, o1, o2, o3, o4) in
-  out.(0ul) <- o0;
-  out.(1ul) <- o1;
-  out.(2ul) <- o2;
-  out.(3ul) <- o3;
-  out.(4ul) <- o4;
-  pop_frame()
-
-inline_for_extraction
-val fmul_r4_normalize:
-    out:felem 4
-  -> p:precomp_r 4
-  -> Stack unit
-    (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
-[@ CInline]
-let fmul_r4_normalize out p =
-  push_frame();
-  admit();
-  let r = sub p 0ul 5ul in
-  let r_5 = sub p 5ul 5ul in
-  let r4 = sub p 10ul 5ul in
-  let r4_5 = sub p 15ul 5ul in
-  let r2 = create_felem 4 in
-  let r3 = create_felem 4 in
-  let tmp = create_felem 4 in
-  mul_felem tmp r r r_5;
-  carry_wide_felem r2 tmp;
-  mul_felem tmp r2 r r_5;
-  carry_wide_felem r3 tmp;
-  let h0 = ST.get() in
-  loop_nospec #h0 5ul r2
-  (fun i ->
-    let v1212 = vec_interleave_low r2.(i) r.(i) in
-    let v3434 = vec_interleave_low r4.(i) r3.(i) in
-    let v1234 = vec_interleave_low (cast U128 2 v3434) (cast U128 2 v1212) in
-    r2.(i) <- cast U64 4 v1234
-  );
-
-  let r1234 = r2 in
-  let r1234_5 = r3 in
-  precompute_shift_reduce r1234_5 r1234;
-  mul_felem tmp out r1234 r1234_5;
-  carry_wide_felem out tmp;
-
-  loop_nospec #h0 5ul out
-  (fun i ->
-    let oi = out.(i) in
-    let v0 = cast U64 4 (vec_interleave_high (cast U128 2 oi) (cast U128 2 oi)) in
-    let v1 = vec_add_mod oi v0 in
-    let v2 = vec_add_mod v1 (vec_permute4 v1 1ul 1ul 1ul 1ul) in
-    out.(i) <- v2
-  );
-  carry_full_felem out out;
-  pop_frame()
-
-inline_for_extraction
-val fmul_rn_normalize:
-    #w:lanes
-  -> out:felem w
+  -> h:mem
   -> p:precomp_r w
-  -> Stack unit
-    (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
-[@ CInline]
-let fmul_rn_normalize #w out p =
-  match w with
-  | 1 -> fmul_r1_normalize out p
-  | 2 -> fmul_r2_normalize out p
-  | 4 -> fmul_r4_normalize out p
-
+  -> Type0
+let load_precompute_r_post #s h p =
+  assert_norm (pow2 128 < S.prime);
+  let r = gsub p 0ul 5ul in
+  let r_5 = gsub p 5ul 5ul in
+  let rn = gsub p 10ul 5ul in
+  let rn_5 = gsub p 15ul 5ul in
+  felem_fits h r (1, 1, 1, 1, 1) /\
+  felem_fits h r_5 (5, 5, 5, 5, 5) /\
+  felem_fits h rn (1, 2, 1, 1, 1) /\
+  felem_fits h rn_5 (5, 10, 5, 5, 5) /\
+  as_tup5 h r_5 == precomp_r5 (as_tup5 h r) /\
+  as_tup5 h rn_5 == precomp_r5 (as_tup5 h rn) /\
+  feval h rn == S.compute_rw (feval h r)
 
 inline_for_extraction
 val load_felem:
@@ -625,7 +409,6 @@ val load_precompute_r1:
     (requires fun h -> live h p)
     (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1)
 let load_precompute_r1 p r0 r1 =
-  push_frame();
   admit();
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -636,8 +419,7 @@ let load_precompute_r1 p r0 r1 =
   load_felem r r_vec0 r_vec1;
   precompute_shift_reduce r5 r;
   copy_felem rn r;
-  copy_felem rn_5 r5;
-  pop_frame()
+  copy_felem rn_5 r5
 
 inline_for_extraction
 val load_precompute_r2:
@@ -648,7 +430,6 @@ val load_precompute_r2:
     (requires fun h -> live h p)
     (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1)
 let load_precompute_r2 p r0 r1 =
-  push_frame();
   admit();
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -658,11 +439,8 @@ let load_precompute_r2 p r0 r1 =
   let r_vec1 = vec_load r1 2 in
   load_felem r r_vec0 r_vec1;
   precompute_shift_reduce r5 r;
-  let tmp = create_felem 2 in
-  mul_felem tmp r r r5;
-  carry_wide_felem rn tmp;
-  precompute_shift_reduce rn_5 rn;
-  pop_frame()
+  fmul_r rn r r r5;
+  precompute_shift_reduce rn_5 rn
 
 inline_for_extraction
 val load_precompute_r4:
@@ -673,7 +451,6 @@ val load_precompute_r4:
     (requires fun h -> live h p)
     (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1)
 let load_precompute_r4 p r0 r1 =
-  push_frame();
   admit();
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -683,14 +460,10 @@ let load_precompute_r4 p r0 r1 =
   let r_vec1 = vec_load r1 4 in
   load_felem r r_vec0 r_vec1;
   precompute_shift_reduce r5 r;
-  let tmp = create_felem 4 in
-  mul_felem tmp r r r5;
-  carry_wide_felem rn tmp;
+  fmul_r rn r r r5;
   precompute_shift_reduce rn_5 rn;
-  mul_felem tmp rn rn rn_5;
-  carry_wide_felem rn tmp;
-  precompute_shift_reduce rn_5 rn;
-  pop_frame()
+  fmul_r rn rn rn rn_5;
+  precompute_shift_reduce rn_5 rn
 
 inline_for_extraction
 val load_precompute_r:
@@ -700,8 +473,12 @@ val load_precompute_r:
   -> r1:uint64
   -> Stack unit
     (requires fun h -> live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1)
-let load_precompute_r #w p r0 r1 =
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p) h0 h1 /\
+      load_precompute_r_post #w h1 p /\
+      feval h1 (gsub p 0ul 5ul) ==
+        LSeq.create w (uint_v r1 * pow2 64 + uint_v r0))
+let load_precompute_r #w p r0 r1 = admit();
   match w with
   | 1 -> load_precompute_r1 p r0 r1
   | 2 -> load_precompute_r2 p r0 r1
@@ -758,13 +535,16 @@ val load_felems_le:
   -> b:lbuffer uint8 (size w *! 16ul)
   -> Stack unit
     (requires fun h -> live h f /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let load_felems_le #w f b =
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
+      felem_less h1 f (pow2 128) /\
+      feval h1 f == S.load_elem (as_seq h0 b))
+let load_felems_le #w f b = admit();
   match w with
   | 1 -> load_felem1_le f b
   | 2 -> load_felem2_le f b
   | 4 -> load_felem4_le f b
-
 
 inline_for_extraction
 val load_felem_le:
@@ -773,8 +553,12 @@ val load_felem_le:
   -> b:lbuffer uint8 16ul
   -> Stack unit
     (requires fun h -> live h f /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let load_felem_le #w f b =
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
+      felem_less h1 f (pow2 128) /\
+      feval h1 f == LSeq.create w (BSeq.nat_from_bytes_le (as_seq h0 b)))
+let load_felem_le #w f b = admit();
   let lo = uint_from_bytes_le #U64 (sub b 0ul 8ul) in
   let hi = uint_from_bytes_le #U64 (sub b 8ul 8ul) in
   let f0 = vec_load lo w in
@@ -853,3 +637,148 @@ let store_felem_le #w b f =
   | 1 -> store_felem1_le b f
   | 2 -> store_felem2_le b f
   | 4 -> store_felem4_le b f
+
+//[@ CInline]
+inline_for_extraction
+val carry_full_felem:
+    #w:lanes
+  -> out:felem w
+  -> inp:felem_wide w
+  -> Stack unit
+    (requires fun h -> live h out /\ live h inp)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+[@ CInline]
+let carry_full_felem #w out inp =
+  let i0 = inp.(0ul) in
+  let i1 = inp.(1ul) in
+  let i2 = inp.(2ul) in
+  let i3 = inp.(3ul) in
+  let i4 = inp.(4ul) in
+  let (t0, t1, t2, t3, t4) =
+    carry_full_felem5 (i0, i1, i2, i3, i4) in
+  out.(0ul) <- t0;
+  out.(1ul) <- t1;
+  out.(2ul) <- t2;
+  out.(3ul) <- t3;
+  out.(4ul) <- t4
+
+inline_for_extraction
+val fmul_r1_normalize:
+    out:felem 1
+  -> p:precomp_r 1
+  -> Stack unit
+    (requires fun h -> live h out /\ live h p)
+    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
+[@ CInline]
+let fmul_r1_normalize out p = admit();
+  let r = sub p 0ul 5ul in
+  let r5 = sub p 5ul 5ul in
+  fmul_r out out r r5
+
+inline_for_extraction
+val fmul_r2_normalize:
+    out:felem 2
+  -> p:precomp_r 2
+  -> Stack unit
+    (requires fun h -> live h out /\ live h p)
+    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
+[@ CInline]
+let fmul_r2_normalize out p =
+  //push_frame();
+  admit();
+  //let tmp = create_felem 2 in
+  let r = sub p 0ul 5ul in
+  let r2 = sub p 10ul 5ul in
+  let r2_5 = sub p 15ul 5ul in
+  r2.(0ul) <- vec_interleave_low r2.(0ul) r.(0ul);
+  r2.(1ul) <- vec_interleave_low r2.(1ul) r.(1ul);
+  r2.(2ul) <- vec_interleave_low r2.(2ul) r.(2ul);
+  r2.(3ul) <- vec_interleave_low r2.(3ul) r.(3ul);
+  r2.(4ul) <- vec_interleave_low r2.(4ul) r.(4ul);
+  precompute_shift_reduce r2_5 r2;
+  fmul_r out out r2 r2_5;
+  //mul_felem tmp out r2 r2_5;
+  //carry_wide_felem out tmp;
+  let o0 = out.(0ul) in
+  let o1 = out.(1ul) in
+  let o2 = out.(2ul) in
+  let o3 = out.(3ul) in
+  let o4 = out.(4ul) in
+  let o0 = vec_add_mod o0 (vec_interleave_high o0 o0) in
+  let o1 = vec_add_mod o1 (vec_interleave_high o1 o1) in
+  let o2 = vec_add_mod o2 (vec_interleave_high o2 o2) in
+  let o3 = vec_add_mod o3 (vec_interleave_high o3 o3) in
+  let o4 = vec_add_mod o4 (vec_interleave_high o4 o4) in
+  let (o0, o1, o2, o3, o4) = carry_full_felem5 (o0, o1, o2, o3, o4) in
+  out.(0ul) <- o0;
+  out.(1ul) <- o1;
+  out.(2ul) <- o2;
+  out.(3ul) <- o3;
+  out.(4ul) <- o4
+  //pop_frame()
+
+inline_for_extraction
+val fmul_r4_normalize:
+    out:felem 4
+  -> p:precomp_r 4
+  -> Stack unit
+    (requires fun h -> live h out /\ live h p)
+    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
+[@ CInline]
+let fmul_r4_normalize out p =
+  push_frame();
+  admit();
+  let r = sub p 0ul 5ul in
+  let r_5 = sub p 5ul 5ul in
+  let r4 = sub p 10ul 5ul in
+  let r4_5 = sub p 15ul 5ul in
+  let r2 = create_felem 4 in
+  let r3 = create_felem 4 in
+  let tmp = create_felem 4 in
+  fmul_r r2 r r r_5;
+  //mul_felem tmp r r r_5;
+  //carry_wide_felem r2 tmp;
+  fmul_r r3 r2 r r_5;
+  //mul_felem tmp r2 r r_5;
+  //carry_wide_felem r3 tmp;
+  let h0 = ST.get() in
+  loop_nospec #h0 5ul r2
+  (fun i ->
+    let v1212 = vec_interleave_low r2.(i) r.(i) in
+    let v3434 = vec_interleave_low r4.(i) r3.(i) in
+    let v1234 = vec_interleave_low (cast U128 2 v3434) (cast U128 2 v1212) in
+    r2.(i) <- cast U64 4 v1234
+  );
+
+  let r1234 = r2 in
+  let r1234_5 = r3 in
+  precompute_shift_reduce r1234_5 r1234;
+  fmul_r out out r1234 r1234_5;
+  //mul_felem tmp out r1234 r1234_5;
+  //carry_wide_felem out tmp;
+
+  loop_nospec #h0 5ul out
+  (fun i ->
+    let oi = out.(i) in
+    let v0 = cast U64 4 (vec_interleave_high (cast U128 2 oi) (cast U128 2 oi)) in
+    let v1 = vec_add_mod oi v0 in
+    let v2 = vec_add_mod v1 (vec_permute4 v1 1ul 1ul 1ul 1ul) in
+    out.(i) <- v2
+  );
+  carry_full_felem out out;
+  pop_frame()
+
+inline_for_extraction
+val fmul_rn_normalize:
+    #w:lanes
+  -> out:felem w
+  -> p:precomp_r w
+  -> Stack unit
+    (requires fun h -> live h out /\ live h p)
+    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
+[@ CInline]
+let fmul_rn_normalize #w out p =
+  match w with
+  | 1 -> fmul_r1_normalize out p
+  | 2 -> fmul_r2_normalize out p
+  | 4 -> fmul_r4_normalize out p
