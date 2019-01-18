@@ -3,7 +3,7 @@ module EverCrypt.Hash
 open EverCrypt.Helpers
 open FStar.HyperStack.ST
 open FStar.Integers
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 /// Stating the obvious: TODO remove me
@@ -23,7 +23,7 @@ let bad_hack (): Stack unit (fun _ -> True) (fun _ _ _ -> True) = ()
 ///   purpose only
 /// * SHA3 will be provided by HACL*
 ///
-/// ``hash_alg``, from Spec.Hash.Helpers, lists all supported algorithms
+/// ``hash_alg``, from Spec.Hash.Definitions, lists all supported algorithms
 unfold
 let alg = hash_alg
 
@@ -39,17 +39,17 @@ type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 
 /// Alternative names from Cédric, to be aligned with naming conventions.
 noextract unfold
-let tagLength = Spec.Hash.Helpers.size_hash
+let tagLength = Spec.Hash.Definitions.hash_length
 noextract unfold
-let blockLength = Spec.Hash.Helpers.size_block
+let blockLength = Spec.Hash.Definitions.block_length
 noextract unfold
-let maxLength = Spec.Hash.Helpers.max_input8
+let maxLength = Spec.Hash.Definitions.max_input_length
 noextract unfold
-let spec = Spec.Hash.Nist.hash
+let spec = Spec.Hash.hash
 unfold
-let tagLen = Hacl.Hash.Definitions.size_hash_ul
+let tagLen = Hacl.Hash.Definitions.hash_len
 unfold
-let blockLen = Hacl.Hash.Definitions.size_block_ul
+let blockLen = Hacl.Hash.Definitions.block_len
 noextract unfold
 let tag (a:alg) = s:Seq.seq UInt8.t { Seq.length s = tagLength a }
 
@@ -78,7 +78,7 @@ let uint32_fits_maxLength (a: alg) (x: UInt32.t): Lemma
 
 noextract
 let acc (a: alg): Type0 =
-  hash_w a
+  words_state a
 
 (* the initial value of the accumulator *)
 noextract
@@ -97,7 +97,7 @@ let compress_many (#a: alg) (s: acc a) (b:bytes_blocks a): GTot (acc a) =
 (* extracts the tag from the (possibly larger) accumulator *)
 noextract
 let extract (#a:alg) (s: acc a): GTot (bytes_hash a) =
-  Spec.Hash.Common.finish a s
+  Spec.Hash.PadFinish.finish a s
 
 
 /// Stateful interface implementing the agile specifications.
@@ -270,7 +270,7 @@ val update:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  block:uint8_p { B.length block = size_block a } ->
+  block:uint8_p { B.length block = block_length a } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -288,7 +288,7 @@ val update_multi:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  blocks:uint8_p { B.length blocks % size_block a = 0 } ->
+  blocks:uint8_p { B.length blocks % block_length a = 0 } ->
   len: UInt32.t { v len = B.length blocks } ->
   Stack unit
   (requires fun h0 ->
@@ -314,10 +314,10 @@ val update_last:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  last:uint8_p { B.length last < size_block a } ->
+  last:uint8_p { B.length last < block_length a } ->
   total_len:uint64_t {
-    v total_len < max_input8 a /\
-    (v total_len - B.length last) % size_block a = 0 } ->
+    v total_len < max_input_length a /\
+    (v total_len - B.length last) % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -325,10 +325,10 @@ val update_last:
     M.(loc_disjoint (footprint s h0) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
-    (B.length last + Seq.length (Spec.Hash.Common.pad a (v total_len))) % size_block a = 0 /\
+    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
     repr s h1 ==
       compress_many (repr s h0)
-        (Seq.append (B.as_seq h0 last) (Spec.Hash.Common.pad a (v total_len))) /\
+        (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
@@ -337,7 +337,7 @@ val finish:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  dst:uint8_p { B.length dst = size_hash a } ->
+  dst:uint8_p { B.length dst = hash_length a } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -379,9 +379,9 @@ val copy:
 
 val hash:
   a:alg ->
-  dst:uint8_p {B.length dst = size_hash a} ->
+  dst:uint8_p {B.length dst = hash_length a} ->
   input:uint8_p ->
-  len:uint32_t {B.length input = v len /\ v len < max_input8 a} ->
+  len:uint32_t {B.length input = v len /\ v len < max_input_length a} ->
   Stack unit
   (requires fun h0 ->
     B.live h0 dst /\
@@ -389,4 +389,4 @@ val hash:
     M.(loc_disjoint (loc_buffer input) (loc_buffer dst)))
   (ensures fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst == Spec.Hash.Nist.hash a (B.as_seq h0 input))
+    B.as_seq h1 dst == Spec.Hash.hash a (B.as_seq h0 input))

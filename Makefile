@@ -5,9 +5,9 @@
 #
 #            merkle_tree
 #                |
-#             evercrypt               secure_api
+#             evercrypt                secure_api
 #               /  \                      |
-#           code   vale                cold/old
+#           code   vale                code/old
 #           /   \  /                      |
 #         lib   specs                  specs/old
 #
@@ -15,7 +15,7 @@
 # building secure_api, vale, providers, merkle_tree to recursive make
 # invocations.
 
-# 0. Top-level entry points, delegating to recursive make invocations via pattern
+# -2. Top-level entry points, delegating to recursive make invocations via pattern
 # rules.
 
 all: secure_api.build secure_api/merkle_tree.build \
@@ -37,7 +37,7 @@ ci: all test
 %.build:
 	$(MAKE) -C $*
 
-# 0. Complete dependency graph for HACL*
+# -1. Complete dependency graph for HACL*
 
 ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
 
@@ -53,12 +53,19 @@ endif
 
 include .depend
 
+# 0. Convenience targets for subsets of HACL*
+
+ALL_CHECKED_FILES	= $(addsuffix .checked,$(ROOTS))
+
+SPEC_CHECKED_FILES	= $(filter $(HACL_HOME)/specs/%,$(ALL_CHECKED_FILES))
+CODE_CHECKED_FILES	= $(filter $(HACL_HOME)/code/%,$(ALL_CHECKED_FILES))
+
+verify-specs: $(SPEC_CHECKED_FILES)
+verify-code: $(CODE_CHECKED_FILES)
+
 # 1. Manual, finely crafted dependency edges (see artistic rendition above).
 
-ALL_CHECKED_FILES	= $(addsuffix .checked,$(ALL_FST_FILES))
-SPEC_CHECKED_FILES	= $(filter $(HACL_HOME)/specs/%,$(ALL_CHECKED_FILES))
-
-vale.build: $(SPEC_CHECKED_FILES)
+vale.build: verify-specs
 providers.build: compile-compact vale.build
 secure_api/merkle_tree.build: providers.build
 
@@ -115,6 +122,9 @@ HACL_OLD_FILES=\
 dist/compact/Makefile.basic: EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
+
+dist/compact-c89/Makefile.basic: EXTRA=$(COMPACT_FLAGS) -fc89 -ccopt -std=c89
+dist/compact-c89/Makefile.basic: HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
 .PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/headers/Makefile.basic $(HAND_WRITTEN_FILES) | old-extract-c

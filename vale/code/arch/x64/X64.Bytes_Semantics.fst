@@ -158,9 +158,11 @@ val update_operand_flags_same_unspecified (dst:operand) (v:nat64) (s:state) : Le
   forall x. not (Map.contains s1.mem x && Map.contains s.mem x) ==> s1.mem.[x] == s.mem.[x])
   [SMTPat (update_operand_preserve_flags' dst v s)]
 
+#push-options "--max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
 let update_operand_flags_same_unspecified dst v s = match dst with
   | OMem _ -> reveal_opaque update_heap64_def
   | _ -> ()
+#pop-options
 
 val update_operand_same_unspecified (dst:operand) (ins:ins) (v:nat64) (s:state) : Lemma
   (let s1 = update_operand' dst ins v s in

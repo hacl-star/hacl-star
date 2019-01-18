@@ -1,5 +1,5 @@
 [
-  "?%\u001aûT3\u000f¦«-(àÄšƒÔ",
+  "¢ä\u00100·\u0007\u000f-GRb»ôY\u0002\n",
   [
     [
       "Sha_update_bytes_stdcall.pre_cond",
@@ -14,7 +14,7 @@
         "projection_inverse_LowStar.BufferView.View_n"
       ],
       0,
-      "99c11a4c2e4067b2afbf1659448531b3"
+      "01b344fb351805de512ee27467ef41c8"
     ],
     [
       "Sha_update_bytes_stdcall.post_cond",
@@ -24,17 +24,17 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
-        "equation_SHA_helpers.byte", "equation_SHA_helpers.size_block",
+        "equation_SHA_helpers.block_length", "equation_SHA_helpers.byte",
         "equation_SHA_helpers.size_block_w_256", "equation_SHA_helpers.word",
         "equation_Sha_update_bytes_stdcall.uint32_p",
         "function_token_typing_FStar.UInt32.t",
-        "function_token_typing_SHA_helpers.size_block", "int_inversion",
+        "function_token_typing_SHA_helpers.block_length", "int_inversion",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "067492e939dd75cd28736897b6aa5f66"
+      "a3d49e02d2df1e285aa0a12ec33c41b9"
     ],
     [
       "Sha_update_bytes_stdcall.pre_cond8",
@@ -47,7 +47,7 @@
         "projection_inverse_LowStar.BufferView.View_n"
       ],
       0,
-      "25cedc504d6e9f5cfaffdeb4253ad5b7"
+      "70d4a8946bd530307ed20366ab149823"
     ],
     [
       "Sha_update_bytes_stdcall.post_cond8",
@@ -55,18 +55,18 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_SHA_helpers.byte",
-        "equation_SHA_helpers.size_block",
+        "@MaxIFuel_assumption", "@query",
+        "equation_SHA_helpers.block_length", "equation_SHA_helpers.byte",
         "equation_SHA_helpers.size_block_w_256", "equation_Types_s.quad32",
         "equation_Views.view128",
-        "function_token_typing_SHA_helpers.size_block", "int_inversion",
+        "function_token_typing_SHA_helpers.block_length", "int_inversion",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "proj_equation_LowStar.BufferView.View_n",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_LowStar.BufferView.View_n"
       ],
       0,
-      "cc8ccff1ba4cdf3ae08428fab5048d7c"
+      "0a336d312c1b4de546acecc648432f1a"
     ],
     [
       "Sha_update_bytes_stdcall.create_buffer_list",
@@ -87,7 +87,7 @@
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a"
       ],
       0,
-      "16217f262a24668004883cd4b7445f58"
+      "028f097504ac36bfc9ce52671e0ba3cd"
     ],
     [
       "Sha_update_bytes_stdcall.create_initial_trusted_state",
@@ -122,7 +122,7 @@
         "typing_Sha_update_bytes_stdcall.create_buffer_list"
       ],
       0,
-      "4ef74256535c32149853f9d7d6f62f5d"
+      "f678d765772592c12a1fba2b8d8d33b2"
     ],
     [
       "Sha_update_bytes_stdcall.create_initial_vale_state",
@@ -157,7 +157,7 @@
         "typing_Sha_update_bytes_stdcall.create_buffer_list"
       ],
       0,
-      "f492b181f5325f0c70c068ba9a7fca92"
+      "5da4361011fdab4c08bfefeabdf3dbed"
     ],
     [
       "Sha_update_bytes_stdcall.create_lemma",
@@ -233,7 +233,7 @@
         "typing_X64.Vale.Xmms.of_fun"
       ],
       0,
-      "13744fda9905357c04b7478cf68bda9a"
+      "efcbe34ea8e674ca0aa5f9a8e044c984"
     ],
     [
       "Sha_update_bytes_stdcall.implies_pre_aux",
@@ -263,7 +263,7 @@
         "typing_X64.Memory.buffer_length", "unit_typing"
       ],
       0,
-      "dc72187af78045030d0ffbc2524906c1"
+      "cb5bacc830eaf6685558241e6a4bc544"
     ],
     [
       "Sha_update_bytes_stdcall.implies_pre",
@@ -308,9 +308,9 @@
         "equation_Interop.b8", "equation_Interop.disjoint_addr",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eq2",
-        "equation_Prims.eqtype", "equation_Prims.l_and",
-        "equation_Prims.logical", "equation_Prims.nat",
-        "equation_Prims.squash", "equation_SHA_helpers.k_reqs",
+        "equation_Prims.eqtype", "equation_Prims.logical",
+        "equation_Prims.nat", "equation_Prims.squash",
+        "equation_SHA_helpers.k_reqs",
         "equation_Sha_update_bytes_stdcall.create_initial_vale_state",
         "equation_Sha_update_bytes_stdcall.pre_cond8",
         "equation_Types_s.quad32",
@@ -428,7 +428,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "864b9e06cf80378d75833b019fa79baa"
+      "ddf1cb071ad5d74e1407efca96a5a8c3"
     ],
     [
       "Sha_update_bytes_stdcall.implies_post",
@@ -535,7 +535,7 @@
         "typing_X64.Vale.State.__proj__Mkstate__item__mem"
       ],
       0,
-      "4a7fc448c4a9c0d927b6f8f04ce14e09"
+      "b04b8b5a6f5d6210f25ead7c81c69db3"
     ],
     [
       "Sha_update_bytes_stdcall.lemma_ghost_sha_update_bytes_stdcall",
@@ -741,7 +741,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok"
       ],
       0,
-      "89a20a5c4e0295b5831aeadd5165e4b8"
+      "abf93c215e25dfcc859d729a8939a343"
     ],
     [
       "Sha_update_bytes_stdcall.b32_to_b8",
@@ -761,7 +761,7 @@
         "refinement_interpretation_Sha_update_bytes_stdcall_Tm_refine_0c7cedfc8b39a72d59cba291af0b1ba6"
       ],
       0,
-      "80db3f09b96a06c8c7e5d3f9d53cf726"
+      "0ad9c766ae20fea17e6588c608ee0703"
     ],
     [
       "Sha_update_bytes_stdcall.b8_to_b32",
@@ -783,7 +783,7 @@
         "refinement_interpretation_Sha_update_bytes_stdcall_Tm_refine_0c7cedfc8b39a72d59cba291af0b1ba6"
       ],
       0,
-      "40ad6952fa862151dd85314801070830"
+      "8175f029bfce0ac7a95004cf1494dc72"
     ],
     [
       "Sha_update_bytes_stdcall.simplify_bytes_hash_aux",
@@ -801,7 +801,7 @@
         "unit_typing"
       ],
       0,
-      "3c9b408a05d64db7a69ef0ba6bf8f9d0"
+      "6241a4d1c4c9c42f0a23e8cf79b5fd71"
     ],
     [
       "Sha_update_bytes_stdcall.simplify_bytes_hash_aux2",
@@ -919,7 +919,7 @@
         "typing_tok_Spec.Hash.Helpers.MD5@tok", "unit_typing"
       ],
       0,
-      "6ac4eed006edd3fd37a963d3aa5b5574"
+      "ef1e02b8357d6c7ed01f759b8172ea18"
     ],
     [
       "Sha_update_bytes_stdcall.simplify_bytes_hash",
@@ -947,9 +947,8 @@
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_FStar.UInt32.n", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.l_and",
-        "equation_Prims.nat", "equation_Prims.squash",
-        "equation_SHA_helpers.hash256",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_SHA_helpers.hash256",
         "equation_SHA_helpers.le_bytes_to_hash",
         "equation_SHA_helpers.nat32_to_word",
         "equation_SHA_helpers.to_uint32", "equation_SHA_helpers.word",
@@ -1033,7 +1032,7 @@
         "unit_typing"
       ],
       0,
-      "c154e265dcbe30779d7f89294a22855f"
+      "c4adab74e32a5360b9277002f7ea7262"
     ],
     [
       "Sha_update_bytes_stdcall.simplify_quad_aux",
@@ -1051,7 +1050,7 @@
         "unit_typing"
       ],
       0,
-      "411ea68ac7d73cee794f0b68b58c191e"
+      "4972be6cbe0b1ff4d0643d0ca8ba3f0c"
     ],
     [
       "Sha_update_bytes_stdcall.simplify_quad_bytes",
@@ -1207,7 +1206,7 @@
         "typing_tok_Spec.Hash.Helpers.SHA1@tok", "unit_typing"
       ],
       0,
-      "7eac3e1611878529c0af3240a555ffc5"
+      "2fecd135285903a1cd59dec6d9363ae7"
     ],
     [
       "Sha_update_bytes_stdcall.post_cond8_post_cond",
@@ -1283,7 +1282,7 @@
         "typing_Spec.SHA2.Constants.k224_256"
       ],
       0,
-      "5f8263d744421646fc9dada0c488e6d9"
+      "96881578396d46311ac784a51b7ad73b"
     ],
     [
       "Sha_update_bytes_stdcall.ghost_sha_update",
@@ -1349,7 +1348,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "141a96ab2a0bdd2269377de67f9a8c04"
+      "2481ab23ce98e1c08437ddcae550bcca"
     ],
     [
       "Sha_update_bytes_stdcall.sha_update_bytes_stdcall_aux",
@@ -1377,7 +1376,7 @@
         "typing_Sha_update_bytes_stdcall.ghost_sha_update"
       ],
       0,
-      "c3a467d8ad3c0deae6ae2d12302c410b"
+      "9702aeb17f6039f6f58967f1137ba8aa"
     ],
     [
       "Sha_update_bytes_stdcall.sha256_update",
@@ -1537,7 +1536,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Prims.pow2"
       ],
       0,
-      "c27403d7a1f194eb5fdedf0bc85e880a"
+      "dabb08b0610d904921b7beb7d97e86ac"
     ]
   ]
 ]

@@ -1,6 +1,42 @@
 [
-  "ì¡Ÿt;\u0005­äNwÍ÷\t_ªf",
+  "\u0002\t–(n×fãÌCOœÊN}ã",
   [
+    [
+      "X64.FastSqr.va_lemma_fast_sqr",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+      ],
+      0,
+      "8f273ed2d8e325f4d5650c86dc64cfb8"
+    ],
+    [
+      "X64.FastSqr.va_wp_fast_sqr",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+      ],
+      0,
+      "c91f45ec8ab9b3d91bb77bdcf0314126"
+    ],
+    [
+      "X64.FastSqr.va_wpProof_fast_sqr",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "aedf1f1553de951e1ada9f0de4c0bf60"
+    ],
     [
       "X64.FastSqr.va_lemma_fast_sqr_stdcall",
       1,
@@ -32,7 +68,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "467c3588314b5980513821d0fb4a0818"
+      "3fad4d13866febc6342a6dd4ce3db94b"
     ],
     [
       "X64.FastSqr.va_wp_fast_sqr_stdcall",
@@ -53,7 +89,7 @@
         "typing_X64.Vale.Decls.va_if", "unit_typing"
       ],
       0,
-      "b446fe82f78ba563369cc473d049ad35"
+      "92feb5c39c12dc19f72c453f80791f3b"
     ],
     [
       "X64.FastSqr.va_wpProof_fast_sqr_stdcall",
@@ -65,7 +101,73 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "afc3383b810ed74f733acb92ca9ee3ff"
+      "8394c7d5d056d67aee4fcaf09fff89e9"
+    ],
+    [
+      "X64.FastSqr.va_lemma_sqr2_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equality_tok_X64.Machine_s.Rcx@tok",
+        "equality_tok_X64.Machine_s.Rdi@tok",
+        "equality_tok_X64.Machine_s.Rdx@tok",
+        "equality_tok_X64.Machine_s.Rsi@tok",
+        "equality_tok_X64.Machine_s.Secret@tok", "equation_Prims.nat",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_X64.Vale.Decls.validSrcAddrs64",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.CPU_Features_s.adx_enabled",
+        "function_token_typing_X64.CPU_Features_s.bmi2_enabled",
+        "proj_equation_X64.Vale.State.Mkstate_mem",
+        "proj_equation_X64.Vale.State.Mkstate_memTaint",
+        "proj_equation_X64.Vale.State.Mkstate_regs",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.FastSqr_Tm_refine_008f6efa2d83e8c13451912013d87ea9",
+        "typing_X64.Vale.Regs.sel",
+        "typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.Rcx@tok",
+        "typing_tok_X64.Machine_s.Rdi@tok",
+        "typing_tok_X64.Machine_s.Rdx@tok",
+        "typing_tok_X64.Machine_s.Rsi@tok"
+      ],
+      0,
+      "a2bfe0fdd716363de0740cb4809c5c67"
+    ],
+    [
+      "X64.FastSqr.va_wp_sqr2_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equation_Prims.nat", "equation_Words_s.nat64",
+        "equation_Words_s.natN", "equation_X64.Vale.Decls.va_if",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_Words_s.nat64",
+        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "typing_X64.FastSqr_Tm_abs_b1e1a7fb7a7968d210062719315e71c2",
+        "typing_X64.FastSqr_Tm_abs_c2bb5b1221b8afc9d05888f8b139b633",
+        "typing_X64.Vale.Decls.va_if", "unit_typing"
+      ],
+      0,
+      "e0df13753bf260e359bee08dcabc76e5"
+    ],
+    [
+      "X64.FastSqr.va_wpProof_sqr2_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "f1838da177cd011d9a39240d50b59671"
     ]
   ]
 ]

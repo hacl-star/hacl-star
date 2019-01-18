@@ -14,7 +14,7 @@ module H = EverCrypt.Hash
 open Test.Vectors
 open LowStar.BufferOps
 open C.Failure
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 open Test.Lowstarize
 
@@ -80,7 +80,7 @@ let compute a len text tag0 =
 
   let vblocks = B.as_seq h1 blocks in
   let vlast = B.as_seq h1 last in
-  let vsuffix = Spec.Hash.Common.pad a (U32.v len) in
+  let vsuffix = Spec.Hash.PadFinish.pad a (U32.v len) in
   FStar.Seq.(lemma_eq_intro (B.as_seq h1 text) (vblocks @| vlast));
   Seq.append_assoc vblocks vlast vsuffix
 

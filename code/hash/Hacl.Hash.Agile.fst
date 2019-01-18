@@ -1,7 +1,7 @@
 module Hacl.Hash.Agile
 
 open Hacl.Hash.Definitions
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 (** A series of static multiplexers that will be useful when building the
     generic Merkle-Damgard construction. *)

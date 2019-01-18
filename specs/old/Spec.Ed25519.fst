@@ -18,7 +18,7 @@ type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
 
 let sha512 (b:bytes{length b < pow2 32}) : Tot (lbytes 64) = 
   assert_norm(pow2 32 < pow2 125);
-  Spec.Hash.Nist.hash Hash.Helpers.SHA2_512 b
+  Spec.Hash.hash Hash.Definitions.SHA2_512 b
 
 let modp_inv (x:elem) : Tot elem =
   x ** (prime - 2)

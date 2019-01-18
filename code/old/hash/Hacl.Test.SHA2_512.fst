@@ -486,7 +486,7 @@ let test_6 () =
 
   test_6_loop state plaintext;
 
-  let rem_len = UInt32.rem (128ul *%^ 8388607ul) Hash.size_block in
+  let rem_len = UInt32.rem (128ul *%^ 8388607ul) Hash.block_length in
   Hash.update_last state plaintext plaintext_len;
   Hash.finish state output;
 

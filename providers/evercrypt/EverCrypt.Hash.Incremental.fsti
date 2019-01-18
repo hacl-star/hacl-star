@@ -14,14 +14,14 @@ module G = FStar.Ghost
 module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open FStar.Integers
 
 noeq
 type state a =
 | State:
     hash_state: Hash.state a ->
-    buf: B.buffer UInt8.t { B.length buf = size_block a } ->
+    buf: B.buffer UInt8.t { B.length buf = block_length a } ->
     total_len: UInt64.t ->
     state a
 
@@ -64,16 +64,16 @@ let split_at_last (a: Hash.alg) (b: bytes):
   Pure (bytes_blocks a & bytes)
     (requires True)
     (ensures (fun (blocks, rest) ->
-      S.length rest < size_block a /\
-      S.length rest = S.length b % size_block a /\
+      S.length rest < block_length a /\
+      S.length rest = S.length b % block_length a /\
       S.equal (S.append blocks rest) b))
 =
-  let n = S.length b / size_block a in
-  let blocks, rest = S.split b (n * size_block a) in
-  assert (S.length blocks = n * size_block a);
-  assert ((n * size_block a) % size_block a = 0);
-  assert (S.length rest = S.length b - n * size_block a);
-  assert (S.length b - n * size_block a < size_block a);
+  let n = S.length b / block_length a in
+  let blocks, rest = S.split b (n * block_length a) in
+  assert (S.length blocks = n * block_length a);
+  assert ((n * block_length a) % block_length a = 0);
+  assert (S.length rest = S.length b - n * block_length a);
+  assert (S.length b - n * block_length a < block_length a);
   blocks, rest
 
 #set-options "--max_fuel 0 --max_ifuel 0"
@@ -88,7 +88,7 @@ let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
   B.(loc_disjoint (loc_buffer buf_) (Hash.footprint hash_state h)) /\
   Hash.invariant hash_state h /\
   S.equal (Hash.repr hash_state h) (Hash.compress_many (Hash.acc0 #a) blocks) /\
-  S.equal (S.slice (B.as_seq h buf_) 0 (v total_len % size_block a)) rest
+  S.equal (S.slice (B.as_seq h buf_) 0 (v total_len % block_length a)) rest
 
 let bytes = S.seq UInt8.t
 
@@ -161,6 +161,6 @@ let finish_st (a: Hash.alg) =
       preserves_freeable s h0 h1 /\
       footprint s h0 == footprint s h1 /\
       B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1) /\
-      S.equal (B.as_seq h1 dst) (Spec.Hash.Nist.hash a (G.reveal prev)))
+      S.equal (B.as_seq h1 dst) (Spec.Hash.hash a (G.reveal prev)))
 
 val finish: a:Hash.alg -> finish_st a

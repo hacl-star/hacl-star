@@ -48,6 +48,11 @@ chacha-c/Hacl_Chacha20.c: chacha-c/out.krml
 		-add-include '"kremlib.h"' -minimal -bundle 'Hacl.Chacha20=*' \
 		-skip-compilation $^ -o $@
 
+chacha-c89/Hacl_Chacha20.c: chacha-c/out.krml
+	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c89 \
+		-add-include '"kremlib.h"' -minimal -bundle 'Hacl.Chacha20=*' \
+		-skip-compilation $^ -o $@ -fc89
+
 chacha20.exe: chacha-c/Hacl_Chacha20.c chacha-c/out.krml
 	mkdir -p chacha-c
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha-c -no-prefix Hacl.Test.Chacha20 \
@@ -94,7 +99,7 @@ chacha20-vec128.exe: chacha-vec128-c/Hacl_Chacha20_Vec128.c chacha-vec128-c/out.
 	  $^ -o $@
 	./$@
 
-extract-c: chacha-c/Hacl_Chacha20.c salsa-c/Hacl_Salsa20.c chacha-vec128-c/Hacl_Chacha20_Vec128.c
+extract-c: chacha-c/Hacl_Chacha20.c salsa-c/Hacl_Salsa20.c chacha-vec128-c/Hacl_Chacha20_Vec128.c chacha-c89/Hacl_Chacha20.c
 
 test: chacha20.exe salsa20.exe chacha20-vec128.exe
 

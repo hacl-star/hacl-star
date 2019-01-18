@@ -49,21 +49,21 @@ private let uint8_p  = Buffer.buffer uint8_ht
 //
 
 (* Define word size *)
-inline_for_extraction let size_word = 4ul // Size of the word in bytes
+inline_for_extraction let word_length = 4ul // Size of the word in bytes
 
 (* Define algorithm parameters *)
-inline_for_extraction let size_hash_w   = 8ul // 8 words (Final hash output size)
-inline_for_extraction let size_block_w  = 16ul  // 16 words (Working data block size)
-inline_for_extraction let size_hash     = size_word *^ size_hash_w
-inline_for_extraction let size_block    = size_word *^ size_block_w
+inline_for_extraction let state_word_length   = 8ul // 8 words (Final hash output size)
+inline_for_extraction let block_word_length  = 16ul  // 16 words (Working data block size)
+inline_for_extraction let hash_length     = word_length *^ state_word_length
+inline_for_extraction let block_length    = word_length *^ block_word_length
 inline_for_extraction let max_input_len = 2305843009213693952uL // 2^61 Bytes
 
 (* Sizes of objects in the state *)
-inline_for_extraction let size_k_w     = 64ul  // 2048 bits = 64 words of 32 bits (size_block)
+inline_for_extraction let size_k_w     = 64ul  // 2048 bits = 64 words of 32 bits (block_length)
 inline_for_extraction let size_ws_w    = size_k_w
-inline_for_extraction let size_whash_w = size_hash_w
+inline_for_extraction let size_whash_w = state_word_length
 inline_for_extraction let size_count_w = 1ul  // 1 word
-inline_for_extraction let size_len_8   = 2ul *^ size_word
+inline_for_extraction let len_length   = 2ul *^ word_length
 
 inline_for_extraction let size_state   = size_k_w +^ size_ws_w +^ size_whash_w +^ size_count_w
 
@@ -106,7 +106,7 @@ val init:
 
 val update:
   state :uint32_p {length state = v size_state} ->
-  data  :uint8_p  {length data = v size_block /\ disjoint state data} ->
+  data  :uint8_p  {length data = v block_length /\ disjoint state data} ->
   Stack unit
     (requires (fun h0 ->
       live h0 state /\ live h0 data /\
@@ -121,8 +121,8 @@ val update:
 
 val update_multi:
   state :uint32_p{length state = v size_state} ->
-  data  :uint8_p {length data % v size_block = 0 /\ disjoint state data} ->
-  n     :uint32_t{v n * v size_block = length data} ->
+  data  :uint8_p {length data % v block_length = 0 /\ disjoint state data} ->
+  n     :uint32_t{v n * v block_length = length data} ->
   Stack unit
     (requires (fun h0 ->
       live h0 state /\ live h0 data /\
@@ -138,7 +138,7 @@ val update_multi:
 val update_last:
   state :uint32_p {length state = v size_state} ->
   data  :uint8_p  {disjoint state data} ->
-  len   :uint32_t {v len = length data /\ (length data + v size_len_8 + 1) < 2 * v size_block} ->
+  len   :uint32_t {v len = length data /\ (length data + v len_length + 1) < 2 * v block_length} ->
   Stack unit
     (requires (fun h0 ->
       live h0 state /\ live h0 data /\
@@ -146,14 +146,14 @@ val update_last:
       slice_k h0 state = Spec.k))
     (ensures  (fun h0 r h1 ->
       let seq_data = Hacl.Spec.Endianness.reveal_sbytes (as_seq h0 data) in
-      let prevlen = U32.(counter h0 state * (v size_block)) in
+      let prevlen = U32.(counter h0 state * (v block_length)) in
       live h0 state /\ live h0 data /\ live h1 state /\ modifies_1 state h0 h1 /\
       slice_k h1 state == Spec.k /\
       slice_hash h1 state = Spec.update_last (slice_hash h0 state) prevlen seq_data))
 
 val finish:
   state :uint32_p{length state = v size_state} ->
-  hash  :uint8_p{length hash = v size_hash /\ disjoint state hash} ->
+  hash  :uint8_p{length hash = v hash_length /\ disjoint state hash} ->
   Stack unit
     (requires (fun h0 ->
       live h0 state /\ live h0 hash))
@@ -163,7 +163,7 @@ val finish:
       seq_hash == Spec.finish (slice_hash h0 state)))
 
 val hash:
-  hash :uint8_p {length hash = v size_hash} ->
+  hash :uint8_p {length hash = v hash_length} ->
   input:uint8_p {length input < Spec.max_input_len_8 /\ disjoint hash input} ->
   len  :uint32_t{v len = length input} ->
   Stack unit

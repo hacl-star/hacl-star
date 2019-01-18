@@ -1,7 +1,7 @@
 module Hacl.Hash.Core.MD5
 
 open Hacl.Hash.Definitions
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 noextract inline_for_extraction
 val alloca: alloca_st MD5

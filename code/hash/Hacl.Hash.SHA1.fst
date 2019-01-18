@@ -1,7 +1,7 @@
 module Hacl.Hash.SHA1
 
 open Hacl.Hash.Definitions
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 include Hacl.Hash.Core.SHA1
 

@@ -189,6 +189,7 @@ open Words.Seq_s
 open Words.Four_s
 open Collections.Seqs_s
 
+#push-options "--max_fuel 0 --max_ifuel 0"
 let index128_get_heap_val128_aux (s:Seq.lseq UInt8.t 16) (ptr:int) (heap:S.heap) : Lemma
   (requires (forall (j:nat) . j < 16 ==> UInt8.v (Seq.index s j) == heap.[ptr+j]))
   (ensures Views.get128 s == Mkfour
@@ -199,7 +200,7 @@ let index128_get_heap_val128_aux (s:Seq.lseq UInt8.t 16) (ptr:int) (heap:S.heap)
   Opaque_s.reveal_opaque S.get_heap_val32_def;
   Opaque_s.reveal_opaque Views.get128_def;
   Opaque_s.reveal_opaque Types_s.le_bytes_to_quad32_def
-
+#pop-options
 
 let index128_get_heap_val128 h b heap i =
   let open FStar.Mul in

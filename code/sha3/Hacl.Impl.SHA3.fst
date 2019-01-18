@@ -24,7 +24,7 @@ module S = Spec.SHA3
 let keccak_rotc :x:ilbuffer rotc_t 24ul{witnessed x S.keccak_rotc /\ recallable x}
   = createL_global rotc_list
 
-noextract
+inline_for_extraction noextract
 let piln_list: x:list piln_t{List.Tot.length x <= max_size_t} =
   assert_norm (List.Tot.length piln_list <= max_size_t);
   piln_list

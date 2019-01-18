@@ -33,14 +33,11 @@ VALE_NAMESPACES='X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
   'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
   Workarounds 'Math.*' Interop TypesNative_s
 
-# TODO: remove the exceptions for old-style HACL from already_cached
-# TODO: make it Hacl instead of Hacl.Hash, eventually
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --cache_checked_modules \
   $(OTHERFLAGS) \
   --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   $(addprefix --include ,$(FSTAR_INCLUDES)) --cmi \
-  --already_cached 'FStar LowStar C -C.Compat Spec Hacl.Hash' \
-  $(addprefix --already_cached ,$(subst .*,,$(VALE_NAMESPACES)))
+  --already_cached '* -EverCrypt'
 
 ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst EverCrypt.Hash.Incremental.fst
 
@@ -52,13 +49,10 @@ ROOTS = EverCrypt.fst EverCrypt.Bytes.fsti EverCrypt.HKDF.fst EverCrypt.Hash.Inc
 
 include .depend
 
-ADMIT=false
-
 # Thanks to --already_cached, this Makefile should never attempt to produce any
 # Vale file or F*/ulib file
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< \
-	  --admit_smt_queries $(ADMIT) \
 	  --use_hints --record_hints \
 	  --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
@@ -139,10 +133,11 @@ dist/header/Makefile.basic: \
 dist/compact/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS)
 
-# Note: EverCrypt.OpenSSL should go once we compile dist/coco with
-#   EVERCRYPT_OPENSSL=false
 # Note: this is not as tight as it could be because EverCrypt.fst has everything
 #   while Coco just wants AES-NI
+ifeq ($(CONFIG),everest)
+dist/coco/Makefile.basic: EVERCRYPT_MAYBE_SOURCES =
+endif
 dist/coco/Makefile.basic: \
   EXTRA = $(COMPACT_FLAGS) \
   -bundle EverCrypt.Hash= -bundle EverCrypt.AutoConfig2= \

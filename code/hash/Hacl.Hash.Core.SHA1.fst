@@ -11,14 +11,14 @@ module E = FStar.Kremlin.Endianness
 module CE = C.Endianness
 
 open Hacl.Hash.Definitions
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 friend Spec.SHA1
 friend Hacl.Hash.PadFinish
 
 open LowStar.Modifies.Linear
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans' --z3rlimit 100"
 
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
@@ -58,7 +58,7 @@ inline_for_extraction
 let w_t = (b: B.lbuffer (word SHA1) 80)
 
 inline_for_extraction
-let block_t = (block: B.buffer U8.t { B.length block == size_block SHA1 } )
+let block_t = (block: B.buffer U8.t { B.length block == block_length SHA1 } )
 
 let w_inv' (i: nat) (mi: Spec.word_block) (b: w_t) (h: HS.mem) : GTot Type0 =
   i <= 80 /\
@@ -77,7 +77,7 @@ let w_loop_inv (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (h: HS.mem) (i: n
   B.live h m /\
   B.live h b /\
   B.modifies (B.loc_buffer b) h0 h /\ (
-    let mi = E.seq_uint32_of_be size_block_w (B.as_seq h m) in
+    let mi = E.seq_uint32_of_be block_word_length (B.as_seq h m) in
     w_inv' i mi b h
   )
 
@@ -88,7 +88,7 @@ let w_inv_elim (h: HS.mem) (m: Spec.word_block) (b: w_t) (i: nat) (j: nat) : Lem
 
 let w_loop_inv_elim (h0: Ghost.erased HS.mem) (h: HS.mem) (m: block_t) (b: w_t) (i: nat) (j: nat) : Lemma
   (requires (w_loop_inv h0 m b h i /\ j < i))
-  (ensures (Seq.index (B.as_seq h b) j == Spec.w (E.seq_uint32_of_be size_block_w (B.as_seq h m)) (U32.uint_to_t j)))
+  (ensures (Seq.index (B.as_seq h b) j == Spec.w (E.seq_uint32_of_be block_word_length (B.as_seq h m)) (U32.uint_to_t j)))
 = ()
 
 inline_for_extraction
@@ -102,19 +102,21 @@ let index_32_be' (n: Ghost.erased nat) (b: B.buffer UInt8.t) (i: UInt32.t):
       r = Seq.index (E.seq_uint32_of_be (Ghost.reveal n) (B.as_seq h0 b)) (UInt32.v i)))
 = CE.index_32_be b i
 
+#push-options "--max_fuel 1"
 inline_for_extraction
 let w_body_value (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t) : HST.Stack U32.t
   (requires (fun h -> w_loop_inv h0 m b h (U32.v i) /\ U32.v i < 80))
-  (ensures (fun h v h' -> B.modifies B.loc_none h h' /\ v == Spec.w (E.seq_uint32_of_be size_block_w (B.as_seq (Ghost.reveal h0) m)) i))
-= if U32.lt i 16ul
-  then
-    index_32_be' (Ghost.hide size_block_w) m i
+  (ensures (fun h v h' -> B.modifies B.loc_none h h' /\ v == Spec.w (E.seq_uint32_of_be block_word_length (B.as_seq (Ghost.reveal h0) m)) i))
+=
+  if U32.lt i 16ul then
+    index_32_be' (Ghost.hide block_word_length) m i
   else
     let wmit3 = B.index b (i `U32.sub` 3ul) in
     let wmit8 = B.index b (i `U32.sub` 8ul) in
     let wmit14 = B.index b (i `U32.sub` 14ul) in
     let wmit16 = B.index b (i `U32.sub` 16ul) in
     Spec.rotl 1ul (wmit3 `U32.logxor` wmit8 `U32.logxor` wmit14 `U32.logxor` wmit16)
+#pop-options
 
 let lt_S_r (j i: nat) : Lemma
   (requires (j < i + 1))
@@ -131,7 +133,7 @@ let w_body (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t { U32.v i <
   let h' = HST.get () in
   let f (j: nat) : Lemma
     (requires (j < U32.v i + 1))
-    (ensures (j < U32.v i + 1 /\ Seq.index (B.as_seq h' b) j == Spec.w (E.seq_uint32_of_be size_block_w (B.as_seq (Ghost.reveal h0) m)) (U32.uint_to_t j)))
+    (ensures (j < U32.v i + 1 /\ Seq.index (B.as_seq h' b) j == Spec.w (E.seq_uint32_of_be block_word_length (B.as_seq (Ghost.reveal h0) m)) (U32.uint_to_t j)))
   = lt_S_r j (U32.v i);
     if j = U32.v i
     then ()
@@ -142,7 +144,7 @@ let w_body (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t { U32.v i <
 inline_for_extraction
 let w (m: block_t) (b: w_t) : HST.Stack unit
   (requires (fun h -> B.live h m /\ B.live h b /\ B.disjoint m b))
-  (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ w_inv (E.seq_uint32_of_be size_block_w (B.as_seq h m)) b h'))
+  (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ w_inv (E.seq_uint32_of_be block_word_length (B.as_seq h m)) b h'))
 = let h = Ghost.hide (HST.get ()) in
   C.Loops.for 0ul 80ul (w_loop_inv h m b) (fun i -> w_body h m b i)
 
@@ -210,15 +212,15 @@ let zero_out
 let spec_step3_body
   (mi: Spec.word_block)
   (gw: Ghost.erased (Spec.step3_body_w_t mi))
-  (st: Ghost.erased (hash_w SHA1))
+  (st: Ghost.erased (words_state SHA1))
   (t: nat {t < 80})
-: Tot (Ghost.erased (hash_w SHA1))
+: Tot (Ghost.erased (words_state SHA1))
 = Ghost.elift1 (fun h -> Spec.step3_body mi (Ghost.reveal gw) h t) st
 
 let spec_step3_body_spec
   (mi: Spec.word_block)
   (gw: Ghost.erased (Spec.step3_body_w_t mi))
-  (st: Ghost.erased (hash_w SHA1)) (t: nat { t < 80 } )
+  (st: Ghost.erased (words_state SHA1)) (t: nat { t < 80 } )
 : Lemma
   (Ghost.reveal (spec_step3_body mi gw st t) == Spec.step3_body mi (Ghost.reveal gw) (Ghost.reveal st) t)
   [SMTPat (Ghost.reveal (spec_step3_body mi gw st t))]
@@ -237,24 +239,24 @@ let step3
   (ensures (fun h0 _ h1 ->
     B.modifies (B.loc_buffer h) h0 h1 /\
     B.live h1 h /\
-    B.as_seq h1 h == Spec.step3 (E.seq_uint32_of_be size_block_w (B.as_seq h0 m)) (B.as_seq h0 h)
+    B.as_seq h1 h == Spec.step3 (E.seq_uint32_of_be block_word_length (B.as_seq h0 m)) (B.as_seq h0 h)
   ))
 = let h0 = HST.get () in
   HST.push_frame ();
   let _w = B.alloca 0ul 80ul in
   w m _w;
-  let mi = Ghost.hide (E.seq_uint32_of_be size_block_w (B.as_seq h0 m)) in
+  let mi = Ghost.hide (E.seq_uint32_of_be block_word_length (B.as_seq h0 m)) in
   let h1 = HST.get () in
   let cwt = Ghost.hide (Spec.compute_w (Ghost.reveal mi) 0 Seq.empty) in
   let gw: Ghost.erased (Spec.step3_body_w_t (Ghost.reveal mi)) =
     Ghost.elift1 (Spec.index_compute_w (Ghost.reveal mi)) cwt
   in
-  let f : Ghost.erased (C.Loops.repeat_range_body_spec (hash_w SHA1) 80) = Ghost.hide (Spec.step3_body (Ghost.reveal mi) (Ghost.reveal gw)) in
+  let f : Ghost.erased (C.Loops.repeat_range_body_spec (words_state SHA1) 80) = Ghost.hide (Spec.step3_body (Ghost.reveal mi) (Ghost.reveal gw)) in
   let inv (h' : HS.mem) : GTot Type0 =
     B.modifies (B.loc_buffer h) h1 h' /\
     B.live h' h
   in
-  let interp (h' : HS.mem { inv h' } ) : GTot (hash_w SHA1) =
+  let interp (h' : HS.mem { inv h' } ) : GTot (words_state SHA1) =
     B.as_seq h' h
   in
   C.Loops.repeat_range 0ul 80ul f inv interp (fun i -> step3_body mi _w gw h i);
@@ -275,7 +277,7 @@ let step4
   (ensures (fun h0 _ h1 ->
     B.modifies (B.loc_buffer h) h0 h1 /\
     B.live h1 h /\
-    B.as_seq h1 h == Spec.step4 (E.seq_uint32_of_be size_block_w (B.as_seq h0 m)) (B.as_seq h0 h)
+    B.as_seq h1 h == Spec.step4 (E.seq_uint32_of_be block_word_length (B.as_seq h0 m)) (B.as_seq h0 h)
   ))
 = let ha = B.index h 0ul in
   let hb = B.index h 1ul in

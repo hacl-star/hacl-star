@@ -3,7 +3,7 @@ module Hacl.Hash.PadFinish
 module U32 = FStar.UInt32
 
 open Hacl.Hash.Definitions
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 (** Shared implementations of the pad and finish functions, across all hash algorithms. *)
 

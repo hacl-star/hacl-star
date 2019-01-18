@@ -1,5 +1,5 @@
 [
-  "=∞¸g…s@Âr¿,>}\u001bùY",
+  "\bÓ…ÄëEYÆ[!\u001b1õY˜‡",
   [
     [
       "X64.SHA.va_req_sha_update_bytes_stdcall",
@@ -15,7 +15,7 @@
         "unit_typing"
       ],
       0,
-      "de1fd17aa0d8f00958e4d98a241e1aff"
+      "6f4bf09f24198cf063d5d8c390025ca4"
     ],
     [
       "X64.SHA.va_ens_sha_update_bytes_stdcall",
@@ -30,10 +30,9 @@
         "equality_tok_X64.Machine_s.Rdi@tok",
         "equality_tok_X64.Machine_s.Rsi@tok", "equation_Prims.l_and",
         "equation_Prims.nat", "equation_Prims.squash",
-        "equation_Prims.subtype_of", "equation_SHA_helpers.byte",
-        "equation_SHA_helpers.size_block",
-        "equation_SHA_helpers.size_block_w_256", "equation_Words_s.nat64",
-        "equation_Words_s.natN",
+        "equation_Prims.subtype_of", "equation_SHA_helpers.block_length",
+        "equation_SHA_helpers.byte", "equation_SHA_helpers.size_block_w_256",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
         "equation_X64.SHA.va_req_sha_update_bytes_stdcall",
         "equation_X64.Vale.Decls.va_state_eq",
         "fuel_guarded_inversion_X64.Vale.State.state", "int_inversion",
@@ -49,7 +48,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok", "unit_typing"
       ],
       0,
-      "5b0d68698c87bc3bba94089dd5740386"
+      "e7f4bf827e7faba13710f093813cefef"
     ],
     [
       "X64.SHA.va_lemma_sha_update_bytes_stdcall",
@@ -61,28 +60,28 @@
         "equality_tok_X64.Machine_s.R9@tok",
         "equality_tok_X64.Machine_s.Rcx@tok",
         "equality_tok_X64.Machine_s.Rdi@tok",
-        "equality_tok_X64.Machine_s.Rdx@tok", "equation_Prims.nat",
-        "equation_SHA_helpers.byte", "equation_SHA_helpers.size_block",
+        "equality_tok_X64.Machine_s.Rdx@tok",
+        "equality_tok_X64.Machine_s.Rsi@tok", "equation_Prims.nat",
+        "equation_SHA_helpers.block_length", "equation_SHA_helpers.byte",
         "equation_SHA_helpers.size_block_w_256", "equation_Words_s.nat64",
-        "equation_Words_s.natN", "equation_X64.Memory.buffer128",
-        "equation_X64.Memory.vuint128",
+        "equation_Words_s.natN",
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_X64.CPU_Features_s.sha_enabled",
-        "function_token_typing_X64.Memory.vuint128", "int_inversion",
-        "proj_equation_X64.Vale.State.Mkstate_regs",
+        "int_inversion", "proj_equation_X64.Vale.State.Mkstate_regs",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "refinement_interpretation_X64.SHA_Tm_refine_bef743ed8e583a213aacac0db17045bb",
-        "typing_X64.Memory.buffer_length", "typing_X64.Vale.Regs.sel",
+        "typing_X64.Vale.Regs.sel",
         "typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_tok_X64.Machine_s.R9@tok",
         "typing_tok_X64.Machine_s.Rcx@tok",
         "typing_tok_X64.Machine_s.Rdi@tok",
-        "typing_tok_X64.Machine_s.Rdx@tok"
+        "typing_tok_X64.Machine_s.Rdx@tok",
+        "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "ba95cd9992e5101d86b1dd909050d4c5"
+      "1318e1fc4f10347f0cd5c84a65f6de89"
     ],
     [
       "X64.SHA.va_wp_sha_update_bytes_stdcall",
@@ -92,10 +91,9 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
-        "equation_Prims.nat", "equation_SHA_helpers.byte",
-        "equation_SHA_helpers.size_block",
-        "equation_SHA_helpers.size_block_w_256", "equation_Words_s.nat64",
-        "equation_Words_s.natN",
+        "equation_Prims.nat", "equation_SHA_helpers.block_length",
+        "equation_SHA_helpers.byte", "equation_SHA_helpers.size_block_w_256",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_Words_s.nat64",
         "projection_inverse_BoxInt_proj_0",
@@ -108,7 +106,7 @@
         "typing_X64.Vale.Decls.va_if", "unit_typing"
       ],
       0,
-      "e2ef90db37b1ad5544243d32c0c893c1"
+      "ed1c2134b185936639fae5acccabeffb"
     ],
     [
       "X64.SHA.va_wpProof_sha_update_bytes_stdcall",
@@ -120,7 +118,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "5d8385d25fa51c718302ab7ced97be30"
+      "e71e90a9dd87463795074432125507c6"
     ]
   ]
 ]
