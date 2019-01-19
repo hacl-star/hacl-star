@@ -4,42 +4,96 @@ module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
+module P = Prop_s
+module HS = FStar.HyperStack
+module W = Words_s
+module L = FStar.List.Tot
+
 let __reduce__ = ()
 
+type base_typ:eqtype =
+  | TUInt8
+  | TUInt16
+  | TUInt32
+  | TUInt64
+  | TUInt128
+
+let base_typ_as_vale_type (t:base_typ) : Tot eqtype =
+  let open W in
+  let open Types_s in
+  match t with
+  | TUInt8 -> nat8
+  | TUInt16 -> nat16
+  | TUInt32 -> nat32
+  | TUInt64 -> nat64
+  | TUInt128 -> quad32
+
+
+let base_typ_as_type (t:base_typ) : Tot eqtype =
+  let open W in
+  let open Types_s in
+  match t with
+  | TUInt8 -> UInt8.t
+  | TUInt16 -> UInt16.t
+  | TUInt32 -> UInt32.t
+  | TUInt64 -> UInt64.t
+  | TUInt128 -> quad32
+
+
 [@__reduce__]
-let view_n (x:ME.typ) =
-  let open ME in
-  match x with
-  | TBase TUInt8 -> 1
-  | TBase TUInt16 -> 2
-  | TBase TUInt32 -> 4
-  | TBase TUInt64 -> 8
-  | TBase TUInt128 -> 16
+let view_n = function
+  | TUInt8 -> 1
+  | TUInt16 -> 2
+  | TUInt32 -> 4
+  | TUInt64 -> 8
+  | TUInt128 -> 16
 
 let b8 = B.buffer UInt8.t
 
 [@__reduce__]
-let lowstar_buffer (t:ME.typ) = b:b8{B.length b % view_n t == 0}
+let buf_t t = b:b8{B.length b % view_n t == 0}
 
-let buffer_equiv (t:ME.typ)
-  : Lemma (ME.buffer t == lowstar_buffer t)
-  = admit() //TODO: This should be provided by X64.Memory
+let disjoint_addr addr1 length1 addr2 length2 =
+  (* The first buffer is completely before the second, or the opposite *)
+  addr1 + length1 < addr2 ||
+  addr2 + length2 < addr1
+
+type addr_map = m:(b8 -> W.nat64){
+  (forall (buf1 buf2:b8).{:pattern (m buf1); (m buf2)}
+    B.disjoint buf1 buf2 ==>
+    disjoint_addr (m buf1) (B.length buf1) (m buf2) (B.length buf2)) /\
+  (forall (b:b8).{:pattern (m b)} m b + B.length b < MS.pow2_64)}
+
+[@__reduce__]
+let disjoint_or_eq_b8 (ptr1 ptr2:b8) =
+  B.loc_disjoint (B.loc_buffer ptr1) (B.loc_buffer ptr2) \/
+  ptr1 == ptr2
+
+let list_disjoint_or_eq (ptrs:list b8) =
+  forall (p1 p2:b8).
+    L.memP p1 ptrs /\
+    L.memP p2 ptrs ==> disjoint_or_eq_b8 p1 p2
+
+unfold
+let list_live (#a:Type0) mem (ptrs:list (B.buffer a)) =
+  forall p . L.memP p ptrs ==> B.live mem p
+
+assume val global_addrs_map : addr_map
+
+let mk_addr_map (ptrs : list b8 { list_disjoint_or_eq ptrs }) : GTot addr_map =
+  global_addrs_map
+
+noeq
+type mem =
+  | Mem : ptrs : list b8 { list_disjoint_or_eq ptrs } ->
+          addrs : addr_map { addrs  == mk_addr_map ptrs } ->
+          hs : HS.mem{ list_live hs ptrs } ->
+          mem
 
 [@__reduce__]
 let coerce (x:'a{'a == 'b}) : 'b = x
-
-let as_lowstar_buffer (#t:ME.typ) (x:ME.buffer t)
-  : Tot (lowstar_buffer t)
-  = buffer_equiv t;
-    coerce x
-
-let as_vale_buffer (#t:ME.typ) (x:lowstar_buffer t)
-  : Tot (b:ME.buffer t)
-  = buffer_equiv t;
-    coerce x
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -63,12 +117,12 @@ let stack_bq = {
   strict_disjointness=true
 }
 
-let valid_base_type = x:ME.base_typ{x <> ME.TUInt128}
+let valid_base_type = x:base_typ{x <> TUInt128}
 
 //type descriptors
 type td =
   | TD_Base of valid_base_type
-  | TD_Buffer : ME.base_typ -> buffer_qualifiers -> td
+  | TD_Buffer : base_typ -> buffer_qualifiers -> td
 
 unfold
 let normal (#a:Type) (x:a) : a =
@@ -93,32 +147,20 @@ let normal (#a:Type) (x:a) : a =
                  `%fst;
                  `%snd;
                  `%Mktuple2?._1;
-                 `%Mktuple2?._2;
-                 `%ME.TBase?.b;
+                 `%Mktuple2?._2
                  ];
      primops;
      simplify]
      x
 
 ////////////////////////////////////////////////////////////////////////////////
-
 #set-options "--initial_ifuel 1"
-[@__reduce__]
-let base_typ_as_type : ME.base_typ -> Type =
-  let open ME in
-  function
-  | TUInt8 -> UInt8.t
-  | TUInt16 -> UInt16.t
-  | TUInt32 -> UInt32.t
-  | TUInt64 -> UInt64.t
-  | TUInt128 -> ME.quad32
 
 [@__reduce__]
 let td_as_type : td -> Type =
-  let open ME in
   function
   | TD_Base bt -> base_typ_as_type bt
-  | TD_Buffer bt _ -> lowstar_buffer (TBase bt)
+  | TD_Buffer bt _ -> buf_t bt
 
 let arg = t:td & td_as_type t
 
@@ -207,21 +249,8 @@ let elim_dep_arrow_cons (hd:td)
    = f
 
 //Just a small test function to see how these coercions work
-let __test : n_dep_arrow [TD_Base ME.TUInt8] (fun (x:UInt8.t) -> y:UInt8.t{x == y}) =
+let __test : n_dep_arrow [TD_Base TUInt8] (fun (x:UInt8.t) -> y:UInt8.t{x == y}) =
   fun (x:UInt8.t) -> intro_dep_arrow_nil (y:UInt8.t{x == y}) x
-////////////////////////////////////////////////////////////////////////////////
-
-let disjoint_addr addr1 length1 addr2 length2 =
-  (* The first buffer is completely before the second, or the opposite *)
-  addr1 + length1 < addr2 ||
-  addr2 + length2 < addr1
-
-type addr_map = m:(b8 -> ME.nat64){
-  (forall (buf1 buf2:b8).{:pattern (m buf1); (m buf2)}
-    B.disjoint buf1 buf2 ==>
-    disjoint_addr (m buf1) (B.length buf1) (m buf2) (B.length buf2)) /\
-  (forall (b:b8).{:pattern (m b)} m b + B.length b < MS.pow2_64)}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 [@__reduce__]
@@ -237,23 +266,6 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
 [@__reduce__]
 let disjoint_or_eq (l:list arg) =
   BigOps.pairwise_and' disjoint_or_eq_1  l
-
-[@__reduce__]
-let vale_disjoint_or_eq_1 (a:arg) (b:arg) =
-    match a, b with
-    | (| TD_Buffer tx {strict_disjointness=true}, xb |), (| TD_Buffer ty _, yb |)
-    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |) ->
-      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #ME.(TBase tx) xb))
-                      (ME.loc_buffer (as_vale_buffer #ME.(TBase ty) yb))
-    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
-      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #ME.(TBase tx) xb))
-                      (ME.loc_buffer (as_vale_buffer #ME.(TBase ty) yb)) \/
-      eq2 #b8 xb yb
-    | _ -> True
-
-[@__reduce__]
-let vale_disjoint_or_eq (l:list arg) =
-  BigOps.pairwise_and' vale_disjoint_or_eq_1 l
 
 [@__reduce__]
 let live_arg (h:HS.mem) (x:arg) =
@@ -273,6 +285,15 @@ let mem_roots_p (h0:HS.mem) (args:list arg) =
 [@__reduce__]
 let mem_roots (args:list arg) =
     h0:HS.mem{ mem_roots_p h0 args }
+
+[@__reduce__]
+let args_b8 (args:list arg) : GTot (list b8) =
+  let maybe_cons_buffer (x:arg) (args:list b8) : list b8 =
+      match x with
+      | (|TD_Buffer _ _, x|) -> x :: args
+      | _ -> args
+  in
+  List.Tot.fold_right_gtot args maybe_cons_buffer []
 
 [@__reduce__]
 let modified_arg_loc (x:arg) : GTot B.loc =
@@ -313,6 +334,78 @@ let disjoint_or_eq_cons (hd:arg) (tl:list arg)
   : Lemma (disjoint_or_eq (hd::tl) <==> (BigOps.big_and' (disjoint_or_eq_1 hd) tl /\ disjoint_or_eq tl))
   = BigOps.pairwise_and'_cons disjoint_or_eq_1 hd tl
 
+let rec args_b8_mem (l:list arg) (y:b8)
+  : Lemma (L.memP y (args_b8 l) <==>
+          (exists (a:arg). {:pattern L.memP a l}
+             L.memP a l /\
+             (match a with
+              | (| TD_Base _, _|) -> False
+              | (| TD_Buffer _ _, x|) -> x == y)))
+  = let goal (l:list arg) (a:arg) =
+        L.memP a l /\
+        (match a with
+         | (| TD_Base _, _|) -> False
+         | (| TD_Buffer _ _, x|) -> x == y)
+    in
+    match l with
+    | [] -> ()
+    | hd::tl ->
+      match hd with
+      | (| TD_Base _, _ |) ->
+        args_b8_mem tl y;
+        assert ((exists a. goal tl a) ==> (exists a. goal l a))
+      | (| TD_Buffer bt q, x |) ->
+        let aux_1 ()
+          : Lemma (requires (x == y))
+                  (ensures (exists a. goal l a)) =
+          FStar.Classical.exists_intro (goal l) hd
+        in
+        let aux_2 ()
+          : Lemma (requires (x =!= y))
+                  (ensures (L.memP y (args_b8 l) <==> (exists a. goal l a))) =
+          args_b8_mem tl y
+        in
+        FStar.Classical.move_requires aux_1 ();
+        FStar.Classical.move_requires aux_2 ()
+
+let rec args_b8_disjoint_or_eq (args:list arg)
+  : Lemma
+      (requires (disjoint_or_eq args))
+      (ensures (list_disjoint_or_eq (args_b8 args)))
+  = match args with
+    | [] -> ()
+    | hd::tl ->
+      disjoint_or_eq_cons hd tl;
+      args_b8_disjoint_or_eq tl;
+      BigOps.big_and'_forall (disjoint_or_eq_1 hd) tl;
+      FStar.Classical.forall_intro (args_b8_mem tl)
+
+let rec args_b8_live (hs:HS.mem) (args:list arg{all_live hs args})
+  : Lemma (list_live hs (args_b8 args))
+  = match args with
+    | [] -> ()
+    | hd::tl ->
+      all_live_cons hd tl hs;
+      args_b8_live hs tl
+
+let liveness_disjointness (args:list arg) (h:mem_roots args)
+  : Lemma (list_disjoint_or_eq (args_b8 args) /\
+           list_live h (args_b8 args))
+  = args_b8_disjoint_or_eq args;
+    args_b8_live h args
+
+let mk_mem (args:list arg) (h:mem_roots args) : GTot mem =
+  liveness_disjointness args h;
+  Mem (args_b8 args) (mk_addr_map (args_b8 args)) h
+
+let hs_of_mem (m:mem) : HS.mem = Mem?.hs m
+let ptrs_of_mem (m:mem) : l:list b8{list_disjoint_or_eq l} = Mem?.ptrs m
+let addrs_of_mem (m:mem) : addr_map = Mem?.addrs m
+let mk_mem_injective (args:list arg) (h:mem_roots args)
+  : Lemma (hs_of_mem (mk_mem args h) == h /\
+           ptrs_of_mem (mk_mem args h) == args_b8 args)
+  = ()
+
 let rec mem_roots_p_modifies_none (args:list arg) (h0:HS.mem) (h1:HS.mem)
   : Lemma
     (requires
@@ -327,14 +420,14 @@ let rec mem_roots_p_modifies_none (args:list arg) (h0:HS.mem) (h1:HS.mem)
       mem_roots_p_modifies_none tl h0 h1
 
 [@__reduce__]
-let arg_of_lb #t (x:lowstar_buffer (ME.TBase t)) : arg = (| TD_Buffer t default_bq, x |)
+let arg_of_lb #t (x:buf_t t) : arg = (| TD_Buffer t default_bq, x |)
 
 [@__reduce__]
-let arg_of_sb #t (x:lowstar_buffer t) :arg = (| TD_Buffer (ME.TBase?.b t) stack_bq, x |)
+let arg_of_sb #t (x:buf_t t) :arg = (| TD_Buffer t stack_bq, x |)
 
 let rec disjoint_or_eq_fresh
        #t
-       (x:lowstar_buffer (ME.TBase t))
+       (x:buf_t t)
        (args:list arg)
        (h0:HS.mem)
   : Lemma
@@ -348,3 +441,43 @@ let rec disjoint_or_eq_fresh
     | hd::tl ->
       all_live_cons hd tl h0;
       disjoint_or_eq_fresh x tl h0
+
+let rec write_taint
+    (i:nat)
+    (mem:mem)
+    (ts:b8 -> GTot MS.taint)
+    (b:b8{i <= B.length b})
+    (accu:MS.memTaint_t)
+  : GTot MS.memTaint_t
+        (decreases %[B.length b - i]) =
+  if i = B.length b then accu
+  else write_taint (i + 1) mem ts b (Map.upd accu (Mem?.addrs mem b) (ts b))
+
+let create_memtaint
+    (mem:mem)
+    (ps:list b8)
+    (ts:b8 -> GTot MS.taint)
+  : GTot MS.memTaint_t
+  = List.Tot.fold_right_gtot ps (write_taint 0 mem ts) (FStar.Map.const MS.Public)
+
+let correct_down_p (mem:mem) (h:BS.heap) (p:b8) =
+  let length = B.length p in
+  let contents = B.as_seq (hs_of_mem mem) p in
+  let addr = addrs_of_mem mem p in
+  let open BS in
+  (forall i.  0 <= i /\ i < length ==> h.[addr + i] == UInt8.v (FStar.Seq.index contents i))
+
+let rec addrs_ptr (i:nat) (addrs:addr_map) (ptr:b8{i <= B.length ptr}) (acc:Set.set int)
+  : GTot (Set.set int)
+         (decreases (B.length ptr - i))
+  = if i = B.length ptr then acc
+    else addrs_ptr (i + 1) addrs ptr (Set.singleton (addrs ptr + i))
+
+let addrs_set (mem:mem) : GTot (Set.set int) =
+  L.fold_right_gtot (ptrs_of_mem mem) (addrs_ptr 0 (addrs_of_mem mem)) Set.empty
+
+let correct_down (mem:mem) (h:BS.heap) =
+  Set.equal (addrs_set mem) (Map.domain h) /\
+  (forall p. L.memP p (ptrs_of_mem mem) ==> correct_down_p mem h p)
+
+let down_mem_t = m:mem -> GTot (h:BS.heap {correct_down m h})

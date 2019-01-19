@@ -5,11 +5,11 @@ module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module ME = X64.Memory
+// module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
-module IM = Interop.Mem
+// module IM = Interop.Mem
 module List = FStar.List.Tot
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,9 +110,8 @@ let upd_reg (regs:registers) (i:nat) (v:_) : registers =
       | _ -> regs r
 
 [@__reduce__]
-let arg_as_nat64 (a:arg) : GTot ME.nat64 =
+let arg_as_nat64 (a:arg) : GTot MS.nat64 =
   let (| tag, x |) = a in
-  let open ME in
   match tag with
   | TD_Base TUInt8 ->
      UInt8.v x
@@ -123,7 +122,7 @@ let arg_as_nat64 (a:arg) : GTot ME.nat64 =
   | TD_Base TUInt64 ->
      UInt64.v x
   | TD_Buffer _ _ ->
-    IA.addrs x
+    global_addrs_map x
 
 [@__reduce__]
 let update_regs (x:arg)
@@ -135,15 +134,16 @@ let update_regs (x:arg)
 let max_slots = n:pos{n < UInt32.n /\ n % 8 == 0}
 
 let stack_buffer (num_b8_slots:max_slots) =
-  b:lowstar_buffer (ME.TBase ME.TUInt64){
+  b:buf_t TUInt64{
     B.length b == num_b8_slots
   }
 
-let regs_with_stack (regs:registers) (#num_b8_slots:_) (stack_b:stack_buffer num_b8_slots) : registers =
+let regs_with_stack (regs:registers) (#num_b8_slots:_) (stack_b:stack_buffer num_b8_slots)
+  : registers =
     fun r ->
       let open FStar.Mul in
       if r = MS.Rsp then
-        IA.addrs stack_b + num_b8_slots
+        global_addrs_map stack_b + num_b8_slots
       else regs r
 
 [@__reduce__]
@@ -185,27 +185,30 @@ let init_taint : taint_map = fun r -> MS.Public
 // Splitting the construction of the initial state into two functions
 // one that creates the initial trusted state (i.e., part of our TCB)
 // and another that just creates the vale state, a view upon the trusted one
-let create_initial_trusted_state (num_b8_slots:max_slots) (args:arity_ok arg)
-  : state_builder_t num_b8_slots args (TS.traceState & ME.mem) =
+let create_initial_trusted_state
+      (num_b8_slots:max_slots)
+      (args:arity_ok arg)
+      (down_mem: down_mem_t)
+  : state_builder_t num_b8_slots args (TS.traceState & mem) =
   fun h0 stack ->
     let open MS in
     let regs = register_of_args (List.Tot.length args) args IA.init_regs in
     let regs = FunctionalExtensionality.on reg (regs_with_stack regs stack) in
     let xmms = FunctionalExtensionality.on xmm IA.init_xmms in
     let args = arg_of_sb stack::args in
-    Adapters.liveness_disjointness args h0;
-    let mem:ME.mem = Adapters.mk_mem args h0 in
+    liveness_disjointness args h0;
+    let mem:mem = mk_mem args h0 in
     let (s0:BS.state) = {
       BS.ok = true;
       BS.regs = regs;
       BS.xmms = xmms;
       BS.flags = 0;
-      BS.mem = IM.down_mem h0 IA.addrs (Adapters.args_b8 args)
+      BS.mem = down_mem mem
     } in
     {
       TS.state = s0;
       TS.trace = [];
-      TS.memTaint = Adapters.create_valid_memtaint mem (Adapters.args_b8 args) init_taint
+      TS.memTaint = create_memtaint mem (args_b8 args) init_taint
     },
     mem
 
@@ -220,12 +223,13 @@ let prediction_post_rel_t (c:TS.tainted_code) (num_b8_slots:max_slots) (args:ari
     push_h0:mem_roots args ->
     alloc_push_h0:mem_roots args ->
     b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
-    (nat & ME.mem) ->
+    (nat & mem) ->
     sn:TS.traceState ->
     prop
 
 [@__reduce__]
 let prediction_pre
+    (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
     (args:arity_ok arg)
@@ -242,10 +246,11 @@ let prediction_pre
   HS.get_tip push_h0 == HS.get_tip alloc_push_h0 /\
   B.frameOf b == HS.get_tip alloc_push_h0 /\
   B.live alloc_push_h0 b /\
-  s0 == fst (create_initial_trusted_state num_b8_slots args alloc_push_h0 b)
+  s0 == fst (create_initial_trusted_state num_b8_slots args down_mem alloc_push_h0 b)
 
 [@__reduce__]
 let prediction_post
+    (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
     (args:arity_ok arg)
@@ -255,20 +260,22 @@ let prediction_post
     (push_h0:mem_roots args)
     (alloc_push_h0:mem_roots args)
     (sb:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_sb sb::args)})
-    (fuel_mem:nat & ME.mem) =
+    (fuel_mem:nat & mem) =
+  let s_args = arg_of_sb sb :: args in
   let fuel, final_mem = fuel_mem in
   Some? (TS.taint_eval_code c fuel s0) /\ (
     let s1 = Some?.v (TS.taint_eval_code c fuel s0) in
-    let h1 = Adapters.hs_of_mem final_mem in
+    let h1 = hs_of_mem final_mem in
     FStar.HyperStack.ST.equal_domains alloc_push_h0 h1 /\
-    B.modifies (loc_modified_args (arg_of_sb sb :: args)) alloc_push_h0 h1 /\
-    IM.down_mem h1 (IA.addrs)
-                (Adapters.ptrs_of_mem final_mem) == s1.TS.state.BS.mem /\
+    B.modifies (loc_modified_args s_args) alloc_push_h0 h1 /\
+    mem_roots_p h1 s_args /\
+    down_mem (mk_mem s_args h1) == s1.TS.state.BS.mem /\
     calling_conventions s0 s1 /\
     post_rel h0 s0 push_h0 alloc_push_h0 sb fuel_mem s1
   )
 
 let prediction
+    (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
     (args:arity_ok arg)
@@ -279,9 +286,9 @@ let prediction
   push_h0:mem_roots args ->
   alloc_push_h0:mem_roots args ->
   b:stack_buffer num_b8_slots{mem_roots_p h0 args /\ mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
-  Ghost (nat & ME.mem)
-    (requires prediction_pre c num_b8_slots args pre_rel h0 s0 push_h0 alloc_push_h0 b)
-    (ensures prediction_post c num_b8_slots args post_rel h0 s0 push_h0 alloc_push_h0 b)
+  Ghost (nat & mem)
+    (requires prediction_pre down_mem c num_b8_slots args pre_rel h0 s0 push_h0 alloc_push_h0 b)
+    (ensures prediction_post down_mem c num_b8_slots args post_rel h0 s0 push_h0 alloc_push_h0 b)
 
 noeq
 type as_lowstar_sig_ret =
@@ -292,20 +299,21 @@ type as_lowstar_sig_ret =
       alloc_push_h0:mem_roots args ->
       b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
       fuel:nat ->
-      final_mem:ME.mem ->
+      final_mem:mem ->
       as_lowstar_sig_ret
 
 let als_ret = Ghost.erased as_lowstar_sig_ret
 
 [@__reduce__]
 let as_lowstar_sig_post
+    (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
     (args:arity_ok arg)
     (h0:mem_roots args)
     (#pre_rel:_)
     (#post_rel: _)
-    (predict:prediction c num_b8_slots args pre_rel post_rel)
+    (predict:prediction down_mem c num_b8_slots args pre_rel post_rel)
     (ret:als_ret)
     (h1:HS.mem) =
   (* write it this way to be reduction friendly *)
@@ -317,24 +325,25 @@ let as_lowstar_sig_post
   let b = As_lowstar_sig_ret?.b ret in
   let fuel = As_lowstar_sig_ret?.fuel ret in
   let final_mem = As_lowstar_sig_ret?.final_mem ret in
-  let s0 = fst (create_initial_trusted_state num_b8_slots args alloc_push_h0 b) in
-  let pre_pop = Adapters.hs_of_mem final_mem in
-  prediction_pre c num_b8_slots args pre_rel h0 s0 push_h0 alloc_push_h0 b /\
+  let s0 = fst (create_initial_trusted_state num_b8_slots args down_mem alloc_push_h0 b) in
+  let pre_pop = hs_of_mem final_mem in
+  prediction_pre down_mem c num_b8_slots args pre_rel h0 s0 push_h0 alloc_push_h0 b /\
   (fuel, final_mem) == predict h0 s0 push_h0 alloc_push_h0 b /\
-  prediction_post c num_b8_slots args post_rel h0 s0 push_h0 alloc_push_h0 b (fuel, final_mem) /\
+  prediction_post down_mem c num_b8_slots args post_rel h0 s0 push_h0 alloc_push_h0 b (fuel, final_mem) /\
   FStar.HyperStack.ST.equal_domains alloc_push_h0 pre_pop /\
   HS.poppable pre_pop /\
   h1 == HS.pop pre_pop)
 
 [@__reduce__]
 let as_lowstar_sig_post_weak
+    (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
     (args:arity_ok arg)
     (h0:mem_roots args)
     (#pre_rel:_)
     (#post_rel: _)
-    (predict:prediction c num_b8_slots args pre_rel post_rel)
+    (predict:prediction down_mem c num_b8_slots args pre_rel post_rel)
     (ret:als_ret)
     (h1:HS.mem) =
   (* write it this way to be reduction friendly *)
@@ -346,26 +355,27 @@ let as_lowstar_sig_post_weak
   let b = As_lowstar_sig_ret?.b ret in
   let fuel = As_lowstar_sig_ret?.fuel ret in
   let final_mem = As_lowstar_sig_ret?.final_mem ret in
-  let s0 = fst (create_initial_trusted_state num_b8_slots args alloc_push_h0 b) in
-  let pre_pop = Adapters.hs_of_mem final_mem in
+  let s0 = fst (create_initial_trusted_state num_b8_slots args down_mem alloc_push_h0 b) in
+  let pre_pop = hs_of_mem final_mem in
   (exists fuel
      final_mem
      _s1.
-     let pre_pop = Adapters.hs_of_mem final_mem in
+     let pre_pop = hs_of_mem final_mem in
      HS.poppable pre_pop /\
      h1 == HS.pop pre_pop /\
      post_rel h0 s0 push_h0 alloc_push_h0 b (fuel, final_mem) _s1))
 
 [@__reduce__]
 let as_lowstar_sig (c:TS.tainted_code) =
+    down_mem:down_mem_t ->
     num_b8_slots:max_slots ->
     args:arity_ok arg ->
     #pre_rel:_ ->
     #post_rel:_ ->
-    predict:prediction c num_b8_slots args pre_rel post_rel ->
+    predict:prediction down_mem c num_b8_slots args pre_rel post_rel ->
     FStar.HyperStack.ST.Stack als_ret
         (requires (fun h0 -> mem_roots_p h0 args /\ pre_rel h0))
-        (ensures fun h0 ret h1 -> as_lowstar_sig_post c num_b8_slots args h0 predict ret h1)
+        (ensures fun h0 ret h1 -> as_lowstar_sig_post down_mem c num_b8_slots args h0 predict ret h1)
 
 val wrap_variadic (c:TS.tainted_code) : as_lowstar_sig c
 
@@ -398,6 +408,7 @@ let elim_rel_gen_t_cons #c hd tl #args #f (p:rel_gen_t c (hd::tl) args f)
   = p
 
 let rec prediction_t
+      (down_mem:down_mem_t)
       (c:TS.tainted_code)
       (num_b8_slots:max_slots)
       (dom:list td)
@@ -406,11 +417,12 @@ let rec prediction_t
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
     = match dom with
       | [] ->
-        prediction c num_b8_slots args pre_rel post_rel
+        prediction down_mem c num_b8_slots args pre_rel post_rel
 
       | hd::tl ->
         x:td_as_type hd ->
         prediction_t
+          down_mem
           c
           num_b8_slots
           tl
@@ -420,17 +432,19 @@ let rec prediction_t
 
 [@__reduce__]
 let elim_predict_t_nil
+      (#down_mem:down_mem_t)
       (#c:TS.tainted_code)
       (#num_b8_slots:max_slots)
       (#args:arity_ok arg)
       (#pre_rel:_)
       (#post_rel:_)
-      (p:prediction_t c num_b8_slots [] args pre_rel post_rel)
-   : prediction c num_b8_slots args pre_rel post_rel
+      (p:prediction_t down_mem c num_b8_slots [] args pre_rel post_rel)
+   : prediction down_mem c num_b8_slots args pre_rel post_rel
    = p
 
 [@__reduce__]
 let elim_predict_t_cons
+      (#down_mem:down_mem_t)
       (#c:TS.tainted_code)
       (#num_b8_slots:max_slots)
       (hd:td)
@@ -438,22 +452,23 @@ let elim_predict_t_cons
       (#args:list arg{arity_ok_2 (hd::tl) args})
       (#pre_rel:_)
       (#post_rel:_)
-      (p:prediction_t c num_b8_slots (hd::tl) args pre_rel post_rel)
+      (p:prediction_t down_mem c num_b8_slots (hd::tl) args pre_rel post_rel)
    : x:td_as_type hd ->
-     prediction_t c num_b8_slots tl (x ++ args)
+     prediction_t down_mem c num_b8_slots tl (x ++ args)
        (elim_rel_gen_t_cons hd tl pre_rel x)
        (elim_rel_gen_t_cons hd tl post_rel x)
    = p
 
 [@__reduce__]
 let rec as_lowstar_sig_t
+      (down_mem:down_mem_t)
       (c:TS.tainted_code)
       (num_b8_slots:max_slots)
       (dom:list td)
       (args:list arg{List.length dom + List.length args < max_arity})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
-      (predict:prediction_t c num_b8_slots dom args pre_rel post_rel) =
+      (predict:prediction_t down_mem c num_b8_slots dom args pre_rel post_rel) =
       match dom with
       | [] ->
         (unit ->
@@ -462,11 +477,12 @@ let rec as_lowstar_sig_t
               mem_roots_p h0 args /\
               elim_rel_gen_t_nil pre_rel h0))
            (ensures fun h0 ret h1 ->
-              as_lowstar_sig_post c num_b8_slots args h0
+              as_lowstar_sig_post down_mem c num_b8_slots args h0
                 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1))
       | hd::tl ->
         x:td_as_type hd ->
         as_lowstar_sig_t
+          down_mem
           c
           num_b8_slots
           tl
@@ -476,24 +492,26 @@ let rec as_lowstar_sig_t
           (elim_predict_t_cons hd tl predict x)
 
 val wrap
+    (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
     (dom:arity_ok td)
     (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c num_b8_slots))
-    (predict:prediction_t c num_b8_slots dom [] pre_rel post_rel)
-  : as_lowstar_sig_t c num_b8_slots dom [] pre_rel post_rel predict
+    (predict:prediction_t down_mem c num_b8_slots dom [] pre_rel post_rel)
+  : as_lowstar_sig_t down_mem c num_b8_slots dom [] pre_rel post_rel predict
 
 
 [@__reduce__]
 let rec as_lowstar_sig_t_weak
+      (down_mem:down_mem_t)
       (c:TS.tainted_code)
       (num_b8_slots:max_slots)
       (dom:list td)
       (args:list arg{List.length dom + List.length args < max_arity})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
-      (predict:prediction_t c num_b8_slots dom args pre_rel post_rel) =
+      (predict:prediction_t down_mem c num_b8_slots dom args pre_rel post_rel) =
       match dom with
       | [] ->
         (unit ->
@@ -502,11 +520,12 @@ let rec as_lowstar_sig_t_weak
               mem_roots_p h0 args /\
               elim_rel_gen_t_nil pre_rel h0))
            (ensures fun h0 ret h1 ->
-              as_lowstar_sig_post_weak c num_b8_slots args h0
+              as_lowstar_sig_post_weak down_mem c num_b8_slots args h0
                 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1))
       | hd::tl ->
         x:td_as_type hd ->
         as_lowstar_sig_t_weak
+          down_mem
           c
           num_b8_slots
           tl
@@ -516,10 +535,11 @@ let rec as_lowstar_sig_t_weak
           (elim_predict_t_cons hd tl predict x)
 
 val wrap_weak
+    (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
     (dom:arity_ok td)
     (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c num_b8_slots))
-    (predict:prediction_t c num_b8_slots dom [] pre_rel post_rel)
-  : as_lowstar_sig_t_weak c num_b8_slots dom [] pre_rel post_rel predict
+    (predict:prediction_t down_mem c num_b8_slots dom [] pre_rel post_rel)
+  : as_lowstar_sig_t_weak down_mem c num_b8_slots dom [] pre_rel post_rel predict

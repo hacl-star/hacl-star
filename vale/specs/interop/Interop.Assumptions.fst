@@ -14,9 +14,36 @@ val st_put
     (requires p)
     (ensures fun h0 x h1 -> f h0 == (x,h1))
 
-//The map from buffers to addresses in the heap, that remains abstract
-assume
-val addrs: addr_map
+(*
+let ptrs = l:list b8{
+  list_disjoint_or_eq l /\
+  List.Tot.length l < MS.pow2_64
+}
+let ptr (l:ptrs) = b:b8{List.Tot.memP b l}
+
+module B = LowStar.Buffer
+
+// let addr_map (l:ptrs) = m:(ptr l -> MS.nat64){
+//   (forall (buf1:ptr l) (buf2:ptr l).
+//     B.disjoint buf1 buf2 ==>
+//     disjoint_addr (m buf1) (B.length buf1) (m buf2) (B.length buf2)) /\
+//   (forall (b:ptr l). m b + B.length b < MS.pow2_64)}
+
+// let find (hd:b8) (tl:list b8{ list_disjoint_or_eq (hd::tl) })
+//   : b:bool{b ==> List.Tot.memP hd tl }
+//   = admit()
+
+let addrs (l:ptrs) : (f:addr_map l & i:MS.nat64 { forall x. f x <= i }) =
+  match l with
+  | [] ->
+    (| (fun x -> 0), 0 |)
+  | hd::tl ->
+    admit()
+
+    let m_tl = addrs tl in
+
+    admit()
+*)
 
 //The initial registers and xmms
 assume
@@ -28,18 +55,3 @@ val init_xmms: MS.xmm -> MS.quad32
 // Abstract current operating system from Low*
 assume
 val win: bool
-
-(* If two refs have the same address, and are in the heap, they are equal *)
-//TODO: may not be needed anymore
-assume
-val ref_extensionality
-      (#a:Type0)
-      (#rel:Preorder.preorder a)
-      (h:Heap.heap)
-      (r1 r2:Heap.mref a rel)
-  : Lemma
-     (ensures Heap.contains h r1 /\
-              Heap.contains h r2 /\
-              Heap.addr_of r1 = Heap.addr_of r2 ==>
-              r1 == r2)
-
