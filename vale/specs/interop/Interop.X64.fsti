@@ -5,11 +5,9 @@ module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-// module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
-// module IM = Interop.Mem
 module List = FStar.List.Tot
 
 ////////////////////////////////////////////////////////////////////////////////
