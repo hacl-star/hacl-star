@@ -155,8 +155,11 @@ val store_felem_le:
   -> b:lbuffer uint8 16ul
   -> f:felem s
   -> Stack unit
-    (requires fun h -> live h f /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc b |+| loc f) h0 h1)
+    (requires fun h ->
+      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc b) h0 h1 /\
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat #(width s) h0 f).[0] % pow2 128))
 let store_felem_le #s b f =
   match s with
   | M32  -> F32xN.store_felem_le #1 b f

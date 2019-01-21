@@ -741,6 +741,13 @@ let load_felems_le #w f b =
   | 2 -> load_felem2_le f b
   | 4 -> load_felem4_le f b
 
+val lemma_nat_from_bytes_le: b:LSeq.lseq uint8 16 ->
+  Lemma (
+    let lo = BSeq.uint_from_bytes_le (LSeq.sub b 0 8) in
+    let hi = BSeq.uint_from_bytes_le (LSeq.sub b 8 8) in
+    BSeq.nat_from_bytes_le b == pow2 64 * uint_v hi + uint_v lo)
+let lemma_nat_from_bytes_le b = admit()
+
 inline_for_extraction
 val load_felem_le:
     #w:lanes
@@ -753,21 +760,28 @@ val load_felem_le:
       felem_fits h1 f (1, 1, 1, 1, 1) /\
       felem_less h1 f (pow2 128) /\
       feval h1 f == LSeq.create w (BSeq.nat_from_bytes_le (as_seq h0 b)))
-let load_felem_le #w f b = admit();
+let load_felem_le #w f b =
   let lo = uint_from_bytes_le #U64 (sub b 0ul 8ul) in
   let hi = uint_from_bytes_le #U64 (sub b 8ul 8ul) in
   let f0 = vec_load lo w in
   let f1 = vec_load hi w in
-  load_felem f f0 f1
+  let h0 = ST.get () in
+  load_felem f f0 f1;
+  let h1 = ST.get () in
+  lemma_nat_from_bytes_le (as_seq h0 b);
+  LSeq.eq_intro (feval h1 f) (LSeq.create w (BSeq.nat_from_bytes_le (as_seq h0 b)))
 
 inline_for_extraction
 val store_felem:
     #w:lanes
   -> f:felem w
   -> Stack (uint64xN w & uint64xN w)
-    (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let store_felem #w f =
+    (requires fun h ->
+      live h f /\ felem_fits h f (1, 1, 1, 1, 3))
+    (ensures  fun h0 (lo, hi) h1 -> h0 == h1 /\
+      (forall (i:nat). i < w ==>
+	v (vec_v hi).[i] * pow2 64 + v (vec_v lo).[i] == (fas_nat h0 f).[i] % pow2 128))
+let store_felem #w f = admit();
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
@@ -775,48 +789,109 @@ let store_felem #w f =
   let f4 = f.(4ul) in
   store_felem5 #w (f0, f1, f2, f3, f4)
 
+val lemma_nat_to_bytes_le: lo:uint64xN 1 -> hi:uint64xN 1 ->
+  Lemma (
+    let b0 = BSeq.uints_to_bytes_le (vec_v lo) in
+    let b1 = BSeq.uints_to_bytes_le (vec_v hi) in
+    BSeq.nat_to_bytes_le 16 (v (vec_v hi).[0] * pow2 64 + v (vec_v lo).[0]) == LSeq.concat b0 b1)
+let lemma_nat_to_bytes_le lo hi = admit()
+
 inline_for_extraction
 val store_felem1_le:
     b:lbuffer uint8 16ul
   -> f:felem 1
   -> Stack unit
-    (requires fun h -> live h f /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc f |+| loc b) h0 h1)
+    (requires fun h ->
+      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc b) h0 h1 /\
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
 let store_felem1_le b f =
+  let h0 = ST.get () in
   let (r0, r1) = store_felem #1 f in
+  assert (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0] == (fas_nat h0 f).[0] % pow2 128);
   vec_store_le (sub b 0ul 8ul) r0;
-  vec_store_le (sub b 8ul 8ul) r1
+  vec_store_le (sub b 8ul 8ul) r1;
+  let h1 = ST.get () in
+  lemma_nat_to_bytes_le r0 r1;
+  LSeq.lemma_concat2 8 (LSeq.sub (as_seq h1 b) 0 8) 8 (LSeq.sub (as_seq h1 b) 8 8) (as_seq h1 b);
+  LSeq.eq_intro (as_seq h1 b) (BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
+
+val lemma_nat_to_bytes_le1: r:vec_t U64 2 ->
+  Lemma (
+    BSeq.uints_to_bytes_le (vec_v r) ==
+    BSeq.nat_to_bytes_le 16 (v (vec_v r).[1] * pow2 64 + v (vec_v r).[0]))
+let lemma_nat_to_bytes_le1 r = admit()
 
 inline_for_extraction
 val store_felem2_le:
     b:lbuffer uint8 16ul
   -> f:felem 2
   -> Stack unit
-    (requires fun h -> live h f /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc f |+| loc b) h0 h1)
+    (requires fun h ->
+      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc b) h0 h1 /\
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
 let store_felem2_le b f =
   let (f0, f1) = store_felem #2 f in
-  let r0 = vec_interleave_low f0 f1 in
-  vec_store_le (sub b 0ul 16ul) r0
+  let r0:vec_t U64 2 = vec_interleave_low f0 f1 in
+  vec_interleave_low_lemma64_2 f0 f1;
+  //assert (v (vec_v r0).[1] * pow2 64 + v (vec_v r0).[0] == (fas_nat h0 f).[0] % pow2 128);
+  vec_store_le b r0;
+  lemma_nat_to_bytes_le1 r0
+
+val lemma_cast_vec64_to_vec128: b:vec_t U64 4 ->
+  Lemma (
+    let r = vec_v (cast U128 2 b) in
+    let b = vec_v b in
+    uint_v r.[0] == uint_v b.[0] + uint_v b.[1] * pow2 64 /\
+    uint_v r.[1] == uint_v b.[2] + uint_v b.[3] * pow2 64)
+let lemma_cast_vec64_to_vec128 b = admit()
+
+val lemma_nat_to_bytes_le2: r:vec_t U128 2 ->
+  Lemma (
+    let b = BSeq.uints_to_bytes_le (vec_v r) in
+    LSeq.sub b 0 16 == BSeq.uint_to_bytes_le (vec_v r).[0] /\
+    LSeq.sub b 16 16 == BSeq.uint_to_bytes_le (vec_v r).[1])
+let lemma_nat_to_bytes_le2 r = admit()
+
+val lemma_nat_to_bytes_le0: r:uint128 ->
+  Lemma (BSeq.uint_to_bytes_le r == BSeq.nat_to_bytes_le 16 (uint_v r))
+let lemma_nat_to_bytes_le0 r = admit()
 
 inline_for_extraction
 val store_felem4_le:
     b:lbuffer uint8 16ul
   -> f:felem 4
   -> Stack unit
-    (requires fun h -> live h f /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc f |+| loc b) h0 h1)
+    (requires fun h ->
+      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc b) h0 h1 /\
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
 let store_felem4_le b f =
   push_frame ();
-  let (f0,f1) = store_felem #4 f in
+  let (f0, f1) = store_felem #4 f in
   let lo = vec_interleave_low f0 f1 in
   let hi = vec_interleave_high f0 f1 in
+  vec_interleave_low_lemma64_4 f0 f1;
+  vec_interleave_high_lemma64_4 f0 f1;
   let lo1 = cast U128 2 lo in
   let hi1 = cast U128 2 hi in
+  lemma_cast_vec64_to_vec128 lo;
+  lemma_cast_vec64_to_vec128 hi;
   let r0 = vec_interleave_low lo1 hi1 in
+  vec_interleave_low_lemma128_2 lo1 hi1;
   let tmp = create 32ul (u8 0) in
-  vec_store_le (sub tmp 0ul 32ul) r0;
+  vec_store_le tmp r0;
+  lemma_nat_to_bytes_le2 r0;
+  let h0 = ST.get () in
   copy b (sub tmp 0ul 16ul);
+  let h1 = ST.get () in
+  assert (as_seq h1 b == BSeq.uint_to_bytes_le (vec_v r0).[0]);
+  assert (v (vec_v r0).[0] == v (vec_v f1).[0] * pow2 64 + v (vec_v f0).[0]);
+  lemma_nat_to_bytes_le0 (vec_v r0).[0];
   pop_frame()
 
 inline_for_extraction
@@ -825,8 +900,11 @@ val store_felem_le:
   -> b:lbuffer uint8 16ul
   -> f:felem w
   -> Stack unit
-    (requires fun h -> live h f /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc f |+| loc b) h0 h1)
+    (requires fun h ->
+      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc b) h0 h1 /\
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
 let store_felem_le #w b f =
   match w with
   | 1 -> store_felem1_le b f
