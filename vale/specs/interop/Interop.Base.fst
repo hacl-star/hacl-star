@@ -1,5 +1,5 @@
 module Interop.Base
-
+include Interop.Types
 module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
@@ -11,26 +11,6 @@ module HS = FStar.HyperStack
 module W = Words_s
 module L = FStar.List.Tot
 
-let __reduce__ = ()
-
-type base_typ:eqtype =
-  | TUInt8
-  | TUInt16
-  | TUInt32
-  | TUInt64
-  | TUInt128
-
-let base_typ_as_vale_type (t:base_typ) : Tot eqtype =
-  let open W in
-  let open Types_s in
-  match t with
-  | TUInt8 -> nat8
-  | TUInt16 -> nat16
-  | TUInt32 -> nat32
-  | TUInt64 -> nat64
-  | TUInt128 -> quad32
-
-
 let base_typ_as_type (t:base_typ) : Tot eqtype =
   let open W in
   let open Types_s in
@@ -41,30 +21,8 @@ let base_typ_as_type (t:base_typ) : Tot eqtype =
   | TUInt64 -> UInt64.t
   | TUInt128 -> quad32
 
-
-[@__reduce__]
-let view_n = function
-  | TUInt8 -> 1
-  | TUInt16 -> 2
-  | TUInt32 -> 4
-  | TUInt64 -> 8
-  | TUInt128 -> 16
-
-let b8 = B.buffer UInt8.t
-
 [@__reduce__]
 let buf_t t = b:b8{B.length b % view_n t == 0}
-
-let disjoint_addr addr1 length1 addr2 length2 =
-  (* The first buffer is completely before the second, or the opposite *)
-  addr1 + length1 < addr2 ||
-  addr2 + length2 < addr1
-
-type addr_map = m:(b8 -> W.nat64){
-  (forall (buf1 buf2:b8).{:pattern (m buf1); (m buf2)}
-    B.disjoint buf1 buf2 ==>
-    disjoint_addr (m buf1) (B.length buf1) (m buf2) (B.length buf2)) /\
-  (forall (b:b8).{:pattern (m b)} m b + B.length b < MS.pow2_64)}
 
 [@__reduce__]
 let disjoint_or_eq_b8 (ptr1 ptr2:b8) =
@@ -72,13 +30,13 @@ let disjoint_or_eq_b8 (ptr1 ptr2:b8) =
   ptr1 == ptr2
 
 let list_disjoint_or_eq (ptrs:list b8) =
-  forall (p1 p2:b8).
+  forall (p1 p2:b8). {:pattern (L.memP p1 ptrs); (L.memP p2 ptrs)}
     L.memP p1 ptrs /\
     L.memP p2 ptrs ==> disjoint_or_eq_b8 p1 p2
 
 unfold
 let list_live (#a:Type0) mem (ptrs:list (B.buffer a)) =
-  forall p . L.memP p ptrs ==> B.live mem p
+  forall p . {:pattern (L.memP p ptrs)} L.memP p ptrs ==> B.live mem p
 
 assume val global_addrs_map : addr_map
 
@@ -386,7 +344,15 @@ let rec args_b8_live (hs:HS.mem) (args:list arg{all_live hs args})
     | [] -> ()
     | hd::tl ->
       all_live_cons hd tl hs;
-      args_b8_live hs tl
+      assert (live_arg hs hd);
+      assert (all_live hs tl);
+      args_b8_live hs tl;
+      match hd with
+      | (| TD_Base _ , _ |) ->
+        assert (args_b8 args == args_b8 tl)
+      | (| TD_Buffer t _, x |) ->
+        assert (B.live hs x);
+        assert (args_b8 args == x :: args_b8 tl)
 
 let liveness_disjointness (args:list arg) (h:mem_roots args)
   : Lemma (list_disjoint_or_eq (args_b8 args) /\
@@ -394,13 +360,22 @@ let liveness_disjointness (args:list arg) (h:mem_roots args)
   = args_b8_disjoint_or_eq args;
     args_b8_live h args
 
+let mem_of_hs_roots (ptrs:list b8{list_disjoint_or_eq ptrs})
+                    (h:HS.mem{list_live h ptrs})
+  : GTot mem
+  = Mem ptrs (mk_addr_map ptrs) h
+
 let mk_mem (args:list arg) (h:mem_roots args) : GTot mem =
   liveness_disjointness args h;
-  Mem (args_b8 args) (mk_addr_map (args_b8 args)) h
+  mem_of_hs_roots (args_b8 args) h
 
+unfold
 let hs_of_mem (m:mem) : HS.mem = Mem?.hs m
+unfold
 let ptrs_of_mem (m:mem) : l:list b8{list_disjoint_or_eq l} = Mem?.ptrs m
+unfold
 let addrs_of_mem (m:mem) : addr_map = Mem?.addrs m
+
 let mk_mem_injective (args:list arg) (h:mem_roots args)
   : Lemma (hs_of_mem (mk_mem args h) == h /\
            ptrs_of_mem (mk_mem args h) == args_b8 args)
@@ -451,7 +426,7 @@ let rec write_taint
   : GTot MS.memTaint_t
         (decreases %[B.length b - i]) =
   if i = B.length b then accu
-  else write_taint (i + 1) mem ts b (Map.upd accu (Mem?.addrs mem b) (ts b))
+  else write_taint (i + 1) mem ts b (Map.upd accu (Mem?.addrs mem b + i) (ts b))
 
 let create_memtaint
     (mem:mem)
@@ -465,7 +440,7 @@ let correct_down_p (mem:mem) (h:BS.heap) (p:b8) =
   let contents = B.as_seq (hs_of_mem mem) p in
   let addr = addrs_of_mem mem p in
   let open BS in
-  (forall i.  0 <= i /\ i < length ==> h.[addr + i] == UInt8.v (FStar.Seq.index contents i))
+  (forall i.{:pattern (Seq.index contents i)}  0 <= i /\ i < length ==> h.[addr + i] == UInt8.v (FStar.Seq.index contents i))
 
 let rec addrs_ptr (i:nat) (addrs:addr_map) (ptr:b8{i <= B.length ptr}) (acc:Set.set int)
   : GTot (Set.set int)
@@ -478,6 +453,7 @@ let addrs_set (mem:mem) : GTot (Set.set int) =
 
 let correct_down (mem:mem) (h:BS.heap) =
   Set.equal (addrs_set mem) (Map.domain h) /\
-  (forall p. L.memP p (ptrs_of_mem mem) ==> correct_down_p mem h p)
+  (forall p.{:pattern (L.memP p (ptrs_of_mem mem))}
+    L.memP p (ptrs_of_mem mem) ==> correct_down_p mem h p)
 
 let down_mem_t = m:mem -> GTot (h:BS.heap {correct_down m h})
