@@ -10,35 +10,33 @@ module B = LowStar.Buffer
 module BV = LowStar.BufferView
 
 friend X64.Memory
-
-let same_domain h m = Set.equal (I.addrs_set h.ptrs h.addrs) (Map.domain m)
+module IB = Interop.Base
+let same_domain h m = Set.equal (IB.addrs_set h) (Map.domain m)
 
 let lemma_same_domains h m1 m2 = ()
 
-let get_heap h = I.down_mem h.hs h.addrs h.ptrs
+let get_heap h = I.down_mem h
 
-let get_hs h m = 
-  {h with hs = I.up_mem m h.addrs h.ptrs h.hs}
+let get_hs h m = I.up_mem m h
 
-let get_hs_heap h = I.down_up_identity h.hs h.addrs h.ptrs
+let get_hs_heap h = I.down_up_identity h
 
-let get_heap_hs m h = I.up_down_identity h.hs h.addrs h.ptrs m
+let get_heap_hs m h = I.up_down_identity h m
 
 
 let bytes_valid ptr h =
-  let t = TBase TUInt64 in
-  let b = get_addr_ptr t ptr h h.ptrs in
+  let t = TUInt64 in
+  let b = get_addr_ptr t ptr h in
   let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
   in_bounds64 h b i;
-  I.addrs_set_mem h.ptrs b h.addrs ptr;
-  I.addrs_set_mem h.ptrs b h.addrs (ptr+1);
-  I.addrs_set_mem h.ptrs b h.addrs (ptr+2);
-  I.addrs_set_mem h.ptrs b h.addrs (ptr+3);
-  I.addrs_set_mem h.ptrs b h.addrs (ptr+4);
-  I.addrs_set_mem h.ptrs b h.addrs (ptr+5);
-  I.addrs_set_mem h.ptrs b h.addrs (ptr+6);
-  I.addrs_set_mem h.ptrs b h.addrs (ptr+7);
-  ()
+  I.addrs_set_mem h b  ptr;
+  I.addrs_set_mem h b  (ptr+1);
+  I.addrs_set_mem h b  (ptr+2);
+  I.addrs_set_mem h b  (ptr+3);
+  I.addrs_set_mem h b  (ptr+4);
+  I.addrs_set_mem h b  (ptr+5);
+  I.addrs_set_mem h b  (ptr+6);
+  I.addrs_set_mem h b  (ptr+7)
 
 val same_mem_get_heap_val128 (b:buffer128)
                           (i:nat{i < buffer_length b})
