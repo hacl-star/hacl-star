@@ -1051,3 +1051,42 @@ let carry_wide_felem5_eval_lemma #w inp =
     carry_wide_felem5_eval_lemma_i #w inp 2;
     carry_wide_felem5_eval_lemma_i #w inp 3;
     eq_intro (feval5 o) (feval5 inp)
+
+val reduce_felem5_eval_lemma_i:
+    #w:lanes
+  -> f:felem5 w
+  -> i:nat{i < w}
+  -> Lemma
+    (requires acc_inv_t f)
+    (ensures
+      (feval5 (reduce_felem5 f)).[i] == (feval5 f).[i] /\
+      as_nat5 (as_tup64_i (reduce_felem5 f) i) < prime)
+let reduce_felem5_eval_lemma_i #w f i =
+  let f = carry_full_felem5 f in
+  let res = subtract_p5 f in ()
+
+
+val reduce_felem5_eval_lemma:
+    #w:lanes
+  -> inp:felem5 w
+  -> Lemma
+    (requires acc_inv_t inp)
+    (ensures
+      feval5 (reduce_felem5 #w inp) == feval5 inp /\
+      felem_less5 (reduce_felem5 #w inp) prime)
+let reduce_felem5_eval_lemma #w inp =
+  let o = reduce_felem5 inp in
+  match w with
+  | 1 ->
+    reduce_felem5_eval_lemma_i #w inp 0;
+    eq_intro (feval5 o) (feval5 inp)
+  | 2 ->
+    reduce_felem5_eval_lemma_i #w inp 0;
+    reduce_felem5_eval_lemma_i #w inp 1;
+    eq_intro (feval5 o) (feval5 inp)
+  | 4 ->
+    reduce_felem5_eval_lemma_i #w inp 0;
+    reduce_felem5_eval_lemma_i #w inp 1;
+    reduce_felem5_eval_lemma_i #w inp 2;
+    reduce_felem5_eval_lemma_i #w inp 3;
+    eq_intro (feval5 o) (feval5 inp)

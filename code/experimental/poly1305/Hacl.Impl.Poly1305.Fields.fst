@@ -223,19 +223,22 @@ let set_zero #s f =
 inline_for_extraction
 val copy_felem:
     #s:field_spec
+  -> #m:scale32_5
   -> f:felem s
   -> f':felem s
   -> Stack unit
     (requires fun h ->
-      live h f /\ live h f' /\ disjoint f f')
+      live h f /\ live h f' /\ disjoint f f' /\
+      felem_fits h f' m)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      felem_fits h1 f m /\
       feval h1 f == feval h0 f')
-let copy_felem #s f f' =
+let copy_felem #s #m f f' =
   match s with
-  | M32  -> F32xN.copy_felem #1 f f'
-  | M128 -> F32xN.copy_felem #2 f f'
-  | M256 -> F32xN.copy_felem #4 f f'
+  | M32  -> F32xN.copy_felem #1 #m f f'
+  | M128 -> F32xN.copy_felem #2 #m f f'
+  | M256 -> F32xN.copy_felem #4 #m f f'
 
 inline_for_extraction
 val reduce_felem:

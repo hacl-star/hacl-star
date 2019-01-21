@@ -11,14 +11,23 @@ module S = Hacl.Spec.Poly1305.Vec
 
 #reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
 
-// val precomp_r5_fits_lemma:
-//     #w:lanes
-//   -> r:felem5 w
-//   -> Lemma
-//     (requires felem_fits5 r (1, 1, 1, 1, 1))
-//     (ensures  felem_fits5 (precomp_r5 #w r) (5, 5, 5, 5, 5))
-//     [SMTPat (precomp_r5 #w r)]
-// let precomp_r5_fits_lemma #w r = ()
+val precomp_r5_fits_lemma:
+    #w:lanes
+  -> r:felem5 w
+  -> Lemma
+    (requires felem_fits5 r (1, 1, 1, 1, 1))
+    (ensures  felem_fits5 (precomp_r5 #w r) (5, 5, 5, 5, 5))
+    [SMTPat (precomp_r5 #w r)]
+let precomp_r5_fits_lemma #w r = ()
+
+val precomp_r5_fits_lemma2:
+    #w:lanes
+  -> r:felem5 w
+  -> Lemma
+    (requires felem_fits5 r (1, 2, 1, 1, 1))
+    (ensures  felem_fits5 (precomp_r5 #w r) (5, 10, 5, 5, 5))
+    [SMTPat (precomp_r5 #w r)]
+let precomp_r5_fits_lemma2 #w r = ()
 
 val fadd5_fits_lemma:
     #w:lanes
