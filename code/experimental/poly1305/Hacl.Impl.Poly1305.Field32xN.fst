@@ -916,30 +916,6 @@ let store_felem_le #w b f =
   | 2 -> store_felem2_le b f
   | 4 -> store_felem4_le b f
 
-//[@ CInline]
-inline_for_extraction
-val carry_full_felem:
-    #w:lanes
-  -> out:felem w
-  -> inp:felem_wide w
-  -> Stack unit
-    (requires fun h -> live h out /\ live h inp)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
-[@ CInline]
-let carry_full_felem #w out inp =
-  let i0 = inp.(0ul) in
-  let i1 = inp.(1ul) in
-  let i2 = inp.(2ul) in
-  let i3 = inp.(3ul) in
-  let i4 = inp.(4ul) in
-  let (t0, t1, t2, t3, t4) =
-    carry_full_felem5 (i0, i1, i2, i3, i4) in
-  out.(0ul) <- t0;
-  out.(1ul) <- t1;
-  out.(2ul) <- t2;
-  out.(3ul) <- t3;
-  out.(4ul) <- t4
-
 inline_for_extraction
 val fmul_r1_normalize:
     out:felem 1
@@ -950,13 +926,12 @@ val fmul_r1_normalize:
       felem_fits h out (2,3,2,2,2) /\
       load_precompute_r_post h p)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out |+| loc p) h0 h1 /\
+      modifies (loc out) h0 h1 /\
       acc_inv_t (as_tup5 h1 out) /\
-      fmul_precomp_r_pre h1 p /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_1 (feval h0 out) r))
 [@ CInline]
-let fmul_r1_normalize out p = admit();
+let fmul_r1_normalize out p =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
   fmul_r out out r r5
@@ -971,35 +946,35 @@ val fmul_r2_normalize:
       felem_fits h out (2,3,2,2,2) /\
       load_precompute_r_post h p)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out |+| loc p) h0 h1 /\
+      modifies (loc out) h0 h1 /\
       acc_inv_t (as_tup5 h1 out) /\
-      fmul_precomp_r_pre h1 p /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_2 (feval h0 out) r))
 [@ CInline]
 let fmul_r2_normalize out p =
-  admit();
   let r = sub p 0ul 5ul in
   let r2 = sub p 10ul 5ul in
-  let r2_5 = sub p 15ul 5ul in
-  r2.(0ul) <- vec_interleave_low r2.(0ul) r.(0ul);
-  r2.(1ul) <- vec_interleave_low r2.(1ul) r.(1ul);
-  r2.(2ul) <- vec_interleave_low r2.(2ul) r.(2ul);
-  r2.(3ul) <- vec_interleave_low r2.(3ul) r.(3ul);
-  r2.(4ul) <- vec_interleave_low r2.(4ul) r.(4ul);
-  precompute_shift_reduce r2_5 r2;
-  fmul_r out out r2 r2_5;
-  let o0 = out.(0ul) in
-  let o1 = out.(1ul) in
-  let o2 = out.(2ul) in
-  let o3 = out.(3ul) in
-  let o4 = out.(4ul) in
-  let o0 = vec_add_mod o0 (vec_interleave_high o0 o0) in
-  let o1 = vec_add_mod o1 (vec_interleave_high o1 o1) in
-  let o2 = vec_add_mod o2 (vec_interleave_high o2 o2) in
-  let o3 = vec_add_mod o3 (vec_interleave_high o3 o3) in
-  let o4 = vec_add_mod o4 (vec_interleave_high o4 o4) in
-  let (o0, o1, o2, o3, o4) = carry_full_felem5 (o0, o1, o2, o3, o4) in
+
+  let a0 = out.(0ul) in
+  let a1 = out.(1ul) in
+  let a2 = out.(2ul) in
+  let a3 = out.(3ul) in
+  let a4 = out.(4ul) in
+
+  let r10 = r.(0ul) in
+  let r11 = r.(1ul) in
+  let r12 = r.(2ul) in
+  let r13 = r.(3ul) in
+  let r14 = r.(4ul) in
+
+  let r20 = r2.(0ul) in
+  let r21 = r2.(1ul) in
+  let r22 = r2.(2ul) in
+  let r23 = r2.(3ul) in
+  let r24 = r2.(4ul) in
+
+  let (o0, o1, o2, o3, o4) =
+    fmul_r2_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r20, r21, r22, r23, r24) in
   out.(0ul) <- o0;
   out.(1ul) <- o1;
   out.(2ul) <- o2;
@@ -1016,47 +991,48 @@ val fmul_r4_normalize:
       felem_fits h out (2,3,2,2,2) /\
       load_precompute_r_post h p)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out |+| loc p) h0 h1 /\
+      modifies (loc out) h0 h1 /\
       acc_inv_t (as_tup5 h1 out) /\
-      fmul_precomp_r_pre h1 p /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_4 (feval h0 out) r))
 [@ CInline]
 let fmul_r4_normalize out p =
-  push_frame();
-  admit();
   let r = sub p 0ul 5ul in
   let r_5 = sub p 5ul 5ul in
   let r4 = sub p 10ul 5ul in
-  let r4_5 = sub p 15ul 5ul in
-  let r2 = create_felem 4 in
-  let r3 = create_felem 4 in
-  let tmp = create_felem 4 in
-  fmul_r r2 r r r_5;
-  fmul_r r3 r2 r r_5;
-  let h0 = ST.get() in
-  loop_nospec #h0 5ul r2
-  (fun i ->
-    let v1212 = vec_interleave_low r2.(i) r.(i) in
-    let v3434 = vec_interleave_low r4.(i) r3.(i) in
-    let v1234 = vec_interleave_low (cast U128 2 v3434) (cast U128 2 v1212) in
-    r2.(i) <- cast U64 4 v1234
-  );
 
-  let r1234 = r2 in
-  let r1234_5 = r3 in
-  precompute_shift_reduce r1234_5 r1234;
-  fmul_r out out r1234 r1234_5;
-  loop_nospec #h0 5ul out
-  (fun i ->
-    let oi = out.(i) in
-    let v0 = cast U64 4 (vec_interleave_high (cast U128 2 oi) (cast U128 2 oi)) in
-    let v1 = vec_add_mod oi v0 in
-    let v2 = vec_add_mod v1 (vec_permute4 v1 1ul 1ul 1ul 1ul) in
-    out.(i) <- v2
-  );
-  carry_full_felem out out;
-  pop_frame()
+  let a0 = out.(0ul) in
+  let a1 = out.(1ul) in
+  let a2 = out.(2ul) in
+  let a3 = out.(3ul) in
+  let a4 = out.(4ul) in
+
+  let r10 = r.(0ul) in
+  let r11 = r.(1ul) in
+  let r12 = r.(2ul) in
+  let r13 = r.(3ul) in
+  let r14 = r.(4ul) in
+
+  let r150 = r_5.(0ul) in
+  let r151 = r_5.(1ul) in
+  let r152 = r_5.(2ul) in
+  let r153 = r_5.(3ul) in
+  let r154 = r_5.(4ul) in
+
+  let r40 = r4.(0ul) in
+  let r41 = r4.(1ul) in
+  let r42 = r4.(2ul) in
+  let r43 = r4.(3ul) in
+  let r44 = r4.(4ul) in
+
+  let (o0, o1, o2, o3, o4) =
+    fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14)
+      (r150, r151, r152, r153, r154) (r40, r41, r42, r43, r44) in
+  out.(0ul) <- o0;
+  out.(1ul) <- o1;
+  out.(2ul) <- o2;
+  out.(3ul) <- o3;
+  out.(4ul) <- o4
 
 inline_for_extraction
 val fmul_rn_normalize:
@@ -1069,9 +1045,8 @@ val fmul_rn_normalize:
       felem_fits h out (2,3,2,2,2) /\
       load_precompute_r_post h p)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out |+| loc p) h0 h1 /\
+      modifies (loc out) h0 h1 /\
       acc_inv_t (as_tup5 h1 out) /\
-      fmul_precomp_r_pre h1 p /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_n (feval h0 out) r))
 [@ CInline]

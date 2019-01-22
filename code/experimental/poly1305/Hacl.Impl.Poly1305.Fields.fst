@@ -338,9 +338,8 @@ val fmul_rn_normalize:
       felem_fits h out (2,3,2,2,2) /\
       load_precompute_r_post #(width s) h precomp)
     (ensures fun h0 _ h1 ->
-      modifies (loc out |+| loc precomp) h0 h1 /\
+      modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-      fmul_precomp_r_pre #(width s) h1 precomp /\
      (let r = feval h0 (gsub precomp 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_n #(width s) (feval h0 out) r))
 let fmul_rn_normalize #s out precomp =
