@@ -322,7 +322,7 @@ let addr_in_ptr #t addr ptr h =
     else aux (i+1)
   in aux 0
 
-let valid_offset (t:base_typ) (n base addr i:nat) = exists j. i <= j /\ j < n /\ base + (view_n t) * j == addr
+let valid_offset (t:base_typ) (n base:nat) (addr:int) (i:nat) = exists j. i <= j /\ j < n /\ base + (view_n t) * j == addr
 
 let rec get_addr_in_ptr (t:base_typ) (n base addr:nat) (i:nat{valid_offset t n base addr i})
   : GTot (j:nat{base + (view_n t) * j == addr})
@@ -356,15 +356,19 @@ let rec find_valid_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:mem{sub_li
   = match ps with
     | [] -> None
     | a::q -> if valid_buffer t addr a h then Some a else find_valid_buffer_aux t addr q h
+    
 let find_valid_buffer (t:base_typ) (addr:int) (h:mem) = find_valid_buffer_aux t addr h.ptrs h
+
 let rec find_valid_buffer_aux_ps (t:base_typ) (addr:int) (ps:list b8) (h1:mem) (h2:mem{h1.ptrs == h2.ptrs /\ sub_list ps h1.ptrs})
   : Lemma (find_valid_buffer_aux t addr ps h1 == find_valid_buffer_aux t addr ps h2)
   = match ps with
     | [] -> ()
     | a::q -> find_valid_buffer_aux_ps t addr q h1 h2
+
 let find_valid_buffer_ps (t:base_typ) (addr:int) (h1:mem) (h2:mem{h1.ptrs==h2.ptrs})
   : Lemma (find_valid_buffer t addr h1 == find_valid_buffer t addr h2)
   = find_valid_buffer_aux_ps t addr h1.ptrs h1 h2
+
 let find_valid_buffer_valid_offset (t:base_typ) (addr:int) (h:mem)
   : Lemma (match find_valid_buffer t addr h with
            | None -> True
@@ -450,7 +454,7 @@ let lemma_load_mem64 b i h =
     BV.length_eq (BV.mk_buffer_view b uint64_view);
     BV.get_view_mk_buffer_view b uint64_view;
     BV.as_buffer_mk_buffer_view b uint64_view;
-    assert (I.disjoint_or_eq a b);
+    assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 let lemma_store_mem64 b i v h =
@@ -465,7 +469,7 @@ let lemma_store_mem64 b i v h =
     BV.length_eq (BV.mk_buffer_view b uint64_view);
     BV.get_view_mk_buffer_view b uint64_view;
     BV.as_buffer_mk_buffer_view b uint64_view;
-    assert (I.disjoint_or_eq a b);
+    assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 let lemma_valid_mem128 b i h = ()
@@ -482,7 +486,7 @@ let lemma_load_mem128 b i h =
     BV.length_eq (BV.mk_buffer_view b uint128_view);
     BV.get_view_mk_buffer_view b uint128_view;
     BV.as_buffer_mk_buffer_view b uint128_view;
-    assert (I.disjoint_or_eq a b);
+    assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 let lemma_store_mem128 b i v h =
@@ -497,7 +501,7 @@ let lemma_store_mem128 b i v h =
     BV.length_eq (BV.mk_buffer_view b uint128_view);
     BV.get_view_mk_buffer_view b uint128_view;
     BV.as_buffer_mk_buffer_view b uint128_view;
-    assert (I.disjoint_or_eq a b);
+    assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 let same_get_addr_ptr (t:base_typ)
@@ -580,7 +584,7 @@ let lemma_frame_store_mem64 ptr v h =
     let aux_diff_buf () : Lemma
       (requires b1 =!= b2)
       (ensures load_mem64 i' h == load_mem64 i' h1) =
-      assert (I.disjoint_or_eq b1 b2);
+      assert (IB.disjoint_or_eq_b8 b1 b2);
       BV.as_seq_sel h.hs (BV.mk_buffer_view b2 uint64_view) i2;
       BV.as_seq_sel h1.hs (BV.mk_buffer_view b2 uint64_view) i2
     in let aux_same_buf () : Lemma
@@ -649,7 +653,7 @@ let lemma_frame_store_mem128 ptr v h =
     let aux_diff_buf () : Lemma
       (requires b1 =!= b2)
       (ensures load_mem128 i' h == load_mem128 i' h1) =
-      assert (I.disjoint_or_eq b1 b2);
+      assert (IB.disjoint_or_eq_b8 b1 b2);
       BV.as_seq_sel h.hs (BV.mk_buffer_view b2 uint128_view) i2;
       BV.as_seq_sel h1.hs (BV.mk_buffer_view b2 uint128_view) i2
     in let aux_same_buf () : Lemma
@@ -928,14 +932,20 @@ let valid_taint_buf64 b mem memTaint t = valid_taint_buf b mem memTaint t
 
 let valid_taint_buf128 b mem memTaint t = valid_taint_buf b mem memTaint t
 
+let apply_taint_buf (b:b8) (mem:mem) (memTaint:memtaint) (t:taint) (i:nat) : Lemma
+  (requires i < B.length b /\ valid_taint_buf b mem memTaint t)
+  (ensures memTaint.[mem.addrs b + i] = t) = ()
+
 let lemma_valid_taint64 b memTaint mem i t =
   length_t_eq (TUInt64) b;
   let ptr = buffer_addr b mem + 8 * i in
-  let aux i' : Lemma
+  let aux (i':nat) : Lemma
     (requires i' >= ptr /\ i' < ptr + 8)
     (ensures memTaint.[i'] == t) =
-    assert (i' == mem.addrs b + (8 * i + i' - ptr));
-    () in
+    let extra = 8 * i + i' - ptr in
+    assert (i' == mem.addrs b + extra);
+    apply_taint_buf b mem memTaint t extra
+  in
   Classical.forall_intro (Classical.move_requires aux)
 
 let lemma_valid_taint128 b memTaint mem i t =
@@ -944,8 +954,10 @@ let lemma_valid_taint128 b memTaint mem i t =
   let aux i' : Lemma
     (requires i' >= ptr /\ i' < ptr + 16)
     (ensures memTaint.[i'] == t) =
-    assert (i' == mem.addrs b + (16 * i + i' - ptr));
-    () in
+    let extra = 16 * i + i' - ptr in
+    assert (i' == mem.addrs b + extra);
+    apply_taint_buf b mem memTaint t extra
+  in
   Classical.forall_intro (Classical.move_requires aux)
 
 let same_memTaint (t:base_typ) (b:buffer t) (mem0 mem1:mem) (memT0 memT1:memtaint) : Lemma
@@ -987,16 +999,16 @@ let rec write_taint_lemma (i:nat) (mem:IB.mem) (ts:b8 -> GTot taint) (b:b8{i <= 
           assert (forall j. 0 <= j /\ j < i + 1 ==> new_accu.[addr + i] == ts b);
           write_taint_lemma (i + 1) mem ts b new_accu
 
-let rec valid_memtaint (mem:mem) (ps:list b8{I.list_disjoint_or_eq ps}) (ts:b8 -> GTot taint)
+let rec valid_memtaint (mem:mem) (ps:list b8{IB.list_disjoint_or_eq ps}) (ts:b8 -> GTot taint)
   : Lemma (valid_taint_bufs mem (IB.create_memtaint mem ps ts) ps ts)
   = match ps with
     | [] -> ()
     | b :: q ->
       assert (List.memP b ps);
       assert (forall i. {:pattern List.memP i q} List.memP i q ==> List.memP i ps);
-      assert (I.list_disjoint_or_eq q);
+      assert (IB.list_disjoint_or_eq q);
       valid_memtaint mem q ts;
       assert (IB.create_memtaint mem ps ts ==
               IB.write_taint 0 mem ts b (IB.create_memtaint mem q ts));
       write_taint_lemma 0 mem ts b (IB.create_memtaint mem q ts);
-      assert (forall p. List.memP p q ==> I.disjoint_or_eq p b)
+      assert (forall p. List.memP p q ==> IB.disjoint_or_eq_b8 p b)

@@ -11,8 +11,9 @@ open X64.Machine_s
 open X64.Bytes_Semantics_s
 module ME = X64.Memory
 module IB = Interop.Base
+
 val bv_upd_update_heap64:
-  (b:b8{B.length b % 8 == 0}) ->
+  (b:IB.b8{B.length b % 8 == 0}) ->
   (heap:heap) ->
   (i:nat{i < B.length b / 8}) ->
   (v:nat64) ->
@@ -30,7 +31,7 @@ val bv_upd_update_heap64:
         BV.upd h bv i (UInt64.uint_to_t v) == B.g_upd_seq b (get_seq_heap heap' addrs b) h))
 
 val bv_upd_update_heap128:
-  (b:b8{B.length b % 16 == 0}) ->
+  (b:IB.b8{B.length b % 16 == 0}) ->
   (heap:heap) ->
   (i:nat{i < B.length b / 16}) ->
   (v:quad32) ->
