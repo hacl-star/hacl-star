@@ -52,6 +52,8 @@ val init_regs: MS.reg -> MS.nat64
 assume
 val init_xmms: MS.xmm -> MS.quad32
 
+//TODO: init_flags
+
 // Abstract current operating system from Low*
 assume
 val win: bool
