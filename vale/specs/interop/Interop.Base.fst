@@ -446,7 +446,7 @@ let rec addrs_ptr (i:nat) (addrs:addr_map) (ptr:b8{i <= B.length ptr}) (acc:Set.
   : GTot (Set.set int)
          (decreases (B.length ptr - i))
   = if i = B.length ptr then acc
-    else addrs_ptr (i + 1) addrs ptr (Set.singleton (addrs ptr + i))
+    else addrs_ptr (i + 1) addrs ptr (Set.union (Set.singleton (addrs ptr + i)) acc)
 
 let addrs_set (mem:mem) : GTot (Set.set int) =
   L.fold_right_gtot (ptrs_of_mem mem) (addrs_ptr 0 (addrs_of_mem mem)) Set.empty

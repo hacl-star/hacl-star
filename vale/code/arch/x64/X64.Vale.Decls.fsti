@@ -95,14 +95,14 @@ unfold let va_operand_xmm = xmm
 (* Abbreviations *)
 unfold let get_reg (o:va_reg_operand) : reg = OReg?.r (t_op_to_op o)
 //unfold let buffer_readable = M.buffer_readable
-unfold let buffer_readable (#t:M.typ) (h:M.mem) (b:M.buffer t) : GTot prop0 = M.buffer_readable #t h b
+unfold let buffer_readable (#t:M.base_typ) (h:M.mem) (b:M.buffer t) : GTot prop0 = M.buffer_readable #t h b
 //unfold let buffer_length = M.buffer_length
-unfold let buffer_length (#t:M.typ) (b:M.buffer t) = M.buffer_length #t b
+unfold let buffer_length (#t:M.base_typ) (b:M.buffer t) = M.buffer_length #t b
 unfold let buffer64_as_seq (m:M.mem) (b:M.buffer64) : GTot (Seq.seq nat64) = M.buffer_as_seq m b
 unfold let buffer128_as_seq (m:M.mem) (b:M.buffer128) : GTot (Seq.seq quad32) = M.buffer_as_seq m b
-unfold let valid_src_addr (#t:M.typ) (m:M.mem) (b:M.buffer t) (i:int) : prop0 =
+unfold let valid_src_addr (#t:M.base_typ) (m:M.mem) (b:M.buffer t) (i:int) : prop0 =
   0 <= i /\ i < buffer_length b /\ buffer_readable m b
-unfold let valid_dst_addr (#t:M.typ) (m:M.mem) (b:M.buffer t) (i:int) : prop0 =
+unfold let valid_dst_addr (#t:M.base_typ) (m:M.mem) (b:M.buffer t) (i:int) : prop0 =
   0 <= i /\ i < buffer_length b /\ buffer_readable m b
 unfold let buffer64_read (b:M.buffer64) (i:int) (m:M.mem) : GTot nat64 = M.buffer_read b i m
 unfold let buffer64_write (b:M.buffer64) (i:int) (v:nat64) (m:M.mem) : GTot M.mem =
@@ -114,7 +114,7 @@ unfold let buffer128_write (b:M.buffer128) (i:int) (v:quad32) (m:M.mem) : GTot M
     M.buffer_write b i v m else m
 unfold let modifies_mem (s:M.loc) (h1 h2:M.mem) : GTot prop0 = M.modifies s h1 h2
 //unfold let loc_buffer = M.loc_buffer
-unfold let loc_buffer(#t:M.typ) (b:M.buffer t) = M.loc_buffer #t b
+unfold let loc_buffer(#t:M.base_typ) (b:M.buffer t) = M.loc_buffer #t b
 unfold let locs_disjoint = M.locs_disjoint
 unfold let loc_union = M.loc_union
 
