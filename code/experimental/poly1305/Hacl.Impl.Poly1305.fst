@@ -91,7 +91,7 @@ val poly1305_encode_r:
     (requires fun h -> live h b /\ live h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc p) h0 h1 /\
-      load_precompute_r_post h1 p /\
+      F32xN.load_precompute_r_post #(width s) h1 p /\
       feval h1 (gsub p 0ul 5ul) == S.encode_r (as_seq h0 b))
 let poly1305_encode_r #s p b =
   let lo = uint_from_bytes_le (sub b 0ul 8ul) in
@@ -142,7 +142,7 @@ val poly1305_init_:
      (let (acc_s, r_s) = S.poly1305_init (as_seq h0 key) in
       let acc = gsub ctx 0ul (nlimb s) in
       let p = gsub ctx (nlimb s) (precomplen s) in
-      load_precompute_r_post h1 p /\
+      F32xN.load_precompute_r_post #(width s) h1 p /\
       feval h1 (gsub p 0ul 5ul) == r_s /\ feval h1 acc == acc_s))
 let poly1305_init_ #s ctx key =
   let kr = sub key 0ul 16ul in
@@ -175,7 +175,7 @@ val poly1305_init:
      (let (acc_s, r_s) = S.poly1305_init (as_seq h0 key) in
       let acc = gsub ctx 0ul (nlimb s) in
       let p = gsub ctx (nlimb s) (precomplen s) in
-      load_precompute_r_post h1 p /\
+      F32xN.load_precompute_r_post #(width s) h1 p /\
       feval h1 (gsub p 0ul 5ul) == r_s /\ feval h1 acc == acc_s))
 let poly1305_init #s ctx key =
   match s with
@@ -194,7 +194,7 @@ val update1:
     (requires fun h ->
       live h p /\ live h b /\ live h acc /\
       F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
-      load_precompute_r_post h p)
+      F32xN.load_precompute_r_post #(width s) h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
@@ -218,7 +218,7 @@ val update1_last:
     (requires fun h ->
       live h p /\ live h b /\ live h acc /\
       F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
-      load_precompute_r_post h p)
+      F32xN.load_precompute_r_post #(width s) h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
@@ -244,7 +244,7 @@ val updaten:
       live h p /\ live h b /\ live h acc /\
       disjoint acc p /\ disjoint acc b /\
       felem_fits h acc (2, 3, 2, 2, 2) /\
-      load_precompute_r_post h p)
+      F32xN.load_precompute_r_post #(width s) h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (2, 3, 2, 2, 2) /\

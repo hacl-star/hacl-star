@@ -260,26 +260,6 @@ let reduce_felem #s f =
   | M128 -> F32xN.reduce_felem #2 f
   | M256 -> F32xN.reduce_felem #4 f
 
-noextract
-val load_precompute_r_post:
-    #s:field_spec
-  -> h:mem
-  -> p:precomp_r s
-  -> Type0
-let load_precompute_r_post #s h p =
-  assert_norm (pow2 128 < S.prime);
-  let r = gsub p 0ul 5ul in
-  let r_5 = gsub p 5ul 5ul in
-  let rn = gsub p 10ul 5ul in
-  let rn_5 = gsub p 15ul 5ul in
-  felem_fits h r (1, 1, 1, 1, 1) /\
-  felem_fits h r_5 (5, 5, 5, 5, 5) /\
-  felem_fits h rn (1, 2, 1, 1, 1) /\
-  felem_fits h rn_5 (5, 10, 5, 5, 5) /\
-  as_tup5 #(width s) h r_5 == precomp_r5 (as_tup5 h r) /\
-  as_tup5 #(width s) h rn_5 == precomp_r5 (as_tup5 h rn) /\
-  feval h rn == S.compute_rw #(width s) (feval h r)
-
 inline_for_extraction
 val load_precompute_r:
     #s:field_spec
@@ -290,7 +270,7 @@ val load_precompute_r:
     (requires fun h -> live h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc p) h0 h1 /\
-      load_precompute_r_post #s h1 p /\
+      load_precompute_r_post #(width s) h1 p /\
       feval h1 (gsub p 0ul 5ul) ==
         LSeq.create (width s) (uint_v r1 * pow2 64 + uint_v r0))
 let load_precompute_r #s p r0 r1 =
@@ -308,13 +288,9 @@ val fadd_mul_r:
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f1 /\ live h precomp /\
-     (let r = gsub precomp 0ul 5ul in
-      let r_5 = gsub precomp 5ul 5ul in
+      fmul_precomp_r_pre #(width s) h precomp /\
       felem_fits h out (1, 2, 1, 1, 1) /\
-      felem_fits h f1 (1, 1, 1, 1, 1) /\
-      felem_fits h r (1, 1, 1, 1, 1) /\
-      felem_fits h r_5 (5, 5, 5, 5, 5) /\
-      as_tup5 #(width s) h r_5 == precomp_r5 (as_tup5 h r)))
+      felem_fits h f1 (1, 1, 1, 1, 1))
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
@@ -351,15 +327,6 @@ let fmul_rn #s out f1 precomp =
   | M128 -> F32xN.fmul_rn #2 out f1 precomp
   | M256 -> F32xN.fmul_rn #4 out f1 precomp
 
-
-let norm (#w:lanes) (n:LSeq.lseq S.pfelem w) (r:S.pfelem) =
-  match w with
-  | 1 -> S.pfmul n.[0] r
-  | 2 -> let r2 = S.pfmul r r in S.pfadd (S.pfmul n.[0] r2) (S.pfmul n.[1] r)
-  | 4 -> let r2 = S.pfmul r r in let r3 = S.pfmul r2 r in let r4 = S.pfmul r2 r2 in
-	S.pfadd (S.pfmul n.[0] r4) (S.pfadd (S.pfmul n.[1] r3) (S.pfadd (S.pfmul n.[2] r2) (S.pfmul n.[3] r)))
-
-
 inline_for_extraction
 val fmul_rn_normalize:
     #s:field_spec
@@ -368,19 +335,15 @@ val fmul_rn_normalize:
   -> Stack unit
     (requires fun h ->
       live h out /\ live h precomp /\
-     (let r = gsub precomp 0ul 5ul in
-      let r_5 = gsub precomp 5ul 5ul in
       felem_fits h out (2,3,2,2,2) /\
-      felem_fits h r (1,1,1,1,1) /\
-      felem_fits h r_5 (5,5,5,5,5) /\
-      as_tup5 #(width s) h r_5 == precomp_r5 (as_tup5 h r)))
+      load_precompute_r_post #(width s) h precomp)
     (ensures fun h0 _ h1 ->
       modifies (loc out |+| loc precomp) h0 h1 /\
-     (let r = (feval h0 (gsub precomp 0ul 5ul)).[0] in
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-     (feval h1 out).[0] == norm (feval h0 out) r))
+      fmul_precomp_r_pre #(width s) h1 precomp /\
+     (let r = feval h0 (gsub precomp 0ul 5ul) in
+      (feval h1 out).[0] == S.normalize_n #(width s) (feval h0 out) r))
 let fmul_rn_normalize #s out precomp =
-  admit();
   match s with
   | M32  -> F32xN.fmul_rn_normalize #1 out precomp
   | M128 -> F32xN.fmul_rn_normalize #2 out precomp

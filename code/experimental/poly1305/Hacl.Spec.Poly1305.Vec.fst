@@ -90,30 +90,26 @@ let updaten (#w:lanes) (r_w:elem w) (b:lbytes (w * size_block)) (acc:elem w) : T
   let acc : elem w = fadd (fmul acc r_w) e in
   acc
 
-let normalize_1 (acc:elem 1) (r:elem 1) : Tot (elem 1) =
-  fmul acc r
+let normalize_1 (acc:elem 1) (r:elem 1) : pfelem =
+  pfmul acc.[0] r.[0]
 
-let normalize_2 (acc:elem 2) (r:elem 2) : Tot (elem 2) =
-  assert_norm (1 < prime);
-  let r1 = r.[0] in
-  let r2 = pfmul r1 r1  in
-  let r21 = create2 r2 r1 in
+let normalize_2 (acc:elem 2) (r:elem 2) : pfelem =
+  let r = r.[0] in
+  let r2 = pfmul r r in
+  let r21 = create2 r2 r in
   let a = fmul acc r21 in
-  let a0 = pfadd a.[0] a.[1] in
-  to_elem 2 a0
+  pfadd a.[0] a.[1]
 
-let normalize_4 (acc:elem 4) (r:elem 4) : Tot (elem 4) =
-  assert_norm (1 < prime);
-  let r1 = r.[0] in
-  let r2 = pfmul r1 r1  in
-  let r3 = pfmul r2 r1 in
+let normalize_4 (acc:elem 4) (r:elem 4) : pfelem =
+  let r = r.[0] in
+  let r2 = pfmul r r in
+  let r3 = pfmul r2 r in
   let r4 = pfmul r2 r2 in
-  let r4321 = create4 r4 r3 r2 r1 in
+  let r4321 = create4 r4 r3 r2 r in
   let a = fmul acc r4321 in
-  let a0 = pfadd (pfadd (pfadd a.[0] a.[1]) a.[2]) a.[3] in
-  to_elem 4 a0
+  pfadd (pfadd (pfadd a.[0] a.[1]) a.[2]) a.[3]
 
-let normalize_n (#w:lanes) (acc:elem w) (r:elem w) : Tot (elem w) =
+let normalize_n (#w:lanes) (acc:elem w) (r:elem w) : pfelem =
   match w with
   | 1 -> normalize_1 acc r
   | 2 -> normalize_2 acc r
@@ -133,7 +129,7 @@ let poly (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot (elem w) =
   repeat_blocks #uint8 #(elem w) (w * size_block) text
     (fun b -> updaten rw b)
     (fun l b res ->
-      let ne = normalize_n res r in
+      let ne = to_elem w (normalize_n res r) in
       repeat_blocks #uint8 #(elem w) size_block b
       (fun bl -> update1 r size_block bl)
       (fun l b res -> if l = 0 then res else update1 r l b res)

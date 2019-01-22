@@ -57,6 +57,35 @@ noextract
 let felem_less (#w:lanes) (h:mem) (f:felem w) (max:nat) : Type0 =
   felem_less5 (as_tup5 h f) max
 
+val fmul_precomp_r_pre:
+    #w:lanes
+  -> h:mem
+  -> precomp:precomp_r w
+  -> Type0
+let fmul_precomp_r_pre #w h precomp =
+  let r = gsub precomp 0ul 5ul in
+  let r_5 = gsub precomp 5ul 5ul in
+  felem_fits h r (1, 1, 1, 1, 1) /\
+  felem_fits h r_5 (5, 5, 5, 5, 5) /\
+  as_tup5 h r_5 == precomp_r5 (as_tup5 h r)
+
+noextract
+val load_precompute_r_post:
+    #w:lanes
+  -> h:mem
+  -> p:precomp_r w
+  -> Type0
+let load_precompute_r_post #w h p =
+  assert_norm (pow2 128 < S.prime);
+  let r = gsub p 0ul 5ul in
+  let rn = gsub p 10ul 5ul in
+  let rn_5 = gsub p 15ul 5ul in
+  fmul_precomp_r_pre h p /\
+  felem_fits h rn (1, 2, 1, 1, 1) /\
+  felem_fits h rn_5 (5, 10, 5, 5, 5) /\
+  as_tup5 h rn_5 == precomp_r5 (as_tup5 h rn) /\
+  feval h rn == S.compute_rw (feval h r)
+
 inline_for_extraction
 val create_felem:
     w:lanes
@@ -244,13 +273,9 @@ val fadd_mul_r:
   -> Stack unit
     (requires fun h ->
       live h acc /\ live h f1 /\ live h p /\
-     (let r = gsub p 0ul 5ul in
-      let r5 = gsub p 5ul 5ul in
       felem_fits h acc (1, 2, 1, 1, 1) /\
       felem_fits h f1 (1, 1, 1, 1, 1) /\
-      felem_fits h r (1, 1, 1, 1, 1) /\
-      felem_fits h r5 (5, 5, 5, 5, 5) /\
-      as_tup5 h r5 == precomp_r5 (as_tup5 h r)))
+      fmul_precomp_r_pre h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       //as_tup5 h1 acc == fadd_mul_r5 (as_tup5 h0 acc) (as_tup5 h0 f1) (as_tup5 h0 r) (as_tup5 h0 r5) /\
@@ -363,26 +388,6 @@ let precompute_shift_reduce #w f1 f2 =
   f1.(2ul) <- vec_smul_mod f22 (u64 5);
   f1.(3ul) <- vec_smul_mod f23 (u64 5);
   f1.(4ul) <- vec_smul_mod f24 (u64 5)
-
-noextract
-val load_precompute_r_post:
-    #w:lanes
-  -> h:mem
-  -> p:precomp_r w
-  -> Type0
-let load_precompute_r_post #w h p =
-  assert_norm (pow2 128 < S.prime);
-  let r = gsub p 0ul 5ul in
-  let r_5 = gsub p 5ul 5ul in
-  let rn = gsub p 10ul 5ul in
-  let rn_5 = gsub p 15ul 5ul in
-  felem_fits h r (1, 1, 1, 1, 1) /\
-  felem_fits h r_5 (5, 5, 5, 5, 5) /\
-  felem_fits h rn (1, 2, 1, 1, 1) /\
-  felem_fits h rn_5 (5, 10, 5, 5, 5) /\
-  as_tup5 h r_5 == precomp_r5 (as_tup5 h r) /\
-  as_tup5 h rn_5 == precomp_r5 (as_tup5 h rn) /\
-  feval h rn == S.compute_rw (feval h r)
 
 inline_for_extraction
 val load_felem:
@@ -940,8 +945,16 @@ val fmul_r1_normalize:
     out:felem 1
   -> p:precomp_r 1
   -> Stack unit
-    (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
+    (requires fun h ->
+      live h out /\ live h p /\
+      felem_fits h out (2,3,2,2,2) /\
+      load_precompute_r_post h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out |+| loc p) h0 h1 /\
+      acc_inv_t (as_tup5 h1 out) /\
+      fmul_precomp_r_pre h1 p /\
+     (let r = feval h0 (gsub p 0ul 5ul) in
+      (feval h1 out).[0] == S.normalize_1 (feval h0 out) r))
 [@ CInline]
 let fmul_r1_normalize out p = admit();
   let r = sub p 0ul 5ul in
@@ -953,13 +966,19 @@ val fmul_r2_normalize:
     out:felem 2
   -> p:precomp_r 2
   -> Stack unit
-    (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
+    (requires fun h ->
+      live h out /\ live h p /\
+      felem_fits h out (2,3,2,2,2) /\
+      load_precompute_r_post h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out |+| loc p) h0 h1 /\
+      acc_inv_t (as_tup5 h1 out) /\
+      fmul_precomp_r_pre h1 p /\
+     (let r = feval h0 (gsub p 0ul 5ul) in
+      (feval h1 out).[0] == S.normalize_2 (feval h0 out) r))
 [@ CInline]
 let fmul_r2_normalize out p =
-  //push_frame();
   admit();
-  //let tmp = create_felem 2 in
   let r = sub p 0ul 5ul in
   let r2 = sub p 10ul 5ul in
   let r2_5 = sub p 15ul 5ul in
@@ -970,8 +989,6 @@ let fmul_r2_normalize out p =
   r2.(4ul) <- vec_interleave_low r2.(4ul) r.(4ul);
   precompute_shift_reduce r2_5 r2;
   fmul_r out out r2 r2_5;
-  //mul_felem tmp out r2 r2_5;
-  //carry_wide_felem out tmp;
   let o0 = out.(0ul) in
   let o1 = out.(1ul) in
   let o2 = out.(2ul) in
@@ -988,15 +1005,22 @@ let fmul_r2_normalize out p =
   out.(2ul) <- o2;
   out.(3ul) <- o3;
   out.(4ul) <- o4
-  //pop_frame()
 
 inline_for_extraction
 val fmul_r4_normalize:
     out:felem 4
   -> p:precomp_r 4
   -> Stack unit
-    (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
+    (requires fun h ->
+      live h out /\ live h p /\
+      felem_fits h out (2,3,2,2,2) /\
+      load_precompute_r_post h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out |+| loc p) h0 h1 /\
+      acc_inv_t (as_tup5 h1 out) /\
+      fmul_precomp_r_pre h1 p /\
+     (let r = feval h0 (gsub p 0ul 5ul) in
+      (feval h1 out).[0] == S.normalize_4 (feval h0 out) r))
 [@ CInline]
 let fmul_r4_normalize out p =
   push_frame();
@@ -1009,11 +1033,7 @@ let fmul_r4_normalize out p =
   let r3 = create_felem 4 in
   let tmp = create_felem 4 in
   fmul_r r2 r r r_5;
-  //mul_felem tmp r r r_5;
-  //carry_wide_felem r2 tmp;
   fmul_r r3 r2 r r_5;
-  //mul_felem tmp r2 r r_5;
-  //carry_wide_felem r3 tmp;
   let h0 = ST.get() in
   loop_nospec #h0 5ul r2
   (fun i ->
@@ -1027,9 +1047,6 @@ let fmul_r4_normalize out p =
   let r1234_5 = r3 in
   precompute_shift_reduce r1234_5 r1234;
   fmul_r out out r1234 r1234_5;
-  //mul_felem tmp out r1234 r1234_5;
-  //carry_wide_felem out tmp;
-
   loop_nospec #h0 5ul out
   (fun i ->
     let oi = out.(i) in
@@ -1047,8 +1064,16 @@ val fmul_rn_normalize:
   -> out:felem w
   -> p:precomp_r w
   -> Stack unit
-    (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out |+| loc p) h0 h1)
+    (requires fun h ->
+      live h out /\ live h p /\
+      felem_fits h out (2,3,2,2,2) /\
+      load_precompute_r_post h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out |+| loc p) h0 h1 /\
+      acc_inv_t (as_tup5 h1 out) /\
+      fmul_precomp_r_pre h1 p /\
+     (let r = feval h0 (gsub p 0ul 5ul) in
+      (feval h1 out).[0] == S.normalize_n (feval h0 out) r))
 [@ CInline]
 let fmul_rn_normalize #w out p =
   match w with
