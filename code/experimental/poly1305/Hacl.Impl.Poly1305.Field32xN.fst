@@ -9,6 +9,8 @@ open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.IntVector
 
+open Lib.Lemmas
+
 include Hacl.Spec.Poly1305.Field32xN
 open Hacl.Spec.Poly1305.Field32xN.Lemmas
 
@@ -530,13 +532,6 @@ let load_precompute_r #w p r0 r1 =
   | 2 -> load_precompute_r2 p r0 r1
   | 4 -> load_precompute_r4 p r0 r1
 
-val lemma_nat_from_bytes_le1: b:LSeq.lseq uint8 16 ->
-  Lemma (
-    let lo:LSeq.lseq uint64 1 = BSeq.uints_from_bytes_le (LSeq.sub b 0 8) in
-    let hi:LSeq.lseq uint64 1 = BSeq.uints_from_bytes_le (LSeq.sub b 8 8) in
-    BSeq.nat_from_bytes_le b == pow2 64 * uint_v hi.[0] + uint_v lo.[0])
-let lemma_nat_from_bytes_le1 b = admit()
-
 inline_for_extraction
 val load_felem1_le:
     f:felem 1
@@ -555,30 +550,8 @@ let load_felem1_le f b =
 
   load_felem f lo hi;
   let h1 = ST.get () in
-  assert (feval h1 f == LSeq.createi #S.pfelem 1 (fun i -> uint_v (vec_v hi).[i] * pow2 64 + uint_v (vec_v lo).[i]));
-  lemma_nat_from_bytes_le1 (as_seq h0 b);
-  assert (uint_v (vec_v hi).[0] * pow2 64 + uint_v (vec_v lo).[0] == BSeq.nat_from_bytes_le (as_seq h0 b));
-  LSeq.eq_intro
-    (LSeq.createi #S.pfelem 1 (fun i -> uint_v (vec_v hi).[i] * pow2 64 + uint_v (vec_v lo).[i]))
-    (LSeq.create 1 (BSeq.nat_from_bytes_le (as_seq h0 b)))
-
-val vec_interleave_low_lemma64_2: b1:uint64xN 2 -> b2:uint64xN 2 ->
-  Lemma (vec_v (vec_interleave_low b1 b2) == create2 (vec_v b1).[0] (vec_v b2).[0])
-let vec_interleave_low_lemma64_2 b1 b2 = admit()
-
-val vec_interleave_high_lemma64_2: b1:uint64xN 2 -> b2:uint64xN 2 ->
-  Lemma (vec_v (vec_interleave_high b1 b2) == create2 (vec_v b1).[1] (vec_v b2).[1])
-let vec_interleave_high_lemma64_2 b1 b2 = admit()
-
-val lemma_nat_from_bytes_le2: b:LSeq.lseq uint8 32 ->
-  Lemma (
-    let lo:LSeq.lseq uint64 2 = BSeq.uints_from_bytes_le (LSeq.sub b 0 16) in
-    let hi:LSeq.lseq uint64 2 = BSeq.uints_from_bytes_le (LSeq.sub b 16 16) in
-    let b1 = BSeq.nat_from_bytes_le (LSeq.sub b 0 16) in
-    let b2 = BSeq.nat_from_bytes_le (LSeq.sub b 16 16) in
-    b1 == pow2 64 * uint_v lo.[1] + uint_v lo.[0] /\
-    b2 == pow2 64 * uint_v hi.[1] + uint_v hi.[0])
-let lemma_nat_from_bytes_le2 b = admit()
+  uints_from_bytes_le_lemma64_1 (as_seq h0 b);
+  LSeq.eq_intro (feval h1 f) (S.load_elem1 (as_seq h0 b))
 
 inline_for_extraction
 val load_felem2_le:
@@ -599,64 +572,10 @@ let load_felem2_le f b =
   let hi = vec_interleave_high b1 b2 in
   load_felem f lo hi;
   let h1 = ST.get () in
-  //assert (
-    //feval h1 f == LSeq.createi #S.pfelem 2
-    //(fun i -> uint_v (vec_v hi).[i] * pow2 64 + uint_v (vec_v lo).[i]));
-
   vec_interleave_low_lemma64_2 b1 b2;
-  //assert ((vec_v lo).[0] == (vec_v b1).[0]);
-  //assert ((vec_v lo).[1] == (vec_v b2).[0]);
-
   vec_interleave_high_lemma64_2 b1 b2;
-  //assert ((vec_v hi).[0] == (vec_v b1).[1]);
-  //assert ((vec_v hi).[1] == (vec_v b2).[1]);
-
-  lemma_nat_from_bytes_le2 (as_seq h0 b);
-  //assert (BSeq.nat_from_bytes_le (LSeq.sub (as_seq h0 b) 0 16) == pow2 64 * uint_v (vec_v hi).[0] + uint_v (vec_v lo).[0]);
-  //assert (BSeq.nat_from_bytes_le (LSeq.sub (as_seq h0 b) 16 16) == pow2 64 * uint_v (vec_v hi).[1] + uint_v (vec_v lo).[1]);
+  uints_from_bytes_le_lemma64_2 (as_seq h0 b);
   LSeq.eq_intro (feval h1 f) (S.load_elem2 (as_seq h0 b))
-
- //LSeq.eq_intro
-    //(LSeq.createi #S.pfelem 2 (fun i -> uint_v (vec_v hi).[i] * pow2 64 + uint_v (vec_v lo).[i]))
-    //(create2 (BSeq.nat_from_bytes_le (LSeq.sub (as_seq h0 b) 0 16)) (BSeq.nat_from_bytes_le (LSeq.sub (as_seq h0 b) 16 16)))
-
-val vec_interleave_low_lemma64_4: b1:uint64xN 4 -> b2:uint64xN 4 ->
-  Lemma (vec_v (vec_interleave_low b1 b2) == create4 (vec_v b1).[0] (vec_v b2).[0] (vec_v b1).[2] (vec_v b2).[2])
-let vec_interleave_low_lemma64_4 b1 b2 = admit()
-
-val vec_interleave_high_lemma64_4: b1:uint64xN 4 -> b2:uint64xN 4 ->
-  Lemma (vec_v (vec_interleave_high b1 b2) == create4 (vec_v b1).[1] (vec_v b2).[1] (vec_v b1).[3] (vec_v b2).[3])
-let vec_interleave_high_lemma64_4 b1 b2 = admit()
-
-val vec_interleave_low_lemma128_2: b1:vec_t U128 2 -> b2:vec_t U128 2 ->
-  Lemma (vec_v (vec_interleave_low b1 b2) == create2 (vec_v b1).[0] (vec_v b2).[0])
-let vec_interleave_low_lemma128_2 b1 b2 = admit()
-
-val vec_interleave_high_lemma128_2: b1:vec_t U128 2 -> b2:vec_t U128 2 ->
-  Lemma (vec_v (vec_interleave_high b1 b2) == create2 (vec_v b1).[1] (vec_v b2).[1])
-let vec_interleave_high_lemma128_2 b1 b2 = admit()
-
-val lemma_cast_vec128_to_vec64: b:vec_t U128 2 ->
-  Lemma (
-    let r = vec_v (cast U64 4 b) in
-    let b = vec_v b in
-    uint_v b.[0] == uint_v r.[0] + uint_v r.[1] * pow2 64 /\
-    uint_v b.[1] == uint_v r.[2] + uint_v r.[3] * pow2 64)
-let lemma_cast_vec128_to_vec64 b = admit()
-
-val lemma_nat_from_bytes_le128: b:LSeq.lseq uint8 64 ->
-  Lemma (
-    let lo:LSeq.lseq uint128 2 = BSeq.uints_from_bytes_le (LSeq.sub b 0 32) in
-    let hi:LSeq.lseq uint128 2 = BSeq.uints_from_bytes_le (LSeq.sub b 32 32) in
-    let b1 = BSeq.nat_from_bytes_le (LSeq.sub b 0 16) in
-    let b2 = BSeq.nat_from_bytes_le (LSeq.sub b 16 16) in
-    let b3 = BSeq.nat_from_bytes_le (LSeq.sub b 32 16) in
-    let b4 = BSeq.nat_from_bytes_le (LSeq.sub b 48 16) in
-    b1 == uint_v lo.[0] /\
-    b2 == uint_v lo.[1] /\
-    b3 == uint_v hi.[0] /\
-    b4 == uint_v hi.[1])
-let lemma_nat_from_bytes_le128 b = admit()
 
 val lemma_load_felem4_le: b:LSeq.lseq uint8 64 -> lo0:vec_t U128 2 -> hi0:vec_t U128 2 ->
   Lemma
@@ -679,7 +598,7 @@ val lemma_load_felem4_le: b:LSeq.lseq uint8 64 -> lo0:vec_t U128 2 -> hi0:vec_t 
     b3 == pow2 64 * uint_v lo1.[3] + uint_v lo1.[2] /\
     b4 == pow2 64 * uint_v hi1.[3] + uint_v hi1.[2]))
 let lemma_load_felem4_le b lo0 hi0 =
-  lemma_nat_from_bytes_le128 b;
+  uints_from_bytes_le_lemma128_2 b;
   lemma_cast_vec128_to_vec64 lo0;
   lemma_cast_vec128_to_vec64 hi0
 
@@ -700,16 +619,8 @@ let load_felem4_le f b =
   let hi0 = vec_load_le U128 2 (sub b 32ul 32ul) in
   let lo1 = vec_interleave_low lo0 hi0 in
   let hi1 = vec_interleave_high lo0 hi0 in
-  let h1 = ST.get () in
-  //assert (vec_v lo0 == BSeq.uints_from_bytes_le (LSeq.sub (as_seq h0 b) 0 32));
-  //assert (vec_v hi0 == BSeq.uints_from_bytes_le (LSeq.sub (as_seq h0 b) 32 32));
-
   vec_interleave_low_lemma128_2 lo0 hi0;
   vec_interleave_high_lemma128_2 lo0 hi0;
-
-  //assert (vec_v lo1 == create2 (vec_v lo0).[0] (vec_v hi0).[0]);
-  //assert (vec_v hi1 == create2 (vec_v lo0).[1] (vec_v hi0).[1]);
-
   let lo2 = cast U64 4 lo1 in
   let hi2 = cast U64 4 hi1 in
 
@@ -717,16 +628,11 @@ let load_felem4_le f b =
   let hi = vec_interleave_high lo2 hi2 in
   vec_interleave_low_lemma64_4 lo2 hi2;
   vec_interleave_high_lemma64_4 lo2 hi2;
-  //assert (vec_v lo == create4 (vec_v lo2).[0] (vec_v hi2).[0] (vec_v lo2).[2] (vec_v hi2).[2]);
-  //assert (vec_v hi == create4 (vec_v lo2).[1] (vec_v hi2).[1] (vec_v lo2).[3] (vec_v hi2).[3]);
 
   load_felem f lo hi;
-  let h2 = ST.get () in
-  //assert (
-      //feval h2 f == LSeq.createi #S.pfelem 4
-	//(fun i -> uint_v (vec_v hi).[i] * pow2 64 + uint_v (vec_v lo).[i]));
+  let h1 = ST.get () in
   lemma_load_felem4_le (as_seq h0 b) lo1 hi1;
-  LSeq.eq_intro (feval h2 f) (S.load_elem4 (as_seq h0 b))
+  LSeq.eq_intro (feval h1 f) (S.load_elem4 (as_seq h0 b))
 
 inline_for_extraction
 val load_felems_le:
@@ -745,13 +651,6 @@ let load_felems_le #w f b =
   | 1 -> load_felem1_le f b
   | 2 -> load_felem2_le f b
   | 4 -> load_felem4_le f b
-
-val lemma_nat_from_bytes_le: b:LSeq.lseq uint8 16 ->
-  Lemma (
-    let lo = BSeq.uint_from_bytes_le (LSeq.sub b 0 8) in
-    let hi = BSeq.uint_from_bytes_le (LSeq.sub b 8 8) in
-    BSeq.nat_from_bytes_le b == pow2 64 * uint_v hi + uint_v lo)
-let lemma_nat_from_bytes_le b = admit()
 
 inline_for_extraction
 val load_felem_le:
@@ -773,7 +672,7 @@ let load_felem_le #w f b =
   let h0 = ST.get () in
   load_felem f f0 f1;
   let h1 = ST.get () in
-  lemma_nat_from_bytes_le (as_seq h0 b);
+  uint_from_bytes_le_lemma (as_seq h0 b);
   LSeq.eq_intro (feval h1 f) (LSeq.create w (BSeq.nat_from_bytes_le (as_seq h0 b)))
 
 inline_for_extraction
@@ -794,13 +693,6 @@ let store_felem #w f = admit();
   let f4 = f.(4ul) in
   store_felem5 #w (f0, f1, f2, f3, f4)
 
-val lemma_nat_to_bytes_le: lo:uint64xN 1 -> hi:uint64xN 1 ->
-  Lemma (
-    let b0 = BSeq.uints_to_bytes_le (vec_v lo) in
-    let b1 = BSeq.uints_to_bytes_le (vec_v hi) in
-    BSeq.nat_to_bytes_le 16 (v (vec_v hi).[0] * pow2 64 + v (vec_v lo).[0]) == LSeq.concat b0 b1)
-let lemma_nat_to_bytes_le lo hi = admit()
-
 inline_for_extraction
 val store_felem1_le:
     b:lbuffer uint8 16ul
@@ -818,15 +710,9 @@ let store_felem1_le b f =
   vec_store_le (sub b 0ul 8ul) r0;
   vec_store_le (sub b 8ul 8ul) r1;
   let h1 = ST.get () in
-  lemma_nat_to_bytes_le r0 r1;
+  uints_to_bytes_le_lemma64_1 (vec_v r0) (vec_v r1);
   LSeq.lemma_concat2 8 (LSeq.sub (as_seq h1 b) 0 8) 8 (LSeq.sub (as_seq h1 b) 8 8) (as_seq h1 b);
   LSeq.eq_intro (as_seq h1 b) (BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
-
-val lemma_nat_to_bytes_le1: r:vec_t U64 2 ->
-  Lemma (
-    BSeq.uints_to_bytes_le (vec_v r) ==
-    BSeq.nat_to_bytes_le 16 (v (vec_v r).[1] * pow2 64 + v (vec_v r).[0]))
-let lemma_nat_to_bytes_le1 r = admit()
 
 inline_for_extraction
 val store_felem2_le:
@@ -840,30 +726,10 @@ val store_felem2_le:
       as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
 let store_felem2_le b f =
   let (f0, f1) = store_felem #2 f in
-  let r0:vec_t U64 2 = vec_interleave_low f0 f1 in
+  let r0 = vec_interleave_low f0 f1 in
   vec_interleave_low_lemma64_2 f0 f1;
-  //assert (v (vec_v r0).[1] * pow2 64 + v (vec_v r0).[0] == (fas_nat h0 f).[0] % pow2 128);
   vec_store_le b r0;
-  lemma_nat_to_bytes_le1 r0
-
-val lemma_cast_vec64_to_vec128: b:vec_t U64 4 ->
-  Lemma (
-    let r = vec_v (cast U128 2 b) in
-    let b = vec_v b in
-    uint_v r.[0] == uint_v b.[0] + uint_v b.[1] * pow2 64 /\
-    uint_v r.[1] == uint_v b.[2] + uint_v b.[3] * pow2 64)
-let lemma_cast_vec64_to_vec128 b = admit()
-
-val lemma_nat_to_bytes_le2: r:vec_t U128 2 ->
-  Lemma (
-    let b = BSeq.uints_to_bytes_le (vec_v r) in
-    LSeq.sub b 0 16 == BSeq.uint_to_bytes_le (vec_v r).[0] /\
-    LSeq.sub b 16 16 == BSeq.uint_to_bytes_le (vec_v r).[1])
-let lemma_nat_to_bytes_le2 r = admit()
-
-val lemma_nat_to_bytes_le0: r:uint128 ->
-  Lemma (BSeq.uint_to_bytes_le r == BSeq.nat_to_bytes_le 16 (uint_v r))
-let lemma_nat_to_bytes_le0 r = admit()
+  uints_to_bytes_le_lemma64_2 (vec_v r0)
 
 inline_for_extraction
 val store_felem4_le:
@@ -890,13 +756,13 @@ let store_felem4_le b f =
   vec_interleave_low_lemma128_2 lo1 hi1;
   let tmp = create 32ul (u8 0) in
   vec_store_le tmp r0;
-  lemma_nat_to_bytes_le2 r0;
+  uints_to_bytes_le_lemma128_2 (vec_v r0);
   let h0 = ST.get () in
   copy b (sub tmp 0ul 16ul);
   let h1 = ST.get () in
   assert (as_seq h1 b == BSeq.uint_to_bytes_le (vec_v r0).[0]);
   assert (v (vec_v r0).[0] == v (vec_v f1).[0] * pow2 64 + v (vec_v f0).[0]);
-  lemma_nat_to_bytes_le0 (vec_v r0).[0];
+  uint_to_bytes_le_lemma128 (vec_v r0).[0];
   pop_frame()
 
 inline_for_extraction
