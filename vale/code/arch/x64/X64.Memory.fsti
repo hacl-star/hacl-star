@@ -49,7 +49,7 @@ val buffer_addr : #t:base_typ -> b:buffer t -> h:mem -> GTot int
 
 unfold
 let locs_disjoint (ls:list loc) : prop0 =
-  BigOps.pairwise_and' loc_disjoint ls
+  BigOps.normal (BigOps.pairwise_and' (fun x y -> loc_disjoint x y /\ loc_disjoint y x) ls)
 
 // equivalent to modifies; used to prove modifies clauses via modifies_goal_directed_trans
 val modifies_goal_directed (s:loc) (h1 h2:mem) : GTot prop0
