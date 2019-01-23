@@ -354,6 +354,7 @@ verify_options = [
 #  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
+  ('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
 
   ('code/*/*.fst', BuildOptions(fstar_default_args)),
   ('code/*/*.fsti', BuildOptions(fstar_default_args)),
