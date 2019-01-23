@@ -400,74 +400,52 @@ let up_down_identity mem heap =
   in Classical.forall_intro (Classical.move_requires aux);
   assert (Map.equal heap new_heap)
 
-(*
-#set-options "--max_fuel 1 --max_ifuel 1"
-
-let g_upd_tot_correct_down_invariant
-  (ptrs:list b8{list_disjoint_or_eq ptrs})
-  (addrs:addr_map)
-  (heap1:heap)
-  (heap2:heap)
-  (b:b8{List.memP b ptrs})
-  (mem:HS.mem{list_live mem ptrs})
-  : Lemma
-  (requires forall p. (p =!= b /\ List.memP p ptrs) ==> correct_down_p mem addrs heap1 p)
-  (ensures (
-    let m' = B.g_upd_seq b (get_seq_heap heap2 addrs b) mem in
-    forall p. (p =!= b /\ List.memP p ptrs) ==> correct_down_p m' addrs heap1 p)
-  ) = 
-    B.g_upd_seq_as_seq b (get_seq_heap heap2 addrs b) mem
-
-let g_upd_tot_correct_down
-  (mem:HS.mem)
-  (addrs:addr_map)
-  (heap:heap)
-  (b:b8{B.live mem b}) :
-  Lemma (correct_down_p (B.g_upd_seq b (get_seq_heap heap addrs b) mem) addrs heap b) =
-  B.g_upd_seq_as_seq b (get_seq_heap heap addrs b) mem
-
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1 --initial_fuel 1 --initial_ifuel 1"
+
 let rec update_buffer_up_mem_aux
-  (ptrs:list b8{list_disjoint_or_eq ptrs})
-  (addrs:addr_map)
-  (mem:HS.mem{list_live mem ptrs})
-  (b:b8{List.memP b ptrs})
-  (heap1:heap{Set.equal (Map.domain heap1) (addrs_set ptrs addrs)})
-  (heap2:heap{Set.equal (Map.domain heap1) (Map.domain heap2)})
+  (h1 h2:heap)
   (ps:list b8)
-  (accu:list b8{forall p. List.memP p ptrs <==> List.memP p ps \/ List.memP p accu}) : Lemma
-  (requires (forall x. x < addrs b \/ x >= addrs b + B.length b ==> heap1.[x] == heap2.[x]) /\
-    (List.memP b accu ==> B.as_seq mem b == get_seq_heap heap2 addrs b) /\  
-    (forall p. List.memP p accu ==> correct_down_p mem addrs heap2 p) /\
-    (forall p. (p =!= b /\ List.memP p ptrs) ==> correct_down_p mem addrs heap1 p)    )
-  (ensures 
-  (List.memP b accu ==> up_mem_aux heap2 addrs ptrs ps accu mem == mem) /\
-  (~(List.memP b accu) ==> up_mem_aux heap2 addrs ptrs ps accu mem ==
-    B.g_upd_seq b (get_seq_heap heap2 addrs b) mem))
-  (decreases ps)
-  
-  = match ps with
-   | [] -> ()
-   | a::q ->
-     let s = get_seq_heap heap2 addrs a in       
-     B.g_upd_seq_as_seq a s mem;         
-     let m' = B.g_upd_seq a s mem in
-     if StrongExcludedMiddle.strong_excluded_middle (a == b) then (
+  (accu:list b8)
+  (b:b8)
+  (m:mem{forall p. List.memP p (ptrs_of_mem m) <==> List.memP p ps \/ List.memP p accu}) : Lemma
+  (requires 
+    List.memP b (ptrs_of_mem m) /\
+    Set.equal (Map.domain h1) (addrs_set m) /\ 
+    Set.equal (Map.domain h2) (addrs_set m) /\
+    (forall p. List.memP p accu ==> correct_down_p m h2 p) /\
+    (List.memP b accu ==> B.as_seq (hs_of_mem m) b == get_seq_heap h2 (addrs_of_mem m) b) /\  
+    (forall p. (p =!= b /\ List.memP p (ptrs_of_mem m)) ==> correct_down_p m h1 p) /\
+    (forall x. x < addrs_of_mem m b \/ x >= addrs_of_mem m b + B.length b ==>
+      h1.[x] == h2.[x])
+  )
+  (ensures
+    (List.memP b accu ==> up_mem_aux h2 ps accu m == m) /\
+    (~(List.memP b accu) ==> hs_of_mem (up_mem_aux h2 ps accu m) ==
+      B.g_upd_seq b (get_seq_heap h2 (addrs_of_mem m) b) (hs_of_mem m))) =
+  match ps with
+  | [] -> ()
+  | hd::tl -> 
+    let addrs = addrs_of_mem m in
+    let mem = hs_of_mem m in
+    let ptrs = ptrs_of_mem m in
+    let s = get_seq_heap h2 addrs hd in       
+    B.g_upd_seq_as_seq hd s mem;         
+    let m' = B.g_upd_seq hd s mem in  
+    if StrongExcludedMiddle.strong_excluded_middle (hd == b) then (
        if StrongExcludedMiddle.strong_excluded_middle (List.memP b accu) then (
-         B.lemma_g_upd_with_same_seq a mem;       
-         update_buffer_up_mem_aux ptrs addrs m' b heap1 heap2 q (a::accu)
+         B.lemma_g_upd_with_same_seq hd mem;       
+         update_buffer_up_mem_aux h1 h2 tl (hd::accu) b (Mem ptrs addrs m')
        ) else (
-         g_upd_tot_correct_down_invariant ptrs addrs heap1 heap2 b mem;
-         g_upd_tot_correct_down mem addrs heap2 b;
-         update_buffer_up_mem_aux ptrs addrs m' b heap1 heap2 q (a::accu)
+         B.g_upd_seq_as_seq b (get_seq_heap h2 addrs b) mem;
+         update_buffer_up_mem_aux h1 h2 tl (hd::accu) b (Mem ptrs addrs m')         
        )
      ) else (
-       assert (B.disjoint a b);
-       get_seq_heap_as_seq heap1 heap2 addrs mem a;
-       B.lemma_g_upd_with_same_seq a mem;       
-       update_buffer_up_mem_aux ptrs addrs m' b heap1 heap2 q (a::accu)
+       assert (B.disjoint hd b);
+       get_seq_heap_as_seq h1 h2 m hd;
+       B.lemma_g_upd_with_same_seq hd mem;       
+       update_buffer_up_mem_aux h1 h2 tl (hd::accu) b (Mem ptrs addrs m')
      )
 
-let update_buffer_up_mem ptrs addrs mem b heap1 heap2 =
-  update_buffer_up_mem_aux ptrs addrs mem b heap1 heap2 ptrs []
-*)
+let update_buffer_up_mem m b h1 h2 = 
+  let ptrs = ptrs_of_mem m in
+  update_buffer_up_mem_aux h1 h2 ptrs [] b m
