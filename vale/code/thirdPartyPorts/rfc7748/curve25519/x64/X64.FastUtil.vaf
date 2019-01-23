@@ -672,6 +672,7 @@ procedure{:quick} fast_sub(
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
+    lemma_sub_carry_equiv_forall();
 
     Xor64(rax, rax);
 

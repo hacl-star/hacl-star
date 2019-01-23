@@ -11,9 +11,22 @@ let int_canon = fun _ -> canon_semiring int_cr //; dump "Final"
 
 let sub_carry (x y:nat64) (c:bit) : nat64 & (c':bit)
   =
-  (x - (y + c)) % pow2_64,
-  (if x - (y + c) < 0 then 1 else 0)
+  if x - (y + c) < 0 then 
+    (x - (y + c) + pow2_64, 1) 
+  else
+    (x - (y + c)), 0
 
+val lemma_sub_carry_equiv (x y:nat64) (c:bit) : 
+  Lemma (let v, c' = sub_carry x y c in
+         v == (x - (y + c)) % pow2_64 /\
+         c' == bool_bit (x - (y+c) < 0))
+
+val lemma_sub_carry_equiv_forall: unit ->
+  Lemma (forall x y c . {:pattern (sub_carry x y c)}
+         let v, c' = sub_carry x y c in
+         v == (x - (y + c)) % pow2_64 /\
+         c' == bool_bit (x - (y+c) < 0))
+  
 val lemma_sub3
       (a:nat) (a0 a1 a2:nat64)      
       (b:nat) (b0 b1 b2:nat64)
