@@ -294,8 +294,8 @@ val fadd_mul_r:
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-      feval h1 out == LSeq.map2 (S.pfmul)
-        (LSeq.map2 (S.pfadd) (feval h0 out) (feval h0 f1)) (feval h0 (gsub precomp 0ul 5ul)))
+      feval h1 out ==
+        S.fmul (S.fadd (feval h0 out) (feval h0 f1)) (feval h0 (gsub precomp 0ul 5ul)))
 let fadd_mul_r #s out f1 precomp =
   match s with
   | M32  -> F32xN.fadd_mul_r #1 out f1 precomp
@@ -320,7 +320,7 @@ val fmul_rn:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-      feval h1 out == LSeq.map2 S.pfmul (feval h0 f1) (feval h0 (gsub precomp 10ul 5ul)))
+      feval h1 out == S.fmul (feval h0 f1) (feval h0 (gsub precomp 10ul 5ul)))
 let fmul_rn #s out f1 precomp =
   match s with
   | M32  -> F32xN.fmul_rn #1 out f1 precomp
@@ -340,8 +340,8 @@ val fmul_rn_normalize:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-     (let r = feval h0 (gsub precomp 0ul 5ul) in
-      (feval h1 out).[0] == S.normalize_n #(width s) (feval h0 out) r))
+      (feval h1 out).[0] ==
+        S.normalize_n #(width s) (feval h0 out) (feval h0 (gsub precomp 0ul 5ul)))
 let fmul_rn_normalize #s out precomp =
   match s with
   | M32  -> F32xN.fmul_rn_normalize #1 out precomp
@@ -362,7 +362,7 @@ val fadd:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (2,3,2,2,2) /\
-      feval h1 out == LSeq.map2 S.pfadd (feval h0 f1) (feval h0 f2))
+      feval h1 out == S.fadd (feval h0 f1) (feval h0 f2))
 let fadd #s out f1 f2 =
   match s with
   | M32  -> F32xN.fadd #1 out f1 f2
