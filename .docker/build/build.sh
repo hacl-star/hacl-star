@@ -8,11 +8,29 @@ threads=$3
 branchname=$4
 
 function export_home() {
+    local home_path=""
     if command -v cygpath >/dev/null 2>&1; then
-        export $1_HOME=$(cygpath -m "$2")
+        home_path=$(cygpath -m "$2")
     else
-        export $1_HOME="$2"
+        home_path="$2"
     fi
+
+    export $1_HOME=$home_path
+
+    # Update .bashrc file
+    local s_token=$1_HOME=
+    if grep -q "$s_token" ~/.bashrc; then
+        sed -i -E "s@$s_token.*@$s_token$home_path@" ~/.bashrc
+    else
+        echo "export $1_HOME=$home_path" >> ~/.bashrc
+    fi
+}
+
+function vale_test() {
+  echo Running Vale Test &&
+  fetch_kremlin &&
+        fetch_and_make_vale &&
+        env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads vale.build -k
 }
 
 function hacl_test() {
@@ -108,11 +126,14 @@ function fetch_vale() {
 
 function fetch_and_make_vale() {
     fetch_vale
-    python3.6 $(which scons) -C valebin -j $threads
+    pushd valebin && ./run_scons.sh -j $threads && popd
 }
 
 function refresh_hacl_hints() {
-    refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
+    # We should not generate hints when building on Windows
+    if [[ "$OS" != "Windows_NT" ]]; then
+        refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
+    fi
 }
 
 # Note: this performs an _approximate_ refresh of the hints, in the sense that
@@ -157,9 +178,7 @@ function refresh_hints() {
 }
 
 function exec_build() {
-    cd hacl-star
 
-    export_home FSTAR "$(pwd)/../"
     result_file="../result.txt"
     local status_file="../status.txt"
     echo -n false >$status_file
@@ -175,12 +194,19 @@ function exec_build() {
 
     if [[ $target == "hacl-ci" ]]; then
         echo target - >hacl-ci
-        hacl_test &&
-        echo -n true >$status_file
+        if [[ $branchname == "vale" ||  $branchname == "_vale" ]]; then
+          vale_test && echo -n true >$status_file
+        else
+          hacl_test && echo -n true >$status_file
+        fi
     elif [[ $target == "hacl-nightly" ]]; then
         echo target - >hacl-nightly
-        export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
-        hacl_test_and_hints && echo -n true >$status_file
+        if [[ $branchname == "vale" ||  $branchname == "_vale" ]]; then
+          vale_test && echo -n true >$status_file
+        else
+          export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
+          hacl_test_and_hints && echo -n true >$status_file
+        fi
     else
         echo "Invalid target"
         echo Failure >$result_file
@@ -194,8 +220,6 @@ function exec_build() {
         echo "Build succeeded"
         echo Success >$result_file
     fi
-
-    cd ..
 }
 
 # Some environment variables we want
@@ -203,4 +227,7 @@ export OCAMLRUNPARAM=b
 export OTHERFLAGS="--print_z3_statistics --use_hints --query_stats"
 export MAKEFLAGS="$MAKEFLAGS -Otarget"
 
+export_home FSTAR "$(pwd)/FStar"
+cd hacl-star
 exec_build
+cd ..
