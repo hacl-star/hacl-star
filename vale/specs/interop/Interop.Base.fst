@@ -71,7 +71,7 @@ let default_bq = {
 [@__reduce__]
 let stack_bq = {
   modified=true;
-  taint=MS.Secret;
+  taint=MS.Public;
   strict_disjointness=true
 }
 
@@ -212,13 +212,18 @@ let __test : n_dep_arrow [TD_Base TUInt8] (fun (x:UInt8.t) -> y:UInt8.t{x == y})
 ////////////////////////////////////////////////////////////////////////////////
 
 [@__reduce__]
+let disjoint_not_eq (x y:b8) =
+    B.disjoint #UInt8.t x y /\
+    x =!= y
+
+[@__reduce__]
 let disjoint_or_eq_1 (a:arg) (b:arg) =
     match a, b with
     | (| TD_Buffer tx {strict_disjointness=true}, xb |), (| TD_Buffer ty _, yb |)
     | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |) ->
-      B.disjoint #UInt8.t xb yb
-    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
-      B.disjoint #UInt8.t xb yb \/ eq2 #b8 xb yb
+      disjoint_not_eq xb yb
+    | (| TD_Buffer tx {taint=tntx}, xb |), (| TD_Buffer ty {taint=tnty}, yb |) ->
+      (disjoint_not_eq xb yb \/ (eq2 #b8 xb yb /\ tntx == tnty))
     | _ -> True
 
 [@__reduce__]

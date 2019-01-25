@@ -156,24 +156,25 @@ let rec register_of_args (n:nat{n < max_arity})
 ////////////////////////////////////////////////////////////////////////////////
 let taint_map = b8 -> GTot MS.taint
 
-let upd_taint_map (taint:taint_map) (x:b8) (tnt:MS.taint)  : taint_map =
+let upd_taint_map_b8 (taint:taint_map) (x:b8) (tnt:MS.taint)  : taint_map =
    fun (y:b8) ->
      if StrongExcludedMiddle.strong_excluded_middle ((x <: b8) == y) then
         tnt
      else taint y
 
+[@__reduce__]
+let upd_taint_map_arg (a:arg) (tm:taint_map) : taint_map =
+    match a with
+    | (| TD_Buffer t {taint=tnt}, x |) ->
+      upd_taint_map_b8 tm x tnt
+    | _ ->
+      tm
+
 let init_taint : taint_map = fun r -> MS.Public
 
 [@__reduce__]
-let rec mk_taint (as:list arg) (tm:taint_map) : taint_map =
-  match as with
-  | [] -> tm
-  | hd::tl ->
-    match hd with
-    | (| TD_Buffer t {taint=tnt}, x |) ->
-      mk_taint tl (upd_taint_map tm x tnt)
-    | _ ->
-      mk_taint tl tm
+let mk_taint (as:list arg) (tm:taint_map) : GTot taint_map =
+  List.fold_right_gtot as upd_taint_map_arg init_taint
 
 ////////////////////////////////////////////////////////////////////////////////
 
