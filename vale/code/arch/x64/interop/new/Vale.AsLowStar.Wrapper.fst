@@ -71,7 +71,7 @@ let rec core_create_lemma_disjointness
       aux tl
 #reset-options
 
-let rec args_b8_lemma (args:list arg) (x:arg) 
+let rec args_b8_lemma (args:list arg) (x:arg)
   : Lemma
       (List.memP x args ==>
         (match x with
@@ -79,7 +79,7 @@ let rec args_b8_lemma (args:list arg) (x:arg)
          | _ -> True))
   = match args with
     | [] -> ()
-    | a::q -> 
+    | a::q ->
       args_b8_lemma q x
 
 let readable_cons (hd:arg) (tl:list arg) (s:ME.mem)
@@ -98,19 +98,19 @@ let core_create_lemma_readable
     (h0:HS.mem)
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
-      (ensures 
+      (ensures
         (let va_s = create_initial_vale_state args h0 stack in
          VSig.readable (arg_of_sb stack::args) VS.(va_s.mem)))
-  = 
+  =
     let readable_registered_one (a:arg) (s:ME.mem)
-      : Lemma 
+      : Lemma
           VSig.(arg_is_registered_root s a <==> readable_one s a)
       = match a with
         | (| TD_Buffer bt _, x |) ->
           Vale.AsLowStar.MemoryHelpers.reveal_readable #bt x s
         | _ -> ()
     in
-    let rec readable_registered_all 
+    let rec readable_registered_all
         (args:list arg)
         (s:ME.mem {forall x. List.memP x args ==> arg_is_registered_root s x})
       : Lemma VSig.(readable args s)
@@ -124,7 +124,7 @@ let core_create_lemma_readable
      let readable_mk_mem
          (args:list arg)
          (h:mem_roots args)
-       : Lemma 
+       : Lemma
            (let mem = mk_mem args h in
             VSig.readable args (as_vale_mem mem))
        = let mem = mk_mem args h in
@@ -158,14 +158,14 @@ let core_create_lemma_readable2
     (h0:HS.mem)
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
-      (ensures 
+      (ensures
         (let va_s = create_initial_vale_state args h0 stack in
          ME.buffer_readable VS.(va_s.mem) (as_vale_buffer stack) /\
          VSig.readable args VS.(va_s.mem)))
   = core_create_lemma_readable args h0 stack;
     let va_s = create_initial_vale_state args h0 stack in
     readable_cons (arg_of_sb stack) args VS.(va_s.mem)
-    
+
 let core_create_lemma_mem_correspondance
     #n
     (args:IX64.arity_ok arg)
@@ -182,17 +182,17 @@ let core_create_lemma_mem_correspondance
     | [] -> ()
     | hd::tl -> aux tl;
       match hd with
-      | (| TD_Buffer bt _, x |) -> 
+      | (| TD_Buffer bt _, x |) ->
         let open Vale.AsLowStar.MemoryHelpers in
         buffer_as_seq_reveal bt x args h0 stack
       | _ -> ()
     in
     aux args
 
-let rec register_args' 
-    (n:nat) 
-    (args:IX64.arity_ok arg{List.length args = n}) 
-    (regs:IX64.registers) 
+let rec register_args'
+    (n:nat)
+    (args:IX64.arity_ok arg{List.length args = n})
+    (regs:IX64.registers)
   : prop
   = match args with
     | [] -> True
@@ -203,7 +203,7 @@ let rec register_args'
 let rec lemma_register_args'_aux
     (n:nat)
     (args:IX64.arity_ok arg{List.length args = n})
-    (regs1 regs2:IX64.registers) 
+    (regs1 regs2:IX64.registers)
   : Lemma
       (requires
         register_args' n args regs1 /\
@@ -215,14 +215,14 @@ let rec lemma_register_args'_aux
     | [] -> ()
     | hd::tl -> lemma_register_args'_aux (n-1) tl regs1 regs2
 
-let rec lemma_register_args' 
-    (args:IX64.arity_ok arg) 
-    (regs:IX64.registers) 
-  : Lemma 
-     (ensures 
+let rec lemma_register_args'
+    (args:IX64.arity_ok arg)
+    (regs:IX64.registers)
+  : Lemma
+     (ensures
        (let final_regs = IX64.register_of_args (List.length args) args regs in
         register_args' (List.length args) args final_regs))
-  = let final_regs = IX64.register_of_args (List.length args) args regs in  
+  = let final_regs = IX64.register_of_args (List.length args) args regs in
     match args with
     | [] -> ()
     | hd::tl ->
@@ -239,7 +239,7 @@ let core_create_lemma_register_args
   : Lemma
       (ensures (let va_s = create_initial_vale_state args h0 stack in
                 LSig.register_args (List.length args) args va_s))
-  = 
+  =
     let va_s = create_initial_vale_state args h0 stack in
     let regs' = IX64.register_of_args (List.Tot.length args) args IA.init_regs in
     lemma_register_args' args IA.init_regs;
@@ -247,21 +247,21 @@ let core_create_lemma_register_args
     let regs = FunctionalExtensionality.on reg (IX64.regs_with_stack regs' stack) in
     lemma_register_args'_aux (List.length args) args regs' regs;
     assert (register_args' (List.length args) args regs);
-    let rec aux 
-        (args:IX64.arity_ok arg) 
-        (s:VS.state) 
-        (args':list arg) 
+    let rec aux
+        (args:IX64.arity_ok arg)
+        (s:VS.state)
+        (args':list arg)
         (h0:HS.mem{mem_roots_p h0 args'})
      : Lemma
-         (requires 
-            (forall r. VS.eval_reg r s == regs r) /\ 
+         (requires
+            (forall r. VS.eval_reg r s == regs r) /\
             register_args' (List.length args) args regs /\
             s.VS.mem == as_vale_mem (mk_mem args' h0))
          (ensures LSig.register_args (List.length args) args s)
-    = let n = List.length args in 
+    = let n = List.length args in
       match args with
       | [] -> ()
-      | hd::tl -> aux tl s args' h0; 
+      | hd::tl -> aux tl s args' h0;
         let (| tag, x |) = hd in
         match tag with
         | TD_Buffer bt _ -> Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal bt x args' h0
@@ -270,7 +270,7 @@ let core_create_lemma_register_args
       aux args va_s (arg_of_sb stack::args) h0
 
 let core_create_lemma_taint_hyp
-    #n 
+    #n
     (args:IX64.arity_ok arg)
     (h0:HS.mem)
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
@@ -285,7 +285,7 @@ let core_create_lemma_state
     (h0:HS.mem)
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
-      (ensures 
+      (ensures
         (let va_s = create_initial_vale_state args h0 stack in
          fst (IX64.create_initial_trusted_state n args I.down_mem h0 stack) == SL.state_to_S va_s))
   = let va_s = create_initial_vale_state args h0 stack in
@@ -302,7 +302,7 @@ let core_create_lemma_state
       = SL.lemma_to_xmm va_s x
     in
     Classical.forall_intro aux_reg;
-    Classical.forall_intro aux_xmm;    
+    Classical.forall_intro aux_xmm;
     assert (FunctionalExtensionality.feq tr_s.TS.state.BS.regs sl_s.TS.state.BS.regs);
     assert (FunctionalExtensionality.feq tr_s.TS.state.BS.xmms sl_s.TS.state.BS.xmms);
     Vale.AsLowStar.MemoryHelpers.get_heap_mk_mem_reveal args h0 stack
@@ -323,7 +323,7 @@ let core_create_lemma
     (h0:HS.mem)
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
-      (ensures 
+      (ensures
         (let va_s = create_initial_vale_state args h0 stack in
          fst (IX64.create_initial_trusted_state n args I.down_mem h0 stack) == SL.state_to_S va_s /\
          LSig.mem_correspondence args h0 va_s /\
@@ -365,10 +365,10 @@ let rec frame_mem_correspondence_back
        LSig.mem_correspondence args h0 va_s)
  = match args with
    | [] -> ()
-   | hd::tl -> 
+   | hd::tl ->
      frame_mem_correspondence_back tl h0 h1 va_s l;
      match hd with
-     | (| TD_Buffer bt _, x |) -> 
+     | (| TD_Buffer bt _, x |) ->
        BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
      | _ -> ()
 
@@ -398,7 +398,7 @@ let rec frame_mem_correspondence
 let rec args_fp (args:list arg)
                 (h0:mem_roots args)
                 (h1:HS.mem{HS.fresh_frame h0 h1})
-  : Lemma 
+  : Lemma
       (B.loc_disjoint (loc_all_args args) (B.loc_regions false (Set.singleton (HS.get_tip h1))))
   = match args with
     | [] -> ()
@@ -421,9 +421,9 @@ let eval_code_rel (c:TS.tainted_code)
 
 let rec mem_correspondence_refl (args:list arg)
                                 (va_s:V.va_state)
- : Lemma 
+ : Lemma
      (ensures LSig.mem_correspondence args (hs_of_mem (as_mem va_s.VS.mem)) va_s)
- = 
+ =
    let h = hs_of_mem (as_mem va_s.VS.mem) in
    match args with
    | [] -> ()
@@ -476,10 +476,10 @@ let loc_includes_union (l1 l1' l:B.loc)
   : Lemma (requires B.(loc_includes l1 l1'))
           (ensures  B.(loc_includes (loc_union l1 l) (loc_union l1' l)))
   = let open B in
-    loc_includes_union_l l1 l l1'; 
-    loc_includes_union_l l1 l l;    
+    loc_includes_union_l l1 l l1';
+    loc_includes_union_l l1 l l;
     loc_includes_union_r (loc_union l1 l) l1' l
-                      
+
 #set-options "--z3rlimit_factor 2"
 val vale_lemma_as_prediction
           (#n:IX64.max_slots)
@@ -524,19 +524,14 @@ let vale_lemma_as_prediction
        assert (VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1));
        assert (IX64.calling_conventions s0 s1);
        assert (ME.modifies (VSig.mloc_modified_args s_args) va_s0.VS.mem va_s1.VS.mem);
-       let h1 = hs_of_mem (as_mem va_s1.VS.mem) in
        let final_mem = va_s1.VS.mem in
-       Vale.AsLowStar.MemoryHelpers.relate_modifies s_args va_s0.VS.mem va_s1.VS.mem;
-       assert (B.modifies (loc_modified_args s_args) alloc_push_h0 h1);
-       assume (FStar.HyperStack.ST.equal_domains alloc_push_h0 h1); //TODO: Vale code does not prove that it does not allocate
-       Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
-       assert (I.down_mem (as_mem final_mem) // h1
-                           // (IA.addrs)
-                           // (ptrs_of_mem final_mem)
-               == s1.TS.state.BS.mem);
        let h1_pre_pop = hs_of_mem (as_mem final_mem) in
-       assert (h1_pre_pop == h1);
-       assert (va_s1.VS.mem == final_mem);
+       Vale.AsLowStar.MemoryHelpers.relate_modifies s_args va_s0.VS.mem va_s1.VS.mem;
+       assert (B.modifies (loc_modified_args s_args) alloc_push_h0 h1_pre_pop);
+       assume (FStar.HyperStack.ST.equal_domains alloc_push_h0 h1_pre_pop); //TODO: Vale code does not prove that it does not allocate
+       assume (ptrs_of_mem (as_mem final_mem) == ptrs_of_mem (as_mem va_s0.VS.mem)); //And the set of roots did not change
+       Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
+       assert (I.down_mem (as_mem final_mem) == s1.TS.state.BS.mem);
        mem_correspondence_refl args va_s1;
        assert (HS.poppable h1_pre_pop);
        let h2 = HS.pop h1_pre_pop in
@@ -552,7 +547,7 @@ let vale_lemma_as_prediction
        assert (mem_roots_p h1_pre_pop args);
        frame_mem_correspondence args h1_pre_pop h2 va_s1 (B.loc_regions false (Set.singleton (HS.get_tip h1_pre_pop)));
        assert (B.modifies (loc_modified_args s_args) alloc_push_h0 h1_pre_pop);
-       assert (B.modifies (loc_modified_args s_args) push_h0 h1_pre_pop);       
+       assert (B.modifies (loc_modified_args s_args) push_h0 h1_pre_pop);
        let l = (B.loc_all_regions_from false (HS.get_tip push_h0)) in
        assert (B.loc_includes l (B.loc_buffer sb));
        loc_includes_union l (B.loc_buffer sb) (loc_modified_args args);
@@ -560,7 +555,6 @@ let vale_lemma_as_prediction
        assert (B.modifies (loc_modified_args args) h0 h2);
        assert (LSig.(to_low_post post args h0 () h2));
        let x : nat & ME.mem = coerce f, va_s1.VS.mem in
-       admit();
        x
 
 [@__reduce__]
