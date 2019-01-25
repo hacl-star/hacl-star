@@ -57,21 +57,21 @@ let coerce (x:'a{'a == 'b}) : 'b = x
 
 type buffer_qualifiers = {
   modified:bool;
-  secret:bool;
+  taint:MS.taint;
   strict_disjointness:bool
 }
 
 [@__reduce__]
 let default_bq = {
   modified=true;
-  secret=true;
+  taint=MS.Secret;
   strict_disjointness=false
 }
 
 [@__reduce__]
 let stack_bq = {
   modified=true;
-  secret=true;
+  taint=MS.Secret;
   strict_disjointness=true
 }
 

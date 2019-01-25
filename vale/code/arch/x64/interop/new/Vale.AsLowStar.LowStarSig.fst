@@ -112,19 +112,19 @@ let rec taint_hyp (args:list arg) : VSig.sprop =
     | hd::tl ->
       let (| tag, x |) = hd in
       match tag with
-      | TD_Buffer TUInt64 _ ->
+      | TD_Buffer TUInt64 {taint=tnt} ->
         fun s0 ->
           ME.valid_taint_buf64
             (as_vale_buffer #TUInt64 x)
             s0.VS.mem
-            s0.VS.memTaint MS.Secret /\
+            s0.VS.memTaint tnt /\
           taint_hyp tl s0
-      | TD_Buffer TUInt128 _ ->
+      | TD_Buffer TUInt128 {taint=tnt} ->
         fun s0 ->
           ME.valid_taint_buf128
             (as_vale_buffer #TUInt128 x)
             s0.VS.mem
-            s0.VS.memTaint MS.Secret /\
+            s0.VS.memTaint tnt /\
           taint_hyp tl s0
       | _ ->
         taint_hyp tl

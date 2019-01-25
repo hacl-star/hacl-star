@@ -156,20 +156,24 @@ let rec register_of_args (n:nat{n < max_arity})
 ////////////////////////////////////////////////////////////////////////////////
 let taint_map = b8 -> GTot MS.taint
 
-let upd_taint_map (taint:taint_map) (x:b8) : taint_map =
-      fun (y:b8) ->
-        if StrongExcludedMiddle.strong_excluded_middle ((x <: b8) == y) then
-          MS.Secret
-        else taint y
+let upd_taint_map (taint:taint_map) (x:b8) (tnt:MS.taint)  : taint_map =
+   fun (y:b8) ->
+     if StrongExcludedMiddle.strong_excluded_middle ((x <: b8) == y) then
+        tnt
+     else taint y
+
+let init_taint : taint_map = fun r -> MS.Public
 
 [@__reduce__]
-let update_taint_map (#a:td)
-                     (x:td_as_type a)
-                     (taint:taint_map) =
-    match a with
-    | TD_Buffer bt _ ->
-      upd_taint_map taint x
-    | _ -> taint
+let rec mk_taint (as:list arg) (tm:taint_map) : taint_map =
+  match as with
+  | [] -> tm
+  | hd::tl ->
+    match hd with
+    | (| TD_Buffer t {taint=tnt}, x |) ->
+      mk_taint tl (upd_taint_map tm x tnt)
+    | _ ->
+      mk_taint tl tm
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -177,8 +181,6 @@ let state_builder_t (num_b8_slots:max_slots) (args:list arg) (codom:Type) =
     h0:HS.mem ->
     stack:stack_buffer num_b8_slots{mem_roots_p h0 (arg_of_sb stack::args)} ->
     GTot codom
-
-let init_taint : taint_map = fun r -> MS.Public
 
 // Splitting the construction of the initial state into two functions
 // one that creates the initial trusted state (i.e., part of our TCB)
@@ -206,7 +208,7 @@ let create_initial_trusted_state
     {
       TS.state = s0;
       TS.trace = [];
-      TS.memTaint = create_memtaint mem (args_b8 args) init_taint
+      TS.memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint)
     },
     mem
 
