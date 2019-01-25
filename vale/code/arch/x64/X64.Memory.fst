@@ -3,6 +3,7 @@ open Interop.Base
 module IB = Interop.Base
 module I = Interop
 module HS = FStar.HyperStack
+module HST = FStar.HyperStack.ST
 module B = LowStar.Buffer
 module M = LowStar.Modifies
 open LowStar.ModifiesPat
@@ -85,8 +86,11 @@ let loc_union = M.loc_union
 let loc_buffer #t b = M.loc_buffer b
 let loc_disjoint = M.loc_disjoint
 let loc_includes = M.loc_includes
-let modifies s h h' = M.modifies s h.hs h'.hs /\ h.ptrs == h'.ptrs /\ h.addrs == h'.addrs
-
+let modifies s h h' = 
+  M.modifies s h.hs h'.hs /\ 
+  h.ptrs == h'.ptrs /\ 
+  h.addrs == h'.addrs /\
+  HST.equal_domains h.hs h'.hs
 
 let buffer_addr #t b h = IB.addrs_of_mem h b
 open FStar.Mul
@@ -299,6 +303,7 @@ let buffer_write #t b i v h =
    let bv = BV.mk_buffer_view b view in
    BV.as_buffer_mk_buffer_view b view;
    BV.upd_modifies h.hs bv i (v_of_typ t v);
+   BV.upd_equal_domains h.hs bv i (v_of_typ t v);
    let hs' = BV.upd h.hs bv i (v_of_typ t v) in
    let h':mem = Mem h.ptrs h.addrs hs' in
    seq_upd h.hs bv i (v_of_typ t v);

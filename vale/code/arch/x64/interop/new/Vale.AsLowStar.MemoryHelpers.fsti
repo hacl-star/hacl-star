@@ -115,6 +115,19 @@ val as_vale_buffer_disjoint (#t1 #t2:base_typ) (x:buf_t t1) (y:buf_t t2)
    : Lemma (B.disjoint x y ==> ME.loc_disjoint (ME.loc_buffer (as_vale_buffer x)) (ME.loc_buffer (as_vale_buffer y)))
            [SMTPat (ME.loc_disjoint (ME.loc_buffer (as_vale_buffer x)) (ME.loc_buffer (as_vale_buffer y)))]
 
+val modifies_same_roots
+  (s:ME.loc)
+  (h0 h1:ME.mem) : Lemma
+  (requires ME.modifies s h0 h1)
+  (ensures ptrs_of_mem (as_mem h0) == ptrs_of_mem (as_mem h1))
+
+val modifies_equal_domains
+  (s:ME.loc)
+  (h0 h1:ME.mem) : Lemma
+  (requires ME.modifies s h0 h1)
+  (ensures FStar.HyperStack.ST.equal_domains (hs_of_mem (as_mem h0)) (hs_of_mem (as_mem h1)))
+
+
 // module IB = Interop.Base
 // val valid_memtaint (mem:ME.mem) (ps:list b8{IB.list_disjoint_or_eq ps}) (ts:b8 -> GTot MS.taint)
 //   : Lemma (ME.valid_taint_bufs mem (IB.create_memtaint mem ps ts) ps ts)

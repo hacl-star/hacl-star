@@ -71,12 +71,12 @@ val lemma_of_to : s:state -> Lemma
   (ensures s == state_of_S s (state_to_S s))
   [SMTPat (state_of_S s (state_to_S s))]
 
-val lemma_to_of_eval_code: (c:TS.tainted_code) -> (s0:state) -> Lemma
+val lemma_to_of_eval_ins: (c:TS.tainted_code) -> (s0:state) -> Lemma
   (requires Ins? c)
   (ensures (
     let Some sM = TS.taint_eval_code c 0 (state_to_S s0) in
     same_domain_eval_ins c 0 (state_to_S s0) s0;
     (state_to_S (state_of_S s0 sM) == {sM with TS.trace = []})
   ))
-    
+
 unfold let op_String_Access (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y

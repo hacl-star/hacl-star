@@ -34,7 +34,7 @@ let eval_ins (c:code) (s0:state) : Ghost ((sM:state) * (f0:fuel))
   let f0 = 0 in
   let (Some sM) = TS.taint_eval_code c f0 (state_to_S s0) in
   same_domain_eval_ins c f0 (state_to_S s0) s0;
-  lemma_to_of_eval_code c s0;
+  lemma_to_of_eval_ins c s0;
   (state_of_S s0 sM, f0)
 
 let eval_ocmp (s:state) (c:ocmp) : GTot bool = snd (TS.taint_eval_ocmp (state_to_S s) c)

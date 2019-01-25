@@ -528,8 +528,10 @@ let vale_lemma_as_prediction
        let h1_pre_pop = hs_of_mem (as_mem final_mem) in
        Vale.AsLowStar.MemoryHelpers.relate_modifies s_args va_s0.VS.mem va_s1.VS.mem;
        assert (B.modifies (loc_modified_args s_args) alloc_push_h0 h1_pre_pop);
-       assume (FStar.HyperStack.ST.equal_domains alloc_push_h0 h1_pre_pop); //TODO: Vale code does not prove that it does not allocate
-       assume (ptrs_of_mem (as_mem final_mem) == ptrs_of_mem (as_mem va_s0.VS.mem)); //And the set of roots did not change
+       Vale.AsLowStar.MemoryHelpers.modifies_equal_domains
+         (VSig.mloc_modified_args s_args) va_s0.VS.mem final_mem;       
+       Vale.AsLowStar.MemoryHelpers.modifies_same_roots 
+         (VSig.mloc_modified_args s_args) va_s0.VS.mem final_mem;
        Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
        assert (I.down_mem (as_mem final_mem) == s1.TS.state.BS.mem);
        mem_correspondence_refl args va_s1;
