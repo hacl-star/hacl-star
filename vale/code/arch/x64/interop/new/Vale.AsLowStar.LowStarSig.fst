@@ -75,9 +75,6 @@ let rec mem_correspondence (args:list arg) : hsprop =
     | _ ->
       mem_correspondence tl
 
-let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state) :
-  Lemma (0 <= ME.buffer_addr x VS.(s.mem) /\ ME.buffer_addr x VS.(s.mem) < pow2 64) = admit()
-
 [@__reduce__]
 let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
   let (| tag, x |) = a in

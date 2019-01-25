@@ -14,9 +14,6 @@ module IX64 = Interop.X64
 module List = FStar.List.Tot
 open X64.MemoryAdapters
 
-assume //TODO: this equivalence should be provided by Vale.Decls
-val code_equiv : squash (V.va_code == TS.tainted_code)
-
 [@__reduce__]
 let vale_pre_tl (num_b8_slots:IX64.max_slots) (dom:list td) =
     n_arrow dom (V.va_state -> IX64.stack_buffer num_b8_slots -> prop)

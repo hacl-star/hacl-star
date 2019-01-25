@@ -192,10 +192,3 @@ let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
     x                                      //with equalities of buffer views
                                            //back to equalities of buffers
 
-
-(*
-   Some things to fix up
-   
-   -- Supporting return values
-
-*)
