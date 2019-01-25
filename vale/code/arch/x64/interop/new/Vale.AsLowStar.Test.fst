@@ -8,7 +8,7 @@ module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
 module W = Vale.AsLowStar.Wrapper
 module VS = X64.Vale.State
-
+module MS = X64.Machine_s
 (* A little utility to trigger normalization in types *)
 let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
@@ -20,7 +20,7 @@ let b64 = buf_t TUInt64
 [@__reduce__] unfold
 let t64_mod = TD_Buffer TUInt64 default_bq
 [@__reduce__] unfold
-let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; secret=true})
+let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 
 [@__reduce__] unfold
 let dom : IX64.arity_ok td =
@@ -146,14 +146,10 @@ open FStar.HyperStack.ST
 
 module M = X64.Memory
 
-// let as_vale_buffer_disjoint (#t1 #t2:ME.typ) (x:lowstar_buffer t1) (y:lowstar_buffer t2)
-//    : Lemma (B.disjoint x y ==> M.loc_disjoint (M.loc_buffer (as_vale_buffer x)) (M.loc_buffer (as_vale_buffer y)))
-//            [SMTPat (M.loc_disjoint (M.loc_buffer (as_vale_buffer x)) (M.loc_buffer (as_vale_buffer y)))]
-//    = admit()
-
 let test (x:b64) = assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)
 
 module T = FStar.Tactics
+#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 module LBV = LowStar.BufferView
 val lbv_as_seq_eq (#a #b:Type) (#rrel #rel:B.srel a) (x y: B.mbuffer a rrel rel) (v:LBV.view a b) (h:_)
   : Lemma
@@ -195,7 +191,7 @@ let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
       B.live h1 src /\
       B.live h1 dst /\
       B.as_seq h1 dst == B.as_seq h1 src)
-  by (T.dump "A"; T.norm [delta_only [`%X64.Memory.loc_disjoint]; iota; zeta; primops]; T.dump "B")
+//  by (T.dump "A") (* in case you want to look at the VC *)
   = let _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
     lbv_as_seq_eq dst src Views.view64 h1 //And a lemma to rephrase the Vale postcondition 

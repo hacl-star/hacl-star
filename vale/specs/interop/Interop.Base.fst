@@ -223,7 +223,7 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
     | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |) ->
       disjoint_not_eq xb yb
     | (| TD_Buffer tx {taint=tntx}, xb |), (| TD_Buffer ty {taint=tnty}, yb |) ->
-      (disjoint_not_eq xb yb \/ (eq2 #b8 xb yb /\ tntx == tnty))
+      disjoint_not_eq xb yb \/ (eq2 #b8 xb yb /\ tntx == tnty)
     | _ -> True
 
 [@__reduce__]

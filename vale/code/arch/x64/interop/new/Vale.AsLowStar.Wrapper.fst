@@ -269,16 +269,6 @@ let core_create_lemma_register_args
       in
       aux args va_s (arg_of_sb stack::args) h0
 
-let core_create_lemma_taint_hyp
-    #n
-    (args:IX64.arity_ok arg)
-    (h0:HS.mem)
-    (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
-  : Lemma
-      (ensures (let va_s = create_initial_vale_state args h0 stack in
-                LSig.taint_hyp args va_s))
-    = admit() // TODO: Requires an implementation of Interop.Adapters.create_valid_memtaint
-
 let core_create_lemma_state
     #n
     (args:IX64.arity_ok arg)
@@ -307,16 +297,6 @@ let core_create_lemma_state
     assert (FunctionalExtensionality.feq tr_s.TS.state.BS.xmms sl_s.TS.state.BS.xmms);
     Vale.AsLowStar.MemoryHelpers.get_heap_mk_mem_reveal args h0 stack
 
-// unfold
-// let valid_stack_slots (m:ME.mem) (rsp:int) (b:ME.buffer64) (num_slots:int) (memTaint:ME.memtaint) =
-//     ME.valid_taint_buf64 b m memTaint X64.Machine_s.Public /\
-//     ME.buffer_readable m b /\
-//     num_slots <= ME.buffer_length b /\
-//     (let open FStar.Mul in
-//      rsp == ME.buffer_addr b m + 8 * num_slots /\
-//      0 <= rsp - 8 * num_slots /\
-//      rsp < Words_s.pow2_64)
-
 let core_create_lemma
     #n
     (args:IX64.arity_ok arg)
@@ -344,10 +324,9 @@ let core_create_lemma
     core_create_lemma_readable args h0 stack;
     core_create_lemma_readable2 args h0 stack;
     core_create_lemma_register_args args h0 stack;
-    core_create_lemma_taint_hyp args h0 stack;
+    Vale.AsLowStar.MemoryHelpers.core_create_lemma_taint_hyp args h0 stack;
     core_create_lemma_state args h0 stack;
     let s_args = arg_of_sb stack :: args in
-    assume (ME.valid_taint_buf64 (as_vale_buffer stack) va_s.VS.mem va_s.VS.memTaint X64.Machine_s.Public);
     Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal _ stack (arg_of_sb stack :: args) h0
 
 let rec frame_mem_correspondence_back
@@ -386,14 +365,14 @@ let rec frame_mem_correspondence
      (ensures
        LSig.mem_correspondence args h1 va_s /\
        mem_roots_p h1 args)
- =  match args with
- | [] -> ()
- | hd::tl ->
-   frame_mem_correspondence tl h0 h1 va_s l;
-   match hd with
-   | (| TD_Buffer bt _, x |) ->
-     BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
-   | _ -> ()
+ = match args with
+   | [] -> ()
+   | hd::tl ->
+     frame_mem_correspondence tl h0 h1 va_s l;
+     match hd with
+     | (| TD_Buffer bt _, x |) ->
+       BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
+     | _ -> ()
 
 let rec args_fp (args:list arg)
                 (h0:mem_roots args)

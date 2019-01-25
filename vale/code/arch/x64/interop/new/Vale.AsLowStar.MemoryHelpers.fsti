@@ -127,7 +127,12 @@ val modifies_equal_domains
   (requires ME.modifies s h0 h1)
   (ensures FStar.HyperStack.ST.equal_domains (hs_of_mem (as_mem h0)) (hs_of_mem (as_mem h1)))
 
-
-// module IB = Interop.Base
-// val valid_memtaint (mem:ME.mem) (ps:list b8{IB.list_disjoint_or_eq ps}) (ts:b8 -> GTot MS.taint)
-//   : Lemma (ME.valid_taint_bufs mem (IB.create_memtaint mem ps ts) ps ts)
+val core_create_lemma_taint_hyp
+    (#n:_)
+    (args:IX64.arity_ok arg)
+    (h0:HS.mem)
+    (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
+  : Lemma
+      (ensures (let va_s = LSig.create_initial_vale_state args h0 stack in
+                LSig.taint_hyp args va_s /\
+                ME.valid_taint_buf64 (as_vale_buffer stack) va_s.VS.mem va_s.VS.memTaint X64.Machine_s.Public))

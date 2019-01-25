@@ -106,28 +106,27 @@ let rec register_args (n:nat)
         VS.eval_reg (IX64.register_of_arg_i (n - 1)) s == arg_as_nat64 hd s
 
 [@__reduce__]
-let rec taint_hyp (args:list arg) : VSig.sprop =
-    match args with
-    | [] -> (fun s -> True)
-    | hd::tl ->
-      let (| tag, x |) = hd in
-      match tag with
-      | TD_Buffer TUInt64 {taint=tnt} ->
-        fun s0 ->
-          ME.valid_taint_buf64
-            (as_vale_buffer #TUInt64 x)
-            s0.VS.mem
-            s0.VS.memTaint tnt /\
-          taint_hyp tl s0
-      | TD_Buffer TUInt128 {taint=tnt} ->
-        fun s0 ->
-          ME.valid_taint_buf128
-            (as_vale_buffer #TUInt128 x)
-            s0.VS.mem
-            s0.VS.memTaint tnt /\
-          taint_hyp tl s0
-      | _ ->
-        taint_hyp tl
+let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
+   let (| tag, x |) = a in
+    match tag with
+    | TD_Buffer TUInt64 {taint=tnt} ->
+      ME.valid_taint_buf64
+         (as_vale_buffer #TUInt64 x)
+         m
+         tm
+         tnt
+    | TD_Buffer TUInt128 {taint=tnt} ->
+      ME.valid_taint_buf128
+         (as_vale_buffer #TUInt128 x)
+         m
+         tm
+         tnt
+    | _ ->
+      True
+
+[@__reduce__]
+let taint_hyp (args:list arg) : VSig.sprop =
+  fun s0 -> BigOps.big_and' (taint_hyp_arg s0.VS.mem s0.VS.memTaint) args
 
 [@__reduce__]
 let vale_pre_hyp #n (sb:IX64.stack_buffer n) (args:IX64.arity_ok arg) : VSig.sprop =
@@ -172,3 +171,18 @@ let to_low_post
        mem_correspondence args hs_mem0 s0 /\
        mem_correspondence args hs_mem1 s1 /\
        elim_nil post s0 sb s1 f)
+
+[@__reduce__]
+let create_initial_vale_state
+       (#n:IX64.max_slots)
+       (args:IX64.arity_ok arg)
+  : IX64.state_builder_t n args V.va_state =
+  fun h0 stack ->
+    let t_state, mem = IX64.create_initial_trusted_state n args Interop.down_mem h0 stack in
+    let open VS in
+    { ok = true;
+      regs = X64.Vale.Regs.of_fun t_state.TS.state.BS.regs;
+      xmms = X64.Vale.Xmms.of_fun t_state.TS.state.BS.xmms;
+      flags = 0; // TODO: REVIEW
+      mem = as_vale_mem mem;
+      memTaint = TS.(t_state.memTaint) }

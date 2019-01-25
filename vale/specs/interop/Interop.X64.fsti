@@ -176,6 +176,40 @@ let init_taint : taint_map = fun r -> MS.Public
 let mk_taint (as:list arg) (tm:taint_map) : GTot taint_map =
   List.fold_right_gtot as upd_taint_map_arg init_taint
 
+let taint_of_arg (a:arg) =
+  let (| tag, x |) = a in
+  match tag with
+  | TD_Buffer TUInt64 {taint=tnt}
+  | TD_Buffer TUInt128 {taint=tnt} -> Some tnt
+  | _ -> None
+
+let taint_arg_b8 (a:arg{Some? (taint_of_arg a)}) : b8 =
+  let (| tag, x |) = a in x
+
+let rec taint_arg_args_b8_mem (args:list arg) (a:arg)
+  : Lemma (List.memP a args /\ Some? (taint_of_arg a) ==>
+           List.memP (taint_arg_b8 a) (args_b8 args))
+  = match args with
+    | [] -> ()
+    | hd::tl ->
+      taint_arg_args_b8_mem tl a
+
+let rec mk_taint_equiv
+     (args:list arg{disjoint_or_eq args})
+     (a:arg)
+   : Lemma (List.memP a args /\ Some? (taint_of_arg a) ==>
+            Some?.v (taint_of_arg a) == (mk_taint args init_taint) (taint_arg_b8 a))
+   = match args with
+     | [] -> ()
+     | hd::tl ->
+       mk_taint_equiv tl a;
+       let (| tag, x |) = hd in
+       match tag with
+       | TD_Base _ -> ()
+       | TD_Buffer _ _ ->
+         disjoint_or_eq_cons hd tl;
+         BigOps.big_and'_forall (disjoint_or_eq_1 hd) tl
+
 ////////////////////////////////////////////////////////////////////////////////
 
 let state_builder_t (num_b8_slots:max_slots) (args:list arg) (codom:Type) =
