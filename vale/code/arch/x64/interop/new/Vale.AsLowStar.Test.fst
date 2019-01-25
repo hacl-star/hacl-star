@@ -173,7 +173,7 @@ let lbv_as_seq_eq #a #b #rrel #rel x y v h =
 
 //#reset-options "--print_implicits"
 let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
-  : Stack unit
+  : Stack UInt64.t
     (requires fun h0 ->
       B.live h0 dst /\
       B.live h0 src /\
@@ -186,11 +186,11 @@ let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
       B.live h1 dst /\
       B.as_seq h1 dst == B.as_seq h1 src)
 //  by (T.dump "A") (* in case you want to look at the VC *)
-  = let _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
+  = let x, _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
-    lbv_as_seq_eq dst src Views.view64 h1 //And a lemma to rephrase the Vale postcondition 
-                                          //with equalities of buffer views
-                                          //back to equalities of buffers
+    lbv_as_seq_eq dst src Views.view64 h1; //And a lemma to rephrase the Vale postcondition 
+    x                                      //with equalities of buffer views
+                                           //back to equalities of buffers
 
 
 (*

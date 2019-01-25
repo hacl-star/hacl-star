@@ -19,21 +19,6 @@ module SL = X64.Vale.StateLemmas
 module VL = X64.Vale.Lemmas
 module ST = FStar.HyperStack.ST
 
-[@__reduce__]
-let create_initial_vale_state
-       (#n:IX64.max_slots)
-       (args:IX64.arity_ok arg)
-  : IX64.state_builder_t n args V.va_state =
-  fun h0 stack ->
-    let t_state, mem = IX64.create_initial_trusted_state n args I.down_mem h0 stack in
-    let open VS in
-    { ok = true;
-      regs = X64.Vale.Regs.of_fun t_state.TS.state.BS.regs;
-      xmms = X64.Vale.Xmms.of_fun t_state.TS.state.BS.xmms;
-      flags = 0; // TODO: REVIEW
-      mem = as_vale_mem mem;
-      memTaint = TS.(t_state.memTaint) }
-
 let lemma_create_initial_vale_state_core
     (#n:IX64.max_slots)
     (args:IX64.arity_ok arg)
@@ -41,7 +26,7 @@ let lemma_create_initial_vale_state_core
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
       (ensures (
-        let s = create_initial_vale_state args h0 stack in
+        let s = LSig.create_initial_vale_state args h0 stack in
         hs_of_mem (as_mem s.VS.mem) == h0
       ))
   = ()
@@ -99,7 +84,7 @@ let core_create_lemma_readable
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
       (ensures
-        (let va_s = create_initial_vale_state args h0 stack in
+        (let va_s = LSig.create_initial_vale_state args h0 stack in
          VSig.readable (arg_of_sb stack::args) VS.(va_s.mem)))
   =
     let readable_registered_one (a:arg) (s:ME.mem)
@@ -159,11 +144,11 @@ let core_create_lemma_readable2
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
       (ensures
-        (let va_s = create_initial_vale_state args h0 stack in
+        (let va_s = LSig.create_initial_vale_state args h0 stack in
          ME.buffer_readable VS.(va_s.mem) (as_vale_buffer stack) /\
          VSig.readable args VS.(va_s.mem)))
   = core_create_lemma_readable args h0 stack;
-    let va_s = create_initial_vale_state args h0 stack in
+    let va_s = LSig.create_initial_vale_state args h0 stack in
     readable_cons (arg_of_sb stack) args VS.(va_s.mem)
 
 let core_create_lemma_mem_correspondance
@@ -173,10 +158,10 @@ let core_create_lemma_mem_correspondance
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
       (ensures
-        (let va_s = create_initial_vale_state args h0 stack in
+        (let va_s = LSig.create_initial_vale_state args h0 stack in
          LSig.mem_correspondence args h0 va_s))
   =
-    let va_s = create_initial_vale_state args h0 stack in
+    let va_s = LSig.create_initial_vale_state args h0 stack in
     let rec aux (accu:list arg) : Lemma (LSig.mem_correspondence accu h0 va_s) =
     match accu with
     | [] -> ()
@@ -237,10 +222,10 @@ let core_create_lemma_register_args
     (h0:HS.mem)
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
-      (ensures (let va_s = create_initial_vale_state args h0 stack in
+      (ensures (let va_s = LSig.create_initial_vale_state args h0 stack in
                 LSig.register_args (List.length args) args va_s))
   =
-    let va_s = create_initial_vale_state args h0 stack in
+    let va_s = LSig.create_initial_vale_state args h0 stack in
     let regs' = IX64.register_of_args (List.Tot.length args) args IA.init_regs in
     lemma_register_args' args IA.init_regs;
     let open MS in
@@ -276,9 +261,9 @@ let core_create_lemma_state
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
       (ensures
-        (let va_s = create_initial_vale_state args h0 stack in
+        (let va_s = LSig.create_initial_vale_state args h0 stack in
          fst (IX64.create_initial_trusted_state n args I.down_mem h0 stack) == SL.state_to_S va_s))
-  = let va_s = create_initial_vale_state args h0 stack in
+  = let va_s = LSig.create_initial_vale_state args h0 stack in
     let tr_s = fst (IX64.create_initial_trusted_state n args I.down_mem h0 stack) in
     let sl_s = SL.state_to_S va_s in
     assert (tr_s.TS.memTaint == va_s.VS.memTaint);
@@ -304,7 +289,7 @@ let core_create_lemma
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
       (ensures
-        (let va_s = create_initial_vale_state args h0 stack in
+        (let va_s = LSig.create_initial_vale_state args h0 stack in
          fst (IX64.create_initial_trusted_state n args I.down_mem h0 stack) == SL.state_to_S va_s /\
          LSig.mem_correspondence args h0 va_s /\
          VSig.disjoint_or_eq (arg_of_sb stack :: args) /\
@@ -318,7 +303,7 @@ let core_create_lemma
                 (n / 8)
                 va_s.VS.memTaint
   ))
-  = let va_s = create_initial_vale_state args h0 stack in
+  = let va_s = LSig.create_initial_vale_state args h0 stack in
     core_create_lemma_mem_correspondance args h0 stack;
     core_create_lemma_disjointness (arg_of_sb stack :: args);
     core_create_lemma_readable args h0 stack;
@@ -383,8 +368,6 @@ let rec args_fp (args:list arg)
     | [] -> ()
     | hd::tl -> args_fp tl h0 h1
 
-//let fuel_eq : squash (V.va_fuel == nat) = Vale.AsLowStar.MemoryHelpers.fuel_eq
-
 let eval_code_ts (c:TS.tainted_code)
                  (s0:TS.traceState)
                  (f0:nat)
@@ -437,15 +420,15 @@ let prediction_post_rel
        (_push_h0:mem_roots args)
        (_alloc_push_h0:mem_roots args)
        (_sb:IX64.stack_buffer n)
-       (fuel_mem:(nat & ME.mem))
-       (_s1:TS.traceState) ->
-
+       (rax_fuel_mem:(UInt64.t & nat & ME.mem))
+       (s1:TS.traceState) ->
+    let rax, fuel, mem = rax_fuel_mem in
     exists h1_pre_pop.
-      h1_pre_pop == hs_of_mem (as_mem (snd fuel_mem)) /\
+      h1_pre_pop == hs_of_mem (as_mem mem) /\
       HS.poppable h1_pre_pop /\ (
       exists h1. h1 == HS.pop h1_pre_pop /\
         mem_roots_p h1 args /\
-        LSig.(to_low_post post args h0 () h1))
+        LSig.(to_low_post post args h0 rax h1))
 
 let pop_is_popped (m:HS.mem{HS.poppable m})
   : Lemma (HS.popped m (HS.pop m))
@@ -485,7 +468,7 @@ let vale_lemma_as_prediction
    = fun h0 s0 push_h0 alloc_push_h0 sb ->
        let c_code : TS.tainted_code = coerce code in
        let s_args = arg_of_sb sb :: args in
-       let va_s0 = create_initial_vale_state args alloc_push_h0 sb in
+       let va_s0 = LSig.create_initial_vale_state args alloc_push_h0 sb in
        core_create_lemma args alloc_push_h0 sb;
        assert (SL.state_to_S va_s0 == s0);
        B.fresh_frame_modifies h0 push_h0;
@@ -534,9 +517,8 @@ let vale_lemma_as_prediction
        loc_includes_union l (B.loc_buffer sb) (loc_modified_args args);
        B.modifies_fresh_frame_popped h0 push_h0 (loc_modified_args args) h1_pre_pop h2;
        assert (B.modifies (loc_modified_args args) h0 h2);
-       assert (LSig.(to_low_post post args h0 () h2));
-       let x : nat & ME.mem = coerce f, va_s1.VS.mem in
-       x
+       assert (LSig.(to_low_post post args h0 (IX64.return_val s1) h2));
+       IX64.return_val s1, coerce f, as_mem va_s1.VS.mem
 
 [@__reduce__]
 let rec lowstar_typ
@@ -551,13 +533,13 @@ let rec lowstar_typ
     match dom with
     | [] ->
       unit ->
-      Stack unit
+      Stack UInt64.t
         (requires (fun h0 ->
           mem_roots_p h0 args /\
           LSig.to_low_pre pre args h0))
-        (ensures (fun h0 _ h1 ->
+        (ensures (fun h0 v h1 ->
           mem_roots_p h1 args /\
-          LSig.to_low_post post args h0 () h1))
+          LSig.to_low_post post args h0 v h1))
 
     | hd::tl ->
       x:td_as_type hd ->
@@ -583,19 +565,19 @@ let rec __test__wrap #n (#dom:list td)
     | [] ->
       let f :
         unit ->
-        ST.Stack unit
+        ST.Stack UInt64.t
           (requires (fun h0 ->
             mem_roots_p h0 args /\
             LSig.to_low_pre pre args h0))
-          (ensures (fun h0 _ h1 ->
+          (ensures (fun h0 r h1 ->
             mem_roots_p h1 args /\
-            LSig.to_low_post post args h0 () h1)) =
+            LSig.to_low_post post args h0 r h1)) =
          fun () ->
            let h0 = ST.get () in
            let prediction =
              vale_lemma_as_prediction _ _ _ _ v in
-           let _ = IX64.wrap_variadic (coerce code) I.down_mem n args prediction in
-           ()
+           let rax, _ = IX64.wrap_variadic (coerce code) I.down_mem n args prediction in
+           rax
       in
       f <: lowstar_typ #n #[] code args pre post
     | hd::tl ->

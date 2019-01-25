@@ -26,22 +26,23 @@ let wrap_variadic c down_mem num_b8_slots args #pre_rel #post_rel predict =
   disjoint_or_eq_cons sarg args;
   disjoint_or_eq_fresh stack_b args push_h0;
   assert (mem_roots_p alloc_push_h0 (sarg::args));
-  let (fuel, final_mem) =
+  let rax, fuel, final_mem =
     IA.st_put
+      #(UInt64.t & nat & mem)
       (fun h0' -> h0' == alloc_push_h0)
       (fun h0' ->
         let va_s0, mem_s0 =
           create_initial_trusted_state num_b8_slots args down_mem h0' stack_b in
-        let (fuel, final_mem) = predict h0 va_s0 push_h0 alloc_push_h0 stack_b in
+        let (rax, fuel, final_mem) = predict h0 va_s0 push_h0 alloc_push_h0 stack_b in
         assert (B.frameOf stack_b = HS.get_tip h0');
         assert (B.live h0' stack_b);
         let Some va_s1 = TS.taint_eval_code c fuel va_s0 in
         let final_hs = hs_of_mem final_mem in
-        ((fuel, final_mem), hs_of_mem final_mem)
+        (rax, fuel, final_mem), hs_of_mem final_mem
       ) in
   ST.pop_frame ();
   assert (ST.equal_domains alloc_push_h0 (hs_of_mem final_mem));
-  Ghost.hide (As_lowstar_sig_ret num_b8_slots args push_h0 alloc_push_h0 stack_b fuel final_mem)
+  rax, Ghost.hide (As_lowstar_sig_ret num_b8_slots args push_h0 alloc_push_h0 stack_b fuel final_mem)
 
 let rec wrap_aux
     (down_mem:down_mem_t)

@@ -158,7 +158,7 @@ let to_low_post
     (post:VSig.vale_post_tl n [])
     (args:list arg)
     (hs_mem0:mem_roots args)
-    (_:unit)
+    (res:UInt64.t)
     (hs_mem1:mem_roots args)
   : prop =
   let open V in
@@ -170,6 +170,7 @@ let to_low_post
     (f:va_fuel).
        mem_correspondence args hs_mem0 s0 /\
        mem_correspondence args hs_mem1 s1 /\
+       UInt64.v res == VS.eval_reg MS.Rax s1 /\
        elim_nil post s0 sb s1 f)
 
 [@__reduce__]
