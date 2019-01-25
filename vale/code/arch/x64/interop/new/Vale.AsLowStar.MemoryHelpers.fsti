@@ -127,6 +127,10 @@ val modifies_equal_domains
   (requires ME.modifies s h0 h1)
   (ensures FStar.HyperStack.ST.equal_domains (hs_of_mem (as_mem h0)) (hs_of_mem (as_mem h1)))
 
+val loc_disjoint_sym (x y:ME.loc)
+   : Lemma (ME.loc_disjoint x y <==> ME.loc_disjoint y x)
+           [SMTPat (ME.loc_disjoint x y)]
+
 val core_create_lemma_taint_hyp
     (#n:_)
     (args:IX64.arity_ok arg)
@@ -136,3 +140,4 @@ val core_create_lemma_taint_hyp
       (ensures (let va_s = LSig.create_initial_vale_state args h0 stack in
                 LSig.taint_hyp args va_s /\
                 ME.valid_taint_buf64 (as_vale_buffer stack) va_s.VS.mem va_s.VS.memTaint X64.Machine_s.Public))
+

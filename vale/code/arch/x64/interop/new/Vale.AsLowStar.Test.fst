@@ -171,12 +171,6 @@ let lbv_as_seq_eq #a #b #rrel #rel x y v h =
   in
   FStar.Classical.forall_intro aux
 
-
-let loc_disjoint_sym (x y:ME.loc)
-   : Lemma (ME.loc_disjoint x y <==> ME.loc_disjoint y x)
-           [SMTPat (ME.loc_disjoint x y)]
-   = admit()
-
 //#reset-options "--print_implicits"
 let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
   : Stack unit
