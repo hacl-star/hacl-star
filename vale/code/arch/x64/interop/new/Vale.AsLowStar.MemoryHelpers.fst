@@ -33,6 +33,8 @@ let buffer_addr_reveal t x args h0 = ()
 let fuel_eq = ()
 let decls_eval_code_reveal c va_s0 va_s1 f = ()
 let as_vale_buffer_disjoint (#t1 #t2:base_typ) (x:buf_t t1) (y:buf_t t2) = ()
+let modifies_same_roots s h0 h1 = ()
+let modifies_equal_domains s h0 h1 = ()
 
 module IB=Interop.Base
 module MS=X64.Machine_s
