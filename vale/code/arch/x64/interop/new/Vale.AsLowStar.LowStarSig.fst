@@ -1,4 +1,5 @@
 module Vale.AsLowStar.LowStarSig
+open X64.MemoryAdapters
 open Interop.Base
 module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
@@ -8,14 +9,13 @@ module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
-module IM = Interop.Mem
 module V = X64.Vale.Decls
 module VS = X64.Vale.State
 module IX64 = Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 
 [@__reduce__]
-let nat_to_uint (t:ME.base_typ) (x:ME.type_of_typ (ME.TBase t))
+let nat_to_uint (t:ME.base_typ) (x:ME.base_typ_as_vale_type t)
   : base_typ_as_type t
   = let open ME in
     match t with
@@ -27,7 +27,7 @@ let nat_to_uint (t:ME.base_typ) (x:ME.type_of_typ (ME.TBase t))
 
 let nat_to_uint_seq_t
       (t:ME.base_typ)
-      (b:Seq.seq (ME.type_of_typ (ME.TBase t)))
+      (b:Seq.seq (ME.base_typ_as_vale_type t))
     : Seq.seq (base_typ_as_type t)
     = Seq.init (Seq.length b) (fun (i:nat{i < Seq.length b}) -> nat_to_uint t (Seq.index b i))
 
@@ -48,11 +48,12 @@ let view_of_base_typ (t:ME.base_typ)
 //////////////////////////////////////////////////////////////////////////////////////////
 let hprop = HS.mem -> prop
 let hsprop = HS.mem -> VS.state -> prop
+module IB = Interop.Base
 
 [@__reduce__]
 let mem_correspondence_1
       (t:ME.base_typ)
-      (x:lowstar_buffer (ME.TBase t))
+      (x:IB.buf_t t)
       (h:HS.mem)
       (s:VS.state) =
   let y = as_vale_buffer x in
@@ -91,8 +92,8 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
   | TD_Base TUInt64 ->
      UInt64.v x
   | TD_Buffer bt _ ->
-     buffer_addr_is_nat64 (as_vale_buffer #(TBase bt) x) s;
-     ME.buffer_addr (as_vale_buffer #(TBase bt) x) VS.(s.mem)
+     buffer_addr_is_nat64 (as_vale_buffer #bt x) s;
+     ME.buffer_addr (as_vale_buffer #bt x) VS.(s.mem)
 
 [@__reduce__]
 let rec register_args (n:nat)
@@ -111,17 +112,17 @@ let rec taint_hyp (args:list arg) : VSig.sprop =
     | hd::tl ->
       let (| tag, x |) = hd in
       match tag with
-      | TD_Buffer ME.TUInt64 _ ->
+      | TD_Buffer TUInt64 _ ->
         fun s0 ->
           ME.valid_taint_buf64
-            (as_vale_buffer #ME.(TBase TUInt64) x)
+            (as_vale_buffer #TUInt64 x)
             s0.VS.mem
             s0.VS.memTaint MS.Secret /\
           taint_hyp tl s0
-      | TD_Buffer ME.TUInt128 _ ->
+      | TD_Buffer TUInt128 _ ->
         fun s0 ->
           ME.valid_taint_buf128
-            (as_vale_buffer #ME.(TBase TUInt128) x)
+            (as_vale_buffer #TUInt128 x)
             s0.VS.mem
             s0.VS.memTaint MS.Secret /\
           taint_hyp tl s0
@@ -132,7 +133,7 @@ let rec taint_hyp (args:list arg) : VSig.sprop =
 let vale_pre_hyp #n (sb:IX64.stack_buffer n) (args:IX64.arity_ok arg) : VSig.sprop =
     fun s0 ->
       let s_args = arg_of_sb sb :: args in
-      vale_disjoint_or_eq s_args /\
+      VSig.disjoint_or_eq s_args /\
       VSig.readable s_args VS.(s0.mem) /\
       register_args (List.length args) args s0 /\
       taint_hyp args s0

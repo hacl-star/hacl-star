@@ -8,11 +8,11 @@ module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
-module IM = Interop.Mem
 module V = X64.Vale.Decls
 module VS = X64.Vale.State
 module IX64 = Interop.X64
 module List = FStar.List.Tot
+open X64.MemoryAdapters
 
 assume //TODO: this equivalence should be provided by Vale.Decls
 val code_equiv : squash (V.va_code == TS.tainted_code)
@@ -71,7 +71,7 @@ let vale_calling_conventions (s0 s1:V.va_state) =
 [@__reduce__]
 let modified_arg_mloc (x:arg) : GTot ME.loc =
     match x with
-    | (|TD_Buffer td {modified=true}, x|) -> ME.loc_buffer (as_vale_buffer #(ME.TBase td) x)
+    | (|TD_Buffer t {modified=true}, x|) -> ME.loc_buffer (as_vale_buffer #t x)
     | _ -> ME.loc_none
 
 [@__reduce__]
@@ -82,16 +82,34 @@ let state_of (x:(V.va_state & V.va_fuel)) = fst x
 let fuel_of (x:(V.va_state & V.va_fuel)) = snd x
 let sprop = VS.state -> prop
 
+
 [@__reduce__]
 let readable_one (s:ME.mem) (arg:arg) : prop =
   match arg with
   | (|TD_Buffer bt _, x |) ->
-    ME.buffer_readable s (as_vale_buffer #(ME.TBase bt) x) /\ True
+    ME.buffer_readable s (as_vale_buffer #bt x)
+    /\ True //promote to prop
   | _ -> True
 
 [@__reduce__]
 let readable (args:list arg) (s:ME.mem) : prop =
     BigOps.big_and' (readable_one s) args
+
+
+[@__reduce__]
+let disjoint_or_eq_1 (a:arg) (b:arg) =
+    match a, b with
+    | (| TD_Buffer tx {strict_disjointness=true}, xb |), (| TD_Buffer ty _, yb |)
+    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb))
+    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb)) \/
+      eq2 #b8 xb yb
+    | _ -> True
+
+[@__reduce__]
+let disjoint_or_eq (l:list arg) =
+  BigOps.pairwise_and' disjoint_or_eq_1  l
 
 [@__reduce__] unfold
 let vale_sig_nil #n

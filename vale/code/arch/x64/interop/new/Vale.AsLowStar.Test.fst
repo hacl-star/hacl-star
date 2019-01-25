@@ -16,11 +16,11 @@ let as_normal_t (#a:Type) (x:a) : normal a = x
 ////////////////////////////////////////////////////////////////////////////////
 //First a little standalone, toy experiment
 [@__reduce__] unfold
-let b64 = lowstar_buffer ME.(TBase TUInt64)
+let b64 = buf_t TUInt64
 [@__reduce__] unfold
-let t64_mod = TD_Buffer ME.TUInt64 default_bq
+let t64_mod = TD_Buffer TUInt64 default_bq
 [@__reduce__] unfold
-let t64_no_mod = TD_Buffer ME.TUInt64 ({modified=false; strict_disjointness=false; secret=true})
+let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; secret=true})
 
 [@__reduce__] unfold
 let dom : IX64.arity_ok td =
@@ -35,8 +35,8 @@ assume val v: VSig.vale_sig pre post
 assume val c: V.va_code
 
 [@__reduce__]
-let call_c_t = IX64.as_lowstar_sig_t_weak c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
-let call_c : call_c_t = IX64.wrap_weak c n dom (W.mk_prediction c dom [] (v c IA.win))
+let call_c_t = IX64.as_lowstar_sig_t_weak Interop.down_mem c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
+let call_c : call_c_t = IX64.wrap_weak Interop.down_mem c n dom (W.mk_prediction c dom [] (v c IA.win))
 let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //You can ask emacs to show you the type of call_c_normal_t ...
 
@@ -46,7 +46,7 @@ module VM = Vale_memcpy
 
 [@__reduce__] unfold
 let vm_dom = dom
-
+open X64.MemoryAdapters
 (* Need to rearrange the order of arguments *)
 [@__reduce__] unfold
 let vm_pre : VSig.vale_pre 24 vm_dom =
@@ -121,6 +121,7 @@ let code_memcpy = VM.va_code_memcpy IA.win
 [@__reduce__]
 let lowstar_memcpy_t =
   IX64.as_lowstar_sig_t_weak
+    Interop.down_mem
     code_memcpy
     24
     vm_dom
@@ -132,6 +133,7 @@ let lowstar_memcpy_t =
 (* And here's the memcpy wrapper itself *)
 let lowstar_memcpy : lowstar_memcpy_t  =
   IX64.wrap_weak
+    Interop.down_mem
     code_memcpy
     24
     vm_dom
