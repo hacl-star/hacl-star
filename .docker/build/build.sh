@@ -122,6 +122,7 @@ function fetch_vale() {
     unzip -o valebin/vale-release.zip -d valebin
     rm -rf "valebin/bin"
     mv "valebin/vale-release-${vale_version}/bin" valebin/
+    chmod +x valebin/bin/*.exe
     export_home VALE "$(pwd)/valebin"
 }
 
