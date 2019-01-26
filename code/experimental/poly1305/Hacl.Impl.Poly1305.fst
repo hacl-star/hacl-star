@@ -234,11 +234,11 @@ let update1_last #s pre len b acc =
   fadd_mul_r acc e pre;
   pop_frame ()
 
-#set-options "--z3rlimit 150"
+//#set-options "--z3rlimit 150"
 
 inline_for_extraction
 val updaten:
-    #s:field_spec
+    #s:field_spec{width s == 1}
   -> p:precomp_r s
   -> b:lbuffer uint8 (blocklen s)
   -> acc:felem s
@@ -261,27 +261,70 @@ let updaten #s pre b acc =
   fadd acc acc e;
   pop_frame ()
 
+#reset-options "--max_fuel 2 --z3rlimit 150"
+
 inline_for_extraction
 val poly1305_update_multi:
-    #s:field_spec
-  -> ctx:poly1305_ctx s
+    #s:field_spec{width s == 1}
   -> len:size_t{v len % v (blocklen s) == 0}
   -> text:lbuffer uint8 len
+  -> pre:precomp_r s
+  -> acc:felem s
   -> Stack unit
-    (requires fun h -> live h ctx /\ live h text)
-    (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
-let poly1305_update_multi #s ctx len text =
-  let acc = get_acc ctx in
-  let pre = get_precomp_r ctx in
+    (requires fun h ->
+      live h pre /\ live h acc /\ live h text /\
+      disjoint acc text /\ disjoint acc pre /\
+      felem_fits h acc (2, 3, 2, 2, 2) /\
+      F32xN.load_precompute_r_post #(width s) h pre)
+    (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1)
+let poly1305_update_multi #s len text pre acc =
+  //let acc = get_acc ctx in
+  //let pre = get_precomp_r ctx in
+
   let sz_block = blocklen s in
   let blocks = len /. sz_block in
-  let h0 = ST.get() in
-  admit();
-  loop_nospec #h0 blocks ctx
-  (fun i ->
-    let b = sub text (i *. sz_block) sz_block in
-    updaten #s pre b acc
-  );
+
+  let h' = ST.get () in
+
+  [@inline_let]
+  let inv (pre:precomp_r s) (acc:felem s) (h:mem) : Type0 =
+    live h pre /\ disjoint acc pre /\
+    as_seq h' pre == as_seq h pre /\
+    felem_fits h acc (2, 3, 2, 2, 2) /\
+    F32xN.load_precompute_r_post #(width s) h pre in
+
+  [@inline_let]
+  let refl (acc:felem s) (h:mem) : GTot (S.elem (width s)) = feval h acc in
+
+  [@inline_let]
+  let spec_f h0 : GTot (Seq.lseq uint8 (v (blocklen s)) -> S.elem (width s) -> S.elem (width s)) =
+    S.updaten #(width s) (feval h' (gsub pre 10ul 5ul)) in
+
+  let impl_f (b:lbuffer uint8 (blocklen s)) (acc:lbuffer (limb s) (nlimb s)) :
+    Stack unit
+    (requires fun h ->
+      live h b /\ live h acc /\
+      disjoint b acc /\ inv pre acc h)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\ inv pre acc h1 /\
+      refl acc h1 == spec_f h' (as_seq h0 b) (refl acc h0))
+  =
+    updaten #s pre b acc in
+
+  let h0 = ST.get () in
+  assert (h' == h0);
+  assert (
+      live h' text /\ live h' acc /\ disjoint text acc /\ inv pre acc h');
+  loop_blocks_multi_inv #uint8 #(S.elem (width s)) #(limb s) #(nlimb s) 
+    h' (inv pre acc) (refl acc) (blocklen s) len text spec_f impl_f acc;
+
+
+  admit() ;
+  // loop_nospec #h0 blocks ctx
+  // (fun i ->
+  //   let b = sub text (i *. sz_block) sz_block in
+  //   updaten #s pre b acc
+  // );
   fmul_rn_normalize acc pre
 
 inline_for_extraction
@@ -320,10 +363,13 @@ val poly1305_update_:
     (requires fun h -> live h ctx /\ live h text)
     (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
 let poly1305_update_ #s ctx len text =
+  let acc = get_acc ctx in
+  let pre = get_precomp_r ctx in
+
   let sz_block = blocklen s in
   let len0 = (len /. sz_block) *. sz_block in
   let t0 = sub text 0ul len0 in
-  poly1305_update_multi ctx len0 t0;
+  poly1305_update_multi len0 t0 pre acc;
 
   let len = len -. len0 in
   let text = sub text len0 len in

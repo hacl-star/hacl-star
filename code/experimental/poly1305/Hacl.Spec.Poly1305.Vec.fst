@@ -124,6 +124,17 @@ let compute_rw (#w:lanes) (r:elem w) : elem w =
   | 2 -> compute_r2 r
   | 4 -> compute_r4 r
 
+let poly_update_multi (#w:lanes) (text:bytes{length text % (w * size_block) = 0}) (acc:elem w) (r:elem w) : Tot (elem w) =
+  let rw = compute_rw r in
+  let acc = repeat_blocks_multi #uint8 #(elem w) (w * size_block) text (updaten rw) acc in
+  to_elem w (normalize_n acc r)
+
+let poly_update1 (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot (elem w) =
+  repeat_blocks #uint8 #(elem w) size_block text
+  (fun bl -> update1 r size_block bl)
+  (fun l b res -> if l = 0 then res else update1 r l b res)
+  acc
+
 let poly (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot (elem w) =
   let rw = compute_rw r in
   repeat_blocks #uint8 #(elem w) (w * size_block) text

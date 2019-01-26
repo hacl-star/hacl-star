@@ -277,6 +277,15 @@ val repeat_blocks:
   -> init:b ->
   Tot b
 
+val repeat_blocks_multi:
+    #a:Type0
+  -> #b:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a{length inp % blocksize = 0}
+  -> f:(lseq a blocksize -> b -> b)
+  -> init:b ->
+  Tot b
+
 (** Generates `n` blocks of length `len` by iteratively applying a function with an accumulator *)
 val generate_blocks:
     #t:Type0
@@ -286,7 +295,7 @@ val generate_blocks:
   -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
   Tot (a n & s:seq t{ length s == n * len})
-  
+
 (* The following functions allow us to bridge between unbounded and bounded sequences *)
 val map_blocks:
     #a:Type0
@@ -295,4 +304,3 @@ val map_blocks:
   -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Tot (out:seq a {length out == length inp})
-
