@@ -116,6 +116,7 @@ function fetch_vale() {
         mkdir valebin
     fi
     vale_version=$(<vale/.vale_version)
+    vale_version=${vale_version%$'\r'}  # remove Windows carriage return, if it exists
     wget "https://github.com/project-everest/vale/releases/download/v${vale_version}/vale-release-${vale_version}.zip" -O valebin/vale-release.zip
     rm -rf "valebin/vale-release-${vale_version}"
     unzip -o valebin/vale-release.zip -d valebin
