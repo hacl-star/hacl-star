@@ -192,3 +192,87 @@ let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
     x                                      //with equalities of buffer views
                                            //back to equalities of buffers
 
+
+module VC = Vale_check_aesni_stdcall
+
+[@__reduce__] unfold
+let aesni_dom : IX64.arity_ok td = []
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__] unfold
+let aesni_pre : VSig.vale_pre 8 aesni_dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 8) ->
+      VC.va_pre c va_s0 IA.win (as_vale_buffer sb)
+
+[@__reduce__] unfold
+let aesni_post : VSig.vale_post 8 aesni_dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 8)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      VC.va_post c va_s0 va_s1 f IA.win (as_vale_buffer sb)
+
+(* The vale lemma doesn't quite suffice to prove the modifies clause
+   expected of the interop layer *)
+[@__reduce__] unfold
+let aesni_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 8)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       aesni_pre code va_s0 sb)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions va_s0 va_s1 /\
+       aesni_post code va_s0 sb va_s1 f))
+ = VC.va_lemma_check_aesni_stdcall code va_s0 IA.win (as_vale_buffer sb)
+
+(* Prove that vm_lemma' has the required type *)
+let aesni_lemma = as_t #(VSig.vale_sig aesni_pre aesni_post) aesni_lemma'
+
+let code_aesni = VC.va_code_check_aesni_stdcall IA.win
+
+(* Here's the type expected for the check_aesni wrapper *)
+[@__reduce__]
+let lowstar_aesni_t =
+  IX64.as_lowstar_sig_t_weak
+    Interop.down_mem
+    code_aesni
+    8
+    aesni_dom
+    []
+    _
+    _
+    (W.mk_prediction code_aesni aesni_dom [] (aesni_lemma code_aesni IA.win))
+
+(* And here's the check_aesni wrapper itself *)
+let lowstar_aesni : lowstar_aesni_t  =
+  IX64.wrap_weak
+    Interop.down_mem
+    code_aesni
+    8
+    aesni_dom
+    (W.mk_prediction code_aesni aesni_dom [] (aesni_lemma code_aesni IA.win))
+
+let lowstar_aesni_normal_t //: normal lowstar_aesni_t
+  = as_normal_t #lowstar_aesni_t lowstar_aesni
+
+open X64.CPU_Features_s
+
+#set-options "--print_full_names"
+
+let aesni_test ()
+  : Stack UInt64.t
+    (requires fun h0 -> True)
+    (ensures fun h0 ret_val h1 -> (UInt64.v ret_val) =!= 0 ==> aesni_enabled /\ pclmulqdq_enabled)
+  by (T.dump "A") (* in case you want to look at the VC *)
+  = 
+  let x, _ = lowstar_aesni_normal_t () in //This is a call to the interop wrapper
+  x
+   
+

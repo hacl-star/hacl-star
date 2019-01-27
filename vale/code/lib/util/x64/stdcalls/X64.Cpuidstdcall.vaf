@@ -31,7 +31,7 @@ procedure {:quick}{:exportSpecs}{:public} check_aesni_stdcall(inline win:bool,gh
     requires
         buffer_readable(mem, stack_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
-        valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
     ensures
         modifies_mem(loc_buffer(stack_b), old(mem), mem);
         win ==>  rbx == old(rbx);
@@ -75,7 +75,7 @@ procedure {:quick}{:exportSpecs}{:public} check_sha_stdcall(inline win:bool,ghos
     requires
         buffer_readable(mem, stack_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
-        valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
     ensures
         modifies_mem(loc_buffer(stack_b), old(mem), mem);
         win ==>  rbx == old(rbx);
