@@ -6,6 +6,8 @@ open FStar.Mul
 open NatPrime
 
 open Hacl.Spec.Curve25519.Field51.Definition
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
 
 #reset-options "--z3rlimit 20 --using_facts_from '* -FStar.Seq'"
 
@@ -54,7 +56,7 @@ let lemma_prime () =
   assert_norm (19 < prime);
   FStar.Math.Lemmas.modulo_lemma 19 prime
 
-#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 150 --max_fuel 1"
 
 val lemma_add_zero:
   f1:felem5{felem_fits5 f1 (1, 2, 1, 1, 1)}
@@ -103,7 +105,7 @@ let lemma_add_zero f1 =
   //   v f14 * pow51 * pow51 * pow51 * pow51) % prime == feval f1);
   assert_spinoff (feval out == feval f1)
 
-#set-options "--z3rlimit 300"
+#set-options "--z3rlimit 300 --max_fuel 0"
 
 val lemma_fmul5_pow51: r:felem5
   -> Lemma
@@ -408,7 +410,7 @@ val lemma_carry51:
     l:uint64
   -> cin:uint64
   -> Lemma
-    (requires v l + v cin < pow2 64)
+    (requires felem_fits1 l 2 /\ felem_fits1 cin 8190)
     (ensures (let l0 = (l +! cin) &. mask51 in
       let l1 = (l +! cin) >>. 51ul in
       v l + v cin == v l1 * pow2 51 + v l0 /\
@@ -444,23 +446,18 @@ let lemma_carry51_wide #m l cin =
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 51 64;
   FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 51)
 
-val lemma_carry_wide5_simplify:
-  inp:felem_wide5{felem_wide_fits5 inp (6579, 4797, 3340, 1881, 423)} ->
+val lemma_carry5_simplify:
   c0:uint64 -> c1:uint64 -> c2:uint64 -> c3:uint64 -> c4:uint64 ->
   t0:uint64 -> t1:uint64 -> t2:uint64 -> t3:uint64 -> t4:uint64 ->
   Lemma
-    (requires
-    feval_wide inp ==
-    (v c0 * pow2 51 + v t0 +
+   ((v c0 * pow2 51 + v t0 +
     (v c1 * pow2 51 + v t1 - v c0) * pow51 +
     (v c2 * pow2 51 + v t2 - v c1) * pow51 * pow51 +
     (v c3 * pow2 51 + v t3 - v c2) * pow51 * pow51 * pow51 +
-    (v c4 * pow2 51 + v t4 - v c3) * pow51 * pow51 * pow51 * pow51) % prime)
-   (ensures
-    feval_wide inp ==
+    (v c4 * pow2 51 + v t4 - v c3) * pow51 * pow51 * pow51 * pow51) % prime ==
     (v t0 + v c4 * 19 + v t1 * pow51 + v t2 * pow51 * pow51 +
      v t3 * pow51 * pow51 * pow51 + v t4 * pow51 * pow51 * pow51 * pow51) % prime)
-let lemma_carry_wide5_simplify inp c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
+let lemma_carry5_simplify c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
   assert (
     v c0 * pow2 51 + v t0 +
     (v c1 * pow2 51 + v t1 - v c0) * pow51 +
@@ -529,3 +526,112 @@ let lemma_smul_add_felem5 #m1 #m2 #m3 u1 f2 acc1 =
     v f23 * pow51 * pow51 * pow51 + v f24 * pow51 * pow51 * pow51 * pow51));
   lemma_mul5_distr_l (v u1) (v f20) (v f21 * pow51) (v f22 * pow51 * pow51)
     (v f23 * pow51 * pow51 * pow51) (v f24 * pow51 * pow51 * pow51 * pow51)
+
+val lemma_nat_from_uints64_le_4: b:lseq uint64 4 ->
+  Lemma (BSeq.nat_from_intseq_le b ==
+    v b.[0] + v b.[1] * pow2 64 +
+    v b.[2] * pow2 64 * pow2 64 + v b.[3] * pow2 64 * pow2 64 * pow2 64)
+let lemma_nat_from_uints64_le_4 b = admit()
+
+val logor_disjoint64: a:uint64 -> b:uint64 -> m:pos{m < 64}
+  -> Lemma
+    (requires v a < pow2 m /\ v b % pow2 m == 0)
+    (ensures v (a `logor` b) == v a + v b)
+let logor_disjoint64 a b m = admit()
+
+#set-options "--z3rlimit 150 --max_fuel 1"
+
+val lemma_load_felem5:
+    f:felem5
+  -> u64s:LSeq.lseq uint64 4
+  -> Lemma
+    (requires (
+      let open Lib.Sequence in
+      let (f0, f1, f2, f3, f4) = f in
+      let (s0, s1, s2, s3) = (u64s.[0], u64s.[1], u64s.[2], u64s.[3]) in
+      v f0 == v s0 % pow2 51 /\
+      v f1 == v s0 / pow2 51 + (v s1 % pow2 38) * pow2 13 /\
+      v f2 == v s1 / pow2 38 + (v s2 % pow2 25) * pow2 26 /\
+      v f3 == v s2 / pow2 25 + (v s3 % pow2 12) * pow2 39 /\
+      v f4 == v s3 / pow2 12))
+    (ensures as_nat5 f == BSeq.nat_from_intseq_le u64s)
+let lemma_load_felem5 f u64s =
+  let open Lib.Sequence in
+  let (f0, f1, f2, f3, f4) = f in
+  let (s0, s1, s2, s3) = (u64s.[0], u64s.[1], u64s.[2], u64s.[3]) in
+  assert_norm (pow51 = pow2 51);
+  FStar.Math.Lemmas.euclidean_division_definition (v s0) (pow2 51);
+  assert_norm (pow2 13 * pow2 51 = pow2 64);
+  assert_norm (pow2 51 * pow2 51 = pow2 38 * pow2 64);
+  FStar.Math.Lemmas.euclidean_division_definition (v s1) (pow2 38);
+  assert_norm (pow2 26 * pow2 51 * pow2 51 = pow2 128);
+  assert_norm (pow2 51 * pow2 51 * pow2 51 = pow2 25 * pow2 128);
+  FStar.Math.Lemmas.euclidean_division_definition (v s2) (pow2 25);
+  assert_norm (pow2 39 * pow2 51 * pow2 51 * pow2 51 = pow2 192);
+  assert_norm (pow2 51 * pow2 51 * pow2 51 * pow2 51 = pow2 12 * pow2 192);
+  FStar.Math.Lemmas.euclidean_division_definition (v s3) (pow2 12);
+  assert (as_nat5 f == v s0 + v s1 * pow2 64 + v s2 * pow2 128 + v s3 * pow2 192);
+  lemma_nat_from_uints64_le_4 u64s;
+  assert_norm (pow2 64 * pow2 64 = pow2 128);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192)
+
+val lemma_load_felem: u64s:LSeq.lseq uint64 4 ->
+  Lemma (
+    let open Lib.Sequence in
+    let (s0, s1, s2, s3) = (u64s.[0], u64s.[1], u64s.[2], u64s.[3]) in
+    let f0 = s0 &. mask51 in
+    let f1 = (s0 >>. 51ul) |. ((s1 &. u64 0x3fffffffff) <<. 13ul) in
+    let f2 = (s1 >>. 38ul) |. ((s2 &. u64 0x1ffffff) <<. 26ul) in
+    let f3 = (s2 >>. 25ul) |. ((s3 &. u64 0xfff) <<. 39ul) in
+    let f4 = s3 >>. 12ul in
+    as_nat5 (f0, f1, f2, f3, f4) == BSeq.nat_from_intseq_le u64s)
+let lemma_load_felem u64s =
+  assert_norm (0x3fffffffff = pow2 38 - 1);
+  assert_norm (0x1ffffff = pow2 25 - 1);
+  assert_norm (0xfff = pow2 12 - 1);
+  let open Lib.Sequence in
+  let (s0, s1, s2, s3) = (u64s.[0], u64s.[1], u64s.[2], u64s.[3]) in
+
+  let f0l = s0 &. mask51 in
+  mod_mask_lemma s0 51ul;
+  uintv_extensionality (mod_mask #U64 51ul) mask51;
+
+  let f0h = s0 >>. 51ul in
+  FStar.Math.Lemmas.lemma_div_lt (v s0) 64 51;
+
+  let f1l = (s1 &. u64 0x3fffffffff) <<. 13ul in
+  mod_mask_lemma s1 38ul;
+  uintv_extensionality (mod_mask #U64 38ul) (u64 0x3fffffffff);
+  assert_norm (pow2 38 * pow2 13 = pow2 51);
+  assert_norm (pow2 51 < pow2 64);
+  FStar.Math.Lemmas.modulo_lemma ((v s1 % pow2 38) * pow2 13) (pow2 64);
+
+  let f1h = s1 >>. 38ul in
+  FStar.Math.Lemmas.lemma_div_lt (v s1) 64 38;
+
+  let f2l = (s2 &. u64 0x1ffffff) <<. 26ul in
+  mod_mask_lemma s2 25ul;
+  uintv_extensionality (mod_mask #U64 25ul) (u64 0x1ffffff);
+  assert_norm (pow2 25 * pow2 26 = pow2 51);
+  FStar.Math.Lemmas.modulo_lemma ((v s2 % pow2 25) * pow2 26) (pow2 64);
+
+  let f2h = s2 >>. 25ul in
+  FStar.Math.Lemmas.lemma_div_lt (v s2) 64 25;
+
+  let f3l = (s3 &. u64 0xfff) <<. 39ul in
+  mod_mask_lemma s3 12ul;
+  uintv_extensionality (mod_mask #U64 12ul) (u64 0xfff);
+  assert_norm (pow2 12 * pow2 39 = pow2 51);
+  FStar.Math.Lemmas.modulo_lemma ((v s3 % pow2 12) * pow2 39) (pow2 64);
+
+  let f3h = s3 >>. 12ul in
+
+  let f0 = f0l in
+  let f1 = f0h |. f1l in
+  logor_disjoint64 f0h f1l 13;
+  let f2 = f1h |. f2l in
+  logor_disjoint64 f1h f2l 26;
+  let f3 = f2h |. f3l in
+  logor_disjoint64 f2h f3l 39;
+  let f4 = f3h in
+  lemma_load_felem5 (f0, f1, f2, f3, f4) u64s

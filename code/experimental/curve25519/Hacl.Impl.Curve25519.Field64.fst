@@ -12,6 +12,10 @@ include Hacl.Impl.Curve25519.Field64.Core
 
 module ST = FStar.HyperStack.ST
 module S = Hacl.Spec.Curve25519.Field64.Definition
+module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
+module LSeq = Lib.Sequence
+module BSeq = Lib.ByteSequence
+module P = NatPrime
 
 #reset-options "--z3rlimit 20"
 
@@ -29,33 +33,48 @@ val create_felem:
 let create_felem () = create 4ul (u64 0)
 
 inline_for_extraction
-val create_wide:
-  unit -> StackInline felem_wide
-  (requires fun _ -> True)
-  (ensures  fun h0 f h1 ->
-    stack_allocated f h0 h1 (Seq.create 8 (u64 0)) /\
-    wide_as_nat h1 f == 0)
-let create_wide () = create 8ul (u64 0)
+val load_felem:
+    f:felem
+  -> u64s:lbuffer uint64 4ul
+  -> Stack unit
+    (requires fun h ->
+      live h u64s /\ live h f /\ disjoint u64s f)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      as_nat h1 f == BSeq.nat_from_intseq_le (as_seq h0 u64s))
+let load_felem f u64s =
+  let h0 = ST.get () in
+  Lemmas.lemma_nat_from_uints64_le_4 (as_seq h0 u64s);
+  f.(0ul) <- u64s.(0ul);
+  f.(1ul) <- u64s.(1ul);
+  f.(2ul) <- u64s.(2ul);
+  f.(3ul) <- u64s.(3ul)
 
 inline_for_extraction
-val set_bit1:
-    f:felem
-  -> i:size_t{v i < 255}
+val store_felem:
+    u64s:lbuffer uint64 4ul
+  -> f:felem
   -> Stack unit
-    (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let set_bit1 f i =
-  f.(i /. size 64) <- f.(i /. size 64) |. (u64 1 <<. (i %. size 64))
+    (requires fun h ->
+      live h f /\ live h u64s /\ disjoint u64s f)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc u64s |+| loc f) h0 h1)
+     // BSeq.nat_from_intseq_le (as_seq h1 u64s) == (as_nat h0 f) % P.prime)
+let store_felem u64s f =
+  let f3 = f.(3ul) in
+  let top_bit = f3 >>. 63ul in
+  f.(3ul) <- f3 &. u64 0x7fffffffffffffff;
+  let carry = add1 f f (u64 19 *. top_bit) in
 
-inline_for_extraction
-val set_bit0:
-    f:felem
-  -> i:size_t{v i < 255}
-  -> Stack unit
-    (requires fun h -> live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let set_bit0 f i =
-  f.(i /. size 64) <- f.(i /. size 64) &. lognot (u64 1 <<. (i %. size 64))
+  let f3 = f.(3ul) in
+  let top_bit = f3 >>. 63ul in
+  f.(3ul) <- f3 &. u64 0x7fffffffffffffff;
+  let carry = add1 f f (u64 19 *. top_bit) in
+
+  u64s.(0ul) <- f.(0ul);
+  u64s.(1ul) <- f.(1ul);
+  u64s.(2ul) <- f.(2ul);
+  u64s.(3ul) <- f.(3ul)
 
 inline_for_extraction
 val set_zero:
@@ -94,41 +113,7 @@ val copy_felem:
       modifies (loc f1) h0 h1 /\
       as_nat h1 f1 == as_nat h0 f2)
 let copy_felem f1 f2 =
-  f1.(size 0) <- f2.(size 0);
-  f1.(size 1) <- f2.(size 1);
-  f1.(size 2) <- f2.(size 2);
-  f1.(size 3) <- f2.(size 3)
-
-inline_for_extraction
-val load_felem:
-    f:felem
-  -> u64s:lbuffer uint64 4ul
-  -> Stack unit
-    (requires fun h -> live h u64s /\ live h f)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
-let load_felem f u64s =
-  f.(0ul) <- u64s.(0ul);
-  f.(1ul) <- u64s.(1ul);
-  f.(2ul) <- u64s.(2ul);
-  f.(3ul) <- u64s.(3ul)
-
-inline_for_extraction
-val store_felem:
-    u64s:lbuffer uint64 4ul
-  -> f:felem
-  -> Stack unit
-    (requires fun h -> live h f /\ live h u64s)
-    (ensures  fun h0 _ h1 -> modifies (loc u64s |+| loc f) h0 h1)
-let store_felem u64s f =
-  let f3 = f.(3ul) in
-  let top_bit = f3 >>. 63ul in
-  f.(3ul) <- f3 &. u64 0x7fffffffffffffff;
-  let carry = add1 f f (u64 19 *. top_bit) in
-  let f3 = f.(3ul) in
-  let top_bit = f3 >>. 63ul in
-  f.(3ul) <- f3 &. u64 0x7fffffffffffffff;
-  let carry = add1 f f (u64 19 *. top_bit) in
-  u64s.(0ul) <- f.(0ul);
-  u64s.(1ul) <- f.(1ul);
-  u64s.(2ul) <- f.(2ul);
-  u64s.(3ul) <- f.(3ul)
+  f1.(0ul) <- f2.(0ul);
+  f1.(1ul) <- f2.(1ul);
+  f1.(2ul) <- f2.(2ul);
+  f1.(3ul) <- f2.(3ul)
