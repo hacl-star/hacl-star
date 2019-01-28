@@ -17,10 +17,7 @@ open FStar.HyperStack.ST
 open Spec.Hash.Definitions
 open FStar.Integers
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3refresh \
-  --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
-
-open LowStar.Modifies.Linear
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3refresh"
 
 let _: squash (inversion Hash.alg) = allow_inversion Hash.alg
 
@@ -58,7 +55,6 @@ let create_in a r =
   assert (S.equal (Hash.repr hash_state h3) (Hash.acc0 #a));
   assert (hashes h3 s S.empty);
   assert (freeable s h3);
-  assert (B.(modifies (footprint s h3) h0 h3));
   assert (Hash.fresh_loc (footprint s h3) h0 h3);
   s
 
@@ -137,7 +133,6 @@ let update_small a s prev data len =
   B.blit data 0ul buf2 0ul len;
   let h1 = ST.get () in
   split_at_last_small a (G.reveal prev) (B.as_seq h0 data);
-  B.modifies_inert_intro (B.loc_buffer buf) h0 h1;
   Hash.frame_invariant (B.loc_buffer buf) hash_state h0 h1;
   Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf) hash_state h0 h1;
   let s' = State hash_state buf (add_len total_len len) in
@@ -207,7 +202,6 @@ let update_empty_buf a s prev data len =
   let h1 = ST.get () in
   B.blit data2 0ul dst 0ul data2_len;
   let h2 = ST.get () in
-  B.modifies_inert_intro (B.loc_buffer buf) h1 h2;
   Hash.frame_invariant (B.loc_buffer buf) hash_state h1 h2;
   Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf) hash_state h1 h2;
 
@@ -261,7 +255,6 @@ let update_round a s prev data len =
   B.blit data 0ul buf2 0ul diff;
   let h1 = ST.get () in
   assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
-  B.modifies_inert_intro (B.loc_buffer buf_) h0 h1;
   Hash.frame_invariant (B.loc_buffer buf_) hash_state h0 h1;
   Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf_) hash_state h0 h1;
   Hash.update_multi #(G.hide a) hash_state buf0 (Hacl.Hash.Definitions.block_len a);
@@ -351,8 +344,6 @@ let mk_finish a s prev dst =
 
   push_frame ();
   let h1 = ST.get () in
-  B.fresh_frame_modifies h0 h1;
-  B.modifies_inert_intro B.loc_none h0 h1;
   Hash.frame_invariant B.loc_none hash_state h0 h1;
   Hash.frame_invariant_implies_footprint_preservation B.loc_none hash_state h0 h1;
   assert (Hash.invariant hash_state h1);
@@ -368,7 +359,6 @@ let mk_finish a s prev dst =
 
   let h2 = ST.get () in
   assert (B.(loc_disjoint (Hash.footprint tmp_hash_state h2) (Hash.footprint hash_state h1)));
-  B.modifies_inert_intro B.(loc_region_only false (HS.get_tip h2)) h1 h2;
   Hash.frame_invariant B.(loc_region_only false (HS.get_tip h2)) hash_state h1 h2;
   Hash.frame_invariant_implies_footprint_preservation
     B.(loc_region_only false (HS.get_tip h2)) hash_state h1 h2;
@@ -380,7 +370,6 @@ let mk_finish a s prev dst =
 
   let h3 = ST.get () in
   assert (Hash.footprint tmp_hash_state h2 == Hash.footprint tmp_hash_state h3);
-  B.modifies_inert_intro (Hash.footprint tmp_hash_state h2) h2 h3;
   Hash.frame_invariant (Hash.footprint tmp_hash_state h2) hash_state h2 h3;
   Hash.frame_invariant_implies_footprint_preservation
     (Hash.footprint tmp_hash_state h2) hash_state h2 h3;
@@ -389,7 +378,6 @@ let mk_finish a s prev dst =
   EverCrypt.Hash.update_last #(G.hide a) tmp_hash_state buf_ total_len;
 
   let h4 = ST.get () in
-  B.modifies_inert_intro (Hash.footprint tmp_hash_state h3) h3 h4;
   Hash.frame_invariant (Hash.footprint tmp_hash_state h3) hash_state h3 h4;
   Hash.frame_invariant_implies_footprint_preservation
     (Hash.footprint tmp_hash_state h3) hash_state h3 h4;
@@ -401,7 +389,6 @@ let mk_finish a s prev dst =
   Spec.Hash.Lemmas.hash_is_hash_incremental a (G.reveal prev);
   assert (S.equal (B.as_seq h5 dst) (Spec.Hash.hash a (G.reveal prev)));
 
-  B.modifies_inert_intro (B.loc_buffer dst) h4 h5;
   Hash.frame_invariant (B.loc_buffer dst) hash_state h4 h5;
   Hash.frame_invariant_implies_footprint_preservation
     (B.loc_buffer dst) hash_state h4 h5;
@@ -410,32 +397,11 @@ let mk_finish a s prev dst =
   pop_frame ();
 
   let h6 = ST.get () in
-  B.popped_modifies h5 h6;
-  B.modifies_inert_intro B.(loc_region_only false (HS.get_tip h5)) h5 h6;
   Hash.frame_invariant B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
   Hash.frame_invariant_implies_footprint_preservation
     B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
 
-  assert (hashes h6 s (G.reveal prev));
-  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1);
-  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h1 h2);
-  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h2);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h2 h3);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h3 h4);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h4 h5);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h2 h4);
-  assert B.(modifies (loc_union
-    (Hash.footprint tmp_hash_state h2)
-    (loc_union (loc_buffer dst) (footprint s h0))) h2 h5);
-  assert B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h6)
+  assert (hashes h6 s (G.reveal prev))
 
   // So much for automated proofs.
 

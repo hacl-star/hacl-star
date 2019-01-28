@@ -16,9 +16,7 @@ open Spec.Hash.Definitions
 friend Spec.SHA1
 friend Hacl.Hash.PadFinish
 
-open LowStar.Modifies.Linear
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans' --z3rlimit 100"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list

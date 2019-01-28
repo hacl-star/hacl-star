@@ -13,8 +13,6 @@ let _: squash (inversion alg) = allow_inversion alg
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-open LowStar.Modifies.Linear
-
 let wrap (a:alg) (key: bytes{S.length key < max_input_length a}): GTot (lbytes (block_length a))
 =
   let key0 = if S.length key <= block_length a then key else spec a key in
@@ -158,9 +156,7 @@ val part1:
 let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
   compress_many (acc0 #a) b
 
-#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
-
-open LowStar.Modifies.Linear
+#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 // we use auxiliary functions only for clarity and proof modularity
 inline_for_extraction
@@ -208,7 +204,6 @@ let part1 a (acc: state a) key data len =
   Hash.finish #(Ghost.hide a) acc tag;
   let h4 = ST.get() in
   (
-    modifies_trans (footprint acc h0) h0 h3 (loc_buffer key) h4; // should this implicitly trigger?
     let p = block_length a in
     let key1 = as_seq h1 key in
     let blocks1 = as_seq h1 blocks in
@@ -364,20 +359,17 @@ let hmac_core a acc tag key data len =
   let h00 = ST.get() in
   push_frame ();
   let h01 = ST.get() in
-  fresh_frame_modifies h00 h01; //18-08-02 a trigger would be nice!
   Hash.frame_invariant loc_none acc h00 h01;
   // assert(invariant acc h01);
   let ipad = alloca 0x36uy (block_len a) in
   let h02 = ST.get() in
   //  assert (loc_in (footprint acc h01) h01);
   // TR: now works thanks to Hash.invariant_loc_in_footprint
-  fresh_is_disjoint (loc_buffer ipad) (footprint acc h01)  h01 h02;
   let l = block_len a in
   let opad = alloca 0x5cuy l in
   xor_bytes_inplace ipad key l;
   xor_bytes_inplace opad key l;
   let h0 = ST.get() in
-  modifies_address_liveness_insensitive_unused_in h01 h0;
   // assert(loc_in (footprint acc h0) h0);
   // TR: now works thanks to
   // modifies_address_liveness_insensitive_unused_in: if no
@@ -419,10 +411,6 @@ let hmac_core a acc tag key data len =
     // modified location that does not necessarily have its liveness
     // preserved (e.g. an abstract footprint) shall be disjoint from
     // any location whose liveness we want to preserve.
-    assert (modifies (loc_union (footprint acc h00) (loc_buffer tag)) h00 h3);
-    modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 tag;
-    modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 key;
-    modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 data;
     //modifies_liveness_insensitive_buffer (footprint acc h00) (loc_buffer tag) h00 h3 tag;
     //
     //
@@ -458,11 +446,9 @@ let mk_compute a mac key keylen data datalen =
   Hash.frame_invariant_implies_footprint_preservation (loc_buffer keyblock) acc h0 h1;
   hmac_core a acc mac keyblock data datalen;
   let h2 = ST.get() in
-  pop_frame ();
-  let hf = ST.get () in
+  pop_frame ()
   // TR: modifies clause proven by erasing all memory locations that
   // were unused in h00:
-  LowStar.Buffer.modifies_only_not_unused_in (loc_buffer mac) h00 hf
 
 let compute_sha1: compute_st SHA1 = mk_compute SHA1
 let compute_sha2_256: compute_st SHA2_256 = mk_compute SHA2_256

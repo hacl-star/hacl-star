@@ -55,7 +55,6 @@ let modifies_disjoint_preserves #a (l: B.loc) (h0 h1: HS.mem) (s: state a): Lemm
     footprint s h0 == footprint s h1))
 =
   let hash_state = State?.hash_state s in
-  B.modifies_inert_intro l h0 h1;
   Hash.frame_invariant l hash_state h0 h1;
   Hash.frame_invariant_implies_footprint_preservation l hash_state h0 h1
 

@@ -16,10 +16,6 @@ open Spec.Hash.Definitions
 friend Spec.MD5
 friend Hacl.Hash.PadFinish
 
-open LowStar.Modifies.Linear
-
-#reset-options "--using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
-
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 let _t = IB.igcmalloc_of_list HS.root Spec.t_as_list
@@ -137,6 +133,7 @@ inline_for_extraction let id : abcd_idx = 3ul
 inline_for_extraction
 let round1_op = round_op_gen Spec.f
 
+#set-options "--z3rlimit 10"
 inline_for_extraction
 let round1
   (abcd: abcd_t)
@@ -182,7 +179,6 @@ let round1
 inline_for_extraction
 let round2_op = round_op_gen Spec.g
 
-#set-options "--z3rlimit 10"
 inline_for_extraction
 let round2
   (abcd: abcd_t)
