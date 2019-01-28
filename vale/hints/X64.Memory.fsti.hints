@@ -1,5 +1,5 @@
 [
-  "ß¯\u0001¼-¨©?¹\u000bÙ[i\u001e#ª",
+  "7þÉ)úŠ‘i/†ze¯K·\u0012",
   [
     [
       "X64.Memory.typ",
@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_X64.Memory.base_typ__uu___haseq" ],
       0,
-      "022002b0b1c2f6d5c413ab948166e745"
+      "38fc3613e093d886b65bae159c25de03"
     ],
     [
       "X64.Memory.type_of_base_typ",
@@ -32,7 +32,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "118d17242580a20fdfe469722ebabeff"
+      "d2e7fb08f5f9f5cfba616e1abd328af4"
     ],
     [
       "X64.Memory.loc_locs_disjoint_rec",
@@ -47,7 +47,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "2470bd4c95fa789c21dffe4fb98450a2"
+      "fd378ef8af17eb58bd51692d988b4bbb"
     ],
     [
       "X64.Memory.locs_disjoint_rec",
@@ -61,7 +61,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "572741c93996fede287878f3f804fca9"
+      "b7db9bc07db5efe82825edaa0e47896a"
     ],
     [
       "X64.Memory.buffer_read",
@@ -70,7 +70,7 @@
       0,
       [ "@query", "lemma_X64.Memory.buffer_length_buffer_as_seq" ],
       0,
-      "60eea7a9ae92bcd4ee7f16e58c49926e"
+      "565040b3b9ca26adb79f534828cc9868"
     ],
     [
       "X64.Memory.buffer_write",
@@ -79,7 +79,7 @@
       0,
       [ "@query", "lemma_X64.Memory.buffer_length_buffer_as_seq" ],
       0,
-      "3f844bee3f4a828b1d442a04d8c4637c"
+      "219d6aa43a75c40a9eddbc09874c2e24"
     ],
     [
       "X64.Memory.lemma_load_mem64",
@@ -94,11 +94,10 @@
         "equation_Prims.nat", "equation_Prims.squash",
         "equation_Words_s.nat64", "equation_Words_s.natN",
         "equation_Words_s.pow2_1", "equation_X64.Memory.buffer64",
-        "equation_X64.Memory.tuint64",
         "equation_X64.Memory.type_of_base_typ",
-        "equation_X64.Memory.type_of_typ",
+        "equation_X64.Memory.type_of_typ", "equation_X64.Memory.vuint64",
         "function_token_typing_Words_s.pow2_1",
-        "function_token_typing_X64.Memory.tuint64", "l_and-interp",
+        "function_token_typing_X64.Memory.vuint64", "l_and-interp",
         "lemma_X64.Memory.buffer_length_buffer_as_seq",
         "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -108,7 +107,7 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "a5970653464de44045d8eb881da9f408"
+      "b9e3cec41bf968e6d484393f89e4eb7c"
     ],
     [
       "X64.Memory.lemma_store_mem64",
@@ -121,7 +120,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "03661ca06d66dbc7af5f05e608147158"
+      "086f5b5c673f9339eb46c8e126bce665"
     ],
     [
       "X64.Memory.lemma_store_mem128",
@@ -134,7 +133,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "02f610e870f15eef20a569683e1e59ee"
+      "24a5d28b67ae11e83ed319eb568e9a6b"
     ],
     [
       "X64.Memory.lemma_store_load_mem64",
@@ -150,7 +149,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "6f777af5f413fad3ec3a96b50aacdad5"
+      "77004d97e1d47849d35dc03575640de4"
     ],
     [
       "X64.Memory.lemma_frame_store_mem64",
@@ -158,24 +157,15 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Types_s.twobits", "equation_Words_s.nat64",
-        "equation_Words_s.natN", "function_token_typing_Types_s.twobits",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Types_s.twobits",
+        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "function_token_typing_Types_s.twobits",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e52c7c657d5c2bcc4d548ae101b60432"
-    ],
-    [
-      "X64.Memory.lemma_frame_store_mem128",
-      1,
-      1,
-      0,
-      [ "@query", "assumption_Prims.HasEq_int" ],
-      0,
-      "7599857e59e90fd2246cd8e5a76f82a3"
+      "1442f8ec92524845276df8942b68e3a9"
     ]
   ]
 ]

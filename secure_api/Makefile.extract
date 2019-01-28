@@ -41,7 +41,7 @@ abstract: $(CRYPTO_DIR)/Crypto_AEAD_Main.h base
 
 concrete: $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.h base
 
-base: $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h
+base: $(CRYPTO_DIR)/Crypto_Symmetric_Bytes.h
 
 %.test: %
 	./$<
@@ -53,15 +53,14 @@ krml-test: $(DIST_DIR)/krml-test.exe.test
 # Building upon the generated .depend file				       #
 ################################################################################
 
-# Extraction runs F* in --lax mode
 ifeq (,$(VERIFY))
-FSTAR += --lax
-LAX = .lax
+FSTAR += --admit_smt_queries true
+# --record_hints + --admit_smt_queries true = empty hints files
+FSTAR := $(filter-out --record_hints,$(FSTAR))
 endif
 
 # The entry points
-FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst \
-  hkdf/Crypto.HKDF.fst
+FSTAR_FILES=aead/Crypto.AEAD.Main.fst test/KrmlTest.fst
 
 EXTRACT='* -FStar -CryptoTypes'
 # Automatic dependency analysis; the hack forces this target to be rebuilt
@@ -78,24 +77,24 @@ verification: $(addprefix $(CACHE_DIR)/,$(notdir $(addsuffix .checked,$(ALL_FST_
 # cwinter: The order-only dependency makes sure that F* will not run until
 # .depend.* is re-generated. Otherwise it can happen that this rule is executed
 # in parallel with the .depend rule, where this rule uses the old .depend file.
-%.checked$(LAX): | .depend.$(IMPL_CHOICE) $(CACHE_DIR) $(OUTPUT_DIR)
-	$(FSTAR) $<
+%.checked: | .depend.$(IMPL_CHOICE) $(CACHE_DIR) $(OUTPUT_DIR)
+	$(FSTAR) $< && \
 	touch $@
 
 # Filling out the right invocations to generate a .krml
 $(OUTPUT_DIR)/%.krml: | $(OUTPUT_DIR)
 	$(FSTAR) \
-          $(subst $(CACHE_DIR)/,,$(subst .checked$(LAX),,$<)) \
+          $(subst $(CACHE_DIR)/,,$(subst .checked,,$<)) \
 	  --codegen Kremlin \
-	  --extract_module $(basename $(notdir $(subst .checked$(LAX),,$<)))
+	  --extract_module $(basename $(notdir $(subst .checked,,$<)))
 
 # ... and a .ml file. Note: it's hard to put these in two separate
 # sub-directories because they share the --odir option of F*.
 $(OUTPUT_DIR)/%.ml: | $(OUTPUT_DIR)
 	$(FSTAR) \
-	  $(subst $(CACHE_DIR)/,,$(subst .checked$(LAX),,$<)) \
+	  $(subst $(CACHE_DIR)/,,$(subst .checked,,$<)) \
 	  --codegen OCaml \
-	  --extract_module $(basename $(notdir $(subst .checked$(LAX),,$<)))
+	  --extract_module $(basename $(notdir $(subst .checked,,$<)))
 
 
 ################################################################################
@@ -105,9 +104,11 @@ $(OUTPUT_DIR)/%.ml: | $(OUTPUT_DIR)
 CCOPTS+=-Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable \
   -Wno-parentheses -Werror -Wno-unknown-warning-option
 
+MY_KRML_FILES=$(filter-out $(OUTPUT_DIR)/prims.krml,$(ALL_KRML_FILES))
+
 # Generic rule for single-file KreMLin packaging -- use with caution, this may
 # repeat most of your program in every single compilation unit.
-$(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(ALL_KRML_FILES)
+$(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(MY_KRML_FILES)
 	$(KREMLIN_HOME)/krml $(KOPTS) -bundle '$(if $(BUNDLE),$(BUNDLE),$*)=*' -minimal -skip-compilation \
 	  -tmpdir $(CRYPTO_DIR) $^ -add-include '"kremlib.h"' -add-include '"kremlin/internal/compat.h"' \
 	  $(EXTRA)
@@ -115,9 +116,6 @@ $(CRYPTO_DIR)/%.h $(CRYPTO_DIR)/%.c: $(ALL_KRML_FILES)
 # Manually override the default argument for bundles, so as to provide a +
 $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.c \
   $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.h: BUNDLE=Crypto_AEAD_Main+Crypto_Symmetric_Cipher+Crypto_Indexing
-
-$(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.c \
-  $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.h: BUNDLE=Crypto_HKDF+Crypto_HMAC
 
 # This is without the indexing id.
 $(CRYPTO_DIR)/Crypto_AEAD_Main.h: EXTRA = -add-include '"Crypto_Indexing.h"' -drop Crypto.Indexing
@@ -161,7 +159,8 @@ $(DIST_DIR)/copied/%.c: $(KREMLIN_HOME)/kremlib/%.c
 
 # Note: this does not yet use the standalone C file because the test still
 # bypasses Crypto.AEAD.Main
-$(DIST_DIR)/krml-test.exe: $(ALL_KRML_FILES) $($(IMPL_CHOICE)_EXTRA)
+.PRECIOUS: $(DIST_DIR)/krml-test.exe
+$(DIST_DIR)/krml-test.exe: $(MY_KRML_FILES) $($(IMPL_CHOICE)_EXTRA)
 	$(KREMLIN_HOME)/krml $(KOPTS) -no-prefix KrmlTest -bundle \
 	  Hacl.Impl.Poly1305_64+Hacl.Impl.Chacha20=Hacl.*,Spec,Spec.* -bundle \
 	    Crypto.AEAD.Main=Crypto.* -tmpdir $(OUTPUT_DIR) \
@@ -195,7 +194,6 @@ OCAMLMKLIB=OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind mklib -g -I $(FSTAR_HOME)/uli
 
 ARCHIVE_FILES= $(VALE_OBJ) \
     $(CRYPTO_DIR)/Crypto_AEAD_Main_Crypto_Symmetric_Cipher_Crypto_Indexing.o \
-    $(CRYPTO_DIR)/Crypto_HKDF_Crypto_HMAC.o \
     $(CHACHA_DIR)/Hacl_Chacha20.o \
     $(POLY_DIR)/AEAD_Poly1305_64.o \
     $(POLICIES_DIR)/Hacl_Policies.o \

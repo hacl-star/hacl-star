@@ -7,6 +7,7 @@ include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
 
 include{:fstar}{:open} "Words_s"
 include{:fstar}{:open} "Types_s"
+include{:fstar}{:open} "Words.Seq_s"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "Spec.SHA2"
 include{:fstar}{:open} "SHA_helpers"
@@ -27,6 +28,7 @@ module X64.SHA
 open Opaque_s
 open Types_s
 open Words_s
+open Words.Seq_s
 open FStar.Seq
 open X64.Machine_s
 open X64.Memory
@@ -93,7 +95,7 @@ procedure {:quick} preamble(
     Palignr8(abef, cdgh);                             // abef := LSB: FEBA == abef in big endian
     // OpenSSL uses punpcklqdq here:
     Shufpd(cdgh, Wi, 0);                              // cdgh := LSB: HGDC == cdgh in big endian
-    assert equal(#(seq(FStar.UInt32.t))(make_hash(abef, cdgh)), #(seq(FStar.UInt32.t))(make_ordered_hash(abcd, efgh)));
+    assert equal(#(seq(SHA_helpers.word))(make_hash(abef, cdgh)), #(seq(SHA_helpers.word))(make_ordered_hash(abcd, efgh)));
 }
 
 #reset-options "--z3rlimit 40"
@@ -616,7 +618,7 @@ procedure {:quick} epilogue(
     Store128_buffer(ctx, cdgh, 16, Secret, ctx_b, 1);
     ghost var abcd := buffer128_read(ctx_b, 0, mem);
     ghost var efgh := buffer128_read(ctx_b, 1, mem);
-    assert equal(#(seq(FStar.UInt32.t))(make_hash(old(abef), old(cdgh))), #(seq(FStar.UInt32.t))(make_ordered_hash(abcd, efgh)));
+    assert equal(#(seq(SHA_helpers.word))(make_hash(old(abef), old(cdgh))), #(seq(SHA_helpers.word))(make_ordered_hash(abcd, efgh)));
 }
 
 
@@ -699,7 +701,7 @@ procedure {:quick} sha_update_bytes(
         let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
         let hash_out :=     le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b)));
 
-        let input_LE := seq_nat8_to_seq_byte(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b))) in
+        let input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b))) in
         length(input_LE) % 64 == 0 /\
         hash_out == update_multi_opaque_vale(hash_in, input_LE);
 
@@ -726,7 +728,7 @@ procedure {:quick} sha_update_bytes(
     ghost var input_BE := reverse_bytes_quad32_seq(input_LE);
     assert hash_out == update_multi_quads(input_BE, hash_in);
     lemma_update_multi_equiv_vale(hash_in, hash_out, input_LE, input_BE, le_seq_quad32_to_bytes(input_LE),
-                                  seq_nat8_to_seq_byte(le_seq_quad32_to_bytes(input_LE)));
+                                  seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(input_LE)));
 }
 
 #reset-options "--z3rlimit 40"
@@ -779,7 +781,7 @@ procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
         let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
         let hash_out :=     le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b)));
 
-        let input_LE := seq_nat8_to_seq_byte(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b))) in
+        let input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b))) in
         length(input_LE) % 64 == 0 /\
         hash_out == update_multi_transparent(hash_in, #(SHA_helpers.bytes_blocks)(input_LE));
 
@@ -828,7 +830,7 @@ procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
     callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
                              old(xmm12), old(xmm13), old(xmm14), old(xmm15));
     ghost var hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
-    ghost var input_LE := seq_nat8_to_seq_byte(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)));
+    ghost var input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)));
     lemma_update_multi_opaque_vale_is_update_multi(hash_in, input_LE);
 }
 

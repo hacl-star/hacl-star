@@ -1,19 +1,17 @@
+HACL_HOME = ../..
+KREMLIN_HOME ?= ../../../kremlin
+
+include ../Makefile.common
+
+FSTAR_INCLUDES += $(HACL_HOME)/providers/.cache
+
 EVERCRYPT_HOME ?= ..
-KREMLIN_HOME   ?= ../../../kremlin
 MLCRYPTO_HOME ?= ../../../MLCrypto
 
 HACL_CODE = ../../code
 
 EXTRACT_DIR = extract
 CACHE_DIR   = cache
-INCLUDE_PATHS = \
-  $(KREMLIN_HOME)/kremlib \
-  ../evercrypt \
-  $(HACL_CODE)/lib/kremlin \
-  $(HACL_CODE)/curve25519/interfaces \
-  $(HACL_CODE)/hash/interfaces \
-  $(HACL_CODE)/api/interfaces \
-  ../../specs
 
 UNAME = $(shell uname)
 
@@ -25,11 +23,11 @@ ifeq ($(OS),Windows_NT)
     EVERCRYPT_HOME_RUN := $(EVERCRYPT_HOME)
     MLCRYPTO_HOME_RUN := $(MLCRYPTO_HOME)
   endif
-  PREFIX = PATH="$(MLCRYPTO_HOME_RUN)/openssl:$(EVERCRYPT_HOME_RUN)/out:$(PATH)"
+  PREFIX = PATH="$(MLCRYPTO_HOME_RUN)/openssl:$(EVERCRYPT_HOME_RUN)/dist/compact:$(PATH)"
 else ifeq ($(UNAME),Darwin)
-  PREFIX = DYLD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(DYLD_LIBRARY_PATH)
+  PREFIX = DYLD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/dist/compact:$(DYLD_LIBRARY_PATH)
 else ifeq ($(UNAME),Linux)
-  PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/out:$(LD_LIBRARY_PATH)
+  PREFIX = LD_LIBRARY_PATH=$(MLCRYPTO_HOME)/openssl:$(EVERCRYPT_HOME)/dist/compact:$(LD_LIBRARY_PATH)
 endif
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe
@@ -38,28 +36,34 @@ all:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) test
 
+.PRECIOUS: %.krml %.checked
+
+ROOTS=$(wildcard *.fst)
+
 .depend:
 	$(FSTAR) \
-	  $(addprefix --include , $(INCLUDE_PATHS)) \
+	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  --cache_dir $(CACHE_DIR) \
 	  --odir $(EXTRACT_DIR) \
-	  --dep full Test.fst Test.Bytes.fst > .depend 
+	  --dep full $(ROOTS) > .depend
 
 include .depend
 
 %.checked: | .depend
 	$(FSTAR) \
 	  --cache_checked_modules \
-	  --admit_smt_queries true \
+	  --already_cached "* -Test" \
 	  --cache_dir $(CACHE_DIR) \
-	  $(addprefix --include , $(INCLUDE_PATHS)) \
-	  $<
+	  --use_hints --record_hints --use_hint_hashes \
+	  $(addprefix --include , $(FSTAR_INCLUDES)) \
+	  $< && \
+	touch $@
 
 $(EXTRACT_DIR)/%.krml:
 	$(FSTAR) --codegen Kremlin \
 	  --cache_checked_modules \
 	  --cache_dir $(CACHE_DIR) \
-	  $(addprefix --include , $(INCLUDE_PATHS)) \
+	  $(addprefix --include , $(FSTAR_INCLUDES)) \
 	  --odir $(EXTRACT_DIR) \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(subst $(CACHE_DIR)/,,$(subst .checked,,$<))
@@ -86,12 +90,4 @@ clean:
         | xargs rm -f
 
 %.fst-in:
-	@echo $(addprefix --include ,\
-	  ../evercrypt $(KREMLIN_HOME)/kremlib \
-          ../../code/lib/kremlin \
-	  ../../specs \
-	  ../../code/hash \
-	  ../../code/hash/interfaces \
-	  ../../code/curve25519 \
-	  ../../code/curve25519/interfaces \
-	  ../../code/bignum)
+	@echo $(addprefix --include ,$(FSTAR_INCLUDES))

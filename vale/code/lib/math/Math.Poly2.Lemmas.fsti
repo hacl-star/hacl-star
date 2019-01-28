@@ -14,10 +14,10 @@ val lemma_zero_define (_:unit) : Lemma (forall (i:int).{:pattern zero.[i]} not z
 val lemma_one_define (_:unit) : Lemma (forall (i:int).{:pattern one.[i]} one.[i] == (i = 0))
 val lemma_monomial_define (n:nat) : Lemma
   (forall (i:int).{:pattern (monomial n).[i]} (monomial n).[i] == (i = n))
-val lemma_shift_define (p:poly) (n:nat) : Lemma
-  (forall (i:int).{:pattern (shift p n).[i]} (shift p n).[i] == p.[i - n])
-val lemma_shift_define_forward (p:poly) (n:nat) : Lemma
-  (forall (i:int).{:pattern p.[i]} (shift p n).[i + n] == p.[i])
+val lemma_shift_define (p:poly) (n:int) : Lemma
+  (forall (i:int).{:pattern (shift p n).[i]} (shift p n).[i] == (p.[i - n] && i >= 0))
+val lemma_shift_define_forward (p:poly) (n:int) : Lemma
+  (forall (i:int).{:pattern p.[i]} (shift p n).[i + n] == (p.[i] && i + n >= 0))
 val lemma_reverse_define (a:poly) (n:nat) : Lemma
   (forall (i:int).{:pattern (reverse a n).[i]} (reverse a n).[i] == (a.[n - i] && i >= 0))
 val lemma_reverse_define_all (_:unit) : Lemma

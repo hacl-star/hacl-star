@@ -21,9 +21,16 @@ let zero = create 0 false
 let one = create 1 true
 let monomial (n:nat) : poly = append (create n false) one
 
-let shift (p:poly) (n:nat) : poly =
+let lshift (p:poly) (n:nat) : poly =
   if length p = 0 then p
   else append (create n false) p
+ 
+let rshift (p:poly) (n:nat) : poly =
+  if length p <= n then zero
+  else slice p n (length p)
+
+let shift (p:poly) (n:int) : poly =
+  if n >= 0 then lshift p n else rshift p (-n)
 
 // Index any coefficient, where all coefficients beyond highest-order term are zero
 // (and n < 0 returns zero)

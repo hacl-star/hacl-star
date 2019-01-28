@@ -9,7 +9,8 @@ INCLUDES = $(KREMLIN_HOME)/kremlib $(HACL_HOME)/code/lib/kremlin
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints \
-  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES)
+  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
+  --already_cached 'FStar LowStar C Spec.Loops -FStar.Endianness'
 
 # TODO: move the specification tests to their own files so that we don't pollute
 # the specs with huge definitions in the scope
@@ -21,19 +22,21 @@ ROOTS=Spec.GF128.fst Spec.Poly1305.fst Spec.Curve25519.fst Spec.Chacha20.fst \
   Spec.Salsa20.fst Spec.Chacha20Poly1305.fst $(wildcard Spec.*.Test.fst) \
   Spec.Ed25519.fst
 
+OTHER_ROOTS=$(wildcard *.fst) $(HACL_HOME)/code/lib/kremlin/FStar.Endianness.fst
+
 # TODO: decide what to do with the following (excluded) specs:
 #  Spec.HMAC.SHA2_256.fst Spec.HMAC.SHA2_384.fst Spec.HMAC.SHA2_512.fst
 
 
-ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS))
+ALL_CHECKED_FILES = $(addsuffix .checked,$(ROOTS) $(OTHER_ROOTS))
 
-all: verify test
+all: verify
 
 verify: $(ALL_CHECKED_FILES)
 
 # Always generate the dependency file
 .depend:
-	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
+	$(FSTAR) --dep full $(ROOTS) $(OTHER_ROOTS) --extract '* -Prims -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
 include .depend
 

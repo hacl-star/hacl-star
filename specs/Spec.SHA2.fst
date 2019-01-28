@@ -75,6 +75,7 @@ let word_rotate_right: a:sha2_alg -> Tot (word a -> s:U32.t{0 < U32.v s /\ U32.v
   | SHA2_224 | SHA2_256 -> rotate_right32
   | SHA2_384 | SHA2_512 -> rotate_right64
 
+inline_for_extraction noextract
 type ops = {
   c0: U32.t; c1: U32.t; c2: U32.t;
   c3: U32.t; c4: U32.t; c5: U32.t;
@@ -83,6 +84,7 @@ type ops = {
 }
 
 (* Definition of constants used in word functions *)
+inline_for_extraction noextract
 let op224_256: ops = {
   c0 = 2ul; c1 = 13ul; c2 = 22ul;
   c3 = 6ul; c4 = 11ul; c5 = 25ul;
@@ -90,6 +92,7 @@ let op224_256: ops = {
   e3 = 17ul; e4 = 19ul; e5 = 10ul
 }
 
+inline_for_extraction noextract
 let op384_512: ops = {
   c0 = 28ul; c1 = 34ul; c2 = 39ul;
   c3 = 14ul; c4 = 18ul; c5 = 41ul;
@@ -163,20 +166,23 @@ unfold
 let (.[]) = S.index
 
 (* Scheduling function *)
-let rec ws (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
+let rec ws_aux (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
   if t < size_block_w then b.[t]
   else
-    let t16 = ws a b (t - 16) in
-    let t15 = ws a b (t - 15) in
-    let t7  = ws a b (t - 7) in
-    let t2  = ws a b (t - 2) in
+    let t16 = ws_aux a b (t - 16) in
+    let t15 = ws_aux a b (t - 15) in
+    let t7  = ws_aux a b (t - 7) in
+    let t2  = ws_aux a b (t - 2) in
 
     let s1 = _sigma1 a t2 in
     let s0 = _sigma0 a t15 in
     (word_add_mod a s1 (word_add_mod a t7 (word_add_mod a s0 t16)))
 
+[@"opaque_to_smt"]
+let ws = ws_aux
+
 (* Core shuffling function *)
-let shuffle_core (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}): Tot (hash_w a) =
+let shuffle_core_aux (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < size_k_w a}): Tot (hash_w a) =
   (**) assert(7 <= S.length hash);
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -196,21 +202,26 @@ let shuffle_core (a:sha2_alg) (block:block_w a) (hash:hash_w a) (t:counter{t < s
   assert_norm (List.Tot.length l = 8);
   S.seq_of_list l
 
+[@"opaque_to_smt"]
+let shuffle_core = shuffle_core_aux
 
 (* Full shuffling function *)
-let shuffle (a:sha2_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
+let shuffle_aux (a:sha2_alg) (hash:hash_w a) (block:block_w a): Tot (hash_w a) =
   Spec.Loops.repeat_range 0 (size_k_w a) (shuffle_core a block) hash
+
+[@"opaque_to_smt"]
+let shuffle = shuffle_aux
 
 let init = h0
 
 (* Compression function *)
-let update (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block a}): Tot (hash_w a) =
+let update_aux (a:sha2_alg) (hash:hash_w a) (block:bytes{S.length block = size_block a}): Tot (hash_w a) =
   let block_w = words_of_bytes a size_block_w block in
   let hash_1 = shuffle a hash block_w in
   Spec.Loops.seq_map2 (word_add_mod a) hash hash_1
 
-
-#set-options "--max_fuel 0 --max_ifuel 0"
+[@"opaque_to_smt"]
+let update = update_aux
 
 let pad = Spec.Hash.Common.pad
 

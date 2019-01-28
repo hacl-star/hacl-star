@@ -1,4 +1,4 @@
-all: verify extract test
+all: compile verify extract test
 
 # Old targets, backwards-compat:
 .PHONY: old-%
@@ -26,7 +26,10 @@ include Makefile.common
 
 verify: $(ALL_CHECKED_FILES)
 
-extract: $(OUTPUT_DIR)/Makefile.include
+extract: dist/compact/Makefile.basic dist/generic/Makefile.basic \
+  dist/compact-msvc/Makefile.basic
+
+compile: compile-compact compile-generic compile-compact-msvc
 
 # Backwards compat target name
 extract-c: extract old-extract-c
@@ -45,7 +48,7 @@ test:
 	$(FSTAR) $< && \
 	touch $@
 
-# 3. Extraction
+# 3. Extraction. Note that all the C files are prefixed with Hacl_. Cleaner!
 
 .PRECIOUS: %.krml
 
@@ -55,6 +58,43 @@ $(OUTPUT_DIR)/%.krml:
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-$(OUTPUT_DIR)/Makefile.include: $(ALL_KRML_FILES)
-	$(KRML) -tmpdir $(OUTPUT_DIR) -skip-compilation -bundle Spec.* $^ \
-	  -warn-error @4
+COMPACT_FLAGS=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
+    -bundle Prims \
+    -bundle LowStar.* \
+    -bundle C,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
+    -minimal \
+    -add-include '"kremlin/internal/types.h"' \
+    -add-include '"kremlin/c_endianness.h"' \
+    -add-include '<string.h>' \
+    -fno-shadow -fcurly-braces
+
+# For the time being, we rely on the old extraction to give us self-contained
+# files
+HACL_OLD_FILES=\
+  curve25519/x25519-c/Hacl_Curve25519.c \
+  ed25519/ed25519-c/Hacl_Ed25519.c \
+  salsa-family/chacha-c/Hacl_Chacha20.c \
+  poly1305/poly-c/AEAD_Poly1305_64.c \
+  poly1305/poly-c/Hacl_Poly1305_64.c \
+  api/aead-c/Hacl_Chacha20Poly1305.c
+
+dist/compact/Makefile.basic: EXTRA=$(COMPACT_FLAGS)
+
+dist/compact-msvc/Makefile.basic: EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
+
+dist/%/Makefile.basic: $(ALL_KRML_FILES) | old-extract-c
+	mkdir -p $(dir $@)
+	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
+	$(KRML) $(EXTRA) -tmpdir $(dir $@) -skip-compilation \
+	  -bundle Spec.*[rename=Hacl_Spec] $^ \
+	  -ccopts -Wno-unused-variable,-Wno-unused-but-set-variable \
+	  -ccopts -Wno-parentheses,-Wno-unused-parameter \
+	  -warn-error @4 \
+	  -fparentheses \
+	  $(notdir $(HACL_OLD_FILES)) \
+	  -o libhacl.a
+
+# 4. Compilation
+
+compile-%: dist/%/Makefile.basic
+	$(MAKE) -C $(dir $<) -f $(notdir $<)

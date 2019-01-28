@@ -1,8 +1,8 @@
 # Make sure PATH is sufficient to run OCaml compiler before using --FSTAR-EXTRACT
-scons --FSTAR-EXTRACT obj/aesgcm.asm obj/aesgcm-gcc.S obj/aesgcm-linux.S obj/aesgcm-macos.S
-scons --FSTAR-EXTRACT obj/cpuid.asm obj/cpuid-gcc.S obj/cpuid-linux.S obj/cpuid-macos.S
-scons --FSTAR-EXTRACT obj/sha256.asm obj/sha256-gcc.S obj/sha256-linux.S obj/sha256-macos.S
-scons --FSTAR-EXTRACT obj/curve25519.asm obj/curve25519-gcc.S obj/curve25519-linux.S obj/curve25519-macos.S
+scons --FSTAR-EXTRACT obj/aesgcm-x86_64-msvc.asm obj/aesgcm-x86_64-mingw.S obj/aesgcm-x86_64-linux.S obj/aesgcm-x86_64-darwin.S
+scons --FSTAR-EXTRACT obj/cpuid-x86_64-msvc.asm obj/cpuid-x86_64-mingw.S obj/cpuid-x86_64-linux.S obj/cpuid-x86_64-darwin.S
+scons --FSTAR-EXTRACT obj/sha256-x86_64-msvc.asm obj/sha256-x86_64-mingw.S obj/sha256-x86_64-linux.S obj/sha256-x86_64-darwin.S
+scons --FSTAR-EXTRACT obj/curve25519-x86_64-msvc.asm obj/curve25519-x86_64-mingw.S obj/curve25519-x86_64-linux.S obj/curve25519-x86_64-darwin.S
 # On Windows, PLATFORM must be set to X64 to generate TestAesGcm.exe
 scons --FSTAR-EXTRACT obj/TestAesGcm.exe
 scons --FSTAR-EXTRACT obj/TestSha.exe

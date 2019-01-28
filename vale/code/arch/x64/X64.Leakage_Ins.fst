@@ -469,8 +469,6 @@ let lemma_addcarry_same_public (ts:taintState) (ins:tainted_ins{S.AddCarry64? in
   = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
     Classical.move_requires (lemma_addcarry_same_public_aux ts ins s1 s2 fuel b) ts'
 
-#set-options "--z3rlimit 300"
-
 let lemma_adcx_same_public_aux (ts:taintState) (ins:tainted_ins{S.Adcx64? ins.i}) (s1:traceState) (s2:traceState)
                                (fuel:nat) (b:bool) (ts':taintState)
   :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
@@ -553,6 +551,7 @@ let lemma_adcx_same_public (ts:taintState) (ins:tainted_ins{S.Adcx64? ins.i}) (s
   = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
     Classical.move_requires (lemma_adcx_same_public_aux ts ins s1 s2 fuel b) ts'
 
+#reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 400"
 let lemma_sub_same_public_aux (ts:taintState) (ins:tainted_ins{S.Sub64? ins.i}) (s1:traceState) (s2:traceState)
                                (fuel:nat) (b:bool) (ts':taintState)
   :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
@@ -634,7 +633,7 @@ let lemma_sub_same_public (ts:taintState) (ins:tainted_ins{S.Sub64? ins.i}) (s1:
   = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
     Classical.move_requires (lemma_sub_same_public_aux ts ins s1 s2 fuel b) ts'
 
-#set-options "--z3rlimit 400"
+#reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 400"
 
 let lemma_sbb_same_public_aux (ts:taintState) (ins:tainted_ins{S.Sbb64? ins.i}) (s1:traceState) (s2:traceState)
                                (fuel:nat) (b:bool) (ts':taintState)

@@ -51,7 +51,7 @@ let pad_length_bound (a: hash_alg) (len: len_t a): Lemma
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 (* Avoiding an ill-formed pattern error... *)
-inline_for_extraction
+noextract inline_for_extraction
 let len_add32 (a: hash_alg)
   (prev_len: len_t a)
   (input_len: U32.t { U32.v input_len + len_v a prev_len < max_input8 a }):
@@ -107,7 +107,7 @@ let mk_update_multi a update s blocks n_blocks =
   assert (B.length blocks = U32.v n_blocks * size_block a);
   C.Loops.for 0ul n_blocks inv f
 
-#push-options "--max_fuel 0 --z3rlimit 200"
+#push-options "--max_fuel 0 --z3rlimit 400"
 
 (** An arbitrary number of bytes, then padding. *)
 noextract inline_for_extraction
@@ -145,8 +145,6 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   padding_round a total_input_len;
   assert (U32.v tmp_len % size_block a = 0);
 
-  (* Bonus, not strictly necessary, could be useful to get rid of the
-     variable-length allocation below. *)
   pad_length_bound a total_input_len;
   assert (U32.v tmp_len <= 2 * size_block a);
 
@@ -180,7 +178,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
 
 #push-options "--max_ifuel 1"
 
-inline_for_extraction
+noextract inline_for_extraction
 let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
   match a with
   | SHA2_384 | SHA2_512 ->

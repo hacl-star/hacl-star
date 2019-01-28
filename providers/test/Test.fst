@@ -7,13 +7,14 @@ module U32 = FStar.UInt32
 open FStar.HyperStack.ST
 open EverCrypt.Helpers
 
-module AC = EverCrypt.AutoConfig
+module AC = EverCrypt.AutoConfig2
 module SC = EverCrypt.StaticConfig
 module H = EverCrypt.Hash
 
 open Test.Vectors
 open LowStar.BufferOps
 open C.Failure
+open Spec.Hash.Helpers
 
 open Test.Lowstarize
 
@@ -27,9 +28,16 @@ let hash_vector = hash_alg * C.String.t * vec8 * UInt32.t
 noextract unfold inline_for_extraction
 let (!$) = C.String.((!$))
 
-let supported_hash_algorithm = function
-  | H.SHA256 | H.SHA384 -> true
-  | _ -> false
+let supported_hmac_algorithm = function
+  | MD5 | SHA2_224 -> false
+  | _ -> true
+
+let uint32_fits_maxLength a (x: UInt32.t): Lemma
+  (requires True)
+  (ensures (U32.v x < EverCrypt.Hash.maxLength a))
+=
+  assert_norm (pow2 32 <= pow2 61);
+  assert_norm (pow2 61 <= pow2 125)
 
 val compute:
   a: EverCrypt.Hash.alg ->
@@ -43,7 +51,7 @@ val compute:
   (ensures fun h0 () h1 ->
     B.live h1 text /\ B.live h1 tag0 /\
     //B.modifies (B.loc_buffer tag0) h0 h1 /\
-    U32.v len <= EverCrypt.Hash.maxLength a /\ (* required for subtyping the RHS below *)
+    U32.v len < EverCrypt.Hash.maxLength a /\ (* required for subtyping the RHS below *)
     B.as_seq h1 tag0 = EverCrypt.Hash.spec a (B.as_seq h0 text))
 //18-07-07 CF: TODO add deallocation; restore Stack (not ST); restore modifies clause
 let compute a len text tag0 =
@@ -52,7 +60,7 @@ let compute a len text tag0 =
   let open EverCrypt.Hash in
   push_frame();
   let s = create a in
-  assert_norm(U32.v len <= maxLength a);
+  uint32_fits_maxLength a len;
   let ll = len % blockLen a in
   let lb = len - ll in
   let blocks = B.sub text 0ul lb in
@@ -60,23 +68,23 @@ let compute a len text tag0 =
   let h1 = get() in
   init #(Ghost.hide a) s;
   let h10 = get() in
-  update_multi #(Ghost.hide a) (Ghost.hide Seq.empty) s blocks lb;
+  update_multi #(Ghost.hide a) s blocks lb;
   let h11 = get() in
   //18-07-10 CF: improve style on ghosts and lists?
   FStar.Seq.(lemma_eq_intro (empty @| (B.as_seq h10 blocks)) (B.as_seq h10 blocks));
-  update_last #(Ghost.hide a) (Ghost.hide (B.as_seq h11 blocks)) s last len;
+  update_last #(Ghost.hide a) s last (Int.Cast.Full.uint32_to_uint64 len);
   finish #(Ghost.hide a) s tag0;
   let h2 = get() in
+  // JP: this leaks memory and the pop_frame is not efficient
   pop_frame();
 
   let vblocks = B.as_seq h1 blocks in
   let vlast = B.as_seq h1 last in
-  let vsuffix = suffix a (U32.v len) in
+  let vsuffix = Spec.Hash.Common.pad a (U32.v len) in
   FStar.Seq.(lemma_eq_intro (B.as_seq h1 text) (vblocks @| vlast));
-  lemma_hash2 (acc0 #a) vblocks FStar.Seq.(vlast @| vsuffix);
   Seq.append_assoc vblocks vlast vsuffix
 
-#set-options "--max_fuel 0"
+#set-options "--max_fuel 0 --z3rlimit 200"
 
 val test_one_hash: hash_vector -> St unit
 let test_one_hash vec =
@@ -85,7 +93,7 @@ let test_one_hash vec =
   let input_len = C.String.strlen input in
   let tlen = H.tagLen a in  
   if expected_len <> tlen then failwith !$"Wrong length of expected tag\n"
-  else if supported_hash_algorithm a then
+  else
     begin
     push_frame();
     let computed = B.alloca 0uy tlen in
@@ -94,9 +102,10 @@ let test_one_hash vec =
     if total_input_len = 0ul then
       begin
       let total_input = B.null in
-      assert_norm (v total_input_len <= EverCrypt.Hash.maxLength a);
+      uint32_fits_maxLength a total_input_len;
+      assert (v total_input_len <= EverCrypt.Hash.maxLength a);
 
-      if AC.Vale? (AC.sha256_impl()) then
+      if AC.has_shaext () then
         compute a total_input_len total_input computed
       else 
         EverCrypt.Hash.hash a computed total_input total_input_len
@@ -113,9 +122,10 @@ let test_one_hash vec =
         assert (v input_len * v i + v input_len <= v input_len * v repeat);
         C.String.memcpy (B.sub total_input (input_len * i) input_len) input input_len
       );
-      assert_norm (v total_input_len <= EverCrypt.Hash.maxLength a);
+      uint32_fits_maxLength a total_input_len;
+      assert (v total_input_len <= EverCrypt.Hash.maxLength a);
 
-      if AC.Vale? (AC.sha256_impl()) then
+      if AC.has_shaext () then
         compute a total_input_len total_input computed
       else
         EverCrypt.Hash.hash a computed total_input total_input_len;
@@ -148,7 +158,7 @@ let test_one_hmac vec =
   let open FStar.Integers in
   let ha, (LB keylen key), (LB datalen data), (LB expectedlen expected) = vec in
   if expectedlen <> H.tagLen ha then failwith !$"Wrong length of expected tag\n" 
-  else if supported_hash_algorithm ha then
+  else if supported_hmac_algorithm ha then
     begin
     push_frame();
     assume (EverCrypt.HMAC.keysized ha (v keylen));
@@ -179,6 +189,8 @@ let rec test_hmac (LB len vs) =
 
 let hkdf_vector = hash_alg * vec8 * vec8 * vec8 * vec8 * vec8
 
+// JP: this function generates code that uses void* but I see no obvious reason.
+// TODO: investigate
 val test_one_hkdf: hkdf_vector -> St unit
 let test_one_hkdf vec =
   let open FStar.Integers in
@@ -186,7 +198,7 @@ let test_one_hkdf vec =
     (LB infolen info), (LB prklen expected_prk), (LB okmlen expected_okm) = vec in
   if prklen <> H.tagLen ha then failwith !$"Wrong length of expected PRK\n"
   else if (okmlen > 255ul * H.tagLen ha) then failwith !$"Wrong output length\n"
-  else if supported_hash_algorithm ha then
+  else if supported_hmac_algorithm ha then
     begin
     push_frame();
     assume (EverCrypt.HMAC.keysized ha (v saltlen));
@@ -243,29 +255,36 @@ let aead_vector = cipher * vec8 * vec8 * vec8 * vec8 * vec8 * vec8
 
 val test_chacha20_poly1305: aead_vector -> St unit
 let test_chacha20_poly1305 vec =
-  push_frame();
+  let wh = AC.wants_hacl () in
+  let wo = AC.wants_openssl () in
 
-  let cipher, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
-    (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = vec
-  in
-  let plaintext'    = B.alloca 0uy plaintext_len in
-  let ciphertext'   = B.alloca 0uy plaintext_len in
-  let tag'          = B.alloca 0uy 16ul in
+  if not wh && not wo then
+    C.String.print !$"Warning: skipping test_chacha20_poly1305 (hacl and openssl disabled)"
+  else begin
+    push_frame();
 
-  let s0 = TestLib.cpucycles () in
-  EverCrypt.chacha20_poly1305_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
-  let s1 = TestLib.cpucycles () in
-  TestLib.print_cycles_per_round s0 s1 1ul;
-  TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
-  TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
+    let cipher, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
+      (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = vec
+    in
+    let plaintext'    = B.alloca 0uy plaintext_len in
+    let ciphertext'   = B.alloca 0uy plaintext_len in
+    let tag'          = B.alloca 0uy 16ul in
 
-  match EverCrypt.chacha20_poly1305_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
-  | 1ul ->
-    TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len
-  | _ ->
-    C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
+    let s0 = TestLib.cpucycles () in
+    EverCrypt.chacha20_poly1305_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
+    let s1 = TestLib.cpucycles () in
+    TestLib.print_cycles_per_round s0 s1 1ul;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
 
-  pop_frame()
+    match EverCrypt.chacha20_poly1305_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
+    | 1ul ->
+      TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len
+    | _ ->
+      C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
+
+    pop_frame()
+  end
 
 val test_aes128_gcm: aead_vector -> St unit
 let test_aes128_gcm vec =
@@ -330,25 +349,32 @@ type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
 
 val test_aes_ecb: block_cipher_vector -> St unit
 let test_aes_ecb v =
-  push_frame();
-  let block, (LB key_len key), (LB plain_len plain), (LB cipher_len cipher) = v in
-  let cipher' = B.alloca 0uy 16ul in
-  let s0 = TestLib.cpucycles () in
-  let () =
-    match block with
-    | AES128 ->
-      let k = EverCrypt.aes128_create key in
-      EverCrypt.aes128_compute k plain cipher';
-      EverCrypt.aes128_free k
-    | AES256 ->
-      let k = EverCrypt.aes256_create key in
-      EverCrypt.aes256_compute k plain cipher';
-      EverCrypt.aes256_free k
-    in
-  let s1 = TestLib.cpucycles () in
-  TestLib.print_cycles_per_round s0 s1 1ul;
-  TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
-  pop_frame()
+  let wh = AC.wants_hacl () in
+  let wv = AC.wants_vale () in
+  if not wh && not wv then
+    C.String.print !$"Warning: not testing aes_ecb because Vale & Hacl are \
+      disabled, no implementation\n"
+  else begin
+    push_frame();
+    let block, (LB key_len key), (LB plain_len plain), (LB cipher_len cipher) = v in
+    let cipher' = B.alloca 0uy 16ul in
+    let s0 = TestLib.cpucycles () in
+    let () =
+      match block with
+      | AES128 ->
+        let k = EverCrypt.aes128_create key in
+        EverCrypt.aes128_compute k plain cipher';
+        EverCrypt.aes128_free k
+      | AES256 ->
+        let k = EverCrypt.aes256_create key in
+        EverCrypt.aes256_compute k plain cipher';
+        EverCrypt.aes256_free k
+      in
+    let s1 = TestLib.cpucycles () in
+    TestLib.print_cycles_per_round s0 s1 1ul;
+    TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
+    pop_frame()
+  end
 
 /// Test drivers
 
@@ -380,30 +406,37 @@ let rec test_chacha20 (LB len vs) =
   end
 
 let test_aead_st (v:aead_vector) : St unit =
-  push_frame();
 
   let alg, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
     (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = v
   in
 
-  let cipher = match alg with
-    | CHACHA20_POLY1305 -> EverCrypt.CHACHA20_POLY1305
-    | AES_128_GCM -> EverCrypt.AES128_GCM
-    | AES_256_GCM -> EverCrypt.AES256_GCM in
-  let st = EverCrypt.aead_create cipher key in
-  let plaintext'    = B.alloca 0uy plaintext_len in
-  let ciphertext'   = B.alloca 0uy plaintext_len in
-  let tag' = B.alloca 0uy tag_len in
-  
-  EverCrypt.aead_encrypt st iv aad aad_len plaintext plaintext_len ciphertext' tag';
-  (match EverCrypt.aead_decrypt st iv aad aad_len plaintext' plaintext_len ciphertext' tag' with
-  | 1ul ->
-    TestLib.compare_and_print !$"of AEAD cipher" ciphertext ciphertext' plaintext_len;
-    TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
-    TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
-  | _ -> C.portable_exit 1l);
-  EverCrypt.aead_free st;
-  pop_frame ()
+  let wh = AC.wants_hacl () in
+  let wo = AC.wants_openssl () in
+
+  if alg = CHACHA20_POLY1305 && not wh && not wo then
+    C.String.print !$"Warning: skipping test_aead_st/chachapoly because no BCrypt implementation\n"
+  else begin
+    push_frame();
+    let cipher = match alg with
+      | CHACHA20_POLY1305 -> EverCrypt.CHACHA20_POLY1305
+      | AES_128_GCM -> EverCrypt.AES128_GCM
+      | AES_256_GCM -> EverCrypt.AES256_GCM in
+    let st = EverCrypt.aead_create cipher key in
+    let plaintext'    = B.alloca 0uy plaintext_len in
+    let ciphertext'   = B.alloca 0uy plaintext_len in
+    let tag' = B.alloca 0uy tag_len in
+    
+    EverCrypt.aead_encrypt st iv aad aad_len plaintext plaintext_len ciphertext' tag';
+    (match EverCrypt.aead_decrypt st iv aad aad_len plaintext' plaintext_len ciphertext' tag' with
+    | 1ul ->
+      TestLib.compare_and_print !$"of AEAD cipher" ciphertext ciphertext' plaintext_len;
+      TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
+      TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
+    | _ -> C.portable_exit 1l);
+    EverCrypt.aead_free st;
+    pop_frame ()
+  end
 
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0 --using_facts_from '* -Test.Vectors'"
 
@@ -447,6 +480,8 @@ let test_dh () : St unit =
   ()
 
 let main (): St C.exit_code =
+  EverCrypt.AutoConfig2.init ();
+
   let open EverCrypt in
   let open C.String in
   push_frame ();
@@ -457,8 +492,16 @@ let main (): St C.exit_code =
   print !$"\n  FINITE-FIELD DIFFIE-HELLMAN\n";
   test_dh ();
 
+  if EverCrypt.StaticConfig.vale then begin
+    print !$"===========Vale===========\n";
+    test_aead aead_vectors_low;
+    test_hash hash_vectors_low;
+    test_cipher block_cipher_vectors_low;
+    Test.Hash.main ()
+  end;
+  AC.disable_vale ();
+
   print !$"===========Hacl===========\n";
-  AC.(init (Prefer Hacl));
   test_hash hash_vectors_low;
   test_hmac hmac_vectors_low;
   test_hkdf hkdf_vectors_low;
@@ -467,26 +510,17 @@ let main (): St C.exit_code =
   test_chacha20 chacha20_vectors_low;
   Test.Hash.main ();
   Test.Bytes.main ();
-
-  if EverCrypt.StaticConfig.vale then begin
-    print !$"===========Vale===========\n";
-    AC.(init (Prefer Vale));
-    test_aead aead_vectors_low;
-    test_hash hash_vectors_low;
-    test_cipher block_cipher_vectors_low;
-    Test.Hash.main ()
-  end;
+  AC.disable_hacl ();
 
   if EverCrypt.StaticConfig.openssl then begin
     print !$"==========OpenSSL=========\n";
-    AC.(init (Prefer OpenSSL));
     test_aead aead_vectors_low;
     test_cipher block_cipher_vectors_low
   end;
+  AC.disable_openssl ();
 
   if EverCrypt.StaticConfig.bcrypt then begin
     print !$"==========BCrypt==========\n";
-    AC.(init (Prefer BCrypt));
     test_aead aead_vectors_low;
     test_cipher block_cipher_vectors_low
   end;

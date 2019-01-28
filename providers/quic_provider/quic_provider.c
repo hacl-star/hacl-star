@@ -54,8 +54,8 @@ static void dump_secret(const quic_secret *s)
 #endif
 
 #define CONVERT_ALG(a) \
-  (a == TLS_hash_SHA256 ? EverCrypt_Hash_SHA256 : \
-     (a == TLS_hash_SHA384 ? EverCrypt_Hash_SHA384 : EverCrypt_Hash_SHA512))
+  (a == TLS_hash_SHA256 ? Spec_Hash_Helpers_SHA2_256 : \
+     (a == TLS_hash_SHA384 ? Spec_Hash_Helpers_SHA2_384 : Spec_Hash_Helpers_SHA2_512))
 
 int MITLS_CALLCONV quic_crypto_hash(quic_hash a, /*out*/ unsigned char *hash, const unsigned char *data, size_t len)
 {

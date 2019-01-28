@@ -5,25 +5,6 @@ open X64.Bytes_Semantics_s
 open X64.Machine_s
 open Words_s
 
-val nat8s_to_nat32_injective (v1 v2 v3 v4 v1' v2' v3' v4':nat8) :
-  Lemma (Views_s.nat8s_to_nat32 v1 v2 v3 v4 == Views_s.nat8s_to_nat32 v1' v2' v3' v4' ==>
-         v1 == v1' /\
-         v2 == v2' /\
-         v3 == v3' /\
-         v4 == v4')
-
-val nat8s_to_nat64_injective (v1 v2 v3 v4 v5 v6 v7 v8 v1' v2' v3' v4' v5' v6' v7' v8':nat8) :
-  Lemma (Views_s.nat8s_to_nat64 v1 v2 v3 v4 v5 v6 v7 v8 ==
-         Views_s.nat8s_to_nat64 v1' v2' v3' v4' v5' v6' v7' v8' ==>
-         v1 == v1' /\
-         v2 == v2' /\
-         v3 == v3' /\
-         v4 == v4' /\
-         v5 == v5' /\
-         v6 == v6' /\
-         v7 == v7' /\
-         v8 == v8')
-
 val same_mem_get_heap_val (ptr:int) (mem1 mem2:heap) : Lemma
   (requires get_heap_val64 ptr mem1 == get_heap_val64 ptr mem2)
   (ensures forall i. i >= ptr /\ i < ptr + 8 ==> mem1.[i] == mem2.[i])

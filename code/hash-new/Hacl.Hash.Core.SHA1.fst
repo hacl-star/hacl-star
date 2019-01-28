@@ -16,9 +16,14 @@ open Spec.Hash.Helpers
 friend Spec.SHA1
 friend Hacl.Hash.PadFinish
 
+open LowStar.Modifies.Linear
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 
+noextract inline_for_extraction
 let alloca () =
   B.alloca_of_list Spec.init_as_list
 
@@ -189,7 +194,8 @@ let step3_body
   let _e = B.index b 4ul in
   let wmit = B.index w t in
   let _T = Spec.rotl 5ul _a `U32.add_mod` Spec.f t _b _c _d `U32.add_mod` _e `U32.add_mod` Spec.k t `U32.add_mod` wmit in
-  upd5 b _T _a (Spec.rotl 30ul _b) _c _d
+  upd5 b _T _a (Spec.rotl 30ul _b) _c _d;
+  reveal_opaque (`%Spec.step3_body') Spec.step3_body'
 
 inline_for_extraction
 let zero_out
@@ -217,8 +223,6 @@ let spec_step3_body_spec
   (Ghost.reveal (spec_step3_body mi gw st t) == Spec.step3_body mi (Ghost.reveal gw) (Ghost.reveal st) t)
   [SMTPat (Ghost.reveal (spec_step3_body mi gw st t))]
 = ()
-
-#set-options "--z3rlimit 32 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction
 let step3
@@ -256,9 +260,7 @@ let step3
   C.Loops.repeat_range 0ul 80ul f inv interp (fun i -> step3_body mi _w gw h i);
   zero_out _w 80ul;
   HST.pop_frame ();
-  ()
-
-#reset-options
+  reveal_opaque (`%Spec.step3) Spec.step3
 
 inline_for_extraction
 let step4
@@ -292,7 +294,8 @@ let step4
     (stb `U32.add_mod` hb)
     (stc `U32.add_mod` hc)
     (std `U32.add_mod` hd)
-    (ste `U32.add_mod` he)
+    (ste `U32.add_mod` he);
+  reveal_opaque (`%Spec.step4) Spec.step4
 
 let update h l =
   step4 l h

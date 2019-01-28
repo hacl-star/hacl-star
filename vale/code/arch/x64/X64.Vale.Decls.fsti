@@ -177,7 +177,8 @@ val va_opr_lemma_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) 
     M.valid_taint_buf64 b s.mem s.memTaint t /\
     eval_operand (t_op_to_op base) s + offset == M.buffer_addr b s.mem + 8 `op_Multiply` index
   )
-  (ensures valid_operand (va_opr_code_Mem base offset t) s)
+  (ensures valid_operand (va_opr_code_Mem base offset t) s /\
+           M.load_mem64 (M.buffer_addr b s.mem + 8 `op_Multiply` index) s.mem == M.buffer_read b index s.mem)
 
 val taint_at (memTaint:M.memtaint) (addr:int) : taint
 
@@ -313,11 +314,15 @@ unfold let va_get_whileCond (c:va_code{While? c}) : ocmp = While?.whileCond c
 unfold let va_get_whileBody (c:va_code{While? c}) : va_code = While?.whileBody c
 
 (** Map syntax **)
+
+//unfold let op_String_Access (m:M.mem) (b:M.buffer64) = fun index -> buffer64_read b index m
+
 // syntax for map accesses, m.[key] and m.[key] <- value
+(*
 type map (key:eqtype) (value:Type) = Map.t key value
 let op_String_Access     = Map.sel
 let op_String_Assignment = Map.upd
-
+*)
 (** Memory framing **)
 
 (*
@@ -332,7 +337,7 @@ let validSrcAddrs (mem:mem) (addr:int) (size:int) (num_bytes:int) =
 
 let memModified (old_mem:mem) (new_mem:mem) (ptr:int) (num_bytes) =
     (forall (a:int) . {:pattern (new_mem `Map.contains` a)} old_mem `Map.contains` a <==> new_mem `Map.contains` a) /\
-    (forall (a:int) . {:pattern (new_mem.[a]) \/ Map.sel new_mem a} a < ptr || a >= ptr + num_bytes ==> old_mem.[a] == new_mem.[a])
+    (forall (a:int) . {:pattern (new_mem.[a]) \/ Map.sel new_mem a} a < ptr || a >= ptr + num_bytes ==> old_mem.[a] == new_mem.[ a])
 *)
 
 (** Convenient memory-related functions **)
@@ -343,6 +348,7 @@ let rec buffers_readable (h: M.mem) (l: list M.buffer64) : GTot prop0 (decreases
 
 unfold let modifies_buffer (b:M.buffer64) (h1 h2:M.mem) = modifies_mem (loc_buffer b) h1 h2
 unfold let modifies_buffer_2 (b1 b2:M.buffer64) (h1 h2:M.mem) =modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
+unfold let modifies_buffer_3 (b1 b2 b3:M.buffer64) (h1 h2:M.mem) =modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
 unfold let modifies_buffer128 (b:M.buffer128) (h1 h2:M.mem) = modifies_mem (loc_buffer b) h1 h2
 unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
 
@@ -583,7 +589,7 @@ val print_footer : printer -> FStar.All.ML unit
 val masm : printer
 val gcc : printer
 
-unfold let memTaint_type = map int taint
+unfold let memTaint_type = Map.t int taint
 
 // There can only be one!
 [@va_qattr]

@@ -106,3 +106,9 @@ let seq_nat32_to_seq_nat8_LE (x:seq nat32) : seq nat8 =
 
 let seq_nat32_to_seq_nat8_BE (x:seq nat32) : seq nat8 =
   seq_four_to_seq_BE (seq_map (nat_to_four 8) x)
+
+let seq_nat8_to_seq_uint8 (x:seq nat8) : seq UInt8.t =
+  seq_map UInt8.uint_to_t x
+
+let seq_uint8_to_seq_nat8 (x:seq UInt8.t) : seq nat8 =
+  seq_map UInt8.v x

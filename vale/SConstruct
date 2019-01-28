@@ -110,17 +110,17 @@ if sys.version_info < (3, 6):
 if 'VALE_HOME' in os.environ:
   vale_default_path = os.environ['VALE_HOME']
 else:
-  vale_default_path = 'tools/Vale'
+  vale_default_path = '../../vale'
 
 if 'KREMLIN_HOME' in os.environ:
   kremlin_default_path = os.environ['KREMLIN_HOME']
 else:
-  kremlin_default_path = 'tools/Kremlin'
+  kremlin_default_path = '../../kremlin'
 
 if 'FSTAR_HOME' in os.environ:
   fstar_default_path = os.environ['FSTAR_HOME']
 else:
-  fstar_default_path = 'tools/FStar'
+  fstar_default_path = '../../FStar'
 
 def AddOptYesNo(name, dest, default, help):
   AddOption('--' + name, dest = dest, default = default, action = 'store_true', help = f'{help} (default {default})')
@@ -166,7 +166,7 @@ AddOptYesNo('COLOR', dest = 'do_color', default = True,
 AddOptYesNo('DUMP-ARGS', dest = 'dump_args', default = False,
   help = "Print arguments that will be passed to the verification tools")
 AddOptYesNo('FSTAR-EXTRACT', dest = 'fstar_extract', default = False,
-  help = "Extract .ml files from F* files")
+  help = "Generate .S and .asm files via F* extraction to OCaml")
 AddOptYesNo('MIN-TEST', dest = 'min_test', default = False,
   help = "Only run on a minimal set of test files")
 AddOptYesNo('PROFILE', dest = 'profile', default = False,
@@ -254,7 +254,11 @@ class BuildOptions:
 #
 ##################################################################################################
 
-fstar_default_args_nosmtencoding = ('--max_fuel 1 --max_ifuel 1'
+def fstar_default_args_nosmtencoding(relative=True):
+  cache_dir = 'obj/cache_checked'
+  cache_dir = cache_dir if relative else os.path.abspath(cache_dir)
+
+  return ('--max_fuel 1 --max_ifuel 1'
   + (' --initial_ifuel 1' if is_single_vaf else ' --initial_ifuel 0')
   # The main purpose of --z3cliopt smt.QI.EAGER_THRESHOLD=100 is to make sure that matching loops get caught
   # Don't remove unless you're sure you've used the axiom profiler to make sure you have no matching loops
@@ -262,10 +266,12 @@ fstar_default_args_nosmtencoding = ('--max_fuel 1 --max_ifuel 1'
   + ' --hint_info'
   + (' --use_hints --use_hint_hashes' if use_hints else '')
   + (' --cache_off' if record_hints else ' --cache_checked_modules')
-  + ' --cache_dir obj/cache_checked'
+  + ' --cache_dir ' + cache_dir
   + ' --use_extracted_interfaces true'
   )
-fstar_default_args = (fstar_default_args_nosmtencoding
+
+def fstar_default_args(relative=True):
+  return (fstar_default_args_nosmtencoding(relative)
   + ' --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped'
   )
 
@@ -340,14 +346,14 @@ manual_dependencies = {
 # Table of special-case sources which requires non-default arguments
 #
 verify_options = [
-  ('code/lib/util/operator.vaf', BuildOptions(fstar_default_args, vale_includes = '')),
+  ('code/lib/util/operator.vaf', BuildOptions(fstar_default_args(), vale_includes = '')),
 
   # Special treatment for sensitive modules
 
   # Disable verification by adding 'filename': None
 
 #  ('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastSqr.vaf', None),
-  
+
    # Temporarily deactivate verification of the whole interop layer
 #   ('code/arch/x64/interop/*', None), 
 #   ('code/arch/x64/interop/new/*', None), 
@@ -355,35 +361,36 @@ verify_options = [
 #  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
-  ('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
+  #('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
+  #('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastHybrid.vaf', None),
 
-  ('code/*/*.fst', BuildOptions(fstar_default_args)),
-  ('code/*/*.fsti', BuildOptions(fstar_default_args)),
-  ('specs/*/*.fst', BuildOptions(fstar_default_args)),
-  ('specs/*/*.fsti', BuildOptions(fstar_default_args)),
+  ('code/*/*.fst', BuildOptions(fstar_default_args())),
+  ('code/*/*.fsti', BuildOptions(fstar_default_args())),
+  ('specs/*/*.fst', BuildOptions(fstar_default_args())),
+  ('specs/*/*.fsti', BuildOptions(fstar_default_args())),
 
   # .fst/.fsti files default to this set of options
-  ('.fst', BuildOptions(fstar_default_args + ' --use_two_phase_tc false')),
-  ('.fsti', BuildOptions(fstar_default_args + ' --use_two_phase_tc false')),
+  ('.fst', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
+  ('.fsti', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
 
-  ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
-  ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
+  ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args().replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
+  ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args().replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
 
-  ('code/arch/x64/X64.BufferViewStore.fst', BuildOptions(fstar_default_args_nosmtencoding + ' --smtencoding.elim_box true')),
-  ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
-  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding)),
-  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding)),
-  ('code/arch/x64/X64.Memory.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
-  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
-  ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
-  ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', ''))),
+  ('code/arch/x64/X64.BufferViewStore.fst', BuildOptions(fstar_default_args_nosmtencoding() + ' --smtencoding.elim_box true')),
+  ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
+  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding())),
+  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding())),
+  ('code/arch/x64/X64.Memory.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
+  ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', ''))),
 
   # We copy these files from F*'s library because we need to generate a .checked file for them,
   # but we don't need to reverify them:
   ('obj/external/*.fst', BuildOptions('--cache_checked_modules --admit_smt_queries true')),
 
   # .vaf files default to this set of options when compiling .fst/.fsti
-  ('.vaf', BuildOptions(fstar_default_args + ' --use_two_phase_tc false'))
+  ('.vaf', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false'))
 ]
 
 verify_options_dict = { k:v for (k,v) in verify_options}
@@ -394,7 +401,7 @@ fstar_no_verify = ''
 verify = GetOption('verify')
 if not verify:
   print('***\n*** WARNING:  NOT VERIFYING ANY CODE\n***')
-  fstar_no_verify = '--lax'
+  fstar_no_verify = '--admit_smt_queries true'
 
 # Find Z3 for F*
 found_z3 = False
@@ -426,7 +433,8 @@ def add_from_os_env(env, name):
   if name in os.environ:
     env['ENV'][name] = os.environ[name]
 
-ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH']})
+ocaml_env = Environment()
+add_from_os_env(ocaml_env, 'PATH')
 add_from_os_env(ocaml_env, 'OCAMLPATH')
 add_from_os_env(ocaml_env, 'OCAMLLIB')
 add_from_os_env(ocaml_env, 'OCAML_TOPLEVEL_PATH')
@@ -617,7 +625,7 @@ def check_vale_version():
 
 def print_dump_args():
   #print('Currently using the following F* args:')
-  options = fstar_default_args
+  options = fstar_default_args(relative=False)
   if len(COMMAND_LINE_TARGETS) > 0:
     options = get_build_options(File(COMMAND_LINE_TARGETS[0])).verifier_flags
     #print("The options are: %s" % options.verifier_flags)
@@ -958,10 +966,10 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   alg_cmxs = [ml_out_file(x, '.cmx') for x in alg_files]
   cmdline_ml = ml_out_file(cmdline_file, '.ml')
   cmdline_cmx = ml_out_file(cmdline_file, '.cmx')
-  pointer_src = File('code/lib/util/FStar_Pointer_Base.ml')
-  pointer_ml = ml_out_file(pointer_src, '.ml')
-  pointer_cmx = ml_out_file(pointer_src, '.cmx')
-  CopyFile(pointer_ml, pointer_src)
+  #pointer_src = File('code/lib/util/FStar_Pointer_Base.ml')
+  #pointer_ml = ml_out_file(pointer_src, '.ml')
+  #pointer_cmx = ml_out_file(pointer_src, '.cmx')
+  #CopyFile(pointer_ml, pointer_src)
   CopyFile(cmdline_ml, cmdline_file)
   CopyFile(main_ml, main_file)
   for alg_cmx in alg_cmxs:
@@ -972,14 +980,20 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   Depends(main_cmx, main_ml)
   done = set()
   cmxs = []
+  objs = []
+  ignore_warnings = [ "8", # Warning 8: this pattern-matching is not exhaustive.
+                     "20", # Warning 20: this argument will not be used by the function.
+                     "26"] # Warning 26: unused variable
+  ignore_warnings_str = "-w " + "".join(["-" + s for s in ignore_warnings])
   def add_cmx(x_ml):
     x_cmx = ml_out_file(x_ml, '.cmx')
-    if x_ml != pointer_ml:
-      Depends(x_cmx, pointer_cmx)
-    cmx = ocaml_env.Command(x_cmx, x_ml,
-      f'ocamlfind ocamlopt -c -package fstarlib -package fstar-tactics-lib -o {x_cmx} {x_ml} -I obj/ml_out')
+    x_obj = ml_out_file(x_ml, '.o')
+    cmx = ocaml_env.Command([x_cmx, x_obj], x_ml,
+      f'ocamlfind ocamlopt -c -package fstarlib -o {x_cmx} {x_ml} -I obj/ml_out {ignore_warnings_str}')
     cmxs.append(cmx[0])
+    objs.append(x_obj)
     Depends(main_exe, cmx[0])
+    Depends(main_exe, x_obj)
   def collect_cmxs_in_order(x_ml):
     if not (x_ml in done):
       done.add(x_ml)
@@ -987,25 +1001,25 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
         # if x depends on y, y must appear first in ocaml link step
         Depends(ml_out_file(x_ml, '.cmx'), ml_out_file(y_ml, '.cmx'))
         collect_cmxs_in_order(y_ml)
-      Depends(x_ml, pointer_ml)
       add_cmx(x_ml)
-  add_cmx(pointer_ml)
   for alg_ml in alg_mls:
     collect_cmxs_in_order(alg_ml)
   add_cmx(cmdline_ml)
   add_cmx(main_ml)
   cmxs_string = " ".join([str(cmx) for cmx in cmxs])
-  ocaml_env.Command(main_exe, cmxs,
-    f'ocamlfind ocamlopt -linkpkg -package fstarlib -package fstar-tactics-lib {cmxs_string} -o {main_exe}')
+  ocaml_env.Command(main_exe, cmxs + objs,
+    f'ocamlfind ocamlopt -linkpkg -package fstarlib {cmxs_string} -o {main_exe}')
   # Run executable to generate assembly files:
   output_target_base = 'obj/' + output_base_name
-  def generate_asm(suffix, assembler, platform):
-    target = output_target_base + suffix
-    return ocaml_env.Command(target, main_exe, f'{main_exe} {assembler} {platform} > {target}')
-  masm_win = generate_asm('.asm', 'MASM', 'Win')
-  gcc_win = generate_asm('-gcc.S', 'GCC', 'Win')
+  def generate_asm(suffix, assembler, os):
+    # TODO: cross-compilation support; note that platform.machine() does not
+    # produce a consistent string across OSes
+    target = output_target_base + "-x86_64" + suffix
+    return ocaml_env.Command(target, main_exe, f'{main_exe} {assembler} {os} > {target}')
+  masm_win = generate_asm('-msvc.asm', 'MASM', 'Win')
+  gcc_win = generate_asm('-mingw.S', 'GCC', 'Win')
   gcc_linux = generate_asm('-linux.S', 'GCC', 'Linux')
-  gcc_macos = generate_asm('-macos.S', 'GCC', 'MacOS')
+  gcc_macos = generate_asm('-darwin.S', 'GCC', 'MacOS')
   if sys.platform.startswith('linux'):
     return [gcc_linux, masm_win, gcc_win, gcc_macos]
   elif sys.platform == 'win32':
@@ -1149,6 +1163,11 @@ if not is_help:
     source = f.filename
     target = f.obj_name()
     shutil.copy(source, target)
+    checked_source = f'{source}.checked'
+    if os.path.isfile(checked_source):
+      shutil.copy(str(checked_source), f'{target}.checked')
+    else:
+      print(f'External file {source}.checked does not exist -- please make F*, KreMLin, and hacl-star/specs first')
 
   if not dump_args:
     print('Processing source files')
@@ -1169,6 +1188,7 @@ if not is_help:
     curve25519_asm = extract_assembly_code(env, 'curve25519', File('code/crypto/ecc/curve25519/Main25519.ml'), [
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastUtil.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastHybrid.vaf'),
+        File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastWide.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastSqr.vaf'),
         File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastMul.vaf')],
       File('code/lib/util/CmdLineParser.ml'))

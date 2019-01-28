@@ -3,6 +3,7 @@ module List = FStar.List.Tot.Base
 module HS = FStar.Monotonic.HyperStack
 module HH = FStar.Monotonic.HyperHeap
 module B = LowStar.Buffer
+module MB = LowStar.Monotonic.Buffer
 module M = LowStar.Modifies
 
 open Opaque_s

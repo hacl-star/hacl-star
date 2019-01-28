@@ -4,6 +4,11 @@ open FStar.Integers
 open EverCrypt.Helpers
 open EverCrypt.Hash
 
+noextract
+unfold let bytes = Spec.Hash.Helpers.bytes
+noextract
+unfold let lbytes = EverCrypt.HMAC.lbytes
+
 /// FUNCTIONAL SPECIFICATION:
 ///
 /// * extraction is just HMAC using the salt as key and the input
@@ -29,7 +34,7 @@ let rec expand0 :
     let chainLength = if count = 0 then 0 else tagLength a in
     HMAC.keysized a (Seq.length prk) /\
     Seq.length last = chainLength /\
-    tagLength a + length info + 1 + blockLength a <= maxLength a /\
+    tagLength a + length info + 1 + blockLength a < maxLength a /\
     count < 255 /\
     required <= (255 - count) * tagLength a } ->
   GTot (lbytes required)
@@ -42,13 +47,13 @@ let rec expand0 :
   then fst (split tag required)
   else tag @| expand0 a prk info (required - tagLength a) count tag
 
-noextract let expand:
+let expand:
   a: Hash.alg ->
   prk: bytes ->
   info: bytes ->
   required: nat {
     HMAC.keysized a (Seq.length prk) /\
-    tagLength a + length info + 1 + blockLength a <= maxLength a /\
+    tagLength a + length info + 1 + blockLength a < maxLength a /\
     required <= 255 * tagLength a } ->
   GTot (lbytes required)
 =
@@ -121,7 +126,7 @@ val hkdf_extract :
     live h0 prk /\ live h0 salt /\ live h0 ikm ))
   (ensures  (fun h0 r h1 ->
     live h1 prk /\ LowStar.Modifies.(modifies (loc_buffer prk) h0 h1) /\
-    length ikm + blockLength a <= maxLength a /\
+    length ikm + blockLength a < maxLength a /\
     as_seq h1 prk == HMAC.hmac a (as_seq h0 salt) (as_seq h0 ikm)))
 
 val hkdf_expand :
@@ -138,7 +143,7 @@ val hkdf_expand :
   (requires (fun h0 -> live h0 okm /\ live h0 prk /\ live h0 info))
   (ensures  (fun h0 r h1 ->
     live h1 okm /\ LowStar.Modifies.(modifies (loc_buffer okm) h0 h1) /\
-    tagLength a + pow2 32 + blockLength a <= maxLength a /\ // required for v len below
+    tagLength a + pow2 32 + blockLength a < maxLength a /\ // required for v len below
     as_seq h1 okm = expand a (as_seq h0 prk) (as_seq h0 info) (v len) ))
 
 

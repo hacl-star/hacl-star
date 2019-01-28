@@ -209,6 +209,16 @@ let lemma_insrq_extrq_relations (x y:quad32) :
   //assert (q == q');
   ()
 
+open Words.Two
+
+let le_bytes_to_nat64_to_bytes s =
+  Opaque_s.reveal_opaque le_nat64_to_bytes_def;
+  Opaque_s.reveal_opaque le_bytes_to_nat64_def
+
+let le_nat64_to_bytes_to_nat64 n =
+  Opaque_s.reveal_opaque le_nat64_to_bytes_def;
+  Opaque_s.reveal_opaque le_bytes_to_nat64_def
+
 #reset-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
 let le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) == create 1 b)
