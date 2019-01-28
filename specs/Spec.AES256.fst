@@ -7,7 +7,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
-open Spec.GaloisField
+
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
@@ -26,13 +26,13 @@ let xkeylen =
   x// 176, 208, or 240
 
 
-type block = lseq uint8 blocklen
-type skey  = lseq uint8 keylen
-type xkey  = lseq uint8 xkeylen
-type word  = lseq uint8 wordlen
+type block = lbytes blocklen
+type skey  = lbytes keylen
+type xkey  = lbytes xkeylen
+type word  = lbytes wordlen
 
-type rnd = r:size_t{v r <= nr}
-type idx_16 = ctr:size_t{v ctr <= 16}
+type rnd = r:size_nat{r <= nr}
+type idx_16 = ctr:size_nat{ctr <= 16}
 
 private val xtime: uint8 -> Tot uint8
 let xtime b =
@@ -51,6 +51,7 @@ let multiply a b =
 
 // tables for S-box and inv-S-box, derived from GF256 specification.
 
+[@"opaque_to_smt"]
 let inv_sbox : lseq uint8 256 =
   let l : list FStar.UInt8.t = [
     0x52uy; 0x09uy; 0x6auy; 0xd5uy; 0x30uy ; 0x36uy; 0xa5uy; 0x38uy;
@@ -90,6 +91,7 @@ let inv_sbox : lseq uint8 256 =
   assert_norm(FStar.List.Tot.Base.length l = 256);
   of_list l
 
+[@"opaque_to_smt"]
 let sbox : lseq uint8 256 =
   let l : list FStar.UInt8.t = [
     0x63uy; 0x7cuy; 0x77uy; 0x7buy; 0xf2uy; 0x6buy; 0x6fuy; 0xc5uy;
@@ -131,29 +133,31 @@ let sbox : lseq uint8 256 =
 
 // ENCRYPTION
 
-let access_sbox (i:uint8) = index sbox (uint_to_nat i)
+let sbox_idx = i:size_nat{i < 256}
 
-let access_inv_sbox (i:uint8) = index inv_sbox (uint_to_nat i)
+let access_sbox (i:sbox_idx) = index sbox i
 
-#set-options "--z3rlimit 10"
+let access_inv_sbox (i:sbox_idx) = index inv_sbox i
 
-val subBytes_aux_sbox: state:block -> ctr:idx_16 -> Tot block (decreases (16 - v ctr))
+#set-options "--max_fuel 1 --z3rlimit 10"
+
+val subBytes_aux_sbox: state:block -> ctr:idx_16 -> Tot block (decreases (blocklen - ctr))
 let rec subBytes_aux_sbox state ctr =
-  if ctr <. size 16 then
-    let si = state.[uint_to_nat ctr] in
-    let si' = access_sbox si in
-    let state = state.[uint_to_nat ctr] <- si' in
-    subBytes_aux_sbox state (ctr +. size 1)
+  if ctr < 16 then
+    let si = state.[ctr] in
+    let si' = access_sbox (uint_to_nat si) in
+    let state = state.[ctr] <- si' in
+    subBytes_aux_sbox state (ctr + 1)
   else
     state
 
-#set-options "--z3rlimit 5"
+#set-options "--max_fuel 0 --z3rlimit 5"
 
 val subBytes_sbox: state:block -> block
 let subBytes_sbox state =
-  subBytes_aux_sbox state 0ul
+  subBytes_aux_sbox state 0
 
-val shiftRows_: state:block -> i:nat{i<4} -> block
+val shiftRows_: state:block -> i:size_nat{i < 4} -> block
 let shiftRows_ state i =
   let tmp = state.[i] in
   let state = state.[i] <- state.[i + 4] in
@@ -162,6 +166,8 @@ let shiftRows_ state i =
   let state = state.[i + 12] <- tmp in
   state
 
+#set-options "--z3rlimit 10"
+
 val shiftRows: state:block -> block
 let shiftRows state =
   let state = shiftRows_ state 1 in
@@ -169,7 +175,7 @@ let shiftRows state =
   let state = shiftRows_ state 3 in
   state
 
-val mixColumns_: state:block -> c:nat{c < 4} -> block
+val mixColumns_: state:block -> c:size_nat{c < 4} -> block
 let mixColumns_ state c =
   let s : lseq uint8 4 = sub state (4*c) 4 in
   let s0 = s.[0] in
@@ -180,7 +186,10 @@ let mixColumns_ state c =
   let s = s.[1] <- multiply (u8 0x2) s1 ^. multiply (u8 0x3) s2 ^. s3 ^. s0 in
   let s = s.[2] <- multiply (u8 0x2) s2 ^. multiply (u8 0x3) s3 ^. s0 ^. s1 in
   let s = s.[3] <- multiply (u8 0x2) s3 ^. multiply (u8 0x3) s0 ^. s1 ^. s2 in
+  let state = update_sub state (4*c) 4 s in
   state
+
+#set-options "--z3rlimit 20"
 
 val mixColumns: state:block -> block
 let mixColumns state =
@@ -190,22 +199,21 @@ let mixColumns state =
   let state = mixColumns_ state 3 in
   state
 
-#set-options "--z3rlimit 10"
 
-
-private val addRoundKey_: state:block -> w:xkey -> rnd -> c:nat{c < 4} -> block
+val addRoundKey_: state:block -> w:xkey -> rnd -> c:size_nat{c < 4} -> block
 let addRoundKey_ state w round c =
   let target = sub state (4*c) 4 in
-  let offset : n:nat{n <= 224} = uint_to_nat ((size blocklen) *. round) in
+  let offset : n:size_nat{n <= 224} = blocklen * round in
   let offset = offset + 4*c in
   let subkey = sub w offset 4 in
   let target = target.[0] <- target.[0] ^. subkey.[0] in
   let target = target.[1] <- target.[1] ^. subkey.[1] in
   let target = target.[2] <- target.[2] ^. subkey.[2] in
   let target = target.[3] <- target.[3] ^. subkey.[3] in
-  update_sub state (4*c) 4 target
+  let state = update_sub state (4*c) 4 target in
+  state
 
-#set-options "--z3rlimit 5"
+#set-options "--z3rlimit 10"
 
 val addRoundKey: state:block -> w:xkey -> round:rnd  -> block
 let addRoundKey state w round =
@@ -215,16 +223,16 @@ let addRoundKey state w round =
   let state = addRoundKey_ state w round 3 in
   state
 
-#set-options "--z3rlimit 20"
+#set-options "--max_fuel 1 --z3rlimit 20"
 
-val cipher_loop: state:block -> w:xkey -> round:rnd -> Tot block (decreases (nr - v round))
+val cipher_loop: state:block -> w:xkey -> round:rnd -> Tot block (decreases (nr - round))
 let rec cipher_loop state w round =
-  if round <. size nr then
+  if round < nr then
     let state = subBytes_sbox state in
     let state = shiftRows     state in
     let state = mixColumns    state in
     let state = addRoundKey   state w round in
-    let new_round = round +. size 1 in
+    let new_round = round + 1 in
     let state = cipher_loop   state w new_round in
     state
   else
@@ -234,11 +242,11 @@ val cipher: input:block -> w:xkey -> Tot block
 let cipher input w =
   // could we use output instead? alignment?
   let state = input in
-  let state = addRoundKey    state w 0ul in
-  let state = cipher_loop    state w 1ul in
+  let state = addRoundKey    state w 0 in
+  let state = cipher_loop    state w 1 in
   let state = subBytes_sbox  state in
   let state = shiftRows      state in
-  let state = addRoundKey    state w (size nr) in
+  let state = addRoundKey    state w nr in
   state
 
 #set-options "--z3rlimit 5"
@@ -259,65 +267,63 @@ let rotWord word =
 
 val subWord: word -> word
 let subWord word =
-  let word = word.[0] <- access_sbox word.[0] in
-  let word = word.[1] <- access_sbox word.[1] in
-  let word = word.[2] <- access_sbox word.[2] in
-  let word = word.[3] <- access_sbox word.[3] in
+  let word = word.[0] <- access_sbox (uint_to_nat word.[0]) in
+  let word = word.[1] <- access_sbox (uint_to_nat word.[1]) in
+  let word = word.[2] <- access_sbox (uint_to_nat word.[2]) in
+  let word = word.[3] <- access_sbox (uint_to_nat word.[3]) in
   word
 
-#set-options "--z3rlimit 10"
+#set-options "--max_fuel 1 --z3rlimit 10"
 
-val rcon: i:pub_uint32{v i >= 1} -> uint8 -> Tot uint8 (decreases (v i))
+val rcon: i:size_nat{i >= 1} -> uint8 -> Tot uint8 (decreases (i))
 let rec rcon i tmp =
-  if i = uint 1 then tmp
+  if i = 1 then tmp
   else begin
     let tmp = multiply (u8 2) tmp in
-    rcon (i -. (uint 1)) tmp
+    rcon (i - 1) tmp
   end
 
 val keyExpansion_aux_0:
   w:xkey ->
-  i:pub_uint32{v i < xkeylen / wordlen /\ v i >= nk} ->
+  i:size_nat{i < xkeylen / wordlen /\ i >= nk} ->
   word
 let keyExpansion_aux_0 w j =
-  let temp : word = sub w (wordlen * (uint_to_nat j - 1)) wordlen in
-  if j %. size nk = size 0 then begin
+  let temp : word = sub w (wordlen * (j - 1)) wordlen in
+  if j % nk = 0 then begin
     let temp = rotWord temp in
     let temp = subWord temp in
     let t0 = temp.[0] in
-    let rc = rcon (j /. size nk) (u8 1) in
+    let rc = rcon (j / nk) (u8 1) in
     let z = t0 ^. rc in
     let temp = temp.[0] <- z in
     temp
-  end else if j %. size nk = size wordlen then
+  end else if j % nk = wordlen then
     subWord temp
   else
     temp
 
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 20"
 
 val keyExpansion_aux_1:
   w:xkey ->
   temp:word ->
-  i:pub_uint32{v i < (xkeylen / wordlen) /\ v i >= nk} ->
+  i:size_nat{i < (xkeylen / wordlen) /\ i >= nk} ->
   Tot xkey
 let keyExpansion_aux_1 w temp j =
-  let i = j *. (uint wordlen) in
-  let w0 = w.[(uint_to_nat i) + 0 - keylen] in
-  let w1 = w.[(uint_to_nat i) + 1 - keylen] in
-  let w2 = w.[(uint_to_nat i) + 2 - keylen] in
-  let w3 = w.[(uint_to_nat i) + 3 - keylen] in
+  let i = j * wordlen in
+  let w0 = w.[i + 0 - keylen] in
+  let w1 = w.[i + 1 - keylen] in
+  let w2 = w.[i + 2 - keylen] in
+  let w3 = w.[i + 3 - keylen] in
   let t0 = temp.[0] in
   let t1 = temp.[1] in
   let t2 = temp.[2] in
   let t3 = temp.[3] in
-  let w = w.[(uint_to_nat i) + 0] <- t0 ^. w0 in
-  let w = w.[(uint_to_nat i) + 1] <- t1 ^. w1 in
-  let w = w.[(uint_to_nat i) + 2] <- t2 ^. w2 in
-  let w = w.[(uint_to_nat i) + 3] <- t3 ^. w3 in
+  let w = w.[i + 0] <- t0 ^. w0 in
+  let w = w.[i + 1] <- t1 ^. w1 in
+  let w = w.[i + 2] <- t2 ^. w2 in
+  let w = w.[i + 3] <- t3 ^. w3 in
   w
-
-#set-options "--z3rlimit 50"
 
 let xkeylen_w =
   let x = xkeylen / wordlen in
@@ -326,13 +332,13 @@ let xkeylen_w =
 
 val keyExpansion_aux:
   w:xkey ->
-  i:pub_uint32{v i <= xkeylen_w /\ v i >= nk} ->
-  Tot xkey (decreases (xkeylen_w - v i))
+  i:size_nat{i <= xkeylen_w /\ i >= nk} ->
+  Tot xkey (decreases (xkeylen_w - i))
 let rec keyExpansion_aux w j =
-  if j <. size xkeylen_w then begin
+  if j < xkeylen_w then begin
     let temp = keyExpansion_aux_0 w j in
     let w = keyExpansion_aux_1 w temp j in
-    let new_j = j +. (uint 1) in
+    let new_j = j + 1 in
     let w = keyExpansion_aux w new_j in
     w
   end else
@@ -344,33 +350,33 @@ val keyExpansion: key:skey -> xkey
 let keyExpansion key =
   let w = create xkeylen (u8 0) in
   let w = update_sub w 0 keylen key in
-  keyExpansion_aux w (uint nk)
+  keyExpansion_aux w nk
 
 // DECRYPTION
 
 #set-options "--z3rlimit 10"
 
-val invSubBytes_aux_sbox: state:block -> ctr:idx_16 -> Tot block (decreases (16 - v ctr))
+val invSubBytes_aux_sbox: state:block -> ctr:idx_16 -> Tot block (decreases (blocklen - ctr))
 let rec invSubBytes_aux_sbox state ctr =
-  if ctr = size 16 then state
+  if ctr = blocklen then state
   else begin
-    let si = state.[uint_to_nat ctr] in
-    let si' = access_inv_sbox si in
-    let state = state.[uint_to_nat ctr] <- si' in
-    invSubBytes_aux_sbox state (ctr+. size 1)
+    let si = state.[ctr] in
+    let si' = access_inv_sbox (uint_to_nat si) in
+    let state = state.[ctr] <- si' in
+    invSubBytes_aux_sbox state (ctr + 1)
   end
 
 val invSubBytes_sbox: state:block -> block
 let invSubBytes_sbox state =
-  invSubBytes_aux_sbox state (size 0)
+  invSubBytes_aux_sbox state 0
 
-val invShiftRows_ : state:block -> i:nat{i < 4} -> Tot block
+val invShiftRows_ : state:block -> i:size_nat{i < 4} -> Tot block
 let invShiftRows_ state i =
   let tmp = state.[i] in
   let state = state.[i]      <- state.[i + 4] in
   let state = state.[i + 4]  <- state.[i + 8] in
   let state = state.[i + 8]  <- state.[i + 12] in
-  let state = state.[i+ 12]  <- tmp in
+  let state = state.[i + 12]  <- tmp in
   state
 
 val invShiftRows: state:block -> block
@@ -380,7 +386,7 @@ let invShiftRows state =
   let state = invShiftRows_ state 1 in
   state
 
-val invMixColumns_: state:block -> c:nat{c < 4} -> Tot block
+val invMixColumns_: state:block -> c:size_nat{c < 4} -> Tot block
 let invMixColumns_ state c =
   let s = sub state (wordlen*c) wordlen in
   let s0 = s.[0] in
@@ -410,15 +416,15 @@ let invMixColumns state =
 val inv_cipher_loop:
   state:block ->
   w:xkey ->
-  round:size_t{v round <= nr - 1} ->
-  Tot block (decreases (v round))
+  round:size_nat{round <= nr - 1} ->
+  Tot block (decreases (round))
 let rec inv_cipher_loop state w round =
-  if round <> size 0 then
+  if round <> 0 then
     let state = invShiftRows state in
     let state = invSubBytes_sbox state in
     let state = addRoundKey state w round in
     let state = invMixColumns state in
-    let state = inv_cipher_loop state w (round -. size 1) in
+    let state = inv_cipher_loop state w (round - 1) in
     state
   else
     state
@@ -426,9 +432,9 @@ let rec inv_cipher_loop state w round =
 val inv_cipher: input:block -> w:xkey -> block
 let inv_cipher input w =
   let state = input in
-  let state = addRoundKey      state w (size nr) in
-  let state = inv_cipher_loop  state w (size (nr - 1)) in
+  let state = addRoundKey      state w nr in
+  let state = inv_cipher_loop  state w (nr - 1) in
   let state = invShiftRows     state in
   let state = invSubBytes_sbox state in
-  let state = addRoundKey      state w 0ul in
+  let state = addRoundKey      state w 0 in
   state
