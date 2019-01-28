@@ -3,7 +3,7 @@ include $(HACL_HOME)/Makefile.include
 
 
 # Files for verification
-KREMLIN_ARGS =-verbose $(KREMLIN_TESTLIB) \
+KREMLIN_ARGS =-verbose \
 	-drop FStar,Prims,LowStar,C,C.*,C.Loops.Spec.Loops,Spec.*,Lib.*,WasmSupport \
 	-ccopt -march=native
 
@@ -12,6 +12,10 @@ CFLAGS=-I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/include
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+all: test
+
+test: test-hmac_sha2_256.exe
 
 #
 # HMAC_SHA2_256
@@ -40,7 +44,7 @@ hmac_sha2_256-c/Test_Impl_HMAC_SHA2_256.c: hmac_sha2_256-c/out.krml
 
 
 test-hmac_sha2_256.exe: hmac_sha2_256-c/Hacl_HMAC_SHA2_256.c hmac_sha2_256-c/Test_Impl_HMAC_SHA2_256.c $(BASE_OBJ)
-	$(CC) $(CFLAGS) -I $(KREMLIN_HOME) -I $(KREMLIN_HOME)/kremlib/extracted -L $(KREMLIN_HOME)/kremlib/out -o $@ $^ -lkremlib
+	$(CC) $(CFLAGS) -I $(KREMLIN_HOME) -I $(KREMLIN_HOME)/kremlib/dist/generic -L $(KREMLIN_HOME)/kremlib/dist/generic -o $@ $^ -lkremlib
 
 
 #
