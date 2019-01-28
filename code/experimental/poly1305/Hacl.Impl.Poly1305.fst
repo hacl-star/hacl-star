@@ -117,80 +117,60 @@ let poly1305_encode_r #s p b =
   LSeq.eq_intro (feval h1 (gsub p 0ul 5ul)) (S.encode_r (as_seq h0 b))
 
 inline_for_extraction
-type poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s +. precomplen s)
-
-(*
-inline_for_extraction
-val get_acc: #s:field_spec -> ctx:poly1305_ctx s -> Stack (felem s)
-                   (requires (fun h -> live h ctx))
-		   (ensures (fun h0 r h1 -> h0 == h1 /\ live h1 r))
-*)
-inline_for_extraction
-let get_acc #s (ctx:poly1305_ctx s) = sub ctx (size 0) (nlimb s)
-
-
-(*
-inline_for_extraction
-val get_precomp_r: #s:field_spec -> ctx:poly1305_ctx s -> Stack (precomp_r s)
-                   (requires (fun h -> live h ctx))
-		   (ensures (fun h0 r h1 -> h0 == h1 /\ live h1 r))
-*)
-inline_for_extraction
-let get_precomp_r #s (ctx:poly1305_ctx s) = sub ctx (nlimb s) (precomplen s)
-
-inline_for_extraction
 val poly1305_init_:
     #s:field_spec
-  -> ctx:poly1305_ctx s
   -> key:lbuffer uint8 32ul
+  -> pre:precomp_r s
+  -> acc:felem s
   -> Stack unit
     (requires fun h ->
-      live h ctx /\ live h key /\ disjoint ctx key)
+      live h pre /\ live h acc /\  live h key /\
+      disjoint pre key /\ disjoint acc key /\
+      disjoint pre acc)
     (ensures  fun h0 _ h1 ->
-      modifies (loc ctx) h0 h1 /\
+      modifies (loc acc |+| loc pre) h0 h1 /\
      (let (acc_s, r_s) = S.poly1305_init (as_seq h0 key) in
-      let acc = gsub ctx 0ul (nlimb s) in
-      let p = gsub ctx (nlimb s) (precomplen s) in
-      F32xN.load_precompute_r_post #(width s) h1 p /\
-      feval h1 (gsub p 0ul 5ul) == r_s /\ feval h1 acc == acc_s))
-let poly1305_init_ #s ctx key =
+      F32xN.load_precompute_r_post #(width s) h1 pre /\
+      feval h1 (gsub pre 0ul 5ul) == r_s /\
+      feval h1 acc == acc_s))
+let poly1305_init_ #s key pre acc =
   let kr = sub key 0ul 16ul in
-  let acc = get_acc ctx in
-  let precomp_r = get_precomp_r ctx in
   let h0 = ST.get () in
   set_zero acc;
   let h1 = ST.get () in
   LSeq.eq_intro (feval h1 acc) (fst (S.poly1305_init (as_seq h0 key)));
-  poly1305_encode_r precomp_r kr
+  poly1305_encode_r #s pre kr
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
-let poly1305_init_32 (ctx:poly1305_ctx M32) (k:lbuffer uint8 32ul) = poly1305_init_ #M32 ctx k
+let poly1305_init_32 (k:lbuffer uint8 32ul) (pre:precomp_r M32) (acc:felem M32) = poly1305_init_ #M32 k pre acc
 [@CInline]
-let poly1305_init_128 (ctx:poly1305_ctx M128) (k:lbuffer uint8 32ul) = poly1305_init_ #M128 ctx k
+let poly1305_init_128 (k:lbuffer uint8 32ul) (pre:precomp_r M128) (acc:felem M128) = poly1305_init_ #M128 k pre acc
 inline_for_extraction
-let poly1305_init_256 (ctx:poly1305_ctx M256) (k:lbuffer uint8 32ul) = poly1305_init_ #M256 ctx k
+let poly1305_init_256 (k:lbuffer uint8 32ul) (pre:precomp_r M256) (acc:felem M256) = poly1305_init_ #M256 k pre acc
 
 inline_for_extraction noextract
 val poly1305_init:
     #s:field_spec
-  -> ctx:poly1305_ctx s
   -> key:lbuffer uint8 32ul
+  -> pre:precomp_r s
+  -> acc:felem s
   -> Stack unit
     (requires fun h ->
-      live h ctx /\ live h key /\ disjoint ctx key)
+      live h pre /\ live h acc /\  live h key /\
+      disjoint pre key /\ disjoint acc key /\
+      disjoint pre acc)
     (ensures  fun h0 _ h1 ->
-      modifies (loc ctx) h0 h1 /\
+      modifies (loc acc |+| loc pre) h0 h1 /\
      (let (acc_s, r_s) = S.poly1305_init (as_seq h0 key) in
-      let acc = gsub ctx 0ul (nlimb s) in
-      let p = gsub ctx (nlimb s) (precomplen s) in
-      F32xN.load_precompute_r_post #(width s) h1 p /\
-      feval h1 (gsub p 0ul 5ul) == r_s /\ feval h1 acc == acc_s))
-let poly1305_init #s ctx key =
+      F32xN.load_precompute_r_post #(width s) h1 pre /\
+      feval h1 (gsub pre 0ul 5ul) == r_s /\
+      feval h1 acc == acc_s))
+let poly1305_init #s key pre acc =
   match s with
-  | M32  -> poly1305_init_32 ctx key
-  | M128 -> poly1305_init_128 ctx key
-  | M256 -> poly1305_init_256 ctx key
+  | M32  -> poly1305_init_32 key pre acc
+  | M128 -> poly1305_init_128 key pre acc
+  | M256 -> poly1305_init_256 key pre acc
 (* WRAPPER to Prevent Inlining *)
 
 inline_for_extraction
@@ -347,45 +327,151 @@ let poly1305_update_multi #s len text pre acc =
       poly1305_update_multi_f #s pre bs nb len text i acc);
   fmul_rn_normalize acc pre
 
+inline_for_extraction noextract
+val poly1305_update1_f:
+    #s:field_spec{width s == 1}
+  -> p:precomp_r s
+  -> nb:size_t
+  -> len:size_t{v nb == v len / 16}
+  -> text:lbuffer uint8 len
+  -> i:size_t{v i < v nb}
+  -> acc:felem s
+  -> Stack unit
+    (requires fun h ->
+      live h p /\ live h text /\ live h acc /\
+      disjoint acc p /\ disjoint acc text /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+      F32xN.fmul_precomp_r_pre #(width s) h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+      //F32xN.fmul_precomp_r_pre #(width s) h1 p /\
+      feval h1 acc ==
+      LSeq.repeat_blocks_f #uint8 #(S.elem (width s)) 16
+	(as_seq h0 text) (S.update1 #(width s) (feval h0 (gsub p 0ul 5ul)) 16) (v nb) (v i) (feval h0 acc))
+let poly1305_update1_f #s pre nb len text i acc=
+  assert ((v i + 1) * 16 <= v nb * 16);
+  let block = sub #_ #_ #len text (i *! 16ul) 16ul in
+  update1 #s pre block acc
+
+inline_for_extraction noextract
+val poly1305_update1_rem:
+    #s:field_spec{width s == 1}
+  -> p:precomp_r s
+  -> rem:size_t{v rem < 16}
+  -> text:lbuffer uint8 rem
+  -> acc:felem s
+  -> Stack unit
+    (requires fun h ->
+      live h p /\ live h text /\ live h acc /\
+      disjoint acc p /\ disjoint acc text /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+      F32xN.fmul_precomp_r_pre #(width s) h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+      //F32xN.fmul_precomp_r_pre #(width s) h1 p /\
+      feval h1 acc == S.poly_update1_rem #(width s)
+	(feval h0 (gsub p 0ul 5ul)) (v rem) (as_seq h0 text) (feval h0 acc))
+let poly1305_update1_rem #s pre rem b acc =
+  if (rem >. 0ul) then update1_last #s pre rem b acc
+
 inline_for_extraction
-val poly1305_update1:
-    #s:field_spec
-  -> ctx:poly1305_ctx s
+val poly1305_update1_loop:
+    #s:field_spec{width s == 1}
   -> len:size_t
   -> text:lbuffer uint8 len
+  -> pre:precomp_r s
+  -> acc:felem s
   -> Stack unit
-    (requires fun h -> live h ctx /\ live h text)
-    (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
-let poly1305_update1 #s ctx len text =
-  let acc = get_acc ctx in
-  let pre = get_precomp_r ctx in
-
-  let blocks = len /. 16ul in
+    (requires fun h ->
+      live h text /\ live h acc /\ live h pre /\
+      disjoint acc text /\ disjoint acc pre /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+      F32xN.fmul_precomp_r_pre #(width s) h pre)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+      F32xN.fmul_precomp_r_pre #(width s) h1 pre /\
+     (let spec_fh h0 = LSeq.repeat_blocks_f 16 (as_seq h0 text)
+	(S.update1 #(width s) (feval h0 (gsub pre 0ul 5ul)) 16) (v len / 16) in
+      feval h1 acc == Lib.LoopCombinators.repeati (v len / 16) (spec_fh h0) (feval h0 acc)))
+let poly1305_update1_loop #s len text pre acc =
+  let nb = len /. 16ul in
   let rem = len %. 16ul in
-  let h0 = ST.get() in
-  admit();
-  loop_nospec #h0 blocks ctx
-  (fun i ->
-    let b = sub text (i *. 16ul) 16ul in
-    update1 #s pre b acc
-  );
-  if (rem >. 0ul) then (
-    let b = sub text (blocks *. 16ul) rem in
-    update1_last #s pre rem b acc)
+
+  let h0 = ST.get () in
+  [@ inline_let]
+  let spec_fh h0 =
+    LSeq.repeat_blocks_f 16 (as_seq h0 text)
+      (S.update1 #(width s) (feval h0 (gsub pre 0ul 5ul)) 16) (v nb) in
+
+  [@ inline_let]
+  let inv h (i:nat{i <= v nb}) =
+    modifies1 acc h0 h /\
+    live h pre /\ live h text /\ live h acc /\
+    disjoint acc pre /\ disjoint acc text /\
+    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+    F32xN.fmul_precomp_r_pre #(width s) h pre /\
+    feval h acc == Lib.LoopCombinators.repeati i (spec_fh h0) (feval h0 acc) in
+
+  Lib.Loops.for (size 0) nb inv
+    (fun i ->
+      Lib.LoopCombinators.unfold_repeati (v nb) (spec_fh h0) (feval h0 acc) (v i);
+      poly1305_update1_f #s pre nb len text i acc)
+
+inline_for_extraction
+val poly1305_update1:
+    #s:field_spec{width s == 1}
+  -> len:size_t
+  -> text:lbuffer uint8 len
+  -> pre:precomp_r s
+  -> acc:felem s
+  -> Stack unit
+    (requires fun h ->
+      live h text /\ live h acc /\ live h pre /\
+      disjoint acc text /\ disjoint acc pre /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+      F32xN.fmul_precomp_r_pre #(width s) h pre)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+      feval h1 acc ==
+      S.poly_update1 #(width s) (as_seq h0 text) (feval h0 acc) (feval h0 (gsub pre 0ul 5ul)))
+let poly1305_update1 #s len text pre acc =
+  let nb = len /. 16ul in
+  let rem = len %. 16ul in
+
+  [@ inline_let]
+  let spec_fh h0 =
+    LSeq.repeat_blocks_f 16 (as_seq h0 text)
+      (S.update1 #(width s) (feval h0 (gsub pre 0ul 5ul)) 16) (v nb) in
+
+  let h0 = ST.get () in
+  poly1305_update1_loop #s len text pre acc;
+  let h1 = ST.get () in
+  assert (feval h1 acc == Lib.LoopCombinators.repeati (v nb) (spec_fh h0) (feval h0 acc));
+  let b = sub text (nb *. 16ul) rem in
+  assume (disjoint acc b);
+  poly1305_update1_rem #s pre rem b acc; admit()
 
 inline_for_extraction
 val poly1305_update_:
     #s:field_spec
-  -> ctx:poly1305_ctx s
   -> len:size_t
   -> text:lbuffer uint8 len
+  -> pre:precomp_r s
+  -> acc:felem s
   -> Stack unit
-    (requires fun h -> live h ctx /\ live h text)
-    (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
-let poly1305_update_ #s ctx len text = admit();
-  let acc = get_acc ctx in
-  let pre = get_precomp_r ctx in
-
+    (requires fun h ->
+      live h text /\ live h acc /\ live h pre /\
+      disjoint acc text /\ disjoint acc pre /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+      F32xN.load_precompute_r_post #(width s) h pre)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc))
+let poly1305_update_ #s len text pre acc = admit();
   let sz_block = blocklen s in
   let len0 = (len /. sz_block) *. sz_block in
   let t0 = sub text 0ul len0 in
@@ -393,30 +479,37 @@ let poly1305_update_ #s ctx len text = admit();
 
   let len = len -. len0 in
   let text = sub text len0 len in
-  poly1305_update1 #s ctx len text
+  poly1305_update1 #s len text pre acc
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
-let poly1305_update_32 (ctx:poly1305_ctx M32) (len:size_t) (text:lbuffer uint8 len) = poly1305_update1 #M32 ctx len text
+let poly1305_update_32 (len:size_t) (text:lbuffer uint8 len) (pre:precomp_r M32) (acc:felem M32) = poly1305_update1 #M32 len text pre acc
 [@CInline]
-let poly1305_update_128 (ctx:poly1305_ctx M128) (len:size_t) (text:lbuffer uint8 len) = poly1305_update_ #M128 ctx len text
+let poly1305_update_128 (len:size_t) (text:lbuffer uint8 len) (pre:precomp_r M128) (acc:felem M128) = poly1305_update_ #M128 len text pre acc
 inline_for_extraction
-let poly1305_update_256 (ctx:poly1305_ctx M256) (len:size_t) (text:lbuffer uint8 len) = poly1305_update_ #M256 ctx len text
+let poly1305_update_256 (len:size_t) (text:lbuffer uint8 len) (pre:precomp_r M256) (acc:felem M256) = poly1305_update_ #M256 len text pre acc
 
 inline_for_extraction noextract
 val poly1305_update:
     #s:field_spec
-  -> ctx:poly1305_ctx s
   -> len:size_t
   -> text:lbuffer uint8 len
+  -> pre:precomp_r s
+  -> acc:felem s
   -> Stack unit
-    (requires fun h -> live h ctx /\ live h text)
-    (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1)
-let poly1305_update #s ctx len text =
+    (requires fun h ->
+      live h text /\ live h acc /\ live h pre /\
+      disjoint acc text /\ disjoint acc pre /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+      F32xN.load_precompute_r_post #(width s) h pre)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc))
+let poly1305_update #s len text pre acc =
   match s with
-  | M32 -> poly1305_update_32 ctx len text
-  | M128 -> poly1305_update_128 ctx len text
-  | M256 -> poly1305_update_256 ctx len text
+  | M32 -> poly1305_update_32 len text pre acc
+  | M128 -> poly1305_update_128 len text pre acc
+  | M256 -> poly1305_update_256 len text pre acc
 (* WRAPPER to Prevent Inlining *)
 
 
@@ -424,14 +517,13 @@ inline_for_extraction
 val poly1305_finish_:
     #s:field_spec
   -> key:lbuffer uint8 32ul
-  -> ctx:poly1305_ctx s
+  -> acc:felem s
   -> tag:lbuffer uint8 16ul
   -> Stack unit
-    (requires fun h -> live h ctx /\ live h tag /\ live h key)
+    (requires fun h -> live h acc /\ live h tag /\ live h key)
     (ensures  fun h0 _ h1 -> modifies (loc tag) h0 h1)
-let poly1305_finish_ #s key ctx tag = admit();
+let poly1305_finish_ #s key acc tag = admit();
   push_frame ();
-  let acc = get_acc ctx in
   reduce_felem acc;
 
   let ks = sub key (size 16) (size 16) in
@@ -445,26 +537,26 @@ let poly1305_finish_ #s key ctx tag = admit();
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
-let poly1305_finish_32 (key:lbuffer uint8 32ul) (ctx:poly1305_ctx M32) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M32 key ctx tag
+let poly1305_finish_32 (key:lbuffer uint8 32ul) (acc:felem M32) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M32 key acc tag
 [@CInline]
-let poly1305_finish_128 (key:lbuffer uint8 32ul) (ctx:poly1305_ctx M128) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M128 key ctx tag
+let poly1305_finish_128 (key:lbuffer uint8 32ul) (acc:felem M128) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M128 key acc tag
 [@CInline]
-let poly1305_finish_256 (key:lbuffer uint8 32ul) (ctx:poly1305_ctx M256) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M256 key ctx tag
+let poly1305_finish_256 (key:lbuffer uint8 32ul) (acc:felem M256) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M256 key acc tag
 
 inline_for_extraction noextract
 val poly1305_finish:
     #s:field_spec
   -> key:lbuffer uint8 32ul
-  -> ctx:poly1305_ctx s
+  -> acc:felem s
   -> tag:lbuffer uint8 16ul
   -> Stack unit
-    (requires fun h -> live h ctx /\ live h tag /\ live h key)
+    (requires fun h -> live h acc /\ live h tag /\ live h key)
     (ensures  fun h0 _ h1 -> modifies (loc tag) h0 h1)
-let poly1305_finish #s key ctx tag =
+let poly1305_finish #s key acc tag =
    match s with
-   | M32 -> poly1305_finish_32 key ctx tag
-   | M128 -> poly1305_finish_128 key ctx tag
-   | M256 -> poly1305_finish_256 key ctx tag
+   | M32 -> poly1305_finish_32 key acc tag
+   | M128 -> poly1305_finish_128 key acc tag
+   | M256 -> poly1305_finish_256 key acc tag
 (* WRAPPER to Prevent Inlining *)
 
 
@@ -481,8 +573,9 @@ let poly1305_finish #s key ctx tag =
 //     (ensures  fun h0 _ h1 -> modifies (loc tag) h0 h1)
 let poly1305_mac #s tag len text key =
   push_frame ();
-  let ctx = create (nlimb s +. precomplen s) (limb_zero s) in
-  poly1305_init ctx key;
-  poly1305_update ctx len text;
-  poly1305_finish key ctx tag;
+  let pre = create (precomplen s) (limb_zero s) in  
+  let acc = create (nlimb s) (limb_zero s) in
+  poly1305_init key pre acc; admit();
+  poly1305_update len text pre acc;
+  poly1305_finish #s key acc tag;
   pop_frame ()

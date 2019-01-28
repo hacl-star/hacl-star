@@ -78,9 +78,10 @@ let precomplen (s:field_spec) : size_t =
   | M128 -> 20ul
   | M256 -> 20ul
 
-
+inline_for_extraction
 type felem (s:field_spec) = lbuffer (limb s) (nlimb s)
 type felem_wide (s:field_spec) = lbuffer (wide s) (nlimb s)
+inline_for_extraction
 type precomp_r (s:field_spec) = lbuffer (limb s) (precomplen s)
 
 noextract

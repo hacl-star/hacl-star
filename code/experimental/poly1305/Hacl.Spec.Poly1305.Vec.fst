@@ -129,10 +129,13 @@ let poly_update_multi (#w:lanes) (text:bytes{length text % (w * size_block) = 0}
   let acc = repeat_blocks_multi #uint8 #(elem w) (w * size_block) text (updaten rw) acc in
   to_elem w (normalize_n acc r)
 
+let poly_update1_rem (#w:lanes) (r:elem w) (l:size_nat{l < 16}) (block:lbytes l) (acc:elem w) : Tot (elem w) =
+  if l = 0 then acc else update1 r l block acc
+
 let poly_update1 (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot (elem w) =
   repeat_blocks #uint8 #(elem w) size_block text
-  (fun bl -> update1 r size_block bl)
-  (fun l b res -> if l = 0 then res else update1 r l b res)
+  (update1 r size_block)
+  (poly_update1_rem r)
   acc
 
 let poly (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot (elem w) =
