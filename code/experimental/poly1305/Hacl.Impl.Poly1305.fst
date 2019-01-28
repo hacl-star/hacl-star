@@ -15,7 +15,6 @@ module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 module F32xN = Hacl.Impl.Poly1305.Field32xN
 
-friend Lib.Sequence
 friend Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
@@ -226,7 +225,7 @@ let update1_last #s pre len b acc =
 
 inline_for_extraction
 val updaten:
-    #s:field_spec{width s == 1}
+    #s:field_spec
   -> p:precomp_r s
   -> b:lbuffer uint8 (blocklen s)
   -> acc:felem s
@@ -251,9 +250,9 @@ let updaten #s pre b acc =
 
 inline_for_extraction noextract
 val poly1305_update_multi_f:
-    #s:field_spec{width s == 1}
+    #s:field_spec
   -> p:precomp_r s
-  -> bs:size_t{v bs == 16} //{v bs == v (blocklen s)}
+  -> bs:size_t{v bs == v (blocklen s)}
   -> nb:size_t
   -> len:size_t{v nb == v len / v bs /\ v len % v bs == 0}
   -> text:lbuffer uint8 len
@@ -278,14 +277,12 @@ let poly1305_update_multi_f #s pre bs nb len text i acc=
   let block = sub #_ #_ #len text (i *! bs) bs in
   updaten #s pre block acc
 
-#reset-options "--max_fuel 2 --z3rlimit 150"
-
 unfold
 let op_String_Access #a #len = LSeq.index #a #len
 
 inline_for_extraction
 val poly1305_update_multi:
-    #s:field_spec{width s == 1}
+    #s:field_spec
   -> len:size_t{v len % v (blocklen s) == 0}
   -> text:lbuffer uint8 len
   -> pre:precomp_r s
@@ -307,6 +304,8 @@ let poly1305_update_multi #s len text pre acc =
   let nb = len /. bs in
 
   let h0 = ST.get () in
+  LSeq.lemma_repeat_blocks_multi #uint8 #(S.elem (width s)) (v bs) (as_seq h0 text)
+    (S.updaten #(width s) (feval h0 (gsub pre 10ul 5ul))) (feval h0 acc);
   [@ inline_let]
   let spec_fh h0 =
     LSeq.repeat_blocks_f (v bs) (as_seq h0 text)
@@ -329,7 +328,7 @@ let poly1305_update_multi #s len text pre acc =
 
 inline_for_extraction noextract
 val poly1305_update1_f:
-    #s:field_spec{width s == 1}
+    #s:field_spec
   -> p:precomp_r s
   -> nb:size_t
   -> len:size_t{v nb == v len / 16}
@@ -356,7 +355,7 @@ let poly1305_update1_f #s pre nb len text i acc=
 
 inline_for_extraction noextract
 val poly1305_update1_rem:
-    #s:field_spec{width s == 1}
+    #s:field_spec
   -> p:precomp_r s
   -> rem:size_t{v rem < 16}
   -> text:lbuffer uint8 rem
@@ -377,52 +376,8 @@ let poly1305_update1_rem #s pre rem b acc =
   if (rem >. 0ul) then update1_last #s pre rem b acc
 
 inline_for_extraction
-val poly1305_update1_loop:
-    #s:field_spec{width s == 1}
-  -> len:size_t
-  -> text:lbuffer uint8 len
-  -> pre:precomp_r s
-  -> acc:felem s
-  -> Stack unit
-    (requires fun h ->
-      live h text /\ live h acc /\ live h pre /\
-      disjoint acc text /\ disjoint acc pre /\
-      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
-      F32xN.fmul_precomp_r_pre #(width s) h pre)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc acc) h0 h1 /\
-      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
-      F32xN.fmul_precomp_r_pre #(width s) h1 pre /\
-     (let spec_fh h0 = LSeq.repeat_blocks_f 16 (as_seq h0 text)
-	(S.update1 #(width s) (feval h0 (gsub pre 0ul 5ul)) 16) (v len / 16) in
-      feval h1 acc == Lib.LoopCombinators.repeati (v len / 16) (spec_fh h0) (feval h0 acc)))
-let poly1305_update1_loop #s len text pre acc =
-  let nb = len /. 16ul in
-  let rem = len %. 16ul in
-
-  let h0 = ST.get () in
-  [@ inline_let]
-  let spec_fh h0 =
-    LSeq.repeat_blocks_f 16 (as_seq h0 text)
-      (S.update1 #(width s) (feval h0 (gsub pre 0ul 5ul)) 16) (v nb) in
-
-  [@ inline_let]
-  let inv h (i:nat{i <= v nb}) =
-    modifies1 acc h0 h /\
-    live h pre /\ live h text /\ live h acc /\
-    disjoint acc pre /\ disjoint acc text /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
-    F32xN.fmul_precomp_r_pre #(width s) h pre /\
-    feval h acc == Lib.LoopCombinators.repeati i (spec_fh h0) (feval h0 acc) in
-
-  Lib.Loops.for (size 0) nb inv
-    (fun i ->
-      Lib.LoopCombinators.unfold_repeati (v nb) (spec_fh h0) (feval h0 acc) (v i);
-      poly1305_update1_f #s pre nb len text i acc)
-
-inline_for_extraction
 val poly1305_update1:
-    #s:field_spec{width s == 1}
+    #s:field_spec
   -> len:size_t
   -> text:lbuffer uint8 len
   -> pre:precomp_r s
@@ -441,19 +396,38 @@ val poly1305_update1:
 let poly1305_update1 #s len text pre acc =
   let nb = len /. 16ul in
   let rem = len %. 16ul in
+  let h0 = ST.get () in
+  LSeq.lemma_repeat_blocks #uint8 #(S.elem (width s)) 16 (as_seq h0 text)
+  (S.update1 #(width s) (feval h0 (gsub pre 0ul 5ul)) 16)
+  (S.poly_update1_rem #(width s) (feval h0 (gsub pre 0ul 5ul)))
+  (feval h0 acc);
 
   [@ inline_let]
   let spec_fh h0 =
     LSeq.repeat_blocks_f 16 (as_seq h0 text)
       (S.update1 #(width s) (feval h0 (gsub pre 0ul 5ul)) 16) (v nb) in
 
-  let h0 = ST.get () in
-  poly1305_update1_loop #s len text pre acc;
+  [@ inline_let]
+  let inv h (i:nat{i <= v nb}) =
+    modifies1 acc h0 h /\
+    live h pre /\ live h text /\ live h acc /\
+    disjoint acc pre /\ disjoint acc text /\
+    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+    F32xN.fmul_precomp_r_pre #(width s) h pre /\
+    feval h acc == Lib.LoopCombinators.repeati i (spec_fh h0) (feval h0 acc) in
+
+  Lib.Loops.for (size 0) nb inv
+    (fun i ->
+      Lib.LoopCombinators.unfold_repeati (v nb) (spec_fh h0) (feval h0 acc) (v i);
+      poly1305_update1_f #s pre nb len text i acc);
+
   let h1 = ST.get () in
   assert (feval h1 acc == Lib.LoopCombinators.repeati (v nb) (spec_fh h0) (feval h0 acc));
-  let b = sub text (nb *. 16ul) rem in
-  assume (disjoint acc b);
-  poly1305_update1_rem #s pre rem b acc; admit()
+  let b = sub text (nb *! 16ul) rem in
+  as_seq_gsub h1 text (nb *! 16ul) rem;
+  assert (as_seq h1 b == LSeq.sub (as_seq h1 text) (v nb * 16) (v rem));
+  assert (disjoint b acc);
+  poly1305_update1_rem #s pre rem b acc
 
 inline_for_extraction
 val poly1305_update_:
@@ -573,7 +547,7 @@ let poly1305_finish #s key acc tag =
 //     (ensures  fun h0 _ h1 -> modifies (loc tag) h0 h1)
 let poly1305_mac #s tag len text key =
   push_frame ();
-  let pre = create (precomplen s) (limb_zero s) in  
+  let pre = create (precomplen s) (limb_zero s) in
   let acc = create (nlimb s) (limb_zero s) in
   poly1305_init key pre acc; admit();
   poly1305_update len text pre acc;

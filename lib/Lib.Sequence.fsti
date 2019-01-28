@@ -267,6 +267,20 @@ val repeati_blocks:
   -> init:b ->
   Tot b
 
+let repeat_blocks_f
+  (#a:Type0)
+  (#b:Type0)
+  (bs:size_nat{bs > 0})
+  (inp:seq a)
+  (f:(lseq a bs -> b -> b))
+  (nb:nat{nb == length inp / bs})
+  (i:nat{i < nb})
+  (acc:b) : b
+ =
+  assert ((i+1) * bs <= nb * bs);
+  let block = Seq.slice inp (i * bs) (i * bs + bs) in
+  f block acc
+
 val repeat_blocks:
     #a:Type0
   -> #b:Type0
@@ -277,6 +291,23 @@ val repeat_blocks:
   -> init:b ->
   Tot b
 
+val lemma_repeat_blocks:
+    #a:Type0
+  -> #b:Type0
+  -> bs:size_nat{bs > 0}
+  -> inp:seq a
+  -> f:(lseq a bs -> b -> b)
+  -> l:(len:size_nat{len == length inp % bs} -> s:lseq a len -> b -> b)
+  -> init:b ->
+  Lemma (
+    let len = length inp in
+    let nb = len / bs in
+    let rem = len % bs in
+    let acc = Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f nb) init in
+    let last = Seq.slice inp (nb * bs) len in
+    let acc = l rem last acc in
+    repeat_blocks #a #b bs inp f l init == acc)
+
 val repeat_blocks_multi:
     #a:Type0
   -> #b:Type0
@@ -285,6 +316,19 @@ val repeat_blocks_multi:
   -> f:(lseq a blocksize -> b -> b)
   -> init:b ->
   Tot b
+
+val lemma_repeat_blocks_multi:
+    #a:Type0
+  -> #b:Type0
+  -> bs:size_nat{bs > 0}
+  -> inp:seq a{length inp % bs = 0}
+  -> f:(lseq a bs -> b -> b)
+  -> init:b ->
+  Lemma (
+    let len = length inp in
+    let nb = len / bs in
+    repeat_blocks_multi #a #b bs inp f init ==
+    Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f nb) init)
 
 (** Generates `n` blocks of length `len` by iteratively applying a function with an accumulator *)
 val generate_blocks:

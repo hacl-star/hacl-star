@@ -186,21 +186,6 @@ let repeati_blocks #a #b bs inp f g init =
   let last = seq_sub inp (nb * bs) rem in
   g nb rem last acc
 
-val repeat_blocks_f:
-    #a:Type0
-  -> #b:Type0
-  -> bs:size_nat{bs > 0}
-  -> inp:seq a
-  -> f:(lseq a bs -> b -> b)
-  -> nb:nat{nb == length inp / bs}
-  -> i:nat{i < nb}
-  -> acc:b
-  -> b
-let repeat_blocks_f #a #b bs inp f nb i acc =
-  assert ((i+1) * bs <= nb * bs);
-  let block = seq_sub inp (i * bs) bs in
-  f block acc
-
 let repeat_blocks #a #b bs inp f l init =
   let len = length inp in
   let nb = len / bs in
@@ -209,10 +194,14 @@ let repeat_blocks #a #b bs inp f l init =
   let last = seq_sub inp (nb * bs) rem in
   l rem last acc
 
+let lemma_repeat_blocks #a #b bs inp f l init = ()
+
 let repeat_blocks_multi #a #b bs inp f init =
   let len = length inp in
   let nb = len / bs in
   repeati nb (repeat_blocks_f bs inp f nb) init
+
+let lemma_repeat_blocks_multi #a #b bs inp f init = ()
 
 let generate_blocks_a (t:Type) (blocklen:size_nat) (n:nat) (a:(i:nat{i <= n} -> Type)) (i:nat{i <= n}) = a i & s:seq t{length s == i * blocklen}
 
