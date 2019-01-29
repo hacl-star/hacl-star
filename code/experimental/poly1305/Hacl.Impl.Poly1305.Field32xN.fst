@@ -354,8 +354,7 @@ val reduce_felem:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      feval h1 f == feval h0 f /\
-      felem_less h1 f S.prime)
+      (fas_nat h1 f).[0] == (feval h0 f).[0])
 let reduce_felem #w f =
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in

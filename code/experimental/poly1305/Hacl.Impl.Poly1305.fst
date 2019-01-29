@@ -505,27 +505,27 @@ val poly1305_finish_:
   -> Stack unit
     (requires fun h ->
       live h acc /\ live h tag /\ live h key /\
-      disjoint acc tag /\ disjoint key tag /\
+      disjoint acc tag /\ disjoint key tag /\ disjoint acc key /\
       F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc))
     (ensures  fun h0 _ h1 ->
-      modifies (loc tag) h0 h1 /\
+      modifies (loc tag |+| loc acc) h0 h1 /\
       as_seq h1 tag == S.finish #(width s) (as_seq h0 key) (feval h0 acc))
 let poly1305_finish_ #s key acc tag =
   push_frame ();
   reduce_felem acc;
 
-  let ks = sub key (size 16) (size 16) in
+  let ks = sub key 16ul 16ul in
   let sk = create (nlimb s) (limb_zero s) in
+  let h2 = ST.get () in
   load_felem_le sk ks;
-  fadd128_store_felem_le #s tag acc sk; admit();
+  let h3 = ST.get () in
+  assert_norm (pow2 128 < S.prime);
+  assert ((feval h3 sk).[0] == BSeq.nat_from_bytes_le (as_seq h2 ks));
+  assert ((feval h3 sk).[0] == (F32xN.as_nat5 (F32xN.transpose #(width s) (F32xN.as_tup5 h3 sk)).[0]) % S.prime);
+  FStar.Math.Lemmas.modulo_lemma (F32xN.as_nat5 (F32xN.transpose #(width s) (F32xN.as_tup5 h3 sk)).[0]) S.prime;
+  assert ((F32xN.fas_nat #(width s) h3 sk).[0] == (feval h3 sk).[0]);
+  fadd128_store_felem_le #s tag acc sk;
   pop_frame ()
-
-(*
-let finish (#w:lanes) (k:key) (acc:elem w) : Tot tag =
-  let s = nat_from_bytes_le (sub k 16 16) in
-  let n = (from_elem acc + s) % pow2 128 in
-  nat_to_bytes_le 16 n
-*)
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
@@ -545,9 +545,10 @@ val poly1305_finish:
     (requires fun h ->
       live h acc /\ live h tag /\ live h key /\
       disjoint acc tag /\ disjoint key tag /\
+      disjoint acc key /\
       F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc))
     (ensures  fun h0 _ h1 ->
-      modifies (loc tag) h0 h1 /\
+      modifies (loc tag |+| loc acc) h0 h1 /\
       as_seq h1 tag == S.finish #(width s) (as_seq h0 key) (feval h0 acc))
 let poly1305_finish #s key acc tag =
    match s with

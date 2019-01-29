@@ -120,7 +120,8 @@ val load_felem_le:
   -> f:felem s
   -> b:lbuffer uint8 16ul
   -> Stack unit
-    (requires fun h -> live h f /\ live h b)
+    (requires fun h -> 
+      live h f /\ live h b)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
@@ -237,8 +238,7 @@ val reduce_felem:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      feval h1 f == feval h0 f /\
-      felem_less #(width s) h1 f S.prime)
+      (fas_nat #(width s) h1 f).[0] == (feval h0 f).[0])
 let reduce_felem #s f =
   match s with
   | M32  -> F32xN.reduce_felem #1 f
