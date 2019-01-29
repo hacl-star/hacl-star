@@ -23,6 +23,7 @@ procedure {:quick}{:exportSpecs}{:public} memcpy(inline win:bool,ghost stack_b:b
         buffer_readable(mem, stack_b);
         buffer_readable(mem, dst);
         buffer_readable(mem, src);
+        buffer_writeable(dst);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf64(dst, mem, memTaint, Secret);
         valid_taint_buf64(src, mem, memTaint, Secret);

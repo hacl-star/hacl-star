@@ -356,7 +356,7 @@ verify_options = [
 
    # Temporarily deactivate verification of the whole interop layer
 #   ('code/arch/x64/interop/*', None), 
-#   ('code/arch/x64/interop/new/*', None), 
+   ('code/arch/x64/interop/new/*', None), 
    ('code/arch/x64/interop/new/Vale.AsLowStar.Test.fst', None), 
 #  ('code/arch/x64/interop/*', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', ''))),
 

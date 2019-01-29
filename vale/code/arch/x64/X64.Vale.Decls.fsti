@@ -94,26 +94,24 @@ unfold let va_operand_xmm = xmm
 
 (* Abbreviations *)
 unfold let get_reg (o:va_reg_operand) : reg = OReg?.r (t_op_to_op o)
-//unfold let buffer_readable = M.buffer_readable
 unfold let buffer_readable (#t:M.base_typ) (h:M.mem) (b:M.buffer t) : GTot prop0 = M.buffer_readable #t h b
-//unfold let buffer_length = M.buffer_length
+unfold let buffer_writeable (#t:M.base_typ) (b:M.buffer t) : GTot prop0 = M.buffer_writeable #t b
 unfold let buffer_length (#t:M.base_typ) (b:M.buffer t) = M.buffer_length #t b
 unfold let buffer64_as_seq (m:M.mem) (b:M.buffer64) : GTot (Seq.seq nat64) = M.buffer_as_seq m b
 unfold let buffer128_as_seq (m:M.mem) (b:M.buffer128) : GTot (Seq.seq quad32) = M.buffer_as_seq m b
 unfold let valid_src_addr (#t:M.base_typ) (m:M.mem) (b:M.buffer t) (i:int) : prop0 =
   0 <= i /\ i < buffer_length b /\ buffer_readable m b
 unfold let valid_dst_addr (#t:M.base_typ) (m:M.mem) (b:M.buffer t) (i:int) : prop0 =
-  0 <= i /\ i < buffer_length b /\ buffer_readable m b
+  0 <= i /\ i < buffer_length b /\ buffer_readable m b /\ buffer_writeable b
 unfold let buffer64_read (b:M.buffer64) (i:int) (m:M.mem) : GTot nat64 = M.buffer_read b i m
 unfold let buffer64_write (b:M.buffer64) (i:int) (v:nat64) (m:M.mem) : GTot M.mem =
-  if FStar.StrongExcludedMiddle.strong_excluded_middle (buffer_readable m b) then
+  if FStar.StrongExcludedMiddle.strong_excluded_middle (buffer_readable m b /\ buffer_writeable b) then
     M.buffer_write b i v m else m
 unfold let buffer128_read (b:M.buffer128) (i:int) (m:M.mem) : GTot quad32 = M.buffer_read b i m
 unfold let buffer128_write (b:M.buffer128) (i:int) (v:quad32) (m:M.mem) : GTot M.mem =
-  if FStar.StrongExcludedMiddle.strong_excluded_middle (buffer_readable m b) then
+  if FStar.StrongExcludedMiddle.strong_excluded_middle (buffer_readable m b /\ buffer_writeable b) then
     M.buffer_write b i v m else m
 unfold let modifies_mem (s:M.loc) (h1 h2:M.mem) : GTot prop0 = M.modifies s h1 h2
-//unfold let loc_buffer = M.loc_buffer
 unfold let loc_buffer(#t:M.base_typ) (b:M.buffer t) = M.loc_buffer #t b
 unfold let locs_disjoint = M.locs_disjoint
 unfold let loc_union = M.loc_union
@@ -358,8 +356,12 @@ let validSrcAddrs64 (m:M.mem) (addr:int) (b:M.buffer64) (len:int) (memTaint:M.me
     M.buffer_addr b m == addr /\
     M.valid_taint_buf64 b m memTaint t
 
-unfold
-let validDstAddrs64 = validSrcAddrs64
+let validDstAddrs64 (m:M.mem) (addr:int) (b:M.buffer64) (len:int) (memTaint:M.memtaint) (t:taint) =
+    buffer_readable m b /\
+    buffer_writeable b /\
+    len <= buffer_length b /\
+    M.buffer_addr b m == addr /\
+    M.valid_taint_buf64 b m memTaint t
 
 let validSrcAddrs128 (m:M.mem) (addr:int) (b:M.buffer128) (len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
@@ -369,6 +371,7 @@ let validSrcAddrs128 (m:M.mem) (addr:int) (b:M.buffer128) (len:int) (memTaint:M.
 
 let validDstAddrs128 (m:M.mem) (addr:int) (b:M.buffer128) (len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
+    buffer_writeable b /\
     len <= buffer_length b /\
     M.buffer_addr b m == addr /\
     M.valid_taint_buf128 b m memTaint t
@@ -379,11 +382,17 @@ let validSrcAddrsOffset128 (m:M.mem) (addr:int) (b:M.buffer128) (offset len:int)
     M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
     M.valid_taint_buf128 b m memTaint t
 
-let validDstAddrsOffset128 = validSrcAddrsOffset128
+let validDstAddrsOffset128 (m:M.mem) (addr:int) (b:M.buffer128) (offset len:int) (memTaint:M.memtaint) (t:taint) =
+    buffer_readable m b /\
+    buffer_writeable b /\
+    offset + len <= buffer_length b /\
+    M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
+    M.valid_taint_buf128 b m memTaint t
 
 let valid_stack_slots (m:M.mem) (rsp:int) (b:M.buffer64) (num_slots:int) (memTaint:M.memtaint) =
     M.valid_taint_buf64 b m memTaint Public /\
     buffer_readable m b /\
+    buffer_writeable b /\
     num_slots <= buffer_length b /\
     (let open FStar.Mul in
      rsp == M.buffer_addr b m + 8 * num_slots /\
