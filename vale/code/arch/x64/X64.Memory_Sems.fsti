@@ -64,7 +64,8 @@ val same_domain_update64: b:buffer64 -> i:nat -> v:nat64 -> h:mem -> Lemma
 val low_lemma_store_mem64 : b:buffer64 -> i:nat-> v:nat64 -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
-    buffer_readable h b
+    buffer_readable h b /\
+    buffer_writeable b
   )
   (ensures (
     same_domain_update64 b i v h;
@@ -99,7 +100,8 @@ val same_domain_update128: b:buffer128 -> i:nat -> v:quad32 -> h:mem -> Lemma
 val low_lemma_store_mem128 : b:buffer128 -> i:nat-> v:quad32 -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
-    buffer_readable h b
+    buffer_readable h b /\
+    buffer_writeable b
   )
   (ensures (
     same_domain_update128 b i v h;

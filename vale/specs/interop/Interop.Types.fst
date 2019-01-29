@@ -22,8 +22,16 @@ let view_n = function
 
 [@__reduce__]
 noeq
-type b8 =
-| Buffer: #rrel:MB.srel UInt8.t -> #rel:MB.srel UInt8.t -> b:MB.mbuffer UInt8.t rrel rel -> b8
+type b8' =
+| Buffer: 
+  #rrel:MB.srel UInt8.t -> 
+  #rel:MB.srel UInt8.t -> 
+  b:MB.mbuffer UInt8.t rrel rel ->
+  writeable:bool ->
+  b8'
+
+// A buffer is considered writeable iff the preorders are trivial
+type b8 = (b:b8'{b.writeable <==> (forall s1 s2. b.rrel s1 s2 /\ b.rel s1 s2)})
 
 let disjoint_addr addr1 length1 addr2 length2 =
   (* The first buffer is completely before the second, or the opposite *)

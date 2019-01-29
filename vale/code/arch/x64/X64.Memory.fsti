@@ -187,12 +187,12 @@ val buffer_write (#t:base_typ) (b:buffer t) (i:int) (v:base_typ_as_vale_type t) 
 
 
 val valid_mem64 : ptr:int -> h:mem -> GTot bool // is there a 64-bit word at address ptr?
-val writeable_mem64 : ptr:int -> h:mem -> GTot prop0 // can we write a 64-bit word at address ptr?
+val writeable_mem64 : ptr:int -> h:mem -> GTot bool // can we write a 64-bit word at address ptr?
 val load_mem64 : ptr:int -> h:mem -> GTot nat64 // the 64-bit word at ptr (if valid_mem64 holds)
 val store_mem64 : ptr:int -> v:nat64 -> h:mem -> GTot mem
 
 val valid_mem128 (ptr:int) (h:mem) : GTot bool
-val writeable_mem128 (ptr:int) (h:mem) : GTot prop0
+val writeable_mem128 (ptr:int) (h:mem) : GTot bool
 val load_mem128  (ptr:int) (h:mem) : GTot quad32
 val store_mem128 (ptr:int) (v:quad32) (h:mem) : GTot mem
 
@@ -272,30 +272,6 @@ val lemma_store_mem128 : b:buffer128 -> i:nat -> v:quad32 -> h:mem -> Lemma
   (ensures
     store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h == buffer_write b i v h
   )
-
-val lemma_store_load_mem64 : ptr:int -> v:nat64 -> h:mem -> Lemma
-  (requires writeable_mem64 ptr h)
-  (ensures (load_mem64 ptr (store_mem64 ptr v h) = v))
-
-val lemma_frame_store_mem64: i:int -> v:nat64 -> h:mem -> Lemma (
-  let h' = store_mem64 i v h in
-  forall i'. i' <> i /\ valid_mem64 i h /\ valid_mem64 i' h ==> load_mem64 i' h = load_mem64 i' h')
-
-val lemma_valid_store_mem64: i:int -> v:nat64 -> h:mem -> Lemma (
-  let h' = store_mem64 i v h in
-  forall j. valid_mem64 j h <==> valid_mem64 j h')
-
-val lemma_store_load_mem128 : ptr:int -> v:quad32 -> h:mem -> Lemma
-  (requires writeable_mem128 ptr h)
-  (ensures load_mem128 ptr (store_mem128 ptr v h) = v)
-
-val lemma_frame_store_mem128: i:int -> v:quad32 -> h:mem -> Lemma (
-  let h' = store_mem128 i v h in
-  forall i'. i' <> i /\ valid_mem128 i h /\ valid_mem128 i' h ==> load_mem128 i' h = load_mem128 i' h')
-
-val lemma_valid_store_mem128: i:int -> v:quad32 -> h:mem -> Lemma (
-  let h' = store_mem128 i v h in
-  forall j. valid_mem128 j h <==> valid_mem128 j h')
 
 //Memtaint related functions
 

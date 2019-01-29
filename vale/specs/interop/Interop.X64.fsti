@@ -120,7 +120,7 @@ let arg_as_nat64 (a:arg) : GTot MS.nat64 =
   | TD_Base TUInt64 ->
      UInt64.v x
   | TD_Buffer _ _ ->
-    let b:b8 = Buffer (x <: B.buffer UInt8.t) in
+    let b:b8 = Buffer (x <: B.buffer UInt8.t) true in
     global_addrs_map b
 
 [@__reduce__]
@@ -142,7 +142,7 @@ let regs_with_stack (regs:registers) (#num_b8_slots:_) (stack_b:stack_buffer num
     fun r ->
       let open FStar.Mul in
       if r = MS.Rsp then
-        global_addrs_map (Buffer stack_b) + num_b8_slots
+        global_addrs_map (Buffer stack_b true) + num_b8_slots
       else regs r
 
 [@__reduce__]
@@ -167,7 +167,7 @@ let upd_taint_map_b8 (taint:taint_map) (x:b8) (tnt:MS.taint)  : taint_map =
 let upd_taint_map_arg (a:arg) (tm:taint_map) : taint_map =
     match a with
     | (| TD_Buffer t {taint=tnt}, x |) ->
-      upd_taint_map_b8 tm (Buffer x) tnt
+      upd_taint_map_b8 tm (Buffer x true) tnt
     | _ ->
       tm
 
@@ -187,7 +187,7 @@ let taint_of_arg (a:arg) =
 let taint_arg_b8 (a:arg{Some? (taint_of_arg a)}) : b8 =
   let (| tag, x |) = a in
   match tag with
-  | TD_Buffer _ _ -> Buffer (x <: B.buffer UInt8.t)
+  | TD_Buffer _ _ -> Buffer (x <: B.buffer UInt8.t) true
 
 let rec taint_arg_args_b8_mem (args:list arg) (a:arg)
   : Lemma (List.memP a args /\ Some? (taint_of_arg a) ==>

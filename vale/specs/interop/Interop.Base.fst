@@ -259,7 +259,7 @@ let mem_roots (args:list arg) =
 let args_b8 (args:list arg) : GTot (list b8) =
   let maybe_cons_buffer (x:arg) (args:list b8) : list b8 =
       match x with
-      | (|TD_Buffer _ _, x|) -> (Buffer x) :: args
+      | (|TD_Buffer _ _, x|) -> (Buffer x true) :: args
       | _ -> args
   in
   List.Tot.fold_right_gtot args maybe_cons_buffer []
@@ -311,12 +311,12 @@ let rec args_b8_mem (l:list arg) (y:b8)
              L.memP a l /\
              (match a with
               | (| TD_Base _, _|) -> False
-              | (| TD_Buffer _ _, x|) -> Buffer x == y)))
+              | (| TD_Buffer _ _, x|) -> Buffer x true == y)))
   = let goal (l:list arg) (a:arg) =
         L.memP a l /\
         (match a with
          | (| TD_Base _, _|) -> False
-         | (| TD_Buffer _ _, x|) -> Buffer x == y)
+         | (| TD_Buffer _ _, x|) -> Buffer x true == y)
     in
     match l with
     | [] -> ()
@@ -327,12 +327,12 @@ let rec args_b8_mem (l:list arg) (y:b8)
         assert ((exists a. goal tl a) ==> (exists a. goal l a))
       | (| TD_Buffer bt q, x |) ->  
         let aux_1 ()
-          : Lemma (requires (y == Buffer x))
+          : Lemma (requires (y == Buffer x true))
                   (ensures (exists a. goal l a)) =
           FStar.Classical.exists_intro (goal l) hd
         in
         let aux_2 ()
-          : Lemma (requires (Buffer x =!= y))
+          : Lemma (requires (Buffer x true =!= y))
                   (ensures (L.memP y (args_b8 l) <==> (exists a. goal l a))) =
           args_b8_mem tl y
         in            
@@ -365,7 +365,7 @@ let rec args_b8_live (hs:HS.mem) (args:list arg{all_live hs args})
         assert (args_b8 args == args_b8 tl)
       | (| TD_Buffer t _, x |) ->
         assert (B.live hs x);
-        assert (args_b8 args == Buffer x :: args_b8 tl)
+        assert (args_b8 args == Buffer x true :: args_b8 tl)
 
 let liveness_disjointness (args:list arg) (h:mem_roots args)
   : Lemma (list_disjoint_or_eq (args_b8 args) /\
