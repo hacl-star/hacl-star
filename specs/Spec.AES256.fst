@@ -13,8 +13,8 @@ open Lib.LoopCombinators
 
 (* Parameters for AES-256 *)
 let nb = 4
-let nk = 8 // 4, 6, or 8
-let nr = 14 // 10, 12, or 14
+let nk = 8
+let nr = 14
 
 let wordlen = 4
 let blocklen  = wordlen * nb
@@ -34,11 +34,11 @@ type word  = lbytes wordlen
 type rnd = r:size_nat{r <= nr}
 type idx_16 = ctr:size_nat{ctr <= 16}
 
-private val xtime: uint8 -> Tot uint8
+val xtime: uint8 -> Tot uint8
 let xtime b =
   (b <<. 1ul) ^. (((b >>. 7ul) &. (u8 0x1)) *. (u8 0x1b))
 
-private val multiply: a:uint8 -> b:uint8 -> Tot uint8
+val multiply: a:uint8 -> b:uint8 -> Tot uint8
 let multiply a b =
   ((a *. (b &. (u8 0x1)))
   ^. (xtime a *. ((b >>. 1ul) &. (u8 0x1)))
@@ -157,23 +157,34 @@ val subBytes_sbox: state:block -> block
 let subBytes_sbox state =
   subBytes_aux_sbox state 0
 
-val shiftRows_: state:block -> i:size_nat{i < 4} -> block
-let shiftRows_ state i =
-  let tmp = state.[i] in
-  let state = state.[i] <- state.[i + 4] in
-  let state = state.[i + 4] <- state.[i + 8] in
-  let state = state.[i + 8] <- state.[i + 12] in
-  let state = state.[i + 12] <- tmp in
-  state
-
-#set-options "--z3rlimit 10"
+#set-options "--z3rlimit 40"
 
 val shiftRows: state:block -> block
 let shiftRows state =
-  let state = shiftRows_ state 1 in
-  let state = shiftRows_ state 2 in
-  let state = shiftRows_ state 3 in
+  let i = 1 in
+  let tmp           = state.[i]                    in
+  let state : block = state.[i]    <- state.[i+4]  in
+  let state : block = state.[i+4]  <- state.[i+8]  in
+  let state : block = state.[i+8]  <- state.[i+12] in
+  let state : block = state.[i+12] <- tmp          in
+
+  let i = 2 in
+  let tmp           = state.[i]                    in
+  let state : block = state.[i]    <- state.[i+8]  in
+  let state : block = state.[i+8]  <- tmp          in
+  let tmp           = state.[i+4]                  in
+  let state : block = state.[i+4]  <- state.[i+12] in
+  let state : block = state.[i+12] <- tmp in
+
+  let i = 3 in
+  let tmp   =         state.[i]                    in
+  let state : block = state.[i]    <- state.[i+12] in
+  let state : block = state.[i+12] <- state.[i+8]  in
+  let state : block = state.[i+8]  <- state.[i+4]  in
+  let state : block = state.[i+4]  <- tmp          in
   state
+
+#set-options "--z3rlimit 10"
 
 val mixColumns_: state:block -> c:size_nat{c < 4} -> block
 let mixColumns_ state c =
@@ -370,21 +381,34 @@ val invSubBytes_sbox: state:block -> block
 let invSubBytes_sbox state =
   invSubBytes_aux_sbox state 0
 
-val invShiftRows_ : state:block -> i:size_nat{i < 4} -> Tot block
-let invShiftRows_ state i =
-  let tmp = state.[i] in
-  let state = state.[i]      <- state.[i + 4] in
-  let state = state.[i + 4]  <- state.[i + 8] in
-  let state = state.[i + 8]  <- state.[i + 12] in
-  let state = state.[i + 12]  <- tmp in
-  state
+#set-options "--z3rlimit 40"
 
 val invShiftRows: state:block -> block
 let invShiftRows state =
-  let state = invShiftRows_ state 3 in
-  let state = invShiftRows_ state 2 in
-  let state = invShiftRows_ state 1 in
+  let i = 3 in
+  let tmp           = state.[i]                    in
+  let state : block = state.[i]    <- state.[i+4]  in
+  let state : block = state.[i+4]  <- state.[i+8]  in
+  let state : block = state.[i+8]  <- state.[i+12] in
+  let state : block = state.[i+12] <- tmp          in
+
+  let i = 2 in
+  let tmp           = state.[i] in
+  let state : block = state.[i]    <- state.[i+8]  in
+  let state : block = state.[i+8]  <- tmp          in
+  let tmp           = state.[i+4]                  in
+  let state : block = state.[i+4]  <- state.[i+12] in
+  let state : block = state.[i+12] <- tmp          in
+
+  let i = 1 in
+  let tmp           = state.[i]                    in
+  let state : block = state.[i]    <- state.[i+12] in
+  let state : block = state.[i+12] <- state.[i+8]  in
+  let state : block = state.[i+8]  <- state.[i+4]  in
+  let state : block = state.[i+4]  <- tmp          in
   state
+
+#set-options "--z3rlimit 10"
 
 val invMixColumns_: state:block -> c:size_nat{c < 4} -> Tot block
 let invMixColumns_ state c =

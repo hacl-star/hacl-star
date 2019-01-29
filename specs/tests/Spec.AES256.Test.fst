@@ -63,32 +63,32 @@ let test2_output_ciphertext = of_list (List.Tot.map u8 [
   0xea; 0xfc; 0x49; 0x90; 0x4b; 0x49; 0x60; 0x89
 ])
 
+let test_compare_buffers (msg:string) (expected:seq uint8) (computed:seq uint8) =
+  IO.print_string "\n";
+  IO.print_string msg;
+  IO.print_string "\nexpected (";
+  IO.print_uint32_dec (UInt32.uint_to_t (length expected));
+  IO.print_string "):\n";
+  FStar.List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list expected);
+  IO.print_string "\n";
+  IO.print_string "computed (";
+  IO.print_uint32_dec (UInt32.uint_to_t (length computed));
+  IO.print_string "):\n";
+  FStar.List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list computed);
+  IO.print_string "\n";
+  let result =
+    for_all2 #uint8 #uint8 #(length computed) (fun x y -> uint_to_nat #U8 x = uint_to_nat #U8 y)
+      computed expected
+  in
+  if result then IO.print_string "\nSuccess !\n"
+  else IO.print_string "\nFailed !\n"
+
+
 let test() : FStar.All.ML unit =
   let computed1 = keyExpansion test1_input_key1 in
-  IO.print_string "TEST1: key expansion\n";
-  IO.print_string "expected:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_output_expanded);
-  IO.print_string "\n";
-  IO.print_string "computed:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list #uint8 computed1);
-  IO.print_string "\n";
-  let result1 =
-    for_all2 (fun x y -> uint_to_nat #U8 x = uint_to_nat #U8 y) computed1 test1_output_expanded
-  in
-  if result1 then IO.print_string "\nSuccess !\n"
-  else IO.print_string "\nFailed !\n";
-
-  IO.print_string "TEST2: cipher\n";
-  IO.print_string "expected:\n";
+  test_compare_buffers "TEST1: key expansion" test1_output_expanded computed1;
   let test2_xkey = keyExpansion test2_input_key in
   let test2_computed = cipher test2_input_plaintext test2_xkey in
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_output_ciphertext);
-  IO.print_string "\n";
-  IO.print_string "computed:\n";
-  FStar.List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list #uint8 test2_computed);
-  IO.print_string "\n";
-  let result2 =
-    for_all2 (fun x y -> uint_to_nat #U8 x = uint_to_nat #U8 y) test2_computed test2_output_ciphertext
-  in
-  if result2 then IO.print_string "\nSuccess !\n"
-  else IO.print_string "\nFailed !\n"
+  test_compare_buffers "TEST2: cipher" test2_output_ciphertext test2_computed;
+  let test2_inv_computed = inv_cipher test2_output_ciphertext test2_xkey in
+  test_compare_buffers "TEST3: inv_cipher" test2_input_plaintext test2_inv_computed
