@@ -388,6 +388,7 @@ let as_lowstar_sig_post_weak
     (ret:als_ret)
     (h1:HS.mem) =
   (* write it this way to be reduction friendly *)
+  let rax = fst ret in
   let ret = Ghost.reveal (snd ret) in
   num_b8_slots == As_lowstar_sig_ret?.num_b8_slots ret /\
   args == As_lowstar_sig_ret?.args ret /\
@@ -404,6 +405,7 @@ let as_lowstar_sig_post_weak
      let pre_pop = hs_of_mem final_mem in
      HS.poppable pre_pop /\
      h1 == HS.pop pre_pop /\
+     rax == return_val s1 /\
      post_rel h0 s0 push_h0 alloc_push_h0 b (return_val s1, fuel, final_mem) s1))
 
 [@__reduce__]

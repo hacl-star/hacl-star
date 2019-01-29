@@ -270,7 +270,7 @@ let aesni_test ()
   : Stack UInt64.t
     (requires fun h0 -> True)
     (ensures fun h0 ret_val h1 -> (UInt64.v ret_val) =!= 0 ==> aesni_enabled /\ pclmulqdq_enabled)
-  by (T.dump "A") (* in case you want to look at the VC *)
+//  by (T.dump "A") (* in case you want to look at the VC *)
   = 
   let x, _ = lowstar_aesni_normal_t () in //This is a call to the interop wrapper
   x
