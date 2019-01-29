@@ -181,6 +181,6 @@ let create_initial_vale_state
     { ok = true;
       regs = X64.Vale.Regs.of_fun t_state.TS.state.BS.regs;
       xmms = X64.Vale.Xmms.of_fun t_state.TS.state.BS.xmms;
-      flags = 0; // TODO: REVIEW
+      flags = IA.init_flags;
       mem = as_vale_mem mem;
       memTaint = TS.(t_state.memTaint) }

@@ -45,14 +45,15 @@ let addrs (l:ptrs) : (f:addr_map l & i:MS.nat64 { forall x. f x <= i }) =
     admit()
 *)
 
-//The initial registers and xmms
+//The initial registers, xmms and flags
 assume
 val init_regs: MS.reg -> MS.nat64
 
 assume
 val init_xmms: MS.xmm -> MS.quad32
 
-//TODO: init_flags
+assume
+val init_flags: MS.nat64
 
 // Abstract current operating system from Low*
 assume

@@ -237,7 +237,7 @@ let create_initial_trusted_state
       BS.ok = true;
       BS.regs = regs;
       BS.xmms = xmms;
-      BS.flags = 0;
+      BS.flags = IA.init_flags;
       BS.mem = down_mem mem
     } in
     {
