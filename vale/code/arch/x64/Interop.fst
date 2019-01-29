@@ -3,7 +3,7 @@ module Interop
 module List = FStar.List.Tot.Base
 module HS = FStar.Monotonic.HyperStack
 module HH = FStar.Monotonic.HyperHeap
-module B = LowStar.Buffer
+module MB = LowStar.Monotonic.Buffer
 module M = LowStar.Modifies
 
 open Opaque_s
@@ -116,19 +116,19 @@ let rec monotone_domain_write_vale_mem
 
 let correct_down_p_cancel (mem:mem) heap (p:b8) : Lemma
   (forall p'. p == p' ==>       
-      (let length = B.length p in
-      let contents = B.as_seq (hs_of_mem mem) p in
+      (let length = MB.length p.b in
+      let contents = MB.as_seq (hs_of_mem mem) p.b in
       let addr = addrs_of_mem mem p in
       let new_heap = write_vale_mem contents length addr 0 heap in
       correct_down_p mem new_heap p')) = 
   let rec aux (p':b8) : Lemma 
-    (p == p'  ==> (let length = B.length p in
-      let contents = B.as_seq (hs_of_mem mem) p in
+    (p == p'  ==> (let length = MB.length p.b in
+      let contents = MB.as_seq (hs_of_mem mem) p.b in
       let addr = addrs_of_mem mem p in
       let new_heap = write_vale_mem contents length addr 0 heap in
       correct_down_p mem new_heap p')) =
-        let length = B.length p in
-        let contents = B.as_seq (hs_of_mem mem) p in
+        let length = MB.length p.b in
+        let contents = MB.as_seq (hs_of_mem mem) p.b in
         let addr = addrs_of_mem mem p in
         let new_heap = write_vale_mem contents length addr 0 heap in
 	load_store_write_vale_mem contents length addr 0 heap
@@ -137,37 +137,37 @@ let correct_down_p_cancel (mem:mem) heap (p:b8) : Lemma
       
 let correct_down_p_frame (mem:mem) (heap:heap) (p:b8) : Lemma
   (forall p'. disjoint p p' /\ correct_down_p mem heap p' ==>       
-      (let length = B.length p in
-      let contents = B.as_seq (hs_of_mem mem) p in
+      (let length = MB.length p.b in
+      let contents = MB.as_seq (hs_of_mem mem) p.b in
       let addr = addrs_of_mem mem p in
       let new_heap = write_vale_mem contents length addr 0 heap in
       correct_down_p mem new_heap p')) = 
   let rec aux (p':b8) : Lemma 
-    (disjoint p p' /\ correct_down_p mem heap p' ==> (let length = B.length p in
-      let contents = B.as_seq (hs_of_mem mem) p in
+    (disjoint p p' /\ correct_down_p mem heap p' ==> (let length = MB.length p.b in
+      let contents = MB.as_seq (hs_of_mem mem) p.b in
       let addr = addrs_of_mem mem p in
       let new_heap = write_vale_mem contents length addr 0 heap in
       correct_down_p mem new_heap p')) =
-        let length = B.length p in
-        let contents = B.as_seq (hs_of_mem mem) p in
+        let length = MB.length p.b in
+        let contents = MB.as_seq (hs_of_mem mem) p.b in
         let addr = addrs_of_mem mem p in
         let new_heap = write_vale_mem contents length addr 0 heap in
 	Classical.forall_intro (Classical.move_requires (frame_write_vale_mem contents length addr 0 heap))
   in
   Classical.forall_intro aux
 
-let rec addrs_ptr_lemma (i:nat) (addrs:addr_map) (ptr:b8{i <= B.length ptr}) (acc:Set.set int) (x:int) : Lemma
+let rec addrs_ptr_lemma (i:nat) (addrs:addr_map) (ptr:b8{i <= MB.length ptr.b}) (acc:Set.set int) (x:int) : Lemma
   (requires True)
   (ensures Set.mem x (addrs_ptr i addrs ptr acc) <==>
-    ((addrs ptr + i <= x /\ x < addrs ptr + B.length ptr) \/ Set.mem x acc))
-  (decreases (B.length ptr - i)) =
-  if i = B.length ptr then ()
+    ((addrs ptr + i <= x /\ x < addrs ptr + MB.length ptr.b) \/ Set.mem x acc))
+  (decreases (MB.length ptr.b - i)) =
+  if i = B.length ptr.b then ()
   else addrs_ptr_lemma (i+1) addrs ptr (Set.union (Set.singleton (addrs ptr + i)) acc) x
 
 let rec addrs_set_lemma_aux (addrs:addr_map) (ptrs:list b8) (acc:Set.set int) (x:int) : Lemma
   (requires True)
   (ensures Set.mem x (List.fold_right_gtot ptrs (addrs_ptr 0 addrs) acc) <==>
-    ((exists (b:b8{List.memP b ptrs}). addrs b <= x /\ x < addrs b + B.length b) \/ Set.mem x acc)) =
+    ((exists (b:b8{List.memP b ptrs}). addrs b <= x /\ x < addrs b + B.length b.b) \/ Set.mem x acc)) =
   match ptrs with
   | [] -> ()
   | a::q -> 
@@ -179,8 +179,8 @@ let addrs_set_lemma mem x =
   addrs_set_lemma_aux (addrs_of_mem mem) (ptrs_of_mem mem) Set.empty x
 
 let write_buffer_vale (a:b8) (heap:heap) (mem:mem) =
-  let length = B.length a in
-  let contents = B.as_seq (hs_of_mem mem) a in
+  let length = B.length a.b in
+  let contents = B.as_seq (hs_of_mem mem) a.b in
   let addr = addrs_of_mem mem a in
   write_vale_mem contents length addr 0 heap
 
@@ -197,8 +197,8 @@ let rec down_mem_aux
     | [] -> h
     | a::q ->
       let new_heap = write_buffer_vale a h mem in
-      let length = B.length a in
-      let contents = B.as_seq (hs_of_mem mem) a in
+      let length = B.length a.b in
+      let contents = B.as_seq (hs_of_mem mem) a.b in
       let addr = addrs_of_mem mem a in      
       load_store_write_vale_mem contents length addr 0 h;
       correct_down_p_cancel mem h a;
@@ -213,8 +213,8 @@ let lemma_write_buffer_domain (a:b8) (heap:heap) (mem:mem) : Lemma
    let s1 = Map.domain heap in
    let s2 = addrs_ptr 0 (addrs_of_mem mem) a Set.empty in
    let s3 = Map.domain new_heap in
-   let length = B.length a in
-   let contents = B.as_seq (hs_of_mem mem) a in
+   let length = B.length a.b in
+   let contents = B.as_seq (hs_of_mem mem) a.b in
    let addr = addrs_of_mem mem a in   
    domain_write_vale_mem contents length addr 0 heap;
    domain2_write_vale_mem contents length addr 0 heap;
@@ -231,19 +231,19 @@ let rec lemma_down_mem_aux_domain
   (x:int) : Lemma
   (requires Set.mem x (Map.domain h) <==>
     (exists (b:b8{List.memP b accu}).{:pattern (addrs_of_mem mem b)}
-      addrs_of_mem mem b <= x /\ x < addrs_of_mem mem b + B.length b)
+      addrs_of_mem mem b <= x /\ x < addrs_of_mem mem b + B.length b.b)
   )
   (ensures Set.mem x (Map.domain (down_mem_aux ptrs mem ps accu h)) <==>
     (exists (b:b8{List.memP b ptrs}).{:pattern (addrs_of_mem mem b)}
-      addrs_of_mem mem b <= x /\ x < addrs_of_mem mem b + B.length b)
+      addrs_of_mem mem b <= x /\ x < addrs_of_mem mem b + B.length b.b)
   ) = match ps with
   | [] -> ()
   | a::tl -> 
     lemma_write_buffer_domain a h mem;
     addrs_ptr_lemma 0 (addrs_of_mem mem) a Set.empty x;    
     let new_heap = write_buffer_vale a h mem in
-    let length = B.length a in
-    let contents = B.as_seq (hs_of_mem mem) a in
+    let length = B.length a.b in
+    let contents = B.as_seq (hs_of_mem mem) a.b in
     let addr = addrs_of_mem mem a in      
     load_store_write_vale_mem contents length addr 0 h;
     correct_down_p_cancel mem h a;
@@ -271,14 +271,14 @@ let rec frame_down_mem_aux (ptrs:list b8{list_disjoint_or_eq ptrs})
   (i:int) : Lemma
   (requires (forall (b:b8{List.memP b ps}). 
       let base = addrs_of_mem mem b in
-      i < base \/ i >= base + B.length b))
+      i < base \/ i >= base + B.length b.b))
   (ensures h.[i] == (down_mem_aux ptrs mem ps accu h).[i]) =
   match ps with
   | [] -> ()
   | a::q ->
     let new_heap = write_buffer_vale a h mem in
-    let length = B.length a in
-    let contents = B.as_seq (hs_of_mem mem) a in
+    let length = B.length a.b in
+    let contents = B.as_seq (hs_of_mem mem) a.b in
     let addr = addrs_of_mem mem a in      
     load_store_write_vale_mem contents length addr 0 h;
     correct_down_p_cancel mem h a;
@@ -318,9 +318,9 @@ let same_unspecified_down hs1 hs2 ptrs =
 
 let get_seq_heap_as_seq (heap1 heap2:heap) (mem:mem) (b:b8) : Lemma
   (requires correct_down_p mem heap1 b /\
-    (forall x. x >= addrs_of_mem mem b /\ x < addrs_of_mem mem b + B.length b ==> heap1.[x] == heap2.[x]))
-  (ensures B.as_seq (hs_of_mem mem) b == get_seq_heap heap2 (addrs_of_mem mem) b) =
-  assert (Seq.equal (B.as_seq (hs_of_mem mem) b) (get_seq_heap heap2 (addrs_of_mem mem) b))
+    (forall x. x >= addrs_of_mem mem b /\ x < addrs_of_mem mem b + B.length b.b ==> heap1.[x] == heap2.[x]))
+  (ensures B.as_seq (hs_of_mem mem) b.b == get_seq_heap heap2 (addrs_of_mem mem) b) =
+  assert (Seq.equal (B.as_seq (hs_of_mem mem) b.b) (get_seq_heap heap2 (addrs_of_mem mem) b))
 
 let rec up_mem_aux
   (h:heap)
@@ -335,8 +335,8 @@ let rec up_mem_aux
   | [] -> m
   | hd::tl ->
     let s = get_seq_heap h (addrs_of_mem m) hd in
-    B.g_upd_seq_as_seq hd s (hs_of_mem m);
-    let m' = B.g_upd_seq hd s (hs_of_mem m) in
+    B.g_upd_seq_as_seq hd.b s (hs_of_mem m);
+    let m' = B.g_upd_seq hd.b s (hs_of_mem m) in
     up_mem_aux h tl (hd::accu) (Mem m.ptrs m.addrs m')
 
 let up_mem heap mem = up_mem_aux heap (ptrs_of_mem mem) [] mem
@@ -352,11 +352,11 @@ let rec down_up_identity_aux
   | [] -> ()
   | hd::tl ->
     let s = get_seq_heap h (addrs_of_mem m) hd in
-    let m' = B.g_upd_seq hd s (hs_of_mem m) in
-    B.lemma_g_upd_with_same_seq hd (hs_of_mem m);    
-    assert (Seq.equal s (B.as_seq (hs_of_mem m) hd));
+    let m' = B.g_upd_seq hd.b s (hs_of_mem m) in
+    B.lemma_g_upd_with_same_seq hd.b (hs_of_mem m);    
+    assert (Seq.equal s (B.as_seq (hs_of_mem m) hd.b));
     (* The previous assertion and lemma ensure that m == m' *)    
-    B.g_upd_seq_as_seq hd s (hs_of_mem m);
+    B.g_upd_seq_as_seq hd.b s (hs_of_mem m);
     down_up_identity_aux h tl (hd::accu) (Mem m.ptrs m.addrs m')
 
 let down_up_identity mem =
@@ -369,13 +369,13 @@ let correct_down_p_same_sel
   (heap1 heap2:heap)
   (x:int) 
   (b:b8) : Lemma
-  (requires (x >= addrs_of_mem mem b /\ x < addrs_of_mem mem b + B.length b 
+  (requires (x >= addrs_of_mem mem b /\ x < addrs_of_mem mem b + B.length b.b 
     /\ correct_down_p mem heap1 b /\ correct_down_p mem heap2 b))
   (ensures Map.sel heap1 x == Map.sel heap2 x) = 
     let addrs = addrs_of_mem mem in
     let i = x - addrs b in
-    assert (heap1.[x] == UInt8.v (Seq.index (B.as_seq (hs_of_mem mem) b) i));
-    assert (heap2.[x] == UInt8.v (Seq.index (B.as_seq (hs_of_mem mem) b) i))    
+    assert (heap1.[x] == UInt8.v (Seq.index (B.as_seq (hs_of_mem mem) b.b) i));
+    assert (heap2.[x] == UInt8.v (Seq.index (B.as_seq (hs_of_mem mem) b.b) i))    
 
 let rec up_down_identity_aux
   (mem:mem)
@@ -413,15 +413,15 @@ let rec update_buffer_up_mem_aux
     Set.equal (Map.domain h1) (addrs_set m) /\ 
     Set.equal (Map.domain h2) (addrs_set m) /\
     (forall p. List.memP p accu ==> correct_down_p m h2 p) /\
-    (List.memP b accu ==> B.as_seq (hs_of_mem m) b == get_seq_heap h2 (addrs_of_mem m) b) /\  
+    (List.memP b accu ==> B.as_seq (hs_of_mem m) b.b == get_seq_heap h2 (addrs_of_mem m) b) /\  
     (forall p. (p =!= b /\ List.memP p (ptrs_of_mem m)) ==> correct_down_p m h1 p) /\
-    (forall x. x < addrs_of_mem m b \/ x >= addrs_of_mem m b + B.length b ==>
+    (forall x. x < addrs_of_mem m b \/ x >= addrs_of_mem m b + B.length b.b ==>
       h1.[x] == h2.[x])
   )
   (ensures
     (List.memP b accu ==> up_mem_aux h2 ps accu m == m) /\
     (~(List.memP b accu) ==> hs_of_mem (up_mem_aux h2 ps accu m) ==
-      B.g_upd_seq b (get_seq_heap h2 (addrs_of_mem m) b) (hs_of_mem m))) =
+      B.g_upd_seq b.b (get_seq_heap h2 (addrs_of_mem m) b) (hs_of_mem m))) =
   match ps with
   | [] -> ()
   | hd::tl -> 
@@ -429,20 +429,20 @@ let rec update_buffer_up_mem_aux
     let mem = hs_of_mem m in
     let ptrs = ptrs_of_mem m in
     let s = get_seq_heap h2 addrs hd in       
-    B.g_upd_seq_as_seq hd s mem;         
-    let m' = B.g_upd_seq hd s mem in  
+    B.g_upd_seq_as_seq hd.b s mem;         
+    let m' = B.g_upd_seq hd.b s mem in  
     if StrongExcludedMiddle.strong_excluded_middle (hd == b) then (
        if StrongExcludedMiddle.strong_excluded_middle (List.memP b accu) then (
-         B.lemma_g_upd_with_same_seq hd mem;       
+         B.lemma_g_upd_with_same_seq hd.b mem;       
          update_buffer_up_mem_aux h1 h2 tl (hd::accu) b (Mem ptrs addrs m')
        ) else (
-         B.g_upd_seq_as_seq b (get_seq_heap h2 addrs b) mem;
+         B.g_upd_seq_as_seq b.b (get_seq_heap h2 addrs b) mem;
          update_buffer_up_mem_aux h1 h2 tl (hd::accu) b (Mem ptrs addrs m')         
        )
      ) else (
-       assert (B.disjoint hd b);
+       assert (B.disjoint hd.b b.b);
        get_seq_heap_as_seq h1 h2 m hd;
-       B.lemma_g_upd_with_same_seq hd mem;       
+       B.lemma_g_upd_with_same_seq hd.b mem;       
        update_buffer_up_mem_aux h1 h2 tl (hd::accu) b (Mem ptrs addrs m')
      )
 

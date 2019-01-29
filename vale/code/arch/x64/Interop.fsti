@@ -15,7 +15,7 @@ open X64.Bytes_Semantics
 let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
 
-let disjoint (ptr1 ptr2:b8) = B.loc_disjoint (B.loc_buffer ptr1) (B.loc_buffer ptr2)
+let disjoint (ptr1 ptr2:b8) = MB.loc_disjoint (MB.loc_buffer ptr1.b) (MB.loc_buffer ptr2.b)
 
 let valid_addr (mem:mem) (x:int) = Set.mem x (addrs_set mem)
 
@@ -23,14 +23,14 @@ val addrs_set_lemma (mem:mem) (x:int)
   : Lemma (let addrs = addrs_of_mem mem in
            let ptrs = ptrs_of_mem mem in
            valid_addr mem x <==>
-           (exists (b:b8{List.memP b ptrs}).{:pattern (addrs b)} addrs b <= x /\ x < addrs b + B.length b))
+           (exists (b:b8{List.memP b ptrs}).{:pattern (addrs b)} addrs b <= x /\ x < addrs b + MB.length b.b))
           [SMTPat (Set.mem x (addrs_set mem))]
   
 let addrs_set_mem (mem:mem) (a:b8) (i:int)
   : Lemma
     (requires (let ptrs = ptrs_of_mem mem in
                let addrs = addrs_of_mem mem in
-               List.memP a ptrs /\ i >= addrs a /\ i < addrs a + B.length a))
+               List.memP a ptrs /\ i >= addrs a /\ i < addrs a + MB.length a.b))
     (ensures valid_addr mem i)
   = ()
   
@@ -51,8 +51,8 @@ val same_unspecified_down:
          heap1.[i] == heap2.[i])
 
 let get_seq_heap (heap:heap) (addrs:addr_map) (b:b8) 
-  : GTot (Seq.lseq UInt8.t (B.length b)) 
-  = let length = B.length b in
+  : GTot (Seq.lseq UInt8.t (MB.length b.b)) 
+  = let length = MB.length b.b in
     let contents (i:nat{i < length}) = UInt8.uint_to_t heap.[addrs b + i] in
     Seq.init length contents
 
@@ -75,7 +75,7 @@ val update_buffer_up_mem
       (heap1:heap{correct_down mem heap1})
       (heap2:heap{Set.equal (Map.domain heap1) (Map.domain heap2)})
  : Lemma
-      (requires (forall x. x < addrs_of_mem mem b \/ x >= addrs_of_mem mem b + B.length b
+      (requires (forall x. x < addrs_of_mem mem b \/ x >= addrs_of_mem mem b + MB.length b.b
         ==> heap1.[x] == heap2.[x]))
       (ensures hs_of_mem (up_mem heap2 mem) ==
-               B.g_upd_seq b (get_seq_heap heap2 (addrs_of_mem mem) b) (hs_of_mem mem))
+               MB.g_upd_seq b.b (get_seq_heap heap2 (addrs_of_mem mem) b) (hs_of_mem mem))

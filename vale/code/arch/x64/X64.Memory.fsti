@@ -20,9 +20,10 @@ let base_typ_as_vale_type (t:base_typ) : Tot eqtype =
   | TUInt64 -> nat64
   | TUInt128 -> quad32
 
-val buffer (t:base_typ) : Type0
+val buffer (t:base_typ) : Type u#1
 val buffer_as_seq (#t:base_typ) (h:mem) (b:buffer t) : GTot (Seq.seq (base_typ_as_vale_type t))
 val buffer_readable (#t:base_typ) (h:mem) (b:buffer t) : GTot prop0
+val buffer_writeable (#t:base_typ) (b:buffer t) : GTot prop0
 val buffer_length (#t:base_typ) (b:buffer t) : GTot nat
 val loc : Type u#0
 val loc_none : loc
@@ -176,7 +177,7 @@ val buffer_read (#t:base_typ) (b:buffer t) (i:int) (h:mem) : Ghost (base_typ_as_
   ))
 
 val buffer_write (#t:base_typ) (b:buffer t) (i:int) (v:base_typ_as_vale_type t) (h:mem) : Ghost mem
-  (requires buffer_readable h b)
+  (requires buffer_readable h b /\ buffer_writeable b)
   (ensures (fun h' ->
     0 <= i /\ i < buffer_length b /\ buffer_readable h b ==>
     modifies (loc_buffer b) h h' /\
@@ -186,10 +187,12 @@ val buffer_write (#t:base_typ) (b:buffer t) (i:int) (v:base_typ_as_vale_type t) 
 
 
 val valid_mem64 : ptr:int -> h:mem -> GTot bool // is there a 64-bit word at address ptr?
+val writeable_mem64 : ptr:int -> h:mem -> GTot prop0 // can we write a 64-bit word at address ptr?
 val load_mem64 : ptr:int -> h:mem -> GTot nat64 // the 64-bit word at ptr (if valid_mem64 holds)
 val store_mem64 : ptr:int -> v:nat64 -> h:mem -> GTot mem
 
 val valid_mem128 (ptr:int) (h:mem) : GTot bool
+val writeable_mem128 (ptr:int) (h:mem) : GTot prop0
 val load_mem128  (ptr:int) (h:mem) : GTot quad32
 val store_mem128 (ptr:int) (v:quad32) (h:mem) : GTot mem
 
@@ -201,6 +204,16 @@ val lemma_valid_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
   )
   (ensures
     valid_mem64 (buffer_addr b h + 8 `op_Multiply` i) h
+  )
+
+val lemma_writeable_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b
+  )
+  (ensures
+    writeable_mem64 (buffer_addr b h + 8 `op_Multiply` i) h
   )
 
 val lemma_load_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
@@ -215,7 +228,8 @@ val lemma_load_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
 val lemma_store_mem64 : b:buffer64 -> i:nat-> v:nat64 -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
-    buffer_readable h b
+    buffer_readable h b /\
+    buffer_writeable b
   )
   (ensures
     store_mem64 (buffer_addr b h + 8 `op_Multiply` i) v h == buffer_write b i v h
@@ -230,6 +244,16 @@ val lemma_valid_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
     valid_mem128 (buffer_addr b h + 16 `op_Multiply` i) h
   )
 
+val lemma_writeable_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b
+  )
+  (ensures
+    writeable_mem128 (buffer_addr b h + 16 `op_Multiply` i) h
+  )
+
 val lemma_load_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
@@ -242,14 +266,15 @@ val lemma_load_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
 val lemma_store_mem128 : b:buffer128 -> i:nat -> v:quad32 -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
-    buffer_readable h b
+    buffer_readable h b /\
+    buffer_writeable b
   )
   (ensures
     store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h == buffer_write b i v h
   )
 
 val lemma_store_load_mem64 : ptr:int -> v:nat64 -> h:mem -> Lemma
-  (requires valid_mem64 ptr h)
+  (requires writeable_mem64 ptr h)
   (ensures (load_mem64 ptr (store_mem64 ptr v h) = v))
 
 val lemma_frame_store_mem64: i:int -> v:nat64 -> h:mem -> Lemma (
@@ -261,7 +286,7 @@ val lemma_valid_store_mem64: i:int -> v:nat64 -> h:mem -> Lemma (
   forall j. valid_mem64 j h <==> valid_mem64 j h')
 
 val lemma_store_load_mem128 : ptr:int -> v:quad32 -> h:mem -> Lemma
-  (requires valid_mem128 ptr h)
+  (requires writeable_mem128 ptr h)
   (ensures load_mem128 ptr (store_mem128 ptr v h) = v)
 
 val lemma_frame_store_mem128: i:int -> v:quad32 -> h:mem -> Lemma (

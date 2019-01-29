@@ -4,7 +4,8 @@ module IB = Interop.Base
 module I = Interop
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
-module B = LowStar.Buffer
+//module B = LowStar.Buffer
+module MB = LowStar.Monotonic.Buffer
 module M = LowStar.Modifies
 open LowStar.ModifiesPat
 module BV = LowStar.BufferView
@@ -70,20 +71,22 @@ let uint_view = function
   | TUInt64 -> uint64_view
   | TUInt128 -> uint128_view
 
-let buffer = IB.buf_t
+let buffer t = (b:b8{MB.length b.b % view_n t == 0})
 
 let buffer_as_seq #t h b =
-  let s = BV.as_seq (IB.hs_of_mem h) (BV.mk_buffer_view b (uint_view t)) in
+  let s = BV.as_seq (IB.hs_of_mem h) (BV.mk_buffer_view b.b (uint_view t)) in
   let len = Seq.length s in
   let contents (i:nat{i < len}) : base_typ_as_vale_type t = v_to_typ t (Seq.index s i) in
   Seq.init len contents
 
 let buffer_readable #t h b = List.memP b (IB.ptrs_of_mem h)
-let buffer_length #t b = BV.length (BV.mk_buffer_view b (uint_view t))
+// A buffer is writeable only if it has the trivial preorders
+let buffer_writeable #t b = forall s1 s2. b.rel s1 s2 /\ b.rrel s1 s2
+let buffer_length #t b = BV.length (BV.mk_buffer_view b.b (uint_view t))
 let loc = M.loc
 let loc_none = M.loc_none
 let loc_union = M.loc_union
-let loc_buffer #t b = M.loc_buffer b
+let loc_buffer #t b = M.loc_buffer b.b
 let loc_disjoint = M.loc_disjoint
 let loc_includes = M.loc_includes
 let modifies s h h' = 
@@ -122,15 +125,15 @@ let index_mul_helper (addr i n j:int) : Lemma
 
 let index64_get_heap_val64 h b heap i =
   let open FStar.Mul in
-  let vb = BV.mk_buffer_view b uint64_view in
+  let vb = BV.mk_buffer_view b.b uint64_view in
   let ptr = buffer_addr b h + 8 * i in
-  let s = B.as_seq h.hs b in
+  let s = MB.as_seq h.hs b.b in
   let t = TUInt64 in
   let addr = buffer_addr b h in
   BV.length_eq vb;
   BV.view_indexing vb i;
-  BV.as_buffer_mk_buffer_view b uint64_view;
-  BV.get_view_mk_buffer_view b uint64_view;
+  BV.as_buffer_mk_buffer_view b.b uint64_view;
+  BV.get_view_mk_buffer_view b.b uint64_view;
   BV.as_seq_sel h.hs vb i;
   BV.get_sel h.hs vb i;
   let s' = Seq.slice s (i*8) (i*8 + 8) in
@@ -180,14 +183,14 @@ let index128_get_heap_val128_aux (s:Seq.lseq UInt8.t 16) (ptr:int) (heap:S.heap)
 
 let index128_get_heap_val128 h b heap i =
   let open FStar.Mul in
-  let vb = BV.mk_buffer_view b uint128_view in
+  let vb = BV.mk_buffer_view b.b uint128_view in
   let ptr = buffer_addr b h + 16 * i in
-  let s = B.as_seq h.hs b in
+  let s = MB.as_seq h.hs b.b in
   let addr = buffer_addr b h in
   BV.length_eq vb;
   BV.view_indexing vb i;
-  BV.as_buffer_mk_buffer_view b uint128_view;
-  BV.get_view_mk_buffer_view b uint128_view;
+  BV.as_buffer_mk_buffer_view b.b uint128_view;
+  BV.get_view_mk_buffer_view b.b uint128_view;
   BV.as_seq_sel h.hs vb i;
   BV.get_sel h.hs vb i;
   let sv = Seq.index (buffer_as_seq h b) i in
@@ -209,20 +212,20 @@ let lemma_modifies_goal_directed s h1 h2 = ()
 let buffer_length_buffer_as_seq #t h b = ()
 
 val same_underlying_seq (#t:base_typ) (h1 h2:mem) (b:buffer t) : Lemma
-  (requires Seq.equal (B.as_seq h1.hs b) (B.as_seq h2.hs b))
+  (requires Seq.equal (MB.as_seq h1.hs b.b) (MB.as_seq h2.hs b.b))
   (ensures Seq.equal (buffer_as_seq h1 b) (buffer_as_seq h2 b))
 
 let same_underlying_seq #t h1 h2 b =
   let rec aux (i:nat{i <= buffer_length b}) : Lemma
     (requires (forall (j:nat{j < i}). Seq.index (buffer_as_seq h1 b) j == Seq.index (buffer_as_seq h2 b) j) /\
-    (Seq.equal (B.as_seq h1.hs b) (B.as_seq h2.hs b)))
+    (Seq.equal (MB.as_seq h1.hs b.b) (MB.as_seq h2.hs b.b)))
     (ensures (forall (j:nat{j < buffer_length b}). Seq.index (buffer_as_seq h1 b) j == Seq.index (buffer_as_seq h2 b) j))
     (decreases %[(buffer_length b) - i]) =
     if i = buffer_length b then ()
     else (
-      let bv = BV.mk_buffer_view b (uint_view t) in
-      BV.as_buffer_mk_buffer_view b (uint_view t);
-      BV.get_view_mk_buffer_view b (uint_view t);
+      let bv = BV.mk_buffer_view b.b (uint_view t) in
+      BV.as_buffer_mk_buffer_view b.b (uint_view t);
+      BV.get_view_mk_buffer_view b.b (uint_view t);
       BV.get_sel h1.hs bv i;
       BV.get_sel h2.hs bv i;
       BV.as_seq_sel h1.hs bv i;
@@ -232,8 +235,8 @@ let same_underlying_seq #t h1 h2 b =
   in aux 0
 
 let modifies_buffer_elim #t1 b p h h' =
-  M.modifies_buffer_elim b p h.hs h'.hs;
-  assert (Seq.equal (B.as_seq h.hs b) (B.as_seq h'.hs b));
+  M.modifies_buffer_elim b.b p h.hs h'.hs;
+  assert (Seq.equal (MB.as_seq h.hs b.b) (MB.as_seq h'.hs b.b));
   same_underlying_seq h h' b;
   assert (Seq.equal (buffer_as_seq h b) (buffer_as_seq h' b));
   ()
@@ -305,8 +308,8 @@ let buffer_write #t b i v h =
  if i < 0 || i >= buffer_length b then h else
  begin
    let view = uint_view t in
-   let bv = BV.mk_buffer_view b view in
-   BV.as_buffer_mk_buffer_view b view;
+   let bv = BV.mk_buffer_view b.b view in
+   BV.as_buffer_mk_buffer_view b.b view;
    BV.upd_modifies h.hs bv i (v_of_typ t v);
    BV.upd_equal_domains h.hs bv i (v_of_typ t v);
    let hs' = BV.upd h.hs bv i (v_of_typ t v) in
@@ -341,7 +344,7 @@ let rec get_addr_in_ptr (t:base_typ) (n base addr:nat) (i:nat{valid_offset t n b
     else get_addr_in_ptr t n base addr (i+1)
 
 let valid_buffer (t:base_typ) (addr:int) (b:b8) (h:mem) : GTot bool =
-  B.length b % (view_n t) = 0 &&
+  MB.length b.b % (view_n t) = 0 &&
   addr_in_ptr #t addr b h
 
 #set-options "--max_fuel 1 --max_ifuel 1"
@@ -399,10 +402,10 @@ let load_mem64 ptr h =
   if not (valid_mem64 ptr h) then 0
   else load_mem (TUInt64) ptr h
 
-let length_t_eq (t:base_typ) (b:buffer t) : Lemma (B.length b == buffer_length b * (view_n t)) =
-  BV.as_buffer_mk_buffer_view b (uint_view t);
-  BV.get_view_mk_buffer_view b (uint_view t);
-  BV.length_eq (BV.mk_buffer_view b (uint_view t))
+let length_t_eq (t:base_typ) (b:buffer t) : Lemma (MB.length b.b == buffer_length b * (view_n t)) =
+  BV.as_buffer_mk_buffer_view b.b (uint_view t);
+  BV.get_view_mk_buffer_view b.b (uint_view t);
+  BV.length_eq (BV.mk_buffer_view b.b (uint_view t))
 
 let get_addr_ptr (t:base_typ) (ptr:int) (h:mem{valid_mem t ptr h})
   : GTot (b:buffer t{List.memP b h.ptrs /\ valid_buffer t ptr b h})
@@ -458,12 +461,12 @@ let lemma_load_mem64 b i h =
   match find_valid_buffer TUInt64 addr h with
   | None -> ()
   | Some a ->
-    BV.length_eq (BV.mk_buffer_view a uint64_view);
-    BV.get_view_mk_buffer_view a uint64_view;
-    BV.as_buffer_mk_buffer_view a uint64_view;
-    BV.length_eq (BV.mk_buffer_view b uint64_view);
-    BV.get_view_mk_buffer_view b uint64_view;
-    BV.as_buffer_mk_buffer_view b uint64_view;
+    BV.length_eq (BV.mk_buffer_view a.b uint64_view);
+    BV.get_view_mk_buffer_view a.b uint64_view;
+    BV.as_buffer_mk_buffer_view a.b uint64_view;
+    BV.length_eq (BV.mk_buffer_view b.b uint64_view);
+    BV.get_view_mk_buffer_view b.b uint64_view;
+    BV.as_buffer_mk_buffer_view b.b uint64_view;
     assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
@@ -473,12 +476,12 @@ let lemma_store_mem64 b i v h =
   match find_valid_buffer TUInt64 addr h with
   | None -> ()
   | Some a ->
-    BV.length_eq (BV.mk_buffer_view a uint64_view);
-    BV.get_view_mk_buffer_view a uint64_view;
-    BV.as_buffer_mk_buffer_view a uint64_view;
-    BV.length_eq (BV.mk_buffer_view b uint64_view);
-    BV.get_view_mk_buffer_view b uint64_view;
-    BV.as_buffer_mk_buffer_view b uint64_view;
+    BV.length_eq (BV.mk_buffer_view a.b uint64_view);
+    BV.get_view_mk_buffer_view a.b uint64_view;
+    BV.as_buffer_mk_buffer_view a.b uint64_view;
+    BV.length_eq (BV.mk_buffer_view b.b uint64_view);
+    BV.get_view_mk_buffer_view b.b uint64_view;
+    BV.as_buffer_mk_buffer_view b.b uint64_view;
     assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
@@ -490,12 +493,12 @@ let lemma_load_mem128 b i h =
   match find_valid_buffer TUInt128 addr h with
   | None -> ()
   | Some a ->
-    BV.length_eq (BV.mk_buffer_view a uint128_view);
-    BV.get_view_mk_buffer_view a uint128_view;
-    BV.as_buffer_mk_buffer_view a uint128_view;
-    BV.length_eq (BV.mk_buffer_view b uint128_view);
-    BV.get_view_mk_buffer_view b uint128_view;
-    BV.as_buffer_mk_buffer_view b uint128_view;
+    BV.length_eq (BV.mk_buffer_view a.b uint128_view);
+    BV.get_view_mk_buffer_view a.b uint128_view;
+    BV.as_buffer_mk_buffer_view a.b uint128_view;
+    BV.length_eq (BV.mk_buffer_view b.b uint128_view);
+    BV.get_view_mk_buffer_view b.b uint128_view;
+    BV.as_buffer_mk_buffer_view b.b uint128_view;
     assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
@@ -505,19 +508,19 @@ let lemma_store_mem128 b i v h =
   match find_valid_buffer TUInt128 addr h with
   | None -> ()
   | Some a ->
-    BV.length_eq (BV.mk_buffer_view a uint128_view);
-    BV.get_view_mk_buffer_view a uint128_view;
-    BV.as_buffer_mk_buffer_view a uint128_view;
-    BV.length_eq (BV.mk_buffer_view b uint128_view);
-    BV.get_view_mk_buffer_view b uint128_view;
-    BV.as_buffer_mk_buffer_view b uint128_view;
+    BV.length_eq (BV.mk_buffer_view a.b uint128_view);
+    BV.get_view_mk_buffer_view a.b uint128_view;
+    BV.as_buffer_mk_buffer_view a.b uint128_view;
+    BV.length_eq (BV.mk_buffer_view b.b uint128_view);
+    BV.get_view_mk_buffer_view b.b uint128_view;
+    BV.as_buffer_mk_buffer_view b.b uint128_view;
     assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 let same_get_addr_ptr (t:base_typ)
                       (ptr:int)
                       (h:mem{valid_mem t ptr h})
-                      (b:buffer t{List.memP b h.ptrs})
+                      (b:buffer t{List.memP b h.ptrs /\ buffer_writeable b})
                       (i:nat{i < buffer_length b})
                       (v:base_typ_as_vale_type t)
   : Lemma (let h1 = buffer_write b i v h in
@@ -525,6 +528,8 @@ let same_get_addr_ptr (t:base_typ)
   = let h1 = buffer_write b i v h in
     assert (h.ptrs == h1.ptrs);
     find_valid_buffer_ps t ptr h h1
+
+
 #reset-options "--z3rlimit_factor 2"
 let lemma_store_load_mem64 ptr v h =
   let t = TUInt64 in
@@ -535,8 +540,8 @@ let lemma_store_load_mem64 ptr v h =
   length_t_eq t b;
   let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
   same_get_addr_ptr t ptr h b i v;
-  BV.as_buffer_mk_buffer_view b (uint_view t);
-  BV.as_seq_sel h1.hs (BV.mk_buffer_view b (uint_view t)) i
+  BV.as_buffer_mk_buffer_view b.b (uint_view t);
+  BV.as_seq_sel h1.hs (BV.mk_buffer_view b.b (uint_view t)) i
 
 
 let rec different_addr_in_ptr
