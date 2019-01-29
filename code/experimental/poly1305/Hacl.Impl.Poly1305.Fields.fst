@@ -150,23 +150,6 @@ let load_felems_le #s f b =
   | M128 -> F32xN.load_felems_le #2 f b
   | M256 -> F32xN.load_felems_le #4 f b
 
-inline_for_extraction
-val store_felem_le:
-    #s:field_spec
-  -> b:lbuffer uint8 16ul
-  -> f:felem s
-  -> Stack unit
-    (requires fun h ->
-      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat #(width s) h0 f).[0] % pow2 128))
-let store_felem_le #s b f =
-  match s with
-  | M32  -> F32xN.store_felem_le #1 b f
-  | M128 -> F32xN.store_felem_le #2 b f
-  | M256 -> F32xN.store_felem_le #4 b f
-
 #set-options "--z3rlimit 50"
 
 inline_for_extraction
@@ -253,6 +236,7 @@ val reduce_felem:
       live h f /\ acc_inv_t #(width s) (as_tup5 h f))
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
       feval h1 f == feval h0 f /\
       felem_less #(width s) h1 f S.prime)
 let reduce_felem #s f =
@@ -369,3 +353,24 @@ let fadd #s out f1 f2 =
   | M32  -> F32xN.fadd #1 out f1 f2
   | M128 -> F32xN.fadd #2 out f1 f2
   | M256 -> F32xN.fadd #4 out f1 f2
+
+inline_for_extraction
+val fadd128_store_felem_le:
+    #s:field_spec
+  -> out:lbuffer uint8 16ul
+  -> f1:felem s
+  -> f2:felem s
+  -> Stack unit
+    (requires fun h ->
+      live h out /\ live h f1 /\ live h f2 /\
+      felem_fits h f1 (1, 1, 1, 1, 1) /\
+      felem_fits h f2 (1, 1, 1, 1, 1))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_seq h1 out ==
+      BSeq.nat_to_bytes_le 16 (((fas_nat #(width s) h0 f1).[0] + (fas_nat #(width s) h0 f2).[0]) % pow2 128))
+let fadd128_store_felem_le #s out f1 f2 =
+  match s with
+  | M32  -> F32xN.fadd128_store_felem_le #1 out f1 f2
+  | M128 -> F32xN.fadd128_store_felem_le #2 out f1 f2
+  | M256 -> F32xN.fadd128_store_felem_le #4 out f1 f2

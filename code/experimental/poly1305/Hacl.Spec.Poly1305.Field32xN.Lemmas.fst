@@ -433,6 +433,7 @@ val reduce_felem5_eval_lemma:
   -> Lemma
     (requires acc_inv_t f)
     (ensures
+      felem_fits5 (reduce_felem5 f) (1, 1, 1, 1, 1) /\
       feval5 (reduce_felem5 f) == feval5 f /\
       felem_less5 (reduce_felem5 f) S.prime)
     [SMTPat (reduce_felem5 f)]

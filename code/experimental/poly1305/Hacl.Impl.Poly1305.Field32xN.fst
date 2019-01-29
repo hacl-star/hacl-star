@@ -353,6 +353,7 @@ val reduce_felem:
       live h f /\ acc_inv_t (as_tup5 h f))
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
       feval h1 f == feval h0 f /\
       felem_less h1 f S.prime)
 let reduce_felem #w f =
@@ -696,36 +697,32 @@ let store_felem #w f = admit();
 inline_for_extraction
 val store_felem1_le:
     b:lbuffer uint8 16ul
-  -> f:felem 1
+  -> r:(uint64xN 1 & uint64xN 1)
   -> Stack unit
-    (requires fun h ->
-      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
+    (requires fun h -> live h b)
     (ensures  fun h0 _ h1 ->
+     (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
-let store_felem1_le b f =
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0])))
+let store_felem1_le b (r0, r1) =
   let h0 = ST.get () in
-  let (r0, r1) = store_felem #1 f in
-  assert (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0] == (fas_nat h0 f).[0] % pow2 128);
   vec_store_le (sub b 0ul 8ul) r0;
   vec_store_le (sub b 8ul 8ul) r1;
   let h1 = ST.get () in
   uints_to_bytes_le_lemma64_1 (vec_v r0) (vec_v r1);
-  LSeq.lemma_concat2 8 (LSeq.sub (as_seq h1 b) 0 8) 8 (LSeq.sub (as_seq h1 b) 8 8) (as_seq h1 b);
-  LSeq.eq_intro (as_seq h1 b) (BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
+  LSeq.lemma_concat2 8 (LSeq.sub (as_seq h1 b) 0 8) 8 (LSeq.sub (as_seq h1 b) 8 8) (as_seq h1 b)
 
 inline_for_extraction
 val store_felem2_le:
     b:lbuffer uint8 16ul
-  -> f:felem 2
+  -> r:(uint64xN 2 & uint64xN 2)
   -> Stack unit
-    (requires fun h ->
-      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
+    (requires fun h -> live h b)
     (ensures  fun h0 _ h1 ->
+     (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
-let store_felem2_le b f =
-  let (f0, f1) = store_felem #2 f in
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0])))
+let store_felem2_le b (f0, f1) =
   let r0 = vec_interleave_low f0 f1 in
   vec_interleave_low_lemma64_2 f0 f1;
   vec_store_le b r0;
@@ -734,16 +731,15 @@ let store_felem2_le b f =
 inline_for_extraction
 val store_felem4_le:
     b:lbuffer uint8 16ul
-  -> f:felem 4
+  -> r:(uint64xN 4 & uint64xN 4)
   -> Stack unit
-    (requires fun h ->
-      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
+    (requires fun h -> live h b)
     (ensures  fun h0 _ h1 ->
+     (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
-let store_felem4_le b f =
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0])))
+let store_felem4_le b (f0, f1) =
   push_frame ();
-  let (f0, f1) = store_felem #4 f in
   let lo = vec_interleave_low f0 f1 in
   let hi = vec_interleave_high f0 f1 in
   vec_interleave_low_lemma64_4 f0 f1;
@@ -769,18 +765,18 @@ inline_for_extraction
 val store_felem_le:
     #w:lanes
   -> b:lbuffer uint8 16ul
-  -> f:felem w
+  -> r:(uint64xN w & uint64xN w)
   -> Stack unit
-    (requires fun h ->
-      live h f /\ live h b /\ felem_fits h f (1, 1, 1, 1, 3))
+    (requires fun h -> live h b)
     (ensures  fun h0 _ h1 ->
+     (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((fas_nat h0 f).[0] % pow2 128))
-let store_felem_le #w b f =
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0])))
+let store_felem_le #w b r =
   match w with
-  | 1 -> store_felem1_le b f
-  | 2 -> store_felem2_le b f
-  | 4 -> store_felem4_le b f
+  | 1 -> store_felem1_le b r
+  | 2 -> store_felem2_le b r
+  | 4 -> store_felem4_le b r
 
 inline_for_extraction
 val fmul_r1_normalize:
@@ -921,3 +917,52 @@ let fmul_rn_normalize #w out p =
   | 1 -> fmul_r1_normalize out p
   | 2 -> fmul_r2_normalize out p
   | 4 -> fmul_r4_normalize out p
+
+inline_for_extraction
+val mod_add128:
+    #w:lanes
+  -> a:(uint64xN w & uint64xN w)
+  -> b:(uint64xN w & uint64xN w)
+  -> Pure (uint64xN w & uint64xN w)
+    (requires True)
+    (ensures (fun (r0, r1) ->
+      let (a0, a1) = a in
+      let (b0, b1) = b in
+      v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0] ==
+	((v (vec_v a1).[0] + v (vec_v b1).[0]) * pow2 64 + (v (vec_v a0).[0] + v (vec_v b0).[0])) % pow2 128))
+let mod_add128 #w (a0, a1) (b0, b1) = admit();
+  let r0 = vec_add_mod a0 b0 in
+  let r1 = vec_add_mod a1 b1 in
+  let c = r0 ^| ((r0 ^| b0) || (r0 -| b0) ^| b0) >>| 63ul in
+  let r1 = vec_add_mod r1 c in
+  (r0, r1)
+
+inline_for_extraction
+val fadd128_store_felem_le:
+    #w:lanes
+  -> out:lbuffer uint8 16ul
+  -> f1:felem w
+  -> f2:felem w
+  -> Stack unit
+    (requires fun h ->
+      live h out /\ live h f1 /\ live h f2 /\
+      felem_fits h f1 (1, 1, 1, 1, 1) /\
+      felem_fits h f2 (1, 1, 1, 1, 1))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_seq h1 out == BSeq.nat_to_bytes_le 16 (((fas_nat h0 f1).[0] + (fas_nat h0 f2).[0]) % pow2 128))
+let fadd128_store_felem_le #w out f1 f2 =
+  let h0 = ST.get () in
+  let (f10, f11) = store_felem #w f1 in
+  assert (v (vec_v f11).[0] * pow2 64 + v (vec_v f10).[0] == (fas_nat h0 f1).[0] % pow2 128);
+  let (f20, f21) = store_felem #w f2 in
+  assert (v (vec_v f21).[0] * pow2 64 + v (vec_v f20).[0] == (fas_nat h0 f2).[0] % pow2 128);
+  let (f30, f31) = mod_add128 #w (f10, f11) (f20, f21) in
+  store_felem_le out (f30, f31);
+  let h1 = ST.get () in
+  assert (as_seq h1 out == BSeq.nat_to_bytes_le 16 ((v (vec_v f31).[0] * pow2 64 + v (vec_v f30).[0])));
+  assert (v (vec_v f31).[0] * pow2 64 + v (vec_v f30).[0] ==
+   ((v (vec_v f11).[0] + v (vec_v f21).[0]) * pow2 64 + (v (vec_v f10).[0] + v (vec_v f20).[0])) % pow2 128);
+  assert (v (vec_v f31).[0] * pow2 64 + v (vec_v f30).[0] ==
+    ((fas_nat h0 f1).[0] % pow2 128 + (fas_nat h0 f2).[0] % pow2 128) % pow2 128);
+  FStar.Math.Lemmas.modulo_distributivity ((fas_nat h0 f1).[0]) ((fas_nat h0 f2).[0]) (pow2 128)

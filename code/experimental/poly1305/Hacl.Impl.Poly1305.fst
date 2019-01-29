@@ -429,6 +429,8 @@ let poly1305_update1 #s len text pre acc =
   assert (disjoint b acc);
   poly1305_update1_rem #s pre rem b acc
 
+#set-options "--z3rlimit 150 --max_fuel 1"
+
 inline_for_extraction
 val poly1305_update_:
     #s:field_spec
@@ -445,10 +447,17 @@ val poly1305_update_:
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc))
-let poly1305_update_ #s len text pre acc = admit();
+let poly1305_update_ #s len text pre acc =
   let sz_block = blocklen s in
-  let len0 = (len /. sz_block) *. sz_block in
+  let len0 = (len /. sz_block) *! sz_block in
   let t0 = sub text 0ul len0 in
+  let h0 = ST.get () in
+  as_seq_gsub h0 text 0ul len0;
+  assert (felem_fits h0 acc (2, 3, 2, 2, 2));
+  assert (disjoint acc t0);
+  //assert (v (blocklen s) > 0);
+  FStar.Math.Lemmas.multiple_modulo_lemma (v (len /. sz_block)) (v (blocklen s));
+  //assert (v len0 % v (blocklen s) = 0);
   poly1305_update_multi len0 t0 pre acc;
 
   let len = len -. len0 in
@@ -494,20 +503,29 @@ val poly1305_finish_:
   -> acc:felem s
   -> tag:lbuffer uint8 16ul
   -> Stack unit
-    (requires fun h -> live h acc /\ live h tag /\ live h key)
-    (ensures  fun h0 _ h1 -> modifies (loc tag) h0 h1)
-let poly1305_finish_ #s key acc tag = admit();
+    (requires fun h ->
+      live h acc /\ live h tag /\ live h key /\
+      disjoint acc tag /\ disjoint key tag /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc tag) h0 h1 /\
+      as_seq h1 tag == S.finish #(width s) (as_seq h0 key) (feval h0 acc))
+let poly1305_finish_ #s key acc tag =
   push_frame ();
   reduce_felem acc;
 
   let ks = sub key (size 16) (size 16) in
   let sk = create (nlimb s) (limb_zero s) in
   load_felem_le sk ks;
-
-  //use u128 addition
-  fadd acc acc sk;
-  store_felem_le tag acc;
+  fadd128_store_felem_le #s tag acc sk; admit();
   pop_frame ()
+
+(*
+let finish (#w:lanes) (k:key) (acc:elem w) : Tot tag =
+  let s = nat_from_bytes_le (sub k 16 16) in
+  let n = (from_elem acc + s) % pow2 128 in
+  nat_to_bytes_le 16 n
+*)
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
@@ -524,8 +542,13 @@ val poly1305_finish:
   -> acc:felem s
   -> tag:lbuffer uint8 16ul
   -> Stack unit
-    (requires fun h -> live h acc /\ live h tag /\ live h key)
-    (ensures  fun h0 _ h1 -> modifies (loc tag) h0 h1)
+    (requires fun h ->
+      live h acc /\ live h tag /\ live h key /\
+      disjoint acc tag /\ disjoint key tag /\
+      F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc tag) h0 h1 /\
+      as_seq h1 tag == S.finish #(width s) (as_seq h0 key) (feval h0 acc))
 let poly1305_finish #s key acc tag =
    match s with
    | M32 -> poly1305_finish_32 key acc tag
