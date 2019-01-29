@@ -362,7 +362,7 @@ verify_options = [
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
   #('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
-  #('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastHybrid.vaf', None),
+  ('obj/code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastHybrid.fst', BuildOptions(fstar_default_args() + ' --admit_smt_queries true')),
 
   ('code/*/*.fst', BuildOptions(fstar_default_args())),
   ('code/*/*.fsti', BuildOptions(fstar_default_args())),
