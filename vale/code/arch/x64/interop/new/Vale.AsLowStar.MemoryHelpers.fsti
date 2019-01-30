@@ -43,7 +43,7 @@ val relate_modifies (args:list arg) (m0 m1 : ME.mem)
 
 val reveal_readable (#t:_) (x:buf_t t) (s:ME.mem)
   : Lemma 
-      ( List.memP x (ptrs_of_mem (as_mem s)) <==>
+      ( List.memP (Buffer x true) (ptrs_of_mem (as_mem s)) <==>
         ME.buffer_readable s (as_vale_buffer x) )
 
 val readable_live (#t:_) (x:buf_t t) (s:ME.mem)
@@ -60,7 +60,7 @@ val buffer_readable_reveal
   (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma (
     let mem = mk_mem (arg_of_sb stack::args) h0 in
     ME.buffer_readable (as_vale_mem mem) (as_vale_buffer #bt x) <==>
-      List.memP x (ptrs_of_mem mem))
+      List.memP (Buffer x true) (ptrs_of_mem mem))
 
 val get_heap_mk_mem_reveal
   (#n:_)
@@ -100,7 +100,7 @@ val buffer_addr_reveal
   (args:list arg)
   (h0:HS.mem{mem_roots_p h0 args}) : Lemma
   (let mem = mk_mem args h0 in
-   addrs_of_mem mem x == ME.buffer_addr (as_vale_buffer #t x) (as_vale_mem mem))
+   addrs_of_mem mem (Buffer x true) == ME.buffer_addr (as_vale_buffer #t x) (as_vale_mem mem))
 
 val fuel_eq : squash (V.va_fuel == nat)
 
@@ -141,3 +141,5 @@ val core_create_lemma_taint_hyp
                 LSig.taint_hyp args va_s /\
                 ME.valid_taint_buf64 (as_vale_buffer stack) va_s.VS.mem va_s.VS.memTaint X64.Machine_s.Public))
 
+val buffer_writeable_reveal (t:ME.base_typ) (x:buf_t t) : Lemma
+  (ME.buffer_writeable (as_vale_buffer x))

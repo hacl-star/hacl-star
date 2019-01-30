@@ -10,9 +10,10 @@ friend X64.Memory
 friend X64.Memory_Sems
 friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
+friend X64.MemoryAdapters
 
 let as_vale_buffer_len (#t:base_typ) (x:buf_t t)
-   = BV.length_eq (BV.mk_buffer_view (as_vale_buffer x) (ME.uint_view t))
+   = BV.length_eq (BV.mk_buffer_view x (ME.uint_view t))
 
 let state_eq_down_mem (va_s1:V.va_state) (s1:_) = ()
 
@@ -63,3 +64,5 @@ let core_create_lemma_taint_hyp
     assert (forall x. List.memP x args /\ Some? (IX64.taint_of_arg x) ==>
                  LSig.taint_hyp_arg mem taint_map x);
     BigOps.big_and'_forall (LSig.taint_hyp_arg mem taint_map) args
+
+let buffer_writeable_reveal t x = ()

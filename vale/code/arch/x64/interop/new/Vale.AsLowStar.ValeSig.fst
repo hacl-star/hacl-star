@@ -84,7 +84,8 @@ let sprop = VS.state -> prop
 let readable_one (s:ME.mem) (arg:arg) : prop =
   match arg with
   | (|TD_Buffer bt _, x |) ->
-    ME.buffer_readable s (as_vale_buffer #bt x)
+    ME.buffer_readable s (as_vale_buffer #bt x) /\
+    ME.buffer_writeable (as_vale_buffer #bt x)
     /\ True //promote to prop
   | _ -> True
 
@@ -101,7 +102,7 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
       ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb))
     | (| TD_Buffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
       ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb)) \/
-      eq2 #b8 xb yb
+      eq3 xb yb
     | _ -> True
 
 [@__reduce__]

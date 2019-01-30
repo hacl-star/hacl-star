@@ -60,7 +60,7 @@ let rec args_b8_lemma (args:list arg) (x:arg)
   : Lemma
       (List.memP x args ==>
         (match x with
-         | (| TD_Buffer bt _, x |) -> List.memP x (args_b8 args)
+         | (| TD_Buffer bt _, x |) -> List.memP (Buffer x true) (args_b8 args)
          | _ -> True))
   = match args with
     | [] -> ()
@@ -74,7 +74,7 @@ let readable_cons (hd:arg) (tl:list arg) (s:ME.mem)
 let arg_is_registered_root (s:ME.mem) (a:arg) =
   match a with
   | (| TD_Buffer bt _, x |) ->
-    List.memP x (ptrs_of_mem (as_mem s))
+    List.memP (Buffer x true) (ptrs_of_mem (as_mem s))
   | _ -> true
 
 let core_create_lemma_readable
@@ -92,7 +92,8 @@ let core_create_lemma_readable
           VSig.(arg_is_registered_root s a <==> readable_one s a)
       = match a with
         | (| TD_Buffer bt _, x |) ->
-          Vale.AsLowStar.MemoryHelpers.reveal_readable #bt x s
+          Vale.AsLowStar.MemoryHelpers.reveal_readable #bt x s;
+          Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal bt x          
         | _ -> ()
     in
     let rec readable_registered_all
@@ -311,6 +312,7 @@ let core_create_lemma
     core_create_lemma_register_args args h0 stack;
     Vale.AsLowStar.MemoryHelpers.core_create_lemma_taint_hyp args h0 stack;
     core_create_lemma_state args h0 stack;
+    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 stack;
     let s_args = arg_of_sb stack :: args in
     Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal _ stack (arg_of_sb stack :: args) h0
 

@@ -89,8 +89,10 @@ let vm_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 /\
        vm_post code dst src va_s0 sb va_s1 f /\
-       (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer src) /\
-        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst)) /\       
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer src) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst) /\ 
+       ME.buffer_writeable (as_vale_buffer src) /\
+       ME.buffer_writeable (as_vale_buffer dst) /\ 
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
@@ -109,6 +111,8 @@ let vm_lemma'
                         va_s0.VS.mem va_s1.VS.mem);
     assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst));
     assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer src));    
+    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 dst;
+    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 src;
     va_s1, f
 
 (* Prove that vm_lemma' has the required type *)
@@ -141,7 +145,9 @@ let lowstar_memcpy : lowstar_memcpy_t  =
 
 let lowstar_memcpy_normal_t //: normal lowstar_memcpy_t
   = as_normal_t #lowstar_memcpy_t lowstar_memcpy
-module B = LowStar.Monotonic.Buffer
+  
+module B = LowStar.Buffer
+module MB = LowStar.Monotonic.Buffer
 open FStar.HyperStack.ST
 
 module M = X64.Memory
@@ -151,7 +157,7 @@ let test (x:b64) = assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)
 module T = FStar.Tactics
 #reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 module LBV = LowStar.BufferView
-val lbv_as_seq_eq (#a #b:Type) (#rrel #rel:B.srel a) (x y: B.mbuffer a rrel rel) (v:LBV.view a b) (h:_)
+val lbv_as_seq_eq (#a #b:Type) (#rrel #rel:MB.srel a) (x y: MB.mbuffer a rrel rel) (v:LBV.view a b) (h:_)
   : Lemma
     (requires (B.length x == B.length y /\
                B.length x % LBV.View?.n v == 0 /\
@@ -172,7 +178,9 @@ let lbv_as_seq_eq #a #b #rrel #rel x y v h =
   FStar.Classical.forall_intro aux
 
 //#reset-options "--print_implicits"
-let memcpy_test (dst:b8{B.length dst % 8 == 0}) (src:b8{B.length src % 8 == 0})
+let memcpy_test 
+  (dst:B.buffer UInt8.t{B.length dst % 8 == 0})
+  (src:B.buffer UInt8.t{B.length src % 8 == 0})
   : Stack UInt64.t
     (requires fun h0 ->
       B.live h0 dst /\
