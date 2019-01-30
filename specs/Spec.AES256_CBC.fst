@@ -68,8 +68,8 @@ let concat_with_last_block first_part_length first_part last_block =
     let out = create blocklen (u8 0) in
     update_sub out 0 blocklen last_block
   end else begin
-    let lastfull_offset : size_nat = first_part_length - blocklen in
-    let out = create first_part_length (u8 0) in
+    let lastfull_offset : size_nat = first_part_length in
+    let out = create (first_part_length + blocklen) (u8 0) in
     let out = update_sub out
       0 lastfull_offset
       (sub first_part 0 lastfull_offset)
@@ -82,7 +82,7 @@ val aes256_cbc_encrypt:
   iv:block ->
   msg:seq uint8{length msg + blocklen <= max_size_t} ->
   msglen:size_nat{msglen == length msg} ->
-  out:seq uint8{length out <> 0 /\ length out % blocklen == 0 /\ length out <= max_size_t}
+  All.ML (out:seq uint8{length out <> 0 /\ length out % blocklen == 0 /\ length out <= max_size_t})
 let aes256_cbc_encrypt key iv msg msglen =
   let fullblocks = (msglen / blocklen) * blocklen in
   assert_norm(fullblocks % blocklen = 0);
@@ -92,6 +92,13 @@ let aes256_cbc_encrypt key iv msg msglen =
   let out1 = create fullblocks (u8 0) in
   let kex = keyExpansion key in
   let out1 = cbc_encrypt_blocks out1 kex iv msg1 fullblocks 0 in
+  IO.print_string "\n";
+  IO.print_string "out1";
+  IO.print_string " (";
+  IO.print_uint32_dec (UInt32.uint_to_t (length out1));
+  IO.print_string "):\n";
+  FStar.List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list out1);
+  IO.print_string "\n";
   let lastfull  = if fullblocks <> 0 then
     sub #uint8 #(fullblocks) out1 (fullblocks - blocklen) blocklen
   else
