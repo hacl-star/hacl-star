@@ -438,13 +438,7 @@ val fmul_r4_normalize5:
   -> r:felem5 4
   -> r_5:felem5 4
   -> r4:felem5 4
-  -> Pure (felem5 4)
-    (requires
-      felem_fits5 acc (2, 3, 2, 2, 2) /\
-      r_5 == precomp_r5 r /\
-      feval5 r4 == compute_r4 (feval5 r))
-    (ensures (fun out -> acc_inv_t out /\
-      (feval5 out).[0] == normalize_4 (feval5 acc) (feval5 r)))
+  -> out:felem5 4
 let fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) (r40, r41, r42, r43, r44) =
   let (r20, r21, r22, r23, r24) =
     fmul_r5 (r10, r11, r12, r13, r14) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
@@ -494,5 +488,5 @@ let fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r15
 
   let v04 = cast U64 4 (vec_interleave_high (cast U128 2 o4) (cast U128 2 o4)) in
   let v14 = vec_add_mod o4 v04 in
-  let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in admit();
+  let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
   carry_full_felem5 (v20, v21, v22, v23, v24)

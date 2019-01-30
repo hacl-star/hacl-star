@@ -49,7 +49,17 @@ val lemma_cast_vec64_to_vec128: b:vec_t U64 4 ->
     uint_v r.[1] == uint_v b.[2] + uint_v b.[3] * pow2 64)
 let lemma_cast_vec64_to_vec128 b = admit()
 
+val lemma_vec_interleave_low_cast_64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 ->
+  Lemma (
+    vec_v (cast U64 4 (vec_interleave_low (cast U128 2 b1) (cast U128 2 b2))) ==
+    create4 (vec_v b1).[0] (vec_v b1).[1] (vec_v b2).[0] (vec_v b2).[1])
+let lemma_vec_interleave_low_cast_64_4 b1 b2 = admit()
 
+val lemma_vec_interleave_high_cast_64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 ->
+  Lemma (
+    vec_v (cast U64 4 (vec_interleave_high (cast U128 2 b1) (cast U128 2 b2))) ==
+    create4 (vec_v b1).[2] (vec_v b1).[3] (vec_v b2).[2] (vec_v b2).[3])
+let lemma_vec_interleave_high_cast_64_4 b1 b2 = admit()
 
 val uint_from_bytes_le_lemma: b:LSeq.lseq uint8 16 ->
   Lemma (

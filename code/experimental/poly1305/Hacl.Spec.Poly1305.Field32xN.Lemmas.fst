@@ -538,7 +538,7 @@ val carry_full_felem5_lemma:
     #w:lanes
   -> f:felem5 w
   -> Lemma
-    (requires felem_fits5 f (2, 4, 2, 2, 2))
+    (requires felem_fits5 f (4, 8, 4, 4, 4))
     (ensures
       acc_inv_t (carry_full_felem5 f) /\
       feval5 (carry_full_felem5 f) == feval5 f)
@@ -584,3 +584,211 @@ let fmul_r2_normalize5_lemma acc r r2 =
 
   let res = carry_full_felem5 out in
   carry_full_felem5_lemma out
+
+inline_for_extraction noextract
+val fmul_r4_normalize50:
+    acc:felem5 4
+  -> r:felem5 4
+  -> r2:felem5 4
+  -> r3:felem5 4
+  -> r4:felem5 4
+  -> Pure (felem5 4)
+    (requires
+      felem_fits5 acc (2, 3, 2, 2, 2) /\
+      felem_fits5 r (1, 1, 1, 1, 1) /\
+      felem_fits5 r2 (1, 2, 1, 1, 1) /\
+      felem_fits5 r3 (1, 2, 1, 1, 1) /\
+      felem_fits5 r4 (1, 2, 1, 1, 1) /\
+      feval5 r2 == S.fmul (feval5 r) (feval5 r) /\
+      feval5 r3 == S.fmul (feval5 r2) (feval5 r) /\
+      feval5 r4 == S.compute_r4 (feval5 r))
+    (ensures (fun out ->
+      let fr4321 = create4 (feval5 r4).[0] (feval5 r3).[0] (feval5 r2).[0] (feval5 r).[0] in
+      feval5 out == S.fmul (feval5 acc) fr4321 /\
+      felem_fits5 out (1, 2, 1, 1, 1)))
+let fmul_r4_normalize50 acc fr fr2 fr3 fr4 =
+  let (r10, r11, r12, r13, r14) = fr in
+  let (r20, r21, r22, r23, r24) = fr2 in
+  let (r30, r31, r32, r33, r34) = fr3 in
+  let (r40, r41, r42, r43, r44) = fr4 in
+  let (a0, a1, a2, a3, a4) = acc in
+
+  let v12120 = vec_interleave_low r20 r10 in
+  vec_interleave_low_lemma64_4 r20 r10;
+  let v34340 = vec_interleave_low r40 r30 in
+  vec_interleave_low_lemma64_4 r40 r30;
+  let r12340 = cast U64 4 (vec_interleave_low (cast U128 2 v34340) (cast U128 2 v12120)) in
+  lemma_vec_interleave_low_cast_64_4 v34340 v12120;
+  //assert (vec_v r12340 == create4 (vec_v r40).[0] (vec_v r30).[0] (vec_v r20).[0] (vec_v r10).[0]);
+
+  let v12121 = vec_interleave_low r21 r11 in
+  vec_interleave_low_lemma64_4 r21 r11;
+  let v34341 = vec_interleave_low r41 r31 in
+  vec_interleave_low_lemma64_4 r41 r31;
+  let r12341 = cast U64 4 (vec_interleave_low (cast U128 2 v34341) (cast U128 2 v12121)) in
+  lemma_vec_interleave_low_cast_64_4 v34341 v12121;
+
+  let v12122 = vec_interleave_low r22 r12 in
+  vec_interleave_low_lemma64_4 r22 r12;
+  let v34342 = vec_interleave_low r42 r32 in
+  vec_interleave_low_lemma64_4 r42 r32;
+  let r12342 = cast U64 4 (vec_interleave_low (cast U128 2 v34342) (cast U128 2 v12122)) in
+  lemma_vec_interleave_low_cast_64_4 v34342 v12122;
+
+  let v12123 = vec_interleave_low r23 r13 in
+  vec_interleave_low_lemma64_4 r23 r13;
+  let v34343 = vec_interleave_low r43 r33 in
+  vec_interleave_low_lemma64_4 r43 r33;
+  let r12343 = cast U64 4 (vec_interleave_low (cast U128 2 v34343) (cast U128 2 v12123)) in
+  lemma_vec_interleave_low_cast_64_4 v34343 v12123;
+
+  let v12124 = vec_interleave_low r24 r14 in
+  vec_interleave_low_lemma64_4 r24 r14;
+  let v34344 = vec_interleave_low r44 r34 in
+  vec_interleave_low_lemma64_4 r44 r34;
+  let r12344 = cast U64 4 (vec_interleave_low (cast U128 2 v34344) (cast U128 2 v12124)) in
+  lemma_vec_interleave_low_cast_64_4 v34344 v12124;
+
+  let fr1234 = (r12340, r12341, r12342, r12343, r12344) in
+  eq_intro (feval5 fr1234) (create4 (feval5 fr4).[0] (feval5 fr3).[0] (feval5 fr2).[0] (feval5 fr).[0]);
+
+  let fr12345 = precomp_r5 #4 fr1234 in
+  let out = fmul_r5 #4 acc fr1234 fr12345 in
+  fmul_r5_eval_lemma acc fr1234 fr12345;
+  fmul_r5_fits_lemma acc fr1234 fr12345;
+  out
+
+inline_for_extraction noextract
+val lemma_fmul_r4_normalize51:
+    #m:scale32{m <= 2}
+  -> o:uint64xN 4{felem_fits1 o m}
+  -> Lemma
+    (let v00 = cast U64 4 (vec_interleave_high (cast U128 2 o) (cast U128 2 o)) in
+    let v10 = vec_add_mod o v00 in
+    let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+    felem_fits1 v20 (4 * m) /\
+    v (vec_v v20).[0] == v (vec_v o).[0] + v (vec_v o).[1] + v (vec_v o).[2] + v (vec_v o).[3])
+let lemma_fmul_r4_normalize51 #m o =
+  let v00 = cast U64 4 (vec_interleave_high (cast U128 2 o) (cast U128 2 o)) in
+  lemma_vec_interleave_high_cast_64_4 o o;
+  let v10 = vec_add_mod o v00 in
+  FStar.Math.Lemmas.modulo_lemma (v (vec_v o).[0] + v (vec_v v00).[0]) (pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v (vec_v o).[1] + v (vec_v v00).[1]) (pow2 64);
+  let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+  FStar.Math.Lemmas.modulo_lemma (v (vec_v v10).[0] + v (vec_v v10).[1]) (pow2 64)
+
+
+val lemma_fmul_r4_normalize51_expand:
+    v2:felem5 4
+  -> out:felem5 4
+  -> Lemma
+    (requires (
+      let (v20, v21, v22, v23, v24) = v2 in
+      let (o0, o1, o2, o3, o4) = out in
+      v (vec_v v20).[0] == v (vec_v o0).[0] + v (vec_v o0).[1] + v (vec_v o0).[2] + v (vec_v o0).[3] /\
+      v (vec_v v21).[0] == v (vec_v o1).[0] + v (vec_v o1).[1] + v (vec_v o1).[2] + v (vec_v o1).[3] /\
+      v (vec_v v22).[0] == v (vec_v o2).[0] + v (vec_v o2).[1] + v (vec_v o2).[2] + v (vec_v o2).[3] /\
+      v (vec_v v23).[0] == v (vec_v o3).[0] + v (vec_v o3).[1] + v (vec_v o3).[2] + v (vec_v o3).[3] /\
+      v (vec_v v24).[0] == v (vec_v o4).[0] + v (vec_v o4).[1] + v (vec_v o4).[2] + v (vec_v o4).[3]))
+    (ensures (
+      let (v20, v21, v22, v23, v24) = v2 in
+      let (o0, o1, o2, o3, o4) = out in
+      (feval5 v2).[0] ==
+      S.pfadd (S.pfadd (S.pfadd (feval5 out).[0] (feval5 out).[1]) (feval5 out).[2]) (feval5 out).[3]))
+let lemma_fmul_r4_normalize51_expand v2 out =
+  let (v20, v21, v22, v23, v24) = v2 in
+  let (o0, o1, o2, o3, o4) = out in
+  assert (
+    as_nat5 ((vec_v v20).[0], (vec_v v21).[0], (vec_v v22).[0], (vec_v v23).[0], (vec_v v24).[0]) ==
+    as_nat5 ((vec_v o0).[0], (vec_v o1).[0], (vec_v o2).[0], (vec_v o3).[0], (vec_v o4).[0]) +
+    as_nat5 ((vec_v o0).[1], (vec_v o1).[1], (vec_v o2).[1], (vec_v o3).[1], (vec_v o4).[1]) +
+    as_nat5 ((vec_v o0).[2], (vec_v o1).[2], (vec_v o2).[2], (vec_v o3).[2], (vec_v o4).[2]) +
+    as_nat5 ((vec_v o0).[3], (vec_v o1).[3], (vec_v o2).[3], (vec_v o3).[3], (vec_v o4).[3]));
+  assert (
+    as_nat5 (as_tup64_i v2 0) % S.prime ==
+      (as_nat5 (as_tup64_i out 0) + as_nat5 (as_tup64_i out 1) +
+      as_nat5 (as_tup64_i out 2) + as_nat5 (as_tup64_i out 3)) % S.prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (as_nat5 (as_tup64_i out 0) + as_nat5 (as_tup64_i out 1))
+    (as_nat5 (as_tup64_i out 2) + as_nat5 (as_tup64_i out 3)) S.prime;
+  FStar.Math.Lemmas.modulo_distributivity (as_nat5 (as_tup64_i out 0)) (as_nat5 (as_tup64_i out 1)) S.prime;
+  assert (
+    (feval5 v2).[0] ==
+      (((feval5 out).[0] + (feval5 out).[1]) % S.prime +
+      as_nat5 (as_tup64_i out 2) + as_nat5 (as_tup64_i out 3)) % S.prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l
+    (((feval5 out).[0] + (feval5 out).[1]) % S.prime + as_nat5 (as_tup64_i out 2))
+    (as_nat5 (as_tup64_i out 3)) S.prime;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r
+    (((feval5 out).[0] + (feval5 out).[1]) % S.prime) (as_nat5 (as_tup64_i out 2)) S.prime;
+  assert (
+    (feval5 v2).[0] ==
+      ((((feval5 out).[0] + (feval5 out).[1]) % S.prime + (feval5 out).[2]) % S.prime +
+      as_nat5 (as_tup64_i out 3)) % S.prime);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r
+    ((((feval5 out).[0] + (feval5 out).[1]) % S.prime + (feval5 out).[2]) % S.prime)
+     (as_nat5 (as_tup64_i out 3)) S.prime
+
+inline_for_extraction noextract
+val fmul_r4_normalize51:
+    a:felem5 4
+  -> Pure (felem5 4)
+    (requires felem_fits5 a (1, 2, 1, 1, 1))
+    (ensures (fun res ->
+      felem_fits5 res (4, 8, 4, 4, 4) /\
+      (feval5 res).[0] ==
+      S.pfadd (S.pfadd (S.pfadd (feval5 a).[0] (feval5 a).[1]) (feval5 a).[2]) (feval5 a).[3]))
+let fmul_r4_normalize51 fa =
+  let (o0, o1, o2, o3, o4) = fa in
+  let v00 = cast U64 4 (vec_interleave_high (cast U128 2 o0) (cast U128 2 o0)) in
+  let v10 = vec_add_mod o0 v00 in
+  let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+  lemma_fmul_r4_normalize51 #1 o0;
+
+  let v01 = cast U64 4 (vec_interleave_high (cast U128 2 o1) (cast U128 2 o1)) in
+  let v11 = vec_add_mod o1 v01 in
+  let v21 = vec_add_mod v11 (vec_permute4 v11 1ul 1ul 1ul 1ul) in
+  lemma_fmul_r4_normalize51 #2 o1;
+
+  let v02 = cast U64 4 (vec_interleave_high (cast U128 2 o2) (cast U128 2 o2)) in
+  let v12 = vec_add_mod o2 v02 in
+  let v22 = vec_add_mod v12 (vec_permute4 v12 1ul 1ul 1ul 1ul) in
+  lemma_fmul_r4_normalize51 #1 o2;
+
+  let v03 = cast U64 4 (vec_interleave_high (cast U128 2 o3) (cast U128 2 o3)) in
+  let v13 = vec_add_mod o3 v03 in
+  let v23 = vec_add_mod v13 (vec_permute4 v13 1ul 1ul 1ul 1ul) in
+  lemma_fmul_r4_normalize51 #1 o3;
+
+  let v04 = cast U64 4 (vec_interleave_high (cast U128 2 o4) (cast U128 2 o4)) in
+  let v14 = vec_add_mod o4 v04 in
+  let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
+  lemma_fmul_r4_normalize51 #1 o4;
+  let res = (v20, v21, v22, v23, v24) in
+  lemma_fmul_r4_normalize51_expand res fa;
+  res
+
+inline_for_extraction noextract
+val fmul_r4_normalize5_lemma:
+    acc:felem5 4
+  -> r:felem5 4
+  -> r_5:felem5 4
+  -> r4:felem5 4
+  -> Lemma
+    (requires
+      felem_fits5 acc (2, 3, 2, 2, 2) /\
+      felem_fits5 r (1, 1, 1, 1, 1) /\
+      felem_fits5 r4 (1, 2, 1, 1, 1) /\
+      r_5 == precomp_r5 r /\
+      feval5 r4 == S.compute_r4 (feval5 r))
+    (ensures (
+      let out = fmul_r4_normalize5 acc r r_5 r4 in
+      acc_inv_t out /\
+      (feval5 out).[0] == S.normalize_4 (feval5 acc) (feval5 r)))
+  [SMTPat (fmul_r4_normalize5 acc r r_5 r4)]
+let fmul_r4_normalize5_lemma acc fr fr_5 fr4 =
+  let fr2 = fmul_r5 fr fr fr_5 in
+  let fr3 = fmul_r5 fr2 fr fr_5 in
+  let out = fmul_r4_normalize50 acc fr fr2 fr3 fr4 in
+  let v2 = fmul_r4_normalize51 out in
+  let res = carry_full_felem5 v2 in
+  carry_full_felem5_lemma v2
