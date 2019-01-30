@@ -414,12 +414,7 @@ val fmul_r2_normalize5:
     acc:felem5 2
   -> r:felem5 2
   -> r2:felem5 2
-  -> Pure (felem5 2)
-    (requires
-      felem_fits5 acc (2, 3, 2, 2, 2) /\
-      feval5 r2 == compute_r2 (feval5 r))
-    (ensures (fun out -> acc_inv_t out /\
-      (feval5 out).[0] == normalize_2 (feval5 acc) (feval5 r)))
+  -> out:felem5 2
 let fmul_r2_normalize5 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r20, r21, r22, r23, r24) =
   let r20 = vec_interleave_low r20 r0 in
   let r21 = vec_interleave_low r21 r1 in
@@ -434,7 +429,7 @@ let fmul_r2_normalize5 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r20, r21, r22,
   let o1 = vec_add_mod o1 (vec_interleave_high o1 o1) in
   let o2 = vec_add_mod o2 (vec_interleave_high o2 o2) in
   let o3 = vec_add_mod o3 (vec_interleave_high o3 o3) in
-  let o4 = vec_add_mod o4 (vec_interleave_high o4 o4) in admit();
+  let o4 = vec_add_mod o4 (vec_interleave_high o4 o4) in
   carry_full_felem5 (o0, o1, o2, o3, o4)
 
 inline_for_extraction
