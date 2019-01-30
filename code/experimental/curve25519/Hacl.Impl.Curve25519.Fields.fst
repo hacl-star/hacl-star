@@ -13,6 +13,8 @@ module F26 = Hacl.Impl.Curve25519.Field26
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 module P = NatPrime
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
 
 type field_spec =
   | M26
@@ -78,11 +80,7 @@ let as_nat #s h e =
 
 noextract
 val feval: #s:field_spec -> h:mem -> e:felem s -> GTot P.felem
-let feval #s h e =
-  match s with
-  | M26 -> admit()
-  | M51 -> F51.fevalh h e
-  | M64 -> F64.fevalh h e
+let feval #s h e = (as_nat h e) % P.prime
 
 inline_for_extraction
 val create_felem:
@@ -90,7 +88,7 @@ val create_felem:
   -> StackInline (felem s)
     (requires fun h -> True)
     (ensures  fun h0 f h1 ->
-      stack_allocated f h0 h1 (Seq.create (v (nlimb s)) (limb_zero s)) /\
+      stack_allocated f h0 h1 (LSeq.create (v (nlimb s)) (limb_zero s)) /\
       as_nat h1 f == 0)
 let create_felem s =
   match s with
@@ -104,13 +102,23 @@ val load_felem:
   -> f:felem s
   -> u64s:lbuffer uint64 4ul
   -> Stack unit
-    (requires fun h -> live h f /\ live h u64s)
-    (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1)
+    (requires fun h ->
+      live h f /\ live h u64s /\ disjoint f u64s)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      as_nat h1 f == BSeq.nat_from_intseq_le (as_seq h0 u64s))
 let load_felem #s f b =
   match s with
-  | M26 -> F26.load_felem f b
+  | M26 -> admit(); F26.load_felem f b
   | M51 -> F51.load_felem f b
   | M64 -> F64.load_felem f b
+
+val store_felem_pre: #s:field_spec -> h:mem -> f:felem s -> Type0
+let store_felem_pre #s h f =
+  match s with
+  | M26 -> True
+  | M51 -> F51.mul_inv_t h f
+  | M64 -> True
 
 inline_for_extraction
 val store_felem:
@@ -118,8 +126,10 @@ val store_felem:
   -> b:lbuffer uint64 4ul
   -> f:felem s
   -> Stack unit
-    (requires (fun h -> live h f /\ live h b))
-    (ensures (fun h0 _ h1 -> modifies (loc b |+| loc f) h0 h1))
+    (requires fun h ->
+      live h f /\ live h b /\ disjoint f b /\
+      store_felem_pre h f)
+    (ensures  fun h0 _ h1 -> modifies (loc b |+| loc f) h0 h1)
 let store_felem #s b f =
   match s with
   | M26 -> F26.store_felem b f
@@ -240,7 +250,7 @@ val fmul_fsqr_post:#s:field_spec -> h:mem -> out:felem s -> Type0
 let fmul_fsqr_post #s h out =
   match s with
   | M26 -> True
-  | M51 -> F51.felem_fits h out (1, 2, 1, 1, 1)
+  | M51 -> F51.mul_inv_t h out
   | M64 -> True
 
 inline_for_extraction
@@ -284,11 +294,9 @@ let fmul2_fsqr2_post #s h out =
   | M51 ->
       let out0 = gsub out 0ul 5ul in
       let out1 = gsub out 5ul 5ul in
-      F51.felem_fits h out0 (1, 2, 1, 1, 1) /\
-      F51.felem_fits h out1 (1, 2, 1, 1, 1)
+      F51.mul_inv_t h out0 /\
+      F51.mul_inv_t h out1
   | M64 -> True
-
-#set-options "--max_fuel 0 --max_ifuel 1"
 
 inline_for_extraction
 val fmul2:

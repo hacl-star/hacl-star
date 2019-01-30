@@ -31,9 +31,9 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.ECIES.fst \
 		Spec.HSalsa20.fst
 
-LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst
+LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst
 LIBS_FILES= $(addprefix ../lib/fst/, $(LIBS))
-LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml
+LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml Lib_PrintSequence.ml
 LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=))
 
 #
@@ -249,9 +249,9 @@ pbkdf2.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.PBKDF2.
 # NOT Under CI
 random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
 	mkdir -p random-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.LoopCombinators --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Random.Test --odir random-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.LoopCombinators --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Lib.PrintSequence --extract_module Spec.Random.Test --odir random-ml $^
 	@echo 'let _ = test()' >> random-ml/Spec_Random_Test.ml
-	$(OCAMLOPT) -package cryptokit -I random-ml -I ../lib/ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_LoopCombinators.ml random-ml/Lib_Sequence.ml ../lib/ml/Lib_RandomSequence.ml random-ml/Lib_ByteSequence.ml random-ml/Spec_Random_Test.ml -o random.exe
+	$(OCAMLOPT) -package cryptokit -I random-ml -I ../lib/ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_LoopCombinators.ml random-ml/Lib_Sequence.ml ../lib/ml/Lib_RandomSequence.ml random-ml/Lib_ByteSequence.ml random-ml/Lib_PrintSequence.ml random-ml/Spec_Random_Test.ml -o random.exe
 	./random.exe
 
 # NOT Under CI

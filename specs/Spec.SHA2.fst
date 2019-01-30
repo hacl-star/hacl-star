@@ -58,6 +58,7 @@ let limb_to_word (a:alg) (x:limb_t a) : word_t a =
 inline_for_extraction let size_opTable: size_nat = 12
 
 [@"opaque_to_smt"]
+inline_for_extraction
 let opTable_list_224_256: l:List.Tot.llist (rotval U32) 12 =
   [@inline_let]
   let l = [
@@ -69,6 +70,7 @@ let opTable_list_224_256: l:List.Tot.llist (rotval U32) 12 =
   l
 
 [@"opaque_to_smt"]
+inline_for_extraction
 let opTable_list_384_512: l:List.Tot.llist (rotval U64) 12 =
   [@inline_let]
   let l = [
@@ -94,6 +96,7 @@ let size_kTable (p:alg): size_nat =
   | SHA2_384 | SHA2_512 -> 80
 
 [@"opaque_to_smt"]
+inline_for_extraction
 let kTable_list_224_256: l:List.Tot.llist uint32 64 =
   [@inline_let]
   let l = [
@@ -117,6 +120,7 @@ let kTable_list_224_256: l:List.Tot.llist uint32 64 =
   l
 
 [@"opaque_to_smt"]
+inline_for_extraction
 let kTable_list_384_512 : l:List.Tot.llist uint64 80 =
   [@inline_let]
   let l = [
@@ -154,6 +158,7 @@ let kTable (a:alg) : kTable_t a =
 inline_for_extraction let size_h0Table: size_nat = 8
 
 [@"opaque_to_smt"]
+inline_for_extraction
 let h0Table_list_224: l:List.Tot.llist uint32 size_h0Table =
   [@inline_let]
   let l = [
@@ -163,6 +168,7 @@ let h0Table_list_224: l:List.Tot.llist uint32 size_h0Table =
   l
 
 [@"opaque_to_smt"]
+inline_for_extraction
 let h0Table_list_256: l:List.Tot.llist uint32 size_h0Table =
   [@inline_let]
   let l = [
@@ -172,6 +178,7 @@ let h0Table_list_256: l:List.Tot.llist uint32 size_h0Table =
   l
 
 [@"opaque_to_smt"]
+inline_for_extraction
 let h0Table_list_384: l:List.Tot.llist uint64 size_h0Table =
   [@inline_let]
   let l = [
@@ -181,6 +188,7 @@ let h0Table_list_384: l:List.Tot.llist uint64 size_h0Table =
   l
 
 [@"opaque_to_smt"]
+inline_for_extraction
 let h0Table_list_512: l:List.Tot.llist uint64 size_h0Table =
   [@inline_let]
   let l = [

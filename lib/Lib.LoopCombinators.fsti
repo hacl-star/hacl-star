@@ -46,6 +46,14 @@ val repeat_right:
   -> acc:a lo
   -> Tot (a hi) (decreases (hi - lo))
 
+val repeat_right_all_ml:
+    lo:nat
+  -> hi:nat{lo <= hi}
+  -> a:(i:nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:nat{lo <= i /\ i < hi} -> a i -> FStar.All.ML (a (i + 1)))
+  -> acc:a lo
+  -> FStar.All.ML (a hi) (decreases (hi - lo))
+
 (** Splitting a repetition *)
 val repeat_right_plus:
     lo:nat
@@ -88,6 +96,13 @@ val repeat_gen:
   -> acc0:a 0
   -> a n
 
+val repeat_gen_all_ml:
+    n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> FStar.All.ML (a (i + 1)))
+  -> acc0:a 0
+  -> FStar.All.ML (a n)
+
 (** Unfolding one iteration *)
 val unfold_repeat_gen:
     n:nat
@@ -107,6 +122,13 @@ val repeati:
   -> f:(i:nat{i < n} -> a -> a)
   -> acc0:a
   -> a
+
+val repeati_all_ml:
+    #a:Type
+  -> n:nat
+  -> f:(i:nat{i < n} -> a -> FStar.All.ML a)
+  -> acc0:a
+  -> FStar.All.ML a
 
 (** Unfolding one iteration *)
 val unfold_repeati:

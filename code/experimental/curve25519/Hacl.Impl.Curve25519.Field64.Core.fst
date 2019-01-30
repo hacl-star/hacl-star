@@ -317,6 +317,7 @@ let fmul out f1 f2 tmp =
 let fmul2 out f1 f2 tmp =
   push_frame();
   let tmp = create 16ul (u64 0) in
+  let h0 = ST.get () in
   mul2 tmp f1 f2;
   let out1 = B.sub out 0ul 4ul in
   let out2 = B.sub out 4ul 4ul in
@@ -324,7 +325,10 @@ let fmul2 out f1 f2 tmp =
   let tmp2 = B.sub tmp 8ul 8ul in
   carry_wide out1 tmp1;
   carry_wide out2 tmp2;
-  admit();
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 (gsub f1 0ul 4ul)) (as_nat h0 (gsub f2 0ul 4ul)) P.prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat h0 (gsub f1 0ul 4ul) % P.prime) (as_nat h0 (gsub f2 0ul 4ul)) P.prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 (gsub f1 4ul 4ul)) (as_nat h0 (gsub f2 4ul 4ul)) P.prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat h0 (gsub f1 4ul 4ul) % P.prime) (as_nat h0 (gsub f2 4ul 4ul)) P.prime;
   pop_frame()
 
 [@ CInline]
@@ -361,8 +365,23 @@ let fsqr2 out f tmp =
   let tmp2 = B.sub tmp 8ul 8ul in
   let out1 = B.sub out 0ul 4ul in
   let out2 = B.sub out 4ul 4ul in
+  let h0 = ST.get () in
   sqr2 tmp f;
   carry_wide out1 tmp1;
   carry_wide out2 tmp2;
-  admit();
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 (gsub f 0ul 4ul)) (as_nat h0 (gsub f 0ul 4ul)) P.prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat h0 (gsub f 0ul 4ul) % P.prime) (as_nat h0 (gsub f 0ul 4ul)) P.prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 (gsub f 4ul 4ul)) (as_nat h0 (gsub f 4ul 4ul)) P.prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat h0 (gsub f 4ul 4ul) % P.prime) (as_nat h0 (gsub f 4ul 4ul)) P.prime;
   pop_frame()
+
+let cswap2 bit p0 p1 =
+  let mask = u64 0 -. bit in
+  let h0 = ST.get() in
+  loop2 h0 8ul p0 p1
+    (fun h -> (fun i s -> s))
+    (fun i ->
+      let dummy = mask &. (p0.(i) ^. p1.(i)) in
+      p0.(i) <- p0.(i) ^. dummy;
+      p1.(i) <- p1.(i) ^. dummy;
+    admit())

@@ -1,12 +1,12 @@
-module Spec.Ed25519
+module Spec.Ed448
 
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
-open Spec.SHA2
-open Spec.Curve25519
+open Spec.SHA3
+open Spec.Curve448
 open Lib.NatMod
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
@@ -20,14 +20,32 @@ let modp_inv (x:elem) : Tot elem =
 
 let d : elem = to_elem 37095705934669439343138083508754565189542113879843219016388785533085940283555
 
-let q: n:nat{n < pow2 256} =
-  assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
-  (pow2 252 + 27742317777372353535851937790883648493) // Group order
+let q: n:nat{n < pow2 446} =
+  assert_norm(pow2 446 - 13818066809895115352007386748515426880336692474882178609894547503885 < prime);
+  (pow2 446 - 13818066809895115352007386748515426880336692474882178609894547503885) // Group order
 
-let _:_:unit{max_input SHA2_512 > pow2 32} = assert_norm (max_input SHA2_512 > pow2 32)
+inline_for_extraction
+let size_label_SigEd448: size_nat = 8
 
-let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
-  (nat_from_bytes_le (hash512 s) % q)
+inline_for_extraction
+let label_SigEd448_list =
+  [@inline_let]
+  let l = [
+    u8 0x53; u8 0x69; u8 0x67; u8 0x45; u8 0x64; u8 0x34; u8 0x34; u8 0x38
+  ]  in
+  assert_norm(List.Tot.length l == size_label_SigEd448);
+  l
+
+let label_SigEd448: lseq uint8 size_label_SigEd448 =
+  assert_norm (List.Tot.length label_SigEd448_list == size_label_SigEd448);
+  of_list label_SigEd448_list
+
+(* let dom4 (x:nat{0 <= x /\ x <= 255}) (y:bytes{length y <= 255}) = *)
+(*   label_SigEd448 @| u8 x @| (nat_to_bytes_le (length y)) @| y *)
+
+
+let shake256_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
+  (nat_from_bytes_le (shake256 len s 16) % q)
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
@@ -102,8 +120,10 @@ let recover_x (y:nat) (sign:bool) : Tot (option elem) =
         let x = if (nat_mod_v x % 2 = 1) <> sign then to_elem (prime - nat_mod_v x) else x in
         Some x)))
 
-let g_x : elem = to_elem 15112221349535400772501151409588531511454012693041857206046113283949847762202
-let g_y : elem = to_elem 46316835694926478169428394003475163141307993866256225615783033603165251855960
+let g_x : elem = to_elem 224580040295924300187604334099896036246789641632564134246125461686950415467406032909029192869357953282578032075146446173674602635247710
+
+let g_y : elem = to_elem
+298819210078481492676017930443930673437544040154080242095928241372331506189835876003536878655418784733982303233503462500531545062832660
 
 let g: ext_point = (g_x, g_y, to_elem 1, g_x *% g_y)
 

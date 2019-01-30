@@ -5,7 +5,7 @@ open Lib.IntTypes
 
 #set-options "--z3rlimit 15"
 
-/// Unbounded sequences, derived from FStar.Seq
+/// Variable length Sequences, derived from FStar.Seq
 
 (* This is the type of unbounded sequences.
    Use this only when dealing with, say, user input whose length is unbounded.
@@ -17,7 +17,7 @@ let seq (a:Type0) = Seq.seq a
 (** Length of a Sequence *)
 let length (#a:Type0) (s:seq a) : nat = Seq.length s
 
-/// Bounded Sequences
+/// Fixed length Sequences
 
 (* This is the type of bounded sequences.
    Use this as much as possible.

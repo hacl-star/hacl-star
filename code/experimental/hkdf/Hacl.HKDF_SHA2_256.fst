@@ -40,7 +40,7 @@ val hkdf_extract:
   Stack unit
   (requires (fun h -> live h output /\ live h salt /\ live h ikm
                  /\ disjoint output salt /\ disjoint output ikm))
-  (ensures  (fun h0 _ h1 -> modifies1 #uint8 #(size (Spec.SHA2.size_hash a)) output h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 output h0 h1))
 
 let hkdf_extract output salt slen ikm ilen = Impl.hkdf_extract output salt slen ikm ilen
 
@@ -61,6 +61,6 @@ val hkdf_expand:
   Stack unit
   (requires (fun h -> live h output /\ live h prk /\ live h info
                  /\ disjoint output prk /\ disjoint output info))
-  (ensures  (fun h0 _ h1 -> modifies1 #uint8 #len output h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 output h0 h1))
 
 let hkdf_expand output prk plen info ilen len = Impl.hkdf_expand output prk plen info ilen len

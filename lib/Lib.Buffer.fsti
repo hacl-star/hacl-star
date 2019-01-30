@@ -103,7 +103,7 @@ let modifies2 (#a0:Type0) (#a1:Type0)
 
 (** Modification three buffers *)
 let modifies3 (#a0:Type0) (#a1:Type0) (#a2:Type0)
-  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a1) (h1 h2: HS.mem) =
+  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (h1 h2: HS.mem) =
   modifies (loc b0 |+| loc b1 |+| loc b2) h1 h2
 
 (** Ghost reveal a buffer as a sequence *)

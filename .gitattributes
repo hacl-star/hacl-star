@@ -10,14 +10,12 @@ Makefile eol=lf
 configure eol=lf
 .gitignore eol=lf
 .ignore eol=lf
+*.sh text eol=lf
 *.fst eol=lf
 *.fsti eol=lf
 *.fs* eol=lf
 *.ml* eol=lf
-*.hints eol=lf
-
-# Don't show diffs for generated ocaml-output files
-*.hints -diff
+*.hints eol=lf -diff linguist-generated
 
 # Checked modules
 *.checked binary
