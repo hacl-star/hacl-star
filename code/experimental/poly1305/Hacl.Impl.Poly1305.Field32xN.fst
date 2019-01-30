@@ -150,6 +150,7 @@ val set_zero:
     (requires fun h -> live h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      felem_fits h1 f (0, 0, 0, 0, 0) /\
       feval h1 f == LSeq.create w 0)
 let set_zero #w f =
   f.(0ul) <- zero w;

@@ -120,7 +120,7 @@ val load_felem_le:
   -> f:felem s
   -> b:lbuffer uint8 16ul
   -> Stack unit
-    (requires fun h -> 
+    (requires fun h ->
       live h f /\ live h b)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
@@ -201,6 +201,7 @@ val set_zero:
     (requires fun h -> live h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      felem_fits h1 f (0, 0, 0, 0, 0) /\
       feval h1 f == LSeq.create (width s) 0)
 let set_zero #s f =
   match s with
