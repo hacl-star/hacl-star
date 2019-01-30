@@ -73,6 +73,7 @@ procedure {:quick}{:exportSpecs}{:public} zero_quad32_stdcall(
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, b);
+        buffer_writeable(b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(b, mem, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
@@ -131,6 +132,7 @@ procedure {:quick}{:exportSpecs}{:public} mk_quad32_lo0_be_1_stdcall(
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, b);
+        buffer_writeable(b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(b, mem, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
@@ -203,6 +205,7 @@ procedure {:quick}{:exportSpecs}{:public} quad32_xor_stdcall(
         buffer_readable(mem, src1);
         buffer_readable(mem, src2);
         buffer_readable(mem, dst);
+        buffer_writeable(dst);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(src1, mem, memTaint, Secret);
         valid_taint_buf128(src2, mem, memTaint, Secret);
@@ -287,6 +290,7 @@ procedure {:quick}{:exportSpecs}{:public} gcm_load_xor_stdcall(
         buffer_readable(mem, plain_b);
         buffer_readable(mem, mask_b);
         buffer_readable(mem, cipher_b);
+        buffer_writeable(cipher_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(plain_b, mem, memTaint, Secret);
         valid_taint_buf128(mask_b, mem, memTaint, Secret);
@@ -382,6 +386,7 @@ procedure {:quick}{:exportSpecs}{:public} reverse_quad32_stdcall(
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, b);
+        buffer_writeable(b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(b, mem, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, 0, memTaint);

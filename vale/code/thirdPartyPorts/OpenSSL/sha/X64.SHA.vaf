@@ -641,7 +641,7 @@ procedure {:quick} sha_update(
     requires
         sha_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
-        validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
+        validDstAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40*num < pow2_64;
         buffers_disjoint128(ctx_b, in_b);
@@ -687,7 +687,7 @@ procedure {:quick} sha_update_bytes(
     requires
         sha_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
-        validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
+        validDstAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40*num < pow2_64;
         buffers_disjoint128(ctx_b, in_b);
@@ -755,6 +755,7 @@ procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(k_b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, ctx_b);
+        buffer_writeable(ctx_b);
         buffer_readable(mem, in_b);
         buffer_readable(mem, k_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);

@@ -817,8 +817,8 @@ procedure{:quick} cswap_single(
 
         buffers_disjoint(p1_b, p0_b) || p1_b == p0_b;
 
-        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
 
     ensures
         validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
@@ -887,12 +887,12 @@ procedure{:quick} cswap2(
         bit <= 1;
         buffers_disjoint(p1_b, p0_b) || p1_b == p0_b;
 
-        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
 
     ensures
-        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
 
         modifies_buffer_2(p0_b, p1_b, old(mem), mem);
 
@@ -985,8 +985,8 @@ procedure{:quick}{:public} cswap2_stdcall(
         buffers_disjoint(stack_b, p0_b);
         buffers_disjoint(stack_b, p1_b);
 
-        validSrcAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
     ensures
         let p0_0 := buffer64_read(p0_b, 0, mem);
@@ -1029,8 +1029,8 @@ procedure{:quick}{:public} cswap2_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_3(p0_b, p1_b, stack_b, old(mem), mem);
-        validSrcAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
 
         rbx == old(rbx);
         rsi == old(rsi);

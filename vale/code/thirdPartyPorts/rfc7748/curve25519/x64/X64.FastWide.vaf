@@ -87,7 +87,7 @@ procedure{:quick}{:public} fmul_stdcall(
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, if win then 5 else 4, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
@@ -193,7 +193,7 @@ procedure{:quick}{:public} fmul2_stdcall(
         validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, if win then 5 else 4, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
@@ -318,7 +318,7 @@ procedure{:quick}{:public} fsqr_stdcall(
 
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, if win then 6 else 5, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
@@ -412,7 +412,7 @@ procedure{:quick}{:public} fsqr2_stdcall(
 
         validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, if win then 6 else 5, memTaint);
     ensures
         let a0  := old(buffer64_read(inA_b, 0, mem));
