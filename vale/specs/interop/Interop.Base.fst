@@ -27,6 +27,17 @@ let base_typ_as_type (t:base_typ) : Tot eqtype =
 let buf_t t = b:B.buffer UInt8.t{B.length b % view_n t == 0}
 
 [@__reduce__]
+let ibuf_t t = b:IB.ibuffer UInt8.t{B.length b % view_n t == 0}
+
+let imm_to_b8 (b:IB.ibuffer UInt8.t) : b8 = 
+  let x:b8' = Buffer b false in
+  let s1 = Seq.create 1 (UInt8.uint_to_t 0) in
+  Seq.lemma_neq_intro s1 Seq.empty;
+  Classical.exists_intro (fun s -> ~ (x.rel s Seq.empty)) s1;
+  x
+
+
+[@__reduce__]
 let disjoint_or_eq_b8 (ptr1 ptr2:b8) =
   B.loc_disjoint (B.loc_buffer ptr1.b) (B.loc_buffer ptr2.b) \/
   ptr1 == ptr2
@@ -79,11 +90,11 @@ let stack_bq = {
 
 let valid_base_type = x:base_typ{x <> TUInt128}
 
-// TODO: We should have another type descriptor for immutable buffers
 //type descriptors
 type td =
   | TD_Base of valid_base_type
   | TD_Buffer : base_typ -> buffer_qualifiers -> td
+  | TD_ImmBuffer : base_typ -> buffer_qualifiers -> td
 
 unfold
 let normal (#a:Type) (x:a) : a =
@@ -122,6 +133,7 @@ let td_as_type : td -> Type =
   function
   | TD_Base bt -> base_typ_as_type bt
   | TD_Buffer bt _ -> buf_t bt
+  | TD_ImmBuffer bt _ -> ibuf_t bt
 
 let arg = t:td & td_as_type t
 
@@ -220,15 +232,21 @@ let disjoint_not_eq
   (x:MB.mbuffer UInt8.t rel1 rrel1) 
   (y:MB.mbuffer UInt8.t rel2 rrel2) =
     B.disjoint #UInt8.t x y /\
-    ~(x === y)
+    ~ (eq3 #(MB.mbuffer UInt8.t rel1 rrel1) #(MB.mbuffer UInt8.t rel2 rrel2) x y)
 
 [@__reduce__]
 let disjoint_or_eq_1 (a:arg) (b:arg) =
     match a, b with
     | (| TD_Buffer tx {strict_disjointness=true}, xb |), (| TD_Buffer ty _, yb |)
-    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |) ->
+    | (| TD_ImmBuffer tx {strict_disjointness=true}, xb |), (| TD_ImmBuffer ty _, yb |)     
+    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |)
+    | (| TD_ImmBuffer tx _, xb |), (| TD_ImmBuffer ty {strict_disjointness=true}, yb |)
+    // An immutable buffer and a trivial buffer should not be equal
+    | (| TD_ImmBuffer tx _, xb |), (| TD_Buffer ty _, yb |)
+    | (| TD_Buffer tx _, xb |), (| TD_ImmBuffer ty _, yb |) ->
       disjoint_not_eq xb yb
-    | (| TD_Buffer tx {taint=tntx}, xb |), (| TD_Buffer ty {taint=tnty}, yb |) ->
+    | (| TD_Buffer tx {taint=tntx}, xb |), (| TD_Buffer ty {taint=tnty}, yb |)
+    | (| TD_ImmBuffer tx {taint=tntx}, xb |), (| TD_ImmBuffer ty {taint=tnty}, yb |) ->
       disjoint_not_eq xb yb \/ (eq3 xb yb /\ tntx == tnty)
     | _ -> True
 
@@ -239,8 +257,9 @@ let disjoint_or_eq (l:list arg) =
 [@__reduce__]
 let live_arg (h:HS.mem) (x:arg) =
     match x with
-    | (|TD_Buffer tx _, x|) -> B.live h x
-    | _ -> True
+    | (|TD_Buffer tx _, x|)
+    | (|TD_ImmBuffer tx _, x|) -> B.live h x
+    | (|TD_Base _, _ |) -> True
 
 [@__reduce__]
 let all_live (h:HS.mem) (bs:list arg) =
@@ -260,7 +279,8 @@ let args_b8 (args:list arg) : GTot (list b8) =
   let maybe_cons_buffer (x:arg) (args:list b8) : list b8 =
       match x with
       | (|TD_Buffer _ _, x|) -> (Buffer x true) :: args
-      | _ -> args
+      | (|TD_ImmBuffer _ _, x|) -> imm_to_b8 x :: args
+      | (|TD_Base _, _ |) -> args
   in
   List.Tot.fold_right_gtot args maybe_cons_buffer []
 
@@ -283,7 +303,8 @@ let loc_modified_args (args:list arg) : GTot B.loc =
 let arg_loc (x:arg) : GTot B.loc =
     match x with
     | (|TD_Buffer _ _, x|) -> B.loc_buffer x
-    | _ -> B.loc_none
+    | (|TD_ImmBuffer _ _, x|) -> B.loc_buffer x
+    | (|TD_Base _, _|) -> B.loc_none
 
 [@__reduce__]
 let loc_all_args (args:list arg) : GTot B.loc =
@@ -311,12 +332,14 @@ let rec args_b8_mem (l:list arg) (y:b8)
              L.memP a l /\
              (match a with
               | (| TD_Base _, _|) -> False
-              | (| TD_Buffer _ _, x|) -> Buffer x true == y)))
+              | (| TD_Buffer _ _, x|) -> Buffer x true == y
+              | (| TD_ImmBuffer _ _, x|) -> imm_to_b8 x == y)))
   = let goal (l:list arg) (a:arg) =
         L.memP a l /\
         (match a with
          | (| TD_Base _, _|) -> False
-         | (| TD_Buffer _ _, x|) -> Buffer x true == y)
+         | (| TD_Buffer _ _, x|) -> Buffer x true == y
+         | (| TD_ImmBuffer _ _, x|) -> imm_to_b8 x == y)
     in
     match l with
     | [] -> ()
@@ -338,6 +361,19 @@ let rec args_b8_mem (l:list arg) (y:b8)
         in            
         FStar.Classical.move_requires aux_1 ();
         FStar.Classical.move_requires aux_2 ()
+      | (| TD_ImmBuffer bt q, x |) ->  
+        let aux_1 ()
+          : Lemma (requires (y == imm_to_b8 x))
+                  (ensures (exists a. goal l a)) =
+          FStar.Classical.exists_intro (goal l) hd
+        in
+        let aux_2 ()
+          : Lemma (requires (imm_to_b8 x =!= y))
+                  (ensures (L.memP y (args_b8 l) <==> (exists a. goal l a))) =
+          args_b8_mem tl y
+        in            
+        FStar.Classical.move_requires aux_1 ();
+        FStar.Classical.move_requires aux_2 ()        
 
 let rec args_b8_disjoint_or_eq (args:list arg)
   : Lemma
@@ -366,6 +402,9 @@ let rec args_b8_live (hs:HS.mem) (args:list arg{all_live hs args})
       | (| TD_Buffer t _, x |) ->
         assert (B.live hs x);
         assert (args_b8 args == Buffer x true :: args_b8 tl)
+      | (| TD_ImmBuffer t _, x |) ->
+        assert (B.live hs x);
+        assert (args_b8 args == imm_to_b8 x :: args_b8 tl)        
 
 let liveness_disjointness (args:list arg) (h:mem_roots args)
   : Lemma (list_disjoint_or_eq (args_b8 args) /\
@@ -428,7 +467,10 @@ let rec disjoint_or_eq_fresh
     | [] -> ()
     | hd::tl ->
       all_live_cons hd tl h0;
-      disjoint_or_eq_fresh x tl h0
+      disjoint_or_eq_fresh x tl h0;
+      match hd with
+      | (|TD_ImmBuffer _ _, y|) -> assume (~(eq3 #(B.buffer UInt8.t) #(IB.ibuffer UInt8.t) x y))
+      | _ -> ()
 
 let rec write_taint
     (i:nat)
