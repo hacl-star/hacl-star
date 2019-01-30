@@ -29,10 +29,15 @@ let buf_t t = b:B.buffer UInt8.t{B.length b % view_n t == 0}
 [@__reduce__]
 let ibuf_t t = b:IB.ibuffer UInt8.t{B.length b % view_n t == 0}
 
+let lemma_seq_neq_intro (#a:Type) (s1:Seq.seq a) (s2:Seq.seq a)
+ : Lemma (requires (Seq.length s1 =!= Seq.length s2))
+         (ensures  (~ (Seq.equal s1 s2)))
+ = ()
+
 let imm_to_b8 (b:IB.ibuffer UInt8.t) : b8 = 
   let x:b8' = Buffer b false in
   let s1 = Seq.create 1 (UInt8.uint_to_t 0) in
-  Seq.lemma_neq_intro s1 Seq.empty;
+  lemma_seq_neq_intro s1 Seq.empty;
   Classical.exists_intro (fun s -> ~ (x.rel s Seq.empty)) s1;
   x
 

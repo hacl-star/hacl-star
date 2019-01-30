@@ -2,7 +2,7 @@ module X64.BufferViewStore
 
 open Views
 open Interop
-module B = LowStar.Buffer
+module MB = LowStar.Monotonic.Buffer
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
 open BufferViewHelpers

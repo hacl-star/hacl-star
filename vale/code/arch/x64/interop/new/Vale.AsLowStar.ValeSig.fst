@@ -87,6 +87,9 @@ let readable_one (s:ME.mem) (arg:arg) : prop =
     ME.buffer_readable s (as_vale_buffer #bt x) /\
     ME.buffer_writeable (as_vale_buffer #bt x)
     /\ True //promote to prop
+  | (|TD_ImmBuffer bt _, x |) ->
+    ME.buffer_readable s (as_vale_immbuffer #bt x) /\
+    True
   | _ -> True
 
 [@__reduce__]
@@ -100,8 +103,19 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
     | (| TD_Buffer tx {strict_disjointness=true}, xb |), (| TD_Buffer ty _, yb |)
     | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |) ->
       ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb))
+    | (| TD_ImmBuffer tx {strict_disjointness=true}, xb |), (| TD_ImmBuffer ty _, yb |) 
+    | (| TD_ImmBuffer tx _, xb |), (| TD_ImmBuffer ty {strict_disjointness=true}, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #tx xb)) (ME.loc_buffer (as_vale_immbuffer #ty yb))
+    // An immutable buffer and a trivial buffer should not be equal
+    | (| TD_ImmBuffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb))
+    | (| TD_Buffer tx _, xb |), (| TD_ImmBuffer ty _, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_immbuffer #ty yb))
     | (| TD_Buffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
       ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb)) \/
+      eq3 xb yb
+    | (| TD_ImmBuffer tx _, xb |), (| TD_ImmBuffer ty _, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #tx xb)) (ME.loc_buffer (as_vale_immbuffer #ty yb)) \/
       eq3 xb yb
     | _ -> True
 

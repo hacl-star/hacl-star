@@ -122,6 +122,7 @@ let arg_as_nat64 (a:arg) : GTot MS.nat64 =
   | TD_Buffer _ _ ->
     let b:b8 = Buffer (x <: B.buffer UInt8.t) true in
     global_addrs_map b
+  | TD_ImmBuffer _ _ -> global_addrs_map (imm_to_b8 x)
 
 [@__reduce__]
 let update_regs (x:arg)
@@ -168,7 +169,9 @@ let upd_taint_map_arg (a:arg) (tm:taint_map) : taint_map =
     match a with
     | (| TD_Buffer t {taint=tnt}, x |) ->
       upd_taint_map_b8 tm (Buffer x true) tnt
-    | _ ->
+    | (| TD_ImmBuffer t {taint=tnt}, x |) ->
+      upd_taint_map_b8 tm (imm_to_b8 x) tnt
+    | (| TD_Base _, _ |) ->
       tm
 
 let init_taint : taint_map = fun r -> MS.Public
@@ -180,6 +183,8 @@ let mk_taint (as:list arg) (tm:taint_map) : GTot taint_map =
 let taint_of_arg (a:arg) =
   let (| tag, x |) = a in
   match tag with
+  | TD_ImmBuffer TUInt64 {taint=tnt}
+  | TD_ImmBuffer TUInt128 {taint=tnt}
   | TD_Buffer TUInt64 {taint=tnt}
   | TD_Buffer TUInt128 {taint=tnt} -> Some tnt
   | _ -> None
@@ -188,6 +193,7 @@ let taint_arg_b8 (a:arg{Some? (taint_of_arg a)}) : b8 =
   let (| tag, x |) = a in
   match tag with
   | TD_Buffer _ _ -> Buffer (x <: B.buffer UInt8.t) true
+  | TD_ImmBuffer _ _ -> imm_to_b8 x
 
 let rec taint_arg_args_b8_mem (args:list arg) (a:arg)
   : Lemma (List.memP a args /\ Some? (taint_of_arg a) ==>
@@ -209,7 +215,7 @@ let rec mk_taint_equiv
        let (| tag, x |) = hd in
        match tag with
        | TD_Base _ -> ()
-       | TD_Buffer _ _ ->
+       | TD_Buffer _ _ | TD_ImmBuffer _ _ ->
          disjoint_or_eq_cons hd tl;
          BigOps.big_and'_forall (disjoint_or_eq_1 hd) tl
 

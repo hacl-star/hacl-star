@@ -4,7 +4,6 @@ module IB = Interop.Base
 module I = Interop
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
-//module B = LowStar.Buffer
 module MB = LowStar.Monotonic.Buffer
 module M = LowStar.Modifies
 open LowStar.ModifiesPat
@@ -49,12 +48,6 @@ let lemma_v_to_of_typ (t:base_typ) (v:base_typ_as_vale_type t) : Lemma
   (ensures v_to_typ t (v_of_typ t v) == v)
   [SMTPat (v_to_typ t (v_of_typ t v))]
   = ()
-
-// val uint8_view: (v:BV.view UInt8.t UInt8.t{BV.View?.n v == view_n (TUInt8)})
-// val uint16_view: (v:BV.view UInt8.t UInt16.t{BV.View?.n v == view_n (TUInt16)})
-// val uint32_view: (v:BV.view UInt8.t UInt32.t{BV.View?.n v == view_n (TUInt32)})
-// val uint64_view: (v:BV.view UInt8.t UInt64.t{BV.View?.n v == view_n (TUInt64)})
-// val uint128_view: (v:BV.view UInt8.t quad32{BV.View?.n v == view_n (TUInt128)})
 
 let uint8_view = Views.view8
 let uint16_view = Views.view16
@@ -542,159 +535,6 @@ let lemma_load_mem128 b i h =
     assert (a == b)
 
 let lemma_store_mem128 b i v h = lemma_store_mem TUInt128 b i v h
-
-// let same_get_addr_ptr (t:base_typ)
-//                       (ptr:int)
-//                       (h:mem{valid_mem t ptr h})
-//                       (b:buffer t{List.memP b h.ptrs /\ buffer_writeable b})
-//                       (i:nat{i < buffer_length b})
-//                       (v:base_typ_as_vale_type t)
-//   : Lemma (let h1 = buffer_write b i v h in
-//            get_addr_ptr t ptr h == get_addr_ptr t ptr h1)
-//   = let h1 = buffer_write b i v h in
-//     assert (h.ptrs == h1.ptrs);
-//     find_valid_buffer_ps t ptr h h1
-
-// let rec different_addr_in_ptr
-//           (t:base_typ) (n base:nat) (addr1 addr2:nat)
-//           (i:nat)
-//   : Lemma
-//       (ensures (addr1 <> addr2 /\
-//                 valid_offset t n base addr1 i /\
-//                 valid_offset t n base addr2 i ==>
-//                 get_addr_in_ptr t n base addr1 i <> get_addr_in_ptr t n base addr2 i))
-//       (decreases %[n-i])
-//   = if (base + (view_n t) * i = addr1) || (base + (view_n t) * i = addr2) || i >= n then ()
-//     else different_addr_in_ptr t n base addr1 addr2 (i+1)
-
-// val different_addr_ptr64
-//       (i:int)
-//       (i':nat{i <> i'})
-//       (h:mem{valid_mem TUInt64 i h /\ valid_mem TUInt64 i' h})
-//  : Lemma
-//      (let t = TUInt64 in
-//       get_addr_ptr t i h =!= get_addr_ptr t i' h \/
-//      (let b = get_addr_ptr t i h in
-//       let b' = get_addr_ptr t i' h in
-//       b == b' /\
-//       get_addr_in_ptr t (buffer_length b) (buffer_addr b h) i 0 <>
-//       get_addr_in_ptr t (buffer_length b) (buffer_addr b h) i' 0))
-
-// let different_addr_ptr64 i i' h =
-//   let t = TUInt64 in
-//   match find_valid_buffer t i h, find_valid_buffer t i' h with
-//   | Some b, Some b' ->
-//     different_addr_in_ptr t (buffer_length b) (buffer_addr b h) i i' 0
-//   | _ -> ()
-
-// #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 4"
-// let lemma_frame_store_mem64 ptr v h =
-//   let h1 = store_mem64 ptr v h in
-//   let t = TUInt64 in
-//   let aux i' : Lemma
-//     (requires i' <> ptr /\ valid_mem64 ptr h /\ valid_mem64 i' h)
-//     (ensures load_mem64 i' h == load_mem64 i' h1) =
-//     store_buffer_write t ptr v h;
-//     load_buffer_read t i' h1;
-//     load_buffer_read t i' h;
-//     let b1 = get_addr_ptr t ptr h in
-//     let i1 = get_addr_in_ptr t (buffer_length b1) (buffer_addr b1 h) ptr 0 in
-//     let b2 = get_addr_ptr t i' h in
-//     let i2 = get_addr_in_ptr t (buffer_length b2) (buffer_addr b2 h) i' 0 in
-//     same_get_addr_ptr t i' h b1 i1 v;
-//     BV.as_buffer_mk_buffer_view b1 uint64_view;
-//     BV.upd_modifies h.hs (BV.mk_buffer_view b1 uint64_view) i1 (v_of_typ t v);
-//     assert (load_mem64 i' h == buffer_read b2 i2 h);
-//     assert (load_mem64 i' h1 == buffer_read b2 i2 h1);
-//     different_addr_ptr64 ptr i' h;
-//     let aux_diff_buf () : Lemma
-//       (requires b1 =!= b2)
-//       (ensures load_mem64 i' h == load_mem64 i' h1) =
-//       assert (IB.disjoint_or_eq_b8 b1 b2);
-//       BV.as_seq_sel h.hs (BV.mk_buffer_view b2 uint64_view) i2;
-//       BV.as_seq_sel h1.hs (BV.mk_buffer_view b2 uint64_view) i2
-//     in let aux_same_buf () : Lemma
-//       (requires i1 <> i2 /\ b1 == b2)
-//       (ensures load_mem64 i' h == load_mem64 i' h1) =
-//       BV.sel_upd (BV.mk_buffer_view b2 uint64_view) i1 i2 (v_of_typ t v) h.hs
-//     in
-//     Classical.move_requires aux_diff_buf ();
-//     Classical.move_requires aux_same_buf ();
-//     ()
-//   in Classical.forall_intro (Classical.move_requires aux)
-
-// let lemma_valid_store_mem64 i v h = ()
-
-// let lemma_store_load_mem128 ptr v h =
-//   let t = TUInt128 in
-//   let h1 = store_mem128 ptr v h in
-//   store_buffer_write t ptr v h;
-//   load_buffer_read t ptr h1;
-//   let b = get_addr_ptr t ptr h in
-//   length_t_eq t b;
-//   let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
-//   same_get_addr_ptr t ptr h b i v;
-//   BV.as_buffer_mk_buffer_view b (uint_view t);
-//   BV.as_seq_sel h1.hs (BV.mk_buffer_view b (uint_view t)) i;
-//   ()
-
-// val different_addr_ptr128
-//       (i:int)
-//       (i':nat{i <> i'})
-//       (h:mem{valid_mem TUInt128 i h /\ valid_mem TUInt128 i' h})
-//  : Lemma
-//      (let t = TUInt128 in
-//       get_addr_ptr t i h =!= get_addr_ptr t i' h \/
-//      (let b = get_addr_ptr t i h in
-//       let b' = get_addr_ptr t i' h in
-//       b == b' /\
-//       get_addr_in_ptr t (buffer_length b) (buffer_addr b h) i 0 <>
-//       get_addr_in_ptr t (buffer_length b) (buffer_addr b h) i' 0))
-// let different_addr_ptr128 i i' h =
-//   let t = TUInt128 in
-//   match find_valid_buffer t i h, find_valid_buffer t i' h with
-//   | Some b, Some b' ->
-//     different_addr_in_ptr t (buffer_length b) (buffer_addr b h) i i' 0
-//   | _ -> ()
-
-// let lemma_frame_store_mem128 ptr v h =
-//   let h1 = store_mem128 ptr v h in
-//   let t = TUInt128 in
-//   let aux i' : Lemma
-//     (requires i' <> ptr /\ valid_mem128 ptr h /\ valid_mem128 i' h)
-//     (ensures load_mem128 i' h == load_mem128 i' h1) =
-//     store_buffer_write t ptr v h;
-//     load_buffer_read t i' h1;
-//     load_buffer_read t i' h;
-//     let b1 = get_addr_ptr t ptr h in
-//     let i1 = get_addr_in_ptr t (buffer_length b1) (buffer_addr b1 h) ptr 0 in
-//     let b2 = get_addr_ptr t i' h in
-//     let i2 = get_addr_in_ptr t (buffer_length b2) (buffer_addr b2 h) i' 0 in
-//     same_get_addr_ptr t i' h b1 i1 v;
-//     BV.as_buffer_mk_buffer_view b1 uint128_view;
-//     BV.upd_modifies h.hs (BV.mk_buffer_view b1 uint128_view) i1 (v_of_typ t v);
-//     assert (load_mem128 i' h == buffer_read b2 i2 h);
-//     assert (load_mem128 i' h1 == buffer_read b2 i2 h1);
-//     different_addr_ptr128 ptr i' h;
-//     let aux_diff_buf () : Lemma
-//       (requires b1 =!= b2)
-//       (ensures load_mem128 i' h == load_mem128 i' h1) =
-//       assert (IB.disjoint_or_eq_b8 b1 b2);
-//       BV.as_seq_sel h.hs (BV.mk_buffer_view b2 uint128_view) i2;
-//       BV.as_seq_sel h1.hs (BV.mk_buffer_view b2 uint128_view) i2
-//     in let aux_same_buf () : Lemma
-//       (requires i1 <> i2 /\ b1 == b2)
-//       (ensures load_mem128 i' h == load_mem128 i' h1) =
-//       BV.sel_upd (BV.mk_buffer_view b2 uint128_view) i1 i2 (v_of_typ t v) h.hs
-//     in
-//     Classical.move_requires aux_diff_buf ();
-//     Classical.move_requires aux_same_buf ();
-//     ()
-//   in Classical.forall_intro (Classical.move_requires aux)
-
-// let lemma_valid_store_mem128 ptr v h = ()
-
-// //#set-options "--z3rlimit 100"
 
 open X64.Machine_s
 

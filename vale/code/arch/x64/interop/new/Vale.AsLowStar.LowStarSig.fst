@@ -62,6 +62,17 @@ let mem_correspondence_1
     (BV.as_seq h (BV.mk_buffer_view x (view_of_base_typ t)))
 
 [@__reduce__]
+let mem_imm_correspondence_1
+      (t:ME.base_typ)
+      (x:IB.ibuf_t t)
+      (h:HS.mem)
+      (s:VS.state) =
+  let y = as_vale_immbuffer x in
+  Seq.equal
+    (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.mem y))
+    (BV.as_seq h (BV.mk_buffer_view x (view_of_base_typ t)))
+
+[@__reduce__]
 let rec mem_correspondence (args:list arg) : hsprop =
   match args with
   | [] -> fun h s -> True
@@ -72,7 +83,11 @@ let rec mem_correspondence (args:list arg) : hsprop =
       fun h s ->
         mem_correspondence_1 bt x h s /\
         mem_correspondence tl h s
-    | _ ->
+    | TD_ImmBuffer bt _ ->
+      fun h s ->
+        mem_imm_correspondence_1 bt x h s /\
+        mem_correspondence tl h s        
+    | TD_Base _ ->
       mem_correspondence tl
 
 [@__reduce__]
@@ -91,6 +106,10 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
   | TD_Buffer bt _ ->
      buffer_addr_is_nat64 (as_vale_buffer #bt x) s;
      ME.buffer_addr (as_vale_buffer #bt x) VS.(s.mem)
+  | TD_ImmBuffer bt _ ->
+     buffer_addr_is_nat64 (as_vale_immbuffer #bt x) s;
+     ME.buffer_addr (as_vale_immbuffer #bt x) VS.(s.mem)
+    
 
 [@__reduce__]
 let rec register_args (n:nat)
@@ -118,6 +137,18 @@ let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
          m
          tm
          tnt
+    | TD_ImmBuffer TUInt64 {taint=tnt} ->
+      ME.valid_taint_buf64
+         (as_vale_immbuffer #TUInt64 x)
+         m
+         tm
+         tnt
+    | TD_ImmBuffer TUInt128 {taint=tnt} ->
+      ME.valid_taint_buf128
+         (as_vale_immbuffer #TUInt128 x)
+         m
+         tm
+         tnt         
     | _ ->
       True
 

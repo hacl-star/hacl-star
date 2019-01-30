@@ -10,6 +10,7 @@ module T = FStar.Tactics
 module B = LowStar.Buffer
 
 let as_vale_buffer #t i = IB.Buffer (i <: B.buffer UInt8.t) true
+let as_vale_immbuffer #t i = IB.imm_to_b8 i
 
 let mem_eq = ()
 let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state) = ()

@@ -14,6 +14,9 @@ friend X64.MemoryAdapters
 
 let as_vale_buffer_len (#t:base_typ) (x:buf_t t)
    = BV.length_eq (BV.mk_buffer_view x (ME.uint_view t))
+   
+let as_vale_immbuffer_len (#t:base_typ) (x:ibuf_t t)
+   = BV.length_eq (BV.mk_buffer_view x (ME.uint_view t))
 
 let state_eq_down_mem (va_s1:V.va_state) (s1:_) = ()
 
@@ -25,15 +28,22 @@ let rec loc_eq (args:list arg)
 
 let relate_modifies (args:list arg) (m0 m1 : ME.mem) = loc_eq args
 let reveal_readable (#t:_) (x:buf_t t) (s:ME.mem) = ()
+let reveal_imm_readable (#t:_) (x:ibuf_t t) (s:ME.mem) = ()
 let readable_live (#t:_) (x:buf_t t) (s:ME.mem) = ()
+let readable_imm_live (#t:_) (x:ibuf_t t) (s:ME.mem) = ()
 let buffer_readable_reveal #n bt x args h0 stack = ()
 let get_heap_mk_mem_reveal #n args h0 stack = ()
 let buffer_as_seq_reveal #n t x args h0 stack = ()
+let immbuffer_as_seq_reveal #n t x args h0 stack = ()
 let buffer_as_seq_reveal2 t x va_s = ()
+let immbuffer_as_seq_reveal2 t x va_s = ()
 let buffer_addr_reveal t x args h0 = ()
+let immbuffer_addr_reveal t x args h0 = ()
 let fuel_eq = ()
 let decls_eval_code_reveal c va_s0 va_s1 f = ()
 let as_vale_buffer_disjoint (#t1 #t2:base_typ) (x:buf_t t1) (y:buf_t t2) = ()
+let as_vale_buffer_imm_disjoint (#t1 #t2:base_typ) (x:ibuf_t t1) (y:buf_t t2) = ()
+let as_vale_immbuffer_imm_disjoint (#t1 #t2:base_typ) (x:ibuf_t t1) (y:ibuf_t t2) = ()
 let modifies_same_roots s h0 h1 = ()
 let modifies_equal_domains s h0 h1 = ()
 let loc_disjoint_sym (x y:ME.loc)  = ()

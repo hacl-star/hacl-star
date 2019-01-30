@@ -18,13 +18,17 @@ let as_normal_t (#a:Type) (x:a) : normal a = x
 [@__reduce__] unfold
 let b64 = buf_t TUInt64
 [@__reduce__] unfold
+let ib64 = ibuf_t TUInt64
+[@__reduce__] unfold
 let t64_mod = TD_Buffer TUInt64 default_bq
 [@__reduce__] unfold
 let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
+[@__reduce__] unfold
+let t64_imm = TD_ImmBuffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 
 [@__reduce__] unfold
 let dom : IX64.arity_ok td =
-  let y = [t64_mod;t64_no_mod] in
+  let y = [t64_mod;t64_imm] in
   assert_norm (List.length y = 2);
   y
 
@@ -52,21 +56,21 @@ open X64.MemoryAdapters
 let vm_pre : VSig.vale_pre 24 vm_dom =
   fun (c:V.va_code)
     (dst:b64)
-    (src:b64)
+    (src:ib64)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 24) ->
-      VM.va_pre c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_buffer src)
+      VM.va_pre c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src)
 
 [@__reduce__] unfold
 let vm_post : VSig.vale_post 24 vm_dom =
   fun (c:V.va_code)
     (dst:b64)
-    (src:b64)
+    (src:ib64)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 24)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VM.va_post c va_s0 va_s1 f IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_buffer src)
+      VM.va_post c va_s0 va_s1 f IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src)
 
 module VS = X64.Vale.State
 #set-options "--print_effect_args"
@@ -79,7 +83,7 @@ let vm_lemma'
     (code:V.va_code)
     (_win:bool)
     (dst:b64)
-    (src:b64)
+    (src:ib64)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 24)
  : Ghost (V.va_state & V.va_fuel)
@@ -89,15 +93,14 @@ let vm_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 /\
        vm_post code dst src va_s0 sb va_s1 f /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer src) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer src) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst) /\ 
-       ME.buffer_writeable (as_vale_buffer src) /\
        ME.buffer_writeable (as_vale_buffer dst) /\ 
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  ))
- =  let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_buffer src) in
+ =  let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src) in
     assert (ME.modifies (ME.loc_buffer (as_vale_buffer dst)) va_s0.VS.mem va_s1.VS.mem);
     //modifies clause in the postcondition should follow automatically by weakening
     //but seems to require a bunch of hand-holding
@@ -110,9 +113,8 @@ let vm_lemma'
     assert (ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb)) l)
                         va_s0.VS.mem va_s1.VS.mem);
     assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst));
-    assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer src));    
+    assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer src));    
     Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 dst;
-    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 src;
     va_s1, f
 
 (* Prove that vm_lemma' has the required type *)
@@ -147,24 +149,29 @@ let lowstar_memcpy_normal_t //: normal lowstar_memcpy_t
   = as_normal_t #lowstar_memcpy_t lowstar_memcpy
   
 module B = LowStar.Buffer
+module IB = LowStar.ImmutableBuffer
 module MB = LowStar.Monotonic.Buffer
 open FStar.HyperStack.ST
 
 module M = X64.Memory
 
 let test (x:b64) = assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)
+let itest (x:ib64) = assert (V.buffer_length (as_vale_immbuffer x) == B.length x / 8)
 
 module T = FStar.Tactics
 #reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 module LBV = LowStar.BufferView
-val lbv_as_seq_eq (#a #b:Type) (#rrel #rel:MB.srel a) (x y: MB.mbuffer a rrel rel) (v:LBV.view a b) (h:_)
+val lbv_as_seq_eq (#a #b:Type) (#rrelx #relx #rrely #rely:MB.srel a) 
+  (x: MB.mbuffer a rrelx relx) 
+  (y: MB.mbuffer a rrely rely) 
+  (v:LBV.view a b) (h:_)
   : Lemma
     (requires (B.length x == B.length y /\
                B.length x % LBV.View?.n v == 0 /\
                Seq.equal (LBV.as_seq h (LBV.mk_buffer_view x v))
                          (LBV.as_seq h (LBV.mk_buffer_view y v))))
     (ensures (Seq.equal (B.as_seq h x) (B.as_seq h y)))
-let lbv_as_seq_eq #a #b #rrel #rel x y v h =
+let lbv_as_seq_eq #a #b #rrelx #relx #rrely #rely x y v h =
   let vx = LBV.mk_buffer_view x v in 
   let vy = LBV.mk_buffer_view y v in
   LBV.as_buffer_mk_buffer_view x v;
@@ -180,7 +187,7 @@ let lbv_as_seq_eq #a #b #rrel #rel x y v h =
 //#reset-options "--print_implicits"
 let memcpy_test 
   (dst:B.buffer UInt8.t{B.length dst % 8 == 0})
-  (src:B.buffer UInt8.t{B.length src % 8 == 0})
+  (src:IB.ibuffer UInt8.t{B.length src % 8 == 0})
   : Stack UInt64.t
     (requires fun h0 ->
       B.live h0 dst /\
@@ -194,12 +201,12 @@ let memcpy_test
       B.live h1 dst /\
       B.as_seq h1 dst == B.as_seq h1 src)
 //  by (T.dump "A") (* in case you want to look at the VC *)
-  = let x, _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
+  = assume (~ (eq3 #(B.buffer UInt8.t) #(IB.ibuffer UInt8.t) dst src));
+    let x, _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
     lbv_as_seq_eq dst src Views.view64 h1; //And a lemma to rephrase the Vale postcondition 
     x                                      //with equalities of buffer views
                                            //back to equalities of buffers
-
 
 module VC = Vale_check_aesni_stdcall
 
