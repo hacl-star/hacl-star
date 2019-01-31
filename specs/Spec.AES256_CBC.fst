@@ -59,7 +59,9 @@ let rec padPKCS tmp len idx =
 let pad tmp len idx = padPKCS tmp len idx
 
 val concat_with_last_block:
-  first_part_length:size_nat{first_part_length % blocklen == 0} ->
+  first_part_length:size_nat{
+    first_part_length % blocklen == 0 /\ first_part_length + blocklen <= max_size_t
+  } ->
   first_part:lseq uint8 first_part_length ->
   last_block:block ->
   out:seq uint8{length out <> 0 /\ length out % blocklen == 0}
@@ -92,13 +94,6 @@ let aes256_cbc_encrypt key iv msg msglen =
   let out1 = create fullblocks (u8 0) in
   let kex = keyExpansion key in
   let out1 = cbc_encrypt_blocks out1 kex iv msg1 fullblocks 0 in
-  IO.print_string "\n";
-  IO.print_string "out1";
-  IO.print_string " (";
-  IO.print_uint32_dec (UInt32.uint_to_t (length out1));
-  IO.print_string "):\n";
-  FStar.List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list out1);
-  IO.print_string "\n";
   let lastfull  = if fullblocks <> 0 then
     sub #uint8 #(fullblocks) out1 (fullblocks - blocklen) blocklen
   else
